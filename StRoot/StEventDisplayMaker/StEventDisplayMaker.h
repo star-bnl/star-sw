@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.18 2000/04/05 03:58:21 fine Exp $
+// $Id: StEventDisplayMaker.h,v 1.19 2000/08/26 03:14:48 fine Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.19  2000/08/26 03:14:48  fine
+// New default filter from M.Panebratcev has been introduced
+//
 // Revision 1.18  2000/04/05 03:58:21  fine
 // Adjusted for ROOT 2.24
 //
@@ -18,6 +21,7 @@
 //////////////////////////////////////////////////////////////////////////
 #include "StMaker.h"
 #include "TSeqCollection.h"
+#include "StDefaultFilter.h"
 
 class    TVolume;
 class    TVolumeView;
@@ -25,18 +29,13 @@ class    TTable;
 
 class TH2F;
 class TCanvas;
-class StEvent;
-class StObjArray;
-class StVecPtrTpcHit;
-class StGlobalTrack;
-class StVertex;
 class StVirtualEventFilter;
 class StTrackChair;
 class TVirtualPad;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.18 2000/04/05 03:58:21 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.19 2000/08/26 03:14:48 fine Exp $";
  private: 
     TList         *m_HitCollector;     //!
     TList         *m_TrackCollector;   //!
@@ -50,13 +49,11 @@ class StEventDisplayMaker : public StMaker {
     TVolume      *m_EventsNode;   //!
     TVolumeView  *m_EventsView;   //!
     TList        *m_ListDataSetNames; // The list of the names to be drawn
-    TTable     *m_Table;        //! The table to be drawn if any
-    StEvent      *m_Event;        //! The StEvent to be drawn if any
+    TTable       *m_Table;        //! The table to be drawn if any
     TObjArray    *m_FilterArray;     // Array of the "event" user supplied filters
 
     TCanvas      *m_PadBrowserCanvas; //!
 
-    Int_t         MakeEvent();
     Int_t         MakeTable(const Char_t **positions);
     Int_t         MakeTableHits(const TTable *points,StVirtualEventFilter *filter,const Char_t *keyColumn,const Char_t *keyPositions[]);
     static Int_t  ParseName(Char_t *inName, Char_t *position[]);
@@ -68,12 +65,7 @@ class StEventDisplayMaker : public StMaker {
    virtual Int_t  BuildGeometry();
    virtual Int_t  Init();
    virtual Int_t  Make();
-   virtual Int_t  MakeGlobalTracks();
-   virtual Int_t  MakeTracks( StGlobalTrack *globTrack,StVirtualEventFilter *filter);
    virtual Int_t  MakeTableTracks(const StTrackChair *points,StVirtualEventFilter *filter);
-   virtual Int_t  MakeHits(const StObjArray *eventCollection,StVirtualEventFilter *filter);
-   virtual Int_t  MakeVertex(const StVertex *vertex,StVirtualEventFilter *filter);
-   virtual Int_t  MakeVertices(const StObjArray *verticesCollection,StVirtualEventFilter *filter);
    virtual void   Clear(Option_t *option="");
    virtual void   ClearCanvas(); // *MENU*
    virtual void   ClearEvents();
@@ -114,64 +106,21 @@ class StEventDisplayMaker : public StMaker {
      Int_t SetPrimaryVertexFlag(Int_t flag=1);
      StVirtualEventFilter *SetPrimaryVertex(StVirtualEventFilter *filter);
 
-     // -- Hits collections filters --
-
-     Int_t SetTpcHitFlag(Int_t flag=1);
-     StVirtualEventFilter *SetTpcHit(StVirtualEventFilter *filter);
-
-     Int_t SetSvtHitFlag(Int_t flag=1);
-     StVirtualEventFilter *SetSvtHit(StVirtualEventFilter *filter);
-
-     Int_t SetFtpcHitFlag(Int_t flag=1);
-     StVirtualEventFilter *SetFtpcHit(StVirtualEventFilter *filter);
-
-     Int_t SetEmcTowerHitFlag(Int_t flag=1);
-     StVirtualEventFilter *SetEmcTowerHit(StVirtualEventFilter *filter);
-
-     Int_t SetEmcPreShowerHitFlag(Int_t flag=1);
-     StVirtualEventFilter *SetEmcPreShowerHit(StVirtualEventFilter *filter);
-
-     Int_t SetSmdPhiHitFlag(Int_t flag=1);
-     StVirtualEventFilter *SetSmdPhiHit(StVirtualEventFilter *filter);
-
-     Int_t SetSmdEtaHitFlag(Int_t flag=1);
-     StVirtualEventFilter *SetSmdEtaHit(StVirtualEventFilter *filter);
-
-     Int_t SetVerticesFlag(Int_t flag=1); 
-     StVirtualEventFilter *SetVertices(StVirtualEventFilter *filter);
-
-     // -- StGlobalTrack filters --
-
-     Int_t SetGlobalTracksFlag(Int_t flag=1); 
-     StVirtualEventFilter *SetGlobalTracks(StVirtualEventFilter *filter);
-
-     Int_t SetTrackFlag(Int_t flag=1);
-     StVirtualEventFilter *SetTrack(StVirtualEventFilter *filter);
-
-     Int_t SetTrackTpcHitsFlag(Int_t flag=1);
-     StVirtualEventFilter *SetTrackTpcHits(StVirtualEventFilter *filter);
-
-     Int_t SetTrackSvtHitsFlag(Int_t flag=1);
-     StVirtualEventFilter *SetTrackSvtHits(StVirtualEventFilter *filter);
-
-     Int_t SetTrackFtpcHitsFlag(Int_t flag=1);
-     StVirtualEventFilter *SetTrackFtpcHits(StVirtualEventFilter *filter);
-
-    //  -- Table filter ---
+     //  -- Table filter ---
      Int_t SetTableFlag(Int_t flag=1); // *MENU*
      StVirtualEventFilter *SetTable(StVirtualEventFilter *filter);
 
     //  -- TPT track table filter ---
      Int_t SetTptTrackFlag(Int_t flag=1); // *MENU*
      StVirtualEventFilter *SetTptTrack(StVirtualEventFilter *filter);
-  // --  end of filter list --
+   // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.18 2000/04/05 03:58:21 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.19 2000/08/26 03:14:48 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
-   static StVirtualEventFilter m_DefaultFilters[kEndOfEventList];
+   static StDefaultFilter m_DefaultFilters[kEndOfEventList];
 };
 
 //______________________________________________________________________________

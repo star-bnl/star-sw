@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.67 2000/08/16 22:34:52 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.68 2000/08/26 03:14:45 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -96,9 +96,12 @@
 #include <TMath.h>
 #include <TObjString.h>
 
+#include "StDefaultFilter.h"
+
 // StVirtualEventFilter hitsOffFilter(0);
 // StVirtualEventFilter hitsOnFilter(1);
-StVirtualEventFilter StEventDisplayMaker::m_DefaultFilters[StEventDisplayMaker::kEndOfEventList];
+// StVirtualEventFilter StEventDisplayMaker::m_DefaultFilters[StEventDisplayMaker::kEndOfEventList];
+StDefaultFilter StEventDisplayMaker::m_DefaultFilters[StEventDisplayMaker::kEndOfEventList];
 
 //_____________________________________________________________________________
 //
@@ -127,14 +130,10 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   m_FilterArray   = new TObjArray(kEndOfEventList);
   Int_t i; 
   for (i =0;i<kEndOfEventList;i++) {
-   m_FilterArray->AddAt(&m_DefaultFilters[i],i);
-//    m_FilterArray->AddAt(&hitsOffFilter,i);
+   m_FilterArray->AddAt(&m_DefaultFilters[0],i); // We want one and the same filter everywhere
+//   m_FilterArray->AddAt(&m_DefaultFilters[i],i);
+//   m_FilterArray->AddAt(&hitsOffFilter,i);
   }
-#ifdef STEVENT
-  ((StVirtualEventFilter *)m_FilterArray->At(kVertices))->TurnOn();
-  ((StVirtualEventFilter *)m_FilterArray->At(kGlobalTracks))->TurnOn();
-  ((StVirtualEventFilter *)m_FilterArray->At(kTrack))->TurnOn();
-#endif
   ((StVirtualEventFilter *)m_FilterArray->At(kTptTrack))->TurnOn();
   ((StVirtualEventFilter *)m_FilterArray->At(kTable))->TurnOn();
 
@@ -299,51 +298,7 @@ TVirtualPad *StEventDisplayMaker::CreateCanvas()
   return m_PadBrowserCanvas;
 }
 
-//_____________________________________________________________________________
-Int_t StEventDisplayMaker::MakeGlobalTracks()
-{
-  Int_t trackCounter  = 0;
-  Int_t hitCounter    = 0;
-#ifdef STEVENT
-  const Int_t maxTrackCounter = 9999999;
-  Size_t size;
-  Style_t style;
-  StTrackCollection *tracks = m_Event->trackCollection();
-  if (tracks) {
-     StGlobalTrackIterator next(tracks);
-     StGlobalTrack *globTrack = 0;
-     while ( ( globTrack = (StGlobalTrack *)next() ) && trackCounter < maxTrackCounter) {
-        StVirtualEventFilter *filter = (StVirtualEventFilter *)m_FilterArray->At(kGlobalTracks);
-        if (filter && (filter->IsOff() || ( filter->Channel(globTrack,size,style)==0 ) ) ) continue;
-        // ------------------------   Tracks   ------------------------- //
-        filter = (StVirtualEventFilter *)m_FilterArray->At(kTrack);
-        if (!filter || filter->IsOn() ) 
-              trackCounter +=  MakeTracks(globTrack,filter);
 
-        // -------------------------   Hits  --------------------------- //
-        filter = (StVirtualEventFilter *)m_FilterArray->At(kTrackTpcHits);
-        if (!filter || filter->IsOn() ) {
-           const StVecPtrTpcHit &hits   = globTrack->tpcHits();
-           hitCounter += MakeHits(&hits,filter);
-        }
-
-        filter = (StVirtualEventFilter *)m_FilterArray->At(kTrackSvtHits);
-        if (!filter || filter->IsOn() ) {
-           const StVecPtrSvtHit &hits   = globTrack->svtHits();
-           hitCounter += MakeHits(&hits,filter);
-        }
-
-        filter = (StVirtualEventFilter *)m_FilterArray->At(kTrackFtpcHits);
-        if (!filter || filter->IsOn() ) {
-           const StVecPtrFtpcHit &hits   = globTrack->ftpcHits();
-           hitCounter += MakeHits(&hits,filter);
-        }
-     }
-     printf(" %d tracks %d hits have been found\n",trackCounter, hitCounter);
-   }   
-#endif
-   return trackCounter+hitCounter;
-}
 
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::Make()
@@ -373,11 +328,6 @@ Int_t StEventDisplayMaker::Make()
     if (!m_ListDataSetNames || m_ListDataSetNames->GetSize() == 0) 
     {
     // Add default names
-#ifdef STEVENT
-      m_Event  = (StEvent *) GetDataSet("StEvent");       
-      if (m_Event)  AddName("StEvent");
-      else 
-#endif
       {
 #if TPC
         TDataSet *dshits = GetDataSet("tphit");
@@ -393,6 +343,16 @@ Int_t StEventDisplayMaker::Make()
            ((TTable *)dstracks)->Print(0,1);
          }
 #else
+        const char *dedx2Refs = "dst/dst_dedx";
+        TDataSet *dedx  = GetDataSet(dedx2Refs);
+        {
+           AddName("dst/dst_dedx(id_track)");
+           if (Debug()) {
+              printf(" dst_dedx found !!!\n");  
+             ((TTable *)dedx)->Print(0,5);   
+           }
+        }
+
         TDataSet *dshits = GetDataSet("dst/point");
         // if (dshits)   
         {
@@ -422,7 +382,6 @@ Int_t StEventDisplayMaker::Make()
     TObjString *eventName = 0;
      while ( (eventName = (TObjString *)nextNames()) ) 
     {
-      m_Event = 0;
       m_Table = 0;
   
       Char_t *nextObjectName = StrDup(eventName->String().Data());
@@ -443,12 +402,6 @@ Int_t StEventDisplayMaker::Make()
           m_Table = (TTable *)event;                           //
           totalCounter += MakeTable((const Char_t **)positions); //
         //  ---------------------------------------------------- //
-      }
-      else if (event->InheritsFrom("StEvent") && type == 1) {
-         //  ---- Draw "StEvent" events ---- //
-           m_Event = (StEvent *)event;       //
-           totalCounter += MakeEvent();      //
-         //  ------------------------------- //
       }
       else if (Debug()) Warning("Make","Can not draw the object \"%s\"",nextObjectName); 
       delete [] nextObjectName;
@@ -516,236 +469,12 @@ Int_t StEventDisplayMaker::ParseName(Char_t *inName, Char_t *positions[])
 }
 
 //_____________________________________________________________________________
-Int_t StEventDisplayMaker::MakeEvent()
-{
-  if (!m_Event) return 0;
-
-  Int_t total      = 0;
-  //----------------------------//
-    total = MakeGlobalTracks(); //
-  //----------------------------//
-#ifdef STEVENT
-  Int_t hitCounter = 0;
-  StVirtualEventFilter *filter = 0;
-  filter = (StVirtualEventFilter *)m_FilterArray->At(kTpcHit);
-  if (!filter || filter->IsOn() ) {
-  StTpcHitCollection *hits   = m_Event->tpcHitCollection();
-     hitCounter = MakeHits(hits,filter);
-     if (Debug()) printf(" TpcHitCollection: %d hits\n", hitCounter);
-     total += hitCounter;
-  }
-
-  filter = (StVirtualEventFilter *)m_FilterArray->At(kFtpcHit);
-  if (!filter || filter->IsOn() ) {
-     StFtpcHitCollection *hits   = m_Event->ftpcHitCollection();
-     hitCounter = MakeHits(hits,filter);
-     if (Debug()) printf(" FtpcHitCollection: %d hits\n", hitCounter);
-     total += hitCounter;
-  }
-
-  filter = (StVirtualEventFilter *)m_FilterArray->At(kSvtHit);
-  if (!filter || filter->IsOn() ) {
-     StSvtHitCollection *hits   = m_Event->svtHitCollection();
-     hitCounter = MakeHits(hits,filter);
-     if (Debug()) printf(" SvtHitCollection: %d hits\n", hitCounter);
-     total += hitCounter;
-  }
-
-  filter = (StVirtualEventFilter *)m_FilterArray->At(kEmcTowerHit);
-  if (!filter || filter->IsOn() ) {
-    StEmcTowerHitCollection *hits   = m_Event->emcTowerHitCollection();
-    hitCounter = MakeHits(hits,filter);
-    if (Debug()) printf(" EmcTowerHitCollection: %d hits\n", hitCounter);
-    total += hitCounter;
-  }
-
-  filter = (StVirtualEventFilter *)m_FilterArray->At(kEmcPreShowerHit);
-  if (!filter || filter->IsOn() ) {
-    StEmcPreShowerHitCollection *hits   = m_Event->emcPreShowerHitCollection();
-    hitCounter = MakeHits(hits,filter);
-    if (Debug()) printf(" EmcPreShowerHitCollection: %d hits\n", hitCounter);
-    total += hitCounter;
-  } 
-
-  filter = (StVirtualEventFilter *)m_FilterArray->At(kSmdPhiHit);
-  if (!filter || filter->IsOn() ) {
-    StSmdPhiHitCollection *hits   = m_Event->smdPhiHitCollection();
-    hitCounter = MakeHits(hits,filter);
-    if (Debug()) printf(" SmdPhiHitCollection: %d hits\n", hitCounter);
-    total += hitCounter;
-  }
-
-  filter = (StVirtualEventFilter *)m_FilterArray->At(kSmdEtaHit);
-  if (!filter || filter->IsOn() ) {
-    StSmdEtaHitCollection *hits   = m_Event->smdEtaHitCollection();
-    hitCounter = MakeHits(hits,filter);
-    if (Debug()) printf(" SmdEtaHitCollection: %d hits\n", hitCounter);
-    total += hitCounter;
-  }
-
-  filter = (StVirtualEventFilter *)m_FilterArray->At(kVertices);
-  if (!filter || filter->IsOn() ) {
-    StVertexCollection *vertices   = m_Event->vertexCollection();
-    hitCounter =  MakeVertices(vertices,filter);
-    if (Debug()) printf(" VertexCollection: %d vertices\n", hitCounter);
-    total += hitCounter;
-  }
-
-  filter = (StVirtualEventFilter *)m_FilterArray->At(kPrimaryVertex);
-  if (!filter || filter->IsOn() ) {
-    StVertex  *vertex   = m_Event->primaryVertex();
-    hitCounter =  MakeVertex(vertex,filter);
-    if (Debug()) printf(" Primary Vertex: %d vertex\n", hitCounter);
-    total += hitCounter;
-  }
-#endif
-  return total;
-}
-//_____________________________________________________________________________
 Color_t StEventDisplayMaker::GetColorAttribute(Int_t adc)
 {
   // Convert the inpput signal amplitude into color index
 //  return Color_t(10-(adc?TMath::Log2(adc):10));
 //  return Color_t(adc?TMath::Log2(adc)+50:10);
   return Color_t(50 + (adc/256));
-}
-
-
-//_____________________________________________________________________________
-Int_t StEventDisplayMaker::MakeHits(const StObjArray *eventCollection,StVirtualEventFilter *filter)
-{
-  if (eventCollection && eventCollection->size() ) {
-    Color_t hitColor = kYellow;
-    Style_t hitStyle = 1;
-    Size_t hitSize  = 2;
-
-    // ---------------------------- hits filter ----------------------------- //
-    if (filter) hitColor =  filter->Channel(eventCollection,hitSize,hitStyle);//
-    // ---------------------------------------------------------------------- //
-#ifdef STEVENT
-    Int_t   hitCounter = 0;
-    if (hitColor > 0) {
-       StHits3DPoints   *hitsPoints  = new StHits3DPoints((StObjArray *)eventCollection);
-       m_HitCollector->Add(hitsPoints);    // Collect to remove  
-       TPolyLineShape *hitsShape   = new TPolyLineShape(hitsPoints);
-         hitsShape->SetVisibility(1);        hitsShape->SetColorAttribute(hitColor);
-         hitsShape->SetStyleAttribute(hitStyle);  hitsShape->SetSizeAttribute(hitSize);
-       // Create a node to hold it
-       TVolume *thisHit = new TVolume("hits",eventCollection->GetName(),hitsShape);
-         thisHit->Mark();
-         thisHit->SetVisibility();
-       TVolumePosition *pp = m_EventsNode->Add(thisHit); 
-       if (!pp && hitCounter) {
-          printf(" no track position %d\n",hitCounter);
-       }
-       return hitsPoints->Size(); // hitColor;
-    }
-#endif
-  }
-  return 0;
-}
-
-//_____________________________________________________________________________
-Int_t StEventDisplayMaker::MakeVertex(const StVertex *vertex,StVirtualEventFilter *filter)
-{
-  if (vertex) {
-
-#ifdef STEVENT
-    Int_t   vertexCounter = 0;
-    Color_t vertexColor = kBlue;
-    Style_t vertexStyle = 3;
-    Size_t vertexSize  = 1;
-    // ---------------------------- hits filter ----------------------------- //
-    if (filter) vertexColor =  filter->Channel(vertex,vertexSize,vertexStyle);//
-    // ---------------------------------------------------------------------- //
-    if (vertexColor > 0) {
-       const StThreeVectorF &vertexVector = ((StVertex *)vertex)->position();
-       Float_t x = vertexVector[0];
-       Float_t y = vertexVector[1];
-       Float_t z = vertexVector[2];
-       TPoints3D *vertexPoint =  new TPoints3D(1, &x, &y, &z);
-       m_HitCollector->Add(vertexPoint);    // Collect to remove  
-       TPolyLineShape *vertexShape   = new TPolyLineShape(vertexPoint);
-         vertexShape->SetVisibility(1);                vertexShape->SetColorAttribute(vertexColor);
-         vertexShape->SetStyleAttribute(vertexStyle);  vertexShape->SetSizeAttribute(vertexSize);
-       // Create a node to hold it
-       TVolume *thisVertex = new TVolume("vertex",vertex->GetName(),vertexShape);
-         thisVertex->Mark();
-         thisVertex->SetVisibility();
-       TVolumePosition *pp = m_EventsNode->Add(thisVertex); 
-       if (!pp) 
-          printf(" no track position \n");
-       vertexCounter = 1;
-       return vertexCounter;
-    }
-#endif
-  }
-  return 0;
-}
-
-//_____________________________________________________________________________
-Int_t StEventDisplayMaker::MakeVertices(const StObjArray *eventCollection,StVirtualEventFilter *filter)
-{
-  if (eventCollection && eventCollection->size() ) {
-#ifdef STEVENT
-    Int_t   hitCounter = 0;
-    Color_t hitColor = kYellow;
-    Style_t hitStyle = 1;
-    Size_t hitSize  = 2;
-    // ---------------------------- hits filter ----------------------------- //
-    if (filter) hitColor =  filter->Channel(eventCollection,hitSize,hitStyle); //
-    // ---------------------------------------------------------------------- //
-    if (hitColor > 0) {
-      StVertices3DPoints *hitsPoints  = new StVertices3DPoints((StObjArray *)eventCollection);
-       m_HitCollector->Add(hitsPoints);    // Collect to remove  
-       TPolyLineShape *hitsShape   = new TPolyLineShape(hitsPoints);
-         hitsShape->SetVisibility(1);        hitsShape->SetLineColor(hitColor);
-         hitsShape->SetLineStyle(hitStyle);  hitsShape->SetLineWidth(hitSize);
-       // Create a node to hold it
-       TVolume *thisHit = new TVolume("hits",eventCollection->GetName(),hitsShape);
-         thisHit->Mark();
-         thisHit->SetVisibility();
-       TVolumePosition *pp = m_EventsNode->Add(thisHit); 
-       if (!pp && hitCounter) {
-          printf(" no track position %d\n",hitCounter);
-       }
-       return hitsPoints->Size(); // hitColor;
-    }
-#endif
-  }
-  return 0;
-}
-//_____________________________________________________________________________
-Int_t StEventDisplayMaker::MakeTracks( StGlobalTrack *globTrack,StVirtualEventFilter *filter)
-{
-  if (globTrack) {
-#ifdef STEVENT
-    Int_t   trackCounter = 0;
-    Color_t trackColor = kRed;
-    Style_t trackStyle = 1;
-    Size_t trackSize  = 2;
-    // --------------------- tracks filter ---------------------------------- //
-    if (filter) trackColor =  filter->Channel(globTrack,trackSize,trackStyle);//
-    // ---------------------------------------------------------------------- //
-    if (trackColor > 0) {
-       StHelix3DPoints *tracksPoints  = new StHelix3DPoints(globTrack);
-       m_TrackCollector->Add(tracksPoints);    // Collect to remove  
-       TPolyLineShape *tracksShape   = new TPolyLineShape(tracksPoints,"L");
-         tracksShape->SetVisibility(1);         tracksShape->SetColorAttribute(trackColor);
-         tracksShape->SetLineStyle(trackStyle); tracksShape->SetSizeAttribute(trackSize);
-       // Create a node to hold it
-       TVolume *thisTrack = new TVolume("tracks",globTrack->GetName(),tracksShape);
-         thisTrack->Mark();   thisTrack->SetVisibility();
-         trackCounter++;
-       TVolumePosition *pp = m_EventsNode->Add(thisTrack); 
-       if (!pp && trackCounter) {
-          printf(" no track position %d\n",trackCounter);
-       }
-       return trackCounter;
-    }
-#endif
-  }
-  return 0;
 }
 
 //_____________________________________________________________________________
@@ -950,26 +679,6 @@ Int_t  StEventDisplayMaker::_NAME3_(Set,filterName,Flag)(Int_t flag)         \
 StVirtualEventFilter *StEventDisplayMaker::_NAME2_(Set,filterName)(StVirtualEventFilter *filter) \
 { return SetFilter(filter,_NAME2_(k,filterName)); }
 
-DISPLAY_FILTER_DEFINITION(PrimaryVertex)
-
-// -- Hits collections filters --
-
-DISPLAY_FILTER_DEFINITION(TpcHit)
-DISPLAY_FILTER_DEFINITION(SvtHit)
-DISPLAY_FILTER_DEFINITION(FtpcHit)
-DISPLAY_FILTER_DEFINITION(EmcTowerHit)
-DISPLAY_FILTER_DEFINITION(EmcPreShowerHit)
-DISPLAY_FILTER_DEFINITION(SmdPhiHit)
-DISPLAY_FILTER_DEFINITION(SmdEtaHit)
-DISPLAY_FILTER_DEFINITION(Vertices)
-
-// -- StGlobalTrack filters --
-
-DISPLAY_FILTER_DEFINITION(GlobalTracks)
-DISPLAY_FILTER_DEFINITION(Track)
-DISPLAY_FILTER_DEFINITION(TrackTpcHits)
-DISPLAY_FILTER_DEFINITION(TrackSvtHits)
-DISPLAY_FILTER_DEFINITION(TrackFtpcHits)
 
 // -- Generic TTable  filters --
 
@@ -983,6 +692,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.68  2000/08/26 03:14:45  fine
+// New default filter from M.Panebratcev has been introduced
+//
 // Revision 1.67  2000/08/16 22:34:52  fine
 // clean up
 //
