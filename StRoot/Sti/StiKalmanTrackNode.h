@@ -70,10 +70,15 @@ public:
     /// -3  : invalid eloss data for this node.
     double  evaluateDedx();
 
-    void propagate(double x, 
+    void propagate(double x);
+		   /*void propagate(double x, 
 		   double x0,   
-		   double rho); 
-    void propagateError();
+		   double rho); */
+
+    /// Extrapolate the track parameters to radial position "x"  and return a point global coordinates along
+    /// the track at that point.
+    StThreeVector<double> getPointAt(double xk) const;
+
     double evaluateChi2(); 
     void updateNode(); //throw (Exception);
     void extendToVertex(); //throw (Exception);

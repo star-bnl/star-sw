@@ -389,204 +389,305 @@ double StiKalmanTrackNode::getPt() const
 int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode, 
 				  const StiDetector * tDet)
 {
-    det = tDet;
-    int position = 0;
-    setState(pNode);
-    StiPlacement * place = tDet->getPlacement();
-    double tAlpha = place->getNormalRefAngle();
-    if (tAlpha < -M_PI) tAlpha += 2*M_PI;
-    if (tAlpha >= M_PI) tAlpha -= 2*M_PI;
+  det = tDet;
+  int position = 0;
+  setState(pNode);
+  StiPlacement * place = tDet->getPlacement();
+  double tAlpha = place->getNormalRefAngle();
+  if (tAlpha < -M_PI) tAlpha += 2*M_PI;
+  if (tAlpha >= M_PI) tAlpha -= 2*M_PI;
     
-    double dAlpha = tAlpha - fAlpha;
-    if (fabs(dAlpha)>1e-4)   // perform rotation if needed
-	rotate(dAlpha);
-    StiShape * sh = tDet->getShape();
-    planarShape = 0;
-    cylinderShape = 0;
-    shapeCode = sh->getShapeCode();
+  double dAlpha = tAlpha - fAlpha;
+  if (fabs(dAlpha)>1e-4)   // perform rotation if needed
+    rotate(dAlpha);
+  StiShape * sh = tDet->getShape();
+  planarShape = 0;
+  cylinderShape = 0;
+  shapeCode = sh->getShapeCode();
     
-    x1=fX;  // current
-    y1=fP0;		z1=fP1;		c1=fP3*x1 - fP2;
-    c1sq = c1*c1; 
-    if (c1sq>=1.) 
-	{
+  x1=fX;  // current
+  y1=fP0;		z1=fP1;		c1=fP3*x1 - fP2;
+  c1sq = c1*c1; 
+  if (c1sq>=1.) 
+    {
 #ifdef DEBUG
-	    *(Messenger::instance(MessageType::kNodeMessage)) << "c1sq:" << c1sq << endl;
+      *(Messenger::instance(MessageType::kNodeMessage)) << "c1sq:" << c1sq << endl;
 #endif
-	    throw runtime_error("SKTN::propagate() - c1sq>=1");
-	}
-    r1=sqrt(1.-c1sq);		
+      throw runtime_error("SKTN::propagate() - c1sq>=1");
+    }
+  r1=sqrt(1.-c1sq);		
     
-    switch (shapeCode)
-	{
-	case kPlanar:
-	    {
-		//cout << "SKTN::propagate() Planar detector encountered." << endl;
-		x2= place->getNormalRadius(); // target
-		break;
-	    }
-	case kCylindrical:
-	    {
-		double x_p, x_m, R, L, x0, y0,r0sq, a, b, sq;
-		//cout << "SKTN::propagate() Cylindrical detector encountered." << endl;
-		//cout << "fP0,fP3,c1sq:"<<fP0<<"\t"<<fP3<<"\t"<<c1sq<<endl;
-		if (fP3>0)
-		    y0 = fP0+r1/fP3;
-		else if (fP3<0)
-		    y0 = fP0-r1/fP3;
-		else
-		    return -1;
-		R = 1/fP3;
-		L = place->getNormalRadius(); // target
+  switch (shapeCode)
+    {
+    case kPlanar:
+      {
+	//cout << "SKTN::propagate() Planar detector encountered." << endl;
+	x2= place->getNormalRadius(); // target
+	break;
+      }
+    case kCylindrical:
+      {
+	double x_p, x_m, R, L, x0, y0,r0sq, a, b, sq;
+	//cout << "SKTN::propagate() Cylindrical detector encountered." << endl;
+	//cout << "fP0,fP3,c1sq:"<<fP0<<"\t"<<fP3<<"\t"<<c1sq<<endl;
+	if (fP3>0)
+	  y0 = fP0+r1/fP3;
+	else if (fP3<0)
+	  y0 = fP0-r1/fP3;
+	else
+	  return -1;
+	R = 1/fP3;
+	L = place->getNormalRadius(); // target
 		
-		x0 = fP2/fP3;
-		//cout << "R,L,x0,y0:"<<R<< "\t" << L<<"\t"<< x0 << "\t" << y0 << endl;
-		r0sq= x0*x0+y0*y0;
-		if (r0sq<=0.)
-		    {
-#ifdef DEBUG
-			cout << "SKTN::propagate() - r0sq<=0" << endl;
-#endif
-			return -1;
-		    }
-		a = 0.5*(r0sq+L*L-R*R);
-		if (a<=0.)
-		    {
-#ifdef DEBUG
-			cout << "SKTN::propagate() - a<=0" << endl;
-#endif
-			return -1;
-		    }
-		b = L*L/(a*a);
-		sq = b*r0sq-1;
-		if (sq<0)
-		    {
-#ifdef DEBUG
-			cout << "SKTN::propagate() - sq<0" << endl;
-#endif
-			return -1;
-		    }
-		sq = sqrt(sq);				
-		x_p = a*(x0+y0*sq)/r0sq;
-		//cout << "x_p:"<< x_p << endl;
-		if (x_p>0)
-		    x2 = x_p;
-		else 
-		    {
-			x_m = a*(x0-y0*sq)/r0sq;
-			//cout << "x_m:"<< x_m << endl;
-			if (x_m>0)
-			    x2 = x_m;
-			else
-			    return -1; // no suitable solution 
-		    }
-		/*double pathLength;
-		  position =  StiMaterialInteraction::findIntersection(pNode,tDet,x2,radThickness,density,pathLength);	
-		  if (position<5) propagate(x2,radThickness,density);
-		*/
-	    break;
-	    }
-	case kConical:
-	    {
-#ifdef DEBUG
-		*(Messenger::instance(MessageType::kNodeMessage)) 
-		    << "SKTN::propagate() - Encountered Conical Volume "
-		    << "- Option not currently supported - abort track" << endl;
-#endif
-		throw runtime_error("SKTN::propagate() - c1sq>=1");
-	    }
-	}
-	dx=x2-x1;
-	c2=fP3*x2 - fP2; 
-	c2sq = c2*c2; 
-	if (c2sq>=1.) 
-	    {
-#ifdef DEBUG
-		*(Messenger::instance(MessageType::kNodeMessage)) << "c2sq>=1 value:" << c2sq << endl;
-#endif
-		throw runtime_error("SKTN::propagate() - c2sq>=1");
-	    }
-	r2=sqrt(1.- c2sq );	
-	double cSum = c1+c2;
-	
-	fP0 += dx*cSum/(r1+r2);
-	double dddd = c1*r2 + c2*r1;
-	if (fabs(dddd)==0)
-	    {
-#ifdef DEBUG
-		*(Messenger::instance(MessageType::kNodeMessage)) 
-		    << "StiKalmanTrackNode::propagate() - dddd: " << dddd << endl;
-#endif
-		throw runtime_error("SKTN::propagate() - fabs(dddd)==0.");
-	    }
-	fP1 += dx*fP4*cSum/dddd;
-	fX=x2;
-	
-	// intersection?
-	double yOff, yAbsOff, detHW, detHD,	edge,innerY, outerY, innerZ, outerZ, zOff, zAbsOff;
-	
-	yOff = fP0 - place->getNormalYoffset();
-	yAbsOff = fabs(yOff);
-	zOff = fP1 - place->getZcenter();
-	zAbsOff = fabs(zOff);
-	switch (shapeCode)
-	    {
-	    case kPlanar:
-		{
-		    StiPlanarShape * planarShape = static_cast<StiPlanarShape *>(sh);
-		    detHW = planarShape->getHalfWidth();
-		    detHD = planarShape->getHalfDepth();
-		    edge  = 4.;//shape->getEdgeHalfWidth();
-		    break;
-		}
-	    case kCylindrical:
-		{
-		    StiCylindricalShape * cylinderShape = static_cast<StiCylindricalShape *>(sh);
-		    detHW = 100.; // will never be outside
-		    detHD = cylinderShape->getHalfDepth();
-		    edge  = 4.;//shape->getEdgeHalfWidth();
-		    break;
-		}
-	    default:
-		{
-#ifdef DEBUG
-		    *(Messenger::instance(MessageType::kNodeMessage)) 
-			<< "SKTN::propagate() - Severe Error" << endl;
-#endif
-		    throw runtime_error("SKTN::propagate() - Bad shape code");
-		}
-	    }
-	innerY = detHW - edge;
-	outerY = innerY + 2*edge;
-	innerZ = detHD - edge;
-	outerZ = innerZ + 2*edge;
+	x0 = fP2/fP3;
+	//cout << "R,L,x0,y0:"<<R<< "\t" << L<<"\t"<< x0 << "\t" << y0 << endl;
+	r0sq= x0*x0+y0*y0;
+	if (r0sq<=0.)
+	  {
+	    cout << "SKTN::propagate() - r0sq<=0" << endl;
+	    return -1;
+	  }
+	a = 0.5*(r0sq+L*L-R*R);
+	if (a<=0.)
+	  {
+	    cout << "SKTN::propagate() - a<=0" << endl;
+	    return -1;
+	  }
+	b = L*L/(a*a);
+	sq = b*r0sq-1;
+	if (sq<0)
+	  {
+	    cout << "SKTN::propagate() - sq<0" << endl;
+	    return -1;
+	  }
+	sq = sqrt(sq);				
+	x_p = a*(x0+y0*sq)/r0sq;
+	//cout << "x_p:"<< x_p << endl;
+	if (x_p>0)
+	  x2 = x_p;
+	else 
+	  {
+	    x_m = a*(x0-y0*sq)/r0sq;
+	    //cout << "x_m:"<< x_m << endl;
+	    if (x_m>0)
+	      x2 = x_m;
+	    else
+	      return -1; // no suitable solution 
+	  }
+	/*double pathLength;
+	  position =  StiMaterialInteraction::findIntersection(pNode,tDet,x2,radThickness,density,pathLength);	
+	  if (position<5) propagate(x2,radThickness,density);
+	*/
+	break;
+      }
+    case kConical:
+      {
 #ifdef DEBUG
 	*(Messenger::instance(MessageType::kNodeMessage)) 
-		<< tDet->getName() << ":" << endl
-		<< " innerY:"  << innerY
-		<< " outerY:"  << outerY
-		<< " innerZ:"  << innerZ
-		<< " outerZ:"  << outerZ << endl
-		<< " yOffset:" << yOff 
-		<< " zOffset:" << zOff << endl;
+	  << "SKTN::propagate() - Encountered Conical Volume "
+	  << "- Option not currently supported - abort track" << endl;
 #endif
-	if (yAbsOff<innerY && zAbsOff<innerZ)
-	    position = kHit; 
-	else if (yAbsOff>outerY && (yAbsOff-outerY)>(zAbsOff-outerZ))
-	    // outside detector to positive or negative y (phi)
-	    position = yOff>0 ? kMissPhiPlus : kMissPhiMinus;
-	else if (zAbsOff>outerZ && (zAbsOff-outerZ)>(yAbsOff-outerY))
-	    // outside detector to positive or negative z (west or east)
-	    position = zOff>0 ? kMissZplus : kMissZminus;
-	else if ((yAbsOff-innerY)>(zAbsOff-innerZ))
-	    // positive or negative phi edge
-	    position = yOff>0 ? kEdgePhiPlus : kEdgePhiMinus;
-	else
-	    // positive or negative z edge
-	    position = zOff>0 ? kEdgeZplus : kEdgeZminus;
+	throw runtime_error("SKTN::propagate() - c1sq>=1");
+      }
+    }
+  dx=x2-x1;
+  c2=fP3*x2 - fP2; 
+  c2sq = c2*c2; 
+  if (c2sq>=1.) 
+    {
+#ifdef DEBUG
+      *(Messenger::instance(MessageType::kNodeMessage)) << "c2sq>=1 value:" << c2sq << endl;
+#endif
+      throw runtime_error("SKTN::propagate() - c2sq>=1");
+    }
+  r2=sqrt(1.- c2sq );	
+  double cSum = c1+c2;
 	
-	//cout << "position:"<< position<< endl;
-	return position;
+  fP0 += dx*cSum/(r1+r2);
+  double dddd = c1*r2 + c2*r1;
+  if (fabs(dddd)==0)
+    {
+#ifdef DEBUG
+      *(Messenger::instance(MessageType::kNodeMessage)) 
+	<< "StiKalmanTrackNode::propagate() - dddd: " << dddd << endl;
+#endif
+      throw runtime_error("SKTN::propagate() - fabs(dddd)==0.");
+    }
+  fP1 += dx*fP4*cSum/dddd;
+  fX=x2;
+	
+  // intersection?
+  double yOff, yAbsOff, detHW, detHD,	edge,innerY, outerY, innerZ, outerZ, zOff, zAbsOff;
+	
+  yOff = fP0 - place->getNormalYoffset();
+  yAbsOff = fabs(yOff);
+  zOff = fP1 - place->getZcenter();
+  zAbsOff = fabs(zOff);
+  switch (shapeCode)
+    {
+    case kPlanar:
+      {
+	StiPlanarShape * planarShape = static_cast<StiPlanarShape *>(sh);
+	detHW = planarShape->getHalfWidth();
+	detHD = planarShape->getHalfDepth();
+	edge  = 4.;//shape->getEdgeHalfWidth();
+	break;
+      }
+    case kCylindrical:
+      {
+	StiCylindricalShape * cylinderShape = static_cast<StiCylindricalShape *>(sh);
+	detHW = 100.; // will never be outside
+	detHD = cylinderShape->getHalfDepth();
+	edge  = 4.;//shape->getEdgeHalfWidth();
+	break;
+      }
+    default:
+      {
+#ifdef DEBUG
+	*(Messenger::instance(MessageType::kNodeMessage)) 
+	  << "SKTN::propagate() - Severe Error" << endl;
+#endif
+	throw runtime_error("SKTN::propagate() - Bad shape code");
+      }
+    }
+  innerY = detHW - edge;
+  outerY = innerY + 2*edge;
+  innerZ = detHD - edge;
+  outerZ = innerZ + 2*edge;
+#ifdef DEBUG
+  *(Messenger::instance(MessageType::kNodeMessage)) 
+    << tDet->getName() << ":" << endl
+    << " innerY:"  << innerY
+    << " outerY:"  << outerY
+    << " innerZ:"  << innerZ
+    << " outerZ:"  << outerZ << endl
+    << " yOffset:" << yOff 
+    << " zOffset:" << zOff << endl;
+#endif
+  if (yAbsOff<innerY && zAbsOff<innerZ)
+    position = kHit; 
+  else if (yAbsOff>outerY && (yAbsOff-outerY)>(zAbsOff-outerZ))
+    // outside detector to positive or negative y (phi)
+    position = yOff>0 ? kMissPhiPlus : kMissPhiMinus;
+  else if (zAbsOff>outerZ && (zAbsOff-outerZ)>(yAbsOff-outerY))
+    // outside detector to positive or negative z (west or east)
+    position = zOff>0 ? kMissZplus : kMissZminus;
+  else if ((yAbsOff-innerY)>(zAbsOff-innerZ))
+    // positive or negative phi edge
+    position = yOff>0 ? kEdgePhiPlus : kEdgePhiMinus;
+  else
+    // positive or negative z edge
+    position = zOff>0 ? kEdgeZplus : kEdgeZminus;
+	
+  //cout << "position:"<< position<< endl;
+	
+  // bail out if this projection is not "interesting"
+  if (position>kEdgeZplus || position<0)
+    return position;
+
+  //f = F - 1
+  double rr=r1+r2, cc=c1+c2, xx=x1+x2;
+  double f02=-dx*(2*rr + cc*(c1/r1 + c2/r2))/(rr*rr);
+  double f03= dx*(rr*xx + cc*(c1*x1/r1+c2*x2/r2))/(rr*rr);
+  double cr=c1*r2+c2*r1;
+  double f12=-dx*fP4*(2*cr + cc*(c2*c1/r1-r1 + c1*c2/r2-r2))/(cr*cr);
+  double f13=dx*fP4*(cr*xx-cc*(r1*x2-c2*c1*x1/r1+r2*x1-c1*c2*x2/r2))/(cr*cr);
+  double f14= dx*cc/cr; 
+    
+  //b = C*ft
+  double b00=f02*fC20 + f03*fC30;
+  double b01=f12*fC20 + f13*fC30 + f14*fC40;
+  double b10=f02*fC21 + f03*fC31;
+  double b11=f12*fC21 + f13*fC31 + f14*fC41;
+  double b20=f02*fC22 + f03*fC32;
+  double b21=f12*fC22 + f13*fC32 + f14*fC42;
+  double b30=f02*fC32 + f03*fC33;
+  double b31=f12*fC32 + f13*fC33 + f14*fC43;
+  double b40=f02*fC42 + f03*fC43;
+  double b41=f12*fC42 + f13*fC43 + f14*fC44;
+    
+    //a = f*b = f*C*ft
+  double a00=f02*b20+f03*b30;
+  double a01=f02*b21+f03*b31;
+  double a11=f12*b21+f13*b31+f14*b41;
+    
+  //F*C*Ft = C + (a + b + bt)
+  fC00 += a00 + 2*b00;
+  fC10 += a01 + b01 + b10; 
+  fC20 += b20;
+  fC30 += b30;
+  fC40 += b40;
+  fC11 += a11 + 2*b11;
+  fC21 += b21; 
+  fC31 += b31; 
+  fC41 += b41; 
+    
+  // Multiple scattering
+  if (mcsCalculated)
+    {
+      prevGas = gas;
+      prevMat = mat;
+      gas = det->getGas();
+      mat = det->getMaterial();
+      if (prevGas!=gas || prevMat!=mat)
+	{
+	  gasDensity = gas->getDensity();
+	  matDensity = mat->getDensity();
+	  gasRL      = gas->getRadLength();
+	  matRL      = mat->getRadLength();
+	}
+      double detHT, gapT, cosLinv,s;
+      switch (shapeCode)
+	{
+	case kPlanar:
+	  {
+	    detHT = 0.5*planarShape->getThickness();
+	    gapT = dx-2*detHT;
+	    cosLinv = sqrt(1.+fP4*fP4);
+	    s = asin(fP3*dx/2)*cosLinv/fP3;
+	    break;
+	  }
+	case kCylindrical:
+	  {
+	    detHT = 0.;
+	    gapT  = 0.;
+	    s=1.;
+	  }
+	}
+      density = (gasDensity*gapT + 2*matDensity*detHT)/s;
+      radThickness  = s*(gapT/gasRL+2*detHT/matRL)/dx;
+      if (density<0) // problem abort MCS
+	return;
+      double d=sqrt((x1-fX)*(x1-fX)
+		    +(y1-fP0)*(y1-fP0)  +(z1-fP1)*(z1-fP1));
+      double tanl  = fP4;
+      double pt = getPt();
+      double p2=(1.+tanl*tanl)*pt*pt;
+      double beta2=p2/(p2 + massHypothesis*massHypothesis);
+      double theta2=14.1*14.1/(beta2*p2*1e6)*d/radThickness*density;
+      //double theta2=1.0259e-6*10*10/20/(beta2*p2)*d*density;
+      double ey=fP3*fX - fP2, ez=fP4;
+      double xz=fP3*ez, zz1=ez*ez+1, xy=fP2+ey;
+      fC33 = fC33 + xz*xz*theta2;
+      fC32 = fC32 + xz*ez*xy*theta2;
+      fC43 = fC43 + xz*zz1*theta2;
+      fC22 = fC22 + (2*ey*ez*ez*fP2+1-ey*ey+ez*ez+
+		     fP2*fP2*ez*ez)*theta2;
+      fC42 = fC42 + ez*zz1*xy*theta2;
+      fC44 = fC44 + zz1*zz1*theta2;
+      // Energy losses
+      if (elossCalculated)
+	{
+	  double dE=0.153e-3/beta2*(log(5940*beta2/(1-beta2)) - beta2)*d*density;
+	  if (x1 < x2) dE=-dE;
+	  cc=fP3;
+	  //cout << "ELOSS: c:" << cc;
+	  fP3 = fP3 *(1.- sqrt(p2+massHypothesis*massHypothesis)/p2*dE);
+	  //cout << " c':" << fP3 << endl;
+	  fP2 = fP2 + fX*(fP3-cc);
+	}
+    }
+  return position;
 }
 
 double  StiKalmanTrackNode::evaluateDedx()
@@ -617,12 +718,12 @@ double  StiKalmanTrackNode::evaluateDedx()
 }
 
 
-void  StiKalmanTrackNode::propagate(double xk, double _radThickness,double _density)
+void  StiKalmanTrackNode::propagate(double xk)//, double _radThickness,double _density)
 {
     x1=fX;
     x2=x1+(xk-x1);
-    radThickness = _radThickness;
-    density = _density;
+    //radThickness = _radThickness;
+    //density = _density;
     dx=x2-x1;
     y1=fP0;
     z1=fP1;
@@ -661,114 +762,58 @@ void  StiKalmanTrackNode::propagate(double xk, double _radThickness,double _dens
     fX=x2;
 }
 
-void  StiKalmanTrackNode::propagateError()
+
+StThreeVector<double> StiKalmanTrackNode::getPointAt(double xk) const
 {
-    
-    //cout << "SKTN::propagateError() - density:"<< density << " radThickness:"<< radThickness<< endl;
-    
-    //f = F - 1
-    double rr=r1+r2, cc=c1+c2, xx=x1+x2;
-    double f02=-dx*(2*rr + cc*(c1/r1 + c2/r2))/(rr*rr);
-    double f03= dx*(rr*xx + cc*(c1*x1/r1+c2*x2/r2))/(rr*rr);
-    double cr=c1*r2+c2*r1;
-    double f12=-dx*fP4*(2*cr + cc*(c2*c1/r1-r1 + c1*c2/r2-r2))/(cr*cr);
-    double f13=dx*fP4*(cr*xx-cc*(r1*x2-c2*c1*x1/r1+r2*x1-c1*c2*x2/r2))/(cr*cr);
-    double f14= dx*cc/cr; 
-    
-    //b = C*ft
-    double b00=f02*fC20 + f03*fC30;
-    double b01=f12*fC20 + f13*fC30 + f14*fC40;
-    double b10=f02*fC21 + f03*fC31;
-    double b11=f12*fC21 + f13*fC31 + f14*fC41;
-    double b20=f02*fC22 + f03*fC32;
-    double b21=f12*fC22 + f13*fC32 + f14*fC42;
-    double b30=f02*fC32 + f03*fC33;
-    double b31=f12*fC32 + f13*fC33 + f14*fC43;
-    double b40=f02*fC42 + f03*fC43;
-    double b41=f12*fC42 + f13*fC43 + f14*fC44;
-    
-    //a = f*b = f*C*ft
-    double a00=f02*b20+f03*b30;
-    double a01=f02*b21+f03*b31;
-    double a11=f12*b21+f13*b31+f14*b41;
-    
-    //F*C*Ft = C + (a + b + bt)
-    fC00 += a00 + 2*b00;
-    fC10 += a01 + b01 + b10; 
-    fC20 += b20;
-    fC30 += b30;
-    fC40 += b40;
-    fC11 += a11 + 2*b11;
-    fC21 += b21; 
-    fC31 += b31; 
-    fC41 += b41; 
-    
-    // Multiple scattering
-    if (mcsCalculated)
+    x1=fX;
+    x2=x1+(xk-x1);
+    dx=x2-x1;
+    y1=fP0;
+    z1=fP1;
+    c1=fP3*x1 - fP2;
+    double c1sq = c1*c1; 
+    if (c1sq>=1.) 
 	{
-	    prevGas = gas;
-	    prevMat = mat;
-	    gas = det->getGas();
-	    mat = det->getMaterial();
-	    if (prevGas!=gas || prevMat!=mat)
-		{
-		    gasDensity = gas->getDensity();
-		    matDensity = mat->getDensity();
-		    gasRL      = gas->getRadLength();
-		    matRL      = mat->getRadLength();
-		}
-	    double detHT, gapT, cosLinv,s;
-	    switch (shapeCode)
-		{
-		case kPlanar:
-		    {
-			detHT = 0.5*planarShape->getThickness();
-			gapT = dx-2*detHT;
-			cosLinv = sqrt(1.+fP4*fP4);
-			s = asin(fP3*dx/2)*cosLinv/fP3;
-			break;
-		    }
-		case kCylindrical:
-		    {
-			detHT = 0.;
-			gapT  = 0.;
-			s=1.;
-		    }
-		}
-	    density = (gasDensity*gapT + 2*matDensity*detHT)/s;
-	    radThickness  = s*(gapT/gasRL+2*detHT/matRL)/dx;
-	    if (density<0) // problem abort MCS
-		return;
-	    double d=sqrt((x1-fX)*(x1-fX)
-			  +(y1-fP0)*(y1-fP0)  +(z1-fP1)*(z1-fP1));
-	    double tanl  = fP4;
-	    double pt = getPt();
-	    double p2=(1.+tanl*tanl)*pt*pt;
-	    double beta2=p2/(p2 + massHypothesis*massHypothesis);
-	    double theta2=14.1*14.1/(beta2*p2*1e6)*d/radThickness*density;
-	    //double theta2=1.0259e-6*10*10/20/(beta2*p2)*d*density;
-	    double ey=fP3*fX - fP2, ez=fP4;
-	    double xz=fP3*ez, zz1=ez*ez+1, xy=fP2+ey;
-	    fC33 = fC33 + xz*xz*theta2;
-	    fC32 = fC32 + xz*ez*xy*theta2;
-	    fC43 = fC43 + xz*zz1*theta2;
-	    fC22 = fC22 + (2*ey*ez*ez*fP2+1-ey*ey+ez*ez+
-			   fP2*fP2*ez*ez)*theta2;
-	    fC42 = fC42 + ez*zz1*xy*theta2;
-	    fC44 = fC44 + zz1*zz1*theta2;
-	    // Energy losses
-	    if (elossCalculated)
-		{
-		    double dE=0.153e-3/beta2*(log(5940*beta2/(1-beta2)) - beta2)*d*density;
-		    if (x1 < x2) dE=-dE;
-		    cc=fP3;
-		    //cout << "ELOSS: c:" << cc;
-		    fP3 = fP3 *(1.- sqrt(p2+massHypothesis*massHypothesis)/p2*dE);
-		    //cout << " c':" << fP3 << endl;
-		    fP2 = fP2 + fX*(fP3-cc);
-		}
+#ifdef DEBUG
+	    *(Messenger::instance(MessageType::kNodeMessage)) << "c1sq:" << c1sq << endl;
+#endif
+	    throw runtime_error("SKTN::propagate() - c1sq>=1");
 	}
+    c2=fP3*x2 - fP2; 
+    double c2sq = c2*c2; 
+    if (c2sq>=1.) 
+	{
+#ifdef DEBUG
+	    *(Messenger::instance(MessageType::kNodeMessage)) << "c2sq>=1 value:" << c2sq << endl;
+#endif
+	    throw runtime_error("SKTN::propagate() - c2sq>=1");
+	}
+    double cSum = c1+c2;
+    r1=sqrt(1.- c1sq );
+    r2=sqrt(1.- c2sq );
+
+    double xx, yy, zz, alpha, ca, sa;
+    double gx, gy;
+    xx = x2;
+    yy = fP0 + dx*cSum/(r1+r2);
+    double dddd = c1*r2 + c2*r1;
+    if (fabs(dddd)==0)
+	{
+#ifdef DEBUG
+	    *(Messenger::instance(MessageType::kNodeMessage)) 
+		<< "StiKalmanTrackNode::propagate() - dddd: " << dddd << endl;
+#endif
+	    throw runtime_error("SKTN::propagate() - fabs(dddd)==0.");
+	}
+    zz = fP1 + dx*fP4*cSum/dddd;
+    ca = cos(alpha);
+    sa = sin(alpha);
+    gx = ca*xx-sa*yy;
+    gy = sa*xx+ca*yy;
+    return (StThreeVector<double>(gx,gy, zz));
 }
+
+
 
 double 
 StiKalmanTrackNode::evaluateChi2() 	//throw ( Exception)
@@ -1030,7 +1075,7 @@ void StiKalmanTrackNode::extendToVertex() //throw (Exception)
     double tgf=-fP2/(fP3*fP0 + sqrt(1-c*c));
     double snf=tgf/sqrt(1.+ tgf*tgf);
     double xv=(fP2+snf)/fP3;
-    propagate(xv,0.,0.);
+    propagate(xv);//,0.,0.);
 }
 
 //_____________________________________________________________________________

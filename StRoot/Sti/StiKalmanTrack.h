@@ -253,6 +253,7 @@ public:
     */
     StThreeVector<double> getPointNear(double x) const;
     StThreeVector<double> getGlobalPointNear(double x) const;
+    StThreeVector<double> getGlobalPointAt(double x) const;
     
     virtual StThreeVector<double> getMomentumAtOrigin();
     virtual StThreeVector<double> getMomentumNear(double x);
