@@ -1,4 +1,7 @@
 #  $Log: MakeSYS.mk,v $
+#  Revision 1.19  1998/07/08 12:57:50  fisyak
+#  replace /usr/pgi => (PGI)
+#
 #  Revision 1.18  1998/06/22 00:36:29  fisyak
 #  cleanup for SL98c_1
 #
@@ -35,7 +38,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/06/22 00:36:29 $ 
+#             Last modification $Date: 1998/07/08 12:57:50 $ 
 #. default setings
 
 RM := rm -f
@@ -155,10 +158,10 @@ ifneq (,$(findstring $(STAF_ARCH),i386_linux2))
 LDFLAGS    += -shared 
   SOFLAGS  := -shared -Wl,-soname,libEvent.so
 #yf  CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
-##FLIBS    := -L/usr/pgi/linux86/lib  -lf2c
+##FLIBS    := -L$(PGI)/linux86/lib  -lf2c
   CLIBS    := -lg++ -lm -ldl
 #                            -rdynamic 
-  FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
+  FLIBS    := -L$(PGI)/linux86/lib -lpgftnrtl 
   FFLAGS   := -DPGI -w 
   FEXTEND  := -Mextend
   YACC     := bison -y
