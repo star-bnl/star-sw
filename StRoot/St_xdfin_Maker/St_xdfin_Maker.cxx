@@ -41,8 +41,6 @@ Int_t St_xdfin_Maker::Make(){
 
   St_DataSetIter local(m_DataSet);
   St_DataSetIter cons(m_ConstSet);
-  Int_t  ret = kStErr;
-
 
   while((set = fXdfin.ReadEvent())) {
     local.Reset();
@@ -60,6 +58,7 @@ Int_t St_xdfin_Maker::Make(){
       if (!m_InitDone) {mkdir = "run";  CONST = kTRUE;}
       else              mkdir = "event/data/global";
     }
+    if (!strcmp("run",dsname)) 		{                     CONST = kTRUE;}
     if (!strcmp("Run",dsname)) 		{mkdir = "run/geant"; CONST = kTRUE;}
     if (!strcmp("params",dsname)) 	{mkdir = "run";       CONST = kTRUE;}
     if (!strcmp("BEGIN_RUN",dsname))	{                     CONST = kTRUE;}
@@ -80,7 +79,7 @@ Int_t St_xdfin_Maker::Make(){
     if (strstr(Data,dsname)) return kStOK;
     SafeDelete(curdir);
   }
-  return ret;
+  return kStEOF;
 }
 //_____________________________________________________________________________
 void St_xdfin_Maker::PrintInfo(){
