@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.33 2000/02/04 19:53:56 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.34 2000/02/07 19:49:06 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.34  2000/02/07 19:49:06  kathy
+// removed L3 trigger histograms and methods that created them - this table is no longer standard on the DST; created methods BookHistEval and MakeHistEval for geant vs reco evaluation histograms; filled geant vs reco evaluation histograms for table-based data
+//
 // Revision 1.33  2000/02/04 19:53:56  kathy
 // added 2 more histograms - for med and small range of # hits in detector
 //
@@ -460,14 +463,19 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   // for method MakeHistKink
     m_kink_tot=0;   //! number of kinks
   
-  // for method MakeHistL3
-    m_l3_tot=0;   //! number of l3 tracks
   
   // for method MakeHistV0Eval
     m_v0eval_tot=0;   //! number of vertices
   
   // for method MakeHistRich
     m_rich_tot=0;   //! number of rich hits
+
+  // for method MakeHistEval
+    
+   m_geant_reco_pvtx_x=0;  //! prim vtx x, diff geant - reco
+   m_geant_reco_pvtx_y=0;  //! prim vtx y, diff geant - reco
+   m_geant_reco_pvtx_z=0;  //! prim vtx z, diff geant - reco
+   m_geant_reco_vtx_z_z=0; //! prim vtx z, diff geant - reco vs reco z
 
 }
 //_____________________________________________________________________________
@@ -487,9 +495,9 @@ Int_t StQABookHist::Init(){
   BookHistXi();
   BookHistPoint();
   BookHistKink();
-  BookHistL3();
   BookHistV0Eval();
   BookHistRich();
+  BookHistEval();
   
   return StMaker::Init();
 
@@ -521,12 +529,12 @@ Int_t StQABookHist::Make(){
   MakeHistPoint();
   // histograms from table kinkVertex
   MakeHistKink();
-  // histograms from table l3Track
-  MakeHistL3();
   // histograms from table ev0_eval
   MakeHistV0Eval();
   // histograms from table g2t_rch_hit
   MakeHistRich();
+  // histograms from geant and reco tables 
+  MakeHistEval();
 
   return kStOK;
 
@@ -1149,12 +1157,7 @@ void StQABookHist::BookHistKink(){
   m_kink_tot   = QAH1F("QaKinkTot",  "kinkVertex: # kinks ",25,0.,25.);
 
 }
-//_____________________________________________________________________________
-void StQABookHist::BookHistL3(){
 
-  m_l3_tot   = QAH1F("QaL3Tot",  "l3Track: # tracks ",50,0.,10000.);
-
-}
 //_____________________________________________________________________________
 void StQABookHist::BookHistV0Eval(){
 
@@ -1168,3 +1171,20 @@ void StQABookHist::BookHistRich(){
 
 }
 //_____________________________________________________________________________
+
+void StQABookHist::BookHistEval(){
+
+   m_geant_reco_pvtx_x  = QAH1F("QaGRpvtxDx"," diff geant - reco prim vtx X",
+                              100, -0.5,0.5);
+   m_geant_reco_pvtx_y  = QAH1F("QaGRpvtxDy"," diff geant - reco prim vtx Y",
+                              100, -0.5,0.5);
+   m_geant_reco_pvtx_z  = QAH1F("QaGRpvtxDz"," diff geant - reco prim vtx Z",
+                              100, -0.5,0.5);
+   m_geant_reco_vtx_z_z = QAH2F("QaGRpvtxDzZ",
+        " reco pvtx Z vs diff geant - reco Z", 100, -0.5,0.5,100,-50.,50.);
+
+}
+
+//_____________________________________________________________________________
+
+

@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.17 2000/02/04 19:53:57 kathy Exp $ 
+//! $Id: StQABookHist.h,v 1.18 2000/02/07 19:49:06 kathy Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.18  2000/02/07 19:49:06  kathy
+//! removed L3 trigger histograms and methods that created them - this table is no longer standard on the DST; created methods BookHistEval and MakeHistEval for geant vs reco evaluation histograms; filled geant vs reco evaluation histograms for table-based data
+//!
 //! Revision 1.17  2000/02/04 19:53:57  kathy
 //! added 2 more histograms - for med and small range of # hits in detector
 //!
@@ -68,7 +71,7 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.17 2000/02/04 19:53:57 kathy Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.18 2000/02/07 19:49:06 kathy Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -421,15 +424,20 @@ class StQABookHist : public StMaker {
   // for method MakeHistKink
    TH1F     *m_kink_tot;   //! number of kinks
   
-  // for method MakeHistL3
-   TH1F     *m_l3_tot;   //! number of l3 tracks
-  
   // for method MakeHistV0Eval
    TH1F     *m_v0eval_tot;   //! number of vertices
   
   // for method MakeHistRich
    TH1F     *m_rich_tot;   //! number of rich hits
+
+  // for method MakeHistEval
+   TH1F *m_geant_reco_pvtx_x;  //! prim vtx x, diff geant - reco
+   TH1F *m_geant_reco_pvtx_y;  //! prim vtx y, diff geant - reco
+   TH1F *m_geant_reco_pvtx_z;  //! prim vtx z, diff geant - reco
+   TH2F *m_geant_reco_vtx_z_z; //! prim vtx z, diff geant - reco vs reco z
+
   
+
  protected:
 
 //   Bool_t drawinit;
@@ -468,9 +476,9 @@ class StQABookHist : public StMaker {
   virtual void   MakeHistXi() = 0;
   virtual void   MakeHistPoint() = 0;
   virtual void   MakeHistKink() = 0;
-  virtual void   MakeHistL3() = 0;
   virtual void   MakeHistV0Eval() = 0;
   virtual void   MakeHistRich() = 0;
+  virtual void   MakeHistEval() = 0;
 
   virtual void   BookHistEvSum();
   virtual void   BookHistGlob();
@@ -483,9 +491,10 @@ class StQABookHist : public StMaker {
   virtual void   BookHistXi();
   virtual void   BookHistPoint();
   virtual void   BookHistKink();
-  virtual void   BookHistL3();
   virtual void   BookHistV0Eval();
   virtual void   BookHistRich();
+  virtual void   BookHistEval();
+
   
  public:
 
@@ -494,7 +503,7 @@ class StQABookHist : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.17 2000/02/04 19:53:57 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.18 2000/02/07 19:49:06 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };
