@@ -23,6 +23,9 @@
 #include "StThreeVectorF.hh"
 //STD
 #include <math.h>
+#include <vector>
+using namespace std;
+
 //Sti
 #include "StiObjectFactoryInterface.h"
 #include "StiTrack.h"
@@ -30,6 +33,8 @@
 #include "StiHitContainer.h"
 #include "StiKTNIterator.h"
 #include "StiHit.h"
+
+class StHit;
 
 /** 
  * @enum StiDirection
@@ -300,6 +305,9 @@ public:
    StThreeVector<double> getMomentumAtOrigin() const;
    StThreeVector<double> getMomentumNear(double x);
    StThreeVector<double> getHitPositionNear(double x) const;
+
+    ///return hits;
+    virtual vector<StHit*> stHits() const;
   
   // Function to reverse the node geometry of a track
   void swap();
