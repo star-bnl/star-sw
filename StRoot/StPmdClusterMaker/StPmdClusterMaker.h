@@ -3,7 +3,7 @@
  * \author
  */
 /***********************************************************
- * $Id: StPmdClusterMaker.h,v 1.5 2004/03/23 05:18:51 subhasis Exp $
+ * $Id: StPmdClusterMaker.h,v 1.6 2004/04/09 23:01:48 jeromel Exp $
  *
  * Author:
  *
@@ -14,6 +14,9 @@
  ************************************************************
  *
  * $Log: StPmdClusterMaker.h,v $
+ * Revision 1.6  2004/04/09 23:01:48  jeromel
+ * GetCVS() missing
+ *
  * Revision 1.5  2004/03/23 05:18:51  subhasis
  * refclust changed to have correct sigma/ncell
  *
@@ -89,7 +92,11 @@ class StPmdClusterMaker: public StMaker{
   void  FillHistograms(StPmdDetector*, StPmdDetector*); //! filling histograms
   void  Browse(TBrowser* b); 
 
-  
+  virtual const char *GetCVS() const {  ///< Returns version tag.
+    static const char cvs[]="Tag $Name:  $ $Id: StPmdClusterMaker.h,v 1.6 2004/04/09 23:01:48 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    return cvs;
+  }
+ 
   ClassDef(StPmdClusterMaker,0) 
 };
 
