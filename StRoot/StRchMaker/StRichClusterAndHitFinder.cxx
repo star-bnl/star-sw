@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 2.7 2001/02/07 16:07:21 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 2.8 2001/04/25 00:31:09 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
+ * Revision 2.8  2001/04/25 00:31:09  lasiuk
+ * HP changes "Declaration in loop violates scope (OLD ANSI)"
+ *
  * Revision 2.7  2001/02/07 16:07:21  lasiuk
  * Charge sharing by ratio of local maximum implemented
  * loadPixels(interface) removed
@@ -964,7 +967,8 @@ bool StRichClusterAndHitFinder::useTheMovingMatrix(StRichSinglePixel* pix, int c
     double iRow = pix->row();
 
     vector<StRichSinglePixel*> aVectorOfPixels;
-    for(size_t ii=0;
+    size_t ii;
+    for(ii=0;
 	(anotherIteration && ii<maximumNumberOfIterations);
 	ii++) {
 
@@ -1009,7 +1013,7 @@ bool StRichClusterAndHitFinder::useTheMovingMatrix(StRichSinglePixel* pix, int c
     //
     // -- too close to existing hits
     //
-    for(size_t ii=0; ii<mTheHits.size(); ii++) {
+    for(ii=0; ii<mTheHits.size(); ii++) {
 	if( abs(info->position() - mTheHits[ii]->internal()) < 1 ) {
 	    status = false;
 // 	    double distance = abs(info->position() - mTheHits[ii]->internal());
