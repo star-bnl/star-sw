@@ -65,7 +65,7 @@ CPPFLAGS += -I. -I../ -I/usr/include -I$(STAR)/asps/staf/inc \
              $(addprefix -I, $(SRC_DIR) $(GEN_TAB) $(GEN_DIR) $(INC_DIRS)) \
             -I$(CERN_ROOT)/include
 ifneq ($(OUT_DIR),$(STAR))        
-CPPFLAGG :=  $(addprefix -I, $(INC_DIRG))
+CPPFLAGG :=  -I$(STAR)/.share/$(DOMAIN) -I$(STAR)/.share/tables
 endif                          
 FFLAGS   += -DCERNLIB_TYPE
 #                                   -I$(CERN_ROOT)/src/geant321 
