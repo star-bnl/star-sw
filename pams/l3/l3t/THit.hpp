@@ -35,7 +35,7 @@
 // some includes
 #include <math.h>
 #include "Common.h"     // include common definitions
-#include "stdlib.h"
+#include <stdlib.h>
 #ifdef LEDA
 #include "_memory.hpp"  // include the LEDA memory manager (that's the most efficient mm i know)
 #endif
