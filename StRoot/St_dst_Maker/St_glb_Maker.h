@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.h,v 1.4 1998/10/31 00:26:13 fisyak Exp $
+// $Id: St_glb_Maker.h,v 1.5 1998/11/01 16:42:27 fisyak Exp $
 // $Log: St_glb_Maker.h,v $
+// Revision 1.5  1998/11/01 16:42:27  fisyak
+// dst analysis
+//
 // Revision 1.4  1998/10/31 00:26:13  fisyak
 // Makers take care about branches
 //
@@ -29,6 +32,12 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#ifndef ROOT_TH1
+#include <TH1.h>
+#endif
+#ifndef ROOT_TH2
+#include <TH2.h>
+#endif
 
 class St_svm_ctrl;
 class St_evr_privert;
@@ -42,7 +51,7 @@ class St_particle_dst_param;
 class St_dst_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.4 1998/10/31 00:26:13 fisyak Exp $";
+// static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.5 1998/11/01 16:42:27 fisyak Exp $";
    // egr
    Int_t         m_scenario;   //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
                                //    EGR will refit the TPC tracks, reproducing the parameters in tptrack.
@@ -93,9 +102,22 @@ class St_dst_Maker : public StMaker {
    St_mft_control *m_magf;        //!
    St_egr_egrpar  *m_egr_egrpar;  //!
    St_particle_dst_param *m_particle_dst_param; //!
+   // Histograms
+   static const Int_t nxpT;
+   static const Int_t nyeta;
+   static const Float_t xminpT;
+   static const Float_t xmaxpT;
+   static const Float_t ymineta;
+   static const Float_t ymaxeta;
+
  protected:
+   TH2F     *m_pT_eta_rec;  // pT versus eta Spectra for reconstructed
+   TH2F     *m_pT_eta_gen;  // pT versus eta Spectra for generated
+   TH1F     *m_pT;      // pT  recostructed
+   TH1F     *m_eta;     // eta recostructed
+
  public: 
-                  St_dst_Maker(const char *name="dst", const char *title="event/data/global");
+                  St_dst_Maker(const char *name="dst", const char *title="event/data/global/dst");
    virtual       ~St_dst_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();

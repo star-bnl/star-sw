@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.21 1998/10/31 00:26:26 fisyak Exp $
+// $Id: bfc.C,v 1.22 1998/11/01 16:42:28 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.22  1998/11/01 16:42:28  fisyak
+// dst analysis
+//
 // Revision 1.21  1998/10/31 00:26:26  fisyak
 // Makers take care about branches
 //
@@ -149,32 +152,30 @@ void bfc(
 // Prepare TCanvas to show some histograms created by makers
   if (xdf_out){
     gBenchmark->Start("xdf out");
-    //    xdf_out->NextEventPut(chain.GetRun()); // xdf output
+    xdf_out->NextEventPut(chain.DataSet("params")); // xdf output
     gBenchmark->Stop("xdf out");
   }
   if (root_out) {
     gBenchmark->Start("root i/o");
     root_out->cd();
-    //    St_DataSet *run = chain.GetRun();// root output
-    //    run->SetWrite();
+    St_DataSet *run = chain.DataSet("params");// root output
+    run->SetWrite();
     gBenchmark->Stop("root i/o");
   }
   gBenchmark->Start("bfc");
   Int_t i=0;
   for (Int_t i =1; i <= Nevents; i++){
     if (chain.Make(i)) break;
-    St_DataSetIter local(chain.DataSet());
-    //    local.Cd(chain.GetName());
-    St_DataSet *evnt = local("event");
+    St_DataSet *dst = chain.DataSet("dst");
     if (xdf_out){
       gBenchmark->Start("xdf out");
-      xdf_out->NextEventPut(evnt); // xdf output
+      xdf_out->NextEventPut(dst); // xdf output
       gBenchmark->Stop("xdf out");
     }
     if (root_out){
       gBenchmark->Start("root i/o");
       root_out->cd();
-      evnt->SetWrite();// root output
+      dst->SetWrite();// root output
       gBenchmark->Stop("root i/o");
     }
     //    root_tree->cd();
