@@ -306,6 +306,14 @@ void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
       cout <<" LSHit: "<<lsHit.position()<<" From Sector: "<<lsHit.fromSector()<<" ";
       cout <<" StiHit: "<<stihit->x()<<" "<<stihit->y()<<" "<<stihit->z()<<endl;
     */
+    double phi=tpchit->position().phi();
+    while (phi<0.) {
+	if (phi<0.) phi+=(2.*M_PI);
+    }
+    
+    cout <<"TpcHit:\t"<<tpchit->sector()<<" "<<tpchit->padrow()<<"\t"<<tpchit->position().perp()<<" "<<phi<<endl;
+    double r=sqrt(stihit->x()*stihit->x() + stihit->y()*stihit->y());
+    cout <<"StiHit:\t \t "<<r<<" "<<stihit->refangle()<<endl;
     return;
 }
 void StiGeometryTransform::operator() (const StiHit* stihit, StTpcHit* tpchit)
