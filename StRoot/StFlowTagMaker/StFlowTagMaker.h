@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.hh
-// $Id: StFlowTagMaker.h,v 1.15 2001/05/22 19:52:03 posk Exp $
+// $Id: StFlowTagMaker.h,v 1.16 2001/12/11 21:28:19 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -39,7 +39,7 @@ public:
   Int_t        Finish();
   FlowTag_st*  TagPointer() const;         // returns pointer to the tag table
   virtual const char *GetCVS() const {static const char cvs[]=
-  "Tag $Name:  $ $Id: StFlowTagMaker.h,v 1.15 2001/05/22 19:52:03 posk Exp $ built "__DATE__" "__TIME__ ;
+  "Tag $Name:  $ $Id: StFlowTagMaker.h,v 1.16 2001/12/11 21:28:19 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -53,12 +53,6 @@ private:
   StFlowEvent*     pFlowEvent;  //! the event to fill from
   StFlowSelection* pFlowSelect; //! the selection object
 
-  enum {
-    nHars = 6,
-    nSels = 2,
-    nSubs = 2
-  };
-
   struct histHarmonic {
     TH1F *mHistPsi;
     TH1F *mHistMeanPt;
@@ -69,10 +63,10 @@ private:
   struct histSubEvent;
   friend struct histSubEvent;
   struct histSubEvent {
-    struct histHarmonic histHarmonics[nHars];
+    struct histHarmonic histHarmonics[Flow::nHars];
   };
 
-  struct histSubEvent histSubEvents[nSels*nSubs]; //!
+  struct histSubEvent histSubEvents[Flow::nSels*Flow::nSubs]; //!
 
   ClassDef(StFlowTagMaker, 1)                     // macro for rootcint
 };
@@ -85,6 +79,9 @@ inline FlowTag_st* StFlowTagMaker::TagPointer() const { return pFlowTag; }
 //
 // History:
 // $Log: StFlowTagMaker.h,v $
+// Revision 1.16  2001/12/11 21:28:19  posk
+// Uses Flow class in StFlowMaker::StFlowConstants
+//
 // Revision 1.15  2001/05/22 19:52:03  posk
 // Put log comments at end of file.
 //

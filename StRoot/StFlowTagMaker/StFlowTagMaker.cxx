@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.26 2001/05/22 19:51:54 posk Exp $
+// $Id: StFlowTagMaker.cxx,v 1.27 2001/12/11 21:28:09 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -131,12 +131,12 @@ Int_t StFlowTagMaker::Init() {
   const Float_t qMin      =  0.;
   const Float_t qMax      =  2.;
 
-  for (int i = 0; i < nSels * nSubs; i++) {
+  for (int i = 0; i < Flow::nSels * Flow::nSubs; i++) {
     TString* histTitle;
     char countSubEvents[5];
     sprintf(countSubEvents,"%d",i);
 
-    for (int j = 0; j < nHars; j++) {
+    for (int j = 0; j < Flow::nHars; j++) {
       char countHarmonics[5];
       sprintf(countHarmonics,"%d",j);
 
@@ -189,7 +189,7 @@ Int_t StFlowTagMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowTag", 5);
-  gMessMgr->Info("##### FlowTag: $Id: StFlowTagMaker.cxx,v 1.26 2001/05/22 19:51:54 posk Exp $");
+  gMessMgr->Info("##### FlowTag: $Id: StFlowTagMaker.cxx,v 1.27 2001/12/11 21:28:09 posk Exp $");
   if (Debug()) StMaker::PrintInfo();
 
   return StMaker::Init();
@@ -202,7 +202,7 @@ void StFlowTagMaker::FillFlowTag() {
 
   TVector2 Q;
 
-  for (int j = 0; j < nHars ; j++) {
+  for (int j = 0; j < Flow::nHars ; j++) {
     pFlowSelect->SetHarmonic(j);
 
     // fill sub1 tags
@@ -250,7 +250,7 @@ void StFlowTagMaker::FillFlowTag() {
 Int_t StFlowTagMaker::FillHistograms() {
   // Fill histograms from Tag table
 
-  for (int j = 0; j < nHars; j++) {
+  for (int j = 0; j < Flow::nHars; j++) {
     float order = (float)(j+1);
 
     histSubEvents[0].histHarmonics[j].mHistMeanPt->
@@ -298,6 +298,9 @@ Int_t StFlowTagMaker::FillHistograms() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.27  2001/12/11 21:28:09  posk
+// Uses Flow class in StFlowMaker::StFlowConstants
+//
 // Revision 1.26  2001/05/22 19:51:54  posk
 // Put log comments at end of file.
 //
