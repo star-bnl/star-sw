@@ -39,7 +39,7 @@ echo Use makefiles from $STAR_MAKE_HOME
 gmake -f ${STAR_MAKE_HOME}/MakeRexe.mk INP_DIR=${INP} OUT_DIR=${OUT} setup
 
 set StarBin = ${OUT}/.${STAR_SYS}/bin
-if ( ! -f  $StarBin/root4star) ln -s $StarBin/Root.exe $StarBin/root4star 
+if ( ! -f  $StarBin/root4star) ln -s $StarBin/root4star $StarBin/Root.exe 
 
 #real run of makefile. It creates executable
 

@@ -120,7 +120,7 @@ ALL_EXE_LIBS += -lXpm $(FLIBS) $(CLIBS)
 
 
 
-Root.exe: $(FILES_O)
+root4star: $(FILES_O)
 	$(DOEXE)  $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
 #
 #

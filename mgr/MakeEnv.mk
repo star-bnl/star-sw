@@ -1,5 +1,8 @@
-# $Id: MakeEnv.mk,v 1.8 1999/01/20 02:16:49 fisyak Exp $
+# $Id: MakeEnv.mk,v 1.9 1999/02/08 02:29:20 fisyak Exp $
 # $Log: MakeEnv.mk,v $
+# Revision 1.9  1999/02/08 02:29:20  fisyak
+# New Makefile scheme
+#
 # Revision 1.8  1999/01/20 02:16:49  fisyak
 # Active STAR_HOST_SYS for egcs
 #
@@ -17,6 +20,15 @@ ALL_DEPS = $^
 NEW_DEPS = $?
 FUL_DEPS = $+
 STEM     = $*
+EMPTY      :=
+ZERO       :=0
+ONE        :=1
+TWO        :=2
+THREE      :=3
+FOUR       :=4
+FIVE       :=5
+SOEXT      :=so
+O          :=o
 
 ifneq (,$(findstring $(OS),Windows_NT))
 NT := $(OS)
@@ -144,3 +156,79 @@ ifdef STAF_SYS
   MAKE_PAMSWITCH := $(STAF_SYS_BIN)/make_pamSwitch
 
 endif
+# Makefiles
+include $(STAR_MAKE_HOME)/MakeArch.mk
+ifndef MakePam
+  MakePam := $(STAR_MAKE_HOME)/MakePam.mk
+endif
+ifndef MakeFun
+  MakeFun := $(STAR_MAKE_HOME)/MakeFun.mk
+endif
+
+ifndef MakeDll
+  MakeDll :=$(STAR_MAKE_HOME)/MakeDll.mk
+endif
+
+ifndef Makeloop
+  Makeloop :=$(STAR_MAKE_HOME)/Makeloop.mk
+endif
+export Makeloop
+export MakeDll
+export MakePam
+export MakeFun
+#	INPUT DIR
+ifndef INP_DIR
+  INP_DIR := $(CWD)
+endif
+
+inp_dir = $(word 2,$(subst :, ,$(INP_DIR)))
+ifneq (,$(inp_dir))
+  override INP_DIR := $(inp_dir)
+endif
+ifeq (,$(strip $(filter /%,$(INP_DIR))))
+  override INP_DIR := $(CWD)/$(INP_DIR)
+endif
+NAME    := $(notdir $(INP_DIR))
+MAKFLAGS := $(filter-out w, $(MAKEFLAGS))
+# define level pams -> domain -> package from *.idl and *.g files
+#======================= level ===========================
+PAMS    := $(findstring /pams,$(INP_DIR))
+ifndef PAMS
+  PAMS    := $(findstring /StRoot,$(INP_DIR))
+endif
+ifndef PAMS
+  PAMS    := $(findstring /.share,$(INP_DIR))
+endif
+ROOT_DIR:= $(word 1,$(subst $(PAMS), ,$(INP_DIR)))
+LEVEL   := $(words  $(subst /, ,$(subst $(ROOT_DIR),, $(INP_DIR))))
+branch  := $(subst /,,$(PAMS))
+ifndef DOMAIN
+DOMAIN  := $(notdir $(DOM_DIR))                          
+endif
+ifndef OUT_DIR
+  OUT_DIR := $(ROOT_DIR)
+endif
+ifeq (,$(strip $(filter /%,$(OUT_DIR))))
+  override OUT_DIR := $(CWD)/$(OUT_DIR)
+endif
+ifeq ($(LEVEL), $(TWO))  #default is domain
+    DOM_DIR := $(CWD)
+    PKG     := $(notdir $(DOM_DIR))
+    ifneq (,$(findstring $(PKG),gen sim))              
+      PKG   :=
+    endif                         
+endif
+ifeq ($(LEVEL), $(THREE)) #package level
+    DOM_DIR := $(subst / ,,$(dir $(INP_DIR)/../) )
+    PKG     := $(NAME)
+endif                       
+ifeq ($(LEVEL),$(FOUR)) #subpackage level
+    DOM_DIR := $(subst / ,,$(INP_DIR)/../../) )
+    PKG     := $(NAME)
+endif
+
+ifdef NT
+BIN_DIR := $(SYS_DIR)/bin
+endif
+
+STAR_OBJ_DIR := $(STAR)/obj/$(PKG)
