@@ -1,5 +1,5 @@
 //
-// $Id: countTrackTowerMatches.cc,v 1.2 2004/07/29 23:06:13 calderon Exp $
+// $Id: countTrackTowerMatches.cc,v 1.3 2004/07/30 18:46:27 calderon Exp $
 //
 // Author: Manuel Calderon de la Barca Sanchez
 //
@@ -73,7 +73,7 @@ int countTrackTowerMatches(StEvent* event) {
     // Loop over primary tracks
     // find towers matching this track inside the loop
     //
-    cout << "countTrackTowerMatches: trackArray.size() " << trackArray.size() << endl; 
+//     cout << "countTrackTowerMatches: trackArray.size() " << trackArray.size() << endl; 
     for (unsigned int ipr1=0; ipr1<trackArray.size(); ++ipr1) {
 	StPrimaryTrack* const ptrack1 = trackArray[ipr1];
 
@@ -95,7 +95,7 @@ int countTrackTowerMatches(StEvent* event) {
 	// if it doesn't extrapolate to the BEMC, go on to the next track.
 	if (!tok) continue;
 
-	cout << "countTrackTowerMatches: Track phi,eta at BEMC " << trackPosition.phi() << ", " << trackPosition.pseudoRapidity() << endl;
+// 	cout << "countTrackTowerMatches: Track phi,eta at BEMC " << trackPosition.phi() << ", " << trackPosition.pseudoRapidity() << endl;
 	
 	// At this point, it extrapolates, so now look to see if the
 	// adc value is 416 which corresponds to roughly 3 GeV.
@@ -106,7 +106,7 @@ int countTrackTowerMatches(StEvent* event) {
 	bemcGeom->getBin(trackPosition.phi(), trackPosition.pseudoRapidity(), moduleH, etaH, subH);
 	bemcGeom->getId(moduleH, etaH, subH, id);
 
-	cout << "countTrackTowerMatches: Module, Eta, Sub " << moduleH << ", " << etaH << ", " << subH << endl;
+// 	cout << "countTrackTowerMatches: Module, Eta, Sub " << moduleH << ", " << etaH << ", " << subH << endl;
 	// can I find the tower by Id? That would be faster
 	// Looks like I have to loop over all the towers in the module...
 	StEmcModule* module = stBEMCDetector->module(moduleH);
@@ -118,7 +118,7 @@ int countTrackTowerMatches(StEvent* event) {
 	    // do some kludgy type-casting...
 	    // The StEmcGeom::getBin code actually does not return negative eta indices, so
 	    // this should be safe... look in StEmcUtil/geometry/StEmcGeom.h
-	    cout << "countTrackTowerMatches: Hit " << i << " eta()= " << hit->eta() << ", sub()= " << hit->sub() << ", adc()= " << hit->adc() << ", energy()= " << hit->energy() << endl;
+// 	    cout << "countTrackTowerMatches: Hit " << i << " eta()= " << hit->eta() << ", sub()= " << hit->sub() << ", adc()= " << hit->adc() << ", energy()= " << hit->energy() << endl;
 	    if (hit->eta()==static_cast<unsigned int>(etaH) && hit->sub()==subH) {
 		// This is the hit that the track extrapolates to.
 		// Check it's adc value, if it's greater
@@ -129,7 +129,7 @@ int countTrackTowerMatches(StEvent* event) {
 		// the pedestal, if we keep it as an unsigned int
 		// we might get huge numbers after the subtraction.
 		int adc = static_cast<int>(hit->adc());
-		cout << "countTrackTowerMatches: Found the tower, it has adc-30 = " << adc-30 << endl; 
+// 		cout << "countTrackTowerMatches: Found the tower, it has adc-30 = " << adc-30 << endl; 
 		if (adc-30>360) ++trackTowerPairs;
 	    } // found the hit that track extrapolates to
 	}// hits in module loop
