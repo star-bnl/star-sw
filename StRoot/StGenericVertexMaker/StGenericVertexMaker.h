@@ -5,7 +5,7 @@
  * Maker for minuit based vertex finder
  * Lee Barnby - modification, becomes StGenericVertexMaker
  *
- * $Id: StGenericVertexMaker.h,v 1.4 2004/07/23 02:24:39 jeromel Exp $
+ * $Id: StGenericVertexMaker.h,v 1.5 2004/08/05 22:08:04 balewski Exp $
  *
  */
 
@@ -48,6 +48,7 @@ class StGenericVertexMaker : public StMaker
   Int_t nEvTotal,nEvGood;
 
  protected:
+  int m_Mode2; // auxiliary flags 
 
  public: 
   StGenericVertexMaker(const char *name="GenericVertex");
@@ -56,7 +57,8 @@ class StGenericVertexMaker : public StMaker
   virtual Int_t InitRun  (int runumber);
   virtual Int_t Finish();
   virtual Int_t  Make();
-
+  void SetMode2(int x) {m_Mode2=x;}
+  int GetMode2() { return m_Mode2; }
   inline StGenericVertexFinder* GetGenericFinder(){return (StGenericVertexFinder*)theFinder;};
 
   inline void UseBeamLine(){usebeamline = kTRUE;};
@@ -69,7 +71,7 @@ class StGenericVertexMaker : public StMaker
   inline void SetDoNotUseITTF(){use_ITTF=kFALSE;};
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StGenericVertexMaker.h,v 1.4 2004/07/23 02:24:39 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StGenericVertexMaker.h,v 1.5 2004/08/05 22:08:04 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StGenericVertexMaker, 0)   //StAF chain virtual base class for Makers
 };

@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of ppLMV
- * $Id: StppLMVVertexFinder.h,v 1.5 2004/08/04 21:57:56 balewski Exp $
+ * $Id: StppLMVVertexFinder.h,v 1.6 2004/08/05 22:08:04 balewski Exp $
  *
  */
 
@@ -44,6 +44,7 @@ private:
     float  mMatchCtbMax_phi;
     float  mDVtxMax;
     uint    mMinMatchTr; // minimal # of tracks matched to CTB for valid vertex
+    float mMaxZrange;// for tracks used by the vertex finder.
     int    mBLequivNtr;
     int n1,n2,n3,n4,n5,n6;
     float mBfield;// magnetic field
@@ -51,6 +52,7 @@ private:
     int eveID;
     int NCtbMatches();
     int NCtbSlats();
+    void   changeCuts();
 
     /*!
      * \struct
@@ -66,6 +68,9 @@ private:
 /***************************************************************************
  *
  * $Log: StppLMVVertexFinder.h,v $
+ * Revision 1.6  2004/08/05 22:08:04  balewski
+ * toward working point
+ *
  * Revision 1.5  2004/08/04 21:57:56  balewski
  * toward smarter ppLMV5
  *
