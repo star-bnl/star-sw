@@ -1,5 +1,8 @@
-// $Id: StPeCLumiMaker.cxx,v 1.1 2002/03/19 22:23:39 meissner Exp $
+// $Id: StPeCLumiMaker.cxx,v 1.2 2002/03/20 17:42:14 meissner Exp $
 // $Log: StPeCLumiMaker.cxx,v $
+// Revision 1.2  2002/03/20 17:42:14  meissner
+// buu fix //uDst->SetFormat
+//
 // Revision 1.1  2002/03/19 22:23:39  meissner
 // New variables: zdc unatt., Trigger word, MC tree if Geant Branch, DCA  for primary pairs, all tracks for secondary pairs (Test)
 //
@@ -50,7 +53,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCLumiMaker.cxx,v 1.1 2002/03/19 22:23:39 meissner Exp $";
+static const char rcsid[] = "$Id: StPeCLumiMaker.cxx,v 1.2 2002/03/20 17:42:14 meissner Exp $";
 
 ClassImp(StPeCLumiMaker)
 
@@ -92,9 +95,10 @@ Int_t StPeCLumiMaker::Init() {
   // filenumber= 
 
   m_outfile   = new TFile( uDstFileName,"recreate");
+  // OLD not needed anymore
   // Get the standard root format to be independent of Star IO   
-  m_outfile->SetFormat(1);
-  m_outfile->SetCompressionLevel(1);
+  // m_outfile->SetFormat(1);
+  // m_outfile->SetCompressionLevel(1);
   
   
   uDstTree = new TTree("uDst","Pcol uDst",99);
