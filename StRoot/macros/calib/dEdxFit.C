@@ -61,6 +61,23 @@ TCanvas *canvas = 0;
 Double_t Xlog10bg, Ylog2dx, Z;
 TFile *newf = 0;
 const Char_t *NAMES[6] = {"e","p","K","pi","mu","d"};
+// peak postion at p = 0.475 GeV/c wrt pion
+//                        Z     pion
+//proton -pi                   Kaon-pi                         e-pi                       d-pi
+static const  Double_t peaks[5] = {9.60848149761959647e-01,  // z pi
+				   1.33136848552729070e+00,  // proton - pi  
+				   5.14780361811221443e-01,  // Kaon   - pi
+				   4.22811868484973097e-01,  // e      - pi
+				   2.55316350542050152e+00}; // d      - pi
+/// <peak postion> at p = [0.45,0.50] GeV/c wrt pion
+struct peak_t {Double_t peak, sigma;};
+//                                mean         RMS
+static const  peak_t Peaks[6] = {{0.      ,       0.}, // pion
+				 {1.425420, 0.105841}, // proton - pion
+				 {0.571553, 0.064864}, // Kaon   - pi
+				 {0.419100, 0.004250}, // e      - pi
+				 {2.656584, 0.119078}, // d      - pi
+				 {0.004818, 0.002861}};// mu     - pi
 Bichsel *gBichsel = 0;
 //#define PRINT 1
 TF1 *func = 0;
@@ -504,6 +521,69 @@ TF1 *FitGP(TH1D *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3) {
   return g;
 }
 //________________________________________________________________________________
+Double_t gfFunc(Double_t *x, Double_t *par) {
+  // par[0] - pion signal
+  // par[1] - pion position wrt Z_pion (Bichsel prediction)
+  // par[2] - sigma 
+  // par[3] - proton signal
+  // par[4] - Kaon    -"-
+  // par[5] - electorn -"-
+  // par[6] - deuteron -"-
+  Double_t sigma = par[2];
+  Double_t Value = TMath::Exp(par[0])*TMath::Gaus(x[0],par[1],sigma,0);
+  for (Int_t i = 1; i < 5; i++) { 
+    //    Value += TMath::Exp(par[i+2])*TMath::Gaus(x[0],par[1]+peaks[i],sigma*(1+peaks[i]/peaks[0]),0);
+    //    Double_t Sigma = TMath::Sqrt(sigma*sigma + Peaks[i].sigma*Peaks[i].sigma);
+    Double_t Sigma = sigma;
+    Value += TMath::Exp(par[i+2])*TMath::Gaus(x[0],par[1]+Peaks[i].peak,Sigma,0);
+  }
+  return Value;
+}
+//________________________________________________________________________________
+TF1 *FitGF(TH1D *proj, Option_t *opt="") {
+  // fit in momentum range p = 0.45 - 0.50 GeV/c
+  if (! proj) return 0;
+  TString Opt(opt);
+  //  Bool_t quet = Opt.Contains("Q",TString::kIgnoreCase);
+  TF1 *g2 = (TF1*) gROOT->GetFunction("GF");
+  if (! g2) {
+    g2 = new TF1("GF",gfFunc, -5, 5, 7);
+    g2->SetParName(0,"pi"); 
+    g2->SetParName(1,"mu");     g2->SetParLimits(1,-.2,0.2);
+    g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.2,0.8);
+    g2->SetParName(3,"P"); 
+    g2->SetParName(4,"K"); 
+    g2->SetParName(5,"e"); 
+    g2->SetParName(6,"d");
+    //    g2->SetParName(7,"factor"); g2->SetParLimits(7,-.1,0.1);
+    g2->SetParameters(10.,1e-3, 0.5, 1., 0., 0.,0.,0.);
+  }
+  TAxis *xx = proj->GetXaxis();
+  for (int i = 0; i <5; i++) {
+    Int_t bin = xx->FindBin(peaks[i]);
+    Int_t p = 0;
+    if (i != 0) p = i+2;
+    Double_t cont = proj->GetBinContent(bin);
+    g2->ReleaseParameter(p);
+    if (cont > 0) g2->SetParameter(p,TMath::Log(cont));
+    else          g2->FixParameter(p,-99.);
+  }
+  proj->Fit(g2,opt);
+  if (! Opt.Contains("q",TString::kIgnoreCase)) {
+    Double_t params[10];
+    g2->GetParameters(params);
+    Double_t X = params[1];
+    Double_t Y = TMath::Exp(params[0]);
+    TPolyMarker *pm = new TPolyMarker(1, &X, &Y);
+    proj->GetListOfFunctions()->Add(pm);
+    pm->SetMarkerStyle(23);
+    pm->SetMarkerColor(kRed);
+    pm->SetMarkerSize(1.3);
+    proj->Draw();
+  }
+  return g2;
+}
+//________________________________________________________________________________
 TF1 *FitG2(TH1D *proj, Option_t *opt="RQ") {
   if (! proj) return 0;
   Double_t params[9];
@@ -661,8 +741,12 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
     f = new TFile(NewRootFile.Data(),"update");
     //  TString TupName(HistName);
     //  TupName += "FitP";
-    FitP = new TNtuple("FitP","Fit results",
-		       "i:j:x:y:mean:rms:peak:mu:sigma:entries:chisq:prob:a0:a1:a2:a3:a4:a5:Npar:dpeak:dmu:dsigma:da0:da1:da2:da3:da4:da5");
+    if (TString(FitName) == "GF")
+      FitP = new TNtuple("FitP","Fit results",
+			 "i:j:x:y:mean:rms:peak:mu:sigma:entries:chisq:prob:P:K:e:d:a4:a5:Npar:dpeak:dmu:dsigma:dP:dK:de:dd:da4:da5");
+    else 
+      FitP = new TNtuple("FitP","Fit results",
+			 "i:j:x:y:mean:rms:peak:mu:sigma:entries:chisq:prob:a0:a1:a2:a3:a4:a5:Npar:dpeak:dmu:dsigma:da0:da1:da2:da3:da4:da5");
   }
   TH1 *mean;   
   TH1 *rms;    
@@ -698,8 +782,8 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
   Int_t ix1 = ix, jy1 = jy;
   if (ix > 0) nx = ix;
   if (jy > 0) ny = jy;
-  if (ix1 <= 0) ix1 = 1;
-  if (jy1 <= 0) jy1 = 1;
+  if (ix1 <= 0) ix1 = 0;
+  if (jy1 <= 0) jy1 = 0;
   for (int i=ix1;i<=nx-mergeX+1;i++){
     Int_t ir0 = i;
     Int_t ir1=i+mergeX-1;
@@ -708,10 +792,21 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
       Int_t jr0 = j;
       Int_t jr1 = j+mergeY-1;
       if (j == 0) {jr0 = 1; jr1 = ny;}
-      if (dim == 3) 
+      if (dim == 3) {
 	proj = ((TH3 *) hist)->ProjectionZ(Form("f%i_%i",i,j),ir0,ir1,jr0,jr1);
-      else                       
+	TString title(proj->GetTitle());
+	title += Form("in x [%5.1f,%5.1f] and y [%5.1f,%5.1f] range",
+		      xax->GetBinLowEdge(ir0), xax->GetBinUpEdge(ir1),
+		      yax->GetBinLowEdge(jr0), yax->GetBinUpEdge(jr1));
+	proj->SetTitle(title.Data());
+      }
+      else {
 	proj = ((TH2 *) hist)->ProjectionY(Form("f%i",i),ir0,ir1);
+	TString title(proj->GetTitle());
+	title += Form("in x [%5.1f,%5.1f] range",
+		      xax->GetBinLowEdge(ir0), xax->GetBinUpEdge(ir1));
+	proj->SetTitle(title.Data());
+      }
       memset (&Fit, 0, sizeof(Fit_t));
       Fit.i = (2.*i+mergeX-1.)/2;
       Fit.j = (2.*j+mergeY-1.)/2;
@@ -725,6 +820,7 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
       if (Fit.entries < 100) {delete proj; continue;}
       if (TString(FitName) == "GP") g = FitGP(proj,opt,nSigma,pow);
       else if (TString(FitName) == "G2") g = FitG2(proj,opt);
+      else if (TString(FitName) == "GF") g = FitGF(proj,opt);
       else {cout << FitName << " has not been definded" << endl; break;}
       if (! g ) {delete proj; continue;}
       g->GetParameters(params);
@@ -784,7 +880,7 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
 #endif
       }
       if (! canvas) delete proj;
-      delete g;
+      //      delete g;
     }
   }
   if (f) {
@@ -793,7 +889,7 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
   }
 } 
 //________________________________________________________________________________
-Int_t FitG(TH1 *proj, TF1 *g, TF1 *ga, Double_t scaleM=-2., Double_t scaleP=2.) {
+Int_t FitG(TH1 *proj, TF1 *g, TF1 *ga){//, Double_t scaleM=-2., Double_t scaleP=2.) {
   Double_t params[10];
   proj->Fit("g","R");
   Double_t chisq = g->GetChisquare();

@@ -17,13 +17,21 @@ TF1  *TpcT::mPadResponseFunctionInner = 0;   //!
 TF1  *TpcT::mChargeFractionOuter = 0;        //!
 TF1  *TpcT::mPadResponseFunctionOuter = 0;   //!
 TF1  *TpcT::mConvolution = 0;                //!
-static Double_t K3I = 1.709;// data Full Field; 0.68;  // K3 from E.Mathieson, Fig. 5.3b (pads) for a/s = 2.5e-3 and h/s = 0.5
-static Double_t K3O = 1.044;//      -"-       ; 0.89;    // K3 from E.Mathieson, Fig. 5.3a (row) for a/s = 2.5e-3 and h/s = 0.5
+//static Double_t K3I = 1.5236; // fit data - res. 1.709;// data Full Field; 0.68;  // K3 from E.Mathieson, Fig. 5.3b (pads) for a/s = 2.5e-3 and h/s = 0.5
+//static Double_t K3O = 1.0270; // -"-      1.044;//      -"-       ; 0.89;    // K3 from E.Mathieson, Fig. 5.3a (row) for a/s = 2.5e-3 and h/s = 0.5
+static const Double_t K3IP = 0.68;    // K3 from E.Mathieson, Fig. 5.3b (pads) for a/s = 2.5e-3 and h/s = 0.5
+static const Double_t K3OP = 0.55;    // K3 from E.Mathieson, Fig. 5.3b (pads) for a/s = 2.5e-3 and h/s = 1
+static const Double_t tau     = 71e-9; // from pulser fit
+static const Double_t pShaper = 5.15;  //     -"- 
+//static const Double_t CrossTalkInner = 0.15;
+//static const Double_t CrossTalkOuter = 0.025;
+static const Double_t CrossTalkInner = 0.004;
+static const Double_t CrossTalkOuter = 0.004;
 //--------------------------------------------------------------------------------
 void TpcT::rLoop() {
 }
 //--------------------------------------------------------------------------------
-void TpcT::Loop(Int_t ev, Double_t tanCut, Int_t NpadCut) {
+void TpcT::Loop(Int_t ev, Double_t tanCut, Int_t NpadCut, Double_t pMomin, Double_t pMomax) {
 //   In a ROOT session, you can do:
 //      Root > .L TpcT.C
 //      Root > TpcT t
@@ -127,11 +135,13 @@ void TpcT::Loop(Int_t ev, Double_t tanCut, Int_t NpadCut) {
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     if (ientry%1000 == 1 || ev >= 0) Print(ientry);
     if (! fNoPixels || fNoPixels >kMaxfPixels) continue;
-    if (fTrack_fNfitpoints < 25) continue;
+    if (fRcTrack_fNfitpoints[0] < 25) continue;
     if (fNoPixels > 80) continue;
     if (fRcPad_fNPads[0] < NpadCut) continue;
     if (fRcHit_mCharge[0] < 1.e-6 || fRcHit_mCharge[0] > 100.e-6) continue;
-    if (tanCut > 0 && TMath::Abs(fTrack_fpy) > 1e-7 && TMath::Abs(fTrack_fpx/fTrack_fpy) > tanCut) continue;
+    Double_t pmom = TMath::Sqrt(fRcTrack_fpx[0]*fRcTrack_fpx[0]+fRcTrack_fpy[0]*fRcTrack_fpy[0]);//+fRcTrack_fpz[0]*fRcTrack_fpz[0]);
+    if (pMomin > 0 && pmom < pMomin || pMomax >0 && pmom > pMomax) continue;
+    if (tanCut > 0 && TMath::Abs(fRcTrack_fpy[0]) > 1e-7 && TMath::Abs(fRcTrack_fpx[0]/fRcTrack_fpy[0]) > tanCut) continue;
     // if (Cut(ientry) < 0) continue;
     if (fNoRcPad != 1) continue;
     if (fAdcSum < 100 || fAdcSum > 2.e3) continue;
@@ -242,30 +252,52 @@ void DrawTpcTPlots(const Char_t *histname="OuterPad",const Char_t *Option="") {
 void TpcT::FitSlices(const Char_t *name, const Char_t *opt, Int_t iy) {
   TProfile2D *h = (TProfile2D *) gDirectory->Get(name);
   TString Opt(opt);
+  Int_t nx = h->GetNbinsX();
+  Int_t ny = h->GetNbinsY();
+  TString Name(h->GetName());
+  Name += opt;
   const double pPI = 0.335;
   const double pPO = 0.670;
+  const double rI  =  89.9;
+  const double rO  = 156.2;
+  const double lI  = 1.15;
+  const double lO  = 1.95;
   if (! h) return;
   TF1 *gd = 0;
   if (! mConvolution) MakeFunctions();
   TF1 *ga = mConvolution;
   ga->FixParameter(0,0);
-  ga->ReleaseParameter(2); ga->SetParLimits(2,0,10);
-  ga->FixParameter(3,K3I);
-  ga->FixParameter(4,K3O);
+  ga->ReleaseParameter(2); ga->SetParLimits(2,0,10); ga->SetParameter(2,1e-5);
+  ga->FixParameter(3,K3IP);
+  ga->FixParameter(4,K3OP);
   ga->FixParameter(5,0);
   ga->FixParameter(6,0);
-  ga->FixParameter(7,3);
-  ga->FixParameter(8,55e-9);
-  Int_t nx = h->GetNbinsX();
-  Int_t ny = h->GetNbinsY();
-  TString Name(h->GetName());
-  Name += opt;
+  ga->FixParameter(7,pShaper);
+  ga->FixParameter(8,tau);
+  if (Name.Contains("InnerPad",TString::kIgnoreCase)) {
+    ga->FixParameter(9,CrossTalkInner);
+    if (Opt.Contains("Cross")) {
+      ga->FixParameter(2,0);
+      ga->ReleaseParameter(9); 
+      ga->SetParameter(9,CrossTalkInner);
+      ga->SetParLimits(9,0,0.5);
+    }
+  }
+  if (Name.Contains("OuterPad",TString::kIgnoreCase)) {
+    ga->FixParameter(9,CrossTalkOuter);
+    if (Opt.Contains("Cross")) {
+      ga->FixParameter(2,0);
+      ga->ReleaseParameter(9); 
+      ga->SetParameter(9,CrossTalkOuter);
+      ga->SetParLimits(9,0,0.5);
+    }
+  }
   if (Name.Contains("InnerPad",TString::kIgnoreCase)) {
     gd = new TF1("gdI",Form("([0]*[0]+[1]*[1]*(209.3-abs(x)))/(%f*%f)",pPI,pPI),-210,210); // to Ground wires
     ga->FixParameter(0,0);
     if (Opt.Contains("K3")) {
       if (! Opt.Contains("K3S")) ga->FixParameter(2,0);
-      ga->SetParameter(3,K3I); ga->SetParLimits(3,0.5*K3I,10*K3I);
+      ga->SetParameter(3,K3IP); ga->SetParLimits(3,0.5*K3IP,10*K3IP);
       ga->FixParameter(6,0);
     }
   }
@@ -274,23 +306,27 @@ void TpcT::FitSlices(const Char_t *name, const Char_t *opt, Int_t iy) {
     ga->FixParameter(0,1);
     if (Opt.Contains("K3")) {
       if (! Opt.Contains("K3S")) ga->FixParameter(2,0);
-      ga->SetParameter(4,K3O); ga->SetParLimits(4,0.5*K3O,10*K3O);
+      ga->SetParameter(4,K3OP); ga->SetParLimits(4,0.5*K3OP,10*K3OP);
       ga->FixParameter(6,0);
     }
   }
   if (Name.Contains("Time",TString::kIgnoreCase)) {
     Double_t timeBin = 5.78602945878541108e-01;// (cm)
-    gd = new TF1("gdIT",Form("([0]*[0]+[1]*[1]*(209.3-abs(x)) +[2]*[2]*x*x)/(%f*%f)",timeBin,timeBin),-210,210);
-    if (! Opt.Contains("K3S")) ga->FixParameter(2,0);
+    if (Name.Contains("Outer",TString::kIgnoreCase)) {
+      gd = new TF1("gdOT",Form("([0]*[0]+[1]*[1]*(209.3-abs(x)) + %f*x*x)/(%f*%f)",lO*lO/(rO*rO)/12.,timeBin,timeBin),-210,210);
+    } else {
+      gd = new TF1("gdIT",Form("([0]*[0]+[1]*[1]*(209.3-abs(x)) + %f*x*x)/(%f*%f)",lI*lI/(rI*rI)/12.,timeBin,timeBin),-210,210);
+    }
+    if (Opt.Contains("K3S")) ga->FixParameter(2,0);
     ga->SetParameter(5,0);
     ga->SetParLimits(5,-10,10);
     ga->SetParameter(6,1.e-2);
     ga->SetParLimits(6,0,1);
-    ga->FixParameter(7,3);
-    //    ga->SetParameter(7,3);
-    //    ga->SetParLimits(7,1,5);
-    ga->SetParameter(8,55e-9);
+    ga->FixParameter(7,pShaper);
+#if 0
+    ga->SetParameter(8,tau);
     ga->SetParLimits(8,20e-9,100e-9);
+#endif
     gd->SetParName(2,"#sigma_{B}");
     gd->SetParLimits(2,0,10.);
   }
@@ -419,6 +455,19 @@ Double_t TpcT::ShaperFunc(Double_t *x, Double_t *par) {
 }
 //________________________________________________________________________________
 Double_t TpcT::PadResponseFunc(Double_t *x, Double_t *par) {
+  Double_t CrossTalk = par[4];
+  Double_t Value = 0;
+  if (CrossTalk > 0) {
+    for (int i = -1; i <= 1; i++) {
+      Double_t xx = x[0] + i;
+      if (i == 0) Value += (1. - 2.*CrossTalk)*Gatti(&xx,par);
+      else        Value +=          CrossTalk *Gatti(&xx,par);
+    }
+  } else   Value = Gatti(x,par);
+  return Value;
+}
+//________________________________________________________________________________
+Double_t TpcT::Gatti(Double_t *x, Double_t *par) {
   /************************************************************************
    *  Function    : generates the cathode signal using                    *
    *                the single-parameter Gatti formula:                   *
@@ -437,7 +486,7 @@ Double_t TpcT::PadResponseFunc(Double_t *x, Double_t *par) {
    *  Authors : V.Balagura,V.Cherniatin,A.Chikanian                       *
    ************************************************************************/
   Double_t w = par[0]; // w = width of pad       
-  Double_t y = w*x[0];   // distance to center of strip
+  Double_t y = w*TMath::Abs(x[0]);   // distance to center of strip
   Double_t h = par[1]; // h = Anode-Cathode gap  
   Double_t lambda = TMath::Abs(y/h);
   Double_t K3 = par[3]; 
@@ -462,8 +511,8 @@ void TpcT::MakeFunctions() {
   if (! mShaperResponse) 
     mShaperResponse = new TF1("ShaperFunc",TpcT::ShaperFunc,timeBinMin,timeBinMax,3);  
   Double_t mTimeBinWidth              = 1.06580379191673078e-07;//1.e-6/gStTpcDb->Electronics()->samplingFrequency();
-  Double_t mTau                       = 55e-9; //1.e-9*gStTpcDb->Electronics()->tau();// s 
-  mShaperResponse->SetParameters(mTau,mTimeBinWidth,3);
+  Double_t mTau                       = tau; //1.e-9*gStTpcDb->Electronics()->tau();// s 
+  mShaperResponse->SetParameters(mTau,mTimeBinWidth,pShaper);
   Double_t params[10];
   params[0] = 2.85e-01;//gStTpcDb->PadPlaneGeometry()->innerSectorPadWidth();                     // w = width of pad       
   params[1] = 0.2;//gStTpcDb->WirePlaneGeometry()->innerSectorAnodeWirePadPlaneSeparation(); // h = Anode-Cathode gap   
@@ -475,72 +524,78 @@ void TpcT::MakeFunctions() {
   Double_t xmax = 5.0;//4.5*gStTpcDb->PadPlaneGeometry()->innerSectorPadWidth();// 4.5 
   if (! mPadResponseFunctionInner)
     mPadResponseFunctionInner = new TF1("PadResponseFunctionInner",
-				      TpcT::PadResponseFunc,xmin,xmax,4); 
-  params[3] =  K3I;  
+				      TpcT::PadResponseFunc,xmin,xmax,5); 
+  params[3] =  K3IP;  
+  params[4] =  0; // CrossTalk
   mPadResponseFunctionInner->SetParameters(params);
   //      mPadResponseFunctionInner->Save(xmin,xmax,0,0,0,0);
   xmax = 5.0;//5*gStTpcDb->PadPlaneGeometry()->innerSectorPadLength(); // 1.42
   if (! mChargeFractionInner) 
     mChargeFractionInner = new TF1("ChargeFractionInner",
-				 TpcT::PadResponseFunc,xmin,xmax,4);
+				 TpcT::PadResponseFunc,xmin,xmax,5);
   params[0] = 1.15;//gStTpcDb->PadPlaneGeometry()->innerSectorPadLength();
-  params[3] = K3O;
+  params[3] = K3OP;
+  params[4] =  0; // CrossTalk
   mChargeFractionInner->SetParameters(params);
   //  mChargeFractionInner->Save(xmin,xmax,0,0,0,0);
   xmax = 5;//5.*gStTpcDb->PadPlaneGeometry()->outerSectorPadWidth(); // 3.
   if (! mPadResponseFunctionOuter) 
     mPadResponseFunctionOuter = new TF1("PadResponseFunctionOuter",
-				      TpcT::PadResponseFunc,xmin,xmax,4); 
+				      TpcT::PadResponseFunc,xmin,xmax,5); 
   params[0] = 6.2e-01;//gStTpcDb->PadPlaneGeometry()->outerSectorPadWidth();                    // w = width of pad       
   params[1] = 0.4;//gStTpcDb->WirePlaneGeometry()->outerSectorAnodeWirePadPlaneSeparation(); // h = Anode-Cathode gap   
   params[2] = 0.4;//gStTpcDb->WirePlaneGeometry()->anodeWirePitch();                         // s = wire spacing       
   //      params[3] = gStTpcDb->WirePlaneGeometry()->anodeWireRadius();                        // a = Anode wire radius  
-  params[3] = 0.55;    // K3 from E.Mathieson, Fig. 5.3b (pads) for a/s = 2.5e-3 and h/s = 1
-  params[4] = 0;
+  params[3] = K3OP;    // K3 from E.Mathieson, Fig. 5.3b (pads) for a/s = 2.5e-3 and h/s = 1
+  params[4] =  0; // CrossTalk
   params[5] = 0;
   mPadResponseFunctionOuter->SetParameters(params);
   //    mPadResponseFunctionOuter->Save(xmin,xmax,0,0,0,0);
   xmax = 5;//5*gStTpcDb->PadPlaneGeometry()->outerSectorPadLength(); // 1.26
   if (! mChargeFractionOuter) 
     mChargeFractionOuter = new TF1("ChargeFractionOuter",
-				 TpcT::PadResponseFunc,xmin,xmax,4);
+				 TpcT::PadResponseFunc,xmin,xmax,5);
   params[0] = 1.95; //gStTpcDb->PadPlaneGeometry()->outerSectorPadLength();
   params[3] =  0.61;    // K3 from E.Mathieson, Fig. 5.3a (row) for a/s = 2.5e-3 and h/s = 1.0
+  params[4] =  0; // CrossTalk
   mChargeFractionOuter->SetParameters(params);
   //  mChargeFractionOuter->Save(xmin,xmax,0,0,0,0);
   if (! mConvolution) 
-    mConvolution = new TF1("fConvolution",TpcT::ConvolutionF,-8,8,9);
+    mConvolution = new TF1("fConvolution",TpcT::ConvolutionF,-8,8,10);
   mConvolution->SetParName(0,"icase"); mConvolution->FixParameter(0,0);
   mConvolution->SetParName(1,"Area");  mConvolution->FixParameter(1,1); mConvolution->SetParLimits(1,0,1e5);
   mConvolution->SetParName(2,"#sigma^{2}");  mConvolution->SetParLimits(2,0,10);
-  mConvolution->SetParName(3,"K3I");   mConvolution->FixParameter(3,K3I);
-  mConvolution->SetParName(4,"K3O");   mConvolution->FixParameter(4,K3O);
+  mConvolution->SetParName(3,"K3I");   mConvolution->FixParameter(3,K3IP);
+  mConvolution->SetParName(4,"K3O");   mConvolution->FixParameter(4,K3OP);
   mConvolution->SetParName(5,"Shift"); mConvolution->FixParameter(5,0);
   mConvolution->SetParName(6,"Noise"); mConvolution->FixParameter(6,0);
-  mConvolution->SetParName(7,"p"); mConvolution->FixParameter(7,3);
-  mConvolution->SetParName(8,"#tau"); mConvolution->FixParameter(8,55e-9);
+  mConvolution->SetParName(7,"p"); mConvolution->FixParameter(7,pShaper);
+  mConvolution->SetParName(8,"#tau"); mConvolution->FixParameter(8,tau);
+  mConvolution->SetParName(9,"CrossTalk"); mConvolution->FixParameter(9,0);
 }
 //________________________________________________________________________________
 Double_t TpcT::ConvolutionF(Double_t *x, Double_t *par) {
-  Int_t icase = (Int_t) par[0]; // 0 - Inner, 1 - Outer
+  Int_t icase = (Int_t) par[0]; // 0 - Inner, 1 - Outer, 2 - Time Shape
   TF1 *pfunc = mPadResponseFunctionInner;
   pfunc->SetParameter(3,par[3]);
+  pfunc->SetParameter(4,par[9]);
   Double_t xshft = par[5];
   Double_t noise = par[6];
   if (icase == 1) {
     pfunc = mPadResponseFunctionOuter;
     pfunc->SetParameter(3,par[4]);
+    pfunc->SetParameter(4,par[9]);
   }
   else if (icase == 2) {
     pfunc = mShaperResponse;
-    pfunc->SetParameter(3,par[7]);
-    pfunc->SetParameter(0,par[8]);
+    pfunc->SetParameter(3,par[7]); // p
+    pfunc->SetParameter(0,par[8]); // tau
   }
   if (! pfunc) return 0;
   Double_t Area   = par[1];
   Double_t sigma2 = TMath::Abs(par[2]);
   Double_t sigma  = TMath::Sqrt(sigma2);
-  Double_t sg = 4;
+  Double_t sg = 5;
   static const Int_t N = 100;
   Double_t dx = 2*sg/N;
   Double_t xc = x[0] - xshft;
@@ -562,8 +617,9 @@ void TpcT::Print(Int_t i) {
   cout << i << "\t =======================================================" << endl;
   cout << "fNoPixels \t" << fNoPixels << "\tNPads " << fRcPad_fNPads[0] << endl;
   cout << "Charge(keV) \t" << 1e6*fRcHit_mCharge[0];
-  if (TMath::Abs(fTrack_fpy) > 1e-7) 
-    cout << "\tpx/py\t" << fTrack_fpx/fTrack_fpy;
+  if (TMath::Abs(fRcTrack_fpy[0]) > 1e-7) 
+    cout << "\tpx/py\t" << fRcTrack_fpx[0]/fRcTrack_fpy[0] 
+	 << "\tpT\t" << TMath::Sqrt(fRcTrack_fpx[0]*fRcTrack_fpx[0]+fRcTrack_fpy[0]*fRcTrack_fpy[0]);
   cout << endl;
   cout << "fNoRcPad " << fNoRcPad << "\tfAdcSum " << fAdcSum << endl;
   cout << "Rc:Pad\t" << fRcPad_fPad[0]        << "\tRc:dX\t" << fRcPad_fdX[0]
@@ -588,6 +644,8 @@ void TpcT::Print(Int_t i) {
     if (tb  > kTbMax) kTbMax = tb;
   }
   Int_t *adcs = new Int_t[(kPadMax-kPadMin+2)*(kTbMax-kTbMin+2)];
+  cout << "kPadMin/kPadMax\t" << kPadMin << "/" << kPadMax
+       << "\tkTbMin/kTbMax\t" << kTbMin << "/" << kTbMax << endl;
   memset (adcs, 0, (kPadMax-kPadMin+2)*(kTbMax-kTbMin+2)*sizeof(Int_t));
   for  (int i = 0; i < fNoPixels; i++) {
     pad = fPixels_mPad[i];
@@ -651,4 +709,25 @@ TGraphErrors *OmegaTau() {
   TGraphErrors *gr2 = new TGraphErrors(6,xx,yy,dxx,dyy);
   gr2->SetMarkerStyle(20);
   return gr2;
+}
+//________________________________________________________________________________
+void TpcTAdc() {
+  TTree *TpcT = (TTree *) gDirectory->Get("TpcT");
+  if (! TpcT) return;
+  //  TF1* off = new TF1("off","exp(log(1.+[0]/exp(x)))",3,10);
+  TpcT->SetMarkerStyle(20);
+  TpcT->SetMarkerColor(1);
+  TpcT->Draw("fMcHit.mlgam/fAdcSum:log(fAdcSum)>>I(70,3.,10.)",
+	     "fNoMcHit==1&&fNoRcHit==1&&fAdcSum/fMcHit.mlgam>0.5&& fAdcSum/fMcHit.mlgam<1.4&&fMcPad.fRow<14",
+	     "prof");
+  TProfile *I = (TProfile *) gDirectory->Get("I");
+  if (! I) return;
+  I->Fit("off","r","",3,10);
+  TpcT->SetMarkerColor(2);
+  TpcT->Draw("fMcHit.mlgam/fAdcSum:log(fAdcSum)>>O(70,3.,10.)",
+	     "fNoMcHit==1&&fNoRcHit==1&&fAdcSum/fMcHit.mlgam>0.5&& fAdcSum/fMcHit.mlgam<1.4&&fMcPad.fRow>=14",
+	     "prof");
+  TProfile *O = (TProfile *) gDirectory->Get("O");
+  if (! O) return;
+  O->Fit("off","r","",3,10);
 }
