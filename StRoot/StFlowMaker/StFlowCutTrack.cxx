@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.26 2001/08/22 19:23:28 oldi Exp $
+// $Id: StFlowCutTrack.cxx,v 1.27 2001/11/09 21:10:27 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -33,7 +33,6 @@ Int_t   StFlowCutTrack::mFitPtsFtpcCuts[2] = {5, 11};     // greater than ten!
 Float_t StFlowCutTrack::mFitOverMaxCuts[2] = {0.52, 1.1}; // greater than one!
 Float_t StFlowCutTrack::mChiSqTpcCuts[2]   = {0., 0.};
 Float_t StFlowCutTrack::mChiSqFtpcCuts[2]  = {0., 0.};
-Float_t StFlowCutTrack::mDcaTpcCuts[2]     = {0., 1.};
 Float_t StFlowCutTrack::mDcaFtpcCuts[2]    = {0., 1.};
 Float_t StFlowCutTrack::mPtTpcCuts[2]      = {0.1, 2.};
 Float_t StFlowCutTrack::mPtFtpcCuts[2]     = {0.1, 2.};
@@ -61,7 +60,6 @@ UInt_t  StFlowCutTrack::mFitOverMaxTpcCutN = 0;
 UInt_t  StFlowCutTrack::mFitOverMaxFtpcCutN= 0;
 UInt_t  StFlowCutTrack::mChiSqTpcCutN      = 0;
 UInt_t  StFlowCutTrack::mChiSqFtpcCutN     = 0;
-UInt_t  StFlowCutTrack::mDcaTpcCutN        = 0;
 UInt_t  StFlowCutTrack::mDcaFtpcCutN       = 0;
 UInt_t  StFlowCutTrack::mPtTpcCutN         = 0;
 UInt_t  StFlowCutTrack::mPtFtpcCutN        = 0;
@@ -110,13 +108,6 @@ Int_t StFlowCutTrack::CheckTrack(StTrack* pTrack) {
  if (pTrack->topologyMap().numberOfHits(kTpcId) || // Tpc track, or no topologyMap
       (pTrack->topologyMap().data(0) == 0 && pTrack->topologyMap().data(1) == 0)) {
 
-    // dca
-    if (mDcaTpcCuts[1] > mDcaTpcCuts[0] && 
-	(dca < mDcaTpcCuts[0] || dca >= mDcaTpcCuts[1])) {
-      mDcaTpcCutN++;
-      return kFALSE;
-    }
-    
     // pt
     if (mPtTpcCuts[1] > mPtTpcCuts[0] && 
 	(pt < mPtTpcCuts[0] || pt >= mPtTpcCuts[1])) {
@@ -259,13 +250,6 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
   if (map.numberOfHits(kTpcId) || // Tpc track, or no topologyMap
       (map.data(0) == 0 && map.data(1) == 0)) {
       
-    // dca
-    if (mDcaTpcCuts[1] > mDcaTpcCuts[0] && 
-	(dca < mDcaTpcCuts[0] || dca >= mDcaTpcCuts[1])) {
-      mDcaTpcCutN++;
-      return kFALSE;
-    }
-
     // pt
     if (mPtTpcCuts[1] > mPtTpcCuts[0] && 
 	(pt < mPtTpcCuts[0] || pt >= mPtTpcCuts[1])) {
@@ -405,9 +389,6 @@ void StFlowCutTrack::PrintCutList() {
        << " :\t\t " << setprecision(3) << (float)mChiSqFtpcCutN/(float)mTrackN/perCent
        << "%\t (" << setprecision(3) << ((mFtpcTrackN == 0)?0.:(float)mChiSqFtpcCutN/(float)mFtpcTrackN/perCent)  
        << "% Ftpc) cut" << endl;
-  cout << "#   Dca (Tpc) cuts= " << mDcaTpcCuts[0] << ", " << mDcaTpcCuts[1]
-       << " :\t\t " << setprecision(3) << (float)mDcaTpcCutN/(float)mTrackN/perCent
-       << "%\t (" << setprecision(3) << (float)mDcaTpcCutN/(float)mTpcTrackN/perCent  <<"% Tpc) cut" << endl;
   cout << "#   Dca (Ftpc) cuts= " << mDcaFtpcCuts[0] << ", " << mDcaFtpcCuts[1]
        << " :\t\t " << setprecision(3) << (float)mDcaFtpcCutN/(float)mTrackN/perCent
        << "%\t (" << setprecision(3) << ((mFtpcTrackN == 0)?0.:(float)mDcaFtpcCutN/(float)mFtpcTrackN/perCent)  
@@ -440,6 +421,9 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.27  2001/11/09 21:10:27  posk
+// Switched from CERNLIB to TMath. Little q is now normalized.
+//
 // Revision 1.26  2001/08/22 19:23:28  oldi
 // Fix to avoid 'nan' in text output if no FTPC tracks found.
 //

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.21 2001/07/27 01:26:43 snelling Exp $
+// $Id: StFlowTrack.h,v 1.22 2001/11/09 21:11:04 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //         FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -50,7 +50,7 @@ public:
   Float_t       Y()          const;
   Short_t       Charge()     const;
   Float_t       Dca()        const;
-  Float_t       DcaSigned()        const;
+  Float_t       DcaSigned()  const;
   Float_t       DcaGlobal()  const;
   Float_t       Chi2()       const;
   Int_t         FitPts()     const;
@@ -336,6 +336,9 @@ inline void StFlowTrack::SetTopologyMap(StTrackTopologyMap map) { mTopology = ma
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.22  2001/11/09 21:11:04  posk
+// Switched from CERNLIB to TMath. Little q is now normalized.
+//
 // Revision 1.21  2001/07/27 01:26:43  snelling
 // Added and changed variables for picoEvent. Changed trackCut class to StTrack
 //

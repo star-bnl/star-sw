@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.61 2001/08/01 19:39:40 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.62 2001/11/09 21:10:45 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -188,7 +188,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.61 2001/08/01 19:39:40 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.62 2001/11/09 21:10:45 posk Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -397,7 +397,6 @@ void StFlowMaker::FillFlowEvent() {
 	pFlowTrack->SetPt(p.perp());
 	pFlowTrack->SetPtGlobal(g.perp());
 	pFlowTrack->SetCharge(pTrack->geometry()->charge());
-	pFlowTrack->SetDca(pTrack->impactParameter());
 
 	dcaSigned = calcDcaSigned(vertex,gTrack);
 	pFlowTrack->SetDcaSigned(dcaSigned);
@@ -680,7 +679,6 @@ void StFlowMaker::FillPicoEvent() {
     pFlowPicoTrack->SetPhi(pFlowTrack->Phi());
     pFlowPicoTrack->SetPhiGlobal(pFlowTrack->PhiGlobal());
     pFlowPicoTrack->SetCharge(pFlowTrack->Charge());
-    pFlowPicoTrack->SetDca(pFlowTrack->Dca());
     pFlowPicoTrack->SetDcaSigned(pFlowTrack->DcaSigned());
     pFlowPicoTrack->SetDcaGlobal(pFlowTrack->DcaGlobal());
     pFlowPicoTrack->SetChi2(pFlowTrack->Chi2());
@@ -822,7 +820,6 @@ Bool_t StFlowMaker::FillFromPicoVersion0DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetEta(pPicoTrack->Eta());
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
-      pFlowTrack->SetDca(pPicoTrack->Dca()/10000.);
       pFlowTrack->SetChi2(pPicoTrack->Chi2()/10000.);
       pFlowTrack->SetFitPts(pPicoTrack->FitPts());
       pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
@@ -874,7 +871,6 @@ Bool_t StFlowMaker::FillFromPicoVersion1DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetEta(pPicoTrack->Eta());
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
-      pFlowTrack->SetDca(pPicoTrack->Dca());
       pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
       pFlowTrack->SetChi2(pPicoTrack->Chi2());
       pFlowTrack->SetFitPts(pPicoTrack->FitPts());
@@ -939,7 +935,6 @@ Bool_t StFlowMaker::FillFromPicoVersion2DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
-      pFlowTrack->SetDca(pPicoTrack->Dca());
       pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
       pFlowTrack->SetChi2(pPicoTrack->Chi2());
       pFlowTrack->SetFitPts(pPicoTrack->FitPts());
@@ -1004,7 +999,6 @@ Bool_t StFlowMaker::FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
-      pFlowTrack->SetDca(pPicoTrack->Dca());
       pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
       pFlowTrack->SetChi2(pPicoTrack->Chi2());
       pFlowTrack->SetFitPts(pPicoTrack->FitPts());
@@ -1085,7 +1079,6 @@ Bool_t StFlowMaker::FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
-      pFlowTrack->SetDca(pPicoTrack->Dca());
       pFlowTrack->SetDcaSigned(pPicoTrack->DcaSigned());
       pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
       pFlowTrack->SetChi2(pPicoTrack->Chi2());
@@ -1254,6 +1247,9 @@ Float_t StFlowMaker::calcDcaSigned(const StThreeVectorF pos,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.62  2001/11/09 21:10:45  posk
+// Switched from CERNLIB to TMath. Little q is now normalized.
+//
 // Revision 1.61  2001/08/01 19:39:40  snelling
 // Added the trigger word
 //

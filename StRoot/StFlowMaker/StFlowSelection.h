@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.13 2001/05/22 20:18:01 posk Exp $
+// $Id: StFlowSelection.h,v 1.14 2001/11/09 21:11:00 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -43,7 +43,6 @@ class StFlowSelection : public StObject {
   void    SetFitPtsPart(const Int_t, const Int_t);
   void    SetFitOverMaxPtsPart(const Float_t, const Float_t);
   void    SetChiSqPart(const Float_t, const Float_t);
-  void    SetDcaPart(const Float_t, const Float_t);
   void    SetDcaGlobalPart(const Float_t, const Float_t);
   void    SetHarmonic(const Int_t&);
   void    SetSelection(const Int_t&);
@@ -60,7 +59,6 @@ class StFlowSelection : public StObject {
   Int_t   mFitPtsPart[2];                    // for parts. wrt plane
   Float_t mFitOverMaxPtsPart[2];             // for parts. wrt plane
   Float_t mChiSqPart[2];                     // for parts. wrt plane
-  Float_t mDcaPart[2];                       // for parts. wrt plane
   Float_t mDcaGlobalPart[2];                 // for parts. wrt plane
 
   Int_t   mHarmonic;
@@ -104,9 +102,6 @@ inline void StFlowSelection::SetFitOverMaxPtsPart(Float_t lo, Float_t hi) {
 inline void StFlowSelection::SetChiSqPart(Float_t lo, Float_t hi) {
   mChiSqPart[0] = lo; mChiSqPart[1] = hi; }
 
-inline void StFlowSelection::SetDcaPart(Float_t lo, Float_t hi) {
-  mDcaPart[0] = lo; mDcaPart[1] = hi; }
-
 inline void StFlowSelection::SetDcaGlobalPart(Float_t lo, Float_t hi) {
   mDcaGlobalPart[0] = lo; mDcaGlobalPart[1] = hi; }
 
@@ -133,6 +128,9 @@ inline void StFlowSelection::SetSubevent(const Int_t& subN) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.14  2001/11/09 21:11:00  posk
+// Switched from CERNLIB to TMath. Little q is now normalized.
+//
 // Revision 1.13  2001/05/22 20:18:01  posk
 // Now can do pseudorapidity subevents.
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.h,v 1.12 2001/07/27 01:26:10 snelling Exp $
+// $Id: StFlowCutTrack.h,v 1.13 2001/11/09 21:10:34 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -43,7 +43,6 @@ class StFlowCutTrack {
   static void    SetFitOverMaxPts(Float_t lo, Float_t hi);
   static void    SetChiSqTpc(Float_t lo, Float_t hi);
   static void    SetChiSqFtpc(Float_t lo, Float_t hi);
-  static void    SetDcaTpc(Float_t lo, Float_t hi);
   static void    SetDcaFtpc(Float_t lo, Float_t hi);
   static void    SetPtTpc(Float_t lo, Float_t hi);
   static void    SetPtFtpc(Float_t lo, Float_t hi);
@@ -86,9 +85,6 @@ class StFlowCutTrack {
   static UInt_t  mChiSqFtpcCutN;             // number not accepted
   static Float_t mChiSqFtpcCuts[2];          // range
 
-  static UInt_t  mDcaTpcCutN;                // number not accepted
-  static Float_t mDcaTpcCuts[2];             // range
-
   static UInt_t  mDcaFtpcCutN;               // number not accepted
   static Float_t mDcaFtpcCuts[2];            // range
 
@@ -128,9 +124,6 @@ inline void StFlowCutTrack::SetChiSqTpc(Float_t lo, Float_t hi) {
 inline void StFlowCutTrack::SetChiSqFtpc(Float_t lo, Float_t hi) {
   mChiSqFtpcCuts[0] = lo; mChiSqFtpcCuts[1] = hi; }
 
-inline void StFlowCutTrack::SetDcaTpc(Float_t lo, Float_t hi) {
-  mDcaTpcCuts[0] = lo; mDcaTpcCuts[1] = hi; }
-
 inline void StFlowCutTrack::SetDcaFtpc(Float_t lo, Float_t hi) {
   mDcaFtpcCuts[0] = lo; mDcaFtpcCuts[1] = hi; }
 
@@ -153,6 +146,9 @@ inline void StFlowCutTrack::SetEtaFtpc(Float_t lo_neg, Float_t hi_neg,
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.h,v $
+// Revision 1.13  2001/11/09 21:10:34  posk
+// Switched from CERNLIB to TMath. Little q is now normalized.
+//
 // Revision 1.12  2001/07/27 01:26:10  snelling
 // Added and changed variables for picoEvent. Changed trackCut class to StTrack
 //

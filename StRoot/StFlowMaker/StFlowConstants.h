@@ -1,9 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.7 2001/11/02 04:49:52 aihong Exp $
+// $Id: StFlowConstants.h,v 1.8 2001/11/09 21:10:26 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
+//          Cumulants added by Aihong Tang, KSU, Nov 2001
 //
 //////////////////////////////////////////////////////////////////////
 //
@@ -20,11 +21,13 @@ class Flow{
  public:
 
   enum {
-    nHars        =   6, 
+    nHars        =   3, 
     nSels        =   2,
     nSubs        =   2,
     nPhiBins     = 120,
     nPhiBinsFtpc = 360,
+    nEtaBins     = 90,
+    nPtBins      = 40,
     nCumulantIntegratedOrders     =   3, 
     nCumulantIntegrated_qMax      =   8,
     nCumulantDifferentialOrders   =   2,
@@ -42,6 +45,9 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.8  2001/11/09 21:10:26  posk
+// Switched from CERNLIB to TMath. Little q is now normalized.
+//
 // Revision 1.7  2001/11/02 04:49:52  aihong
 // add func. for cumulant maker
 //
