@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #include <arpa/inet.h>
 
 #include "rtsLog.h"
@@ -176,6 +177,8 @@ int emcReader(char *m)
 			}
 
 			cou = (b2h32(emcsecp->bh.length) - 10) / 2 ;	// contributions!
+			if(cou<0||cou>999) cou = (l2h32(emcsecp->bh.length) - 10) / 2 ;
+			assert(cou>=0&&cou<999);
 
 
 			// LOG(DBG,"EMC %s: instance %s: %d fibers possible",id2char(id),inst2char(instance),cou,0,0) ;
@@ -185,7 +188,8 @@ int emcReader(char *m)
 
 				if(len == 0) continue ;
 
-				off = b2h32(emcsecp->fiber[j].off) ;
+				off = l2h32(emcsecp->fiber[j].off) ; // new
+				if(off<0||off>9999999) off = b2h32(emcsecp->fiber[j].off) ; // old
 
 				emcrbp = (struct EMCRBP *)((u_int *)emcsecp + off) ;
 
@@ -197,6 +201,8 @@ int emcReader(char *m)
 
 
 				cou2 = (b2h32(emcrbp->bh.length) - 10) /2 ;
+                                if(cou2<0||cou2>999) cou2 = (l2h32(emcrbp->bh.length) - 10) /2 ;
+                                assert(cou2>0&&cou2<999);
 
 				// LOG(DBG,"EMC %s: instance %s: fiber %d: %d banks used",id2char(id),inst2char(instance),j+1,cou2,0) ;
 
@@ -207,7 +213,8 @@ int emcReader(char *m)
 
 					if(len == 0) continue ;
 
-					off = b2h32(emcrbp->banks[k].off) ;
+					off = l2h32(emcrbp->banks[k].off) ;
+					if(off<0||off>9999999) off = b2h32(emcrbp->banks[k].off) ;
 
 					emcadcr = NULL ;
 
@@ -220,10 +227,16 @@ int emcReader(char *m)
 
 						break ;
 					case 1 :	// zero-suppressed...
-						emcadcd = (struct DUMMYDATA *)((u_int *)emcrbp + off) ;
-						if(checkBank(emcadcr->bh.bank_type,adcd) < 0) {
-							continue ;
-						}
+						//  This zero-suppressed part causes a segmentation fault.
+						//  I have no easy way to fix the problem -- no documentation and
+						//  buggy example code.  
+						//  According to Tonko's comment below, we only handle RAW data,
+ 						//  not this zero-suppressed data.  For all these reasons, 
+						//  I will just comment this part out.  Note the "continue" just below.
+						//  emcadcd = (struct DUMMYDATA *)((u_int *)emcrbp + off) ;
+						//  if(checkBank(emcadcd->bh.bank_type,adcd) < 0) {
+						//	continue ;
+						//  }
 
 						break ;
 					default :
