@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.5 1999/12/06 22:25:05 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.6 1999/12/07 16:50:43 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.6  1999/12/07 16:50:43  kathy
+// fix limits on histograms
+//
 // Revision 1.5  1999/12/06 22:25:05  kathy
 // split apart the tpc and ftpc (east & west) histograms for the globtrk table; had to add characters to end of each histogram pointer to differentiate the different ones; updated the default list of hist to be plotted with logy scale
 //
@@ -474,25 +477,25 @@ void StQABookHist::BookHistGlob(){
   m_glb_xfT    = QAH1F("QaGlobtrkXfT",    "globtrk: x of first hit on trk, tpc", 50,-200.,200.);
   m_glb_xfFE   = QAH1F("QaGlobtrkXfFE",   "globtrk: x of first hit on trk, ftpc east", 50,-200.,200.);
   m_glb_xfFW   = QAH1F("QaGlobtrkXfFW",   "globtrk: x of first hit on trk, ftpc west", 50,-200.,200.);
-  m_glb_xf0    = QAH1F("QaGlobtrkXf0",    "globtrk: x of first hit - on helix at start, tpc",50,-20.,20.);
+  m_glb_xf0    = QAH1F("QaGlobtrkXf0",    "globtrk: x of first hit - on helix at start, tpc",50,-5.,5.);
 
   m_glb_yfT    = QAH1F("QaGlobtrkYfT",    "globtrk: y of first hit on trk, tpc", 50,-200.,200.);
   m_glb_yfFE   = QAH1F("QaGlobtrkYfFE",   "globtrk: y of first hit on trk, ftpc east", 50,-200.,200.);
   m_glb_yfFW   = QAH1F("QaGlobtrkYfFW",   "globtrk: y of first hit on trk, ftpc west", 50,-200.,200.);
-  m_glb_yf0    = QAH1F("QaGlobtrkTf0",    "globtrk: y of first hit - on helix at start, tpc",50,-20.,20.);
+  m_glb_yf0    = QAH1F("QaGlobtrkTf0",    "globtrk: y of first hit - on helix at start, tpc",50,-5.,5.);
 
-  m_glb_zfT    = QAH1F("QaGlobtrkZfT",    "globtrk: z of first hit on trk, tpc", 50,-250.,250.);
+  m_glb_zfT    = QAH1F("QaGlobtrkZfT",    "globtrk: z of first hit on trk, tpc", 50,-300.,300.);
   m_glb_zfFE   = QAH1F("QaGlobtrkZfFE",   "globtrk: z of first hit on trk, ftpc east", 50,-300.,300.);
   m_glb_zfFW   = QAH1F("QaGlobtrkZfFW",   "globtrk: z of first hit on trk, ftpc west", 50,-300.,300.);
-  m_glb_zf0    = QAH1F("QaGlobtrkZf0",    "globtrk: z of first hit - on helix at start, tpc",50,-20.,20.);
+  m_glb_zf0    = QAH1F("QaGlobtrkZf0",    "globtrk: z of first hit - on helix at start, tpc",50,-5.,5.);
 
-  m_glb_radfT    = QAH1F("QaGlobtrkRT",   "globtrk: radial position of first hit, tpc", 50,0.,250.);
-  m_glb_radfFE   = QAH1F("QaGlobtrkRFE",  "globtrk: radial position of first hit, ftpc east", 50,0.,250.);
-  m_glb_radfFW   = QAH1F("QaGlobtrkRFW",  "globtrk: radial position of first hit, ftpc west", 50,0.,250.);
+  m_glb_radfT    = QAH1F("QaGlobtrkRT",   "globtrk: radial position of first hit, tpc", 50,0.,200.);
+  m_glb_radfFE   = QAH1F("QaGlobtrkRFE",  "globtrk: radial position of first hit, ftpc east", 50,0.,200.);
+  m_glb_radfFW   = QAH1F("QaGlobtrkRFW",  "globtrk: radial position of first hit, ftpc west", 50,0.,200.);
 
   m_lengthT     = QAH1F("QaGlobtrkLengthT",  "globtrk: track length, tpc", 50,0.,300.);
-  m_lengthFE    = QAH1F("QaGlobtrkLengthFE", "globtrk: track length, ftpc east", 50,0.,300.);
-  m_lengthFW    = QAH1F("QaGlobtrkLengthFW", "globtrk: track length, ftpc west", 50,0.,300.);
+  m_lengthFE    = QAH1F("QaGlobtrkLengthFE", "globtrk: track length, ftpc east", 30,0.,120.);
+  m_lengthFW    = QAH1F("QaGlobtrkLengthFW", "globtrk: track length, ftpc west", 30,0.,120.);
 
   m_psiT       = QAH1F("QaGlobtrkPsiT",   "globtrk: psi, tpc", 36, 0.,360.);
   m_psiFE      = QAH1F("QaGlobtrkPsiFE",  "globtrk: psi, ftpc east", 36, 0.,360.);
@@ -506,17 +509,17 @@ void StQABookHist::BookHistGlob(){
   m_glb_thetaFE = QAH1F("QaGlobtrkThetaFE", "globtrk: theta, ftpc east",20,0.,4.);
   m_glb_thetaFW = QAH1F("QaGlobtrkThetaFW", "globtrk: theta, ftpc west",20,0.,4.);
 
-  m_etaT       = QAH1F("QaGlobtrkEtaT",     "globtrk: eta, tpc",80,-4.0,4.0);
-  m_etaFE      = QAH1F("QaGlobtrkEtaFE",    "globtrk: eta, ftpc east",80,-4.0,4.0);
-  m_etaFW      = QAH1F("QaGlobtrkEtaFW",    "globtrk: eta, ftpc west",80,-4.0,4.0);
+  m_etaT       = QAH1F("QaGlobtrkEtaT",     "globtrk: eta, tpc",45,-4.5,4.5);
+  m_etaFE      = QAH1F("QaGlobtrkEtaFE",    "globtrk: eta, ftpc east",45,-4.5,4.5);
+  m_etaFW      = QAH1F("QaGlobtrkEtaFW",    "globtrk: eta, ftpc west",45,-4.5,4.5);
 
-  m_pTT         = QAH1F("QaGlobtrkPtT",      "globtrk: pT, tpc",50,0.,10.);
-  m_pTFE        = QAH1F("QaGlobtrkPtFE",     "globtrk: pT, ftpc east",50,0.,10.);
-  m_pTFW        = QAH1F("QaGlobtrkPtFW",     "globtrk: pT, ftpc west",50,0.,10.);
+  m_pTT         = QAH1F("QaGlobtrkPtT",      "globtrk: pT, tpc",50,0.,25.);
+  m_pTFE        = QAH1F("QaGlobtrkPtFE",     "globtrk: pT, ftpc east",50,0.,25.);
+  m_pTFW        = QAH1F("QaGlobtrkPtFW",     "globtrk: pT, ftpc west",50,0.,25.);
 
-  m_momT        = QAH1F("QaGlobtrkPT",       "globtrk: momentum, tpc",50,0.,10.);
-  m_momFE       = QAH1F("QaGlobtrkPFE",      "globtrk: momentum, ftpc east ",50,0.,10.);
-  m_momFW       = QAH1F("QaGlobtrkPFW",      "globtrk: momentum, ftpc west ",50,0.,10.);
+  m_momT        = QAH1F("QaGlobtrkPT",       "globtrk: momentum, tpc",50,0.,25.);
+  m_momFE       = QAH1F("QaGlobtrkPFE",      "globtrk: momentum, ftpc east ",50,0.,25.);
+  m_momFW       = QAH1F("QaGlobtrkPFW",      "globtrk: momentum, ftpc west ",50,0.,25.);
 
   m_chisq0T     = QAH1F("QaGlobtrkChisq0T",  "globtrk: chisq0 - xy, tpc", 50, 0.,15.);
   m_chisq0FE    = QAH1F("QaGlobtrkChisq0FE", "globtrk: chisq0 - xy, ftpc east", 50, 0.,15.);
@@ -537,10 +540,10 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_xf_yfT = QAH2F("QaGlobtrkXfYfT",  "globtrk: Y vs X of first hit on trk, tpc", 40,-200.,200.,40,-200.,200.);
     m_globtrk_xf_yfT->SetXTitle("x first");
     m_globtrk_xf_yfT->SetYTitle("y first");
-  m_globtrk_xf_yfFE = QAH2F("QaGlobtrkXfYfFE","globtrk: Y vs X of first hit on trk, ftpcE", 40,-200.,200.,40,-200.,200.);
+  m_globtrk_xf_yfFE = QAH2F("QaGlobtrkXfYfFE","globtrk: Y vs X of first hit on trk, ftpcE", 40,-40.,40.,40,-40.,40.);
     m_globtrk_xf_yfFE->SetXTitle("x first");
     m_globtrk_xf_yfFE->SetYTitle("y first");
-  m_globtrk_xf_yfFW = QAH2F("QaGlobtrkXfYfFW","globtrk: Y vs X of first hit on trk, ftpcW", 40,-200.,200.,40,-200.,200.);
+  m_globtrk_xf_yfFW = QAH2F("QaGlobtrkXfYfFW","globtrk: Y vs X of first hit on trk, ftpcW", 40,-40.,40.,40,-40.,40.);
     m_globtrk_xf_yfFW->SetXTitle("x first");
     m_globtrk_xf_yfFW->SetYTitle("y first");
 
@@ -558,11 +561,11 @@ void StQABookHist::BookHistGlob(){
     m_eta_trklengthT->SetXTitle("eta");
     m_eta_trklengthT->SetYTitle("length");
   m_eta_trklengthFE = QAH2F("QaGlobtrkLengthVEtaFE","globtrk: trk length vs eta, ftpcE",
-			     20,-2.,2.,50,0.,250.);
+			     25,-4.5,-2.,30,0.,120.);
     m_eta_trklengthFE->SetXTitle("eta");
     m_eta_trklengthFE->SetYTitle("length");
   m_eta_trklengthFW = QAH2F("QaGlobtrkLengthVEtaFW","globtrk: trk length vs eta, ftpcW",
-			     20,-2.,2.,50,0.,250.);
+			     25,2.,4.5,30,0.,120.);
     m_eta_trklengthFW->SetXTitle("eta");
     m_eta_trklengthFW->SetYTitle("length");
 
@@ -571,11 +574,11 @@ void StQABookHist::BookHistGlob(){
     m_npoint_lengthT->SetXTitle("trk length");
     m_npoint_lengthT->SetYTitle("Npoints on trk");
   m_npoint_lengthFE = QAH2F("QaGlobtrkNPntLengthFE","globtrk: N pnts vs length, ftpcE",
-			     25,0.,250.,25,0.,50.);
+			     30,0.,120.,15,0.,15.);
     m_npoint_lengthFE->SetXTitle("trk length");
     m_npoint_lengthFE->SetYTitle("Npoints on trk");
   m_npoint_lengthFW = QAH2F("QaGlobtrkNPntLengthFW","globtrk: N pnts vs length, ftpcW",
-			     25,0.,250.,25,0.,50.);
+			     30,0.,120.,15,0.,15.);
     m_npoint_lengthFW->SetXTitle("trk length");
     m_npoint_lengthFW->SetYTitle("Npoints on trk");
 
@@ -584,43 +587,43 @@ void StQABookHist::BookHistGlob(){
     m_fpoint_lengthT->SetXTitle("trk length");
     m_fpoint_lengthT->SetYTitle("Npoints on trk");
   m_fpoint_lengthFE = QAH2F("QaGlobtrkFitPntLengthFE","globtrk: N fit pnts vs length, ftpcE",
-			     25,0.,250.,25,0.,50.);
+			     30,0.,120.,15,0.,15.);
     m_fpoint_lengthFE->SetXTitle("trk length");
     m_fpoint_lengthFE->SetYTitle("Npoints on trk");
   m_fpoint_lengthFW = QAH2F("QaGlobtrkFitPntLengthFW","globtrk: N fit pnts vs length, ftpcW",
-			     25,0.,250.,25,0.,50.);
+			     30,0.,120.,15,0.,15.);
     m_fpoint_lengthFW->SetXTitle("trk length");
     m_fpoint_lengthFW->SetYTitle("Npoints on trk");
 
-  m_chisq0_momT = QAH2F("QaGlobtrkChi0MomT","globtrk: Chisq0 vs log mom, tpc",40,1.,4.,50,0.,5.);
+  m_chisq0_momT = QAH2F("QaGlobtrkChi0MomT","globtrk: Chisq0 vs log mom, tpc",40,1.,4.,50,0.,10.);
     m_chisq0_momT->SetXTitle("log P (MeV)");
     m_chisq0_momT->SetYTitle("chisq0") ;
 
-  m_chisq1_momT = QAH2F("QaGlobtrkChi1MomT","globtrk: Chisq1 vs log mom, tpc",40,1.,4.,50,0.,5.);
+  m_chisq1_momT = QAH2F("QaGlobtrkChi1MomT","globtrk: Chisq1 vs log mom, tpc",40,1.,4.,50,0.,10.);
     m_chisq1_momT->SetXTitle("log P (MeV)");
     m_chisq1_momT->SetYTitle("chisq1");
 
-  m_chisq0_etaT = QAH2F("QaGlobtrkChi0EtaT","globtrk: Chisq0 vs eta, tpc",20,-2.,2.,20,0.,5.);
+  m_chisq0_etaT = QAH2F("QaGlobtrkChi0EtaT","globtrk: Chisq0 vs eta, tpc",20,-2.,2.,20,0.,10.);
     m_chisq0_etaT->SetXTitle("eta");
     m_chisq0_etaT->SetYTitle("chisq0");
 
-  m_chisq1_etaT = QAH2F("QaGlobtrkChi1EtaT","globtrk: Chisq1 vs eta, tpc",20,-2.,2.,20,0.,5.);
+  m_chisq1_etaT = QAH2F("QaGlobtrkChi1EtaT","globtrk: Chisq1 vs eta, tpc",20,-2.,2.,20,0.,10.);
     m_chisq1_etaT->SetXTitle("eta");
     m_chisq1_etaT->SetYTitle("chisq1");
 
-  m_chisq0_dipT = QAH2F("QaGlobtrkChi0TanlT","globtrk: Chisq0 vs tanl(dip), tpc",20,-5.,5.,20,0.,5.);
+  m_chisq0_dipT = QAH2F("QaGlobtrkChi0TanlT","globtrk: Chisq0 vs tanl(dip), tpc",20,-5.,5.,20,0.,10.);
     m_chisq0_dipT->SetXTitle("dip angle");
     m_chisq0_dipT->SetYTitle("chisq0");
 
-  m_chisq1_dipT = QAH2F("QaGlobtrkChi1TanlT","globtrk: Chisq1 vs tanl(dip), tpc",20,-5.,5.,20,0.,5.);
+  m_chisq1_dipT = QAH2F("QaGlobtrkChi1TanlT","globtrk: Chisq1 vs tanl(dip), tpc",20,-5.,5.,20,0.,10.);
     m_chisq1_dipT->SetXTitle("dip angle");
     m_chisq1_dipT->SetYTitle("chisq1");
 
-  m_chisq0_zfT = QAH2F("QaGlobtrkChi0zfT","globtrk: Chisq0 vs zfirst, tpc",20,-250.,250.,20,0.,5.);
+  m_chisq0_zfT = QAH2F("QaGlobtrkChi0zfT","globtrk: Chisq0 vs zfirst, tpc",20,-250.,250.,20,0.,10.);
     m_chisq0_zfT->SetXTitle("zfirst");
     m_chisq0_zfT->SetYTitle("chisq0");
 
-  m_chisq1_zfT = QAH2F("QaGlobtrkChi1zfT","globtrk: Chisq1 vs zfirst, tpc",20,-250.,250.,20,0.,5.);
+  m_chisq1_zfT = QAH2F("QaGlobtrkChi1zfT","globtrk: Chisq1 vs zfirst, tpc",20,-250.,250.,20,0.,10.);
     m_chisq1_zfT->SetXTitle("zfirst");
     m_chisq1_zfT->SetYTitle("chisq1");
 
