@@ -102,6 +102,7 @@ void StiPixelDetectorBuilder::buildDetectors()
 	  p = new StiPlacement; //see StRoot/Sti/StiPlacement.h
 	  p->setZcenter(0.);
 	  p->setLayerRadius(pixRadius);
+	  p->setRegion(StiPlacement::kMidRapidity);
 	  p->setNormalRep(phiForTpcSector(sector), pixRadius, 0.); //all stay the same except fIfcRadius
 	  
 	  StiDetector *ifcVolume = _detectorFactory->getInstance();
