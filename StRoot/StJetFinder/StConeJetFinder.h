@@ -78,7 +78,7 @@ public:
     void setDebug(bool v) {mDebug = v;}
     bool debug() const {return mDebug;}
     
-private:
+protected:
     friend class StConeJetFinder;
     friend class StCdfChargedConeJetFinder;
 
