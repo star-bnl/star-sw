@@ -8,7 +8,7 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
       Content  PIPE,PIPC,PIPO,PIPS,PIPB,PIPT,PFLO,PFLT,PVAC,PVAO,PVAS,
                PVAB,PRIS,PRID,PRIB,PIPI,PVAI,PVAT
 *
-      Structure PIPG {version,  BeInnR,   BeOutR,   BeLeng,
+      Structure PIPG {version,  BeInnR,   BeOutR,   BeLeng,   char Material,
                       S1InnR,   S1OutR,   S1Leng,   S2InnR,   S2OutR,  S2Leng,
                       S3InnR,   S3OutR,   S3Leng,
                       S4InnR,   S4OutR,   S4Leng,
@@ -21,10 +21,38 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
 * -----------------------------------------------------------------------------
 *
    FILL PIPG    !  Beam Pipe data
+      version   =  2    ! geometry version     
+      BeInnR    = 3.9   ! Berillium section inner radius
+      BeOutR    = 4.0   ! Berillium section outer radius
+      BeLeng    = 76.2  ! Berillium section half length
+      material  ='ALUM' ! pipe main section material 
+      S1InnR    = 3.875 ! first Aluminum section inner radius
+      S1OutR    = 4.0   ! first Aluminum section outer radius
+      S1Leng    = 153.4 ! first Aluminum section half length
+      S2InnR    = 3.875 ! second Aluminum section inner radius
+      S2OutR    = 4.00  ! second Aluminum section outer radius
+      S2Leng    = 18.0  ! second Aluminum section half length
+      S3InnR    = 3.875 ! Transition Stub Aluminum section inner radius
+      S3OutR    = 4.0   ! Transition Stub Aluminum section outer radius
+      S3Leng    = 1.0   ! Transition Stub Aluminum section half length
+      S4InnR    = 6.20  ! Large OD Aluminum section inner radius
+      S4OutR    = 6.35  ! Large OD Aluminum section outer radius
+      S4Leng    = 150.0 ! Large OD Aluminum section half length
+      ConeLen   = 12.5  ! half length of the Bell Reducer Cone
+      Flange1T  = 2.0   ! flange SET half thickness
+      Flange1R  = 5.85  ! flange outer radius
+      RibNum    = 8     ! number of Ribs
+      RibSpa    = 1.75  ! spacing between Ribs
+      RibThk    = 0.05  ! Rib half thickness
+      RibOutR   = 4.8   ! Rib Outer Radius
+      RibCent   = 454.5 ! Rib Set center 
+
+   FILL PIPG    !  Beam Pipe data
       version   =  1    ! geometry version     
       BeInnR    = 3.9   ! Berillium section inner radius
       BeOutR    = 4.0   ! Berillium section outer radius
       BeLeng    = 76.2  ! Berillium section half length
+      material  ='IRON' ! material is steel
       S1InnR    = 3.85  ! first steel section inner radius
       S1OutR    = 4.0   ! first steel section outer radius
       S1Leng    = 153.4 ! first steel section half length
@@ -47,7 +75,8 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
       RibCent   = 454.5 ! Rib Set center 
    endfill
 *
-      USE      PIPG  Version=1
+      USE      PIPG  
+      prin1  pipg_material; (' beam pipe material - ',a4)
 * calculate positions of the 1st, 2nd, and 3rd breaks in the expected pipe.
       Z1 = pipg_BeLeng + 2*pipg_S1Leng + pipg_flange1t
       Z2 = Z1 - 2*pipg_flange1t + 2*pipg_s2leng
@@ -56,21 +85,30 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
       Z4 = Z2 + pipg_flange1t + 2*pipg_s3leng + pipg_conelen 
 * calculate mother PCON radii
       R1 = pipg_S2OutR
-      R2 = pipg_s3outr
+      R2 = pipg_S4outR
 *
+*                        select material 
+      if (pipg_Version==1) then    
+          material Iron
+      else
+          material Aluminium
+      endif
+*                        call this material pipe
+      material pipe dens=ag_dens
+*      
       Create   PIPE
       Position PIPE in CAVE 
       Position PIPE in CAVE  ThetaZ=180
 *
 * -----------------------------------------------------------------------------
-Block PIPE is the STAR cave 
+Block PIPE is the STAR beam pipe mother volume
       Material  Air
       Medium    Standard
       Attribute Pipe   Seen=0  colo=1
       SHAPE     PCON   phi1=0  Dphi=360  Nz=4,
-          zi = { 0,        Z1-pipg_flange1t,     Z1-pipg_flange1t ,       Z3 },
-          Rmn= { 0,                  0,                  0,                0 },
-          Rmx= { r1,                r1,                 r2,               r2 }
+          zi = { 0,   Z1-pipg_flange1t,   Z1-pipg_flange1t,            Z3 },
+          Rmn= { 0,                  0,                  0,             0 },
+          Rmx= { r1,                r1,                 r2,            r2 }
 *
       Create and Position PIPC z=pipg_BeLeng/2           " center Be section  "
       Create and Position PIPO z=pipg_beleng+pipg_S1Leng " 8 cm steel section "
@@ -102,7 +140,7 @@ EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 Block PIPO is Steel pipe from Be to 1st flanges
-       Material  Iron
+       Material  pipe
        Attribute Pipo      Seen=1  colo=3
        Shape     TUBE      Rmin=0  Rmax=pipg_S1OutR,
                            Dz=pipg_S1Leng
@@ -116,7 +154,7 @@ EndBlock
 
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Block PIPI is Steel pipe of the Bellow section
-       Material  Iron
+       Material  pipe
        Attribute Pipi      Seen=1  colo=3
        Shape     TUBE      Rmin=0  Rmax=pipg_S2OutR,
                            Dz=pipg_S2Leng
@@ -129,7 +167,7 @@ Block PVAI is its cavity
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Block PIPT is short Steel pipe of the transition section
-       Material  Iron
+       Material  Pipe
        Attribute Pipt      Seen=1  colo=3
        Shape     TUBE      Rmin=0  Rmax=pipg_S3OutR,
                            Dz=pipg_S3Leng
