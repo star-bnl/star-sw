@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide 
 // 
-// $Id: StEmcGainMonitor.cxx,v 1.2 2002/05/22 18:50:38 jklay Exp $
+// $Id: StEmcGainMonitor.cxx,v 1.3 2002/06/26 02:09:17 jklay Exp $
 // $Log: StEmcGainMonitor.cxx,v $
+// Revision 1.3  2002/06/26 02:09:17  jklay
+// Gain calculated from ped-subtracted mean above 30 ADC counts
+//
 // Revision 1.2  2002/05/22 18:50:38  jklay
 // Fixed bug in the way emcTowerGain table is filled
 //
@@ -42,9 +45,9 @@ StEmcGainMonitor::StEmcGainMonitor()
 {
   m_TowerTmp=new TH2F("tmp","tmp",4800,0.5,4800.5,500,0,500);  
   m_TowerMean=new TH2F("TowerMean","Tower mean values",4800,0.5,4800.5,500,0,500);  
-  m_TowerRelGain=new TH2F("TowerRelGain","Tower Relative Gain ADC>30/ADC>0",4800,0.5,4800.5,500,0,3);  
+  m_TowerRelGain=new TH2F("TowerRelGain","Tower Relative Gain Mean>30",4800,0.5,4800.5,500,0,3);  
   m_TowerRelGain1=new TH2F("TowerRelGain1","Tower Relative Gain ADC>80/ADC>30",4800,0.5,4800.5,500,0,3);  
-  m_TowerRelGainDayByDay=new TH2F("TowerRelGainDayByDay","Tower Relative Day by Day ADC>30/ADC>0",365,0,365,500,0,3);  
+  m_TowerRelGainDayByDay=new TH2F("TowerRelGainDayByDay","Tower Relative Day by Day Mean>30",365,0,365,500,0,3);  
   m_TowerRelGainDayByDay1=new TH2F("TowerRelGainDayByDay1","Tower Relative Day by Day ADC>80/ADC>30",365,0,365,500,0,3);  
   m_TowerRMS=new TH2F("TowerRMS","Tower RMS values",4800,0.5,4800.5,500,0,500);  
   nDir = 0;
@@ -169,6 +172,8 @@ Bool_t StEmcGainMonitor::ProcessFiles()
         }
       }
     } while (entry!=0 && nfiles<=nFilesMax);
+
+    SubtractPedestal();
     CalcMeanRMS(year,day,0);
     WriteTower();
   }
@@ -188,6 +193,7 @@ void StEmcGainMonitor::WriteTower()
 {
   TFile output(histFileName.Data(),"UPDATE");
   m_Tower->Write();
+  m_TowerSubPed->Write();
   output.Close();
   return;
 }
@@ -206,8 +212,42 @@ void StEmcGainMonitor::WriteMeanRMS()
   return;
 }
 //_____________________________________________________________________________
-Bool_t StEmcGainMonitor::CalcMeanRMS(Int_t year,Int_t day,Int_t run)
+void StEmcGainMonitor::SubtractPedestal()
 {
+//JLK 19-June-2002
+//In this method, take the m_Tower histogram and for each tower, find the ADC 
+//value where the maximum occurs.  Re-fill the histogram with the subtracted
+//values. This is what will be used by CalcMeanRMS to make Gain table...
+
+   char name[50], title[50];
+   sprintf(name,"%s_pedSubtracted",m_Tower->GetName());
+   sprintf(title,"%s_pedSubtracted",m_Tower->GetTitle());
+   m_TowerSubPed=new TH2F(name,title,4800,0.5,4800.5,500,0,500);  
+
+   for(Int_t i=1; i<4801; i++)  //loop over towers
+   {
+     Float_t max = 0;
+     Int_t adcOfMax = 0;
+     for(Int_t j=0; j<500;j++)  //loop over ADC to find maximum
+     {
+        if(m_Tower->GetBinContent(i-1,j) > max) {
+	   max = m_Tower->GetBinContent(i-1,j);
+	   adcOfMax = j;
+	}
+     }
+     for(Int_t k=adcOfMax; k<500; k++) //Fill new histogram with ped-subtracted values
+     {
+       Float_t signal = m_Tower->GetBinContent(i-1,k);
+       m_TowerSubPed->SetBinContent(i-1,k-adcOfMax,signal);
+     }
+   }
+
+}
+//_____________________________________________________________________________
+void StEmcGainMonitor::CalcMeanRMS(Int_t year,Int_t day,Int_t run)
+{
+  //Here use the pedestal subtracted histogram
+
   emcTowerGain_st row;
   row.year = year;
   row.day = day;
@@ -221,16 +261,17 @@ Bool_t StEmcGainMonitor::CalcMeanRMS(Int_t year,Int_t day,Int_t run)
     Float_t x=0,x2=0,n=0,nlin=0;
     for(Int_t j=0;j<500;j++) // loop over adc
     {
-      sum+=m_Tower->GetBinContent(i-1,j);
+      sum+=m_TowerSubPed->GetBinContent(i-1,j);
       if(j>=30)
       {
-        sumAbove30+=m_Tower->GetBinContent(i-1,j);
+        sumAbove30+=m_TowerSubPed->GetBinContent(i-1,j);
         if(j>=80)
         {
-          sumAbove80+=m_Tower->GetBinContent(i-1,j);
-          if(j<140)
+          sumAbove80+=m_TowerSubPed->GetBinContent(i-1,j);
+	}
+        if(j<140)
           {
-            Float_t xt=m_Tower->GetBinContent(i-1,j);
+            Float_t xt=m_TowerSubPed->GetBinContent(i-1,j);
             if(xt>1)
             {
               Float_t wt=log(xt);
@@ -240,7 +281,6 @@ Bool_t StEmcGainMonitor::CalcMeanRMS(Int_t year,Int_t day,Int_t run)
               n+=wt;
               nlin++;
             }
-          }
         }
       }
     }
@@ -273,19 +313,15 @@ Bool_t StEmcGainMonitor::CalcMeanRMS(Int_t year,Int_t day,Int_t run)
 
     //cout <<"tower "<<i<<"  rel gain = "<<refMean<<"  row = "<<row.Mean[i-1]<<endl;
 
-    /*if(refMean>0)
+//Here we fill the gain using the mean value between 30 and 140
+    if(refMean>0)
     {
       Float_t gain=mean/refMean;
       m_TowerRelGain->Fill((Float_t)i,gain);
       m_TowerRelGainDayByDay->Fill((Float_t)(gainTable->GetNRows()-1),gain);
-    }*/
-    if(refSum>0)
-    {
-      Float_t gain=thisSum/refSum;
-      m_TowerRelGain->Fill((Float_t)i,gain);
-      m_TowerRelGainDayByDay->Fill((Float_t)(gainTable->GetNRows()-1),gain);
     }
 
+//Just for comparison, here's the way using the integrals for ADC>80/ADC>30
     if(refSum1>0)
     {
       Float_t gain=thisSum1/refSum1;
