@@ -1,6 +1,11 @@
-// $Id: StTrsMaker.cxx,v 1.14 1999/02/16 18:15:40 fisyak Exp $
+// $Id: StTrsMaker.cxx,v 1.15 1999/02/17 17:02:16 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.15  1999/02/17 17:02:16  lasiuk
+// streamline for production
+// remove debug.
+// switch for #sectors to be processed
+//
 // Revision 1.14  1999/02/16 18:15:40  fisyak
 // Check in the latest updates to fix them
 //
@@ -89,7 +94,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.14 1999/02/16 18:15:40 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.15 1999/02/17 17:02:16 lasiuk Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -106,16 +111,14 @@ Int_t StTrsMaker::Init()
 //     St_DataSetIter       local(gStChain->DataSet("params"));
 
     //
-    // Make the DataBase
+    // Set up the DataBase access
     //
     // Check File access
     //
-    //cout << "*********************************************" << endl;
     cout << "StTrsMaker::Init()" << endl;
     string geoFile("../run/TPCgeo.conf");
     if (access(geoFile.c_str(),R_OK)) {
 	cerr << "ERROR:\n" << geoFile.c_str() << " cannot be opened" << endl;
-	//shell(pwd);
 	cerr << "Exitting..." << endl;
 	exit(1);
     }
@@ -165,7 +168,7 @@ Int_t StTrsMaker::Init()
    // Containers
    //
 
-     // A Wire Plane
+   // A Wire Plane
    mWireHistogram =
        StTrsWireHistogram::instance(mGeometryDb, mSlowControlDb);
    mWireHistogram->setDoGasGain(true);  // True by default
@@ -173,58 +176,61 @@ Int_t StTrsMaker::Init()
    mWireHistogram->setGasGainInnerSector(4000);  // True by default
    mWireHistogram->setGasGainOuterSector(1000);
    mWireHistogram->setDoTimeDelay(false);
-   
-    // create a Sector:
-    // Analog (for calculation)
+
+   //
+   // An Analog (for calculation)
    mSector = 
        new StTrsSector(mGeometryDb);
 
+   //
+   // Processes
+   //
+   mChargeTransporter =
+       StTrsFastChargeTransporter::instance(mGeometryDb, mSlowControlDb, mGasDb, mMagneticFieldDb);
+   // set status:
+   mChargeTransporter->setChargeAttachment(true);
+   mChargeTransporter->setGatingGridTransparency(false);
+   mChargeTransporter->setTransverseDiffusion(true);
+   mChargeTransporter->setLongitudinalDiffusion(true);
+   mChargeTransporter->setExB(false);
+
+
+   mAnalogSignalGenerator =
+       StTrsSlowAnalogSignalGenerator::instance(mGeometryDb, mSlowControlDb, mElectronicsDb, mSector);
+   //
+   // Set the function for the induced charge on Pad
+   // -->StTrsSlowAnalogSignalGenerator::endo
+   //-->StTrsSlowAnalogSignalGenerator::gatti
+   //-->StTrsSlowAnalogSignalGenerator::dipole
+    //dynamic_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
+    //setChargeDistribution(StTrsSlowAnalogSignalGenerator::endo);
+   //
+   // Set the function for the Analog Electronics signal shape
+   //-->StTrsSlowAnalogSignalGenerator::delta
+   //-->StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation
+   //-->StTrsSlowAnalogSignalGenerator::symmetricGaussianExact
+   //-->asymmetricGaussianApproximation
+   //-->StTrsSlowAnalogSignalGenerator::realShaper
+     //dynamic_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
+     //setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
+   mAnalogSignalGenerator->setDeltaRow(0);
+   mAnalogSignalGenerator->setDeltaPad(1);
+   mAnalogSignalGenerator->setSignalThreshold(.0001*(.001*volt));
+   mAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
+	
+
+   mDigitalSignalGenerator =
+       StTrsFastDigitalSignalGenerator::instance(mElectronicsDb, mSector);
+
+   //
    // Output is into an StTpcRawDataEvent* vector<StTrsDigitalSector*>
    // which is accessible via the StTrsUnpacker
    mUnPacker = new StTrsUnpacker;
 
    mAllTheData =
        new StTrsRawDataEvent();
-    //
-    // Processes
-    //
-    mChargeTransporter =
-      StTrsFastChargeTransporter::instance(mGeometryDb, mSlowControlDb, mGasDb, mMagneticFieldDb);
-    // set status:
-    //mChargeTransporter->setChargeAttachment(true);
-    //mChargeTransporter->setGatingGridTransparency(true);
-    //mChargeTransporter->setTransverseDiffusion(true);
-    //mChargeTransporter->setLongitudinalDiffusion(true);
-    //mChargeTransporter->setExB(true);
 
-
-    mAnalogSignalGenerator =
-	StTrsSlowAnalogSignalGenerator::instance(mGeometryDb, mSlowControlDb, mElectronicsDb, mSector);
-    //
-    // Set the function for the induced charge on Pad
-    //
-    //dynamic_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
-        //setChargeDistribution(StTrsSlowAnalogSignalGenerator::endo);
-	//setChargeDistribution(StTrsSlowAnalogSignalGenerator::gatti);
-	//setChargeDistribution(StTrsSlowAnalogSignalGenerator::dipole);
-    //
-    // Set the function for the Analog Electronics signal shape
-    //
-    //dynamic_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
-	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::delta);
-        //setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
-	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianExact);
-	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::asymmetricGaussianApproximation);
-	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::realShaper); 
-    mAnalogSignalGenerator->setDeltaRow(0);
-    mAnalogSignalGenerator->setDeltaPad(1);
-    mAnalogSignalGenerator->setSignalThreshold(.0001*(.001*volt));
-    mAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
-	
-
-    mDigitalSignalGenerator =
-	StTrsFastDigitalSignalGenerator::instance(mElectronicsDb, mSector);
-
+   
     return StMaker::Init();
 }
 
@@ -232,7 +238,6 @@ Int_t StTrsMaker::Init()
 void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
 
     //cout << "StTrsMaker::whichSector()" << endl;
-    //cout << volId << endl;
     *isDet  = (volId/100000);
 
     volId  -= (*isDet)*100000;
@@ -244,11 +249,12 @@ void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
 }
     
 Int_t StTrsMaker::Make(){
-//     cout << "Make ofstream" << endl;
-//     ofstream ofs("/star/u2b/lasiuk/geantdebug.txt", ios::out);
-//     ofstream raw("/star/u2b/lasiuk/event.txt",ios::out);
-//  PrintInfo();
-  if (!m_DataSet->GetList())  {//if DataSet is empty fill it
+    //  PrintInfo();
+
+    //cout << "Make ofstream" << endl;
+    //ofstream ofs("/star/u2b/lasiuk/geantdebug.txt", ios::out);
+    //ofstream raw("/star/u2b/lasiuk/event.txt",ios::out);
+    if (!m_DataSet->GetList())  {//if DataSet is empty fill it
     //
     // Read the Ionization
     //
@@ -257,56 +263,36 @@ Int_t StTrsMaker::Make(){
     
     St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
     // $STAR/StRoot/base/St_DataSet.h & St_Table.h 
-    Int_t no_tpc_hits =  g2t_tpc_hit->GetNRows();
+    int no_tpc_hits         =  g2t_tpc_hit->GetNRows();
     g2t_tpc_hit_st *tpc_hit =  g2t_tpc_hit->GetTable();
 
     //StTpcCoordinateTransform transformer(mGeometryDb, mSlowControlDb);
 
 
-    cout << "Loop over: " << no_tpc_hits << endl;
-    cout << "First sector" << endl;
-    int currentSectorProcessed;
-    //int nextSectorProcessed;
-      
     int bisdet, bsectorOfHit, bpadrow;
 
     // Where is the first hit in the TPC
     whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
-//     PR(bisdet);
-//     PR(bsectorOfHit);
-//     PR(bpadrow);
-    currentSectorProcessed = bsectorOfHit;
-//     PR(currentSectorProcessed);
+    int currentSectorProcessed = bsectorOfHit;
 
     // Limit the  processing to a fixed number of segments
     //no_tpc_hits = 20;
     for (int i=1; i<=no_tpc_hits; i++){
 	cout << "--> tpc_hit:  " << i << endl;
-// 	raw << tpc_hit->volume_id   << ' '
-// 	    << tpc_hit->de          << ' '
-// 	    << tpc_hit->ds          << ' '
-// 	    << tpc_hit->x[0]        << ' '
-// 	    << tpc_hit->x[1]        << ' '
-// 	    << tpc_hit->x[2]        << ' '
-// 	    << tpc_hit->p[0]        << ' '
-// 	    << tpc_hit->p[1]        << ' '
-// 	    << tpc_hit->p[2]        << ' '  << endl;
-
-	// DEBUG
-	//cout << i
-	//<< " x " << tpc_hit->x[0]
-	//<< " y " << tpc_hit->x[1]
-	//<< " z " << tpc_hit->x[2] << endl;
+//  	raw << tpc_hit->volume_id   << ' '
+//  	    << tpc_hit->de          << ' '
+//  	    << tpc_hit->ds          << ' '
+//  	    << tpc_hit->x[0]        << ' '
+//  	    << tpc_hit->x[1]        << ' '
+//  	    << tpc_hit->x[2]        << ' '
+//  	    << tpc_hit->p[0]        << ' '
+//  	    << tpc_hit->p[1]        << ' '
+//  	    << tpc_hit->p[2]        << ' '  << endl;
 
 
 	whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
-// 	PR(bisdet);
-// 	PR(bsectorOfHit);
-// 	PR(bpadrow);
 	
 	// Process until the next sector is reached.
-// 	PR(currentSectorProcessed);
-// 	PR(bsectorOfHit);
 
 	// Save time initially  - by not processing pseudo padrows
 	if(bisdet) {
@@ -326,23 +312,21 @@ Int_t StTrsMaker::Make(){
 	    // coordinates.  This is the problem you get if you
 	    // don't use a common data base
 	    // GEANT uses: (which is not correct!)
-	    double GEANTDriftLength = 208.55119*centimeter;
-	    double GEANTOffSet      = mGeometryDb->frischGrid() - GEANTDriftLength;
-// 	    PR(GEANTOffSet);
-// 	    PR(GEANTDriftLength);
+	    //double GEANTDriftLength = 208.55119*centimeter;
+	    //double GEANTOffSet      = mGeometryDb->frischGrid() - GEANTDriftLength;
 	    
 	    // Now relative to this, we get the zPosition in coordinates where :
 	    // 0 is the membrane, 208+/-dz is the wire grid
 	    //double zPosition =
-	    //           GEANTDriftLength/2. + tpc_hit->x[2]*centimeter + GEANTOffSet;
+	    //GEANTDriftLength/2. + tpc_hit->x[2]*centimeter + GEANTOffSet;
 	    //--->double zPosition = tpc_hit->x[2]*centimeter;
-// 	    PR(tpc_hit->x[2]*centimeter);
-// 	    PR(zPosition);
+	    //PR(tpc_hit->x[2]*centimeter);
+	    //PR(zPosition);
 	    
 	    StThreeVector<double> hitPosition(tpc_hit->x[0]*centimeter,
-					      tpc_hit->x[1]*centimeter,
-					      tpc_hit->x[2]*centimeter); 
-// 	    PR(hitPosition);
+	    				      tpc_hit->x[1]*centimeter,
+	    				      tpc_hit->x[2]*centimeter); 
+	    //PR(hitPosition);
 
 // 	    // Drift Length is calculated with respect to the FG!
 // 	    double fgOffSet = (bpadrow <= mGeometryDb->numberOfInnerRows()) ?
@@ -354,7 +338,8 @@ Int_t StTrsMaker::Make(){
 	    // Should use StMatrix??? or StTpcCoordinateTransform
 	    // but it is slower
 	    // It is also in StTrsChargeSegment::rotate()
-	    // should change to this SOON!!!
+	    // should change to this SOON, but there is a time penalty because
+	    // a 2x2 matrix must be constructed
 	    double beta = bsectorOfHit*M_PI/6.;  // (30 degrees)
 	    double cb   = cos(beta);
 	    double sb   = sin(beta);
@@ -381,8 +366,6 @@ Int_t StTrsMaker::Make(){
 
 // 	    ofs << " " << aSegment << endl;
 //  	    PR(aSegment);
-	    //sleep(5);
-// 	    cout << "^^^^Segment Definition^^^^" << '\n' << endl;
 	    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 	    vector<int> all[3];
@@ -397,15 +380,16 @@ Int_t StTrsMaker::Make(){
 	    list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> > comp;
 	    list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> >::iterator iter;
 #endif
+	    //
+	    // Better be smarter and  split the segment differnetly
+	    // on the inner and outer part of the sectors...
+	    //
 	    int breakNumber = 1;
-// 	    cout << "call StTrsSegment::split() into " << breakNumber << " segments." << endl;
 	    aSegment.split(mGasDb, mMagneticFieldDb, breakNumber, &comp);
 	    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
-	    copy(comp.begin(), comp.end(), ostream_iterator<StTrsMiniChargeSegment>(cout,"\n"));
+	    //copy(comp.begin(), comp.end(), ostream_iterator<StTrsMiniChargeSegment>(cout,"\n"));
 #endif
-// 	    cout << endl;	    
-// 	    cout << "Number of \"miniSegments\": " << (comp.size()) << endl;
 	    
 	    // Loop over the miniSegments
 	    for(iter = comp.begin();
@@ -445,8 +429,7 @@ Int_t StTrsMaker::Make(){
 	} // if (currentSector == bsectorOfHit)
 	// Otherwise, do the digitization...
 	
-	cout << "\a**********End Of Current Sector***************\a\n" << endl;
-	sleep(3);
+	cout << "Current Sector: " << currentSectorProcessed << endl;
 
 	//
 	// Generate the ANALOG Signals on pads
@@ -456,7 +439,6 @@ Int_t StTrsMaker::Make(){
 
 	cout << "--->sampleAnalogSignal()..." << endl;
 	mAnalogSignalGenerator->sampleAnalogSignal();
-	sleep(3);
 
 	//
 	// Digitize the Signals
@@ -465,7 +447,7 @@ Int_t StTrsMaker::Make(){
 	StTrsDigitalSector* aDigitalSector =
 	    new StTrsDigitalSector(mGeometryDb);
 	//
-	// Point to the object you wnat to fill
+	// Point to the object you want to fill
 	//
 	mDigitalSignalGenerator->fillSector(aDigitalSector);
 
@@ -480,10 +462,7 @@ Int_t StTrsMaker::Make(){
 // 	PR(currentSectorProcessed);
 // 	PR(mAllTheData->mSectors.size());
 	
-// 	cout << "Try add it" << endl;
 	mAllTheData->mSectors[(currentSectorProcessed-1)] = aDigitalSector;
-	//PR(mAllTheData->mSectors[(currentSectorProcessed-1)].size())
-// 	cout << "okay" << endl;
 	
 	// Clear and reset for next sector:
 	mWireHistogram->clear();
@@ -492,8 +471,11 @@ Int_t StTrsMaker::Make(){
 	//
 	// Go to the next sector
 	currentSectorProcessed = bsectorOfHit;
+
 	//
-	//break;  // Finish here
+	// you can skip out here if you only want to process a single sector...
+	if(currentSectorProcessed>3)
+	    break;  // Finish here
 	//
     } // loop over all segments: for(int i...
   } // mDataSet
@@ -501,68 +483,72 @@ Int_t StTrsMaker::Make(){
   // The access stuff:
 #ifdef UNPACK_ALL
   //
-  // Access it!
-  // with:
+  // Access the data with
   //   *mUnPacker  
 
-  //
-  // Loop around the sectors: (should be from db, or size of the structure!)
-//   PR(mAllTheData->mSectors.size());
-  for(int isector=1; isector<=24; isector++) {
-      int getSectorStatus =
-	  mUnPacker->getSector(isector,
-			       static_cast<StTpcRawDataEvent*>(mAllTheData));
-      //PR(getSectorStatus);
+    //
+    // Loop around the sectors: (should be from db, or size of the structure!)
+    //
+    for(int isector=1; isector<=24; isector++) {
+	int getSectorStatus =
+	    mUnPacker->getSector(isector,
+				 static_cast<StTpcRawDataEvent*>(mAllTheData));
+	//PR(getSectorStatus);
+	
+	// if getSectorStatus is bad move on to the next sector
+	if(getSectorStatus) continue;
 
-      // if getSectorStatus is bad move on to the next sector
-      if(getSectorStatus) continue;
-
-      // otherwise, let's decode it
-      unsigned char* padList;
-      for(int irow=1; irow<=45; irow++) {
+	// otherwise, let's decode it
+	unsigned char* padList;
+	for(int irow=1; irow<=45; irow++) {
 //  	  PR(irow);
-	  int numberOfPads = mUnPacker->getPadList(irow, &padList);
+	    int numberOfPads = mUnPacker->getPadList(irow, &padList);
 // 	  PR(numberOfPads);
+
+	    // If there are no pads, go to the next row...
+	    if(!numberOfPads) continue;
 	      
-	  if(!numberOfPads)
-	      continue;  // That is, go to the next row...
-	      
-	  for(int ipad = 0; ipad<numberOfPads; ipad++) {
-	      //PR(static_cast<int>(padList[ipad]));
-	      int nseq;
+	    for(int ipad = 0; ipad<numberOfPads; ipad++) {
+		//PR(static_cast<int>(padList[ipad]));
+		int nseq;
 		  
-	      StSequence* listOfSequences;
-	      int getSequencesStatus =
-		  mUnPacker->getSequences(irow, padList[ipad], &nseq, &listOfSequences);
-		      
+		StSequence* listOfSequences;
+		int getSequencesStatus =
+		    mUnPacker->getSequences(irow,
+					    padList[ipad],
+					    &nseq,
+					    &listOfSequences);
 	      //PR(getSequencesStatus);
 		      
-	      for(int kk=0; kk<nseq; kk++) {
-		  //PR(listOfSequences[kk].length);
-		  for(int zz=0; zz<listOfSequences[kk].length; zz++) {
-		      cout << " " << kk
-			   << " " << zz << '\t'
-			   << '\t' << static_cast<int>(*(listOfSequences[kk].firstAdc)) << endl;
-		      listOfSequences[kk].firstAdc++;
-		  } // zz
-// 		  cout << endl;
-	      } // Loop kk
-	  } // loop over pads
-	  // Do the data manipulation here!
-	  mUnPacker->clear();
-      } // Loop over rows!
-  } // Loop over sectors
+		for(int kk=0; kk<nseq; kk++) {
+		    //PR(listOfSequences[kk].length);
+		    for(int zz=0; zz<listOfSequences[kk].length; zz++) {
+			cout << " " << kk
+			     << " " << zz << '\t'
+			     << '\t' << static_cast<int>(*(listOfSequences[kk].firstAdc)) << endl;
+			listOfSequences[kk].firstAdc++;
+		    } // zz
+
+		} // Loop kk
+
+	    } // loop over pads
+	    //
+	    // One would do the data manipulation here!
+	    // Then deallocate the memory
+	    mUnPacker->clear();
+	} // Loop over rows!
+    } // Loop over sectors
 #endif
   
-  cout << "Got to the end of the maker" << endl;
+    cout << "Got to the end of the maker" << endl;
   
-  // Pass the decoder and data
-  if (m_DataSet) delete m_DataSet;
-  m_DataSet =  new St_DataSet(GetName());
-  m_DataSet->Add(new St_ObjectSet("Event", mAllTheData));
-  m_DataSet->Add(new St_ObjectSet("Decoder", mUnPacker));
+    // Pass the decoder and data
+    if (m_DataSet) delete m_DataSet;
+    m_DataSet =  new St_DataSet(GetName());
+    m_DataSet->Add(new St_ObjectSet("Event", mAllTheData));
+    m_DataSet->Add(new St_ObjectSet("Decoder", mUnPacker));
   
-  return kStOK;
+    return kStOK;
 }
 
 // *****************************************************************
@@ -591,7 +577,7 @@ Int_t StTrsMaker::Make(){
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.14 1999/02/16 18:15:40 fisyak Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.15 1999/02/17 17:02:16 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
