@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.32 1999/08/12 16:39:49 fine Exp $
+// $Id: St_Table.h,v 1.33 1999/08/12 16:41:31 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.33  1999/08/12 16:41:31  fine
+// Clean up
+//
 // Revision 1.32  1999/08/12 16:39:49  fine
-// class between St_Table::GetSize and TArray::GEtSize has been resolved
+// clash between St_Table::GetSize and TArray::GEtSize has been resolved
 //
 // Revision 1.31  1999/08/11 14:44:39  fine
 // name clash with ROOT over enum resolved
