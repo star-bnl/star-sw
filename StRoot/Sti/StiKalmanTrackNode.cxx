@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.41 2004/11/22 19:23:20 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.42 2004/11/22 19:43:06 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.42  2004/11/22 19:43:06  pruneau
+ * commented out offending cout statement
+ *
  * Revision 2.41  2004/11/22 19:23:20  pruneau
  * minor changes
  *
@@ -967,8 +970,8 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
       r11=hit->szz()+_c11;
     }
   double det=r00*r11 - r01*r01;
-  if (_c00<=0 || _c11<=0 || det<=0)
-    cout << endl << "evalChi2 c00:"<<_c00<< " c10:"<<_c10<<" c11:"<<_c11<<" det:"<<det<< " eyy:"<<eyy<<" ezz:"<<ezz<<endl;
+  //if (_c00<=0 || _c11<=0 || det<=0)
+  //  cout << endl << "evalChi2 c00:"<<_c00<< " c10:"<<_c10<<" c11:"<<_c11<<" det:"<<det<< " eyy:"<<eyy<<" ezz:"<<ezz<<endl;
   if (fabs(det)==0.) throw runtime_error("SKTN::evaluateChi2() Singular matrix !\n");
   double tmp=r00; r00=r11; r11=tmp; r01=-r01;  
   double dy=hit->y()-_p0;
