@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.30 1998/12/09 20:55:28 fine Exp $ 
+// $Id: St_Table.cxx,v 1.31 1998/12/17 14:36:51 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.31  1998/12/17 14:36:51  fisyak
+// fix Print for empty tablea, fix copy ctor
+//
 // Revision 1.30  1998/12/09 20:55:28  fine
 // St_Table::Print() method bug has been fixed, some cosmetic improvements
 //
@@ -236,9 +239,11 @@ St_Table::St_Table(const St_Table &table)
 St_Table &St_Table::operator=(const St_Table &rhs)
 {
    // St_Table assingment operator.
-   if (this != &rhs)
+  if (this != &rhs){
       Set(rhs.fN, rhs.s_Table);
-   return *this;
+      SetUsedRows(rhs.GetNRows());
+  }
+  return *this;
 }
  
 //______________________________________________________________________________
@@ -546,7 +551,7 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
    Bool_t isdate = kFALSE;
 //   char *pname; 
 
-   if  (GetNRows() == 0) return 0;
+//   if  (GetNRows() == 0) return 0;
 
    TClass *classPtr = GetRowClass();
 
@@ -569,8 +574,12 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
                  <<"  Allocated rows: "<<fN
                  <<"\t Used rows: "<<*s_MaxIndex
                  <<"\t Row size: "      << *s_Size << " bytes"
-      <<endl 
-      << " Table: " << classPtr->GetName()<< "\t";
+      <<endl; 
+     if  (GetNRows() == 0) {// to Print empty table header 
+       cout << " ======================================================================================" << endl;
+       return 0; 
+     }
+      cout << " Table: " << classPtr->GetName()<< "\t";
       for (Int_t j = row+rowNumber-rowCount; j<row+rowNumber-rowCount+rowStep && j < row+rowNumber ;j++)
       { 
          Int_t hW = width-2;
