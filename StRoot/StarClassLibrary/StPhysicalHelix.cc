@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPhysicalHelix.cc,v 1.2 1999/02/12 01:01:04 wenaus Exp $
+ * $Id: StPhysicalHelix.cc,v 1.3 1999/02/24 11:42:18 ullrich Exp $
  *
  * Author: Brian Lasiuk, Sep 1997
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StPhysicalHelix.cc,v $
- * Revision 1.2  1999/02/12 01:01:04  wenaus
- * Fix bug in momentum calculation
+ * Revision 1.3  1999/02/24 11:42:18  ullrich
+ * Fixed bug in momentum().
  *
  * Revision 1.2  1999/02/12 01:01:04  wenaus
  * Fix bug in momentum calculation
@@ -71,8 +71,7 @@ StThreeVector<double> StPhysicalHelix::momentum(double B) const
 	{
 	    using namespace units;
 #endif
-	    double pt =
-		fabs(c_light*nanosecond/meter*B/tesla)/(fabs(mCurvature)*meter)/GeV;
+	    double pt = GeV*fabs(c_light*nanosecond/meter*B/tesla)/(fabs(mCurvature)*meter);
     
 	    return (StThreeVector<double>(pt*cos(mPhase+mH*M_PI/2),   // pos part pos field
 					  pt*sin(mPhase+mH*M_PI/2),
