@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.cxx,v 1.1 2003/10/15 18:20:51 porter Exp $
+ * $Id: StEStructTrack.cxx,v 1.2 2004/06/28 23:24:11 chunhuih Exp $
  *
  * Author: Jeff Porter merge of code from Aya Ishihara and Jeff Reid
  *
@@ -190,44 +190,48 @@ void StEStructTrack::FillTpcReferencePoints(){
 //  older stuff ... should look at some time in the future ...
 //----------------------------------------------------------
 
-Float_t StEStructTrack::Pt() { return mPt; };
+Float_t StEStructTrack::Pt() const { return mPt; };
 
-Float_t StEStructTrack::Mt(Float_t mass) { 
+Float_t StEStructTrack::Mt(Float_t mass) const { 
   return sqrt((mPt*mPt)+(mass*mass)); 
 }
 
-Float_t StEStructTrack::E(Float_t mass) { 
+Float_t StEStructTrack::E(Float_t mass) const { 
   return ((mPt*mPt)+(mPz*mPz)+(mass*mass)); 
 }
 
-Float_t StEStructTrack::Rapidity(Float_t mass) { 
+Float_t StEStructTrack::Rapidity(Float_t mass) const { 
   Float_t E = this->E(mass);
   return 0.5*log((E+mPz)/(E-mPz)); 
 }
 
-Float_t StEStructTrack::Dca() { 
+Float_t StEStructTrack::Dca() const { 
   return (sqrt((mBxPrimary*mBxPrimary)+(mByPrimary*mByPrimary)+(mBzPrimary*mBzPrimary))); 
 }
 
-Float_t StEStructTrack::DcaPrimary() { 
+Float_t StEStructTrack::DcaPrimary() const { 
   return (sqrt((mBxPrimary*mBxPrimary)+(mByPrimary*mByPrimary)+(mBzPrimary*mBzPrimary))); 
 }
 
-Float_t StEStructTrack::DcaGlobal() { 
+Float_t StEStructTrack::DcaGlobal() const { 
   return (sqrt((mBxGlobal*mBxGlobal)+(mByGlobal*mByGlobal)+(mBzGlobal*mBzGlobal))); 
 }
 
-Float_t StEStructTrack::PIDpiPlus() { 
+Float_t StEStructTrack::PIDpiPlus() const { 
   return ((mCharge == 1) ? mPIDpi : 0); 
 }
 
-Float_t StEStructTrack::PIDpiMinus() { 
+Float_t StEStructTrack::PIDpiMinus() const { 
   return ((mCharge == -1) ? mPIDpi : 0); 
 }
 
 /**********************************************************************
  *
  * $Log: StEStructTrack.cxx,v $
+ * Revision 1.2  2004/06/28 23:24:11  chunhuih
+ * added 'const' specification to some member functions, including some of the
+ * return types, so that they can be used by a const StEStructTrack object.
+ *
  * Revision 1.1  2003/10/15 18:20:51  porter
  * initial check in of Estruct Analysis maker codes.
  *
