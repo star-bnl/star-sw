@@ -77,7 +77,7 @@ StL3RareTrack::StL3RareTrack(StGlobalTrack* track)
 }
 
 
-float StL3RareTrack::dedxExpected(float mass, float charge = 1) const {
+float StL3RareTrack::dedxExpected(float mass, float charge) const {
   float real_mom = p()*charge;
   float dedx = charge*charge*dEdx_formula(real_mom,mass);
   return dedx;
