@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.22 2000/04/26 20:29:13 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.23 2000/05/22 21:53:41 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.22  2000/04/26 20:29:13  ullrich
- * Create instance of StEvent not StBrowsableEvent.
+ * Revision 2.23  2000/05/22 21:53:41  ullrich
+ * No more copying of RICH tables. RICH now writes directly
+ * to StEvent. printEventInfo() and makeEvent() modified.
  *
  * Revision 2.28  2000/08/17 00:38:48  ullrich
  * Allow loading of tpt tracks.
@@ -132,10 +133,10 @@ using std::pair;
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.22 2000/04/26 20:29:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.23 2000/05/22 21:53:41 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.22 2000/04/26 20:29:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.23 2000/05/22 21:53:41 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -779,14 +780,6 @@ StEventMaker::makeEvent()
             end   = index[kFtpcEastId].first+index[kFtpcEastId].second;
             for (i=begin; i<end; i++) {
                 ftpcHit = new StFtpcHit(dstPoints[i]);
-
-    //
-    //  Load RICH pixel
-    //
-    nrows = 0;
-    dst_rch_pixel_st* dstRichPixel = mEventManager->returnTable_dst_rch_pixel(nrows);
-    if (dstRichPixel && nrows)
-        mCurrentEvent->setRichPixelCollection(new StRichPixelCollection(dstRichPixel, nrows));
                 if (ftpcHitColl->addHit(ftpcHit)) {
                     id = dstPoints[i].id_track;
                     if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
@@ -1139,23 +1132,6 @@ StEventMaker::printEventInfo()
         for (k=0; !gotOneHit && k<svtColl->numberOfBarrels(); k++)
             for (j=0; !gotOneHit && j<svtColl->barrel(k)->numberOfLadders(); j++)
                 for (i=0; !gotOneHit && i<svtColl->barrel(k)->ladder(j)->numberOfWafers(); i++)
-    }
-
-    StRichPixelCollection *richPixels = mCurrentEvent->richPixelCollection();
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StRichPixelCollection at "  << (void*) richPixels          << endl;
-    cout << "Dumping first element in collection only (if available). " << endl;
-    cout << "---------------------------------------------------------" << endl;
-    if (richPixels) {
-        cout << "collection size = " << richPixels->size() << endl;
-        richPixels->Dump();
-        
-        if (richPixels->size()) {
-            cout << "---------------------------------------------------------" << endl;
-            cout << "StRichPixel (generated from first word in collection)    " << endl;
-            cout << "---------------------------------------------------------" << endl;
-            richPixels->pixel(0).Dump();
-        }
                     if (svtColl->barrel(k)->ladder(j)->wafer(i)->hits().size()) {
                         svtColl->barrel(k)->ladder(j)->wafer(i)->hits()[0]->Dump();
                         gotOneHit = kTRUE;
