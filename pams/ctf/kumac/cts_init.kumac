@@ -4,15 +4,18 @@ macro cts_init
 *
 cd /dui/constants
 *
-macro/global/import PARAMS_CTF 
-newfilestream ctb_geo [PARAMS_CTF]ctg_pars_ctb.xdf r
+
+newfilestream ctb_geo $STAR/params/ctf/ctg_pars_ctb.xdf r
 getevent ctb_geo
 dio/stream/close ctb_geo
-*
+ 
+* 
 *    Define tables
 *
-cd /dui/constants/ctf/params/
-*
+ 
+ cd /dui/constants/ctf/params/
+ 
+* 
 newtab cts cts_mpara 1
 *
 *     Set values
@@ -85,3 +88,5 @@ newtab ctb_event cts_event 1000
 newtab ctb_raw   ctu_raw   240
 *
 cd /dui
+
+
