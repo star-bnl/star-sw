@@ -1,40 +1,68 @@
 //*-- Author :    Valery Fine   25/05/99  (E-mail: fine@bnl.gov)
-// $Id: PadControlPanel.C,v 1.1 1999/05/29 20:55:11 fine Exp $
+// $Id: PadControlPanel.C,v 1.2 1999/06/02 16:30:12 fine Exp $
 // $Log: PadControlPanel.C,v $
+// Revision 1.2  1999/06/02 16:30:12  fine
+// Clean up
+//
 // Revision 1.1  1999/05/29 20:55:11  fine
 // macro to control any 3D view
 //
 //
-//  PadControl panelis the set if utility to control 
+//  PadControl panel is the set of the static methods to control 
 //  TView of any "current" TPad with some "primitive"
 //  operation:
 //
-class StPadControlPanel {
-public:
-StPadControlPanel() { PadControlPanel();}
-//_______________________________________________________________________________________
-static TControlBar *PadControlPanel(){
 //
-// This macro generates a Controlbar menu: To see the output, click begin_html <a href="gif/demos.gif" >here</a> end_html
+////////////////////////////////////////////////////////////////////////
+//
+// This macro generates a Controlbar panel: 
+// begin_html  <P ALIGN=CENTER> <IMG SRC="gif/PadControlPanel.gif" ></P> end_html
+//
 // To execute an item, click with the left mouse button.
-// To see the HELP of a button, click on the right mouse button.
 //  
 // Just start this macro wheneven you want:
 //
 //  From Root/Cint macro:
 //  --------------------
 //   .x PadControlPanel.C
+//   .L PadControlPanel.C
 // or
 //   gROOT->LoadMacro("PadControlPanel.C");
-//   PadControlPanel();  
 //
 //  From the compiled C++ code:
 //  --------------------
 //   gROOT->LoadMacro("PadControlPanel.C");
-//   gROOT->ProcessLine("PadControlPanel();");
 //
-//   gROOT->Reset();
-   TControlBar *bar = new TControlBar("vertical", "Pad Control Panel");
+///////////////////////////////////////////////////////////////////////
+
+class StPadControlPanel {
+  private:
+   TControlBar *fBar;  
+  public:
+StPadControlPanel() { fBar=PadControlPanel();}
+//_______________________________________________________________________________________
+static TControlBar *PadControlPanel(TControlBar *bar=0){
+//
+// This macro generates a Controlbar panel: 
+// begin_html  <P ALIGN=CENTER> <IMG SRC="gif/PadControlPanel.gif" ></P> end_html
+//
+// To execute an item, click with the left mouse button.
+//  
+// Just start this macro wheneven you want:
+//
+//  From Root/Cint macro:
+//  --------------------
+//   .x PadControlPanel.C
+//   .L PadControlPanel.C
+// or
+//   gROOT->LoadMacro("PadControlPanel.C");
+//
+//  From the compiled C++ code:
+//  --------------------
+//   gROOT->LoadMacro("PadControlPanel.C");
+//
+   if (bar) delete bar;
+   bar = new TControlBar("vertical", "Pad Control Panel");
    bar->AddButton("Black background", "StPadControlPanel::SetBackround(kBlack);", "Change the backgroung color to black");
    bar->AddButton("White background", "StPadControlPanel::SetBackround(kWhite);", "Change the backgroung color to white");
 //   bar->AddButton("Set background", "StPadControlPanel::SetBackroundStyle();", "Change the backgroung color to white");
@@ -48,7 +76,8 @@ static TControlBar *PadControlPanel(){
    bar->Show();
    return bar;
 }
-
+//_______________________________________________________________________________________
+~StPadControlPanel(){ if(fBar) delete fBar; fBar = 0;}
 //_______________________________________________________________________________________
 static void SetBackround(Color_t color, TVirtualPad *pad=0)
 {
@@ -146,3 +175,6 @@ static void Inscrease3DScale()
 }
 //_______________________________________________________________________________________
 };
+
+StPadControlPanel __aa__;
+void PadControlPanel(){}
