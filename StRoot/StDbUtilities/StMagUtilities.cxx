@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.53 2004/07/01 17:48:12 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.54 2004/08/29 19:59:53 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.54  2004/08/29 19:59:53  jhthomas
+ * *** empty log message ***
+ *
  * Revision 1.53  2004/07/01 17:48:12  jhthomas
  * Add Event by Event SpaceCharge capabilities from GVB.  Start adding incomplete/unfinished work on Endcaps from JT.
  *
@@ -293,8 +296,8 @@ StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t 
   thedb2  = 0         ;      // Do not get MagFactor from the DB       - use manual selection above
   thedb   = 0         ;      // Do not get TPC parameters from the DB  - use defaults in CommonStart
   fTpcVolts      =  0 ;      // Do not get TpcVoltages out of the DB   - use defaults in CommonStart
-  ManualSpaceCharge(0);      // Do not get SpaceCharge out of the DB   - use defaults in CommonStart
-  ManualSpaceChargeR2(0);    // Do not get SpaceChargeR2 out of the DB - use defaults in CommonStart
+  ManualSpaceCharge(0);      // Do not get SpaceCharge out of the DB   - use defaults inserted here.
+  ManualSpaceChargeR2(0.01); // JT test    // Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
   CommonStart( mode ) ;      // Read the Magnetic and Electric Field Data Files, set constants
 }
 
@@ -342,7 +345,7 @@ void StMagUtilities::GetSpaceCharge ()
 void StMagUtilities::GetSpaceChargeR2 ()  
 { 
   fSpaceChargeR2 =  StDetectorDbSpaceChargeR2::instance() ;  
-  SpaceChargeR2  =  fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ; 
+  SpaceChargeR2  =  fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ;
 }
 
 void StMagUtilities::GetShortedRing ()
