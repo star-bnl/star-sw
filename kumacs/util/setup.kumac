@@ -4,6 +4,7 @@
 * editted 8/31/98 K. Turner - put stafcv_ok,bad aliases in
 * editted 9/1/98 K. Turner - define counters nevdsttot,nevdstgood
 *                            which are incremented in bfc_util
+* editted 9/23/98 K. Turner - remove event counters that aren't needed
 * 
 **************************************************
  
@@ -38,8 +39,6 @@ macro set_values
 
  macro/global/create log_file ' ' 'default log message file'
  macro/global/create nevents  0   'no. of events processed so far'
- macro/global/create nevdsttot 0 
- macro/global/create nevdstgood 0
 
 return
 
