@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.348 2003/07/30 15:26:50 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.349 2003/07/31 04:39:32 lbarnby Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -929,7 +929,7 @@ Bfc_st BFC2[] = {
   {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StBichsel,StDetectorDbMaker,StEventMaker",
                                                                                "<StEvent creation>",kFALSE},
   {"Sti"         ,"Sti","","SCL,StEvent,tables","StiMaker",
-              "StSvtDbMaker,StTpcDb,Sti,StiGui,libGui,StiMaker,StiTpc,StiSvt,StiEmc","ITTF tracker",kFALSE},
+              "StSvtDbMaker,StTpcDb,libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiEmc","ITTF tracker",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StBichsel,StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
@@ -1292,6 +1292,8 @@ Int_t StBFChain::Instantiate()
 	    // ready to set options and parameters
 	    tk->setGuiEnabled(kFALSE);
 	    tk->setMcEnabled(kFALSE);
+	    pars->doStEventInput=kTRUE; //We always want to have this I think?
+	    cout << "Sti Parameters (seen in bfc)" << *pars << endl;
 
 	    if (GetOption("Simu")) tk->setMcEnabled(kTRUE);
 
