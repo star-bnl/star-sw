@@ -314,6 +314,7 @@ int RdoFinder::FindPointsBetween(dst_track_st *t,float *p,float r_first_row, flo
   int    h    = ((magneticField * t->icharge) > 0 ? -1 : 1);
   float phase = t->psi*degree-h*pi/2;
   float curvature = t->curvature;
+  if (fabs(curvature) < 0.00001) curvature=0.00001;
   float x0 = t->r0 * cos(t->phi0 * degree);
   float y0 = t->r0 * sin(t->phi0 * degree);
   float z0 = t->z0;
@@ -481,7 +482,9 @@ int RdoFinder::FindPointsBetween(StTrack *t,float *p,float r_first_row, float r_
 
   p[0] = x0; p[1] = y0; p[2] = z0;
   p[8] = t->geometry()->helix().xcenter();p[9] = t->geometry()->helix().ycenter();
-  p[10] = 1/t->geometry()->curvature();
+  p[10] = 100000.;
+  float curva = t->geometry()->curvature();
+  if (fabs(curva)>0.00001) p[10] = 1/curva;
 
   float x_in1[2];
   float x_out1[2];
