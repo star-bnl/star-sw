@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.20 1999/12/17 22:11:32 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.21 1999/12/21 23:10:59 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.21  1999/12/21 23:10:59  kathy
+// unpack number of points correctly in primtrk table; change some limits
+//
 // Revision 1.20  1999/12/17 22:11:32  kathy
 // add psi vs phi hist, change limits
 //
@@ -861,9 +864,9 @@ void StQABookHist::BookHistPrim(){
 
   m_primtrk_good  = QAH1F("QaPtrkGood",  "primtrk: tot # good tracks",40,0.,10000.);  
   m_pdet_id     = QAH1F("QaPtrkDetId",   "primtrk: Detector ID for tracks",25,0.,25.);
-  m_ppoint      = QAH1F("QaPtrkNPnt",    "primtrk: N points on track", 50, 0.,50.);
-  m_pmax_point  = QAH1F("QaPtrkNPntMax", "primtrk: N max points on track", 50, 0.,50.);
-  m_pfit_point  = QAH1F("QaPtrkNPntFit", "primtrk: N fit points on track", 50, 0.,50.);
+  m_ppoint      = QAH1F("QaPtrkNPnt",    "primtrk: N points on track",     60, 0.,60.);
+  m_pmax_point  = QAH1F("QaPtrkNPntMax", "primtrk: N max points on track", 50, 0.,100.);
+  m_pfit_point  = QAH1F("QaPtrkNPntFit", "primtrk: N fit points on track", 60, 0.,60.);
   m_prim_charge = QAH1F("QaPtrkChrg",    "primtrk: charge ", 20,-2.,2.);
   m_prim_xf     = QAH1F("QaPtrkXf",      "primtrk: x of first hit on trk ", 50,-200.,200.);
   m_prim_xf0    = QAH1F("QaPtrkXf0",     "primtrk: x of first hit - on helix at start",50,-200.,200.);
@@ -1025,19 +1028,20 @@ void StQABookHist::BookHistVertex(){
   // for MakeHistVertex - from table dst_vertex
   
   
-  m_v_num   = QAH1F("QaVtxNum"," vertex: num vertices ",50,0.,10000.);
-  m_v_detid = QAH1F("QaVtxDetId"," vertex: Detector ID ",100,0.,10000.);
-  m_v_vtxid = QAH1F("QaVtxVtxId"," vertex: Vertex ID ",10,0.,10.);
-  m_v_x     = QAH1F("QaVtxX"," vertex: x ",50,-250.,250.);
-  m_v_y     = QAH1F("QaVtxY"," vertex: y ",50,-250.,250.);
-  m_v_z     = QAH1F("QaVtxZ"," vertex: z ",50,-250.,250.);
-  m_v_pchi2 = QAH1F("QaVtxChisq"," vertex: chisq/dof ",50,0.,50.);
+  m_v_num   = QAH1F("QaVtxNum",  " vertex: num vertices ",50,0.,10000.);
+
+  m_v_detid = QAH1F("QaVtxDetId"," vertex,2ndary: Detector ID ",100,0.,10000.);
+  m_v_vtxid = QAH1F("QaVtxVtxId"," vertex,2ndary: Vertex ID ",10,0.,10.);
+  m_v_x     = QAH1F("QaVtxX",    " vertex,2ndary: x ",50,-250.,250.);
+  m_v_y     = QAH1F("QaVtxY",    " vertex,2ndary: y ",50,-250.,250.);
+  m_v_z     = QAH1F("QaVtxZ",    " vertex,2ndary: z ",50,-250.,250.);
+  m_v_pchi2 = QAH1F("QaVtxChisq"," vertex,2ndary: chisq/dof ",50,0.,50.);
   
   m_pv_detid = QAH1F("QaVtxPrDetId"," vertex,prim: Detector ID ",40,0.,40.);
   m_pv_vtxid = QAH1F("QaVtxPrVtxId"," vertex,prim: Vertex ID ",10,0.,10.);
-  m_pv_x     = QAH1F("QaVtxPrX"," vertex,prim: x ",50,-5.,5.);
-  m_pv_y     = QAH1F("QaVtxPrY"," vertex,prim: y ",50,-5.,5.);
-  m_pv_z     = QAH1F("QaVtxPrZ"," vertex,prim: z ",50,-50.,50.);
+  m_pv_x     = QAH1F("QaVtxPrX",    " vertex,prim: x ",50,-5.,5.);
+  m_pv_y     = QAH1F("QaVtxPrY",    " vertex,prim: y ",50,-5.,5.);
+  m_pv_z     = QAH1F("QaVtxPrZ",    " vertex,prim: z ",50,-50.,50.);
   m_pv_pchi2 = QAH1F("QaVtxPrChisq"," vertex,prim: chisq/dof ",40,0.,20.);
   
 }
