@@ -22,7 +22,7 @@ my $debugOn=0;
 
 my $DISK1 = "/star/rcf/disk00001/star";
 my $DISK2 =  "/star/rcf/data09/reco";
-my $DISK3 = "/star/rcf";
+my $DISK3 = "/star/rcf/data10/reco";
 
 my $prodSr = "P00hf";
 my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
@@ -33,18 +33,21 @@ my @SetD = (
              "P00hf/2000/06",
              "P00hf/2000/07",
              "P00hf/2000/08", 
+#             "P00hf/2000/09", 
 );
 
 my @SetS = (
              "daq/2000/06",
              "daq/2000/07",
              "daq/2000/08",
+#             "daq/2000/09", 
 );
 
 my @DirD = (
             "2000/06",
             "2000/07",
             "2000/08",
+#            "2000/09",
 );
 
 my $recoDir = ("daq");
@@ -185,7 +188,7 @@ my $ndbOnFiles = 0;
    $hpssDstDirs[$ll] = $topHpssReco . "/" . $SetD[$ll];
    print "hpssDstDir:", $hpssDstDirs[$ll], "\n";
  }
-
+ 
  print "\nFinding daq DST files in HPSS\n";
  my $ftpRDaq = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>100)
    or die "HPSS access failed";
@@ -200,7 +203,7 @@ my $maccess;
 my $mdowner; 
 my $flname;
 my $nDiskFiles = 0;
- 
+my $kk = 0; 
 
 #####  find daq reco files on disk
 
@@ -208,13 +211,18 @@ my $nDiskFiles = 0;
  $nDiskFiles = 0;
  print "\nFinding daq reco files in disk\n";
 
+
  for( $ll = 0; $ll<scalar(@SetD); $ll++) {
    $diskDstDirs[$ll] = $DISK2 . "/" . $SetD[$ll];
+   $kk++;
    print "diskDstDir: $diskDstDirs[$ll]\n";
     
  }
- 
+   $diskDstDirs[$ll] = $DISK3 . "/" . $SetD[2];
+    print "diskDstDir: $diskDstDirs[$ll]\n";  
+
  foreach $diskDir (@diskDstDirs) {
+             if (-d $diskDir) {
     opendir(DIR, $diskDir) or die "can't open $diskDir\n";
    while( defined($flname = readdir(DIR)) ) {
       next if $flname =~ /^\.\.?$/;
@@ -255,7 +263,7 @@ my $nDiskFiles = 0;
   }
  closedir DIR;
  }
-
+}
  print "Total daq reco files: $nDiskFiles\n";
 
 ##### connect to the DB
