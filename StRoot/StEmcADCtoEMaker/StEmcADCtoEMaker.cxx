@@ -1,9 +1,9 @@
 //*-- Author : Alexandre Suaide
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.15 2001/10/26 16:15:11 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.16 2001/10/29 19:36:46 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
-// Revision 1.15  2001/10/26 16:15:11  suaide
-// small fix
+// Revision 1.16  2001/10/29 19:36:46  suaide
+// status DB is now working
 //
 // Revision 1.11  2001/10/24 23:06:54  suaide
 // log messages included for easier debug
@@ -103,11 +103,11 @@ Int_t StEmcADCtoEMaker::Make()
   cout <<"\n\n\nStEmcADCtoEMaker::Make()******************************************************************\n";
       
   m_StatusDb=NULL;
-  //if(isDaqFile)
-  //{
-  //  m_StatusDb=GetInputDB("Calibrations/emc/status");
-  //  if(!m_StatusDb) gMessMgr->Warning("StEmcADCtoEMaker::Make() - Can not get new status tables.... will use default ");
-  //} 
+  if(isDaqFile)
+  {
+    m_StatusDb=GetInputDB("Calibrations/emc/status");
+    if(!m_StatusDb) gMessMgr->Warning("StEmcADCtoEMaker::Make() - Can not get new status tables.... will use default ");
+  } 
   
   if(!GetEmcEvent())
   {
@@ -168,6 +168,9 @@ void StEmcADCtoEMaker::GetStatus(Int_t det)
   Int_t nchannels=0,total=0;
   
   for(Int_t i=1;i<=18000;i++) status[i-1]=0;
+  Int_t d = GetDate();
+  Int_t t = GetTime();
+  cout <<"date = "<<d<<"  time = "<<t<<endl;
   
   if(det<2) // bemc and bprs
   {
@@ -176,11 +179,12 @@ void StEmcADCtoEMaker::GetStatus(Int_t det)
     if(m_StatusDb) run = (St_emcRunning*)m_StatusDb->Find(TableName.Data());
     if(run)
     {
-      cout <<"Got table from DataBase\n";
+      cout <<"Got status table from DataBase\n";
       emcRunning_st* runst=run->GetTable(); 
       for(Int_t i=1;i<=4800;i++) 
       {
         status[i-1]=(Int_t) runst[0].IsRunning[i-1];
+        //cout <<" i = "<<i<<"  status = "<<status[i-1]<<"  "<<(char)(runst[0].IsRunning[i-1]+65)<<endl;
         if(status[i-1]==1) nchannels++;
       }
     } 
@@ -188,10 +192,7 @@ void StEmcADCtoEMaker::GetStatus(Int_t det)
     {
       if(det==0)
       {
-        Int_t d = GetDate();
-        Int_t t = GetTime();
-        cout <<"Using bemc default status table for "
-             <<"date = "<<d<<"  time = "<<t<<endl;
+        cout <<"Using bemc default status table\n ";
         for(Int_t i=1;i<=4800;i++)
         {
           status[i-1]=0;
@@ -470,7 +471,7 @@ Bool_t StEmcADCtoEMaker::Calibrate(Int_t detnum,Int_t* NHITS,Float_t* ENERGY)
           nhits++;
           totalenergy+=energy;
         }
-        //cout <<"hit "<<k<<"  m = "<<m<<"  e = "<<e<<"  s = "<<s<<"  adc = "<<adc<<"  en = "<<energy<<endl;
+        //if (adc>0)cout <<"hit "<<k<<"  m = "<<m<<"  e = "<<e<<"  s = "<<s<<"  adc = "<<adc<<"  en = "<<energy<<endl;
       }
     }
   }
