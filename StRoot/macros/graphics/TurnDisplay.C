@@ -1,13 +1,14 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   02/12/99
-// $Id: TurnDisplay.C,v 1.3 1999/12/06 04:46:56 fine Exp $
+// $Id: TurnDisplay.C,v 1.4 1999/12/19 00:12:34 fine Exp $
   StEventDisplayMaker *dsMaker = 0;
   StVirtualEventFilter *trackFilter;
 //___________________________________________________________________
-void TurnDisplay(const Char_t *filterName="StTrackFilter") {
+void TurnDisplay(const Char_t *filterName=0) {
+  //
   // TurnDisplay.C macro:
   //
   //  - Load StEventDisplayMaker
-  //  - Load user-defined filert class if provided
+  //  - Load user-defined filter class if provided
   //  - defines the tables one wants to be drawn
 
     if (!chain->GetOption("DISPLAY")) {
@@ -27,12 +28,15 @@ void TurnDisplay(const Char_t *filterName="StTrackFilter") {
              dsMaker->SetFilter(trackFilter,StEventDisplayMaker::kTable);    
              dsMaker->SetFilter(trackFilter,StEventDisplayMaker::kTptTrack); 
            } 
-           else 
+           else {
              cout << " *** ERROR ***: There is no class filter <" << filterName << ">. The defualt one will be used instead" << endl;           
+             dsMaker->SetTableFlag();
+           }
        }
+       else dsMaker->SetTableFlag();
 
-       // define "Event" geometry (the objects to be drawn out)
-       //  This is under construction !!!!
+        // define "Event" geometry (the objects to be drawn out)
+        //  This is under construction !!!!
      //___________________________________________________________________
      //
      //                  User defined area follow:
@@ -53,6 +57,17 @@ void TurnDisplay(const Char_t *filterName="StTrackFilter") {
        dsMaker->AddName("g2t_svt_hit(track_p,x[0]:x[1]:x[2])");   //Add the tables to the Event Display list
        dsMaker->AddName("tphit(id_globtrk,x:y:z)");               //Add the tables to the Event Display list
 
+       // extra table to check packed options
+       // http://www.star.bnl.gov/STAR/html/comp_l/root/html/egr_globtrk_st.html
+
+       // dsMaker->AddName("egr_globtrk(id,position[0]:position[1]:charge)");    //Add the tables to the Event Display list
+
+       // "Packed" tables:
+       //      contain 1 columns with 2 long numbers associated with packed x,y,z and 
+       //      foreing key to link all points together
+       //      http://www.star.bnl.gov/STAR/html/comp_l/root/html/dst_point_st.html
+       // dsMaker->AddName("dst/point(id_track,position[0]:position[1]:charge)");       //Add the tables to the Event Display list
+
        // "Irregular" tables: has no column associated directly with (x,y,z) coordinates
 
        dsMaker->AddName("tptrack");                // the table has no column with (x,y,z) coordinates,
@@ -62,11 +77,14 @@ void TurnDisplay(const Char_t *filterName="StTrackFilter") {
      //               End of the user defined area follow:
      //___________________________________________________________________
        if (trackFilter) trackFilter->TurnOn(); 
-       dsMaker->SetDebug();
+       dsMaker->SetDebug();     
     }
   }
 //__________________________________________________________________________
 // $Log: TurnDisplay.C,v $
+// Revision 1.4  1999/12/19 00:12:34  fine
+// some corrections for the packed tables
+//
 // Revision 1.3  1999/12/06 04:46:56  fine
 // Bug fixes
 //
