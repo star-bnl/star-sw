@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.65 2004/10/31 23:43:21 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.66 2004/11/15 18:20:25 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -611,7 +611,7 @@ void StMuDstMaker::read(){
     DEBUGVALUE3(bytes);
   }
   if (GetDebug()>1) printArrays();
-
+  mStMuDst->set(this);
   fillHddr();
   return;
 }
@@ -1204,6 +1204,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.66  2004/11/15 18:20:25  mvl
+ * Added call to StMuDst::set() for V0-event-pointers in read()
+ *
  * Revision 1.65  2004/10/31 23:43:21  mvl
  * Removed some warnings for files without EMC, PMD info.
  * Prevent filling of empty event when no stevent pointer.
