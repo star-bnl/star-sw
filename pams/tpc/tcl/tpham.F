@@ -468,7 +468,7 @@ c  this should be understood and fixed, but for now....
      +             * tclpar(1).dxy_fact
               tphit(tphith.nok).dy = tphit(tphith.nok).dy 
      +             * tclpar(1).dxy_fact
-              tphit(tphith.nok).dx = tphit(tphith.nok).dz 
+              tphit(tphith.nok).dz = tphit(tphith.nok).dz 
      +             * tclpar(1).dz_fact
               
 c     here, at the very end, I make up for the sins of Bob Hackenburg, who
