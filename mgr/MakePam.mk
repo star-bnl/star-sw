@@ -144,9 +144,9 @@ ifneq (,$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF)))
 endif                          
 ifneq (,$(strip $(FILES_O)))
 ifdef NODEBUG
-LIB_PKG := $(LIB_DIR)/lib$(PKG).a
+LIB_PKG := $(LIB_DIR)/lib$(DOMAIN).a
 else
-LIB_PKG := $(LIB_DIR)/lib$(PKG).a
+LIB_PKG := $(LIB_DIR)/lib$(DOMAIN).a
 endif
 qwe     := $(shell test ! -f $(LIB_PKG) ||  $(AR) $(ARFLAGS) $(LIB_PKG))
 OBJS    := $(LIB_PKG)($(NAMES_O))
