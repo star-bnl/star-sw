@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.11 1999/09/13 23:28:33 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.12 1999/09/29 20:29:06 wdeng Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.12  1999/09/29 20:29:06  wdeng
+// Accommodate dst_track and dst_vertex change
+//
 // Revision 1.11  1999/09/13 23:28:33  caines
 // Changed egrpars so doesn't use SVT only tracks by default
 //
@@ -40,6 +43,8 @@
 #include <assert.h>
 #include "TMath.h"
 #include "StPrimaryMaker.h"
+
+#include "StVertexId.h"
 
 #include "StChain.h"
 #include "St_DataSet.h"
@@ -226,18 +231,21 @@ Int_t StPrimaryMaker::Make(){
   dst_track_st *glob  = globtrk->GetTable();
   dst_track_st *glob2 = globtrk2->GetTable();
   dst_vertex_st *vrtx = vertex->GetTable();
-  if( vrtx->vtx_id != 1 || vrtx->iflag != 1){
+  if( vrtx->vtx_id != kEventVtxId || vrtx->iflag != 1){
     for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,vrtx++){
-      if( vrtx->vtx_id == 1 && vrtx->iflag == 1 ) break;
+      if( vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1 ) break;
     }
   }
-  if (vrtx->vtx_id == 1 && vrtx->iflag == 1) {
+  if (vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1) {
     
     Float_t *v0 = &vrtx->x;
     for( Int_t no_rows=0; no_rows<globtrk2->GetNRows() &&
                           no_rows<globtrk->GetNRows(); no_rows++, glob++,glob2++)
       {
-	double qwe = pow(glob2->x0-v0[0],2)+pow(glob2->y0-v0[1],2)+pow(glob2->z0-v0[2],2);
+	Float_t xStart = glob2->r0 * cos(glob2->phi0);
+	Float_t yStart = glob2->r0 * sin(glob2->phi0);
+	Float_t zStart = glob2->z0;
+	double qwe = pow(xStart-v0[0],2)+pow(yStart-v0[1],2)+pow(zStart-v0[2],2);
 	
 	glob->impact = TMath::Sqrt(qwe);
       }
