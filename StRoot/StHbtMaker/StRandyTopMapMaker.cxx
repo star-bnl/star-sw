@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRandyTopMapMaker.cxx,v 1.4 2000/04/03 23:18:36 rcwells Exp $
+ * $Id: StRandyTopMapMaker.cxx,v 1.5 2000/05/02 22:13:24 laue Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRandyTopMapMaker.cxx,v $
+ * Revision 1.5  2000/05/02 22:13:24  laue
+ * Memory leak fixed
+ *
  * Revision 1.4  2000/04/03 23:18:36  rcwells
  * Improved speed in RandyTopMapMaker
  *
@@ -38,16 +41,17 @@
 #include "StTrackGeometry.h"
 #include "StTrackTopologyMap.h"
 
-static const char rcsid[] = "$Id: StRandyTopMapMaker.cxx,v 1.4 2000/04/03 23:18:36 rcwells Exp $";
+static const char rcsid[] = "$Id: StRandyTopMapMaker.cxx,v 1.5 2000/05/02 22:13:24 laue Exp $";
 
 ClassImp(StRandyTopMapMaker)
 
 StRandyTopMapMaker::StRandyTopMapMaker(const Char_t *name) : StMaker(name)
 {
-    drawinit = kFALSE;
+//    drawinit = kFALSE;
 }
 
-StRandyTopMapMaker::~StRandyTopMapMaker() { /* noop */ }
+StRandyTopMapMaker::~StRandyTopMapMaker() { 
+}
 
 Int_t
 StRandyTopMapMaker::Init()
@@ -86,7 +90,7 @@ StRandyTopMapMaker::Make()
     unsigned long mask2 = 0x80000000;
     unsigned long temp1;
     int pad, ipad;
-    bool padRow[46];
+    bool  padRow[46];    
     unsigned long map1, map2;
     StPtrVecHit myHitVector;
     StPtrVecHitIterator myHitIterator;
@@ -131,9 +135,10 @@ StRandyTopMapMaker::Make()
 	}
       }
       //      if ( turnAround ) map2 |= 1UL<<(30);
-      StTrackTopologyMap newMap( map1,map2 );
-      rTrack->setTopologyMap( newMap );
+      StTrackTopologyMap aNewMap( map1,map2 );
+      rTrack->setTopologyMap( aNewMap );
     }
     
+    myHitVector.clear();
     return kStOK;
 }
