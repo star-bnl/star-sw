@@ -797,38 +797,27 @@ CCC      CALL TPCSCA(R,RL,PR(1),P(1),X,CMS(1))
 *--
       CALL VZERO(C(1),15)
 *--
-CCC      IF(X.LE.0.0)RETURN
 
       COSL = SQRT(1./(1.+P(3)**2))
 
       BETM2 = 1. + (PMASS * P(5)/COSL)**2
-CCC      rad = 1.0/abs(CONSB*p(5))
+
       dpsi = p(4)-pl(4)
 
-C -- check for rotation direction
-CCC      if(p(5)*CONSB.lt.0)then
-CCC        if(dpsi.lt.0)then
-CCC          dpsi = (C_2PI+dpsi)
-CCC        endif
-CCC      else
-CCC        if(dpsi.gt.0)then
-CCC           dpsi = -(C_2PI-dpsi)
-CCC        endif
-CCC      endif
-C -- put dpsi in 0-2pi range
-CCC      dpsi = amod(dpsi,real(C_2PI))
-CCC      pathl = abs(dpsi*rad/cosl)
       DXSQ = (R*cos(p(1)/R)-RL*cos(pl(1)/RL))**2
       DYSQ = (R*sin(p(1)/R)-RL*sin(pl(1)/RL))**2
       DZSQ = (p(2)-pl(2))**2
 
 *-- fraction of radiation length for P10
       XLTRUE = SQRT(DXSQ+DYSQ+DZSQ)/11600.
+
 *-- put in the material for inner field cage
       if((rl.gt.50.0).and.(r.lt.50.0))XLTRUE = XLTRUE + 0.006/COSL
-CCC      if((rl.gt.50.0).and.(r.lt.50.0))XLTRUE = XLTRUE + 0.006
-CCC      XLTRUE = pathl/11600.
-
+*-- put in the material for beam pipe
+      if((rl.gt.4.0).and.(r.lt.4.0))then
+        if(abs(p(2)).lt.76.0)XLTRUE = XLTRUE + 0.003/COSL ! Beryllium
+        if(abs(p(2)).ge.76.0)XLTRUE = XLTRUE + 0.0739/COSL ! Iron
+      endif
       IF (XLTRUE.GT.1E-8) THEN
          CORR = 1. + 0.11111111 * ALOG10(XLTRUE)
       ELSE
@@ -840,14 +829,9 @@ CCC      XLTRUE = pathl/11600.
       C(1)  = 0.3333*(R-RL)**2*thplsq ! r*phi term 
 
       C(6)  = 0.3333*(DXSQ+DYSQ)*thplsq ! z term
-CCC      C(10) = thplsq ! atan(tanl) term
-CCC      C(10) = thplsq/cosl**2 ! tanl term
       C(10) = thplsq/cosl**4 ! tanl term
       C(13) = thplsq ! psi term
 *-- track radius
-CCC      tanl = tan(C_PI_2-p(3))
-CCC      tanl = p(3)
-CCC      cosl = sqrt(1./(1.+tanl**2))
       
       drorsq = 0.3333*thplsq*dpsi**2 
       C(15) = drorsq*p(5)**2 ! q/pt term
