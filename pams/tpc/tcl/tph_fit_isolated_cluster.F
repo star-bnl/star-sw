@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.5 1998/08/25 16:50:00 sakrejda Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.6 1998/08/26 20:34:21 hardtke Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.6  1998/08/26 20:34:21  hardtke
+* set clusters of 0 width to 1/sqrt(12)
+*
 * Revision 1.5  1998/08/25 16:50:00  sakrejda
 * z_vector protexted agains overflows
 *
@@ -93,6 +96,10 @@ C       * Around Xmas I messed up the conversion of the z fit to work
 C         with a real z value for each pixel somewhat - try to fix it 
 C         today.
 C
+C   26-Aug-1998 --- D. Hardtke
+C       * For zero width clusters, set prf (zrf) to 1/sqrt(12) times intrinsic
+C         width.  Of course, these really shouldn't exist!
+C
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
@@ -178,6 +185,8 @@ c
         real rvec(nbuck_max)          ! temp array
         real slope                    ! Slope of linear fit
         real tdc_x_adc(npads_max)     ! Sum of tdc*adc of cluster
+        real bucket_length_in         ! length (cm) of inner sector time bucket
+        real bucket_length_out        ! length (cm) of outer sector time bucket
 c
         logical first                 ! .T. iff first call
         logical lookat_mc             ! Look at Monte Carlo info.
@@ -200,6 +209,8 @@ C-----------------------------------------------------------------------
         save imc_track
         save lookat_mc
         save nocc_track
+        save bucket_length_in
+        save bucket_length_out
 C-----------------------------------------------------------------------
 
 c set up the identity vector for x (pad) calculation
@@ -209,6 +220,15 @@ c set up the identity vector for x (pad) calculation
               identity_vector(indx) = float(indx)
            enddo
            lookat_mc = (tclpar(1).mc.eq.1)
+c get difference in z-positions for two randomly selected pixels:
+           iret=tgc_time_to_z(50,50,5,5,zdummy) 
+           if(iret.eq.1)bucket_length_in = zdummy
+           iret=tgc_time_to_z(51,50,5,5,zdummy) 
+           if(iret.eq.1)bucket_length_in = zdummy - bucket_length_in
+           iret=tgc_time_to_z(50,50,35,5,zdummy) 
+           if(iret.eq.1)bucket_length_out = zdummy
+           iret=tgc_time_to_z(51,50,35,5,zdummy) 
+           if(iret.eq.1)bucket_length_out = zdummy - bucket_length_out
         endif
 
 c loop over all pixels, in the process:
@@ -313,7 +333,11 @@ cmal     +       call tph_weighted_mean(identity_vector, rvec,
      +       centroid, sigma, uncertainty)
         x(1) = centroid
         dx(1) = uncertainty
-        prf(1) = sigma
+        if (sigma.gt.0.) then
+         prf(1) = sigma
+        else
+         prf(1) = 1/sqrt(12.)
+        endif
 
 c z,dz,zrf: - do weighted mean
 c  for uncertainties, see notebook2 p113
@@ -333,7 +357,13 @@ c
 c
         z(1) = centroid
         dz(1) = uncertainty
-        zrf(1) = sigma
+        if (sigma.gt.0.) then
+         zrf(1) = sigma
+        else if (irow.gt.13) then
+         zrf(1) = bucket_length_out/sqrt(12.)
+        else 
+         zrf(1) = bucket_length_in/sqrt(12.)
+        endif
 
 c orientation phi:
 c ??? If pad_proj *is* 0, rvec is peculiar...but I left existing *logic*

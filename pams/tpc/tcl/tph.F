@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.4 1998/07/12 21:21:03 sakrejda Exp $
+* $Id: tph.F,v 1.5 1998/08/26 20:34:20 hardtke Exp $
 * $Log: tph.F,v $
+* Revision 1.5  1998/08/26 20:34:20  hardtke
+* set clusters of 0 width to 1/sqrt(12)
+*
 * Revision 1.4  1998/07/12 21:21:03  sakrejda
 * protection against unphysical time buckets
 *
@@ -483,7 +486,7 @@ c
 c     while we have these numbers, fill the lambda field of tphit,
 c     with the ansatz that the track comes from (0,0,0)
               tphit(tphit_h.nok).lambda = 
-     +             - abs(atand(tphit(tphit_h.nok).z/rad)) ! lambda < 0 always
+     +             abs(atand(tphit(tphit_h.nok).z/rad)) ! lambda > 0 always
               
 c     and I can calcualte alpha as well -- see notebook 2, pp 25-32 for
 c     explanation...
