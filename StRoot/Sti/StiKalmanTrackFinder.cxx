@@ -51,7 +51,8 @@ ostream& operator<<(ostream&, const StiTrack&);
 StiKalmanTrackFinder::StiKalmanTrackFinder()
     : StiTrackFinder(), mCurrentTrack(0), mCurrentNode(0)
 {
-    if (StiDebug::isReq(StiDebug::Flow)) cout <<"StiKalmanTrackFinder::StiKalmanTrackFinder()"<<endl; 
+    if (StiDebug::isReq(StiDebug::Flow))
+	cout <<"StiKalmanTrackFinder::StiKalmanTrackFinder()"<<endl; 
     StiTrack::setTrackFitter(new StiKalmanTrackFitter());
     reset();
     StiDebug::debug=0;

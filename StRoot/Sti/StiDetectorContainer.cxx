@@ -92,7 +92,6 @@ void StiDetectorContainer::setToDetector(double radius, double angle)
   found that is equal to <b>layer</b>, then an error message is streamed to
   the screen and reset() is called.
 */
-
 void StiDetectorContainer::setToDetector(StiDetector* layer)
 {
     SameData<data_t> mySameData;
@@ -107,7 +106,7 @@ void StiDetectorContainer::setToDetector(StiDetector* layer)
 	//cout <<"layer not found in leaves.  Seg-fault"<<endl;
 	//cout <<"\tlayer:\t"<<(*layer)<<"\n"<<endl;
 	cout <<"\t\t!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"<<endl;
-	StiDetector* dummy=0;
+	//StiDetector* dummy=0;
 	//dummy->isOn(); //This ought to cause a seg-fault!
 	
 	reset();
@@ -292,9 +291,9 @@ void StiDetectorContainer::print() const
     cout <<"\nStiDetectorContainer::print()  Det"<<endl;
     cout <<"--- Leaves ----"<<endl;
 
-    //StreamNodeData<data_node> myStreamer;
-    //for_each(mLeafIt->const_begin(), mLeafIt->const_end(),
-    //myStreamer);
+    StreamNodeData<StiDetector> myStreamer;
+    for_each(mLeafIt->const_begin(), mLeafIt->const_end(),
+	     myStreamer);
 }
 
 //We assume that the node is a leaf in phi

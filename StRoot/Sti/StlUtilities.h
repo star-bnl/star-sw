@@ -24,7 +24,7 @@ struct StreamNodeData
 {
     void operator()(const StiCompositeTreeNode<T>* node) {
 	T* data = node->getData();
-	cout <<node->getName()<<endl;
+	//cout <<node->getName()<<endl;
 	if (data) {cout <<" "<<(*data)<<endl;}
     }
 };
