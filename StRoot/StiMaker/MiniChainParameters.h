@@ -18,6 +18,7 @@ class MiniChainParameters : public TObject
   bool useTpc;
   bool useFtpc;
 
+  bool useMcAsRec;
   bool useGui;
   bool doSimulation;
   bool doAssociation;

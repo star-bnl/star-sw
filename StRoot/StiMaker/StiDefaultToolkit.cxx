@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.8 2003/02/11 10:38:18 andrewar Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.9 2003/03/31 17:19:26 pruneau Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.9  2003/03/31 17:19:26  pruneau
+ * various
+ *
  * Revision 2.8  2003/02/11 10:38:18  andrewar
  * Changed limits for StiHitFactory:: maxIncrements (from 5 to 10).
  *
@@ -90,6 +93,7 @@ StiDefaultToolkit::StiDefaultToolkit()
   _trackNodeFactory(0),
   _detectorContainer(0),
   _hitContainer(0),
+  _mcHitContainer(0),
   _trackContainer(0),
   _mcTrackContainer(0),
   _detectorFinder(0),
@@ -102,10 +106,10 @@ StiDefaultToolkit::StiDefaultToolkit()
   _hitLoader(0),
   _associationMaker(0)
 {
-  cout<<"StiDefaultToolkit::StiDefaultToolkit() - INFO - Started"<<endl;
+  cout<<"StiDefaultToolkit::StiDefaultToolkit() -I- Started"<<endl;
   Messenger::init(0);
   //Messenger::setRoutingMask(0);
-  cout<<"StiDefaultToolkit::StiDefaultToolkit() - INFO - Done"<<endl;
+  cout<<"StiDefaultToolkit::StiDefaultToolkit() -I- Done"<<endl;
 };
 
 StiDefaultToolkit::~StiDefaultToolkit()
@@ -113,6 +117,7 @@ StiDefaultToolkit::~StiDefaultToolkit()
   delete _trackFilterFactory;
   delete _hitFactory;
   delete _hitContainer;
+  delete _mcHitContainer;
   delete _detectorFactory;
   delete _detectorContainer;
   StiDetectorFinder::kill(); 
@@ -133,7 +138,7 @@ Factory< Filter<StiTrack>   >  * StiDefaultToolkit::getTrackFilterFactory()
 {
   if (_trackFilterFactory)
     return _trackFilterFactory;
-  cout << "StiDefaultToolkit::getTrackFilterFactory() - INFO - Instantiating StiTrackFilterFactory" << endl;
+  cout << "StiDefaultToolkit::getTrackFilterFactory() -I- Instantiating StiTrackFilterFactory" << endl;
   _trackFilterFactory = new VectorizedFactory<StiDefaultTrackFilter, 
     Filter<StiTrack>  >("StiDefaultTrackFilterFactory",3,5,2);
   return _trackFilterFactory;
@@ -162,7 +167,7 @@ Factory<StiKalmanTrack>* StiDefaultToolkit::getTrackFactory()
 {
   if (_trackFactory)
     return _trackFactory;
-  cout << "StiDefaultToolkit::getTrackFactory() - INFO - "; 
+  cout << "StiDefaultToolkit::getTrackFactory() -I- "; 
   if (_guiEnabled)
     {
       if (_evaluatorEnabled)
@@ -184,7 +189,7 @@ Factory<StiMcTrack>* StiDefaultToolkit::getMcTrackFactory()
 {
   if (_mcTrackFactory)
     return _mcTrackFactory;
-  cout << "StiDefaultToolkit::getMcTrackFactory() - INFO - "; 
+  cout << "StiDefaultToolkit::getMcTrackFactory() -I- "; 
   if (_guiEnabled)
       _mcTrackFactory = new VectorizedFactory<StiRootDrawableMcTrack,StiMcTrack>("StiRootDrawableMcTrackFactory",10000,5000,10);
   else // no gui needed
@@ -196,7 +201,7 @@ Factory<StiDetector>* StiDefaultToolkit::getDetectorFactory()
 {
   if (_detectorFactory)
     return _detectorFactory;
-  cout << "StiDefaultToolkit::getDetectorFactory() - INFO - Instantiating Detector Factory"; 
+  cout << "StiDefaultToolkit::getDetectorFactory() -I- Instantiating Detector Factory"; 
   if (_guiEnabled)
     _detectorFactory = new VectorizedFactory<StiRootDrawableDetector,StiDetector>("StiRDDetectorFactory",2000,500,10);
   else
@@ -224,30 +229,30 @@ Factory<StiKalmanTrackNode>* StiDefaultToolkit::getTrackNodeFactory()
 }
 
 
-void StiDefaultToolkit::add(StiDetectorGroup<StEvent>* detectorGroup)
+void StiDefaultToolkit::add(StiDetectorGroup<StEvent,StMcEvent>* detectorGroup)
 {
   //_detectorGroups.push_back(detectorGroup);
-  StiMasterHitLoader<StEvent,StiDetectorBuilder> * masterLoader;
-  masterLoader = static_cast<StiMasterHitLoader<StEvent,StiDetectorBuilder> *>(getHitLoader());
-  StiHitLoader<StEvent,StiDetectorBuilder> * loader = detectorGroup->getHitLoader();
+  StiMasterHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * masterLoader;
+  masterLoader = static_cast<StiMasterHitLoader<StEvent,StMcEvent,StiDetectorBuilder> *>(getHitLoader());
+  StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * loader = detectorGroup->getHitLoader();
   if (loader)
     {
-      cout << "StiDefaultToolkit::add() - INFO - Adding hit loader for detector group:"
+      cout << "StiDefaultToolkit::add() -I- Adding hit loader for detector group:"
 	   << detectorGroup->getName()<<endl;
       masterLoader->addLoader(loader);
     }
   else
-    cout << "StiDefaultToolkit::add() - INFO - Not adding hit loader for detector group:"<< detectorGroup->getName()<<endl;
+    cout << "StiDefaultToolkit::add() -I- Not adding hit loader for detector group:"<< detectorGroup->getName()<<endl;
 
   StiMasterDetectorBuilder * masterBuilder = getDetectorBuilder();
   StiDetectorBuilder * builder = detectorGroup->getDetectorBuilder();
   if (builder)
     {
-      cout << "StiDefaultToolkit::add() - INFO - Adding builder for detector group:"<< detectorGroup->getName()<<endl;
+      cout << "StiDefaultToolkit::add() -I- Adding builder for detector group:"<< detectorGroup->getName()<<endl;
       masterBuilder->addBuilder(builder);
     }
   else
-    cout << "StiDefaultToolkit::add() - INFO - Not adding builder for detector group:"<< detectorGroup->getName()<<endl;
+    cout << "StiDefaultToolkit::add() -I- Not adding builder for detector group:"<< detectorGroup->getName()<<endl;
 }
 
 StiMasterDetectorBuilder * StiDefaultToolkit::getDetectorBuilder()
@@ -272,7 +277,7 @@ StiHitContainer       * StiDefaultToolkit::getHitContainer()
 {
   if (_hitContainer)
     return _hitContainer;
-  cout << "StiDefaultToolkit::getHitContainer() - INFO - "; 
+  cout << "StiDefaultToolkit::getHitContainer() -I- "; 
   if (_guiEnabled)
     {
       _hitContainer = new StiRootDrawableHitContainer();
@@ -281,27 +286,47 @@ StiHitContainer       * StiDefaultToolkit::getHitContainer()
   else 
     {
       _hitContainer = new StiHitContainer();			
-      cout << "instantiating StiRootDrawableHitContainer" << endl;
+      cout << "instantiating StiHitContainer" << endl;
     }
   return _hitContainer;
 }
 
+
+StiHitContainer       * StiDefaultToolkit::getMcHitContainer()
+{
+  if (_mcHitContainer)
+    return _mcHitContainer;
+  cout << "StiDefaultToolkit::getMcHitContainer() -I- "; 
+  if (_guiEnabled)
+    {
+      _mcHitContainer = new StiRootDrawableHitContainer();
+      cout << "instantiating StiRootDrawableHitContainer" << endl;
+    }
+  else 
+    {
+      _mcHitContainer = new StiHitContainer();			
+      cout << "instantiating StiHitContainer" << endl;
+    }
+  return _mcHitContainer;
+}
+
+
 StiTrackContainer     * StiDefaultToolkit::getTrackContainer()
 {	
-  cout << "StiDefaultToolkit::getTrackContainer() - INFO - Starting" << endl;
+  cout << "StiDefaultToolkit::getTrackContainer() -I- Starting" << endl;
   if (_trackContainer)
     return _trackContainer;
-  cout << "StiDefaultToolkit::getTrackContainer() - INFO - Instantiating Container" << endl;
+  cout << "StiDefaultToolkit::getTrackContainer() -I- Instantiating Container" << endl;
   _trackContainer = new StiTrackContainer();
   return _trackContainer;
 }
 
 StiTrackContainer     * StiDefaultToolkit::getMcTrackContainer()
 {	
-  cout << "StiDefaultToolkit::getMcTrackContainer() - INFO - Starting" << endl;
+  cout << "StiDefaultToolkit::getMcTrackContainer() -I- Starting" << endl;
   if (_mcTrackContainer)
     return _mcTrackContainer;
-  cout << "StiDefaultToolkit::getMcTrackContainer() - INFO - Instantiating Container" << endl;
+  cout << "StiDefaultToolkit::getMcTrackContainer() -I- Instantiating Container" << endl;
   _mcTrackContainer = new StiTrackContainer();
   return _mcTrackContainer;
 }
@@ -319,7 +344,7 @@ StiTrackSeedFinder   * StiDefaultToolkit::getTrackSeedFinder()
 {
   if (_trackSeedFinder)
     return _trackSeedFinder;
-  cout << "StiDefaultToolkit::getTrackSeedFinder() - INFO - "; 
+  cout << "StiDefaultToolkit::getTrackSeedFinder() -I- "; 
   if (_evaluatorEnabled)
     {
       cout << "instantiating StiEvaluableTrackSeedFinder" << endl;
@@ -402,14 +427,15 @@ StiDisplayManager    * StiDefaultToolkit::getDisplayManager()
   return StiRootDisplayManager::instance();
 }
 
-StiHitLoader<StEvent,StiDetectorBuilder>    * StiDefaultToolkit::getHitLoader()
+StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>    * StiDefaultToolkit::getHitLoader()
 {
   if (_hitLoader)
     return _hitLoader;
-  _hitLoader = new StiMasterHitLoader<StEvent,StiDetectorBuilder>("StarHitLoader",
-								 getHitContainer(),
-								 getHitFactory(),
-								 0);
+  _hitLoader = new StiMasterHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("StarHitLoader",
+									    getHitContainer(),
+									    getMcHitContainer(),
+									    getHitFactory(),
+									    0);
   return _hitLoader;
 }
 

@@ -8,7 +8,7 @@
 using std::string;
 
 class StiDetector;
-class StHit;
+//class StHit;
 class StiHit;
 class StTpcHit;
 class StiTrackNode;
@@ -38,20 +38,22 @@ struct NameMapKey {
     string name;
 };
 
+/*
 //Functors for ordering hits
 struct StHitRadiusLessThan
 {
-    bool operator() (const StHit*, const StHit*) const;
+bool operator() (const StHit*, const StHit*) const;
 };
 
 struct StHitRadiusGreaterThan
 {
-    bool operator() (const StHit*, const StHit*) const;
+   bool operator() (const StHit*, const StHit*) const;
 };
+*/
 
 struct StidHitLessThan
 {
-    bool operator() (const StiHit*, const StiHit*) const;
+  bool operator() (const StiHit*, const StiHit*) const;
 };
 
 struct StizHitLessThan
@@ -70,12 +72,13 @@ struct StiDetectorNodePositionLessThan
     bool operator() (const StiCompositeTreeNode<StiDetector> *, const StiCompositeTreeNode<StiDetector> *) const;
 };
 
+/*
 //StHit utility
 struct SameStHit
 {
-    bool operator() (const StiHit*) const;
-    StHit* stHit;
-};
+bool operator() (const StiHit*) const;
+StHit* stHit;
+};*/
 
 //unary predicate
 class StTpcHitFilter

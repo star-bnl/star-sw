@@ -17,7 +17,8 @@
 #define StiToolkit_H 1
 
 class   StEvent;
-template<class Event>class StiDetectorGroup;
+class   StMcEvent;
+template<class Event, class McEvent>class StiDetectorGroup;
 class   StiDetector;
 class   StiTrack;
 class   StiKalmanTrack;
@@ -29,8 +30,8 @@ class   StiMasterDetectorBuilder;
 template<class Factorized> class Factory;
 template<class Filtered>   class Filter;
 template<class T>          class StiCompositeTreeNode;
-template<class X,class y>  class StiHitLoader;
-template<class X,class y>  class StiMasterHitLoader;
+template<class X,class y, class z>  class StiHitLoader;
+template<class X,class y, class z>  class StiMasterHitLoader;
 
 
 // common object containers
@@ -69,6 +70,7 @@ public:
   virtual StiMasterDetectorBuilder * getDetectorBuilder()=0;
   virtual StiDetectorContainer  * getDetectorContainer()=0;
   virtual StiHitContainer       * getHitContainer()=0;
+  virtual StiHitContainer       * getMcHitContainer()=0;
   virtual StiTrackContainer     * getTrackContainer()=0;
   virtual StiTrackContainer     * getMcTrackContainer()=0;
   
@@ -82,16 +84,16 @@ public:
   virtual StiDisplayManager    * getDisplayManager()=0;
   virtual StAssociationMaker * getAssociationMaker()=0;
   virtual void setAssociationMaker(StAssociationMaker * a)=0;
-  virtual StiHitLoader<StEvent,StiDetectorBuilder> * getHitLoader()=0;
-  virtual void add(StiDetectorGroup<StEvent>* detectorGroup)=0;
-
-	virtual void setGuiEnabled(bool )=0;
-	virtual bool isGuiEnabled() const=0;
-	virtual void setMcEnabled(bool)=0;
-	virtual bool isMcEnabled() const=0;
-	virtual void setEvaluatorEnabled(bool)=0;
-	virtual bool isEvaluatorEnabled() const=0;
-
+  virtual StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * getHitLoader()=0;
+  virtual void add(StiDetectorGroup<StEvent,StMcEvent>* detectorGroup)=0;
+  
+  virtual void setGuiEnabled(bool )=0;
+  virtual bool isGuiEnabled() const=0;
+  virtual void setMcEnabled(bool)=0;
+  virtual bool isMcEnabled() const=0;
+  virtual void setEvaluatorEnabled(bool)=0;
+  virtual bool isEvaluatorEnabled() const=0;
+  
   static void setToolkit(StiToolkit*toolkit);
   static StiToolkit *instance();
   static void kill();

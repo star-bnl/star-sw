@@ -16,40 +16,37 @@ StiRootDrawableHitContainer::StiRootDrawableHitContainer()
     setMarkerSize( 0.3 );
     setColor( 4 );
     setMarkerStyle( 8 );
-		setName("AStiRootDrawableHitContainer"); //must come first in list of drawable!!!
+    setName("AStiRootDrawableHitContainer"); //must come first in list of drawable!!!
     StiRootDisplayManager::instance()->addDrawable(this);
 }
 
 StiRootDrawableHitContainer::~StiRootDrawableHitContainer()
 {
-    cout <<"StiRootDrawableHitContainer::~StiRootDrawableHitContainer()"<<endl;
+  cout <<"StiRootDrawableHitContainer::~StiRootDrawableHitContainer() -I- Done"<<endl;
 }
 
 void StiRootDrawableHitContainer::clear()
 {
-    StiRootDrawableHits::clear();
-    StiHitContainer::clear();
+  StiRootDrawableHits::clear();
+  StiHitContainer::clear();
 }
 
 void StiRootDrawableHitContainer::update()
 {
-    cout <<"StiRootDrawableHitContainer::update()"<<endl;
+    cout <<"StiRootDrawableHitContainer::update() -I- Started"<<endl;
     const hitmap& theMap = hits();
     StiRootDrawableHits::clear();
-    for (hitmap::const_iterator it=theMap.begin(); it!=theMap.end(); ++it) {
-	//const hitvector& tempvec = (*it).second;
+    cout << "StiRootDrawableHitContainer::update() -I- Map Size:" << theMap.size()<<endl;
+    for (hitmap::const_iterator it=theMap.begin(); it!=theMap.end(); ++it) 
+      {
 	const hitvector& tempvec = (*it).second.theHitVec;
 	hitvector::const_iterator end = (*it).second.theEffectiveEnd;
-	for (hitvector::const_iterator vit=tempvec.begin(); vit!=end; ++vit) {
+	for (hitvector::const_iterator vit=tempvec.begin(); vit!=end; ++vit) 
+	  {
 	    const StThreeVectorF& pos = (*vit)->globalPosition();
 	    add(pos.x(),pos.y(),pos.z());
-	    
-	    //StiRootDrawableHits::push_back( StThreeVector<double>(pos.x(), pos.y(), pos.z() ) );
-	    //StiRootDrawableHits::push_back( pos.x() );
-	    //StiRootDrawableHits::push_back( pos.y() );
-	    //StiRootDrawableHits::push_back( pos.z() );
-	    
-	}
-    }
+	  }
+      }
     fillHitsForDrawing();
+    cout <<"StiRootDrawableHitContainer::update() -I- Done"<<endl;
 }

@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <vector>
+#include "Sti/Base/Vectorized.h"
 #include "StiHitLoader.h"
 
 /*! \class StiMasterHitLoader
@@ -23,84 +24,123 @@
   
   \author Claude A Pruneau (Wayne)
  */
-template<class Source,class Detector>
-class StiMasterHitLoader : public StiHitLoader<Source,Detector>
+template<class Source1, class Source2,class Detector>
+class StiMasterHitLoader : public StiHitLoader<Source1, Source2,Detector>,
+                           public Vectorized< StiHitLoader<Source1, Source2,Detector> >
 {
 public:
 
     StiMasterHitLoader();
-    StiMasterHitLoader(const string& name,StiHitContainer* hitContainer,
+    StiMasterHitLoader(const string& name,
+		       StiHitContainer* hitContainer,
+		       StiHitContainer* mcHitContainer,
 		       Factory<StiHit>*hitFactory,
 		       Detector*transform);
     virtual ~StiMasterHitLoader();
-    void addLoader(StiHitLoader<Source,Detector>*loader);
-    void loadHits(Source *source);
+    void addLoader(StiHitLoader<Source1, Source2,Detector>*loader); 
+    void loadEvent(Source1 *source1, Source2 *source2);
     void setHitContainer(StiHitContainer* hitContainer);
+    void setMcHitContainer(StiHitContainer* hitContainer);
     void setHitFactory(Factory<StiHit>*hitFactory);
     virtual void setDetector(Detector*detector);
-    
+    virtual void setUseMcAsRec(bool value);
 protected:
-    typedef vector<StiHitLoader<Source,Detector>*>  HitLoaderVector;
+    typedef StiHitLoader<Source1,Source2,Detector>* HitLoaderKey;
+    typedef vector< HitLoaderKey >  HitLoaderVector;
     typedef HitLoaderVector::iterator HitLoaderIter;
     typedef HitLoaderVector::const_iterator HitLoaderConstIter;
-    Detector       * _transfrom;
-    StiHitContainer * _hitContainer;
-    Factory<StiHit> * _hitFactory;
-    HitLoaderVector _hitLoaders;
+    //HitLoaderVector _hitLoaders;
 };
 
-template<class Source,class Detector>
-StiMasterHitLoader<Source,Detector>::StiMasterHitLoader()
-  : StiHitLoader<Source,Detector>("MasterHitLoader",0,0,0)
+template<class Source1, class Source2,class Detector>
+StiMasterHitLoader<Source1, Source2,Detector>::StiMasterHitLoader()
+  : StiHitLoader<Source1, Source2,Detector>("MasterHitLoader",0,0,0)
 {}
 
-template<class Source,class Detector>
-StiMasterHitLoader<Source,Detector>::StiMasterHitLoader(const string& name,
+template<class Source1, class Source2,class Detector>
+StiMasterHitLoader<Source1, Source2,Detector>::StiMasterHitLoader(const string& name,
 							StiHitContainer* hitContainer,
+							StiHitContainer* mcHitContainer,
 							Factory<StiHit>*hitFactory,
 							Detector*transform)
-  : StiHitLoader<Source,Detector>(name,hitContainer,hitFactory,transform)
+  : StiHitLoader<Source1, Source2,Detector>(name,hitContainer,mcHitContainer,hitFactory,transform)
 {}
 
-template<class Source,class Detector>
-StiMasterHitLoader<Source,Detector>::~StiMasterHitLoader()
+template<class Source1, class Source2,class Detector>
+StiMasterHitLoader<Source1, Source2,Detector>::~StiMasterHitLoader()
 {}
 
-template<class Source,class Detector>   
+template<class Source1, class Source2,class Detector>   
 
-void StiMasterHitLoader<Source,Detector>::addLoader(StiHitLoader<Source,Detector>*loader)
+void StiMasterHitLoader<Source1, Source2,Detector>::addLoader(StiHitLoader<Source1, Source2,Detector>*loader)
 {
-   _hitLoaders.push_back(loader); 
+   add(loader); 
 }
 
-template<class Source,class Detector>
-void StiMasterHitLoader<Source,Detector>::loadHits(Source *source)
+template<class Source1, class Source2,class Detector>
+void StiMasterHitLoader<Source1, Source2,Detector>::loadEvent(Source1 *source1, Source2 * source2)
 {
+  if(!_hitContainer)
+    throw runtime_error("StiMasterHitLoader::loadEvent( ) -F- _hitContainer==0");
+  _hitContainer->clear();
+  if (source2 && false)
+    {
+      if(!_mcHitContainer)
+	throw runtime_error("StiMasterHitLoader::loadEvent( ) -F- _hitContainer==0");
+      _mcHitContainer->clear();
+    }
   HitLoaderConstIter iter;
-  for (iter=_hitLoaders.begin();iter!=_hitLoaders.end();iter++)
-    (*iter)->loadHits(source);
+  for (iter=begin();iter!=end();iter++)
+    (*iter)->loadEvent(source1,source2); 
+  _hitContainer->sortHits();
+  _hitContainer->update();  
+  if (source2 && false)
+    {
+      _mcHitContainer->sortHits();
+      _mcHitContainer->update();
+    }
 }
 
-template<class Source,class Detector>
-void StiMasterHitLoader<Source,Detector>::setHitContainer(StiHitContainer* hitContainer)
+template<class Source1, class Source2,class Detector>
+void StiMasterHitLoader<Source1, Source2,Detector>::setHitContainer(StiHitContainer* hitContainer)
 {
+  _hitContainer = hitContainer;
   HitLoaderIter iter;
-  for (iter=_hitLoaders.begin();iter!=_hitLoaders.end();iter++)
+  for (iter=begin();iter!=end();iter++)
     (*iter)->setHitContainer(hitContainer);
 }
     
-template<class Source,class Detector>
-void StiMasterHitLoader<Source,Detector>::setHitFactory(Factory<StiHit>*hitFactory)
+template<class Source1, class Source2,class Detector>
+void StiMasterHitLoader<Source1, Source2,Detector>::setMcHitContainer(StiHitContainer* mcHitContainer)
+{
+  _mcHitContainer = mcHitContainer;
+  HitLoaderIter iter;
+  for (iter=begin();iter!=end();iter++)
+    (*iter)->setMcHitContainer(mcHitContainer);
+}
+    
+template<class Source1, class Source2,class Detector>
+void StiMasterHitLoader<Source1, Source2,Detector>::setHitFactory(Factory<StiHit>*hitFactory)
 {
   HitLoaderIter iter;
-  for (iter=_hitLoaders.begin();iter!=_hitLoaders.end();iter++)
+  for (iter=begin();iter!=end();iter++)
     (*iter)->setHitFactory(hitFactory);
 }
 
-template<class Source,class Detector>
-void StiMasterHitLoader<Source,Detector>::setDetector(Detector*transform)
+template<class Source1, class Source2,class Detector>
+void StiMasterHitLoader<Source1, Source2,Detector>::setDetector(Detector*transform)
 {
-  throw runtime_error("StiMasterHitLoader<Source,Detector>::setDetector(Detector*) - This call is Forbiden in StiMasterHitLoader");
+  throw runtime_error("StiMasterHitLoader<Source1, Source2,Detector>::setDetector(Detector*) - This call is Forbiden in StiMasterHitLoader");
+}
+
+
+template<class Source1, class Source2,class Detector>
+void StiMasterHitLoader<Source1, Source2,Detector>::setUseMcAsRec(bool value)
+{
+  _useMcAsRec = value; 
+  HitLoaderIter iter;
+  for (iter=begin();iter!=end();iter++)
+    (*iter)->setUseMcAsRec(value);
 }
 
 #endif

@@ -3,6 +3,7 @@
 
 #include "Sti/StiHitLoader.h"
 class StEvent;
+class StMcEvent;
 class StiDetectorBuilder;
 
 /*! \class StiSvtHitLoader
@@ -16,16 +17,18 @@ class StiDetectorBuilder;
 
   \author Claude A Pruneau (Wayne) and M.L. Miller (Yale Software)
  */
-class StiSvtHitLoader : public StiHitLoader<StEvent,StiDetectorBuilder>
+class StiSvtHitLoader : public StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>
 {
 public:
 
 	StiSvtHitLoader();
 	StiSvtHitLoader(StiHitContainer      * hitContainer,
+			StiHitContainer      * mcHitContainer,
 			Factory<StiHit>      * hitFactory,
 			StiDetectorBuilder   * detector);
 	virtual ~StiSvtHitLoader();
 	virtual void loadHits(StEvent* source);
+	virtual void loadMcHits(StMcEvent* source,bool useMcAsRec);
 };
 
 #endif

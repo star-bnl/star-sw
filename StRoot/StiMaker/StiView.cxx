@@ -27,7 +27,7 @@ void StiZoomSkeletonView::setToDefault()
 
     //Keep Tpc layer 45 visible
     where = name.find("Tpc");
-    string::size_type where2 = name.find("Padrow_1/");
+    string::size_type where2 = name.find("Padrow_0/");
     if (where!=name.npos && where2!=name.npos && layer->isOn()) {
 	layer->setVisibility(true);
     }

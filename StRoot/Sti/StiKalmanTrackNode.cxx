@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.14 2003/03/13 21:21:27 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.15 2003/03/31 17:18:56 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.15  2003/03/31 17:18:56  pruneau
+ * various
+ *
  * Revision 2.14  2003/03/13 21:21:27  pruneau
  * getPhase() fixed. MUST inclde -helicity()*pi/2
  *
@@ -372,15 +375,19 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   StiPlacement * place = tDet->getPlacement();
   double tAlpha = nice(place->getNormalRefAngle());
   double dAlpha = tAlpha - _alpha;
-  if (fabs(dAlpha)>1e-4) rotate(dAlpha);
+  if (fabs(dAlpha)>1e-3) rotate(dAlpha);
   StiShape * sh = tDet->getShape();
   planarShape = 0;
   cylinderShape = 0;
   _refX = place->getNormalRadius();
   position = propagate(_refX,sh->getShapeCode()); 
+  //if (_refX>57. && _refX<65.)
+  //  cout << " prop: det:" << det->getName() << " shape:" <<sh->getShapeCode() <<" position:"<<position<<endl;
   if (position<0) 
     return position;
   position = locate(place,sh);
+  //if (_refX>57. and _refX<65.)
+  //  cout << " location:"<<position<<endl;
   *(Messenger::instance(MessageType::kNodeMessage)) 
     << "StiKalmanTrackNode::propagate(pNode,tDet) -INFO- (2) position:"<<position<<endl;
   if (position>kEdgeZplus || position<0) return position;
@@ -480,8 +487,8 @@ int  StiKalmanTrackNode::propagate(double xk, int option)
 void StiKalmanTrackNode::nudge()
 {
   double deltaX = _hit->x()-_x;
-   sinCA2=_p3*(_x+deltaX) - _p2; 
-  MESSENGER << " StiKalmanTrackNode::nudge() -W- sin(CA2):"<<sinCA2<<endl;
+  sinCA2=_p3*(_x+deltaX) - _p2; 
+  //MESSENGER << " StiKalmanTrackNode::nudge() -I- sin(CA2):"<<sinCA2<<endl;
   if (fabs(sinCA2)>1.) return;
   cosCA2   = sqrt(1.-sinCA2*sinCA2);
   sumSin   = sinCA1+sinCA2;
@@ -694,12 +701,12 @@ StThreeVector<double> StiKalmanTrackNode::getPointAt(double xk) const
   x2=x1+(xk-x1);
   dx=x2-x1;
   sinCA2=_p3*x2 - _p2;
-  if (fabs(sinCA2)>1.) throw runtime_error("SKTN::propagate() - WARNING - fabs(sinCA2)>1.");
+  if (fabs(sinCA2)>1.) throw runtime_error("SKTN::getPointAt() - WARNING - fabs(sinCA2)>1.");
   cosCA2=sqrt(1.- sinCA2*sinCA2);
   double sumSin = sinCA1+sinCA2;
   double yy = _p0 + dx*sumSin/(cosCA1+cosCA2);
   double sinCA1plusCA2  = sinCA1*cosCA2 + sinCA2*cosCA1;
-  if (sinCA1plusCA2==0) throw runtime_error("SKTN::propagate() - WARNING - sinCA1plusCA2==0.");
+  if (sinCA1plusCA2==0) throw runtime_error("SKTN::getPointAt() - WARNING - sinCA1plusCA2==0.");
   return StThreeVector<double>(_cosAlpha*x2-_sinAlpha*yy, _sinAlpha*x2+_cosAlpha*yy, _p1+dx*_p4*sumSin/sinCA1plusCA2);
 }
 
@@ -942,21 +949,29 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
   return os;
 }
 
-double StiKalmanTrackNode::getWindowY() const
-{	 
-  double window = pars->searchWindowScale*_c00;
+double StiKalmanTrackNode::getWindowY()
+{	  
+  const StiHitErrorCalculator * calc = getDetector()->getHitErrorCalculator();
+  if (!calc)
+    throw runtime_error("SKTN::getWindowY() - calc==0");
+  calc->calculateError(this);
+  double sqrtC00 = sqrt(_c00);
+  double sqrtEyy = sqrt(eyy);
+  //cout << "getWindowY() _refX: "<< _refX<< " sqrt(_c00):"<<sqrtC00<<" ey:"<<sqrtEyy;
+  double window = pars->searchWindowScale*sqrt(_c00+eyy);
+  //cout << " window:"<<window;
   if (window<pars->minSearchWindow)
     window = pars->minSearchWindow;
   else if (window>pars->maxSearchWindow)
     window = pars->maxSearchWindow;
-  *(Messenger::instance(MessageType::kNodeMessage)) <<" winY:"<<window;
+  //cout <<" win corr:"<<window<<endl;
   return window;
 }
 
 //_____________________________________________________________________________
 double StiKalmanTrackNode::getWindowZ() const
 {	 
-  double window = pars->searchWindowScale*_c11;
+  double window = pars->searchWindowScale*sqrt(_c11+ezz);
   if (window<pars->minSearchWindow)
     window = pars->minSearchWindow;
   else if (window>pars->maxSearchWindow)

@@ -15,6 +15,7 @@
 using namespace std;
 #include "Sti/Base/Messenger.h"
 #include "Sti/Base/Parameter.h"
+#include "Sti/Base/EditableParameter.h"
 #include "Sti/Base/EditableFilter.h"
 #include "StiHitLoader.h"
 #include "StiToolkit.h"
@@ -52,11 +53,11 @@ using namespace std;
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh"
 #include "StiVertexFinder.h"
+#include "StiDefaultTrackFilter.h"
 
 ostream& operator<<(ostream&, const StiTrack&);
 void StiKalmanTrackFinder::initialize()
 {
-  //set the cached variables
   cout << "StiKalmanTrackFinder::initialize() -I- Started"<<endl;
   _toolkit = StiToolkit::instance();
   _trackSeedFinder   = _toolkit->getTrackSeedFinder();
@@ -70,7 +71,46 @@ void StiKalmanTrackFinder::initialize()
   _trackContainer    = _toolkit->getTrackContainer();
   _mcTrackContainer  = _toolkit->getMcTrackContainer();
   _vertexFinder      = _toolkit->getVertexFinder();
-  _eventFiller       = new StiStEventFiller();
+  StiDefaultTrackFilter * trackFilter = new StiDefaultTrackFilter("RecTrackFilter","Reconstructed Track Filter");
+  trackFilter->add( new EditableParameter("nPtsUsed","Use nPts", 1., 1., 0., 1., 1.,
+					  Parameter::Boolean, StiTrack::kPointCount) );
+  trackFilter->add( new EditableParameter("nPtsMin", "Minimum nPts", 20., 20., 0., 100.,1., 
+					  Parameter::Integer,StiTrack::kPointCount) );
+  trackFilter->add( new EditableParameter("nPtsMax", "Maximum nPts", 60., 60., 0., 100.,1., 
+					  Parameter::Integer,StiTrack::kPointCount) );
+  _trackFilter = trackFilter;
+
+  trackFilter = new StiDefaultTrackFilter("GuiRecTrackFilter","Reconstructed Track Filter");
+  trackFilter->add( new EditableParameter("nPtsUsed","Use nPts", 1., 1., 0., 1., 1.,
+					  Parameter::Boolean, StiTrack::kPointCount) );
+  trackFilter->add( new EditableParameter("nPtsMin", "Minimum nPts", 20., 20., 0., 100.,1., 
+					  Parameter::Integer,StiTrack::kPointCount) );
+  trackFilter->add( new EditableParameter("nPtsMax", "Maximum nPts", 60., 60., 0., 100.,1., 
+					  Parameter::Integer,StiTrack::kPointCount) );
+
+  trackFilter->add( new EditableParameter("ptUsed","Use pt",     0.,   0., 0.,   1., 1.,  Parameter::Boolean, StiTrack::kPt) );
+  trackFilter->add( new EditableParameter("ptMin", "Minimum pt", 0.,   0., 0., 100., 0.1, Parameter::Double,StiTrack::kPt) );
+  trackFilter->add( new EditableParameter("ptMax", "Maximum pt", 5.,   5., 0., 100., 0.1, Parameter::Double,StiTrack::kPt) );
+  trackFilter->add( new EditableParameter("etaUsed","Use eta",      0.,   0.,  0.,   1., 1.,  Parameter::Boolean,   StiTrack::kPseudoRapidity) );
+  trackFilter->add( new EditableParameter("etaMin", "Minimum eta", -1.5, -1.5, 0., 100., 0.1, Parameter::Double,StiTrack::kPseudoRapidity) );
+  trackFilter->add( new EditableParameter("etaMax", "Maximum eta",  1.5,  1.5, 0., 100., 0.1, Parameter::Double,StiTrack::kPseudoRapidity) );
+  _guiTrackFilter  = trackFilter;
+
+
+  trackFilter = new StiDefaultTrackFilter("GuiRecTrackFilter","Reconstructed Track Filter");
+  trackFilter->add( new EditableParameter("nPtsUsed","Use nPts", 1., 1., 0., 1., 1.,
+					  Parameter::Boolean, StiTrack::kPointCount) );
+  trackFilter->add( new EditableParameter("nPtsMin", "Minimum nPts", 10., 10., 0., 100.,1., 
+					  Parameter::Integer,StiTrack::kPointCount) );
+  trackFilter->add( new EditableParameter("nPtsMax", "Maximum nPts", 60., 60., 0., 100.,1., 
+					  Parameter::Integer,StiTrack::kPointCount) );
+  trackFilter->add( new EditableParameter("ptUsed","Use pt",     0.,   0., 0.,   1., 1.,  Parameter::Boolean, StiTrack::kPt) );
+  trackFilter->add( new EditableParameter("ptMin", "Minimum pt", 0.,   0., 0., 100., 0.1, Parameter::Double,StiTrack::kPt) );
+  trackFilter->add( new EditableParameter("ptMax", "Maximum pt", 5.,   5., 0., 100., 0.1, Parameter::Double,StiTrack::kPt) );
+  trackFilter->add( new EditableParameter("etaUsed","Use eta",      0.,   0.,  0.,   1., 1.,  Parameter::Boolean,   StiTrack::kPseudoRapidity) );
+  trackFilter->add( new EditableParameter("etaMin", "Minimum eta", -1.5, -1.5, 0., 100., 0.1, Parameter::Double,StiTrack::kPseudoRapidity) );
+  trackFilter->add( new EditableParameter("etaMax", "Maximum eta",  1.5,  1.5, 0., 100., 0.1, Parameter::Double,StiTrack::kPseudoRapidity) );
+  _guiMcTrackFilter = trackFilter;
   cout << "StiKalmanTrackFinder::initialize() -I- Done"<<endl;
 }
 
@@ -115,13 +155,14 @@ StiKalmanTrackFinder::~StiKalmanTrackFinder()
  */
 void StiKalmanTrackFinder::reset()
 {
-  _messenger << "StiKalmanTrackFinder::reset() - INFO - Starting" <<endl;
+  _messenger << "StiKalmanTrackFinder::reset() -I- Starting" <<endl;
   _detectorContainer->reset();
   _trackContainer->clear();
   _trackFactory->reset();
   _trackNodeFactory->reset();
+  _hitContainer->reset();
   _trackSeedFinder->reset();
-  _messenger << "StiKalmanTrackFinder::reset() - INFO - Done" <<endl;
+  _messenger << "StiKalmanTrackFinder::reset() -I- Done" <<endl;
 }
 
 /*!
@@ -134,16 +175,13 @@ void StiKalmanTrackFinder::reset()
  */
 void StiKalmanTrackFinder::clear()
 {
-  _messenger << "StiKalmanTrackFinder::clear() - INFO - Starting" <<endl;
-  _detectorContainer->reset();
+  _messenger << "StiKalmanTrackFinder::clear() -I- Starting" <<endl;
+    _mcTrackContainer->clear();
   _hitContainer->clear();
   _hitFactory->reset();
-  _trackFactory->reset();
   _mcTrackFactory->reset();
-  _trackNodeFactory->reset();
-  _trackContainer->clear();
-  _mcTrackContainer->clear();
-  _messenger << "StiKalmanTrackFinder::clear() - INFO - Done" <<endl;
+  reset();  
+  _messenger << "StiKalmanTrackFinder::clear() -I- Done" <<endl;
 }
 
 /*! Find all tracks associated with the current event.
@@ -163,6 +201,9 @@ void StiKalmanTrackFinder::findTracks()
   StiKalmanTrack * track;
   // find global tracks
   _messenger<<"StiKalmanTrackFinder::findTracks() -I- Begin tracking loop"<<endl;
+  _trackSeedFinder->reset();
+  _trackContainer->clear();
+  
   try
     {
       while (_trackSeedFinder->hasMore())
@@ -173,34 +214,30 @@ void StiKalmanTrackFinder::findTracks()
 	      track = _trackSeedFinder->next();
 	      if (!track) break;
 	      track->find();
-	      StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
-	      if (t) t->update();
 	      if (_trackFilter)
 		{
 		  if (_trackFilter->filter(track)) 
-		    _trackContainer->push_back(track);
+		    {
+		      StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
+		      if (t) t->update();
+		      _trackContainer->push_back(track);
+		    }
 		}
 	      else
-		_trackContainer->push_back(track);
+		{
+		  _trackContainer->push_back(track);
+		  StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
+		  if (t) t->update();
+		}
 	    }
 	  catch (runtime_error & rte)
 	    {
 	      _messenger<< "StiKalmanTrackFinder::findTracks() - Run Time Error :" << rte.what() << endl;
 	    }
 	}
-      if (_eventFiller)
-	_eventFiller->fillEvent(_event, _trackContainer);
-      if (_vertexFinder)
-	{
-	  StiHit *vertex=0;
-	  vertex = _vertexFinder->findVertex(_event);
-	  if (vertex)
-	    {
-	      extendTracksToVertex(vertex);
-	      if (_eventFiller)
-		_eventFiller->fillEventPrimaries(_event, _trackContainer);
-	    }						
-	}
+      cout << "SKTF::findTracks() -I- Global Track Search Completed"<<endl;
+      
+      cout << "SKTF::findTracks() -I- Done"<<endl;
     }
   catch (runtime_error & rte)
     {
@@ -317,52 +354,48 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 ///                internal error has occured.
 bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_error, logic_error
 {
-  _messenger << "SKTF::find(StiTrack * t) - INFO - Started" << endl;
+  _messenger << "SKTF::find(StiTrack * t) -I- Started" << endl;
   int position;
   StiDetector * nextDet;
   StiHit * stiHit;
   track = dynamic_cast<StiKalmanTrack *> (t);
   if (!track) 
-		{
-			cout <<"StiKalmanTrackFinder::find(StiTrack * t, int direction) -F- track cast failed"<<endl;
-			throw logic_error("SKTF::find()\t - ERROR - dynamic_cast<StiKalmanTrack *>  returned 0");
-		}
+    {
+      cout <<"StiKalmanTrackFinder::find(StiTrack * t, int direction) -F- track cast failed"<<endl;
+      throw logic_error("SKTF::find()\t - ERROR - dynamic_cast<StiKalmanTrack *>  returned 0");
+    }
   int  nAdded       = 0;
   bool trackDone    = false;
   bool scanningDone = true;
   sNode   = track->getLastNode(); 
-	if (!sNode)
-		{
-			cout <<"                     sNode is null"<<endl;
-			return false;
-		}
-	StiHit* hhh = sNode->getHit();
-	if (!hhh)
-		{
-			cout << "           hhh==0" <<endl;
-			return false;
-		}
-  sDet    = hhh->detector();
+  if (!sNode)
+    throw logic_error("SKTF::find()\t - ERROR - track last node ==0");
+  StiHit* hhh = sNode->getHit();
+  if (!hhh)
+    {
+      cout << "StiKalmanTrackFinder::find(StiTrack * t, int direction) -W- lastNode->getHit()==0" <<endl;
+      return false;
+    }
+  sDet = hhh->detector();
   if (sDet==0) 
-		{
-			cout << "StiKalmanTrackFinder::find(StiTrack * t, int direction) -I- sDet==0"<<endl;
-			throw logic_error("SKTF::find(StiTrack*) - FATAL - sDet==0");
-		}
+    throw logic_error("SKTF::find(StiTrack*) - FATAL - sDet==0");
   tNode   = 0;
   tDet    = 0;
   leadDet = sDet;
   StiKalmanTrackNode testNode;
   StiDetector * currentDet;
-	_messenger << "SKTF::find(StiTrack * t) -I- searching track"<< endl;
+  _messenger << "SKTF::find(StiTrack * t) -I- searching track"<< endl;
   while (!trackDone) 
     {
       _detectorContainer->setToDetector(leadDet);
       currentDet = **_detectorContainer;
       if (direction==kOutsideIn)
-				_detectorContainer->moveIn();
+	_detectorContainer->moveIn();
       else
-				_detectorContainer->moveOut();
+	_detectorContainer->moveOut();
       tDet = **_detectorContainer;
+      //cout << tDet->getName()<<" ACTIVE:" << tDet->isActive() << endl;
+	  
       leadDet = tDet;
       // tDet==0 implies a severe detector container error - exit
       if (tDet==0) throw logic_error("SKTF::find() - ERROR -  **_detectorContainer ==0");
@@ -371,80 +404,86 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
       lastMove     = 0;
       scanningDone = false;
       // loop over possible volumes
-			_messenger << "SKTF::find(StiTrack * t) -I- scanning detors"<< endl;
+      _messenger << "SKTF::find(StiTrack * t) -I- scanning"<< endl;
       while (!scanningDone)
-				{
-					//_messenger <<"SCANNING LAYER"<<endl;
-					testNode.reset();
-					testNode.setChi2(1e50);
-					position = testNode.propagate(sNode,tDet);
-					if (position<0)
-						{ // not reaching this detector layer - stop track
-							_messenger << "TRACK DOES NOT REACH CURRENT LAYER"<<endl;
-							trackDone = true; break;
-						}
-					else if (position<=kEdgeZplus) 
-						{ // within detector on reached layer
-							_messenger <<"WITHIN VOLUME"<<endl;
-							testNode.setDetector(tDet);
-							if (tDet->isActive()) 
-								{ // active detector may have a hit
-									_hitContainer->setRefPoint(testNode);
-									while (_hitContainer->hasMore()) 
-										{  
-											stiHit = _hitContainer->getHit();
-											if (!stiHit) throw logic_error("StiKalmanTrackFinder::doNextDetector() - FATAL - StiHit*hit==0");
-											_messenger << "      chi2:"<<(chi2 = testNode.evaluateChi2(stiHit));
-											_messenger << "  max chi2:"<< _pars->maxChi2ForSelection<<endl;
-											_messenger << " best chi2:"<< testNode.getChi2()<<endl;
-											if (chi2<_pars->maxChi2ForSelection && chi2<testNode.getChi2())
-												{
-													testNode.setHit(stiHit);
-													testNode.setChi2(chi2);
-												}
-										} 
-								}
-							// add best node to track if it has a hit or
-							// if the maximum of node with null hit has NOT been exceeded
-							//cout << "CURRENT NODE:" << testNode<<endl;
-							if (testNode.getHit() ||
-									(testNode.nullCount  <  _pars->maxNullCount &&
-									 testNode.contiguousNullCount  <  _pars->maxContiguousNullCount) )
-								{
-									StiKalmanTrackNode * node = _trackNodeFactory->getInstance();
-									if (node==0) throw logic_error("SKTF::find() - ERROR - node==null");
-									node->reset();
-									*node = testNode;
-									sNode = track->add(node);
-									leadDet = sNode->getDetector();
-									break;
-								}
-							else
-								{
-									//_messenger <<"TRACK IS DONE"<<endl;
-									trackDone = true;  break;
-								}
-						}
-					else if ( (position==kEdgePhiPlus || position==kMissPhiPlus)  && lastMove>=0 )
-						{
-							//_messenger << " MOVE PLUS PHI"<<endl;
-							_detectorContainer->movePlusPhi(); lastMove++;
-						}
-					else if ( (position==kEdgePhiMinus || position==kMissPhiMinus) && lastMove<=0)
-						{
-							//_messenger << " MOVE MINUUS PHI"<<endl;
-							_detectorContainer->moveMinusPhi(); lastMove--;
-						}
-					if (abs(lastMove)>2) break;
-					nextDet = **_detectorContainer;
-					if (nextDet==0 || tDet==nextDet) 
-						{
-							//_messenger <<" SCANNING DONE"<<endl;
-							scanningDone = true;
-						}
-					else
-						tDet = nextDet;
-				}
+	{
+	  //_messenger <<"SCANNING LAYER"<<endl;
+	  testNode.reset();
+	  testNode.setChi2(1e50);
+	  position = testNode.propagate(sNode,tDet);
+	  //if (testNode._x<65. && testNode._x>57.)
+	  //  {
+	  //    cout  << "  Detector:" << tDet->getName();
+	  //  }
+	  if (position<0)
+	    { // not reaching this detector layer - stop track
+	      _messenger << "TRACK DOES NOT REACH CURRENT LAYER"<<endl;
+	      trackDone = true; break;
+	    }
+	  else if (position<=kEdgeZplus) 
+	    { // within detector on reached layer
+	      //if (testNode._x<65. && testNode._x>57.) cout <<"WITHIN VOLUME"<<endl;
+	      testNode.setDetector(tDet);
+	      if (tDet->isActive()) 
+		{ // active detector may have a hit
+		  _hitContainer->setRefPoint(testNode);
+		  while (_hitContainer->hasMore()) 
+		    {  
+		      stiHit = _hitContainer->getHit();
+		      if (!stiHit) throw logic_error("StiKalmanTrackFinder::doNextDetector() - FATAL - StiHit*hit==0");
+		      chi2 = testNode.evaluateChi2(stiHit);
+		      //if (testNode._x<65. && testNode._x>57.)
+		      //{
+		      //  cout  << "  Detector:" << tDet->getName()
+		      //	<< "  chi2/max/best:"<< chi2 << "/" << _pars->maxChi2ForSelection<< "/" << testNode.getChi2()<<endl;
+		      //}
+		      if (chi2<_pars->maxChi2ForSelection && chi2<testNode.getChi2())
+			{
+			  testNode.setHit(stiHit);
+			  testNode.setChi2(chi2);
+			}
+		    } 
+		}
+	      // add best node to track if it has a hit or
+	      // if the maximum of node with null hit has NOT been exceeded
+	      if (testNode.getHit() ||
+		  (testNode.nullCount  <  _pars->maxNullCount &&
+		   testNode.contiguousNullCount  <  _pars->maxContiguousNullCount) )
+		{
+		  StiKalmanTrackNode * node = _trackNodeFactory->getInstance();
+		  if (node==0) throw logic_error("SKTF::find() - ERROR - node==null");
+		  node->reset();
+		  *node = testNode;
+		  sNode = track->add(node);
+		  leadDet = sNode->getDetector();
+		  break;
+		}
+	      else
+		{
+		  //_messenger <<"TRACK IS DONE"<<endl;
+		  trackDone = true;  break;
+		}
+	    }
+	  else if ( (position==kEdgePhiPlus || position==kMissPhiPlus)  && lastMove>=0 )
+	    {
+	      //_messenger << " MOVE PLUS PHI"<<endl;
+	      _detectorContainer->movePlusPhi(); lastMove++;
+	    }
+	  else if ( (position==kEdgePhiMinus || position==kMissPhiMinus) && lastMove<=0)
+	    {
+	      //_messenger << " MOVE MINUUS PHI"<<endl;
+	      _detectorContainer->moveMinusPhi(); lastMove--;
+	    }
+	  if (abs(lastMove)>2) break;
+	  nextDet = **_detectorContainer;
+	  if (nextDet==0 || tDet==nextDet) 
+	    {
+	      //_messenger <<" SCANNING DONE"<<endl;
+	      scanningDone = true;
+	    }
+	  else
+	    tDet = nextDet;
+	}
     }
   _messenger << "StiKalmanTrackFinder::find(StiTrack* ) -I- TRACK IS DONE"<<endl;
   return nAdded>0;
@@ -573,12 +612,12 @@ void StiKalmanTrackFinder::update()
   // Monte Carlo Tracks
   if (_mcTrackContainer)
     {
-      //_messenger << "StiKalmanTrackFinder::update() - INFO - Looping on MC tracks."<<endl;
+      //_messenger << "StiKalmanTrackFinder::update() -I- Looping on MC tracks."<<endl;
       for (iter=_mcTrackContainer->begin();iter!=_mcTrackContainer->end(); ++iter) 
 				{
 					if (_guiMcTrackFilter)
 						{
-							//_messenger << "StiKalmanTrackFinder::update() - INFO - Filter OK/";
+							//_messenger << "StiKalmanTrackFinder::update() -I- Filter OK/";
 							if (_guiMcTrackFilter->filter((*iter).second))
 								{
 									//_messenger <<"Passed"<<endl;
@@ -590,7 +629,7 @@ void StiKalmanTrackFinder::update()
 								}
 						}	
 					else
-						_messenger << "StiKalmanTrackFinder::update() - INFO - Filter NOK"<<endl;
+						_messenger << "StiKalmanTrackFinder::update() -I- Filter NOK"<<endl;
 				}
     }
 	
@@ -608,9 +647,10 @@ void StiKalmanTrackFinder::update()
     }
   StiToolkit::instance()->getDisplayManager()->draw();
   StiToolkit::instance()->getDisplayManager()->update();
-  //_messenger << "StiKalmanTrackFinder::update() - INFO - Done."<<endl;
+  //_messenger << "StiKalmanTrackFinder::update() -I- Done."<<endl;
 }
 
+/*
 void StiKalmanTrackFinder::reloadEvent()
 {
 	clear();
@@ -623,14 +663,19 @@ void StiKalmanTrackFinder::loadEvent(StEvent * event, StMcEvent * mcEvent)
     throw runtime_error("StiKalmanTrackFinder::loadEvent(...) - FATAL - given event==0");
   _event = event;
   _mcEvent = mcEvent;
-  loadHits(event);
-
+  if (!_pars->useMcAsRec)
+    {
+      cout << "StiKalmanTrackFinder::loadEvent( ) -I- Loading StEvent Reconstructed Hits"<<endl; 
+      loadHits(event);
+    }
+  else
+    cout << "StiKalmanTrackFinder::loadEvent( ) -I- Not loading StEvent Reconstructed Hits"<<endl; 
   if (mcEvent)
     { 
       StiEvaluableTrackSeedFinder* temp;
       temp = dynamic_cast<StiEvaluableTrackSeedFinder*>(_trackSeedFinder);
       if (temp!=0) 
-				temp->setEvent(mcEvent);
+	temp->setEvent(mcEvent);
       loadMcTracks(mcEvent);
     }
   _trackSeedFinder->reset();
@@ -641,31 +686,13 @@ void StiKalmanTrackFinder::loadHits(StEvent * event)
 {
   if(!_hitLoader)
     throw runtime_error("StiKalmanTrackFinder::loadHits(...) - FATAL - _hitLoader==0");
-  if(!_hitContainer)
-    throw runtime_error("StiKalmanTrackFinder::loadHits(...) - FATAL - _hitContainer==0");
-  _hitContainer->clear();
   _hitLoader->loadHits(event);
-  _hitContainer->sortHits();
-  _hitContainer->update(); //uncommented, MLM, 9/27
 }
 
 void StiKalmanTrackFinder::loadMcTracks(StMcEvent * mcEvent)
 {
-  // Store the pointers to StMcTrack in StiMcTrack
-  StSPtrVecMcTrack & mcTracks = mcEvent->tracks();
-  StiMcTrack * mcTrack;
-  StMcTrackConstIterator iter;
-  if (!_mcTrackFactory)
-    throw runtime_error("StiKalmanTrackFinder::loadMcTracks() - ERROR - _mcTrackFactory==0");
-  if (!_mcTrackContainer)
-    throw runtime_error("StiKalmanTrackFinder::loadMcTracks() - ERROR - _mcTrackContainer==0");
-  for (iter=mcTracks.begin();iter!=mcTracks.end();iter++)
-    {
-      //_messenger << "Loading StMcTrack into _mcTrackContainer" << endl;
-      mcTrack = _mcTrackFactory->getInstance();
-      mcTrack->setStMcTrack( (*iter) );
-      _mcTrackContainer->add(mcTrack);
-    }
+  cout << "StiKalmanTrackFinder::loadMcTracks() -I- Started"<<endl;
+  _hitLoader->loadMcHits(mcEvent);
 }
 
 
@@ -676,18 +703,18 @@ void StiKalmanTrackFinder::loadMcTracks(StMcEvent * mcEvent)
 <li>Load the hits of the given event, and optionally the tracks of the given McEvent</li>
 <li>Proceed to find all tracks of the given event</li>
 </ol>
-*/
 void StiKalmanTrackFinder::findTracks(StEvent * event, StMcEvent * mcEvent)
 {
-  _messenger << "StiKalmanTrackFinder::findTracks(StEvent * event, StMcEvent * mcEvent) - INFO - Starting"  << endl;
+  _messenger << "StiKalmanTrackFinder::findTracks(StEvent * event, StMcEvent * mcEvent) -I- Starting"  << endl;
   // Reset/Clear all data from previous events
   clear();
   // Load data from given event and mcEvent
   loadEvent(event,mcEvent);
   // Proceed to find all track 
   findTracks();
-  _messenger << "StiKalmanTrackFinder::findTracks(StEvent*) - INFO - Done"  << endl;
+  _messenger << "StiKalmanTrackFinder::findTracks(StEvent*) -I- Done"  << endl;
 }
+*/
 
 void StiKalmanTrackFinder::setParameters(StiKalmanTrackFinderParameters *par)
 {
@@ -713,15 +740,15 @@ void StiKalmanTrackFinder::setVertexFinder(StiVertexFinder *vertexFinder)
   _vertexFinder = vertexFinder;
 }
 
-void StiKalmanTrackFinder::loadTracks(StEvent * event)
-{
-  /* not implemented yet */
-}
+//void StiKalmanTrackFinder::loadTracks(StEvent * event)
+//{
+//  /* not implemented yet */
+//}
 
 
 
 /*
-  _messenger << "StiKalmanTrackFinder() - INFO - Instantiating gui filters" << endl;
+  _messenger << "StiKalmanTrackFinder() -I- Instantiating gui filters" << endl;
   EditableFilter<StiTrack> * guiFilter;
   _guiTrackFilter = _trackFilterFactory->getInstance();
   guiFilter = static_cast< EditableFilter<StiTrack> * >(_guiTrackFilter);

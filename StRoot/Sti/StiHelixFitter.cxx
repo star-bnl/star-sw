@@ -7,6 +7,7 @@
 #include <math.h>
 #include <float.h>
 #include <algorithm>
+#include <stdexcept>
 using std::sort;
 using std::for_each;
 
@@ -35,32 +36,24 @@ StiHelixFitter::~StiHelixFitter()
 bool StiHelixFitter::fit(const StiHitVector& hits)
 {
     //cout <<"----------- New Track ------------- "<<endl;
-    
-    if (hits.size()<3) {
-	cout <<"StiHelixFitter::refit(). ERROR:\t";
-	cout <<"Less than 3 hits.  Abort"<<endl;
-	mValid=false;
-	return false;
-    }
-    
+    if (hits.size()<3)
+      throw runtime_error("StiHelixFitter::fit(const StiHitVector& hits) -E- hits.size()<3");    
     reset();
-
-    //for_each(hits.rbegin(), hits.rend(), PtrStreamer<StiHit>());
-
-    //Now do global circle fit to get origin
+    //Do global circle fit to get origin
     //Do circle fit in x-yOrder doesn't matter for circle fit
-    
     for (StiHitVector::const_iterator it=hits.begin(); it!=hits.end(); ++it) {
-	mCircleFitter.addPoint( (*it)->x_g(),(*it)->y_g() );
+      mCircleFitter.addPoint( (*it)->x_g(),(*it)->y_g() );
     }
     bool circle_rc = mCircleFitter.fit();
 
-    if (!circle_rc) {
+    if (!circle_rc) 
+      {
+	//throw runtime_error("StiHelixFitter::fit(const StiHitVector& hits) -E- hits.size()<3");    {
 	cout <<"StiHelixFitter::refit(). ERROR:\t";
 	cout <<"Circle Fit Failed.  abort"<<endl;
 	mValid=false;
 	return false;
-    }
+      }
 
     //Now calculate h, or the sign of the curvature:
     //assumes a strict less-than ordering in radius
@@ -81,7 +74,7 @@ bool StiHelixFitter::fit(const StiHitVector& hits)
 				   mCircleFitter.ycenter(), firsthit,
 				   (*it)->globalPosition());
 	
-	mLineFitter.addPoint(s2d, (*it)->globalPosition().z(), 1.); //Use a dummy weight of 1
+	mLineFitter.addPoint(s2d, (*it)->z_g(), 1.); //Use a dummy weight of 1
     }
         
     bool line_rc = mLineFitter.fit();
@@ -134,11 +127,11 @@ bool StiHelixFitter::calculateH(const StiHitVector& hits)
     //cout <<"mInside: "<<mInside<<" mMiddle: "<<mMiddle<<" mOutside: "<<mOutside<<" mCenter: "<<mCenter<<endl;
     
     //Now rotate to the frame defined by the angle between the mInside and mOutside points
-    if ( (mOutside.y()-mInside.y())==0. || (mOutside.x()-mInside.x())==0.) {
-	cout <<"StiHelixFitter::calculateH(). ERROR:\t"
-	     <<"(mOutside.y()-mInside.y())==0. || (mOutside.x()-mInside.x())==0.).  Abort"<<endl;
-	return false;
-    }
+    //if ( (mOutside.y()-mInside.y())==0. || (mOutside.x()-mInside.x())==0.) {
+    //cout <<"StiHelixFitter::calculateH(). ERROR:\t"
+    //     <<"(mOutside.y()-mInside.y())==0. || (mOutside.x()-mInside.x())==0.).  Abort"<<endl;
+    //return false;
+    //}
     
     double alpha = atan2(mOutside.y()-mInside.y(), mOutside.x()-mInside.x() );
     double beta = M_PI/2.-alpha;

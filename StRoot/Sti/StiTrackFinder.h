@@ -20,17 +20,17 @@ public:
   /// Initialize the finder
   virtual void initialize()=0;
   /// Load given event, and find all tracks of that event
-  virtual void findTracks(StEvent * event,StMcEvent * mcEvent)=0; 
+  //virtual void findTracks(StEvent * event,StMcEvent * mcEvent)=0; 
   /// ReLoad current event
-  virtual void reloadEvent()=0;
+  //virtual void reloadEvent()=0;
   /// Load given event and MC event
-  virtual void loadEvent(StEvent * event,StMcEvent * mcEvent)=0;
+  //virtual void loadEvent(StEvent * event,StMcEvent * mcEvent)=0;
   /// Load tracks from the given source
-  virtual void loadTracks(StEvent * event)=0;
+  //virtual void loadTracks(StEvent * event)=0;
   /// Load MC tracks from the given source
-  virtual void loadMcTracks(StMcEvent * mcEvent)=0;
+  //virtual void loadMcTracks(StMcEvent * mcEvent)=0;
   /// Load hits from the given source
-  virtual void loadHits(StEvent * event)=0;
+  //virtual void loadHits(StEvent * event)=0;
   /// Find all tracks of the currently loaded event
   virtual void findTracks()=0; 
   /// Find/extend the given track, in the given direction

@@ -11,15 +11,17 @@
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiDetector.h"
 #include "StEvent.h"
+#include "StMcEvent.hh"
 
 StiEmcHitLoader::StiEmcHitLoader()
-  : StiHitLoader<StEvent,StiDetectorBuilder>("EmcHitLoader")
+  : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("EmcHitLoader")
 {}
     
 StiEmcHitLoader::StiEmcHitLoader(StiHitContainer* hitContainer,
+				 StiHitContainer* mcHitContainer,
 				 Factory<StiHit>*hitFactory,
 				 StiDetectorBuilder*detector)
-  : StiHitLoader<StEvent,StiDetectorBuilder>("EmcHitLoader",hitContainer,hitFactory,detector)
+  : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("EmcHitLoader",hitContainer,mcHitContainer,hitFactory,detector)
 {}
 
 StiEmcHitLoader::~StiEmcHitLoader()
@@ -50,6 +52,10 @@ void StiEmcHitLoader::loadHits(StEvent* source)
       stiHit->setGlobal(detector,*pointIter,x,y,z,energy);
       _hitContainer->push_back( stiHit );
     }  
-  
-
 }
+
+void StiEmcHitLoader::loadMcHits(StMcEvent* source,bool useMcAsRec)
+{
+  return;
+}
+	

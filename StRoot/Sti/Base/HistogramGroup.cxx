@@ -1,8 +1,8 @@
 #include "HistogramGroup.h"
 
 HistogramGroup::HistogramGroup()
-  : Named("HistogramGroup"),
-    Described("HistogramGroup")
+  : Named(""),
+    Described("")
 {}
 
 HistogramGroup::HistogramGroup(const string & name, const string & description)
@@ -12,6 +12,21 @@ HistogramGroup::HistogramGroup(const string & name, const string & description)
 
 HistogramGroup::~HistogramGroup()
 {}
+
+void HistogramGroup::write(TFile * file)
+{
+  file->cd();
+  write();
+}
+
+void HistogramGroup::write(const string & fileName, const string &option)
+{
+  TFile *file = new TFile(fileName.c_str(),option.c_str());
+  write();
+  file->Close();
+  delete file;
+}
+
 
 void HistogramGroup::write()
 {
@@ -30,3 +45,29 @@ void HistogramGroup::reset()
       (*iter)->Reset();
     }
 }
+
+TH1D * HistogramGroup::book(const string &title, 
+			    const string & description, 
+			    int nx, 
+			    double xMin,
+			    double xMax)
+{
+  string histoName = getName() + "_" + title;
+  string histoDesc = getName() + " " + description;
+  return dynamic_cast<TH1D*>(add(new TH1D(histoName.c_str(),histoDesc.c_str(),nx,xMin,xMax)));
+}
+
+TH2D * HistogramGroup::book(const string &title, 
+			    const string & description, 
+			    int nx, 
+			    double xMin,
+			    double xMax,
+			    int ny, 
+			    double yMin,
+			    double yMax)
+{
+  string histoName = getName() + "_" + title;
+  string histoDesc = getName() + " " + description;
+  return dynamic_cast<TH2D*>(add(new TH2D(histoName.c_str(),histoDesc.c_str(),nx,xMin,xMax,ny,yMin,yMax)) );
+}
+

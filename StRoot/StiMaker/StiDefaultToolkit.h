@@ -40,6 +40,7 @@ public:
   virtual StiMasterDetectorBuilder * getDetectorBuilder();
   virtual StiDetectorContainer     * getDetectorContainer();
   virtual StiHitContainer          * getHitContainer();
+  virtual StiHitContainer          * getMcHitContainer();
   virtual StiTrackContainer        * getTrackContainer();
   virtual StiTrackContainer        * getMcTrackContainer();
   
@@ -49,32 +50,32 @@ public:
   virtual StiTrackFinder         * getTrackFinder();
   virtual StiTrackFitter         * getTrackFitter();
   virtual StiTrackMerger         * getTrackMerger();
-	virtual StiVertexFinder        * getVertexFinder();
+  virtual StiVertexFinder        * getVertexFinder();
   virtual StiDisplayManager      * getDisplayManager();
   //virtual StiEvaluator         * getEvaluator(const string& file);
   //virtual StiEvaluator         * getEvaluator();
   //virtual StiEventAssociator   * getEventAssociator();
-  virtual StiHitLoader<StEvent,StiDetectorBuilder> * getHitLoader();
+  virtual StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * getHitLoader();
   virtual StAssociationMaker     * getAssociationMaker();
   virtual void setAssociationMaker(StAssociationMaker * a);
-  virtual void add(StiDetectorGroup<StEvent>* detectorGroup);
+  virtual void add(StiDetectorGroup<StEvent,StMcEvent>* detectorGroup);
 
   //RootEditableParameter & getParameters();
-	void setGuiEnabled(bool );
-	bool isGuiEnabled() const;
-	void setMcEnabled(bool);
-	bool isMcEnabled() const;
-	void setEvaluatorEnabled(bool);
-	bool isEvaluatorEnabled() const;
-
+  void setGuiEnabled(bool );
+  bool isGuiEnabled() const;
+  void setMcEnabled(bool);
+  bool isMcEnabled() const;
+  void setEvaluatorEnabled(bool);
+  bool isEvaluatorEnabled() const;
+  
  protected:
   
-	bool _guiEnabled;
-	bool _evaluatorEnabled;
-	bool _mcEnabled;
-
+  bool _guiEnabled;
+  bool _evaluatorEnabled;
+  bool _mcEnabled;
+  
   virtual ~StiDefaultToolkit();
-
+  
   // small object factories
   Factory< Filter<StiTrack>  > * _trackFilterFactory;
   Factory<EditableParameter>   * _parameterFactory;
@@ -89,20 +90,21 @@ public:
   StiMasterDetectorBuilder     * _detectorBuilder;
   StiDetectorContainer         * _detectorContainer;
   StiHitContainer              * _hitContainer;
+  StiHitContainer              * _mcHitContainer;
   StiTrackContainer            * _trackContainer;
   StiTrackContainer            * _mcTrackContainer;
   
   // service and convenience class objects.
   StiDetectorFinder       * _detectorFinder;
-  StiTrackSeedFinder           * _trackSeedFinder;
+  StiTrackSeedFinder      * _trackSeedFinder;
   StiTrackFinder          * _trackFinder;
   StiTrackFitter          * _trackFitter;
   StiTrackMerger          * _trackMerger;
-	StiVertexFinder         * _vertexFinder;
+  StiVertexFinder         * _vertexFinder;
   StiDisplayManager       * _displayManager;
   //StiEvaluator          * _evaluator;
   //StiEventAssociator    * _eventAssociator;
-  StiHitLoader<StEvent,StiDetectorBuilder> * _hitLoader;
+  StiHitLoader<StEvent,StMcEvent, StiDetectorBuilder> * _hitLoader;
   StAssociationMaker                       * _associationMaker; 
 };
 

@@ -3,6 +3,7 @@
 #include <cmath>
 #include <stdio.h>
 #include "StEvent.h"
+#include "StMcEvent.hh"
 #include "StEventTypes.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
@@ -13,16 +14,21 @@
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorBuilder.h"
+#include "Sti/StiMcTrack.h"
+#include "Sti/StiTrackContainer.h"
 #include "StiTpcHitLoader.h"
+#include "StMcTrack.hh"
+#include "StMcTpcHit.hh"
 
 StiTpcHitLoader::StiTpcHitLoader()
-  : StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader")
+  : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("TpcHitLoader")
 {}
     
 StiTpcHitLoader::StiTpcHitLoader(StiHitContainer* hitContainer,
+				 StiHitContainer* mcHitContainer,
 				 Factory<StiHit>*hitFactory,
 				 StiDetectorBuilder * detector)
-  : StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader",hitContainer,hitFactory,detector)
+  : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("TpcHitLoader",hitContainer,mcHitContainer,hitFactory,detector)
 {}
 
 StiTpcHitLoader::~StiTpcHitLoader()
@@ -30,7 +36,7 @@ StiTpcHitLoader::~StiTpcHitLoader()
 
 void StiTpcHitLoader::loadHits(StEvent* source)
 {
-  //_messenger << "StiTpcHitLoader::loadHits(StEvent*) - INFO - Started" << endl;
+  cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Started" << endl;
   if (!_detector)
     throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
   if(!_hitContainer)
@@ -86,9 +92,113 @@ void StiTpcHitLoader::loadHits(StEvent* source)
 				hit->position().y(),
 				hit->position().z(),
 				hit->charge());
+	      //cout << "Adding HIT:"<<*stiHit<<endl;
 	      _hitContainer->push_back( stiHit );
 	    }
 	}
     }
+  cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Done" << endl;
+}
+
+void StiTpcHitLoader::loadMcHits(StMcEvent* source,bool useMcAsRec)
+{
+  cout << "StiTpcHitLoader::loadMcHits(StEvent*) -I- Started" << endl;
+  if (!_detector)
+    throw runtime_error("StiTpcHitLoader::loadMcHits(StEvent*) -F- _detector==0");
+  if(!_mcHitContainer)
+    throw runtime_error("StiTpcHitLoader::loadMcHits(StEvent*) -F- _mcHitContainer==0");
+  
+  if(!_mcTrackFactory)
+    throw runtime_error("StiTpcHitLoader::loadMcHits() -F- _mcTrackFactory==0");
+  if (!_mcTrackContainer)
+    throw runtime_error("StiTpcHitLoader::loadMcHitss() -F- _mcTrackContainer==0");
+  if(!_hitFactory)
+    throw runtime_error("StiTpcHitLoader::loadMcHits(StMcEvent*) -F- _hitFactory==0");
+  cout << "StiTpcHitLoader::loadMcHits() -I- Loading"<<endl;
+  
+  // 
+  StSPtrVecMcTrack & mcTracks = source->tracks();
+  StiMcTrack * mcTrack;
+  StMcTrack  * stMcTrack;
+  StMcTrackConstIterator iter;
+  int nTracks      = 0;
+  int nPlusTracks  = 0;
+  int nMinusTracks = 0;
+  for (iter=mcTracks.begin();iter!=mcTracks.end();iter++)
+    {
+      //_messenger << "Loading StMcTrack into _mcTrackContainer" << endl;
+      stMcTrack = *iter;
+      double eta = stMcTrack->pseudoRapidity();
+      double pt  = stMcTrack->pt();
+      const StPtrVecMcTpcHit& hits = stMcTrack->tpcHits();
+      int nPts = hits.size();
+      mcTrack = _mcTrackFactory->getInstance();
+      mcTrack->setStMcTrack( (*iter) );
+      double charge = mcTrack->getCharge();
+      if (fabs(eta)<1.5 && pt<10. && pt>0.1 && nPts>10) // && charge<0)
+	{      
+	  _mcTrackContainer->add(mcTrack);
+	  nTracks++;
+	  if (charge>0) 
+	    ++nPlusTracks;
+	  else 
+	    ++nMinusTracks;
+	  //cout << "StiKalmanTrackFinder::loadMcHits() -I- nHits:" << hits.size()<<endl; 
+	  for (vector<StMcTpcHit*>::const_iterator iterHit = hits.begin();
+	       iterHit != hits.end(); 
+	       iterHit++) 
+	    {
+	      //cout << "StiKalmanTrackFinder::loadMcHits() -I- Hit:"<<endl;
+	      StMcTpcHit*hit=*iterHit; 
+	      if (!hit)
+		throw runtime_error("StiKalmanTrackFinder::loadMcHits(StMcEvent*) -E- hit==0");
+	      //cout << *hit<<endl;
+	      unsigned int row = hit->padrow()-1;
+	      unsigned int sector = hit->sector()-1;
+	      unsigned int stiSector;
+	      if (sector<12)
+		stiSector = sector;
+	      else
+		stiSector = 11 - (sector-11)%12;
+	      //cout << "sector = " << sector <<" stiSector = "<<stiSector<<endl;
+	      StiDetector * detector = _detector->getDetector(row,stiSector);
+	      if (!detector)
+		{
+		  //cout << "StiKalmanTrackFinder::loadMcHits(StMcEvent*) -E- Detector element not found"<<endl;
+		  throw runtime_error("StiKalmanTrackFinder::loadMcHits(StMcEvent*) -E- Detector element not found");
+		}
+	      StiHit * stiHit = _hitFactory->getInstance();
+	      if(!stiHit)
+		{
+		  //cout << "StiKalmanTrackFinder::loadMcHits(StMcEvent*) -E- stiHit==0"<<endl;
+		  throw runtime_error("StiKalmanTrackFinder::loadMcHits(StMcEvent*) -E- stiHit==0");
+		}
+	      //cout << "StiKalmanTrackFinder::loadMcHits() -I- copy hit info to StiHit"<<endl;
+	      stiHit->setGlobal(detector, 
+				0, 
+				hit->position().x(),
+				hit->position().y(),
+				hit->position().z(),
+				hit->dE());
+	      //_mcHitContainer->push_back( stiHit );
+	      if (useMcAsRec) 
+		{
+		  _hitContainer->push_back( stiHit );
+		}
+	      //cout << "StiKalmanTrackFinder::loadMcHits() -I- Hit Done."<<endl;
+	    }
+	  //cout << "StiKalmanTrackFinder::loadMcHits() -I- Hit Loop Done."<<endl;
+	}
+      //cout << "StiKalmanTrackFinder::loadMcHits() -I- Track done"<<endl;
+    }
+  cout << "StiTpcHitLoader::loadMcHits() -I- Event Loaded"<< endl
+       << "============================================================================="<< endl
+       << "      hitContainer size = " << _hitContainer->size()<<endl
+       << "  mc  hitContainer size = " << _mcHitContainer->size()<<endl
+       << " mc track Container size= " << _mcTrackContainer->size()<<endl
+       << "               nTracks  = " << nTracks << endl
+       << "           nPlusTracks  = " << nPlusTracks << endl
+       << "          nMinusTracks  = " << nMinusTracks << endl;
+  cout << "StiTpcHitLoader::loadMcHits(StEvent*) -I- Done" << endl;
 }
 

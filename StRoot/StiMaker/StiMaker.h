@@ -12,25 +12,29 @@ using std::string;
 
 class TH1D;
 class StEvent;
-
+class StMcEvent;
+class StiStEventFiller;
 class StiTrackContainer;
 class StiEvaluableTrack;
 class StiTrackSeedFinder;
 class StiTrackFinder;
 class StiKalmanTrackFinder;
+class StiTrackSeedFinder;
 class StiKalmanTrackNode;
 class StiKalmanTrack;
 class StMcEventMaker;
 class StAssociationMaker;
-class StMcEvent;
 class StiTrackMerger;
 class StiToolkit;
 class StiTrackingPlots;
+class StiMakerParameters;
+class StiVertexFinder;
 
 class StiMaker : public StMaker 
 {
  public:
     
+    StiMaker(const char* name = "StiMaker");
     virtual ~StiMaker();
     virtual void  Clear(const char* opt="");
     virtual Int_t Init();
@@ -40,26 +44,28 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.5 2003/03/13 18:59:44 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.6 2003/03/31 17:19:30 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
-    static StiMaker* instance();
-    static void kill();
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
-
-protected:
-    StiMaker(const char* name = "StiMaker");
+    void setParameters(StiMakerParameters * pars);
+    StiMakerParameters * getParameters();
 
 private:
-
-    static StiMaker* sinstance; //!
-    bool eventIsFinished;
-    bool initialized;
-    StiToolkit  *    _toolkit;
-    StiTrackFinder * tracker;
-    StMcEventMaker* mMcEventMaker; //!
-    StAssociationMaker* mAssociationMaker; //!
-    StiTrackingPlots* plotter;
+    StiMakerParameters * _pars;
+    bool                 eventIsFinished;
+    bool                 _initialized;
+    StiToolkit  *        _toolkit;
+    StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * _hitLoader;
+    StiTrackSeedFinder *  _seedFinder;
+    StiTrackFinder *      _tracker;
+    StiStEventFiller *    _eventFiller;
+    StiTrackContainer *   _trackContainer;
+    StiVertexFinder*      _vertexFinder;
+    StMcEventMaker*       mMcEventMaker; //!
+    StAssociationMaker*   mAssociationMaker; //!
+    StiTrackingPlots*     _recPlotter;
+    StiTrackingPlots*     _mcPlotter;
     ClassDef(StiMaker, 1)
 };
 

@@ -21,7 +21,7 @@ class StMcEvent;
 class StiStEventFiller;
 class StiKalmanTrackFinderParameters;
 template<class Factorized>class Factory;
-template<class Event,class Detector>class StiHitLoader;
+template<class Event,class McEvent,class Detector>class StiHitLoader;
 
 
 ///\class StiKalmanTrackFinder  
@@ -44,17 +44,17 @@ public:
   virtual void initialize();
   /// Load given event, and find all tracks of that event
   /// Optionally load the given (associated) monte carlo event
-  virtual void findTracks(StEvent * event,StMcEvent * mcEvent); 
+  //virtual void findTracks(StEvent * event,StMcEvent * mcEvent); 
   /// Load given event and MC event
-  virtual void reloadEvent();
+  //virtual void reloadEvent();
   /// Load given event and MC event
-  virtual void loadEvent(StEvent * event,StMcEvent * mcEvent);
+  //virtual void loadEvent(StEvent * event,StMcEvent * mcEvent);
   /// Load hits from the given source
-  virtual void loadHits(StEvent * event);
+  //virtual void loadHits(StEvent * event);
   /// Load tracks from the given source
-  virtual void loadTracks(StEvent * event);
+  //virtual void loadTracks(StEvent * event);
   /// Load MC tracks from the given source
-  virtual void loadMcTracks(StMcEvent * mcEvent);
+  //virtual void loadMcTracks(StMcEvent * mcEvent);
   /// Find all tracks of the currently loaded event
   virtual void findTracks(); 
   /// Find/extend the given track, in the given direction
@@ -107,8 +107,6 @@ public:
   void doFinishTrackSearch();
   void doNextTrackStep();
 
-  
-
 protected:
 
     void printState();
@@ -122,7 +120,7 @@ protected:
     Factory<StiMcTrack>         * _mcTrackFactory;
     Factory<StiHit>             * _hitFactory;
     StiDetectorContainer        * _detectorContainer;
-    StiHitLoader<StEvent,StiDetectorBuilder> * _hitLoader;
+    StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * _hitLoader;
     StiHitContainer             * _hitContainer;
     StiTrackContainer           * _trackContainer;
     StiTrackContainer           * _mcTrackContainer;

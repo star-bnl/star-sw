@@ -37,7 +37,7 @@ public:
   friend StiKalmanTrackNode;
   
  protected:
-  
+  bool   useMcAsRec;
   bool   useTrackFilter;
   bool   elossCalculated;
   bool   mcsCalculated; 
