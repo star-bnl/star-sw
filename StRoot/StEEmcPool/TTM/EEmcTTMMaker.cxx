@@ -1,8 +1,60 @@
-// *-- Author : Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
-// *-- Date   : 2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.3 2004/01/06 22:42:55 zolnie Exp $
-// see README for Info
+/// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
+/// \date   2003/12/08 
+// $Id: EEmcTTMMaker.cxx,v 1.4 2004/01/14 22:59:02 zolnie Exp $
+// doxygen info here
+/** 
+    \mainpage TTM - an endcap Tower to Track Match maker
 
+    \section intro Introduction
+    This a MuDST based class to get tower calibration from matching TPC tracks
+    Since cint in root/root4star does not allow to pass function pointers 
+    (that would be ideal for user defineable AcceptTrack/MatchTrack)
+    we're stuck with FORTRAN++
+
+
+    \section algorithm Algorithm
+    
+    1. build a list of good TPC tracks/event (using AcceptTrack)
+     - flag() > 0        (see StEvent manual for information)
+     - type() == primary (see StEvent manual for information)
+     - hits/track      >= mMinTrackHits   (user changeable via SetMinTrackHits  (Int_t    v)
+     - track  length   >= mMinTrackLength (user changeable via SetMinTrackLength(Double_t v)
+     - transverse momentum >= mMinTrackPt     (user changeable via SetMinTrackPt    (Double_t v)
+
+     2. loop over all EEMC tower hits (with adc>ped)
+     for each track check if it matches a tower at preselected positions (mZ)
+         - extrapolate track to a mZ with ExtrapolateToZ() to get track_hit_position
+         - match is established with MatchTrack()
+	     - if the distance from track_hit_position to tower_center in phi/eta
+             - is smaller than mPhiFac/mEtaFac x tower_half_width
+         - if the match is found the data (see struct NTuple_TTM ) is written to mFileName file
+
+    \section params Parameters
+    user may change _almost_ everything
+    - mMinTrackHits   (default kDefMinTrackHits  ) changeable via SetMinTrackHits  (Int_t    v)
+    - mMinTrackLength (default kDefMinTrackLength) changeable via SetMinTrackLength(Double_t v)
+    - mMinTrackPt     (default kDefMinTrackPt    ) changeable via SetMinTrackPt    (Double_t v)
+    - mPhiFac/mEtaFac (default 1.0)  user changeable via  SetPhiFactor/SetEtaFactor(Double_t v)
+    - mZ              (default   "pres" => kEEmcZPRE1+0.1,
+	                         "post" => kEEmcZPOST-0.1,
+	                         "smd"  => kEEmcSMD       ) 
+
+	 changeable via ResetZPositions() and subsequent calls to AppendZPosition("name",value)
+
+	 NOTE: "name" will define 2 new branches in TTree deta+name and dphi+name
+                     that will hold distances in eta/phi for matched tracks for further cutting
+                     to e.g. reduce fiducial volume         
+     - mFileName       (default lowercase(MakerName)+".root") changeable with SetFileName
+
+
+     \section example Example
+     see macros/ttm.C for detais         
+
+     \section final Final Analysis 
+     is done with macros e.g. mipcalib.C 
+     info to be written 
+
+ */
 
 #include <iostream>
 
@@ -57,6 +109,10 @@ const Double_t EETowTrackMatchMaker::kDefMinTrackPt     =  0.5;
 
 
 //_____________________________________________________________________________
+//! the TTM constructor
+/// \param self     this maker name (const char*)
+/// \param mumaker a pointer to a StMuDstMaker 
+/// \param dbmaker a pointer to a StEEmcDbMaker 
 EETowTrackMatchMaker::EETowTrackMatchMaker(
 					   const char* self      , // this maker name
 					   StMuDstMaker  *mumaker,
@@ -107,6 +163,7 @@ EETowTrackMatchMaker::EETowTrackMatchMaker(
 }
 
 //_____________________________________________________________________________
+/// destructor - cleanup
 EETowTrackMatchMaker::~EETowTrackMatchMaker(){
   if(mTree !=NULL) delete mTree;
   if(mFile !=NULL) delete mFile;
@@ -116,6 +173,7 @@ EETowTrackMatchMaker::~EETowTrackMatchMaker(){
 
 
 //_____________________________________________________________________________
+/// Init()
 Int_t 
 EETowTrackMatchMaker::Init(){
 
@@ -189,6 +247,7 @@ EETowTrackMatchMaker::Init(){
 }
 
 //_____________________________________________________________________________
+/// Make()
 Int_t 
 EETowTrackMatchMaker::Make(){
   mNEvents++;
@@ -341,6 +400,7 @@ EETowTrackMatchMaker::Make(){
 }
 
 //_____________________________________________________________________________
+/// clear maker (does nothing at the moment)
 void
 EETowTrackMatchMaker::Clear(Option_t *option ) {
   //TString opt = option;
@@ -350,6 +410,7 @@ EETowTrackMatchMaker::Clear(Option_t *option ) {
 }
 
 //_____________________________________________________________________________
+/// finish the job, write TTree 
 Int_t 
 EETowTrackMatchMaker::Finish () {
   if(mFile)      mFile->Write();
@@ -358,7 +419,8 @@ EETowTrackMatchMaker::Finish () {
 
 
 //_____________________________________________________________________________
-/// AcceptTrack() - accept track function
+//! default criterion of track acceptance
+//! \param track a pointer to a current StMuTrack
 Bool_t 
 EETowTrackMatchMaker::AcceptTrack(const StMuTrack *track) {
   if(! track->topologyMap().trackTpcOnly()  ) return kFALSE;
@@ -371,7 +433,12 @@ EETowTrackMatchMaker::AcceptTrack(const StMuTrack *track) {
 }
 
 //_____________________________________________________________________________
-/// MatchTrack() - decide if a track matches a tower or not
+//! default criterion whether a track matches a tower or not
+/// \param dphi  a distance from track hit to tower centre in phi
+/// \param deta  a distance from track hit to tower centre in eta
+/// \param phihw a tower half-width in phi
+/// \param etahw a tower half-width in eta
+/// \return Bool_t 
 Bool_t 
 EETowTrackMatchMaker::MatchTrack(
 				 const double dphi , // track hit to tower center distance
@@ -386,6 +453,11 @@ EETowTrackMatchMaker::MatchTrack(
 				   
 
 //_____________________________________________________________________________
+//! given track and position z return TVector3 with a 
+/// \param track a const pointer to current track
+/// \param z     a z (along the beam) position where 
+/// \param r     a TVector (returned)
+/// \return boolean indicating if track crosses a plane
 Bool_t
 EETowTrackMatchMaker::ExtrapolateToZ(const StMuTrack *track, const double   z, TVector3 &r)
 {
@@ -407,6 +479,9 @@ EETowTrackMatchMaker::ExtrapolateToZ(const StMuTrack *track, const double   z, T
 
 
 //_____________________________________________________________________________
+/// prints matching cuts and statistics summary
+/// \param out an ostream to print to 
+/// \return ostream 
 ostream& 
 EETowTrackMatchMaker::Summary(ostream &out ) const
 {
@@ -448,6 +523,9 @@ ostream&  operator<<(ostream &out, const EETowTrackMatchMaker& ttm)  {
 };
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.4  2004/01/14 22:59:02  zolnie
+// use doxygen for documentation
+//
 // Revision 1.3  2004/01/06 22:42:55  zolnie
 // provide summary/statistics info
 //
