@@ -8,6 +8,9 @@
 // and both charge signs
 // 
 // $Log: StiEvaluator.cxx,v $
+// Revision 1.34  2003/06/19 01:37:03  calderon
+// Adding all the histograms from Zbigniew.
+//
 // Revision 1.33  2002/11/27 00:08:55  calderon
 // New version of evaluator using the minimctrees
 //
@@ -28,6 +31,9 @@ StiEvaluator::StiEvaluator() :
     mFitPtsLimit(99),
     mDcaLimit(99),
     mGeantId(9999),
+    mEtaMinimum(-10),
+    mEtaMaximum(10),
+    mPullType(0),
     mFileName(0),
     mChain(0)
 {
@@ -36,6 +42,9 @@ StiEvaluator::StiEvaluator(const StiEvaluator& e) :
     mFitPtsLimit(e.mFitPtsLimit),
     mDcaLimit(e.mDcaLimit),
     mGeantId(e.mGeantId),
+    mEtaMinimum(e.mEtaMinimum),
+    mEtaMaximum(e.mEtaMaximum),
+    mPullType(e.mPullType),
     mFileName(e.mFileName),
     mChain(e.mChain)
 {
@@ -47,12 +56,19 @@ StiEvaluator::~StiEvaluator() {
 int StiEvaluator::initialize() {
     cout << "StiEvaluator::initialize()" << endl;
     EfficiencyAnalysis AnalysisPiPlHi;
-
+    
     AnalysisPiPlHi.setFitPtsLimit(mFitPtsLimit); //cut is >=
     AnalysisPiPlHi.setDcaLimit(mDcaLimit);
+    AnalysisPiPlHi.setEtaRange(mEtaMinimum,mEtaMaximum);
+    AnalysisPiPlHi.setPullType(mPullType);
     AnalysisPiPlHi.setGeantId(8);   
     AnalysisPiPlHi.setFileName(mFileName); // should already be figured out in the macro
 
+    cout << "cuts " << endl;
+    cout << "fit points >= " << mFitPtsLimit << endl; 
+    cout << "global dca <= " << mDcaLimit    << endl; 
+    cout << "eta limits    " << mEtaMinimum << " - " << mEtaMaximum << endl;
+    cout << "pull (tpt/it) " << mPullType   << endl;
     // copy construct so that the track cuts, and file name are identical
     cout << "made efficiency analysis, now make its copies and set their geant id's" << endl;
     EfficiencyAnalysis AnalysisPiPlMe(AnalysisPiPlHi);
@@ -92,6 +108,11 @@ int StiEvaluator::initialize() {
     EfficiencyAnalysis AnalysisPrMiMe(AnalysisPrMiHi);
     EfficiencyAnalysis AnalysisPrMiLo(AnalysisPrMiHi);
 
+    // inclusive
+    EfficiencyAnalysis AnalysisAllHi(AnalysisPiPlHi);
+    AnalysisAllHi.setGeantId(9999);   
+    EfficiencyAnalysis AnalysisAllMe(AnalysisAllHi);
+    EfficiencyAnalysis AnalysisAllLo(AnalysisAllHi);
     
     
     mEfficiencyAnalysisVector.push_back(AnalysisPiPlHi); // index 0
@@ -112,6 +133,9 @@ int StiEvaluator::initialize() {
     mEfficiencyAnalysisVector.push_back(AnalysisPrMiHi); // index 15
     mEfficiencyAnalysisVector.push_back(AnalysisPrMiMe); // index 16
     mEfficiencyAnalysisVector.push_back(AnalysisPrMiLo); // index 17
+    mEfficiencyAnalysisVector.push_back(AnalysisAllHi);  // index 18
+    mEfficiencyAnalysisVector.push_back(AnalysisAllMe);  // index 19
+    mEfficiencyAnalysisVector.push_back(AnalysisAllLo);  // index 20
 
     // the name of output histogram should be different though
     cout << "Figure out output names " << endl;
@@ -130,6 +154,9 @@ int StiEvaluator::initialize() {
 	cout << mEfficiencyAnalysisVector[i].suffix() << endl;
 	mEfficiencyAnalysisVector[i].createHistograms();
     }
+    mEfficiencyAnalysisVector[18].setSuffix("HiAll");
+    mEfficiencyAnalysisVector[19].setSuffix("MeAll");
+    mEfficiencyAnalysisVector[20].setSuffix("LoAll");
 
     return 0;
 }
@@ -180,7 +207,7 @@ void StiEvaluator::makehistograms() {
 	btree->GetEntry(i);
 	size_t mcMultiplicity = (size_t) minimcevent->mNMcTrack;
 	
-	if (-25. < minimcevent->mVertexZ && minimcevent->mVertexZ < 25.) {
+	if (-50. < minimcevent->mVertexZ && minimcevent->mVertexZ < 50.) {
 
   	    cout << "Getting Event " << i << ", z vertex " << minimcevent->mVertexZ << ", mc mult " << mcMultiplicity << endl;
  	    
@@ -191,6 +218,7 @@ void StiEvaluator::makehistograms() {
 	    mEfficiencyAnalysisVector[index+9].fillHistograms(minimcevent);
 	    mEfficiencyAnalysisVector[index+12].fillHistograms(minimcevent);
 	    mEfficiencyAnalysisVector[index+15].fillHistograms(minimcevent);
+            mEfficiencyAnalysisVector[index+18].fillHistograms(minimcevent);
 	}
     }
     return;
@@ -211,6 +239,14 @@ void StiEvaluator::setFitPtsLimit(double val) { mFitPtsLimit = val;}
 void StiEvaluator::setDcaLimit(double val) { mDcaLimit = val;}
 
 void StiEvaluator::setGeantId(int val) { mGeantId = val;}
+
+void StiEvaluator::setEtaRange(double val1, double val2) 
+{
+  mEtaMinimum = val1;
+  mEtaMaximum = val2;
+}
+
+void StiEvaluator::setPullType(bool val) { mPullType = val;}
 
 void StiEvaluator::setFileName(char* val) { mFileName = val;}
 
