@@ -1,7 +1,12 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.14 2000/05/11 15:34:29 calderon Exp $
+ * $Id: StAssociationMaker.h,v 1.15 2000/06/09 19:54:02 calderon Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.15  2000/06/09 19:54:02  calderon
+ * use the new StMcHitComparisons
+ * use the message manager more extensively
+ * protection against the absence of hit collections
+ *
  * Revision 1.14  2000/05/11 15:34:29  calderon
  * added option to print memory usage using StMemoryInfo, useful
  * for checking leaks.  If used, a lot of status information is printed
@@ -168,13 +173,13 @@ struct compMcVertex {
 //
 // TPC
 //
-typedef  multimap<const StTpcHit*, const StMcTpcHit*, compTpcHit>   rcTpcHitMapType;//!
-typedef  multimap<const StMcTpcHit*, const StTpcHit*, compMcTpcHit> mcTpcHitMapType;//!
+typedef  multimap<const StTpcHit*, const StMcTpcHit*, compHit>   rcTpcHitMapType;//!
+typedef  multimap<const StMcTpcHit*, const StTpcHit*, compMcHit> mcTpcHitMapType;//!
 //
 // SVT
 //
-typedef  multimap<const StSvtHit*, const StMcSvtHit*, compSvtHit>   rcSvtHitMapType;//!
-typedef  multimap<const StMcSvtHit*, const StSvtHit*, compMcSvtHit> mcSvtHitMapType;//!
+typedef  multimap<const StSvtHit*, const StMcSvtHit*, compHit>   rcSvtHitMapType;//!
+typedef  multimap<const StMcSvtHit*, const StSvtHit*, compMcHit> mcSvtHitMapType;//!
 //
 // FTPC
 //
@@ -212,10 +217,10 @@ typedef  const StTpcHit*    mcTpcHitMapValue;
 typedef  const StMcTpcHit*  rcTpcHitMapValue;
 typedef  const StMcTpcHit*  mcTpcHitMapKey;
 
-typedef  multimap<rcTpcHitMapKey, rcTpcHitMapValue, compTpcHit,
+typedef  multimap<rcTpcHitMapKey, rcTpcHitMapValue, compHit,
     allocator< OS_PAIR(rcTpcHitMapKey, rcTpcHitMapValue) > > rcTpcHitMapType;//!
 
-typedef  multimap<mcTpcHitMapKey, mcTpcHitMapValue, compMcTpcHit,
+typedef  multimap<mcTpcHitMapKey, mcTpcHitMapValue, compMcHit,
     allocator< OS_PAIR(mcTpcHitMapKey, mcTpcHitMapValue) > > mcTpcHitMapType;//!
 //
 // SVT
@@ -225,10 +230,10 @@ typedef  const StSvtHit*    mcSvtHitMapValue;
 typedef  const StMcSvtHit*  rcSvtHitMapValue;
 typedef  const StMcSvtHit*  mcSvtHitMapKey;
 
-typedef  multimap<rcSvtHitMapKey, rcSvtHitMapValue, compSvtHit,
+typedef  multimap<rcSvtHitMapKey, rcSvtHitMapValue, compHit,
     allocator< OS_PAIR(rcSvtHitMapKey, rcSvtHitMapValue) > > rcSvtHitMapType;//!
 
-typedef  multimap<mcSvtHitMapKey, mcSvtHitMapValue, compMcSvtHit,
+typedef  multimap<mcSvtHitMapKey, mcSvtHitMapValue, compMcHit,
     allocator< OS_PAIR(mcSvtHitMapKey, mcSvtHitMapValue) > > mcSvtHitMapType;//!
 //
 // FTPC
@@ -442,7 +447,7 @@ private:
     Bool_t drawinit;
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.14 2000/05/11 15:34:29 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.15 2000/06/09 19:54:02 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker, 1)
 
