@@ -1,5 +1,8 @@
-// $Id: read_bfc_hist_list.C,v 1.2 1999/06/03 17:55:26 kathy Exp $ 
+// $Id: read_bfc_hist_list.C,v 1.3 1999/06/22 18:14:26 kathy Exp $ 
 // $Log: read_bfc_hist_list.C,v $
+// Revision 1.3  1999/06/22 18:14:26  kathy
+// change default input files and fix name of macro
+//
 // Revision 1.2  1999/06/03 17:55:26  kathy
 // changed DrawDstHist from using St_io_Maker to Victor's new StIOMaker - actually just copied doEvents to DrawDstHist and hacked it. Fixed comments in read_bfc_hist_list.C
 // 
@@ -18,8 +21,8 @@ St_DataSet *Event;
 StChain *chain;
 TBrowser *brow=0;
 
-void Example_pmj(Int_t nevents=1, const char
-*MainFile="/disk00000/star/test/new/tfs_Solaris/year_1b/psc0069_01_40evts.hist.root")
+void read_bfc_hist_list(Int_t nevents=1, const char
+*MainFile="/disk00000/star/test/dev/tfs_Linux/Thu/year_2a/psc0208_01_40evts.hist.root")
 
 {
 //
@@ -29,7 +32,7 @@ void Example_pmj(Int_t nevents=1, const char
     gSystem->Load("StTreeMaker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StRootEvent");
-
+   
 //  Input Tree
   StTreeMaker *treeMk = new StTreeMaker("treeRead",MainFile);
   treeMk->SetIOMode("r");
