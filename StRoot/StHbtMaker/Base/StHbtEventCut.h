@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventCut.h,v 1.6 2000/03/23 22:43:27 laue Exp $
+ * $Id: StHbtEventCut.h,v 1.7 2000/04/03 16:21:19 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEventCut.h,v $
+ * Revision 1.7  2000/04/03 16:21:19  laue
+ * some include files changed
+ *
  * Revision 1.6  2000/03/23 22:43:27  laue
  * Clone() function implemented in cuts.
  *
@@ -59,7 +62,6 @@
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Infrastructure/StHbtCutMonitorHandler.h"
-#include <string>
 
 class StHbtEventCut : public StHbtCutMonitorHandler {
 

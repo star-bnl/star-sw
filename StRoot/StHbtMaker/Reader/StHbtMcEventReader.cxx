@@ -14,7 +14,7 @@
 
 // c++ stuff
 //#include <typeinfo>
-#include <cmath>
+#include <math.h>
 
 // hbt stuff
 #include "SystemOfUnits.h"   // has "tesla" in it
@@ -164,7 +164,6 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
   //cout << " *  primary Vertex = " << VertexPosition << endl;
     
   StHbtEvent* hbtEvent = new StHbtEvent;
-
   hbtEvent->SetEventNumber(EventNumber);
   hbtEvent->SetCtbMult(0.);
   hbtEvent->SetZdcAdcEast(0.);
@@ -217,6 +216,8 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
 #endif
     //cout << " P     " << hbtTrack->P() << endl;
 
+    hbtTrack->SetTrackId(track->key());
+
     hbtTrack->SetNHits( nTpcHits );               // hits in Tpc
     hbtTrack->SetNHitsPossible(nTpcHits );        // hits in Tpc
     //cout << " NHits " << hbtTrack->NHits() << endl;
@@ -229,33 +230,44 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
     //cout << geantPid << " " << track->particleDefinition()->mass() << " " << track->particleDefinition()->charge() << endl;
 
     switch (geantPid) {
+    case 11:  // intentional fall-through
+    case -11:  // gid=211,-211 is pion
+      hbtTrack->SetNSigmaElectron(0.);
+      hbtTrack->SetNSigmaPion(-999.);
+      hbtTrack->SetNSigmaKaon(-999.);
+      hbtTrack->SetNSigmaProton(-999.);
+      break;
     case 211:  // intentional fall-through
     case -211:  // gid=211,-211 is pion
+      hbtTrack->SetNSigmaElectron(999.);
       hbtTrack->SetNSigmaPion(0.);
       hbtTrack->SetNSigmaKaon(-999.);
       hbtTrack->SetNSigmaProton(-999.);
       break;
     case 321:  // intentional fall-through
     case -321:  // gid=321,-321 is kaon
+      hbtTrack->SetNSigmaElectron(999.);
       hbtTrack->SetNSigmaPion(999.0);
       hbtTrack->SetNSigmaKaon(0.);
       hbtTrack->SetNSigmaProton(-999.);
       break;
     case 2212:  // intentional fall-through
     case -2212:  // gid=2212,-2212 is proton
+      hbtTrack->SetNSigmaElectron(999.);
       hbtTrack->SetNSigmaPion(999.);
       hbtTrack->SetNSigmaKaon(999.);
       hbtTrack->SetNSigmaProton(0.);
       break;
     default:
+      hbtTrack->SetNSigmaElectron(999.);
       hbtTrack->SetNSigmaPion(999.);
       hbtTrack->SetNSigmaKaon(999.);
       hbtTrack->SetNSigmaProton(999.);
       break;
     }
 
-    //cout << "Nsig pion,kaon,proton : " << hbtTrack->NSigmaPion() << " ";
-    //cout << hbtTrack->NSigmaKaon() << " " << hbtTrack->NSigmaProton() << " PDG code " << geantPId << endl;
+    //cout << "Nsig electron,pion,kaon,proton : " << hbtTrack->NSigmaElectron() << " ";
+    //cout << hbtTrack->NSigmaPion() << " " hbtTrack->NSigmaKaon() << " " << hbtTrack->NSigmaProton() << " PDG code " << geantPId << endl;
    
     hbtTrack->SetdEdx( dedxMean( track->particleDefinition()->mass(),  track->momentum().mag() ) ); // not in mike's
     //cout << " dedx " << hbtTrack->Dedx() << endl;

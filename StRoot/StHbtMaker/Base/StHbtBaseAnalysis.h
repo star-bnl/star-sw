@@ -17,7 +17,6 @@
 #include "StHbtMaker/Base/StHbtEventCut.h"
 #include "StHbtMaker/Base/StHbtParticleCut.h"
 #include "StHbtMaker/Infrastructure/StHbtPicoEventCollection.hh"
-#include <string>
 
 class StHbtMixingBuffer;
 

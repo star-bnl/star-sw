@@ -16,7 +16,6 @@
  * 
  **************************************************************************/
 
-#include <string>
 #include "StHbtMaker/Reader/StHbtBinaryReader.h"
 #include "StHbtMaker/Infrastructure/StHbtIOBinary.hh"
 
@@ -32,7 +31,8 @@ void wait(int n, const char* c) {
 
 
 //_______________________________
-StHbtBinaryReader::StHbtBinaryReader() : mInputStream(0), mOutputStream(0), mReaderStatus(ioOK), mFileName(0), mFileList(0) {
+StHbtBinaryReader::StHbtBinaryReader() : mInputStream(0), mOutputStream(0), mReaderStatus(ioOK), mDirName(0), mFileName(0), mFileList(0), mRetrieve(0) {
+  mStHbtEventVersion = mStHbtTrackVersion = mStHbtV0Version = 1;
 #ifdef __ROOT__
   mIOMaker =0;
 #endif
@@ -41,6 +41,7 @@ StHbtBinaryReader::StHbtBinaryReader() : mInputStream(0), mOutputStream(0), mRea
 #ifdef __ROOT__
 StHbtBinaryReader::StHbtBinaryReader(StIOMaker* ioMaker) {
   StHbtBinaryReader();
+  mRetrieve = 1;
   mIOMaker = ioMaker;
 #ifdef STHBTDEBUG
   cout << " StHbtBinaryReader::StHbtBinaryReader(StIOMaker* ioMaker) -  mIOMaker : " << mIOMaker << endl;
@@ -90,14 +91,13 @@ StHbtEvent* StHbtBinaryReader::ReturnHbtEvent(){
 //_______________________________
 int StHbtBinaryReader::WriteHbtEvent(StHbtEvent* event){
 #ifdef __ROOT__
-  if (mIOMaker) {
+  if (mIOMaker && mRetrieve==1) {
     if ( strcmp(mCurrentFile.c_str(),mIOMaker->GetFile()) ) {
       cout << " StHbtBinaryReader::WriteHbtEvent(StHbtEvent* event)  " << endl;
       cout << "   current file : " << mCurrentFile.c_str() << endl;
       cout << "   new     file : " << mIOMaker->GetFile() << endl;
       mCurrentFile = mIOMaker->GetFile();
-      char* append = ".microDST";
-      mFileName = (mCurrentFile+append).c_str();
+      mFileName = (mCurrentFile).c_str();
       cout << "   open file    : " << mFileName << endl;
       if ( binaryIO ) delete binaryIO; // this closes the file
       mReaderStatus = Init("w",mTheMessage);  // instantiate new writer, open file <mFileName>			
@@ -129,17 +129,27 @@ int StHbtBinaryReader::Init(const char* ReadWrite, StHbtString& Message){
   cout << mFileName << endl;
   mReaderStatus = ioOK;
   if (((*ReadWrite)=='r')|| ((*ReadWrite)=='R')){  // this object will be a reader
-    binaryIO = new StHbtIOBinary(mFileName,"r");   // create input object and open file 
+    binaryIO = new StHbtIOBinary( mDirName,mFileName, mAppendix ,"r");   // create input object and open file 
     binaryIO->readString(Message);                 // read file header
     if (mTheMessage!=Message) {
       mTheMessage = Message;
       cout << Message.c_str() << endl;
     }
+
+    binaryIO->read(mStHbtEventVersion);
+    binaryIO->read(mStHbtTrackVersion);
+    binaryIO->read(mStHbtV0Version);
+    cout << " StHbtEventVersion=" << mStHbtEventVersion;
+    cout << " StHbtTrackVersion=" << mStHbtTrackVersion;
+    cout << " StHbtV0Version=" << mStHbtV0Version << endl;
   }
   else{                                            // this object will be a writer
     mTheMessage = Message;
-    binaryIO = new StHbtIOBinary(mFileName,"w");   // create output object and open file
+    binaryIO = new StHbtIOBinary(mDirName, mFileName, mAppendix,"w");   // create output object and open file
     binaryIO->writeString(Message);                // output file header (Message);
+    binaryIO->write(mStHbtEventVersion);
+    binaryIO->write(mStHbtTrackVersion);
+    binaryIO->write(mStHbtV0Version);
   }
   cout << " StHbtBinaryReader::Init(const char* ReadWrite, StHbtString& Message) - mReaderStatus: " << mReaderStatus << endl;
  return (mReaderStatus);
@@ -149,9 +159,24 @@ int StHbtBinaryReader::Init(const char* ReadWrite, StHbtString& Message){
 void StHbtBinaryReader::Finish(){
 }
 //_______________________________
-void StHbtBinaryReader::SetFileName(char* file){mFileName=file;}
+int StHbtBinaryReader::NextFile() {
+  mFileName="";
+  delete (mFileList->front());              // remove current file from list
+  mFileList->pop_front();                   // remove current file from list
+  if ( mFileList->empty() ) return ioEOL;
+  mFileName = mFileList->front()->c_str();  // get next file
+#ifdef STHBTDEBUG 
+  cout << " StHbtBinaryReader::NextFile() - mFileName: " << mFileName << endl;
+#endif
+  return ioOK;
+}
 //_______________________________
-void StHbtBinaryReader::AddFileList(char* fileList) {
+void StHbtBinaryReader::SetFileName(const char* file){mFileName=(char*)file;}
+void StHbtBinaryReader::SetDirName(const char* dir){mDirName=(char*)dir;}
+void StHbtBinaryReader::SetAppendix(const char* appendix){mAppendix=(char*)appendix;}
+void StHbtBinaryReader::SetRetrieveFileName(const int r){ mRetrieve = r;}
+//_______________________________
+void StHbtBinaryReader::AddFileList(const char* fileList) {
   cout << " StHbtBinaryReader::AddFileList(char* fileList)"<< endl;
   if (!mFileList) mFileList = new fileCollection;
   ifstream* inputStream = new ifstream;
@@ -175,15 +200,4 @@ void StHbtBinaryReader::AddFileList(char* fileList) {
   if (!mFileList->empty())
     mFileName = mFileList->front()->c_str();
 }
-//_______________________________
-int StHbtBinaryReader::NextFile() {
-  mFileName="";
-  delete (mFileList->front());              // remove current file from list
-  mFileList->pop_front();                   // remove current file from list
-  if ( mFileList->empty() ) return ioEOL;
-  mFileName = mFileList->front()->c_str();  // get next file
-#ifdef STHBTDEBUG 
-  cout << " StHbtBinaryReader::NextFile() - mFileName: " << mFileName << endl;
-#endif
-  return ioOK;
-}
+

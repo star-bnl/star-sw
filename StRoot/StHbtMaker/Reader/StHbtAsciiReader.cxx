@@ -14,10 +14,7 @@
  * 
  **************************************************************************/
 
-#include <string>
 #include "StHbtMaker/Reader/StHbtAsciiReader.h"
-//#include "StChain.h"
-//#include "StHbtMaker/Infrastructure/StHbtIO.cc"
 
 #ifdef __ROOT__
 ClassImp(StHbtAsciiReader)
@@ -28,12 +25,14 @@ ClassImp(StHbtAsciiReader)
 StHbtAsciiReader::StHbtAsciiReader() : mInputStream(0), mOutputStream(0){
   mFileName = "HbtAsciiFile";  // default name
   mReaderStatus = 0;           // means "good"
+  mStHbtEventVersion = mStHbtTrackVersion = mStHbtV0Version = 1;
 }
 
 //_______________________________
 StHbtAsciiReader::StHbtAsciiReader(char* file) : mInputStream(0), mOutputStream(0), mFileName(file)
 {
   mReaderStatus = 0;           // means "good"
+  mStHbtEventVersion = mStHbtTrackVersion = mStHbtV0Version = 1;
 }
 
 //_______________________________
@@ -124,6 +123,10 @@ int StHbtAsciiReader::Init(const char* ReadWrite, StHbtString& Message){
     } while (stemp != "-*-*-*-* End of Input Reader Report");
     cout << "Here is the message that was at the beginning of the file...\n";
     cout << Message.c_str();
+    (*mInputStream) >> mStHbtEventVersion >> mStHbtTrackVersion >> mStHbtV0Version;
+    cout << " StHbtEventVersion=" << mStHbtEventVersion;
+    cout << " StHbtTrackVersion=" << mStHbtTrackVersion;
+    cout << " StHbtV0Version=" << mStHbtV0Version << endl;
   }
   else{                                      // this object will be a writer
     mOutputStream = new ofstream;
@@ -138,6 +141,7 @@ int StHbtAsciiReader::Init(const char* ReadWrite, StHbtString& Message){
     (*mOutputStream) << Message.c_str();
     (*mOutputStream) << endl;
     (*mOutputStream) << "-*-*-*-* End of Input Reader Report" << endl;  // write THIS out even if there is no report
+    (*mOutputStream) << mStHbtEventVersion << " " << mStHbtTrackVersion << " " << mStHbtV0Version << endl;
   }
   return (0);
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPairCut.h,v 1.5 2000/03/23 22:43:27 laue Exp $
+ * $Id: StHbtPairCut.h,v 1.6 2000/04/03 16:21:19 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPairCut.h,v $
+ * Revision 1.6  2000/04/03 16:21:19  laue
+ * some include files changed
+ *
  * Revision 1.5  2000/03/23 22:43:27  laue
  * Clone() function implemented in cuts.
  *
@@ -80,6 +83,7 @@ public:
 #endif
   // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
   friend class StHbtAnalysis;
+  friend class StHbtLikeSignAnalysis;
   StHbtAnalysis* HbtAnalysis(){return myAnalysis;};
 
 protected:
