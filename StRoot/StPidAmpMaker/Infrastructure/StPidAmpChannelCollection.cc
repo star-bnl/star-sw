@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannelCollection.cc,v 1.1.1.1 2000/03/09 17:48:35 aihong Exp $
+ * $Id: StPidAmpChannelCollection.cc,v 1.2 2000/03/24 17:47:18 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannelCollection.cc,v $
+ * Revision 1.2  2000/03/24 17:47:18  aihong
+ * modify writeBGBands2Disk()
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:35  aihong
  * Installation of package
  *
@@ -428,9 +431,10 @@ void StPidAmpChannelCollection::writeAmp2Disk(){
    fileName.Append(mName.c_str());
    fileName.Append("Amp.root");
 
-   TFile *theFile=new TFile(fileName,"recreate",fileName);
-   TTree* netSetTree=new TTree("netSetTree", "netSetTree");
-   TObjArray* channelLevel=0;
+   TFile*     theFile     = new TFile(fileName,"recreate",fileName);
+   TTree*     netSetTree  = new TTree("netSetTree", "netSetTree");
+   TObjArray* channelLevel= 0;
+
    TBranch* br=netSetTree->Branch("netSetBranch","TObjArray", &channelLevel, bufSize,splitLevel);
 
    for (i=0; i<mChannelCollect->size(); i++) {
@@ -442,8 +446,7 @@ void StPidAmpChannelCollection::writeAmp2Disk(){
     for (j=0; j<(((*mChannelCollect)[i])->netVector())->size();j++) {
     theNet=(*(theChannel->netVector()))[j];
     StPidAmpNetOut* theNetOut=new StPidAmpNetOut( theNet->netOut() );
-    // for (int k=0; k<(theNetOut->GetBandParArray()).GetSize();k++)
-    //  cout<<(theNetOut->GetBandParArray()).At(k)<<endl;
+   
      channelLevel->AddLast(theNetOut);
     }
 
@@ -523,7 +526,7 @@ void StPidAmpChannelCollection::writeBGBands2Disk(){
    fileName.Append(mName.c_str());
    fileName.Append("BGBands.root");
 
-   TFile *theFile=new TFile(fileName,"recreate",fileName);
+   TFile*          theFile =new TFile(fileName,"recreate",fileName);
    StPidAmpNetOut* bgNetOut=new StPidAmpNetOut( mBGNet->netOut() );
 
    //the name from mBGNet->netOut is setname+mBGname. 
@@ -538,6 +541,7 @@ void StPidAmpChannelCollection::writeBGBands2Disk(){
     for (j=0; j<(theChannel->netVector())->size();j++) {
     theNet=(*(theChannel->netVector()))[j];
     StPidAmpNetOut* theNetOut=new StPidAmpNetOut(theNet->netOut());
+
     TArrayD bandPar=(theNet->netOut()).GetBandParArray();
          
    if (bandPar.GetSize()>=NBandParam) {
@@ -545,9 +549,14 @@ void StPidAmpChannelCollection::writeBGBands2Disk(){
          bandPar.AddAt((mBGNet->netOut()).GetBandParArray().At(i),i);//refresh bandPar.
    }
 
+     TArrayD dummyArray;
+
      theNetOut->SetBandParArray(bandPar);
-     theNetOut->SetAmpParArray(TArrayD());
-     theNetOut->SetResoParArray(TArrayD());
+     dummyArray.Set(NAmpParam); //TArrayD with size 0 won't be copied.
+     theNetOut->SetAmpParArray(dummyArray);
+     dummyArray.Set(NResoParam);
+     theNetOut->SetResoParArray(dummyArray);
+
      theNetOut->Write();
     }
 
