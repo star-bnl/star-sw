@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.24 2000/07/16 21:14:45 laue Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.25 2000/08/31 22:32:37 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.25  2000/08/31 22:32:37  laue
+ * Readers updated for new StHbtEvent version 3.
+ *
  * Revision 1.24  2000/07/16 21:14:45  laue
  * StStandardHbtEventReader modified to read primary tracks only
  *
@@ -108,13 +111,13 @@
  * Installation of StHbtMaker
  *
  **************************************************************************/
-#define HBT_BFIELD 0.25*tesla
- 
 #include "StHbtMaker/Reader/StStandardHbtEventReader.h"
 #include "StChain.h"
 
 
 #include "StEvent.h"
+#include "StEventTypes.h"
+#include "StEventUtilities/StuRefMult.hh"
 #include "StEventSummary.h"
 #include "StGlobalTrack.h"
 #include "StTrackNode.h"
@@ -129,7 +132,7 @@
 #include "StParticleTypes.hh"
 #include "StTpcDedxPidAlgorithm.h"
 #include "StHit.h"
-
+#include "StEventInfo.h"
 #include <math.h>
 
 
@@ -140,6 +143,11 @@
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
 
 #include "StEventMaker/StEventMaker.h"
+
+
+#include "StFlowTagMaker/StFlowTagMaker.h"
+#include "tables/St_FlowTag_Table.h"
+
 
 #ifdef __ROOT__
 ClassImp(StStandardHbtEventReader)
@@ -154,8 +162,8 @@ ClassImp(StStandardHbtEventReader)
 StStandardHbtEventReader::StStandardHbtEventReader(){
   mTheEventMaker=0;
   mTheV0Maker=0;
+  mTheTagReader = 0;
   mReaderStatus = 0;  // "good"
-
 }
 //__________________
 StStandardHbtEventReader::~StStandardHbtEventReader(){
@@ -194,19 +202,19 @@ StHbtString StStandardHbtEventReader::Report(){
 }
 //__________________
 StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
-
   cout << " StStandardHbtEventReader::ReturnHbtEvent()" << endl;
 
+  /////////////////
+  // get StEvent //
+  /////////////////
   StEvent* rEvent = 0;
-
   StEventMaker* tempMaker = (StEventMaker*) mTheEventMaker;
-
   rEvent = tempMaker->event();
-
   if (!rEvent){
     cout << " StStandardHbtEventReader::ReturnHbtEvent() - No StEvent!!! " << endl;
     return 0;
   }
+
   /*
   StEventSummary* summary = rEvent->summary();
   if (!summary){
@@ -214,8 +222,19 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     return 0;
   }
   */
-  StHbtEvent* hbtEvent = new StHbtEvent;
 
+  // if this event has no tags, then return
+  if (!mTheTagReader) {
+    cout << " StStandardHbtEventReader::ReturnHbtEvent() -  no tag reader " << endl;
+    return 0;
+  }
+  if (!mTheTagReader->EventMatch(rEvent->info()->runId() , rEvent->info()->id()) ) {
+    cout << " StStandardHbtEventReader::ReturnHbtEvent() -  no tags for this event" << endl;
+    return 0;
+  }
+
+
+  StHbtEvent* hbtEvent = new StHbtEvent;
   int mult = rEvent->trackNodes().size();
 
   if ( rEvent->numberOfPrimaryVertices() != 1) {
@@ -260,6 +279,9 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   int iBadFlag =0;
   int iPrimary = 0;
   int iGoodPrimary = 0;
+
+  int isPrimary = 1;
+
   // loop over all the tracks, accept only global
   for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
     pTrack = rEvent->trackNodes()[icount]->track(primary);
@@ -270,9 +292,21 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
       }
     }
   }
+
   
   hbtEvent->SetNumberOfTracks(iPrimary);
   hbtEvent->SetNumberOfGoodTracks(iGoodPrimary);
+  hbtEvent->SetUncorrectedNumberOfPositivePrimaries(0);
+  hbtEvent->SetUncorrectedNumberOfNegativePrimaries(uncorrectedNumberOfNegativePrimaries(*rEvent));
+  hbtEvent->SetEventNumber(mTheTagReader->tag("mEventNumber"));    
+  StHbtThreeVector a( mTheTagReader->tag("qxa",1), mTheTagReader->tag("qya",1),0);
+  StHbtThreeVector b( mTheTagReader->tag("qxb",1), mTheTagReader->tag("qyb",1),0);
+  float reactionPlane = (a+b).phi();
+  float reactionPlaneError = a.angle(b);
+  cout << " reactionPlane : " << reactionPlane/3.1415927*180.;
+  cout << " reactionPlaneError : " << reactionPlaneError/3.1415927*180. << endl;
+  hbtEvent->SetReactionPlane(reactionPlane);
+  hbtEvent->SetReactionPlaneError(reactionPlaneError);
   
 
   for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
@@ -284,7 +318,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     // don't make a hbtTrack if not a primary track
     if (!pTrack) {
       iNoPrimary++;
-      //cout << " No primary track -- skipping track" << endl;
+      isPrimary = -1;
       continue;
     }
     if (pTrack->flag() < 0) {
@@ -369,7 +403,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     hbtTrack->SetNHits(nhits);
 
     float nsige = PidAlgorithm->numberOfSigma(Electron);
-    //cout << "nsigpe\t\t" << nsigpe << endl;
+    //cout << "nsige\t\t" << nsige << endl;
     hbtTrack->SetNSigmaElectron(nsige);
 
     float nsigpi = PidAlgorithm->numberOfSigma(Pion);
@@ -395,7 +429,6 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     double pathlength = pTrack->geometry()->helix().pathLength(vp);
     //cout << "pathlength\t" << pathlength << endl;
     StHbtThreeVector p = pTrack->geometry()->momentum();
-    //StHbtThreeVector p = rTrack->geometry()->helix().momentumAt(pathlength,HBT_B_FIELD);
     //cout << "p: " << p << endl;
     hbtTrack->SetP(p);
 
@@ -416,7 +449,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     //cout << "pt\t\t\t" << pt << endl;
     //hbtTrack->SetPt(pt);
     
-    hbtTrack->SetPt(pt);
+    hbtTrack->SetPt(pt);   // flag secondary tracks
     
     int charge = (pTrack->geometry()->charge());
     //cout << "charge\t\t\t\t" << charge << endl;

@@ -62,7 +62,7 @@ void StHbtBinaryReader::init(const char* dir, const char* file, const char* appe
 
   mReaderStatus = ioOK;
   mRetrieve = 0;
-  mStHbtEventVersion = 1;
+  mStHbtEventVersion = 2;
   mStHbtTrackVersion = 2,
   mStHbtV0Version = 2;
 }
@@ -232,10 +232,12 @@ void StHbtBinaryReader::AddFileList(const char* fileList) {
     StHbtString* newFile = new StHbtString(temp);
     if ( newFile->length()>0 ) { 
       mFileList->push_back(newFile);
+#ifdef STHBTDEBUG
       cout << "    file " << newFile->c_str() << " added to file list " << endl;
+#endif
     }
   }
-  cout << " StHbtBinaryReader::FillFileList(char* fileList) - Constructing input file list done " << endl;
+  cout << " StHbtBinaryReader::FillFileList(char* fileList) - " << mFileList->empty() << " files in list " << endl;
   if (!mFileList->empty())
     mFileName = mFileList->front()->c_str();
 }
