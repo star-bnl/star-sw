@@ -9,8 +9,11 @@ class StEvent;
 class StAngleCorrAnalysisManager {
 
 private:
-  
+#ifdef ST_NO_TEMPLATE_DEF_ARGS
+  vector<StAngleCorrAnalysis*, allocator<StAngleCorrAnalysis*> > vec;
+#else
   vector<StAngleCorrAnalysis*> vec;
+#endif
   int mNumberOfTracksInPool,mNumberOfEventsInPool;
   
 public:

@@ -15,6 +15,7 @@
 #include <TFile.h>
 #include "TString.h"
 
+
 class StGlobalTrack;
 class StTrack;
 class StEvent;
@@ -48,8 +49,14 @@ private:
   StBackgroundTrackCollection mBackgroundTracks2;
  
   /* functions, diagnostics */
+#ifdef ST_NO_TEMPLATE_DEF_ARGS
+  vector<StAngleCorrFunction*, allocator<StAngleCorrFunction*> > functionLibrary;
+  vector<StDiagnosticTool*, allocator<StDiagnosticTool*> >       diagnosticsLibrary;
+#else
   vector<StAngleCorrFunction* > functionLibrary;
-  vector<StDiagnosticTool* >  diagnosticsLibrary;
+  vector<StDiagnosticTool* >    diagnosticsLibrary;
+#endif 
+
   TString name;
   TString DiagnoseEventStream,DiagnoseEventCuts;
   TString DiagnoseTracks,DiagnoseTrack1,DiagnoseTrack2;
