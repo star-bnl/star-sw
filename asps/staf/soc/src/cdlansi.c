@@ -509,10 +509,8 @@ cdl_load(char *lib_name)
 
 int cdl_load_(char *lib_name, int n)
 {
-    char name[82];
-    strncpy(name, lib_name, n); 
-    name[ n]=0; /* hjw 19Feb98 */
-    name[n] = '\0';
+    char name[500];
+    name[0]=0; strncat(name, lib_name, n); 
     return cdl_load(name);
 }
 
@@ -552,9 +550,8 @@ int cdl_unload(char *lib_name)
 
 int cdl_unload_(char *lib_name, int n)
 {
-    char name[82];
-    strncpy(name, lib_name, n); 
-    name[n] = '\0';
+    char name[500];
+    name[0] = '\0'; strncat(name, lib_name, n); 
     return cdl_unload(name);
 }
 
