@@ -138,8 +138,8 @@ public:
 };
 
 class TileFrame;
-
 class StIOMaker;
+class StiDisplayManager;
 
 class MainFrame : public TGMainFrame
 {    
@@ -175,7 +175,9 @@ public:
 private:
 
     static MainFrame* s_instance;
-    
+
+    StiDisplayManager * displayManager;
+
     virtual void CloseWindow();
     
     void ShowRootColors();

@@ -107,18 +107,17 @@ Bool_t TileFrame::HandleButton(Event_t *event)
 ClassImp(MainFrame)
     
     MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
-	: TGMainFrame(p, w, h),
-	  
-	  fCanvasWindow(0), fContainer(0),
-	  fMenuBar(0), fMenuFile(0), fMenuHelp(0), fDetectorMenu(0),
-	  fDetectorViewMenu(0), mSvtViewMenu(0), mTpcViewMenu(0),
-	  mIfcViewMenu(0), mAllViewMenu(0), mNavigateMenu(0),
-	  mTrackingMenu(0), mNextStepMenu(0),
-	  fMenuBarLayout(0), fMenuBarItemLayout(0), fMenuBarHelpLayout(0),
-	  mchain(0), mIoMaker(0),
-	  fTrackingFrame(0), fDoTrackStepButton(0),
-	  fFinishTrackButton(0), fFinishEventButton(0),
-	  fNextEventButton(0)
+      : TGMainFrame(p, w, h),
+	fCanvasWindow(0), fContainer(0),
+	fMenuBar(0), fMenuFile(0), fMenuHelp(0), fDetectorMenu(0),
+	fDetectorViewMenu(0), mSvtViewMenu(0), mTpcViewMenu(0),
+	mIfcViewMenu(0), mAllViewMenu(0), mNavigateMenu(0),
+	mTrackingMenu(0), mNextStepMenu(0),
+	fMenuBarLayout(0), fMenuBarItemLayout(0), fMenuBarHelpLayout(0),
+	mchain(0), mIoMaker(0),
+	fTrackingFrame(0), fDoTrackStepButton(0),
+	fFinishTrackButton(0), fFinishEventButton(0),
+	fNextEventButton(0)
 {
     cout <<"MainFrame::MainFrame()"<<endl;
     s_instance = this;
@@ -327,87 +326,33 @@ MainFrame::~MainFrame()
     // Delete all created widgets.
     cout <<"MainFrame::~MainFrame()"<<endl;
     
-    delete fContainer;
-    fContainer=0;
-    
-    delete fCanvasWindow;
-    fCanvasWindow=0;
-    
-    delete fMenuBarLayout;
-    fMenuBarLayout=0;
-    
-    delete fMenuBarItemLayout;
-    fMenuBarItemLayout=0;
-    
-    delete fMenuBarHelpLayout;
-    fMenuBarHelpLayout=0;
-    
-    delete fMenuBar;
-    fMenuBar=0;
-    
-    delete fMenuFile;
-    fMenuFile=0;
-    
-    delete fMenuHelp;
-    fMenuHelp=0;
-
-    delete fDetectorMenu;
-    fDetectorMenu=0;
-    
-    delete fDetectorViewMenu;
-    fDetectorViewMenu=0;
-
-    delete mTrackingMenu;
-    mTrackingMenu=0;
-
-    delete mOptionsMenu;
-    mOptionsMenu=0;
-    
-    delete mSvtViewMenu;
-    mSvtViewMenu=0;
-
-    delete mNavigateMenu;
-    mNavigateMenu=0;
-    
-    delete mTpcViewMenu;
-    mTpcViewMenu=0;
-
-    delete mIfcViewMenu;
-    mIfcViewMenu=0;
-
-    delete mAllViewMenu;
-    mAllViewMenu=0;
-
-    delete fMenuBarLayout;
-    fMenuBarLayout=0;
-
-    delete fMenuBarItemLayout;
-    fMenuBarItemLayout=0;
-
-    delete fMenuBarHelpLayout;
-    fMenuBarHelpLayout=0;
-
-    delete fTrackingFrame;
-    fTrackingFrame=0;
-
-    delete fDoTrackStepButton;
-    fDoTrackStepButton=0;
-    
-    delete fFinishTrackButton;
-    fFinishTrackButton=0;
-
-    delete fFinishEventButton;
-    fFinishEventButton=0;
-
-    delete fResetEventButton;
-    fResetEventButton=0;
-    
-    delete fNextEventButton;
-    fNextEventButton=0;
-
-    delete mNextStepMenu;
-    mNextStepMenu=0;
-
+    delete fContainer;           fContainer=0;
+    delete fCanvasWindow;        fCanvasWindow=0;
+    delete fMenuBarLayout;       fMenuBarLayout=0;
+    delete fMenuBarItemLayout;   fMenuBarItemLayout=0;
+    delete fMenuBarHelpLayout;   fMenuBarHelpLayout=0;
+    delete fMenuBar;             fMenuBar=0;
+    delete fMenuFile;            fMenuFile=0;
+    delete fMenuHelp;            fMenuHelp=0;
+    delete fDetectorMenu;        fDetectorMenu=0;
+    delete fDetectorViewMenu;    fDetectorViewMenu=0;
+    delete mTrackingMenu;        mTrackingMenu=0;
+    delete mOptionsMenu;         mOptionsMenu=0;
+    delete mSvtViewMenu;         mSvtViewMenu=0;
+    delete mNavigateMenu;        mNavigateMenu=0;
+    delete mTpcViewMenu;         mTpcViewMenu=0;
+    delete mIfcViewMenu;         mIfcViewMenu=0;
+    delete mAllViewMenu;         mAllViewMenu=0;
+    delete fMenuBarLayout;       fMenuBarLayout=0;
+    delete fMenuBarItemLayout;   fMenuBarItemLayout=0;
+    delete fMenuBarHelpLayout;   fMenuBarHelpLayout=0;
+    delete fTrackingFrame;       fTrackingFrame=0;
+    delete fDoTrackStepButton;   fDoTrackStepButton=0;
+    delete fFinishTrackButton;   fFinishTrackButton=0;
+    delete fFinishEventButton;   fFinishEventButton=0;
+    delete fResetEventButton;    fResetEventButton=0;
+    delete fNextEventButton;     fNextEventButton=0;
+    delete mNextStepMenu;        mNextStepMenu=0;
 }
 
 void MainFrame::CloseWindow()
@@ -458,8 +403,8 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 	    break;
 	    
 	case kCM_MENU:
-	    switch (parm1) {
-		
+	    switch (parm1) 
+	      {
 	    case M_FILE_OPEN:
 		{
 		    static TString dir("/star/data22/ITTF/");
@@ -475,161 +420,52 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 		    stepToNextEvent();
 		}
 		break;
-
 		//Mike's stuff here:
-
-	    case M_Messenger:	
-		new TestMsgBox(fClient->GetRoot(), this, 400, 200);
-		break;
-
-	    case M_ShowRootColors:
-		ShowRootColors();
-		break;
-		
-	    case M_DisplayOptions:
-		new EntryTestDlg(fClient->GetRoot(), this);		
-		break;
-
-	    case M_SeedFinderOptions:
-		new SeedFinderIO(fClient->GetRoot(), this);
-		break;
-
-	    case M_TrackFinderOptions:
-		new KalmanTrackFinderIO(fClient->GetRoot(), this);
-		break;
-
-	    case M_LocalSeedFinderOptions:
-		new LocalSeedFinderIO(fClient->GetRoot(), this);
-		break;
-		
-	    case M_Draw_TestObject:
-		testDraw();
-		break;
-		
-	    case M_DetView_AllVisible:
-		setAllVisible();
-		break;
-
-	    case M_DetView_AllInvisible:
-		setAllInvisible();
-		break;
-
-	    case M_DetView_TpcVisible:
-		setTpcVisible();
-		break;
-
-	    case M_DetView_TpcInvisible:
-		setTpcInvisible();
-		break;
-
-	    case M_DetView_SvtVisible:
-		setSvtVisible();
-		break;
-
-	    case M_DetView_SvtInvisible:
-		setSvtInvisible();
-		break;
-
-	    case M_DetView_IfcVisible:
-		setIfcVisible();
-		break;
-
-	    case M_DetView_IfcInvisible:
-		setIfcInvisible();
-		break;
-
-	    case M_DetView_ManualView:
-		setManualView();
-		break;
-		
-	    case M_DetView_SkeletonView:
-		setSkeletonView();
-		break;
-
-	    case M_DetView_ZoomSkeletonView:
-		setZoomSkeletonView();
-		break;
-
-	    case M_DetOnOff:
-		new DetectorActivator(fClient->GetRoot(), this, 800, 200);
-		break;
-		
-	    case M_Det_Navigate:
-		new Navigator(fClient->GetRoot(), this, 400, 200);
-		break;
-		
-	    case M_DetNavigate_MoveIn:
-		moveIn();
-		break;
-
-	    case M_DetNavigate_MoveOut:
-		moveOut();
-		break;
-
-	    case M_DetNavigate_MovePlusPhi:
-		movePlusPhi();
-		break;
-
-	    case M_DetNavigate_MoveMinusPhi:
-		moveMinusPhi();
-		break;
-
-	    case M_DetNavigate_SetLayer:
-		setLayer();
-		break;
-
-	    case M_DetNavigate_SetLayerAndAngle:
-		setLayerAndAngle();
-		break;
-
-	    case M_Tracking_ToggleFitFind:
-		toggleFitFind();
-		break;
-
-	    case M_TrackingSwitch_NextDetector:
-		StiMaker::instance()->defineNextTrackStep(StepByDetector);
-		break;
-		
-	    case M_TrackingSwitch_ScanLayer:
-		StiMaker::instance()->defineNextTrackStep(StepByLayer);
-		break;
-		
-	    case M_Tracking_DoTrackStep:
-		doNextTrackStep();
-		break;
-
-	    case M_Tracking_FinishTrack:
-		finishTrack();
-		break;
-
-	    case M_Tracking_FinishEvent:
-		finishEvent();
-		break;
-
-	    case M_Tracking_EventStep:
-		stepToNextEvent();
-		break;
-
-	    case M_Tracking_NEventStep:
-		stepThroughNEvents();
-		break;
-		
-	    case M_FILE_SAVE:
-		printf("M_FILE_SAVE\n");
-		break;
-		
-	    case M_FILE_EXIT:
-		CloseWindow();   // this also terminates theApp
-		break;
-		
+	    case M_Messenger:	new TestMsgBox(fClient->GetRoot(), this, 400, 200);break;
+	    case M_ShowRootColors: ShowRootColors();	break;
+	    case M_DisplayOptions: new EntryTestDlg(fClient->GetRoot(), this); break;
+	    case M_SeedFinderOptions: new SeedFinderIO(fClient->GetRoot(), this);break;
+	    case M_TrackFinderOptions:new KalmanTrackFinderIO(fClient->GetRoot(), this);break;
+	    case M_LocalSeedFinderOptions: new LocalSeedFinderIO(fClient->GetRoot(), this);break;
+	    case M_Draw_TestObject:testDraw();break;
+	    case M_DetView_AllVisible: 	 setAllVisible();  break;
+	    case M_DetView_AllInvisible: setAllInvisible();break;
+	    case M_DetView_TpcVisible:   setTpcVisible();    break;
+	    case M_DetView_TpcInvisible: setTpcInvisible();  break;
+	    case M_DetView_SvtVisible:   setSvtVisible();    break;
+	    case M_DetView_SvtInvisible: setSvtInvisible();  break;
+	    case M_DetView_IfcVisible:   setIfcVisible();    break;
+	    case M_DetView_IfcInvisible: setIfcInvisible();  break;
+	    case M_DetView_ManualView:   setManualView();    break;
+	    case M_DetView_SkeletonView: setSkeletonView();  break;
+	    case M_DetView_ZoomSkeletonView: setZoomSkeletonView(); break;
+	    case M_DetOnOff:	 new DetectorActivator(fClient->GetRoot(), this, 800, 200); break;
+	    case M_Det_Navigate: new Navigator(fClient->GetRoot(), this, 400, 200); break;
+	    case M_DetNavigate_MoveIn:      moveIn();  break;
+	    case M_DetNavigate_MoveOut:	    moveOut(); break;
+	    case M_DetNavigate_MovePlusPhi: movePlusPhi();break;
+	    case M_DetNavigate_MoveMinusPhi:moveMinusPhi();break;
+	    case M_DetNavigate_SetLayer:    setLayer();	break;
+	    case M_DetNavigate_SetLayerAndAngle:setLayerAndAngle();break;
+	    case M_Tracking_ToggleFitFind:toggleFitFind();break;
+	    case M_TrackingSwitch_NextDetector:	StiMaker::instance()->defineNextTrackStep(StepByDetector);break;
+	    case M_TrackingSwitch_ScanLayer:StiMaker::instance()->defineNextTrackStep(StepByLayer);break;
+	    case M_Tracking_DoTrackStep:doNextTrackStep();break;
+	    case M_Tracking_FinishTrack:finishTrack();	break;
+	    case M_Tracking_FinishEvent:finishEvent();	break;
+	    case M_Tracking_EventStep:	stepToNextEvent();break;
+	    case M_Tracking_NEventStep:	stepThroughNEvents();break;
+	    case M_FILE_SAVE:	printf("M_FILE_SAVE\n");break;
+	    case M_FILE_EXIT:	CloseWindow();   // this also terminates theApp
+	      break;		
 	    default:
-		break;
+	      break;
 	    }
 	default:
-	    break;
+	  break;
 	}
     default:
-	break;
+      break;
     }
     return kTRUE;
 }
@@ -714,21 +550,21 @@ void MainFrame::printFactorySize()
 
 void MainFrame::setAllVisible()
 {
-    StiRootDisplayManager::instance()->setVisible();
+    StiRootDisplayManager::instance()->setVisible(true);
     StiRootDisplayManager::instance()->draw();
     StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setAllInvisible()
 {
-    StiRootDisplayManager::instance()->setInvisible();
+    StiRootDisplayManager::instance()->setVisible(false);
     StiRootDisplayManager::instance()->draw();
     StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setSkeletonView()
 {
-    StiRootDisplayManager::instance()->setSkeletonView();
+    StiRootDisplayManager::instance()->setView(0);
     setView(new StiSkeletonView());
     StiRootDisplayManager::instance()->draw();
     StiRootDisplayManager::instance()->update();
@@ -736,7 +572,7 @@ void MainFrame::setSkeletonView()
 
 void MainFrame::setManualView()
 {
-    StiRootDisplayManager::instance()->setVisible();
+    StiRootDisplayManager::instance()->setVisible(true);
     setView(new StiManualView());
     StiRootDisplayManager::instance()->draw();
     StiRootDisplayManager::instance()->update();
@@ -744,7 +580,7 @@ void MainFrame::setManualView()
 
 void MainFrame::setZoomSkeletonView()
 {
-    StiRootDisplayManager::instance()->setZoomSkeletonView();
+    StiRootDisplayManager::instance()->setView(1);
     setView(new StiZoomSkeletonView());
     StiRootDisplayManager::instance()->draw();
     StiRootDisplayManager::instance()->update();
@@ -752,28 +588,28 @@ void MainFrame::setZoomSkeletonView()
 
 void MainFrame::setSvtVisible()
 {
-    StiRootDisplayManager::instance()->setSvtVisible();
+    StiRootDisplayManager::instance()->setVisible("Svg",true);
     StiRootDisplayManager::instance()->draw();
     StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setSvtInvisible()
 {
-    StiRootDisplayManager::instance()->setSvtInvisible();
+    StiRootDisplayManager::instance()->setVisible("Svg",false);
     StiRootDisplayManager::instance()->draw();
     StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setTpcVisible()
 {
-    StiRootDisplayManager::instance()->setTpcVisible();
+    StiRootDisplayManager::instance()->setVisible("Tpc",true);
     StiRootDisplayManager::instance()->draw();
     StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setTpcInvisible()
 {
-    StiRootDisplayManager::instance()->setTpcInvisible();
+    StiRootDisplayManager::instance()->setVisible("Tpc",false);
     StiRootDisplayManager::instance()->draw();
     StiRootDisplayManager::instance()->update();
 }
@@ -781,7 +617,7 @@ void MainFrame::setTpcInvisible()
 void MainFrame::setIfcVisible()
 {
     cout <<"MainFrame::setIfcVisible(). Not yet implemented"<<endl;
-    StiRootDisplayManager::instance()->setIfcVisible();
+    StiRootDisplayManager::instance()->setVisible("Ifc",true);
     StiRootDisplayManager::instance()->draw();
     StiRootDisplayManager::instance()->update();
 }
@@ -789,7 +625,7 @@ void MainFrame::setIfcVisible()
 void MainFrame::setIfcInvisible()
 {
     cout <<"MainFrame::setIfcInvisible(). Not yet implemented"<<endl;
-    StiRootDisplayManager::instance()->setIfcInvisible();
+    StiRootDisplayManager::instance()->setVisible("Ifc",false);
     StiRootDisplayManager::instance()->draw();
     StiRootDisplayManager::instance()->update();
 }
@@ -1177,46 +1013,26 @@ Bool_t Navigator::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
     switch(GET_MSG(msg)) {
     case kC_COMMAND:
 	
-	switch(GET_SUBMSG(msg)) {
-	case kCM_BUTTON:
-	    switch(parm1) {
-		
-	    case 1:
-		MainFrame::instance()->moveIn();
-		break;
-		
-	    case 2:
-		MainFrame::instance()->moveOut();
-		break;
-		
-	    case 3:
-		MainFrame::instance()->movePlusPhi();
-		break;
-		
-	    case 4:
-		MainFrame::instance()->moveMinusPhi();
-		break;
-		
-	    case 5:
-		CloseWindow();
-		break;
-	    }
+	switch(GET_SUBMSG(msg)) 
+	  {
+	  case kCM_BUTTON:
+	    switch(parm1) 
+	      {
+	      case 1:  MainFrame::instance()->moveIn(); break;
+	      case 2:  MainFrame::instance()->moveOut(); break;
+	      case 3:  MainFrame::instance()->movePlusPhi();  break;
+	      case 4:  MainFrame::instance()->moveMinusPhi(); break;
+	      case 5:  CloseWindow(); break;
+	      }
 	    break;
-	    
-	case kCM_RADIOBUTTON:
-	    
-	case kCM_CHECKBUTTON:
-	    break;
-	    
-	default:
-	    break;
-	}
+	  case kCM_RADIOBUTTON:
+	  case kCM_CHECKBUTTON:	    break;
+	  default:    break;
+	  }
 	break;
-	
     default:
-	break;
+      break;
     }
-    
     return kTRUE;
 }
 
@@ -1600,7 +1416,6 @@ void DetectorActivator::updateDetectors()
     }
     StiRootDisplayManager::instance()->draw();
     StiRootDisplayManager::instance()->update();
-
 }
 
 void DetectorActivator::activateLayer(const string& name, bool on)
@@ -2797,32 +2612,32 @@ void KalmanTrackFinderIO::SetLimits()
 
 Bool_t KalmanTrackFinderIO::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 {
-    switch (GET_MSG(msg)) {
-    case kC_COMMAND:
+  switch (GET_MSG(msg)) {
+  case kC_COMMAND:
+    {
+      switch (GET_SUBMSG(msg)) {
+      case kCM_BUTTON:
 	{
-	    switch (GET_SUBMSG(msg)) {
-	    case kCM_BUTTON:
-		{
-		    switch (parm1) {
-			// exit button
-		    case 1:
-			{
-			    CloseWindow();
-			    break;
-			}
-			// set button
-		    case 2:
-			{
-			    SetLimits();
-			    break;
-			}
-		    }
-		    break;
-		}
+	  switch (parm1) {
+	    // exit button
+	  case 1:
+	    {
+	      CloseWindow();
+	      break;
 	    }
-	    break;
+	    // set button
+	  case 2:
+	    {
+	      SetLimits();
+	      break;
+	    }
+	  }
+	  break;
 	}
+      }
+      break;
     }
-    return kTRUE;
+  }
+  return kTRUE;
 }
 

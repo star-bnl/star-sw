@@ -7,6 +7,10 @@
 //
 //
 // $Log: StiMaker.cxx,v $
+// Revision 1.101  2002/08/28 17:14:18  pruneau
+// Simplified the interface of StiKalmanTrackFinder and the calls
+// required in StiMaker.
+//
 // Revision 1.100  2002/08/23 18:16:50  pruneau
 // Added StiSimpleTrackFilter to StiMaker to enable simple and
 // fast track finding diagnostics.
@@ -152,14 +156,9 @@ void StiMaker::Clear(const char*)
   if (initialized) 
     {
       initialized = true;
-      toolkit->getHitContainer()->clear();
-      toolkit->getDetectorContainer()->reset();
-      toolkit->getHitFactory()->reset();
-      toolkit->getTrackFactory()->reset();
-      toolkit->getTrackNodeFactory()->reset();
-      toolkit->getTrackContainer()->clear();
+      tracker->reset();
       if (ioBroker->useGui()) 
-				toolkit->getDisplayManager()->reset();
+	toolkit->getDisplayManager()->reset();
     }
   StMaker::Clear();
 }
@@ -203,9 +202,7 @@ Int_t StiMaker::InitRun(int run)
 					
 	  StiEventAssociator::instance(mAssociationMaker);
 	  StiEvaluator::instance(mEvalFileName);
-	  //toolkit->setAssociationMaker(mAssociationMaker);
-	  //toolkit->getEvaluator(mEvalFileName);
-	  cout <<"--- Evaluator Ready" << endl;
+	  cout <<"---- Evaluator Ready" << endl;
 	}
       else
 	cout <<"--- Evaluator will not be used" << endl;
@@ -216,10 +213,9 @@ Int_t StiMaker::InitRun(int run)
       cout <<"--- Tracker Ready" << endl;
       if (ioBroker->useGui()) 
 	{
-	  toolkit->getDisplayManager()->setSkeletonView();
+	  toolkit->getDisplayManager()->setView(0);
 	  toolkit->getDisplayManager()->draw();
 	  toolkit->getDisplayManager()->update();
-	  //toolkit->getDisplayManager()->print();
 	}
       cout <<"\n --- StiMaker::InitRun(): Done building --- \n"<<endl;
     }
@@ -228,64 +224,35 @@ Int_t StiMaker::InitRun(int run)
 
 Int_t StiMaker::Make()
 {
-  cout <<" \n\n ------------ You have entered StiMaker::Make() ----------- \n\n"<<endl;
+  cout <<"StiMaker::Make() - INFO - Starting"<<endl;
   eventIsFinished = false;
-  StEvent* rEvent = 0;
-  rEvent = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
-  StMcEvent* mc = 0;
-  if (rEvent) 
+  mevent = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
+  if (!mevent)
     {
-      mevent = rEvent;
-      cout <<"Number of Primary Vertices:\t"<<mevent->numberOfPrimaryVertices()<<endl;
-			 
-      //Fill hits, organize the container
-      toolkit->getHitFiller()->setEvent(mevent);
-      toolkit->getHitFiller()->fillHits(toolkit->getHitContainer(), toolkit->getHitFactory());
-				
-      cout <<"StiMaker::Make() - INFO - sortHits starting"<<endl;
-      toolkit->getHitContainer()->sortHits();
-      cout <<"StiMaker::Make() - INFO - sortHits completed"<<endl;
-      cout <<"StiMaker::Make() - INFO - Call StiHitContainer::update()"<<endl;
-      toolkit->getHitContainer()->update();
-      cout <<"StiMaker::Make() - INFO Call TrackSeedFinder reset "<<endl;
-      //Init seed finder for start
-      StiSeedFinder * seedFinder = toolkit->getTrackSeedFinder();
-      if (seedFinder)
-	seedFinder->reset();
-      else
+      cout <<"StiMaker::Make() - ERROR - rEvent == 0" << endl;
+      return 0;
+    }
+  
+  if (ioBroker->simulated()) 
+    {
+      mMcEvent= mMcEventMaker->currentMcEvent();
+      if (!mMcEvent)
 	{
-	  cout << "StiMaker::Make() - FATAL - seedFinder==0" << endl;
+	  cout <<"StiMaker::Make() - ERROR - mcEvent == 0" << endl;
 	  return 0;
 	}
-      cout <<"StiMaker::Make() - INFO - Call TrackSeedFinder reset completed"<<endl;
-      if (ioBroker->simulated()) 
-	{
-	  if (!mMcEventMaker)
-	    {
-	      cout <<"StiMaker::Make(). ERROR!\tmMcEventMaker==0"<<endl;
-	      return 0;
-	    }
-	  mc = mMcEventMaker->currentMcEvent();
-	  mMcEvent = mc;
-	  if (mc==0)
-	    {
-	      cout <<"StiMaker::Make(). ERROR!\tMcEvent==0"<<endl;
-	      return 0;
-	    }
-	  StiEvaluableTrackSeedFinder* temp;
-	  temp = dynamic_cast<StiEvaluableTrackSeedFinder*>(toolkit->getTrackSeedFinder());
-	  if (temp!=0) 
-	    temp->setEvent(mc);
-	}
-      //Now we can loop, if we're not using the gui
-      if (!ioBroker->useGui()) 
-	finishEvent();
     }
-  if (ioBroker->useGui()==true) 
+  else
+    mMcEvent = 0;
+  tracker->setEvent(mevent,mMcEvent);
+  if (ioBroker->useGui()) 
     {
       toolkit->getDisplayManager()->draw();
       toolkit->getDisplayManager()->update();
     }
+  else
+    finishEvent();
+
   return kStOK;
 }
 
@@ -298,98 +265,72 @@ void StiMaker::printStatistics() const
 
 void StiMaker::finishEvent()
 {
+  StTimer clockGlobalFinder;
+  StTimer clockGlobalFiller;
+  StTimer clockPrimaryFiller;
+  StTimer clockPrimaryFinder;
+  StTimer clockAssociator;
+  StTimer clockEvaluator;
+  StTimer clockPlot;
+  
   if (eventIsFinished)
     {
       cout << "StiMaker::finishEvent() - Event reconstruction is finished." <<endl;
       return;				
     }
   cout <<"StiMaker::finishEvent() - Event reconstruction begins."<<endl;
-  cout <<mevent->numberOfPrimaryVertices()<<endl;
   
-  StTimer clock;
-  clock.start();
-  tracker->findTracks();
-  clock.stop();
-  cout <<"StiMaker::finishEvent() - Time to find tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
 
-  //
-  // fill the global tracks in StEvent
-  //
-  clock.start();
-  cout <<"StiMaker::finishEvent() - INFO - Call StEvent Filler"  << endl;
+  clockGlobalFinder.start();   
+  tracker->findTracks();  
+  clockGlobalFinder.stop();
+
+  clockGlobalFiller.start();
   mevent = mStEventFiller->fillEvent(mevent, toolkit->getTrackContainer());
-  clock.stop();
-  cout <<"StiMaker::finishEvent() - Time to fill StEvent: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
+  clockGlobalFiller.stop();
 
-  bool useTrackMerger=false;
-  if (useTrackMerger)
+  if (mevent->primaryVertex()) 
     {
-      cout <<"Merge Tracks"<<endl;
-      clock.reset();
-      //clock.start();
-      //mTrackMerger->mergeTracks();
-      //clock.stop();
-      //cout <<"StiMaker::finishEvent() - Time to merge tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
+      clockPrimaryFinder.start();
+      StiHit * vertex = toolkit->getHitFactory()->getObject();
+      const StThreeVectorF& vp = mevent->primaryVertex()->position();
+      const StThreeVectorF& ve = mevent->primaryVertex()->positionError();
+      vertex->set(0.,0.,vp.x(),vp.y(),vp.z(),ve.x(),0.,0.,ve.y(),0.,ve.z());
+      vertex->setStHit(mevent->primaryVertex());
+      tracker->extendTracksToVertex(vertex);
+      clockPrimaryFinder.stop();
+      clockPrimaryFiller.start();
+      mevent = mStEventFiller->fillEventPrimaries(mevent, toolkit->getTrackContainer());
+      clockPrimaryFiller.stop();
     }
-  bool useExtendToVertex=true;
-  if (useExtendToVertex)
-    {
-      cout <<"StiMaker::finishEvent() - INFO - Get main vertex and extend tracks" << endl;
-      if (mevent->primaryVertex()) {
-	StiHit * vertex = toolkit->getHitFactory()->getObject();
-	const StThreeVectorF& vp = mevent->primaryVertex()->position();
-	const StThreeVectorF& ve = mevent->primaryVertex()->positionError();
-	vertex->set(0.,0.,vp.x(),vp.y(),vp.z(),ve.x(),0.,0.,ve.y(),0.,ve.z());
-	vertex->setStHit(mevent->primaryVertex());
-	tracker->extendTracksToVertex(vertex);
-	cout <<"StiMaker::finishEvent() - INFO - Tracks extension to main vertex completed" << endl;
-
-	//
-	// fill the primary tracks in StEvent
-	//
-	clock.start();  
-	cout <<"StiMaker::finishEvent() - INFO - Call StEvent Filler for Primaries"  << endl;
-	mevent = mStEventFiller->fillEventPrimaries(mevent, toolkit->getTrackContainer());
-	clock.stop();
-	cout <<"StiMaker::finishEvent() - Time to fill StEvent Primaries: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
-
-      }
-      else {
-	cout <<"StiMaker::finishEvent() - INFO - Event has no vertex" << endl;
-      }
-    }
+  else 
+    cout <<"StiMaker::finishEvent() - INFO - Event has no vertex" << endl;
   if (ioBroker->simulated())
     {
-      cout <<"StiMaker::finishEvent() - INFO - Call Associator"<<endl;
+      clockAssociator.start();
       StiEventAssociator::instance()->associate(mMcEvent);
-      cout <<"StiMaker::finishEvent() - INFO - Associator done"<<endl;
-      cout <<"StiMaker::finishEvent() - INFO - Call Evaluator"<<endl;
+      clockAssociator.stop();
+      clockEvaluator.start();
       StiEvaluator::instance()->evaluate(toolkit->getTrackContainer());
-      cout <<"StiMaker::finishEvent() - INFO - Evaluator done"<<endl;
+      clockEvaluator.stop();
     }
-  /* 
-     Proper display done if the following piece of code is commented out.
-     if (ioBroker->useGui()==true) 
-     {
-     cout <<"StiMaker::finishEvent() - INFO - Call HitContainer update"<<endl;
-     toolkit->getDisplayManager()->reset();
-     toolkit->getHitContainer()->update();
-     cout <<"StiMaker::finishEvent() - INFO - HitContainer update completed"<<endl;
-     
-     cout <<"StiMaker::finishEvent() - INFO - Call DisplayManager update "<<endl;
-     // update canvas
-     toolkit->getDisplayManager()->draw(); 
-     toolkit->getDisplayManager()->update();
-     cout <<"StiMaker::finishEvent() - INFO - DisplayManager update completed"<<endl;
-     }
-  */
-  clock.stop();
-  eventIsFinished = true;
+  if (ioBroker->useGui()==true)    tracker->update();
 
+  eventIsFinished = true;
+  cout <<"StiMaker::finishEvent()"<<endl
+       <<"        Activity :   Time Elapsed(cpu-s)"<<endl
+       <<"====================================================="<<endl
+       <<" Global  Finding :"<<clockGlobalFinder.elapsedTime()<<endl
+       <<"         Filling :"<<clockGlobalFiller.elapsedTime()<<endl
+       <<" Primary Finding :"<<clockPrimaryFinder.elapsedTime()<<endl
+       <<"         Filling :"<<clockPrimaryFiller.elapsedTime()<<endl
+       <<"     Association :"<<clockAssociator.elapsedTime()<<endl
+       <<"      Evaluation :"<<clockEvaluator.elapsedTime()<<endl;
+    
   // filter our baby...
   trackFilter->set(StiSimpleTrackFilter::kChi2,       0., 100.);
   trackFilter->set(StiSimpleTrackFilter::kPt,         0., 10. );
-  trackFilter->set(StiSimpleTrackFilter::kPseudoRap, -1.5, 1.5);
+  //trackFilter->set(StiSimpleTrackFilter::kPseudoRap, -1.5, 1.5);
   trackFilter->set(StiSimpleTrackFilter::kNPts,       5., 50.);
   trackFilter->set(StiSimpleTrackFilter::kNGaps,      0., 50.);
   cout << "      Total Found:" << tracker->getTrackFoundCount()<<endl;
@@ -408,9 +349,9 @@ void StiMaker::finishEvent()
   cout << "NPts>20 && 0.1<pt<0.5 :" << tracker->getTrackFoundCount(trackFilter) << endl;
   trackFilter->set(StiSimpleTrackFilter::kPt,         0.5, 10. );
   trackFilter->set(StiSimpleTrackFilter::kNPts,       5., 20.);
-  cout << "NPts<20 && 0.1<pt<0.5 :" << tracker->getTrackFoundCount(trackFilter) << endl;
+  cout << "NPts<20 && 0.5<pt<10. :" << tracker->getTrackFoundCount(trackFilter) << endl;
   trackFilter->set(StiSimpleTrackFilter::kNPts,       20., 100.);
-  cout << "NPts>20 && 0.1<pt<0.5 :" << tracker->getTrackFoundCount(trackFilter) << endl;
+  cout << "NPts>20 && 0.5<pt<10. :" << tracker->getTrackFoundCount(trackFilter) << endl;
   cout <<"StiMaker::finishEvent() - INFO - Done"<<endl;
 }
 
