@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.47 2003/05/07 15:09:22 putschke Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.48 2003/05/15 20:29:50 putschke Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.48  2003/05/15 20:29:50  putschke
+// bug fixed
+//
 // Revision 1.47  2003/05/07 15:09:22  putschke
 // improvements for cathode offset corretions
 //
@@ -970,9 +973,9 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
 		  // =============
 
 		  // check if > MaximumPad/Time
-		   for (i=iPad-DeltaPad;i<=iPad+DeltaPad && iPad+DeltaPad<=160;i++)
+		   for (i=iPad-DeltaPad;i<=(iPad+DeltaPad) && (iPad+DeltaPad)<=160 && (iPad-DeltaPad)>=0;i++)
 		     {
-		      for (k=iTime-DeltaTime;k<=iTime+DeltaTime && iTime+DeltaTime<=256;k++)
+		      for (k=iTime-DeltaTime;k<=(iTime+DeltaTime) && (iTime+DeltaTime)<=256 && (iTime-DeltaTime)>=0;k++)
 			{
 			  if (i<iPad+DeltaPad && i>iPad-DeltaPad && k<iTime+DeltaTime && k>iTime-DeltaTime)
 			    cl_charge=cl_charge+TClSearch[i][k];
