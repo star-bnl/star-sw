@@ -21,7 +21,7 @@ require "/afs/rhic/star/packages/DEV00/mgr/dbTJobsSetup.pl";
 #require "dbTJobsSetup.pl";
 
 my $TOP_DIRD = "/star/rcf/test/dev/";
-my @dir_year = ("year_1h", "year_2a");
+my @dir_year = ("year_1h", "year_2b");
 my @node_dir = ("trs_redhat61", "trs_redhat61_opt");
 my @node_daq = ("daq_redhat61", "daq_redhat61_opt"); 
 my @hc_dir = ("hc_lowdensity", "hc_standard", "hc_highdensity", "peripheral");
@@ -84,6 +84,7 @@ if($thisday eq "Sat" or $thisday eq "Sun" ){
  exit();
 } 
   print "Day Name: ",$thisday, " % ", "Index", $iday, "\n";
+
 
 ##### setup output directories for DEV with thisDay
 
@@ -405,7 +406,8 @@ my $Fname;
        $timeS = sprintf ("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:00",
                        $fullyear,$mo,$dy,$hr,$min);    
 
-           if( $ltime > 1800 && $ltime < 345600 ){         
+#           if( $ltime > 1800 && $ltime < 345600 ){         
+          if( $ltime > 1800) { 
 #   print "Log time: ", $ltime, "\n";
         &logInfo("$fullname", "$platf");
       $jobTime = $timeS;  
@@ -637,7 +639,8 @@ foreach  $eachOutNDir (@OUT_DIR) {
           ($size, $mTime) = (stat($lgFile))[7, 9];
             $ltime = $now - $mTime;
 #  print "Log time: ", $ltime, "\n"; 
-           if( $ltime > 1800 && $ltime < 345600 ){         
+#           if( $ltime > 1800 && $ltime < 345600 ){         
+            if( $ltime > 1800) { 
 	     foreach my $eachLogFile (@testJobStFiles) {
 
                $jpath   = ($$eachLogFile)->pth; 
@@ -1106,7 +1109,7 @@ my $Anflag = 0;
         @size_line = split(" ",$line); 
 
           $mymaker = $size_line[3];
-        if( $mymaker eq "tree:"){
+        if( $mymaker eq "outputStream:"){
 	  if( $plt_form eq "tfs_Solaris_CC5" or $plt_form eq "trs_Solaris" ) {
          $maker_size[$no_event + 1] = $size_line[12]/1000;
         }else {
