@@ -1,5 +1,11 @@
-* $Id: istbgeo.g,v 1.6 2005/01/26 01:13:45 potekhin Exp $
+* $Id: istbgeo.g,v 1.7 2005/02/02 22:09:40 potekhin Exp $
 * $Log: istbgeo.g,v $
+* Revision 1.7  2005/02/02 22:09:40  potekhin
+* a) Edited an obsolete comment
+* b) Changed sensor color as per Gerrit's suggestion
+* c) Corrected the dimensions of the AlN elements
+* d) Improved the arithmetic for positioning of the AlN plates
+*
 * Revision 1.6  2005/01/26 01:13:45  potekhin
 * Whoa! Did the complete water manifold shebang.
 *
@@ -65,7 +71,7 @@ Module ISTBGEO is the geometry of the outer barrel pixel detector
       nUnit      =  7          ! sensor units per ladder
       Length     =  28.0       ! Overal length of the detector
 
-      LadderWidth=  6.0        ! Ladder Width
+      LadderWidth=  7.0        ! Ladder Width
       LadderThk  =  0.730      ! Includes sensor assembly and the water duct
       SensAThk  =   0.370      ! Includes two layers of Si, AlN plates and chips
 
@@ -81,7 +87,7 @@ Module ISTBGEO is the geometry of the outer barrel pixel detector
       pOffset    =  2.0        ! Position offset (shift)
    EndFill
 
-   Fill ISBG                   ! Pixel detector data
+   Fill ISBG                   ! Inner silicon tracker data
       Layer      =  2          ! layer index
       nLadder    =  19         ! ladder count
       nUnit      =  10         ! sensor units per ladder
@@ -93,7 +99,7 @@ Module ISTBGEO is the geometry of the outer barrel pixel detector
       pOffset    =  2.0        ! Position offset (shift)
    EndFill
 
-   Fill ISBG                   ! Pixel detector data
+   Fill ISBG                   ! Inner silicon tracker data
       Layer      =  3          ! layer index
       nLadder    =  27         ! ladder count
       nUnit      =  13         ! sensor units per ladder
@@ -105,16 +111,17 @@ Module ISTBGEO is the geometry of the outer barrel pixel detector
       pOffset    =  2.0        ! Position offset (shift)
    EndFill
 *--------------------------------------------------------
+* Describe AlN plate and substrate via versions of same struct:
    Fill ISAN                   ! Aluminum Nitride Thermal Plate
-      Version    =   1         ! May have a few
+      Version    =  1          ! May have a few
       Thk        =  0.0762     ! AlN Thickness
-      Length     =  2.0        ! AlN length
+      Length     =  3.0        ! AlN length
    EndFill
 
    Fill ISAN                   ! Aluminum Nitride Thermal Plate
-      Version    =   2         ! May have a few
+      Version    =  2          ! May have a few
       Thk        =  0.0762     ! AlN Thickness
-      Length     =  1.0        ! AlN length
+      Length     =  2.0        ! AlN length
    EndFill
 
 *--------------------------------------------------------
@@ -202,7 +209,7 @@ Block IBAM is the mother of the whole long ladder
 endblock
 * -----------------------------------------------------------------------------
 Block IBLM is the mother of the sensor assmebly
-      Attribute IBAM  Seen=0  colo=4
+      Attribute IBAM  Seen=0  colo=1
 
       Shape BOX dx=ISBG_LadderWidth/2.0 dy=ISBG_SensAThk/2.0 dz=ISBG_SensorLngth/2.0
 
@@ -217,12 +224,12 @@ Block IBLM is the mother of the sensor assmebly
 
 * -- AlN plates, three of them -- central and substrate(s)
       Use ISAN Version=1
-      Create and Position ISTP x=0.5*(ISBG_LadderWidth-ISBG_SensorWidth)+ISAN_Length/2.0
+      Create and Position ISTP x=-0.5*ISBG_LadderWidth+ISBG_SensorWidth+0.5*ISAN_Length
 
       Use ISAN Version=2
       Create   ISTP
-      Position ISTP x=0.5*(ISBG_LadderWidth-ISBG_SensorWidth)+ISAN_Length/2.0 y=ISAN_Thk
-      Position ISTP x=0.5*(ISBG_LadderWidth-ISBG_SensorWidth)+ISAN_Length/2.0 y=-ISAN_Thk
+      Position ISTP x=-0.5*ISBG_LadderWidth+ISBG_SensorWidth+0.5*ISAN_Length y=ISAN_Thk
+      Position ISTP x=-0.5*ISBG_LadderWidth+ISBG_SensorWidth+0.5*ISAN_Length y=-ISAN_Thk
 
 * -- readout silicon chip
       Create   ISSC
@@ -239,7 +246,7 @@ Block IBSS is the Silicon Sensor
       Material  Silicon
       Material  Sensitive  Isvol=1
 
-      Attribute IBSS  Seen=1  colo=5
+      Attribute IBSS  Seen=1  colo=4
 
       Shape BOX dX=ISBG_SensorWidth/2.0 dY=ISBG_SensorThk/2.0 dz=ISBG_SensorLngth/2.0
 
