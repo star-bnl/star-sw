@@ -126,7 +126,7 @@ int StSsdStripList::removeStrip(StSsdStrip *ptr)
 
 void StSsdStripList::exchangeTwoStrips(StSsdStrip *ptr1, StSsdStrip *ptr2)
 {
-  StSsdStrip *ptrTemp = new StSsdStrip(ptr1->getNStrip(), ptr1->getDigitSig(), ptr1->getSigma());
+  StSsdStrip *ptrTemp = new StSsdStrip(ptr1->getNStrip(), ptr1->getDigitSig(), ptr1->getSigma(),ptr1->getPedestal());
   ptr1->copyTo(ptrTemp);
   ptr2->copyTo(ptr1);
   ptrTemp->copyTo(ptr2);

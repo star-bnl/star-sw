@@ -1,24 +1,26 @@
 #include "StSsdStrip.hh"
 
-StSsdStrip::StSsdStrip(int rNStrip, int rDigitSig, float rSigma, int *rIdMcHit)
+StSsdStrip::StSsdStrip(int rNStrip, int rDigitSig, float rSigma, int rPedestal, int *rIdMcHit)
 {
   mIdMcHit   = new int[SSD_MAXIDMCHIT];
 
   mNStrip    = rNStrip;
   mDigitSig  = rDigitSig;
   mSigma     = rSigma;
+  mPedestal  = rPedestal;
   for(int e=0;e<SSD_MAXIDMCHIT;e++) mIdMcHit[e] = rIdMcHit[e];
   mPrevStrip = 0;
   mNextStrip = 0;
 }
 
-StSsdStrip::StSsdStrip(int rNStrip, int rDigitSig, float rSigma)
+StSsdStrip::StSsdStrip(int rNStrip, int rDigitSig, float rSigma, int rPedestal)
 {
   mIdMcHit   = new int[SSD_MAXIDMCHIT];
 
   mNStrip    = rNStrip;
   mDigitSig  = rDigitSig;  
   mSigma     = rSigma;
+  mPedestal  = rPedestal;
   for(int e=0;e<SSD_MAXIDMCHIT;e++) mIdMcHit[e] = 0;
   mPrevStrip = 0;
   mNextStrip = 0;
@@ -37,6 +39,9 @@ void StSsdStrip::setNextStrip(StSsdStrip *rNextStrip)
 
 void StSsdStrip::setSigma(float rSigma)
 {  this->mSigma = rSigma; }
+
+void StSsdStrip::setPedestal(int iPedestal)
+{  this->mPedestal = iPedestal; }
 
 void StSsdStrip::setNStrip(int rNStrip)
 {  this->mNStrip = rNStrip; }
@@ -62,6 +67,9 @@ StSsdStrip* StSsdStrip::getNextStrip()
 float StSsdStrip::getSigma()
 {  return this->mSigma; }
 
+int StSsdStrip::getPedestal()
+{  return this->mPedestal; }
+
 int StSsdStrip::getIdMcHit(int iR)
 {  return this->mIdMcHit[iR]; }
 
@@ -70,6 +78,7 @@ void StSsdStrip::copyTo(StSsdStrip *ptrClone)
   ptrClone->mNStrip    = this->mNStrip;
   ptrClone->mDigitSig  = this->mDigitSig;
   ptrClone->mSigma     = this->mSigma;
+  ptrClone->mPedestal  = this->mPedestal;
   for(int e=0;e<SSD_MAXIDMCHIT;e++) ptrClone->mIdMcHit[e] = this->mIdMcHit[e];
 }
 

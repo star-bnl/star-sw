@@ -141,7 +141,8 @@ int StSsdBarrel::readStripFromTable(St_spa_strip *spa_strip)
   int iLad          = 0;
   int nStrip        = 0;
   int iSide         = 0;
-  float sigma         = 0;
+  float sigma       = 0;
+  int iPedestal     = 0;
   int idMcHit[5]    = {0,0,0,0,0};
   int e = 0;
   for (int i = 0 ; i < spa_strip->GetNRows(); i++)
@@ -152,7 +153,7 @@ int StSsdBarrel::readStripFromTable(St_spa_strip *spa_strip)
       iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
       iSide   = (strip[i].id_strip - nStrip*100000 - idWaf)/10000;
       for (e = 0 ; e < 5;e++) idMcHit[e] = strip[i].id_mchit[e];
-      StSsdStrip *newStrip = new StSsdStrip(nStrip, strip[i].adc_count, sigma, idMcHit);
+      StSsdStrip *newStrip = new StSsdStrip(nStrip, strip[i].adc_count, sigma, iPedestal, idMcHit);
       mLadders[iLad]->mWafers[iWaf]->addStrip(newStrip, iSide);
     }
   NumberOfStrip = spa_strip->GetNRows();  
