@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.h,v 1.2 2000/03/09 20:44:56 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.h,v 1.3 2000/05/05 19:25:39 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.h,v $
+ * Revision 1.3  2000/05/05 19:25:39  aihong
+ * modified ctor
+ *
  * Revision 1.2  2000/03/09 20:44:56  aihong
  * add head for Log
  *
@@ -22,19 +25,21 @@
 
 #include "TString.h"
 #include "TObjArray.h"
+//#include "tables/St_tpcDedxPidAmpDb_Table.h"
 #include "StEventTypes.h"
 #include "StParticleTable.hh"
 #include "StParticleTypes.hh"
 #include "StPidAmpMaker/StPidAmpNetOut.h"
 
-
+class StEvent;
 
 
 class StuProbabilityPidAlgorithm : public StPidAlgorithm {
 
  public:
 
-      StuProbabilityPidAlgorithm();
+      StuProbabilityPidAlgorithm(StEvent& ev);
+      virtual  ~StuProbabilityPidAlgorithm();
 
 
       
@@ -50,16 +55,18 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
       double mostLikelihoodProbability();
       double secondLikelihoodProbability();
       double thirdLikelihoodProbability();
-
+      double lowRigReso(double xa, double xb, double ya, double yb,double theX);
       bool isExtrap();
 
       StParticleDefinition*
       operator() (const StTrack&, const StSPtrVecTrackPidTraits&);
 
 
-      static void readInputFile(TString fileName);
-
-
+      static void readParametersFromFile(TString fileName);
+      //      static void readParametersFromTable(St_Table* tb);
+      static void printParameters();
+      //      static void refreshParameters(St_Table* theTable);
+      static void readAType(StParticleDefinition* def, Float_t* mean, Float_t* amp,Float_t* sig,Float_t cal,TObjArray*  theChannel);
 
  private:
 
@@ -68,32 +75,33 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
       double ( *funcResoPt) (double *, double *);
 
      
-      double bandCenter(double rig, TArrayD& bandPars);
-      double resolution(double rig, TArrayD& linrPars,TArrayD& bandPars);
-      double peak(double rig, TArrayD& ampPars);
+      double bandCenter(double rig, TArrayD* bandPars);
+      double resolution(double rig, TArrayD* linrPars,TArrayD* bandPars);
+      double peak(double rig, TArrayD* ampPars);
       double tossTail(double rig);
       void   lowRigPID(double rig,double dedx);
       void   fill(double prob, StPidAmpNetOut* netOut);
       void   fillAsUnknown();
       void   tagExtrap(double rig, double dedx,TObjArray* channelLevel);
 
-      double amplitude(double dedx, double rig, TArrayD& bandPars, TArrayD& linrPars, TArrayD& ampPars);
+      double amplitude(double dedx, double rig, TArrayD* bandPars, TArrayD* linrPars, TArrayD* ampPars);
 
       void lowRigPID();
 
       StDedxMethod mDedxMethod;
       StParticleTable* table;
 
-      int    PID[3];
-      double mProb[3];
-      bool   mExtrap;
-      bool   mTurnOnNoise;
-      double mNoise;
+      int      PID[3];
+      double   mProb[3];
+      double   mNoise;
+      bool     mExtrap;
+      bool     mTurnOnNoise;
+      StEvent* mEvent; //!
       
 
 
-  static TObjArray mDataSet;//array of Channel datas. be initialize by readInputFile
-
+  static TObjArray mDataSet;//array of Channel datas. be initialize by readParametersFromFile
+  //  static St_Table* mDataTable;
 
 
 
