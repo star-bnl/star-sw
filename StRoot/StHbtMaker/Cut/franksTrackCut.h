@@ -30,6 +30,7 @@ class franksTrackCut : public StHbtTrackCut
  public:
 
   franksTrackCut();
+  franksTrackCut(franksTrackCut& );
   ~franksTrackCut();
   
   virtual bool Pass(const StHbtTrack*);

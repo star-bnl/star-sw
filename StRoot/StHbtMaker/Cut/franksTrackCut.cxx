@@ -23,6 +23,32 @@
 franksTrackCut::franksTrackCut(){
   mNTracksPassed = mNTracksFailed = 0;
 }
+//------------------------------
+franksTrackCut::franksTrackCut(franksTrackCut& c) : StHbtTrackCut(c) {
+  mNTracksPassed = mNTracksFailed = 0;
+  mCharge = c.mCharge;
+  mNSigmaPion[0] = c.mNSigmaPion[0];
+  mNSigmaPion[1] = c.mNSigmaPion[1];
+  mNSigmaKaon[0] = c.mNSigmaKaon[0];
+  mNSigmaKaon[1] = c.mNSigmaKaon[1];
+  mNSigmaProton[0] = c.mNSigmaProton[0];
+  mNSigmaProton[1] = c.mNSigmaProton[1];
+  mNHits[0] = c.mNHits[0];
+  mNHits[1] = c.mNHits[1];
+  mP[0] = c.mP[0];
+  mP[1] = c.mP[1];
+  mPt[0] = c.mPt[0];
+  mPt[1] = c.mPt[1];
+  mRapidity[0] = c.mRapidity[0];
+  mRapidity[1] = c.mRapidity[1];
+  mDCA[0] = c.mDCA[0];
+  mDCA[1] = c.mDCA[1];
+  mNTracksPassed=0;
+  mNTracksFailed=0;
+#ifdef STHBTDEBUG
+  cout << " franksTrackCut::franksTrackCut(franksTrackCut& c) " << endl;
+#endif
+}
 
 //------------------------------
 franksTrackCut::~franksTrackCut(){
