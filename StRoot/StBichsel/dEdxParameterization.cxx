@@ -16,7 +16,7 @@
 
 ClassImp(dEdxParameterization);
 //________________________________________________________________________________
-dEdxParameterization::dEdxParameterization(const Char_t *Tag, 
+dEdxParameterization::dEdxParameterization(const Char_t *Tag, Int_t keep3D,
 					   const Double_t MostProbableZShift,
 					   const Double_t AverageZShift,
 					   const Double_t I70Shift,
@@ -60,6 +60,7 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag,
     assert(fnBins[i] !=1);
 #endif
   }
+  //  if (! keep3D) SafeDelete(fPhi);
   // set normalization factor to 2.3976 keV/cm at beta*gamma = 4;
   static const Double_t dEdxMIP = 2.39761562607903311; // [keV/cm]
   static const Double_t MIPBetaGamma10 = TMath::Log10(4.);

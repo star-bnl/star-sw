@@ -1,9 +1,24 @@
 #include "Riostream.h"
 #include "Bichsel.h"
 ClassImp(Bichsel);
-Bichsel::Bichsel(const Char_t *tag) : m_Tag(tag), m_dEdxParameterization(0) {
-  if (! m_dEdxParameterization) 
-    m_dEdxParameterization = new dEdxParameterization(m_Tag.Data());
+TString   Bichsel::m_Tags[kTotal] = {"P10","Bi","PAI"};
+dEdxParameterization *Bichsel::m_dEdxParameterizations[kTotal] = {0,0,0};
+//________________________________________________________________________________
+Bichsel::Bichsel(const Char_t *tag, Int_t keep3D) : m_Type(-1), m_Tag(tag), m_dEdxParameterization(0) {
+  
+  for (Int_t k = 0; k < kTotal; k++) if (m_Tag.Contains(m_Tags[k].Data(),TString::kIgnoreCase)) {m_Type = k; break;}
+  assert(m_Type >= 0);
+  if (! m_dEdxParameterizations[m_Type]) 
+    m_dEdxParameterizations[m_Type] = new dEdxParameterization(m_Tag.Data(), keep3D);
+  m_dEdxParameterization = m_dEdxParameterizations[m_Type];
+}
+//________________________________________________________________________________
+void Bichsel::Clean() {
+  for (Int_t k = 0; k < kTotal; k++) 
+    if (m_dEdxParameterizations[k]) {
+      delete m_dEdxParameterizations[k]; 
+      m_dEdxParameterizations[k] = 0;
+    }
 }
 //________________________________________________________________________________
 Double_t  Bichsel::GetI70(Double_t log10bg, Double_t log2dx, Int_t kase)  {
