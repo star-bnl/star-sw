@@ -1,3 +1,4 @@
+*CMZ :          03/09/98  14.12.13  by  Pavel Nevski
 *CMZ :  1.40/05 24/08/98  22.02.41  by  Pavel Nevski
 *CMZ :  1.30/00 29/04/97  23.40.13  by  Pavel Nevski
 *-- Author :    Pavel Nevski   29/03/97
@@ -223,7 +224,8 @@ c***  Get command and number of parameters passed
               write(6,*) ' GXUSER: opening output file ',
      >                              string1(1:length1)
               Call AgZOPEN  ('O',string1(1:length1),'GEKHD',0,0)
-              Call AGZWRITE ('O',ier)
+*             PN,03.09.98 - spool output until the first trig
+*             Call AGZWRITE ('O',ier)
  
           else                                          !  close output
               Call AgZOPEN('O',' ',' ',0,0)
@@ -378,6 +380,7 @@ c----------------------------------------------------------------------
        end
  
  
+*CMZ :          07/09/98  17.34.19  by  Pavel Nevski
 *CMZ :  1.40/05 26/08/98  20.16.56  by  Pavel Nevski
 *CMZ :  1.40/05 26/08/98  19.34.12  by  Pavel Nevski
 *CMZ :  2.06/13 01/02/95  09.38.53  by  O.Couet
@@ -393,12 +396,12 @@ c----------------------------------------------------------------------
 *KEEP,VIDQQ.
       CHARACTER*68 VIDQQ
       DATA VIDQQ/
-     +'@(#)* Advanced Geant Inteface   1.40/05   C: 28/08/98  10.55.07
+     +'@(#)* Advanced Geant Inteface   1.40/05   C: 12/09/98  17.19.00
      +'/
 *KEEP,DATEQQ.
-      IDATQQ =   980828
+      IDATQQ =   980912
 *KEEP,TIMEQQ.
-      ITIMQQ =   1055
+      ITIMQQ =   1719
 *KEEP,VERSQQ.
       VERSQQ = ' 1.40/05'
       IVERSQ =  14005
@@ -417,7 +420,7 @@ c----------------------------------------------------------------------
      >       ' *                                                    *'/,
      >       ' *            W E L C O M E    to   ', A7,'           *'/,
      >       ' *                                                    *'/,
-     >       ' *          Version ',A8,4X,I2,1X,A,1X,I4,A,2X,      '*'/,
+     >       ' *        Version ',A8,4X,I2,1X,A,1X,I4,A,4X,        '*'/,
      >       ' *                                                    *'/,
      >       ' ******************************************************')
       END
