@@ -13,8 +13,10 @@ FTPC_DIR = ../FTPC
 RICH_DIR = ../RICH
 TRG_DIR  = ../TRG
 
-client:	client.o EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o TPCV1P0.Banks.o TPCV2P0.Banks.o  swaps.o RICH_Reader.o TRG_Reader.o FTPV1P0.o FTPV1P0.Banks.o FTPV1P0_ADCR_SR.o FTPV1P0_CPP_SR.o FTPV1P0_ZS_SR.o
-	g++ $(CFLAGS) client.o EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o  TPCV1P0.Banks.o TPCV2P0.Banks.o swaps.o RICH_Reader.o  TRG_Reader.o FTPV1P0.o FTPV1P0.Banks.o FTPV1P0_ADCR_SR.o FTPV1P0_CPP_SR.o FTPV1P0_ZS_SR.o -o client
+OBJECTS = client.o EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o TPCV1P0.Banks.o TPCV2P0.Banks.o  swaps.o RICH_Reader.o TRG_Reader.o FTPV1P0.o FTPV1P0.Banks.o FTPV1P0_ADCR_SR.o FTPV1P0_CPP_SR.o FTPV1P0_ZS_SR.o SVTV1P0.o SVTV1P0.Banks.o SVTV1P0_ADCR_SR.o SVTV1P0_CPP_SR.o SVTV1P0_ZS_SR.o 
+
+client: $(OBJECTS)	
+	g++ $(CFLAGS) $(OBJECTS) -o client
 
 client.o:	client.cxx $(EMC_DIR)/EMC_Reader.hh $(RICH_DIR)/RICH_Reader.hh $(TRG_DIR)/TRG_Reader.hh
 	g++ $(CFLAGS) -c client.cxx
@@ -51,6 +53,22 @@ FTPV1P0_CPP_SR.o:	$(FTPC_DIR)/FTPV1P0_CPP_SR.cxx  $(FTPC_DIR)/FTPV1P0.hh $(IFACE
 
 FTPV1P0_ZS_SR.o:	$(FTPC_DIR)/FTPV1P0_ZS_SR.cxx $(FTPC_DIR)/FTPV1P0.hh $(IFACE_DIR)/EventReader.hh
 	g++ $(CFLAGS) -c $(FTPC_DIR)/FTPV1P0_ZS_SR.cxx
+
+
+SVTV1P0.o:	$(SVT_DIR)/SVTV1P0.cxx $(SVT_DIR)/SVTV1P0.hh $(SVT_DIR)/SVTV1P0_Reader.hh $(SVT_DIR)/SVTV1P0.Banks.hh $(IFACE_DIR)/EventReader.hh $(IFACE_DIR)/RecHeaderFormats.hh
+	g++ $(CFLAGS) -c $(SVT_DIR)/SVTV1P0.cxx
+
+SVTV1P0.Banks.o:	$(SVT_DIR)/SVTV1P0.Banks.hh $(SVT_DIR)/SVTV1P0.Banks.cxx $(IFACE_DIR)/RecHeaderFormats.hh
+	g++ $(CFLAGS) -c $(SVT_DIR)/SVTV1P0.Banks.cxx
+
+SVTV1P0_ADCR_SR.o:	$(SVT_DIR)/SVTV1P0_ADCR_SR.cxx $(IFACE_DIR)/EventReader.hh $(SVT_DIR)/SVTV1P0.hh 
+	g++ $(CFLAGS) -c $(SVT_DIR)/SVTV1P0_ADCR_SR.cxx
+
+SVTV1P0_CPP_SR.o:	$(SVT_DIR)/SVTV1P0_CPP_SR.cxx  $(SVT_DIR)/SVTV1P0.hh $(IFACE_DIR)/EventReader.hh
+	g++ $(CFLAGS) -c $(SVT_DIR)/SVTV1P0_CPP_SR.cxx
+
+SVTV1P0_ZS_SR.o:	$(SVT_DIR)/SVTV1P0_ZS_SR.cxx $(SVT_DIR)/SVTV1P0.hh $(IFACE_DIR)/EventReader.hh
+	g++ $(CFLAGS) -c $(SVT_DIR)/SVTV1P0_ZS_SR.cxx
 
 
 
