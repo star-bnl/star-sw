@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.5 1998/02/11 19:32:55 sakrejda Exp $
+* $Id: tpt.F,v 1.6 1998/03/17 16:58:26 sakrejda Exp $
 * $Log: tpt.F,v $
+* Revision 1.6  1998/03/17 16:58:26  sakrejda
+* initialisation of track# and sector flag cleanup put in one loop
+*
 * Revision 1.5  1998/02/11 19:32:55  sakrejda
 * tpt protected agains overflows, tpt_find_slic.F,tpt_row_sect_pnt.F simplified (and tested)
 *
@@ -94,10 +97,7 @@ C     set return value to normal success
       tpt = STAFCV_OK
 C     set counter for number of rows of good data to 0
       track_h.nok = 0
-C     preset all the hit(i).track to 0
-      do i=1,hit_h.nok
-        hit(i).track=0
-      end do
+C
       if(hit_h.nok.eq.0) go to 888
       call Msg_Enable( 'TPT-I1' )
 c
@@ -118,6 +118,9 @@ C     membrane is less painful
       call timed(time_now)
       time_all = time_all + time_now
       do i=1,hit_h.nok
+C        preset all the hit(i).track to 0
+         hit(i).track=0
+C        clean up sector assignement.
          xglobal(1)=hit(i).x
          xglobal(2)=hit(i).y
          xglobal(3)=hit(i).z
