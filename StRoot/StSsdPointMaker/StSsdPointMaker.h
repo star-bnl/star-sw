@@ -1,3 +1,9 @@
+// $Id: StSsdPointMaker.h,v 1.4 2005/03/18 13:39:21 lmartin Exp $
+//
+// $Log: StSsdPointMaker.h,v $
+// Revision 1.4  2005/03/18 13:39:21  lmartin
+// Missing cvs header added
+//
 /*!
  * \class StSsdPointMaker
  * \author B.Hippolyte, W.Pinganaud, C.Suire.   
@@ -109,7 +115,7 @@ class StSsdPointMaker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.3 2004/08/13 07:07:31 croy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.4 2005/03/18 13:39:21 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };
