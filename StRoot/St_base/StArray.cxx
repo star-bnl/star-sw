@@ -3,6 +3,9 @@
 #include "StArray.h"
 #include "TDatime.h"
 #include "TBrowser.h"
+#include "StMkDeb.h"
+
+enum {kBelongs = BIT(22)};
 //______________________________________________________________________________
 ClassImp(StObjLink)
 //______________________________________________________________________________
@@ -186,11 +189,12 @@ StStrArray::StStrArray(Int_t sz):StObjArray(sz){}
   
   clear();
   n = a.size();
+  resize(n);
   for (i=0; i<n; i++)
   {
     sto = a[i];       
     if (sto) sto = ((StObject*)sto)->clone(); 
-    push_back(sto);
+    put_at(sto,i);
   }
 } 
 //______________________________________________________________________________
@@ -198,15 +202,52 @@ StStrArray::StStrArray(const StStrArray &from){ *this = from;}
 //______________________________________________________________________________
  void StStrArray::clear()
 { 
+  assert(!fV.size() || !fV[0] || ((TObject*)fV[0])->TestBit(TObject::kNotDeleted));
   int n,i;
   
   n = fV.size();
-  for (i=0; i<n; i++){delete fV[i]; fV[i]=0;}
+  for (i=0; i<n; i++){
+    TObject *to = fV[i];
+    if (!to) continue;
+    if (abs((int)to)<10000 || to->TestBit(TObject::kNotDeleted)) {
+      delete fV[i];
+    } else {
+      Warning("clear","Object[%d]=%p(%d) is already deleted",i,(void*)to,to);
+      const char *mk=0;
+      mk = StMkDeb::GetName(StMkDeb::GetCurrent());
+      if (mk && *mk) printf("*** Now we are in %s ***\n",mk);
+      mk = StMkDeb::GetUser(to);
+      if (mk && *mk) printf("*** It was deleted in maker %s ***\n",mk);
+//    assert(0);
+    }
+    fV[i]=0;
+  }
   fV.clear();
 } 
 StStrArray::~StStrArray()
 {
   clear(); 
+}
+//______________________________________________________________________________
+void StStrArray::put_at(TObject *obj,int i)
+{
+  assert(i>=0 && i<int(size()));
+  if (obj) {   
+     if (fV[i]==obj) return;
+     assert(!obj->TestBit(kBelongs) && obj->TestBit(TObject::kNotDeleted));
+     obj->SetBit(kBelongs);
+  }
+  fV[i]=obj;}
+//______________________________________________________________________________
+void StStrArray::push_back(const TObject * const to)
+{
+  TObject* obj = (TObject*)to;
+  if (obj) {   
+     assert(!obj->TestBit(kBelongs) && obj->TestBit(TObject::kNotDeleted));
+     obj->SetBit(kBelongs);
+  }
+
+  fV.push_back(obj);
 }
 
 //______________________________________________________________________________

@@ -140,7 +140,8 @@ public:
  virtual ~StStrArray();
        void operator=(const StStrArray &a); 
 
- void push_back(const TObject *to){fV.push_back((TObject*)to);}
+ void push_back(const TObject *to);
+ void put_at(TObject *obj,int i);
  void clear();
  virtual void makeZombie(int flg);			
 private:
