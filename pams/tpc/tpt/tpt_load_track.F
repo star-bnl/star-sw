@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.15 2000/02/23 04:07:08 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.16 2000/03/03 23:46:01 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.16  2000/03/03 23:46:01  sakrejda
+* Loading track for no field
+*
 * Revision 1.15  2000/02/23 04:07:08  sakrejda
 * Cleard id_globtrk - requested by Helen Caines - in the track table
 *
@@ -83,7 +86,6 @@ C___________________________________________________________________
       INTEGER ipt
       REAL    x0, y0, sgn, sign
       REAL   dx0,dy0
-      real   radtodeg
       real   xlocal(3),bfield(3)
       real   atand
       data   xlocal /3*0./
@@ -115,51 +117,61 @@ C     chisq from the linear fit
       track(ipt).chisq(1) = trk(ipt).p(8)
       track(ipt).chisq(2) = trk(ipt).p(9)
 C 
-C     curvature
-      track(ipt).curvature = 1.0/abs(trk(ipt).p(2))    
+
 C     inverse of the pt
       call gufld(xlocal,bfield)
-      if(bfield(3).eq.0.0)then
-        track(ipt).invp = 0.0
+      if(abs(bfield(3)).lt.0.1)then
+        track(ipt).invp = 0.001
         track(ipt).cov(1) = 0.0
+        track(ipt).cov(3) = 0.0
+        track(ipt).cov(6) = 0.0
+        track(ipt).cov(10) = 0.0
+        track(ipt).cov(15) = 0.0
+C       curvature
+        track(ipt).curvature = 0.0  
+        track(ipt).r0 = 0.0  
+        track(ipt).phi0=trk(ipt).p(4)
+        track(ipt).r0=trk(ipt).p(2)
+        track(ipt).psi = trk(ipt).p(5)
       else
         track(ipt).invp =  1.0/(abs(trk(ipt).p(2))*bfield(3)*C_D_CURVATURE)
         track(ipt).cov(1) = abs(trk(ipt).dpar(6))/
      >                    ((trk(ipt).p(2)**2*bfield(3)*C_D_CURVATURE)**2)
-      endif
-C
-C     coordinates of the point where track parameters are given
-      x0 = abs(trk(ipt).p(2))*cos(trk(ipt).p(5))+trk(ipt).p(3)
-      dx0= sqrt( cos(trk(ipt).p(5))**2*abs(trk(ipt).dpar(6)) +
+C       curvature
+        track(ipt).curvature = 1.0/abs(trk(ipt).p(2))    
+C       coordinates of the point where track parameters are given
+        x0 = abs(trk(ipt).p(2))*cos(trk(ipt).p(5))+trk(ipt).p(3)
+        dx0= sqrt( cos(trk(ipt).p(5))**2*abs(trk(ipt).dpar(6)) +
      >          (trk(ipt).p(2)*sin(trk(ipt).p(5))*trk(ipt).dpar(7))**2 +
      >           abs(trk(ipt).dpar(1)) )
-      y0 = abs(trk(ipt).p(2))*sin(trk(ipt).p(5))+trk(ipt).p(4)
-      dy0= sqrt( sin(trk(ipt).p(5))**2*abs(trk(ipt).dpar(6)) +
+        y0 = abs(trk(ipt).p(2))*sin(trk(ipt).p(5))+trk(ipt).p(4)
+        dy0= sqrt( sin(trk(ipt).p(5))**2*abs(trk(ipt).dpar(6)) +
      >          (trk(ipt).p(2)*cos(trk(ipt).p(5))*trk(ipt).dpar(7))**2 +
      >           abs(trk(ipt).dpar(4)) )
 C
-C     azimuthal angle for this point
-      track(ipt).phi0 = atan2(y0,x0)
+C       azimuthal angle for this point
+        track(ipt).phi0 = atan2(y0,x0)
+        track(ipt).cov(3)  = ((y0*dx0/(x0*x0))**2 + (dy0/x0)**2) /
+     >                  ((1 + (y0/x0)**2)**2)
+C
+C       radius for this point
+        track(ipt).r0 = sqrt(x0**2+y0**2)
+        track(ipt).cov(6) = ((x0*dx0)**2 + (y0*dy0)**2)/(track(ipt).r0**2)
+        track(ipt).r0 = sqrt(x0**2+y0**2)
+        track(ipt).cov(10) = trk(ipt).dpar(8)
+        track(ipt).cov(15) = trk(ipt).dpar(9)
+C       azimuthal angle for the momentum at the first point
+        sgn = sign(1.0,trk(ipt).p(2))
+        track(ipt).psi = trk(ipt).p(5)-sgn*0.25*C_2PI
+      endif
       if(track(ipt).phi0.lt.0) track(ipt).phi0=
      >track(ipt).phi0+C_2PI
       track(ipt).phi0 = track(ipt).phi0*C_DEG_PER_RAD ! convert to degrees
-**cc      if (track(ipt).phi0.gt.180.0) track(ipt).phi0 = 
-**cc     +     track(ipt).phi0 - 360.0
-      track(ipt).cov(3)  = ((y0*dx0/(x0*x0))**2 + (dy0/x0)**2) /
-     >                  ((1 + (y0/x0)**2)**2)
-C
-C     radius for this point
-      track(ipt).r0 = sqrt(x0**2+y0**2)
-      track(ipt).cov(6) = ((x0*dx0)**2 + (y0*dy0)**2)/(track(ipt).r0**2)
 C
 C     tangent of the dip angle
       track(ipt).tanl = trk(ipt).p(7)
-      track(ipt).cov(10) = trk(ipt).dpar(8)
-C     
 C     z coordinate of the point where track parameters are given
       track(ipt).z0 = trk(ipt).p(6)
-      track(ipt).cov(15) = trk(ipt).dpar(9)
-C
       track(ipt).nrec = trk(ipt).nhit
       ld = trk(ipt).ipnt(trk(ipt).nhit)
       track(ipt).hitid = hit(ld).id
@@ -171,8 +183,9 @@ c
          ient = trk(ipt).ipnt(ld)
          iret = tpt_cross_fact(hit(ient).row,hit(ient).x,
      >          hit(ient).y,xold,yold,cf,hit(ient).alpha)
-         ds=ds+2.0*abs(trk(ipt).p(2))*asin(0.5*sqrt((xold-hit(ient).x)**2+
-     >      (yold-hit(ient).y)**2)/abs(trk(ipt).p(2)))
+         if(abs(bfield(3)).gt.0.1)
+     >   ds=ds+2.0*abs(trk(ipt).p(2))*asin(0.5*sqrt((xold-hit(ient).x)**2+
+     >   (yold-hit(ient).y)**2)/abs(trk(ipt).p(2)))
          xold = hit(ient).x
          yold = hit(ient).y
          hit(ient).lambda=atand(trk(ipt).p(7))
@@ -183,10 +196,12 @@ c
       hit( trk(ipt).ipnt(trk(ipt).nhit)).lambda =
      >hit( trk(ipt).ipnt(trk(ipt).nhit-1)).lambda
 C
-      track(ipt).length =ds*sqrt(1.0+track(ipt).tanl**2)
-C     azimuthal angle for the momentum at the first point
-      sgn = sign(1.0,trk(ipt).p(2))
-      track(ipt).psi = trk(ipt).p(5)-sgn*0.25*C_2PI
+      if(abs(bfield(3)).gt.0.1) then
+           track(ipt).length =ds*sqrt(1.0+track(ipt).tanl**2)
+      else
+           track(ipt).length = trk(ipt).p(3)
+      endif
+
       if(track(ipt).psi.lt.0) track(ipt).psi=track(ipt).psi+
      >                        C_2PI
       track(ipt).psi = track(ipt).psi*C_DEG_PER_RAD ! convert to degrees
@@ -194,7 +209,7 @@ C     azimuthal angle for the momentum at the first point
 **cc     +     track(ipt).psi - 360.0
 C
 
-      if(nposOn) then
+      if(nposOn.and.abs(bfield(3)).gt.0.1) then
 c---- Calculation of possible (maximum) number of points
 
 C convert to Tesla
