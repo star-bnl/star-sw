@@ -13,6 +13,7 @@
 * 7/11/98 - K. Turner - change default data file to new version
 * 7/13/98 - K. Turner - change to use bfc macros
 * 7/30/98 - K. Turner - change to use new utility kumacs
+* 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk
 * 
 ************************************************************************
 ************************************************************************
@@ -154,7 +155,7 @@
 
 * close ntuple
   message ' close ntuple'
-  exec write_table_to_ntuple#close_disk [funit]
+  exec write_table_to_ntuple#close_disk [funit] [nid]
 
 * close input file
   message ' close input file'
