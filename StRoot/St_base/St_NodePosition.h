@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98   
-// $Id: St_NodePosition.h,v 1.5 1999/02/04 19:22:23 fine Exp $
+// $Id: St_NodePosition.h,v 1.6 1999/03/21 22:38:53 fine Exp $
 // $Log: St_NodePosition.h,v $
+// Revision 1.6  1999/03/21 22:38:53  fine
+// StDataSetIter make up + new NextDataSet method introced
+//
 // Revision 1.5  1999/02/04 19:22:23  fine
 // Severak drawing method have been added to draw STAR nodes
 //
@@ -27,12 +30,13 @@
 #define ROOT_St_NodePosition
 
 #include <TClass.h>
+#include "St_DefineSet.h"
 #include "St_Node.h"
   
 class TBrowser;
 class TRotMatrix;
   
-class St_NodePosition  : public TObject {
+class St_NodePosition  : public TObject, public St_DefineSet {
  protected:
    Double_t        fX;           //X offset with respect to parent object
    Double_t        fY;           //Y offset with respect to parent object
@@ -47,6 +51,7 @@ class St_NodePosition  : public TObject {
         virtual ~St_NodePosition(){;}
         virtual void        Browse(TBrowser *b);
         virtual Int_t       DistancetoPrimitive(Int_t px, Int_t py);
+        virtual St_DataSet *DefineSet();
         virtual void        Draw(Option_t *option=""); // *MENU*
         virtual void        ExecuteEvent(Int_t event, Int_t px, Int_t py);
         virtual TRotMatrix  *GetMatrix() const {return fMatrix;}
@@ -74,5 +79,7 @@ class St_NodePosition  : public TObject {
  
         ClassDef(St_NodePosition,1)  //Description of parameters to position a 3-D geometry object
 };
+
+inline St_DataSet *St_NodePosition::DefineSet(){ return GetNode(); }
  
 #endif
