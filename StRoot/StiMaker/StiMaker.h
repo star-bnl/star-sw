@@ -19,7 +19,8 @@ class StiTrackContainer;
 class StiDrawableHits;
 class StiEvaluableTrackSeedFinder;
 class StiTrackSeedFinder;
-class Sti2HitComboFilter;
+class StiTrackFinder;
+class StiKalmanTrackFinder;
 
 class StiMaker : public StMaker {
  public:
@@ -34,7 +35,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.13 2001/08/15 20:10:52 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.14 2001/08/20 18:55:47 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -53,7 +54,6 @@ public:
     
 protected:
     StiMaker(const char* name = "StiMaker");
-    void initSeedFinderForStart();
 
 private:
 
@@ -78,7 +78,9 @@ private:
     StiHitFiller* mhitfiller; //!
     StiEvaluableTrackSeedFinder* mtrackseedfinder; //!
     StiTrackSeedFinder* mkalmanseedfinder; //!
-    Sti2HitComboFilter* mhitcombofilter; //!
+
+    //Tracker
+    StiKalmanTrackFinder* mtracker; //!
     
     char* mmaterialbuildpath; //!
     char* mdetectorbuildpath; //!

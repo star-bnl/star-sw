@@ -35,6 +35,7 @@
 #include "Sti/StiGeometryTransform.h"
 #include "Sti/StiTrackSeedFinder.h"
 #include "Sti/StiEvaluableTrackSeedFinder.h"
+#include "Sti/StiKalmanTrackFinder.h"
 
 //StiGui
 #include "StiGui/StiDrawableHits.h"
@@ -107,12 +108,12 @@ StiMaker::~StiMaker()
     delete mkalmanseedfinder;
     mkalmanseedfinder = 0;
 
-    delete mhitcombofilter;
-    mhitcombofilter = 0;
-
     delete mkalmantrackfactory;
     mkalmantrackfactory=0;
 
+    delete mtracker;
+    mtracker = 0;
+    
     StiGeometryTransform::kill();
 }
 
@@ -187,11 +188,6 @@ Int_t StiMaker::Init()
 
     //KalmanTrackSeedFinder
     mkalmanseedfinder = new StiTrackSeedFinder(mhitstore);
-    StiRectangular2HitComboFilter* temp = new StiRectangular2HitComboFilter();
-    temp->deltaD = 1.; //TEMP
-    temp->deltaZ = 1.; //TEMP
-    mhitcombofilter = temp;
-    mkalmanseedfinder->setHitComboFilter(mhitcombofilter);
     mkalmanseedfinder->setFactory(mkalmantrackfactory);
     
     //The StiDetector factory
@@ -232,6 +228,12 @@ Int_t StiMaker::Init()
     mhitfiller->addDetector(kTpcId);
     //mhitfiller->addDetector(kSvtId);
     cout <<"Hits used from detectors:\t"<<*mhitfiller<<endl;
+
+    //The Tracker
+    mtracker = new StiKalmanTrackFinder();
+    mtracker->setTrackNodeFactory(mtracknodefactory);
+    mtracker->setTrackSeedFinder(mkalmanseedfinder);
+    mtracker->isValid(true);
     
     return StMaker::Init();
 }
@@ -253,7 +255,7 @@ Int_t StiMaker::Make()
 	mhitstore->sortHits();
 
 	//Init seed finder for start
-	initSeedFinderForStart();
+	mtracker->initSeedFinderForStart();
 
 	//Temp patch to draw hits
 	const hitmap& hits = mhitstore->hits();
@@ -302,41 +304,7 @@ void StiMaker::setDetectorBuildPath(char* val)
 void StiMaker::doNextAction()
 {
     //Add call to next tracker action here
-    if (mkalmanseedfinder->hasMore()) {
-	StiKalmanTrack* track = mkalmanseedfinder->next();
-	if (track) {
-	    cout <<"StiMaker::doNextAction()\tgot track"<<endl;}
-	else {
-	    cout <<"StiMaker::doNextAction()\ttrack==0"<<endl;}
-    }
-    else if (mdetector->hasMoreStartPoints()) {
-	mdetector->nextStartPoint();
-	initSeedFinderForStart();
-	cout <<"StiMaker::doNextAction()\tSet to next start point"<<endl;
-    }
-    else {
-	cout <<"StiMaker::doNextActio():\tNo more start points"<<endl;
-    }
-	
-    return;
-}
-
-void StiMaker::initSeedFinderForStart()
-{
-    mkalmanseedfinder->clear();
-    StiDetectorContainer& rdet = (*mdetector);
-    //Get Outer 3 layers
-    for (int i=0; i<3; ++i) {
-	StiDetector* layer = *rdet;
-	mkalmanseedfinder->addLayer( layer->getPlacement()->getCenterRefAngle(),
-				     layer->getPlacement()->getCenterRadius());
-	rdet.moveIn();
-    }
-    //Move back out to where we were
-    for (int i=0; i<3; ++i) {
-	rdet.moveOut();
-    }
-    //mkalmanseedfinder->print();
+    mtracker->doNextAction();
     return;
 }
 
