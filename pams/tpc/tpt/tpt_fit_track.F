@@ -1,5 +1,8 @@
-* $Id: tpt_fit_track.F,v 1.3 1998/02/06 22:03:15 fisyak Exp $
+* $Id: tpt_fit_track.F,v 1.4 1998/07/07 14:30:51 sakrejda Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.4  1998/07/07 14:30:51  sakrejda
+* pnt defined as integer
+*
 * Revision 1.3  1998/02/06 22:03:15  fisyak
 * Remove tgc_cross_and_dip.F
 *
@@ -53,7 +56,8 @@ C     Local variables
       INTEGER n_good, ipnt_temp(mxpnt)
       LOGICAL enough, good_hit(mxpnt)
       REAL    xcir(mxpnt),ycir(mxpnt),zcir(mxpnt)
-      REAL    wcir(mxpnt),wlin(mxpnt),pnt(mxpnt)
+      REAL    wcir(mxpnt),wlin(mxpnt)
+      INTEGER pnt(mxpnt)
       REAL    as,bs,cf,xold,yold,theta
       REAL    r1,tanphi0
 
