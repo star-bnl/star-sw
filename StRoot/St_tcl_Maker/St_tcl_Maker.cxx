@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.58 2000/02/25 17:57:05 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.59 2000/02/26 01:51:11 snelling Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.59  2000/02/26 01:51:11  snelling
+// clean up
+//
 // Revision 1.58  2000/02/25 17:57:05  fisyak
 // Set proper include path
 //
@@ -11,174 +14,6 @@
 //
 // Revision 1.55  2000/02/01 18:49:54  love
 // Protect against empty TPC data
-//
-// Revision 1.54  2000/01/31 21:29:19  snelling
-// Made CC5 compatible (strstr in CC5 returns const char* if called
-// as strstr(const char*, const char *))
-//
-// Revision 1.53  1999/12/07 23:49:35  snelling
-// Fixed Linux warnings
-//
-// Revision 1.52  1999/12/06 04:09:02  snelling
-// Fixed morphology, now in chain when running with eval switch
-//
-// Revision 1.51  1999/12/05 00:07:04  snelling
-// Modifications made for eval option: added Histograms and NTuple support
-//
-// Revision 1.50  1999/11/22 23:18:45  snelling
-// added Li Qun's changes to tfs
-//
-// Revision 1.49  1999/11/20 20:53:51  snelling
-// Removed hitclus table and added entries to tphit table
-//
-// Revision 1.48  1999/11/11 16:27:46  fisyak
-// Add cast to ceil for HP
-//
-// Revision 1.47  1999/10/07 03:24:49  snelling
-// created tables dynamically, correct for TFS - TRS/DATA ipix/10
-//
-// Revision 1.46  1999/10/05 00:46:02  snelling
-// added some histogram protections
-//
-// Revision 1.45  1999/10/01 22:22:23  snelling
-// updated histograms
-//
-// Revision 1.44  1999/09/24 01:23:43  fisyak
-// Reduced Include Path
-//
-// Revision 1.43  1999/09/05 05:13:44  sakrejda
-// Calls to Limit Error Messages added to Init()
-//    gMessMgr->SetLimit("TPSEQ",10);
-//    gMessMgr->SetLimit("TPHAM",10);
-//
-// Revision 1.42  1999/08/26 01:27:17  snelling
-// Li Qun: Table fixed
-//
-// Revision 1.41  1999/08/25 21:50:20  snelling
-// Li Qun added a table for tracking
-//
-// Revision 1.40  1999/07/15 13:58:24  perev
-// cleanup
-//
-// Revision 1.39  1999/07/02 15:25:11  ward
-// Add -1 so 1-512 -> 0-511.
-//
-// Revision 1.38  1999/04/14 13:54:56  sakrejda
-// Iterator Reset() taken out of the if for pixel table creation
-//
-// Revision 1.37  1999/04/08 17:21:27  snelling
-// calculated size for tcl_tp table and create it with this size
-//
-// Revision 1.36  1999/04/07 23:31:49  snelling
-// calculate size for adcxyz table and create it with that size
-//
-// Revision 1.35  1999/03/29 23:11:41  snelling
-// auxiliary hit table eliminated
-//
-// Revision 1.34  1999/03/24 01:17:07  sakrejda
-// tss_pars added to the xyz_newtab call
-//
-// Revision 1.33  1999/03/17 19:23:49  sakrejda
-// unpacking of raw data into adcxyz table with an on/off switch added
-//
-// Revision 1.33  1999/03/17 11:02:43  snellings
-// switch for the pixel table and pixel table added
-//
-// Revision 1.32  1999/03/17 02:02:43  fisyak
-// New scheme
-//
-// Revision 1.31  1999/03/16 00:20:39  sakrejda
-// switch for the cluster morphology stuff added
-//
-// Revision 1.30  1999/03/15 22:31:04  sakrejda
-// names of variables for the cluster morph. table changed
-//
-// Revision 1.29  1999/03/13 23:34:03  perev
-// New makers
-//
-// Revision 1.28  1999/03/11 20:40:18  ward
-// Add code for cluster morphology.
-//
-// Revision 1.27  1999/03/04 14:05:59  sakrejda
-// table of sequences increased
-//
-// Revision 1.26  1999/03/03 00:29:04  sakrejda
-// size of the tables reduced following wasted space diagnostics
-//
-// Revision 1.25  1999/03/02 19:50:42  sakrejda
-// Histograms cleaned up
-//
-// Revision 1.24  1999/03/01 18:53:32  sakrejda
-// hit evaluation switchable
-//
-// Revision 1.23  1999/02/27 23:10:48  sakrejda
-// auxiliary hit table eliminated
-//
-// Revision 1.22  1999/02/26 17:25:30  kathy
-// fix histograms
-//
-// Revision 1.21  1999/02/25 03:36:05  sakrejda
-// Threshold lowered, was set for the test data
-//
-// Revision 1.20  1999/02/19 16:30:25  fisyak
-// sanitary check
-//
-// Revision 1.19  1999/02/16 01:53:57  fisyak
-// Make sure that tfs does not run if there tss
-//
-// Revision 1.18  1999/02/10 20:57:39  kathy
-// added histograms to Maker
-//
-// Revision 1.17  1999/01/20 23:59:56  fisyak
-// Just clean up
-//
-// Revision 1.16  1999/01/08 23:18:30  sakrejda
-// index  table created only once and only for the mc run
-//
-// Revision 1.15  1999/01/02 19:08:22  fisyak
-// Add ctf
-//
-// Revision 1.14  1998/12/18 18:37:16  fisyak
-// account module changes
-//
-// Revision 1.13  1998/12/16 22:19:19  fisyak
-// New tfs
-//
-// Revision 1.12  1998/12/04 15:31:50  fisyak
-// Add g2t_vertex for tcl
-//
-// Revision 1.11  1998/10/31 00:26:22  fisyak
-// Makers take care about branches
-//
-// Revision 1.10  1998/10/06 18:00:48  perev
-// cleanup
-//
-// Revision 1.9  1998/09/18 14:35:31  fisyak
-// Fix makers
-//
-// Revision 1.8  1998/09/15 20:55:27  fisyak
-// Split St_DataSet -> St_DataSet + St_DataSetIter
-//
-// Revision 1.7  1998/08/26 12:15:10  fisyak
-// Remove asu & dsl libraries
-//
-// Revision 1.6  1998/08/18 14:05:04  fisyak
-// Add to bfc dst
-//
-// Revision 1.5  1998/08/14 15:25:41  fisyak
-// Move out tpg from run
-//
-// Revision 1.4  1998/08/10 02:34:34  fisyak
-// Add St_laser_Maker
-//
-// Revision 1.3  1998/08/07 19:34:55  fisyak
-// Add St_run_Maker
-//
-// Revision 1.2  1998/07/21 01:04:39  fisyak
-// Clean up
-//
-// Revision 1.1  1998/07/21 00:36:46  fisyak
-// tcl and tpt
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -243,10 +78,8 @@ Int_t St_tcl_Maker::Init() {
   // 		Create tables
   St_DataSet *tpc = GetDataBase("params/tpc");
   assert(tpc);
-  St_DataSetIter   local(tpc);
 
   // 		geometry parameters
-
 
   m_tpg_pad_plane = NULL;
   m_tpg_pad_plane = (St_tpg_pad_plane *) GetDataSet("tpcDB/.const/tpg_pad_plane");
@@ -255,25 +88,25 @@ Int_t St_tcl_Maker::Init() {
   m_tpg_detector  = (St_tpg_detector  *) GetDataSet("tpcDB/.const/tpg_detector");
   assert ((m_tpg_pad_plane && m_tpg_detector)) ;
 
-
   // 		TCL parameters
-  St_DataSet *tclpars = local("tclpars");
+  St_DataSet *tclpars = tpc->Find("tclpars");
   assert(tclpars);
 
   m_tcl_sector_index = new St_tcl_sector_index("tcl_sector_index",1);
-  m_tcl_sector_index->SetNRows(1); AddConst(m_tcl_sector_index);
+  m_tcl_sector_index->SetNRows(1); 
+  AddConst(m_tcl_sector_index);
   
   m_tclpar           = NULL;
-  m_tclpar           = (St_tcl_tclpar *)         tclpars->Find("tclpar");
+  m_tclpar           = (St_tcl_tclpar *) tclpars->Find("tclpar");
   m_type             = NULL;
   m_type             = (St_tcl_tpc_index_type *) tclpars->Find("type");
   assert(m_tclpar && m_type);
 
   // 		TSS parameters
-  St_DataSet *tsspars = local("tsspars");
+  St_DataSet *tsspars = tpc->Find("tsspars");
   assert(tsspars);
 
-  m_tsspar = 0;
+  m_tsspar = NULL;
   m_tsspar = (St_tss_tsspar *) tsspars->Find("tsspar");
   assert(m_tsspar); 
   tss_tsspar_st *tsspar = m_tsspar->GetTable();
@@ -281,12 +114,12 @@ Int_t St_tcl_Maker::Init() {
 
 
   // 		TFS parameters
-  St_DataSet *tfspars = local("tfspars");
+  St_DataSet *tfspars = tpc->Find("tfspars");
   assert(tfspars);
   m_tfs_fspar = NULL;
-  m_tfs_fspar = (St_tfs_fspar *) local("tfspars/tfs_fspar");
+  m_tfs_fspar = (St_tfs_fspar *) tfspars->Find("tfs_fspar");
   m_tfs_fsctrl= NULL;
-  m_tfs_fsctrl= (St_tfs_fsctrl*) local("tfspars/tfs_fsctrl");
+  m_tfs_fsctrl= (St_tfs_fsctrl*) tfspars->Find("tfs_fsctrl");
 
 
   //		Histograms     
@@ -299,13 +132,9 @@ Int_t St_tcl_Maker::Init() {
 
 Int_t St_tcl_Maker::Make() {
 
-  St_DataSetIter local(m_DataSet);
+  //  m_DataSet is global pointer from StMaker to data set
 
   if (Debug()) printf("Start of TCL Maker");
-
-  // get the parameters for TCL
-  // apparently not used this looks strange
-  //  tcl_tclpar_st* sttclpar = m_tclpar->GetTable();
 
   // initialize pointers to tables
   tpseq = NULL;
@@ -323,7 +152,7 @@ Int_t St_tcl_Maker::Make() {
     m_raw_data_tpc = kTRUE;
     St_DataSetIter next(raw_data_tpc);
     St_raw_sec_m  *raw_sec_m = (St_raw_sec_m *) next("raw_sec_m");
-    //Create the adcxyz table
+    //Get the adcxyz table
     St_tfc_adcxyz *adcxyz = (St_tfc_adcxyz *) next("adcxyz");
 
     //counters for calculating size tables
@@ -355,7 +184,7 @@ Int_t St_tcl_Maker::Make() {
     //calculate or estimate the size before creating the tables
     if (Debug()) cout << "making tcl_tp table with " << isumseq << " entries" << endl;
     tpseq = new St_tcl_tp_seq("tpseq",isumseq);      
-    local.Add(tpseq);
+    m_DataSet->Add(tpseq);
 
     // WARNING no knowledge of actual number of hits here but we create a
     // table smart enough to contain biggest events. Try max number of hits
@@ -364,28 +193,28 @@ Int_t St_tcl_Maker::Make() {
     int max_hit = (int) ceil((float)(isumpix/10));
     // We have to protect against DAQ event records that say there is TPC data
     // when its empty.
-    if(isumpix<1){
+    if (isumpix < 1) {
       Warning ("Make"," TPC data is empty, isumpix=%d dump event.",isumpix);
       return kStErr;
     }
     cout << "number of estimated hits used: " << max_hit << endl;
     // create tables used with a reasonable size
     tphit = new St_tcl_tphit("tphit",max_hit); 
-    local.Add(tphit);
+    m_DataSet->Add(tphit);
     tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); 
-    local.Add(tpcluster);
+    m_DataSet->Add(tpcluster);
 
     if(!morph && m_tclMorphOn) {
       // UW morphology study 
       morph = new St_tcc_morphology("morph",max_hit);    
-      local.Add(morph);
+      m_DataSet->Add(morph);
     }
 
     if (!adcxyz && m_tclPixTransOn) {  
       // create flat adcxyz Table for pixel viewing
       if (Debug()) cout << "making adcxyz table with " << isumpix << " entries" << endl;
       adcxyz = new St_tfc_adcxyz("adcxyz",isumpix);  
-      next.Add(adcxyz);
+      m_DataSet->Add(adcxyz);
       adcxyz->SetNRows(0);
     }
     // end creation tables
@@ -416,28 +245,28 @@ Int_t St_tcl_Maker::Make() {
 	  if(Debug()) printf("Starting %20s for sector %2d.\n","xyz_newtab",indx);
 	  // Need to guard against zero size output tables
           if(adcxyz->GetTableSize()){	  
-	  Int_t res = xyz_newtab(m_tpg_detector,
-				 m_tcl_sector_index,raw_sec_m,
-				 raw_row_in,raw_pad_in,raw_seq_in,pixel_data_in,
-				 raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
-				 adcxyz,m_tsspar);
-	  
-	  if (res != kSTAFCV_OK) Warning("Make","xyz_newtab == %d",res);
+	    Int_t res = xyz_newtab(m_tpg_detector,
+				   m_tcl_sector_index,raw_sec_m,
+				   raw_row_in,raw_pad_in,raw_seq_in,pixel_data_in,
+				   raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
+				   adcxyz,m_tsspar);
+	    
+	    if (res != kSTAFCV_OK) Warning("Make","xyz_newtab == %d",res);
 	  }
 	}
 	
 	//     	TCL
         if(Debug()) printf("Starting %20s for sector %2d.\n","tcl",indx);
 	
-	  // Need to guard against zero size output tables
-          if(tpcluster->GetTableSize()){	  
-	Int_t tcl_res = tcl(m_tpg_pad_plane, m_tcl_sector_index, raw_sec_m,
-                            raw_row_in, raw_pad_in, raw_seq_in, pixel_data_in,
-                            raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
-                            tpcluster,tpseq);
+	// Need to guard against zero size output tables
+	if(tpcluster->GetTableSize()){	  
+	  Int_t tcl_res = tcl(m_tpg_pad_plane, m_tcl_sector_index, raw_sec_m,
+			      raw_row_in, raw_pad_in, raw_seq_in, pixel_data_in,
+			      raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
+			      tpcluster,tpseq);
 	  
-        if (tcl_res!=kSTAFCV_OK) Warning("Make","tcl == %d",tcl_res);
-	  }
+	  if (tcl_res!=kSTAFCV_OK) Warning("Make","tcl == %d",tcl_res);
+	}
 	// Create morphology table only if needed
 	if (m_tclMorphOn) {
 	  if(Debug()) printf("Starting %20s for sector %2d.\n","cluster_morphology",indx);
@@ -452,16 +281,15 @@ Int_t St_tcl_Maker::Make() {
 	if (sector_tot == 1) {k = -k;}
 	tcl_sector_index->CurrentSector = k;
         if(Debug()) printf("Starting %20s for sector %2d.\n","tph",indx);
-	  // Need to guard against zero size output tables
-          if(tpcluster->GetTableSize()){	  
-	Int_t tph_res = tph(m_tcl_sector_index, m_tclpar,m_tsspar,
-			    m_tpg_pad_plane,
-			    pixel_data_in, pixel_data_out,
-			    tpseq, tpcluster, tphit);
-        if (tph_res!=kSTAFCV_OK) Warning("Make","tph == %d",tph_res);
-	  }      
+	// Need to guard against zero size output tables
+	if(tpcluster->GetTableSize()){	  
+	  Int_t tph_res = tph(m_tcl_sector_index, m_tclpar,m_tsspar,
+			      m_tpg_pad_plane,
+			      pixel_data_in, pixel_data_out,
+			      tpseq, tpcluster, tphit);
+	  if (tph_res!=kSTAFCV_OK) Warning("Make","tph == %d",tph_res);
+	}
       }
-    // end raw data
     }
     if (sector_tot && m_tclEvalOn) { //slow simulation exist and evaluation switch set
       if (Debug()) cout << "start run_tte_hit_match" << endl;
@@ -470,12 +298,12 @@ Int_t St_tcl_Maker::Make() {
 	St_DataSetIter geantI(geant);
 	St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geantI("g2t_tpc_hit");
 	if (g2t_tpc_hit){//geant data exists too
-
+	  
 	  // create the index table, if any
-	  index = (St_tcl_tpc_index *) local("index");
+	  index = (St_tcl_tpc_index *) m_DataSet->Find("index");
 	  if (!index) {
 	    index = new St_tcl_tpc_index("index",2*max_hit); 
-	    local.Add(index);
+	    m_DataSet->Add(index);
 	  }
 	  
 	  Int_t Res_tte =  tte_hit_match(g2t_tpc_hit,index,m_type,tphit); 
@@ -487,7 +315,7 @@ Int_t St_tcl_Maker::Make() {
     }
   }
   else {
-// 		Raw data does not exist, check GEANT. if it does then use fast cluster simulation
+    // 		Raw data does not exist, check GEANT. if it does then use fast cluster simulation
     St_DataSet *geant = GetInputDS("geant");
     if (geant) {
       St_DataSetIter geantI(geant);
@@ -503,16 +331,16 @@ Int_t St_tcl_Maker::Make() {
       St_g2t_vertex  *g2t_vertex  = (St_g2t_vertex  *) geantI("g2t_vertex");
       if (g2t_tpc_hit && g2t_track){
 	// create the index table, if any
-	index = (St_tcl_tpc_index *) local("index");
+	index = (St_tcl_tpc_index *) m_DataSet->Find("index");
 	if (!index) {
 	  index = new St_tcl_tpc_index("index",2*max_hit); 
-	  local.Add(index);
+	  m_DataSet->Add(index);
 	}
 	if (Debug()) cout << "start tfs_run" << endl;
 
 	// make a tphit table with the size of the number of geant hits
 	tphit = new St_tcl_tphit("tphit",max_hit); 
-	local.Add(tphit);
+	m_DataSet->Add(tphit);
 	
 	Int_t Res_tfs_g2t = tfs_g2t(g2t_tpc_hit, g2t_track, g2t_vertex,
 				    m_tfs_fspar,m_tfs_fsctrl,
@@ -541,7 +369,7 @@ Int_t St_tcl_Maker::Make() {
 //		Histograms     
   MakeHistograms(); // clustering histograms
 
-  cout << "got through St_tcl_Maker OK." << endl;
+  cout << "Got through St_tcl_Maker OK." << endl;
 
   return kStOK;
 }
@@ -550,7 +378,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.58 2000/02/25 17:57:05 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.59 2000/02/26 01:51:11 snelling Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -592,15 +420,12 @@ void St_tcl_Maker::InitHistograms() {
 
 void St_tcl_Maker::MakeHistograms() {
 
-  St_DataSetIter tpc_hits(GetDataSet("tpc_hits"));
 
   // hit table
-  St_tcl_tphit *phtcl = 0; 
-  tcl_tphit_st *pttphit = 0; 
-  // get pointers to tpc hit table
-  phtcl = (St_tcl_tphit*) tpc_hits.Find("tphit");
-  if (phtcl) {
-    pttphit = phtcl->GetTable();
+  tcl_tphit_st* pttphit = NULL; 
+  // tphit is global pointer to tpc hit table
+  if (tphit) {
+    pttphit = tphit->GetTable();
   }
   else { 
     cout << "Warning: tphit table header does not exist "   << endl; 
@@ -609,7 +434,7 @@ void St_tcl_Maker::MakeHistograms() {
     cout << "Warning: tphit table does not exist " << endl; 
   }
   else {
-    for(int i=0; i < phtcl->GetNRows(); i++) {
+    for(int i=0; i < tphit->GetNRows(); i++) {
       m_tpc_row->Fill((Float_t) pttphit[i].row);
       m_x_of_hit->Fill((Float_t) pttphit[i].x);
       m_y_of_hit->Fill((Float_t) pttphit[i].y);
@@ -620,15 +445,13 @@ void St_tcl_Maker::MakeHistograms() {
       }
     }
   }
-
+  
   if (m_raw_data_tpc) {
-    // cluster table
-    St_tcl_tpcluster *phtpcl =0;
-    tcl_tpcluster_st *pttpcl = 0; 
+    // tpcluster is global pointer to cluster table
+    tcl_tpcluster_st* pttpcl = NULL; 
     // get pointers to tpc hit table
-    phtpcl = (St_tcl_tpcluster*) tpc_hits.Find("tpcluster");
-    if (phtpcl) {
-      pttpcl = phtpcl->GetTable();
+    if (tpcluster) {
+      pttpcl = tpcluster->GetTable();
     }
     else { 
       cout << "Warning: tphit cluster table header does not exist "   << endl; 
@@ -637,7 +460,7 @@ void St_tcl_Maker::MakeHistograms() {
       cout << "Warning: tphit cluster table does not exist " << endl; 
     }
     else {
-      for(int j=0; j < phtpcl->GetNRows(); j++) {
+      for(int j=0; j < tpcluster->GetNRows(); j++) {
 	m_nseq_cluster->Fill((Float_t) pttpcl[j].nseq);
 	m_nhits->Fill((Float_t) pttpcl[j].nhits);
       }
