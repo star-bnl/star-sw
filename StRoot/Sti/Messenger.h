@@ -86,9 +86,13 @@ public:
 
     /// determines whether or not the MessengerBuf's routing code
     /// and the static routing mask allow this Messenger to write
-    /// anything
+    /// anything.  Always returns false when DEBUG is defined.
     inline bool canWrite(){
+#ifndef DEBUG
+      return false;
+#else
       return ((getRoutingCode() & s_routing) > 0);
+#endif
     } // canWrite
 
 protected:
@@ -100,7 +104,7 @@ protected:
     /// updates the ios state bits of all Messengers based on whether or
     /// not they can read given the current global routing mask.
     static void updateStates();
-
+    
     /// static map of Messenger instances indexed by routing code.
     static messengerMap s_messengerMap;
 
@@ -109,5 +113,5 @@ protected:
 
 };
 
-#endif  
+#endif  //defined MESSENGER_H
 

@@ -100,11 +100,10 @@ void RunStiMaker(Int_t nevents=1,
     if(doProfile){
         // this variable tells jprof that it should start profiling when loaded
         // and how often it should record info
-        gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.0010001");
+        gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001001");
 
         // this starts the profiling
         gSystem->Load("Jprof");
-        Jprof *pJprof = new Jprof;
     }
     // create a new instance of the chain
     chain = new StChain("StChain"); 
