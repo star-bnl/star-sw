@@ -79,19 +79,8 @@
     if [adcxyzon].eq.1 then
       exec create_tables_tpc#tfc
     endif
-    exec tss_init#init 
+    exec tss_init#init [tpc_sector_first] [tpc_sector_last] 
        
-* now overwrite which sector you want to run (in case you don't want default)
-   cd [params]/tpc/tsspars
-   tdm/table/cell/putvalue 'tsspar[0].min_sect' [tpc_sector_first]
-   tdm/table/cell/putvalue 'tsspar[0].max_sect' [tpc_sector_last]
-   message 'Minimum and Maximum Sector numbers for tpc slow simulation: '
-   tdm/table/cell/getvalue 'tsspar[0].min_sect'
-   tdm/table/cell/getvalue 'tsspar[0].max_sect'
-   tdm/table/cell/getvalue 'tsspar[0].bfield'
-   cd /dui
-   
-
 * tpc cluster init
    exec create_tables_tpc#tcl_slow
    exec tcl_init#init  
