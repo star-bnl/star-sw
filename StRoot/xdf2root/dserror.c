@@ -17,7 +17,7 @@ error code routines...
 #include <stddef.h>
 #include <string.h>
 #define DS_PRIVATE
-#include "asuAlloc.h"
+#include <stdlib.h>
 #include "dstype.h"
 /* error information struct */
 typedef struct ds_error_info_t{
