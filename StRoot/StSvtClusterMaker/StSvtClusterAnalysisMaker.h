@@ -1,5 +1,8 @@
-// $Id: StSvtClusterAnalysisMaker.h,v 1.11 2003/09/10 19:47:35 perev Exp $
+// $Id: StSvtClusterAnalysisMaker.h,v 1.12 2004/03/18 04:02:56 caines Exp $
 // $Log: StSvtClusterAnalysisMaker.h,v $
+// Revision 1.12  2004/03/18 04:02:56  caines
+// Remove from global scope variables used in debug mode as they shouldnt be there and caused erratic behaviour
+//
 // Revision 1.11  2003/09/10 19:47:35  perev
 // ansi corrs
 //
@@ -49,6 +52,8 @@
 class TH1F;
 class TH2F;
 class TObjectSet;
+class TFile;
+class TNtuple;
 
 class StSvtHit;
 class StSvtHybridCollection;
@@ -90,7 +95,7 @@ class StSvtClusterAnalysisMaker : public StMaker
   void  printClusterInfo();
   void MakeHistograms(); // Tracking histograms
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterAnalysisMaker.h,v 1.11 2003/09/10 19:47:35 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterAnalysisMaker.h,v 1.12 2004/03/18 04:02:56 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     
  protected:
@@ -108,6 +113,9 @@ class StSvtClusterAnalysisMaker : public StMaker
 
 
   Float_t adcArray[128*240];
+
+  TFile *hfile;  //!
+  TNtuple* ntpl;  //!
 
   StSvtData* mSvtAdjEvent;                    //! 
   StSvtHybridData* mHybridRawData ;           //!

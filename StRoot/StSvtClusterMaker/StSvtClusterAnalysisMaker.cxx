@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.26 2004/01/27 02:31:47 perev Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.27 2004/03/18 04:02:56 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.27  2004/03/18 04:02:56  caines
+ * Remove from global scope variables used in debug mode as they shouldnt be there and caused erratic behaviour
+ *
  * Revision 1.26  2004/01/27 02:31:47  perev
  * LeakOff
  *
@@ -106,8 +109,7 @@
 #include "StSvtClusterAnalysisMaker.h"
 #include "StSvtSeqAdjMaker/StSvtSeqAdjMaker.h"
 
-TFile *hfile;
-//TNtuple* ntpl;
+
 //___________________________________________________________________________________________
 StSvtClusterAnalysisMaker::StSvtClusterAnalysisMaker(const char *name) : StMaker(name)
 {
