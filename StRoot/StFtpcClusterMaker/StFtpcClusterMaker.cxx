@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.29 2001/10/29 12:53:23 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.30 2001/11/21 12:44:44 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.30  2001/11/21 12:44:44  jcs
+// make ftpcGas database table available to FTPC cluster maker
+//
 // Revision 1.29  2001/10/29 12:53:23  jcs
 // select FTPC drift maps according to flavor of magnetic field
 //
@@ -152,6 +155,7 @@ StMaker(name),
     m_ampoffset(0),
     m_timeoffset(0),
     m_driftfield(0),
+    m_gas(0),
     m_electronics(0)
 {
   drawinit=kFALSE;
@@ -245,8 +249,9 @@ Int_t StFtpcClusterMaker::Init(){
   m_ampslope = (St_ftpcAmpSlope *)dblocal_calibrations("ftpcAmpSlope" );
   m_ampoffset = (St_ftpcAmpOffset *)dblocal_calibrations("ftpcAmpOffset");
   m_timeoffset = (St_ftpcTimeOffset *)dblocal_calibrations("ftpcTimeOffset");
-  m_driftfield = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
-  m_electronics = (St_ftpcElectronics *)dblocal_calibrations("ftpcElectronics");
+   m_driftfield = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
+   m_gas        = (St_ftpcGas *)dblocal_calibrations("ftpcGas");
+   m_electronics = (St_ftpcElectronics *)dblocal_calibrations("ftpcElectronics");
 
 // 		Create Histograms
 m_csteps      = new TH2F("fcl_csteps"	,"FTPC charge steps by sector"	,60,-0.5,59.5, 260, -0.5, 259.5);
@@ -308,6 +313,7 @@ Int_t StFtpcClusterMaker::Make()
                                                 m_ampoffset,
                                                 m_timeoffset,
                                                 m_driftfield,
+                                                m_gas,
                                                 m_electronics);
 
   TObjArray *hitarray = new TObjArray(10000);  
