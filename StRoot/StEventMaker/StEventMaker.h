@@ -1,5 +1,8 @@
-// $Id: StEventMaker.h,v 1.1 1999/05/04 22:40:35 fisyak Exp $
+// $Id: StEventMaker.h,v 1.2 1999/05/22 17:59:01 perev Exp $
 // $Log: StEventMaker.h,v $
+// Revision 1.2  1999/05/22 17:59:01  perev
+// Can read also mdc2 and last format
+//
 // Revision 1.1  1999/05/04 22:40:35  fisyak
 // Initial revision of persistent StEventMaker
 //
@@ -46,18 +49,28 @@
 //////////////////////////////////////////////////////////////////////////
 
  * Revision 2.2  2000/01/05 16:07:47  ullrich
-class StEventManager;
+ * Added loading of SSD hits and handling of runco branch.
+ *
  * Revision 2.1  1999/11/05 18:35:57  ullrich
  * Added methods and flags for debugging and monitoring.
+class dst_run_header_st;
+class dst_event_header_st;
+class dst_event_summary_st;
+class dst_monitor_hard_st;
+class dst_monitor_soft_st;
+class gen_header_st;
+class particle_st;
+class dst_TriggerDetectors_st;
+ *
  * Revision 2.0  1999/11/04 19:03:00  ullrich
  private:
-  StEventManager* theEventManager; //!
-  StEvent* currentEvent; //!
-  StRun* currentRun; //!
+  StEventManager* theEventManager; 			//!
+  StEvent* currentEvent; 				//!
+  StRun* currentRun; 					//!
   
  protected:
  public: 
-                  StEventMaker(const char *name="StEventMaker");
+                  StEventMaker(const char *name="StEventMaker",const char *titl="");
    virtual       ~StEventMaker();
    virtual Int_t  Init();
    virtual Int_t  Make();
@@ -66,6 +79,25 @@ class StEventManager;
    virtual StEventManager* eventManager(){return theEventManager;};
    virtual StEvent* event() { return currentEvent;}; 
    virtual StRun* run() {return currentRun;};
+   virtual void Clear(const char* opt="");
+
+// For local use
+  ooStatus status;					//!
+  dst_run_header_st 		*dstRunHeader;		//!
+  dst_run_header_st 		*defRunHeader;		//!
+  dst_event_header_st  		*dstEventHeader;	//!
+  dst_event_header_st  		*defEventHeader;	//!
+  dst_event_summary_st 		*dstEventSummary;	//!
+  dst_event_summary_st 		*defEventSummary;	//!
+  dst_monitor_hard_st 		*dstMonitorHard;	//!
+  dst_monitor_hard_st 		*defMonitorHard;	//!
+  dst_monitor_soft_st 		*dstMonitorSoft;	//!
+  dst_monitor_soft_st 		*defMonitorSoft;	//!
+  gen_header_st 		*genHeader;		//!
+  particle_st 			*particle;		//!
+  dst_TriggerDetectors_st 	*dstTriggerDetectors;	//!
+  dst_TriggerDetectors_st 	*defTriggerDetectors;	//!
+  Bool_t doLoad;					//!
    
    ClassDef(StEventMaker, 1)   //StAF chain virtual base class for Makers
     Int_t  makeEvent();
