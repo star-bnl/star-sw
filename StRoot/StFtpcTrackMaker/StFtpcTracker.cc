@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.28 2003/09/16 20:49:34 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.29 2003/12/05 04:08:49 perev Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.29  2003/12/05 04:08:49  perev
+// technical cleanup
+//
 // Revision 1.28  2003/09/16 20:49:34  oldi
 // One more pointer initialized to zero. Code clean-up.
 //
@@ -338,7 +341,7 @@ void StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere, UCha
   StFtpcVertex v = *vertex;
 
   for (Int_t i = 0; i < iterations; i++) {
-    StFtpcVertex v_new = StFtpcVertex(mTrack, &v, hemisphere);
+    StFtpcVertex v_new(mTrack, &v, hemisphere);
     v = v_new;
   }
 
@@ -376,7 +379,7 @@ StFtpcVertex StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphe
 
   for (Int_t i = 0; i < iterations; i++) {
 
-    StFtpcVertex v_new = StFtpcVertex(tracks, &v, hemisphere);
+    StFtpcVertex v_new(tracks, &v, hemisphere);
     v = v_new;
   }
 
@@ -409,7 +412,7 @@ StFtpcVertex StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphe
   }
 
   for (Int_t i = 0; i < iterations; i++) {
-    StFtpcVertex v_new = StFtpcVertex(tracks, &v, hemisphere);
+    StFtpcVertex v_new(tracks, &v, hemisphere);
     v = v_new;
   }
   
