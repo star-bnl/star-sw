@@ -21,7 +21,7 @@
 //:<--------------------------------------------------------------------
 int eml_init()
 {
-   EML_MESSAGE("Initializing EML.");
+   EML_MESSAGE(Initializing EML.);
 
 /*- Define the EML KUIP commands. -*/
 // eml_def_();
@@ -40,7 +40,7 @@ int eml_init()
 //:<--------------------------------------------------------------------
 int eml_start()
 {
-   EML_MESSAGE("Starting EML.");
+   EML_MESSAGE(Starting EML.);
 
    return TRUE;
 }
@@ -53,7 +53,7 @@ int eml_start()
 //:<--------------------------------------------------------------------
 int eml_stop()
 {
-   EML_MESSAGE("Stopping EML.");
+   EML_MESSAGE(Stopping EML.);
 
    return TRUE;
 }
