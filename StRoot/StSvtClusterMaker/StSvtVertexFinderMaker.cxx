@@ -61,18 +61,20 @@ Int_t StSvtVertexFinderMaker::Make()
   
   //pointer to preVertex
   St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
-  int numRowPreVtx = preVtx->GetNRows();
-  preVtx->ReAllocate(numRowPreVtx+1);
-
-
-  // Find SVT vertex
-  Int_t Res_sft= sft_main(ScsSpt,preVtx);
-  
-  if (Res_sft !=  kSTAFCV_OK) 
+  int numRowPreVtx = 0;
+  if( preVtx){
+    numRowPreVtx = preVtx->GetNRows();
+    preVtx->ReAllocate(numRowPreVtx+1);
+    
+    
+    // Find SVT vertex
+    Int_t Res_sft= sft_main(ScsSpt,preVtx);
+    
+    if (Res_sft !=  kSTAFCV_OK) 
     gMessMgr->Warning() << " Problem on return from SFT" << endm;
-  
-  MakeHistograms(preVtx); // histograms
-  
+    
+    MakeHistograms(preVtx); // histograms
+  }
   return kStOK;
 }
 
