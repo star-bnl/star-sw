@@ -1,0 +1,58 @@
+//:Copyright 1995, Lawrence Berkeley National Laboratory
+//:>--------------------------------------------------------------------
+//:FILE:	tdmItypes.idl
+//:DESCRIPTION:	Table & Dataset Memory types
+//:AUTHOR:	cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:	-- STILL IN DEVELOPMENT --
+//:HISTORY:	02feb97-v000b-cet- rename file
+//:HISTORY:	23apr96-v000a-cet- creation from tdm_i.idl
+//:<--------------------------------------------------------------------
+
+//:----------------------------------------------- INCLUDES           --
+#include "socItypes.idl"
+
+//:----------------------------------------------- TYPEDEFS           --
+
+typedef sequence<octet> TDM_DATABLOCK_T;
+
+// WARNING - This must track DSL declaration.
+enum DS_TYPE_CODE_T {
+   DS_TYPE_CHAR,           /* ascii character [0, 128) */
+   DS_TYPE_OCTET,          /* unsigned 8-bit integer [0, 256) */
+   DS_TYPE_SHORT,          /* signed 16-bit integer (-2^15, 2^15) */
+   DS_TYPE_U_SHORT,        /* unsigned 16-bit integer [0, 2^16) */
+   DS_TYPE_LONG,           /* signed 32-bit integer (-2^31, 2^31) */
+   DS_TYPE_U_LONG,         /* unsigned 32-bit integer [0, 2^32) */
+   DS_TYPE_FLOAT,          /* IEEE 32-bit floating point */
+   DS_TYPE_DOUBLE,         /* IEEE 64-bit floating point */
+   DS_TYPE_STRUCT          /* only constructed type */
+};
+/* DS_TYPE_UNKNOWN         ** error */
+
+typedef long DSL_PTR_T;	// HACK << cannot work remotely
+
+union TDM_DATA_T switch(DS_TYPE_CODE_T) {
+	case DS_TYPE_CHAR : char c;
+	case DS_TYPE_OCTET : octet o;
+	case DS_TYPE_SHORT : short s;
+	case DS_TYPE_U_SHORT : unsigned short us;
+	case DS_TYPE_LONG : long l;
+	case DS_TYPE_U_LONG : unsigned long ul;
+	case DS_TYPE_FLOAT : float f;
+	case DS_TYPE_DOUBLE : double d;
+	default : VOID_T v;
+};
+
+typedef sequence<TDM_DATA_T> TDM_CELLDATA_T;
+
+struct TDM_COLUMN_T {
+   long nCol;           // column number
+   string name;         // variable name
+   string type;         // type name
+   DS_TYPE_CODE_T code;	// type code
+   long size;           // size in bytes
+   long rank;           // count of indices
+   long shape[4];       // max of indices
+   long elcount;        // number of elements
+};
+
