@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.12 2002/04/24 02:40:25 ullrich Exp $
+ * $Id: StHelix.cc,v 1.13 2002/06/21 17:49:25 genevb Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
+ * Revision 1.13  2002/06/21 17:49:25  genevb
+ * Some minor speed improvements
+ *
  * Revision 1.12  2002/04/24 02:40:25  ullrich
  * Restored old format and lost CVS statements.
  *
@@ -341,16 +344,28 @@ pair<double, double> StHelix::pathLength(double r) const
 	double p = period();
 	if (!isnan(value.first)) {
 	    if (fabs(value.first-p) < fabs(value.first)) value.first = value.first-p;
-	    if (fabs(value.first+p) < fabs(value.first)) value.first = value.first+p;
+	    else if (fabs(value.first+p) < fabs(value.first)) value.first = value.first+p;
 	}
 	if (!isnan(value.second)) {
 	    if (fabs(value.second-p) < fabs(value.second)) value.second = value.second-p;
-	    if (fabs(value.second+p) < fabs(value.second)) value.second = value.second+p;
+	    else if (fabs(value.second+p) < fabs(value.second)) value.second = value.second+p;
 	}
     }
     if (value.first > value.second)
 	swap(value.first,value.second);
     return(value);
+}
+
+pair<double, double> StHelix::pathLength(double r, double x, double y)
+{
+    double x0 = mOrigin.x();
+    double y0 = mOrigin.y();
+    mOrigin.setX(x0-x);
+    mOrigin.setY(y0-y);
+    pair<double, double> result = this->pathLength(r);
+    mOrigin.setX(x0);
+    mOrigin.setY(y0);
+    return result;  
 }
 
 double StHelix::pathLength(const StThreeVector<double>& r,

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPhysicalHelix.hh,v 1.2 2002/02/20 00:56:23 ullrich Exp $
+ * $Id: StPhysicalHelix.hh,v 1.3 2002/06/21 17:49:26 genevb Exp $
  *
  * Author: Brian Lasiuk, Sep 1997
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPhysicalHelix.hh,v $
+ * Revision 1.3  2002/06/21 17:49:26  genevb
+ * Some minor speed improvements
+ *
  * Revision 1.2  2002/02/20 00:56:23  ullrich
  * Added methods to calculate signed DCA.
  *
@@ -43,7 +46,7 @@ public:
 
     // Requires:  signed Magnetic Field
     StThreeVector<double> momentum(double) const;     // returns the momentum at origin
-    StThreeVector<double> momentumAt(double, double); // returns momemtum at S
+    StThreeVector<double> momentumAt(double, double) const; // returns momemtum at S
     int                   charge(double)   const;     // returns charge of particle
     // 2d DCA to x,y point signed relative to curvature
     double curvatureSignedDistance(double x, double y) ;
