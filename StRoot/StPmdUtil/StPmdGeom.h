@@ -4,7 +4,7 @@
  */
 /*********************************************************
  *
- * $Id: StPmdGeom.h,v 1.3 2003/09/02 17:58:49 perev Exp $
+ * $Id: StPmdGeom.h,v 1.4 2003/10/14 07:30:19 subhasis Exp $
  *
  * Author: Dipak Mishra
  *
@@ -15,6 +15,9 @@
  *************************************************************
  *
  * $Log: StPmdGeom.h,v $
+ * Revision 1.4  2003/10/14 07:30:19  subhasis
+ * mzreal changed to 535
+ *
  * Revision 1.3  2003/09/02 17:58:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -86,7 +89,8 @@ inline void StPmdGeom::commonconstants()
   mcell_rad = 0.5282;
   mcelldia_x = 1.0564;
   mcelldia_y = 0.91484;   
-  mzreal = 550.0;
+  // changed to 535mzreal = 550.0;
+  mzreal = 535.0;
 }
 #endif
 
