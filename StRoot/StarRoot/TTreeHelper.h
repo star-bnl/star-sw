@@ -13,7 +13,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "TTree.h"
-
+class TChain;
 class TTreeHelperMem;
 class TTreeHelperCast
 {
@@ -57,7 +57,9 @@ class TTreeHelper : public TNamed{
 
 protected:
     Int_t         fEntry;             	//!  current entry number
-    TTree        *fTree;	      	//!  pointer to TTree object
+    Int_t         fTreeNumb;            //!  current TTree number
+    TTree        *fTree;	      	//!  pointer to TTree/TChain object
+    TChain       *fChain;             	//!  
     TObjArray     fMemList;		//!  list of mem objects
     TObjArray     fBraList;		//!  list of uset branches
     Int_t         fUnits;		//!  current number of units
