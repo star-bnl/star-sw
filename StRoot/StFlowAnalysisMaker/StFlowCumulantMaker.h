@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.h,v 1.5 2003/09/10 19:47:14 perev Exp $
+// $Id: StFlowCumulantMaker.h,v 1.6 2004/11/16 21:22:22 aihong Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -51,11 +51,10 @@ public:
   Int_t    Init();
   Int_t    Make();
   Int_t    Finish();
-  void     SetOldMethod(Bool_t flag=kFALSE);
   void     SetHistoRanges(Bool_t ftpc_included = kFALSE);
 
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowCumulantMaker.h,v 1.5 2003/09/10 19:47:14 perev Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowCumulantMaker.h,v 1.6 2004/11/16 21:22:22 aihong Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -67,8 +66,6 @@ private:
 #ifndef __CINT__
   UInt_t   mMult[Flow::nSels][Flow::nHars];                  //! multiplicity
   UInt_t   mMultSub[Flow::nSels*Flow::nSubs][Flow::nHars];   //! multiplicity subs
-  Double_t mWgtMult_q4[Flow::nSels][Flow::nHars];            //for getting q4 with wgt in old cumulant method
-  Double_t mWgtMult_q6[Flow::nSels][Flow::nHars];            //for getting q6 with wgt in old cumulant method
 #endif /*__CINT__*/
   TString          xLabel;      //! label axis with rapidity or pseudorapidity 
   StFlowEvent*     pFlowEvent;  //! pointer to StFlowEvent
@@ -78,7 +75,6 @@ private:
   Double_t  r0;                 //! r0 in the cumulant paper.
   Double_t  r0Sq;               //! square of r0.
   UInt_t    m_M;                //! m in the cumulant paper.
-  Bool_t    mOldMethod;         //! tag for old new / new new method
 
 
   // for each harmonic and each selection
@@ -92,10 +88,6 @@ private:
     TH1D**         mHist_vEta;
     TH1D**         mHist_vPt;
 
-    TProfile2D**   mCumulG0Denom2D; 
-    TProfile**     mCumulG0DenomEta;
-    TProfile**     mCumulG0DenomPt;
-
     TProfile**     mCumulG0Denom; //denominator in (82), <G>
 
     Double_t       mIntegXz[Flow::nCumulIntegOrders*Flow::nCumulInteg_qMax];
@@ -106,13 +98,9 @@ private:
     Double_t       mCumulG0DenomRead[Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax];
 
     Double_t       mMultSum;
-    Double_t       mWgtMultSum_q4; //for getting q4 right in the old method
-    Double_t       mWgtMultSum_q6; //for getting q6 right in the old method
     Int_t          mNEvent; 
 
     TH1D*          mHistMultSum;    //histo for holding mMultSum.
-    TH1D*          mHistWgtMultSum_q4; 
-    TH1D*          mHistWgtMultSum_q6;
     TH1D*          mHistNEvent;
 
     TH1D**         mHistCumulIntegG0Sum; //summation of G value.
@@ -141,14 +129,15 @@ private:
     
 };
     
-inline void StFlowCumulantMaker::SetOldMethod(Bool_t flag)
-{ mOldMethod=flag; }
 
 #endif
 
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.h,v $
+// Revision 1.6  2004/11/16 21:22:22  aihong
+// removed old cumulant method
+//
 // Revision 1.5  2003/09/10 19:47:14  perev
 // ansi corrs
 //
