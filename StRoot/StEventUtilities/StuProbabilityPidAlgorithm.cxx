@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.7 2000/07/12 16:29:38 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.8 2000/07/22 22:45:27 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.8  2000/07/22 22:45:27  aihong
+ * change include path
+ *
  * Revision 1.7  2000/07/12 16:29:38  aihong
  * change to avoid possible name confliction from StarClassLibary
  *
@@ -35,12 +38,12 @@
 
 #include "StuProbabilityPidAlgorithm.h"
 
-#include "StPidAmpMaker/Include/BetheBlochFunction.hh"
-#include "StPidAmpMaker/Include/MaxllBoltz.hh"
-#include "StPidAmpMaker/Include/Linear.hh"
-#include "StPidAmpMaker/Include/StPidAmpConst.hh"
+#include "StEventUtilities/BetheBlochFunction.hh"
+#include "StEventUtilities/MaxllBoltz.hh"
+#include "StEventUtilities/Linear.hh"
+#include "StEventUtilities/StPidAmpConst.hh"
 
-#include "StPidAmpMaker/StPidAmpChannelInfoOut.h"
+#include "StEventUtilities/StPidAmpChannelInfoOut.h"
 
 //-------------------------------
 StuProbabilityPidAlgorithm::StuProbabilityPidAlgorithm(StEvent& ev){
