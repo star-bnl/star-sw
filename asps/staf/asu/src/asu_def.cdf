@@ -15,7 +15,7 @@
 >GUIDANCE
 Analysis_Service_Utilities commands.
 .
- #(@)$Id: asu_def.cdf,v 1.3 1997/12/22 17:34:07 tull Exp $
+ #(@)$Id: asu_def.cdf,v 1.4 1998/01/24 19:03:21 ward Exp $
 .
 ASU is utility package which contains several useful functions and
 user-interface commands.

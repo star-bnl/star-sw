@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_to_NTuple commands.
 .
- #(@)$Id: tnt_def.cdf,v 1.4 1997/12/22 17:46:25 tull Exp $
+ #(@)$Id: tnt_def.cdf,v 1.5 1998/01/24 19:06:16 ward Exp $
 .
 TNT is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -26,10 +26,21 @@ Each ASP is comprised of an object factory interface (eg. tntFactory)
 and zero or more worker object interfaces.
 .
 TNT worker objects include:
-   tntObject - See TNT/OBJECT
-	       - More guidance needed here.
+   tntCWNtuple - See TNT/CWNTUPLE
+      - A C++ wrapper for getting table data into and out of HBOOK
+	Column-Wise Ntuples.
 .
-More guidance needed here.
+The TNT package provides an interface for importing DSL table data into
+HBOOK Column-Wise Ntuples and for exporting HBOOK Column-Wise Ntuple
+data to DSL tables.
+.
+Although Column-Wise Ntuples do not gracefully handle all the data
+types contained in DSL tables, data conversion is performed on import
+and export to provide full functionality. Nonetheless, some DSL table
+types cannot be mapped onto HBOOK Column-Wise Ntuples (N.B. Users can
+use TOP/PROJECT to project data into an importable DSL table type.).
+.
+NOTICE: Exporting data from CWNtuples to tables is not yet implemented.
 .
 ** ---------------------------------------------------------------------
 ** TNT/COUNT

@@ -15,7 +15,7 @@
 >GUIDANCE
 Analysis_Module_Invoker commands.
 .
- #(@)$Id: ami_def.cdf,v 1.3 1997/12/22 17:44:40 tull Exp $
+ #(@)$Id: ami_def.cdf,v 1.4 1998/01/24 19:02:51 ward Exp $
 .
 AMI is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
