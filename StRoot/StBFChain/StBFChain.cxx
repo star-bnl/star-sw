@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.13 1999/09/24 14:50:46 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.14 1999/10/12 23:13:30 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.14  1999/10/12 23:13:30  fisyak
+// Add AddBefore and AddAfter methods
+//
 // Revision 1.13  1999/09/24 14:50:46  fisyak
 // Write and Close TFile if any
 //
@@ -249,7 +252,7 @@ void StBFChain::SetFlags(const Char_t *Chain )
       (GetOption(kMATCH) || GetOption(kPRIMARY) || GetOption(kV0) ||
        GetOption(kXI)    || GetOption(kKINK))) SetOption(kGLOBAL);
   if (!GetOption(kEval) && GetOption(kAllEvent))  SetOption(kEval); 
-  SetOption(-kEMC);
+  //  SetOption(-kEMC);
   //  SetOption(-kKINK);
   // Print set values
   for (k = kFIRST; k<NoChainOptions;k++) {
@@ -775,4 +778,19 @@ Int_t StBFChain::Finish()
   SafeDelete (xdf_out);
   if (m_TFile) {m_TFile->Write(); m_TFile->Close(); SafeDelete (m_TFile);}
   return StMaker::Finish();
+}
+//_____________________________________________________________________
+Int_t StBFChain::AddAB (const Char_t *mkname,const StMaker *maker, Int_t Opt) {
+  if (! maker || strlen(mkname) == 0) return kStErr;
+  StMaker *parent = maker->GetParentMaker();
+  if (parent) {
+    TList   *list    = parent->GetMakeList();
+    list->Remove((StMaker *)maker);
+  }
+  StMaker *mk      = GetMaker(mkname);      if (!mk)     return kStErr;
+  parent  = mk->GetParentMaker();  if (!parent) return kStErr;
+  TList   *list    = parent->GetMakeList(); if (!list)   return kStErr;
+  if (Opt > 0) list->AddAfter (maker,mk);
+  else         list->AddBefore(maker,mk);
+  return kStOk;
 }
