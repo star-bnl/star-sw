@@ -1,3 +1,7 @@
+
+C>--------------------------------------------------------------------
+C     EGR_FILL_GLOBTRK - fills the global track table
+C<--------------------------------------------------------------------
        INTEGER FUNCTION EGR_LOAD_GLOBTRK(globtrk_h,globtrk
      +     ,igtrk,gtrk,tphit_h,tphit,covar,itpct)
        
@@ -59,20 +63,22 @@ C
       y0 = abs(gtrk(igtrk).p(2))*sin(gtrk(igtrk).p(5))+
      +     gtrk(igtrk).p(4)
       globtrk(iglob).phi0 = atan2(y0,x0)
-      if (globtrk(iglob).phi0.lt.0) globtrk(iglob).phi0 = 
-     +     globtrk(iglob).phi0+2.0*pi
       globtrk(iglob).phi0 = globtrk(iglob).phi0*radtodeg ! to degrees
-      if (globtrk(iglob).phi0.gt.180.0) globtrk(iglob).phi0 = 
-     +     globtrk(iglob).phi0 - 360.0
+      if (globtrk(iglob).phi0.gt.180.0) then
+         globtrk(iglob).phi0 = globtrk(iglob).phi0 - 360.0
+      elseif( globtrk(iglob).phi0 .lt. -180.0) then
+         globtrk(iglob).phi0 = globtrk(iglob).phi0 + 360.0
+      endif
       globtrk(iglob).r0 = sqrt(x0**2+y0**2)
       globtrk(iglob).tanl = gtrk(igtrk).p(7)
       sgn = sign(1.0,gtrk(igtrk).p(2))
       globtrk(iglob).psi = gtrk(igtrk).p(5)-sgn*0.5*pi
-      if (globtrk(iglob).psi.lt.0) globtrk(iglob).psi = 
-     +     globtrk(iglob).psi + 2.0*pi
       globtrk(iglob).psi = globtrk(iglob).psi*radtodeg ! to degrees
-      if (globtrk(iglob).psi.gt.180.0) globtrk(iglob).psi=
-     +     globtrk(iglob).psi-360.0
+      if( globtrk(iglob).psi.gt.180.0) then
+         globtrk(iglob).psi=  globtrk(iglob).psi-360.0
+      elseif( globtrk(iglob).psi .lt. -180.0) then
+         globtrk(iglob).psi = globtrk(iglob).psi + 360.0
+      endif
       globtrk(iglob).z0 = gtrk(igtrk).p(6)
       globtrk(iglob).id_emc = 0
       globtrk(iglob).id_pver = 0

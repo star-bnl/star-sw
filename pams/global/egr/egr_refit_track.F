@@ -1,3 +1,8 @@
+C     >--------------------------------------------------------------------
+C     
+C     EGR_REFIT_TRACK - track fitting routine
+      
+C     <--------------------------------------------------------------------
       INTEGER*4 FUNCTION EGR_REFIT_TRACK(igtrk,itpct,isvtt,ipriv,gtrk,
      +     tphit_h,tphit,privert_h,privert,svt_spt_h,svt_spt,
      +     svt_track_h,svt_track,svt_group_h,svt_group,
@@ -7,7 +12,7 @@ C     >-----------------------------------------------------------------------
 C     Input arguments
 C     igtrk    - current fitting array id
 C     itpct    - use this TPC track id number in the refit (=0 if don't)
-C     isvtt    - use this SVT track id in the refit (=0 if don't)
+C     isvtt    - use this SVT track index (not id no) in the refit (=0 if don't)
 C     ipriv    - flag for whether or not to include the vertex in the fit
 C     gtrk     - the refitting array
 C     gtrk contains TPC stats if itpct>0, otherwise has SVT stats
@@ -63,7 +68,7 @@ C______________________________________________________________________
       RECORD /table_head_st/     evt_match_h
       RECORD /svm_evt_match_st/     evt_match(*)
       
-C_____________________________________________________________________
+C____________________________________________________________________
 
 C     Local variables
 
@@ -92,14 +97,17 @@ C Load the gtrk array with the vertex and SVT points
             if (svt_group(iplane).id1 .eq. svt_track(isvtt).id) then
                gtrk(igtrk).nhit = gtrk(igtrk).nhit + 1
                ient = ient+1
+               gtrk(igtrk).det(ient) = 2
                gtrk(igtrk).ipnt(ient) = svt_group(iplane).id2
                gtrk(igtrk).pos(ient) = ient
-               gtrk(igtrk).det(ient) = 2
+               
             endif
 c Has to be maxpnt-1 in case primary vertex is added to fit
             if (ient .ge. mxpnt-1) goto 12
          enddo
  12      continue
+         
+            
       endif
       if (ipriv.ne.0) then
          gtrk(igtrk).nhit = gtrk(igtrk).nhit+1
@@ -132,7 +140,7 @@ C     load the fitting arrays for the primary vertex
             zcir(ncir) = privert(1).z
             wcir(ncir) = 500.0        ! Arbitrary, but large, for now
             wlin(ncir) = 1000.0
-            pnt(ncir) = ncir
+            pnt(ncir) = gtrk(igtrk).nhit
          endif
 
 C     Load the fitting arrays with the SVT space points
@@ -140,7 +148,7 @@ C     Load the fitting arrays with the SVT space points
          if (isvtt.ne.0) then
             do iplane=gtrk(igtrk).ntpc+1,
      +           gtrk(igtrk).ntpc+svt_track(isvtt).nspt
-               if (good_hit(iplane) .ne. .false. ) then
+               if (good_hit(iplane) ) then
                   ncir = ncir + 1
                   isvth = gtrk(igtrk).ipnt(iplane)
                   xcir(ncir) = svt_spt(isvth).x(1)
@@ -148,7 +156,9 @@ C     Load the fitting arrays with the SVT space points
                   zcir(ncir) = svt_spt(isvth).x(3)
 c                  wcir(ncir) = 1.0/(svt_spt(isvth).cov(1)**2+svt_spt(isvth).
 c     +                 cov(2)**2+svt_spt(isvth).cov(3)**2)
-                  wcir(ncir) = 1.0/(0.01*0.01+0.01*0.01+0.01*0.01)
+C     WRONG should only be 1/dx**2+dy**2 (yes?)
+C                  wcir(ncir) = 1.0/(0.01*0.01+0.01*0.01+0.01*0.01)
+                  wcir(ncir) = 1.0/(0.01*0.01+0.01*0.01)
 c                     previous line is a hard wired 100 micron SVT resolution
                   wlin(ncir) = 1.0/(0.01*0.01)
                   pnt(ncir) = iplane ! Used to identify outliers
@@ -226,10 +236,10 @@ C     If yes, call the helix fit
                iret=egr_helix_fit(igtrk,gtrk,xcir,ycir,zcir,
      >              wcir,wlin,ncir,egrpar_h,egrpar,covar)
                if(iret.eq.STAFCV_OK) then
-                  if((gtrk(igtrk).p(8)/real(ncir-3).lt.
+                  if((gtrk(igtrk).p(8)/real(2*ncir-3).lt.
      >                 egrpar(1).prob(1).or.egrpar(1).prob(1)
      >                 .lt.0.0).and.
-     >                 (gtrk(igtrk).p(9)/real(ncir-2).lt.
+     >                 (gtrk(igtrk).p(9)/real(2*ncir-2).lt.
      >                 egrpar(1).prob(2)
      >                 .or.egrpar(1).prob(2).lt.0.0)) then
                      gtrk(igtrk).nfit = ncir
@@ -287,3 +297,4 @@ C     fit wasn't succesful, reset all the points
       
       return
       end
+

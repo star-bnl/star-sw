@@ -1,9 +1,32 @@
+C>--------------------------------------------------------------------
+C
+C EGR_FIND_OUTLIER - identifies position of the outlier on a track
+C
+C DESCRIPTION:
+C For every point used in the fit weighted residua in both projections
+C are calculated and the one with the worst chisq is identified.
+C
+C INPUT PARAMETERS:
+C  ipt  - track id
+C  trk  - auxiliary tracking table
+C  xcir - x coordinates of the hits
+C  ycir - y coordinates of the hits
+C  zcir - z coordinates of the hits
+C  wcir - weights for the circle fit
+C  wlin - weights for the linear regresion fit
+C  ncir - number of points 	INCLUDEd in fit
+C
+C OUTPUT PARAMETERS:
+C  ibad - id of a point with the worst chisq contribution
+C
+C AUTHOR:
+C Iwona Sakrejda
+C<---------------------------------------------------------------------
       INTEGER*4 FUNCTION EGR_FIND_OUTLIER(ipt,trk,xcir,ycir,zcir
      >                  ,wcir,wlin,ncir,ibad,egrpar_h,egrpar)
  
       IMPLICIT NONE
 #include "PAM.inc"
-#include "tpt_track.inc"
 #include "egr_egrpar.inc"
 #include "egr_track_pointers.inc"
 C__________________________________________________________________
@@ -72,3 +95,4 @@ C_________________________________________________________________
       endif
       return
       end
+      
