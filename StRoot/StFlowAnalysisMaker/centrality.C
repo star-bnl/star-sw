@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: centrality.C,v 1.3 2003/02/25 19:25:31 posk Exp $
+// $Id: centrality.C,v 1.4 2003/06/27 21:25:43 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 // Description:  Macro to plot flow, etc. as a function of centrality.
@@ -16,7 +16,7 @@
 
 #include <iomanip.h>
 Int_t runNumber      =  0;
-const Int_t nCens    = 10;
+const Int_t nCens    = 9;
 TFile* histFile[nCens];
 TCanvas* can;
 char tmp[10];
@@ -98,8 +98,12 @@ TCanvas* centrality(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
 //   for (int i=0; i<=bins; i++){ x[i]= xMin[i]/nMax; }   // normalize
 //   TH1F* histCen = new TH1F(histCenName->Data(), histCenName->Data(), bins, x);
   TH1F* histCen = new TH1F(histCenName->Data(), histCenName->Data(),
-			   nCens, -0.5, nCens-0.5);
+			   nCens, 0.5, nCens+0.5);
   TH1* hist = (TH1*)histFile[0]->Get(histName->Data());
+  if (!hist) {
+    cout << "### Can't find histogram " << histName->Data() << endl;
+    return can;
+  }
   char* yTitle = hist->GetYaxis()->GetTitle();
 
 
@@ -129,7 +133,7 @@ TCanvas* centrality(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     // get and put contents
     content = hist->GetBinContent(harN);
     error   = hist->GetBinError(harN);
-    cout << "centrality= " << cen << " content= " << setprecision(3) <<
+    cout << "centrality= " << cen+1 << " content= " << setprecision(3) <<
       content << " error= "  << setprecision(2)  << error << endl;
     histCen->SetBinContent(cen+1, content);
     histCen->SetBinError(cen+1, error);
@@ -159,7 +163,7 @@ TCanvas* centrality(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   }
 
 //   TLine* lineZeroCen = new TLine(0., 0., x[bins], 0.);
-  TLine* lineZeroCen = new TLine(-0.5, 0., nCens-0.5, 0.);
+  TLine* lineZeroCen = new TLine(0.5, 0., nCens+0.5, 0.);
   lineZeroCen->Draw();
   gPad->Update();
 
@@ -176,7 +180,8 @@ void centralityAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
     can->Update();
     cout << "save? y/[n], quit? q" << endl;
     fgets(tmp, sizeof(tmp), stdin);
-    if (strstr(tmp,"y")!=0) can->Print(".ps");
+    //    if (strstr(tmp,"y")!=0) can->Print(".ps");
+    if (strstr(tmp,"y")!=0) can->Print(".gif");
     else if (strstr(tmp,"q")!=0) return;
   }
   cout << "  Done" << endl;
@@ -185,6 +190,9 @@ void centralityAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: centrality.C,v $
+// Revision 1.4  2003/06/27 21:25:43  posk
+// v4 and v6 are with repect to the 2nd harmonic event plane.
+//
 // Revision 1.3  2003/02/25 19:25:31  posk
 // Improved plotting.
 //

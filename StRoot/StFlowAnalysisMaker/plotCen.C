@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.16 2003/05/06 21:33:08 posk Exp $
+// $Id: plotCen.C,v 1.17 2003/06/27 21:25:45 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -8,7 +8,7 @@
 //               Plots a set of histograms with different centrality
 //               starting with anaXX.root given by first run number XX.
 //               Run Number appended to "ana" is entered in the bottom, left box.
-//               Default selN = 1 and harN = 2.
+//               Default selN = 2 and harN = 2.
 //               First time type .x plotCen.C() to see the menu.
 //               After the first execution, just type plotCen(N) .
 //               A negative N plots all pages starting with page N.
@@ -265,8 +265,8 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   for (int i = 0; i < pads; i++) {
     int fileN = i;                           // file number
     int padN = fileN + 1;                    // pad number
-    sprintf(histTitle,"Centrality %d",fileN);
-    cout << "centrality= " << fileN << endl;
+    sprintf(histTitle,"Centrality %d",padN);
+    cout << "centrality= " << padN << endl;
 
     // get the histogram
     bool twoD;
@@ -419,7 +419,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       TH1* histMult = dynamic_cast<TH1*>(histFile[fileN]->Get(histMulName->Data()));
       if (!histMult) {
 	cout << "### Can't find histogram " << histMulName->Data() << endl;
-	return can;
+	return c;
       }
       delete histMulName;
       float mult = histMult->GetMean();
@@ -658,6 +658,9 @@ static Double_t StruveL0(Double_t x)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.17  2003/06/27 21:25:45  posk
+// v4 and v6 are with repect to the 2nd harmonic event plane.
+//
 // Revision 1.16  2003/05/06 21:33:08  posk
 // Removed some histograms.
 //
