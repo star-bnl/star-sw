@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedMaker.cxx,v 1.2 2000/11/30 20:32:02 caines Exp $
+ * $Id: StSvtPedMaker.cxx,v 1.3 2001/07/11 23:30:47 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedMaker.cxx,v $
+ * Revision 1.3  2001/07/11 23:30:47  munhoz
+ * modification to allow pedestal reading from daq file
+ *
  * Revision 1.2  2000/11/30 20:32:02  caines
  * Use MessMgr
  *
@@ -106,12 +109,21 @@ Int_t StSvtPedMaker::SetSvtPed()
 {
   fSvtStat = new StSvtHybridCollection(fSvtData->getConfiguration());
 
-  fPedSet = new TObjectSet("StSvtPedestal");
-  AddConst(fPedSet);    
+  St_DataSet *dataSet;
+  dataSet = (TObjectSet*)GetDataSet("StSvtPedestal");
 
-  fSvtPed = new StSvtHybridCollection(fSvtData->getConfiguration());
-  fPedSet->SetObject((TObject*)fSvtPed);
-  assert(fSvtPed);
+  if (!dataSet) {
+    fPedSet = new TObjectSet("StSvtPedestal");
+    AddConst(fPedSet);
+
+    fSvtPed = new StSvtHybridCollection(fSvtData->getConfiguration());
+    fPedSet->SetObject((TObject*)fSvtPed);
+    assert(fSvtPed);
+  }
+  else {
+    fSvtPed = (StSvtHybridCollection*)(dataSet->GetObject());
+    assert(fSvtPed);
+  }
 
   return kStOK;
 }
@@ -364,7 +376,7 @@ Int_t StSvtPedMaker::CalcPed()
 	    for (int time=0; time<fPed->getNumberOfTimeBins();time++) {
 
 	      fPed->AddAt(fStat->getMean(anode,time),fPed->getPixelIndex(anode,time));
-	      // if ((anode == 120) && (time == 64))
+	      //if ((anode == 120) && (time == 64))
 	      //	cout << fPed->getPixelContent(anode,time) << endl;
 	      rms += fStat->getRMS(anode,time);
 	    }
@@ -479,7 +491,7 @@ Int_t StSvtPedMaker::ReadFromFile(const char* fileName)
 
 	  sprintf(name,"Ped_%d_%d_%d_%d",barrel, ladder, wafer, hybrid);
 	  fPed = (StSvtHybridPed*)file->Get(name);
-	  	
+
 	  if (fPed) {
 	    if (fSvtPed->at(fSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid)))
 	      delete fSvtPed->at(fSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid));
@@ -535,7 +547,7 @@ Int_t StSvtPedMaker::Finish()
 void StSvtPedMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtPedMaker.cxx,v 1.2 2000/11/30 20:32:02 caines Exp $\n");
+  printf("* $Id: StSvtPedMaker.cxx,v 1.3 2001/07/11 23:30:47 munhoz Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
