@@ -1,7 +1,10 @@
-* $Id: tte.F,v 1.10 1998/04/17 10:48:04 didenko Exp $
+* $Id: tte.F,v 1.11 1998/04/20 21:57:25 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.11  1998/04/20 21:57:25  sakrejda
+* count of reconstructed points per mc track corrected
+*
 * Revision 1.10  1998/04/17 10:48:04  didenko
-* _ is added to event_number
+*  _ is added to event_number
 *
 * Revision 1.9  1998/04/16 21:16:11  sakrejda
 * primary vertex field of tte_mctrack updated following changes in gstar
@@ -176,9 +179,9 @@ C_____________________________________________________________________________
       call Msg_Enable( 'TTE-I7' )
       call Msg_Enable( 'TTE-I8' )
       call Msg_Enable( 'TTE-I9' )
-c      call Msg_Enable( 'TTE-I10' )
-c      call Msg_Enable( 'TTE-I11' )
-c      call Msg_Enable( 'TTE-I12' )
+      call Msg_Enable( 'TTE-I10' )
+      call Msg_Enable( 'TTE-I11' )
+      call Msg_Enable( 'TTE-I12' )
       call Msg_Enable( 'TTE-I13' )
       call Msg_Enable( 'TTE-I14' )
       event_number=event_number+1
@@ -357,13 +360,14 @@ c                find whether this hit is on our short list
                  if(max_track_length.gt.rec_hit_on_mc_track_nok) then
                  if(iloc.eq.0) then
                    rec_hit_on_mc_track_nok=rec_hit_on_mc_track_nok+1
+                   iloc=rec_hit_on_mc_track_nok
 c                  memorize the id of a reconstructed hit
-                   rec_hit_on_mc_track(1,rec_hit_on_mc_track_nok)=
-     >             tindex(index_mc).key2
-                   rec_hit_on_mc_track(2,rec_hit_on_mc_track_nok)=0
+                   rec_hit_on_mc_track(1,iloc)=tindex(index_mc).key2
+                   rec_hit_on_mc_track(2,iloc)=0
+
                  endif
-                 rec_hit_on_mc_track(2,rec_hit_on_mc_track_nok)=
-     >           rec_hit_on_mc_track(2,rec_hit_on_mc_track_nok)+1
+                 rec_hit_on_mc_track(2,iloc)=
+     >           rec_hit_on_mc_track(2,iloc)+1
                  endif
                else
 *                 write(m132(1),*) 'TTE-I10 this hit was dropped',
@@ -456,20 +460,26 @@ c                check whether we have it on our rec_track_on_mc_track list
      >                =id_track
                       rec_track_on_mc_track(2,rec_track_on_mc_track_nok)
      >                =0
+                      iloc=rec_track_on_mc_track_nok
                     endif
                  endif
-                 rec_track_on_mc_track(2,rec_track_on_mc_track_nok)=
-     >           rec_track_on_mc_track(2,rec_track_on_mc_track_nok)+1
+                 rec_track_on_mc_track(2,iloc)=
+     >           rec_track_on_mc_track(2,iloc)+1
               endif
            end do
 c          went through all the reconstructed hits, now it's time to deal
 c          with tracks
-           evmc(evmc_h.nok).nseg=rec_track_on_mc_track_nok
+           evmc(evmc_h.nok).nseg=0
            evmc(evmc_h.nok).nrec1=0
            evmc(evmc_h.nok).nrec2=0
            evmc(evmc_h.nok).recid=0
            do j=1,rec_track_on_mc_track_nok
              it=rec_track_on_mc_track(1,j)
+c            make sure that this mc track is important in the reconstructed 
+c            track
+             if(real(rec_track_on_mc_track(2,j))/real(track(it).nrec)
+     >       .gt.0.5) then
+             evmc(evmc_h.nok).nseg=evmc(evmc_h.nok).nseg+1
              if(rec_track_on_mc_track(2,j).gt.
      >       evmc(evmc_h.nok).nrec1) then
                 if(evmc(evmc_h.nok).nrec1.gt.evmc(evmc_h.nok).nrec2) 
@@ -479,6 +489,7 @@ c          with tracks
              else if(rec_track_on_mc_track(2,j).gt.
      >       evmc(evmc_h.nok).nrec2) then
                 evmc(evmc_h.nok).nrec2=rec_track_on_mc_track(2,j)
+             endif
              endif
            end do
       endif
@@ -686,10 +697,11 @@ c          let's see how many different tracks got mixed up in this one...
                 rec_track_on_mc_track(1,rec_track_on_mc_track_nok)=
      >          mc_track
                 rec_track_on_mc_track(2,rec_track_on_mc_track_nok)=0
+                iloc=rec_track_on_mc_track_nok
              endif
            endif
-           rec_track_on_mc_track(2,rec_track_on_mc_track_nok)=
-     >     rec_track_on_mc_track(2,rec_track_on_mc_track_nok)+1
+           rec_track_on_mc_track(2,iloc)=
+     >     rec_track_on_mc_track(2,iloc)+1
            j=j+1
            track_num_local=hit(loc_hit(j)).track/1000
          end do
