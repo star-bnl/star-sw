@@ -1,321 +1,292 @@
-/***************************************************************************
- *
- * $Id: StPidAmpMaker.cxx,v 1.8 2000/07/22 22:11:33 aihong Exp $
- *
- * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
- *         Send questions to aihong@cnr.physics.kent.edu
- ***************************************************************************
- *
- * Description:part of StPidAmpMaker package
- *             StPidAmpMaker is a mediator between StEvent and StPidAmpManager
- ***************************************************************************
- *
- * $Log: StPidAmpMaker.cxx,v $
- * Revision 1.8  2000/07/22 22:11:33  aihong
- * move some include files to StEventUtilities & change include path
- *
- * Revision 1.7  2000/07/12 15:38:33  aihong
- * update for real data
- *
- * Revision 1.6  2000/05/01 16:59:49  aihong
- * clean up
- *
- * Revision 1.5  2000/04/12 20:14:29  aihong
- * change to adapt to ROOT 2.24 and bug fixed with help from valery
- *
- * Revision 1.4  2000/04/11 15:45:25  aihong
- * change to adapt dividing trks by channel for faster filling
- *
- * Revision 1.3  2000/04/09 18:50:47  aihong
- * change Make() to read directly from dst tables instead of StEvent
- *
- * Revision 1.2  2000/04/09 16:36:43  aihong
- * change for adapting NHitDcaNet added
- *
- * Revision 1.1.1.1  2000/03/09 17:48:33  aihong
- * Installation of package
- *
- **************************************************************************/
+////////////////////////////////////////////////////////////////////////////
+//
+// $Id: StPidAmpMaker.cxx,v 1.9 2002/02/14 21:25:56 aihong Exp $
+//
+// Authors: Aihong Tang
+//
+////////////////////////////////////////////////////////////////////////////
+//
+//  Description: produce hist. for PIDFitter, which builds PID tables.
+//
+////////////////////////////////////////////////////////////////////////////
 
-
-#include "StPidAmpMaker/StPidAmpMaker.h"
-#include "StChain.h"
-
-#include "St_DataSetIter.h"
+#include <iostream.h>
+#include <stdlib.h>
+#include <math.h>
+#include "StMaker.h"
+#include "StPidAmpMaker.h"
+#include "StFlowMaker/StFlowMaker.h"
+#include "StFlowMaker/StFlowEvent.h"
+#include "StFlowMaker/StFlowConstants.h"
+#include "StFlowMaker/StFlowSelection.h"
+#include "StFlowMaker/StFlowCutTrack.h"
+#include "StEnumerations.h"
+#include "PhysicalConstants.h"
+#include "SystemOfUnits.h"
+#include "TVector2.h"
+#include "TFile.h"
+#include "TString.h"
+#include "TH1.h"
+#include "TH2.h"
+#include "TH3.h"
+#include "TF1.h"
 #include "StMessMgr.h"
-#include "StEventTypes.h"
-
-#include "tables/St_dst_track_Table.h"
-#include "tables/St_dst_dedx_Table.h"
-#include "tables/St_dst_vertex_Table.h"
-
-#include "StEventUtilities/StPidAmpConst.hh"
-
-
-void fillStPidAmpTrks4StandardStEvent(StEvent& event, StPidAmpTrkVector* trks, Int_t dedxMethod);
-void fillStPidAmpTrks(St_dst_track* theTrackTable, St_dst_dedx* theDedxTable, St_dst_vertex* theVertexTable, StPidAmpTrkVector* trks, Int_t dedxMethod);
-void readDataFromDisk(StPidAmpTrkVector* trks);//read trks from disk.
-void writeTrks(St_dst_track* theTrackTable, St_dst_dedx* theDedxTable, St_dst_vertex* theVertexTable, Int_t dedxMethod);//write trks to disk for quik reading.vi readDataFromDisk.
+#include "TMath.h"
+#define PR(x) cout << "##### PidAmp " << (#x) << " = " << (x) << endl;
 
 ClassImp(StPidAmpMaker)
 
-StPidAmpMaker::StPidAmpMaker(const Char_t *name) : StMaker(name)
-{
-    theManager    =new StPidAmpManager(); 
+//-----------------------------------------------------------------------
 
-    ampTrks     =new StPidAmpTrkVector();
-
-    mNHits4BG=0;
-    theManager->passTrksAddress(ampTrks);
-    mReadFromTable=kFALSE;
-    mManualSetTrks=kFALSE;//will switch to true if SetTotalTracks() is called
-    mDedxMethod=1; //truncated mean
+StPidAmpMaker::StPidAmpMaker(const Char_t* name): 
+  StMaker(name),
+  mSingleMultiplicityBin(1),
+  MakerName(name) {
 
 }
 
-StPidAmpMaker::~StPidAmpMaker() { /* noop */ }
+//-----------------------------------------------------------------------
 
-Int_t
-StPidAmpMaker::Init()
-{
+StPidAmpMaker::~StPidAmpMaker() {
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StPidAmpMaker::Make() {
+  // Make histograms
 
 
-  ampTrks->reserve(8000000);
+  // Get a pointer to StFlowEvent
+  StFlowMaker* pFlowMaker = NULL;
+  pFlowMaker = (StFlowMaker*)GetMaker("Flow");
+  if (pFlowMaker) pFlowEvent = pFlowMaker->FlowEventPointer();
+  if (pFlowEvent && pFlowSelect->Select(pFlowEvent)) {     // event selected
+
+  if (pFlowEvent) FillParticleHistograms(); // fill particle histograms
+    
+  if (Debug()) StMaker::PrintInfo();
+
+  }
+  
+  return kStOK;
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StPidAmpMaker::Init() {
+  // Book histograms
+
+  
+  TH1F dummyHisto("dummy","dummy",mNDedxBins,mDedxStart,mDedxEnd);
+
+  pidHisto
+  =new TH1F*[mSingleMultiplicityBin*mNDcaBins*mNChargeBins*mNPBins*mNEtaBins*mNNHitsBins];
+
+  for(int m=0;m<mSingleMultiplicityBin;m++)        //
+    for(int d=0; d<mNDcaBins;d++)             //0_3_inf
+      for(int e=0; e<mNChargeBins;e++)        //0_minus 1_plus
+        for(int i=0; i<mNPBins;i++)           //0-99
+          for(int j=0; j<mNEtaBins;j++)       //0-9
+            for(int k=0; k<mNNHitsBins; k++){ //0-5
+	char *theName = new char[80];
+
+        if (i<10){
+	  sprintf(theName,"%d%d%d0%d%d%d",theMultBin,d,e,i,j,k);
+	}else {
+          sprintf(theName,"%d%d%d%d%d%d",theMultBin,d,e,i,j,k);
+	}
+
+	pidHisto[GetPositionInArray(m,d,e,i,j,k)]=
+         new TH1F(dummyHisto);     
+	pidHisto[GetPositionInArray(m,d,e,i,j,k)]->SetName(theName);
+	pidHisto[GetPositionInArray(m,d,e,i,j,k)]->SetTitle(theName);
+
+        cout<<"booking histo, mult. # "<<theMultBin<<", dca # "<<d<<", charge # "<<e<<", p # "<<i<<", eta # "<<j<<", ndedx # "<<k<<endl;
+      }
+
+
+  gMessMgr->SetLimit("##### StPidAmp", 2);
+  gMessMgr->Info("##### StPidAmp: $Id: StPidAmpMaker.cxx,v 1.9 2002/02/14 21:25:56 aihong Exp $");
 
   return StMaker::Init();
 }
 
-void
-StPidAmpMaker::Clear(Option_t *opt)
-{
-    StMaker::Clear();
-}
-
-Int_t
-StPidAmpMaker::Finish()
-{
-
-  if (ampTrks->size()>=mTotalTrks4Run) {
-  // readDataFromDisk(ampTrks);
-
-    //release unused space back to memory.
-    StPidAmpTrkVector tmpVector=*ampTrks;
-    ampTrks->swap(tmpVector);
-
-     
-    //run...
-    if (theManager->netSets()->size()==0) 
-    theManager->bookADefaultChannelCollection("BAR"," ");
 
 
-    theManager->process();
-  } else {
-  gMessMgr->Info()<<"Statistics is not enough for run. Require "<<mTotalTrks4Run<<" tracks to run this option "<<endm;
-  gMessMgr->Info()<<"But got only "<<ampTrks->size()<<" tracks. Aborted. "<<endm;
-  }
+
+//-----------------------------------------------------------------------
+
+void StPidAmpMaker::FillParticleHistograms() {
+  // Fill histograms from the particles
+
+     int multBin=0; //single multbin here.
+
+  // Initialize Iterator
+  StFlowTrackCollection* pFlowTracks = pFlowEvent->TrackCollection();
+  StFlowTrackIterator itr;
   
-    return kStOK;
-}
+  for (itr = pFlowTracks->begin(); itr != pFlowTracks->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
 
-Int_t
-StPidAmpMaker::Make()
-{
+    float eta       = pFlowTrack->Eta();
+    int   charge    = pFlowTrack->Charge();
+    float dca       = pFlowTrack->Dca();
+    float dcaGlobal = pFlowTrack->DcaGlobal();
+    int   fitPts    = pFlowTrack->FitPts();
+    float mtm       = pFlowTrack->P();
+    float dedx      = pFlowTrack->Dedx();
+    float NDedxUsed = (fitPts-1.39589)/1.41276; //linear relation between mFitPts and NDedxUsed.
 
-  if (ampTrks->size()>=mTotalTrks4Run)    return kStEOF;
-  
+  int dcaBin=0;
+  int chargeBin=0;
+  int pBin=0;
+  int etaBin=0;
+  int nhitsBin=0;
 
-  if (mReadFromTable) {
+  dcaBin=0;  //for p00he dst, they only produced primary tracks, so I let dcaBin=0.
 
-  St_DataSet *dst_data = GetInputDS("dst");
-  if (!dst_data) return 0;
-
-  St_DataSetIter  local(dst_data);
-
-  St_dst_track* globalTable   =( St_dst_track *)local["globtrk"];
-  St_dst_dedx*  dst_dedxTable =(St_dst_dedx *)  local["dst_dedx"];
-  St_dst_vertex *vertexTable  =(St_dst_vertex* )local["vertex"];
-
-    // OK, we've got the tables. Pass them and process them.
-     if (globalTable && dst_dedxTable && vertexTable) {
-    fillStPidAmpTrks(globalTable, dst_dedxTable,vertexTable, ampTrks,mDedxMethod);
-    //    writeTrks(globalTable, dst_dedxTable,vertexTable,mDedxMethod);
-    return kStOK;
-
-     } else return 0;
-
-  } else {//read through standard StEvent
-
-    StEvent* mEvent;
-    mEvent = (StEvent *) GetInputDS("StEvent");
-    if (! mEvent) return kStOK; // If no event, we're done
-    StEvent& ev = *mEvent;
-  
-    fillStPidAmpTrks4StandardStEvent(ev,ampTrks,mDedxMethod);
-    return kStOK;
-  }
-  
-  
-
-}
-
-void
-StPidAmpMaker::SetTotalTracks(Int_t totalTracks){
-     mTotalTrks4Run=totalTracks;
-     mManualSetTrks=kTRUE;
-}
-
-
-void
-StPidAmpMaker::SetNHitsFilter2LastCollection(Int_t nhits){
-       theManager->setNHits4BGNet(nhits);
-}
-
-void 
-StPidAmpMaker::SetDedxMethod(TString method){
-  TString theMethod=method;
-  theMethod.ToUpper();
-  if (theMethod.Contains("UNDEFINED"))            mDedxMethod=0;
-  if ( (theMethod.Contains("TRUNCATEDMEAN")) && 
-        !(theMethod.Contains("ENSEMBLE")) &&
-        !(theMethod.Contains("WEIGHTED"))   )  
-                                                  mDedxMethod=1;
-
-  if (theMethod.Contains("ENSEMBLE"))             mDedxMethod=2;
-
-  if (theMethod.Contains("LIKEHOOD"))             mDedxMethod=3;
-  if (theMethod.Contains("WEIGHTED"))             mDedxMethod=4;
-  if (theMethod.Contains("OTHER"))                mDedxMethod=5;
-}
-
-
-
-
-
-void 
-StPidAmpMaker::AddDefaultChannelCollection(TString fitOpt, TString drawOpt){
-    theManager->bookADefaultChannelCollection(fitOpt,drawOpt);
-    gMessMgr->Info()<<"a default ChannelCollection is registered in Manager"<<endm;
-    if (!mManualSetTrks) mTotalTrks4Run=1000000;
-}
-
-
-
-
-
-void 
-StPidAmpMaker::AddNHitsChannelCollection(Int_t x1, Int_t x2,TString fitOpt, TString drawOpt){
-    theManager->bookADefaultChannelCollection(fitOpt,drawOpt);
-    gMessMgr->Info()<<"ignored two inputs "<<x1<<" "<<x2<<endm;
-    gMessMgr->Info()<<"two inputs is for default option, the default ChannelCollection is registered in the Manager"<<endm;
-   if (!mManualSetTrks) mTotalTrks4Run=1000000;
-
-}
-
-
-void 
-StPidAmpMaker::AddNHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt, TString drawOpt){
-    theManager->bookANHitsChannelCollection(x1,x2,x3,fitOpt,drawOpt);
-    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<") ChannelCollection is registered in the Manager "<<endm;
-    if (!mManualSetTrks) mTotalTrks4Run=4000000;
-}
-
-void 
-StPidAmpMaker::AddNHitsChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x4,TString fitOpt, TString drawOpt){
-    theManager->bookANHitsChannelCollection(x1,x2,x3,x4,fitOpt,drawOpt);
-    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<") ChannelCollection is registered in the Manager "<<endm;
-    if (!mManualSetTrks) mTotalTrks4Run=4000000;
-}
-
-
-
-void 
-StPidAmpMaker::AddNHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt, TString drawOpt){
-    theManager->bookANHitsChannelCollection(x1,x2,x3,x4,x5,fitOpt,drawOpt);
-    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<x5<<" "<<") ChannelCollection is registered in the Manager"<<endm;
-    if (!mManualSetTrks) mTotalTrks4Run=4000000;
-}
-
-
-void 
-StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,TString fitOpt,Double_t d1, Double_t d2, Double_t d3, TString drawOpt){
-    theManager->bookADefaultChannelCollection(fitOpt,drawOpt);
-    gMessMgr->Info()<<"ignored two inputs "<<x1<<" "<<x2<<endm;
-    gMessMgr->Info()<<"two inputs is for default option, the default ChannelCollection is registered in the Manager"<<endm;
-    if (!mManualSetTrks) mTotalTrks4Run=6000000;
-}
-
-
-void 
-StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt,Double_t d1, Double_t d2,  Double_t d3, TString drawOpt){
-    theManager->bookANHitsDcaChannelCollection(x1,x2,x3,fitOpt,drawOpt,d1,d2,d3);
-    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<") dca("<<d1<<" "<<d2<<" "<<d3<<")  ChannelCollection is registered in the Manager "<<endm;
-    if (!mManualSetTrks) mTotalTrks4Run=6000000;
-}
-
-void 
-StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x4,TString fitOpt, Double_t d1,  Double_t d2, Double_t d3, TString drawOpt){
-
-    theManager->bookANHitsDcaChannelCollection(x1,x2,x3,x4,fitOpt,drawOpt,d1,d2,d3);
-    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<") dca("<<d1<<" "<<d2<<" "<<d3<<") ChannelCollection is registered in the Manager "<<endm;
-    if (!mManualSetTrks) mTotalTrks4Run=6000000;
-}
-
-
-
-void 
-StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt, Double_t d1,  Double_t d2, Double_t  d3, TString drawOpt){
-    theManager->bookANHitsDcaChannelCollection(x1,x2,x3,x4,x5,fitOpt,drawOpt,d1,d2,d3);
-    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<x5<<" "<<") dca("<<d1<<" "<<d2<<" "<<d3<<") ChannelCollection is registered in the Manager "<<endm;
-    if (!mManualSetTrks) mTotalTrks4Run=6000000;
-
-}
-
-
-
-void 
-StPidAmpMaker::AddPtChannelCollection(Double_t x1, Double_t x2,TString fitOpt, TString drawOpt){
-    theManager->bookADefaultChannelCollection(fitOpt,drawOpt);
-    gMessMgr->Info()<<"ignored two inputs "<<x1<<" "<<x2<<endm;
-    gMessMgr->Info()<<"two inputs is for default option, the default ChannelCollection is registered in the Manager"<<endm;
-}
-
-
-void 
-StPidAmpMaker::AddPtChannelCollection(Double_t x1, Double_t x2, Double_t x3,TString fitOpt, TString drawOpt){
-    theManager->bookAPtChannelCollection(x1,x2,x3,fitOpt,drawOpt);
-    gMessMgr->Info()<<"a pt("<<x1<<" "<<x2<<" "<<x3<<") ChannelCollection is registered in the Manager "<<endm;
-}
-
-void 
-StPidAmpMaker::AddPtChannelCollection(Double_t x1, Double_t x2,Double_t x3, Double_t x4,TString fitOpt, TString drawOpt){
-    theManager->bookAPtChannelCollection(x1,x2,x3,x4,fitOpt,drawOpt);
-    gMessMgr->Info()<<"a pt("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<") ChannelCollection is registered in the Manager "<<endm;
-}
-
-void 
-StPidAmpMaker::AddPtChannelCollection(Double_t x1, Double_t x2, Double_t x3, Double_t x4, Double_t x5,TString fitOpt, TString drawOpt){
-    theManager->bookAPtChannelCollection(x1,x2,x3,x4,x5,fitOpt,drawOpt);
-    gMessMgr->Info()<<"a Pt("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<x5<<" "<<") ChannelCollection is registered in the Manager"<<endm;
-}
-
+     chargeBin= (charge>0) ? 1 : 0;
+      
+    pBin=int(mtm/((mPEnd-mPStart)/mNPBins));
+    if (pBin>(mNPBins-1)) continue;
     
+    etaBin=int(fabs(eta)/((mEtaEnd-mEtaStart)/mNEtaBins));
+    if (etaBin>(mNEtaBins-1)) continue;
 
-void 
-StPidAmpMaker::AddPtNHitsChannelCollection(Int_t n, Int_t* nhitsAry,Int_t p, Double_t* ptAry,TString fitOpt, TString drawOpt){
+    nhitsBin=
+      int(float(NDedxUsed)/(float(mNNHitsEnd-mNNHitsStart)/mNNHitsBins));
+    nhitsBin=(nhitsBin>(mNNHitsBins-1)) ? (mNNHitsBins-1) : nhitsBin;
+    nhitsBin=(nhitsBin<0) ? 0 : nhitsBin;
   
-    Int_t j;
+    if (dedx>mDedxStart && dedx<mDedxEnd) 
+      pidHisto[GetPositionInArray(multBin,dcaBin,chargeBin,pBin,etaBin,nhitsBin)]->Fill(dedx);//multBin shoud be 0 if produce histo for mult bin seperatly.
 
-    theManager->bookAPtNHitsChannelCollection(n, nhitsAry, p, ptAry,fitOpt,drawOpt);
-    gMessMgr->Info()<<"a Pt( ";
-    for ( j=0; j<n; j++) gMessMgr->Info()<<nhitsAry[j]<<" ";
-    gMessMgr->Info()<<")&NHits( ";
-    for ( j=0; j<p; j++) gMessMgr->Info()<<ptAry[j]<<" ";
-    gMessMgr->Info()<<") ChannelCollection is registered in the Manager "<<endm;
+  }
+
+
 }
 
 
+//---------------------------------------------------------------------------
+Int_t StPidAmpMaker::GetPositionInArray(Int_t theMultBin, Int_t theDcaBin, Int_t theChargeBin, Int_t thePBin, Int_t theEtaBin, Int_t theNHitsBin){
 
+    int totalEntry
+      = mSingleMultiplicityBin*mNDcaBins*mNChargeBins*mNPBins*mNEtaBins*mNNHitsBins;
     
+    int positionPointer=0;
+    
+    totalEntry=totalEntry/mSingleMultiplicityBin;
+    positionPointer=positionPointer+totalEntry*theMultBin;
+    
+    totalEntry=totalEntry/mNDcaBins;
+    positionPointer=positionPointer+totalEntry*theDcaBin;
+    
+    totalEntry=totalEntry/mNChargeBins;
+    positionPointer=positionPointer+totalEntry*theChargeBin;
+    
+    totalEntry=totalEntry/mNPBins;
+    positionPointer=positionPointer+totalEntry*thePBin;
+    
+    totalEntry=totalEntry/mNEtaBins;
+    positionPointer=positionPointer+totalEntry*theEtaBin;
+    
+    totalEntry=totalEntry/mNNHitsBins;
+    positionPointer=positionPointer+totalEntry*theNHitsBin;
+    
+    return positionPointer;
+}    
 
 
 
+
+//-----------------------------------------------------------------------
+
+Int_t StPidAmpMaker::Finish() {
+
+   //write out histograms
+   for(int m=0;m<mSingleMultiplicityBin;m++)        //
+    for(int d=0; d<mNDcaBins;d++)             //0_3_inf
+      for(int e=0; e<mNChargeBins;e++) {      //0_minus 1_plus  
+
+	char *theHistoFileName = new char[200];
+	  sprintf(theHistoFileName,"./PidHisto_%d%d%d.root",theMultBin,d,e);
+
+  TFile histoFile(theHistoFileName,"RECREATE");
+  cout<<" writting histogram file "<<theHistoFileName<<endl;
+
+   histoFile.cd();
+
+  //a name for PIDFitter to identify
+  /////////nameTag convention   1N+
+  //  1 -> the second multiplicity bin
+  //  N -> no primary tracks
+  //  + -> positive charge tracks
+
+  char* multName=new char[80];
+  sprintf(multName,"%d",theMultBin);
+
+  TString tempString;
+  tempString.Append(multName);
+
+  if (d==0) tempString.Append("P"); // dca<3
+  else tempString.Append("N"); //dca>3
+  
+  if (e==0) tempString.Append("-"); //negative particle
+  else tempString.Append("+"); //positive particle
+
+
+   TNamed fileNameTag(tempString,tempString);
+
+   fileNameTag.Write();
+
+
+  TH1F* tempHisto=0;
+
+   for (int i =0; i<mNPBins; i++)
+     for (int j=0; j<mNEtaBins;j++)
+       for (int k=0; k<mNNHitsBins;k++) {
+
+
+	char *theName = new char[80];
+        if (i<10)
+	  sprintf(theName,"h0%d%d%d",i,j,k);
+        else sprintf(theName,"h%d%d%d",i,j,k);
+
+          histoFile.cd();
+          tempHisto=new TH1F(*(pidHisto[GetPositionInArray(m,d,e,i,j,k)]));
+          tempHisto->SetName(theName);
+          tempHisto->SetTitle(theName);
+          tempHisto->Write();
+          delete tempHisto;
+
+       }
+
+   histoFile.SetFormat(1);   
+
+   histoFile.Write();
+
+   histoFile.Close();
+
+      }
+
+
+  // Print the selection object details
+   //  pFlowSelect->PrintList();
+
+  delete pFlowSelect;
+
+  cout << endl;
+  gMessMgr->Summary(3);
+  cout << endl;
+
+  return StMaker::Finish();
+}
+
+////////////////////////////////////////////////////////////////////////////
+//
+// $Log: StPidAmpMaker.cxx,v $
+// Revision 1.9  2002/02/14 21:25:56  aihong
+// re-install the new version
+//
+//  
+////////////////////////////////////////////////////////////////////////////

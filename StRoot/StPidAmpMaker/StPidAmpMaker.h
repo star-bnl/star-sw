@@ -1,119 +1,76 @@
-/***************************************************************************
- *
- * $Id: StPidAmpMaker.h,v 1.7 2000/09/15 21:22:50 fisyak Exp $
- *
- * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
- *         Send questions to aihong@cnr.physics.kent.edu
- ***************************************************************************
- *
- * Description:part of StPidAmpMaker package
- *             StPidAmpMaker is a mediator between StEvent and StPidAmpManager
- ***************************************************************************
- *
- * $Log: StPidAmpMaker.h,v $
- * Revision 1.7  2000/09/15 21:22:50  fisyak
- * HP does not have iostream
- *
- * Revision 1.6  2000/07/22 22:11:33  aihong
- * move some include files to StEventUtilities & change include path
- *
- * Revision 1.5  2000/07/12 15:38:33  aihong
- * update for real data
- *
- * Revision 1.4  2000/05/01 16:59:49  aihong
- * clean up
- *
- * Revision 1.3  2000/04/11 15:45:25  aihong
- * change to adapt dividing trks by channel for faster filling
- *
- * Revision 1.2  2000/04/09 16:36:43  aihong
- * change for adapting NHitDcaNet added
- *
- * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
- * Installation of package
- *
- **************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Id: StPidAmpMaker.h,v 1.8 2002/02/14 21:25:56 aihong Exp $
+//
+// Authors: Aihong Tang
+//
+///////////////////////////////////////////////////////////////////////////////
+//
+// Description: produce hist. for PIDFitter, which builds PID tables.
+//
+///////////////////////////////////////////////////////////////////////////////
 
-
-#ifndef StPidAmpMaker_h
-#define StPidAmpMaker_h
-
-#ifdef __HP_aCC
+#ifndef StPidAmpMaker_H
+#define StPidAmpMaker_H
 #include <iostream.h>
-#else
-#include <iostream>
-#endif
-
-#ifndef StMaker_H
 #include "StMaker.h"
-#endif
-
+#include "StFlowMaker/StFlowConstants.h"
+#include "StPidProbabilityConst.hh"
+#include "TVector2.h"
 #include "TString.h"
-#include "TH1.h"
-
-#include "StPidAmpManager.h"
-#include "StPidAmpTrkVector.h"
+class StFlowEvent;
+class TH1F;
+class TH1D;
+class TH2F;
+class TH2D;
+class TH3F;
+class StFlowSelection;
 
 class StPidAmpMaker : public StMaker {
+
 public:
 
-    StPidAmpMaker(const Char_t *name="StPidAmpMaker");
-    virtual ~StPidAmpMaker();
-    
-    virtual void Clear(Option_t *option="");
-    virtual Int_t  Init();
-    virtual Int_t  Make();
-    virtual Int_t  Finish();
+           StPidAmpMaker(const Char_t* name="PidAmp");
+           StPidAmpMaker(const StPidAmpMaker &from){};
+  virtual  ~StPidAmpMaker();
 
-    void SetTotalTracks(Int_t totalTracks);
+  Int_t    Init();
+  Int_t    Make();
+  Int_t    Finish();
+  void     SetMultBinNumber(int val);
+  virtual  const char *GetCVS() const {static const char cvs[]=
+    "Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.8 2002/02/14 21:25:56 aihong Exp $ built "__DATE__" "__TIME__ ;
+    return cvs;}
 
-    void SetNHitsFilter2LastCollection(Int_t nhits);
-    void SetDedxMethod(TString method);
-
-    void AddDefaultChannelCollection(TString fitOpt="BAR", TString drawOpt=" ");
-    void AddNHitsChannelCollection(Int_t x1, Int_t x2,TString fitOpt="BAR", TString drawOpt=" ");
-    void AddNHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt="BAR", TString drawOpt=" ");
-    void AddNHitsChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x4,TString fitOpt="BAR", TString drawOpt=" ");
-    void AddNHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt="BAR", TString drawOpt=" ");
-
-    void AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,TString fitOpt, Double_t d1, Double_t d2, Double_t d3, TString drawOpt=" ");
-    void AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt,Double_t d1, Double_t d2, Double_t d3, TString drawOpt=" ");
-    void AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x4,TString fitOpt, Double_t d1, Double_t d2, Double_t d3, TString drawOpt=" ");
-    void AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt,Double_t d1, Double_t d2, Double_t d3, TString drawOpt=" ");
-
-    void AddPtChannelCollection(Double_t x1, Double_t x2,TString fitOpt="BAR", TString drawOpt=" ");
-    void AddPtChannelCollection(Double_t x1, Double_t x2, Double_t x3,TString fitOpt="BAR", TString drawOpt=" ");
-    void AddPtChannelCollection(Double_t x1, Double_t x2,Double_t x3, Double_t x4,TString fitOpt="BAR", TString drawOpt=" ");
-    void AddPtChannelCollection(Double_t x1, Double_t x2, Double_t x3, Double_t x4, Double_t x5,TString fitOpt="BAR", TString drawOpt=" ");
-    
-
-    void AddPtNHitsChannelCollection(Int_t n, Int_t* nhitsAry,Int_t p, Double_t* ptAry,TString fitOpt="BAR", TString drawOpt=" ");
-  
-    virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.7 2000/09/15 21:22:50 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-    
 private:
 
-    void   bookCollection();
+  void     FillParticleHistograms();
+  Int_t    GetPositionInArray(Int_t theMultBin, Int_t theDcaBin, Int_t theChargeBin, Int_t thePBin, Int_t theEtaBin, Int_t theNHitsBin);
 
-    Bool_t  mReadFromTable;
-    Bool_t  mManualSetTrks;//if true, Add..Collection wont change mTotalTrks.
-    Int_t   mNHits4BG;
-    Int_t   mDedxMethod;
-    Int_t   mTotalTrks4Run;
+  StFlowEvent*     pFlowEvent;  //! pointer to StFlowEvent
+  StFlowSelection* pFlowSelect; //! selection object
+  TH1F**           pidHisto;    //!
+  int          mSingleMultiplicityBin; //always be 1. 
+  int          theMultBin;
+  
+  TString      MakerName;
 
-    TString drawOpt;
-    Char_t  collectionName[256];
-
-    
-    StPidAmpTrkVector*  ampTrks; //!
-    StPidAmpManager*    theManager; //!
-
-    ClassDef(StPidAmpMaker,1)
+  ClassDef(StPidAmpMaker, 1)              // macro for rootcint
 };
+
+
+inline void StPidAmpMaker::SetMultBinNumber(int val) {
+  theMultBin=val;
+}
+
 #endif
 
-// if no specific Add*ChannelCollection() is called, a default ChannelCollection will be booked.
-// if there is a call to Add*ChannelCollection, the default ChannelCollection will not be booked.
-// so if you wanna compare default vs.NHits, you have make a call 
-// addDefaultChannelCollection() after you called AddNHitsChannelCollection()
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Log: StPidAmpMaker.h,v $
+// Revision 1.8  2002/02/14 21:25:56  aihong
+// re-install the new version
+//
+
+//
+/////////////////////////////////////////////////////////////////////////////////
