@@ -379,11 +379,13 @@ Int_t TTreeIter::Next(Int_t entry)
   Int_t ans = 0;
 
   ans = fTree->GetEntry(ientry);
-//     int n = fBraList.GetEntriesFast();
-//     for (int i=0;i<n;i++) {
-//       TBranch *b = (TBranch*)fBraList.UncheckedAt(i);
-//       ans +=b->GetEntry(ientry); 
-//     }
+#if 0
+     int n = fBraList.GetEntriesFast();
+     for (int i=0;i<n;i++) {
+       TBranch *b = (TBranch*)fBraList.UncheckedAt(i);
+       ans +=b->GetEntry(ientry); 
+     }
+#endif //0
   Assert(!IsCorrupted());
   if (ans) return ans;
   fEntry=0;
@@ -412,7 +414,7 @@ Bool_t TTreeIter::Notify()
     }
     fTree->SetBranchAddress(t->GetName(),*pddr);
   }
-
+#if ROOT_VERSION_CODE <= ROOT_VERSION(3,3,9)
   TBranch *br=0;
   int added = 1;
   while(added) {
@@ -428,12 +430,13 @@ Bool_t TTreeIter::Notify()
         printf("Branch %s activated\n",br->GetName());
       } else {// We are here because of ROOT bug. Do workaround
         fTree->SetBranchStatus(br->GetName(),0);
+        br->SetBit(kDoNotProcess);		continue;
         printf("Branch %s desactivated\n",br->GetName());
       }  
 
     }
   }
-
+#endif //ROOT 3.03.09
   fMemList.Sort();
   n = fMemList.GetEntriesFast();
   for (int i=0;i<n;i++) {
@@ -482,7 +485,13 @@ void TTreeIter::ls(const TTree *ttp, Option_t* option)
 //______________________________________________________________________________
 void TTreeIter::ls(Option_t* option) const
 {
-   ls(fTree,option);
+  if(option && strstr(option,"fil")) {
+    if(!fTree) return;
+    if(!fTree->GetListOfFiles()) return;
+    fTree->GetListOfFiles()->ls();
+    return;
+  }	
+  ls(fTree,option);
 }
 //______________________________________________________________________________
 void TTreeIter::Print(Option_t* option) const
