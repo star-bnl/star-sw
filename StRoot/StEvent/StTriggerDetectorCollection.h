@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.h,v 1.1 1999/01/30 03:58:09 fisyak Exp $
+ * $Id: StTriggerDetectorCollection.h,v 1.2 1999/02/09 22:22:18 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.h,v $
- * Revision 1.1  1999/01/30 03:58:09  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 22:22:18  fisyak
+ * Import Torre stuff
  *
  * Revision 1.4  1999/04/28 22:27:39  fisyak
  * New version with pointer instead referencies
