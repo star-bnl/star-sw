@@ -14,10 +14,14 @@ my $AFS_RHIC     = $env->{ENV}->{AFS_RHIC};
 @Repo   = Repository_List unless $param::noRepository;  # print "Repositories = |@Repo|\n";nv
 
 my $SO_PKG  = "";
+my $SO_PKG_PLAIN = "";
 my $SO_PKGT = "";
+my $SO_MAP  = "";
+my $SO_MAPT = "";
 my $pkg;
 my $PKG;
-
+my @LinkDefs = ();
+my @PlainObj = ();
 if ( ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/) ||
      ($Dir =~ m/StRoot.*Client\// && $Dir !~ /StRoot.*Client\/St/)  ){
     # Added 2003. In Construct, the logic is such
@@ -113,13 +117,14 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     @src     = script::sortu(@srcL);
     @h_files = script::sortu(@h_filesL);
     @idlM    = script::sortu(@idlML);
-    if ( $#idlM > -1 and $PKG !~ "^St" ) { $PKG = "St_" . $PKG; }
+    $SO_PKG = $PKG . "." . $env->{SUFSOLIB};
+    $SO_PKG_PLAIN = $SO_PKG;
+    if ( $#idlM > -1 and $PKG !~ "^St" ) { $PKG = "St_" . $PKG; @PlainObj = @src; $SO_PKG = $PKG . "." . $env->{SUFSOLIB};}
 
     $obj = $ObjDir;
     print "obj = $obj\n" if $param::debug;
-    $SO_PKG = $PKG . "." . $env->{SUFSOLIB};
     print "SO_PKG = $SO_PKG\n" if $param::debug;
-
+    $SO_MAP = $PKG . ".map";
     #+
     # Extraneous flag treatment for specific makers
     # Search path depth for Makers.
@@ -215,6 +220,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       } elsif ( $pkg =~ m/^gcalor$/ || $pkg =~ m/^geant321$/) {
         $LIBPKG = "lib" . $pkg . "." . $env->{SUFLIB};
 	$SO_PKG = "";
+	$SO_MAP = "";
 	$FCPATH = "#" . $Dir . "/../geant321" .
 	  $main::PATH_SEPARATOR . "#" . $Dir . "/../starsim/include" . 
 	    $main::PATH_SEPARATOR . "#" . $Dir . "/../gcalor/include" . 
@@ -353,6 +359,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
     } else {
 	foreach $h(@h_files) {
+	  if ( $h =~ /LinkDef/) { push @LinkDefs, $h;}
 	    if ( $h =~ /LinkDef/ || $h =~ /Stypes/ ) { push @Defs, $h; next; }
 	    my $hh = $Dir . "/" . $h;
 	    if ( -r $hh ) {
@@ -408,6 +415,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
 	Command $env2 [@CintFiles], @defs,
 	  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
+	if ($#LinkDefs < 0) { push @LinkDefs, "LinkDef.h";}
 	my @objfiles = Objects $envCint ($CintFiles[0]);#
 #	push @src, $CintFiles[0];
 	push @src, @objfiles[0];
@@ -447,11 +455,13 @@ if ( $#idlL > -1 ) {
     if ( $#idlT > -1 ) {
         $PKGT    = "lib" . $pkg . "_Tables";
         $SO_PKGT = $PKGT . "." . $env->{SUFSOLIB};
+	$SO_MAPT = $PKGT . ".map";
         print "SO_PKGT = $SO_PKGT\n" if $param::debug;
         my $LIBPKGT = $PKGT . "." . $env->{SUFLIB};
 
         if ( $Dir =~ /StRoot\// ) {
             $SO_PKGT = $SO_PKG;
+	    $SO_MAPT = $SO_MAP;
             $LIBPKGT = $LIBPKG;
         } else {
             printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir,
@@ -490,6 +500,7 @@ if ( $#idlL > -1 ) {
             my $idlC = "St_" . $stem . "_Table.cxx";
             print "idlC: $idlC\n" if $param::debug;
             my $LinkDef = $stem . "LinkDef.h";
+	    push @LinkDefs, $LinkDef;
             print "LinkDef = $LinkDef\n" if $param::debug;
             my $idlCintH = "St_" . $stem . "_TableCint.h";
             print "idlCintH = $idlCintH\n" if $param::debug;
@@ -518,6 +529,7 @@ if ( $#idlL > -1 ) {
                 @Deps = ();
                 push @Deps, $idlH;
                 push @Deps, $LinkDef;
+		push @LinkDefs, $LinkDef;
                 push @Deps, $idlh;
                 push @Deps, $idli;
 
@@ -549,6 +561,11 @@ if ( $#sourcesT > -1 ) {
     script::Keep $SO_PKGT;
     LinkedModule $env3 $SO_PKGT, @sourcesT;
     Install $env3 $LIB, $SO_PKGT;
+    if ($env3->{Packages}->{ROOT}->{RLIBMAP} and $SO_MAPT and $#LinkDefs > -1) {
+      Command $env3 [ $SO_MAPT ], ($LIB . "/" . $SO_PKGT, @LinkDefs), 
+      qq($env3->{Packages}->{ROOT}->{RLIBMAP} -r %> -l %1 -c %2); 
+      Install $env3 $LIB, $SO_MAPT;
+    }
 }
 
 if ( $#src > -1 ) {
@@ -562,11 +579,24 @@ if ( $#src > -1 ) {
 	  my $libpkg = $LIB . "/" . File::Basename::basename($LIBPKG);
 	  Depends $env2 $SO_PKG, $libpkg;
 	}
+	
     }
     if ($SO_PKG) {
       script::Keep $SO_PKG;
       LinkedModule $env2 $SO_PKG, @src;
       Install $env2 $LIB,         $SO_PKG;
+#      print "$env2->{Packages}->{ROOT}->{RLIBMAP} and $SO_MAP and $LinkDefs\n";
+      if ($env2->{Packages}->{ROOT}->{RLIBMAP} and $SO_MAP and $#LinkDefs > -1) {
+	Command $env2 [ $SO_MAP ], ($LIB . "/" . $SO_PKG, @LinkDefs), 
+	qq($env2->{Packages}->{ROOT}->{RLIBMAP} -r %> -l %1 -c %2); 
+	Install $env2 $LIB, $SO_MAP;
+      }
+#      print "SO_PKG = $SO_PKG SO_PKG_PLAIN = $SO_PKG_PLAIN $#PlainObj PlainObj = @PlainObj\n";
+      if ($SO_PKG ne $SO_PKG_PLAIN and $#PlainObj > -1) {#print "============================\n";
+	script::Keep $SO_PKG_PLAIN;
+	LinkedModule $env2 $SO_PKG_PLAIN, @PlainObj;
+	Install $env2 $LIB,         $SO_PKG_PLAIN;
+      }
     }
     if ( $pkg eq "Star2Root" or $pkg eq "St_base" or $pkg eq "StUtilities" ) {
         my $lib = $LIB . "/lib" . $SO_PKG;
