@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide 
 // 
-// $Id: StEmcPreCalibrationMaker.cxx,v 1.1 2001/09/24 13:30:49 suaide Exp $
+// $Id: StEmcPreCalibrationMaker.cxx,v 1.2 2001/10/17 13:51:31 suaide Exp $
 // $Log: StEmcPreCalibrationMaker.cxx,v $
+// Revision 1.2  2001/10/17 13:51:31  suaide
+// new modifications to work with real data
+//
 // Revision 1.1  2001/09/24 13:30:49  suaide
 // Added Effective pedestal calculation and Pre Calibration Maker to
 // generate EMC and L3 StEvent objects from Daq file
@@ -39,36 +42,55 @@ StEmcPreCalibrationMaker::~StEmcPreCalibrationMaker()
 Int_t StEmcPreCalibrationMaker::Init()
 {
   cout <<"Starting EmcPreCalibration maker ++++++++++++++++++++++++\n";
+  etaDistr=new TH2F("etaDistr","nHits x eta",300,-2,2,200,0,200);
+  pDistr=new TH2F("pDistr","nHits x momentum",1000,0,5,200,0,200);
   return StMaker::Init();
 }
-
+//_____________________________________________________________________________
+/*void StEmcPreCalibrationMaker::Clear(Option_t *option)
+{
+  cout <<"Cleaning EmcPreCalibration maker ++++++++++++++++++++++++\n";
+  //return StMaker::Clear();
+}*/
 //_____________________________________________________________________________
 Int_t StEmcPreCalibrationMaker::Finish()
 {
   cout <<"Finishing EmcPreCalibration maker ++++++++++++++++++++++++\n";
-  return StMaker::Finish();
 }
 //_____________________________________________________________________________
 Int_t StEmcPreCalibrationMaker::Make()
 {  
-  StEvent *currevent = (StEvent*)GetInputDS("StEvent");
-  if(currevent)
-  {
-   delete currevent;
-  }
-  
+  //StEvent *currevent = (StEvent*)GetInputDS("StEvent");
+  //if(currevent)
+  //{
+  // delete currevent;
+  //}
+  currevent=NULL;
+  emccol=NULL;
   currevent=new StEvent();
 	
   mTheEmcData   = GetDataSet("StDAQReader");
  	if(!mTheEmcData) { return kStWarn;}
+  
+  StDAQReader* TheDataReader=(StDAQReader*)(mTheEmcData->GetObject());
+  unsigned int evtime= TheDataReader->getUnixTime();
+  cout <<"evtime = "<<evtime<<"  GetDate = "<<GetDate()<<"  GetTime = "<<GetTime()<<endl;
  	      
-  StEmcCollection* emc = GetEmcCollectionFromDaq(mTheEmcData);
-  if(!emc) return kStWarn;
-  if(currevent->emcCollection()) delete currevent->emcCollection();
-  currevent->setEmcCollection(emc);
-	
+  emccol = GetEmcCollectionFromDaq(mTheEmcData);
+  if(!emccol) 
+  {
+    cout <<"StEmcPreCalibrationMaker:: No EMC\n";
+    return kStWarn;
+  }
+  currevent->setEmcCollection(emccol);
+  
+  
   StDAQReader* mTheDataReader = (StDAQReader*)(mTheEmcData->GetObject());
-  if(!mTheDataReader->L3Present()) return kStWarn;
+  //if(!mTheDataReader->L3Present()) 
+  //{
+  //  cout <<"StEmcPreCalibrationMaker:: No L3\n";
+  //  return kStWarn;
+  //}
   StL3Reader *L3=mTheDataReader->getL3Reader();
   if(!L3) return kStWarn;
   
@@ -77,12 +99,12 @@ Int_t StEmcPreCalibrationMaker::Make()
   
   Int_t ntracks=L3Tracks->getNumberOfTracks();
   globalTrack *tracks=L3Tracks->getTrackList();
-  
+  cout <<"StEmcPreCalibrationMaker:: Number of global tracks = "<<ntracks<<endl;
 
   StL3Trigger* l3t = new StL3Trigger();
   StSPtrVecTrackNode& nodes = l3t->trackNodes() ;
 
-  Float_t cte=3.1415926/180.; // check if L3 angles are dregee or radians....
+  Float_t cte=1.; // check if L3 angles are dregee or radians....
   
   for(Int_t i=0;i<ntracks;i++)
   {
@@ -99,13 +121,40 @@ Int_t StEmcPreCalibrationMaker::Make()
     StThreeVectorF momentum( pt * cos(psi), pt * sin(psi), pt * tanl ) ;
     StThreeVectorF origin( r0*cos(phi0),r0*sin(phi0),z0) ;
     StHelixModel* helixModel = new StHelixModel(charge,psi,curvature,tanl,origin,momentum,0) ;
+    //cout <<"Track "<<i<<"  p = "<<momentum.mag()<<"  pt = "<<pt<<"  q = "<<charge<<"  psi = "<<psi<<"  phi0 = "<<phi0<<"  tanl = "<<tanl<<endl;
 
     gTrack->setLength(tracks[i].length);    
     gTrack->setGeometry(helixModel);
     
+    /*StTrackDetectorInfo* detecInfo = new StTrackDetectorInfo() ;
+    detecInfo->setNumberOfPoints(tracks[i].nHits) ;
+    gTrack->setDetectorInfo(detecInfo) ;*/
+    
+    Float_t a[2],b[15];
+    StTrackFitTraits fit(0,(Int_t)tracks[i].nHits,a,b);
+    gTrack->setFitTraits(fit);
+        
+    pDistr->Fill(momentum.mag(),(Int_t)tracks[i].nHits);
+    if(momentum.mag()>1.2) 
+    {
+      Float_t R=230;
+      Float_t dr=R-r0;
+      StThreeVectorF tmp(dr*cos(psi),dr*sin(psi),dr*tanl);
+      StThreeVectorF tmp1=tmp+origin;
+      Float_t eta=tmp1.pseudoRapidity();      
+      etaDistr->Fill(eta,(Int_t)tracks[i].nHits);
+      /*if(eta>=0 && eta<=1) cout <<" track "<<i<<"  p = "<<momentum.mag()
+                                <<"  nHits = "<<(Int_t)tracks[i].nHits
+                                <<"  z0 = "<<z0
+                                <<"  r0 = "<<r0
+                                <<"  tanl = "<<tanl
+                                <<"  dr = "<<dr
+                                <<"  etaEMc = "<<eta<<endl;*/
+    }
+    
     StTrackNode* trackNode = new StTrackNode() ;
     trackNode->addTrack(gTrack) ;
-    nodes.push_back(trackNode) ;    
+    nodes.push_back(trackNode) ; 
   }
   vertex l3v=L3Tracks->getVertex();
   StThreeVectorF vv(l3v.x,l3v.y,l3v.z);
@@ -115,7 +164,7 @@ Int_t StEmcPreCalibrationMaker::Make()
   l3t->addPrimaryVertex(v);
 
   currevent->setL3Trigger(l3t);
-    
+	    
   AddData(currevent);
   return kStOK;
 }

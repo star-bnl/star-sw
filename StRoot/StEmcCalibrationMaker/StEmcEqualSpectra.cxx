@@ -72,25 +72,50 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
    
   Bool_t EqDone=kFALSE;
     
-  Float_t pwd1=5;
-  Float_t pwd2=5;
+  Float_t pwd1=15;
+  Float_t pwd2=15;
 
   Float_t a=0,b=0,erra=0,errb=0,cov=0,chi=0;
-  const int npoints=10;
+  const int npoints=6;
   
-  if(mode==0)
+  // mean and RMS modes  
+  // 0 -  mean and RMS with liear average
+  // 1 -  mean with linear average
+  // 2 -  mean and rms with log average
+  // 3 -  mean with log average 
+  if(mode>=0 && mode <=3)  
   {
+    Int_t max=nadcMax;
+    max=140;
     Float_t m1,r1,m2,r2;
-    GetMeanAndRms(position1,(Int_t)pwd1,nadcMax,&m1,&r1);
-    GetMeanAndRms(position2,(Int_t)pwd1,nadcMax,&m2,&r2);
-    a=r1/r2;
-    b=m1-a*m2;
+    if(mode==0 || mode==1)
+    {
+      GetMeanAndRms(position1,(Int_t)pwd1,max,&m1,&r1);
+      GetMeanAndRms(position2,(Int_t)pwd1,max,&m2,&r2);
+    }
+    if(mode==2 || mode==3)
+    {
+      GetLogMeanAndRms(position1,(Int_t)pwd1,max,&m1,&r1);
+      GetLogMeanAndRms(position2,(Int_t)pwd1,max,&m2,&r2);
+    }
+    if(mode==0 || mode==2)
+    {
+      a=r1/r2;
+      b=m1-a*m2;
+    }
+    if(mode==1 || mode==3)
+    {    
+      a=m1/m2;
+      b=0;
+    }
     EqDone=kTRUE;
-    cout <<"  id = "<<position2<<"  ref = "<<position1
+    cout <<"  id = "<<position2<<"  ref = "<<position1<<"  mean = "<<m1<<" , "<<m2
+         <<"  rms = "<<r1<<" , "<<r2
          <<"  a = "<<a<<"  b = "<<b<<endl;
   }
 
-  if(mode==1)
+  // fit modes
+  if(mode==4) 
   {
     Float_t x1[4096],x2[4096];
     Int_t ini1=nadcMax-1,ini2=nadcMax-1;
@@ -110,8 +135,8 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
     
     Float_t limit;
     
-    if(x1[(int)max]<x2[(int)max]) limit=0.9*x1[(int)max];
-    else limit=0.9*x2[(int)max];
+    if(x1[(int)max]<x2[(int)max]) limit=0.95*x1[(int)max];
+    else limit=0.95*x2[(int)max];
     cout <<"id = "<<position2<<"  ref = "<<position1<<"  limit = "<<limit<<endl;
     
     if(limit>=10)
@@ -143,9 +168,13 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
           }
         cc1[i]=(a1+a2)/2.;
         cc2[i]=(b1+b2)/2.;
-        cout <<"i = "<<i<<"  x = "<<x<<"  cc1[i] = "<<cc1[i]<<"  cc2[i]= "<<cc2[i]<<endl;
-        ec1[i]=sqrt(((a2-a1)/2.)*((a2-a1)/2.)+pwd1*pwd1);  
-        ec2[i]=sqrt(((b2-b1)/2.)*((b2-b1)/2.)+pwd2*pwd2);
+        ec1[i]=fabs(a1-a2)/2.;  
+        ec2[i]=fabs(a1-a2)/2.;
+        //cc1[i]=a1;
+        //cc2[i]=b1;
+        //ec1[i]=cc1[i]/sqrt(x);
+        //ec2[i]=cc2[i]/sqrt(x);
+        cout <<"i = "<<i<<"  x = "<<x<<"  cc1 = "<<cc1[i]<<"+-"<<ec1[i]<<"  cc2 = "<<cc2[i]<<"+-"<<ec2[i]<<endl;
         ss+=1/(ec1[i]*ec1[i]);
         sx+=cc2[i]/(ec1[i]*ec1[i]);
         sx2+=(cc2[i]*cc2[i])/(ec1[i]*ec1[i]);
@@ -173,13 +202,14 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
       erra=sqrt(ss/delta);
       errb=sqrt(sx2/delta);
       cov=-sx/delta;
-    
+      
       for(Int_t i=0;i<npoints;i++)  // chi calc
       {
         Float_t sigma=sqrt(ec1[i]*ec1[i]+a*a*ec2[i]*ec2[i]);
         chi+=(cc1[i]-(a*cc2[i]+b))*(cc1[i]-(a*cc2[i]+b))/(sigma*sigma);
       }
       EqDone=kTRUE;
+      cout <<"a = "<<a<<"+-"<<erra<<"  b = "<<b<<"+-"<<errb<<"  cov = "<<cov<<"  chi = "<<sqrt(chi/(npoints-2))<<endl;
     }
   }
   

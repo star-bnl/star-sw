@@ -174,6 +174,36 @@ Bool_t StEmcSpectra::GetMeanAndRms(Int_t position,Int_t amin,Int_t amax,
   return kTRUE;
 }
 //_____________________________________________________________________________
+Bool_t StEmcSpectra::GetLogMeanAndRms(Int_t position,Int_t amin,Int_t amax,
+                                      Float_t* m,Float_t* r)
+{
+  if(GetStatus(position)==0)
+  {
+    cout <<"***** StEmcSpectra: This position is turned off. Can not get AVG and RMS\n"; 
+    return kFALSE;
+  }
+  
+  Float_t mean=0,rms=0,sum=0;
+  for(Int_t j=amin;j<amax;j++)
+  {
+    if(GetAdcValue(position,j)>0)
+    {
+      Float_t temp=log(GetAdcValue(position,j));
+      mean+=temp*(Float_t)j;
+      sum+=temp;
+      rms+=(Float_t)j*(Float_t)j*temp;
+    }
+  }
+  if(sum>0)
+  {
+    mean/=sum;
+    rms=sqrt(rms/sum-mean*mean);
+  }
+  *m=mean;
+  *r=rms;
+  return kTRUE;
+}
+//_____________________________________________________________________________
 Bool_t StEmcSpectra::GetOccupancy(Int_t minimum,Float_t* m,
                                   Float_t* r,Float_t* fr)
 {

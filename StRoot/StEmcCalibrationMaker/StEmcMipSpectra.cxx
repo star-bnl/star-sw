@@ -12,44 +12,20 @@
 #include "TH1.h"
 #include "TGraphErrors.h"
 #include "TMinuit.h"
+#include "StEmcFit.h"
 
 ClassImp(StEmcMipSpectra);
-Double_t PI=3.1415926;
-Double_t xfit[4096];
-Int_t npointsfit,xinit,xstop;
  
 //_____________________________________________________________________________
 //These functions are for TMinuit MIP fit
 //_____________________________________________________________________________
-Double_t Gaussian(Double_t x,Double_t A,Double_t xavg,Double_t sigma,Double_t assym)
+Double_t Gaussian(Double_t x,Double_t A,Double_t xavg,Double_t sigma)
 {
-  Double_t sig=sigma;
-  if(x>xavg)sig*=assym;
-  Double_t xtemp=(x-xavg)/sig;  
-  return (A/(sqrt(2.*PI)*sigma))*exp(-0.5*xtemp*xtemp);
+  Double_t ex,arg;
+  arg=(x-xavg)/sigma;
+  ex=exp(-arg*arg);
+  return A*ex;
 }
-Double_t Pol(Double_t x,Double_t A,Double_t B,Double_t C)
-{
-  return A+B*x+C*x*x;
-}
-void TwoGaussians(Int_t &npar,Double_t *gin, Double_t &chi, Double_t *par, Int_t iflag)
-{
-  Double_t chitemp=0,np=0;
-  for(Int_t adc=xinit;adc<xstop;adc++)
-  {
-    if(xfit[adc]>0)
-    {
-      Double_t peak=Gaussian((Double_t)adc+0.5,par[0],par[1],par[2],par[3]);
-      Double_t back=Gaussian((Double_t)adc+0.5,par[4],par[5],par[6],1);
-//      Double_t back=Pol((Double_t)adc,par[4],par[5],par[6]);
-      Double_t f=peak+back;
-      chitemp+=((xfit[adc]-f)*(xfit[adc]-f))/xfit[adc];
-      np++;
-    }
-  }
-  if(np>0) chi=sqrt(chitemp/np);
-}
-
 //_____________________________________________________________________________
 //The member functions start here
 //_____________________________________________________________________________
@@ -90,11 +66,10 @@ void StEmcMipSpectra::DrawEtaBin(Int_t etabin)
     {
       Double_t gauss1=Gaussian((Double_t)adc,(Double_t)mip[etabin-1].MipFitParam[0],
                                (Double_t)mip[etabin-1].MipFitParam[1],
-                               (Double_t)mip[etabin-1].MipFitParam[2],
-                               (Double_t)mip[etabin-1].MipFitParam[3]);
-      Double_t gauss2=Gaussian((Double_t)adc,(Double_t)mip[etabin-1].MipFitParam[4],
-                               (Double_t)mip[etabin-1].MipFitParam[5],
-                              (Double_t)mip[etabin-1].MipFitParam[6],1);
+                               (Double_t)mip[etabin-1].MipFitParam[2]);
+      Double_t gauss2=Gaussian((Double_t)adc,(Double_t)mip[etabin-1].MipFitParam[3],
+                               (Double_t)mip[etabin-1].MipFitParam[4],
+                              (Double_t)mip[etabin-1].MipFitParam[5]);
 //      Double_t gauss2=Pol((Double_t)adc,(Double_t)mip[etabin-1].MipFitParam[4],
 //                               (Double_t)mip[etabin-1].MipFitParam[5],
 //                               (Double_t)mip[etabin-1].MipFitParam[6]);
@@ -118,21 +93,9 @@ Bool_t StEmcMipSpectra::CalibrateEtaBin(Int_t etabin,Int_t mode)
   
   if (mode==0) 
   {
-    TArrayF SpectraTemp=GetEtaBinSpectra(etabin);
-    Int_t mi,mf,ei,ef;
-    CalcEtaBin(etabin,etaBinWidth,&mi,&mf,&ei,&ef);
-        
-    Int_t firstadc=5;   // first adc to fit
-    
-    Int_t nadcMax=GetNAdcMax();
-    
-    Int_t adcmip=firstadc;
-    for(Int_t i=firstadc;i<nadcMax;i++)
-      if(SpectraTemp[i]>SpectraTemp[adcmip]) adcmip=i;
-    
-    Int_t lastadc=(Int_t)(2.5*(Float_t)adcmip);
-
-    if(CalibrateByMip(etabin,SpectraTemp,firstadc,lastadc)) return kTRUE;
+    TArrayF SpectraTemp=GetEtaBinSpectra(etabin);            
+    Int_t nadcMax=GetNAdcMax();    
+    if(CalibrateByMip(etabin,SpectraTemp,0,nadcMax)) return kTRUE;
   }
   return kFALSE;
 }
@@ -143,19 +106,9 @@ Bool_t StEmcMipSpectra::CalibrateBin(Int_t bin,Int_t mode)
   
   if (mode==0) 
   {
-    TArrayF SpectraTemp=GetSpectra(bin);
-    
-    Int_t firstadc=5;   // first adc to fit
-    
-    Int_t nadcMax=GetNAdcMax();
-    
-    Int_t adcmip=firstadc;
-    for(Int_t i=firstadc;i<nadcMax;i++)
-      if(SpectraTemp[i]>SpectraTemp[adcmip]) adcmip=i;
-    
-    Int_t lastadc=(Int_t)(2.5*(Float_t)adcmip);
-
-    if(CalibrateByMip(bin,SpectraTemp,firstadc,lastadc)) return kTRUE;
+    TArrayF SpectraTemp=GetSpectra(bin);        
+    Int_t nadcMax=GetNAdcMax();    
+    if(CalibrateByMip(bin,SpectraTemp,0,nadcMax)) return kTRUE;
   }
   return kFALSE;
 }
@@ -163,96 +116,92 @@ Bool_t StEmcMipSpectra::CalibrateBin(Int_t bin,Int_t mode)
 Bool_t StEmcMipSpectra::CalibrateByMip(Int_t bin,TArrayF SpectraTemp,
                                     Int_t fitmin,Int_t fitmax)
 {
-  Float_t max=0,countmax=0,sum=0;
-  Int_t nadcMax=GetNAdcMax();
-  for(Int_t i=0;i<nadcMax;i++)
-  {
-    xfit[i]=0;
-    if(SpectraTemp[i]>0 && i>=fitmin && i<=fitmax) 
-    {
-      xfit[i]=SpectraTemp[i];
-      sum+=xfit[i];
-      if(xfit[i]>countmax) { max=(Float_t)i; countmax=xfit[i]; }
-    }
-  }
-
-  npointsfit=fitmax-fitmin;
-  xinit=fitmin;
-  xstop=fitmax;
-    
-// setting fit procedure    
-  Double_t para[10],step[10],errp[10],pmin[10],pmax[10];
-  for(Int_t i=0;i<10;i++)
-  {
-    pmin[i]=0; pmax[i]=0;
-  }
-  
-// inicial guesses...
-  para[2]=2; 
-  para[1]=max;
-  para[0]=countmax*(sqrt(2*PI)*para[2]);
-  para[3]=1.; pmin[3]=0.9 ; pmax[3]=1.1;
-
-// for gaussian background
-  para[4]=(Double_t)sum-para[0];
-  para[5]=0;
-  para[6]=120; pmin[6]=20; pmax[6]=300;
-  
-// for parabolic background
-//  para[5]=(SpectraTemp[fitmax]-SpectraTemp[fitmin])/(Float_t)(fitmax-fitmin);
-//  para[4]=SpectraTemp[fitmin]-para[4]*(Float_t)fitmin;
-//  para[6]=0;
-  
-  for(Int_t i=0;i<10;i++) step[i]=para[i]/50.+0.001;
-
-  TMinuit *fit = new TMinuit(7);    // max 6 parameters to fit
-  Int_t ierflag=0;
-  fit->Command("SET ERR 1");    // init fit
-  fit->SetFCN(TwoGaussians); 
-  fit->mnparm(0,"A    ",para[0],step[0],pmin[0],pmax[0],ierflag);
-  fit->mnparm(1,"Peak ",para[1],step[1],pmin[1],pmax[1],ierflag);
-  fit->mnparm(2,"Width",para[2],step[2],pmin[2],pmax[2],ierflag);  
-  fit->mnparm(3,"Assym",para[3],step[3],pmin[3],pmax[3],ierflag);
-  fit->mnparm(4,"BG1  ",para[4],step[4],pmin[4],pmax[4],ierflag);
-  fit->mnparm(5,"BG2  ",para[5],step[5],pmin[5],pmax[5],ierflag);
-  fit->mnparm(6,"BG3  ",para[6],step[6],pmin[6],pmax[6],ierflag);
-
-//Fitting ...
-  Double_t chi2=0,edm,errdef,chiold;
-  Int_t nvpar,nparx,icstat;
-
-  do
-  {
-    chiold=chi2;
-    fit->Command("MIG 100");
-    fit->mnstat(chi2,edm,errdef,nvpar,nparx,icstat);
-    cout <<"**************** chi2 = "<<chi2<<"\n";
-  } while(fabs(chiold-chi2)>0.000001); //does fit while chi2 changes
-//  } while(chiold!=chi2); //does fit while chi2 changes
-  
-//end of fit 
-    
   emcMipCalib_st* mip=MipTable->GetTable();
+
+  StEmcFit *fit=new StEmcFit();
+  fit->SetNParms(6);
+  Int_t type=1;             // two gaussians
+  fit->SetFuncType(type);
+  Float_t a[7];
+  Int_t   ia[7]={0,1,1,1,1,1,1};
   
-// filling etabin table
-  mip[bin-1].Status=1;
-  mip[bin-1].MipFitAdcMin=fitmin;
-  mip[bin-1].MipFitAdcMax=fitmax;
-  
-  for(Int_t i=0;i<7;i++)
-  {            
-    fit->GetParameter(i,para[i],errp[i]);
-    cout <<"i = "<<i<<"  para[i] = "<<para[i]<<" err[i] = "<<errp[i]<<"\n";
-    mip[bin-1].MipFitParam[i]=para[i];
-    mip[bin-1].MipFitParamError[i]=errp[i];
-    // need to write covariance matrix
+  Int_t adcmip=fitmin;
+  Int_t firstadc=0;
+  for(Int_t i=fitmin;i<fitmax;i++)
+      if(SpectraTemp[i]>SpectraTemp[adcmip]) adcmip=i;
+      
+  if(adcmip<20) 
+  {
+    firstadc=5;
+    a[3]=5;         // mip width
+  } 
+  else 
+  {
+    firstadc=10; 
+    a[3]=10;        // mip width
   }
-  mip[bin-1].MipFitChiSqr=chi2;
-  mip[bin-1].MipPeakPosition=para[1];
-  mip[bin-1].MipPeakPositionError=errp[1];
-  mip[bin-1].MipPeakWidth=para[2];
-  mip[bin-1].MipPeakWidthError=errp[2];
-// finished filling eta bin table
+  
+  a[2]=adcmip;      // mip position
+  
+  Int_t lastadc=(Int_t)(5.0*a[3]+(Float_t)adcmip);
+  
+  a[4]=0;
+  for(Int_t i=0;i<3;i++) a[4]+=SpectraTemp[firstadc+i]/3;   // background amplitude
+  a[5]=(Float_t)firstadc+1.;                      // background center
+  
+  Float_t b=(Float_t) lastadc;
+  Float_t yb=0;
+  for(Int_t i=0;i<3;i++) yb+=SpectraTemp[lastadc+i-1]/3;
+  a[6]=(b-a[3])/sqrt(fabs(2*log(a[4]/yb)));       // background width
+  
+  a[1]=SpectraTemp[adcmip]-a[4]*exp(-0.5*pow((a[2]-a[5])/a[6],2));  // mip amplitude
+  cout <<"firstadc = "<<firstadc<<"  lastadc = "<<lastadc<<endl;
+
+  for(Int_t i=firstadc;i<lastadc;i++) 
+  {
+    Float_t sig=sqrt(SpectraTemp[i]);
+    if (sig==0) sig=1;
+    fit->AddPoint((Float_t)i,SpectraTemp[i],sig);
+  }
+  for(Int_t i=1;i<=6;i++) 
+  {
+    cout <<"Parm i = "<<i<<"  Initial a[i] = "<<a[i]<<endl;
+    fit->SetParm(i,a[i],ia[i]);
+  }
+  
+  fit->Fit(2000);
+
+  for (int i=1;i<=fit->GetNParam();i++)
+  {
+    a[i]=fit->GetParameter(i);
+    Float_t ea=fit->GetParameterError(i);
+    cout <<"Parm i = "<<i<<"  Final a[i] = "<<a[i]<<" +- "<< ea<<endl;
+    mip[bin-1].MipFitParam[i-1]=a[i];
+    mip[bin-1].MipFitParamError[i-1]=ea;
+  }
+  Float_t chi=fit->GetChiSquare()/(fit->GetNPoints()-fit->GetNParam());
+  cout <<"Final chi2 = "<<chi<<endl;
+
+  cout <<"Covariance Matrix ********************\n";
+  for(Int_t i=1;i<=fit->GetNParam();i++)
+  {
+    for(Int_t j=1;j<=fit->GetNParam();j++) 
+    {
+      mip[bin-1].MipFitCovMatrix[i-1][j-1]=fit->GetCovariance(i,j);
+      cout <<"  "<< fit->GetCovariance(i,j);
+    }
+    cout <<endl;
+  }
+  mip[bin-1].Status=1;
+  mip[bin-1].MipFitAdcMin=firstadc;
+  mip[bin-1].MipFitAdcMax=lastadc;
+  
+  mip[bin-1].MipFitChiSqr=chi;
+  mip[bin-1].MipPeakPosition=mip[bin-1].MipFitParam[1];
+  mip[bin-1].MipPeakPositionError=mip[bin-1].MipFitParamError[1];
+  mip[bin-1].MipPeakWidth=mip[bin-1].MipFitParam[2];
+  mip[bin-1].MipPeakWidthError=mip[bin-1].MipFitParamError[2];
+  delete fit;
 
   return kTRUE; 
 }
