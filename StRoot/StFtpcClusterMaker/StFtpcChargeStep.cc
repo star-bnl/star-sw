@@ -1,6 +1,9 @@
-// $Id: StFtpcChargeStep.cc,v 1.9 2001/04/23 19:19:04 oldi Exp $
+// $Id: StFtpcChargeStep.cc,v 1.10 2001/04/24 13:12:54 oldi Exp $
 //
 // $Log: StFtpcChargeStep.cc,v $
+// Revision 1.10  2001/04/24 13:12:54  oldi
+// Typo fixed.
+//
 // Revision 1.9  2001/04/23 19:19:04  oldi
 // This class had a problem if the decline of the edge of histogram was too steep!
 // Therefore dCharge[peak] was set to 0.000001. This is mathematically incorrect,
@@ -286,7 +289,7 @@ int StFtpcChargeStep::histogram(int setPressure)
     }
     
     else {
-      gMessMgr->Message("", "I", "OST") << "because chargestep histo has " << mHisto->GetEntries() << " entries up to now (at least 10000 entries are necessary" << endm;
+      gMessMgr->Message("", "I", "OST") << "because chargestep histo has " << mHisto->GetEntries() << " entries up to now (at least 10000 entries are necessary)" << endm;
       gMessMgr->Message("", "I", "OST") << "and the method of writing the value to the database has to be switched on." << endm;
     }
   }
