@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.138  2004/02/24 01:59:46  jeromel
+// Commented out include of disappeared .h
+//
 // Revision 1.137  2004/02/21 18:28:31  pruneau
 // Updates to comply to changes in interfaces
 //
@@ -160,7 +163,7 @@
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiHitLoader.h"
-#include "Sti/StiTrackSeedFinder.h"
+//#include "Sti/StiTrackSeedFinder.h"
 #include "Sti/StiVertexFinder.h"
 #include "Sti/StiResidualCalculator.h"
 #include "Sti/StiDetectorContainer.h"
