@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.66 2000/08/16 20:50:55 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.67 2000/08/16 22:34:52 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -30,6 +30,7 @@
 //                                                                      //
 // - the default 3D viewer is ROOT TPad object. That can be switched to either //
 //   X3D or OpenGL view TPad "view" menu (see picture attached)         //
+//  begin_html <P ALIGN=CENTER> <IMG SRC="gif/DisplayGL.gif" width=100%> </P> end_html   //
 //                                                                      //
 // - The custom view can be provided by user code as well. The user should provide 
 //   his/her own selection with the selection class-filter.             //
@@ -183,8 +184,8 @@ Int_t StEventDisplayMaker::BuildGeometry()
 // ---  Create "standard" TPC and SVT views ----
   TVolume *sector = 0;
 //  const Char_t *volueNames[] = {"TPSS","STSI"}; // STLI"};
-//  const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB"}; // STSI"};
-  const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB","BTOF"}; // STSI"};
+  const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB"}; // STSI"};
+//  const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB","BTOF"}; // STSI"};
   const Int_t lvolueNames = sizeof(volueNames)/sizeof(Char_t *);
   while ( (sector = ( TVolume *)volume()) ){
     Bool_t found = kFALSE;
@@ -194,10 +195,19 @@ Int_t StEventDisplayMaker::BuildGeometry()
     if (found) {
       sector->SetVisibility(TVolume::kBothVisible);
       sector->Mark();
+      if (sector->GetLineColor()==1 || sector->GetLineColor()==7) 
+              sector->SetLineColor(14);
+      TShape *myShape = sector->GetShape();
+      if (myShape->InheritsFrom(TTUBE::Class()) &&
+        strcmp(sector->GetName(),"TPSS")==0 ) {	 
+        ((TTUBE *)myShape)->SetNumberOfDivisions(1);
+      }
+#if 0      
       if (!i) {  // special case for TPSS sectors
         TTUBE *tubs = (TTUBE *)sector->GetShape();
         tubs->SetNumberOfDivisions(1);
       }
+#endif      
     } else { 
       sector->UnMark();
       sector->SetVisibility(TVolume::kThisUnvisible);
@@ -973,6 +983,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.67  2000/08/16 22:34:52  fine
+// clean up
+//
 // Revision 1.66  2000/08/16 20:50:55  fine
 // CTB object has been added to the list of the volumes to draw
 //
