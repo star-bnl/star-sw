@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.h,v 1.6 1999/01/27 00:17:55 dhammika Exp $
+// $Id: St_ebye_Maker.h,v 1.7 1999/03/12 14:39:41 perev Exp $
 // $Log: St_ebye_Maker.h,v $
+// Revision 1.7  1999/03/12 14:39:41  perev
+// New maker schema
+//
 // Revision 1.6  1999/01/27 00:17:55  dhammika
 // EbyE PKG works for more than one event in ROOT
 //
@@ -44,20 +47,19 @@ class St_sca_out;
 class St_sca_prior;
 class St_ebye_Maker : public StMaker {
  private:
-               Bool_t drawinit;
                St_sca_switch              *m_sca_switch;           //!
                St_sca_const               *m_sca_const;            //!
                St_sca_filter_const        *m_sca_filter_const;     //!
+               St_sca_prior               *m_sca_prior;            //!
+               St_sca_out                 *m_sca_ensemble_ave;     //!
                St_dst_run_header          *this_dst_run_header;    //!
                St_dst_event_header        *this_dst_event_header;  //!
                St_dst_track               *this_dst_track;         //!
-               St_sca_prior               *m_sca_prior;            //!
-               St_sca_out                 *m_sca_ensemble_ave;     //!
                St_sca_in                  *this_sca_in;            //!
                St_sca_out                 *this_sca_out;           //!
  protected:
  public: 
-                  St_ebye_Maker(const char *name="ebye", const char *title="event/data/ebye");
+                  St_ebye_Maker(const char *name="ebye");
    virtual       ~St_ebye_Maker();
    virtual Int_t  Init();
    virtual Int_t  Make();
