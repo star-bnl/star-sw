@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.3  1998/04/01 18:42:34  fisyak
+#  Add hpux
+#
 #  Revision 1.2  1998/03/29 23:19:25  fisyak
 #  RL98c fixes
 #
@@ -23,7 +26,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/03/29 23:19:25 $ 
+#             Last modification $Date: 1998/04/01 18:42:34 $ 
 #. default setings
 GREP := grep
 #GCC := /afs/rhic/opt/rhic/bin/gcc
@@ -82,8 +85,8 @@ ifndef PGI_dummy
   LD       := $(CXX)
   SO	   := $(CXX)
   GCC      := $(GCC) -Dlynx
-  CXXFLAGS := -fPIC -Dlynx 
-  CFLAGS   := -fPIC -Dlynx
+  CXXFLAGS := -fPIC -Dlynx -ansi
+  CFLAGS   := -fPIC -Dlynx -ansi
   LDFLAGS  := 
   SOFLAGS  := -shared 
   CLIBS    := -L/usr/X11R6/lib -lXm -lXpm _-lXt -lXext -lX11 -lg++ -lm -ldl -rdynamic

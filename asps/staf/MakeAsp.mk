@@ -79,7 +79,7 @@ INC_GEN_DIR := $(OUT_DIR)/inc
 
 
 #	Includes
-INCLUDES := $(addprefix -I,$(wildcard $(UPP_INP_DIR)/*/inc)) -I$(CERN_ROOT)/src/cfortran
+INCLUDES := $(addprefix -I,$(wildcard $(UPP_INP_DIR)/*/inc)) -I$(CERN)/new/src/cfortran
 
 
 BIN_DIR := $(OUT_DIR)/bin
@@ -128,10 +128,10 @@ FILES_SRM := $(filter-out %-lex.c %-yacc.c, $(FILES_SRM))
 #	Test for main() it MUST NOT be in src but .....
 #	I hope it is temporary check
 #ifdef FILES_SRC
-#  QWE1 := $(shell grep -l -e '.*main *(.*)' $(FILES_SRC))
+#  QWE1 := $(shell $(GREP) -l -e '.*main *(.*)' $(FILES_SRC))
 #endif
 ifdef FILES_SRM
-  QWE2 := $(shell grep -l -e '.*main *(.*)' $(FILES_SRM))
+  QWE2 := $(shell $(GREP) -l -e '.*main *(.*)' $(FILES_SRM))
 endif
 #FILES_SRC := $(filter-out $(QWE1),$(FILES_SRC) )
 FILES_SRM := $(filter     $(QWE2),$(FILES_SRM) )
@@ -231,9 +231,9 @@ Libraries : $(MY_LIB)
 
 $(MY_LIB) : $(FILES_O)
 	$(AR) $(ARFLAGS) $(MY_LIB) $(FILES_O)
-#	OBJS := $(foreach  OBJ, $(FILES_O), $(shell test -z `nm -p $OBJ |  grep ' T main' ` || echo $(OBJ)))
+#	OBJS := $(foreach  OBJ, $(FILES_O), $(shell test -z `nm -p $OBJ |  $(GREP) ' T main' ` || echo $(OBJ)))
 #	$(AR) $(ARFLAGS) $(MY_LIB) $(OBJS)
-#	@OBJS=; for OBJ in $(FILES_O)/ ; do x=`nm -p $$OBJ | grep ' T main' `; if test "$$x"="" ; then OBJS="$$OBJS $$OBJ"; fi done;\
+#	@OBJS=; for OBJ in $(FILES_O)/ ; do x=`nm -p $$OBJ | $(GREP) ' T main' `; if test "$$x"="" ; then OBJS="$$OBJS $$OBJ"; fi done;\
 #	$(AR) $(ARFLAGS) $(MY_LIB) $(OBJS)
 
 $(LIB_DIR)/lib$(PKGNAME).$(SOEXT) : $(FILES_O)
@@ -295,7 +295,7 @@ $(DEP_DIR)/%.didlm : $(IDM_DIR)%.$(SUFF_IDM)
 	cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm; \
         $(GCC)  $(MKDEPFLAGS) $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm | \
         sed -e 's/.idlm.o/.didlm/g' > $(GEN_DIR)/$(STEM).didlm
-	$(STIC) -M  $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm | grep ":" >> $(GEN_DIR)/$(STEM).didlm
+	$(STIC) -M  $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm | $(GREP) ":" >> $(GEN_DIR)/$(STEM).didlm
 #       temporarly, until stic is fixed:
 	@sed -e 's/broker->newInvoker(\(.*\),/broker->deleteInvoker(\1); broker->newInvoker(\1,/' \
                 $(GEN_DIR)/$(STEM)_i.cc > temp
