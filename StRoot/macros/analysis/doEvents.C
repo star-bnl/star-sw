@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.38 2000/01/10 22:06:09 kathy Exp $
+// $Id: doEvents.C,v 1.39 2000/01/11 18:20:20 ullrich Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -35,8 +35,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
-// Revision 1.38  2000/01/10 22:06:09  kathy
-// add owner name and comments
+// Revision 1.39  2000/01/11 18:20:20  ullrich
+// Add latests improvements from Victor.
 //
 // Revision 1.38  2000/01/10 22:06:09  kathy
 // add owner name and comments
@@ -102,7 +102,8 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     for (int ifil=0; fileList[ifil]; ifil++)
 	{ setFiles->AddFile(fileList[ifil]);}
     StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
-    //  IOMk->SetDebug();
+    IOMk->SetBranch("runcoBranch",0,"r");
+    IOMk->SetDebug();
 
 
     //
