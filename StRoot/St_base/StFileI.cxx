@@ -27,10 +27,12 @@ StUKey::StUKey(UInt_t uRun,UInt_t uEvent)
 //______________________________________________________________________________
 void StUKey::SetUrr(const UInt_t *uk,int nk)
 {
+  int n;
   fNUrr = 1;
   fUrr[0] = 0;
   if (!uk) return;
-  fNUrr = nk;
+  for (n=1;n<nk && uk[n]; n++){}
+  fNUrr = n;
   memcpy(fUrr,uk,nk*sizeof(UInt_t));
 }
 //______________________________________________________________________________
@@ -89,10 +91,10 @@ UInt_t  StUKey::GetSum() const
 //______________________________________________________________________________
 StUKey StFileI::GetNextEvent()
 {
-  UInt_t u[9];
+  UInt_t u[9] = {0,0,0,0,0,0,0,0,0};
   int ret = GetNextEvent(u);
   if (ret) u[0]=kUMAX;
-  StUKey uk(u[0]);
+  StUKey uk(0,u,9);
   return uk;
 }
 
