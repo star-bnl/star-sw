@@ -2,17 +2,19 @@
 *-- Author :    Pavel Nevski
 *****************************************************************************
 *                                                                           *
-      subroutine        A G M A I N (nwg,nwp)
+      subroutine        A G M A I N (nwg,nwp,iwtyp)
 *                                                                           *
 *****************************************************************************
 +CDE,TYPING,AGECOM,AGCKINE.
 +CDE,GCFLAG,GCTIME,GCPHYS,GCTRAK.
 *
-      integer nwg, nwp
+      integer nwg, nwp, iwtyp
       INTEGER           NWGEA/4000000/,NWPA/500000/,p
       CHARACTER*6       PROG/'agroot'/
 *
       CALL TIMEST  (3.E7)  ! set time limit for interactive mode
+      if (nwg .gt. 0) NWGEA = nwg
+      if (nwp .ge. 0) NWPA  = nwp
       write (*,1001) PROG,NWGEA,NWPA
 1001  format(1x,54('*')/' * Starting ',a8,
      >       ' NwGEANT=',i9,' NwPAW=',i8,' *'/ 1x,54('*'))
@@ -20,9 +22,8 @@
 *                                        initialise packages
       CALL TIMEL   (TIMINT)
       CALL MZEBRA  (-3)
-      if (nwg .gt. 0) NWGEA = nwg
-      if (nwp .gt. 0) NWPA  = nwp
       CALL GZEBRA  (NWGEA)         ! store 0 - geant
+      if (iwtyp .gt. 0) then
       CALL MZPAW   (NWPA,' ')      ! store 1 - pawc
       CALL KUINIT  (5000)
       CALL IGINIT  (10000)
@@ -30,6 +31,7 @@
       CALL HLIMIT  (0)
       CALL REBANKM (-1)
       CALL GDINIT                  ! Initialise Drawing pkg
+      endif
 ****>
       p  = Idebug
       CALL GINIT                   "  GEANT common blocks                "
