@@ -1,5 +1,9 @@
-* $Id: tde_new.F,v 1.14 1999/05/27 15:28:14 ogilvie Exp $
+* $Id: tde_new.F,v 1.15 1999/06/01 17:55:57 ogilvie Exp $
 * $Log: tde_new.F,v $
+* Revision 1.15  1999/06/01 17:55:57  ogilvie
+* fixed bug in sign of track rotation, now includes sign of bz
+* comments added throughout for path-length across a pad-row for each hit
+*
 * Revision 1.14  1999/05/27 15:28:14  ogilvie
 * removed extra write statements
 *
@@ -72,6 +76,7 @@ C-----------------------------------------------------------------------
                 REAL length
                 REAL charge
                 REAL adedx
+                REAL sortadedx
       END STRUCTURE
 
 C-----------------------------------------------------------------------
@@ -115,6 +120,7 @@ C-----------------------------------------------------------------------
 
 
 *      call message('TDE_DEDX-I: Execution started',1,imsg1)
+
 
 C Abort if there are no TPC hits to work with
 
@@ -211,14 +217,16 @@ c
 C        calculate center and radius from the track parameters
          x1 = track(j).r0 * cos(track(j).phi0*C_RAD_PER_DEG)
          y1 = track(j).r0 * sin(track(j).phi0*C_RAD_PER_DEG)
-
 c
-c old hardwired B=0.5
-c         radius = 1. / (track(j).invp * 0.5 * bconv)
+c        x1,y1 are the cordinates of the track's start
+c        raidus is the radius of the transverse circle
+c        psic is the azimuthal angle of the start of the track
+c        wrt to the center of the transverse circle
+c        xc, yc are the coordinates of center of the circle
 c
          radius=1.0 / (track(j).invp*bfield(3)*C_D_CURVATURE)
-         psic=track(j).psi*C_RAD_PER_DEG+sign(1,track(j).q)*C_PI*0.5
-
+         psic=track(j).psi*C_RAD_PER_DEG+
+     >      sign(1,track(j).q*bfield(3))*C_PI*0.5
          xc = x1 - radius*cos(psic)
          yc = y1 - radius*sin(psic)
          cosl= sqrt(1.0+track(j).tanl**2)
@@ -238,7 +246,7 @@ C        tdpar.averaging_method=1   calculate dE/dx=(sum of q/s)/(# of pnts)
 c     
 c        tdpar.averaging_method=2   calculate dE/dx as maximum likelihood
 C
-c        tdpar.averaging_method=3  calculate dE/dx=(sum of weight*q/s)/(# of weight)
+c        tdpar.averaging_method=3   dE/dx=(sum of weight*q/s)/(# of weight)
 c                           weight = sqrt(s)
 c
 C        tdpar.usemerge=1   skipp  point flagged as merged 
@@ -290,6 +298,10 @@ c
                iret2 = cros(flag,xc,yc,radius,ao,bo,hit
      >                (loc_hit(l)).x,
      >                 hit(loc_hit(l)).y,xb,yb)
+c
+c  (xa,ya) (xb,yb) are the coordinates of the pad-row where the transverse
+c  circle enters and leaves the pad-raow
+c
                if(iret1.lt.0.and.iret2.eq.0) then
                   flag = 1
                   iret1= cros(flag,xc,yc,radius,ao,bo,hit
@@ -301,7 +313,14 @@ c
      >                  (loc_hit(l)).x,
      >                   hit(loc_hit(l)).y,xb,yb)
                endif
-               
+c
+c To calculate the arc-length across the pad-row first
+c the angle subtended by the entrance (xa,ya) and exit points (xb,yb)
+c from the center of the circle is calculated. 
+c The arc-length across the pad is is calculated from half of this
+c angle and the radius of the transverse circle. The path-length of the track
+c then includes the dip angle factor, cosl
+c               
                if(iret1.eq.0.and.iret2.eq.0) then
                   ds=radius*2.0*
      >            asin(0.5*sqrt((xa-xb)**2+(ya-yb)**2)
@@ -318,6 +337,11 @@ c             write(6,*)'flag',hit(loc_hit(l)).flag ,ds
                     dedx(nde).length=ds
                     dedx(nde).charge=hit(loc_hit(l)).q
                     dedx(nde).adedx=dedx(nde).charge/ds
+                    if (tdpar(1).averaging_method.eq.3) then
+                       dedx(nde).sortadedx = dedx(nde).adedx/sqrt(ds)
+                    else
+                      dedx(nde).sortadedx = dedx(nde).adedx
+                    endif  
                   endif
 c               else if((xc-hit(loc_hit(l)).x)**2+
 c     >            (yc-hit(loc_hit(l)).y)**2
@@ -348,9 +372,8 @@ c
 		last=0
             endif     
          end do
-c         write(6,*) 'sort', nde,dedx(1).adedx,dedx(2).adedx
-         iret=tls_Quick_Sort_r(nde,dedx(1).adedx,
-     >        dedx(2).adedx,dedx)
+         iret=tls_Quick_Sort_r(nde,dedx(1).sortadedx,
+     >        dedx(2).sortadedx,dedx)
 c
 c truncating options
 c
@@ -449,6 +472,7 @@ c
 c      if (tdpar(1).averaging_method.eq.2) then
 c         call hdelet(hhid)
 c      endif
+
       tde_new=STAFCV_OK
       end
 
