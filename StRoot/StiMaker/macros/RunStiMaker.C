@@ -1,75 +1,103 @@
-// RunStiMaker.C
-// M.L. Miller
-//  5/00
 
-class StChain;
-StChain *chain=0;
+Int_t    usePath = 0;
+Int_t    nFile = 0;
+TString  thePath;
+TString  theFileName;
+TString  originalPath;
+class    StChain;
+StChain  *chain=0;
+class StEventDisplayMaker;
+StEventDisplayMaker *dsMaker = 0;
+TBrowser *b=0;
+
+const char *dstFile = 0;
+const char *xdfFile = 0;
+const char *mdcFile = 0;
+const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
+
+void Help()
+{
+    cout << "Usage: doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.xdf\")" << endl;
+    cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
+    cout << "       doEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
+}
+
+
+void RunStiMaker(Int_t, const Char_t **, const Char_t *qaflag = "");
+//const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
 
 void RunStiMaker(Int_t nevents=1,
-		 bool simulated=true, //sim or data?
-		 //bool doFit=true, // true->fit track only
-		 bool doFit=false, // false->find track only
-		 //const char* outfile = "/star/rcf/pwg/spectra/mmiller/Evaluation.root",
-		 const char* outfile = "Evaluation.root",
-		 bool doProfile=false, // produce profiling output? 
-		 //const char* MainFile="/a1/pruneau/data/EvalData/MCNtuple/muon_100_neg.event.root")
-		 
-  //This file points to 30 events of 10 neg muons w/ pt=.9
-  const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
-    //const char* MainFile="/star/data13/reco/dev/2002/01/*3007007*.event.root")
-		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/pp_minbias/pds0200_04_12812evts.event.root")
-		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/hc_highdensity/hc_highdensity.16_evts.event.root")
-		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/hc_standard/hc_standard.40_evts.event.root")
-		 //const char* MainFile="/direct/star+rcf/test/dev/trs_redhat61/Wed/year_2001/hc_lowdensity/hc_lowdensity.400_evts.event.root")
-    //const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
-    //This file points to 5 muons /event
-    //const char* MainFile="/star/data22/ITTF/EvalData/MCNtuple/muon_100_neg.event.root")
+		 //const Char_t *path="/star/data13/reco/dev/2002/01/",
+		 const Char_t *path = "/star/data22/ITTF/data/simple_geant/DEV_10_8_01/",
+		      
+		 //const Char_t *file="*3007007*.event.root",
+		 const Char_t *file= "muon_10_neg.event.root",
+		      
+		      const Char_t *qaflag = "off",
+		      const Int_t wrStEOut = 0);
+
+// ------------------ Here is the actual method -----------------------------------------
+void RunStiMaker(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, const Int_t wrStEOut)
 {
-    //bool optimized = true;
+    Int_t theRunNumber=0;
+    bool simulated = true;
+    bool doFit = false;
     bool optimized = false;
+    char* outfile = "Evaluation.root";
     
-    // Dynamically link needed shared libs
-    cout <<"Loading St_base"<<endl;
+    cout <<  endl << endl <<" doEvents -  input # events = " << nevents << endl;
+    Int_t ilist=0;
+    while(fileList[ilist]){ 
+	cout << " doEvents -  input fileList = " << fileList[ilist] << endl;
+	ilist++; 
+    }
+    cout << " doEvents -  input qaflag   = " << qaflag << endl;
+    cout << " doEvents -  input wrStEOut = " << wrStEOut << endl << endl << endl;
+ 
+    //
+    // First load some shared libraries we need
+    //
+
     gSystem->Load("St_base");
-    
-    cout <<"Loading StChain"<<endl;
-    gSystem->Load("StChain");
-    
-    cout <<"Loading St_Tables"<<endl;
-    gSystem->Load("St_Tables");
-    
-    cout <<"Loading StUtilities"<<endl;
     gSystem->Load("StUtilities");
-    
-    cout <<"Loading StIOMaker"<<endl;
+    gSystem->Load("StChain");
+    gSystem->Load("StBFChain"); 
+    gSystem->Load("St_Tables");
+
+    gSystem->Load("libgen_Tables");
+    gSystem->Load("libsim_Tables");
+    gSystem->Load("libglobal_Tables");
+    gSystem->Load("geometry");
+
+    gSystem->Load("St_g2t");
+    gSystem->Load("St_geant_Maker");
+
     gSystem->Load("StIOMaker");
-    
-    cout <<"Loading StarClassLibrary"<<endl;
+    gSystem->Load("StTreeMaker");
     gSystem->Load("StarClassLibrary");
-    
-    cout <<"Loading DataBase"<<endl;
-    gSystem->Load("StDbUtilities");
+
+    gSystem->Load("St_db_Maker");
     gSystem->Load("StDbLib");
     gSystem->Load("StDbBroker");
-    gSystem->Load("St_db_Maker");
+    gSystem->Load("StDbUtilities");
     gSystem->Load("StTpcDb");
+    gSystem->Load("StEvent");
+    gSystem->Load("StEventMaker");
+    gSystem->Load("StEmcUtil"); 
+    gSystem->Load("StMcEvent");
+    gSystem->Load("StMcEventMaker");
+    gSystem->Load("StAssociationMaker");
+    gSystem->Load("StDaqLib");
+    gSystem->Load("StDAQMaker");
+
     gSystem->Load("StSvtClassLibrary");
     gSystem->Load("StSvtDbMaker");
-    
-    cout <<"Loading StEvent"<<endl;
-    gSystem->Load("StEvent");
-
-    cout <<"Loading StDetectorDbMaker"<<endl;
-    gSystem->Load("StDetectorDbMaker");
-    
-    cout <<"Loading StEventMaker"<<endl;
-    gSystem->Load("StEventMaker");
-
-    cout <<"Loading StEmcUtil"<<endl;
-    gSystem->Load("StEmcUtil");
-    
-    cout <<"Loading StMcEvent"<<endl;
-    gSystem->Load("StMcEvent");
+    gSystem->Load("StSvtDaqMaker");
+    gSystem->Load("StSvtSimulationMaker");
+    gSystem->Load("StSvtCalibMaker");
+    gSystem->Load("StSvtSeqAdjMaker");
+    gSystem->Load("StSvtEvalMaker");
+    gSystem->Load("StSvtClusterMaker");
 
     cout <<"Loading StMcEventMaker"<<endl;
     gSystem->Load("StMcEventMaker");
@@ -77,103 +105,99 @@ void RunStiMaker(Int_t nevents=1,
     cout <<"Loading AssociationMaker"<<endl;
     gSystem->Load("StAssociationMaker");
 
-    if (optimized) {
-	cout <<"Loading Optimized Sti"<<endl;
-	gSystem->Load(".i386_redhat61/LIB/Sti.so");
-	
-	cout <<"Loading Optimized StiGui"<<endl;
-	gSystem->Load(".i386_redhat61/LIB/StiGui");
-	
-	cout <<"Loading Optimized StiEvaluator"<<endl;
-	gSystem->Load(".i386_redhat61/LIB/StiEvaluator");
-	
-	cout <<"Loading Optimized StiMaker"<<endl;
-	gSystem->Load(".i386_redhat61/LIB/StiMaker");
+    cout <<"Loading Sti"<<endl;
+    gSystem->Load("Sti");
+    
+    cout <<"Loading StiGui"<<endl;
+    gSystem->Load("StiGui");
+    
+    cout <<"Loading StiEvaluator"<<endl;
+    gSystem->Load("StiEvaluator");
+    
+    cout <<"Loading StiMaker"<<endl;
+    gSystem->Load("StiMaker");
+    //
+    // Handling depends on whether file is a ROOT file or XDF file
+    //
+    chain  = new StChain("StChain");
+
+    StFileI *setFiles =0;
+    if (fileList) {	//Normal case
+	setFiles= new StFile(fileList);
+    } else        {	//Grand Challenge
+	gSystem->Load("StChallenger");
+	setFiles = StChallenger::Challenge();
+	setFiles->SetDebug();
+	const char *Argv[]= {
+	    "-s","daq",                           // list of components needed
+	    "-q","mRunNumber=1228023",   // example of user query
+	    "-c","/afs/rhic/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
+        };
+	Int_t Argc=sizeof(Argv)/4;
+	setFiles->Init(Argc,Argv);
     }
-    else {
-	cout <<"Loading Sti"<<endl;
-	gSystem->Load("Sti");
-	
-	cout <<"Loading StiGui"<<endl;
-	gSystem->Load("StiGui");
-		
-	cout <<"Loading StiEvaluator"<<endl;
-	gSystem->Load("StiEvaluator");
-	
-	cout <<"Loading StiMaker"<<endl;
-	gSystem->Load("StiMaker");
+
+    StIOMaker *IOMk = new StIOMaker("inputStream","r",setFiles);
+    //IOMk->SetBranch("*",0,"0");	//deactivate all branches
+    //IOMk->SetBranch("dstBranch",0,"r");
+    //IOMk->SetBranch("runcoBranch",0,"r");
+    IOMk->SetBranch("eventBranch",0,"r");
+    if (simulated) { //addded by MLM
+	IOMk->SetBranch("geantBranch",0,"r");
     }
-    
-    //-----------------
-    // start profiling
-    if(doProfile){
-        // this variable tells jprof that it should start profiling when loaded
-        // and how often it should record info
-        gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001001");
+    IOMk->SetDebug();
 
-        // this starts the profiling
-        gSystem->Load("Jprof");
-    }
-    // create a new instance of the chain
-    chain = new StChain("StChain"); 
-    chain->SetDebug();
-    
-    // add makers to the chain
-    
-    StIOMaker* ioMaker = new StIOMaker("IO","r",MainFile,"bfcTree");
-    ioMaker->SetDebug();
-    ioMaker->SetIOMode("r");
-    ioMaker->SetBranch("*",0,"0");            //deactivate all branches
-    ioMaker->SetBranch("geantBranch",0,"r");  //activate geant Branch
-    ioMaker->SetBranch("dstBranch",0,"r");    //activate Event Branch
-    ioMaker->SetBranch("runcoBranch",0,"r");  //activate runco Branch
-    
-    // Database:
+    St_geant_Maker       *geantMk  = new St_geant_Maker("geant");
+    geantMk->SetActive(kFALSE);
 
-    // This is the real SQL database
-    const char* calibDB = "MySQL:StarDb";
-    // This is the filesystem database which we need for tsspars, needed
-    // by TpcDb
-    const char* paramsDB = "$STAR/StarDb";
-    // this maker must be called "db" or StSvtDbMaker will crash
-    St_db_Maker* calibMk = new St_db_Maker("db",calibDB,paramsDB);
-    calibMk->SetDateTime(20010801,000000);
-    //calibMk->SetDateTime("year_2b");
-    calibMk->SetDebug();
-    
-    //Tpc Database access
-    StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
+    //
+    // Maker to read events from file or database into StEvent
+    //
+    //StEventMaker *readerMaker =  new StEventMaker("events","title");
 
-    //Svt Database access
-    StSvtDbMaker *svtDbMk = new StSvtDbMaker("svtDb");
+    //
+    // DB maker
+    //       
+    // dbaseMk = new St_db_Maker("svt","$PWD/svtcvs/StarDb");
+    //dbaseMk = new St_db_Maker("db","StarDb");
+    dbaseMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb");
+    //dbaseMk->SetDateTime("year_1h");
+    //dbaseMk->SetDateTime("year_2a");
+    dbaseMk-> SetDateTime(20010801,000000);  
 
-    //StEventMaker
-    StEventMaker*       eventReader   = new StEventMaker("events","title");
-    eventReader->doPrintEventInfo = 0;
-	  
+    //
+    // TPC Db maker
+    // 
+    tpcDbMk  = new StTpcDbMaker("tpcDb");
+
+    //
+    // SVT Db maker
+    // 
+    svtDbMk  = new StSvtDbMaker("svtDb");
+
     //StMcEventMaker
     StMcEventMaker* mcEventReader = 0;
     //Association
     StAssociationMaker* assocMaker = 0;
-    
+  
     if (simulated) {
 	mcEventReader = new StMcEventMaker();
 	assocMaker = new StAssociationMaker();
     }
-    
+  
     //StiMaker
     StiMaker* anaMk = StiMaker::instance();
-
+  
     //StiIOBroker
     StiRootIOBroker* stiIO = new StiRootIOBroker();
-
+  
     stiIO->setTPHFMinPadrow(1);
     stiIO->setTPHFMaxPadrow(45);
     stiIO->setETSFLowerBound(5);
     stiIO->setETSFMaxHits(6);
-
+  
     stiIO->setDoTrackFit(doFit);
-
+  
     //Set Kalman Track Finder (KTF) run-time values:
     stiIO->setKTFMcsCalculated(false);
     stiIO->setKTFElossCalculated(false);
@@ -186,12 +210,12 @@ void RunStiMaker(Int_t nevents=1,
     stiIO->setKTFMinSearchRadius(.5); //cm
     stiIO->setKTFMaxSearchRadius(4.); //cm
     stiIO->setKTFSearchWindowScale(5.); //cm
-	
+  
     //Set Local Track Seed Finder (LTSF) run-time values
     stiIO->setLTSFZWindow(5.);
     stiIO->setLTSFYWindow(2.);
     stiIO->setLTSFSeedLength(2);
-
+  
     stiIO->setLTSFDoHelixFit(true);
     stiIO->setLTSFExtrapYWindow(1.);
     stiIO->setLTSFExtrapZWindow(2.);
@@ -199,9 +223,9 @@ void RunStiMaker(Int_t nevents=1,
     stiIO->setLTSFExtrapMinLength(4);
     stiIO->setLTSFExtrapMaxLength(5);
     stiIO->setLTSFUseVertex(true);
-
+  
     stiIO->setLTMDeltaR(1.); //10% in r
-    
+  
     //Add sectors:
     for (unsigned int sector=1; sector<=12; ++sector) {
 	stiIO->addLTSFSector(sector);
@@ -216,22 +240,19 @@ void RunStiMaker(Int_t nevents=1,
     enum SeedFinderType {kUndefined=0, kComposite=1, kEvaluable=2};
     //stiIO->setSeedFinderType(kEvaluable);
     stiIO->setSeedFinderType(kComposite);
-
+  
     stiIO->setSimulated(simulated);
     anaMk->setEvaluationFileName(outfile);
-    
+  
     if (simulated) {
 	anaMk->setMcEventMaker(mcEventReader);
 	anaMk->setAssociationMaker(assocMaker);
     }
-    
-    // now execute the chain member functions
-    chain->PrintInfo();
-
+  
     //Make Control Window if not batch
     MainFrame* sti=0;
     StiGuiIOBroker* guiIO=0;
-
+    
     if (gROOT->IsBatch()==false) {
 	
 	cout <<"No batch option detected.  Run Integrated Tracker in Gui Mode."<<endl;
@@ -239,7 +260,7 @@ void RunStiMaker(Int_t nevents=1,
 	sti = new MainFrame(gClient->GetRoot(), 400, 220);
 	
 	sti->setStChain(chain);
-	sti->setIoMaker(ioMaker);
+	sti->setIoMaker(IOMk);
 	
 	//we're in batch mode
 	stiIO->setUseGui(true);
@@ -263,26 +284,88 @@ void RunStiMaker(Int_t nevents=1,
 	stiIO->setUseGui(false);
     }
     
-    cout <<"Calling Init() Methods "<<endl;
-    chain->Init();
-    
-    cout <<"Starting Event Loop"<<endl;
-    
-    int istat=0,iev=1;
-    
-    chain->InitRun(0);
-    
- EventLoop: if (iev<=nevents && !istat) {
+    // WriteOut StEvent
+    if (wrStEOut) {
+	cout << "!!!! doEvents: will write out .event.root file !!" << endl << endl;
+	StTreeMaker *outMk = new StTreeMaker("EvOut","","bfcTree");
+        outMk->SetIOMode("w");
+        outMk->SetBranch("eventBranch","test.event.root","w");
+        outMk->IntoBranch("eventBranch","StEvent");
+    }
+
+    /*
+      dbaseMk->Init();
+      svtDbMk->setSvtDb_Reader();
+      dbaseMk->Make();
+      svtDbMk->readSvtConfig();
+      svtDbMk->readSvtGeometry();
+    */
+
+    //
+    // Initialize chain
+    //
+
+    cout<<"I got here"<<endl;
+    Int_t iInit = chain->Init();
+    if (iInit) chain->Fatal(iInit,"on init");
+    //chain->PrintInfo();
+    chain->InitRun(theRunNumber);
+
+    //
+    // Event loop
+    //
+    int istat=0,i=1;
+ EventLoop: if (i <= nevents && istat!=2) {
+
+     cout << endl << "============================ Event " << i
+	  << " start ============================" << endl;
+
      chain->Clear();
-     cout << "---------------------- Processing Event : " << iev << endl;
-     istat = chain->Make(iev);
-     if (istat) {
-	 cout << "Last Event Processed. Status = " << istat << endl;
-     }
-     iev++; goto EventLoop;
+     istat = chain->Make(i);
+
+     if (istat==2) 
+         {cout << "Last  event processed. Status = " << istat << endl;}
+     if (istat==3) 
+         {cout << "Error event processed. Status = " << istat << endl;}
+
+     i++;
+     goto EventLoop;
  }
-    
-    
-    return;
+
+    //chain->Finish();
+
+    i--;
+    cout << endl << "============================ Event " << i
+	 << " finish ============================" << endl;
+
 }
+
+//--------------------------------------------------------------------------
+
+void RunStiMaker(const Int_t nevents, const Char_t *path, const Char_t *file,
+		      const Char_t *qaflag, const Int_t wrStEOut)
+{
+    if (nevents==-1) { Help(); return;}
+
+    const char *fileListQQ[]={0,0};
+    if (strncmp(path,"GC",2)==0) {
+	fileListQQ=0;
+    } else if (path[0]=='-') {
+	fileListQQ[0]=file;
+    } else if (!file[0]) {
+	fileListQQ[0]=path;
+    } else {
+	fileListQQ[0] = gSystem->ConcatFileName(path,file);
+    }
+
+    /*
+      const char *fileListQQ[3];
+      fileListQQ[0] = "/star/svt/online/jundata/st_pedestal_2165026_raw_0001.daq";
+      fileListQQ[1] = "/star/svt/online/jundata/st_pedestal_2165027_raw_0001.daq";
+      fileListQQ[2] = NULL;                                                      
+    */
+
+    RunStiMaker(nevents,fileListQQ,qaflag,wrStEOut);
+}
+
 
