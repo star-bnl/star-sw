@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.10 2003/08/27 18:08:39 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.11 2003/08/29 17:30:04 thenry Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.11  2003/08/29 17:30:04  thenry
+ * Added some comments
+ *
  * Revision 1.10  2003/08/27 18:08:39  thenry
  * Added Cuts on number of points above threshold and total EMC energy.
  * Added set point threshold.
@@ -573,16 +576,33 @@ class StEmcTpcFourPMaker : public StFourPMaker {
   double mPIDR, mKDR, mPRDR, mEDR, mCAD;
   EMCHitType useType;
 
+  // Number of tracks which land near EMC Points
   int getNumberCoincidences(void) { return numCoincidences; };
+  // The sum of Pt of all the primary tracks in the event
   double getSumPtTracks(void) { return sumPtTracks; }; 
+  // The sum of all the EMC Points or the sum of all the EMC hits including negatives in the event
   double getSumEMC(void) { return sumEMC; };
+  // The sum of the energy subtracted from the points before they are sent
+  // to the JetFinder
   double getSumSubtracted(void) { return sumSubtracted; };
+  // The maximum amount of energy which could possibly be subtracted from
+  // the points before they are sent to the JetFinder
   double getSumTheorySubtracted(void) { return sumTheorySubtracted; };
+  // Set the maximum total Point energy or the maximum sum of all EMC towers
+  // which will be run through the JetFinder (StppMikeConeJetFinder is limited)
   void setEMCSanityThreshold(double EST) { EMCSanityThreshold = EST; };
+  // Set the minimum energy required before the Point will be sent to the
+  // JetFinder
   void setMinPointThreshold(double threshold) 
     { minPointThreshold = threshold; };
+  // The number of Points which fit the above criterion
   long getNumPoints(void) { return numberPoints; };
+  // If this object decided not to send the tracks+points to the JetFinder
+  // because of exceeding above thresholds then isAborted() will return true
   bool isAborted(void) { return aborted; };
+  // Objects of type SafetyArray can be given to the StEmcTpcFourPMaker here
+  // which will make decisions on whether to use individual towers given
+  // the runNumber.  The default one does no descision making.
   void setTowerProxy(SafetyArray* sa) { towerProxy = sa; };
  
   ClassDef(StEmcTpcFourPMaker,1)
