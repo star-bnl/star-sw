@@ -175,7 +175,7 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 			 <<"cast to kalman track failed."<<endl;
 		}
 		else {
-		    fillHitEntry(tkt);
+		    //fillHitEntry(tkt);
 		}
 		mTree->Fill();
 	    }
@@ -202,7 +202,7 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 			     <<"cast to kalman track failed."<<endl;
 		    }
 		    else {
-			fillHitEntry(tkt);
+			//fillHitEntry(tkt);
 		    }
 		    mEntry->setAssociation(info);
 		    mTree->Fill();

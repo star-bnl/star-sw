@@ -370,7 +370,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
     
     unsigned int nhits=0;
     StiHit* closestHit = 0;
-    dz = DBL_MAX;
+    double dist_max = DBL_MAX;
     
     while (mHitStore->hasMore()) {
 	++nhits;
@@ -378,9 +378,13 @@ bool StiLocalTrackSeedFinder::extrapolate()
 	//if (theHit->isUsed()==false) {
 	if (theHit->timesUsed()==0) {
 	    double theDeltaZ = fabs( theHit->z() - z3 );
-	    if ( theDeltaZ < dz ) {
+	    double theDeltaY = fabs( theHit->y() - y3 );
+	    double dist = theDeltaZ*theDeltaZ/max(theHit->z(),z3) +
+		theDeltaY*theDeltaY/max(theHit->y(),y3);
+	    
+	    if ( dist < dist_max ) {
 		closestHit = theHit;
-		dz = theDeltaZ;
+		dist_max = dist;
 	    }
 	}
     }

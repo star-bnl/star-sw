@@ -38,11 +38,12 @@ class StiMaker : public StMaker {
 
     virtual void  Clear(const char* opt="");
     virtual Int_t Init();
+    virtual Int_t InitRun(int);
     virtual Int_t Make();
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.38 2002/02/04 17:06:00 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.39 2002/02/11 21:08:54 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -99,6 +100,9 @@ private:
 
     //Tracker
     StiKalmanTrackFinder* mtracker; //!
+
+    //flags
+    bool mBuilt; //!
     
     static StiMaker* sinstance; //!
 

@@ -14,8 +14,9 @@ void RunStiMaker(Int_t nevents=1,
 		 bool doProfile=false, // produce profiling output? 
 		 //const char* MainFile="/a1/pruneau/data/EvalData/MCNtuple/muon_100_neg.event.root")
 		 
-  //This file points to 30 events of 10 neg muons w/ pt=.9 
+  //This file points to 30 events of 10 neg muons w/ pt=.9
   const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
+    //const char* MainFile="/star/data13/reco/dev/2002/01/*3007007*.event.root")
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/pp_minbias/pds0200_04_12812evts.event.root")
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/hc_highdensity/hc_highdensity.16_evts.event.root")
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/hc_standard/hc_standard.40_evts.event.root")
@@ -136,7 +137,7 @@ void RunStiMaker(Int_t nevents=1,
     const char* paramsDB = "$STAR/StarDb";
     // this maker must be called "db" or StSvtDbMaker will crash
     St_db_Maker* calibMk = new St_db_Maker("db",calibDB,paramsDB);
-    calibMk->SetDateTime(20010702,000000);  
+    calibMk->SetDateTime(20010801,000000);
     //calibMk->SetDateTime("year_2b");
     calibMk->SetDebug();
     
@@ -268,6 +269,8 @@ void RunStiMaker(Int_t nevents=1,
     cout <<"Starting Event Loop"<<endl;
     
     int istat=0,iev=1;
+    
+    chain->InitRun(0);
     
  EventLoop: if (iev<=nevents && !istat) {
      chain->Clear();

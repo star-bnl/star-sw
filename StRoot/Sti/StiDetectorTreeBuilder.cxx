@@ -23,7 +23,9 @@ ostream& operator<<(ostream&, const StiDetector&);
 StiDetectorTreeBuilder::StiDetectorTreeBuilder()
     : mroot(0), mnodefactory(0), mdetfactory(0), mregion(0)
 {
-  mDetectorBuilder = new StiCodedDetectorBuilder();
+    cout <<"StiDetectorTreeBuilder::StiDetectorTreeBuilder()\t";
+    mDetectorBuilder = new StiCodedDetectorBuilder();
+    cout <<"done"<<endl;
 }
 
 StiDetectorTreeBuilder::~StiDetectorTreeBuilder()
@@ -34,24 +36,35 @@ StiDetectorTreeBuilder::~StiDetectorTreeBuilder()
 data_node* StiDetectorTreeBuilder::build(StiObjectFactoryInterface<StiDetectorNode>* nodefactory,
 					 StiObjectFactoryInterface<StiDetector>* detfactory)
 {
+    cout <<"StiDetectorTreeBuilder::build()"<<endl;
     if (mroot) {
 	cout << "StiDetectorTreeBuilder::build()\tError!\t"
 	     << "root tree already built"<<endl;
 	return 0;
     }
+
+    if (!nodefactory && !detfactory) {
+	cout << "StiDetectorTreeBuilder::build()\tError!\t"
+	     << "null factory pointer.  ABORT"<<endl;
+	return 0;
+    }
     
     mnodefactory = nodefactory;
     mdetfactory = detfactory;
+    cout <<"Build root"<<endl;
     buildRoot();
+    cout <<"loopOnDetectors"<<endl;
     loopOnDetectors();
-    
+    cout <<"Sort Tree"<<endl;
     //Now sort the tree:
     SortDaughters<data_t> mysorter;
     mysorter(mregion);
 
     //Now index the tree to give efficient sibling traversal
+    cout <<"Index Tree"<<endl;
     IndexDaughters<data_t> myindexer;
     myindexer(mregion);
+    cout <<"Done"<<endl;
     
     return mroot;
 }
