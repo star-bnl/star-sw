@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.23 2000/04/13 21:46:33 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.24 2000/04/18 20:44:48 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.24  2000/04/18 20:44:48  kathy
+// St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
+//
 // Revision 1.23  2000/04/13 21:46:33  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -121,9 +124,9 @@ void QA_bfcread_dst_tables(
 // --- now execute chain member functions
   chain->Init();
 
-  St_DataSet *ds=0;
-  St_Table *tabl=0;
-  St_DataSet *obj=0;
+  TDataSet *ds=0;
+  TTable *tabl=0;
+  TDataSet *obj=0;
 
   Float_t tottabcntr=0.;
 
@@ -210,7 +213,7 @@ void QA_bfcread_dst_tables(
     fout  << "QAInfo: reading dst.root Ev# " << iev << endl;
 
       ds=chain->GetDataSet("dst");
-      St_DataSetIter tabiter(ds);
+      TDataSetIter tabiter(ds);
 
       tabcntr=0;
       tabmiss=0;
@@ -222,13 +225,13 @@ void QA_bfcread_dst_tables(
 
         while (obj = tabiter.Next()) {
 //.. count all tables that exist:
-          if (obj->InheritsFrom("St_Table")) {
+          if (obj->InheritsFrom("TTable")) {
             tabcntr++;
 
             //cout << "object  = " << obj->GetName() << endl;
             //cout << "tabcntr = " << tabcntr << endl;
 
-            tabl = (St_Table *)tabiter.Find(obj->GetName());
+            tabl = (TTable *)tabiter.Find(obj->GetName());
             if (tabl) {
               cout << "QAInfo: " << obj->GetName();
               cout.width(28-strlen(obj->GetName()));
