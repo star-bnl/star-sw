@@ -9,43 +9,23 @@ void example() {
      gSystem->Load("libTable");
      gSystem->Load("libPhysics");
    }     
-  gSystem->Load("St_base");
-  gSystem->Load("StChain");
-  gSystem->Load("St_Tables");
-  gSystem->Load("StMagF");
-  gSystem->Load("StUtilities");  // new addition 22jul99
-  gSystem->Load("StTreeMaker");
-  gSystem->Load("StIOMaker");
-  gSystem->Load("StarClassLibrary");
-  gSystem->Load("StTpcDb");
-  gSystem->Load("StDbUtilities");
-  gSystem->Load("StEvent");
-  gSystem->Load("StEventUtilities"); 
-  gSystem->Load("StMcEvent"); 
-  gSystem->Load("StMcEventMaker"); 
-  gSystem->Load("StAssociationMaker");
-  gSystem->Load("StMcAnalysisMaker");
-  gSystem->Load("StStrangeMuDstMaker");
-  gSystem->Load("StMuDSTMaker");
-
+  gROOT->LoadMacro("StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+  loadSharedLibraries();
   cout << " loading done " << endl;
   
-  StMuDebug::setLevel(3);  // switch of some debug output
+  StMuDebug::setLevel(0);  // switch of some debug output
 
   int iret=0;
-  maker = new StMuDstMaker(0,0,"","AuAu200.lis","MuDst.root",2);   // set up maker in read mode
+  maker = new StMuDstMaker(0,0,"","test.lis","MuDst.root",2);   // set up maker in read mode
   StMuDbReader* db = StMuDbReader::instance();
   //  db->addDb("/star/u/laue/afsWork/P02gc.db");
   //  db->addDb("/star/u/laue/afsWork/P02gd.db");
 
   iret = maker->Make();  // read an event 
-  cout << " I " << endl;
   iret = maker->Make();  
-  cout << " II " << endl;
 
 
   StMuEvent* e = maker->muDst()->event();
-  cout << " III " << endl;
   StL0Trigger t;
   StEventInfo info;
   if (e) {
@@ -60,11 +40,11 @@ void example() {
     StMuTrack* global = primaryTrack->globalTrack();
     cout << endl;
     StMuTrack*  tt = primaryTrack;
-    printf("primary momentum=%8f first-helix=%8f  last-outerHelix=%8f length=%8f lengthMeasured=%8f \n",
-	   tt->p().mag(), (tt->firstPoint() - tt->helix().origin()).mag(), (tt->lastPoint() - tt->outerHelix().origin()).mag(), tt->length(), tt->lengthMeasured() );
+    printf("primary momentum=%8f first-helix=%8f  last-outerHelix=%8f length=%8f lengthMeasured=%8f charge=%d \n",
+	   tt->p().mag(), (tt->firstPoint() - tt->helix().origin()).mag(), (tt->lastPoint() - tt->outerHelix().origin()).mag(), tt->length(), tt->lengthMeasured(), tt->charge() );
     StMuTrack*  tt = global;
-    printf("global  momentum=%8f first-helix=%8f  last-outerHelix=%8f length=%8f lengthMeasured=%8f \n",
-	   tt->p().mag(), (tt->firstPoint() - tt->helix().origin()).mag(), (tt->lastPoint() - tt->outerHelix().origin()).mag(), tt->length(), tt->lengthMeasured() );
+    printf("global  momentum=%8f first-helix=%8f  last-outerHelix=%8f length=%8f lengthMeasured=%8f  charge=%d \n",
+	   tt->p().mag(), (tt->firstPoint() - tt->helix().origin()).mag(), (tt->lastPoint() - tt->outerHelix().origin()).mag(), tt->length(), tt->lengthMeasured(), tt->charge() );
   }
   printf("EVENT id=%d, runId=%d  unix time=%d trigWord=0x%0x bXing=%d spinBits=%d nPrim=%d\n", info.id(), info.runId(), info.time(), t.triggerWord(),t.bunchCrossingId(), t.spinBits(),n);
   

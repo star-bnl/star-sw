@@ -6,7 +6,7 @@ StChain *chain=0;
 
 //==========================================================================================
 //==========================================================================================
-void StEventReadTest(const Char_t *file="/star/data13/reco/dev/2001/10/st_physics_2304060_raw_0303.event.root")
+void StEventReadTest(const Char_t *file="/star/data16/reco/dAuMinBias/ReversedFullField/P03ia/2003/019/st_physics_4019019_raw_0040020.event.root")
 {
     // Dynamically link needed shared libs
     gSystem->Load("libTable");
@@ -23,6 +23,7 @@ void StEventReadTest(const Char_t *file="/star/data13/reco/dev/2001/10/st_physic
     gSystem->Load("StEvent");
     gSystem->Load("StEventUtilities");
     gSystem->Load("StEmcUtil");
+    gSystem->Load("StPreEclMaker");
     gSystem->Load("StStrangeMuDstMaker");
     gSystem->Load("StMuDSTMaker");  
     cout << " loading of shared libraries done" << endl;
@@ -57,10 +58,10 @@ void StEventReadTest(const Char_t *file="/star/data13/reco/dev/2001/10/st_physic
     chain->PrintInfo();
     int iret=0;
     int iev=0;
-    while (iret==0) {
+    while (iret==0 && iev++ <10) {
 	cout << "StExample -- Working on eventNumber " << iev++ << endl;
 	chain->Clear();
-	int iret = chain->Make(iev); // This should call the Make() method in ALL makers    
+	iret = chain->Make(iev); // This should call the Make() method in ALL makers    
     } // Event Loop
     chain->Finish(); // This should call the Finish() method in ALL makers
     

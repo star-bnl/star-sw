@@ -1,3 +1,8 @@
+#include "TSystem.h"
+
+extern TSystem* gSystem;
+
+
 void loadSharedLibraries() {
   // Dynamically link needed shared libs
   gSystem->Load("libTable");
@@ -14,6 +19,7 @@ void loadSharedLibraries() {
   gSystem->Load("StEvent");
   gSystem->Load("StEventUtilities");
   gSystem->Load("StEmcUtil");
+  gSystem->Load("StPreEclMaker");
   gSystem->Load("StStrangeMuDstMaker");
   gSystem->Load("StMuDSTMaker");  
   cout << " loading of shared libraries done" << endl;
