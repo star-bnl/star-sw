@@ -1,5 +1,8 @@
-// $Id: rootlogon.C,v 1.6 1999/06/15 16:19:11 fine Exp $
+// $Id: rootlogon.C,v 1.7 1999/06/27 22:45:33 fisyak Exp $
 // $Log: rootlogon.C,v $
+// Revision 1.7  1999/06/27 22:45:33  fisyak
+// Merge StRootEvent and StEvent
+//
 // Revision 1.6  1999/06/15 16:19:11  fine
 // New logon script
 //
@@ -15,7 +18,6 @@
 //=======================================================================
 
 {
-#include <iostream.h>
     TString gPrompt =  gROOT->GetApplication()->Argv(0);
     gPrompt += " [%d] ";
 
@@ -70,6 +72,11 @@
 // 	Assign bif size of hashtable for STAR I/O
 TBuffer::SetGlobalWriteParam(2003);
 printf("fgMapSize=%d\n",TBuffer::GetGlobalWriteParam());
-
+//      Print version
+ TString STAR_LEVEL("$STAR_LEVEL");
+ TString ROOT_LEVEL("$ROOT_LEVEL");
+ gSystem->ExpandPathName(STAR_LEVEL);
+ gSystem->ExpandPathName(ROOT_LEVEL);
+ printf("You are using STAR_LEVEL : %s and ROOT_LEVEL : %s \n",  STAR_LEVEL.Data(),ROOT_LEVEL.Data());
 }
  

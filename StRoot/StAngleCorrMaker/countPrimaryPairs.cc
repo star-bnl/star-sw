@@ -1,5 +1,8 @@
-// $Id: countPrimaryPairs.cc,v 1.2 1999/04/28 15:14:50 ogilvie Exp $
+// $Id: countPrimaryPairs.cc,v 1.3 1999/06/27 22:45:25 fisyak Exp $
 // $Log: countPrimaryPairs.cc,v $
+// Revision 1.3  1999/06/27 22:45:25  fisyak
+// Merge StRootEvent and StEvent
+//
 // Revision 1.2  1999/04/28 15:14:50  ogilvie
 // included filling of histogram for pairs of tracks in real events
 // i.e. numerator of correlation function
@@ -33,17 +36,17 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-#include "StEvent/StEvent.hh"
-#include "StEvent/StGlobalTrack.hh"
+#include "StEvent.h"
+#include "StGlobalTrack.h"
 #include "StAngleDiff.hh"
 #include "StTrackForPool.hh"
-#include "StThreeVector.hh"
+#include "StThreeVectorD.hh"
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
 #include "TRandom.h"
 #include <TOrdCollection.h>
 
-static const char rcsid[] = "$Id: countPrimaryPairs.cc,v 1.2 1999/04/28 15:14:50 ogilvie Exp $";
+static const char rcsid[] = "$Id: countPrimaryPairs.cc,v 1.3 1999/06/27 22:45:25 fisyak Exp $";
 
 long countPrimaryPairs(StEvent& event,int eventNumber, TOrdCollection* trackPool)
 {
@@ -102,7 +105,7 @@ long countPrimaryPairs(StEvent& event,int eventNumber, TOrdCollection* trackPool
     if (vertex1 &&
         vertex1->type() == primary) {
         StTrackForPool *trackforpool = new StTrackForPool; 
-	StThreeVector<double> mom1 = track1->helix().momentum(bField);      //
+	StThreeVectorD mom1 = track1->helix().momentum(bField);      //
       // put track into pool
       //
 
@@ -111,14 +114,14 @@ long countPrimaryPairs(StEvent& event,int eventNumber, TOrdCollection* trackPool
 	 //
 	 // find pairs in this event
 	 //
-	 for (iter2 = iter1+1;
+	 for (iter2 = iter1, iter2++;
 	      iter2 != tracks->end(); iter2++) {
 	     track2 = *iter2;
 	     vertex2 = track2->startVertex();
 	     if (vertex2 &&
 		 vertex2->type() == primary) {
 
-		 StThreeVector<double> mom2 = track2->helix().momentum(bField);
+		 StThreeVectorD mom2 = track2->helix().momentum(bField);
 	         double diff = anglediff->alphaDiff(mom1,mom2);
 
 	       // fill histrograms here

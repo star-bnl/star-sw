@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.70 1999/06/23 12:20:27 fisyak Exp $
+// $Id: bfc.C,v 1.71 1999/06/27 22:45:32 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.71  1999/06/27 22:45:32  fisyak
+// Merge StRootEvent and StEvent
+//
 // Revision 1.70  1999/06/23 12:20:27  fisyak
 // Herb's & Iwona's change to read event from DAQ
 //
@@ -409,6 +412,7 @@ void Load(const Char_t *Chain="gstar tfs"){
   gSystem->Load("StChain");
   gSystem->Load("xdf2root");
   gSystem->Load("St_Tables");
+  //  gSystem->Load("StUtilities");
   gSystem->Load("libmsg");
   gSystem->Load("libtls");
   gSystem->Load("St_db_Maker");
@@ -477,9 +481,9 @@ void Load(const Char_t *Chain="gstar tfs"){
     gSystem->Load("St_global");
     gSystem->Load("St_dst_Maker");
     if (ChainFlags[kEVENT]) {
-      gSystem->Load("StRootEvent");
+      gSystem->Load("StEvent");
       gSystem->Load("StEventMaker");
-      if (ChainFlags[kANALYS]) gSystem->Load("StRAnalysisMaker");
+      if (ChainFlags[kANALYS]) gSystem->Load("StAnalysisMaker");
     }
     gSystem->Load("St_QA_Maker");
   }

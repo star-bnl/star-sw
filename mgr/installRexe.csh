@@ -40,7 +40,8 @@ gmake -f ${STAR_MAKE_HOME}/MakeRexe.mk INP_DIR=${INP} OUT_DIR=${OUT} setup
 
 set StarBin = ${OUT}/.${STAR_SYS}/bin
 set mach_os = ` uname -sr | sed -e 's/ //g' -e 's/\.//g' `
-if ( ! -f  $StarBin/root4star) ln -s $StarBin/root4star $StarBin/Root.exe 
+if ( ! -f  $StarBin/Root.exe  ) ln -s $StarBin/root4star $StarBin/Root.exe 
+if ( ! -f  $StarBin/rootPstar ) ln -s $StarBin/root4star $StarBin/rootPstar 
 
 #real run of makefile. It creates executable
 

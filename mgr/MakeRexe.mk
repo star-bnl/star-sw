@@ -1,5 +1,8 @@
-# $Id: MakeRexe.mk,v 1.22 1999/06/16 12:37:02 fisyak Exp $
+# $Id: MakeRexe.mk,v 1.23 1999/06/27 22:44:03 fisyak Exp $
 # $Log: MakeRexe.mk,v $
+# Revision 1.23  1999/06/27 22:44:03  fisyak
+# Merge StRootEvent and StEvent
+#
 # Revision 1.22  1999/06/16 12:37:02  fisyak
 # Changes for egcs-1.1.2 on Solaris
 #
@@ -100,8 +103,8 @@ CCload = YES
 ifeq ($(STAR_HOST_SYS),sun4x_56)
   STCLASS_OBJS =  $(wildcard $(STAR)/.$(STAR_HOST_SYS)/obj/StarClassLibrary/*.o \
 $(STAR)/.$(STAR_HOST_SYS)/obj/StarClassLibrary/Templates.DB/*.o) 
-  STEVENT_OBJS = $(wildcard $(STAR)/.$(STAR_HOST_SYS)/obj/StEvent/*.o \
-$(STAR)/.$(STAR_HOST_SYS)/obj/StEvent/Templates.DB/*.o)
+#  STEVENT_OBJS = $(wildcard $(STAR)/.$(STAR_HOST_SYS)/obj/StEvent/*.o \
+#$(STAR)/.$(STAR_HOST_SYS)/obj/StEvent/Templates.DB/*.o)
 endif
 
 
@@ -143,11 +146,7 @@ ALL_EXE_LIBS += -lXpm $(FLIBS) $(CLIBS)
 .SUFFIXES:
 .SUFFIXES:  .o .g .f .c .cc .cxx   .F
 #all: rootPstar root4star 
-ifndef STEVENT_OBJS
 all: root4star 
-else
-all: rootPstar root4star 
-endif
 rootPstar: $(FILES_O) 
 	$(DOEXE) $(ALL_DEPS) $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
 root4star: $(FILES_O) $(STCLASS_OBJS) $(STEVENT_OBJS)

@@ -1,15 +1,15 @@
 #include "StAngleCorrMaker.h"
-#include "StEvent/StEvent.hh"
-#include "StEvent/StGlobalTrack.hh"
+#include "StEvent.h"
+#include "StGlobalTrack.h"
 #include "StAngleDiff.hh"
 #include "StTrackForPool.hh"
-#include "StThreeVector.hh"
+#include "StThreeVectorD.hh"
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
 #include "TRandom.h"
 #include <TOrdCollection.h>
 
-static const char rcsid[] = "$Id: analyseMixedPairs.cc,v 1.1 1999/04/29 16:51:55 ogilvie Exp $";
+static const char rcsid[] = "$Id: analyseMixedPairs.cc,v 1.2 1999/06/27 22:45:24 fisyak Exp $";
 
 void StAngleCorrMaker::analyseMixedPairs()
 {
@@ -49,8 +49,8 @@ void StAngleCorrMaker::analyseMixedPairs()
     //
     if ((trackfrompool1->mEventNumber) != (trackfrompool2->mEventNumber)) {  
       loop++;
-      StThreeVector<double> mom1 = trackfrompool1->mMomentum  ;
-      StThreeVector<double> mom2 = trackfrompool2->mMomentum  ;
+      StThreeVectorD mom1 = trackfrompool1->mMomentum  ;
+      StThreeVectorD mom2 = trackfrompool2->mMomentum  ;
       double diff = anglediff->phiDiff(mom1,mom2);
       double weight = anglediff->weightPhiDiff(mom1,mom2);
       // convert radians to degrees

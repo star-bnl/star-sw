@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.96 1999/06/19 20:31:51 fisyak Exp $
+# $Id: MakePam.mk,v 1.97 1999/06/27 22:44:02 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.97  1999/06/27 22:44:02  fisyak
+# Merge StRootEvent and StEvent
+#
 # Revision 1.96  1999/06/19 20:31:51  fisyak
 # Fix bugs with include path
 #
@@ -241,6 +244,48 @@ VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS) $(INC_DIRS)
 ifneq (,$(FILES_IDM))
 VPATH   += $(GEN_DIR)
 endif
+define MAKE_TABLE_CXX
+	@$(RM) $(GEN_TAB)/St_$(STEM)_Table.cxx;\
+echo "#include \"St_$(STEM)_Table.h\""         >$(GEN_TAB)/St_$(STEM)_Table.cxx;\
+echo "/////////////////////////////////////////////////////////////////////////" >>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
+echo "//                                          ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
+echo "//  Class St_$(STEM) wraps the STAF table $(STEM) ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
+echo "//  It has been generated "by automatic". Please don't change it \"by hand\" ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
+echo "//                                          ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
+echo "/////////////////////////////////////////////////////////////////////////  ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
+echo "                                            ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
+echo "#include \"Stypes.h\"                       ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
+echo "TList *_NAME2_(St_,$(STEM))::fgListOfColDescriptors = 0; ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
+echo "TableImp($(STEM))                     ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
+echo "TableStreamerImp($(STEM))             ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;
+endef
+define MAKE_TABLE_H
+	@$(RM) 	$(GEN_TAB)/St_$(STEM)_Table.h ;\
+echo "#ifndef STAF_St_$(STEM)_Table         ">$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "#define STAF_St_$(STEM)_Table        ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "                                           ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "#include \"St_Table.h\"                      ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "                                           ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "#include \"$(STEM).h\"                 ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "                                           ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "class St_$(STEM) : public St_Table   ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "{                                          ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "protected:                                 ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  static TList *fgListOfColDescriptors;    ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  virtual TList *GetRowDescritors() { return fgListOfColDescriptors?fgListOfColDescriptors:(fgListOfColDescriptors=GetTableDescriptors());}       ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  virtual void  SetRowDescritors(TList *list) { fgListOfColDescriptors = list;}  ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "public:                                    ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  St_$(STEM)() : St_Table(\"$(STEM)\",sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}           ">>$(GEN_TAB)/St_$(STEM)_Table.h ;\
+echo "  St_$(STEM)(Text_t *name) : St_Table(name,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}          ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  St_$(STEM)(Int_t n): St_Table(\"$(STEM)\",n,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}   ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  St_$(STEM)(Text_t *name,Int_t n): St_Table(name,n,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");} ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  $(STEM)_st *GetTable(){ return ($(STEM)_st *)s_Table;}                                            ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "                                           ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  ClassDef(St_$(STEM),0) // class particle STAF tables  ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "};                                                            ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "                                                              ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "#endif                                                        ">>$(GEN_TAB)/St_$(STEM)_Table.h
+endef
 #-------------------------------includes----------------------------
 STICFLAGS =  $(addprefix -I,  $(STAF_SYS_INCS) $(SRC_DIR) $(IDL_DIRS))
 CXXFLAGS   += -DASU_MALLOC_OFF
@@ -269,6 +314,7 @@ NAMES_C  := $(basename $(notdir $(FILES_C)))
 NAMES_F  := $(basename $(notdir $(FILES_F)))
 NAMES_CDF:= $(basename $(notdir $(FILES_CDF)))
 #.________________________  modules ____________________________________________
+FILES_IDT := $(notdir $(wildcard $(OUT_DIR)/pams/$(DOMAIN)/idl/*.idl $(STAR)/pams/$(DOMAIN)/idl/*.idl))
 ifneq (,$(FILES_IDM))
 FILES_ICC := $(addprefix $(GEN_DIR)/, $(subst .idl,_i.cc,  $(notdir $(FILES_IDM))))
 FILES_IH  := $(addprefix $(GEN_DIR)/, $(subst .idl,.h,     $(notdir $(FILES_IDM))))
@@ -277,8 +323,8 @@ FILES_MOD := $(addprefix $(GEN_DIR)/St_,$(subst .idl,_Module.cxx, $(notdir $(FIL
 FILES_MHH := $(addprefix $(GEN_DIR)/St_,$(subst .idl,_Module.h  , $(notdir $(FILES_IDM))))
 FILES_ALL_MOD := $(FILES_SYM) $(FILES_ICC) $(FILES_IH) $(FILES_INC) $(FILES_MOD) $(FILES_MHH)
 #list :=  $(STIC) -T -q $(STICFLAGS) 
-FILES_IDT := $(notdir $(wildcard $(OUT_DIR)/pams/$(DOMAIN)/idl/*.idl $(STAR)/pams/$(DOMAIN)/idl/*.idl))
 FILES_IDT += $(foreach IDM, $(FILES_IDM), $(shell $(STIC) -T -q $(STICFLAGS) $(IDM))) 
+endif    
 FILES_IDT := $(sort $(FILES_IDT))
 #FILES_IDT := $(shell  for IDM in $(FILES_IDM) ;  do [$(list) $(IDM)] ; done ) 
 #            for name [ in word; ] do list ; done                       
@@ -289,7 +335,6 @@ FILES_TAI := $(addprefix $(GEN_TAB)/, $(addsuffix .inc, $(sort $(basename $(notd
 FILES_TAB := $(addprefix $(GEN_TAB)/St_, $(addsuffix _Table.cxx, $(sort $(basename $(notdir $(FILES_IDT))))))
 FILES_THH := $(addprefix $(GEN_TAB)/St_, $(addsuffix _Table.h, $(sort $(basename $(notdir $(FILES_IDT))))))
 FILES_ALL_TAB := $(FILES_SYT) $(FILES_TAH) $(FILES_TAI) $(FILES_TAB) $(FILES_THH)
-endif    
 endif
 FILES_O  := $(strip $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_F) $(NAMES_C) $(NAMES_CC))))
 ifndef NODEPEND                
@@ -407,6 +452,7 @@ $(FILES_TAH) : $(GEN_TAB)/%.h : %.idl
 $(FILES_TAI) : $(GEN_TAB)/%.inc : %.idl
 	$(CP) $(1ST_DEPS) $(GEN_TAB)/ ; cd $(GEN_TAB); $(STIC) -H -q $(STICFLAGS) $(STEM).idl; $(RM) $(STEM).idl
 ifndef NOROOT
+ifdef NEVER
 $(GEN_TAB)/.rootrc:
 	@echo '# ROOT Environment settings are handled via the class TEnv. To see' > $(ALL_TAGS)
 	@echo '# which values are active do: gEnv->Print(). '>>  $(ALL_TAGS)
@@ -450,6 +496,14 @@ $(FILES_THH) : $(GEN_TAB)/St_%_Table.h : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc
 	@echo "}" >> $(GEN_TAB)/$(STEM).C;
 #	cat $(GEN_TAB)/$(STEM).C;
 	cd $(GEN_TAB); root.exe -b $(STEM).C -q  > /dev/null ; $(RM) $(STEM).C
+endif
+#------------------------------------------- ---------------------------------
+#$(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : $(GEN_TAB)/%.h
+$(GEN_TAB)/St_%_Table.cxx:
+	$(MAKE_TABLE_CXX)
+#$(FILES_THH) : $(GEN_TAB)/St_%_Table.h : $(GEN_TAB)/%.h
+$(GEN_TAB)/St_%_Table.h:
+	$(MAKE_TABLE_H)
 endif #NOROOT
 endif #ALL_TAB
 #--- compilation -
@@ -563,6 +617,7 @@ endif
 test: test_dir test_files test_mk
 test_files:
 	@echo LEVEL     = $(LEVEL)
+	@echo IDLS      = $(IDLS)
 	@echo FILES_IDM = $(FILES_IDM)
 	@echo FILES_IDT = $(FILES_IDT)
 	@echo FILES_G   = $(FILES_G)

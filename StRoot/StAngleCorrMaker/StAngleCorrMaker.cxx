@@ -18,10 +18,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "StAngleCorrMaker.h"
 #include "StTrackForPool.hh"
-#include "StRoot/StEventReaderMaker/StEventReaderMaker.h"
 #include "StChain/StChain.h"
-#include "StEvent/StRun.hh"
-#include "StEvent/StEvent.hh"
+#include "StRun.h"
+#include "StEvent.h"
 
 #include <TOrdCollection.h>
 #include <TH1.h>
@@ -57,11 +56,16 @@ Int_t StAngleCorrMaker::Init() {
 
 Int_t StAngleCorrMaker::Make() {
 
+#if 0
   StEventReaderMaker* evMaker = (StEventReaderMaker*) gStChain->Maker("events");
-  if (! evMaker->event()) return kStOK; // If no event, we're done
+  if (! event()) return kStOK; // If no event, we're done
   StEvent& ev = *(evMaker->event());
+#endif
+  StEvent* mEvent = (StEvent *) GetInputDS("StEvent");
+  if (!mEvent) return kStOK; // If no event, we're done
+  StEvent& ev = *mEvent;
 
-  int eventNumber = evMaker->GetNumber();
+  int eventNumber = GetNumber();
   // process all posssible pairs of primary tracks
   // fill histograms, and add tracks to pool of tracks
   //
@@ -104,7 +108,7 @@ StAngleCorrMaker::~StAngleCorrMaker() {
 
 void StAngleCorrMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StAngleCorrMaker.cxx,v 1.4 1999/05/03 17:19:28 ogilvie Exp $\n");
+  printf("* $Id: StAngleCorrMaker.cxx,v 1.5 1999/06/27 22:45:24 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

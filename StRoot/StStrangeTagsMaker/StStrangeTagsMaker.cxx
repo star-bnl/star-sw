@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.8 1999/04/14 22:05:11 genevb Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.9 1999/06/27 22:45:31 fisyak Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.9  1999/06/27 22:45:31  fisyak
+ * Merge StRootEvent and StEvent
+ *
  * Revision 1.8  1999/04/14 22:05:11  genevb
  * Comply with momentumOfV0 call
  *
@@ -36,10 +39,9 @@
  *
  **************************************************************************/
 #include "StStrangeTagsMaker.h"
-#include "StRoot/StEventReaderMaker/StEventReaderMaker.h"
-#include "StEvent/StEvent.hh"
-#include "StEvent/StV0Vertex.hh"
-#include "StEvent/StXiVertex.hh"
+#include "StEvent.h"
+#include "StV0Vertex.h"
+#include "StXiVertex.h"
 #include "StChain/StChain.h"
 #include "TMath.h"
 #include "PhysicalConstants.h"
@@ -73,9 +75,8 @@ Int_t StStrangeTagsMaker::Make()
 {
     delete mTagTable;
     mTagTable = new StrangeTag_st;
-    StEventReaderMaker* evMaker = (StEventReaderMaker*) gStChain->Maker("events");
-    if (! evMaker->event()) return kStOK;
-    mEvent = evMaker->event();                      	
+    mEvent = (StEvent *) GetInputDS("StEvent");
+    if (!mEvent) return kStOK; // If no event, we're done
       
     fillTag();
             
@@ -84,7 +85,7 @@ Int_t StStrangeTagsMaker::Make()
 
 void StStrangeTagsMaker::PrintInfo()
 {
-    cout << "$Id: StStrangeTagsMaker.cxx,v 1.8 1999/04/14 22:05:11 genevb Exp $" << endl;
+    cout << "$Id: StStrangeTagsMaker.cxx,v 1.9 1999/06/27 22:45:31 fisyak Exp $" << endl;
     if (Debug()) StMaker::PrintInfo();
 }
 
@@ -114,9 +115,9 @@ void StStrangeTagsMaker::fillTag()
       if ( (*vertices)->type() == V0 ) {
         v0tot++;
         StV0Vertex *vertex = (StV0Vertex *) *vertices;
-        const StThreeVector<float>& nMom = vertex->momentumOfDaughter(negativeTrack);
-        const StThreeVector<float>& pMom = vertex->momentumOfDaughter(positiveTrack);
-        StThreeVector<float> vMom = nMom + pMom;
+        const StThreeVectorF& nMom = vertex->momentumOfDaughter(negativeTrack);
+        const StThreeVectorF& pMom = vertex->momentumOfDaughter(positiveTrack);
+        StThreeVectorF vMom = nMom + pMom;
         Float_t pN2 = nMom.mag2();
         Float_t pP2 = pMom.mag2();
         Float_t pV2 = vMom.mag2();
@@ -149,9 +150,9 @@ void StStrangeTagsMaker::fillTag()
       } else if ( (*vertices)->type() == Xi ) {
 
         StXiVertex *vertex = (StXiVertex *) *vertices;
-        const StThreeVector<float>& pMom = vertex->momentumOfBachelor();
-        StThreeVector<float> lMom = vertex->momentumOfV0();
-        StThreeVector<float> xMom = lMom + pMom;
+        const StThreeVectorF& pMom = vertex->momentumOfBachelor();
+        StThreeVectorF lMom = vertex->momentumOfV0();
+        StThreeVectorF xMom = lMom + pMom;
         Float_t pP2 = pMom.mag2();
         Float_t pL2 = lMom.mag2();
         Float_t pX2 = xMom.mag2();

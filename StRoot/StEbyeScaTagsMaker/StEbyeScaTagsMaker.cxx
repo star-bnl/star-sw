@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.5 1999/05/27 17:19:24 jgreid Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.6 1999/06/27 22:45:27 fisyak Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.6  1999/06/27 22:45:27  fisyak
+ * Merge StRootEvent and StEvent
+ *
  * Revision 1.5  1999/05/27 17:19:24  jgreid
  * fixed rapidity calculation bug and added additional QC cuts
  *
@@ -27,11 +30,10 @@
  *
  **************************************************************************/
 #include "StEbyeScaTagsMaker.h"
-#include "StRoot/StEventReaderMaker/StEventReaderMaker.h"
 #include "StChain/StChain.h"
-#include "StEvent/StRun.hh"
-#include "StEvent/StEvent.hh"
-#include "StEvent/StGlobalTrack.hh"
+#include "StRun.h"
+#include "StEvent.h"
+#include "StGlobalTrack.h"
 #include "SystemOfUnits.h"
 
 // define values for temperature calculation
@@ -50,10 +52,15 @@ StEbyeScaTagsMaker::~StEbyeScaTagsMaker() {
 }
 
 Int_t StEbyeScaTagsMaker::Make() {
+#if 0
   StEventReaderMaker* evMaker = (StEventReaderMaker*) gStChain->Maker("events");
-  if (! evMaker->event()) return kStOK; // If no event, we're done
+  if (! event()) return kStOK; // If no event, we're done
   StEvent& ev = *(evMaker->event());
-  StRun& run = *(evMaker->run());
+#endif
+  StEvent* mEvent = (StEvent *) GetInputDS("StEvent");
+  if (!mEvent) return kStOK; // If no event, we're done
+  StEvent& ev = *mEvent;
+  StRun *run = (StRun *) GetInputDS("StRun");
 
   // OK, we've got the event. Do what thou wilst.
 
@@ -66,7 +73,7 @@ Int_t StEbyeScaTagsMaker::Make() {
 }
 
 void StEbyeScaTagsMaker::PrintInfo() {
-  cout << "$Id: StEbyeScaTagsMaker.cxx,v 1.5 1999/05/27 17:19:24 jgreid Exp $" << endl;
+  cout << "$Id: StEbyeScaTagsMaker.cxx,v 1.6 1999/06/27 22:45:27 fisyak Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -88,8 +95,8 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event, ScaTag_st& scaTag) {
   
   StVertex *primeVertex = event.primaryVertex();
 
-  StThreeVector<double> origin(0,0,0);
-  StThreeVector<double> primaryVertexPosition = primeVertex->position();
+  StThreeVectorD origin(0,0,0);
+  StThreeVectorD primaryVertexPosition = primeVertex->position();
 
   double mt_histo[NBINS];
   
@@ -133,7 +140,7 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event, ScaTag_st& scaTag) {
   float meanEtaSquared = 0.0;
 
   double s;
-  StThreeVector<double> dca, p;
+  StThreeVectorD dca, p;
 
   double dcaX, dcaY, dcaZ, dcaM;
 

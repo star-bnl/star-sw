@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.h,v 1.5 1999/06/16 10:50:19 ullrich Exp $
+ * $Id: StGlobalTrack.h,v 1.6 1999/06/27 22:45:28 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,11 +13,14 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.h,v $
+ * Revision 1.6  1999/06/27 22:45:28  fisyak
+ * Merge StRootEvent and StEvent
+ *
+ * Revision 1.6  1999/06/27 22:45:28  fisyak
+ * Merge StRootEvent and StEvent
+ *
  * Revision 1.5  1999/06/16 10:50:19  ullrich
  * Added members to hold the number of hits in case
- * the hits are not stored on the DST. Sync changes in
- * StEvent with StRootEvent.
- *
  * the hits are not stored on the DST. Sync changes in
  * StEvent with StRootEvent.
  *
@@ -97,13 +100,13 @@ using namespace std;
                   double phase,
                   StThreeVectorD& origin,
 		  int h);
-    virtual const StVecPtrTpcHit*     tpcHits() const;
-    virtual const StVecPtrSvtHit*     svtHits() const;
-    virtual const StVecPtrFtpcHit*    ftpcHits() const;
-    virtual const StDedx*             svtDedx() const;
-    virtual const StDedx*             tpcDedx() const;
-    virtual const StDedx*             ftpcDedx() const;
-    virtual const StTrackPidTraits*   pidTraits() const;
+    // StGlobalTrack(const StGlobalTrack&);     use default
+    // const StGlobalTrack & operator=(const StGlobalTrack &);
+    
+    virtual const StVecPtrTpcHit&     tpcHits() const   { return *mTpcHits;   };
+    virtual const StVecPtrSvtHit&     svtHits() const   { return *mSvtHits;   };
+    virtual const StVecPtrFtpcHit&    ftpcHits() const  { return *mFtpcHits;  };
+    virtual const StDedx*             svtDedx() const   { return  mSvtDedx;   };
     virtual const StDedx*             tpcDedx() const   { return  mTpcDedx;   };
     virtual const StDedx*             ftpcDedx() const  { return  mFtpcDedx;  }; 
     virtual const StTrackPidTraits&   pidTraits() const { return *mPidTraits; };
@@ -154,21 +157,6 @@ protected:
     const StVertex* vertex() const;
 StCollectionDef(GlobalTrack)
 typedef StGlobalTrackIterator        StTrackIterator; 
-#ifndef __CINT__
-inline const StVecPtrTpcHit* StGlobalTrack::tpcHits() const { return mTpcHits; }
-
-inline const StVecPtrSvtHit* StGlobalTrack::svtHits() const { return mSvtHits; }
-
-inline const StVecPtrFtpcHit* StGlobalTrack::ftpcHits() const { return mFtpcHits; }
-
-inline const StDedx* StGlobalTrack::svtDedx() const { return mSvtDedx; }
-
-inline const StDedx* StGlobalTrack::tpcDedx() const { return mTpcDedx; }
-
-inline const StDedx* StGlobalTrack::ftpcDedx() const { return mFtpcDedx; }
-
-inline const StTrackPidTraits* StGlobalTrack::pidTraits() const { return mPidTraits; }
-#endif
 typedef StGlobalTrackIterator        StTrackConstIterator; 
 typedef StGlobalTrackCollection      StTrackCollection;
 typedef StVecPtrGlobalTrack          StVecPtrTrack;

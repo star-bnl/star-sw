@@ -36,7 +36,7 @@
 //  1. A separate method to provide lexicographical sort if the "sorted" column is a kind of array
 //
 //  Usage: 
-//    1. Create an instanse of the sorter for the selected column of your table
+//    1. Create an instance of the sorter for the selected column of your table
 //
 //        new St_TableSorter(St_Table &table, TString &colName,Int_t firstRow,Int_t numberRows)
 //

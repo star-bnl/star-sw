@@ -1,7 +1,7 @@
-// $Id: StSmdstMaker.cxx,v 1.7 1999/06/24 22:09:21 genevb Exp $
+// $Id: StSmdstMaker.cxx,v 1.8 1999/06/27 22:45:30 fisyak Exp $
 // $Log: StSmdstMaker.cxx,v $
-// Revision 1.7  1999/06/24 22:09:21  genevb
-// Add README file, use StMessageManager
+// Revision 1.8  1999/06/27 22:45:30  fisyak
+// Merge StRootEvent and StEvent
 //
 // Revision 1.6  1999/06/22 19:06:15  genevb
 // Fixed no vertex collection error for cascades too
@@ -45,7 +45,6 @@
 #include <iostream.h>
 #include "TROOT.h"
 
-#include "StMessageManager.h"
 #include "StSmdstMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -53,10 +52,9 @@
 #include <TCanvas.h>
 #include <TPaveText.h>
 #include <TStyle.h>
-#include "StEventReaderMaker/StEventReaderMaker.h"
-#include "StEvent/StEvent.hh"
-#include "StEvent/StV0Vertex.hh"
-#include "StEvent/StXiVertex.hh"
+#include "StEvent.h"
+#include "StV0Vertex.h"
+#include "StXiVertex.h"
 #include "global/inc/math_constants.h"
 #include "PhysicalConstants.h"
 #include "TMath.h"
@@ -206,16 +204,21 @@ Int_t StSmdstMaker::FillV0Table() {
    Float_t dx, dy, dz;
    Float_t primX, primY, primZ;
   
+#if 0
    StEventReaderMaker* evMaker = (StEventReaderMaker*) gStChain->Maker("events");
    StEvent *ev = evMaker->event();
    if (!ev) return kStOK;
-   StVertexIterator vertices = ev->vertexCollection()->begin();
-   if (!(vertices)) {
-     gMessMgr->Warning("StSmdstMaker: No vertex collection in event.");
+#endif
+  StEvent* ev = (StEvent *) GetInputDS("StEvent");
+  if (!ev) return kStOK; // If no event, we're done
+   
+   StVertexCollection *vertices = ev->vertexCollection();
+   if (!vertices) {
+     printf("StSmdstMaker: Warning - no vertex collection in event.\n");
      return kStOK;
    }
-   if (!(*vertices)) {
-     gMessMgr->Warning("StSmdstMaker: No vertices in event.");
+   if (vertices->size()) {
+     printf("StSmdstMaker: Warning - no vertices in event.\n");
      return kStOK;
    }
 
@@ -225,17 +228,17 @@ Int_t StSmdstMaker::FillV0Table() {
    agufld_(x,bf);
    bf[2] = bf[2]*0.1;
    if( bf[2] == 0. )
-     gMessMgr->Warning("StSmdstMaker: Magnetic field not loaded.");
+     printf("StSmdstMaker: Warning - magnetic field not loaded.\n");
 
    StVertex *primaryVertex = ev->primaryVertex();
    if (primaryVertex) {
-     primaryVertex = *vertices;
-     const StThreeVector<float>& primaryPos = primaryVertex->position();
+     primaryVertex = vertices->front();
+     const StThreeVectorF& primaryPos = primaryVertex->position();
      primX = primaryPos.x();
      primY = primaryPos.y();
      primZ = primaryPos.z();
    } else {
-     gMessMgr->Warning("StSmdstMaker: No primary vertex, setting to (0,0,0).");
+     printf("StSmdstMaker: Warning - no primary vertex, setting to (0,0,0).\n");
      primX = 0.;
      primY = 0.;
      primZ = 0.;
@@ -245,10 +248,12 @@ Int_t StSmdstMaker::FillV0Table() {
    StGlobalTrack* pTrack;
    StTrackFitTraits* nFitTraits;
    StTrackFitTraits* pFitTraits;
-   for (vertices  = ev->vertexCollection()->begin();
-        vertices != ev->vertexCollection()->end(); vertices++) {
-     if ( (*vertices)->type() != V0) continue;
-     StV0Vertex *vertex = (StV0Vertex *) *vertices;
+   StVertexIterator vtxI;
+   for (vtxI  = ev->vertexCollection()->begin();
+        vtxI != ev->vertexCollection()->end(); vtxI++) {
+     StVertex *vtx = *vtxI;
+     if ( vtx->type() != V0) continue;
+     StV0Vertex *vertex = (StV0Vertex *) vtx;
 
      StVecPtrGlobalTrack& vTracks = vertex->daughters();
      if( vTracks.size() > 1 ) {
@@ -263,7 +268,7 @@ Int_t StSmdstMaker::FillV0Table() {
        pflag = 1;
      }
 
-     const StThreeVector<float>& pos = vertex->position();
+     const StThreeVectorF& pos = vertex->position();
      dx = pos.x() - primX;
      dy = pos.y() - primY;
      dz = pos.z() - primZ;
@@ -277,12 +282,12 @@ Int_t StSmdstMaker::FillV0Table() {
 
       
        if (++out == m_v0_maxlen) {
-         gMessMgr->Error("StSmdstMaker: V0 table maxlen exceeded.");
+         printf("StSmdstMaker: Error - v0 table maxlen exceeded.\n");
          return kStErr;
        }
 
-       const StThreeVector<float>& nMom = vertex->momentumOfDaughter(negativeTrack);
-       const StThreeVector<float>& pMom = vertex->momentumOfDaughter(positiveTrack);
+       const StThreeVectorF& nMom = vertex->momentumOfDaughter(negativeTrack);
+       const StThreeVectorF& pMom = vertex->momentumOfDaughter(positiveTrack);
       
        ptotn2 = nMom.mag2();
        ptotp2 = pMom.mag2();
@@ -297,7 +302,7 @@ Int_t StSmdstMaker::FillV0Table() {
        malb = TMath::Sqrt( mMasspr2 + mMasspi2 + 2*(epip*eprn - pdotn) );
        mak0 = TMath::Sqrt( mMasspi2 + mMasspi2 + 2*(epip*epin - pdotn) );
 
-       StThreeVector<float> vMom = pMom + nMom;
+       StThreeVectorF vMom = pMom + nMom;
 
        pt2   = vMom.perp2();
        ptot2 = vMom.mag2();
@@ -433,29 +438,33 @@ void StSmdstMaker::FillXiHistograms() {
   Float_t ek0b, epib, elav;
   Float_t maxi, maom;
 
+#if 0
   StEventReaderMaker* evMaker = (StEventReaderMaker*) gStChain->Maker("events");
-  StEvent *ev = evMaker->event();
-  if (!ev) return;
-  StVertexIterator vertices = ev->vertexCollection()->begin();
-  if (!(vertices)) {
-    gMessMgr->Warning("StSmdstMaker: No vertex collection in event.");
-    return;
-  }
-  if (!(*vertices)) {
-    gMessMgr->Warning("StSmdstMaker: No vertices in event.");
-    return;
-  }
+  StEvent *ev = event();
+#endif
+  StEvent* ev = (StEvent *) GetInputDS("StEvent");
+   StVertexCollection *vertices = ev->vertexCollection();
+   if (!vertices) {
+     printf("StSmdstMaker: Warning - no vertex collection in event.\n");
+     return;
+   }
+   if (vertices->size()) {
+     printf("StSmdstMaker: Warning - no vertices in event.\n");
+     return;
+   }
 
   if (m_DataSet && update) {
-   for (vertices  = ev->vertexCollection()->begin();
-        vertices != ev->vertexCollection()->end(); vertices++) {
-     if ( (*vertices)->type() != Xi) continue;
-     StXiVertex *vertex = (StXiVertex *) *vertices;
+    StVertexIterator vtxI;
+   for (vtxI  = ev->vertexCollection()->begin();
+        vtxI != ev->vertexCollection()->end(); vtxI++) {
+     StVertex *vtx = *vtxI;
+     if ( vtx->type() != Xi) continue;
+     StXiVertex *vertex = (StXiVertex *) vtx;
 
      StGlobalTrack* bTrack = vertex->bachelor();
 
-     const StThreeVector<float>& bMom = vertex->momentumOfBachelor();
-     const StThreeVector<float> vMom = vertex->momentumOfV0();
+     const StThreeVectorF& bMom = vertex->momentumOfBachelor();
+     const StThreeVectorF vMom = vertex->momentumOfV0();
       
      ptotb2 = bMom.mag2();
      ptotv2 = vMom.mag2();
@@ -502,7 +511,7 @@ void StSmdstMaker::PrintInfo() {
 // PrintInfo() prints information about the class to standard output.
 //
   printf("**************************************************************\n");
-  printf("* $Id: StSmdstMaker.cxx,v 1.7 1999/06/24 22:09:21 genevb Exp $\n");
+  printf("* $Id: StSmdstMaker.cxx,v 1.8 1999/06/27 22:45:30 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   if (draw_histos) printf("* Strangeness Histograms are active\n");
   printf("**************************************************************\n");

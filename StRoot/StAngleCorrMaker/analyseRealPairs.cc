@@ -1,15 +1,15 @@
 #include "StAngleCorrMaker.h"
-#include "StEvent/StEvent.hh"
-#include "StEvent/StGlobalTrack.hh"
+#include "StEvent.h"
+#include "StGlobalTrack.h"
 #include "StAngleDiff.hh"
 #include "StTrackForPool.hh"
-#include "StThreeVector.hh"
+#include "StThreeVectorD.hh"
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
 #include "TRandom.h"
 #include <TOrdCollection.h>
 
-static const char rcsid[] = "$Id: analyseRealPairs.cc,v 1.2 1999/05/03 17:19:29 ogilvie Exp $";
+static const char rcsid[] = "$Id: analyseRealPairs.cc,v 1.3 1999/06/27 22:45:25 fisyak Exp $";
 
 void StAngleCorrMaker::analyseRealPairs(StEvent& event,int eventNumber)
 {
@@ -75,7 +75,7 @@ void StAngleCorrMaker::analyseRealPairs(StEvent& event,int eventNumber)
 	       continue;
 
         StTrackForPool *trackforpool = new StTrackForPool; 
-	StThreeVector<double> mom1 = track1->helix().momentum(bField);      //
+	StThreeVectorD mom1 = track1->helix().momentum(bField);      //
 	if (mom1.perp() > 1.5*GeV ) {
       // put track into pool
       //
@@ -89,7 +89,7 @@ void StAngleCorrMaker::analyseRealPairs(StEvent& event,int eventNumber)
 	 //
 	 // find pairs in this event
 	 //
-	 for (iter2 = iter1+1;
+	 for (iter2 = iter1, iter2++;
 	      iter2 != tracks->end(); iter2++) {
 	     track2 = *iter2;
 	     vertex2 = track2->startVertex();
@@ -100,7 +100,7 @@ void StAngleCorrMaker::analyseRealPairs(StEvent& event,int eventNumber)
 	       if ((track2->fitTraits().chiSquaredInXY()/degreesOfFreedom > 1.5 ) ||
                 (track2->fitTraits().chiSquaredInPlaneZ()/degreesOfFreedom > 1.5)) 
 	       continue;
-	       StThreeVector<double> mom2 = track2->helix().momentum(bField);
+	       StThreeVectorD mom2 = track2->helix().momentum(bField);
 	       if (mom2.perp() > 1.5*GeV ) {
 	         double diff = anglediff->phiDiff(mom1,mom2);
                  double weight = anglediff->weightPhiDiff(mom1,mom2);
