@@ -1,5 +1,8 @@
-// $Id: TestStarPalette.C,v 1.2 1999/06/25 19:17:27 kathy Exp $
+// $Id: TestStarPalette.C,v 1.3 2000/01/10 15:21:08 kathy Exp $
 // $Log: TestStarPalette.C,v $
+// Revision 1.3  2000/01/10 15:21:08  kathy
+// updated the *Palette macros for changes in ROOT (see email to software-l from Valery on 7jan00)
+//
 // Revision 1.2  1999/06/25 19:17:27  kathy
 // fix the Palette macros so that you can run StarPalette directly from TestStarPalette - thanks, Thoams & Gene!
 //
@@ -8,16 +11,24 @@
 //
 //
 //======================================================================
-// owner: Jon Gans
+// owner: Jon Gans/Kathy Turner (took over 10jan00)
 // what it does: 
-//      Example to show how what color scheme will be set up when
-//      using StarPalette.C
+//      This macro loads and runs the StarPalette macro and shows
+//      an example plot for the color scheme setup by StarPalette.C
+//
+//      This macro also shows how to load and run another macro from
+//      a different file.
+//
+//    10jan00(KT) --> 
+//       This color palette is now implemented automatically
+//       by ROOT, so one doesn't need to use this!   However, I leave
+//       it here as an example!!
 //
 // To use:
 //    Run root4star, then
 //      .x TestStarPalette.C
+//
 //=======================================================================
-
 
 {
 // to run another macro from this macro:
