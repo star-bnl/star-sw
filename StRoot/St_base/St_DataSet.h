@@ -18,6 +18,7 @@
 #include <TList.h>
 //*KEEP,TNamed.
 #include <TNamed.h>
+#include <TNode.h>
 //*KEND.
  
 class St_DataSetIter;
@@ -28,7 +29,11 @@ class TBrowser;
 typedef enum {
       kContinue,  // continue passing 
       kPrune,     // stop passing of the current branch but continue with the next one if any
-      kStop       // break passing
+      kStop,      // break passing
+      kStruct,    // work with structural links only
+      kAll,       // work with all links 
+      kRefs,      // work with refs links only
+      kMarked     // work with marked links only
      } EDataSetPass;
 
 class St_DataSet : public TNamed
@@ -45,9 +50,12 @@ class St_DataSet : public TNamed
  public:
  
     St_DataSet(const Char_t *name="", St_DataSet *parent=0);
+    St_DataSet(const St_DataSet &src,EDataSetPass iopt=kAll);
+    St_DataSet(TNode &src); 
     virtual ~St_DataSet();
             void         Add(St_DataSet *dataset);
     virtual void         Browse(TBrowser *b);
+    virtual TObject     *Clone();
     virtual St_DataSet  *Data() const { return HasData() ? (St_DataSet *)this : 0; }  // returns this pointer the derived classes if any
     virtual void         Delete(Option_t *opt="");   
             TObject     *GetMother() const { return fMother; }

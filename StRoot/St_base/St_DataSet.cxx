@@ -38,6 +38,64 @@ St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent) : TNamed(), fList
    SetTitle("St_DataSet");
 }
 //______________________________________________________________________________
+St_DataSet::St_DataSet(const St_DataSet &src,EDataSetPass iopt)
+{
+  //
+  // Creates St_DataSet with topology similar with St_DataSet *src)  
+  //
+  //  Parameters:
+  //  -----------
+  //  src      - the name of the "native file system" directory
+  //             to convert into St_FileSet
+  //  iopt = kStruct - clone only my strutural links
+  //         kAll    - clone all links
+  //         kRefs   - clone only refs
+  //         kMarked - clone marked (not implemented yet) only
+  //
+  //   All new-created sets become the structural anyway.
+  //
+
+  SetName(src.GetName());
+  SetTitle(src.GetTitle());
+
+  St_DataSet *set = 0;
+  St_DataSetIter next((St_DataSet *)&src);
+  Bool_t optsel = (iopt == kStruct);
+  Bool_t optall = (iopt == kAll);
+  while (set = next()) {
+    // define the parent of the next set
+     St_DataSet *parent = set->GetParent();
+     if ( optall || (optsel && parent == this) )
+                                  Add((St_DataSet *)(set->Clone()));
+  }
+}
+
+//______________________________________________________________________________
+St_DataSet::St_DataSet(TNode &src)
+{
+  //
+  // Creates St_DataSet with topology similar with TNode *src
+  //
+  //   All new-created sets become the structural anyway.
+  //
+  // Note:  We need this ctor temporary unless Tnode is derived from
+  //        St_Dataset
+  //
+
+  SetName(src.GetName());
+  SetTitle(src.GetTitle());
+
+  TList *nodelist = src.GetListOfNodes();
+  if (nodelist) {
+    TNamed *named = 0;
+    TIter next(nodelist);
+    while (named  = (TNamed *) next()) {
+             Add(new St_DataSet(*(TNode *)named));
+    }
+  }
+}
+
+//______________________________________________________________________________
 St_DataSet::~St_DataSet()
 {
    Delete();
@@ -66,6 +124,10 @@ void St_DataSet::Browse(TBrowser *b)
    if (b)
        while (obj = next())
                  b->Add(obj,obj->GetName());
+}
+//______________________________________________________________________________
+TObject *St_DataSet::Clone() {
+   return new St_DataSet(*this);
 }
 //______________________________________________________________________________
 void St_DataSet::Delete(Option_t *opt){
