@@ -1,8 +1,5 @@
 /**************************************************************
- *
- * $Id: StSsdWaferCollection.cc,v 1.1 2004/03/12 04:24:20 jeromel Exp $
- *
- * Author: cr
+ * Author: christelle roy
  **************************************************************/
 #include <Stiostream.h>
 #include "StObject.h"
@@ -65,47 +62,9 @@ void StSsdWaferCollection::setConfiguration(StSsdConfig* config)
   resize(mSsdConfig->getTotalNumberOfHybrids()/2);
 }
 
-/*! 
-  returns an internal index for the specified wafer. 
-  This index should be used to store/retrieve a specific wafer in/from the collection.
-  Or one can use the getObject method which parameters are the barrel, ladder, wafer 
-  and hybrid numbers.
-*/
-int StSsdWaferCollection::getWaferIndex(int barrelID, int ladderID, int waferID)
-{
-  int index;
 
-  if (mSsdConfig) {
-    index = (int)mSsdConfig->getHybridIndex(barrelID, ladderID, waferID, 1)/2;
-    return index;
-  }
-
-  return -1;
-}
-
-/*
-StSsdHybridObject* StSsdWaferCollection::At(int index)
-{
-  return (StSsdHybridObject*)at(index);
-}
-
-void StSsdWaferCollection::AddAt(StSsdHybridObject* object, int index)
-{
-  put_at((TObject*)object,index);
-}
-*/
-
-/// Method to retrieve an object (StSsdHybridObject) of the collection using the barrel, ladder, wafer numbers.
-StSsdHybridObject* StSsdWaferCollection::getObject(int barrelID, int ladderID, int waferID)
-{
-  int index = getWaferIndex(barrelID, ladderID, waferID);
-  if (index<0) return 0;
-  return (StSsdHybridObject*)at(index);
-}
-
-int StSsdWaferCollection::getNumberOfBarrels() {return mSsdConfig->getNumberOfBarrels();}
-int StSsdWaferCollection::getNumberOfLadders(int barrel) {return mSsdConfig->getNumberOfLadders(barrel);}
-int StSsdWaferCollection::getNumberOfWafers(int barrel)  {return mSsdConfig->getNumberOfWafers(barrel);}
+int StSsdWaferCollection::getNumberOfLadders() {return mSsdConfig->getNumberOfLadders();}
+int StSsdWaferCollection::getNumberOfWafers()  {return mSsdConfig->getNumberOfWafers();}
 int StSsdWaferCollection::getTotalNumberOfWafers() {return (int)mSsdConfig->getTotalNumberOfHybrids()/2;}
 const char* StSsdWaferCollection::getConfiguration(){return mConfig.Data();}
 
