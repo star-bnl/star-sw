@@ -201,7 +201,7 @@ STAFCV_T duiFactory:: duRecurse (char *path,int indent,DS_DATASET_T *pDS,
   } else { /* is a table */
     if(!dsTableRowSize(&rowsize,pDS)) EML_ERROR(DATASET_ERROR);
     if(!dsTableMaxRowCount(&nrows,pDS)) EML_ERROR(DATASET_ERROR);
-    if(nrows*rowsize>=minsize) {
+    if((long)(nrows*rowsize)>=minsize) {
       printf("%s/%s ",path,dsName);
       duiSprinfWithCommas(buf,(long)(nrows*rowsize));
       for(ii=56-strlen(buf)-strlen(path)-strlen(dsName);ii>=0;ii--) {
@@ -217,8 +217,8 @@ STAFCV_T duiFactory:: duRecurse (char *path,int indent,DS_DATASET_T *pDS,
 void duiFactory:: duiSprinfWithCommas(char *out,long in) {
   char *p,buf[77];
   int ii,len,leadoff;
-  if(in<=0) { sprintf(out,"%d",in); return; }
-  sprintf(buf,"%d",in); len=strlen(buf); p=out;
+  if(in<=0) { sprintf(out,"%ld",in); return; }
+  sprintf(buf,"%ld",in); len=strlen(buf); p=out;
   leadoff=len%3+98;
   for(ii=0;ii<len;ii++) {
     *(p++)=buf[ii]; if(!buf[ii+1]) break;
@@ -230,7 +230,6 @@ void duiFactory:: duiSprinfWithCommas(char *out,long in) {
 STAFCV_T duiFactory:: du (const char * dirPath,long minsize) {
 
    DS_DATASET_T *pDS=NULL; int i; char buf[50];
-   bool_t result;
 
    if( !findNode_ds(dirPath,pDS)) {
       EML_ERROR(OBJECT_NOT_FOUND);
@@ -249,7 +248,7 @@ STAFCV_T duiFactory:: du (const char * dirPath,long minsize) {
    FREE(path2); duiSprinfWithCommas(buf,(long)totBytes);
    printf("                                     Total bytes %11s\n",buf);
    if(minsize>0) {
-      printf("Only tables of size >= %d bytes are listed above.\n",minsize);
+      printf("Only tables of size >= %ld bytes are listed above.\n",minsize);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -287,7 +286,6 @@ STAFCV_T duiFactory:: append (const char * fromPath
   DS_DATASET_T *from=NULL,*targ=NULL;
   size_t nbytes,nokFrom,nmaxFrom,nmaxTarg,nokTarg,offset,sizeTarg,sizeFrom;
   char *fromSpec,*targSpec,*fromData,*targData;
-  bool_t isDirectory;
 
   if(!findNode_ds(fromPath,from)) EML_ERROR(SRC_NOT_FOUND);
   if(!dsTableRowCount(&nokFrom,from)) EML_ERROR(SRC_TABLE_NOT_FOUND);
@@ -633,7 +631,12 @@ tdmTable* duiFactory:: findTable (const char * filePath) {
 }
 
 //----------------------------------
-tdmDataset* duiFactory:: newDataset (const char * name, long setDim){
+tdmDataset* 
+duiFactory::newDataset (const char * name, long setDim)
+{
+  //Just to hush pedantic compilers
+  static void *ps = &setDim;
+
    IDREF_T id;
    if( soc->idObject(name,"tdmDataset",id) ){
       // EML_ERROR(DUPLICATE_OBJECT_NAME);
@@ -666,7 +669,7 @@ tdmTable* duiFactory:: newTable (const char * name
       return NULL;
    }
    tdmTable* p=NULL;
-   DS_DATASET_T *pDSbase=NULL, *pDSnew=NULL;
+   DS_DATASET_T *pDSbase=NULL;
    char* pData=NULL;
    if( NULL == (p = findTable(name)) ){	//- create object from pointer
       					//- ... or create pointer

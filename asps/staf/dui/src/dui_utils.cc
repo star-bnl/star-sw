@@ -55,7 +55,7 @@ char * dui_dirof(const char* path)
    d=(char*)MALLOC(strlen(path)+1);
    d[0] = '\000';
    p=NULL;
-   while( n = (char*)strntok(path,"/",i++) ){
+   while ((n = (char*)strntok(path,"/",i++))) {
       if(p){
          strcat(d,"/");
          strcat(d,p);
@@ -82,7 +82,7 @@ char * dui_notdirof(const char * path)
    char * p=NULL;
    int i=0;
 
-   while( c = (char*)strntok(path,"/",i++) ){
+   while ((c = (char*)strntok(path,"/",i++))){
       if(p)FREE(p);
       p = (char*)c;
    }
@@ -136,7 +136,7 @@ char * dui_pathof(const char* base,const char* mod)
       int l=0;		// string length
       int herb2=-8;     // max index for FREE() {some of the d[i]'s are
                         // dynamically allocated, and some are not}
-      while( d[i]=strntok(base,"/",i) ){	// load absolute base
+      while ((d[i]=strntok(base,"/",i))){	// load absolute base
          l += strlen(d[i]); 
          e[i]=d[i]; herb2=i+1;
          i++;
@@ -191,7 +191,6 @@ int duiFindDS(DS_DATASET_T *& node, DS_DATASET_T* root, char* path)
    DS_DATASET_T *pDSr=root;
    DS_DATASET_T *pDSc=NULL;
    int i=0;
-   char *name;
    bool_t isDataset;
 
 //printf("path = %s \n",path);			.. ***** DEBUG *****
