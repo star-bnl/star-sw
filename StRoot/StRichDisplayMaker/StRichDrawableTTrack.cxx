@@ -1,12 +1,12 @@
 /**********************************************************
- * $Id: StRichDrawableTTrack.cxx,v 2.1 2000/09/29 17:36:58 gans Exp $
+ * $Id: StRichDrawableTTrack.cxx,v 2.2 2000/11/01 16:56:58 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichDrawableTTrack.cxx,v $
- *  Revision 2.1  2000/09/29 17:36:58  gans
- *  Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
+ *  Revision 2.2  2000/11/01 16:56:58  lasiuk
+ *  default arguments in c'tor.  Reduce number of particles contained
  *
  *  Revision 2.1  2000/09/29 17:36:58  gans
  *  Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
@@ -26,20 +26,24 @@
  *
  *
  **********************************************************/
+#include <vector>
+
+#include "TPolyLine.h"
+
+#include "StThreeVectorD.hh"
+#include "StThreeVector.hh"
+#include "StPhysicalHelixD.hh"
+#include "StPhysicalHelix.hh"
+#include "StParticleDefinition.hh"
+#include "StParticleTypes.hh"
+
+#include "StRichPIDMaker/StRichRings.h"
+#include "StRichPIDMaker/StRichTrack.h"
 
 #include "StRichDrawableTTrack.h"
 #include "StRichDrawableTRings.h"
-#include "StParticleDefinition.hh"
-#include "StParticleTypes.hh"
-#include "StRichPIDMaker/StRichRings.h"
-#include "TPolyLine.h"
-#include "StRichPIDMaker/StRichTrack.h"
-#include "StThreeVectorD.hh"
-#include "StThreeVector.hh"
-#include <vector>
+
 #include "StEventTypes.h"
-#include "StPhysicalHelixD.hh"
-#include "StPhysicalHelix.hh"
 
 #ifndef ST_NO_NAMESPACES
 using namespace units;
@@ -47,55 +51,36 @@ using namespace units;
 
 StRichDrawableTTrack::StRichDrawableTTrack() {}
 
-StRichDrawableTTrack::StRichDrawableTTrack(StRichTrack* track) {
-
-  mTrack = track;
-  mProjectedMIP = 0;
+StRichDrawableTTrack::StRichDrawableTTrack(StRichTrack* track)
+    :  mTrack(track),   mProjectedMIP(0)
+{
   
-  if (!mTrack) {
-    cout << "StRichDrawableTTrack:: passed null pointer! " << endl;
-    abort();
-  }
+    if (!mTrack) {
+	cout << "StRichDrawableTTrack:: passed null pointer! " << endl;
+	abort();
+    }
 
-   
-  StPionMinus*  pionminus   = StPionMinus::instance();
-  StKaonMinus*  kaonminus   = StKaonMinus::instance();
-  StAntiProton* antiproton  = StAntiProton::instance();
-  StPionPlus*  pionplus   = StPionPlus::instance();
-  StKaonPlus*  kaonplus   = StKaonPlus::instance();
-  StProton*    proton     = StProton::instance(); 
-  
-  mProjectedMIP = new StRichDrawableTMip(this);
-  
-  StRichRings pionminusRing(mTrack,pionminus);
-  StRichRings pionplusRing(mTrack,pionplus);
-  StRichRings kaonplusRing(mTrack,kaonplus);
-  StRichRings kaonminusRing(mTrack,kaonminus);
-  StRichRings antiprotonRing(mTrack,antiproton);
-  StRichRings protonRing(mTrack,proton);
-  
-  mVectorRings.clear();
-  mVectorRings.resize(0);
-  int charge=0;
-  if (mTrack->getStTrack() && mTrack->getStTrack()->geometry()) {
-    charge = mTrack->getStTrack()->geometry()->helix().h();
-  }
+    StPionPlus*  pionplus   = StPionPlus::instance();
+    StKaonPlus*  kaonplus   = StKaonPlus::instance();
+    StProton*    proton     = StProton::instance(); 
 
-  //  if(charge < 0) // if negative
-  //  {
-  mVectorRings.push_back(new StRichDrawableTRings(pionminusRing));
-  mVectorRings.push_back(new StRichDrawableTRings(kaonminusRing));
-  mVectorRings.push_back(new StRichDrawableTRings(antiprotonRing));
-	  //   }
+    //
+    // make a MIP extrapolation
+    //
+    mProjectedMIP = new StRichDrawableTMip(this);
 
-  /*
-  else
-      {
-	  mVectorRings.push_back(new StRichDrawableTRings(pionplusRing));
-	  mVectorRings.push_back(new StRichDrawableTRings(kaonplusRing));
-	  mVectorRings.push_back(new StRichDrawableTRings(protonRing));
-      }
-  */
+
+    // In PIDMaker
+    StRichRings pionRing(mTrack,pionplus);
+    StRichRings kaonRing(mTrack,kaonplus);
+    StRichRings protonRing(mTrack,proton);
+    
+    mVectorRings.clear();
+    mVectorRings.resize(0);
+
+    mVectorRings.push_back(new StRichDrawableTRings(pionRing));
+    mVectorRings.push_back(new StRichDrawableTRings(kaonRing));
+    mVectorRings.push_back(new StRichDrawableTRings(protonRing));
 
 }
 
@@ -111,6 +96,7 @@ StRichDrawableTTrack::~StRichDrawableTTrack() {
 }
 
 StRichDrawableTRings* StRichDrawableTTrack::getRing(unsigned int i) {
+
     if(i < mVectorRings.size())
 	return mVectorRings[i];
     else
@@ -118,9 +104,10 @@ StRichDrawableTRings* StRichDrawableTTrack::getRing(unsigned int i) {
 }
 
 StRichDrawableTRings* StRichDrawableTTrack::getRing(StParticleDefinition * def) {
+
     for(unsigned int i=0;i < mVectorRings.size();i++){
 	if(mVectorRings[i]->getParticle() == def){
-		return mVectorRings[i];
+	    return mVectorRings[i];
 	}
     }
     return 0;
@@ -128,12 +115,16 @@ StRichDrawableTRings* StRichDrawableTTrack::getRing(StParticleDefinition * def) 
 }
 
 StRichTrack* StRichDrawableTTrack::getTrack() {
-  return mTrack;
+
+    return mTrack;
 }
 
 Int_t StRichDrawableTTrack::numberOfRings() {
-  return mVectorRings.size();
+
+    return mVectorRings.size();
 }
 
 StRichDrawableTMip * StRichDrawableTTrack::getProjectedMIP(){
-    return mProjectedMIP;}
+
+    return mProjectedMIP;
+}
