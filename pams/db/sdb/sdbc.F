@@ -344,12 +344,12 @@ C: Get current working directory
       ln3=index(pwd,char(0))-1
       ln4=lenocc(troot)
 C: Produce path list of current directory
-      string='find '//troot(1:ln4)//' -type d >1'//flist(1:ln1)
+      string='find '//troot(1:ln4)//' -type d -a ! -name CVS >1'//flist(1:ln1)
       CALL SYSTEMF(string)
       if(iopt.eq.0) then
 C: Goto STAR directory, produce path list, return to PWD
       string='cd '//caldir(1:ln2)//'/..; find '//troot(1:ln4)//
-     >' -type d >'//pwd(1:ln3)//'/2'//flist(1:ln1)//'; cd '//pwd(1:ln3)
+     >' -type d  -a ! -name CVS >'//pwd(1:ln3)//'/2'//flist(1:ln1)//'; cd '//pwd(1:ln3)
       CALL SYSTEMF(string)
       endif
 C: Sort both lists to merge its
