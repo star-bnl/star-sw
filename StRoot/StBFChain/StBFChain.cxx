@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.326 2003/04/07 22:01:14 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.327 2003/04/09 21:13:44 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1307,8 +1307,9 @@ Int_t StBFChain::Instantiate()
 	    Int_t DMode=0;
 	    St_tpcdaq_Maker *tcpdaqMk = (St_tpcdaq_Maker *) mk;
 
-	    if (GetOption("Trs")) mk->SetMode(1); // trs
-	    else                  mk->SetMode(0); // daq
+	    if      (GetOption("Trs"))   mk->SetMode(1); // trs
+	    else if (GetOption("Simu"))  mk->SetMode(2); // daq, no gain
+	    else                         mk->SetMode(0); // daq
 
 	    if ( GetOption("onlcl") )   DMode = DMode | 0x2;  // use the online TPC clusters info if any
 	    if ( GetOption("onlraw") )  DMode = DMode | 0x1;  // use the TPC raw hit information
