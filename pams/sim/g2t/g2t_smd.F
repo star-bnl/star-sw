@@ -1,7 +1,7 @@
       FUNCTION  G2T_SMD (g2t_track_h,   g2t_track , 
      >                   g2t_emc_hit_h, g2t_emc_hit ) 
       IMPLICIT  NONE
-#include "g2t_smd.inc"
+#include "g2t_emc.inc"
 *    - - - - - - - - - 
       Integer         Lnmax
       Parameter       (Lnmax=50)
