@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.cc,v 1.5 1999/02/14 20:45:15 lasiuk Exp $
+ * $Id: StTrsUnpacker.cc,v 1.6 1999/02/16 18:15:41 fisyak Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.cc,v $
- * Revision 1.5  1999/02/14 20:45:15  lasiuk
- * use assert and index (ii) was 'off by 1'
+ * Revision 1.6  1999/02/16 18:15:41  fisyak
+ * Check in the latest updates to fix them
+ *
+ * Revision 1.7  1999/02/23 14:05:16  lasiuk
+ * exit if last time bin has non-zero count in ADCs
  *
  * Revision 1.6  1999/02/16 18:15:41  fisyak
  * Check in the latest updates to fix them
@@ -40,7 +43,7 @@
 
 StTrsUnpacker::StTrsUnpacker() { /* nopt */}
 
-    PR(theData->mSectors.size());
+StTrsUnpacker::~StTrsUnpacker() { /* nopt */}
     
 int StTrsUnpacker::getSector(int which, StTpcRawDataEvent* eventData)
 {

@@ -24,7 +24,7 @@ void Load(){
     gSystem->Load("St_dst_Maker");
 };
 
-void GetEvent(const Char_t *testedMakerName = "geant",Int_t numberOfEvent=1,Int_t firstEventNumber=0) {
+void GetEvent(const Char_t *testedMakerName = "geant",Int_t numberOfEvent=1,Int_t firstEventNumber=2) {
  cout << "\tUsage: GetEvent(const Char_t *testedMakerName = \"" << testedMakerName << "\""
                       << ", Int_t numberOfEvent=" << numberOfEvent
                       <<",Int_t firstEventNumber="<<firstEventNumber<< ")" 

@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.2 1999/02/11 16:22:51 wenaus Exp $
+// $Id: doEvents.C,v 1.3 1999/02/16 18:15:48 fisyak Exp $
 // $Log: doEvents.C,v $
-// Revision 1.2  1999/02/11 16:22:51  wenaus
-// load StEvent for Linux
+// Revision 1.3  1999/02/16 18:15:48  fisyak
+// Check in the latest updates to fix them
+//
+// Revision 1.3  1999/02/16 18:15:48  fisyak
+// Check in the latest updates to fix them
 //
 // Revision 1.2  1999/02/11 16:22:51  wenaus
 // load StEvent for Linux
@@ -54,9 +57,10 @@ TString  originalPath;
 // to be processed.
 
 void doEvents(const Int_t nevents=999,
-               const Char_t *path="-/disk00000/star/auau200/hijing135/",
-               const Char_t *file="/disk00000/star/auau200/hijing135/default/b0_20/year2x/hadronic_on/tfs_dst/pet213_02_190evts_h_dst.xdf")
+              const Char_t *path="-/disk00000/star/auau200/hijing135/",
+              const Char_t *file="/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
     cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
+  //               const Char_t *file="/disk00000/star/auau200/hijing135/default/b0_20/year2x/hadronic_on/tfs_dst/pet213_02_190evts_h_dst.xdf")
 
 
 

@@ -156,7 +156,7 @@ St_DataSet *St_DBList::GetValidFile(Int_t date, Int_t time)
       const Char_t *p = 0;
       St_DataSet *parent = file->GetParent();
       if (parent) {
-        TString dbfile = "/afs/rhic/star/";
+        TString dbfile = "$STAR_ROOT/";
 //        dbfile += file->Path();
         dbfile += validfile->GetName();
         p=dbfile;
@@ -280,7 +280,7 @@ Int_t St_db_Maker::Make(){
 //_____________________________________________________________________________
 void St_db_Maker::PrintInfo(){
   printf("***************************************************************\n");
-  printf("* $Id: St_db_Maker.cxx,v 1.1 1999/01/02 19:08:15 fisyak Exp $\n");
+  printf("* $Id: St_db_Maker.cxx,v 1.2 1999/02/16 18:15:43 fisyak Exp $\n");
   printf("***************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
