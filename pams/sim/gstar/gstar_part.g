@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.9 2003/12/19 17:51:11 potekhin Exp $
+* $Id: gstar_part.g,v 1.10 2004/06/06 14:08:35 fisyak Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.10  2004/06/06 14:08:35  fisyak
+* make LASERINO charged
+*
 * Revision 1.9  2003/12/19 17:51:11  potekhin
 * Added the CVS tag, and repeating the comment from the previous check-in:
 * Including the straglet nomenclature developed by Ron, with a few corresctions.
@@ -70,7 +73,8 @@
   Particle Upsilon   code=161 TrkTyp=4 mass=9.460   charge=0  tlife=1.254e-20,
                      pdg=553  bratio= { 1, }       mode= { 203, }
 
-  Particle LASERINO  code=170         TrkTyp=6 mass=0     charge=0 tlife=big
+  Particle LASERINO  code=170         TrkTyp=6 mass=0     charge=1 tlife=big
+  Particle chasrino  code=171         TrkTyp=6 mass=0     charge=1 tlife=big
 
 
 * the Stranglet World, authored by Ron Longacre and remastered by M.Potekhin
