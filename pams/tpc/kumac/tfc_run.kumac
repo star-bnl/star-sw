@@ -43,7 +43,6 @@ macro run_newtab tpc_sector_first=1 tpc_sector_last=24
      tdm/table/cell/putvalue 'tfc_sector_index[0].CurrentSector' [j]
      cd /dui 
    ami/module/call xyz_newtab_
-       [geometry]/tpc/tpgpar/tpg_pad_plane_
        [geometry]/tpc/tpgpar/tpg_detector_
        [params]/tpc/tfcpars/tfc_sector_index_
        [raw_data]/tpc/raw_sec_m_
