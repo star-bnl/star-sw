@@ -1,25 +1,6 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.6 2003/09/11 05:49:17 perev Exp $
-// $Log: StEEmcFastMaker.cxx,v $
-// Revision 1.6  2003/09/11 05:49:17  perev
-// ansi corrs
-//
-// Revision 1.5  2003/02/21 15:31:18  balewski
-// do not kill the chain (it is against my will, JB)
-//
-// Revision 1.4  2003/02/20 05:15:51  balewski
-// *** empty log message ***
-//
-// Revision 1.3  2003/02/18 19:56:03  balewski
-// add pedestals
-//
-// Revision 1.2  2003/02/14 00:04:31  balewski
-// remove few printouts
-//
-// Revision 1.1  2003/01/28 23:12:59  balewski
-// star
-//
+// $Id: StEEmcFastMaker.cxx,v 1.7 2003/11/12 19:58:31 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -87,7 +68,7 @@ Int_t StEEmcFastMaker::Init(){
 //--------------------------------------------
 //--------------------------------------------
 Int_t StEEmcFastMaker::Make(){
-
+  
   static int first=1;
   printf("%s::Make()\n",GetName());
   meeve->clear();
@@ -102,6 +83,7 @@ Int_t StEEmcFastMaker::Make(){
     return kStOK;
   }
 
+  
   EEeventDst eeveRaw;    // raw M-C hits 
   
   // generation of TTree
@@ -155,6 +137,7 @@ void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
   int mxSector = kEEmcNumSectors;
   assert(stevt); // fix dumm input
   if(mdbg)printf("EE2ST() start %p\n",(void*)stevt);
+  eevt->print();
 
   StEmcCollection* emcC =(StEmcCollection*)stevt->emcCollection();
    if(mdbg)printf("EE2ST got emcCollection\n");
@@ -199,7 +182,7 @@ void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
 	  int adc= (int) (t->energy()* mfixPgain);
 	  StEmcRawHit* h = new StEmcRawHit(id,isec,jeta,jsub,adc,t->energy());
 	  d->addHit(h);
-	  printf("Pr1   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy());
+	  printf("Pr1   %c  %d  adc=%d e=%f\n",t->sub(),t->eta(),adc,t->energy());
 	}
 
 	tca = EEsec->getPre2Hits();      
@@ -331,6 +314,29 @@ void  StEEmcFastMaker::mST2EE(EEeventDst* evt, StEvent* stevt){
   }
 }
 
+
+// $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.7  2003/11/12 19:58:31  balewski
+// bug for pre2 in StEvent fixed (was either copy of pre1 or garbage)
+//
+// Revision 1.6  2003/09/11 05:49:17  perev
+// ansi corrs
+//
+// Revision 1.5  2003/02/21 15:31:18  balewski
+// do not kill the chain (it is against my will, JB)
+//
+// Revision 1.4  2003/02/20 05:15:51  balewski
+// *** empty log message ***
+//
+// Revision 1.3  2003/02/18 19:56:03  balewski
+// add pedestals
+//
+// Revision 1.2  2003/02/14 00:04:31  balewski
+// remove few printouts
+//
+// Revision 1.1  2003/01/28 23:12:59  balewski
+// star
+//
 
 
 
