@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.28 2000/01/26 23:41:47 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.29 2000/01/31 15:07:30 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.29  2000/01/31 15:07:30  caines
+// Set primary mxtry for fitting to 1 so no testing on chi2 is done
+//
 // Revision 1.28  2000/01/26 23:41:47  caines
 // Prob cuts set to 10 as in global fit
 //
@@ -203,7 +206,7 @@ Int_t StPrimaryMaker::Init(){
   {  
     egr_egrpar_st row;
     memset(&row,0,sizeof(row));
-    row.mxtry =    10;
+    row.mxtry =    1;
     row.minfit =    5;
     row.prob[0] =   10;
     row.prob[1] =   10;
