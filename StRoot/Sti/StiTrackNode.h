@@ -26,10 +26,14 @@ class StiTrackNode : public StiDefaultMutableTreeNode
   const StiDetector *getDetector() const;
   void setDetector(const StiDetector *pDetector);
 
+	void setDedx(double e) {dedx=e;}
+	double getDedx() const {return dedx;}
+		
  protected:   
 
   StiTrackNode(): hit(NULL), detector(NULL){}
 
+	double        dedx;
   StiHit      * hit;  
   StiDetector * detector; // used if not hit for node
 };

@@ -85,6 +85,8 @@ public:
     ///Return the (y,z) component of the error matrix.
     double syz() const;
 
+		double getEloss();
+
     ///Return the refAngle of the detector plane from which the hit arose.
     double refangle() const;
     ///Return the position of the detector plane from whcih the hit arose.
