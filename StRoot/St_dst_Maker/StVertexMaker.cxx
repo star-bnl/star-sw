@@ -32,6 +32,8 @@
 
 #include "tables/St_vertexSeed_Table.h"
 
+#define NSWITCH 30    /// lmv to evr switch value
+
 long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
 int curEvNum=-1;
 
@@ -205,8 +207,8 @@ Int_t StVertexMaker::Make(){
         iRes = evr_am(m_evr_evrpar,globtrk,vertex);
       }
     } else {  // Primary vertex is not fixed, find it
-      // Switch to Low Multiplicity Primary Vertex Finder for multiplicities < 15
-      if( NGlbTrk < 15 ){
+      // Switch to Low Multiplicity Primary Vertex Finder for multiplicities < NSWITCH
+      if( NGlbTrk < NSWITCH ){
 
         // lmv
         if(Debug()) gMessMgr->Debug("run_lmv: calling lmv");
@@ -380,8 +382,11 @@ void StVertexMaker::UnFixVertex(){
   }
 }
 //_____________________________________________________________________________
-// $Id: StVertexMaker.cxx,v 1.2 2002/02/19 20:28:19 genevb Exp $
+// $Id: StVertexMaker.cxx,v 1.3 2002/02/22 23:44:57 jeromel Exp $
 // $Log: StVertexMaker.cxx,v $
+// Revision 1.3  2002/02/22 23:44:57  jeromel
+// 15 to 30 tracks as a start.
+//
 // Revision 1.2  2002/02/19 20:28:19  genevb
 // Fix mode=2 option (VtxOffSet)
 //
