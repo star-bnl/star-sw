@@ -84,7 +84,7 @@
 * tfc        - unpacks tpc raw data into adcxyz table for diagnostics
 * evin       - to read from tpc raw data file that already has results of tss
 * tcl        - TPC clustering - slow sim only !
-* tte_c      - TPC cluster evaluation - slow sim only
+* tcl_e      - TPC cluster evaluation - slow sim only
 * tfs        - TPC fast simulator
 * sgr        - grouping SVT hits into tracks 
 * tpt        - TPC track finding
@@ -110,7 +110,7 @@
 *                            sgr tracker, tpt tracker, tte track evaluator
 *                            global tracking, global refitting, v0 finder
 *                            & write event out
-*      chain=' g2t svg tpg srs tss tcl tte_c sgr tpt tte_e svm egr ev0 evout'_
+*      chain=' g2t svg tpg srs tss tcl tcl_e sgr tpt tte_e svm egr ev0 evout'_
 *
 * 3. read from geant file, svt fast sim, sgr tracker & write event out
 *      chain=' g2t svg srs sgr evout'_
@@ -121,7 +121,7 @@
 * 
 * 5. read from geant file, tpc slow sim, tpc clustering, tpt tracker,
 *                             tte track evaluator, write event out
-*      chain=' g2t tpg tss tcl tte_c tpt tte_e evout'
+*      chain=' g2t tpg tss tcl tcl_e tpt tte_e evout'
 * 
 * 6. to read in event generator file, run gstar & g2t & write out to xdf file
 *     domain=' geometry sim/gstar sim/g2t ' _
