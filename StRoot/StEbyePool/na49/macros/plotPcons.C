@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotFiles.C,v 1.2 2002/03/27 21:25:54 posk Exp $
+// $Id: plotPcons.C,v 1.1 2002/05/14 20:59:31 posk Exp $
 //
 // Author:        Art Poskanzer, Dec. 2001
 // Description:
@@ -8,7 +8,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-void plotFiles(Char_t* part = "pion") {
+void plotPcons(Char_t* part = "pion") {
   Bool_t pion = kFALSE;
   if (strcmp(part, "pion")==0) pion = kTRUE;
 
@@ -29,12 +29,14 @@ void plotFiles(Char_t* part = "pion") {
   }
 
   //Char_t pstype[255] = "ps";
-  //Char_t pstype[255] = "eps";
-  Char_t pstype[255] = "gif";
+  Char_t pstype[255] = "eps";
+  //Char_t pstype[255] = "gif";
 
   gROOT->SetStyle("Bold");
   gStyle->SetOptStat(kFALSE);
   gStyle->SetOptTitle(kFALSE);
+  gStyle->SetHistLineColor(kBlack);
+  gStyle->SetHistLineStyle(kDashed);
 
   const Int_t har = 1;     // v1
   Int_t   nYbins;
@@ -43,26 +45,8 @@ void plotFiles(Char_t* part = "pion") {
   Float_t min;
   Float_t flip;
   Float_t yCM = 2.92;
-  Float_t markerSize = 2.0;
-
-//   Char_t* infile[nFiles];
-//   //Char_t temp[30];
-//   //for (int i = 0; i < nFiles; i++) {
-//   Char_t tmp1[30];
-//   strcpy(tmp1, part);
-//   infile[0] = strcat(tmp1, fileExt[0]);
-//   cout << "in file 1 = " << infile[0] << endl;
-//   Char_t tmp2[30];
-//   strcpy(tmp2, part);
-//   infile[1] = strcat(tmp2, fileExt[1]);
-//   cout << "in file 2 = " << infile[1] << endl;
-//   //}
-
-//   Char_t tmp[30];
-//   strcpy(tmp, part);
-//   strcat(tmp, plotExt);
-//   Char_t outdir[255] = strcat(tmp, "/");
-//   cout << "out dir = " << outdir << endl;
+  Float_t markerSize = 1.7;
+  Float_t noPercent = 100.;
 
   TString* inFileName[nFiles];
   for (int i = 0; i < nFiles; i++) {
@@ -161,6 +145,7 @@ void plotFiles(Char_t* part = "pion") {
     }
     delete inFileName[i];
     Y[i] = (TH1F*)file[i]->Get(histYName->Data());
+    Y[i]->Scale(1./noPercent);
     Y[i]->Rebin(2);
     Y[i]->Scale(0.5);
 //     if (!pion) {
@@ -168,6 +153,7 @@ void plotFiles(Char_t* part = "pion") {
 //       Y[i]->Scale(0.5);
 //     }
     Pt[i] = (TH1F*)file[i]->Get(histPtName->Data());
+    Pt[i]->Scale(1./noPercent);
     if (!pion) {
       Pt[i]->Rebin(8);
       Pt[i]->Scale(0.125);
@@ -278,7 +264,7 @@ void plotFiles(Char_t* part = "pion") {
   // Draw Graphs
 
   // Minimum Bias vs. y -------------------- ------------------------
-  Char_t title[255] = "Minimum Bias ";
+  Char_t title[255] = "Minimum Bias y ";
   flowY[0][0]->SetTitle(strcat(title, part));
   flowY[0][0]->SetMarkerStyle(kFullCircle);
   flowY[0][1]->SetMarkerStyle(kOpenCircle);
@@ -288,6 +274,10 @@ void plotFiles(Char_t* part = "pion") {
   flowY[0][1]->SetMarkerColor(kRed);
   flowY[1][0]->SetMarkerColor(kGreen);
   flowY[1][1]->SetMarkerColor(kGreen);
+  flowY[0][0]->SetLineColor(kRed);
+  flowY[0][1]->SetLineColor(kRed);
+  flowY[1][0]->SetLineColor(kGreen);
+  flowY[1][1]->SetLineColor(kGreen);
   flowY[0][0]->SetMarkerSize(markerSize);
   flowY[0][1]->SetMarkerSize(markerSize);
   flowY[1][0]->SetMarkerSize(markerSize);
@@ -302,9 +292,11 @@ void plotFiles(Char_t* part = "pion") {
     max = 4.;
     min = -4.;
   }
-  hist->SetMaximum(max);
-  hist->SetMinimum(min);
+  hist->SetMaximum(max/noPercent);
+  hist->SetMinimum(min/noPercent);
   hist->Draw();
+  f3->SetLineColor(kRed);
+  r3->SetLineColor(kRed);
   flowY[0][0]->Fit("f3", "R");
   flowY[0][0]->Draw("P");
   flowY[0][1]->Fit("r3", "R");
@@ -319,15 +311,20 @@ void plotFiles(Char_t* part = "pion") {
   flowY[1][0]->Draw("P");
   flowY[1][1]->Draw("P");
 
-  TLine* lineYcm = new TLine(yCM, min, yCM, max);
+  TLine* lineYcm = new TLine(yCM, min/noPercent, yCM, max/noPercent);
+  lineYcm->SetLineStyle(kDashed);
   lineYcm->Draw();
   
   TLatex l; 
   l.SetNDC();
   l.SetTextColor(kBlue); 
   l.SetTextSize(0.06); 
-    l.SetTextAngle(90); 
-  l.DrawLatex(0.07,0.6,"Flow (%)" ); 
+  l.SetTextAngle(90); 
+  //l.DrawLatex(0.07,0.6,"Flow (%)" ); 
+  ordTitle = new TString(" v_{1}");
+  ordTitle->Prepend(part);
+  l.DrawLatex(0.05,0.6,ordTitle->Data());
+  delete ordTitle;
   l.SetTextAngle(0); 
   l.DrawLatex(0.7,0.05,"rapidity" );
   l.SetTextSize(0.04); 
@@ -350,17 +347,19 @@ void plotFiles(Char_t* part = "pion") {
   }
 
   Char_t outfile[255];
-  sprintf(outfile, "%smb_y.%s", outDirName->Data(), pstype);
+  sprintf(outfile, "%smomConsY.%s", outDirName->Data(), pstype);
   canvas->Print(outfile, pstype);
   if (!Pause()) return;
 
   // Minimum Bias versus pt -------------------- ---------------------
-  sprintf(title, "Minimum Bias ");
+  sprintf(title, "Minimum Bias pt ");
   flowPt[0][0]->SetTitle(strcat(title, part));
   flowPt[0][0]->SetMarkerStyle(kFullCircle);
   flowPt[1][0]->SetMarkerStyle(kFullSquare);
   flowPt[0][0]->SetMarkerColor(kRed);
   flowPt[1][0]->SetMarkerColor(kGreen);
+  flowPt[0][0]->SetLineColor(kRed);
+  flowPt[1][0]->SetLineColor(kGreen);
   flowPt[0][0]->SetMarkerSize(markerSize);
   flowPt[1][0]->SetMarkerSize(markerSize);
 
@@ -374,28 +373,32 @@ void plotFiles(Char_t* part = "pion") {
     max = 10.;
     min = -5.;
   }
-  hist->SetMaximum(max);
-  hist->SetMinimum(min);
+  hist->SetMaximum(max/noPercent);
+  hist->SetMinimum(min/noPercent);
   hist->Draw();
 
   if (pion) {
     //flowPt[0][0]->Draw("PC");
-    flowPt[1][0]->Fit("o2", "R");
-    flowPt[1][0]->Fit("n2", "R+");
-    flowPt[1][0]->Draw("P");
-    flowPt[0][0]->Fit("o2", "R");
-    flowPt[0][0]->Fit("n2", "R+");
-    flowPt[0][0]->Draw("P");
+    //flowPt[1][0]->Fit("o2", "R");
+    //flowPt[1][0]->Fit("n2", "R+");
+    flowPt[1][0]->Draw("PC");
+    //flowPt[0][0]->Fit("o2", "R");
+    //flowPt[0][0]->Fit("n2", "R+");
+    flowPt[0][0]->Draw("PC");
   } else {
-    flowPt[1][0]->Fit("p2", "R");
-    flowPt[1][0]->Draw("P");
-    flowPt[0][0]->Fit("p2", "R");
-    flowPt[0][0]->Draw("P");
+    //flowPt[1][0]->Fit("p2", "R");
+    flowPt[1][0]->Draw("PC");
+    //flowPt[0][0]->Fit("p2", "R");
+    flowPt[0][0]->Draw("PC");
   }
 
   l.SetTextColor(kBlue); 
   l.SetTextAngle(90); 
-  l.DrawLatex(.07,0.6,"Flow (%)" ); 
+  //l.DrawLatex(.07,0.6,"Flow (%)" ); 
+  ordTitle = new TString(" v_{1}");
+  ordTitle->Prepend(part);
+  l.DrawLatex(0.05,0.6,ordTitle->Data());
+  delete ordTitle;
   l.SetTextAngle(0); 
   l.DrawLatex(0.7,0.05,"p_{t} (GeV/c)" ); 
   l.SetTextSize(0.04); 
@@ -413,7 +416,7 @@ void plotFiles(Char_t* part = "pion") {
     l.DrawLatex(0.7,0.7,"no corr.");
   } 
   
-  sprintf(outfile, "%smb_pt.%s", outDirName->Data(), pstype);
+  sprintf(outfile, "%smomConsPt.%s", outDirName->Data(), pstype);
   canvas->Print(outfile, pstype);
   //if (!Pause()) return;
 
@@ -432,7 +435,10 @@ bool Pause() {
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Log: plotFiles.C,v $
+// $Log: plotPcons.C,v $
+// Revision 1.1  2002/05/14 20:59:31  posk
+// For paper version 09.
+//
 // Revision 1.2  2002/03/27 21:25:54  posk
 // Moved to my directory.
 //
