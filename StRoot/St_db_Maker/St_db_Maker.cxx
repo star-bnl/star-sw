@@ -1,6 +1,10 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.57 2002/03/04 16:38:58 jeromel Exp $
+// $Id: St_db_Maker.cxx,v 1.58 2002/05/18 01:04:52 jeromel Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.58  2002/05/18 01:04:52  jeromel
+// Small modif adding more debugging of what it's doing ... In perticular,
+// the association string <-> DateTime is shown.
+//
 // Revision 1.57  2002/03/04 16:38:58  jeromel
 // More info printed before assert()
 //
@@ -363,7 +367,7 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
    TDataSet **dss = new TDataSet*[nrows];
    memset(dss,0,nrows*sizeof(void*));
 
-//		First pass: directories only
+   //		First pass: directories only
    for (irow=0,ihy=thy; irow <nrows ; irow++,ihy++)
    {
      if (strcmp(ihy->tabtype,".node")==0) {// new node
@@ -402,7 +406,7 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
 
 
    delete [] dss;
-//   top->ls(99);
+   //   top->ls(99);
    return top;   
 }
 
@@ -426,7 +430,7 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
   fDBBroker->SetStructName(dat->GetTitle());
   fDBBroker->SetStructSize(dat->GetRowSize());
 
-// 		if descriptor filled, no need for newdat
+  // 		if descriptor filled, no need for newdat
   void *dbstruct = fDBBroker->Use(dat->GetUniqueID(),parId);
   val[0].Set(fDBBroker->GetBeginDate(),fDBBroker->GetBeginTime());
   val[1].Set(fDBBroker->GetEndDate  (),fDBBroker->GetEndTime  ());
@@ -436,12 +440,12 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
   }
 
   int nRows = fDBBroker->GetNRows();
-//		Adopt DB data in the new TTable
+  //		Adopt DB data in the new TTable
   dat->Adopt(nRows,dbstruct);
-//  dat->Print(0,1);
+  //  dat->Print(0,1);
 
-//  printf("BegVal=%s\n",val[0].AsString());
-//  printf("EndVal=%s\n",val[1].AsString());
+  //  printf("BegVal=%s\n",val[0].AsString());
+  //  printf("EndVal=%s\n",val[1].AsString());
   return 0;
 
 }
@@ -454,8 +458,8 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
   TDatime valsCINT[2],valsSQL[2];
    
   if (strcmp(".Val",ds->GetTitle()))		return kContinue;
-//
-//	It is our place.
+  //
+  //	It is our place.
   val = (St_ValiSet*)ds;    
   St_db_Maker *mk = (St_db_Maker*)user;    
   if (mk->fUpdateMode && !val->IsModified()) 	return kPrune;
@@ -463,11 +467,11 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
   TDatime currenTime = mk->GetDateTime();
   UInt_t uevent = currenTime.Get();
 
-// 		Check validity
+  // 		Check validity
     if (val->fTimeMin.Get() <= uevent 
      && val->fTimeMax.Get() >  uevent) 		return kPrune;
 
-//	Start loop
+    //	Start loop
   
 
 
@@ -699,7 +703,9 @@ TDatime St_db_Maker::GetDateTime() const
 void St_db_Maker::SetDateTime(Int_t idat,Int_t itim)
 { 
   fIsDBTime=0; if (idat==0) return;
-  fIsDBTime=1; fDBTime.Set(idat,itim);
+  fIsDBTime=1; fDBTime.Set(idat,itim);  
+  (void) printf("QAInfo: SetDateTime : Setting Startup Date=%d Time=%d\n",
+		idat,itim);
 }
 //_____________________________________________________________________________
 void   St_db_Maker::SetDateTime(const char *alias)
@@ -708,6 +714,8 @@ void   St_db_Maker::SetDateTime(const char *alias)
   int idat = AliasDate(alias);// <name>.YYYYMMDD.hhmmss.<ext>
   int itim = AliasTime(alias);
   assert(idat);
+  (void) printf("QAInfo: SetDateTime(\"%s\") will give Startup Date=%d Time=%d\n",
+		alias,idat,itim);
   fDBTime.Set(idat,itim);
 }
 //_____________________________________________________________________________
