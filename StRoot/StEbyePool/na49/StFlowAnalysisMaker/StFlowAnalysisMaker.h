@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.1 2001/02/22 23:34:25 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.2 2001/08/17 22:03:32 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.2  2001/08/17 22:03:32  posk
+// Now can also do 40 GeV data.
+//
 // Revision 1.1  2001/02/22 23:34:25  posk
 // NA49 version of STAR flow software.
 //
@@ -49,10 +52,11 @@ public:
   Int_t    Finish();
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
+  static   void SetV21();
 
 private:
 
-  void     FillFromFlowEvent();
+  bool     FillFromFlowEvent();
   void     FillEventHistograms();
   void     FillParticleHistograms();
 
@@ -65,6 +69,9 @@ private:
   UInt_t   mMultSub[Flow::nSels*Flow::nSubs][Flow::nHars];   //! multiplicity subs
   Float_t  mRes[Flow::nSels][Flow::nHars];      //! event plane resolution
   Float_t  mResErr[Flow::nSels][Flow::nHars];   //! event plane resolution error
+  Float_t  mResK2[Flow::nSels];      //! event plane resolution for k=2
+  Float_t  mResK2Err[Flow::nSels];   //! event plane resolution error for k=2
+  static   Bool_t mV21;              // Flag for v2 relative to 1st har. plane
   StFlowEvent*     pFlowEvent;  //! pointer to StFlowEvent
   StFlowSelection* pFlowSelect; //! selection object
 
@@ -161,5 +168,7 @@ inline Float_t StFlowAnalysisMaker::Res(Int_t eventN, Int_t harN) const
 
 inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const 
   { return mResErr[eventN][harN]; }
+
+inline void StFlowAnalysisMaker::SetV21() { mV21 = kTRUE; }
 
 #endif

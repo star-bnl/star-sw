@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.3 2001/05/14 22:53:37 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.4 2001/08/17 22:03:23 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.4  2001/08/17 22:03:23  posk
+// Now can also do 40 GeV data.
+//
 // Revision 1.3  2001/05/14 22:53:37  posk
 // Can select PID for event plane particles. Protons not used for 1st harmonic
 // event plane.
@@ -49,10 +52,10 @@
 #include "StMessMgr.h"
 #include "TRandom.h"
 #define PR(x) cout << "##### FlowAnalysis: " << (#x) << " = " << (x) << endl;
-extern "C" float besi0_(const float&);
-extern "C" float besi1_(const float&);
 
 ClassImp(StFlowAnalysisMaker)
+
+Bool_t  StFlowAnalysisMaker::mV21 = kFALSE;
 
 //-----------------------------------------------------------------------
 
@@ -83,16 +86,21 @@ Int_t StFlowAnalysisMaker::Make() {
   if (pFlowMaker) pFlowEvent = pFlowMaker->FlowEventPointer();
   if (pFlowEvent) {
     if (pFlowSelect->Select(pFlowEvent)) {   // event selected
-      FillFromFlowEvent();                   // get event quantities
-      FillEventHistograms();                 // fill event histograms
-      FillParticleHistograms();              // fill particle histograms
+
+      //change to elliminate psi == 0 events
+      if (FillFromFlowEvent()) {             // get event quantities
+	FillEventHistograms();               // fill event histograms
+	FillParticleHistograms(); 
+      } else {
+	gMessMgr->Info("##### FlowAnalysis: Event psi = 0");
+      }
     }
     if (Debug()) StMaker::PrintInfo();
   } else {
-    gMessMgr->Info("##### FlowAnalysis: FlowEvent pointer null");
+    //gMessMgr->Info("##### FlowAnalysis: FlowEvent pointer null");
     return kStOK;
   }
-  
+ 
   return kStOK;
 }
 
@@ -668,7 +676,7 @@ Int_t StFlowAnalysisMaker::Init() {
 
 //-----------------------------------------------------------------------
 
-void StFlowAnalysisMaker::FillFromFlowEvent() {
+bool StFlowAnalysisMaker::FillFromFlowEvent() {
   // Get event quantities from StFlowEvent
   
   for (int k = 0; k < Flow::nSels; k++) {
@@ -680,6 +688,7 @@ void StFlowAnalysisMaker::FillFromFlowEvent() {
 	int i = Flow::nSels*k + n;
 	// sub-event quantities
 	mPsiSub[i][j] = pFlowEvent->Psi(pFlowSelect);
+	if ( mPsiSub[i][j] == 0 ) return kFALSE; //to elliminate psi0
       }
 
       pFlowSelect->SetSubevent(-1);
@@ -688,9 +697,10 @@ void StFlowAnalysisMaker::FillFromFlowEvent() {
       mPsi[k][j]    = pFlowEvent->Psi(pFlowSelect);
       m_q[k][j]     = pFlowEvent->q(pFlowSelect);
       mMult[k][j]   = pFlowEvent->Mult(pFlowSelect);
+      if ( mPsi[k][j] == 0 ) return kFALSE; //to elliminate psi0
     }
   }
-
+  return kTRUE;
 }
 
 //-----------------------------------------------------------------------
@@ -865,15 +875,23 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     if (eta > Flow::yCM) { etaSymPosN++; }
     else { etaSymNegN++; }
 
+    // Loop over the selections and harmonics
     for (int k = 0; k < Flow::nSels; k++) {
       pFlowSelect->SetSelection(k);
       for (int j = 0; j < Flow::nHars; j++) {
 	pFlowSelect->SetHarmonic(j);
 	bool oddHar = (j+1) % 2;
 	double order  = (double)(j+1);
+	// Set the event plane angle
 	float psi_i;
 	if (!pFlowEvent->Stripes()) {
-	  psi_i = mPsi[k][j];
+	  if (mV21 && j==1) {
+	    // 1st harmonics eventplane used for v2 calculation
+	    psi_i = mPsi[k][j-1];
+	    if (psi_i > twopi/2.) psi_i -= twopi/2.;
+	  } else {
+	    psi_i = mPsi[k][j];
+	  }
 	} else { // for particles with the other subevent
 	  int i = Flow::nSels*k;
 	  if (pFlowTrack->Select(j,k,0)) {
@@ -888,15 +906,32 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	      psi_i = mPsiSub[i][j];
 	    }
 	  }
+	  // if 1st harmonics eventplane is used for v2 calculation
+	  if (mV21 && j==1) {
+	    int i = Flow::nSels*k;
+	    if (pFlowTrack->Select(j-1,k,0)) {
+	      psi_i = mPsiSub[i+1][j-1];
+	    } else if (pFlowTrack->Select(j-1,k,1)) {
+	      psi_i = mPsiSub[i][j-1];
+	    } else {
+	      double ran = rand->Rndm(123);
+	      if (ran > 0.5) {
+		psi_i = mPsiSub[i+1][j-1];
+	      } else {
+		psi_i = mPsiSub[i][j-1];
+	      }
+	    }
+	    if (psi_i > twopi/2.) psi_i -= twopi/2.;
+	  }
 	}
 
+	// Remove autocorrelations
 	if (pFlowSelect->Select(pFlowTrack)) {
 	  histFull[k].histFullHar[j].mHistPhi->Fill(phi);
 	  histFull[k].histFullHar[j].mHistYield2D->Fill(rapidity, pt);
 	  double phiWgt = pFlowEvent->PhiWeight(phi, k, j);
 	  histFull[k].histFullHar[j].mHistPhiFlat->Fill(phi, phiWgt);
 	  if (!pFlowEvent->Stripes()) {
-	    // Remove autocorrelations
 	    if (rapidity < Flow::yCM && oddHar) phiWgt *= -1.;
 	    if (pFlowEvent->PtWgt() && !oddHar) phiWgt *= pt;
 	    if (pFlowEvent->YWgt() && oddHar)   phiWgt *= fabs(rapidity -
@@ -910,8 +945,30 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	    psi_i = mQ_i.Phi() / order;
 	    if (psi_i < 0.) psi_i += twopi / order;
 	  }
+	  
+	  // Remove autocorrelation for 2nd  harmonic when 1st harmonic 
+	  // event plane is used for analysis
+	  if (!pFlowEvent->Stripes() && mV21 && j==1) {
+	    pFlowSelect->SetHarmonic(j-1);
+	    if (pFlowSelect->Select(pFlowTrack)) {
+	      double phiWgt = pFlowEvent->PhiWeight(phi, k, j-1);
+	      if (rapidity < Flow::yCM && oddHar) phiWgt *= -1.;
+	      if (pFlowEvent->PtWgt() && !oddHar) phiWgt *= pt;
+	      if (pFlowEvent->YWgt() && oddHar)   phiWgt *= fabs(rapidity -
+								 Flow::yCM);
+	      double meanCos = pFlowEvent->MeanCos(rapidity, pt, j-1);
+	      double meanSin = pFlowEvent->MeanSin(rapidity, pt, j-1);
+	      TVector2 Q_i;
+	      Q_i.Set(phiWgt * (cos(phi * (order-1)) - meanCos),
+		      phiWgt * (sin(phi * (order-1)) - meanSin));
+	      TVector2 mQ_i = mQ[k][j-1] - Q_i;
+	      psi_i = mQ_i.Phi() / (order-1);
+	      if (psi_i < 0.) psi_i += twopi / (order-1);
+	      if (psi_i > pi) psi_i -= pi;
+	    }	    
+	  }
 	}
-	
+
        	// Caculate v for all particles selected for correlation analysis
 	if (pFlowSelect->SelectPart(pFlowTrack)) {
 	  corrMultN++;
@@ -938,8 +995,8 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	    Fill(fmod((double)dPhi, twopi / order));
 	}
 
+	// fill mean sin/cos tabels
 	if (pFlowSelect->Select(pFlowTrack)) {
-	  // fill mean sin/cos tabels
 	  histFull[k].histFullHar[j].mHistMeanCos->Fill(rapidity, pt, 
 							cos(order * phi));
 	  histFull[k].histFullHar[j].mHistMeanSin->Fill(rapidity, pt, 
@@ -991,7 +1048,7 @@ static Double_t qDist(double* q, double* par) {
 
   double expo = par[1]*par[0]*par[0]*perCent*perCent + q[0]*q[0];
   Double_t dNdq = par[2] * (2. * q[0] * exp(-expo) * 
-    (double)besi0_(2.*q[0]*par[0]*perCent*sqrt(par[1])));
+   TMath::BesselI0(2.*q[0]*par[0]*perCent*sqrt(par[1])));
 
   return dNdq;
 }
@@ -1003,9 +1060,25 @@ static Double_t resEventPlane(double chi) {
 
   double con = 0.626657;                   // sqrt(pi/2)/2
   double arg = chi * chi / 4.;
-  float farg = (float)arg;
 
-  Double_t res = con * chi * exp(-arg) * (double)(besi0_(farg) + besi1_(farg)); 
+  Double_t res = con * chi * exp(-arg) * (TMath::BesselI0(arg) + 
+					  TMath::BesselI1(arg)); 
+
+  return res;
+}
+
+//-----------------------------------------------------------------------
+
+static Double_t resEventPlaneK2(double chi) {
+  // Calculates the event plane resolution as a function of chi
+  //  for the case k=2, elliptic flow relative to the 1st har. event plane.
+
+  double con = 0.626657;                   // sqrt(pi/2)/2
+  double arg = chi * chi / 4.;
+
+  double besselOneHalf = sqrt(arg/halfpi) * sinh(arg)/arg;
+  double besselThreeHalfs = sqrt(arg/halfpi) * (cosh(arg)/arg - sinh(arg)/(arg*arg));
+  Double_t res = con * chi * exp(-arg) * (besselOneHalf + besselThreeHalfs); 
 
   return res;
 }
@@ -1015,7 +1088,7 @@ static Double_t resEventPlane(double chi) {
 static Double_t chi(double res) {
   // Calculates chi from the event plane resolution
 
-  double chi = 2.0;
+  double chi   = 2.0;
   double delta = 1.0;
 
   for (int i = 0; i < 15; i++) {
@@ -1029,8 +1102,8 @@ static Double_t chi(double res) {
 //-----------------------------------------------------------------------
 
 Int_t StFlowAnalysisMaker::Finish() {
-  // Calculates resolution and mean flow values
-  // Fits q distribution and outputs phiWgt values
+  // Calculates resolution and flow values
+  // Fits q distribution, and outputs phiWgt and meanSinCos values
   TString* histTitle;
 
   // Flattening histogram collections
@@ -1080,6 +1153,22 @@ Int_t StFlowAnalysisMaker::Finish() {
 	  mRes[k][j]    = 0.;     // subevent correlation must be positive
 	  mResErr[k][j] = 0.;
 	}
+	if (j==0) {               // k=2 resolution
+	  if (cosPair[k][j] > 0.) {
+	    double deltaResSub = 0.005;  // differential for the error propergation
+	    double resSub = sqrt(cosPair[k][j]);
+	    double resSubErr = cosPairErr[k][j] / (2. * resSub);
+	    double chiSub = chi(resSub);
+	    double chiSubDelta = chi(resSub + deltaResSub);
+	    mResK2[k] = resEventPlaneK2(sqrt(2.) * chiSub); // full event plane res.
+	    double mResDelta = resEventPlaneK2(sqrt(2.) * chiSubDelta);
+	    mResK2Err[k] = resSubErr * fabs((double)mResK2[k] - mResDelta) 
+	      / deltaResSub;
+	  } else {
+	    mResK2[k]    = 0.;     // subevent correlation must be positive
+	    mResK2Err[k] = 0.;
+	  }
+	}
       } else { // sub res only
 	if (cosPair[k][j] > 0.) {
 	  double resSub = sqrt(cosPair[k][j]);
@@ -1091,10 +1180,8 @@ Int_t StFlowAnalysisMaker::Finish() {
 	  mResErr[k][j] = 0.;
 	}
       }
-      histFull[k].mHistRes->SetBinContent(j+1, mRes[k][j]);
-      histFull[k].mHistRes->SetBinError(j+1, mResErr[k][j]);
 
-	// Create the v 2D histogram
+      // Create the v 2D histogram
       histTitle = new TString("Flow_v2D_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -1134,14 +1221,31 @@ Int_t StFlowAnalysisMaker::Finish() {
       AddHist(histFull[k].histFullHar[j].mHist_vPt);
 
       // Calulate v = vObs / Resolution
+      if (j==1) {
+	cout << "##### Resolution of the 2nd harmonic = " << 
+	  mRes[k][j] << " +/- " << mResErr[k][j] << endl;
+	if (mResK2[k] != 0.) {
+	  cout << "##### Resolution of the 2nd harmonic k=2 = " << 
+	    mResK2[k] << " +/- " << mResK2Err[k] << endl;
+	} else {
+	  cout << "##### Resolution of the 2nd harmonic k=2 was zero." << endl;
+	}
+	if (mV21) {
+	  mRes[k][j]    = mResK2[k];
+	  mResErr[k][j] = mResK2Err[k];
+	  cout<<"##### v2 relative to 1st har. event plane."<<endl;
+	}
+      }
+      histFull[k].mHistRes->SetBinContent(j+1, mRes[k][j]);
+      histFull[k].mHistRes->SetBinError(j+1, mResErr[k][j]);
+
       if (mRes[k][j] != 0.) {
 	cout << "##### Resolution of the " << j+1 << "th harmonic = " << 
-	  mRes[k][j] << " +/- " << mResErr[k][j] 
-	     << endl;
+	  mRes[k][j] << " +/- " << mResErr[k][j] << endl;
 	// The systematic error of the resolution is not folded in.
-	histFull[k].histFullHar[j].mHist_v2D-> Scale(1. / mRes[k][j]);
-	histFull[k].histFullHar[j].mHist_vY->Scale(1. / mRes[k][j]);
-	histFull[k].histFullHar[j].mHist_vPt ->Scale(1. / mRes[k][j]);
+
+	histFull[k].histFullHar[j].mHist_vY ->Scale(1. / mRes[k][j]);
+	histFull[k].histFullHar[j].mHist_vPt->Scale(1. / mRes[k][j]);
 	content = histFull[k].mHist_v->GetBinContent(j+1);
 	content /=  mRes[k][j];
 	histFull[k].mHist_v->SetBinContent(j+1, content);
@@ -1156,9 +1260,9 @@ Int_t StFlowAnalysisMaker::Finish() {
       } else {
 	cout << "##### Resolution of the " << j+1 << "th harmonic was zero."
 	     << endl;
-	histFull[k].histFullHar[j].mHist_v2D-> Reset();
-	histFull[k].histFullHar[j].mHist_vY->Reset();
-	histFull[k].histFullHar[j].mHist_vPt ->Reset();
+	histFull[k].histFullHar[j].mHist_v2D->Reset();
+	histFull[k].histFullHar[j].mHist_vY ->Reset();
+	histFull[k].histFullHar[j].mHist_vPt->Reset();
 	histFull[k].mHist_v->SetBinContent(j+1, 0.);
 	histFull[k].mHist_v->SetBinError(j+1, 0.);
       }
