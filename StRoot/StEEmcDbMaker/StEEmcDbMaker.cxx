@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.40 2004/09/20 13:32:59 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.41 2004/10/20 20:06:55 balewski Exp $
  
 
 #include <time.h>
@@ -640,7 +640,7 @@ void  StEEmcDbMaker::mOptimizeFibers  (){
     if(nFiber==0) {
       nFiber=atoi(blob);
       mDbFiber=new EEmcDbCrate[ nFiber];
-      gMessMgr->Message("","E") <<"\n  EEDB mOptimizeFibers() map , nFiber="<<nFiber<<endm;
+      gMessMgr->Message("","D") <<"\n  EEDB mOptimizeFibers() map start: , nFiber="<<nFiber<<endm;
       icr=0;
       continue;
     }
@@ -657,7 +657,8 @@ void  StEEmcDbMaker::mOptimizeFibers  (){
  fatal:
     gMessMgr->Message("","E") <<"\n\n      EEDB EEMC  FiberConf  error,\n without it decoding of the _raw_ EEMC data from StEvent is not working\n(all data are dropped).\nHowever, this missing table is irreleveant for muDst analysis, JB\n\n"<<endm;
     return;
-done:
+
+ done:
     gMessMgr->Message("","I") <<"\n  EEDB mOptimizeFibers() map found for nFiber="<<nFiber<<endm; 
    if(icr==nFiber)  return;
 
@@ -1015,6 +1016,9 @@ void  StEEmcDbMaker::changeMaskAction(const char *fname) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.41  2004/10/20 20:06:55  balewski
+// only printouts
+//
 // Revision 1.40  2004/09/20 13:32:59  balewski
 // to make Valgrind happy
 //
