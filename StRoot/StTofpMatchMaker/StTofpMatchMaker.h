@@ -9,10 +9,13 @@
  *  tofCollection->tofData() and will store the matches in
  *  tofCollection->tofSlats().
  *
- * $Id: StTofpMatchMaker.h,v 1.5 2004/03/11 22:29:32 dongx Exp $
+ * $Id: StTofpMatchMaker.h,v 1.6 2004/06/09 21:28:05 dongx Exp $
  */    
 /*  -------------------------------------------------------------------------
  * $Log: StTofpMatchMaker.h,v $
+ * Revision 1.6  2004/06/09 21:28:05  dongx
+ * update matching : checking before projecting track, improve the speed by around an order of magnitude
+ *
  * Revision 1.5  2004/03/11 22:29:32  dongx
  * -remove assert()
  * -add member mYear4
@@ -104,6 +107,7 @@ private:
   void writeHistogramsToFile();
   StTofGeometry *mTofGeom; //! pointer to the TOF geometry utility class
 
+  static const Int_t mTofpTrayId = 93;   // tofp tray id number in year 4
   Bool_t mHisto; //! create, fill and write out histograms
   //Bool_t mInitLocalDb; //! initialize from local (true) dbase or STAR dbase (false)
   Bool_t mYear2; //! STAR year2: TOFp+pVPD
@@ -178,7 +182,7 @@ private:
   TH2D *hTofpMatchNoHit[NTOFP]; //!
 
   virtual const char *GetCVS() const 
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMatchMaker.h,v 1.5 2004/03/11 22:29:32 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMatchMaker.h,v 1.6 2004/06/09 21:28:05 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StTofpMatchMaker,0)
 };
