@@ -22,13 +22,13 @@ require "/afs/rhic/star/packages/DEV00/mgr/dbDescriptorSetup.pl";
 my $debugOn=0;
 
 my @SetD = (
-             "daq/2000/06",
-             "daq/2000/07", 
+#             "daq/2000/06",
+#             "daq/2000/07", 
              "daq/2000/08",               
 );
 
-my $prodPeriod = "P00hf"; 
-my @chName = ("p00h5", "p00h1");              
+my $prodPeriod = "P00hg"; 
+my @chName = ("p00h6", "p00h1");              
 my $chainDir = "daq";
 
 ###Set directories to be created for jobfiles
@@ -176,7 +176,7 @@ my $nrunSet = 0;
  $jobDIn_no = 0; 
  for ($ii=0; $ii< scalar(@SetD); $ii++)  { 
 
-  $sql="SELECT path, fName, Nevents FROM $FileCatalogT WHERE fName LIKE '%daq' AND path LIKE '%$SetD[$ii]' AND hpss = 'Y'";
+  $sql="SELECT path, fName, Nevents FROM $FileCatalogT WHERE fName LIKE '%daq' AND path LIKE '%$SetD[$ii]' AND runID > '1223001' AND hpss = 'Y'";
     $cursor =$dbh->prepare($sql)
      || die "Cannot prepare statement: $DBI::errstr\n";
            $cursor->execute;
@@ -223,12 +223,13 @@ my $mrunId;
      }else {
        $mrunId = 0;
      }
-
+        if ( $mrunId < 1223003 || $mrunId > 1228003 ) {   
       foreach my $runNum (@runSet) {
-         
+
         if ( $mrunId eq $runNum) {      
 #      print "Run ID : ", $mrunId, "\n";
-        foreach my $optDchain (@jobDOpt) {
+ 
+       foreach my $optDchain (@jobDOpt) {
          my $mchain   = ($$optDchain)->chaOpt;
          my $mlibVer  = ($$optDchain)->libVer; 
          my $mNikName = ($$optDchain)->chaName;
@@ -280,7 +281,7 @@ my $mrunId;
      }
       }  
    }
-
+    }
 #####delete from $JobStatusT inserted JobID
 
      $sql="delete from $JobStatusT WHERE ";    
@@ -364,7 +365,7 @@ my $mrunId;
       my $hpss_dst_file2 = $gfile . ".tags.root";
       my $hpss_dst_file3 = $gfile . ".runco.root";
       my $hpss_dst_file4 = $gfile . ".event.root";
-      my $executable     = "/afs/rhic/star/packages/" . $jlibVer . "/mgr/bfcc.csh";
+      my $executable     = "/afs/rhic/star/packages/" . $jlibVer . "/mgr/bfc.csh";
       my $executableargs = $fchain;
       my $log_dir       = $logDir;
       my $log_name      = $gfile . ".log";
