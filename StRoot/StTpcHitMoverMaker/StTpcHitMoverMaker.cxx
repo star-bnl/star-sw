@@ -28,8 +28,11 @@ StTpcHitMover::~StTpcHitMover() {
 
 Int_t StTpcHitMover::Init() {
 
+  TString giHN  = getInputHitName();
+  TString giDSn = getInputDataSetName();
+
   gMessMgr->Info() << "StTpcHitMover::Init() - reading hits from "  <<
-    getInputDataSetName().Data() << ":" << getInputHitName().Data() << endm;
+    giDSn << ":" << giHN << endm;
 
   gMessMgr->Info() << "StTpcHitMover::Init() - sector align:     "  <<
     mAlignSector   << endm;
