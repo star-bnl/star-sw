@@ -78,9 +78,16 @@ void StEmcMicroUtil::processStEventInfo()
   mMicroEvent->setRunID((Int_t)(mStEvent->runId()));
   mMicroEvent->setEventTime((Int_t)mStEvent->time());
     
-  // Get primary vertex position
-  const StThreeVectorF& vertex = mStEvent->primaryVertex(0)->position();
-  mMicroEvent->setVertexPos(vertex.x(),vertex.y(),vertex.z());
+  // Get primary vertex position (if any)
+  StPrimaryVertex* primaryVertex = mStEvent->primaryVertex(0);
+  if(primaryVertex)
+    {
+      const StThreeVectorF& vertex = primaryVertex->position();
+      mMicroEvent->setVertexPos(vertex.x(),vertex.y(),vertex.z());
+      // Get initial multiplicity before TrackCuts 
+      UInt_t origMult = primaryVertex->numberOfDaughters(); 
+      mMicroEvent->setOrigMult(origMult);
+    }
 
   // include trigger (ZDC, CTB and BBC)
   Int_t ctb  = 0;
@@ -131,11 +138,6 @@ void StEmcMicroUtil::processStEventInfo()
   mMicroEvent->setBBCw(bbce);
   mMicroEvent->setBBCNHits(bbcnh);
   mMicroEvent->setZVertexBBC(bbcvz);
-
-  // Get initial multiplicity before TrackCuts 
-  UInt_t origMult = mStEvent->primaryVertex(0)->numberOfDaughters(); 
-  mMicroEvent->setOrigMult(origMult);
-  
 }
 void StEmcMicroUtil::processStEventTracks()
 {
