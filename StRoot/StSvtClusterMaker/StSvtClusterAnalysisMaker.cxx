@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.16 2001/09/22 01:07:09 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.17 2002/01/05 21:45:18 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.17  2002/01/05 21:45:18  caines
+ * Inlcude t0 correction in hit
+ *
  * Revision 1.16  2001/09/22 01:07:09  caines
  * Fixes now that AddData() is cleared everyevent
  *
@@ -298,6 +301,7 @@ Int_t StSvtClusterAnalysisMaker::Make()
 Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
 {
  int index =0;
+ float T0Jitter;
 
  StSvtSeqAdjMaker* StSvtSeqMaker = (StSvtSeqAdjMaker*)GetMaker("SvtSeqAdj");
  
@@ -315,6 +319,19 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
 
           mHybridAdjData = (StSvtHybridData *)mSvtAdjEvent->at(index);
 	  if( !mHybridAdjData) continue;
+	  // Adjust recorded phase for each hybrid into frcation of a 
+	  // time bucket
+	  T0Jitter = (long)(mHybridAdjData->getTimeZero());
+	  if( T0Jitter == 3){
+	    T0Jitter = 0.;
+	  }
+	  if( T0Jitter == 4){
+	    T0Jitter = 3. - (8./3.);
+	  }
+	  if( T0Jitter == 5){
+	    T0Jitter =  6. - ( 2.*8./3.);;
+	  }
+
           mHybridCluster = (StSvtHybridCluster*)mSvtClusterColl->at(index); 
 
           mHybridRawData = (StSvtHybridData *)mSvtRawEventColl->at(index);
@@ -342,8 +359,10 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
 	  }
 	  mSvtAnalClusters = new StSvtAnalysedHybridClusters(barrel, ladder, wafer, hybrid);
           if(mSvtAnalClusters) {
-	    mSvtAnalClusters->setMembers(mSvtAnalysis->GetnSvtClu(),index);
-	    mSvtAnalClusters->setSvtHit(mSvtAnalysis);
+	    mSvtAnalClusters->setMembers(mSvtAnalysis->GetnSvtClu(),
+					 mSvtAdjEvent->getProperHybridIndex(
+					 barrel,ladder,wafer,hybrid));
+	    mSvtAnalClusters->setSvtHit(mSvtAnalysis,T0Jitter);
 	    mSvtAnalColl->at(index) = mSvtAnalClusters;
 	   
 	    for( int clu=0; clu<mSvtAnalysis->GetnSvtClu(); clu++){
