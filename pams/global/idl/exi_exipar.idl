@@ -5,14 +5,14 @@
 */
 
    struct exi_exipar {
-       long      pid;        /* logical flag to control usage of global pid */
+       long      use_pid;    /* logical flag to control usage of global pid */
        float     dca_max;    /* cut on dca between the two tracks */
        float     bxi_max;    /* cut on impact param. of xi from prim. vertex */
-       float     rv_min;     /* cut on min. dist. of decay from prim. vertex */
-       float     rv_max;     /* cut on max. dist. of decay from prim. vertex */
+       float     rv_xi;      /* cut on min. dist. of decay from prim. vertex */
+       float     rv_v0;      /* cut on min. dist. of decay from prim. vertex */
        float     dmass;      /* v0 mass cut +/- [dmass] */
-       float     bsum_v0;    /* cut on sum of v0 daught. impact param. bp+bn */
+       float     bpn_v0;     /* cut on v0 pion daught. impact param. */
        float     pchisq;     /* cut on chi^2 probability of vertex fit*/
    } ;
-/*  Last mod. for exi_exipar: $Date: 1999/02/11 14:58:35 $ */
+/*  Last mod. for exi_exipar: $Date: 1999/02/12 19:12:57 $ */
 
