@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.122 2002/02/22 21:16:21 perev Exp $
+// $Id: StMaker.cxx,v 1.123 2002/03/12 21:19:00 fisyak Exp $
 //
 /*!
  *                                                                      
@@ -6,6 +6,7 @@
  *                                                                     
  */
 #include <iostream.h>
+#include <fstream.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -310,7 +311,7 @@ int icol,islas;
     goto DOWN;
   }
 
-  assert(m_DataSet);
+  if (m_DataSet) {
   islas = actInput.Index("/");
   if (islas>0) {
     tmp.Replace(0,999,actInput,islas);
@@ -328,7 +329,7 @@ int icol,islas;
   if (dataset) goto FOUND;
   dataset = m_ConstSet->Find(actInput);
   if (dataset) goto FOUND;
-
+  }
 
 //	Try to search DOWN
 DOWN: if (!(dir = Find(".make"))) goto UP;
@@ -1134,6 +1135,9 @@ const char *StMaker::GetBroadcast(const char *subj,const char *author) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.123  2002/03/12 21:19:00  fisyak
+// Set only one StEvtHddr as default option (due to Embedding)
+//
 // Revision 1.122  2002/02/22 21:16:21  perev
 // new method NotifyMe
 //

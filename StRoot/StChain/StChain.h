@@ -35,7 +35,7 @@ class StChain : public StMaker {
  protected:
    StEvtHddr         *m_EvtHddr;     	//Header of event
  public:
-                      StChain(const char *name="bfcChain");
+                      StChain(const char *name="bfcChain", const Bool_t UseOwnHeader = kFALSE);
    virtual           ~StChain();
    virtual void       Clear(Option_t *option="");
    virtual Int_t      Finish();   // *MENU*
@@ -48,15 +48,18 @@ class StChain : public StMaker {
    Int_t              GetVersionDate() {return m_VersionDate;}
 
  virtual const char *GetCVS() const 
- {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.39 2002/02/02 23:31:14 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+ {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.40 2002/03/12 21:19:00 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StChain, 0)   //StChain control class
 };
 
 #endif
 
 
-// $Id: StChain.h,v 1.39 2002/02/02 23:31:14 jeromel Exp $
+// $Id: StChain.h,v 1.40 2002/03/12 21:19:00 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.40  2002/03/12 21:19:00  fisyak
+// Set only one StEvtHddr as default option (due to Embedding)
+//
 // Revision 1.39  2002/02/02 23:31:14  jeromel
 // doxygenized. Added some text for the Make() method.
 //

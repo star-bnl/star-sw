@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.284 2002/03/12 00:44:04 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.285 2002/03/12 21:23:09 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -354,8 +354,8 @@ Bfc_st BFC[] = {
                                                  ,"St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"FindVtxSeed" ,"FindVtxSeed","","","StVertexSeedMaker","St_global,St_dst_Maker,StPass0CalibMaker",
                                                                      "Performs vertex seed finding",kFALSE},
-  {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil"         ,"StdEdxMaker","StdEdxMaker","",kFALSE},
-  {"Event"       ,"","","StEvent,tpcDB"                           ,"StEventMaker","StEventMaker","",kFALSE},
+  {"dEdx"       ,"dEdx","globalChain","globT,tpcDb,TbUtil","StdEdxMaker","          StdEdxMaker","",kFALSE},
+  {"Event"       ,"","","StEvent,tpcDB"         ,"StEventMaker","StDetectorDbMaker,StEventMaker","",kFALSE},
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
                           
@@ -438,8 +438,8 @@ ClassImp(StBFChain)
 
 //_____________________________________________________________________________
 /// Default Constructor
-StBFChain::StBFChain(const char *name):
-  StChain(name),fXdfOut(0),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0),fXdfFile(0) {
+StBFChain::StBFChain(const char *name, const Bool_t UseOwnHeader):
+  StChain(name,UseOwnHeader),fXdfOut(0),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0),fXdfFile(0) {
   fBFC = new Bfc_st[NoChainOptions];
   memcpy (fBFC, &BFC, sizeof (BFC));
   FDate = FTime = 0;
@@ -733,6 +733,7 @@ Int_t StBFChain::Instantiate()
       }
     }
   }
+  
   if (fXdfFile) {
     fXdfOut = new St_XDFFile(fXdfFile->Data(),"wb");
     if (!fXdfOut) status = kStErr;
@@ -970,9 +971,10 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
       gc = TString(infile,3);
       gc.ToLower();
     }
-    if (gc == "gc:") SetGC(infile+3);
-    else             SetInputFile(infile);
+    if (gc == "gc:") {SetGC(infile+3); goto SetOut;}
   }
+  SetInputFile(infile);
+ SetOut:
   SetOutputFile(outfile);
 }
 //_____________________________________________________________________
