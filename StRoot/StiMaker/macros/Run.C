@@ -1,3 +1,8 @@
+//const char * path= "/star/data13/reco/ppMinBias/FullField/P02gf/2002/019/",
+//const char * path ="/star/data22/ITTF/EvalData/Event/ppMinBias/",
+//const char * file="st_physics_3019045_raw_0031.event.root",
+//const char * path= "/star/data06/ITTF/EvalData/MCFiles/auau200",
+//const char * path= "/data/r20b/ittf/auau200/hijing/b0_20/standard/year2001/",
 
 void help();
 void loadLibrairies();
@@ -11,8 +16,6 @@ void help()
 
 void loadLibrairies(bool doProfile)
 {	
-	//  char * list[]={"St_base","StChain","StUtilities","StBFChain", "St_Tables","libgen_Tables",
-	// "libsim_Tables","libglobal_Tables","geometry","St_g2t","St_geant_Maker",
   char * list[]={"St_base","StChain","StUtilities", "St_Tables", "StarClassLibrary",
 		 "libsim_Tables","libglobal_Tables","geometry","St_g2t","St_geant_Maker","libGui",
 		 "StIOMaker","StTreeMaker", "St_db_Maker","StDbLib","StDbBroker",
@@ -40,12 +43,47 @@ void loadLibrairies(bool doProfile)
   cout <<"Run.C::loadLibrairies() - INFO - Done"<<endl;
 }
 
-void RunMany(int first=0, int count=100)
+void RunMany(int firstEvent = 0, 
+	     int nEvents    = 100,
+	     const char * filePrefix = "rcf",
+	     const char * path= "/data/r23b/star/hijingAuau/200GeV/b0_20/standard/2001/Unknown/",
+	     const char * file="rcf0183_02_300evts.geant.root",
+	     bool useGui=false,
+	     bool useMcAsRec=false,
+	     bool doPlots=true,
+	     bool doSimulation=true,
+	     bool doAssociation=true,
+	     bool doMiniMcEvent=true,
+	     bool doDst=false,
+	     bool doStEventOutput=false,
+	     bool doStEventInput=true,
+	     bool useTpc=true,
+	     bool useSvt=false,
+	     bool useEmc=false,
+	     bool useFtpc=false,
+	     bool useResidualCalculator=false,
+	     bool doProfile=false	 )
 {
-  Run(first, count,
-      "rcf", 
-      "/data/r23b/star/hijingAuau/200GeV/b0_20/standard/2001/Unknown/",
-      "rcf0183_02_300evts.geant.root");
+  Run(firstEvent,
+      nEvents,
+      filePrefix,
+      path,
+      file,
+      useGui, 
+      useMcAsRec,
+      doPlots,
+      doSimulation,
+      doAssociation,
+      doMiniMcEvent,
+      doDst,
+      doStEventOutput,
+      doStEventInput,
+      useTpc,
+      useSvt,
+      useEmc,
+      useFtpc,
+      useResidualCalculator,
+      doProfile);
 }
 
 void RunResiduals(int firstEvent = 0, 
@@ -90,37 +128,67 @@ void RunResiduals(int firstEvent = 0,
       useResidualCalculator,
       doProfile);
 }
- 
-void RunGui()
+
+void RunGui(int firstEvent = 0, 
+	    int nEvents    = 1,
+	    const char * filePrefix = "rcf",
+	    const char * path= "/data/r23b/star/hijingAuau/200GeV/b0_20/standard/2001/Unknown/",
+	    const char * file="rcf0183_02_300evts.geant.root",
+	    bool useGui=true,
+	    bool useMcAsRec=false,
+	    bool doPlots=true,
+	    bool doSimulation=true,
+	    bool doAssociation=true,
+	    bool doMiniMcEvent=true,
+	    bool doDst=false,
+	    bool doStEventOutput=false,
+	    bool doStEventInput=true,
+	    bool useTpc=true,
+	    bool useSvt=false,
+	    bool useEmc=false,
+	    bool useFtpc=false,
+	    bool useResidualCalculator=false,
+	    bool doProfile=false	 )
 {
-   Run(0,1, 
-      "rcf", 
-      "/data/r23b/star/hijingAuau/200GeV/b0_20/standard/2001/Unknown/",
-      "rcf0183_02_300evts.geant.root",
-       true);
- 
-}
+  Run(firstEvent,
+      nEvents,
+      filePrefix,
+      path,
+      file,
+      useGui, 
+      useMcAsRec,
+      doPlots,
+      doSimulation,
+      doAssociation,
+      doMiniMcEvent,
+      doDst,
+      doStEventOutput,
+      doStEventInput,
+      useTpc,
+      useSvt,
+      useEmc,
+      useFtpc,
+      useResidualCalculator,
+      doProfile);
+} 
+
+
 void Run(int firstEvent,
 	 int nEvents,
-	 const char * filePrefix = "rcf",
-	 //const char * path= "/star/data13/reco/ppMinBias/FullField/P02gf/2002/019/",
-	 //const char * path ="/star/data22/ITTF/EvalData/Event/ppMinBias/",
-  	 //const char * file="st_physics_3019045_raw_0031.event.root",
-	 //const char * path= "/star/data06/ITTF/EvalData/MCFiles/auau200",
-	 //const char * path= "/data/r20b/ittf/auau200/hijing/b0_20/standard/year2001/",
-	 const char * path= "/data/r23b/star/hijingAuau/200GeV/b0_20/standard/2001/Unknown/",
-	 const char * file="rcf0183_02_300evts.geant.root",
+	 const char * filePrefix,
+	 const char * path,
+	 const char * file,
 	 bool useGui=false,
 	 bool useMcAsRec=false,
-	 bool doPlots=true,
-	 bool doSimulation=true,
-	 bool doAssociation=true,
-	 bool doMiniMcEvent=true,
+	 bool doPlots,
+	 bool doSimulation,
+	 bool doAssociation,
+	 bool doMiniMcEvent,
 	 bool doDst=false,
-	 bool doStEventOutput=true,
-	 bool doStEventInput=true,
-	 bool useTpc=true,
-	 bool useSvt=false,
+	 bool doStEventOutput,
+	 bool doStEventInput,
+	 bool useTpc,
+	 bool useSvt,
 	 bool useEmc=false,
 	 bool useFtpc=false,
 	 bool useResidualCalculator=false,
@@ -169,30 +237,29 @@ void Run(Int_t firstEvent,
 	 bool doDst,
 	 bool doStEventOutput,
 	 bool doStEventInput,
-	 bool useTpc=true,
-	 bool useSvt=false,
-	 bool useEmc=false,
-	 bool useFtpc=false,
-	 bool useResidualCalculator=false,
-	 bool doProfile=false)
+	 bool useTpc,
+	 bool useSvt,
+	 bool useEmc,
+	 bool useFtpc,
+	 bool useResidualCalculator,
+	 bool doProfile)
 {
   loadLibrairies(doProfile);
   MiniChain * miniChain = new MiniChain();
-  
   StiMakerParameters* pars = miniChain->getParameters();
-  pars->useGui=useGui;
-  pars->useMcAsRec=useMcAsRec;
-  pars->doSimulation=doSimulation;
-  pars->doAssociation=doAssociation;
-  pars->doMiniMcEvent=doMiniMcEvent;
-  pars->doDst=doDst;
-  pars->doStEventOutput=doStEventOutput;
-  pars->doStEventInput=doStEventInput;  
-  pars->doPlots = doPlots; 
-  pars->useTpc=useTpc;
-  pars->useSvt=useSvt;
-  pars->useEmc=useEmc;
-  pars->useFtpc=useFtpc;  
-  pars->useResidualCalculator=useResidualCalculator;
+  pars->useGui          =useGui;
+  pars->useMcAsRec      = useMcAsRec;
+  pars->doSimulation    = doSimulation;
+  pars->doAssociation   = doAssociation;
+  pars->doMiniMcEvent   = doMiniMcEvent;
+  pars->doDst           = doDst;
+  pars->doStEventOutput = doStEventOutput;
+  pars->doStEventInput  = doStEventInput;  
+  pars->doPlots         = doPlots; 
+  pars->useTpc          = useTpc;
+  pars->useSvt          = useSvt;
+  pars->useEmc          = useEmc;
+  pars->useFtpc         = useFtpc;  
+  pars->useResidualCalculator = useResidualCalculator;
   miniChain->run(firstEvent,nEvents,filePrefix,fileList);
 }
