@@ -48,11 +48,11 @@ void StDetectorDbRichScalers::update(StMaker* maker){
     if(maker){
 		
 	TDataSet* dataSet = maker->GetDataBase("Calibrations/rich");
-	
+
 	if(dataSet){
 	    TTable* scalerTable = dynamic_cast<TTable*>(dataSet->Find("trigDetSums"));
 	    TTable* voltTable   = dynamic_cast<TTable*>(dataSet->Find("richvoltages"));
-
+	
 	    // Get Scaler Table
 	    if(scalerTable){
 		mScalers = (trigDetSums_st*)(scalerTable->GetArray());
@@ -92,11 +92,11 @@ double StDetectorDbRichScalers::getCTBEast(){
     return value;
 };
 
-/// CTB Or
-double StDetectorDbRichScalers::getCTBOr(){
+/// CTBWest + CTBEast + TOFp
+double StDetectorDbRichScalers::getCTBOrTOFp(){
     double value = 0;
     if(mScalers)
-	value = mScalers->ctbOR;
+	value = mScalers->ctbTOFp;
     return value;
 };
 
@@ -104,7 +104,7 @@ double StDetectorDbRichScalers::getCTBOr(){
 double StDetectorDbRichScalers::getTOFp(){
     double value = 0;
     if(mScalers)
-	value = mScalers->TOFp;
+	value = mScalers->tofp;
     return value;
 };
 
@@ -124,7 +124,7 @@ double StDetectorDbRichScalers::getZDCEast(){
     return value;
 };
 
-/// ZDC AND
+/// ZDC East * ZDC West
 double StDetectorDbRichScalers::getZDCX(){
     double value = 0;
     if(mScalers)
@@ -151,6 +151,22 @@ double StDetectorDbRichScalers::getL0(){
     return value;
 };
 
+/// BBC East * BBC West
+double StDetectorDbRichScalers::getBBCX(){
+    double value = 0;
+    if(mScalers)
+	value = mScalers->bbcX;
+    return value;
+};
+
+/// (BBC East * BBC West) * (CTB West + CTB East + TOFp)
+double StDetectorDbRichScalers::getBBCXCTB(){
+    double value = 0;
+    if(mScalers)
+	value = mScalers->bbcXctbTOFp;
+    return value;
+};
+
 /// Rich High Voltage status (1 is good, 0 is bad)
 unsigned int StDetectorDbRichScalers::getRichHVStatus(){
     unsigned int value = 999;
@@ -162,15 +178,18 @@ unsigned int StDetectorDbRichScalers::getRichHVStatus(){
 /// outputs to ostream the entire class
 ostream& operator<<(ostream& os, StDetectorDbRichScalers& v){
     
-    os << "CTB East = " << v.getCTBEast() << endl;
-    os << "CTB West = " << v.getCTBWest() << endl;
-    os << "CTB Or   = " << v.getCTBOr() << endl;
-    os << "TOFp     = " << v.getTOFp() << endl;
-    os << "ZDC East = " << v.getZDCEast() << endl;
-    os << "ZDC West = " << v.getZDCWest() << endl;
-    os << "ZDC And  = " << v.getZDCX() << endl;
-    os << "Mult     = " << v.getMult() << endl;
-    os << "L0       = " << v.getL0() << endl;
+    os << "CTB East        = " << v.getCTBEast() << endl;
+    os << "CTB West        = " << v.getCTBWest() << endl;
+    os << "CTB Or + TOFp   = " << v.getCTBOrTOFp() << endl;
+    os << "TOFp            = " << v.getTOFp() << endl;
+    os << "ZDC East        = " << v.getZDCEast() << endl;
+    os << "ZDC West        = " << v.getZDCWest() << endl;
+    os << "ZDC And         = " << v.getZDCX() << endl;
+    os << "Mult            = " << v.getMult() << endl;
+    os << "L0              = " << v.getL0() << endl;
+    os << "BBC And         = " << v.getBBCX() << endl;
+    os << "BBC*(CTB+TOFp)  = " << v.getBBCX() << endl;
+    
     os << "Rich HV  = " << v.getRichHVStatus() << endl;
         
     return os;

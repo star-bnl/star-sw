@@ -14,13 +14,15 @@ public:
     
     double getCTBWest();
     double getCTBEast();
-    double getCTBOr();
+    double getCTBOrTOFp();
     double getTOFp();
     double getZDCWest();
     double getZDCEast();
     double getZDCX();
     double getMult();
     double getL0();
+    double getBBCX();
+    double getBBCXCTB();
     unsigned int getRichHVStatus();
     void update(StMaker*);
     
