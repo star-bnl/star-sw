@@ -1,14 +1,18 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.13 2000/02/29 21:55:14 posk Exp $
+// $Id: plot.C,v 1.14 2000/03/15 23:32:05 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Aug 1999
-// Description:  Macro to plot histograms made by StFlowAnalysisMaker
-//               If selN = 0 plot all selections and harmonics
+// Description:  Macro to plot histograms made by StFlowAnalysisMaker.
+//               If selN = 0 plot all selections and harmonics.
+//               Place a symbolic link to this file in StRoot/macros/analysis .
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.14  2000/03/15 23:32:05  posk
+// *** empty log message ***
+//
 // Revision 1.13  2000/02/29 21:55:14  posk
 // Removed static const int& statements.
 //
@@ -81,6 +85,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_Mult",
 			     "Flow_OrigMult",
 			     "Flow_MultOverOrig",
+			     "Flow_CorrMult",
 			     "Flow_VertexZ",
 			     "Flow_VertexXY2D",
 			     "Flow_EtaSym",
@@ -122,7 +127,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_v.Eta_Sel",
 			     "Flow_v.Pt_Sel"};
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles = 25 + 1;
+  const int nSingles = 26 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -457,14 +462,14 @@ TCanvas* plotSingles(char* shortName){
     gStyle->SetOptStat(10);
     hist->Draw("");
   } else if (strstr(shortName,".PhiEta")!=0) {      // 3D Phi Eta projection
-    TH2D* projZX = hist->Project3D("zxe");
+    TH2D* projZX = hist->Project3D("zx");
     projZX->SetName(histProjName->Data());
     projZX->SetYTitle("azimuthal angle (rad)");
     projZX->SetXTitle("pseudorapidity");
     gStyle->SetOptStat(10);
     if (projZX) projZX->Draw("COLZ");
   } else if (strstr(shortName,".PhiPt")!=0) {       // 3D Phi Pt projection
-    TH2D* projZY = hist->Project3D("zye");
+    TH2D* projZY = hist->Project3D("zy");
     projZY->SetName(histProjName->Data());
     projZY->SetYTitle("azimuthal angle (rad");
     projZY->SetXTitle("Pt (GeV)");
@@ -474,14 +479,14 @@ TCanvas* plotSingles(char* shortName){
     gStyle->SetOptStat(10);
     hist->Draw("COLZ");
   } else if (strstr(shortName,".Eta")!=0) {         // 2D Eta projection
-    TH1D* projX = hist->ProjectionX(histName->Data(), 0, 9999, "E");
+    TH1D* projX = hist->ProjectionX(histName->Data(), 0, 9999);
     projX->SetName(histProjName->Data());
     projX->SetXTitle("pseudorapidity");
     projX->SetYTitle("Counts");
     gStyle->SetOptStat(10);
     if (projX) projX->Draw("H");
   } else if (strstr(shortName,".Pt")!=0) {          // 2D Pt projection
-    TH1D* projY = hist->ProjectionY(histName->Data(), 0, 9999, "E"); 
+    TH1D* projY = hist->ProjectionY(histName->Data(), 0, 9999); 
     projY->SetName(histProjName->Data());
     projY->SetXTitle("Pt (GeV)");
     projY->SetYTitle("Counts");
