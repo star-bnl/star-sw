@@ -1,0 +1,125 @@
+<HTML>
+<PRE>
+<H2>file: spx/src/spx_init.cc</H2>
+
+
+//:Copyright 1995, Lawrence Berkeley National Laboratory
+//:&gt;--------------------------------------------------------------------
+//:FILE:	spx_init.C
+//:DESCRIPTION:	Functions  to initialize <A HREF="spx_macros.h.html#SPX">SPX</A> 
+//:AUTHOR:	cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:	-- STILL IN DEVELOPMENT --
+//:HISTORY:	21nov95-v000a-cet- creation
+//:&lt;--------------------------------------------------------------------
+
+#include "asuLib.h"
+#include "emlLib.h"
+#include "<A HREF="spxLib.h.html">spxLib.h</A>"
+
+spxManager *spx;
+
+//:&gt;--------------------------------------------------------------------
+//:ROUTINE:	int <A HREF="#spx_init">spx_init(</A>)
+//:DESCRIPTION:	Initialize <A HREF="spx_macros.h.html#SPX">SPX</A>
+//:ARGUMENTS:	-- NONE --
+//:RETURN VALUE:-- NONE --
+//:&lt;--------------------------------------------------------------------
+<B>int <A NAME="spx_init">spx_init(</A>)</B>
+{
+   EML_MESSAGE("Initializing <A HREF="spx_macros.h.html#SPX">SPX</A>.");
+
+/*- Define the <A HREF="spx_macros.h.html#SPX">SPX</A> KUIP commands. -*/
+   spx_def_();
+
+   return TRUE;
+}
+
+//:&gt;--------------------------------------------------------------------
+//:ROUTINE:	int <A HREF="#spx_start">spx_start(</A>)
+//:DESCRIPTION:	Start <A HREF="spx_macros.h.html#SPX">SPX</A>
+//:ARGUMENTS:	-- NONE --
+//:RETURN VALUE:-- NONE --
+//:&lt;--------------------------------------------------------------------
+<B>int <A NAME="spx_start">spx_start(</A>)</B>
+{
+   EML_MESSAGE("Starting <A HREF="spx_macros.h.html#SPX">SPX</A>.");
+
+/*- Create the <A HREF="spx_macros.h.html#SPX">SPX</A> Manager. -*/
+   spx = new <U>spxManager(</U>"spx");        //OVERLOAD CALL: spxManager: <A HREF="spxClasses.cc.html#spxManager">spxClasses.cc(?)</A>, <A HREF="spxClasses.cc.html#spxManager">spxClasses.cc(?)</A>
+
+   return TRUE;
+}
+
+//:&gt;--------------------------------------------------------------------
+//:ROUTINE:	int <A HREF="#spx_stop">spx_stop(</A>)
+//:DESCRIPTION:	Stop <A HREF="spx_macros.h.html#SPX">SPX</A>
+//:ARGUMENTS:	-- NONE --
+//:RETURN VALUE:-- NONE --
+//:&lt;--------------------------------------------------------------------
+<B>int <A NAME="spx_stop">spx_stop(</A>)</B>
+{
+   EML_MESSAGE("Stopping <A HREF="spx_macros.h.html#SPX">SPX</A>.");
+
+/*- Delete the <A HREF="spx_macros.h.html#SPX">SPX</A> Manager.
+   delete spx;
+unecessary -- soc will do it. -*/
+
+   return TRUE;
+}
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

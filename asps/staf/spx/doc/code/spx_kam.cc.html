@@ -1,0 +1,380 @@
+<HTML>
+<PRE>
+<H2>file: spx/src/spx_kam.cc</H2>
+
+
+/*:Copyright 1995, Lawrence Berkeley National Laboratory
+*:&gt;---------------------------------------------------------------------
+*:FILE:         spx_kam.c
+*:DESCRIPTION:  C KUIP Action Modules for Error & Message Logger
+*:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+*:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      26jul95-v000a-cet- creation
+*:&lt;---------------------------------------------------------------------
+*/
+
+/*-------------------------------------------- INCLUDES             --*/
+
+#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+
+#include "asuAlloc.h"
+#include "asuLib.h"
+#include "emlLib.h"
+#include "<A HREF="spxLib.h.html">spxLib.h</A>"
+
+#include "kuip.h"
+
+/*-------------------------------------------- TYPEDEFS             --*/
+/*-------------------------------------------- GLOBALS              --*/
+/*-------------------------------------------- PROTOTYPES           --*/
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_spxdummy_ncalls_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="spx_macros.h.html#SPX">SPX</A>/DUMMY/NCALLS NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_spxdummy_ncalls_">kam_spxdummy_ncalls_(</A>){<A HREF="#kam_spxdummy_ncalls">kam_spxdummy_ncalls(</A>);}</B>
+<B>int <A NAME="kam_spxdummy_ncalls">kam_spxdummy_ncalls(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* name = ku_gets();	/* spxDummy name */
+
+   spxDummy* dummy;		/* spxDummy object */
+
+   if( !spx-&gt;<A HREF="spxClasses.cc.html#findDummy">findDummy</A>(name, dummy) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   printf("SPXDUMMY:\tNumber of calls = %d \n",dummy-&gt;<A HREF="spxClasses.cc.html#nCalls">nCalls</A>());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_spxdummy_hello_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="spx_macros.h.html#SPX">SPX</A>/DUMMY/HELLO NAME MESSAGE
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_spxdummy_hello_">kam_spxdummy_hello_(</A>){<A HREF="#kam_spxdummy_hello">kam_spxdummy_hello(</A>);}</B>
+<B>int <A NAME="kam_spxdummy_hello">kam_spxdummy_hello(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* name = ku_gets();	/* spxDummy name */
+   char* message = ku_gets();	/* message */
+
+   spxDummy* dummy;		/* spxDummy object */
+
+   if( !spx-&gt;<A HREF="spxClasses.cc.html#findDummy">findDummy</A>(name, dummy) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   if( !dummy-&gt;<A HREF="spxClasses.cc.html#hello">hello</A>(message) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_spxdummy_null_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="spx_macros.h.html#SPX">SPX</A>/DUMMY/NULL NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_spxdummy_null_">kam_spxdummy_null_(</A>){<A HREF="#kam_spxdummy_null">kam_spxdummy_null(</A>);}</B>
+<B>int <A NAME="kam_spxdummy_null">kam_spxdummy_null(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* name = ku_gets();	/* spxDummy name */
+
+   spxDummy* dummy;		/* spxDummy object */
+
+   if( !spx-&gt;<A HREF="spxClasses.cc.html#findDummy">findDummy</A>(name, dummy) 
+   ||  !dummy-&gt;<A HREF="spxClasses.cc.html#null">null</A>() ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_spxdummy_time_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="spx_macros.h.html#SPX">SPX</A>/DUMMY/TIME NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_spxdummy_time_">kam_spxdummy_time_(</A>){<A HREF="#kam_spxdummy_time">kam_spxdummy_time(</A>);}</B>
+<B>int <A NAME="kam_spxdummy_time">kam_spxdummy_time(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* name = ku_gets();	/* spxDummy name */
+
+   spxDummy* dummy;		/* spxDummy object */
+
+   if( !spx-&gt;<A HREF="spxClasses.cc.html#findDummy">findDummy</A>(name, dummy) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   char* tim;
+   if( !dummy-&gt;<A HREF="spxClasses.cc.html#getTime">getTime</A>(tim) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   printf("SPXDUMMY:\tTime = %s \n",tim);
+   ASUFREE(tim);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_spxgrid_height_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="spx_macros.h.html#SPX">SPX</A>/GRID/HEIGHT NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_spxgrid_height_">kam_spxgrid_height_(</A>){<A HREF="#kam_spxgrid_height">kam_spxgrid_height(</A>);}</B>
+<B>int <A NAME="kam_spxgrid_height">kam_spxgrid_height(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* name = ku_gets();	/* spxGrid name */
+
+   spxGrid* grid;		/* spxGrid object */
+
+   if( !spx-&gt;<A HREF="spxClasses.cc.html#findGrid">findGrid</A>(name, grid) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   printf("SPXGRID:\tHeight = %d \n",grid-&gt;<A HREF="spxClasses.cc.html#height">height</A>());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_spxgrid_width_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="spx_macros.h.html#SPX">SPX</A>/GRID/WIDTH NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_spxgrid_width_">kam_spxgrid_width_(</A>){<A HREF="#kam_spxgrid_width">kam_spxgrid_width(</A>);}</B>
+<B>int <A NAME="kam_spxgrid_width">kam_spxgrid_width(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* name = ku_gets();	/* spxGrid name */
+
+   spxGrid* grid;		/* spxGrid object */
+
+   if( !spx-&gt;<A HREF="spxClasses.cc.html#findGrid">findGrid</A>(name, grid) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   printf("SPXGRID:\tWidth = %d \n",grid-&gt;<A HREF="spxClasses.cc.html#width">width</A>());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_spxgrid_get_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="spx_macros.h.html#SPX">SPX</A>/GRID/GET NAME M N
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_spxgrid_get_">kam_spxgrid_get_(</A>){<A HREF="#kam_spxgrid_get">kam_spxgrid_get(</A>);}</B>
+<B>int <A NAME="kam_spxgrid_get">kam_spxgrid_get(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* name = ku_gets();	/* spxGrid name */
+   short m = ku_geti();		/* first index */
+   short n = ku_geti();		/* second index */
+
+   spxGrid* grid;		/* spxGrid object */
+
+   if( !spx-&gt;<A HREF="spxClasses.cc.html#findGrid">findGrid</A>(name, grid) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   long value;
+   if( !grid-&gt;<A HREF="spxClasses.cc.html#get">get</A>(m,n,value) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   printf("SPXGRID:\tCell value = %d \n",value);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_spxgrid_set_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="spx_macros.h.html#SPX">SPX</A>/GRID/SET NAME M N VALUE
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_spxgrid_set_">kam_spxgrid_set_(</A>){<A HREF="#kam_spxgrid_set">kam_spxgrid_set(</A>);}</B>
+<B>int <A NAME="kam_spxgrid_set">kam_spxgrid_set(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* name = ku_gets();	/* spxGrid name */
+   short m = ku_geti();		/* first index */
+   short n = ku_geti();		/* second index */
+   long value = ku_geti();	/* new grid value */
+
+   spxGrid* grid;		/* spxGrid object */
+
+   if( !spx-&gt;<A HREF="spxClasses.cc.html#findGrid">findGrid</A>(name, grid) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   if( !grid-&gt;<A HREF="spxClasses.cc.html#set">set</A>(m,n,value) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_spx_count_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="spx_macros.h.html#SPX">SPX</A>/MANAGER/COUNT
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_spx_count_">kam_spx_count_(</A>){<A HREF="#kam_spx_count">kam_spx_count(</A>);}</B>
+<B>int <A NAME="kam_spx_count">kam_spx_count(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+
+   printf("<A HREF="spx_macros.h.html#SPX">SPX</A>:\tObject count = %d \n",spx-&gt;count());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_spx_list_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="spx_macros.h.html#SPX">SPX</A>/MANAGER/LIST
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_spx_list_">kam_spx_list_(</A>){<A HREF="#kam_spx_list">kam_spx_list(</A>);}</B>
+<B>int <A NAME="kam_spx_list">kam_spx_list(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+
+   if( !spx-&gt;<A HREF="spxClasses.cc.html#list">list</A>() ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_spx_newdummy_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="spx_macros.h.html#SPX">SPX</A>/MANAGER/NEWDUMMY NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_spx_newdummy_">kam_spx_newdummy_(</A>){<A HREF="#kam_spx_newdummy">kam_spx_newdummy(</A>);}</B>
+<B>int <A NAME="kam_spx_newdummy">kam_spx_newdummy(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* name = ku_gets();	/* spxDummy name */
+
+   if( !spx-&gt;<A HREF="spxClasses.cc.html#newDummy">newDummy</A>(name) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_spx_newgrid_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="spx_macros.h.html#SPX">SPX</A>/MANAGER/NEWGRID NAME HEIGHT WIDTH
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_spx_newgrid_">kam_spx_newgrid_(</A>){<A HREF="#kam_spx_newgrid">kam_spx_newgrid(</A>);}</B>
+<B>int <A NAME="kam_spx_newgrid">kam_spx_newgrid(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* name = ku_gets();	/* spxGrid name */
+   short <A HREF="spxClasses.cc.html#height">height</A> = ku_geti();	/* spxGrid <A HREF="spxClasses.cc.html#height">height</A> */
+   short <A HREF="spxClasses.cc.html#width">width</A> = ku_geti();	/* spxGrid <A HREF="spxClasses.cc.html#width">width</A> */
+
+   if( !spx-&gt;<A HREF="spxClasses.cc.html#newGrid">newGrid</A>(name,<A HREF="spxClasses.cc.html#height">height</A>,<A HREF="spxClasses.cc.html#width">width</A>) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>
