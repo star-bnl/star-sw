@@ -17,9 +17,12 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //
-//  $Id: Stl3CounterMaker.cxx,v 1.1 2002/02/13 22:36:31 struck Exp $
+//  $Id: Stl3CounterMaker.cxx,v 1.2 2002/02/20 22:09:49 struck Exp $
 //
 //  $Log: Stl3CounterMaker.cxx,v $
+//  Revision 1.2  2002/02/20 22:09:49  struck
+//  added some debugging info
+//
 //  Revision 1.1  2002/02/13 22:36:31  struck
 //  major code clean-up for Stl3RawReaderMaker, first version of Stl3CounterMaker
 //
@@ -326,6 +329,21 @@ Int_t Stl3CounterMaker::GetCounters()
 	}
   }
 
+  // debugging
+  if (m_DebugLevel) {
+        cout << " Global counters:   nProcessed = " << totalCounter->nProcessed
+	     << ",   nReconstructed = " << totalCounter->nReconstructed << endl;
+	cout << " algId\tnProcessed\tnAccept\tnBuild" << endl;
+	for (int k=0; k<mNumberOfAlgorithms; k++) {
+	      cout << totalAlgCounter[k].algId << "\t"
+		   << totalAlgCounter[k].nProcessed << "\t"
+		   << totalAlgCounter[k].nAccept << "\t"
+		   << totalAlgCounter[k].nBuild << endl;
+	}
+	cout << " ------------------------------------ " << endl;
+  }
+
+
   // all right go home
   return 0 ;  
 }
@@ -333,7 +351,10 @@ Int_t Stl3CounterMaker::GetCounters()
 
 
 //_____________________________________________________________________________
-Int_t Stl3CounterMaker::Finish() {
+Int_t Stl3CounterMaker::Finish()
+{
+
+  cout << "TTTTTTTTTTTTTTTT" << endl;
 
   if (!mStoreDbTables) return 0;
 
