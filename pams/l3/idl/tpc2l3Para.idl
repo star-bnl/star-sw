@@ -1,8 +1,0 @@
-/*   tpc2l3Para    
-   Controls L3 cluster finder
-*/
-struct tpc2l3Para {
-   short      i960Number;     /* id number of receiver board processor */
-   short      StartRow  ;     /* First Row to be processed */
-   short      EndRow    ;     /* Last  Row to be processed */
-};

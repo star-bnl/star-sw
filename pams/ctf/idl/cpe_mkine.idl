@@ -1,8 +1,0 @@
-   struct cpe_mkine {  
-       long      id;         /* primary key */
-       long      ivor;       /* Vertex index */
-       long      pid;        /* Particle id */
-       float     e;          /* Kinematic energy */
-       float     p[3];       /* Momentum */
-   } ;
-
