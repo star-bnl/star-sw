@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.5 2000/02/18 21:32:23 laue Exp $
+ * $Id: StHbtEvent.cc,v 1.6 2000/05/03 17:44:42 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,10 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.6  2000/05/03 17:44:42  laue
+ * StHbtEvent, StHbtTrack & StHbtV0 declared friend to StHbtIOBinary
+ * StHbtParticle updated for V0 pos,neg track Id
+ *
  * Revision 1.5  2000/02/18 21:32:23  laue
  * franksTrackCut changed. If mCharge is set to '0' there will be no cut
  * on charge. This is important for front-loaded cuts.
@@ -87,14 +91,14 @@ StHbtEvent::~StHbtEvent(){
   for (iter=mTrackCollection->begin();iter!=mTrackCollection->end();iter++){
     delete *iter;
   }
+  mTrackCollection->clear();
   delete mTrackCollection;
-
-
   //must do the same for the V0 collection
   StHbtV0Iterator V0iter;
   for (V0iter=mV0Collection->begin();V0iter!=mV0Collection->end();V0iter++){
     delete *V0iter;
   }
+  mV0Collection->clear();
   delete mV0Collection;
 }
 //___________________

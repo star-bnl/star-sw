@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.8 2000/04/03 16:21:51 laue Exp $
+ * $Id: StHbtParticle.hh,v 1.9 2000/05/03 17:44:43 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
+ * Revision 1.9  2000/05/03 17:44:43  laue
+ * StHbtEvent, StHbtTrack & StHbtV0 declared friend to StHbtIOBinary
+ * StHbtParticle updated for V0 pos,neg track Id
+ *
  * Revision 1.8  2000/04/03 16:21:51  laue
  * some include files changed
  * Multi track cut added
@@ -67,12 +71,21 @@ public:
   unsigned long TopologyMap(const int word) const;
   int NumberOfHits() const;
 
+  unsigned long TrackId() const;         // only for particles from tracks 
+  unsigned short   NegTrackId() const;   // only for particles from v0 
+  unsigned short   PosTrackId() const;   // only for particles from v0 
+
+
 private:
   StHbtLorentzVector mFourMomentum;
   StPhysicalHelixD mHelix;
   StHbtThreeVector mDecayVertexV0;
-  unsigned long mMap[2];
+  unsigned long  mMap[2]; 
   int mNhits;
+  unsigned short mTrackId;     // only for particles from tracks 
+  unsigned short mPosTrackId;  // only for particles from v0 
+  unsigned short mNegTrackId;  // only for particles from v0 
+
 
 };
 
@@ -81,4 +94,7 @@ inline StPhysicalHelixD& StHbtParticle::Helix() {return mHelix;}
 inline const StHbtThreeVector& StHbtParticle::DecayVertexPosition() const {return mDecayVertexV0;}
 inline unsigned long StHbtParticle::TopologyMap(const int word) const {return mMap[word];}
 inline int StHbtParticle::NumberOfHits() const {return mNhits;}
+inline unsigned long  StHbtParticle::TrackId() const { return mTrackId; }; 
+inline unsigned short StHbtParticle::NegTrackId() const { return mNegTrackId; }; 
+inline unsigned short StHbtParticle::PosTrackId() const { return mPosTrackId; }; 
 #endif

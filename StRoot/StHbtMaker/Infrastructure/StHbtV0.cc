@@ -12,8 +12,11 @@ StHbtV0::StHbtV0(const StHbtV0& v){ // copy constructor
   mmomPos = v.mmomPos;
   mmomNeg = v.mmomNeg;
 
-  mtpcHitsPos = v.mtpcHitsPos;
-  mtpcHitsNeg = v.mtpcHitsNeg;
+
+  mTrackTopologyMapPos[0] = v.mTrackTopologyMapPos[0];
+  mTrackTopologyMapNeg[0] = v.mTrackTopologyMapNeg[0];
+  mTrackTopologyMapPos[1] = v.mTrackTopologyMapPos[1];
+  mTrackTopologyMapNeg[1] = v.mTrackTopologyMapNeg[1];
        
   mmomV0 = v.mmomV0;
   malphaV0 = v.malphaV0;
@@ -40,6 +43,9 @@ StHbtV0::StHbtV0(const StHbtV0& v){ // copy constructor
 
   midNeg = v.midNeg;
   midPos = v.midPos;
+  
+  mtpcHitsPos = v.mtpcHitsPos;
+  mtpcHitsNeg = v.mtpcHitsNeg;
 
 
 }
@@ -65,7 +71,7 @@ void StHbtV0::UpdateV0(){
    MomNegAlongV0 =  mmomNeg*mmomV0 / sqrt(pow(mptotV0,2));
    MomPosAlongV0 =  mmomPos*mmomV0 / sqrt(pow(mptotV0,2));
 
-   malphaV0 = (MomPosAlongV0-MomNegAlongV0)/(MomPosAlongV0-MomNegAlongV0);
+   malphaV0 = (MomPosAlongV0-MomNegAlongV0)/(MomPosAlongV0+MomNegAlongV0);
    mptArmV0 =  sqrt(mptotPos*mptotPos - MomPosAlongV0*MomPosAlongV0);
    mmassLambda = sqrt(pow(mePosProton+meNegPion,2)-pow(mptotV0,2));
    mmassAntiLambda = sqrt(pow(meNegProton+mePosPion,2)-pow(mptotV0,2));

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.7 2000/04/03 16:21:51 laue Exp $
+ * $Id: StHbtParticle.cc,v 1.8 2000/05/03 17:44:43 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.8  2000/05/03 17:44:43  laue
+ * StHbtEvent, StHbtTrack & StHbtV0 declared friend to StHbtIOBinary
+ * StHbtParticle updated for V0 pos,neg track Id
+ *
  * Revision 1.7  2000/04/03 16:21:51  laue
  * some include files changed
  * Multi track cut added
@@ -49,7 +53,7 @@ StHbtParticle::~StHbtParticle(){
   /* no-op */
 }
 //_____________________
-StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass){
+StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass) : mPosTrackId(0), mNegTrackId(0) {
   // I know there is a better way to do this...
   StHbtThreeVector temp = hbtTrack->P();
   mFourMomentum.setVect(temp);
@@ -58,18 +62,22 @@ StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass
   mMap[0] = hbtTrack->TopologyMap(0);
   mMap[1] = hbtTrack->TopologyMap(1);
   mNhits = hbtTrack->NHits();
-
   mHelix = hbtTrack->Helix();
+  mTrackId = hbtTrack->TrackId();
 }
 //_____________________
-StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass){
+StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mTrackId(0) {
+  mMap[0]= 0;
+  mMap[1]= 0;
   // I know there is a better way to do this...
   StHbtThreeVector temp = hbtV0->momV0();
   mFourMomentum.setVect(temp);
   double ener = sqrt(temp.mag2()+mass*mass);
   mFourMomentum.setE(ener);
-
   mDecayVertexV0 = hbtV0->decayVertexV0();
+  mPosTrackId = hbtV0->idPos();
+  mNegTrackId = hbtV0->idNeg();
+  //  cout << mPosTrackId << " " << mNegTrackId << " " << hbtV0->idPos() << " " << hbtV0->idNeg() << endl;
   //  mHelix = hbtTrack->Helix(); ?? what to do with mHelix for a Particle coming from a V0?
 }
 //_____________________

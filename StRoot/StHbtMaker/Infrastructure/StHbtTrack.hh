@@ -1,7 +1,6 @@
-
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.12 2000/04/03 16:21:51 laue Exp $
+ * $Id: StHbtTrack.hh,v 1.13 2000/05/03 17:44:43 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +13,10 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.13  2000/05/03 17:44:43  laue
+ * StHbtEvent, StHbtTrack & StHbtV0 declared friend to StHbtIOBinary
+ * StHbtParticle updated for V0 pos,neg track Id
+ *
  * Revision 1.12  2000/04/03 16:21:51  laue
  * some include files changed
  * Multi track cut added
@@ -71,6 +74,8 @@
 
 #ifndef StHbtTrack_hh
 #define StHbtTrack_hh
+
+#include <fstream.h>
 
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StPhysicalHelixD.hh"
@@ -142,7 +147,7 @@ private:
   float mPt;
   StPhysicalHelixD mHelix;
 
-
+  friend class StHbtIOBinary;
 };
 
 inline void StHbtTrack::SetNHits(const unsigned short& nh){mNHits=nh;}
