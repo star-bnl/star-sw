@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.cxx,v 1.4 1999/01/25 23:39:12 fisyak Exp $
+// $Id: St_ctf_Maker.cxx,v 1.5 1999/02/06 00:15:46 fisyak Exp $
 // $Log: St_ctf_Maker.cxx,v $
+// Revision 1.5  1999/02/06 00:15:46  fisyak
+// Add adc/tdc histograms
+//
 // Revision 1.4  1999/01/25 23:39:12  fisyak
 // Add tof
 //
@@ -43,6 +46,7 @@
 #include "ctf/St_ctg_Module.h"
 #include "ctf/St_cts_Module.h"
 #include "ctf/St_ctu_Module.h"
+#include "TH1.h"
 
 ClassImp(St_ctf_Maker)
 
@@ -82,47 +86,54 @@ Int_t St_ctf_Maker::Init(){
   //  m_cts          = (St_cts_mpara    *) params("ctf/cts")->GetList()->FindObject("cts");
   m_cts_ctb          = (St_cts_mpara    *) params("ctf/cts/cts_ctb");
   m_cts_tof          = (St_cts_mpara    *) params("ctf/cts/cts_tof");
-  // Create Histograms    
+  // Create Histograms  
+  m_adc              = new TH1F("abc","CTB ADC counters",100,0,100);
+  m_tdc              = new TH1F("tdc","CTB TDC counters",100,0,100);
   return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_ctf_Maker::Make(){
 //  PrintInfo();
   if (!m_DataSet->GetList())  {//if DataSet is empty fill it
-  St_DataSetIter geant(gStChain->DataSet("geant"));
-  St_g2t_track   *g2t_track   = (St_g2t_track *)   geant("g2t_track");
-  St_g2t_ctf_hit *g2t_ctb_hit = (St_g2t_ctf_hit *) geant("g2t_ctb_hit");
-  if (g2t_ctb_hit) {
-    St_cts_mslat *ctb_mslat = new  St_cts_mslat("ctb_mslat", 240); m_DataSet->Add(ctb_mslat);
-    St_cts_event *ctb_event = new  St_cts_event("ctb_event",5000); m_DataSet->Add(ctb_event);
-    St_ctu_raw   *ctb_raw   = new  St_ctu_raw("ctb_raw",     240); m_DataSet->Add(ctb_raw);
-    St_ctu_cor   *ctb_cor   = new  St_ctu_cor("ctb_cor",     240); m_DataSet->Add(ctb_cor);
-    Int_t Res_cts_ctb = cts(g2t_ctb_hit, g2t_track,
-			    m_ctb,  m_ctb_slat, m_ctb_slat_phi, m_ctb_slat_eta, m_cts_ctb,
-			    ctb_event, ctb_mslat, ctb_raw);
-    
-    Int_t Res_ctu_ctb =  ctu(m_ctb,  m_ctb_slat,
-			     ctb_raw, ctb_cor);
+    St_DataSetIter geant(gStChain->DataSet("geant"));
+    St_g2t_track   *g2t_track   = (St_g2t_track *)   geant("g2t_track");
+    St_g2t_ctf_hit *g2t_ctb_hit = (St_g2t_ctf_hit *) geant("g2t_ctb_hit");
+    if (g2t_ctb_hit) {
+      St_cts_mslat *ctb_mslat = new  St_cts_mslat("ctb_mslat", 240); m_DataSet->Add(ctb_mslat);
+      St_cts_event *ctb_event = new  St_cts_event("ctb_event",5000); m_DataSet->Add(ctb_event);
+      St_ctu_raw   *ctb_raw   = new  St_ctu_raw("ctb_raw",     240); m_DataSet->Add(ctb_raw);
+      St_ctu_cor   *ctb_cor   = new  St_ctu_cor("ctb_cor",     240); m_DataSet->Add(ctb_cor);
+      Int_t Res_cts_ctb = cts(g2t_ctb_hit, g2t_track,
+			      m_ctb,  m_ctb_slat, m_ctb_slat_phi, m_ctb_slat_eta, m_cts_ctb,
+			      ctb_event, ctb_mslat, ctb_raw);
+      
+      Int_t Res_ctu_ctb =  ctu(m_ctb,  m_ctb_slat,
+			       ctb_raw, ctb_cor);
+      ctu_raw_st *raw = ctb_raw->GetTable();
+      for (Int_t i=0; i<ctb_raw->GetNRows();i++,raw++){
+	m_adc->Fill((Float_t) raw->adc);
+	m_tdc->Fill((Float_t) raw->tdc);
+      }
+    }
+    St_g2t_ctf_hit *g2t_tof_hit = (St_g2t_ctf_hit *) geant("g2t_tof_hit");
+    if (g2t_tof_hit) {
+      St_cts_mslat *tof_mslat = new  St_cts_mslat("tof_mslat",5400); m_DataSet->Add(tof_mslat);
+      St_cts_event *tof_event = new  St_cts_event("tof_event",5000); m_DataSet->Add(tof_event);
+      St_ctu_raw   *tof_raw   = new  St_ctu_raw("tof_raw",    5400); m_DataSet->Add(tof_raw);
+      St_ctu_cor   *tof_cor   = new  St_ctu_cor("tof_cor",    5400); m_DataSet->Add(tof_cor);
+      Int_t Res_cts_tof = cts(g2t_tof_hit, g2t_track,
+			      m_tof,  m_tof_slat, m_tof_slat_phi, m_tof_slat_eta, m_cts_tof,
+			      tof_event, tof_mslat, tof_raw);
+      Int_t Res_ctu_tof =  ctu(m_tof,  m_tof_slat,
+			       tof_raw, tof_cor);
+    }
   }
-  St_g2t_ctf_hit *g2t_tof_hit = (St_g2t_ctf_hit *) geant("g2t_tof_hit");
-  if (g2t_tof_hit) {
-    St_cts_mslat *tof_mslat = new  St_cts_mslat("tof_mslat",5400); m_DataSet->Add(tof_mslat);
-    St_cts_event *tof_event = new  St_cts_event("tof_event",5000); m_DataSet->Add(tof_event);
-    St_ctu_raw   *tof_raw   = new  St_ctu_raw("tof_raw",    5400); m_DataSet->Add(tof_raw);
-    St_ctu_cor   *tof_cor   = new  St_ctu_cor("tof_cor",    5400); m_DataSet->Add(tof_cor);
-    Int_t Res_cts_tof = cts(g2t_tof_hit, g2t_track,
-			    m_tof,  m_tof_slat, m_tof_slat_phi, m_tof_slat_eta, m_cts_tof,
-			    tof_event, tof_mslat, tof_raw);
-    Int_t Res_ctu_tof =  ctu(m_tof,  m_tof_slat,
-			     tof_raw, tof_cor);
-  }
-  }
- return kStOK;
+  return kStOK;
 }
 //_____________________________________________________________________________
 void St_ctf_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ctf_Maker.cxx,v 1.4 1999/01/25 23:39:12 fisyak Exp $\n");
+  printf("* $Id: St_ctf_Maker.cxx,v 1.5 1999/02/06 00:15:46 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.h,v 1.3 1999/01/25 23:39:13 fisyak Exp $
+// $Id: St_ctf_Maker.h,v 1.4 1999/02/06 00:15:47 fisyak Exp $
 // $Log: St_ctf_Maker.h,v $
+// Revision 1.4  1999/02/06 00:15:47  fisyak
+// Add adc/tdc histograms
+//
 // Revision 1.3  1999/01/25 23:39:13  fisyak
 // Add tof
 //
@@ -43,6 +46,7 @@ class St_ctg_slat_phi;
 class St_ctg_slat_eta;
 class St_ctg_slat;
 class St_cts_mpara;
+class TH1F;
 class St_ctf_Maker : public StMaker {
  private:
    Bool_t drawinit;
@@ -57,6 +61,8 @@ class St_ctf_Maker : public StMaker {
    St_ctg_slat      *m_tof_slat;     //!
    St_cts_mpara     *m_cts_tof;      //!
  protected:
+   TH1F *m_adc;   //!
+   TH1F *m_tdc;   //!
  public: 
                   St_ctf_Maker(const char *name="ctf", const char *title="event/data/ctf");
    virtual       ~St_ctf_Maker();
