@@ -1,5 +1,8 @@
-// $Id: makedoc.C,v 1.40 1999/08/07 18:36:33 fine Exp $
+// $Id: makedoc.C,v 1.41 1999/09/12 01:09:57 fine Exp $
 // $Log: makedoc.C,v $
+// Revision 1.41  1999/09/12 01:09:57  fine
+// Adjusted to the new source tree
+//
 // Revision 1.40  1999/08/07 18:36:33  fine
 // StDisplayMaker has been included into makedoc
 //
@@ -68,8 +71,6 @@
      gSystem->Load("xdf2root");
      gSystem->Load("St_Tables");
   
- 
-     gSystem->Load("libmsg.so");
      gSystem->Load("libtls.so");
    
 //     gSystem->Load("global.sl");
@@ -102,13 +103,15 @@
   STAR += "/star/packages/dev";
   TString sourcedir;
   sourcedir = STAR;
-  sourcedir += "/StRoot/St_base";
   if (!NT) { 
+    sourcedir += ":";
+    sourcedir = STAR;
+    sourcedir += "/StRoot/St_base:";
     sourcedir += ":";
     sourcedir += STAR;
     sourcedir += "/.share/tables:";
     sourcedir += STAR;
-    sourcedir += "/inc:";
+    sourcedir += "/include:";
     sourcedir += STAR;
     sourcedir += "/StRoot/StEvent:";
     sourcedir += STAR;
@@ -131,7 +134,11 @@
   }
   else {
     lookup = STAR;
+    lookup += ":";
+    lookup += STAR;
     lookup += "/StRoot/StChain:";
+    lookup += STAR;
+    lookup += "/include:";
     lookup += STAR;
     lookup += "/StRoot/xdf2root:";
     lookup += STAR;
@@ -165,7 +172,7 @@
 
   // Create the list of the classes defined with the loaded DLL's to be documented
 
-  Char_t *classes[] = { "St_TableSorter","St_TableNtuple"
+  Char_t *classes[] = { "St_TableSorter"
                        ,"St_XDFFile",    "St_Module",       "St_Table"
                        ,"St_DataSet",    "St_DataSetIter", "St_FileSet"
                        ,"StParticleView","St_ObjectSet",    "St_Node",     "St_NodePosition"
@@ -180,13 +187,13 @@
                        ,"StEventDisplayMaker"
                        ,"St_srs_Maker",  "St_xdfin_Maker"
                       };
-  Int_t nclass = 36;
+  Int_t nclass = 35;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
-     gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
+     gROOT->LoadMacro("$STAF/inc/table_header.h");
   }
   else
-     gROOT->LoadMacro("/afs/rhic/star/packages/dev/inc/table_header.h");
+     gROOT->LoadMacro("$STAF/inc/table_header.h");
 
   TClass header1("table_head_st",1,"table_header.h","table_header.h");
   // Create HTML subdirectory tree
@@ -197,7 +204,7 @@
 
   // Make class descriptions
   Int_t i=0;
-  for (i=0;i<nclass;i++)  html.MakeClass(classes[i]);
+  for (i=0;i<nclass;i++)  html.MakeClass(classes[i],kTRUE);
 
   TString giffile = STAR;
   giffile += "/StRoot/html/src/gif";
