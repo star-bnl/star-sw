@@ -1,3 +1,21 @@
+/***************************************************************************
+ *
+ * $Id: StDAQReader.h,v 1.3 1999/08/01 00:10:57 perev Exp $
+ *
+ * Author: Victor Perev
+ ***************************************************************************
+ *
+ * Description: Offline Wrapper for DAQ reader classes
+ *
+ ***************************************************************************
+ *
+ * $Log: StDAQReader.h,v $
+ * Revision 1.3  1999/08/01 00:10:57  perev
+ * leak removed author added
+ *
+ *
+ **************************************************************************/
+#include "StDAQMaker/StDAQReader.h
 #ifndef _StDAQReader_
 #define _StDAQReader_
 
