@@ -1,9 +1,15 @@
 #! /usr/local/bin/perl
 use File::Basename;
+my $input = shift;
 my $file = shift;
 if ($file =~ /Table\.h/) {
   my $idlHH   = $file; #print "ConstructTable: $idlHH\n";
-  TableH($idlHH);
+  if ($input =~ /\.idl/) {
+    TableH($idlHH);
+  }
+  else {
+    TableD($idlHH);
+  }
 }
 elsif ($file =~ /Table\.cxx/) {
 my $idlCXX  = $file; #print "ConstructTable: $idlCXX\n";
@@ -13,22 +19,8 @@ elsif ($file =~ /LinkDef\.h/) {
   my $LinkDef = $file; #print "ConstructTable: $LinkDef\n";
   TableLinkDef($LinkDef);
 }
-#________________________________________
-sub TableH {
-#  my($env, $dst, $src) = shift;
-#  my $env = shift;
-  (my $dst = shift) =~ s/^\#//g; 
-  my $dir = dirname($dst);
-  rmkdir($dir);
-  (my $stem = basename($dst,"_Table.h")) =~ s/^St_//g;# print "cons::TableH stem = $stem\n";
-  open (OUT,">$dst") or die "Can't open $dst\n";
-  print OUT "#ifndef STAF_St_",$stem,"_Table\n";
-  print OUT "#define STAF_St_",$stem,"_Table\n";
-  print OUT "\n";
-  print OUT "#include \"St_Table.h\"\n";
-  print OUT "\n";
-  print OUT "#include \"",$stem,".h\"\n";
-  print OUT "\n";
+sub tableH ($) {
+  my $stem = $_[0];
   print OUT "class St_",$stem," : public St_Table\n";
   print OUT "{\n";
   print OUT "protected:\n";
@@ -47,6 +39,44 @@ sub TableH {
   print OUT "};\n";
   print OUT "\n";
   print OUT "#endif\n";
+}
+#________________________________________
+sub TableH {
+#  my($env, $dst, $src) = shift;
+#  my $env = shift;
+  (my $dst = shift) =~ s/^\#//g; 
+  my $dir = dirname($dst);
+  rmkdir($dir);
+  (my $stem = basename($dst,"_Table.h")) =~ s/^St_//g;# print "cons::TableH stem = $stem\n";
+  open (OUT,">$dst") or die "Can't open $dst\n";
+  print OUT "#ifndef STAF_St_",$stem,"_Table\n";
+  print OUT "#define STAF_St_",$stem,"_Table\n";
+  print OUT "\n";
+  print OUT "#include \"St_Table.h\"\n";
+  print OUT "\n";
+  print OUT "#include \"",$stem,".h\"\n";
+  print OUT "\n";
+  tableH($stem);
+  close (OUT);
+}
+#________________________________________
+sub TableD {
+#  my($env, $dst, $src) = shift;
+#  my $env = shift;
+  (my $dst = shift) =~ s/^\#//g; 
+  my $dir = dirname($dst);
+  rmkdir($dir);
+  (my $stem = basename($dst,"_Table.h")) =~ s/^St_//g;# print "cons::TableH stem = $stem\n";
+  open (OUT,">$dst") or die "Can't open $dst\n";
+  print OUT "#ifndef STAF_St_",$stem,"_Table\n";
+  print OUT "#define STAF_St_",$stem,"_Table\n";
+  print OUT "\n";
+  print OUT "#include \"St_Table.h\"\n";
+  print OUT "\n";
+  print OUT "#include \"",$stem,".h\"\n";
+  print OUT "\n";
+  print OUT "typedef ",$stem," ",$stem,"_st;\n";
+  tableH($stem);
   close (OUT);
 }
 #________________________________________
