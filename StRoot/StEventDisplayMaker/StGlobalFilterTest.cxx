@@ -1,4 +1,4 @@
-// $Id: StGlobalFilterTest.cxx,v 1.2 2004/10/07 19:41:23 perev Exp $
+// $Id: StGlobalFilterTest.cxx,v 1.3 2004/10/17 03:37:19 perev Exp $
 #include "TError.h"
 #include "TSystem.h"
 #include "TCanvas.h"
@@ -71,8 +71,8 @@ void StGlobalFilterTest::Filter(TObjArray *eArr,int flag)
     double tmp;
     tmp = th.GetFirstPoint().perp()  ;if(tmp>200) iSel|=1;
     tmp = th.GetLastPoint ().perp()  ;if(tmp>200) iSel|=2;
-    tmp =fabs(th.GetFirstPoint().z());if(tmp>210) iSel|=4;
-    tmp =fabs(th.GetLastPoint ().z());if(tmp>210) iSel|=8;
+    tmp =fabs(th.GetFirstPoint().z());if(tmp>269) iSel|=4;
+    tmp =fabs(th.GetLastPoint ().z());if(tmp>269) iSel|=8;
     
 
     double curv1,curv2,dE;

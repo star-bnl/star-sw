@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.103 2004/10/07 19:41:23 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.104 2004/10/17 03:37:19 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -850,6 +850,7 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
   for (int i = 0; i < ntrk; i++ )
   {
     pnt = (StPoints3DABC*)points->At(i);
+    if (!pnt->Size()) continue;
     //		Filtration
     nextFilter.Reset();
     while ((filt=(StFilterABC*)nextFilter())) {if (!filt->AcceptCB(pnt,col,siz,sty)) break;}
@@ -857,17 +858,19 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
 
     int kind = pnt->Kind();
     L = "P";
-    if (kind==3 && (kase&kUSE || pnt->Size()>1)) kind=4;
+    if (kind==3 && (kase&kUSE || pnt->Size()>1)) kind=9;
     switch (kind) {
-      case 1:  defSty = VertSty; defSiz = VertSiz; defCol = VertCol;        break;
-      case 2:  defSty = TrakSty; defSiz = TrakSiz; defCol = TrakCol; L="L"; break;
-      case 3:  defSty = NHitSty; defSiz = NHitSiz; defCol = NHitCol;        break;
-      case 4:  defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol;	    break;
+      case 1:  defSty = VertSty; defSiz = VertSiz  ; defCol = VertCol;        break;
+      case 2:  defSty = TrakSty; defSiz = TrakSiz  ; defCol = TrakCol; L="L"; break;
+      case 3:  defSty = NHitSty; defSiz = NHitSiz  ; defCol = NHitCol;        break;
+      case 4:  defSty = VertSty; defSiz = UHitSiz*4; defCol = VertCol;        break;
+      case 5:  defSty = VertSty; defSiz = UHitSiz*4; defCol = VertCol;        break;
+      case 9:  defSty = UHitSty; defSiz = UHitSiz  ; defCol = UHitCol;	      break;
     }
 
     col = pnt->GetUniqueID();
     if (!col) col = defCol;
-
+    siz = defSiz;sty=defSty;
 //  Draw it
 
     DrawIt(pnt,L,col,sty,siz);
@@ -1190,6 +1193,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.104  2004/10/17 03:37:19  perev
+// A lot of improvements
+//
 // Revision 1.103  2004/10/07 19:41:23  perev
 // Tuning
 //

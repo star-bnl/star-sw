@@ -1,5 +1,5 @@
 //*-- Author :    Victor Perev(perev@bnl.gov)   11/09/04  
-// $Id: StGlobalFilterABC.h,v 1.2 2004/10/07 19:41:23 perev Exp $ 
+// $Id: StGlobalFilterABC.h,v 1.3 2004/10/17 03:37:19 perev Exp $ 
 #ifndef STAR_StGlobalFilterABC
 #define STAR_StGlobalFilterABC
 
@@ -26,13 +26,17 @@ class StGlobalFilterABC : public TNamed  {
     virtual void NewEvent(int nrun,int nev);
             void SetActive(int act=1){fActive=act;}
             int  IsActive(){return fActive;}
-            void SetMode(int mode){fMode=mode;}
-            int  GetMode(){return fMode;}
+            void SetMode(int    mode){fMode=mode;}
+            void SetMode(double dode){fDode=dode;}
+            void SetDode(double dode){fDode=dode;}
+             int GetMode(){return fMode;}
+          double GetDode(){return fDode;}
             void SetMaker(StEventDisplayMaker *edm){fEDMaker=edm;}
 static TList *GetList() {return fgGlobalList;}
 protected:
- int fActive;
+ double fDode;
  int fMode;
+ int fActive;
  int fRun;		
  int fEvent;		
  int fNewEvent;
