@@ -15,6 +15,9 @@
 
 /*
 $Log: TGeant3.cxx,v $
+Revision 1.3  2000/01/07 17:51:24  fisyak
+Add Gtmedi
+
 Revision 1.2  2000/01/07 00:16:43  fisyak
 add filling fgGeant
 
@@ -105,6 +108,7 @@ Introduction of the Copyright and cvs Log
 #define    gdtom	 F77_NAME(gdtom,GDTOM)
 #define    glmoth	 F77_NAME(glmoth,GLMOTH)
 #define    gmedia	 F77_NAME(gmedia,GMEDIA)
+#define    gtmedi	 F77_NAME(gtmedi,GTMEDI)
 #define    gmtod	 F77_NAME(gmtod,GMTOD)
 #define    gsdvn	 F77_NAME(gsdvn,GSDVN)
 #define    gsdvn2	 F77_NAME(gsdvn2,GSDVN2)
@@ -254,6 +258,8 @@ extern "C"
 			   Int_t *, Int_t * DEFCHARL); 
 
   void type_of_call gmedia(Float_t *, Int_t &); 
+
+  void type_of_call gtmedi(Float_t *, Int_t &); 
 
   void type_of_call gmtod(Float_t *, Float_t *, Int_t &); 
 
@@ -2146,6 +2152,19 @@ void  TGeant3::Gmedia(Float_t *x, Int_t &numed)
   //         outside the experimental setup.
   //
   gmedia(x,numed); 
+} 
+ 
+//_____________________________________________________________________________
+void  TGeant3::Gtmedi(Float_t *x, Int_t &numed) 
+{ 
+  //
+  //   Finds in which volume/medium the point X is, and updates the
+  //    common /GCVOLU/ and the structure JGPAR accordingly. 
+  // 
+  //   NUMED returns the tracking medium number, or 0 if point is
+  //         outside the experimental setup.
+  //
+  gtmedi(x,numed); 
 } 
  
 //_____________________________________________________________________________
