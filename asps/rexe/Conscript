@@ -6,12 +6,12 @@ $build =~ s/\\/\//g;
 (my $Dir = $obj_dir) =~ s/$build\///g;
 my $ObjDir = "#" . $obj_dir; 
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
-my $pkg;
-if ($env->{ENV}->{STAR}) {
-  if ($env->{ROOTLIBS} =~ /-lNew/) {$pkg  = "root4starN";}
-  else                             {$pkg  = "root4star";}
-}
-else                     {$pkg  = "Root.exe";}
+my $pkg  = "root4star";
+my $pkgN = "root4starN";
+my $ROOTLIBS = $env->{ROOTLIBS};
+my $ROOTLIBSN = $ROOTLIBS;
+if ($ROOTLIBS =~ /-lNew/) {$ROOTLIBS =~ s/-lNew//;}
+if ($ROOTLIBSN !~ /-lNew/) {$ROOTLIBSN =~ s/-lRint/-lRint -lNew/;}
 my @GDIRS = qw(.
 	       ../agi/gst/agsim
 	       ../agi/gst/geant
@@ -30,7 +30,8 @@ print "build $pkg with cons\n";
 (my $share = $EXPORT .  "/" . $Dir) =~ s/\/asps//g; 
 my $CXXFLAGS = $env->{CXXFLAGS};
 my $LIBPATH = $env->{ENV}->{ROOTSYS} . "/lib" . $main::PATH_SEPARATOR . $env->{LIBPATH};
-my $LIBS  = $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS};# . " " . $env->{LIBS};
+my $LIBS   = $ROOTLIBS . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS};# . " " . $env->{LIBS};
+my $LIBSN  = $ROOTLIBSN . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS};# . " " . $env->{LIBS};
 #print "LIBS = $LIBS : ROOTLIBS = ",$env->{ROOTLIBS}," ROOTGLIBS = ",$env->{ROOTGLIBS},
 #  " RINTLIBS = ", $env->{RINTLIBS},"\n";
 if ($env->{ENV}->{STAR}) {$LIBS .= " -lTable -lStar2Root";}
@@ -61,6 +62,7 @@ $env2 = $env->clone('CPPPATH'      => $CPPPATH,
 		    'ObjDir'       => $obj_dir,
 		    'Libraries'    => $Libraries
 		   );
+$envN = $env2->clone('LIBS'         => $LIBSN);
 my @src = ();
 foreach my $d (@GDIRS){
   my $dir = $Dir . "/" . $d;
@@ -134,4 +136,8 @@ if ($#src > -1) {
   script::Keep $pkg;
   Program      $env2 $pkg, @src;
   Install $env2 $BIN, $pkg;
+  my @o = Objects $env2 @src; print "@o\n";
+  script::Keep $pkgN;
+  Program      $envN $pkgN, @o;
+  Install $envN $BIN, $pkgN;
 }  
