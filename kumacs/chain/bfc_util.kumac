@@ -2,6 +2,7 @@
 *                    in domain
 * 3Jul98 K. Turner - changed tpc kumacs so that pam kumacs are called directly
 * 7Jul98 K. Turner - changed to use gstar stuff
+* 9Jul98 K. Turner - changed to use new tpc cluster and track eval for slow sim
 * 
 *************************************************************
 *                     BFC_UTIL.KUMAC
@@ -54,6 +55,7 @@ macro bfc_start domain='geometry tpc svt global'
    enddo
    vec/cre make_done
  endif
+
 return
  
 **********************************************************************
@@ -61,9 +63,9 @@ return
 **********************************************************************
  
 macro bfc_init _
-    chain='g2t svg tpg srs tss tcl sgr tpt svm egr  ev0 evout'
- 
- macro/global/import *
+         chain=' g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout' 
+  
+  macro/global/import *
     
  test = [chain]
  nw = $words([test])
@@ -105,45 +107,45 @@ macro bfc_init _
       (tpg) exec tpg_init#init    | TPC geometry initialization
       (sss) exec svt_slow_sim#initialize | SVT initialization - slow simulation
       (srs) exec init_srs	| SVT initialization - fast simulation
-      (tfs) exec create_tables_tpc#tcl_fast
+      (tfs) 
+            exec create_tables_tpc#tcl_fast
             exec tcl_init#init
             exec tfs_init#init
-      (tss) exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
-              if [adcxyzon].eq.1 then
+      (tss) 
+	    exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
+            if [adcxyzon].eq.1 then
                 exec create_tables_tpc#tfc
-              endif
-	      exec tss_init#init [tpc_sector_first] [tpc_sector_last]
+            endif
+            exec tss_init#init [tpc_sector_first] [tpc_sector_last]
       (tcl)
-          exec create_tables_tpc#tcl_slow
-          exec tcl_init#init
+            exec create_tables_tpc#tcl_slow
+            exec tcl_init#init
       (tpt)
-	  exec create_tables_tpc#tpt
-          exec tpt_init#init
-          exec tid_init#init
-      (tte_t) 
-	  exec create_tables_tpc#tpt
-          exec tpt_init#init
-          exec tid_init#init
-      (tte_e)   
-              if $index([test],tfs)>0 then
-                exec create_tables_tpc#tte
-                exec tte_init#init
-              else
-                message ' NO evaluation for tpc slow sim'
-              endif
+	    exec create_tables_tpc#tpt
+            exec tpt_init#init
+            exec tid_init#init
+    (tte_t) 
+	    exec create_tables_tpc#tpt
+            exec tpt_init#init
+            exec tid_init#init
+    (tte_e)
+            exec create_tables_tpc#tte
+            exec tte_init#init
       (stk) exec svt_tracker#initialize
       (sgr) exec svt_tracker#initialize
       (svm) exec init_svm
       (egr) exec init_egr
       (ev0) exec init_ev0#init_ev0
 (ev0_eval2) exec init_ev0#ev0_eval2 
-      (emc) exec init_ems;  
+      (emc)
+            exec init_ems;  
             exec init_jet;     |  EMC geometry &  pam initialization 
       (*)   message " !!! bfc_util: No initialization for package " [mod]
     ENDCASE
     
   enddo
- EOF:
+EOF:
+ 
  return
  
 **********************************************************************
@@ -151,7 +153,7 @@ macro bfc_init _
 **********************************************************************
 
  macro bfc_process _
-   chain='g2t svg tpg srs tss tcl sgr tpt svm egr  ev0 evout'
+      chain=' g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
    
   macro/global/import *
   test = [chain]
@@ -161,31 +163,40 @@ macro bfc_init _
    mod = $word([test],[i],1)
    message ' !!! bfc_util ==> chain processing for  ' [mod]
    CASE [mod] in 
-      (gethij)    cd [event]; getev hij_in
+     (gethij)    
+               cd [event]; getev hij_in
                user/input u evgen/particle.staf
       (gst)    trig 1; cd [geant]; for/call g2t; cd /dui; 
-      (g2t)    dio/stream/getevent G2Tfile [geant];
+      (g2t)    
+               dio/stream/getevent G2Tfile [geant];
                if (staf_status(1).ne.STAFCV_OK) goto EOF
       (svg)    nextl 1
       (tpg)    nextl 1
       (sss)    exec svt_slow_sim#process_event;
       (srs)    exec svt_fast_sim#process_event; 
-      (tfs)    exec tfs_run#run
+      (tfs)    
+               exec tfs_run#run
                if (staf_status(1) .ne. stafcv_ok) then 
                   message ' problem with tpc_fast_sim_process_event'
-		endif
-      (tss)    exec tss_run#run [tpc_sector_first] [tpc_sector_last]
+	       endif
+      (tss)    
+               exec tss_run#run [tpc_sector_first] [tpc_sector_last]
                if [adcxyzon].eq.1 then
                  exec tfc_run#run 
                endif
                if (staf_status(1) .ne. stafcv_ok) then 
                  message ' problem with tpc_slow_sim_process_event'
                endif
-      (tcl)    exec tcl_run#run_tcl [tpc_sector_first] [tpc_sector_last] 
+      (tcl)    
+	       exec tcl_run#run_tcl [tpc_sector_first] [tpc_sector_last] 
                exec tcl_run#run_tph [tpc_sector_first] [tpc_sector_last]
                if (staf_status(1) .ne. stafcv_ok) then 
                  message ' problem with tpc_clustering_process_event'
                endif
+    (tte_e)    | must be done only for tss and before tracking!
+	       if $index([test],tss)>0 then
+                   exec tte_run#run_tte_hit_match
+	       endif
       (emc)    exec run_ems_interface          
       (stk)    exec svt_tracker#process_event_stk [ievent];
                if (staf_status(1) .ne. stafcv_ok) then
@@ -200,29 +211,24 @@ macro bfc_init _
                if (staf_status(1) .ne. stafcv_ok) then 
                  message ' problem with tpc_tracker_tpt'
                endif
-      (tte_t)   exec tte_run#run_tte_track
-                exec tid_run#run_tde_new
+    (tte_t)    exec tte_run#run_tte_track
+               exec tid_run#run_tde_new
                  if (staf_status(1) .ne. stafcv_ok) then 
                    message ' problem with tpc_tracker_tte'
                  endif
-      (tte_e)
-               if $index([test],tfs)>0 then
-                     exec tte_run#run_tte
-               else
-                  NO track evaluation for tss!
-               endif
+    (tte_e)    exec tte_run#run_tte
       (svm)    exec run_svm#run_svm 2	|  TPC to SVT Matching 
       (egr)    exec run_egr#egr 2             |  Event Global Refit
       (ev0)    exec run_ev0#ev0_am  2         |  V0 Finder 
-      (ev0_eval2)    exec run_ev0#ev0_eval2  [ievent]
+(ev0_eval2)    exec run_ev0#ev0_eval2  [ievent]
       (erj)    exec run_jet_egrid
                exec run_jet_erj
-      (evout)  if [output_file]="" then
+    (evout)    if [output_file]="" then
                  message "Empty output file"
                else
                  dio/stream/putevent evout [event]
                endif
-      (*)      message " !!! bfc_util: No process stage for package " [mod]
+        (*)    message " !!! bfc_util: No process stage for package " [mod]
       if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
    ENDCASE
 	     
@@ -244,7 +250,7 @@ return
 **********************************************************************
 
 macro bfc_finish _
-   chain='g2t svg tpg srs tss tcl sgr tpt svm egr  ev0 evout'
+   chain=' g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'
   
   macro/global/import *
   test = [chain]
