@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.17 2001/12/18 21:50:37 pfachini Exp $
+// $Id: StLaserEventMaker.cxx,v 1.18 2001/12/20 23:39:55 pfachini Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.18  2001/12/20 23:39:55  pfachini
+// Increasing the number of tracks for a good laser event
+//
 // Revision 1.17  2001/12/18 21:50:37  pfachini
 // Since the laserhist.*.*.root file cannot be written to the database directory (it makes the whole thing crash), I am adding the date and time stamp to Bill's tree
 //
@@ -136,7 +139,7 @@ Int_t StLaserEventMaker::Init(){
   fzlWestLow = new TH1F("fzlEastLow","fzlEastLow",100,15,40);
   fzlEastHigh = new TH1F("fzlWestHigh","fzlWestHigh",100,-190,-165);
   fzlEastLow = new TH1F("fzlWestLow","fzlWestLow",100,-40,-15);
-  numberTracks = new TH1F("numberTracks","numberTracks",100,0,2000);
+  numberTracks = new TH1F("numberTracks","numberTracks",100,5,2005);
   driftVelocityRec = new TH1F("driftVelocityRec","driftVelocityRec",100,5000000,6000000);
   AddHist(fzLaser);
   AddHist(fzlEastHigh);
@@ -669,7 +672,7 @@ void StLaserEventMaker::UndoExB(Float_t *x, Float_t *y, Float_t *z){
 }
 //_____________________________________________________________________________
 Int_t StLaserEventMaker::Finish() {
-  if (numberTracks->GetMean()>=600){
+  if (numberTracks->GetMean()>=700){
     WriteTableToFile();
   }
   else{
@@ -684,7 +687,7 @@ Int_t StLaserEventMaker::Finish() {
 //_____________________________________________________________________________
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.17 2001/12/18 21:50:37 pfachini Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.18 2001/12/20 23:39:55 pfachini Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
