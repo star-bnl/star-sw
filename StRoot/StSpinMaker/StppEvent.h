@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.h,v 1.7 2003/02/20 22:12:47 thenry Exp $ 
+// $Id: StppEvent.h,v 1.8 2003/03/07 23:46:44 thenry Exp $ 
 // $Log: StppEvent.h,v $
+// Revision 1.8  2003/03/07 23:46:44  thenry
+// Added fill calls with different parameters
+//
 // Revision 1.7  2003/02/20 22:12:47  thenry
 // Allowed External undefine of _jet_.
 //
@@ -80,11 +83,14 @@ public:
   
 #ifndef __CINT__
     Int_t fill(StEvent* event);  //event=0 for reading from MuDst
+    Int_t fill(StMuDst* uDst); 
+    Int_t fill(StEvent* event, StMuDst* uDst);
 #endif /*__CINT__*/
     void clear();
     void reset();
     void setMuDst(StMuDst* dst) {mudst=dst;};
-    
+    StMuDst* getMuDst(void) { return mudst; };
+        
     void addAnalyzer(StppJetAnalyzer* a) {
         cout << "Calling addAnalyzer" << endl;
         mAnalyzers[numAnalyzers] = a;
@@ -201,8 +207,8 @@ public:
     Int_t getInfoLevel() const {return infoLevel;} 
     Int_t getTrackChoice() const {return trackChoice;}
 
-private:
   StMuDst* mudst;  //!
+private:
   Int_t infoLevel; //!  
   Int_t trackChoice; // 0=primary, 1=global, 2=l3
 #ifdef _Jet_
