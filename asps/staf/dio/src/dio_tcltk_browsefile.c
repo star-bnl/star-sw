@@ -1,8 +1,6 @@
-#ifndef __sparc
-#include <strings.h>
-#else
 #include <string.h>
-#endif /* __sparc */
+#include "asuLib.h"
+#include "emlLib.h"
 #include "dio_types.h"
 
 #define NAME_D "i_changed"

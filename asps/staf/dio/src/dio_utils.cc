@@ -4,6 +4,7 @@
 *:DESCRIPTION:  Utility functions for DIO.
 *:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
 *:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      30dec96-v020a-cet- NEW_DSL -> OLD_DSL option
 *:HISTORY:      13dec95-v000a-cet- creation
 *:<---------------------------------------------------------------------
 */
@@ -78,8 +79,13 @@ int dio_addHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
       if( !dsDatasetName(&name,pAdd)
       ||  !dsDatasetEntryCount(&count,pAdd)
       ||  !dsDatasetMaxEntryCount(&maxcount,pAdd)
+#ifndef OLD_DSL
+      ||  !dsNewDataset(&pAdded, name)
+      ||  !dsLink(pDS, pAdded)
+#else   /*OLD_DSL*/
       ||  !dsAddDataset(pDS,name,maxcount+100,pAdded) //HACK 100
       ||  !dsFindEntry(&pAdded,pDS,name)
+#endif  /*OLD_DSL*/
       ){
 	 EML_PRINTF("dataset = (%s)\n",pAdd->name);
          EML_DSPERROR("can't add dataset");
@@ -160,8 +166,13 @@ int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
 	 return FALSE;
       }
       if( !dsFindEntry(&pAdded,pDS,name) ){
-	 if( !dsAddDataset(pDS,name,maxcount+100,pAdded) /* HACK-100 */
+#ifndef OLD_DSL
+	 if( !dsNewDataset(&pAdded, name)
+	 ||  !dsLink(pDS, pAdded)
+#else   /*OLD_DSL*/
+	 if( !dsAddDataset(pDS,name,maxcount+100,pAdded) /* HACK 100 */
 	 ||  !dsFindEntry(&pAdded,pDS,name)
+#endif  /*OLD_DSL*/
 	 ){
 	    EML_DSPERROR("can't map dataset");
 	    return FALSE;

@@ -7,6 +7,8 @@
 //:HISTORY:	08dec95-v000a-cet- creation
 //:<--------------------------------------------------------------------
 
+#include "asuLib.h"
+#include "emlLib.h"
 #include "dio_macros.h"
 #include "dio_types.h"
 #include "dioClasses.hh"
