@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.41 2004/01/06 20:04:41 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.42 2004/01/16 23:48:12 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.42  2004/01/16 23:48:12  jhthomas
+ * Fix integer math as suggested by Gene Van Buren
+ *
  * Revision 1.41  2004/01/06 20:04:41  jhthomas
  * Add new routine to handle a shorted ring on the East end of the TPC.
  * Also new routine to help redo the space charge calculations.
@@ -275,8 +278,8 @@ void StMagUtilities::GetMagFactor ()
 void StMagUtilities::GetTPCParams ()  
 { 
   StarDriftV     =  1e-6*thedb->DriftVelocity() ;        
-  TPC_Z0         =  thedb->PadPlaneGeometry()->outerSectorPadPlaneZ()-thedb->WirePlaneGeometry()
-                    ->outerSectorFrischGridPadPlaneSeparation() ;    
+  TPC_Z0         =  thedb->PadPlaneGeometry()->outerSectorPadPlaneZ() -
+                    thedb->WirePlaneGeometry()->outerSectorGatingGridPadPlaneSeparation() ;    
   XTWIST         =  1e3*thedb->GlobalPosition()->TpcEFieldRotationY() ; 
   YTWIST         =  -1e3*thedb->GlobalPosition()->TpcEFieldRotationX() ;            
   IFCShift       =  thedb->FieldCage()->InnerFieldCageShift();
@@ -319,12 +322,12 @@ void StMagUtilities::CommonStart ( Int_t mode )
   //  End of list of items that might come from the DB
 
   if ( thedb2 == 0 ) cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected BFIELD setting." << endl ; 
-  else  cout << "StMagUtilities::ComonSta  Magnetic Field scale factor is " << gFactor << endl ;
+  else  cout << "StMagUtilities::CommonSta  Magnetic Field scale factor is " << gFactor << endl ;
 
   if ( thedb == 0 )
     {
       StarDriftV  =     5.45 ;      // Drift Velocity (cm/microSec) Magnitude
-      TPC_Z0      =    208.7 ;      // Z location of STAR TPC Frisch Grid (Gating Grid) (cm)
+      TPC_Z0      =    208.7 ;      // Z location of STAR TPC Gated Grid (cm)
       XTWIST      =   -0.165 ;      // X Displacement of West end of TPC wrt magnet (mRad)
       YTWIST      =    0.219 ;      // Y Displacement of West end of TPC wrt magnet (mRad)
       IFCShift    =   0.0080 ;      // Shift of the IFC towards the West Endcap (cm) (2/1/2002)
@@ -380,18 +383,22 @@ void StMagUtilities::CommonStart ( Int_t mode )
 
   // Theoretically, OmegaTau is defined as shown in the next line.  
   // OmegaTau   =  -10. * B[2] * StarDriftV / StarMagE ;  // cm/microsec, Volts/cm
-  // Instead, we will use scaled values from the Aleph collaboration
+  // Instead, we will use scaled values from Amendolia et al NIM A235 (1986) 296.
 
-  StarMagE   =  TMath::Abs(CathodeV/TPC_Z0) ;           // STAR Electric Field (V/cm) Magnitude
-  OmegaTau   =  -11.0 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note the sign of B is important 
+  StarMagE   =  TMath::Abs((CathodeV-GG)/TPC_Z0) ;           // STAR Electric Field (V/cm) Magnitude
+  OmegaTau   =  -10.0 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note the sign of B is important 
 
-  Const_0    =  1. / ( 1. +  OmegaTau*OmegaTau ) ;
-  Const_1    =  OmegaTau / ( 1. + OmegaTau*OmegaTau ) ;
-  Const_2    =  OmegaTau*OmegaTau / ( 1. + OmegaTau*OmegaTau ) ;
+  Float_t Fudge_0    =  1.34 ;  // Drift in plane of E and B
+  Float_t Fudge_1    =  1.11 ;  // Drift perpendicular to plane of E and B
+  Float_t Fudge_2    =  1.34 ;  // Drift in plane of E and B
+
+  Const_0    =  1. / ( 1. +  Fudge_0*Fudge_0*OmegaTau*OmegaTau ) ;
+  Const_1    =  Fudge_1*OmegaTau / ( 1. + Fudge_1*Fudge_1*OmegaTau*OmegaTau ) ;
+  Const_2    =  Fudge_2*Fudge_2*OmegaTau*OmegaTau / ( 1. + Fudge_2*Fudge_2*OmegaTau*OmegaTau ) ;
 
   cout << "StMagUtilities::DriftVel     =  " << StarDriftV << " cm/microsec" <<  endl ; 
   cout << "StMagUtilities::TPC_Z0       =  " << TPC_Z0 << " cm" << endl ; 
-  cout << "StMagUtilities::OmegaTau     =  " << OmegaTau << endl ; 
+  cout << "StMagUtilities::OmegaTau     =  " << OmegaTau * Fudge_1 << endl ; 
   cout << "StMagUtilities::XTWIST       =  " << XTWIST << " mrad" << endl ;
   cout << "StMagUtilities::YTWIST       =  " << YTWIST << " mrad" << endl ;
   cout << "StMagUtilities::SpaceCharge  =  " << SpaceCharge << " Coulombs/epsilon-nought" << endl ;
@@ -1303,13 +1310,14 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 
 { 
 
-  const Float_t   Ring        =  169.5 ;               // Location of short (in units of rings)
-  const Float_t   Pitch       =  1.15  ;               // Ring to Ring pitch (cm)
-  const Float_t   RingRatio   =  Ring*Pitch/TPC_Z0 ;   // Percent of full length where short appears
+  const Float_t   Ring        =  169.5 ;                // Location of short (in units of rings)
+  const Float_t   Pitch       =  1.15  ;                // Ring to Ring pitch (cm)
+  const Float_t   RingRatio   =  Ring*Pitch/TPC_Z0 ;    // Percent of full length where short appears
+  const Float_t   GridRatio   =  (CathodeV-GG)/CathodeV ; // Ratio of TPC length to Resistor chain length.
   
   const Int_t     ROWS        =  150 ;        // Rmax - Rmin (cm) [high accuracy not required]
   const Int_t     COLUMNS     =  182 ;        // Number of rings  [high accuracy not required]
-  const Int_t     ITERATIONS  =  1000 ;
+  const Int_t     ITERATIONS  =  2500 ;
   const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
   const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
   const Double_t  Ratio       =  GRIDSIZER*GRIDSIZER / (GRIDSIZEZ*GRIDSIZEZ) ;
@@ -1330,15 +1338,21 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
       for ( Int_t i = 0 ; i < ROWS ; i++ )  
 	{
 	  Double_t Radius = IFCRadius + i*GRIDSIZER ;
+	  Double_t SHRINK = IFCRadius*IFCRadius / ( Radius*Radius ) ;  // Shrink candidate solution with 1/r**2 falloff
+	  if ( i == 0 ) SHRINK = 1.0 ;  // Force Boundary Condition on IFC without perturbation by Shrinkage
 	  Rlist[i] = Radius ;
-	  for ( Int_t j = 0 ; j < COLUMNS ; j++ )  
+	  for ( Int_t j = 0 ; j < COLUMNS ; j++ )  // Fill Vmatrix with Boundary Conditions *and* candidate solution
 	    {
   	      Double_t zed = j*GRIDSIZEZ ;
 	      Zedlist[j] = zed ;
               if ( (float)j/(float)(COLUMNS-1) < RingRatio )
-                ArrayV(i,j) = ((ROWS-1-i)/(ROWS-1))*StarMagE*j*Pitch/(COLUMNS-2) ;
-              else
-                ArrayV(i,j) = ((ROWS-1-i)/(ROWS-1))*StarMagE*(j-(COLUMNS-1))*Pitch/(COLUMNS-2) ;
+                ArrayV(i,j) = SHRINK * StarMagE*Pitch * GridRatio*(double)j/(double)(COLUMNS-1) ;          // One shorted Ring
+	      //ArrayV(i,j) = 0.0 ;   // Add one external resistor
+	      else
+                ArrayV(i,j) = SHRINK * StarMagE*Pitch * ( GridRatio*(double)j/(double)(COLUMNS-1) - 1 ) ;  // One shorted Ring
+	      //ArrayV(i,j) = SHRINK * StarMagE*Pitch * -1 ; // Add one  external resistor
+	      if ( j == 0 || j == (COLUMNS-1) ) ArrayV(i,j) = 0.0 ;  // Force zero error potential on endcap and CM
+	      if ( i == (ROWS-1) )              ArrayV(i,j) = 0.0 ;  // Force zero error potential on OFC
             }
 	}      
       
@@ -1353,10 +1367,10 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 		{
 		  Double_t Radius = IFCRadius + i*GRIDSIZER ;
 		  ArrayV(i,j) = ( ArrayV(i+1,j) + ArrayV(i-1,j) + Ratio*ArrayV(i,j+1) + Ratio*ArrayV(i,j-1) ) 
-		    + ArrayV(i+1,j)*GRIDSIZER/(2*Radius) - ArrayV(i-1,j)*GRIDSIZER/(2*Radius)  ;
+		                + ArrayV(i+1,j)*GRIDSIZER/(2*Radius) - ArrayV(i-1,j)*GRIDSIZER/(2*Radius)  ;
 		  ArrayV(i,j) *=  1.0/Four ;
 		}
-	    }
+	    } 
 	}
 
       //Differentiate V(r) and solve for E(r) using special equations for the first and last row
