@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StTrackFilter.h,v 1.3 1999/12/15 23:04:14 fine Exp $ 
+// $Id: StTrackFilter.h,v 1.4 1999/12/21 19:17:31 fine Exp $ 
 // $Log: StTrackFilter.h,v $
+// Revision 1.4  1999/12/21 19:17:31  fine
+// Width_t type has been replaced by Size_t
+//
 // Revision 1.3  1999/12/15 23:04:14  fine
 // header file fixed by Wensheng
 // 
@@ -42,14 +45,14 @@ class StTrackFilter : public StVirtualEventFilter  {
     const St_TableSorter *m_G2t_vertex;
 
  protected:
-    Int_t SubChannel(St_tcl_tphit   &hit, Int_t rowNumber,Width_t &size,Style_t &style); 
-    Int_t SubChannel(St_g2t_tpc_hit &hit, Int_t rowNumber,Width_t &size,Style_t &style); 
-    Int_t SubChannel(St_g2t_svt_hit &hit, Int_t rowNumber,Width_t &size,Style_t &style); 
+    Int_t SubChannel(St_tcl_tphit   &hit, Int_t rowNumber,Size_t &size,Style_t &style); 
+    Int_t SubChannel(St_g2t_tpc_hit &hit, Int_t rowNumber,Size_t &size,Style_t &style); 
+    Int_t SubChannel(St_g2t_svt_hit &hit, Int_t rowNumber,Size_t &size,Style_t &style); 
  public:
     StTrackFilter() : m_LTrackP(0),m_Lid_globtrk(0),m_Ltpt_track(0), m_G2t_track(0), m_NextG2tTrack(0) {}
     virtual ~StTrackFilter() {Reset();}
-    virtual Int_t Channel(const St_TableSorter *tableObject,Int_t index,Width_t &size,Style_t &style);
-    virtual Int_t Channel(const St_Table *tableObject,Int_t rowNumber,Width_t &size,Style_t &style);
+    virtual Int_t Channel(const St_TableSorter *tableObject,Int_t index,Size_t &size,Style_t &style);
+    virtual Int_t Channel(const St_Table *tableObject,Int_t rowNumber,Size_t &size,Style_t &style);
     virtual Int_t Reset(Int_t reset=0);
     Int_t SetGe_pid(Int_t pid);
     Int_t SetTrack_P(Int_t *track_p,Int_t n=1); 
