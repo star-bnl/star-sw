@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.81 2000/02/01 21:35:10 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.82 2000/02/02 16:35:23 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.82  2000/02/02 16:35:23  kathy
+// fixing some histograms - booking params
+//
 // Revision 1.81  2000/02/01 21:35:10  kathy
 // fix code for xi mass in StEvent histograms; change curvature and impact param histograms so it's log of the value, plotted in linear scale
 //
@@ -867,7 +870,7 @@ void St_QA_Maker::MakeHistPrim(){
         Float_t nfitntot = (Float_t(trkfpnt))/(Float_t(trkpnt));
 
         Float_t logImpact = TMath::Log10(t->impact); 
-        Float_t logCurvature = TMath::Log10(t->curvature); 
+
 
 
 // Spiros' modifications start - 10jan00

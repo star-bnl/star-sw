@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.25 2000/02/02 01:37:54 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.26 2000/02/02 16:35:22 kathy Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.26  2000/02/02 16:35:22  kathy
+// fixing some histograms - booking params
+//
 // Revision 1.25  2000/02/02 01:37:54  lansdell
 // log base 10 now applied to curvature and impact parameter values
 //
@@ -486,7 +489,7 @@ void StEventQAMaker::MakeHistPrim() {
 	                   (Float_t(primtrk->detectorInfo()->numberOfPoints()));
 
 	Float_t logImpact = TMath::Log10(primtrk->impactParameter());
-	Float_t logCurvature = TMath::Log10(primtrk->geometry()->curvature());
+
 
 	// need to find position on helix closest to first point on track since
 	// the primary vertex is used as the first point on helix for primary
