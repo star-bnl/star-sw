@@ -1,4 +1,5 @@
 #include "ConstrainedParameter.h"
+#include <stdexcept>
 
 ConstrainedParameter::ConstrainedParameter() 
   : Parameter(),
