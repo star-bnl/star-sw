@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.h,v 1.2 2000/04/21 19:10:27 nystrand Exp $
+// $Id: StPeCEvent.h,v 1.3 2001/02/12 21:15:44 yepes Exp $
 // $Log: StPeCEvent.h,v $
+// Revision 1.3  2001/02/12 21:15:44  yepes
+// New version of StPeCMaker, lots of changes
+//
 // Revision 1.2  2000/04/21 19:10:27  nystrand
 // Include StPeCPair class
 //
@@ -21,66 +24,70 @@
 #ifndef StPeCEvent_h
 #define StPeCEvent_h
 #include "Rtypes.h"
-#include "StPeCTrackCollection.h"
 #include "StPeCEnumerations.h"
+#include "TObject.h"
+#include "TClonesArray.h"
 #ifndef __CINT__
 #include "PhysicalConstants.h"
 #include "StEventTypes.h"
-#include "StPeCPair.h"
 #endif /* __CINT__ */
+#include "StPeCPair.h"
+#include "StPeCTrack.h"
 #include "SystemOfUnits.h"
 
-class StPeCEvent{
+class StPeCEvent: public TObject {
 
 public:
 
                                   StPeCEvent();
   virtual                         ~StPeCEvent();
 
+
   Long_t                          eventNumber() const;
   Long_t                          runNumber() const;
-  Int_t                           globMultiplicity() const;
-  Int_t                           primMultiplicity() const;
-  Int_t                           qTot() const;
-  Float_t                         pT() const;
+  Int_t                           getNTot() const;
+  Int_t                           getNPrim() const;
+  Int_t                           getQTot() const;
+  Int_t                           getNPriPairs ( ) { return nPPairs ; } ;
+  Int_t                           getNSecPairs ( ) { return nSPairs ; } ;
+  StPeCPair*                      getPriPair ( Int_t i ) ;
+  StPeCPair*                      getSecPair ( Int_t i ) ;
+  Float_t                         getPt() const;
   Float_t                         yRap() const;
-  Float_t                         zVertex() const;
+  Float_t                         getXVertex() const;
+  Float_t                         getYVertex() const;
+  Float_t                         getZVertex() const;
 #ifndef __CINT__
-  void                            addPeCPrimaryTrack(StTrack* trk) const;
-  void                            addPeCNonPrimaryTrack(StTrack* trk) const;
-  void                            addPeCPair(StPeCPair* pair) const;
-  StPeCPrimaryTrackCollection*    getPeCPrimaryTrackCollection() const;
-  StPeCNonPrimaryTrackCollection* getPeCNonPrimaryTrackCollection() const;
-  StPeCPairCollection*            getPeCPairCollection() const;
-  StLorentzVectorF                getEvent4Momentum(StPeCParticle pid) const;
+  StEvent*                        eventP ;
+  void                            addPair(StPeCPair* pair) const;
+  Int_t                           fill ( StEvent* event ) ;
+  Int_t                           infoLevel ;
+  void                            setInfoLevel ( Int_t in ) { infoLevel = in ; } ;
+  StLorentzVectorF                getEvent4Momentum(StPeCSpecies pid) const;
 #endif /*__CINT__*/
-  Float_t                         mInv(StPeCParticle pid) const;
-  Float_t                         yRap(StPeCParticle pid) const;
+  void                            clear ( ) ;
+  void                            reset ( ) ;
 
-  void                            setEventNumber(Long_t&);
-  void                            setRunNumber(Long_t&);
-  void                            setGlobMultiplicity(Int_t&);
-  void                            setPrimMultiplicity(Int_t&);
-  void                            setQTot(Int_t&);
-  void                            setPT(Float_t&);
-  void                            setYRap(Float_t&);
-  void                            setZVertex(Float_t&);
-
+  Float_t                         mInv(StPeCSpecies pid) const;
+  Float_t                         yRap(StPeCSpecies pid) const;
 
 private:
+  Int_t                           eventN;
+  Int_t                           runN;
+  Int_t                           nTot;
+  Int_t                           nPrim;
+  Int_t                           qTot;
+  Float_t                         pt;
+  Float_t                         xVertex;
+  Float_t                         yVertex;
+  Float_t                         zVertex;
+  Int_t                           nTracks ;
+  Int_t                           nPPairs ;
+  Int_t                           nSPairs ;
+  TClonesArray                   *pPairs ;
+  TClonesArray                   *sPairs ;
+  TClonesArray                   *tracks;
 
-  Int_t                           mEventNumber;
-  Int_t                           mRunNumber;
-  Int_t                           mGlobMultiplicity;
-  Int_t                           mPrimMultiplicity;
-  Int_t                           mQTot;
-  Float_t                         mPT;
-  Float_t                         mZVertex;
-#ifndef __CINT__
-  StPeCPrimaryTrackCollection     *pPrim; //!
-  StPeCNonPrimaryTrackCollection  *pNonPrim; //!
-  StPeCPairCollection             *pPair; //!
-#endif /*__CINT__*/
 
   ClassDef(StPeCEvent,1)
 };

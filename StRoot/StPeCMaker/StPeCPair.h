@@ -1,9 +1,9 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.h,v 1.2 2000/12/13 00:08:59 akio Exp $
+// $Id: StPeCPair.h,v 1.3 2001/02/12 21:16:01 yepes Exp $
 // $Log: StPeCPair.h,v $
-// Revision 1.2  2000/12/13 00:08:59  akio
-// Added trigger sim and histograms
+// Revision 1.3  2001/02/12 21:16:01  yepes
+// New version of StPeCMaker, lots of changes
 //
 // Revision 1.1  2000/04/21 19:12:25  nystrand
 // First Version
@@ -24,40 +24,77 @@
 #ifndef StPeCPair_h
 #define StPeCPair_h
 #include "Rtypes.h"
+#include "TObject.h"
+#include "TClonesArray.h"
 #include "StPeCEnumerations.h"
 #ifndef __CINT__
 #include "PhysicalConstants.h"
 #include "StEventTypes.h"
+#include "StEvent.h"
 #endif /* __CINT__ */
 #include "SystemOfUnits.h"
+#include "StPeCSpec.h"
+#include "StPeCTrack.h"
 
-class StPeCPair{
+class StPeCPair : public TObject {
 
 public:
 
                                   StPeCPair();
   virtual                         ~StPeCPair();
 
+  void                            calculatePair4Momentum( ) ;
 #ifndef __CINT__
-                                  StPeCPair(StTrack* trk1, StTrack* trk2);
+                                  StPeCPair ( StTrack *trk1, StTrack *trk2, 
+				              Bool_t primaryFlag, StEvent* event );
+
+  Int_t                           fill ( Bool_t primaryFlag, StEvent* event ) ;
   void                            setTrack1(StTrack* trk);
   void                            setTrack2(StTrack* trk);
   StTrack*                        getTrack1();
   StTrack*                        getTrack2();
-  StLorentzVectorF                getPair4Momentum(StPeCParticle pid) const;
+  StLorentzVectorF                getPair4Momentum(StPeCSpecies pid) const;
 #endif /*__CINT__*/
-  Int_t                           sumCharge() const;
-  Float_t                         sumPt() const;
-  Float_t                         sumPz() const;
-  Float_t                         mInv(StPeCParticle pid) const;
-  Float_t                         openingAngle() const;
-  Float_t                         cosThetaStar(StPeCParticle pid) const;
+  Int_t                           getSumCharge() const;
+  Float_t                         getSumPt() const;
+  Float_t                         getSumPz() const;
+  Float_t                         getMInv(StPeCSpecies pid) const;
+  Float_t                         getOpeningAngle() const;
+  Float_t                         getCosThetaStar(StPeCSpecies pid) const;
+  Float_t                         getPartDca ( ) { return pPartDca ; } ;
+  Float_t                         getV0Dca ( ) { return pV0Dca ; } ;
 
 private:
 
+  Int_t                           pCharge ;
+  Float_t                         pPt ;
+  Float_t                         pPz ;
+  Float_t                         pAngle ;
+  Float_t                         pPtArm ; // Armenteros pt: pt positive along pair momentum
+  Float_t                         pAlpha ; // Armerteros alpha:
+                                           //  (pl_pos-pl_neg)/(pl_pos+pl_neg)
+                                           //  pl_pos(neg) : momentum along pair momentum for positive
+					   //               (negative) charge
+  Float_t                         pPartDca ; // Distance closest approach between particles
+  Float_t                         pV0Dca ;   // Distance closest pair and vertex            
+  Float_t                         rV0 ;
+  Float_t                         phiV0 ;
+  Float_t                         zV0 ;
+  
+
+  StPeCTrack                      tr1 ;
+  StPeCTrack                      tr2 ;
+
+
+  StPeCSpec                       pionH;
+  StPeCSpec                       kaonH;
+  StPeCSpec                       protonH;
+  StPeCSpec                       electronH;
+  StPeCSpec                       muonH;
+  
 #ifndef __CINT__
-  StTrack*                        Track1; //!
-  StTrack*                        Track2; //!
+  StTrack*                        track1; //!
+  StTrack*                        track2; //!
 #endif /*__CINT__*/
 
   ClassDef(StPeCPair,1)

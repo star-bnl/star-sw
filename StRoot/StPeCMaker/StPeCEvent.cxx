@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.3 2000/04/24 19:15:27 nystrand Exp $
+// $Id: StPeCEvent.cxx,v 1.4 2001/02/12 21:15:42 yepes Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.4  2001/02/12 21:15:42  yepes
+// New version of StPeCMaker, lots of changes
+//
 // Revision 1.3  2000/04/24 19:15:27  nystrand
 // Fix of a possible memory leak
 //
@@ -18,52 +21,211 @@
 #include "StPeCEvent.h"
 #include "StEventTypes.h"
 
+
 ClassImp(StPeCEvent)
 
 StPeCEvent::StPeCEvent() {
-#ifndef __CINT__
-  pPrim = new StPeCPrimaryTrackCollection;
-  pNonPrim = new StPeCNonPrimaryTrackCollection;
-  pPair = new StPeCPairCollection;
-#endif /*__CINT__*/
+
+  pPairs  = new TClonesArray ("StPeCPair", 10);
+  sPairs  = new TClonesArray ("StPeCPair", 10);
+  tracks  = new TClonesArray ("StPeCTrack", 10);
+  nPPairs  = 0 ;
+  nSPairs  = 0 ;
+  nTracks  = 0 ;
+  eventP   = 0 ;
 }
 
 StPeCEvent::~StPeCEvent() {
-#ifndef __CINT__
-  // The tracks have been instantiated by StEvent, so only the collections
-  // have to be deleted 
-  delete pPrim;
-  delete pNonPrim;
-  // Go through and delete the pairs
-  StPeCPairIterator iter;
-  for(iter=pPair->begin();iter!=pPair->end();iter++)delete *iter;
-  // Delete the collection
-  delete pPair;
-#endif /*__CINT__*/
+  clear() ;
+  delete pPairs ;
+  delete sPairs ;
 }
 
-Long_t  StPeCEvent::eventNumber() const{ return mEventNumber; }
-Long_t  StPeCEvent::runNumber() const{ return mRunNumber; }
-Int_t   StPeCEvent::globMultiplicity() const{ return mGlobMultiplicity; }
-Int_t   StPeCEvent::primMultiplicity() const{ return mPrimMultiplicity; }
-Int_t   StPeCEvent::qTot() const{ return mQTot; }
-Float_t StPeCEvent::pT() const{ return mPT; }
-Float_t StPeCEvent::zVertex() const{ return mZVertex; }
-#ifndef __CINT__
-void StPeCEvent::addPeCPrimaryTrack(StTrack* trk) const{
-  pPrim->push_back(trk);
-}
-StPeCPrimaryTrackCollection* StPeCEvent::getPeCPrimaryTrackCollection() const{ return pPrim; }
-void StPeCEvent::addPeCNonPrimaryTrack(StTrack* trk) const{
-  pNonPrim->push_back(trk);
-}
-StPeCNonPrimaryTrackCollection* StPeCEvent::getPeCNonPrimaryTrackCollection() const{ return pNonPrim; }
-void StPeCEvent::addPeCPair(StPeCPair* pair) const{
-  pPair->push_back(pair);
-}
-StPeCPairCollection* StPeCEvent::getPeCPairCollection() const{ return pPair; }
 
-StLorentzVectorF StPeCEvent::getEvent4Momentum(StPeCParticle pid) const{
+
+
+void  StPeCEvent::clear ( ) {
+   eventN = 0 ;
+   runN   = 0 ;
+   nTot   = 0 ;
+   nPrim  = 0 ;
+   qTot   = 0 ;
+   pt     = 0 ;
+   xVertex = 0 ;
+   yVertex = 0 ;
+   zVertex = 0 ;
+   nPPairs = 0 ;
+   nSPairs = 0 ;
+   nTracks = 0 ;
+
+
+   pPairs->Clear();
+   sPairs->Clear();
+   tracks->Clear();
+}
+
+Int_t StPeCEvent::fill ( StEvent *event ) {
+
+  eventP = event ;
+
+  // Set Run and Event Number
+  eventN = event->id() ;
+  runN   = event->runId(); 
+
+  //get trigger info
+
+  Int_t   NGlobal=0; 
+  Int_t   NPrimaries=0; 
+  Int_t   SumQ=0; 
+  Float_t SumPx=0.0; 
+  Float_t SumPy=0.0;  
+
+  // Get the track nodes
+  StSPtrVecTrackNode& exnode = event->trackNodes();
+  Int_t nnode=exnode.size();
+  TClonesArray &pTracks = *tracks;
+
+  for( Int_t in=0; in<nnode; in++ ) {
+    UInt_t nprim = exnode[in]->entries(primary);
+    UInt_t nglob = exnode[in]->entries(global);
+    if( nprim>1 || nglob>1 ){
+      cout<<"There could be a problem! nprim= "<<nprim<<"  nglob= "<<nglob<<endl;
+    }
+    if( nprim==1 ){
+      NPrimaries++;
+      StTrack *tp = exnode[in]->track(primary);
+      float px = tp->geometry()->momentum().x();
+      float py = tp->geometry()->momentum().y();
+      SumPx = SumPx + px; SumPy = SumPy + py;
+      SumQ  = SumQ  + tp->geometry()->charge();
+      new(pTracks[nTracks++]) StPeCTrack(1,tp) ;
+      // Store the Primaries in a vector for formation of pairs
+    }
+    if( nprim==0 && nglob==1 ){
+      NGlobal++; 
+      StTrack *tnp = exnode[in]->track(global);
+      new(pTracks[nTracks++]) StPeCTrack(0,tnp) ;
+    }
+  }
+
+  nPrim             = NPrimaries ;
+  nTot              = NGlobal + NPrimaries  ;
+  qTot = SumQ ;
+  pt   = sqrt( SumPx*SumPx + SumPy*SumPy );
+
+  StPrimaryVertex* vtx = event->primaryVertex();
+  if(vtx) {
+    xVertex = vtx->position().x();
+    yVertex = vtx->position().y();
+    zVertex = vtx->position().z();
+    if ( infoLevel > 1 ) {
+     cout << "StPeCEvent : primary vertex " << vtx->position().x() << " " 
+       << vtx->position().y() << " " << vtx->position().z() << endl;
+    }
+  }
+  else {
+    xVertex = -9999. ;
+    yVertex = -9999. ;
+    zVertex = -9999. ;
+    cout<<"StPeCEvent: There was no primary vertex!"<<endl;
+  }
+
+  StPeCPair* lPair ; 
+  nPPairs = 0 ;
+  StTrack *trk1, *trk2 ;
+  for( Int_t i1=0; i1<nnode-1; i1++ ) {
+     if( exnode[i1]->entries(primary) !=1 ) continue ;
+     for( Int_t i2=i1+1; i2<nnode; i2++ ) {
+        if( exnode[i2]->entries(primary) !=1 ) continue ;
+ 
+        trk1 = exnode[i1]->track(primary);
+        trk2 = exnode[i2]->track(primary);
+        TClonesArray &ppairs = *pPairs;
+        lPair = new(ppairs[nPPairs++]) StPeCPair(trk1,trk2,1,event) ;
+#ifdef PECPRINT
+        cout << "StPeCEvent : Primary Pair : " 
+           << "  sumQ = " << lPair->getSumCharge()
+           << "  sumPt = " << lPair->getSumPt()
+           << "  mInv = " << lPair->getMInv(pion)
+           << "  opening angle = " << lPair->getOpeningAngle()
+           << "  cos(theta*) = " << lPair->getCosThetaStar(pion) << endl;
+#endif	   
+     }
+  }
+//
+//   Look for V0
+//
+  for( Int_t i=0; i<nnode-1; i++ ) {
+     if ( exnode[i]->entries(primary)  ) continue ; 
+     if ( exnode[i]->entries(global)  !=1 ) continue ;
+     for( Int_t j=i+1; j<nnode; j++ ) {
+        if ( exnode[j]->entries(primary)     ) continue ; 
+        if ( exnode[j]->entries(global)  !=1 ) continue ;
+        StTrack *trk1 = exnode[i]->track(global);
+        StTrack *trk2 = exnode[j]->track(global);
+	StPhysicalHelixD h1 = trk1->geometry()->helix() ;
+	StPhysicalHelixD h2 = trk2->geometry()->helix() ;
+
+	pairD dcaLengths = h1.pathLengths(h2);
+        StThreeVectorD x1 = h1.at(dcaLengths.first);
+        StThreeVectorD x2 = h2.at(dcaLengths.second);
+        StThreeVectorD x = (x1-x2) ;
+	if ( x.mag() > 10 ) continue ; // Hardwire cut
+
+        TClonesArray &spairs = *sPairs;
+        lPair = new(spairs[nSPairs++]) StPeCPair(trk1,trk2,0,event) ;
+//#ifdef PECPRINT
+        cout << "StPeCEvent : Secondary Pair : " 
+           << "  sumQ = " << lPair->getSumCharge()
+           << "  sumPt = " << lPair->getSumPt()
+           << "  mInv = " << lPair->getMInv(pion)
+           << "  opening angle = " << lPair->getOpeningAngle()
+           << "  cos(theta*) = " << lPair->getCosThetaStar(pion) << endl;
+//#endif	   
+     }
+  }
+
+
+  return 0 ;
+}
+
+StPeCPair* StPeCEvent::getPriPair ( Int_t i ) {
+   if ( i < 0 || i >= nPPairs ) return 0 ;
+   TClonesArray &pairs = *pPairs;
+   return (StPeCPair *)pairs[i] ;
+}
+
+StPeCPair* StPeCEvent::getSecPair ( Int_t i ) {
+   if ( i < 0 || i >= nSPairs ) return 0 ;
+   TClonesArray &pairs = *sPairs;
+   return (StPeCPair *)pairs[i] ;
+}
+
+void StPeCEvent::reset() { 
+   delete pPairs ;
+   delete sPairs ;
+   delete tracks ;
+   pPairs  = 0 ;
+   sPairs  = 0 ;
+   nPPairs  = 0 ;
+   nSPairs  = 0 ;
+   tracks = 0 ;
+   nTracks = 0 ;
+}
+
+Long_t  StPeCEvent::eventNumber() const{ return eventN; }
+Long_t  StPeCEvent::runNumber() const{ return runN; }
+Int_t   StPeCEvent::getNTot() const{ return nTot; }
+Int_t   StPeCEvent::getNPrim() const{ return nPrim; }
+Int_t   StPeCEvent::getQTot() const{ return qTot; }
+Float_t StPeCEvent::getPt() const{ return pt; }
+Float_t StPeCEvent::getXVertex() const{ return xVertex; }
+Float_t StPeCEvent::getYVertex() const{ return yVertex; }
+Float_t StPeCEvent::getZVertex() const{ return zVertex; }
+#ifndef __CINT__
+
+
+StLorentzVectorF StPeCEvent::getEvent4Momentum(StPeCSpecies pid) const{
   Float_t mptcle=0.0;
   if(pid==pion){
     mptcle = pion_plus_mass_c2;
@@ -81,39 +243,39 @@ StLorentzVectorF StPeCEvent::getEvent4Momentum(StPeCParticle pid) const{
     mptcle = 105.6584*MeV; 
   }
   StLorentzVectorF p4event(0.0,0.0,0.0,0.0);
-  StPeCPrimaryTrackIterator miter = pPrim->begin();
-  while( miter != pPrim->end() ){
-    StTrack *ttp = *miter;
-    StThreeVectorF p = ttp->geometry()->momentum();
+
+  StSPtrVecTrackNode& exnode = eventP->trackNodes();
+  if ( !eventP ) {
+     printf ( "StPeCEvent::getEvent4Momentum eventP null \n" ) ;
+     return p4event ;
+  }
+  Int_t nnode=exnode.size();
+
+  for( Int_t in=0; in<nnode; in++ ) {
+    if( exnode[in]->entries(global) != 1 ) continue ;
+    StTrack* trk = exnode[in]->track(primary);
+    StThreeVectorF p = trk->geometry()->momentum();
     Float_t energy = p.massHypothesis(mptcle);
     StLorentzVectorF pfour(energy,p);
     p4event = p4event + pfour;
-    miter++;
   }
 
   return p4event;
 }
 #endif /*__CINT__*/
 
-Float_t StPeCEvent::mInv(StPeCParticle pid) const{
+Float_t StPeCEvent::mInv(StPeCSpecies pid) const{
 
   StLorentzVectorF p4event = getEvent4Momentum(pid);
 
   return p4event.m();
 }
 
-Float_t StPeCEvent::yRap(StPeCParticle pid) const{
+Float_t StPeCEvent::yRap(StPeCSpecies pid) const{
+ 
 
   StLorentzVectorF p4event = getEvent4Momentum(pid);
 
   return p4event.rapidity();
 }
-
-void StPeCEvent::setEventNumber(Long_t &val) { mEventNumber=val; } 
-void StPeCEvent::setRunNumber(Long_t &val) { mRunNumber=val; }
-void StPeCEvent::setGlobMultiplicity(Int_t &val) { mGlobMultiplicity=val; }
-void StPeCEvent::setPrimMultiplicity(Int_t &val) { mPrimMultiplicity=val; }
-void StPeCEvent::setQTot(Int_t &val) { mQTot=val; }
-void StPeCEvent::setPT(Float_t &val) { mPT=val; }
-void StPeCEvent::setZVertex(Float_t &val) { mZVertex=val; }
 
