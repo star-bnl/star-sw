@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.9 2002/11/18 21:32:18 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.10 2002/11/19 01:27:09 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -746,7 +746,7 @@ Int_t StdEdxY2Maker::Make(){
 	if (l == 1) track = pTrack;
 	if (l == 2) track = tTrack;
 	if (track) {
-	  StSPtrVecTrackPidTraits traits = track->pidTraits();
+	  StSPtrVecTrackPidTraits &traits = track->pidTraits();
 	  unsigned int size = traits.size();
 	  if (size) {
 	    for (unsigned int i = 0; i < size; i++) {
@@ -1130,7 +1130,8 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   Int_t NoFitPoints = gTrack->fitTraits().numberOfFitPoints();
   //  StTpcDedxPidAlgorithm tpcDedxAlgo;
   // dE/dx
-  StPtrVecTrackPidTraits traits = gTrack->pidTraits(kTpcId);
+  //  StPtrVecTrackPidTraits traits = gTrack->pidTraits(kTpcId);
+  StSPtrVecTrackPidTraits &traits = gTrack->pidTraits();
   unsigned int size = traits.size();
   StDedxPidTraits *pid, *pid70 = 0, *pidF = 0;
   StProbPidTraits *pidprob = 0;
