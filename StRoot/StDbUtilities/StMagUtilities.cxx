@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.57 2004/12/08 01:25:29 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.58 2005/01/08 00:39:16 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.58  2005/01/08 00:39:16  jhthomas
+ * Change InnerOuterRatio (pad size ratio) from 1.3 to 0.5 for a test.
+ *
  * Revision 1.57  2004/12/08 01:25:29  jhthomas
  * Add new method - kGridLeak.  It can be invoked with a chain flag.
  * Fix Jeromes Insure bug with power of 2 check.  New function to do this cleanly.
@@ -2839,7 +2842,7 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
    // Return default values if passed a whacko input value (i.e. infinite or NaN)
    if ( finite((double)Charge)*finite(x[0])*finite(x[1])*finite(x[2])*finite(p[0])*finite(p[1])*finite(p[2]) == 0 ) return ;
 
-   const Float_t InnerOuterRatio = 1.3 ; // Ratio of size of the inner pads to the outer pads (real world == 1.0)
+   const Float_t InnerOuterRatio = 0.5 ; // Ratio of size of the inner pads to the outer pads (real world == 1.0)
    const Int_t   INNER    = 13  ;        // Number of TPC rows in the inner sectors
    const Int_t   ROWS     = 45  ;        // Total number of TPC rows per sector (Inner + Outer)
    const Int_t   RefIndex =  7  ;        // Refindex 7 (TPCRow 8) is about where 1/R**2 has no effect on points (~97 cm radius).
@@ -3016,7 +3019,10 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
 
 
 
-// Input Physical-Signed DCA and get back spacecharge parameter plus a success or failure flag.
+/// Input Physical-Signed DCA and get back spacecharge parameter plus a success or failure flag.
+/*!
+Add comments here.
+*/
 Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Float_t VertexZ, Float_t PseudoRapidity, 
 	       Float_t DCA,  const unsigned int RowMask1, const unsigned int RowMask2, Float_t &pSpace )
 {
@@ -3029,7 +3035,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    if ( (Charge != 1) && (Charge != -1) )                    return(0) ; // Fail
    if ( (DCA < -4.0) || (DCA > 4.0) )                        return(0) ; // Fail
 
-   const Float_t InnerOuterRatio = 1.3 ; // Ratio of size of the inner pads to the outer pads (real world == 1.0 or 1.3)
+   const Float_t InnerOuterRatio = 0.5 ; // Ratio of size of the inner pads to the outer pads (real world == 1.0 or 1.3)
    const Int_t   INNER    = 13  ;        // Number of TPC rows in the inner sector
    const Int_t   ROWS     = 45  ;        // Total number of TPC rows per sector (Inner + Outer)
    const Int_t   RefIndex =  7  ;        // Refindex 7 (TPCRow 8) is about where 1/R**2 has no effect on points (~97 cm radius).
