@@ -1,5 +1,8 @@
-// $Id: makeStrangeMuDst.C,v 2.2 2000/06/30 23:54:20 lansdell Exp $
+// $Id: makeStrangeMuDst.C,v 2.3 2001/05/04 20:18:46 genevb Exp $
 // $Log: makeStrangeMuDst.C,v $
+// Revision 2.3  2001/05/04 20:18:46  genevb
+// Update for new EMC dependencies
+//
 // Revision 2.2  2000/06/30 23:54:20  lansdell
 // load St_emc_Maker so StMcEventMaker runs properly
 //
@@ -39,10 +42,7 @@
 void load() {
   gSystem->Load("St_base");
   gSystem->Load("StUtilities");
-
-  gSystem->Load("libgen_Tables");
-  gSystem->Load("libsim_Tables");
-  gSystem->Load("libglobal_Tables");
+  gSystem->Load("St_Tables");
 
   gSystem->Load("StChain");
   gSystem->Load("StIOMaker");
@@ -52,7 +52,7 @@ void load() {
   gSystem->Load("StEventMaker");
   gSystem->Load("StStrangeMuDstMaker");
 // The following are needed for using Monte Carlo info
-//  gSystem->Load("St_emc_Maker");
+//  gSystem->Load("StEmcUtil");
 //  gSystem->Load("StMcEvent");
 //  gSystem->Load("StMcEventMaker");
 //  gSystem->Load("StAssociationMaker");
