@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.13 2004/08/07 02:44:05 mvl Exp $
+ * $Id: StMuTrack.cxx,v 1.14 2004/08/10 22:38:30 mvl Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -76,25 +76,46 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Globa
   // Need to think of backward compatibiltiy mode (old StEvent)
   // Also what about initialisation for odl MuDst files?
   mNHitsPossTpc=0;
-  if ( (tpc_hits=track->numberOfPossiblePoints(kTpcId)) )
-    mNHitsPossTpc=tpc_hits; 
-  else if ( (tpc_hits=track->numberOfPossiblePoints(kFtpcEastId)) )
-    mNHitsPossTpc=(1 << 7) + tpc_hits;
-  else if ( (tpc_hits=track->numberOfPossiblePoints(kFtpcEastId)) ) 
-    mNHitsPossTpc=(2 << 7) + tpc_hits;
+  if (track->numberOfPossiblePoints(kTpcId)==track->numberOfPossiblePoints(kFtpcEastId)) {
+    // backward compatibility mode, figure out which TPC points are in
+    if (track->topologyMap().hasHitInDetector(kTpcId))
+      mNHitsPossTpc=track->numberOfPossiblePoints(kTpcId);
+    else if (track->topologyMap().hasHitInDetector(kFtpcEastId))
+      mNHitsPossTpc=(1 << 6) + track->numberOfPossiblePoints(kFtpcEastId);
+    else if (track->topologyMap().hasHitInDetector(kFtpcWestId))
+      mNHitsPossTpc=(2 << 6) + track->numberOfPossiblePoints(kFtpcWestId);
+  } else {
+    // new Ittf chain distinguishes the three TPCs properly
+    if ( (tpc_hits=track->numberOfPossiblePoints(kTpcId)) )
+      mNHitsPossTpc=tpc_hits; 
+    else if ( (tpc_hits=track->numberOfPossiblePoints(kFtpcEastId)) )
+      mNHitsPossTpc=(1 << 6) + tpc_hits;
+    else if ( (tpc_hits=track->numberOfPossiblePoints(kFtpcWestId)) ) 
+      mNHitsPossTpc=(2 << 6) + tpc_hits;
+  }
 
   mNHitsPossInner=track->numberOfPossiblePoints(kSvtId) & 0x7;
   mNHitsPossInner|=(track->numberOfPossiblePoints(kSsdId) & 0x3) << 3;
 
   mNHitsFit = track->fitTraits().numberOfFitPoints();
   mNHitsFitTpc=0;
-  if ( (tpc_hits=track->fitTraits().numberOfFitPoints(kTpcId)) ) 
-    mNHitsFitTpc=tpc_hits; 
-  else if ( (tpc_hits=track->fitTraits().numberOfFitPoints(kFtpcEastId)) ) 
-    mNHitsFitTpc=(1 << 7) + tpc_hits;
-  else if ( (tpc_hits=track->fitTraits().numberOfFitPoints(kFtpcEastId)) ) 
-    mNHitsFitTpc=(2 << 7) + tpc_hits;
-
+  if (track->numberOfPossiblePoints(kTpcId)==track->numberOfPossiblePoints(kFtpcEastId)) {
+    // backward compatibility mode, figure out which TPC points are in
+    if (track->topologyMap().hasHitInDetector(kTpcId))
+      mNHitsFitTpc=track->fitTraits().numberOfFitPoints(kTpcId);
+    else if (track->topologyMap().hasHitInDetector(kFtpcEastId))
+      mNHitsFitTpc=(1 << 6) + track->fitTraits().numberOfFitPoints(kFtpcEastId);
+    else if (track->topologyMap().hasHitInDetector(kFtpcWestId))
+      mNHitsFitTpc=(2 << 6) + track->fitTraits().numberOfFitPoints(kFtpcWestId);
+  } else {
+    // new Ittf chain distinguishes the three TPCs properly
+    if ( (tpc_hits=track->fitTraits().numberOfFitPoints(kTpcId)) ) 
+      mNHitsFitTpc=tpc_hits; 
+    else if ( (tpc_hits=track->fitTraits().numberOfFitPoints(kFtpcEastId)) ) 
+      mNHitsFitTpc=(1 << 6) + tpc_hits;
+    else if ( (tpc_hits=track->fitTraits().numberOfFitPoints(kFtpcWestId)) ) 
+      mNHitsFitTpc=(2 << 6) + tpc_hits;
+  }
   mNHitsFitInner=track->fitTraits().numberOfFitPoints(kSvtId) & 0x7;
   mNHitsFitInner|=(track->fitTraits().numberOfFitPoints(kSsdId) & 0x3) << 3;
 
@@ -142,19 +163,19 @@ unsigned short StMuTrack::nHitsPoss(StDetectorId det) const {
   // New situation: decode point counts
   switch (det) {
   case kTpcId:
-    return ((mNHitsPossTpc & 0x80)==0)*mNHitsPoss;
+    return ((mNHitsPossTpc & 0xC0)==0)*mNHitsPoss;
     break;
   case kFtpcEastId:
-    return ((mNHitsPossTpc & 0xB0)==1)*(mNHitsPoss & 0x3F);
+    return ((mNHitsPossTpc & 0xC0)==0x40)*(mNHitsPoss & 0x3F);
     break;
   case kFtpcWestId:
-    return ((mNHitsPossTpc & 0xB0)==2)*(mNHitsPoss & 0x3F);
+    return ((mNHitsPossTpc & 0xC0)==0x80)*(mNHitsPoss & 0x3F);
     break;
   case kSvtId:
     return (mNHitsPossInner & 0x7);
     break;
   case kSsdId:
-    return ((mNHitsPossInner & 0xB) >> 3);
+    return ((mNHitsPossInner & 0x18) >> 3);
     break;
   default:
     return 0;
@@ -174,19 +195,19 @@ unsigned short StMuTrack::nHitsFit(StDetectorId det) const {
   // New situation: decode point counts
   switch (det) {
   case kTpcId:
-    return ((mNHitsFitTpc & 0x80)==0)*mNHitsFit;
+    return ((mNHitsFitTpc & 0xC0)==0)*mNHitsFit;
     break;
   case kFtpcEastId:
-    return ((mNHitsFitTpc & 0xB0)==1)*(mNHitsFit & 0x3F);
+    return ((mNHitsFitTpc & 0xC0)==0x40)*(mNHitsFit & 0x3F);
     break;
   case kFtpcWestId:
-    return ((mNHitsFitTpc & 0xB0)==2)*(mNHitsFit & 0x3F);
+    return ((mNHitsFitTpc & 0xC0)==0x80)*(mNHitsFit & 0x3F);
     break;
   case kSvtId:
     return (mNHitsFitInner & 0x7);
     break;
   case kSsdId:
-    return ((mNHitsFitInner & 0xB) >> 3);
+    return ((mNHitsFitInner & 0x18) >> 3);
     break;
   default:
     return 0;
@@ -268,6 +289,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.14  2004/08/10 22:38:30  mvl
+ * Extended support for fitspoints in Svt and Tpc to work for old files + fixed some types in previous version.
+ *
  * Revision 1.13  2004/08/07 02:44:05  mvl
  * Added support for fitted and possible points in different detectors, for ITTF
  *
