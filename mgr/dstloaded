@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/opt/star/bin/perl
 # List dst xdf files loaded to DB.
 # Creates a file dstdelete.csh which will delete the files that
 # have been loaded.

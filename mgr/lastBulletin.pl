@@ -1,8 +1,11 @@
-#!/usr/local/bin/perl
+#!/opt/star/bin/perl
 #
-# $Id: lastBulletin.pl,v 1.5 1999/09/16 02:08:02 wenaus Exp $
+# $Id: lastBulletin.pl,v 1.6 1999/11/19 23:13:43 wenaus Exp $
 #
 # $Log: lastBulletin.pl,v $
+# Revision 1.6  1999/11/19 23:13:43  wenaus
+# /opt/star/bin/perl
+#
 # Revision 1.5  1999/09/16 02:08:02  wenaus
 # Use RCF NFS based data area
 #

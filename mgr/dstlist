@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/opt/star/bin/perl
 # List all dst xdf files on disk
 # T. Wenaus
 $topPrefix="/disk00001/star/";
