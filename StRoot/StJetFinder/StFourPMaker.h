@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StFourPMaker.h,v 1.3 2003/05/09 21:01:34 thenry Exp $
+ * $Id: StFourPMaker.h,v 1.4 2003/08/27 23:19:49 thenry Exp $
  * $Log: StFourPMaker.h,v $
+ * Revision 1.4  2003/08/27 23:19:49  thenry
+ * Added track level eta cutting.
+ *
  * Revision 1.3  2003/05/09 21:01:34  thenry
  * removed "../" from #include statement
  *
@@ -52,6 +55,11 @@ public:
     FourList &getTracks() { return tracks; };
     Int_t numTracks(void) { return tracks.size(); };
 
+    void SetEtaLow(Float_t eta_low) { eta_low_lim = eta_low; };
+    void SetEtaHigh(Float_t eta_high) { eta_high_lim = eta_high; };
+    Float_t GetEtaLow(void) { return eta_low_lim; };
+    Float_t GetEtaHigh(void) { return eta_high_lim; };
+
     TrackPile tPile; 
 protected:
 
@@ -64,6 +72,9 @@ public:
     const double mpr;
     const double mpi;
     const double mk;
+
+    Float_t          eta_high_lim;
+    Float_t          eta_low_lim;
 
     ClassDef(StFourPMaker,1)
 };
