@@ -274,7 +274,7 @@ C
       REAL    gseed,gtanl,ginvpt,bf,glength
       REAL    rr
 
-      if(bf.lt.0.01) then
+      if(abs(bf).lt.0.01) then
          glength = gseed
       else
          rr=1./(C_D_CURVATURE*bf*ginvpt)
