@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.191 2001/04/18 15:03:07 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.192 2001/04/19 15:59:35 balewski Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -75,8 +75,7 @@ Bfc_st BFC[] = {
   {"C2000"       ,""  ,"","y2000,C1default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"C2001"       ,""  ,"","y2001,C2default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"MDC4"        ,""  ,"","C2001,trs,sss,fss,rrs,big,GeantOut"      ,"","","Turn on chain for MDC4",kFALSE},
-  {"ppMDC4"      ,""  ,"","pp,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,rrs,big,GeantOut","","",
-                                                                         "Turn on chain for ppMDC4",kFALSE},
+  {"ppMDC4"      ,""  ,"","pp,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,rrs,big,GeantOut","","","Turn on chain for ppMDC",kFALSE},
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
@@ -127,7 +126,7 @@ Bfc_st BFC[] = {
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
-  {"pp"          ,""  ,"","ppLPfind1,ppLPprojectA",""              ,"","Use pp specific parameters",kFALSE},
+  {"pp"          ,""  ,"","ppLPfind1,SpinSortA,ppLPprojectA",""              ,"","Use pp specific parameters",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -190,7 +189,7 @@ Bfc_st BFC[] = {
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE}, 
   {"mwc"         ,"mwc","l0Chain","mwc_T,db,tpcDB"         ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
   {"trg"         ,"trg","l0Chain","trg_T,globT,db"         ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
-  {"ppMCTrig"    ,"ppMC_trig1","l0Chain",""                          ,"StppTrigMaker","StppSpin","",kFALSE},
+  {"ppMCTrig"    ,"ppMC_trig1","l0Chain",""                          ,"StppTrigMaker","StppSpin","Add emulation of pp Trigger based on CTB+MWC",kFALSE},
   {"tpc"         ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StMaker","StChain","",kFALSE},
   {"Trs"         ,"","tpcChain","scl,tpcDB,tpc_daq,Simu"              ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"Mixer"       ,"tpc_raw","","","StMixerMaker"  ,"StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
@@ -294,11 +293,11 @@ Bfc_st BFC[] = {
   {"McAna"       ,"","McChain","McEvent",                "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
   {"LAna"        ,"","","in,RY1h,geant,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
-  {"ppLPfind1"   ,"ppLPfind1"  ,"",""         ,"StppLPfindMaker","StppSpin","Find leading particle",kFALSE},
+  {"ppLPfind1"   ,"ppLPfind1"  ,"",""         ,"StppLPfindMaker","StppSpin","Find leading particle for pp",kFALSE},
   {"SpinSortA"   ,"SpinSortA"  ,"",""               ,"StSpinSortMaker","StppSpin","Spin sort event",kFALSE},
-  {"ppLPprojectA","ppLPprojectA","",""   ,"StppLPprojectMaker","StppSpin","PROJECT LP TO PHI-HISTO",kFALSE},
-  {"ppLPeval1"   ,"ppLPeval1"  ,"","","StppLPevalMaker","StppSpin","EVAL LEADING PARTICLE(no cuts)",kFALSE},
-  {"ppDAQfilter1","ppDAQfilter1"  ,"",""                ,"StDAQfilterMaker","StppSpin","DAQ FILTER",kFALSE},
+  {"ppLPprojectA","ppLPprojectA","",""   ,"StppLPprojectMaker","StppSpin","project LP to the spin dependent phi-histo",kFALSE},
+  {"ppLPeval1"   ,"ppLPeval1"  ,"","","StppLPevalMaker","StppSpin","Evaluation of LP algo for pp",kFALSE},
+  {"ppDAQfilter1","ppDAQfilter1"  ,"",""                ,"StDAQfilterMaker","StppSpin","DAQ filter (used for pp)",kFALSE},
   {"xout"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE}, 
   {"Tree"        ,"OutTree","","","StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE}
 };
@@ -498,11 +497,9 @@ Int_t StBFChain::Instantiate()
 	}
 	// special maker options 
 	if (mk) {
-	  if (GetOption("pp")) {// pp specific stuff
+	  if (GetOption("pp") ) {// pp specific stuff
 	    if (maker == "StTrsMaker") mk->SetMode(1);
-	    if (maker == "StPrimaryMaker") {
-	      ((StPrimaryMaker *) mk)->ppLMVuse(15.); // 
-	    }
+	    if (maker == "StPrimaryMaker") mk->SetMode(15);
 	  }
 	  if ((maker == "StPrimaryMaker"  ||
 	       maker == "StPreVertexMaker") && 
