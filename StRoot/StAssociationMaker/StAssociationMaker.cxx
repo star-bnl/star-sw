@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.38 2003/10/08 20:15:03 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.39 2004/01/13 21:04:54 fisyak Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.39  2004/01/13 21:04:54  fisyak
+ * use IdTruth information for hit matching if any
+ *
  * Revision 1.38  2003/10/08 20:15:03  calderon
  * using <iostream> and std::cout, std::ostream, as well as <cmath>.
  *
@@ -168,7 +171,7 @@
  *************************************************/
 
 
-#include <iostream>
+#include "Stiostream.h"
 #include <iterator>
 #include <stdlib.h>
 #include <string>
@@ -179,8 +182,6 @@
 using std::string;
 using std::vector;
 using std::find_if;
-using std::cout;
-using std::ostream;
 #endif
 
 #include "StAssociationMaker.h"
@@ -198,7 +199,7 @@ using std::ostream;
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "TH2.h"
-
+#include "TMath.h"
 
 #include "StEventTypes.h"
 
@@ -681,13 +682,13 @@ Int_t StAssociationMaker::Make()
 	
     }
 
-    StSPtrVecTrackNode& rcTrackNodes = (!mL3TriggerOn) ? rEvent->trackNodes() : rL3Event->trackNodes();
-    
     if (!rEvent) {
 	gMessMgr->Warning() << "No StEvent!!! " << endm;
 	gMessMgr->Warning() << "Bailing out ..." << endm;
 	return kStWarn;
     }
+    
+    StSPtrVecTrackNode& rcTrackNodes = (!mL3TriggerOn) ? rEvent->trackNodes() : rL3Event->trackNodes();
     
     //
     // Get StMcEvent
@@ -727,9 +728,8 @@ Int_t StAssociationMaker::Make()
 	// Instantiate the Tpc Hit maps
 	mRcTpcHitMap = new rcTpcHitMapType;
 	mMcTpcHitMap = new mcTpcHitMapType;
-	
-	float tpcHitDistance = 9999;
 	if (Debug()) cout << "In Sector : ";
+	
 	for (unsigned int iSector=0;
 	     iSector<rcTpcHitColl->numberOfSectors(); iSector++) {
 	    
@@ -755,56 +755,39 @@ Int_t StAssociationMaker::Make()
 		    // over the hits that we don't need to.
 		    
 		    tpcComp.setReferenceZ(rcTpcHit->position().z() - parDB->zCutTpc(200.));
-		    StMcTpcHit* closestTpcHit = 0;
-		    
 		    // Find the first Mc Tpc Hit that might have a meaningful association.
-		    StMcTpcHitIterator tpcHitSeed = find_if (mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().begin(),
-							     mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end(),
-							     tpcComp);
-		    
-		    bool isFirst = true;
-		    float xDiff, yDiff, zDiff;
-		    xDiff = yDiff = zDiff = -999;
+		    StMcTpcHitIterator tpcHitSeed = mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().begin();
+		    Int_t matchedR = 0;
 		    for (StMcTpcHitIterator jHit = tpcHitSeed;
-			 jHit<mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end();
+			 jHit != mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end();
 			 jHit++){
 			//PR(jHit); 
 			mcTpcHit = *jHit;
-			xDiff = mcTpcHit->position().x()-rcTpcHit->position().x();
-			yDiff = mcTpcHit->position().y()-rcTpcHit->position().y();
-			zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();
-			float mcZ = mcTpcHit->position().z(); // the z resolution now depends on z
-			if ( zDiff > parDB->zCutTpc(mcZ) ) break; //mc hits are sorted, save time!
-			
-			if (isFirst) {
-			    tpcHitDistance=xDiff*xDiff+zDiff*zDiff;
-			    closestTpcHit = mcTpcHit;
-			    isFirst = false;
+			Int_t idMc = 0;
+			if (mcTpcHit->parentTrack()) idMc = mcTpcHit->parentTrack()->key();
+			if (idMc != rcTpcHit->idTruth()) continue;
+			if (! mcTpcHit->parentTrack()->key()) { // no Id -> take one in the window 
+			  Float_t xDiff = mcTpcHit->position().x()-rcTpcHit->position().x();
+			  Float_t yDiff = mcTpcHit->position().y()-rcTpcHit->position().y();
+			  Float_t zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();
+			  float mcZ = mcTpcHit->position().z(); // the z resolution now depends on z
+			  if ( zDiff > parDB->zCutTpc(mcZ) ) break; //mc hits are sorted, save time!
+			  if ( TMath::Abs(xDiff) >= parDB->xCutTpc() ||
+			       TMath::Abs(yDiff) >= parDB->yCutTpc() ||
+			       TMath::Abs(zDiff) >= parDB->zCutTpc(mcZ)) continue;
 			}
-			if (xDiff*xDiff+zDiff*zDiff<tpcHitDistance) {
-			    tpcHitDistance = xDiff*xDiff+zDiff*zDiff;
-			    closestTpcHit = mcTpcHit;
-			}
-			
-			if ( fabs(xDiff)< parDB->xCutTpc() &&
-			     fabs(yDiff)< parDB->yCutTpc() &&
-			     fabs(zDiff)< parDB->zCutTpc(mcZ)) {
-			    // Make Associations  Use maps,
-			    mRcTpcHitMap->insert(rcTpcHitMapValType (rcTpcHit, mcTpcHit) );
-			    mMcTpcHitMap->insert(mcTpcHitMapValType (mcTpcHit, rcTpcHit) );
-			}
-			
+			// Make Associations  Use maps,
+			mRcTpcHitMap->insert(rcTpcHitMapValType (rcTpcHit, mcTpcHit) );
+			mMcTpcHitMap->insert(mcTpcHitMapValType (mcTpcHit, rcTpcHit) );
+			rcTpcHit->SetBit(StMcHit::kMatched,1);
+			mcTpcHit->SetBit(StMcHit::kMatched,1);
+			matchedR++;
 		    } // End of Hits in Padrow loop for MC Hits
-		    if (closestTpcHit)
-			if(false)
-			    mTpcLocalHitResolution->Fill(closestTpcHit->position().x()-
-							 rcTpcHit->position().x(),
-							 closestTpcHit->position().z()-
-							 rcTpcHit->position().z() );
+		    // check for non associated hits
 		} // End of Hits in Padrow loop for Rec. Hits
 	    } // End of Padrow Loop for Rec. Hits
 	} // End of Sector Loop for Rec. Hits
-	
+	// check non associated Mc hits 
 	if (Debug()) {
 	    cout << "\n";
 	    gMessMgr->Info() << "Number of Entries in TPC Hit Maps: " << mRcTpcHitMap->size() << endm;
@@ -947,7 +930,7 @@ Int_t StAssociationMaker::Make()
 		    StMcFtpcHitIterator ftpcHitSeed = mcFtpcHitColl->plane(iPlane)->hits().begin();
 		    bool isFirst = true;
 		    for (StMcFtpcHitIterator jHit = ftpcHitSeed;
-			 jHit<mcFtpcHitColl->plane(iPlane)->hits().end();
+			 jHit != mcFtpcHitColl->plane(iPlane)->hits().end();
 			 jHit++){
 			
 			mcFtpcHit = *jHit;
@@ -1117,6 +1100,7 @@ Int_t StAssociationMaker::Make()
 		for (tpcHMIter=boundsTpc.first; tpcHMIter!=boundsTpc.second; ++tpcHMIter) {
 		    
 		    mcValueTpcHit = (*tpcHMIter).second;
+		    if (! mcValueTpcHit) continue; // I added 0 for unmatched RcTpcHit
 		    trackCand = mcValueTpcHit->parentTrack();
 		    
 		    // At this point we have a candidate Monte Carlo Track
