@@ -1,5 +1,8 @@
-* $Id: mountain_finder.F,v 1.5 1999/07/17 00:32:04 genevb Exp $
+* $Id: mountain_finder.F,v 1.6 1999/07/19 16:27:59 genevb Exp $
 * $Log: mountain_finder.F,v $
+* Revision 1.6  1999/07/19 16:27:59  genevb
+* Edited some messages
+*
 * Revision 1.5  1999/07/17 00:32:04  genevb
 * Use StMessMgr
 *
@@ -653,7 +656,7 @@ c Load the assigned pixels:
 c
 c Guarantee that arrays won't overrun:
                   if (nclspix_temp.ge.nclpix_max) then
-                     call StWarning(' Too many pixels in hit ?')
+                     call StWarning('TPHAM - Too many pixels in hit ?')
                      goto 99
                   end if
 c
@@ -703,7 +706,7 @@ c Fit the peak:
 c
 c Should *not* be possible...
             nhits = nhits - 1
-            call StWarning(' No pixels in hit ?')
+            call StWarning('TPHAM - No pixels in hit ?')
          end if
       end do   ! i=1,nmax
 c
