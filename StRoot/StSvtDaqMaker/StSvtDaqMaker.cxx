@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.3 2000/07/01 20:14:06 caines Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.4 2000/07/04 02:36:53 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.4  2000/07/04 02:36:53  perev
+ * formal corrections, gStChain removed
+ *
  * Revision 1.3  2000/07/01 20:14:06  caines
  * Removed unneccesary delete that was crashing code
  *
@@ -217,8 +220,8 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.3 2000/07/01 20:14:06 caines Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.4 2000/07/04 02:36:53 perev Exp $\n");
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
 
