@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.16 1999/07/17 00:23:24 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.17 1999/07/22 00:19:31 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.17  1999/07/22 00:19:31  genevb
+// Add MessageOut(), fix Linux bugs with character array lengths passed from FORTRAN
+//
 // Revision 1.16  1999/07/17 00:23:24  genevb
 // Fixed bug when option fields are empty in FORTRAN, and let type limits be set before types are even added
 //
@@ -74,6 +77,7 @@
 // Section I. Basic usage: creating a message
 // I-1.   C++ and CINT usage
 // I-2.   Fortran usage
+// I-3.   C usage
 //
 // Section II. Advanced features
 // II-1.  Message summary
@@ -199,6 +203,19 @@
 //   msg_enabled(message,id)      (the id parameter is unused)
 //   msg_enable(message)
 //   msg_disable(message)
+//
+//
+// *** I-3.   C usage
+//
+// For C, one must have "extern" statements stating that the routines to
+// use have been defined externally. This can be done simply by including
+// the StMessMgr.h file. All the C routines are identical to the FORTRAN
+// routines except that they have an underscore ("_") at the end of the
+// subroutine name. Otherwise they are identical.
+//
+// Also, for C, one more routine has been provided: MessageOut(message)
+// just to maintain some compatibility with the MSG package. This routine
+// does not have an extern statement in StMessMgr.h at the moment.
 //
 //
 //
@@ -333,7 +350,7 @@
 
 #include "StMessageManager.h"
 #include <ctype.h>
-#include <string.h>
+#include <string>
 
 StMessMgr* gMessMgr = 0;
 StMessage* gMessage=0;
@@ -347,6 +364,13 @@ static char* emptyString = "";
 static char* oOpt = "O";
 static char* eOpt = "E";
 static size_t oSize = 25;
+#ifdef LINUX
+static int sMessLength;
+static const int maxLOMP = 1024;
+static const int maxLOMP1 = (maxLOMP-1);
+static char* listOfMessPtrs[maxLOMP];
+static size_t listOfMessLens[maxLOMP];
+#endif
 
 StMessMgr* StMessageManager::mInstance = 0;
 //
@@ -357,7 +381,11 @@ void type_of_call Message_(char* mess, int* lines, int*, size_t len) {
   static const char* messReturnChar = "\n";
   size_t messSize = strlen(mess);
   if (*lines>1) {
+#ifdef LINUX
+    int lineSize = (messSize+1)/(*lines) - 1;  // Avoid Linux's extra chars bug
+#else
     int lineSize = messSize/(*lines);
+#endif
     char* mess1 = mess;
     char* mess2 = new char[messSize];    // Build a new version of the
     strcpy(mess2,emptyString);           // message with trailing spaces
@@ -374,7 +402,10 @@ void type_of_call Message_(char* mess, int* lines, int*, size_t len) {
     gMessMgr->Message(mess2);
     delete [] mess2;
   } else {
-    if (messSize > len) strcpy(&(mess[len]),emptyString);
+#ifdef LINUX
+    sMessLength = len;
+#endif
+    if ((len>1) && (messSize > len)) strcpy(&(mess[len]),emptyString);
     gMessMgr->Message(mess);
   }
 }
@@ -397,7 +428,10 @@ void type_of_call Msg_Disable_(char* mess, size_t len) {
 //________________________________________
 void type_of_call StMessage_(char* mess, char* type, char* opt,
                              size_t len1, size_t len2, size_t len3) {
-  if (strlen(mess) > len1) strcpy(&(mess[len1]),emptyString);
+#ifdef LINUX
+    sMessLength = len1;
+#endif
+  if ((len1>1) && (strlen(mess) > len1)) strcpy(&(mess[len1]),emptyString);
   if ((len2<=0) || (len2>oSize)) type=emptyString;
   else if (strlen(type) > len2) strcpy(&(type[len2]),emptyString);
   if ((len3<=0) || (len3>oSize)) opt=oOpt;
@@ -406,28 +440,40 @@ void type_of_call StMessage_(char* mess, char* type, char* opt,
 }
 //________________________________________
 void type_of_call StInfo_(char* mess, char* opt, size_t len1, size_t len2) {
-  if (strlen(mess) > len1) strcpy(&(mess[len1]),emptyString);
+#ifdef LINUX
+    sMessLength = len1;
+#endif
+  if ((len1>1) && (strlen(mess) > len1)) strcpy(&(mess[len1]),emptyString);
   if ((len2<=0) || (len2>oSize)) opt=oOpt;
   else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
   gMessMgr->Message(mess,"I",opt);
 }
 //________________________________________
 void type_of_call StWarning_(char* mess, char* opt, size_t len1, size_t len2) {
-  if (strlen(mess) > len1) strcpy(&(mess[len1]),emptyString);
+#ifdef LINUX
+    sMessLength = len1;
+#endif
+  if ((len1>1) && (strlen(mess) > len1)) strcpy(&(mess[len1]),emptyString);
   if ((len2<=0) || (len2>oSize)) opt=eOpt;
   else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
   gMessMgr->Message(mess,"W",opt);
 }
 //________________________________________
 void type_of_call StError_(char* mess, char* opt, size_t len1, size_t len2) {
-  if (strlen(mess) > len1) strcpy(&(mess[len1]),emptyString);
+#ifdef LINUX
+    sMessLength = len1;
+#endif
+  if ((len1>1) && (strlen(mess) > len1)) strcpy(&(mess[len1]),emptyString);
   if ((len2<=0) || (len2>oSize)) opt=eOpt;
   else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
   gMessMgr->Message(mess,"E",opt);
 }
 //________________________________________
 void type_of_call StDebug_(char* mess, char* opt, size_t len1, size_t len2) {
-  if (strlen(mess) > len1) strcpy(&(mess[len1]),emptyString);
+#ifdef LINUX
+    sMessLength = len1;
+#endif
+  if ((len1>1) && (strlen(mess) > len1)) strcpy(&(mess[len1]),emptyString);
   if ((len2<=0) || (len2>oSize)) opt=oOpt;
   else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
   gMessMgr->Message(mess,"D",opt);
@@ -438,6 +484,10 @@ void type_of_call StMessAddType_(const char* type, const char* text,
   if (strlen(type) > len1) strcpy(&((const_cast<char*> (type))[len1]),emptyString);
   if (strlen(text) > len2) strcpy(&((const_cast<char*> (text))[len2]),emptyString);
  gMessMgr->AddType(type,text);
+}
+//________________________________________
+void type_of_call MessageOut( const char *msg ) {
+  StMessage(const_cast<char*> (msg));
 }
 
 //
@@ -464,6 +514,9 @@ StMessageManager::StMessageManager() : StMessMgr() {
   AddType("E","Error");
   AddType("D","Debug");
   SwitchOff("D");
+#ifdef LINUX
+  memset(listOfMessPtrs,0,(maxLOMP * sizeof(char*)));
+#endif
 }
 //_____________________________________________________________________________
 StMessageManager::~StMessageManager() {
@@ -495,7 +548,29 @@ StMessMgr& StMessageManager::Message(char* mess, char* type, char* opt) {
 // Message declarator - creates a new message if mess is not empty,
 // otherwise, prepares for << input.
 //
-  if (strlen(mess)) {
+  size_t messSize = strlen(mess);
+  if (messSize) {
+#ifdef LINUX
+    if (sMessLength == 1) {                // Check for re-used mess ptr
+      for (int i=0; i<maxLOMP; i++) {
+        if (!(listOfMessPtrs[i])) {        // mess ptr not found
+          listOfMessPtrs[i] = mess;
+          listOfMessLens[i] = messSize;
+          break;
+        }
+        if (mess == listOfMessPtrs[i]) {   // mess ptr found
+          strcpy(&(mess[(listOfMessLens[i]-1)]),emptyString);
+          while ((listOfMessPtrs[++i]) && (i<maxLOMP)) 
+            listOfMessPtrs[i] = 0;
+          break;
+        }
+        if (i==maxLOMP1) {
+          BuildMessage("StMessageManager - maximum depth reached on ptr list",
+             "W","E");
+        }
+      }
+    }
+#endif
     BuildMessage(mess, type, opt);     // comes back with curType=0
   } else {
     curType = type;
@@ -740,7 +815,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.16 1999/07/17 00:23:24 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.17 1999/07/22 00:19:31 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
