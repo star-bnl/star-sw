@@ -1,6 +1,14 @@
-* $Id: palogo.F,v 1.1.1.1 2004/01/12 23:49:38 potekhin Exp $
+* $Id: palogo.F,v 1.2 2004/03/25 00:47:10 potekhin Exp $
 * $Log: palogo.F,v $
+* Revision 1.2  2004/03/25 00:47:10  potekhin
+* Since somthing fails during patching
+* the version character string, we shall
+* replace it by static tag for now to prevent
+* unprintable characters in the output
+* (could be slightly useful for other reasons!)
+*
 * Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
+*
 *
 * Revision 1.3  2003/09/11 11:50:28  nevski
 * correct logo length
@@ -36,6 +44,10 @@
       ELSE IF (IYEAR.LT.100) then
            IYEAR=1900+IYEAR
       ENDIF
+
+      VERSQQ(1:4)='INIT'
+      VERSQQ(5:8)='IAL '
+
       PRINT 3000,CHPAW,VERSQQ,IDAY,MONTH(IMONTH)(1:NCM),
      >           IYEAR,MONTH(IMONTH)(NCM+1:)
  3000 FORMAT(' ******************************************************'/,
