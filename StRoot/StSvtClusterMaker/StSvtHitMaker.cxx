@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.15 2001/08/07 20:52:15 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.16 2001/09/22 01:07:09 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.16  2001/09/22 01:07:09  caines
+ * Fixes now that AddData() is cleared everyevent
+ *
  * Revision 1.15  2001/08/07 20:52:15  caines
  * Implement better packing of svt hardware and charge values
  *
@@ -72,6 +75,7 @@
 
 #include "StDbUtilities/StSvtCoordinateTransform.hh"
 #include "StDbUtilities/StCoordinates.hh"
+#include "StTpcDb/StTpcDb.h"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClassLibrary/StSvtData.hh"
 #include "StSvtAnalysedHybridClusters.hh"
@@ -98,23 +102,16 @@ Int_t StSvtHitMaker::Init()
   if (Debug()) gMessMgr->Debug() << "In StSvtHitMaker::Init() ..."  << endm;
 
   //  iWrite=1;
-
- // Get pointer to StSvtData
-
-  St_DataSet *dataSet2 = GetDataSet("StSvtData");
-  assert(dataSet2);
-  mSvtData = (StSvtData*)(dataSet2->GetObject());
-  assert(mSvtData);
-
+    
   // Get pointer to StSvtAnalysis
 
-  dataSet2 = GetDataSet("StSvtAnalResults");
-  assert(dataSet2);
-  mSvtCluColl = (StSvtHybridCollection*)(dataSet2->GetObject());
-  assert(mSvtCluColl);
+  if( GetSvtRawData()){
+    gMessMgr->Warning() << " No SVT raw data "<< endm;
+    return kStWarn;
+  }
 
   // get geant hits if running MC data
-  dataSet2 = GetDataSet("StSvtGeantHits");
+   St_DataSet *dataSet2 = GetDataSet("StSvtGeantHits");
   if (dataSet2)
     mSvtGeantHitColl = (StSvtHybridCollection*)(dataSet2->GetObject());
 
@@ -125,7 +122,7 @@ Int_t StSvtHitMaker::Init()
  // 		geometry parameters
    m_shape       = (St_svg_shape   *) local("svgpars/shape");
 
-   if(  !strncmp(mSvtCluColl->getConfiguration(), "Y1L", strlen("Y1L"))){
+   if(  !strncmp(mSvtData->getConfiguration(), "Y1L", strlen("Y1L"))){
    m_geom        = (St_svg_geom    *) local("svgpars/geomy1l");
    }
    else{
@@ -152,7 +149,7 @@ Int_t StSvtHitMaker::Init()
   m_x_vs_y->SetXTitle("x cm");
 
 
-  m_waf_no = new TH2F*[2*mSvtCluColl->getNumberOfBarrels()];
+  m_waf_no = new TH2F*[2*mSvtData->getNumberOfBarrels()];
   
   char title1[20];
   char* title3;
@@ -160,11 +157,11 @@ Int_t StSvtHitMaker::Init()
 
   int barrel=0;
 
-  for( int idbarrel=1; idbarrel<=mSvtCluColl->getNumberOfBarrels(); 
+  for( int idbarrel=1; idbarrel<=mSvtData->getNumberOfBarrels(); 
        idbarrel++, barrel++){
 
 
-    float n_ladders = float(mSvtCluColl->getNumberOfLadders(idbarrel))+0.5;
+    float n_ladders = float(mSvtData->getNumberOfLadders(idbarrel))+0.5;
 
     sprintf(title1,"SvtLayer");
     sprintf(title2,"%d", barrel+1);
@@ -219,6 +216,31 @@ Int_t StSvtHitMaker::Init()
 
 //___________________________________________________________________________
 
+Int_t StSvtHitMaker::GetSvtRawData()
+{
+
+  mSvtData = 0;
+  St_DataSet *dataSet2 = GetDataSet("StSvtData");
+  if( dataSet2) mSvtData = (StSvtData*)(dataSet2->GetObject());
+
+  if( !mSvtData) return kStWarn;
+  return kStOk;
+}
+//___________________________________________________________________________
+
+Int_t StSvtHitMaker::GetSvtClusterData()
+{
+
+  
+  St_DataSet *dataSet2  = GetDataSet("StSvtAnalResults");
+  if( !dataSet2) return kStWarn;
+   mSvtCluColl = (StSvtHybridCollection*)(dataSet2->GetObject());
+ 
+  if( !mSvtCluColl) return kStWarn;
+  return kStOK;
+ 
+}
+//___________________________________________________________________________
 Int_t StSvtHitMaker::Make()
 {
   if (Debug()) gMessMgr->Debug() << "In StSvtHitMaker::Make() ..."  << endm;
@@ -226,6 +248,18 @@ Int_t StSvtHitMaker::Make()
   //              Create output tables
   St_scs_spt    *scs_spt    = new St_scs_spt("scs_spt",100);
   m_DataSet->Add(scs_spt);
+
+// Get pointer to StSvtData
+
+  if( GetSvtRawData()){
+    gMessMgr->Warning() <<" No SVT raw data" << endm;
+    return kStWarn;
+  }
+
+  if( GetSvtClusterData()){
+    gMessMgr->Warning() <<" No SVT Cluster data" << endm;
+    return kStWarn;
+  }
 
   TransformIntoSpacePoint();
   FillHistograms();
@@ -246,23 +280,23 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
   svg_geom_st* geom = m_geom->GetTable();
   svg_shape_st* shape = m_shape->GetTable();
   
-  StSvtCoordinateTransform* SvtGeomTrans = new StSvtCoordinateTransform();
+  StSvtCoordinateTransform* SvtGeomTrans = new StSvtCoordinateTransform(gStTpcDb);
   SvtGeomTrans->setParamPointers(&srs_par[0], &geom[0], &shape[0], mSvtData->getSvtConfig());
   StSvtLocalCoordinate localCoord(0,0,0);
   StSvtWaferCoordinate waferCoord(0,0,0,0,0,0);
   StGlobalCoordinate globalCoord(0,0,0); 
   StThreeVectorF mPos(0,0,0);
   
-  for(int barrel = 1;barrel <= mSvtCluColl->getNumberOfBarrels();barrel++) {
+  for(int barrel = 1;barrel <= mSvtData->getNumberOfBarrels();barrel++) {
 
-    for (int ladder = 1;ladder <= mSvtCluColl->getNumberOfLadders(barrel);ladder++) {
+    for (int ladder = 1;ladder <= mSvtData->getNumberOfLadders(barrel);ladder++) {
 
-      for (int wafer = 1;wafer <= mSvtCluColl->getNumberOfWafers(barrel);wafer++) {
+      for (int wafer = 1;wafer <= mSvtData->getNumberOfWafers(barrel);wafer++) {
 
-	for (int hybrid = 1;hybrid <=mSvtCluColl->getNumberOfHybrids();hybrid++){
+	for (int hybrid = 1;hybrid <=mSvtData->getNumberOfHybrids();hybrid++){
 
 	  
-	  index = mSvtCluColl->getHybridIndex(barrel,ladder,wafer,hybrid);
+	  index = mSvtData->getHybridIndex(barrel,ladder,wafer,hybrid);
 	  if(index < 0) continue;
 	  
 	  mSvtBigHit = (StSvtAnalysedHybridClusters*)mSvtCluColl->at(index);
@@ -318,6 +352,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
     
   }
 
+  delete SvtGeomTrans;
   gMessMgr->Info() << "Found " << GoodHit << " good hits " << endm;
 }
 
@@ -383,16 +418,16 @@ Int_t StSvtHitMaker::FillHistograms(){
   
   int index;
 
-  for(int barrel = 1;barrel <= mSvtCluColl->getNumberOfBarrels();barrel++) {
+  for(int barrel = 1;barrel <= mSvtData->getNumberOfBarrels();barrel++) {
     
-    for (int ladder = 1;ladder <= mSvtCluColl->getNumberOfLadders(barrel);ladder++) {
+    for (int ladder = 1;ladder <= mSvtData->getNumberOfLadders(barrel);ladder++) {
 
-      for (int wafer = 1;wafer <= mSvtCluColl->getNumberOfWafers(barrel);wafer++) {
+      for (int wafer = 1;wafer <= mSvtData->getNumberOfWafers(barrel);wafer++) {
 	
-	for (int hybrid = 1;hybrid <=mSvtCluColl->getNumberOfHybrids();hybrid++){
+	for (int hybrid = 1;hybrid <=mSvtData->getNumberOfHybrids();hybrid++){
 	  
 	  
-	  index = mSvtCluColl->getHybridIndex(barrel,ladder,wafer,hybrid);
+	  index = mSvtData->getHybridIndex(barrel,ladder,wafer,hybrid);
 	  if(index < 0) continue;
 	  
 	  mSvtBigHit = (StSvtAnalysedHybridClusters*)mSvtCluColl->at(index);
@@ -459,12 +494,12 @@ Int_t StSvtHitMaker::FillHistograms(){
 
 Int_t StSvtHitMaker::Eval()
 {
-  for(int barrel = 1;barrel <= mSvtCluColl->getNumberOfBarrels();barrel++) {
-    for (int ladder = 1;ladder <= mSvtCluColl->getNumberOfLadders(barrel);ladder++) {
-      for (int wafer = 1;wafer <= mSvtCluColl->getNumberOfWafers(barrel);wafer++) {
-	for (int hybrid = 1;hybrid <=mSvtCluColl->getNumberOfHybrids();hybrid++){
+  for(int barrel = 1;barrel <= mSvtData->getNumberOfBarrels();barrel++) {
+    for (int ladder = 1;ladder <= mSvtData->getNumberOfLadders(barrel);ladder++) {
+      for (int wafer = 1;wafer <= mSvtData->getNumberOfWafers(barrel);wafer++) {
+	for (int hybrid = 1;hybrid <=mSvtData->getNumberOfHybrids();hybrid++){
 	  
-	  int index = mSvtCluColl->getHybridIndex(barrel,ladder,wafer,hybrid);
+	  int index = mSvtData->getHybridIndex(barrel,ladder,wafer,hybrid);
 	  if(index < 0) continue;          
 	  
 	  mSvtBigHit = (StSvtAnalysedHybridClusters*)mSvtCluColl->at(index);

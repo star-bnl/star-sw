@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.cxx,v 1.5 2001/08/07 20:52:15 caines Exp $
+// $Id: StSvtClusterMaker.cxx,v 1.6 2001/09/22 01:07:09 caines Exp $
 // $Log: StSvtClusterMaker.cxx,v $
+// Revision 1.6  2001/09/22 01:07:09  caines
+// Fixes now that AddData() is cleared everyevent
+//
 // Revision 1.5  2001/08/07 20:52:15  caines
 // Implement better packing of svt hardware and charge values
 //
@@ -63,19 +66,30 @@ Int_t StSvtClusterMaker::Init(){
 
  if (Debug()) gMessMgr->Debug() << "In StSvtClusterMaker::Init() ..."  << 
 		 GetName() << endm;
-
-  St_DataSet *dataSet = GetDataSet("StSvtData");
-  assert(dataSet); 
-  mSvtEvent = (StSvtData*)(dataSet->GetObject());
-  assert(mSvtEvent);
-
-  SetSvtCluster();
-  mClusterFinder = new StSvtClusterFinder();
+ 
+ //if( GetSvtRawData()) gMessMgr->Warning() << "No SVT Raw data..."  << endm;
+		 
+ //SetSvtCluster();
+ mClusterFinder = new StSvtClusterFinder();
 
   return StMaker::Init();
 
 }
 
+//_____________________________________________________________________________
+Int_t StSvtClusterMaker::GetSvtRawData(){
+
+ St_DataSet *dataSet = GetDataSet("StSvtData");
+  //assert(dataSet); 
+ if( !dataSet) return kStWarn;
+ 
+ mSvtEvent = (StSvtData*)(dataSet->GetObject());
+ if( !mSvtEvent) return kStWarn;
+
+ return kStOk;
+ 
+
+}
 //_____________________________________________________________________________
 Int_t StSvtClusterMaker::SetSvtCluster()
 {
@@ -84,10 +98,10 @@ Int_t StSvtClusterMaker::SetSvtCluster()
   SetOutput(mClusterSet); //Declare for output
 
   
-  if (!mClusterColl) {
+  // if (!mClusterColl) {
     mClusterColl = new StSvtHybridCollection(mSvtEvent->getConfiguration());
     mClusterSet->SetObject((TObject*)mClusterColl);
-  } 
+    //} 
 
   return kStOK;
 }
@@ -100,7 +114,12 @@ Int_t StSvtClusterMaker::Make(){
  if (Debug()) gMessMgr->Debug() << "In StSvtClusterMaker::Make() ..."  << 
 		 GetName() << endm;
 
-  SetHybridClusters();
+ if( GetSvtRawData()) {
+   gMessMgr->Warning() << " Problem with SVt raw in ClusterMaker" << endm;
+   return kStWarn;
+ }
+ SetSvtCluster();
+ SetHybridClusters();
    
  return kStOK;
 }
