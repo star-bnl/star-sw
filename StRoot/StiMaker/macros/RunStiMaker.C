@@ -131,7 +131,15 @@ void RunStiMaker(Int_t nevents=1,
     
     //StiMaker
     StiMaker* anaMk = StiMaker::instance();
-    
+
+    //StiIOBroker
+    StiRootIOBroker* stiIO = new StiRootIOBroker();
+
+    stiIO->setTPHFMinPadrow(1);
+    stiIO->setTPHFMaxPadrow(45);
+    stiIO->setETSFLowerBound(5);
+    stiIO->setETSFMaxHits(6);
+
     anaMk->setDoFit(doFit);
     
     //enum SeedFinderType {kUndefined=0, kComposite=1, kEvaluable=2};

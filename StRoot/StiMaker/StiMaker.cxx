@@ -23,6 +23,7 @@
 #include "StMcEventMaker/StMcEventMaker.h"
 
 // Sti
+#include "Sti/StiIOBroker.h"
 #include "Sti/StiFactoryTypes.h"
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiHit.h"
@@ -191,6 +192,10 @@ Int_t StiMaker::Init()
     Messenger::instance()->setRoutingMask(0); //turn off all streams
     Messenger::instance()->setRoutingBits(MessageType::kHitMessage);
 
+    //The IOBroker
+    StiIOBroker* stiIO = StiIOBroker::instance();
+    cout <<"\n\n ------------------- StiIOBroker ----------------------- \n\n"<<*stiIO<<endl;
+
     //The Display
     if (mUseGui) {
 	mdisplay = StiDisplayManager::instance();
@@ -220,7 +225,7 @@ Int_t StiMaker::Init()
 	    new StiEvaluableTrackFactory("StiEvaluableTrackFactory");
     }
     mtrackfactory->setIncrementalSize(50);
-    mtrackfactory->setMaxIncrementCount(10);
+    mtrackfactory->setMaxIncrementCount(100);
 
     //The Track node factory
     mktracknodefactory =
