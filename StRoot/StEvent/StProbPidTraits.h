@@ -4,13 +4,13 @@
  */
 /***************************************************************************
  *
- * $Id: StProbPidTraits.h,v 2.2 2003/09/07 03:49:02 perev Exp $
+ * $Id: StProbPidTraits.h,v 2.3 2003/10/21 14:24:30 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
  *
  * Description: Yuri Fisyak, Oct 2002
- *    keep track Likelyhood for each mass hypothesis
+ *    keep track Likelihood for each mass hypothesis
  *
  **************************************************************************/
 #ifndef StProbPidTraits_hh
