@@ -591,11 +591,12 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
     sti->initialize(curvature, tanLambda, stiGlobalOrigin, hitvec);
 
     //Test track!
-    cout <<"Test the track:"<<endl;
-    for (double xLocal=hitvec.back()->x(); xLocal<=hitvec.front()->x(); xLocal+=10.) {
+    //cout <<"Test the track:"<<endl;
+    //for (double xLocal=hitvec.back()->x(); xLocal<=hitvec.front()->x(); xLocal+=10.) {
+    for (double xLocal=0.; xLocal<=190.; xLocal+=10.) {
 	//for (double xLocal=hitvec.front()->x(); xLocal<=hitvec.back()->x(); xLocal+=10.) {
 	StThreeVector<double> pos = sti->getGlobalPointNear(xLocal);
-	cout <<"\tx: "<<xLocal<<"\tpos: "<<pos<<endl;
+	//cout <<"\tx: "<<xLocal<<"\tpos: "<<pos<<endl;
     }
     
 }
