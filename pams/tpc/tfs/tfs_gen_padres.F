@@ -1,5 +1,8 @@
-* $Id: tfs_gen_padres.F,v 1.6 1998/04/02 20:54:40 sakrejda Exp $
+* $Id: tfs_gen_padres.F,v 1.7 1998/07/02 19:11:29 sakrejda Exp $
 * $Log: tfs_gen_padres.F,v $
+* Revision 1.7  1998/07/02 19:11:29  sakrejda
+* B field obtained via gufld call
+*
 * Revision 1.6  1998/04/02 20:54:40  sakrejda
 * more proofing...
 *
@@ -114,6 +117,8 @@ C
       real Nh,Neff_b,Neff_h,siga2(2),sigb2(2),sigc2(2),sigd2(2)
       real clus_per_cm_P10,rel_dedx,ds_ave
       real AA, BB, CC
+      real xlocal(3),Bfield(3)
+      DATA xlocal /3*0/
 
 C=========================== Begin Executable Code =======================
 
@@ -202,18 +207,21 @@ C     it is coded this way to avoid overflow when pz = 0
 C     Modefy the code to accommodate zero B-filed magnitude.
 C     Added a piece of code to handle zero B-field case.
 C     ***  DSW  03/29/1997 ***
-               
-               if ( par(1).bmag .ne. 0. ) then
+               xlocal(1)=tphit(k).x
+               xlocal(2)=tphit(k).y
+               xlocal(3)=tphit(k).z
+               call gufld(xlocal,Bfield)
+               if ( Bfield(3).ne. 0. ) then
                   
 C     evaluate the length of the track over the padrow
 C     wmin - is the track length along the padrow
 C     tlen  - is the approximated track arc-length
                   
 C     1st -  approximate with a circle
-CDH   par(1).bmag is in Tesla, C_D_CURVATURE is (GeV/c)(1/kG)(1/cm)
+CIS   Bfield is in kG, C_D_CURVATURE is (GeV/c)(1/kG)(1/cm)
 
                   rad = sqrt( px**2 + py**2 ) / 
-     +                   ((C_D_CURVATURE*10.)*par(1).bmag)
+     +                   ((C_D_CURVATURE)*abs(Bfield(3)))
                   if( rad .lt. par(1).padlen(ipad) ) then
 C     this is a spiral - cannot calculate track length
                      wcirc = 2.0 * rad

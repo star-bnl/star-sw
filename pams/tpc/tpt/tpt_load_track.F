@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.2 1998/01/27 00:35:49 fisyak Exp $
+* $Id: tpt_load_track.F,v 1.3 1998/07/02 19:17:34 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.3  1998/07/02 19:17:34  sakrejda
+* B field obtained via gufld call
+*
 * Revision 1.2  1998/01/27 00:35:49  fisyak
 * Split sources
 *
@@ -25,6 +28,7 @@ C<--------------------------------------------------------------------
 
 #include "tpt_track.inc"
 #include "tpt_pointers.inc"
+#include "phys_constants.inc"
 
 C___________________________________________________________________
       RECORD /table_head_st/    track_h
@@ -36,6 +40,8 @@ C___________________________________________________________________
       REAL    x0, y0, sgn, sign
       REAL   dx0,dy0
       real   twopi,radtodeg
+      real   xlocal(3),bfield(3)
+      data   xlocal /3*0/
 C___________________________________________________________________
 
       twopi=8.0*atan(1.0)
@@ -54,9 +60,10 @@ C     chisq from the linear fit
       track(ipt).chisq(2) = trk(ipt).p(9)
 C     
 C     inverse of the pt
-      track(ipt).invp =  1.0/(abs(trk(ipt).p(2))*0.001499)
+      call gufld(xlocal,bfield)
+      track(ipt).invp =  1.0/(abs(trk(ipt).p(2))*bfield(3)*C_D_CURVATURE)
       track(ipt).cov(1) = abs(trk(ipt).dpar(6))/
-     >                    ((trk(ipt).p(2)**2*0.001499)**2)
+     >                    ((trk(ipt).p(2)**2*bfield(3)*C_D_CURVATURE)**2)
 C
 C     coordinates of the point where track parameters are given
       x0 = abs(trk(ipt).p(2))*cos(trk(ipt).p(5))+trk(ipt).p(3)

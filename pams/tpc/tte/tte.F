@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.13 1998/06/05 19:02:28 sakrejda Exp $
+* $Id: tte.F,v 1.14 1998/07/02 19:20:17 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.14  1998/07/02 19:20:17  sakrejda
+* B field obtained via gufld call
+*
 * Revision 1.13  1998/06/05 19:02:28  sakrejda
 * protection agains bad track numbers added
 *
@@ -177,8 +180,12 @@ c     message related variables
      >                -1,0,-1,-1,0,0,-1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,
      >                 0,0,0,1,1,2,0,2,0,50*0/
 
+      real xlocal(3), bfield(3)
+      data xlocal /3*0/
+
 C_____________________________________________________________________________
       tte=STAFCV_OK
+      call gufld(xlocal,bfield)
       call Msg_Enable( 'TTE-I1' )
       call Msg_Enable( 'TTE-I2' )
       call Msg_Enable( 'TTE-I3' )
@@ -647,7 +654,7 @@ c            and get it's momentum information.
 *            first get the track radius
 *            hrot is the sence of rotation
              hrot=-track(list_tracks(track_num)).q
-             radius=1.0/(track(list_tracks(track_num)).invp*5.0
+             radius=1.0/(track(list_tracks(track_num)).invp*bfield(3)
      >       *C_D_CURVATURE)
              psic=C_RAD_PER_DEG*track(list_tracks(track_num)).psi-
      >       hrot*0.25*C_2PI
@@ -715,7 +722,11 @@ c          let's see how many different tracks got mixed up in this one...
            mc_track_on_rec_track(2,iloc)=
      >     mc_track_on_rec_track(2,iloc)+1
            j=j+1
-           track_num_local=hit(loc_hit(j)).track/1000
+           if(j.lt.hit_h.nok) then
+                    track_num_local=hit(loc_hit(j)).track/1000
+           else
+                    track_num_local=-1
+           endif
          end do
 
 c        let's find the biggest contribution
