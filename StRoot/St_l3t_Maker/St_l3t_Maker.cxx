@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.24 2000/04/12 19:01:05 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.25 2000/04/24 17:24:54 yepes Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -200,8 +200,6 @@ Int_t St_l3t_Maker::MakeOnLine(){
 //    Set parameters
 //
    tracker.setup ( 30000, 3000 ) ;
-   tracker.xyError = 0.1 ;
-   tracker.zError  = 0.2 ;
    tracker.para.infoLevel = 10 ;
    for ( int ie = 0 ; ie < gl3.nEvents ; ie++ ) gl3.event[ie].bField = 0.5 ;
    tracker.reset();
@@ -315,7 +313,7 @@ Int_t St_l3t_Maker::MakeOnLine(){
 	 hit[nHits].q     = tracker.hit[j].q  ;
 	 hit[nHits].track = 0  ;
 	 if ( tracker.hit[j].track != NULL ) {
-	    hit[nHits].track = tracker.hit[j].track->id + 10000 * secIndex  ;
+	    hit[nHits].track = ((FtfTrack *)tracker.hit[j].track)->id + 10000 * secIndex  ;
 	 }
 	 nHits++ ;
 	 if ( nHits >= maxHits ) {
@@ -358,9 +356,9 @@ Int_t St_l3t_Maker::MakeOnLine(){
          tTrk->invpt    = 1./fabs(gTrk->pt);
          tTrk->n_point  = gTrk->nHits ;
          tTrk->icharge  = (long)(gTrk->pt/fabs(gTrk->pt));
-         tTrk->chisq[0] = gTrk->chisq[0] ;
-         tTrk->chisq[1] = gTrk->chisq[1] ;
-         tTrk->length   = gTrk->trackLength ;
+         tTrk->chisq[0] = gTrk->chi2[0] ;
+         tTrk->chisq[1] = gTrk->chi2[1] ;
+         tTrk->length   = gTrk->length ;
          tTrk->phi0     = gTrk->phi0 * toDeg ;
          tTrk->psi      = gTrk->psi  * toDeg ;
          tTrk->r0       = gTrk->r0   ;
@@ -452,7 +450,7 @@ Int_t St_l3t_Maker::MakeOffLine(){
       tTrk->icharge  = fTrk->q;
       tTrk->chisq[0] = fTrk->chi2[0] ;
       tTrk->chisq[1] = fTrk->chi2[1] ;
-      tTrk->length   = fTrk->trackLength ;
+      tTrk->length   = fTrk->length ;
       tTrk->phi0     = fTrk->phi0 * toDeg ;
       tTrk->psi      = fTrk->psi  * toDeg ;
       tTrk->r0       = fTrk->r0   ;
@@ -464,7 +462,7 @@ Int_t St_l3t_Maker::MakeOffLine(){
 //
    for ( int k = 0 ; k < nHits ; k++ ) {
       if ( tracker.hit[k].track != 0 ) {
-         hit[k].track = 1000 * tracker.hit[k].track->id ;
+         hit[k].track = 1000 * ((FtfTrack *)tracker.hit[k].track)->id ;
       }
    }
 //
