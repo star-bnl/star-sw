@@ -798,6 +798,10 @@ void StEventQAMaker::MakeHistPrim() {
 
       if (primtrk->flag()>0) {
         StTrackGeometry* geom = primtrk->geometry();
+	// due to variation on "kalman fitting" of primary tracks
+	// we want to look at the hit residuals using the outerGeometry()
+	// helix parameters (parameters at last point on track)
+	StTrackGeometry* outerGeom = primtrk->outerGeometry();
         StTrackFitTraits& fTraits = primtrk->fitTraits();
         StTrackDetectorInfo* detInfo = primtrk->detectorInfo();
         const StTrackTopologyMap& map=primtrk->topologyMap();
@@ -830,6 +834,7 @@ void StEventQAMaker::MakeHistPrim() {
         const StThreeVectorF& firstPoint = detInfo->firstPoint();
 	const StThreeVectorF& lastPoint = detInfo->lastPoint();
 	const StThreeVectorF& origin = geom->origin();
+	const StThreeVectorF& outerOrigin = outerGeom->origin();
 
 	// need to find position on helix closest to first point on track since
 	// the primary vertex is used as the first point on helix for primary
@@ -840,6 +845,7 @@ void StEventQAMaker::MakeHistPrim() {
 
 	StThreeVectorF dif = firstPoint - geom->helix().at(sFirst);
 	StThreeVectorF difl = lastPoint - geom->helix().at(sLast);
+
 	Float_t xcenter = geom->helix().xcenter();
 	Float_t ycenter = geom->helix().ycenter();
 	Float_t rcircle = 1./geom->helix().curvature();
@@ -851,6 +857,25 @@ void StEventQAMaker::MakeHistPrim() {
 	if (rcircle<centerOfCircleToFP) azimdif *= -1.;
 	Float_t azimdifl = difl.perp();
 	if (rcircle<centerOfCircleToLP) azimdifl *= -1.;
+
+	// get the same information as above but from the outerGeometry()
+	// ... this is so we can look at the hit residuals using the helix
+	// parameters at the last point on a track
+	double sFirstOuter = outerGeom->helix().pathLength(firstPoint);
+	double sLastOuter = outerGeom->helix().pathLength(lastPoint);
+	StThreeVectorF outerDif = firstPoint - outerGeom->helix().at(sFirstOuter);
+	StThreeVectorF outerDifl = lastPoint - outerGeom->helix().at(sLastOuter);
+	Float_t outerXcenter = outerGeom->helix().xcenter();
+	Float_t outerYcenter = outerGeom->helix().ycenter();
+	Float_t outerRcircle = 1./outerGeom->helix().curvature();
+	Float_t outerCenterOfCircleToFP = sqrt(pow(outerXcenter-firstPoint.x(),2) +
+					       pow(outerYcenter-firstPoint.y(),2));
+	Float_t outerCenterOfCircleToLP = sqrt(pow(outerXcenter-lastPoint.x(),2) +
+					       pow(outerYcenter-lastPoint.y(),2));
+	Float_t outerAzimdif = outerDif.perp();
+	if (outerRcircle<outerCenterOfCircleToFP) outerAzimdif *= -1.;
+	Float_t outerAzimdifl = outerDifl.perp();
+	if (outerRcircle<outerCenterOfCircleToLP) outerAzimdifl *= -1.;
 
         Float_t radf = firstPoint.perp();
 
@@ -888,17 +913,17 @@ void StEventQAMaker::MakeHistPrim() {
 	  mean_ptT += geom->momentum().perp();
 	  mean_etaT += eta;
 // these are TPC only
-	  hists->m_prim_f0->Fill(dif.x(),0.);
-	  hists->m_prim_f0->Fill(dif.y(),1.);
-	  hists->m_prim_f0->Fill(dif.z(),2.);
+	  hists->m_prim_f0->Fill(outerDif.x(),0.);
+	  hists->m_prim_f0->Fill(outerDif.y(),1.);
+	  hists->m_prim_f0->Fill(outerDif.z(),2.);
 
-	  hists->m_prim_xf0->Fill(dif.x());
-	  hists->m_prim_yf0->Fill(dif.y());
-	  hists->m_prim_zf0->Fill(dif.z());
-	  hists->m_prim_rzf0->Fill(azimdif,0.);
-	  hists->m_prim_rzf0->Fill(dif.z(),1.);
-	  hists->m_prim_rzl0->Fill(azimdifl,0.);
-	  hists->m_prim_rzl0->Fill(difl.z(),1.);
+	  hists->m_prim_xf0->Fill(outerDif.x());
+	  hists->m_prim_yf0->Fill(outerDif.y());
+	  hists->m_prim_zf0->Fill(outerDif.z());
+	  hists->m_prim_rzf0->Fill(outerAzimdif,0.);
+	  hists->m_prim_rzf0->Fill(outerDif.z(),1.);
+	  hists->m_prim_rzl0->Fill(outerAzimdifl,0.);
+	  hists->m_prim_rzl0->Fill(outerDifl.z(),1.);
 	  hists->m_prim_impactT->Fill(logImpact);
 	  hists->m_prim_impactrT->Fill(primtrk->impactParameter());
 	  hists->m_prim_impactTTS->Fill(logImpact,1.);
@@ -1002,17 +1027,17 @@ void StEventQAMaker::MakeHistPrim() {
 	  mean_ptTS += geom->momentum().perp();
 	  mean_etaTS += eta;
 
-	  hists->m_prim_f0TS->Fill(dif.x(),0.);
-	  hists->m_prim_f0TS->Fill(dif.y(),1.);
-	  hists->m_prim_f0TS->Fill(dif.z(),2.);
+	  hists->m_prim_f0TS->Fill(outerDif.x(),0.);
+	  hists->m_prim_f0TS->Fill(outerDif.y(),1.);
+	  hists->m_prim_f0TS->Fill(outerDif.z(),2.);
 
-	  hists->m_prim_xf0TS->Fill(dif.x());
-	  hists->m_prim_yf0TS->Fill(dif.y());
-	  hists->m_prim_zf0TS->Fill(dif.z());
-	  hists->m_prim_rzf0TS->Fill(azimdif,0.);
-	  hists->m_prim_rzf0TS->Fill(dif.z(),1.);
-	  hists->m_prim_rzl0TS->Fill(azimdifl,0.);
-	  hists->m_prim_rzl0TS->Fill(difl.z(),1.);
+	  hists->m_prim_xf0TS->Fill(outerDif.x());
+	  hists->m_prim_yf0TS->Fill(outerDif.y());
+	  hists->m_prim_zf0TS->Fill(outerDif.z());
+	  hists->m_prim_rzf0TS->Fill(outerAzimdif,0.);
+	  hists->m_prim_rzf0TS->Fill(outerDif.z(),1.);
+	  hists->m_prim_rzl0TS->Fill(outerAzimdifl,0.);
+	  hists->m_prim_rzl0TS->Fill(outerDifl.z(),1.);
 	  hists->m_prim_impactTS->Fill(logImpact);
 	  hists->m_prim_impactrTS->Fill(primtrk->impactParameter());
 	  hists->m_prim_impactTTS->Fill(logImpact,0.);
@@ -1836,8 +1861,11 @@ void StEventQAMaker::MakeHistEval() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.35 2002/02/23 00:31:26 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 2.36 2002/04/03 21:13:11 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.36  2002/04/03 21:13:11  lansdell
+// primary track first, last point residuals now use outerGeometry() for helix parameters
+//
 // Revision 2.35  2002/02/23 00:31:26  lansdell
 // bug fix: primary vertex check histograms for a multiplicity class did not reflect the correct number of good events
 //
