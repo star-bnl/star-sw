@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.25 2003/11/27 03:06:12 perev Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.26 2004/01/14 13:22:07 fisyak Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.26  2004/01/14 13:22:07  fisyak
+* add IdTruth information
+*
 * Revision 1.25  2003/11/27 03:06:12  perev
 * test for zeros before call lfitw
 *
@@ -25,7 +28,7 @@
       Subroutine tph_fit_isolated_cluster(tclpar, nclspix,
      +     ipad, itdc, iadc, itrk,
      +     white_noise, filtered_noise,
-     +     qq,x,dx,prf,z,dz,zrf,phi,track,
+     +     qq,x,dx,prf,z,dz,zrf,phi,track,quality,
      +     mu1,mu2,mu3,mu4,mu5,
      +     npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi, ierr)
 
@@ -110,7 +113,8 @@ c     passed outputs
       real prf(*)               ! Width along x
       real qq(*)                ! Sum of ADC counts
       real sigma                ! Width of hit
-      real track(*)             ! MC track contributing most
+      integer track(*)          ! MC track contributing most
+      real quality(*)
       real uncertainty          ! Uncertainty in centroid
       real white_noise          ! SCA and digitization noise
       real x(*)                 ! Position along row (pad units)
@@ -144,10 +148,12 @@ c
       integer mtrk              ! Index for nocc_track array
       integer nmc_tracks        ! Number of MC tracks
       integer nocc_track(nmc_tracks_max) ! Number of pixels on MC track
+      real    q_track(nmc_tracks_max)    ! Charge in cluster from MC track
       integer pad_n             ! Pad index
 c
       real adc_ipix             ! ADC for pixel
       real adc_sum              ! ADC sum in cluster
+      real q_sum
       real b                    ! Intercept of linear fit
       real badness              ! 'Badness' of linear fit
       real d_rvec(nbuck)        ! temp array
@@ -176,7 +182,7 @@ c-----------------------------------------------------------------------
 c     functions:
 c
       integer iucomp
-      integer lvsimx
+      integer lvsimx, lvmax
 c      integer tgc_time_to_z
       integer tpc_time_to_z
       integer loop_over_z
@@ -184,20 +190,20 @@ c      integer tgc_time_to_z
       integer tpc_pad_time_offset   ! pad-by-pad t0 from database
 c-----------------------------------------------------------------------
       data first/.true./
-      data imc_track /nmc_tracks_max*0/
-      data nocc_track /nmc_tracks_max*0/
 c-----------------------------------------------------------------------
       save first
       save identity_vector
-      save imc_track
       save lookat_mc
-      save nocc_track
       save bucket_length_in
       save bucket_length_out
 
       character*132 m132(2)
 c-----------------------------------------------------------------------
       ierr = 0
+c     clean up the workspace 
+      call vzero(imc_track,nmc_tracks)
+      call vzero(nocc_track,nmc_tracks)
+      call vzero(q_track,nmc_tracks)
       
 c     set up the identity vector for x (pad) calculation
       if (first) then
@@ -362,7 +368,7 @@ c     ??? If pad_proj *is* 0, rvec is peculiar...but I left existing *logic*
          d_rvec(indx) = pad_proj(indx)
          if (abs(pad_proj(indx)) .gt. 1.e-10) then
             rvec(indx) = tdc_x_adc(indx)/d_rvec(indx)
-            if (rvec(indx).gt.0) nonzeros = nonzeros + 1;
+            if (rvec(indx).gt.0) nonzeros = nonzeros + 1
          else
             rvec(indx) = tdc_x_adc(indx)
          end if
@@ -381,29 +387,34 @@ c     this following is only useful for MC data-- turn it off with
 c     switch if interested in real data (or real data performance)
       if (lookat_mc) then
          nmc_tracks = 0
+         q_sum = 0
          do ipix=1,nclspix
             ktrk=itrk(ipix)
             mtrk=iucomp(ktrk,imc_track,nmc_tracks)
+            q_sum = q_sum + iadc(ipix)
             if (mtrk .eq. 0) then
                if (nmc_tracks .lt. nmc_tracks_max) then
                   nmc_tracks=nmc_tracks+1
                   imc_track(nmc_tracks) = ktrk
                   nocc_track(nmc_tracks) = 1
+                  q_track(nmc_tracks) = iadc(ipix)
                else             ! too many contributing tracks... forget it
                   write(m132,*) 'TPH FitI_Cluster: to many tracks'
                   call StWarning(m132)
                endif
             else
                nocc_track(mtrk) = nocc_track(mtrk)+1
+               q_track(mtrk) = q_track(mtrk)+iadc(ipix)
             endif
          enddo
-         imax = lvsimx(nocc_track,nmc_tracks,1)
-         track(1) = imc_track(imax)
-     
-c     Now, clean up the workspace for next time:
-         call vzero(imc_track,nmc_tracks)
-         call vzero(nocc_track,nmc_tracks)
-     
+*yf      imax = lvsimx(nocc_track,nmc_tracks,1)
+         imax = lvmax(q_track,nmc_tracks)
+         track(1)   = 0
+         quality(1) = 0
+         if (imax .gt. 0 .and. q_sum .gt. 0) then
+            track(1) = imc_track(imax)
+            quality(1) = 100*q_track(imax)/q_sum
+         endif
       endif
       
       return

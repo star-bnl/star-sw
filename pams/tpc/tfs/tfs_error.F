@@ -55,7 +55,7 @@ C     General physical constants now in math_constants and phys_constants
 C  
       
       integer ipad, iret
-      real theta, diptan, alpha, lambda
+      real theta, alpha, lambda
       real dlen, talpha2, calpha2
       real Nh,Neff_b,Neff_h,siga2(2),sigb2(2),sigc2(2),sigd2(2)
       real AA, BB, CC

@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.29 2003/10/11 04:04:58 perev Exp $ 
+* $Id: tph.F,v 1.30 2004/01/14 13:22:07 fisyak Exp $ 
 * $Log: tph.F,v $
+* Revision 1.30  2004/01/14 13:22:07  fisyak
+* add IdTruth information
+*
 * Revision 1.29  2003/10/11 04:04:58  perev
 * BugFix rad  was used before seting
 *
@@ -38,6 +41,8 @@
      +,                       pad_plane_h,     pad_plane
      +,                       pixel_data_in_h,   pixel_data_in
      +,                       pixel_data_out_h,  pixel_data_out
+     +,                       pixel_indx_in_h,   pixel_indx_in
+     +,                       pixel_indx_out_h,  pixel_indx_out
      +,                       tpseq_h,         tpseq 
      +,                       tpcluster_h,     tpcluster 
      +,                       tphit_h,         tphit) 
@@ -150,7 +155,8 @@ c
       real dz(max_hits_in_cluster) ! Uncertainty in z
       real zrf(max_hits_in_cluster) ! Width along z
       real phi(max_hits_in_cluster) ! Orientation of cluster
-      real track(max_hits_in_cluster) ! MC track contributing most
+      integer track(max_hits_in_cluster) ! MC track contributing most
+      real quality(max_hits_in_cluster) !contribution from the above track
       real mu1(max_hits_in_cluster) ! 1st moment of hit (mean)
       real mu2(max_hits_in_cluster) ! 2nd moment of hit (rms)
       real mu3(max_hits_in_cluster) ! 3rd moment of hit (skewness)
@@ -233,6 +239,7 @@ c     ??? Check index?
                   call tph_get_cluster_data(jseq, nseq, irow, isec,
      &                 npads, tpseq_h, tpseq, 
      &                 pixel_data_out_h, pixel_data_out,
+     &                 pixel_indx_out_h, pixel_indx_out,
      &                 nclspix, ipad, itdc, iadc, itrk,
      &                 nclpix_max, npix_seq, ipad_lo,
      &                 ipad_hi, itdc_lo, itdc_hi)
@@ -240,6 +247,7 @@ c     ??? Check index?
                   call tph_get_cluster_data(jseq, nseq, irow, isec,
      &                 npads, tpseq_h, tpseq,
      &                 pixel_data_in_h, pixel_data_in,
+     &                 pixel_indx_in_h, pixel_indx_in,
      &                 nclspix, ipad, itdc, iadc, itrk,
      &                 nclpix_max, npix_seq, ipad_lo,
      &                 ipad_hi, itdc_lo, itdc_hi)
@@ -282,7 +290,7 @@ c     Skip clusters on the end pads (should be done on hit level?).
      &             ipad, itdc, iadc, itrk, 
      &             white_noise, filtered_noise, nhits,
      &             max_hits_in_cluster, qq, x, dx, prf, z, dz, zrf,
-     &             phi,track,mu1,mu2,mu3,mu4,mu5, irow, isec, npads,
+     &             phi,track,quality,mu1,mu2,mu3,mu4,mu5, irow, isec, npads,
      &             ipad_lo, ipad_hi, itdc_lo, itdc_hi,
      &             ipad_hit_lo, ipad_hit_hi, itdc_hit_lo, itdc_hit_hi)
 
@@ -343,6 +351,8 @@ c     filled by global
               tphit(tphit_h.nok).id_globtrk = 0
 c     filled here only for MC data
               tphit(tphit_h.nok).track      = track(ihit)
+              tphit(tphit_h.nok).id_simtrk  = track(ihit) ! add for truth information 
+              tphit(tphit_h.nok).id_quality = quality(ihit)
 c     index values
               tphit(tphit_h.nok).row        = 100*isec+irow
               tphit(tphit_h.nok).nseq       = nseq

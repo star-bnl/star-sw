@@ -1,5 +1,8 @@
-* $Id: tph_fit_cluster.F,v 1.6 1999/10/07 03:21:37 snelling Exp $
+* $Id: tph_fit_cluster.F,v 1.7 2004/01/14 13:22:07 fisyak Exp $
 * $Log: tph_fit_cluster.F,v $
+* Revision 1.7  2004/01/14 13:22:07  fisyak
+* add IdTruth information
+*
 * Revision 1.6  1999/10/07 03:21:37  snelling
 * changes related to StMessage
 *
@@ -22,7 +25,7 @@
      +     ipad, itdc, iadc, itrk,
      +     white_noise,  filtered_noise, nhits,
      +     max_hits_in_cluster,
-     +     qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
+     +     qq,x,dx,prf,z,dz,zrf,phi,track,quality,mu1,mu2,mu3,mu4,mu5,
      +     irow, isec, npads, ipad_lo, ipad_hi, itdc_lo, itdc_hi,
      +     ipad_hit_lo, ipad_hit_hi, itdc_hit_lo, itdc_hit_hi)
 
@@ -59,6 +62,7 @@ C     x,dx,prf  - position, uncertainty, and width along row (units=pads)
 C     z,dz,zrf  - position, uncertainty, and width along time (units=buckets)
 C     phi       - "orientation" of cluster
 C     track     - MC track contributing the most pixels
+C     quality   - the contribution from above track
 C     mu1       - 1st moment of hit (mean)
 C     mu2       - 2nd moment of hit (rms)
 C     mu3       - 3rd moment of hit (skewness)
@@ -129,7 +133,8 @@ c-liq
         real phi(*)                   ! Orientation of cluster
         real prf(*)                   ! Width along x
         real qq(*)                    ! Sum of ADC counts
-        real track(*)                 ! MC track contributing most
+        integer track(*)              ! MC track contributing most
+        real quality(*)               ! contribution from the above track
         real white_noise              ! SCA and digitization noise
         real x(*)                     ! Position along row (pad units)
         real z(*)                     ! Position along drift (bucket units)
@@ -165,7 +170,7 @@ c----------------------------------------------------------------
             call mountain_finder(tclpar, nseq, nclspix, npix_seq,
      +           ipad, itdc, iadc, itrk,
      +           white_noise, filtered_noise,nhits, qq, x, dx, prf,
-     +           z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5, npads,
+     +           z,dz,zrf,phi,track,quality,mu1,mu2,mu3,mu4,mu5, npads,
      +           irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi,
      +           ipad_hit_lo, ipad_hit_hi, itdc_hit_lo, itdc_hit_hi)
             if (nhits .gt. max_hits_in_cluster) then 
@@ -177,7 +182,7 @@ c----------------------------------------------------------------
             call tph_fit_isolated_cluster(tclpar, nclspix,
      +           ipad, itdc, iadc, itrk,
      +           white_noise, filtered_noise,
-     +           qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
+     +           qq,x,dx,prf,z,dz,zrf,phi,track,quality,mu1,mu2,mu3,mu4,mu5,
      +           npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi,
      +           ierr)
             if(ierr.eq.0) nhits=1
@@ -186,7 +191,7 @@ c----------------------------------------------------------------
          call tph_fit_isolated_cluster(tclpar, nclspix,
      +        ipad, itdc, iadc, itrk,
      +        white_noise, filtered_noise,
-     +        qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
+     +        qq,x,dx,prf,z,dz,zrf,phi,track,quality,mu1,mu2,mu3,mu4,mu5,
      +        npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi, 
      &        ierr)
          if (ierr.eq.0) nhits=1

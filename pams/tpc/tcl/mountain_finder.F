@@ -1,5 +1,8 @@
-* $Id: mountain_finder.F,v 1.10 1999/10/09 22:46:35 nevski Exp $
+* $Id: mountain_finder.F,v 1.11 2004/01/14 13:22:07 fisyak Exp $
 * $Log: mountain_finder.F,v $
+* Revision 1.11  2004/01/14 13:22:07  fisyak
+* add IdTruth information
+*
 * Revision 1.10  1999/10/09 22:46:35  nevski
 * pgf->g77 cleanup
 *
@@ -34,7 +37,7 @@
      +     ipad, itdc, iadc, itrk,
      +     white_noise, filtered_noise,
      +     nhits,
-     +     qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
+     +     qq,x,dx,prf,z,dz,zrf,phi,track,quality,mu1,mu2,mu3,mu4,mu5,
      +     npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi,
      +     ipad_hit_lo, ipad_hit_hi, itdc_hit_lo, itdc_hit_hi)
 C-----------------------------------------------------------------------
@@ -69,6 +72,7 @@ C     x,dx,prf  - position, uncertainty, and width along row (units=pads)
 C     z,dz,zrf  - position, uncertainty, and width along time (units=buckets)
 C     phi       - "orientation" of cluster
 C     track     - MC track contributing the most pixels
+C     quality
 C     mu1       - 1st moment of hit (mean)
 C     mu2       - 2nd moment of hit (rms)
 C     mu3       - 3rd moment of hit (skewness)
@@ -162,7 +166,8 @@ c-liq
         real phi(*)                   ! Orientation of cluster
         real prf(*)                   ! Width along x
         real qq(*)                    ! Sum of ADC counts
-        real track(*)                 ! MC track contributing most
+        integer track(*)              ! MC track contributing most
+        real quality(*)
         real white_noise              ! SCA and digitization noise
         real x(*)                     ! Position along row (pad units)
         real z(*)                     ! Position along drift (bucket units)
@@ -424,7 +429,7 @@ c
      +        white_noise, filtered_noise,qq,
      +        x,dx,prf,
      +        z,dz,zrf,
-     +        phi,track,
+     +        phi,track,quality,
      +        mu1,mu2,mu3,mu4,mu5,
      +        npads, irow, isec,
      +        ipad_lo, ipad_hi, itdc_lo, itdc_hi, ierr)
@@ -726,7 +731,7 @@ c Fit the peak:
      +           white_noise, filtered_noise, qq(i),
      +           x(i),dx(i),prf(i),
      +           z(i),dz(i),zrf(i),
-     +           phi(i),track(i),
+     +           phi(i),track(i),quality(i),
      +           mu1(i),mu2(i),mu3(i),mu4(i),mu5(i),
      +           npads, irow, isec,
      +           ipad_lo_temp, ipad_hi_temp, itdc_lo_temp, itdc_hi_temp,
