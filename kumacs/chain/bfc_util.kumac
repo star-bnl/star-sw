@@ -109,6 +109,9 @@
 * editted 9/15/98 Y. Fisyak - fixed "fzin" so it gets to EOF properly
 * editted 9/16/98 K. Turner - new chain variable "ntup" to write ntuple
 * editted 9/18/98 K. Turner - added create_tables for "spr" init
+*                           - create chain variable "insvt" to initialize
+*                             svt tables that are needed even when svt
+*                             packages aren't being called
 *
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -194,6 +197,17 @@ macro bfc_init _
           dio/newfilestream inev [input_file] r
           cd [run]
           dio/stream/getevent inev
+    (insvt)
+         exec init_svg#svg_am
+         exec create_tables_svt#srs
+	 exec init_srs#init
+	 exec create_tables_svt#sgr
+         exec create_tables_svt#stk
+         exec init_vertices#init
+         exec init_sgr#init
+	 exec init_stk#init   
+         exec create_tables_global#svm
+         exec init_svm#init
       (svg) 	  
            exec init_svg#svg_am
       (tpg) 
