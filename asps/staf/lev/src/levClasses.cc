@@ -36,7 +36,7 @@ typedef int pid_t;
 //:----------------------------------------------- MACROS             --
 #define LEV_ENV_TABLE "config/levEnv"
 #define LEV_VER_TABLE "config/levVer"
-/* HACK These should be from idl/*.idl: */
+/* HACK These should be from idl*.idl: */
 #define LEV_ENV_SPEC "struct levEnvTab { char name[32],value[128]; };"
 #define LEV_VER_SPEC "struct levVerTab { char name[128],\
   type[32],version[256]; };"
@@ -307,7 +307,7 @@ STAFCV_T levFactory:: registerVersion(const char *name,
 } /* nrow val */
 char *levFactory:: version() {
   char *c=NULL;
-  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.9 1998/05/09 02:40:20 perev Exp $";
+  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.10 1998/05/18 18:13:59 dave Exp $";
   c=(char*)MALLOC(strlen(v)+1);
   strcpy(c,v);
   return c;
