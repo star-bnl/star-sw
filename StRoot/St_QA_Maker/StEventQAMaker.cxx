@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.3 2000/12/08 18:37:22 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.4 2001/04/24 21:33:05 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.4  2001/04/24 21:33:05  genevb
+// Use det_id to identify detectors, and some cleanup
+//
 // Revision 2.3  2000/12/08 18:37:22  genevb
 // Change kTofPatchId->kTofId
 //
@@ -161,44 +164,50 @@ void StEventQAMaker::MakeHistGlob() {
     cnttrk += theNodes[i]->entries(global);
     hists->m_globtrk_iflag->Fill(globtrk->flag());
     if (globtrk->flag()>0) {
+      StTrackGeometry* geom = globtrk->geometry();
+      StTrackFitTraits& fTraits = globtrk->fitTraits();
+      StTrackDetectorInfo* detInfo = globtrk->detectorInfo();
+      const StTrackTopologyMap& map=globtrk->topologyMap();
+
       cnttrkg++;
       Float_t pT = -999.;
-      pT = globtrk->geometry()->momentum().perp();
+      pT = geom->momentum().perp();
       Float_t lmevpt = TMath::Log10(pT*1000.0);
-      Float_t theta = TMath::ASin(1.) - globtrk->geometry()->dipAngle();
+      Float_t theta = TMath::ASin(1.) - geom->dipAngle();
       Float_t thetad = theta/degree;
-      Float_t eta = globtrk->geometry()->momentum().pseudoRapidity();
-      Float_t gmom = abs(globtrk->geometry()->momentum());
+      Float_t eta = geom->momentum().pseudoRapidity();
+      Float_t gmom = abs(geom->momentum());
       Float_t lmevmom = TMath::Log10(gmom*1000.0);
-      Float_t chisq0 = globtrk->fitTraits().chi2(0);
-      Float_t chisq1 = globtrk->fitTraits().chi2(1);
-      Float_t nfitntot = (Float_t(globtrk->fitTraits().numberOfFitPoints())) /
-	                 (Float_t(globtrk->detectorInfo()->numberOfPoints()));
-      Float_t nfitnmax = (Float_t(globtrk->fitTraits().numberOfFitPoints())) /
+      Float_t chisq0 = fTraits.chi2(0);
+      Float_t chisq1 = fTraits.chi2(1);
+      Float_t nfitntot = (Float_t(fTraits.numberOfFitPoints())) /
+	                 (Float_t(detInfo->numberOfPoints()));
+      Float_t nfitnmax = (Float_t(fTraits.numberOfFitPoints())) /
                          (Float_t(globtrk->numberOfPossiblePoints()));
-      StThreeVectorF dif = globtrk->detectorInfo()->firstPoint() -
-	                   globtrk->geometry()->origin();
-      Float_t radf = globtrk->detectorInfo()->firstPoint().perp();
+      const StThreeVectorF& firstPoint = detInfo->firstPoint();
+      const StThreeVectorF& origin = geom->origin();
+      StThreeVectorF dif = firstPoint - origin;
+      Float_t radf = firstPoint.perp();
 
       Float_t logImpact = TMath::Log10(globtrk->impactParameter());
-      Float_t logCurvature = TMath::Log10(globtrk->geometry()->curvature());
+      Float_t logCurvature = TMath::Log10(geom->curvature());
 
       // pathLength(double x,double y) should return path length at
       // DCA in the xy-plane to a given point
-      double S = globtrk->geometry()->helix().pathLength(0,0);
-      StThreeVectorD dcaToBeam = globtrk->geometry()->helix().at(S);
+      double S = geom->helix().pathLength(0,0);
+      StThreeVectorD dcaToBeam = geom->helix().at(S);
       // these histogram additions are for Lanny's evr QA histograms
       hists->m_dcaToBeamXY->Fill(dcaToBeam.x(),dcaToBeam.y());
       hists->m_dcaToBeamZ1->Fill(dcaToBeam.z());
       hists->m_dcaToBeamZ2->Fill(dcaToBeam.z());
       hists->m_dcaToBeamZ3->Fill(dcaToBeam.z());
-      hists->m_zDcaTanl->Fill(dcaToBeam.z(),TMath::Tan(globtrk->geometry()->dipAngle()));
-      hists->m_zDcaZf->Fill(dcaToBeam.z(),globtrk->detectorInfo()->firstPoint().z());
-      hists->m_zDcaPsi->Fill(dcaToBeam.z(),globtrk->geometry()->psi()/degree);
-      if (globtrk->geometry()->origin().phi() < 0)
-        hists->m_zDcaPhi0->Fill(dcaToBeam.z(),360+globtrk->geometry()->origin().phi()/degree);
+      hists->m_zDcaTanl->Fill(dcaToBeam.z(),TMath::Tan(geom->dipAngle()));
+      hists->m_zDcaZf->Fill(dcaToBeam.z(),firstPoint.z());
+      hists->m_zDcaPsi->Fill(dcaToBeam.z(),geom->psi()/degree);
+      if (origin.phi() < 0)
+        hists->m_zDcaPhi0->Fill(dcaToBeam.z(),360+origin.phi()/degree);
       else
-        hists->m_zDcaPhi0->Fill(dcaToBeam.z(),globtrk->geometry()->origin().phi()/degree);
+        hists->m_zDcaPhi0->Fill(dcaToBeam.z(),origin.phi()/degree);
 
 // from Lanny on 2 Jul 1999 9:56:03
 //1. x0,y0,z0 are coordinates on the helix at the starting point, which
@@ -209,40 +218,40 @@ void StEventQAMaker::MakeHistGlob() {
 // so it doesn't need to be calculated here 
 
       // check if the track has hits in a detector -CPL
-      if (globtrk->topologyMap().numberOfHits(kUnknownId)>0) hists->m_det_id->Fill(kUnknownId);
-      if (globtrk->topologyMap().numberOfHits(kTpcId)>0) hists->m_det_id->Fill(kTpcId);
-      if (globtrk->topologyMap().numberOfHits(kSvtId)>0) hists->m_det_id->Fill(kSvtId);
-      if (globtrk->topologyMap().numberOfHits(kRichId)>0) hists->m_det_id->Fill(kRichId);
-      if (globtrk->topologyMap().numberOfHits(kFtpcWestId)>0) hists->m_det_id->Fill(kFtpcWestId);
-      if (globtrk->topologyMap().numberOfHits(kFtpcEastId)>0) hists->m_det_id->Fill(kFtpcEastId);
-      if (globtrk->topologyMap().numberOfHits(kTofId)>0) hists->m_det_id->Fill(kTofId);
-      if (globtrk->topologyMap().numberOfHits(kCtbId)>0) hists->m_det_id->Fill(kCtbId);
-      if (globtrk->topologyMap().numberOfHits(kSsdId)>0) hists->m_det_id->Fill(kSsdId);
-      if (globtrk->topologyMap().numberOfHits(kBarrelEmcTowerId)>0) hists->m_det_id->Fill(kBarrelEmcTowerId);
-      if (globtrk->topologyMap().numberOfHits(kBarrelEmcPreShowerId)>0) hists->m_det_id->Fill(kBarrelEmcPreShowerId);
-      if (globtrk->topologyMap().numberOfHits(kBarrelSmdEtaStripId)>0) hists->m_det_id->Fill(kBarrelSmdEtaStripId);
-      if (globtrk->topologyMap().numberOfHits(kBarrelSmdPhiStripId)>0) hists->m_det_id->Fill(kBarrelSmdPhiStripId);
-      if (globtrk->topologyMap().numberOfHits(kEndcapEmcTowerId)>0) hists->m_det_id->Fill(kEndcapEmcTowerId);
-      if (globtrk->topologyMap().numberOfHits(kEndcapEmcPreShowerId)>0) hists->m_det_id->Fill(kEndcapEmcPreShowerId);
-      if (globtrk->topologyMap().numberOfHits(kEndcapSmdUStripId)>0) hists->m_det_id->Fill(kEndcapSmdUStripId);
-      if (globtrk->topologyMap().numberOfHits(kEndcapSmdVStripId)>0) hists->m_det_id->Fill(kEndcapSmdVStripId);
-      if (globtrk->topologyMap().numberOfHits(kZdcWestId)>0) hists->m_det_id->Fill(kZdcWestId);
-      if (globtrk->topologyMap().numberOfHits(kZdcEastId)>0) hists->m_det_id->Fill(kZdcEastId);
-      if (globtrk->topologyMap().numberOfHits(kMwpcWestId)>0) hists->m_det_id->Fill(kMwpcWestId);
-      if (globtrk->topologyMap().numberOfHits(kMwpcEastId)>0) hists->m_det_id->Fill(kMwpcEastId);
-      if (globtrk->topologyMap().numberOfHits(kTpcSsdId)>0) hists->m_det_id->Fill(kTpcSsdId);
-      if (globtrk->topologyMap().numberOfHits(kTpcSvtId)>0) hists->m_det_id->Fill(kTpcSvtId);
-      if (globtrk->topologyMap().numberOfHits(kTpcSsdSvtId)>0) hists->m_det_id->Fill(kTpcSsdSvtId);
-      if (globtrk->topologyMap().numberOfHits(kSsdSvtId)>0) hists->m_det_id->Fill(kSsdSvtId);
+      if (map.hasHitInDetector(kUnknownId)) hists->m_det_id->Fill(kUnknownId);
+      if (map.hasHitInDetector(kTpcId)) hists->m_det_id->Fill(kTpcId);
+      if (map.hasHitInDetector(kSvtId)) hists->m_det_id->Fill(kSvtId);
+      if (map.hasHitInDetector(kRichId)) hists->m_det_id->Fill(kRichId);
+      if (map.hasHitInDetector(kFtpcWestId)) hists->m_det_id->Fill(kFtpcWestId);
+      if (map.hasHitInDetector(kFtpcEastId)) hists->m_det_id->Fill(kFtpcEastId);
+      if (map.hasHitInDetector(kTofId)) hists->m_det_id->Fill(kTofId);
+      if (map.hasHitInDetector(kCtbId)) hists->m_det_id->Fill(kCtbId);
+      if (map.hasHitInDetector(kSsdId)) hists->m_det_id->Fill(kSsdId);
+      if (map.hasHitInDetector(kBarrelEmcTowerId)) hists->m_det_id->Fill(kBarrelEmcTowerId);
+      if (map.hasHitInDetector(kBarrelEmcPreShowerId)) hists->m_det_id->Fill(kBarrelEmcPreShowerId);
+      if (map.hasHitInDetector(kBarrelSmdEtaStripId)) hists->m_det_id->Fill(kBarrelSmdEtaStripId);
+      if (map.hasHitInDetector(kBarrelSmdPhiStripId)) hists->m_det_id->Fill(kBarrelSmdPhiStripId);
+      if (map.hasHitInDetector(kEndcapEmcTowerId)) hists->m_det_id->Fill(kEndcapEmcTowerId);
+      if (map.hasHitInDetector(kEndcapEmcPreShowerId)) hists->m_det_id->Fill(kEndcapEmcPreShowerId);
+      if (map.hasHitInDetector(kEndcapSmdUStripId)) hists->m_det_id->Fill(kEndcapSmdUStripId);
+      if (map.hasHitInDetector(kEndcapSmdVStripId)) hists->m_det_id->Fill(kEndcapSmdVStripId);
+      if (map.hasHitInDetector(kZdcWestId)) hists->m_det_id->Fill(kZdcWestId);
+      if (map.hasHitInDetector(kZdcEastId)) hists->m_det_id->Fill(kZdcEastId);
+      if (map.hasHitInDetector(kMwpcWestId)) hists->m_det_id->Fill(kMwpcWestId);
+      if (map.hasHitInDetector(kMwpcEastId)) hists->m_det_id->Fill(kMwpcEastId);
+      if (map.hasHitInDetector(kTpcSsdId)) hists->m_det_id->Fill(kTpcSsdId);
+      if (map.hasHitInDetector(kTpcSvtId)) hists->m_det_id->Fill(kTpcSvtId);
+      if (map.hasHitInDetector(kTpcSsdSvtId)) hists->m_det_id->Fill(kTpcSsdSvtId);
+      if (map.hasHitInDetector(kSsdSvtId)) hists->m_det_id->Fill(kSsdSvtId);
 
       // calculate the probability of a fit being correct
       // number of degrees of freedom = fitpoints-5 (5 params constrain track)
-      Double_t ndf = 2*globtrk->fitTraits().numberOfFitPoints()-5;
+      Double_t ndf = 2*fTraits.numberOfFitPoints()-5;
       Double_t probability = TMath::Prob(chisq0*ndf,ndf);
       hists->m_globtrk_fit_prob->Fill(probability);
 
 // now fill all TPC histograms ------------------------------------------------
-      if (globtrk->flag()>=100 && globtrk->flag()<200) {
+      if (map.trackTpcOnly()) {
 
 // these are TPC only
 	// m_glb_f0 uses hist class StMultiH1F
@@ -258,34 +267,34 @@ void StEventQAMaker::MakeHistGlob() {
 
 	// TPC padrow histogram
 	StTpcCoordinateTransform transformer(gStTpcDb);
-	StGlobalCoordinate globalHitPosition(globtrk->detectorInfo()->firstPoint());
+	StGlobalCoordinate globalHitPosition(firstPoint);
 	StTpcPadCoordinate padCoord;
 	transformer(globalHitPosition,padCoord);
         hists->m_glb_padfT->Fill(padCoord.row());
 
 // these are TPC & FTPC
-        hists->m_pointT->Fill(globtrk->detectorInfo()->numberOfPoints());
+        hists->m_pointT->Fill(detInfo->numberOfPoints());
         hists->m_max_pointT->Fill(globtrk->numberOfPossiblePoints());
-        hists->m_fit_pointT->Fill(globtrk->fitTraits().numberOfFitPoints());
-        hists->m_glb_chargeT->Fill(globtrk->geometry()->charge());
+        hists->m_fit_pointT->Fill(fTraits.numberOfFitPoints());
+        hists->m_glb_chargeT->Fill(geom->charge());
 
-        hists->m_glb_r0T->Fill(globtrk->geometry()->origin().perp());
-	if (globtrk->geometry()->origin().phi() < 0)
-	  hists->m_glb_phi0T->Fill(360+globtrk->geometry()->origin().phi()/degree);
+        hists->m_glb_r0T->Fill(origin.perp());
+	if (origin.phi() < 0)
+	  hists->m_glb_phi0T->Fill(360+origin.phi()/degree);
 	else
-	  hists->m_glb_phi0T->Fill(globtrk->geometry()->origin().phi()/degree);
-        hists->m_glb_z0T->Fill(globtrk->geometry()->origin().z());
+	  hists->m_glb_phi0T->Fill(origin.phi()/degree);
+        hists->m_glb_z0T->Fill(origin.z());
         hists->m_glb_curvT->Fill(logCurvature);
 
-        hists->m_glb_rfT->Fill(globtrk->detectorInfo()->firstPoint().perp());
-        hists->m_glb_xfT->Fill(globtrk->detectorInfo()->firstPoint().x());
-        hists->m_glb_yfT->Fill(globtrk->detectorInfo()->firstPoint().y());
-        hists->m_glb_zfT->Fill(globtrk->detectorInfo()->firstPoint().z());
+        hists->m_glb_rfT->Fill(firstPoint.perp());
+        hists->m_glb_xfT->Fill(firstPoint.x());
+        hists->m_glb_yfT->Fill(firstPoint.y());
+        hists->m_glb_zfT->Fill(firstPoint.z());
         hists->m_glb_radfT->Fill(radf);
         hists->m_glb_ratioT->Fill(nfitntot);
         hists->m_glb_ratiomT->Fill(nfitnmax);
-        hists->m_psiT->Fill(globtrk->geometry()->psi()/degree);
-        hists->m_tanlT->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
+        hists->m_psiT->Fill(geom->psi()/degree);
+        hists->m_tanlT->Fill(TMath::Tan(geom->dipAngle()));
         hists->m_glb_thetaT->Fill(thetad);
         hists->m_etaT->Fill(eta);
         hists->m_pTT->Fill(pT);
@@ -295,50 +304,50 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_chisq1T->Fill(chisq1);
 
 // these are for TPC & FTPC
-        hists->m_globtrk_xf_yfT->Fill(globtrk->detectorInfo()->firstPoint().x(),
-			       globtrk->detectorInfo()->firstPoint().y());
+        hists->m_globtrk_xf_yfT->Fill(firstPoint.x(),
+			       firstPoint.y());
         hists->m_eta_trklengthT->Fill(eta,globtrk->length());
         hists->m_npoint_lengthT->Fill(globtrk->length(),
-	      		       Float_t(globtrk->detectorInfo()->numberOfPoints()));
+	      		       Float_t(detInfo->numberOfPoints()));
         hists->m_fpoint_lengthT->Fill(globtrk->length(),
-			       Float_t(globtrk->fitTraits().numberOfFitPoints()));
+			       Float_t(fTraits.numberOfFitPoints()));
 
 // these are TPC only
         hists->m_pT_eta_recT->Fill(eta,lmevpt);
 	if (event->primaryVertex()) {
-	  hists->m_tanl_zfT->Fill(globtrk->detectorInfo()->firstPoint().z() -
+	  hists->m_tanl_zfT->Fill(firstPoint.z() -
 			   event->primaryVertex()->position().z(),
-			   Float_t(TMath::Tan(globtrk->geometry()->dipAngle())));
+			   Float_t(TMath::Tan(geom->dipAngle())));
 	}
         hists->m_mom_trklengthT->Fill(globtrk->length(),lmevmom);
         hists->m_chisq0_momT->Fill(lmevmom,chisq0);
         hists->m_chisq1_momT->Fill(lmevmom,chisq1);
         hists->m_chisq0_etaT->Fill(eta,chisq0);
         hists->m_chisq1_etaT->Fill(eta,chisq1);
-        hists->m_chisq0_dipT->Fill(TMath::Tan(globtrk->geometry()->dipAngle()),chisq0);
-        hists->m_chisq1_dipT->Fill(TMath::Tan(globtrk->geometry()->dipAngle()),chisq1);
-        hists->m_chisq0_zfT->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq0);
-        hists->m_chisq1_zfT->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq1);
-	if (globtrk->geometry()->origin().phi() < 0)
-	  hists->m_chisq0_phiT->Fill(360+globtrk->geometry()->origin().phi()/degree,chisq0);
+        hists->m_chisq0_dipT->Fill(TMath::Tan(geom->dipAngle()),chisq0);
+        hists->m_chisq1_dipT->Fill(TMath::Tan(geom->dipAngle()),chisq1);
+        hists->m_chisq0_zfT->Fill(firstPoint.z(),chisq0);
+        hists->m_chisq1_zfT->Fill(firstPoint.z(),chisq1);
+	if (origin.phi() < 0)
+	  hists->m_chisq0_phiT->Fill(360+origin.phi()/degree,chisq0);
 	else
-	  hists->m_chisq0_phiT->Fill(globtrk->geometry()->origin().phi()/degree,chisq0);
+	  hists->m_chisq0_phiT->Fill(origin.phi()/degree,chisq0);
         hists->m_nfptonpt_momT->Fill(lmevmom,nfitntot);
         hists->m_nfptonpt_etaT->Fill(eta,nfitntot);
 	// had to make psi_deg and phi_deg b/c ROOT won't compile otherwise
 	// for some strange reason... -CPL
 	Float_t phi_deg;
-	if (globtrk->geometry()->origin().phi() < 0)
-	  phi_deg = 360+globtrk->geometry()->origin().phi()/degree;
+	if (origin.phi() < 0)
+	  phi_deg = 360+origin.phi()/degree;
 	else
-	  phi_deg = globtrk->geometry()->origin().phi()/degree;
-	Float_t psi_deg = globtrk->geometry()->psi()/degree;
+	  phi_deg = origin.phi()/degree;
+	Float_t psi_deg = geom->psi()/degree;
         hists->m_psi_phiT->Fill(phi_deg,psi_deg);
       }
 
 // now fill all TPC+SVT histograms --------------------------------------------
 
-      if (globtrk->flag()>=500 && globtrk->flag()<600 ) {
+      else if (map.trackTpcSvt()) {
 
         hists->m_glb_f0TS->Fill(dif.x(),0.);
         hists->m_glb_f0TS->Fill(dif.y(),1.);
@@ -350,28 +359,28 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_impactTS->Fill(logImpact);
         hists->m_glb_impactrTS->Fill(globtrk->impactParameter());
 
-        hists->m_pointTS->Fill(globtrk->detectorInfo()->numberOfPoints());
+        hists->m_pointTS->Fill(detInfo->numberOfPoints());
         hists->m_max_pointTS->Fill(globtrk->numberOfPossiblePoints());
-        hists->m_fit_pointTS->Fill(globtrk->fitTraits().numberOfFitPoints());
-        hists->m_glb_chargeTS->Fill(globtrk->geometry()->charge());
+        hists->m_fit_pointTS->Fill(fTraits.numberOfFitPoints());
+        hists->m_glb_chargeTS->Fill(geom->charge());
 
-        hists->m_glb_r0TS->Fill(globtrk->geometry()->origin().perp());
-	if (globtrk->geometry()->origin().phi() < 0)
-	  hists->m_glb_phi0TS->Fill(360+globtrk->geometry()->origin().phi()/degree);
+        hists->m_glb_r0TS->Fill(origin.perp());
+	if (origin.phi() < 0)
+	  hists->m_glb_phi0TS->Fill(360+origin.phi()/degree);
 	else
-	  hists->m_glb_phi0TS->Fill(globtrk->geometry()->origin().phi()/degree);
-        hists->m_glb_z0TS->Fill(globtrk->geometry()->origin().z());
+	  hists->m_glb_phi0TS->Fill(origin.phi()/degree);
+        hists->m_glb_z0TS->Fill(origin.z());
         hists->m_glb_curvTS->Fill(logCurvature);
 
-        hists->m_glb_rfTS->Fill(globtrk->detectorInfo()->firstPoint().perp());
-        hists->m_glb_xfTS->Fill(globtrk->detectorInfo()->firstPoint().x());
-        hists->m_glb_yfTS->Fill(globtrk->detectorInfo()->firstPoint().y());
-        hists->m_glb_zfTS->Fill(globtrk->detectorInfo()->firstPoint().z());
+        hists->m_glb_rfTS->Fill(firstPoint.perp());
+        hists->m_glb_xfTS->Fill(firstPoint.x());
+        hists->m_glb_yfTS->Fill(firstPoint.y());
+        hists->m_glb_zfTS->Fill(firstPoint.z());
         hists->m_glb_radfTS->Fill(radf);
         hists->m_glb_ratioTS->Fill(nfitntot);
         hists->m_glb_ratiomTS->Fill(nfitnmax);
-        hists->m_psiTS->Fill(globtrk->geometry()->psi()/degree);
-        hists->m_tanlTS->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
+        hists->m_psiTS->Fill(geom->psi()/degree);
+        hists->m_tanlTS->Fill(TMath::Tan(geom->dipAngle()));
         hists->m_glb_thetaTS->Fill(thetad);
         hists->m_etaTS->Fill(eta);
         hists->m_pTTS->Fill(pT);
@@ -379,63 +388,63 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_lengthTS->Fill(globtrk->length());
         hists->m_chisq0TS->Fill(chisq0);
         hists->m_chisq1TS->Fill(chisq1);
-        hists->m_globtrk_xf_yfTS->Fill(globtrk->detectorInfo()->firstPoint().x(),
-			       globtrk->detectorInfo()->firstPoint().y());
+        hists->m_globtrk_xf_yfTS->Fill(firstPoint.x(),
+			       firstPoint.y());
         hists->m_eta_trklengthTS->Fill(eta,globtrk->length());
         hists->m_npoint_lengthTS->Fill(globtrk->length(),
-	      		       Float_t(globtrk->detectorInfo()->numberOfPoints()));
+	      		       Float_t(detInfo->numberOfPoints()));
         hists->m_fpoint_lengthTS->Fill(globtrk->length(),
-			       Float_t(globtrk->fitTraits().numberOfFitPoints()));
+			       Float_t(fTraits.numberOfFitPoints()));
 
         hists->m_pT_eta_recTS->Fill(eta,lmevpt);
 	if (event->primaryVertex()) {
-	  hists->m_tanl_zfTS->Fill(globtrk->detectorInfo()->firstPoint().z() -
+	  hists->m_tanl_zfTS->Fill(firstPoint.z() -
 			    event->primaryVertex()->position().z(),
-			    Float_t(TMath::Tan(globtrk->geometry()->dipAngle())));
+			    Float_t(TMath::Tan(geom->dipAngle())));
 	}
         hists->m_mom_trklengthTS->Fill(globtrk->length(),lmevmom);
         hists->m_chisq0_momTS->Fill(lmevmom,chisq0);
         hists->m_chisq1_momTS->Fill(lmevmom,chisq1);
         hists->m_chisq0_etaTS->Fill(eta,chisq0);
         hists->m_chisq1_etaTS->Fill(eta,chisq1);
-        hists->m_chisq0_dipTS->Fill(TMath::Tan(globtrk->geometry()->dipAngle()),chisq0);
-        hists->m_chisq1_dipTS->Fill(TMath::Tan(globtrk->geometry()->dipAngle()),chisq1);
-        hists->m_chisq0_zfTS->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq0);
-        hists->m_chisq1_zfTS->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq1);
-	if (globtrk->geometry()->origin().phi() < 0)
-	  hists->m_chisq0_phiTS->Fill(360+globtrk->geometry()->origin().phi()/degree,chisq0);
+        hists->m_chisq0_dipTS->Fill(TMath::Tan(geom->dipAngle()),chisq0);
+        hists->m_chisq1_dipTS->Fill(TMath::Tan(geom->dipAngle()),chisq1);
+        hists->m_chisq0_zfTS->Fill(firstPoint.z(),chisq0);
+        hists->m_chisq1_zfTS->Fill(firstPoint.z(),chisq1);
+	if (origin.phi() < 0)
+	  hists->m_chisq0_phiTS->Fill(360+origin.phi()/degree,chisq0);
 	else
-	  hists->m_chisq0_phiTS->Fill(globtrk->geometry()->origin().phi()/degree,chisq0);
+	  hists->m_chisq0_phiTS->Fill(origin.phi()/degree,chisq0);
 
         hists->m_nfptonpt_momTS->Fill(lmevmom,nfitntot);
         hists->m_nfptonpt_etaTS->Fill(eta,nfitntot);
 	// had to make psi_deg and phi_deg b/c ROOT won't compile otherwise
 	// for some strange reason... -CPL
 	Float_t phi_deg;
-	if (globtrk->geometry()->origin().phi() < 0)
-	  phi_deg = 360+globtrk->geometry()->origin().phi()/degree;
+	if (origin.phi() < 0)
+	  phi_deg = 360+origin.phi()/degree;
 	else
-	  phi_deg = globtrk->geometry()->origin().phi()/degree;
-	Float_t psi_deg = globtrk->geometry()->psi()/degree;
+	  phi_deg = origin.phi()/degree;
+	Float_t psi_deg = geom->psi()/degree;
         hists->m_psi_phiTS->Fill(phi_deg,psi_deg);
       }
 
 // now fill all FTPC East histograms ------------------------------------------
-      if (globtrk->flag()>=700 && globtrk->flag()<800 && globtrk->topologyMap().numberOfHits(kFtpcEastId)>0) {
+      else if (map.trackFtpcEast()) {
 
 // these are TPC & FTPC
-        hists->m_pointFE->Fill(globtrk->detectorInfo()->numberOfPoints());
+        hists->m_pointFE->Fill(detInfo->numberOfPoints());
         hists->m_max_pointFE->Fill(globtrk->numberOfPossiblePoints());
-        hists->m_fit_pointFE->Fill(globtrk->fitTraits().numberOfFitPoints());
-        hists->m_glb_chargeFE->Fill(globtrk->geometry()->charge());
-        hists->m_glb_rfFE->Fill(globtrk->detectorInfo()->firstPoint().perp());
-        hists->m_glb_xfFE->Fill(globtrk->detectorInfo()->firstPoint().x());
-        hists->m_glb_yfFE->Fill(globtrk->detectorInfo()->firstPoint().y());
-        hists->m_glb_zfFE->Fill(globtrk->detectorInfo()->firstPoint().z());
+        hists->m_fit_pointFE->Fill(fTraits.numberOfFitPoints());
+        hists->m_glb_chargeFE->Fill(geom->charge());
+        hists->m_glb_rfFE->Fill(firstPoint.perp());
+        hists->m_glb_xfFE->Fill(firstPoint.x());
+        hists->m_glb_yfFE->Fill(firstPoint.y());
+        hists->m_glb_zfFE->Fill(firstPoint.z());
         hists->m_glb_radfFE->Fill(radf);
         hists->m_glb_ratioFE->Fill(nfitntot);
         hists->m_glb_ratiomFE->Fill(nfitnmax);
-        hists->m_psiFE->Fill(globtrk->geometry()->psi()/degree);
+        hists->m_psiFE->Fill(geom->psi()/degree);
         hists->m_etaFE->Fill(eta);
         hists->m_pTFE->Fill(pT);
         hists->m_momFE->Fill(gmom);
@@ -445,31 +454,31 @@ void StEventQAMaker::MakeHistGlob() {
 
 // these are for TPC & FTPC
         hists->m_pT_eta_recFE->Fill(eta,lmevpt);
-        hists->m_globtrk_xf_yfFE->Fill(globtrk->detectorInfo()->firstPoint().x(),
-			       globtrk->detectorInfo()->firstPoint().y());
+        hists->m_globtrk_xf_yfFE->Fill(firstPoint.x(),
+			       firstPoint.y());
         hists->m_eta_trklengthFE->Fill(eta,globtrk->length());
         hists->m_npoint_lengthFE->Fill(globtrk->length(),
-	      		       Float_t(globtrk->detectorInfo()->numberOfPoints()));
+	      		       Float_t(detInfo->numberOfPoints()));
         hists->m_fpoint_lengthFE->Fill(globtrk->length(),
-			       Float_t(globtrk->fitTraits().numberOfFitPoints()));
+			       Float_t(fTraits.numberOfFitPoints()));
 
       }
 // now fill all FTPC West histograms ------------------------------------------
-      if (globtrk->flag()>=700 && globtrk->flag()<800 && globtrk->topologyMap().numberOfHits(kFtpcWestId)>0) {
+      else if (map.trackFtpcWest()) {
 
 // these are TPC & FTPC
-        hists->m_pointFW->Fill(globtrk->detectorInfo()->numberOfPoints());
+        hists->m_pointFW->Fill(detInfo->numberOfPoints());
         hists->m_max_pointFW->Fill(globtrk->numberOfPossiblePoints());
-        hists->m_fit_pointFW->Fill(globtrk->fitTraits().numberOfFitPoints());
-        hists->m_glb_chargeFW->Fill(globtrk->geometry()->charge());
-        hists->m_glb_rfFW->Fill(globtrk->detectorInfo()->firstPoint().perp());
-        hists->m_glb_xfFW->Fill(globtrk->detectorInfo()->firstPoint().x());
-        hists->m_glb_yfFW->Fill(globtrk->detectorInfo()->firstPoint().y());
-        hists->m_glb_zfFW->Fill(globtrk->detectorInfo()->firstPoint().z());
+        hists->m_fit_pointFW->Fill(fTraits.numberOfFitPoints());
+        hists->m_glb_chargeFW->Fill(geom->charge());
+        hists->m_glb_rfFW->Fill(firstPoint.perp());
+        hists->m_glb_xfFW->Fill(firstPoint.x());
+        hists->m_glb_yfFW->Fill(firstPoint.y());
+        hists->m_glb_zfFW->Fill(firstPoint.z());
         hists->m_glb_radfFW->Fill(radf);
         hists->m_glb_ratioFW->Fill(nfitntot);
         hists->m_glb_ratiomFW->Fill(nfitnmax);
-        hists->m_psiFW->Fill(globtrk->geometry()->psi()/degree);
+        hists->m_psiFW->Fill(geom->psi()/degree);
         hists->m_etaFW->Fill(eta);
         hists->m_pTFW->Fill(pT);
         hists->m_momFW->Fill(gmom);
@@ -479,13 +488,13 @@ void StEventQAMaker::MakeHistGlob() {
 
 // these are for TPC & FTPC
         hists->m_pT_eta_recFW->Fill(eta,lmevpt);
-        hists->m_globtrk_xf_yfFW->Fill(globtrk->detectorInfo()->firstPoint().x(),
-			       globtrk->detectorInfo()->firstPoint().y());
+        hists->m_globtrk_xf_yfFW->Fill(firstPoint.x(),
+			       firstPoint.y());
         hists->m_eta_trklengthFW->Fill(eta,globtrk->length());
         hists->m_npoint_lengthFW->Fill(globtrk->length(),
-	      		       Float_t(globtrk->detectorInfo()->numberOfPoints()));
+	      		       Float_t(detInfo->numberOfPoints()));
         hists->m_fpoint_lengthFW->Fill(globtrk->length(),
-			       Float_t(globtrk->fitTraits().numberOfFitPoints()));
+			       Float_t(fTraits.numberOfFitPoints()));
 
       }
     }
@@ -533,64 +542,71 @@ void StEventQAMaker::MakeHistPrim() {
       hists->m_primtrk_iflag->Fill(primtrk->flag());
 
       if (primtrk->flag()>0) {
+        StTrackGeometry* geom = primtrk->geometry();
+        StTrackFitTraits& fTraits = primtrk->fitTraits();
+        StTrackDetectorInfo* detInfo = primtrk->detectorInfo();
+        const StTrackTopologyMap& map=primtrk->topologyMap();
+
         cnttrkg++;
 	Float_t pT = -999.;
-	pT = primtrk->geometry()->momentum().perp();
+	pT = geom->momentum().perp();
         Float_t lmevpt = TMath::Log10(pT*1000.0);
-	Float_t theta = TMath::ASin(1.) - primtrk->geometry()->dipAngle();
+	Float_t theta = TMath::ASin(1.) - geom->dipAngle();
 	Float_t thetad = theta/degree;
-	Float_t eta   = primtrk->geometry()->momentum().pseudoRapidity();
-	Float_t gmom = abs(primtrk->geometry()->momentum());
+	Float_t eta   = geom->momentum().pseudoRapidity();
+	Float_t gmom = abs(geom->momentum());
         Float_t lmevmom = TMath::Log10(gmom*1000.0); 
-	Float_t chisq0 = primtrk->fitTraits().chi2(0);
-	Float_t chisq1 = primtrk->fitTraits().chi2(1);
-	Float_t nfitnmax = (Float_t(primtrk->fitTraits().numberOfFitPoints())) /
+	Float_t chisq0 = fTraits.chi2(0);
+	Float_t chisq1 = fTraits.chi2(1);
+	Float_t nfitnmax = (Float_t(fTraits.numberOfFitPoints())) /
 	                   (Float_t(primtrk->numberOfPossiblePoints()));
-        Float_t nfitntot = (Float_t(primtrk->fitTraits().numberOfFitPoints()))/
-	                   (Float_t(primtrk->detectorInfo()->numberOfPoints()));
+        Float_t nfitntot = (Float_t(fTraits.numberOfFitPoints()))/
+	                   (Float_t(detInfo->numberOfPoints()));
 
 	Float_t logImpact = TMath::Log10(primtrk->impactParameter());
-	Float_t logCurvature = TMath::Log10(primtrk->geometry()->curvature());
+	Float_t logCurvature = TMath::Log10(geom->curvature());
 
+        const StThreeVectorF& firstPoint = detInfo->firstPoint();
+        const StThreeVectorF& origin = geom->origin();
 
 	// need to find position on helix closest to first point on track since
 	// the primary vertex is used as the first point on helix for primary
 	// tracks -CPL
-	double s = primtrk->geometry()->helix().
-	           pathLength(primtrk->detectorInfo()->firstPoint());
-	StThreeVectorF dif = primtrk->detectorInfo()->firstPoint() -
-	                     primtrk->geometry()->helix().at(s);
-        Float_t radf = primtrk->detectorInfo()->firstPoint().perp();
+	double s = geom->helix().
+	           pathLength(firstPoint);
+	StThreeVectorF dif = firstPoint -
+	                     geom->helix().at(s);
+        Float_t radf = firstPoint.perp();
 
 	// check if the track has hits in a detector -CPL
-	if (primtrk->topologyMap().numberOfHits(kUnknownId)>0) hists->m_pdet_id->Fill(kUnknownId);
-	if (primtrk->topologyMap().numberOfHits(kTpcId)>0) hists->m_pdet_id->Fill(kTpcId);
-	if (primtrk->topologyMap().numberOfHits(kSvtId)>0) hists->m_pdet_id->Fill(kSvtId);
-	if (primtrk->topologyMap().numberOfHits(kRichId)>0) hists->m_pdet_id->Fill(kRichId);
-	if (primtrk->topologyMap().numberOfHits(kFtpcWestId)>0) hists->m_pdet_id->Fill(kFtpcWestId);
-	if (primtrk->topologyMap().numberOfHits(kFtpcEastId)>0) hists->m_pdet_id->Fill(kFtpcEastId);
-	if (primtrk->topologyMap().numberOfHits(kTofId)>0) hists->m_pdet_id->Fill(kTofId);
-	if (primtrk->topologyMap().numberOfHits(kCtbId)>0) hists->m_pdet_id->Fill(kCtbId);
-	if (primtrk->topologyMap().numberOfHits(kSsdId)>0) hists->m_pdet_id->Fill(kSsdId);
-	if (primtrk->topologyMap().numberOfHits(kBarrelEmcTowerId)>0) hists->m_pdet_id->Fill(kBarrelEmcTowerId);
-	if (primtrk->topologyMap().numberOfHits(kBarrelEmcPreShowerId)>0) hists->m_pdet_id->Fill(kBarrelEmcPreShowerId);
-	if (primtrk->topologyMap().numberOfHits(kBarrelSmdEtaStripId)>0) hists->m_pdet_id->Fill(kBarrelSmdEtaStripId);
-	if (primtrk->topologyMap().numberOfHits(kBarrelSmdPhiStripId)>0) hists->m_pdet_id->Fill(kBarrelSmdPhiStripId);
-	if (primtrk->topologyMap().numberOfHits(kEndcapEmcTowerId)>0) hists->m_pdet_id->Fill(kEndcapEmcTowerId);
-	if (primtrk->topologyMap().numberOfHits(kEndcapEmcPreShowerId)>0) hists->m_pdet_id->Fill(kEndcapEmcPreShowerId);
-	if (primtrk->topologyMap().numberOfHits(kEndcapSmdUStripId)>0) hists->m_pdet_id->Fill(kEndcapSmdUStripId);
-	if (primtrk->topologyMap().numberOfHits(kEndcapSmdVStripId)>0) hists->m_pdet_id->Fill(kEndcapSmdVStripId);
-	if (primtrk->topologyMap().numberOfHits(kZdcWestId)>0) hists->m_pdet_id->Fill(kZdcWestId);
-	if (primtrk->topologyMap().numberOfHits(kZdcEastId)>0) hists->m_pdet_id->Fill(kZdcEastId);
-	if (primtrk->topologyMap().numberOfHits(kMwpcWestId)>0) hists->m_pdet_id->Fill(kMwpcWestId);
-	if (primtrk->topologyMap().numberOfHits(kMwpcEastId)>0) hists->m_pdet_id->Fill(kMwpcEastId);
-	if (primtrk->topologyMap().numberOfHits(kTpcSsdId)>0) hists->m_pdet_id->Fill(kTpcSsdId);
-	if (primtrk->topologyMap().numberOfHits(kTpcSvtId)>0) hists->m_pdet_id->Fill(kTpcSvtId);
-	if (primtrk->topologyMap().numberOfHits(kTpcSsdSvtId)>0) hists->m_pdet_id->Fill(kTpcSsdSvtId);
-	if (primtrk->topologyMap().numberOfHits(kSsdSvtId)>0) hists->m_pdet_id->Fill(kSsdSvtId);
+	if (map.hasHitInDetector(kUnknownId)) hists->m_pdet_id->Fill(kUnknownId);
+	if (map.hasHitInDetector(kTpcId)) hists->m_pdet_id->Fill(kTpcId);
+	if (map.hasHitInDetector(kSvtId)) hists->m_pdet_id->Fill(kSvtId);
+	if (map.hasHitInDetector(kRichId)) hists->m_pdet_id->Fill(kRichId);
+	if (map.hasHitInDetector(kFtpcWestId)) hists->m_pdet_id->Fill(kFtpcWestId);
+	if (map.hasHitInDetector(kFtpcEastId)) hists->m_pdet_id->Fill(kFtpcEastId);
+	if (map.hasHitInDetector(kTofId)) hists->m_pdet_id->Fill(kTofId);
+	if (map.hasHitInDetector(kCtbId)) hists->m_pdet_id->Fill(kCtbId);
+	if (map.hasHitInDetector(kSsdId)) hists->m_pdet_id->Fill(kSsdId);
+	if (map.hasHitInDetector(kBarrelEmcTowerId)) hists->m_pdet_id->Fill(kBarrelEmcTowerId);
+	if (map.hasHitInDetector(kBarrelEmcPreShowerId)) hists->m_pdet_id->Fill(kBarrelEmcPreShowerId);
+	if (map.hasHitInDetector(kBarrelSmdEtaStripId)) hists->m_pdet_id->Fill(kBarrelSmdEtaStripId);
+	if (map.hasHitInDetector(kBarrelSmdPhiStripId)) hists->m_pdet_id->Fill(kBarrelSmdPhiStripId);
+	if (map.hasHitInDetector(kEndcapEmcTowerId)) hists->m_pdet_id->Fill(kEndcapEmcTowerId);
+	if (map.hasHitInDetector(kEndcapEmcPreShowerId)) hists->m_pdet_id->Fill(kEndcapEmcPreShowerId);
+	if (map.hasHitInDetector(kEndcapSmdUStripId)) hists->m_pdet_id->Fill(kEndcapSmdUStripId);
+	if (map.hasHitInDetector(kEndcapSmdVStripId)) hists->m_pdet_id->Fill(kEndcapSmdVStripId);
+	if (map.hasHitInDetector(kZdcWestId)) hists->m_pdet_id->Fill(kZdcWestId);
+	if (map.hasHitInDetector(kZdcEastId)) hists->m_pdet_id->Fill(kZdcEastId);
+	if (map.hasHitInDetector(kMwpcWestId)) hists->m_pdet_id->Fill(kMwpcWestId);
+	if (map.hasHitInDetector(kMwpcEastId)) hists->m_pdet_id->Fill(kMwpcEastId);
+	if (map.hasHitInDetector(kTpcSsdId)) hists->m_pdet_id->Fill(kTpcSsdId);
+	if (map.hasHitInDetector(kTpcSvtId)) hists->m_pdet_id->Fill(kTpcSvtId);
+	if (map.hasHitInDetector(kTpcSsdSvtId)) hists->m_pdet_id->Fill(kTpcSsdSvtId);
+	if (map.hasHitInDetector(kSsdSvtId)) hists->m_pdet_id->Fill(kSsdSvtId);
 
 // now fill all TPC histograms ------------------------------------------------
-	if (primtrk->flag()>=300 && primtrk->flag()<400) {
+        if (map.trackTpcOnly()) {
 
 // these are TPC only
 	  hists->m_prim_f0->Fill(dif.x(),0.);
@@ -613,27 +629,27 @@ void StEventQAMaker::MakeHistPrim() {
 	  }
 
 // these are TPC & FTPC
-	  hists->m_ppointT->Fill(primtrk->detectorInfo()->numberOfPoints());
+	  hists->m_ppointT->Fill(detInfo->numberOfPoints());
 	  hists->m_pmax_pointT->Fill(primtrk->numberOfPossiblePoints());
-	  hists->m_pfit_pointT->Fill(primtrk->fitTraits().numberOfFitPoints());
-	  hists->m_prim_chargeT->Fill(primtrk->geometry()->charge());
+	  hists->m_pfit_pointT->Fill(fTraits.numberOfFitPoints());
+	  hists->m_prim_chargeT->Fill(geom->charge());
 
-	  hists->m_prim_r0T->Fill(primtrk->geometry()->origin().perp());
-	  if (primtrk->geometry()->origin().phi() < 0)
-	    hists->m_prim_phi0T->Fill(360+primtrk->geometry()->origin().phi()/degree);
+	  hists->m_prim_r0T->Fill(origin.perp());
+	  if (origin.phi() < 0)
+	    hists->m_prim_phi0T->Fill(360+origin.phi()/degree);
 	  else
-	    hists->m_prim_phi0T->Fill(primtrk->geometry()->origin().phi()/degree);
-	  hists->m_prim_z0T->Fill(primtrk->geometry()->origin().z());
+	    hists->m_prim_phi0T->Fill(origin.phi()/degree);
+	  hists->m_prim_z0T->Fill(origin.z());
 	  hists->m_prim_curvT->Fill(logCurvature);
 
-	  hists->m_prim_xfT->Fill(primtrk->detectorInfo()->firstPoint().x());
-	  hists->m_prim_yfT->Fill(primtrk->detectorInfo()->firstPoint().y());
-	  hists->m_prim_zfT->Fill(primtrk->detectorInfo()->firstPoint().z());
+	  hists->m_prim_xfT->Fill(firstPoint.x());
+	  hists->m_prim_yfT->Fill(firstPoint.y());
+	  hists->m_prim_zfT->Fill(firstPoint.z());
 	  hists->m_prim_radfT->Fill(radf);
 	  hists->m_prim_ratioT->Fill(nfitntot);
 	  hists->m_prim_ratiomT->Fill(nfitnmax);
-	  hists->m_ppsiT->Fill(primtrk->geometry()->psi()/degree);
-	  hists->m_ptanlT->Fill(TMath::Tan(primtrk->geometry()->dipAngle()));
+	  hists->m_ppsiT->Fill(geom->psi()/degree);
+	  hists->m_ptanlT->Fill(TMath::Tan(geom->dipAngle()));
 	  hists->m_prim_thetaT->Fill(thetad);
 	  hists->m_petaT->Fill(eta);
 	  hists->m_ppTT->Fill(pT);
@@ -643,44 +659,44 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_pchisq1T->Fill(chisq1);
 
 // these are for TPC & FTPC
-	  hists->m_primtrk_xf_yfT->Fill(primtrk->detectorInfo()->firstPoint().x(),
-				 primtrk->detectorInfo()->firstPoint().y());
+	  hists->m_primtrk_xf_yfT->Fill(firstPoint.x(),
+				 firstPoint.y());
 	  hists->m_peta_trklengthT->Fill(eta,primtrk->length());
 	  hists->m_pnpoint_lengthT->Fill(primtrk->length(),
-				  Float_t(primtrk->detectorInfo()->numberOfPoints()));
+				  Float_t(detInfo->numberOfPoints()));
 	  hists->m_pfpoint_lengthT->Fill(primtrk->length(),
-				  Float_t(primtrk->fitTraits().numberOfFitPoints()));
+				  Float_t(fTraits.numberOfFitPoints()));
 
 // these are TPC only
 	  hists->m_ppT_eta_recT->Fill(eta,lmevpt);
-	  hists->m_ptanl_zfT->Fill(primtrk->detectorInfo()->firstPoint().z() -
+	  hists->m_ptanl_zfT->Fill(firstPoint.z() -
 			    event->primaryVertex()->position().z(),
-			    Float_t(TMath::Tan(primtrk->geometry()->dipAngle())));
+			    Float_t(TMath::Tan(geom->dipAngle())));
 	  hists->m_pmom_trklengthT->Fill(primtrk->length(),lmevmom);
 	  hists->m_pchisq0_momT->Fill(lmevmom,chisq0);
 	  hists->m_pchisq1_momT->Fill(lmevmom,chisq1);
 	  hists->m_pchisq0_etaT->Fill(eta,chisq0);
 	  hists->m_pchisq1_etaT->Fill(eta,chisq1);
-	  hists->m_pchisq0_dipT->Fill(TMath::Tan(primtrk->geometry()->dipAngle()),chisq0);
-	  hists->m_pchisq1_dipT->Fill(TMath::Tan(primtrk->geometry()->dipAngle()),chisq1);
-	  hists->m_pchisq0_zfT->Fill(primtrk->detectorInfo()->firstPoint().z(),chisq0);
-	  hists->m_pchisq1_zfT->Fill(primtrk->detectorInfo()->firstPoint().z(),chisq1);
+	  hists->m_pchisq0_dipT->Fill(TMath::Tan(geom->dipAngle()),chisq0);
+	  hists->m_pchisq1_dipT->Fill(TMath::Tan(geom->dipAngle()),chisq1);
+	  hists->m_pchisq0_zfT->Fill(firstPoint.z(),chisq0);
+	  hists->m_pchisq1_zfT->Fill(firstPoint.z(),chisq1);
 	  hists->m_pnfptonpt_momT->Fill(lmevmom,nfitntot);
 	  hists->m_pnfptonpt_etaT->Fill(eta,nfitntot);
 	  // had to make psi_deg and phi_deg b/c ROOT won't compile otherwise
 	  // for some strange reason... -CPL
 	  Float_t phi_deg;
-	  if (primtrk->geometry()->origin().phi() < 0)
-	    phi_deg = 360+primtrk->geometry()->origin().phi()/degree;
+	  if (origin.phi() < 0)
+	    phi_deg = 360+origin.phi()/degree;
 	  else
-	    phi_deg = primtrk->geometry()->origin().phi()/degree;
-	  Float_t psi_deg = primtrk->geometry()->psi()/degree;
+	    phi_deg = origin.phi()/degree;
+	  Float_t psi_deg = geom->psi()/degree;
 	  hists->m_ppsi_phiT->Fill(phi_deg,psi_deg);
 	}
 
 // now fill all TPC+SVT histograms --------------------------------------------
 
-	if (primtrk->flag()>=600 && primtrk->flag()<700) {
+        else if (map.trackTpcSvt()) {
 
 	  hists->m_prim_f0TS->Fill(dif.x(),0.);
 	  hists->m_prim_f0TS->Fill(dif.y(),1.);
@@ -692,27 +708,27 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_prim_impactTS->Fill(logImpact);
 	  hists->m_prim_impactrTS->Fill(primtrk->impactParameter());
 
-	  hists->m_ppointTS->Fill(primtrk->detectorInfo()->numberOfPoints());
+	  hists->m_ppointTS->Fill(detInfo->numberOfPoints());
 	  hists->m_pmax_pointTS->Fill(primtrk->numberOfPossiblePoints());
-	  hists->m_pfit_pointTS->Fill(primtrk->fitTraits().numberOfFitPoints());
-	  hists->m_prim_chargeTS->Fill(primtrk->geometry()->charge());
+	  hists->m_pfit_pointTS->Fill(fTraits.numberOfFitPoints());
+	  hists->m_prim_chargeTS->Fill(geom->charge());
 
-	  hists->m_prim_r0TS->Fill(primtrk->geometry()->origin().perp());
-	  if (primtrk->geometry()->origin().phi() < 0)
-	    hists->m_prim_phi0TS->Fill(360+primtrk->geometry()->origin().phi()/degree);
+	  hists->m_prim_r0TS->Fill(origin.perp());
+	  if (origin.phi() < 0)
+	    hists->m_prim_phi0TS->Fill(360+origin.phi()/degree);
 	  else
-	    hists->m_prim_phi0TS->Fill(primtrk->geometry()->origin().phi()/degree);
-	  hists->m_prim_z0TS->Fill(primtrk->geometry()->origin().z());
+	    hists->m_prim_phi0TS->Fill(origin.phi()/degree);
+	  hists->m_prim_z0TS->Fill(origin.z());
 	  hists->m_prim_curvTS->Fill(logCurvature);
 
-	  hists->m_prim_xfTS->Fill(primtrk->detectorInfo()->firstPoint().x());
-	  hists->m_prim_yfTS->Fill(primtrk->detectorInfo()->firstPoint().y());
-	  hists->m_prim_zfTS->Fill(primtrk->detectorInfo()->firstPoint().z());
+	  hists->m_prim_xfTS->Fill(firstPoint.x());
+	  hists->m_prim_yfTS->Fill(firstPoint.y());
+	  hists->m_prim_zfTS->Fill(firstPoint.z());
 	  hists->m_prim_radfTS->Fill(radf);
 	  hists->m_prim_ratioTS->Fill(nfitntot);
 	  hists->m_prim_ratiomTS->Fill(nfitnmax);
-	  hists->m_ppsiTS->Fill(primtrk->geometry()->psi()/degree);
-	  hists->m_ptanlTS->Fill(TMath::Tan(primtrk->geometry()->dipAngle()));
+	  hists->m_ppsiTS->Fill(geom->psi()/degree);
+	  hists->m_ptanlTS->Fill(TMath::Tan(geom->dipAngle()));
 	  hists->m_prim_thetaTS->Fill(thetad);
 	  hists->m_petaTS->Fill(eta);
 	  hists->m_ppTTS->Fill(pT);
@@ -721,55 +737,55 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_pchisq0TS->Fill(chisq0);
 	  hists->m_pchisq1TS->Fill(chisq1);
 
-	  hists->m_primtrk_xf_yfTS->Fill(primtrk->detectorInfo()->firstPoint().x(),
-				  primtrk->detectorInfo()->firstPoint().y());
+	  hists->m_primtrk_xf_yfTS->Fill(firstPoint.x(),
+				  firstPoint.y());
 	  hists->m_peta_trklengthTS->Fill(eta,primtrk->length());
 	  hists->m_pnpoint_lengthTS->Fill(primtrk->length(),
-				   Float_t(primtrk->detectorInfo()->numberOfPoints()));
+				   Float_t(detInfo->numberOfPoints()));
 	  hists->m_pfpoint_lengthTS->Fill(primtrk->length(),
-				   Float_t(primtrk->fitTraits().numberOfFitPoints()));
+				   Float_t(fTraits.numberOfFitPoints()));
 
 	  hists->m_ppT_eta_recTS->Fill(eta,lmevpt);
-	  hists->m_ptanl_zfTS->Fill(primtrk->detectorInfo()->firstPoint().z() -
+	  hists->m_ptanl_zfTS->Fill(firstPoint.z() -
 			     event->primaryVertex()->position().z(),
-			     Float_t(TMath::Tan(primtrk->geometry()->dipAngle())));
+			     Float_t(TMath::Tan(geom->dipAngle())));
 	  hists->m_pmom_trklengthTS->Fill(primtrk->length(),lmevmom);
 	  hists->m_pchisq0_momTS->Fill(lmevmom,chisq0);
 	  hists->m_pchisq1_momTS->Fill(lmevmom,chisq1);
 	  hists->m_pchisq0_etaTS->Fill(eta,chisq0);
 	  hists->m_pchisq1_etaTS->Fill(eta,chisq1);
-	  hists->m_pchisq0_dipTS->Fill(TMath::Tan(primtrk->geometry()->dipAngle()),chisq0);
-	  hists->m_pchisq1_dipTS->Fill(TMath::Tan(primtrk->geometry()->dipAngle()),chisq1);
-	  hists->m_pchisq0_zfTS->Fill(primtrk->detectorInfo()->firstPoint().z(),chisq0);
-	  hists->m_pchisq1_zfTS->Fill(primtrk->detectorInfo()->firstPoint().z(),chisq1);
+	  hists->m_pchisq0_dipTS->Fill(TMath::Tan(geom->dipAngle()),chisq0);
+	  hists->m_pchisq1_dipTS->Fill(TMath::Tan(geom->dipAngle()),chisq1);
+	  hists->m_pchisq0_zfTS->Fill(firstPoint.z(),chisq0);
+	  hists->m_pchisq1_zfTS->Fill(firstPoint.z(),chisq1);
 	  hists->m_pnfptonpt_momTS->Fill(lmevmom,nfitntot);
 	  hists->m_pnfptonpt_etaTS->Fill(eta,nfitntot);
 	  // had to make psi_deg and phi_deg b/c ROOT won't compile otherwise
 	  // for some strange reason... -CPL
 	  Float_t phi_deg;
-	  if (primtrk->geometry()->origin().phi() < 0)
-	    phi_deg = 360+primtrk->geometry()->origin().phi()/degree;
+	  if (origin.phi() < 0)
+	    phi_deg = 360+origin.phi()/degree;
 	  else
-	    phi_deg = primtrk->geometry()->origin().phi()/degree;
-	  Float_t psi_deg = primtrk->geometry()->psi()/degree;
+	    phi_deg = origin.phi()/degree;
+	  Float_t psi_deg = geom->psi()/degree;
 	  hists->m_ppsi_phiTS->Fill(phi_deg,psi_deg);
 	}
 
 // now fill all FTPC East histograms ------------------------------------------
-	if (primtrk->flag()>=700 && primtrk->flag()<800 && primtrk->topologyMap().numberOfHits(kFtpcEastId)>0) {
+        else if (map.trackFtpcEast()) {
 
 // these are TPC & FTPC
-	  hists->m_ppointFE->Fill(primtrk->detectorInfo()->numberOfPoints());
+	  hists->m_ppointFE->Fill(detInfo->numberOfPoints());
 	  hists->m_pmax_pointFE->Fill(primtrk->numberOfPossiblePoints());
-	  hists->m_pfit_pointFE->Fill(primtrk->fitTraits().numberOfFitPoints());
-	  hists->m_prim_chargeFE->Fill(primtrk->geometry()->charge());
-	  hists->m_prim_xfFE->Fill(primtrk->detectorInfo()->firstPoint().x());
-	  hists->m_prim_yfFE->Fill(primtrk->detectorInfo()->firstPoint().y());
-	  hists->m_prim_zfFE->Fill(primtrk->detectorInfo()->firstPoint().z());
+	  hists->m_pfit_pointFE->Fill(fTraits.numberOfFitPoints());
+	  hists->m_prim_chargeFE->Fill(geom->charge());
+	  hists->m_prim_xfFE->Fill(firstPoint.x());
+	  hists->m_prim_yfFE->Fill(firstPoint.y());
+	  hists->m_prim_zfFE->Fill(firstPoint.z());
 	  hists->m_prim_radfFE->Fill(radf);
 	  hists->m_prim_ratioFE->Fill(nfitntot);
 	  hists->m_prim_ratiomFE->Fill(nfitnmax);
-	  hists->m_ppsiFE->Fill(primtrk->geometry()->psi()/degree);
+	  hists->m_ppsiFE->Fill(geom->psi()/degree);
 	  hists->m_petaFE->Fill(eta);
 	  hists->m_ppTFE->Fill(pT);
 	  hists->m_pmomFE->Fill(gmom);
@@ -779,30 +795,30 @@ void StEventQAMaker::MakeHistPrim() {
 
 // these are for TPC & FTPC
 	  hists->m_ppT_eta_recFE->Fill(eta,lmevpt);
-	  hists->m_primtrk_xf_yfFE->Fill(primtrk->detectorInfo()->firstPoint().x(),
-				  primtrk->detectorInfo()->firstPoint().y());
+	  hists->m_primtrk_xf_yfFE->Fill(firstPoint.x(),
+				  firstPoint.y());
 	  hists->m_peta_trklengthFE->Fill(eta,primtrk->length());
 	  hists->m_pnpoint_lengthFE->Fill(primtrk->length(),
-				   Float_t(primtrk->detectorInfo()->numberOfPoints()));
+				   Float_t(detInfo->numberOfPoints()));
 	  hists->m_pfpoint_lengthFE->Fill(primtrk->length(),
-				   Float_t(primtrk->fitTraits().numberOfFitPoints()));
+				   Float_t(fTraits.numberOfFitPoints()));
 	}
 
 // now fill all FTPC West histograms ------------------------------------------
-	if (primtrk->flag()>=700 && primtrk->flag()<800 && primtrk->topologyMap().numberOfHits(kFtpcWestId)>0) {
+        else if (map.trackFtpcWest()) {
 
 // these are TPC & FTPC
-	  hists->m_ppointFW->Fill(primtrk->detectorInfo()->numberOfPoints());
+	  hists->m_ppointFW->Fill(detInfo->numberOfPoints());
 	  hists->m_pmax_pointFW->Fill(primtrk->numberOfPossiblePoints());
-	  hists->m_pfit_pointFW->Fill(primtrk->fitTraits().numberOfFitPoints());
-	  hists->m_prim_chargeFW->Fill(primtrk->geometry()->charge());
-	  hists->m_prim_xfFW->Fill(primtrk->detectorInfo()->firstPoint().x());
-	  hists->m_prim_yfFW->Fill(primtrk->detectorInfo()->firstPoint().y());
-	  hists->m_prim_zfFW->Fill(primtrk->detectorInfo()->firstPoint().z());
+	  hists->m_pfit_pointFW->Fill(fTraits.numberOfFitPoints());
+	  hists->m_prim_chargeFW->Fill(geom->charge());
+	  hists->m_prim_xfFW->Fill(firstPoint.x());
+	  hists->m_prim_yfFW->Fill(firstPoint.y());
+	  hists->m_prim_zfFW->Fill(firstPoint.z());
 	  hists->m_prim_radfFW->Fill(radf);
 	  hists->m_prim_ratioFW->Fill(nfitntot);
 	  hists->m_prim_ratiomFW->Fill(nfitnmax);
-	  hists->m_ppsiFW->Fill(primtrk->geometry()->psi()/degree);
+	  hists->m_ppsiFW->Fill(geom->psi()/degree);
 	  hists->m_petaFW->Fill(eta);
 	  hists->m_ppTFW->Fill(pT);
 	  hists->m_pmomFW->Fill(gmom);
@@ -812,13 +828,13 @@ void StEventQAMaker::MakeHistPrim() {
 
 // these are for TPC & FTPC
 	  hists->m_ppT_eta_recFW->Fill(eta,lmevpt);
-	  hists->m_primtrk_xf_yfFW->Fill(primtrk->detectorInfo()->firstPoint().x(),
-				  primtrk->detectorInfo()->firstPoint().y());
+	  hists->m_primtrk_xf_yfFW->Fill(firstPoint.x(),
+				  firstPoint.y());
 	  hists->m_peta_trklengthFW->Fill(eta,primtrk->length());
 	  hists->m_pnpoint_lengthFW->Fill(primtrk->length(),
-				   Float_t(primtrk->detectorInfo()->numberOfPoints()));
+				   Float_t(detInfo->numberOfPoints()));
 	  hists->m_pfpoint_lengthFW->Fill(primtrk->length(),
-				   Float_t(primtrk->fitTraits().numberOfFitPoints()));
+				   Float_t(fTraits.numberOfFitPoints()));
 	}
       }
     }
