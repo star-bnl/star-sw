@@ -1,11 +1,9 @@
+/*!
+ * \class StIOMaker 
+ */
 #ifndef STAR_StIOMaker
 #define STAR_StIOMaker
 
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// StIOMaker 			                            	        //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
 
 #include "StMaker.h"
 #include "StTree.h"
@@ -59,7 +57,7 @@ StIOInterFace *Load();
    Int_t  fSkip    ;		//! 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.12 2003/09/02 17:58:38 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.13 2003/09/09 01:01:21 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StIOMaker, 1)   //StAR chain virtual base class for Makers
 };
