@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.10 2000/01/31 17:11:18 porter Exp $
+ * $Id: StDbBroker.h,v 1.11 2000/02/28 15:24:20 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.11  2000/02/28 15:24:20  porter
+ * add more StDbLib methods to broker: this time, StDbManager::closeAllConnections()
+ *
  * Revision 1.10  2000/01/31 17:11:18  porter
  * fix break caused by the interaction design between
  * 'StRoot/St_base/tableDescriptor.h' & 'StDbBroker::Descriptor'
@@ -109,7 +112,7 @@ typedef tableDescriptor_st Descriptor;
   public:
 
     StDbBroker();
-  virtual ~StDbBroker();
+    virtual ~StDbBroker();
     
     //    int Init(const char *dbname);// return 0 if OK
 
@@ -179,6 +182,8 @@ typedef tableDescriptor_st Descriptor;
     static int DbInit(const char *);  		//dbInit
 
     void   setVerbose(int isVerbose) { m_isVerbose = isVerbose; } 
+    void   CloseAllConnections();
+
   //-> here's all the real stuff now
    
     dbConfig_st* InitConfig(const char* configName, int& numRows, char* versionName=0);

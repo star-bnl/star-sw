@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.13 2000/02/14 23:36:36 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.14 2000/02/28 15:24:19 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.14  2000/02/28 15:24:19  porter
+ * add more StDbLib methods to broker: this time, StDbManager::closeAllConnections()
+ *
  * Revision 1.13  2000/02/14 23:36:36  porter
  * fixed unsigned int <-> int comparison & timestamp string
  *
@@ -123,7 +126,14 @@ StDbBroker::~StDbBroker(){
 
 }
 
-//______________________________________________________________________________
+
+//_____________________________________________________________________________
+
+void StDbBroker::CloseAllConnections(){
+  if(mgr)mgr->closeAllConnections();
+};
+
+//_____________________________________________________________________________
 // int StDbBroker::Init(const char *dbname)
 // {
 //   return DbInit(dbname);
