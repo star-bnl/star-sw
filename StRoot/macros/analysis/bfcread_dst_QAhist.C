@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.7 1999/11/03 19:02:54 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.8 1999/11/05 16:30:15 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.8  1999/11/05 16:30:15  kathy
+// minor changes to documentation in macro
+//
 // Revision 1.7  1999/11/03 19:02:54  kathy
 // changes to default input files and output file names - needed by perl script for testing
 //
@@ -53,29 +56,8 @@
 //
 // standard Maker names in bfc 
 //   (but if you run your own Maker here, then use whatever name you give it)
-//  geant
-//  db
-//  calib
-//  emc_raw
-//  tpc_hits
-//  svt_hits
-//  ftpc_hits
-//  tpc_tracks
-//  svt_tracks
-//  ftpc_tracks
-//  ctf
-//  mwc
-//  trg
-//  global
-//  match
-//  primary
-//  v0
-//  xi
-//  kink
-//  dst
-//  StEventMaker
-//  analysis
-//  QA
+//  are listed at 
+// http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/St_QA_Maker/doc/
 //
 //======================================================================
 
