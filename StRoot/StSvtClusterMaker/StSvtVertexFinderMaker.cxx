@@ -15,8 +15,12 @@
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_scs_spt_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
+#include "StEvent.h"
+#include "StSvtHitCollection.h"
+#include "StPrimaryVertex.h"
 
 float sft_main( St_scs_spt *scs_spt, St_dst_vertex *vertex, float x=0, float y=0, TH1F *hist=0);
+float sft_main2(  StSvtHitCollection* rSvtHitColl, StEvent* event, float x=0, float y=0, TH1F *hist=0);
 long event_numb=0;
 
 ClassImp(StSvtVertexFinderMaker)
@@ -74,51 +78,93 @@ Int_t StSvtVertexFinderMaker::Make()
   
   St_scs_spt    *ScsSpt      = (St_scs_spt *)GetDataSet("svt_hits/.data/scs_spt");
   
-  if (!ScsSpt) {
+
+  StEvent* event=0;
+  StSvtHitCollection* rSvtHitColl=0;
+  event = (StEvent *) GetInputDS("StEvent"); 
+   
+  
+  if( event){ 
+    rSvtHitColl = event->svtHitCollection();
+  }
+    
+  if (!ScsSpt && !rSvtHitColl) {
+    
     gMessMgr->Warning() << "StSvtVertexMaker:: No SVT space points" << endm;
     return kStWarn;
   }
   
-  
-  //pointer to preVertex dataset
-  St_DataSet *preVertex = GetDataSet("preVertex"); 
-  
-  //iterator
-  St_DataSetIter preVertexI(preVertex);
-  
-  //pointer to preVertex
-  St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
 
   int numRowPreVtx = 0;
-  if( preVtx){
-    numRowPreVtx = preVtx->GetNRows();
-    preVtx->ReAllocate(numRowPreVtx+1);
+  float xtpc=0;
+  float ytpc=0;
+  float ztpc=0;
+  St_DataSet* preVertex;
+  St_dst_vertex  *preVtx;
+  preVtx = 0;
+  preVertex= 0;
+  if( ScsSpt){
 
-    // Finds TPC x,y,z
-    dst_vertex_st *preVtxPtr = preVtx->GetTable();    
-    float xtpc=0;
-    float ytpc=0;
-    float ztpc=0;
-    for (Int_t i = 0; i < numRowPreVtx;i++,preVtxPtr++) {
-      if(preVtxPtr->iflag == 101) {
-	xtpc = preVtxPtr->x;
-	ytpc = preVtxPtr->y;
-	ztpc = preVtxPtr->z;
+    //pointer to preVertex dataset
+    preVertex = GetDataSet("preVertex"); 
+    if (!preVertex) {
+      preVtx  = new St_dst_vertex("preVertex",4); 
+      AddData(preVtx);
+    }
+    else{
+      //iterator
+      St_DataSetIter preVertexI(preVertex);
+      //pointer to preVertex
+      preVtx  = (St_dst_vertex *)preVertexI("preVertex");
+    }
+    if( preVtx){
+      numRowPreVtx = preVtx->GetNRows();
+      preVtx->ReAllocate(numRowPreVtx+1);
+      
+      // Finds TPC x,y,z
+      dst_vertex_st *preVtxPtr = preVtx->GetTable();    
+      for (Int_t i = 0; i < numRowPreVtx;i++,preVtxPtr++) {
+	if(preVtxPtr->iflag == 101) {
+	  xtpc = preVtxPtr->x;
+	  ytpc = preVtxPtr->y;
+	  ztpc = preVtxPtr->z;
+	}
       }
     }
+  }
+  else if( event){
     
-    // Find SVT vertex
-    event_numb++;
-    if (Debug()) {    
-      float zsvt= sft_main(ScsSpt,preVtx,xtpc,ytpc,mtemp[event_numb]);
-    }
-    else {
-      float zsvt= sft_main(ScsSpt,preVtx,xtpc,ytpc);
-    }
+    for( int i=0; i<event->numberOfPrimaryVertices(); i++){
       
+      if( event->primaryVertex(i)->flag() == 1){
+	xtpc = event->primaryVertex(i)->position().x();
+	ytpc = event->primaryVertex(i)->position().y();
+	ztpc = event->primaryVertex(i)->position().z();
+	break;
+      }
+    } 
+  }
+  
+  
+  // Find SVT vertex
+  event_numb++;
+  float zsvt;
+  if (Debug()) { 
+    if( ScsSpt)
+      zsvt= sft_main(ScsSpt,preVtx,xtpc,ytpc,mtemp[event_numb]);
+    if(rSvtHitColl)
+      zsvt= sft_main2(rSvtHitColl,event,xtpc,ytpc,mtemp[event_numb]);
+  }
+  else {
+    if( ScsSpt) zsvt= sft_main(ScsSpt,preVtx,xtpc,ytpc);
+    if(rSvtHitColl) zsvt= sft_main2(rSvtHitColl,event,xtpc,ytpc); 
+  }
+  
+  
+  if( ScsSpt){
     scs_spt_st *s_spt = ScsSpt->GetTable();  
     long NSpt = ScsSpt->GetNRows();
-
+    
     //
     //Fills ntuple3
     if (Debug()) {
@@ -129,19 +175,18 @@ Int_t StSvtVertexFinderMaker::Make()
 	  float my_z = s_spt[i].x[2];
 	  float my_r = sqrt(my_x*my_x+my_y*my_y);
 	  float ix = atan2(my_y,my_x);
-	  // float my_z0 = (float)zsvt;
 	  float my_z0 = (float)ztpc;
 	  float iz = ((11*my_z)/my_r)+((11*my_z0)/my_r)-my_z0;
 	  ntuple3->Fill(event_numb,s_spt[i].x[0],s_spt[i].x[1],s_spt[i].x[2],
-                      s_spt[i].id_wafer,ix,iz,my_r);
+			s_spt[i].id_wafer,ix,iz,my_r);
 	}
       }
     }
-
+ 
     MakeHistograms(preVtx,event_numb); // histograms
-
   }
-
+  
+  
   return kStOK;
 }
 
