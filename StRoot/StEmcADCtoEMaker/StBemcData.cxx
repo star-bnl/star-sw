@@ -33,6 +33,7 @@ Bool_t StBemcData::checkTDC(Int_t i)
 	Bool_t ok = kTRUE;
   if(!mDecoder) mDecoder = new StEmcDecoder(EventDate,EventTime);
 	Int_t crate;
+  if(!getTDCStatus(i)) return kTRUE;
   mDecoder->GetTowerCrateFromTDC(i,crate);
   if(TDCError[i]!=0) ok = kFALSE;
 	if(TDCCrateId[i]!=crate) ok = kFALSE;
@@ -46,7 +47,7 @@ void StBemcData::validateData()
 	if(!TowerPresent) ok = kFALSE;
 	if(TDCErrorFlag==1) ok = kFALSE;
   Int_t nbad = 0;
-	for(Int_t i=0;i<30;i++) if(getTDCStatus(i)) if(!checkTDC(i)) nbad++;
+	for(Int_t i=0;i<30;i++) if(!checkTDC(i)) nbad++;
   if(nbad==0) ok = kTRUE;
 	ValidTowerEvent = ok;
 	
