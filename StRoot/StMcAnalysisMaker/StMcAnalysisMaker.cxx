@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.15 2000/04/04 23:18:12 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.16 2000/04/12 21:33:57 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.16  2000/04/12 21:33:57  calderon
+ * check case where no multimaps are found
+ *
  * Revision 1.15  2000/04/04 23:18:12  calderon
  * B -> B * kilogauss
  *
@@ -79,6 +82,8 @@
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "StPhysicalHelixD.hh"
+
+#include "StMessMgr.h"
 
 #include "StChain.h"
 #include "St_DataSet.h"
@@ -215,6 +220,11 @@ Int_t StMcAnalysisMaker::Make()
     mcV0MapType* theMcV0Map = 0;
     theMcV0Map = assoc->mcV0Map(); 
 
+    if (!theHitMap) {
+	gMessMgr->Warning() << "----------WARNING----------\n"
+			    << "No Hit Map found for this event!" << endm;
+	return kStWarn;
+    }
     // Example: look at the position of the primary vertex
     //          Map is not needed for this, but it's a good check,
     //          tracking will not be good if primary vertex was not well placed.
@@ -273,16 +283,6 @@ Int_t StMcAnalysisMaker::Make()
     // Example: Make a histogram using the Hit Map.
     
     
-    // Delete previous histogram if any, then book histogram
-//     if (mHitResolution!=0) {
-// 	delete mHitResolution;
-// 	mHitResolution =0;
-//     }
-//     mHitResolution = new TH2F("Hit Resolution","Delta X Vs Delta Z for Hits",
-// 			     mNumDeltaX,mMinDeltaX,mMaxDeltaX,mNumDeltaZ,mMinDeltaZ,mMaxDeltaZ);
-//     mHitResolution->SetXTitle("Delta X (cm)");
-//     mHitResolution->SetYTitle("Delta Z (cm)");
-
     // Fill histogram from map
 
     float DeltaX;
@@ -317,6 +317,11 @@ Int_t StMcAnalysisMaker::Make()
     keyHit = 0;
     cout << "Finished Making Histogram." << endl;
     
+    if (!theTrackMap) {
+	gMessMgr->Warning() << "----------WARNING----------\n"
+			    << "No Track Map found for this event!" << endm;
+	return kStWarn;
+    }
     // Example: look at the magnitude of the momentum of
     //          the MC track associated with first track in track Collection
 
@@ -436,6 +441,11 @@ Int_t StMcAnalysisMaker::Make()
 	 mcHitIt != partner->tpcHits().end();
 	 mcHitIt++) coordMcPartner->Fill((*mcHitIt)->position().x(),(*mcHitIt)->position().y());
     
+    if (!theMcV0Map) {
+	gMessMgr->Warning() << "----------WARNING----------\n"
+			    << "No V0 Map found for this event!" << endm;
+	return kStWarn;
+    }
     //Example: Print out position of V0 vertices that have been associated.
     //         (LSB)
     StSPtrVecMcVertex& mcVertices = mEvent->vertices();
