@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: StEStructMCReader.h,v 1.3 2004/03/03 23:17:10 chunhuih Exp $
+ *  $Id: StEStructMCReader.h,v 1.4 2004/03/18 18:35:17 chunhuih Exp $
  *
  *  Author: Chunhui Han
  *
@@ -15,7 +15,11 @@
  ********************************************************************
  *
  *  $Log: StEStructMCReader.h,v $
+ *  Revision 1.4  2004/03/18 18:35:17  chunhuih
+ *  use const char * instead of char * for the constructor argument filelistfile.
+ *
  *  Revision 1.3  2004/03/03 23:17:10  chunhuih
+ *
  *  added mNentries to store the total entries in the rootuple, to reduce
  *  redundant code.
  *
@@ -100,7 +104,7 @@ class StEStructMCReader : public StEStructEventReader {
  public:
   StEStructMCReader(TTree *tree=0);
   StEStructMCReader(int nevents, TTree *tree = 0, StEStructEventCuts *ecuts = 0, StEStructTrackCuts *tcuts = 0);
-  StEStructMCReader(int nevents, char *fileListFile, StEStructEventCuts *ecuts = 0, StEStructTrackCuts *tcuts = 0);
+  StEStructMCReader(int nevents, const char *fileListFile, StEStructEventCuts *ecuts = 0, StEStructTrackCuts *tcuts = 0);
   ~StEStructMCReader();
 
   void setEventCuts(StEStructEventCuts *cuts);
