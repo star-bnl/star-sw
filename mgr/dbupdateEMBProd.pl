@@ -47,7 +47,7 @@ my @EmSet = (
 #              "embedding_alamlopt",
 #              "embedding_lamhipt",
 #              "embedding_lamlopt",
-              "embedding_phi";
+               "embedding_phi",
                "embedding_pbar",
 );
               
@@ -317,7 +317,7 @@ my $flname;
         if ( $filename =~ /$msumFile/ ) {
       $jb_sumFile = $msumDir . "/" . $msumFile;
 
- print "SumDir: ", $jb_sumFile, "\n"; 
+# print "SumDir: ", $jb_sumFile, "\n"; 
        $mjobDg = "none";
        $mjobSt = "n\/a"; 
 
@@ -450,7 +450,7 @@ my $embType;
   $msite = "hpss_rcf";
   $mhpss = "Y";
   $mtype = "emb_reco";
-
+}
   $daqType = 0; 
 
   foreach my $daqFile (@dbOnFiles){
@@ -627,10 +627,10 @@ foreach my $runDsc (@runDescr) {
        $mrunID = $Numrun;
        $mdataset = $daqHash{$Numrun}; 
     if ( defined $mdataset) { 
- for ($ll = 0; $ll<scalar(@EmSet); $ll++) {
-    $EmbSet = $EmSet[$ll];
+  for ($ii = 0; $ii<scalar(@EmSet); $ii++) {
+    $EmbSet = $EmSet[$ii];
     &updateDataSet();
-  }
+    }
    }
  } 
 
