@@ -337,6 +337,11 @@ C-----calculate the new track parameters
       dsx = (((x(1)-xi)/r)+cos(bphi))
       dsy =(((x(2)-yi)/r)+sin(bphi))
 
+      if( abs(dsx) .gt. 1.0 ) then
+         dsx = sign(1.,dsx)
+      elseif( abs( dsy) .gt. 1.0) then
+         dsy = sign(1.,dsy)
+      endif
 C      sinl = trk1(5)/(sqrt(1+trk1(5)**2))
 C      cosl = 1/sqrt(1+trk1(5)**2)
 C      sinl = sin( atan(trk1(5)))
