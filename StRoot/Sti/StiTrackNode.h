@@ -25,7 +25,8 @@ class StiTrackNode : public StiDefaultMutableTreeNode
   double fP0;             // Y-coordinate of a track
   double fP1;             // Z-coordinate of a track
   double fP2;             // C*x0
-  double fP3;             // track curvature==C
+  double fP3;             // track curvature==C == 1/R * sign(Y0-Y)
+  //                                            == 1/R * -sign(charge*field)
   double fP4;             // tangent of the track momentum dip angle
 
   double fC00;                         // covariance

@@ -9,6 +9,9 @@
 #include "StThreeVectorD.hh"
 #include "tables/St_svg_config_Table.h"
 
+class StiTrack;
+class StiTrackNode;
+class StTrack;
 class StTpcHit;
 class StSvtHit;
 class StSsdHit;
@@ -18,6 +21,7 @@ class svg_geom_st;
 class svg_shape_st;
 class StPrimaryVertex;
 class StSvtConfig;
+class StHelix;
 
 class StiGeometryTransform{
     
@@ -69,6 +73,8 @@ public:
     void operator() (const StiHit*, StSsdHit*);  //From Sti -> Ssd
     
     void operator() (const StPrimaryVertex*, StiHit*); //From StPrimaryVertex -> StiHit
+
+    void operator() (const StiTrackNode*, StHelix*);  // from StiTrackNode helix params -> StHelix
 
     //Point Transform Functors
     

@@ -7,6 +7,7 @@
 #define STI_MATERIAL_HH
 
 #include <iostream>
+#include <string>
 
 class StiMaterial{
 
