@@ -44,29 +44,29 @@ c---------------------------------------------------------------------
          emc_jetpar(1).init = 0
          write(*,*)'EMC_ERJ -- The jet finding parameters are:'
          write(*,*)
-     1        'EMC_ERJ -- Jet Finding Method                      =',
-     1        EMC_jetpar(1).jetmethod
+     >        'EMC_ERJ -- Jet Finding Method                      =',
+     >        EMC_jetpar(1).jetmethod
          write(*,*)
-     1        'EMC_ERJ -- Enable eta,phi Weighting?               =',
-     1        EMC_jetpar(1).jetweighting
+     >        'EMC_ERJ -- Enable eta,phi Weighting?               =',
+     >        EMC_jetpar(1).jetweighting
          write(*,*)
-     1        'EMC_ERJ -- Cone Radius                             =',
-     1        EMC_jetpar(1).cone_rad
+     >        'EMC_ERJ -- Cone Radius                             =',
+     >        EMC_jetpar(1).cone_rad
          write(*,*)
-     1        'EMC_ERJ -- Min. energy for post-algorithm selection=',
-     1        EMC_jetpar(1).ej_min
+     >        'EMC_ERJ -- Min. energy for post-algorithm selection=',
+     >        EMC_jetpar(1).ej_min
          write(*,*)
-     1        'EMC_ERJ -- Min. seed tower energy                  =',
-     1        EMC_jetpar(1).et_seed
+     >        'EMC_ERJ -- Min. seed tower energy                  =',
+     >        EMC_jetpar(1).et_seed
          write(*,*)
-     1        'EMC_ERJ -- Min. tower energy to be included        =',
-     1        EMC_jetpar(1).et_min
+     >        'EMC_ERJ -- Min. tower energy to be included        =',
+     >        EMC_jetpar(1).et_min
          write(*,*)
-     1        'EMC_ERJ -- Maximum phi deviation for back-to-back  =',
-     1        EMC_jetpar(1).phi_dev
+     >        'EMC_ERJ -- Maximum phi deviation for back-to-back  =',
+     >        EMC_jetpar(1).phi_dev
          write(*,*)
-     1        'EMC_ERJ -- Background subtraction mode off=0/on=1  =',
-     1        EMC_jetpar(1).mode_bg
+     >        'EMC_ERJ -- Background subtraction mode off=0/on=1  =',
+     >        EMC_jetpar(1).mode_bg
          ncell_bemc=ems_control(1).nmodule(BEMC)
      +             *ems_control(1).neta(BEMC)
      +             *ems_control(1).nsub(BEMC)
@@ -77,8 +77,8 @@ c---------------------------------------------------------------------
      +             *ems_control(1).nsub(BEMC)
          ncell_tot =ncell_bemc+ncell_eemc+ncell_gap
          write(*,*)
-     1        'EMC_ERJ -- # of cell in BEMC/EEMC/GAP/Total      =',
-     1        ncell_bemc,ncell_eemc,ncell_gap,ncell_tot
+     >        'EMC_ERJ -- # of cell in BEMC/EEMC/GAP/Total      =',
+     >        ncell_bemc,ncell_eemc,ncell_gap,ncell_tot
       endif
 c---------------------------------------------------------------------
 C     Initialize nok counter and variable arrays
@@ -117,7 +117,7 @@ c---------------------------------------------------------------------
          call jet_finder_isa
       else
          write(*,*)
-     1     '***EMC_ERJ: Jet Finder option not coded yet'
+     >     '***EMC_ERJ: Jet Finder option not coded yet'
          EMC_ERJ = STAFCV_BAD
          return
       endif
@@ -127,7 +127,7 @@ c---------------------------------------------------------------------
       endif
       if(ierror .eq. 1) then
          write(*,*)
-     1     '***EMC_ERJ: Found error condition from UA1'
+     >     '***EMC_ERJ: Found error condition from UA1'
          EMC_ERJ = STAFCV_BAD
          return
       end if
@@ -217,8 +217,9 @@ c*-back-to-back criteria
             endif
             imark(nmark)=j
           endif
- 50     enddo
- 40   enddo    
+C  PN, 07.10.99: enddo is not standard for DO LABEL clause
+ 50     continue
+ 40   continue
       if(marki.eq.0.and.markj.eq.0) go to 999
       ems_jetlist(marki).id_b=markj
       ems_jetlist(markj).id_b=marki
