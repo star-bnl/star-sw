@@ -32,11 +32,12 @@ class StIOHeader : public TObject
 
  public:
   StIOHeader(const Char_t *name, TBranch *branch, TObject *obj=0) : m_BranchName(name),
-                                                                    m_Branch(branch),
-                                                                    m_DataSet(obj){SetAddress();}
+                                                                    m_DataSet(obj),
+                                                                    m_Branch(branch)
+                                                                    {SetAddress();}
   StIOHeader(TString &name, TBranch *branch, TObject *obj=0)      : m_BranchName(name),
-                                                                    m_Branch(branch),
-                                                                    m_DataSet(obj){SetAddress();}    
+                                                                    m_DataSet(obj),
+                                                                    m_Branch(branch){SetAddress();}    
   StIOHeader(TString &name, TTree *tree)                          : m_BranchName(name),m_DataSet(0)
   {
     if (!m_DataSet) m_DataSet = new St_DataSet;
@@ -129,7 +130,6 @@ void St_io_Maker::Add(const Char_t *dataName, const Char_t *fileName)
   if (!CreateBranchList()) return;
 
   // Create branch  
-  Int_t buffersize = 4000;
   m_BranchName = dataName;
   m_BranchName += "_Branch";
   TBranch *b = 0;
@@ -226,7 +226,7 @@ void St_io_Maker::Clear(Option_t *)
         TObjArray *branches = tree->GetListOfBranches();
         if (branches) {
           TIter next(branches);
-          while (nextb = (TBranch *)next())  
+          while ( (nextb = (TBranch *)next()) )  
                  if(nextb->GetFile()) nextb->GetFile()->Flush();
         }
       }
@@ -243,7 +243,7 @@ void St_io_Maker::BuildBranchList(TTree *tree)
   TObjArray *branches = tree->GetListOfBranches();
   if (!branches)   return;
   TIter next(branches);
-  while (nextb = (TBranch *)next())  
+  while ( (nextb = (TBranch *)next()) )  
   {
      const Char_t *treePathName   = gSystem->DirName(tree->GetCurrentFile()->GetName());
      const Char_t *branchFileName = gSystem->BaseName(nextb->GetFileName());
@@ -254,7 +254,7 @@ void St_io_Maker::BuildBranchList(TTree *tree)
   }
 }
 //_____________________________________________________________________________
-static Int_t GetEntries(StIOHeader *obj)
+static Stat_t GetEntries(StIOHeader *obj)
 {
   // Returns the number of entries from the selected TBranch
   if (obj) {
@@ -288,11 +288,11 @@ void St_io_Maker::DestroyBranchList()
 }
 
 //_____________________________________________________________________________
-Int_t St_io_Maker::GetEvent(Int_t nevent)
+Stat_t St_io_Maker::GetEvent(Int_t nevent)
 {
   // returns the nuber of the bytes been read from the "nevent" event
-  Int_t i = NextEventGet(nevent);
-  printf(" =========== >>>>>>> %d bytes have been read\n",i);
+  Stat_t i = NextEventGet(nevent);
+  printf(" =========== >>>>>>> %d bytes have been read\n",Int_t(i));
   return i;
 }
 //_____________________________________________________________________________
@@ -367,7 +367,7 @@ Int_t St_io_Maker::NextEventGet(Int_t nEvent)
      counter = -1;
      TIter next(m_ListOfBranches);
      StIOHeader *obj = 0;
-     while(obj = (StIOHeader *)next())  {
+     while( (obj = (StIOHeader *)next()) )  {
 //VP       // determinate the recepient
 //VP        TString name = obj->GetName();
 //VP        name.ReplaceAll("_Branch","");
@@ -379,7 +379,7 @@ Int_t St_io_Maker::NextEventGet(Int_t nEvent)
 //VP           maker->SetDataSet((St_DataSet *)obj->ShuntData());
 //VP        }
 
-     St_DataSet *getDs,*psPar,*par,*son=0;
+     St_DataSet *getDs,*psPar,*son=0;
      getDs = (St_DataSet *)obj->ShuntData();
 //		Fix of very weird BUG in written structure
      if (getDs) {
@@ -409,7 +409,7 @@ Int_t St_io_Maker::NextEventPut()
   {
     TIter next(m_ListOfBranches);
     StIOHeader *obj = 0;
-    while(obj = (StIOHeader *)next())  {
+    while( (obj = (StIOHeader *)next()) )  {
       // Collect data
       TString name = obj->GetName();
       name.ReplaceAll("_Branch","");
@@ -452,7 +452,7 @@ Int_t St_io_Maker::SetActive()
   tree->SetBranchStatus("*",kFALSE);
   TIter next(m_ListOfBranches);
   StIOHeader *obj = 0;
-  while(obj = (StIOHeader *)next())  
+  while( (obj = (StIOHeader *)next()) )  
   {
     TString name = obj->GetName();
     name.ReplaceAll("_Branch","");
@@ -498,7 +498,7 @@ TTree *St_io_Maker::SetNextTree()
          if (m_Tree) {
             m_Tree->Print();
             // Calclulate next and current offset
-            m_OffSet += TMath::Min(m_Entries,GetMaxEvent());
+            m_OffSet += Int_t(TMath::Min(m_Entries,GetMaxEvent()));
             m_Entries = -1;         
          }
          else {

@@ -25,14 +25,14 @@ class  TFile;
 class St_io_Maker : public StIOInterFace {
  private:
    Bool_t fSplit;    // flag of the "split" mode
-// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.14 1999/07/15 13:58:12 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.15 1999/12/29 22:21:15 fine Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
    TFile         *m_TreeRootFile;   //! ROOT file to keep TTRee object in their.
    TObjArray     *m_ListOfBranches; //!
    TObjArray     *m_ListOfFiles;    //!
    TIter         *m_FileIterator;   //!
    Int_t          m_OffSet;         // Event offset for multi-volumes tree's
-   Int_t          m_Entries;        // Number of the events of the current tree.
+   Stat_t         m_Entries;        // Number of the events of the current tree.
    Int_t          m_MaxEventToProcess; // Max # if events to rpocess from each files
    TTree         *m_Tree;           //! Local Tree of this maker.
    TString        m_BranchName;      //?????????
@@ -55,8 +55,8 @@ class St_io_Maker : public StIOInterFace {
    virtual void       Clear(Option_t *option="");
 //VP   virtual St_DataSet *DataSet(const Char_t *set);
    virtual Int_t      Finish();
-   virtual Int_t      GetEvent(Int_t nevent=0);
-   virtual Int_t      GetMaxEvent(){ return m_MaxEventToProcess;} 
+   virtual Stat_t     GetEvent(Int_t nevent=0);
+   virtual Stat_t     GetMaxEvent(){ return Stat_t(m_MaxEventToProcess);} 
    virtual TTree     *GetTree();  
    virtual Int_t      Init();
    virtual Bool_t     IsNewTree(Int_t nevent);
@@ -82,7 +82,7 @@ class St_io_Maker : public StIOInterFace {
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_io_Maker.h,v 1.14 1999/07/15 13:58:12 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_io_Maker.h,v 1.15 1999/12/29 22:21:15 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_io_Maker, 1)   //StAF chain virtual base class for Makers
 };
