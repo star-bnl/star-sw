@@ -7,6 +7,8 @@
 //                                                                      //
 // Array of the STAF structures longs (one STAF Table per element).     //
 //                                                                      //
+// Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/st2tab.gif"> </P> End_Html //
+//                                                                      //
 //////////////////////////////////////////////////////////////////////////
  
 #include <iostream.h>
@@ -255,7 +257,6 @@ void St_Table::LinkHeader()
 //______________________________________________________________________________
 void St_Table::ls(Option_t *option)
 {
-  printf(" St_Table::ls()\n");
   TNamed::ls(option);
   IncreaseDirLevel();
   IndentLevel();

@@ -19,9 +19,12 @@ ClassImp(St_Module)
 //        "it is either "zero" or                                             //
 //         the last value of the "missed" parameters                          //
 //                                                                            //
-//         Calling St_Module::Call, St_Module::ExecuteModule methods with       //
+//         Calling St_Module::Call, St_Module::ExecuteModule methods with     //
 //         any parameter = 0 means the wrapped STAR module will be called     //
 //         with "default" parameter instead.                                  //
+//                                                                            //
+//                                                                            //
+// Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/Module2Root.gif"> </P> End_Html  
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -279,14 +282,13 @@ Int_t St_Module::CheckParameters(const Char_t *names[])
  //                                                                //
  //  Return:                                                       //
  //      0  = Ok, All parameters are "well" defined                //
- //     +n  = the n paramneters were not defined yet.              //
+ //     +n  = the n parameters were not defined yet.              //
  //                                                                //
  //  To print the list of parameters one may call                  //
  //           St_Module::Print() method                            //
  //                                                                //
  ////////////////////////////////////////////////////////////////////
    Int_t errcode = 0;
-   printf ("CheckParameters of module %s \n",GetName());
    if (st_Params) {
      for (Int_t i=0;i<fN;i++)
        if (!st_Params[i]) { 

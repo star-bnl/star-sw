@@ -8,7 +8,7 @@
 //                                                                      //
 // St_DataSet                                                           //
 //                                                                      //
-// Staf Data Set class to implement the STAF Event data strucutre       //
+// Staf Data Set class to implement the STAF Event data structure       //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
  

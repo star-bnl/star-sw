@@ -340,9 +340,9 @@ void St_DataSet::Browse(TBrowser *b)
    if (b)
        while (obj = next()) {
           if (obj->GetTableObj()) 
-                 b->Add(obj->GetTableObj());
+                 b->Add(obj->GetTableObj(),obj->GetTableObj()->GetName());
           else 
-                 b->Add(obj);
+                 b->Add(obj,obj->GetName());
        }
 }
 //______________________________________________________________________________
@@ -405,7 +405,30 @@ void  St_DataSet::ls(Int_t deep)
     }
   }
 }
- 
+#if 0
+//______________________________________________________________________________
+TTree *MakeTree(St_DataSet *dataset)
+{
+  // Creare a TTree object for the current Dataset
+
+ if (s_StafTable) s_StafTable->ls();
+ else             strcat(path,GetName());
+
+  if (s_ListOfDataSet && deep != 1 ) {
+    TIter next(s_ListOfDataSet);
+    St_DataSet *d=0;
+    while (d = (St_DataSet *)next()) {
+        IncreaseDirLevel();
+        d->ls(deep == 0 ? 0 : --deep);
+        DecreaseDirLevel();
+    }
+  }
+}
+//______________________________________________________________________________
+void FillTree()
+{
+}
+#endif
 //______________________________________________________________________________
 void St_DataSet::Remove(St_DataSet *set)
 { 
