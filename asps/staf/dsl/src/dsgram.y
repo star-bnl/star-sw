@@ -99,6 +99,9 @@ base_type:
 	| UNSIGNED LONG
 	| FLOAT
 	| DOUBLE
+	| LONG DOUBLE
+	| LONG LONG
+	| UNSIGNED LONG LONG
 	;
 %%
 /******************************************************************************

@@ -19,11 +19,13 @@ routines to test xdrrec for dsl
 
 static void clientTest(char *host);
 static void serverTest(void);
-#ifdef _CRAY
-#define XDRREC_CAST (unsigned long)
+#if defined _CRAY
+#define XDR_CAST1 unsigned long
 #else
-#define XDRREC_CAST 
+#define XDR_CAST1 const caddr_t
 #endif
+#define XDR_CAST2 int (*) (void *, caddr_t, int)
+#define XDR_CAST3 int (*) (void *, caddr_t, int)
 #define DS_COUNT 200
 /****************************************************************************
 */
@@ -48,7 +50,8 @@ static void clientTest(char *host)
 	if (!tcpConnectToServer(&sock, host, TCP_SERVER_PORT)) {
 		return;
 	}
-	xdrrec_create(&xdr, 0, 0, XDRREC_CAST&sock, tcpRead, tcpWrite);
+	xdrrec_create(&xdr, 0, 0, (XDR_CAST1)&sock, (XDR_CAST2)tcpRead,
+		(XDR_CAST3)tcpWrite);
 	xdr.x_op = XDR_DECODE;
 	if (!xdrrec_skiprecord(&xdr)) {
 		TCP_ERROR_PRINT("xdrrec_skiprecord failed");
@@ -82,7 +85,8 @@ static void serverTest(void)
 		if(!tcpConnectToClient(&sock, listenSocket)) {
 			return;
 		}
-		xdrrec_create(&xdr, 0, 0, XDRREC_CAST&sock, tcpRead, tcpWrite);
+		xdrrec_create(&xdr, 0, 0, (XDR_CAST1)&sock, (XDR_CAST2)tcpRead,
+			(XDR_CAST3)tcpWrite);
 		xdr.x_op = XDR_ENCODE;
 		t0 = msecTime(NULL);
 		if (!dsWriteTest(&xdr, DS_COUNT, bigEndian)) {

@@ -217,14 +217,14 @@ static bool_t dsDecodeType(XDR *xdrs, DS_DATASET_T **ppDataset)
 			DS_LOG_ERROR(DS_E_XDR_IO_ERROR);
 			goto fail;
 		}
-		if (strncmp(buf, "type", 4) == 0) {
-			if (!dsTypeListEnter(tList, buf + 4, &str)) {
+		if (strncmp(buf, "type ", 5) == 0) {
+			if (!dsTypeListEnter(tList, buf + 5, &str)) {
 				goto fail;
 			}
 		}
-		else if (strncmp(buf, "data", 4) == 0) {
+		else if (strncmp(buf, "data ", 5) == 0) {
 			if (!dsCreateDataset(&pDataset,
-				tList, buf+4, &str)) {
+				tList, buf + 5, &str)) {
 				goto fail;
 			}
 			pDataset->flags = optsLittleEndian ? 
@@ -233,8 +233,8 @@ static bool_t dsDecodeType(XDR *xdrs, DS_DATASET_T **ppDataset)
 			*ppDataset = pDataset;
 			return dsTypeListFree(tList);
 		}
-		else if (strncmp(buf, "opts", 4) == 0) {
-			if (strstr(buf + 4, "lend") != NULL && firstLine) {
+		else if (strncmp(buf, "opts ", 5) == 0) {
+			if (strstr(buf + 5, "lend") != NULL && firstLine) {
 				optsLittleEndian = TRUE;
 			}
 			else {
@@ -289,9 +289,8 @@ static bool_t dsEncodeType(XDR *xdrs, DS_DATASET_T *pDataset)
 {
 	char buf[DS_MAX_SPEC_LEN+1];
 	size_t *tList = NULL;
-	DS_BUF_T bp;
 	char *str, *typeStr = "type ";
-	size_t h, i, len;
+	size_t h, i;
 	unsigned size;
 	DS_DATASET_T *item;
 	DS_LIST_T list;
@@ -300,9 +299,7 @@ static bool_t dsEncodeType(XDR *xdrs, DS_DATASET_T *pDataset)
 	if (!dsTypeListCreate(&tList, DS_XDR_HASH_LEN + 1)) {
 		return FALSE;
 	}
-	if (!dsListInit(&list)) {
-		return FALSE;
-	}
+	dsListInit(&list);
 	if (!dsVisitList(&list, pDataset)) {
 		goto fail;
 	}
@@ -330,10 +327,10 @@ static bool_t dsEncodeType(XDR *xdrs, DS_DATASET_T *pDataset)
 			goto fail;
 		}
 		tList[h] = item->tid;
-		if (!dsTypeSpecifier(&str, &len, item->tid)) {
+		if (!dsTypeSpecifier(&str, item->tid)) {
 			goto fail;
 		}
-		size = len + strlen(typeStr);
+		size = strlen(str) + strlen(typeStr);
 		if (size >= sizeof(buf)) {
 			DS_LOG_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 			goto fail;
@@ -345,11 +342,10 @@ static bool_t dsEncodeType(XDR *xdrs, DS_DATASET_T *pDataset)
 			goto fail;
 		}
 	}
-	str = buf;
-	DS_PUT_INIT(&bp, buf, sizeof(buf));
-	if (!dsDatasetSpecifier(&bp, pDataset)) {
+	if (!dsDatasetSpecifier(pDataset, buf, sizeof(buf))) {
 		goto fail;
 	}
+	str = buf;
 	if (!xdr_string(xdrs, &str, sizeof(buf) -1)) {
 		DS_LOG_ERROR(DS_E_XDR_IO_ERROR);
 		goto fail;
@@ -513,9 +509,7 @@ bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset)
 	if (xdrs->x_op != XDR_DECODE && xdrs->x_op != XDR_ENCODE) {
 		DS_ERROR(DS_E_INVALID_XDR_OP);
 	}
-	if (!dsListInit(&list)) {
-		return FALSE;
-	}
+	dsListInit(&list);
 	if (!dsVisitList(&list, pDataset)) {
 		goto fail;
 	}
@@ -556,27 +550,6 @@ bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset)
 				DS_LOG_ERROR(DS_E_XDR_PAD_ERROR);
 				goto fail;
 			}
-			/*------------------------------------------------------------------
-			if (xdrs->x_op == XDR_DECODE) {
-				item->elcount = item->maxcount;
-			}
-			if (item->elcount == 0) {
-				continue;
-			}
-			if (item->p.data == NULL) {
-				DS_LOG_ERROR(DS_E_NULL_POINTER_ERROR);
-				goto fail;
-			}
-			if (!dsTypePtr(&type, item->tid) ||
-				!xdr_ctype(xdrs, item->p.data, item->elcount, type, swap)) {
-				goto fail;
-			}
-			npad = DS_PAD(item->elcount*type->stdsize, BYTES_PER_XDR_UNIT);
-			if (!XDR_PAD(xdrs, npad)) {
-				DS_LOG_ERROR(DS_E_XDR_PAD_ERROR);
-				goto fail;
-			}
-			--------------------------------------------------------------------*/
 		}
 	}
 	if (skip !=0) {

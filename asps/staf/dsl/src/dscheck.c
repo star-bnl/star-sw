@@ -70,9 +70,7 @@ int dsCheckDataset(DS_DATASET_T *pDataset)
 	DS_TYPE_T *type;
 	DS_LIST_T list;
 
-	if(!dsListInit(&list)) {
-		return FALSE;
-	}
+	dsListInit(&list);
 	if (!dsVisitList(&list, pDataset)) {
 		goto fail;
 	}
@@ -310,9 +308,7 @@ int dsSetDataset(DS_DATASET_T *pDataset)
 	DS_TYPE_T *type;
 	DS_LIST_T list;
 
-	if(!dsListInit(&list)) {
-		return FALSE;
-	}
+	dsListInit(&list);
 	if (!dsVisitList(&list, pDataset)) {
 		goto fail;
 	}

@@ -24,7 +24,6 @@ general routines for memory allocation
 /*
  * locations for memory allocation stats
  */
-static int dsBufSize = 0;
 static int dsDsetSize = 0;
 static int dsListSize = 0;
 static int dsMemCalls = 0;
@@ -37,57 +36,8 @@ static int dsTidSize = 0;
 */
 void dsAllocStats(void)
 {
-	printf("AllocStats: bufSize %d, dsetSize %d, listSize %d, memCalls %d, tidSize %d\n",
-		dsBufSize, dsDsetSize, dsListSize, dsMemCalls, dsTidSize);
-}
-/*****************************************************************************
-*
-* dsBufFree - free memory for buf struct
-*
-* RETURNS: TRUE if success else FALSE
-*/
-int dsBufFree(DS_BUF_T *bp)
-{
-	if (bp->out == NULL && bp->first != NULL) {
-		free(bp->first);
-		dsMemCalls++;
-		dsBufSize -= bp->limit - bp->first;
-		bp->first = bp->in = bp->limit = NULL;
-	}
-	return TRUE;
-}
-/*****************************************************************************
-*
-* dsBufRealloc - realloc memory for buf struct
-*
-* RETURNS: TRUE if success else FALSE
-*/
-int dsBufRealloc(DS_BUF_T *bp, size_t size)
-{
-	char *ptr;
-	size_t ndata = bp->in - bp->first;
-
-	if (bp->out != NULL || bp->in > bp->limit || ndata > size) {
-		DS_ERROR(DS_E_BUF_REALOC_ERROR);
-	}
-	if (size != 0) {
-		if ((ptr = DS_REALLOC(bp->first, size)) == NULL){
-			DS_ERROR(DS_E_NOT_ENOUGH_MEMORY);
-		}
-		dsMemCalls++;
-	}
-	else {
-		if (bp->first != NULL) {
-			free(bp->first);
-			dsMemCalls++;
-		}
-		ptr = NULL;
-	}
-	dsBufSize += size - (bp->limit - bp->first);
-	bp->first = ptr;
-	bp->in = ptr + ndata;
-	bp->limit = ptr + size;
-	return TRUE;
+	printf("AllocStats: dsetSize %d, listSize %d, memCalls %d, tidSize %d\n",
+		dsDsetSize, dsListSize, dsMemCalls, dsTidSize);
 }
 /******************************************************************************
 *
@@ -97,72 +47,42 @@ int dsBufRealloc(DS_BUF_T *bp, size_t size)
 */
 int dsFreeDataset(DS_DATASET_T *dataset)
 {
-	size_t i, j;
 	DS_LIST_T list;
-	DS_DATASET_T *p;
 
-	if (dataset == NULL) {
-		DS_ERROR(DS_E_NULL_POINTER_ERROR);
-	}
-	if (!dsListInit(&list)) {
+	if (!dsMakeFreeList(&list, dataset) ||
+		!dsFreeListed(&list)) {
 		return FALSE;
 	}
-	if (!dsVisitList(&list, dataset)) {
-		goto fail;
-	}
-	for (i = 0; i < list.count; i++) {
-		list.pItem[i]->visit = 0;
-	}
-	if (!dsVisitCount(dataset)) {
-		goto fail;
-	}
-	if ((dataset->refcount + 1) != dataset->visit) {
-		DS_LOG_ERROR(DS_E_NOTHING_TO_FREE);
-		goto fail;
-	}
-	for (i = 1; i < list.count; i++) {
-		p = list.pItem[i];
-		if (p->visit && p->refcount > p->visit && !dsVisitClear(p)) {
-			goto fail;
-		}
-		else if (p->visit != 0 && p->visit != p->refcount) {
-			DS_LOG_ERROR(DS_E_SYSTEM_ERROR);
-			goto fail;
-		}
-	}
-	for (i = 0; i < list.count; i++) {
-		p = list.pItem[i];
-		if (DS_IS_DATASET(p) && p->visit != 0) {
-			for (j = 0; j < p->elcount; j++) {
-				p->p.link[j]->refcount--;
-			}
+	return TRUE;
+}
+/******************************************************************************
+*
+* dsFreeListed - free memory for datasets on list
+*
+* RETURNS: TRUE if success else FALSE
+*/
+int dsFreeListed(DS_LIST_T *list)
+{
+	size_t i;
+	DS_DATASET_T *p;
+
+	for (i = 0; i < list->count; i++) {
+		p = list->pItem[i];
+		if (p->p.data && (p->flags & DS_F_ALLOC_P) != 0) {
 			p->elcount = 0;
-		}
-	}
-	for (i = 0; i < list.count; i++) {
-		p = list.pItem[i];
-		if (p->visit != 0) {
-			if (p->refcount != 0) {
-				DS_ERROR(DS_E_SYSTEM_ERROR);
-			}
-			if (p->p.data && (p->flags & DS_F_ALLOC_P) != 0) {
-				p->elcount = 0;
-				if (!dsRealloc(p, 0)) {
-					goto fail;
-				}
-			}
-			if (p->flags & DS_F_ALLOC_NODE) {
-				p->flags = DS_F_INVALID;
-				free(p);
-				dsMemCalls++;
-				dsDsetSize -= sizeof(DS_DATASET_T);
+			if (!dsRealloc(p, 0)) {
+				dsListFree(list);
+				return FALSE;
 			}
 		}
+		if (p->flags & DS_F_ALLOC_NODE) {
+			p->flags = DS_F_INVALID;
+			free(p);
+			dsMemCalls++;
+			dsDsetSize -= sizeof(DS_DATASET_T);
+		}
 	}
-	return dsListFree(&list);
-fail:
-	dsListFree(&list);
-	return FALSE;
+	return dsListFree(list);
 }
 /*****************************************************************************
 *
@@ -200,10 +120,9 @@ int dsListAppend(DS_LIST_T *list, DS_DATASET_T *item)
 *
 * RETURN TRUE if success else FALSE
 */
-int dsListInit(DS_LIST_T *list)
+void dsListInit(DS_LIST_T *list)
 {
 	memset(list, 0 , sizeof(DS_LIST_T));
-	return TRUE;
 }
 /*****************************************************************************
 *
@@ -217,8 +136,78 @@ int dsListFree(DS_LIST_T *list)
 		free(list->pItem);
 		dsMemCalls++;
 		dsListSize -= sizeof(DS_LIST_T *)*list->maxcount;
+		memset(list, 0, sizeof(DS_LIST_T));
 	}
 	return TRUE;
+}
+/******************************************************************************
+*
+* dsMakeFreeList - make list of datasets to be freed and adjust refcount
+*
+* RETURNS: TRUE if success else FALSE
+*/
+int dsMakeFreeList(DS_LIST_T *list, DS_DATASET_T *dataset)
+{
+	size_t i, j;
+	DS_DATASET_T *p;
+
+	if (dataset == NULL) {
+		DS_ERROR(DS_E_NULL_POINTER_ERROR);
+	}
+	dsListInit(list);
+	/* form list of reachable nodes */
+	if (!dsVisitList(list, dataset)) {
+		goto fail;
+	}
+	/* clear visit for reachable nodes */
+	for (i = 0; i < list->count; i++) {
+		list->pItem[i]->visit = 0;
+	}
+	/* depth first traversal to count number of times node is visited */
+	if (!dsVisitCount(dataset)) {
+		goto fail;
+	}
+	if ((dataset->refcount + 1) != dataset->visit) {
+		DS_LOG_ERROR(DS_E_NOTHING_TO_FREE);
+		goto fail;
+	}
+	/* clear visit during depth first traversal of dataset */
+	/* for nodes that have refcount > vist */
+	for (i = 1; i < list->count; i++) {
+		p = list->pItem[i];
+		if (p->visit && p->refcount > p->visit && !dsVisitClear(p)) {
+			goto fail;
+		}
+		else if (p->visit != 0 && p->visit != p->refcount) {
+			DS_LOG_ERROR(DS_E_SYSTEM_ERROR);
+			goto fail;
+		}
+	}
+	/* adjust refcounts */
+	for (i = 0; i < list->count; i++) {
+		p = list->pItem[i];
+		if (DS_IS_DATASET(p) && p->visit != 0) {
+			for (j = 0; j < p->elcount; j++) {
+				p->p.link[j]->refcount--;
+			}
+			p->elcount = 0;
+		}
+	}
+	/* form list of nodes to be freed */
+	for (i = j = 0; i < list->count; i++) {
+		p = list->pItem[i];
+		if (p->visit != 0) {
+			if (p->refcount != 0) {
+				DS_ERROR(DS_E_SYSTEM_ERROR);
+			}
+			list->pItem[j++] = p;
+		}
+	}
+	list->count = j;
+	return TRUE;
+fail:
+	dsListFree(list);
+	return FALSE;
 }
 /*****************************************************************************
 *
@@ -228,6 +217,7 @@ int dsListFree(DS_LIST_T *list)
 */
 int dsNewDataset(DS_DATASET_T **ppDataset, char *name)
 {
+	char *tst;
 	DS_DATASET_T *pDataset;
 
 	if (ppDataset == NULL) {
@@ -237,7 +227,7 @@ int dsNewDataset(DS_DATASET_T **ppDataset, char *name)
 		DS_ERROR(DS_E_NOT_ENOUGH_MEMORY);
 	}
 	dsMemCalls++;
-	if (!dsCopyName(pDataset->name, name, NULL)) {
+	if (!dsParseName(pDataset->name, name, &tst) || *tst != '\0') {
 		free(pDataset);
 		dsMemCalls++;
 		DS_ERROR(DS_E_INVALID_DATASET_NAME);	

@@ -7,7 +7,7 @@ modification history
 --------------------
 24apr93,whg  written.
 15feb95,whg	 added functions for CORBA IDL
-11jun96,whg  added indirection to dataset structure
+11jun98,whg  restructured
 */
 /*
 DESCRIPTION
@@ -19,6 +19,7 @@ general utility routines
 #include <string.h>
 #define DS_PRIVATE
 #include "dstype.h"
+
 /*****************************************************************************
 *
 * dsCmpName - CORBA style compare of names
@@ -43,304 +44,175 @@ int dsCmpName(char *s1, char *s2)
 		}
 	}
 }
-/******************************************************************************
+/*****************************************************************************
 *
-* dsCopyName - get standard C identifier
+* dsHash - hash function for strings
 *
-* RETURNS: TRUE if copy successuful, FALSE if invalid name or name too long
-*/
-int dsCopyName(char *dst, char *str, char **ptr)
+* RETURNS: hash of string
+*/	
+size_t dsHash(char *str)
 {
-	DS_BUF_T bp;
 	int c;
-    
-	DS_GET_INIT(&bp, str);
-	if ((c = dsGetName(dst, &bp)) >= 0) {
-		str = bp.out;
+	size_t h;
+
+	/* djb2 hash algorithm by Dan Bernstein */
+	for (h = 5381; c = *str; str++) {
+		h += (h << 5) + c;
 	}
-	if (ptr) {
+	return h;
+}
+/*****************************************************************************
+*
+* dsIsNextName - check for next name
+*
+* RETURNS: TRUE if name is next else FALSE
+*/
+int dsIsNextName(char *name, char *str, char **ptr)
+{
+	for (;isspace(*str); str++);
+	for (;*str == *name && *str != '\0'; name++, str++);
+	if (*name != '\0' || isalpha(*str) || *str == '_') {
+		return FALSE;
+	}
+	if (ptr != NULL) {
 		*ptr = str;
 	}
-	return c < 0 ? FALSE : TRUE;
+	return TRUE;
 }
 /*****************************************************************************
 *
-* dsGetChar - get a character from the buffer defined by bp
-*
-* RETURNS: character >= 0 for success or EOF if an error occured
-*/
-int dsGetc(DS_BUF_T *bp)
-{
-	return DS_GETC(bp);
-}
-/*****************************************************************************
-*
-* dsGetColumnSpecifier - return col specifier (colName or tableName.tableName)
-*
-* RETURNS:
-*/ 
-int dsGetColumnSpecifier(char *tableName, char *columnName, DS_BUF_T *bp)
-{	
-	if (dsGetName(columnName, bp) <= 0) {
-		DS_ERROR(DS_E_INVALID_COLUMN_SPECIFIER);
-	}
-	if (DS_PEEK(bp) != '.') {
-		tableName[0] = '\0';
-		return TRUE;
-	}
-	DS_GETC(bp);
-	strcpy(tableName, columnName);
-	if (!isalpha(DS_PEEK(bp)) || dsGetName(columnName, bp) <= 0) {
-		DS_ERROR(DS_E_INVALID_COLUMN_SPECIFIER);
-	}
-    return TRUE;
-}
-/*****************************************************************************
-*
-* dsGetName - get a CORBA style name
-*
-* RETURNS: length of the name for success or EOF
-*/
-int dsGetName(char *name, DS_BUF_T *bp)
-{
-	int c, i = 0;
-	
-	if (!isalpha(c = dsGetNonSpace(bp))) {
-		dsUngetc(c, bp);
-		return EOF;
-	}
-	do {
-		if (i < DS_MAX_NAME_LEN) {
-			name[i++] = (char)c;
-		}
-		c = DS_GETC(bp);
-	} while (isalnum(c) || c == '_');
-	dsUngetc(c, bp);
-	if (i <= DS_MAX_NAME_LEN) {
-		name[i] = '\0';
-		return i;
-	}
-	return EOF;
-}
-/*****************************************************************************
-*
-* dsGetNonSpace - return next non-space character
+* dsNonSpace - return next non-space character
 *
 * RETURNS: non-space character for success or EOF
 */
-int dsGetNonSpace(DS_BUF_T *bp)
+int dsNonSpace(char *str, char **ptr)
 {
-	int c;
-	
-	while (isspace(c = DS_GETC(bp)));
-	return c;
+	while (isspace(*str++));
+	if (ptr != NULL) {
+		*ptr = str;
+	}
+	return *(str - 1);
 }
 /*****************************************************************************
 *
-* dsGetNumber - get an unsigned number
+* dsParseName - get a CORBA style name
 *
-* RETURNS: zero for success or EOF 
+* RETURNS: length of the name for success or EOF
 */
-int dsGetNumber(size_t *pNumber, DS_BUF_T *bp)
+int dsParseName(char *name, char *str, char **ptr)
+{
+	int c, i = 0;
+	
+	if (!isalpha(c = dsNonSpace(str, &str))) {
+		DS_ERROR(DS_E_INVALID_NAME);
+	}
+	do {
+		if (i >= DS_MAX_NAME_LEN) {
+			DS_ERROR(DS_E_INVALID_NAME);
+		}
+		name[i++] = (char)c;
+		c = *str++;
+	} while (isalnum(c) || c == '_');
+	name[i] = '\0';
+	if (ptr != NULL) {
+		*ptr = str - 1;
+	}
+	return TRUE;
+}
+/*****************************************************************************
+*
+* dsParseNumber - get an unsigned number
+*
+* RETURNS: TRUE if success else FALSE
+*/
+int dsParseNumber(size_t *pNumber, char *str, char **ptr)
 {
 	int c;
 	size_t number = 0;
 
-	if (!isdigit(c = dsGetNonSpace(bp))) {
-		dsUngetc(c, bp);
-		return EOF;
+	if (!isdigit(c = dsNonSpace(str, &str))) {
+		DS_ERROR(DS_E_INVALID_NUMBER)
 	}
 	do {
-		if (number < (UINT_MAX/10)) {
-			number = 10*number + (c - '0');
+		if (number > (UINT_MAX/10 -1)) {
+			DS_ERROR(DS_E_INVALID_NUMBER)
 		}
-		else {
-			/* overflow - return max unsigned */
-			number = UINT_MAX;
-		} 
-	} while(isdigit(c = DS_GETC(bp)));
-	dsUngetc(c, bp);
+		number = 10*number + (c - '0');
+	} while(isdigit(c = *str++));
 	*pNumber = number;
-	return 0;
-}
-/*****************************************************************************
-*
-* dsMark - mark node as visited
-*
-* RETURN TRUE if success else FALSE
-*/
-int dsMark(DS_LIST_T *list, DS_DATASET_T *node)
-{
-	if (!DS_IS_VALID(node)) {
-		DS_ERROR(DS_E_INVALID_DATASET_OR_TABLE);
+	if (ptr != NULL) {
+		*ptr = str - 1;
 	}
-	if ((node->visit - 1) < list->count &&
-		list->pItem[node->visit - 1] == node) {
-		DS_ERROR(DS_E_MARK_ERROR);
-	}
-	if (!dsListAppend(list, node)) {
-		return FALSE;
-	}
-	node->visit = list->count;
 	return TRUE;
 }
 /*****************************************************************************
 *
-* dsPutc - put a character in the buffer defined by bp
+* dsPutc - put a character in string
 *
-* RETURNS: the character for success or EOF if an error occured
+* RETURNS: TRUE for success else FALSE
 */
-int dsPutc(int c, DS_BUF_T *bp)
+int dsPutc(int c, char **in, char *limit)
 {
-	size_t size;
+	char *ptr = *in;
 
-	if (bp->in >= bp->limit) {
-		size = bp->limit - bp->first + DS_BUF_ALLOC;
-		if (!dsBufRealloc(bp, size)) {
-			return EOF;
-		}
+	if ((ptr + 1) >= limit) {
+		return FALSE;
 	}
-	return  0XFF & (*bp->in++ = (char)c);
+	*ptr++ = (char)c;
+	*ptr = '\0';
+	*in = ptr;
+	return  TRUE;
 }
 /*****************************************************************************
 *
-* dsPutNumber - put a number in the buffer defined by bp
+* dsPutNumber - put a number in string
 *
-* RETURNS: nonnegative for success else EOF
+* RETURNS: TRUE for success else FALSE
 */
-int dsPutNumber(int n, DS_BUF_T *bp)
+int dsPutNumber(int n, char **in, char *limit)
 {
 	char buf[20];
 	
 	sprintf(buf, "%d", n);
-	return dsPuts(buf, bp);
+	return dsPutStr(buf, in, limit);
 }
 /*****************************************************************************
 *
-*  dsPuts - put a string in the buffer defined by bp
+*  dsPutStr - append a string
 *
-* RETURNS: nonnegative for success else EOF
+* RETURNS: TRUE for success else FALSE
 */
-int dsPuts(char *s, DS_BUF_T *bp)
+int dsPutStr(char *str, char **in, char *limit)
 {
-	int c;
-	
-	while ((c = *s++) != '\0') {
-		if (DS_PUTC(c, bp) < 0) {
-			return EOF;
-		}
-	}
-	return 0;
-}
-/*****************************************************************************
-*
-* dsPutTabs - put n tabs in the buffer defined by bp
-*
-* RETURNS: nonnegative for success else EOF
-*/ 
-int dsPutTabs(int n, DS_BUF_T *bp)
-{
-	while (n-- > 0) {
-		if (DS_PUTC('\t', bp) < 0) {
-			return EOF;
-		}
-	}
-	return 0;
-}
-/******************************************************************************
-*
-* dsUngetc - push character back
-*
-* RETURNS: character if success else EOF
-*/
-int dsUngetc(int c, DS_BUF_T *bp)
-{
-	if (c != EOF && bp->out > bp->first && (0XFF & c) == *(bp->out - 1)) {
-		bp->out--;
-		return c;
-	}
-	return EOF;
-} 
-/******************************************************************************
-*
-* dsVisitClear - clear visit during depth first traversal of dataset
-*
-* RETURN TRUE if success else FALSE
-*/
-int dsVisitClear(DS_DATASET_T *dataset)
-{
-	size_t i;
+	char *ptr = *in;
 
-	if (!DS_IS_VALID(dataset)) {
-		DS_ERROR(DS_E_INVALID_DATASET_OR_TABLE);
+	while(*str != '\0' && ptr < limit) {
+		*ptr++ = *str++;
 	}
-	if (dataset->visit != 0) {
-		dataset->visit = 0;
-		if (DS_IS_DATASET(dataset)) {
-			for (i = 0; i < dataset->elcount; i++) {
-				if (!dsVisitClear(dataset->p.link[i])) {
-					return FALSE;
-				}
-			}
-		}
-	}
-	return TRUE;
-}
-/******************************************************************************
-*
-* dsVisitCount - count visits during depth first traversal of dataset
-*
-* RETURN TRUE if success else FALSE
-*/
-int dsVisitCount(DS_DATASET_T *dataset)
-{
-	size_t i;
-
-	if (!DS_IS_VALID(dataset)) {
-		DS_ERROR(DS_E_INVALID_DATASET_OR_TABLE);
-	}
-	if (dataset->visit++ == 0) {
-		if (DS_IS_DATASET(dataset)) {
-			for (i = 0; i < dataset->elcount; i++) {
-				if (!dsVisitCount(dataset->p.link[i])) {
-					return FALSE;
-				}
-			}
-		}
-	}
-	return TRUE;
-}
-/*****************************************************************************
-*
-* dsVisited - check for node of dataset visited
-*
-* RETURN TRUE if visited else FALSE
-*/
-int dsVisited(DS_LIST_T *list, DS_DATASET_T *node)
-{
-	return node != NULL && (node->visit - 1) < list->count &&
-		node == list->pItem[node->visit - 1];
-}
-/******************************************************************************
-*
-* dsVisitList - form a list of nodes accessable from dataset
-*
-* RETURN TRUE if success else FALSE
-*/
-int dsVisitList(DS_LIST_T *list, DS_DATASET_T *dataset)
-{
-	size_t i;
-
-	if (!dsMark(list, dataset)) {
+	if (ptr >= limit) {
 		return FALSE;
 	}
-	if (DS_IS_DATASET(dataset)) {
-		for (i = 0; i < dataset->elcount; i++) {
-			if (!dsVisited(list, dataset->p.link[i]) &&
-				!dsVisitList(list, dataset->p.link[i])) {
-				return FALSE;
-			}
-		}
+	*ptr = '\0';
+	*in = ptr;
+	return TRUE;
+}
+/*****************************************************************************
+*
+* dsPutTabs - put n tabs in string
+*
+* RETURNS: TRUE for success else FALSE
+*/ 
+int dsPutTabs(size_t n, char **in, char *limit)
+{
+	char *ptr = *in;
+
+	while (n-- > 0 && ptr < limit) {
+		*ptr++ = '\t';
 	}
+	if (ptr >= limit) {
+		return FALSE;
+	}
+	*ptr = '\0';
+	*in = ptr;
 	return TRUE;
 }
