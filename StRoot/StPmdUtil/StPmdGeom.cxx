@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.13 2005/01/27 13:09:50 subhasis Exp $
+ * $Id: StPmdGeom.cxx,v 1.14 2005/02/22 07:36:52 subhasis Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.14  2005/02/22 07:36:52  subhasis
+ * big prinout on picking.. commented
+ *
  * Revision 1.13  2005/01/27 13:09:50  subhasis
  * New map for 2005 data
  *
@@ -1285,7 +1288,7 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
   // Once the day is know choose the mapping file
   //     if( rn >=1 && rn <21)
   //Following are the configuration of FEE from 1st Jan'04 to 21st Jan'04
-   cout<<"picking old board status"<<endl;
+   //cout<<"picking old board status"<<endl;
   if( rn >=1)    
     {
       //chain 0
