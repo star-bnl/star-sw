@@ -2,7 +2,6 @@
 * Run BFC in following manner:
 * - read in fz file
 * - run g2t
-* - run tpc (tss) & svt (srs) & emc (ems) simulation
 * - write out xdf file
 *  
 * 
