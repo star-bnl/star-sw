@@ -1,5 +1,8 @@
-// $Id: rootlogon.C,v 1.17 1999/11/15 23:46:42 fisyak Exp $
+// $Id: rootlogon.C,v 1.18 1999/12/07 20:23:28 fisyak Exp $
 // $Log: rootlogon.C,v $
+// Revision 1.18  1999/12/07 20:23:28  fisyak
+// Uncomment Default white background for all plots
+//
 // Revision 1.17  1999/11/15 23:46:42  fisyak
 // Separate time stamps and chains
 //
@@ -83,7 +86,7 @@
    }
 
 
-//gROOT->SetStyle("Plain");// Default white background for all plots
+   gROOT->SetStyle("Plain");// Default white background for all plots
 
  // The modes below are provided by Nick van Eijndhoven <Nick@phys.uu.nl>
  // from Alice.
