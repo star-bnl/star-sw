@@ -119,7 +119,6 @@ void TRG_Reader::SanityCheck2003(char *ptr, int check_s=1) {
   /* As of Jan 14 2003, the trigger data is messed up, and this sanity check
   ** will fail.  Under pressure to get the chain running, I'm commenting it
   ** out.  We'll depend upon the above checks, which are not messed up.
-  */
   if (check_s){
     assert( gs2003->RAW[0].RawDetHeader[0]  =='R');   
     assert( gs2003->RAW[0].RawDetHeader[1]  =='D');   
@@ -132,4 +131,5 @@ void TRG_Reader::SanityCheck2003(char *ptr, int check_s=1) {
   } else {
     cout << "TRG_Reader::SanityCheck2003 : Bank position and summary sanity check is disabled" << endl;
   }
+  */
 }
