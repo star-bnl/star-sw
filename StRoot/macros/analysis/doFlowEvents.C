@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.45 2003/05/16 20:47:33 posk Exp $
+// $Id: doFlowEvents.C,v 1.46 2003/06/27 21:17:18 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -128,7 +128,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   // Make Selection objects and instantiate FlowMaker
   //
   char makerName[30];
-//   StFlowSelection flowSelect;
+//    StFlowSelection flowSelect;
   // particles:h+, h-, pi+, pi-, pi, k+, k-, k, e-, e+, e, pr-, pr+, pr, d+, d-, and d
 //   flowSelect->SetPidPart("h+");               // for parts. wrt plane
 //   flowSelect->SetPtPart(0., 8.);              // for parts. wrt plane
@@ -138,7 +138,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   flowSelect->SetFitPtsPart(20, 50);          // for parts. wrt plane
 //   flowSelect->SetFitOverMaxPtsPart(0.52, 1.); // for parts. wrt plane
 //   flowSelect->SetChiSqPart(0.1, 1.3);         // for parts. wrt plane
-//   flowSelect->SetDcaGlobalPart(0., 2.);       // for parts. wrt plane
+//   flowSelect->SetDcaGlobalPart(0., 0.5);       // for parts. wrt plane
 //   flowSelect->SetYPart(-0.5, 0.5);            // for parts. wrt plane
 
   // Uncomment next line if you make a selection object
@@ -214,8 +214,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
     bool anaMaker = kTRUE;
     bool cumMaker = kFALSE;
     //bool cumMaker = kTRUE;
-    bool spMaker = kFALSE;
-    //bool spMaker = kTRUE;
+    //bool spMaker = kFALSE;
+    bool spMaker = kTRUE;
   }
 
   Bool_t includeTpcTracks  = kTRUE;
@@ -295,7 +295,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   }
   
   // Set the event cuts
-//     StFlowCutEvent::SetCent(5, 5);
+//      StFlowCutEvent::SetCent(5, 5);
 //   StFlowCutEvent::SetMult(0, 0);
 //   StFlowCutEvent::SetVertexX(0., 0.);
 //   StFlowCutEvent::SetVertexY(0., 0.);
@@ -326,27 +326,22 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   StFlowCutTrack::SetChgFtpc(0, 0);
 
   // Set the event plane selections
+    // Harmonic 1 means odd, harmonic 2 means even
   // TPC
 //   StFlowEvent::SetEtaTpcCut(0.05, 1., 0, 0);  // harmonic 1, selection 1
 //   StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 0);  // harmonic 2, selection 1
-//   StFlowEvent::SetEtaTpcCut(0.05, 1., 2, 0);  // harmonic 3, selection 1
 //   StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 1);  // harmonic 2, selection 2
 //   StFlowEvent::SetPtTpcCut(0.0, 1., 1, 1);    // harmonic 2, selection 2
 //   StFlowEvent::SetDcaGlobalTpcCut(0., 1.);    // for event plane
-
   // FTPC
 //   StFlowEvent::SetEtaFtpcCut(0., 10., 0, 0);  // harmonic 1, selection 1
 //   StFlowEvent::SetEtaFtpcCut(0., 10., 1, 0);  // harmonic 2, selection 1
-//   StFlowEvent::SetEtaFtpcCut(0., 10., 2, 0);  // harmonic 3, selection 1
 //   StFlowEvent::SetEtaFtpcCut(0., 10., 0, 1);  // harmonic 1, selection 2
 //   StFlowEvent::SetEtaFtpcCut(0., 10., 1, 1);  // harmonic 2, selection 2
-//   StFlowEvent::SetEtaFtpcCut(0., 10., 2, 1);  // harmonic 3, selection 2 
 //   StFlowEvent::SetPtFtpcCut(0., 10., 0, 0);   // harmonic 1, selection 1
 //   StFlowEvent::SetPtFtpcCut(0., 10., 1, 0);   // harmonic 2, selection 1
-//   StFlowEvent::SetPtFtpcCut(0., 10., 2, 0);   // harmonic 3, selection 1
 //   StFlowEvent::SetPtFtpcCut(0., 10., 0, 1);   // harmonic 1, selection 2
 //   StFlowEvent::SetPtFtpcCut(0., 10., 1, 1);   // harmonic 2, selection 2
-//   StFlowEvent::SetPtFtpcCut(0., 10., 2, 1);   // harmonic 3, selection 2
 //   StFlowEvent::SetDcaGlobalFtpcCut(0., 1.);   // for event plane
 
   // particles:h+, h-, pi+, pi-, pi, k+, k-, k, e-, e+, e, pr-, pr+, pr, d+, d-, and d
@@ -473,8 +468,13 @@ void doFlowEvents(const Int_t nevents, Bool_t phiWgtOnly) {
 
 // PDSF pico files
   // 200 GeV
-  
-  // P02gg with FTPC
+  // FTPC
+//   Char_t* filePath="/auto/pdsfdv36/starebye/oldi/ProductionMinBias/PicoDst/AllSectors/FullField";
+//   if (nevents < 250) {
+//     Char_t* fileExt="st_physics_2253050_raw_0001.flowpicoevent.root";
+//    } else {
+//      Char_t* fileExt="*.flowpicoevent.root";
+//    }
 
   // ProductionMinBias P02gd
   Char_t* filePath="/auto/stardata/pDST/flow_pDST_production_removed_l3_trigged_events/reco/ProductionMinBias/ReversedFullField/P02gd/2001/2258044";
@@ -527,6 +527,9 @@ void doFlowEvents(const Int_t nevents, Bool_t phiWgtOnly) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.46  2003/06/27 21:17:18  posk
+// Event plane cuts now only odd and even, instead of different for each harmonic.
+//
 // Revision 1.45  2003/05/16 20:47:33  posk
 // Runs only StFlowPhiWgtMaker if called with phiWgtOnly=kTRUE.
 //
