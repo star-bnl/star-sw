@@ -101,31 +101,39 @@ void StTpcDeviantSpectraAnalysis::fillHistograms(StEvent& event) {
 
 	    StThreeVectorD mom = track->geometry()->momentum();
 	    double p = abs(mom);
+            StDedxPidTraits* dedxPidTr;
+            StSPtrVecTrackPidTraits& traits=track->pidTraits();
+            for (int itrait = 0; itrait < traits.size(); itrait++){
+	      if (traits[itrait]->detector() == kTpcId) {
+		   dedxPidTr = dynamic_cast<StDedxPidTraits*>(traits[itrait]);
+	      }
+              if (dedxPidTr &&  dedxPidTr->method() == kTruncatedMeanId) break;
+	    }
+	    //StTrackPidTraits* trkPidTr = track->pidTraits(kTpcId)[0];
+	    //StDedxPidTraits* dedxPidTr = (StDedxPidTraits*)(trkPidTr);
+	    if  (dedxPidTr &&  dedxPidTr->method() == kTruncatedMeanId) {
+	      double dedx = dedxPidTr->mean();
 
-            StDetectorId useTpc = kTpcId;
-	    StTrackPidTraits* trkPidTr = track->pidTraits(kTpcId)[0];
-	    StDedxPidTraits* dedxPidTr = (StDedxPidTraits*)(trkPidTr);
-	    double dedx = dedxPidTr->mean();
+	      StParticleDefinition *guess = track->pidTraits(tpcDedx);
+	      double deviant = tpcDedx.numberOfSigma(mParticle);
 
-            StParticleDefinition *guess = track->pidTraits(tpcDedx);
-	    double deviant = tpcDedx.numberOfSigma(mParticle);
-
-	    double effic = mEffic.efficiency(track);
+	      double effic = mEffic.efficiency(track);
 	    //  cout << effic << endl;
-            if (effic > 0. && effic < 1.) {
-	      float weight = 1./effic;
-              double pperp = mom.perp();
-              double mt = sqrt(pperp*pperp + mMassPid*mMassPid);
-              double E = sqrt(p*p+mMassPid*mMassPid);
-	      double pz = mom.z();
-	      double y = 0.5*log((E+pz)/(E-pz)); 
-              mYMtDeviant->Fill(y,mt,deviant,weight);
+	      if (effic > 0. && effic < 1.) {
+		float weight = 1./effic;
+		double pperp = mom.perp();
+		double mt = sqrt(pperp*pperp + mMassPid*mMassPid);
+		double E = sqrt(p*p+mMassPid*mMassPid);
+		double pz = mom.z();
+		double y = 0.5*log((E+pz)/(E-pz)); 
+		mYMtDeviant->Fill(y,mt,deviant,weight);
 
 	    // diagnostic
-	      if (p < 1.0*GeV) {
+		if (p < 1.0*GeV) {
 		//  cout << weight<<" " << deviant << endl;
-               mDedxvsP->Fill(float(p), float(dedx));
-               mPIDDeviant->Fill(deviant,weight);
+		  mDedxvsP->Fill(float(p), float(dedx));
+		  mPIDDeviant->Fill(deviant,weight);
+		}
 	      }
 	    }
        }            
