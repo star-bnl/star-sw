@@ -12,10 +12,10 @@ StChain *chain=0;
 
 
 int rdMu2soloPi0(
- TString fullName="aa6",
+ TString fullName="aa8c",
  int nEve=10000,
- Int_t nFiles  = 2,
- char* file="inp/R5107005.lis", 
+ Int_t nFiles  = 5,
+ char* file="inp/R5112017.lis", 
  char* inDir   = "./",
  char* outDir   = "outPi0/"
 ){ 
@@ -67,7 +67,7 @@ int rdMu2soloPi0(
     chain->Clear();
     stat = chain->Make();
 
-    if(eventCounter%100!=0)continue;
+    if(eventCounter%300!=0)continue;
 
     printf("\n\n ====================%d  processing  ==============\n", eventCounter);
 
@@ -81,7 +81,8 @@ int rdMu2soloPi0(
    chain->Finish();
    //   HList.ls();
    fullName+=".hist.root";
-   TFile f( outDir+fullName,"recreate");
+   fullName=outDir+fullName;
+   TFile f( fullName,"recreate");
    assert(f.IsOpen());
    printf("%d histos are written  to '%s' ...\n",HList.GetEntries(),fullName.Data());
    HList.Write();
