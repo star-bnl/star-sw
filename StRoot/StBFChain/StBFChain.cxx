@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.144 2000/09/30 14:24:53 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.145 2000/10/03 12:05:50 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -695,8 +695,6 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 	TObjString *File;
 	while ((File = (TObjString *) next())) {
 	  TString string = File->GetString();
-	  char *filename = string.Data();
-	  int lfilename = strlen(filename);
 	  if (!strstr(string.Data(),"*") &&
 	      gSystem->AccessPathName(string.Data())) {// file does not exist
 	    printf (" *** NO FILE: %s, exit!\n", string.Data());
