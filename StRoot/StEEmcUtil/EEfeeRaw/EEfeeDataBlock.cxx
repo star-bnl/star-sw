@@ -6,8 +6,8 @@
 
 ClassImp(EEfeeDataBlock)
 
-static const int DefaultMaxHead=4;
-static const int DefaultMaxData=128;
+const int EEfeeDataBlock::DefaultMaxHead=4;
+const int EEfeeDataBlock::DefaultMaxData=192;
 
 
 //--------------------------------------------------
@@ -161,6 +161,9 @@ int  EEfeeDataBlock :: isValid(){
 
 /*
  * $Log: EEfeeDataBlock.cxx,v $
+ * Revision 1.8  2003/12/03 18:55:41  zolnie
+ * fixed yet another bug
+ *
  * Revision 1.7  2003/12/02 17:22:07  balewski
  * fix after version mixup
  *
