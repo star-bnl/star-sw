@@ -163,6 +163,10 @@
 *                      from ev0out table - then deletes ev0out table
 *                      - should be called AFTER ev02! and b4 smdst!
 * 
+* 11/4/98  K. Turner - create "obin" and "obout" chain for reading and
+*                      writing objectivity database - Torre will implement
+*                    - create "ntup2" chain so can write a 2nd ntuple
+* 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -414,6 +418,7 @@ macro bfc_init _
 	    exec dst_chk_tabl#run_header
     (user)  exec init_user
     (ntup)  exec write_table_to_ntuple#init_disk [nunit] [nfile]
+   (ntup2)  exec write_table_to_ntuple#init_disk [nunit2] [nfile2]    
     (fzout) user/output o [output_fzd_file]
     (evout)
             if output_xdf_file="" then
@@ -700,8 +705,9 @@ return
                exec dst_chk_tabl#event_header
                exec dst_chk_tabl#dst_tables
 *              exec dst_chk_tabl#event_summary    
-     (user)     exec run_user
-     (ntup)     exec write_table_to_ntuple#write_event_disk [nid] [ntable]
+     (user)    exec run_user
+     (ntup)    exec write_table_to_ntuple#write_event_disk [nid] [ntable]
+    (ntup2)    exec write_table_to_ntuple#write_event_disk [nid2] [ntable2]   
     (evout)    if [output_xdf_file]="" then
                  message "Empty output file"
                else
@@ -796,6 +802,7 @@ macro bfc_finish _
             endif
      (user) exec finish_user
      (ntup) exec write_table_to_ntuple#close_disk [nunit] [nid]
+    (ntup2) exec write_table_to_ntuple#close_disk [nunit2] [nid2]    
      (evout,esout) 
             if [output_xdf_file]="" then
                  message "Empty output file"
