@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.23 2003/09/23 04:37:16 porter Exp $
+ * $Id: StDbSql.cc,v 1.24 2003/09/26 20:40:37 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.24  2003/09/26 20:40:37  deph
+ * *** empty log message ***
+ *
  * Revision 1.23  2003/09/23 04:37:16  porter
  * fixed leak of timeValues array
  *
@@ -405,7 +408,9 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
     char* dt=getDateTime(t1);
     table->setBeginTime(dt); delete [] dt;
     table->setRowNumber(); // reset current row to 0
-  }
+  } else {
+	  	delete [] timeValues;
+	 }
 
   Db.Release();  
    if(retVal) retVal=(int)updateEndTime(table,dataTable,reqTime);
@@ -413,7 +418,6 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
   delete [] idMap;
   delete [] dataIDList;
   delete [] dataTable;
-  delete [] timeValues;
 
  return retVal;
 #undef __METHOD__
