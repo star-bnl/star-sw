@@ -33,7 +33,7 @@ socObject:: socObject() {
 
 //----------------------------------
 socObject:: socObject(long id) {
-   EML_MESSAGE("Alert -- This CTOR called only by soc.");
+// EML_MESSAGE("Alert -- This CTOR called only by soc.");
    myPtr = NULL; // This must be set in derived CTOR !!!
    myName = new string("soc");
    myType = new string("socCatalog");
@@ -257,11 +257,11 @@ STAFCV_T socCatalog:: findObject (
    idObject(name,type,id);
    if( !VALID_IDREF(id) ){
       obj = NULL;
-      EML_ERROR(INVALID_IDREF);
+      return FALSE; //BUG-TOO VERBOSE      EML_ERROR(INVALID_IDREF);
    }
-   if(myObjs[id]->lock()){
-      EML_ERROR(OBJECT_LOCKED);
-   }
+//BUG???   if(myObjs[id]->lock()){
+//BUG???      EML_ERROR(OBJECT_LOCKED);
+//BUG???   }
    obj = myObjs[id];
    EML_SUCCESS(STAFCV_OK);
 }
@@ -296,7 +296,7 @@ STAFCV_T socCatalog:: idObject (const char * name
       }
    }
    id = -1;
-// EML_ERROR(INVALID_IDREF);
+// EML_ERROR(OBJECT_NOT_IDED);
    return FALSE;	//- HACK: This error is too sensitive
 }
 

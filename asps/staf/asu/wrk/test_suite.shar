@@ -12,9 +12,12 @@
 #	test120tdm.kumac
 #	test121getput.kumac
 #	test130dui.kumac
+#	test140dio.kumac
+#	test141multread.kumac
+#	test700list.kumac
 #	test_suite.README
 #	test_suite.SETUP
-# This archive created: Thu Jun  6 18:07:30 1996
+# This archive created: Wed Jun 12 11:01:56 1996
 export PATH; PATH=/bin:$PATH
 if test -f 'test000commands.kumac'
 then
@@ -281,13 +284,6 @@ WAIT 'Hit <CR> to continue:' 0
 TRACE ON
 SPX/COUNT
 SPX/LIST
-SPX/NEWDUMMY mats
-SPX/NEWGRID jerry 100 20
-SPX/LIST
-SPX/GRID/HEIGHT jerry
-SPX/GRID/WIDTH jerry
-SPX/GRID/SET jerry 21 17 1234
-SPX/GRID/GET jerry 21 17
 TRACE OFF
 WAIT 'Hit <CR> to continue:' 0
 
@@ -604,6 +600,182 @@ WAIT 'Hit <CR> to continue:' 0
 RETURN
 SHAR_EOF
 fi # end of overwriting check
+if test -f 'test140dio.kumac'
+then
+	echo shar: will not over-write existing file "'test140dio.kumac'"
+else
+cat << \SHAR_EOF > 'test140dio.kumac'
+MACRO TEST140DIO
+
+MESS
+MESS ************************************************************
+MESS ************************************************************
+MESS ****  DIO - Test some Dataset Input/Output commands.    ****
+MESS ************************************************************
+MESS ************************************************************
+MESS
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Open input and output disk files.                 ****
+MESS ************************************************************
+NEWFILESTREAM idat data/tss_mc.xdf R
+NEWFILESTREAM odat t140out.xdf W
+DIO/COUNT
+DIO/LIST
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Create a working dataset and get one "event" from ****
+MESS ****  input stream "idat".                              ****
+MESS ************************************************************
+MKDIR work
+CD work
+GETEVENT idat .
+MESS ************************************************************
+MESS ****  HACK - Account for getEvent BUG.                  ****
+MESS ************************************************************
+GETEVENT idat .
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Put one event to output stream "odat".            ****
+MESS ************************************************************
+PUTEVENT odat
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Close idat and odat.                              ****
+MESS ************************************************************
+FILE/CLOSE idat
+FILE/CLOSE odat
+WAIT 'Hit <CR> to continue:' 0
+
+RETURN
+SHAR_EOF
+fi # end of overwriting check
+if test -f 'test141multread.kumac'
+then
+	echo shar: will not over-write existing file "'test141multread.kumac'"
+else
+cat << \SHAR_EOF > 'test141multread.kumac'
+MACRO TEST141MULTREAD
+
+MESS
+MESS ************************************************************
+MESS ************************************************************
+MESS ****  MULTREAD - Test reading multiple events.          ****
+MESS ************************************************************
+MESS ************************************************************
+MESS
+ALIAS/CREATE STAFCV_OK 1
+ALIAS/CREATE STAFCV_BAD 0
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Open input disk file.                             ****
+MESS ************************************************************
+NEWFILESTREAM idat data/tpc_pulser.xdf R
+DIO/COUNT
+DIO/LIST
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Create a working dataset get all "events" from    ****
+MESS ****  input stream "idat", printing 1 row from each.    ****
+MESS ************************************************************
+MKDIR work
+CD work
+GETEVENT idat .
+MESS ************************************************************
+MESS ****  HACK - Account for getEvent BUG.                  ****
+MESS ************************************************************
+I = 0
+LS
+WHILE ( STAF_STATUS(1) .EQ. STAFCV_OK ) DO
+   I = [I] + 1
+   MESS '******************'
+   MESS '**** Event #' [I]
+   MESS '******************'
+   GETEVENT idat
+   IF ( STAF_STATUS(1) .EQ. STAFCV_OK ) THEN
+      TABLE/PRINT TMPRCV0_TAB/tmpRcv0Tab 1
+      WAIT 'Hit <CR> to continue:' 0
+   ENDIF
+ENDWHILE
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Close idat.                                       ****
+MESS ************************************************************
+FILE/CLOSE idat
+WAIT 'Hit <CR> to continue:' 0
+
+RETURN
+SHAR_EOF
+fi # end of overwriting check
+if test -f 'test700list.kumac'
+then
+	echo shar: will not over-write existing file "'test700list.kumac'"
+else
+cat << \SHAR_EOF > 'test700list.kumac'
+MACRO TEST700LIST
+
+MESS
+MESS ************************************************************
+MESS ************************************************************
+MESS ****  LIST - Test each of several list commands.        ****
+MESS ************************************************************
+MESS ************************************************************
+MESS
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  SOC - Service and Object Catalog                  ****
+MESS ************************************************************
+SOC/LIST
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  TDM - Table and Dataset Memory                    ****
+MESS ************************************************************
+TDM/LIST
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  DUI - Dataset Unix-like Interface                 ****
+MESS ************************************************************
+DUI/LIST
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  DIO - Dataset Input and Output                    ****
+MESS ************************************************************
+DIO/LIST
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  AMI - Analysis Module Interface                   ****
+MESS ************************************************************
+AMI/LIST
+WAIT 'Hit <CR> to continue:' 0
+
+
+RETURN
+SHAR_EOF
+fi # end of overwriting check
 if test -f 'test_suite.README'
 then
 	echo shar: will not over-write existing file "'test_suite.README'"
@@ -640,7 +812,9 @@ test121getput.kumac
 	Argument #1 == number of rows to process
 
 test130dui.kumac
-	Test some DUI commands.
+	Test some DUI commands by creating a fake raw-data hierarchy.
+	Argument #1 == number of TPC sectors
+	Argument #2 == number of I960s per TPC sector
 
 SHAR_EOF
 fi # end of overwriting check

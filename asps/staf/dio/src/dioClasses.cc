@@ -107,15 +107,16 @@ STAFCV_T dioFileStream:: getEvent (tdmDataset* destination) {
    }
    myState = DIO_READ_STATE;
 
-EML_PRINTF(" Get pointer to destination dataset. \n");
-   DSL_PTR_T ddd;
+//-DEBUG-EML_PRINTF(" Get pointer to destination dataset. \n");
+   DSL_PTR_T ddd=0;
+//-DEBUG-EML_PRINTF(" Get pointer to destination dataset. \n");
    if( !destination->cvtDslPointer(ddd) ){
       EML_ERROR(BAD_DATASET);
    }
-EML_PRINTF(" Convert pointer to DS_DATASET_T. \n");
+//-DEBUG-EML_PRINTF(" Convert pointer to DS_DATASET_T. \n");
    DS_DATASET_T *pDest=(DS_DATASET_T*)ddd;
 
-EML_PRINTF(" Read data here. \n");
+//-DEBUG-EML_PRINTF(" Read data here. \n");
 DS_DATASET_T *pDS=NULL;
 bool_t result;
    if( !xdr_dataset_type(&myXDR, &pDS,0)	/* get descriptor */
@@ -182,6 +183,7 @@ STAFCV_T dioFileStream:: putEvent (tdmDataset* source) {
 //- Get pointer to source dataset -**
    DSL_PTR_T ddd;
    if( !source->cvtDslPointer(ddd) ){
+      myState = DIO_OPEN_STATE;
       EML_ERROR(BAD_DATASET);
    }
    DS_DATASET_T *pSour=(DS_DATASET_T*)ddd;

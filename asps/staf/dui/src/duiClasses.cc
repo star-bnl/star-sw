@@ -225,6 +225,9 @@ STAFCV_T duiDispatcher:: findDataset (const char * dirPath
 	 EML_ERROR(INVALID_AHS_SPEC);
    }
 
+/*-HACK- should be superfluous. -*/
+   dataset = NULL;
+
    if( !tdmFactory::findDataset(fullPath,dataset) ){
       if( !findNode_ds(fullPath,pDS)
       ||  !createDataset(fullPath,pDS,dataset)
@@ -268,9 +271,12 @@ STAFCV_T duiDispatcher:: newDataset (const char * name, long setDim){
       EML_ERROR(DUPLICATE_OBJECT_NAME);
    }
    tdmDataset* p;
-   if( !mkdir(name)
-   ||  !findDataset(name,p) ){
-      EML_ERROR(CANT_CREATE_OBJECT);
+   if( !findDataset(name,p) ){		//- create object from pointer
+      if( !mkdir(name)			//- create pointer
+      ||  !findDataset(name,p)		//- create object from pointer
+      ){
+	 EML_ERROR(CANT_CREATE_OBJECT);
+      }
    }
    if( !soc->idObject(name,"tdmDataset",id) ){
       EML_ERROR(OBJECT_NOT_FOUND);
@@ -287,9 +293,12 @@ STAFCV_T duiDispatcher:: newTable (const char * name, const char * spec
       EML_ERROR(DUPLICATE_OBJECT_NAME);
    }
    tdmTable* p;
-   if( !mkTable(name,spec,rows)
-   ||  !findTable(name,p) ){
-      EML_ERROR(CANT_CREATE_OBJECT);
+   if( !findTable(name,p) ){		//- create object from pointer
+      if( !mkTable(name,spec,rows)	//- create pointer
+      ||  !findTable(name,p)		//- create object from pointer
+      ){
+	 EML_ERROR(CANT_CREATE_OBJECT);
+      }
    }
    if( !soc->idObject(name,"tdmTable",id) ){
       EML_ERROR(OBJECT_NOT_FOUND);

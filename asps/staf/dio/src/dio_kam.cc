@@ -177,20 +177,23 @@ int kam_diofilestream_getevent()
    dioFileStream* stream;
    tdmDataset* destination=NULL;
 
-EML_PRINTF("Find file stream (%s).\n",name);
+//-DEBUG-("Find file stream (%s).\n",name);
    if( !dio->findFileStream(name, stream) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
 
-EML_PRINTF("Find destination dataset (%s)(%p).\n",dest,destination);
+//-DEBUG-("Find destination dataset (%s)(%p).\n",dest,destination);
    if( !tdm->findDataset(dest, destination)
-   &&  !tdm->newDataset(dest, 100) 		// HACK - 100
-   &&  !tdm->findDataset(dest, destination)
+   ||  !(NULL != destination)
    ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      if( !tdm->newDataset(dest, 100) 		// HACK - 100
+      ||  !tdm->findDataset(dest, destination)
+      ){
+	 EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      }
    }
 
-EML_PRINTF("Get the event.\n");
+//-DEBUG-("Get the event.\n");
    if( !stream->getEvent(destination) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
@@ -214,12 +217,14 @@ int kam_diofilestream_putevent()
    char* sour = ku_gets();      /* source dataset */
 
    dioFileStream* stream;
-   tdmDataset* source;
+   tdmDataset* source=NULL;
 
    if( !dio->findFileStream(name, stream) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
-   if( !tdm->findDataset(sour, source) ){
+   if( !tdm->findDataset(sour, source)
+   ||  !( NULL != source )
+   ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    if( !stream->putEvent(source) ){

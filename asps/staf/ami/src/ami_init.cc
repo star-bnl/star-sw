@@ -23,7 +23,7 @@ extern CC_P int ami_load(amiBroker* broker); //automatically generated
 //:<--------------------------------------------------------------------
 int ami_init()
 {
-   EML_MESSAGE(Initializing AMI.);
+   EML_MESSAGE(AMI: Initializing.);
 
 /*- Define the AMI KUIP commands. -*/
    ami_def_();
@@ -39,7 +39,7 @@ int ami_init()
 //:<--------------------------------------------------------------------
 int ami_start()
 {
-   EML_MESSAGE(Starting AMI.);
+   EML_MESSAGE(AMI: Starting.);
 
 /*- Create the AMI Broker. -*/
    ami = new amiBroker("ami");
@@ -56,7 +56,7 @@ int ami_start()
 //:<--------------------------------------------------------------------
 int ami_stop()
 {
-   EML_MESSAGE(Stopping AMI.);
+   EML_MESSAGE(AMI: Stopping.);
 
 /*- Delete the AMI Broker.
    delete ami;

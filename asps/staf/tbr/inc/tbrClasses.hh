@@ -71,7 +71,8 @@ public:
 //:**NONE**
 
 //:----------------------------------------------- PUB FUNCTIONS      --
-   virtual STAFCV_T list ();
+   virtual char * list ();
+
    virtual STAFCV_T deleteAsciiViewer (const char * name);
    virtual STAFCV_T findAsciiViewer (const char * name
 		, tbrAsciiViewer*& viewer);

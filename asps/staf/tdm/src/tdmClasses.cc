@@ -695,7 +695,7 @@ STAFCV_T tdmDataset:: getDescriptor (char *& descriptor) {
 tdmFactory:: tdmFactory()
 		: socFactory()
 		, socObject() {
-   EML_MESSAGE(tdmFactory -- NULL Creator);
+// EML_MESSAGE(tdmFactory -- NULL Creator);
 }
 
 tdmFactory:: tdmFactory(const char * name)
@@ -731,8 +731,9 @@ STAFCV_T tdmFactory:: deleteTable (const char * name) {
 //----------------------------------
 STAFCV_T tdmFactory:: findDataset (const char * name
 		, tdmDataset*& dataset ) {
-   socObject* obj;
+   socObject* obj=NULL;
    if( !soc->findObject(name,"tdmDataset",obj) ){
+      dataset = NULL;	//- ???-leave as is?
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    dataset = (tdmDataset*)(obj->ptr());
@@ -744,7 +745,7 @@ STAFCV_T tdmFactory:: findTable (const char * name
 		, tdmTable*& table) {
    socObject* obj;
    if( !soc->findObject(name,"tdmTable",obj) ){
-      EML_ERROR(OBJECT_NOT_FOUND);
+      return FALSE; //BUG-TOO VERBOSE      EML_ERROR(OBJECT_NOT_FOUND);
    }
    table = (tdmTable*)(obj->ptr());
    EML_SUCCESS(STAFCV_OK);
