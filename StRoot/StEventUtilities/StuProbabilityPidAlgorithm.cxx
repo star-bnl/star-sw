@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.24 2001/03/21 18:16:13 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.25 2002/01/17 03:25:27 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.25  2002/01/17 03:25:27  aihong
+ * add production Tag to take care of different centrality def. between different productions
+ *
  * Revision 1.24  2001/03/21 18:16:13  aihong
  * constructor without StEvent added
  *
@@ -485,10 +488,22 @@ void StuProbabilityPidAlgorithm::readParametersFromFile(TString fileName){
 	StuProbabilityPidAlgorithm::mDcaBinEdgeSet   
                         =(TVectorD* )f.Get("DcaBinEdgeSet");
 
-	StuProbabilityPidAlgorithm::mBBScale
-                   	  =(TVectorD* )f.Get("BBScale");
+
+	StuProbabilityPidAlgorithm::mBBPrePar
+                   	  =(TVectorD* )f.Get("BBPrePar");
+	StuProbabilityPidAlgorithm::mBBTurnOver
+                   	  =(TVectorD* )f.Get("BBTurnOver");
 	StuProbabilityPidAlgorithm::mBBOffSet
                 	  =(TVectorD* )f.Get("BBOffSet");
+	StuProbabilityPidAlgorithm::mBBScale
+                   	  =(TVectorD* )f.Get("BBScale");
+	StuProbabilityPidAlgorithm::mBBSaturate
+                   	  =(TVectorD* )f.Get("BBSaturate");
+
+	StuProbabilityPidAlgorithm::mProductionTag
+                	  =(TObjString* )f.Get("productionTag");
+
+
 
 	StuProbabilityPidAlgorithm::thisMultBins
                         =int((*mNoEqualyDividableRangeNBinsSet)(0));
@@ -523,6 +538,8 @@ void StuProbabilityPidAlgorithm::readParametersFromFile(TString fileName){
                 	  =(*mEqualyDividableRangeEndSet)(2);
 	StuProbabilityPidAlgorithm::thisNHitsEnd
                 	  =(*mEqualyDividableRangeEndSet)(3);
+
+
 
 
         StuProbabilityPidAlgorithm::mPIDTableRead=true;
@@ -599,33 +616,38 @@ bool StuProbabilityPidAlgorithm::mPIDTableRead=false;
 
 StDedxMethod  StuProbabilityPidAlgorithm::mDedxMethod=kTruncatedMeanId;
 
-TVectorD* StuProbabilityPidAlgorithm::mEAmp = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mEAmp    = new TVectorD();
 TVectorD* StuProbabilityPidAlgorithm::mECenter = new TVectorD();
-TVectorD* StuProbabilityPidAlgorithm::mESigma = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mESigma  = new TVectorD();
 
-TVectorD* StuProbabilityPidAlgorithm::mPiAmp = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mPiAmp    = new TVectorD();
 TVectorD* StuProbabilityPidAlgorithm::mPiCenter = new TVectorD();
-TVectorD* StuProbabilityPidAlgorithm::mPiSigma = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mPiSigma  = new TVectorD();
 
-TVectorD* StuProbabilityPidAlgorithm::mKAmp = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mKAmp    = new TVectorD();
 TVectorD* StuProbabilityPidAlgorithm::mKCenter = new TVectorD();
-TVectorD* StuProbabilityPidAlgorithm::mKSigma = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mKSigma  = new TVectorD();
 
-TVectorD* StuProbabilityPidAlgorithm::mPAmp = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mPAmp    = new TVectorD();
 TVectorD* StuProbabilityPidAlgorithm::mPCenter = new TVectorD();
-TVectorD* StuProbabilityPidAlgorithm::mPSigma = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mPSigma  = new TVectorD();
 
 
-TVectorD* StuProbabilityPidAlgorithm::mEqualyDividableRangeStartSet = new TVectorD();
-TVectorD* StuProbabilityPidAlgorithm::mEqualyDividableRangeEndSet = new TVectorD();
-TVectorD* StuProbabilityPidAlgorithm::mEqualyDividableRangeNBinsSet = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mEqualyDividableRangeStartSet   = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mEqualyDividableRangeEndSet     = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mEqualyDividableRangeNBinsSet   = new TVectorD();
 TVectorD* StuProbabilityPidAlgorithm::mNoEqualyDividableRangeNBinsSet = new TVectorD();
 
 TVectorD* StuProbabilityPidAlgorithm::mMultiBinEdgeSet = new TVectorD();
-TVectorD* StuProbabilityPidAlgorithm::mDcaBinEdgeSet = new TVectorD();  
+TVectorD* StuProbabilityPidAlgorithm::mDcaBinEdgeSet   = new TVectorD();  
 
-TVectorD* StuProbabilityPidAlgorithm::mBBScale = new TVectorD(); 
-TVectorD* StuProbabilityPidAlgorithm::mBBOffSet = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mBBPrePar   = new TVectorD(); 
+TVectorD* StuProbabilityPidAlgorithm::mBBTurnOver = new TVectorD(); 
+TVectorD* StuProbabilityPidAlgorithm::mBBOffSet   = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mBBScale    = new TVectorD(); 
+TVectorD* StuProbabilityPidAlgorithm::mBBSaturate = new TVectorD(); 
+
+TObjString* StuProbabilityPidAlgorithm::mProductionTag = new TObjString();
 
 
 
@@ -786,6 +808,18 @@ int StuProbabilityPidAlgorithm::getCentralityBin(double theCent){
 double StuProbabilityPidAlgorithm::getCentrality(int theMult){
 
 
+  if (mProductionTag){
+
+
+  if ( (mProductionTag->GetString()).Contains("P01gl") )
+  return  getCentrality_P01gl(theMult);
+
+  else gMessMgr->Error()<<"Production tag "<<mProductionTag->GetString().Data()<<" in PIDTable is filled but its name is not recognized ! "<<endm;
+
+  }
+
+  else {
+
      // limits 
     // For Cut Set 1       
     // 225 ~ 3%            
@@ -810,6 +844,38 @@ double StuProbabilityPidAlgorithm::getCentrality(int theMult){
   else if (theMult > 120 ) return 0.23;
   else if (theMult > 115 ) return 0.24;
   else if (theMult > 100 ) return 0.28;
+  else return 0.99;
+
+  }
+
+
+
+}
+//-------------------------------
+
+
+double StuProbabilityPidAlgorithm::getCentrality_P01gl(int theMult){
+     
+  //from Zhangbu's study     
+  //5% 474 
+  //10% 409 
+  //20% 302 
+  //30% 216 
+  //40% 149 
+  //50% 98 
+  //60% 59 
+  //70% 32 
+  //80% 14 
+
+  if (theMult*2. > 474 )      return 0.03; //use Nch instead of hminus. so *2.
+  else if (theMult*2. > 409 ) return 0.10;
+  else if (theMult*2. > 302 ) return 0.20;
+  else if (theMult*2. > 216 ) return 0.30;
+  else if (theMult*2. > 149 ) return 0.40;
+  else if (theMult*2. > 98  ) return 0.50; 
+  else if (theMult*2. > 59  ) return 0.60;
+  else if (theMult*2. > 32  ) return 0.70;
+  else if (theMult*2. > 14  ) return 0.80;
   else return 0.99;
 }
 
@@ -878,6 +944,17 @@ void StuProbabilityPidAlgorithm::setCalibrations(double theEta, int theNhits){
    myBandBGFcn->SetParameter(5,(*mBBScale)(thePosition));
    myBandBGFcn->SetParameter(2,(*mBBOffSet)(thePosition));
 
+
+ if (mProductionTag){
+
+   if ( (mProductionTag->GetString()).Contains("P01gl") ){
+     
+   myBandBGFcn->SetParameter(0,(*mBBPrePar)(thePosition));
+   myBandBGFcn->SetParameter(1,(*mBBTurnOver)(thePosition));
+   myBandBGFcn->SetParameter(6,(*mBBSaturate)(thePosition));
+
+   }
+ }
 
 
 }

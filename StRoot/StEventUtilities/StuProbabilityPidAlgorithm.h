@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.h,v 1.13 2001/03/21 18:16:13 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.h,v 1.14 2002/01/17 03:25:37 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.h,v $
+ * Revision 1.14  2002/01/17 03:25:37  aihong
+ * add production Tag to take care of different centrality def. between different productions
+ *
  * Revision 1.13  2001/03/21 18:16:13  aihong
  * constructor without StEvent added
  *
@@ -45,7 +48,7 @@
 
 #include "TString.h"
 #include "TVectorD.h"
-
+#include "TObjString.h"
 
 #include "StEventTypes.h"
 #include "StParticleTable.hh"
@@ -54,6 +57,7 @@
 class StEvent;
 class TString;
 class TVectorD;
+class TObjString;
 class TF1;
 
 
@@ -120,6 +124,7 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
       void   fillAsUnknown();
       void   lowRigPID(double rig,double dedx,int theCharge);
       double getCentrality(int theMult);
+      double getCentrality_P01gl(int theMult);
       int    getCentralityBin(double theCent);
       int    getCalibPosition(double theEta, int theNHits);
       void   setCalibrations(double theEta, int theNhits);
@@ -194,8 +199,16 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
   static TVectorD*     mMultiBinEdgeSet;  // % central
   static TVectorD*     mDcaBinEdgeSet;    // in centimeter
 
-  static TVectorD*     mBBScale; //BetheBloch scale par.
-  static TVectorD*     mBBOffSet; //BetheBolch offset par.
+
+  static TVectorD*     mBBPrePar;   //par[0]
+  static TVectorD*     mBBTurnOver; //par[1]
+  static TVectorD*     mBBOffSet;   //par[2],BetheBolch offset par. 
+  static TVectorD*     mBBScale;    //par[5],BetheBloch scale par.
+  static TVectorD*     mBBSaturate; //par[6]
+
+
+  static TObjString*   mProductionTag; //production tag
+
 
   TF1*        myBandBGFcn;
 
