@@ -275,7 +275,7 @@ C     Now find last point on track and calculate track length.
       endif
       globtrk(iglob).impact = 0.
       globtrk(iglob).curvature = abs(1/gtrk(igtrk).p(2))
-      globtrk(iglob).method = 2**kHelix2StepId
+      globtrk(iglob).method = kHelix2StepId
       globtrk(iglob).map(1) = 0
       globtrk(iglob).map(2) = 0
 CSM      globtrk(iglob).id_start_vertex = 0

@@ -522,7 +522,7 @@ C     Now find last point on track
 CSM               
                   globtrk(iglob).id_start_vertex= 0
                   globtrk(iglob).curvature = tptrack(itrk).curvature
-                  globtrk(iglob).method = 2**8+2**kHelix2StepId
+                  globtrk(iglob).method = kHelix2StepId+2**tpcOther
                   globtrk(iglob).map(1) = 0
                   globtrk(iglob).map(2) = 0
                   globtrk(iglob).pid = 0
@@ -665,7 +665,7 @@ C     Adjust for ssd later
 C     SM                    globtrk(iglob).id_start_vertex = 0
                     globtrk(iglob).curvature = abs(C_D_CURVATURE*bfield(3)*
      +                   globtrk(iglob).invpt)
-                    globtrk(iglob).method = 2**kHelix2StepId+2**7
+                    globtrk(iglob).method = kHelix2StepId+2**tpcStandard
                     globtrk(iglob).map(1) = 0
                     globtrk(iglob).map(2) = 0
                     globtrk(iglob).pid = 0

@@ -92,7 +92,7 @@ c
        if(globtrk(i).iflag.gt.0)then ! work with good tracks only
 
 C      this will only work if Kalman fit was used
-        if(iand(globtrk(i).method,2**kKalmanFitId).ne.0)then
+        if(iand(globtrk(i).method,kKalmanFitId).ne.0)then
          globtrk(i).chisq(2) = 0.0 ! preset in case of failure
          rc = 1./globtrk(i).curvature
          ndef = 2*globtrk(i).n_fit_point-5
