@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.86 1999/07/14 01:42:41 fisyak Exp $
+// $Id: bfc.C,v 1.87 1999/07/15 00:56:16 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -11,8 +11,22 @@
 #include "TRegexp.h"
 #include "TSystem.h"
 #include "StRoot/St_base/St_DataSet.h"
-#include "StRoot/StChain/StMaker.h"
+#include "StRoot/StChain/StChain.h"
 #include "StRoot/xdf2root/St_XDFFile.h"
+#include "StRoot/StMagF/StMagF.h"
+#include "StRoot/St_xdfin_Maker/St_xdfin_Maker.h"
+#include "StRoot/St_db_Maker/St_db_Maker.h"
+#include "StRoot/St_geant_Maker/St_geant_Maker.h"
+#include "StRoot/StMinidaqMaker/StMinidaqMaker.h"
+#include "StRoot/St_tpcdaq_Maker/St_tpcdaq_Maker.h"
+#include "StRoot/StTrsMaker/StTrsMaker.h"
+#include "StRoot/St_tpcdaq_Maker/St_tpcdaq_Maker.h"
+#include "StRoot/St_tss_Maker/St_tss_Maker.h"
+#include "StRoot/St_fss_Maker/St_fss_Maker.h"
+#include "StRoot/St_ems_Maker/St_ems_Maker.h"
+#include "StRoot/St_emc_Maker/St_emc_Maker.h"
+#include "StRoot/St_tcl_Maker/St_tcl_Maker.h"
+#include "StRoot/St_srs_Maker/St_srs_Maker.h"
 
 #endif
 TBrowser *b = 0;
@@ -25,10 +39,10 @@ class St_XDFFile;     St_XDFFile     *xdf_out = 0;
 class St_geant_Maker; St_geant_Maker *geant   = 0;   
 class St_db_Maker;    St_db_Maker    *dbMk    = 0; St_db_Maker *calibMk = 0;
 
-class StMagF;         StMagF         *field   = 0;           
+class StMagFC;         StMagFC        *field   = 0;           
 
 class St_tss_Maker;   St_tss_Maker   *tssMk   = 0;
-class StMinidaqMaker; StMinidaqMaker *tpc_raw = 0;
+
 class StTrsMaker;     StTrsMaker     *trs     = 0;
 class St_tcl_Maker;   St_tcl_Maker   *tclMk   = 0;     
 class St_tpt_Maker;   St_tpt_Maker   *tptMk   = 0;
@@ -60,6 +74,8 @@ class StEventMaker;   StEventMaker   *evMk    = 0;
 class StAnalysisMaker;StAnalysisMaker *anaMk  = 0;
 class St_QA_Maker;    St_QA_Maker    *qa      = 0;
 class StTreeMaker;    StTreeMaker    *treeMk  = 0;
+class StEventDisplayMaker; StEventDisplayMaker *disp = 0;
+class St_geom_Maker;  St_geom_Maker  *geom    = 0;
 TString *InFile = 0;
 TString *FileOut= 0;
 TString *XdfFile = 0;
@@ -80,7 +96,7 @@ enum EChainOptions {
   kRICH    ,                                                  // RICH
   kGLOBAL  ,kMATCH   ,kPRIMARY ,kV0      ,kXI      ,kKINK    ,// Global Chain
   kDST     ,kEVENT   ,kANALYSIS,kQA      ,                    // Dst
-  kTREE    ,kAllEvent,kLAST    ,                              // StEvent
+  kTREE    ,kAllEvent,kDISPLAY ,kLAST    ,                    // StEvent
   kDEFAULT ,
   kMakeDoc
 };
@@ -99,7 +115,7 @@ Char_t  *ChainOptions[] = {
  ,"RICH"
  ,"GLOBAL" ,"MATCH"  ,"PRIMARY","V0"     ,"XI"     ,"KINK"
  ,"DST"    ,"EVENT"  ,"ANALYSIS","QA"
- ,"TREE"   ,"AllEvent","LAST"
+ ,"TREE"   ,"AllEvent","DISPLAY","LAST"
  ,"DEFAULT"
  ,"MakeDoc"
 };
@@ -132,7 +148,7 @@ Char_t *ChainComments[] = {
   "St_tss_Maker   \tin Chain",
   "StTrsMaker     \tin Chain",
   "StMinidaqMaker \tin Chain",
-  "use TFS (no St_tss_Maker and no StTrsMaker)",
+  "use TFS \t(no St_[tss_ and no Trs]Maker)",
   "St_tcl_Maker   \tin Chain",
   "St_tpt_Maker   \tin Chain",
   "SVT            \tin Chain (St_[srs+stk]_Maker)",
@@ -159,10 +175,11 @@ Char_t *ChainComments[] = {
   "StEventMaker   \tin Chain",
   "StAnalysisMaker\tin Chain",
   "St_QA_Maker    \tin Chain",
-  "write event to StTree",
+  "StTreeMaker    \tin Chain",
   "Write whole event to StTree",
+  "StEventDisplayMaker \tin Chain",
   "Nothing to comment",
-  "Default Set has been set",
+  "Default has been set",
   "Make HTML documentation for the given Chain"
 };
 //_____________________________________________________________________
@@ -249,6 +266,7 @@ void SetOption(int k){// set all OFF
       break;
     case  kY1b:
       if (!ChainFlags[kDEFAULT]) {
+	SetOption(kEMS);
 	SetOption(kEMC);
 	SetOption(kRICH);
       }
@@ -274,6 +292,7 @@ void SetOption(int k){// set all OFF
     case  kY2a:
       if (!ChainFlags[kDEFAULT]) {
 	SetOption(kDEFAULT);
+	SetOption(kEMS);
 	SetOption(kEMC);
 	SetOption(kTPC);
 	SetOption(kFTPC);
@@ -322,9 +341,10 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
   printf ("==============================================\n");
   printf ("============= You are in %s ===============\n",STAR_VERSION.Data());
   Int_t k, kgo;
+#ifdef __CINT__
   if (!Chain || !strlen(Chain)) {
     printf ("============= \t U S A G E =============\n");
-    printf ("
+    printf ("\n
 \tbfc(Int_t First, Int_t Nevents, Char_t *Chain, Char_t *infile, Char_t *outfile)
 \tbfc(Int_t Nevents, Char_t *Chain, Char_t *infile, Char_t *outfile)
 \tbfc(Char_t *Chain, Char_t *infile, Char_t *outfile)
@@ -362,12 +382,15 @@ Examples:
 \n");
     printf ("============= \tPossible Chain Options are: \n"); 
     for (Int_t k=kFIRST;k<NoChainOptions;k++)
-      printf ("============ %2d \t:[-]%s   \t:%s \n",k,ChainOptions[k],ChainComments[k]);
+      printf ("============ %2d\t:[-]%-8s\t:%s \n",k,ChainOptions[k],ChainComments[k]);
+#if 0
     printf ("============= \tImportant two changes:
                            \tIt is required exact matching in Chain definition
                            \tAll Chain options set in supplyed order\n");
+#endif
     gSystem->Exit(1);
   }
+#endif
   TString tChain(Chain);
   printf ("Requested chain is :\t%s\n",tChain.Data());
   tChain.ToLower(); //printf ("Chain %s\n",tChain.Data());
@@ -410,9 +433,9 @@ Examples:
       (ChainFlags[kMATCH] || ChainFlags[kPRIMARY] || ChainFlags[kV0] ||
        ChainFlags[kXI]    || ChainFlags[kKINK])) SetOption(kGLOBAL);
   if (!ChainFlags[kEval] && ChainFlags[kAllEvent])  SetOption(kEval); 
-  SetOption(-kL3T);
+  //  SetOption(-kL3T);
   SetOption(-kEMC);
-  SetOption(-kKINK);
+  //  SetOption(-kKINK);
   // Print set values
   for (k = kFIRST; k<NoChainOptions;k++) {
     if (ChainFlags[k]) {
@@ -431,98 +454,17 @@ void Load(){
   //  gSystem->Load("StUtilities");
   gSystem->Load("libmsg");
   gSystem->Load("libtls");
-  // Create the main chain object
-  if (!chain) delete chain;
-  chain = new StChain("bfc");
-  printf ("Run chain version %s on %s in %s\n",
-	  chain->GetCVS(),
-	  gSystem->HostName(),
-	  gSystem->WorkingDirectory());
-  chain->SetDebug();
   gSystem->Load("St_db_Maker");
-  //  Create the makers to be called by the current chain
-  const char *mainDB = "$STAR/StDb/params";
-  dbMk = new St_db_Maker("db",mainDB);
-  dbMk->SetDebug();
-  if (ChainFlags[kSD97]) { dbMk->SetDateTime("sd97");}
-  if (ChainFlags[kSD98]) { dbMk->SetDateTime("sd98");}
-  if (ChainFlags[kY1a])  { dbMk->SetDateTime("year_1a");}
-  if (ChainFlags[kY1b])  { dbMk->SetDateTime("year_1b");}
-  if (ChainFlags[kY1c])  { dbMk->SetDateTime("year_1c");}
-  if (ChainFlags[kES99]) { dbMk->SetDateTime("es99");}
-  if (ChainFlags[kER99]) { dbMk->SetDateTime("er99");}
-  if (ChainFlags[kY1d])  { dbMk->SetDateTime("year_1d");}
-  if (ChainFlags[kY1e])  { dbMk->SetDateTime("year_1e");}
-  if (ChainFlags[kY2a])  { dbMk->SetDateTime("year_2a");}
-  printf ("db Maker set time = %d %d \n",dbMk->GetDateTime().GetDate(),
-	  dbMk->GetDateTime().GetTime());
-  const char *calibDB = "$STAR_ROOT/calib";
-  calibMk = new St_db_Maker("calib",calibDB);
-  calibMk->SetDebug();  
-  if (ChainFlags[kFieldOff] || ChainFlags[kFieldOn] || ChainFlags[kHalfField] ) {
-    gSystem->Load("StMagF");
-    if (gClassTable->GetID("StChain") < 0) Load(Chain);
-    if (ChainFlags[kFieldOff]) field   = new StMagFC("field","STAR no field",0.00002);
-    if (ChainFlags[kFieldOn])  field   = new StMagFC("field","STAR Normal field",1.);
-    if (ChainFlags[kHalfField])field   = new StMagFC("field","STAR Normal field",0.5);
-  }
-  else        gSystem->Load("geometry");
-  if (ChainFlags[kXIN]) {
-    gSystem->Load("St_xdfin_Maker");
-    xdfMk = new St_xdfin_Maker("xdfin",InFile->Data());
-    xdfMk->SetDebug();
-    chain->SetInput("geant",".make/xdfin/.data/event/geant/Event");
-  }
+  if (ChainFlags[kFieldOff] || ChainFlags[kFieldOn] || ChainFlags[kHalfField])
+       gSystem->Load("StMagF");
+  else gSystem->Load("geometry");
+  if (ChainFlags[kXIN]) gSystem->Load("St_xdfin_Maker");
   if (ChainFlags[kGEANT])  {
     gSystem->Load("St_g2r"); 
     gSystem->Load("St_geant_Maker");
-    geant = new St_geant_Maker("geant");
-    geant->SetNwGEANT(10000000);
-    chain->SetInput("geant",".make/geant/.data");
-    //  geant->SetIwtype(1);
-    //  geant->SetDebug();
-    if (ChainFlags[kGSTAR]) {
-      if (ChainFlags[kSD97] || ChainFlags[kSD98] || ChainFlags[kY1a] || 
-	  ChainFlags[kES99] || ChainFlags[kER99]) geant->LoadGeometry("detp geometry YEAR_1A");
-      else {
-	if (ChainFlags[kY1b])                     geant->LoadGeometry("detp geometry YEAR_1B");
-	else {
-	  if (ChainFlags[kY1c])                   geant->LoadGeometry("detp geometry YEAR_1C");
-	  else {
-	    if (ChainFlags[kES99])                geant->LoadGeometry("detp geometry YEAR_1A");
-	    else {
-	      if (ChainFlags[kER99])              geant->LoadGeometry("detp geometry YEAR_1A");
-	      else {
-		if (ChainFlags[kY2a])             geant->LoadGeometry("detp geometry YEAR_2A");
-		else                              geant->LoadGeometry("detp geometry YEAR_2A");
-	      }
-	    }
-	  }
-	}
-      }
-      geant->Do("subevent 0;");
-      // gkine #particles partid ptrange yrange phirange vertexrange 
-      geant->Do("gkine 10 6 1. 1. -1. 1. 0 6.28  0. 0.;");
-      geant->Do("mode g2tm prin 1;");
-      //  geant->Do("next;");
-      //  geant->Do("dcut cave z 1 10 10 0.03 0.03;");
-      //  geant->Do("debug on;");
-      geant->Do("swit 2 3;");
-      // geant->LoadGeometry("detp geometry ChainFlags[kFieldOn] field_off");
-      if (ChainFlags[kFZIN]) {
-	if (geant->SetInputFile(InFile->Data()) > kStOK) {
-	  printf ("File %s cannot be opened. Exit! \n",InFile->Data());
-	  gSystem->Exit(1);
-	}
-      }
-    }
   }
   if (ChainFlags[kMINIDAQ]) {
     gSystem->Load("StMinidaqMaker");
-  // defined for ChainFlags[kMINIDAQ]
-    chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
-    chain->SetInput("TPC_DATA",".make/xdfin/.data/TPC_DATA");
-    tpc_raw = new StMinidaqMaker("tpc_raw");
   }
 
   if (ChainFlags[kTPC]) {
@@ -583,7 +525,12 @@ void Load(){
     }
     gSystem->Load("St_QA_Maker");
   }
+  if (ChainFlags[kDISPLAY]) {
+    gSystem->Load("St_geom_Maker");
+    gSystem->Load("StEventDisplayMaker");
+  }
   if (ChainFlags[kTREE]) gSystem->Load("StTreeMaker");
+
   //  gSystem->Exit(1);
 }
 //_____________________________________________________________________
@@ -638,9 +585,9 @@ void Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0 ){
   }
 }
 //_____________________________________________________________________
-void bfc (const Int_t First,
-	  const Int_t Nevents=1,
-	  const Char_t *Chain="gstar tfs",Char_t *infile=0, Char_t *outfile=0)
+void bfc(const Int_t First,
+	 const Int_t Nevents=1,
+	 const Char_t *Chain="gstar tfs",Char_t *infile=0, Char_t *outfile=0)
 { // Chain variable define the chain configuration 
   // All symbols are significant (regardless of case)
   // "-" sign before requiest means that this option is disallowed
@@ -652,7 +599,93 @@ void bfc (const Int_t First,
   SetFlags(Chain);
   Set_IO_Files(infile,outfile);
   if (gClassTable->GetID("StChain") < 0) Load();
-  if (!ChainFlags[kMINIDAQ]) {
+  // Create the main chain object
+  if (!chain) delete chain;
+  chain = new StChain("bfc");
+  printf ("Run chain version %s on %s in %s\n",
+	  chain->GetCVS(),
+	  gSystem->HostName(),
+	  gSystem->WorkingDirectory());
+  if (chain) chain->SetDebug();
+  //  Create the makers to be called by the current chain
+  const char *mainDB = "$STAR/StDb/params";
+  dbMk = new St_db_Maker("db",mainDB);
+  if (dbMk) dbMk->SetDebug();
+  if (ChainFlags[kSD97]) { dbMk->SetDateTime("sd97");}
+  if (ChainFlags[kSD98]) { dbMk->SetDateTime("sd98");}
+  if (ChainFlags[kY1a])  { dbMk->SetDateTime("year_1a");}
+  if (ChainFlags[kY1b])  { dbMk->SetDateTime("year_1b");}
+  if (ChainFlags[kY1c])  { dbMk->SetDateTime("year_1c");}
+  if (ChainFlags[kES99]) { dbMk->SetDateTime("es99");}
+  if (ChainFlags[kER99]) { dbMk->SetDateTime("er99");}
+  if (ChainFlags[kY1d])  { dbMk->SetDateTime("year_1d");}
+  if (ChainFlags[kY1e])  { dbMk->SetDateTime("year_1e");}
+  if (ChainFlags[kY2a])  { dbMk->SetDateTime("year_2a");}
+  printf ("db Maker set time = %d %d \n",dbMk->GetDateTime().GetDate(),
+	  dbMk->GetDateTime().GetTime());
+  const char *calibDB = "$STAR_ROOT/calib";
+  calibMk = new St_db_Maker("calib",calibDB);
+  if (calibMk) calibMk->SetDebug();  
+  if (ChainFlags[kFieldOff]) field   = new StMagFC("field","STAR no field",0.00002);
+  if (ChainFlags[kFieldOn])  field   = new StMagFC("field","STAR Normal field",1.);
+  if (ChainFlags[kHalfField])field   = new StMagFC("field","STAR Half field",0.5);
+  if (ChainFlags[kXIN]) {
+    xdfMk = new St_xdfin_Maker("xdfin",InFile->Data());
+    if (xdfMK) xdfMk->SetDebug();
+    chain->SetInput("geant",".make/xdfin/.data/event/geant/Event");
+  }
+  if (ChainFlags[kGEANT])  {
+    geant = new St_geant_Maker("geant");
+    if (geant) {
+      geant->SetNwGEANT(10000000);
+      chain->SetInput("geant",".make/geant/.data");
+    //  geant->SetIwtype(1);
+    //  geant->SetDebug();
+      if (ChainFlags[kGSTAR]) {
+	if (ChainFlags[kSD97] || ChainFlags[kSD98] || ChainFlags[kY1a] || 
+	    ChainFlags[kES99] || ChainFlags[kER99]) geant->LoadGeometry("detp geometry YEAR_1A");
+	else {
+	  if (ChainFlags[kY1b])                     geant->LoadGeometry("detp geometry YEAR_1B");
+	  else {
+	    if (ChainFlags[kY1c])                   geant->LoadGeometry("detp geometry YEAR_1C");
+	    else {
+	      if (ChainFlags[kES99])                geant->LoadGeometry("detp geometry YEAR_1A");
+	      else {
+		if (ChainFlags[kER99])              geant->LoadGeometry("detp geometry YEAR_1A");
+		else {
+		  if (ChainFlags[kY2a])             geant->LoadGeometry("detp geometry YEAR_2A");
+		  else                              geant->LoadGeometry("detp geometry YEAR_2A");
+		}
+	      }
+	    }
+	  }
+	}
+	geant->Do("subevent 0;");
+	// gkine #particles partid ptrange yrange phirange vertexrange 
+	geant->Do("gkine 10 6 1. 1. -1. 1. 0 6.28  0. 0.;");
+	geant->Do("mode g2tm prin 1;");
+	//  geant->Do("next;");
+	//  geant->Do("dcut cave z 1 10 10 0.03 0.03;");
+	//  geant->Do("debug on;");
+	geant->Do("swit 2 3;");
+	// geant->LoadGeometry("detp geometry ChainFlags[kFieldOn] field_off");
+	if (ChainFlags[kFZIN]) {
+	  if (geant->SetInputFile(InFile->Data()) > kStOK) {
+	    printf ("File %s cannot be opened. Exit! \n",InFile->Data());
+	    gSystem->Exit(1);
+	  }
+	}
+      }
+    }
+  }
+  
+  if (ChainFlags[kMINIDAQ]) {
+    // defined for ChainFlags[kMINIDAQ]
+    chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
+    chain->SetInput("TPC_DATA",".make/xdfin/.data/TPC_DATA");
+    StMinidaqMaker *tpc_raw = new StMinidaqMaker("tpc_raw");
+  }
+  else {
     //  S I M U L A T I O N  or D A Q
     if (ChainFlags[kTDAQ])  St_tpcdaq_Maker *tpc_raw = new St_tpcdaq_Maker("tpc_raw",InFile->Data());
     else {
@@ -660,63 +693,67 @@ void bfc (const Int_t First,
 	trs = new StTrsMaker;
 	tpc_raw = new St_tpcdaq_Maker("tpc_raw",0);
       }
-    }
-    else { 
-      if (ChainFlags[kTSS]) {//		tss
-	tssMk 	= new St_tss_Maker("tpc_raw");
-	tssMk->SetDebug();
+      else { 
+	if (ChainFlags[kTSS]) {//		tss
+	  tssMk 	= new St_tss_Maker("tpc_raw");
+	  if (tssMk) tssMk->SetDebug();
+	}
       }
     }
   }
   if (ChainFlags[kFSS]) {//		fss
     fssMk 	= new St_fss_Maker("ftpc_raw");
-    fssMk->SetDebug();
+    if (fssMk) fssMk->SetDebug();
   }
   
   if (ChainFlags[kEMS]) {//		emc
     emsMk = new St_ems_Maker("emc_raw" );
-    emsMk->SetDebug();
+    if (emsMk) emsMk->SetDebug();
   }
   if (ChainFlags[kEMC]) {
     emcMk = new St_emc_Maker("emc_hits");
-    emcMk->SetDebug();
+    if (emcMk) emcMk->SetDebug();
   }
   // L O C A L    R E C O N S T R U C T I O
   if (ChainFlags[kTCL]) {//		tcl
     tclMk = new St_tcl_Maker("tpc_hits");
-    if (ChainFlags[kEval]) {//Additional switches
-      tclMk->tclPixTransOn(); //Turn on flat adcxyz table
-      tclMk->tclEvalOn(); //Turn on the hit finder evaluation
+    if (tclMk) {
+      if (ChainFlags[kEval]) {//Additional switches
+	tclMk->tclPixTransOn(); //Turn on flat adcxyz table
+	tclMk->tclEvalOn(); //Turn on the hit finder evaluation
+      }
+      tclMk->SetDebug();
     }
-    tclMk->SetDebug();
   }
   if (ChainFlags[kSRS]) {//		svt
     srsMk 	= new St_srs_Maker("svt_hits");
-    srsMk->SetDebug();  
+    if (srsMk) srsMk->SetDebug();  
   }
   if(ChainFlags[kFCL]){//		fcl
     fclMk 	= new St_fcl_Maker("ftpc_hits");  
-    fclMk->SetDebug();
+    if (fclMk) fclMk->SetDebug();
   }
   // T R A C K I N G
   if (ChainFlags[kTPT]) {
     tptMk = new St_tpt_Maker("tpc_tracks");
-    if (ChainFlags[kMINIDAQ]) {
-      tptMk->Set_final(kTRUE);// Turn on the final ntuple.
+    if (tptMk) {
+      if (ChainFlags[kMINIDAQ]) {
+	tptMk->Set_final(kTRUE);// Turn on the final ntuple.
+      }
+      if (ChainFlags[kEval]) {//Additional switches
+	tptMk->tteEvalOn();   //Turn on the tpc evaluation
+	tptMk->tptResOn();    // Turn on the residual table
+      }
+      tptMk->SetDebug();
     }
-    if (ChainFlags[kEval]) {//Additional switches
-      tptMk->tteEvalOn();   //Turn on the tpc evaluation
-      tptMk->tptResOn();    // Turn on the residual table
-    }
-    tptMk->SetDebug();
   }
   if (ChainFlags[kSTK]) {//		stk
     stkMk 	= new St_stk_Maker("svt_tracks");
-    stkMk->SetDebug();
+    if (stkMk) stkMk->SetDebug();
   }
   if (ChainFlags[kFPT]){//		fpt
     fptMk 	= new St_fpt_Maker("ftpc_tracks");
-    fptMk->SetDebug();
+    if (fptMk) fptMk->SetDebug();
   }
   // T R I G G E R
   if (ChainFlags[kTRG]) {
@@ -728,85 +765,96 @@ void bfc (const Int_t First,
   if (ChainFlags[kGLOBAL]) {//		global
     glbMk = new StMaker("global");
     //    chain->SetInput("dst",".make/global/.data/dst");
-    glbMk->SetDebug();
-    StMaker *saveMK = glbMk->cd();
-    if (ChainFlags[kMATCH])   matchMk   = new StMatchMaker();
-    if (ChainFlags[kPRIMARY]) primaryMk = new StPrimaryMaker();
-    if (ChainFlags[kV0])      v0Mk      = new StV0Maker();
-    if (ChainFlags[kXI])      xiMk      = new StXiMaker();
-    if (ChainFlags[kKINK])    kinkMk    = new StKinkMaker();
-    saveMK->cd();
-    if (v0Mk && ChainFlags[kEval]) {//Additional switches 
-      v0Mk->ev0EvalOn();   //Turn on the ev0 evaluation  
+    if (glbMk) {
+      glbMk->SetDebug();
+      StMaker *saveMK = glbMk->cd();
+      if (ChainFlags[kMATCH])   matchMk   = new StMatchMaker();
+      if (ChainFlags[kPRIMARY]) primaryMk = new StPrimaryMaker();
+      if (ChainFlags[kV0])      v0Mk      = new StV0Maker();
+      if (ChainFlags[kXI])      xiMk      = new StXiMaker();
+      if (ChainFlags[kKINK])    kinkMk    = new StKinkMaker();
+      saveMK->cd();
+      if (v0Mk && ChainFlags[kEval]) {//Additional switches 
+	v0Mk->ev0EvalOn();   //Turn on the ev0 evaluation  
+      }
     }
   }
   if (ChainFlags[kL3T]) {//		l3t
     l3tMk  = new St_l3t_Maker("l3Tracks");
-    l3tMk->SetDebug();
+    if (l3tMk) l3tMk->SetDebug();
   }
   if (ChainFlags[kGLOBAL]) {
   //		dst
     if (ChainFlags[kDST]){
       dstMk = new St_dst_Maker("dst");
+      if (dstMk) {
       chain->SetInput("dst",".make/dst/.data/dst");
       dstMk->SetDebug();
+      }
     }
     if (ChainFlags[kEVENT]){
       evMk  = new StEventMaker;
       if (ChainFlags[kANALYSIS]) {
 	anaMk = new StAnalysisMaker;
-	anaMk->SetDebug(0);
+	if (anaMk) anaMk->SetDebug(0);
       }
     }
     if (ChainFlags[kQA]) qa = new St_QA_Maker;  
   }
+  if (ChainFlags[kDISPLAY]) {
+    geom = new St_geom_Maker; // this maker open its own TFile !!
+    disp = new StEventDisplayMaker;
+  }  
+  
   if (ChainFlags[kTREE]) {//		Tree
-    treeMk = new StTreeMaker("tree",FileOut.Data());
+    treeMk = new StTreeMaker("tree",FileOut->Data());
+    if (treeMk) {
     treeMk->SetIOMode("w");
     treeMk->SetDebug();
     if (dstMk) {
-      //  treeMk->SetBranch("dstBranch",FileOut.Data());
+      //  treeMk->SetBranch("dstBranch",FileOut->Data());
       treeMk->IntoBranch("dstBranch","dst");
     }
     else if (glbMk) {
-      //  treeMk->SetBranch("globalBranch",FileOut.Data());
+      //  treeMk->SetBranch("globalBranch",FileOut->Data());
       treeMk->IntoBranch("globalBranch","global/.data");
     }
     if (evMk){
-      //  treeMk->SetBranch("EventBranch",FileOut.Data());
+      //  treeMk->SetBranch("EventBranch",FileOut->Data());
       treeMk->IntoBranch("eventBranch","StEvent");
     }
     if (ChainFlags[kAllEvent]) {
       if (geant) {
 	treeMk->IntoBranch("geantBranch","geant");
-	//  treeMk->SetBranch("geantBranch",FileOut.Data());
+	//  treeMk->SetBranch("geantBranch",FileOut->Data());
 	//    treeMk->IntoBranch("geantBranch","geant/.data/particle");
 	//    treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
       }
       if (fssMk) {
-	//  treeMk->SetBranch("ftpc_rawBranch",FileOut.Data());
+	//  treeMk->SetBranch("ftpc_rawBranch",FileOut->Data());
 	treeMk->IntoBranch("ftpc_rawBranch","ftpc_raw/.data");
       }
       if (emsMk) {
-	//  treeMk->SetBranch("emc_rawBranch",FileOut.Data());
+	//  treeMk->SetBranch("emc_rawBranch",FileOut->Data());
 	treeMk->IntoBranch("emc_rawBranch","emc_raw/.data");
       }
       if (ChainFlags[kTSS] || ChainFlags[kTRS]) { 
-	//  treeMk->SetBranch("tpc_rawBranch",FileOut.Data());
+	//  treeMk->SetBranch("tpc_rawBranch",FileOut->Data());
 	treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
       }
       if (tclMk) treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
       if (tptMk) treeMk->IntoBranch("tpc_tracksBranch","tpc_tracks/.data");
       if (ChainFlags[kTRG]) {
-	//  treeMk->SetBranch("trgBranch",FileOut.Data());
+	//  treeMk->SetBranch("trgBranch",FileOut->Data());
 	treeMk->IntoBranch("trgBranch","ctf mwc trg");
       }
       if (l3tMk) {
-	//  treeMk->SetBranch("l3TBranch",FileOut.Data());
+	//  treeMk->SetBranch("l3TBranch",FileOut->Data());
 	treeMk->IntoBranch("l3tBranch","l3Tracks");
       }
     }      
     treeMk->SetBranch("histBranch");
+  }
   }
   chain->PrintInfo();
   // START the chain (may the force be with you)
@@ -838,15 +886,15 @@ void bfc (const Int_t First,
     printf ("=============== Done with Event no. %d (%d)\n",i,iMake);
     if (iMake>=kStEOF) break;
   }
-  
   if (NoEvents > 1) {
     chain->Finish();
     if (xdf_out) delete xdf_out;
     printf ("Run completed ");
     gSystem->Exec("date");
   }
-  else {if (evMk) Event = (StEvent *) chain->GetInputDS("StEvent");}
-  //  else {b = new TBrowser("BFC chain",chain);}
+  else {
+    if (evMk) Event = (StEvent *) chain->GetInputDS("StEvent");
+  }
 }
 //_____________________________________________________________________
 void bfc (const Int_t Nevents, 
