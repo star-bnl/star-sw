@@ -1,4 +1,19 @@
-/* these defines MAY NOT be moved intto a header file, they are of use only in this source file  M.W.S */
+/***************************************************************************
+ * $Id: swaps.cxx,v 1.2 1999/07/02 04:37:42 levine Exp $
+ * Author: M.W. Schulz
+ ***************************************************************************
+ * Description: swap method and macros for use on DAQ banks
+ *    these defines MAY NOT be moved into a header file, 
+ *    they are of use only in this source file    - MWS
+ *
+ ***************************************************************************
+ * $Log: swaps.cxx,v $
+ * Revision 1.2  1999/07/02 04:37:42  levine
+ * Many changes - see change logs in individual programs
+ *
+ *
+ **************************************************************************/
+
 #define SWP0312  {help = data[i] ;  cdp[i*4]   = ch[3] ; cdp[i*4+1] = ch[2] ;  cdp[i*4+2] = ch[1] ;  cdp[i*4+3] = ch[0] ;}
 #define SWP12    {help = data[i] ;  cdp[i*4]   = ch[0] ; cdp[i*4+1] = ch[2] ; cdp[i*4+2] = ch[1] ; cdp[i*4+3] = ch[3] ;}
 #define SWP04    { help = data[i];  cdp[i*4]   = ch[3] ; cdp[i*4+1] = ch[1] ; cdp[i*4+2] = ch[2] ; cdp[i*4+3] = ch[0] ;}

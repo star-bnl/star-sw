@@ -1,3 +1,26 @@
+/***************************************************************************
+ * $Id: EventReader.cxx,v 1.5 1999/07/02 04:37:41 levine Exp $
+ * Author: M.J. LeVine
+ ***************************************************************************
+ * Description: Event reader code common to all DAQ detectors
+ *    
+ *
+ *  change log
+ * 06-Jun-99 MJL implement EventReader::getEventInfo()
+ * 06-Jun-99 MJL implement EventReader::printEventInfo()
+ * 23-Jun-99 MJL add verbose flag and setVerbose() method
+ * 23-Jun-99 MJL turn off all printf, cout when verbose=0
+ * 24-Jun-99 MJL navigation now reads DATAP without prior 
+ *               knowledge of DATAP length
+ *
+ ***************************************************************************
+ * $Log: EventReader.cxx,v $
+ * Revision 1.5  1999/07/02 04:37:41  levine
+ * Many changes - see change logs in individual programs
+ *
+ *
+ **************************************************************************/
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -7,9 +30,6 @@
 #include <unistd.h>
 #include "EventReader.hh"
 
-//  change log
-// 06-Jun-99 MJL implement EventReader::getEventInfo()
-// 06-Jun-99 MJL implement EventReader::printEventInfo()
 
 EventReader *getEventReader(int fd, long offset, int MMap=1)
 {
@@ -49,13 +69,14 @@ EventReader::EventReader()
   event_size = 0;
   fd = -1;
   next_event_offset = -1;
+  verbose = 0;
 }
 
 // Here lies the event reader code
 void EventReader::InitEventReader(int fdes, long offset, int MMap=1)
-{
+{//InitER
   long c_offset = offset;
-  cout << "Initializing EventReader with a file" << endl;
+  if (verbose) cout << "Initializing EventReader with a file" << endl;
   
   fd = fdes;
   int DATAPEVENTLENGTH=0;   // hack, the event length is not yet in datap
@@ -107,9 +128,10 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap=1)
     int offset = 0;
     strncpy(lcopy,lr.RecordType,8);
     lcopy[8] = 0;
-    printf("lr.RecordType: %s\n",lcopy);
+    if (verbose) printf("lr.RecordType: %s\n",lcopy);
     if (strncmp(lr.RecordType, "ENDR", 4)==0) { // check for ENDR record
-      printf("ENDR encountered. Processing terminated\n"); fflush(stdout);
+      if (verbose) 
+	printf("ENDR encountered. Processing terminated\n"); fflush(stdout);
       next_event_offset = -1;
       ERROR(ERR_ENDR_ENCOUNTERED);
     }
@@ -117,7 +139,7 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap=1)
       //skip over this record 
       offset = 4*lr.RecordLength-sizeof(lr);
 //       printf("%s::%d  c_offset=0x%x \n",__FILE__,__LINE__,c_offset);
-      printf("....skipping %d bytes\n",offset);
+      if (verbose) printf("....skipping %d bytes\n",offset);
       lseek(fd,offset,SEEK_CUR);
       c_offset += offset;
       
@@ -154,9 +176,17 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap=1)
     
   // read the datap bank then seek back to start of it
   Bank_DATAP datap;
-  ret = read(fd,&datap,sizeof(datap));
+  ret = read(fd,&datap,sizeof(Bank_Header));
+  if (datap.swap() < 0) ERROR(ERR_SWAP);
+  int len = 4*datap.header.BankLength;
+  //  if (len>sizeof(datap)) ERROR(ERR_BANK);
+  // why is sizeof(datap) 548 when it should be 138*4 ??
+  // according to the RecHeaderFormats.hh declaration??
+  ret = lseek(fd,-sizeof(Bank_Header),SEEK_CUR);
   if(ret < 0) ERROR(ERR_FILE);
-  ret = lseek(fd,-sizeof(datap),SEEK_CUR);
+  ret = read(fd,&datap,len);
+  if(ret < 0) ERROR(ERR_FILE);
+  ret = lseek(fd,-len,SEEK_CUR);
   if(ret < 0) ERROR(ERR_FILE);
 
   // check CRC, swap
@@ -193,7 +223,7 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap=1)
   {
     // Calculate the mmap offset - must be aligned to pagesize
     long pagesize = sysconf(_SC_PAGESIZE);
-    cout << "pagesize = " << pagesize << endl;
+    if (verbose) cout << "pagesize = " << pagesize << endl;
     int mmap_offset = (offset/pagesize)*pagesize;
 
     if(ret < 0) ERROR(ERR_FILE);
@@ -215,7 +245,7 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap=1)
 
 void EventReader::InitEventReader(void *event)
 {
-  cout << "Creating EventReader with a pointer" << endl;
+  if (verbose) cout << "Creating EventReader with a pointer" << endl;
 
   if(strncmp((char *)event,"LRHD",4) == 0)
   {
@@ -329,8 +359,8 @@ int EventReader::MemUsed()
   return event_size;
 }
 
-
-
-
-
+void EventReader::setVerbose(int v)
+{
+  verbose = v;
+}
 
