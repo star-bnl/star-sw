@@ -1,7 +1,12 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.21 2000/03/28 02:57:32 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.22 2000/03/29 16:14:08 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.22  2000/03/29 16:14:08  calderon
+ * Keep storing Vertices in V0 map that come from event generator, and hence don't
+ * have a parent.
+ * Check that these vertices are not used for Xi map.
+ *
  * Revision 1.21  2000/03/28 02:57:32  calderon
  * Add additional check for V0 vertices: Make sure they also have a parent.
  *
@@ -1234,8 +1239,7 @@ Int_t StAssociationMaker::Make()
 		mcDaughter2 = (*trkIter2).second->partnerMcTrack();
 		if (mcDaughter1->startVertex() == mcDaughter2->startVertex() &&
 		    mcDaughter1->startVertex() != primary &&
-		    mcDaughter1->startVertex() != 0 &&
-		    mcDaughter1->startVertex()->parent() != 0) {
+		    mcDaughter1->startVertex() != 0) {
 		    // Got a V0 candidate
 		    mRcV0Map->insert(rcV0MapValType (rcV0, mcDaughter1->startVertex()));
 		    mMcV0Map->insert(mcV0MapValType (mcDaughter1->startVertex(), rcV0));
@@ -1272,7 +1276,7 @@ Int_t StAssociationMaker::Make()
 	    xiBoundsV0 = mRcV0Map->equal_range(rcV0ofXi);
 	    for (rcV0MapIter v0Iter = xiBoundsV0.first; v0Iter!= xiBoundsV0.second; v0Iter++){
 		mcV0 = (*v0Iter).second;
-		if (mcXi == mcV0->parent()->startVertex()) {
+		if (mcV0->parent() != 0 && mcXi == mcV0->parent()->startVertex()) {
 		    // Got a Xi candidate
 		    mRcXiMap->insert(rcXiMapValType (rcXi, mcXi));
 		    mMcXiMap->insert(mcXiMapValType (mcXi, rcXi));
