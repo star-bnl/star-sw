@@ -1,0 +1,716 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="Description" content="STAR computing tutorial">
+<meta name="GENERATOR" content="Microsoft FrontPage Express 2.0">
+<title>Offline directory structure for ROOT</title>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000" link="#000080"
+vlink="#800000" alink="#002866">
+<font face="verdana,arial,helvetica,sans-serif"><!-- Header material --></font>
+
+<table border="0" cellpadding="5" cellspacing="0" width="100%">
+    <tr>
+        <td bgcolor="#C0C0C0"><a href="/STAR/"><font size="2"
+        face="verdana,arial,helvetica,sans-serif">STAR</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif">
+        &nbsp; </font><a href="/STAR/html/star_computing.html"><font
+        size="2" face="verdana,arial,helvetica,sans-serif">Computing</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif"> </font></td>
+        <td align="right" bgcolor="#C0C0C0"><a
+        href="/STAR/html/comp_l/train/tutorials.html"><font
+        size="2" face="verdana,arial,helvetica,sans-serif">Tutorials
+        main page</font></a><font size="2"
+        face="verdana,arial,helvetica,sans-serif"> </font></td>
+    </tr>
+    <tr>
+        <td align="center" colspan="2" bgcolor="#C0C0C0"><font
+        size="5" face="verdana,arial,helvetica,sans-serif"><b>ROOT
+        C++ classes and the source tree organization</b></font></td>
+    </tr>
+    <tr>
+        <td bgcolor="#C0C0C0"><font size="2"
+        face="verdana,arial,helvetica,sans-serif">Offline
+        computing tutorial </font></td>
+        <td align="right" bgcolor="#C0C0C0"><a
+        href="/STAR/html/ofl_l/prodinfo.html"><font size="2"
+        face="verdana,arial,helvetica,sans-serif">Maintained</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif"> by </font><a
+        href="mailto:fine@bnl.gov"><font size="2"
+        face="verdana,arial,helvetica,sans-serif">Fine</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif"> and </font><a
+        href="mailto:wenaus@bnl.gov"><font size="2"
+        face="verdana,arial,helvetica,sans-serif">Wenaus</font></a></td>
+    </tr>
+    <tr>
+        <td align="right" colspan="2" bgcolor="#C0C0C0"><font
+        size="2" face="verdana,arial,helvetica,sans-serif"><script
+        language="JavaScript">
+            <!-- Hide script from old browsers
+             document.write("Last modified "+ document.lastModified)
+             // end of script --></script> </font></td>
+    </tr>
+</table>
+
+<p><font size="2" face="verdana,arial,helvetica,sans-serif"><!-- Content --> </font></p>
+
+<h3><font size="2" face="verdana,arial,helvetica,sans-serif">Base
+classes and ROOT C++ wrappers</font></h3>
+
+<p><font size="2" face="verdana,arial,helvetica,sans-serif">The
+special C++ classes to organize an interface between the </font><a
+href="http://www.star.bnl.gov/STAR/html/ssd_l/staf_l/STAF-current/staf.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">STAF</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> packages and
+tables and </font><a href="http://root.cern.ch"><font size="2"
+face="verdana,arial,helvetica,sans-serif">ROOT</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> framework
+reside in the </font><a
+href="http://duvall.star.bnl.gov/lxr/source/StRoot/"><font
+size="2" face="verdana,arial,helvetica,sans-serif"><strong>StRoot</strong></font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> subdirectory
+and belong the </font><a href="../tut/DirStruct.html#domains"
+domains><font size="2" face="verdana,arial,helvetica,sans-serif">&quot;<em>New
+software domains</em>&quot;</font></a><font size="2"
+face="verdana,arial,helvetica,sans-serif"> (see: </font>chapter
+&quot;Organization of software releases&quot;) </p>
+
+<p>It can be examined using <font size="2"
+face="verdana,arial,helvetica,sans-serif">the </font><a
+href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/"><font
+size="2" face="verdana,arial,helvetica,sans-serif"><b>CVS
+repository browser</b></font></a><font size="2"
+face="verdana,arial,helvetica,sans-serif"> to browse the current
+directory structure, domains and packages and the </font><a
+href="http://root.cern.ch/root/Documentation.html"><font size="2"
+face="verdana,arial,helvetica,sans-serif"><strong>ROOT generated</strong></font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"><strong> </strong></font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/ClassIndex.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">html
+documentation</font></a><font size="2"
+face="verdana,arial,helvetica,sans-serif">. The page </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/train/root/RootChain.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">ROOT chain</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> outlines the
+main steps an user should perform to develop his/her own C++
+class code based on approach present below.</font></p>
+
+<p>At the moment the STAR C++ base classes generate:</p>
+
+<ul>
+    <li>objects to wrap and describe STAF tables (<a
+        href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_Table.html"><font
+        size="2" face="verdana,arial,helvetica,sans-serif">St_Table</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif">)</font></li>
+    <li>objects to wrap and call PAMs (<a
+        href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_Module.html"><font
+        size="2" face="verdana,arial,helvetica,sans-serif">St_Module</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif">)</font></li>
+    <li>objects to create (<a
+        href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_DataSet.html"><font
+        size="2" face="verdana,arial,helvetica,sans-serif">St_DataSet</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif">, </font><a
+        href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_ObjectSet.html"><font
+        size="2" face="verdana,arial,helvetica,sans-serif">St_ObjectSet</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif">) </font>and
+        navigate the hierarchycal structure of datasets (<a
+        href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_DataSetIter.html"><font
+        size="2" face="verdana,arial,helvetica,sans-serif">St_DataSetIter</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif">)</font></li>
+    <li>objects to create the hierarchycal structure of datasets
+        from the &quot;native&quot; file system structure (<a
+        href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_FileSet.html"><font
+        size="2" face="verdana,arial,helvetica,sans-serif">St_FileSet</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif">)</font></li>
+    <li>objects to create the hierarchycal structure of datasets
+        from the <a
+        href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/gif/STARNodeStruct.gif">&quot;GEANT&quot;
+        Zebra</a> banks (<a
+        href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_Node.html"><font
+        size="2" face="verdana,arial,helvetica,sans-serif">St_Node</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif">, </font><a
+        href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_geant_Maker.html"><font
+        size="2" face="verdana,arial,helvetica,sans-serif">St_geant_Maker</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif">)</font></li>
+    <li>reads and writes table with XDF format compatible with
+        the current STAF framework (<a
+        href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_XDFFile.html"><font
+        size="2" face="verdana,arial,helvetica,sans-serif">St_XDFFile</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif">)</font></li>
+    <li>objects to describe to whole production chain (to replace
+        the existing kumacs) (<a
+        href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StChain.html"><font
+        size="2" face="verdana,arial,helvetica,sans-serif">StChain</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif">)</font></li>
+    <li>object to describe a single step of the whole chain (<a
+        href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StMaker.html"><font
+        size="2" face="verdana,arial,helvetica,sans-serif">StMaker</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif">)</font></li>
+</ul>
+
+<p>The most complicated example of the ROOT macro employing all
+&quot;integration&quot; classes is <a
+href="http://www.star.bnl.gov/STAR/html/comp_l/train/tut/bfc.html"><em>bfc.C</em></a>
+file. Other more simple examples can be found at <a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/">ROOT in
+STAR</a> Web page.</p>
+
+<h1><font size="2" face="verdana,arial,helvetica,sans-serif">Chains:
+The list of the STAR production </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StChain.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">chains</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> under
+development from </font><a
+href="http://www.star.bnl.gov/cgi-bin/star-cgi/cvsweb.pl/StRoot/macros/"><font
+size="2" face="verdana,arial,helvetica,sans-serif"><em>macros</em></font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"><em> directory</em>:</font></h1>
+
+<ul>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/tss.C.html">tss.C</a> <font
+size="2" face="verdana,arial,helvetica,sans-serif">        - &quot;TPC slow simulator&quot; chain (<strong>obsolete</strong>)</font></pre>
+    </li>
+</ul>
+
+<ul>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/train/tut/bfc.html">bfc.C<font
+size="2" face="verdana,arial,helvetica,sans-serif"> </font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">         - the STAR &quot;Big Full Chain&quot; (<strong>obsolete</strong>)</font></pre>
+    </li>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/bfcx.C.html">bfcx.C</a><font
+size="2" face="verdana,arial,helvetica,sans-serif">        - the STAR extended &quot;Big Full Chain&quot; (<strong>obsolete</strong>)</font></pre>
+    </li>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/ebye.C.html">ebye.C</a><font
+size="2" face="verdana,arial,helvetica,sans-serif">        - &quot;Event by Event&quot; chain  (<strong>obsolete</strong>)</font></pre>
+    </li>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/laser.C.html">laser.C</a><font
+size="2" face="verdana,arial,helvetica,sans-serif">      - The analysis of laser events equivalent to Iwona's old </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/tst.kumac.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">tst.kumac</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> (<strong>obsolete</strong>)</font></pre>
+    </li>
+</ul>
+
+<h1><font size="2" face="verdana,arial,helvetica,sans-serif">base:
+STAF2ROOT base classes (</font><font size="1"
+face="verdana,arial,helvetica,sans-serif"><em>the files in the
+brackets are the names of the share libraries for UNIX or DLL for
+Windows NT containing the binary of the classes in question)</em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif">:</font></h1>
+
+<ul>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_Module.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_Module</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">        - the base class to create STAF module (</font><a
+href="http://www.star.bnl.gov/STAR/html/ssd_l/staf_l/STAF-current/pams/pams.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">PAM</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">s) wrappers (</font><font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_base.so/St_base.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif">)</font></pre>
+    </li>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StCL.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">StCL</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">                - the base class to provide the basic <strong>matrix / vector</strong> manipulation based 
+                         on CERN </font><a
+href="http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">F110 </font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">and </font><a
+href="http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f112/top.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">F112</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> packages (</font><font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_base.so/St_base.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif">)
+                         Macro </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/micky.C.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">micky.C</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> and class </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StMicky.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">StMicky</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> test </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StCL.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">StCL</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> class with the standard CERN testsuit</font></pre>
+    </li>
+</ul>
+
+<ul>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_Table.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_Table</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">          - the base class to create </font><a
+href="../tut/StafTables.html"><font size="2"
+face="verdana,arial,helvetica,sans-serif">STAF table</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> wrappers (</font><font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_base.so/St_base.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif">)</font></pre>
+    </li>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_TableElementDescriptor.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_TableElementDescriptor</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> - the class to get an acces to one table column by its name
+                                       (</font><font size="1"
+face="verdana,arial,helvetica,sans-serif"><em><strong>St_base.so/St_base.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif">)</font></pre>
+    </li>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_tableDescriptor.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_tableDescriptor</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> - the class replaces the </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_TableElementDescriptor.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_TableElementDescriptor</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> to get an access
+                            to table column definitions by its name and support the data-base I/O
+                            as well (</font><font size="1"
+face="verdana,arial,helvetica,sans-serif"><em><strong>St_base.so/St_base.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif">)</font></pre>
+    </li>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_TableSorter.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_TableSorter</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> - the class-iterator to work with the sorted rows of the </font><a
+href="../tut/StafTables.html"><font size="2"
+face="verdana,arial,helvetica,sans-serif">STAF wrapped tables</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> 
+                         (see example</font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/TestSorter.C.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif"> TestSorter.C</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> )  (</font><font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_base.so/St_base.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif">)</font></pre>
+    </li>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_TableNtuple.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_TableNtuple</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> - the class </font><font
+size="2" face="Verdana">to convert </font><a
+href="../../root/html/St_Table.html"><font size="2"
+face="Verdana">STAR Tables</font></a><font size="2"
+face="Verdana"> into ntuples The class inherits</font><font
+size="2" face="verdana,arial,helvetica,sans-serif">
+</font><font size="2" face="Verdana">                          from </font><a
+href="http://root.cern.ch/root/html/TTree.html"><font size="2"
+face="Verdana">TTree</font></a><font size="2" face="Verdana"> </font><font
+size="2" face="verdana,arial,helvetica,sans-serif">(</font><font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>xdf2root.so/xdf2root.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif">)</font></pre>
+    </li>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_DataSet.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_DataSet</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">       - the class to create the complex object (the tree-like list of the named objects) 
+                         to provide the &quot;old&quot; STAF dataset functionality (</font><font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_base.so/St_base.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif">)</font></pre>
+    </li>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_ObjectSet.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_ObjectSet</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">    - </font><font
+size="2" face="Verdana">this class is a special kind of </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_DataSet.html"><font
+size="2" face="Verdana">St_DataSet</font></a><font size="2"
+face="Verdana"> with one extra pointer</font><font size="2"
+face="verdana,arial,helvetica,sans-serif">
+</font><font size="2" face="Verdana">                         to wrap any </font><a
+href="http://root.cern.ch/root/html/TObject.html"><font size="2"
+face="Verdana">TObject</font></a><font size="2" face="Verdana"> into </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_DataSet.html"><font
+size="2" face="Verdana">St_DataSet</font></a><font size="2"
+face="Verdana"> object</font> <font size="2"
+face="verdana,arial,helvetica,sans-serif">(</font><font size="1"
+face="verdana,arial,helvetica,sans-serif"><em><strong>St_base.so/St_base.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif">)</font></pre>
+    </li>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_FileSet.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_FileSet</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">        - the class to create (import) the heirarchycal structure of datasets from the &quot;native&quot; 
+                         file system structure (directories/files) (</font><font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_base.so/St_base.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif">)</font></pre>
+    </li>
+</ul>
+
+<ul>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_DataSetIter.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_DataSetIter</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> - class-iterator of </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_DataSet.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_DataSet</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> to iterate and 
+                         navigate </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_DataSet.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_DataSet</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> objects (</font><font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_base.so/St_base.dll</strong></em><em>)</em></font></pre>
+    </li>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_XDFFile.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_XDFFile</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">       - class to create, read/write,fill the C++ objects
+                         (</font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_DataSet.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_DataSet</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> and </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_Table.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_Table</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> ) from/to XDF files (</font><font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>xd2root.so/xdf2root.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif">)
+                        </font><font color="#FF0000" size="3"
+face="verdana,arial,helvetica,sans-serif"><strong>This class provides the an interface for ROOT interactive browser.
+                        The </strong></font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/XDFBrowser.C.html"><font
+color="#FF0000" size="3"
+face="verdana,arial,helvetica,sans-serif"><strong>XDFBrowser.C</strong></font></a><font
+color="#FF0000" size="3"
+face="verdana,arial,helvetica,sans-serif"><strong> macro shows how this feature can used.</strong></font></pre>
+    </li>
+    <li><pre><font size="2"
+face="verdana,arial,helvetica,sans-serif"><strong><u>STAR GEANT and 3D Geometry classes:</u></strong></font></pre>
+        <ul>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_Node.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_Node</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">              - class to define STAR geometry. (</font><font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_base.so/St_base.dll</strong></em><em>)</em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif">
+                           This class creates an interface between GEANT 
+                           </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_geant_Maker.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_geant_Maker</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> and other </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StMaker.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">StMaker's</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> (see: </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/StarFromWeb.C.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">StarFromWeb.C</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> for an example)</font></pre>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_NodeView.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_NodeView</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">        - Viewer of  </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_Node.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_Node</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> objects (</font><font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_base.so/St_base.dll</strong></em><em>)</em></font></pre>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_NodeViewIter.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_NodeViewIter</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">   - Iterator for viewers of  </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_Node.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_Node</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> objects (</font><font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_base.so/St_base.dll</strong></em><em>)</em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif">
+                            (see: </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/SubDetectorView.C.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">SubDetectorView.C </font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">for an example)</font></pre>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_NodePosition.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_NodePosition</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">    - class to defined the position of </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_Node.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_Node</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> within data structure </font><font
+color="#FF0000" size="3"
+face="verdana,arial,helvetica,sans-serif"><strong>
+</strong></font><font size="2"
+face="verdana,arial,helvetica,sans-serif">                            (</font><font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_base.so/St_base.dll</strong></em><em>)</em></font></pre>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_PolyLineShape.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_PolyLineShape</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">  - class to create a special shape for the array of the abstarct 3D points</font><font
+color="#FF0000" size="3"
+face="verdana,arial,helvetica,sans-serif"><strong>
+</strong></font><font size="2"
+face="verdana,arial,helvetica,sans-serif">                              (like hits, tracks, etc. See: </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/HitsDraw.C.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">HitsDraw.C macro</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">)</font><font
+color="#FF0000" size="3"
+face="verdana,arial,helvetica,sans-serif"><strong>
+                          </strong></font><font size="2"
+face="verdana,arial,helvetica,sans-serif">(</font><font size="1"
+face="verdana,arial,helvetica,sans-serif"><em><strong>St_base.so/St_base.dll</strong></em><em>)</em></font></pre>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_Table3Points.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_Table3Points</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">    -  class is to create 3D view of any 3 columns of the </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_Table.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_Table</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> objects
+                             with one the same &quot;key column value&quot; (See: </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/HitsDraw.C.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">HitsDraw.C macro</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">).</font></pre>
+                <ul>
+                    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_TablePoints.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_TablePoints</font></a></pre>
+                    </li>
+                </ul>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_PolyLine3D.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_PolyLine3D</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">     -  class is to create 3D view of the array of the floating point</font><font
+color="#FF0000" size="3"
+face="verdana,arial,helvetica,sans-serif"><strong>
+</strong></font><font size="2"
+face="verdana,arial,helvetica,sans-serif">                           (see: </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/basic3dPrimitives.C.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">basic3dPrimitives.C</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> )</font></pre>
+                <ul>
+                    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_Points3D.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_Points3D</font></a></pre>
+                    </li>
+                    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_PointsArray3D.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_PointsArray3D</font></a></pre>
+                    </li>
+                </ul>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StHits3DPoints.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">StHits3DPoints</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">     -  class is to create 3D view of the </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StObjArray.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">StObjArray</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> collection of the </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StHit.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">StHit </font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">objects
+                            (see: </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/DrawTpcHits.C.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">DrawTpcHits.C</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> macro)</font></pre>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StHelix3DPoints.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">StHelix3DPoints</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">    - class is to create 3D view of the </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StHelix3D.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">StHelixD</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> and the </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StTrack.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">StTrack</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> objects
+.                          (see </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/DrawTrackTpcHits.C.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">DrawTrackTpcHits.C</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> )</font></pre>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/PadControlPanel.C.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">StPadControlPanel</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> - class to manipulate with 3D view on the screen interactively. </font></pre>
+            </li>
+        </ul>
+    </li>
+    <li><pre><font size="2"
+face="verdana,arial,helvetica,sans-serif">There are several classes and (see: example  </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/PadBrowser.C.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">PadBrowser.C</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> ) those can be used an example to see how the above 3D classes can be used.</font></pre>
+        <ul>
+            <li><pre><a href="../../root/html/St_geom_Maker.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_geom_Maker</font></a></pre>
+            </li>
+            <li><pre><a
+href="../../root/html/StPadDisplayMaker.html"><font size="2"
+face="verdana,arial,helvetica,sans-serif">StPadDisplayMaker</font></a></pre>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<ul>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StChain.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">StChain </font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">          - class to define the whole process. The STAR chain is a list of 
+                        STAR makers defined as a C++ object of the classes derived 
+                        from </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StMaker.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">StMaker</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> base class. (</font><font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>StChain.so/StChain.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif">)</font></pre>
+    </li>
+    <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StMaker.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">StMaker</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">          - the base class to describe one single step of 
+                        the full chain controlled by the object of the </font><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/StChain.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">StChain </font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">
+                        class. At the moment there are several STAR makers ( </font><font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>StChain.so/StChain.dll </strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif"><strong>)</strong></font></pre>
+    </li>
+    <li><pre><a href="../../root/html/St_io_Maker.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">St_io_Maker</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">    - the special &quot;io&quot; maker to take over all I/O operations for this chain
+                       ( </font><font size="1"
+face="verdana,arial,helvetica,sans-serif"><em><strong>St_io_Maker.so/St_io_Maker.dll </strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif"><strong>)</strong></font></pre>
+        <ul>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_TLA_Maker.html">St_TLA_Maker</a> (<font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_TLA_Maker.so/St_TLA_Maker.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif"><strong>) - </strong></font></pre>
+                <pre><font size="2"
+face="verdana,arial,helvetica,sans-serif"><strong>this is a &quot;prototype&quot; maker.  Pick it and customize to create your own one.</strong></font></pre>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_srs_Maker.html">St_srs_Maker</a>    (<font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_srs_Maker.so/St_srs_Maker.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif"><strong>)</strong></font></pre>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_tpt_Maker.html">St_tpt_Maker</a>    (<font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_tpt_Maker.so/St_tpt_Maker.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif"><strong>)</strong></font></pre>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_xdfin_Maker.html">St_xdfin_Maker</a>  (<font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_xdfin_Maker.so/St_xdfin_Maker.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif"><strong>)</strong></font></pre>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_evg_Maker.html">St_evg_Maker</a>    (<font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_evg_Maker.so/St_evg_Maker.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif"><strong>)</strong></font></pre>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_tcl_Maker.html">St_tcl_Maker</a>    (<font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_tcl_Maker.so/St_tcl_Maker.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif"><strong>)</strong></font></pre>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_tss_Maker.html">St_tss_Maker</a>    (<font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_tss_Maker.so/St_tss_Maker.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif"><strong>) </strong></font></pre>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_laser_Maker.html">St_laser_Maker</a>  (<font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_laser_Maker.so/St_laser_Maker.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif"><strong>) </strong></font></pre>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_calib_Maker.html">St_calib_Maker</a>  (<font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_calib_Maker.so/St_calib_Maker.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif"><strong>) </strong></font></pre>
+            </li>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_smdst_Maker.html">St_smdst_Maker</a>  (<font
+size="1" face="verdana,arial,helvetica,sans-serif"><em><strong>St_smdst_Maker.so/St_smdst_Maker.dll</strong></em></font><font
+size="2" face="verdana,arial,helvetica,sans-serif"><strong>) </strong></font></pre>
+            </li>
+        </ul>
+        <p><font size="2"
+        face="verdana,arial,helvetica,sans-serif"><strong>The
+        Html documentation for all STAR classes above can be
+        generated with the method </strong></font><a
+        href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/src/StMaker.cxx.html#StMaker:MakeDoc"><font
+        size="2" face="verdana,arial,helvetica,sans-serif"><strong>StMaker::MakeDoc()</strong></font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif"><strong>.</strong></font></p>
+        <h1><a
+        href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples"><font
+        size="2" face="verdana,arial,helvetica,sans-serif">test</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif">:<br>
+        ===<br>
+        Contains the set of the </font><a
+        href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples"><font
+        size="2" face="verdana,arial,helvetica,sans-serif">test
+        macros</font></a><font size="2"
+        face="verdana,arial,helvetica,sans-serif"> to check the
+        base and chain<br>
+        stuff<br>
+        <br>
+        </font><a
+        href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples"><font
+        size="2" face="verdana,arial,helvetica,sans-serif">macros</font></a><font
+        size="2" face="verdana,arial,helvetica,sans-serif">:</font></h1>
+        <h1><font size="2"
+        face="verdana,arial,helvetica,sans-serif">This directory
+        contains several examples one can use either directly or
+        as a pattern to build his/her own ROOT macros:<br>
+        </font></h1>
+        <ul>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/StarView.C.html">StarView.C</a> <font
+size="2" face="verdana,arial,helvetica,sans-serif">       - Draws the STAR GEANT geometry converted into the local ROOT file with </font><a
+href="http://root.cern.ch/root/html/TGeometry.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">TGeometry</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> object (requires AFS access)</font></pre>
+            </li>
+        </ul>
+        <ul>
+            <li><pre><a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/examples/StarWebView.C.html">StarWebView.C</a> <font
+size="2" face="verdana,arial,helvetica,sans-serif">  - Draws the STAR GEANT geometry converted into Web ROOT file with </font><a
+href="http://root.cern.ch/root/html/TGeometry.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif">TGeometry</font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> object (requires Web access)
+</font></pre>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<p><font size="2" face="verdana,arial,helvetica,sans-serif">Apart
+this there are the derived wrapper classes for STAF modules and
+tables generated by </font><a
+href="http://www.star.bnl.gov/STAR/html/ssd_l/staf_l/STAF-current/tools/stic/stic.html"><font
+size="2" face="verdana,arial,helvetica,sans-serif"><strong>stic</strong></font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"> compiler from
+the IDL description into<em> </em></font><a
+href="../tut/DirStruct.html#tables"><font size="2"
+face="verdana,arial,helvetica,sans-serif"><em>.share/tables</em></font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif"><em> </em>and </font><a
+href="../tut/DirStruct.html#domain"><font size="2"
+face="verdana,arial,helvetica,sans-serif"><em>.share/domains</em></font></a><font
+size="2" face="verdana,arial,helvetica,sans-serif">. </font></p>
+
+<p><font size="2" face="verdana,arial,helvetica,sans-serif">The
+scheme of the creating the STAF table wrapper classes is shown on
+the picture:</font></p>
+
+<p><!--webbot bot="HTMLMarkup" startspan --><P ALIGN=CENTER> <IMG SRC="http://www.star.bnl.gov/STAR/html/comp_l/root/html/gif/st2tab.gif"> </P><!--webbot
+bot="HTMLMarkup" endspan --></p>
+
+<p>The full list of the STAF classes ready for ROOT is generated
+by ROOT itself and can be see too as a part of the <a
+href="http://www.star.bnl.gov/STAR/html/comp_l/root/html/St_Table.html#St_Table:s_Table">St_Table</a>
+class description.</p>
+
+<p>The wrappers for the STAF modules are done the same way:</p>
+
+<p><!--webbot bot="HTMLMarkup" startspan --><P ALIGN=CENTER> <IMG SRC="http://www.star.bnl.gov/STAR/html/comp_l/root/html/gif/Module2Root.gif"> </P><!--webbot
+bot="HTMLMarkup" endspan --></p>
+
+<pre><font size="2" face="verdana,arial,helvetica,sans-serif"><!-- Footer --> </font></pre>
+</body>
+</html>
