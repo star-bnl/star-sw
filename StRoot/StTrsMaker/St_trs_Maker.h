@@ -1,7 +1,7 @@
-// $Id: St_trs_Maker.h,v 1.1 1998/11/10 17:11:57 fisyak Exp $
+// $Id: St_trs_Maker.h,v 1.2 1999/01/22 11:43:09 lasiuk Exp $
 // $Log: St_trs_Maker.h,v $
-// Revision 1.1  1998/11/10 17:11:57  fisyak
-// Put Brian trs versin into StRoot
+// Revision 1.2  1999/01/22 11:43:09  lasiuk
+// add output structures
 //
 // Revision 1.1  1998/11/10 17:11:57  fisyak
 // Put Brian trs versin into StRoot
@@ -36,55 +36,58 @@
 #include "StMaker.h"
 #endif
 
+// Dbs
 class StTpcGeometry;
 class StTpcSlowControl;
 class StMagneticField;
 class StTpcElectronics;
 class StTrsDeDx;
 
-   // Processes 
+// Processes 
 class StTrsChargeTransporter;
 class StTrsAnalogSignalGenerator;
 class StTrsDigitalSignalGenerator;
 
-   // Container
+// Containers
 class StTrsWireHistogram;
 class StTrsSector;
+class StTrsDigitalSector;
 
+// Output Data
+//class StTpcRawDataEvent;
 class St_trs_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_trs_Maker.h,v 1.1 1998/11/10 17:11:57 fisyak Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_trs_Maker.h,v 1.2 1999/01/22 11:43:09 lasiuk Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
-   //I/O
-   //StTrsReader                 *mReader; //
-   //StTrsWriter                 *mWriter; //
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
    //vector<StTrsChargeSegment>  *mData; //
 #else
    //vector<StTrsChargeSegment,allocator<StTrsChargeSegment> >  *mData; //
 #endif
 
-   // DataBases
-   StTpcGeometry               *mGeometryDb; //!
-   StTpcSlowControl            *mSlowControlDb; //!
-   StMagneticField             *mMagneticFieldDb;//!
-   StTpcElectronics            *mElectronicsDb; //!
-   StTrsDeDx                   *mGasDb;//!
+    // DataBases
+    StTpcGeometry               *mGeometryDb; //!
+    StTpcSlowControl            *mSlowControlDb; //!
+    StMagneticField             *mMagneticFieldDb;//!
+    StTpcElectronics            *mElectronicsDb; //!
+    StTrsDeDx                   *mGasDb;//!
+    
+    // Processes 
+    StTrsChargeTransporter      *mChargeTransporter;//!
+    StTrsAnalogSignalGenerator  *mAnalogSignalGenerator;//!
+    StTrsDigitalSignalGenerator *mDigitalSignalGenerator;//!
+    
+    // Container
+    StTrsWireHistogram           *mWireHistogram;//!
+    StTrsSector                  *mSector;//!
+    StTrsDigitalSector           *mDigitalSector;//!
 
-   // Processes 
-   StTrsChargeTransporter      *mChargeTransporter;//!
-   StTrsAnalogSignalGenerator  *mAnalogSignalGenerator;//!
-   StTrsDigitalSignalGenerator *mDigitalSignalGenerator;//!
-
-   // Container
-   StTrsWireHistogram           *mWireHistogram;//!
-   StTrsSector                  *mSector;//!
-
- protected:
- public: 
+    //StTpcRawDataEvent          *mAllTheData;
+protected:
+public: 
                   St_trs_Maker(const char *name="tpc_raw", const char *title="event/raw_data/tpc");
    virtual       ~St_trs_Maker();
    virtual Int_t Init();
