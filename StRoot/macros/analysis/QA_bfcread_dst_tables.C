@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.19 2000/04/12 15:06:50 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.20 2000/04/12 15:29:05 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.20  2000/04/12 15:29:05  kathy
+// comment out libtpc by default
+//
 // Revision 1.19  2000/04/12 15:06:50  kathy
 // changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
 //
@@ -87,7 +90,7 @@ void QA_bfcread_dst_tables(
   gSystem->Load("libgen_Tables");
   gSystem->Load("libsim_Tables");
   gSystem->Load("libglobal_Tables");
-  gSystem->Load("libtpc_Tables");
+  //  gSystem->Load("libtpc_Tables");
 
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
