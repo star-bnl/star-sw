@@ -6,6 +6,7 @@
  */
 
 struct tofTrayConfig {
-  short iTray; /* number Id of the trays of MRPC-TOF */
-  short nModules; /* total number of modules in this tray */
+  long entries;
+  short iTray[120]; /* number Id of the trays of MRPC-TOF */
+  short nModules[120]; /* total number of modules in this tray */
 };

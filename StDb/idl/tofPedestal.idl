@@ -6,7 +6,9 @@
  */
 
 struct tofPedestal {
-  long daqChannel; /* pVPD:0-5(11), TOFp:0-41, TOFr:0-71(119) */
-  long adcChan; /* CAMAC ADC channel Id */
-  short adcPedestal; /* ADC pedestal of tof channels */
+  long entries;
+  short daqChannel[26000]; /* pVPD:0-5(11), TOFp:0-41, TOFr:0-71(119)..., 
+                              TOT: 0-10... */
+  short adcChan[26000]; /* CAMAC ADC channel Id */
+  short adcPedestal[26000]; /* ADC pedestal of tof channels */
 };
