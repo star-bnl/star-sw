@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.h,v 1.17 2002/02/05 22:21:28 hardtke Exp $
+// $Id: StTrsMaker.h,v 1.18 2003/05/02 23:54:19 hardtke Exp $
 //
 // $Log: StTrsMaker.h,v $
+// Revision 1.18  2003/05/02 23:54:19  hardtke
+// Allow user to adjust normalFactor (i.e. Fudge Factor)
+//
 // Revision 1.17  2002/02/05 22:21:28  hardtke
 // Move Init code to InitRun
 //
@@ -128,7 +131,7 @@ class StTrsMaker : public StMaker {
  private:
     StTrsMaker(const StTrsMaker&);
     StTrsMaker& operator=(const StTrsMaker&);
-// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.17 2002/02/05 22:21:28 hardtke Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.18 2003/05/02 23:54:19 hardtke Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
@@ -172,6 +175,9 @@ class StTrsMaker : public StMaker {
     // Which Algorithm to be used:
   int                           mUseParameterizedSignalGenerator;
 
+   //  Gain normalization Factor
+    double normalFactor; 
+
 protected:
 
 public:
@@ -196,10 +202,11 @@ public:
 
     int   readFile(char*);//!
     int   writeFile(char*, int);//!
+    void  setNormalFactor(double FudgeFactor=1.0);
     
   virtual const char *GetCVS() const
   {
-      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.17 2002/02/05 22:21:28 hardtke Exp $ built __DATE__ __TIME__" ; return cvs;}
+      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.18 2003/05/02 23:54:19 hardtke Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StTrsMaker, 1)   //StAF chain virtual base class for Makers
 

@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.71 2003/04/30 20:38:56 perev Exp $
+// $Id: StTrsMaker.cxx,v 1.72 2003/05/02 23:54:18 hardtke Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.72  2003/05/02 23:54:18  hardtke
+// Allow user to adjust normalFactor (i.e. Fudge Factor)
+//
 // Revision 1.71  2003/04/30 20:38:56  perev
 // Warnings cleanup. Modified lines marked VP
 //
@@ -379,7 +382,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.71 2003/04/30 20:38:56 perev Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.72 2003/05/02 23:54:18 hardtke Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -403,6 +406,7 @@ mUseParameterizedSignalGenerator(1) // test trial,Hui Long
     mTrsNtupleFile = 0;
     mWireNtuple = mContinuousAnalogNtuple = mDiscreteAnalogNtuple = mDigitalNtuple = 0;
 #endif
+    normalFactor = 1.0;
 }
 
 StTrsMaker::~StTrsMaker() { /* nopt */ }
@@ -617,6 +621,7 @@ Int_t StTrsMaker::InitRun(int runnumber)
    mAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
    mAnalogSignalGenerator->addNoise(true);
    mAnalogSignalGenerator->generateNoiseUnderSignalOnly(true);
+   ((StTrsParameterizedAnalogSignalGenerator*)mAnalogSignalGenerator)->setNormalFactor(normalFactor);
    }
    else {
 
@@ -1279,3 +1284,9 @@ Int_t StTrsMaker::Finish()
     return kStOK;
 }
 
+void StTrsMaker::setNormalFactor(double FudgeFactor) {
+  normalFactor = FudgeFactor;
+  if (mUseParameterizedSignalGenerator&&mAnalogSignalGenerator) {
+    ((StTrsParameterizedAnalogSignalGenerator*)mAnalogSignalGenerator)->setNormalFactor(normalFactor);
+  }
+}
