@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstHit.cc,v 1.5 2001/07/15 20:31:33 caines Exp $
+ * $Id: StEstHit.cc,v 1.6 2002/02/20 17:22:07 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstHit.cc,v $
+ * Revision 1.6  2002/02/20 17:22:07  caines
+ * Comment out some of the print statements
+ *
  * Revision 1.5  2001/07/15 20:31:33  caines
  * Fixes from Insure++ debugging
  *
@@ -182,7 +185,8 @@ void StEstHit::LeaveBranch(StEstBranch *br) {
 	if (mDebugLevel>0) gMessMgr->Info()<<"SharingSame= "<<SharingSame<<endm;
 	if (mDebugLevel>0) gMessMgr->Info()<<"  mBranch["<<i<<"]==br<--- this branch is being removed"<<endm;
 // 	brToKill = mBranch[i]; // We point to the branch we want to leave and we will delete it after
-	for (j=i;j<mNBranch-1;j++) { mBranch[j] = mBranch[j+1]; cout << " j " << j << endl;}
+	for (j=i;j<mNBranch-1;j++) { mBranch[j] = mBranch[j+1]; //cout << " j " << j << endl;
+	}
 	break;
       }
     }
