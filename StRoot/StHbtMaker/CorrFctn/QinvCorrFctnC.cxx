@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: QinvCorrFctnC.cxx,v 1.2 2000/01/25 17:34:45 laue Exp $
+ * $Id: QinvCorrFctnC.cxx,v 1.3 2000/03/20 16:42:48 laue Exp $
  *
  * Author: Randy Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: QinvCorrFctnC.cxx,v $
+ * Revision 1.3  2000/03/20 16:42:48  laue
+ * Bug fix by Randy
+ *
  * Revision 1.2  2000/01/25 17:34:45  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -121,13 +124,9 @@ void QinvCorrFctnC::AddRealPair(const StHbtPair* pair){
 //____________________________
 void QinvCorrFctnC::AddMixedPair(const StHbtPair* pair){
   double Qinv = fabs(pair->qInv());   // note - qInv() will be negative for identical pairs...
-  //double pionMass = 0.139;
-  double charge = 1.0;
   // I call SetRadius(7.0) in my macro so don't need to use it here.
-  //  double weight = mCorrection.CoulombCorrect(charge,pionMass,pionMass,Qinv,radius);
-  //  double weight = mCorrection.CoulombCorrect(charge,pionMass,pionMass,Qinv);
-  //  double weight = mCorrection.CoulombCorrect(pair,charge);
-  double weight = mCorrection.CoulombCorrect(pair,charge);
+  //  double weight = mCorrection.CoulombCorrect(pair,radius);
+  double weight = mCorrection.CoulombCorrect(pair);
   mDenominator->Fill(Qinv,weight);
 }
 
