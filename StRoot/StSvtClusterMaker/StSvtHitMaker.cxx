@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.20 2002/02/03 00:34:50 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.21 2002/02/16 22:05:06 jeromel Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.21  2002/02/16 22:05:06  jeromel
+ * Marcelo's recen changes to StSvtClusterMaker (needed to be in sync with
+ * StDbUtilities changes)
+ *
  * Revision 1.20  2002/02/03 00:34:50  caines
  * Still fill scs_spt table even if database missing so global doesnt crash
  *
@@ -137,6 +141,9 @@ Int_t StSvtHitMaker::Init()
 
   if( GetSvtGeometry() != kStOK) return kStWarn;
 
+  // drift velocity
+  if( GetSvtDriftVelocity() != kStOK) return kStWarn;
+
   m_x_vs_y = new TH2F("si_x_vs_y","X vs Y of Si space points",
 		      300,-30,30,300,-30,30);
 
@@ -253,6 +260,23 @@ Int_t StSvtHitMaker::GetSvtGeometry()
 
 }
 //___________________________________________________________________________
+Int_t StSvtHitMaker::GetSvtDriftVelocity()
+{
+  m_driftVeloc = 0;
+  St_DataSet* dataSet;
+  dataSet = GetDataSet("StSvtDriftVelocity");
+  if(!dataSet) {
+    gMessMgr->Error("Failure to get SVT drift velocity  - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
+    
+    return kStOK;
+  }
+
+  m_driftVeloc = (StSvtHybridCollection*)dataSet->GetObject();
+  
+  return kStOK;
+
+}
+//___________________________________________________________________________
 Int_t StSvtHitMaker::Make()
 {
   if (Debug()) gMessMgr->Debug() << "In StSvtHitMaker::Make() ..."  << endm;
@@ -295,7 +319,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
   
   StSvtCoordinateTransform* SvtGeomTrans = new StSvtCoordinateTransform();
   //SvtGeomTrans->setParamPointers(&srs_par[0], &geom[0], &shape[0], mSvtData->getSvtConfig());
-  if(m_geom)  SvtGeomTrans->setParamPointers(m_geom, mSvtData->getSvtConfig());
+  if(m_geom)  SvtGeomTrans->setParamPointers(m_geom, mSvtData->getSvtConfig(), m_driftVeloc);
   StSvtLocalCoordinate localCoord(0,0,0);
   StSvtWaferCoordinate waferCoord(0,0,0,0,0,0);
   StGlobalCoordinate globalCoord(0,0,0); 

@@ -1,5 +1,9 @@
-// $Id: StSvtHitMaker.h,v 1.8 2002/01/28 23:42:14 caines Exp $
+// $Id: StSvtHitMaker.h,v 1.9 2002/02/16 22:05:06 jeromel Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.9  2002/02/16 22:05:06  jeromel
+// Marcelo's recen changes to StSvtClusterMaker (needed to be in sync with
+// StDbUtilities changes)
+//
 // Revision 1.8  2002/01/28 23:42:14  caines
 // Move to SVT database with StSvtDbMaker
 //
@@ -64,13 +68,14 @@ class StSvtHitMaker : public StMaker
   Int_t GetSvtRawData();
   Int_t GetSvtClusterData();
   Int_t GetSvtGeometry();
+  Int_t GetSvtDriftVelocity();
   void TransformIntoSpacePoint();
   void SaveIntoTable(int numOfCluster, int index);
   void SaveIntoNtuple(int numOfCluster, int index);
   void SetWriteNtuple(int iwrite){iWrite = iwrite;};
   Int_t Eval();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.8 2002/01/28 23:42:14 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.9 2002/02/16 22:05:06 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:
@@ -80,6 +85,7 @@ class StSvtHitMaker : public StMaker
   StSvtGeometry *m_geom; //!
   StSvtHybridCollection *mSvtCluColl; //!
   StSvtHybridCollection *mSvtGeantHitColl; //!
+  StSvtHybridCollection *m_driftVeloc; //!
 
   StSvtAnalysedHybridClusters  *mSvtBigHit;  //!
   
