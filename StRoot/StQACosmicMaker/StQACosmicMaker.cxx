@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.cxx,v 1.14 2000/02/03 23:51:38 snelling Exp $
+ * $Id: StQACosmicMaker.cxx,v 1.15 2000/02/05 01:26:10 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking etc.)
  *
  * $Log: StQACosmicMaker.cxx,v $
+ * Revision 1.15  2000/02/05 01:26:10  snelling
+ * Fixed multiple declaration loop variable (SUN compiler does not like it)
+ *
  * Revision 1.14  2000/02/03 23:51:38  snelling
  * Removed empty histograms
  *
@@ -55,7 +58,6 @@ Int_t StQACosmicMaker::Init() {
 
   return StMaker::Init();
 }
-
 //-----------------------------------------------------------------------
 
 Int_t StQACosmicMaker::Make() {
@@ -75,7 +77,7 @@ Int_t StQACosmicMaker::Make() {
 
 void StQACosmicMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StQACosmicMaker.cxx,v 1.14 2000/02/03 23:51:38 snelling Exp $\n");
+  printf("* $Id: StQACosmicMaker.cxx,v 1.15 2000/02/05 01:26:10 snelling Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -91,18 +93,6 @@ Int_t StQACosmicMaker::Finish() {
   if (bWriteHistogramsOn) {writeOutHistograms();}
   
   return StMaker::Finish();
-}
-
-//-----------------------------------------------------------------------
-
-Int_t StQACosmicMaker::initTNtuple() {
-  
-  mTNtupleTPC = new TNtuple("nttpc",
-			    "TPC TNtuple",
-			    "hrow:hx:hy:hz:hdx:hdy:hdz:halpha:hlamda:hdalpha:\
-hdlamda:resy:resz:trknfit:trkcalcp");
-  
-  return kStOK;
 }
 
 //-----------------------------------------------------------------------
@@ -246,26 +236,17 @@ Int_t StQACosmicMaker::writeOutHistograms() {
 
 //-----------------------------------------------------------------------
 
-Int_t StQACosmicMaker::writeOutTNtuple() {
-
-
-  TString *mTNtupleFileName = new TString(MakerName.Data());
-  mTNtupleFileName->Append(".ntuple.root");
-
-  TFile outTNtupleFile(mTNtupleFileName->Data(),"RECREATE"); 
-  mTNtupleTPC->Write();
-  outTNtupleFile.Close();
-
-  delete mTNtupleFileName;
+Int_t StQACosmicMaker::initTNtuple() {
   
-  return kStOK;
-}
+  mTNtupleTPC = new TNtuple("nttpc",
+			    "TPC TNtuple",
+			    "hrow:hx:hy:hz:hdx:hdy:hdz:halpha:hlamda:hdalpha:\
+hdlamda:cnseq:cnpix:cnpads:resy:resz:trknfit:trkcalcp");
 
-//-----------------------------------------------------------------------
-
-Int_t StQACosmicMaker::writeOutPostscript() {
-  // not implemented yet
-
+  mTNtupleMorph = new TNtuple("ntmorph",
+			    "Morph TNtuple",
+			    "hx:hy:hz:cnseq:cnpix:cnpads");
+  
   return kStOK;
 }
 
@@ -277,14 +258,22 @@ Int_t StQACosmicMaker::fillTNtuple() {
     Int_t irow_res = ressorter->operator[]((Int_t)(pttphit[i].id));
     // track in row table is 1000*id + position on track
     Int_t irow_trk = trksorter->operator[]((Int_t)(pttphit[i].track/1000.));
+    // cluster information
+    Int_t irow_morph = morphsorter->operator[]((Int_t)(pttphit[i].cluster));
 
-    if (irow_trk >= 0) {
-
+    // row in tphit table 100*sector + row
+    Int_t isector = (Int_t)(pttphit[i].row/100.);
+    // row number in sector (to distinguish between inner and outer)
+    Int_t irowsector = pttphit[i].row - 100 * isector;   
+    
+    // global cuts and only particles belonging to track
+    if (irow_trk >= 0 && irow_morph >= 0 && irow_res >= 0) {
+      // calculate total momentum of the track where the hit belongs to
       Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
 			      (pttrk[irow_trk].invp * pttrk[irow_trk].invp));
       
       mTNtupleTPC->Fill(
-			(Float_t)(Int_t(pttphit[i].row/100.)),
+			(Float_t)(pttphit[i].row/100.),
 			(Float_t)(pttphit[i].x),
 			(Float_t)(pttphit[i].y),
 			(Float_t)(pttphit[i].z),
@@ -297,13 +286,48 @@ Int_t StQACosmicMaker::fillTNtuple() {
 			(Float_t)(pttphit[i].dlambda),
 			(Float_t)(ptres[irow_res].resy),
 			(Float_t)(ptres[irow_res].resz),
-			(Float_t)(Float_t(pttrk[irow_trk].nfit)),
+			(Float_t)(pttrk[irow_trk].nfit),
 			(Float_t)(trkcalcp)
 			);
-      
+
+      mTNtupleMorph->Fill(
+			  (Float_t)(pttphit[i].x),
+			  (Float_t)(pttphit[i].y),
+			  (Float_t)(pttphit[i].z),
+			  (Float_t)(ptmorph[irow_morph].numberOfSequences),
+			  (Float_t)(ptmorph[irow_morph].numberOfPixels),
+			  (Float_t)(ptmorph[irow_morph].numberOfPads)
+			  );
+
       if (Debug()) {cout << "dip angle " <<pttphit[i].lambda << endl;}
     }
   }
+
+  return kStOK;
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StQACosmicMaker::writeOutTNtuple() {
+
+
+  TString *mTNtupleFileName = new TString(MakerName.Data());
+  mTNtupleFileName->Append(".ntuple.root");
+
+  TFile outTNtupleFile(mTNtupleFileName->Data(),"RECREATE"); 
+  mTNtupleTPC->Write();
+  mTNtupleMorph->Write();
+  outTNtupleFile.Close();
+
+  delete mTNtupleFileName;
+  
+  return kStOK;
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StQACosmicMaker::writeOutPostscript() {
+  // not implemented yet
 
   return kStOK;
 }
@@ -834,6 +858,7 @@ Int_t StQACosmicMaker::fillResHistograms() {
 Int_t StQACosmicMaker::calcResHistograms() {
 
   int i;
+  int j;
   TString *mHistTitle;
   TString *mHistName;
   char mCount[2];
@@ -919,7 +944,7 @@ Int_t StQACosmicMaker::calcResHistograms() {
     ResidualHists[i].FitHists.mXYResVersusAlpha_chi->SetXTitle("Crossing Angle (degree)");
     ResidualHists[i].FitHists.mXYResVersusAlpha_chi->SetYTitle("chi2");
     
-    for (int j=0; j<ResidualHists[i].FitHists.mXYResVersusAlpha_sigma->fN; j++) { 
+    for (j=0; j<ResidualHists[i].FitHists.mXYResVersusAlpha_sigma->fN; j++) { 
       ResidualHists[i].FitHists.mXYResVersusAlpha_sigma->fArray[j] = 
     	fabs(ResidualHists[i].FitHists.mXYResVersusAlpha_sigma->fArray[j]);
     }
@@ -1000,7 +1025,7 @@ Int_t StQACosmicMaker::calcResHistograms() {
     ResidualHists[i].FitHists.mXYResVersusAlphaZ1_chi->SetXTitle("Crossing Angle (degree)");
     ResidualHists[i].FitHists.mXYResVersusAlphaZ1_chi->SetYTitle("chi2");
     
-    for (int j=0; j<ResidualHists[i].FitHists.mXYResVersusAlphaZ1_sigma->fN; j++) { 
+    for (j=0; j<ResidualHists[i].FitHists.mXYResVersusAlphaZ1_sigma->fN; j++) { 
       ResidualHists[i].FitHists.mXYResVersusAlphaZ1_sigma->fArray[j] = 
     	fabs(ResidualHists[i].FitHists.mXYResVersusAlphaZ1_sigma->fArray[j]);
     }
@@ -1081,7 +1106,7 @@ Int_t StQACosmicMaker::calcResHistograms() {
     ResidualHists[i].FitHists.mXYResVersusAlphaZ2_chi->SetXTitle("Crossing Angle (degree)");
     ResidualHists[i].FitHists.mXYResVersusAlphaZ2_chi->SetYTitle("chi2");
     
-    for (int j=0; j<ResidualHists[i].FitHists.mXYResVersusAlphaZ2_sigma->fN; j++) { 
+    for (j=0; j<ResidualHists[i].FitHists.mXYResVersusAlphaZ2_sigma->fN; j++) { 
       ResidualHists[i].FitHists.mXYResVersusAlphaZ2_sigma->fArray[j] = 
     	fabs(ResidualHists[i].FitHists.mXYResVersusAlphaZ2_sigma->fArray[j]);
     }
@@ -1162,7 +1187,7 @@ Int_t StQACosmicMaker::calcResHistograms() {
     ResidualHists[i].FitHists.mXYResVersusAlphaZ3_chi->SetXTitle("Crossing Angle (degree)");
     ResidualHists[i].FitHists.mXYResVersusAlphaZ3_chi->SetYTitle("chi2");
     
-    for (int j=0; j<ResidualHists[i].FitHists.mXYResVersusAlphaZ3_sigma->fN; j++) { 
+    for (j=0; j<ResidualHists[i].FitHists.mXYResVersusAlphaZ3_sigma->fN; j++) { 
       ResidualHists[i].FitHists.mXYResVersusAlphaZ3_sigma->fArray[j] = 
     	fabs(ResidualHists[i].FitHists.mXYResVersusAlphaZ3_sigma->fArray[j]);
     }
@@ -1243,7 +1268,7 @@ Int_t StQACosmicMaker::calcResHistograms() {
     ResidualHists[i].FitHists.mXYResVersusAlphaZ4_chi->SetXTitle("Crossing Angle (degree)");
     ResidualHists[i].FitHists.mXYResVersusAlphaZ4_chi->SetYTitle("chi2");
     
-    for (int j=0; j<ResidualHists[i].FitHists.mXYResVersusAlphaZ4_sigma->fN; j++) { 
+    for (j=0; j<ResidualHists[i].FitHists.mXYResVersusAlphaZ4_sigma->fN; j++) { 
       ResidualHists[i].FitHists.mXYResVersusAlphaZ4_sigma->fArray[j] = 
     	fabs(ResidualHists[i].FitHists.mXYResVersusAlphaZ4_sigma->fArray[j]);
     }

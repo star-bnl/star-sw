@@ -2,13 +2,16 @@
 #define StQACosmicMaker_HH
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.h,v 1.10 2000/02/03 23:51:39 snelling Exp $
+ * $Id: StQACosmicMaker.h,v 1.11 2000/02/05 01:26:11 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking, 
  *               geometry etc.)
  *
  * $Log: StQACosmicMaker.h,v $
+ * Revision 1.11  2000/02/05 01:26:11  snelling
+ * Fixed multiple declaration loop variable (SUN compiler does not like it)
+ *
  * Revision 1.10  2000/02/03 23:51:39  snelling
  * Removed empty histograms
  *
@@ -52,7 +55,7 @@ class StQACosmicMaker : public StMaker {
   virtual void   WriteHistogramsOff(){WriteHistograms();}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.10 2000/02/03 23:51:39 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.11 2000/02/05 01:26:11 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  private:
 
@@ -130,6 +133,7 @@ class StQACosmicMaker : public StMaker {
 	nMorphHist = 4 };
 
   TNtuple *mTNtupleTPC; //!
+  TNtuple *mTNtupleMorph; //!
 
   struct ClusterHist {
     TH1F *mNPadsPerHit;
