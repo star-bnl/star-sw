@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.8 2000/04/04 16:13:09 lisa Exp $
+ * $Id: StHbtPair.hh,v 1.9 2000/07/17 20:03:17 lisa Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
+ * Revision 1.9  2000/07/17 20:03:17  lisa
+ * Implemented tools for addressing and assessing trackmerging
+ *
  * Revision 1.8  2000/04/04 16:13:09  lisa
  * StHbtPair:quality() now returns normalized value (and so is double) and add a CorrFctn which looks at quality()
  *
@@ -99,6 +102,14 @@ public:
   double qLongBf(double beta=0.0) const;
 
   double quality() const;
+
+  // the following two methods calculate the "nominal" separation of the tracks 
+  // at the inner field cage (EntranceSeparation) and when they exit the TPC,
+  // which may be at the outer field cage, or at the endcaps.
+  // "nominal" means that the tracks are assumed to start at (0,0,0).  Making this
+  // assumption is important for the Event Mixing-- it is not a mistake. - MALisa
+  double NominalTpcExitSeparation() const;
+  double NominalTpcEntranceSeparation() const;
 
 private:
   StHbtParticle* mTrack1;

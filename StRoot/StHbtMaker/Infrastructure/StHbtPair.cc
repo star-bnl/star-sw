@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.10 2000/04/04 16:27:03 rcwells Exp $
+ * $Id: StHbtPair.cc,v 1.11 2000/07/17 20:03:16 lisa Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.11  2000/07/17 20:03:16  lisa
+ * Implemented tools for addressing and assessing trackmerging
+ *
  * Revision 1.10  2000/04/04 16:27:03  rcwells
  * Removed an errant cout in StHbtPair.cc
  *
@@ -265,3 +268,15 @@ double StHbtPair::quality() const {
   return ( normQual );
 
 }
+
+double StHbtPair::NominalTpcExitSeparation() const {
+  StHbtThreeVector diff = mTrack1->NominalTpcExitPoint() - mTrack2->NominalTpcExitPoint();
+  return (diff.mag());
+}
+
+double StHbtPair::NominalTpcEntranceSeparation() const {
+  StHbtThreeVector diff = mTrack1->NominalTpcEntrancePoint() - mTrack2->NominalTpcEntrancePoint();
+  return (diff.mag());
+}
+
+
