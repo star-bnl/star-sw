@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.5 2004/04/01 20:08:54 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.6 2004/04/09 16:11:18 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.6  2004/04/09 16:11:18  dongx
+ * comment out a potential bug causing crash
+ *
  * Revision 1.5  2004/04/01 20:08:54  dongx
  * fix a bug about the hit position stored in TofCell
  *
@@ -865,7 +868,7 @@ Int_t StTofrMatchMaker::Make(){
 	     << "\tpT=" << momentum.perp() << "\tp=" << momentum.mag()
 	     << "\thits="<< nHitsPerTrack << "\ts="<< pathLength
 	     << "\t#fitp=" <<theTrack->fitTraits().numberOfFitPoints(kTpcId)
-	     << "\t#trkp=" <<theTrack->detectorInfo()->numberOfPoints(kTpcId)
+	  //	     << "\t#trkp=" <<theTrack->detectorInfo()->numberOfPoints(kTpcId)
 	     << " \tdedx=" << dedx
 	     << " \tdca="<< globalTrack->geometry()->helix().distance(mEvent->primaryVertex()->position())<<" and "<<theTrackGeometry->helix().distance(mEvent->primaryVertex()->position());
 	if (cherang!=0) cout  << " \trich="<< cherang << " (" << cherang_nph << ")";
