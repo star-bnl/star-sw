@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.18 2000/08/31 18:58:17 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.19 2000/09/05 16:11:30 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.19  2000/09/05 16:11:30  snelling
+// Added global DCA, electron and positron
+//
 // Revision 1.18  2000/08/31 18:58:17  posk
 // For picoDST, added version number, runID, and multEta for centrality.
 // Added centrality cut when reading picoDST.
@@ -166,7 +169,7 @@ Bool_t StFlowCutEvent::CheckEvent(StFlowPicoEvent* pPicoEvent) {
   if (!pPicoEvent) return kFALSE;
 
   // Centrality
-  UInt_t cent = pPicoEvent->Centrality();
+  Int_t cent = pPicoEvent->Centrality();
   if (mCentCuts[0] && mCentCuts[1] >= mCentCuts[0] && 
       (cent < mCentCuts[0] || cent > mCentCuts[1])) {
     mCentCut++;

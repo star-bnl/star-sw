@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.cxx,v 1.3 2000/06/01 18:26:41 posk Exp $
+// $Id: StFlowTrack.cxx,v 1.4 2000/09/05 16:11:39 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.cxx,v $
+// Revision 1.4  2000/09/05 16:11:39  snelling
+// Added global DCA, electron and positron
+//
 // Revision 1.3  2000/06/01 18:26:41  posk
 // Increased precision of Track integer data members.
 //
@@ -27,7 +30,6 @@
 ClassImp(StFlowTrack)
 
 Float_t StFlowTrack::maxInt  = 32.;
-Float_t StFlowTrack::maxUInt = 6.5;
 
 StFlowTrack::StFlowTrack() : mSelection(0) {
 }

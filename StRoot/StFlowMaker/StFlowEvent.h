@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.14 2000/08/31 18:58:22 posk Exp $
+// $Id: StFlowEvent.h,v 1.15 2000/09/05 16:11:32 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.15  2000/09/05 16:11:32  snelling
+// Added global DCA, electron and positron
+//
 // Revision 1.14  2000/08/31 18:58:22  posk
 // For picoDST, added version number, runID, and multEta for centrality.
 // Added centrality cut when reading picoDST.
@@ -148,6 +151,10 @@ public:
   static void SetAntiProtonCut(Float_t lo, Float_t hi);
   static void SetKPlusCut(Float_t lo, Float_t hi);
   static void SetKMinusCut(Float_t lo, Float_t hi);
+  static void SetElectronCut(Float_t lo, Float_t hi);
+  static void SetPositronCut(Float_t lo, Float_t hi);
+  static void SetDeuteronCut(Float_t lo, Float_t hi);
+  static void SetAntiDeuteronCut(Float_t lo, Float_t hi);
   void  SetCTB(const Float_t ctb);
   void  SetZDCe(const Float_t zdce);
   void  SetZDCw(const Float_t zdcw);
@@ -169,6 +176,10 @@ private:
   static Float_t  mKMinusCuts[2];
   static Float_t  mKPlusCuts[2];
   static Float_t  mAntiProtonCuts[2];
+  static Float_t  mDeuteronCuts[2];
+  static Float_t  mAntiDeuteronCuts[2];
+  static Float_t  mElectronCuts[2];
+  static Float_t  mPositronCuts[2];
   Float_t         mCTB;                                 // CTB value sum
   Float_t         mZDCe;                                // ZDC east
   Float_t         mZDCw;                                // ZDC west
@@ -244,6 +255,18 @@ inline void StFlowEvent::SetKPlusCut(Float_t lo, Float_t hi) {
 
 inline void StFlowEvent::SetAntiProtonCut(Float_t lo, Float_t hi) { 
   mAntiProtonCuts[0] = lo; mAntiProtonCuts[1] = hi; }
+
+inline void StFlowEvent::SetDeuteronCut(Float_t lo, Float_t hi) { 
+  mDeuteronCuts[0] = lo; mDeuteronCuts[1] = hi; }
+
+inline void StFlowEvent::SetAntiDeuteronCut(Float_t lo, Float_t hi) { 
+  mAntiDeuteronCuts[0] = lo; mAntiDeuteronCuts[1] = hi; }
+
+inline void StFlowEvent::SetElectronCut(Float_t lo, Float_t hi) { 
+  mElectronCuts[0] = lo; mElectronCuts[1] = hi; }
+
+inline void StFlowEvent::SetPositronCut(Float_t lo, Float_t hi) { 
+  mPositronCuts[0] = lo; mPositronCuts[1] = hi; }
 
 inline void  StFlowEvent::SetCTB(const Float_t ctb)  {mCTB = ctb; }
 
