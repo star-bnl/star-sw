@@ -16,24 +16,10 @@ my @Deps = ();
 (my $llib = $LIB) =~ s/\#//; #print "llib = $llib\n";
 my $pwd = cwd(); #print "pwd = $pwd\n";
 foreach my $pkg (@pkgs) {
-#  if ($STAR_SYS =~ /^hp_ux102$/) {
-#    my $lib = $llib  . $pkg . "_Tables.so"; print "lib = $lib\n";
-#    $LIBS .= " " . $lib;
-##    my $lib = "../../" . $llib  . $pkg . "_Tables.so"; print "lib = $lib\n";
-##    if (-f $lib) {$LIBS .= " " . $lib;}
-##    else {
-##      foreach my $dir (@Repo) {
-##	my $rlib = $dir . "/" . $lib; print "rlib = $rlib\n";
-##	if (-f $rlib) {$LIBS .= " " . $rlib; last;}
-##      }
-##    }
-#  }
-#  else  {
     my $lib = "-l" . $pkg . "_Tables"; $LIBS .= " " . $lib;
-#  }
   $lib = $LIB . "/lib" . $pkg . "_Tables." . $env->{SUFSOLIB};			 
   push @Deps, $lib;
-} #print "LIBS = $LIBS\n";
+}
 $env3 = $env->clone(
 		    'DEBUG'      => ' ',
 		    'LIBS'       => $LIBS
