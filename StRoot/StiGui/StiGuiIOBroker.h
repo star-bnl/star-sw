@@ -20,7 +20,10 @@
 
 #include "TObject.h"
 
-class StiGuiIOBroker
+//Sti
+#include "Sti/SubjectObserver.h"
+
+class StiGuiIOBroker : public Subject
 {
 public:
     static StiGuiIOBroker* instance();
@@ -65,7 +68,7 @@ private:
     double mMarkedHitSize;
     unsigned int mMarkedHitColor;
     unsigned int mMarkedHitStyle;
-    
+
     ClassDef(StiGuiIOBroker, 1)
 };
 
@@ -77,6 +80,7 @@ inline StiGuiIOBroker* StiGuiIOBroker::instance()
 inline void StiGuiIOBroker::setUnMarkedHitSize(double val)
 {
     mUnMarkedHitSize=val;
+    notify();
 }
 
 inline double StiGuiIOBroker::unMarkedHitSize() const
@@ -87,6 +91,7 @@ inline double StiGuiIOBroker::unMarkedHitSize() const
 inline void StiGuiIOBroker::setUnMarkedHitColor(unsigned int val)
 {
     mUnMarkedHitColor=val;
+    notify();
 }
 
 inline unsigned int StiGuiIOBroker::unMarkedHitColor() const
@@ -97,6 +102,7 @@ inline unsigned int StiGuiIOBroker::unMarkedHitColor() const
 inline void StiGuiIOBroker::setUnMarkedHitStyle(unsigned int val)
 {
     mUnMarkedHitStyle=val;
+    notify();
 }
 
 inline unsigned int StiGuiIOBroker::unMarkedHitStyle() const
@@ -107,6 +113,7 @@ inline unsigned int StiGuiIOBroker::unMarkedHitStyle() const
 inline void StiGuiIOBroker::setMarkedHitSize(double val)
 {
     mMarkedHitSize=val;
+    notify();
 }
 
 inline double StiGuiIOBroker::markedHitSize() const
@@ -117,6 +124,7 @@ inline double StiGuiIOBroker::markedHitSize() const
 inline void StiGuiIOBroker::setMarkedHitColor(unsigned int val)
 {
     mMarkedHitColor=val;
+    notify();
 }
 
 inline unsigned int StiGuiIOBroker::markedHitColor() const
@@ -127,6 +135,7 @@ inline unsigned int StiGuiIOBroker::markedHitColor() const
 inline void StiGuiIOBroker::setMarkedHitStyle(unsigned int val)
 {
     mMarkedHitStyle=val;
+    notify();
 }
     
 inline unsigned int StiGuiIOBroker::markedHitStyle() const

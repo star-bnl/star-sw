@@ -34,57 +34,64 @@
 using std::sort;
 
 StiRootDrawableStiEvaluableTrack::StiRootDrawableStiEvaluableTrack()
+    : mBroker(StiGuiIOBroker::instance()), mSubject(StiGuiIOBroker::instance())
 {
-    StiGuiIOBroker* broker = StiGuiIOBroker::instance();
+    mLineHitPair.first = new StiRootDrawableLine();
+    mLineHitPair.second = new StiRootDrawableHits();
     
-    mLine = new StiRootDrawableLine();
-    
-    mHits = new StiRootDrawableHits();
+    mLineHitPair.first->setRemoved(true);
+    mLineHitPair.second->setRemoved(true);
 
-    mHits->setColor( broker->markedHitColor() );
-    mHits->setMarkerSize( broker->markedHitSize() );
-    mHits->setMarkerStyle( broker->markedHitStyle() );
-    
-    mLine->setRemoved(true);
-    mHits->setRemoved(true);
+    mSubject->attach(this);
+    getNewValues();
 }
 
 StiRootDrawableStiEvaluableTrack::~StiRootDrawableStiEvaluableTrack()
 {
     // cout <<"StiRootDrawableStiEvaluableTrack::~StiRootDrawableStiEvaluableTrack()"<<endl;
-    delete mLine;
-    mLine=0;
-    delete mHits;
-    mHits=0;
+    delete mLineHitPair.first;
+    mLineHitPair.first=0;
+    delete mLineHitPair.second;
+    mLineHitPair.second=0;
+
+    if (mSubject) {
+	mSubject->detach(this);
+    }
     // cout <<"\tdone"<<endl;
+}
+
+void StiRootDrawableStiEvaluableTrack::getNewValues()
+{
+    // cout <<"StiRootDrawableStiEvaluableTrack::getNewValues()"<<endl;
+    mLineHitPair.second->setColor( mBroker->markedHitColor() );
+    mLineHitPair.second->setMarkerSize( mBroker->markedHitSize() );
+    mLineHitPair.second->setMarkerStyle( mBroker->markedHitStyle() );
+    // cout <<"\tdone"<<endl;
+    
 }
 
 void StiRootDrawableStiEvaluableTrack::reset()
 {
     StiEvaluableTrack::reset();
-    mLine->clear();
-    mHits->clear();
-    mLine->setIsAdded(false);
-    mHits->setIsAdded(false);
+    mLineHitPair.first->clear();
+    mLineHitPair.second->clear();
+    mLineHitPair.first->setIsAdded(false);
+    mLineHitPair.second->setIsAdded(false);
 }
 
 void StiRootDrawableStiEvaluableTrack::update()
 {
-    //cout <<"void StiRootDrawableStiEvaluableTrack::update()"<<endl;
-    StiGuiIOBroker* broker = StiGuiIOBroker::instance();
-
-    mHits->setColor( broker->markedHitColor() );
-    mHits->setMarkerSize( broker->markedHitSize() );
-    mHits->setMarkerStyle( broker->markedHitStyle() );    
-
+    // cout <<"StiRootDrawableStiEvaluableTrack::update()"<<endl;
+    //getNewValues();
     fillHitsForDrawing();
+    // cout <<"\t done"<<endl;
 }
 
 void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
 {
     //be sure to reset internal state
-    mLine->clear();
-    mHits->clear();
+    mLineHitPair.first->clear();
+    mLineHitPair.second->clear();
 
     if (!mPair) {
 	cout <<"StiRootDrawableStiEvaluableTrack::fillHitsForDrawing() Error:";
@@ -93,7 +100,7 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
     }
 
     //Set color and line type
-    mLine->clearLine();
+    mLineHitPair.first->clearLine();
     setLineInfo();
     
     //Let's try to find out where the first node is:
@@ -103,10 +110,10 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
     for (double xLocal=xStart; xLocal<200.; xLocal+=1.) {
 	StThreeVector<double> pos = getGlobalPointNear(xLocal);
 	//cout <<"Adding Position:\t"<<pos<<endl;
-	//mLine->push_back( pos );
-	mLine->push_back( pos.x() );
-	mLine->push_back( pos.y() );
-	mLine->push_back( pos.z() );
+	//mLineHitPair.first->push_back( pos );
+	mLineHitPair.first->push_back( pos.x() );
+	mLineHitPair.first->push_back( pos.y() );
+	mLineHitPair.first->push_back( pos.z() );
 	
     }
 
@@ -119,9 +126,9 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
 	if (node->getHit()) {
 	    //Add this point to the drawable hits
 	    const StThreeVectorF& pos = node->getHit()->globalPosition();
-	    mHits->push_back( pos.x() );
-	    mHits->push_back( pos.y() );
-	    mHits->push_back( pos.z() );
+	    mLineHitPair.second->push_back( pos.x() );
+	    mLineHitPair.second->push_back( pos.y() );
+	    mLineHitPair.second->push_back( pos.z() );
 	    ++hits;
 	}
 	//now check for parent:
@@ -139,16 +146,16 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
     }
 
     //cout <<"Hits on track:\t"<<hits<<endl;
-    mLine->fillHitsForDrawing();
-    mHits->fillHitsForDrawing();
+    mLineHitPair.first->fillHitsForDrawing();
+    mLineHitPair.second->fillHitsForDrawing();
 
     //These get automatically removed from display each event
     //The display dynamically shrinks temp objects each event (tracks, hits, etc)
-    if (!mLine->isAdded()) {
-	StiDisplayManager::instance()->addDrawable( mLine );
+    if (!mLineHitPair.first->isAdded()) {
+	StiDisplayManager::instance()->addDrawable( mLineHitPair.first );
     }
-    if (!mHits->isAdded()) {
-	StiDisplayManager::instance()->addDrawable( mHits );
+    if (!mLineHitPair.second->isAdded()) {
+	StiDisplayManager::instance()->addDrawable( mLineHitPair.second );
     }
     
     return;
@@ -208,9 +215,9 @@ void StiRootDrawableStiEvaluableTrack::setLineInfo()
 	color=5;
 	//lineStyle=1;
     }
-    mLine->clearLine();
-    mLine->setColor(color);
-    mLine->setLineStyle(lineStyle);
-    mLine->setLineWidth(1.5);
+    mLineHitPair.first->clearLine();
+    mLineHitPair.first->setColor(color);
+    mLineHitPair.first->setLineStyle(lineStyle);
+    mLineHitPair.first->setLineWidth(1.5);
 
 }
