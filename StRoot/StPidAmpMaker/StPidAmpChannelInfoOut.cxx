@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannelInfoOut.cxx,v 1.2 2000/03/24 15:11:14 aihong Exp $
+ * $Id: StPidAmpChannelInfoOut.cxx,v 1.3 2000/04/09 16:36:42 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannelInfoOut.cxx,v $
+ * Revision 1.3  2000/04/09 16:36:42  aihong
+ * change for adapting NHitDcaNet added
+ *
  * Revision 1.2  2000/03/24 15:11:14  aihong
  * add PrintContent()
  *
@@ -30,8 +33,8 @@ StPidAmpChannelInfoOut::StPidAmpChannelInfoOut(const StPidAmpChannelInfoOut& inf
     mNHitsEnd  =infoOut.mNHitsEnd;
     mPtStart   =infoOut.mPtStart;
     mPtEnd     =infoOut.mPtEnd;
-    //mXStart  =infoOut.mXStart;
-    //mXEnd    =infoOut.mXEnd;
+    mDcaStart  =infoOut.mDcaStart;
+    mDcaEnd    =infoOut.mDcaEnd;
 }
 
 
@@ -45,15 +48,15 @@ StPidAmpChannelInfoOut::StPidAmpChannelInfoOut(Int_t nhitsStart, Int_t nhitsEnd,
 
 StPidAmpChannelInfoOut::~StPidAmpChannelInfoOut(){}
 
-//StPidAmpChannelInfoOut::StPidAmpChannelInfoOut(Int_t nhitsStart, Int_t nhitsEnd, Double_t ptStart, Double_t ptEnd, Double_t xStart, Double_t xEnd){
+StPidAmpChannelInfoOut::StPidAmpChannelInfoOut(Int_t nhitsStart, Int_t nhitsEnd, Double_t ptStart, Double_t ptEnd, Double_t dcaStart, Double_t dcaEnd){
 
-//   mNHitsStart=nhitsStart;
-//   mNHitsEnd  =nhitsEnd;
-//   mPtStart   =ptStart;
-//   mPtEnd     =ptEnd;
-//   mXStart    =xStart;
-//   mXEnd      =xEnd;
-//}
+   mNHitsStart  = nhitsStart;
+   mNHitsEnd    = nhitsEnd;
+   mPtStart     = ptStart;
+   mPtEnd       = ptEnd;
+   mDcaStart    = dcaStart;
+   mDcaEnd      = dcaEnd;
+}
 
 void StPidAmpChannelInfoOut::SetNHitsRange(Int_t nhitsStart, Int_t nhitsEnd){
     mNHitsStart=nhitsStart;
@@ -65,10 +68,10 @@ void StPidAmpChannelInfoOut::SetPtRange(Double_t ptStart, Double_t ptEnd){
     mPtEnd   = ptEnd;
 }
 
-//void  StPidAmpChannelInfoOut::SetXRange(Double_t xStart, Double_t xEnd){
-//    mXStart =xStart;
-//    mXEnd   =xEnd;
-//}
+void  StPidAmpChannelInfoOut::SetDcaRange(Double_t dcaStart, Double_t dcaEnd){
+    mDcaStart =dcaStart;
+    mDcaEnd   =dcaEnd;
+}
 
 Int_t StPidAmpChannelInfoOut::NHitsStart() const {return mNHitsStart;}
 
@@ -86,22 +89,23 @@ Double_t StPidAmpChannelInfoOut::PtEnd() const {return mPtEnd;}
 
 
 
-//Double_t StPidAmpChannelInfoOut::XStart() const {return mXStart;}
-//Double_t StPidAmpChannelInfoOut::XEnd()   conts {return mXEnd;}
+Double_t StPidAmpChannelInfoOut::DcaStart() const {return mDcaStart;}
+Double_t StPidAmpChannelInfoOut::DcaEnd()   const {return mDcaEnd;}
 
 Bool_t StPidAmpChannelInfoOut::IsInChannel(Int_t nhits,Double_t pt){
 
  return ((nhits<=mNHitsEnd)&&(nhits>mNHitsStart)&&(pt<=mPtEnd)&&(pt>mPtStart));
 }
 
-//Bool_t StPidAmpChannelInfoOut::IsInChannel(Int_t nhits,Double_t pt,Double_t x){
+Bool_t StPidAmpChannelInfoOut::IsInChannel(Int_t nhits,Double_t pt,Double_t dca){
 
-// return ((nhits<=mNHitsEnd)&&(nHits>mNHitsStart)&&(pt<=mPtEnd)&&(pt>mPtStart)&&(x<=mXEnd)&&(x>mXStart));
-//}
+ return ((nhits<=mNHitsEnd)&&(nhits>mNHitsStart)&&(pt<=mPtEnd)&&(pt>mPtStart)&&(dca<=mDcaEnd)&&(dca>mDcaStart));
+}
 
 void StPidAmpChannelInfoOut::PrintContent(){
   cout<<"NHitsStart: "<<NHitsStart()<<" NHitsEnd: "<<NHitsEnd()<<endl;
   cout<<"PtStart:    "<<PtStart()   <<" PtEnd:    "<<PtEnd()<<endl;
+  cout<<"DcaStart:   "<<DcaStart()  <<" DcaEnd:   "<<DcaEnd()<<endl;
   cout<<endl;
 }
 
@@ -110,6 +114,8 @@ ostream& operator<<(ostream& s, const StPidAmpChannelInfoOut& infoOut){
 
   s<<"NHitsStart: "<<infoOut.NHitsStart()<<" NHitsEnd: "<<infoOut.NHitsEnd()<<endl;
   s<<"PtStart:    "<<infoOut.PtStart()   <<" PtEnd:    "<<infoOut.PtEnd()<<endl;
+
+  s<<"DcaStart:   "<<infoOut.DcaStart() <<" DcaEnd:   "<<infoOut.DcaEnd()<<endl;
   s<<endl;
   return s;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannelInfoOut.h,v 1.2 2000/03/24 15:11:09 aihong Exp $
+ * $Id: StPidAmpChannelInfoOut.h,v 1.3 2000/04/09 16:36:43 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannelInfoOut.h,v $
+ * Revision 1.3  2000/04/09 16:36:43  aihong
+ * change for adapting NHitDcaNet added
+ *
  * Revision 1.2  2000/03/24 15:11:09  aihong
  * add PrintContent()
  *
@@ -45,22 +48,22 @@ class StPidAmpChannelInfoOut : public TObject {
     StPidAmpChannelInfoOut(const StPidAmpChannelInfoOut&);
     StPidAmpChannelInfoOut(Int_t nhitsStart, Int_t nhitsEnd, Double_t ptStart, Double_t ptEnd);
     virtual ~StPidAmpChannelInfoOut();
-   // StPidAmpChannelInfoOut(Int_t nhitsStart, Int_t nhitsEnd, Double_t ptStart, Double_t ptEnd, Double_t xStart, Double_t xEnd);
+    StPidAmpChannelInfoOut(Int_t nhitsStart, Int_t nhitsEnd, Double_t ptStart, Double_t ptEnd, Double_t dcaStart, Double_t dcaEnd);
     void SetNHitsRange(Int_t nhitsStart, Int_t nhitsEnd);
     void SetPtRange(Double_t ptStart, Double_t ptEnd);
-    //SetXRange(Double_t xStart, Double_t xEnd);
+    void SetDcaRange(Double_t dcaStart, Double_t dcaEnd);
 
     void PrintContent();
 
-    Int_t NHitsStart() const;
-    Int_t   NHitsEnd() const;
-    Double_t PtStart() const;
-    Double_t   PtEnd() const;
-    //Double_t XStart() cont;
-    //Double_t XEnd() const;
+    Int_t  NHitsStart() const;
+    Int_t    NHitsEnd() const;
+    Double_t  PtStart() const;
+    Double_t    PtEnd() const;
+    Double_t DcaStart() const;
+    Double_t   DcaEnd() const;
     
     Bool_t IsInChannel(Int_t nhits, Double_t pt);        
-    //   Bool_t IsInChannel(Int_t nhits, Double_t pt,Double_t x);        
+    Bool_t IsInChannel(Int_t nhits, Double_t pt,Double_t dca);        
 
 
 
@@ -71,8 +74,8 @@ class StPidAmpChannelInfoOut : public TObject {
     Double_t mPtStart;
     Double_t mPtEnd;
  
-    //Double_t mXStart;
-    //Double_t mXEnd;
+    Double_t mDcaStart;
+    Double_t mDcaEnd;
 
 
  ClassDef(StPidAmpChannelInfoOut,1)

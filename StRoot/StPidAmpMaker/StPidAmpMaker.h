@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpMaker.h,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: StPidAmpMaker.h,v 1.2 2000/04/09 16:36:43 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpMaker.h,v $
+ * Revision 1.2  2000/04/09 16:36:43  aihong
+ * change for adapting NHitDcaNet added
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -51,6 +54,11 @@ public:
     void AddNHitsChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x4,TString fitOpt="BAR", TString drawOpt="B");
     void AddNHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt="BAR", TString drawOpt="B");
 
+    void AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,TString fitOpt, TString drawOpt,Double_t d1, Double_t d2, Double_t d3);
+    void AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt, TString drawOpt,Double_t d1, Double_t d2, Double_t d3);
+    void AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x4,TString fitOpt, TString drawOpt,Double_t d1, Double_t d2, Double_t d3);
+    void AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt, TString drawOpt,Double_t d1, Double_t d2, Double_t d3);
+
     void AddPtChannelCollection(Double_t x1, Double_t x2,TString fitOpt="BAR", TString drawOpt="B");
     void AddPtChannelCollection(Double_t x1, Double_t x2, Double_t x3,TString fitOpt="BAR", TString drawOpt="B");
     void AddPtChannelCollection(Double_t x1, Double_t x2,Double_t x3, Double_t x4,TString fitOpt="BAR", TString drawOpt="B");
@@ -60,7 +68,7 @@ public:
     void AddPtNHitsChannelCollection(Int_t n, Int_t* nhitsAry,Int_t p, Double_t* ptAry,TString fitOpt="BAR", TString drawOpt="B");
   
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.2 2000/04/09 16:36:43 aihong Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
 private:
 
