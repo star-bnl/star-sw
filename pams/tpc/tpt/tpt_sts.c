@@ -108,7 +108,37 @@ ARGUMENTS:
 extern void type_of_call tgc_cross_and_dip_(long *,float *,float *,float *);
 
 #define tls_index_sort_i_ F77_NAME(tls_index_sort_i,TLS_INDEX_SORT_I)
-extern void type_of_call tls_index_sort_i_(long *, long *,long *,long *,long *);
+extern void type_of_call tls_index_sort_i_(long *, void *,void *,long *,long *);
+int reject (TABLE_HEAD_ST *par_h,
+	    TPT_SPARS_ST *par,
+	    long rskip[MAX_SECS][MAX_ROWS])
+{
+    #include "PAM.h"
+    #include "tpt_spars.h"
+
+    long l, k;
+    long row;         /* Row array index; here, [0,44] */
+    long sector;      /* Sector array index; here, [0,23] */
+/*
+ * Initialize all rows as "no skip" with FALSE's:
+ */
+    for (l=0; l<MAX_SECS; l++) {
+	for (k=0; k<MAX_ROWS; k++) rskip[l][k]=FALSE;
+    }
+/*
+ * Mark the rows to skip with TRUE's:
+ */
+    for (l=0; l<par[0].nskip; l++) {  
+	sector = par[0].skip[l]/100 - 1;
+	row = par[0].skip[l]%100 - 1;
+/*
+ * Check validity range in case parameters were inconsistent
+ */
+	if (row<MAX_ROWS && row>=0 && sector>=0 && sector<MAX_SECS)
+	    rskip[sector][row] = TRUE;
+    }
+    return(1);
+}
 
 /* Underscore on next line is necessary to link with FORTRAN. */
 long type_of_call tpt_sts_(
@@ -127,7 +157,6 @@ long type_of_call tpt_sts_(
     int lkeep;                         /* Counter for kept outliers */
     int l_outlier_keep;                /* Index for kept outliers */
     int max_hole;                      /* par->hole = max row sep. of hits */
-    int nshift[MAX_ROWS];              /* Shift needed to delete outliers */
     int outlier[MAX_ROWS];             /* List of outliers */
     int outlier_keep[MAX_ROWS];        /* List of outliers to keep */
     int par_ilimit;                    /* par->ilimit = outlier loop limit */
@@ -152,7 +181,7 @@ long type_of_call tpt_sts_(
     long lrow_last_hit;                /* lrow for last hit found on track */
     long m;                            /* Row index */
     long mrow;                         /* Row counter */
-    long n, nn, n_2, n_3;              /* */
+    long n, n_2, n_3;                  /* */
     long ndel;                         /* # hits killed in outlier rejection */
     long ndel_try;                     /* First ndel count */
     long nkeep;                        /* # outliers that have to be kept */
@@ -984,6 +1013,7 @@ long type_of_call tpt_sts_(
 	    dbz = sqrt(sxx/detz_n);
 
 	    Az_norm = 1.0/sqrt(1.0+Az*Az);
+	    /* a comment added to force compilation */
 
 	    ntrack_p1 = ntrack + 1;
 
@@ -1280,33 +1310,3 @@ long type_of_call tpt_sts_(
     return STAFCV_OK;
 }
 
-int reject (TABLE_HEAD_ST *par_h,
-	    TPT_SPARS_ST *par,
-	    long rskip[MAX_SECS][MAX_ROWS])
-{
-    #include "PAM.h"
-    #include "tpt_spars.h"
-
-    long l, k;
-    long row;         /* Row array index; here, [0,44] */
-    long sector;      /* Sector array index; here, [0,23] */
-/*
- * Initialize all rows as "no skip" with FALSE's:
- */
-    for (l=0; l<MAX_SECS; l++) {
-	for (k=0; k<MAX_ROWS; k++) rskip[l][k]=FALSE;
-    }
-/*
- * Mark the rows to skip with TRUE's:
- */
-    for (l=0; l<par[0].nskip; l++) {  
-	sector = par[0].skip[l]/100 - 1;
-	row = par[0].skip[l]%100 - 1;
-/*
- * Check validity range in case parameters were inconsistent
- */
-	if (row<MAX_ROWS && row>=0 && sector>=0 && sector<MAX_SECS)
-	    rskip[sector][row] = TRUE;
-    }
-    return(1);
-}
