@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.cxx,v 1.1 1999/04/14 15:10:35 genevb Exp $
+// $Id: StSmdstMaker.cxx,v 1.2 1999/04/14 15:23:30 genevb Exp $
 // $Log: StSmdstMaker.cxx,v $
+// Revision 1.2  1999/04/14 15:23:30  genevb
+// Fixed file includes
+//
 // Revision 1.1  1999/04/14 15:10:35  genevb
 // Add StSmdstMaker source files
 //
@@ -38,10 +41,10 @@
 #include "StEvent/StEvent.hh"
 #include "StEvent/StV0Vertex.hh"
 #include "StEvent/StXiVertex.hh"
-#include "math_constants.h"
+#include "global/inc/math_constants.h"
 #include "PhysicalConstants.h"
 #include "TMath.h"
-#include "StMagF.h"
+#include "StMagF/StMagF.h"
 
 ClassImp(StSmdstMaker)
 
@@ -475,7 +478,7 @@ void StSmdstMaker::PrintInfo() {
 // PrintInfo() prints information about the class to standard output.
 //
   printf("**************************************************************\n");
-  printf("* $Id: StSmdstMaker.cxx,v 1.1 1999/04/14 15:10:35 genevb Exp $\n");
+  printf("* $Id: StSmdstMaker.cxx,v 1.2 1999/04/14 15:23:30 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   if (draw_histos) printf("* Strangeness Histograms are active\n");
   printf("**************************************************************\n");
