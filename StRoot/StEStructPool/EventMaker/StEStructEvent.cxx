@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.cxx,v 1.1 2003/10/15 18:20:51 porter Exp $
+ * $Id: StEStructEvent.cxx,v 1.2 2004/02/27 02:28:04 prindle Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -84,8 +84,10 @@ void StEStructEvent::Clear(Option_t *option) {
 }
 
 //-------------------------------------------------------
-void StEStructEvent::SetCentrality(UInt_t N) {
-  mCentrality=StEStructCentrality::Instance()->centrality(N);
+// Feb 26, 2004 djp Change from UInt_t to Double_t so we can use
+//                  impact parameter in case data comes from an event generator.
+void StEStructEvent::SetCentrality(Double_t impact) {
+  mCentrality=StEStructCentrality::Instance()->centrality(impact);
 }
 
 //-------------------------------------------------------
@@ -122,6 +124,11 @@ StEStructTrackCollection * StEStructEvent::TrackCollectionP() const { return mTr
 /**********************************************************************
  *
  * $Log: StEStructEvent.cxx,v $
+ * Revision 1.2  2004/02/27 02:28:04  prindle
+ * Small modification to StEStructCentrality in EventMaker branch.
+ * Many modifications to Fluctuations branch, although that branch is not
+ * stable yet.
+ *
  * Revision 1.1  2003/10/15 18:20:51  porter
  * initial check in of Estruct Analysis maker codes.
  *

@@ -19,13 +19,17 @@ class TH2D;
 const int NSCENTBINS = 11;
 const int NPTSCENTBINS = 3;
 #endif
-#ifdef PPDATA
-const int NSCENTBINS = 5;
+#ifdef HIJING
+const int NSCENTBINS = 6;
 const int NPTSCENTBINS = 2;
 #endif
+#ifdef PPDATA
+const int NSCENTBINS = 1;
+const int NPTSCENTBINS = 1;
+#endif
 
-const float SETAMIN = -3.0;
-const float SETAMAX = +3.0;
+const float SETAMIN = -1.0;
+const float SETAMAX = +1.0;
 
 
 class StEStructSigmas {
@@ -49,12 +53,13 @@ class StEStructSigmas {
     TH2D *PNMinus[NSCENTBINS];
     TH2D *PNPlusMinus[NSCENTBINS];
     TH2D *PNMinusPlus[NSCENTBINS];
-    TH1D *PtSHat;
-    TH1D *PtPHat;
-    TH1D *PtMHat;
-    TH1D *sigPtSHat;
-    TH1D *sigPtPHat;
-    TH1D *sigPtMHat;
+
+    TH2D *SPtHat[NSCENTBINS];
+    TH2D *PPtHat[NSCENTBINS];
+    TH2D *MPtHat[NSCENTBINS];
+    TH2D *sigSPtHat[NSCENTBINS];
+    TH2D *sigPPtHat[NSCENTBINS];
+    TH2D *sigMPtHat[NSCENTBINS];
 
     TH2D *ptNSig[NPTSCENTBINS][NPTBINS];
     TH2D *ptNDel[NPTSCENTBINS][NPTBINS];
@@ -70,12 +75,13 @@ class StEStructSigmas {
     TH2D *ptPNMinus[NPTSCENTBINS][NPTBINS];
     TH2D *ptPNPlusMinus[NPTSCENTBINS][NPTBINS];
     TH2D *ptPNMinusPlus[NPTSCENTBINS][NPTBINS];
-    TH1D *ptPtSHat[NPTBINS];
-    TH1D *ptPtPHat[NPTBINS];
-    TH1D *ptPtMHat[NPTBINS];
-    TH1D *ptsigPtSHat[NPTBINS];
-    TH1D *ptsigPtPHat[NPTBINS];
-    TH1D *ptsigPtMHat[NPTBINS];
+
+    TH2D *ptSPtHat[NPTSCENTBINS][NPTBINS];
+    TH2D *ptPPtHat[NPTSCENTBINS][NPTBINS];
+    TH2D *ptMPtHat[NPTSCENTBINS][NPTBINS];
+    TH2D *ptsigSPtHat[NPTSCENTBINS][NPTBINS];
+    TH2D *ptsigPPtHat[NPTSCENTBINS][NPTBINS];
+    TH2D *ptsigMPtHat[NPTSCENTBINS][NPTBINS];
 
     TH2D *NSigErrors[NSCENTBINS];
     TH2D *NDelErrors[NSCENTBINS];

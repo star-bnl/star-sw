@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.h,v 1.1 2003/10/15 18:20:51 porter Exp $
+ * $Id: StEStructEvent.h,v 1.2 2004/02/27 02:28:04 prindle Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -99,7 +99,7 @@ class StEStructEvent : public TObject {
 
   virtual StEStructTrackCollection * TrackCollectionM() const; 
   virtual StEStructTrackCollection * TrackCollectionP() const;
-  void SetCentrality(const UInt_t N);
+  void SetCentrality(const Double_t N);
 
   virtual void FillChargeCollections();
   
@@ -114,6 +114,11 @@ class StEStructEvent : public TObject {
 /**********************************************************************
  *
  * $Log: StEStructEvent.h,v $
+ * Revision 1.2  2004/02/27 02:28:04  prindle
+ * Small modification to StEStructCentrality in EventMaker branch.
+ * Many modifications to Fluctuations branch, although that branch is not
+ * stable yet.
+ *
  * Revision 1.1  2003/10/15 18:20:51  porter
  * initial check in of Estruct Analysis maker codes.
  *

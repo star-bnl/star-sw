@@ -23,13 +23,17 @@ class StTimer;
 const int NCENTBINS = 11;
 const int NPTCENTBINS = 3;
 #endif
-#ifdef PPDATA
-const int NCENTBINS = 5;
+#ifdef HIJING
+const int NCENTBINS = 6;
 const int NPTCENTBINS = 2;
 #endif
+#ifdef PPDATA
+const int NCENTBINS = 1;
+const int NPTCENTBINS = 1;
+#endif
 
-const float ETAMIN = -3.0;
-const float ETAMAX = +3.0;
+const float ETAMIN = -1.0;
+const float ETAMAX = +1.0;
 
 
 class StEStructFluctuations: public StEStructAnalysis {
@@ -68,15 +72,14 @@ class StEStructFluctuations: public StEStructAnalysis {
     TH1D *hNPlus[NCENTBINS][2];
     TH1D *hNMinus[NCENTBINS][2];
     TH1D *hNPlusMinus[NCENTBINS];
-    TH1D *hPSum[NCENTBINS][4];
-    TH1D *hPPlus[NCENTBINS][4];
-    TH1D *hPMinus[NCENTBINS][4];
+    TH1D *hPSum[NCENTBINS][5];
+    TH1D *hPPlus[NCENTBINS][5];
+    TH1D *hPMinus[NCENTBINS][5];
     TH1D *hPPlusMinus[NCENTBINS][8];
     TH1D *hPNSum[NCENTBINS][4];
     TH1D *hPNPlus[NCENTBINS][4];
     TH1D *hPNMinus[NCENTBINS][4];
     TH1D *hPNPlusMinus[NCENTBINS][12];
-    TH1D *hPtSumSq[3];
 
     TH1D *hptTotEvents[NPTCENTBINS][NPTBINS][5];
     TH1D *hptNSum[NPTCENTBINS][NPTBINS][2];
@@ -84,15 +87,14 @@ class StEStructFluctuations: public StEStructAnalysis {
     TH1D *hptNPlus[NPTCENTBINS][NPTBINS][2];
     TH1D *hptNMinus[NPTCENTBINS][NPTBINS][2];
     TH1D *hptNPlusMinus[NPTCENTBINS][NPTBINS];
-    TH1D *hptPSum[NPTCENTBINS][NPTBINS][4];
-    TH1D *hptPPlus[NPTCENTBINS][NPTBINS][4];
-    TH1D *hptPMinus[NPTCENTBINS][NPTBINS][4];
-    TH1D *hptPPlusMinus[NPTCENTBINS][NPTBINS][4];
+    TH1D *hptPSum[NPTCENTBINS][NPTBINS][5];
+    TH1D *hptPPlus[NPTCENTBINS][NPTBINS][5];
+    TH1D *hptPMinus[NPTCENTBINS][NPTBINS][5];
+    TH1D *hptPPlusMinus[NPTCENTBINS][NPTBINS][8];
     TH1D *hptPNSum[NPTCENTBINS][NPTBINS][4];
     TH1D *hptPNPlus[NPTCENTBINS][NPTBINS][4];
     TH1D *hptPNMinus[NPTCENTBINS][NPTBINS][4];
-    TH1D *hptPNPlusMinus[NPTCENTBINS][NPTBINS][4];
-    TH1D *hptPtSumSq[NPTBINS][3];
+    TH1D *hptPNPlusMinus[NPTCENTBINS][NPTBINS][12];
 
   // Histogram declarations.
   // These are summed over events for this job.
@@ -168,9 +170,13 @@ class StEStructFluctuations: public StEStructAnalysis {
     void randomMultStruct(double p, float val);
     void AddEvent(multStruct *ms);
     void AddToPtBin( int iCent, int iPt, int iBin,
-                     double plus, double minus, double pplus, double pminus );
-    void AddToBin( int jPhi, int jEta, int iCent, int iBin,
-                   double plus, double minus, double pplus, double pminus );
+                     double plus,    double minus,
+                     double pplus,   double pminus,
+                     double psqplus, double psqminus );
+    void AddToBin( int iCent,      int iBin,
+                   double plus,    double minus,
+                   double pplus,   double pminus,
+                   double psqplus, double psqminus );
     int getEtaStart( int iEta, int dEta );
     int getPhiStart( int iPhi, int dPhi );
     int getNumEtaBins( int dEta );
