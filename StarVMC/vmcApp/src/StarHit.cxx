@@ -1,5 +1,9 @@
-// $Id: StarHit.cxx,v 1.1 2004/07/12 20:36:38 potekhin Exp $
+// $Id: StarHit.cxx,v 1.2 2004/07/13 19:12:04 potekhin Exp $
+// $Log: StarHit.cxx,v $
+// Revision 1.2  2004/07/13 19:12:04  potekhin
+// Removed the G4 specific calls
 //
+
 
 #include <iostream.h>
 
@@ -18,25 +22,11 @@ StarHit::StarHit()
 {}
 
 //_____________________________________________________________________________
-StarHit::~StarHit() 
-{}
+StarHit::~StarHit() {}
 
 /*
 //_____________________________________________________________________________
-void StarHit::Draw()
-{
-  G4VVisManager* pVVisManager = G4VVisManager::GetConcreteInstance();
-  if(pVVisManager)
-  {
-    G4Circle circle(pos);
-    circle.SetScreenSize(0.04);
-    circle.SetFillStyle(G4Circle::filled);
-    G4Colour colour(1.,0.,0.);
-    G4VisAttributes attribs(colour);
-    circle.SetVisAttributes(attribs);
-    pVVisManager->Draw(circle);
-  }
-}
+void StarHit::Draw() {}
 */
 
 //_____________________________________________________________________________
