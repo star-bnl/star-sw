@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbFill.cxx,v 1.4 2000/03/26 16:47:13 fine Exp $
+ * $Id: DbFill.cxx,v 1.3 2000/01/31 17:11:18 porter Exp $
  *
  * Author: S. Vanyashin
  ***************************************************************************
@@ -11,9 +11,6 @@
  ***************************************************************************
  *
  * $Log: DbFill.cxx,v $
- * Revision 1.4  2000/03/26 16:47:13  fine
- * Adjusted to ROOT 2.24
- *
  * Revision 1.3  2000/01/31 17:11:18  porter
  * fix break caused by the interaction design between
  * 'StRoot/St_base/tableDescriptor.h' & 'StDbBroker::Descriptor'
@@ -232,22 +229,22 @@ for (i=0;i<num_struct;i++)
 		  {
 		    row = mysql_fetch_row(result);
 		    
-		    if (strcmp(d[j].fColumnName,row[0]))
+		    if (strcmp(d[j].m_ColumnName,row[0]))
 		      break;
 		    
 		    //same name: check offset
 		    //cout<<"offset: \""<<d[j].offset<<"\" \""<<row[1]<<"\""<<endl;
-		    if ( d[j].fOffset!=(unsigned int)atoi(row[1]) )
+		    if ( d[j].m_Offset!=(unsigned int)atoi(row[1]) )
 		      break;
 		    
 		    //same offset: check nDims
 		    //cout<<"nDims: \""<<d[j].dimensions<<"\" \""<<row[2]<<"\""<<endl;
-		    if ( d[j].fDimensions!=(unsigned int)atoi(row[2]) )
+		    if ( d[j].m_Dimensions!=(unsigned int)atoi(row[2]) )
 		      break;
 		    
 		    //same nDims: check firstDim
 		    //cout<<"nDims: \""<<d[j].firstDimension<<"\" \""<<row[3]<<"\""<<endl;
-		    if ( d[j].fIndexArray[0]!=(unsigned int)atoi(row[3]) )
+		    if ( d[j].m_IndexArray[0]!=(unsigned int)atoi(row[3]) )
 		      break;
 		    
 		    //same value: check comment
@@ -316,11 +313,11 @@ if (same==0)//we have to insert this structure
       {
 	Query.seekp(0);
 	Query << "INSERT INTO headers SET strID=\""<<structureID
-	      <<"\", name=\""<<d[j].fColumnName
-	      <<"\", type=\""<<StDbBroker::GetTypeName((StDbBroker::EColumnType)d[j].fType)
-	      <<"\", nDims=\""<<d[j].fDimensions//ENUM has to be as string
-	      <<"\", firstDim="<<d[j].fIndexArray[0]
-	      <<", offset="<<d[j].fOffset
+	      <<"\", name=\""<<d[j].m_ColumnName
+	      <<"\", type=\""<<StDbBroker::GetTypeName((StDbBroker::EColumnType)d[j].m_Type)
+	      <<"\", nDims=\""<<d[j].m_Dimensions//ENUM has to be as string
+	      <<"\", firstDim="<<d[j].m_IndexArray[0]
+	      <<", offset="<<d[j].m_Offset
 	      <<", comment=\""<<ends;
 
 	//we have to escape comments

@@ -1,9 +1,10 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_Table3PackedPoints.cxx,v 1.4 2000/04/05 03:58:21 fine Exp $
+// $Id: St_Table3PackedPoints.cxx,v 1.3 2000/01/24 23:06:09 fine Exp $
 
 #include <assert.h>
 
 #include  "St_Table3PackedPoints.h"
+#include  "St_TableElementDescriptor.h"
 
 ///////////////////////////////////////////////////////////////////////////////////
 //
@@ -59,33 +60,33 @@ static inline Float_t factor(Float_t &range,const Char_t *name="tpc")
 St_Table3PackedPoints::St_Table3PackedPoints(): m_LastIndx(-1){}
 
 //________________________________________________________________________________
-St_Table3PackedPoints::St_Table3PackedPoints(TTableSorter *sorter,const void *key,
+St_Table3PackedPoints::St_Table3PackedPoints(St_TableSorter *sorter,const void *key,
                        const Char_t *xyzName,const Char_t *detector,Option_t *opt)
-                : TTable3Points(sorter,key,xyzName,"","",opt),m_LastIndx(-1)
+                : St_Table3Points(sorter,key,xyzName,"","",opt),m_LastIndx(-1)
 
 { 
   SetDetectorId(detectId(detector));
   m_MaxFactor = factor(m_MaxRange,GetLastDetectorId()); 
 }
 //________________________________________________________________________________
-St_Table3PackedPoints::St_Table3PackedPoints(TTableSorter *sorter,const void *key,
+St_Table3PackedPoints::St_Table3PackedPoints(St_TableSorter *sorter,const void *key,
                        const Char_t *xyzName,Float_t maxFactor,Float_t maxRange,Option_t *opt)
-                : TTable3Points(sorter,key,xyzName,"","",opt),m_LastIndx(-1),
+                : St_Table3Points(sorter,key,xyzName,"","",opt),m_LastIndx(-1),
                   m_MaxFactor(maxFactor), m_MaxRange(maxRange)
 { }
 
 //________________________________________________________________________________
-St_Table3PackedPoints::St_Table3PackedPoints(TTableSorter *sorter,Int_t keyIndex,
+St_Table3PackedPoints::St_Table3PackedPoints(St_TableSorter *sorter,Int_t keyIndex,
                        const Char_t *xyzName,const Char_t *detector,Option_t *opt)
-                : TTable3Points(sorter,keyIndex,xyzName,"","",opt),m_LastIndx(-1)
+                : St_Table3Points(sorter,keyIndex,xyzName,"","",opt),m_LastIndx(-1)
 {
   SetDetectorId(detectId(detector));
   m_MaxFactor = factor(m_MaxRange,GetLastDetectorId()); 
 }
 //________________________________________________________________________________
-St_Table3PackedPoints::St_Table3PackedPoints(TTableSorter *sorter,Int_t keyIndex,
+St_Table3PackedPoints::St_Table3PackedPoints(St_TableSorter *sorter,Int_t keyIndex,
                        const Char_t *xyzName,Float_t maxFactor,Float_t maxRange,Option_t *opt)
-                : TTable3Points(sorter,keyIndex,xyzName,"","",opt),m_LastIndx(-1),
+                : St_Table3Points(sorter,keyIndex,xyzName,"","",opt),m_LastIndx(-1),
                   m_MaxFactor(maxFactor), m_MaxRange(maxRange)
 { SetMaxFactor(); SetMaxRange();}
 
@@ -107,19 +108,20 @@ void St_Table3PackedPoints::SetAnyColumn(const Char_t *anyName, EPointDirection 
 //____________________________________________________________________________
 Float_t *St_Table3PackedPoints::GetXYZ(Float_t *xyz,Int_t idx, Int_t num) const
 {
- TTable  *table = 0;
- if (fTableSorter) table = fTableSorter->GetTable();
+ St_Table  *table = 0;
+ if (m_TableSorter) table = m_TableSorter->GetTable();
  if (table) {
     Int_t size = TMath::Min(idx+num,Size());
-    const Char_t *tablePtr = (Char_t *)fRows;
+    const Char_t *tablePtr = (Char_t *)m_Rows;
     Int_t rowSize = table->GetRowSize();
-  //    St_TableElementDescriptor *tableDsc = GetDescriptor(kXPoints);
-  //    Long_t offSet = tableDsc->GetOffset();
-    Long_t offSet = fColumnOffset[0] ;
+    St_TableElementDescriptor *tableDsc = GetDescriptor(kXPoints);
+    Long_t offSet = tableDsc->GetOffset();
+
     for (Int_t i=idx;i<size;i++) {
       tablePtr += Indx(i)*rowSize + offSet;     
       ULong_t *pos = (ULong_t *)tablePtr;  
       ULong_t *pos1 = pos+1;
+
       Int_t detId = (*(pos-1)) & 0xF;
       if (GetLastDetectorId() != detId ) {
         ((St_Table3PackedPoints *)this)->SetDetectorId(detId);
@@ -145,9 +147,6 @@ Float_t *St_Table3PackedPoints::GetXYZ(Float_t *xyz,Int_t idx, Int_t num) const
 }
 //____________________________________________________________________________
 // $Log: St_Table3PackedPoints.cxx,v $
-// Revision 1.4  2000/04/05 03:58:21  fine
-// Adjusted for ROOT 2.24
-//
 // Revision 1.3  2000/01/24 23:06:09  fine
 // Linux warning removed
 //

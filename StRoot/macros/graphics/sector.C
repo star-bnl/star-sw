@@ -1,13 +1,13 @@
 void sector()
 {
- TVolume *hall = (TVolume *)chain->DataSet("HALL");
- TVolume *sector = (TVolume *)hall->FindByName("TPSS");
+ St_Node *hall = (St_Node *)chain->DataSet("HALL");
+ St_Node *sector = (St_Node *)hall->FindByName("TPSS");
  TList *pos = sector->GetListOfPositions();
- TVolumePosition *padPos = 0;
+ St_NodePosition *padPos = 0;
  Int_t i = 0;
  TIter next(pos);
  Bool_t outter = kFALSE;
- while (padPos = (TVolumePosition *)next() )  {
+ while (padPos = (St_NodePosition *)next() )  {
    Int_t padRowNumber =  padPos->GetId();
    if (padRowNumber  <= 39 && ((padRowNumber %3)-2) )  continue;
    if (padRowNumber  <= 39) {

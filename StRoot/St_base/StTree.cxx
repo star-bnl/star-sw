@@ -1,8 +1,8 @@
-#include <stdio.h>
 #include "Stypes.h"
 #include "StTree.h"
 #include "TRegexp.h"
 #include "TKey.h"
+
 
 const char* TFOPT[9] = {"0","READ","RECREATE","UPDATE",
                         "0","READ","RECREATE","UPDATE",0};
@@ -86,12 +86,7 @@ TObject *StIO::Read(TFile *file, const Char_t *name)
 
   if (!key)  { printf("<StIO::Read> Key %s not found\n",name); goto RETURN; }
 
-  if (strcmp(key->GetClassName(),"StIOEvent")) 
-             { printf("<StIO::Read> Key %s has wrong className %s\n",
-               key->GetName(),key->GetClassName()); 
-               toread = (TObject*)(-1); goto RETURN; }
-
-  toread = key->ReadObj(); if (!toread) toread = (TObject*)(-1);
+  toread = key->ReadObj();
 
 RETURN: gFile=bakfile; gDirectory=bakdir; return toread;
 }
@@ -102,7 +97,6 @@ TObject *StIO::Read(TFile *file, const Char_t *name, ULong_t  ukey)
   TObject   *retn  = 0;
   event = (StIOEvent*)Read(file,(const char*)MakeKey(name,ukey));
   if (!event) 		return 0;
-  if (event == (StIOEvent*)(-1)) return (TObject*)(-1);
   retn = event->fObj; 
   assert( !retn || retn==(TObject*)(-1) || event->GetUniqueID()==ukey);
   delete event;
@@ -310,8 +304,7 @@ Int_t StBranch::GetEvent(Int_t mode)
   if(Open()) return 1; 
 
   if (IsOption("const"))	{//Read constant branch (event independent)
-    obj = StIO::Read (fTFile,GetName(),(ULong_t)(-2));  fIOMode = -fIOMode;
-    if (!obj) 			return kStErr;}
+    obj = StIO::Read (fTFile,GetName(),(ULong_t)(-2));  fIOMode = -fIOMode;}
 
   else if (mode) 		{//Read next
     obj = StIO::ReadNext(fTFile,GetName(),fUKey);
@@ -502,7 +495,7 @@ Int_t StTree::ReadEvent(ULong_t  ukey)
   while ((br=(StBranch*)next())) {	//Read all branches 
     iret=br->ReadEvent(fUKey); 
     if (!iret) num++;
-  if(iret==kStErr) return kStErr;
+    if(iret==kStErr) return kStErr;
   }
   return (num)? 0:kStEOF;
 }  
@@ -611,64 +604,10 @@ static int AreSimilar(const Char_t *fileA, const Char_t *fileB)
 
 //_____________________________________________________________________________
 ClassImp(StFile)
- StFile::StFile(const char** fileList):StFileI("StFile")
+ StFile::StFile(const char** fileList):St_ObjectSet("StFile")
 {
-  fDS = new St_DataSet();
-  fIter = 0;
   SetTitle(" nbranches=1 ");
   AddFile(fileList);
-}
-//_____________________________________________________________________________
- StFile::~StFile()
-{
-  delete fDS; 	fDS   =	0;
-  delete fIter; fIter = 0;
-}
-//_____________________________________________________________________________
-Int_t StFile::GetNextBundle()
-{
-  if (!fIter) fIter = new St_DataSetIter(fDS);
-  return !(fIter->Next());
-}
-//_____________________________________________________________________________
-Int_t StFile::GetNBundles()
-{
-  if (!fIter) fIter = new St_DataSetIter(fDS);
-  return fDS->GetListSize();
-}
-//_____________________________________________________________________________
-Int_t StFile::GetNFiles()
-{
-  return fDS->GetListSize();
-}
-//_____________________________________________________________________________
-St_DataSet *StFile::GetFileDS(Int_t idx)
-{
-  St_DataSet *fam = (St_DataSet *)**fIter;
-  if (!fam) return 0;
-  St_DataSet *df = fam->At(idx);
-  if (!df) return 0;
-  SetInfo(df);
-  return df;
-}
-//_____________________________________________________________________________
-const Char_t *StFile::GetFileName(Int_t idx)
-{
-  St_DataSet *df = GetFileDS(idx);
-  if (!df) return 0;
-  return strstr(df->GetTitle(),"file=")+5;  
-}
-//_____________________________________________________________________________
-const Char_t *StFile::GetFormat(Int_t idx)
-{
-  St_DataSet *df = GetFileDS(idx);
-  return GetAttr(df,"format=");  
-}
-//_____________________________________________________________________________
-const Char_t *StFile::GetCompName(Int_t idx)
-{
-  St_DataSet *df = GetFileDS(idx);
-  return GetAttr(df,"branch=");  
 }
 //_____________________________________________________________________________
 Int_t StFile::AddFile(const Char_t **fileList)
@@ -699,6 +638,8 @@ Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
     return kStWarn;}
 
   base = gSystem->BaseName(tfile);
+  if (Find(base)) 
+    Warning("AddFile","File %s added twice \n",(const Char_t *)tfile);
 
   famy = base; 
   int dot = famy.Last('.');
@@ -706,27 +647,28 @@ Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
   dot = famy.Last('.');
   if (dot>0) famy.Replace(dot+1,999,""); 
   
-  St_DataSet *dsfam = fDS->Find(famy);
-  if (!dsfam) dsfam = new St_DataSet(famy,fDS);
+  St_DataSetIter next(this);
+  St_DataSet *dss;
+  while((dss = next())) {
+    if (strncmp(famy,dss->GetName(),famy.Length())) 	continue;
+    Warning("AddFile","Files %s and %s are from the same family \n",
+    (const Char_t *)tfile,dss->GetName());
+  }
+  
+    
 
-  if (dsfam->Find(base)) 
-    Warning("AddFile","File %s added twice \n",(const Char_t *)tfile);
 
-  //  St_DataSet *dss = dsfam->First();
-  //if (dss) 
-  //  Warning("AddFile","Files %s and %s are from the same family \n",
-  //  (const Char_t *)tfile,dss->GetName());
 
   tit = tfile; tit.Replace(0,0," file=");
 
   if (branch) {tit.Replace(0,0,branch); tit.Replace(0,0," br=");}
 
-  St_DataSet *ds = new St_DataSet(base,dsfam);
+  St_DataSet *ds = new St_DataSet(base,this);
   ds->SetTitle(tit);
     
 
-  if (GetDebug()) printf("<%s::AddFile> Added file %s %s\n",
-                  ClassName(),ds->GetName(),ds->GetTitle());
+  printf("<%s::AddFile> Added file %s %s\n",
+         ClassName(),ds->GetName(),ds->GetTitle());
          
   return 0;
 }
@@ -770,9 +712,19 @@ Int_t StFile::AddWild(const Char_t *file)
   return 0;
 }
 //_____________________________________________________________________________
-void StFile::SetInfo(St_DataSet *ds)
+const Char_t * StFile::NextFileName()
+{
+  St_DataSet *ds;
+  ds = First(); if (!ds) return 0;
+  delete fObj; fObj=ds; Remove(ds);
+  SetInfo();
+  return strstr(ds->GetTitle(),"file=")+5;
+}
+//_____________________________________________________________________________
+void StFile::SetInfo()
 {
   TFile *tf=0;
+  St_DataSet *ds = (St_DataSet*)fObj;
   if (!ds) return;
   TString tit(ds->GetTitle());  
   Int_t known = 0;
@@ -799,16 +751,6 @@ void StFile::SetInfo(St_DataSet *ds)
   
   if (known!=3) {
     assert (!strcmp(".root",ext));
-    if (!(known&1)) {tit.Replace(0,0," format=root ");known|=1;}
-    TString bran = fname;
-    bran.ReplaceAll(".root","");
-    int i = bran.Last('.');
-    if (i>0) bran.Replace(0,i+1,"");
-    else     bran = "unknown";
-    bran.Replace(0,0,"branch=");
-    bran+=" ";
-    if (!(known&2)) {tit.Replace(0,0,bran);known|=2;}
-#if 0
 
     tf = new TFile(fname,"READ");
     assert(!tf->IsZombie());
@@ -841,131 +783,30 @@ void StFile::SetInfo(St_DataSet *ds)
       }
       if (known==3) break;
     }
-#endif /*0*/
   }
   delete tf;
-  if (!known&1) tit.Replace(0,0,"format=unknown ");   
-  if (!known&2) tit.Replace(0,0,"branch=unknown ");   
+  if (!known&1) tit.Replace(0,0,"format=unknown");   
+  if (!known&2) tit.Replace(0,0,"branch=unknown");   
   ds->SetTitle(tit);
 }
 //_____________________________________________________________________________
-void StFile::ls(Option_t *opt)
-{
-
-class Cat : public TNamed {
-public:
-Cat(){fNGeant=0;fNKeys=0;fNRecs=0;fSize=0;fNFiles=0;};
-double fSize;
-int    fNGeant;
-int    fNKeys;
-int    fNRecs;
-int    fNFiles;
-};
-
-
-  TList blist;
-  int ibr=0,i;  
-  Cat *cat;
-  
-  int numFile=0;
-  TString oldirname("_");
-  while (!GetNextBundle()) {	//Bundle loop
-    for (int idx=0; idx<999; idx++) {	//File loop
-      const char *fil = GetFileName(idx); 
-      if (!fil) 	break;
-      numFile++;
-      TString dirname = gSystem->DirName(fil);
-      TString basname = gSystem->BaseName(fil);
-      TString br(basname);
-      i = br.Last('.'); if (i<0) continue;
-      br.Replace(i,999,"");
-      i = br.Last('.'); 
-      if (i<0) { br = "undef";} else { br.Replace(0,i+1,"");};
-
-      if (oldirname != dirname) {
-        printf("\nDirName  =%s\n\n",dirname.Data());
-        oldirname.Replace(0,999,dirname);}
-
-      cat = (Cat*)(blist.FindObject(br));
-      if (!cat) { cat = new Cat(); cat->SetName(br); blist.Add(cat);}
-      cat->fNFiles++;
-
-      TFile *tf = 0;
-      if (opt && opt[0]=='r') tf = new TFile(fil,"update");
-      if (!tf || tf->IsZombie()) { delete tf; tf = new TFile(fil,"read");}
-      if (       tf->IsZombie()) { delete tf; continue;}
-
-      TList *keys = tf->GetListOfKeys();
-      int nkeys=0,nreks=0;
-      double dsize=0;
-      
-      TIter nextk(keys);
-      TKey *key;
-      while ((key=(TKey*)nextk())) {	//Key loop        
-        TString keyname(key->GetName());
-        i = keyname.First('.');
-        if (i>0) keyname.Replace(i,9999,"");
-        keyname.ReplaceAll("Branch","");
-        cat = (Cat*)(blist.FindObject(keyname));
-        if (!cat) {
-          cat = new Cat();
-          cat->SetName(keyname);
-          blist.Add(cat);
-        }
-        nkeys++;
-        cat->fNKeys++;
-        if (keyname==br) { nreks++;  cat->fNRecs++;};    
-        dsize +=      key->GetObjlen();
-        cat->fSize += key->GetObjlen();
-        TString clasname(key->GetClassName());
-        cat = (Cat*)(blist.FindObject(clasname));
-        if (!cat) {
-          cat = new Cat();
-          cat->SetName(clasname);
-          blist.Add(cat);
-        }
-        cat->fNKeys++;
-        cat->fSize += key->GetObjlen();
-        
-      }// End key loop 
-      dsize/=1000000.;
-      printf("%4d BR=%-7s NK=%-4d NR=%-4d SZ=%8.2fM File= %s\n",
-             numFile,br.Data(),nkeys,nreks,dsize,basname.Data());    
-      delete tf;
-
-//  printf("%4d %s\n",numFile,fil);
-    } //*end File loop*/
-  }//*end Bundle loop*/
-
-  printf("\n\n  In Total ==================================================\n");
-  blist.Sort();
-  TIter nextBr(&blist);  
-  ibr = 0;
-  while ( (cat = (Cat*)nextBr())){
-    ibr++;
-    printf("%4d BR=%-10s NK=%-4d NR=%-4d SZ=%8.2fM NFiles %4d\n",
-             ibr,
-             cat->GetName(),
-             cat->fNKeys,
-             cat->fNRecs,
-             cat->fSize*1.e-6,    
-             cat->fNFiles);    
-  }
-  blist.Delete();  
-
-}
-//_____________________________________________________________________________
-const Char_t *StFile::GetAttr(St_DataSet *ds,const char *att) 
+const Char_t *StFile::GetAttr(const char *att) 
 {
   static TString brName;
+  St_DataSet *ds = (St_DataSet*)fObj;
   if (!ds) return 0;
-  SetInfo(ds);
+  SetInfo();
   const char *bn = strstr(ds->GetTitle(),att);
   if (!bn) return 0;
   bn += strlen(att);
   int n = strcspn(bn," ");
   brName.Replace(0,999,bn,n);
   return (const char*)brName;
+}
+//_____________________________________________________________________________
+Int_t StFile::GetNBranches() 
+{ 
+return 1;
 }
 
 

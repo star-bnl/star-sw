@@ -1,9 +1,6 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.61 2000/03/26 02:43:22 fine Exp $
+// $Id: St_geant_Maker.cxx,v 1.60 2000/03/03 22:00:53 nevski Exp $
 // $Log: St_geant_Maker.cxx,v $
-// Revision 1.61  2000/03/26 02:43:22  fine
-// adjusted to ROOT 2.24
-//
 // Revision 1.60  2000/03/03 22:00:53  nevski
 // protection against bad track number
 //
@@ -80,7 +77,7 @@
 // update of user parameter extraction
 //
 // Revision 1.35  1999/04/15 20:36:40  fine
-// St_geant::Work() was void becomes TVolume *
+// St_geant::Work() was void becomes St_Node *
 //
 // Revision 1.34  1999/04/12 23:17:11  fine
 // Unique postion ID has been introduced
@@ -152,7 +149,7 @@
 // Give access to Zebra
 //
 // Revision 1.4  1999/01/05 01:37:02  fisyak
-// Intermeidate version with TVolume
+// Intermeidate version with St_Node
 //
 // Revision 1.3  1999/01/03 20:56:35  fisyak
 // Remove St_geom_Maker
@@ -201,7 +198,7 @@
 
 #include "St_geant_Maker.h"
 #include "StChain.h"
-#include "TDataSetIter.h"
+#include "St_DataSetIter.h"
 #include "St_Table.h"
 #include <iostream.h>
 #include <stdio.h>
@@ -214,7 +211,7 @@ extern "C" int isprint (int);
 #include "TString.h"
 #include "TInterpreter.h"
 #include "TClassTable.h"    
-#include "TVolume.h"
+#include "St_Node.h"
 #include "TMath.h"
 #include "TBRIK.h"
 #include "TTRD1.h"
@@ -243,7 +240,7 @@ extern "C" int isprint (int);
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_g2t_track_Table.h"
 
-#include "TDataSetIter.h"
+#include "St_DataSetIter.h"
 #include "g2t/St_g2t_get_event_Module.h"
 #include "g2t/St_g2t_get_kine_Module.h"
 #include "g2t/St_g2t_particle_Module.h"
@@ -307,7 +304,7 @@ R__EXTERN "C" {
 */
   void type_of_call rootmaptable_(DEFCHARD,DEFCHARD,DEFCHARD, Int_t&,Char_t * 
 				  DEFCHARL DEFCHARL DEFCHARL);
-  Int_t type_of_call agvolume(TVolume*&,Float_t*&,Float_t*&,Float_t*&,
+  Int_t type_of_call agvolume(St_Node*&,Float_t*&,Float_t*&,Float_t*&,
 			      Int_t&,Int_t&,Float_t*&,Int_t&);
 }
 
@@ -322,7 +319,7 @@ Float_t *z_q;
 
 Int_t   nlev;
 static Int_t irot = 0;
-static TVolume *topnode=0;
+static St_Node *topnode=0;
 typedef struct {
   Float_t par[50];
 } params;
@@ -334,16 +331,16 @@ extern "C"
   }
 ClassImp(St_geant_Maker)
 
-TDataSet *St_geant_Maker::fgGeom = 0;
+St_DataSet *St_geant_Maker::fgGeom = 0;
 TGeant3  *St_geant_Maker::geant3 = 0;
 //_____________________________________________________________________________
 St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int_t iwtype):
 StMaker(name){
-  fVolume    = 0;
+  fNode    = 0;
   fNwGeant = nwgeant;
   fNwPaw   = nwpaw;
   fIwType  = iwtype;
-  fgGeom = new TDataSet("geom");  
+  fgGeom = new St_DataSet("geom");  
   m_ConstSet->Add(fgGeom);
   SetOutput(fgGeom);	//Declare this "geom" for output
   fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
@@ -368,29 +365,29 @@ StMaker(name){
   }
 }
 //_____________________________________________________________________________
-TDataSet  *St_geant_Maker::GetDataSet (const char* logInput,const StMaker *uppMk,
+St_DataSet  *St_geant_Maker::GetDataSet (const char* logInput,const StMaker *uppMk,
                                         const StMaker *dowMk) const 
 {
-  TDataSet *ds = StMaker::GetDataSet(logInput,uppMk,dowMk);
+  St_DataSet *ds = StMaker::GetDataSet(logInput,uppMk,dowMk);
 
   if (ds || strcmp(logInput,"HALL")) return ds;
 
-  if (!fVolume) ((St_geant_Maker *)this)->Work();
+  if (!fNode) ((St_geant_Maker *)this)->Work();
 
-  if (fVolume) { 
+  if (fNode) { 
     //--
     // Remove hall from the list of ROOT nodes
     // to make it free of ROOT control
     //--
-    TList *listOfVolume = gGeometry->GetListOfNodes();
+    TList *listOfNode = gGeometry->GetListOfNodes();
     // Remove hall from the list of ROOT nodes to make it free of ROOT control
-    listOfVolume->Remove(fVolume);
-    listOfVolume->Remove(fVolume);
+    listOfNode->Remove(fNode);
+    listOfNode->Remove(fNode);
     // Add "hall" into ".const" area of this maker
-    ((St_geant_Maker *)this)->AddConst(fVolume);
-    if (Debug()) fVolume->ls(3);
+    ((St_geant_Maker *)this)->AddConst(fNode);
+    if (Debug()) fNode->ls(3);
   }
-  return fVolume;
+  return fNode;
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
@@ -686,7 +683,7 @@ void St_geant_Maker::G2root()
     if (!t) {t = MakeShape(&name,ivo);}
   }
 
-//----------- Volumes -------------------  
+//----------- Nodes -------------------  
   Int_t Nlevel = 0;
   Int_t Names[15];
   Int_t Numbers[15];
@@ -694,24 +691,24 @@ void St_geant_Maker::G2root()
   TString  name((const Char_t *) &(z_iq[jvolum+ivo]), 4);
   TShape*  shape = (TShape *) gGeometry->GetListOfShapes()->FindObject(name.Data());
   if (!shape) {shape = MakeShape(&name,ivo);}
-  topnode = new TVolume(name.Data(), name.Data(), shape);
+  topnode = new St_Node(name.Data(), name.Data(), shape);
   Names[0] = z_iq[jvolum+ivo];
   Numbers[0] = 1;
-  TVolume *node = 0;
-  node = MakeVolume(&name, ivo, Nlevel, Names, Numbers);
+  St_Node *node = 0;
+  node = MakeNode(&name, ivo, Nlevel, Names, Numbers);
 }
 
 //_____________________________________________________________________________
-TVolume *St_geant_Maker::MakeVolume(TString *name, Int_t ivo, Int_t Nlevel, Int_t *Names, Int_t *Numbers){
-  TVolume *node = 0;
+St_Node *St_geant_Maker::MakeNode(TString *name, Int_t ivo, Int_t Nlevel, Int_t *Names, Int_t *Numbers){
+  St_Node *node = 0;
   Int_t   jvolum  = clink->jvolum;
   Int_t jvo = z_lq[jvolum-ivo];
   if (jvo) {
-    node = (TVolume *) topnode->FindObject(name->Data());
+    node = (St_Node *) topnode->FindObject(name->Data());
     if (! node) {
       TShape *shape = (TShape *) gGeometry->GetListOfShapes()->FindObject(name->Data());
       if (!shape ) {shape = MakeShape(name,ivo);}
-      node = new TVolume(name->Data(), name->Data(), shape);
+      node = new St_Node(name->Data(), name->Data(), shape);
     }
 
     Int_t nin =(Int_t) z_q[jvo+3];
@@ -735,10 +732,10 @@ TVolume *St_geant_Maker::MakeVolume(TString *name, Int_t ivo, Int_t Nlevel, Int_
 
 	Gfxzrm(Nlevel, xx[0],xx[1],xx[2], 
 		       theta1,phi1, theta2,phi2, theta3,phi3, type);
-        TVolume *newnode = (TVolume *) topnode->FindObject(namem.Data());
+        St_Node *newnode = (St_Node *) topnode->FindObject(namem.Data());
 
 	if (!newnode) 
-        {  newnode = MakeVolume(&namem, ivom, nlevv, Names, Numbers);  }
+        {  newnode = MakeNode(&namem, ivom, nlevv, Names, Numbers);  }
 
 	irot++;
 	Char_t ss[12];
@@ -864,14 +861,14 @@ void St_geant_Maker::Call(const Char_t *name)
   if (address) csjcal_(address, &narg);
 }
 //_____________________________________________________________________________
-TVolume *St_geant_Maker::Work()
+St_Node *St_geant_Maker::Work()
 {  
   struct  Medium 
     { Char_t name[20]; Int_t nmat, isvol, ifield; Float_t fieldm; };
   struct  Volume
     { Char_t name[4],nick[4]; Int_t npar; Float_t par[50]; };
 
-  TVolume   *node=0;
+  St_Node   *node=0;
   Float_t   *volu=0, *position=0, *mother=0, *p=0;
   Int_t     who=0, copy=0, npar=0;
   Int_t     nvol=cnum->nvolum;
@@ -898,15 +895,15 @@ TVolume *St_geant_Maker::Work()
     Char_t   name[]  = {0,0,0,0,0};
     Char_t   nick[]  = {0,0,0,0,0};
     float    xx[3]   = {0.,0.,0.};
-    TVolume *newVolume = 0;
+    St_Node *newNode = 0;
     if (mother)  nin = (Int_t) mother[2];
-    TVolume *Hp      = 0;
+    St_Node *Hp      = 0;
 
     strncpy(nick,(const Char_t*)&cvolu->names[cvolu->nlevel-1],4);
     strncpy(name,(const Char_t*)(volu-5),4);
 
-    Hp = (TVolume *) H->GetPointer(p,npar+1);
-    if (Hp)  newVolume = Hp; 
+    Hp = (St_Node *) H->GetPointer(p,npar+1);
+    if (Hp)  newNode = Hp; 
     else
       { // printf(" creating object %s  %f  %f  %f \n", name,p[0],p[1],p[2]);
       switch (shape) 
@@ -970,24 +967,24 @@ TVolume *St_geant_Maker::Work()
       t->SetLineColor(att[4]);
  
       // to build a compressed tree, name should be checked for repetition
-      newVolume = new TVolume(name,nick,t);
-//      newVolume -> SetVisibility(ENodeSEEN(MapGEANT2StNodeVis(att[1])));
-      newVolume -> SetVisibility((TVolume::ENodeSEEN)TVolume::MapGEANT2StNodeVis(att[1]));
-      H->SetPointer(newVolume);
+      newNode = new St_Node(name,nick,t);
+//      newNode -> SetVisibility(ENodeSEEN(MapGEANT2StNodeVis(att[1])));
+      newNode -> SetVisibility((St_Node::ENodeSEEN)St_Node::MapGEANT2StNodeVis(att[1]));
+      H->SetPointer(newNode);
     }
 
     if (node)
     {  Gfxzrm(nlev, xx[0],xx[1],xx[2], theta1,phi1, 
                        theta2,phi2, theta3,phi3, type);
        TRotMatrix *matrix=GetMatrix(theta1,phi1,theta2,phi2,theta3,phi3);
-       node->Add(newVolume,xx[0],xx[1],xx[2],matrix,UInt_t(copy));
+       node->Add(newNode,xx[0],xx[1],xx[2],matrix,UInt_t(copy));
     }
-    node = newVolume;
+    node = newNode;
   };
 
-  fVolume=node;
+  fNode=node;
   gGeometry->GetListOfNodes()->Add(node);
-  return GetVolume();
+  return GetNode();
 }
 
 //_____________________________________________________________________________
@@ -1077,7 +1074,7 @@ Int_t St_geant_Maker::G2t_volume_id(const Char_t *name, Int_t *numbv){
   return g2t_volume_id(PASSCHARD(name),numbv PASSCHARL(name));
 }
 //_____________________________________________________________________________
-Int_t St_geant_Maker::Agvolume(TVolume *&node,Float_t *&par,Float_t *&pos,Float_t *&mot,
+Int_t St_geant_Maker::Agvolume(St_Node *&node,Float_t *&par,Float_t *&pos,Float_t *&mot,
 		       Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar){
   return agvolume(node,par,pos,mot,who,copy,par1,npar);
 }
@@ -1137,7 +1134,7 @@ void St_geant_Maker::FillHist(){
 
 
   // get geant event vertex
-  TDataSet *geant = GetDataSet("geant"); 
+  St_DataSet *geant = GetDataSet("geant"); 
   if( !geant ){
     cout << " No pointer to GEANT DataSet \n" << endl; 
   }

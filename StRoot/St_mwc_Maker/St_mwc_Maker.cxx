@@ -1,8 +1,5 @@
-// $Id: St_mwc_Maker.cxx,v 1.16 2000/03/28 20:27:56 fine Exp $
+// $Id: St_mwc_Maker.cxx,v 1.15 2000/01/26 22:05:13 ward Exp $
 // $Log: St_mwc_Maker.cxx,v $
-// Revision 1.16  2000/03/28 20:27:56  fine
-// Adjuested to ROOT 2.24
-//
 // Revision 1.15  2000/01/26 22:05:13  ward
 // replaced for(int iii with int iii for(iii
 //
@@ -173,6 +170,7 @@ Int_t St_mwc_Maker::Make(){
 		(sec+ii)->tot_hit,(sec+ii)->de);
      }*/
    g2t_mwc_hit_st *hitTable = g2t_mwc_hit->GetTable();
+   table_head_st *hitHead  = g2t_mwc_hit->GetHeader();
    float px,py,pz,x,y;
    int iNHit;
    int nSectorsHit=0;
@@ -185,8 +183,7 @@ Int_t St_mwc_Maker::Make(){
        m_EtaPhi -> Fill(float(int(iii/4)+1),float(iii%4)+1,float(iNHit) );
      }
    m_nSectorsHit -> Fill(float(nSectorsHit));
-   Int_t nok = g2t_mwc_hit->GetNRows();
-   for (iii=0;iii<nok;iii++)
+   for (iii=0;iii<hitHead->nok;iii++)
      {
        x  = (hitTable+iii)->x[0];
        y  = (hitTable+iii)->x[1];

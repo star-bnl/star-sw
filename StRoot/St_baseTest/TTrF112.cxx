@@ -4,23 +4,20 @@
 // matrix / vector "derived" from  
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f112/top.html 
 //
-// $Id: TTrF112.cxx,v 1.4 2000/03/26 03:16:05 fine Exp $
+// $Id: TTrF112.cxx,v 1.3 1999/12/07 22:33:11 fine Exp $
 // $Log: TTrF112.cxx,v $
-// Revision 1.4  2000/03/26 03:16:05  fine
-// Adjusted to ROOT 2.24
-//
 // Revision 1.3  1999/12/07 22:33:11  fine
 // Clean up to remove compilation warnings
 //
 // Revision 1.2  1999/09/28 19:54:57  fine
-// RMath has been renamed to TCL
+// RMath has been renamed to StCL
 //
 // Revision 1.1  1999/09/27 00:13:46  fine
 //  test F112 has been fixed for Sun
 //
 
 #include "StMicky.h"
-#include "TCL.h"
+#include "StCL.h"
 #include <iostream.h>
 
 //____________________________________________________________________________________
@@ -63,19 +60,19 @@ int StMicky::ttrinv()
 
     Newguy("TRINV -TRSINV.", "TTRINV  ");
     param_1.zerlev = param_1.zerov[1];
-    TCL::trinv(cc, _BLNK__1.a, 4);
+    StCL::trinv(cc, _BLNK__1.a, 4);
     Mverif(11, _BLNK__1.a, qc, 10);
 
-    TCL::ucopy(cc, _BLNK__1.a, 10);
-    TCL::trinv(_BLNK__1.a, _BLNK__1.a, 4);
+    StCL::ucopy(cc, _BLNK__1.a, 10);
+    StCL::trinv(_BLNK__1.a, _BLNK__1.a, 4);
     Mverif(12, _BLNK__1.a, qc, 10);
 
     param_1.zerlev = param_1.zerov[3];
-    TCL::trsinv(ac, _BLNK__1.a, 4);
+    StCL::trsinv(ac, _BLNK__1.a, 4);
     Mverif(21, _BLNK__1.a, rc, 10);
 
-    TCL::ucopy(ac, _BLNK__1.a, 10);
-    TCL::trsinv(_BLNK__1.a, _BLNK__1.a, 4);
+    StCL::ucopy(ac, _BLNK__1.a, 10);
+    StCL::trsinv(_BLNK__1.a, _BLNK__1.a, 4);
     Mverif(22, _BLNK__1.a, rc, 10);
 /* - - - - - - - - - - - - - - - - - - - -- -  - -- - - - - - - - - - - - 
 */
@@ -83,14 +80,14 @@ int StMicky::ttrinv()
     
     Timed(&param_1.timerd);
     for (j = 1; j <= 1000; ++j) 
-	TCL::trinv(cc, _BLNK__1.a, 4);
+	StCL::trinv(cc, _BLNK__1.a, 4);
 
     Timing(tinf);
     tinf[1] = tinfs2;
     tinf[3] = tinfs4;
     Timed(&param_1.timerd);
     for (j = 1; j <= 1000; ++j) 
-	TCL::trsinv(ac, _BLNK__1.a, 4);
+	StCL::trsinv(ac, _BLNK__1.a, 4);
     Timing(tinf);
     return 0;
 } /* trinv */
@@ -162,29 +159,29 @@ int StMicky::ttrinv()
   int j;
   Newguy("TRLA-TRLTA-TRAL-TRALT.", "TTRLA   ");
     param_1.zerlev = param_1.zerov[1];
-    TCL::trla(dc, ec, _BLNK__1.a, 4, 3);
+    StCL::trla(dc, ec, _BLNK__1.a, 4, 3);
     Mverif(111, _BLNK__1.a, vc, 12);
 
-    TCL::ucopy(ec, _BLNK__1.a, 12);
-    TCL::trla(dc, _BLNK__1.a, _BLNK__1.a, 4, 3);
+    StCL::ucopy(ec, _BLNK__1.a, 12);
+    StCL::trla(dc, _BLNK__1.a, _BLNK__1.a, 4, 3);
     Mverif(112, _BLNK__1.a, vc, 12);
 
-    TCL::trlta(dc, ec, _BLNK__1.a, 4, 3);
+    StCL::trlta(dc, ec, _BLNK__1.a, 4, 3);
     Mverif(121, _BLNK__1.a, tc, 12);
-    TCL::ucopy(ec, _BLNK__1.a, 12);
-    TCL::trlta(dc, _BLNK__1.a, _BLNK__1.a, 4, 3);
+    StCL::ucopy(ec, _BLNK__1.a, 12);
+    StCL::trlta(dc, _BLNK__1.a, _BLNK__1.a, 4, 3);
     Mverif(122, _BLNK__1.a, tc, 12);
 
-    TCL::tral(ec, dc, _BLNK__1.a, 3, 4);
+    StCL::tral(ec, dc, _BLNK__1.a, 3, 4);
     Mverif(131, _BLNK__1.a, uc, 12);
-    TCL::ucopy(ec, _BLNK__1.a, 12);
-    TCL::tral(_BLNK__1.a, dc, _BLNK__1.a, 3, 4);
+    StCL::ucopy(ec, _BLNK__1.a, 12);
+    StCL::tral(_BLNK__1.a, dc, _BLNK__1.a, 3, 4);
     Mverif(132, _BLNK__1.a, uc, 12);
 
-    TCL::tralt(ec, dc, _BLNK__1.a, 3, 4);
+    StCL::tralt(ec, dc, _BLNK__1.a, 3, 4);
     Mverif(141, _BLNK__1.a, yc, 12);
-    TCL::ucopy(ec, _BLNK__1.a, 12);
-    TCL::tralt(_BLNK__1.a, dc, _BLNK__1.a, 3, 4);
+    StCL::ucopy(ec, _BLNK__1.a, 12);
+    StCL::tralt(_BLNK__1.a, dc, _BLNK__1.a, 3, 4);
     Mverif(142, _BLNK__1.a, yc, 12);
 /* -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 
 */
@@ -194,21 +191,21 @@ int StMicky::ttrinv()
     tinf[3] = tinf4[0];
     Timed(&param_1.timerd);
     for (j = 1; j <= 1000; ++j) 
-	 TCL::trla(dc, ec, _BLNK__1.a, 4, 3);
+	 StCL::trla(dc, ec, _BLNK__1.a, 4, 3);
 
     Timing(tinf);
     tinf[1] = tinf2[1];
     tinf[3] = tinf4[1];
     Timed(&param_1.timerd);
     for (j = 1; j <= 1000; ++j) 
-	 TCL::trlta(dc, ec, _BLNK__1.a, 4, 3);
+	 StCL::trlta(dc, ec, _BLNK__1.a, 4, 3);
 
     Timing(tinf);
     tinf[1] = tinf2[2];
     tinf[3] = tinf4[2];
     Timed(&param_1.timerd);
     for (j = 1; j <= 1000; ++j) 
-	 TCL::tral(ec, dc, _BLNK__1.a, 3, 4);
+	 StCL::tral(ec, dc, _BLNK__1.a, 3, 4);
 
     Timing(tinf);
     tinf[1] = tinf2[3];
@@ -216,17 +213,17 @@ int StMicky::ttrinv()
     Timed(&param_1.timerd);
 
     for (j = 1; j <= 1000; ++j) 
-	 TCL::tralt(ec, dc, _BLNK__1.a, 3, 4);
+	 StCL::tralt(ec, dc, _BLNK__1.a, 3, 4);
 
     Timing(tinf);
 /* ---------------------------------------------------------------------- 
 */
 L180:
     Newguy("TRAAT-TRATA.", "TTRLA   ");
-    TCL::traat(ec, _BLNK__1.a, 4, 3);
+    StCL::traat(ec, _BLNK__1.a, 4, 3);
     Mverif(211, _BLNK__1.a, wc, 10);
 
-    TCL::trata(ec, _BLNK__1.a, 4, 3);
+    StCL::trata(ec, _BLNK__1.a, 4, 3);
     Mverif(221, _BLNK__1.a, xc, 10);
 /* -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 
 */
@@ -237,7 +234,7 @@ L180:
     Timed(&param_1.timerd);
 
     for (j = 1; j <= 1000; ++j) 
-	 TCL::traat(ec, _BLNK__1.a, 4, 3);
+	 StCL::traat(ec, _BLNK__1.a, 4, 3);
     
     Timing(tinf);
     tinf[1] = tinf2[5];
@@ -245,19 +242,19 @@ L180:
     Timed(&param_1.timerd);
 
     for (j = 1; j <= 1000; ++j) 
-	 TCL::trata(ec, _BLNK__1.a, 4, 3);
+	 StCL::trata(ec, _BLNK__1.a, 4, 3);
     
     Timing(tinf);
 /* ---------------------------------------------------------------------- 
 */
 L280:
     Newguy("TRASAT-TRATSA-TRQSQ.", "TTRLA   ");
-    TCL::trasat(ec, ac, _BLNK__1.a, 3, 4);
+    StCL::trasat(ec, ac, _BLNK__1.a, 3, 4);
     Mverif(311, _BLNK__1.a, sc, 6);
 
-    TCL::tratsa(ec, dc, _BLNK__1.a, 3, 4);
+    StCL::tratsa(ec, dc, _BLNK__1.a, 3, 4);
     Mverif(321, _BLNK__1.a, atsac, 6);
-    TCL::trqsq(dc, ac, _BLNK__1.a, 4);
+    StCL::trqsq(dc, ac, _BLNK__1.a, 4);
     Mverif(331, _BLNK__1.a, qsqc, 10);
 /* -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 
 */
@@ -268,7 +265,7 @@ L280:
     Timed(&param_1.timerd);
 
     for (j = 1; j <= 1000; ++j) 
-	 TCL::trasat(ac, ec, _BLNK__1.a, 4, 3);
+	 StCL::trasat(ac, ec, _BLNK__1.a, 4, 3);
 
     Timing(tinf);
     tinf[1] = tinf2[7];
@@ -276,30 +273,30 @@ L280:
     Timed(&param_1.timerd);
 
     for (j = 1; j <= 1000; ++j) 
-	 TCL::tratsa(ec, ac, _BLNK__1.a, 3, 4);
+	 StCL::tratsa(ec, ac, _BLNK__1.a, 3, 4);
     
     Timing(tinf);
     tinf[1] = tinf2[8];
     tinf[3] = tinf4[8];
     Timed(&param_1.timerd);
     for (j = 1; j <= 1000; ++j) 
-	 TCL::trqsq(dc, ac, _BLNK__1.a, 4);
+	 StCL::trqsq(dc, ac, _BLNK__1.a, 4);
 
     Timing(tinf);
 /* ---------------------------------------------------------------------- 
 */
 L380:
     Newguy("TRSA-TRAS-TRSAT-TRATS.", "TTRLA   ");
-    TCL::trsa(dc, ec, _BLNK__1.a, 4, 3);
+    StCL::trsa(dc, ec, _BLNK__1.a, 4, 3);
     Mverif(411, _BLNK__1.a, sac, 12);
 
-    TCL::tras(ec, dc, _BLNK__1.a, 3, 4);
+    StCL::tras(ec, dc, _BLNK__1.a, 3, 4);
     Mverif(421, _BLNK__1.a, asc, 12);
 
-    TCL::trsat(dc, ec, _BLNK__1.a, 4, 3);
+    StCL::trsat(dc, ec, _BLNK__1.a, 4, 3);
     Mverif(431, _BLNK__1.a, satc, 12);
 
-    TCL::trats(ec, dc, _BLNK__1.a, 3, 4);
+    StCL::trats(ec, dc, _BLNK__1.a, 3, 4);
     Mverif(441, _BLNK__1.a, atsc, 12);
 /* -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 
 */
@@ -309,7 +306,7 @@ L380:
     Timed(&param_1.timerd);
 
     for (j = 1; j <= 1000; ++j) 
-	 TCL::trsa(dc, ec, _BLNK__1.a, 4, 3);
+	 StCL::trsa(dc, ec, _BLNK__1.a, 4, 3);
 
     Timing(tinf);
     tinf[1] = tinf2[10];
@@ -317,34 +314,34 @@ L380:
     Timed(&param_1.timerd);
 
     for (j = 1; j <= 1000; ++j) 
-	 TCL::tras(ec, dc, _BLNK__1.a, 3, 4);
+	 StCL::tras(ec, dc, _BLNK__1.a, 3, 4);
     Timing(tinf);
     tinf[1] = tinf2[11];
     tinf[3] = tinf4[11];
     Timed(&param_1.timerd);
     for (j = 1; j <= 1000; ++j) 
-	 TCL::trsat(dc, ec, _BLNK__1.a, 4, 3);
+	 StCL::trsat(dc, ec, _BLNK__1.a, 4, 3);
     
     Timing(tinf);
     tinf[1] = tinf2[12];
     tinf[3] = tinf4[12];
     Timed(&param_1.timerd);
     for (j = 1; j <= 1000; ++j) 
-	 TCL::trats(ec, dc, _BLNK__1.a, 3, 4);
+	 StCL::trats(ec, dc, _BLNK__1.a, 3, 4);
     Timing(tinf);
 /* ---------------------------------------------------------------------- 
 */
 L480:
     Newguy("TRPCK-TRUPCK.", "TTRLA   ");
-    TCL::trpck(upckc, _BLNK__1.a, 4);
+    StCL::trpck(upckc, _BLNK__1.a, 4);
     Mverif(511, _BLNK__1.a, pckc, 10);
 
-    TCL::trupck(pckc, _BLNK__1.b, 4);
+    StCL::trupck(pckc, _BLNK__1.b, 4);
     Mverif(521, _BLNK__1.b, upckc, 16);
 
-    TCL::trpck(_BLNK__1.b, _BLNK__1.b, 4);
+    StCL::trpck(_BLNK__1.b, _BLNK__1.b, 4);
     Mverif(512, _BLNK__1.b, pckc, 10);
-    TCL::trupck(_BLNK__1.a, _BLNK__1.a, 4);
+    StCL::trupck(_BLNK__1.a, _BLNK__1.a, 4);
     Mverif(522, _BLNK__1.a, upckc, 16);
 /* -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 
 */
@@ -353,14 +350,14 @@ L480:
     tinf[3] = tinf4[13];
     Timed(&param_1.timerd);
     for (j = 1; j <= 1000; ++j) 
-	 TCL::trpck(_BLNK__1.a, _BLNK__1.b, 4);
+	 StCL::trpck(_BLNK__1.a, _BLNK__1.b, 4);
 
     Timing(tinf);
     tinf[3] = tinf4[14];
     tinf[1] = tinf2[14];
     Timed(&param_1.timerd);
     for (j = 1; j <= 1000; ++j) 
-	 TCL::trupck(_BLNK__1.a, _BLNK__1.b, 4);
+	 StCL::trupck(_BLNK__1.a, _BLNK__1.b, 4);
  
     Timing(tinf);
 L580:
@@ -427,30 +424,30 @@ int StMicky::ttrcho()
   int j;
     Newguy("TRCHLU-TRCHUL.", "TTRCHO  ");
     param_1.zerlev = param_1.zerov[2];
-    TCL::trchlu(ac, _BLNK__1.a, 4);
+    StCL::trchlu(ac, _BLNK__1.a, 4);
     Mverif(11, _BLNK__1.a, pc, 10);
 
-    TCL::ucopy(ac, _BLNK__1.a, 10);
-    TCL::trchlu(_BLNK__1.a, _BLNK__1.a, 4);
+    StCL::ucopy(ac, _BLNK__1.a, 10);
+    StCL::trchlu(_BLNK__1.a, _BLNK__1.a, 4);
     Mverif(12, _BLNK__1.a, pc, 10);
 
-    TCL::trchul(bc, _BLNK__1.a, 4);
+    StCL::trchul(bc, _BLNK__1.a, 4);
     Mverif(21, _BLNK__1.a, dc, 10);
-    TCL::ucopy(bc, _BLNK__1.a, 10);
-    TCL::trchul(_BLNK__1.a, _BLNK__1.a, 4);
+    StCL::ucopy(bc, _BLNK__1.a, 10);
+    StCL::trchul(_BLNK__1.a, _BLNK__1.a, 4);
     Mverif(22, _BLNK__1.a, dc, 10);
 /* - - - - - - - - - - - - - - - - - - - -- -  - -- - - - - - - - - - - - 
 */
     if (param_1.itimes == 0) 	goto L120;
     Timed(&param_1.timerd);
     for (j = 1; j <= 1000; ++j)
-	 TCL::trchlu(ac, _BLNK__1.a, 4);
+	 StCL::trchlu(ac, _BLNK__1.a, 4);
 
     Timing(tinf);
     tinf[1] = tinft2;
     Timed(&param_1.timerd);
     for (j = 1; j <= 1000; ++j) 
-	 TCL::trchul(bc, _BLNK__1.a, 4);
+	 StCL::trchul(bc, _BLNK__1.a, 4);
 
     Timing(tinf);
 /* -----------------------------------------------------------------------
@@ -458,18 +455,18 @@ int StMicky::ttrcho()
 L120:
     Newguy("TRSMUL-TRSMLU.", "TTRCHO  ");
     param_1.zerlev = param_1.zerov[1];
-    TCL::trsmul(dc, _BLNK__1.a, 4);
+    StCL::trsmul(dc, _BLNK__1.a, 4);
     Mverif(11, _BLNK__1.a, bc, 10);
 
-    TCL::ucopy(dc, _BLNK__1.a, 10);
-    TCL::trsmul(_BLNK__1.a, _BLNK__1.a, 4);
+    StCL::ucopy(dc, _BLNK__1.a, 10);
+    StCL::trsmul(_BLNK__1.a, _BLNK__1.a, 4);
     Mverif(12, _BLNK__1.a, bc, 10);
 
-    TCL::trsmlu(dc, _BLNK__1.a, 4);
+    StCL::trsmlu(dc, _BLNK__1.a, 4);
     Mverif(22, _BLNK__1.a, ec, 10);
 
-    TCL::ucopy(dc, _BLNK__1.a, 10);
-    TCL::trsmlu(_BLNK__1.a, _BLNK__1.a, 4);
+    StCL::ucopy(dc, _BLNK__1.a, 10);
+    StCL::trsmlu(_BLNK__1.a, _BLNK__1.a, 4);
     Mverif(21, _BLNK__1.a, ec, 10);
 /* - - - - - - - - - - - - - - - - - - - -- -  - -- - - - - - - - - - - - 
 */
@@ -478,13 +475,13 @@ L120:
     tinf[3] = tinfm4;
     Timed(&param_1.timerd);
     for (j = 1; j <= 1000; ++j) 
-	TCL::trsmul(dc, _BLNK__1.a, 4);
+	StCL::trsmul(dc, _BLNK__1.a, 4);
 
     Timing(tinf);
 //    tinf[1] = tinfl2;
     Timed(&param_1.timerd);
     for (j = 1; j <= 1000; ++j) 
-	TCL::trsmlu(dc, _BLNK__1.a, 4);
+	StCL::trsmlu(dc, _BLNK__1.a, 4);
 
     Timing(tinf);
     return 0;

@@ -1,8 +1,5 @@
-// $Id: Load.C,v 1.9 2000/03/27 02:57:12 fine Exp $
+// $Id: Load.C,v 1.8 1999/11/05 16:19:50 fisyak Exp $
 // $Log: Load.C,v $
-// Revision 1.9  2000/03/27 02:57:12  fine
-// ROOT 2.24 needs libSTAR to be loaded
-//
 // Revision 1.8  1999/11/05 16:19:50  fisyak
 // Add StUtilities
 //
@@ -18,8 +15,6 @@
 //=======================================================================
 
 void Load(){
-    gSystem->Load("libSTAR");
-    gSystem->Load("Star2Root");
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("StUtilities");

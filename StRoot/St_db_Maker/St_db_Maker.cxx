@@ -1,12 +1,6 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.27 2000/04/07 15:44:42 perev Exp $
-// $Log: St_db_Maker.cxx,v $
-// Revision 1.27  2000/04/07 15:44:42  perev
-// Error return when MySQL is not available
-//
-// Revision 1.26  2000/03/23 14:55:55  fine
-// Adjusted to libSTAR and ROOT 2.24
-//
+// 
+// 
 // 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -27,12 +21,12 @@
 #include "TFile.h"
 #include "TSystem.h"
 #include "St_db_Maker.h"
-#include "TDataSetIter.h"
-#include "TFileSet.h"
+#include "St_DataSetIter.h"
+#include "St_FileSet.h"
 #include "St_XDFFile.h"
 #include "StTree.h"
-#include "TTableDescriptor.h"
-#include "TTable.h"
+#include "St_tableDescriptor.h"
+#include "St_Table.h"
 
 #include "StDbBroker/StDbBroker.h"
 
@@ -60,25 +54,25 @@ static const int   times[]=  {
 //                                          
 /////////////////////////////////////////////////////////////////////////  
                                             
-TTableDescriptor *St_dbConfig::fgColDescriptors = 0; 
+St_tableDescriptor *St_dbConfig::fgColDescriptors = 0; 
 
 TableImp(dbConfig)                     
 TableStreamerImp(dbConfig)             
 
 
 //_________________________ class St_Validity ____________________________________
-class St_ValiSet : public TDataSet{
+class St_ValiSet : public St_DataSet{
 public:
    TDatime fTimeMin;
    TDatime fTimeMax;
-   TDataSet *fDat;
-   St_ValiSet(const char *name,TDataSet *parent);
+   St_DataSet *fDat;
+   St_ValiSet(const char *name,St_DataSet *parent);
    virtual ~St_ValiSet(){};
    virtual void ls(Int_t lev=1);
 };
 
 //_____________________________________________________________________________
-St_ValiSet::St_ValiSet(const char *name,TDataSet *parent): TDataSet(name,parent)
+St_ValiSet::St_ValiSet(const char *name,St_DataSet *parent): St_DataSet(name,parent)
 {
   SetTitle(".Val");
   fTimeMin.Set(kMaxTime,0);
@@ -93,7 +87,7 @@ void St_ValiSet::ls(Int_t lev)
   printf("  %s.Validity = %s ",GetName(),fTimeMin.AsString());
   printf(" <-> %s\n",     fTimeMax.AsString());
   if (fDat) printf("  Contains DataSet %s\n",fDat->GetName());
-  TDataSet::ls(lev);
+  St_DataSet::ls(lev);
 }
 
 //__________________________ class St_db_Maker  ____________________________
@@ -118,20 +112,19 @@ St_db_Maker::~St_db_Maker(){
 //_____________________________________________________________________________
 Int_t St_db_Maker::Init()
 {
-   TFileSet *fileset;
+   St_FileSet *fileset;
    TString fullpath,topdir;
 
    fDataBase=0;
    if (!fMainDir.IsNull() && strncmp("MySQL:",(const char*)fMainDir,6)==0){
      fDataBase = OpenMySQL(((const char*)fMainDir)+6);
-     if (!fDataBase) return kStErr;
-     fDataBase->Pass(PrepareDB,0);
+     if (fDataBase) fDataBase->Pass(PrepareDB,0);
    }
 
 // 		recreate a memory resided data-structure
    fCurrentDir = fMainDir;
    if (!fDataBase && !fCurrentDir.IsNull()) {
-     fileset = new TFileSet(fCurrentDir);
+     fileset = new St_FileSet(fCurrentDir);
      fileset->Purge(); 
      fileset->Sort(); 
      fileset->Pass(PrepareDB,&fCurrentDir);
@@ -144,7 +137,7 @@ Int_t St_db_Maker::Init()
 
    fCurrentDir = fUserDir; fileset = 0;
    if (!fCurrentDir.IsNull()) {
-     fileset = new TFileSet(fCurrentDir);
+     fileset = new St_FileSet(fCurrentDir);
      fileset->Purge();
      fileset->Sort(); 
      fileset->Pass(PrepareDB,&fCurrentDir);
@@ -213,11 +206,11 @@ int St_db_Maker::Kind(const char *filename)
    return 0;
 }
 //_____________________________________________________________________________
-TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
+St_DataSet *St_db_Maker::OpenMySQL(const char *dbname)
 {
    int nrows,irow,jrow;
    dbConfig_st *thy,*ihy,*jhy;
-   TDataSet *top,*node,*ds;
+   St_DataSet *top,*node,*ds;
    
    fDBBroker  = new StDbBroker();
 
@@ -237,22 +230,22 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
    fHierarchy->Adopt(nrows,thy);
    if (GetDebug()>1)  fHierarchy->Print(0,nrows);  
 
-   top = new TDataSet(thy->parname);
+   top = new St_DataSet(thy->parname);
    top->SetTitle("directory");
 
-   TDataSet **dss = new TDataSet*[nrows];
+   St_DataSet **dss = new St_DataSet*[nrows];
    memset(dss,0,nrows*sizeof(void*));
 
 //		First pass: directories only
    for (irow=0,ihy=thy; irow <nrows ; irow++,ihy++)
    {
      if (strcmp(ihy->tabtype,".node")==0) {// new node
-       ds = new TDataSet(ihy->tabname);
+       ds = new St_DataSet(ihy->tabname);
        ds->SetTitle("directory");
      } else {				// new table
        const char *ty = ihy->tabtype;
        if (ty[0]=='.') ty++; 
-       ds = TTable::New(ihy->tabname,ty,0,0);
+       ds = St_Table::New(ihy->tabname,ty,0,0);
        if (!ds) {
          Warning("OpenMySQL","Unknown table %s/%s.%s",ihy->parname,ihy->tabname,ihy->tabtype); continue;}
      }
@@ -286,7 +279,7 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
 
 
 //_____________________________________________________________________________
-TDataSet *St_db_Maker::UpdateDB(TDataSet* ds)
+St_DataSet *St_db_Maker::UpdateDB(St_DataSet* ds)
 { 
   if(!ds) return 0;
 #ifdef __CC5__
@@ -297,12 +290,12 @@ TDataSet *St_db_Maker::UpdateDB(TDataSet* ds)
   return ds;
 }
 //_____________________________________________________________________________
-int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
+int St_db_Maker::UpdateTable(UInt_t parId, St_Table* dat, TDatime val[2] )
 {
 
   assert(fDBBroker);assert(dat);
   fDBBroker->SetDateTime(GetDateTime().GetDate(),GetDateTime().GetTime());
-  TTableDescriptor *rowTL = ((TTable*)dat)->GetRowDescriptors();
+  St_tableDescriptor *rowTL = ((St_Table*)dat)->GetRowDescriptors();
   int nElements = rowTL->GetNRows();
 
   tableDescriptor_st *elem= rowTL->GetTable();
@@ -323,7 +316,7 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
   }
 
   int nRows = fDBBroker->GetNRows();
-//		Adopt DB data in the new TTable
+//		Adopt DB data in the new St_Table
   dat->Adopt(nRows,dbstruct);
 //  dat->Print(0,1);
   val[0].Set(fDBBroker->GetBeginDate(),fDBBroker->GetBeginTime());
@@ -336,9 +329,9 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
 }
 
  //_____________________________________________________________________________
-EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
+EDataSetPass St_db_Maker::UpdateDB(St_DataSet* ds,void *user )
 {
-  TDataSet *left,*par;
+  St_DataSet *left,*par;
   St_ValiSet *val;
   TDatime valsCINT[2],valsSQL[2];
    
@@ -369,13 +362,13 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
   int kase = 0;
   if (mk->fDBBroker && val->fDat) {	// Try to load from MySQL
      
-    int ierr = mk->UpdateTable(par->GetUniqueID(),(TTable*)val->fDat, valsSQL );
+    int ierr = mk->UpdateTable(par->GetUniqueID(),(St_Table*)val->fDat, valsSQL );
     if (!ierr) kase = 1;
   }
   
   left = mk->FindLeft(val,valsCINT);
   if (left) kase+=2;
-  TDataSet *newGuy=0;
+  St_DataSet *newGuy=0;
 SWITCH:  switch (kase) {
   
     case 0:   break;  
@@ -409,7 +402,7 @@ SWITCH:  switch (kase) {
   return kPrune;  
 }
 //_____________________________________________________________________________
-TDataSet *St_db_Maker::FindLeft(St_ValiSet *val, TDatime vals[2])
+St_DataSet *St_db_Maker::FindLeft(St_ValiSet *val, TDatime vals[2])
 {
 
 //	Start loop
@@ -418,9 +411,9 @@ TDataSet *St_db_Maker::FindLeft(St_ValiSet *val, TDatime vals[2])
   vals[0].Set(kMinTime,0);
   vals[1].Set(kMaxTime,0);
   UInt_t utmp,udifleft=(UInt_t)(-1),udifrite=(UInt_t)(-1); 
-  TDataSet *left=0,*rite=0,*set=0; 
+  St_DataSet *left=0,*rite=0,*set=0; 
   TListIter next(val->GetList());
-  while ((set = (TDataSet*)next())) {
+  while ((set = (St_DataSet*)next())) {
     const char *filename = set->GetName();
     UInt_t ucur = St_db_Maker::Time(filename).Get();
     if (uevent < ucur) 
@@ -440,16 +433,16 @@ TDataSet *St_db_Maker::FindLeft(St_ValiSet *val, TDatime vals[2])
 
 
 //_____________________________________________________________________________
-TDataSet *St_db_Maker::LoadTable(TDataSet* left)
+St_DataSet *St_db_Maker::LoadTable(St_DataSet* left)
 {
   TFile *tf =0;
   TObject *to =0;
   TString command;  
-  TDataSet *newdat = 0;
+  St_DataSet *newdat = 0;
   TString dbfile = left->GetTitle()+5;
 
 
-  TDataSet *ds = left->GetParent();
+  St_DataSet *ds = left->GetParent();
   ds = ds->GetParent();
   dbfile += strchr(strstr(ds->Path(),"/.data/")+7,'/');
   dbfile += "/"; dbfile += left->GetName();
@@ -466,7 +459,7 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
       command = ".L "; command += dbfile;
       if (GetDebug()) printf("LoadTable: %s\n",(const char*)command);
       gInterpreter->ProcessLine(command);
-      newdat = (TDataSet *) gInterpreter->Calc("CreateTable()");
+      newdat = (St_DataSet *) gInterpreter->Calc("CreateTable()");
       command.ReplaceAll(".L ",".U "); 
       gInterpreter->ProcessLine(command);
 
@@ -480,10 +473,10 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
       if (!to) break;
       if (strcmp(to->ClassName(),"StIOEvent")==0) to = ((StIOEvent*)to)->fObj;
       if (!to) break;
-      if (to->InheritsFrom(TDataSet::Class())) 	{
-        newdat = (TDataSet*)to; 
+      if (to->InheritsFrom(St_DataSet::Class())) 	{
+        newdat = (St_DataSet*)to; 
       } else 					{ 
-	newdat = new TObjectSet(to->GetName());
+	newdat = new St_ObjectSet(to->GetName());
 	newdat->SetObject(to);
       }
     break;
@@ -495,9 +488,9 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
 }
 
 //_____________________________________________________________________________
-EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
+EDataSetPass St_db_Maker::PrepareDB(St_DataSet* ds, void *user)
 {
-  TDataSet *set;
+  St_DataSet *set;
   St_ValiSet *pseudo;
   const char *dsname,*filename,*dot;     
   char psname[100];
@@ -516,9 +509,9 @@ EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
 //	Start loop
   pseudo = 0; psname[0]='.'; psname[1]=0;
   TListIter next(list);
-  while ((set = (TDataSet*)next())) {
+  while ((set = (St_DataSet*)next())) {
     filename = set->GetName();
-    int isSql =(set->InheritsFrom(TTable::Class())!=0);
+    int isSql =(set->InheritsFrom(St_Table::Class())!=0);
     if (isSql) {			// Sql object
       lpsname = strlen(filename); 
     } else {				// Cint object
@@ -579,22 +572,22 @@ void St_db_Maker::OnOff()
 {
   int Off,len;
   if (!fDataBase) return;
-  TDataSet *onoff = Find(".onoff");
+  St_DataSet *onoff = Find(".onoff");
   if (!onoff) return;
   
   TString tsBase,tsDir,tsTit;
-  TDataSet *ono;  
-  TDataSetIter onoffNext(onoff);
+  St_DataSet *ono;  
+  St_DataSetIter onoffNext(onoff);
   while((ono=onoffNext())) {// loop onoffs
     Off = (strcmp("Off",ono->GetName())==0);
     tsDir  = gSystem->DirName(ono->GetTitle());
     tsBase = gSystem->BaseName(ono->GetTitle());
     TRegexp rex(tsBase,1);
-    TDataSet *dsDir = GetDataSet(tsDir);
+    St_DataSet *dsDir = GetDataSet(tsDir);
     if (!dsDir) continue;
     if (GetMaker(dsDir) != this) continue;
-    TDataSetIter nextVal(dsDir);
-    TDataSet *val;
+    St_DataSetIter nextVal(dsDir);
+    St_DataSet *val;
     while ((val=nextVal())) {//loop over val's  
       const char *name = val->GetName();
       if(name[0]!='.') 				continue;

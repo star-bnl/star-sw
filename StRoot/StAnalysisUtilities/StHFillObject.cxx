@@ -1,8 +1,5 @@
-// $Id: StHFillObject.cxx,v 1.4 2000/03/27 19:08:01 fine Exp $
+// $Id: StHFillObject.cxx,v 1.3 1999/12/02 03:20:19 perev Exp $
 // $Log: StHFillObject.cxx,v $
-// Revision 1.4  2000/03/27 19:08:01  fine
-// Adjuested to ROOT 2.24
-//
 // Revision 1.3  1999/12/02 03:20:19  perev
 // cast's for CC5
 //
@@ -32,8 +29,6 @@
 #include "StHFillObject.h"
 #include "StHFillVars.h"
 #include "TH1.h"
-#include "TH2.h"
-#include "TH3.h"
 #include "TMethodCall.h"
 #include "TDataMember.h"
 #include "TList.h"
@@ -567,16 +562,16 @@ void StHFillObject::Draw(Option_t* option) {
     if (!vars.histo[j]) return;
     switch (vars.dims[j]) {
       case 1:
-        ((TH1 *)vars.histo[j])->Fill((Axis_t) vars.values[j][0],
+        vars.histo[j]->Fill((Axis_t) vars.values[j][0],
                             vars.weight[j]);
         break;
       case 2:
-        ((TH2 *)vars.histo[j])->Fill((Axis_t) vars.values[j][0],
+        vars.histo[j]->Fill((Axis_t) vars.values[j][0],
                             (Axis_t) vars.values[j][1],
                             vars.weight[j]);
         break;
       case 3:
-        ((TH3 *)vars.histo[j])->Fill((Axis_t) vars.values[j][0],
+        vars.histo[j]->Fill((Axis_t) vars.values[j][0],
                             (Axis_t) vars.values[j][1],
                             (Axis_t) vars.values[j][2],
                             vars.weight[j]);

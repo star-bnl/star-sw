@@ -1,9 +1,6 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_Table3PackedPoints.h,v 1.2 2000/04/05 03:58:21 fine Exp $
+// $Id: St_Table3PackedPoints.h,v 1.1 1999/12/20 17:32:29 fine Exp $
 // $Log: St_Table3PackedPoints.h,v $
-// Revision 1.2  2000/04/05 03:58:21  fine
-// Adjusted for ROOT 2.24
-//
 // Revision 1.1  1999/12/20 17:32:29  fine
 // St_Table3Point has been removed from St_base
 //
@@ -24,9 +21,11 @@
 #define STAR_St_Table3PackedPoints
 
 
-#include "TTable3Points.h"
+#include "St_Table3Points.h"
 
-class St_Table3PackedPoints :  public TTable3Points
+class St_TableElementDescriptor;
+
+class St_Table3PackedPoints :  public St_Table3Points
 {
   private:
 
@@ -42,16 +41,16 @@ class St_Table3PackedPoints :  public TTable3Points
   public:
         St_Table3PackedPoints();
 
-        St_Table3PackedPoints(TTableSorter *sorter,const void *key, const Char_t *xyzName,
+        St_Table3PackedPoints(St_TableSorter *sorter,const void *key, const Char_t *xyzName,
                               const Char_t *detector="tpc",Option_t *opt="");
 
-        St_Table3PackedPoints(TTableSorter *sorter,const void *key, const Char_t *xyzName, 
+        St_Table3PackedPoints(St_TableSorter *sorter,const void *key, const Char_t *xyzName, 
                               Float_t maxFactor, Float_t maxRange, Option_t *opt="");
 
-        St_Table3PackedPoints(TTableSorter *sorter,Int_t keyIndex, const Char_t *xyzName, 
+        St_Table3PackedPoints(St_TableSorter *sorter,Int_t keyIndex, const Char_t *xyzName, 
                               const Char_t *detector="tpc",Option_t *opt="");
 
-        St_Table3PackedPoints(TTableSorter *sorter,Int_t keyIndex, const Char_t *xyzName, 
+        St_Table3PackedPoints(St_TableSorter *sorter,Int_t keyIndex, const Char_t *xyzName, 
                               Float_t maxFactor, Float_t maxRange, Option_t *opt="");
 
         ~St_Table3PackedPoints();       

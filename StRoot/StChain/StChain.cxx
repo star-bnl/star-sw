@@ -1,8 +1,5 @@
-// $Id: StChain.cxx,v 1.43 2000/03/23 00:15:21 fine Exp $
+// $Id: StChain.cxx,v 1.42 1999/12/06 01:57:29 fine Exp $
 // $Log: StChain.cxx,v $
-// Revision 1.43  2000/03/23 00:15:21  fine
-// Adjusted to libSTAR for ROOT 2.24
-//
 // Revision 1.42  1999/12/06 01:57:29  fine
 // Time statistic fixed
 //
@@ -114,8 +111,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <TROOT.h>
-#include <TBrowser.h>
+#include "TROOT.h"
+#include "TBrowser.h"
 #include "StChain.h"
 #include "StEvtHddr.h"
 

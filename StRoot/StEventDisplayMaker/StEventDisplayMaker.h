@@ -1,9 +1,6 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.18 2000/04/05 03:58:21 fine Exp $
-// $Log: StEventDisplayMaker.h,v $
-// Revision 1.18  2000/04/05 03:58:21  fine
-// Adjusted for ROOT 2.24
-//
+//   
+//  
 //
 #ifndef STAR_StEventDisplayMaker
 #define STAR_StEventDisplayMaker
@@ -19,9 +16,9 @@
 #include "StMaker.h"
 #include "TSeqCollection.h"
 
-class    TVolume;
-class    TVolumeView;
-class    TTable;
+class    St_Node;
+class    St_NodeView;
+class    St_Table;
 
 class TH2F;
 class TCanvas;
@@ -36,21 +33,21 @@ class TVirtualPad;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.18 2000/04/05 03:58:21 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.17 2000/03/15 17:22:19 fine Exp $";
  private: 
     TList         *m_HitCollector;     //!
     TList         *m_TrackCollector;   //!
     TList         *m_TableCollector;   //!
 
  protected:
-    TVolume      *m_Hall;         //!
-    TVolumeView  *m_FullView;     //!
-    TVolumeView  *m_ShortView;    //!
-    TVolumeView  *m_Sensible;     //!
-    TVolume      *m_EventsNode;   //!
-    TVolumeView  *m_EventsView;   //!
+    St_Node      *m_Hall;         //!
+    St_NodeView  *m_FullView;     //!
+    St_NodeView  *m_ShortView;    //!
+    St_NodeView  *m_Sensible;     //!
+    St_Node      *m_EventsNode;   //!
+    St_NodeView  *m_EventsView;   //!
     TList        *m_ListDataSetNames; // The list of the names to be drawn
-    TTable     *m_Table;        //! The table to be drawn if any
+    St_Table     *m_Table;        //! The table to be drawn if any
     StEvent      *m_Event;        //! The StEvent to be drawn if any
     TObjArray    *m_FilterArray;     // Array of the "event" user supplied filters
 
@@ -58,7 +55,7 @@ class StEventDisplayMaker : public StMaker {
 
     Int_t         MakeEvent();
     Int_t         MakeTable(const Char_t **positions);
-    Int_t         MakeTableHits(const TTable *points,StVirtualEventFilter *filter,const Char_t *keyColumn,const Char_t *keyPositions[]);
+    Int_t         MakeTableHits(const St_Table *points,StVirtualEventFilter *filter,const Char_t *keyColumn,const Char_t *keyPositions[]);
     static Int_t  ParseName(Char_t *inName, Char_t *position[]);
  
  public: 
@@ -80,11 +77,11 @@ class StEventDisplayMaker : public StMaker {
    virtual TVirtualPad *CreateCanvas();
            TVirtualPad *GetEventPad();
    virtual Int_t  CreateTrackNodes();
-   virtual TVolume *GetHall()          { return m_Hall; }
-   virtual TVolumeView *GetFullView()  { return m_FullView;  }
-   virtual TVolumeView *GetShortView() { return m_ShortView; }
-   virtual TVolumeView *GetSensible()  { return m_Sensible;  }
-   virtual TVolume     *GetEventsNode(){ return m_EventsNode;}
+   virtual St_Node *GetHall()          { return m_Hall; }
+   virtual St_NodeView *GetFullView()  { return m_FullView;  }
+   virtual St_NodeView *GetShortView() { return m_ShortView; }
+   virtual St_NodeView *GetSensible()  { return m_Sensible;  }
+   virtual St_Node     *GetEventsNode(){ return m_EventsNode;}
    virtual Color_t      GetColorAttribute(Int_t adc);
    virtual void         PrintFilterStatus(); // *MENU*
    virtual void         SetMode       (Int_t   m = 0){StMaker::SetMode(m);} // *MENU*
@@ -167,7 +164,7 @@ class StEventDisplayMaker : public StMaker {
   // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.18 2000/04/05 03:58:21 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.17 2000/03/15 17:22:19 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:

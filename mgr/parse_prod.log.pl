@@ -31,8 +31,7 @@ $dir_sum = $mdir_sum . $dir_ext[$ii];
 
 chdir $dir_log;
 @list = `ls *log`;
-#chdir $dir_sum;
-#@smlist = `ls *sum`;
+
 
 foreach my $file (@list) {
         my $ltime = `mod_time $file`;
@@ -44,17 +43,10 @@ foreach my $file (@list) {
               $file_sum = $file_sum . ".sum";
         chdir $dir_sum;
         if(-f $file_sum ) {
-             my $stime = `mod_time $file_sum`;
-        if( $ltime < $stime) {
-#     print "Name of file: ", $file_sum, " logfile: ", $ltime, " sumfile: ", $stime, "\n";      
-              $f_flag = 0;
-         } else {
-               $f_flag = 1;
-	     }
-           }
+              $f_flag = 1;
+            }
          chdir $dir_log;
               if($f_flag != 1) {  
-#         print "Name of file: ", $file, "\n";
              parse_log($file);
              timestamp($file);
             $name_log = $file; 
@@ -461,7 +453,7 @@ sub parse_log($) {
     print '=' x 80, "\n";    
 
    if ($num_event ne 0) {
- @cpu_output = `tail -250 $job_log`;
+ @cpu_output = `tail -220 $job_log`;
   foreach $end_line (@cpu_output){
           chop $end_line;
    if ($end_line =~ /seconds Cpu Time/) {

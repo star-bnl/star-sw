@@ -5,11 +5,8 @@
 // matrix / vector "derived" from  
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: TMxF110.cxx,v 1.4 2000/03/26 03:16:05 fine Exp $
+// $Id: TMxF110.cxx,v 1.3 1999/09/28 19:54:57 fine Exp $
 // $Log: TMxF110.cxx,v $
-// Revision 1.4  2000/03/26 03:16:05  fine
-// Adjusted to ROOT 2.24
-//
 // Revision 1.3  1999/09/28 19:54:57  fine
 // RMath has been renamed to StCL
 //
@@ -28,7 +25,7 @@
 //
 
 #include "StMicky.h"
-#include <TCL.h>
+#include "StCL.h"
 #include <iostream.h>
 
 //____________________________________________________________________________________
@@ -148,36 +145,36 @@ void StMicky::Tmxm()
 
 //_______________________________________________________
     param_1.zerlev = param_1.zerov[1];
-    TCL::vzero(zer,12);
-    TCL::mxtrp(bc, bct, 2, 4);
-    TCL::mxtrp(ac, act, 3, 2);
+    StCL::uzero(zer, 1, 12);
+    StCL::mxtrp(bc, bct, 2, 4);
+    StCL::mxtrp(ac, act, 3, 2);
 /*        TEST FOR MXMPY-1-2-3 */
     Newguy("MXMPY-1-2-3.", "TMXM    ");
-    TCL::mxmpy(ac, bc, _BLNK__1.a, 3, 2, 4);
+    StCL::mxmpy(ac, bc, _BLNK__1.a, 3, 2, 4);
     Mverif(1, _BLNK__1.a, c1c, 12);
 
-    TCL::mxmpy1(ac, bct, _BLNK__1.a, 3, 2, 4);
+    StCL::mxmpy1(ac, bct, _BLNK__1.a, 3, 2, 4);
     Mverif(11, _BLNK__1.a, c1c, 12);
 
-    TCL::mxmpy2(act, bc, _BLNK__1.a, 3, 2, 4);
+    StCL::mxmpy2(act, bc, _BLNK__1.a, 3, 2, 4);
     Mverif(21, _BLNK__1.a, c1c, 12);
 
-    TCL::mxmpy3(act, bct, _BLNK__1.a, 3, 2, 4);
+    StCL::mxmpy3(act, bct, _BLNK__1.a, 3, 2, 4);
     Mverif(31, _BLNK__1.a, c1c, 12);
 
-    TCL::mxmpy(ac, bc, _BLNK__1.a, 3, 0, 4);
+    StCL::mxmpy(ac, bc, _BLNK__1.a, 3, 0, 4);
     Mverif(10, _BLNK__1.a, zer, 12);
 
-    TCL::mxmpy1(ac, bct, _BLNK__1.a, 3, 0, 4);
+    StCL::mxmpy1(ac, bct, _BLNK__1.a, 3, 0, 4);
     Mverif(110, _BLNK__1.a, zer, 12);
 
-    TCL::mxmpy2(act, bc, _BLNK__1.a, 3, 0, 4);
+    StCL::mxmpy2(act, bc, _BLNK__1.a, 3, 0, 4);
     Mverif(210, _BLNK__1.a, zer, 12);
 
-    TCL::mxmpy3(act, bct, _BLNK__1.a, 3, 0, 4);
+    StCL::mxmpy3(act, bct, _BLNK__1.a, 3, 0, 4);
     Mverif(310, _BLNK__1.a, zer, 12);
 
-    TCL::mxmpy(ac, ac, _BLNK__1.a, 3, 2, 3);
+    StCL::mxmpy(ac, ac, _BLNK__1.a, 3, 2, 3);
     Mverif(12, _BLNK__1.a, c2c, 9);
 /* --      TIMING */
     if (param_1.itimes == 0) {
@@ -187,71 +184,71 @@ void StMicky::Tmxm()
     tinf[0] = ntimes;
     Timed(&param_1.timerd);
     for (j = 1; j <= ntimes; ++j) 
-	TCL::mxmpy(ac, bc, _BLNK__1.a, 3, 2, 4);
+	StCL::mxmpy(ac, bc, _BLNK__1.a, 3, 2, 4);
     
     Timing(tinf);
     tinf[1] = tinfy1;
     Timed(&param_1.timerd);
     for (j = 1; j <= ntimes; ++j) 
-	TCL::mxmpy1(ac, bct, _BLNK__1.a, 3, 2, 4);    
+	StCL::mxmpy1(ac, bct, _BLNK__1.a, 3, 2, 4);    
 
     Timing(tinf);
     tinf[1] = tinfy2;
     Timed(&param_1.timerd);
     for (j = 1; j <= ntimes; ++j) 
-	TCL::mxmpy2(act, bc, _BLNK__1.a, 3, 2, 4);
+	StCL::mxmpy2(act, bc, _BLNK__1.a, 3, 2, 4);
     
     Timing(tinf);
     tinf[1] = tinfy3;
     Timed(&param_1.timerd);
     for (j = 1; j <= ntimes; ++j) 
-	TCL::mxmpy3(act, bct, _BLNK__1.a, 3, 2, 4);
+	StCL::mxmpy3(act, bct, _BLNK__1.a, 3, 2, 4);
     
     Timing(tinf);
 /*        TEST FOR MXMAD-12-3- */
 L100:
     Newguy("MXMAD-1-2-3.", "TMXM    ");
-    TCL::ucopy(c1c, _BLNK__1.a, 12);
-    TCL::vadd(_BLNK__1.a, d__, aplus, 12);
-    TCL::vsub(_BLNK__1.a, d__, amin, 12);
-    TCL::mxmpy(ac, ac, _BLNK__1.a, 3, 2, 3);
-    TCL::vadd(_BLNK__1.a, d__, aplus1, 9);
-    TCL::vsub(_BLNK__1.a, d__, amin2, 9);
+    StCL::ucopy(c1c, _BLNK__1.a, 12);
+    StCL::vadd(_BLNK__1.a, d__, aplus, 12);
+    StCL::vsub(_BLNK__1.a, d__, amin, 12);
+    StCL::mxmpy(ac, ac, _BLNK__1.a, 3, 2, 3);
+    StCL::vadd(_BLNK__1.a, d__, aplus1, 9);
+    StCL::vsub(_BLNK__1.a, d__, amin2, 9);
 
-    TCL::ucopy(d__, _BLNK__1.a, 12);    
-    TCL::mxmad(ac, bc, _BLNK__1.a, 3, 2, 4);
+    StCL::ucopy(d__, _BLNK__1.a, 12);    
+    StCL::mxmad(ac, bc, _BLNK__1.a, 3, 2, 4);
     Mverif(1, _BLNK__1.a, aplus, 12);
 
-    TCL::ucopy(d__, _BLNK__1.a, 12);
-    TCL::mxmad1(ac, bct, _BLNK__1.a, 3, 2, 4);
+    StCL::ucopy(d__, _BLNK__1.a, 12);
+    StCL::mxmad1(ac, bct, _BLNK__1.a, 3, 2, 4);
     Mverif(11, _BLNK__1.a, aplus, 12);
 
-    TCL::ucopy(d__, _BLNK__1.a, 12);
-    TCL::mxmad2(act, bc, _BLNK__1.a, 3, 2, 4);
+    StCL::ucopy(d__, _BLNK__1.a, 12);
+    StCL::mxmad2(act, bc, _BLNK__1.a, 3, 2, 4);
     Mverif(21, _BLNK__1.a, aplus, 12);
 
-    TCL::ucopy(d__, _BLNK__1.a, 12);
-    TCL::mxmad3(act, bct, _BLNK__1.a, 3, 2, 4);
+    StCL::ucopy(d__, _BLNK__1.a, 12);
+    StCL::mxmad3(act, bct, _BLNK__1.a, 3, 2, 4);
     Mverif(31, _BLNK__1.a, aplus, 12);
 
-    TCL::ucopy(d__, _BLNK__1.a, 12);
-    TCL::mxmad(ac, bc, _BLNK__1.a, 3, 0, 4);
+    StCL::ucopy(d__, _BLNK__1.a, 12);
+    StCL::mxmad(ac, bc, _BLNK__1.a, 3, 0, 4);
     Mverif(10, _BLNK__1.a, d__, 12);
 
-    TCL::mxmad1(ac, bct, _BLNK__1.a, 3, 0, 4);
+    StCL::mxmad1(ac, bct, _BLNK__1.a, 3, 0, 4);
     Mverif(110, _BLNK__1.a, d__, 12);
 
-    TCL::mxmad2(act, bc, _BLNK__1.a, 3, 0, 4);
+    StCL::mxmad2(act, bc, _BLNK__1.a, 3, 0, 4);
     Mverif(210, _BLNK__1.a, d__, 12);
 
-    TCL::mxmad3(act, bct, _BLNK__1.a, 3, 0, 4);
+    StCL::mxmad3(act, bct, _BLNK__1.a, 3, 0, 4);
     Mverif(310, _BLNK__1.a, d__, 12);
 
-    TCL::ucopy(d__, _BLNK__1.a, 9);
-    TCL::mxmad(ac, ac, _BLNK__1.a, 3, 2, 3);
+    StCL::ucopy(d__, _BLNK__1.a, 9);
+    StCL::mxmad(ac, ac, _BLNK__1.a, 3, 2, 3);
     Mverif(12, _BLNK__1.a, aplus1, 9);
 
-    TCL::ucopy(d__, _BLNK__1.a, 9);
+    StCL::ucopy(d__, _BLNK__1.a, 9);
 /* --      TIMING */
     if (param_1.itimes == 0) {
 	goto L200;
@@ -259,8 +256,8 @@ L100:
     tinf[1] = tinfa;
     Timed(&param_1.timerd);
     for (j = 1; j <= ntimes; ++j) {
-	TCL::ucopy(d__, _BLNK__1.a, 12);
-	TCL::mxmad(ac, bc, _BLNK__1.a, 3, 2, 4);
+	StCL::ucopy(d__, _BLNK__1.a, 12);
+	StCL::mxmad(ac, bc, _BLNK__1.a, 3, 2, 4);
     }
 
     Timing(tinf);
@@ -268,8 +265,8 @@ L100:
     Timed(&param_1.timerd);
 
     for (j = 1; j <= ntimes; ++j) {
-	TCL::ucopy(d__, _BLNK__1.a, 12);
-	TCL::mxmad1(ac, bct, _BLNK__1.a, 3, 2, 4);
+	StCL::ucopy(d__, _BLNK__1.a, 12);
+	StCL::mxmad1(ac, bct, _BLNK__1.a, 3, 2, 4);
     }
 
     Timing(tinf);
@@ -277,8 +274,8 @@ L100:
     Timed(&param_1.timerd);
 
     for (j = 1; j <= ntimes; ++j) {
-	TCL::ucopy(d__, _BLNK__1.a, 12);
-	TCL::mxmad2(act, bc, _BLNK__1.a, 3, 2, 4);
+	StCL::ucopy(d__, _BLNK__1.a, 12);
+	StCL::mxmad2(act, bc, _BLNK__1.a, 3, 2, 4);
     }
 
     Timing(tinf);
@@ -286,8 +283,8 @@ L100:
     Timed(&param_1.timerd);
 
     for (j = 1; j <= ntimes; ++j) {
-	TCL::ucopy(d__, _BLNK__1.a, 12);
-	TCL::mxmad3(act, bct, _BLNK__1.a, 3, 2, 4);
+	StCL::ucopy(d__, _BLNK__1.a, 12);
+	StCL::mxmad3(act, bct, _BLNK__1.a, 3, 2, 4);
     }
 
     Timing(tinf);
@@ -295,41 +292,41 @@ L100:
 /*        TEST FOR MXMUB-1-2-3 */
 L200:
     Newguy("MXMUB-1-2-3.", "TMXM    ");
-    TCL::vcopyn(d__, dmin__, 12);
-    TCL::ucopy(d__, _BLNK__1.a, 12);
-    TCL::mxmub(ac, bc, _BLNK__1.a, 3, 2, 4);
+    StCL::vcopyn(d__, dmin__, 12);
+    StCL::ucopy(d__, _BLNK__1.a, 12);
+    StCL::mxmub(ac, bc, _BLNK__1.a, 3, 2, 4);
     Mverif(1, _BLNK__1.a, amin, 12);
 
-    TCL::ucopy(d__, _BLNK__1.a, 12);
-    TCL::mxmub1(ac, bct, _BLNK__1.a, 3, 2, 4);
+    StCL::ucopy(d__, _BLNK__1.a, 12);
+    StCL::mxmub1(ac, bct, _BLNK__1.a, 3, 2, 4);
     Mverif(11, _BLNK__1.a, amin, 12);
 
-    TCL::ucopy(d__, _BLNK__1.a, 12);
-    TCL::mxmub2(act, bc, _BLNK__1.a, 3, 2, 4);
+    StCL::ucopy(d__, _BLNK__1.a, 12);
+    StCL::mxmub2(act, bc, _BLNK__1.a, 3, 2, 4);
     Mverif(21, _BLNK__1.a, amin, 12);
 
-    TCL::ucopy(d__, _BLNK__1.a, 12);
-    TCL::mxmub3(act, bct, _BLNK__1.a, 3, 2, 4);
+    StCL::ucopy(d__, _BLNK__1.a, 12);
+    StCL::mxmub3(act, bct, _BLNK__1.a, 3, 2, 4);
     Mverif(31, _BLNK__1.a, amin, 12);
 
-    TCL::ucopy(d__, _BLNK__1.a, 12);
-    TCL::mxmub(ac, bc, _BLNK__1.a, 3, 0, 4);
+    StCL::ucopy(d__, _BLNK__1.a, 12);
+    StCL::mxmub(ac, bc, _BLNK__1.a, 3, 0, 4);
     Mverif(10, _BLNK__1.a, dmin__, 12);
 
-    TCL::ucopy(d__, _BLNK__1.a, 12);
-    TCL::mxmub1(ac, bct, _BLNK__1.a, 3, 0, 4);
+    StCL::ucopy(d__, _BLNK__1.a, 12);
+    StCL::mxmub1(ac, bct, _BLNK__1.a, 3, 0, 4);
     Mverif(110, _BLNK__1.a, dmin__, 12);
 
-    TCL::ucopy(d__, _BLNK__1.a, 12);
-    TCL::mxmub2(act, bc, _BLNK__1.a, 3, 0, 4);
+    StCL::ucopy(d__, _BLNK__1.a, 12);
+    StCL::mxmub2(act, bc, _BLNK__1.a, 3, 0, 4);
     Mverif(210, _BLNK__1.a, dmin__, 12);
 
-    TCL::ucopy(d__, _BLNK__1.a, 12);
-    TCL::mxmub3(act, bct, _BLNK__1.a, 3, 0, 4);
+    StCL::ucopy(d__, _BLNK__1.a, 12);
+    StCL::mxmub3(act, bct, _BLNK__1.a, 3, 0, 4);
     Mverif(310, _BLNK__1.a, dmin__, 12);
 
-    TCL::ucopy(d__, _BLNK__1.a, 9);
-    TCL::mxmub(ac, ac, _BLNK__1.a, 3, 2, 3);
+    StCL::ucopy(d__, _BLNK__1.a, 9);
+    StCL::mxmub(ac, ac, _BLNK__1.a, 3, 2, 3);
     Mverif(12, _BLNK__1.a, amin2, 9);
 
     if (param_1.itimes == 0) goto L300;
@@ -338,8 +335,8 @@ L200:
     Timed(&param_1.timerd);
 
     for (j = 1; j <= ntimes; ++j) {
-	TCL::ucopy(d__, _BLNK__1.a, 12);
-	TCL::mxmub(ac, bc, _BLNK__1.a, 3, 2, 4);
+	StCL::ucopy(d__, _BLNK__1.a, 12);
+	StCL::mxmub(ac, bc, _BLNK__1.a, 3, 2, 4);
     }
 
     Timing(tinf);
@@ -347,8 +344,8 @@ L200:
     Timed(&param_1.timerd);
 
     for (j = 1; j <= ntimes; ++j) {
-	TCL::ucopy(d__, _BLNK__1.a, 12);
-	TCL::mxmub1(ac, bct, _BLNK__1.a, 3, 2, 4);
+	StCL::ucopy(d__, _BLNK__1.a, 12);
+	StCL::mxmub1(ac, bct, _BLNK__1.a, 3, 2, 4);
     }
 
     Timing(tinf);
@@ -356,8 +353,8 @@ L200:
     Timed(&param_1.timerd);
 
     for (j = 1; j <= ntimes; ++j) {
-	TCL::ucopy(d__, _BLNK__1.a, 12);
-	TCL::mxmub2(act, bc, _BLNK__1.a, 3, 2, 4);
+	StCL::ucopy(d__, _BLNK__1.a, 12);
+	StCL::mxmub2(act, bc, _BLNK__1.a, 3, 2, 4);
     }
 
     Timing(tinf);
@@ -365,8 +362,8 @@ L200:
     Timed(&param_1.timerd);
 
     for (j = 1; j <= ntimes; ++j) {
-	TCL::ucopy(d__, _BLNK__1.a, 12);
-	TCL::mxmub3(act, bct, _BLNK__1.a, 3, 2, 4);
+	StCL::ucopy(d__, _BLNK__1.a, 12);
+	StCL::mxmub3(act, bct, _BLNK__1.a, 3, 2, 4);
     }
 
     Timing(tinf);
@@ -374,22 +371,22 @@ L200:
 /* --                TEST FOR MXMLRT - MXMLTR */
 L300:
     Newguy("MXMLRT - MXMLTR.", "TMXM    ");
-    TCL::mxmpy(ac, c2c, _BLNK__1.a, 2, 3, 3);
-    TCL::mxmpy1(_BLNK__1.a, ac, _BLNK__1.b, 2, 3, 2);
-    TCL::mxmpy1(c2c, ac, &_BLNK__1.a[100], 3, 3, 2);
-    TCL::mxmpy(ac, &_BLNK__1.a[100], &_BLNK__1.b[100], 2, 3, 2);
+    StCL::mxmpy(ac, c2c, _BLNK__1.a, 2, 3, 3);
+    StCL::mxmpy1(_BLNK__1.a, ac, _BLNK__1.b, 2, 3, 2);
+    StCL::mxmpy1(c2c, ac, &_BLNK__1.a[100], 3, 3, 2);
+    StCL::mxmpy(ac, &_BLNK__1.a[100], &_BLNK__1.b[100], 2, 3, 2);
     Mverif(0, _BLNK__1.b, &_BLNK__1.b[100], 4);
 
-    TCL::mxmlrt(ac, c2c, _BLNK__1.a, 2, 3);
+    StCL::mxmlrt(ac, c2c, _BLNK__1.a, 2, 3);
     Mverif(1, _BLNK__1.a, _BLNK__1.b, 4);
 
-    TCL::mxmpy2(c1c, c2c, _BLNK__1.a, 4, 3, 3);
-    TCL::mxmpy(_BLNK__1.a, c1c, _BLNK__1.b, 4, 3, 4);
-    TCL::mxmpy(c2c, c1c, &_BLNK__1.a[100], 3, 3, 4);
-    TCL::mxmpy2(c1c, &_BLNK__1.a[100], &_BLNK__1.b[100], 4, 3, 4);
+    StCL::mxmpy2(c1c, c2c, _BLNK__1.a, 4, 3, 3);
+    StCL::mxmpy(_BLNK__1.a, c1c, _BLNK__1.b, 4, 3, 4);
+    StCL::mxmpy(c2c, c1c, &_BLNK__1.a[100], 3, 3, 4);
+    StCL::mxmpy2(c1c, &_BLNK__1.a[100], &_BLNK__1.b[100], 4, 3, 4);
     Mverif(10, _BLNK__1.b, &_BLNK__1.b[100], 16);
 
-    TCL::mxmltr(c1c, c2c, _BLNK__1.a, 4, 3);
+    StCL::mxmltr(c1c, c2c, _BLNK__1.a, 4, 3);
     Mverif(11, _BLNK__1.a, _BLNK__1.b, 16);
 
 } /* tmxm_ */

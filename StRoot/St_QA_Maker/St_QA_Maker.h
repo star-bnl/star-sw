@@ -1,8 +1,5 @@
-//! $Id: St_QA_Maker.h,v 1.40 2000/03/28 19:19:20 fine Exp $
+//! $Id: St_QA_Maker.h,v 1.39 2000/02/09 19:22:23 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
-//! Revision 1.40  2000/03/28 19:19:20  fine
-//! Adjuested to ROOT 2.24
-//!
 //! Revision 1.39  2000/02/09 19:22:23  kathy
 //! protect MakeHistEval method so that if there is no geant dataset, it skips out
 //!
@@ -154,13 +151,14 @@
 #define STAR_St_QA_Maker
 
 #include "StQABookHist.h"
-#include "St_DataSet.h"
+
+class St_DataSet;
 
 //////////////////////////////////////////////////////////////////////////
 
 class St_QA_Maker : public StQABookHist {
  private:
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.40 2000/03/28 19:19:20 fine Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.39 2000/02/09 19:22:23 kathy Exp $";
 
   St_DataSet *dst;        //! Pointer to current dataset - dst
   
@@ -191,7 +189,7 @@ class St_QA_Maker : public StQABookHist {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.40 2000/03/28 19:19:20 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.39 2000/02/09 19:22:23 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
     };

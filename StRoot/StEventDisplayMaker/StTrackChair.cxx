@@ -12,7 +12,7 @@ static Int_t CheckName(const Char_t *key, const Char_t **values, Int_t length)
   return i;
 }
 //_____________________________________________________________________________
-StTrackChair::StTrackChair(TTable *table) : TChair(table) {
+StTrackChair::StTrackChair(St_Table *table) : TChair(table) {
   if (!table) return;
   mR0   = table->GetOffset("r0");            //        radius at start (cm)                   
   mPhi0 = table->GetOffset("phi0");          //        azimuthal angle at start (deg)         
@@ -52,12 +52,12 @@ StHelixD *StTrackChair::MakeHelix(Int_t i) const
 }
 
 //_____________________________________________________________________________
-Int_t StTrackChair::IsTrack(TTable *table){
+Int_t StTrackChair::IsTrack(St_Table *table){
    assert(table);
    return CheckName(table->GetType(),trackTableList,sizeof(trackTableList)/sizeof(Char_t *));
 }
 //_____________________________________________________________________________
-StTrackChair *StTrackChair::Instance(TTable *table){
+StTrackChair *StTrackChair::Instance(St_Table *table){
    assert(table);
    StTrackChair *chair = 0;
    if (CheckName(table->GetType(),trackTableList,sizeof(trackTableList)/sizeof(Char_t *))>=0) 

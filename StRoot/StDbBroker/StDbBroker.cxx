@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.17 2000/04/04 14:04:07 perev Exp $
+ * $Id: StDbBroker.cxx,v 1.15 2000/03/04 18:56:20 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,12 +12,6 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
- * Revision 1.17  2000/04/04 14:04:07  perev
- * table descriptor modif
- *
- * Revision 1.16  2000/03/26 16:47:13  fine
- * Adjusted to ROOT 2.24
- *
  * Revision 1.15  2000/03/04 18:56:20  porter
  * fixed return of endtime, it was returning beginTime for both begin & end
  *
@@ -79,7 +73,6 @@
 #include "TDataType.h"
 
 #include "Api.h"
-#include "tableredef.h"
 #include "StDbBroker.h"
 #include "StDbLib/StDbManager.hh"
 #include "StDbLib/StDbConfigNode.hh"
@@ -159,13 +152,13 @@ void StDbBroker::Fill(void * pArray, const char **Comments)
   UInt_t i;
   for (i=0;i<m_nElements;i++) {
     
-    if(m_descriptor[i].fDimensions>1)
+    if(m_descriptor[i].m_Dimensions>1)
       {
 	cerr<<"dim>1, can't handle yet"<<endl;
 	return;
       }
     
-    m_descriptor[i].fColumnName[31]='\0';
+    m_descriptor[i].m_ColumnName[31]='\0';
   }
   
   UInt_t date, time;
@@ -189,20 +182,20 @@ StDbTableDescriptor* descriptor = new StDbTableDescriptor();
 
  for(int i=0;i<(int)m_nElements;i++){
 
-   buff.WriteScalar(m_descriptor[i].fColumnName,"name");
+   buff.WriteScalar(m_descriptor[i].m_ColumnName,"name");
 
    // array designation & lengths 
    char lengthString[100];
    ostrstream os(lengthString,100);
-   for(int k=0; k<(int)m_descriptor[i].fDimensions-1;k++) os<<m_descriptor[i].fIndexArray[k]<<",";
-   os<<m_descriptor[i].fIndexArray[m_descriptor[i].fDimensions-1]<<ends;
+   for(int k=0; k<(int)m_descriptor[i].m_Dimensions-1;k++) os<<m_descriptor[i].m_IndexArray[k]<<",";
+   os<<m_descriptor[i].m_IndexArray[m_descriptor[i].m_Dimensions-1]<<ends;
    buff.WriteScalar(lengthString,"length");
 
    // position in struct
    buff.WriteScalar(i,"position");
 
    // Type identification
-  switch ((EColumnType)m_descriptor[i].fType) {
+  switch ((EColumnType)m_descriptor[i].m_Type) {
   case kFloat:
     {
       buff.WriteScalar("Stfloat","type");
@@ -305,7 +298,7 @@ void * StDbBroker::Use(int tabID, int parID)
   // This is an "Offline" requirement of only 31 char per element name 
   UInt_t i;
   for (i=0;i<m_nElements;i++) {
-      m_descriptor[i].fColumnName[31]='\0';
+      m_descriptor[i].m_ColumnName[31]='\0';
   }
 
   void* pData = 0;
@@ -367,7 +360,7 @@ void * StDbBroker::Use()
   
   UInt_t i;
   for (i=0;i<m_nElements;i++) {
-      m_descriptor[i].fColumnName[31]='\0';
+      m_descriptor[i].m_ColumnName[31]='\0';
   }
 
   // Check if request is a "hierarchy" : if so send request to "params" DB

@@ -22,11 +22,11 @@ class StTrackChair : public TChair {
     StTrackChair() {;}
  public:
   static const Char_t *trackTableList[];
-  StTrackChair(TTable *track);
+  StTrackChair(St_Table *track);
  ~StTrackChair(){;}
   StHelixD *MakeHelix(Int_t i) const ;
-  static StTrackChair *Instance(TTable *table);
-  static Int_t IsTrack(TTable *table);
+  static StTrackChair *Instance(St_Table *table);
+  static Int_t IsTrack(St_Table *table);
   Float_t R0(Int_t i)        const;
   Float_t Z0(Int_t i)        const;
   Float_t Phi0(Int_t i)      const;

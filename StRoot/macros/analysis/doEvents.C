@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.45 2000/04/12 17:33:45 kathy Exp $
+// $Id: doEvents.C,v 1.41 2000/03/20 17:32:55 kathy Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -35,18 +35,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
-// Revision 1.45  2000/04/12 17:33:45  kathy
-// put loading of libtpc_Tables back in since Iwona is going back to original tpt_track table
-//
-// Revision 1.44  2000/04/12 15:29:05  kathy
-// comment out libtpc by default
-//
-// Revision 1.43  2000/04/12 15:06:53  kathy
-// changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
-//
-// Revision 1.42  2000/04/07 15:54:26  perev
-// GC added
-//
 // Revision 1.41  2000/03/20 17:32:55  kathy
 // setbranches in all macros so that they will work with softlinks - for StIOMaker
 //
@@ -99,15 +87,9 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     //
     // First load some shared libraries we need
     //
-
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-
-    gSystem->Load("libgen_Tables");
-    gSystem->Load("libsim_Tables");
-    gSystem->Load("libglobal_Tables");
-    gSystem->Load("libtpc_Tables");
-
+    gSystem->Load("St_Tables");
     gSystem->Load("StUtilities");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
@@ -120,20 +102,11 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     // Handling depends on whether file is a ROOT file or XDF file
     //
     chain  = new StChain("StChain");
-    StFile *setFiles =0;
-    if (fileList) {	//Normal case
-      setFiles= new StFile(fileList);
-    } else        {	//Grand Chalenge
-      gSystem->Load("StChallenger");
-      setFiles = StChallenger::Challenge();
-      setFiles->SetDebug();
-      Int_t Argc=4;
-      const char *Argv[4]= {
-        "-s","dst;hist;runco",
-        "-q","-5<=qxa_3<0.3 && 22>qxc_1>18"
-        };
-      setFiles->Init(Argc,Argv);
-    }
+
+    StFile *setFiles= new StFile();
+
+    for (int ifil=0; fileList[ifil]; ifil++)
+	{ setFiles->AddFile(fileList[ifil]);}
     StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
      IOMk->SetIOMode("r");
      IOMk->SetBranch("*",0,"0");                 //deactivate all branches
@@ -163,13 +136,12 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     // Event loop
     //
     int istat=0,i=1;
- EventLoop: if (i <= nevents && istat!=2) {
+ EventLoop: if (i <= nevents && !istat) {
      cout << "============================ Event " << i
 	  << " start ============================" << endl;
      chain->Clear();
      istat = chain->Make(i);
-     if (istat==2) {cout << "Last  event processed. Status = " << istat << endl;}
-     if (istat==3) {cout << "Error event processed. Status = " << istat << endl;}
+     if (istat) {cout << "Last event processed. Status = " << istat << endl;}
      i++;
      goto EventLoop;
  }
@@ -191,9 +163,7 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,const char *qaflag)
 {
     const char *fileListQQ[]={0,0};
-    if (strncmp(path,"GC",2)==0) {
-      fileListQQ=0;
-    } else if (path[0]=='-') {
+    if (path[0]=='-') {
 	fileListQQ[0]=file;
     } else {
 	fileListQQ[0] = gSystem->ConcatFileName(path,file);

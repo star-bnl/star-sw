@@ -3,11 +3,11 @@
 #include <time.h>
 ClassImp(StEvtHddr)
 //_____________________________________________________________________________
-StEvtHddr::StEvtHddr(TDataSet *parent):TDataSet("EvtHddr",parent)
+StEvtHddr::StEvtHddr(St_DataSet *parent):St_DataSet("EvtHddr",parent)
 { 
   SetDateTime(20330101,0);
   SetEventType("NONE");
-  memset(&mRunNumber,0,(char*)(&mEventNumber)-(char*)&mRunNumber); 
+  memset(&mRunNumber,0,(char*)&mEventNumber-(char*)&mRunNumber); 
   mRunNumber=-1;mOldRunNumber=-1;mEventNumber=-1;
 }  
 //_____________________________________________________________________________
@@ -16,7 +16,7 @@ StEvtHddr &StEvtHddr::operator=(const StEvtHddr &hddr)
   SetParent(0);
   SetName(hddr.GetName());
   SetTitle(hddr.GetTitle());
-  memcpy(&mRunNumber,&hddr.mRunNumber,(char*)((&mEventNumber)+1)-(char*)&mRunNumber); 
+  memcpy(&mRunNumber,&hddr.mRunNumber,(char*)&mEventNumber-(char*)&mRunNumber); 
   mEventTime = hddr.mEventTime;
   mProdTime  = hddr.mProdTime;
   mEventType = hddr.mEventType;

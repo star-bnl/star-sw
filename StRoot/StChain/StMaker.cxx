@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.89 2000/04/07 15:41:42 perev Exp $
+// $Id: StMaker.cxx,v 1.85 2000/03/01 22:56:25 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -9,27 +9,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <TSystem.h>
-#include <TClass.h>
-#include <TROOT.h>
-#include <THtml.h>
-#include <TH1.h>
+#include "TSystem.h"
+#include "TClass.h"
+#include "TROOT.h"
+#include "THtml.h"
+#include "TH1.h"
 
-#include <TChain.h>
-#include <TTree.h>
-#include <TList.h>
-#include <TClonesArray.h>
-#include <TBrowser.h>
+#include "TChain.h"
+#include "TTree.h"
+#include "TList.h"
+#include "TClonesArray.h"
+#include "TBrowser.h"
 
 #include "StMaker.h"
 #include "StChain.h"
-#include "TTable.h"
+#include "St_Table.h"
 
 #include "StMemoryInfo.hh"
 
 StMaker *StMaker::fgStChain = 0;
-StMaker *StMaker::fgFailedMaker = 0;
-Int_t    StMaker::fgTallyMaker[kStFatal+1] = {0,0,0,0,0};
 Int_t MaxWarnings = 26;
 
 ClassImp(StMaker)
@@ -37,7 +35,7 @@ ClassImp(StMaker)
 static void doPs(const char *who,const char *where);
 
 //_____________________________________________________________________________
-StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),fActive(kTRUE)
+StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker"),fActive(kTRUE)
 {
    SetMode();
    m_DebugLevel=0;
@@ -48,11 +46,11 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),fActive(
    } else         {	// add this maker to chain  
      fgStChain->AddData(this,".make");
    }
-   m_DataSet  = new TObjectSet(".data") ;Add(m_DataSet);
-   m_ConstSet = new TObjectSet(".const");Add(m_ConstSet);
-   m_GarbSet  = new TObjectSet(".garb" );Add(m_GarbSet);
-   m_Inputs   = new TObjectSet(".aliases" );Add(m_Inputs);
-   m_Runco  = new TObjectSet(".runco" );Add(m_Runco);
+   m_DataSet  = new St_ObjectSet(".data") ;Add(m_DataSet);
+   m_ConstSet = new St_ObjectSet(".const");Add(m_ConstSet);
+   m_GarbSet  = new St_ObjectSet(".garb" );Add(m_GarbSet);
+   m_Inputs   = new St_ObjectSet(".aliases" );Add(m_Inputs);
+   m_Runco  = new St_ObjectSet(".runco" );Add(m_Runco);
    AddHist(0); m_Histograms = GetHistList();
    gStChain = this; //?????????????????????????????????????????????????????
 ::doPs(GetName(),"constructor");
@@ -80,7 +78,7 @@ Int_t StMaker::GetNumber() const
 //______________________________________________________________________________
 StMaker *StMaker::GetParentMaker() const
 { 
-  TDataSet *par = GetParent(); if (!par) return 0;
+  St_DataSet *par = GetParent(); if (!par) return 0;
   return (StMaker*)par->GetParent();
 }
 //______________________________________________________________________________
@@ -92,25 +90,25 @@ StMaker *StMaker::GetMaker(const char *mkname)
 //______________________________________________________________________________
 TObject *StMaker::GetDirObj(const char *dir) const
 {
-  TObjectSet *h = (TObjectSet*)Find(dir);
+  St_ObjectSet *h = (St_ObjectSet*)Find(dir);
   if (!h) return 0;
   return h->GetObject();
 }
 //______________________________________________________________________________
 void StMaker::SetDirObj(TObject *obj,const char *dir)
 { 
-  TObjectSet *set = (TObjectSet *)Find(dir);
+  St_ObjectSet *set = (St_ObjectSet *)Find(dir);
   if (!set) { // No dir, make it
-    set = new TObjectSet(dir); Add(set);}
+    set = new St_ObjectSet(dir); Add(set);}
   set->SetObject(obj);
 }
 //______________________________________________________________________________
-TObjectSet *StMaker::AddObj(TObject *obj,const char *dir)
+St_ObjectSet *StMaker::AddObj(TObject *obj,const char *dir)
 { 
   assert (dir[0]=='.');
-  TObjectSet *set = (TObjectSet*)Find(dir);
+  St_ObjectSet *set = (St_ObjectSet*)Find(dir);
   if (!set) { // No dir, make it
-    set = new TObjectSet(dir); Add(set);}
+    set = new St_ObjectSet(dir); Add(set);}
 
   TList *list = (TList *)set->GetObject();
   if (!list) {// No list, make it
@@ -133,7 +131,7 @@ TObjectSet *StMaker::AddObj(TObject *obj,const char *dir)
 {
    assert (name && name && comment[0]); 
 
-   TDataSet *dp = new TDataSet(name,m_Runco);
+   St_DataSet *dp = new St_DataSet(name,m_Runco);
    TString ts("  // "); ts += comment;
    char buf[40];
    sprintf(buf,"%f",par);
@@ -143,39 +141,39 @@ TObjectSet *StMaker::AddObj(TObject *obj,const char *dir)
 
 
 //______________________________________________________________________________
-TDataSet *StMaker::AddData(TDataSet *ds, const char* dir)
+St_DataSet *StMaker::AddData(St_DataSet *ds, const char* dir)
 { 
   assert (dir); assert(dir[0]=='.');
-  TDataSet *set = Find(dir);
+  St_DataSet *set = Find(dir);
   if (!set) { // No dir, make it
-    set = new TObjectSet(dir); Add(set);}
+    set = new St_ObjectSet(dir); Add(set);}
   if (!ds) return set;
   TList *tl = set->GetList();
   if (!tl || !tl->FindObject(ds)) set->Add(ds);
   return set;
 }
 //______________________________________________________________________________
-TDataSet  *StMaker::GetData(const char *name, const char* dir) const
+St_DataSet  *StMaker::GetData(const char *name, const char* dir) const
 { 
-  TDataSet *set = Find(dir);
+  St_DataSet *set = Find(dir);
   if (!set) return 0;
   return set->Find(name);
 }
 //______________________________________________________________________________
 void StMaker::AddAlias(const char* log, const char* act,const char* dir)
 {
-  TDataSet *ali = new TDataSet(log); 
+  St_DataSet *ali = new St_DataSet(log); 
   ali->SetTitle(act);
   AddData(ali,dir);
 }
 //______________________________________________________________________________
 void StMaker::SetAlias(const char* log, const char* act,const char* dir)
 { 
-  TDataSet *ali = GetData(log,dir);
+  St_DataSet *ali = GetData(log,dir);
   if (ali) {
     if (!strcmp(act,ali->GetTitle())) return;
   } else {
-    ali = new TDataSet(log); AddData(ali,dir);
+    ali = new St_DataSet(log); AddData(ali,dir);
   }
   ali->SetTitle(act);
 
@@ -183,7 +181,7 @@ void StMaker::SetAlias(const char* log, const char* act,const char* dir)
     printf("<%s(%s)::SetAlias> %s = %s\n",ClassName(),GetName(),log,act);
 }
 //______________________________________________________________________________
-void StMaker::SetOutput(const char* log,TDataSet *ds)
+void StMaker::SetOutput(const char* log,St_DataSet *ds)
 {
   int idx;
   const char* logname = log;
@@ -194,16 +192,16 @@ void StMaker::SetOutput(const char* log,TDataSet *ds)
 }
 
 //______________________________________________________________________________
-void StMaker::SetOutputAll(TDataSet *ds, Int_t level)
+void StMaker::SetOutputAll(St_DataSet *ds, Int_t level)
 {
-  TDataSet *set;
-  TDataSetIter next(ds,level);
+  St_DataSet *set;
+  St_DataSetIter next(ds,level);
   while ((set = next())) SetOutput(set);
 }
 
 //______________________________________________________________________________
 TList *StMaker::GetMakeList() const
-{ TDataSet *ds = Find(".make");
+{ St_DataSet *ds = Find(".make");
   if (!ds) return 0;
   return ds->GetList();
 }
@@ -213,19 +211,19 @@ TString StMaker::GetAlias(const char* log,const char* dir) const
   TString act;
   int nspn = strcspn(log," /");
   act.Prepend(log,nspn);
-  TDataSet *in = GetData(act,dir);
+  St_DataSet *in = GetData(act,dir);
   act ="";
   if (in) {act = in->GetTitle(); act += log+nspn;}
   return act;
 }
 //______________________________________________________________________________
-TDataSet *StMaker::GetDataSet(const char* logInput,
+St_DataSet *StMaker::GetDataSet(const char* logInput,
                                 const StMaker *uppMk,
                                 const StMaker *dowMk) const
 {
-TDataSetIter nextMk(0);
+St_DataSetIter nextMk(0);
 TString actInput,findString,tmp;
-TDataSet *dataset,*dir;
+St_DataSet *dataset,*dir;
 StMaker    *parent,*mk;
 int icol,islas;
   
@@ -315,9 +313,9 @@ FOUND: if (uppMk || dowMk) 	return dataset;
 
 }
 //______________________________________________________________________________
-TDataSet *StMaker::GetDataBase(const char* logInput)
+St_DataSet *StMaker::GetDataBase(const char* logInput)
 {
-  TDataSet *ds;
+  St_DataSet *ds;
   StMaker *mk;
   ds = GetInputDS(logInput);
   if (!ds) return 0;
@@ -387,13 +385,14 @@ void StMaker::StartMaker()
 {
   if (!m_DataSet) {//Keep legacy code
     m_DataSet = Find(".data");
-    if (!m_DataSet) {m_DataSet = new TObjectSet(".data"); Add(m_DataSet);}
+    if (!m_DataSet) {m_DataSet = new St_ObjectSet(".data"); Add(m_DataSet);}
   }
-  if (GetDebug()>1) {
+  if (GetDebug()) {
     printf("\n*** Call %s::Make() ***\n\n", ClassName());
-    StMemoryInfo* info = StMemoryInfo::instance();
-    info->snapshot(); info->print();
-  }
+    if (GetDebug()>1) {
+      StMemoryInfo* info = StMemoryInfo::instance();
+      info->snapshot(); info->print();
+  } }
 
 
   StartTimer();}
@@ -401,17 +400,18 @@ void StMaker::StartMaker()
 void StMaker::EndMaker(int ierr)
 {
   if (ierr){};
-  TDataSet *dat = Find(".data");
+  St_DataSet *dat = Find(".data");
   if (dat) dat->Pass(ClearDS,0);
-  TDataSet *gar = Find(".garb");
+  St_DataSet *gar = Find(".garb");
   if (gar) gar->Delete();
   ::doPs(GetName(),"EndMaker");
   
-  if (GetDebug()>1) {
+  if (GetDebug()) {
     printf("\n*** End of %s::Make() ***\n\n", ClassName());
-    StMemoryInfo* info = StMemoryInfo::instance();
-    info->snapshot(); info->print();
-  }
+    if (GetDebug()>1) {
+      StMemoryInfo* info = StMemoryInfo::instance();
+      info->snapshot(); info->print();
+  } }
   StopTimer();
 }
 
@@ -422,8 +422,7 @@ Int_t StMaker::Finish()
 //   place to make operations on histograms, normalization,etc.
    int nerr = 0;
    int run = GetRunNumber();
-   if (run>-1) FinishRun(run);   
-
+   if (run>-1) FinishRun(run);
    TIter next(GetMakeList());
    StMaker *maker;
    Double_t totalCpuTime = 0;
@@ -438,7 +437,7 @@ Int_t StMaker::Finish()
 
    // Print relative time
    if (totalCpuTime && totalRealTime) {
-     Printf("\n---------------------------------------------------------------------------------");
+     Printf("---------------------------------------------------------------------------------");
      Printf("QAInfo: Total: %-12s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds"
                                ,GetName(),totalRealTime,totalCpuTime);
      Printf("---------------------------------------------------------------------------------");
@@ -449,13 +448,6 @@ Int_t StMaker::Finish()
                ,100*maker->RealTime()/totalRealTime
                ,100*maker->CpuTime()/totalCpuTime);
      }
-     if (!GetParent()) {// Only for top maker
-
-       printf("\n--------------Error Codes-------------------------\n");
-       printf("     nStOK   nStWarn    nStEOF    nStErr  nStFatal  \n");
-       for( int i=0; i<=kStFatal; i++) printf("%10d",fgTallyMaker[i]); 
-       printf("\n--------------------------------------------------\n");
-     }  
      Printf("=================================================================================\n");
    }
    
@@ -473,7 +465,6 @@ Int_t StMaker::Make()
    StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");   
    TIter nextMaker(tl);
    StMaker *maker;
-   fgFailedMaker = 0;
    while ((maker = (StMaker*)nextMaker())) {
      if (!maker->IsActive()) continue;
      if (hd && hd->IsNewRun()) {
@@ -485,14 +476,11 @@ Int_t StMaker::Make()
 // 		Call Maker
      maker->StartMaker();
      ret = maker->Make();
-     assert(ret>=0 && ret<=kStFatal);     
-     fgTallyMaker[ret]++;
      maker->EndMaker(ret);
 
-     if (Debug() || ret) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
+     if (Debug()) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
 
-     if (ret>kStWarn) { 
-       maker->ls(3); fgFailedMaker = maker; return ret;}
+     if (ret>kStWarn) { if (Debug()) maker->ls(3); return ret;}
      
    }
    return kStOK;
@@ -506,17 +494,17 @@ void StMaker::Fatal(int Ierr, const char *com)
    fflush(stdout);
 }
 //_____________________________________________________________________________
-StMaker *StMaker::GetMaker(const TDataSet *ds) 
+StMaker *StMaker::GetMaker(const St_DataSet *ds) 
 { 
-  const TDataSet *par = ds;
+  const St_DataSet *par = ds;
   while (par && (par = par->GetParent()) && strncmp(".maker",par->GetTitle(),6)) {}
   return (StMaker*)par;
 }
 //_____________________________________________________________________________
-EDataSetPass StMaker::ClearDS (TDataSet* ds,void * )
+EDataSetPass StMaker::ClearDS (St_DataSet* ds,void * )
 {
   static TClass *tabClass = 0;
-  if (!tabClass) tabClass  = gROOT->GetClass("TTable");
+  if (!tabClass) tabClass  = gROOT->GetClass("St_Table");
 
   if (ds->InheritsFrom(tabClass)) ds->Clear("Garbage");
   return kContinue; 
@@ -557,7 +545,8 @@ StMaker     *StMaker::GetParentChain() const
 }
 //_____________________________________________________________________________
 TDatime  StMaker::GetDateTime() const 
-{    
+{
+    
    TDatime td;    
    StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
    if (!hd) return td;
@@ -578,13 +567,9 @@ const Char_t *StMaker::GetEventType() const
 //_____________________________________________________________________________
 void StMaker::PrintTimer(Option_t *option) 
 {
-  // Print timer information of this maker
-  // Entries counts how many times the methods:
-  //    Init(), Make() and Finish () 
-  // were called
    if(option){};
-   Printf("QAInfo:%-20s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds, Entries = %d",GetName()
-           ,m_Timer.RealTime(),m_Timer.CpuTime(),m_Timer.Counter());
+   Printf("QAInfo:%-20s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds",GetName()
+                                         ,m_Timer.RealTime(),m_Timer.CpuTime());
 }
 
 //_____________________________________________________________________________
@@ -721,8 +706,8 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
  // MakeDoc - creates the HTML doc for this class and for the base classes
  //           (if baseClasses == kTRUE):
  //
- //         *  St_XDFFile   St_Module      TTable       *
- //         *  TDataSet   St_DataSetIter St_FileSet     *
+ //         *  St_XDFFile   St_Module      St_Table       *
+ //         *  St_DataSet   St_DataSetIter St_FileSet     *
  //         *  StMaker      StChain        StEvent        *
  //         *  St_TLA_Maker                               *
  //
@@ -954,18 +939,6 @@ Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
-// Revision 1.89  2000/04/07 15:41:42  perev
-// Printout error codes improved
-//
-// Revision 1.88  2000/04/05 02:45:13  fine
-// call-counter has been added
-//
-// Revision 1.87  2000/04/03 23:46:48  perev
-// Increased error check
-//
-// Revision 1.86  2000/03/23 00:15:22  fine
-// Adjusted to libSTAR for ROOT 2.24
-//
 // Revision 1.85  2000/03/01 22:56:25  fisyak
 // Adjust ps for RedHat 6.1
 //

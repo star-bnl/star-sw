@@ -5,7 +5,7 @@
 // StVirtualEventFilter virtual base class is to create the variuous    //
 // user-defined filters                                                 //
 //                                                                      //
-// $Id: StVirtualEventFilter.cxx,v 1.11 2000/03/24 20:35:21 fine Exp $   //
+// $Id: StVirtualEventFilter.cxx,v 1.10 2000/01/24 21:12:23 fine Exp $   //
 //                                                                      //
 // This class defines the intreface to define                           //
 // a graphics attribute:                                                //
@@ -22,9 +22,9 @@
 //    -------------  -----------------------------                      //
 // 1. StGlobalTrack  *globTrack                                         //
 // 2. StObjArray     *hitCollection                                     //
-// 3. TTableSorter *tableObject,Int_t index                           //
+// 3. St_TableSorter *tableObject,Int_t index                           //
 // 4. StVertex       *vertexObject                                      //
-// 5. TTable       *tableObject, Int_t rowNumber                      //
+// 5. St_Table       *tableObject, Int_t rowNumber                      //
 //                                                                      //
 // User should derive his own class and overload the "Channel" methods  //
 // with the signature those fit his/her current needs                   //
@@ -50,21 +50,18 @@ Int_t StVirtualEventFilter::Channel(const StObjArray *,Size_t &,Style_t &)
 {return GetFlag()? kYellow : 0 ;}
 
 //_____________________________________________________________________________
-Int_t StVirtualEventFilter::Channel(const TTableSorter *,Int_t index,Size_t &,Style_t &)
+Int_t StVirtualEventFilter::Channel(const St_TableSorter *,Int_t index,Size_t &,Style_t &)
 { return GetFlag()? (kGreen+index)%20 : 0 ;}
 //_____________________________________________________________________________
 Int_t StVirtualEventFilter::Channel(const StVertex *,Size_t &,Style_t &)
 { return GetFlag()? kBlue : 0 ; }
 
 //_____________________________________________________________________________
-Int_t StVirtualEventFilter::Channel(const TTable *,Int_t rowNumber,Size_t &,Style_t &)
+Int_t StVirtualEventFilter::Channel(const St_Table *,Int_t rowNumber,Size_t &,Style_t &)
 { return GetFlag()? (kGreen+rowNumber)%20 : 0 ;}
 
 //_____________________________________________________________________________
 // $Log: StVirtualEventFilter.cxx,v $
-// Revision 1.11  2000/03/24 20:35:21  fine
-// adjusted to ROOT 2.24. Doesn't work yet. Under development
-//
 // Revision 1.10  2000/01/24 21:12:23  fine
 // new comments
 //

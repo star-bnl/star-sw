@@ -1,9 +1,6 @@
 //*-- Author :    Valery Fine   26/03/99  (E-mail: fine@bnl.gov)
-// $Id: StarFromWeb.C,v 1.4 2000/04/07 17:07:08 fine Exp $
+// $Id: StarFromWeb.C,v 1.3 1999/05/21 15:33:53 kathy Exp $
 // $Log: StarFromWeb.C,v $
-// Revision 1.4  2000/04/07 17:07:08  fine
-// adjusted to the ROOT 2.24
-//
 // Revision 1.3  1999/05/21 15:33:53  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
@@ -12,7 +9,7 @@
 //
 //=======================================================================
 // owner: Valery fine
-// what it does: Shows the various view of the STAR geometry
+// what it does: 
 //=======================================================================
 
 {
@@ -26,11 +23,7 @@
  
   gROOT->Reset();
   cout << " Loading share library" << endl;
-  Bool_t NT=kFALSE;
-  if (strcmp(gSystem.GetName(),"WinNT") == 0 ) NT=kTRUE;
-  if (NT) gSystem->Load("ROOT_STAR");
-  else  gSystem->Load("libSTAR");
-  if (!gGeometry) new TGeometry;
+  gSystem->Load("St_base");
 
   // Create canvas
 
@@ -42,10 +35,14 @@
 
   // Open remote Webfile
   cout << " Open the remote Web file with STAR geometry database in ROOT format" << endl;
-  TWebFile f("http://www.star.bnl.gov/~fine/star_year_2a.root");
+  TWebFile f("http://www.star.bnl.gov/~fine/star.root");
   // read STAR geometry database remotely
   cout << " Reading STAR geometry database (the full size of this database 28K bytes - ROOT-object" << endl;
-  TDataSetIter volume(HALL);
+  TGeometry *star = f.Get("STAR");
+
+  TList *listOfNode = star.GetListOfNodes();
+  St_Node *hall = listOfNode->First();
+  St_DataSetIter volume(hall);
   volume.Cd("HALL/CAVE");
 
   const Char_t *parts[] = {"TPCE"
@@ -58,10 +55,9 @@
   for (Int_t i =0; i< numParts; i++) {
     const Char_t *part = parts[i];
     cout << "Drawing \"" << part << "\"" << endl;
-    TVolume *vol = (TVolume *)volume(part);
+    St_Node *vol = volume(part);
     starCanvas.cd(i+1);
     if (vol) vol->Draw();
-    else printf(" Volume \"%s\"  was not found\n", part);
     gPad->Update();
   }
   
@@ -78,11 +74,11 @@
   gPad->x3d();
 
   cout << "Drawing ROOT TBrowser" << endl;
-  TBrowser b("STAR",HALL);
+  TBrowser b("STAR",hall);
   cout << "Now. Try yourself:" << endl <<
-  "     1. Select any STAR geometry TVolume object with  \"double-left-mouse click\" on the TVolumePosition" << endl <<
-  "               TVolume object has no \";<n>\" in its name." << endl <<
-  "               The objects with trail  \";<n>\" are TVolumePosition ones" << endl <<
+  "     1. Select any STAR geometry St_Node object with  \"double-left-mouse click\" on the St_NodePosition" << endl <<
+  "               St_Node object has no \";<n>\" in its name." << endl <<
+  "               The objects with trail  \";<n>\" are St_NodePosition ones" << endl <<
   "     2. Pop the context menu up with \"right-mouse click\" on the ROOT browser" << endl <<
   "     3. Select \"Draw\" position" << endl <<
   "     4. Click OK" << endl;

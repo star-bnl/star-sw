@@ -1,8 +1,5 @@
-// $Id: St_xdfin_Maker.cxx,v 1.34 2000/03/22 22:46:56 perev Exp $
+// $Id: St_xdfin_Maker.cxx,v 1.33 2000/01/12 16:38:54 fisyak Exp $
 // $Log: St_xdfin_Maker.cxx,v $
-// Revision 1.34  2000/03/22 22:46:56  perev
-// Printout of I/O actions
-//
 // Revision 1.33  2000/01/12 16:38:54  fisyak
 // Add Id and Log
 //
@@ -79,7 +76,7 @@ Int_t St_xdfin_Maker::Make(){
   St_DataSet *curdir = 0, *set = 0;
   Bool_t      CONST;
 //  PrintInfo();
-  fNIO++;
+
   St_DataSetIter local(m_DataSet);
   St_DataSetIter cons(m_ConstSet);
 

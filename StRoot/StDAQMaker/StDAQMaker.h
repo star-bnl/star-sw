@@ -14,13 +14,13 @@
 
 //	Forward declarations
 class StDAQReader;
-class TObjectSet;
+class St_ObjectSet;
 
 class StDAQMaker : public StIOInterFace {
  private:
   StEvtHddr 	*fEvtHddr;	//! pointer to Event Header
   StDAQReader 	*fDAQReader;	//! pointer to StDAQReader
-  TObjectSet 	*fDAQReaderSet;	//! pointer to StDAQReader DataSet
+  St_ObjectSet 	*fDAQReaderSet;	//! pointer to StDAQReader DataSet
  public:
   StDAQMaker(const char *name="DAQInput",const char *inputFile=0);
   virtual       ~StDAQMaker();
@@ -35,7 +35,7 @@ class StDAQMaker : public StIOInterFace {
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StDAQMaker.h,v 1.3 2000/03/26 23:23:02 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StDAQMaker.h,v 1.2 1999/07/15 13:56:50 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StDAQMaker, 0)   //
 };

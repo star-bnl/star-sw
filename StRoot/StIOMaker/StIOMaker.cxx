@@ -33,13 +33,13 @@ StIOMaker::StIOMaker(const char *name,  const char *iomode,
 }
 //_____________________________________________________________________________
 StIOMaker::StIOMaker(const char *name,   const char *iomode, 
-                     StFileI  *fileSet,const char *treeName )
+                     StFile     *fileSet,const char *treeName )
 :StIOInterFace(name,iomode)
 {
   Build( fileSet,treeName);
 }
 //_____________________________________________________________________________
-void StIOMaker::Build(StFileI *fileSet,const char *treeName) 
+void StIOMaker::Build(StFile *fileSet,const char *treeName) 
 {
   SetTreeName(treeName); fCase=0;
   SetMaxEvent();
@@ -83,14 +83,13 @@ Int_t StIOMaker::Open()
 {
   
   fNumEvent = 0;
-  if (!fFileSet) 			return kStEOF;
+  if (!fFileSet) return kStEOF;
 
-  if (fFileSet->GetNextBundle())	return kStEOF;
-
-  fNextFile = fFileSet->GetFileName();
+  
+  fNextFile = fFileSet->NextFileName();
   if (!fNextFile) return kStEOF;
   TString fmt = fFileSet->GetFormat();
-  TString bra = fFileSet->GetCompName();
+  TString bra = fFileSet->GetBraName();
 
   const char *cc = strstr(IOFMTS,(const char*)fmt);
   if (!cc) return kStErr;
@@ -109,7 +108,6 @@ Int_t StIOMaker::Open()
 //_____________________________________________________________________________
 Int_t StIOMaker::Make(){
   int iret;   
-  fNIO++;
   if (fIOMode[0]=='r')  { //Read mode
 AGAIN:
     iret = MakeRead();  
@@ -126,13 +124,9 @@ AGAIN:
 }
 //_____________________________________________________________________________
 Int_t StIOMaker::MakeRead(){
-  UInt_t uRunEvent[8];
 
   if (!fCurrMk) return kStEOF;
-  int res = fFileSet->GetNextEvent(uRunEvent);
-  if (res)	return kStEOF;
-
-  return fCurrMk->MakeRead(uRunEvent);
+  return fCurrMk->Make();
 }    
 //_____________________________________________________________________________
 Int_t StIOMaker::MakeWrite()
@@ -148,7 +142,6 @@ Int_t StIOMaker::Finish()
     fFmtMk[i]->Finish();
     fFmtMk[i]=0;}
   fCurrMk = 0;
-  StIOInterFace::Finish();
   return 0;
 }
 //_____________________________________________________________________________
@@ -197,7 +190,7 @@ StIOInterFace *StIOMaker::Load()
   Mk->SetTreeName(fTreeName);
   Mk->SetFile(fNextFile);
   if (GetDebug()) Mk->SetDebug();
-  TDataSet *brs = Find(".branches");
+  St_DataSet *brs = Find(".branches");
   if (brs) brs->Shunt(Mk);
   int iret = Mk->Init();
   return (iret) ? 0 : Mk;

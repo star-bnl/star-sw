@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.6 2000/04/03 13:38:11 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.5 2000/03/15 21:06:06 fisyak Exp $
 {
  if (defined($AFS)) {$File::Find::dont_use_nlink;}
  use File::Basename;
@@ -200,14 +200,6 @@
    $LDFLAGS   = "-library=iostream";
    $SO        = $CXX;
    $SOFLAGS   = "-G";#
-   if (defined($ARG{INSURE})){
-     print "***Use INSURE++***\n";
-     $CC       = "insure -g -Zoi \"compiler_c cc\"";
-     $CPP      = "insure -g -Zoi \"compiler_c CC\"";
-     $CXX      = "insure -g -Zoi \"compiler_cpp CC\"";
-     $LD       = $CXX;
-     $SO       = $CXX;
-   }
  }
  elsif (/^sun4x_5.$/) {
    $OSFID     = "__SunOS_5_6";
@@ -454,7 +446,7 @@
 		 'LDFLAGS'      => $LDFLAGS,
 		 'PREFLIB'      => 'lib',
 		 'SUFLIB'       => $A,
-		 'SUFLIBS'      => "." . $SOEXT . ":." . $A,
+		 'SUFLIBS'      => $SOEXT . ":" . $A,
 		 'SUFSOLIB'     => $SOEXT,
 		 'SUFEXE'       => $EXESUF,
 		 'SUFMAP'       => {

@@ -20,7 +20,6 @@ public:
    StIOInterFace(const char *name="",const char *iomode="r");
    virtual        ~StIOInterFace(){};
    virtual  Int_t MakeRead() {assert(0);return 1999;};
-   virtual  Int_t MakeRead(UInt_t *RunEvent) {assert(!*RunEvent);return MakeRead();};
    virtual  Int_t Skip(int nskip);
    virtual  Int_t MakeWrite(){assert(0);return 1999;};
    virtual  Int_t Open(const char *filename=0){assert(0&&filename);return 1999;};

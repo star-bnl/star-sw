@@ -1,17 +1,16 @@
 #ifndef StEvtHddr_h
 #define StEvtHddr_h
 
-#include <TDatime.h>
-#include "TDataSet.h"
+#include "TDatime.h"
+#include "St_DataSet.h"
 struct EvtHddr_st;
 
-class StEvtHddr : public TDataSet
+class StEvtHddr : public St_DataSet
 {
 public:
-  StEvtHddr(TDataSet *parent=0);
+  StEvtHddr(St_DataSet *parent=0);
  ~StEvtHddr(){};
   StEvtHddr &operator=(const StEvtHddr &hddr);
-  virtual TObject *Clone(){StEvtHddr *to=new StEvtHddr();*to = *this; return to;};
 //		Get methods
 
   Int_t 	GetRunNumber()    const {return mRunNumber;};
@@ -62,7 +61,7 @@ public:
 //		Data Members
 protected:
     Int_t	mRunNumber;
-    Int_t	mOldRunNumber;		//!
+    Int_t	mOldRunNumber;
     Int_t       mId;
     UInt_t 	mInputTriggerMask;
     UInt_t 	mTriggerMask;

@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.56 2000/04/10 20:11:03 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.54 2000/03/15 17:22:19 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -37,20 +37,20 @@
 
 #include "StEventDisplayMaker.h"
 #include "StChain.h"
-#include "TDataSetIter.h"
-#include "TVolume.h"
-#include "TVolumeView.h"
-#include "TVolumePosition.h"
+#include "St_DataSetIter.h"
+#include "St_Node.h"
+#include "St_NodeView.h"
+#include "St_NodePosition.h"
 #include "St_PolyLine3D.h"
-#include "TPoints3D.h"
+#include "St_Points3D.h"
 #include "StHits3DPoints.h"
 #include "StVertices3DPoints.h"
 #include "StHelix3DPoints.h"
-#include "TTable3Points.h"
+#include "St_Table3Points.h"
 #include "St_Table3PackedPoints.h"
 #include "StVirtualEventFilter.h"
-#include "TTable.h"
-#include "TTableSorter.h"
+#include "St_Table.h"
+#include "St_TableSorter.h"
 #include "StArray.h"
 #include "tables/St_tpt_track_Table.h"
 
@@ -147,23 +147,22 @@ Int_t StEventDisplayMaker::BuildGeometry()
 {
   // Create STAR sub-detector definition
 
-  m_Hall = (TVolume *)GetDataSet("HALL");
+  m_Hall = (St_Node *)GetDataSet("HALL");
   if (!m_Hall) return kStErr;
   //
   // Create an iterator to navigate STAR geometry
-  TDataSetIter volume(m_Hall,0);
+  St_DataSetIter volume(m_Hall,0);
 // ---  Create "standard" TPC and SVT views ----
-  TVolume *sector = 0;
-//  const Char_t *volueNames[] = {"TPSS","SLDI","SFDM"};
-   const Char_t *volueNames[] = {"TPSS","STSI"}; // STLI"};
-   const Int_t lvolueNames = sizeof(volueNames)/sizeof(Char_t *);
-  while ( (sector = ( TVolume *)volume()) ){
+  St_Node *sector = 0;
+  const Char_t *volueNames[] = {"TPSS","SLDI","SFDM"};
+  const Int_t lvolueNames = sizeof(volueNames)/sizeof(Char_t *);
+  while ( (sector = ( St_Node *)volume()) ){
     Bool_t found = kFALSE;
     Int_t i;
     for (i =0; i < lvolueNames; i++) 
     if (strcmp(sector->GetName(),volueNames[i]) == 0 ) {found = kTRUE; break; }
     if (found) {
-      sector->SetVisibility(TVolume::kSonUnvisible);
+      sector->SetVisibility(St_Node::kSonUnvisible);
       sector->Mark();
       if (!i) {  // special case for TPSS sectors
         TTUBE *tubs = (TTUBE *)sector->GetShape();
@@ -173,9 +172,9 @@ Int_t StEventDisplayMaker::BuildGeometry()
   }
 
   // Select sensors
-  m_FullView = new TVolumeView(*m_Hall); 
+  m_FullView = new St_NodeView(*m_Hall); 
   // Create the "open" sub-structure from the full one
-  m_Sensible = new TVolumeView(m_FullView);
+  m_Sensible = new St_NodeView(m_FullView);
   delete m_FullView; m_FullView = 0;
   printf(" drawing the STAR geometry sensible volumes and hits \n");
 
@@ -190,8 +189,8 @@ Int_t StEventDisplayMaker::BuildGeometry()
   m_Sensible->Mark();                                                       // Select HALL
   
   // Select all sectors
-  TDataSetIter nextSector(m_Sensible,0);
-  TDataSet *tpssNode = 0;
+  St_DataSetIter nextSector(m_Sensible,0);
+  St_DataSet *tpssNode = 0;
   while (( tpssNode = nextSector() ) ) {
 //    if (strcmp(tpssNode->GetName(),"TPGV") && strcmp(tpssNode->GetName(),"TPSS")) continue;
     Int_t i;
@@ -203,13 +202,13 @@ Int_t StEventDisplayMaker::BuildGeometry()
   //
   //    Select all hits
   //_______________________________________
-  TVolumeView *trackNode = (TVolumeView *)m_Sensible->FindByName(".track");    // Select ".track"
+  St_NodeView *trackNode = (St_NodeView *)m_Sensible->FindByName(".track");    // Select ".track"
   if (trackNode) trackNode->Mark();     
-  trackNode = (TVolumeView *)m_Sensible->FindByName("CAVE");                   // Select CAVE
+  trackNode = (St_NodeView *)m_Sensible->FindByName("CAVE");                   // Select CAVE
   if (trackNode) {
      trackNode->Mark();     
-     TDataSetIter nextHits(trackNode);
-     while ( ( m_ShortView = (TVolumeView *) nextHits()) ) {
+     St_DataSetIter nextHits(trackNode);
+     while ( ( m_ShortView = (St_NodeView *) nextHits()) ) {
        if (strcmp(m_ShortView->GetName(),"ZCAL")==0) continue;       // skip ZCAL detector element
        m_ShortView->Mark();
     }
@@ -220,7 +219,7 @@ Int_t StEventDisplayMaker::BuildGeometry()
   //   Create new short view                                        // New "short" dataset
   //_______________________________________
   printf(" Creating a new structure simplified structure\n");
-  m_ShortView = new TVolumeView(m_Sensible);
+  m_ShortView = new St_NodeView(m_Sensible);
   delete m_Sensible; m_Sensible = 0;
 
   //_______________________________________
@@ -255,9 +254,9 @@ void StEventDisplayMaker::ClearEvents()
 
     delete m_EventsView;
     m_EventsView = 0;
-    TVolume *node = 0;
-    TDataSetIter nextNode(m_EventsNode);
-    while ( (node = (TVolume *)nextNode() )) {
+    St_Node *node = 0;
+    St_DataSetIter nextNode(m_EventsNode);
+    while ( (node = (St_Node *)nextNode() )) {
       TShape *shape = node->GetShape();
       if (shape) delete shape;   
       m_EventsNode->Delete();
@@ -280,9 +279,9 @@ void StEventDisplayMaker::ClearCanvas()
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::CreateTrackNodes()
 {
- //  Create TVolume dataset
+ //  Create St_Node dataset
   if (m_EventsNode) delete m_EventsNode;
-  m_EventsNode  = new TVolume(".track",".track",(TShape *)0);
+  m_EventsNode  = new St_Node(".track",".track",(TShape *)0);
   m_EventsNode->Mark();
   m_EventsNode->SetVisibility();
   AddConst(m_EventsNode);
@@ -389,17 +388,17 @@ Int_t StEventDisplayMaker::Make()
       else 
 #endif
       {
-        TDataSet *dshits = GetDataSet("tphit");
+        St_DataSet *dshits = GetDataSet("tphit");
         if (dshits)   {
            AddName("tphit(id_globtrk,x:y:z)");
            printf(" tphit found !!!\n");  
-          ((TTable *)dshits)->Print(0,10);   
+          ((St_Table *)dshits)->Print(0,10);   
         }
-         TDataSet *dstracks = GetDataSet("tptrack");
+         St_DataSet *dstracks = GetDataSet("tptrack");
          if (dstracks) {
             AddName(dstracks->GetName());
             printf(" tptrack found !!!\n"); 
-           ((TTable *)dstracks)->Print(0,1);
+           ((St_Table *)dstracks)->Print(0,1);
          }
       }
     }
@@ -416,16 +415,16 @@ Int_t StEventDisplayMaker::Make()
       if (Debug()) { printf(" The type of the current parameter is %d \n", type); }
       if (!type) { delete [] nextObjectName; continue; }
       const Char_t *foundName = positions[0];
-      TDataSet *event = GetDataSet(foundName);
+      St_DataSet *event = GetDataSet(foundName);
       if (!event) {
          if (Debug()) Warning("Make","No object \"%s\" found",foundName);
          continue;
       }
-      if (event->InheritsFrom("TTable") && 
+      if (event->InheritsFrom("St_Table") && 
           (( type == 5) || (type == 1) || (type == 2)) ) 
       {
         //  ----- Draw "table" events -------------------------- //
-          m_Table = (TTable *)event;                           //
+          m_Table = (St_Table *)event;                           //
           totalCounter += MakeTable((const Char_t **)positions); //
         //  ---------------------------------------------------- //
       }
@@ -439,7 +438,7 @@ Int_t StEventDisplayMaker::Make()
       delete [] nextObjectName;
      }
      if (totalCounter) {
-       m_EventsView = new TVolumeView(*m_EventsNode);
+       m_EventsView = new St_NodeView(*m_EventsNode);
        m_ShortView->Add(m_EventsView);
      }
      printf(" updating view of %d objects\n",totalCounter);
@@ -455,7 +454,7 @@ Int_t StEventDisplayMaker::ParseName(Char_t *inName, Char_t *positions[])
   // returns  the number of the tokens found:
   //
   //              "1" - assuming StEvent name defined by position[0]
-  //              "5" - assuming TTable columns definitions
+  //              "5" - assuming St_Table columns definitions
   //              "0" - syntax error
   //  
   //  "name" - StEvent
@@ -612,14 +611,14 @@ Int_t StEventDisplayMaker::MakeHits(const StObjArray *eventCollection,StVirtualE
     if (hitColor > 0) {
        StHits3DPoints   *hitsPoints  = new StHits3DPoints((StObjArray *)eventCollection);
        m_HitCollector->Add(hitsPoints);    // Collect to remove  
-       TPolyLineShape *hitsShape   = new TPolyLineShape(hitsPoints);
+       St_PolyLineShape *hitsShape   = new St_PolyLineShape(hitsPoints);
          hitsShape->SetVisibility(1);        hitsShape->SetColorAttribute(hitColor);
          hitsShape->SetStyleAttribute(hitStyle);  hitsShape->SetSizeAttribute(hitSize);
        // Create a node to hold it
-       TVolume *thisHit = new TVolume("hits",eventCollection->GetName(),hitsShape);
+       St_Node *thisHit = new St_Node("hits",eventCollection->GetName(),hitsShape);
          thisHit->Mark();
          thisHit->SetVisibility();
-       TVolumePosition *pp = m_EventsNode->Add(thisHit); 
+       St_NodePosition *pp = m_EventsNode->Add(thisHit); 
        if (!pp && hitCounter) {
           printf(" no track position %d\n",hitCounter);
        }
@@ -648,16 +647,16 @@ Int_t StEventDisplayMaker::MakeVertex(const StVertex *vertex,StVirtualEventFilte
        Float_t x = vertexVector[0];
        Float_t y = vertexVector[1];
        Float_t z = vertexVector[2];
-       TPoints3D *vertexPoint =  new TPoints3D(1, &x, &y, &z);
+       St_Points3D *vertexPoint =  new St_Points3D(1, &x, &y, &z);
        m_HitCollector->Add(vertexPoint);    // Collect to remove  
-       TPolyLineShape *vertexShape   = new TPolyLineShape(vertexPoint);
+       St_PolyLineShape *vertexShape   = new St_PolyLineShape(vertexPoint);
          vertexShape->SetVisibility(1);                vertexShape->SetColorAttribute(vertexColor);
          vertexShape->SetStyleAttribute(vertexStyle);  vertexShape->SetSizeAttribute(vertexSize);
        // Create a node to hold it
-       TVolume *thisVertex = new TVolume("vertex",vertex->GetName(),vertexShape);
+       St_Node *thisVertex = new St_Node("vertex",vertex->GetName(),vertexShape);
          thisVertex->Mark();
          thisVertex->SetVisibility();
-       TVolumePosition *pp = m_EventsNode->Add(thisVertex); 
+       St_NodePosition *pp = m_EventsNode->Add(thisVertex); 
        if (!pp) 
           printf(" no track position \n");
        vertexCounter = 1;
@@ -683,14 +682,14 @@ Int_t StEventDisplayMaker::MakeVertices(const StObjArray *eventCollection,StVirt
     if (hitColor > 0) {
       StVertices3DPoints *hitsPoints  = new StVertices3DPoints((StObjArray *)eventCollection);
        m_HitCollector->Add(hitsPoints);    // Collect to remove  
-       TPolyLineShape *hitsShape   = new TPolyLineShape(hitsPoints);
+       St_PolyLineShape *hitsShape   = new St_PolyLineShape(hitsPoints);
          hitsShape->SetVisibility(1);        hitsShape->SetLineColor(hitColor);
          hitsShape->SetLineStyle(hitStyle);  hitsShape->SetLineWidth(hitSize);
        // Create a node to hold it
-       TVolume *thisHit = new TVolume("hits",eventCollection->GetName(),hitsShape);
+       St_Node *thisHit = new St_Node("hits",eventCollection->GetName(),hitsShape);
          thisHit->Mark();
          thisHit->SetVisibility();
-       TVolumePosition *pp = m_EventsNode->Add(thisHit); 
+       St_NodePosition *pp = m_EventsNode->Add(thisHit); 
        if (!pp && hitCounter) {
           printf(" no track position %d\n",hitCounter);
        }
@@ -715,14 +714,14 @@ Int_t StEventDisplayMaker::MakeTracks( StGlobalTrack *globTrack,StVirtualEventFi
     if (trackColor > 0) {
        StHelix3DPoints *tracksPoints  = new StHelix3DPoints(globTrack);
        m_TrackCollector->Add(tracksPoints);    // Collect to remove  
-       TPolyLineShape *tracksShape   = new TPolyLineShape(tracksPoints,"L");
+       St_PolyLineShape *tracksShape   = new St_PolyLineShape(tracksPoints,"L");
          tracksShape->SetVisibility(1);         tracksShape->SetColorAttribute(trackColor);
          tracksShape->SetLineStyle(trackStyle); tracksShape->SetSizeAttribute(trackSize);
        // Create a node to hold it
-       TVolume *thisTrack = new TVolume("tracks",globTrack->GetName(),tracksShape);
+       St_Node *thisTrack = new St_Node("tracks",globTrack->GetName(),tracksShape);
          thisTrack->Mark();   thisTrack->SetVisibility();
          trackCounter++;
-       TVolumePosition *pp = m_EventsNode->Add(thisTrack); 
+       St_NodePosition *pp = m_EventsNode->Add(thisTrack); 
        if (!pp && trackCounter) {
           printf(" no track position %d\n",trackCounter);
        }
@@ -744,7 +743,7 @@ Int_t StEventDisplayMaker::MakeTable(const Char_t **positions)
     filter = (StVirtualEventFilter *)m_FilterArray->At(kTable);
     if (!filter || filter->IsOn() ) {
        tableCounter += MakeTableHits(m_Table,filter,positions[1],&positions[2]);
-       if (Debug()) printf(" TTable: %d \n", tableCounter);
+       if (Debug()) printf(" St_Table: %d \n", tableCounter);
     }
   }
   else {
@@ -752,7 +751,7 @@ Int_t StEventDisplayMaker::MakeTable(const Char_t **positions)
     if (!filter || filter->IsOn() ) {
        StTrackChair tracks(m_Table);
        tableCounter += MakeTableTracks(&tracks,filter);
-       if (Debug()) printf(" TTable:tpc_Track %d \n", tableCounter);
+       if (Debug()) printf(" St_Table:tpc_Track %d \n", tableCounter);
     }
   }
   return tableCounter;
@@ -780,14 +779,14 @@ Int_t StEventDisplayMaker::MakeTableTracks(const StTrackChair *points,StVirtualE
 	   Float_t step = len / nSteps;
            StHelix3DPoints *tracksPoints  = new StHelix3DPoints(helix,step,nSteps);
            m_TrackCollector->Add(tracksPoints);    // Collect to remove  
-           TPolyLineShape *tracksShape   = new TPolyLineShape(tracksPoints,"L");
+           St_PolyLineShape *tracksShape   = new St_PolyLineShape(tracksPoints,"L");
              tracksShape->SetVisibility(1);         tracksShape->SetColorAttribute(trackColor);
              tracksShape->SetLineStyle(trackStyle); tracksShape->SetSizeAttribute(trackSize);
            // Create a node to hold it
-           TVolume *thisTrack = new TVolume("tracks",points->GetName(),tracksShape);
+           St_Node *thisTrack = new St_Node("tracks",points->GetName(),tracksShape);
              thisTrack->Mark();   thisTrack->SetVisibility();
              trackCounter++;
-           TVolumePosition *pp = m_EventsNode->Add(thisTrack); 
+           St_NodePosition *pp = m_EventsNode->Add(thisTrack); 
            if (!pp && trackCounter) {
               printf(" no track position %d\n",trackCounter);
            }
@@ -799,12 +798,12 @@ Int_t StEventDisplayMaker::MakeTableTracks(const StTrackChair *points,StVirtualE
   return trackCounter;
 }
 //_____________________________________________________________________________
-Int_t StEventDisplayMaker::MakeTableHits(const TTable *points,StVirtualEventFilter *filter
+Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFilter *filter
                                         ,const Char_t *keyColumn,const Char_t *keyPositions[]
 )
 {
   Int_t totalHits = 0;
-  TTable &ttt = *((TTable *)points);
+  St_Table &ttt = *((St_Table *)points);
   TString tr = keyColumn; 
   const Char_t *packedList[] = {"dst_point"};
   const Int_t lPackedList = sizeof(packedList)/sizeof(Char_t *);
@@ -814,7 +813,7 @@ Int_t StEventDisplayMaker::MakeTableHits(const TTable *points,StVirtualEventFilt
     if (!strcmp(ttt.GetType(),packedList[i])) packed = kTRUE;
   }
   if (ttt.GetNRows() ) {
-    TTableSorter *track2Line = new TTableSorter (ttt,tr);
+    St_TableSorter *track2Line = new St_TableSorter (ttt,tr);
     m_TableCollector->Add(track2Line);    // Collect to remove  
     Color_t hitColor = kGreen;
     Style_t hitStyle = packed ?   5 : 8;
@@ -829,7 +828,7 @@ Int_t StEventDisplayMaker::MakeTableHits(const TTable *points,StVirtualEventFilt
        if (filter->IsOff() ) break;                                                     //
        // ----------------------------------------------------------------------------- //
        if (hitColor > 0 && keyPositions[0]) {
-         TTable3Points *hitsPoints = 0;
+         St_Table3Points *hitsPoints = 0;
          if (packed)  
              hitsPoints = new St_Table3PackedPoints(track2Line,
                                               nextKeyIndx,
@@ -841,14 +840,14 @@ Int_t StEventDisplayMaker::MakeTableHits(const TTable *points,StVirtualEventFilt
          else { hitColor = -1; break; }
          if (hitsPoints) {
            m_HitCollector->Add(hitsPoints);    // Collect to remove  
-           TPolyLineShape *hitsShape   = new TPolyLineShape(hitsPoints);
+           St_PolyLineShape *hitsShape   = new St_PolyLineShape(hitsPoints);
            hitsShape->SetVisibility(1);            hitsShape->SetColorAttribute(hitColor);
            hitsShape->SetStyleAttribute(hitStyle); hitsShape->SetSizeAttribute(hitSize);
            // Create a node to hold it
-           TVolume *thisHit = new TVolume("tableHits",points->GetName(),hitsShape);
+           St_Node *thisHit = new St_Node("tableHits",points->GetName(),hitsShape);
              thisHit->Mark();
              thisHit->SetVisibility();
-           TVolumePosition *pp = m_EventsNode->Add(thisHit); 
+           St_NodePosition *pp = m_EventsNode->Add(thisHit); 
            Int_t s = hitsPoints->Size();
            totalHits   += s;
            nextKeyIndx += s; 
@@ -913,7 +912,7 @@ void StEventDisplayMaker::PrintFilterStatus()
                                  , "Track Tpc Hits"
                                  , "Track Svt Hits"
                                  , "Track Ftpc Hits" 
-                                 , "TTable generic object" 
+                                 , "St_Table generic object" 
                                  , "tpt_track table object" 
                                 } ;
    
@@ -956,7 +955,7 @@ DISPLAY_FILTER_DEFINITION(TrackTpcHits)
 DISPLAY_FILTER_DEFINITION(TrackSvtHits)
 DISPLAY_FILTER_DEFINITION(TrackFtpcHits)
 
-// -- Generic TTable  filters --
+// -- Generic St_Table  filters --
 
 DISPLAY_FILTER_DEFINITION(Table)
 
@@ -968,12 +967,6 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
-// Revision 1.56  2000/04/10 20:11:03  fine
-// change the default valume fro SVT from SLDI to STSI
-//
-// Revision 1.55  2000/04/05 03:58:20  fine
-// Adjusted for ROOT 2.24
-//
 // Revision 1.54  2000/03/15 17:22:19  fine
 // some extra protection against of dead canvas
 //
