@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_Table3PackedPoints.h,v 1.2 1999/12/19 00:12:45 fine Exp $
+// $Id: St_Table3PackedPoints.h,v 1.1 1999/12/20 17:32:29 fine Exp $
 // $Log: St_Table3PackedPoints.h,v $
+// Revision 1.1  1999/12/20 17:32:29  fine
+// St_Table3Point has been removed from St_base
+//
 // Revision 1.2  1999/12/19 00:12:45  fine
 // some corrections for the packed tables
 //

@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_Table3PackedPoints.cxx,v 1.3 1999/12/20 01:40:54 fine Exp $
+// $Id: St_Table3PackedPoints.cxx,v 1.1 1999/12/20 17:32:29 fine Exp $
 
 #include <assert.h>
 
@@ -147,6 +147,9 @@ Float_t *St_Table3PackedPoints::GetXYZ(Float_t *xyz,Int_t idx, Int_t num) const
 }
 //____________________________________________________________________________
 // $Log: St_Table3PackedPoints.cxx,v $
+// Revision 1.1  1999/12/20 17:32:29  fine
+// St_Table3Point has been removed from St_base
+//
 // Revision 1.3  1999/12/20 01:40:54  fine
 // correction for detid_ssd
 //
