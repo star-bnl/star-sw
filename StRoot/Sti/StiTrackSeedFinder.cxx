@@ -25,8 +25,8 @@ StiTrackSeedFinder::StiTrackSeedFinder(StiHitContainer* h)
 
     //Setup a default 2 hit filter
     StiRectangular2HitComboFilter* temp = new StiRectangular2HitComboFilter();
-    temp->deltaD = 1.; //TEMP
-    temp->deltaZ = 1.; //TEMP
+    temp->deltaD = 2.; //TEMP
+    temp->deltaZ = 2.; //TEMP
     mhitcombofilter = temp;
 
     //Look at seeds (temp, MLM 8/8/01)
@@ -35,6 +35,7 @@ StiTrackSeedFinder::StiTrackSeedFinder(StiHitContainer* h)
     mdrawablehits->setMarkerStyle(3);
     mdrawablehits->setMarkerSize(1.);
     mdrawablehits->setRemoved(false);
+    //mdrawablehits->setName("Seed Finder Hits");
     StiDisplayManager::instance()->addDrawable(mdrawablehits);
 }
 
@@ -93,11 +94,11 @@ StiKalmanTrack* StiTrackSeedFinder::next()
     bool go = true;
     StiKalmanTrack* track = 0;
     while (go && hasMore()) {
-	cout <<"\nCombination "<<it.current()<<" -----------"<<endl;
+	//cout <<"\nCombination "<<it.current()<<" -----------"<<endl;
 	track = makeTrack( it() );
 	if (track) {
 	    go=false; //We found a good track, return it.  Else, we keep searching combinations
-	    cout <<"Found a good track, return it"<<endl;
+	    //cout <<"Found a good track, return it"<<endl;
 	}
 	++it;
     }
@@ -114,18 +115,18 @@ StiKalmanTrack* StiTrackSeedFinder::makeTrack(const tvector& vec) const
 	return track;
     }
     mdrawablehits->clear();
-    cout <<"StiTrackSeedFinder::makeTrack()\tConstruct seed from"<<endl;
+    //cout <<"StiTrackSeedFinder::makeTrack()\tConstruct seed from"<<endl;
 
     //This is an ugly loop ,but it is chosen for efficiency to avoid multiple loops over the points
     //and terminate the loop immediately if a hit combination doesn't pass the filter
     bool go=true;
     mdrawablehits->push_back( vec[0] ); //Temp, MLM
-    cout <<"\t"<<*(vec[0])<<endl;
+    //cout <<"\t"<<*(vec[0])<<endl;
     for (unsigned int i=1; i<vec.size() && go; ++i) { //start at begin+1
-	cout <<"\t"<<*(vec[i])<<endl;
+	//cout <<"\t"<<*(vec[i])<<endl;
 	go = mhitcombofilter->operator()( vec[i-1], vec[i] );
 	if (!go) {
-	    cout <<"go==false, aborting"<<endl;
+	    //cout <<"go==false, aborting"<<endl;
 	}
 	mdrawablehits->push_back( vec[i] ); //Temp, MLM
     }

@@ -80,6 +80,7 @@ bool StiKalmanTrackFinder::isValid(bool debug) const
 //Temporary patch, to test seed finder (MLM, 8/20/01)
 void StiKalmanTrackFinder::doNextAction()
 {
+    //cout <<"StiKalmanTrackFinder::doNextAction()\tNull function call"<<endl;
     if (trackSeedFinder->hasMore()) {
 	StiKalmanTrack* track = trackSeedFinder->next();
 	if (track) {
@@ -95,7 +96,7 @@ void StiKalmanTrackFinder::doNextAction()
     else {
 	cout <<"StiKalmanTrackFinder::doNextAction():\tNo more start points"<<endl;
     }
-	
+    
     return;
 }
 
@@ -116,11 +117,10 @@ void StiKalmanTrackFinder::initSeedFinderForStart()
 			      layer->getPlacement()->getCenterRadius());
 	rdet.moveIn();
     }
-    //Move back out to where we were
+    
     for (int i=0; i<3; ++i) {
 	rdet.moveOut();
     }
-    //trackSeedFinder->print();
     return;
 }
 
