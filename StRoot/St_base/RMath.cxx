@@ -1,3 +1,14 @@
+//*-- Author :    Valery Fine(fine@bnl.gov)   25/09/99  
+//
+// The set of methods to work with the plain matrix / vector
+// "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
+//
+// $Id: RMath.cxx,v 1.3 1999/09/23 18:32:11 fine Exp $
+// $Log: RMath.cxx,v $
+// Revision 1.3  1999/09/23 18:32:11  fine
+// double prec for float matrices was introduced
+//
+//
 #include "RMath.h"
 
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
@@ -31,6 +42,7 @@ void RMath::mxmad_0_(int n_, float *a, float *b, float *c, int i, int j, int k)
     };
 
     ia = 1; ic = 1;
+    double cic;
     for (l = 1; l <= i; ++l) {
 	ib = 1;
 	for (m = 1; m <= k; ++m,++ic) {
@@ -40,8 +52,10 @@ void RMath::mxmad_0_(int n_, float *a, float *b, float *c, int i, int j, int k)
 	    };
 	    if (j == 0) continue;
 	    ja = ia; jb = ib;
+            cic = double(c[ic]);
 	    for (n = 1; n <= j; ++n, ja+=iia, jb+=iib) 
-		c[ic] += a[ja] * b[jb];
+		cic += a[ja] * b[jb];
+            c[ic] = float(cic);
 	    ib += iob;
 	}
 	ia += ioa;
