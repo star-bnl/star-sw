@@ -1,3 +1,9 @@
+// $Id: StFtpcCluster.hh,v 1.2 2000/01/03 12:48:41 jcs Exp $
+//
+// $Log: StFtpcCluster.hh,v $
+// Revision 1.2  2000/01/03 12:48:41  jcs
+// Add CVS Id strings
+//
 #ifndef STAR_StFtpcCluster
 #define STAR_StFtpcCluster
 

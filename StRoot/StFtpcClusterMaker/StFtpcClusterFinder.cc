@@ -1,3 +1,10 @@
+// $Id: StFtpcClusterFinder.cc,v 1.4 2000/01/03 12:48:44 jcs Exp $
+//
+// $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.4  2000/01/03 12:48:44  jcs
+// Add CVS Id strings
+//
+
 #include <iostream.h>
 #include <stdlib.h>
 #include "StFtpcClusterFinder.hh"
