@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.17 1999/01/20 23:59:56 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.18 1999/02/10 20:57:39 kathy Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.18  1999/02/10 20:57:39  kathy
+// added histograms to Maker
+//
 // Revision 1.17  1999/01/20 23:59:56  fisyak
 // Just clean up
 //
@@ -69,6 +72,7 @@
 #include "tpc/St_tte_hit_match_Module.h"
 #include "tpc/St_tfs_g2t_Module.h"
 #include "tpc/St_tfs_filt_Module.h"
+#include "TH1.h"
 
 ClassImp(St_tcl_Maker)
   
@@ -128,7 +132,23 @@ Int_t St_tcl_Maker::Init(){
     m_tfs_fspar = (St_tfs_fspar *) local("tpc/tfspars/tfs_fspar");
     m_tfs_fsctrl= (St_tfs_fsctrl*) local("tpc/tfspars/tfs_fsctrl");
   }
-  // Create Histograms    
+  // Create Histograms
+
+  // for tph pam
+  m_nseq_hit   = new TH1F("tcl_nseq_hit","num seq in hit",50,0.,200.);
+  m_tpc_row    = new TH1F("tcl_tpc_row","tpc row num",150,100.,250.);
+  m_x_of_hit   = new TH1F("tcl_x_of_hit","x dist of hits",50,-200.,200.);
+  m_y_of_hit   = new TH1F("tcl_y_of_hit","y dist of hits",50,-200.,200.);
+  m_z_of_hit   = new TH1F("tcl_z_of_hit","z dist of hits",50,-250.,250.);
+  m_charge_hit = new TH1F("tcl_charge_hit","total charge in hit",50,0.,0.0001);
+  m_alpha      = new TH1F("tcl_alpha","crossing angle in xy",50,-200.,200.);
+  m_phi        = new TH1F("tcl_phi","orientation of hit wrt padplane",64,0.,64.);
+  m_lambda     = new TH1F("tcl_lambda","dip angle(radians)",64,0.,64.);
+
+  // for tcl pam
+  m_nseq_cluster = new TH1F("tcl_nseq_cluster"," num seq in cluster",50,0.,200.);
+  m_nhits = new TH1F("tcl_nhits"," estimated num overlapping hits in cluster",50,0.,200.);
+  
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -223,14 +243,62 @@ Int_t St_tcl_Maker::Make(){
     }
   }
   //Histograms     
+   MakeHistograms(); // clustering histograms
   return kStOK;
 }
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.17 1999/01/20 23:59:56 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.18 1999/02/10 20:57:39 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
+}
+
+//----------------------------------------------------------------------
+
+void St_tcl_Maker::MakeHistograms() {
+  // Create an iterator
+  St_DataSetIter tpc_hits(m_DataSet);
+  //Get the table:
+  St_tcl_tphit *ptphh = 0;
+  St_tcl_tpcluster *ptpcl =0;
+  ptphh  = (St_tcl_tphit *) tpc_hits.Find("tphit");
+  ptpcl  = (St_tcl_tpcluster *) tpc_hits.Find("tpcluster");
+
+  //  cout << " **** NOW MAKING HISTOGRAMS FOR TCL !!!!! " << endl;
+  if (ptphh) {
+    tcl_tphit_st *r = ptphh->GetTable();
+    for(Int_t i=0; i<ptphh->GetNRows();i++,r++){
+      Float_t tphit_z      = r->z;
+      Float_t tphit_x      = r->x;
+      Float_t tphit_y      = r->y;
+      Float_t tphit_lambda = r->lambda;
+      Float_t tphit_alpha  = r->alpha;
+      Float_t tphit_phi    = r->phi;
+      Int_t tphit_nseq   = r->nseq;
+      Int_t tphit_row    = r->row;
+      Float_t tphit_q      = r->q;
+        m_nseq_hit->Fill(tphit_nseq);
+        m_tpc_row->Fill(tphit_row);
+        m_x_of_hit->Fill(tphit_x);
+        m_y_of_hit->Fill(tphit_y);
+        m_z_of_hit->Fill(tphit_z);
+        m_charge_hit->Fill(tphit_q);
+        m_alpha->Fill(tphit_alpha);
+        m_phi->Fill(tphit_phi);
+        m_lambda->Fill(tphit_lambda);
+    }
+  }
+  if (ptpcl) {
+    tcl_tpcluster_st *r2 = ptpcl->GetTable();
+    for(Int_t i=0; i<ptpcl->GetNRows();i++,r2++){
+     Int_t tpcl_nseq = r2->nseq;
+     Int_t tpcl_nhits = r2->nhits;
+     m_nseq_cluster->Fill(tpcl_nseq);
+     m_nhits->Fill(tpcl_nhits);
+    }
+  }
+
 }
 
