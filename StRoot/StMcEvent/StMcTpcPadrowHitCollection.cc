@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcTpcPadrowHitCollection.cc,v 2.1 2000/05/11 14:27:23 calderon Exp $
+ * $Id: StMcTpcPadrowHitCollection.cc,v 2.2 2005/01/27 23:40:49 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcTpcPadrowHitCollection.cc,v $
+ * Revision 2.2  2005/01/27 23:40:49  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.1  2000/05/11 14:27:23  calderon
  * use clear() in destructors to reduce size of containers
  *
@@ -21,11 +24,9 @@
 #include "StMcTpcPadrowHitCollection.hh"
 #include "StMcTpcHit.hh"
 
-static const char rcsid[] = "$Id: StMcTpcPadrowHitCollection.cc,v 2.1 2000/05/11 14:27:23 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTpcPadrowHitCollection.cc,v 2.2 2005/01/27 23:40:49 calderon Exp $";
 
-#ifdef PERSISTENT
 ClassImp(StMcTpcPadrowHitCollection)
-#endif
 
 StMcTpcPadrowHitCollection::StMcTpcPadrowHitCollection() { /* noop */ }
 

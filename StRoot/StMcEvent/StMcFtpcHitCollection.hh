@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHitCollection.hh,v 2.2 2000/04/17 23:01:15 calderon Exp $
+ * $Id: StMcFtpcHitCollection.hh,v 2.3 2005/01/27 23:40:47 calderon Exp $
  * $Log: StMcFtpcHitCollection.hh,v $
+ * Revision 2.3  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.2  2000/04/17 23:01:15  calderon
  * Added local momentum to hits as per Lee's request
  *
@@ -23,7 +26,7 @@
 #include "StMcFtpcPlaneHitCollection.hh"
 class StMcFtpcHit;
 
-class StMcFtpcHitCollection {
+class StMcFtpcHitCollection : public StObject {
 public:
 
     StMcFtpcHitCollection();
@@ -38,5 +41,6 @@ public:
 private:
     enum { mNumberOfPlanes = 20 };
     StMcFtpcPlaneHitCollection mPlanes[mNumberOfPlanes];
+    ClassDef(StMcFtpcHitCollection,1)
 };
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtLadderHitCollection.hh,v 2.3 2000/04/18 23:46:13 calderon Exp $
+ * $Id: StMcSvtLadderHitCollection.hh,v 2.4 2005/01/27 23:40:48 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcSvtLadderHitCollection.hh,v $
+ * Revision 2.4  2005/01/27 23:40:48  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.3  2000/04/18 23:46:13  calderon
  * Fix bug in reurning barrel number
  * Enumerations for the Max barrels, ladders & wafers modified for
@@ -34,7 +37,7 @@
 
 #include "StMcSvtWaferHitCollection.hh"
 
-class StMcSvtLadderHitCollection
+class StMcSvtLadderHitCollection : public StObject
 {
 public:
     StMcSvtLadderHitCollection();
@@ -54,6 +57,6 @@ private:
     enum { mMaxNumberOfWafers = 16 };
     int                        mBarrelNumber;
     StMcSvtWaferHitCollection  mWafers[mMaxNumberOfWafers];
-    
+    ClassDef(StMcSvtLadderHitCollection,1)
 };
 #endif

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcCtbHit.hh,v 2.1 2003/02/19 03:29:41 calderon Exp $
+ * $Id: StMcCtbHit.hh,v 2.2 2005/01/27 23:40:46 calderon Exp $
  * $Log: StMcCtbHit.hh,v $
+ * Revision 2.2  2005/01/27 23:40:46  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.1  2003/02/19 03:29:41  calderon
  * Introduction of CTB classes to repository.
  *
@@ -30,12 +33,16 @@ public:
     int operator!=(const StMcCtbHit&) const;
     void get_slat_tray(unsigned int & slat, unsigned int & tray) const;
     float tof() const;
+#ifdef POOL
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
-    
+#endif    
 private:
+#ifdef POOL
     static StMemoryPool mPool; //!
+#endif
     float               mTof;
+    ClassDef(StMcCtbHit,1)
 };
 
 ostream&  operator<<(ostream& os, const StMcCtbHit&);

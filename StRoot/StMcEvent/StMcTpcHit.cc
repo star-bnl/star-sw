@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.cc,v 2.8 2003/12/02 21:22:03 calderon Exp $
+ * $Id: StMcTpcHit.cc,v 2.9 2005/01/27 23:40:48 calderon Exp $
  * $Log: StMcTpcHit.cc,v $
+ * Revision 2.9  2005/01/27 23:40:48  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.8  2003/12/02 21:22:03  calderon
  * remove unnecessary #include "StMcTrack.hh"
  *
@@ -40,10 +43,12 @@
 #include "StMcTpcHit.hh"
 #include "tables/St_g2t_tpc_hit_Table.h"  
 
-static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.8 2003/12/02 21:22:03 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.9 2005/01/27 23:40:48 calderon Exp $";
 
+#ifdef POOL
 StMemoryPool StMcTpcHit::mPool(sizeof(StMcTpcHit));
-
+#endif
+ClassImp(StMcTpcHit);
 StMcTpcHit::StMcTpcHit() { /* noop */ }
 
 StMcTpcHit::StMcTpcHit(const StThreeVectorF& x,const StThreeVectorF& p,
@@ -59,7 +64,8 @@ StMcTpcHit::StMcTpcHit(g2t_tpc_hit_st* pt)
 	  pt->ds,
 	  pt->id,
 	  pt->volume_id,
-	  0)
+	  0),
+  mLgamma(pt->lgam)
 {/* noop */ }
 
 StMcTpcHit::~StMcTpcHit() {/* noop */}

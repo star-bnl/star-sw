@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtWaferHitCollection.cc,v 2.3 2003/02/19 03:16:05 calderon Exp $
+ * $Id: StMcSvtWaferHitCollection.cc,v 2.4 2005/01/27 23:40:48 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcSvtWaferHitCollection.cc,v $
+ * Revision 2.4  2005/01/27 23:40:48  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.3  2003/02/19 03:16:05  calderon
  * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
  * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
@@ -31,8 +34,8 @@
 #include "StMcSvtWaferHitCollection.hh"
 #include "StMcSvtHit.hh"
 
-static const char rcsid[] = "$Id: StMcSvtWaferHitCollection.cc,v 2.3 2003/02/19 03:16:05 calderon Exp $";
-
+static const char rcsid[] = "$Id: StMcSvtWaferHitCollection.cc,v 2.4 2005/01/27 23:40:48 calderon Exp $";
+ClassImp(StMcSvtWaferHitCollection);
 StMcSvtWaferHitCollection::StMcSvtWaferHitCollection() { /* noop */ }
 
 StMcSvtWaferHitCollection::~StMcSvtWaferHitCollection()

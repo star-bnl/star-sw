@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHitCollection.hh,v 2.3 2000/04/18 23:46:12 calderon Exp $
+ * $Id: StMcSvtHitCollection.hh,v 2.4 2005/01/27 23:40:48 calderon Exp $
  * $Log: StMcSvtHitCollection.hh,v $
+ * Revision 2.4  2005/01/27 23:40:48  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.3  2000/04/18 23:46:12  calderon
  * Fix bug in reurning barrel number
  * Enumerations for the Max barrels, ladders & wafers modified for
@@ -31,7 +34,7 @@
 #include "StMcSvtBarrelHitCollection.hh"
 class StMcSvtHit;
 
-class StMcSvtHitCollection {
+class StMcSvtHitCollection : public StObject {
 public:
     StMcSvtHitCollection();
     ~StMcSvtHitCollection();
@@ -48,7 +51,7 @@ public:
 private:
     enum { mNumberOfBarrels = 4 }; // Keeping the SSD along with SVT
     StMcSvtBarrelHitCollection mBarrels[mNumberOfBarrels];
-    
+    ClassDef(StMcSvtHitCollection,1)
 };
 
 #endif

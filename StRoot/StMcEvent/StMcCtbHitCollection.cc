@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcCtbHitCollection.cc,v 2.1 2003/02/19 03:29:42 calderon Exp $
+ * $Id: StMcCtbHitCollection.cc,v 2.2 2005/01/27 23:40:46 calderon Exp $
  * $Log: StMcCtbHitCollection.cc,v $
+ * Revision 2.2  2005/01/27 23:40:46  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.1  2003/02/19 03:29:42  calderon
  * Introduction of CTB classes to repository.
  *
@@ -12,9 +15,9 @@
 #include "StMcCtbHitCollection.hh"
 #include "StMcCtbHit.hh"
 
-static const char rcsid[] = "$Id: StMcCtbHitCollection.cc,v 2.1 2003/02/19 03:29:42 calderon Exp $";
-
-StMcCtbHitCollection::StMcCtbHitCollection()
+static const char rcsid[] = "$Id: StMcCtbHitCollection.cc,v 2.2 2005/01/27 23:40:46 calderon Exp $";
+ClassImp(StMcCtbHitCollection)
+StMcCtbHitCollection::StMcCtbHitCollection() : StObject()
 {
 }
 

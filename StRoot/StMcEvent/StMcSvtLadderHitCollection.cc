@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtLadderHitCollection.cc,v 2.4 2000/04/19 14:34:48 calderon Exp $
+ * $Id: StMcSvtLadderHitCollection.cc,v 2.5 2005/01/27 23:40:48 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcSvtLadderHitCollection.cc,v $
+ * Revision 2.5  2005/01/27 23:40:48  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.4  2000/04/19 14:34:48  calderon
  * More corrections for the SSD, thanks Helen
  *
@@ -32,8 +35,8 @@
  **************************************************************************/
 #include "StMcSvtLadderHitCollection.hh"
 
-static const char rcsid[] = "$Id: StMcSvtLadderHitCollection.cc,v 2.4 2000/04/19 14:34:48 calderon Exp $";
-
+static const char rcsid[] = "$Id: StMcSvtLadderHitCollection.cc,v 2.5 2005/01/27 23:40:48 calderon Exp $";
+ClassImp(StMcSvtLadderHitCollection);
 StMcSvtLadderHitCollection::StMcSvtLadderHitCollection()
 {
     mBarrelNumber = -1;

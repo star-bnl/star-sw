@@ -1,6 +1,9 @@
-// $Id: StMcCalorimeterHit.cc,v 2.3 2003/08/20 18:50:20 calderon Exp $
+// $Id: StMcCalorimeterHit.cc,v 2.4 2005/01/27 23:40:46 calderon Exp $
 //
 // $Log: StMcCalorimeterHit.cc,v $
+// Revision 2.4  2005/01/27 23:40:46  calderon
+// Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+//
 // Revision 2.3  2003/08/20 18:50:20  calderon
 // Addition of Tof classes and Pixel classes.  Modified track, event, and
 // container code to reflect this.
@@ -19,10 +22,10 @@
 #include "StMcTrack.hh"
 #include "StParticleDefinition.hh"
 
-// static const char rcsid[] = "$Id: StMcCalorimeterHit.cc,v 2.3 2003/08/20 18:50:20 calderon Exp $";
+// static const char rcsid[] = "$Id: StMcCalorimeterHit.cc,v 2.4 2005/01/27 23:40:46 calderon Exp $";
 
 //StMemoryPool StMcCalorimeterHit::mPool(sizeof(StMcCalorimeterHit));
-
+ClassImp(StMcCalorimeterHit);
 StMcCalorimeterHit::StMcCalorimeterHit():mModule(0),mEta(0),mSub(0),mdE(0),mParentTrack(0)
 { /* noop */   }
 

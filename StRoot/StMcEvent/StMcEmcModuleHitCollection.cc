@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEmcModuleHitCollection.cc,v $
+ * Revision 2.4  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.3  2001/05/13 21:12:10  calderon
  * Modifications by Aleksei to the Emc Hit Collections on indexing of
  * module numbers
@@ -25,11 +28,9 @@
 #include "StMcEmcModuleHitCollection.hh"
 #include "StMcCalorimeterHit.hh"
 
-static const char rcsid[] = "$Id: StMcEmcModuleHitCollection.cc,v 2.3 2001/05/13 21:12:10 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEmcModuleHitCollection.cc,v 2.4 2005/01/27 23:40:47 calderon Exp $";
 
-#ifdef PERSISTENT
 ClassImp(StMcEmcModuleHitCollection)
-#endif
 
 StMcEmcModuleHitCollection::StMcEmcModuleHitCollection(const unsigned int m)  
 {init(m);}

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.15 2004/09/14 05:00:29 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.16 2005/01/27 23:40:47 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.16  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.15  2004/09/14 05:00:29  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -85,7 +88,7 @@
 #include "Stiostream.h"
 #include "StMcContainers.hh" 
 #include "TString.h"
-
+#include "TDataSet.h"
 class StMcTpcHitCollection;
 class StMcFtpcHitCollection;
 class StMcRichHitCollection;
@@ -99,7 +102,7 @@ class StMcIstHitCollection;
 class StMcVertex;
 class g2t_event_st;
 
-class StMcEvent {
+class StMcEvent : public TDataSet {
     
 public:
     StMcEvent();  
@@ -115,7 +118,7 @@ public:
     //"Get" Methods
   
     // The following stuff will be read directly from g2t_event table
-    static const TString&        cvsTag();   
+    static const TString&        cvsTag() {return mCvsTag; }   
     
     unsigned long                eventGeneratorEventLabel() const;
     unsigned long                eventNumber() const;
@@ -251,7 +254,7 @@ protected:
 private:
     const StMcEvent& operator=(const StMcEvent&);
     StMcEvent(const StMcEvent&);
-    
+    ClassDef(StMcEvent,1)
 };
 
 ostream&  operator<<(ostream& os, const StMcEvent&);

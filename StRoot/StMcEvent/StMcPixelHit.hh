@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHit.hh,v 2.2 2004/09/14 05:00:30 calderon Exp $
+ * $Id: StMcPixelHit.hh,v 2.3 2005/01/27 23:40:47 calderon Exp $
  * $Log: StMcPixelHit.hh,v $
+ * Revision 2.3  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.2  2004/09/14 05:00:30  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -32,16 +35,20 @@ public:
 	       const float, const float, const long, const long, StMcTrack*);
     StMcPixelHit(g2t_pix_hit_st*);
     ~StMcPixelHit();
-
+#ifdef POOL
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
+#endif
 
     unsigned long layer() const; // 1-2
     unsigned long ladder() const; // 1-6, 1-18
     
 private:
 
+#ifdef POOL
     static StMemoryPool mPool; //!
+#endif
+    ClassDef(StMcPixelHit,1)
 };
 
 ostream&  operator<<(ostream& os, const StMcPixelHit&);

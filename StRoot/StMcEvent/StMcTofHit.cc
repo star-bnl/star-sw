@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTofHit.cc,v 2.2 2003/12/02 21:22:03 calderon Exp $
+ * $Id: StMcTofHit.cc,v 2.3 2005/01/27 23:40:48 calderon Exp $
  * $Log: StMcTofHit.cc,v $
+ * Revision 2.3  2005/01/27 23:40:48  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.2  2003/12/02 21:22:03  calderon
  * remove unnecessary #include "StMcTrack.hh"
  *
@@ -13,9 +16,11 @@
  ***************************************************************************/
 #include "StMcTofHit.hh"
 #include "tables/St_g2t_ctf_hit_Table.h"
-static const char rcsid[] = "$Id: StMcTofHit.cc,v 2.2 2003/12/02 21:22:03 calderon Exp $";
-
+static const char rcsid[] = "$Id: StMcTofHit.cc,v 2.3 2005/01/27 23:40:48 calderon Exp $";
+#ifdef POOL
 StMemoryPool StMcTofHit::mPool(sizeof(StMcTofHit));
+#endif
+ClassImp(StMcTofHit);
 
 StMcTofHit::StMcTofHit() { /* noop */ };
 

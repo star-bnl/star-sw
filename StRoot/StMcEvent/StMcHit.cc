@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.cc,v 2.6 2000/06/06 02:58:41 calderon Exp $
+ * $Id: StMcHit.cc,v 2.7 2005/01/27 23:40:47 calderon Exp $
  * $Log: StMcHit.cc,v $
+ * Revision 2.7  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.6  2000/06/06 02:58:41  calderon
  * Introduction of Calorimeter classes.  Modified several classes
  * accordingly.
@@ -34,8 +37,8 @@
 
 #include "tables/St_g2t_hits_Table.h"
 
-static const char rcsid[] = "$Id: StMcHit.cc,v 2.6 2000/06/06 02:58:41 calderon Exp $";
-
+static const char rcsid[] = "$Id: StMcHit.cc,v 2.7 2005/01/27 23:40:47 calderon Exp $";
+ClassImp(StMcHit);
 StMcHit::StMcHit()
     : mPosition(0.,0.,0.), mdE(0),mdS(0),mParentTrack(0)
 { /* noop */   }

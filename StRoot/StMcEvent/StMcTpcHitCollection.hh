@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHitCollection.hh,v 2.1 1999/11/19 19:06:34 calderon Exp $
+ * $Id: StMcTpcHitCollection.hh,v 2.2 2005/01/27 23:40:49 calderon Exp $
  * $Log: StMcTpcHitCollection.hh,v $
+ * Revision 2.2  2005/01/27 23:40:49  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.1  1999/11/19 19:06:34  calderon
  * Recommit after redoing the files.
  *
@@ -21,7 +24,7 @@
 
 class StMcTpcHit;
 
-class StMcTpcHitCollection {
+class StMcTpcHitCollection : public StObject {
 public:
     StMcTpcHitCollection();
     ~StMcTpcHitCollection();
@@ -38,7 +41,7 @@ public:
 private:
     enum { mNumberOfSectors = 24 };
     StMcTpcSectorHitCollection mSectors[mNumberOfSectors];
-    
+    ClassDef(StMcTpcHitCollection,1)
 };
 
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSsdLayerHitCollection.hh,v 2.1 2004/09/14 05:00:30 calderon Exp $
+ * $Id: StMcSsdLayerHitCollection.hh,v 2.2 2005/01/27 23:40:48 calderon Exp $
  *
  * Author: Fabrice Retiere/Kai Schweda, Aug 2003
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StMcSsdLayerHitCollection.hh,v $
+ * Revision 2.2  2005/01/27 23:40:48  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.1  2004/09/14 05:00:30  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -27,14 +30,15 @@
 #define StMcSsdLayerHitCollection_hh
 
 #include "StMcContainers.hh"
+#include "StObject.h"
 
 class StMcSsdHit;
 
-class StMcSsdLayerHitCollection
+class StMcSsdLayerHitCollection : public StObject
 {
 public:
     StMcSsdLayerHitCollection();
-    ~StMcSsdLayerHitCollection();
+    virtual ~StMcSsdLayerHitCollection();
     
     unsigned long numberOfHits() const;
 
@@ -43,6 +47,6 @@ public:
 
 private:
     StSPtrVecMcSsdHit mHits;
-        
+    ClassDef(StMcSsdLayerHitCollection,1)
 };
 #endif

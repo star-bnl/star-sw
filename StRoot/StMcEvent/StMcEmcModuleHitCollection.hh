@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEmcModuleHitCollection.hh,v 2.3 2001/05/31 02:45:55 perev Exp $
+ * $Id: StMcEmcModuleHitCollection.hh,v 2.4 2005/01/27 23:40:47 calderon Exp $
  *
  * Author: Aleksei Pavlinov, May 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEmcModuleHitCollection.hh,v $
+ * Revision 2.4  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.3  2001/05/31 02:45:55  perev
  * const(ing)
  *
@@ -47,6 +50,7 @@ public:
     void operator()(const unsigned int m) { init(m); } 
 
 private:
-    StSPtrVecMcCalorimeterHit mHits; 
+    StSPtrVecMcCalorimeterHit mHits;
+    ClassDef(StMcEmcModuleHitCollection,1)
 };
 #endif

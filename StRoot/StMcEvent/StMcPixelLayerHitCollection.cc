@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcPixelLayerHitCollection.cc,v 2.1 2003/08/20 18:50:21 calderon Exp $
+ * $Id: StMcPixelLayerHitCollection.cc,v 2.2 2005/01/27 23:40:47 calderon Exp $
  *
  * Author: Fabrice Retiere/Kai Schweda, Aug 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcPixelLayerHitCollection.cc,v $
+ * Revision 2.2  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.1  2003/08/20 18:50:21  calderon
  * Addition of Tof classes and Pixel classes.  Modified track, event, and
  * container code to reflect this.
@@ -20,11 +23,9 @@
  **************************************************************************/
 #include "StMcPixelLayerHitCollection.hh"
 #include "StMcPixelHit.hh"
-static const char rcsid[] = "$Id: StMcPixelLayerHitCollection.cc,v 2.1 2003/08/20 18:50:21 calderon Exp $";
+static const char rcsid[] = "$Id: StMcPixelLayerHitCollection.cc,v 2.2 2005/01/27 23:40:47 calderon Exp $";
 
-#ifdef PERSISTENT
 ClassImp(StMcPixelLayerHitCollection)
-#endif
 
 StMcPixelLayerHitCollection::StMcPixelLayerHitCollection() { /* noop */ }
 

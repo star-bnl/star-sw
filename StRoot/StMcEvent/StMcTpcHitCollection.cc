@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHitCollection.cc,v 2.1 1999/12/14 07:04:49 calderon Exp $
+ * $Id: StMcTpcHitCollection.cc,v 2.2 2005/01/27 23:40:49 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcTpcHitCollection.cc,v $
+ * Revision 2.2  2005/01/27 23:40:49  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.1  1999/12/14 07:04:49  calderon
  * Numbering scheme as per SVT request.
  *
@@ -22,11 +25,9 @@
 #include "StMcTpcPadrowHitCollection.hh"
 #include "StMcTpcHit.hh"
 
-static const char rcsid[] = "$Id: StMcTpcHitCollection.cc,v 2.1 1999/12/14 07:04:49 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTpcHitCollection.cc,v 2.2 2005/01/27 23:40:49 calderon Exp $";
 
-#ifdef PERSISTENT
 ClassImp(StMcTpcHitCollection)
-#endif
 
 StMcTpcHitCollection::StMcTpcHitCollection() { /* noop */ }
 

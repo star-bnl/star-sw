@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHit.cc,v 2.3 2004/09/14 05:00:30 calderon Exp $
+ * $Id: StMcPixelHit.cc,v 2.4 2005/01/27 23:40:47 calderon Exp $
  * $Log: StMcPixelHit.cc,v $
+ * Revision 2.4  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.3  2004/09/14 05:00:30  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -20,10 +23,16 @@
 #include "StMcPixelHit.hh"
 #include "tables/St_g2t_pix_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.3 2004/09/14 05:00:30 calderon Exp $";
+static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.4 2005/01/27 23:40:47 calderon Exp $";
 
+#ifdef POOL
 StMemoryPool StMcPixelHit::mPool(sizeof(StMcPixelHit));
+#endif
+ClassImp(StMcPixelHit);
 
+StMcPixelHit::StMcPixelHit() : StMcHit(StThreeVectorF(0, 0, 0),
+				       StThreeVectorF(0, 0, 0),
+				       0, 0, 0, 0, 0) {}
 StMcPixelHit::StMcPixelHit(const StThreeVectorF& x,const StThreeVectorF& p,
 			 const float de, const float ds, const long key,
 			 const long id,

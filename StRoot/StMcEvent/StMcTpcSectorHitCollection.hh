@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcTpcSectorHitCollection.hh,v 2.1 2000/03/06 18:05:23 calderon Exp $
+ * $Id: StMcTpcSectorHitCollection.hh,v 2.2 2005/01/27 23:40:49 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcTpcSectorHitCollection.hh,v $
+ * Revision 2.2  2005/01/27 23:40:49  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.1  2000/03/06 18:05:23  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.
@@ -26,7 +29,7 @@
 
 #include "StMcTpcPadrowHitCollection.hh"
 
-class StMcTpcSectorHitCollection
+class StMcTpcSectorHitCollection : public StObject
 {    
 public:
     StMcTpcSectorHitCollection();
@@ -43,6 +46,6 @@ public:
 private:
     enum { mNumberOfPadrows = 45 };
     StMcTpcPadrowHitCollection mPadrows[mNumberOfPadrows];
-    
+    ClassDef(StMcTpcSectorHitCollection,1)
 };
 #endif

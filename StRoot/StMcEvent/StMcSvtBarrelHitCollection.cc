@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtBarrelHitCollection.cc,v 2.2 2000/04/19 18:32:23 calderon Exp $
+ * $Id: StMcSvtBarrelHitCollection.cc,v 2.3 2005/01/27 23:40:48 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, March 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcSvtBarrelHitCollection.cc,v $
+ * Revision 2.3  2005/01/27 23:40:48  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.2  2000/04/19 18:32:23  calderon
  * Added check for SSD in barrel collection
  * put default numbers for l, d, w in SvtHitCollection
@@ -24,8 +27,8 @@
  **************************************************************************/
 #include "StMcSvtBarrelHitCollection.hh"
 
-static const char rcsid[] = "$Id: StMcSvtBarrelHitCollection.cc,v 2.2 2000/04/19 18:32:23 calderon Exp $";
-
+static const char rcsid[] = "$Id: StMcSvtBarrelHitCollection.cc,v 2.3 2005/01/27 23:40:48 calderon Exp $";
+ClassImp(StMcSvtBarrelHitCollection);
 StMcSvtBarrelHitCollection::StMcSvtBarrelHitCollection()
 {
     mBarrelNumber = -1;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcPlaneHitCollection.cc,v 2.0 1999/11/17 02:00:59 calderon Exp $
+ * $Id: StMcFtpcPlaneHitCollection.cc,v 2.1 2005/01/27 23:40:47 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcFtpcPlaneHitCollection.cc,v $
+ * Revision 2.1  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.0  1999/11/17 02:00:59  calderon
  * Completely revised for new StEvent
  *
@@ -17,11 +20,9 @@
  **************************************************************************/
 #include "StMcFtpcPlaneHitCollection.hh"
 #include "StMcFtpcHit.hh"
-static const char rcsid[] = "$Id: StMcFtpcPlaneHitCollection.cc,v 2.0 1999/11/17 02:00:59 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFtpcPlaneHitCollection.cc,v 2.1 2005/01/27 23:40:47 calderon Exp $";
 
-#ifdef PERSISTENT
 ClassImp(StMcFtpcPlaneHitCollection)
-#endif
 
 StMcFtpcPlaneHitCollection::StMcFtpcPlaneHitCollection() { /* noop */ }
 

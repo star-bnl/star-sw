@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.15 2004/09/14 05:00:30 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.16 2005/01/27 23:40:49 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.16  2005/01/27 23:40:49  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.15  2004/09/14 05:00:30  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -36,8 +39,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
  *
- * $Id: StMcTrack.hh,v 2.15 2004/09/14 05:00:30 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.16 2005/01/27 23:40:49 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.16  2005/01/27 23:40:49  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.15  2004/09/14 05:00:30  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -118,13 +124,13 @@
 #include "Stiostream.h"
 #include "StLorentzVectorF.hh"
 #include "StMcContainers.hh"
-//#include "StTrackTopologyMap.h"
+#include "StObject.h"
 class StParticleDefinition;
 class g2t_track_st;
 class particle_st;
 class StMcTrack;
 
-class StMcTrack {
+class StMcTrack : public StObject {
 public:
     StMcTrack();
     virtual ~StMcTrack();
@@ -274,11 +280,11 @@ protected:
     long                     mPdgId; //!
     long                     mKey;     //!
     long                     mEventGenLabel; //!
-    //    StTrackTopologyMap     mTopologyMap; //!
+    ClassDef(StMcTrack,1)
 };
-
+#ifndef __CINT__
 ostream&  operator<<(ostream& os, const StMcTrack&);
-
+#endif
 inline const StLorentzVectorF& StMcTrack::fourMomentum() const { return mFourMomentum; }
 
 inline const StThreeVectorF& StMcTrack::momentum() const { return mFourMomentum.vect(); }
