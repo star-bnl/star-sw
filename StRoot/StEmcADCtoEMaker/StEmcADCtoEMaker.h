@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.13 2001/12/26 19:25:34 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.14 2001/12/27 17:45:36 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.14  2001/12/27 17:45:36  suaide
+// removed obsolete files and updated documentation
+//
 // Revision 1.13  2001/12/26 19:25:34  suaide
 // Added documentation and few modifications
 //
@@ -26,6 +29,25 @@
 // The other version is kept as *.old for future debug
 //
 //
+
+/*!\class StEmcADCtoEMaker
+\author Alexandre A. P. Suaide
+
+This class gets EMC raw ADC's and convert them to calibrated energy.<br><br>
+
+The main variables that should be set are:<br>
+  - kCalib[det] - Set to kTRUE if you want to calibrate an EMC subdetector.
+  - isDaqFile - Set to kTRUE if you are reading a DAQ dataset.
+  - subtractPedestal - Set to kTRUE if pedestal should be subtracted.
+  - saveOnlyCalibHits - Set to kTRUE if you want to save only calibrated hits. Otherwise, all hits with ADC>0 are saved.
+
+The defaults values are:<br>
+  - kCalib[det] = {kTRUE, kFALSE, kTRUE, kTRUE}
+  - isDaqFile = kTRUE
+  - subtractPedestal = kTRUE
+  - saveOnlyCalibHits = kFALSE
+*/
+
 #ifndef STAR_StEmcADCtoEMaker
 #define STAR_StEmcADCtoEMaker
 
@@ -82,31 +104,31 @@ class StEmcADCtoEMaker : public StMaker
            
            StEmcGeom         *geo[MAXDET];
 
-           StEmcCollection   *GetEmcCollectionFromDaq(TDataSet* daq);
-           void              GetStatus(Int_t);
+           StEmcCollection   *GetEmcCollectionFromDaq(TDataSet* daq);///This method gets EMC collection from DAQ dataset.
+           void              GetStatus(Int_t); ///This method gets the status tables for a given detector
            
   protected:    
     
   public: 
-           Bool_t            kCalib[MAXDET];
-           Bool_t            isDaqFile;
-           Bool_t            subtractPedestal;
-           Bool_t            saveOnlyCalibHits;
+           Bool_t            kCalib[MAXDET]; /// set to kTRUE if you want to calibrate some detector
+           Bool_t            isDaqFile; /// set to kTRUE if you are reading a .daq file
+           Bool_t            subtractPedestal; /// set to kTRUE to subtract pedestal
+           Bool_t            saveOnlyCalibHits; /// set to kTRUE to save only calibrated hits
                  
-                             StEmcADCtoEMaker(const char *name="Eread");
-   virtual                   ~StEmcADCtoEMaker();
-   virtual Int_t             Init();
-   virtual Int_t             Make();
-   virtual Int_t             Finish();
-           Bool_t            GetEmcEvent();
-           Bool_t            CreateVector(Int_t);
-           Bool_t            Calibrate(Int_t,Int_t*,Float_t*);
-           Bool_t            FillHistograms(Int_t,Int_t,Float_t);
-           Bool_t            FillStEvent();
+                             StEmcADCtoEMaker(const char *name="Eread"); ///StEmcADCtoEMaker constructor
+   virtual                   ~StEmcADCtoEMaker(); ///StEmcADCtoEMaker destructor
+   virtual Int_t             Init(); ///Init function. This method initializes the histograms
+   virtual Int_t             Make(); ///Process each event
+   virtual Int_t             Finish(); /// This method creates mean ADC and RMS histograms.
+           Bool_t            GetEmcEvent(); ///This method gets EMC hits from different sources.
+           Bool_t            CreateVector(Int_t); ///This method creates a temporary ADC vector for each detector.
+           Bool_t            Calibrate(Int_t,Int_t*,Float_t*); ///This method applies the calibration constants to get the hit energy.
+           Bool_t            FillHistograms(Int_t,Int_t,Float_t); ///This method fills QA histograms
+           Bool_t            FillStEvent(); ///This method makes a clean up of StEvent
    
-   static  controlADCtoE_st  *getControlTable()  {return NULL;}
-           StEmcCollection   *getEmcCollection() {return m_emc;}
-           void              clearStEventStaf()  { m_emc = 0;}
+   static  controlADCtoE_st  *getControlTable()  {return NULL;} ///return Control table (NULL)
+           StEmcCollection   *getEmcCollection() {return m_emc;} /// return emcCollection
+           void              clearStEventStaf()  { m_emc = 0;} /// clear emcCollection (does not delete from memory)
 
    ClassDef(StEmcADCtoEMaker, 1)  
 };

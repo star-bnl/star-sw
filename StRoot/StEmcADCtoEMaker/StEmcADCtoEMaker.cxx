@@ -1,8 +1,8 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.25 2001/12/27 16:23:44 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.26 2001/12/27 17:45:36 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
-// Revision 1.25  2001/12/27 16:23:44  suaide
-// changed documentation
+// Revision 1.26  2001/12/27 17:45:36  suaide
+// removed obsolete files and updated documentation
 //
 // Revision 1.24  2001/12/26 19:25:34  suaide
 // Added documentation and few modifications
@@ -35,25 +35,6 @@
 // Revision 1.13  2000/05 16:07:01  
 // Add README
 //
-
-/*!\class StEmcADCtoEMaker
-\author Alexandre A. P. Suaide
-
-This class gets EMC raw ADC's and convert them to calibrated energy.<br><br>
-
-The main variables that should be set are:<br>
-kCalib[det] - Set to kTRUE if you want to calibrate an EMC subdetector.<br>
-isDaqFile - Set to kTRUE if you are reading a DAQ dataset.<br>
-subtractPedestal - Set to kTRUE if pedestal should be subtracted.<br>
-saveOnlyCalibHits - Set to kTRUE if you want to save only calibrated hits. Otherwise, all
-hits with ADC>0 are saved.<br><br>
-
-The defaults values are:<br>
-kCalib[det] = {kTRUE,kFALSE,kTRUE,kTRUE}<br>
-isDaqFile = kTRUE<br>
-subtractPedestal = kTRUE<br>
-saveOnlyCalibHits = kFALSE<br>
-*/
 #include "StEmcADCtoEMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -76,7 +57,9 @@ saveOnlyCalibHits = kFALSE<br>
 ClassImp(StEmcADCtoEMaker)
 
 //_____________________________________________________________________________
-///StEmcADCtoEMaker constructor
+/* 
+Default constructor
+*/
 StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
 {
   for(Int_t i=0;i<MAXDET;i++) kCalib[i]=kFALSE; // all detectors off
@@ -88,12 +71,17 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
   saveOnlyCalibHits=kFALSE;
 }
 //_____________________________________________________________________________
-///StEmcADCtoEMaker destructor
+/* 
+Default destructor
+*/
 StEmcADCtoEMaker::~StEmcADCtoEMaker()
 {
 }
 //_____________________________________________________________________________
-///Init function. This method initializes the histograms
+/* 
+Init function. Initializes the histograms and all other variables used by the
+program
+*/
 Int_t StEmcADCtoEMaker::Init()
 {   
   gMessMgr->SetLimit("StEmcADCtoEMaker",1000);
@@ -140,7 +128,9 @@ Int_t StEmcADCtoEMaker::Init()
   return StMaker::Init();
 }
 //_____________________________________________________________________________
-///This method creates mean ADC and RMS histograms. It runs only in the end of the job
+/*!
+This method creates mean ADC and RMS histograms. It runs only in the end of the job
+*/
 Int_t StEmcADCtoEMaker::Finish()
 {
   cout <<"Creating gain monitor histogram for EMC towers\n";
@@ -171,10 +161,12 @@ Int_t StEmcADCtoEMaker::Finish()
   return kStOk;
 }
 //_____________________________________________________________________________
-///Process the event. Basicaly it get the status database and makes a loop over
-///EMC subdetectors. For each sub detector it gets the calibration tables, subtract
-///pedestals and apply calibration constants. In the end, update StEvent with
-///calibrated hits
+/*!
+Process the event. Basicaly it get the status database and makes a loop over
+EMC subdetectors. For each sub detector it gets the calibration tables, subtract
+pedestals and apply calibration constants. In the end, update StEvent with
+calibrated hits
+*/
 Int_t StEmcADCtoEMaker::Make()
 {  
   TStopwatch clock;
@@ -232,8 +224,10 @@ Int_t StEmcADCtoEMaker::Make()
   return kStOK;
 }
 //_____________________________________________________________________________
-///This method gets the status tables for a given detector and stores it in the
-///array status[det][index].
+/*!
+This method gets the status tables for a given detector and stores it in the
+array status[det][index].
+*/
 void StEmcADCtoEMaker::GetStatus(Int_t det)
 {
   cout <<"Getting status table for detector "<<detname[det].Data()<<endl;
@@ -307,9 +301,11 @@ void StEmcADCtoEMaker::GetStatus(Int_t det)
 
 }
 //_____________________________________________________________________________
-///This method gets EMC collection from DAQ dataset. It also gets the capacitor number
-///for SMD and saves it in the calibrationType member of StEmcRawHit. It looks for
-///hits in the detector only if kCalib[det] is set as kTRUE
+/*!
+This method gets EMC collection from DAQ dataset. It also gets the capacitor number
+for SMD and saves it in the calibrationType member of StEmcRawHit. It looks for
+hits in the detector only if kCalib[det] is set as kTRUE
+*/
 StEmcCollection* StEmcADCtoEMaker::GetEmcCollectionFromDaq(TDataSet* daq)
 {
   cout <<"***** Getting EMC event from daq file\n";
@@ -399,9 +395,11 @@ StEmcCollection* StEmcADCtoEMaker::GetEmcCollectionFromDaq(TDataSet* daq)
   return emcDaqUtil;
 }
 //_____________________________________________________________________________
-///This method gets EMC hits from different sources. First it looks for DAQ datasets.
-///if Not present, looks for Simulated hits and, in the end, for old StEvent hits to
-///recalibrate.
+/*!
+This method gets EMC hits from different sources. First it looks for DAQ datasets.
+if Not present, looks for Simulated hits and, in the end, for old StEvent hits to
+recalibrate.
+*/
 Bool_t StEmcADCtoEMaker::GetEmcEvent()
 {
   StEmcCollection* emctemp=NULL;
@@ -461,9 +459,11 @@ Bool_t StEmcADCtoEMaker::GetEmcEvent()
   
 }
 //_____________________________________________________________________________
-///This method creates a temporary ADC vector for each detector. This ADC vector
-///is pedestal subtracted and it is used for calibration, once the original ADC
-///value present at StEvent is not pedestal subtracted.
+/*!
+This method creates a temporary ADC vector for each detector. This ADC vector
+is pedestal subtracted and it is used for calibration, once the original ADC
+value present at StEvent is not pedestal subtracted.
+*/
 Bool_t StEmcADCtoEMaker::CreateVector(Int_t detnum)
 {
   cout <<"organizing data for detector "<<detname[detnum].Data()<<endl;
@@ -547,9 +547,11 @@ Bool_t StEmcADCtoEMaker::CreateVector(Int_t detnum)
   return kTRUE;
 }
 //_____________________________________________________________________________
-///This method applies the calibration constants to get the hit energy. The calibration
-///is applied only to the hits which tower/strip status is set to 1 (status[det][index==1).
-///It also checks if the calibration is done for that bin
+/*!
+This method applies the calibration constants to get the hit energy. The calibration
+is applied only to the hits which tower/strip status is set to 1 (status[det][index==1).
+It also checks if the calibration is done for that bin
+*/
 Bool_t StEmcADCtoEMaker::Calibrate(Int_t detnum,Int_t* NHITS,Float_t* ENERGY)
 {
   cout <<"applying calibration for detector "<<detname[detnum].Data()<<endl;
@@ -591,14 +593,20 @@ Bool_t StEmcADCtoEMaker::Calibrate(Int_t detnum,Int_t* NHITS,Float_t* ENERGY)
         Float_t adc=ADCTemp[idh-1];
        
         Float_t energy=0;
-        Bool_t st=kFALSE;
-        if(adc>0 && status[detnum][idh-1]==1 && cal_st[idh-1].Status==1 && cal_st[idh-1].CalibStatus==1)
+        if(adc>0 && 
+           status[detnum][idh-1]==1 && 
+           cal_st[idh-1].Status==1 && 
+           cal_st[idh-1].CalibStatus==1)
         {
-           Float_t adcpower=1;
-           for(Int_t i=0;i<5;i++) {energy+=cal_st[idh-1].AdcToE[i]*adcpower; adcpower*=adc;}            
-           if (energy<0) energy=0;
-           nhits++;
-           totalenergy+=energy;
+          Float_t adcpower=1;
+          for(Int_t i=0;i<5;i++) 
+          {
+            energy+=cal_st[idh-1].AdcToE[i]*adcpower; 
+            adcpower*=adc;
+          }            
+          if (energy<0) energy=0;
+          nhits++;
+          totalenergy+=energy;
         }
         rawHit[k]->setEnergy(energy);
         /*if (rawHit[k]->adc()>0)
@@ -613,7 +621,9 @@ Bool_t StEmcADCtoEMaker::Calibrate(Int_t detnum,Int_t* NHITS,Float_t* ENERGY)
   return kTRUE;
 }
 //_____________________________________________________________________________
-///This method fills QA histograms
+/*!
+This method fills QA histograms
+*/
 Bool_t StEmcADCtoEMaker::FillHistograms(Int_t detnum,Int_t nhits,Float_t energy)
 {
   cout <<"***** Filling histograms for detector "<<detname[detnum].Data()<<endl;
@@ -675,9 +685,11 @@ Bool_t StEmcADCtoEMaker::FillHistograms(Int_t detnum,Int_t nhits,Float_t energy)
   return kTRUE;
 }
 //_____________________________________________________________________________
-///This method makes a clean up of StEvent before store it in the .data
-///The clean up corresponds to eliminate all hits with non calibrated energy,
-///if this option is set (saveOnlyCalibHits)
+/*!
+This method makes a clean up of StEvent before store it in the .data
+The clean up corresponds to eliminate all hits with non calibrated energy,
+if this option is set (saveOnlyCalibHits)
+*/
 Bool_t StEmcADCtoEMaker::FillStEvent()
 {  
   // first need to clean hits with adc = 0
