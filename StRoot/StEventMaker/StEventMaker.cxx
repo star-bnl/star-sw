@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.15 2000/01/14 18:51:06 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.16 2000/01/25 20:11:11 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,9 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.15  2000/01/14 18:51:06  ullrich
- * Added printout of quasi-histos in the event summary
- * to printEventInfo().
+ * Revision 2.16  2000/01/25 20:11:11  ullrich
+ * Fixed bug in loading the Xi vertices.
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -93,7 +92,7 @@
  * Revision 2.5  1999/11/11 10:02:58  ullrich
  * Added warning message in case some hits cannot be stored.
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.15 2000/01/14 18:51:06 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.16 2000/01/25 20:11:11 ullrich Exp $";
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -130,10 +129,10 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.15 2000/01/14 18:51:06 ul
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.15 2000/01/14 18:51:06 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.16 2000/01/25 20:11:11 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.15 2000/01/14 18:51:06 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.16 2000/01/25 20:11:11 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -489,6 +488,7 @@ StEventMaker::makeEvent()
     if (nfailed) 
 	gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
     //  New: iflag > 0 for event (primary) vertices.
+        }
     }
     if (nfailed)
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
@@ -536,17 +536,17 @@ StEventMaker::makeEvent()
 	    if (id < vecGlobalTracks.size()) v0->addDaughter(vecGlobalTracks[id]);
 	    id = dstV0Vertices[i].idpos;
 	    if (id < vecGlobalTracks.size()) v0->addDaughter(vecGlobalTracks[id]);
-    long nXiVertices;
+	    v0Vertices.push_back(v0);
 	}
-
+	else
 	    nfailed++;
     }
-        id = dstV0Vertices[i].id_vertex - 1;
+    if (nfailed) 
 	gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
 			    << " V0 vertices, no valid id_vertex." << endm;
         if (vecPrimaryTracks[k]) {nfailed++; delete vecPrimaryTracks[k];}
     if (nfailed)
-	    id = dstXiVertices[i].id_b;
+        gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot assign " << nfailed
                             << " primary tracks, no corresponding primary vertex found." << endm;
        
     //
@@ -555,7 +555,7 @@ StEventMaker::makeEvent()
     long nV0Vertices;
     dst_v0_vertex_st* dstV0Vertices = mEventManager->returnTable_dst_v0_vertex(nV0Vertices);
 	if (id < static_cast<unsigned long>(nVertices)) {
-			    << " Xi vertices, no valid id_vertex." << endm;
+	    StXiVertex *xi = new StXiVertex(dstVertices[id], dstXiVertices[i]);
 	    id = dstXiVertices[i].id_v0 - 1;
 	    if (id < v0Vertices.size()) xi->setV0Vertex(v0Vertices[id]);
 	    id  = dstXiVertices[i].id_b;       // no -1 here 
@@ -1133,7 +1133,7 @@ StEventMaker::printRunInfo()
         gotOneHit = kFALSE;
         for (k=0; !gotOneHit && k<svtColl->numberOfBarrels(); k++)
             for (j=0; !gotOneHit && j<svtColl->barrel(k)->numberOfLadders(); j++)
-    
+                for (i=0; !gotOneHit && i<svtColl->barrel(k)->ladder(j)->numberOfWafers(); i++)
     }
 	cout << "collection size = " << richPixels->size() << endl;
 	richPixels->Dump();
