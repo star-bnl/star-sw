@@ -1,6 +1,10 @@
-* $Id: g2t_get_event.F,v 1.6 2003/03/14 17:26:19 potekhin Exp $
+* $Id: g2t_get_event.F,v 1.7 2003/05/14 22:55:53 potekhin Exp $
 *
 * $Log: g2t_get_event.F,v $
+* Revision 1.7  2003/05/14 22:55:53  potekhin
+* Introducing new data elements in teh event record -- number of
+* wounded nucleaons etc. Changed interface to the mheadrd sub.
+*
 * Revision 1.6  2003/03/14 17:26:19  potekhin
 * Added a call to the "mheadrd", the facility which
 * will allow us to read optional Zebra banks into root
@@ -27,14 +31,17 @@
       implicit   none
 
 #include "g2t_get_event.inc"
-      Integer                G2T_GET_EVENT,Len,NBytPW
-      Integer                NwHEAD,IHEAD(100),Nu,IBUF(100),i,j,in,ip,jn,jp
-      Integer                Ntra,IRUN,Ievt,IwtFL,Istat,IDPDG,MOTH(2),IDAU1
-      Real                   VERT(4),PP(4),TIME,AMASS,WEIGH
-      Character              GeName*8
-      Parameter              (NBytPW=4)
-      INTEGER                NUMPRIM,NUMFINS,SUB_ID
-      common /g2tevtcnt/     NUMPRIM,NUMFINS 
+      Integer             G2T_GET_EVENT,Len,NBytPW
+      Integer             NwHEAD,IHEAD(100),Nu,IBUF(100),i,j,in,ip,jn,jp
+      Integer             Ntra,IRUN,Ievt,IwtFL,Istat,IDPDG,MOTH(2),IDAU1
+      Real                VERT(4),PP(4),TIME,AMASS,WEIGH
+      Character           GeName*8
+      Parameter           (NBytPW=4)
+
+      INTEGER             NUMPRIM,NUMFINS
+      INTEGER             SUB_ID,NBIN_COLL,NWE,NWW,NJETS
+      common /g2tevtcnt/  NUMPRIM,NUMFINS 
+      common /HDRNFO/     SUB_ID,NBIN_COLL,NWE,NWW,NJETS
 *
 *     make g2t_event:
       G2T_GET_EVENT   = 1
@@ -49,7 +56,8 @@
       g2t_event(1).ge_rndm(1)         = IHEAD(3)
       g2t_event(1).ge_rndm(2)         = IHEAD(4)
 
-      if (Istat .eq. 10) then
+* --max-- was EQ.10, which was also incorrect
+      if (Istat .ge. 10) then
         g2t_event(1).eg_label         = VERT(2)    ! run number
         g2t_event(1).event_type       = VERT(1)    ! event number
         i  =  AMASS                                ! Awest.Aeast
@@ -72,9 +80,13 @@
       g2t_event(1).prim_vertex_p      = 1
       g2t_event(1).time_offset        = 0
 
-* Adding the suboprocess ID reader
-      call MHEADRD(SUB_ID)
+* Adding the suboprocess ID and other additional info, to the event struct:
+      call MHEADRD() ! Fetch data from Zebra and into the common block
       g2t_event(1).subprocess_id = SUB_ID
+      g2t_event(1).n_binary      = NBIN_COLL
+      g2t_event(1).n_wounded_east= NWE
+      g2t_event(1).n_wounded_west= NWW
+      g2t_event(1).njets         = NJETS
 
       END
 
