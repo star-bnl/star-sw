@@ -14,7 +14,7 @@ C VECTOR
 C MINUIT                                                                
 C MATRIX                                                                
 C FFREAD                                                                
-C RANDOM                                                                
+C RANDOM                                                                 
 C RANDOM                                                                
 C COMIS                                                                 
 C INTERP                                                                
@@ -50,6 +50,13 @@ C Check IX>=0
       FDUM3 = DCOSD(0.0D0)                                              
       FDUM4 = DTAND(0.0D0)                                              
       IX=SYSTEMF(' ')                                                   
+* Landau
+      FDUM1 = DENLAN(0.0)
+      FDUM1 = DSTLAN(0.0)
+      FDUM1 = DIFLAN(0.0)
+      FDUM1 = XM1LAN(0.0)
+      FDUM1 = XM2LAN(0.0)
+      FDUM1 = RANLAN(0.0)
 * now fake calls to library - no need for arguments
       CALL GFKINE                                                       
       CALL GFVERT                                                       
