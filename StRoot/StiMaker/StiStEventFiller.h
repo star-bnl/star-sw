@@ -1,12 +1,17 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.0 2002/12/04 16:51:01 pruneau Exp $
+ * $Id: StiStEventFiller.h,v 2.1 2003/01/22 21:12:16 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.1  2003/01/22 21:12:16  calderon
+ * Restored encoded method, uses enums but stores the value in constructor
+ * as a data member so bit operations are only done once.
+ * Fixed warnings.
+ *
  * Revision 2.0  2002/12/04 16:51:01  pruneau
  * introducing version 2.0
  *
@@ -101,6 +106,7 @@ private:
     StiDedxCalculator dEdxSvtCalculator;
 
     StHelix * helix;
+    unsigned short mStiEncoded;
 
 };
 
