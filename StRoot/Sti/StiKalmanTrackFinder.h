@@ -3,7 +3,7 @@
 #ifndef StiKalmanTrackFinder_H_INCLUDED
 #define StiKalmanTrackFinder_H_INCLUDED
 #include "Sti/StiTrackFinder.h"
-class Messenger;
+#include "Sti/StiKalmanTrackFinderParameters.h"
 class StiDetector;
 class StiDetectorBuilder;
 class StiDetectorContainer;
@@ -19,7 +19,6 @@ class StiKalmanTrackNode;
 class StEvent;
 class StMcEvent;
 class StiStEventFiller;
-class StiKalmanTrackFinderParameters;
 template<class Factorized>class Factory;
 template<class Event,class McEvent,class Detector>class StiHitLoader;
 
@@ -98,8 +97,8 @@ public:
   /// Get Tracking Mode used for Interactive Tracking
   StiFindStep getTrackingMode() const;
   
-  void setParameters(StiKalmanTrackFinderParameters *par);
-  virtual EditableParameters * getParameters();
+  void setParameters(const StiKalmanTrackFinderParameters &par);
+  virtual EditableParameters & getParameters();
   
   void doInitLayer(int trackingDirection);
   void doNextDetector();
@@ -128,8 +127,7 @@ protected:
     StiStEventFiller            * _eventFiller;
     StEvent                     * _event;
     StMcEvent                   * _mcEvent;
-    StiKalmanTrackFinderParameters * _pars;
-    Messenger                      & _messenger;
+    StiKalmanTrackFinderParameters  _pars;
 
 private:
     
