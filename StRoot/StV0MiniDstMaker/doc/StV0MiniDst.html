@@ -1,0 +1,85 @@
+<html>
+<head>
+<title> StV0MiniDstMaker Documentation </title>
+</head>
+<body bgcolor=lightblue>
+<h1> StV0MiniDstMaker Documentation </h1>
+
+<h3> Comments on the StV0MiniDst Class </h3>
+When the class is written out to file only a subset of the protected 
+data members are saved. This currently amounts to 12 words per V0 candidate
+(or instance of the class) instead of 24, a reduction of 50%. The
+redundant information is calculated when the class is instantiated
+but since it is not written to the mini-DST file, it must be
+recalculated when the mini-DST is read in. The member function
+StV0MiniDst::Update() is provided for this purpose and its use
+is shown in the example <a href=readV0MiniDst.html> readV0MiniDst.C </a>,
+an up-to-date copy of which should be avialable in the 
+$STAR/StRoot/macros/analysis directory.
+
+<h3> The StV0MiniDst Class Definition </h3>
+<pre>
+class StV0MiniDst : public TObject {
+public:
+  StV0MiniDst();
+  ~StV0MiniDst();
+  StV0MiniDst(StV0Vertex*,StVertex*);
+  void Update();
+
+  float decayDistance() const;          // 3-d decay distance
+  float *position();                    // Coordinates of decay vertex
+  float dcaDaughters() const;           // DCA of daughters at decay vertex
+  float dcaParentToPrimVertex() const;  // DCA of v0 to primary vertex
+  float *momPosDaughter();              // Momentum components of pos. daughter
+  float *momNegDaughter();              // Momentum components of neg. daughter
+
+  float alpha();                // Armenteros-Podolanski variable
+  float ptArm();                // Armenteros-Podolanski variable
+  float eLambda();              // Energy assuming lambda hypothesis
+  float eK0Short();             // Energy assuming k-short hypothesis
+  float ePosDaughterProton();   // Energy of pos. daughter assuming proton
+  float ePosDaughterPion();     // Energy of pos. daughter assuming pion
+  float eNegDaughterProton();   // Energy of neg. daughter assuming antiproton
+  float eNegDaughterPion();     // Energy of neg. daughter assuming pion
+  float massLambda();           // Mass assuming lambda hypothesis
+  float massAntiLambda();       // Mass assuming antilambda hypothesis
+  float massK0Short();          // Mass assuming k-short hypothesis
+  float rapLambda();            // Rapidity assuming (anti)lambda
+  float rapK0Short();           // Rapidity assuming k-short
+  float cTauLambda();           // Lifetime (ctau) assuming (anti)lambda
+  float cTauK0Short();          // Lifetime (ctau) assuming k-short
+  float pt();                   // Transverse momentum
+  float ptot();                 // Total momentum
+  float ptPosDaughter();        // Transverse momentum of pos. daughter
+  float ptotPosDaughter();      // Total momentum of pos. daughter
+  float ptNegDaughter();        // Transverse momentum of neg. daughter
+  float ptotNegDaughter();      // Total momentum of neg. daughter  
+
+protected:
+  float mDecayDistance;         // 12 words per candidate are written out
+  float mPosition[3];
+
+  float mDcaDaughters;
+  float mDcaParentToPrimVertex;
+  float mMomPosDaughter[3];
+  float mMomNegDaughter[3];
+
+  float mMomV0[3];              //! Not to be written out
+  float mPtot2PosDaughter;      //! Not to be written out
+  float mPtot2NegDaughter;      //! Not to be written out
+  float mPtot2;                 //! Not to be written out
+  float mPt2;                   //! Not to be written out
+  float mPx;                    //! Not to be written out
+  float mPy;                    //! Not to be written out
+  float mPz;                    //! Not to be written out
+  float mMomPosAlongV0;         //! Not to be written out
+  float mMomNegAlongV0;         //! Not to be written out
+
+  ClassDef(StV0MiniDst, 1)
+};
+</pre>
+<hr>
+Author: <a href=mailto:p.g.jones@bham.ac.uk> P.G.Jones </a>
+University of Birmingham
+</body>
+</html>
