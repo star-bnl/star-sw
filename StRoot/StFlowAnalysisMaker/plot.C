@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.25 2000/08/31 18:50:32 posk Exp $
+// $Id: plot.C,v 1.26 2000/09/15 22:52:56 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -17,6 +17,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.26  2000/09/15 22:52:56  posk
+// Added Pt weighting for event plane calculation.
+//
 // Revision 1.25  2000/08/31 18:50:32  posk
 // Added plotCen.C to plot from a series of files with different centralities.
 //
@@ -78,7 +81,7 @@ const Int_t nSels    = 2;
 const Int_t nSubs    = 2;
 const Float_t twopi  = 2. * 3.1416;
 const Float_t etaMax = 1.5;
-const Float_t ptMax  = 2.;
+//const Float_t ptMax  = 2.;
 Int_t runNumber      = 0;
 char  runName[6];
 char  fileNumber[4]  = "x";
@@ -251,7 +254,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     int firstK = selN -1, firstJ = harN -1, lastK = selN, lastJ = harN;
   }
   TLine* lineZeroEta = new TLine(-etaMax, 0., etaMax, 0.);
-  TLine* lineZeroPt  = new TLine(0., 0., ptMax, 0.);
   TLine* lineOnePhi  = new TLine(0., 1., phiMax, 1.);
   for (int j = firstJ; j < lastJ; j++) {
     char countRows[2];
@@ -314,7 +316,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	gPad->SetLogy();
 	gStyle->SetOptStat(100110);
 	if (projY) projY->Draw("H");
-  	lineZeroPt->Draw();
       } else if (strstr(shortName[pageNumber],"Corr")!=0) { // azimuthal corr.
 	float norm = (float)(hist->GetNbinsX()) / hist->Integral(); 
 	cout << "  Normalized by: " << norm << endl;
@@ -379,7 +380,11 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       } else if (strstr(shortName[pageNumber],"Pt")!=0) {     // Pt distibutions
 	gStyle->SetOptStat(100110);
 	hist->Draw();
-  	lineZeroPt->Draw();
+	if (strstr(shortName[pageNumber],"v")!=0) {
+	  ptMax = hist->GetXaxis()->GetXmax();
+	  TLine* lineZeroPt  = new TLine(0., 0., ptMax, 0.);
+	  lineZeroPt->Draw();
+	}
       } else {                                                // all others
 	gStyle->SetOptStat(100110);
 	hist->Draw(); 

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.2 2000/09/07 16:42:09 posk Exp $
+// $Id: plotCen.C,v 1.3 2000/09/15 22:52:56 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -17,6 +17,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.3  2000/09/15 22:52:56  posk
+// Added Pt weighting for event plane calculation.
+//
 // Revision 1.2  2000/09/07 16:42:09  posk
 // Updated list of histograms.
 //
@@ -29,7 +32,6 @@
 const Int_t nCens    = 8;
 const Float_t twopi  = 2. * 3.1416;
 const Float_t etaMax = 1.5;
-const Float_t ptMax  = 2.;
 Int_t runNumber      = 0;
 char  runName[6];
 char  fileName[30];
@@ -204,7 +206,6 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
   // make the plots
   graphPad->Divide(columns,rows);
   TLine* lineZeroEta = new TLine(-etaMax, 0., etaMax, 0.);
-  TLine* lineZeroPt  = new TLine(0., 0., ptMax, 0.);
   TLine* lineOnePhi  = new TLine(0., 1., phiMax, 1.);
   for (int i = 0; i < pads; i++) {
     int fileN = i;                           // file number
@@ -247,7 +248,6 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
       gPad->SetLogy();
       gStyle->SetOptStat(100110);
       if (projY) projY->Draw("H");
-      lineZeroPt->Draw();
     } else if (strstr(shortName[pageNumber],"Corr")!=0) { // azimuthal corr.
       float norm = (float)(hist->GetNbinsX()) / hist->Integral(); 
       cout << "  Normalized by: " << norm << endl;
@@ -312,7 +312,11 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
     } else if (strstr(shortName[pageNumber],"Pt")!=0) {     // Pt distibutions
       gStyle->SetOptStat(100110);
 	hist->Draw();
-  	lineZeroPt->Draw();
+	if (strstr(shortName[pageNumber],"v")!=0) {
+	  ptMax = hist->GetXaxis()->GetXmax();
+	  TLine* lineZeroPt  = new TLine(0., 0., ptMax, 0.);
+	  lineZeroPt->Draw();
+	}
     } else {                                                // all others
       gStyle->SetOptStat(100110);
       hist->Draw(); 
@@ -447,6 +451,7 @@ TCanvas* plotCenSingles(char* shortName){
       hist->Draw();
       lineZeroHar->Draw();
     } else if (strstr(shortName,"PidMult")!=0) {      // PID Mult
+      gPad->SetLogy();
       gStyle->SetOptStat(0);
       hist->Draw();
     } else if (strstr(shortName,"Pid")!=0) {          // PID
