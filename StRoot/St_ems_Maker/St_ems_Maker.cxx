@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.cxx,v 1.15 1999/11/13 02:32:57 fisyak Exp $
+// $Id: St_ems_Maker.cxx,v 1.16 2000/03/29 20:25:33 akio Exp $
 // $Log: St_ems_Maker.cxx,v $
+// Revision 1.16  2000/03/29 20:25:33  akio
+// Add StEvent
+//
 // Revision 1.15  1999/11/13 02:32:57  fisyak
 // Take calb_calg directly from geant w/o Cint macros
 //
@@ -58,12 +61,39 @@
 #include "emc/St_dep_e_toadc_Module.h"
 #include "emc/St_emc_adc_sim_Module.h"
 #include "emc/St_dep_e_toadc_Module.h"
+
+#include "tables/St_ems_hits_Table.h"
+
+#include "St_ObjectSet.h"
+#include "StEmcCollection.h"
+#include "StEmcDetector.h"
+#include "StEmcModule.h"
+#include "StEmcRawHit.h"
+#include "StEmcClusterCollection.h"
+#include "StEmcCluster.h"
+#include "StEmcPoint.h"
+#include "StEnumerations.h"
+
+#if !defined(ST_NO_NAMESPACES)
+using std::vector;
+using std::max;
+using std::pair;
+#endif
+
+#if defined(ST_NO_TEMPLATE_DEF_ARGS)
+#define StVector(T) vector<T, allocator<T> >
+#else
+#define StVector(T) vector<T>
+#endif
+
+
 ClassImp(St_ems_Maker)
 
 const TString detname[] = {
   "bemc", "bprs", "bsmde", "bsmdp",
   "eemc", "eprs", "esmde", "esmdp"
 };
+
 //_____________________________________________________________________________
 St_ems_Maker::St_ems_Maker(const char *name):StMaker(name){
 // Use Constructor from StMaker
@@ -271,9 +301,48 @@ Int_t St_ems_Maker::Make(){
     }
   }
 
+  fillStEvent();
+
   return kStOK;
 }
 //_____________________________________________________________________________
+Int_t St_ems_Maker::fillStEvent(){
+  unsigned int  i, j, k;
+  
+
+  //Create StEmcHitCollection  
+  StEmcCollection* emc = new StEmcCollection();
+
+  //Add it to dataset as ObjectSet 
+  AddData(new St_ObjectSet("EmcCollection" , emc));
+
+  //Loop over detectors
+  int nModule[8] = {120, 120, 120, 120, 24, 24, 24, 24}; // temp.->database
+  St_DataSet *emcRaw = GetDataSet("emc_raw/.data"); 
+  if(!emcRaw) return kStWarn;
+  St_DataSetIter itr(emcRaw);
+  for(i=0; i<8; i++){
+    StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
+    TString name = "emc_hits_" + detname[i];
+    St_emc_hits  *table = (St_emc_hits *) itr(name);
+    cout << i << " " << name << " " << table << endl;
+    if(table){
+      //Create StEmcDetector
+      StEmcDetector* detector = new StEmcDetector(id, nModule[i]);
+      emc->setDetector(detector);
+      //Get table
+      emc_hits_st *t = table->GetTable();
+      //Create StEmcHit
+      for(j=0; j<table->GetNRows(); j++){
+	StEmcRawHit* hit = new StEmcRawHit(id, 
+			  	           t[j].module, t[j].eta, t[j].sub,
+				           t[j].adc, t[j].energy);
+	detector->addHit(hit);
+      }	
+    }
+  } 
+  return kStOK;
+}
 //_____________________________________________________________________________
 void St_ems_Maker::printNameOfTables(){
   Char_t *path="/bfc/.make/.data/params/emc/";
@@ -301,3 +370,6 @@ void St_ems_Maker::printmEEMC(){
   if(!mEEMC) cout<<" EEMC out of CHAIN  mEEMC="<<mEEMC<<endl;
   else       cout<<" EEMC     in CHAIN  mEEMC="<<mEEMC<<endl;
 }
+
+
+

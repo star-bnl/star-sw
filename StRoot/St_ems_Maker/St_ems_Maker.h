@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.h,v 1.9 1999/09/24 01:23:40 fisyak Exp $ 
+// $Id: St_ems_Maker.h,v 1.10 2000/03/29 20:25:33 akio Exp $ 
 // $Log: St_ems_Maker.h,v $
+// Revision 1.10  2000/03/29 20:25:33  akio
+// Add StEvent
+//
 // Revision 1.9  1999/09/24 01:23:40  fisyak
 // Reduced Include Path
 //
@@ -54,9 +57,7 @@
 //                       (only for BEMC now).                           //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#ifndef StMaker_H
 #include "StMaker.h"
-#endif
 #include "TH2.h"
 #include "TH1.h"
 #include "emc_def.h"
@@ -72,6 +73,34 @@ class St_emc_adcslope;
 class St_calb_calg;
 
 class St_ems_Maker : public StMaker {
+public: 
+  St_ems_Maker(const char *name="emc_raw");
+  ~St_ems_Maker();
+  virtual Int_t Init();
+  virtual Int_t Make();
+  virtual Int_t fillStEvent();
+  virtual void  printNameOfTables();
+  virtual void  bookHistograms(const Int_t);
+  virtual void  makeHistograms(const Int_t, St_emc_hits*);
+
+  Short_t getBEMC(){return mBEMC;}
+  Short_t getEEMC(){return mEEMC;}
+  Short_t getHistControl(){return mHistControl;}
+  void   printmBEMC();
+  void   printmEEMC();
+  void   setBEMC(Short_t key){mBEMC = key; if (Debug()) printmBEMC();}
+  void   setEEMC(Short_t key){mEEMC = key; if (Debug()) printmEEMC();}
+  void   setHistControl(Short_t key) {mHistControl = key;}
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_ems_Maker.h,v 1.10 2000/03/29 20:25:33 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
+protected:
+  TH2F *m_nhit;           //! 
+  TH2F *m_etot;           //!
+  TH2F *m_hits[MAXDET];   //!
+  TH2F *m_energy[MAXDET]; //!
+  TH1F *m_adc[MAXDET];    //!
+
 private:
   Bool_t drawinit;
   St_ems_control      *m_ems_control;     //!
@@ -87,32 +116,6 @@ private:
   Short_t mHistControl;     // Do histogramms (1) or no (0)
   Short_t mBEMC;            // Switch for BEMC; 0 => off; 1=> on
   Short_t mEEMC;            // Switch for EEMC; 0 => off; 1=> on
-
-protected:
-  TH2F *m_nhit;           //! 
-  TH2F *m_etot;           //!
-  TH2F *m_hits[MAXDET];   //!
-  TH2F *m_energy[MAXDET]; //!
-  TH1F *m_adc[MAXDET];    //!
-public: 
-  St_ems_Maker(const char *name="emc_raw");
-  ~St_ems_Maker();
-  virtual Int_t Init();
-  virtual Int_t Make();
-  virtual void  printNameOfTables();
-  virtual void  bookHistograms(const Int_t);
-  virtual void  makeHistograms(const Int_t, St_emc_hits*);
-
-  Short_t getBEMC(){return mBEMC;}
-  Short_t getEEMC(){return mEEMC;}
-  Short_t getHistControl(){return mHistControl;}
-  void   printmBEMC();
-  void   printmEEMC();
-  void   setBEMC(Short_t key){mBEMC = key; if (Debug()) printmBEMC();}
-  void   setEEMC(Short_t key){mEEMC = key; if (Debug()) printmEEMC();}
-  void   setHistControl(Short_t key) {mHistControl = key;}
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_ems_Maker.h,v 1.9 1999/09/24 01:23:40 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_ems_Maker, 1)  
 };
