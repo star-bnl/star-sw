@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.7 2001/02/07 19:15:54 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.8 2001/02/18 00:10:48 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.8  2001/02/18 00:10:48  caines
+ * Improve and use StSvtConfig
+ *
  * Revision 1.7  2001/02/07 19:15:54  caines
  * Change evaluation flag when running with GEANT
  *
@@ -174,10 +177,10 @@ Int_t StSvtHitMaker::Init()
     mZHitResolution = new TH1F("hitZRes","Delta Z for Hits",1000,-2.0,2.0);			      
     mHitResolution = new TH2F("hitRes","Delta Z Vs Delta X for Hits",1000,-2.0,2.0,1000,-2.0,2.0);
     
-    mXHitResolution->SetXTitle("delta X (cm)");
-    mZHitResolution->SetYTitle("delta Z (cm)");
-    mHitResolution->SetXTitle("delta X (cm)");
-    mHitResolution->SetYTitle("delta Z (cm)");
+    mXHitResolution->SetXTitle("delta X (timebucket)");
+    mZHitResolution->SetYTitle("delta Z (anode)");
+    mHitResolution->SetXTitle("delta X (timebucket)");
+    mHitResolution->SetYTitle("delta Z (anode)");
   }
   return  StMaker::Init();
     
@@ -365,7 +368,7 @@ Int_t StSvtHitMaker::FillHistograms(){
 	    if( mSvtBigHit->svtHit()[clu].flag() < 255){
 	      int layer = mSvtBigHit->getLayerID()-1;
 	      int ladder = (int)(mSvtBigHit->svtHit()[clu].ladder());
-	      
+	      cout << " Hit is on " << layer << " and  ladder " << ladder << endl;
 	      m_x_vs_y->Fill(mSvtBigHit->svtHit()[clu].position().x(),mSvtBigHit->svtHit()[clu].position().y());
 	      m_waf_no[layer]->Fill(mSvtBigHit->svtHit()[clu].position().z(),ladder,1);
 	    }
