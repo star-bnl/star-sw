@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.29 1999/11/08 17:47:54 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.30 1999/11/09 22:47:39 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.30  1999/11/09 22:47:39  fine
+// psi angle was forgotten to be converted from degrees to rad.
+//
 // Revision 1.29  1999/11/08 17:47:54  fine
 // The bug for tpt_track filtering was fixed
 //
@@ -824,13 +827,7 @@ Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEvent
            const float rad = 3.1415926/180.;
            float angle =  t.phi0 * rad;
            StThreeVectorD vector(t.r0*cos(angle),t.r0*sin(angle),t.z0);
-           StHelixD *helix  = new  StHelixD(t.curvature, atan(t.tanl), t.psi,vector); 
-           //-------------------------------------------------------------//
-           // Artificial length has to be replaced with the "regular" one //
-           //-------------------------------------------------------------//
-	   //           Float_t artficialLength = 200; // cm
-	   //           Int_t nSteps = Int_t(4*artficialLength*t.curvature + 1); 
-	   // Float_t step = artficialLength / nSteps;
+           StHelixD *helix  = new  StHelixD(t.curvature, atan(t.tanl), t.psi*rad,vector);           
 	   Int_t nSteps = Int_t(4*t.length*t.curvature + 1); 
 	   Float_t step = t.length / nSteps;
            StHelix3DPoints *tracksPoints  = new StHelix3DPoints(helix,step,nSteps);
