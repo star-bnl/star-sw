@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofSimMaker.h,v 1.2 2002/12/12 01:43:46 geurts Exp $
+ * $Id: StTofSimMaker.h,v 1.3 2003/07/25 04:34:45 geurts Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StTofSimMaker.h,v $
+ * Revision 1.3  2003/07/25 04:34:45  geurts
+ * - upper adc and tdc limits
+ * - geometry initialization moved to InitRun()
+ *
  * Revision 1.2  2002/12/12 01:43:46  geurts
  * Introduced InitRun() and FinishRun() members.
  * TofData in TofCollection is filled with adc and tdc data.
@@ -24,16 +28,12 @@
 #define STTOFSIMMAKER_HH
 #include "StMaker.h"
 
-
-#include "TFile.h"
-#include "TH1.h"
-#include "StTofMCSlat.h"
-#include "StTofMaker/StTofSlatCollection.h"
-
+class StEvent;
+class TH1F;
 class StTofCalibration;
 class StTofSimParam;
 class StTofGeometry;
-class StEvent;
+class StTofMCSlat;
 struct g2t_ctf_hit_st;
 
 class StTofSimMaker : public StMaker{
@@ -50,6 +50,9 @@ class StTofSimMaker : public StMaker{
   TH1F* mTime;//!
   TH1F* mTime1;//!
   TH1F* mPMlength;//!
+  TH1F* mAdc;//!
+  TH1F* mTdc;//!
+
 
  protected:
   StTofMCSlat detectorResponse(g2t_ctf_hit_st*);
@@ -68,7 +71,7 @@ class StTofSimMaker : public StMaker{
   virtual Int_t  Finish();
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofSimMaker.h,v 1.2 2002/12/12 01:43:46 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofSimMaker.h,v 1.3 2003/07/25 04:34:45 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StTofSimMaker,1)
 };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofSimMaker.cxx,v 1.2 2002/12/12 01:43:46 geurts Exp $
+ * $Id: StTofSimMaker.cxx,v 1.3 2003/07/25 04:34:44 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StTofSimMaker.cxx,v $
+ * Revision 1.3  2003/07/25 04:34:44  geurts
+ * - upper adc and tdc limits
+ * - geometry initialization moved to InitRun()
+ *
  * Revision 1.2  2002/12/12 01:43:46  geurts
  * Introduced InitRun() and FinishRun() members.
  * TofData in TofCollection is filled with adc and tdc data.
@@ -27,13 +31,6 @@
     <p>TOF simulation software. This Maker further processes the simulated
     detector response from GSTAR's GEANT simulation. It takes the G2T tof
     hit tables and build an StEvent Tof SlatCollection.</p>
-
-    <p>To Do:
-    <ul>
-    <li> Introduce slat response table, currently an exponential model is used</li>
-    <li> Introduce hit position based corrections from measured delays</li>
-    <li> ... </li>
-    </ul>
 */
 #include <iostream.h>
 #include <iomanip.h>    //fg only now needed for setw()
@@ -44,20 +41,22 @@
 #include "Random.h"
 #include "RanluxEngine.h"
 #include "RandGauss.h"
+#include "TH1.h"
+#include "TFile.h"
 
 #include "StTofUtil/StTofCalibration.h"
 #include "StTofUtil/StTofSimParam.h"
 #include "StTofUtil/StTofGeometry.h"
 #include "StEventTypes.h"
 
-// g2t tables
+// g2t tables and collections
 #include "tables/St_g2t_ctf_hit_Table.h"
 #include "tables/St_g2t_vpd_hit_Table.h"
 //#include "tables/St_g2t_track_Table.h"
 //#include "tables/St_g2t_tpc_hit_Table.h"
-//tmp
 #include "StTofMaker/StTofDataCollection.h"
-//tmp
+#include "StTofMaker/StTofSlatCollection.h"
+#include "StTofMCSlat.h"
 
 typedef vector<StTofMCSlat> tofMCSlatVector;
 typedef tofMCSlatVector::iterator tofMCSlatVecIter;
@@ -76,8 +75,8 @@ StTofSimMaker::~StTofSimMaker(){/* nope */}
 
 /// Initialize dBase interfaces and book histograms
 Int_t StTofSimMaker::Init(){
-  mGeomDb = new StTofGeometry();
-  mGeomDb->init(this);
+  //mGeomDb = new StTofGeometry();
+  //mGeomDb->init(this);
   mCalibDb = new StTofCalibration();
   mCalibDb->init();
   mSimDb = new StTofSimParam();
@@ -91,6 +90,8 @@ Int_t StTofSimMaker::Init(){
   mTime = new TH1F("only hit-pos resolution added","tt",100,0.,12e-7);
   mTime1 = new TH1F("fully corrected tof","tt1",100,0.,120e-7);
   mPMlength = new TH1F("distance in slat","length",100,0,22);
+  mAdc = new TH1F("adc","adc",1025,-0.5,1024.5);
+  mTdc = new TH1F("tdc","tdc",2049,-0.5,2048.5);
 
   return StMaker::Init();
 }
@@ -99,9 +100,9 @@ Int_t StTofSimMaker::Init(){
 
 /// InitRun method, (re)initialize TOFp data from STAR dBase
 Int_t StTofSimMaker::InitRun(int runnumber){
-  // cout << "StTofSimMaker::InitRun  -- initializing TofGeometry --" << endl;
-  // mGeomDb = new StTofGeometry();
-  // mGeomDb->init(this);
+  cout << "StTofSimMaker::InitRun  -- initializing TofGeometry --" << endl;
+  mGeomDb = new StTofGeometry();
+  mGeomDb->init(this);
   return kStOK;
 }
 
@@ -109,9 +110,9 @@ Int_t StTofSimMaker::InitRun(int runnumber){
 
 /// FinishRun method, clean up TOFp dBase entries
 Int_t StTofSimMaker::FinishRun(int runnumber){
-  // cout << "StTofSimMaker::FinishRun -- cleaning up TofGeometry --" << endl;
-  // if (mGeomDb) delete mGeomDb;
-  // mGeomDb=0;
+  cout << "StTofSimMaker::FinishRun -- cleaning up TofGeometry --" << endl;
+  if (mGeomDb) delete mGeomDb;
+  mGeomDb=0;
   return 0;
 }
 
@@ -229,7 +230,7 @@ Int_t StTofSimMaker::Make(){
       if (indexSlat == mGeomDb->daqToSlatId(i)){
 	slatFound = true;
 	StTofData *rawTofData = new  StTofData(indexSlat,tempSlat->adc(),tempSlat->tdc(),0,0);
-	cout << indexSlat << ":  A" << tempSlat->adc() << "  T" << tempSlat->tdc() << endl;
+	if (Debug()) cout << indexSlat << ":  A" << tempSlat->adc() << "  T" << tempSlat->tdc() << endl;
 	mDataCollection->push_back(rawTofData);
       }
     }
@@ -277,9 +278,7 @@ Int_t StTofSimMaker::Make(){
 /// calculate detector response for a single hit
 StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
 {
-
-
-#ifdef TOFSIM_DEBUG
+  if(Debug()){
     // dump the g2t structure ...
     cout << " " <<setw( 3) << tof_hit->id      << " " <<setw( 4) << tof_hit->next_tr_hit_p
 	 << " " <<setw( 4) << tof_hit->track_p << " " <<setw( 8) << tof_hit->volume_id
@@ -289,7 +288,7 @@ StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
 	 << " " <<setw(13) << tof_hit->tof     << " " <<setw(10) << tof_hit->x[0]
 	 << " " <<setw(10) << tof_hit->x[1]    << " " <<setw(10) << tof_hit->x[2]
 	 << endl;
-#endif
+  }
     // skip the consistency checks for now,
 
     // determine eta and phi indices from hitpoint and slatId
@@ -384,14 +383,21 @@ StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
                       + random.shoot() * mCalibDb->slat(slatId).ods_adc;
     unsigned short adc =  (unsigned short)((float)numberOfPhotoelectrons
                                      * mSimDb->nphe_to_adc() + adcOffset);
+    if (tdc>2048) tdc=2048;
+    if (adc>1024) adc=1024;
     slat.setAdc(adc);
     slat.setTdc(tdc);
+    mAdc->Fill(adc);
+    mTdc->Fill(tdc);
 
-    cout << "StTofmcInfo slatId " << slatId << "  " << slatData;
-    cout << "    a:" << adc << " t:" << tdc << " dE:"<< slatData.mDe << " dS:"<<  slatData.mDs 
-	 << " mTof:" <<  slatData.mTof << " mTime:"<<  slatData.mTime << " mMTime:"<<slatData.mMTime
-	 << " mMTimeL:"<< slatData.mMTimeL << " mSLength:" << slatData.mSLength
-	 << " mPTot:" << slatData.mPTot  << endl;
+
+    if (Debug()){
+      cout << "StTofmcInfo slatId " << slatId << "  " << slatData;
+      cout << "    a:" << adc << " t:" << tdc << " dE:"<< slatData.mDe << " dS:"<<  slatData.mDs 
+	   << " mTof:" <<  slatData.mTof << " mTime:"<<  slatData.mTime << " mMTime:"<<slatData.mMTime
+	   << " mMTimeL:"<< slatData.mMTimeL << " mSLength:" << slatData.mSLength
+	   << " mPTot:" << slatData.mPTot  << endl;
+    }
 
     // this part considers X-talk between slats (based on parameter below) ...
     //    cout << "PHYSNOISE PARAMETER: " << mSimDb->phys_noise() << endl;
@@ -425,6 +431,8 @@ Int_t StTofSimMaker::Finish(){
   mTime->Write();
   mTime1->Write();
   mPMlength->Write();
+  mAdc->Write();
+  mTdc->Write();
   cout << "done"<<endl;
   //#endif
   return kStOK;
