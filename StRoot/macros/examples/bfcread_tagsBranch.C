@@ -1,4 +1,4 @@
-// $Id: bfcread_tagsBranch.C,v 1.1 2000/03/13 22:32:09 kathy Exp $
+// $Id: bfcread_tagsBranch.C,v 1.2 2000/03/20 17:50:41 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -16,7 +16,7 @@
 
 
 void bfcread_tagsBranch(const char *MainFile=
- "/star/rcf/test/new/tfs_redhat61/year_1h/hc_standard/hc_standard.40_evts.tags.root")
+ "/afs/rhic/star/data/samples/gstar.tags.root")
 {
   // fill tags table
 

@@ -1,5 +1,8 @@
-// $Id: StHbtExample.C,v 1.6 2000/01/19 15:52:46 kathy Exp $
+// $Id: StHbtExample.C,v 1.7 2000/03/20 17:50:40 kathy Exp $
 // $Log: StHbtExample.C,v $
+// Revision 1.7  2000/03/20 17:50:40  kathy
+// fix all macros so that they set all branches on that are needed - otherwise won't work with soft links
+//
 // Revision 1.6  2000/01/19 15:52:46  kathy
 // change default input file to be the one in /afs/rhic/star/data/samples
 //
@@ -70,6 +73,7 @@ void StHbtExample(Int_t nevents=1,
     ioMaker->SetDebug();
     ioMaker->SetBranch("*",0,"0");                 //deactivate all branches
     ioMaker->SetBranch("dstBranch",0,"r"); //activate EventBranch
+    ioMaker->SetBranch("runcoBranch",0,"r"); //activate runcoBranch
 
 
     StEventMaker* eventMaker = new StEventMaker("events","title");
