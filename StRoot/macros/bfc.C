@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.142 2000/08/04 21:04:05 perev Exp $
+// $Id: bfc.C,v 1.143 2000/08/15 23:39:57 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -32,6 +32,7 @@ StMaker    *treeMk=0;
 class StEvent;
 StEvent *Event;
 class St_geant_Maker;
+St_geant_Maker *geant = 0;
 class StIOMaker;
 class St_XDFFile;
 class StEventDisplayMaker; StEventDisplayMaker *dsMk = 0;
@@ -139,12 +140,15 @@ void bfc(const Int_t First,
   Int_t iTotal = 0, iBad = 0;
   if (Last >= 0) {
     Int_t iInit = chain->Init();
-    if (iInit >=  kStEOF) goto END;
+    if (iInit >=  kStEOF) {
+      printf ("QAInfo:Run is failed on Init stage with %i\n",iInit);
+      goto END;
+    }
     StEvtHddr *hd = (StEvtHddr*)chain->GetDataSet("EvtHddr");
     hd->SetRunNumber(-2); // to be sure that InitRun calls at least once
     // skip if any
-    St_geant_Maker *geant = (St_geant_Maker *) chain->GetMaker("geant");
-    if (chain->GetOption("Event")) evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
+    if (gClassTable->GetID("St_geant_Maker") >=0) 
+      geant = (St_geant_Maker *) chain->GetMaker("geant");
     if (geant) {
       if (First > 1 && geant->IsActive()) geant->Skip(First-1);
     }
@@ -154,6 +158,7 @@ void bfc(const Int_t First,
     }
   }
   St_XDFFile *xdf_out = chain->GetXdfOut();
+  if (chain->GetOption("Event")) evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
   treeMk = chain->GetMaker("tree");
   TBenchmark evnt;
   Int_t iMake = 0, i = First;
