@@ -105,10 +105,10 @@
                        ,"St_DataSet", "St_DataSetIter","St_FileSet"
                        ,"StParticleView","St_ObjectSet","St_Node","St_NodePosition"
                        ,"StMaker",     "StChain",       "St_NodeView"
-                       ,"table_head_st","St_NodeViewIter"
+                       ,"table_head_st","St_NodeViewIter", "St_PolyLineShape"
                        ,"St_srs_Maker","St_xdfin_Maker"
                       };
-  Int_t nclass = 16;
+  Int_t nclass = 17;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
@@ -146,6 +146,7 @@
 
   // Make HTML docs for the "plain" text files those are not in the dictionaries
   cout << " Makeing HTML's for macros" << endl;
+  html.Convert("./HitsDraw.C","3D drawing of the STAR Geometry and the hits from the STAF table");
   html.Convert("./SubDetectorView.C","How to create sub-detector view");
   html.Convert("./StarFromWeb.C","Access to ROOT/GEANT geometry database");
   html.Convert("./GetEvent.C","An example of the reading MDC2 dst events");
