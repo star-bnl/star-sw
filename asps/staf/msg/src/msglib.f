@@ -654,6 +654,9 @@
 
 	IMPLICIT NONE
 
+*	This routine is obviated by the introduction of classes,
+*	but is retained for back-compatibility.
+
 *  Input:
 	CHARACTER*(*) PREFIX !A STAR-standard message prefix.
 
