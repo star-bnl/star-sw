@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.15 2002/04/30 16:02:48 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.16 2002/05/10 20:59:31 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.16  2002/05/10 20:59:31  genevb
+// Fixed bug with branch status and changed cuts split level
+//
 // Revision 3.15  2002/04/30 16:02:48  genevb
 // Common muDst, improved MC code, better kinks, StrangeCuts now a branch
 //
@@ -205,16 +208,16 @@ void StStrangeMuDstMaker::InitReadDst() {
   }
 
   tree->SetBranchStatus("*",0);
-  tree->SetBranchStatus("Event",1);
+  tree->SetBranchStatus("Event.*",1);
   tree->SetBranchAddress("Event",&evClonesArray);
   if (doMc) {
-    tree->SetBranchStatus("McEvent",1);
+    tree->SetBranchStatus("McEvent.*",1);
     tree->SetBranchAddress("McEvent",&evMcArray);
   }
   EachController(InitReadDst());
 
   if (tree->GetBranch("StrangeCuts")) {
-    tree->SetBranchStatus("StrangeCuts",1);
+    tree->SetBranchStatus("StrangeCuts.*",1);
     tree->SetBranchAddress("StrangeCuts",&cutsArray);
   } else {
     TOrdCollection* ordCuts = (TOrdCollection*) muDst->Get("StrangeCuts");
@@ -233,11 +236,10 @@ void StStrangeMuDstMaker::InitCreateDst() {
   tree->SetDirectory(muDst);
   EachController(InitCreateDst());
 
-  Int_t split = 0;
+  Int_t split = 99;
   TBranch* branch = tree->Branch("StrangeCuts",&cutsArray,bsize[evT],split);
   branch->SetFile(file[evT]);
   if (!dstMaker) {
-    split = 10;
     branch = tree->Branch("Event",&evClonesArray,bsize[evT],split);
     branch->SetFile(file[evT]);
     if (doMc) {
