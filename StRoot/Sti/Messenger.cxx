@@ -30,6 +30,17 @@ void Messenger::kill(){
   }
 } // kill
 
+void Messenger::updateStates(){
+
+  for(messengerMapIterator iterator = s_messengerMap.begin();
+      iterator!=s_messengerMap.end(); iterator++){
+    Messenger *pMessenger = iterator->second;
+    if(pMessenger->canWrite()){ pMessenger->clear(); }
+    else{                       pMessenger->setstate(ios::badbit);}
+  }
+  
+} // updateStates
+
 Messenger* Messenger::instance(unsigned int routing){ 
 
   // check for existing messenger & return if found

@@ -11,7 +11,7 @@ void RunStiMaker(Int_t nevents=1,
 		 bool doFit=false, // false->find track only
 		 const char* outfile = "Evaluation.root",
 		 //This file points to 30 events of 10 neg muons w/ pt=.9 
-		 const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
+		 const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root",
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Mon/year_2001/pp_minbias/pds0200_04_12812evts.event.root")
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Mon/year_2001/hc_highdensity/hc_highdensity.16_evts.event.root")
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Mon/year_2001/hc_standard/hc_standard.40_evts.event.root")
@@ -19,7 +19,7 @@ void RunStiMaker(Int_t nevents=1,
     //const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
     //This file points to 5 muons /event
     //const char* MainFile="/star/data22/ITTF/EvalData/MCNtuple/muon_100_neg.event.root")
-    
+    bool doProfile=false) // produce profiling output?
 {
     //bool optimized = true;
     bool optimized = false;
@@ -95,6 +95,17 @@ void RunStiMaker(Int_t nevents=1,
 	gSystem->Load("StiMaker");
     }
     
+    //-----------------
+    // start profiling
+    if(doProfile){
+        // this variable tells jprof that it should start profiling when loaded
+        // and how often it should record info
+        gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.0010001");
+
+        // this starts the profiling
+        gSystem->Load("Jprof");
+        Jprof *pJprof = new Jprof;
+    }
     // create a new instance of the chain
     chain = new StChain("StChain"); 
     chain->SetDebug();
