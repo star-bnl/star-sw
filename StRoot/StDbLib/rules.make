@@ -71,13 +71,14 @@ endif
 endif
 
 ifeq (Linux,$(SYSTYPE))
+#  CXX = insure
 
   OSDEFS     := GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES
   LD       := $(CXX)
   SO       := $(CXX)
   CXXFLAGS := -g -fPIC -Wall -I/usr/include/g++
   CFLAGS   := -g -fPIC -Wall
-  LDFLAGS  := -g -Wl,-Bstatic
+#  LDFLAGS  := -g -Wl,-Bstatic
   SOFLAGS  := -g -shared  
   CLIBS    := -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lm -ldl  -rdynamic 
 
