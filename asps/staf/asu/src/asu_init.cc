@@ -19,8 +19,6 @@
 #define asu_def_ F77_NAME(asu_def,ASU_DEF)
 extern "C" void type_of_call asu_def_();
 
-extern "C" void staf_kuip_init_();
-
 //:>--------------------------------------------------------------------
 //:ROUTINE:	int asu_init()
 //:DESCRIPTION:	Initialize ASU
