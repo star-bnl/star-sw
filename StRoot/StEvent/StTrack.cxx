@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.11 2000/04/20 13:49:07 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.12 2001/03/16 20:56:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.12  2001/03/16 20:56:45  ullrich
+ * Added non-const version of fitTraits().
+ *
  * Revision 2.11  2000/04/20 13:49:07  ullrich
  * Removed redundant line in operator=().
  *
@@ -58,7 +61,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.11 2000/04/20 13:49:07 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.12 2001/03/16 20:56:45 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -220,6 +223,9 @@ StTrack::geometry() const { return mGeometry; }
 
 StTrackGeometry*
 StTrack::geometry() { return mGeometry; }
+
+StTrackFitTraits&
+StTrack::fitTraits() { return mFitTraits; }
 
 const StTrackFitTraits&
 StTrack::fitTraits() const { return mFitTraits; }
