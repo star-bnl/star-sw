@@ -34,7 +34,7 @@ my @src     = sortu (@srcL);# print "@src\n";
 my @h_files = sortu (@h_filesL);
 my @idlM    = sortu (@idlML);
 if ($#idlM > -1) {$PKG = "St_" . $PKG;}
-printf ("Run Conscript-standard in %-30s  for %-20s\n",$Dir, $PKG) ;
+printf ("Run Conscript-standard in %-30s  for %-20s\n",$Dir, $PKG) unless ($param::quiet);
 my $obj  = $ObjDir;  #print "obj = $obj\n";
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; #print "SO_PKG = $SO_PKG\n";
 my $LIBS  = $env->{LIBS};
