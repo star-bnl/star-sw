@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.17 2002/03/21 18:49:31 laue Exp $
+ * $Id: StHbtEvent.cc,v 1.18 2002/11/19 23:27:37 renault Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,10 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.18  2002/11/19 23:27:37  renault
+ * New event constructor to find V0 daughters informations(helix for average
+ * separation calculation)
+ *
  * Revision 1.17  2002/03/21 18:49:31  laue
  * updated for new MuDst reader
  *
@@ -184,6 +188,7 @@ StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) {
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StMuDSTMaker/COMMON/StMuDebug.h"
+#endif
 
 StHbtEvent::StHbtEvent(const StMuDst* dst, int trackType) {
   DEBUGMESSAGE1("");
@@ -238,6 +243,7 @@ StHbtEvent::StHbtEvent(const StMuDst* dst, int trackType) {
   int nV0s = dst->v0s()->GetEntries();
   for ( int i=0; i<nV0s; i++) {
     dst->v0s(i)->SetEvent(strangeEvent);
+
     StHbtV0* v0Copy = new StHbtV0( *dst->v0s(i) );
     mV0Collection->push_back(v0Copy);
   }
@@ -261,10 +267,138 @@ StHbtEvent::StHbtEvent(const StMuDst* dst, int trackType) {
   cout << "/" << mKinkCollection->size();
   cout << endl;
 }
-#endif
 
 
 
+// Gael addition 24 Sept 02
+StHbtEvent::StHbtEvent(const StMuDst* dst, int trackType, bool readV0Daughters) {
+  DEBUGMESSAGE1("");
+  StMuEvent* ev = dst->event();
+  mEventNumber = ev->eventNumber();
+  mRunNumber = ev->runNumber();
+  mTpcNhits = 0;
+  mNumberOfTracks = ev->eventSummary().numberOfTracks();
+  mNumberOfGoodTracks = ev->eventSummary().numberOfGoodTracks();
+  mCtbMultiplicity = ev->ctbMultiplicity();
+  mZdcAdc[0] = ev->zdcAdcAttentuatedSumWest();
+  mZdcAdc[1] = ev->zdcAdcAttentuatedSumEast();
+  mUncorrectedNumberOfPositivePrimaries = ev->refMultPos();
+  mUncorrectedNumberOfNegativePrimaries = ev->refMultNeg();
+  mReactionPlane[0] = 0;
+  mReactionPlane[1] = 0;
+  mReactionPlanePtWgt[0] = 0;
+  mReactionPlanePtWgt[1] = 0;
+  mPrimVertPos = ev->eventSummary().primaryVertexPosition();
+  mMagneticField = ev->magneticField();
+
+  mTriggerWord = ev->l0Trigger().triggerWord();
+  mTriggerActionWord = ev->l0Trigger().triggerActionWord();
+
+
+
+  // create collections
+  mV0Collection = new StHbtV0Collection();
+  mXiCollection = new StHbtXiCollection();
+  mKinkCollection = new StHbtKinkCollection();
+  mTrackCollection = new StHbtTrackCollection();
+
+  // copy track collection  
+  TClonesArray* tracks=0;
+  switch (trackType) {
+  case 0: tracks = dst->globalTracks(); break;
+  case 1: tracks = dst->primaryTracks(); break;
+  default: DEBUGMESSAGE("don't know how to handle this track type");
+  }
+
+  if (tracks) {
+    DEBUGVALUE2(trackType);
+    int nTracks = tracks->GetEntries();
+    DEBUGVALUE2(tracks->GetEntries());
+    for ( int i=0; i<nTracks; i++) {
+      StHbtTrack* trackCopy = new StHbtTrack(dst, (StMuTrack*) tracks->UncheckedAt(i));
+
+      mTrackCollection->push_back(trackCopy);
+    }
+  }
+
+  StStrangeEvMuDst* strangeEvent = dst->strangeEvent();
+  // copy v0 collection  
+  int nV0s = dst->v0s()->GetEntries();
+  // to read V0 daugthers
+  double *TrackToId;
+  tracks = dst->globalTracks();
+  int nTracks = tracks->GetEntries();
+  TrackToId = (double*)malloc(sizeof(double)*nTracks);
+  for ( int i=0; i<nTracks; i++) {
+	StHbtTrack* trackCopy = new StHbtTrack(dst, (StMuTrack*) tracks->UncheckedAt(i));
+	TrackToId[i] = trackCopy->TrackId();
+	delete trackCopy;
+  }
+  for ( int i=0; i<nV0s; i++) {
+    dst->v0s(i)->SetEvent(strangeEvent);
+    StHbtV0* v0Copy = new StHbtV0( *dst->v0s(i) );
+    // Gael 23 Sept 02 --beg
+    // search for daughters....
+    if (readV0Daughters){
+      tracks = dst->globalTracks();
+      int nTracks = tracks->GetEntries();
+      int V0NegOk = 1;
+      int V0PosOk = 1;
+
+      for ( int j=0; j<nTracks; j++) {
+	if (TrackToId[j]==v0Copy->idNeg()) {
+	  V0NegOk = -1;
+	  StHbtTrack* trackCopy = new StHbtTrack(dst, (StMuTrack*) tracks->UncheckedAt(j));
+	  v0Copy->SetHelixNeg(trackCopy->Helix());
+	  delete trackCopy;
+	}
+	if (TrackToId[j]==v0Copy->idPos()) {
+	  V0PosOk = -1; 
+	  StHbtTrack* trackCopy = new StHbtTrack(dst, (StMuTrack*) tracks->UncheckedAt(j));
+	  v0Copy->SetHelixPos(trackCopy->Helix());
+	  delete trackCopy;
+	}
+
+ 	if ((V0PosOk < 0) && (V0NegOk < 0)) {
+ 	  break;}
+      }
+      
+      if ((V0PosOk < 0) != (V0NegOk < 0)) {
+	cout <<"!!! StHbtEvent::At least One V0 daughter is not found !!!" << endl;
+      }
+      v0Copy->SetprimaryVertex(ev->eventSummary().primaryVertexPosition());
+    }
+    mV0Collection->push_back(v0Copy); 
+  }
+  free(TrackToId); // Gael 23 Sept 02 --end 
+
+  
+  // copy xi collection  
+  int nXis = dst->xis()->GetEntries();
+  for ( int i=0; i<nXis; i++) {
+    dst->xis(i)->SetEvent(strangeEvent);
+    StHbtXi* xiCopy = new StHbtXi( *dst->xis(i) );
+    mXiCollection->push_back(xiCopy);
+  }
+//   // copy kink collection  
+//   int nKinks = dst->kinks()->GetEntries();
+//   for ( unsigned int i=0; i <nKinks; i++) {
+//     StHbtKink* kinkCopy = new StHbtKink( *dst->kinks(i) );
+//     mKinkCollection->push_back(kinkCopy);
+//   }
+  cout << "StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) - collections:";
+  cout << " " << mTrackCollection->size();
+  cout << "/" << mV0Collection->size();
+  cout << "/" << mXiCollection->size();
+  cout << "/" << mKinkCollection->size();
+  cout << endl;
+}
+
+
+
+
+//___________________
+// end Gael addition 24 Sept 02
 //___________________
 StHbtEvent::StHbtEvent(){
   mPrimVertPos[0]=-999.0;
