@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.43 2000/04/12 15:06:53 kathy Exp $
+// $Id: doEvents.C,v 1.44 2000/04/12 15:29:05 kathy Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -35,6 +35,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.44  2000/04/12 15:29:05  kathy
+// comment out libtpc by default
+//
 // Revision 1.43  2000/04/12 15:06:53  kathy
 // changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
 //
@@ -100,7 +103,7 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     gSystem->Load("libgen_Tables");
     gSystem->Load("libsim_Tables");
     gSystem->Load("libglobal_Tables");
-    //    gSystem->Load("libtpc_Tables");
+//  gSystem->Load("libtpc_Tables");
 
     gSystem->Load("StUtilities");
     gSystem->Load("StIOMaker");
