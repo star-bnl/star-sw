@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.44 2004/11/11 03:19:05 pruneau Exp $
- * $Id: StiKalmanTrack.cxx,v 2.44 2004/11/11 03:19:05 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.45 2004/11/12 22:48:28 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.45 2004/11/12 22:48:28 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.45  2004/11/12 22:48:28  fisyak
+ * Back to use chi2 instead DCA for Vertex fit
+ *
  * Revision 2.44  2004/11/11 03:19:05  pruneau
  * implementation of extrapolation functions for Jan
  *
@@ -1072,8 +1075,8 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 		<< " d: "<< d<<endl;*/
       _vDca = d;
       _vChi2= chi2;
-      //if (chi2<pars->maxChi2Vertex)
-      if (d<3.)
+      if (chi2<pars->maxChi2Vertex)
+	//      if (d<3.)
 	{
 	  _dca = ::sqrt(dy*dy+dz*dz);
 	  myHit = StiToolkit::instance()->getHitFactory()->getInstance();
