@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: BFC.C,v 1.4 1999/09/16 17:08:55 perev Exp $
+// $Id: BFC.C,v 1.5 1999/10/14 22:08:09 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -632,7 +632,7 @@ void BFC(const Int_t First,
   //  Create the makers to be called by the current chain
   const char *mainDB = "$STAR/StDb/params";
   //DbInit from StDbBroker.so checks that mysql db1 server is accessible
-  if (StDbBroker::DbInit("params")==0) mainDB = "MySQL:params";
+  //  if (StDbBroker::DbInit("params")==0) mainDB = "MySQL:params";
   printf ("QAInfo: Main DataBase == %s\n",mainDB);
   dbMk = new St_db_Maker("db",mainDB);
   if (dbMk && ChainFlags[kDEBUG]) dbMk->SetDebug();
