@@ -21,11 +21,7 @@ SUFF_IDL := idl
 .SUFFIXES:
 
 include $(STAF_MAKE_HOME)/MakeEnv.mk
-ifndef NODEBUG                 
 include $(STAF_MAKE_HOME)/MakeArch.mk
-else
-include $(STAF_MAKE_HOME)/MakeArch.mk NODEBUG=yes
-endif                          
 
 #
 #	INP_DIR & OUT_DIR could be declared in invoking
@@ -276,7 +272,12 @@ $(OBJ_DIR)/idl-yacc.o :  $(SRC_DIR)/idl.l $(SRC_DIR)/idl.y
 	$(RM) y.tab.c ;\
         $(LEX) $(SRC_DIR)/idl.l;\
         $(RM) idl-lex.c;\
-        cat lex.yy.c | sed 's/FILE \*yyin = {stdin},/FILE/' > idl-lex.c;\
+        cat lex.yy.c \
+	| sed 's/FILE \*yyin = {stdin},/FILE/' \
+ifdef HPUX
+	| sed '/static void __yy__unused() { main(); }/d' \
+endif
+	> idl-lex.c;\
         $(RM) lex.yy.c;\
         $(CC) $(CFLAGS) -I. -I$(SRC_DIR) -c idl-yacc.c -o $(ALL_TAGS)
 #

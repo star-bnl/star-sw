@@ -4,11 +4,7 @@ ifndef STAF_MAKE_HOME
   STAF_MAKE_HOME := $(STAR)/mgr
 endif
 include $(STAF_MAKE_HOME)/MakeEnv.mk
-ifndef NODEBUG                 
 include $(STAF_MAKE_HOME)/MakeArch.mk
-else
-include $(STAF_MAKE_HOME)/MakeArch.mk NODEBUG=yes
-endif                          
 #
 #	INP_DIR & OUT_DIR could be declared in invoking
 #
@@ -148,7 +144,6 @@ cleanall :
 	$(RMDIR) $(OUT_DIR)
 clean:
 	$(RMDIR) $(OBJ_DIR) $(EXE_DIR)
-	
 atlas:	geant3 atlsim detm clean
 star:	geant3 gstar  detm clean
 
@@ -174,4 +169,3 @@ show:
 	@echo FILES_O=$(FILES_O)
 	@echo SRC_DIRS=$(SRC_DIRS)
 	@echo INCL=$(INCL)
-	

@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.2  1998/07/01 12:15:57  fisyak
+#  Move NODEBUG flag in Env, variable
+#
 #  Revision 1.1  1998/06/11 12:39:24  fisyak
 #  New STAR/STAF makefiles
 #
@@ -85,7 +88,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/06/11 12:39:24 $ 
+#           Last modification $Date: 1998/07/01 12:15:57 $ 
 #  default setings
 # Current Working Directory
 #
@@ -180,10 +183,10 @@ ifeq ($(NAME),$(PKG))
 endif                          
 ifneq ($(EMPTY),$(SUBDIRS))     
 ifneq (,$(findstring $(LEVEL),0 1))
-TARGETS := St_base St_Tables
+TARGETS := St_base St_Tables St_Chain
 endif
 #          I have subdrs
-.PHONY               :  all St_base St_Tables test clean clean_lib clean_share clean_obj
+.PHONY               :  all St_base St_Tables St_Chain test clean clean_lib clean_share clean_obj
 #      I_have_subdirs
 all:  $(addsuffix _all, $(SUBDIRS))   $(TARGETS)
 %_all:; $(MAKE) -f $(MakePam) -C $(STEM) $(MAKFLAGS) 
@@ -222,11 +225,15 @@ endif
 ifndef NOROOT
 St_base:   $(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so
 St_Tables: $(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so
+StChain:   $(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.so
 $(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so:   $(wildcard $(ROOT_DIR)/StRoot/base/*.*) 
 	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base    SO_LIB=$(ALL_TAGS)
 $(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so: $(wildcard $(ROOT_DIR)/.share/tables/St*.*)
 	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/.share/tables  SO_LIB=$(ALL_TAGS)
+$(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.so: $(wildcard $(ROOT_DIR)/StRoot/StChain/St*.*)
+	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain  SO_LIB=$(ALL_TAGS)
 endif
+test: test_level
 test_level:
 	@echo "LEVEL     =" $(LEVEL)
 	@echo "SUBDIRS   =" $(SUBDIRS)

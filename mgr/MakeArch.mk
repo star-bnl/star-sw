@@ -1,6 +1,6 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.5  1998/06/27 14:57:28  fisyak
-#  Add hp, move Debug flag to MakeArch.mk
+#  Revision 1.6  1998/07/01 12:15:55  fisyak
+#  Move NODEBUG flag in Env, variable
 #
 #  Revision 1.10  1998/05/19 16:36:38  perev
 #  Makefiles
@@ -23,7 +23,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/06/27 14:57:28 $ 
+#             Last modification $Date: 1998/07/01 12:15:55 $ 
 #. default setings
 
 RM := rm -f
@@ -201,6 +201,7 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
 
 #    case "hp":
 #  ====================
+  HPUX := Yess
   OSFID := HPUX CERNLIB_HPUX CERNLIB_UNIX
   ifdef GCC
     CXXFLAGS  := -fPIC   -I/usr/include/X11R5 
@@ -332,14 +333,4 @@ FC  := $(FC) $(FEXTEND)
 ifeq ($(EXEFLAGS),NONE)
   EXEFLAGS := $(LDFLAGS)
 endif
-ifndef NODEBUG                 
-FFLAGS   += -g
-CFLAGS   += -g
-CXXFLAGS += -g
-CPPFLAGS += -DDEBUG
-else
-FFLAGS   += -O
-CFLAGS   += -O
-CXXFLAGS += -O
-endif                          
 
