@@ -1,7 +1,10 @@
-* $Id: tte.F,v 1.3 1998/02/11 19:49:44 sakrejda Exp $
+* $Id: tte.F,v 1.4 1998/02/13 19:33:05 fisyak Exp $
 * $Log: tte.F,v $
-* Revision 1.3  1998/02/11 19:49:44  sakrejda
-* tte.F charge retrieved from tptrack.q, previously it was attached tp invpt
+* Revision 1.4  1998/02/13 19:33:05  fisyak
+* zerov => vzero
+*
+* Revision 1.4  1998/02/13 19:33:05  fisyak
+* zerov => vzero
 *
 * Revision 1.3  1998/02/11 19:49:44  sakrejda
 * tte.F charge retrieved from tptrack.q, previously it was attached tp invpt
@@ -216,7 +219,7 @@ c     sort on the mc hit id (key1)
       iret = tls_qsort_herb_i(ng2t,tindex(istart).key1,
      >       tindex(istart+1).key1,tindex)
 C     translation table, clean up and zero the list_index first
-      call zerov(list_index,list_size)
+      call vzero(list_index,list_size)
 c     set up a list so the monte carlo hit can be found in the
         list_index(tindex(i).key1)=i
       call vzero(list_index_mc,list_size)
@@ -420,7 +423,7 @@ c     sort on the index table on reconstructed hit id (key2)
       iret = tls_qsort_herb_i(ng2t,tindex(istart).key2,
      >       tindex(istart+1).key2,tindex)
 c     translation table, clean up and zero the list_index first
-      call zerov(list_index,list_size)
+      call vzero(list_index,list_size)
 c     set up a list so the monte carlo hit can be found in the
         list_index(tindex(i).key2)=i
      >    tindex(i).key2                     

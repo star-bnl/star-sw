@@ -1,5 +1,8 @@
-* $Id: tte_track.F,v 1.2 1998/01/27 02:18:52 fisyak Exp $
+* $Id: tte_track.F,v 1.3 1998/02/13 19:33:06 fisyak Exp $
 * $Log: tte_track.F,v $
+* Revision 1.3  1998/02/13 19:33:06  fisyak
+* zerov => vzero
+*
 * Revision 1.2  1998/01/27 02:18:52  fisyak
 * Add README
 *
@@ -158,7 +161,7 @@ c
 c
 c     set up a list so the monte carlo hit can be found in the
 C     translation table, clean up and zero the list_index first
-      call zerov(list_index,list_size)
+      call vzero(list_index,list_size)
       do i=istart,istart+ng2t-1
         list_index(tindex(i).key1)=i
       end do 
