@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StGlobalCoordinate.hh,v 1.1 1999/11/19 19:01:07 calderon Exp $
+ * $Id: StGlobalCoordinate.hh,v 1.2 2000/02/02 23:01:38 calderon Exp $
  *
  * Author:  brian Feb 6, 1998
  *
@@ -11,6 +11,10 @@
  *************************************************************************
  *
  * $Log: StGlobalCoordinate.hh,v $
+ * Revision 1.2  2000/02/02 23:01:38  calderon
+ * Changes for CC5
+ * Tests withs StTpcDb still going.
+ *
  * Revision 1.1  1999/11/19 19:01:07  calderon
  * First version of files for StDbUtilities.
  * Note: this package uses StTpcDb.
@@ -43,25 +47,14 @@
 
 #include <iostream.h>
 
-#ifdef PERSISTENT
-#include "StObject.h"
-#endif
-
-#include "StThreeVectorF.hh"
-
-#if !defined(ST_NO_NAMESPACES)
-using namespace std;
-#endif
+#include "StThreeVector.hh"
 
 class StGlobalCoordinate
-#ifdef PERSISTENT
-: public StObject
-#endif
 {         
 public:
     StGlobalCoordinate();
-    StGlobalCoordinate(const float, const float, const float);
-    StGlobalCoordinate(const StThreeVectorF&);
+    StGlobalCoordinate(const double, const double, const double);
+    StGlobalCoordinate(const StThreeVector<double>&);
 
     virtual ~StGlobalCoordinate();
     //StGlobalCoordinate(const StGlobalCoordinate&);
@@ -70,16 +63,15 @@ public:
     int operator==(const StGlobalCoordinate&) const;
     int operator!=(const StGlobalCoordinate&) const;
     // access functions provided by StThreeVector
-    virtual const StThreeVectorF& position() const;
-    virtual void setPosition(const StThreeVectorF&);
+    virtual const StThreeVector<double>& position() const;
+    virtual void setPosition(const StThreeVector<double>&);
     
 protected:
-    StThreeVectorF mPosition;
+    StThreeVector<double> mPosition;
 
-#ifdef PERSISTENT
-    ClassDef(StGlobalCoordinate,1)
-#endif
 };
+
+inline const StThreeVector<double>& StGlobalCoordinate::position() const {return(mPosition);}
 
 // Non-Member
 ostream& operator<<(ostream&, const StGlobalCoordinate&);

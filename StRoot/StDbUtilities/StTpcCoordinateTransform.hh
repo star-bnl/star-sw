@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.1 1999/11/19 19:01:08 calderon Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.2 2000/02/02 23:01:38 calderon Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,10 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.2  2000/02/02 23:01:38  calderon
+ * Changes for CC5
+ * Tests withs StTpcDb still going.
+ *
  * Revision 1.1  1999/11/19 19:01:08  calderon
  * First version of files for StDbUtilities.
  * Note: this package uses StTpcDb.
@@ -76,14 +80,18 @@
 // SCL
 #include "StGlobals.hh"
 #include "SystemOfUnits.h"
-#include "StThreeVectorF.hh"
+#include "StThreeVector.hh"
 #include "StMatrix.hh"
 
-#include "StCoordinates.hh"        // coordinate definitions
 #include "StTpcDb/StTpcDb.h"
 
 #define DEBUG_TPC 0
 #define idb if(DEBUG_TPC) cout
+
+class StGlobalCoordinate;
+class StTpcLocalCoordinate;
+class StTpcLocalSectorCoordinate;
+class StTpcPadCoordinate;
 
 class StTpcCoordinateTransform {
 public:
@@ -118,29 +126,29 @@ public:
     void  operator()(const StTpcPadCoordinate&, StGlobalCoordinate&);
     void  operator()(const StGlobalCoordinate&, StTpcPadCoordinate&);
 
-    StThreeVectorF sector12Coordinate(StThreeVectorF&, int*);
-    StThreeVectorF padCentroid(StTpcLocalSectorCoordinate&, int*, int*)  ;
+    StThreeVector<double> sector12Coordinate(StThreeVector<double>&, int*);
+    StThreeVector<double> padCentroid(StTpcLocalSectorCoordinate&, int*, int*)  ;
     
 private:
     // Transformation Routines!!
     // Raw Data From tpc local Coordinates
     int      sectorFromCoordinate(const StTpcLocalCoordinate&)       const;
-    int      sectorFromCoordinate(const StThreeVectorF&)      const;
+    int      sectorFromCoordinate(const StThreeVector<double>&)      const;
     // Raw Data (pad row timebin or drift L From tpc local sector Coordinates
-    int      rowFromLocal(const StThreeVectorF&)              const;
-    int      padFromLocal(const StThreeVectorF&, const int)   const;
+    int      rowFromLocal(const StThreeVector<double>&)              const;
+    int      padFromLocal(const StThreeVector<double>&, const int)   const;
     int      tBFromZ(const double)                                   const;
 
     // tpc local sector Coordinates from Raw Data
-    StThreeVectorF xyFromRaw(const StTpcPadCoordinate&)      ;
+    StThreeVector<double> xyFromRaw(const StTpcPadCoordinate&)      ;
     double                yFromRow(const int)                  const;
     double                xFromPad(const int, const int)       const;
     double                zFromTB(const int)                   const;
     
     // (3d)rotations   From means "From the TPC local  Coordinates to Tpc Local  Sector Coordinates "     
   //    "to" means " from Tpc local sector  Coordinates to  TPC local  Coordinates "
-    StThreeVectorF rotateToLocal(const StThreeVectorF&, const int)  ;
-    StThreeVectorF rotateFromLocal(const StThreeVectorF&, const int);
+    StThreeVector<double> rotateToLocal(const StThreeVector<double>&, const int)  ;
+    StThreeVector<double> rotateFromLocal(const StThreeVector<double>&, const int);
 
     // Utilities
     double      rad2deg(double)        const; //radians to degrees (should be in global?)

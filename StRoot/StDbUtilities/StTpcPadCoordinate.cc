@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTpcPadCoordinate.cc,v 1.1 1999/11/19 19:01:09 calderon Exp $
+ * $Id: StTpcPadCoordinate.cc,v 1.2 2000/02/02 23:01:39 calderon Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -11,6 +11,10 @@
  *******************************************************************
  *
  * $Log: StTpcPadCoordinate.cc,v $
+ * Revision 1.2  2000/02/02 23:01:39  calderon
+ * Changes for CC5
+ * Tests withs StTpcDb still going.
+ *
  * Revision 1.1  1999/11/19 19:01:09  calderon
  * First version of files for StDbUtilities.
  * Note: this package uses StTpcDb.
@@ -32,11 +36,7 @@
  *******************************************************************/
 #include "StTpcPadCoordinate.hh"
 
-static const char rcsid[] = "$Id: StTpcPadCoordinate.cc,v 1.1 1999/11/19 19:01:09 calderon Exp $";
-
-#ifdef PERSISTENT
-ClassImp(StTpcPadCoordinate)
-#endif
+static const char rcsid[] = "$Id: StTpcPadCoordinate.cc,v 1.2 2000/02/02 23:01:39 calderon Exp $";
 
 StTpcPadCoordinate::StTpcPadCoordinate() {/**/}
 

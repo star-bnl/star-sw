@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StFtpcLocalCoordinate.cc,v 1.1 1999/11/19 19:01:07 calderon Exp $
+ * $Id: StFtpcLocalCoordinate.cc,v 1.2 2000/02/02 23:01:38 calderon Exp $
  *
  * Author:  Manuel CBS Oct 1999
  *
@@ -11,6 +11,10 @@
  ************************************************************************
  *
  * $Log: StFtpcLocalCoordinate.cc,v $
+ * Revision 1.2  2000/02/02 23:01:38  calderon
+ * Changes for CC5
+ * Tests withs StTpcDb still going.
+ *
  * Revision 1.1  1999/11/19 19:01:07  calderon
  * First version of files for StDbUtilities.
  * Note: this package uses StTpcDb.
@@ -23,18 +27,15 @@
  ***********************************************************************/
 #include "StFtpcLocalCoordinate.hh"
 
-static const char rcsid[] = "$Id: StFtpcLocalCoordinate.cc,v 1.1 1999/11/19 19:01:07 calderon Exp $";
+static const char rcsid[] = "$Id: StFtpcLocalCoordinate.cc,v 1.2 2000/02/02 23:01:38 calderon Exp $";
 
-#ifdef PERSISTENT
-ClassImp(StFtpcLocalCoordinate)
-#endif
     
 StFtpcLocalCoordinate::StFtpcLocalCoordinate() {/**/}
 
-StFtpcLocalCoordinate::StFtpcLocalCoordinate(const float x, const float y, const float z)
+StFtpcLocalCoordinate::StFtpcLocalCoordinate(const double x, const double y, const double z)
     : mPosition(x,y,z) { /* nopt */}
 
-StFtpcLocalCoordinate::StFtpcLocalCoordinate(const StThreeVectorF& position)
+StFtpcLocalCoordinate::StFtpcLocalCoordinate(const StThreeVector<double>& position)
     : mPosition(position) { /* nopt */ }
 
 StFtpcLocalCoordinate::~StFtpcLocalCoordinate() {/**/}

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: StTpcLocalSectorCoordinate.hh,v 1.1 1999/11/19 19:01:09 calderon Exp $
+ * $Id: StTpcLocalSectorCoordinate.hh,v 1.2 2000/02/02 23:01:39 calderon Exp $
  *
  * Author: brian Jan 26, 1999
  *
@@ -11,6 +11,10 @@
  **********************************************************************
  *
  * $Log: StTpcLocalSectorCoordinate.hh,v $
+ * Revision 1.2  2000/02/02 23:01:39  calderon
+ * Changes for CC5
+ * Tests withs StTpcDb still going.
+ *
  * Revision 1.1  1999/11/19 19:01:09  calderon
  * First version of files for StDbUtilities.
  * Note: this package uses StTpcDb.
@@ -38,21 +42,14 @@
 
 #include <iostream.h>
 
-#ifdef PERSISTENT
-#include "StObject.h"
-#endif
-
-#include "StThreeVectorF.hh"
+#include "StThreeVector.hh"
 
 class StTpcLocalSectorCoordinate
-#ifdef PERSISTENT
-    : public StObject
-#endif
 {
 public:
     StTpcLocalSectorCoordinate();
-    StTpcLocalSectorCoordinate(const float, const float, const float, const int);
-    StTpcLocalSectorCoordinate(const StThreeVectorF&, const int);
+    StTpcLocalSectorCoordinate(const double, const double, const double, const int);
+    StTpcLocalSectorCoordinate(const StThreeVector<double>&, const int);
 
     virtual ~StTpcLocalSectorCoordinate();
     //StTpcLocalSectorCoordinate(const StTpcLocalCoordinate&);
@@ -62,21 +59,18 @@ public:
     int operator!=(const StTpcLocalSectorCoordinate&) const;
      
     // access functions provided by StThreeVector
-    const StThreeVectorF& position()  const;
+    const StThreeVector<double>& position()  const;
     int  fromSector()                 const;
-    StThreeVectorF& position();
+    StThreeVector<double>& position();
 
 private:
-    StThreeVectorF mPosition;
+    StThreeVector<double> mPosition;
     int            mFromSector;
-#ifdef PERSISTENT
-    ClassDef(StTpcLocalSectorCoordinate,1)
-#endif
     
 };
 
-inline const StThreeVectorF& StTpcLocalSectorCoordinate::position() const { return(mPosition); }
-inline StThreeVectorF& StTpcLocalSectorCoordinate::position() { return(mPosition); }
+inline const StThreeVector<double>& StTpcLocalSectorCoordinate::position() const { return(mPosition); }
+inline StThreeVector<double>& StTpcLocalSectorCoordinate::position() { return(mPosition); }
 inline int StTpcLocalSectorCoordinate::fromSector() const { return(mFromSector); }//HL
 
 // Non-member

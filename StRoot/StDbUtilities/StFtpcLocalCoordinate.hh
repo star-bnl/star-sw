@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StFtpcLocalCoordinate.hh,v 1.1 1999/11/19 19:01:07 calderon Exp $
+ * $Id: StFtpcLocalCoordinate.hh,v 1.2 2000/02/02 23:01:38 calderon Exp $
  *
  * Author:  Manuel CBS Oct 1999
  *
@@ -11,6 +11,10 @@
  ************************************************************************
  *
  * $Log: StFtpcLocalCoordinate.hh,v $
+ * Revision 1.2  2000/02/02 23:01:38  calderon
+ * Changes for CC5
+ * Tests withs StTpcDb still going.
+ *
  * Revision 1.1  1999/11/19 19:01:07  calderon
  * First version of files for StDbUtilities.
  * Note: this package uses StTpcDb.
@@ -25,21 +29,14 @@
 #define ST_FTPC_LOCAL_COORDINATE_HH
 #include <iostream.h>
 
-#ifdef PERSISTENT
-#include "StObject.h"
-#endif
-
-#include "StThreeVectorF.hh"
+#include "StThreeVector.hh"
 
 class StFtpcLocalCoordinate
-#ifdef PERSISTENT
-    : public StObject
-#endif
 {
 public:
     StFtpcLocalCoordinate();
-    StFtpcLocalCoordinate(const float, const float, const float);
-    StFtpcLocalCoordinate(const StThreeVectorF&);
+    StFtpcLocalCoordinate(const double, const double, const double);
+    StFtpcLocalCoordinate(const StThreeVector<double>&);
 
     virtual ~StFtpcLocalCoordinate();
     //StFtpcLocalCoordinate(const StTpcLocalCoordinate&);
@@ -48,20 +45,17 @@ public:
     int operator==(const StFtpcLocalCoordinate&) const;
     int operator!=(const StFtpcLocalCoordinate&) const;
     // access functions provided by StThreeVector
-    const StThreeVectorF& position()  const;
-    StThreeVectorF& position();
-    void setPosition(const StThreeVectorF&);
+    const StThreeVector<double>& position()  const;
+    StThreeVector<double>& position();
+    void setPosition(const StThreeVector<double>&);
     
 private:
-    StThreeVectorF mPosition;
-#ifdef PERSISTENT
-    ClassDef(StFtpcLocalCoordinate,1)
-#endif
+    StThreeVector<double> mPosition;
 };
 
-inline const StThreeVectorF& StFtpcLocalCoordinate::position() const { return(mPosition); }
-inline StThreeVectorF& StFtpcLocalCoordinate::position() { return(mPosition); }
-inline void StFtpcLocalCoordinate::setPosition(const StThreeVectorF& val) { mPosition = val; }
+inline const StThreeVector<double>& StFtpcLocalCoordinate::position() const { return(mPosition); }
+inline StThreeVector<double>& StFtpcLocalCoordinate::position() { return(mPosition); }
+inline void StFtpcLocalCoordinate::setPosition(const StThreeVector<double>& val) { mPosition = val; }
 
 // Non-member
 ostream& operator<<(ostream&, const StFtpcLocalCoordinate&);

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.2 1999/12/03 00:50:31 calderon Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.3 2000/02/02 23:01:38 calderon Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,10 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.3  2000/02/02 23:01:38  calderon
+ * Changes for CC5
+ * Tests withs StTpcDb still going.
+ *
  * Revision 1.2  1999/12/03 00:50:31  calderon
  * Using StTpcDb (there are still problems with SlowControl parameters).
  *
@@ -98,8 +102,12 @@
  *
  ***********************************************************************/
 #include "StTpcCoordinateTransform.hh"
+#include "StCoordinates.hh"        // coordinate definitions
 #include "StMatrix.hh"
 #include <unistd.h>
+#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+using namespace units;
+#endif
 // StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcGeometry* geomdb,
 // 						   StTpcSlowControl* scdb,
 // 						   StTpcElectronics* eldb)
@@ -182,7 +190,7 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
 }
 void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLocalSectorCoordinate& b)
 {
-    StThreeVectorF  tmp=xyFromRaw(a);
+    StThreeVector<double>  tmp=xyFromRaw(a);
     double zoffset= (a.row()>13) ?
 // 	gTpcDbPtr->PadPlaneGeometry()->outerSectorzOffSet()
 // 	:gTpcDbPtr->PadPlaneGeometry()->innerSectorzOffSet() ;
@@ -215,16 +223,16 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
     
 
 
-    StThreeVectorF sector12Position(a.position().x(),
+    StThreeVector<double> sector12Position(a.position().x(),
 					   a.position().y() ,
 					   a.position().z());
-    StThreeVectorF tmp = rotateToLocal(sector12Position,sector);
+    StThreeVector<double> tmp = rotateToLocal(sector12Position,sector);
 
     b = StTpcLocalCoordinate(tmp);
 }
 void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate& a, StTpcLocalSectorCoordinate& b)
 {   int sector= sectorFromCoordinate(a);
-    StThreeVectorF tmp=rotateFromLocal(a.position(),sector);
+    StThreeVector<double> tmp=rotateFromLocal(a.position(),sector);
     
     b = StTpcLocalSectorCoordinate(tmp,sector);
 }
@@ -245,14 +253,14 @@ void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a, StTpcLoca
     b = StTpcLocalCoordinate(a.position());   
 }
 
-StThreeVectorF StTpcCoordinateTransform::sector12Coordinate(StThreeVectorF& v, int *sector)
+StThreeVector<double> StTpcCoordinateTransform::sector12Coordinate(StThreeVector<double>& v, int *sector)
 {
     *sector = sectorFromCoordinate(v);
 //     sec12 = rotateToLocal(v,sector);
     return  rotateFromLocal(v,*sector);
 }
 
-StThreeVectorF
+StThreeVector<double>
 StTpcCoordinateTransform::padCentroid(StTpcLocalSectorCoordinate& localSector, int *pad, int *row)
 {
     StTpcLocalSectorCoordinate centerOfPad;
@@ -290,7 +298,7 @@ int StTpcCoordinateTransform::sectorFromCoordinate(const StTpcLocalCoordinate& a
      return(sectorNumber);
 }
 // sector from Tpc local coordinates
-int StTpcCoordinateTransform::sectorFromCoordinate(const StThreeVectorF& a) const
+int StTpcCoordinateTransform::sectorFromCoordinate(const StThreeVector<double>& a) const
 {
     // 30 degrees should be from db
 
@@ -311,7 +319,7 @@ int StTpcCoordinateTransform::sectorFromCoordinate(const StThreeVectorF& a) cons
 }
 
 // FOR SECTOR 12 ONLY!!!! (Local coordinate);
-int StTpcCoordinateTransform::rowFromLocal(const StThreeVectorF& b) const
+int StTpcCoordinateTransform::rowFromLocal(const StThreeVector<double>& b) const
 {
     double referencePosition;
     double rowPitch;
@@ -357,7 +365,7 @@ int StTpcCoordinateTransform::rowFromLocal(const StThreeVectorF& b) const
 }
 
 
-int StTpcCoordinateTransform::padFromLocal(const StThreeVectorF& b, const int row) const
+int StTpcCoordinateTransform::padFromLocal(const StThreeVector<double>& b, const int row) const
 {
     int probablePad = gTpcDbPtr->PadPlaneGeometry()->numberOfPadsAtRow(row)/2;
     //cout << "Probable Pad: " << probablePad << endl;
@@ -400,7 +408,7 @@ int StTpcCoordinateTransform::padFromLocal(const StThreeVectorF& b, const int ro
 //
 // Coordinate from Raw
 //
-StThreeVectorF StTpcCoordinateTransform::xyFromRaw(const StTpcPadCoordinate& a)
+StThreeVector<double> StTpcCoordinateTransform::xyFromRaw(const StTpcPadCoordinate& a)
 {
     double localY = yFromRow(a.row());
     // Just a test?
@@ -415,10 +423,10 @@ StThreeVectorF StTpcCoordinateTransform::xyFromRaw(const StTpcPadCoordinate& a)
     
 
     // rotate properly
-	// StThreeVectorF newxy =
-	//	rotateFromLocal(StThreeVectorF(localX,localY,0), a.sector());
+	// StThreeVector<double> newxy =
+	//	rotateFromLocal(StThreeVector<double>(localX,localY,0), a.sector());
 
-    return(StThreeVectorF(localX,localY,0));
+    return(StThreeVector<double>(localX,localY,0));
 }
 
 //Local Transformation...
@@ -481,8 +489,8 @@ int StTpcCoordinateTransform::tBFromZ(const double z) const
 // Rotation Matrices
 //
 
-StThreeVectorF
-StTpcCoordinateTransform::rotateToLocal(const StThreeVectorF& a,
+StThreeVector<double>
+StTpcCoordinateTransform::rotateToLocal(const StThreeVector<double>& a,
 				     const int sector)
 {
     // Should be replaced with Rotation class:
@@ -536,12 +544,12 @@ StTpcCoordinateTransform::rotateToLocal(const StThreeVectorF& a,
     mResult = mRotation*mRotate;
 //     PR(mResult);
     
-    return (sector>12)? (StThreeVectorF(mResult(1,1),mResult(2,1),-a.z()))
-                        : (StThreeVectorF(mResult(1,1),mResult(2,1),a.z()));
+    return (sector>12)? (StThreeVector<double>(mResult(1,1),mResult(2,1),-a.z()))
+                        : (StThreeVector<double>(mResult(1,1),mResult(2,1),a.z()));
 }
  
-StThreeVectorF 
-StTpcCoordinateTransform::rotateFromLocal(const StThreeVectorF& a,
+StThreeVector<double> 
+StTpcCoordinateTransform::rotateFromLocal(const StThreeVector<double>& a,
 						     const int sector)
 {
     //
@@ -592,8 +600,8 @@ StTpcCoordinateTransform::rotateFromLocal(const StThreeVectorF& a,
   
     mResult = mRotation*mRotate;
 //     PR(mResult);
-    return (sector>12) ? (StThreeVectorF(mResult(1,1),mResult(2,1),-a.z()))
-                         : (StThreeVectorF(mResult(1,1),mResult(2,1),a.z()));
+    return (sector>12) ? (StThreeVector<double>(mResult(1,1),mResult(2,1),-a.z()))
+                         : (StThreeVector<double>(mResult(1,1),mResult(2,1),a.z()));
 }
 
 /****************************************************************/
