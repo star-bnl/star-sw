@@ -15,8 +15,11 @@
 #include <stdio.h>
 #include <string.h>
 
+typedef	void	(*funcPoint)(char*,...);
+
 static int  One=1;
 static int* one=&One;
+static funcPoint MsgAlarmRoutine = NULL;
 
 	void message_( const char *msg, int *one, int *ID, int len );
 	void message_out_( const char *msg, int *one, int len );
@@ -37,6 +40,7 @@ static int* one=&One;
 	int  msg_journal_open_( const char *FileName, int len );
 	void msg_journal_page_( void );
 	void msg_lun_page_( int *LUN );
+	void msg_parse_( const char *msg, int *isep, int *nprefix, int *nmessage, int len );
 	void msg_mark_( const char *Prefix, int *ID, int len );
 	void msg_name_node_( const char *NodeName, int len );
 	void msg_nocount_( const char *Prefix, int len );
@@ -61,7 +65,98 @@ static int* one=&One;
 	void msg_to_journal_out_( const char *msg, int *one, int len );
 	void msg_to_lun_( const char *msg, int *one, int *LUN, int *ID, int len );
 	void msg_to_lun_out_( const char *msg, int *one, int *LUN, int len );
+	void strfc( char *msg, int msglen, char *cstring, int cmax, int *clen );
 
+
+	void	msgalarm_( 
+
+/*   Inputs:                                                                              */
+	  char *msg      /* Character-string message, with prefix, submitted for display. */
+	, int  *severity /* Severity level of alarm -- from msg class.                    */
+	, int   msglen ) /* (FORTRAN-hidden) Length of msg.                               */
+
+{
+
+/*   Fortran callable, as:
+
+	msgalarm( character*(*) message
+	         ,integer       severity )
+*/
+
+/* Description:	FORTRAN callable msg interface to application-specified alarm routine. */
+
+	char mstring[1000];
+	char pstring[1000];
+	int  mlen, plen;
+	int  isep, nprefix, nmessage;
+
+/*	Do this only if nothing's been declared:  */
+	if ( MsgAlarmRoutine != NULL )
+	{
+	  msg_parse_( msg, &isep, &nprefix, &nmessage, msglen );
+
+	  if ( nprefix > 0 )  /*  Make c-string containing the prefix only:  */
+	  {
+	    strfc( msg, nprefix, pstring, 1000, &plen );  /* Make c-string from FORTRAN-string (append null). */
+	  }
+	  else  /*  Make c-string containing the whole thing:  */
+	  {
+	    strfc( msg, msglen, pstring, 1000, &plen );  /* Make c-string from FORTRAN-string (append null). */
+	  }
+
+	  if ( isep <= 0 )
+	  {                         /*  No message here -- prefix-only.
+	    strfc( msg, msglen, mstring, 1000, &mlen );  /* Make c-string from FORTRAN-string (append null). */
+	  }
+	  else if ( nmessage > 0 )  /*  Make c-string containing the message-without-prefix:  */
+	  {                         /*  isep is FORTRAN index;  points to first char in message in C.  */
+	    strfc( &msg[isep], nmessage, mstring, 1000, &mlen );  /* Make c-string from FORTRAN-string (append null). */
+	  }
+	  else                      /*  Make c-string containing the whole thing:  */
+	  {
+	    strfc( msg, msglen, mstring, 1000, &mlen );  /* Make c-string from FORTRAN-string (append null). */
+	  }
+
+	  MsgAlarmRoutine( pstring, mstring, *severity );
+	}
+	return;
+}
+
+
+	void	MsgAlarmRegister(
+
+/*    Input:                                                                                                */
+	 funcPoint AlarmRoutine ) /* Application-specified Alarm routine to use by msg.  */
+{
+/* Description:  Register an alarm-routine to be called by active-alarm messages.
+*/
+
+	MsgAlarmRoutine = AlarmRoutine;
+	return;
+}
+
+	void	msgalarmregister_(
+
+/*    Input:                                                                         */
+	 funcPoint AlarmRoutine ) /* Application-specified Alarm routine to use by msg.  */
+{
+
+/*   Fortran callable, as:
+
+	msgalarmregister( external alarmroutine )
+*/
+
+/* Description:  Register an alarm-routine to be called by active-alarm messages.  For FORTRAN.
+	         Note that if "alarmroutine" is defined as a c-procedure, its name as defined
+	         must contain the suffix "_" and must be in lower-case, in order to be used
+	         with this call.  If it does not contain the suffix "_" or is not all in lower
+	         case, the call must be made from a c-procedure, in which case a call to
+	         MsgAlarmRegister is better than msgalarmregister_ .
+*/
+
+	MsgAlarmRoutine = AlarmRoutine;
+	return;
+}
 
 	void	Message(
 

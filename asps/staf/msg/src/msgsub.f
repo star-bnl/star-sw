@@ -19,7 +19,7 @@
 
 *	For "UNIX", this is:  @msg_include_define  ("@" is part of filename.)
 
-*	STAR Standard Return Conditions defined in include file msg_ret_inc.
+*	Return Conditions defined in include file msg_ret_inc.
 
 
 *                              ***
@@ -74,24 +74,26 @@
 	RETURN
 	END
 *
-	SUBROUTINE			MSG_Check( MSG, ID, Active, Counting )
+	SUBROUTINE			MSG_Check( MSG, ID, Active, Alarming, Counting )
 
 	IMPLICIT NONE
 
 *  Input:
-	CHARACTER*(*) MSG !A STAR-standard message, with prefix.
+	CHARACTER*(*) MSG !A message, with prefix.
 	                  !MSG can be just a prefix.
 
 *  Input/output:
-	INTEGER ID !STAR-standard message ID.  Set to zero by caller 
+	INTEGER ID !Message ID.  Set to zero by caller 
                    !before first call, set by Message on first call by
                    !looking up or entering the prefix contained in MSG
                    !(prefix is everything before the first space) in
-	           !the index of STAR-standard message prefixes.
+	           !the index of message prefixes.
 
 *  Outputs:
 	LOGICAL Active !Flag set to .TRUE. if the message selected
                        !(by prefix and/or ID) is active.
+	LOGICAL Alarming !Flag set to .TRUE. if the message selected
+                         !(by prefix and/or ID) is enabled for alarming.
 	LOGICAL Counting !Flag set to .TRUE. if the message selected
                          !(by prefix and/or ID) is enabled for counting.
 
@@ -123,7 +125,7 @@
 	INCLUDE 'msg_inc'
 
 	LOGICAL Found
-	LOGICAL E_Found, E_Active, E_Counting, CALLER_BUG
+	LOGICAL E_Found, E_Active, E_Alarming, E_Counting, CALLER_BUG
 	CHARACTER*(MSG_Prefix_length_P) Prefix
 
 	CHARACTER*132 M132(4)
@@ -172,10 +174,11 @@
 
 	IF      ( LID .LE. 0 )             THEN !Look up the message in the index:
 	  CALL MSG_Get_Prefix( MSG, Prefix )
-	  Found = MSG_Find( Prefix, LID, Active, Counting ) !Set the ID & flags.
+	  Found = MSG_Find( Prefix, LID, Active, Alarming, Counting ) !Set the ID & flags.
 	ELSE IF ( LID .LE. MSG_Nprefixes ) THEN !It's in the index:
 	  Found    = .TRUE.
 	  Active   = MSG_Active( LID )
+	  Alarming = MSG_Alarming( LID )
 	  Counting = MSG_Counting( LID )
 	  IF ( .NOT. Active ) THEN !Waste no more time unless active.
 	    RETURN
@@ -186,24 +189,31 @@
 	    ELSE !It's wrong -- this is a caller-bug:
 	      CALLER_BUG = .TRUE.
 *	      First check if this message is disabled:
-	      E_Found = MSG_Find( 'MSG_Check-B1', EID, E_Active, E_Counting )
+	      E_Found = MSG_Find( 'MSG_Check-B1', EID, E_Active, E_Alarming, E_Counting )
 	      IF ( .NOT. E_Found ) THEN !Enter the prefix in the index.
 	        CALL MSG_Enter( 'MSG_Check-B1', EID )
 	        E_Active   = .TRUE.
+	        E_Alarming = .TRUE.
 	        E_Counting = .TRUE.
 	        MSG_Active(   EID ) = E_Active !Overwrite usual defaults.
+	        MSG_Alarming( EID ) = E_Alarming
 	        MSG_Counting( EID ) = E_Counting
 	      END IF
-	      IF ( E_Active ) THEN
+	      IF ( E_Active .OR. E_Alarming ) THEN
 	        Prefix_given  = Prefix          !Truncate to MSG_Prefix_length_P.
 	        Prefix_stored = MSG_Prefix(LID) !Truncate to MSG_Prefix_length_P.
 	        WRITE( M132, 501 ) LID, Prefix_given, Prefix_stored
-	        CALL Message_Out( M132, 4 ) !4 lines in M132.
+	        IF ( E_Active ) THEN
+	          CALL Message_Out( M132, 4 ) !4 lines in M132.
+	        END IF
+	        IF ( E_Alarming ) THEN
+	          CALL MSGalarm( M132, 3 ) !Alarm level 3.
+	        END IF
 	      END IF
 	      IF ( E_Counting ) THEN
 	        CALL MSG_INCR( EID )
 	      END IF
-	      Found = MSG_Find( Prefix, LID, Active, Counting ) !Set the ID & flags.
+	      Found = MSG_Find( Prefix, LID, Active, Alarming, Counting ) !Set the ID & flags.
 	    END IF !Prefix(:L) .EQ. MSG_Prefix(LID)(:MSG_Length(LID))
 	  END IF !Active
 	ELSE !It's not in the index:
@@ -217,6 +227,7 @@
 *	Check whether it's exceeded its counting limit:
 	IF ( LID .GT. 0 ) THEN
 	  Active   = MSG_Active(LID)
+	  Alarming = MSG_Alarming(LID)
 	  Counting = MSG_Active(LID)
 	  IF      ( .NOT. MSG_Active(LID) )                     THEN
 	  ELSE IF ( MSG_Count_limit(LID) .LE. 0 )               THEN !No counting limit.
@@ -231,6 +242,7 @@
 	  END IF !.NOT.Active
 	ELSE !Not found, not entered -- total failure.  Just set these false:
 	  Active   = .FALSE.
+	  Alarming = .FALSE.
 	  Counting = .FALSE.
 	END IF
 
@@ -284,7 +296,7 @@
 	INTEGER CID
 	INTEGER EID
 	INTEGER L
-	LOGICAL Active, Counting, Found
+	LOGICAL Active, Alarming, Counting, Found
 	LOGICAL MSG_Find
 	LOGICAL MSG_Find_Class
 
@@ -309,9 +321,10 @@
      1	       '             ['A']'/
      1	       '             Change parameter MSG_Nprefixes_max_P in'
      1    ,' msg_inc.')
-	  Found=MSG_FIND('MSG_Enter-E1',EID,Active,Counting)
-	  IF (Active) CALL MESSAGE_OUT(M132,3)
-	  IF (Counting) CALL MSG_INCR(EID)
+	  Found = MSG_FIND( 'MSG_Enter-E1', EID, Active, Alarming, Counting )
+	  IF ( Active   ) CALL Message_Out(M132,3)
+	  IF ( Found .AND. Alarming ) CALL MSGalarm(M132,MSG_Alarm_Level(EID)) !Level 3 alarm.
+	  IF ( Found .AND. Counting ) CALL MSG_Incr(EID)
 	END IF !MSG_Nprefixes.LT.MSG_Nprefixes_max_P
 
 	RETURN
@@ -348,7 +361,7 @@
 	CHARACTER*132 M132(3)
 	INTEGER EID
 	INTEGER L
-	LOGICAL Found, Active, Counting
+	LOGICAL Found, Active, Alarming, Counting
 	LOGICAL MSG_Find
 
 	IF ( MSG_Nclasses .LT. MSG_Nclasses_max_P ) THEN !There's room:
@@ -368,26 +381,29 @@
 501	FORMAT('MSG_Enter_Class-E1 No room left for new classes; class not entered:'/
      1	       '             ['A']'/
      1	       '             Change parameter MSG_Nclasses_max_P in msg_inc.')
-	  Found = MSG_Find( 'MSG_Enter_Class-E1', EID, Active, Counting )
-	  IF ( Active ) CALL Message_Out( M132, 3 )
-	  IF ( Counting ) CALL MSG_Incr( EID )
+	  Found = MSG_Find( 'MSG_Enter_Class-E1', EID, Active, Alarming, Counting )
+	  IF ( Active   ) CALL Message_Out( M132, 3 )
+	  IF ( Found .AND. Alarming ) CALL MSGalarm(M132,MSG_Alarm_Level(EID)) !Level 3 alarm.
+	  IF ( Found .AND. Counting ) CALL MSG_Incr(EID)
 	  MSG_Enter_Class = .FALSE.
 	END IF !MSG_Nprefixes .LT. MSG_Nprefixes_max_P
 
 	RETURN
 	END
 *
-	LOGICAL FUNCTION		MSG_Find( Prefix, ID, Active, Counting )
+	LOGICAL FUNCTION		MSG_Find( Prefix, ID, Active, Alarming, Counting )
 
 	IMPLICIT NONE
 
 *  Input:
-	CHARACTER*(*) Prefix !A STAR-standard message prefix.
+	CHARACTER*(*) Prefix !A message prefix.
 
 *  Outputs:
-	INTEGER ID       !STAR-standard message ID.
+	INTEGER ID       !Message ID.
 	LOGICAL Active   !Flag set to .TRUE. if the message selected
                          !(by Prefix and/or ID) is active.
+	LOGICAL Alarming !Flag set to .TRUE. if the message selected
+                         !(by Prefix and/or ID) is enabled for alarming.
 	LOGICAL Counting !Flag set to .TRUE. if the message selected
                          !(by Prefix and/or ID) is enabled for counting.
 
@@ -436,6 +452,7 @@
 	IF (.NOT.Found) THEN
 *	  Not in index -- set these like this:
 	  Active=.FALSE.
+	  Alarming=.FALSE.
 	  Counting=.FALSE.
 	  LID=0
 	ELSE !In index -- look up the flags:
@@ -449,6 +466,7 @@
      1	         MSG_Prefix(LID)//' Disabled -- count limit reached',1)
 	  END IF !.NOT.Active
 	  Active=MSG_Active(LID)
+	  Alarming=MSG_Alarming(LID)
 	  Counting=MSG_Counting(LID)
 	END IF
 
@@ -524,15 +542,15 @@
 	IMPLICIT NONE
 
 *  Input:
-	CHARACTER*(*) Prefix !A STAR-standard message-prefix.
+	CHARACTER*(*) Prefix !A message-prefix.
 
 *  Output:
-	CHARACTER*(*) Class !The STAR-standard prefix-class from Prefix.
+	CHARACTER*(*) Class !The prefix-class from Prefix.
 
 *  Brief description:  Strip the class off of a prefix and return it.
 
 *   Description:
-*	Extract the STAR-standard class from the character string Prefix
+*	Extract the class from the character string Prefix
 *	and return it in Class.
 
 *   Return conditions:  none
@@ -583,15 +601,15 @@
 	IMPLICIT NONE
 
 *  Input:
-	CHARACTER*(*) MSG !A STAR-standard message, with prefix.
+	CHARACTER*(*) MSG !A message, with prefix.
 
 *  Output:
-	CHARACTER*(*) Prefix !The STAR-standard message-prefix from MSG.
+	CHARACTER*(*) Prefix !The message-prefix from MSG.
 
 *  Brief description:  Strip the prefix off a message and return it.
 
 *   Description:
-*	Extract the STAR-standard prefix from the character string MSG
+*	Extract the prefix from the character string MSG
 *	and return it in Prefix.
 
 *   Return conditions:  none
@@ -661,12 +679,12 @@
 	IMPLICIT NONE
 
 *  Input:
-	INTEGER ID !STAR-standard message-ID -- must be valid.
+	INTEGER ID !Message-ID -- must be valid.
 
 *  Brief description:  Increment a prefix's counter, referenced by ID.
 
 *  Description:
-*	Increment the counter for the STAR-standard-message indexed
+*	Increment the counter for the message indexed
 *	by ID.  Also, if a CPU time for ID has been marked, take a difference
 *	from that CPU and the current, and add it to the CPU total for ID.
 
@@ -694,12 +712,97 @@
 	RETURN
 	END
 *
+	SUBROUTINE			MSG_Parse( MSG, Isep, Nprefix, Nmessage )
+
+	IMPLICIT NONE
+
+*  Input:
+	CHARACTER*(*) MSG !A message, with prefix.
+
+*  Outputs:
+	INTEGER       Isep     !The position of the separator, between prefix and the rest of the message.
+	INTEGER       Nprefix  !Length of prefix, or zero.
+	INTEGER       Nmessage !Length of message-without-prefix (and without separator), or zero.
+
+*  Description:  Locate the separator between the prefix and the rest of the message.
+*	Return Nprefix = 0 if no prefix is found, Nmessage = 0 if no message is found.
+
+	INCLUDE 'msg_inc'
+
+	INTEGER I1,In,L
+
+	CHARACTER*5 seplist
+	SAVE seplist
+	LOGICAL seplist_initialized
+	SAVE seplist_initialized
+
+	DATA seplist_initialized/.FALSE./
+
+
+	IF (.NOT.seplist_initialized) THEN
+	  seplist_initialized=.TRUE.
+	  seplist(1:1) = ' '        !Space
+	  seplist(2:2) = '	'   !Tab
+	  seplist(3:3) = CHAR( 10 ) !Newline
+	  seplist(4:4) = CHAR( 12 ) !Form-feed
+	  seplist(3:3) = CHAR(  0 ) !Null
+	END IF
+
+	L=LEN(MSG)
+
+*	Scan for first non-separator:
+	I1=1
+	DO WHILE (  ( INDEX( seplist, MSG(I1:I1) ) .GT. 0 )
+     1	    .AND.   ( I1 .LT. (L-1) )  )
+	  I1=I1+1
+	END DO
+
+
+*	Scan for the next separator:
+	In=I1+1
+	DO WHILE (  ( INDEX( seplist, MSG(In:In) ) .LE. 0 )
+     1	    .AND.   ( In .LT. L )  )
+	  In=In+1
+	END DO
+
+
+	IF ( In .GT. L ) THEN !Blank line, or zero-length line -- blank prefix:
+	  Isep = 0
+	  Nprefix  = 0
+	  Nmessage = 0
+	ELSE
+*	  If terminated by a separator, then subtract one from In to make it
+*	  the last character in the prefix:
+	  IF (INDEX( seplist, MSG(In:In) ).GT.0) THEN !The trailing separator is here.
+	    In=In-1 !Back off one, from the trailing separator.
+	  END IF
+	  IF (In.LT.I1) THEN !Blank line, or zero-length line -- blank prefix:
+	    Isep = 0
+	    Nprefix  = 0
+	    Nmessage = 0
+	  ELSE
+*	    Prefix is everything from first non-separator to one-before next separator:
+	    Isep = In + 1
+	    Nprefix = In
+	    Nmessage = L - In
+	    IF ( Isep .GT. L ) Isep = L !Message is pure-prefix.
+	    IF ( Isep .LT. 0 ) Isep = 0 !Message has no prefix.
+	    IF ( Nprefix .GT. L ) Nprefix = L !Message is pure-prefix.
+	    IF ( Nprefix .LT. 0 ) Nprefix = 0 !Message has no prefix.
+	    IF ( Nmessage .GT. L ) Nmessage = L !Message has no prefix.
+	    IF ( Nmessage .LT. 0 ) Nmessage = 0 !Message is pure-prefix.
+	  END IF
+	END IF
+
+	RETURN
+	END
+*
 	SUBROUTINE			MSG_Parse_Prefix( Prefix, Prefix_stripped, Prefix_number)
 
 	IMPLICIT NONE
 
 *  Input:
-	CHARACTER*(*) Prefix !STAR-standard messsage prefix.
+	CHARACTER*(*) Prefix !Messsage prefix.
 
 *  Outputs:
 	CHARACTER*(*) Prefix_stripped !Prefix stripped of trailing digits.
@@ -709,7 +812,7 @@
 *  Brief description:  Parse a prefix into a string and a number.
 
 *  Description:
-*	Parse the specified STAR-standard message prefix "Prefix" into two
+*	Parse the specified message prefix "Prefix" into two
 *	components:
 *	1)	The prefix without trailing digits,
 *	2)	The trailing digits, converted to an integer.
@@ -792,15 +895,19 @@
 	CALL MSG_Get_Class( MSG_Prefix(ID), Class ) !Get the class, from the prefix.
 	IF ( MSG_Find_Class( Class, CID ) ) THEN !Found the class -- set class defaults:
 	  MSG_Active(      ID ) = MSG_Class_Default_Active(      CID )
+	  MSG_Alarming(    ID ) = MSG_Class_Default_Alarming(    CID )
 	  MSG_Counting(    ID ) = MSG_Class_Default_Counting(    CID )
 	  MSG_Count_limit( ID ) = MSG_Class_Default_Count_Limit( CID )
 	  MSG_Abort_limit( ID ) = MSG_Class_Default_Abort_Limit( CID )
+	  MSG_Alarm_level( ID ) = MSG_Class_Default_Alarm_level( CID )
 	  MSG_Iclass(      ID ) = CID
 	ELSE                                     !Didn't find the class:
 	  MSG_Active(      ID ) = .NOT. MSG_All_Disable
+	  MSG_Alarming(    ID ) = .NOT. MSG_All_Noalarm
 	  MSG_Counting(    ID ) = .NOT. MSG_All_Nocount
 	  MSG_Count_limit( ID ) = MSG_All_Count_Limit !The default.
 	  MSG_Abort_limit( ID ) = 0 !The default -- no abort limit.
+	  MSG_Alarm_level( ID ) = 0 !Default level.
 	  MSG_Iclass(      ID ) = 0 !No class.
 	END IF
 
