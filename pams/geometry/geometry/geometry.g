@@ -101,8 +101,8 @@ If LL>1
 
 * sanity check - if something left in commands (unknown keyword), we stop!
   l=LENOCC(commands); if l>0
-  {  print *,' Unknown command left => ', commands(1:l), ' <='
-     if (Ideb<3) stop 'You better stop here to avoid problems'
+  {  print *,' Unknown command left => ', commands(1:l), ' <= ',l
+     if (Ideb<3) stop 'You better stop here to avoid problems'     
   }
 *
 * -------------------- setup selected configuration ------------------------
