@@ -10,41 +10,58 @@
 #include "TObject.h"
 
 class StiDetector : public TObject{
+    
+public:
 
-  public:
-  
-  // con/destructor
-  StiDetector();
-  virtual ~StiDetector();
+    enum StiShapeCode {kPlanar = 1, kCircular}; // shapeCode constants
+    
+    // con/destructor
+    StiDetector();
+    virtual ~StiDetector();
+    
+    //Gets
+    Bool_t isActive() const { return active; }
+    Bool_t isContinuousMedium() const { return continuousMedium; }
+    Bool_t isDiscreteScatterer() const { return discreteScatterer; }
+    double getDensity() const { return density; }
+    double getThickness() const { return thickness; }
+    double getHalfWidth() const { return halfWidth; }
+    double getHalfDepth() const { return halfDepth; }
+    double getZCenter() const {return zcenter;}
+    double getMaterialRadLength() const { return radLength; }
+    double getRadLengthThickness() const { return thickness/radLength; }
+    double getPosition() const { return position; }
+    double getRefAngle() const { return refAngle; }
+    Int_t getShapeCode() const { return shapeCode; }
+    
+    //Sets
+    void setIsActive(bool val) {active = val;}
+    void setIsContinuousMedium(bool val) {continuousMedium = val;}
+    void setIsDiscreteScatterer(bool val) {discreteScatterer = val;}
+    void setDensity(double val) {density = val;}
+    void setThickness(double val) {thickness = val;}
+    void setHalfWidth(double val) {halfWidth = val;}
+    void setZCenter(double val) {zcenter = val;}
+    void setHalfDepth(double val) {halfDepth = val;}
+    void setRadLength(double val) {radLength = val;}
+    void setPosition(double val) {position = val;}
+    void setRefAngle(double val) {refAngle = val;}
+    void setShapeCode(StiShapeCode val) {shapeCode = val;}
+    
+protected:
 
-  Bool_t isActive() const { return active; }
-  Bool_t isContinuousMedium() const { return continuousMedium; }
-  Bool_t isDiscreteScatterer() const { return discreteScatterer; }
-  Float_t getDensity() const { return density; }
-  Float_t getThickness() const { return thickness; }
-  Float_t getHalfWidth() const { return halfWidth; }
-  Float_t getHalfDepth() const { return halfDepth; }
-  Float_t getMaterialRadLength() const { return radLength; }
-  Float_t getRadLengthThickness() const { return thickness/radLength; }
-  Float_t getPosition() const { return position; }
-  Float_t getRefAngle() const { return refAngle; }
-  Int_t getShapeCode() const { return shapeCode; }
-
-  enum {kPlanar = 1, kCircular}; // shapeCode constants
-
-  protected:
-
-  Bool_t active;              // does the object provide hit information?
-  Bool_t continuousMedium;    // is this a continuous scatterer?
-  Bool_t discreteScatterer;   // is this a discrete scatterer?
-  Float_t density;            // g/cm^3 [STAR units]
-  Float_t thickness;          // extent in local x (global r) in cm
-  Float_t halfWidth;          // 1/2 extent in local y (global phi) in cm
-  Float_t halfDepth;          // 1/2 extent in z in cm
-  Float_t radLength;          // cm
-  Float_t position;           // perpendicular distance to global origin
-  Float_t refAngle;           // angle of normal to object in global coords
-  Int_t shapeCode;            // 1 if planar, 2 if circular
+    Bool_t active;              // does the object provide hit information?
+    Bool_t continuousMedium;    // is this a continuous scatterer?
+    Bool_t discreteScatterer;   // is this a discrete scatterer?
+    double density;            // g/cm^3 [STAR units]
+    double thickness;          // extent in local x (global r) in cm
+    double halfWidth;          // 1/2 extent in local y (global phi) in cm
+    double zcenter;                 // center of detector in z (global) projection in cm
+    double halfDepth;          // 1/2 extent in z in cm
+    double radLength;          // cm
+    double position;           // perpendicular distance to global origin
+    double refAngle;           // angle of normal to object in global coords
+    StiShapeCode shapeCode;            // 1 if planar, 2 if circular
 
 };
 
