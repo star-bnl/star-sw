@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.cc,v 1.3 1999/10/15 15:46:51 ullrich Exp $
+ * $Id: StThreeVectorF.cc,v 1.4 2000/09/28 02:06:10 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.cc,v $
- * Revision 1.3  1999/10/15 15:46:51  ullrich
- * Changed output format in operator<<
+ * Revision 1.4  2000/09/28 02:06:10  perev
+ * non automatic streamer added
+ *
+ * Revision 1.4  2000/09/28 02:06:10  perev
+ * non automatic streamer added
  *
  * Revision 1.3  1999/10/15 15:46:51  ullrich
  * Changed output format in operator<<
@@ -29,6 +32,7 @@
  **************************************************************************/
 #include <assert.h>
 #include "StThreeVectorF.hh"
+#include "StThreeVectorD.hh"
 
 #ifdef __ROOT__
 #include "TBuffer.h"
@@ -107,6 +111,24 @@ istream&  operator>>(istream& is, StThreeVectorF& v)
     float  x, y, z;
     is >> x >> y >> z;
     v.setX(x);
+    v.setY(y);
+    v.setZ(z);
+    return is;
+}
+//______________________________________________________________________________
+void StThreeVectorF::Streamer(TBuffer &R__b)
+      R__b.SetBufferOffset(offset+4);
+      Version_t R__v = R__b.ReadVersion(); 
+      if (R__v == 1) R__b.SetBufferOffset(R__b.Length()+10); //skip TObject
+   }
+   if (R__b.IsReading()) {
+      Version_t R__v = R__b.ReadVersion();if (R__v){/*touch*/}; 
+      R__b >> mX1;
+      R__b >> mX2;
+      R__b >> mX3;
+   } else {
+      R__b.WriteVersion(Class());
+      R__b << mX1;
       R__b << mX2;
       R__b << mX3;
    }
