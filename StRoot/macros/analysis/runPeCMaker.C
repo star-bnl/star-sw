@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: runPeCMaker.C,v 1.5 2000/04/18 20:20:33 nystrand Exp $
+// $Id: runPeCMaker.C,v 1.6 2000/05/09 19:38:35 kathy Exp $
 //
 // Description: 
 // Chain for StPeCMaker based on doEvents.C. Runs StEventMaker and StPeCMaker.
@@ -32,6 +32,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: runPeCMaker.C,v $
+// Revision 1.6  2000/05/09 19:38:35  kathy
+// update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
+//
 // Revision 1.5  2000/04/18 20:20:33  nystrand
 // StFile --> StFileI + updated chain return codes
 //
@@ -64,14 +67,18 @@ const char *xdfFile = 0;
 const char *mdcFile = 0;
 const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 
-void runPeCMaker()
-{
-    cout << "Usage: runPeCMaker.C(nevents,\"-\",\"some_directory/some_dst_file.xdf\")" << endl;
-    cout << "       runPeCMaker.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
-    cout << "       runPeCMaker.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
-}
+//void runPeCMaker()
+//{
+//    cout << "Usage: runPeCMaker.C(nevents,\"-\",\"some_directory/some_dst_file.xdf\")" << endl;
+//    cout << "       runPeCMaker.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
+//    cout << "       runPeCMaker.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
+//}
+
 void runPeCMaker(Int_t,const Char_t **,const char *qaflag = "");
-void runPeCMaker(Int_t nevents=999, const Char_t *path, const Char_t *file,
+
+void runPeCMaker(Int_t nevents=2, 
+              const Char_t *path="-",
+              const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
               const char *qaflag = "off");
 
 

@@ -1,5 +1,8 @@
-// $Id: strange.C,v 1.12 2000/04/13 21:46:35 kathy Exp $
+// $Id: strange.C,v 1.13 2000/05/09 19:38:42 kathy Exp $
 // $Log: strange.C,v $
+// Revision 1.13  2000/05/09 19:38:42  kathy
+// update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
+//
 // Revision 1.12  2000/04/13 21:46:35  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -90,8 +93,9 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 //===================================================================================================
 //
 void strange(Int_t,const Char_t **,const char *qaflag = "");
-void strange(Int_t nevents=999,
-              const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
+
+void strange(Int_t nevents=2,
+              const Char_t *path="-"
               const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
               const char *qaflag = "off");
 

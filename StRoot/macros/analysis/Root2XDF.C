@@ -1,5 +1,8 @@
-// $Id: Root2XDF.C,v 1.5 2000/04/13 21:46:33 kathy Exp $
+// $Id: Root2XDF.C,v 1.6 2000/05/09 19:37:51 kathy Exp $
 // $Log: Root2XDF.C,v $
+// Revision 1.6  2000/05/09 19:37:51  kathy
+// update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
+//
 // Revision 1.5  2000/04/13 21:46:33  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -27,7 +30,7 @@ StChain *chain;
 void Root2XDF(
   const char *MainFile=
   "/afs/rhic/star/data/samples/gstar.dst.root",
-  Int_t nevents=99999) 
+  Int_t nevents=5) 
 {
   cout << "Usage: root.exe -b -q Root2XDF.C(\"rootfile name.dst.root\")" << endl
        << "       Converts the input ROOT file into the XDF format."     << endl
@@ -43,7 +46,6 @@ void Root2XDF(
   gSystem->Load("libgen_Tables");
   gSystem->Load("libsim_Tables");
   gSystem->Load("libglobal_Tables");
-
 
   gSystem->Load("StIOMaker");
   gSystem->Load("xdf2root");
@@ -86,7 +88,9 @@ void Root2XDF(
   };
   if (xdf) { xdf->CloseXDF(); delete xdf;} 
   if (iev) { 
-    cout << endl << " *** Total: " << iev << " events have been written out" << endl << endl; 
+    cout << endl << 
+   " *** Root2XDF.C -- Total: " << iev << 
+   " events have been written out" << endl << endl; 
     TString lsOut = "ls -l ";
     lsOut += xdfOut;
     gSystem->Exec(lsOut);
@@ -95,7 +99,7 @@ void Root2XDF(
           << " root.exe \'XDFBrowser.C(\""<<  xdfOut.Data() << "\")\'" << endl << endl;
   }
   else {
-   cout << "no event has been writen" << endl;
+   cout << "Root2XDF.C - no events were written" << endl;
   }
   chain->Finish();   
 }

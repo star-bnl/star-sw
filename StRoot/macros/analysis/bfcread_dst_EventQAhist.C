@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.22 2000/04/13 21:46:34 kathy Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.23 2000/05/09 19:38:03 kathy Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.23  2000/05/09 19:38:03  kathy
+// update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
+//
 // Revision 1.22  2000/04/13 21:46:34  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -107,7 +110,7 @@ StChain *chain;
 //TBrowser *brow=0;
 
 void bfcread_dst_EventQAhist(
-     Int_t nevents=1,
+     Int_t nevents=2,
      const Char_t *MainFile=
       "/afs/rhic/star/data/samples/gstar.dst.root",
     const Char_t *psFile="Event_QA_hist.ps",

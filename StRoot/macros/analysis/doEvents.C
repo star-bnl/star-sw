@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.49 2000/04/21 13:40:08 wenaus Exp $
+// $Id: doEvents.C,v 1.50 2000/05/09 19:38:17 kathy Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -36,6 +36,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.50  2000/05/09 19:38:17  kathy
+// update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
+//
 // Revision 1.49  2000/04/21 13:40:08  wenaus
 // correct the doc for nevents in multifile mode
 //
@@ -98,14 +101,16 @@ const char *xdfFile = 0;
 const char *mdcFile = 0;
 const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 
-void doEvents()
-{
-    cout << "Usage: doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.xdf\")" << endl;
-    cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
-    cout << "       doEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
-}
-void doEvents(Int_t,const Char_t **,const char *qaflag = "");
-void doEvents(Int_t nevents=999, const Char_t *path, const Char_t *file,
+//void doEvents()
+//{
+//    cout << "Usage: doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.xdf\")" << endl;
+//    cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
+//    cout << "       doEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
+//}
+void doEvents(Int_t, const Char_t **, const char *qaflag = "");
+void doEvents(Int_t nevents=2, 
+              const Char_t *path="-",
+              const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
               const char *qaflag = "off");
 
 
