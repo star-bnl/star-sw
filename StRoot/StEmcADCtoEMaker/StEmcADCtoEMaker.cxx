@@ -1,9 +1,9 @@
 //*-- Author : Alexandre Suaide
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.10 2001/10/24 22:41:39 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.11 2001/10/24 23:06:54 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
-// Revision 1.10  2001/10/24 22:41:39  suaide
-// small changes
+// Revision 1.11  2001/10/24 23:06:54  suaide
+// log messages included for easier debug
 //
 // Revision 1.8  2001/10/24 14:47:16  suaide
 // type correction
@@ -154,11 +154,11 @@ Int_t StEmcADCtoEMaker::Make()
 //_____________________________________________________________________________
 void StEmcADCtoEMaker::GetStatus(Int_t det)
 {
-  m_StatusDb=GetInputDB("Conditions/emc");
+  /*m_StatusDb=GetInputDB("Conditions/emc");
   if(m_StatusDb)
   {
     //return;
-  } 
+  } */
 
   if(det==0) // bemc
   {
@@ -180,19 +180,22 @@ void StEmcADCtoEMaker::GetStatus(Int_t det)
 //_____________________________________________________________________________
 StEmcCollection* StEmcADCtoEMaker::GetEmcCollectionFromDaq(TDataSet* daq)
 {
+  cout <<"***** Getting EMC event from daq file\n";
   UInt_t eta[]={20,20,150,10};
   UInt_t sub[]={2,2,1,15};
 
   StEmcCollection* emcDaqUtil=new StEmcCollection();
 
+  cout <<"***** Getting Daq Reader\n";
   StDAQReader* TheDataReader=(StDAQReader*)(daq->GetObject());
   if(!TheDataReader) return 0;
   if(!TheDataReader->EMCPresent()) return 0;
 
+  cout <<"***** Getting point to EMC data bank\n";
   StEMCReader* TheEmcReader=TheDataReader->getEMCReader();
   if(!TheEmcReader) return 0;
   
-
+  cout <<"***** Loop over detectors\n";
   for(Int_t det=0;det<4;det++) if(kCalib[det]) 
   {
     GetStatus(det);
@@ -230,6 +233,7 @@ Bool_t StEmcADCtoEMaker::GetEmcEvent()
 // check if there is event from DAQ
   if(isDaqFile)
   {
+    cout <<"***** trying to get Daq dataset\n";
     TDataSet* mTheEmcData   = GetDataSet("StDAQReader");
  	  if(!mTheEmcData) return kFALSE;
     emctemp = GetEmcCollectionFromDaq(mTheEmcData);
@@ -290,6 +294,7 @@ Bool_t StEmcADCtoEMaker::SubtractPedestal(Int_t detnum)
   emcPedestal_st *emcpedst=NULL;
   smdPedestal_st *smdpedst=NULL;
    
+  cout <<"getting pedestal tables for "<<detname[detnum].Data()<<endl;
   if(detnum<2) //bemc and bprs
   {
     St_emcPedestal* ped=(St_emcPedestal*)m_CalibDb->Find(TableName.Data());
@@ -305,6 +310,7 @@ Bool_t StEmcADCtoEMaker::SubtractPedestal(Int_t detnum)
     if(!smdpedst) return kFALSE;  
   }
   
+  cout <<"subtracting pedestal.... loop over modules\n";
   for(UInt_t j=1;j<121;j++)
   {
     StEmcModule* module = detector->module(j);
@@ -345,6 +351,7 @@ Bool_t StEmcADCtoEMaker::Calibrate(Int_t detnum,Int_t* NHITS,Float_t* ENERGY)
   
   if(!detector) return kFALSE;
   
+  cout <<"getting calibration table \n";
   TString TableName=detname[detnum]+"Calibration";
   St_emcCalibration* cal=(St_emcCalibration*)m_CalibDb->Find(TableName.Data());
   if(!cal) return kFALSE;
@@ -352,6 +359,7 @@ Bool_t StEmcADCtoEMaker::Calibrate(Int_t detnum,Int_t* NHITS,Float_t* ENERGY)
   emcCalibration_st* cal_st=cal->GetTable();
   if(!cal_st) return kFALSE;
 
+  cout <<"applying calibration... loop over modules \n";
   for(UInt_t j=1;j<121;j++)
   {
     StEmcModule* module = detector->module(j);
@@ -394,6 +402,7 @@ Bool_t StEmcADCtoEMaker::Calibrate(Int_t detnum,Int_t* NHITS,Float_t* ENERGY)
 //_____________________________________________________________________________
 Bool_t StEmcADCtoEMaker::FillHistograms(Int_t detnum,Int_t nhits,Float_t energy)
 {
+  cout <<"***** Filling histograms for detector "<<detname[detnum].Data()<<endl;
   if(nhits>0)  m_nhit->Fill(log((Float_t)nhits),(Float_t)detnum+1);
   if(energy>0) m_etot->Fill(log(energy),(Float_t)detnum+1);
     
