@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.28 2004/09/03 03:09:26 suaide Exp $
+// $Id: StPreEclMaker.cxx,v 1.29 2004/09/07 14:32:05 suaide Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.29  2004/09/07 14:32:05  suaide
+// small changes in the histograms
+//
 // Revision 1.28  2004/09/03 03:09:26  suaide
 // changes in the histograms
 //
@@ -156,7 +159,7 @@ StEmcCollection* ecmpreecl;
 StPreEclMaker::StPreEclMaker(const char *name, const char *title):StMaker(name,title){
 //  drawinit=kFALSE;
   mPrint = kTRUE;
-  mFillHisto = kFALSE;
+  mFillHisto = kTRUE;
   m_ncl = 0;
   m_etot = 0;
   m_sig_e = 0;
@@ -193,6 +196,9 @@ Int_t StPreEclMaker::Init()
   SetClusterConditions("bsmdp", 5, 0.4,0.001, 0.1,kFALSE);
   mParam->Purge();
   parTable = mParam->GetTable();
+
+  // histograms in reco controlled by bfc
+   if(!IAttr(".histos")) mFillHisto = kFALSE;
 
   Int_t greta[4]={40,40,300,20};   // eta bins
   Int_t grphi[4]={120,120,60,900}; // phi bins  => 16-apr by PAI
@@ -556,7 +562,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.28 2004/09/03 03:09:26 suaide Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.29 2004/09/07 14:32:05 suaide Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

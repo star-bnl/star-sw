@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.26 2004/09/03 03:09:45 suaide Exp $
+// $Id: StEpcMaker.cxx,v 1.27 2004/09/07 14:32:20 suaide Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.27  2004/09/07 14:32:20  suaide
+// small changes in the histograms
+//
 // Revision 1.26  2004/09/03 03:09:45  suaide
 // changes in the histograms
 //
@@ -154,7 +157,7 @@ StEpcMaker::StEpcMaker(const char *name):StMaker(name)
     m_emc_points[i] = 0;     //! //Emc Point multiplicity  
   }
   m_point_flag = 0;
-  mFillHisto = kFALSE;
+  mFillHisto = kTRUE;
 }
 //_____________________________________________________________________________
 StEpcMaker::~StEpcMaker()
@@ -166,6 +169,9 @@ Int_t StEpcMaker::Init()
 //Making QA histgrams
 // for points
   m_point_flag= new TH1F(" Point Flag "," Point Flag ",5,0.5,5.5);
+
+  // histograms in reco controlled by bfc
+  if(!IAttr(".histos")) mFillHisto = kFALSE;
 
   for (Int_t i=0; i<4; i++)
   {
