@@ -1,12 +1,28 @@
-// $Id: EEmcTTMatch.cxx,v 1.3 2004/05/05 21:37:38 zolnie Exp $
+// $Id: EEmcTTMatch.cxx,v 1.4 2004/05/05 22:11:08 zolnie Exp $
 /*!
  *                                                                     
  * \class  EEmcTTMatch
+
+ * \brief  EEmcTTMatch class contains results of TPC track to EEMC tower matching
+ *
+ * The contents of a EEmcTTMatch is a pointer to EEmcTower object and a list of StMuTrack 
+ * objects that 
+ * fulfilled certain matching criteria. 
+ * 
  * \author Piotr A. Zolnierczuk
  * \date   2004/04/30
  *
- * \brief  EEmcTTMatch class contains results of TPC track to EEMC tower matching
  *
+ * \section eemcttmachexample Example 
+  \verbatim
+  // assume that tmatch is of type EEmcTTMatch* 
+  EEmcTower *tower =tmatch->Tower(); 
+  StMuTrack *track =NULL;
+  TIter nextTrack(tmatch->Tracks());
+  while((track=(StMuTrack *)nextTrack())) { 
+    // do something with tracks
+  } 
+  \endverbatim
  */                                                                      
 
 
