@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.67 1999/08/13 17:42:34 fine Exp $ 
+// $Id: St_Table.cxx,v 1.68 1999/08/13 21:38:48 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.68  1999/08/13 21:38:48  fine
+// if endif fixed
+//
 // Revision 1.67  1999/08/13 17:42:34  fine
 // Comments clean up
 //
@@ -1183,16 +1186,13 @@ void St_Table::SetType(const Text_t *const type)
    SetTableType(type);
    St_DataSet::SetTitle(s_TableHeader->type);
 }
-
+#if 0
 //______________________________________________________________________________
 int St_Table::PointerToPointer(G__DataMemberInfo &m)
 {
    if (strstr(m.Type()->Name(), "**")) return 1;
    return 0;
 }
-
-#if 0
-
 //______________________________________________________________________________
 Bool_t St_Table::MakeExpression(const Char *expressions[],Int_t nExpressions)
 {
@@ -1257,6 +1257,7 @@ void St_Table::MakeHeader(const Char_t *prefix,const Char_t *tablename,
   fclose(fp);
   delete [] include;
 }
+#endif
 //______________________________________________________________________________
 void St_Table::StafStreamer(Char_t *structname, FILE *fl)
 {
