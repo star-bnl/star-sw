@@ -119,9 +119,11 @@ StiMaker::~StiMaker()
     
     delete mhitfiller;
     mhitfiller = 0;
-    
-    StiDisplayManager::kill();
-    mdisplay = 0;
+
+    if (mUseGui) {
+	StiDisplayManager::kill();
+	mdisplay = 0;
+    }
 
     delete mtrackfactory;
     mtrackfactory = 0;
@@ -171,8 +173,10 @@ void StiMaker::Clear(const char*)
     mtrackfactory->reset();
     mktracknodefactory->reset();
 
-    //Reset DisplayManager
-    mdisplay->reset();
+    if (mUseGui) {
+	//Reset DisplayManager
+	mdisplay->reset();
+    }
 
     //Clear the track store
     mtrackstore->clear();
@@ -190,9 +194,11 @@ Int_t StiMaker::Init()
     Messenger::init();
 
     //The Display
-    mdisplay = StiDisplayManager::instance();
-    //Must come before anything that you want to be drawn
-    mdisplay->cd();
+    if (mUseGui) {
+	mdisplay = StiDisplayManager::instance();
+	//Must come before anything that you want to be drawn
+	mdisplay->cd();
+    }
 
     //The track store
     mtrackstore = StiTrackContainer::instance();
@@ -203,7 +209,8 @@ Int_t StiMaker::Init()
     //The Hit Factory
     mhitfactory = new StiHitFactory("HitFactory");
     mhitfactory->setIncrementalSize(50000); //Allocate in chunks of 50k hits
-    mhitfactory->setMaxIncrementCount(10);  //So, we can have 10 allocations at 50k a pop -> 500k hits max.
+    mhitfactory->setMaxIncrementCount(10);
+    //So, we can have 10 allocations at 50k a pop -> 500k hits max.
 
     //The Evalualbe Track Factory
     if (mUseGui==true) {
@@ -284,9 +291,11 @@ Int_t StiMaker::Init()
     mtracker->setTrackSeedFinder(mSeedFinder);
     mtracker->isValid(true);
 
-    mdisplay->setSkeletonView();
-    mdisplay->draw();
-    mdisplay->update();
+    if (mUseGui) {
+	mdisplay->setSkeletonView();
+	mdisplay->draw();
+	mdisplay->update();
+    }
 
     //The Evaluator
     //First call to instance must specify then output file name

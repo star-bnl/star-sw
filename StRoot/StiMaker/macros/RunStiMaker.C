@@ -5,20 +5,14 @@
 class StChain;
 StChain *chain=0;
 
-void RunStiMaker(Int_t nevents=1,
-
-		 bool simulated=true, /*!sim or data?*/
+void RunStiMaker(Int_t nevents=10,
 		 
-		 bool draw=true, /*! use gui, click your way around */
-		 //bool draw=false, /*! console version, run through nevents */
+		 bool simulated=true, /*!sim or data?*/
 		 
 		 //bool doFit=true, /*! true->fit track only */
 		 bool doFit=false, /*! false->find track only */
 
-const char* outfile = "/star/data17/ITTF/evaluation/default/Evaluation.root",
-
-//This file points to 10 events of 10 neg muons w/ pt=.9 
-//const char *MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_04_01/*.event.root")
+const char* outfile = "Evaluation.root",
 
 //This file points to 30 events of 10 neg muons w/ pt=.9
 const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
@@ -131,35 +125,48 @@ const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.ro
     
     //StiMaker
     StiMaker* anaMk = StiMaker::instance();
-
+    
     anaMk->setDoFit(doFit);
+    
     //enum SeedFinderType {kUndefined=0, kComposite=1, kEvaluable=2};
     anaMk->setSeedFinderType(StiMaker::kEvaluable);
     //anaMk->setSeedFinderType(StiMaker::kComposite);
-
+    
     anaMk->setSimulation(simulated);
-    anaMk->setGui(draw);
     anaMk->setEvaluationFileName(outfile);
     
     if (simulated) {
 	anaMk->setMcEventMaker(mcEventReader);
 	anaMk->setAssociationMaker(assocMaker);
     }
-
+    
     // now execute the chain member functions    
     chain->PrintInfo();
     
-    //Make Control Window
-    //if (draw==true) {
-    MainFrame* sti = new MainFrame(gClient->GetRoot(), 400, 220);
-    sti->setStChain(chain);
-    sti->setIoMaker(ioMaker);
+    //Make Control Window if not batch
+    MainFrame* sti=0;
+    if (gROOT->IsBatch()==false) {
+	
+	cout <<"No batch option detected.  Run Integrated Tracker in Gui Mode."<<endl;
+	
+	sti = new MainFrame(gClient->GetRoot(), 400, 220);
+	sti->setStChain(chain);
+	sti->setIoMaker(ioMaker);
+	
+	//Tell StiMaker that we're in batch mode
+	anaMk->setGui(true);	
+    }
+    
+    else {
+	cout <<"Batch option detector.  Run Integrated Tracker in non-Gui Mode."<<endl;
+	anaMk->setGui(false);
+    }
     
     cout <<"Calling Init() Methods "<<endl;
     chain->Init();
     
     cout <<"Starting Event Loop"<<endl;
-
+    
     int istat=0,iev=1;
     
  EventLoop: if (iev<=nevents && !istat) {
@@ -171,7 +178,7 @@ const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.ro
      }
      iev++; goto EventLoop;
  }
- 
- return;
+    
+    return;
 }
 
