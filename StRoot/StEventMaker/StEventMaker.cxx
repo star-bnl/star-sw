@@ -7,7 +7,7 @@
            Revised version for new StEvent by T. Ullrich, Yale
 
 */
-
+ 
 #include <vector>
 #include <algorithm>
 #include <utility>
@@ -44,59 +44,59 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.69 2004/07/07 20:58:51 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.70 2004/08/03 17:26:05 ullrich Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
 {
-static int r0Len = 0;
-static int r0outLen = 0;
-   if (!r0Len) {
-     r0Len    = &(t->impact  ) - &(t->r0   ) + 1;
-     r0outLen = &(t->invptout) - &(t->r0out) + 1;
-   }
-   if (t->iflag < 0)       			return 1;
-   if ( StMath::tooBig(&(t->r0   ),r0Len   )) 	return 2; 
-// if ( StMath::tooBig(&(t->r0out),r0outLen)) 	return 3; 
-   if ( StMath::tooBig(&(t->r0out),r0outLen))   {//fill by senseless but not carzy
-     for (int i=0;i<r0outLen;i++) {(&(t->r0out))[i]=1.e+5;}}
-   return 0;
+    static int r0Len = 0;
+    static int r0outLen = 0;
+    if (!r0Len) {
+	r0Len    = &(t->impact  ) - &(t->r0   ) + 1;
+	r0outLen = &(t->invptout) - &(t->r0out) + 1;
+    }
+    if (t->iflag < 0)       			return 1;
+    if ( StMath::tooBig(&(t->r0   ),r0Len   )) 	return 2; 
+    // if ( StMath::tooBig(&(t->r0out),r0outLen)) 	return 3; 
+    if ( StMath::tooBig(&(t->r0out),r0outLen))   {//fill by senseless but not carzy
+	for (int i=0;i<r0outLen;i++) {(&(t->r0out))[i]=1.e+5;}}
+    return 0;
 }
 
 //______________________________________________________________________________
 static int badDstVertex(dst_vertex_st *t)
 {
-static int xLen = 0;
-   if (!xLen) { xLen    = &(t->chisq[1]) - &(t->x) + 1;}
-   if (t->iflag <= 0)       			return 1;
-   if ( StMath::tooBig(&(t->x   ),xLen   )) 	return 2; 
-   if (t->chisq[0] < 0.)			return 3;
-   if (t->chisq[1] < 0.)			return 4;
-   return 0;
+    static int xLen = 0;
+    if (!xLen) { xLen    = &(t->chisq[1]) - &(t->x) + 1;}
+    if (t->iflag <= 0)       			return 1;
+    if ( StMath::tooBig(&(t->x   ),xLen   )) 	return 2; 
+    if (t->chisq[0] < 0.)			return 3;
+    if (t->chisq[1] < 0.)			return 4;
+    return 0;
 }
 //______________________________________________________________________________
 static int badDstV0Vertex(dst_v0_vertex_st *t)
 {
-static int dcanLen = 0;
-   if (!dcanLen) { dcanLen = &(t->pos_pz) - &(t->dcan) + 1;}
-   if ( StMath::tooBig(&(t->dcan),dcanLen)) 	return 1; 
-   return 0;
+    static int dcanLen = 0;
+    if (!dcanLen) { dcanLen = &(t->pos_pz) - &(t->dcan) + 1;}
+    if ( StMath::tooBig(&(t->dcan),dcanLen)) 	return 1; 
+    return 0;
 }
 //______________________________________________________________________________
 static int badDstXiVertex(dst_xi_vertex_st *t)
 {
-static int dcaLen = 0;
-   if (!dcaLen) { dcaLen = &(t->pz_b) - &(t->dca) + 1;}
-   if ( StMath::tooBig(&(t->dca),dcaLen)) 	return 1; 
-   return 0;
+    static int dcaLen = 0;
+    if (!dcaLen) { dcaLen = &(t->pz_b) - &(t->dca) + 1;}
+    if ( StMath::tooBig(&(t->dca),dcaLen)) 	return 1; 
+    return 0;
 }
 //______________________________________________________________________________
 static int badDstTkfVertex(dst_tkf_vertex_st *t)
 {
-static int dcaLen = 0;
-   if (!dcaLen) { dcaLen = &(t->theta_cm) - &(t->dca) + 1;}
-   if ( StMath::tooBig(&(t->dca),dcaLen)) 	return 1; 
-   return 0;
+    static int dcaLen = 0;
+    if (!dcaLen) { dcaLen = &(t->theta_cm) - &(t->dca) + 1;}
+    if ( StMath::tooBig(&(t->dca),dcaLen)) 	return 1; 
+    return 0;
 }
 
 //______________________________________________________________________________
@@ -162,7 +162,7 @@ StEventMaker::Make()
     // Since this Maker should also work without any 'dst' dataset
     // we create *always* an instance of StEvent, even if it is empty.
     //
-
+    
     //
     //  Init timing and memory snapshots
     //
@@ -194,7 +194,7 @@ StEventMaker::Make()
         AddData(mCurrentEvent);
     else
         gMessMgr->Warning() << "StEventMaker::Make(): error in makeEvent(), no StEvent object created." << endm;
- 
+    
     mEventManager->closeEvent();
 
     //
@@ -211,7 +211,7 @@ StEventMaker::Make()
         cout << "CPU time for StEventMaker::Make(): "
              << timer.elapsedTime() << " sec\n" << endl;
     }
-
+    
     return status;
 }
 
@@ -241,18 +241,18 @@ StEventMaker::fillOuterTrackGeometry(StTrack* track, const dst_track_st& t)
     // Things which don't change
     short q = track->geometry()->charge();
     short h = track->geometry()->helicity();
-
+    
     // New origin, psi and dip angle
     StThreeVectorF o(t.r0out*cos(t.phi0out*degree),
 		     t.r0out*sin(t.phi0out*degree),
 		     t.z0out);
     double psi = t.psiout*degree;
     double dip = atan(t.tanlout);
-
+    
     // New momentum
     double invptout = t.invptout;
     double tanlout  = t.tanlout;
-//	bad idea, but what to do? Waiting ittf (VP)
+    //	bad idea, but what to do? Waiting ittf (VP)
     if (fabs(invptout)<1.e-10) {invptout = t.invpt;tanlout=t.tanl;}
     double pt = 1./invptout;
     double pz = pt*t.tanlout;
@@ -261,7 +261,7 @@ StEventMaker::fillOuterTrackGeometry(StTrack* track, const dst_track_st& t)
     // New curvature
     double c = track->geometry()->curvature()*
 	track->geometry()->momentum().perp()*invptout;
-	
+    
     // Assign to track
     track->setOuterGeometry(new StHelixModel(q, psi, c, dip, o, p, h));
 }
@@ -284,13 +284,13 @@ StEventMaker::makeEvent()
     //  Create AND setup/fill StEvent.
     //
     long nrows;
-
+    
     //
     //  Event header and event summary
     //
     event_header_st* dstEventHeader = mEventManager->returnTable_event_header(nrows);
     dst_event_summary_st* dstEventSummary = mEventManager->returnTable_dst_event_summary(nrows);
-
+    
     
     //
     //  Create instance of StEvent, using whatever we got so far.
@@ -300,7 +300,7 @@ StEventMaker::makeEvent()
 	mCurrentEvent->setInfo(new StEventInfo(*dstEventHeader));
     if (dstEventSummary && !mCurrentEvent->summary())
 	mCurrentEvent->setSummary(new StEventSummary(*dstEventSummary));
-	
+    
     
     //
     //  Setup the software monitors.
@@ -348,7 +348,7 @@ StEventMaker::makeEvent()
 	    mCurrentEvent->setTriggerData(pTrg);
 	}
     }
-
+    
     //
     //  year 2001, 2002: use TrgDet tables
     //  year >= 2003: use info from StTriggerData
@@ -364,8 +364,13 @@ StEventMaker::makeEvent()
     
     StL0Trigger *l0t = mCurrentEvent->l0Trigger();
     if (!l0t) mCurrentEvent->setL0Trigger((l0t = new StL0Trigger()));
-    l0t->set(dstL0Trigger       );
-    l0t->set(dstTriggerDetectors);
+    if (mCurrentEvent->triggerData() && mCurrentEvent->triggerData()->year() >= 2003){
+	l0t->set(mCurrentEvent->triggerData());
+    }
+    else {
+	l0t->set(dstL0Trigger       );
+	l0t->set(dstTriggerDetectors);
+    }
 
     if (dstL0Trigger && dstL1Trigger && !mCurrentEvent->l1Trigger())
 	mCurrentEvent->setL1Trigger(new StL1Trigger(*dstL0Trigger, *dstL1Trigger));
@@ -377,23 +382,23 @@ StEventMaker::makeEvent()
     StTriggerIdCollection* triggerIdColl = mCurrentEvent->triggerIdCollection();
     if (!triggerIdColl) {
         mCurrentEvent->setTriggerIdCollection((triggerIdColl =
-            new StTriggerIdCollection()));
+					       new StTriggerIdCollection()));
     }
     StTriggerId* trigId[3];
     triggerIdColl->setL1((trigId[0] = new StTriggerId()));
     triggerIdColl->setL2((trigId[1] = new StTriggerId()));
     triggerIdColl->setL3((trigId[2] = new StTriggerId()));
-
+    
     St_DataSet *daqReaderSet=GetDataSet("StDAQReader");
     if (daqReaderSet) {
-
+	
         StTrigSummary* trigSummary =
             ((StDAQReader*) (daqReaderSet->GetObject()))->getTrigSummary();
 	if (!trigSummary) gMessMgr->Warning("StEventMaker: No StTrigSummary found");
-      
+	
 	StDetectorDbTriggerID* dbTriggerId = StDetectorDbTriggerID::instance();
 	if (!dbTriggerId) gMessMgr->Warning("StEventMaker: No StDetectorDbTriggerID found");
-
+	
 	if (trigSummary && dbTriggerId) {
 	    
 	    // The nominal is a pointer to one of the above. 
@@ -421,7 +426,7 @@ StEventMaker::makeEvent()
 		}
 	    }	    
 	    if ( (idx=dbTriggerId->getDefaultTriggerLevel() ) != kDbTriggerBadID ){
-	      triggerIdColl->setNominal(new StTriggerId(*(trigId[idx-1])));
+		triggerIdColl->setNominal(new StTriggerId(*(trigId[idx-1])));
 	    }
 	}
     }
@@ -442,7 +447,7 @@ StEventMaker::makeEvent()
     unsigned int               id, k, nfailed, nfailed2, idvtx;
     int                        i, h;
     int signOfField = mCurrentEvent->summary()->magneticField() < 0 ? -1 : 1;
-
+    
     //
     //  Complete information in StEventInfo
     //
@@ -470,7 +475,7 @@ StEventMaker::makeEvent()
     int bad;
     for (i=0; i<nrows; i++) {
         if ((bad=badDstTrack(dstGlobalTracks+i))) {
-	  if (Debug()) Warning("makeEvent","global track rejected by %d",bad);
+	    if (Debug()) Warning("makeEvent","global track rejected by %d",bad);
           continue;}
         gtrack = new StGlobalTrack(dstGlobalTracks[i]);
         vecGlobalTracks[dstGlobalTracks[i].id] = gtrack;
@@ -484,9 +489,9 @@ StEventMaker::makeEvent()
         node = new StTrackNode();
         node->addTrack(gtrack);          // node<->track association
         trackNodes.push_back(node);
-
+	
     }
-
+    
     //
     //  Create primary tracks.
     //  Like the global tracks, they are kept in a vector (vecPrimaryTracks)
@@ -520,8 +525,8 @@ StEventMaker::makeEvent()
     
     for (i=0; i<nrows; i++) {
         if ((bad=badDstTrack(dstPrimaryTracks+i))) {
-	  if (Debug()) Warning("makeEvent","primary track rejected by %d",bad);
-          nfailed++; continue;}
+	    if (Debug()) Warning("makeEvent","primary track rejected by %d",bad);
+	    nfailed++; continue;}
         idvtx = dstPrimaryTracks[i].id_start_vertex ? dstPrimaryTracks[i].id_start_vertex/10 : 0;
         if (!idvtx) {
             nfailed++;
@@ -554,13 +559,13 @@ StEventMaker::makeEvent()
             node->addTrack(ptrack);
         }
         else {
-           info = new StTrackDetectorInfo(dstPrimaryTracks[i]);
-           ptrack->setDetectorInfo(info);
-           detectorInfo.push_back(info);
-           node = new StTrackNode();
-           node->addTrack(ptrack);          // node<->track association
-           assert(node->track(primary) == ptrack);
-           trackNodes.push_back(node);
+	    info = new StTrackDetectorInfo(dstPrimaryTracks[i]);
+	    ptrack->setDetectorInfo(info);
+	    detectorInfo.push_back(info);
+	    node = new StTrackNode();
+	    node->addTrack(ptrack);          // node<->track association
+	    assert(node->track(primary) == ptrack);
+	    trackNodes.push_back(node);
         }
     }
     if (nfailed)
@@ -584,8 +589,8 @@ StEventMaker::makeEvent()
 	
     for (i=0; i<nrows; i++) {
         if ((bad=badDstTrack(dstTptTracks+i))) {
-	  if (Debug()) Warning("makeEvent","tpt track rejected by %d",bad);
-          nfailed++; continue;}
+	    if (Debug()) Warning("makeEvent","tpt track rejected by %d",bad);
+	    nfailed++; continue;}
 	ttrack = new StTptTrack(dstTptTracks[i]);
 	vecTptTracks[dstTptTracks[i].id] = ttrack;
 	ttrack->setGeometry(new StHelixModel(dstTptTracks[i]));
@@ -612,7 +617,7 @@ StEventMaker::makeEvent()
 	    node = new StTrackNode();
 	    trackNodes.push_back(node);
 	}
-
+	
 	//
 	//  Check if the existing detector info is still ok for the
 	//  tpt track. If not we have to create a new one.
@@ -648,8 +653,8 @@ StEventMaker::makeEvent()
     
     for (i=0; i<nrows; i++) {
         if ((bad=badDstTrack(dstEstGlobalTracks+i))) {
-	  if (Debug()) Warning("makeEvent","est global track rejected by %d",bad);
-          nfailed++; continue;}
+	    if (Debug()) Warning("makeEvent","est global track rejected by %d",bad);
+	    nfailed++; continue;}
 	//
 	//   For each EST global track there must be already a node
 	//   since EST doesn't create new tracks.
@@ -662,8 +667,8 @@ StEventMaker::makeEvent()
 	    info = vecGlobalTracks[id]->detectorInfo();
 	}
         if (!node) {
-	  nfailed++;
-	  continue;
+	    nfailed++;
+	    continue;
 	}
 	
 	//
@@ -702,7 +707,7 @@ StEventMaker::makeEvent()
     StEstPrimaryTrack *eptrack = 0;
     dst_track_st *dstEstPrimaryTracks = 0;
     if (doLoadEstTracks) 
-      dstEstPrimaryTracks = mEventManager->returnTable_EstPrimary(nrows);
+	dstEstPrimaryTracks = mEventManager->returnTable_EstPrimary(nrows);
     if (!dstEstPrimaryTracks) nrows = 0;
     mxId = dstEstPrimaryTracks && nrows>0 ? max((long) dstEstPrimaryTracks[nrows-1].id, nrows) : 0;
     if (mxId>maxId) maxId = mxId;
@@ -712,8 +717,8 @@ StEventMaker::makeEvent()
     
     for (i=0; i<nrows; i++) {
         if ((bad=badDstTrack(dstEstPrimaryTracks+i))) {
-	  if (Debug()) Warning("makeEvent","estprimary track rejected by %d",bad);
-          nfailed++;continue;}
+	    if (Debug()) Warning("makeEvent","estprimary track rejected by %d",bad);
+	    nfailed++;continue;}
 	//
 	//  Check for valid primary vertex
 	//
@@ -737,7 +742,7 @@ StEventMaker::makeEvent()
 	    info = vecEstGlobalTracks[id]->detectorInfo();
 	}
         if (!node) continue;
-
+	
 	eptrack = new StEstPrimaryTrack(dstEstPrimaryTracks[i]);
         vecEstPrimaryTracks[dstEstPrimaryTracks[i].id]   = eptrack;
         vecEstPrimaryVertexId[dstEstPrimaryTracks[i].id] = idvtx;
@@ -745,7 +750,7 @@ StEventMaker::makeEvent()
 	h =  eptrack->geometry()->charge()*signOfField > 0 ? -1 : 1;   //  h = -sign(q*B)
 	eptrack->geometry()->setHelicity(h);
 	fillOuterTrackGeometry(eptrack, dstEstPrimaryTracks[i]);
-
+	
 	//
 	//  We do not need a new detector info? 
 	//  According to Helen the detector info of the EST 
@@ -824,9 +829,9 @@ StEventMaker::makeEvent()
     for (i=0; i<nVertices; i++) {
         if (dstVertices[i].iflag <=0) 	 continue;
         if ((bad=badDstVertex(dstVertices+i))) {
-	  if (Debug()) Warning("makeEvent","vertex rejected by %d",bad);
-          dstVertices[i].iflag = -abs(dstVertices[i].iflag);continue;}
-
+	    if (Debug()) Warning("makeEvent","vertex rejected by %d",bad);
+	    dstVertices[i].iflag = -abs(dstVertices[i].iflag);continue;}
+	
         if (dstVertices[i].iflag < 100 && dstVertices[i].iflag%10 == 1 &&
 	    dstVertices[i].vtx_id == kEventVtxId ) {
             StPrimaryVertex *pvtx = new StPrimaryVertex(dstVertices[i]);
@@ -861,7 +866,7 @@ StEventMaker::makeEvent()
 	delete ptrack;
 	vecPrimaryTracksCopy[k] = 0;
 	vecPrimaryTracks[k]     = 0;
-	}
+    }
     if (nfailed)
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot assign " << nfailed
                             << " primary tracks, no corresponding primary vertex found." << endm;
@@ -879,39 +884,39 @@ StEventMaker::makeEvent()
     if (nfailed)
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot assign " << nfailed
                             << " EST primary tracks, no corresponding primary vertex found." << endm;
-       
+    
     //
     //  Setup V0 vertices
     //
     long nV0Vertices;
     dst_v0_vertex_st* dstV0Vertices = mEventManager->returnTable_dst_v0_vertex(nV0Vertices);
-
+    
     nfailed = 0;
     for (i=0; i<nV0Vertices; i++) {
         if((bad=badDstV0Vertex(dstV0Vertices+i))) {
-	  if (Debug()) Warning("makeEvent","V0 vertex rejected by %d",bad);
-          nfailed++;continue;}
-
+	    if (Debug()) Warning("makeEvent","V0 vertex rejected by %d",bad);
+	    nfailed++;continue;}
+	
         id = dstV0Vertices[i].id_vertex - 1;
         int ifail = 2;
         if (id < static_cast<unsigned long>(nVertices)
-        &&  dstVertices[id].iflag > 0) {
+	    &&  dstVertices[id].iflag > 0) {
             StV0Vertex *v0 = new StV0Vertex(dstVertices[id], dstV0Vertices[i]);
             id = dstV0Vertices[i].idneg;
             if (id < vecGlobalTracks.size() && vecGlobalTracks[id] ) {
-              v0->addDaughter(vecGlobalTracks[id]);
-              ifail--;
+		v0->addDaughter(vecGlobalTracks[id]);
+		ifail--;
             }
             id = dstV0Vertices[i].idpos;
             if (id < vecGlobalTracks.size() && vecGlobalTracks[id] ) {
-              v0->addDaughter(vecGlobalTracks[id]);
-              ifail--;
+		v0->addDaughter(vecGlobalTracks[id]);
+		ifail--;
             }
             if (ifail) {
-              gMessMgr->Warning() << "StEventMaker::makeEvent(): V0 has <2 daughters. Delete it" << endm;
-              delete v0;
+		gMessMgr->Warning() << "StEventMaker::makeEvent(): V0 has <2 daughters. Delete it" << endm;
+		delete v0;
             } else {
-              v0Vertices.push_back(v0);
+		v0Vertices.push_back(v0);
             }
         }
         if (ifail) nfailed++;
@@ -929,25 +934,25 @@ StEventMaker::makeEvent()
     nfailed = 0;
     for (i=0; i<nXiVertices; i++) {
         if ((bad=badDstXiVertex(dstXiVertices+i))) {
-	  if (Debug()) Warning("makeEvent","Xi vertex rejected by %d",bad);
-          nfailed++;continue;}
+	    if (Debug()) Warning("makeEvent","Xi vertex rejected by %d",bad);
+	    nfailed++;continue;}
         id    = dstXiVertices[i].id_xi - 1;
         int ifail = 1;
         if (dstVertices[id].iflag > 0
-        && (id < static_cast<unsigned long>(nVertices))) {
+	    && (id < static_cast<unsigned long>(nVertices))) {
             StXiVertex *xi = new StXiVertex(dstVertices[id], dstXiVertices[i]);
             id = dstXiVertices[i].id_v0 - 1;
             if (id < v0Vertices.size()) xi->setV0Vertex(v0Vertices[id]);
             id  = dstXiVertices[i].id_b;       // no -1 here
             if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
-              xi->addDaughter(vecGlobalTracks[id]);
-              ifail--;
+		xi->addDaughter(vecGlobalTracks[id]);
+		ifail--;
             }
             if (ifail) {
-              gMessMgr->Warning() << "StEventMaker::makeEvent(): Xi has <1 daughters. Delete it" << endm;
-              delete xi;
+		gMessMgr->Warning() << "StEventMaker::makeEvent(): Xi has <1 daughters. Delete it" << endm;
+		delete xi;
             } else {
-              xiVertices.push_back(xi);
+		xiVertices.push_back(xi);
             }
         }
         if (ifail) nfailed++;
@@ -955,7 +960,7 @@ StEventMaker::makeEvent()
     if (nfailed)
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
                             << " Xi vertices, invalid foreign key to vertex table." << endm;
-
+    
     //
     //  Setup kinks
     //
@@ -965,25 +970,25 @@ StEventMaker::makeEvent()
     nfailed = 0;
     for (i=0; i<nKinkVertices; i++) {
         if ((bad=badDstTkfVertex(dstKinkVertices+i))) {
-	  if (Debug()) Warning("makeEvent","tkf vertex rejected by %d",bad);
-          nfailed++;continue;}
-
+	    if (Debug()) Warning("makeEvent","tkf vertex rejected by %d",bad);
+	    nfailed++;continue;}
+	
         int ifail=3;
         id = dstKinkVertices[i].id_vertex - 1;
         if (dstVertices[id].iflag > 0
-        && (id < static_cast<unsigned long>(nVertices))) {
+	    && (id < static_cast<unsigned long>(nVertices))) {
             StKinkVertex *kink = new StKinkVertex(dstVertices[id], dstKinkVertices[i]);
             id = dstKinkVertices[i].idd;
             if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
-              ifail-=1; kink->addDaughter(vecGlobalTracks[id]);}
-
+		ifail-=1; kink->addDaughter(vecGlobalTracks[id]);}
+	    
             id = dstKinkVertices[i].idp;
             if (id < vecGlobalTracks.size()) {
-              ifail-=2; kink->setParent(vecGlobalTracks[id]);}
+		ifail-=2; kink->setParent(vecGlobalTracks[id]);}
             if (ifail&1) {
-               gMessMgr->Warning() << "StEventMaker::makeEvent(): Kink has no daughter. Delete it" << endm;}
+		gMessMgr->Warning() << "StEventMaker::makeEvent(): Kink has no daughter. Delete it" << endm;}
             if (ifail&2) {
-               gMessMgr->Warning() << "StEventMaker::makeEvent(): Kink has no parent.   Delete it" << endm;}
+		gMessMgr->Warning() << "StEventMaker::makeEvent(): Kink has no parent.   Delete it" << endm;}
             if (ifail) {delete kink;} else {kinkVertices.push_back(kink);}
         }
         if (ifail) nfailed++;
@@ -991,7 +996,7 @@ StEventMaker::makeEvent()
     if (nfailed)
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
                             << " kink vertices, no valid id_vertex." << endm;
-
+    
     //
     //  Setup hits
     //  Since the user might have decided to skip certain kind of hits
@@ -1009,10 +1014,10 @@ StEventMaker::makeEvent()
             if (i < index[id].first) index[id].first = i;
             index[id].second++;
         }
-
+	
         int  begin, end;
 	
-
+	
 	//
 	//  Make a compact list of unique detector infos
 	//  for each track ID. Heavy use of STL here.
@@ -1022,18 +1027,18 @@ StEventMaker::makeEvent()
         if (mxId>maxId) maxId = mxId;
 	vector<vector<StTrackDetectorInfo*> > infomap(maxId+1);
 	for (k=0; k<=(unsigned int)maxId; k++) {
-           if (k<vecTptTracks.size()        && vecTptTracks[k]           ) 
-              infomap[k].push_back(vecTptTracks[k]->detectorInfo()       );
-           if (k<vecGlobalTracks.size()     && vecGlobalTracks[k]        )
-              infomap[k].push_back(vecGlobalTracks[k]->detectorInfo()    );
-           if (k<vecEstGlobalTracks.size()  && vecEstGlobalTracks[k]     )
-              infomap[k].push_back(vecEstGlobalTracks[k]->detectorInfo() );
-           if (k<vecEstPrimaryTracks.size() && vecEstPrimaryTracks[k]    ) 
-              infomap[k].push_back(vecEstPrimaryTracks[k]->detectorInfo());
-           if (k<vecPrimaryTracks.size()    && vecPrimaryTracks[k]       )
-              infomap[k].push_back(vecPrimaryTracks[k]->detectorInfo()   );
+	    if (k<vecTptTracks.size()        && vecTptTracks[k]           ) 
+		infomap[k].push_back(vecTptTracks[k]->detectorInfo()       );
+	    if (k<vecGlobalTracks.size()     && vecGlobalTracks[k]        )
+		infomap[k].push_back(vecGlobalTracks[k]->detectorInfo()    );
+	    if (k<vecEstGlobalTracks.size()  && vecEstGlobalTracks[k]     )
+		infomap[k].push_back(vecEstGlobalTracks[k]->detectorInfo() );
+	    if (k<vecEstPrimaryTracks.size() && vecEstPrimaryTracks[k]    ) 
+		infomap[k].push_back(vecEstPrimaryTracks[k]->detectorInfo());
+	    if (k<vecPrimaryTracks.size()    && vecPrimaryTracks[k]       )
+		infomap[k].push_back(vecPrimaryTracks[k]->detectorInfo()   );
         }
-
+	
 	vector<StTrackDetectorInfo*>::iterator iter;
 	for (k=0; k<infomap.size(); k++) {
 	    sort(infomap[k].begin(),infomap[k].end());
@@ -1068,7 +1073,7 @@ StEventMaker::makeEvent()
                 gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
                                     << " TPC hits, wrong hardware address." << endm;
         }
-
+	
         //
         //        SVT hits
         //
@@ -1085,7 +1090,7 @@ StEventMaker::makeEvent()
                     id = dstPoints[i].id_track;
 		    for (k=0; k<infomap[id].size(); k++)
 			infomap[id][k]->addHit(svtHit);
-               }
+		}
                 else {
                     nfailed++;
                     delete svtHit;
@@ -1179,7 +1184,7 @@ StEventMaker::makeEvent()
 	if (mCurrentEvent->info())
 	    mCurrentEvent->info()->setEventSize(header->GetEventSize());
     }
-
+    
     //
     //  Fill StRunInfo
     //
@@ -1221,7 +1226,7 @@ StEventMaker::makeEvent()
 	mCurrentRunInfo->setBbcBlueBackgroundRate(richScalers->getBBCBlueBkg());	
 	mCurrentRunInfo->setBbcYellowBackgroundRate(richScalers->getBBCYellowBkg());
     }
-
+    
     // Add SVT drift scaler to run info 
     St_DataSet *svtDriftScalerSet = GetDataSet("svt_hits/.data/svtDrift");
     if (svtDriftScalerSet) {
@@ -1234,7 +1239,7 @@ StEventMaker::makeEvent()
     
     if (mCurrentRunInfo)
 	mCurrentEvent->setRunInfo(mCurrentRunInfo);
-
+    
     //
     //  Detector States
     //
@@ -1250,7 +1255,7 @@ StEventMaker::printEventInfo()
     cout << "*********************************************************" << endl;
     cout << "*                  StEvent Information                  *" << endl;
     cout << "*********************************************************" << endl;
-
+    
     cout << "---------------------------------------------------------" << endl;
     cout << "StEvent at " << (void*) mCurrentEvent                      << endl;
     cout << "---------------------------------------------------------" << endl;
@@ -1258,19 +1263,19 @@ StEventMaker::printEventInfo()
         mCurrentEvent->Dump();
     else
         return;
-
+    
     cout << "---------------------------------------------------------" << endl;
     cout << "StRunInfo at " << (void*) mCurrentEvent->runInfo()         << endl;
     cout << "---------------------------------------------------------" << endl;
     if (mCurrentEvent->runInfo())
         mCurrentEvent->runInfo()->Dump();
-
+    
     cout << "---------------------------------------------------------" << endl;
     cout << "StEventInfo at " << (void*) mCurrentEvent->info()          << endl;
     cout << "---------------------------------------------------------" << endl;
     if (mCurrentEvent->info())
         mCurrentEvent->info()->Dump();
-
+    
     cout << "---------------------------------------------------------" << endl;
     cout << "StEventSummary at " << (void*) (mCurrentEvent->summary())  << endl;
     cout << "---------------------------------------------------------" << endl;
@@ -1316,7 +1321,7 @@ StEventMaker::printEventInfo()
          << (void*) (mCurrentEvent->softwareMonitor())                  << endl;
     cout << "---------------------------------------------------------" << endl;
     if (mCurrentEvent->softwareMonitor()) mCurrentEvent->softwareMonitor()->Dump();
-
+    
     if (mCurrentEvent->softwareMonitor()) {
         cout << "---------------------------------------------------------" << endl;
         cout << "StTpcSoftwareMonitor at "
@@ -1338,7 +1343,7 @@ StEventMaker::printEventInfo()
         cout << "---------------------------------------------------------" << endl;
         if (mCurrentEvent->softwareMonitor()->ftpc())
             mCurrentEvent->softwareMonitor()->ftpc()->Dump();
-        
+	
         cout << "---------------------------------------------------------" << endl;
         cout << "StEmcSoftwareMonitor at "
              << (void*) (mCurrentEvent->softwareMonitor()->emc())           << endl;
@@ -1374,13 +1379,13 @@ StEventMaker::printEventInfo()
         if (mCurrentEvent->softwareMonitor()->global())
             mCurrentEvent->softwareMonitor()->global()->Dump();
     }
-
+    
     cout << "---------------------------------------------------------" << endl;
     cout << "StL0Trigger at "
          << (void*) (mCurrentEvent->l0Trigger())                        << endl;
     cout << "---------------------------------------------------------" << endl;
     if (mCurrentEvent->l0Trigger()) mCurrentEvent->l0Trigger()->Dump();
-
+    
     cout << "---------------------------------------------------------" << endl;
     cout << "StTriggerDetectorCollection at "
          << (void*) (mCurrentEvent->triggerDetectorCollection())        << endl;
@@ -1393,23 +1398,23 @@ StEventMaker::printEventInfo()
         cout << "StCtbTriggerDetector"                                      << endl;
         cout << "---------------------------------------------------------" << endl;
         mCurrentEvent->triggerDetectorCollection()->ctb().Dump();
-
+	
         cout << "---------------------------------------------------------" << endl;
         cout << "StMwcTriggerDetector"                                      << endl;
         cout << "---------------------------------------------------------" << endl;
         mCurrentEvent->triggerDetectorCollection()->mwc().Dump();
-
+	
         cout << "---------------------------------------------------------" << endl;
         cout << "StVpdTriggerDetector"                                      << endl;
         cout << "---------------------------------------------------------" << endl;
         mCurrentEvent->triggerDetectorCollection()->vpd().Dump();
-
+	
         cout << "---------------------------------------------------------" << endl;
         cout << "StZdcTriggerDetector"                                      << endl;
         cout << "---------------------------------------------------------" << endl;
         mCurrentEvent->triggerDetectorCollection()->zdc().Dump();
     }
-
+    
     cout << "---------------------------------------------------------" << endl;
     cout << "StSPtrVecTrackDetectorInfo"                                << endl;
     cout << "Dumping first element in collection only (if available). " << endl;
@@ -1446,7 +1451,7 @@ StEventMaker::printEventInfo()
         for (i=0; i<mCurrentEvent->trackNodes()[0]->entries(); i++)
             printTrackInfo(mCurrentEvent->trackNodes()[0]->track(i));
     }
-
+    
     cout << "---------------------------------------------------------" << endl;
     cout << "StSPtrVecPrimaryVertex"                                    << endl;
     cout << "Dumping first element in collection only (if available). " << endl;
@@ -1507,7 +1512,7 @@ StEventMaker::printEventInfo()
         cout << "---------------------------------------------------------" << endl;
         mCurrentEvent->xiVertices()[0]->Dump();
     }
-
+    
     cout << "---------------------------------------------------------" << endl;
     cout << "StSPtrVecKinkVertex"                                       << endl;
     cout << "Dumping first element in collection only (if available). " << endl;
@@ -1522,7 +1527,7 @@ StEventMaker::printEventInfo()
         cout << "---------------------------------------------------------" << endl;
         mCurrentEvent->kinkVertices()[0]->Dump();
     }
-
+    
     unsigned int       j, k, nhits;
     Bool_t             gotOneHit;
     StTpcHitCollection *tpcColl = mCurrentEvent->tpcHitCollection();
@@ -1576,7 +1581,7 @@ StEventMaker::printEventInfo()
                         gotOneHit = kTRUE;
                     }
     }
-        
+    
     StSsdHitCollection *ssdColl = mCurrentEvent->ssdHitCollection();
     cout << "---------------------------------------------------------" << endl;
     cout << "StSsdHitCollection at " << (void*) ssdColl                 << endl;
@@ -1587,11 +1592,11 @@ StEventMaker::printEventInfo()
         cout << "# of hits in collection = " << nhits << endl;
         gotOneHit = kFALSE;
         for (k=0; !gotOneHit && k<ssdColl->numberOfLadders(); k++)
-                for (i=0; !gotOneHit && i<ssdColl->ladder(j)->numberOfWafers(); i++)
-                    if (ssdColl->ladder(j)->wafer(i)->hits().size()) {
-                        ssdColl->ladder(j)->wafer(i)->hits()[0]->Dump();
-                        gotOneHit = kTRUE;
-                    }
+	    for (i=0; !gotOneHit && i<ssdColl->ladder(j)->numberOfWafers(); i++)
+		if (ssdColl->ladder(j)->wafer(i)->hits().size()) {
+		    ssdColl->ladder(j)->wafer(i)->hits()[0]->Dump();
+		    gotOneHit = kTRUE;
+		}
     }
 
     cout << endl;
@@ -1635,7 +1640,7 @@ StEventMaker::printTrackInfo(StTrack* track)
     if (track) {
         track->Dump();
         cout << "covariantMatrix():" << track->fitTraits().covariantMatrix() << endl;
-        
+	
         cout << "---> StTrack -> StGeometry ("<< track->geometry()->GetName()
              << ") at " << (void*) (track->geometry()) << endl;
         if (track->geometry()) track->geometry()->Dump();
@@ -1643,15 +1648,15 @@ StEventMaker::printTrackInfo(StTrack* track)
         cout << "---> StTrack -> StGeometry (outer) ("<< track->outerGeometry()->GetName()
              << ") at " << (void*) (track->outerGeometry()) << endl;
         if (track->outerGeometry()) track->outerGeometry()->Dump();
-
+	
         cout << "---> StTrack -> StDetectorInfo at "
              << (void*) (track->detectorInfo()) << endl;
         if (track->detectorInfo()) track->detectorInfo()->Dump();
-
+	
         cout << "---> StTrack -> StTrackNode at "
              << (void*) (track->node()) << endl;
         if (track->node()) track->node()->Dump();
-
+	
         cout << "---> StTrack -> StPidTraits ("
              << (track->pidTraits().size() ? 1 : 0 ) << " of "
              <<  track->pidTraits().size() << " entries shown)" << endl;
@@ -1660,8 +1665,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.69 2004/07/07 20:58:51 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.70 2004/08/03 17:26:05 ullrich Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.70  2004/08/03 17:26:05  ullrich
+ * Update of trigger part by Akio.
+ *
  * Revision 2.69  2004/07/07 20:58:51  ullrich
  * Corrected way the SVT drift velocity scaler is obtained.
  *
