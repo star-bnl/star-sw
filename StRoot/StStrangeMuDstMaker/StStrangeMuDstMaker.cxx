@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.13 2001/09/14 21:39:02 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.14 2001/11/05 23:41:06 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.14  2001/11/05 23:41:06  genevb
+// Add more dEdx, B field info, careful of changes to TTree unrolling
+//
 // Revision 3.13  2001/09/14 21:39:02  genevb
 // Adjustments to not depend on order in which maker Clear() is called
 //
@@ -91,13 +94,14 @@
 #include "StParticleDefinition.hh"
 #include "StMessMgr.h"
 #include "StuJitterBug.hh"
-#include "TStreamerInfo.h"
 
 // Set maximum file size to 1.9 GB (Root has a 2GB limit)
 #define MAXFILESIZE 1900000000
+
 #define EachDoT(proc) \
   for (Int_t i=1; i<strDstT; i++) { \
     if (doT[i]) proc; }
+
 #define EachController(proc) EachDoT(cont[i]->proc);
 
 ClassImp(StStrangeMuDstMaker)
@@ -205,7 +209,7 @@ void StStrangeMuDstMaker::InitCreateDst() {
   EachController(InitCreateDst());
 
   if (!dstMaker) {
-    Int_t split=2;
+    Int_t split=10;
     TBranch* branch = tree->Branch("Event",&evClonesArray,bsize[evT],split);
     branch->SetFile(file[evT]);
     if (doMc) {

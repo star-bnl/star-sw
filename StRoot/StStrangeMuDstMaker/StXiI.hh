@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiI.hh,v 3.2 2001/08/23 13:20:59 genevb Exp $
+ * $Id: StXiI.hh,v 3.3 2001/11/05 23:41:07 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 24-Apr-2001
  *
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiI.hh,v $
+ * Revision 3.3  2001/11/05 23:41:07  genevb
+ * Add more dEdx, B field info, careful of changes to TTree unrolling
+ *
  * Revision 3.2  2001/08/23 13:20:59  genevb
  * Many bug workarounds...
  *
@@ -53,6 +56,7 @@ public:
   virtual Float_t momXiZ() const=0;
   virtual Float_t alphaXi();                // Armenteros-Podolanski variable
   virtual Float_t ptArmXi();                // Armenteros-Podolanski variable
+
   virtual Float_t eOmega();                 // Energy assuming Omega hypothesis
   virtual Float_t eXi();                    // Energy assuming Xi hypothesis
   virtual Float_t eBachelorPion();          // Energy of bachelor assuming pion
@@ -63,10 +67,16 @@ public:
   virtual Float_t rapXi();                  // Rapidity assuming (anti)Xi
   virtual Float_t cTauOmega();              // Lifetime (ctau) assuming (anti)Omega
   virtual Float_t cTauXi();                 // Lifetime (ctau) assuming (anti)Xi
-  virtual Float_t ptBachelor();             // Transverse momentum of bachelor
-  virtual Float_t ptotBachelor();           // Total momentum of bachelor
+
   virtual Float_t ptXi();                   // Transverse momentum of Xi/Omega
+  virtual Float_t ptBachelor();             // Transverse momentum of bachelor
   virtual Float_t ptotXi();                 // Total momentum of Xi/Omega
+  virtual Float_t ptotBachelor();           // Total momentum of bachelor
+  virtual Float_t thetaXi();                // Polar angle theta of Xi/Omega
+  virtual Float_t thetaBachelor();          // Polar angle theta of bachelor
+  virtual Float_t pseudoRapXi();            // Pseudorapidity of Xi/Omega
+  virtual Float_t pseudoRapBachelor();      // Pseudorapidity of bachelor
+
   virtual Float_t mtOmega();                // Transverse mass assuming (anti)Omega
   virtual Float_t mtXi();                   // Transverse mass assuming (anti)Xi
   virtual Float_t mtm0Omega();              // mt-m0 assuming (anti)Omega
@@ -108,8 +118,12 @@ public:
   virtual Long_t detectorIdPars() {return 0;}
   // dE/dX of bachelor
   virtual Float_t dedxBachelor() const {return 0;}
+  // Error on mean of dE/dX of bachelor
+  virtual Float_t errDedxBachelor() const {return 0;}
   // Number of dE/dX points for bachelor
   virtual UShort_t numDedxBachelor() const {return 0;}
+  // Length of dE/dX track for bachelor
+  virtual Float_t lenDedxBachelor() const {return 0;}
 
 protected:
   virtual Float_t Ptot2Bachelor();
@@ -202,6 +216,22 @@ inline Float_t StXiI::ptXi() {
 
 inline Float_t StXiI::ptotXi() {
   return sqrt(Ptot2Xi());
+}
+
+inline Float_t StXiI::thetaXi() {
+  return acos(momXiZ()/ptotXi());
+}
+
+inline Float_t StXiI::pseudoRapXi() {
+  return (-log(tan(thetaXi()/2.)));
+}
+
+inline Float_t StXiI::thetaBachelor() {
+  return acos(momBachelorZ()/ptotBachelor());
+}
+
+inline Float_t StXiI::pseudoRapBachelor() {
+  return (-log(tan(thetaBachelor()/2.)));
 }
 
 inline Float_t StXiI::mtOmega() {

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeEvMuDst.hh,v 3.3 2001/09/14 21:22:26 genevb Exp $
+ * $Id: StStrangeEvMuDst.hh,v 3.4 2001/11/05 23:41:06 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 19-Aug-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeEvMuDst.hh,v $
+ * Revision 3.4  2001/11/05 23:41:06  genevb
+ * Add more dEdx, B field info, careful of changes to TTree unrolling
+ *
  * Revision 3.3  2001/09/14 21:22:26  genevb
  * Avoid hiding TObject::Clear()
  *
@@ -66,11 +69,13 @@ public:
   Float_t primaryVertexX() const; // Primary Vertex Position coordinates
   Float_t primaryVertexY() const;
   Float_t primaryVertexZ() const;
-  Int_t   globalTracks() const;
+  Int_t   globalTracks() const;   // Multiplicities and cross section fractions
   Int_t   primaryTracks() const;
   Int_t   primaryNegTracks() const;
   Float_t primaryCorrectedTracks() const;
   Float_t fractionSigma() const;
+  Float_t magneticField() const;  // Magnetic field
+  void    setMagneticField(Float_t);
 
 protected:
   Int_t   mRun;                   // These are written out
@@ -81,6 +86,7 @@ protected:
   Int_t   mGlobalTracks;
   Int_t   mPrimaryTracks;
   Int_t   mPrimaryNegTracks;
+  Float_t mMagneticField;
 
   ClassDef(StStrangeEvMuDst,5)
 };
@@ -105,5 +111,9 @@ inline Int_t   StStrangeEvMuDst::primaryTracks() const
                { return mPrimaryTracks; }
 inline Int_t   StStrangeEvMuDst::primaryNegTracks() const
                { return mPrimaryNegTracks; }
+inline void    StStrangeEvMuDst::setMagneticField(Float_t b)
+               { mMagneticField = b; }
+inline Float_t StStrangeEvMuDst::magneticField() const 
+               { return mMagneticField; }
 
 #endif

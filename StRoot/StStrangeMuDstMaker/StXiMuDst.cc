@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMuDst.cc,v 3.2 2001/05/04 20:15:15 genevb Exp $
+ * $Id: StXiMuDst.cc,v 3.3 2001/11/05 23:41:07 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 30-Mar-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiMuDst.cc,v $
+ * Revision 3.3  2001/11/05 23:41:07  genevb
+ * Add more dEdx, B field info, careful of changes to TTree unrolling
+ *
  * Revision 3.2  2001/05/04 20:15:15  genevb
  * Common interfaces and reorganization of components, add MC event info
  *
@@ -73,13 +76,16 @@ void StXiMuDst::FillXi(StXiVertex* xiVertex) {
   mTopologyMapBachelor = trk->topologyMap();
   mChi2Bachelor = trk->fitTraits().chi2(0);
   mClBachelor = trk->fitTraits().chi2(1);
+  mDedxBachelor = 0.;
+  mNumDedxBachelor = 0;
   // For now, get the truncated mean dE/dX from the TPC
   StPtrVecTrackPidTraits pidBachelor = trk->pidTraits(kTpcId);
   for (UInt_t i=0; i<pidBachelor.size(); i++) {
     StDedxPidTraits* pid = (StDedxPidTraits*) pidBachelor[i];
     if (pid->method() == kTruncatedMeanId) {
       mDedxBachelor = pid->mean();
-      mNumDedxBachelor = pid->numberOfPoints();
+      mErrDedxBachelor = pid->errorOnMean();
+      mNumDedxBachelor = pid->numberOfPoints() + (100*((int) (pid->length())));
       break;
     }
   }

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0I.hh,v 3.2 2001/08/23 13:20:58 genevb Exp $
+ * $Id: StV0I.hh,v 3.3 2001/11/05 23:41:06 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 24-Apr-2001
  *
@@ -13,6 +13,9 @@
  ***********************************************************************
  *
  * $Log: StV0I.hh,v $
+ * Revision 3.3  2001/11/05 23:41:06  genevb
+ * Add more dEdx, B field info, careful of changes to TTree unrolling
+ *
  * Revision 3.2  2001/08/23 13:20:58  genevb
  * Many bug workarounds...
  *
@@ -73,6 +76,7 @@ public:
   virtual Float_t momV0Z() const=0;
   virtual Float_t alphaV0();              // Armenteros-Podolanski variable
   virtual Float_t ptArmV0();              // Armenteros-Podolanski variable
+
   virtual Float_t eLambda();              // Energy assuming lambda hypothesis
   virtual Float_t eK0Short();             // Energy assuming k-short hypothesis
   virtual Float_t ePosProton();           // Energy of pos. daughter assuming proton
@@ -86,22 +90,31 @@ public:
   virtual Float_t rapK0Short();           // Rapidity assuming k-short
   virtual Float_t cTauLambda();           // Lifetime (ctau) assuming (anti)lambda
   virtual Float_t cTauK0Short();          // Lifetime (ctau) assuming k-short
+
   virtual Float_t ptV0();                 // Transverse momentum
-  virtual Float_t ptotV0();               // Total momentum
   virtual Float_t ptPos();                // Transverse momentum of pos. daughter
-  virtual Float_t ptotPos();              // Total momentum of pos. daughter
   virtual Float_t ptNeg();                // Transverse momentum of neg. daughter
+  virtual Float_t ptotV0();               // Total momentum
+  virtual Float_t ptotPos();              // Total momentum of pos. daughter
   virtual Float_t ptotNeg();              // Total momentum of neg. daughter  
+  virtual Float_t thetaV0();              // Polar angle theta
+  virtual Float_t thetaPos();             // Polar angle theta of pos. daughter
+  virtual Float_t thetaNeg();             // Polar angle theta of neg. daughter
+  virtual Float_t pseudoRapV0();          // Pseudorapidity
+  virtual Float_t pseudoRapPos();         // Pseudorapidity of pos. daughter
+  virtual Float_t pseudoRapNeg();         // Pseudorapidity of neg. daughter
+
   virtual Float_t mtLambda();             // Transverse mass assuming lambda
   virtual Float_t mtK0Short();            // Transverse mass assuming k-short
   virtual Float_t mtm0Lambda();           // mt-m0 assuming lambda
   virtual Float_t mtm0K0Short();          // mt-m0 assuming k-short
+
   virtual Float_t decayCosThetaLambda();  // Cosine of decay angle lambda hypo.
   virtual Float_t decayCosThetaAntiLambda(); // Cosine of decay angle antilambda hypothesis
   virtual Float_t decayCosThetaK0Short(); // Cosine of decay angle k-short hypo
-  virtual Float_t polCosThetaLambda();  // Cosine of polzn. angle lambda hypothesis
+  virtual Float_t polCosThetaLambda();    // Cosine of polzn. angle lambda hypothesis
   virtual Float_t polCosThetaAntiLambda(); // Cosine of polzn. angle antilambda hypothesis
-  virtual Float_t polCosThetaK0Short(); // Cosine of polzn. angle k0 hypo.
+  virtual Float_t polCosThetaK0Short();   // Cosine of polzn. angle k0 hypo.
 
 // ************************************************************************
 // The next few functions are presently used only by MC
@@ -156,10 +169,18 @@ public:
   virtual Float_t dedxPos() const {return 0;}
   // dE/dX of neg. daughter
   virtual Float_t dedxNeg() const {return 0;}
+  // Error on mean of dE/dX of pos. daughter
+  virtual Float_t errDedxPos() const {return 0;}
+  // Error on mean of dE/dX of neg. daughter
+  virtual Float_t errDedxNeg() const {return 0;}
   // Number of dE/dX points for pos. daughter
   virtual UShort_t numDedxPos() const {return 0;}
   // Number of dE/dX points for neg. daughter
   virtual UShort_t numDedxNeg() const {return 0;}
+  // Length of dE/dX track of pos. daughter
+  virtual Float_t lenDedxPos() const {return 0;}
+  // Length of dE/dX track of neg. daughter
+  virtual Float_t lenDedxNeg() const {return 0;}
 
 protected:
 
@@ -312,6 +333,30 @@ inline Float_t StV0I::ptV0() {
 
 inline Float_t StV0I::ptotV0() {
   return sqrt(Ptot2V0());
+}
+
+inline Float_t StV0I::thetaV0() {
+  return acos(momV0Z()/ptotV0());
+}
+
+inline Float_t StV0I::pseudoRapV0() {
+  return (-log(tan(thetaV0()/2.)));
+}
+
+inline Float_t StV0I::thetaPos() {
+  return acos(momPosZ()/ptotPos());
+}
+
+inline Float_t StV0I::pseudoRapPos() {
+  return (-log(tan(thetaPos()/2.)));
+}
+
+inline Float_t StV0I::thetaNeg() {
+  return acos(momNegZ()/ptotNeg());
+}
+
+inline Float_t StV0I::pseudoRapNeg() {
+  return (-log(tan(thetaNeg()/2.)));
 }
 
 inline Float_t StV0I::mtLambda() {

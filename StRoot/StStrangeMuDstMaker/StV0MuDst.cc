@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.cc,v 3.4 2001/05/04 20:15:15 genevb Exp $
+ * $Id: StV0MuDst.cc,v 3.5 2001/11/05 23:41:06 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.cc,v $
+ * Revision 3.5  2001/11/05 23:41:06  genevb
+ * Add more dEdx, B field info, careful of changes to TTree unrolling
+ *
  * Revision 3.4  2001/05/04 20:15:15  genevb
  * Common interfaces and reorganization of components, add MC event info
  *
@@ -78,6 +81,8 @@ void StV0MuDst::Fill(StV0Vertex* v0Vertex,
   mTopologyMapPos = trk->topologyMap();
   mChi2Pos = trk->fitTraits().chi2(0);
   mClPos = trk->fitTraits().chi2(1);
+  mDedxPos = 0.;
+  mNumDedxPos = 0;
   // For now, get the truncated mean dE/dX from the TPC
   StPtrVecTrackPidTraits pidPos = trk->pidTraits(kTpcId);
   UInt_t i;
@@ -85,7 +90,8 @@ void StV0MuDst::Fill(StV0Vertex* v0Vertex,
     StDedxPidTraits* pid = (StDedxPidTraits*) pidPos[i];
     if (pid->method() == kTruncatedMeanId) {
       mDedxPos = pid->mean();
-      mNumDedxPos = pid->numberOfPoints();
+      mErrDedxPos = pid->errorOnMean();
+      mNumDedxPos = pid->numberOfPoints() + (100*((int) (pid->length())));
       break;
     }
   }
@@ -95,13 +101,16 @@ void StV0MuDst::Fill(StV0Vertex* v0Vertex,
   mTopologyMapNeg = trk->topologyMap();
   mChi2Neg = trk->fitTraits().chi2(0);
   mClNeg = trk->fitTraits().chi2(1);
+  mDedxNeg = 0.;
+  mNumDedxNeg = 0;
   // For now, get the truncated mean dE/dX from the TPC
   StPtrVecTrackPidTraits pidNeg = trk->pidTraits(kTpcId);
   for (i=0; i<pidNeg.size(); i++) {
     StDedxPidTraits* pid = (StDedxPidTraits*) pidNeg[i];
     if (pid->method() == kTruncatedMeanId) {
       mDedxNeg = pid->mean();
-      mNumDedxNeg = pid->numberOfPoints();
+      mErrDedxNeg = pid->errorOnMean();
+      mNumDedxNeg = pid->numberOfPoints() + (100*((int) (pid->length())));
       break;
     }
   }

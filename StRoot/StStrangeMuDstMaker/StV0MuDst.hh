@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.hh,v 3.4 2001/05/04 20:15:15 genevb Exp $
+ * $Id: StV0MuDst.hh,v 3.5 2001/11/05 23:41:07 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.hh,v $
+ * Revision 3.5  2001/11/05 23:41:07  genevb
+ * Add more dEdx, B field info, careful of changes to TTree unrolling
+ *
  * Revision 3.4  2001/05/04 20:15:15  genevb
  * Common interfaces and reorganization of components, add MC event info
  *
@@ -91,8 +94,12 @@ public:
   virtual Long_t detectorIdPars();// Detector ID for pars used in V0 finder
   Float_t dedxPos() const;        // dE/dX of pos. daughter
   Float_t dedxNeg() const;        // dE/dX of neg. daughter
+  Float_t errDedxPos() const;     // Error on mean of dE/dX of pos. daughter
+  Float_t errDedxNeg() const;     // Error on mean of dE/dX of neg. daughter
   UShort_t numDedxPos() const;    // Number of dE/dX points for pos. daughter
   UShort_t numDedxNeg() const;    // Number of dE/dX points for neg. daughter
+  Float_t lenDedxPos() const;     // Length of dE/dX track of pos. daughter
+  Float_t lenDedxNeg() const;     // Length of dE/dX track of neg. daughter
 
 protected:
 
@@ -127,10 +134,12 @@ protected:
 
   Float_t mDedxPos;
   Float_t mDedxNeg;
+  Float_t mErrDedxPos;
+  Float_t mErrDedxNeg;
   UShort_t mNumDedxPos;
   UShort_t mNumDedxNeg;
 
-  ClassDef(StV0MuDst,4)
+  ClassDef(StV0MuDst,5)
 };
 
 inline StV0MuDst::StV0MuDst(StV0Vertex* v1,StStrangeEvMuDst* e1) : StV0I()
@@ -169,6 +178,10 @@ inline Float_t StV0MuDst::chi2Neg() const { return mChi2Neg; }
 inline Float_t StV0MuDst::clNeg()   const { return mClNeg; }
 inline Float_t StV0MuDst::dedxPos() const { return mDedxPos; }
 inline Float_t StV0MuDst::dedxNeg() const { return mDedxNeg; }
-inline UShort_t StV0MuDst::numDedxPos() const { return mNumDedxPos; }
-inline UShort_t StV0MuDst::numDedxNeg() const { return mNumDedxNeg; }
+inline Float_t StV0MuDst::errDedxPos() const { return mErrDedxPos; }
+inline Float_t StV0MuDst::errDedxNeg() const { return mErrDedxNeg; }
+inline UShort_t StV0MuDst::numDedxPos() const { return (mNumDedxPos%100); }
+inline UShort_t StV0MuDst::numDedxNeg() const { return (mNumDedxNeg%100); }
+inline Float_t StV0MuDst::lenDedxPos() const { return (mNumDedxPos/100); }
+inline Float_t StV0MuDst::lenDedxNeg() const { return (mNumDedxNeg/100); }
 #endif
