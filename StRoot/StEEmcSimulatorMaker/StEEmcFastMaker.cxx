@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.9 2004/03/25 18:13:56 balewski Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.10 2004/04/08 16:28:08 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -161,13 +161,13 @@ void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
 	tca = EEsec->getTwHits();      
 	for(int j=0; j<=tca->GetLast(); j++){
 	  EEtwHitDst* t = (EEtwHitDst *) tca->At(j);
-	  int jeta=t->eta()-1;
-	  int jsub=t->sub()-'A';
+	  int eta=t->eta();
+	  int sub=t->sub()-'A'+1;
 
 	  // FAST SIMU:
-	  int adc=(int) (t->energy() * mfixTgain[jeta]);
+	  int adc=(int) (t->energy() * mfixTgain[eta-1]);
 	  
-	  StEmcRawHit* h = new StEmcRawHit(id,isec,jeta,jsub,adc,t->energy());
+	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
 	  //	  printf("yyy secID=%d, id2=%d\n",isec,h->module());
 	   if(mdbg) printf("Tw   %c  %d  %f  %d \n",t->sub(),t->eta(),t->energy(),adc);
@@ -177,10 +177,10 @@ void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
 	tca = EEsec->getPre1Hits();      
 	for(int j=0; j<=tca->GetLast(); j++){
 	  EEtwHitDst* t = (EEtwHitDst *)(* tca)[j];
-	  int jeta=t->eta()-1;
-	  int jsub=t->sub()-'A';
+	  int eta=t->eta();
+	  int sub=t->sub()-'A'+1;
 	  int adc= (int) (t->energy()* mfixPgain);
-	  StEmcRawHit* h = new StEmcRawHit(id,isec,jeta,jsub,adc,t->energy());
+	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
 	   if(mdbg) printf("Pr1   %c  %d  adc=%d e=%f\n",t->sub(),t->eta(),adc,t->energy());
 	}
@@ -188,10 +188,10 @@ void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
 	tca = EEsec->getPre2Hits();      
 	for(int j=0; j<=tca->GetLast(); j++){
 	  EEtwHitDst* t = (EEtwHitDst *)(* tca)[j];
-	  int jeta=t->eta()-1;
-	  int jsub=t->sub()-'A'+5;
+	  int eta=t->eta();
+	  int sub=t->sub()-'A'+5+1;
 	  int adc= (int) (t->energy()* mfixPgain);
-	  StEmcRawHit* h = new StEmcRawHit(id,isec,jeta,jsub,adc,t->energy());
+	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
 	    if(mdbg)printf("Pr2   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy());
 	}
@@ -199,10 +199,10 @@ void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
 	tca = EEsec->getPostHits();      
 	for(int j=0; j<=tca->GetLast(); j++){
 	  EEtwHitDst* t = (EEtwHitDst *)(* tca)[j];
-	  int jeta=t->eta()-1;
-	  int jsub=t->sub()-'A'+10;
+	  int eta=t->eta();
+	  int sub=t->sub()-'A'+10+1;
 	  int adc= (int) (t->energy()* mfixPgain);
-	  StEmcRawHit* h = new StEmcRawHit(id,isec,jeta,jsub,adc,t->energy());
+	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
 	   if(mdbg) printf("Post   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy());
 	}
@@ -213,9 +213,10 @@ void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
 	
 	for(int j=0; j<=tca->GetLast(); j++){
 	  EEsmdHitDst* t = (EEsmdHitDst *)(* tca)[j];
-	  int jeta=t->strip()-1;
+	  int eta=t->strip();
+	  int sub=1;
 	  int adc= (int) (t->energy()* mfixPgain);
-	  StEmcRawHit* h = new StEmcRawHit(id,isec,jeta,0,adc,t->energy());
+	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
 	  if(mdbg) printf("SMDU     %d  %d %f\n",t->strip(),adc,t->energy());
 	}
@@ -226,9 +227,10 @@ void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
 	tca = EEsec->getSmdVHits();
 	for(int j=0; j<=tca->GetLast(); j++){
 	  EEsmdHitDst* t = (EEsmdHitDst *)(* tca)[j];
-	  int jeta=t->strip()-1;
+	  int eta=t->strip();
+	  int sub=1;
 	  int adc= (int) (t->energy()* mfixSMDgain);
-	  StEmcRawHit* h = new StEmcRawHit(id,isec,jeta,0,adc,t->energy());
+	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  if(mdbg)  printf("SMDV    %d  %d  %f\n",t->strip(),adc,t->energy());
 	  d->addHit(h);
 	} 
@@ -316,6 +318,9 @@ void  StEEmcFastMaker::mST2EE(EEeventDst* evt, StEvent* stevt){
 
 
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.10  2004/04/08 16:28:08  balewski
+// *** empty log message ***
+//
 // Revision 1.9  2004/03/25 18:13:56  balewski
 // cleanup
 //

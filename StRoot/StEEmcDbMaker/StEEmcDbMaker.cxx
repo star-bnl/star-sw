@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.25 2004/04/04 06:10:37 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.26 2004/04/08 16:28:06 balewski Exp $
  
 
 #include <time.h>
@@ -25,6 +25,8 @@
 
 #include "tables/St_eemcDbADCconf_Table.h"
 #include "tables/St_eemcDbPMTcal_Table.h"
+#include "tables/St_eemcDbPMTname_Table.h"
+#include "tables/St_eemcDbPIXcal_Table.h"
 #include "tables/St_eemcDbPMTped_Table.h"
 #include "tables/St_eemcDbPMTstat_Table.h"
 #include "tables/St_kretDbBlobS_Table.h"
@@ -82,6 +84,20 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
 //________________________________________________________
 //_______________________________________________________
 StEEmcDbMaker::~StEEmcDbMaker(){
+
+  if( mNSector) {
+    delete [] mDbADCconf;
+    delete [] mDbPMTcal;
+    delete [] mDbPMTname;
+    delete [] mDbPIXcal;
+    delete [] mDbPMTped;
+    delete [] mDbPMTstat;
+    delete [] mDbsectorID;
+  }
+
+  delete mDbFiber;
+
+  //old, drop it
   delete [] mDbItem1;
 
   int i;
@@ -91,17 +107,7 @@ StEEmcDbMaker::~StEEmcDbMaker(){
   }
   delete [] mLookup;
 
-  if( mNSector) {
-    delete [] mDbADCconf;
-    //    delete [] mDbPMTconf;
-    delete [] mDbPMTcal;
-    delete [] mDbPMTped;
-    delete [] mDbPMTstat;
-    delete [] mDbsectorID;
-  }
 
-  //new
-  delete mDbFiber;
 }
 
 //________________________________________________________
@@ -184,9 +190,12 @@ void StEEmcDbMaker::setSectors(int sec1,int sec2){
 
   mDbADCconf=(eemcDbADCconf_st **) new void *[mNSector];
   mDbPMTcal= (eemcDbPMTcal_st  **) new void *[mNSector];
+  mDbPMTname=(eemcDbPMTname_st **) new void *[mNSector];
+  mDbPIXcal= (eemcDbPIXcal_st  **) new void *[mNSector];
   mDbPMTped= (eemcDbPMTped_st  **) new void *[mNSector];
   mDbPMTstat=(eemcDbPMTstat_st **) new void *[mNSector];
   mDbsectorID=  new int [mNSector];
+
 
   clear();
 
@@ -228,6 +237,7 @@ void StEEmcDbMaker::clear(){
   nFiber=0;
   mDbFiberConfBlob=0;
 
+  //xxx start here
   nFound=0;
   mDbADCconf[0]=0;
   for(i=0; i<mNSector; i++) {// clear pointers old DB tables
@@ -272,18 +282,12 @@ Int_t  StEEmcDbMaker::InitRun  (int runumber){
   int is;
   for(is=0; is< mNSector; is++) {
     mOptimizeMapping(is);
-    //reloadDbOthers(secID);
+    mOptimizeOthers(is); 
   }
 
   mOptimizeFibers();
 
-  // exportAscii();
-
-  //  assert(3==8);
-   //............... old
-
-  // mOptimizeDb();
-
+  exportAscii(); //tmp
 
   printf("%s::InitRun()  Found %d EEMC related tables for the present time stamp\n",GetName(),nFound);
 
@@ -389,23 +393,23 @@ void  StEEmcDbMaker::mReloadDb  (){
 void StEEmcDbMaker::mOptimizeMapping(int is){
 
   printf("\n  conf ADC for sector=%d\n",mDbsectorID[is]); //tmp
-
+  
   assert(mDbsectorID[is]>0);
-
+  
   eemcDbADCconf_st *t= mDbADCconf[is];
-
+  
   if(t==0) return;
   printf("  comment=%s\n",t->comment); //tmp
-
+  
   int j;
   for(j=0;j<EEMCDbMaxAdc; j++) { // loop over channels
     char *name=t->name+j*EEMCDbMaxName;
-
+    
     if(*name==EEMCDbStringDelim) continue;
-
+    
     //printf("%d '%s'  %d %d\n",j,name,t->crate[j],t->channel[j]);
     // printf("%d   %d %d\n",j,t->crate[j],t->channel[j]);
-
+    
     int key=EEname2Index(name);
     assert(key>=0 && key<EEindexMax);
     EEmcDbItem *x=&byIndex[key];
@@ -419,7 +423,7 @@ void StEEmcDbMaker::mOptimizeMapping(int is){
     x->key=key;
     x->setDefaultTube(minMapmtCrateID);
     // x->print();
-
+    
     assert(x->crate>=0 && x->crate<mxAdcCrate);
     assert(x->chan>=0 && x->chan<mxAdcChan);
     assert(byCrate[x->crate]);// ERROR: duplicated crate ID from DB
@@ -431,6 +435,121 @@ void StEEmcDbMaker::mOptimizeMapping(int is){
     }
     byCrate[x->crate][x->chan]=x;
   }
+}
+
+
+//--------------------------------------------------
+//--------------------------------------------------
+void StEEmcDbMaker::mOptimizeOthers(int is){
+
+  int secID= mDbsectorID[is];
+  printf("\n  optimizeDB for sector=%d\n",secID); //tmp
+  int ix1,ix2;
+  EEindexRange(secID,ix1,ix2);
+  // if(dbg)
+  printf("EEindexRange(%d,%d,%d)\n",secID,ix1,ix2);
+  
+  //  if(dbg)printf(" Size: ped=%d cal=%d name=%d stat=%d \n",sizeof(ped->name)/EEMCDbMaxName,sizeof(cal->name)/EEMCDbMaxName,sizeof(tubeTw->name)/EEMCDbMaxName,sizeof(stat->name)/EEMCDbMaxName);
+  
+  assert(secID>0);
+
+  eemcDbPMTcal_st  *calT=mDbPMTcal[is];  
+  if(calT) printf("  calTw-comment=%s\n",calT->comment);
+
+  eemcDbPMTped_st  *ped=mDbPMTped[is];
+  if(ped) printf("  ped-comment=%s\n",ped->comment);
+
+  eemcDbPMTstat_st *stat=mDbPMTstat[is];
+  if(stat) printf("  stat-comment=%s\n",stat->comment);
+
+  
+  int key; 
+  for(key=ix1;key<ix2; key++) { // loop  in this sector
+    EEmcDbItem *x=byIndex+key;
+    if(x->isEmpty()) continue;
+    char *name=x->name;
+
+    if(ped) { // pedestals 
+      int j;
+      int mx=sizeof(ped->name)/EEMCDbMaxName;
+      for(j=0;j<mx; j++) {
+	char *name1=ped->name+j*EEMCDbMaxName;
+	if(strncmp(name,name1,strlen(name))) continue;
+	x->ped=ped->ped[j];
+	x->thr=ped->ped[j]+KsigOverPed*ped->sig[j];
+	//printf("%d found %s %d %d\n",j,name,strlen(name),strncmp(name,name1,strlen(name)));
+	//x->print();
+	break;
+      }
+    } // end of pedestals
+
+
+    if(calT&& name[2]=='T') { // calibration for towers only
+      int j;
+      int mx=sizeof(calT->name)/EEMCDbMaxName;
+      for(j=0;j<mx; j++) {
+	char *name1=calT->name+j*EEMCDbMaxName;
+	if(strncmp(name,name1,strlen(name))) continue;
+	x->gain=calT->gain[j];
+	break;
+      }
+    } // end of Tower gains
+
+#if 0
+    if(calM && name[2]!='T') { // calibration for MAPMT
+      int j;
+      int mx=sizeof(calM->name)/EEMCDbMaxName;
+
+      for(j=0;j<mx; j++) {
+	char *name1=calM->name+j*EEMCDbMaxName;
+	if(strncmp(name,name1,strlen(name))) continue;
+	x->gain=calM->gain[j];
+	break;
+      }
+    } // end of gains
+
+    if(tubeTw && name[2]=='T') { // change tube for towers only
+      int j;
+      int mx=sizeof(tubeTw->name)/EEMCDbMaxName;
+      for(j=0;j<mx; j++) {
+	char *name1=tubeTw->name+j*EEMCDbMaxName;
+	if(strncmp(name,name1,strlen(name))) continue;
+	x->setTube(tubeTw->tubeName+j*EEMCDbMaxName);
+	//x->print();
+	break;
+      }
+    } // end of tube
+#endif    
+    
+    if(stat) { // status
+      int j;
+      int mx=sizeof(stat->name)/EEMCDbMaxName;
+      for(j=0;j<mx; j++) {
+	char *name1=stat->name+j*EEMCDbMaxName;
+	if(strncmp(name,name1,strlen(name))) continue;
+	x->stat=stat->stat[j];
+	x->fail=stat->fail[j];
+	//x->print();
+	break;
+      }
+    } // end of status
+
+
+    
+  }// end of pixels in this sector
+
+#if 0
+  
+  eemcDbPIXcal  *calM= ( eemcDbPIXcal*)  getDbTable(secID,"eemcPIXcal");
+  if(calM) printf("  calMAPMT-comment=%s\n",calM->comment);
+
+
+  eemcDbPMTname_st *tubeTw=( eemcDbPMTname*) getDbTable(secID,"eemcPMTname");
+  if(tubeTw) printf("  tube-comment=%s\n",tubeTw->comment);
+
+
+#endif
+
 }
 
 //--------------------------------------------------
@@ -875,6 +994,9 @@ void  StEEmcDbMaker::mPrintItems  (){
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.26  2004/04/08 16:28:06  balewski
+// *** empty log message ***
+//
 // Revision 1.25  2004/04/04 06:10:37  balewski
 // *** empty log message ***
 //
