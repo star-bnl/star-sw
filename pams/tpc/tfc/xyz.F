@@ -1,3 +1,8 @@
+* $Id: xyz.F,v 1.5 1998/01/27 01:14:52 fisyak Exp $
+* $Log: xyz.F,v $
+* Revision 1.5  1998/01/27 01:14:52  fisyak
+* Split sources
+*
 CC:>--------------------------------------------------------------------
 CC: FILE:       xyz.F
 CC: HISTORY:

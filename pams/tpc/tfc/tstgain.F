@@ -1,3 +1,8 @@
+* $Id: tstgain.F,v 1.2 1998/01/27 01:14:52 fisyak Exp $
+* $Log: tstgain.F,v $
+* Revision 1.2  1998/01/27 01:14:52  fisyak
+* Split sources
+*
 CC:>--------------------------------------------------------------------
 CC: FILE:       tstgain.F
 CC: HISTORY:

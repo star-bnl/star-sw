@@ -1,3 +1,8 @@
+* $Id: conversion.F,v 1.2 1998/01/27 01:14:50 fisyak Exp $
+* $Log: conversion.F,v $
+* Revision 1.2  1998/01/27 01:14:50  fisyak
+* Split sources
+*
 	Integer function pad_id(in,mode)
 c
 c A conversion function for all our wonderful pad numbering conventions...
