@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.cc,v 1.14 2003/01/21 17:26:33 magestro Exp $
+ * $Id: StHbtTrack.cc,v 1.15 2003/01/31 19:57:15 magestro Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: StHbtTrack.cc,v $
+ * Revision 1.15  2003/01/31 19:57:15  magestro
+ * Cleared up simple compiler warnings on i386_linux24
+ *
  * Revision 1.14  2003/01/21 17:26:33  magestro
  * Added condition to globalTrack() call so GlobalTracks branch in MuDst can be disabled
  *
@@ -97,10 +100,11 @@ StHbtTrack::StHbtTrack(const StHbtTrack& t) { // copy constructor
 StHbtTrack::StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex)
 {
   StTpcDedxPidAlgorithm PidAlgorithm;
+
   // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
   // pointers to track and pidTraits are set 
   // So, even though BestGuess will generate a "variable not used" warning, DO NOT DELETE THE NEXT LINE
-  StParticleDefinition* BestGuess = (StParticleDefinition*)ST->pidTraits(PidAlgorithm);
+  // StParticleDefinition* BestGuess = (StParticleDefinition*)ST->pidTraits(PidAlgorithm);
 
   // the following just point to particle definitions in StEvent
   StElectron* Electron = StElectron::instance();
@@ -353,7 +357,6 @@ StHbtTrack::StHbtTrack(const StHbtTTreeEvent* ev, const StHbtTTreeTrack* t) { //
       StuProbabilityPidAlgorithm::readParametersFromFile("PIDTable.root");
     }
     static const StHbtTTreeEvent* evPrev;
-    static double tCent;
     if(evPrev!=ev){
       // to be changed
       int tRefMult = ev->mUncorrectedNumberOfNegativePrimaries;
@@ -441,7 +444,7 @@ StHbtTrack::StHbtTrack(const StMuDst* dst, const StMuTrack* t) { // copy constru
    mHiddenInfo = 0;
 };
 
-#endif __ROOT__
+#endif
 
 void StHbtTrack::SetTrackType(const short& t){mTrackType=t;}
 void StHbtTrack::SetCharge(const short& ch){mCharge=ch;}
@@ -501,3 +504,4 @@ short StHbtTrack::TrackId() const { return mTrackId; }
 void StHbtTrack::SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo) {mHiddenInfo=aHiddenInfo;}
 bool StHbtTrack::ValidHiddenInfo() const { if (mHiddenInfo) return true; else return false; }
 StHbtHiddenInfo* StHbtTrack::getHiddenInfo() const {return mHiddenInfo;}
+

@@ -19,6 +19,9 @@
  * corrected calculation of opening angle 
  **
  * $Log: StHbtPair.cc,v $
+ * Revision 1.26  2003/01/31 19:57:15  magestro
+ * Cleared up simple compiler warnings on i386_linux24
+ *
  * Revision 1.25  2003/01/14 09:44:08  renault
  * corrections on average separation calculation for tracks which doesn't cross
  * all 45 padrows.
@@ -437,9 +440,11 @@ double StHbtPair::quality2() const {
   unsigned long padRow25To45Track1 = mTrack1->TopologyMap(1) & mapMask1;
   unsigned long padRow1To24Track2 = mTrack2->TopologyMap(0) & mapMask0;
   unsigned long padRow25To45Track2 = mTrack2->TopologyMap(1) & mapMask1;
+
   // AND logic
-  unsigned long bothPads1To24 = padRow1To24Track1 & padRow1To24Track2;
-  unsigned long bothPads25To45 = padRow25To45Track1 & padRow25To45Track2;
+  //unsigned long bothPads1To24 = padRow1To24Track1 & padRow1To24Track2;
+  //unsigned long bothPads25To45 = padRow25To45Track1 & padRow25To45Track2;
+
   // XOR logic
   unsigned long onePad1To24 = padRow1To24Track1 ^ padRow1To24Track2;
   unsigned long onePad25To45 = padRow25To45Track1 ^ padRow25To45Track2;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTTreeTrack.cxx,v 1.2 2001/09/05 20:41:42 laue Exp $
+ * $Id: StHbtTTreeTrack.cxx,v 1.3 2003/01/31 19:57:15 magestro Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -62,10 +62,10 @@ StHbtTTreeTrack::StHbtTTreeTrack(const StHbtEvent* event, const StHbtTrack* trac
     mNSigmaPion     = track->mNSigmaPion;
     mNSigmaKaon     = track->mNSigmaKaon;
     mNSigmaProton   = track->mNSigmaProton;
-    mPidProbElectron = (1000.*track->mPidProbElectron+.5);
-    mPidProbPion = (1000.*track->mPidProbPion+.5);
-    mPidProbKaon = (1000.*track->mPidProbKaon+.5);
-    mPidProbProton = (1000.*track->mPidProbProton+.5);
+    mPidProbElectron = (short) (1000.*track->mPidProbElectron+.5);
+    mPidProbPion = (short) (1000.*track->mPidProbPion+.5);
+    mPidProbKaon = (short) (1000.*track->mPidProbKaon+.5);
+    mPidProbProton = (short) (1000.*track->mPidProbProton+.5);
 
     mTrackId = track->mTrackId;
     mTrackType = track->mTrackType;
@@ -77,6 +77,9 @@ ClassImp(StHbtTTreeTrack)
 /***************************************************************************
  *
  * $Log: StHbtTTreeTrack.cxx,v $
+ * Revision 1.3  2003/01/31 19:57:15  magestro
+ * Cleared up simple compiler warnings on i386_linux24
+ *
  * Revision 1.2  2001/09/05 20:41:42  laue
  * Updates of the hbtMuDstTree microDSTs
  *

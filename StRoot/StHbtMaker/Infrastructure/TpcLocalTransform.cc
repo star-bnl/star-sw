@@ -16,8 +16,8 @@ int TpcLocalTransform(StThreeVectorD& aPoint, int& aSector, int& aRow,
   124,126,128,128,130,132,134,136,138,138,140,142,144,144,144,144};
   static double tSectToPhi[24]={2.,1.,0.,11.,10.,9.,8. ,7. ,6.,5.,4.,3.,
 				4.,5.,6., 7., 8.,9.,10.,11.,0.,1.,2.,3.};
-  static double tPhiToSect[24]={2.,1.,0.,11.,10.,9.,8. ,7. ,6.,5.,4.,3.,
-				4.,5.,6., 7., 8.,9.,10.,11.,0.,1.,2.,3.};
+  //static double tPhiToSect[24]={2.,1.,0.,11.,10.,9.,8. ,7. ,6.,5.,4.,3.,
+	//			4.,5.,6., 7., 8.,9.,10.,11.,0.,1.,2.,3.};
   static double tPadWidthInner = 0.335;
   static double tPadWidthOuter = 0.67;
 
