@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbDefs.hh,v 1.18 2002/11/14 17:43:00 porter Exp $
+ * $Id: StDbDefs.hh,v 1.19 2002/11/24 01:39:16 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StDbDefs.hh,v $
+ * Revision 1.19  2002/11/24 01:39:16  porter
+ * added Pmd domain
+ *
  * Revision 1.18  2002/11/14 17:43:00  porter
  * added dbEemc to enumerated domain list
  *
@@ -105,7 +108,7 @@
 enum StDbType { dbStDb=0, dbServer, dbRunLog, dbConfigurations, dbConditions, dbCalibrations, dbGeometry, dbRunCatalog, dbRunParams, dbScalers, dbTestScheme, dbTUser1, dbTUser2, dbTUser3, dbTEnd};
 
 // enumerated standard set of database domains
-enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3, dbOnl, dbRich, dbMwc, dbRhic, dbSsd, dbRts, dbTof, dbFpd, dbEemc, dbDUser1, dbDUser2, dbDUser3, dbDEnd };
+enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3, dbOnl, dbRich, dbMwc, dbRhic, dbSsd, dbRts, dbTof, dbFpd, dbEemc, dbPmd, dbDUser1, dbDUser2, dbDUser3, dbDEnd };
 
 // enumerated sets of storage models (different sql content)
 enum StDbStoreType { dbV00=0 };
