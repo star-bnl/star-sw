@@ -1,9 +1,9 @@
-#ifndef TGeant3_H 
-#define TGeant3_H 
+#ifndef TGiant3_H 
+#define TGiant3_H 
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3.h,v 1.10 2004/03/01 16:02:49 fisyak Exp $ */
+/* $Id: TGiant3.h,v 1.1 2005/02/07 21:08:51 fisyak Exp $ */
 
 //////////////////////////////////////////////// 
 //  C++ interface to Geant3 basic routines    // 
@@ -512,7 +512,7 @@ typedef struct {
  ************************************************************************/
 class TVolume;
 
-class TGeant3 : public StarMC { 
+class TGiant3 : public StarMC { 
 
 protected:
   Int_t fNextVol;      //! Iterator for GeomIter
@@ -561,9 +561,9 @@ protected:
   Int_t fPDGCode[kMaxParticles]; //!
 
 public: 
-  TGeant3(); 
-  TGeant3(const char *title, Int_t nwgeant=5000000, Int_t nwpaw=0, Int_t iwtype=1);
-  virtual ~TGeant3();
+  TGiant3(); 
+  TGiant3(const char *title, Int_t nwgeant=5000000, Int_t nwpaw=0, Int_t iwtype=1);
+  virtual ~TGiant3();
   virtual void LoadAddress(); 
  
 ///////////////////////////////////////////////////////////////////////
@@ -875,12 +875,12 @@ public:
                             Int_t  &narg,   /* number   of arguments      */
                             ...);         /* other narg arguments       */
 #endif
-   static TGeant3  *Geant3(){ return fgGeant;}
-   static TGeant3  *fgGeant; 
+   static TGiant3  *Geant3(){ return fgGeant;}
+   static TGiant3  *fgGeant; 
    virtual void FinishGeometry();
    virtual void BuildPhysics();
 
-   ClassDef(TGeant3,0)  //C++ interface to Geant basic routines 
+   ClassDef(TGiant3,0)  //C++ interface to Geant basic routines 
 }; 
 
 #endif 

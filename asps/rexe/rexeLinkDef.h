@@ -4,6 +4,6 @@
 #pragma link off all functions;
 #pragma link C++ global gMC;
 #pragma link C++ class StarMC;
-#pragma link C++ class TGeant3;
+#pragma link C++ class TGiant3;
 #pragma link C++ class TPaveTree;
 #endif

@@ -15,6 +15,9 @@
 
 /*
 $Log: StarMC.cxx,v $
+Revision 1.4  2005/02/07 21:08:50  fisyak
+rename antique TGeant3 to TGiant3
+
 Revision 1.3  2004/03/01 16:02:49  fisyak
 new interface to simulation based on starsim
 
@@ -22,10 +25,10 @@ Revision 1.2  2000/04/23 19:18:09  fisyak
 Merge with Alice V3.03
 
 Revision 1.1  2000/01/04 16:04:02  fisyak
-move TGeant3 to root4star executable
+move TGiant3 to root4star executable
 
 Revision 1.1  1999/12/07 15:44:25  fisyak
-Add geane, new TGeant3 from Starce
+Add geane, new TGiant3 from Starce
 
 Revision 1.2  1999/09/29 09:24:29  fca
 Introduction of the Copyright and cvs Log
