@@ -4,7 +4,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.h
-// $Id: StFlowTagMaker.h,v 1.3 1999/08/09 21:43:06 snelling Exp $
+// $Id: StFlowTagMaker.h,v 1.4 1999/08/17 21:47:42 fisyak Exp $
 //
 // Description: 
 //  Maker to access and analyze StEvent and fill Tag for flow analysis
@@ -17,12 +17,15 @@
 //
 // History:
 // $Log: StFlowTagMaker.h,v $
+// Revision 1.4  1999/08/17 21:47:42  fisyak
+// iostream => iostream.h for HP
+//
 // Revision 1.3  1999/08/09 21:43:06  snelling
 // removed parameters from cxx file
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-#include <iostream>
+#include <iostream.h>
 #include <stdlib.h>
 #include "StMaker.h"
 #include "tables/FlowTag.h"
