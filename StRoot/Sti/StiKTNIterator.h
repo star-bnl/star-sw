@@ -33,10 +33,10 @@ public:
     StiKTNIterator(KTN_t& leaf  ,int dir=0) : mDir(dir),mNode(&leaf) {};
 
     ///equality:
-    bool operator==(const StiKTNIterator& rhs);
+    bool operator==(const StiKTNIterator& rhs) const;
 
     ///inequlity
-    bool operator!=(const StiKTNIterator& rhs);
+    bool operator!=(const StiKTNIterator& rhs) const;
 
     ////Dereference
     KTN_t& operator*();
@@ -78,12 +78,12 @@ static const StiKTNForwardIterator& end(){return (StiKTNForwardIterator&)mgEnd;}
 };
 //inlines --
 
-inline bool StiKTNIterator::operator==(const StiKTNIterator& rhs)
+inline bool StiKTNIterator::operator==(const StiKTNIterator& rhs) const
 {
     return mNode==rhs.mNode;
 }
 
-inline bool StiKTNIterator::operator!=(const StiKTNIterator& rhs)
+inline bool StiKTNIterator::operator!=(const StiKTNIterator& rhs) const
 {
     return !(mNode==rhs.mNode);
 }
