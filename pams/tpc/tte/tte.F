@@ -1,5 +1,10 @@
+* $Id: tte.F,v 1.2 1998/01/27 02:18:51 fisyak Exp $
+* $Log: tte.F,v $
 * Revision 1.2  1998/01/27 02:18:51  fisyak
-      INTEGER FUNCTION tte_am(      track_h,       track,
+* Add README
+*
+* Revision 1.2  1998/01/27 02:18:51  fisyak
+* Add README
 *
 C<----------------------------------------------------------------------------
       INTEGER FUNCTION tte(      track_h,       track,
@@ -12,7 +17,7 @@ C<----------------------------------------------------------------------------
      >                           evmc_h,        evmc,
      >                           everes_h,      everes,
      >                           cntrl_h,       cntrl)
-#include "tte_am.inc"
+
 #include "tpt_const.inc"
 
 #include "tte.inc"
@@ -112,7 +117,7 @@ c                                              <-> real hit assignement
       integer  bad_track
       data my_charge /0,1,-1,0,1,-1,0,1,-1,0,1,-1,0,1,-1,0,0,0,1,0,
      >                -1,0,-1,-1,0,0,-1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,
-      tte_am=STAFCV_OK
+     >                 0,0,0,1,1,2,0,2,0,50*0/
 
       twopi=atan(1.0)*8.0
       degtorad=atan(1.0)/45.0
@@ -126,14 +131,14 @@ c     set up an index table to address an mc hit by its hit id
 c     but first clean up the list
 c
       call vzero(list_g2t_hits,list_size)
-             tte_am=STAFCV_BAD
+C
              write(6,*) 'list_size not big enough ','i = ', i,
      >      'list_size = ', list_size, 'g2t_hit(i).id = ', g2t_hit(i).id
      >                         ,g2t_hit(i).id
              call Message (m132, 2, idI1 )
              return
          else
-      if(tte_am.eq.STAFCV_BAD) return
+      if(tte.eq.STAFCV_BAD) return
 
              list_g2t_hits(g2t_hit(i).id)=i
          endif   
@@ -141,21 +146,21 @@ c
 c
 c     set up an index table to address a reconstructed hit by its hit id
 c     but first clean up the list
-             tte_am=STAFCV_BAD
+      call vzero(list_hits,hit_size)
              write(6,*)'list_size not big enough ','i = ', i,
      >      'list_size = ', list_size, 'hit(i).id = ', hit(i).id
      >                         hit(i).id
              call Message (m132, 2, idI2 )
              return
          else
-      if(tte_am.eq.STAFCV_BAD) return
+      if(tte.eq.STAFCV_BAD) return
          endif
       end do 
 
       call vzero(list_g2t_track,track_size)
 c     set up an index table to address mc tracks in g2t_track table by the 
 c     track id
-             tte_am=STAFCV_BAD
+      call vzero(list_g2t_tracks,track_size)
              write(6,*) 'track_size not big enough, i = ',i,
      >       ' track_size = ',track_size,' g2t_track(i).id = ',
      >        g2t_track(i).id
@@ -169,7 +174,7 @@ c     track id
       call vzero(list_trk,track_size)
 c     set up an index table to address rec tracks by the rec track id
 c     
-             tte_am=STAFCV_BAD
+      call vzero(list_tracks,track_size)
              write(6,*) 'track_size not big enough, i = ',i,
      >       ' list_size = ',list_size,' track(i).id = ',
      >        track(i).id
@@ -224,7 +229,7 @@ c     let's count dropped mc hits
            evmc(evmc_h.nok).ngnt=0
            evmc(evmc_h.nok).pzvr =  0.0
 		write(6,*) 'hit_size not big enough',hit_h.maxlen,hit_size
-                tte_am = STAFCV_BAD
+		write(m132(1),*) 'TTE-I5 hit_size not big enough'
                 write(m132(2),*) hit_h.maxlen,hit_size
                 call Message (m132, 2, idI5 )
                 tte = STAFCV_BAD
@@ -252,7 +257,7 @@ c            hits.................
              if(list_hits(tindex(index_mc).key2).gt.0) then
                 if(tindex(index_mc).key2.gt.hit_size.or.
 c              hits
-                   tte_am=STAFCV_BAD
+               if(list_hits(tindex(index_mc).key2).gt.0) then
                    write(6,*) 'long_list not long enough, hit_size = ',
      >             hit_size, ' tindex(index_mc).key2 = ',
                    write(m132(1),*) 'TTE-I6 long_list not long enough,'
@@ -327,7 +332,7 @@ c          went through all the points mc for 1 track
 
                  write(6,*) 'track_size not big enough', 
               id_track=hit(ip_real).track/1000
-                 tte_am=STAFCV_BAD
+                 write(m132(1),*) 'TTE-I8 track_size not big enough', 
      >           hit(ip_real).track, ip_real
                  call Message (m132, 1, idI8 )
               if(id_track.ne.0) then
@@ -563,7 +568,7 @@ c         call GFPART(Ipart,CHPart,ITRTyp,Amass,Charge,Tlife,Ub,Nb)
               return
          endif
          else
-      tte_am=STAFCV_OK
+     >   'TTE-I14 hit assigned to a bad reconstructed track', bad_track
          call message (m132, 1 ,idI14)
       endif
       tte=STAFCV_OK

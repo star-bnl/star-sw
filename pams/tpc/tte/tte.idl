@@ -1,5 +1,5 @@
-/*          tte_am.idl
-*           Module: tte_am
+/*          tte.idl
+*           Module: tte
 *           Description: tracking eveluation
 */
 #include "PAM.idl"
@@ -14,7 +14,7 @@
 #include "tte_res.idl"
 #include "tte_control.idl"
 
-interface tte_am : amiModule{
+interface tte : amiModule{
           STAFCV_T call
                    (      in     tpt_track track
 			, in     tcl_tphit hit 
@@ -27,4 +27,4 @@ interface tte_am : amiModule{
 			, out    tte_res everes 
 			, out    tte_control cntrl);
 };
-/* Last mod. for tte: $Date: 1997/12/31 14:34:08 $ */
+/* Last mod. for tte: $Date: 1998/01/27 02:18:52 $ */

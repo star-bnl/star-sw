@@ -1,3 +1,8 @@
+* $Id: tte_track.F,v 1.2 1998/01/27 02:18:52 fisyak Exp $
+* $Log: tte_track.F,v $
+* Revision 1.2  1998/01/27 02:18:52  fisyak
+* Add README
+*
 C<----------------------------------------------------------------------------
       INTEGER FUNCTION tte_track(track_h,       track,
      >                           hit_h,         hit,
