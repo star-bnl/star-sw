@@ -22,16 +22,19 @@ using std::string;
 #include "StiMaterial.h"
 #include "StiPlacement.h"
 #include "StiDetector.h"
+#include "Messenger.h"
 
 #include "StiCodedDetectorBuilder.h"
 
 StiCodedDetectorBuilder::StiCodedDetectorBuilder(){
   init();
-  cout << "################################StiCodedDetectorBuilder()" << endl;
+  m_messenger << 
+      "################################StiCodedDetectorBuilder()" << endl;
 }
 
 StiCodedDetectorBuilder::~StiCodedDetectorBuilder(){
-  cout << "################################~StiCodedDetectorBuilder()" << endl;
+  m_messenger << 
+      "################################~StiCodedDetectorBuilder()" << endl;
 }
 
 void StiCodedDetectorBuilder::init(){
