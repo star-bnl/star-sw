@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_full_tables.C,v 1.8 1999/11/03 19:02:53 kathy Exp $
+// $Id: QA_bfcread_dst_full_tables.C,v 1.9 1999/11/03 19:05:02 kathy Exp $
 // $Log: QA_bfcread_dst_full_tables.C,v $
+// Revision 1.9  1999/11/03 19:05:02  kathy
+// another small fix for output file name - now .out instead of .txt
+//
 // Revision 1.8  1999/11/03 19:02:53  kathy
 // changes to default input files and output file names - needed by perl script for testing
 //
@@ -49,7 +52,7 @@ St_DataSet *Event;
 void QA_bfcread_dst_full_tables(Int_t nevents=15, 
  const char *MainFile=
  "/disk00000/star/test/new/tfs_Linux/year_2a/psc0208_01_40evts.dst.root",
- const char *fname="qa_full_tables.txt")
+ const char *fname="qa_full_tables.out")
 
 {
 //

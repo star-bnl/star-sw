@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.11 1999/11/03 17:12:58 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.12 1999/11/03 19:05:02 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.12  1999/11/03 19:05:02  kathy
+// another small fix for output file name - now .out instead of .txt
+//
 // Revision 1.11  1999/11/03 17:12:58  kathy
 // fixed macros so they use StIOMaker instead of StTreeMaker
 //
@@ -57,7 +60,7 @@ void QA_bfcread_dst_tables(
  Int_t nevents=1, 
  const char *MainFile=
  "/disk00000/star/test/new/tfs_Linux/year_2a/psc0208_01_40evts.dst.root",
- const char *fname="qa_tables.txt") {
+ const char *fname="qa_tables.out") {
 
   gSystem->Load("St_base");
   gSystem->Load("StChain");
