@@ -1,7 +1,9 @@
 // example how to access memberfunctions from a correlation function 
-// ((MinvCorrFctn*) ((StHbtMaker*) chain->GetMaker("HBT"))->HbtManager()->Analysis(0)->CorrFctn(0))->Difference()->Draw()
-// ((MinvCorrFctnY_vs_Pt*) ((StHbtMaker*) chain->GetMaker("HBT"))->HbtManager()->Analysis(0)->CorrFctn(2))->Difference()->Draw("colz")
-// ((MinvCorrFctnArmenteros*) ((StHbtMaker*) chain->GetMaker("HBT"))->HbtManager()->Analysis(0)->CorrFctn(1))->Difference()->Draw("colz")
+//  ((MinvCorrFctn*) ((StHbtAnalysis*)((StHbtMaker*) chain->GetMaker("HBT"))->HbtManager()->Analysis(0))->CorrFctn(0))->CorrFctn(0))->Difference()->Draw()
+
+// ((MinvCorrFctnY_vs_Pt*) ((StHbtAnalysis*)((StHbtMaker*) chain->GetMaker("HBT"))->HbtManager()->Analysis(0))->CorrFctn(2))->Difference()->Draw("colz")
+
+// ((MinvCorrFctnArmenteros*) ((StHbtAnalysis*)((StHbtMaker*) chain->GetMaker("HBT"))->HbtManager()->Analysis(0))->CorrFctn(1))->Difference()->Draw("colz")
 
 // examples to access member function from cutMonitors (here the member functions return a pointer to a histogram)  
 // ((trackCutMonitor_P_vs_Dedx*)phiAnal->FirstParticleCut()->PassMonitor(0))->Histo()->Draw()
@@ -455,7 +457,7 @@ cout << "READER SET UP.... " << endl;
  //franksPairCut* phiPairCut = new franksPairCut;  // use "frank's" pair cut object
  phiAnal->SetPairCut(phiPairCut);         // this is the pair cut for this analysis
  // 4) set the number of events to mix (per event)
- phiAnal->SetNumEventsToMix(10); 
+ phiAnal->SetNumEventsToMix(5); 
  // ********************************************************************
  // 5) now set up the correlation functions that this analysis will make
  // ********************************************************************
@@ -508,7 +510,7 @@ cout << "READER SET UP.... " << endl;
  ((franksTrackCut*)lambdaAnal->FirstParticleCut())->SetPt(0.,2.);
  ((franksTrackCut*)lambdaAnal->FirstParticleCut())->SetCharge(-1);
  ((franksTrackCut*)lambdaAnal->FirstParticleCut())->SetMass(0.938);
- ((franksTrackCut*)lambdaAnal->FirstParticleCut())->SetDCA(10.0,50.);
+ ((franksTrackCut*)lambdaAnal->FirstParticleCut())->SetDCA(8.0,16.);
  ((franksTrackCut*)lambdaAnal->SecondParticleCut())->SetNSigmaPion(-3.0,3.0); //pion
  ((franksTrackCut*)lambdaAnal->SecondParticleCut())->SetNSigmaKaon(-1000.0,1000.0);
  ((franksTrackCut*)lambdaAnal->SecondParticleCut())->SetNSigmaProton(-1000.0,1000.0);
@@ -516,7 +518,7 @@ cout << "READER SET UP.... " << endl;
  ((franksTrackCut*)lambdaAnal->SecondParticleCut())->SetPt(0.,2.);
  ((franksTrackCut*)lambdaAnal->SecondParticleCut())->SetCharge(-1);
  ((franksTrackCut*)lambdaAnal->SecondParticleCut())->SetMass(0.139);
- ((franksTrackCut*)lambdaAnal->SecondParticleCut())->SetDCA(10.0,50.);
+ ((franksTrackCut*)lambdaAnal->SecondParticleCut())->SetDCA(8.0,16.);
  TheManager->AddAnalysis(lambdaAnal);
  
  // ********************************************* // 
@@ -526,7 +528,7 @@ cout << "READER SET UP.... " << endl;
  delete  ((franksPairCut*)lambdaAnal2->PairCut());
  franksPairCut* lambdaAnal2PairCut = new franksPairCut;  // use "frank's" pair cut object
  lambdaAnal2->SetPairCut(lambdaAnal2PairCut);            // this is the pair cut for this analysis
- //TheManager->AddAnalysis(lambdaAnal2);
+ TheManager->AddAnalysis(lambdaAnal2);
 
  // ****************************************** // 
  // * franks rho analysis - by Frank Laue, OSU //
