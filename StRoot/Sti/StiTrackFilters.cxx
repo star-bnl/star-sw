@@ -7,6 +7,7 @@
 #include <float.h>
 #include <iostream>
 #include <string>
+#include <stdexcept>
 using namespace std;
 
 //Sti
@@ -17,7 +18,8 @@ using namespace std;
 //--- StiPtFilter ---
 bool StiPtFilter::operator()(const StiTrack* t) const
 {
-    return true;
+    double pt = t->getPt();
+    return (pt>mPtMin && pt<mPtMax);
 }
 
 void StiPtFilter::getNewState()
@@ -34,7 +36,8 @@ void StiPtFilter::print() const
 //--- StiEtaFilter ---
 bool StiEtaFilter::operator()(const StiTrack* t) const
 {
-    return true;
+    double eta = t->getPseudoRapidity();
+    return (eta>=mEtaMin && eta<=mEtaMax);
 }
 
 void StiEtaFilter::getNewState()

@@ -52,6 +52,7 @@ using namespace std;
 #include "StiKalmanTrackFinder.h"
 #include "StiKalmanTrackFitter.h"
 #include "StiMaterialInteraction.h"
+#include "StiDynamicTrackFilter.h"
 
 ostream& operator<<(ostream&, const StiTrack&);
 
@@ -59,167 +60,167 @@ ostream& operator<<(ostream&, const StiTrack&);
 
 
 StiKalmanTrackFinder::StiKalmanTrackFinder()
-  : StiTrackFinder(),trackMes(*Messenger::instance(MessageType::kTrackMessage)),
-    mSubject(StiIOBroker::instance())
+    : StiTrackFinder(),trackMes(*Messenger::instance(MessageType::kTrackMessage)),
+      mSubject(StiIOBroker::instance())
     
 {
-  //Turn off by default
-  Messenger::instance()->clearRoutingBits(MessageType::kTrackMessage);
+    //Turn off by default
+    Messenger::instance()->clearRoutingBits(MessageType::kTrackMessage);
     
-  //cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Begins"<<endl;
-  StiTrack::setTrackFitter(new StiKalmanTrackFitter());
-  reset();
+    //cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Begins"<<endl;
+    StiTrack::setTrackFitter(new StiKalmanTrackFitter());
+    reset();
 
-	// set parameters used by this finder.
-	setParameters(new StiKalmanTrackFinderParameters());
+    // set parameters used by this finder.
+    setParameters(new StiKalmanTrackFinderParameters());
 	
 	
-  mSubject->attach(this);
-  getNewState();
+    mSubject->attach(this);
+    getNewState();
     
-  //cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
+    //cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
 }
 
 StiKalmanTrackFinder::~StiKalmanTrackFinder()
 {
-  //progFlowMes <<"StiKalmanTrackFinder::~StiKalmanTrackFinder() - Begin/End"<<endl;
-  if (mSubject) {
-    mSubject->detach(this);
-  }
+    //progFlowMes <<"StiKalmanTrackFinder::~StiKalmanTrackFinder() - Begin/End"<<endl;
+    if (mSubject) {
+	mSubject->detach(this);
+    }
 }
 
 void StiKalmanTrackFinder::getNewState()
 {
-  StiIOBroker *  broker = StiIOBroker::instance();
-  //cout <<"StiKalmanTrackFinder::getNewState()"<<endl;
-  pars->setMCSCalculated(broker->ktfMcsCalculated()); //check
-  pars->setElossCalculated(broker->ktfElossCalculated()); //check
-  pars->setMaxChi2ForSelection(broker->ktfMaxChi2ForSelection());//check
-  pars->setField(broker->ktfBField()); //check
-  pars->setMassHypothesis(broker->ktfMassHypothesis()); //check
+    StiIOBroker *  broker = StiIOBroker::instance();
+    //cout <<"StiKalmanTrackFinder::getNewState()"<<endl;
+    pars->setMCSCalculated(broker->ktfMcsCalculated()); //check
+    pars->setElossCalculated(broker->ktfElossCalculated()); //check
+    pars->setMaxChi2ForSelection(broker->ktfMaxChi2ForSelection());//check
+    pars->setField(broker->ktfBField()); //check
+    pars->setMassHypothesis(broker->ktfMassHypothesis()); //check
   
-  pars->setMinContiguousHitCount(broker->ktfMinContiguousHitCount());  //check
-  pars->setMaxNullCount(broker->ktfMaxNullCount()); //check
-  pars->setMaxContiguousNullCount(broker->ktfMaxContiguousNullCount()); //check
+    pars->setMinContiguousHitCount(broker->ktfMinContiguousHitCount());  //check
+    pars->setMaxNullCount(broker->ktfMaxNullCount()); //check
+    pars->setMaxContiguousNullCount(broker->ktfMaxContiguousNullCount()); //check
   
-  pars->setMinSearchWindow(broker->ktfMinSearchRadius()); //check
-  pars->setMaxSearchWindow(broker->ktfMaxSearchRadius()); //check
-  pars->setSearchWindowScale(broker->ktfSearchWindowScale()); //check
+    pars->setMinSearchWindow(broker->ktfMinSearchRadius()); //check
+    pars->setMaxSearchWindow(broker->ktfMaxSearchRadius()); //check
+    pars->setSearchWindowScale(broker->ktfSearchWindowScale()); //check
 
-  if (broker->ktfUseHelixExtrapolation()==true)  {
-      StiMaterialInteraction::setExtrapolationType(kHelixExtrapolation);
-  }
-  else {
-      StiMaterialInteraction::setExtrapolationType(kLinearExtrapolation);
-  }
+    if (broker->ktfUseHelixExtrapolation()==true)  {
+	StiMaterialInteraction::setExtrapolationType(kHelixExtrapolation);
+    }
+    else {
+	StiMaterialInteraction::setExtrapolationType(kLinearExtrapolation);
+    }
 }
 
 void StiKalmanTrackFinder::reset()
 {
-  //progFlowMes <<"StiKalmanTrackFinder::reset()"<<endl;
-  singleNodeDescent    = true;
-  singleNodeFrom       = 20;
-  mcsCalculated        = false;
-  elossCalculated      = false;
-  maxChi2ForSelection  = 50.;
+    //progFlowMes <<"StiKalmanTrackFinder::reset()"<<endl;
+    singleNodeDescent    = true;
+    singleNodeFrom       = 20;
+    mcsCalculated        = false;
+    elossCalculated      = false;
+    maxChi2ForSelection  = 50.;
     
-  track = 0;
-  trackDone = true;
-  scanningDone = true;
-  state = 0;
-  mode=StepByLayer;
+    track = 0;
+    trackDone = true;
+    scanningDone = true;
+    state = 0;
+    mode=StepByLayer;
 }
 
 bool StiKalmanTrackFinder::isValid(bool debug) const
 {
-  return StiTrackFinder::isValid(debug);
+    return StiTrackFinder::isValid(debug);
 }
 
 //Temporary patch, to test seed finder (MLM, 8/20/01)
 
 bool StiKalmanTrackFinder::hasMore()
 {
-  return trackSeedFinder->hasMore();
+    return trackSeedFinder->hasMore();
 }
 
 void StiKalmanTrackFinder::doNextTrackStep()
 {
-  try
-    {
-      if (mode==StepByLayer)
+    try
 	{
-	  trackMes << "StepByLayer" << endl;
-	  switch (state)
-	    {
-	    case 0:
-	      trackMes<< "InitTrackSearch()"<< endl;
+	    if (mode==StepByLayer)
+		{
+		    trackMes << "StepByLayer" << endl;
+		    switch (state)
+			{
+			case 0:
+			    trackMes<< "InitTrackSearch()"<< endl;
        
-	      doInitTrackSearch(); 
-	      state++; 
-	      break;
-	    case 1: 
-	      doInitLayer();
-	      doScanLayer();
-	      doFinishLayer();
-	      if (trackDone)
-		{
-		  doFinishTrackSearch(); 
-		  state=0;
+			    doInitTrackSearch(); 
+			    state++; 
+			    break;
+			case 1: 
+			    doInitLayer();
+			    doScanLayer();
+			    doFinishLayer();
+			    if (trackDone)
+				{
+				    doFinishTrackSearch(); 
+				    state=0;
+				}
+			    break;
+			}
 		}
-	      break;
-	    }
+	    else if (mode==StepByDetector)
+		{
+      
+		    trackMes << "StepByDetector" << endl;
+      
+		    switch (state)
+			{
+			case 0:
+			    trackMes<< "InitTrackSearch()"<<endl;
+			    doInitTrackSearch(); 
+			    state++; 
+			    break;
+			case 1:
+			    trackMes<< "InitLayer()" << endl;
+			    doInitLayer();
+			    state++;
+			    break;
+			case 2:
+			    trackMes<< "doNextDetector()" << endl;
+			    doNextDetector();
+			    if (scanningDone)
+				{
+				    doFinishLayer();
+				    state = 1;
+				    if(trackDone)
+					{
+					    doFinishTrackSearch(); 
+					    state=0;
+					}
+				    break;
+				}
+			}
+		}
+	    trackMes << "STATE:" << state << endl;
+	    track->update();
 	}
-      else if (mode==StepByDetector)
+    catch (runtime_error & rte)
 	{
-      
-	  trackMes << "StepByDetector" << endl;
-      
-	  switch (state)
-	    {
-	    case 0:
-	      trackMes<< "InitTrackSearch()"<<endl;
-	      doInitTrackSearch(); 
-	      state++; 
-	      break;
-	    case 1:
-	      trackMes<< "InitLayer()" << endl;
-	      doInitLayer();
-	      state++;
-	      break;
-	    case 2:
-	      trackMes<< "doNextDetector()" << endl;
-	      doNextDetector();
-	      if (scanningDone)
-		{
-		  doFinishLayer();
-		  state = 1;
-		  if(trackDone)
-		    {
-		      doFinishTrackSearch(); 
-		      state=0;
-		    }
-		  break;
-		}
-	    }
+	    cout << "RunTime Error Exception: " << rte.what();
 	}
-      trackMes << "STATE:" << state << endl;
-      track->update();
-    }
-  catch (runtime_error & rte)
-    {
-      cout << "RunTime Error Exception: " << rte.what();
-    }
-  catch (exception & e)
-    {
-      cout << "Exception: " << e.what();
-    }
+    catch (exception & e)
+	{
+	    cout << "Exception: " << e.what();
+	}
 }
 
 void StiKalmanTrackFinder::doTrackFit()
 {
-  //progFlowMess <<"StiKalmanTrackFinder::doTrackFit()"<<endl;
-  try 
-    {
+    //progFlowMess <<"StiKalmanTrackFinder::doTrackFit()"<<endl;
+    try 
+ {
       track = 0;
       if (trackSeedFinder->hasMore()) 
 	{ //Redundant check, but it protectes against naive calls
@@ -235,7 +236,8 @@ void StiKalmanTrackFinder::doTrackFit()
 	      track->fit();
 				if (pars->useTrackFilter)
 					{
-						if (trackFilter->filter(track)) 
+					    //if (trackFilter->filter(track)) 
+						if (trackFilter->accept(track)) 
 							trackContainer->push_back(track);
 					}
 				else
@@ -279,7 +281,8 @@ void StiKalmanTrackFinder::doTrackFind()
       trackMes << " SKTFinder::doTrackFind() - Track Parameters" << endl << *track;
 			if (pars->useTrackFilter)
 				{
-					if (trackFilter->filter(track)) 
+				    //if (trackFilter->filter(track)) 
+					if (trackFilter->accept(track)) 
 						trackContainer->push_back(track);
 				}
 			else
@@ -318,7 +321,8 @@ void StiKalmanTrackFinder::findTracks()
       findTrack(t);
 			if (pars->useTrackFilter)
 				{
-					if (trackFilter->filter(t)) 
+				    //if (trackFilter->filter(t)) 
+					if (trackFilter->accept(t)) 
 						trackContainer->push_back(t);
 				}
 			else
@@ -410,7 +414,8 @@ void StiKalmanTrackFinder::doFinishTrackSearch()
   //trackMes<<"SKTF::doFinishTrackSearch() - begins"<<endl;
 	if (pars->useTrackFilter)
 		{
-			if (trackFilter->filter(track)) 
+		    //if (trackFilter->filter(track)) 
+			if (trackFilter->accept(track)) 
 				trackContainer->push_back(track);
 		}
 	else
