@@ -1,5 +1,8 @@
-// $Id: DstStruct.C,v 3.2 2000/08/02 16:36:39 fine Exp $
+// $Id: DstStruct.C,v 3.3 2000/08/02 16:39:50 fine Exp $
 // $Log: DstStruct.C,v $
+// Revision 3.3  2000/08/02 16:39:50  fine
+// Change order of Skip and Init methods
+//
 // Revision 3.2  2000/08/02 16:36:39  fine
 // Fixed wrong counter
 //
@@ -52,9 +55,10 @@ void DstStruct(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
   IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch  
-  if (firstEvent > 1) IOMk->Skip(firstEvent-1);
 // --- now execute chain member functions
   chain->Init();
+
+  if (firstEvent > 1) IOMk->Skip(firstEvent-1);
 
   TDataSet *ds=0;
 
