@@ -154,9 +154,7 @@ cd /dui
   tdm/table/cell/putvalue 'stk_vtx[0].cov' 0.0 0.0 0.0 0.0 0.0 0.0 
 cd /dui
 
- 
- table/print /dui/event/data/global/vertices/stk_vtx
- wait
+
 
 
 
