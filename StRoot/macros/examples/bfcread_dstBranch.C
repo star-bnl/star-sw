@@ -1,5 +1,8 @@
-// $Id: bfcread_dstBranch.C,v 1.11 2000/05/31 21:25:17 kathy Exp $
+// $Id: bfcread_dstBranch.C,v 1.12 2000/06/01 18:13:27 kathy Exp $
 // $Log: bfcread_dstBranch.C,v $
+// Revision 1.12  2000/06/01 18:13:27  kathy
+// update to print out info needed properly
+//
 // Revision 1.11  2000/05/31 21:25:17  kathy
 // updated so it now finds all tables/objects (e.g. BfcStatus) under dstBranch
 //
@@ -71,7 +74,7 @@ void bfcread_dstBranch(
   int istat=0;
   int iev=0;
 
-  int countev=0;
+  Float_t countev=0.0;
 
   Float_t countevdstB=0.0;
   Float_t countevdst=0.0;
@@ -97,6 +100,7 @@ EventLoop: if (iev < nevents && !istat) {
 
     countev++;
     cout << " start event # " << countev << endl;
+    fout << " start event # " << countev << endl;
 
     ddstBranch=chain->GetDataSet("dstBranch");
 
@@ -123,6 +127,8 @@ EventLoop: if (iev < nevents && !istat) {
 
          tabl = (TTable *)ddb;
          cout << " QAInfo:     it's a table with #rows = " 
+                        << tabl->GetNRows() << endl;
+         fout << " QAInfo:     it's a table with #rows = " 
                         << tabl->GetNRows() << endl;
       }
 
@@ -202,26 +208,21 @@ EventLoop: if (iev < nevents && !istat) {
   cout << "QAInfo: End of Job " << endl; 
   cout << "QAInfo: # times Make called = " << iev << endl;
   cout << "QAInfo:  # events read = " << countev << endl;
-  cout << "QAInfo:   # events with dstBranch dataset = " << 
-                      countevdstB << endl;
-  cout << "QAInfo:   # events with dst dataset = " << 
-                      countevdst << endl;
-  cout << "QAInfo: avg # tables per event  = " << countevtab << endl;
-  cout << "QAInfo: avg # objects per event = " << countevobj << endl << endl;
-
+  cout << "QAInfo:   # events with dstBranch dataset = " << countevdstB << endl;
+  cout << "QAInfo:   # events with dst dataset = " <<  countevdst << endl;
+  cout << "QAInfo: avg #tables per event  = " << countevtab << endl;
+  cout << "QAInfo: avg #objects per event = " << countevobj << endl << endl;
 
   fout << endl;
   fout << "QAInfo: End of Job " << endl; 
   fout << "QAInfo: # times Make called = " << iev << endl;
   fout << "QAInfo:  # events read = " << countev << endl;
-  fout << "QAInfo:   # events with dstBranch dataset = " << 
-                      countevdstB << endl;
-  fout << "QAInfo:   # events with dst dataset = " << 
-                      countevdst << endl;
-  fout << "QAInfo: avg # tables per event  = " << countevtab << endl;
-  fout << "QAInfo: avg # objects per event = " << countevobj << endl << endl;
+  fout << "QAInfo:   # events with dstBranch dataset = " << countevdstB << endl;
+  fout << "QAInfo:   # events with dst dataset = " <<  countevdst << endl;
+  fout << "QAInfo: avg #tables per event  = " << countevtab << endl;
+  fout << "QAInfo: avg #objects per event = " << countevobj << endl << endl;
 
- chain->Finish();   
+  chain->Finish();   
 
 }
 
