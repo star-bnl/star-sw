@@ -2,25 +2,16 @@
 **************************************************************************
 * This kumac initializes the SGR (Svt Grouping tracker) module
 **************************************************************************
+ 
+* ******************* Create Tables ***************************
+ 
 
-**************************************************************************
-***************init_sgr.kumac   225***********************************************************
-
-*make table to hold results:
-message 'making the sgr tables...'
-
-* Book groups tables
-
-cd /dui/data/svt/tracks
-tdm/newtable candidate_groups sgr_groups 30000
-tdm/newtable groups sgr_groups 30000
-tdm/newtable mcgroups sgr_groups 30000
-
-*Book and Fill pix_info
+* Book  pix_info table
 cd /dui/constants/svt/params/
 tdm/newtable pix_info sgr_pixmap 4
 tdm/table/rowcount pix_info 4
-
+ 
+* **************** Fill pix_info *****************************
 * pix_info[0] tuned to 400 MeV/c search
 
 tdm/table/cell/putvalue 'pix_info[0].NHitsMax' 10
@@ -61,8 +52,9 @@ tdm/table/cell/putvalue 'pix_info[3].PhiMax' 360.
 tdm/table/cell/putvalue 'pix_info[3].ZMin' -20.
 tdm/table/cell/putvalue 'pix_info[3].ZMax' 20
 
-
-
+cd /dui
+ 
+* ********************************************************
 
 
 

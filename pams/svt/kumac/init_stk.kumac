@@ -1,3 +1,4 @@
+*  editted June 4, 1998 by Kathy Turner
 **************************************************************************
 **************************************************************************
 * This kumac initializes the STK (Svt Tracker) modules
@@ -18,13 +19,6 @@
 *-------------------------------------------------------------------------
 
 
-cd /dui/data/svt/tracks
-
-tdm/newtable stk_track stk_track 6000
-tdm/newtable stk_kine stk_kine 6000
-tdm/newtable stk_mctrack stk_track 6000
-tdm/newtable stk_mckine stk_kine 6000
-tdm/newtable /dui/data/global/tracks/globtrk egr_globtrk 10000
 
 message 'initializing the stk stkpar table...'
 
@@ -147,21 +141,9 @@ tdm/table/cell/putvalue 'stk_filler[0].wth85'  90.0
 tdm/table/cell/putvalue 'stk_filler[0].wth76'  90.0
 tdm/table/cell/putvalue 'stk_filler[0].wth86'  90.0
 tdm/table/cell/putvalue 'stk_filler[0].wth87' 120.0
-*-------------------------------------------------------------------------
-* This section creates and initializes the vtx_direct table
-*-------------------------------------------------------------------------
-message 'initializing the stk vtx direct table...'
-
-cd /dui/data/global/vertices
-
-newtable stk_vtx_direct stk_vtx_direct 1
-tdm/table/rowcount stk_vtx_direct 1
-
-* sx = gaussian widths for vertex smearing
-tdm/table/cell/putvalue 'stk_vtx_direct[0].sx' .0005 .0005 .0005
 
 
-
+cd /dui
 
 
 

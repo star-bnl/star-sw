@@ -1,4 +1,5 @@
-************************************************
+*  editted June 4, 1998 Kathy Turner
+* ***********************************************
 * init_svg.kumac
 *
 * Authors: W.K.Wilson, C.A.Pruneau, WSU 
@@ -81,7 +82,10 @@ tdm/table/cell/putvalue 'config[0].cap_shape_id'  1
 tdm/table/cell/putvalue 'config[0].cap_nshape'  3 
 tdm/table/cell/putvalue 'config[0].cap_shape' 5. 16. 1.
 tdm/table/cell/putvalue 'config[0].cap_position'  29.5
-
+ 
+ 
+ cd /dui
+ 
 ****************************************************************************************
 *  Initialize the shape and geom tables by calling svg_am
 ****************************************************************************************
@@ -90,11 +94,9 @@ ami/module/call svg_am /dui/constants/svt/geometry/config _
                        /dui/constants/svt/geometry/shape _
                        /dui/constants/svt/geometry/geom
 
-****************************************************************************************
-*  Show its been read in
-****************************************************************************************
-ls
 
+ 
+  return
 
 
 

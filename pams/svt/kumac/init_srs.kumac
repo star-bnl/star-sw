@@ -6,14 +6,13 @@
 * author:   W.K.Wilson
 *
 * history:  C.Pruneau, June 97, adaptation to new staf
-*
+*           editted by Kathy Turner June 5, 98 
+* 
 **************************************************************************
-
-**************************************************************************
-* This section defines the standard active areas on Silicon Drift Chambers
-* It fills the srs_activea table
-
-message 'initializing the srs active area table...'
+ 
+macro init
+ 
+*********** Create Tables ************************************
 
 cd /dui/constants/svt/geometry
 
@@ -63,7 +62,7 @@ tdm/table/rowcount srs_srspar 1
 tdm/table/cell/putvalue 'srs_srspar[0].method' 3
 * init_ran is the seed for the gaussian smearing
 tdm/table/cell/putvalue 'srs_srspar[0].init_ran' 111111
-* id_active is the active area type for each layer (eg rectangle, butterfly, etc)
+* id_active is the active area type for each layer(eg rectangle, butterfly,etc)
 tdm/table/cell/putvalue 'srs_srspar[0].id_active' 1 1 1 1 1 1 0 0 0 
 tdm/table/cell/putvalue 'srs_srspar[0].pitch' 0
 tdm/table/cell/putvalue 'srs_srspar[0].nsca' 0
@@ -84,22 +83,10 @@ tdm/table/rowcount srs_direct 1
 *          the expected value is 20 microns
 tdm/table/cell/putvalue 'srs_direct[0].sd' .0020
 tdm/table/cell/putvalue 'srs_direct[0].st' .0020
-
-
-message 'making the scs spt table...'
-
-cd /dui/data/svt/hits
-newtable scs_spt scs_spt 20000
-
-**************************************************************************
-*make table to hold results:
-
-message 'making the srs results table...'
-
-newtable srs_result srs_result 20000
-
-
-
+ 
+ cd /dui
+ 
+return
 
 
 

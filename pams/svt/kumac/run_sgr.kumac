@@ -4,10 +4,12 @@ MACRO run_sgr i=1
 i = [1]
 
 if [i] = 1 then
+  exec create_tables_svt#sgr
+  exec create_tables_svt#stk
   exec init_sgr
   exec init_stk
-*
-message ' *** Warning vertex not found just filled fron MC ***'
+ 
+ message ' *** Warning vertex not found just filled fron MC ***'
   cd /dui/data/global/vertices
   tdm/newtable stk_vtx stk_vtx 1
   tdm/table/rowcount stk_vtx 1
@@ -16,8 +18,6 @@ message ' *** Warning vertex not found just filled fron MC ***'
   tdm/table/cell/putvalue 'stk_vtx[0].t' 0
   tdm/table/cell/putvalue 'stk_vtx[0].x' 0.0 0.0 0.0
   tdm/table/cell/putvalue 'stk_vtx[0].cov' 0.0 0.0 0.0 0.0 0.0 0.0 
-
-*
 endif
 
 
