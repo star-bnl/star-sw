@@ -40,25 +40,9 @@ gmake -f ${STAF_MAKE_HOME}/MakeStaf.mk
 # Makefile does not touch input area
 # But in current environment should be "inc" directory on the same level
 # as ASPs. So this directory is making by link to created "inc" directory 
-
-
-####if ( -d ${INP}/inc ) rm -f ${INP}/inc
-####ln -s ${OUT}/inc ${INP}/inc
-
 #
-#If this is official place remove some redundant directories
-#But if it your own place do not do it. Next Make will be much faster
-
-set OffPlace = `echo $OUT | grep /afs/rhic/common/`
-if ( ${#OffPlace} ) then
-  echo '*** CLEAN UP ***'
-  
-#rm -rf ${OUT}/.@sys/dep
-#rm -rf ${OUT}/.@sys/obj
-#rm -rf ${OUT}/tmp
   echo '*** DONE ***'
 
-endif
 #
 # All comments to perev@bnl.gov
 

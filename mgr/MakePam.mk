@@ -62,8 +62,8 @@ ifeq (,$(findstring $(LEVEL),0 1))
     IDLS    := $(wildcard $(SRC_DIR)/*.idl $(SRC_DIR)/*/*.idl)
     ifneq (,$(IDLS))       
       FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(IDLS))
-      FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g)
     endif
+    FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g)
 #_________________________________________________________________________
 SUFFIXES := .c .cc .C .cxx .f .F .g .h .hpp .inc .idl
 sources := $(strip $(sort $(dir $(foreach s, $(SUFFIXES), $(wildcard $(SRC_DIR)/*$(s) $(SRC_DIR)/*/*$(s) $(SRC_DIR)/*/*/*$(s))))))
