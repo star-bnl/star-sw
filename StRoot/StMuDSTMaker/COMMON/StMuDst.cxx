@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.10 2002/09/21 00:26:09 laue Exp $
+ * $Id: StMuDst.cxx,v 1.11 2003/01/09 18:59:45 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -15,6 +15,7 @@
 #include "StMuTrack.h"
 #include "StMuEvent.h"
 #include "StMuDebug.h"
+#include "StMuEmcUtil.h"
 #include "TClonesArray.h"
 #include "TTree.h"
 
@@ -24,6 +25,7 @@
 
 TClonesArray* StMuDst::arrays[__NARRAYS__] = {0,0,0,0,0,0,0,0,0};
 TClonesArray* StMuDst::strangeArrays[__NSTRANGEARRAYS__] = {0,0,0,0,0,0,0,0,0,0,0,0};
+TClonesArray* StMuDst::emcArrays[__NEMCARRAYS__] = {0};
 
 
 StMuDst::StMuDst() {
@@ -41,6 +43,10 @@ void StMuDst::unset() {
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     strangeArrays[i] = 0;
   }
+
+  for ( int i=0; i<__NEMCARRAYS__; i++) {
+    emcArrays[i] = 0;
+  }
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -54,6 +60,9 @@ void StMuDst::set(StMuDstMaker* maker) {
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     strangeArrays[i] = maker->mStrangeArrays[i];
   }
+  for ( int i=0; i<__NEMCARRAYS__; i++) {
+    emcArrays[i] = maker->mEmcArrays[i];
+  }
 
   StStrangeEvMuDst* ev = strangeEvent();
   int nV0s = v0s()->GetEntries(); for (int i=0;i<nV0s; i++) v0s(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
@@ -64,13 +73,18 @@ void StMuDst::set(StMuDstMaker* maker) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDst::set(TClonesArray** theArrays, TClonesArray** theStrangeArrays) {
+void StMuDst::set(TClonesArray** theArrays, TClonesArray** theStrangeArrays, TClonesArray** theEmcArrays) {
   DEBUGMESSAGE2("");
   for ( int i=0; i<__NARRAYS__; i++) {
     arrays[i] = theArrays[i];
   }
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     strangeArrays[i] = theStrangeArrays[i];
+  }
+  if (theEmcArrays) {
+    for ( int i=0; i<__NEMCARRAYS__; i++) {
+      emcArrays[i] = theEmcArrays[i];
+    }
   }
 }
 //-----------------------------------------------------------------------
@@ -185,6 +199,15 @@ StEvent* StMuDst::createStEvent() {
       ev->addDetectorState(det);
   }
   
+
+  // now get the EMC stuff and put it in the StEvent
+  static StMuEmcUtil* mEmcUtil = new StMuEmcUtil();
+  StMuEmcCollection *emc = emcCollection();
+  if(emc) { // transform to StEvent format and fill it
+    StEmcCollection *EMC = mEmcUtil->getEmc(emc);
+    if(EMC) ev->setEmcCollection(EMC);
+  }
+  
   DEBUGVALUE2(timer.elapsedTime());
   return ev;
 }
@@ -219,6 +242,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.11  2003/01/09 18:59:45  laue
+ * initial check in of new EMC classes and the changes required
+ *
  * Revision 1.10  2002/09/21 00:26:09  laue
  * Bug fix in createStEvent() function. Now you can delete the StEvent
  *

@@ -1,12 +1,18 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.cxx,v 1.5 2002/05/20 17:23:31 laue Exp $
+ * $Id: StMuArrays.cxx,v 1.6 2003/01/09 18:59:45 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
 #include "StMuArrays.h"
 
 
+//**************************************************************************
+char* StMuArrays::emcArrayNames[__NEMCARRAYS__] = {"EmcCollection"};
+char* StMuArrays::emcArrayTypes[__NEMCARRAYS__] = {"StMuEmcCollection"};
+int StMuArrays::emcArraySizes[__NEMCARRAYS__]       = {1};
+int StMuArrays::emcArrayCounters[__NEMCARRAYS__]    = {0};
+//**************************************************************************
 char* StMuArrays::strangeArrayNames[__NSTRANGEARRAYS__] = {"Event","McEvent",
 							   "V0","McV0","V0Assoc",
 							   "Xi","McXi","XiAssoc",
@@ -19,8 +25,7 @@ char* StMuArrays::strangeArrayTypes[__NSTRANGEARRAYS__] = {"StStrangeEvMuDst","S
 							   "TCut"};
 int StMuArrays::strangeArraySizes[__NSTRANGEARRAYS__]       = {1,1,50000,100,100,50000,100,100,50000,100,100,200};
 int StMuArrays::strangeArrayCounters[__NSTRANGEARRAYS__]    = {0,0,0,0,0,0,0,0,0,0,0,0};
-
-
+//**************************************************************************
 char* StMuArrays::arrayNames[__NARRAYS__] = {"MuEvent",
 						 "PrimaryTracks","GlobalTracks","OtherTracks","L3Tracks",
                                                  "RichSpectra","DetectorStates","L3AlgoAccept","L3AlgoReject"};
@@ -33,6 +38,9 @@ int StMuArrays::arrayCounters[__NARRAYS__]    = {0,0,0,0,0,0,0,0,0};
 /***************************************************************************
  *
  * $Log: StMuArrays.cxx,v $
+ * Revision 1.6  2003/01/09 18:59:45  laue
+ * initial check in of new EMC classes and the changes required
+ *
  * Revision 1.5  2002/05/20 17:23:31  laue
  * StStrangeCuts added
  *

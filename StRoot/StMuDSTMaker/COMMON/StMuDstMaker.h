@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.15 2002/11/08 14:18:59 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.16 2003/01/09 18:59:45 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -46,8 +46,11 @@ class StKinkMc;
 class StStrangeAssoc;
 class StStrangeCuts;
 
-///
-class StMuCut;
+
+
+/// emc stuff
+#include "StMuEmcCollection.h"
+class StMuEmcUtil;
 
 class TFile;
 class TTree;
@@ -68,7 +71,8 @@ class StMuDstMaker : public StMaker {
     /// Default constructor
     StMuDstMaker(const char* name="MuDst");
     /// Constructor
-    StMuDstMaker(int mode, int nameMode, const char* dirName="./", const char* fileName="", const char* filter=".", int maxfiles=10 );
+    StMuDstMaker(int mode, int nameMode, const char* dirName="./", const char* fileName="", const char* filter=".", int maxfiles=10, 
+		 const char* filter="MuDst" );
     ~StMuDstMaker();
     
   int Init();
@@ -101,9 +105,12 @@ class StMuDstMaker : public StMaker {
   void setBufferSize(int=65536*4);
   /// Sets the compression level for the file and all branches. 0 means no compression, 9 is the higher compression level. 
   void setCompression(int comp=9);
-  /// Returns version tag.
-  virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.15 2002/11/08 14:18:59 laue Exp $ built "__DATE__" "__TIME__ ; 
+
+  StMuEmcUtil* muEmcUtil() { return mEmcUtil; } ///< return pointer to StMuEmcUtil;
+
+  virtual const char *GetCVS() const {  ///< Returns version tag.
+
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.16 2003/01/09 18:59:45 laue Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -123,6 +130,7 @@ private:
   StStrangeMuDstMaker* mStStrangeMuDstMaker;
   StIOMaker* mIOMaker;
   StTreeMaker* mTreeMaker;
+  StMuEmcUtil* mEmcUtil;
 
   int mIoMode;
   int mIoNameMode;
@@ -182,6 +190,7 @@ private:
   void fill();
   void fillTrees(StEvent* ev, StMuCut* cut=0);
   void fillEvent(StEvent* ev, StMuCut* cut=0);
+  void fillEmc(StEvent* ev);
   void fillStrange(StStrangeMuDstMaker*);
   void fillL3Tracks(StEvent* ev, StMuCut* cut=0);
   void fillTracks(StEvent* ev, StMuCut* cut=0);
@@ -192,6 +201,7 @@ private:
   template <class T, class U> int addType(TClonesArray* tcaTo , U u, T t);
   void addTrackNode(const StEvent* ev, const StTrackNode* node, StMuCut* cut, TClonesArray* gTCA=0, TClonesArray* pTCA=0, TClonesArray* oTCA=0, bool l3=false);
   int addTrack(TClonesArray* tca, const StEvent* event, const StTrack* track, StMuCut* cut, int index2Global, bool l3=false);
+/*   int addType(TClonesArray* tcaTo , StMuEmcCollection t); */
 
   StRichSpectra* richSpectra(const StTrack* track);
 
@@ -222,6 +232,10 @@ private:
 
   TClonesArray* strangeArrays[__NSTRANGEARRAYS__];//->
   TClonesArray* mStrangeArrays[__NSTRANGEARRAYS__];//->
+
+  TClonesArray* emcArrays[__NEMCARRAYS__];//->
+  TClonesArray* mEmcArrays[__NEMCARRAYS__];//->
+
 
   ClassDef(StMuDstMaker, 1)
 }; 
@@ -257,6 +271,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.16  2003/01/09 18:59:45  laue
+ * initial check in of new EMC classes and the changes required
+ *
  * Revision 1.15  2002/11/08 14:18:59  laue
  * saveDelete(<T>) added, sets pointer=null after delete
  *

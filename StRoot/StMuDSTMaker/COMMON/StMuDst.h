@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.8 2002/08/23 17:30:18 laue Exp $
+ * $Id: StMuDst.h,v 1.9 2003/01/09 18:59:45 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -26,6 +26,8 @@ class StV0Mc;
 class StXiMc;
 class StKinkMc;
 class TCut;
+
+class StMuEmcCollection;
 
 class StEvent;
 class StTrack;
@@ -59,7 +61,7 @@ public:
   /// set the pointers to the TClonesArrays
   void set(StMuDstMaker* maker);
   /// set the pointers to the TClonesArrays
-  void set(TClonesArray**, TClonesArray**);
+  void set(TClonesArray**, TClonesArray**, TClonesArray** emc=0);
   /// resets the pointers to the TClonesArrays to 0
   void unset();
   /// checks and if necessary corrects the indecies of elements pointing to each other (e.g., a primary track's index to the corresponding gloabl track)
@@ -76,12 +78,16 @@ public:
   static TClonesArray* arrays[__NARRAYS__];
   /// array of TClonesArrays for the stuff inherited from the StStrangeMuDst
   static TClonesArray* strangeArrays[__NSTRANGEARRAYS__];
+  /// array of TClonesArrays for the stuff inherited from the Emc
+  static TClonesArray* emcArrays[__NEMCARRAYS__];
 
 public:
   /// returns pointer to the n-th TClonesArray 
   static TClonesArray* StMuDst::array(int type) { return arrays[type]; }
   /// returns pointer to the n-th TClonesArray from the strangeness arrays
   static TClonesArray* StMuDst::strangeArray(int type) { return strangeArrays[type]; }
+  /// returns pointer to the n-th TClonesArray from the emc arrays
+  static TClonesArray* StMuDst::emcArray(int type) { return emcArrays[type]; }
 
   /// returns pointer to the primary tracks list
   static TClonesArray* primaryTracks() { return arrays[muPrimary]; }
@@ -138,6 +144,10 @@ public:
   /// returns pointer to the i-th stranneCut (of type TCut)
   static TCut* strangeCuts(int i) { return (TCut*)strangeArrays[smuCut]->UncheckedAt(i); }
 
+  /// returns pointer to current StMuEmcCollection
+  static StMuEmcCollection* emcCollection() { return (StMuEmcCollection*)emcArrays[muEmc]->UncheckedAt(0); }
+
+
   static unsigned int numberOfPrimaryTracks()  { return arrays[muPrimary]->GetEntries(); }
   static unsigned int numberOfGlobalTracks()   { return arrays[muGlobal]->GetEntries(); }
   static unsigned int numberOfOtherTracks()    { return arrays[muOther]->GetEntries(); }
@@ -173,6 +183,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.9  2003/01/09 18:59:45  laue
+ * initial check in of new EMC classes and the changes required
+ *
  * Revision 1.8  2002/08/23 17:30:18  laue
  * additional member functions added (Helen Caines' request)
  *

@@ -47,6 +47,7 @@ void StHbtExampleQQ(const Int_t nevents, const Char_t **fileList, const Char_t* 
   gSystem->Load("StAssociationMaker");
   gSystem->Load("StMcAnalysisMaker");
   gSystem->Load("StStrangeMuDstMaker");
+  gSystem->Load("StEmcUtil");
   gSystem->Load("StMuDSTMaker");
 
 //  gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001"); 
@@ -76,6 +77,7 @@ ioMaker->SetIOMode("r");
 ioMaker->SetDebug();
 ioMaker->SetBranch("*",0,"0");         //deactivate all branches
 ioMaker->SetBranch("eventBranch",0,"r"); //activate evt.root Branch
+ioMaker->SetBranch("emcBranch",0,"r");   //activate evt.root Branch
 ioMaker->SetBranch("runcoBranch",0,"r"); //activate evt.root Branch
 
 // ***********************
@@ -104,7 +106,7 @@ ioMaker->SetBranch("runcoBranch",0,"r"); //activate evt.root Branch
  StMuFilter* filter = new StMuFilter();       maker->setTrackFilter(filter);
 //  filter->addEncodedMethod(32770);
 //  filter->addEncodedMethod(8,7);
- StMuDebug::setLevel(2);
+ StMuDebug::setLevel(0);
 
  chain->Init(); // This should call the Init() method in ALL makers
  chain->PrintInfo();

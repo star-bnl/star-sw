@@ -1,0 +1,296 @@
+#include "StMuEmcUtil.h"
+#include "StEvent.h"
+#include "StEventTypes.h"
+#include "StMuEmcCollection.h"
+#include "SystemOfUnits.h"
+#include "StEmcUtil/StEmcGeom.h"
+#include "StEmcUtil/emcDetectorName.h"
+
+ClassImp(StMuEmcUtil)
+
+StMuEmcUtil::StMuEmcUtil()
+{
+  for(Int_t i =0;i<4;i++) mGeo[i]=StEmcGeom::getEmcGeom(detname[i].Data());
+}
+StMuEmcUtil::~StMuEmcUtil()
+{
+}
+StMuEmcCollection* StMuEmcUtil::getMuEmc(StEmcCollection *emccol)
+{
+  if(!emccol) return NULL;
+  StMuEmcCollection* muEmc=new StMuEmcCollection();
+  
+  Int_t HitsId[18000];
+      
+  // starting by hits;    
+  for(Int_t d=0; d<4; d++)
+  {  
+    Int_t EmcDet=d+1;
+    for(Int_t i=0;i<18000;i++) HitsId[i]=-1;
+    
+    StDetectorId id = static_cast<StDetectorId>(d+kBarrelEmcTowerId);
+    StEmcDetector* detector=emccol->detector(id);
+    if(detector)
+    {                          
+      Int_t HitIndex=0;
+      for(UInt_t j=1;j<121;j++)
+      {
+        StEmcModule* module = detector->module(j);
+        if(module)
+        {
+          StSPtrVecEmcRawHit& rawHit=module->hits();
+          Int_t nhits=(Int_t)rawHit.size();
+          if(nhits>0)
+            for(Int_t k=0;k<nhits;k++)
+            {
+              Int_t m = rawHit[k]->module();
+              Int_t e = rawHit[k]->eta();
+              Int_t s = abs(rawHit[k]->sub());
+              Int_t adc = rawHit[k]->adc();
+              Float_t energy = rawHit[k]->energy();
+              Int_t cal = rawHit[k]->calibrationType();              
+              Int_t rid;
+              mGeo[d]->getId(m,e,s,rid);
+              HitsId[rid-1] = HitIndex;
+              HitIndex++;
+              
+              if(EmcDet == 1) // towers save only ADC
+              {
+                muEmc->setTowerADC(rid,adc);
+              }
+              if(EmcDet==3|| EmcDet==4)
+              {
+                StMuEmcHit* muHit = new StMuEmcHit();          
+                muHit->setId(rid);
+                muHit->setAdc(adc);
+                muHit->setEnergy(energy);
+                muHit->setCalType(cal);      
+                muEmc->addSmdHit(EmcDet,muHit);
+              }
+            }
+          }      
+        } 
+      
+      // now clusters
+      if(detector->cluster())
+      {
+        StSPtrVecEmcCluster& cluster=detector->cluster()->clusters();
+        Int_t totalcluster=(Int_t)cluster.size();
+        if(totalcluster>0)
+          for(Int_t j=0;j<totalcluster;j++)
+          {
+            StMuEmcCluster *muCl=new StMuEmcCluster();
+          
+            muCl->setEta(cluster[j]->eta());
+            muCl->setPhi(cluster[j]->phi());
+            muCl->setSigmaEta(cluster[j]->sigmaEta());
+            muCl->setSigmaPhi(cluster[j]->sigmaPhi());
+            muCl->setEnergy(cluster[j]->energy());
+        
+            StPtrVecEmcRawHit& rawHit=cluster[j]->hit();
+            Int_t nhit=(Int_t)rawHit.size();
+            muCl->setNHits(nhit);
+
+            for(Int_t k=0;k<nhit;k++)
+            {
+              Int_t m = rawHit[k]->module();
+              Int_t e = rawHit[k]->eta();
+              Int_t s = abs(rawHit[k]->sub());
+              Int_t rid;
+              mGeo[d]->getId(m,e,s,rid);
+              Int_t index = HitsId[rid-1];
+              if(EmcDet==1) index=rid;
+              if(index!=-1) muCl->setHitId(k,index);
+            }
+            muEmc->addCluster(EmcDet,muCl);
+          }
+      }  // if detector->cluster
+    } // if detector
+  } // loop detector
+    
+  StSPtrVecEmcPoint& points=emccol->barrelPoints();
+  Int_t npoints=points.size();
+  if(npoints>0)
+  {
+    for(Int_t p=0;p<npoints;p++)
+    {
+      StEmcPoint* point=points[p];
+      StThreeVectorF position=point->position();
+      StMuEmcPoint *muPt=new StMuEmcPoint();
+      muPt->setEta(position.pseudoRapidity());
+      muPt->setPhi(position.phi());
+      muPt->setRadius(sqrt(position.x()*position.x()+position.y()*position.y()));
+      muPt->setDeltaEta(point->deltaEta());
+      muPt->setDeltaPhi(point->deltaPhi());
+      muPt->setEnergy(point->energy());
+      muPt->setChiSquare(point->chiSquare());
+      
+      for(Int_t d=0;d<4;d++)
+      {
+        Int_t det =d+1;
+        StDetectorId detid=static_cast<StDetectorId>(d+kBarrelEmcTowerId);
+        StPtrVecEmcCluster& cluster=point->cluster(detid);
+        Int_t ptnc=0;
+        ptnc=cluster.size();
+        for(Int_t i=0;i<ptnc;i++) if(cluster[i])
+        {
+          Float_t eta = cluster[i]->eta();
+          Float_t phi = cluster[i]->phi();
+          for(Int_t j=0;j<muEmc->getNClusters(det);j++)
+          {
+            StMuEmcCluster *cl=muEmc->getCluster(det,j);
+            if(eta == cl->getEta() && phi==cl->getPhi())
+            {
+              muPt->addCluster(det,cl);
+              goto cont;
+            }
+          }
+          cont: continue;
+        }
+      } // loop detector
+      muEmc->addPoint(muPt);
+    } // loop points
+
+  }// npoint >0
+  
+  return muEmc;
+
+}
+StEmcCollection* StMuEmcUtil::getEmc(StMuEmcCollection* muEmc)
+{
+  if(!muEmc) return NULL;
+  
+  StEmcCollection *emc=new StEmcCollection();
+  for(Int_t i=0;i<4;i++)
+  {
+    Int_t det=i+1;
+    
+    StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
+    StEmcDetector* detector = new StEmcDetector(id, 120);
+    emc->setDetector(detector);
+    // hits
+    Int_t nh=0;
+    if (det==1) nh = 4800; 
+    if (det==3||det==4) nh=muEmc->getNSmdHits(det);
+    for(Int_t j=0;j<nh;j++)
+    {
+      Bool_t save = kTRUE;
+      Int_t m,e,s,a,cal,rid;
+      Float_t energy=0;
+      if(det==1) // towers have only ADC
+      {
+        a = muEmc->getTowerADC(j+1);
+        mGeo[det]->getBin(j+1,m,e,s);
+        energy = 0;
+        cal = 0;
+        if(a==0) save = kFALSE;
+      }
+      if(det==3||det==4) //smd
+      {
+        StMuEmcHit* hit=muEmc->getSmdHit(det,j);
+        rid=hit->getId();
+        mGeo[det]->getBin(rid,m,e,s);
+        a=hit->getAdc();
+        cal=hit->getCalType();
+        energy=hit->getEnergy();
+      }
+      if(save)
+      {
+        StEmcRawHit* rawHit=new StEmcRawHit(id,(UInt_t)m,(UInt_t)e,(UInt_t)s,(UInt_t)a,energy);
+        rawHit->setCalibrationType(cal);
+        //cout <<"Hit number "<<j<<"  m = "<<m<<"  e = "<<e<<"  s = "<<s<<"  adc = "<<a<<"  en = "<<energy<<"\n";
+        detector->addHit(rawHit);
+      }
+    }
+    //clusters
+    Int_t nc=muEmc->getNClusters(det);
+    if(nc>0)
+    {
+      cout <<"Number of clusters = "<<nc<<endl;
+      StEmcClusterCollection* clusters=new StEmcClusterCollection();
+      for(Int_t j=0;j<nc;j++)
+      {
+        StMuEmcCluster* cl=muEmc->getCluster(det,j);
+        StEmcCluster* cluster=new StEmcCluster();
+        Float_t eta=cl->getEta();
+        Float_t seta=cl->getSigmaEta();
+        Float_t phi=cl->getPhi();
+        Float_t sphi=cl->getSigmaPhi();
+        Float_t e=cl->getEnergy();
+        cluster->setEta(eta);
+        cluster->setPhi(phi);
+        cluster->setSigmaEta(seta);
+        cluster->setSigmaPhi(sphi);
+        cluster->setEnergy(e);
+        for(Int_t k=0;k<cl->getNHits();k++)
+        {
+          Int_t hid = cl->getHitId(k);
+          Int_t m,e,s,rid;
+          if(det==1) // towers
+          {
+            rid = hid;
+          }
+          if(det==3||det==4)
+          {
+            StMuEmcHit *hit=muEmc->getSmdHit(det,hid);
+            rid = hit->getId();
+          }
+          mGeo[det]->getBin(rid,m,e,s);
+          StEmcModule *module = detector->module(m);
+          StSPtrVecEmcRawHit& rawhits=module->hits();
+          for(Int_t l=0;l<(Int_t)rawhits.size();l++)
+            if(m==(Int_t)rawhits[l]->module() && e==(Int_t)rawhits[l]->eta() && s==(Int_t)abs(rawhits[l]->sub()))
+              cluster->addHit(rawhits[l]);
+        }
+        
+        clusters->addCluster(cluster);
+      }
+      detector->setCluster(clusters);
+    }
+  }
+  // points  
+  for(Int_t i=0; i<muEmc->getNPoints();i++)
+  {
+    StMuEmcPoint *point=muEmc->getPoint(i);
+    Float_t eta=point->getEta();
+    Float_t deta=point->getDeltaEta();
+    Float_t phi=point->getPhi();
+    Float_t dphi=point->getDeltaPhi();
+    Float_t en=point->getEnergy();
+    Float_t chi=point->getChiSquare();
+    Float_t theta=2*atan(exp(-eta));
+    Float_t mag = point->getRadius();
+    Float_t x,y,z;
+    x = mag*sin(theta)*cos(phi);
+    y = mag*sin(theta)*sin(phi);
+    z = mag*cos(theta);
+    StThreeVectorF p(x,y,z);
+    StEmcPoint *pt=new StEmcPoint();
+    pt->setEnergy(en);
+    pt->setChiSquare(chi);
+    pt->setDeltaEta(deta);
+    pt->setDeltaPhi(dphi);
+    pt->setPosition(p);
+    for(Int_t j=0;j<4;j++) // looking for clusters
+    {
+      Int_t det = j+1;
+      if(point->getNClusters(det)>0) for(Int_t l=0;l<point->getNClusters(det);l++)
+      {
+        StMuEmcCluster *cl=point->getCluster(det,l);
+        Float_t eta=cl->getEta();
+        Float_t phi=cl->getPhi();
+        Float_t e=cl->getEnergy();
+        StDetectorId id = static_cast<StDetectorId>(j+kBarrelEmcTowerId);
+        StEmcDetector *detector=emc->detector(id);
+        StSPtrVecEmcCluster& clusters=detector->cluster()->clusters();
+        for(Int_t k=0;k<(Int_t)clusters.size();k++)
+          if(eta==clusters[k]->eta() && phi==clusters[k]->phi() && e==clusters[k]->energy())
+            pt->addCluster(id,clusters[k]);
+      }
+    }
+    emc->addBarrelPoint(pt);
+  }
+  // set emc collection
+  
+  return emc;
+}

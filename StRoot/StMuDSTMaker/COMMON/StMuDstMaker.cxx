@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.19 2002/11/27 15:07:31 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.20 2003/01/09 18:59:45 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -35,6 +35,7 @@
 #include "StStrangeMuDstMaker/StKinkMc.hh"
 #include "StStrangeMuDstMaker/StStrangeCuts.hh"
 
+
 #include "StMuException.hh"
 #include "StMuEvent.h"
 #include "StMuTrack.h"
@@ -43,6 +44,8 @@
 #include "StMuFilter.h"
 #include "StMuL3Filter.h"
 #include "StMuChainMaker.h"
+#include "StMuEmcCollection.h"
+#include "StMuEmcUtil.h"
 
 #include "StMuDstMaker.h"
 #include "StMuDst.h"
@@ -63,9 +66,6 @@ ClassImp(StMuDstMaker)
 
 
 
-//TClonesArray* StMuDstMaker::arrays[__NARRAYS__] = {0,0,0,0,0,0,0,0,0};
-//TClonesArray* StMuDstMaker::strangeArrays[__NSTRANGEARRAYS__] = {0,0,0,0,0,0,0,0,0,0,0,0};
- 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -80,8 +80,9 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   mIoMode(1), mIoNameMode((int)ioTreeMaker),
   mTrackType(256), mReadTracks(1), 
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
+  mTrackFilter(0), mL3TrackFilter(0), 
   mSplit(99), mCompression(9), mBufferSize(65536*4), 
-  mProbabilityPidAlgorithm(0),  mTrackFilter(0), mL3TrackFilter(0)
+  mProbabilityPidAlgorithm(0)  
 {
   mDirName="./";
   mFileName="";
@@ -90,8 +91,10 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
   mEventCounter=0;
   mStMuDst = new StMuDst();
-  createArrays();
+  mEmcUtil = new StMuEmcUtil();
   
+  createArrays();
+
   setProbabilityPidFile("/afs/rhic/star/users/aihong/www/PIDTableP01gl.root");
   FORCEDDEBUGMESSAGE("ATTENTION: pid table hardwired to /afs/rhic/star/users/aihong/www/PIDTableP01gl.root");
   StMuL3Filter* l3Filter = new StMuL3Filter(); setL3TrackFilter(l3Filter);
@@ -104,14 +107,15 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles) : 
+StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles, const char* name) : StMaker(name), 
   mStEvent(0), mStStrangeMuDstMaker(0), mIOMaker(0), mTreeMaker(0),
   mIoMode(mode), mIoNameMode(nameMode),
   mDirName(dirName), mFileName(fileName), mFilter(filter), mMaxFiles(maxFiles),
   mTrackType(256), mReadTracks(1), 
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
+  mTrackFilter(0), mL3TrackFilter(0),
   mSplit(99), mCompression(9), mBufferSize(65536*4), 
-  mProbabilityPidAlgorithm(0), mTrackFilter(0), mL3TrackFilter(0)
+  mProbabilityPidAlgorithm(0)  
 {
   streamerOff();
   if (mIoMode==ioRead) openRead();
@@ -122,6 +126,7 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
 
   mEventCounter=0;
   mStMuDst = new StMuDst();
+  mEmcUtil = new StMuEmcUtil();
 
   createArrays();
   
@@ -135,6 +140,7 @@ StMuDstMaker::~StMuDstMaker() {
   delete mStMuDst;
   for ( int i=0; i<__NARRAYS__; i++) { delete arrays[i]; arrays[i]=0;} 
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) { delete strangeArrays[i];strangeArrays[i]=0;}
+  for ( int i=0; i<__NEMCARRAYS__; i++) { delete emcArrays[i];emcArrays[i]=0;}
   DEBUGMESSAGE3("after arrays");
   saveDelete(mProbabilityPidAlgorithm);
   saveDelete(mTrackFilter);
@@ -168,6 +174,7 @@ void  StMuDstMaker::streamerOff() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::createArrays() {
+  /// regular stuff
   for ( int i=0; i<__NARRAYS__; i++) {
     DEBUGVALUE2(arrays[i]);
     mArrays[i]= clonesArray(arrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],StMuArrays::arrayCounters[i]);
@@ -177,7 +184,11 @@ void StMuDstMaker::createArrays() {
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     mStrangeArrays[i]= clonesArray(strangeArrays[i],StMuArrays::strangeArrayTypes[i],StMuArrays::strangeArraySizes[i],StMuArrays::strangeArrayCounters[i]);
   }
-  mStMuDst->set(mArrays,mStrangeArrays);
+  /// from emcness group
+  for ( int i=0; i<__NEMCARRAYS__; i++) {
+    mEmcArrays[i]= clonesArray(emcArrays[i],StMuArrays::emcArrayTypes[i],StMuArrays::emcArraySizes[i],StMuArrays::emcArrayCounters[i]);
+  }
+  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -191,6 +202,9 @@ void StMuDstMaker::clear(){
   }
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     clear(mStrangeArrays[i],StMuArrays::strangeArrayCounters[i]);
+  }
+  for ( int i=0; i<__NEMCARRAYS__; i++) {
+    clear(mEmcArrays[i],StMuArrays::emcArrayCounters[i]);
   }
   DEBUGMESSAGE2("out");
 }
@@ -263,7 +277,7 @@ int StMuDstMaker::Make(){
   catch(StMuException e) {
     e.print();
   }
-  DEBUGVALUE1(timer.elapsedTime());
+  DEBUGVALUE2(timer.elapsedTime());
   return 0;
 }
 //-----------------------------------------------------------------------
@@ -372,6 +386,11 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
     chain->SetBranchAddress(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i]);
   } 
   
+  // emc stuff
+  for ( int i=0; i<__NEMCARRAYS__; i++) {
+    chain->SetBranchAddress(StMuArrays::emcArrayNames[i],&mEmcArrays[i]);
+  } 
+  
   mTTree = mChain->GetTree();
 }
 //-----------------------------------------------------------------------
@@ -389,7 +408,8 @@ void StMuDstMaker::openRead() {
 
   setBranchAddresses(mChain);
 
-  mStMuDst->set(mArrays,mStrangeArrays);  
+  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays);  
+
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -456,6 +476,13 @@ void StMuDstMaker::openWrite(string fileName) {
     branch = mTTree->Branch(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i], bufsize, mSplit);
   }
   
+  // emc stuff
+  DEBUGMESSAGE2("emc arrays");
+  for ( int i=0; i<__NEMCARRAYS__; i++) {
+    DEBUGVALUE2(i);
+    branch = mTTree->Branch(StMuArrays::emcArrayNames[i],&mEmcArrays[i], bufsize, mSplit);
+  }
+  
   mCurrentFileName = fileName;
 }
 //-----------------------------------------------------------------------
@@ -484,6 +511,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     fillEvent(ev);
     fillL3AlgorithmInfo(ev);
     fillDetectorStates(ev);
+    fillEmc(ev);
   }
   catch(StMuException e) {
     e.print();
@@ -530,6 +558,21 @@ void StMuDstMaker::fillEvent(StEvent* ev, StMuCut* cut) {
     DEBUGMESSAGE3("");
     addType(mArrays[muEvent],ev,typeOfEvent);
   }
+  timer.stop();
+  DEBUGVALUE2(timer.elapsedTime());
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDstMaker::fillEmc(StEvent* ev) {
+  DEBUGMESSAGE2("");   
+  StEmcCollection* emccol=(StEmcCollection*)ev->emcCollection();
+  if (!emccol)  return; //throw StMuExceptionNullPointer("no StEmcCollection",PF);
+  StTimer timer;
+  timer.start();
+  StMuEmcCollection* muEmcColl = mEmcUtil->getMuEmc(emccol);
+  if (!muEmcColl) throw StMuExceptionNullPointer("no StMuEmcCollection",PF);
+  addType( mEmcArrays[muEmc], *muEmcColl );
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
 }
@@ -720,6 +763,18 @@ void StMuDstMaker::addType(TClonesArray* tcaFrom, TClonesArray* tcaTo , T t) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+// int StMuDstMaker::addType(TClonesArray* tcaTo , StMuEmcCollection t) {
+//   int counter =-1;
+//   if (tcaTo) {
+//     counter = tcaTo->GetEntries();
+    
+//     new((*tcaTo)[counter]) StMuEmcCollection();
+//   }
+//   return counter;
+// }
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 template <class T>
 int StMuDstMaker::addType(TClonesArray* tcaTo , T t) {
   int counter =-1;
@@ -786,7 +841,6 @@ string StMuDstMaker::dirname(string s){
 
   name=name+"/";
   DEBUGVALUE3(name);
-  //cout << "==> will return " << name << " based on " << s << endl;
   return name;
 } 
 void StMuDstMaker::setProbabilityPidFile(const char* file) {
@@ -796,6 +850,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.20  2003/01/09 18:59:45  laue
+ * initial check in of new EMC classes and the changes required
+ *
  * Revision 1.19  2002/11/27 15:07:31  laue
  * fix to run with standard root
  *
