@@ -30,7 +30,7 @@ if ($#ARGV > -1) {
 
 my $KEEP;
 if( $^O eq "linux"){
-    $KEEP = 2;
+    $KEEP = 1;
 } else {
     $KEEP = 1;
 }
