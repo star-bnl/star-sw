@@ -1,4 +1,8 @@
-
+// $Id: StChain.cxx,v 1.6 1998/07/19 21:14:48 fisyak Exp $
+// $Log: StChain.cxx,v $
+// Revision 1.6  1998/07/19 21:14:48  fisyak
+// add log information
+//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StChain                                                              //
@@ -436,7 +440,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("*                                                            *\n");
+   printf("* $Id: StChain.cxx,v 1.6 1998/07/19 21:14:48 fisyak Exp $   *\n");
    printf("**************************************************************\n");
    printf("\n\n");
 
