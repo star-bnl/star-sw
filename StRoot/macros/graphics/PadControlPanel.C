@@ -2,8 +2,11 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.5 1999/06/03 00:35:34 fine Exp $
+// $Id: PadControlPanel.C,v 1.6 1999/06/10 03:40:53 fine Exp $
 // $Log: PadControlPanel.C,v $
+// Revision 1.6  1999/06/10 03:40:53  fine
+// New button to draw 3D axice added
+//
 // Revision 1.5  1999/06/03 00:35:34  fine
 // Comments clean up
 //
@@ -92,6 +95,7 @@ static TControlBar *PadControlPanel(TControlBar *bar=0){
    bar->AddButton("Top View","StPadControlPanel::TopView();","Show the top view");
    bar->AddButton("Side View","StPadControlPanel::SideView();","Show the side view");
    bar->AddButton("Front View","StPadControlPanel::FrontView();","Show the front view");
+   bar->AddButton("Add Axice","St_PolyLine3D::Axis();","Add 3D axice to the cuurent TPad view");
    bar->AddButton("4 views","StPadControlPanel::MakeFourView();","4 view");
 
    bar->Show();
