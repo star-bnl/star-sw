@@ -32,7 +32,7 @@ my @SetD = (
 );
 
 my $prodPeriod = "P00hd_1"; 
-my @chName = ("p00h2", "p00h1");              
+my @chName = ("p00h3", "p00h1");              
 my $chainDir = "daq";
 
 ###Set directories to be created for jobfiles
