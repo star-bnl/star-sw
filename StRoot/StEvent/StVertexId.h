@@ -1,12 +1,9 @@
 #ifndef StVertexId_hh
 #define StVertexId_hh
-#include "StVertexDefinitions.h"
-enum StVertexId {
-  kUndefinedVtxId = kUndefinedVertexIdentifier,
-  kEventVtxId     = kEventVertexIdentifier,
-  kV0VtxId        = kV0DecayIdentifier,
-  kXiVtxId        = kXiDecayIdentifier,
-  kKinkVtxId      = kKinkDecayIdentifier,
-  kOtherVtxId     = kOtherTypeIdentifier
-};
+#include "StEnumerations.h"
+// This file (StVertexId.h) is obsolete!
+// All content from StVertexId.h is now in StEnumerations.h
+// together with all other enumerations used in StEvent.
+// Please add all enumerations to StEnumerations.h and
+// change your code to NOT include StVertexId.h.
 #endif
