@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.54 2004/12/23 18:15:46 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.55 2005/01/04 01:37:47 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.55  2005/01/04 01:37:47  perev
+ * minor bug fix
+ *
  * Revision 2.54  2004/12/23 18:15:46  perev
  * Cut for -ve cosCA added
  *
@@ -723,7 +726,7 @@ int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
 //	Check what sign of cosCA2 must be
   test = (2*dir-1)*_p3*dsin*cosCA1;
   if (test<0) cosCA2 = -cosCA2;
-  if (cosCA2 <=0) return -5;
+  if (cosCA2 <=0.2) return -5;
   assert( cosCA2>0 ); 
   
   sumSin   = sinCA1+sinCA2;
@@ -1306,7 +1309,7 @@ int StiKalmanTrackNode::updateNode()
   if (!finite(_c00)||!finite(_c11)||!finite(k30)||!finite(k31))  return -11;
   // update Kalman state
    double p0 = _p0 + k00*dy + k01*dz;
-  _p0 += k00*dy + k01*dz;
+//VP  _p0 += k00*dy + k01*dz;
   if (fabs(p0)>200.) 
     {
       cout << "updateNode()[1] -W- _p0:"<<_p0<<" _p1:"<<_p1<<endl;
@@ -1684,7 +1687,7 @@ int StiKalmanTrackNode::testError(double *emx)
 
 
   static int nCalls=0; nCalls++;
-  static const double dia[5] = { 4., 4.,4.,4.,100.};
+  static const double dia[5] = { 2., 2.,2.,2.,2.};
   static const int    idx[5][5] = 
   {{0,1,3,6,10},{1,2,4,7,11},{3,4,5,8,12},{6,7,8,9,13},{10,11,12,13,14}};
 return 0;
@@ -1694,14 +1697,16 @@ return 0;
     if (emx[jj]<=10*dia[j1] && (emx[jj]>0)) continue;
     assert(finite(emx[jj]));
     ians++; emx[jj]=dia[j1];
-    for (j2=0; j2<5;j2++){if (j1!=j2) emx[idx[j1][j2]]=0;}
+//    for (j2=0; j2<5;j2++){if (j1!=j2) emx[idx[j1][j2]]=0;}
   }
   for (j1=0; j1< 5;j1++){
   for (j2=0; j2<j1;j2++){
     jj = idx[j1][j2];
     assert(finite(emx[jj]));
-    if (emx[jj]*emx[jj]<0.9*emx[idx[j1][j1]]*emx[idx[j2][j2]]) continue;
-    ians++;emx[jj]=0;
+    double cormax = 0.9*emx[idx[j1][j1]]*emx[idx[j2][j2]];
+    if (emx[jj]*emx[jj]<cormax) continue;
+    cormax= sqrt(cormax);
+//    ians++;emx[jj]= (emx[jj]<0) ? -cormax:cormax;
   }}
   return ians;
 }
