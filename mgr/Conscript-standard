@@ -363,7 +363,9 @@ if ( $#Defs > -1 ) {
 }
 
 if ( $#QtDefs > -1 ) {
-     my @mocs = script::MakeMoc( $env2, $pkg, $done, @QtDefs);
+     my $mocheaders = join $main::PATH_SEPARATOR, @QtDefs;
+#     my @mocs = script::MakeMoc( $env2, $pkg, $done, @QtDefs);
+     my @mocs = script::MakeMoc( $env2, $pkg, $done, $mocheaders);
      foreach $m(@mocs) { push @src, $m;}
 }
  
@@ -530,15 +532,13 @@ sub script::MakeMoc {
   my $env  = shift;
   my $pkg  = shift;
   my $done = shift; 
-  my @includes = shift;
+  my @includes = split $main::PATH_SEPARATOR,shift;
   my $Dir  = $env->{Dir};
   my $ROOTCINTFLAGS = "-I" . $Dir . "/inc";
   my $ObjDir        = "#" . $env->{ObjDir};  #    print "MakeMoc ObjDir = $ObjDir\n";
   my @src      = ();
   my @Defs     = ();
   my $PLATFORM = $env->{PLATFORM};
-
-  
   foreach my $header (@includes) { 
     my $dd = $d;
     my $G__name = "moc_" . $header; 
