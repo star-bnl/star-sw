@@ -1,5 +1,14 @@
-* $Id: geometry.g,v 1.65 2003/10/10 23:15:35 potekhin Exp $
+* $Id: geometry.g,v 1.66 2003/10/10 23:59:18 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.66  2003/10/10 23:59:18  potekhin
+* Per Jerome's suggestion, which I agree with, we should
+* semantically separate our current geometry tags from the
+* future development ones. Also, it makes sense to have a more
+* complete (as compared to 2003) geometry, for the pixel
+* studies. Therefore, the pixel testbed tag has been
+* renamed and the STAR detector more fully populated.
+* It's now ASYMPT1, and the indexing may continue.
+*
 * Revision 1.65  2003/10/10 23:15:35  potekhin
 * In previous check-n: forgot to mention the new CorrNum=3
 * which actually programmatically modifies the inner radius of
@@ -444,7 +453,7 @@ If LL>1
 *    added the Photon Multiplicity Detector (PHMD)
 *    added newly installed parts of ECAL (to be done)
 
-  on Y2003B    { correction 1 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
+  on Y2003B    { correction 2 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -474,8 +483,40 @@ If LL>1
                      PhmdVersion = 1;
                 }
 
-* same as Y2003B but with pixel detector
-  on Y2003C    { correction 1 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
+  on Y2003X    { same as year2003 but with full calorimeters
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     btofconfig=5;
+                  "calb" 
+                     ems=on   "endcap " 
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
+                  "ecal" 
+                     ecal_config=3   "both wheels"
+                     ecal_fill=3     "all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+                  "geometry correction "
+                     CorrNum = 1;
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdVersion = 1;
+                }
+
+* as complete as Y2003X but with all corrections AND pixel detector
+* we introduce a family of more modern "asymptotic" geometries here,
+* which we shall name ASYMPT* (indexed)
+  on ASYMPT1    { correction 3 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -488,10 +529,10 @@ If LL>1
                      btofconfig=5;
                   "calb" 
                      ems=on
-                     nmod={60,0}; shift={75,0}; " 60 sectors " 
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
                   "ecal"
-                     ecal_config=1   " one ecal patch, west "
-                     ecal_fill=3     " all sectors filled "
+                     ecal_config=3   "both wheels"
+                     ecal_fill=3     "all sectors filled "
                   "beam-beam counter "
                      bbcm=on
                   "forward pion detector "
@@ -508,36 +549,6 @@ If LL>1
                    pixl=on;    " put the pixel detector in"
                 }
 
-
-  on Y2003X    { same as year2003 but with full calorimeters
-                  "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
-                  "tpc: standard, i.e.  "
-                     mwc=on " Wultiwire chambers are read-out ";
-                     pse=on " inner sector has pseudo padrows ";
-                  "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
-                     btofconfig=5;
-                  "calb" 
-                     ems=on   "endcap " 
-                     nmod={60,60}; shift={75,105}; " 60 sectors " 
-                  "ecal" 
-                     ecal_config=3   "both wheels"
-                     ecal_fill=3     "all sectors filled "
-                  "beam-beam counter "
-                     bbcm=on
-                  "forward pion detector "
-                     fpdm=on
-                  "field version "
-                     Mf=4;      "tabulated field, with correction "
-                  "geometry correction "
-                     CorrNum = 1;
-                  "Photon Multiplicity Detector Version "
-                     phmd=on;
-                     PhmdVersion = 1;
-                }
 
   on HADR_ON    { all Geant Physics On;                                       }
   on HADR_OFF   { all Geant Physics on, except for hadronic interactions; 
