@@ -26,9 +26,7 @@ TBrowser *fBrowser;
 //______________________________________________________________________________
 void StAutoInspector::Inspect(TClass* kl, const char* tit , const char* name, void* addr)
 {
-  int idot = (tit && strchr(tit,'.'));
-  int ifor = strcmp("*fOrBrowser",name)==0;
-  if (idot != ifor) return;
+  if(tit && strchr(tit,'.'))	return ;
   if (fCount && !fBrowser) return;
 
   TString ts;
