@@ -60,7 +60,10 @@ int TPCV1P0_ZS_SR::initialize()
 
   // search through the  SEQD banks to build our tables of what's where
 
-  for(int rcb = 0; rcb < 6; rcb++) {
+  // This stupid compiler thinks rcb's scope extends here, so I removed int
+  // The original line should go in when we upgrade to a better compiler 
+  //  for(int rcb = 0; rcb < 6; rcb++) {
+  for( rcb = 0; rcb < 6; rcb++) {
     for(int mz = 0; mz < 3; mz++) {
       if (seqd_p[rcb][mz] == (classname(Bank_TPCSEQD) *)NULL) continue;
       printf("TPCSEQD found sector %d  RB%d MZ%d\n",sector+1,rcb+1,mz+1);
@@ -108,7 +111,10 @@ int TPCV1P0_ZS_SR::initialize()
   }
 
       //allocate memory for Sequence arrays
-  for (int row=0; row<TPC_PADROWS; row++) {
+  // This stupid compiler thinks row's scope extends here, so I removed int
+  // The original line should go in when we upgrade to a better compiler 
+  //  for (int row=0; row<TPC_PADROWS; row++) {
+  for (row=0; row<TPC_PADROWS; row++) {
     int npads = Row_array[row].npads;
     for (int pad=0; pad<TPC_MAXPADS; pad++) {
        int nseq = Pad_array[row][pad].nseq;
@@ -122,7 +128,10 @@ int TPCV1P0_ZS_SR::initialize()
     }
   }
      //second pass
-  for(int rcb = 0; rcb < 6; rcb++) {
+  // This stupid compiler thinks rcb's scope extends here, so I removed int
+  // The original line should go in when we upgrade to a better compiler 
+  //  for(int rcb = 0; rcb < 6; rcb++) {
+  for(rcb = 0; rcb < 6; rcb++) {
     for(int mz = 0; mz < 3; mz++) {
       if (seqd_p[rcb][mz] == (classname(Bank_TPCSEQD) *)NULL) continue;
       int padrow=-1, pad=-1, lastbin=-2, pad_seq, oldstart = 0;
