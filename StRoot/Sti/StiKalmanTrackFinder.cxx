@@ -41,7 +41,7 @@
 #include "StiCompositeSeedFinder.h"
 #include "StiTrackFilter.h"
 #include "StiKalmanTrackFinder.h"
-
+#include "StiMaterialInteraction.h"
 
 StiKalmanTrackFinder::StiKalmanTrackFinder()
 {
@@ -199,10 +199,10 @@ StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) throw (Exception)
 	  tNode = trackNodeFactory->getObject();
 	  tNode->setState(sNode);
 	  position = tNode->propagate(tDet); // 
-	  if (position<0) return sNode;
+	  if (position==kFailed) return sNode;
 	  if (tDet->isActive())  // active vol, look for hits
 	    {
-	      if (position<5)
+	      if (position<=kEdgeZplus)
 		{
 		  hitContainer->setDeltaD(5.); //yWindow);
 		  hitContainer->setDeltaZ(5.); //zWindow);
@@ -220,22 +220,22 @@ StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) throw (Exception)
 			  bestNode = tNode;
 			}
 		    } // searching best hit
-		  if (position==0)
+		  if (position==kHit)
 		    scanningDone = true;
 		}
 	    }
 	  else  // inactive, keep only if position==0
 	    {
-	      if (position<5)
+	      if (position<=kEdgeZplus)
 		scanningDone = true;
 	    }
 	  
 	  if (!scanningDone)
 	    {
 	      // try a different detector on the same layer
-	      if (position==1 || position==5)
+	      if (position==kEdgePhiPlus || position==kMissPhiPlus)
 		detectorContainer->movePlusPhi();
-	      else if (position==3 || position==7)
+	      else if (position==kEdgePhiMinus || position==kMissPhiMinus)
 		detectorContainer->moveMinusPhi();
 	      else
 		scanningDone = true;
