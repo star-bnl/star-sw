@@ -6,11 +6,12 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.23 1998/05/05 16:12:45 ward Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.24 1998/05/18 17:58:20 dave Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <sys/types.h>
-#ifndef Linux
+#include <stdio.h>
+#ifndef linux
 #include <sys/stream.h>
 #else
 #include <g++/stream.h>
@@ -40,7 +41,7 @@ extern "C" char *shortname(char *longname, size_t length);
 //:----------------------------------------------- CTORS & DTOR       --
 socObject:: socObject() {
    EML_MESSAGE("Warning -- This CTOR should never be called.");
-   myPtr = NULL; // This must be set in derived CTOR !!!
+   myPtr = 0; // This must be set in derived CTOR !!!
    myName = new string("UNNAMED");
    myType = new string("UNKNOWN");
    myLock = FALSE;
@@ -50,7 +51,7 @@ socObject:: socObject() {
 //----------------------------------
 socObject:: socObject(long id) {
 // EML_MESSAGE("Alert -- This CTOR called only by soc.");
-   myPtr = NULL; // This must be set in derived CTOR !!!
+   myPtr = 0; // This must be set in derived CTOR !!!
    myName = new string("soc");
    myType = new string("socCatalog");
    myLock = TRUE;
@@ -68,7 +69,7 @@ socObject:: socObject(const char* name) {
 
 //----------------------------------
 socObject:: socObject(const char* name, const char* type) {
-   myPtr = NULL; // This must be set in derived CTOR !!!
+   myPtr = 0; // This must be set in derived CTOR !!!
    myName = new string(name);
    myType = new string(type);
    myLock = FALSE;
@@ -77,10 +78,10 @@ socObject:: socObject(const char* name, const char* type) {
 
 //----------------------------------
 socObject:: socObject(long n, const char* type) {
-   myPtr = NULL; // This must be set in derived CTOR !!!
-   	char *name = id2name((char*)type,n);
+   myPtr = 0; // This must be set in derived CTOR !!!
+   char *name = id2name((char*)type,n);
    myName = new string(name);
-   	FREE(name);
+   FREE(name);
    myType = new string(type);
    myLock = FALSE;
    soc->signIn(this,myIdRef);
@@ -88,8 +89,6 @@ socObject:: socObject(long n, const char* type) {
 
 //----------------------------------
 socObject:: ~socObject() {
-  delete myName; // hjw 980502
-  delete myType; // hjw 980502
 }
 
 //:----------------------------------------------- ATTRIBUTES         --
@@ -140,13 +139,13 @@ unsigned char socObject::  lock () {
 
 //----------------------------------
 char * socObject:: listing () {
-   char *c = NULL; 
+   char *c = 0; 
    c = (char*)MALLOC(79);
    memset(c,0,79);
    char l='|';
    if(lock())l='-';
    char *n, *t, *nn, *tt;
-   sprintf(c,"| %5d %c %-15s | %-15s |"
+   sprintf(c,"| %5ld %c %-15s | %-15s |"
    		, idRef(), l, nn=shortname(n=name(),15)
 		, tt=shortname(t=type(),15));
    FREE(n); FREE(t); FREE(nn); FREE(tt);
@@ -203,7 +202,7 @@ char * socFactory::  listing () {
    char* cc = NULL;
    cc = (char*)MALLOC(79);
    memset(cc,0,79);
-   sprintf(cc,"%s %d/%d obj.s",c,count(),maxCount());
+   sprintf(cc,"%s %ld/%ld obj.s",c,count(),maxCount());
    FREE(c);
    return cc;
 }
@@ -327,10 +326,17 @@ char * socCatalog:: version() {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
-STAFCV_T socCatalog :: bind (const char * pname){
+STAFCV_T 
+socCatalog::bind (const char * pname) {
    int status;
+
+   status = soc_dl_load((char*)pname);
+
+#ifdef NO_AUTO_INIT_DL
    status = soc_dl_init((char*)pname);
    status = soc_dl_start((char*)pname);
+#endif
+
    return status;
 }
 
@@ -414,7 +420,7 @@ STAFCV_T socCatalog:: idObject (const char * name
 	    ||  0 == strcmp("-",type) ){
 	       id = i;
 	       if(i != myObjs[i]->idRef()){	//- HACK???
-printf("MAJOR ERROR REPORT!!! (%d,%d)\n",i,id=myObjs[i]->idRef());
+		 printf("MAJOR ERROR REPORT!!! (%d,%ld)\n",i,id=myObjs[i]->idRef());
 	       }
 	       FREE(n); FREE(t);
 	       EML_SUCCESS(STAFCV_OK);
