@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.16 2003/12/23 21:58:28 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.17 2004/11/02 21:19:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.17  2004/11/02 21:19:25  ullrich
+ * Added StTriggerData2005 class.
+ *
  * Revision 2.16  2003/12/23 21:58:28  ullrich
  * Modifications to handle StTruggerData2004.
  *
@@ -62,7 +65,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.16 2003/12/23 21:58:28 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.17 2004/11/02 21:19:25 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -88,6 +91,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StTriggerData",               "evt_trigger",  3);
     setBranch("StTriggerData2003",           "evt_trigger",  3);
     setBranch("StTriggerData2004",           "evt_trigger",  3);
+    setBranch("StTriggerData2005",           "evt_trigger",  3);
     setBranch("StSPtrVecTrackDetectorInfo",  "evt_tracks",   4);
     setBranch("StSPtrVecPrimaryVertex",      "evt_tracks",   4);
     setBranch("StSPtrVecTrackNode",          "evt_tracks",   4);
@@ -128,6 +132,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StTriggerData",               "event", 1);
     setBranch("StTriggerData2003",           "event", 1);
     setBranch("StTriggerData2004",           "event", 1);
+    setBranch("StTriggerData2005",           "event", 1);
     setBranch("StSPtrVecKinkVertex",         "event", 1);
     setBranch("StSPtrVecV0Vertex",           "event", 1);
     setBranch("StSPtrVecXiVertex",           "event", 1);
