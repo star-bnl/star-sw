@@ -1,26 +1,29 @@
-* created May 27, 1998 - Kathy Turner
-*                    - this is now kumac that drives tpc fast simulator
-*                      and then does tracking
-*  editted June 4, 1998 Kathy Turner
+** *************************************************************************
+* run_tpc_slow_sim_tracker.kumac
+* 
+* created May 27, 1998 - Kathy Turner - runs tpc slow simulator & does tracking
+* editted June 4, 1998 Kathy Turner
 *  editted 6/9/98 Kathy Turner
 * editted 6/25/98 Lidia Didenko
 *  editted 6/25/98 Kathy Turner
-*  7/2/98 - K. Turner - code now requires that you load geometry libraries
+* 7/2/98 - K. Turner - code now requires that you load geometry libraries 
+*  7/3/98 - K. Turner - make to use bfc_util kumacs and include pam kumacs
 * ***********************************************************************
 ************************************************************************
-macro run__
+ macro run__
+          TOP=$STAR _
+          domain='geometry tpc' _ 
           INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
           input_g2t_file=event_0000050.xdf_
           num_events=1_
           tpc_sector_first=18_
           tpc_sector_last=18_
-          tracker=tpt_
+          tracker=tpt _
           funit=21 _
           nfile=tphit.ntup _
           nid=111_
           table=tpc/hits/tphit_
           adcxyzon=0
-  
   
   
 *  this is an example!! you must change to fill your needs
@@ -31,73 +34,53 @@ macro run__
 *    -   exec run_tpc_slow_sim_tracker
 *
 *
-
-message ' *** Data sample directory -->  ' [INPUT_DATA_DIR]
-message ' *** Input G2T file -->         ' [input_g2t_file]
-message ' *** Num Events to process -->  ' [num_events]
-message ' *** TPC Sector first,last -->  ' [tpc_sector_first],[tpc_sector_last]
-message ' *** tpc tracker --->           ' [tracker] 
-message ' *** ntup file unit -->         ' [funit]
-message ' *** output Ntuple filename  -->' [nfile]
-message ' *** Ntuple ID # -->            ' [nid]
-message ' *** Table to write to ntup --> ' [table]
-message ' *** Fill adcxyz table for diag.? 0,1 = no,yes --> ' [adcxyzon]
+  message ' *** TOP directory to search for kumacs --> ' [TOP]
+  message ' *** domains to load  -->                   ' [domain]
+  message ' *** Data sample directory -->  ' [INPUT_DATA_DIR]
+  message ' *** Input G2T file -->         ' [input_g2t_file]
+  message ' *** Num Events to process -->  ' [num_events]
+  message ' *** Sector first,last -->  ' [tpc_sector_first],[tpc_sector_last]
+  message ' *** tpc tracker --->           ' [tracker] 
+  message ' *** ntup file unit -->         ' [funit]
+  message ' *** output Ntuple filename  -->' [nfile]
+  message ' *** Ntuple ID # -->            ' [nid]
+  message ' *** Table to write to ntup --> ' [table]
+  message ' *** Fill adcxyz table for diag.? 0,1 = no,yes --> ' [adcxyzon]
  
-
-* SETUP DIRECTORIES TO FIND KUMACS:
-
- 
- DEFAULT = _
-./kumacs/util,_
-./kumacs/chain,_
-./kumacs/tpc,_
-./pams/emc/kumac,_
-./pams/ftpc/kumac,_
-./pams/global/kumac,_
-./pams/svt/kumac,_
-./pams/tpc/kumac,_
-$STAR/kumacs/util,_
-$STAR/kumacs/chain,_
-$STAR/kumacs/svt,_
-$STAR/kumacs/tpc,_
-$STAR/pams/ctf/kumac,_
-$STAR/pams/emc/kumac,_
-$STAR/pams/ftpc/kumac,_
-$STAR/pams/gen/kumac,_
-$STAR/pams/global/kumac,_
-$STAR/pams/mwc/kumac,_
-$STAR/pams/svt/kumac,_
-$STAR/pams/tpc/kumac,_
-$STAR/pams/tpc/kumac,_
-$STAR/pams/trg/kumac
- 
- def [DEFAULT]
- message 'Define default kumac search path as' def
- 
-
-*  LOAD LIBRARIES
- 
- if $vexist(make_done)=0 then
-   make geometry
-   make tpc 
-   vec/cre make_done
- endif
- 
- ******************** GENERIC INITS ******************************
-  exec setup_dir
-macro/global/import *
+* ----------- General setup stuff ------------------------*
+  macro/global/create TOP              [TOP]
+    
+* setup default directories to search for kumacs in
+* setup default table directory structure in STAF
+* load libraries [domain]
+    
+ exec $STAR/kumacs/chain/bfc_util#bfc_start [domain]
+     
+ macro/global/import *  
+   
+* **************************************************************
+* --------- Setup and run tpc slow simulator & tracker pams -------------*
+   
+* open input g2t data file
   exec input_g2t_file#init [INPUT_DATA_DIR][input_g2t_file]
 
   if STAF_STATUS(1).eq.0 goto ENDOFDATA
-
   
-********************** TPC GEOMETRY ***************************
+* open output ntuple
+  exec write_table_to_ntuple#init_disk [funit] [nfile]     
+    
+* --------------------- initialization ----------------------------* 
+
+* tpc geometry init
   exec tpg_init#init
 
-* ****************** TPC FAST SIM INIT ***************************
-   exec tpc_slow_sim#initialize [adcxyzon] [tpc_sector_first] [tpc_sector_last]
-   
-   
+*  tpc slow sim init
+    exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
+    if [adcxyzon].eq.1 then
+      exec create_tables_tpc#tfc
+    endif
+    exec tss_init#init 
+       
 * now overwrite which sector you want to run (in case you don't want default)
    cd [params]/tpc/tsspars
    tdm/table/cell/putvalue 'tsspar[0].min_sect' [tpc_sector_first]
@@ -108,53 +91,49 @@ macro/global/import *
    tdm/table/cell/getvalue 'tsspar[0].bfield'
    cd /dui
    
-   
-* ****************** TPC CLUSTERING INIT **************************
-* tpc cluster init
-  exec tpc_clustering#initialize
-  
-     
-* ****************** TPC TRACKING INIT **************************
-* tpc tracker init
-  exec tpc_tracker#initialize
-  
-* ****************** TPC EVALUATION INIT **************************
-* tpc evaluation init - doesn't work for slow sim!
-* exec tpc_evaluation#initialize
-  
-  
-   exec write_table_to_ntuple#init_disk [funit] [nfile]   
 
-   
-******************* TPC FAST SIM PROCESSING ********************
-* ****************** TPC CLUSTERING *****************************
-* ****************** TPC TRACKER PROCESSING *********************
-   
+* tpc cluster init
+   exec create_tables_tpc#tcl_slow
+   exec tcl_init#init  
+     
+* tpc tracker init
+   exec create_tables_tpc#tpt
+   exec tpt_init#init
+   exec tid_init#init
+
+  
+* ------------------- process events ------------------------------*
+  
 * read event and then process thru tpc slow sim
   do i=1,[num_events]
     message 'run_tpc_slow_sim_tracker: processing event ' [i]
+* zero all tables
+    tabclear [event]
 * read input file
     exec input_g2t_file#read
     if STAF_STATUS(1).eq.0 goto ENDOFDATA
-*  slow simulator
-    exec tpc_slow_sim#process_event _
-        [i] [adcxyzon] [tpc_sector_first] [tpc_sector_last]
+* slow simulator
+    exec tss_run#run [tpc_sector_first] [tpc_sector_last]
+    if [adcxyzon].eq.1 then
+      exec tfc_run#run 
+    endif
 * clustering
-    exec tpc_clustering#process_event _
-        [i] [tpc_sector_first] [tpc_sector_last]  
+    exec tcl_run#run_tcl [tpc_sector_first] [tpc_sector_last] 
+    exec tcl_run#run_tph [tpc_sector_first] [tpc_sector_last]
 *  tracking
     if [tracker]=tpt then
-      exec tpc_tracker#process_event_tpt [i] 
+      exec tpt_run#run
+      exec tid_run#run_tde_new      
     elseif [tracker]=tte then
-      exec tpc_tracker#process_event_tte [i] 
+      exec tte_run#run_tte_track
+      exec tid_run#run_tde_new
     endif
-* evaluation - doesn't work for slow sim! 
-* exec tpc_evaluation#process_event [i]
+* write table to ntuple 
     exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
   enddo
   
   
-* ******************* END STUFF *****************************
+* ------------------- end stuff -----------------------------*
   
   ENDOFDATA:
     if [i].lt.[num_events] then
@@ -171,9 +150,6 @@ macro/global/import *
 
 return
 
-************************************************************************
-************************************************************************
-************************************************************************
 ************************************************************************
 ************************************************************************
 
