@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.19 2002/01/30 15:40:47 porter Exp $
+ * $Id: MysqlDb.cc,v 1.20 2002/03/22 19:05:38 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.20  2002/03/22 19:05:38  porter
+ * #-of-retries on server connect increased to 7 with timeout period doubled per
+ * retry starting at 1 sec.  DOES NOT work (is ignored) on STAR's Redhat 6.2
+ * version of mysqlclient but does on Redhat 7.2. Needed for maintainable
+ * multiple mirror servers using dns for round-robin load balancing.
+ *
  * Revision 1.19  2002/01/30 15:40:47  porter
  * changed limits on flavor tag & made defaults retrieving more readable
  *
@@ -152,9 +158,12 @@ static const char* binaryMessage = {"Cannot Print Query with Binary data"};
 MysqlDb::MysqlDb(): mdbhost(0), mdbName(0), mdbuser(0), mdbpw(0), mdbPort(0),mlogTime(false) {
 
 mhasConnected=false;
+mtimeout=1;
 mQuery=0;
 mQueryLast=0;
 mRes= new MysqlResult;
+
+
 }
 //////////////////////////////////////////////////////////////////////
 
@@ -175,14 +184,21 @@ if(mdbName)  delete [] mdbName;
 bool MysqlDb::reConnect(){
 #define __METHOD__ "reConnect()"
 
-if(mysql_real_connect(&mData,mdbhost,mdbuser,mdbpw,mdbName,mdbPort,NULL,0))
-    return true;
+  bool connected=false;
+  unsigned int timeOutConnect=mtimeout;
+  while(!connected && timeOutConnect<600){ 
+    mysql_options(&mData,MYSQL_OPT_CONNECT_TIMEOUT,(const char*)&timeOutConnect);
+    if(mysql_real_connect(&mData,mdbhost,mdbuser,mdbpw,mdbName,mdbPort,NULL,0))
+    connected=true;
+    if(!connected){
+      timeOutConnect*=2;
+      ostrstream wm;
+      wm<<" Connection Failed: will re-try with timeout set at \n==> "<<timeOutConnect<<" seconds <=="<<ends;
+      StDbManager::Instance()->printInfo(wm.str(),dbMConnect,__LINE__,__CLASS__,__METHOD__); wm.freeze(0);
+    }
+  }      
 
- ostrstream mm;
- mm<<" Upon re-connecting to DB "<<mdbName<<" MySQL returns error"<<ends;
- char* myMessage = mm.str(); mm.freeze(0);
-
-return (bool) StDbManager::Instance()->printInfo(myMessage,mysql_error(&mData),dbMErr,__LINE__,__CLASS__,__METHOD__);
+  return connected;
 
 #undef __METHOD__
 }
@@ -221,7 +237,8 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
 
   // char *connString; 
   ostrstream cs;
-  if(mysql_real_connect(&mData,aHost,aUser,aPasswd,bDb,aPort,NULL,0)){ 
+  if(reConnect()){
+    //  if(mysql_real_connect(&mData,aHost,aUser,aPasswd,bDb,aPort,NULL,0)){ 
        t0=mqueryLog.wallTime()-t0;
        cs<< "Server Connecting:"; if(bDb)cs<<" DB=" << bDb ;
        cs<< "  Host=" << aHost <<":"<<aPort<<endl;
@@ -291,46 +308,28 @@ return true;
 bool MysqlDb::ExecQuery(){
 #define __METHOD__ "ExecQuery()"
 
-bool tOk=false;
-unsigned int mysqlError;
+mqueryState=false;
 
-  if(mlogTime)mqueryLog.start();
-  if(!mysql_real_query(&mData,mQuery,mQueryLen)){ // no errors? ok store-&-return
-     if(mlogTime)mqueryLog.end();
-     mRes->Release();
-     if(mlogTime)msocketLog.start();
-     mRes->mRes=mysql_store_result(&mData);
-     if(mlogTime)msocketLog.end();
-     tOk=true;
-     mqueryState=true;
-     return tOk;
-  } else {
-    mysqlError = mysql_errno(&mData);
-    if(mysqlError==CR_SERVER_GONE_ERROR || mysqlError==CR_SERVER_LOST){
+if(mlogTime)mqueryLog.start();
 
+int status=mysql_real_query(&mData,mQuery,mQueryLen);
+
+  if( (status!=0) && ( mysql_errno(&mData)==CR_SERVER_GONE_ERROR || mysql_errno(&mData)==CR_SERVER_LOST ) ){
        StDbManager::Instance()->printInfo(mysql_error(&mData)," Lost server, will try to reconnect",dbMDebug,__LINE__,__CLASS__,__METHOD__); 
-     reConnect();  
-
-     if(mysql_real_query(&mData,mQuery,mQueryLen)){        
-        
-       StDbManager::Instance()->printInfo(" Query failed with MySQL error",mysql_error(&mData),dbMErr,__LINE__,__CLASS__,__METHOD__); 
-       mqueryState=false;
-
-      } else {
-
-       mRes->Release();
-       mRes->mRes=mysql_store_result(&mData);
-       tOk=true;
-       mqueryState=true;
-     }
-
-    } else {
-
-       StDbManager::Instance()->printInfo(" Query failed with MySQL error",mysql_error(&mData),dbMErr,__LINE__,__CLASS__,__METHOD__); 
-       mqueryState=false;
-    }
+       if(reConnect())status=mysql_real_query(&mData,mQuery,mQueryLen);       
   }
-  return tOk;
+
+  if(status!=0)
+    return StDbManager::Instance()->printInfo(" Query Failed ",mysql_error(&mData),dbMErr,__LINE__,__CLASS__,__METHOD__);
+
+  if(mlogTime)mqueryLog.end();
+  mRes->Release();
+
+  if(mlogTime)msocketLog.start();
+  mRes->mRes=mysql_store_result(&mData);
+  if(mlogTime)msocketLog.end();
+
+  return mqueryState=true;
 }
 
 ////////////////////////////////////////////////////////////////////////

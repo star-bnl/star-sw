@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.15 2002/01/30 15:40:47 porter Exp $
+ * $Id: MysqlDb.h,v 1.16 2002/03/22 19:05:38 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.16  2002/03/22 19:05:38  porter
+ * #-of-retries on server connect increased to 7 with timeout period doubled per
+ * retry starting at 1 sec.  DOES NOT work (is ignored) on STAR's Redhat 6.2
+ * version of mysqlclient but does on Redhat 7.2. Needed for maintainable
+ * multiple mirror servers using dns for round-robin load balancing.
+ *
  * Revision 1.15  2002/01/30 15:40:47  porter
  * changed limits on flavor tag & made defaults retrieving more readable
  *
@@ -166,6 +172,9 @@ private:
   char* mdbuser;
   char* mdbpw;
   int mdbPort;  
+
+  unsigned int mtimeout; // wait time between connection tries
+
 
 public:
 
