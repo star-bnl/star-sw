@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.hh,v 1.5 1999/09/03 22:39:15 lisa Exp $
+ * $Id: StHbtEvent.hh,v 1.6 1999/09/16 18:47:59 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.hh,v $
+ * Revision 1.6  1999/09/16 18:47:59  lisa
+ * replace placeholder HbtV0Track stuff with Helens StHbtV0 classes
+ *
  * Revision 1.5  1999/09/03 22:39:15  lisa
  * Readers now MUST have Report() methods and MAY have WriteHbtEvent() methods
  *
@@ -35,7 +38,7 @@
 
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
-#include "StHbtMaker/Infrastructure/StHbtV0TrackCollection.hh"
+#include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
 
 class StHbtEvent{
 public:
@@ -53,7 +56,7 @@ public:
   float ReactionPlaneError() const;
   StHbtThreeVector PrimVertPos() const;
   StHbtTrackCollection* TrackCollection() const;
-  StHbtV0TrackCollection* V0TrackCollection() const;
+  StHbtV0Collection* V0Collection() const;
 
   void SetEventNumber(const unsigned short&);
   void SetCtbMult(const unsigned short&);
@@ -81,7 +84,7 @@ private:
   float mReactionPlane[2]; //reaction plane/error  //   
   StHbtThreeVector mPrimVertPos;
   StHbtTrackCollection* mTrackCollection;
-  StHbtV0TrackCollection* mV0TrackCollection;
+  StHbtV0Collection* mV0Collection;
 
 };
 
@@ -120,8 +123,8 @@ return mReactionPlane[0];}
 inline  float          StHbtEvent::ReactionPlaneError() const {
 return mReactionPlane[1];}
 inline StHbtTrackCollection* StHbtEvent::TrackCollection() const {return mTrackCollection;}
-inline StHbtV0TrackCollection* StHbtEvent::V0TrackCollection() const 
-{return mV0TrackCollection;}
+inline StHbtV0Collection* StHbtEvent::V0Collection() const 
+{return mV0Collection;}
 inline StHbtThreeVector StHbtEvent::PrimVertPos() const {return mPrimVertPos;}
 
 

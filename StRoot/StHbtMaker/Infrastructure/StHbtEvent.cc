@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.3 1999/07/27 10:47:04 lisa Exp $
+ * $Id: StHbtEvent.cc,v 1.4 1999/09/16 18:47:59 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.4  1999/09/16 18:47:59  lisa
+ * replace placeholder HbtV0Track stuff with Helens StHbtV0 classes
+ *
  * Revision 1.3  1999/07/27 10:47:04  lisa
  * now works in dev on linux and solaris - mistake in deleting picoEvents fixed
  *
@@ -31,7 +34,7 @@ StHbtEvent::StHbtEvent(){
   mPrimVertPos[1]=-999.0;
   mPrimVertPos[2]=-999.0;
   mTrackCollection = new StHbtTrackCollection;
-  mV0TrackCollection = new StHbtV0TrackCollection;
+  mV0Collection = new StHbtV0Collection;
 }
 //___________________
 StHbtEvent::~StHbtEvent(){
@@ -42,12 +45,12 @@ StHbtEvent::~StHbtEvent(){
   delete mTrackCollection;
 
 
-  //must do the same for the V0 track collection
-  StHbtV0TrackIterator V0iter;
-  for (V0iter=mV0TrackCollection->begin();V0iter!=mV0TrackCollection->end();V0iter++){
+  //must do the same for the V0 collection
+  StHbtV0Iterator V0iter;
+  for (V0iter=mV0Collection->begin();V0iter!=mV0Collection->end();V0iter++){
     delete *V0iter;
   }
-  delete mV0TrackCollection;
+  delete mV0Collection;
 }
 //___________________
 

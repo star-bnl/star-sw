@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.5 1999/09/09 02:59:55 lisa Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.6 1999/09/16 18:48:01 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
+ * Revision 1.6  1999/09/16 18:48:01  lisa
+ * replace placeholder HbtV0Track stuff with Helens StHbtV0 classes
+ *
  * Revision 1.5  1999/09/09 02:59:55  lisa
  * fix Randys factor of 2 in CoulombCorrection AND add SetCut methods to StStandardHbtEventReader which were forgotten last commit
  *
@@ -48,15 +51,22 @@
 #include "StHbtMaker/Base/StHbtEventReader.hh"
 //#include "StChain/StChain.h"
 #include "StChain/StMaker.h"
+#include "StV0MiniDstMaker/StV0MiniDstMaker.h"
 #include "StHbtMaker/Base/StHbtEventCut.hh"
 #include "StHbtMaker/Base/StHbtParticleCut.hh"
 
+class TOrdCollection;
 class StStandardHbtEventReader : public StHbtEventReader{
 
 private:
   StMaker* mTheEventMaker;      //! this is the chain where the StEventReaderMaker is
+  StV0MiniDstMaker* mTheV0Maker; //! this is the chain where the StV0MiniDstMaker is
   StHbtEventCut* mEventCut;     //!
   StHbtParticleCut* mParticleCut; //!
+  long              mV0;        //! Number of v0s looked at to date
+
+ protected:
+ TOrdCollection *mCollection; //!
 
 public:
   StStandardHbtEventReader();
@@ -67,6 +77,8 @@ public:
 
   void SetTheEventMaker(StMaker*);
   StMaker* TheEventMaker();
+  void SetTheV0Maker(StV0MiniDstMaker*);
+  StV0MiniDstMaker* TheV0Maker();
 
   void SetEventCut(StHbtEventCut*);          // use these methods to do
   void SetParticleCut(StHbtParticleCut*);    // "front-loaded" cuts
@@ -77,8 +89,10 @@ public:
 
 inline void StStandardHbtEventReader::SetTheEventMaker(StMaker* maker){mTheEventMaker=maker;}
 inline StMaker* StStandardHbtEventReader::TheEventMaker(){return mTheEventMaker;}
-
+inline void StStandardHbtEventReader::SetTheV0Maker(StV0MiniDstMaker* maker){mTheV0Maker=maker;}
+inline StV0MiniDstMaker* StStandardHbtEventReader::TheV0Maker(){return mTheV0Maker;}
 inline void StStandardHbtEventReader::SetEventCut(StHbtEventCut* ecut){mEventCut=ecut;}
 inline void StStandardHbtEventReader::SetParticleCut(StHbtParticleCut* pcut){mParticleCut=pcut;}
 
 #endif
+

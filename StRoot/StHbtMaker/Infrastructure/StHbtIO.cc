@@ -8,6 +8,7 @@
 #ifndef StHbtIO_cc
 #define StHbtIO_cc
 
+#include "StHbtMaker/Infrastructure/StHbtV0.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 
@@ -65,6 +66,52 @@ istream& operator>>(istream& in,  StHbtTrack& trk){
   return in;
 }
 
+//------------------------- StHbtV0 -----------------------------------
+ostream& operator<<(ostream& out, StHbtV0& v0){
+
+  return (out
+	  << v0.mdecayLengthV0   << " " << v0.mdecayVertexV0      << " "
+	  << v0.mdcaV0Daughters  << " " << v0.mdcaV0ToPrimVertex  << " "
+	  << v0.mdcaPosToPrimVertex << " " << v0.mdcaNegToPrimVertex << " "
+	  << v0.mmomPos          << " " << v0.mmomNeg             << " "
+	  << v0.mtpcHitsPos      << " " << v0.mtpcHitsNeg         << " "
+	  << v0.mmomV0           << " " << v0.malphaV0            << " "
+	  << v0.meLambda         << " " << v0.meK0Short           << " "
+	  << v0.mePosProton      << " " << v0.mePosPion           << " "
+	  << v0.meNegProton      << " " <<  v0.meNegPion          << " "
+	  << v0.mmassLambda      << " " << v0.mmassK0Short        << " " 
+	  << v0.mmassAntiLambda  << " " << v0.mmassAntiLambda     << " "
+	  << v0.mrapLambda       << " " << v0.mrapK0Short         << " "
+          << v0.mrapAntiLambda   << " " << v0.mcTauLambda         << " "
+          << v0.mcTauK0Short     << " " << v0.mptV0               << " "
+          << v0.mptotV0          << " " << v0.mptPos              << " "
+          << v0.mptotPos         << " " << v0.mptNeg              << " "
+          << v0.mptotNeg );
+}
+
+//------------------------- StHbtV0 -----------------------------------
+  istream& operator>>(istream& in, StHbtV0& v0){
+  
+  
+    return (in 
+	  >> v0.mdecayLengthV0      >>  v0.mdecayVertexV0   
+	  >> v0.mdcaV0Daughters     >>  v0.mdcaV0ToPrimVertex 
+	  >> v0.mdcaPosToPrimVertex >>  v0.mdcaNegToPrimVertex
+	  >> v0.mmomPos             >>  v0.mmomNeg      
+	  >> v0.mtpcHitsPos         >>  v0.mtpcHitsNeg      
+	  >> v0.mmomV0              >>  v0.malphaV0       
+	  >> v0.meLambda            >>  v0.meK0Short 
+	  >> v0.mePosProton         >>  v0.mePosPion 
+	  >> v0.meNegProton         >>  v0.meNegPion 
+	  >> v0.mmassLambda         >>  v0.mmassK0Short  
+	  >> v0.mmassAntiLambda     >>  v0.mmassAntiLambda 
+	  >> v0.mrapLambda          >>  v0.mrapK0Short 
+          >> v0.mrapAntiLambda      >>  v0.mcTauLambda 
+          >> v0.mcTauK0Short        >>  v0.mptV0 
+          >> v0.mptotV0             >>  v0.mptPos 
+          >> v0.mptotPos            >>  v0.mptNeg 
+          >> v0.mptotNeg) ;
+}
 
 //------------------------- StHbtEvent -----------------------------------
 ostream& operator<<(ostream& out, StHbtEvent& ev){
@@ -79,10 +126,18 @@ ostream& operator<<(ostream& out, StHbtEvent& ev){
   StHbtTrack trk;
   for (StHbtTrackIterator iter=ev.mTrackCollection->begin();
        iter != ev.mTrackCollection->end(); iter++){
-    trk = **iter;              // correct???
+    trk= **iter;              // correct???
     out << trk << endl;   // don't forget the endl to seperate them...
   } 
-  // now we should do the v0 collection...
+  // now we do the v0 collection...
+  out << ev.mV0Collection->size() << endl;;
+  StHbtV0 v0;
+  for (StHbtV0Iterator iterv0=ev.mV0Collection->begin();
+       iterv0 != ev.mV0Collection->end(); iterv0++){
+    v0 = **iterv0;              // correct???
+    out << v0 << endl;   // don't forget the endl to seperate them...
+  } 
+
   out << endl; // blank-line delimiter between events
   return out;
 }
@@ -137,6 +192,34 @@ istream& operator>>(istream& in,  StHbtEvent& ev){
     //cout << " " << itrk;
   }
   // now we should do the v0 collection...
+ 
+ long NV0sInCollection;
+  in >> NV0sInCollection;
+  if (!(in.good())){
+    cout << "StHbtEvent input operator finds stream in bad state ! " << endl;
+    return in;
+  }
+  // since this should *overwrite* any StHbtV0s in the
+  // StHbtV0Collection, let's erase any that might be there
+  //
+  StHbtV0Iterator iterv0;
+  for (iterv0=ev.mV0Collection->begin();iterv0!=ev.mV0Collection->end();iterv0++){
+    delete *iterv0;
+  }
+  // ok, now we have gotten rid of the v0s themselves.  Let's lose the pointers to those deleted v0ss
+  ev.mV0Collection->clear();  // if this doesn't work then just delete the collection and make a new one.
+
+  for (int iv0=0; iv0<NV0sInCollection; iv0++){
+    StHbtV0* v0 = new StHbtV0;
+    if ( !(in >> (*v0))){
+      cout << "StHbtEvent input operator finds stream in bad state during v0 read ! ";
+      cout << iv0 << " of " << NV0sInCollection << " intended" << endl;
+      return in;
+    }
+    ev.mV0Collection->push_back(v0);  // ?ok?
+    //cout << " " << iv0;
+  }
+
   return in;
 }
 
