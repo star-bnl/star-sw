@@ -1,4 +1,6 @@
-macro init
+* 8/10/98 K. Turner - split into 2 macros
+* *************************************************************
+ macro read
 macro/global/import *
 
   cd [params]/tpc
@@ -12,16 +14,21 @@ macro/global/import *
   tdm/newtable tpg_pad tpg_pad 1
 
   cd /dui
-
-  ami/module/call tpg_main [geometry]/tpc/tpgpar/tpg_pad_plane _
-                           [geometry]/tpc/tpgpar/tpg_detector _
-                           [geometry]/tpc/tpgpar/tpg_pad
-
-  cd /dui
  
 return
 
 *********************************************************************
-**********************************************************************
+ macro tpg_main
+   
+  macro/global/import *
+     
+  ami/module/call tpg_main [geometry]/tpc/tpgpar/tpg_pad_plane _
+                           [geometry]/tpc/tpgpar/tpg_detector _
+                           [geometry]/tpc/tpgpar/tpg_pad
+
+     
+  return
+ 
+* *********************************************************************
 
 
