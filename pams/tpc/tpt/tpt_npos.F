@@ -102,8 +102,52 @@ C***  Second pair
             k = k + 2
 
  30      CONTINUE
-         
-C***  Deal with spirals contained within a sector
+
+C***  Deal with spirals contained within a sector with up/down touching
+
+         IF( (k.eq.2).and.(l.eq.2).and.(y(1).eq.y(2)) ) THEN
+            IF( abs(y(2)-xc(2)).lt.rr ) THEN
+               hit(1)=xc(2)-rr
+               hit(2)=y(2)
+            ELSE
+               hit(1)=y(1)
+               hit(2)=xc(2)+rr
+            ENDIF
+            IF(hit(1).le.123) THEN ! inner sector
+               IF(hit(2).le.123) THEN
+                  nmax = int(abs(hit(2)-hit(1))/5.)
+               ELSE             ! some inner, some outer
+                  nmax = int(abs(123.-hit(1))/5.) + 1
+                  nmax = nmax + int(abs(127.2-hit(2))/2.) + 1
+               ENDIF
+            ELSE                ! outer sector
+               nmax = nmax + int(abs(hit(2)-hit(1))/2.)
+            ENDIF   
+            nmax = 2*nmax - 1     ! spiral loops around
+            GOTO 90
+         ENDIF
+
+C***  Deal with spirals contained within a sector with side touching
+
+         IF( (k.eq.2).and.(l.eq.2) ) THEN
+            IF( abs(y(1)-y(2)).lt.(2.*rr) ) THEN
+               hit(1)=xc(2)-rr
+               hit(2)=xc(2)+rr
+               IF(hit(1).le.123) THEN ! inner sector
+                  IF(hit(2).le.123) THEN
+                     nmax = int(abs(hit(2)-hit(1))/5.)
+                  ELSE          ! some inner, some outer
+                     nmax = int(abs(123.-hit(1))/5.) + 1
+                     nmax = nmax + int(abs(127.2-hit(2))/2.) + 1
+                  ENDIF
+               ELSE             ! outer sector
+                  nmax = nmax + int(abs(hit(2)-hit(1))/2.)
+               ENDIF   
+               nmax = 2*nmax - 3 ! spiral loops around
+               GOTO 90
+            ENDIF
+         ENDIF
+C***  Deal with spirals contained within a sector w/out touching
 
          IF( (k.eq.0).and.(l.eq.2) ) THEN
             hit(1)=xc(2)-rr
@@ -161,7 +205,10 @@ C***  Calculate padrow crossings
          
          
  75   CONTINUE                  ! over three sectors
- 90   RETURN
+
+ 90   IF(nmax.eq.0) nmax = 2    ! protect divisions
+
+      RETURN
       END
 C=======================================================================
 
