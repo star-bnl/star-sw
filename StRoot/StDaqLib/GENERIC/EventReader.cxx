@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.14 1999/12/06 22:53:20 levine Exp $
+ * $Id: EventReader.cxx,v 1.15 1999/12/07 20:24:45 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -20,6 +20,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.15  1999/12/07 20:24:45  levine
+ * add #include <time.h> to make compile warning go away
+ *
  * Revision 1.14  1999/12/06 22:53:20  levine
  * Cleaned up information generated on failure to initialize EventReader
  *
@@ -72,6 +75,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+#include <time.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <sys/uio.h>
