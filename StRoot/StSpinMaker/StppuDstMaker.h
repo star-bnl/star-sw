@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StppuDstMaker.h,v 1.4 2002/12/04 20:28:10 thenry Exp $
+ * $Id: StppuDstMaker.h,v 1.5 2003/02/04 21:57:10 akio Exp $
  * $Log: StppuDstMaker.h,v $
+ * Revision 1.5  2003/02/04 21:57:10  akio
+ * Improvments on pi0 reconstruction code and ntuple
+ *
  * Revision 1.4  2002/12/04 20:28:10  thenry
  * StppuDstMaker was modified to allow multiple jet analysis modules to be
  * run simultaneosly with various parameters while the Maker loads the events
@@ -40,7 +43,7 @@
 
 //#define _GEANT_
 #define _BBC_data_
-//#define _FPD_data_
+#define _FPD_data_
 //#define _EMC_CLUSTERS_
 //#define _EMC_POINTS_
 //#define _EMC_
