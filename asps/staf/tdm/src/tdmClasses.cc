@@ -780,7 +780,7 @@ int nrows = rowCount ();
         if (finite(word)) continue;
 //		ERROR FOUND
         nerr++; colname = columnName(icol);
-        printf("tdmTable::NaN ***ERROR***: Table %s.%s.%d\n",Name,colname,irow);
+        printf("tdmTable::NaN ***ERROR***: Table %s.%s.%d\n",Name(),colname,irow);
         FREE(colname);
   }  }  } 
 return nerr;
