@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.17 1998/07/22 18:31:23 sakrejda Exp $
+* $Id: tte.F,v 1.18 1998/08/20 21:27:27 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.18  1998/08/20 21:27:27  sakrejda
+* protection against tracks that cannot be associated with a mc track
+*
 * Revision 1.17  1998/07/22 18:31:23  sakrejda
 * added check on mc hits that were not used to create reconstructed hits
 *
@@ -203,7 +206,7 @@ C_____________________________________________________________________________
       call Msg_Enable( 'TTE-I6' )
       call Msg_Enable( 'TTE-I7' )
       call Msg_Enable( 'TTE-I8' )
-      call Msg_Enable( 'TTE-I9' )
+*      call Msg_Enable( 'TTEI9-E2' )
       call Msg_Enable( 'TTE-I10' )
       call Msg_Enable( 'TTE-I11' )
 *      call Msg_Enable( 'TTEI12-E1' )
@@ -750,6 +753,7 @@ c            let's see how many different tracks got mixed up in this one...
          end do
 
 c        let's find the biggest contribution
+         if(mc_track_on_rec_track_nok.gt.0) then
          ibig=0
          iloc=1
          do ii=1,mc_track_on_rec_track_nok
@@ -772,8 +776,22 @@ c        let's find the biggest contribution
          if(g2t_track(ii).ge_pid.le.100) then
               eval(eval_h.nok).qg=my_charge(g2t_track(ii).ge_pid)
          else
-              write(m132(1),*) 'TTE-I9 pid too big'
+              write(m132(1),*) 'TTEI9-E2 pid too big',
+     >        g2t_track(ii).ge_pid
               call Message (m132, 1, idI9 )
+              eval(eval_h.nok).qg=0
+         endif
+         else
+         eval(eval_h.nok).mtrk=-999
+         eval(eval_h.nok).ngood=-999
+         eval(eval_h.nok).pxvg=-999.0
+         eval(eval_h.nok).pyvg=-999.0
+         eval(eval_h.nok).pzvg=-999.0
+         eval(eval_h.nok).ptvg=-999.0
+         eval(eval_h.nok).qfact=-999.0
+         eval(eval_h.nok).vid=-999.0
+         eval(eval_h.nok).pid=-999.0
+         eval(eval_h.nok).qg=-999.0
          endif
          i=j
          else
