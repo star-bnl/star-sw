@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsAnalogSignal.hh,v 1.1 1998/11/10 17:12:08 fisyak Exp $
+ * $Id: StTrsAnalogSignal.hh,v 1.2 1998/11/13 21:29:46 lasiuk Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -10,8 +10,11 @@
  *****************************************************************
  *
  * $Log: StTrsAnalogSignal.hh,v $
- * Revision 1.1  1998/11/10 17:12:08  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1998/11/13 21:29:46  lasiuk
+ * << operator
+ *
+ * Revision 1.2  1998/11/13 21:29:46  lasiuk
+ * << operator
  *
  * Revision 1.1  1998/11/10 17:12:08  fisyak
  * Put Brian trs versin into StRoot
@@ -20,6 +23,7 @@
  * Initial Revision
  *
  ******************************************************************/
+#ifndef ST_TRS_ANALOGSIGNAL_HH
 #define ST_TRS_ANALOGSIGNAL_HH
 
 #include <iostream.h>
@@ -47,6 +51,9 @@ protected:
 
 inline float StTrsAnalogSignal::time() const {return mAnalogSignal.first;}
 inline float StTrsAnalogSignal::amplitude() const {return mAnalogSignal.second;}
+inline void StTrsAnalogSignal::setTime(float t) { mAnalogSignal.first = t;}
+inline void StTrsAnalogSignal::setAmplitude(float a) { mAnalogSignal.second = a;}
+inline void StTrsAnalogSignal::scaleAmplitude(float fac) {mAnalogSignal.second *= fac;}
 
 // Non-member function
 ostream& operator<<(ostream&, StTrsAnalogSignal&);

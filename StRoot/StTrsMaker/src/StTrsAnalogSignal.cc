@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsAnalogSignal.cc,v 1.1 1998/11/10 17:12:23 fisyak Exp $
+ * $Id: StTrsAnalogSignal.cc,v 1.2 1998/11/13 21:30:53 lasiuk Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -10,8 +10,11 @@
  *****************************************************************
  *
  * $Log: StTrsAnalogSignal.cc,v $
- * Revision 1.1  1998/11/10 17:12:23  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1998/11/13 21:30:53  lasiuk
+ * << operator
+ *
+ * Revision 1.2  1998/11/13 21:30:53  lasiuk
+ * << operator
  *
  * Revision 1.1  1998/11/10 17:12:23  fisyak
  * Put Brian trs versin into StRoot
@@ -36,10 +39,10 @@ StTrsAnalogSignal::StTrsAnalogSignal()
 }
 
 StTrsAnalogSignal::~StTrsAnalogSignal() { /* nopt */}
-template<class T>
-ostream& operator<<(ostream& os, const pair<T, T>& v)
+
+
 // Non-member Function for printing
-    return os << '(' << v.first << ", " << v.second << ')';
+//template<class T>
 ostream& operator<<(ostream& os, StTrsAnalogSignal& sig)
 {
     return os << '(' << sig.amplitude() << ", " << sig.time() << ')';
