@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.30 1999/07/26 16:14:25 perev Exp $
+// $Id: doEvents.C,v 1.31 1999/07/30 22:50:09 kathy Exp $
 // $Log: doEvents.C,v $
-// Revision 1.30  1999/07/26 16:14:25  perev
-// Fix printing of event number
+// Revision 1.31  1999/07/30 22:50:09  kathy
+// new version of doEvents which is now the default - has new input flag to turn on QA testing and output file
+//
+// Revision 1.31  1999/07/30 22:50:09  kathy
+// new version of doEvents which is now the default - has new input flag to turn on QA testing and output file
 //
 // Revision 1.30  1999/07/26 16:14:25  perev
 // Fix printing of event number
@@ -78,7 +81,9 @@
 // Revision 1.1  1999/02/11 15:44:28  wenaus
 // macro to read DSTs into StEvent and analyze
 //
-// what it does: 
+//
+//=======================================================================
+//          - set qaflag ON to create the QA output file
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
 //          to fill StEvent and StAnalysisMaker to show example of analysis
 //          
@@ -100,7 +105,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
 // Functions included below which retrieve a single file or all files
 // under a path
 
@@ -113,17 +117,15 @@ TString  thePath;
 TString  theFileName;
 TString  originalPath;
 class StChain;
+StChain *chain=0;
 
 TBrowser *b=0;
 
 const char *dstFile ="/disk00001/star/auau200/two_photon/starlight/twogam/year_1b/hadronic_on/tfs/ric0022_01_14552evts.dst.root";
 const char *xdfFile ="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf";
-  // const Char_t *file="/afs/rhic/star/data/samples/psc0016_05_35evts.root")
-  // const Char_t *file="/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/./set0022_01_56evts_dst.xdf")
-  // const Char_t *file="/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
-  // const Char_t *file="/disk00000/star/auau200/hijing135/default/b0_20/year2x/hadronic_on/tfs_dst/pet213_02_190evts_h_dst.xdf")
-  // const Char_t *path="-/disk00000/star/auau200/hijing135/",
+const char *mdcFile ="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0081_07_40evts.root";
 const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
+
 //========================================================================================================
 
 // ----------- Ways to run -------------------------------------------
@@ -137,21 +139,34 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 // to be processed.
 //
 // example invocation:
-// .x doEvents.C(10,"-","/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/gstardata/psc0033_01_40evts.root")
+// .x doEvents.C(10,"-","/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
 //
 // example ROOT file invocation:
-// .x doEvents.C(9999,"/disk00001/star/auau200/hijing/b0_3/jet05/year_1b/hadronic_on/tfs/","*.root")
-void doEvents(Int_t,const Char_t **);
-void doEvents(const Int_t nevents=999,
-              const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
-              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf");
+// .x doEvents.C(9999,"/disk00001/star/auau200/hijing/b0_3/jet05/year_1b/hadronic_on/tfs/","*.dst.root")
 
+// SPECIAL NOTE (kathy, 30jul99)
+//   If you are using multi-Root file invocation, make sure you put "*.dst.root" so that it only
+//   picks up the type of root file you want!! Otherwise it will pick up all root files in that
+//   area and then find the correct one later - in effect processing same events over and over
+//========================================================================================================
+//
+void doEvents(Int_t,const Char_t **,const char *qaflag);
+
+//void doEvents(Int_t nevents=999,
+//              const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
+//              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf",
+//              const char *qaflag="off");
+
+//===================================================================================================
+              const Char_t *path="/disk00000/star/test/new/tfs_Solaris/year_2a",
+              const Char_t *file="*.dst.root",
+              const char *qaflag="off");
               const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
-void doEvents(Int_t nevents,const Char_t **fileList)
+              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf",
+void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
     cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
     cout << "       doEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
 void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
-
 
 
 
@@ -164,8 +179,8 @@ void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StEvent");
 //  gSystem->Load("StEventReaderMaker");
-  //  gSystem->Load("St_geom_Maker");
-  //  gSystem->Load("StEventDisplayMaker");
+  gSystem->Load("StMagF");
+  gSystem->Load("StEventMaker");
   gSystem->Load("StAnalysisMaker");
 //  gSystem->Load("St_geom_Maker");
 //  gSystem->Load("StEventDisplayMaker");
@@ -182,11 +197,24 @@ void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
   // St_geom)Maker is to supply the GEANT/GEOM dataset, that will be provided by
   // StIOMAker in future.
   //  St_geom_Maker *geom = new St_geom_Maker; // this maker open its own TFile !!!
-// 		Maker to read events from file or database into StEvent
+  StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
+//  IOMk->SetDebug();
 
 
-// 		Sample analysis maker
-  StAnalysisMaker *analysisMaker = new StAnalysisMaker ("analysis");
+// Maker to read events from file or database into StEvent
+//  StEventReaderMaker readerMaker("events","title");
+  StEventMaker *readerMaker =  new StEventMaker("events","title");
+  StAnalysisMaker *analysisMaker;
+  const char *fname="qa_doevents.log";
+  if (strcmp(qaflag,"ON") == 0 || strcmp(qaflag,"on") == 0) {
+    cout << endl << "-> QA testing is ON" << endl;
+    analysisMaker = new StAnalysisMaker(fname,nevents,"analysis");
+  }
+  else
+    analysisMaker = new StAnalysisMaker("analysis");
+
+//  Sample analysis maker
+  StAnalysisMaker *analysisMaker = new StAnalysisMaker("analysis");
 
 
 //  Event Display Maker
@@ -216,7 +244,8 @@ EventLoop: if (i <= nevents && !istat) {
     if (!b) {
       //       gROOT->LoadMacro("PadControlPanel.C");
     b = new TBrowser;
-void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file)
+
+void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,const char *qaflag)
   }
     }
 	if (!b) {
@@ -224,8 +253,16 @@ void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file)
   const char *fileListQQ[]={0,0};
   if (path[0]=='-') {
     fileListQQ[0]=file;
-  doEvents(nevents,fileListQQ);
+  } else {
     fileListQQ[0] = gSystem->ConcatFileName(path,file);
+  }
+  doEvents(nevents,fileListQQ,qaflag);
+    if (path[0]=='-') {
+	fileListQQ[0]=file;
+    } else {
+	fileListQQ[0] = gSystem->ConcatFileName(path,file);
+    }
+    doEvents(nevents,fileListQQ,qaflag);
 }
 
 
