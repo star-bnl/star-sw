@@ -14,6 +14,11 @@
 #include "asuLib.h"	/* Analysis Service Utilities */
 #include "emlLib.h"	/* Error Messaging & Logging */
 
+#include "fortranc.h"   /* The definition of the Fortran/C interface */
+
+#define asu_def_ F77_NAME(asu_def,ASU_DEF)
+extern "C" void type_of_call asu_def_();
+
 extern "C" void staf_kuip_init_();
 
 //:>--------------------------------------------------------------------
