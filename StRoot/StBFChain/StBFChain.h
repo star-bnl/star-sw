@@ -3,18 +3,18 @@
 
 //////////////////////////////////////////////////////////////////////////
 /*!
-                                                                      
- \class  StBFChain                                                            
+
+ \class  StBFChain
  \author Yuri Fisyak, Jerome LAURET
  \date   1999/07/29 , 2001-2002
-                                                                      
- Class to control "BFC" chain                                         
-                                                                      
- This class :                                                         
-   - Initialises the run default parameters                           
-   - Provides API to Set/Get run parameters                           
+
+ Class to control "BFC" chain
+
+ This class :
+   - Initialises the run default parameters
+   - Provides API to Set/Get run parameters
    - Creates the support lists (TClonesArrays) for the Event structure
-   - Creates the physics objects makers                               
+   - Creates the physics objects makers
 
 */
 //////////////////////////////////////////////////////////////////////////
@@ -40,7 +40,7 @@ class StBFChain : public StChain {
   Int_t               FTime;      // floating timestamp time (unused)
   Int_t               FDateS;     // floating timestamp date (DateTime)
   Int_t               FTimeS;     // floating timestamp time (DateTime)
-  
+
  public:
                        StBFChain(const char *name="bfc", const Bool_t UseOwnHeader = kFALSE);
                        StBFChain(Int_t);
@@ -49,9 +49,9 @@ class StBFChain : public StChain {
    virtual Int_t       Make(){return StChain::Make();};
    virtual Int_t       Load();      // *MENU*
    virtual Int_t       Instantiate();      // *MENU*
-   virtual Int_t       AddAB (const Char_t *after="",const StMaker *maker=0,const Int_t Opt=1); 
-   virtual Int_t       AddAfter  (const Char_t *after, const StMaker *maker) {return AddAB (after,maker);} 
-   virtual Int_t       AddBefore (const Char_t *before,const StMaker *maker) {return AddAB (before,maker,-1);} 
+   virtual Int_t       AddAB (const Char_t *after="",const StMaker *maker=0,const Int_t Opt=1);
+   virtual Int_t       AddAfter  (const Char_t *after, const StMaker *maker) {return AddAB (after,maker);}
+   virtual Int_t       AddBefore (const Char_t *before,const StMaker *maker) {return AddAB (before,maker,-1);}
    virtual Int_t       ParseString (const TString &tChain, TObjArray &Opt);
    void                SetFlags(const Char_t *Chain="gstar tfs"); // *MENU*
    void                Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0); // *MENU
@@ -62,8 +62,8 @@ class StBFChain : public StChain {
 			     );                                                       // *MENU
 
    void                SetOutputFile(const Char_t *outfile=0);                        // *MENU
-   virtual Int_t       kOpt(const TString *Tag) const; 
-   virtual Int_t       kOpt(const Char_t  *Tag) const; 
+   virtual Int_t       kOpt(const TString *Tag) const;
+   virtual Int_t       kOpt(const Char_t  *Tag) const;
    virtual void        SetXdfOut(St_XDFFile *xdf=0) {fXdfOut = xdf;}
    virtual void        SetDbOptions();
    virtual void        SetGeantOptions();
@@ -83,10 +83,10 @@ class StBFChain : public StChain {
    virtual Bool_t      GetOption(const Char_t  *Opt) const {return GetOption(kOpt(Opt));}
    virtual Char_t     *GetOptionString(const Char_t  *);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.26 2002/05/18 01:01:27 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.27 2004/01/02 20:53:11 starreco Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class
-   ClassDef(StBFChain, 3) 
+   ClassDef(StBFChain, 3)
 };
 #endif
