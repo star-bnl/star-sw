@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.31 2001/03/05 17:16:16 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.32 2001/03/06 17:17:19 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.32  2001/03/06 17:17:19  genevb
+// Increased vertex table buffer size
+//
 // Revision 1.31  2001/03/05 17:16:16  genevb
 // Reduce vertex table buffer size slightly
 //
@@ -247,12 +250,12 @@ Int_t StV0Maker::Make(){
     if(Debug()) gMessMgr->Info() << "StV0Maker::Make(): Calling ev0..." << endm;
     Int_t v0_limit = globtrk->GetNRows()/50;
     v0_limit = v0_limit*v0_limit;
-    if (v0_limit < 15000) v0_limit=15000;
+    if (v0_limit < 10000) v0_limit=10000;
     if (! dst_v0_vertex) {
       dst_v0_vertex = new St_dst_v0_vertex("dst_v0_vertex",v0_limit); 
       AddData(dst_v0_vertex);
     }
-    vertex->ReAllocate(v0_limit);
+    vertex->ReAllocate(2*v0_limit);
     Long_t NGlbTrk = globtrk->GetNRows();
     Long_t space2 = 0;
     Long_t space3 = 0;
