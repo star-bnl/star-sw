@@ -8,7 +8,7 @@
 #include  "tpt_track.idl"
 #include  "tte_eval.idl"
 #include  "dst_vertex.idl"
-#include  "ev0_aux.idl"
+#include  "dst_v0_vertex.idl"
 #include  "ev0_eval.idl"
 #include  "g2t_track.idl"
 #include  "g2t_vertex.idl"
@@ -20,12 +20,12 @@ interface ev0_eval2 : amiModule {
 			, in    tpt_track       tpt_track
 			, in    tte_eval        tte_eval
                         , in    dst_vertex      vertex
-                        , in    ev0_aux         ev0out
+                        , in    dst_v0_vertex   ev0out
 	                , out   ev0_eval        ev0_eval
                         , in    g2t_track       g2t_track
                         , in    g2t_vertex      g2t_vertex
 	);
 };
 
-/* Last mod for ev0_eval2: $Date: 1998/05/08 15:06:41 $ */
+/* Last mod for ev0_eval2: $Date: 1999/06/25 22:50:02 $ */
 

@@ -99,6 +99,7 @@ C convert to Tesla
               trak(nok).xc(2) = xc(2)
               trak(nok).pid = globtrk(i).id_global_pid
               trak(nok).sagitta = globtrk(i).length**2/(8*trak(nok).rc)
+              trak(nok).dca = globtrk(i).impact
            endif
         ENDDO
  35     CONTINUE
