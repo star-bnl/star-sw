@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.22 1999/12/02 03:22:25 perev Exp $
+// $Id: StPrimaryMaker.cxx,v 1.23 1999/12/10 17:38:41 genevb Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.23  1999/12/10 17:38:41  genevb
+// Added fixed vtx functionality, allow lmv and fixed vtx only one vtx entry
+//
 // Revision 1.22  1999/12/02 03:22:25  perev
 // remove redundant m_egr_egrpar
 //
@@ -101,12 +104,48 @@ ClassImp(StPrimaryMaker)
   StPrimaryMaker::StPrimaryMaker(const char *name):StMaker(name),
   m_evr_evrpar(0),
   m_egr_egrpar(0),
-  m_egr2_egrpar(0)
+  m_egr2_egrpar(0),
+  m_fixedVertex(0)
 {
   m_flag      = 2;
 }
 //_____________________________________________________________________________
 StPrimaryMaker::~StPrimaryMaker(){
+  UnFixVertex();
+}
+//_____________________________________________________________________________
+void StPrimaryMaker::FixVertex(Float_t x, Float_t y, Float_t z){
+  if (m_fixedVertex) {
+    m_fixedVertex->x = x;
+    m_fixedVertex->y = y;
+    m_fixedVertex->z = z;
+  } else {
+    m_fixedVertex = new dst_vertex_st;
+    m_fixedVertex->vtx_id = kEventVtxId;
+    m_fixedVertex->n_daughters = 0;
+    m_fixedVertex->id = 1;
+    m_fixedVertex->iflag = 1;
+    m_fixedVertex->det_id = 3;
+    m_fixedVertex->id_aux_ent = 0;
+    m_fixedVertex->x = x;
+    m_fixedVertex->y = y;
+    m_fixedVertex->z = z;
+    m_fixedVertex->covar[0] = 0.;
+    m_fixedVertex->covar[1] = 0.;
+    m_fixedVertex->covar[2] = 0.;
+    m_fixedVertex->covar[3] = 0.;
+    m_fixedVertex->covar[4] = 0.;
+    m_fixedVertex->covar[5] = 0.;
+    m_fixedVertex->chisq[0] = -1.;
+    m_fixedVertex->chisq[1] = -1.;
+  }
+}
+//_____________________________________________________________________________
+void StPrimaryMaker::UnFixVertex(){
+  if (m_fixedVertex) {
+    delete m_fixedVertex;
+    m_fixedVertex = 0;
+  }
 }
 //_____________________________________________________________________________
 Int_t StPrimaryMaker::Init(){
@@ -178,7 +217,7 @@ Int_t StPrimaryMaker::Make(){
   St_dst_track     *globtrk  = (St_dst_track *) matchI("globtrk");
   St_svm_evt_match *evt_match = (St_svm_evt_match *) matchI("evt_match");
   St_dst_track     *primtrk     = 0;   
-  St_dst_vertex *vertex = new St_dst_vertex("vertex",4); 
+  St_dst_vertex *vertex = new St_dst_vertex("vertex",1); 
   AddData(vertex);   
   
   
@@ -226,26 +265,41 @@ Int_t StPrimaryMaker::Make(){
     if( !stk_track){ stk_track = new St_stk_track("stk_tracks",5000); AddGarb(stk_track);}
   } 
 
-  // Switch to Low Multiplicity Primary Vertex Finder for multiplicities < 15
-  long NGlbTrk = globtrk->GetNRows();
-  if( NGlbTrk < 15 ){
-    // lmv
-
-    St_db_Maker *db = ( St_db_Maker *)GetMaker("db");
-    Int_t mdate = db->GetDateTime().GetDate();
-    if(Debug()) gMessMgr->Debug() << "run_lmv: calling lmv" << endm;
-    iRes = lmv(globtrk,vertex,mdate);
-    //   ================================================
-  }
-  else{    
-    // evr
-    if(Debug()) gMessMgr->Debug() << "run_evr: calling evr_am" << endm;
+  if (m_fixedVertex) {  // Fixed primary vertex
+    gMessMgr->Warning("StPrimaryMaker: --------- WARNING!!! ---------","E-");
+    gMessMgr->Warning() << "StPrimaryMaker: Fixing the primary vertex at (" <<
+      m_fixedVertex->x << "," <<
+      m_fixedVertex->y << "," <<
+      m_fixedVertex->z << ")" << endm;
+    gMessMgr->Warning("StPrimaryMaker: --------- WARNING!!! ---------","E-");
+    // evr with fixed vertex
+    vertex->AddAt(m_fixedVertex,0);
+    if(Debug()) gMessMgr->Debug() <<
+        "run_evr: calling evr_am with fixed vertex" << endm;
     iRes = evr_am(m_evr_evrpar,globtrk,vertex);
-    //	 ================================================
-  }
+  } else {  // Primary vertex is not fixed, find it
+    // Switch to Low Multiplicity Primary Vertex Finder for multiplicities < 15
+    long NGlbTrk = globtrk->GetNRows();
+    if( NGlbTrk < 15 ){
+      // lmv
+
+      St_db_Maker *db = ( St_db_Maker *)GetMaker("db");
+      Int_t mdate = db->GetDateTime().GetDate();
+      if(Debug()) gMessMgr->Debug() << "run_lmv: calling lmv" << endm;
+      iRes = lmv(globtrk,vertex,mdate);
+      //   ================================================
+    }
+    else{    
+      // evr
+      vertex->Set(4);
+      if(Debug()) gMessMgr->Debug() << "run_evr: calling evr_am" << endm;
+      iRes = evr_am(m_evr_evrpar,globtrk,vertex);
+      //	 ================================================
+    }
+  
+  }  // end section on finding a primary vertex if not fixed
   
   if (iRes !=kSTAFCV_OK) return kStWarn;
-  
   
   // track_propagator
   St_dst_track *globtrk2     = new St_dst_track("globtrk2");
@@ -263,6 +317,7 @@ Int_t StPrimaryMaker::Make(){
       memcpy(tp_param->x,&vrtx->x,3*sizeof(Float_t));  
     }
   }
+
   iRes = track_propagator(globtrk,m_tp_param,globtrk2);
   //	 ==============================================
   
@@ -302,7 +357,6 @@ Int_t StPrimaryMaker::Make(){
       
       if(Debug())
         gMessMgr->Debug() << "Calling EGR_fitter - Second time" << endm;
-      
       iRes = egr_fitter (tphit,    vertex,       tptrack,  evaltrk,
 			 scs_spt,m_egr2_egrpar,stk_track,groups,
 			 evt_match,primtrk);
@@ -332,11 +386,5 @@ Int_t StPrimaryMaker::Make(){
   return iMake;
 }
 //_____________________________________________________________________________
-
-
-
-
-
-
 
 
