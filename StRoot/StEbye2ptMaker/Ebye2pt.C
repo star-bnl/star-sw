@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Ebye2pt.C,v 1.1 2000/08/14 22:05:19 jseger Exp $
+// $Id: Ebye2pt.C,v 1.2 2000/12/16 18:41:42 aya Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -84,15 +84,15 @@ void Ebye2pt(Int_t nevents=2,
 void Ebye2pt(Int_t nevents, const Char_t **fileList, const Char_t *outFile, const Char_t *qaflag, const Int_t wrStEOut)
 {
 
-  cout <<  endl << endl <<" doEvents -  input # events = " << nevents << endl;
+  cout <<  endl << endl <<" Ebye2pt -  input # events = " << nevents << endl;
   Int_t ilist=0;
   while(fileList[ilist]){ 
-      cout << " doEvents -  input fileList = " << fileList[ilist] << endl;
+      cout << " Ebye2pt -  input fileList = " << fileList[ilist] << endl;
       ilist++; 
     }
-  cout << " doEvents -  output filname = " << outFile << endl;
-  cout << " doEvents -  input qaflag   = " << qaflag << endl;
-  cout << " doEvents -  input wrStEOut = " << wrStEOut << endl << endl << endl;
+  cout << " Ebye2pt -  output filname = " << outFile << endl;
+  cout << " Ebye2pt -  input qaflag   = " << qaflag << endl;
+  cout << " Ebye2pt -  input wrStEOut = " << wrStEOut << endl << endl << endl;
  
     //
     // First load some shared libraries we need
@@ -241,15 +241,6 @@ void Ebye2pt(Int_t nevents, const Char_t **fileList, const Char_t *outFile, cons
     cout << endl << "============================ Event " << i
 	 << " finish ============================" << endl;
 
-    if (nevents > 1) {
-	chain->Clear();
-	chain->Finish();
-    }
-    else {
-	if (!b) {
-	    b = new TBrowser;
-	}
-    }
 }
 
 //--------------------------------------------------------------------------
@@ -272,6 +263,9 @@ void Ebye2pt(const Int_t nevents, const Char_t *path, const Char_t *file,
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: Ebye2pt.C,v $
+// Revision 1.2  2000/12/16 18:41:42  aya
+// *** empty log message ***
+//
 // Revision 1.1  2000/08/14 22:05:19  jseger
 // Added eta-spectra.  Now reads Ebye mini-DST as input.  Bins events in
 // multiplicity and z-vertex position.  Name of output file is no longer hard-wired.
@@ -289,7 +283,8 @@ void Ebye2pt(const Int_t nevents, const Char_t *path, const Char_t *file,
 // change flag to write out .event.root file to false by default
 //
 // Revision 1.52  2000/05/17 16:50:47  kathy
-// put Victor's code to write out .event.root file from doEvents.C in here with a flag to turn off and on - now we can get rid of doEventsOut.C ... don't have to keep up 2 sets of macros
+// put Victor's code to write out .event.root file from doEvents.C in here with a flag to turn off and on - now we can get rid of doEventsOut.C ...
+// don't have to keep up 2 sets of macros
 //
 // Revision 1.51  2000/05/17 15:58:08  kathy
 // added some print statements to beginning
@@ -316,28 +311,9 @@ void Ebye2pt(const Int_t nevents, const Char_t *path, const Char_t *file,
 // comment out libtpc by default
 //
 // Revision 1.43  2000/04/12 15:06:53  kathy
-// changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- of a mismatch with tpt_track table
+// changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); 
+// currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables 
+// because of a mismatch with tpt_track table.
 //
 // Revision 1.42  2000/04/07 15:54:26  perev
 // GC added
