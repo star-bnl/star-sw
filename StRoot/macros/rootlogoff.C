@@ -1,5 +1,8 @@
-// $Id: rootlogoff.C,v 1.7 2004/01/14 20:13:13 perev Exp $
+// $Id: rootlogoff.C,v 1.8 2004/01/15 00:53:55 perev Exp $
 // $Log: rootlogoff.C,v $
+// Revision 1.8  2004/01/15 00:53:55  perev
+// Delete chain only for DEBUG lib
+//
 // Revision 1.7  2004/01/14 20:13:13  perev
 // flag -nodelete added
 //
@@ -27,8 +30,6 @@ class StMaker;
 namespace rootlogoff {
 TClass *tclassMk=0;
 ::StMaker *mk=0;
-::TList *list;
-int iarg;
 }
 
 rootlogoff::tclassMk = gROOT->GetClass("StMaker",0);
@@ -36,15 +37,11 @@ if (rootlogoff::tclassMk && rootlogoff::tclassMk->GetClassInfo())
 {
   rootlogoff::mk = StMaker::GetChain();
   if (rootlogoff::mk) {
+    
+
     rootlogoff::mk->Finish();
-    for (rootlogoff::iarg=1;rootlogoff::iarg<gApplication->Argc();rootlogoff::iarg++)
-    {
-       if (strcmp("-nodelete",gApplication->Argv(rootlogoff::iarg))) continue; 
-       rootlogoff::iarg=-1;
-       break;
-    }
-    if (rootlogoff::iarg!=-1) delete rootlogoff::mk;
-    else printf ("*** Chain not deleted***\n");
+    if (!gSystem->Getenv("NODEBUG")) delete rootlogoff::mk;
+    else                            printf ("*** Chain not deleted***\n");
   }
 }
 printf("\nThis is the end of ROOT -- Goodbye\n\n");
