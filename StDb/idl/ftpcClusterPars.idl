@@ -42,6 +42,10 @@
      float unfoldLimit;              /* accuracy of unfolding */
      float unfoldFailedLimit;        /* limit for failed unfolding */
 
+     long maxTimelength;             /* max timelength of cluster */
+     long maxPadlength;              /* max padlength of cluster */
+     long minTimebin;                /* min timebin for cluster search */ 
+
        // run parameters
      float normalizedNowPressure;   /* normalized air pressure (in hPa) */
      float adjustedAirPressureWest;  /* temperature adjusted air pressure for FTPC West */
