@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.8 2000/11/10 18:39:09 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.9 2000/11/23 01:33:16 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.9  2000/11/23 01:33:16  oldi
+// Proper initialization of some variables to avoid Insure++ error messages.
+//
 // Revision 1.8  2000/11/10 18:39:09  oldi
 // TBenchmark object 'mBech' moved from StFtpcConfMapper to here. This implied changes in the constructors.
 // New function CalcEnergyLoss(FDE_FDEPAR_ST *fdepar) which replaces the pams/fde modul.
@@ -283,6 +286,10 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
   dedx_arr = new Double_t[max_hit];
   index_arr = new Int_t[max_hit];
   
+  for (int go = 0; go < max_hit; go++) {
+    dedx_arr[go] = 0.;
+  }
+
   // loop over all tracks inside the FTPC for each track 
   // possible to limit number of tracks for processing 
   for (itrk = 0; itrk < TMath::Min(GetNumberOfTracks(), (Int_t)fdepar[0].max_track); itrk++) {
@@ -562,19 +569,19 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
 }
 
 
-void StFtpcTracker::Sorter(Double_t *arr, Int_t *index, Int_t len)
+void StFtpcTracker::Sorter(Double_t arr[], Int_t *index, Int_t len)
 {
   // Sorts hits in ascending order (depending on dE/dx).
   // This function is needed to replace pams/ftpc/fde.
-  
+ 
   Int_t i, j;
   Double_t temp;
   Int_t itemp;
 
   for (i=0; i<len-2; ++i) {
     
-    for (j=len-1; j>i; --j) {
-      
+    for (j = len-1; j > i; --j) {
+
       if (arr[i] > arr[j]) {
 	temp = arr[i];       // swap
 	arr[i] = arr[j];
@@ -701,7 +708,11 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
     // tmp array to store delta_E of hits on a track 
     dedx_arr = new Double_t[max_hit];
     index_arr = new Int_t[max_hit];
-  
+    
+    for (int go = 0; go < max_hit; go++) {
+      dedx_arr[go] = 0.;
+    }
+
     // loop over all tracks inside the FTPC for each track 
     // possible to limit number of tracks for processing 
     for (itrk = 0; itrk < TMath::Min(GetNumberOfTracks(), (Int_t)fdepar[0].max_track); itrk++) {

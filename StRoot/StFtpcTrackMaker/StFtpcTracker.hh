@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.hh,v 1.6 2000/11/10 18:39:09 oldi Exp $
+// $Id: StFtpcTracker.hh,v 1.7 2000/11/23 01:33:16 oldi Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.7  2000/11/23 01:33:16  oldi
+// Proper initialization of some variables to avoid Insure++ error messages.
+//
 // Revision 1.6  2000/11/10 18:39:09  oldi
 // TBenchmark object 'mBech' moved from StFtpcConfMapper to here. This implied changes in the constructors.
 // New function CalcEnergyLoss(FDE_FDEPAR_ST *fdepar) which replaces the pams/fde modul.
@@ -90,7 +93,7 @@ public:
   virtual  ~StFtpcTracker();  // destructor
 
   void    CalcEnergyLoss(FDE_FDEPAR_ST *fdepar);                            // calculates dE/dx
-  void    Sorter(Double_t *arr, Int_t *index, Int_t len);                   // sorts by dE/dx
+  void    Sorter(Double_t arr[], Int_t *index, Int_t len);                  // sorts by dE/dx
   Int_t   FitAnddEdxAndWrite(St_fpt_fptrack *trackTable, 
 			     FDE_FDEPAR_ST *fdepar, 
 			     Int_t id_start_vertex);                        // does momentum fit, the dEdx calculation and writes tracks to STAF table
