@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.1 2002/04/01 22:42:29 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.2 2002/04/11 14:19:30 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -9,6 +9,7 @@
 #include "StMuException.hh"
 #include "StMuDebug.h"
 #include "StMuChainMaker.h"
+#include "StMuDbReader.h"
 
 #include "StMaker.h"
 #include "StChain.h"
@@ -26,6 +27,7 @@ ClassImp(StMuChainMaker)
 //-----------------------------------------------------------------------
 StMuChainMaker::StMuChainMaker(const char* name) : mTreeName(name) {
   DEBUGMESSAGE2("");
+  mDbReader = StMuDbReader::instance();
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -129,8 +131,8 @@ TChain* StMuChainMaker::fromDir(string dir, string filter, int maxFiles) {
     if ( pass(name,mSubFilters) ) {
       char* fullFile = gSystem->ConcatFileName(dir.c_str(),fileName);
       // add it to the chain
-      DEBUGVALUE(fileCount);
-      chain->Add(fullFile);
+      cout << fileCount << endl;
+      chain->Add( fullFile, mDbReader->entries(fullFile) );
       fileCount++;
       delete fullFile;
     }
@@ -157,8 +159,8 @@ TChain* StMuChainMaker::fromList(string dir, string list, int maxFiles) {
   for (;inputStream->good();) {
     temp = new char[200];
     inputStream->getline(temp,200);
-    DEBUGVALUE2(temp);
-    chain->Add(temp);
+    cout <<temp << endl;
+    chain->Add( temp, mDbReader->entries(temp) );
     delete temp;
     ++fileCount;
     if (fileCount>maxFiles) break;
@@ -170,8 +172,11 @@ TChain* StMuChainMaker::fromList(string dir, string list, int maxFiles) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-TChain* StMuChainMaker::fromFile(string dir, string list, int maxFiles) {
+TChain* StMuChainMaker::fromFile(string dir, string file, int maxFiles) {
   DEBUGMESSAGE2("");
+  TChain* chain = new TChain(mTreeName.c_str());
+  cout << mTreeName.c_str() << endl;
+  chain->Add( file.c_str(), mDbReader->entries(file.c_str()) );
   return 0;
 }
 //-----------------------------------------------------------------------
@@ -189,6 +194,11 @@ bool StMuChainMaker::pass(string file, string**  filters) {
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.2  2002/04/11 14:19:30  laue
+ * - update for RH 7.2
+ * - decrease default arrays sizes
+ * - add data base readerfor number of events in a file
+ *
  * Revision 1.1  2002/04/01 22:42:29  laue
  * improved chain filter options
  *

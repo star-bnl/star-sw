@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.8 2002/04/01 22:42:30 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.9 2002/04/11 14:19:30 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -128,7 +128,10 @@ private:
 
   void openRead();
   void read();
+  void setBranchAddresses();
   void closeRead();
+
+  void setBranchAddresses(TChain*);
 
   void clear(TClonesArray* t, int& counter);
   void clear();
@@ -210,6 +213,11 @@ inline void StMuDstMaker::setCompression(int comp) { mCompression = comp;}
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.9  2002/04/11 14:19:30  laue
+ * - update for RH 7.2
+ * - decrease default arrays sizes
+ * - add data base readerfor number of events in a file
+ *
  * Revision 1.8  2002/04/01 22:42:30  laue
  * improved chain filter options
  *
