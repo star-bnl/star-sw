@@ -29,7 +29,7 @@ class StGlobalTrack;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.1 1999/07/14 01:46:16 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.2 1999/07/14 15:24:47 fine Exp $";
  private: 
     TList         *m_HitCollector;     //!
     TList         *m_TrackCollector;   //!
@@ -54,7 +54,8 @@ class StEventDisplayMaker : public StMaker {
    virtual Int_t  Init();
    virtual Int_t  Make();
 
-   virtual void   Clear(Option_t *option);
+   virtual void   Clear(Option_t *option="");
+   virtual void   ClearCanvas(); // *MENU*
    virtual void   ClearEvents();
    virtual Int_t  CreateCanvas();
    virtual Int_t  CreateTrackNodes();
@@ -67,6 +68,8 @@ class StEventDisplayMaker : public StMaker {
    virtual void         SetMode       (Int_t   m = 0){StMaker::SetMode(m);} // *MENU*
    virtual Int_t        GetTrackFilterFlag(){ return m_TrackFilterFlag;}
    virtual Int_t        GetHitFilterFlag(){ return m_HitFilterFlag;}
+   virtual Int_t        ReDraw(){return Make();} // *MENU*
+
    virtual Int_t        SetTrackFilterFlag(Int_t flag=1){Int_t f = m_TrackFilterFlag; m_TrackFilterFlag=flag; return f;} // *MENU*
    virtual Int_t        SetHitFilterFlag(Int_t flag=1)  {Int_t f = m_HitFilterFlag; m_HitFilterFlag=flag; return f;}  // *MENU*
 
@@ -75,7 +78,7 @@ class StEventDisplayMaker : public StMaker {
    virtual Int_t        TrackFilter(StGlobalTrack *globTrack);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.1 1999/07/14 01:46:16 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.2 1999/07/14 15:24:47 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
 };

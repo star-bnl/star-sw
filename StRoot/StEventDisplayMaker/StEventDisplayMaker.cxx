@@ -12,6 +12,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
+#include "TROOT.h"
 #include "TCanvas.h"
 #include "TColor.h"
 #include "TStyle.h"
@@ -57,6 +58,7 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
 
   SetTrackFilterFlag();
   SetHitFilterFlag();
+  gROOT->GetListOfBrowsables()->Add(this,GetName());
 }
 //_____________________________________________________________________________
 StEventDisplayMaker::~StEventDisplayMaker(){
@@ -105,18 +107,6 @@ Int_t StEventDisplayMaker::Init(){
    palette();
    // Call the "standard" Init()
    return StMaker::Init();
-}
-
-//_____________________________________________________________________________
-Int_t StEventDisplayMaker::CreateTrackNodes()
-{
- //  Create St_Node dataset
-  if (m_EventsNode) delete m_EventsNode;
-  m_EventsNode  = new St_Node(".track",".track",(TShape *)0);
-  m_EventsNode->Mark();
-  m_EventsNode->SetVisibility();
-  AddConst(m_EventsNode);
-  return 0;
 }
 
 //_____________________________________________________________________________
@@ -204,6 +194,28 @@ void StEventDisplayMaker::ClearEvents()
    }
   }
 }
+//_____________________________________________________________________________
+void StEventDisplayMaker::ClearCanvas()
+{
+  // Clear canvas from the TBrowser Context Menu
+  if (m_PadBrowserCanvas) {
+    Clear();
+    m_PadBrowserCanvas->Modified();
+    m_PadBrowserCanvas->Update();
+  }
+}
+
+//_____________________________________________________________________________
+Int_t StEventDisplayMaker::CreateTrackNodes()
+{
+ //  Create St_Node dataset
+  if (m_EventsNode) delete m_EventsNode;
+  m_EventsNode  = new St_Node(".track",".track",(TShape *)0);
+  m_EventsNode->Mark();
+  m_EventsNode->SetVisibility();
+  AddConst(m_EventsNode);
+  return 0;
+}
 //______________________________________________________________________________
 void StEventDisplayMaker::Clear(Option_t *option)
 {
@@ -261,9 +273,7 @@ Int_t StEventDisplayMaker::Make()
      Int_t trackCounter = 0;
      while ( ( globTrack = (StGlobalTrack *)next() ) && trackCounter < maxTrackCounter) {
         St_Node *thisTrack = 0;
-    //==    printf ("Track %d\n",trackCounter);
         if (!GlobalTrackFilter(globTrack))                               continue;
-
         if (TrackFilter(globTrack) ) {
           StHelix3DPoints *helixPoints = new StHelix3DPoints(globTrack,globTrack->length(),30);
           m_TrackCollector->Add(helixPoints);  // Collect to remove
@@ -285,8 +295,9 @@ Int_t StEventDisplayMaker::Make()
             trackShape->SetLineStyle(1);  trackShape->SetSizeAttribute(1);
             m_HitCollector->Add(hitPoints);  // Collect to remove  
           } 
-          else 
+          else {
             delete hitPoints;
+          }
           if (trackShape) {
             if (!thisTrack) thisTrack = new St_Node("hits","hits",trackShape);
             else            thisTrack->Add(trackShape);
@@ -296,8 +307,8 @@ Int_t StEventDisplayMaker::Make()
 
         St_NodePosition *pp = m_EventsNode->Add(thisTrack); 
         if (thisTrack) trackCounter++;
-        if (!pp) {
-          // === turn this of for while  printf(" no position %d\n",trackCounter);
+        if (!pp && trackCounter) {
+          // printf(" no position %d\n",trackCounter);
         }
      }
      printf(" %d tracks has been found\n",trackCounter);
