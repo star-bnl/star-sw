@@ -43,7 +43,8 @@ StiMakerParameters * MiniChain::getParameters()
 void MiniChain::run(int first, 
 		    int nEvents, 
 		    const char *  filePrefix,
-		    const char ** fileList )
+		    const char ** fileList,
+		    const char * outfile)
 {
   int iList=0;
   cout << "MiniChain::Run(...) -I- Starting"<< endl
@@ -195,24 +196,29 @@ void MiniChain::setupOutput(const char * filePrefix,
 			    const char * fileTemplate)
 {
   cout <<"MiniChain::setupOutput -I- Started"<<endl;
-  TString outFilePrefix = "MiniChain_";
-  TString stEventFileSuffix = "event.root";
-  TString MuDstSuffix = "MuDst.root";
 
   //Now clip prefix and 'event.root' from filename
   TString templateFile = fileTemplate;
   int fileBeginIndex = templateFile.Index(filePrefix,0);
   templateFile.Remove(0,fileBeginIndex);
 
+  
+  templateFile.ReplaceAll("geant","event"); //replace "geant" if it's there
+  TString eventName = templateFile.ReplaceAll(".event.root","_sti.event.root");
+  //.event.root now replaced with _sti.event.root
+  
+  TString dstName = templateFile.ReplaceAll(".event.root",".mudst.root");
+  //_sti.event.root now replaced with _sti.mudst.root
+  
+  TString miniMcName = templateFile.ReplaceAll(".mudst.root",".minimc.root");
+  //_sti.mudst.root now replaced with _sti.minimc.root
+  
   if (_pars->doStEventOutput) 
     {
-      TString stEventFileName = outFilePrefix;
-      stEventFileName.Append(templateFile);
-      
-      cout << "    Events written out to " <<stEventFileName << endl;
+      cout << "    Events written out to " <<eventName << endl;
       StTreeMaker * outMaker = new StTreeMaker("EvOut","","bfcTree");
       outMaker->SetIOMode("w");
-      outMaker->SetBranch("eventBranch",stEventFileName,"w");
+      outMaker->SetBranch("eventBranch",eventName,"w");
       outMaker->IntoBranch("eventBranch","StEvent");
     }
   else
@@ -227,8 +233,8 @@ void MiniChain::setupOutput(const char * filePrefix,
       StMiniMcMaker * minimcMaker = new StMiniMcMaker;
       minimcMaker->setDebug();
       minimcMaker->setOutDir("./");
-      TString miniMcFile = templateFile;
-      minimcMaker->setFileName(miniMcFile);
+      cout <<"MiniMc to be written out, file : "<<miniMcName<<endl;
+      minimcMaker->setFileName(miniMcName);
     }
   else
     {
