@@ -1,5 +1,8 @@
-//  
-//  
+// $Id: bfcread_event_QA_outhistfile.C,v 1.2 2000/05/15 20:24:00 kathy Exp $ 
+// $Log: bfcread_event_QA_outhistfile.C,v $
+// Revision 1.2  2000/05/15 20:24:00  kathy
+// correct Log,Id so they get written out
+//
 //
 //======================================================================
 // owner:  Curtis Lansdell, Kathy Turner

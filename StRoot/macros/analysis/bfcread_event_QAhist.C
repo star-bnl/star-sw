@@ -1,5 +1,8 @@
-//  
-//  
+// $Id: bfcread_event_QAhist.C,v 1.2 2000/05/15 20:24:01 kathy Exp $
+// $Log: bfcread_event_QAhist.C,v $
+// Revision 1.2  2000/05/15 20:24:01  kathy
+// correct Log,Id so they get written out
+//
 //
 //======================================================================
 // owner:  Curtis Lansdell
