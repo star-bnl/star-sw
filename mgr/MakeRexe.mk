@@ -1,5 +1,8 @@
-# $Id: MakeRexe.mk,v 1.24 1999/07/20 00:24:55 fisyak Exp $
+# $Id: MakeRexe.mk,v 1.25 1999/08/25 13:09:38 fisyak Exp $
 # $Log: MakeRexe.mk,v $
+# Revision 1.25  1999/08/25 13:09:38  fisyak
+# Devorce StAF
+#
 # Revision 1.24  1999/07/20 00:24:55  fisyak
 # Remove Objy
 #
@@ -48,6 +51,7 @@ ifndef STAR_MAKE_HOME
   STAR_MAKE_HOME := $(STAR)/mgr
 endif
 include $(STAR_MAKE_HOME)/MakeEnv.mk
+include $(STAR_MAKE_HOME)/MakeArch.mk
 
 #
 #	INP_DIR & OUT_DIR could be declared in invoking
@@ -159,7 +163,7 @@ $(OBJ_DIR)/%.o : %.g
 	cd $(OBJ_DIR);\
 	test -h geant3.def || $(RM)  geant3.def; \
 	test -h geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  geant3.def; \
-	$(EXE_DIR)/geant3    $(1ST_DEPS) -o $(STEM).F; \
+	$(GEANT3)    $(1ST_DEPS) -o $(STEM).F; \
 	$(FOR) -c $(INCL) $(STEM).F -o  $(OBJ_DIR)/$(STEM).o;
 #        $(RM)  $(STEM).F;
 $(OBJ_DIR)/%.o : %.f
