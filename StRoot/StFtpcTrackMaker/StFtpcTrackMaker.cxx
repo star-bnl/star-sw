@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.30 2002/04/05 16:51:00 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.31 2002/04/08 15:38:04 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.31  2002/04/08 15:38:04  oldi
+// Switch for magnetic field factor installed.
+// Minor corrections/improvements.
+//
 // Revision 1.30  2002/04/05 16:51:00  oldi
 // Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
 // Each Track inherits from StHelix, now.
@@ -143,6 +147,9 @@
 
 #include "StChain.h"
 #include "StVertexId.h"
+#include "StMessMgr.h"
+#include "StDetectorDbMaker/StDetectorDbMagnet.h"
+
 
 #include "tables/St_fpt_fptrack_Table.h"
 #include "tables/St_ffs_gepoint_Table.h"
@@ -159,9 +166,6 @@
 #include "TProfile.h"
 #include "TCanvas.h"
 #include "TFile.h"
-
-#include "StMessMgr.h"
-
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -220,9 +224,9 @@ Int_t StFtpcTrackMaker::Init()
   m_phires_vs_r_west = new TH2F("fpt_phi_res_vs_r_west", "FTPC west phi residuals vs. r", 100, -0.01, 0.01, 100, 6.5, 31.);
 
   m_vertex_east_xy = new TH2F("fpt_vertex_east_xy", "FTPC east vertex xy estimation with resp. to TPC vertex", 80, -2., 2., 80, -2., 2.);
-  m_vertex_east_z = new TH1F("fpt_vertex_east_z", "FTPC east vertex z estimation with resp. to TPC vertex", 100, -5., 5.);
+  m_vertex_east_z = new TH1F("fpt_vertex_east_z", "FTPC east vertex z estimation with resp. to TPC vertex", 100, -10., 10.);
   m_vertex_west_xy = new TH2F("fpt_vertex_west_xy", "FTPC west vertex xy estimation with resp. to TPC vertex", 80, -2., 2., 80, -2., 2.);
-  m_vertex_west_z = new TH1F("fpt_vertex_west_z", "FTPC west vertex z estimation with resp. to TPC vertex", 100, -5., 5.);
+  m_vertex_west_z = new TH1F("fpt_vertex_west_z", "FTPC west vertex z estimation with resp. to TPC vertex", 100, -10., 10.);
 
   return StMaker::Init();
 }
@@ -370,14 +374,23 @@ Int_t StFtpcTrackMaker::Make()
     // No tracking!
     return kStWarn; 
   }
-
+  
+  // get magnetic field
+  StDetectorDbMagnet* magnet = StDetectorDbMagnet::instance();
+  Double_t mag_fld_factor = magnet->getScaleFactor();
 
   Double_t vertexPos[6] = {primary_vertex_x,     primary_vertex_y,     primary_vertex_z, 
 			   primary_vertex_x_err, primary_vertex_y_err, primary_vertex_z_err};
   StFtpcConfMapper *tracker = new StFtpcConfMapper(fcl_fppoint, vertexPos, kTRUE);
 
   // tracking 
-  tracker->MainVertexTracking();
+  if (mag_fld_factor == 0.) {
+    tracker->NoFieldTracking();
+  }
+
+  else {
+    tracker->MainVertexTracking();
+  }
 
   // for the line above you have these possibilities
   //tracker->MainVertexTracking();
@@ -389,8 +402,11 @@ Int_t StFtpcTrackMaker::Make()
   m_DataSet->Add(fpt_fptrack);
 
   // momentum fit, dE/dx calculation, write tracks to tables
-  tracker->FitAnddEdxAndWrite(fpt_fptrack, m_fdepar->GetTable(), -primary_vertex_id);
-  tracker->EstimateVertex(tracker->GetVertex(), 1);
+  if (mag_fld_factor != 0.) {
+    // momentum fit possible
+    tracker->FitAnddEdxAndWrite(fpt_fptrack, m_fdepar->GetTable(), -primary_vertex_id);
+    tracker->EstimateVertex(tracker->GetVertex(), 1);
+  }
 
   if (Debug()) {
     gMessMgr->Message("", "I", "OST") << "Total time consumption         " << tracker->GetTime() << " s." << endm;
@@ -541,7 +557,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.30 2002/04/05 16:51:00 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.31 2002/04/08 15:38:04 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {

@@ -1,5 +1,9 @@
-// $Id: StFtpcTrack.cc,v 1.15 2002/04/05 16:50:42 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.16 2002/04/08 15:37:59 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.16  2002/04/08 15:37:59  oldi
+// Switch for magnetic field factor installed.
+// Minor corrections/improvements.
+//
 // Revision 1.15  2002/04/05 16:50:42  oldi
 // Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
 // Each Track inherits from StHelix, now.
@@ -565,8 +569,6 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
 
   CalcResiduals();
 
-  //cout << id_start_vertex << " " << GetCharge() << " " << mP.x() << " " << mP.y() << " " << mP.z() << " " << mChiSq[0] << " " << mChiSq[1] << endl;
-  
   return;
 }
 
@@ -706,8 +708,8 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
   /////////////////////////////////////////////////////////////////////
   // calculate first guess momentum from helix fit
   /////////////////////////////////////////////////////////////////////
+  
   CircleFit(xval, yval, xWeight, yWeight, GetNumberOfPoints() + mVertexPointOffset);
-
   LineFit(xval, yval, zval, xWeight, yWeight, GetNumberOfPoints() + mVertexPointOffset);
 
   // determine helix parameters
@@ -744,7 +746,7 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
   // get z-component of B-field at 0,0,0 for first momentum guess
   Float_t pos[3] = {0, 0, 0};
   Float_t centralField[3];
-  gufld(pos,centralField);
+  gufld(pos, centralField);
   centralField[0] *= kilogauss;
   centralField[1] *= kilogauss;
   centralField[2] *= kilogauss;
