@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcDbElectronics.cc,v 1.1 1999/10/11 23:55:20 calderon Exp $
+ * $Id: StTpcDbElectronics.cc,v 1.2 1999/12/08 02:10:41 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcDbElectronics.cc,v $
+ * Revision 1.2  1999/12/08 02:10:41  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.1  1999/10/11 23:55:20  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
@@ -38,7 +41,7 @@ StTpcDbElectronics::StTpcDbElectronics(StTpcDb* globalDbPointer)
     mAdcConversion       = gTpcDbPtr->Electronics()->adcConversion();    
     mAdcConversionCharge = gTpcDbPtr->Electronics()->adcCharge();    
     mNumberOfTimeBins    = gTpcDbPtr->Electronics()->numberOfTimeBins();    
-    mAveragePedestal     = gTpcDbPtr->Electronics()->averagePedestal();
+    mAveragePedestal     = static_cast<int>(gTpcDbPtr->Electronics()->averagePedestal());
     mShapingTime         = gTpcDbPtr->Electronics()->shapingTime();
     mTau                 = gTpcDbPtr->Electronics()->tau();
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.19 1999/11/12 01:42:15 long Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.20 1999/12/08 02:10:42 calderon Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.20  1999/12/08 02:10:42  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.19  1999/11/12 01:42:15  long
  * delete "fabs((magDb->at(mSector12Position)).z())>0.01)" because it is not needed
  *
@@ -99,13 +102,14 @@ RandFlat        StTrsChargeSegment::mFlatDistribution(mEngine);
 
 StTrsChargeSegment::StTrsChargeSegment()
     : mPosition(0,0,0),
+      mSector12Position(mPosition),
       mMomentum(0,0,0),
-      mNumberOfElectrons(-1),
       mDE(0),
       mDs(0),
       mPid(0),
-      mSectorOfOrigin(0),
-      mSector12Position(mPosition)
+      mNumberOfElectrons(-1),
+      mSectorOfOrigin(0)
+
 { /* nopt */ }
 
 StTrsChargeSegment::StTrsChargeSegment(StThreeVector<double>& pos,
@@ -115,13 +119,13 @@ StTrsChargeSegment::StTrsChargeSegment(StThreeVector<double>& pos,
 				       int    pid,
 				       double ne)
     : mPosition(pos),
+      mSector12Position(mPosition),
       mMomentum(mom),
-      mNumberOfElectrons(ne), //default is -1
       mDE(de),
       mDs(ds),
       mPid(pid),  // default is -1
-      mSectorOfOrigin(0),
-      mSector12Position(mPosition)
+      mNumberOfElectrons(ne), //default is -1
+      mSectorOfOrigin(0)
 { /* nopt */ }
 
 StTrsChargeSegment::~StTrsChargeSegment() {/* nopt */ }
@@ -322,11 +326,11 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
     
 	//cout << "ionization.size() " << (ionization.size()) << endl;
 // 	PR(subSegments);
-	for(ii=0; ii<subSegments; ii++) {
+	for(int i=0; i<subSegments; i++) {
 	    // Take the electrons from the vector
 	    
 	    // If there is no Ionization, take the next
-	    if(!theIonization[ii]) {
+	    if(!theIonization[i]) {
 		newPosition += deltaS;
 		continue;
 	    }
@@ -335,7 +339,7 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
  	    //PR(track.at(newPosition));
 	    
 	    StTrsMiniChargeSegment aMiniSegment(track.at(newPosition),
-						theIonization[ii],
+						theIonization[i],
 						deltaS);
 	    listOfMiniSegments->push_back(aMiniSegment);
 	    
@@ -486,7 +490,7 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 	//To decompose track use the helix parameterization.
 	//StPhysicalHelix(p,x,B,+/-)
 	// Need some track info from pid:
-       if(mDE>0.&&fabs((magDb->at(mSector12Position)).z())>1.e-28){    //HL,9/4/99,if mDe<0,helix model is not good
+       if(mDE>0.&&fabs((magDb->at(mSector12Position)).z())>0.01){    //HL,9/4/99,if mDe<0,helix model is not good
 	 
 	StPhysicalHelix
 	    track(mMomentum,
@@ -506,10 +510,10 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 	// loop over all subSegments and distribute charge
 	//
 	
-	for(ii=0; ii<ionizationSegments[(numberOfLevels-1)].size(); ii++) {
+	for(unsigned int i=0; i<ionizationSegments[(numberOfLevels-1)].size(); i++) {
 	    // Take the electrons from the vector
 	    StTrsMiniChargeSegment aMiniSegment(track.at(newPosition),
-						ionizationSegments[(numberOfLevels-1)][ii],
+						ionizationSegments[(numberOfLevels-1)][i],
 						deltaS);
 	    listOfMiniSegments->push_back(aMiniSegment);
 	    
@@ -522,13 +526,13 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
          newS=-mDs/2. + deltaS/2.;
          StThreeVector<double> miniHitPosition; 
         
-	for(ii=0; ii<ionizationSegments[(numberOfLevels-1)].size(); ii++) {
+	for(unsigned int j=0; j<ionizationSegments[(numberOfLevels-1)].size(); j++) {
             
 	    miniHitPosition.setX(mSector12Position.x()+newS*mMomentum.x()/mMomentum.mag()); 
             miniHitPosition.setY(mSector12Position.y()+newS*mMomentum.y()/mMomentum.mag()); 
             miniHitPosition.setZ(mSector12Position.z()+newS*mMomentum.z()/mMomentum.mag());
 	    StTrsMiniChargeSegment aMiniSegment(miniHitPosition,
-						ionizationSegments[(numberOfLevels-1)][ii],
+						ionizationSegments[(numberOfLevels-1)][j],
 						deltaS);
 	 
 	    listOfMiniSegments->push_back(aMiniSegment); 

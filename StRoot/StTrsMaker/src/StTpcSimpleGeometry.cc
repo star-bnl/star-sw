@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleGeometry.cc,v 1.5 1999/10/11 23:55:21 calderon Exp $
+ * $Id: StTpcSimpleGeometry.cc,v 1.6 1999/12/08 02:10:42 calderon Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleGeometry.cc,v $
+ * Revision 1.6  1999/12/08 02:10:42  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.5  1999/10/11 23:55:21  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
@@ -143,18 +146,18 @@ StTpcSimpleGeometry::StTpcSimpleGeometry(const char* file)
     // padrows 9-13
     double base =
 	mFirstPadRow + 7*mInnerSectorRowPitch1;
-    for(ii=9; ii<14; ii++)
-	mRadialDistanceAtRow[ii-1] =
-	    base+(ii-8)*mInnerSectorRowPitch2;
+    for(int i=9; i<14; i++)
+	mRadialDistanceAtRow[i-1] =
+	    base+(i-8)*mInnerSectorRowPitch2;
 
     // pad row 14
     mRadialDistanceAtRow[13] =
 	mFirstPadRow + 7*mInnerSectorRowPitch1 + 5*mInnerSectorRowPitch2 + mIoSectorSeparation;
 
     // pad row 15-45
-    for(ii=15; ii<46; ii++)
-	mRadialDistanceAtRow[ii-1] =
-	    mFirstOuterSectorPadRow + (ii-14)*mOuterSectorRowPitch;
+    for(int jj=15; jj<46; jj++)
+	mRadialDistanceAtRow[jj-1] =
+	    mFirstOuterSectorPadRow + (jj-14)*mOuterSectorRowPitch;
 
     // Make sure units are as expected:
     
@@ -188,8 +191,8 @@ StTpcSimpleGeometry::StTpcSimpleGeometry(const char* file)
     mInnerSectorzOffSet    *= millimeter;
     mOuterSectorzOffSet    *= millimeter;
     
-    for(ii=0; ii<mRadialDistanceAtRow.size(); ii++)
-	mRadialDistanceAtRow[ii] *= millimeter;
+    for(unsigned int j=0; j<mRadialDistanceAtRow.size(); j++)
+	mRadialDistanceAtRow[j] *= millimeter;
 
     // Wires
     mAnodeWirePitch       *= millimeter;

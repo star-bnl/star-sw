@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
+ * Revision 1.21  1999/12/08 02:10:42  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.20  1999/11/10 15:46:25  calderon
  * Made changes to reduce timing, including:
  * Made coordinate transfrom a data member of StTrsAnalogSignalGenerator
@@ -117,7 +120,7 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
     // Remember mSector is the "normal" analog sector! 
       cout << "StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
       for(int irow=1; irow<=mSector->numberOfRows(); irow++) { 
-	for(int ipad=1; ipad<=mSector->padsOfRow(irow).size(); ipad++) {
+	for(unsigned int ipad=1; ipad<=mSector->padsOfRow(irow).size(); ipad++) {
            
 	    currentPad = mSector->timeBinsOfRowAndPad(irow,ipad); 
            
@@ -127,7 +130,7 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 	    digitalPadData.clear();
 	    //   cout<<irow<<" row "<<ipad<<" pad"<<endl;
          
-	    int currentTimeBin = digitalPadData.size();
+	    unsigned int currentTimeBin = digitalPadData.size();
 	    //  cout<<currentTimeBin<<"  should be 0 "<<endl;
 // 	    PR(currentTimeBin);
 	    unsigned int zeroCounter = 0;
@@ -136,7 +139,8 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 		mTimeSequenceIterator++) {
 
 		//PR(*mTimeSequenceIterator);
-		int timeBinIndex = static_cast<int>(mTimeSequenceIterator->time());
+		unsigned int timeBinIndex =
+		    static_cast<unsigned int>(mTimeSequenceIterator->time());
 		if (timeBinIndex > currentTimeBin) {
 		    //cout << "Positive time shift" << endl;
 		    // remove previous zero if any

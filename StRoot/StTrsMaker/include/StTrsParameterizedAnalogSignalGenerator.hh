@@ -74,7 +74,7 @@ const double         mPadResponseFunctionSigmaInner;
     int            mCentralRow;
     int            mNumberOfRows;
     int            mNumberOfInnerRows;
-    int            mFrischGrid;
+    double         mFrischGrid;
     double yb1, yb2, yb3, yb4;
     double rowNormalization;
     double padWidth, padLength;

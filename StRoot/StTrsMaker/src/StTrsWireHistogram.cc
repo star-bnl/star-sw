@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.17 1999/10/22 15:51:48 calderon Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.18 1999/12/08 02:10:43 calderon Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.18  1999/12/08 02:10:43  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.17  1999/10/22 15:51:48  calderon
  * Remove ifdefs for erf.  Problem is solved by loading libm at the
  * macro level.
@@ -210,7 +213,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 	    kk<=highestWireToCollectCharge; kk++) {
 
 	    // the y coordinate of the wire:
-	    double yOfMiniSegment = wireCoordinate(kk);
+	    //double yOfMiniSegment = wireCoordinate(kk);
 	    //
 	    // Make a new StTrsWireBinEntry
 	    //

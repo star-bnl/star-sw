@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.hh,v 1.3 1999/03/24 22:22:13 lasiuk Exp $
+ * $Id: StTrsUnpacker.hh,v 1.4 1999/12/08 02:10:25 calderon Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.hh,v $
+ * Revision 1.4  1999/12/08 02:10:25  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.3  1999/03/24 22:22:13  lasiuk
  * confirm dataset delete
  *
@@ -42,7 +45,7 @@ public:
     //StTrsUnpacker& operator=(const StTrsUnpacker&);
 
     // access functions
-    int  getSector(int which, StTpcRawDataEvent* eventData);
+    int  getSector(unsigned int which, StTpcRawDataEvent* eventData);
     int  getSequences(int padRow, int npad, int *nSeq, StSequence** seq);
     int  getPadList(int padRow, unsigned char **padList);
     void clear();

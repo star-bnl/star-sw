@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsMiniChargeSegment.cc,v 1.2 1999/01/18 21:02:53 lasiuk Exp $
+ * $Id: StTrsMiniChargeSegment.cc,v 1.3 1999/12/08 02:10:42 calderon Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsMiniChargeSegment.cc,v $
+ * Revision 1.3  1999/12/08 02:10:42  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.2  1999/01/18 21:02:53  lasiuk
  * comment diagnostics
  *
@@ -32,7 +35,7 @@
 #include "StTrsMiniChargeSegment.hh"
 
 StTrsMiniChargeSegment::StTrsMiniChargeSegment(StThreeVector<double> pos, double de, double ds)
-    : mPosition(pos), mNumberOfElectrons(de), mLength(ds) { /*nopt*/ }
+    : mNumberOfElectrons(de), mLength(ds), mPosition(pos) { /*nopt*/ }
 
 StTrsMiniChargeSegment::~StTrsMiniChargeSegment() { /*nopt*/ }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDetectorReader.hh,v 1.1 1999/11/05 22:17:04 calderon Exp $
+ * $Id: StTrsDetectorReader.hh,v 1.2 1999/12/08 02:10:25 calderon Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDetectorReader.hh,v $
+ * Revision 1.2  1999/12/08 02:10:25  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.1  1999/11/05 22:17:04  calderon
  * Made private copy constructor and operator= in StTrsDigitalSector.
  * Renamed DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast
@@ -33,7 +36,7 @@ public:
     StTrsDetectorReader();
     //    StTrsDetectorReader(string& fd, string& ver = "0");
     //    StTrsDetectorReader(St_DataSet& ev, string& ver = "0");
-    StTrsDetectorReader(StTpcRawDataEvent* ev, string& ver = string("TrsDatav1.0"));
+    StTrsDetectorReader(StTpcRawDataEvent* ev, string ver = string("TrsDatav1.0"));
     
     ~StTrsDetectorReader();
     

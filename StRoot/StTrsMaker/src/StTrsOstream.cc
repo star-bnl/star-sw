@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsOstream.cc,v 1.4 1999/11/05 22:18:16 calderon Exp $
+ * $Id: StTrsOstream.cc,v 1.5 1999/12/08 02:10:42 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,7 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsOstream.cc,v $
+ * Revision 1.5  1999/12/08 02:10:42  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.4  1999/11/05 22:18:16  calderon
+ *
  * Made private copy constructor and operator= in StTrsDigitalSector.
  * Renamed DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast
  * and use new "Fast" as default.
@@ -75,7 +79,7 @@ StTrsOstream::StTrsOstream(string streamName, int numberOfEvents, StTpcGeometry*
     mSectors = mGeomDb->numberOfSectors();
     mRows    = mGeomDb->numberOfRows();
     padsAtRow.resize(mRows);
-    for (int k=0; k<mRows; k++) padsAtRow[k]=mGeomDb->numberOfPadsAtRow(k+1);
+    for (unsigned int k=0; k<mRows; k++) padsAtRow[k]=mGeomDb->numberOfPadsAtRow(k+1);
     
     //
     // Open the specified file
@@ -110,7 +114,8 @@ void StTrsOstream::writeTrsEvent(StTrsRawDataEvent* EventData)
 {
     cout << "Writing Output to file " << endl;
     // Write output
-    for (unsigned int iSector = 0; iSector < mSectors; iSector++) { // sector loop
+    unsigned int iSector;
+    for (iSector = 0; iSector < mSectors; iSector++) { // sector loop
 	if(EventData->mSectors[iSector]) { // Make sure the sector has data
 	    StTrsDigitalSector* aDigitalSector = EventData->mSectors[iSector];
 	    cout << "Cleanup of Sector " << iSector+1 << endl;	
@@ -119,12 +124,14 @@ void StTrsOstream::writeTrsEvent(StTrsRawDataEvent* EventData)
 	    else { // sector has data, write it out
 		ofs << static_cast<unsigned short>(iSector) << " ";
 		cout << "Writing Sector " << iSector+1 << endl;
-		for (unsigned int iRow = 0; iRow < mRows; iRow++) { // row loop
+		unsigned int iRow;
+		for (iRow = 0; iRow < mRows; iRow++) { // row loop
 		    if (aDigitalSector->mData[iRow].size()>0) { //Make sure the row has data
 			ofs << static_cast<unsigned short>(iRow) << " ";
 // 			cout << endl;
 // 			PR(iRow);
-			for (unsigned int iPad = 0; iPad < padsAtRow[iRow]; iPad++) { // pad loop
+			int iPad;
+			for (iPad = 0; iPad < padsAtRow[iRow]; iPad++) { // pad loop
 // 			    PR(iPad);
 			    int lengthData = aDigitalSector->mData[iRow][iPad].size();
 			    if (lengthData){ // Make sure the pad has data
