@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.4 1999/07/26 16:21:26 lisa Exp $
+ * $Id: StHbtManager.cxx,v 1.5 1999/07/27 10:47:04 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
+ * Revision 1.5  1999/07/27 10:47:04  lisa
+ * now works in dev on linux and solaris - mistake in deleting picoEvents fixed
+ *
  * Revision 1.4  1999/07/26 16:21:26  lisa
  * always convert string to char when output - needed on solaris
  *
@@ -199,11 +202,14 @@ void StHbtManager::ProcessEvent(){
 	    for (PartIter2=StartInnerLoop;PartIter2!=EndInnerLoop;PartIter2++){
 	      // OBSOLETE	      StHbtPair* pair = new StHbtPair(*PartIter1,*PartIter2);
 	      ThePair->SetTrack2(*PartIter2);
+	      // testing...	      cout << "ThePair defined... going to pair cut... ";
 	      if (currentAnalysis->PairCut()->Pass(ThePair)){
+		// testing...		cout << " ThePair passed PairCut... ";
 		for (CorrFctnIter=currentAnalysis->CorrFctnCollection()->begin();
 		     CorrFctnIter!=currentAnalysis->CorrFctnCollection()->end();CorrFctnIter++){
 		  StHbtCorrFctn* CorrFctn = *CorrFctnIter;
 		  CorrFctn->AddMixedPair(ThePair);
+		  // testing...cout << " ThePair has been added to MixedPair method " << endl;
 		}
 	      }  // if passed pair cut
 	      // OBSOLETE	      delete pair;
@@ -213,6 +219,7 @@ void StHbtManager::ProcessEvent(){
 	// Now get rid of oldest stored pico-event in buffer.
 	// This means (1) delete the event from memory, (2) "pop" the pointer to it from the MixingBuffer
 	picoEventIter = currentAnalysis->MixingBuffer()->end();
+	picoEventIter--;   // bug fixed malisa 27jul99 - end() is one BEYOND the end! (besides crashing on linux, this was a memory leak)
 	delete *picoEventIter;
 	currentAnalysis->MixingBuffer()->pop_back();
       }  // if mixing buffer is full

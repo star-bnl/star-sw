@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.2 1999/07/19 14:24:05 hardtke Exp $
+ * $Id: StHbtEvent.cc,v 1.3 1999/07/27 10:47:04 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.3  1999/07/27 10:47:04  lisa
+ * now works in dev on linux and solaris - mistake in deleting picoEvents fixed
+ *
  * Revision 1.2  1999/07/19 14:24:05  hardtke
  * modifications to implement uDST
  *
@@ -37,6 +40,8 @@ StHbtEvent::~StHbtEvent(){
     delete *iter;
   }
   delete mTrackCollection;
+
+
   //must do the same for the V0 track collection
   StHbtV0TrackIterator V0iter;
   for (V0iter=mV0TrackCollection->begin();V0iter!=mV0TrackCollection->end();V0iter++){
