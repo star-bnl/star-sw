@@ -1,5 +1,8 @@
-// $Id: StMessageManager.h,v 1.8 1999/07/01 01:24:46 genevb Exp $
+// $Id: StMessageManager.h,v 1.9 1999/07/01 23:32:53 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.9  1999/07/01 23:32:53  genevb
+// Change default message typing
+//
 // Revision 1.8  1999/07/01 01:24:46  genevb
 // Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
 //
@@ -60,8 +63,8 @@ R__EXTERN   int type_of_call Msg_Enabled_(char* mess="", int *id=0,
                                   size_t len=0);
 R__EXTERN  void type_of_call Msg_Disable_(char* mess="",
                                   size_t len=0);
-R__EXTERN  void type_of_call StMessage_(char* mess="", char* type="I", char* opt="O",
-                                  size_t len1=0, size_t len2=1, size_t len3=1);
+R__EXTERN  void type_of_call StMessage_(char* mess="", char* type="", char* opt="O",
+                                  size_t len1=0, size_t len2=0, size_t len3=1);
 R__EXTERN  void type_of_call StInfo_(char* mess="", char* opt="O",
                                   size_t len1=0, size_t len2=1);
 R__EXTERN  void type_of_call StWarning_(char* mess="", char* opt="O",
@@ -102,7 +105,7 @@ class StMessageManager : public ostrstream {
    messTypeVec messCollection;
    virtual messVecIter FindMessageIter(const char* s1, char* s2="",
          char* s3="", char* s4="", messVec* list=0);
-   virtual        void BuildMessage(char* mess="", char* type="I",
+   virtual        void BuildMessage(char* mess="", char* type="",
                                                       char* opt="O");
  
  public:
@@ -110,7 +113,7 @@ class StMessageManager : public ostrstream {
    static StMessageManager* Instance();
 
 // Generic Messages:
-   virtual StMessageManager& Message(char* mess="", char* type="I",
+   virtual StMessageManager& Message(char* mess="", char* type="",
                                                       char* opt="O");
    virtual       void Print();
    virtual        int PrintList(messVec* list);
