@@ -13,9 +13,9 @@ class TH2S;
 
 class StTpcCalibSector {
 private :
-  int mSectorId; 
+  int mSectorId; //!
   const StTpcCalibSetup* mSetup; //!
-  int* mNumberOfPadAtRow; //! To be replaced by db
+  const int* mNumberOfPadAtRow; //! To be replaced by db
 
   TH1F* mHCorrupted;//!
   TH2F* mHCorruptedMap;//!
@@ -43,7 +43,7 @@ public :
   // Called at Init
   StTpcCalibSector(const StTpcCalibSetup* aSetup, 
 		   const int aSectorId,  
-		   int* aNumberOfPadAtRow); // To be replaced by db
+		   const int* aNumberOfPadAtRow); // To be replaced by db
   void readBadTable(ifstream* aInFile);
   void readDeadTable(ifstream* aInFile);
 
