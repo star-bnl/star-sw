@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventScavenger.h,v 2.4 2001/04/05 04:00:36 ullrich Exp $
+ * $Id: StEventScavenger.h,v 2.5 2002/01/17 02:06:29 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventScavenger.h,v $
+ * Revision 2.5  2002/01/17 02:06:29  ullrich
+ * Added the removal of objects recently added to StEvent.
+ *
  * Revision 2.4  2001/04/05 04:00:36  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -45,7 +48,10 @@ public:
     static bool removeV0Vertices(StEvent*);
     static bool removeXiVertices(StEvent*);
     static bool removeKinkVertices(StEvent*);
-
+    static bool removeFpdCollection(StEvent*);
+    static bool removeToFCollection(StEvent*);
+    static bool removeCalibrationVertices(StEvent*);
+ 
     static bool remove(StTrack*);
 
     static bool removeTpcHitsNotOnTracks(StEvent*);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventScavenger.cxx,v 2.6 2001/06/10 21:02:49 perev Exp $
+ * $Id: StEventScavenger.cxx,v 2.7 2002/01/17 02:06:29 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventScavenger.cxx,v $
+ * Revision 2.7  2002/01/17 02:06:29  ullrich
+ * Added the removal of objects recently added to StEvent.
+ *
  * Revision 2.6  2001/06/10 21:02:49  perev
  * Solaris: <typeinfo> removed
  *
@@ -86,6 +89,14 @@ bool StEventScavenger::removeKinkVertices(StEvent* evt)
     StSPtrVecKinkVertex &vec = evt->kinkVertices();
     for (unsigned int i=0; i<vec.size(); i++)
         vec[i]->makeZombie();
+    return true;
+}
+
+bool StEventScavenger::removeCalibrationVertices(StEvent* evt)
+{
+    if (!evt) return false;
+    for (unsigned int i=0; i<evt->numberOfCalibrationVertices(); i++)
+        evt->calibrationVertex(i)->makeZombie();
     return true;
 }
 
@@ -206,6 +217,26 @@ bool StEventScavenger::removeTriggerDetectorCollection(StEvent* evt)
 {
     if (evt && evt->triggerDetectorCollection()) {
         evt->triggerDetectorCollection()->makeZombie();
+        return true;
+    }
+    else
+        return false;
+}
+
+bool StEventScavenger::removeFpdCollection(StEvent* evt)
+{
+    if (evt && evt->fpdCollection()) {
+        evt->fpdCollection()->makeZombie();
+        return true;
+    }
+    else
+        return false;
+}
+
+bool StEventScavenger::removeToFCollection(StEvent* evt)
+{
+    if (evt && evt->tofCollection()) {
+        evt->tofCollection()->makeZombie();
         return true;
     }
     else
