@@ -1,9 +1,0 @@
-struct dst_rch {          /* dst_rch, container for DST table */ 
-    long      id;         /* primary key */
-    long      track_p;    /* Id of parent track */
-    long      volume_id;  /* Identify whether left or right RICH plane */
-    float     de;         /* energy deposition at hit */
-    float     p[3];       /* local momentum */
-    float     tof;        /* time of flight */
-    float     x[3];       /* coordinate (Cartesian) */
-};
