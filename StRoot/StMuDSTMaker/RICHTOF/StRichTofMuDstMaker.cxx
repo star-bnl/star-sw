@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichTofMuDstMaker.cxx,v 1.6 2002/03/10 20:28:42 dunlop Exp $
+ * $Id: StRichTofMuDstMaker.cxx,v 1.7 2002/03/17 02:12:15 dunlop Exp $
  *
  * Author: Thomas Ullrich, Oct 2000
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichTofMuDstMaker.cxx,v $
+ * Revision 1.7  2002/03/17 02:12:15  dunlop
+ * Remove FTPC tracks that project to (wide) tof cuts
+ *
  * Revision 1.6  2002/03/10 20:28:42  dunlop
  * Tweak logic of removing events
  *
@@ -418,6 +421,8 @@ bool StRichTofMuDstMaker::accept(StEvent* event)
 bool StRichTofMuDstMaker::acceptTof(StTrack* track)
 {    
     if (!track) return false;
+    if (track->topologyMap().trackFtpcEast() || track->topologyMap().trackFtpcWest()) return false;
+    
     if (track->flag() <=0) return false;
     
     // Check only if the tof accepts the event
@@ -452,6 +457,9 @@ bool StRichTofMuDstMaker::acceptTof(StTrack* track)
 bool StRichTofMuDstMaker::acceptRich(StTrack* track) 
 {
     
+    if (!track) return false;
+    
+    if (track->topologyMap().trackFtpcEast() || track->topologyMap().trackFtpcWest()) return false;
     if (!mEventAcceptedRich) return false;
     
     if (!(track->pidTraits(kRichId).size())) return false;
