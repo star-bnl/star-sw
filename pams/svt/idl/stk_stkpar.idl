@@ -25,6 +25,8 @@
        float     th_init;    /* initial th max */
        float     th_max;     /* largest step */
        float     th_step;    /* th step */
+       float     ssd_fac;    /* factor to open the cones for the ssd */
+       long      fast_search;/* flag for the fast search in stk_fillX.F */
    };
-/*  Last mod. for stk_stkpar: $Date: 1998/06/10 21:34:45 $ */
+/*  Last mod. for stk_stkpar: $Date: 1999/02/14 21:44:12 $ */
 

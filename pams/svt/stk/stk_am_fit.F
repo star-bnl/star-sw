@@ -499,8 +499,9 @@ c              wkw: store residuals
                   track(itrack).cres(ispt) = cir_res(ispt) 
                   track(itrack).lres(ispt) = lin_res(ispt)
                enddo                  
-               track(itrack).dedx(1)  = 0.    ! energy loss
-               track(itrack).dedx(2)  = 0.    ! error on above
+c commented out today next 2 lines
+C               track(itrack).dedx(1)  = 0.    ! energy loss
+C               track(itrack).dedx(2)  = 0.    ! error on above
                track(itrack).invpt    = invpt ! inverse radius of 
                                                     ! curvature
                track(itrack).psi      = psi   ! azimuthal angle of 
@@ -795,9 +796,10 @@ c                 wkw: store residuals
                   do ispt=1,nspt
                      track(itrack).cres(ispt) = 0 ! 3 points
                      track(itrack).lres(ispt) = lin_res(ispt)
-                  enddo                  
-                  track(itrack).dedx(1)  = 0. ! energy loss
-                  track(itrack).dedx(2)  = 0. ! error on above
+                  enddo
+c commented out today next 2 lines            
+C                  track(itrack).dedx(1)  = 0. ! energy loss
+C                  track(itrack).dedx(2)  = 0. ! error on above
                   track(itrack).invpt    = invpt ! inverse radius of 
                                                        ! curvat ure
                   track(itrack).psi      = psi ! azimuthal angle of 
@@ -832,9 +834,10 @@ c                 wkw: store residuals
                   do ispt=1,nspt
                      track(itrack).cres(ispt) = infinity
                      track(itrack).lres(ispt) = infinity
-                  enddo                  
-                  track(itrack).dedx(1)  = infinity ! energy loss
-                  track(itrack).dedx(2)  = infinity ! error on above
+                  enddo    
+c commented out today next 2 lines              
+C                  track(itrack).dedx(1)  = infinity ! energy loss
+C                  track(itrack).dedx(2)  = infinity ! error on above
                   track(itrack).pid      = infinity
                   track(itrack).invpt     = infinity ! inverse radius of curvature
                   track(itrack).psi      = infinity ! azimuthal angle of momentum at first point
@@ -871,9 +874,10 @@ c           wkw: store residuals
             do ispt=1,nspt
                track(itrack).cres(ispt) = infinity
                track(itrack).lres(ispt) = infinity
-            enddo                  
-            track(itrack).dedx(1)  = infinity ! energy loss
-            track(itrack).dedx(2)  = infinity ! error on above
+            enddo  
+c commented out today next 2 lines        
+C            track(itrack).dedx(1)  = infinity ! energy loss
+C            track(itrack).dedx(2)  = infinity ! error on above
             track(itrack).pid      = 0        ! no pid at this time
             track(itrack).invpt    = infinity ! inverse radius of curvature
             track(itrack).psi      = infinity ! azimuthal angle of momentum at
