@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: calculateEventPlaneEventCut.cxx,v 1.4 2001/11/14 21:07:19 lisa Exp $
+ * $Id: calculateEventPlaneEventCut.cxx,v 1.5 2003/08/04 20:21:27 perev Exp $
  *
  * Author: Randall Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: calculateEventPlaneEventCut.cxx,v $
+ * Revision 1.5  2003/08/04 20:21:27  perev
+ * warnOff
+ *
  * Revision 1.4  2001/11/14 21:07:19  lisa
  * Fixed several small things (mostly discarded const) that caused fatal errors with gcc2.95.3
  *
@@ -61,6 +64,7 @@ bool calculateEventPlaneEventCut::Pass(const StHbtEvent* ConstantEventIn){
     if (mFromHBT) mFlowMaker->FillFlowEvent(event);
     if (mFlowMaker->FlowEventPointer()) {
       mFlowMaker->FlowEventPointer()->SetPtWgt(false);
+      if (mFlowMaker->FlowEventPointer()->PtWgt()){/*warnOff*/}
       // First get RP for whole event
       mFlowMaker->FlowSelection()->SetSubevent(-1);
       double reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
@@ -74,6 +78,7 @@ bool calculateEventPlaneEventCut::Pass(const StHbtEvent* ConstantEventIn){
       event->SetReactionPlaneSubEventDifference(RP1-RP2,0);
       // Now with Pt Weighting
       mFlowMaker->FlowEventPointer()->SetPtWgt(true);
+      if (mFlowMaker->FlowEventPointer()->PtWgt()){/*warnOff*/}
       // First get RP for whole event
       mFlowMaker->FlowSelection()->SetSubevent(-1);
       reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
