@@ -156,7 +156,7 @@ $(ALL_GEN_DIRS) :
 	$(MKDIR) $(TARGET)
 
 $(ALL_LNK_DIRS) : $(OUT_DIR)/% : $(OUT_DIR)/.$(STAF_ARCH)/%
-	$(LN)  $(OUT_DIR)/.$(STAR_HOST_SYS)/$(STEM) $(OUT_DIR)/$(STEM)
+	$(LN)  $(OUT_DIR)/.@sys/$(STEM) $(OUT_DIR)/$(STEM)
 
 show: 
 	@echo STAF_SYS		:= $(STAF_SYS)
