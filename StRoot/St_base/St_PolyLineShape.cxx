@@ -1,4 +1,5 @@
 #include <TPolyLine3D.h>
+#include <TPolyMarker3D.h>
 #include "St_Node.h"
 #include "St_NodePosition.h"
 #include <TTUBE.h>
@@ -17,22 +18,27 @@ St_PolyLineShape::St_PolyLineShape()
    m_Shape = 0;
    m_Smooth = kFALSE;
    m_Connection= 0;
-   m_Line=0;
+   m_Points=0;
    SetWidthFactor();
    m_HasDrawn = kFALSE;
    m_ShapeType = kNULL;
 }
+
 //______________________________________________________________________________
-St_PolyLineShape::St_PolyLineShape(TPolyLine3D  *line,Option_t* option)
+#ifdef LINES
+St_PolyLineShape::St_PolyLineShape(TPolyLine3D  *points,Option_t* option)
+#else
+St_PolyLineShape::St_PolyLineShape(TPolyMarker3D  *points,Option_t* option)
+#endif
 {
    m_Shape       = new TTUBE("tube","tube","void",0.5,0.5);
    m_ShapeType   = kNULL;
    m_Smooth      = kFALSE;
    m_Connection  = 0;
-   m_Line        = line;
+   m_Points        = points;
    m_HasDrawn    = kFALSE;
    // Take in account the current node if any   
-   if (!m_Line) { 
+   if (!m_Points) { 
      Error("St_PolyLineShape","No polyline is defined");
      return;
    }
@@ -48,6 +54,7 @@ St_PolyLineShape::~St_PolyLineShape()
 //______________________________________________________________________________
 void St_PolyLineShape::Axis(TVirtualPad *p, Float_t width)
 {
+#if 0
    TVirtualPad *pad = p;
    TVirtualPad *savpad = 0;
    if (pad && pad != gPad) {
@@ -93,6 +100,7 @@ void St_PolyLineShape::Axis(TVirtualPad *p, Float_t width)
       lzview->Draw();
    }
    if (savpad) savpad->cd();
+#endif
  }   
 
 //______________________________________________________________________________
@@ -104,7 +112,7 @@ void St_PolyLineShape::Create()
 //______________________________________________________________________________
 Int_t St_PolyLineShape::SetConnection(EShapeTypes connection)
 {
-// Float_t size = 0.5*GetWidthFactor()*(m_Line->GetLineWidth());
+// Float_t size = 0.5*GetWidthFactor()*(m_Points->GetLineWidth());
  Float_t size = 0.5;
 
  if (m_ShapeType != connection) {
@@ -125,7 +133,7 @@ Int_t St_PolyLineShape::SetConnection(EShapeTypes connection)
 //______________________________________________________________________________
 Int_t St_PolyLineShape::DistancetoPrimitive(Int_t px, Int_t py)
 {
- if (m_Line) return m_Line->DistancetoPrimitive(px,py);
+ if (m_Points) return m_Points->DistancetoPrimitive(px,py);
  return 999999;
 }
 
@@ -137,8 +145,8 @@ void St_PolyLineShape::Draw(Option_t *opt)
 
   Create();
 
-  if (m_Line) {
-//   m_Line->Draw();
+  if (m_Points) {
+//   m_Points->Draw();
     AppendPad();
     m_HasDrawn = kTRUE;
   }  
@@ -147,7 +155,7 @@ void St_PolyLineShape::Draw(Option_t *opt)
 //______________________________________________________________________________
 void St_PolyLineShape::ExecuteEvent(Int_t event, Int_t px, Int_t py)
 {
- if (m_Line) m_Line->ExecuteEvent(event,px, py);
+ if (m_Points) m_Points->ExecuteEvent(event,px, py);
 }
 
 //______________________________________________________________________________
@@ -180,8 +188,11 @@ void St_PolyLineShape::PaintNode(Float_t *start,Float_t *end,Option_t *option)
     if (!shape) shape = m_Connection;
 
     gyrot(rotate,cosa,sina,mrot);
-  
-    Float_t width = GetWidthFactor()*(m_Line->GetLineWidth());
+#ifdef LINES  
+    Float_t width = GetWidthFactor()*(m_Points->GetLineWidth());
+#else
+    Float_t width = GetWidthFactor()*(m_Points->GetMarkerSize());
+#endif
 
     mrot[0][0] *= width;
     mrot[0][1] *= width;
@@ -195,11 +206,16 @@ void St_PolyLineShape::PaintNode(Float_t *start,Float_t *end,Option_t *option)
     mrot[2][1] *= length;
     mrot[2][2] *= length;
 
+#ifdef LINES  
+    Color_t color = m_Points->GetLineColor();
+#else
+    Color_t color = m_Points->GetMarkerColor();
+#endif
 
     St_Node node("SegmentNode","SegmentNode", shape);
-    node.SetLineColor(m_Line->GetLineColor());
+    node.SetLineColor(color);
     if (!m_Shape) node.SetVisibility(2);
-    node.SetLineColor(m_Line->GetLineColor());
+    node.SetLineColor(color);
 
     TRotMatrix matrix ("rotate","rotate",&mrot[0][0]);
     St_NodePosition position(&node,nodeposition[0],nodeposition[1]
@@ -222,7 +238,7 @@ void St_PolyLineShape::PaintNode(Float_t *start,Float_t *end,Option_t *option)
     TRotMatrix kneeMatrix("knee","knee",&mrot[0][0]);
     St_Node knee("ConnectionNode","ConnectionNode", m_Connection);
     St_NodePosition kneePosition(&knee, 0, 0, 0.5, &kneeMatrix);
-    knee.SetLineColor(m_Line->GetLineColor());
+    knee.SetLineColor(color);
     node.Add(&knee,&kneePosition);
 
     node.PaintNodePosition(option, &position);
@@ -231,24 +247,24 @@ void St_PolyLineShape::PaintNode(Float_t *start,Float_t *end,Option_t *option)
 //______________________________________________________________________________
 void St_PolyLineShape::Paint(Option_t *opt)
 {
-  if (!m_Line) return;
+  if (!m_Points) return;
   if (!strstr(opt, "x3d"))
-     m_Line->Paint(opt);
+     m_Points->Paint(opt);
   else
-     m_Line->Paint(opt);
+     m_Points->Paint(opt);
 //     Paint3d(opt);
 }
 
 //______________________________________________________________________________
 void St_PolyLineShape::Paint3d(Option_t *opt)
 {
- if (!m_Line) return;
+ if (!m_Points) return;
 
  Create();
 
  struct XYZ { Float_t xyz[3]; } *points;
- points  = (XYZ *)(m_Line->GetP());
- Int_t size      = m_Line->GetN()-1;
+ points  = (XYZ *)(m_Points->GetP());
+ Int_t size      = m_Points->GetN()-1;
   
  for (Int_t i=0;i<size;i++) 
       PaintNode((Float_t *)(points+i+1),(Float_t *)(points+i),opt);      
@@ -336,5 +352,5 @@ void St_PolyLineShape::Sizeof3D() const
 {
 //*-*-*-*-*-*-*Return total X3D size of this shape with its attributes*-*-*-*-*-*
 //*-*          =======================================================
-  if (m_Line)  m_Line->Sizeof3D();
+  if (m_Points)  m_Points->Sizeof3D();
 }
