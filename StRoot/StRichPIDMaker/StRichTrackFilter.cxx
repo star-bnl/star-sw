@@ -1,10 +1,14 @@
 /**********************************************************
- * $Id: StRichTrackFilter.cxx,v 1.3 2000/05/19 19:06:11 horsley Exp $
+ * $Id: StRichTrackFilter.cxx,v 1.4 2000/06/16 02:37:12 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrackFilter.cxx,v $
+ *  Revision 1.4  2000/06/16 02:37:12  horsley
+ *  many additions, added features to pad plane display (MIPS, rings, etc)
+ *  along with Geant info. Added StMcRichTrack. Modified access to hit collection.
+ *
  *  Revision 1.3  2000/05/19 19:06:11  horsley
  *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
  *
@@ -18,7 +22,7 @@
 #include "StRichTrackFilter.h"
 #include "StRichTrack.h"
 #include "StRrsMaker/StRichGeometryDb.h"
-#include "StEventTypes.h"
+#include "StEvent/StEventTypes.h"
 #include "SystemOfUnits.h"
 
 
@@ -27,9 +31,10 @@ using namespace units;
 #endif
 
 StRichTrackFilter::StRichTrackFilter()  {
-  mMomCut      = 0.25*GeV;
-  mImpactPar   = .33*centimeter;
-  mChi2Cut     = 2.0;
+  //mMomCut      = 0.5*GeV;
+  mMomCut      = -0.1*GeV;
+  mImpactPar   = 1*centimeter;
+  mChi2Cut     = 20.0;
   mMinNTPCHits = 20.0;
   myGeometryDb = StRichGeometryDb::getDb();
 }
@@ -40,7 +45,7 @@ void StRichTrackFilter::setTrack(StRichTrack* track)  {
   mStRichTrack      = track;
   mAngleOfIncidence = mStRichTrack->getTheta();
   mMomentum         = mStRichTrack->getMomentum();
-  mMIP              = mStRichTrack->getMIP();
+  mMIP              = mStRichTrack->getProjectedMIP();
   
   mFlag = mStRichTrack->getStTrack()->flag();
   mImpactParameter  = (double)mStRichTrack->getStTrack()->impactParameter();
@@ -60,7 +65,7 @@ bool StRichTrackFilter::trackAcceptable() {
  
   if ( (mMomentum.mag()   > mMomCut)       &&
         (mImpactParameter  < mImpactPar)   &&
-        (mAngleOfIncidence < 35.0*degree)  &&
+        (mAngleOfIncidence < 85.0*degree)  &&
         (mNumberOfTPCHits  > mMinNTPCHits) &&
         (mFlag > 0) ) {
     return true;

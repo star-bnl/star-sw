@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPIDAlgorithm.h,v 1.1 2000/05/19 19:09:15 horsley Exp $
+ * $Id: StRichPIDAlgorithm.h,v 1.2 2000/06/16 02:37:11 horsley Exp $
  *
  * Author: Matt Horsley apr 8, 2000
  ***************************************************************************
@@ -16,8 +16,8 @@
 #define StRichPIDAlgorithm_hh
 
 #include <vector>
-#include "StFunctional.h"
-#include "StEnumerations.h"
+#include "StEvent/StFunctional.h"
+#include "StEvent/StEnumerations.h"
 #include "StParticleDefinition.hh"
 #include "StParticleTypes.hh"
 

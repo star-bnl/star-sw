@@ -1,12 +1,16 @@
 /**********************************************************
- * $Id: StRichRingCalculator.cxx,v 1.2 2000/05/19 19:06:11 horsley Exp $
+ * $Id: StRichRingCalculator.cxx,v 1.3 2000/06/16 02:37:12 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingCalculator.cxx,v $
- *  Revision 1.2  2000/05/19 19:06:11  horsley
- *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
+ *  Revision 1.3  2000/06/16 02:37:12  horsley
+ *  many additions, added features to pad plane display (MIPS, rings, etc)
+ *  along with Geant info. Added StMcRichTrack. Modified access to hit collection.
+ *
+ *  fixed bug in Minimization routine, included StMagF stuff (commented out)
+ *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
  *
  *  Revision 2.1  2000/09/29 01:35:37  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
@@ -82,25 +86,20 @@ void StRichRingCalculator::setParticleType(StParticleDefinition* particle) {
 }
 double StRichRingCalculator::getRingWidth() const {
 void StRichRingCalculator::setParticleType(StParticleDefinition* particle) { 
-double StRichRingCalculator::getInnerDistance(StThreeVector<double>& testPoint,
-					      double& innerAngle) {
+double StRichRingCalculator::getInnerDistance(StThreeVector<double>& testPoint,double& innerAngle) {
   mOuterRing->setParticleType(particle);
   mMeanRing->setParticleType(particle);
   return (closestInnerRingPoint - testPoint).mag();
 
     mMeanRing->setParticleType(particle);
-double StRichRingCalculator::getOuterDistance(StThreeVector<double>& testPoint,
-					      double& outerAngle) {
-
+double StRichRingCalculator::getOuterDistance(StThreeVector<double>& testPoint,double& outerAngle) {
   innerAngle            = mInnerMinimization->getPsi();
   return (closestInnerRingPoint - testPoint).perp();
   return (closestOuterRingPoint - testPoint).mag();
 
     return (closestInnerRingPoint - testPoint).perp();
 double StRichRingCalculator::getOuterDistance(StThreeVectorF& testPoint,double& outerAngle) {
-double StRichRingCalculator::getMeanDistance(StThreeVector<double>& testPoint,
-					     double& meanAngle) {
-
+double StRichRingCalculator::getMeanDistance(StThreeVector<double>& testPoint,double& meanAngle) {
   outerAngle            = mOuterMinimization->getPsi();
   return (closestOuterRingPoint - testPoint).perp();
   return (closestMeanRingPoint - testPoint).mag();
