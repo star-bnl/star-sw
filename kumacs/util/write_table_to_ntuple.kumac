@@ -65,7 +65,9 @@ macro/global/import *
 
  hrout 0
  close [funit]
-
+ oid = staf_result(1); 
+ soc/deleteoid [oid] 
+ 
 return
 
 *******************************************************************
