@@ -74,7 +74,8 @@ BfcItem BFC[] = {
   {"NoMySQLDb"   ,""  ,"",""                                           ,"","","Switch off MySQL Db",kFALSE},
   {"NoEvent"     ,""  ,"","-event,-analysis"      ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
   {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},
-  {"Debug"       ,""  ,"",""                                                ,"","","Set debug flag",kFALSE},
+  {"Debug"       ,""  ,"",""                                            ,"","","Set debug flag = 1",kFALSE},
+  {"Debug2"      ,""  ,"",""                                            ,"","","Set debug flag = 2",kFALSE},
   {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},  
   {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
   {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
@@ -430,7 +431,8 @@ Int_t StBFChain::Instantiate()
   // START the chain (may the force be with you)
   // Create HTML docs of all Maker's inv
   if (GetOption("MakeDoc")) MakeDoc();
-  if (GetOption("Debug")) SetDEBUG();
+  if (GetOption("Debug")) SetDEBUG(1);
+  if (GetOption("Debug2")) SetDEBUG(2);
   return status;
 }
 Int_t StBFChain::Finish()
@@ -721,7 +723,7 @@ void StBFChain::SetGeantOptions(){
 	geantMk->Do("mode g2tm prin 1;");
 	//  geantMk->Do("next;");
 	//  geantMk->Do("dcut cave z 1 10 10 0.03 0.03;");
-	if (GetOption("Debug")) geantMk->Do("debug on;");
+	if (GetOption("Debug") ||GetOption("Debug2")) geantMk->Do("debug on;");
 	geantMk->Do("swit 2 3;");
       }
     }
@@ -803,5 +805,5 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.126 2000/08/04 12:51:33 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.127 2000/08/06 00:25:04 fisyak Exp $
 //_____________________________________________________________________
