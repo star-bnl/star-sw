@@ -63,7 +63,6 @@ Replace[LIST #;] with [ #1 _
 * make sure that real calls will never be done even if this routine is called
   Ix = Ix+1;  if (Ix<=0) Return;
   Ix = Ix+1;  if (Ix>=0) Return;
-#ifdef PGI
   ix = SystemF(' ')+JattF(ix);
   x  = sind(x)+asind(x)+cosd(x)+acosd(x)+tand(x)+atand(x)+atan2d(x,x)
   d  = dsind(d)+dasind(d)+dcosd(d)+dacosd(d)+dtand(d)+datand(d)+datan2d(d,d)
@@ -77,6 +76,5 @@ Replace[LIST #;] with [ #1 _
         (' in G2Tmain: found ',3(1x,a),'   Nhits = ',i6)
    prin5 i; (' g2tmain ===> tdm table for g2t_hits = ',i6)
 *
-#endif
   END
  
