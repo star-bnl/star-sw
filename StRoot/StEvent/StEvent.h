@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.10 2000/05/22 21:47:15 ullrich Exp $
+ * $Id: StEvent.h,v 2.11 2000/05/24 15:46:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 2.10  2000/05/22 21:47:15  ullrich
- * Added RICH collection and related methods.
+ * Revision 2.11  2000/05/24 15:46:10  ullrich
+ * Added setSummary() method.
  *
  * Revision 2.12  2000/06/19 01:32:15  perev
  *  Thomas StEvent branches added
@@ -144,6 +144,7 @@ public:
 
     StSPtrVecObject&                    content();  // for IO purposes only
 
+    void setRunId(Long_t);
     void setBunchCrossingNumber(ULong_t);
     void setTime(Long_t);
     void setTriggerMask(ULong_t);
