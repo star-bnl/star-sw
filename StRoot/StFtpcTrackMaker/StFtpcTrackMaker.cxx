@@ -1,11 +1,14 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.1 2000/05/10 13:39:28 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.2 2000/05/11 15:14:52 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.2  2000/05/11 15:14:52  oldi
+// Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
+//
 // Revision 1.1  2000/05/10 13:39:28  oldi
 // Initial version of StFtpcTrackMaker
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 10.05.2000
+//----------Last Modified: 11.05.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include <iostream.h>
@@ -291,9 +294,9 @@ void StFtpcTrackMaker::PrintInfo()
 {
   // prints some information
 
-  cout << "***************************************************************" << endl;
-  cout << "* $Id: StFtpcTrackMaker.cxx,v 1.1 2000/05/10 13:39:28 oldi Exp $ *" << endl;
-  cout << "**************************************************************" << endl;
+  cout << "******************************************************************" << endl;
+  cout << "* $Id: StFtpcTrackMaker.cxx,v 1.2 2000/05/11 15:14:52 oldi Exp $ *" << endl;
+  cout << "******************************************************************" << endl;
   
   if (Debug()) {
     StMaker::PrintInfo();

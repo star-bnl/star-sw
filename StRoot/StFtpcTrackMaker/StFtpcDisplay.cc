@@ -1,15 +1,18 @@
-// $Id: StFtpcDisplay.cc,v 1.1 2000/05/10 13:39:13 oldi Exp $
+// $Id: StFtpcDisplay.cc,v 1.2 2000/05/11 15:14:43 oldi Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.2  2000/05/11 15:14:43  oldi
+// Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
+//
 // Revision 1.1  2000/05/10 13:39:13  oldi
 // Initial version of StFtpcTrackMaker
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 10.05.2000
+//----------Last Modified: 11.05.2000
 //----------Copyright:     &copy MDO Production 2000
 
 #include "StFtpcDisplay.hh"
-#include "StFtpcConfMapHit.hh"
+#include "StFtpcConfMapPoint.hh"
 #include "StFtpcTrack.hh"
 #include "TMath.h"
 #include "TSystem.h"
@@ -212,10 +215,10 @@ void StFtpcDisplay::TrackInfo()
 
 
       cout << "Track: " << number << " Cluster: " << trackcluster << endl;
-      StFtpcConfMapHit *h;
+      StFtpcConfMapPoint *h;
       for (Int_t j = 0; j < trackcluster; j++) {
 	
-	h = (StFtpcConfMapHit *)hits->At(j);
+	h = (StFtpcConfMapPoint *)hits->At(j);
 	cout << "#" << h->GetHitNumber() << " address:" << (Int_t) h << endl;
 	phi_track->SetPoint(j, h->GetX(), h->GetY());
 	eta_track->SetPoint(j, h->GetZ(), h->GetY());
@@ -277,7 +280,7 @@ void StFtpcDisplay::TrackInfo()
 	// cout << "Track: " << i << " Cluster: " << trackcluster << endl;
 	for (Int_t j = 0; j < trackcluster; j++) {
 	  
-	  if ((StFtpcConfMapHit *)address == (StFtpcConfMapHit *)hits->At(j)) {
+	  if ((StFtpcConfMapPoint *)address == (StFtpcConfMapPoint *)hits->At(j)) {
 	    cout << "Track: " << i << " Cluster #" << j << endl;
 	  }
 	}
@@ -323,12 +326,12 @@ void StFtpcDisplay::Info()
        << endl << endl;
   cout << cluster_anz << " clusters in this event." << endl;
   
-  StFtpcConfMapHit *h;
+  StFtpcConfMapPoint *h;
   TPolyMarker *phi_points = new TPolyMarker(cluster_anz, 0, 0, "");
   TPolyMarker *eta_points = new TPolyMarker(cluster_anz, 0, 0, "");
   
   for (Int_t i = 0; i < cluster_anz; i++) {
-    h = (StFtpcConfMapHit *)mHit->At(i);
+    h = (StFtpcConfMapPoint *)mHit->At(i);
 
     cout << "No. " << i << " Pad: " << h->GetPadRow() << "/" << GetRowSegm(h) 
 	 << " Phi: " << h->GetPhi() << "/" << GetPhiSegm(h) 
@@ -509,7 +512,7 @@ void StFtpcDisplay::Info()
 
     for (Int_t j = 0; j < trackcluster; j++) {
 
-    h = (StFtpcConfMapHit *)hits->At(j);
+    h = (StFtpcConfMapPoint *)hits->At(j);
       
       x[i][j] =  h->GetX();
       y[i][j] =  h->GetY();
@@ -625,9 +628,9 @@ void StFtpcDisplay::ShowClusters()
   xy->Draw();
 
   TMarker *m = new TMarker[cluster_anz];
-  StFtpcConfMapHit *h;
+  StFtpcConfMapPoint *h;
   for (Int_t i = 0; i < cluster_anz; i++) {
-    h = (StFtpcConfMapHit *)mHit->At(i);
+    h = (StFtpcConfMapPoint *)mHit->At(i);
     m[i] = TMarker(h->GetX(), h->GetY(), 4);
 
     m[i].SetMarkerSize((TMath::Sqrt(h->GetX()*h->GetX()+h->GetY()*h->GetY()+h->GetZ()*h->GetZ())-163.)/98.*10.*0.1);
@@ -756,7 +759,7 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
     if (trackanz == 0 || trackanz == -2) { // show all tracks
       Int_t track_entries = mTrack->GetEntriesFast(); 
       
-      StFtpcConfMapHit *cluster;
+      StFtpcConfMapPoint *cluster;
       StFtpcTrack *track;
       TPolyLine3D *k;
       l = new TPolyLine3D[track_entries];
@@ -770,7 +773,7 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
 	// loop over all clusters
 	for (Int_t clusters = 0; clusters < cluster_entries && clusters < 100; clusters++) {
 
-	  cluster = (StFtpcConfMapHit *)track->GetHits()->At(clusters);
+	  cluster = (StFtpcConfMapPoint *)track->GetHits()->At(clusters);
 	  
 	  // fill point array
 	  x[clusters] = (Float_t)(cluster->GetX());
@@ -801,7 +804,7 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
     else { // option was set to a 'trackanz' != (0, -1, or -2) -> show only given tracks
       Int_t track_entries = trackanz;
       
-      StFtpcConfMapHit *cluster;
+      StFtpcConfMapPoint *cluster;
       StFtpcTrack *track;
       TPolyLine3D *k;
       l = new TPolyLine3D[track_entries];
@@ -815,7 +818,7 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
 	// loop over all clusters
 	for (Int_t clusters = 0; clusters < cluster_entries; clusters++) {
 	  
-	  cluster = (StFtpcConfMapHit *)track->GetHits()->At(clusters);
+	  cluster = (StFtpcConfMapPoint *)track->GetHits()->At(clusters);
 	  
 	  // fill point array
 	  x[clusters] = (Float_t)(cluster->GetX());
@@ -851,14 +854,14 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
     Float_t *value_minus = new Float_t[3*cluster_anz];
     Float_t *value = new Float_t[3*cluster_anz];
     
-    StFtpcConfMapHit *h;
+    StFtpcConfMapPoint *h;
     Int_t cl_plus = 0;
     Int_t cl_minus = 0;  
     Int_t cl = 0;
     
     // loop over all clusters
     for (Int_t i = 0; i < cluster_anz; i++) {
-      h = (StFtpcConfMapHit *)mHit->At(i);
+      h = (StFtpcConfMapPoint *)mHit->At(i);
       
       if (trackanz == -1 && h->GetUsage() == 1) { // don't show used clusters if '-1' option was given 
 	continue; 
@@ -1149,7 +1152,7 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
   if (value_plus) delete[] value_minus;
   if (value_minus) delete[] value_minus;
   
-  StFtpcConfMapHit *cluster;
+  StFtpcConfMapPoint *cluster;
   StFtpcTrack *track;
   
   // coordinates of trackpoints
@@ -1176,7 +1179,7 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
       // loop over all clusters
       for (Int_t clusters = 0; clusters < cluster_entries && clusters < 100; clusters++) {
 	
-	cluster = (StFtpcConfMapHit *)track->GetHits()->At(clusters);
+	cluster = (StFtpcConfMapPoint *)track->GetHits()->At(clusters);
 	
 	// fill point array
 	x[clusters] = (Float_t)(cluster->GetX());
@@ -1229,14 +1232,14 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
     Float_t *value_minus = new Float_t[3*cluster_anz];
     Float_t *value = new Float_t[3*cluster_anz];
     
-    StFtpcConfMapHit *h;
+    StFtpcConfMapPoint *h;
     Int_t cl_plus = 0;
     Int_t cl_minus = 0;  
     Int_t cl = 0;
     
     // loop over all clusters
     for (Int_t i = 0; i < cluster_anz; i++) {
-      h = (StFtpcConfMapHit *)mGeantHit->At(i);
+      h = (StFtpcConfMapPoint *)mGeantHit->At(i);
       
       // fill (+, -, both) cluster arrays
       value[cl++] = h->GetX();
@@ -1305,7 +1308,7 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
   if (value_plus) delete[] value_minus;
   if (value_minus) delete[] value_minus;
   
-  StFtpcConfMapHit *cluster;
+  StFtpcConfMapPoint *cluster;
   StFtpcTrack *track;
   
   // coordinates of trackpoints
@@ -1347,7 +1350,7 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
       // loop over all clusters
       for (Int_t clusters = 0; clusters < cluster_entries; clusters++) {
 	
-	cluster = (StFtpcConfMapHit *)track->GetHits()->At(clusters);
+	cluster = (StFtpcConfMapPoint *)track->GetHits()->At(clusters);
 	
 	// fill point array
 	x[clusters] = (Float_t)(cluster->GetX());
@@ -1385,7 +1388,7 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
       // loop over all clusters
       for (Int_t clusters = 0; clusters < cluster_entries; clusters++) {
 	
-	cluster = (StFtpcConfMapHit *)track->GetHits()->At(clusters);
+	cluster = (StFtpcConfMapPoint *)track->GetHits()->At(clusters);
 	
 	// fill point array
 	x[clusters] = (Float_t)(cluster->GetX());
@@ -1430,7 +1433,7 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
 	// loop over all clusters
 	for (Int_t clusters = 0; clusters < cluster_entries; clusters++) {
 	  
-	  cluster = (StFtpcConfMapHit *)track->GetHits()->At(clusters);
+	  cluster = (StFtpcConfMapPoint *)track->GetHits()->At(clusters);
 	  
 	  // fill point array
 	  x[clusters] = (Float_t)(cluster->GetX());
@@ -1467,14 +1470,14 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
     Float_t *value_minus = new Float_t[3*cluster_anz];
     Float_t *value = new Float_t[3*cluster_anz];
     
-    StFtpcConfMapHit *h;
+    StFtpcConfMapPoint *h;
     Int_t cl_plus = 0;
     Int_t cl_minus = 0;  
     Int_t cl = 0;
     
     // loop over all clusters
     for (Int_t i = 0; i < cluster_anz; i++) {
-      h = (StFtpcConfMapHit *)mHit->At(i);
+      h = (StFtpcConfMapPoint *)mHit->At(i);
       
       // fill (+, -, both) cluster arrays
       value[cl++] = h->GetX();

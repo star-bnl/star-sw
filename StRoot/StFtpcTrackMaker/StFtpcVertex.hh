@@ -1,14 +1,17 @@
-// $Id: StFtpcVertex.hh,v 1.1 2000/05/10 13:39:36 oldi Exp $
+// $Id: StFtpcVertex.hh,v 1.2 2000/05/11 15:14:54 oldi Exp $
 // $Log: StFtpcVertex.hh,v $
+// Revision 1.2  2000/05/11 15:14:54  oldi
+// Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
+//
 // Revision 1.1  2000/05/10 13:39:36  oldi
 // Initial version of StFtpcTrackMaker
 //
 
-/////////////////////////////////////////////////////////////////////////////////
-//                                                                             //
-// StFtpcHit class - representation of one FTPC cluster for the FTPC trackers. //
-//                                                                             //
-/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+//                                                             //
+// StFtpcVertex class - representation of the main vertex one  //
+//                                                             //
+/////////////////////////////////////////////////////////////////
 
 #ifndef STAR_StFtpcVertex
 #define STAR_StFtpcVertex

@@ -1,17 +1,17 @@
-// $Id: StFtpcHit.hh,v 1.1 2000/05/10 13:39:17 oldi Exp $
-// $Log: StFtpcHit.hh,v $
-// Revision 1.1  2000/05/10 13:39:17  oldi
-// Initial version of StFtpcTrackMaker
+// $Id: StFtpcPoint.hh,v 1.1 2000/05/11 15:14:49 oldi Exp $
+// $Log: StFtpcPoint.hh,v $
+// Revision 1.1  2000/05/11 15:14:49  oldi
+// Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
 //
 
-/////////////////////////////////////////////////////////////////////////////////
-//                                                                             //
-// StFtpcHit class - representation of one FTPC cluster for the FTPC trackers. //
-//                                                                             //
-/////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+//                                                                               //
+// StFtpcPoint class - representation of one FTPC cluster for the FTPC trackers. //
+//                                                                               //
+///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef STAR_StFtpcHit
-#define STAR_StFtpcHit
+#ifndef STAR_StFtpcPoint
+#define STAR_StFtpcPoint
 
 #include "TObject.h"
 #include "TClonesArray.h"
@@ -23,7 +23,7 @@
 
 #include "StFtpcTrack.hh"
 
-class StFtpcHit : public TObject {
+class StFtpcPoint : public TObject {
   
 private:
   
@@ -49,10 +49,10 @@ private:
   
 public:
   
-                 StFtpcHit();                                 // default constructor
-                 StFtpcHit(fcl_fppoint_st *point_st);         // constructor for data after cluster finding
-  virtual       ~StFtpcHit();                                 // destructor
-  virtual Int_t  Write();                                     // writes cluster to disc
+                 StFtpcPoint();                                 // default constructor
+                 StFtpcPoint(fcl_fppoint_st *point_st);         // constructor for data after cluster finding
+  virtual       ~StFtpcPoint();                                 // destructor
+  virtual Int_t  Write();                                       // writes cluster to disc
   
   // getter
   StThreeVector<double> GetCoord()  { return mCoord;    }
@@ -104,7 +104,7 @@ public:
   void    SetSigmaR(Double_t f)     {        mSigmaR =  f;  }
   
   
-  ClassDef(StFtpcHit, 1)   //Ftpc hit class
+  ClassDef(StFtpcPoint, 1)   //Ftpc point class
 };
 
 #endif

@@ -1,23 +1,23 @@
-// $Id: StFtpcConfMapHit.hh,v 1.1 2000/05/10 13:39:08 oldi Exp $
-// $Log: StFtpcConfMapHit.hh,v $
-// Revision 1.1  2000/05/10 13:39:08  oldi
-// Initial version of StFtpcTrackMaker
+// $Id: StFtpcConfMapPoint.hh,v 1.1 2000/05/11 15:14:40 oldi Exp $
+// $Log: StFtpcConfMapPoint.hh,v $
+// Revision 1.1  2000/05/11 15:14:40  oldi
+// Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
 //
 
-/////////////////////////////////////////////////////////////////////////////////////
-//                                                                                 //
-// StFtpcConfMapHit class - derived FTPC Hit class to represent additional data    //
-//                          needed by the conformel mapping track algorithm.       //
-//                                                                                 //
-/////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+//                                                                                   //
+// StFtpcConfMapPoint class - derived FTPC Hit class to represent additional data    //
+//                            needed by the conformel mapping track algorithm.       //
+//                                                                                   //
+///////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef STAR_StFtpcConfMapHit
-#define STAR_StFtpcConfMapHit
+#ifndef STAR_StFtpcConfMapPoint
+#define STAR_StFtpcConfMapPoint
 
-#include "StFtpcHit.hh"
+#include "StFtpcPoint.hh"
 #include "StFtpcVertex.hh"
 
-class StFtpcConfMapHit : public StFtpcHit {
+class StFtpcConfMapPoint : public StFtpcPoint {
   
 private:
   
@@ -59,9 +59,9 @@ private:
   
 public:
   
-            StFtpcConfMapHit();                                                 // default constructor
-            StFtpcConfMapHit(fcl_fppoint_st *point_st, StFtpcVertex *vertex);   // constructor
-  virtual  ~StFtpcConfMapHit();                                                 // destructor
+            StFtpcConfMapPoint();                                                 // default constructor
+            StFtpcConfMapPoint(fcl_fppoint_st *point_st, StFtpcVertex *vertex);   // constructor
+  virtual  ~StFtpcConfMapPoint();                                                 // destructor
   
   // getter
   Double_t   GetCircleDist() const   { return mCircleDist; }
@@ -121,10 +121,10 @@ public:
   void    SetIntPoint(const Double_t in_x = 0.,     const Double_t in_y = 0.,     const Double_t in_z = 0.,
 		      const Double_t in_x_err = 0., const Double_t in_y_err = 0., const Double_t in_z_err = 0.);  // set interaction point
   void    SetShiftedCoord();                                                           // set shifted coordinates  
-  void    SetAllCoord(const StFtpcConfMapHit *hit);                                    // set conformal mapping coordinates in respect to given hit
+  void    SetAllCoord(const StFtpcConfMapPoint *hit);                                  // set conformal mapping coordinates in respect to given hit
   void    SetConfCoord();                                                              // conformal mapping
   
-  ClassDef(StFtpcConfMapHit, 1)   //Ftpc conformal mapping hit class
+  ClassDef(StFtpcConfMapPoint, 1)   //Ftpc conformal mapping point class
 };
 
 #endif

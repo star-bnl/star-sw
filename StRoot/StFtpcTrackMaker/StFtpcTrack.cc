@@ -1,16 +1,19 @@
-// $Id: StFtpcTrack.cc,v 1.1 2000/05/10 13:39:22 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.2 2000/05/11 15:14:50 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.2  2000/05/11 15:14:50  oldi
+// Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
+//
 // Revision 1.1  2000/05/10 13:39:22  oldi
 // Initial version of StFtpcTrackMaker
 //
 
 //----------Author:        Holm G. H&uuml;mmler, Markus D. Oldenburg
-//----------Last Modified: 09.05.2000
+//----------Last Modified: 11.05.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcTrack.hh"
 #include "StFtpcVertex.hh"
-#include "StFtpcConfMapHit.hh"
+#include "StFtpcConfMapPoint.hh"
 #include "StFtpcMomentumFit.hh"
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -37,8 +40,24 @@ StFtpcTrack::StFtpcTrack()
   SetCenterX(0.);
   SetCenterY(0.);
   SetAlpha0(0.);
-  
-  ComesFromMainVertex(true);
+  SetPid(0);
+  SetNMax(0);
+
+  ComesFromMainVertex(false);
+
+  mP.setX(0.);
+  mP.setY(0.);
+  mP.setZ(0.);
+
+  mV.setX(0.);
+  mV.setY(0.);
+  mV.setZ(0.);
+
+  mQ = 0.;
+  mChiSq[0] = 0.;
+  mChiSq[1] = 0.;
+  mTheta = 0.;
+  mDca = 0.;
 }
 
 
@@ -79,10 +98,13 @@ StFtpcTrack::StFtpcTrack(fpt_fptrack_st *track_st, TClonesArray *hits)
 
   ComesFromMainVertex(track_st->flag);
 
-  SetRadius(0.);
+  SetRadius(1./track_st->curvature);
   SetCenterX(0.);
   SetCenterY(0.);
   SetAlpha0(0.);
+
+  SetNMax(track_st->nmax);
+  SetDca(track_st->impact);
 }
 
 
@@ -140,17 +162,17 @@ void StFtpcTrack::SetProperties(Bool_t usage, Int_t tracknumber)
     if (i != 0) {
       
       if (usage == true) {
-	((StFtpcConfMapHit *)mPoints->At(i))->SetNextHitNumber(((StFtpcConfMapHit *)mPoints->At(i-1))->GetHitNumber());
+	((StFtpcConfMapPoint *)mPoints->At(i))->SetNextHitNumber(((StFtpcConfMapPoint *)mPoints->At(i-1))->GetHitNumber());
       }
 
       else {
-	((StFtpcConfMapHit *)mPoints->At(i))->SetNextHitNumber(-1);
+	((StFtpcConfMapPoint *)mPoints->At(i))->SetNextHitNumber(-1);
       }
     }
     
 
-    ((StFtpcConfMapHit *)mPoints->At(i))->SetUsage(usage);
-    ((StFtpcConfMapHit *)mPoints->At(i))->SetTrackNumber(tracknumber);
+    ((StFtpcConfMapPoint *)mPoints->At(i))->SetUsage(usage);
+    ((StFtpcConfMapPoint *)mPoints->At(i))->SetTrackNumber(tracknumber);
   }
 
   return;
@@ -167,8 +189,8 @@ void StFtpcTrack::CalculateNMax()
   Double_t z_row[] = {162.75, 171.25, 184.05, 192.55, 205.35, 213.85, 226.65, 235.15, 247.95, 256.45};
   Short_t nmax = 0;
   
-  StFtpcConfMapHit *lastpoint  = (StFtpcConfMapHit *)this->GetHits()->Last();
-  StFtpcConfMapHit *firstpoint = (StFtpcConfMapHit *)this->GetHits()->First();
+  StFtpcConfMapPoint *lastpoint  = (StFtpcConfMapPoint *)this->GetHits()->Last();
+  StFtpcConfMapPoint *firstpoint = (StFtpcConfMapPoint *)this->GetHits()->First();
   
   Double_t z2 = firstpoint->GetZ();
   Double_t z1 = lastpoint->GetZ();
@@ -213,7 +235,7 @@ void StFtpcTrack::Fit()
   StThreeVector<double> *Hit=new StThreeVector<double>[numHits];
   for(Int_t i=0; i<numHits; i++)
     {
-      Hit[numHits -1 -i] = (((StFtpcConfMapHit *)mPoints->At(i))->GetCoord());
+      Hit[numHits -1 -i] = (((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord());
     }
 
   // call fit class
@@ -239,7 +261,7 @@ Double_t StFtpcTrack::CalcDca(StFtpcVertex *vertex)
   StThreeVector<double> vertexPos = vertex->GetCoord();
   
   for(Int_t i=0; i<numHits; i++) {
-    Hit[numHits -1 -i] = (((StFtpcConfMapHit *)mPoints->At(i))->GetCoord());
+    Hit[numHits -1 -i] = (((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord());
   }
 
   // call fit class
@@ -269,7 +291,7 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca)
   StThreeVector<double> vertexPos = vertex->GetCoord();
   
   for(Int_t i=0; i<numHits; i++) {
-    Hit[numHits -1 -i] = (((StFtpcConfMapHit *)mPoints->At(i))->GetCoord());
+    Hit[numHits -1 -i] = (((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord());
   }
 
   // call fit class
@@ -293,7 +315,7 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca)
     mChiSq[0] = looseFit->chi2Rad();
     mChiSq[1] = looseFit->chi2Lin();
     mQ = looseFit->usedCharge();
-    mRadius = looseFit->curvature();
+    mRadius = 1./looseFit->curvature();
   }
 
   else {
@@ -305,7 +327,7 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca)
     mChiSq[0] = Fit->chi2Rad();
     mChiSq[1] = Fit->chi2Lin();
     mQ = Fit->usedCharge();
-    mRadius = Fit->curvature();
+    mRadius = 1./Fit->curvature();
   }
   
   mTheta = mP.theta();
@@ -334,7 +356,7 @@ Int_t StFtpcTrack::Write(fpt_fptrack_st *trackTableEntry)
   }
   
   for(Int_t i=0; i<trackTableEntry->nrec; i++) {
-    Int_t rowindex = (((StFtpcConfMapHit *)mPoints->At(i))->GetPadRow());
+    Int_t rowindex = (((StFtpcConfMapPoint *)mPoints->At(i))->GetPadRow());
     
     if(rowindex > 10) {
       rowindex -= 10;
