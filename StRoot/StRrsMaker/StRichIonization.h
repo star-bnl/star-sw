@@ -1,5 +1,5 @@
 /***********************************************************************
- *  $Id: StRichIonization.h,v 1.3 2000/02/08 16:27:36 lasiuk Exp $
+ *  $Id: StRichIonization.h,v 1.4 2000/02/12 00:38:29 lasiuk Exp $
  *
  * Description:
  *   StRichIonization function object contains ionization algorithm
@@ -14,9 +14,12 @@
  *
  ***************************************************************************
  * $Log: StRichIonization.h,v $
- * Revision 1.3  2000/02/08 16:27:36  lasiuk
- * change to class.  Put dbs and random generators into
- * class as data members
+ * Revision 1.4  2000/02/12 00:38:29  lasiuk
+ * rename probability (max)
+ *
+ * Revision 1.5  2000/03/12 23:56:34  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
  *
  * Revision 1.4  2000/02/12 00:38:29  lasiuk
  * rename probability (max)
@@ -63,7 +66,7 @@ public:
     void operator()( const StRichGHit& );
 
     void splitSegment(const StRichGHit*, list<StRichMiniHit*>&) const;
-    double           mMaximumElectronEnergy;
+    double betheBloch(double bg);
     
 
     StRichPhysicsDb* mPhysicsDb;
