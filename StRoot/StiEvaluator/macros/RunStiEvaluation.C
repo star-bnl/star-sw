@@ -6,6 +6,7 @@
 //Compares momentum components for Pi- (GEANTID=9
 //
 
+#include <iostream.h> //So that Mike can run on windows...
 
 void RunStiEvaluation(const char* evalFName="Evaluation.root",
 		      const char* histFName="EvalHists.root",
