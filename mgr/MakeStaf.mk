@@ -1,17 +1,17 @@
 CWD := $(shell pwd)
 
 #
-ifndef STAF_MAKE_HOME
-  STAF_MAKE_HOME := $(STAR)/mgr
-  export STAF_MAKE_HOME
+ifndef STAR_MAKE_HOME
+  STAR_MAKE_HOME := $(STAR)/mgr
+  export STAR_MAKE_HOME
 endif
 
 
 ###	Suppress all imlicit rules
 .SUFFIXES:
 
-include $(STAF_MAKE_HOME)/MakeEnv.mk
-include $(STAF_MAKE_HOME)/MakeArch.mk
+include $(STAR_MAKE_HOME)/MakeEnv.mk
+include $(STAR_MAKE_HOME)/MakeArch.mk
 
 #
 #	INP_DIR & OUT_DIR could be declared in invoking
@@ -135,13 +135,13 @@ all : setup incs libs exes
 
 libs : $(ASPSLIB)
 $(ASPSLIB): %_LIB:
-	$(MAKE) $(subst /,$(SLASH), -f $(STAF_MAKE_HOME)/MakeAsp.mk lib INP_DIR=$(INP_DIR)/$(STEM) OUT_DIR=$(OUT_DIR))
+	$(MAKE) $(subst /,$(SLASH), -f $(STAR_MAKE_HOME)/MakeAsp.mk lib INP_DIR=$(INP_DIR)/$(STEM) OUT_DIR=$(OUT_DIR))
 
 
 exes : $(ASPSEXE)
 
 $(ASPSEXE): %_EXE : 
-	$(MAKE) $(subst /,$(SLASH), -f $(STAF_MAKE_HOME)/MakeAsp.mk exe INP_DIR=$(INP_DIR)/$(STEM) OUT_DIR=$(OUT_DIR))
+	$(MAKE) $(subst /,$(SLASH), -f $(STAR_MAKE_HOME)/MakeAsp.mk exe INP_DIR=$(INP_DIR)/$(STEM) OUT_DIR=$(OUT_DIR))
 
 incs : $(ALL_INC_INST)
 
@@ -173,6 +173,6 @@ show:
 	@echo INC_GEN_DIR       := $(INC_GEN_DIR)
 	@echo LN       		:= $(LN)
 	@echo MKDIR       	:= $(MKDIR)
-	$(MAKE) -f $(STAF_MAKE_HOME)/MakeAsp.mk show 
+	$(MAKE) -f $(STAR_MAKE_HOME)/MakeAsp.mk show 
 
 

@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.37  1998/12/12 00:58:42  fisyak
+#  remove STAF
+#
 #  Revision 1.36  1998/12/10 22:48:01  fine
 #  Correction for fit Window NT branch
 #
@@ -187,7 +190,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/12/10 22:48:01 $ 
+#           Last modification $Date: 1998/12/12 00:58:42 $ 
 #  default setings
 # Current Working Directory
 #
@@ -195,9 +198,9 @@ ifdef SILENT
 .SILENT:
 endif       
 
-ifdef STAF_MAKE_HOME
-  include $(STAF_MAKE_HOME)/MakeEnv.mk
-  include $(STAF_MAKE_HOME)/MakeArch.mk
+ifdef STAR_MAKE_HOME
+  include $(STAR_MAKE_HOME)/MakeEnv.mk
+  include $(STAR_MAKE_HOME)/MakeArch.mk
 else
   include $(STAR)/mgr/MakeEnv.mk
   include $(STAR)/mgr/MakeArch.mk
@@ -211,20 +214,20 @@ THREE      :=3
 FOUR       :=4
 FIVE       :=5
 
-ifndef STAF_MAKE_HOME
-  STAF_MAKE_HOME := $(STAR)/mgr
+ifndef STAR_MAKE_HOME
+  STAR_MAKE_HOME := $(STAR)/mgr
 endif
 
 ifndef MakePam
-  MakePam := $(STAF_MAKE_HOME)/MakePam.mk
+  MakePam := $(STAR_MAKE_HOME)/MakePam.mk
 endif
 
 ifndef MakeDll
-MakeDll :=$(STAF_MAKE_HOME)/MakeDll.mk
+MakeDll :=$(STAR_MAKE_HOME)/MakeDll.mk
 endif
 
 ifndef Makeloop
-Makeloop :=$(STAF_MAKE_HOME)/Makeloop.mk
+Makeloop :=$(STAR_MAKE_HOME)/Makeloop.mk
 endif
 
 export Makeloop
@@ -291,7 +294,10 @@ PKG     :=
 endif                          
 ifeq (sim,$(PKG))              
 PKG     :=
-endif                          
+endif
+ifndef SUBDIRS
+SUBDIRS := ./
+endif         
 endif
 ifeq ($(LEVEL), $(THREE)) #package level
 DOM_DIR := $(subst / ,,$(dir $(INP_DIR)/../) )
@@ -417,11 +423,12 @@ test_level:
 	@echo "CWD       = |"$(CWD)"|"
 	@echo "NAME      = |"$(NAME)"|"
 	@echo "ROOT_DIR  = |"$(ROOT_DIR)"|"
+	@echo "DOM_DIR   = |"$(DOM_DIR)"|"
 	@echo "TARGETS   = |"$(TARGETS)"|"
 	@echo "Makeloop  = |"$(Makeloop)"|"	
 	@echo "MakePam   = |"$(MakePam)"|"	
 	@echo "MakeDll   = |"$(MakeDll)"|"
-	@echo "STAF_MAKE_HOME=|"$(STAF_MAKE_HOME)"|"
+	@echo "STAR_MAKE_HOME=|"$(STAR_MAKE_HOME)"|"
 	@echo "DIRS=|"$(DIRS)"|"
 	@echo "NT=$(NT)"
 

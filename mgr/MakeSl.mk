@@ -1,8 +1,8 @@
-ifndef STAF_MAKE_HOME
-  STAF_MAKE_HOME := $(STAR)/mgr
+ifndef STAR_MAKE_HOME
+  STAR_MAKE_HOME := $(STAR)/mgr
 endif
-include $(STAF_MAKE_HOME)/MakeEnv.mk
-include $(STAF_MAKE_HOME)/MakeArch.mk
+include $(STAR_MAKE_HOME)/MakeEnv.mk
+include $(STAR_MAKE_HOME)/MakeArch.mk
 
 CPPFLAGS += -DSTAF -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON 
 INCL  =  -I$(STAR)/inc -I$(STAR)/.share/tables

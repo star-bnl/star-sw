@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.39 1998/12/04 01:17:30 fisyak Exp $
+# $Id: MakeDll.mk,v 1.40 1998/12/12 00:58:33 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.40  1998/12/12 00:58:33  fisyak
+# remove STAF
+#
 # Revision 1.39  1998/12/04 01:17:30  fisyak
 # fix for fortran source in StRoot
 #
@@ -36,14 +39,14 @@ endif
 .SUFFIXES:
 
 #
-ifndef STAF_MAKE_HOME
-  STAF_MAKE_HOME := $(STAR)/mgr
+ifndef STAR_MAKE_HOME
+  STAR_MAKE_HOME := $(STAR)/mgr
 endif
 
 ASU_MALLOC_OFF :=YES
 
-include $(STAF_MAKE_HOME)/MakeEnv.mk
-include $(STAF_MAKE_HOME)/MakeArch.mk
+include $(STAR_MAKE_HOME)/MakeEnv.mk
+include $(STAR_MAKE_HOME)/MakeArch.mk
 
 #
 #	INP_DIR & OUT_DIR could be declared in invoking

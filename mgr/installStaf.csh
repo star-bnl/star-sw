@@ -18,19 +18,19 @@ set OUT = $cwd
 echo OUT_DIR = $OUT
 
 # define where all Make*.mk are. Here the place is the same as input area
-if ( ! $?STAF_MAKE_HOME ) then
+if ( ! $?STAR_MAKE_HOME ) then
   if ( -e $cwd/mgr/MakeArch.mk ) then
-    setenv STAF_MAKE_HOME $cwd/mgr
+    setenv STAR_MAKE_HOME $cwd/mgr
   else
-    setenv STAF_MAKE_HOME ${STAR}/mgr
+    setenv STAR_MAKE_HOME ${STAR}/mgr
   endif
 endif
-echo installStaf: STAF_MAKE_HOME = $STAF_MAKE_HOME
+echo installStaf: STAR_MAKE_HOME = $STAR_MAKE_HOME
 #
 # setup stage: create OUTPUT directories and logon file makestaflogon.mk
 #  info about INP_DIR and OUT_DIR is saved into this file
 
-gmake -f ${STAF_MAKE_HOME}/MakeStaf.mk INP_DIR=${INP} OUT_DIR=${OUT} setup
+gmake -f ${STAR_MAKE_HOME}/MakeStaf.mk INP_DIR=${INP} OUT_DIR=${OUT} setup
 
 #
 if (-f asps/staf/dsl/star.mk) then
@@ -43,7 +43,7 @@ endif
 # if you add "exes" only executables will be created (no libraries)
 
 
-gmake -f ${STAF_MAKE_HOME}/MakeStaf.mk INP_DIR=${INP} OUT_DIR=${OUT} $NODEBUG
+gmake -f ${STAR_MAKE_HOME}/MakeStaf.mk INP_DIR=${INP} OUT_DIR=${OUT} $NODEBUG
 
 
 # Makefile does not touch input area

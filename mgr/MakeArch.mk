@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.51  1998/12/12 00:58:32  fisyak
+#  remove STAF
+#
 #  Revision 1.50  1998/12/11 22:08:11  perev
 #  redhat51
 #
@@ -128,7 +131,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/12/11 22:08:11 $ 
+#             Last modification $Date: 1998/12/12 00:58:32 $ 
 #. default setings
 
 MAKE  := gmake
@@ -247,10 +250,10 @@ ifneq (,$(findstring $(STAR_SYS),intel_wnt))
   A     :=lib
   Cxx   :=cc
   So    :=dll
-ifndef STAF_MAKE_HOME
-  STAF_MAKE_HOME := $(STAR)/mgr
+ifndef STAR_MAKE_HOME
+  STAR_MAKE_HOME := $(STAR)/mgr
 endif
-  MAKECERNLIB := $(subst \,\\,$(subst /,\,$(STAF_MAKE_HOME)/cernlib.bat)) 
+  MAKECERNLIB := $(subst \,\\,$(subst /,\,$(STAR_MAKE_HOME)/cernlib.bat)) 
 # MAKECERNLIB = call Y:\wrk\mgr\cernlib.bat
 
   MAKEDEPEND =echo Please RUN this makefile from UNIX, first
@@ -398,7 +401,7 @@ ifneq (,$(findstring $(STAR_SYS),i386_redhat51))
   CFLAGS   := $(DEBUG) -fPIC
   CPPFLAGS += f2cFortran
   LDFLAGS  := $(DEBUG) -Wl,-Bstatic
-  EXEFLAGS := $(DEBUG) -Wl,-Bdynamic    
+  EXEFLAGS := $(DEBUG) -Wl,-Bdynamic   
   SOFLAGS  := $(DEBUG) -shared  
 ##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lpgc -lm -ldl -rdynamic
   CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic
