@@ -90,7 +90,7 @@ C :>--------------------------------------------------------------------
          If (Gname(j).eq. 'PTOT')   iPT=j
          If (Gname(j).eq. 'LPTO')   iLP=j
       enddo
-      if (iX*iC*jX*jP.le.0) print *,' errenious G1 table ',iX,iP,jX,jP
+      if (iX*iC*jX*jP.le.0) print *,' errenious G1 table ',iX,iC,jX,jP
       if (iET*iPT*iLP.le.0) print *,' errenious G2 table ',iET,iPT,iLP
 *
       nh = p_hits_h.nok
