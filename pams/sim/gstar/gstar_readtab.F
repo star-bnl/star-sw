@@ -10,7 +10,7 @@
       Integer   ISLFLAG,NN(3)/1,1,1/
       character Cform*6 /'/6I 9F'/
 *
-      If (Idebug>1) print *,' GSTAR_ReadTab N=',TAB_h.nok
+      If (Idebug.gt.1) print *,' GSTAR_ReadTab N=',TAB_h.nok
       Call RbSTORE ('/EVNT/GENE/GENT',NN,Cform,15*TAB_h.nok,TAB_P(1).IstHep)
       Call AgGZKINE(ISLFLAG('INPU','PRIN'))
       GSTAR_READTAB = 0
