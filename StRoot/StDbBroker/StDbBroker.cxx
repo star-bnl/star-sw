@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.6 2000/01/10 20:31:16 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.7 2000/01/14 14:49:10 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.7  2000/01/14 14:49:10  porter
+ * set verbose level for checking, added $Id & $Logs, & made node container
+ * more robust for interactions with StDbLib
+ *
  * Revision 1.6  2000/01/10 20:31:16  porter
  * modified StDbBroker to be an interface to the DB-interface, StDbLib.
  *  - old functionality is retained for the short-term & modifications
@@ -74,7 +78,7 @@ char **StDbBroker::GetComments(St_Table *parentTable)
 }
 
 //_____________________________________________________________________________
-StDbBroker::StDbBroker(): m_structName(0), m_tableName(0), m_tableVersion(0), m_database(0), m_Nodes(0), m_Tree(0) {
+StDbBroker::StDbBroker(): m_structName(0), m_tableName(0), m_tableVersion(0), m_database(0), m_isVerbose(0), m_Nodes(0), m_Tree(0) {
 
   mgr=StDbManager::Instance();
 
@@ -263,17 +267,28 @@ dbConfig_st*
 StDbBroker::InitConfig(const char* configName, int& numRows, char* versionName)
 {
 
-if(m_Nodes)delete m_Nodes;
-m_Nodes=new dbNodes;
+  if(m_Nodes){ 
+    delete m_Nodes;
+    m_Nodes = 0;
+  }
 
 if(m_Tree) delete m_Tree;
 
-if(versionName){
-  m_Tree=mgr->initConfig(configName);
+if(!versionName){
+  m_Tree=mgr->initConfig(configName,"reconV0");
 }else{
   m_Tree=mgr->initConfig(configName,versionName);
 }
 
+ if(m_isVerbose){
+ cout << "****************************************************************"<<endl;
+ cout << "***    Will Print the Tree "<<endl;
+ mgr->setVerbose(true);
+ m_Tree->printTree(0);
+ mgr->setVerbose(false);
+ cout << "***    End Print the Tree "<<endl;
+ cout << "****************************************************************"<<endl;
+ };
 dbConfig_st* configTable = 0;
 numRows = 0;
 if(!buildNodes(m_Tree,0)) return configTable;
@@ -288,19 +303,17 @@ int
 StDbBroker::buildNodes(StDbConfigNode* parentNode, int pID){
 
 if(!parentNode) return 0;
-if(!m_Nodes) m_Nodes=new dbNodes;
+if(!m_Nodes) {
+  m_Nodes=new dbNodes;
+  m_Nodes->addNode(parentNode,0);
+}
+
 int cID;
 
 // check for tables in this Node
    if( (parentNode->hasData()) ){   
       TableIter* itr = parentNode->getTableIter();
-      while(!itr->done()){
-        if(!(cID=m_Nodes->addNode(itr->next()))){
-          return 0;
-        } else {
-          m_Nodes->setParentID(pID);
-        }
-      }
+      while(!itr->done())cID=m_Nodes->addNode(itr->next(),pID);
       delete itr;
    }
 
@@ -309,23 +322,16 @@ int cID;
 // check for children of this Node
    if((parentNode->hasChildren())){
      next=parentNode->getFirstChildNode(); 
-     if(!(cID=m_Nodes->addNode(next)) ){
-       return 0;
-     } else {
-       m_Nodes->setParentID(pID);
-     }
-     return buildNodes(next, cID);
+     cID=m_Nodes->addNode(next,pID);
+     if(!buildNodes(next, cID))return 0;
    }
 
 // check for siblings of this Node
+   int parID;
    if( (next=parentNode->getNextNode()) ){
-      pID=m_Nodes->getParentID(pID);
-      if(!(cID=m_Nodes->addNode(next)) ){
-        return 0;
-      } else {
-       m_Nodes->setParentID(pID);
-      }
-      return buildNodes(next, cID);
+      parID=m_Nodes->getParentID(pID);
+      cID=m_Nodes->addNode(next,parID);
+      if(!buildNodes(next, cID))return 0;
    }
 
 return 1;       
@@ -381,6 +387,18 @@ int parID;
    cTab[i-1].tabID=i;
    cTab[i-1].parID=parID;
 
+ }
+
+ if(m_isVerbose){
+   cout <<"****************************************************"<<endl;
+   cout <<"********* Will print dbConfig table "<<endl;
+ for(int k=0; k<numRows; k++) {
+   cout << "row "<<k<<" name =" << cTab[k].tabname<< " tid= "<< cTab[k].tabID;
+   cout << " type = "<<cTab[k].tabtype;
+   cout << " parent =" << cTab[k].parname << " pid= " << cTab[k].parID<<endl;
+ }   
+   cout <<"********* End print dbConfig table "<<endl;
+   cout <<"****************************************************"<<endl;
  }
 
 return cTab;

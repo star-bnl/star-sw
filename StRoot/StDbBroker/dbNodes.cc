@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: dbNodes.cc,v 1.1 2000/01/10 20:31:17 porter Exp $
+ * $Id: dbNodes.cc,v 1.2 2000/01/14 14:49:10 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: dbNodes.cc,v $
+ * Revision 1.2  2000/01/14 14:49:10  porter
+ * set verbose level for checking, added $Id & $Logs, & made node container
+ * more robust for interactions with StDbLib
+ *
  * Revision 1.1  2000/01/10 20:31:17  porter
  * modified StDbBroker to be an interface to the DB-interface, StDbLib.
  *  - old functionality is retained for the short-term & modifications
@@ -21,7 +25,7 @@
 #include "dbNodes.h"
 
 
-dbNodes::dbNodes(): numNodes(0), curNode(0), maxList(500), curPids(0) {
+dbNodes::dbNodes(): numNodes(0), curNode(0), maxList(500) {
 
   mpids = new int[maxList];
 
@@ -30,12 +34,14 @@ dbNodes::dbNodes(): numNodes(0), curNode(0), maxList(500), curPids(0) {
 ////////////////////////////////////////////////////////
 
 int
-dbNodes::addNode(StDbNode* node){
+dbNodes::addNode(StDbNode* node, int parentID){
 
  mnodes.push_back(node);
+ if(numNodes==maxList) extendParentList();
+ mpids[numNodes]=parentID;
  numNodes++;
 
-return numNodes;
+return numNodes-1;
 }
 
 ////////////////////////////////////////////////////////
@@ -49,24 +55,6 @@ dbNodes::getNode(int index){
 
 }
 
-////////////////////////////////////////////////////////
-
-void
-dbNodes::setParentID(int index){
-
-  if(curPids==maxList){
-    int newMax = 2*maxList;
-    int* tmpList = new int[newMax];
-    memcpy(tmpList,mpids,maxList*sizeof(int));
-    delete [] mpids;
-    mpids = tmpList;
-    maxList = newMax;
-  }
-    
-  mpids[curPids]=index;
-  curPids++;
-
-}
 
 ////////////////////////////////////////////////////////
 

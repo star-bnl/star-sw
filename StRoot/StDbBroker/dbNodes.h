@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: dbNodes.h,v 1.1 2000/01/10 20:31:17 porter Exp $
+ * $Id: dbNodes.h,v 1.2 2000/01/14 14:49:10 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: dbNodes.h,v $
+ * Revision 1.2  2000/01/14 14:49:10  porter
+ * set verbose level for checking, added $Id & $Logs, & made node container
+ * more robust for interactions with StDbLib
+ *
  * Revision 1.1  2000/01/10 20:31:17  porter
  * modified StDbBroker to be an interface to the DB-interface, StDbLib.
  *  - old functionality is retained for the short-term & modifications
@@ -42,17 +46,17 @@ int curNode;
 
 int*   mpids;
 int maxList;
-int curPids;
+
+  void extendParentList();
 
 public:
 
   dbNodes();
   ~dbNodes() { };
 
-  virtual int       addNode(StDbNode* node); 
+  virtual int       addNode(StDbNode* node, int parentID); 
   virtual StDbNode* getNode(int index)     ;
 
-  virtual void      setParentID(int index) ;
   virtual int       getParentID(int index) ;
   virtual StDbNode* getParent(int index)   ;
 
@@ -67,6 +71,17 @@ int dbNodes::getNumNodes(){ return numNodes; }
 
 inline
 void dbNodes::reset(){ curNode=0; }
+
+inline
+void dbNodes::extendParentList() {
+    int newMax = 2*maxList;
+    int* tmpList = new int[newMax];
+    memcpy(tmpList,mpids,maxList*sizeof(int));
+    delete [] mpids;
+    mpids = tmpList;
+    maxList = newMax;
+}
+ 
 
 #endif
 

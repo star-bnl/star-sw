@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: dbNodeArray.h,v 1.1 2000/01/10 20:31:17 porter Exp $
+ * $Id: dbNodeArray.h,v 1.2 2000/01/14 14:49:10 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: dbNodeArray.h,v $
+ * Revision 1.2  2000/01/14 14:49:10  porter
+ * set verbose level for checking, added $Id & $Logs, & made node container
+ * more robust for interactions with StDbLib
+ *
  * Revision 1.1  2000/01/10 20:31:17  porter
  * modified StDbBroker to be an interface to the DB-interface, StDbLib.
  *  - old functionality is retained for the short-term & modifications
@@ -28,10 +32,9 @@ public:
 
   virtual ~dbNodeArray(){};
 
-  virtual int       addNode(StDbNode* node)    = 0;
+  virtual int       addNode(StDbNode* node, int parentID)    = 0;
   virtual StDbNode* getNode(int index)         = 0;
 
-  virtual void      setParentID(int index)     = 0;
   virtual int       getParentID(int index)     = 0;
   virtual StDbNode* getParent(int index)       = 0;
 
