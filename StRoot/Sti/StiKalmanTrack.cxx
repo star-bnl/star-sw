@@ -6,6 +6,8 @@
 #include "StiDefaultMutableTreeNode.h"
 #include "StiKalmanTrackNode.h"
 #include "StiKalmanTrack.h"
+#include "StiDetector.h"
+#include "StiPlacement.h"
 
 ostream& operator<<(ostream&, const StiHit&);
 
@@ -286,8 +288,7 @@ StiHit * StiKalmanTrack::getHit(int index)
   return 0;
 }
 
-void StiKalmanTrack::initialize(double alpha, 
-				double eta,
+void StiKalmanTrack::initialize(double eta,
 				double curvature,
 				double tanl,
 				const hitvector & v)
@@ -297,6 +298,8 @@ void StiKalmanTrack::initialize(double alpha,
     {
       cout <<"StiKalmanTrack::initialize()\tERROR:\ttrackNodeFactory==0.  Abort"<<endl;
     }
+
+  double alpha;
   
   hitvector::const_iterator it;
   StiKalmanTrackNode * newNode;
@@ -349,6 +352,7 @@ void StiKalmanTrack::initialize(double alpha,
     //newNode = addHit(hit); this is done in the set call below...
     state[0] = hit->y(); 
     state[1] = hit->z(); 
+    alpha = hit->detector()->getPlacement()->getNormalRefAngle();
     newNode->set(i, hit, alpha, hit->x(), state,error, 0., 0.);
     i++;
   }
