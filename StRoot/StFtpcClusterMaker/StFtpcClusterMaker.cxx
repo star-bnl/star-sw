@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.6 2000/02/04 13:49:36 hummler Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.7 2000/02/24 15:18:42 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.7  2000/02/24 15:18:42  jcs
+// inactivate histograms for MDC3
+//
 // Revision 1.6  2000/02/04 13:49:36  hummler
 // upgrade ffs:
 // -remove unused fspar table
@@ -91,13 +94,13 @@ Int_t StFtpcClusterMaker::Init(){
   m_gaspar     = (St_ffs_gaspar   *)local("ffspars/gaspar"  );
 
 // 		Create Histograms
-  m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,7,0.,8.);
-  m_row        = new TH1F("fcl_row"	,"FTPC rows"			,20,1.,21.);
-  m_sector     = new TH1F("fcl_sector"	,"FTPC sectors"			,6,1.,7.);
-  m_pads       = new TH1F("fcl_pads"	,"FTPC pads"			,80,1.,161.);
-  m_timebins   = new TH1F("fcl_timebins","FTPC timebins"		,100,1.,257.);
-  m_row_sector = new TH2F("fcl_row_sector","FTPC(fcl) row vs. sector"	,20,1.,21.,6,1.,7.);
-  m_npad_nbin  = new TH2F("fcl_pad_bin"	,"FTPC(fcl) pad vs. timebin"	,80,1.,161.,100,1.,257.);
+//m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,7,0.,8.);
+//m_row        = new TH1F("fcl_row"	,"FTPC rows"			,20,1.,21.);
+//m_sector     = new TH1F("fcl_sector"	,"FTPC sectors"			,6,1.,7.);
+//m_pads       = new TH1F("fcl_pads"	,"FTPC pads"			,80,1.,161.);
+//m_timebins   = new TH1F("fcl_timebins","FTPC timebins"		,100,1.,257.);
+//m_row_sector = new TH2F("fcl_row_sector","FTPC(fcl) row vs. sector"	,20,1.,21.,6,1.,7.);
+//m_npad_nbin  = new TH2F("fcl_pad_bin"	,"FTPC(fcl) pad vs. timebin"	,80,1.,161.,100,1.,257.);
 
   return StMaker::Init();
 }
@@ -208,7 +211,8 @@ Int_t StFtpcClusterMaker::Make()
     }
   }
   
-  MakeHistograms(); // FTPC cluster finder histograms
+// Deactivate histograms for MDC3
+//MakeHistograms(); // FTPC cluster finder histograms
   return iMake;
 }
 //_____________________________________________________________________________
