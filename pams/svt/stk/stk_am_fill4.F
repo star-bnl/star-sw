@@ -67,7 +67,7 @@ C     =====================
 C     Local Declarations:
 C     ===================
       real       x(3,0:7), v(3,7,0:7), vm(7,0:7), cth, cthij(7,0:7)
-      integer    extra(7), ispts(0:7), ispt, jspt(0:7), iwafer(0:7)
+      integer    extra(7), ispts(1:7), ispt, jspt(0:7), iwafer(0:7)
       integer    jwafer(0:7), islayer_hits
       integer    iwafer1, iwafer2, n, kwafer
       integer    iladder, iladder1, iladder2
@@ -1319,7 +1319,7 @@ c            if ((islayer_hits.ge.4)) then ! least 3 super layer hits
                track(itrack).nspt       = ispt
                track(itrack).id         = itrack
                ispt = 0
-               do k = 1, 6
+               do k = 0, 7
                   if (ispts(k).gt.0) then
                      ispt = ispt + 1
 C     spt(ispts(k)).id_track     = itrack
