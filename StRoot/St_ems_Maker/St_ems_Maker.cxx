@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.cxx,v 1.17 2000/03/30 18:36:02 akio Exp $
+// $Id: St_ems_Maker.cxx,v 1.18 2000/06/23 19:57:06 fisyak Exp $
 // $Log: St_ems_Maker.cxx,v $
+// Revision 1.18  2000/06/23 19:57:06  fisyak
+// remove access to params
+//
 // Revision 1.17  2000/03/30 18:36:02  akio
 // delete stlib stuff
 //
@@ -97,7 +100,7 @@ St_ems_Maker::~St_ems_Maker() { }
 //_____________________________________________________________________________
 Int_t St_ems_Maker::Init(){
 
-  St_DataSet *emcPar = GetInputDB("params/emc");
+  St_DataSet *emcPar = GetInputDB("emc");
   assert(emcPar);   
   St_DataSetIter       local(emcPar);
   m_ems_control     = (St_ems_control *)      local("ems/ems_control");
@@ -337,17 +340,26 @@ Int_t St_ems_Maker::fillStEvent(){
 void St_ems_Maker::printNameOfTables(){
   Char_t *path="/bfc/.make/.data/params/emc/";
   printf("**** Name of control table for ST_ems_Maker ****\n");
-  printf("** Type=St_ems_control       Name=%sems/%s \n", path,m_ems_control->GetName());
-  printf("** Type=St_control_toadc     Name=%sems/%s \n", path,m_control_toadc->GetName());
-  printf("** Type=St_ems_cal_control   Name=%scal/%s \n", path,m_ems_cal_control->GetName());
-  printf("** Type=St_emc_calib_header  Name=%scal/%s \n", path,m_org_ped_bemc_h->GetName());
-  printf("** Type=St_emc_pedestal      Name=%scal/%s \n", path,m_org_ped_bemc->GetName());
-  printf("** Type=St_emc_calib_header  Name=%scal/%s \n", path,m_org_slp_bemc_h->GetName());
-  printf("** Type=St_emc_adcslope      Name=%scal/%s \n", path,m_org_slp_bemc->GetName());
-  printf("** Type=St_emc_adcslope      Name=%scal/%s \n", path,m_org_slp_bemc->GetName());
+  printf("** Type=St_ems_control       Name=%sems/%s \n", 
+	 (const char*) m_ems_control->Path(),    m_ems_control->GetName());     
+  printf("** Type=St_control_toadc     Name=%sems/%s \n", 
+	 (const char*) m_control_toadc->Path(),  m_control_toadc->GetName());   
+  printf("** Type=St_ems_cal_control   Name=%scal/%s \n", 
+	 (const char*) m_ems_cal_control->Path(),m_ems_cal_control->GetName()); 
+  printf("** Type=St_emc_calib_header  Name=%scal/%s \n", 
+	 (const char*) m_org_ped_bemc_h->Path(), m_org_ped_bemc_h->GetName());  
+  printf("** Type=St_emc_pedestal      Name=%scal/%s \n", 
+	 (const char*) m_org_ped_bemc->Path(),   m_org_ped_bemc->GetName());    
+  printf("** Type=St_emc_calib_header  Name=%scal/%s \n", 
+	 (const char*) m_org_slp_bemc_h->Path(), m_org_slp_bemc_h->GetName());  
+  printf("** Type=St_emc_adcslope      Name=%scal/%s \n", 
+	 (const char*) m_org_slp_bemc->Path(),   m_org_slp_bemc->GetName());    
+  printf("** Type=St_emc_adcslope      Name=%scal/%s \n", 
+	 (const char*) m_org_slp_bemc->Path(),   m_org_slp_bemc->GetName());          
 
   path="/bfc/.make/.data/params/geant/";
-  printf("\n** Type=St_emc_adcslope      Name=%s%s \n", path,m_calb_calg->GetName());
+  printf("\n** Type=St_emc_adcslope      Name=%s%s \n", 
+	 (const char*)   m_calb_calg->Path(),      m_calb_calg->GetName());
   printf("**** \n");
 }
 //_____________________________________________________________________________
