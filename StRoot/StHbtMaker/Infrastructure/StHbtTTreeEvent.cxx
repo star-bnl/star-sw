@@ -140,6 +140,8 @@ void StHbtTTreeEvent::fillEventInfo(const StHbtEvent* event){
   mUncorrectedNumberOfNegativePrimaries = event->mUncorrectedNumberOfNegativePrimaries;
   mReactionPlane[0] = event->mReactionPlane[0];              
   mReactionPlane[1] = event->mReactionPlane[1];              
+  mReactionPlanePtWgt[0] = event->mReactionPlanePtWgt[0];              
+  mReactionPlanePtWgt[1] = event->mReactionPlanePtWgt[1];              
   mVertexX = event->mPrimVertPos.x();
   mVertexY = event->mPrimVertPos.y();
   mVertexZ = event->mPrimVertPos.z();

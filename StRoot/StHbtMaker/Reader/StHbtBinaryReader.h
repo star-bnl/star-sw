@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtBinaryReader.h,v 1.13 2001/06/21 19:18:42 laue Exp $ 
+ * $Id: StHbtBinaryReader.h,v 1.14 2001/07/20 20:03:57 rcwells Exp $ 
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtBinaryReader.h,v $
+ * Revision 1.14  2001/07/20 20:03:57  rcwells
+ * Added pT weighting and moved event angle cal. to event cut
+ *
  * Revision 1.13  2001/06/21 19:18:42  laue
  * Modified Files: (to match the changed base classes)
  * 	StHbtAsciiReader.cxx StHbtAsciiReader.h
@@ -42,10 +45,6 @@
 #ifndef StHbtBinaryReader_hh
 #define StHbtBinaryReader_hh
 
-
-class StFlowMaker;
-class StFlowEvent;
-class StFlowAnalysisMaker;
 class StHbtIOBinary;
 
 #include "StHbtMaker/Base/StHbtEventReader.hh"
@@ -78,9 +77,6 @@ private:
   unsigned short mStHbtEventVersion;
   unsigned short mStHbtTrackVersion;
   unsigned short mStHbtV0Version;
-
-  StFlowMaker* mFlowMaker;             //!
-  StFlowAnalysisMaker* mFlowAnalysisMaker; //!
 
   //  int mReaderStatus;                   //!
 
@@ -118,8 +114,6 @@ public:
   void SetFileName(const char*);
   void SetAppendix(const char*);
   void AddFileList(const char*);
-  void SetFlowMaker(StFlowMaker* flowMaker);
-  void SetFlowAnalysisMaker(StFlowAnalysisMaker* flowAnal);
 
  private:
   void init(const char* dir, const char* file, const char* appendix);
@@ -130,9 +124,5 @@ public:
       
 
 };
-inline void StHbtBinaryReader::SetFlowMaker(StFlowMaker* flowMaker){mFlowMaker = flowMaker;}
-inline void StHbtBinaryReader::SetFlowAnalysisMaker(StFlowAnalysisMaker* flowAnal) {
-  mFlowAnalysisMaker = flowAnal;
-}
 
 #endif

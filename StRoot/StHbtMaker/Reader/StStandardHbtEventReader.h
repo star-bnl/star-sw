@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.19 2001/06/23 21:55:45 laue Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.20 2001/07/20 20:03:57 rcwells Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
+ * Revision 1.20  2001/07/20 20:03:57  rcwells
+ * Added pT weighting and moved event angle cal. to event cut
+ *
  * Revision 1.19  2001/06/23 21:55:45  laue
  * *** empty log message ***
  *
@@ -133,10 +136,6 @@ class StKaonPlus;
 class StProton;
 class StTpcDedxPidAlgorithm;
 class StParticleDefinition;
-class StFlowMaker;
-class StFlowEvent;
-class StFlowAnalysisMaker;
-class StFlowSelection;
 
 class StStandardHbtEventReader : public StMaker, public StHbtEventReader{
 
@@ -150,9 +149,6 @@ private:
   StTrackType mTrackType;
   bool mReadTracks;
   bool mReadV0s;
-
-  StFlowMaker* mFlowMaker;             //!
-  StFlowAnalysisMaker* mFlowAnalysisMaker; //!
 
  protected:
 
@@ -176,8 +172,6 @@ private:
   void SetTrackType(StTrackType);
   void SetReadTracks(bool);
   void SetReadV0s(bool);
-  void SetFlowMaker(StFlowMaker* flowMaker);
-  void SetFlowAnalysisMaker(StFlowAnalysisMaker* flowAnal);
 
 #ifdef __ROOT__
   ClassDef(StStandardHbtEventReader, 1)
@@ -196,10 +190,6 @@ inline bool StStandardHbtEventReader::ReadV0s() { return mReadV0s;}
 inline void StStandardHbtEventReader::SetTrackType(StTrackType t) { mTrackType=t;}
 inline void StStandardHbtEventReader::SetReadTracks(bool b) { mReadTracks=b;}
 inline void StStandardHbtEventReader::SetReadV0s(bool b) { mReadV0s=b;}
-inline void StStandardHbtEventReader::SetFlowMaker(StFlowMaker* flowMaker){mFlowMaker = flowMaker;}
-inline void StStandardHbtEventReader::SetFlowAnalysisMaker(StFlowAnalysisMaker* flowAnal) {
-  mFlowAnalysisMaker = flowAnal;
-}
 
 #endif
 

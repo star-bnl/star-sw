@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtReactionPlaneAnalysis.cxx,v 1.1 2001/07/13 20:03:14 rcwells Exp $
+ * $Id: StHbtReactionPlaneAnalysis.cxx,v 1.2 2001/07/20 20:03:53 rcwells Exp $
  *
  * Author: Randall Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtReactionPlaneAnalysis.cxx,v $
+ * Revision 1.2  2001/07/20 20:03:53  rcwells
+ * Added pT weighting and moved event angle cal. to event cut
+ *
  * Revision 1.1  2001/07/13 20:03:14  rcwells
  * Adding reaction plane analysis
  *
@@ -142,7 +145,13 @@ StHbtString StHbtReactionPlaneAnalysis::Report()
 void StHbtReactionPlaneAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
   cout << " StHbtReactionPlaneAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) " << endl;
   // get right mixing buffer
-  mReactionPlaneAngle = hbtEvent->ReactionPlane();
+  if (mPtWgt) mReactionPlaneAngle = hbtEvent->ReactionPlane(1);
+  else mReactionPlaneAngle = hbtEvent->ReactionPlane(0);
+  cout << "Reaction Plane " << mReactionPlaneAngle << endl; 
+  if (mReactionPlaneAngle==-999) {
+    cout << "No event plane!" << endl;
+    return;
+  }
   if ( mReactionPlaneAngle<0.0 ) mReactionPlaneAngle+=2*pi;
   mMixingBuffer = mPicoEventCollectionVectorHideAway->PicoEventCollection(mReactionPlaneAngle); 
   if (!mMixingBuffer) {

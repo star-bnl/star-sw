@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.hh,v 1.14 2001/06/21 19:15:45 laue Exp $
+ * $Id: StHbtEvent.hh,v 1.15 2001/07/20 20:03:53 rcwells Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.hh,v $
+ * Revision 1.15  2001/07/20 20:03:53  rcwells
+ * Added pT weighting and moved event angle cal. to event cut
+ *
  * Revision 1.14  2001/06/21 19:15:45  laue
  * Modified fiels:
  *   CTH.hh : new constructor added
@@ -110,9 +113,9 @@ public:
   unsigned short NumberOfGoodTracks() const;
   unsigned int UncorrectedNumberOfPositivePrimaries() const;
   unsigned int UncorrectedNumberOfNegativePrimaries() const;
-  float ReactionPlane() const;
-  float ReactionPlaneError() const;
-  float ReactionPlaneSubEventDifference() const;
+  float ReactionPlane(const int& wgt=0) const;
+  float ReactionPlaneError(const int& wgt=0) const;
+  float ReactionPlaneSubEventDifference(const int& wgt=0) const;
   StHbtThreeVector PrimVertPos() const;
   StHbtV0Collection* V0Collection() const;
   StHbtKinkCollection* KinkCollection() const;
@@ -129,9 +132,9 @@ public:
   void SetNumberOfGoodTracks(const unsigned short&);
   void SetUncorrectedNumberOfPositivePrimaries(const unsigned int&);
   void SetUncorrectedNumberOfNegativePrimaries(const unsigned int&); 
-  void SetReactionPlane(const float&);
-  void SetReactionPlaneError(const float&);
-  void SetReactionPlaneSubEventDifference(const float&);
+  void SetReactionPlane(const float&,const int& wgt=0);
+  void SetReactionPlaneError(const float&, const int& wgt=0);
+  void SetReactionPlaneSubEventDifference(const float&, const int& wgt=0);
   void SetPrimVertPos(const StHbtThreeVector&);
   void SetMagneticField(const double&);
 
@@ -150,7 +153,8 @@ private:
   unsigned short mNumberOfGoodTracks; // number of "good" tracks
   unsigned int mUncorrectedNumberOfPositivePrimaries;
   unsigned int mUncorrectedNumberOfNegativePrimaries;
-  float mReactionPlane[2]; //reaction plane/error  //   
+  float mReactionPlane[2]; //reaction plane/error without pT weight //   
+  float mReactionPlanePtWgt[2]; //reaction plane/error with pT weight //   
   double mMagneticField; // magnetic field in Z direction
   StHbtThreeVector mPrimVertPos;
   StHbtTrackCollection* mTrackCollection;

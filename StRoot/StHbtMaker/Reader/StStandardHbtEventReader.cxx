@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.34 2001/06/23 21:55:45 laue Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.35 2001/07/20 20:03:57 rcwells Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.35  2001/07/20 20:03:57  rcwells
+ * Added pT weighting and moved event angle cal. to event cut
+ *
  * Revision 1.34  2001/06/23 21:55:45  laue
  * *** empty log message ***
  *
@@ -186,10 +189,6 @@
 
 #include "StFlowTagMaker/StFlowTagMaker.h"
 #include "tables/St_FlowTag_Table.h"
-#include "StFlowMaker/StFlowMaker.h"
-#include "StFlowMaker/StFlowEvent.h"
-#include "StFlowAnalysisMaker/StFlowAnalysisMaker.h"
-#include "StFlowMaker/StFlowSelection.h"
 
 //#define STHBTDEBUG
 
@@ -208,8 +207,6 @@ StStandardHbtEventReader::StStandardHbtEventReader() : mTrackType(primary), mRea
   mTheV0Maker=0;
   mTheTagReader = 0;
   mReaderStatus = 0;  // "good"
-  mFlowMaker = 0;
-  mFlowAnalysisMaker = 0;
 }
 //__________________
 StStandardHbtEventReader::~StStandardHbtEventReader(){
@@ -677,23 +674,37 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     }
   cout << "Number of StHbtKinks in HbtEvent: " << hbtEvent->KinkCollection()->size() << endl;
 
-  // Can't get Reaction Plane until whole HbtEvent is filled
-  if ( mFlowMaker && hbtEvent ) {
+  /*  Randy moved this to event cut "calculateEventPlaneEventCut"
+  if (hbtEvent) {
     mFlowMaker->FillFlowEvent(hbtEvent);
-    // First get RP for whole event
-    mFlowMaker->FlowSelection()->SetSubevent(-1);
-    double reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-    cout << "Reaction Plane " << reactionPlane << endl;
-    hbtEvent->SetReactionPlane(reactionPlane);
-    // Sub event RPs
-    mFlowMaker->FlowSelection()->SetSubevent(0);
-    double RP1 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-    mFlowMaker->FlowSelection()->SetSubevent(1);
-    double RP2 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-    hbtEvent->SetReactionPlaneSubEventDifference(RP1-RP2);
-    // if Flow Analysis is switched on ... make correction histogram
-    if (mFlowAnalysisMaker) mFlowAnalysisMaker->Make();
-  }
+    if (mFlowMaker->FlowEventPointer()) {
+      mFlowMaker->FlowEventPointer()->SetPtWgt(false);
+      // First get RP for whole event
+      mFlowMaker->FlowSelection()->SetSubevent(-1);
+      double reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+      hbtEvent->SetReactionPlane(reactionPlane,0);
+      // Sub event RPs
+      mFlowMaker->FlowSelection()->SetSubevent(0);
+      double RP1 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+      mFlowMaker->FlowSelection()->SetSubevent(1);
+      double RP2 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+      hbtEvent->SetReactionPlaneSubEventDifference(RP1-RP2,0);
+      // Now with Pt Weighting
+      mFlowMaker->FlowEventPointer()->SetPtWgt(true);
+      // First get RP for whole event
+      mFlowMaker->FlowSelection()->SetSubevent(-1);
+      reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+      hbtEvent->SetReactionPlane(reactionPlane,1);
+      // Sub event RPs
+      mFlowMaker->FlowSelection()->SetSubevent(0);
+      RP1 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+      mFlowMaker->FlowSelection()->SetSubevent(1);
+      RP2 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+      hbtEvent->SetReactionPlaneSubEventDifference(RP1-RP2,1);
+      // if Flow Analysis is switched on ... make correction histogram
+      if (mFlowAnalysisMaker) mFlowAnalysisMaker->Make();
+    }
+  */
 
   // There might be event cuts that modify the collections of Tracks or V0 in the event.
   // These cuts have to be done after the event is built. That's why we have the event cut
