@@ -27,7 +27,7 @@ ifeq (SunOS,$(SYSTYPE))
   OSDEFS   := sun SUN SOLARIS Solaris ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES 
   CXXFLAGS := -g -fPIC -Wall
   CFLAGS   := -g -fPIC -Wall
-  LDFLAGS  := -g
+#  LDFLAGS  := -g
   EXEFLAGS := -g -Wl,-Bdynamic   
   SOFLAGS  := -g -shared  
   LIBS     := -lnsl -lsocket
@@ -35,7 +35,7 @@ ifeq (SunOS,$(SYSTYPE))
 ifndef GNU_GCC
 #-->then we're using CC5
   OSDEFS   := sun SUN SOLARIS Solaris ST_NO_NUMERIC_LIMITS ST_NO_MEMBER_TEMPLATES ST_NO_EXCEPTIONS  ST_DBAPI_CC5 
-  LDFLAGS  :=  -g  -xar
+  LDFLAGS  :=  -g  -xar -o
   SOFLAGS  :=  -g  -G
   CC :=  /opt/WS5.0/bin/cc
   CXX := /opt/WS5.0/bin/CC

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.17 2000/02/15 20:27:45 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.18 2000/02/18 16:58:09 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.18  2000/02/18 16:58:09  porter
+ * optimization of table-query, + whereClause gets timeStamp if indexed
+ *  + fix to write multiple rows algorithm
+ *
  * Revision 1.17  2000/02/15 20:27:45  porter
  * Some updates to writing to the database(s) via an ensemble (should
  * not affect read methods & haven't in my tests.
@@ -227,7 +231,7 @@ int
 mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
 
   //
-  //  Using name & version informataion in StDbTable + request timestamp
+  //  Using name & version information in StDbTable + request timestamp
   //  fill data from the database into the StDbTable pointer.
   //
   // --> get table name &, if needed, get the descriptor
@@ -268,11 +272,12 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
   int* elementID = currentNode.getElementID((const char*)currentNode.elementID,numRows);
 
   // loop over numRows to get minimum endTime in 1 query
+  // and in query of data
+
   char elementString[4096];
   ostrstream es(elementString,4096);
 
   int i;
-
   if(elementID){
    es << " AND elementID IN(";
    for(i=0;i<numRows-1;i++)es<<elementID[i]<<",";
@@ -282,14 +287,15 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
     es<<" "<<ends;
   }
 
-  unsigned int z = 0;
-  table->setBeginTime(z);
-  char* bTime=getDateTime(z);  
+  // zero beginTime for table
+  table->setBeginTime((unsigned int)0);
+  char* bTime=getDateTime(0);  
   table->setBeginTime(bTime);
   if(bTime){
     delete [] bTime;
     bTime=0;  
   }
+
   char* eTime=0;
   int numberOfRows=0;
 
@@ -300,7 +306,6 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
   if(Db.Output(&buff)){
     buff.SetClientMode();
     buff.ReadScalar(eTime,"mendTime");
-    buff.SetStorageMode();
     Db.Release(); buff.Raz();
     table->setEndTime(eTime);
     table->setEndTime(getUnixTime(eTime));
@@ -310,37 +315,35 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
   }
 
   unsigned int t1,t2;
-  int indexID;
   t1=t2=0;
   int countRows = 0;
   int eID;
 
   if(!currentNode.IsBinary){ // each dataID points to data row
 
-   
     if(!elementID){//then request all rows of this version+timestamp
 
      Db << " select DISTINCT elementID from dataIndex";
      Db << baseString <<" order by elementID"<< endsql;
 
      numRows=0; int nmax = 500;
-     int swapSize;
-     int* storeIt = new int[nmax];
-     int* swapIt=0;
+     int swapSize; int* storeIt = new int[nmax]; int* swapIt=0;
+
      while(Db.Output(&buff)){
-      buff.ReadScalar(eID,"elementID");
-      if(numRows==nmax){
+       buff.ReadScalar(eID,"elementID");
+       if(numRows==nmax){ // up the 'storeIt' array
         swapSize = 2*nmax; 
         swapIt = new int[swapSize];
         memcpy(swapIt,storeIt,4*nmax);
-        delete [] storeIt; storeIt = swapIt; swapIt = 0;
+        delete [] storeIt;  storeIt = swapIt;  swapIt = 0;
         nmax = swapSize;
-      }
+       }
       storeIt[numRows]=eID;
       numRows++;
       buff.Raz();
      }
 
+     // now copy contents of 'storeIt' into elementID array
      elementID = new int[numRows];
      memcpy(elementID,storeIt,(unsigned int)numRows*sizeof(int));              
      delete [] storeIt;
@@ -348,106 +351,156 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
      
     }
 
+     char Nrows[10];
+     ostrstream NR(Nrows,10); NR<<numRows<<ends;
 
-   // loop over rows in 'elementID' either from request or just all 
+     // query Index to retrieve pointer(s) to data
+     char qs[1024]; ostrstream queryS(qs,1024);
+     queryS << " select elementID, unix_timestamp(Max(beginTime)) as mbeginTime ";
+     queryS << " from dataIndex";
+     queryS << baseString <<" AND beginTime<'"<<rTime<<"' "<<elementString;
+     queryS << " Group by elementID order by elementID DESC limit ";
+     queryS <<Nrows<<ends;       
 
-    for(i=0;i<numRows;i++){
+     Db << qs << endsql;
 
-     char thisElement[100];
-     ostrstream tes(thisElement,100); tes<<elementID[i]<<ends;
+     if(StDbManager::Instance()->IsVerbose())       
+        cout << " My ID Query :: " << endl << qs << endl;
 
-     // query Index to retrieve pointer to data
-     Db << " select count, beginTime as mbeginTime from dataIndex";
-     Db << baseString <<" AND beginTime<'"<<rTime;
-     Db <<"' AND elementID="<<thisElement;
-     Db << " Group by count order by beginTime DESC limit 1"<<endsql;  
-
-     if(StDbManager::Instance()->IsVerbose()){
-       char qs[1024];
-       ostrstream queryS(qs,1024);
-       queryS<<"select count, beginTime as mbeginTime from dataIndex";
-       queryS<<baseString <<" AND beginTime<'"<<rTime;
-       queryS<<"' AND elementID="<<thisElement;
-       queryS<<" Group by count order by beginTime DESC limit 1"<<ends;
-       cout << " My Query :: " << endl;
-       cout << qs << endl;
+     bool * foundElem = new bool[numRows];
+     int * id2data = new int[numRows];
+     unsigned int* btimes = new unsigned int[numRows];
+     for(i=0;i<numRows;i++){
+       foundElem[i]=false;
+       id2data[i]=0;
+       btimes[i]=0;
      }
 
-     if(Db.Output(&buff)){
-       buff.SetClientMode();
-       buff.ReadScalar(bTime,"mbeginTime");
-       buff.ReadScalar(indexID,"count");
-       buff.SetStorageMode();
-       Db.Release(); buff.Raz();
-       t1 = getUnixTime(bTime);
-     } else {
-       cerr<<"QueryDb::Table no valid row for this query" << endl;
+     int icount=0;
+     int j=0; 
+     int dataID;
+
+     while(Db.Output(&buff)){
+          buff.ReadScalar(t1,"mbeginTime");
+          buff.ReadScalar(eID,"elementID");
+          //buff.ReadScalar(dataID,"dataID");       
+          for(i=j;i<numRows;i++){ 
+            if(eID==elementID[i]){
+               if(i==j)j++;
+               foundElem[i]=true;
+               // id2data[i]=dataID;
+               btimes[i] = t1;
+               if(t1>t2)t2=t1;
+               break;
+            }
+          }
+          icount++;
+     }
+
+     Db.Release(); buff.Raz(); 
+
+     if(icount==0){
+       cerr<<"WARNING::QueryDb Table: no valid data found in DB"<<endl;
+       return 0;
+     }
+       
+     if(icount<numRows)
+        cerr<<"WARNING::QueryDb: not all rows are filled from DB"<<endl;
+
+     icount=0;
+     int rcount=0;
+     for(i=0;i<numRows;i++){
+       char dquery[1024]; ostrstream dqy(dquery,1024);
+       if(foundElem[i]){
+         dqy<<"Select dataID from dataIndex "<< baseString;
+         dqy<<" And elementID="<<elementID[i];
+         dqy<<" And beginTime=from_unixtime("<<btimes[i]<<")"<<ends;
+         if(StDbManager::Instance()->IsVerbose())
+             cout << " My dataID Query :: " << endl << dquery << endl;
+         Db<<dquery<<endsql;
+         icount++;
+         if(Db.Output(&buff)){
+            buff.ReadScalar(dataID,"dataID");
+            id2data[i]=dataID;
+            Db.Release();
+            rcount++;
+         }
+       }
+     }
+
+     if(rcount!=icount){
+        cerr<<"WARNING::QueryDb: not all dataIDs are found In DB"<<endl;
+        cerr<<" rows requested = " << icount <<" rows read = " <<rcount<<endl;
+     }
+
+     char dataIDString[4096];
+     ostrstream dstr(dataIDString,4096);
+     dstr<<" dataID In(";
+     for(i=0;i<numRows-1;i++)dstr<<id2data[i]<<",";
+     dstr<<id2data[numRows-1]<<") "<<ends;
+
+     char qdata[4096];
+     ostrstream qd(qdata,4096);
+     
+     qd << " Select * from "<<currentNode.structName;
+     qd << " where "<<dataIDString<<ends;
+      
+     if(StDbManager::Instance()->IsVerbose())       
+        cout << " My Data Query :: " << endl << qdata << endl;
+    
+     Db << qdata <<endsql;
+  
+     j=0; dataID=0;
+     while(Db.Output(&buff)){
+       buff.ReadScalar(dataID,"dataID");
+          for(i=j;i<numRows;i++){ 
+            if(dataID==id2data[i]){
+               if(i==j)j++;
+               table->setRowNumber(i);
+               table->dbStreamer(&buff,true);
+               countRows++;
+               break;
+            }
+          }
+     }
+
+     Db.Release(); buff.Raz();
+
+     delete [] foundElem;
+     delete [] id2data;
+     delete [] btimes;
+
+     if(countRows==0) {
+       cerr<<"ERROR::Query reference to data is broken: no data found"<<endl; 
        return 0;
      }
 
-     char thisIndex[100];
-     ostrstream inds(thisIndex,100); inds<<indexID<<ends;
-
-    // get data for this Index pointer
-
-     Db<< "Select * from " << currentNode.structName;
-     Db<<" LEFT JOIN dataIndex on ";
-     Db<< "dataIndex.dataID="<<currentNode.structName<<".dataID ";
-     Db<< "where dataIndex.count="<<thisIndex<<endsql; 
-
-     // send data into the table
-     if(Db.Output(&buff)){
-        table->dbStreamer(&buff,true);
-        countRows++;
-        buff.Raz();
-     } else {
-       cerr<<"QueryDb::Table no valid DATA row for this query" << endl;
-       return 0;
-     }
-
-      // keep track of maximum beginTime & minimum 'endTime'
-      if(!t2){
-       t2=t1;
-      } else {
-      if(t1>t2)t2=t1;
-      }
-      if(bTime){
-        delete [] bTime;
-        bTime = 0;
-      }
-
-     }// end loop over rows
-
-  } else {  
-
+  } else {   // binary data store
 
    // query Index to retrieve pointer to data
-    Db << " select count, numRows, beginTime as mbeginTime from dataIndex";
+    Db << " select dataID, numRows, unix_timestamp(Max(beginTime)) as mbeginTime" ;
+    Db << " from dataIndex";
     Db << baseString <<" AND beginTime<'"<<rTime;
-    Db << "' Group by count order by beginTime DESC limit 1"<<endsql;  
+    Db << "' Group by dataID order by beginTime DESC limit 1"<<endsql;  
  
+    int dataID;
     if(Db.Output(&buff)){
-      buff.SetClientMode();
-      buff.ReadScalar(bTime,"mbeginTime");
-      buff.ReadScalar(indexID,"count");
+      buff.ReadScalar(t2,"mbeginTime");
+      buff.ReadScalar(dataID,"dataID");
       buff.ReadScalar(numberOfRows,"numRows");
-      buff.SetStorageMode();
       Db.Release(); buff.Raz();
-      t2 = getUnixTime(bTime);
     } else {
       cerr<<"QueryDb::Table no valid row for this query" << endl;
       return 0;
     }
 
     char thisIndex[100];
-    ostrstream inds(thisIndex,100); inds<<indexID<<ends;
+    ostrstream inds(thisIndex,100); inds<<dataID<<ends;
 
    // get data for this Index pointer
   
-    Db<< "Select * from bytes LEFT JOIN dataIndex on ";
-    Db<< "dataIndex.dataID=bytes.dataID ";
-    Db<< "where dataIndex.count="<<thisIndex<<endsql; 
-  
+    Db<< "Select * from bytes where dataID="<<thisIndex<<endsql;
+
    // send data into the table
     table->SetNRows(numberOfRows);
     if(Db.Output(&buff)){
@@ -455,6 +508,7 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
        countRows+=numberOfRows;
        buff.Raz();
     }
+    Db.Release();
 
   } //End binary stream
 
@@ -467,6 +521,7 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
    // reset row number to 0 for future dbStreaming
   table->setRowNumber();
   table->setStoreMode(false);
+
   if(countRows != table->GetNRows()){
      cerr <<"Query::Table: Mismatch between NRows Requested & Delivered"<<endl;
      cerr <<" NRows Requested = "<<table->GetNRows() << "  ";
@@ -491,24 +546,73 @@ mysqlAccessor::QueryDb(StDbTable* table, const char* whereClause){
       if(!QueryDescriptor(table))return 0;
    }
 
+   if(table->IsBinary()) return 0;
+
    Db.Release();
-   Db<<"Select * from "<<table->getMyName()<<" "<<whereClause<<endsql;
+   Db<<"Select * from "<<table->getCstrName()<<" "<<whereClause<<endsql;
 
    int icount=0;
+   int dataID=0;
+   table->setRowNumber();
    while(Db.Output(&buff)){
+     if(table->IsIndexed() && icount==0)buff.ReadScalar(dataID,"dataID");
      table->dbStreamer(&buff,true);
      buff.Raz();
      icount++;
    }
-   table->setRowNumber();
+
    if(icount==0){
      cerr<<"Query::Table NO DATA via whereClause [ "<<endl;
      cerr<<" Select * from "<<table->getMyName()<<" "<<whereClause<<" ]"<<endl;
+     return 0;
    }
+
+   // This checks to see if row is indexed on timestamp
+   // & if so, get the beginTime & endTime for returned row
+   if(dataID){
+      int nodeID = table->getNodeID();
+      if(!nodeID){
+        if(!QueryDb((StDbNode*)table))return icount;
+        nodeID=table->getNodeID();
+      }
+
+      char NodeID[12]; char DataID[12];
+      ostrstream nid(NodeID,12); ostrstream did(DataID,12);
+      nid<<nodeID<<ends;  did<<dataID<<ends;
+      char* bTime=0;
+
+      Db.Release();
+      Db<<"select beginTime from dataIndex where nodeID="<<NodeID;
+      Db<<" and dataID="<<DataID<<" limit 1 "<<endsql;
+
+      if(Db.Output(&buff)){
+        if(buff.ReadScalar(bTime,"beginTime")){
+           table->setBeginTime(bTime);
+           table->setBeginTime(getUnixTime(bTime));
+        }
+      } else { return icount; }
+
+      Db.Release();
+      Db<<"select beginTime from dataIndex where nodeID="<<NodeID;
+      Db<<" and dataID="<<DataID<<" And beginTime>'"<<bTime<<"' ";
+      Db<<" order by beginTime limit 1 "<<endsql;
+
+      char* eTime=0;
+
+      if(Db.Output(&buff)){
+        if(buff.ReadScalar(eTime,"beginTime")){
+           table->setEndTime(eTime);
+           table->setEndTime(getUnixTime(eTime));
+        }
+      } else { if(bTime)delete [] bTime; return icount; }
+      
+      if(eTime) delete [] eTime;
+   }
+
 
 return icount;
 }
-
+ 
 ////////////////////////////////////////////////////////////////
 
 int
@@ -572,6 +676,7 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
   }
 
   int dataID=0;
+  int startDataID=0;
   if(!table->hasData()) dataID=findDefaultID(table);
 
   if(currentNode.IsBinary){
@@ -614,9 +719,10 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
      int eID;
      int* storedData = new int[nrows];
      int* storedIndex = new int[nrows];
+     startDataID = dataID;
      for(int i=0; i<nrows; i++){
   
-    if(dataID==0 && table->hasData()){ //dataID may = 0 if !indexed
+    if(startDataID==0 && table->hasData()){ //dataID may = 0 if !indexed
        table->dbStreamer(&buff,false);
        Db.Input(currentNode.structName,&buff); // input to database
        dataID = Db.GetLastInsertID(); // get auto-generated row-id
