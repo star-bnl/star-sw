@@ -22,7 +22,7 @@ C         1.  Removed use of obsolete table evr_privert; L.Ray, 8/19/98
 C----------------------------------------------------------------------
 #include "PAM.inc"
 #include "dst_vertex.inc"
-#include "ev0_aux.inc"
+#include "dst_v0_vertex.inc"
 #include "ev0_ev0par2.inc"
 #include "ev0_track2.inc"
 C---------------
@@ -32,7 +32,7 @@ C---------------
       RECORD/ table_head_st/ vertex_h
       RECORD/ dst_vertex_st/ vertex(*)
       RECORD/ table_head_st/ ev0out_h
-      RECORD/ ev0_aux_st/ ev0out(*)
+      RECORD/ dst_v0_vertex_st/ ev0out(*)
       RECORD/ table_head_st/ trak_h
       RECORD/ ev0_track2_st/ trak(*)
     
@@ -108,7 +108,7 @@ C--   skip all tracks with impact parameter .lt. dcapnmin
            IF( (trak(i).dca.le.ev0par(det_id).dcapnmin)) GO TO 10 
 C******************
 C-- skip all SVT only tracks
-           if(det_id.eq.2)go to 10
+c           if(det_id.eq.2)go to 10
 C******************
            call ev0_track_mom(trak(i).r0,trak(i).rc,0,pst1,bfield(3))
            trak(i).p=sqrt(pst1(1)*pst1(1)+pst1(2)*pst1(2)
@@ -131,7 +131,7 @@ C******************
                  endif
 C******************
 C-- skip all SVT only tracks
-           if(det_id.eq.2)go to 20
+c           if(det_id.eq.2)go to 20
 C******************
 
               if( first ) then
@@ -290,9 +290,9 @@ C---- find square of impact param of reconstructed particle------
                        vertex(vertex_h.nok).id_aux_ent= ok
                        vertex(vertex_h.nok).id = vertex_h.nok
                        vertex(vertex_h.nok).n_daughters = 2
-                       ev0out(ok).px=pp(1)
-                       ev0out(ok).py=pp(2)
-                       ev0out(ok).pz=pp(3)
+C                       ev0out(ok).px=pp(1)
+C                       ev0out(ok).py=pp(2)
+C                       ev0out(ok).pz=pp(3)
                        ev0out(ok).id=ok
                        ev0out(ok).id_vertex= vertex_h.nok                    
                        ev0out(ok).dcap = trak(i).dca
@@ -301,8 +301,8 @@ C---- find square of impact param of reconstructed particle------
                        ev0out(ok).dcav0=sqrt(rmin)
                        ev0out(ok).idpos=trak(i).id
                        ev0out(ok).idneg=trak(j).id
-                       ev0out(ok).pidpos = trak(i).pid
-                       ev0out(ok).pidneg = trak(j).pid
+C                       ev0out(ok).pidpos = trak(i).pid
+C                       ev0out(ok).pidneg = trak(j).pid
 C--   calculate Armenteros variables---
                        ev0out(ok).pos_px = pst1(1)
                        ev0out(ok).pos_py = pst1(2)
@@ -311,68 +311,68 @@ C--   calculate Armenteros variables---
                        ev0out(ok).neg_py = pst2(2)
                        ev0out(ok).neg_pz = pst2(3)
                        
-                       pdotp=pst1(1)*pp(1)+pst1(2)*pp(2)+pst1(3)*pp(3) !dot product of p+ and p(v0)
+                       pdotp=pst1(1)*pp(1)+pst1(2)*pp(2)+pst1(3)*pp(3) !dot product of p+ and p(v0) 
                        ndotp=pst2(1)*pp(1)+pst2(2)*pp(2)+pst2(3)*pp(3) !dot product of p- and p(v0)
                        pv0  = sqrt(pv0sq) 
                        ppar= pdotp/pv0
                        npar= ndotp/pv0
                        pper= sqrt(trak(i).p*trak(i).p-ppar*ppar)
                        if( trak(i).p*trak(i).p-ppar*ppar .lt.0 ) then
-                          write(6,*) 'Found one'
+C                          write(6,*) 'Found one'
                           pper = 0.
                        endif
-                       ev0out(ok).pt = pper
-                       ev0out(ok).alpha = (ppar-npar)/(ppar+npar)
-                       if( ev0out(ok).pt .gt. ev0par(det_id).ptarm_max  
-     +                     .or.  abs(ev0out(ok).alpha) .gt. 
+C                       ev0out(ok).pt = pper
+C                       ev0out(ok).alpha = (ppar-npar)/(ppar+npar)
+                       if( pper .gt. ev0par(det_id).ptarm_max  
+     +                     .or.  abs((ppar-npar)/(ppar+npar)) .gt. 
      +                      ev0par(det_id).alpha_max) then
                           ok=ok-1
                           ev0out_h.nok= ev0out_h.nok-1
                           vertex_h.nok = vertex_h.nok -1
                           goto 20
                        endif
-                       ev0out(ok).sagitta_pos = trak(i).sagitta
-                       ev0out(ok).sagitta_neg = trak(j).sagitta
+C                       ev0out(ok).sagitta_pos = trak(i).sagitta
+C                       ev0out(ok).sagitta_neg = trak(j).sagitta
                        
                        
 c     Opening angles: wkw
-                       dot=pst1(1)*pst2(1)+pst1(2)*pst2(2)
-     +                      +pst1(3)*pst2(3)
-                       open=(dot/(trak(i).p*trak(j).p))
-                       if( open .gt. 1.0) then
-                          open = 1.0
-                       elseif( open .lt. -1.) then
-                          open = -1.0
-                       endif
-                       ev0out(ok).theta = acosd(open)
+C                       dot=pst1(1)*pst2(1)+pst1(2)*pst2(2)
+C     +                      +pst1(3)*pst2(3)
+C                       open=(dot/(trak(i).p*trak(j).p))
+C                       if( open .gt. 1.0) then
+C                          open = 1.0
+C                       elseif( open .lt. -1.) then
+C                          open = -1.0
+C                       endif
+C                       ev0out(ok).theta = acosd(open)
 *     
 *---  if blind run test all mass hypothesis
 *     
                        
-                       DO ll=1,3
-                          massl(1)=mass1(ll)
-                          massl(2)=mass2(ll)
-                          index=ll
+C                       DO ll=1,3
+C                          massl(1)=mass1(ll)
+C                          massl(2)=mass2(ll)
+C                          index=ll
                           
-                          call ev0_inv_mass(trak(i).p,trak(j).p,massl,
-     +                         pv0sq,pp(3),inv_mass,env0,ep,rap)
+C                          call ev0_inv_mass(trak(i).p,trak(j).p,massl,
+C     +                         pv0sq,pp(3),inv_mass,env0,ep,rap)
                           
-                          if( index .eq. 1) then
-                             ev0out(ok).inv_mass_k0=inv_mass
-                             ev0out(ok).rapidity_k0 = rap
+C                          if( index .eq. 1) then
+C                             ev0out(ok).inv_mass_k0=inv_mass
+C                             ev0out(ok).rapidity_k0 = rap
 C-- calculate proper lifetime assuming that particle originated at main vertex
-                             ev0out(ok).tau_k0=inv_mass*rv/pv0
-                          elseif( index .eq. 2) then
-                             ev0out(ok).inv_mass_la=inv_mass
-                             ev0out(ok).rapidity_la = rap
+C                             ev0out(ok).tau_k0=inv_mass*rv/pv0
+C                          elseif( index .eq. 2) then
+C                             ev0out(ok).inv_mass_la=inv_mass
+C                             ev0out(ok).rapidity_la = rap
 C-- calculate proper lifetime assuming that particle originated at main vertex
-                             ev0out(ok).tau_la=inv_mass*rv/pv0
-                          elseif( index .eq. 3) then
-                             ev0out(ok).inv_mass_lb=inv_mass
-                             ev0out(ok).rapidity_lb = rap
+C                             ev0out(ok).tau_la=inv_mass*rv/pv0
+C                          elseif( index .eq. 3) then
+C                             ev0out(ok).inv_mass_lb=inv_mass
+C                             ev0out(ok).rapidity_lb = rap
 C-- calculate proper lifetime assuming that particle originated at main vertex
-                             ev0out(ok).tau_lb=inv_mass*rv/pv0
-                          endif
+C                             ev0out(ok).tau_lb=inv_mass*rv/pv0
+C                          endif
                                  
 C                    ev0out(ok).tmin(index)=inv_mass*ev0par(det_id).dlen/pv0 
 c--   calculate cos(theta_c.m.)
@@ -383,8 +383,8 @@ C                          ev0out(ok).cos_th_cm(index)=
 C     +                         cos(atan2(pper,ppar_cm))
 c     
 c                          WRITE(6,*) rd,rv,rmin,inv_mass
-                          
-                       ENDDO
+C                          
+C                       ENDDO
                        GOTO 30  !next j
 *                    else
 *                       if( j.eq. i+1 ) then

@@ -13,8 +13,8 @@ C     globtrk_h:    global track structure header
 C     globtrk:      global track structure 
 C     vertex_h:     dst vertex table header
 C     vertex:       dst vertex table, co-ords and pointers to aux tables
-C     ev0out_h:     auxiallary vertex structure header
-C     ev0out:       auxilliary vertex structure 
+C     ev0out_h:     dst auxiallary vertex structure header
+C     ev0out:       dst auxilliary vertex structure 
 C     trak_h:       local ev0 track table header
 C     track         local ev0 track table
 C
@@ -80,7 +80,7 @@ C convert to Tesla
         nok=0
         if((globtrk_h.nok).eq.0) return
         DO i=1,globtrk_h.nok
-           if (globtrk(i).iflag .gt. 0 ) then
+           if (globtrk(i).iflag .gt. 0 .and. globtrk(i).det_id .lt. 4) then
               nok=nok+1
               IF(nok .ge. trak_h.maxlen)   GOTO 35
               trak(nok).id  = globtrk(i).id
