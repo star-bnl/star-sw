@@ -1,0 +1,65 @@
+
+
+		    STAR String Manipulation
+
+			And Math Routines
+
+			 October 7,  1992
+
+
+
+
+			Robert Hackenburg
+
+		 Brookhaven National Laboratory
+
+
+
+
+
+		Brief Description of Package Use
+
+
+	Build all packages from the STAR library.  This is the STR
+package --  the STAR string manipulation and math routines.
+
+	To build STR on VMS -- need to build strlib.olb & strlib_dbg.olb:
+
+	a) Extract STR_DEFINE.COM from STR_REF into the current
+	default directory.
+
+	b) Edit STR_DEFINE.COM to define the logical
+	STARSTR.  Sample lines are included, commented out, with
+	defaults provided wherever possible, corresponding to a
+	session on CSA.  The logical STARSTR has no default, and
+	must be provided by the user (eg, the default directory
+	should serve well for this).  This is the destination for
+	the object code from the source library STR_REF. If locally
+	edited copies of sources are to be used, edit
+	STR_DEFINE.COM to redefine the logical STR_REF to be the
+	local source directory. 
+
+	c) Set the default directory to be the same as STARSTR: . 
+
+	d) Execute STR_REF:MAKESTR.COM ;  strlib.olb & strlib_dbg.olb
+	should now be built. 
+
+
+
+	To build STR on Unix -- need to build libstr.a:
+
+	a) From an STR-updated VMS host, set default to STR_REF
+	and run FTP.  Issue the "TAKE FTPSTR.COM" command to ftp,
+	which should copy over the files, then exit FTP.  It
+	may be necessary to modify FTPSTR.COM to conform to
+	individual variations in the placement of the str directory.
+
+	b) Log on the the now-updated Unix machine, and change
+	directory to the str directory.  Then type "make str",
+	and libstr.a should be built.
+
+
+
+	At the moment, no verbose documentation of this package exists.
+However, the routines in STRLIB.FOR, STRLIB_VMS.FOR and STRMTH.FOR are
+fairly well commented.
