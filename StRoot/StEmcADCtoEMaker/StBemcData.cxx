@@ -13,6 +13,24 @@ ClassImp(StBemcData)
 */
 StBemcData::StBemcData():StBemcRaw()
 {  
+  Int_t   calib[]      = {1, 1, 1, 1, 0, 0, 0, 0};
+  Int_t   pedSub[]     = {1, 1, 1, 1, 0, 0, 0, 0};
+  Float_t cut[]        = {-1, 1.5, 1.5, 1.5, -1, -1, -1, -1};
+  Int_t   cutType[]    = {0, 1, 1, 1, 0, 0, 0, 0};
+  Int_t   onlyCal[]    = {0, 0, 0, 0, 0, 0, 0, 0};
+  Int_t   status[]     = {1, 1, 1, 1, 0, 0, 0, 0};
+  Int_t   crate[]      = {1, 1, 1, 1, 0, 0, 0, 0};
+  
+  for(Int_t i=0; i<MAXDETBARREL; i++)
+  {
+    mControlADCtoE->Calibration[i]=calib[i];
+    mControlADCtoE->DeductPedestal[i]=pedSub[i];  
+    mControlADCtoE->CutOff[i]=cut[i];
+    mControlADCtoE->CutOffType[i]=cutType[i];
+    mControlADCtoE->OnlyCalibrated[i]=onlyCal[i];
+    mControlADCtoE->CheckStatus[i]=status[i];
+    mControlADCtoE->CheckCrate[i]=crate[i];
+  }
 
 }
 //_____________________________________________________________________________

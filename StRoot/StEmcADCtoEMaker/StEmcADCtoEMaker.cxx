@@ -46,6 +46,7 @@ StEmcADCtoEMaker::~StEmcADCtoEMaker()
 Int_t StEmcADCtoEMaker::Init()
 {     
   mBemcData->initHisto();
+  mBemcData->printConf();
   return StMaker::Init();
 }
 Int_t StEmcADCtoEMaker::InitRun(Int_t run)
