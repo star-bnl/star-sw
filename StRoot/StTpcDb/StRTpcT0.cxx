@@ -1,16 +1,20 @@
 #include "StRTpcT0.h"
 
 ClassImp(StRTpcT0)
-//_____________________________________________________________________________
-float StRTpcT0::getT0(int row, int pad)   const {
-  float padT0 = 0;
-  if (row > 0 && padplane->indexForRowPad(row,pad)>=0) {
-    if (row<=padplane->numberOfInnerRows())
-      padT0 =  (*mT0)[0].innerSectorTimeOffsets[padplane->indexForRowPad(row,pad)];
-   else if (row>padplane->numberOfInnerRows()&&row<=padplane->numberOfRows())
-      padT0 =  (*mT0)[0].outerSectorTimeOffsets[padplane->indexForRowPad(row,pad)];
+
+  void StRTpcT0::SetPadPlanePointer(StTpcPadPlaneI* ppin){
+      padplane = ppin;
   }
-  return padT0;
+
+
+float StRTpcT0::getT0(int row, int pad)   const {
+  if (padplane->indexForRowPad(row,pad)<0){return 0;}
+  if (row>0&&row<=padplane->numberOfInnerRows()){
+    return mT0->innerSectorTimeOffsets[padplane->indexForRowPad(row,pad)];
+  }
+  else if (row>padplane->numberOfInnerRows()&&row<=padplane->numberOfRows()){
+    return mT0->outerSectorTimeOffsets[padplane->indexForRowPad(row,pad)];
+  }
 } 
   
  

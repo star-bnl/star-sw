@@ -1,114 +1,125 @@
--*- mode:outline -*-
-This file is best viewed with x(emacs).
-Time-stamp: <99/10/11 17:03:10 ullrich>
+README file for Transient OO Data Model developer.
+Time-stamp: <99/01/14 15:07:50 ullrich> 
 
-* Disclaimer
-============
-This file is meant for developer only. This is
-not a documentation of the new StEvent.
-Who ever works on StEvent should look here first.
-Please document any technical issues here for other
-developers.
-This file will be replaces as soon as there's
-documentation available.
+Package coordinator: Thomas Ullrich
+
+Modification history
+====================
 
 
-* Latest News
-=============
-** Victor: mark pure references (pointers) with //$LINK
+02/11/1999 T. Wenaus
+  - new track constructor to accept helix parameters separately from
+    track table
+02/10/1999 T. Wenaus
+  - fix setPrimaryVertex in StEvent to set the vertex type to primary
+  - print the required 'lousy compiler' line only for the lousy (Sun)
+    compiler (StEvent.cc)
+  - plug lotsa leaks
+01/30/1999 T. Wenaus
+  - minor changes to table loader constructor interfaces
+  - StTables/ => tables/ which is understood by standard makefiles
+01/15/1999 T. Wenaus
+  - table-based constructors added throughout so event can be loaded 
+    from Objy or ROOT via tables
+  - changed StEvent constructor to create its collections
+  - StEventSummary renamed back to StDstEventSummary; it is the
+    DST-level event summary
+  - installed as package StEvent; include references #include "StEvent/"
+
+01/14/1999 Original version. Author: Thomas Ullrich
 
 
-* Remarks
-=========
-These remarks are added in chronological order. Old remarks might
-not be valid any more.
+Description
+===========
 
-** In StSPtrVec
-   erase() means also delete the object. Make sure this is the case.
-   clean() means take it out of the list but do NOT delete it.
+Memory Management:
+------------------
+The tree has to be set up by hand, i.e. the elements have
+to be created and assigned.
+The whole event tree incl. all hits, tracks, vertices etc.
+gets deleted when invoking the destructor of StEvent.
+With other words:
 
-** All classes have constructors and destructors, copy constructors and
-   assignement operators.
-   Exception:
-   if the class has only static data member, ie no pointers, than the
-   default copy constructor and assignement operators are used. This is
-   marked clearly in the header file. In this case both are commented out.
+StEvent event;
 
-** StDedxPidTraits
-   Meaning of dst_dedx::dedx[2] not clear. Method as an enum? What are these
-   methods, how many?
+// setup event ...
 
-** StTrackFitTraits
-   implemented not as an abstract class as depicted in the current UML
-   diagrams. All concrete classes would be identical. Makes no sense.
-   pidHypothesis is a GeantId -> still return a StParticleDefinition*.
-   (needs lookup: test gives 13 us/lookup on HP)
+delete event;     // removes the whole tree
 
-** StTrackDetectorInfo
-   The numberOfPoints is taken from the table. This is necessary
-   in case we do NOT store the hits on the DST. That's the only
-   info we have then (except the topo map).
-   As soon as one hit is added numberOfPoints reflects the 
-   size of the internal container.
+There is currently one open question and that is if the instance
+of StRun (referred to by StEvent) should be deleted or not.
 
-** All 3 l3 tables merged into one StL3SoftwareMonitor
-   This is what these tables are. dst_summary is something else!
-   Added to StSoftwareMonitor.
+Reference Counting
+------------------
+The StGlobalTrack::addXXXHit() and removeXXXHit() methods
+automatically  manage the reference counting,
+i.e. they increase or decrease the reference counter
+of the referring hit (see StHit).
+Hits associated with tracks *have* to be assigned only with
+these functions (there's anyhow no otgher way ;-)).
 
-** StSvtHit has different unpacking than stated in Lannys docu.  Sep 2, tu
-   See Helens mail:
-   hw = det_id + 2^4 * id_wafer
-   where
-   id_wafer = 1000*layer+100*wafer+ladder
+Collection classes
+------------------
+All typedefs to Std. Lib containers incl. the iterators.
+All hits are contained by value, tracks and vertices are
+stored by pointer. The latter ones are stored in list<T>
+containers, the other in vector<T>'s.
+(list allow insertion and deletion in anywhere, vectors
+don't). StVertexCollection *has* to store the elements
+by pointer (polymorphism StVertex/StV0Vertex).
 
-** Change naming scheme of containers.  Sep 2, tu
-   Follow RogueWaves nomenclature:
-   StSPtrVecXXXX
-   StPtrVecXXXX
+Missing stuff
+-------------
+TOF, RICH, pixels and probably much more.
 
-** StHit::detector()
-   coding of detector position somewhat odd. Check with
-   dst_filler.
 
-** StTpcPixel
-   check the uncoding. Make sure the bit masks are correct.
+Compiler flags
+--------------
+In order to get this stuff to compile MACROS have to
+be defined. This is necessary to deal with the different
+compiler versions. Here I adopted the MACROS already in use
+in the StarClassLibrary.
+I'm not sure if Victor put them already in the official
+makefiles. Better mention them here anyway.
+Not all are used in the data model but in the SCL (which is
+used heavily).
 
-** NEW: StBrowsableEvent
-   derived from StEvent. Contains all stuff needed
-   to be shown in Root browser.
+i386_redhat50:       egcs > 1.02 or gcc > 2.8
+                     -DST_NO_NUMERIC_LIMITS
+                     -DST_NO_EXCEPTIONS
+                     -DST_NO_NAMESPACES
 
-** StHit
-   Has now also hardware position as member (request by pwgs).
-   To keep the costs low I simply store the compressed word.
-   The specialized classes (StTpcHit, StSvtHit, ...) shall
-   provide the access methods which then have to unpack
-   the unsigned long word and pull out the info.
-   Constructor changed for all hit classes!
+i386_redhat51:       egcs > 1.02 or gcc > 2.8
+                     -DST_NO_NUMERIC_LIMITS
+                     -DST_NO_EXCEPTIONS
+                     -DST_NO_NAMESPACES
 
-** NEW: StEventTypes
-   Since the header files now contain only the 'real' minimum of
-   #include's the users might be shocked and puzzled by the amount
-   of files the need for their stuff. StEventTypes solves this
-   problem. It includes ALL StEvent headers.
+i386_redhat52:       egcs > 1.02 or gcc > 2.8
+                     -DST_NO_NUMERIC_LIMITS
+                     -DST_NO_EXCEPTIONS
+                     -DST_NO_NAMESPACES
 
-** Some setXXX methods look redundant
-   since the classes are setup using the tables passed via
-   to the constructor but as soon as the tables are dropped
-   we will need setXXX stuff (unless one wants to pass many
-   many args to the constructor).
-   
-** StEnumerations includes StDetectorID and StVertexId
-   StVertexId is new. Spiros added it. Vertex type enums
-   where in StDetectorId before.
+hp_ux102:            no flags with aCC
 
-** StRun & StRunSummary: both setup through constructor of StRun
+sun4x_*:             CC4 with STARS ObjectSpace Version
+		    -DST_NO_MEMBER_TEMPLATES -DST_NO_NUMERIC_LIMITS
+		    -DST_NO_EXCEPTIONS -DST_NO_TEMPLATE_DEF_ARGS
+		    -DST_NO_NAMESPACES
 
-** StEventSummary: setup through constructor of StEvent
+On Sun don't forget to set:
+	STDHOME      := /afs/rhic/star/packages/ObjectSpace/2.0m
+	CPPFLAGS     := -I$(STDHOME) -I$(STDHOME)/ospace/std 
+        and link with -L$(STDHOME)/lib -lospace		
 
-** StEventSummary: arrays which fake histos have no set-method
-   reason: if we can fill them directly, i.e. we get rid of the table
-   we don't need these cumbersome arrays any more. We use histos right
-   away.
+Tests done
+----------
+Compiles on hp_ux102 and sun4x. linux not tested yet.
 
-** All StXXXSoftwareMonitor classes are setup through StSoftwareMonitor
+Templates
+---------
+If needed the SCL template classes could be replaced, the
+STL containers, iterators and algorithms used cannot.
+Most of the list, vectors are typedef'ed since the lack
+of template default arguments in SUN makes the definition
+look confusing (allocator has to be added each time).
 

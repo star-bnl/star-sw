@@ -1,8 +1,5 @@
-* $Id: tdi_fit.F,v 1.3 1999/10/15 00:53:55 nevski Exp $
+* $Id: tdi_fit.F,v 1.2 1998/01/27 00:59:18 fisyak Exp $
 * $Log: tdi_fit.F,v $
-* Revision 1.3  1999/10/15 00:53:55  nevski
-* pgf->g77 cleanup
-*
 * Revision 1.2  1998/01/27 00:59:18  fisyak
 * Split sources
 *
@@ -95,7 +92,6 @@ c-----------------------------------------------------------------------
       logical NTUPLE, FIT_OK
       save NTUPLE
       data NTUPLE /.false./
-      real atand,cosd
 c-----------------------------------------------------------------------
 c*** initialize
 
@@ -185,7 +181,7 @@ c*** loop over hits and make selection
 
         if( nhit .gt. mxhit ) then
           write(6,'(''TDI_FIT: Event: '',i6)') ievent
-          write(6,'(''TDI_FIT: Warning - mxhit exceeded maximum'')')
+          write(6,'(''TDI_FIT: Warning - mxhit exceeded !'')')
         endif
 
 c*** fit straight lines and fill track and residual tables

@@ -1,14 +1,15 @@
-#ifndef ClassStTpcDb
-#define ClassStTpcDb
-
+//
+//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StTpcDb                                                              //
+// StTpcDb                                                            //
 //                                                                      //
 // This class implements to offline interface to the STAR database      //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef ClassStTpcDb
+#define ClassStTpcDb
 
 #ifndef __CINT__
 #include "fortranc.h"
@@ -18,6 +19,9 @@ int type_of_call numberOfPadsAtRow_(int *row);
 }
 #endif
 #include "StMessMgr.h"
+#include "StMaker.h"
+#include "StDbTableI.h"
+#include "StDbDataSet.h"
 #include "StRTpcPadPlane.h"
 #include "StRTpcWirePlane.h"
 #include "StRTpcDimensions.h"
@@ -26,28 +30,27 @@ int type_of_call numberOfPadsAtRow_(int *row);
 #include "StRTpcT0.h"
 #include "StRTpcSlowControlSim.h"
 class StMaker;
-class St_Table;
+
 
 class StTpcDb {
  private:
- enum { kCalibrarion,kGeometry,kConditions } ;
  StMaker* mk;
- StTpcPadPlaneI*       PadPlane;      //!
- StTpcWirePlaneI*      WirePlane;     //!
- StTpcDimensionsI*     dimensions;    //! 
- StTpcSlowControlSimI* slowControlSim;//! 
- StTpcElectronicsI*    electronics;   //!
- StTpcGainI*           gain[24];      //!
- StTpcT0I*             t0[24];        //! 
- St_DataSet*           tpc[3];        //!
+ StTpcPadPlaneI* PadPlane;
+ StTpcWirePlaneI* WirePlane;
+ StTpcDimensionsI* dimensions;
+ StTpcSlowControlSimI* slowControlSim;
+ StTpcElectronicsI* electronics;
+ StTpcGainI* gain[24];
+ StTpcT0I* t0[24];
+ St_DataSet* tpc_geometry;
+ St_DataSet* tpc_calibrations;
+ St_DataSet* tpc_conditions;
 
  protected:
-   StTpcDb() {}
-   void GetDataBase(StMaker* maker);
+ 
  public:
-   StTpcDb(St_DataSet* input);
-   StTpcDb(StMaker* makerDb);
-   virtual ~StTpcDb();
+   StTpcDb(StDbDataSet* input);
+   ~StTpcDb();
    StTpcPadPlaneI* PadPlaneGeometry();
    StTpcWirePlaneI* WirePlaneGeometry();
    StTpcDimensionsI* Dimensions();
@@ -55,7 +58,6 @@ class StTpcDb {
    StTpcElectronicsI* Electronics();
    StTpcGainI* Gain(int sector);
    StTpcT0I* T0(int sector);
-   St_Table *getTpcTable(int i);
 
 #ifdef __ROOT__
    ClassDef(StTpcDb,0)

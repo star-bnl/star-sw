@@ -1,8 +1,5 @@
-* $Id: tpt_make_segment.F,v 1.9 1999/10/15 00:54:08 nevski Exp $
+* $Id: tpt_make_segment.F,v 1.8 1999/09/14 00:55:49 liq Exp $
 * $Log: tpt_make_segment.F,v $
-* Revision 1.9  1999/10/15 00:54:08  nevski
-* pgf->g77 cleanup
-*
 * Revision 1.8  1999/09/14 00:55:49  liq
 * use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
 *
@@ -83,7 +80,7 @@ C     Local variables
       INTEGER nf,drow,i,nh1,ilc
       INTEGER tpt_fit_track
       INTEGER is_pnt,islic,ipass,tte_skip
-      INTEGER tpt_find_slic
+      INTEGER tpt_find_slic, iret
 
       INTEGER tgc_global_to_sector
       INTEGER tgc_sec24_to_sec12

@@ -136,21 +136,17 @@ CC:  Load/Fill dst_track and increment nok value:
                 dst_track(dst_track_h.nok).n_max_point = 0
                 dst_track(dst_track_h.nok).n_fit_point = 0    
                 dst_track(dst_track_h.nok).icharge = charge_short
-                dst_track(dst_track_h.nok).r0 = 0.1*
-     +   sqrt(particle(i).vhep(1)**2.+particle(i).vhep(2)**2.)
-                dst_track(dst_track_h.nok).phi0 = 
-     +          atan2(particle(i).vhep(2),particle(i).vhep(1))*57.296
-                if (dst_track(dst_track_h.nok).phi0.lt.0.)
-     +dst_track(dst_track_h.nok).phi0=dst_track(dst_track_h.nok).phi0+360.
+                dst_track(dst_track_h.nok).x0 = 0.1*particle(i).vhep(1)
+                dst_track(dst_track_h.nok).y0 = 0.1*particle(i).vhep(2)
                 dst_track(dst_track_h.nok).z0 = 0.1*particle(i).vhep(3)
                 dst_track(dst_track_h.nok).psi           = phi
                 dst_track(dst_track_h.nok).tanl          = tanl
                 dst_track(dst_track_h.nok).invpt         = invpt
-                dst_track(dst_track_h.nok).covar(1) = 0.0
-                dst_track(dst_track_h.nok).covar(2) = 0.0
-                dst_track(dst_track_h.nok).covar(3) = 0.0
-                dst_track(dst_track_h.nok).covar(4) = 0.0
-                dst_track(dst_track_h.nok).covar(5) = 0.0
+                dst_track(dst_track_h.nok).covar_diag(1) = 0.0
+                dst_track(dst_track_h.nok).covar_diag(2) = 0.0
+                dst_track(dst_track_h.nok).covar_diag(3) = 0.0
+                dst_track(dst_track_h.nok).covar_diag(4) = 0.0
+                dst_track(dst_track_h.nok).covar_diag(5) = 0.0
                 dst_track(dst_track_h.nok).chisq(1)      = 0.0
                 dst_track(dst_track_h.nok).chisq(2)      = 0.0
                 dst_track(dst_track_h.nok).x_first(1)    = 0.0
@@ -161,7 +157,13 @@ CC:  Load/Fill dst_track and increment nok value:
                 dst_track(dst_track_h.nok).x_last(3)     = 0.0
                 dst_track(dst_track_h.nok).length        = 0.0
                 dst_track(dst_track_h.nok).impact        = 0.0
+                dst_track(dst_track_h.nok).ndegf         = 0
+                dst_track(dst_track_h.nok).id_global_pid = 0
+                dst_track(dst_track_h.nok).id_hypo_pid   = 0
                 dst_track(dst_track_h.nok).id_start_vertex = 0
+                dst_track(dst_track_h.nok).id_stop_vertex = 0
+                dst_track(dst_track_h.nok).id_emc         = 0
+                dst_track(dst_track_h.nok).id_smd         = 0
                else
                   write(6,20) dst_track_h.nok
 20                Format(2x,'No. DST TRACK entries .ge. maximum')

@@ -9,7 +9,7 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.19 1999/10/22 19:37:52 fisyak Exp $
+# $Id: cons,v 1.18 1999/10/19 21:32:12 fisyak Exp $
 $cons_history =
   q(
     Modification History:
@@ -44,7 +44,7 @@ $cons_history =
 $ver_num = 1.6;
 $ver_rev = "b1";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.19 1999/10/22 19:37:52 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.18 1999/10/19 21:32:12 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -136,8 +136,7 @@ Arguments can be any of the following, in any order:
   -f <file>	Use the specified file instead of "Construct" (but first
 		change to containing directory of <file>).
 
-  -i            Don\'t force to search for include file in default include directory
-  -lh           Show a help message local to the current build if
+  -h            Show a help message local to the current build if
 		one such is defined,  and exit.
 
   -o <file>	Read override file <file>.
@@ -162,7 +161,6 @@ Arguments can be any of the following, in any order:
   -v		Show cons version and continue processing.
   -V            Show cons version and exit.
   -x		Show this message and exit.
-  -h		Show this message and exit.
 
    Please report any bugs/fixes/suggestions through the
    cons-discuss@eng.fore.com mailing list. To subscribe, send mail to
@@ -181,7 +179,6 @@ $0 =~ s#.*/##;
 $param::topfile = 'Construct';	# Top-level construction file.
 $param::defaultConstruct = $STAR . "/mgr/Construct";	# Default construction file.
 $param::defaultConscript = $STAR . "/mgr/Conscript-standard";	# Default construction file.
-$param::defaultInclude   = 1;   # Force to use default include path
 $param::install = 1;		# Show installations
 $param::build = 1;		# Build targets
 $param::show = 1;		# Show building of targets.
@@ -280,13 +277,11 @@ sub option {
     } elsif ($_ eq 'r') {
 	$param::rflag = 1;
 	$param::build = 0;
-    } elsif ($_ eq 'lh') {
+    } elsif ($_ eq 'h') {
 	$param::localhelp =1;
-    } elsif ($_ eq 'i') {
-	$param::defaultInclude = 0;
     } elsif ($_ eq 'g') {
 	$param::debug =1;
-    } elsif ($_ eq 'x' || $_ eq 'h') {
+    } elsif ($_ eq 'x') {
 	print($usage);
 	exit 0;
     } elsif ($_ eq 'd') {
@@ -2208,7 +2203,7 @@ sub scan {
 		last;
 	    }
 	}
-      if ($param::defaultInclude && $default_include) { 
+      if ($default_include) { 
 	if ($default_include->path !~ /incbeg\.inc$/ &&
 	    $default_include->path !~ /incend\.inc$/) {
 	  push @includes, $default_include;

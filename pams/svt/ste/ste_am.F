@@ -53,7 +53,7 @@ C     ARGUMENTS:
 
 C     Local Declarations: 
 c     -------------------
-      integer ictrack, idtrack, j_spt(10), mctrk
+      integer ictrack, idtrack, jspt(10), mctrk
       integer the_spt, iteval1, ispt1, ispt2, ispt3
       integer ispt, idspt, icspt, ig2t_track, imctrk
       integer nrspt, ncspt, ngspt
@@ -110,7 +110,7 @@ c     error/message
       logical   first
       data      first/.true./
       save first
-      real atan2d,tand
+
 c     wkw
       integer iseed
 
@@ -366,25 +366,25 @@ c     ===============================================================
      >        .and. mcgroups(table_off(1)).ident .eq. 1) then
             
 c     use first point as the reference
-            j_spt(1) = mcgroups(table_off(1)).id2 
-            if (j_spt(1).lt.1 .or. j_spt(1).gt.nsptmax) then
-               write(msg,1022) j_spt(1),idtrack
+            jspt(1) = mcgroups(table_off(1)).id2 
+            if (jspt(1).lt.1 .or. jspt(1).gt.nsptmax) then
+               write(msg,1022) jspt(1),idtrack
                call message(msg,1,msg_id(28))
                goto 200
             end if
          endif
          
           
-         ispt = sptkey(j_spt(1))
+         ispt = sptkey(jspt(1))
          if (ispt.lt.1 .or. ispt.gt.spt_h.nok) then
-            write(msg,1023) j_spt(1),ispt
+            write(msg,1023) jspt(1),ispt
             call message(msg,1,msg_id(29))
             goto 200
          end if
          
          mctrk  = spt(ispt).id_mctrack
          if (mctrk.lt.1 .or. mctrk.gt.nkinemax) then
-            write(msg,1024) j_spt(1),ispt
+            write(msg,1024) jspt(1),ispt
             call message(msg,1,msg_id(30))
             imctrk = 0
             kpid    = 0
@@ -580,38 +580,38 @@ c     track candidate - none from this part
          teval(iteval1).crdca   =  -1
          teval(iteval1).czdca   =  -1
  
-         ispt1 = sptkey(j_spt(1))
+         ispt1 = sptkey(jspt(1))
          teval(iteval1).x1(1)   = spt(ispt1).x(1)
          teval(iteval1).x1(2)   = spt(ispt1).x(2)
          teval(iteval1).x1(3)   = spt(ispt1).x(3)
          
          if( krows .ge. 2) then
-            j_spt(2) = mcgroups(table_off(2)).id2
+            jspt(2) = mcgroups(table_off(2)).id2
          else
-            j_spt(2) = 0
+            jspt(2) = 0
          endif
-         if (j_spt(2).lt.1.or.j_spt(2).gt.spt_h.nok) then
+         if (jspt(2).lt.1.or.jspt(2).gt.spt_h.nok) then
             teval(iteval1).x2(1)   = infinity
             teval(iteval1).x2(2)   = infinity
             teval(iteval1).x2(3)   = infinity
          else
-            ispt2 = sptkey(j_spt(2))
+            ispt2 = sptkey(jspt(2))
             teval(iteval1).x2(1)   = spt(ispt2).x(1)
             teval(iteval1).x2(2)   = spt(ispt2).x(2)
             teval(iteval1).x2(3)   = spt(ispt2).x(3)
          endif
 
          if( krows .ge. 3) then
-            j_spt(3) = mcgroups(table_off(3)).id2
+            jspt(3) = mcgroups(table_off(3)).id2
          else
-            j_spt(3) = 0
+            jspt(3) = 0
          endif
-         if (j_spt(3).lt.1.or.j_spt(3).gt.spt_h.nok) then
+         if (jspt(3).lt.1.or.jspt(3).gt.spt_h.nok) then
             teval(iteval1).x3(1)   = infinity
             teval(iteval1).x3(2)   = infinity
             teval(iteval1).x3(3)   = infinity
          else
-            ispt3 = sptkey(j_spt(3))
+            ispt3 = sptkey(jspt(3))
             teval(iteval1).x3(1)   = spt(ispt3).x(1)
             teval(iteval1).x3(2)   = spt(ispt3).x(2)
             teval(iteval1).x3(3)   = spt(ispt3).x(3)
@@ -733,10 +733,10 @@ c     search the "real" track info
          if( krows .gt. 0 .and. groups(table_off(1)).ident .gt. 1
      >        .and. groups(table_off(1)).id1 .eq. ictrack) then
 
-            j_spt(1) = groups(table_off(1)).id2
+            jspt(1) = groups(table_off(1)).id2
 c use first point as the reference
-            if (j_spt(1).lt.1 .or. j_spt(1).gt.nsptmax) then
-               write(msg,1022) j_spt(1),ictrack
+            if (jspt(1).lt.1 .or. jspt(1).gt.nsptmax) then
+               write(msg,1022) jspt(1),ictrack
                call message(msg,1,msg_id(20))
                ste_am = stafcv_bad
                done = .true.
@@ -744,9 +744,9 @@ c use first point as the reference
             end if
          endif
 
-         ispt = sptkey(j_spt(1))
+         ispt = sptkey(jspt(1))
          if (ispt.lt.1 .or. ispt.gt.spt_h.nok) then
-            write(msg,1023) j_spt(1),ispt
+            write(msg,1023) jspt(1),ispt
             call message(msg,1,msg_id(21))
             ste_am = stafcv_bad
             done = .true.

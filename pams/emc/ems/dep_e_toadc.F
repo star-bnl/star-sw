@@ -48,7 +48,7 @@ CC:>--------------------------------------------------------------------
 
       if(key.eq.0) then ! Calculated value of coefficients
          key = 1
-         write(6,101)
+         write(6,1)
          do i=1,MAXDET
             write(6,2) i,control_toadc(1).mode(i)
             if(control_toadc(1).mode(i).eq.0) then
@@ -111,13 +111,7 @@ c     +   , ' sub ',sub, ' phi ',phi,' eta ', eta
             adc  = -1
             
          elseif(mode .eq. 1) then ! DE => ADC
-
-C    PN,7.10.99:     Chto eto za xrenovina ???????????????? 
-C  Please put an extensive explanation in the code if you use
-C  non-standard fortran. It is hard to even guess what should be here
-C           sf      = samplefraction(%VAL(det),%VAL(eta))
-            sf      = samplefraction(det,eta)
-
+            sf      = samplefraction(%VAL(det),%VAL(eta))
             const_w = control_toadc(1).c1(det) / cosh(eta)
             radc = hits_ems(ih).energy / cosh(eta)        ! 1./cosh(eta)=sin(theta)
      +           * sf * control_toadc(1).c1(det)
@@ -125,9 +119,7 @@ C           sf      = samplefraction(%VAL(det),%VAL(eta))
             adc  = max(0,adc)
 
          elseif(mode .eq. 2) then ! DE => PHE => ADC
-C    PN,7.10.99:    Chto eto za xrenovina ???????????????? 
-C           sf      = samplefraction(%VAL(det),%VAL(eta))
-            sf      = samplefraction(det,eta)
+            sf   = samplefraction(%VAL(det),%VAL(eta)) 
             const_w = control_toadc(1).c1(det) / cosh(eta)
             amu  = hits_ems(ih).energy / cosh(eta)        ! 1./cosh(eta)=sin(theta)
      +           * sf * control_toadc(1).c2(det)
@@ -210,7 +202,7 @@ c         write(*,*) 'det ', det,' eta ', eta,' sf ', sf  ! For testing only
       write(*,7) det1,o1, det2,o2
       
       return
- 101  format(6x,'dep_e_toadc(Ver. 1.32) date => 07-Jun-1999')
+ 1    format(6x,'dep_e_toadc(Ver. 1.32) date => 07-Jun-1999')
  2    format(6x,'dep_e_toadc: detector# = ',i2,' mode =',i2)
  3    format(
      + ' Sample Fraction coefficient (unused now)     ', f10.2/

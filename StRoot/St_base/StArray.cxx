@@ -1,11 +1,5 @@
-// $Id: StArray.cxx,v 1.14 1999/10/22 22:24:00 perev Exp $
+// $Id: StArray.cxx,v 1.12 1999/07/30 01:12:05 perev Exp $
 // $Log: StArray.cxx,v $
-// Revision 1.14  1999/10/22 22:24:00  perev
-// Minor fixes
-//
-// Revision 1.13  1999/10/21 00:13:58  perev
-// Version of StArray for new StEvent
-//
 // Revision 1.12  1999/07/30 01:12:05  perev
 // StArray const(antisation)
 //
@@ -14,6 +8,9 @@
 //
 // Revision 1.10  1999/06/23 20:31:04  perev
 // StArray I/O + browser
+//
+// Revision 1.8  1999/05/22 17:46:45  perev
+// StVectorInt class added
 //
 // Revision 1.7  1999/05/11 01:10:50  fine
 // StArray::Browse() method jas been introduced
@@ -37,19 +34,36 @@
 
 TObjArray *StRegistry::fReg = 0;
 TList     *StRegistry::fNon = 0;
+
+ClassImp(StVectorInt)
 //______________________________________________________________________________
-ClassImp(StTObjArray)
+ void StVectorInt::Streamer(TBuffer &){}
+//______________________________________________________________________________
+// void StVectorInt::ShowMembers(TMemberInspector &, char *){}
+//______________________________________________________________________________
+ void StVectorInt::Set(Int_t n)
+{
+   // Set array size of TArrayI object to n integers.
+   // If n<0 leave array unchanged.
+
+   if (n < 0) return;
+   Int_t *arrSav = fArray;
+   if (n) {
+     fArray = new Int_t[n];
+     memset(fArray,0,sizeof(Int_t)*n);
+     if (arrSav) memcpy(fArray,arrSav,sizeof(Int_t)*fN);
+   }
+   fN = n;
+   if (arrSav) delete [] arrSav;
+   if (fLast >=fN) fLast=fN-1;
+}
+//______________________________________________________________________________
+ void StVectorInt::Add(const Int_t &c )
+{ if (++fLast >=fN) Set(fN*2);
+  fArray[fLast]=c;
+}
 //______________________________________________________________________________
 ClassImp(StRegistry)
-//______________________________________________________________________________
-void StRegistry::Clear(){if (fReg) fReg->Clear();}
-//______________________________________________________________________________
-ULong_t StRegistry::Ident(ULong_t colidx,ULong_t objidx){return colidx<<24 |objidx;}
-//______________________________________________________________________________
-void    StRegistry::Ident(ULong_t ident,ULong_t &colidx,ULong_t &objidx)
-  {colidx = ident>>24;  objidx = ident & 0x00ffffff;}
-//______________________________________________________________________________
-Int_t StRegistry::GetNColl(){return (fReg) ? fReg->GetLast()+1:0;}				// Number of collections
 //______________________________________________________________________________
 void StRegistry::Streamer(TBuffer &){assert(0);}
 
@@ -147,27 +161,6 @@ void StRegistry::List()
 
 ClassImp(StObjArray)
 //______________________________________________________________________________
-void 	StObjArray::push_back(const TObject *obj) {AddLast((TObject*)obj);}
-//______________________________________________________________________________
-void 	StObjArray::pop_back() {RemoveAt(GetLast());}
-//______________________________________________________________________________
-UInt_t  StObjArray::size() const {return GetSize();}
-//______________________________________________________________________________
-void    StObjArray::resize(Int_t num){Resize(num);}
-//______________________________________________________________________________
-Int_t 	StObjArray::capacity() const {return Capacity();}
-//______________________________________________________________________________
-TObject* StObjArray::Back() const {return Last();}
-//______________________________________________________________________________
-TObject* StObjArray::Front() const {return First();}
-//______________________________________________________________________________
-void 	StObjArray::clear(){Clear();}
-//______________________________________________________________________________
-Bool_t 	StObjArray::empty() const {return IsEmpty();}
-//______________________________________________________________________________
-TObject** StObjArray::GetCell(Int_t idx) const{return &(*fArr)[idx];}
-
-//______________________________________________________________________________
 void StObjArray::Streamer(TBuffer &)
 {;}
 //______________________________________________________________________________
@@ -216,7 +209,7 @@ const TIterator *StObjArray::End() const
 //______________________________________________________________________________
 void StObjArray::SetLast(Int_t last)
 {
-  *((int*)((int*)((void*)(this))+8)) = last;
+  *((int*)((int*)((void*)(fObjArr))+8)) = last;
 }
 //______________________________________________________________________________
 void StObjArray::Resize(Int_t num)
@@ -229,31 +222,6 @@ TIterator* StObjArray::MakeIterator(Bool_t dir) const
 {
   return (TIterator*)(new StObjArrayIter(this,dir));
 }
-//______________________________________________________________________________
-void StObjArray::Clean(StObject *obj)
-{
-  if (!obj) Clear(); else Remove(obj);
-}  
-//______________________________________________________________________________
-void StObjArray::Clean(StObjArrayIter *iter)
-{
-    int idx = iter->GetCursor(); AddAt(0,idx);
-}
-//______________________________________________________________________________
-void StObjArray::Erase(StObject *obj)
-{
-  if (!obj) {Delete();return;}
-  Remove(obj); delete obj;
-}
-
-//______________________________________________________________________________
-void StObjArray::Erase(StObjArrayIter *iter)
-{ 
-  TObject *obj = iter->GetObject();
-  if (!obj) return;
-  Clean(iter); delete obj;
-}
-
 //______________________________________________________________________________
 ClassImp(StObjArrayIter)
 //______________________________________________________________________________
@@ -281,10 +249,9 @@ Bool_t   StObjArrayIter::GetDirection() const
   return *((Bool_t*)((int*)((void*)(this))+3));
 }
 //______________________________________________________________________________
-void   StObjArrayIter::SetCollection(const TCollection *coll)
+void   StObjArrayIter::SetCollection(TObjArray *coll)
 {
-  *((const TCollection**)((int*)((void*)(this))+1)) = coll;
-  assert(GetCollection()==coll);
+  *((TObjArray**)((int*)((void*)(this))+1)) = coll;
 }
 //______________________________________________________________________________
 TObject* StObjArrayIter::GetObject() const
@@ -321,7 +288,7 @@ Bool_t StObjArrayIter::operator!=(const StObjArrayIter &iter) const
 //______________________________________________________________________________
 void StObjArrayIter::operator=(const StObjArrayIter &iter)
 {
- SetCollection(iter.GetCollection());
+ SetCollection((TObjArray*)iter.GetCollection());
  SetCursor(iter.GetCursor());
  SetDirection(iter.GetDirection());
 } 
@@ -415,31 +382,7 @@ void StRefArray::Decode()
     AddAt(obj, j++);
   }
 }
-//______________________________________________________________________________
 ClassImp(StStrArray)
-//______________________________________________________________________________
- void StStrArray::Book(TObject* obj,int idx)
- { obj->SetUniqueID(StRegistry::Ident(fIdx,idx));}
-
-//______________________________________________________________________________
- const Char_t *StStrArray::GetName() const {return fName;}
-//______________________________________________________________________________
- void          StStrArray::SetName(const char* name) {fName = name;} 
-//______________________________________________________________________________
- void StStrArray::AddFirst(TObject* obj)
- { StObjArray::AddFirst(obj); Book(obj,0);}
-
-//______________________________________________________________________________
- void StStrArray::AddLast(TObject* obj)
- { StObjArray::AddLast(obj); Book(obj,GetLast());}
-
-//______________________________________________________________________________
- void StStrArray::AddAt(TObject* obj, Int_t idx)
- { StObjArray::AddAt(obj,idx); Book(obj,idx);}
- 
-//______________________________________________________________________________
- void StStrArray::AddAtAndExpand(TObject* obj, Int_t idx)
- { StObjArray::AddAtAndExpand(obj,idx); Book(obj,idx);};
 //______________________________________________________________________________
 //void StStrArray::ShowMembers(TMemberInspector &, char *){}
 //______________________________________________________________________________
@@ -487,12 +430,73 @@ void StStrArray::Streamer(TBuffer &R__b)
       Version_t R__v = R__b.ReadVersion(); if (R__v) { }
       TString name; name.Streamer(R__b);SetName(name);
       name.Streamer(R__b);SetIDName(name);
-      StTObjArray::Streamer(R__b);
+      R__b >> fObjArr;
    } else {
       R__b.WriteVersion(StStrArray::IsA());
       fName.Streamer(R__b);
       fIDName.Streamer(R__b);
-      StTObjArray::Streamer(R__b);
+      R__b << fObjArr;
    }
 
 }
+#if 0
+ClassImp(QWERTY)
+
+ClassImp(QWERTYIter)
+//______________________________________________________________________________
+void QWERTYIter::Streamer(TBuffer& ){}
+
+//______________________________________________________________________________
+ClassImp(QWERTYRef)
+void QWERTYRef::Streamer(TBuffer& b){StRefArray::Streamer(b);}
+
+TIterator* QWERTYRef::MakeIterator(Bool_t dir) const
+{return (TIterator*)new QWERTYIter(this,dir);}
+
+const QWERTYIter QWERTYRef::begin() const { return *((QWERTYIter*)Begin());};
+const QWERTYIter QWERTYRef::end()   const { return *((QWERTYIter*)End());};
+
+//______________________________________________________________________________
+ClassImp(QWERTYStr)
+void QWERTYStr::Streamer(TBuffer& b){StStrArray::Streamer(b);}
+
+TIterator* QWERTYStr::MakeIterator(Bool_t dir) const
+{return (TIterator*)new QWERTYIter(this,dir);}
+
+const QWERTYIter QWERTYStr::begin() const { return *((QWERTYIter*)Begin());};
+const QWERTYIter QWERTYStr::end()   const { return *((QWERTYIter*)End());};
+
+
+
+void testqwe()
+{
+
+printf("TEST 1: QWERTYRef\n\n");
+
+  int i,n;
+  QWERTY *to;
+
+  QWERTYRef ar(100);
+  ar.resize(20);
+  for (i=0;i<20;i++)
+  { 
+    to = new QWERTY; to->SetUniqueID(i);
+    ar[i] = to;
+  }
+
+  n = ar.size(); printf("size = %d\n",n);
+  for (i=0;i<n;i++)
+  { 
+    to = ar[i]; 
+    printf(" %d == %d\n",i,to->GetUniqueID());
+  }
+
+  printf("TEST 2: QWERTYRef\n\n");
+
+  for (QWERTYIter it = ar.begin(); !(it==ar.end()); ++it)
+  {
+    to = *it; printf(" %d == %d\n",i,to->GetUniqueID());
+
+  }
+}
+#endif

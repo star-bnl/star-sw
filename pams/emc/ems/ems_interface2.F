@@ -53,7 +53,7 @@ c      write(*,*) 'EMS_INTERFACE2:starting...'
 c----
 c---- Barrel EMC/PRS
 c----
-      if(ems_control(1).bemc_on.eq.1 .and. g2t_emc_hit_h.nok.gt.0) then
+      if(ems_control(1).bemc_on.eq.1) then
          call vzero(tbemc, 120*20*2*2)
          nout     = 0
          do ihit = 1, g2t_emc_hit_h.nok
@@ -108,7 +108,7 @@ c----
 c----
 c---- Barrel SMD
 c----
-      if(ems_control(1).bsmd_on.eq.1 .and. g2t_smd_hit_h.nok.gt.0) then
+      if(ems_control(1).bsmd_on.eq.1) then
          call vzero(tbsmd, 120*150*15*2)
          nout     = 0
          do ihit = 1, g2t_smd_hit_h.nok
@@ -126,7 +126,7 @@ c----
                   write(*,*) 'EMS INTERFACE2: Short of space in EMS_HITS_BSMD'
                   RETURN
                endif
-               tbsmd(module,eta,sub,t)=nout
+               tesmd(module,eta,sub,t)=nout
                ems_hits_bsmd(nout).det    = type
                ems_hits_bsmd(nout).module = module
                ems_hits_bsmd(nout).eta    = eta
@@ -142,7 +142,7 @@ c----
 c----
 c---- Endcap EMC/PRS
 c----
-      if(ems_control(1).eemc_on.eq.1 .and. g2t_eem_hit_h.nok.gt.0) then
+      if(ems_control(1).eemc_on.eq.1) then
          call vzero(teemc, 24*12*5*2)
          nout     = 0
          do ihit = 1, g2t_eem_hit_h.nok
@@ -197,7 +197,7 @@ c----
 c----
 c---- Endcap SMD
 c----
-      if(ems_control(1).esmd_on.eq.1 .and. g2t_esm_hit_h.nok.gt.0) then
+      if(ems_control(1).esmd_on.eq.1) then
          nout = 0
          call vzero(tesmd, 24*12*100*2)
          do ihit = 1, g2t_esm_hit_h.nok

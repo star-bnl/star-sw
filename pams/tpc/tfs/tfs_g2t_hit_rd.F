@@ -1,8 +1,5 @@
-* $Id: tfs_g2t_hit_rd.F,v 1.10 1999/10/15 00:54:01 nevski Exp $
+* $Id: tfs_g2t_hit_rd.F,v 1.9 1999/10/11 16:53:11 sakrejda Exp $
 * $Log: tfs_g2t_hit_rd.F,v $
-* Revision 1.10  1999/10/15 00:54:01  nevski
-* pgf->g77 cleanup
-*
 * Revision 1.9  1999/10/11 16:53:11  sakrejda
 * Obsolete parameters removed and the old code to do the pileup
 * deleted (not Akio's , akio's is still in!). It did not work anyway.
@@ -186,7 +183,7 @@ C     store local momentum in place of position errors
            icount=icount+1            ! not enough space in tphit
          endif                       ! nok < tphit.maxlen
          
- 100  continue
+ 100  enddo
 
 C     set the row counter
       if(icount.ne.0) ierr = nok+icount

@@ -1,11 +1,5 @@
-// $Id: St_dst_Maker.cxx,v 1.29 1999/10/19 00:11:30 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.27 1999/09/24 01:23:36 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
-// Revision 1.29  1999/10/19 00:11:30  fisyak
-// Remove aux tables
-//
-// Revision 1.28  1999/10/01 17:07:24  wdeng
-// Accommodate new dst tables. Check it in though I am not sure what I did.
-//
 // Revision 1.27  1999/09/24 01:23:36  fisyak
 // Reduced Include Path
 //
@@ -89,7 +83,7 @@
 #include "tables/St_dst_summary_param_Table.h"
 #include "tables/St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.29 1999/10/19 00:11:30 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.27 1999/09/24 01:23:36 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -103,8 +97,8 @@ St_dst_Maker::~St_dst_Maker(){
 //_____________________________________________________________________________
 Int_t St_dst_Maker::Init(){
   static const char *todst[] = {
-    "match:",  "globtrk", 
-    "primary:","globtrk2", "primtrk", "vertex",
+    "match:",  "globtrk", "globtrk_aux",
+    "primary:","globtrk2", "primtrk", "primtrk_aux", "vertex",
     "v0:",     "dst_v0_vertex","ev0_eval",
     "xi:",     "dst_xi_vertex",
     "kink:",   "kinkVertex",
@@ -119,80 +113,59 @@ Int_t St_dst_Maker::Init(){
   m_dst_summary_param = new St_dst_summary_param("summary_param",1);
   AddConst(m_dst_summary_param);
   dst_summary_param_st dst_summary_param;
-  //  dst_summary_param.bfc_run_id =  0;
-  dst_summary_param.eta_bins[0] = -2.;
-  dst_summary_param.eta_bins[1] = -1.;
-  dst_summary_param.eta_bins[2] = -.5;
-  dst_summary_param.eta_bins[3] =  .5;
-  dst_summary_param.eta_bins[4] =  1.;
-  dst_summary_param.eta_bins[5] =  2.;
-  dst_summary_param.eta_bins[6] =  2.;
-  dst_summary_param.eta_bins[7] =  2.;
-  dst_summary_param.eta_bins[8] =  2.;
+  dst_summary_param.eta_bins[0]=  -2.;
+  dst_summary_param.eta_bins[1]=  -1.;
+  dst_summary_param.eta_bins[2]=  -.5;
+  dst_summary_param.eta_bins[3]=   .5;
+  dst_summary_param.eta_bins[4]=   1.;
+  dst_summary_param.eta_bins[5]=   2.;
   
-  dst_summary_param.pt_bins[0] = .1;
-  dst_summary_param.pt_bins[1] = .15;
-  dst_summary_param.pt_bins[2] = .2;
-  dst_summary_param.pt_bins[3] = .3;
-  dst_summary_param.pt_bins[4] = .5;
-  dst_summary_param.pt_bins[5] = 1.;
-  dst_summary_param.pt_bins[6] = 1.;
-  dst_summary_param.pt_bins[7] = 1.;
-  dst_summary_param.pt_bins[8] = 1.;
-
-  dst_summary_param.phi_bins[0] = 0.;
-  dst_summary_param.phi_bins[1] = 36.;
-  dst_summary_param.phi_bins[2] = 72.;
-  dst_summary_param.phi_bins[3] = 108.;
-  dst_summary_param.phi_bins[4] = 144.;
-  dst_summary_param.phi_bins[5] = 180.;
-  dst_summary_param.phi_bins[6] = 216.;
-  dst_summary_param.phi_bins[7] = 252.;
-  dst_summary_param.phi_bins[8] = 288.;
-  dst_summary_param.phi_bins[9] = 324.;
-    
+  dst_summary_param.pt_bins[0]=    .1;
+  dst_summary_param.pt_bins[1]=    .15;
+  dst_summary_param.pt_bins[2]=    .2;
+  dst_summary_param.pt_bins[3]=    .3;
+  dst_summary_param.pt_bins[4]=    .5;
+  dst_summary_param.pt_bins[5]=    1.;
+  
+  dst_summary_param.mt_bins[0]=    .03;
+  dst_summary_param.mt_bins[1]=    .12;
+  dst_summary_param.mt_bins[2]=    .2;
+  dst_summary_param.mt_bins[3]=    .3;
+ dst_summary_param.mt_bins[4]=    .5;
+  dst_summary_param.mt_bins[5]=    1.;
+  
+  dst_summary_param.n_phi_bins=  8;
+  
   m_dst_summary_param->AddAt(&dst_summary_param,0);
-  St_run_header *run_header = new St_run_header("run_header",1);
+  St_dst_run_header *run_header = new St_dst_run_header("run_header",1);
   AddConst(run_header);
 
   St_dst_run_summary *dst_run_summary = new St_dst_run_summary("dst_run_summary",1);
   AddConst(dst_run_summary);
-  dst_run_summary_st run_summary;
-
-#if 0
-  // Spiros says he initialize the table in his filler. I am not sure what should be done here. 
-  // So just comment it out. -Wensheng
-  // comment-out begins
-  if(0) {
   dst_run_summary_st run_summary = 
 {
-  0,     // long   bfc_run_id;      /* Unique BFC run ID, F.key to run_header          */
-  0,     // long   n_events_tot;    /* Total number of events in the BFC prod. run     */
-  0,     // long   n_events_good;   /* Total number events successfully processed      */
-  {0,0}, // long   date[2];         /* Start/stop date for processing                  */
-  {0,0}, // long   time[2];         /* Start/stop time of day (sec)                    */
-  0,     // float  cpu_total;       /* Total cpu sec for production run                */
-  0,     // float  east_pol_L;      /* Avg magnitude of east beam Longitudinal Pol     */
-  0,     // float  east_pol_T;      /* Avg magnitude of east beam Transverse Pol       */
-  0,     // float  west_pol_L;      /* Avg magnitude of west beam Longitudinal Pol     */
-  0,     // float  west_pol_T;      /* Avg magnitude of west beam Transverse Pol       */
-  0,     // float  luminosity;      /* Avg luminosity during experiment for events     */
-                                    /* in production run, 1.0/[cm^2 sec]               */
-  {0,0}, // float  eta[2];          /* Mean and std.dev. of &lt;eta&gt; for all events */
-  {0,0}, // float  pt[2];           /* Mean and std.dev. of &lt;pt&gt; for all events  */
-  {0,0}, // float  num_vert[2];     /* Mean and std.dev. of total # vertices           */
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-         // float  mean_mult[30];   /* Mean multiplicity (energy) per detector for run */ 
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} 
-        // float  rms_mult[30];    /* RMS multiplicity (energy) per detector for run  */
+  "Unknown", //char   version[20];     /* DST production software version               */
+  0,         //long   prod_run;        /* Prod. run number, F.key to dst_run_header     */
+  0,         //long   n_events_tot;    /* Total number of events in the run             */
+  0,         //long   n_events_good;   /* Total number events successfully processed    */
+  {0,0},     //long   date[2];         /* Start/stop date for processing                */
+  {0,0},     //long   time[2];         /* Start/stop time of day (sec)                  */
+  0.,        //float  cpu_total;       /* Total cpu sec for production run              */
+  {0.,0.,0.,0.,0.,0.}, //float  eta_bins[6];     /* Pseudorapidity bins, lower->upper ranges */
+  {0.,0.,0.,0.,0.,0.}, //float  pt_bins[6];      /* Trans. momen. bins, lower->upper ranges  */
+  {0.,0.,0.,0.,0.,0.}, //float  mt_bins[6];      /* Trans. mass bins, lower->upper ranges    */
+  0,         //long   n_phi_bins;      /* # of phi bins, start at phi=0, max # is 8     */
+  {0.,0.},   //float  mean_eta[2];     /* Mean and std.dev. of <eta> for all events     */
+  {0.,0.},   //float  mean_pt[2];      /* Mean and std.dev. of <pt> for all events      */
+  { 0, 0},   //long   multiplicity[2]; /* Mean and std.dev. of total chrg. mult.        */
+  { 0, 0},   //long   num_vert[2];     /* Mean and std.dev. of total # vertices         */
+  { 0, 0},   //long   energy_emc[2];   /* Mean and std.dev. of total energy in EMC      */
  };
+
 
   run_summary.version[0]=0;
   strncat (run_summary.version,GetCVS(),sizeof(run_summary.version)-1); // DST production software version
   dst_run_summary->AddAt(&run_summary,0);
-  }
-  // comment-out ends
-#endif
  
   // Create Histograms    
   return StMaker::Init();
@@ -232,19 +205,21 @@ Int_t  St_dst_Maker::Filler(){
   int iMake = kStOK;
   int iRes = 0;
   St_dst_track     *globtrk     = (St_dst_track *)     dstI("globtrk");
+  St_dst_track_aux *globtrk_aux = (St_dst_track_aux *) dstI("globtrk_aux");
   St_dst_vertex    *vertex      = (St_dst_vertex *)    dstI("vertex");    
   St_svm_evt_match *evt_match   = (St_svm_evt_match *) dstI("evt_match");
   St_dst_run_summary *dst_run_summary = (St_dst_run_summary   *) m_ConstSet->Find("dst_run_summary");
   
-  St_event_header  *event_header  = new St_event_header("event_header",1);
+  St_dst_event_header  *event_header  = new St_dst_event_header("event_header",1);
   dstI.Add(event_header);
   event_header->SetNRows(1);
-  event_header_st  event =   {"Collision", //event_type
-                              0,           // n_event
-                              0, 0, 0, 0}; // exp_run_id,time,trig_mask,bunch_cross
+  dst_event_header_st  event =   {"Collision", //event_type
+                                  {0,0},       // n_event[2]
+                                  0, 0, 0, 0}; // n_run,time,trig_mask,bunch_cross
   if (GetEventType()) strcpy (&event.event_type[0],GetEventType());
-  event.n_event    = GetEventNumber();
-  event.exp_run_id = GetRunNumber();
+  event.n_event[0] = GetEventNumber();
+  event.n_event[1] = GetDate();
+  event.n_run      = GetRunNumber();
   event.time       = GetTime();
   event_header->AddAt(&event,0);
   St_dst_event_summary *event_summary = new St_dst_event_summary("event_summary",1);
@@ -333,9 +308,10 @@ Int_t  St_dst_Maker::Filler(){
     if(Debug()) gMessMgr->Debug()<<" run_dst: Calling fill_ftpc_dst"<<endm;
     Int_t No_of_Tracks = globtrk->GetNRows() + fpt_fptrack->GetNRows();
     globtrk->ReAllocate(No_of_Tracks);
+    globtrk_aux->ReAllocate(No_of_Tracks);
     dst_dedx->ReAllocate(No_of_Tracks);
     iRes = fill_ftpc_dst(fpt_fptrack, fcl_fppoint, globtrk,
-                         point,vertex,dst_dedx);
+                         globtrk_aux,point,vertex,dst_dedx);
     //             ==========================================================
     if (iRes != kSTAFCV_OK) {
       iMake = kStWarn;
@@ -358,20 +334,14 @@ Int_t  St_dst_Maker::Filler(){
  
   if(Debug()) gMessMgr->Debug() << " run_dst: Calling dst_monitor_soft_filler" << endm;
     
-  St_dst_monitor_soft_ftpc    *monitor_soft_ftpc   = new St_dst_monitor_soft_ftpc("monitor_soft_ftpc",1);
-  St_dst_monitor_soft_global  *monitor_soft_global = new St_dst_monitor_soft_global("monitor_soft_global",1);
-  St_dst_monitor_soft_svt     *monitor_soft_svt    = new St_dst_monitor_soft_svt("monitor_soft_svt",1);
-  St_dst_monitor_soft_tpc     *monitor_soft_tpc    = new St_dst_monitor_soft_tpc("monitor_soft_tpc",1);
-  dstI.Add(monitor_soft_ftpc);
-  dstI.Add(monitor_soft_global);
-  dstI.Add(monitor_soft_svt);
-  dstI.Add(monitor_soft_tpc);
-  iRes = dst_monitor_soft_filler(tpcluster, scs_cluster,
-				 tphit, scs_spt, fcl_fppoint,
+  St_dst_monitor_soft  *monitor_soft = new St_dst_monitor_soft("monitor_soft",1);
+  dstI.Add(monitor_soft);
+  iRes = dst_monitor_soft_filler(tpcluster,
+				 scs_cluster,
+				 tphit,scs_spt,fcl_fppoint,
 				 tptrack,stk_track,fpt_fptrack,
-				 evt_match, ctb_cor, vertex, event_summary, 
-                                 monitor_soft_ftpc, monitor_soft_global,
-                                 monitor_soft_svt, monitor_soft_tpc );
+				 evt_match,
+				 ctb_cor,vertex,event_summary,monitor_soft);
     //     ===========================================================================
   if (iRes !=kSTAFCV_OK) {
     iMake = kStWarn;
@@ -379,15 +349,15 @@ Int_t  St_dst_Maker::Filler(){
     if(Debug()) gMessMgr->Debug() << " run_dst: finished calling dst_monitor_soft_filler" << endm;
   }
  //--------------- ????????? --------------
-  St_run_header    *run_header    = (St_run_header *)    m_ConstSet->Find("run_header");
+  St_dst_run_header    *run_header    = (St_dst_run_header *)    m_ConstSet->Find("run_header");
   St_dst_summary_param *summary_param = (St_dst_summary_param *) m_ConstSet->Find("summary_param");
   
   if (!run_header) {
     StEvtHddr * evthdr = (StEvtHddr*)GetDataSet("EvtHddr");
     assert(evthdr);
-    run_header = new St_run_header("run_header",1);
-    run_header_st run;
-    run.bfc_run_id = evthdr->GetRunNumber();
+    run_header = new St_dst_run_header("run_header",1);
+    dst_run_header_st run;
+    run.run_id = evthdr->GetRunNumber();
     // count printable chars
     const Char_t *type = evthdr->GetEventType();
     Int_t n=0;

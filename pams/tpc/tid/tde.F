@@ -1,11 +1,5 @@
-* $Id: tde.F,v 1.4 1999/10/15 00:54:06 nevski Exp $
+* $Id: tde.F,v 1.2 1999/08/18 20:46:39 fisyak Exp $
 * $Log: tde.F,v $
-* Revision 1.4  1999/10/15 00:54:06  nevski
-* pgf->g77 cleanup
-*
-* Revision 1.3  1999/10/01 16:35:54  margetis
-* updated tid, put method instead of iflag
-*
 * Revision 1.2  1999/08/18 20:46:39  fisyak
 * replace ran by rmdn
 *
@@ -95,7 +89,7 @@ C-----------------------------------------------------------------------
                 REAL length
                 REAL charge
                 REAL adedx
-                REAL sorta_dedx
+                REAL sortadedx
       END STRUCTURE
 
 C-----------------------------------------------------------------------
@@ -155,7 +149,7 @@ C Abort if there are no TPC hits to work with
 
       if (hit_h.nok.eq.0) then
         call message('TDE_DEDX-W: No TPC hitss.'// 
-     >                 ' TDE aborted.',1,imsg2)
+     >               ' TDE aborted.',1,imsg2)
          tde=STAFCV_BAD
          return
       endif
@@ -402,9 +396,9 @@ c
                     dedx(nde).charge=hit(loc_hit(l)).q
                     dedx(nde).adedx=dedx(nde).charge/ds
                     if (tdpar(1).averaging_method.eq.3) then
-                       dedx(nde).sorta_dedx = dedx(nde).adedx/sqrt(ds)
+                       dedx(nde).sortadedx = dedx(nde).adedx/sqrt(ds)
                     else
-                      dedx(nde).sorta_dedx = dedx(nde).adedx
+                      dedx(nde).sortadedx = dedx(nde).adedx
                     endif  
                   endif
 c               else if((xc-hit(loc_hit(l)).x)**2+
@@ -436,8 +430,8 @@ c
 		last=0
             endif     
          end do
-         iret=tls_Quick_Sort_r(nde,dedx(1).sorta_dedx,
-     >        dedx(2).sorta_dedx,dedx)
+         iret=tls_Quick_Sort_r(nde,dedx(1).sortadedx,
+     >        dedx(2).sortadedx,dedx)
 c
 c truncating options
 c
@@ -577,7 +571,7 @@ c fill tpcdedx table
          tpcdedx(k).dedx(1) = track(j).dedx(1)
          tpcdedx(k).dedx(2) = track(j).dedx(2)
          tpcdedx(k).id_track = track(j).id
-         tpcdedx(k).method = tdpar(1).averaging_method 
+         tpcdedx(k).iflag = tdpar(1).averaging_method 
   
        end do 
 c      if (tdpar(1).averaging_method.eq.2) then

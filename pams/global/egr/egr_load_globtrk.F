@@ -2,8 +2,8 @@
 C>--------------------------------------------------------------------
 C     EGR_FILL_GLOBTRK - fills the global track table
 C<--------------------------------------------------------------------
-       INTEGER FUNCTION EGR_LOAD_GLOBTRK(globtrk_h,globtrk,
-     +     igtrk,gtrk,tphit_h,tphit,svthit_h,svthit,
+       INTEGER FUNCTION EGR_LOAD_GLOBTRK(globtrk_h,globtrk,globtrk_aux_h,
+     +     globtrk_aux,igtrk,gtrk,tphit_h,tphit,svthit_h,svthit,
      +     covar,itpct,isvtt,ipriv,bfield)
        
 C>--------------------------------------------------------------------
@@ -11,6 +11,8 @@ C
 C     Input arguments
 C     globtrk_h    - header for the globtrk table
 C     globtrk     - rows of the globtrk table
+C     globtrk_aux_h    - header for the auxiallry globtrk table
+C     globtrk_aux     - rows of the auxillary globtrk table
 C     igtrk    - current fitting array id
 C     gtrk     - the refitting array
 C     tphit_h     - header for the tphit (tpc hits) table
@@ -24,6 +26,7 @@ C<--------------------------------------------------------------------
 #include "PAM.inc"
 #include "StDetectorId.inc"
 #include "dst_track.inc"
+#include "dst_track_aux.inc"
 #include "tcl_tphit.inc"
 #include "scs_spt.inc"
 #include "egr_track_pointers.inc"
@@ -33,6 +36,8 @@ C______________________________________________________________________
  
       RECORD /table_head_st/     globtrk_h
       RECORD /dst_track_st/      globtrk(*)
+      RECORD /table_head_st/     globtrk_aux_h
+      RECORD /dst_track_aux_st/  globtrk_aux(*)
       RECORD /table_head_st/     tphit_h
       RECORD /tcl_tphit_st/      tphit(*)
       RECORD /table_head_st/     svthit_h
@@ -56,20 +61,17 @@ C--->>>>>>>>>>
 c---<<<<<<<<<<<<<<<<<<<<<<<<
  
       globtrk_h.nok = globtrk_h.nok + 1
+      globtrk_aux_h.nok = globtrk_aux_h.nok +1
       iglob = globtrk_h.nok
       globtrk(iglob).id = iglob
       globtrk(iglob).n_point = gtrk(igtrk).nhit
       globtrk(iglob).n_max_point = 0
       globtrk(iglob).n_fit_point = gtrk(igtrk).nfit
       globtrk(iglob).icharge = sign(1.0,gtrk(igtrk).p(2))
-      globtrk(iglob).r0 = abs(gtrk(igtrk).p(2))+
+      globtrk(iglob).x0 = abs(gtrk(igtrk).p(2))*cos(gtrk(igtrk).p(5))+
      +     gtrk(igtrk).p(3)
-      globtrk(iglob).phi0 = gtrk(igtrk).p(5)*C_DEG_PER_RAD
-      globtrk(iglob).phi0 = AMOD(globtrk(iglob).phi0, 360.0)
-      if( globtrk(iglob).phi0 .lt. .0) then
-         globtrk(iglob).phi0 = globtrk(iglob).phi0 + 360.0
-      endif
-      
+      globtrk(iglob).y0 = abs(gtrk(igtrk).p(2))*sin(gtrk(igtrk).p(5))+
+     +     gtrk(igtrk).p(4)
       globtrk(iglob).z0 = gtrk(igtrk).p(6)
       sgn = sign(1.0,gtrk(igtrk).p(2)*bfield)
       globtrk(iglob).psi = gtrk(igtrk).p(5)-sgn*C_PI_2
@@ -81,22 +83,11 @@ c---<<<<<<<<<<<<<<<<<<<<<<<<
       globtrk(iglob).tanl = gtrk(igtrk).p(7)
       globtrk(iglob).invpt =1.0/abs(C_D_CURVATURE*bfield*
      +     gtrk(igtrk).p(2))
-      globtrk(iglob).covar(1) = 0
-      globtrk(iglob).covar(2) = 0
-      globtrk(iglob).covar(3) = 0
-      globtrk(iglob).covar(4) = 0
-      globtrk(iglob).covar(5) = 0
-      globtrk(iglob).covar(6) = 0
-      globtrk(iglob).covar(7) = 0
-      globtrk(iglob).covar(8) = 0
-      globtrk(iglob).covar(9) = 0
-      globtrk(iglob).covar(10) = 0
-      globtrk(iglob).covar(11) = 0
-      globtrk(iglob).covar(12) = 0
-      globtrk(iglob).covar(13) = 0
-      globtrk(iglob).covar(14) = 0
-      globtrk(iglob).covar(15) = 0
-
+      globtrk(iglob).covar_diag(1) = covar(1,1)
+      globtrk(iglob).covar_diag(2) = covar(2,2)
+      globtrk(iglob).covar_diag(3) = covar(3,3)
+      globtrk(iglob).covar_diag(4) = 0
+      globtrk(iglob).covar_diag(5) = 0
       globtrk(iglob).chisq(1) = gtrk(igtrk).p(8)/
      +     real(globtrk(iglob).n_fit_point-3)
       globtrk(iglob).chisq(2) = gtrk(igtrk).p(9)/
@@ -242,11 +233,27 @@ C---  <<<<<<<
          globtrk(iglob).length=99999.9
       endif
       globtrk(iglob).impact = 0.
-      globtrk(iglob).curvature = gtrk(igtrk).p(2)
-      globtrk(iglob).method = 0
-      globtrk(iglob).map(1) = 0
-      globtrk(iglob).map(2) = 0
+      globtrk(iglob).ndegf =  2*(gtrk(igtrk).nfit) - 5
+      globtrk(iglob).id_global_pid = 0
+      globtrk(iglob).id_hypo_pid = 0
       globtrk(iglob).id_start_vertex = 0
+      globtrk(iglob).id_stop_vertex = 0
+      globtrk(iglob).id_emc = 0
+      globtrk(iglob).id_smd = 0
+
+      globtrk_aux(globtrk_aux_h.nok).id_track = iglob
+      globtrk_aux(globtrk_aux_h.nok).residuals(1)=0
+      globtrk_aux(globtrk_aux_h.nok).residuals(2)=0
+      globtrk_aux(globtrk_aux_h.nok).covar_off_diag(1)=covar(1,2)
+      globtrk_aux(globtrk_aux_h.nok).covar_off_diag(2)=covar(2,1)
+      globtrk_aux(globtrk_aux_h.nok).covar_off_diag(3)=covar(3,1)
+      globtrk_aux(globtrk_aux_h.nok).covar_off_diag(4)=covar(3,2)
+      globtrk_aux(globtrk_aux_h.nok).covar_off_diag(5)=0
+      globtrk_aux(globtrk_aux_h.nok).covar_off_diag(6)=0
+      globtrk_aux(globtrk_aux_h.nok).covar_off_diag(7)=0
+      globtrk_aux(globtrk_aux_h.nok).covar_off_diag(8)=0
+      globtrk_aux(globtrk_aux_h.nok).covar_off_diag(9)=0
+      globtrk_aux(globtrk_aux_h.nok).covar_off_diag(10)=0
 
       EGR_LOAD_GLOBTRK = 0
       return
@@ -267,7 +274,7 @@ C
       REAL    gseed,gtanl,ginvpt,bf,glength
       REAL    rr
 
-      if(bf.lt.0.01) then
+      if(abs(bf).lt.0.01) then
          glength = gseed
       else
          rr=1./(C_D_CURVATURE*bf*ginvpt)

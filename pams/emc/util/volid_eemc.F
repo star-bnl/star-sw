@@ -7,9 +7,7 @@
          ivid        = ivid - emc_chid(i)*eemc_ivid(i)
       enddo
       if(ivid.ne.0)then
-C Unsupported VXT statement at here:
-C        type *,'VOLID_EEMC -- error decoding EEMC volume_id...',ivid
-         print *,'VOLID_EEMC -- error decoding EEMC volume_id...',ivid
+         type *,'VOLID_EEMC -- error decoding EEMC volume_id...',ivid
          return
       endif
       rl  = emc_chid(1)        ! right/left: =1 for Z>0, and =2 for Z<0

@@ -54,7 +54,6 @@ c     error/message
       logical   first
       data      first/.true./
       save      first
-      real      sind,cosd,atan2d,acosd 
       
 C     RETURN:
 C     ------

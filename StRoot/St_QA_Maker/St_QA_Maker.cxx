@@ -1,11 +1,5 @@
-// $Id: St_QA_Maker.cxx,v 1.56 1999/09/30 21:48:39 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.54 1999/09/23 20:08:37 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
-// Revision 1.56  1999/09/30 21:48:39  kathy
-// fix for phi0 being in degrees in globtrk
-//
-// Revision 1.55  1999/09/29 16:46:29  kathy
-// changed code so it would compile in .dev due to changes in DST tables - I even used cons instead of makel - wow! - I just changed variables or commented out some histograms that use now-non-existant variables so it would compile - later I will go through and redefine histograms as needed
-//
 // Revision 1.54  1999/09/23 20:08:37  kathy
 // fix some histogram limits
 //
@@ -190,7 +184,6 @@
 #include "PhysicalConstants.h"
 #include <math.h>
 #include "TMath.h"
-#include "SystemOfUnits.h"
 
 #include "St_QA_Maker/St_QA_Maker.h"
 #include "St_QA_Maker/StHistUtil.h"
@@ -199,7 +192,7 @@
 
 // tables  on DST
 #include "tables/St_dst_event_summary_Table.h" // event_summary (1 row)
-#include "tables/St_event_header_Table.h"  // event_header (1 row)
+#include "tables/St_dst_event_header_Table.h"  // event_header (1 row)
 #include "tables/St_dst_track_Table.h"         // 3 tables: globtrk,globtrk2,primtrk
 #include "tables/St_dst_track_aux_Table.h"     // 2 tables: globtrk_aux,primtrk_aux
 #include "tables/St_dst_vertex_Table.h"        // vertex
@@ -425,14 +418,14 @@ ClassImp(St_QA_Maker)
   m_v_x=0;     //! vertex coordinates in
   m_v_y=0;     //!  STAR reference 
   m_v_z=0;     //!   system
-  m_v_pchi2=0; //! chisq per dof of vertex fit
+  m_v_pchi2=0; //! P(chi^2,ndf) of vertex fit
   
   m_pv_detid=0; //! row1-detector id where vertex was found 
   m_pv_vtxid=0; //! row1-vertex type
   m_pv_x=0;     //! row1-vertex coordinates in
   m_pv_y=0;     //!  STAR reference 
   m_pv_z=0;     //!   system
-  m_pv_pchi2=0; //! row1-chisq per dof of vertex fit
+  m_pv_pchi2=0; //! row1-P(chi^2,ndf) of vertex fit
   
 
   // for method MakeHistXi
@@ -947,21 +940,22 @@ void St_QA_Maker::MakeHistEvSum(St_DataSet *dst){
       m_trk_tot_gd->Fill(trk_good/trk_tot); 
       m_glb_trk_tot->Fill(tt->glb_trk_tot);
       m_glb_trk_plusminus->Fill(trk_plus/trk_minus);
+      m_glb_trk_prim->Fill(tt->glb_trk_prim);
+      
       m_vert_total->Fill(tt->n_vert_total);
+      m_vert_V0->Fill(tt->n_vert_V0);
+
 
       m_mean_pt->Fill(tt->mean_pt);
       m_mean_eta->Fill(tt->mean_eta);
       m_rms_eta->Fill(tt->rms_eta);
+      m_T_average->Fill(tt->T_average);
 
       if(!isnan((double)(tt->prim_vrtx[0])))  m_prim_vrtx0->Fill(tt->prim_vrtx[0]);
       if(!isnan((double)(tt->prim_vrtx[1])))  m_prim_vrtx1->Fill(tt->prim_vrtx[1]);
       if(!isnan((double)(tt->prim_vrtx[2])))  m_prim_vrtx2->Fill(tt->prim_vrtx[2]);
-      
-// not in 99i tables
-//      m_glb_trk_prim->Fill(tt->glb_trk_prim);
-//      m_T_average->Fill(tt->T_average);    
-//      m_vert_V0->Fill(tt->n_vert_V0);
-//      m_vrtx_chisq->Fill(tt->prim_vrtx_chisq); 
+
+      m_vrtx_chisq->Fill(tt->prim_vrtx_chisq); 
 
     }
   }
@@ -1001,10 +995,8 @@ void St_QA_Maker::MakeHistGlob(St_DataSet *dst){
 	Float_t chisq0_p = chisq0/(degoffree-3);
 	Float_t chisq1_p = chisq1/(degoffree-2);
         Float_t nfitntot = (Float_t(t->n_fit_point))/(Float_t(t->n_point));
-        Float_t x0s  =  t->r0 * TMath::Cos(t->phi0*degree);
-        Float_t y0s  =  t->r0 * TMath::Sin(t->phi0*degree);
-        Float_t xdif =  (t->x_first[0])-x0s;
-        Float_t ydif =  (t->x_first[1])-y0s;
+        Float_t xdif =  (t->x_first[0])-(t->x0);
+        Float_t ydif =  (t->x_first[1])-(t->y0);
         Float_t zdif =  (t->x_first[2])-(t->z0);
         Float_t radf = TMath::Power((t->x_first[0]),2) + 
                        TMath::Power((t->x_first[1]),2);
@@ -1039,7 +1031,7 @@ void St_QA_Maker::MakeHistGlob(St_DataSet *dst){
         m_mom->Fill(gmom);
 	m_length->Fill(t->length);
         m_glb_impact->Fill(t->impact);
-
+        m_glb_ndf->Fill(t->ndegf);
 	m_chisq0->Fill(chisq0  );
 	m_chisq1->Fill(chisq1  );
 
@@ -1060,11 +1052,6 @@ void St_QA_Maker::MakeHistGlob(St_DataSet *dst){
 	m_chisq1_zf->Fill(t->x_first[2],chisq1  );
         m_nfptonpt_mom->Fill(lmevmom,nfitntot);
         m_nfptonpt_eta->Fill(eta,nfitntot);
-
-//  not in 99i tables	
-//        Float_t xdif =  (t->x_first[0])-(t->x0);
-//        Float_t ydif =  (t->x_first[1])-(t->y0);
-//        m_glb_ndf->Fill(t->ndegf);
 
       }
     }
@@ -1131,10 +1118,8 @@ void St_QA_Maker::MakeHistPrim(St_DataSet *dst){
 	Float_t chisq0_p = chisq0/(degoffree-3);
 	Float_t chisq1_p = chisq1/(degoffree-2);
         Float_t nfitntot = (Float_t(t->n_fit_point))/(Float_t(t->n_point));
-        Float_t x0s  =  t->r0 * TMath::Cos(t->phi0*degree);
-        Float_t y0s  =  t->r0 * TMath::Sin(t->phi0*degree);
-        Float_t xdif =  (t->x_first[0])-x0s;
-        Float_t ydif =  (t->x_first[1])-y0s;
+        Float_t xdif = (t->x_first[0]) - (t->x0);
+        Float_t ydif = (t->x_first[1]) - (t->y0);
         Float_t zdif = (t->x_first[2]) - (t->z0);
         Float_t radf = TMath::Power((t->x_first[0]),2) + 
                        TMath::Power((t->x_first[1]),2);
@@ -1161,7 +1146,8 @@ void St_QA_Maker::MakeHistPrim(St_DataSet *dst){
         m_pmom->Fill(gmom);
 	m_plength->Fill(t->length);
         m_prim_impact->Fill(t->impact);
-       	m_pchisq0->Fill(chisq0);
+        m_prim_ndf->Fill(t->ndegf);
+	m_pchisq0->Fill(chisq0);
 	m_pchisq1->Fill(chisq1);
 
 	m_ppT_eta_rec->Fill(eta,lmevpt);
@@ -1181,11 +1167,6 @@ void St_QA_Maker::MakeHistPrim(St_DataSet *dst){
 	m_pchisq1_zf->Fill(t->x_first[2],chisq1);
         m_pnfptonpt_mom->Fill(lmevmom,nfitntot);
         m_pnfptonpt_eta->Fill(eta,nfitntot);
-
-// not in 99i tables
-//   m_prim_ndf->Fill(t->ndegf);
-//   Float_t xdif = (t->x_first[0]) - (t->x0);
-//   Float_t ydif = (t->x_first[1]) - (t->y0);
 
       }
     }
@@ -1351,14 +1332,14 @@ void St_QA_Maker::MakeHistVertex(St_DataSet *dst){
 	if (!isnan(double(t->x))) m_pv_x->Fill(t->x);     
 	if (!isnan(double(t->y))) m_pv_y->Fill(t->y);     
 	if (!isnan(double(t->z))) m_pv_z->Fill(t->z);     
-	m_pv_pchi2->Fill(t->chisq[0]);
+	m_pv_pchi2->Fill(t->pchi2);
       }
       m_v_detid->Fill(t->det_id); 
       m_v_vtxid->Fill(t->vtx_id);
       if (!isnan(double(t->x))) m_v_x->Fill(t->x);     
       if (!isnan(double(t->y))) m_v_y->Fill(t->y);     
       if (!isnan(double(t->z))) m_v_z->Fill(t->z);     
-      m_v_pchi2->Fill(t->chisq[0]); 
+      m_v_pchi2->Fill(t->pchi2); 
       // }
     }
   }
@@ -1471,6 +1452,5 @@ void St_QA_Maker::MakeHistRich(St_DataSet *dst){
 
 
 //_____________________________________________________________________________
-
 
 

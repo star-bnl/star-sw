@@ -89,15 +89,19 @@ C
       logical SCV_STATE
 C
       character*132 mess
-      real    atan2d
+     
       logical Vert_Ok
 
- 1000 format(a,I5,a,I5,a)
+ 1111 format(a,I5,a)
+ 1112 format(a,I5)
+ 1113 format(a,I5,a,I5)
+ 1114 format(a,I5,a,I5,a)
+
 C
 C-------------------------------------------------------------------------
 C How many passes is there to be done?. Check all setup info there
 
-      write(mess,1000) ' SGR:Doing', pix_info_h.nok, ' passes'
+      write(mess,1111) ' SGR:Doing', pix_info_h.nok, ' passes'
       call StInfo(mess)
       if( pix_info_h.nok .le. 0) then
          call StError( 
@@ -141,14 +145,14 @@ C Loop up to number of passes requested.
        do 100 ipass = 1, pix_info_h.nok
 
 
-          write(mess,1000) 'Now on pass',ipass
+          write(mess,1112) 'Now on pass',ipass
           call StInfo(mess)
           
 
 C Check there are hits left to use
 
       if( n_spt  .lt. 3 ) then
-         write(mess,1000) 'No more hits so jumping out on pass ',ipass
+         write(mess,1112) 'No more hits so jumping out on pass ',ipass
          call StInfo(mess)
          goto  101
       endif
@@ -182,7 +186,7 @@ c     in this case the hits are locally tagged as used.
                    Merge(i) = 0
                    Used(i)= .TRUE.
                 else
-                   write(mess,1000) ' Hit',i,'recorded as on layer',Layer(i)
+                   write(mess,1113) ' Hit',i,'recorded as on layer',Layer(i)
                    call StError(mess)
                 endif
              else
@@ -518,13 +522,13 @@ C     is that all?
       if (ok .ne. 1) call StError('Error completing sgr_to_ctrack')
       
       if( (ier) .gt. 0) then 
-         write(mess,1000)' Ier = ' ,ier
+         write(mess,1112)' Ier = ' ,ier
          call StError(mess)
          call StError(' This is bad!!!! Shouldnt be able to get iers')
          sgr_am = STAFCV_BAD
       else
          sgr_am = STAFCV_OK
-         write(mess,1000)' Found ',stk_track_h.nok,' trks from ',
+         write(mess,1114)' Found ',stk_track_h.nok,' trks from ',
      >      svt_hits_h.nok,' SVT hits.'
          call StInfo(mess)
       endif

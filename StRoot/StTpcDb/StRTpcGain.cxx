@@ -2,37 +2,29 @@
 
 ClassImp(StRTpcGain)
 
-//_____________________________________________________________________________
-void StRTpcGain::SetPadPlanePointer(StTpcPadPlaneI* ppin){
-    padplane = ppin;
-}
-
-
-//_____________________________________________________________________________
-float StRTpcGain::getGain(int row, int pad)   const {
-  float gain = 0;
-  if (row > 0 && padplane->indexForRowPad(row,pad) > 0) {
-    if (row<=padplane->numberOfInnerRows())
-      gain =  (*mGain)[0].innerSectorGainFactors[padplane->indexForRowPad(row,pad)];
-    else if (row>padplane->numberOfInnerRows()&&row<=padplane->numberOfRows())
-      gain = (*mGain)[0].outerSectorGainFactors[padplane->indexForRowPad(row,pad)];
+  void StRTpcGain::SetPadPlanePointer(StTpcPadPlaneI* ppin){
+      padplane = ppin;
   }
-  return gain;
+
+
+float StRTpcGain::getGain(int row, int pad)   const {
+  if (padplane->indexForRowPad(row,pad)<0){return 0;}
+  if (row>0&&row<=padplane->numberOfInnerRows()){
+    return mGain->innerSectorGainFactors[padplane->indexForRowPad(row,pad)];
+  }
+  else if (row>padplane->numberOfInnerRows()&&row<=padplane->numberOfRows()){
+    return mGain->outerSectorGainFactors[padplane->indexForRowPad(row,pad)];
+  }
 } 
   
-//_____________________________________________________________________________
 float StRTpcGain::getOnlineGain(int row, int pad) const {return 0;}
   
-//_____________________________________________________________________________
 float StRTpcGain::getNominalGain(int row, int pad) const {return 0;}
   
-//_____________________________________________________________________________
 float StRTpcGain::getRelativeGain(int row, int pad) const {return 0;}
   
-//_____________________________________________________________________________
 float StRTpcGain::getAverageGainInner(int sector) const {return 0;}
   
-//_____________________________________________________________________________
 float StRTpcGain::getAverageGainOuter(int sector) const {return 0;}
  
 

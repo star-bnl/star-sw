@@ -21,8 +21,8 @@
 
 long  type_of_call fill_dst_run_summary_ (
   TABLE_HEAD_ST  *dst_summary_param_h, DST_SUMMARY_PARAM_ST  *dst_summaryparam,
-  TABLE_HEAD_ST  *run_header_h,        RUN_HEADER_ST         *dst_runheader,
-  TABLE_HEAD_ST  *event_header_h,      EVENT_HEADER_ST       *dst_eventheader,
+  TABLE_HEAD_ST  *dst_run_header_h,    DST_RUN_HEADER_ST     *dst_runheader,
+  TABLE_HEAD_ST  *dst_event_header_h,  DST_EVENT_HEADER_ST   *dst_eventheader,
   TABLE_HEAD_ST  *dst_event_summary_h, DST_EVENT_SUMMARY_ST  *dst_eventsummary,
   TABLE_HEAD_ST  *dst_track_h,         DST_TRACK_ST          *dst_track,
   TABLE_HEAD_ST  *dst_vertex_h,        DST_VERTEX_ST         *dst_vertex,
@@ -41,10 +41,10 @@ long  type_of_call fill_dst_run_summary_ (
    *:
    *: ARGUMENTS:
    *:          IN:
-   *:             run_header           - run header table
-   *:             run_header_h         - Header Structure for run_header  
-   *:             event_header         - event header table
-   *:             event_header_h       - Header Structure for event_header
+   *:             dst_runheader        - DST run header table
+   *:             dst_run_header_h     - Header Structure for dst_runheader  
+   *:             dst_eventheader      - DST event header table
+   *:             dst_event_header_h   - Header Structure for dst_eventheader
    *:             dst_eventsummary     - DST event summary table 
    *:             dst_event_summary_h  - Header Structure for dst_eventsummary
    *:             dst_track            - DST tracks table       
@@ -77,7 +77,7 @@ long  type_of_call fill_dst_run_summary_ (
    *:                                       dst_run_summary table at the
    *:                                       very end of the event loop.
    *:
-   *:      Sep 29, 1999       Margetis S.   Make it comply with new DSTs
+   *:
    *:>--------------------------------------------------------------------
    */
 
@@ -103,7 +103,7 @@ long  type_of_call fill_dst_run_summary_ (
   /* Initialize dst_run_summary table at the begining of the event loop */
   if (first_event) {
     dst_run_summary_h->nok = 1;  
-    dst_runsummary->bfc_run_id        = 0;
+    dst_runsummary->prod_run          = 0;
     dst_runsummary->n_events_tot      = 0;
     dst_runsummary->n_events_good     = 0;
     for (i=0; i<2; i++) {
@@ -111,32 +111,20 @@ long  type_of_call fill_dst_run_summary_ (
       dst_runsummary->time[i]         = 0;
     } 
     dst_runsummary->cpu_total         = 0;
-    dst_runsummary->east_pol_L        = 0;
-    dst_runsummary->east_pol_T        = 0;
-    dst_runsummary->west_pol_L        = 0;
-    dst_runsummary->west_pol_T        = 0;
-    dst_runsummary->luminosity        = 0;
     
-    /* Obsolete in newest DSTs   */
-    /*    for (i=0; i<2; i++) {                         
-          dst_runsummary->eta_bins[i]     = 0;        
-          dst_runsummary->pt_bins[i]      = 0;        
-          dst_runsummary->mt_bins[i]      = 0;        
-          }                                            
-          dst_runsummary->n_phi_bins        = 0; 
-    */
-
+    for (i=0; i<6; i++) {                         
+      dst_runsummary->eta_bins[i]     = 0;        
+      dst_runsummary->pt_bins[i]      = 0;        
+      dst_runsummary->mt_bins[i]      = 0;        
+    }                                            
+    dst_runsummary->n_phi_bins        = 0;
     for (i=0; i<2; i++) {
-      dst_runsummary->eta[i]     = 0;
-      dst_runsummary->pt[i]      = 0;
+      dst_runsummary->mean_eta[i]     = 0;
+      dst_runsummary->mean_pt[i]      = 0;
+      dst_runsummary->multiplicity[i] = 0;
       dst_runsummary->num_vert[i]     = 0;
+      dst_runsummary->energy_emc[i]   = 0;
     }
-
-    for (i=0; i<30; i++) {
-      dst_runsummary->mean_mult[i] = 0;
-      dst_runsummary->rms_mult[i]   = 0;
-    }
-
     first_event=0;
   }
 
@@ -205,18 +193,16 @@ long  type_of_call fill_dst_run_summary_ (
   /* Fill mean & stand. deviations  */
   mean   = pt_sum/nchgtrk_sum;
   stddev = pt2_sum/nchgtrk_sum - pow(mean,2);
-  dst_runsummary->pt[0]       = mean;
-  dst_runsummary->pt[1]       = sqrt(stddev);
+  dst_runsummary->mean_pt[0]       = mean;
+  dst_runsummary->mean_pt[1]       = sqrt(stddev);
   mean   = eta_sum/nchgtrk_sum;  
   stddev = eta2_sum/nchgtrk_sum - pow(mean,2);
-  dst_runsummary->eta[0]      = mean;
-  dst_runsummary->eta[1]      = sqrt(stddev);
+  dst_runsummary->mean_eta[0]      = mean;
+  dst_runsummary->mean_eta[1]      = sqrt(stddev);
   mean   = nchgtrk_sum/n_events_good;  
   stddev = nchgtrk2_sum/n_events_good - pow(mean,2);
-  /* I used detector id for global =23 (temporarily), this
-     has to be passed from bfc. SMargetis  */
-  dst_runsummary->mean_mult[23]  = mean; 
-  dst_runsummary->rms_mult[23]  = sqrt(stddev);
+  dst_runsummary->multiplicity[0]  = mean; 
+  dst_runsummary->multiplicity[1]  = sqrt(stddev);
   mean   = nvertx_sum/n_events_good;  
   stddev = nvertx2_sum/n_events_good - pow(mean,2);
   dst_runsummary->num_vert[0]      = mean; 
@@ -226,18 +212,13 @@ long  type_of_call fill_dst_run_summary_ (
      Load kinematic ranges from dst_summaryparam into dst_runsummary.
      DSW  Nov. 18 , 1998
    */
-  /* Obsolete in newest DSTs   */
-  /*  for (i=0; i<6; i++) {                         
-      dst_runsummary->eta_bins[i]     = dst_summaryparam->eta_bins[i];        
-      dst_runsummary->pt_bins[i]      = dst_summaryparam->pt_bins[i];        
-      dst_runsummary->mt_bins[i]      = dst_summaryparam->mt_bins[i];        
-      }                                            
-      dst_runsummary->n_phi_bins        = dst_summaryparam->n_phi_bins;
-  */
+  for (i=0; i<6; i++) {                         
+    dst_runsummary->eta_bins[i]     = dst_summaryparam->eta_bins[i];        
+    dst_runsummary->pt_bins[i]      = dst_summaryparam->pt_bins[i];        
+    dst_runsummary->mt_bins[i]      = dst_summaryparam->mt_bins[i];        
+  }                                            
+  dst_runsummary->n_phi_bins        = dst_summaryparam->n_phi_bins;
 
  NextEvent:
   return STAFCV_OK;
 }  /*  End of fill_dst_run_summary  */
-
-
-

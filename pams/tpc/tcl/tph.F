@@ -1,8 +1,5 @@
-* $Id: tph.F,v 1.20 1999/10/15 00:53:50 nevski Exp $
+* $Id: tph.F,v 1.19 1999/10/07 03:21:37 snelling Exp $
 * $Log: tph.F,v $
-* Revision 1.20  1999/10/15 00:53:50  nevski
-* pgf->g77 cleanup
-*
 * Revision 1.19  1999/10/07 03:21:37  snelling
 * changes related to StMessage
 *
@@ -332,8 +329,8 @@ C-----------------------------------------------------------------------
         save last_cluster_index
         data last_cluster_index / 1 /
         logical debug 
-        data    debug /.false./
-        real    tand,atand     
+        data debug /.false./
+       
 C-----------------------------------------------------------------------
         data first/.true./
         data pads_per_row

@@ -365,7 +365,7 @@ C   Error conditions 		: None
 C   Status	     		: Tested
 C----------------------------------------------------------------------
       INTEGER	iflag
-      REAL 	r_min,mv(3),x(3),p(3),ptotsq,rcheck
+      REAL 	r_min,mv(3),x(3),p(3),ptotsq,check
       REAL      x1,y1,z1
 *
 *---------assume a good candidate, reset flag-------------------------
@@ -378,12 +378,12 @@ C----------------------------------------------------------------------
         x1 = x(1)-mv(1)
         y1 = x(2)-mv(2)
         z1 = x(3)-mv(3)
-	rcheck=(x1*p(1))+(y1*p(2))+(z1*p(3))
-	IF(rcheck.lt.0.0) THEN
+	check=(x1*p(1))+(y1*p(2))+(z1*p(3))
+	IF(check.lt.0.0) THEN
 	  iflag=2
           r_min = 99999.
 	  goto 999
-	ENDIF !if(rcheck<0)
+	ENDIF !if(check<0)
 *
 *---------calculate the impact parameter of the track from vertex-------
 *------------------ Normal way using vector-cross-product -------------

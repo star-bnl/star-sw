@@ -1,8 +1,5 @@
-* $Id: tfs_gen_padres.F,v 1.12 1999/10/15 00:54:02 nevski Exp $
+* $Id: tfs_gen_padres.F,v 1.11 1999/10/11 16:53:11 sakrejda Exp $
 * $Log: tfs_gen_padres.F,v $
-* Revision 1.12  1999/10/15 00:54:02  nevski
-* pgf->g77 cleanup
-*
 * Revision 1.11  1999/10/11 16:53:11  sakrejda
 * Obsolete parameters removed and the old code to do the pileup
 * deleted (not Akio's , akio's is still in!). It did not work anyway.
@@ -142,7 +139,6 @@ C
       real xlength, dummy
       integer tgc_drift_volume_length
       DATA xlocal /3*0/
-      Real atand
 
 C=========================== Begin Executable Code =======================
 c     get the TPC length

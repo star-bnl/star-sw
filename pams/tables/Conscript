@@ -61,10 +61,10 @@ foreach my $idll (@idlT) {
       Command $env2 [$idlh],        @Deps, qq (stic.pl %>  -q %1 );
       Command $env2 [$idli],        @Deps, qq (stic.pl %>  -q %1 );
       push @Deps, $idlh;
-      Command $env2 [$idlH],        @Deps, qq (ConstructTable.pl %1 %>);
+      Command $env2 [$idlH],        @Deps, qq (ConstructTable.pl %>);
       push @Deps, $idlH;
-      Command $env2 [$idlC],        @Deps, qq (ConstructTable.pl %1 %>);
-      Command $env2 [$LinkDef],     @Deps, qq (ConstructTable.pl %1 %>);
+      Command $env2 [$idlC],        @Deps, qq (ConstructTable.pl %>);
+      Command $env2 [$LinkDef],     @Deps, qq (ConstructTable.pl %>);
     }
     @Deps = ();
     push @Deps, $idlH;

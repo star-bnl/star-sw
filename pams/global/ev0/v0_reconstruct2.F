@@ -337,21 +337,16 @@ C---- find square of impact param of reconstructed particle------
                        vertex(vertex_h.nok).det_id = 
      +                      (100*trak(i).det_id)+trak(j).det_id
                        vertex(vertex_h.nok).vtx_id= kV0VtxId
-                       vertex(vertex_h.nok).covar(1) = 0
-                       vertex(vertex_h.nok).covar(2) = 0
-                       vertex(vertex_h.nok).covar(3) = 0
+                       vertex(vertex_h.nok).sigma(1) = 0
+                       vertex(vertex_h.nok).sigma(2) = 0
+                       vertex(vertex_h.nok).sigma(3) = 0
+                       vertex(vertex_h.nok).pchi2 = 0
                        vertex(vertex_h.nok).id_aux_ent= ok
                        vertex(vertex_h.nok).id = vertex_h.nok
                        vertex(vertex_h.nok).n_daughters = 2
-                       vertex(vertex_h.nok).chisq(1) = 0
-                       vertex(vertex_h.nok).chisq(2) = 0
-                       vertex(vertex_h.nok).covar(1) = 0
-                       vertex(vertex_h.nok).covar(2) = 0
-                       vertex(vertex_h.nok).covar(3) = 0
-                       vertex(vertex_h.nok).covar(4) = 0
-                       vertex(vertex_h.nok).covar(5) = 0
-                       vertex(vertex_h.nok).covar(6) = 0
-
+C                       ev0out(ok).px=pp(1)
+C                       ev0out(ok).py=pp(2)
+C                       ev0out(ok).pz=pp(3)
                        ev0out(ok).id=ok
                        ev0out(ok).id_vertex= vertex_h.nok                    
                        ev0out(ok).dcap = trak(i).dca
@@ -360,6 +355,8 @@ C---- find square of impact param of reconstructed particle------
                        ev0out(ok).dcav0=sqrt(rmin)
                        ev0out(ok).idpos=trak(i).id
                        ev0out(ok).idneg=trak(j).id
+C                       ev0out(ok).pidpos = trak(i).pid
+C                       ev0out(ok).pidneg = trak(j).pid
 C--   calculate Armenteros variables---
                        ev0out(ok).pos_px = pst1(1)
                        ev0out(ok).pos_py = pst1(2)

@@ -1,8 +1,5 @@
-* $Id: tpt_cross_fact.F,v 1.6 1999/10/15 00:54:08 nevski Exp $
+* $Id: tpt_cross_fact.F,v 1.5 1998/09/01 13:32:34 sakrejda Exp $
 * $Log: tpt_cross_fact.F,v $
-* Revision 1.6  1999/10/15 00:54:08  nevski
-* pgf->g77 cleanup
-*
 * Revision 1.5  1998/09/01 13:32:34  sakrejda
 * restored sector numbering 1-24 in tphit.row
 *
@@ -49,7 +46,7 @@ C______________________________________________________________________
       integer iret, isect
 
       INTEGER tgc_sec24_to_sec12, tgc_global_to_local_p
-      real    atand
+
 C_____________________________________________________________________
 
       if(cf.lt.0) then 

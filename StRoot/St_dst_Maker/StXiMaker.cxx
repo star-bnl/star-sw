@@ -2,11 +2,8 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.10 1999/09/29 20:29:10 wdeng Exp $
+// $Id: StXiMaker.cxx,v 1.9 1999/09/12 23:03:04 fisyak Exp $
 // $Log: StXiMaker.cxx,v $
-// Revision 1.10  1999/09/29 20:29:10  wdeng
-// Accommodate dst_track and dst_vertex change
-//
 // Revision 1.9  1999/09/12 23:03:04  fisyak
 // Move parameters into makers
 //
@@ -36,8 +33,6 @@
 
 #include "TMath.h"
 #include "StXiMaker.h"
-
-#include "StVertexId.h"
 
 #include "StChain.h"
 #include "St_DataSet.h"
@@ -129,12 +124,12 @@ Int_t StXiMaker::Make(){
   
   if (!globtrk || !vertex || !dst_v0_vertex) return kStWarn;
   dst_vertex_st *vrtx = vertex->GetTable();
-  if( vrtx->vtx_id != kEventVtxId || vrtx->iflag != 1){
+  if( vrtx->vtx_id != 1 || vrtx->iflag != 1){
     for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,vrtx++){
-      if( vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1 ) break;
+      if( vrtx->vtx_id == 1 && vrtx->iflag == 1 ) break;
     }
   }
-  if (vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1) {
+  if (vrtx->vtx_id == 1 && vrtx->iflag == 1) {
     Int_t xi_limit = 2*dst_v0_vertex->GetNRows();
     if (xi_limit < 250) xi_limit=250;
     dst_xi_vertex = new St_dst_xi_vertex("dst_xi_vertex",xi_limit);
