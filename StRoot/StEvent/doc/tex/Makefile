@@ -7,7 +7,10 @@ LATEX           = latex
 MKINDEX         = makeindex -s StEventIndex.sty
 PSNUP		= psnup -2 -pletter
 PSSRC		= StEventTitle.eps StarIcon.eps umlForHits.eps \
-		  umlForEvents.eps umlForTracks.eps umlForVertices.eps
+		  umlForEvents.eps umlForTracks.eps umlForVertices.eps \
+		  umlAggregation.eps umlClassIcon.eps umlClass.eps \
+	          umlAssociation.eps umlComposition.eps umlInheritance.eps \
+	          umlDependency.eps
 
 all:			$(TEXSRC).ps
 
