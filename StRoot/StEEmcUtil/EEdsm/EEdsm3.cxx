@@ -1,5 +1,8 @@
 #include <iostream>
 #include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 
 #include "EEdsm3.h"
@@ -63,6 +66,9 @@ void EEdsm3 :: print( int k) {
 }
  
 // $Log: EEdsm3.cxx,v $
+// Revision 1.2  2005/02/01 22:13:40  perev
+// Compatibility to redhat
+//
 // Revision 1.1  2004/11/29 20:12:59  balewski
 // first
 //

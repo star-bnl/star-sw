@@ -1,10 +1,13 @@
 #ifndef EEdsm0_h
 #define EEdsm0_h
 /**************************************************************
- * $Id: EEdsm0.h,v 1.1 2004/11/29 20:12:59 balewski Exp $
+ * $Id: EEdsm0.h,v 1.2 2005/02/01 22:13:37 perev Exp $
  **************************************************************/
- 
-#define uchar unsigned char
+#include <stdlib.h> 
+#include <stdio.h> 
+#include <string.h> 
+
+typedef unsigned char uchar;
 
 class EEdsm0  {
   static const int nw=16;
@@ -31,6 +34,9 @@ class EEdsm0  {
 
 /*
  * $Log: EEdsm0.h,v $
+ * Revision 1.2  2005/02/01 22:13:37  perev
+ * Compatibility to redhat
+ *
  * Revision 1.1  2004/11/29 20:12:59  balewski
  * first
  *
