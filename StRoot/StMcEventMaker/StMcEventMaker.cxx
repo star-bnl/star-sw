@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.34 2000/06/22 23:53:31 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.35 2000/08/11 20:57:00 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.35  2000/08/11 20:57:00  calderon
+ * bug fix to PrintInfo(), Thanks Maria
+ *
  * Revision 1.34  2000/06/22 23:53:31  calderon
  * Changes from Aleksei for filling of emc hits.
  * ttemp and ttempParticle are now data members.
@@ -170,7 +173,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.34 2000/06/22 23:53:31 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.35 2000/08/11 20:57:00 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -1198,9 +1201,9 @@ StMcEventMaker::printEventInfo()
     if (svtColl && nhits) {
 	
 	gotOneHit = kFALSE;
-	for (k=1; !gotOneHit && k<=svtColl->numberOfBarrels(); k++)
-	    for (j=1; !gotOneHit && j<=svtColl->barrel(k)->numberOfLadders(); j++)
-		for (i=1; !gotOneHit && i<=svtColl->barrel(k)->ladder(j)->numberOfWafers(); i++)
+	for (k=0; !gotOneHit && k<svtColl->numberOfBarrels(); k++)
+	    for (j=0; !gotOneHit && j<svtColl->barrel(k)->numberOfLadders(); j++)
+		for (i=0; !gotOneHit && i<svtColl->barrel(k)->ladder(j)->numberOfWafers(); i++)
 		    if (svtColl->barrel(k)->ladder(j)->wafer(i)->hits().size()) {
 			cout << "Svt Hit" << endl;
 			cout << *(svtColl->barrel(k)->ladder(j)->wafer(i)->hits()[0]);
