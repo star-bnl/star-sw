@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 1.9 1999/06/16 14:22:04 fisyak Exp $
+ * $Id: StEvent.h,v 1.10 1999/06/24 17:33:00 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 1.9  1999/06/16 14:22:04  fisyak
- * take out StRun from StEvent
+ * Revision 1.10  1999/06/24 17:33:00  fisyak
+ * Replace Collection by value to Collection by pointer for TBrowser
+ *
+ * Revision 1.10  1999/06/24 17:33:00  fisyak
+ * Replace Collection by value to Collection by pointer for TBrowser
  *
  * Revision 1.9  1999/06/16 14:22:04  fisyak
  * take out StRun from StEvent
@@ -170,12 +173,12 @@ struct pairL : public TObject
     virtual StDstEventSummary*           summary(){ return mSummary;};
     virtual StGlobalTrackCollection*     trackCollection(){ return mTracks;};
     virtual StTpcHitCollection*          tpcHitCollection(){ return mTpcHits;};
-    virtual StEmcPreShowerHitCollection* emcPreShowerHitCollection() { return mEmcPreShowerHits;};
+    virtual StSvtHitCollection*          svtHitCollection(){ return mSvtHits;};
     virtual StFtpcHitCollection*         ftpcHitCollection(){ return mFtpcHits;};
     virtual StEmcTowerHitCollection*     emcTowerHitCollection(){ return mEmcTowerHits;};
     virtual StEmcPreShowerHitCollection* emcPreShowerHitCollection(){ return mEmcPreShowerHits;};
     virtual StSmdPhiHitCollection*       smdPhiHitCollection(){ return mSmdPhiHits;};
-    virtual StL0Trigger*                 l0Trigger(){ return mL0Trigger;};                        
+    virtual StSmdEtaHitCollection*       smdEtaHitCollection(){ return mSmdEtaHits;};
     virtual StVertexCollection*          vertexCollection(){ return mVertices;};
     virtual StTriggerDetectorCollection* triggerDetectorCollection(){ return mTriggerDetectors;};
     virtual StL0Trigger*                 l0Trigger(){ return  mL0Trigger;};                        
