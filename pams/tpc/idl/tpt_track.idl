@@ -4,6 +4,10 @@
 *   
 *        description: Reconstructed TPC tracks                
 *
+* r0,phi0,z0 - cylidrical coordinates of reference point. The reference 
+*              point is the point of the helix closest to first/innemost
+*              measured point on the track as it travels away from the vertex.
+*
 */
 
    /*******************  Row struct *******************/
@@ -23,11 +27,11 @@
        float     invp;       /* 1/pt (transverse momentum) at (r,phi,z) */
        float     curvature;  /* 1/radius */
        float     length;     /* track length */
-       float     phi0;       /* azimuthal angle of the first point */
+       float     phi0;       /* azimuthal angle of reference (see comments) */
        float     psi;        /* azimuthal angle of the momentum at (r,.. */
-       float     r0;         /* r (in cyl. coord.) for the first point */
+       float     r0;         /* r (in cyl. coord.) of reference (see comments) */
        float     tanl;       /* tg of the dip angle at (r,phi,z) */
-       float     z0;         /* z coordinate of the first point */
+       float     z0;         /* z coordinate of reference (see comments) */
    };
 
 /*  Last mod. for tptrack:   783365193 Fri Oct 28 13:26:33 1994 */
