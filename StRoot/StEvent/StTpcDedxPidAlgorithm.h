@@ -1,6 +1,10 @@
+/*!
+ * \class StTpcDedxPidAlgorithm 
+ * \author Thomas Ullrich, Sep 1999
+ */
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.h,v 2.6 2000/03/02 12:43:51 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.h,v 2.7 2002/02/22 22:56:52 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.h,v $
+ * Revision 2.7  2002/02/22 22:56:52  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.6  2000/03/02 12:43:51  ullrich
  * Method can be passed as argument to constructor. Default
  * method is truncated mean.

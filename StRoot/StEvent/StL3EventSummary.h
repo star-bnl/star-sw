@@ -1,6 +1,10 @@
+/*!
+ * \class StL3EventSummary
+ * \author Christof Struck, July 2001
+ */
 /***************************************************************************
  *
- * $Id: StL3EventSummary.h,v 2.4 2001/11/28 18:52:57 struck Exp $
+ * $Id: StL3EventSummary.h,v 2.5 2002/02/22 22:56:49 jeromel Exp $
  *
  * Author: Christof Struck, July 2001
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StL3EventSummary.h,v $
+ * Revision 2.5  2002/02/22 22:56:49  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.4  2001/11/28 18:52:57  struck
  * updated classdef version
  *

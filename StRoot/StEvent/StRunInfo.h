@@ -1,6 +1,10 @@
+/*!
+ * \class StRunInfo 
+ * \author Thomas Ullrich, Sep 2001
+ */
 /***************************************************************************
  *
- * $Id: StRunInfo.h,v 2.3 2002/01/31 23:42:36 ullrich Exp $
+ * $Id: StRunInfo.h,v 2.4 2002/02/22 22:56:50 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 2001
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StRunInfo.h,v $
+ * Revision 2.4  2002/02/22 22:56:50  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.3  2002/01/31 23:42:36  ullrich
  * Added member to hold BBC coincidence rate.
  *

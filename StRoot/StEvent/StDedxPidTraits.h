@@ -1,6 +1,10 @@
+/*!
+ * \class StDedxPidTraits 
+ * \author Thomas Ullrich, Sep 1999
+ */
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.h,v 2.8 2001/04/05 04:00:34 ullrich Exp $
+ * $Id: StDedxPidTraits.h,v 2.9 2002/02/22 22:56:47 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.h,v $
+ * Revision 2.9  2002/02/22 22:56:47  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.8  2001/04/05 04:00:34  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *

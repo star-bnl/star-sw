@@ -1,6 +1,10 @@
+/*!
+ * \class StXiVertex 
+ * \author Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
+ */
 /***************************************************************************
  *
- * $Id: StXiVertex.h,v 2.6 2001/06/10 21:03:32 perev Exp $
+ * $Id: StXiVertex.h,v 2.7 2002/02/22 22:56:53 jeromel Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.h,v $
+ * Revision 2.7  2002/02/22 22:56:53  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.6  2001/06/10 21:03:32  perev
  * Solaris: consting
  *

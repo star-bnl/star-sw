@@ -1,6 +1,10 @@
+/*!
+ * \class StHit 
+ * \author Thomas Ullrich, Jan 1999
+ */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.8 2001/04/25 17:46:56 jeromel Exp $
+ * $Id: StHit.h,v 2.9 2002/02/22 22:56:48 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.9  2002/02/22 22:56:48  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.8  2001/04/25 17:46:56  jeromel
  * Remove last change. There is another way to fix the problems seen (the right way
  * actually) which Thomas will take care off.

@@ -1,6 +1,10 @@
+/*!
+ * \class StTofMCHit 
+ * \author Wei-Ming Zhang, April 2001 
+ */
 /***************************************************************************
  *
- * $Id: StTofMCHit.h,v 2.1 2001/04/26 01:07:42 ullrich Exp $
+ * $Id: StTofMCHit.h,v 2.2 2002/02/22 22:56:51 jeromel Exp $
  *
  * Author: Wei-Ming Zhang, April 2001 
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StTofMCHit.h,v $
+ * Revision 2.2  2002/02/22 22:56:51  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.1  2001/04/26 01:07:42  ullrich
  * Initial Revision.
  *

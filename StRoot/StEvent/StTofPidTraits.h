@@ -1,6 +1,10 @@
+/*!
+ * \class StTofPidTraits 
+ * \author Thomas Ullrich, Dec 2000
+ */
 /***************************************************************************
  *
- * $Id: StTofPidTraits.h,v 2.3 2001/03/24 03:34:59 perev Exp $
+ * $Id: StTofPidTraits.h,v 2.4 2002/02/22 22:56:52 jeromel Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StTofPidTraits.h,v $
+ * Revision 2.4  2002/02/22 22:56:52  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.3  2001/03/24 03:34:59  perev
  * clone() -> clone() const
  *

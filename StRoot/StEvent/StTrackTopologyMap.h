@@ -1,6 +1,10 @@
+/*!
+ * \class StTrackTopologyMap 
+ * \author Thomas Ullrich, AUg 1999
+ */
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.h,v 2.7 2001/04/24 21:32:07 genevb Exp $
+ * $Id: StTrackTopologyMap.h,v 2.8 2002/02/22 22:56:53 jeromel Exp $
  *
  * Author: Thomas Ullrich, AUg 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.h,v $
+ * Revision 2.8  2002/02/22 22:56:53  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.7  2001/04/24 21:32:07  genevb
  * Additional helper functions
  *

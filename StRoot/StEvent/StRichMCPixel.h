@@ -1,6 +1,13 @@
+/*!
+ * \class StRichMCPixel 
+ * \author Brian Lasiuk, May 2000
+ *
+ *    MC pixel contains  the raw pixel info but also
+ *
+ */
 /***************************************************************************
  *
- * $Id: StRichMCPixel.h,v 2.2 2001/04/05 04:00:40 ullrich Exp $
+ * $Id: StRichMCPixel.h,v 2.3 2002/02/22 22:56:49 jeromel Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -11,6 +18,10 @@
  ***************************************************************************
  *
  * $Log: StRichMCPixel.h,v $
+ * Revision 2.3  2002/02/22 22:56:49  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.2  2001/04/05 04:00:40  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *

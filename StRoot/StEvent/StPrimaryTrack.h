@@ -1,6 +1,10 @@
+/*!
+ * \class StPrimaryTrack 
+ * \author Thomas Ullrich, Sep 1999
+ */
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.h,v 2.4 2001/05/30 17:45:54 perev Exp $
+ * $Id: StPrimaryTrack.h,v 2.5 2002/02/22 22:56:49 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.h,v $
+ * Revision 2.5  2002/02/22 22:56:49  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.4  2001/05/30 17:45:54  perev
  * StEvent branching
  *

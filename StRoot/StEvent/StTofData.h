@@ -1,6 +1,10 @@
+/*!
+ * \class StTofData 
+ * \author W.J. Llope, Sep 2001
+ */
 /***************************************************************************
  *
- * $Id: StTofData.h,v 2.1 2001/10/01 19:39:52 ullrich Exp $
+ * $Id: StTofData.h,v 2.2 2002/02/22 22:56:51 jeromel Exp $
  *
  * Author: W.J. Llope, Sep 2001
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StTofData.h,v $
+ * Revision 2.2  2002/02/22 22:56:51  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.1  2001/10/01 19:39:52  ullrich
  * Initial Revision.
  *

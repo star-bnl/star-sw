@@ -1,6 +1,10 @@
+/*!
+ * \class StFpdCollection 
+ * \author Akio Ogawa, Jan 2002
+ */
 /***************************************************************************
  *
- * $Id: StFpdCollection.h,v 2.3 2002/01/17 18:38:11 ullrich Exp $
+ * $Id: StFpdCollection.h,v 2.4 2002/02/22 22:56:48 jeromel Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StFpdCollection.h,v $
+ * Revision 2.4  2002/02/22 22:56:48  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.3  2002/01/17 18:38:11  ullrich
  * Several new methods added. Bug fixed.
  *

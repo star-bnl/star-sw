@@ -1,6 +1,10 @@
+/*!
+ * \class StL3AlgorithmInfo
+ * \author Christof Struck, July 2001
+ */
 /***************************************************************************
  *
- * $Id: StL3AlgorithmInfo.h,v 2.2 2001/08/20 21:29:00 ullrich Exp $
+ * $Id: StL3AlgorithmInfo.h,v 2.3 2002/02/22 22:56:48 jeromel Exp $
  *
  * Author: Christof Struck, July 2001
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StL3AlgorithmInfo.h,v $
+ * Revision 2.3  2002/02/22 22:56:48  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.2  2001/08/20 21:29:00  ullrich
  * Changed counter type from UInt_t to Int_t.
  *

@@ -1,6 +1,10 @@
+/*!
+ * \class StTrigger 
+ * \author Thomas Ullrich, Sep 1999
+ */
 /***************************************************************************
  *
- * $Id: StTrigger.h,v 2.2 2001/08/29 18:53:37 ullrich Exp $
+ * $Id: StTrigger.h,v 2.3 2002/02/22 22:56:53 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StTrigger.h,v $
+ * Revision 2.3  2002/02/22 22:56:53  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.2  2001/08/29 18:53:37  ullrich
  * Changed trigger words to UInt_t (was UShort_t)
  *

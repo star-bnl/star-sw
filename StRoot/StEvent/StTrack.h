@@ -1,6 +1,10 @@
+/*!
+ * \class StTrack 
+ * \author Thomas Ullrich, Sep 1999
+ */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.13 2001/09/28 22:20:50 ullrich Exp $
+ * $Id: StTrack.h,v 2.14 2002/02/22 22:56:52 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.14  2002/02/22 22:56:52  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.13  2001/09/28 22:20:50  ullrich
  * Added helix geometry at last point.
  *

@@ -1,6 +1,10 @@
+/*!
+ * \class StEmcClusterCollection 
+ * \author Akio Ogawa, Jan 2000
+ */
 /***************************************************************************
  *
- * $Id: StEmcClusterCollection.h,v 2.2 2001/04/05 04:00:34 ullrich Exp $
+ * $Id: StEmcClusterCollection.h,v 2.3 2002/02/22 22:56:47 jeromel Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StEmcClusterCollection.h,v $
+ * Revision 2.3  2002/02/22 22:56:47  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.2  2001/04/05 04:00:34  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *

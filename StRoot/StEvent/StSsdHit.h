@@ -1,6 +1,10 @@
+/*!
+ * \class StSsdHit 
+ * \author Thomas Ullrich, Jan 1999
+ */
 /***************************************************************************
  *
- * $Id: StSsdHit.h,v 2.6 2001/04/05 04:00:42 ullrich Exp $
+ * $Id: StSsdHit.h,v 2.7 2002/02/22 22:56:50 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -11,6 +15,10 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.h,v $
+ * Revision 2.7  2002/02/22 22:56:50  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.6  2001/04/05 04:00:42  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *

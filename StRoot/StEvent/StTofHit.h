@@ -1,6 +1,10 @@
+/*!
+ * \class StTofHit 
+ * \author Wei-Ming Zhang, Dec 2000
+ */
 /***************************************************************************
  *
- * $Id: StTofHit.h,v 2.4 2001/04/16 20:49:00 ullrich Exp $
+ * $Id: StTofHit.h,v 2.5 2002/02/22 22:56:51 jeromel Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -11,6 +15,10 @@
  *
  *
  * $Log: StTofHit.h,v $
+ * Revision 2.5  2002/02/22 22:56:51  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.4  2001/04/16 20:49:00  ullrich
  * Fixed typo in setSlatIndex().
  *

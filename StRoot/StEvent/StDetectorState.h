@@ -1,6 +1,10 @@
+/*!
+ * \class StDetectorState 
+ * \author Thomas Ullrich, Dec 2001
+ */
 /***************************************************************************
  *
- * $Id: StDetectorState.h,v 2.1 2001/12/01 15:34:50 ullrich Exp $
+ * $Id: StDetectorState.h,v 2.2 2002/02/22 22:56:47 jeromel Exp $
  *
  * Author: Thomas Ullrich, Dec 2001
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StDetectorState.h,v $
+ * Revision 2.2  2002/02/22 22:56:47  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.1  2001/12/01 15:34:50  ullrich
  * Initial Revision.
  *

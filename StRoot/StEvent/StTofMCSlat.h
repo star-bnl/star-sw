@@ -1,6 +1,10 @@
+/*!
+ * \class StTofMCSlat 
+ * \author Wei-Ming Zhang, April 2001 
+ */
 /***************************************************************************
  *
- * $Id: StTofMCSlat.h,v 2.3 2001/04/27 21:43:18 ullrich Exp $
+ * $Id: StTofMCSlat.h,v 2.4 2002/02/22 22:56:52 jeromel Exp $
  *
  * Author: Wei-Ming Zhang, April 2001 
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StTofMCSlat.h,v $
+ * Revision 2.4  2002/02/22 22:56:52  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.3  2001/04/27 21:43:18  ullrich
  * Moved MC info class into separate file.
  *

@@ -1,6 +1,10 @@
+/*!
+ * \class StSvtHit 
+ * \author Thomas Ullrich, Sep 1999
+ */
 /***************************************************************************
  *
- * $Id: StSvtHit.h,v 2.8 2001/08/07 20:50:53 caines Exp $
+ * $Id: StSvtHit.h,v 2.9 2002/02/22 22:56:51 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.h,v $
+ * Revision 2.9  2002/02/22 22:56:51  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.8  2001/08/07 20:50:53  caines
  * Implement better packing of hardware and charge values
  *

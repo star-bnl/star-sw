@@ -1,6 +1,10 @@
+/*!
+ * \class StTpcHit 
+ * \author Thomas Ullrich, Jan 1999
+ */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.7 2001/04/05 04:00:44 ullrich Exp $
+ * $Id: StTpcHit.h,v 2.8 2002/02/22 22:56:52 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.8  2002/02/22 22:56:52  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.7  2001/04/05 04:00:44  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
