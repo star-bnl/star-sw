@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichRayTracer.h,v 1.1 2001/02/25 22:11:20 lasiuk Exp $
+ * $Id: StRichRayTracer.h,v 1.2 2001/08/21 17:58:34 lasiuk Exp $
  *
  * Author:  bl Feb 21, 2001
  ***************************************************************************
@@ -10,10 +10,15 @@
  ***************************************************************************
  *
  * $Log: StRichRayTracer.h,v $
+ * Revision 1.2  2001/08/21 17:58:34  lasiuk
+ * for 2000 analysis
+ *
  * Revision 1.1  2001/02/25 22:11:20  lasiuk
  * Initial Revision
  *
  **************************************************************************/
+#ifndef StRichRayTracer_h
+#define StRichRayTracer_h
 
 #include <iostream.h>
 #include <stdlib.h>
@@ -25,38 +30,50 @@
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
-#include "StPairD.h"
 
 class StRichRayTracer {
 
 public:
     StRichRayTracer();
-    StRichRayTracer(StThreeVectorF&, StPairD&, StPairD&);
+    StRichRayTracer(double);
+    StRichRayTracer(double, StThreeVectorF&, StThreeVectorF&, StThreeVectorF&);
     ~StRichRayTracer();
 
-    void setPhotonPosition(StPairD&);
-    void doTrackRotation();
-    void doPhotonRotation();
-    bool setTheta(double);
-    bool initialTheta();
+    //StRichRayTracer(const StRichRayTracer&) {/* use default */}
+    //operator=(const StRichRayTracer&) {/* use default */}
+
+    void setTrack(StThreeVectorF&, StThreeVectorF&, StThreeVectorF&);
+    void setPhotonPosition(StThreeVectorF&);
+    bool initialPropagator();
 
     bool propagateToRadiator();
     bool findCerenkovAngle();
     bool processPhoton(double*);
 
-    bool checkConvergence(double) const;
-    double cerenkovAngle() const;
+    bool checkConvergence(StThreeVectorF&) const;
+
+    //
+    // simple accessors and assignment
+    //
+
+    void setxyPrecision(double);
+    
+    double cerenkovAngle()    const;
+    double azimuth()          const;
+    double trackAngle()       const;
+    double convergenceValue() const;
+    double epsilon()          const;
 
     void  status() const;
     
-protected:
-    
-    void init();
-    void calculateRotatedGeometry();
+protected:    
+
+    void init(double);
+    void calculateGeometry();
     void calculateTrackAngle();
-    void calculateFastTrigFunctions();
-    void shiftOriginToMipIntersectionOnPadPlane();
-    
+
+    bool adjustPropagator();
+
 private:
     
     //
@@ -64,77 +81,65 @@ private:
     //
     
     StThreeVectorF mLocalTrackMomentum;
-    StPairD mLocalMipPosition;
-    StPairD mLocalRadiatorIntercept;
-
-    double mAlpha;  // Track incident angle (rotation)
-    double mCosAlpha, mSinAlpha, mTanAlpha;
-    double mTanTheta;
-
-    //
-    // Rotated Chamber Geometry
-    //
-    double mRGapThickness;
-    double mRQuartzThickness;
-    double mRRadiatorThickness;
-    
-    double mRBottomQuartz;
-    double mRTopQuartz;
-    double mRTopRadiator;
-
-    double mRRadiationPoint;
+    StThreeVectorF mExpectedRadiationPoint;
+    StThreeVectorF mTheCalculatedRadiationPoint;
+    double mAlpha;   // track incident angle
 
     //
     // Photon Quantities
     //
-    StPairD  mLocalPhotonPosition;
-    double   mPhotonInPlaneRotation;
-    
-    //
-    // local angle calculcation:
-    StPairD  mTrackOnPadPlane;
-    StPairD  mTrackOnRadiator;
-    StPairD  mPhotonOnPadPlane;
-    
-    //
-    // Database Quantities
-    //
-    double indexQuartz;
-    double indexFreon;
-    double indexCH4;
+    StThreeVectorF  mLocalPhotonPosition;
 
-    double gapThickness;
-    double quartzThickness;
-    double radiatorThickness;
 
-    double mPrecision;
-    
-
-    //    ^
-    //  z |
-    //    |
-    //    |
-    //    -------> l
-    //
-    // (l,z) where:
-    //   l is on pad plane
-    //   z is distance from pad plane
-    //
 
     //
-    // calulator Quantities
+    // calulator/propagator Quantities
     //
     double m2Pi;
-    double mPiBy2;
-    double mSlope;
-    double mLZero;
-    double mLOne;
-    double mLTwo;
-    double mLThree;
 
-    double mTheta;
+    //
+    //
+    StThreeVectorF mGapPropagator;
+    double mPhotonRadPointTransverseDistance;
+    double mConvergenceValue;
+    
+    //double mTheta;
     double mDeltaTheta;
+    double mInitialIncrement;
     double mCerenkovAngle;
+    double mPhi;
 
+    //
+    // Parameters
+    //
+    
     double mMaximumNumberOfIterations;
+    double mzPrecision;
+    double mxyPrecision;
+
+    //
+    // Database Quantities and
+    // chamber geometry
+    //
+    double mMeanWavelength;
+    double mIndexFreon;
+    double mIndexQuartz;
+    double mIndexCH4;
+
+    double mRadiatorThickness;
+    double mQuartzThickness;
+    double mGapThickness;
+
+    StThreeVectorF mNormalBottomQuartz;
+    StThreeVectorF mNormalTopQuartz;
+    StThreeVectorF mNormalTopRadiator;
+    StThreeVectorF mNormalRadiationPoint;
 };
+
+inline double StRichRayTracer::azimuth() const {return mPhi; }
+inline double StRichRayTracer::cerenkovAngle() const {return mCerenkovAngle;}
+inline double StRichRayTracer::trackAngle() const {return mAlpha; }
+inline double StRichRayTracer::convergenceValue() const {return mConvergenceValue; }
+inline double StRichRayTracer::epsilon() const {return (mConvergenceValue - mPhotonRadPointTransverseDistance); }
+
+#endif
