@@ -188,7 +188,7 @@ ostream& operator<<(ostream& os, StDetectorDbRichScalers& v){
     os << "Mult            = " << v.getMult() << endl;
     os << "L0              = " << v.getL0() << endl;
     os << "BBC And         = " << v.getBBCX() << endl;
-    os << "BBC*(CTB+TOFp)  = " << v.getBBCX() << endl;
+    os << "BBC*(CTB+TOFp)  = " << v.getBBCXCTB() << endl;
     
     os << "Rich HV  = " << v.getRichHVStatus() << endl;
         
