@@ -1,7 +1,10 @@
 #ifndef StKinkLocalTrack_hh
 #define StKinkLocalTrack_hh
-// $Id: StKinkLocalTrack.hh,v 1.3 1999/07/08 19:09:51 fisyak Exp $
+// $Id: StKinkLocalTrack.hh,v 1.4 1999/08/26 17:30:51 wdeng Exp $
 // $Log: StKinkLocalTrack.hh,v $
+// Revision 1.4  1999/08/26 17:30:51  wdeng
+// Use shorter names for identifiers
+//
 // Revision 1.3  1999/07/08 19:09:51  fisyak
 // Add tabs, remove St_glb_Maker
 //
@@ -31,15 +34,15 @@ public:
   Bool_t IsEqual(TObject *obj);
   
   StPhysicalHelixD& helix();
-  Int_t getId() const;
-  Int_t getDetId() const;
-  Int_t getNumOfHits() const;
-  Int_t getCharge() const;  
-  Float_t getPt() const;  
-  Float_t getStartPoint(Int_t i) const;
-  Float_t getLastPoint(Int_t i) const;  
-  Float_t getEndRadius2D() const;
-  Float_t getStartRadius2D() const;
+  Int_t   Id() const;
+  Int_t   DetId() const;
+  Int_t   numOfHits() const;
+  Int_t   charge() const;  
+  Float_t pt() const;  
+  Float_t startPoint(Int_t i) const;
+  Float_t lastPoint(Int_t i) const;  
+  Float_t endRadius2D() const;
+  Float_t startRadius2D() const;
   
 protected:
   StPhysicalHelixD mHelix;  
@@ -57,14 +60,14 @@ private:
 };
 
 inline StPhysicalHelixD& StKinkLocalTrack::helix() { return mHelix; }
-inline Int_t StKinkLocalTrack::getId() const { return mId; }
-inline Int_t StKinkLocalTrack::getDetId() const { return mDetId; }
-inline Int_t StKinkLocalTrack::getNumOfHits() const { return mNumOfHits; }
-inline Int_t StKinkLocalTrack::getCharge() const { return mCharge; }
-inline Float_t StKinkLocalTrack::getPt() const { return mPt; }
-inline Float_t StKinkLocalTrack::getStartPoint(Int_t i) const { return mStartPoint[i]; }
-inline Float_t StKinkLocalTrack::getLastPoint(Int_t i) const { return mLastPoint[i]; }
-inline Float_t StKinkLocalTrack::getEndRadius2D() const { return mEndRadius2D; }
-inline Float_t StKinkLocalTrack::getStartRadius2D() const { return mStartRadius2D; }
+inline Int_t StKinkLocalTrack::Id() const { return mId; }
+inline Int_t StKinkLocalTrack::DetId() const { return mDetId; }
+inline Int_t StKinkLocalTrack::numOfHits() const { return mNumOfHits; }
+inline Int_t StKinkLocalTrack::charge() const { return mCharge; }
+inline Float_t StKinkLocalTrack::pt() const { return mPt; }
+inline Float_t StKinkLocalTrack::startPoint(Int_t i) const { return mStartPoint[i]; }
+inline Float_t StKinkLocalTrack::lastPoint(Int_t i) const { return mLastPoint[i]; }
+inline Float_t StKinkLocalTrack::endRadius2D() const { return mEndRadius2D; }
+inline Float_t StKinkLocalTrack::startRadius2D() const { return mStartRadius2D; }
 
 #endif
