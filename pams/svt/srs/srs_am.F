@@ -34,7 +34,6 @@ c:AUTHOR:       Ken Wilson/ Claude Pruneau
 C:BUGS:         -- STILL IN DEVELOPMENT --
 C:HISTORY:      10aug96- STAF Version Creation.
 c:>------------------------------------------------------------------
-
 c:>------------------------------------------------------------------
 C:ROUTINE:      INTEGER*4 PAM
 C:DESCRIPTION:  SVT resolution simulator:
@@ -134,32 +133,14 @@ c------------------------------------------------------------------------------c
      &             activea_h,activea)
               if(active.eq.0.and.wafer.gt.7000) then 
                  deadssd=deadssd+1 ! only dead sdd hits
+                 svt_hit(ihit).volume_id = -1*svt_hit(ihit).volume_id
               endif
               if(active.eq.0.and.wafer.lt.7000) then 
                  deadsvt=deadsvt+1 ! only dead svt hits
+                 svt_hit(ihit).volume_id = -1*svt_hit(ihit).volume_id
               endif
               if (active.eq.1) then ! keep this one
                  filtered=filtered+1
-                 svt_hit(filtered).id=
-     &                svt_hit(ihit).id
-                 svt_hit(filtered).volume_id=
-     &                svt_hit(ihit).volume_id
-                 svt_hit(filtered).next_tr_hit_p=
-     &                svt_hit(ihit).next_tr_hit_p
-                 svt_hit(filtered).track_p=
-     &                svt_hit(ihit).track_p
-                 svt_hit(filtered).de=
-     &                svt_hit(ihit).de
-                 svt_hit(filtered).ds=
-     &                svt_hit(ihit).ds
-                 svt_hit(filtered).tof=
-     &                svt_hit(ihit).tof
-                 do i=1,3
-                    svt_hit(filtered).p(i)=
-     &                   svt_hit(ihit).p(i)
-                    svt_hit(filtered).x(i)=
-     &                   svt_hit(ihit).x(i)
-                 enddo
               endif
            else
               write(m132,*) 'SVT Wafer Shape ID is not set!'
@@ -180,7 +161,6 @@ c------------------------------------------------------------------------------c
         write(myString,111)'Number of SSD hits on inactive areas = ',deadssd
         call StInfo(myString)
  111    format(A45,I6)
-        svt_hit_h.nok=filtered
 c------------------------------------------------------------------------------c
 c------------------------------------------------------------------------------c
 
@@ -500,54 +480,55 @@ c------------------------------------------------------------------------------c
            print*,' SRS done with ',ihit
            report=report+del
         endif   
-	gcoord(1)=svt_hit(ihit).x(1) ! vector for svt global to local routine
-	gcoord(2)=svt_hit(ihit).x(2)
-	gcoord(3)=svt_hit(ihit).x(3)
-        pxin=svt_hit(ihit).p(1)
-        pyin=svt_hit(ihit).p(2)
-        pzin=svt_hit(ihit).p(3)
-	pin=sqrt(pxin**2.+pyin**2.+pzin**2.)	    
-        de=svt_hit(ihit).de
+        if( svt_hit(ihit).volume_id .gt. 0) then
+           gcoord(1)=svt_hit(ihit).x(1) ! vector for svt global to local routine
+           gcoord(2)=svt_hit(ihit).x(2)
+           gcoord(3)=svt_hit(ihit).x(3)
+           pxin=svt_hit(ihit).p(1)
+           pyin=svt_hit(ihit).p(2)
+           pzin=svt_hit(ihit).p(3)
+           pin=sqrt(pxin**2.+pyin**2.+pzin**2.)	    
+           de=svt_hit(ihit).de
 c------------------------------------------------------------------------------c
-
+           
 c------------------------------------------------------------------------------C
-c       TRANSFORM GLOBAL COORD TO LOCAL COORD AND FIND DRIFT DIST, OFFSET      c
-c       ANGLES, AND CHARGE                                                     c
+c     TRANSFORM GLOBAL COORD TO LOCAL COORD AND FIND DRIFT DIST, OFFSET      c
+c     ANGLES, AND CHARGE                                                     c
 c------------------------------------------------------------------------------c
-        iwafer = 0
-        wafer  = svt_hit(ihit).volume_id
-        iwafer = get_geom_row(geom_h,geom,wafer)
-        if (iwafer.gt.0) then
-          call svtgtol(gcoord,lcoord,
-     &           geom(iwafer).x,
-     &           geom(iwafer).d,
-     &           geom(iwafer).t,
-     &           geom(iwafer).n)
-          layer=geom(iwafer).layer
-          id_shape=config(1).layer_shape(layer)
-	  drift_length=shape(id_shape).shape(1)
-          trans_length=shape(id_shape).shape(2)
-          thickness=2.0*shape(id_shape).shape(3) ! 2.0 * half width
-c         drift distance:
-          id_active=srspar(1).id_active(layer)
-          dist=drift_length-abs(lcoord(1))-
-     1     activea(id_active).param(1)
-	  if (dist.gt.drift_length) then
+           iwafer = 0
+           wafer  = svt_hit(ihit).volume_id
+           iwafer = get_geom_row(geom_h,geom,wafer)
+           if (iwafer.gt.0) then
+              call svtgtol(gcoord,lcoord,
+     &             geom(iwafer).x,
+     &             geom(iwafer).d,
+     &             geom(iwafer).t,
+     &             geom(iwafer).n)
+              layer=geom(iwafer).layer
+              id_shape=config(1).layer_shape(layer)
+              drift_length=shape(id_shape).shape(1)
+              trans_length=shape(id_shape).shape(2)
+              thickness=2.0*shape(id_shape).shape(3) ! 2.0 * half width
+c     drift distance:
+              id_active=srspar(1).id_active(layer)
+              dist=drift_length-abs(lcoord(1))-
+     1             activea(id_active).param(1)
+              if (dist.gt.drift_length) then
 	     print*,'drift too long!',drift_length,lcoord(1)
 	     dist=drift_length
 	  endif
-	  if (dist.lt.0) then ! drift negative (due to geant 10mic bin?)
-	     dist=0.0001 ! minimum drift = 1 micron for numerical reasons
+	  if (dist.lt.0) then   ! drift negative (due to geant 10mic bin?)
+	     dist=0.0001        ! minimum drift = 1 micron for numerical reasons
 	  endif
-c         offset with respect to anodes 
-c         (assume there is an anode on the center line of wafer)
+c     offset with respect to anodes 
+c     (assume there is an anode on the center line of wafer)
           nanode=nint(lcoord(2)/srspar(1).pitch)
-c         offset can be negative or positive
+c     offset can be negative or positive
           offset=(lcoord(2)-float(nanode)*srspar(1).pitch) 
-c         theta (angle w.r.t. normal incidence)
+c     theta (angle w.r.t. normal incidence)
 	  call dproduct(svt_hit(ihit).p,geom(iwafer).n,dot)
 	  dot=dot/(pin) 
-	  dot=abs(dot) ! force theta to be between 0 and 90 degrees
+	  dot=abs(dot)          ! force theta to be between 0 and 90 degrees
 	  if (dot.gt.1.0) then
 	     dot=1.0		! safety from roundoff error
 	     print*,'Problem with angle'
@@ -753,6 +734,7 @@ c          Save info for use in merging:
 	      endif
 	    endif
 	endif
+        endif ! Only fill spt table if hit on active area
 	enddo ! loop over hits
 c------------------------------------------------------------------------------c
 c------------------------------------------------------------------------------c
@@ -2383,40 +2365,41 @@ c     loop on all rows of svt_hit and transfer the global coordinates,
 c     the dedx info
 c     to spt, will set errors to zero
 
+      spt_h.nok = 0
       do ihit = 1, svt_hit_h.nok
-
-         spt(ihit).x(1)   = svt_hit(ihit).x(1) ! position of space point
-         spt(ihit).x(2)   = svt_hit(ihit).x(2) ! position of space point
-         spt(ihit).x(3)   = svt_hit(ihit).x(3) ! position of space point
-         spt(ihit).xl(1)     = 0.                  ! local position on wafer
-         spt(ihit).xl(2)     = 0.                  ! local position on wafer
-         spt(ihit).xl(3)     = 0.                  ! local position on wafer
-         spt(ihit).de(1)      = svt_hit(ihit).de  ! energy loss
-         spt(ihit).de(2)      = 0.                  ! error on energy loss
-         spt(ihit).mom2(1)    = 0.                  ! 2nd moment of fit x
-         spt(ihit).mom2(2)    = 0.                  ! 2nd moment of fit y
-         spt(ihit).cov(1)     = 0.                  ! error on x(1)
-         spt(ihit).cov(2)     = 0.                  ! error on x(2)
-         spt(ihit).cov(3)     = 0.                  ! error on x(3)
-         spt(ihit).res(1)     = 0.                  ! residual of fit
-         spt(ihit).res(2)     = 0.                  ! 
-         spt(ihit).res(3)     = 0.                  ! 
-         spt(ihit).flag       = 0                   ! quality of space point - perfect
-         spt(ihit).id         = ihit                ! sequential index
-         spt(ihit).id_globtrk = 0                   ! initialized to zero.
-         spt(ihit).id_track   = 0                   ! link to reconstructed track - 
-                                                    ! to   be left empty here
-         spt(ihit).id_match   = 0 
-         spt(ihit).id_mctrack = svt_hit(ihit).track_p! link to monte carlo track
-         spt(ihit).id_cluster = svt_hit(ihit).id  ! link to svt_hit
-         spt(ihit).id_mchit = svt_hit(ihit).id ! Link to mc hit
-         spt(ihit).id_wafer   = svt_hit(ihit).volume_id
-c         svt_hit(ihit).id_spt   = ihit
+         if( svt_hit(ihit).volume_id .gt. 0) then
+            
+            
+         spt_h.nok         = spt_h.nok + 1
+         spt(spt_h.nok).x(1)   = svt_hit(ihit).x(1) ! position of space point
+         spt(spt_h.nok).x(2)   = svt_hit(ihit).x(2) ! position of space point
+         spt(spt_h.nok).x(3)   = svt_hit(ihit).x(3) ! position of space point
+         spt(spt_h.nok).xl(1)     = 0.       ! local position on wafer
+         spt(spt_h.nok).xl(2)     = 0.       ! local position on wafer
+         spt(spt_h.nok).xl(3)     = 0.       ! local position on wafer
+         spt(spt_h.nok).de(1)      = svt_hit(ihit).de  ! energy loss
+         spt(spt_h.nok).de(2)      = 0.      ! error on energy loss
+         spt(spt_h.nok).mom2(1)    = 0.      ! 2nd moment of fit x
+         spt(spt_h.nok).mom2(2)    = 0.      ! 2nd moment of fit y
+         spt(spt_h.nok).cov(1)     = 0.      ! error on x(1)
+         spt(spt_h.nok).cov(2)     = 0.      ! error on x(2)
+         spt(spt_h.nok).cov(3)     = 0.      ! error on x(3)
+         spt(spt_h.nok).res(1)     = 0.      ! residual of fit
+         spt(spt_h.nok).res(2)     = 0.      ! 
+         spt(spt_h.nok).res(3)     = 0.      ! 
+         spt(spt_h.nok).flag       = 0       ! quality of space point - perfect
+         spt(spt_h.nok).id         = ihit    ! sequential index
+         spt(spt_h.nok).id_globtrk = 0       ! initialized to zero.
+         spt(spt_h.nok).id_track   = 0       ! link to reconstructed track - 
+                                             ! to   be left empty here
+         spt(spt_h.nok).id_match   = 0 
+         spt(spt_h.nok).id_mctrack = svt_hit(ihit).track_p! link to monte carlo track
+         spt(spt_h.nok).id_cluster = svt_hit(ihit).id  ! link to svt_hit
+         spt(spt_h.nok).id_mchit = svt_hit(ihit).id ! Link to mc hit
+         spt(spt_h.nok).id_wafer   = svt_hit(ihit).volume_id
+         endif ! ONly put in hit on active area
       end do
 
-c     set the number of OK lines in spt
-
-      spt_h.nok         = svt_hit_h.nok 
       return
       
       end
@@ -2550,6 +2533,7 @@ c     map to wafer local frame coordinate, smear and map back to global frame
 
       ispt = 0
       do ihit = 1, svt_hit_h.nok
+         if( svt_Hit(ihit).volume_id .gt.0) then
          wafer  = svt_hit(ihit).volume_id
          iwafer = get_geom_row(geom_h,geom,wafer)
          if (iwafer.gt.0) then
@@ -2605,7 +2589,7 @@ c     map to wafer local frame coordinate, smear and map back to global frame
             spt(ispt).mom2(1)    = 0.
             spt(ispt).mom2(2)    = 0.
             spt(ispt).flag       = 0 ! quality of space point - perfect
-            spt(ispt).id         = ihit ! sequential index
+            spt(ispt).id         = ispt ! sequential index
             spt(ispt).id_globtrk = 0 ! link to global track 
             spt(ispt).id_track   = 0 ! link to reconstructed track 
             spt(ispt).id_mctrack = svt_hit(ihit).track_p! link to monte carlo track
@@ -2613,12 +2597,12 @@ c     map to wafer local frame coordinate, smear and map back to global frame
             spt(ispt).id_wafer   = svt_hit(ihit).volume_id
             spt(ispt).id_match   = 0
             spt(ispt).id_mchit = svt_hit(ihit).id ! Link to mc hits
-c            svt_hit(ihit).id_spt   = ihit
+
          else
             write(myString,1004) ihit 
             call stError(myString)
          end if
-         
+         end if ! Only fill spts on active areas
       end do
       
 c     set the number of OK lines in spt 
