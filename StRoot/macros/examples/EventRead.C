@@ -1,5 +1,8 @@
-// $Id: EventRead.C,v 1.2 1999/06/11 18:35:13 fine Exp $
+// $Id: EventRead.C,v 1.3 1999/06/21 23:53:35 fisyak Exp $
 // $Log: EventRead.C,v $
+// Revision 1.3  1999/06/21 23:53:35  fisyak
+// Switch off Browser
+//
 // Revision 1.2  1999/06/11 18:35:13  fine
 // *** empty log message ***
 //
@@ -90,11 +93,12 @@ void EventRead(Int_t nevents=1, const char
 // for the last event.
 // Create browser with name=BName,title=Btitle
     Event = (StEvent *) chain->GetDataSet("StEvent");
+#if 0
     if (Event) {
           Event->ls(9);
           brow = new TBrowser("Event",Event);    
     }
-
+#endif
 // Comment out for now because it clears data so you can't
 // look at data in browser!  
 //  Call finish routines:
