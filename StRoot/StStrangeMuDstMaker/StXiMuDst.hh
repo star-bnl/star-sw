@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMuDst.hh,v 3.0 2000/07/14 12:56:51 genevb Exp $
+ * $Id: StXiMuDst.hh,v 3.1 2000/07/14 14:09:11 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 30-Mar-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiMuDst.hh,v $
+ * Revision 3.1  2000/07/14 14:09:11  genevb
+ * Fixed small typo
+ *
  * Revision 3.0  2000/07/14 12:56:51  genevb
  * Revision 3 has event multiplicities and dedx information for vertex tracks
  *
@@ -117,7 +120,6 @@ protected:
   Float_t MomV0AlongXi();
 
   Float_t mDedxBachelor;
-;
 
   ClassDef(StXiMuDst,3)
 };
