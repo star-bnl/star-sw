@@ -1,6 +1,6 @@
- /***************************************************************************
+/***************************************************************************
  *
- * $Id: StEmcCollection.cxx,v 2.5 2003/09/12 21:54:53 jeromel Exp $
+ * $Id: StEmcCollection.cxx,v 2.6 2004/03/26 21:54:15 ullrich Exp $
  *
  * Author: Akio Ogawa, Nov 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCollection.cxx,v $
+ * Revision 2.6  2004/03/26 21:54:15  ullrich
+ * Added StEmcRawData to collection.
+ *
  * Revision 2.5  2003/09/12 21:54:53  jeromel
  * Zeroing
  *
@@ -31,16 +34,20 @@
 
 ClassImp(StEmcCollection)
 
-static const char rcsid[] = "$Id: StEmcCollection.cxx,v 2.5 2003/09/12 21:54:53 jeromel Exp $";
+static const char rcsid[] = "$Id: StEmcCollection.cxx,v 2.6 2004/03/26 21:54:15 ullrich Exp $";
 
 StEmcCollection::StEmcCollection() {
-  for(int i=0; i<8; i++) mDetector[i] = 0;
+    for(int i=0; i<8; i++) mDetector[i] = 0;
+    mBemcRawData =0;
+    mEemcRawData =0;
 }
 
 StEmcCollection::~StEmcCollection(){
-  for(int i=0; i<8; i++){
-    if(mDetector[i]) delete mDetector[i];
-  }
+    for(int i=0; i<8; i++)
+	if(mDetector[i])
+	    delete mDetector[i];
+    if(mBemcRawData) delete mBemcRawData;
+    if(mEemcRawData) delete mEemcRawData;
 }
     
 const StEmcDetector*
@@ -90,3 +97,12 @@ StEmcCollection::addBarrelPoint(const StEmcPoint* p){mBarrel.push_back(p);}
 
 void
 StEmcCollection::addEndcapPoint(const StEmcPoint* p){mEndcap.push_back(p);}
+
+StEmcRawData*
+StEmcCollection::bemcRawData() { return mBemcRawData;}
+
+StEmcRawData*
+StEmcCollection::eemcRawData() { return mEemcRawData;}
+
+void StEmcCollection::setBemcRawData(StEmcRawData* data) { mBemcRawData = data;}
+void StEmcCollection::setEemcRawData(StEmcRawData* data) { mEemcRawData = data;}
