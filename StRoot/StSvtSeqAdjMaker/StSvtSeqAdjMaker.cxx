@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.33 2001/10/05 23:18:27 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.34 2001/10/05 23:36:25 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.34  2001/10/05 23:36:25  caines
+ * Improve first anode subtraction to cope with DAQ changes
+ *
  * Revision 1.33  2001/10/05 23:18:27  caines
  * Make BadAnode a cont not data so code doesnt crash
  *
@@ -578,7 +581,7 @@ Int_t StSvtSeqAdjMaker::Make()
 	  length = 0;
 
 	  for( i=0; i<nSequence; i++)  length += Seq[i].length;
-	  if( length != 128) doCommon =1;
+	  if( length < 126) doCommon =1;
 	  if( !doCommon){
 	    
 	    // Fill in array of adc values of first anode
@@ -599,12 +602,12 @@ Int_t StSvtSeqAdjMaker::Make()
 	  length = 0;
 	  
 	  for( i=0; i<nSequence; i++)  length += Seq[i].length;
-	  if( length != 128){
+	  if( length < 126){
 	    status= mHybridRawData->getSequences(240,nSequence,Seq);
 	    length = 0;
 	    
 	    for( i=0; i<nSequence; i++)  length += Seq[i].length;
-	    if( length != 128){
+	    if( length < 126){
 	      doCommon=1;
 	    }
 	  }
