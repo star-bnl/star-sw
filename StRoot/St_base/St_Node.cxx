@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.15 1999/03/27 22:44:59 fine Exp $
+// $Id: St_Node.cxx,v 1.16 1999/03/29 19:25:23 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.16  1999/03/29 19:25:23  fine
+// Visibility flag have been activated. Some working correction
+//
 // Revision 1.15  1999/03/27 22:44:59  fine
 // Working 3D St_node with X3d and OpenGL
 //
@@ -644,7 +647,8 @@ void St_Node::PaintNodePosition(Option_t *option,St_NodePosition *pos)
   position->UpdatePosition(option);      
 
   PaintShape(option);  
-////---   if ( thisNode->TestBit(kSonsInvisible) ) return;
+  St_Node *n =  position->GetNode();
+  if ( n && n->TestBit(kSonsInvisible) ) return;
  
 //*-*- Paint all sons
   TList *posList = GetListOfPositions();

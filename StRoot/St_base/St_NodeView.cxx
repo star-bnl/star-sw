@@ -28,6 +28,28 @@
 
 ClassImp(St_NodeView)
 //_____________________________________________________________________________
+St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition)
+            : St_ObjectSet(viewNode->GetName(),(TObject *)nodePosition)
+{
+  if (viewNode) {
+     SetTitle(viewNode->GetTitle());
+#if 0
+  St_NodeView *view = new St_NodeView(*hall);
+  St_NodeViewIter next(viewNode);
+  St_NodeView *nextView = 0;
+  while (nextView = next()){     
+     if (nextView.IsMarked()) {
+        St_Position *position = next->GetPosition();
+        St_Node *node = position->GetNode();
+        Add(new St_NodeView(nextView->GetName(),nextView->GetTitle(),position);
+        next->ResetPosition();
+     }
+  }
+
+#endif
+  }
+}
+//_____________________________________________________________________________
 St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,EDataSetPass iopt)
             : St_ObjectSet(pattern.GetName(),(TObject *)nodePosition)
 {

@@ -22,7 +22,8 @@ public:
      virtual void             Notify(St_DataSet *set);
      virtual void             Reset(St_DataSet *l=0,Int_t depth=0);
      St_NodePosition          operator[](Int_t level);
-     St_NodePosition          *UpdateTempMatrix(St_NodePosition *curPosition);
+     St_NodePosition         *UpdateTempMatrix(St_NodePosition *curPosition);
+     void                     ResetPosition(Int_t level=0, St_NodePosition *newPosition=0);
      ClassDef(St_NodeViewIter,0)
 };
 #endif 
