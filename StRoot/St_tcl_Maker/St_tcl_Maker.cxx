@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.51 1999/12/05 00:07:04 snelling Exp $
+// $Id: St_tcl_Maker.cxx,v 1.52 1999/12/06 04:09:02 snelling Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.52  1999/12/06 04:09:02  snelling
+// Fixed morphology, now in chain when running with eval switch
+//
 // Revision 1.51  1999/12/05 00:07:04  snelling
 // Modifications made for eval option: added Histograms and NTuple support
 //
@@ -213,7 +216,7 @@ Int_t St_tcl_Maker::Init() {
   // set bools
   if (m_tclEvalOn) {
     m_tclPixTransOn = kTRUE;
-    //    m_tclMorphOn = kTRUE;
+    m_tclMorphOn = kTRUE;
     bWriteTNtupleOn = kTRUE; 
   }
 
@@ -522,7 +525,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.51 1999/12/05 00:07:04 snelling Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.52 1999/12/06 04:09:02 snelling Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -675,7 +678,7 @@ Int_t St_tcl_Maker::cluster_morphology(
       if(seqTbl[iSeqTbl].tpc_row!=clusterTbl[iClusterTbl].tpc_row) 	return 3;
 
       for(iPixTbl=pixBeg;iPixTbl<=pixEnd;iPixTbl++) {
-        whichTimeBin=seqTbl[iSeqTbl].tdc_low+iPixTbl-pixBeg-1;
+        whichTimeBin=seqTbl[iSeqTbl].tdc_low+iPixTbl-pixBeg;
         if(whichTimeBin<0||whichTimeBin>=TCC_BIN) 			return 81;
         charge[whichPad][whichTimeBin]=pixTbl[iPixTbl].data;
         if(maxCharge<pixTbl[iPixTbl].data) maxCharge=pixTbl[iPixTbl].data;
@@ -706,7 +709,7 @@ Int_t St_tcl_Maker::cluster_morphology(
     )) 									return 102;
   }
   lastRowPrevTime=nCluster-1;
-  return 0; // OK.
+  return kStOK;
 }
 /*=====================================================================================
                    NOTES FOR FUNCTION cluster_morphology()
@@ -782,7 +785,7 @@ Int_t St_tcl_Maker::FillOneRowOfMorphTable(
 
   morph->AddAt(&singlerow,iClusterTbl);
 
-  return 0; // no error
+  return kStOK; 
 }
 
 //_____________________________________________________________________________
@@ -869,7 +872,5 @@ Int_t St_tcl_Maker::CalculateQuadrupoleMoms(
   linEcc1Eq8=tan(LINEARIZATION*(ecc1Eq15))/tanLinearizationFactor;
   linEcc2Eq9=tan(LINEARIZATION*(ecc2Eq16))/tanLinearizationFactor;
 
-  return 0; // OK.
+  return kStOK; 
 }
-
-
