@@ -280,7 +280,9 @@ StIOInterFace *StIOMaker::Load()
   ts += IONAME[fCase]; 
   Mk = (StIOInterFace*)GetMaker(ts.Data());
   assert(Mk->InheritsFrom(StIOInterFace::Class()));
-  if (!Mk) {
+  if (Mk){
+     assert(Mk->InheritsFrom(StIOInterFace::Class()));
+  } else {  
     Mk = (StIOInterFace*)New(className,ts.Data());    
     assert(Mk);
   }  
