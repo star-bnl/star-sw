@@ -1,5 +1,12 @@
-// $Id: StFtpcConfMapper.hh,v 1.5 2000/07/18 21:22:15 oldi Exp $
+// $Id: StFtpcConfMapper.hh,v 1.6 2000/08/02 10:10:44 oldi Exp $
 // $Log: StFtpcConfMapper.hh,v $
+// Revision 1.6  2000/08/02 10:10:44  oldi
+// Changes in function GetSegm() to avoid pointing out of the ObjArry.
+// If GetSegm() tries to use a segment out of bounds a warning will be print
+// and the last segment will be returned.
+// New functions added to be able to calculate the coordinates of a given
+// volume segment (used in the warning message above).
+//
 // Revision 1.5  2000/07/18 21:22:15  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -45,6 +52,8 @@
 #include "StFtpcTracker.hh"
 #include "StFtpcConfMapPoint.hh"
 #include "StFtpcTrack.hh"
+#include "StMessMgr.h"
+
 #include "TObjArray.h"
 #include "TBenchmark.h"
 
@@ -192,6 +201,9 @@ public:
      Int_t  GetPhiSegm(Int_t segm);                                   // returns number of phi segment of a specific segment
      Int_t  GetEtaSegm(Int_t segm);                                   // returns number of eta segment of a specific segment
      Int_t  GetSegm(Int_t row_segm, Int_t phi_segm, Int_t eta_segm);  // returns number of segment
+     Int_t  GetRow(Int_t segm);                                       // returns the row of a given row segment
+  Double_t  GetPhi(Int_t segm);                                       // returns phi of a given phi segment
+  Double_t  GetEta(Int_t segm);                                       // returns eta of a given eta segment
 
   Double_t const  GetPhiDiff(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2);          //returns normalized difference of phi
   Double_t const  GetEtaDiff(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2);          //returns normalized difference of eta
@@ -288,11 +300,27 @@ inline Int_t StFtpcConfMapper::GetRowSegm(StFtpcConfMapPoint *hit)
 }
 
 
+inline Int_t StFtpcConfMapper::GetRow(Int_t segm)
+{
+  // Returns the row number of a given row segment.
+
+  return segm + 1;
+}
+
+
 inline Int_t StFtpcConfMapper::GetPhiSegm(StFtpcConfMapPoint *hit)
 {
   // Returns number of phi segment of a specific hit.
   
   return (Int_t)(hit->GetPhi()  * mNumPhiSegment / (2.*TMath::Pi())); // fPhi has no offset but needs to be segmented (this is done by type conversion to Int_t)
+}
+
+
+inline Double_t StFtpcConfMapper::GetPhi(Int_t segm)
+{
+  // Returns the angle phi of a given segment.
+
+  return 2 * TMath::Pi() * segm / (Double_t)mNumPhiSegment;
 }
 
 
@@ -315,11 +343,39 @@ inline Int_t StFtpcConfMapper::GetEtaSegm(StFtpcConfMapPoint *hit)
 }
 
 
+inline Double_t StFtpcConfMapper::GetEta(Int_t segm)
+{
+  // Returns the pseudorapidity eta of the given segment.
+
+  Bool_t minus_sign = (Bool_t)false;
+
+  if (segm >= mNumEtaSegment/2.) {
+    minus_sign = (Bool_t)true;
+    segm -= mNumEtaSegment/2;
+  }
+
+  if (minus_sign) {
+    return -segm * (mEtaMax - mEtaMin)/ (2. * mNumEtaSegment) + mEtaMin;
+  }
+
+  else {
+    return +segm * (mEtaMax - mEtaMin)/ (2. * mNumEtaSegment) + mEtaMin;
+  }
+}
+
+
 inline Int_t StFtpcConfMapper::GetSegm(Int_t row_segm, Int_t phi_segm, Int_t eta_segm)
 {
   // Calculates the volume segment number from the segmented volumes (segm = segm(pad,phi,eta)).
 
-  return row_segm * (mNumPhiSegment * mNumEtaSegment) + phi_segm * (mNumEtaSegment) + eta_segm;
+  Int_t segm = row_segm * (mNumPhiSegment * mNumEtaSegment) + phi_segm * (mNumEtaSegment) + eta_segm;
+
+  if (segm >= mBounds) {
+    gMessMgr->Message("", "W", "OST") << "Segment calculation out of bounds (row = " << GetRow(row_segm) << ", phi = " << GetPhi(phi_segm) << ", eta = " << GetEta(eta_segm) << ")!" << endm;
+    return mBounds-1;
+  }
+
+  else return segm;
 }
 
 
