@@ -84,7 +84,8 @@ class StTObjArray : public TSeqCollection {
         virtual TObject* After(TObject* obj) const {return fArr->After(obj);}
         virtual TObject* At(Int_t idx) const {return fArr->At(idx);}
         virtual TObject* Before(TObject* obj) const {return fArr->Before(obj) ;}
-           virtual Int_t BinarySearch(TObject* obj, Int_t upto = kMaxInt){return fArr->BinarySearch(obj,upto);}
+           virtual Int_t Capacity() const { return fArr->Capacity();}
+            virtual Int_t BinarySearch(TObject* obj, Int_t upto = kMaxInt){return fArr->BinarySearch(obj,upto);}
             virtual void Clear(Option_t* option=""){fArr->Clear(option);}
             virtual void Compress(){fArr->Compress();}
             virtual void Delete(Option_t* option=""){fArr->Delete(option);}
@@ -93,6 +94,7 @@ class StTObjArray : public TSeqCollection {
                    Int_t GetEntries() const {return fArr->GetEntries();}
                    Int_t GetEntriesFast() const {return fArr->GetEntriesFast();}
                    Int_t GetLast() const {return fArr->GetLast();}
+                   Int_t GetSize() const {return fArr->GetSize();}
            virtual Int_t IndexOf(TObject* obj) const {return fArr->IndexOf(obj);}
         virtual TObject* Last() const {return fArr->Last();}
                    Int_t LowerBound() const {return fArr->LowerBound();}
@@ -215,7 +217,7 @@ ClassDef(StRefArray,1)
 };
 
 
-
+#ifndef __CINT__
 #define StCollectionDef(QWERTY) \
 class St ## QWERTY;\
 class St ## QWERTY ## Iterator;\
@@ -346,5 +348,6 @@ void StSPtrVec ## QWERTY::clean(St ## QWERTY ## Iterator &iter){Clean(&iter);}\
 void StSPtrVec ## QWERTY::erase(St ## QWERTY ## Iterator &iter){Erase(&iter);}\
 St ## QWERTY*& StSPtrVec ## QWERTY::operator[](Int_t i) const{return *((St ## QWERTY**)GetCell(i));};\
 
+#endif /*End not __CINT__*/
 #endif
 

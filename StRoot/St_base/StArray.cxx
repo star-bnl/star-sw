@@ -1,5 +1,8 @@
-// $Id: StArray.cxx,v 1.15 1999/10/30 02:10:54 perev Exp $
+// $Id: StArray.cxx,v 1.16 1999/11/06 18:01:47 perev Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.16  1999/11/06 18:01:47  perev
+// StArray cleanup
+//
 // Revision 1.15  1999/10/30 02:10:54  perev
 // CleanUp of StArray for new StEvent
 //
@@ -57,24 +60,12 @@ Int_t StRegistry::GetNColl(){return (fReg) ? fReg->GetLast()+1:0;}				// Number 
 void StRegistry::Streamer(TBuffer &){assert(0);}
 
 //______________________________________________________________________________
-Int_t StRegistry::SetColl (StStrArray *coll) 		
+Int_t StRegistry::SetColl(StStrArray *coll) 		
 // Register new container
 {
   assert(coll);
   if (!fReg) fReg = new TObjArray(10);
   
-  const char *collname = coll->GetIDName();
-  int i=0,n=fReg->GetLast();
-  
-  for (i=0;i<=n;i++) 
-  {
-    StStrArray *koll = (StStrArray*)fReg->At(i);
-    if (!koll) 					continue;
-    if (strcmp(collname,koll->GetIDName()))	continue;
-    printf("Warning <WaStRegistry::SetColl> Same collection %s \n  %s\n"
-    ,coll->GetName(),collname);
-    return i+1;
-  }
   fReg->AddLast(coll);
   return fReg->GetLast()+1;
 }
@@ -154,7 +145,7 @@ void 	StObjArray::push_back(const TObject *obj) {AddLast((TObject*)obj);}
 //______________________________________________________________________________
 void 	StObjArray::pop_back() {RemoveAt(GetLast());}
 //______________________________________________________________________________
-UInt_t  StObjArray::size() const {return GetSize();}
+UInt_t  StObjArray::size() const {return GetLast()+1;}
 //______________________________________________________________________________
 void    StObjArray::resize(Int_t num){Resize(num);}
 //______________________________________________________________________________
@@ -168,7 +159,7 @@ void 	StObjArray::clear(){Clear();}
 //______________________________________________________________________________
 Bool_t 	StObjArray::empty() const {return IsEmpty();}
 //______________________________________________________________________________
-TObject** StObjArray::GetCell(Int_t idx) const{return &(*fArr)[idx];}
+TObject** StObjArray::GetCell(Int_t idx) const{return &((*fArr)[idx]);}
 
 //______________________________________________________________________________
 void StObjArray::Streamer(TBuffer &)
@@ -423,8 +414,7 @@ ClassImp(StStrArray)
 //______________________________________________________________________________
 StStrArray::StStrArray(const Char_t *name, Int_t s):StObjArray(s)
 { 
-  if (!name) return;
-  SetName(name); SetIDName(0); 
+  if (name) SetName(name); SetIDName(0); 
 }
 //______________________________________________________________________________
 StStrArray::StStrArray(const StStrArray &from )
@@ -489,7 +479,7 @@ const Char_t *StStrArray::GetIDName() const
 //______________________________________________________________________________
 void StStrArray::SetIDName(const Char_t *idname)
 {
-  assert(fIDName.IsNull()) ;
+  int isNull = fIDName.IsNull();
   if (idname) 
   {
     fIDName = idname; 
@@ -501,7 +491,7 @@ void StStrArray::SetIDName(const Char_t *idname)
     TDatime dt; fIDName += dt.AsString();
   }
 
-  fIdx=StRegistry::SetColl(this);
+  if (isNull) fIdx=StRegistry::SetColl(this);
 }
 //______________________________________________________________________________
 void StStrArray::Streamer(TBuffer &R__b)
