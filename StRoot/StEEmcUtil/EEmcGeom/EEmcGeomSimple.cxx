@@ -1,51 +1,15 @@
-// $Id: EEmcGeomSimple.cxx,v 1.18 2004/05/20 21:12:07 zolnie Exp $
-// $Log: EEmcGeomSimple.cxx,v $
-// Revision 1.18  2004/05/20 21:12:07  zolnie
-// added a static instance of EEmcGeomSimple
-//
-// Revision 1.17  2003/09/17 22:05:33  zolnie
-// delete mumbo-jumbo
-//
-// Revision 1.16  2003/09/11 19:41:06  zolnie
-// updates for gcc3.2
-//
-// Revision 1.15  2003/09/05 15:04:24  zolnie
-// remove Stiostream/iostream from the source code
-//
-// Revision 1.14  2003/09/02 17:57:56  perev
-// gcc 3.2 updates + WarnOff
-//
-// Revision 1.13  2003/07/01 14:13:25  balewski
-// simplified formulano clue
-//
-// Revision 1.12  2003/05/23 22:13:04  zolnie
-// SUN does not like inlines (why??)
-//
-// Revision 1.11  2003/04/25 15:53:52  zolnie
-// always initalize
-//
-// Revision 1.10  2003/04/23 18:11:19  balewski
-// 'continous' eta & phi bins added
-//
-// Revision 1.9  2003/03/22 22:44:57  zolnie
-// make it standalone library
-//
-// Revision 1.8  2003/03/06 18:54:21  zolnie
-// improvements for track/tower matching
-//
-// Revision 1.7  2003/02/20 21:47:25  zolnie
-// *** empty log message ***
-//
-// Revision 1.4  2003/01/19 03:47:10  zolnie
-// still further improvements
-//
-// Revision 1.3  2003/01/18 02:35:53  zolnie
-// further modifications
-//
-// Revision 1.1  2003/01/16 19:33:50  zolnie
-// added a simple Geom class to conver a track hit -> tower hit
-//
+// $Id: EEmcGeomSimple.cxx,v 1.19 2004/05/24 18:33:39 zolnie Exp $
+/// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
+/// \date   Jan 14, 2003
+/// doxygen info here
+/** 
+ * \class  EEmcGeomSimple
+ * \brief  EEMC simple geometry 
+ *
+ */
+
 #include <cmath>
+#include <iostream>
 
 #include "TVector3.h"
 
@@ -62,8 +26,28 @@
 #include "EEmcGeomDefs.h"
 #include "EEmcGeomSimple.h"
 
+#include <assert.h>
+
+
+ClassImp(EEmcGeomException)
+
+EEmcGeomException::EEmcGeomException(const char *msg)
+{
+  // this is ugly but root does not handle exceptions quite well
+  Warning("exception thrown","%s",msg);
+}
+
+// 
+EEmcGeomException::~EEmcGeomException()
+{
+}
+
+
+
+
 // ######################################################################
 //         *** WARNING NOT TESTED FOR mClock==1 (clock-wise) ***
+// see EEmcGeomSimple.h for function documentation
 // ######################################################################
 ClassImp(EEmcGeomSimple)
 
@@ -71,6 +55,7 @@ ClassImp(EEmcGeomSimple)
 // single instance of EEmcGeomSimple
 EEmcGeomSimple EEmcGeomSimple::sInstance;
 
+//
 EEmcGeomSimple::EEmcGeomSimple() 
 {
   // always initialize
@@ -88,53 +73,64 @@ EEmcGeomSimple::EEmcGeomSimple()
   useDefaultGeometry();
 }
 
+// 
 EEmcGeomSimple::~EEmcGeomSimple() 
 {
   if(mEtaBin) delete [] mEtaBin;
 }
 
-// counter-clockwise (mClock==-1)
-//    12:  105deg ->   75deg
-//     3:  195deg ->  165deg
-//     6:  285deg ->  255deg
-//     9:   15deg ->  345deg
+//
+// default geometry
+// counter-clockwise (actual) Endcap (mClock==-1)
+//     3'clock [2] :  center at   0  deg
+//     6'clock [5] :  center at  -90 deg
+//     9'clock [8] :  center at -180 deg
+//    12'clock [11]:  center at -270 deg
 void
 EEmcGeomSimple::useDefaultGeometry() 
 {
-  // default EtaBins
-  const Float_t defaultEtaBin[] = {
+  // default EtaBins 2.0 -> 1.086
+  // the first 13 entries mark the bounds of the 12 eta Bins.  14th value is not used
+  static const Float_t defaultEtaBin[] = {
     2.0    , 
     1.9008 , 1.8065 , 1.7168 , 1.6317 , 1.5507 , 1.4738 ,
     1.4007 , 1.3312 , 1.2651 , 1.2023 , 1.1427 , 1.086  ,
-    0.0 
+    0.0
   };
 
   mNumSec  = kEEmcNumSectors;
   mNumSSec = kEEmcNumSubSectors;
   mNumEta  = kEEmcNumEtas;
 
+  // fill in eta boundaries
   if(mEtaBin) delete [] mEtaBin;
   mEtaBin = new Float_t[mNumEta+1];
-  for(UInt_t i=0;i<=mNumEta;i++) mEtaBin[i] = defaultEtaBin[i];
+  for(UInt_t i=0;i<=mNumEta && defaultEtaBin[i]>0.0 ;i++) mEtaBin[i] = defaultEtaBin[i];
 
   mZ1     =  kEEmcZPRE1; // preshower
   mZ2     =  kEEmcZPOST; // postshower
   mZSMD   =  kEEmcZSMD;  // 
-  mPhi0   =  75.0*M_PI/180.0;       
-  mClock  =  CounterClockwise;  
+  mPhi0   =  75.0*M_PI/180.0;  // first sector (1 o'clock) phi value [index 0]
+  mClock  =  CounterClockwise; // indexing goes counter-clockwise 
 }
+
 
 TVector3 
 EEmcGeomSimple::getTowerCenter(const UInt_t sec, const UInt_t sub, const UInt_t etabin) const 
 {
-  Double_t  phi   = getPhiMean(sec,sub);
-  Double_t  eta   = getEtaMean(etabin);
-  if(eta<0.0) return TVector3();
-  Double_t  z     = getZMean();
-  Double_t  rho   = z*tan(2.0*atan(exp(-1.0*eta)));  
+  Double_t phi =  0.0;
+  Double_t eta = -1.0;
+  Double_t z   =  0.0;
+  Double_t rho =  0.0;
 
+  phi  = getPhiMean(sec,sub);
+  eta  = getEtaMean(etabin);
+  if(eta<0.0) throw EEmcGeomException("invalid eta");
+  z     = getZMean();
+  rho   = z*tan(2.0*atan(exp(-1.0*eta)));  
   // create vector pointing toward the center of the tower
   return TVector3(rho*cos(phi),rho*sin(phi),z);
+
 }
 
 TVector3 
@@ -152,9 +148,8 @@ EEmcGeomSimple::getDirection(const Float_t xetaBin, const Float_t xphiBin) const
 
   Double_t  eta   = getEtaMean(ietaBin) - (xetaBin-ietaBin)*2*getEtaHalfWidth(ietaBin);
   //  printf("getDirection(xetaBin=%f, xphiBin=%f)--> eta=%f, phi=%f\n",xetaBin,xphiBin,eta,phi);
-  
-  if(eta<0.0) return TVector3();
-  Double_t  z     = getZMean();
+  if(eta<0.0) throw EEmcGeomException("invalid eta");
+    Double_t  z     = getZMean();
   Double_t  rho   = z/sinh(eta);  
 
   //printf("getDirection(xetaBin=%f, xphiBin=%f)--> eta=%f, phi=%f, x=%f, y=%f z=%f\n",xetaBin,xphiBin,eta,phi,rho*cos(phi),rho*sin(phi),z);
@@ -260,3 +255,55 @@ EEmcGeomSimple::getTrackPoint(const StTrack& track, Double_t z) const
 } 
 
 #endif
+
+
+// $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.19  2004/05/24 18:33:39  zolnie
+// comment cleanup, added a small exception class
+// more argument checking, exception thrown when argument invalid
+//
+// Revision 1.18  2004/05/20 21:12:07  zolnie
+// added a static instance of EEmcGeomSimple
+//
+// Revision 1.17  2003/09/17 22:05:33  zolnie
+// delete mumbo-jumbo
+//
+// Revision 1.16  2003/09/11 19:41:06  zolnie
+// updates for gcc3.2
+//
+// Revision 1.15  2003/09/05 15:04:24  zolnie
+// remove Stiostream/iostream from the source code
+//
+// Revision 1.14  2003/09/02 17:57:56  perev
+// gcc 3.2 updates + WarnOff
+//
+// Revision 1.13  2003/07/01 14:13:25  balewski
+// simplified formulano clue
+//
+// Revision 1.12  2003/05/23 22:13:04  zolnie
+// SUN does not like inlines (why??)
+//
+// Revision 1.11  2003/04/25 15:53:52  zolnie
+// always initalize
+//
+// Revision 1.10  2003/04/23 18:11:19  balewski
+// 'continous' eta & phi bins added
+//
+// Revision 1.9  2003/03/22 22:44:57  zolnie
+// make it standalone library
+//
+// Revision 1.8  2003/03/06 18:54:21  zolnie
+// improvements for track/tower matching
+//
+// Revision 1.7  2003/02/20 21:47:25  zolnie
+// *** empty log message ***
+//
+// Revision 1.4  2003/01/19 03:47:10  zolnie
+// still further improvements
+//
+// Revision 1.3  2003/01/18 02:35:53  zolnie
+// further modifications
+//
+// Revision 1.1  2003/01/16 19:33:50  zolnie
+// added a simple Geom class to conver a track hit -> tower hit
+//

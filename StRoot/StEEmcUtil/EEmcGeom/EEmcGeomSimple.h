@@ -5,12 +5,171 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.16 2004/05/20 21:12:08 zolnie Exp $
+ * $Id: EEmcGeomSimple.h,v 1.17 2004/05/24 18:33:40 zolnie Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
  *********************************************************************
+ */
+
+
+
+
+#include "TObject.h"
+#include "TVector3.h"
+
+
+class EEmcGeomException : public TObject  {
+public:
+  EEmcGeomException(const char* message);
+  ~EEmcGeomException();
+private:
+
+public:
+  ClassDef(EEmcGeomException,1)
+
+};
+
+
+
+/// class EEmcGeomSimple
+class  EEmcGeomSimple : public TObject { 
+public:
+  /// chirality defined
+  enum Chiral_t { CounterClockwise=-1, Clockwise=1, Undefined=0};
+
+  /// default constructor
+  EEmcGeomSimple();
+  /// the destructor
+  virtual ~EEmcGeomSimple();
+
+  /// gets EEMC tower center given sector,subsector and eta indices (0-offset) 
+  /// \param sec     sector index    [0 ... mNumSec  ]
+  /// \param sub     subsector index [0 ... mNumSSec ]
+  /// \param etabin  tile/eta index  [0 ... mNumEta  ]
+  /// \return tower center as TVector3
+  TVector3 getTowerCenter(const UInt_t  sec, const UInt_t sub, const UInt_t etabin) const;
+
+  /// gets 'direction' vector from (0,0,0) toward a point on EEMC
+  /// \param xetaBin
+  /// \param xphiBin
+  /// \return direction as TVector3
+  TVector3 getDirection  (const Float_t xetaBin, const Float_t xphiBin) const;
+  
+  /// gets lower Z edge of EEMC (preshower)
+  inline Float_t getZ1()     const { return mZ1;  };
+  /// gets upper Z edge of EEMC (postshower)
+  inline Float_t getZ2()     const { return mZ2;  };
+  /// gets z-depth of the SMD layer in EEMC 
+  inline Float_t getZSMD()   const { return mZSMD;};
+  /// gets lower eta limit 
+  inline Float_t getEtaMin() const { return mEtaBin[0];       };
+  /// gets upper eta bound
+  inline Float_t getEtaMax() const { return mEtaBin[mNumEta]; };
+  
+  /// returns the "mean" value of a tile (eta bin)
+  /// \param eta tile index (eta bin) [0 ... mNumEta ]
+  inline Float_t getEtaMean(UInt_t eta) const {
+    if(mNumEta<=eta) throw EEmcGeomException("getEtaHalfWidth: invalid eta index"); 
+    return 0.5 * ( mEtaBin[eta] + mEtaBin[eta+1] );
+  }
+
+  /// returns the "half-width" of a tile (eta bin)
+  /// \param eta tile index (eta bin) [0 .. mNumEta ]
+  inline Float_t getEtaHalfWidth(UInt_t eta) const { 
+    if(mNumEta<=eta) throw EEmcGeomException("getEtaHalfWidth: invalid eta index");
+    return 0.5 * fabs( mEtaBin[eta] - mEtaBin[eta+1] );
+  }
+
+  /// returns the center value of phi for a given sector
+  /// \param sec sector index [0 ... mNumSec ]
+  /// \note: may return negative angles
+  inline Float_t getPhiMean(UInt_t sec) const {
+    const  double dPhi=2.0*M_PI/mNumSec;
+    if(mNumSec<=sec) throw EEmcGeomException("getPhiMean: invalid sector index");
+    return mClock*(sec+0.5)*dPhi+mPhi0;
+  }
+  
+  /// returns the center value of phi for a subsector
+  /// \param sec  sector index    [0 ... mNumSec  ]
+  /// \param ssec subsector index [0 ... mNumSSec ]
+  /// \note: may return negative angles
+  inline Float_t getPhiMean(UInt_t sec, UInt_t ssec) const {
+    const double dPhi=2.0*M_PI/mNumSec;
+    if(mNumSec <=sec ) throw EEmcGeomException("getPhiMean: invalid sector index");
+    if(mNumSSec<=ssec) throw EEmcGeomException("getPhiMean: invalid subsector index");
+    return mClock*(Float_t(sec)+(ssec+0.5)/mNumSSec)*dPhi+mPhi0;
+  }
+  
+  /// returns the half-width (in phi) of a subsector
+  /// \param sec  sector index    [0 ... mNumSec  ]
+  /// \param ssec subsector index [0 ... mNumSSec ]
+  inline Float_t getPhiHalfWidth(UInt_t sec=0, UInt_t ssec=0) const {
+    const double dPhi=2.0*M_PI/mNumSec;
+    if(mNumSec <=sec ) throw EEmcGeomException("getPhiMean: invalid sector index");
+    if(mNumSSec<=ssec) throw EEmcGeomException("getPhiMean: invalid subsector index");
+    return 0.5/mNumSSec*dPhi;
+  }
+
+  /// returns the center of EEMC in z direction 
+  inline Float_t getZMean() const {
+    return 0.5*(mZ1+mZ2);
+  }
+  
+  /// returns the half-width of EEMC (in z-direction)
+  inline Float_t getZHalfWidth() const {
+     return 0.5*fabs(mZ1-mZ2);
+  }
+
+
+  /// gets number of tiles (eta bins)
+  inline Int_t   getNumberOfEtas()       const { return mNumEta;  }
+  /// gets number of sectors 
+  inline Int_t   getNumberOfSectors()    const { return mNumSec;  }
+  /// gets number of subsectors
+  inline Int_t   getNumberOfSubSectors() const { return mNumSSec; } 
+  /// gets azimuthal angle of the  edge of first sector (index 0)
+  /// the edge is 'upper' for counter-clockwise, and 'lower' for clockwise indexing
+  inline Float_t getPhi0()               const { return mPhi0; };
+  /// is endcap labeling clockwise?
+  inline Bool_t  isClockwise()           const { return ( mClock == Clockwise        ); };
+  /// is endcap labeling clockwise?
+  inline Bool_t  isCounterClockwise()    const { return ( mClock == CounterClockwise ); }
+
+  /// returns a reference to a static instance of EEmcGeomSimple
+  static EEmcGeomSimple& Instance() { return sInstance; } 
+
+protected:  
+  Float_t  mZ1   ;   // z preshower)
+  Float_t  mZ2   ;   // z postshower)
+  Float_t  mZSMD ;   // z smd
+  Float_t *mEtaBin;  // eta bins [0..mNumEta]
+  UInt_t   mNumEta;  // number of eta bins 
+  UInt_t   mNumSec;  // number of sectors    (in phi)
+  UInt_t   mNumSSec; // number of subsectors (in phi)
+  Float_t  mPhi0;    // phi0 of the 0th sector 
+  Chiral_t mClock;   // +1 == clockwise  -1 == counter-clockwise
+
+  void    useDefaultGeometry();
+
+private:
+  
+  
+  static EEmcGeomSimple sInstance; //! 
+
+  ClassDef(EEmcGeomSimple,2)  // STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
+   
+};
+
+#endif
+
+
+/*********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.17  2004/05/24 18:33:40  zolnie
+ * comment cleanup, added a small exception class
+ * more argument checking, exception thrown when argument invalid
+ *
  * Revision 1.16  2004/05/20 21:12:08  zolnie
  * added a static instance of EEmcGeomSimple
  *
@@ -51,94 +210,6 @@
  * Revision 1.1  2003/01/16 19:33:51  zolnie
  * added a simple Geom class to conver a track hit -> tower hit
  *
- *********************************************************************/
-#include "TObject.h"
-#include "TVector3.h"
-
-
-class  EEmcGeomSimple : public TObject { 
-public:
-  enum Chiral_t { CounterClockwise=-1, Clockwise=1, Undefined=0};
-
-  EEmcGeomSimple();
-  virtual ~EEmcGeomSimple();
-
-  TVector3 getTowerCenter(const UInt_t  sec, const UInt_t sub, const UInt_t etabin) const;
-  TVector3 getDirection  (const Float_t xetaBin, const Float_t xphiBin) const;
-  
-  inline Float_t getZ1()     const { return mZ1;  };
-  inline Float_t getZ2()     const { return mZ2;  };
-  inline Float_t getZSMD()   const { return mZSMD;};
-  inline Float_t getEtaMin() const { return mEtaBin[0];       };
-  inline Float_t getEtaMax() const { return mEtaBin[mNumEta]; };
-  
-  // return the "mean" value of an eta bin
-  inline Float_t getEtaMean(UInt_t eta) const {
-    if(mNumEta<=eta) return (-1.0);
-    return 0.5 * ( mEtaBin[eta] + mEtaBin[eta+1] );
-  }
-
-  // return the "half-width" of an eta bin
-  inline Float_t getEtaHalfWidth(UInt_t eta) const { 
-    if(mNumEta<=eta) return (-1.0);
-    return 0.5 * fabs( mEtaBin[eta] - mEtaBin[eta+1] );
-  }
-
-  // return the mean value of phi (subsector)
-  inline Float_t getPhiMean(UInt_t sec) const {
-    double dPhi=2.0*M_PI/mNumSec;
-    return mClock*(sec+0.5)*dPhi+mPhi0;
-  }
-  // return the mean value of phi (subsector)
-  inline Float_t getPhiMean(UInt_t sec, UInt_t ssec) const {
-    double dPhi=2.0*M_PI/mNumSec;
-    return mClock*(Float_t(sec)+(ssec+0.5)/mNumSSec)*dPhi+mPhi0;
-  }
-  // return the phi half-width of a subsector
-  inline Float_t getPhiHalfWidth(UInt_t sec=0, UInt_t ssec=0) const {
-    double dPhi=2.0*M_PI/mNumSec;
-    return 0.5/mNumSSec*dPhi;
-  }
-
-  // return the mean value of phi
-  inline Float_t getZMean() const {
-    return 0.5*(mZ1+mZ2);
-  }
-  // return the phi half-width of a subsector
-  inline Float_t getZHalfWidth() const {
-     return 0.5*fabs(mZ1-mZ2);
-  }
-
-
-
-  inline Int_t   getNumberOfEtas()       const { return mNumEta;  }
-  inline Int_t   getNumberOfSectors()    const { return mNumSec;  }
-  inline Int_t   getNumberOfSubSectors() const { return mNumSSec; } 
-  inline Float_t getPhi0()               const { return mPhi0; };
-  inline Bool_t  isClockwise()           const { return ( mClock == Clockwise        ); };
-  inline Bool_t  isCounterClockwise()    const { return ( mClock == CounterClockwise ); }
-
-  static EEmcGeomSimple& Instance() { return sInstance; } 
-
-protected:  
-  Float_t  mZ1   ;   // z1  
-  Float_t  mZ2   ;   // z2
-  Float_t  mZSMD ;
-  Float_t *mEtaBin;  // eta bins [0..mNumEta]
-  UInt_t   mNumEta;  // number of eta bins 
-  UInt_t   mNumSec;  // number of sectors    (in phi)
-  UInt_t   mNumSSec; // number of subsectors (in phi)
-  Float_t  mPhi0;    // phi0 of the 0th sector 
-  Chiral_t mClock;   // +1 == clockwise  -1 == counter-clockwise
-
-  void    useDefaultGeometry();
-
-private:
-  static EEmcGeomSimple sInstance; //! 
-
-  ClassDef(EEmcGeomSimple,2)  // STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
-   
-};
-
-#endif
+ ********************************************************************
+*/
 
