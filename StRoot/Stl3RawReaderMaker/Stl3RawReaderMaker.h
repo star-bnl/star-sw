@@ -1,7 +1,10 @@
 //
-//  $Id: Stl3RawReaderMaker.h,v 1.6 2001/09/27 03:49:53 struck Exp $
+//  $Id: Stl3RawReaderMaker.h,v 1.7 2001/11/14 23:30:56 struck Exp $
 //
 //  $Log: Stl3RawReaderMaker.h,v $
+//  Revision 1.7  2001/11/14 23:30:56  struck
+//  major update: set 'unbiased'-flag, correct bugs in StGlobalTrack-filling
+//
 //  Revision 1.6  2001/09/27 03:49:53  struck
 //  actual no. of gl3s handled flexible, max no. of gl3s and algorithms now global define-statements
 //
@@ -35,6 +38,9 @@
 #define MaxNumberOfGl3Nodes   10
 #define MaxNumberOfAlgorithms 20
 
+#define IntParameterSize       5
+#define FloatParameterSize     5
+
 // some foreward declaration since includes don't work
 // in these cases 
 class globalTrack;
@@ -45,7 +51,7 @@ class StPrimaryVertex;
 
 // ol' fashioned structs for counter bookkeeping
 struct AlgorithmCounter {
-      unsigned int  algId;
+      int  algId;
       int  nProcessed;
       int  nAccept;
       int  nBuild;
@@ -61,21 +67,24 @@ class Stl3RawReaderMaker : public StMaker {
  
  private:
     // General stuff
-    TDataSet*          DAQReaderSet ; //!
-    StL3Reader*        ml3reader ;  //!
+    TDataSet*          DAQReaderSet; //!
+    StL3Reader*        ml3reader;  //!
 
     // Mini Event
-    Stl3MiniEvent*     mL3Event ;  //!
-    TTree*             mGlobalTrackTree ;  //!
+    Stl3MiniEvent*     mL3Event;  //!
+    TTree*             mGlobalTrackTree;  //!
 
     // StEvent
     StEvent*           mStEvent; //!
-    StL3Trigger*       myStL3Trigger ; //!
+    StL3Trigger*       myStL3Trigger; //!
+
+    // Database
+    TDataSet*          mDbSet;
 
     // switches
-    bool               mWriteMiniEvent ; //!
-    bool               mWriteStEvent ; //!
-    int                mCalculateVertex ; //!
+    bool               mWriteMiniEvent; //!
+    bool               mWriteStEvent; //!
+    int                mCalculateVertex; //!
     bool               mL3On;
 
     // counter
@@ -86,7 +95,6 @@ class Stl3RawReaderMaker : public StMaker {
     int                mNumberOfAlgorithms;
     int                mEventCounter;
 
- protected:
  public: 
                   Stl3RawReaderMaker(const char *name="l3RawReader");
    virtual       ~Stl3RawReaderMaker();
@@ -112,7 +120,7 @@ class Stl3RawReaderMaker : public StMaker {
    TTree* GetGlobalTrackTree() {return mGlobalTrackTree;} ;
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: Stl3RawReaderMaker.h,v 1.6 2001/09/27 03:49:53 struck Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: Stl3RawReaderMaker.h,v 1.7 2001/11/14 23:30:56 struck Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(Stl3RawReaderMaker, 1)   //StAF chain virtual base class for Makers
 };
