@@ -1,15 +1,12 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.19 2000/11/25 12:27:12 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.20 2000/11/26 15:08:56 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 2.19  2000/11/25 12:27:12  lasiuk
- * mean angle -> psi.  Fill the photonInfo.  take care of flag
- * ambiguities where possible.  Remove the old commented hitFilter
- * code.  Store the TOTAL CONSTANT AREA and TOTAL CONSTANT AREA ON
- * ACTIVE PAD-PLANE
+ * Revision 2.20  2000/11/26 15:08:56  lasiuk
+ * move the setting of all flags to the pidtraits
  *
  * Revision 2.22  2000/11/28 19:21:01  lasiuk
  * correct memory leak in writing to StEvent
@@ -206,7 +203,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.19 2000/11/25 12:27:12 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.20 2000/11/26 15:08:56 lasiuk Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -1355,63 +1352,22 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
  	sigmaOfD = 0.30;
 	
 	if( normalizedD<-1. || normalizedD>3. ) continue;
-	switch(particleType) {//switch
-	case -211:  // pion
 
-	    if(inArea) {
-		if( (*hitIter)->isSet(eInAreaPi) ) {
-		    (*hitIter)->setBit(eInMultipleAreaPi);
-		}
-		else {
-		    (*hitIter)->setBit(eInAreaPi);
-		}
-	    }
-	    
-	    ringCalculator->
-		getRing(eInnerRing)->
-		getTrack()->
-		addHit((*hitIter),normalizedD,sigma,psi,radPath,quartzPath,particle);
-	    break;
-		
-	case -321:  // kaon
-
-	    if(inArea) {
-		if( (*hitIter)->isSet(eInAreaK) ) {
-		    (*hitIter)->setBit(eInMultipleAreaK);
-		}
-		else {
-		    (*hitIter)->setBit(eInAreaK);
-		}
-	    }
+	bool inArea = false;
+	if(normalizedD>=0 && normalizedD<=1 )
+	    inArea = true;
 	
 	double sigma = (normalizedD - meanOfD)/sigmaOfD;
 	//
 	//**************** hitfilter *******************
 	//              setting the flags
-	    break;
-	    
-	case -2212:  //proton
-	     
-	    if(inArea) {
-		if( (*hitIter)->isSet(eInAreap) ) {
-		    (*hitIter)->setBit(eInMultipleAreap);
-		}
-		else {
-		    (*hitIter)->setBit(eInAreap);
-		}
-	    }
+	//
+
+	if(particleType == -211   ||   // pion
+	   particleType == -321   ||   // kaon
+	   particleType == -2212  ) {  // proton
 
 	    ringCalculator->
-		getRing(eInnerRing)->
-		getTrack()->
-		addHit((*hitIter),normalizedD,sigma,psi,radPath,quartzPath,particle);
-	    break;
-	    
-	default:
-	    cout << "Unknown particle type:" << endl;
-	    continue;
-	    break;
-	} // switch
 		getRing(eInnerRing)->
 		getTrack()->
 		addHit((*hitIter),normalizedD,sigma,psi,radPath,quartzPath,particle);
@@ -1699,47 +1655,44 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
 // 		 << sigma << '\t'
 // 		 << psi << '\t'
 // 		 << ringCalc->getConstantAreaAngle() << " ";
+//  		 << normalizedD << '\t'
 //  		 << sigma << '\t'
-	    bool inArea          = false;
-
+//  		 << psi << '\t'
 //  		 << ringCalc->getConstantAreaAngle() << " ";
 	    
 	    pid->addPhotonInfo(new StRichPhotonInfo(normalizedD, sigma, psi));
 
-		
-		if(theCurrentHit->isSet(eInAreaPi) ||
-		   theCurrentHit->isSet(eInAreaK)  ||
-		   theCurrentHit->isSet(eInAreap) ) {
-		    // it should be
-		}
-		else {
-		    cout << "StPIDMaker::fillPIDTraits()\n";
-		    cout << "\tERROR NOT IN AREA!!!" << endl;
-		}
-	    }
+	    //
 	    // boolean flags
 	    //
 	    bool inArea          = false;
 	    bool inConstantAngle = false;
 	    if ( (normalizedD >= 0) && (normalizedD <= 1) ) {
 		inArea = true;
-	    if(inArea && inConstantAngle)
+		totalHitsInArea++;
+	    }	    
 
-	  
+	    pid->setConstantAreaCut(ringCalc->getConstantAreaAngle());
 	    
-	    if(part==pion) {
+	    if ( fabs(psi) > ringCalc->getConstantAreaAngle()) {
 		inConstantAngle = true;
+		hitsInConstantAngle++;
+	    }
 
-		if(inArea && inConstantAngle) {
-		    if( theCurrentHit->isSet(eInConstantAreaPi) ) {
-			theCurrentHit->setBit(eInMultipleCAreaPi);
+	    if(inArea && inConstantAngle) {
+		inConstantArea = true;
+		hitsInConstantArea++;
+	    }
+
+	    if(part == pion) {
+		if( theCurrentHit->isSet(eInMultipleCAreaPi) ) continue;
+		
 		if( theCurrentHit->isSet(eInAreaPi) ||
 		    theCurrentHit->isSet(eInConstantAnglePi) ) {
-			theCurrentHit->setBit(eInConstantAreaPi);
+		    //
 		    // it was touched by another pion ring
 		    theCurrentHit->setBit(eMultiplyAssigned);
 		}
-		if( theCurrentHit->isSet(eInMultipleCAnglePi) ) continue;
 
 		if(inArea) {
 		    if( theCurrentHit->isSet(eInAreaPi) ) {
@@ -1754,21 +1707,35 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
 		    if( theCurrentHit->isSet(eInConstantAnglePi) ) {
 			theCurrentHit->setBit(eInMultipleCAnglePi);
 		    }
+		    else {
+			theCurrentHit->setBit(eInConstantAnglePi);
+		    }
+		}
+
+		if( inConstantAngle && !theCurrentHit->isSet(eInMultipleCAnglePi) ) {
+		    if( fabs(sigma)<1 ) {theCurrentHit->setBit(e1SigmaPi);sig1++;}
+		    if( fabs(sigma)<2 ) {theCurrentHit->setBit(e2SigmaPi);sig2++;}
+		}
 	    }
-		
-	    if(part==kaon) {
+
 	    if(inConstantArea) {
 		if( theCurrentHit->isSet(eInConstantAreaPi) ) {
-		if(inArea && inConstantAngle) {
-		    if( theCurrentHit->isSet(eInConstantAreaK) ) {
-			theCurrentHit->setBit(eInMultipleCAreaK);
+		    theCurrentHit->setBit(eInMultipleCAreaPi);
+		}
+		else {
+		    theCurrentHit->setBit(eInConstantAreaPi);
+		}
+	    }
+	    
+	    if(part == kaon) {
+		if( theCurrentHit->isSet(eInMultipleCAreaK) ) continue;
+
 		if( theCurrentHit->isSet(eInAreaK)          ||
 		    theCurrentHit->isSet(eInConstantAngleK) ) {
-			theCurrentHit->setBit(eInConstantAreaK);
+		    //
 		    // it was touched by another kaon ring
 		    theCurrentHit->setBit(eMultiplyAssigned);
 		}
-		if( theCurrentHit->isSet(eInMultipleCAngleK) ) continue;
 
 		if(inArea) {
 		    if( theCurrentHit->isSet(eInAreaK) ) {
@@ -1777,27 +1744,43 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
 		    else {
 			theCurrentHit->setBit(eInAreaK);
 		    }
-
 		}
 
 		if(inConstantAngle) {
 		    if( theCurrentHit->isSet(eInConstantAngleK) ) {
 			theCurrentHit->setBit(eInMultipleCAngleK);
-
+		    }
+		    else {
+			theCurrentHit->setBit(eInConstantAngleK);
+		    }
+		}
 		
-	    if(part==proton) {
+		if( inConstantAngle && !theCurrentHit->isSet(eInMultipleCAngleK) ) {
+		    if( fabs(sigma)<1 ) {theCurrentHit->setBit(e1SigmaK);sig1++;}
+		    if( fabs(sigma)<2 ) {theCurrentHit->setBit(e2SigmaK);sig2++;}
+		}
+
+		if(inConstantArea) {
+		    if( theCurrentHit->isSet(eInConstantAreaK) ) {
 			theCurrentHit->setBit(eInMultipleCAreaK);
 		    }
-		if(inArea && inConstantAngle) {
-		    if( theCurrentHit->isSet(eInConstantAreap) ) {
-			theCurrentHit->setBit(eInMultipleCAreap);
+		    else {
+			theCurrentHit->setBit(eInConstantAreaK);
+		    }
+		}
+		
+	    }
+	    
+	    if(part == proton) {
+		if( theCurrentHit->isSet(eInMultipleCAreap) ) continue;
+
+		if( theCurrentHit->isSet(eInAreap)          ||
 		    theCurrentHit->isSet(eInConstantAnglep) ) {
 
-			theCurrentHit->setBit(eInConstantAreap);
+		    //
 		    // it was touched by another proton ring
 		    theCurrentHit->setBit(eMultiplyAssigned);
 		}
-		if( theCurrentHit->isSet(eInMultipleCAnglep) ) continue;
 
 		if(inArea) {
 		    if( theCurrentHit->isSet(eInAreap) ) {
@@ -1811,8 +1794,18 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
 		if(inConstantAngle) {
 		    if( theCurrentHit->isSet(eInConstantAnglep) ) {
 			theCurrentHit->setBit(eInMultipleCAnglep);
-	    }    
-	    
+		    }
+		    else {
+			theCurrentHit->setBit(eInConstantAnglep);
+		    }
+		}
+
+		if(inConstantAngle && !theCurrentHit->isSet(eInMultipleCAnglep) ) {
+		    if( fabs(sigma)<1 ) {theCurrentHit->setBit(e1Sigmap);sig1++;}
+		    if( fabs(sigma)<2 ) {theCurrentHit->setBit(e2Sigmap);sig2++;}
+		}
+
+		if(inConstantArea) {
 		    if( theCurrentHit->isSet(eInConstantAreap) ) {
 			theCurrentHit->setBit(eInMultipleCAreap);
 		    }
