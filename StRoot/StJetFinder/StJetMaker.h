@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.2 2003/04/04 21:26:42 thenry Exp $
+ * $Id: StJetMaker.h,v 1.3 2003/04/24 14:15:16 thenry Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.3  2003/04/24 14:15:16  thenry
+ * These changes are really the first working version of the StFourPMakers
+ * and teh StJetMakers.  This is all c++ stl implementation, and by virtue of
+ * that fact, StEmcTpcFourPMaker bady needs to be speed optimized.
+ *
  * Revision 1.2  2003/04/04 21:26:42  thenry
  * Repeated jet bug fix + debugging output not removed
  *
@@ -33,6 +38,12 @@
 #define StJetMaker_h
 #include "StMaker.h"
 #include "../StSpinMaker/StppJetAnalyzer.h"
+#include <string>
+#include <iostream>
+#include <map>
+#include <algorithm>
+using namespace std;
+
 
 //#define _GEANT_
 #define _BBC_data_
@@ -53,11 +64,13 @@ class StFourPMaker;
 
 class StJetMaker : public StMaker {
 public:
+    typedef map<string, StppJetAnalyzer*, less<string> > jetBranchesMap;
+
     StJetMaker(const Char_t *name, StFourPMaker* fPMaker, 
         StMuDstMaker* uDstMaker, const char *outputName);
-    Int_t Init();
-    Int_t Make();
-    Int_t Finish();
+    virtual Int_t Init();
+    virtual Int_t Make();
+    virtual Int_t Finish();
     void setMuDst(StMuDst* p) {mudst=p;};
     StppEvent* event() {return jetEvent;} //added by MLM
     TTree* tree() {return jetTree;}  //added by MLM
@@ -66,24 +79,33 @@ public:
 
     void SetSaveEventWithNoJets(bool saveIt);
     void addAnalyzer(StppJetAnalyzer* a, const char *);
+    jetBranchesMap &getJets(void) { return jetBranches; };
+    StppJetAnalyzer* firstanalyzer(void) { 
+      return (*(jetBranches.begin())).second;
+    };
+    int firstNumJets(void) 
+      { return firstanalyzer()->getmuDstJets()->nJets(); };
 
 protected:
     void InitFile(void);
     void FinishFile(void);
 
     StMuEmcCollection* muEmcCol; //!
-    StppJetAnalyzer **jetBranches; //!
-    char** names;                  //!
-    Int_t numJetBranches;          
+    jetBranchesMap jetBranches;  
+    //StppJetAnalyzer **jetBranches; //!
+    //char** names;                  //!
+    //Int_t numJetBranches;          
     bool saveEventWithNoJets;
     int maxEventsPerFile;	   //!      
     int eventFileCounter;	   //!
     int fileCounter;		   //!
     bool saveEMC;		   //!
+    bool neverSave;                //!
 
-private:
+protected:
     StFourPMaker*   fourPMaker;   //!
     StMuDstMaker*   muDstMaker;   //!
+private:
     const char*     outName;      //!
     StMuDst*        mudst;        //!
     size_t          mGoodCounter; //!
@@ -105,3 +127,6 @@ private:
     ClassDef(StJetMaker,1)
 	};
 #endif
+
+
+

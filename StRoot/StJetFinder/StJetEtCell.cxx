@@ -45,6 +45,9 @@ void StJetEtCell::add(const StProtoJet& pj)
 
 void StJetEtCell::add(StJetEtCell* cell)
 {
+  //cout << "StJetEtCell::add(cell->nTimedUsed=" << cell->nTimesUsed() 
+  //<< "): " << mEt << " + " << cell->eT() 
+  //<< " = " << mEt + cell->eT() << endl;
     mEt += cell->eT();
     mCells.push_back(cell);
     cell->setNtimesUsed( cell->nTimesUsed() + 1 );
