@@ -3,28 +3,29 @@
 * 
 * created May 27, 1998 - Kathy Turner - runs tpc slow simulator & does tracking
 * editted June 4, 1998 Kathy Turner
-*  editted 6/9/98 Kathy Turner
+* editted 6/9/98 Kathy Turner
 * editted 6/25/98 Lidia Didenko
-*  editted 6/25/98 Kathy Turner
-*  7/2/98 - K. Turner - code now requires that you load geometry libraries 
-*  7/3/98 - K. Turner - make to use bfc_util kumacs and include pam kumacs
-*  7/8/98 - I. Sakrejda - put in cluster matching evaluator & track evaluator
+* editted 6/25/98 Kathy Turner
+* 7/2/98 - K. Turner - code now requires that you load geometry libraries 
+* 7/3/98 - K. Turner - make to use bfc_util kumacs and include pam kumacs
+* 7/8/98 - I. Sakrejda - put in cluster matching evaluator & track evaluator
+* 7/9/98 - K. Turner - put in tfc_run#run_newtab - can now set adcxyzon=1
 * ***********************************************************************
 ************************************************************************
  macro run__
-          TOP=$STAR _
+          TOP=/scr22/kathy/testdev _
           domain='geometry tpc' _ 
           INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
           input_g2t_file=event_0000050.xdf_
           num_events=1_
           tpc_sector_first=1_
-          tpc_sector_last=24_
+          tpc_sector_last=1_
           tracker=tpt _
           funit=21 _
           nfile=tphit.ntup _
           nid=111_
           table=tpc/tracks/mctrk_
-          adcxyzon=0
+          adcxyzon=1
   
   
 *  this is an example!! you must change to fill your needs
@@ -74,8 +75,9 @@
 
 * tpc geometry init
   exec tpg_init#init
+  
 
-*  tpc slow sim init
+* tpc slow sim init
     exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
     if [adcxyzon].eq.1 then
       exec create_tables_tpc#tfc
@@ -85,7 +87,7 @@
 * tpc cluster init
    exec create_tables_tpc#tcl_slow
    exec tcl_init#init  
-     
+        
 * tpc tracker init
    exec create_tables_tpc#tpt
    exec tpt_init#init
@@ -108,7 +110,7 @@
 * slow simulator
     exec tss_run#run [tpc_sector_first] [tpc_sector_last]
     if [adcxyzon].eq.1 then
-      exec tfc_run#run 
+      exec tfc_run#run_newtab [tpc_sector_first] [tpc_sector_last]
     endif
 * clustering
     exec tcl_run#run_tcl [tpc_sector_first] [tpc_sector_last] 
