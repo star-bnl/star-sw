@@ -1,5 +1,8 @@
-* $Id: tpt_merge_segments.F,v 1.15 2000/03/07 04:39:32 sakrejda Exp $
+* $Id: tpt_merge_segments.F,v 1.16 2000/03/10 08:15:07 sakrejda Exp $
 * $Log: tpt_merge_segments.F,v $
+* Revision 1.16  2000/03/10 08:15:07  sakrejda
+* Merged tracks arranged based on order of the end-points in Z
+*
 * Revision 1.15  2000/03/07 04:39:32  sakrejda
 * Track merging in field cleaned up.
 *
@@ -78,15 +81,6 @@ c Define local structure to sort radius
                 real    xclose(2)
                 real    yclose(2)
       END STRUCTURE
-
-      STRUCTURE /local_hits/
-                integer lhit
-                integer ltrack
-                real    x
-                real    y
-                real    z
-      END STRUCTURE
-
 C______________________________________________________________________
       RECORD /table_head_st/    track_h
       RECORD /tpt_track_st/     track(*)
@@ -97,17 +91,16 @@ C______________________________________________________________________
       RECORD /tpt_pars_st/      tpar(*)
 
       RECORD /track_merge/      merge(mxtrack)
-      RECORD /local_hits/       rhits(1000)
 C_________________________________________________________________
       INTEGER ltot,tls_Quick_Sort_r,iret
-      INTEGER i,j,k,ipass, lxi, lxj
-
+      INTEGER i,j,k,ipass, lxi, lxj, lvmin
+      INTEGER lstep1, lstep2, lstart1, lstart2, lx1, lx2
       REAL    min(5),cuta,cutb
       INTEGER tpt_fit_track, tpt_load_track
       REAL    radi,radj
       REAL    varb,varc
 
-      REAL    temp
+      REAL    temp,zedge(4)
       INTEGER event, dummy
       data    event /0/
       CHARACTER*132 m132
@@ -116,7 +109,7 @@ C______________________________________________________________________
 
 c Order the good tracks according to their helix radius.
 c The array lpnt will point to each of these tracks in order.
-C      write(17,*)"****************** event ",event," ***************"
+      write(17,*)"****************** event ",event," ***************"
       event = event+1
 C      if(event.eq.4) return
 
@@ -147,8 +140,8 @@ C      if(event.eq.4) return
                merge(ltot).yclose(1)=merge(ltot).yclose(2)
                merge(ltot).yclose(2)=temp
             endif
-C            write(17,*) i,merge(ltot).rad,merge(ltot).xclose(1),merge(ltot).xclose(2),
-C     >                 merge(ltot).yclose(1),merge(ltot).yclose(2)
+            write(17,*) i,merge(ltot).rad,merge(ltot).xclose(1),merge(ltot).xclose(2),
+     >                 merge(ltot).yclose(1),merge(ltot).yclose(2)
          endif
       enddo
 C      go to 999
@@ -179,56 +172,86 @@ c radd is the larger of the radii being compared.
             enough = abs(radi-radj)/radj.gt.0.1
          endif
          lxj=merge(j).lpnt
-C         write(17,*)"trying to merge", lxi, lxj
+         write(17,*)"trying to merge", lxi, lxj
          if(.not.enough.and.trk(lxj).flag.gt.0) then
-C            write(17,*)"trying to merge", lxi, lxj
+            write(17,*)"trying to merge", lxi, lxj
 c           Now compare the average of the differences of the 
 c           x and y for the closest apptoach to the origin.
             cuta = abs(merge(i).xclose(1)-merge(j).xclose(1))/merge(i).rad
             cutb = abs(merge(i).xclose(1)-merge(j).xclose(1))/merge(i).rad
             if (cuta.lt.min(2).and.cutb.lt.min(2)) then
-C                write(17,*)"trying to merge", lxi, lxj
+                write(17,*)"trying to merge", lxi, lxj
 c               Now compare their dip angles.
                 varc=abs(abs(trk(lxi).p(7))-abs(trk(lxj).p(7)))
                 if (abs(varc).lt.min(3)) then
-C                   write(17,*)"merged",lxi,lxj
+                   write(17,*)"merged",lxi,lxj
                    track_h.nok=track_h.nok+1
-
+                   zedge(1)=hit(trk(lxi).ipnt(trk(lxi).nhit)).z
+                   zedge(2)=hit(trk(lxi).ipnt(1)).z
+                   zedge(3)=hit(trk(lxj).ipnt(trk(lxj).nhit)).z
+                   zedge(4)=hit(trk(lxj).ipnt(1)).z
+                   iret =lvmin(zedge,4)
+                   write(17,*)"zedge ",zedge, iret
+                   if(iret.lt.3) then
+                      lx1=lxi
+                      lx2=lxj
+                      if(zedge(1).gt.zedge(2))then
+                           lstart1=0
+                           lstep1=1
+                      else
+                           lstart1=trk(lx1).nhit+1
+                           lstep1=-1
+                      endif
+                      if(zedge(3).gt.zedge(4))then
+                           lstart2=0
+                           lstep2=1
+                      else
+                           lstart2=trk(lx2).nhit+1
+                           lstep2=-1
+                      endif
+                   else
+                      lx1=lxj
+                      lx2=lxi
+                      if(zedge(3).gt.zedge(4))then
+                           lstart1=0
+                           lstep1=1
+                      else
+                           lstart1=trk(lx1).nhit+1
+                           lstep1=-1
+                      endif
+                      if(zedge(1).gt.zedge(2))then
+                           lstart2=0
+                           lstep2=1
+                      else
+                           lstart2=trk(lx2).nhit+1
+                           lstep2=-1
+                      endif
+                   endif
 C                  store hits from both tracks in a local struct
-                   do k=1,trk(lxi).nhit
-                      rhits(k).lhit=trk(lxi).ipnt(k)
-                      rhits(k).ltrack=lxi
-                      rhits(k).x=hit(rhits(k).lhit).x
-                      rhits(k).y=hit(rhits(k).lhit).y
-                      rhits(k).z=hit(rhits(k).lhit).z
-c                      write(6,*)hit(rhits(k).lhit).x,hit(rhits(k).lhit).y,hit(rhits(k).lhit).z,hit(rhits(k).lhit).track
+                   do k=1,trk(lx1).nhit
+                      trk(track_h.nok).ipnt(k)=trk(lx1).ipnt(lstart1+lstep1*k)
                    end do
-                   do k=1,trk(lxj).nhit
-                      rhits(k+trk(lxi).nhit).lhit=trk(lxj).ipnt(k)
-                      rhits(k+trk(lxi).nhit).ltrack=lxj
-                      rhits(k+trk(lxi).nhit).x=hit(rhits(k+trk(lxi).nhit).lhit).x
-                      rhits(k+trk(lxi).nhit).y=hit(rhits(k+trk(lxi).nhit).lhit).y
-                      rhits(k+trk(lxi).nhit).z=hit(rhits(k+trk(lxi).nhit).lhit).z
+                   do k=1,trk(lx2).nhit
+                      trk(track_h.nok).ipnt(k+trk(lx1).nhit)=trk(lx2).ipnt(lstart2+lstep2*k)
                    end do
                    trk(track_h.nok).nhit=trk(lxi).nhit+trk(lxj).nhit
-C                  sort hits in z
-                   iret=tls_Quick_Sort_r(trk(track_h.nok).nhit, rhits(1).z, rhits(2).z, rhits)
-C                  re-load trk(lxi)
+C
                    do  k=1,trk(track_h.nok).nhit
-                      trk(track_h.nok).ipnt(k)=rhits(k).lhit
-                      hit(rhits(k).lhit).track=1000*track_h.nok+k
+                      hit(trk(track_h.nok).ipnt(k)).track=1000*track_h.nok+k
+                      write(17,*)hit(trk(track_h.nok).ipnt(k)).z
                    end do
 c                  refit track
-c                call the fitting and loading
-                 iret = tpt_fit_track(track_h.nok,trk,hit_h,hit,tpar_h,tpar,dummy,ipass)
-                 if(trk(track_h.nok).flag.gt.0)then
-                    iret = tpt_load_track(track_h.nok,track_h,track,trk,hit_h,hit)
-C                   flag the contributing track as "admerged"
-                    trk(lxj).flag=-77
-                    track(lxj).flag=-77
-                    trk(lxi).flag=-77
-                    track(lxi).flag=-77
-                 else
+c                  call the fitting and loading
+                   iret = tpt_fit_track(track_h.nok,trk,hit_h,hit,tpar_h,tpar,dummy,ipass)
+                  write(17,*)trk(track_h.nok).flag,track_h.nok, trk(track_h.nok).nhit
+                   if(trk(track_h.nok).flag.gt.0)then
+                     iret = tpt_load_track(track_h.nok,track_h,track,trk,hit_h,hit)
+C                    flag the contributing track as "admerged"
+                     trk(lxj).flag=-77
+                     track(lxj).flag=-77
+                     trk(lxi).flag=-77
+                     track(lxi).flag=-77
+                   else
 C                   if fit fails
                     track_h.nok=track_h.nok-1
                     do  k=1,trk(lxi).nhit
@@ -237,8 +260,8 @@ C                   if fit fails
                     do  k=1,trk(lxj).nhit
                       hit(trk(lxj).ipnt(k)).track=1000*lxj+k
                     end do
-                 endif
-C                 write(17,*)track(lxi).flag, track(lxi).id, track(lxi).nrec
+                  endif
+
               endif   ! p(7) or tanl
             endif   ! cuta,b
          endif! track that passes the radius criterion already merged 
