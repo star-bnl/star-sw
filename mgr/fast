@@ -1,6 +1,9 @@
 #!/usr/local/bin/tcsh
-#  $Id: fast,v 1.7 1998/05/15 21:54:02 fisyak Exp $
+#  $Id: fast,v 1.8 1998/05/15 21:55:02 fisyak Exp $
 #  $Log: fast,v $
+#  Revision 1.8  1998/05/15 21:55:02  fisyak
+#  check commitlog once again
+#
 #  Revision 1.7  1998/05/15 21:54:02  fisyak
 #  check commitlog once again
 #
@@ -36,7 +39,7 @@
 # During the execution output files are written at the directory you
 # submitted the script. Check if your quota space is enough.
 #
-#
+#  
 # DQS embedded directives  follow
 #@$ -a 12241200  # date-time to run, format [[CC]yy]MMDDhhmm[.SS]
 #$ -eo           # merge std error and out
