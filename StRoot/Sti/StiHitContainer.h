@@ -126,6 +126,7 @@ using std::map;
 using std::vector;
 
 class StiHit;
+class StiDetector;
 
 ///We define this globally for convenience of users.
 typedef vector<StiHit*> hitvector;
@@ -184,6 +185,7 @@ public:
 
     ///Return a const reference to a vector of hits.
     const hitvector& hits(double refangle, double position);
+    hitvector& hits(const StiDetector*);
 
     ///Return a const reference ot the hit-vector map.
     const hitmap& hits() const;

@@ -16,7 +16,6 @@ using std::for_each;
 
 //StMcEvent
 #include "StMcEventTypes.hh"
-/// \dontinclude StMcEventTypes.hh
 
 //Association
 #include "StAssociationMaker/StTrackPairInfo.hh"
@@ -41,8 +40,9 @@ ostream& operator<<(ostream&, const StiHit&);
   object is owned by some other scope.
 */
 StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(StAssociationMaker* assoc)
-    : mAssociationMaker(assoc), mMcEvent(0), mFactory(0), mTpcHitFilter(0),
-      mBuildPath("empty"), mBuilt(false), mLowerBound(0), mMaxHits(0)
+    : StiSeedFinder(),
+      mAssociationMaker(assoc), mMcEvent(0), mTpcHitFilter(0),
+      mLowerBound(0), mMaxHits(0)
 {
     cout <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder()"<<endl;
     if (!assoc) {

@@ -84,27 +84,10 @@ public:
     
     //Sets
 
-    ///Set a pointer to StMcEvent
     void setEvent(StMcEvent* mcevt=0);
-
-    ///Set a pointer to the track factory.
-    void setFactory(StiObjectFactoryInterface<StiKalmanTrack>* val);
-
-    ///Set the path of the file from which to build the seed-finder.
-    void setBuildPath(const string&);
-    
-    //User query interface to StiKalmanTracks
-
-    ///Are there more tracks to be had?
     virtual bool hasMore();
-
-    ///Access to the next track.
     virtual StiKalmanTrack* next();
-
-    ///Dynamically build the internal state of the seed-finder.
     virtual void build();
-    
-    ///This performs no operation.
     virtual void reset();
 
 protected:
@@ -117,12 +100,8 @@ private:
     
     StAssociationMaker* mAssociationMaker;
     StMcEvent* mMcEvent;
-    StiObjectFactoryInterface<StiKalmanTrack>* mFactory;
     //deep memeber, requires non-defualt assignment and copy
     StTpcHitFilter* mTpcHitFilter;
-    
-    string mBuildPath;
-    bool mBuilt;
 
     unsigned int mLowerBound;
     unsigned int mMaxHits;
@@ -134,15 +113,6 @@ private:
     vector<StMcTrack*>::iterator mEndMc;
 };
 
-inline void StiEvaluableTrackSeedFinder::setFactory(StiObjectFactoryInterface<StiKalmanTrack>* val)
-{
-    mFactory=val;
-}
-
-inline void StiEvaluableTrackSeedFinder::setBuildPath(const string& val)
-{
-    mBuildPath = val;
-}
 #endif
 
 

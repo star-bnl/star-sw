@@ -33,6 +33,48 @@
 #include <vector>
 using std::vector;
 
+///Helper class:
+template <class T>
+class IteratorTriplet
+{
+public:
+
+    /*
+      typedef vector<T> tvector;
+      
+      IteratorTriplet(tvector::const_iterator begin, tvector::const_iterator end)
+      : beginIt(begin), endIt(end) {init();}
+      
+      void init() {currentIt = beginIt;}
+      
+      tvector::const_iterator beginIt;
+      tvector::const_iterator endIt;
+      tvector::const_iterator currentIt;
+    */
+
+    
+    IteratorTriplet(T& begin, T& end)
+	: beginIt(begin), endIt(end) {init();}
+    
+    void init() {currentIt = beginIt;}
+    
+    T beginIt;
+    T endIt;
+    T currentIt;
+    
+private:
+    IteratorTriplet(); ///not implemented
+}; //End Helper class IteratorTriplet definition
+
+template <class Type, class Container>
+class ForwardCombIterator
+{
+public:
+    typedef Container<Type> tvec;
+    
+private:
+};
+
 template <class T>
 class CombinationIterator
 {
@@ -82,28 +124,8 @@ public:
     void print() const;
     
 private:
-    
-    ///Nested Helper class:
-    class VectorEntry
-    {
-    public:
-	VectorEntry(tvector::const_iterator begin, tvector::const_iterator end) 
-	    : beginIt(begin), endIt(end) {init();}
-	
-	void init() {currentIt = beginIt;}
-	
-	tvector::const_iterator beginIt;
-	tvector::const_iterator endIt;
-	tvector::const_iterator currentIt;
-	
-    private:
-	VectorEntry(); ///not implemented
-    }; //End nested class VectorEntry definition
-    
-    
-    typedef vector<VectorEntry> vector_entry_vector;
-    
-private:
+    typedef IteratorTriplet<tvector::const_iterator> Triplet;
+    typedef vector<Triplet> vector_entry_vector;
     
     vector_entry_vector mvector;
 
@@ -126,7 +148,7 @@ void CombinationIterator<T>::push_back(tvector::const_iterator begin,
 	cout <<"StiCombinationIterator<T>::push_back()\tError:";
 	cout <<"range is empty is empty"<<endl;
     }
-    VectorEntry entry(begin, end);
+    Triplet entry(begin, end);
     mvector.push_back(entry);
     return;
 }

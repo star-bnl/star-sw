@@ -5,7 +5,7 @@
 #include <iostream.h>
 #include "StiSeedFinder.h"
 
-StiSeedFinder::StiSeedFinder()
+StiSeedFinder::StiSeedFinder() : mFactory(0), mBuildPath("empty"), mBuilt(false)   
 {
     //cout <<"StiSeedFinder::StiSeedFinder()"<<endl;
 }

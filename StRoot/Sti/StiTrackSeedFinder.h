@@ -7,62 +7,45 @@
 #ifndef StiTrackSeedFinder_HH
 #define StiTrackSeedFinder_HH
 
-#include <vector>
 #include "StiSeedFinder.h"
 
-#include "StiHit.h"
-#include "StiHitContainer.h" //Include temp., so that we can use typedefs
-#include "StiKalmanTrack.h"
-#include "CombinationIterator.h"
-
 class StiRootDrawableHits;
-class StTrack;
+class StiKalmanTrack;
 class Sti2HitComboFilter;
+class StiHitContainer;
+class StiDetectorContainer;
 
 class StiTrackSeedFinder : public StiSeedFinder
 {
-    typedef CombinationIterator<StiHit*> combo_iterator;
-    typedef combo_iterator::tvector tvector;
-
 public:
 
-    StiTrackSeedFinder(StiHitContainer*, Sti2HitComboFilter*);
-    StiTrackSeedFinder(const StiTrackSeedFinder&);
-    StiTrackSeedFinder& operator=(const StiTrackSeedFinder&);
-    
+    StiTrackSeedFinder(StiDetectorContainer*, StiHitContainer*, Sti2HitComboFilter*);
     virtual ~StiTrackSeedFinder();
-
+    
     //Set Hit Combination filter type
     void setHitComboFilter(Sti2HitComboFilter* val);
     const Sti2HitComboFilter* getHitComboFilter() const;
     
-    //SetFactory
-    void setFactory(StiObjectFactoryInterface<StiKalmanTrack>* val);
-    
-    //Enforced User interface
-    virtual bool hasMore();
-    virtual StiKalmanTrack* next();
-    virtual void build();
+    //Inherited User interface
+    virtual bool hasMore() = 0;
+    virtual StiKalmanTrack* next() = 0;
+    virtual void build() = 0;
     virtual void reset();
-    
-    void addLayer(double refangle, double position);
-    
-    virtual void print() const; //Print contents of iterator
-    int numberOfLayers() const;
-    
-protected:
-    void copyToThis(const StiTrackSeedFinder&); //deep copy
-    virtual StiKalmanTrack* makeTrack(const tvector&) const;
 
+    ///The derived class is responsible for ordering the detectors apporpriately.
+    virtual void addLayer(StiDetector*) = 0;
+    
 protected:
+    
     //Shallow members
+    StiDetectorContainer* mDetStore;
     StiHitContainer* mhitstore;
-    combo_iterator miterator;
-    StiObjectFactoryInterface<StiKalmanTrack>* mtrackfactory;
-    int mnlayers;
     StiRootDrawableHits* mdrawablehits;
     Sti2HitComboFilter* mhitcombofilter;
 
+private:
+    //The following are not implemented
+    StiTrackSeedFinder();
 };
 
 // Non members ---
@@ -108,11 +91,6 @@ inline void StiTrackSeedFinder::setHitComboFilter(Sti2HitComboFilter* val)
 inline const Sti2HitComboFilter* StiTrackSeedFinder::getHitComboFilter() const
 {
     return mhitcombofilter;
-}
-
-inline void StiTrackSeedFinder::setFactory(StiObjectFactoryInterface<StiKalmanTrack>* val)
-{
-    mtrackfactory=val;
 }
 
 #endif
