@@ -1,4 +1,6 @@
+#include <math.h>
 #include "StDstPointChair.h"
+
 ClassImp(StDstPointChair)
 
 //________________________________________________________________________________

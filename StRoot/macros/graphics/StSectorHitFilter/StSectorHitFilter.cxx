@@ -216,6 +216,7 @@ Int_t StSectorHitFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_
             (*m_Primtrk)[track[rowNumber].id] < 0) colorIndex = kBlue;
         // style = 6;
         // size = 1.6;
+        printf(" Track id = %d \n",int(track[rowNumber].id)); 
         return colorIndex;     
      }
    }

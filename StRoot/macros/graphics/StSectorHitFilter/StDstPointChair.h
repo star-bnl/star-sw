@@ -72,7 +72,7 @@ class StDstPointChair : public TChair {
     void            SetMaxRange(Float_t maxRange);
     void            SetDetectorRange(Long_t hwPosition);
 
-    dst_point_st   *Table(Int_t i=0) const;
+    dst_point_st   *GetTable(Int_t i=0) const;
 
     Float_t         GetRealPoint(Long_t unPackgedPoint) const;
     Float_t         GetRealError(Long_t unPackgedPoint) const;
@@ -82,10 +82,10 @@ class StDstPointChair : public TChair {
 };
 
 //______________________________________________________________
-inline dst_point_st &StDstPointChair::operator[](Int_t i){return *Table(i);}
+inline dst_point_st &StDstPointChair::operator[](Int_t i){return *GetTable(i);}
 
 //______________________________________________________________
-inline Float_t  StDstPointChair::Factor(Float_t &range,Int_t &errF,const Char_t *name) 
+inline Float_t  StDstPointChair::Factor(Float_t &range,Float_t &errF,const Char_t *name) 
                 {  return Factor(range,errF,DetectId(name));        }
 
 //______________________________________________________________
@@ -136,24 +136,24 @@ inline void     StDstPointChair::SetMaxRange(Float_t maxRange)
 inline void     StDstPointChair::SetDetectorId(Int_t detId)     
                 {m_DetectorId = detId;}
 //______________________________________________________________
-inline dst_point_st *StDstPointChair::Table(Int_t i) const 
+inline dst_point_st *StDstPointChair::GetTable(Int_t i) const 
                     {
                       if (m_LastIndx != i) {
                         ((StDstPointChair *)this)->m_LastIndx = i;
                         ((StDstPointChair *)this)->m_LastRow = 
-                             ((St_dst_point *)GetTable())->GetTable(i);
+                             ((St_dst_point *)GetThisTable())->GetTable(i);
                       }
                       return m_LastRow; 
                     }
 //______________________________________________________________
 inline UShort_t StDstPointChair::DetectorId(Int_t i) const 
-                {return UpckDetectorId(Table(i)->hw_position);}
+                {return UpckDetectorId(GetTable(i)->hw_position);}
 //______________________________________________________________
 inline UShort_t StDstPointChair::Sector(Int_t i)   const 
-                { return UpckSec(Table(i)->hw_position);}
+                { return UpckSec(GetTable(i)->hw_position);}
 //______________________________________________________________
 inline UShort_t StDstPointChair::PadRow(Int_t i)   const 
-                { return UpckRow(Table(i)->hw_position);}
+                { return UpckRow(GetTable(i)->hw_position);}
 //______________________________________________________________
 inline void     StDstPointChair::SetDetectorRange(Long_t hwPosition) {
                   Int_t detId = UpckDetectorId(hwPosition);
@@ -174,21 +174,21 @@ inline ULong_t  StDstPointChair::UpckZ(const Long_t *position)
 //______________________________________________________________
 inline Float_t  StDstPointChair::GetX(Int_t i)           const
 {
-  dst_point_st *row = Table(i);
+  dst_point_st *row = GetTable(i);
   ((StDstPointChair *)this)->SetDetectorRange(row->hw_position);
   return GetRealPoint(UpckX(row->position));
 }
 //______________________________________________________________
 inline Float_t  StDstPointChair::GetY(Int_t i)           const
 {
-  dst_point_st *row = Table(i);
+  dst_point_st *row = GetTable(i);
   ((StDstPointChair *)this)->SetDetectorRange(row->hw_position);
   return GetRealPoint(UpckY(row->position));
 }
 //______________________________________________________________
 inline Float_t  StDstPointChair::GetZ(Int_t i)           const
 {
-  dst_point_st *row = Table(i);
+  dst_point_st *row = GetTable(i);
   ((StDstPointChair *)this)->SetDetectorRange(row->hw_position);
   return GetRealPoint(UpckZ(row->position));
 }
@@ -196,21 +196,21 @@ inline Float_t  StDstPointChair::GetZ(Int_t i)           const
 //______________________________________________________________
 inline Float_t  StDstPointChair::GetXError(Int_t i)      const
 {
-  dst_point_st *row = Table(i);
+  dst_point_st *row = GetTable(i);
   ((StDstPointChair *)this)->SetDetectorRange(row->hw_position);
   return GetRealError(UpckX(row->position));
 }
 //______________________________________________________________
 inline Float_t  StDstPointChair::GetYError(Int_t i)      const
 {
-  dst_point_st *row = Table(i);
+  dst_point_st *row = GetTable(i);
   ((StDstPointChair *)this)->SetDetectorRange(row->hw_position);
   return GetRealError(UpckY(row->position));
 }
 //______________________________________________________________
 inline Float_t  StDstPointChair::GetZError(Int_t i)       const
 {
-  dst_point_st *row = Table(i);
+  dst_point_st *row = GetTable(i);
   ((StDstPointChair *)this)->SetDetectorRange(row->hw_position);
   return GetRealError(UpckZ(row->position));
 }
