@@ -1,10 +1,16 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.26 2000/12/08 06:32:48 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.27 2000/12/08 14:59:41 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.27  2000/12/08 14:59:41  horsley
+ * thepids is now passed by reference
+ * fillCorrectedNtuple now uses the particledefinition->pdgEncoding()
+ * TpcHitVectorUtilites function commented out due to micro dst tpc hit
+ * problem
+ *
  * Revision 2.26  2000/12/08 06:32:48  lasiuk
  * fillcorrectedNtuple (ifdefs)
  *
@@ -215,7 +221,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.26 2000/12/08 06:32:48 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.27 2000/12/08 14:59:41 horsley Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -2658,7 +2664,7 @@ void StRichPIDMaker::fillHitNtuple(const StSPtrVecRichHit* hits,
       //
       // need to get the last entry in the list
       //
-      StSPtrVecRichPid thepids = pidTrait->getAllPids();
+      StSPtrVecRichPid& thepids = pidTrait->getAllPids();
       for (size_t pidcounter=0;pidcounter<thepids.size();pidcounter++) {
 	if (thepids[pidcounter]->getRingType()==pion)  {
 	  pionPid   = thepids[pidcounter]; 
@@ -3334,7 +3340,7 @@ StRichPIDMaker::fillPIDNtuple() {
       //
       // need to get the last entry in the list
       //
-      StSPtrVecRichPid thepids = pidTrait->getAllPids();
+      StSPtrVecRichPid& thepids = pidTrait->getAllPids();
       for (size_t pidcounter=0;pidcounter<thepids.size();pidcounter++) {
 	if (thepids[pidcounter]->getRingType()==pion)   pionPid   = thepids[pidcounter]; 
 	if (thepids[pidcounter]->getRingType()==kaon)   kaonPid   = thepids[pidcounter]; 
@@ -3342,13 +3348,13 @@ StRichPIDMaker::fillPIDNtuple() {
       }
       
 
-      util->clear();
-      util->setTrack(track->getStTrack());
-      util->findHits();
-      util->sortTpcHitVecZ();
+      //util->clear();
+      //util->setTrack(track->getStTrack());
+      //util->findHits();
+      //util->sortTpcHitVecZ();
       
-      double posZ = util->numberOfHitsInZTrack(0,200);
-      double negZ = util->numberOfHitsInZTrack(-200,0);
+      double posZ = 0;//util->numberOfHitsInZTrack(0,200);
+      double negZ = 0;//util->numberOfHitsInZTrack(-200,0);
       
       double PionTotalArea         = 0;
       double PionConstantArea      = 0;
@@ -3560,11 +3566,11 @@ StRichPIDMaker::fillPIDNtuple() {
 
 void StRichPIDMaker::initNtuples() {
 #ifdef  myRICH_WITH_NTUPLE
-//     char finalname[200];
-//     sprintf(finalname,"%s.root",mySaveDirectory);
-//     file = new TFile(finalname,"RECREATE");
-
-    file = new TFile("/star/rcf/scratch/lasiuk/exb/dtuplerev.root","RECREATE");
+  char finalname[200];
+  sprintf(finalname,"%s.root",mySaveDirectory);
+  file = new TFile(finalname,"RECREATE");
+  
+  //file = new TFile("/star/rcf/scratch/lasiuk/ex","RECREATE");
     file->SetFormat(1);
 
     distup = new TNtuple("dist","b","xi:yi:xo:yo:si:ld:d:oldd:oldsig:oldsi:phx:phy:x:y:px:py:pz:theta:evt:numb:resx:resy:res:ring:cos:d2siline:p:q:vtx:refit:constang:energyloss");
@@ -3572,9 +3578,10 @@ void StRichPIDMaker::initNtuples() {
 
     trackNtuple = new TNtuple("trackNtuple","trackwise tuple","evtn:nprimaries:nnegprimaries:posz:negz:vz:nrichtracks:globalp:globalpt:globalpx:globalpy:globalpz:localpx:localpy:localpz:eta:q:amipq:amipx:amipy:pmipx:pmipy:radx:rady:oradx:orady:otheta:ophi:ctbx:ctby:ctbz:firstrow:lastrow:lasthitx:lasthity:lasthitz:lasthitdca:pathlength:maxchain:maxgap:theta:phi:tpchits:tpcfitpoints:pionfactor:piontotalarea:pionconstarea:piontotalangle:pionconstangle:piontotalhits:pionconsthits:kaonfactor:kaontotalarea:kaonconstarea:kaontotalangle:kaonconstangle:kaontotalhits:kaonconsthits:protonfactor:protontotalarea:protonconstarea:protontotalangle:protonconstangle:protontotalhits:protonconsthits:innerwave:outerwave");
 
-#ifdef myRICH_WITH_MC
+
     trackCorrectedNtuple = new TNtuple("trackCorrectedNtuple","","vertz:prims:gpx:gpy:gpz:lpx:lpy:lpz:clpx:clpy:clpz:eta:q:amipq:amipx:amipy:cpmipx:cpmipy:cradx:crady:radx:rady:pmipx:pmipy:lastx:lasty:lastz:nhits:nfits:pifact:pitotarea:piconstarea:pitotang:piconstang:pitothits:piconsthits:kafact:katotarea:kaconstarea:katotang:kaconstang:katothits:kaconsthits:prfact:prtotarea:prconstarea:prtotang:prconstang:prtothits:prconsthits:pichits:picthits:kachits:kacthits:prchits:prcthits:inwave:outwave:gradx:grady:mass");
-    
+
+#ifdef myRICH_WITH_MC    
     geantTrackNtuple = new TNtuple("geantTrackNtuple","geant trackwise tuple",
 				 "evtn:nprimaries:nnegprimaries:vz:nrichtracks:globalpx:globalpy:globalpz:localpx:localpy:localpz:eta:q:amipid:amipproc:amipq:amipx:amipy:amipnpads:pmipx:pmipy:gmipid:gmipproc:gmipq:gmipx:gmipy:gmipnpads:radx:rady:oradx:orady:olocalpx:olocalpy:olocalpz:firstrow:lastrow:lasthitx:lasthity:lasthitz:lasthitdca:pathlength:maxchain:maxgap:tpchits:tpcfitpoints:innerwave:outerwave:glocalpx:glocalpy:glocalpz:gradx:grady:geantmipx:geantmipy:gstopvertx:gstopverty:gstopvertz:gphots:grecophots:gradhits:gtpccommonhits:gglobalpx:gglobalpy:gglobalpz:gid:gstopproc:gnpartners:pionfactor:piontotalarea:pionconstarea:piontotalangle:pionconstangle:piontotalhits:pionconsthits:kaonfactor:kaontotalarea:kaonconstarea:kaontotalangle:kaonconstangle:kaontotalhits:kaonconsthits:protonfactor:protontotalarea:protonconstarea:protontotalangle:protonconstangle:protontotalhits:protonconsthits");
 
@@ -3892,20 +3899,20 @@ void StRichPIDMaker::fillCorrectedNtuple() {
     StRichTrack* track = mListOfStRichTracks[trackIndex];
 #endif    
     if (track) {
-      int PionTotalHits = track->getOrigTotHits(pion->mass());
-      int PionConstantHits = track->getOrigConstHits(pion->mass());
-      int pioncHits = track->getNewTotHits(pion->mass());
-      int pionctHits = track->getNewConstHits(pion->mass());
+      int PionTotalHits = track->getOrigTotHits(pion->pdgEncoding());
+      int PionConstantHits = track->getOrigConstHits(pion->pdgEncoding());
+      int pioncHits = track->getNewTotHits(pion->pdgEncoding());
+      int pionctHits = track->getNewConstHits(pion->pdgEncoding());
       
-      int KaonTotalHits = track->getOrigTotHits(kaon->mass());
-      int KaonConstantHits = track->getOrigConstHits(kaon->mass());
-      int kaoncHits = track->getNewTotHits(kaon->mass());
-      int kaonctHits = track->getNewConstHits(kaon->mass());
+      int KaonTotalHits = track->getOrigTotHits(kaon->pdgEncoding());
+      int KaonConstantHits = track->getOrigConstHits(kaon->pdgEncoding());
+      int kaoncHits = track->getNewTotHits(kaon->pdgEncoding());
+      int kaonctHits = track->getNewConstHits(kaon->pdgEncoding());
       
-      int ProtonTotalHits = track->getOrigTotHits(proton->mass());
-      int ProtonConstantHits = track->getOrigConstHits(proton->mass());
-      int protoncHits = track->getNewTotHits(proton->mass());
-      int protonctHits = track->getNewConstHits(proton->mass());
+      int ProtonTotalHits = track->getOrigTotHits(proton->pdgEncoding());
+      int ProtonConstantHits = track->getOrigConstHits(proton->pdgEncoding());
+      int protoncHits = track->getNewTotHits(proton->pdgEncoding());
+      int protonctHits = track->getNewConstHits(proton->pdgEncoding());
 
       StThreeVectorF mip;
       
