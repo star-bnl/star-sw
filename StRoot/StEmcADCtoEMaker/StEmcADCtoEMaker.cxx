@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.26 2001/12/27 17:45:36 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.27 2001/12/28 15:03:09 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.27  2001/12/28 15:03:09  suaide
+// fixed documentation
+//
 // Revision 1.26  2001/12/27 17:45:36  suaide
 // removed obsolete files and updated documentation
 //
@@ -58,7 +61,7 @@ ClassImp(StEmcADCtoEMaker)
 
 //_____________________________________________________________________________
 /* 
-Default constructor
+Default constructor. Set Initial values for some variables
 */
 StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
 {
