@@ -1,5 +1,11 @@
-// $Id: StFtpcTrackMaker.h,v 1.8 2002/10/31 13:41:16 oldi Exp $
+// $Id: StFtpcTrackMaker.h,v 1.9 2002/11/06 13:46:54 oldi Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.9  2002/11/06 13:46:54  oldi
+// Vertex handling simplifed.
+// Global/primary fit handling simplified.
+// Vertex estimations only calculated if a vertex was used for tracking.
+// Code clean ups.
+//
 // Revision 1.8  2002/10/31 13:41:16  oldi
 // Histograms for vertex estimation for different sectors added.
 //
@@ -97,9 +103,8 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  Make();                                           // actual program
            Int_t  Finish();                                         // final cleanup
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.8 2002/10/31 13:41:16 oldi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.9 2002/11/06 13:46:54 oldi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
-           void   MakeHistograms();                                 // makes histograms
 	   void   MakeHistograms(StFtpcTracker *tracker);           // makes histograms
 
 
