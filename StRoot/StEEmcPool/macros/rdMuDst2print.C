@@ -7,11 +7,15 @@ int rdMuDst2print(
 	  char* file    = "R50530.MuDst.root",
 	  Int_t nFiles  = 1, 
 	  char* inDir   = "./",
-	  int nEve=1)
+	  int nEve=100)
 { 
 
   //file    = "R5086033e.MuDst.root";
   file    = "R5015034x.MuDst.root";
+
+  inDir  = "/star/data05/scratch/balewski/outProd/R5086037/";
+  file="st_physics_5086037_raw_4040001-1*.MuDst.root";
+
 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
@@ -22,7 +26,7 @@ int rdMuDst2print(
   chain = new StChain("StChain"); 
   
 // Now we add Makers to the chain...   
-  muDstMaker = new StMuDstMaker(0,0,inDir,file,"MuDst.root",nFiles);
+  muMk = new StMuDstMaker(0,0,inDir,file,"MuDst.root",nFiles);
   
   chain->Init();
   chain->ls(3);
@@ -35,16 +39,23 @@ int rdMuDst2print(
     if(eventCounter>=nEve) break;
     chain->Clear();
     stat = chain->Make();
-    printf("\n\n ==================== processing event# %d ==============\n", eventCounter++);
+
+    // Access to muDst .......................
+    StMuEvent* muEve = muMk->muDst()->event();
+    int nPrim = muMk->muDst()->primaryTracks()->GetEntries();  // get number of primary tracks
+    StEventInfo &info=muEve->eventInfo();
+    
+
+    printf("\n\n ====================%d  processing eventID %d nPrim=%d ==============\n", eventCounter++,info.id(),nPrim);
  
-    StMuEmcCollection* emc = muDstMaker->muDst()->emcCollection();
+    StMuEmcCollection* emc = muMk->muDst()->emcCollection();
     if (!emc) {
       printf(" No EMC data for this event\n");
       return kStOK;
     }
-    printEEtower(emc);
-    printEEpre(emc);
-    printEEsmd(emc);
+    // printEEtower(emc);
+    // printEEpre(emc);
+    // printEEsmd(emc);
     
   }
   
