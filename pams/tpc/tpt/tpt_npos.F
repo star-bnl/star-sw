@@ -22,13 +22,6 @@ C***y positions of first/last padrow
 
 C*** z position of padplane
       zpl = 210.
-
-      
-C***  Clear variables
-      DO i=1,8
-         x(i) = 0.
-         y(i) = 0.
-      ENDDO
       
 C***  Rotate track so its sector pads are normal to y-axis
 C***  Watch out. This is not as trivial as it seems.
@@ -47,6 +40,13 @@ C***  Loop over three adjacent sectors
       trk(2) = trk(2) - 2.*0.5236
       trk(4) = trk(4) - 2.*0.5236
       DO 75 l=1,3
+
+C***  Clear variables
+         DO i=1,8
+            x(i) = 0.
+            y(i) = 0.
+         ENDDO
+
          trk(2) = trk(2) + 0.5236
          trk(4) = trk(4) + 0.5236
          call nmax_circle_param(trk,xc,rr,bf)         
@@ -106,6 +106,7 @@ C***  Second pair
 C***  Arrange possible solutions in increasing y-order
          
          DO 45 i=1,8
+            hit(i)=0.
             IF( (trk(5).ne.0.).and.
      +          (y(i).gt.((zpl-abs(trk(3)))/abs(trk(5)))) 
      +        ) THEN
@@ -167,7 +168,7 @@ C-SM      iflag=0
 C-SM      CALL nmax_track_mom(trk,r,iflag,p,beta)
       CALL nmax_track_mom(trk,r,p,beta)
 C--------find the two possible solutions------------------------------
-      IF(p(1).lt.0.001) p(1)=0.001
+      IF(abs(p(1)).lt.0.001) p(1)=0.001
       a=p(2)/p(1)
       b = sqrt( r*r/(a*a+1) )
 C     yt1= b + y
