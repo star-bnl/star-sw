@@ -1,9 +1,12 @@
-* $Id: tpt_helix_pred.F,v 1.2 1998/01/27 00:35:48 fisyak Exp $
+* $Id: tpt_helix_pred.F,v 1.3 1998/03/23 18:25:59 sakrejda Exp $
 * $Log: tpt_helix_pred.F,v $
+* Revision 1.3  1998/03/23 18:25:59  sakrejda
+* tpg_pad-plane removed from the tpt module, it was not used there anyway
+*
 * Revision 1.2  1998/01/27 00:35:48  fisyak
 * Split sources
 *
-      INTEGER FUNCTION TPT_HELIX_PRED(itrk,pad_pl_h,pad_pl,trk,isect,
+      INTEGER FUNCTION TPT_HELIX_PRED(itrk,trk,isect,
      >                                irow,tpar_h,tpar,np,xp,yp,ipass)
 C>--------------------------------------------------------------------
 C
@@ -23,8 +26,6 @@ C  irow     - row number for the crossings
 C  trk      - structure of reconstructed segments
 C  tpar_h    - header for the tptpar (tracking parameters) table
 C  tpar     - tracking parameters table
-C  pad_pl_h  - header for the pad_plane (pad_plane geometry) table
-C  pad_pl   - pad_plane geometry table
 C
 C OUTPUT ARGUMENTS:
 C  np        - number of crossings within sector
@@ -42,15 +43,12 @@ C
       IMPLICIT NONE
 #include "PAM.inc"
 
-#include "tpg_pad_plane.inc"
 #include "tpt_pointers.inc"
 #include "tpt_pars.inc"
 
       RECORD /table_head_st/    tpar_h
-      RECORD /tpt_pars_st/    tpar(*)
+      RECORD /tpt_pars_st/      tpar(*)
       RECORD /track_pointers/   trk(*)
-      RECORD /table_head_st/    pad_pl_h
-      RECORD /tpg_pad_plane_st/ pad_pl
 C______________________________________________________________________
 
       INTEGER tgc_row_par,tpt_circle_pred

@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.6 1998/03/17 16:58:26 sakrejda Exp $
+* $Id: tpt.F,v 1.7 1998/03/23 18:25:51 sakrejda Exp $
 * $Log: tpt.F,v $
+* Revision 1.7  1998/03/23 18:25:51  sakrejda
+* tpg_pad-plane removed from the tpt module, it was not used there anyway
+*
 * Revision 1.6  1998/03/17 16:58:26  sakrejda
 * initialisation of track# and sector flag cleanup put in one loop
 *
@@ -12,8 +15,7 @@
 * Revision 1.2  1998/01/27 00:35:42  fisyak
 * Split sources
 *
-      INTEGER FUNCTION TPT(tpar_h,tpar,pad_pl_h,pad_pl,
-     >                               hit_h,hit,track_h, track)
+      INTEGER FUNCTION TPT(tpar_h,tpar,hit_h,hit,track_h,track)
 C
 C TPT - main track finding 
 C
@@ -28,8 +30,6 @@ C
 C INPUT ARGUMENTS:
 C  tpar_h    - header for the tptpar (tracking parameters) table
 C  tpar     - tracking parameters table
-C  pad_pl_h  - header for the pad_plane (pad_plane geometry) table
-C  pad_pl   - pad_plane geometry table
 C  hit_h     - header for the tphit (tpc hits) table
 C  hit      - rows of the tphit table
 C
@@ -168,7 +168,7 @@ C     First do segment formation with the conformal mapping.
       call timed(time_now)
       time_all = time_all + time_now
       iret=tpt_form_segments(hit_h,hit,track_h,track,tpar_h,tpar,
-     >                pad_pl_h,pad_pl,loc_hit,tpstart,tpcount,trk,
+     >                loc_hit,tpstart,tpcount,trk,
      >                next_hit,slice_loc,slice_pnt,ipass,1.0)
       call timed(time_now)
       time_all = time_all + time_now
@@ -180,7 +180,7 @@ C     Then do the regular segment formation from what is left out.
             time_all = time_all + time_now
             iret=tpt_form_segments(hit_h,hit,track_h,track,
      >                  tpar_h,tpar,
-     >                  pad_pl_h,pad_pl,loc_hit,tpstart,tpcount,trk,
+     >                  loc_hit,tpstart,tpcount,trk,
      >                  next_hit,slice_loc,slice_pnt,ipass,0.0)
             call timed(time_now)
             time_all = time_all + time_now
@@ -200,7 +200,7 @@ C             extend track segments crossing the sector boundries
               call timed(time_now)
               time_all = time_all + time_now
               iret=tpt_extend_segments(hit_h,hit,track_h,track,
-     >                         tpar_h,tpar,pad_pl_h,pad_pl,trk,
+     >                         tpar_h,tpar,trk,
      >                         next_hit,slice_loc,slice_pnt,
      >                         0,ipass)
               call timed(time_now)
@@ -256,21 +256,19 @@ C     Set up tables so that hit could be found within rows and sectors
             endif
         endif
       iret=tpt_form_segments(hit_h,hit,track_h,track,tpar_h,tpar,
-     >                pad_pl_h,pad_pl,loc_hit,tpstart,tpcount,trk,
+     >                loc_hit,tpstart,tpcount,trk,
      >                next_hit,slice_loc,slice_pnt,ipass,1.0)
       call timed(time_now)
       write(6,*) 'second pass', track_h.nok,'time_now',time_now
       if(tpar(ipass).form_xy.eq.1) then
 C     Then do the regular segment formation from what is left out.
             iret=tpt_form_segments(hit_h,hit,track_h,track,tpar_h,
-     >                   tpar,
-     >                   pad_pl_h,pad_pl,loc_hit,tpstart,tpcount,
-     >                   trk,
+     >                   tpar,loc_hit,tpstart,tpcount,trk,
      >                   next_hit,slice_loc,slice_pnt,ipass,0.0)
       if(tpar(ipass).extend.eq.1) then
 C        extend track segments crossing the sector boundries
          iret=tpt_extend_segments(hit_h,hit,track_h,track,
-     >                         tpar_h,tpar,pad_pl_h,pad_pl,trk,
+     >                         tpar_h,tpar,trk,
      >                         next_hit,slice_loc,slice_pnt,
      >                         last_track,ipass)
       endif

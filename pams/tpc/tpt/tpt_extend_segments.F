@@ -1,10 +1,13 @@
-* $Id: tpt_extend_segments.F,v 1.2 1998/01/27 00:35:44 fisyak Exp $
+* $Id: tpt_extend_segments.F,v 1.3 1998/03/23 18:25:55 sakrejda Exp $
 * $Log: tpt_extend_segments.F,v $
+* Revision 1.3  1998/03/23 18:25:55  sakrejda
+* tpg_pad-plane removed from the tpt module, it was not used there anyway
+*
 * Revision 1.2  1998/01/27 00:35:44  fisyak
 * Split sources
 *
       INTEGER FUNCTION TPT_EXTEND_SEGMENTS(hit_h,hit,track_h,track,
-     >                             tpar_h,tpar,pad_pl_h,pad_pl,trk,
+     >                             tpar_h,tpar,trk,
      >                             next_hit,slice_loc,slice_pnt,
      >                             last_track,ipass)
 C>--------------------------------------------------------------------
@@ -24,8 +27,6 @@ C  track_h   - header for the tptrack (reconstructed tracks) table
 C  track    - rows of the tptrack table
 C  tpar_h    - header for the tptpar (tracking parameters) table
 C  tpar     - tracking parameters table
-C  pad_pl_h  - header for the pad_plane (pad_plane geometry) table
-C  pad_pl   - pad_plane geometry table
 C  loc_hit  - pointers to the tphit table sorted according to the
 C             row/sec field
 C  tpstart  - pointers to first hits in every row/sector
@@ -50,8 +51,6 @@ C
 #include "tpt_pars.inc"
 #include "tpt_track.inc"
 #include "tcl_tphit.inc"
-#include "tpg_pad_plane.inc"
-
 #include "tpt_pointers.inc"
 #include "tpt_mxdim.inc"
 #include "tpt_mxhit.inc"
@@ -63,8 +62,6 @@ C______________________________________________________________________
       RECORD /tpt_track_st/     track(*)
       RECORD /table_head_st/    hit_h
       RECORD /tcl_tphit_st/     hit(*)
-      RECORD /table_head_st/    pad_pl_h
-      RECORD /tpg_pad_plane_st/ pad_pl
       RECORD /track_pointers/   trk(*)
 C_____________________________________________________________________
 C
@@ -134,7 +131,7 @@ C              mark all the points on this track as used
      >            abs(hit(trk(ipos).ipnt(j)).track)
                end do
                iret = tpt_project(ipos,hit_h,hit,track_h,track,
-     >                tpar_h,tpar,pad_pl_h,pad_pl,trk,next_hit,
+     >                tpar_h,tpar,trk,next_hit,
      >                slice_loc,slice_pnt,ipass)
 C              mark candidate as used
                tmp(ipos) = -1.0

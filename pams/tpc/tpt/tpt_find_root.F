@@ -1,10 +1,13 @@
-* $Id: tpt_find_root.F,v 1.2 1998/01/27 00:35:45 fisyak Exp $
+* $Id: tpt_find_root.F,v 1.3 1998/03/23 18:25:56 sakrejda Exp $
 * $Log: tpt_find_root.F,v $
+* Revision 1.3  1998/03/23 18:25:56  sakrejda
+* tpg_pad-plane removed from the tpt module, it was not used there anyway
+*
 * Revision 1.2  1998/01/27 00:35:45  fisyak
 * Split sources
 *
-      INTEGER FUNCTION TPT_FIND_ROOT(k,hit_h,hit,tpar_h,tpar,pad_pl_h,
-     >                               pad_pl,nroot,root,next_hit,
+      INTEGER FUNCTION TPT_FIND_ROOT(k,hit_h,hit,tpar_h,tpar,
+     >                               nroot,root,next_hit,
      >                               slice_loc,slice_pnt,ipass)
 C>---------------------------------------------------------------------
 C
@@ -12,8 +15,6 @@ C TPT_FIND_ROOT - formation of the track seeds
 C
 C DESCRIPTION:
 C INPUT ARGUMENTS:
-C  pad_pl_h  - header for the pad_plane (pad_plane geometry) table
-C  pad_pl   - pad_plane geometry table
 C  tpcount  - count of hits for every row/sector
 C OUTPUT ARGUMENTS:
 C<---------------------------------------------------------------------
@@ -22,13 +23,10 @@ C Modified: 13-NOV-1997 by R.Bossingham
 C           Eliminate unused variables.
 C
       IMPLICIT NONE
-C     pad_pl_h  - header for the pad_plane (pad_plane geometry) table
-C     pad_pl   - pad_plane geometry table
 
 #include "PAM.inc"
 
 #include "tcl_tphit.inc"
-#include "tpg_pad_plane.inc"
 #include "tpt_pars.inc"
 #include "tpt_root.inc"
 #include "tpt_const.inc"
@@ -38,11 +36,9 @@ C     pad_pl   - pad_plane geometry table
 C_____________________________________________________________________
 
       RECORD /table_head_st/    tpar_h
-      RECORD /tpt_pars_st/    tpar(*)
+      RECORD /tpt_pars_st/      tpar(*)
       RECORD /table_head_st/    hit_h
       RECORD /tcl_tphit_st/     hit(*)
-      RECORD /table_head_st/    pad_pl_h
-      RECORD /tpg_pad_plane_st/ pad_pl
 C_____________________________________________________________________
 C     Local variables
       RECORD /track_root/     root(mxroot)
