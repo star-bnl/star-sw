@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.21 2003/09/02 17:58:16 perev Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.22 2003/09/29 21:37:28 oldi Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.22  2003/09/29 21:37:28  oldi
+// Small change to make it compatible with the new StFtpcTrackingParams class.
+//
 // Revision 1.21  2003/09/02 17:58:16  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -229,7 +232,8 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
   // instance tracking parameters for rotations
   StFtpcTrackingParams::Instance(kTRUE, 
 				 (St_ftpcCoordTrans *)dblocal_calibrations("ftpcCoordTrans"),
-				 GetDataBase("RunLog"));
+				 GetDataBase("RunLog"),
+				 (StBFChain*) GetChain());
   // get ftpc parameters
   St_DataSet *ftpcParsDb = GetInputDB("ftpc");
   assert(ftpcParsDb);
