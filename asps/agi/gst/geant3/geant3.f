@@ -924,7 +924,7 @@ C------------------------------------------------------------------
       CALLMESAGE(15, 7, B-3,E)
 99999 RETURN
       END
-*CMZ :  1.00/00 19/09/95  15.17.28  by  Pavel Nevski
+*CMZ :          05/08/98  23.28.15  by  Pavel Nevski
 *-- Author :
 C------------------------------------------------------------------
       SUBROUTINE DEFINE(S)
@@ -1056,6 +1056,9 @@ C   d-link all cats
          O(O(34)-J)=O(A-J)
 111   CONTINUE
       IF(O(13).GT.0)CALLMACTRC(12,0,S)
+      O(60)=193042-O(34)
+      IF (O(60) .LE. 100) PRINT *,' Geant3 warning: only ',O(60),
+     *                    ' memory left, you may get a problem'
       GOTO 99999
 50    NEED=L(1)+L(3)+2*6
       IF (NEED.GT.193042-O(34)) CALLKRUNC(2+NEED)
@@ -1107,6 +1110,8 @@ C   d-link all cats
       O(34)= P +NEED
       O(60)=193042-O(34)
       O(61)=(100*O(60))/(193042-4175)
+      IF (O(60) .LE. 100) PRINT *,' Geant3 warning: only ',O(60),
+     *                    ' memory left, you may get a problem'
 99999 RETURN
       END
 *CMZ :  1.00/00 19/09/95  15.17.28  by  Pavel Nevski
@@ -1158,7 +1163,7 @@ C----------------------------------------------------------------
 21    CONTINUE
 99999 RETURN
       END
-*CMZ :  1.00/00 19/09/95  15.17.28  by  Pavel Nevski
+*CMZ :          05/08/98  23.29.02  by  Pavel Nevski
 *-- Author :
 C------------------------------------------------------------------
       SUBROUTINE KRUNC(R)
@@ -1202,12 +1207,17 @@ C   MOVE IT
 41       CONTINUE
       GOTO 30
 31    CONTINUE
+      FRE=O(34)
       O(34)=O(34)-D
       O(O(34))=0
       IF (R.GT.D)CALLMESAGE(15, 6, 0,0)
       O(60)=193042-O(34)
-      O(61)=(100*O(60))/(193042-4175)
+      O(61)=(100*(193042-FRE))/(193042-4175)
+CPN: control space in macro buffer here ?
       IF(R.EQ.0)CALLMESAGE(13,1,D,0)
+      RT=100*(193042-FRE)/(193042-4175)
+      IF (RT .LE. 5) PRINT *,' Geant3 WARNING: only ',RT,
+     *      '% of buffer left, you may run in a problem '
 99999 RETURN
       END
 *CMZ :  1.00/00 19/09/95  15.17.28  by  Pavel Nevski
@@ -2414,7 +2424,7 @@ C ARGUMENTS are: Input string, Output string, Output lengt=
       MUSER=1
 99999 RETURN
       END
-
+ 
 *CMZ :          30/04/98  06.39.37  by  Pavel Nevski
 *-- Author :
 C------------------------------------------------------------------
