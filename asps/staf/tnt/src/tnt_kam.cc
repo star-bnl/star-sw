@@ -189,16 +189,16 @@ tntcwntuple_entrycount(long hid)
 /*---------------------------------------------------------------------
 ** TNT/CWNTUPLE/COLUMNCOUNT NTUPLE
 */
-void kam_tntcwntuple_colcount_()
+void kam_tntcwntuple_columncount_()
 {
   long npars = ku_npar();	/* no. of KUIP param.s */
   long hid = ku_geti();	/* hid of CWNtuple */
    
-  STAFCV_T status = tntcwntuple_colcount(hid);
+  STAFCV_T status = tntcwntuple_columncount(hid);
 }
 
 STAFCV_T 
-tntcwntuple_colcount(long hid)
+tntcwntuple_columncount(long hid)
 {
   tntCWNtuple *tuple = tnt->findCWNtuple(hid);
   

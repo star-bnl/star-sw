@@ -5,7 +5,7 @@
 #######################################################################
 .PHONY: all clean test help setup config install default
 #
-VERSION			:= "$Id: Makefile,v 1.6 1997/11/17 21:02:14 tull Exp $"
+VERSION			:= "$Id: Makefile,v 1.7 1997/12/22 17:46:21 tull Exp $"
 #
 default: all
 #
@@ -14,7 +14,7 @@ all: setup config inc_all src_all lib_all bin_all doc_all
 %_all:
 	@cd $*; $(MAKE) all
 #
-#?make install     - Install local files in $STAR_LIB/dev area.
+#?make install     - Install local files in $STAR_LIB area.
 install: inc_install src_install lib_install bin_install doc_install
 %_install:
 	@cd $*; $(MAKE) install

@@ -72,6 +72,28 @@ STAFCV_T ami_list()
 
 /*
 *:>---------------------------------------------------------------------
+*:ROUTINE:      void kam_amimodule_call_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* AMI/MODULE/RANK
+*:<---------------------------------------------------------------------
+*/
+void kam_amimodule_call_()
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* pname = ku_gets();	/* PAM name */
+   char **tnames;		/* array of TABLE names */
+
+   tnames = new char*[npars-1];
+   for( int np=1;np<npars;np++ ){
+      tnames[np-1] = ku_gets();
+   }
+	STAFCV_T status = ami_call(pname,npars-1,tnames);
+   delete[] tnames;
+}
+/*
+*:>---------------------------------------------------------------------
 *:ROUTINE:      void kam_ami_call_
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --
@@ -89,6 +111,9 @@ void kam_ami_call_()
    for( int np=1;np<npars;np++ ){
       tnames[np-1] = ku_gets();
    }
+	EML_CONTEXT("This is an obsolete command.\n"
+	"Please use AMI/MODULE/CALL instead.\n");
+	EML_WARNING(OBSOLETE_COMMAND);
 	STAFCV_T status = ami_call(pname,npars-1,tnames);
    delete[] tnames;
 }
@@ -114,22 +139,22 @@ STAFCV_T ami_call(char* name,long ntabs,char **tnames)
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_amiinvoker_rank_
+*:ROUTINE:      void kam_amimodule_rank_
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --
 *:RETURN VALUE: -- NONE --
 *:* AMI/MODULE/RANK PAM
 *:<---------------------------------------------------------------------
 */
-void kam_amiinvoker_rank_()
+void kam_amimodule_rank_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();	/* PAM name */
 
-	STAFCV_T status = amiinvoker_rank(name);
+	STAFCV_T status = amimodule_rank(name);
 }
 /*------------------------------------*/
-STAFCV_T amiinvoker_rank(char* name)
+STAFCV_T amimodule_rank(char* name)
 {
    amiInvoker* pam;		/* amiInvoker object */
 
@@ -142,7 +167,7 @@ STAFCV_T amiinvoker_rank(char* name)
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_amiinvoker_show_
+*:ROUTINE:      void kam_amimodule_show_
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --
 *:RETURN VALUE: -- NONE --
@@ -150,16 +175,15 @@ STAFCV_T amiinvoker_rank(char* name)
 *:<---------------------------------------------------------------------
 */
 /*=HACK========================== THIS SUBROUTINE SHOULD BE CHANGED. =*/
-void kam_amiinvoker_show_()
+void kam_amimodule_show_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();	/* PAM name */
-   char* opts = ku_gets();	/* Options */
 
-	STAFCV_T status = amiinvoker_show(name, opts);
+	STAFCV_T status = amimodule_show(name);
 }
 /*------------------------------------*/
-STAFCV_T amiinvoker_show(char* name, char* opts)
+STAFCV_T amimodule_show(char* name)
 {
    amiInvoker* pam;		/* amiInvoker object */
 
@@ -185,66 +209,66 @@ STAFCV_T amiinvoker_show(char* name, char* opts)
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_amiinvoker_init_
+*:ROUTINE:      void kam_amimodule_init_
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --
 *:RETURN VALUE: -- NONE --
 *:* AMI/MODULE/INIT PAM
 *:<---------------------------------------------------------------------
 */
-void kam_amiinvoker_init_()
+void kam_amimodule_init_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();	/* PAM name */
 
-	STAFCV_T status = amiinvoker_init(name);
+	STAFCV_T status = amimodule_init(name);
 }
 /*------------------------------------*/
-STAFCV_T amiinvoker_init(char* name)
+STAFCV_T amimodule_init(char* name)
 {
    EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_amiinvoker_start_
+*:ROUTINE:      void kam_amimodule_start_
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --
 *:RETURN VALUE: -- NONE --
 *:* AMI/MODULE/START PAM
 *:<---------------------------------------------------------------------
 */
-void kam_amiinvoker_start_()
+void kam_amimodule_start_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();	/* PAM name */
 
-	STAFCV_T status = amiinvoker_start(name);
+	STAFCV_T status = amimodule_start(name);
 }
 /*------------------------------------*/
-STAFCV_T amiinvoker_start(char* name)
+STAFCV_T amimodule_start(char* name)
 {
    EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_amiinvoker_stop_
+*:ROUTINE:      void kam_amimodule_stop_
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --
 *:RETURN VALUE: -- NONE --
 *:* AMI/MODULE/STOP PAM
 *:<---------------------------------------------------------------------
 */
-void kam_amiinvoker_stop_()
+void kam_amimodule_stop_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();	/* PAM name */
 
-	STAFCV_T status = amiinvoker_stop(name);
+	STAFCV_T status = amimodule_stop(name);
 }
 /*------------------------------------*/
-STAFCV_T amiinvoker_stop(char* name)
+STAFCV_T amimodule_stop(char* name)
 {
    EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }

@@ -12,11 +12,8 @@ ASPS := tbr ami dio dui tdm spx soc
 #USER_LIBS := -ldsu -ldsl -lasu
 #
 # Choose flags controlling make.
-DEBUG := TRUE
-IRIX := IRIX
-ifneq ($(IRIX),$(shell uname))
-SHARE := FALSE
-endif
+DEBUG := FALSE
+SHARE := TRUE
 MOTIF := TRUE
 #
 # Specify which CERN libraries against which to link.

@@ -24,5 +24,11 @@ foreach p ($pams)
 	echo "	${p}_load_ami(ami);"
 end
 echo 'return 1; }'
-echo "int ${pkg}_stop() { return 1; }"
+echo "int ${pkg}_stop() {"
+echo '	amiInvoker *i;'
+foreach p ($pams)
+	echo "	if(NULL != (i=ami->findInvoker(\"${p}\")))"
+	echo "		)ami->deleteInvoker(\"${p}\");"
+end
+echo 'return 1; }'
 #

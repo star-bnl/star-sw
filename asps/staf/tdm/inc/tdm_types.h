@@ -107,9 +107,9 @@ extern CC_P void kam_tdm_count_();
 extern CC_P void kam_tdm_list_();
 extern CC_P void kam_tdm_newdataset_();
 extern CC_P void kam_tdm_newtable_();
-extern CC_P void kam_tdm_type_list_();
-extern CC_P void kam_tdm_type_show_();
-extern CC_P void kam_tdm_type_load_();
+extern CC_P void kam_tdmtypespecifiers_list_();
+extern CC_P void kam_tdmtypespecifiers_show_();
+extern CC_P void kam_tdmtypespecifiers_load_();
 extern CC_P void kam_tdmdataset_adddataset_();
 extern CC_P void kam_tdmdataset_addtable_();
 extern CC_P void kam_tdmdataset_entrycount_();
@@ -122,7 +122,7 @@ extern CC_P void kam_tdmdataset_name_();
 extern CC_P void kam_tdmdataset_show_();
 extern CC_P void kam_tdmtable_cell_getvalue_();
 extern CC_P void kam_tdmtable_cell_putvalue_();
-extern CC_P void kam_tdmtable_colcount_();
+extern CC_P void kam_tdmtable_columncount_();
 extern CC_P void kam_tdmtable_column_code_();
 extern CC_P void kam_tdmtable_column_elcount_();
 extern CC_P void kam_tdmtable_column_find_();
@@ -144,14 +144,13 @@ extern CC_P void kam_tdmtable_typename_();
 extern CC_P STAFCV_T tdm_allocstats();
 extern CC_P STAFCV_T tdm_count();
 extern CC_P STAFCV_T tdm_list();
-extern CC_P STAFCV_T tdm_newdataset(char* name, long dim);
+extern CC_P STAFCV_T tdm_newdataset(char* name);
 extern CC_P STAFCV_T tdm_newtable(char* name, char* spec
 		, long rowcount);
-extern CC_P STAFCV_T tdm_type_list(long tid);
-extern CC_P STAFCV_T tdm_type_show(char* name);
-extern CC_P STAFCV_T tdm_type_load(char* fname);
-extern CC_P STAFCV_T tdmdataset_adddataset(char* dsname,char* name
-		, long dim);
+extern CC_P STAFCV_T tdmtypespecifiers_list(long tid);
+extern CC_P STAFCV_T tdmtypespecifiers_show(char* name);
+extern CC_P STAFCV_T tdmtypespecifiers_load(char* fname);
+extern CC_P STAFCV_T tdmdataset_adddataset(char* dsname,char* name);
 extern CC_P STAFCV_T tdmdataset_addtable(char* dsname, char* name
 		, char* spec, long rowcount);
 extern CC_P STAFCV_T tdmdataset_entrycount(char* name);
@@ -165,7 +164,7 @@ extern CC_P STAFCV_T tdmdataset_show();
 extern CC_P STAFCV_T tdmtable_cell_getvalue(char* cellSpec);
 extern CC_P STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv
 		, char **values);
-extern CC_P STAFCV_T tdmtable_colcount(char* name);
+extern CC_P STAFCV_T tdmtable_columncount(char* name);
 extern CC_P STAFCV_T tdmtable_column_code();
 extern CC_P STAFCV_T tdmtable_column_elcount();
 extern CC_P STAFCV_T tdmtable_column_find();
@@ -180,7 +179,7 @@ extern CC_P STAFCV_T tdmtable_print(char* name, long nrows
 		, long ifirst);
 extern CC_P STAFCV_T tdmtable_rowcount(char* name, long rowcount);
 extern CC_P STAFCV_T tdmtable_rowsize(char* name);
-extern CC_P STAFCV_T tdmtable_show(char* name, char* option);
+extern CC_P STAFCV_T tdmtable_show(char* name);
 extern CC_P STAFCV_T tdmtable_specifier(char* name);
 extern CC_P STAFCV_T tdmtable_typename(char* name);
 

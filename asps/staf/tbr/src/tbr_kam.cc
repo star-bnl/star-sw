@@ -69,20 +69,20 @@ STAFCV_T tbr_list()
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_tbr_motif_viewdataset_
+*:ROUTINE:      void kam_tbr_viewdataset_
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --
 *:RETURN VALUE: -- NONE --
 *:* TBR/LAUNCH
 *:<---------------------------------------------------------------------
 */
-void kam_tbr_motif_viewdataset_()
+void kam_tbr_viewdataset_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
 
-        STAFCV_T status = tbr_motif_viewdataset();
+        STAFCV_T status = tbr_viewdataset();
 }
-STAFCV_T tbr_motif_viewdataset()
+STAFCV_T tbr_viewdataset()
 {
    if( !tbr_MotifViewer->viewDataset(dui->rootDO()) ){
       EML_ERROR(KAM_METHOD_FAILURE);

@@ -68,12 +68,11 @@ void kam_soc_release_()
 {
    long npars = ku_npar();	/* number of KUIP parameters */
    char* aspName = ku_gets();	/* ASP name */
-   char* solibName = ku_gets();	/* shared library */
 
-   STAFCV_T status = soc_release(aspName,solibName);
+   STAFCV_T status = soc_release(aspName);
 }
 
-STAFCV_T soc_release(char * aspName, char* solibName)
+STAFCV_T soc_release(char * aspName)
 {
    if( 0 != soc->release(aspName) ){
       EML_SUCCESS(STAFCV_OK);
@@ -220,10 +219,37 @@ void kam_soc_deleteid_()
    long npars = ku_npar();	/* number of KUIP parameters */
    long id = ku_geti();		/* object id */
 
+   EML_CONTEXT("This is a functional, though obsolete command.\n"
+   "Please use SOC/DELETEOID instead.\n");
+   EML_WARNING(OBSOLETE_COMMAND);
+
    STAFCV_T status = soc_deleteid(id);
 }
 
 STAFCV_T soc_deleteid(long id)
+{
+   soc->deleteID(id);
+   EML_SUCCESS(STAFCV_OK);
+}
+
+/*
+*:>---------------------------------------------------------------------
+*:ROUTINE:      void kam_soc_deleteoid_
+*:DESCRIPTION:  KUIP Action Module to delete object #id
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* SOC/CATALOG/DELETEOBJECT NAME [ TYPE ]
+*:<---------------------------------------------------------------------
+*/
+void kam_soc_deleteoid_()
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   long id = ku_geti();		/* object id */
+
+   STAFCV_T status = soc_deleteoid(id);
+}
+
+STAFCV_T soc_deleteoid(long id)
 {
    soc->deleteID(id);
    EML_SUCCESS(STAFCV_OK);
@@ -243,6 +269,10 @@ void kam_soc_deleteobject_()
    long npars = ku_npar();	/* number of KUIP parameters */
    char* name = ku_gets();	/* object name */
    char* type = ku_gets();	/* object type */
+
+   EML_CONTEXT("This is a functional, though obsolete command.\n"
+   "Please use SOC/OBJECT/DELETE instead.\n");
+   EML_WARNING(OBSOLETE_COMMAND);
 
    STAFCV_T status = soc_deleteobject(name, type);
 }
@@ -389,7 +419,7 @@ void kam_socobject_implements_()
 {
    long npars = ku_npar();	/* number of KUIP parameters */
    long idref = ku_geti();	/* idRef of object */
-   char* iface = ku_gets();	/* lock value */
+   char* iface = ku_gets();	/* interface name */
 
    STAFCV_T status = socobject_implements(idref,iface);
 }
@@ -415,6 +445,58 @@ STAFCV_T socobject_implements(long idref, char* iface)
    }
    FREE(n);
 
+   EML_SUCCESS(STAFCV_OK);
+}
+
+/*
+*:>---------------------------------------------------------------------
+*:ROUTINE:      void kam_socobject_delete_
+*:DESCRIPTION:  KUIP Action Module to delete object
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* SOC/OBJECT/DELETE NAME [ TYPE ]
+*:<---------------------------------------------------------------------
+*/
+void kam_socobject_delete_()
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* name = ku_gets();	/* object name */
+   char* type = ku_gets();	/* object type */
+
+   STAFCV_T status = socobject_delete(name, type);
+}
+
+STAFCV_T socobject_delete(char* name, char* type)
+{
+   soc->deleteObject(name,type);
+   EML_SUCCESS(STAFCV_OK);
+}
+
+/*
+*:>---------------------------------------------------------------------
+*:ROUTINE:      void kam_socobject_oid_
+*:DESCRIPTION:  KUIP Action Module to identify object
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* SOC/CATALOG/FINDOBJECT NAME [ TYPE ]
+*:<---------------------------------------------------------------------
+*/
+void kam_socobject_oid_()
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* name = ku_gets();	/* object name */
+   char* type = ku_gets();	/* object type */
+
+   STAFCV_T status = socobject_oid(name, type);
+}
+
+STAFCV_T socobject_oid(char* name, char* type)
+{
+   IDREF_T id;
+   if( !soc->idObject(name,type,id) ){
+      EML_FAILURE(KAM_INVALID_IDREF);
+   }
+   printf("SOC:\tObject idRef =  %d \n",id);
    EML_SUCCESS(STAFCV_OK);
 }
 

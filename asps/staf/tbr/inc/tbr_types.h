@@ -39,12 +39,12 @@ extern CC_P void tbr_def_();
 #ifndef NOKUIP
 extern CC_P void kam_tbr_count_();
 extern CC_P void kam_tbr_list_();
-extern CC_P void kam_tbr_motif_viewdataset_();
+extern CC_P void kam_tbr_viewdataset_();
 #endif /*NOKUIP*/
 
 extern CC_P STAFCV_T tbr_count();
 extern CC_P STAFCV_T tbr_list();
-extern CC_P STAFCV_T tbr_motif_viewdataset();
+extern CC_P STAFCV_T tbr_viewdataset();
 
 #endif /* TBR_TYPES_H */
 

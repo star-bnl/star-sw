@@ -9,7 +9,7 @@ endif
 #
 .PHONY: all clean test help install default
 #
-VERSION                 := "$Id: Makefile,v 1.5 1997/12/12 20:00:31 tull Exp $"
+VERSION                 := "$Id: Makefile,v 1.6 1997/12/22 17:48:01 tull Exp $"
 #
 default: all
 #

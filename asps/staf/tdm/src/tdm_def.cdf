@@ -1,566 +1,1301 @@
-**:Copyright 1995, Lawrence Berkeley National Laboratory
+**######################################################################
+**######################################################################
+**######################################################################
+**:Copyright 1997, Lawrence Berkeley National Laboratory
 **:>--------------------------------------------------------------------
 **:FILE:        tdm_def.cdf
-**:DESCRIPTION: Table & Dataset Memory Command Definition File 
-**:HISTORY:	30apr96-v100a-cet- Beta Release Version
-**:HISTORY:     26apr96-v003a-cet- Add many new commands
-**:HISTORY:     29nov95-v001a-cet- Update
-**:HISTORY:     18arp95-v000a-cet- Creation
+**:DESCRIPTION: Command Definition File for TDM package.
 **:<--------------------------------------------------------------------
-
+**
 >NAME TDM_DEF
-
-************************************************************************
+**
 ************************************************************************
 ** TDM
 >MENU TDM
 >GUIDANCE
-Table & Dataset Memory commands.
-$Id: tdm_def.cdf,v 1.6 1997/11/15 03:17:38 tull Exp $
+Table_and_Dataset_Memory commands.
 .
-Commands for the Table & Dataset Memory (TDM) ASP.
+ #(@)$Id: tdm_def.cdf,v 1.7 1997/12/22 17:39:42 tull Exp $
 .
-The TDM package is a C++ classs library implementation of the DSL
-Package for memory-resident datasets and tables.
+TDM is an Analysis Service Package (ASP) for the Standard Analysis
+Framework (StAF). An ASP is a package of object interfaces which plug
+into the software bus archictecture of StAF in a CORBA compliant
+interface layer.
 .
-TDM is responsible for memory allocation and management for DSL
-datasets and tables, and management of the data tictionary of table
-types.
+Each ASP is comprised of an object factory interface (eg. tdmFactory)
+and zero or more worker object interfaces.
 .
-************************************************************************
-************************************************************************
-
-** ---------------------------------------------------------------------
-** TDM/ALLOCSTATS
->COMMAND ALLOCSTATS
->PARAMETERS
->GUIDANCE
-Show DSL allocation statistics.
+TDM worker objects include:
+   tdmObject - See TDM/OBJECT
+	       - More guidance needed here.
 .
-Show the statistics for membory allocation and deallocation of DSL
-tables and datasets.
+More guidance needed here.
 .
->ACTION KAM_TDM_ALLOCSTATS
-
 ** ---------------------------------------------------------------------
 ** TDM/COUNT
 >COMMAND COUNT
 >PARAMETERS
 >GUIDANCE
-Show count of known TDM objects.
+Show the current count of TDM worker objects.
 .
-Show the number of dataset and table objects currently instantiated and
-managed by the TDM object factory.
+DESCRIPTION: 
+.
+COUNT is a readonly long attribute which reflects the number of TDM
+worker objects currently registered with the TDM object factory.
+Constructing a new TDM worker object increments COUNT by 1,
+destructing an existing TDM worker object decrements COUNT by 1.
+.
+TDM worker objects include:
+   More guidance needed here.
+.
+ARGUMENTS: 
+.
+   None.
+.
+RETURN:
+.
+   The current value of COUNT is pushed onto the STAF_RESULT stack
+   (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Show the current count of TDM worker objects.
+.
+   StAF> TDM/COUNT
+   TDM:    Object count = 18
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
 .
 >ACTION KAM_TDM_COUNT
-
+**
 ** ---------------------------------------------------------------------
 ** TDM/LIST
 >COMMAND LIST
 >PARAMETERS
 >GUIDANCE
-List all known TDM objects.
+List all currently registered TDM worker objects.
 .
-List all dataset and table objects currently instantiated and
-managed by the TDM object factory.
+DESCRIPTION: 
+.
+Show a one-line description for each TDM worker object currently
+registered with the TDM object factory in a table for quick,
+simple perusal.
+.
+The one-line description for each object is the result of an invokation
+of that object's listing method. The typical content of this listing is:
+	0> OID
+	   The object's OID attribute (see SOC) presented as "%5d".
+	1> Lock State
+           The object's LOCK attribute (see SOC) presented as the
+	   divider character between the OID column and the NAME:OBJECT
+	   column. An object whose LOCK attribute is TRUE (cannot be
+	   deleted) uses the "-" character, whereas an object whose
+	   LOCK attribute is FALSE (can be deleted) uses "|" character.
+	2> NAME:OBJECT
+	   The object's NAME attribute (see SOC) presented as "%-15s".
+	   Object names longer than 15 characters are abreviated with a
+	   "~" character at midpoint.
+	   An object name is synonymous with an object instance.
+	3> TYPE:CLASS
+	   The object's TYPE attribute (see SOC) presented as "%-15s".
+	   Object types longer than 15 characters are abreviated with a
+	   "~" character at midpoint. 
+	   An object type is synonymous with an object class.
+	4> DESCRIPTION
+	   A class-specific description of the object.
+	   More guidance needed here.
+.
+TDM worker objects include:
+   More guidance needed here.
+.
+ARGUMENTS: 
+.
+   None.
+.
+RETURN: 
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   tdmFactory::list()
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. List all currently registered TDM worker objects.
+.
+   StAF> TDM/LIST
+   +-------------------------------------------------------------------
+   |*********************** TDM - Not a valid TDM listing *************
+   +-------+-----------------+-----------------+-----------------------
+   | OID   | NAME:OBJECT     | TYPE:CLASS      | DESCRIPTION
+   +-------+-----------------+-----------------+-----------------------
+   +-------+-----------------+-----------------+-----------------------
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
 .
 >ACTION KAM_TDM_LIST
-
+**
 ** ---------------------------------------------------------------------
-** TDM/NEWDATASET NAME [ SETDIM ]
+** TDM/NEWDATASET NAME
 >COMMAND NEWDATASET
 >PARAMETERS
-NAME 'tdmDataset name.' C
-+
-DIM 'dataset dimension.' I D=100
+NAME 'Name for new tdmDataset object' C
 >GUIDANCE
-Create a new tdmDataset.
+Create a new tdmDataset object.
 .
-Create a new dataset unencapsulated by any other dataset.
+DESCRIPTION: 
+.
+Each tdmDataset created by the tdmFactory shows up as an object
+managed by the tdmFactory (see TDM/COUNT and TDM/LIST) and
+registered with the socCatalog (see SOC/COUNT and SOC/LIST).
+.
+ARGUMENTS: 
+.
+   NAME - Case-sensitive alphanumeric name for new tdmDataset object.
+   - Use this name as part of SOREF (see SOC) to specify this particular
+     tdmDataset object in subsequent commands.
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   tdmFactory::newDataset
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Create a new tdmDataset with NAME "bob"
+.
+   StAF> TDM/NEWDATASET bob
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_CREATED - The object creation failed. See error stack for
+      detailed explaination of failure.
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+   TDM/DATASET
 .
 >ACTION KAM_TDM_NEWDATASET
-
+**
 ** ---------------------------------------------------------------------
-** TDM/NEWTABLE NAME [ SPEC ROWCOUNT ]
+** TDM/NEWTABLE NAME SPEC MAXROWCOUNT
 >COMMAND NEWTABLE
 >PARAMETERS
-NAME 'tdmTable name.' C
-SPEC 'Type specifier for a table row.' C
-ROWCOUNT 'Number of rows in the table.' I R='0:'
+NAME 'Name for new tdmTable object' C
+SPEC    'Type specifier for a table type' C
+MAXROWCOUNT        'Count of rows allocated in memory' I R='0:'
 >GUIDANCE
-Create a new tdmTable.
+Create a new tdmTable object.
 .
-     NAME -- Case-sensitive alphanumeric name for table to create.
-	     EG.: fred, Table001, tpc_calib
+DESCRIPTION: 
 .
-     SPEC -- IDL specification string or table type name for new table.
-	     EG.: 'struct point {double x,y,z;};', point
+Each tdmTable created by the tdmFactory shows up as an object
+managed by the tdmFactory (see TDM/COUNT and TDM/LIST) and
+registered with the socCatalog (see SOC/COUNT and SOC/LIST).
 .
- ROWCOUNT -- Initial number of rows to allocate for new table. (0 >=1)
+ARGUMENTS: 
+.
+   NAME - Case-sensitive alphanumeric name for new tdmTable object.
+   - Use this name as part of SOREF (see SOC) to specify this particular
+     tdmTable object in subsequent commands.
+   - More guidance needed here.
+.
+   SPEC - Type specifier for a table type.
+   - More guidance needed here.
+.
+   MAXROWCOUNT - Count of rows allocated in memory.
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   tdmFactory::newTable
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Create a new tdmTable with NAME "bob"
+.
+   StAF> TDM/NEWTABLE bob
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_CREATED - The object creation failed. See error stack for
+      detailed explaination of failure.
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+   TDM/TABLE
 .
 >ACTION KAM_TDM_NEWTABLE
-
-************************************************************************
-************************************************************************
-** TDM/TYPESPECIFIERS
->MENU TYPESPECIFIERS
->GUIDANCE
-dsl type specifier commands.
-.
-************************************************************************
-************************************************************************
-
+**
 ** ---------------------------------------------------------------------
-** TDM/TYPESPECIFIERS/LIST [ NTYPE ]
->COMMAND LIST
+** TDM/ALLOCSTATS
+>COMMAND ALLOCSTATS
 >PARAMETERS
-+
-NTYPE 'Table type id.' I D='-1'
 >GUIDANCE
-List one or all table type names.
+More guidance needed here.
 .
->ACTION KAM_TDM_TYPE_LIST
-
+DESCRIPTION: 
+.
+ALLOCSTATS is a member function of the tdmFactory interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   None.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   tdmFactory::ALLOCSTATS
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. More guidance needed here.
+.
+   StAF> TDM/ALLOCSTATS
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_TDM_ALLOCSTATS
+**
+************************************************************************
+** TDM/DATASET
+>MENU DATASET
+>GUIDANCE
+tdmDataset object commands.
+.
+Commands found under the TDM/DATASET menu can be applied to objects
+which implement the tdmDataset interface.
+.
+More guidance needed here.
+.
+**
 ** ---------------------------------------------------------------------
-** TDM/TYPESPECIFIERS/SHOW [ TYPENAME OPTION ]
+** TDM/DATASET/ENTRYCOUNT SOREF
+>COMMAND ENTRYCOUNT
+>PARAMETERS
+SOREF 'tdmDataset object SORef' C
+>GUIDANCE
+Get the ENTRYCOUNT attribute of the tdmDataset SOREF.
+.
+DESCRIPTION: 
+.
+ENTRYCOUNT is a readonly attribute which reflects the value of the ENTRYCOUNT
+attribute of the tdmDataset SOREF. Readonly attributes cannot be changed
+from the user interface.
+.
+NB. Readonly attributes are not necessarily static attributes.
+.
+ARGUMENTS: 
+.
+   SOREF - Stringified Object REFerence (see SOC).
+   -  denoting an object implementing the tdmDataset interface.
+.
+RETURN:
+.
+   The current value of ENTRYCOUNT is pushed onto the STAF_RESULT stack
+   (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Show the current value of the ENTRYCOUNT attribute of
+    tdmDataset "bob".
+.
+   StAF> TDM/DATASET/ENTRYCOUNT bob
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmDataset interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_TDMDATASET_ENTRYCOUNT
+**
+** ---------------------------------------------------------------------
+** TDM/DATASET/NAME SOREF
+>COMMAND NAME
+>PARAMETERS
+SOREF 'tdmDataset object SORef' C
+>GUIDANCE
+Get the NAME attribute of the tdmDataset SOREF.
+.
+DESCRIPTION: 
+.
+NAME is a readonly attribute which reflects the value of the NAME
+attribute of the tdmDataset SOREF. Readonly attributes cannot be changed
+from the user interface.
+.
+NB. Readonly attributes are not necessarily static attributes.
+.
+ARGUMENTS: 
+.
+   SOREF - Stringified Object REFerence (see SOC).
+   -  denoting an object implementing the tdmDataset interface.
+.
+RETURN:
+.
+   The current value of NAME is pushed onto the STAF_RESULT stack
+   (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Show the current value of the NAME attribute of
+    tdmDataset "bob".
+.
+   StAF> TDM/DATASET/NAME bob
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmDataset interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_TDMDATASET_NAME
+**
+** ---------------------------------------------------------------------
+** TDM/DATASET/ADDDATASET SOREF NAME
+>COMMAND ADDDATASET
+>PARAMETERS
+SOREF 'tdmDataset object SORef' C
+NAME 'Name for new tdmDataset object' C
+>GUIDANCE
+More guidance needed here.
+.
+DESCRIPTION: 
+.
+ADDDATASET is a member function of objects which implement the tdmDataset
+interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   SOREF - Stringified Object REFerence (see SOC).
+   - denoting an object implementing the tdmDataset interface.
+.
+   NAME - Name for new tdmDataset object
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   tdmDataset::ADDDATASET
+   method is pushed on the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Invoke the ADDDATASET method function of tdmDataset "bob"
+     More guidance needed here.
+.
+   StAF> TDM/DATASET/ADDDATASET bob 
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmDataset interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_TDMDATASET_ADDDATASET
+**
+** ---------------------------------------------------------------------
+** TDM/DATASET/ADDTABLE SOREF SOREF NAME SPEC MAXROWCOUNT
+>COMMAND ADDTABLE
+>PARAMETERS
+SOREF 'tdmDataset object SORef' C
+NAME 'Name for new tdmTable object' C
+SPEC    'Type specifier for a table type' C
+MAXROWCOUNT        'Count of rows allocated in memory' I R='0:'
+>GUIDANCE
+More guidance needed here.
+.
+DESCRIPTION: 
+.
+ADDTABLE is a member function of objects which implement the tdmDataset
+interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   SOREF - Stringified Object REFerence (see SOC).
+   - denoting an object implementing the tdmDataset interface.
+.
+   NAME - Name for new tdmDataset object
+   - More guidance needed here.
+.
+   SPEC - Type specifier for a table type.
+   - More guidance needed here.
+.
+   MAXROWCOUNT - Count of rows allocated in memory.
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   tdmDataset::ADDTABLE
+   method is pushed on the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Invoke the ADDTABLE method function of tdmDataset "bob"
+     More guidance needed here.
+.
+   StAF> TDM/DATASET/ADDTABLE bob 
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmDataset interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_TDMDATASET_ADDTABLE
+**
+** ---------------------------------------------------------------------
+** TDM/DATASET/SHOW SOREF
 >COMMAND SHOW
 >PARAMETERS
-+
-TYPENAME 'Table type name.' C D='*'
-OPTION 'Options' C D=' ' R=' '
+SOREF 'tdmDataset object SORef' C
 >GUIDANCE
-Show table type names.
+More guidance needed here.
 .
-Possible OPTION values are:
-   ' '   Show everything.
+DESCRIPTION: 
 .
->ACTION KAM_TDM_TYPE_SHOW
-
-** ---------------------------------------------------------------------
-** TDM/TYPESPECIFIERS/LOAD [ IDL_FILE ]
->COMMAND LOAD
->PARAMETERS
-+
-IDL_FILE 'IDL file containing table specificaiont.' C D='-'
->GUIDANCE
-Load table definitions from IDL files.
+SHOW is a member function of objects which implement the tdmDataset
+interface.
 .
->ACTION KAM_TDM_TYPE_LOAD
-
-************************************************************************
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   SOREF - Stringified Object REFerence (see SOC).
+   - denoting an object implementing the tdmDataset interface.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   tdmDataset::SHOW
+   method is pushed on the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Invoke the SHOW method function of tdmDataset "bob"
+     More guidance needed here.
+.
+   StAF> TDM/DATASET/SHOW bob 
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmDataset interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_TDMDATASET_SHOW
+**
 ************************************************************************
 ** TDM/TABLE
 >MENU \TABLE
 >GUIDANCE
-tdmTable commands.
+tdmTable object commands.
 .
-************************************************************************
-************************************************************************
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/NAME TDMTABLE
->COMMAND NAME
->PARAMETERS
-TDMTABLE 'tdmTable name.' C
->GUIDANCE
-Show the DSL name of a tdmTable Object.
+Commands found under the TDM/TABLE menu can be applied to objects
+which implement the tdmTable interface.
 .
->ACTION KAM_TDMTABLE_NAME
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/ROWCOUNT TDMTABLE [ROWCOUNT]
->COMMAND ROWCOUNT
->PARAMETERS
-TDMTABLE 'tdmTable name.' C
-+
-ROWCOUNT 'Number of rows filled' I D=-1
->GUIDANCE
-Show or change the number of rows filled.
+More guidance needed here.
 .
->ACTION KAM_TDMTABLE_ROWCOUNT
-
+**
 ** ---------------------------------------------------------------------
-** TDM/TABLE/MAXROWCOUNT TDMTABLE [MAXROWCOUNT]
+** TDM/TABLE/MAXROWCOUNT SOREF [ NEW_VALUE ]
 >COMMAND MAXROWCOUNT
 >PARAMETERS
-TDMTABLE 'tdmTable name.' C
+SOREF 'tdmTable object SORef' C
 +
-MAXROWCOUNT 'Number of rows allocated' I D=-1
+NEW_VALUE 'New value of MAXROWCOUNT attribute' I D=-1 R='-1:'
 >GUIDANCE
-Show or change the number of rows allocated.
+Get or set the MAXROWCOUNT attribute of the tdmTable SOREF.
+.
+DESCRIPTION: 
+.
+MAXROWCOUNT is a read-writable attribute which determines the value of
+the MAXROWCOUNT attribute.
+.
+To get the current value of MAXROWCOUNT, leaving MAXROWCOUNT unchanged, do not
+specify a new value in the optional argument NEW_VALUE.
+.
+To set a new value of MAXROWCOUNT, specify the new value as the optional
+argument NEW_VALUE.
+.
+ARGUMENTS: 
+.
+   SOREF - Stringified Object REFerence (see SOC).
+   -  denoting an object implementing the tdmTable interface.
+.
+   NEW_VALUE - New value for the MAXROWCOUNT attribute.
+   - DEFAULT: Show the current value of MAXROWCOUNT, do not change it.
+.
+RETURN:
+.
+   The current value of MAXROWCOUNT is pushed onto the STAF_RESULT stack
+   (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Show the current value of the MAXROWCOUNT attribute of tdmTable 
+    object "bob".
+.
+   StAF> TDM/TABLE/MAXROWCOUNT bob
+.
+EG2. Set the MAXROWCOUNT attribute of tdmTable object "bob" to 123.
+.
+   StAF> TDM/TABLE/MAXROWCOUNT bob 123
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmTable interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
 .
 >ACTION KAM_TDMTABLE_MAXROWCOUNT
-
+**
 ** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMNCOUNT TDMTABLE
+** TDM/TABLE/ROWCOUNT SOREF [ NEW_VALUE ]
+>COMMAND ROWCOUNT
+>PARAMETERS
+SOREF 'tdmTable object SORef' C
++
+NEW_VALUE 'New value of ROWCOUNT attribute' I D=-1 R='-1:'
+>GUIDANCE
+Get or set the ROWCOUNT attribute of the tdmTable SOREF.
+.
+DESCRIPTION: 
+.
+ROWCOUNT is a read-writable attribute which determines the value of
+the ROWCOUNT attribute.
+.
+To get the current value of ROWCOUNT, leaving ROWCOUNT unchanged, do not
+specify a new value in the optional argument NEW_VALUE.
+.
+To set a new value of ROWCOUNT, specify the new value as the optional
+argument NEW_VALUE.
+.
+ARGUMENTS: 
+.
+   SOREF - Stringified Object REFerence (see SOC).
+   -  denoting an object implementing the tdmTable interface.
+.
+   NEW_VALUE - New value for the ROWCOUNT attribute.
+   - DEFAULT: Show the current value of ROWCOUNT, do not change it.
+.
+RETURN:
+.
+   The current value of ROWCOUNT is pushed onto the STAF_RESULT stack
+   (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Show the current value of the ROWCOUNT attribute of tdmTable 
+    object "bob".
+.
+   StAF> TDM/TABLE/ROWCOUNT bob
+.
+EG2. Set the ROWCOUNT attribute of tdmTable object "bob" to 123.
+.
+   StAF> TDM/TABLE/ROWCOUNT bob 123
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmTable interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_TDMTABLE_ROWCOUNT
+**
+** ---------------------------------------------------------------------
+** TDM/TABLE/COLUMNCOUNT SOREF
 >COMMAND COLUMNCOUNT
 >PARAMETERS
-TDMTABLE 'tdmTable name.' C
+SOREF 'tdmTable object SORef' C
 >GUIDANCE
-Show the number of columns.
+Get the COLUMNCOUNT attribute of the tdmTable SOREF.
 .
->ACTION KAM_TDMTABLE_COLCOUNT
-
+DESCRIPTION: 
+.
+COLUMNCOUNT is a readonly attribute which reflects the value of the COLUMNCOUNT
+attribute of the tdmTable SOREF. Readonly attributes cannot be changed
+from the user interface.
+.
+NB. Readonly attributes are not necessarily static attributes.
+.
+ARGUMENTS: 
+.
+   SOREF - Stringified Object REFerence (see SOC).
+   -  denoting an object implementing the tdmTable interface.
+.
+RETURN:
+.
+   The current value of COLUMNCOUNT is pushed onto the STAF_RESULT stack
+   (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Show the current value of the COLUMNCOUNT attribute of
+    tdmTable "bob".
+.
+   StAF> TDM/TABLE/COLUMNCOUNT bob
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmTable interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_TDMTABLE_COLUMNCOUNT
+**
 ** ---------------------------------------------------------------------
-** TDM/TABLE/TYPENAME TDMTABLE
->COMMAND TYPENAME
+** TDM/TABLE/NAME SOREF
+>COMMAND NAME
 >PARAMETERS
-TDMTABLE 'tdmTable name.' C
+SOREF 'tdmTable object SORef' C
 >GUIDANCE
-Show the tdmTable type.
+Get the NAME attribute of the tdmTable SOREF.
 .
->ACTION KAM_TDMTABLE_TYPENAME
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/SPECIFIER TDMTABLE
->COMMAND SPECIFIER
->PARAMETERS
-TDMTABLE 'tdmTable name.' C
->GUIDANCE
-Show the tdmTable specification.
+DESCRIPTION: 
 .
->ACTION KAM_TDMTABLE_SPECIFIER
-
+NAME is a readonly attribute which reflects the value of the NAME
+attribute of the tdmTable SOREF. Readonly attributes cannot be changed
+from the user interface.
+.
+NB. Readonly attributes are not necessarily static attributes.
+.
+ARGUMENTS: 
+.
+   SOREF - Stringified Object REFerence (see SOC).
+   -  denoting an object implementing the tdmTable interface.
+.
+RETURN:
+.
+   The current value of NAME is pushed onto the STAF_RESULT stack
+   (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Show the current value of the NAME attribute of
+    tdmTable "bob".
+.
+   StAF> TDM/TABLE/NAME bob
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmTable interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_TDMTABLE_NAME
+**
 ** ---------------------------------------------------------------------
-** TDM/TABLE/ROWSIZE TDMTABLE
+** TDM/TABLE/ROWSIZE SOREF
 >COMMAND ROWSIZE
 >PARAMETERS
-TDMTABLE 'tdmTable name.' C
+SOREF 'tdmTable object SORef' C
 >GUIDANCE
-Show the tdmTable row size.
+Get the ROWSIZE attribute of the tdmTable SOREF.
+.
+DESCRIPTION: 
+.
+ROWSIZE is a readonly attribute which reflects the value of the ROWSIZE
+attribute of the tdmTable SOREF. Readonly attributes cannot be changed
+from the user interface.
+.
+NB. Readonly attributes are not necessarily static attributes.
+.
+ARGUMENTS: 
+.
+   SOREF - Stringified Object REFerence (see SOC).
+   -  denoting an object implementing the tdmTable interface.
+.
+RETURN:
+.
+   The current value of ROWSIZE is pushed onto the STAF_RESULT stack
+   (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Show the current value of the ROWSIZE attribute of
+    tdmTable "bob".
+.
+   StAF> TDM/TABLE/ROWSIZE bob
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmTable interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
 .
 >ACTION KAM_TDMTABLE_ROWSIZE
-
+**
 ** ---------------------------------------------------------------------
-** TDM/TABLE/PRINT TDMTABLE [ NROWS IFIRST FILE ]
+** TDM/TABLE/SPECIFIER SOREF
+>COMMAND SPECIFIER
+>PARAMETERS
+SOREF 'tdmTable object SORef' C
+>GUIDANCE
+Get the SPECIFIER attribute of the tdmTable SOREF.
+.
+DESCRIPTION: 
+.
+SPECIFIER is a readonly attribute which reflects the value of the SPECIFIER
+attribute of the tdmTable SOREF. Readonly attributes cannot be changed
+from the user interface.
+.
+NB. Readonly attributes are not necessarily static attributes.
+.
+ARGUMENTS: 
+.
+   SOREF - Stringified Object REFerence (see SOC).
+   -  denoting an object implementing the tdmTable interface.
+.
+RETURN:
+.
+   The current value of SPECIFIER is pushed onto the STAF_RESULT stack
+   (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Show the current value of the SPECIFIER attribute of
+    tdmTable "bob".
+.
+   StAF> TDM/TABLE/SPECIFIER bob
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmTable interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_TDMTABLE_SPECIFIER
+**
+** ---------------------------------------------------------------------
+** TDM/TABLE/TYPENAME SOREF
+>COMMAND TYPENAME
+>PARAMETERS
+SOREF 'tdmTable object SORef' C
+>GUIDANCE
+Get the TYPENAME attribute of the tdmTable SOREF.
+.
+DESCRIPTION: 
+.
+TYPENAME is a readonly attribute which reflects the value of the TYPENAME
+attribute of the tdmTable SOREF. Readonly attributes cannot be changed
+from the user interface.
+.
+NB. Readonly attributes are not necessarily static attributes.
+.
+ARGUMENTS: 
+.
+   SOREF - Stringified Object REFerence (see SOC).
+   -  denoting an object implementing the tdmTable interface.
+.
+RETURN:
+.
+   The current value of TYPENAME is pushed onto the STAF_RESULT stack
+   (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Show the current value of the TYPENAME attribute of
+    tdmTable "bob".
+.
+   StAF> TDM/TABLE/TYPENAME bob
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmTable interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_TDMTABLE_TYPENAME
+**
+** ---------------------------------------------------------------------
+** TDM/TABLE/PRINT SOREF [ NROWS IFIRST ]
 >COMMAND PRINT
 >PARAMETERS
-TDMTABLE 'tdmTable name.' C
+SOREF 'tdmTable object SORef' C
 +
-NROWS 'Number of rows.' I D=10
-IFIRST 'First row.' I D=0
-FILE 'name of ASCII file.' C D='-'
+NROWS   'Number of rows to print' I D=10
+IFIRST  'First row to print' I D=1
 >GUIDANCE
-Print the contents of a tdmTable to stdout or a file.
+More guidance needed here.
 .
-   FILE = "-" :: Print output to standard out.
+DESCRIPTION: 
 .
- ************************
- * Still In Development *
- ************************
+PRINT is a member function of objects which implement the tdmTable
+interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   SOREF - Stringified Object REFerence (see SOC).
+   - denoting an object implementing the tdmTable interface.
+.
+   NROWS - Number of rows to print.
+   - More guidance needed here.
+.
+   IFIRST - First row to print. 
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   tdmTable::PRINT
+   method is pushed on the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Invoke the PRINT method function of tdmTable "bob"
+     More guidance needed here.
+.
+   StAF> TDM/TABLE/PRINT bob 
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmTable interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
 .
 >ACTION KAM_TDMTABLE_PRINT
-
+**
 ** ---------------------------------------------------------------------
-** TDM/TABLE/SHOW TDMTABLE [ OPTION ]
+** TDM/TABLE/SHOW SOREF
 >COMMAND SHOW
 >PARAMETERS
-TDMTABLE 'tdmTable name.' C
-+
-OPTION 'Options.' C D=' ' R=' '
+SOREF 'tdmTable object SORef' C
 >GUIDANCE
-Show the definition of a tdmTable.
+More guidance needed here.
 .
-Possible OPTION values are:
-   ' '    Show everything.
+DESCRIPTION: 
 .
- ************************
- * Still In Development *
- ************************
+SHOW is a member function of objects which implement the tdmTable
+interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   SOREF - Stringified Object REFerence (see SOC).
+   - denoting an object implementing the tdmTable interface.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   tdmTable::SHOW
+   method is pushed on the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Invoke the SHOW method function of tdmTable "bob"
+     More guidance needed here.
+.
+   StAF> TDM/TABLE/SHOW bob 
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmTable interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
 .
 >ACTION KAM_TDMTABLE_SHOW
-
-************************************************************************
+**
 ************************************************************************
 ** TDM/TABLE/CELL
 >MENU CELL
 >GUIDANCE
-tdmTable cell commands.
+tdmTable object CELL component commands.
 .
- ************************
- * Still In Development *
- ************************
+Commands found under the TDM/TABLE/CELL menu can be applied to CELL
+components of objects which implement the tdmTable interface.
 .
-************************************************************************
-************************************************************************
-
+More guidance needed here.
+.
+**
 ** ---------------------------------------------------------------------
-** TDM/TABLE/CELL/GETVALUE CELLNAME
+** TDM/TABLE/CELL/GETVALUE SOREF      
 >COMMAND GETVALUE
 >PARAMETERS
-CELLNAME 'tdmTable cell name.' C
+SOREF 'tdmTable.CELL component SORef' C
 >GUIDANCE
-Print the contents of a tdmTable cell.
+More guidance needed here.
 .
- ************************
- * Still In Development *
- ************************
+DESCRIPTION: 
+.
+GETVALUE is a member function of CELL components of objects which
+implement the tdmTable interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   SOREF - Stringified Object REFerence (see SOC).
+   - denoting a CELL component of an object implementing the 
+     tdmTable interface.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. More guidance needed here.
+.
+   StAF> TDM/TABLE/CELL/GETVALUE bob.head
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No CELL component specified by SOREF can be
+      found for an object which implements the tdmTable interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
 .
 >ACTION KAM_TDMTABLE_CELL_GETVALUE
-
+**
 ** ---------------------------------------------------------------------
-** TDM/TABLE/CELL/PUTVALUE CELLNAME VALUES
+** TDM/TABLE/CELL/PUTVALUE SOREF VALUES
 >COMMAND PUTVALUE
 >PARAMETERS
-CELLNAME 'tdmTable cell name.' C
-VALUES 'list of values.' C
+SOREF 'tdmTable.CELL component SORef' C
+VALUES  'List of new cell values' C
 >GUIDANCE
-Change the contents of a tdmTable cell.
+More guidance needed here.
 .
- ************************
- * Still In Development *
- ************************
+DESCRIPTION: 
+.
+PUTVALUE is a member function of CELL components of objects which
+implement the tdmTable interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   SOREF - Stringified Object REFerence (see SOC).
+   - denoting a CELL component of an object implementing the 
+     tdmTable interface.
+.
+   VALUES - List of new cell values.
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. More guidance needed here.
+.
+   StAF> TDM/TABLE/CELL/PUTVALUE bob.head
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No CELL component specified by SOREF can be
+      found for an object which implements the tdmTable interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
 .
 >ACTION KAM_TDMTABLE_CELL_PUTVALUE
-
+**
 ************************************************************************
-************************************************************************
-** TDM/TABLE/COLUMN
->MENU \COLUMN
+** TDM/TYPESPECIFIERS
+>MENU \\TYPESPECIFIERS
 >GUIDANCE
-tdmTable column commands.
+tdmTypespecifiers object commands.
 .
- ************************
- * Not yet Implemented  *
- ************************
+Commands found under the TDM/TYPESPECIFIERS menu can be applied to objects
+which implement the tdmTypespecifiers interface.
 .
-************************************************************************
-************************************************************************
-
+More guidance needed here.
+.
+**
 ** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMN/FIND COLUMNAME
->COMMAND FIND
+** TDM/TYPESPECIFIERS/LIST [ TYPEID ]
+>COMMAND LIST
 >PARAMETERS
-COLUMNAME 'tdmTable.column name.' C
->GUIDANCE
-Find the column number of a named column.
-.
-See STAF/SYNTAX for syntax of column names.
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_TDMTABLE_COLUMN_FIND
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMN/NAME [ NCOL ]
->COMMAND NAME
->PARAMETERS
-NCOL 'tdmTable.number.' C
->GUIDANCE
-Show the name of a tdmTable column.
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_TDMTABLE_COLUMN_NAME
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMN/TYPE [ NCOL ]
->COMMAND TYPE
->PARAMETERS
-NCOL 'tdmTable.number.' C
->GUIDANCE
-Show the type name of a tdmTable column.
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_TDMTABLE_COLUMN_TYPE
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMN/CODE [ NCOL ]
->COMMAND CODE
->PARAMETERS
-NCOL 'tdmTable.number.' C
->GUIDANCE
-Show the type code of a tdmTable column.
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_TDMTABLE_COLUMN_CODE
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMN/RANK [ NCOL ]
->COMMAND RANK
->PARAMETERS
-NCOL 'tdmTable.number.' C
->GUIDANCE
-Show the rank of a tdmTable column.
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_TDMTABLE_COLUMN_RANK
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMN/SHAPE [ NCOL ]
->COMMAND SHAPE
->PARAMETERS
-NCOL 'tdmTable.number.' C
->GUIDANCE
-Show the shape of a tdmTable column.
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_TDMTABLE_COLUMN_SHAPE
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMN/ELCOUNT [ NCOL ]
->COMMAND ELCOUNT
->PARAMETERS
-NCOL 'tdmTable.number.' C
->GUIDANCE
-Show the element count of a tdmTable column.
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_TDMTABLE_COLUMN_ELCOUNT
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMN/SIZE [ NCOL ]
->COMMAND SIZE
->PARAMETERS
-NCOL 'tdmTable.number.' C
->GUIDANCE
-Show the size in bytes of a tdmTable column.
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_TDMTABLE_COLUMN_SIZE
-
-
-************************************************************************
-************************************************************************
-** TDM/DATASET
->MENU \\DATASET
->GUIDANCE
-tdmDataset commands.
-.
-************************************************************************
-************************************************************************
-
-** ---------------------------------------------------------------------
-** TDM/DATASET/NAME TDMDATASET
->COMMAND NAME
->PARAMETERS
-TDMDATASET 'tdmDataset name.' C
->GUIDANCE
-Show the DSL name of a tdmDataset Object.
-.
->ACTION KAM_TDMDATASET_NAME
-
-** ---------------------------------------------------------------------
-** TDM/DATASET/ENTRYCOUNT TDMDATASET
->COMMAND ENTRYCOUNT
->PARAMETERS
-TDMDATASET 'tdmDataset name.' C
->GUIDANCE
-Show the number of entries in a tdmDataset Object.
-.
->ACTION KAM_TDMDATASET_ENTRYCOUNT
-
-** ---------------------------------------------------------------------
-** TDM/DATASET/MAXENTRYCOUNT TDMDATASET
-**OLD_DSL >COMMAND MAXENTRYCOUNT
-**OLD_DSL >PARAMETERS
-**OLD_DSL TDMDATASET 'tdmDataset name.' C
-**OLD_DSL >GUIDANCE
-**OLD_DSL Show the maximum allowable number of entries in a tdmDataset
-**OLD_DSL Object.
-**OLD_DSL .
-**OLD_DSL >ACTION KAM_TDMDATASET_MAXENTRYCOUNT
-
-** ---------------------------------------------------------------------
-** TDM/DATASET/ADDDATASET TDMDATASET NAME [ DIM ]
->COMMAND ADDDATASET
->PARAMETERS
-TDMDATASET 'tdmDataset name.' C
-NAME 'tdmTable name.' C
 +
-DIM 'New dataset dimension.' I D=100
+TYPEID  'Table type ID' I D=-1
 >GUIDANCE
-Add a tdmDataset to a tdmDataset.
+More guidance needed here.
 .
- ************************
- * Not yet Implemented  *
- ************************
+DESCRIPTION: 
 .
->ACTION KAM_TDMDATASET_ADDDATASET
-
+LIST is a member function of objects which implement the tdmTypespecifiers
+interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   TYPEID - Table type ID.
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   tdmTypespecifiers::LIST
+   method is pushed on the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Invoke the LIST method function of tdmTypespecifiers "bob"
+.
+   StAF> TDM/TYPESPECIFIERS/LIST bob 
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmTypespecifiers interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_TDMTYPESPECIFIERS_LIST
+**
 ** ---------------------------------------------------------------------
-** TDM/DATASET/ADDTABLE TDMDATASET NAME SPEC ROWCOUNT
->COMMAND ADDTABLE
+** TDM/TYPESPECIFIERS/LOAD IDL_FILE
+>COMMAND LOAD
 >PARAMETERS
-TDMDATASET 'tdmDataset name.' C
-NAME 'tdmTable name.' C
-SPEC 'Type specifier for a table row.' C
-ROWCOUNT 'Number of rows in the table.' I
+IDL_FILE 'IDL file containing table IDL' C
 >GUIDANCE
-Add a tdmTable to a tdmDataset.
+More guidance needed here.
 .
- ************************
- * Not yet Implemented  *
- ************************
+DESCRIPTION: 
 .
->ACTION KAM_TDMDATASET_ADDTABLE
-
+LOAD is a member function of objects which implement the tdmTypespecifiers
+interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   IDL_FILE - IDL file containing table IDL.
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   tdmTypespecifiers::LOAD
+   method is pushed on the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Invoke the LOAD method function of tdmTypespecifiers "bob"
+.
+   StAF> TDM/TYPESPECIFIERS/LOAD bob 
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmTypespecifiers interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_TDMTYPESPECIFIERS_LOAD
+**
 ** ---------------------------------------------------------------------
-** TDM/DATASET/SHOW TDMDATASET [ OPTION ]
+** TDM/TYPESPECIFIERS/SHOW [ TYPENAME ]
 >COMMAND SHOW
 >PARAMETERS
-TDMDATASET 'tdmDataset name.' C
 +
-OPTION 'Options' C D=' ' R=' '
+TYPENAME        'Table type name' C D='*'
 >GUIDANCE
-Show the hierarchy of a tdmDataset.
+More guidance needed here.
 .
-Possible OPTION values are:
-   ' '   Show everything.
+DESCRIPTION: 
 .
- ************************
- * Not yet Implemented  *
- ************************
+SHOW is a member function of objects which implement the tdmTypespecifiers
+interface.
 .
->ACTION KAM_TDMDATASET_SHOW
-
-** ---------------------------------------------------------------------
-** TDM/DATASET/ENTRYNAME NENTRY
->COMMAND ENTRYNAME
->PARAMETERS
-NENTRY 'tdmDataset.entryNumber.' C
->GUIDANCE
-Show the name of a numbered tdmDataset entry.
+More guidance needed here.
 .
- ************************
- * Not yet Implemented  *
- ************************
+ARGUMENTS: 
 .
->ACTION KAM_TDMDATASET_ENTRYNAME
-
-** ---------------------------------------------------------------------
-** TDM/DATASET/FINDENTRY ENTRYNAME
->COMMAND FINDENTRY
->PARAMETERS
-ENTRYNAME 'tdmDataset.entryName.' C
->GUIDANCE
-Find and show entry number of named tdmDataset entry.
+   TYPENAME - Table type name.
+   - More guidance needed here.
 .
- ************************
- * Not yet Implemented  *
- ************************
+RETURN:
 .
->ACTION KAM_TDMDATASET_FINDENTRY
-
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   tdmTypespecifiers::SHOW
+   method is pushed on the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Invoke the SHOW method function of tdmTypespecifiers "bob"
+.
+   StAF> TDM/TYPESPECIFIERS/SHOW bob 
+.
+EXCEPTIONS: 
+.
+   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
+      implements the tdmTypespecifiers interface.
+      (See SOC/BIND to dynamically bind the proper resources, or
+      rebuild executable with the proper resources statically linked.)
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_TDMTYPESPECIFIERS_SHOW
+**
