@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleElectronics.cc,v 1.4 1999/02/24 19:33:29 lasiuk Exp $
+ * $Id: StTpcSimpleElectronics.cc,v 1.5 1999/02/28 20:17:40 lasiuk Exp $
  *
  * Author: brian Nov 3, 1998
  *
@@ -11,8 +11,8 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleElectronics.cc,v $
- * Revision 1.4  1999/02/24 19:33:29  lasiuk
- * add tzero offset parameter
+ * Revision 1.5  1999/02/28 20:17:40  lasiuk
+ * add numberOfTimeBins
  *
  * Revision 1.4  1999/02/24 19:33:29  lasiuk
  * add tzero offset parameter
@@ -52,6 +52,7 @@ StTpcSimpleElectronics::StTpcSimpleElectronics(const char* file)
     StGetConfigValue(file,"tZero",mTZero);
     StGetConfigValue(file,"adcConversion",mAdcConversion);    
     StGetConfigValue(file,"adcCharge",mAdcConversionCharge);    
+    StGetConfigValue(file,"numberOfTimeBins",mNumberOfTimeBins);    
     StGetConfigValue(file,"averagePedestal",mAveragePedestal);
     StGetConfigValue(file,"shapingTime",mShapingTime);
     StGetConfigValue(file,"tau",mTau);
@@ -140,6 +141,7 @@ void StTpcSimpleElectronics::print(ostream& os) const
     os << "\nDigital:"                                                      << endl;
     os << "adcConversion:       " << mAdcConversion/(volt*.001) << " mV/channel" << endl;
     os << "adcConversionCharge: " << mAdcConversionCharge/(coulomb*1.e-15)  << " mV/fC"      << endl;    
+    os << "numberOfTimeBins:    " << mNumberOfTimeBins                      << endl;    
     os << "averagePedestal:     " << mAveragePedestal      << " channels"   << endl;
     os << endl;
 }

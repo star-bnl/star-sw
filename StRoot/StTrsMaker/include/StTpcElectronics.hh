@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcElectronics.hh,v 1.3 1999/02/24 19:32:11 lasiuk Exp $
+ * $Id: StTpcElectronics.hh,v 1.4 1999/02/28 20:17:55 lasiuk Exp $
  *
  * Author: brian Nov 3, 1998
  *
@@ -11,8 +11,8 @@
  **********************************************************************
  *
  * $Log: StTpcElectronics.hh,v $
- * Revision 1.3  1999/02/24 19:32:11  lasiuk
- * tzero offset parameter added
+ * Revision 1.4  1999/02/28 20:17:55  lasiuk
+ * add numberOfTimeBins
  *
  * Revision 1.3  1999/02/24 19:32:11  lasiuk
  * tzero offset parameter added
@@ -53,6 +53,7 @@ public:
     // Digital Electronics
     virtual double adcConversion()                     const = 0;
     virtual double adcConversionCharge()               const = 0;
+    virtual int    numberOfTimeBins()                  const = 0;
     virtual int    averagePedestal()                   const = 0;
     virtual int    pedestal(int,int,int,int)           const = 0;
     virtual int    pedestal(StTpcPadCoordinate&)       const = 0;
