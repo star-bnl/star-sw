@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.cxx,v 1.10 1999/02/26 14:49:54 kathy Exp $
+// $Id: St_ctf_Maker.cxx,v 1.11 1999/03/02 00:11:49 llope Exp $
 // $Log: St_ctf_Maker.cxx,v $
+// Revision 1.11  1999/03/02 00:11:49  llope
+// reduced table maxlen's for mdc2
+//
 // Revision 1.10  1999/02/26 14:49:54  kathy
 // fixed histogram limits as per Bill's request
 //
@@ -123,7 +126,7 @@ Int_t St_ctf_Maker::Make(){
     St_g2t_ctf_hit *g2t_ctb_hit = (St_g2t_ctf_hit *) geant("g2t_ctb_hit");
     if (g2t_ctb_hit) {
       St_cts_mslat *ctb_mslat = new  St_cts_mslat("ctb_mslat", 240); m_DataSet->Add(ctb_mslat);
-      St_cts_event *ctb_event = new  St_cts_event("ctb_event",5000); m_DataSet->Add(ctb_event);
+      St_cts_event *ctb_event = new  St_cts_event("ctb_event",   1); m_DataSet->Add(ctb_event);
       St_ctu_raw   *ctb_raw   = new  St_ctu_raw("ctb_raw",     240); m_DataSet->Add(ctb_raw);
       St_ctu_cor   *ctb_cor   = new  St_ctu_cor("ctb_cor",     240); m_DataSet->Add(ctb_cor);
       Int_t Res_cts_ctb = cts(g2t_ctb_hit, g2t_track,
@@ -137,10 +140,10 @@ Int_t St_ctf_Maker::Make(){
     }
     St_g2t_ctf_hit *g2t_tof_hit = (St_g2t_ctf_hit *) geant("g2t_tof_hit");
     if (g2t_tof_hit) {
-      St_cts_mslat *tof_mslat = new  St_cts_mslat("tof_mslat",5400); m_DataSet->Add(tof_mslat);
-      St_cts_event *tof_event = new  St_cts_event("tof_event",5000); m_DataSet->Add(tof_event);
-      St_ctu_raw   *tof_raw   = new  St_ctu_raw("tof_raw",    5400); m_DataSet->Add(tof_raw);
-      St_ctu_cor   *tof_cor   = new  St_ctu_cor("tof_cor",    5400); m_DataSet->Add(tof_cor);
+      St_cts_mslat *tof_mslat = new  St_cts_mslat("tof_mslat",500); m_DataSet->Add(tof_mslat); //safe factor of 5 for mdc2
+      St_cts_event *tof_event = new  St_cts_event("tof_event",  1); m_DataSet->Add(tof_event);
+      St_ctu_raw   *tof_raw   = new  St_ctu_raw("tof_raw",     50); m_DataSet->Add(tof_raw);
+      St_ctu_cor   *tof_cor   = new  St_ctu_cor("tof_cor",     50); m_DataSet->Add(tof_cor); 
       Int_t Res_cts_tof = cts(g2t_tof_hit, g2t_track,
 			      m_tof,  m_tof_slat, m_tof_slat_phi, m_tof_slat_eta, m_cts_tof,
 			      tof_event, tof_mslat, tof_raw);
@@ -159,7 +162,7 @@ Int_t St_ctf_Maker::Make(){
          vertex  = (St_dst_vertex *) globalI["dst/vertex"];
       }
       if (g2t_track && tptrack && mctrk && vertex ) {
-         St_dst_tof_trk *dst_tof_trk = new St_dst_tof_trk("dst_tof_trk",1000);
+         St_dst_tof_trk *dst_tof_trk = new St_dst_tof_trk("dst_tof_trk",250); //safe factor of 5 for mdc2
          m_DataSet->Add(dst_tof_trk);
          St_dst_tof_evt *dst_tof_evt = new St_dst_tof_evt("dst_tof_evt",1);
          m_DataSet->Add(dst_tof_evt);
@@ -189,7 +192,7 @@ Int_t St_ctf_Maker::Make(){
 //_____________________________________________________________________________
 void St_ctf_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ctf_Maker.cxx,v 1.10 1999/02/26 14:49:54 kathy Exp $\n");
+  printf("* $Id: St_ctf_Maker.cxx,v 1.11 1999/03/02 00:11:49 llope Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
