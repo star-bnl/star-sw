@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 1.18 1999/04/13 23:27:23 genevb Exp $
+% $Id: StEvent.tex,v 1.19 1999/04/19 17:37:21 genevb Exp $
 %
 % Author: Thomas Ullrich, March 1999
 %
@@ -21,8 +21,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 1.18  1999/04/13 23:27:23  genevb
-% Slightly refined vertex code, updated V0, Xi vertex documentation
+% Revision 1.19  1999/04/19 17:37:21  genevb
+% Updated vertex documentation
+%
+% Revision 1.20  1999/04/19 20:46:41  ullrich
+% Mods to StHit (virtual)
 %
 % Revision 1.19  1999/04/19 17:37:21  genevb
 % Updated vertex documentation
@@ -158,14 +161,14 @@
 % Revision 2.20  2000/02/24 13:25:12  ullrich
 % Added RICH and EMC to the reference section. Created
 % (empty) section for EMC and RICH in User Guide.
-  {\LARGE $ $Revision: 1.18 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/04/13 23:27:23 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.19 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/04/19 17:37:21 $ $}  % replaced by cvs with current revision
 %
 % Revision 2.18  2000/02/11 16:23:45  ullrich
 % Add info on order in which primary vertices are stored
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.18 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/04/13 23:27:23 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.19 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/04/19 17:37:21 $ $}  % replaced by cvs with current revision
 % Added Helens description of iflag (see StTrack::flag()).
 %
 % Revision 2.16  2000/01/27 18:38:30  ullrich
@@ -309,7 +312,7 @@ are not guaranteed to compile. Their only purpose is to illustrate a
 specific feature and not to provide a fully functional programming
 unit.
 
-  {\LARGE $ $Date: 1999/04/13 23:27:23 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/04/19 17:37:21 $ $}  % replaced by cvs with current revision
      \advance\leftmargin by \labelsep%
 \section{Further documentation}
 \label{sec:furtherdoc}
@@ -3478,6 +3481,10 @@ bool triggerDetectorsComplete(StEvent *event)
     DCA of the parent track to the primary vertex.
     
 
+    \verb+virtual const StThreeVector<float>&+\\
+    \verb+momentumOfDaughter(StTrackSign sign) const;+\\
+    Momentum of the negative (\name{sign=negativeTrack}) or positive
+    (\name{sign=positiveTrack}) daughter track.
     
 
     \verb+virtual StThreeVector<float> momentum() const;+\\
@@ -3613,6 +3620,11 @@ unsigned long countGoodV0s(StEvent *event, double limit)
     \verb+virtual const StGlobalTrack* parent();+\\
     Pointer to parent track or null pointer if no parent stored.
 
+    \verb+virtual const StThreeVector<float>& position();+\\
+    Vertex position.
+
+    \verb+virtual const StThreeVector<float>& positionError();+\\
+    Position uncertainty.
 
     \verb+virtual StThreeVector<float> momentum(double B);+\\
     Momentum of the vertex given the magnetic field B.
@@ -3957,6 +3969,9 @@ void printVpdAdcs(StEvent *event)
 
     \verb+float dcaParentToPrimaryVertex() const;+\\
     DCA of the parent track to the primary vertex.
+    
+    \verb+const StThreeVector<float>& momentumOfBachelor() const;+\\
+    Momentum of the bachelor track at the Xi vertex.
 
     \verb+StThreeVector<float>& momentumOfV0() const;+\\
     Momentum of the neutral daughter (the associated V0).
