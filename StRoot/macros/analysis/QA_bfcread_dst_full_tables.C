@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_full_tables.C,v 1.4 1999/07/17 00:48:45 kathy Exp $
+// $Id: QA_bfcread_dst_full_tables.C,v 1.5 1999/07/26 20:54:15 kathy Exp $
 // $Log: QA_bfcread_dst_full_tables.C,v $
+// Revision 1.5  1999/07/26 20:54:15  kathy
+// changed output text to QAInfo: so that the QA sripts can tag on it; also cleaned up a bit and set to newer default input file
+//
 // Revision 1.4  1999/07/17 00:48:45  kathy
 // change check on dst_TrgDet to test on TrgDet table
 //
@@ -33,17 +36,11 @@ StChain *chain;
 class St_DataSet;
 St_DataSet *Event;
 
-//"/afs/rhic/star/data/test/dev/tfs_Solaris/Mon/year_1b/psc0050_01_40evts.dst.root",
 
-// /disk00001/star/auau200/two_photon/starlight/twogam/year_1b/hadronic_on/tfs/rcf070_01_25000evts.dst.root
-
-// /disk00001/star/auau200/two_photon/starlight/rho/year_1b/hadronic_on/tfs/rcf052_01_15000evts.dst.root
-
-// /disk00001/star/augas100/venus412/hydrogen/b0_10/year_1b/hadronic_on/tfs/rcf062_01_1522evts.dst.root
-
-void QA_bfcread_dst_full_tables(Int_t nevents=10, const char 
-*MainFile="/afs/rhic/star/data/test/dev/tfs_Solaris/Thu/year_2a/psc0208_01_40evts.dst.root",
-const char *fname="qa_full_tables.txt")
+void QA_bfcread_dst_full_tables(Int_t nevents=10, 
+ const char *MainFile=
+ "/disk00000/star/test/dev/tfs_Linux/Wed/year_2a/psc0208_01_40evts.dst.root",
+ const char *fname="qa_full_tables.txt")
 
 {
 //
@@ -53,11 +50,10 @@ const char *fname="qa_full_tables.txt")
   gSystem->Load("StTreeMaker");
   gSystem->Load("StarClassLibrary");
 
-
   ofstream fout(fname);
 
-  fout << "QA-> " << MainFile << endl << endl;
-  cout << "QA-> " << MainFile << endl << endl;
+  fout << "QAInfo: " << MainFile << endl << endl;
+  cout << "QAInfo: " << MainFile << endl << endl;
 
 //  Setup top part of chain
   chain = new StChain("bfc");
@@ -78,7 +74,6 @@ const char *fname="qa_full_tables.txt")
   St_DataSet *obj=0;
   Int_t tabcntr=0;
 
-
    Int_t evcntr=0;
    Int_t dstcntr=0;
 
@@ -98,6 +93,8 @@ const char *fname="qa_full_tables.txt")
    Int_t cnt_TrgDet=0;
    Int_t cnt_monitor_soft=0;
    Int_t cnt_g2t_rch_hit=0;
+   Int_t cnt_kinkVertex=0;
+   Int_t cnt_ev0_eval=0;
 
 
 // Loop over events
@@ -157,6 +154,10 @@ const char *fname="qa_full_tables.txt")
                cnt_monitor_soft++;
             if (strcmp(obj->GetName(),"g2t_rch_hit")==0) 
                cnt_g2t_rch_hit++;
+            if (strcmp(obj->GetName(),"kinkVertex")==0) 
+               cnt_kinkVertex++;
+            if (strcmp(obj->GetName(),"ev0_eval")==0) 
+               cnt_ev0_eval++;
 
           }
         }
@@ -165,99 +166,109 @@ const char *fname="qa_full_tables.txt")
     }
 
 
-      cout  << "QA-> # times Make called = " << evcntr << endl;
-      fout  << "QA-> # times Make called = " << evcntr << endl;
+      cout  << "QAInfo: # times Make called = " << evcntr << endl;
+      fout  << "QAInfo: # times Make called = " << evcntr << endl;
 
-      cout  << "QA-> # times found dst = " << dstcntr << endl << endl;
-      fout  << "QA-> # times found dst = " << dstcntr << endl << endl;
+      cout  << "QAInfo: # times found dst = " << dstcntr << endl << endl;
+      fout  << "QAInfo: # times found dst = " << dstcntr << endl << endl;
 
-      cout << "QA-> total # event_header tables = " << 
+      cout << "QAInfo: total # event_header tables = " << 
          cnt_event_header << endl;
-      fout << "QA-> total # event_header tables = " << 
+      fout << "QAInfo: total # event_header tables = " << 
          cnt_event_header << endl;
 
-      cout << "QA-> total # event_summary tables = " << 
+      cout << "QAInfo: total # event_summary tables = " << 
          cnt_event_summary << endl;
-      fout << "QA-> total # event_summary tables = " << 
+      fout << "QAInfo: total # event_summary tables = " << 
          cnt_event_summary << endl;
 
-      cout << "QA-> total # globtrk tables = " << 
+      cout << "QAInfo: total # globtrk tables = " << 
          cnt_globtrk << endl;
-      fout << "QA-> total # globtrk tables = " << 
+      fout << "QAInfo: total # globtrk tables = " << 
          cnt_globtrk << endl;
 
-      cout << "QA-> total # globtrk_aux tables = " << 
+      cout << "QAInfo: total # globtrk_aux tables = " << 
          cnt_globtrk_aux << endl;
-      fout << "QA-> total # globtrk_aux tables = " << 
+      fout << "QAInfo: total # globtrk_aux tables = " << 
          cnt_globtrk_aux << endl;
 
-      cout << "QA-> total # vertex tables = " << 
+      cout << "QAInfo: total # vertex tables = " << 
          cnt_vertex << endl;
-      fout << "QA-> total # vertex tables = " << 
+      fout << "QAInfo: total # vertex tables = " << 
          cnt_vertex << endl;
 
-      cout << "QA-> total # point tables = " << 
+      cout << "QAInfo: total # point tables = " << 
          cnt_point << endl;
-      fout << "QA-> total # point tables = " << 
+      fout << "QAInfo: total # point tables = " << 
          cnt_point << endl;
 
-      cout << "QA-> total # globtrk2 tables = " << 
+      cout << "QAInfo: total # globtrk2 tables = " << 
          cnt_globtrk2 << endl;
-      fout << "QA-> total # globtrk2 tables = " << 
+      fout << "QAInfo: total # globtrk2 tables = " << 
 	 cnt_globtrk2 << endl;
 
 
-      cout << "QA-> total # primtrk tables = " << 
+      cout << "QAInfo: total # primtrk tables = " << 
          cnt_primtrk << endl;
-      fout << "QA-> total # primtrk tables = " << 
+      fout << "QAInfo: total # primtrk tables = " << 
 	 cnt_primtrk << endl;
 
 
-      cout << "QA-> total # primtrk_aux tables = " << 
+      cout << "QAInfo: total # primtrk_aux tables = " << 
          cnt_primtrk_aux << endl;
-      fout << "QA-> total # primtrk_aux tables = " << 
+      fout << "QAInfo: total # primtrk_aux tables = " << 
 	 cnt_primtrk_aux << endl;
 
 
-      cout << "QA-> total # dst_v0_vertex tables = " << 
+      cout << "QAInfo: total # dst_v0_vertex tables = " << 
          cnt_dst_v0_vertex << endl;
-      fout << "QA-> total # dst_v0_vertex tables = " << 
+      fout << "QAInfo: total # dst_v0_vertex tables = " << 
 	 cnt_dst_v0_vertex << endl;
 
 
-      cout << "QA-> total # dst_xi_vertex tables = " << 
+      cout << "QAInfo: total # ev0_eval tables = " << 
+         cnt_ev0_eval << endl;
+      fout << "QAInfo: total # ev0_eval tables = " << 
+	 cnt_ev0_eval << endl;
+
+      cout << "QAInfo: total # dst_xi_vertex tables = " << 
          cnt_dst_xi_vertex << endl;
-      fout << "QA-> total # dst_xi_vertex tables = " << 
+      fout << "QAInfo: total # dst_xi_vertex tables = " << 
 	 cnt_dst_xi_vertex << endl;
 
+      cout << "QAInfo: total # kinkVertex tables = " << 
+         cnt_kinkVertex << endl;
+      fout << "QAInfo: total # kinkVertex tables = " << 
+	 cnt_kinkVertex << endl;
 
-      cout << "QA-> total # dst_dedx tables = " << 
+
+      cout << "QAInfo: total # dst_dedx tables = " << 
          cnt_dst_dedx << endl;
-      fout << "QA-> total # dst_dedx tables = " << 
+      fout << "QAInfo: total # dst_dedx tables = " << 
 	 cnt_dst_dedx << endl;
 
 
-      cout << "QA-> total # particle tables = " << 
+      cout << "QAInfo: total # particle tables = " << 
          cnt_particle << endl;
-      fout << "QA-> total # particle tables = " << 
+      fout << "QAInfo: total # particle tables = " << 
 	 cnt_particle << endl;
 
 
-      cout << "QA-> total # TrgDet tables = " << 
+      cout << "QAInfo: total # TrgDet tables = " << 
          cnt_TrgDet << endl;
-      fout << "QA-> total # TrgDet tables = " << 
+      fout << "QAInfo: total # TrgDet tables = " << 
 	 cnt_TrgDet << endl;
 
 
-      cout << "QA-> total # monitor_soft tables = " << 
+      cout << "QAInfo: total # monitor_soft tables = " << 
          cnt_monitor_soft << endl;
-      fout  << "QA-> total # monitor_soft tables = " << 
+      fout  << "QAInfo: total # monitor_soft tables = " << 
 	 cnt_monitor_soft << endl;
 
 
-      cout  << "QA-> total # g2t_rch_hit tables = " << 
+      cout  << "QAInfo: total # g2t_rch_hit tables = " << 
          cnt_g2t_rch_hit << endl;
-      fout  << "QA-> total # g2t_rch_hit tables = " << 
+      fout  << "QAInfo: total # g2t_rch_hit tables = " << 
 	 cnt_g2t_rch_hit << endl;
 
 
