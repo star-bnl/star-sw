@@ -148,7 +148,7 @@ void StTpcHitMover::moveTpcHit(Float_t pos[3], Float_t posMoved[3],
   // ExB corrections
   if (m_Mode & 0x01) {
     // option handling needs some clean up, but right now we stay compatible
-    Int_t option = (m_Mode & 0x3FFE) >> 1;
+    Int_t option = (m_Mode & 0x7FFE) >> 1;
     if (! mExB ) {
       TDataSet *RunLog = GetDataBase("RunLog");
       mExB = new StMagUtilities(gStTpcDb, RunLog, option);
