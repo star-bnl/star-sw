@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.9 2002/04/11 14:19:30 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.10 2002/04/17 21:04:16 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -343,11 +343,18 @@ void StMuDstMaker::openRead() {
 //-----------------------------------------------------------------------
 void StMuDstMaker::read(){
   DEBUGMESSAGE2("");
-  if ( !(mEventCounter<mChain->GetEntries()) ) throw StMuExceptionEOF("end of input",PF);
-  if (mChain->GetCurrentFile()) cout << mChain->GetCurrentFile()->GetName() << endl;
-  mChain->GetEntry(mEventCounter);
-  mEventCounter++;
-  
+   if (mChain->GetCurrentFile()) {
+     cout << mChain->GetCurrentFile()->GetName() << endl;
+   } 
+   int bytes = 0;
+   while (bytes==0 ) {
+     DEBUGVALUE3(mEventCounter);
+     if ( mEventCounter >= mChain->GetEntries() ) throw StMuExceptionEOF("end of input",PF);
+     bytes = mChain->GetEntry(mEventCounter++);
+     DEBUGVALUE3(bytes);
+   }
+   //  mEventCounter++;
+   
   return;
 }
 //-----------------------------------------------------------------------
@@ -719,6 +726,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.10  2002/04/17 21:04:16  laue
+ * minor updates
+ *
  * Revision 1.9  2002/04/11 14:19:30  laue
  * - update for RH 7.2
  * - decrease default arrays sizes
