@@ -73,12 +73,9 @@ double  StiKalmanTrack::getRapidity()       const
   if (mass<0)
     throw runtime_error("StiKalmanTrack::getRapidity() - particle mass unknown");
   double e = sqrt(mass*mass+p[0]*p[0]+p[1]*p[1]+p[2]*p[2]);
-  double nn = e+p[2];
-  double dd = e-p[2];
-  if (dd>0 && nn>0)
-    return 0.5*log(nn/dd);
-  else
-    return -999.;
+	if (e<=p[2])
+		throw runtime_error("StiKalmanTrack::getRapidity() - Error: e<=pz");
+	return 0.5*log(e+p[2]/e-p[2]);
 }
 
 double  StiKalmanTrack::getPseudoRapidity() const
@@ -176,7 +173,7 @@ StiKalmanTrackNode * StiKalmanTrack::insertHit(StiHit *hInserted, StiHit * targe
     {
       StiKalmanTrackNode * pn = findHit(targetParent);
       if (pn==0)
-	  throw runtime_error("SKT::insertHit() - ERROR - Attempted hit insertion after hit which does not belong to this track");
+	  throw logic_error("SKT::insertHit() - ERROR - Attempted hit insertion after hit which does not belong to this track");
       else
 	{
 	  StiKalmanTrackNode * cn = static_cast<StiKalmanTrackNode *> (pn->getFirstChild());
@@ -234,7 +231,7 @@ void StiKalmanTrack::removeHit(StiHit *h)
 	}
     }
   else
-    throw runtime_error("StiKalmanTrack::removeHit() - Error - Given hit does not belong to this track");
+    throw logic_error("StiKalmanTrack::removeHit() - Error - Given hit does not belong to this track");
 }
 
 StiKalmanTrackNode * StiKalmanTrack::findHit(StiHit * h)
@@ -325,37 +322,38 @@ void StiKalmanTrack::initialize(double curvature,
     //cout <<"\tAdd Hits"<<endl;
     for (it=v.begin(); it!=v.end(); ++it)
       {
-	//cout <<"===========Adding Hit: "<<(*(*it))<<endl;
-	StiDetector* layer = (*it)->detector();
-	if (!layer) 
-	  throw runtime_error("StiKalmanTrack::initialize() ERROR:\t Hit has null detector.");
-	alpha = layer->getPlacement()->getNormalRefAngle();
-	node = fac->getObject();
-	if (node==0)
-	  throw runtime_error("StiKalmanTrack::initialize() ERROR:\t Null node returned by Node factory");
-	node->reset();
-	if (pNode==0)
-	  alphaP = -99999.; // no parent, set crazy value
-	else
-	  alphaP = pNode->fAlpha; // value of the parent
-	if (alphaP!=alpha)
-	  {
-	    StThreeVectorD temp = origin;
-	    temp.rotateZ(-alpha);
-	    eta = curvature*temp.x();
-	  }
-	state[0] = (*it)->y(); 
-	state[1] = (*it)->z(); 
-	state[2] = eta;
-	node->set(i, (*it), alpha, (*it)->x(), state,error, 0., 0.);
-	if (pNode==0) 
-	  firstNode = node;
-	else
-	  {
-	    pNode->add(node);
-	  }
-	pNode = node;
-	i++;
+				//cout <<"===========Adding Hit: "<<(*(*it))<<endl;
+				StiDetector* layer = (*it)->detector();
+				if (!layer) 
+					throw logic_error("StiKalmanTrack::initialize() ERROR:\t Hit has null detector.");
+				alpha = layer->getPlacement()->getNormalRefAngle();
+				node = fac->getObject();
+				if (node==0)
+					throw logic_error("StiKalmanTrack::initialize() ERROR:\t Null node returned by Node factory");
+				node->reset();
+				if (pNode==0)
+					alphaP = -99999.; // no parent, set crazy value
+				else
+					alphaP = pNode->fAlpha; // value of the parent
+				if (alphaP!=alpha)
+					{
+						StThreeVectorD temp = origin;
+						temp.rotateZ(-alpha);
+						eta = curvature*temp.x();
+					}
+				state[0] = (*it)->y(); 
+				state[1] = (*it)->z(); 
+				state[2] = eta;
+				node->set(i, (*it), alpha, (*it)->x(), state,error, 0., 0.);
+				if (pNode==0) 
+					firstNode = node;
+				else
+					{
+						pNode->add(node);
+					}
+				pNode = node;
+				lastNode = node;
+				i++;
       }
 }
 
@@ -389,55 +387,42 @@ StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
 StThreeVector<double>
 StiKalmanTrack::getHitPositionNear(double x) const
 {
-    /*
-      Returns the hit position associated with the node nearest to the given "x" value.
-    */
-    StiKalmanTrackNode * node = getNodeNear(x);
-    if (node==0)
-	return StThreeVector<double>(0.,0.,0.);
-    else 
-	{
-	    StiHit * hit = node->getHit();
-	    StThreeVectorF pos = hit->globalPosition();
-	    return StThreeVector<double>( pos.x(), pos.y(), pos.z() );
-	}
+	/*
+		Returns the hit position associated with the node nearest to the given "x" value.
+	*/
+	StiKalmanTrackNode * node = getNodeNear(x);
+	if (node==0)
+		throw logic_error("StiKalmanTrack::getHitPositionNear(double x) - ERROR - node==0");
+	StiHit * hit = node->getHit();
+	if (hit==0)
+		throw runtime_error("StiKalmanTrack::getHitPositionNear(double x) - ERROR - hit==0");
+	StThreeVectorF pos = hit->globalPosition();
+	return StThreeVector<double>( pos.x(), pos.y(), pos.z() );
 }
 
 StThreeVector<double> StiKalmanTrack::getPointNear(double x) const
 {
-    // returns point in local coordinates
-    double xx,yy,zz;
-    StiKalmanTrackNode * node = getNodeNear(x);
-    if (node==0)
-	return StThreeVector<double>(0.,0.,0.);
-    else 
-	{
-	    xx = node->fX;
-	    yy = node->fP0;
-	    zz = node->fP1;
-	    return (StThreeVector<double>(xx, yy,zz));
-	}
+	// returns point in local coordinates
+	StiKalmanTrackNode * node = getNodeNear(x);
+	if (node==0)
+		throw logic_error("StiKalmanTrack::getPointNear(double x) - ERROR - node==0");
+	return StThreeVector<double>(node->fX, node->fP0, node->fP1);
 }
 
 StThreeVector<double> StiKalmanTrack::getGlobalPointNear(double x) const
 {
-    // returns point in local coordinates
-    double xx,yy,zz;
-    StiKalmanTrackNode * node = getNodeNear(x);
-    if (node==0)
-	return StThreeVector<double>(0.,0.,0.);
-    else 
-	{
-	    xx = node->fX;
-	    yy = node->fP0;
-	    zz = node->fP1;
-	    double alpha = node->fAlpha;
-	    double ca = cos(alpha);
-	    double sa = sin(alpha);
-	    double gx = ca*xx-sa*yy;
-	    double gy = sa*xx+ca*yy;
-	    return (StThreeVector<double>(gx,gy, zz));
-	}
+	// returns point in local coordinates
+	double xx,yy,zz;
+	StiKalmanTrackNode * node = getNodeNear(x);
+	if (node==0)
+		throw logic_error("StiKalmanTrack::getGlobalPointNear(double x) - ERROR - node==0");
+	xx = node->fX;
+	yy = node->fP0;
+	zz = node->fP1;
+	double alpha = node->fAlpha;
+	double ca = cos(alpha);
+	double sa = sin(alpha);
+	return (StThreeVector<double>(ca*xx-sa*yy, sa*xx+ca*yy, zz));
 }
 
 
@@ -455,33 +440,25 @@ StThreeVector<double> StiKalmanTrack::getGlobalPointAt(double x) const
 
     double xx,yy,zz;
     StiKalmanTrackNode * nearNode = getNodeNear(x);
+    if (nearNode==0)
+			throw logic_error("StiKalmanTrack::getGlobalPointAt(double x) - ERROR - nearNode==0");
     StiObjectFactoryInterface<StiKalmanTrackNode> * f 
-	= static_cast<StiObjectFactoryInterface<StiKalmanTrackNode>*>(trackNodeFactory);
+			= static_cast<StiObjectFactoryInterface<StiKalmanTrackNode>*>(trackNodeFactory);
+		if (f==0)
+			throw logic_error("StiKalmanTrack::getGlobalPointAt(double x) - ERROR - no factory f==0");
     StiKalmanTrackNode * n = f->getObject();
+    if (n==0)
+			throw logic_error("StiKalmanTrack::getGlobalPointAt(double x) - ERROR - n==0");
     n->reset();
     n->setState(nearNode);
-    if (n==0 || nearNode==0)
-	return StThreeVector<double>(0.,0.,0.);
-    else 
-	{
-	  try 
-	    {
-	      n->propagate(x);
-	    }
-	  catch (runtime_error& rte)
-	    {
-	      return StThreeVector<double>(0.,0.,0.);
-	    }
-	  xx = n->fX;
+		n->propagate(x);
+		xx = n->fX;
 	  yy = n->fP0;
 	  zz = n->fP1;
 	  double alpha = n->fAlpha;
 	  double ca = cos(alpha);
 	  double sa = sin(alpha);
-	  double gx = ca*xx-sa*yy;
-	  double gy = sa*xx+ca*yy;
-	  return (StThreeVector<double>(gx,gy, zz));
-	}
+	  return (StThreeVector<double>(ca*xx-sa*yy, sa*xx+ca*yy, zz));
 }
 
 
@@ -504,7 +481,7 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
     pz = 0;
     StiKalmanTrackNode * inner = getInnerMostNode();
     if (inner==0)
-      throw runtime_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
+      throw logic_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
     inner->propagate(0.);
     double p[3];
     double e[6];
@@ -562,7 +539,7 @@ int    StiKalmanTrack::getGapCount()    const
   int gaps = 0;
   if (firstNode)
     {
-      StiKTNForwardIterator it(getLastNode());
+      StiKTNBidirectionalIterator it(getLastNode());
       bool inGap = false;
       while(it!=it.end())
 	{
@@ -596,7 +573,7 @@ int    StiKalmanTrack::getFitPointCount()    const
 {
   /*  if (firstNode)
     {
-      StiKTNForwardIterator it(getLastNode());
+      StiKTNBidirectionalIterator it(getLastNode());
       int nPts = 0;
       while(it!=it.end())
 	{
@@ -611,20 +588,19 @@ int    StiKalmanTrack::getFitPointCount()    const
     return 0;
 }
 
-StiKTNForwardIterator StiKalmanTrack::begin() const 
+StiKTNBidirectionalIterator StiKalmanTrack::begin() const 
 {
-	return StiKTNForwardIterator(firstNode);
+	return StiKTNBidirectionalIterator(firstNode);
 }
 
-StiKTNForwardIterator StiKalmanTrack::end() const 
+StiKTNBidirectionalIterator StiKalmanTrack::end() const 
 {
-	return StiKTNForwardIterator(lastNode);
+	return StiKTNBidirectionalIterator(lastNode);
 }
-
 
 int    StiKalmanTrack::getPointCount() const
 {
-	StiKTNForwardIterator it;
+	StiKTNBidirectionalIterator it;
 	int nPts = 0;
 	for (it=begin();it!=end();it++)
 		{
@@ -646,7 +622,7 @@ StiKalmanTrackNode * StiKalmanTrack::getOuterMostNode()  const
   if (trackingDirection==kOutsideIn)
     return firstNode;
   else
-    return getLastNode();
+    return lastNode;
 }
 
 /// Accessor method returns the inner most node associated with the track.
@@ -655,97 +631,57 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostNode()   const
   if (trackingDirection==kInsideOut)
     return firstNode;
   else
-    return getLastNode();
+    return lastNode;
 }
 
 StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode()  const
 {
-  StiKalmanTrackNode * pNode;
-  StiKalmanTrackNode * cNode;
-  if (firstNode==0)
-    throw runtime_error("StiKalmanTrack::getOuterMostHitNode() - ERROR - firstNode==0");
-	StiKTNForwardIterator it(firstNode);
+  if (firstNode==0 || lastNode==0)
+    throw logic_error("StiKalmanTrack::getOuterMostHitNode() - ERROR - firstNode||lastNode==0");
+	StiKTNBidirectionalIterator it;
 	
   if (trackingDirection==kOutsideIn)
     {
-      if ((*it).getHit())
-				return &*it;
-      else
+			for (it=begin();it!=end();it++)
 				{
-					pNode = firstNode; // parent
-					while (pNode->getChildCount()>0) 
-						{
-							cNode = static_cast<StiKalmanTrackNode *>(pNode->getFirstChild());
-							if (cNode==0)
-								throw runtime_error("StiKalmanTrack::getOuterMostHitNode() - ERROR - pNode reports childCount>0 but has no children");
-							if (cNode->getHit())
-								return cNode;
-							pNode = cNode;
-						}
+					if ((*it).getHit())
+						return &*it;
+				}
+		}
+	else
+		{	
+			for (it=end();it!=begin();it--)
+				{
+					if ((*it).getHit())
+						return &*it;
 				}
     }
-  else
-    {
-      cNode = getLastNode();  
-      if (cNode->getHit())
-				return cNode;
-      else
-				{
-					pNode = static_cast<StiKalmanTrackNode *>(cNode->getParent());
-					while (pNode)
-						{
-							if (pNode->getHit())
-								return pNode;
-							cNode = pNode;
-							pNode = static_cast<StiKalmanTrackNode *>(cNode->getParent());
-						}
-				}
-    }
-  throw runtime_error("StiKalmanTrack::getOuterMostHitNode() - ERROR - Track has no hit");
+  throw logic_error("StiKalmanTrack::getOuterMostHitNode() - ERROR - Track has no hit");
 }
 
 StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
 {
-  StiKalmanTrackNode * pNode;
-  StiKalmanTrackNode * cNode;
-  if (firstNode==0)
-    throw runtime_error("StiKalmanTrack::getInnerMostHitNode() - ERROR - firstNode==0");
+  if (firstNode==0 || lastNode==0)
+    throw logic_error("StiKalmanTrack::getInnerMostHitNode() - ERROR - firstNode||lastNode==0");
+	StiKTNBidirectionalIterator it;
+	
   if (trackingDirection==kInsideOut)
-    { 
-      if (firstNode->getHit())
-	return firstNode;
-      else
-	{
-	  pNode = firstNode; // parent
-	  while (pNode->getChildCount()>0) 
-	    {
-	      cNode = static_cast<StiKalmanTrackNode *>(pNode->getFirstChild());
-	      if (cNode==0)
-		throw runtime_error("StiKalmanTrack::getInnerMostHitNode() - ERROR - pNode reports childCount>0 but has no children");
-	      if (cNode->getHit())
-		return cNode;
-	      pNode = cNode;
-	    }
-	}
-    }
-  else
     {
-      cNode = getLastNode();  
-      if (cNode->getHit())
-	return cNode;
-      else
-	{
-	  pNode = static_cast<StiKalmanTrackNode *>(cNode->getParent());
-	  while (pNode)
-	    {
-	      if (pNode->getHit())
-		return pNode;
-	      cNode = pNode;
-	      pNode = static_cast<StiKalmanTrackNode *>(cNode->getParent());
-	    }
-	}
+			for (it=begin();it!=end();it++)
+				{
+					if ((*it).getHit())
+						return &*it;
+				}
+		}
+	else
+		{	
+			for (it=end();it!=begin();it--)
+				{
+					if ((*it).getHit())
+						return &*it;
+				}
     }
-  throw runtime_error("StiKalmanTrack::getInnerMostHitNode() - ERROR - Track has no hit");
+  throw logic_error("StiKalmanTrack::getInnerMostHitNode() - ERROR - Track has no hit");
 }
 
 

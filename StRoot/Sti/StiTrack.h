@@ -33,11 +33,6 @@ public:
   virtual void reset();
     virtual void fit(); //throw (Exception);
 
-  // accessor methods
-  
-  virtual double  getMass()           const=0;   // mass when pid known
-  virtual int     getCharge()         const=0;   // charge of the particle
-  virtual double  getChi2()           const=0;   // chi2 of fit
 
     //This is for full state (3 mom + error matrix) 
     virtual void    getMomentum(double p[3], double e[6]) const =0;
@@ -66,10 +61,38 @@ public:
     
     StiHit * getVertex() const;  // return pointer to vertex associated with this track if any. 
     
-    void  setCharge(int v)   ;   // charge of the particle
-    void  setChi2(double v)        ;  // chi2 of fit
-    void  setFitPointCount(int v) ;  // number of points used in fit
-    void  setPointCount(int v)    ;  // number of points currently assigned to the track;
+  // accessor methods
+  
+		/// Get mass of the particle that produced this track
+		virtual double  getMass() const
+			{ 
+				return m;
+			}
+		
+		/// Get charge of the particle that produced this track
+		virtual int     getCharge() const
+			{
+				return q;
+			}
+		
+		/// Get chi2 of this track
+		virtual double  getChi2() const
+			{
+				return chi2;
+			}
+		
+		/// Set charge  of the particle that produced this track
+    void  setCharge(int v)
+			{
+				q = v;
+			}
+
+		/// Set chi2 of the track
+    void  setChi2(double v)
+			{
+				chi2 = v;
+			}
+
     void  setVertex(StiHit *v);
     void setSeedHitCount(int c) {mSeedHitCount=c;}
 

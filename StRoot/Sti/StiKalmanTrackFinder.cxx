@@ -274,6 +274,7 @@ void StiKalmanTrackFinder::doTrackFind()
       trackMes <<"StiKalmanTrackFinder::doTrackFind()\t Got Valid track"<<endl;
 
       findTrack(track);
+			cout << " StiKalmanTrackFinder::doTrackFind() - done" << endl;
 
       trackMes << " SKTFinder::doTrackFind() - Track Parameters" << endl << *track;
 			if (pars->useTrackFilter)
@@ -356,8 +357,11 @@ void StiKalmanTrackFinder::findTrack(StiTrack * t)
       cout << "SKTF::findTrack() exception: " << e.what();
       track->setFlag(0);
     }
+	cout << " findTrack(StiTrack * t)  - track completed " << endl;
   pruneNodes(lastNode);
+	cout << " findTrack(StiTrack * t)  - track pruned " << endl;
   reserveHits(lastNode);
+	cout << " findTrack(StiTrack * t)  - track has reserved hits " << endl;
   track->setChi2(lastNode->fChi2);
   using namespace std;
   if (lastNode->fP3*StiKalmanTrackNode::getFieldConstant()>0)
@@ -365,6 +369,8 @@ void StiKalmanTrackFinder::findTrack(StiTrack * t)
   else
     track->setCharge(1);
   if (pars->xtrapolateToMainVertex) extendToMainVertex(lastNode);
+	cout << " findTrack(StiTrack * t)  - extend called " << endl;
+
 }
 
 void StiKalmanTrackFinder::doInitTrackSearch()
@@ -383,7 +389,7 @@ void StiKalmanTrackFinder::doInitTrackSearch()
 	  trackMes << "NO MORE TRACK SEEDS - EVENT COMPLETED" << endl;
 	  return;
 	}
-      //throw logic_error("SKTF::doInitTrackSearch() - Error - trackSeedFinder->next() returned 0 while trackSeedFinder->hasMore() returned thrue");
+      //throw logic_error("SKTF::doInitTrackSearch() - Error - trackSeedFinder->next() returned 0 while trackSeedFinder->hasMore() returned true");
       //trackMes <<"SKTF::doTrackFind()\t Got Valid track"<<endl;
       StiKalmanTrackNode * lastNode = track->getLastNode();
       if (!lastNode) 
@@ -411,7 +417,7 @@ void StiKalmanTrackFinder::doFinishTrackSearch()
 		{
 			trackContainer->push_back(track);
 		}
-
+	cout << " doFinishTrackSearch() - track done - now update display" << endl;
   track->update();  //This updates the track on the display
 }
 
@@ -450,6 +456,7 @@ void StiKalmanTrackFinder::search()
       doScanLayer();
       doFinishLayer();
     }
+	cout << " StiKalmanTrackFinder::search() done" << endl;
 }
 
 void StiKalmanTrackFinder::doInitLayer()
@@ -465,7 +472,10 @@ void StiKalmanTrackFinder::doInitLayer()
   leadDet = tDet;
   //trackMes << "TDET:" << *tDet<<endl;
   if (tDet==0) 
-    throw logic_error("SKTF::doInitLayer() ERROR - tDet==0");
+		{
+			cout << "StiKalmanTrackFinder::doInitLayer() - LOGIC ERROR - tDet==0" << endl;
+			throw logic_error("SKTF::doInitLayer() ERROR - tDet==0");
+		}
   else if (tDet==currentDet) 
     {
       //trackMes << "SKTF::doInitLayer() - TrackDone==true - moveIn >> tDet==sDet"  << endl;
@@ -725,6 +735,13 @@ void StiKalmanTrackFinder::reserveHits(StiKalmanTrackNode * node)
   StiKTNForwardIterator it(node);
   for_each( it, it.end(), SetHitUsed() );
 }
+
+void StiKalmanTrackFinder::extendToMainVertex(StiKalmanTrackNode * node)
+{
+	// to be implemented...
+}
+
+
 
 /*
   
