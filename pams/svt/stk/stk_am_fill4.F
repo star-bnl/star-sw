@@ -1348,6 +1348,8 @@ C     spt(ispts(k)).id_track     = itrack
                         done(4)   = .true.
                         done(5)   = .true.
                         done(6)   = .true.
+                        done(7)   = .true.
+                        done(8)   = .true.
                         stk_am_fill4 = stafcv_bad
                         goto 117
                      endif
