@@ -44,7 +44,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.60 2003/11/25 04:13:25 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.61 2003/12/01 18:22:31 perev Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -801,9 +801,7 @@ StEventMaker::makeEvent()
 
     for (i=0; i<nVertices; i++) {
         if (dstVertices[i].iflag <=0) 	 continue;
-        dstVertices[i].iflag = -abs(dstVertices[i].iflag);
-        if (badDstVertex(dstVertices+i)) continue;
-        dstVertices[i].iflag =  abs(dstVertices[i].iflag);
+        if (badDstVertex(dstVertices+i)) {dstVertices[i].iflag = -abs(dstVertices[i].iflag);continue;}
         if (dstVertices[i].iflag < 100 && dstVertices[i].iflag%10 == 1 &&
 	    dstVertices[i].vtx_id == kEventVtxId ) {
             StPrimaryVertex *pvtx = new StPrimaryVertex(dstVertices[i]);
@@ -1588,8 +1586,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.60 2003/11/25 04:13:25 perev Exp $
+ * $Id: StEventMaker.cxx,v 2.61 2003/12/01 18:22:31 perev Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.61  2003/12/01 18:22:31  perev
+ * Fix bug in bad track filter. Thanks to Helen
+ *
  * Revision 2.60  2003/11/25 04:13:25  perev
  * FPE protection
  *
