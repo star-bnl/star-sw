@@ -5,11 +5,11 @@
  This file (and its companion cuts.h, which you should #include in your
  files where you call anything from this file, contain
  software for doing table cuts under dsl for STAR.  You must link
- to STAR's dsl lib (-ldsl).
+ to STAR's dsl and dsu libraries.
  There are two functions (DoCuts() and RowPassedCuts()) that you call.
  Here is how to use them.
  1.  Declarations:
-        char ba[NBYTES];       NOTE:   ba=Boolean Array
+        char ba[NBYTES];       (ba means Boolean Array)
         size_t rowIndex,nBytes;
         DS_DATASET_T *pTable;
  2.  Determine the number of rows in your table.  Divide this number by 8,
@@ -43,9 +43,11 @@
      void Say(char *errMessageFromCuts) {
        printf("Error message from cuts:\n%s\n",errMessageFromCuts);
      }
- 8.  You must provide a second function named FatalError.  Simple example:
+ 8.  You must provide a second function named Err.  You might use the
+     following code for your Err() (this has to be (this has to be in
+     YOUR code for ME to call):
          #include <stdio.h>
-         void FatalError(int xx) {
+         void Err(int xx) {
             printf("Fatal error number %d during cuts.\n",xx);
          }
 */
