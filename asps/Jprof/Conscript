@@ -1,6 +1,5 @@
 #!/opt/star/bin/perl
-
-Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
+Import qw ( env INCLUDE LIB BIN BUILD OBJ);
 (my $build = $OBJ) =~ s/\#//g;
 $build =~ s/\\/\//g;
 
@@ -44,7 +43,7 @@ $tmp =~ s/\#//;
 if( -d $tmp){ $LIBPATH = $tmp;}
 
 
-
+if ($param::debug) {
 # Display new or current values
 print "\tLibraries = $Libraries\n";
 print "\tCPPPATH   = $CPPPATH\n";
@@ -52,7 +51,7 @@ print "\tLIBPATH   = $LIBPATH\n";
 print "\tSOFLAGS   = $SOFLAGS\n";
 print "\tCXXFLAGS  = $CXXFLAGS\n";
 print "\tCPPFLAGS  = $CPPFLAGS\n";
-
+}
 # Find sources and determine what should go in t
 # the library. /leaky/ is pretty much hardcoded.
 foreach $file (script::find_sources($Dir)){
