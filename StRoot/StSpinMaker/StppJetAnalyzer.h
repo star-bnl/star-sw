@@ -11,7 +11,7 @@
 #include "TObject.h"
 #include "StJetFinder/StJetFinder.h"
 #include "StJetFinder/FourVec.h"
-#include "StJetFinder/StProtoJet.h"
+#include "../StJetFinder/StProtoJet.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StJets.h"
 
@@ -29,7 +29,7 @@ class StppJetAnalyzer
 {
 public:
     typedef StJetFinder::JetList JetList;
-    typedef list<AbstractFourVec*> FourList;
+    typedef vector<AbstractFourVec*> FourList;
     
     StppJetAnalyzer();
     virtual ~StppJetAnalyzer();
@@ -77,7 +77,7 @@ public:
 
     //action
     virtual void setEvent(StppEvent* e);
-    virtual void setFourVec(StMuTrackFourVec* tracks, int numTracks);
+    virtual void setFourVec(FourList &tracks);
     virtual void print();
     virtual void findJets();
     virtual void fillHists();
@@ -114,7 +114,7 @@ protected:
     void acceptJets(void);
     bool acceptJet(StProtoJet &pj);
     void fillLists();
-    void fillLists(StMuTrackFourVec* tracks, int numTracks);
+    void fillLists(FourList &tracks);
     void bookHists();
     
     //new
@@ -158,3 +158,6 @@ private:
 
 
 #endif
+
+
+
