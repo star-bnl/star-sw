@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.10 2001/03/22 20:46:53 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.11 2001/04/25 18:37:28 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.11  2001/04/25 18:37:28  perev
+ * HPcorrs
+ *
  * Revision 1.10  2001/03/22 20:46:53  caines
  * Comment out some of the QA histograms
  *
@@ -440,7 +443,7 @@ Int_t StSvtClusterAnalysisMaker::GetPixelData(int index)
      for(int an = 1; an <= 240; an++)
        {
          if(an < 30)
-	 cout<<"Pixel"<<"\["<<an - 1<<"]"<<"\["<<tim<<"] = "<< mHybridPixelData->getPixelContent(an,tim)<<endl;
+	 cout<<"Pixel"<<"["<<an - 1<<"]"<<"["<<tim<<"] = "<< mHybridPixelData->getPixelContent(an,tim)<<endl;
       }
     }
  

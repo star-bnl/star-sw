@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.11 2001/04/21 21:47:39 caines Exp $
+ * $Id: StSvtAnalysis.cc,v 1.12 2001/04/25 18:34:44 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -51,6 +51,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.12  2001/04/25 18:34:44  perev
+ * HPcorrs
+ *
  * Revision 1.11  2001/04/21 21:47:39  caines
  * Fix int to double problem
  *
@@ -254,10 +257,10 @@ void StSvtAnalysis::SetPointers(StSvtHybridData* hybAdjData,
   }
 
   //this is called for each new event
-  for (int i=0; i<NumberOfHybrids; i++) {
-    for (int j=0; j<242; j++) m_countBadAn[i][j] = 0;
-    for (int j=0; j<129; j++) m_countBadTb[i][j] = 0;
-  }
+   {for (int i=0; i<NumberOfHybrids; i++) {
+     {for (int j=0; j<242; j++) m_countBadAn[i][j] = 0;}
+     {for (int j=0; j<129; j++) m_countBadTb[i][j] = 0;}
+   }}
 
 }
 
@@ -285,7 +288,7 @@ void StSvtAnalysis::FirstAndLastAnodes()
 	}
       else
 	{
-	  for(int j = 1; j<mNumOfMembers ; j++)
+	  {for(int j = 1; j<mNumOfMembers ; j++)
 	    {
 	      actualAn =  tempMemberInfo[clu][mem].actualAnode;
 	      actualan = tempMemberInfo[clu][j].actualAnode;
@@ -297,10 +300,10 @@ void StSvtAnalysis::FirstAndLastAnodes()
 		  mCluFirstAnode[clu]= actualan;
 		  mem = j;
 		}
-	    }
+	    }}
 	  
 	  mem = 0;
-	  for(int j = 1; j<mNumOfMembers ; j++)
+	  {for(int j = 1; j<mNumOfMembers ; j++)
 	    {
 	      actualAn = tempMemberInfo[clu][mem].actualAnode;
 	      actualan = tempMemberInfo[clu][j].actualAnode;
@@ -313,7 +316,7 @@ void StSvtAnalysis::FirstAndLastAnodes()
 		  mCluLastAnode[clu] =  actualan;
 		  mem = j;
 		}
-	    }
+	    }}
 	  
 	}
     }
@@ -586,10 +589,10 @@ void StSvtAnalysis::finalMoments(int clu,int numAnodes)
        double Neff = (double) mSumAdc*mSumAdc/mNeff;  
        if (Neff>1.5)                                                 //make sure calc. does not mess up
        {
-         mDriftMom2 = mDriftMom2 * sqrt( (Neff/(Neff-1)) );
-         mAnodeMom2 = mAnodeMom2 * sqrt( (Neff/(Neff-1)) );
-         if (mDriftMom2!=0) mY_err = 260.e-4*mDriftMom2/sqrt(Neff); /*is 0 for 1 drift wonders. Units: cm*/
-         if (mAnodeMom2!=0) mX_err = 250.e-4*mAnodeMom2/sqrt(Neff); /*is 0 for 1 anode wonders. Units: cm*/
+         mDriftMom2 = mDriftMom2 * sqrt( (double(mNeff)/(mNeff-1)) );
+         mAnodeMom2 = mAnodeMom2 * sqrt( (double(mNeff)/(mNeff-1)) );
+         if (mDriftMom2!=0) mY_err = 260.e-4*mDriftMom2/sqrt(double(mNeff)); /*is 0 for 1 drift wonders. Units: cm*/
+         if (mAnodeMom2!=0) mX_err = 250.e-4*mAnodeMom2/sqrt(double(mNeff)); /*is 0 for 1 anode wonders. Units: cm*/
        }
    
        if (numAnodes==1 && mAnodeMom2==0) mAnodeMom2=0.288;    //bin width/sqrt(12)
@@ -1411,7 +1414,7 @@ void StSvtAnalysis::Report(int index)
 
  else {
 
- for(int clu = 0; clu <  mNumOfClusters; clu++)
+ {for(int clu = 0; clu <  mNumOfClusters; clu++)
    { 
     mNumOfMembers = mHybridCluster->getNumberOfMembers(clu);
 
@@ -1425,16 +1428,16 @@ void StSvtAnalysis::Report(int index)
     
     cout<<"****************************************************"<<"\n";
     cout<<"\n";
-   }
+   }}
  cout<<"****************************************************"<<endl;
  cout<<"------- Moment Analysis Results for hybrid "<<index<<" ------"<<endl;
  cout<<"****************************************************"<<endl;
  
- for( int clu = 0; clu <  mNumOfClusters; clu++)
+ {for( int clu = 0; clu <  mNumOfClusters; clu++)
    {
     cout<<"mAverageHybAn"<<"["<<clu<<"] ="<<mMeanClusterAnode[clu]<<endl;
     cout<<"mAverageTimeBin"<<"["<<clu<<"] ="<<mMeanClusterTimeBin[clu]<<endl;
-   }
+   }}
 
   cout<<"--------------------------------------------------------"<<endl;
  }
