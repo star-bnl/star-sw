@@ -1,5 +1,8 @@
-// $Id: bfcread_dstBranch.C,v 1.14 2000/06/02 19:33:35 kathy Exp $
+// $Id: bfcread_dstBranch.C,v 1.15 2000/06/13 15:41:44 kathy Exp $
 // $Log: bfcread_dstBranch.C,v $
+// Revision 1.15  2000/06/13 15:41:44  kathy
+// add a few more counters so we know how many events have dst tables and how many have RunEvent object
+//
 // Revision 1.14  2000/06/02 19:33:35  kathy
 // now unpack and print out contents of BfcStatus table every event
 //
@@ -84,6 +87,8 @@ void bfcread_dstBranch(
 
   Float_t countevdstB=0.0;
   Float_t countevdst=0.0;
+  Float_t countevdstTab=0.0;
+  Float_t countevdstRE=0.0;
   Float_t countevobjd=0.0;
   Float_t countevtabd=0.0;
   Float_t countevobjb=0.0;
@@ -96,6 +101,9 @@ EventLoop: if (iev < nevents && !istat) {
   Int_t Countevtabd=0;
   Int_t Countevobjb=0;
   Int_t Countevtabb=0;
+
+  Int_t countholdT=0;
+  Int_t countre=0;
 
     chain->Clear();
     istat = chain->Make(iev);
@@ -172,9 +180,7 @@ EventLoop: if (iev < nevents && !istat) {
           Countevtabd++;
         }
  
-
       }
-
 
 // now look under dst branch
       if (dsName == "dst") {
@@ -197,10 +203,16 @@ EventLoop: if (iev < nevents && !istat) {
           countevobjd++;
           Countevobjd++;
 
+         TString dstobjName =  obj->GetName();
+         if (dstobjName == "RunEvent") {
+	   countre=1;
+        }
+
 //.. count all tables that exist:
           if (obj->InheritsFrom("TTable")) {
             tabl = (TTable *)tabiter.Find(obj->GetName());
             if (tabl) {
+              counthold=1;
 	      countevtabd++;
               Countevtabd++;
 
@@ -216,6 +228,7 @@ EventLoop: if (iev < nevents && !istat) {
 	}  // while obj
 
       } // dsName = dst
+
 
     } // while dstBranch
 
@@ -235,6 +248,9 @@ EventLoop: if (iev < nevents && !istat) {
 
 
       } // if dstBranch
+
+      if (counthold) countevdstTab++;
+      if (countre)   countevdstRE++;
 
     }  // istat
 
@@ -257,7 +273,9 @@ EventLoop: if (iev < nevents && !istat) {
   cout << " QAInfo: # times Make called = " << iev << endl;
   cout << " QAInfo:  # events read = " << countev << endl;
   cout << " QAInfo:   # events with dstBranch dataset = " << countevdstB << endl;
-  cout << " QAInfo:   # events with dst dataset = " <<  countevdst << endl;
+  cout << " QAInfo:    # events with dst dataset = " <<  countevdst << endl;
+  cout << " QAInfo:     # events with RunEvent object = " <<  countevdstRE << endl;
+  cout << " QAInfo:     # events with dst Tables = " <<  countevdstTab << endl;
   cout << " QAInfo: avg # dst tables per event  = " << countevtabd << endl;
   cout << " QAInfo: avg # dst objects per event = " << countevobjd << endl;
   cout << " QAInfo: avg # Bfc tables per event  = " << countevtabb << endl;
@@ -268,7 +286,9 @@ EventLoop: if (iev < nevents && !istat) {
   fout << " QAInfo: # times Make called = " << iev << endl;
   fout << " QAInfo:  # events read = " << countev << endl;
   fout << " QAInfo:   # events with dstBranch dataset = " << countevdstB << endl;
-  fout << " QAInfo:   # events with dst dataset = " <<  countevdst << endl;
+  fout << " QAInfo:    # events with dst dataset = " <<  countevdst << endl;
+  fout << " QAInfo:     # events with RunEvent object = " <<  countevdstRE << endl;
+  fout << " QAInfo:     # events with dst Tables = " <<  countevdstTab << endl;
   fout << " QAInfo: avg # dst tables per event  = " << countevtabd << endl;
   fout << " QAInfo: avg # dst objects per event = " << countevobjd << endl;
   fout << " QAInfo: avg # Bfc tables per event  = " << countevtabb << endl;
