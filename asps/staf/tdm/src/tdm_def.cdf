@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_and_Dataset_Memory commands.
 .
- #(@)$Id: tdm_def.cdf,v 1.16 1998/07/18 01:39:54 perev Exp $
+ #(@)$Id: tdm_def.cdf,v 1.17 1998/07/18 03:15:59 ward Exp $
  Edited by Bill Love on 23-24 Feb 1998
 .
 TDM is an Analysis Service Package (ASP) for the Standard Analysis
@@ -984,7 +984,7 @@ BUGS:
 >ACTION kam_tdmtable_typename_%C
 **
 ** ---------------------------------------------------------------------
-** TDM/TABLE/DUMP SOREF [ NROWS IFIRST ]
+** TDM/TABLE/DUMP SOREF NROWS IFIRST NAMEOFFILE COLUMNLIST
 >COMMAND DUMP
 >PARAMETERS
 SOREF 'name of table' C
@@ -1000,10 +1000,13 @@ The IFIRST parameter counts from zero _UNLIKE_ Fortran.
 If you want all the rows, use a large number for NROWS, and zero
 for IFIRST.
 .
+If you want output to the screen instead of a file,
+write 'screen' for the filename.
+.
 The COLUMNLIST parameter is used
 to select a subset of the columns.  In the COLUMNLIST parameter, separate the 
 column names with carets (^).  See the example below.
-Instead of a list of columns, you can type allColumns.
+If you want all the columns, type 'allColumns'.
 .
 EXAMPLE: 
 This example writes columns id, offset, and pedestal of
@@ -1137,13 +1140,16 @@ components of objects which implement the tdmTable interface.
 .
 **
 ** ---------------------------------------------------------------------
-** TDM/TABLE/CELL/GETVALUE SOREF      
+** TDM/TABLE/CELL/GETVALUE SOREF      [OFF|ON]
 >COMMAND GETVALUE
 >PARAMETERS
 SOREF 'tdmTable.CELL component SORef' C
++
+SCREEN 'Screen output. Either OFF or ON.' C D='OFF'
 >GUIDANCE
-return the value contained in a single cell of a table.
-
+Return the value contained in a single cell of a table.
+SCREEN controls whether the returned value is written
+to the screen.  
 .
 DESCRIPTION: 
 .
@@ -1163,13 +1169,14 @@ ARGUMENTS:
 RETURN:
 .
    The contents of the cell are returned in staf_result(1)
-   A message with the contents is also printed to stdout.
+   The contents of the cell are also optionally printed to the 
+   screen.
    Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
    method is pushed onto the STAF_STATUS stack (see SOC).
 .
 EXAMPLES: 
 .
- EG1. STAF> tdm/table/cell/getvalue 'tpt_spars[0].last_row'
+ EG1. STAF> tdm/table/cell/getvalue 'tpt_spars[0].last_row' ON_SCREEN
  TDMTABLE:       Cell data =     45
 .
 EXCEPTIONS: 
@@ -1182,10 +1189,6 @@ EXCEPTIONS:
 .
 BUGS: 
 .
-   It is inconvenient that the contents of the cell are printed (good
-   for interactive use but for production there is no way to suppress this?) 
-   and to get the value for use in a kumac it is necessary to fetch it from
-   staf_result(1).
    An ill-formed cell reference causes a segmentation fault.
 
  STAF[55] tdm/table/cell/get 'tpg_cathode.cath_mat'   
