@@ -1,0 +1,19 @@
+MACRO TST_PROJECT [NROWS]=12
+
+**TRACE ON
+MKDIR tst_project
+CD tst_project
+NEWTABLE p 'struct fourvect{ float x,y,z,e; }' 100
+TABLE/ROWCOUNT p [NROWS]
+DO I=0,[NROWS]-1
+	CELL/PUTVALUE 'p['//[I]//'].x' [i]
+	CELL/PUTVALUE 'p['//[I]//'].y' [i]
+	CELL/PUTVALUE 'p['//[I]//'].z' [i]
+	CELL/PUTVALUE 'p['//[I]//'].e' [i]
+ENDDO
+LS
+NEWPROJECT pt '{x,y}'
+PROJECT pt p pp
+**TRACE OFF
+
+RETURN

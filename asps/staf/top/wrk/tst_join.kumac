@@ -1,0 +1,25 @@
+MACRO TST_JOIN [NROWS]=12
+
+**TRACE ON
+MKDIR tst_join
+CD tst_join
+NEWTABLE q 'struct fourvect{ long id; float x,y,z; }' 100
+NEWTABLE p 'struct fourvect{ long id; float p[3],e; }' 100
+TABLE/ROWCOUNT q [NROWS]
+TABLE/ROWCOUNT p [NROWS]
+DO I=0,[NROWS]-1
+	CELL/PUTVALUE 'q['//[I]//'].id' [i]
+	CELL/PUTVALUE 'q['//[I]//'].x' [i]
+	CELL/PUTVALUE 'q['//[I]//'].y' [i]
+	CELL/PUTVALUE 'q['//[I]//'].z' [i]
+	j = 2*[i]
+	CELL/PUTVALUE 'p['//[I]//'].id' [j]
+	CELL/PUTVALUE 'p['//[I]//'].p' [i] 1+[i] 2+[i]
+	CELL/PUTVALUE 'p['//[I]//'].e' [i]
+ENDDO
+NEWJOIN jn ! '{id}'
+JOIN jn q p x
+LS
+**TRACE OFF
+
+RETURN
