@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 1.5 2000/04/07 18:18:30 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 1.6 2000/04/18 02:30:04 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 1.6  2000/04/18 02:30:04  genevb
+// Added multi-file capabilities
+//
 // Revision 1.5  2000/04/07 18:18:30  genevb
 // Additional crash protection
 //
@@ -23,6 +26,7 @@
 //////////////////////////////////////////////////////////////////////////
 #include "TFile.h"
 #include "TTree.h"
+#include "StTree.h"
 #include "StChain.h"
 #include "StEventMaker/StEventMaker.h"
 #include "StEvent.h"
@@ -62,6 +66,10 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
   v0File="v0MuDst.root";
   xiFile="xiMuDst.root";
   kinkFile="kinkMuDst.root";
+  evFiles=0;
+  v0Files=0;
+  xiFiles=0;
+  kinkFiles=0;
   v0Selections = 0;
   xiSelections = 0;
   kinkSelections = 0;
@@ -183,6 +191,7 @@ Int_t StStrangeMuDstMaker::Make() {
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::MakeReadDst() {
 
+  if (!tree) return kStErr;
   StStrangeEvMuDst* ev = 0;
   Int_t event_number = GetNumber();
   if (event_number == -2) {        // If event numbers aren't supplied,
@@ -190,6 +199,22 @@ Int_t StStrangeMuDstMaker::MakeReadDst() {
     SetNumber(-1);                 // Use m_Number = -1 to indicate this.
   } else if (event_number == -1) {
     event_number = tree->GetReadEvent() + 1;
+  } else if (evFiles) {
+    event_number -= evNumber;
+  }
+  Int_t tree_size = (Int_t) tree->GetEntries();
+  if (event_number >= tree_size) {
+    if (evFiles) {                                     // If reading from
+      SetStFiles();                                    // multiple files, then
+      if (!evFile) return kStErr;                      // get the next file
+      CloseFile();                                     // names, close the old
+      if (OpenFile() == kStErr) return kStErr;         // files, open the new,
+      InitReadDst();                                   // and subtract total
+      evNumber += tree_size;                           // events from old file
+      event_number -= tree_size;                       // from current event #.
+    } else {
+      return kStErr;
+    }
   }
   if (! tree->GetEvent(event_number)) return kStErr;   // Read the event
   Int_t j;
@@ -393,13 +418,10 @@ void StStrangeMuDstMaker::Clear(Option_t *option) {
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::Finish() {
 
+  CloseFile();
   if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Finish() ... "
                                << GetName() << endm; 
   
-  if (muDst) {
-    if (rw == StrangeWrite) muDst->Write();
-    muDst->Close();
-  }
   if (doV0) gMessMgr->Info() << "StStrangeMuDstMaker: "
                              << nV0Entries << " V0 Entries" << endm;
   if (doXi) gMessMgr->Info() << "StStrangeMuDstMaker: "
@@ -422,6 +444,17 @@ void StStrangeMuDstMaker::SetRead (char* eFile, char* vFile,
   SetFiles(eFile,vFile,xFile,kFile);
 }
 //_____________________________________________________________________________
+void StStrangeMuDstMaker::SetRead (StFile* eFiles, StFile* vFiles,
+                                   StFile* xFiles, StFile* kFiles) {
+  rw = StrangeRead;
+  evFiles = eFiles;
+  v0Files = vFiles;
+  xiFiles = xFiles;
+  kinkFiles = kFiles;
+  evNumber = 0;
+  SetStFiles();
+}
+//_____________________________________________________________________________
 void StStrangeMuDstMaker::SetNoKeep() {
   rw = StrangeNoKeep;
 }
@@ -434,6 +467,41 @@ void StStrangeMuDstMaker::SetFiles (char* eFile, char* vFile,
   if (kFile) kinkFile = kFile;
 }
 //_____________________________________________________________________________
+void StStrangeMuDstMaker::SetStFiles () {
+// Temporary fix for incompatibility between SL00b_3 and dev libraries (4/17/00)
+#ifndef CERNLIB_QMLNX
+  if (evFiles) {
+    evFiles->GetNextBundle();
+    evFile = const_cast<char*> (evFiles->GetFileName(0));
+  }
+  if (v0Files) {
+    v0Files->GetNextBundle();
+    v0File = const_cast<char*> (v0Files->GetFileName(0));
+  }
+  if (xiFiles) {
+    xiFiles->GetNextBundle();
+    xiFile = const_cast<char*> (xiFiles->GetFileName(0));
+  }
+  if (kinkFiles) {
+    kinkFiles->GetNextBundle();
+    kinkFile = const_cast<char*> (kinkFiles->GetFileName(0));
+  }
+#else
+  if (evFiles) {
+    evFile = const_cast<char*> (evFiles->NextFileName());
+  }
+  if (v0Files) {
+    v0File = const_cast<char*> (v0Files->NextFileName());
+  }
+  if (xiFiles) {
+    xiFile = const_cast<char*> (xiFiles->NextFileName());
+  }
+  if (kinkFiles) {
+    kinkFile = const_cast<char*> (kinkFiles->NextFileName());
+  }
+#endif
+}
+//_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::OpenFile() {
   char* option=0;
   if (rw == StrangeRead)
@@ -444,9 +512,19 @@ Int_t StStrangeMuDstMaker::OpenFile() {
     return kStOk;
     
   if( ! (muDst = new TFile(evFile,option)) ) {
-    gMessMgr->Error() << "StStrangeMuDstMaker: Error - opening event file "
+    gMessMgr->Error() << "StStrangeMuDstMaker: Error opening event file:\n  "
                       << evFile << endm;
     return kStErr;
+  }
+  gMessMgr->Info() << "StStrangeMuDstMaker: Opened event file:\n  "
+                   << evFile << endm;     
+  return kStOk;
+}
+//_____________________________________________________________________________
+Int_t StStrangeMuDstMaker::CloseFile() {
+  if (muDst) {
+    if (rw == StrangeWrite) muDst->Write();
+    muDst->Close();
   }
   return kStOk;
 }

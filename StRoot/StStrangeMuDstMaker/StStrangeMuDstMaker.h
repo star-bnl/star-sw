@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.h,v 1.4 2000/04/06 14:51:11 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 1.5 2000/04/18 02:30:04 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 1.5  2000/04/18 02:30:04  genevb
+// Added multi-file capabilities
+//
 // Revision 1.4  2000/04/06 14:51:11  genevb
 // Fixed bug with storing event info when making subDST
 //
@@ -30,6 +33,7 @@ class StXiMuDst;
 class StKinkMuDst;
 class TClonesArray;
 class TArrayI;
+class StFile;
 
 enum StrangeEnum {StrangeNoKeep, StrangeNoFile, StrangeWrite, StrangeRead};
 
@@ -38,6 +42,8 @@ class StStrangeMuDstMaker : public StMaker {
   StStrangeMuDstMaker(const char *name="strangeMuDst");
   virtual ~StStrangeMuDstMaker();
   void SetRead (char* eFile=0, char* vFile=0, char* xFile=0, char* kFile=0);
+  void SetRead (StFile* eFiles, StFile* vFiles=0,
+                StFile* xFiles=0, StFile* kFiles=0);
   void SetWrite(char* eFile=0, char* vFile=0, char* xFile=0, char* kFile=0);
   void SetNoKeep();
   void DoV0(Bool_t doIt=kTRUE);
@@ -61,6 +67,7 @@ class StStrangeMuDstMaker : public StMaker {
   virtual Int_t Finish();
   // Functions for sub-dsts:
   virtual void SubDst(StStrangeMuDstMaker* maker);
+  virtual void SubDst(StStrangeMuDstMaker& maker);
   virtual void SubDst(const char* maker_name);
   virtual void SelectEvent();          // selects whole event for sub DST
   virtual void SelectV0(Int_t i=-1);   // use i<0 to specify whole event
@@ -74,12 +81,19 @@ class StStrangeMuDstMaker : public StMaker {
   virtual Int_t MakeCreateDst();
   virtual Int_t MakeCreateSubDst();
   void SetFiles(char* eFile, char* vFile, char* xFile, char* kFile);
+  void SetStFiles();
   Int_t OpenFile();
+  Int_t CloseFile();
   TTree* tree;                   //!
   char* evFile;                  //!
   char* v0File;                  //!
   char* xiFile;                  //!
   char* kinkFile;                //!
+  StFile* evFiles;               //!
+  StFile* v0Files;               //!
+  StFile* xiFiles;               //!
+  StFile* kinkFiles;             //!
+  Int_t evNumber;                //!
   TFile* muDst;                  //!
   Bool_t doV0;
   Bool_t doXi;
@@ -124,6 +138,8 @@ inline TTree* StStrangeMuDstMaker::GetTree()
             { return tree; }
 inline void StStrangeMuDstMaker::SubDst(StStrangeMuDstMaker* maker)
             { dstMaker = maker; }
+inline void StStrangeMuDstMaker::SubDst(StStrangeMuDstMaker& maker)
+            { dstMaker = &maker; }
 inline void StStrangeMuDstMaker::SubDst(const char* maker_name)
             { SubDst((StStrangeMuDstMaker*) GetMaker(maker_name)); }
 #endif

@@ -160,6 +160,23 @@ one file: that of the event component branch, where the root of the
 TTree used in the micro-DST resides. This file defaults to "evMuDst.root"
 if no parameters are given to <tt>SetRead()</tt>.<p>
 
+If the user is interested in reading in several micro-DSTs, the use of
+the StFile class is employed. StFile can take as an argument in its
+constructor an array of file names, any of which may also include wild
+cards (as in <tt>"ev*Dst.root"</tt>). Passing <tt>SetRead()</tt> a pointer
+to the StFile class then teaches StStrangeMuDstMaker what files to read.
+Here is an example:
+<pre>
+  char* files[3];
+  files[0] = "/bigfiles/run471.evMuDst.root";
+  files[1] = "/bigfiles/run475.evMuDst.root";
+  files[2] = "/oldfiles/run*.evMuDst.root";
+  StFiles* flist = new StFile(files);
+  StStrangeMuDstMaker strangeDst();
+  strangeDst.SetRead(flist);
+</pre>
+<p>
+
 Access to the micro-DST is then available inside the event loop.
 Member functions outlined in the section below on
 <a href="#tools">Tools from StStrangeMuDstMaker</a>
@@ -218,7 +235,7 @@ member function, and should be implemented in the following style:
   strangeOldDst.DoV0();
   strangeOldDst.SetRead("oldEvMuDst.root");
 
-  strangeNewDst.SubDst(&strangeOldDst);
+  strangeNewDst.SubDst(strangeOldDst);
 </pre>
 The filenames used above are up to the user, and different combinations
 of strangeness micro-DST components other than simply the V0 components
