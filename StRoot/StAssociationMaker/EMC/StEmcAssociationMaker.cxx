@@ -218,12 +218,13 @@ Int_t StEmcAssociationMaker::Make()
         }
       }
       // Starting normalization of Cluster Energy Fraction Matrix elements
-      for (UInt_t j2=0; j2<clusters.size(); j2++)
+      // commented out because it makes no sense SUAIDE 20031114
+      /*for (UInt_t j2=0; j2<clusters.size(); j2++)
       {
         Float_t norm=0;
         for (UInt_t i3=0; i3<tracks.size(); i3++) norm+=mClHitEnergyRtMatrix[detnum](i3,j2);
         for (UInt_t i3=0; i3<tracks.size(); i3++) mClHitEnergyRtMatrix[detnum](i3,j2)=mClHitEnergyRtMatrix[detnum](i3,j2)/norm;
-      }
+      }*/
       // Finishing normalization
     }
   }
@@ -274,12 +275,13 @@ Int_t StEmcAssociationMaker::Make()
                 Int_t clSub=abs(clHit[l]->sub());
 
                 //Doing comparision between hit track and hit cluster from a point
-                if (module==clModule && eta==clEta && sub==clSub) assoc+=(1<<(detnum));
+                if (module==clModule && eta==clEta && sub==clSub) { assoc+=(1<<(detnum)); goto nextDetector;}
               }
             }
           }
-          mAssocPointMatrix(i,j)=assoc;
+          nextDetector: continue;
         } 
+        mAssocPointMatrix(i,j)=assoc;
       }
     }   
   }  
