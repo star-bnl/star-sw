@@ -28,6 +28,7 @@ size_t tntLongwordifyRowSize(tdmTable *);
 
 //:#####################################################################
 //:=============================================== CLASS              ==
+#define export Export
 class tntNtuple: public virtual socObject {
 
 public:
