@@ -8,12 +8,12 @@ source $GROUP_DIR/group_env.csh
 #source $GROUP_DIR/.starnew
 #printenv
 echo "start time: `date`" 
-set no    = 100    # -n
-set chain = \"lana\" # -c 
-set input = 0      # -i
-set output = 0     # -o
-set tfile = 0      # 
-set dir   = $SCRATCH # -d
+set no    = 100      # -n NoOfEvents
+set chain = \"lana\" # -c Chain
+set input = 0        # -i Input
+set output = 0       # -o Output
+set tfile = 0        # -t TFile
+set dir   = $SCRATCH # -d Work Directory
 while ( $#argv > 0 )
         switch ($1)
         case -n:       2
@@ -37,8 +37,8 @@ while ( $#argv > 0 )
         endsw
         shift
 end
+echo "Working directory " $dir
 cd $dir
-ln -s $STAR/StDb/calibrations/tpc/noiseElim.19991216.000000.tpcdaq noiseElim.tpcdaq 
 echo root4star -q -b \'bfc.C\($no,$chain,$input,$output,$tfile\)\'
 root4star -q -b bfc.C\($no,$chain,$input,$output,$tfile\)
 echo "end time: `date`" 
