@@ -47,7 +47,7 @@ Created during Nov 00
       real Rphi_lim/360./
       real pzpt_lim/0.9/
 * number of particles
-      integer jimbed/10/
+      integer jimbed/25/
       real vzlim/10./
 * ................................................
 

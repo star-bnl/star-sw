@@ -34,7 +34,7 @@ macro simple N=1
      ACTION S
     gexec protonstart
     gfile u '2K_protons.fzd'
-      do i=1,10
+      do i=1,100
        next; dshow 1; trig 1; call g2t;
       enddo
           
