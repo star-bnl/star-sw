@@ -2,15 +2,17 @@
 //.L StRoot/StEEmcUtil/EEfeeRaw/EEname2Index.cxx+
 class EEmcDbItem;
 
-rdEz2SmdCal(int mxEve=1000000,
-       char *runL="R5107005_1 R5107005 ",
+rdEz2SmdCal( int nDot=16,int mxEve=5000000,
+	     //  R5107005_1 R5109035 R5109034 R5109031 R5109030  
+       char *runL="R5107005 R5112004 R5107008  R5109025 R5109026 ",
        TString iPath="/star/data04/sim/balewski/daq/ezTree/pp200/pp2/",
        int firstSec=5,
        int lastSec=5,
        int oflTrigId=0
       ) {
   //  iPath="/tmp/balewski/";  
-  // runL="R5107005";
+  //  runL="R5107005";
+   runL="R5107008";
 
   char *libL[]={
     "StRoot/StDbLib/StDbLib.so",  
@@ -81,7 +83,12 @@ rdEz2SmdCal(int mxEve=1000000,
   //........... sorters ..........
   EzEEsmdCal *sorter=new  EzEEsmdCal(5); // sectID
   sorter->set(&HList,db,eFee,eHead,eTrig);
+  float thrMipSmdE=0.2;
+  int emptyStripCount=nDot;
+  int iTagLayer=3; //0-3 means T,P,Q,R
+  sorter->setMipCuts(thrMipSmdE,emptyStripCount,iTagLayer);
   sorter->init();
+
    
   printf("Sort %d  of total Events %d, use trigId=%d\n",mxEve, nEntries,oflTrigId);
 
@@ -94,7 +101,9 @@ rdEz2SmdCal(int mxEve=1000000,
     nAcc++;
     // verify data block consistency
     int nCr=eFee->maskWrongCrates(timeStamp,eHead->getToken(),EEfeeRawEvent::headVer1);
-    if(nCr==22) nOK++;
+    if(nCr!=22) continue;
+    // use only 100% healthy events
+    nOK++;
     sorter->make();
   }
   int t2=time(0);
@@ -106,14 +115,16 @@ rdEz2SmdCal(int mxEve=1000000,
   sorter->finish();
 
   // save output histograms
-  sorter->saveHisto("aaa7P+11+5d");
+  TString out="out/bbbRx-nD";
+  out+=nDot;
+  sorter->saveHisto(out);
   // HList.ls(); 
 
   h=(TH1F *) HList.FindObject("myStat");   assert(h);
   float *my=h->GetArray();
-  printf("%d -->UxV multi=%.1f  one=%.1f any=%.1f non1x1=%.1f\n",nEve,my[2],my[3],my[4],my[5]);
+  printf("%d -->UxV multi=%.1f  one=%.1f any=%.1f tw=%.1f\n",nEve,my[2],my[3],my[4],my[5]);
 
-  printf(" -->MIP tw=%.1f cntr=%.1f \n",my[6],my[7]);
+  printf(" -->MIP cntr=%.1f w/tag=%.1f \n",my[6],my[7]);
 
    return;
   gStyle->SetPalette(1,0);

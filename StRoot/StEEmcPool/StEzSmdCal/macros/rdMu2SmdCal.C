@@ -45,7 +45,7 @@ int rdMu2SmdCal( int nEve=1000 ){
 
   St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
   myDb=new StEEmcDbMaker("eemcDb");
-  //myDb->setSectors(6,6);
+  myDb->setSectors(6,6);
   //myDb->setPreferedFlavor("expoSlope1","eemcPIXcal");
   gMessMgr->SwitchOff("D");
   gMessMgr->SwitchOff("I");
@@ -54,7 +54,11 @@ int rdMu2SmdCal( int nEve=1000 ){
   myMk3=new StEEsmdCalMaker("eeSmdCal","MuDst");
   myMk3->Set(&HList);
   myMk3->SetSector(6);
-  myMk3->SetMCflag(1);
+  myMk3->SetMCflag();
+  float thrMipSmdE=0.2;
+  int emptyStripCount=8;
+  int iTagLayer=3; //0-3 means T,P,Q,R
+  myMk3->setMipCuts(thrMipSmdE,emptyStripCount,iTagLayer);
 
   chain->ls();
   chain->Init();
