@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.126 2000/01/31 15:17:20 fisyak Exp $
+// $Id: bfc.C,v 1.127 2000/02/12 17:37:33 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -129,7 +129,7 @@ if (Last >= 0) {
 }
 TBenchmark evnt;
 Int_t iMake = 0, i = First;
-EventLoop: if (i <= Last && iMake < kStEOF) {
+EventLoop: if (i <= Last && iMake != kStEOF && iMake != kStFatal) {
   evnt->Reset();
   evnt->Start("QAInfo:");
   chain->Clear();
