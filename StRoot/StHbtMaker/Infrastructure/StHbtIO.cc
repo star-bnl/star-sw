@@ -99,32 +99,32 @@ istream& operator>>(istream& in,  StHbtTrack& trk){
 ostream& operator<<(ostream& out, StHbtV0& v0){
 
   return (out
-	  << v0.mdecayLengthV0    << " " << v0.mdecayVertexV0.x()  << " "
-	  << v0.mdecayVertexV0.y()<< " " << v0.mdecayVertexV0.z()  << " "
-	  << v0.mdcaV0Daughters   << " " << v0.mdcaV0ToPrimVertex  << " "
-	  << v0.mdcaPosToPrimVertex <<" "<< v0.mdcaNegToPrimVertex << " "
-	  << v0.mmomPos.x()       << " " << v0.mmomPos.y()         << " "
-          << v0.mmomPos.z()       << " " << v0.mmomNeg.x()         << " "
-	  << v0.mmomNeg.y()       << " " << v0.mmomNeg.z()         << " " 
-	  << v0.mtpcHitsPos       << " " << v0.mtpcHitsNeg         << " "    
-	  << v0.mrapLambda        << " " << v0.mrapK0Short         << " "
-          << v0.mcTauLambda       << " " << v0.mcTauK0Short        << " "
-          << v0.midNeg            << " " << v0.midPos     );
+	  << v0.mdecayLengthV0        << " " << v0.mdecayVertexV0.x()  << " "
+	  << v0.mdecayVertexV0.y()    << " " << v0.mdecayVertexV0.z()  << " "
+	  << v0.mdcaV0Daughters       << " " << v0.mdcaV0ToPrimVertex  << " "
+	  << v0.mdcaPosToPrimVertex   <<" "<< v0.mdcaNegToPrimVertex << " "
+	  << v0.mmomPos.x()           << " " << v0.mmomPos.y()         << " "
+          << v0.mmomPos.z()           << " " << v0.mmomNeg.x()         << " "
+	  << v0.mmomNeg.y()           << " " << v0.mmomNeg.z()         << " " 
+	  << v0.mTrackTopologyMapPos[0]  << " " <<  v0.mTrackTopologyMapPos[1] << " " 
+	  << v0.mTrackTopologyMapNeg[0]  << " " <<  v0.mTrackTopologyMapNeg[1] << " " 
+	  << v0.mrapLambda            << " " << v0.mrapK0Short         << " "
+          << v0.mcTauLambda           << " " << v0.mcTauK0Short        << " "
+          << v0.midNeg                << " " << v0.midPos     );
 }
 
 //------------------------- StHbtV0 -----------------------------------
   istream& operator>>(istream& in, StHbtV0& v0){
- 
-
    in 
-	  >> v0.mdecayLengthV0      >>  v0.mdecayVertexV0   
-	  >> v0.mdcaV0Daughters     >>  v0.mdcaV0ToPrimVertex 
-	  >> v0.mdcaPosToPrimVertex >>  v0.mdcaNegToPrimVertex
-	  >> v0.mmomPos             >>  v0.mmomNeg      
-	  >> v0.mtpcHitsPos         >>  v0.mtpcHitsNeg                
-	  >> v0.mrapLambda          >>  v0.mrapK0Short 
-          >> v0.mcTauLambda         >>  v0.mcTauK0Short 
-          >> v0.midNeg              >>  v0.midPos;
+	  >> v0.mdecayLengthV0        >>  v0.mdecayVertexV0   
+	  >> v0.mdcaV0Daughters       >>  v0.mdcaV0ToPrimVertex 
+	  >> v0.mdcaPosToPrimVertex   >>  v0.mdcaNegToPrimVertex
+	  >> v0.mmomPos               >>  v0.mmomNeg      
+	  >> v0.mTrackTopologyMapPos[0] >>  v0.mTrackTopologyMapPos[1]                 
+	  >> v0.mTrackTopologyMapNeg[0] >>  v0.mTrackTopologyMapNeg[1]                 
+	  >> v0.mrapLambda            >>  v0.mrapK0Short 
+          >> v0.mcTauLambda           >>  v0.mcTauK0Short 
+          >> v0.midNeg                >>  v0.midPos;
    v0.UpdateV0();
    return (in) ;
 }

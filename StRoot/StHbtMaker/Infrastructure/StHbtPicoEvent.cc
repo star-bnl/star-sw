@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPicoEvent.cc,v 1.2 2000/03/17 17:23:05 laue Exp $
+ * $Id: StHbtPicoEvent.cc,v 1.3 2000/06/01 20:40:13 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -16,6 +16,12 @@
  ***************************************************************************
  *
  * $Log: StHbtPicoEvent.cc,v $
+ * Revision 1.3  2000/06/01 20:40:13  laue
+ * StHbtIO.cc: updated for new V0s
+ * StHbtPicoEvent.cc: collections especially cleared
+ * franks1DHistoD.hh, include changed from  <stdio> to <cstdio>
+ * franks1DHistoD.cc, cout statement deleted
+ *
  * Revision 1.2  2000/03/17 17:23:05  laue
  * Roberts new three particle correlations implemented.
  *
@@ -38,6 +44,7 @@ StHbtPicoEvent::~StHbtPicoEvent(){
   for (iter=mFirstParticleCollection->begin();iter!=mFirstParticleCollection->end();iter++){
     delete *iter;
   }
+  mFirstParticleCollection->clear();
   delete mFirstParticleCollection;
   mFirstParticleCollection = 0;
 
@@ -45,6 +52,7 @@ StHbtPicoEvent::~StHbtPicoEvent(){
     for (iter=mSecondParticleCollection->begin();iter!=mSecondParticleCollection->end();iter++){
       delete *iter;
     }
+    mSecondParticleCollection->clear();
     delete mSecondParticleCollection;
     mSecondParticleCollection = 0;
 
@@ -54,6 +62,7 @@ StHbtPicoEvent::~StHbtPicoEvent(){
     for (iter=mThirdParticleCollection->begin();iter!=mThirdParticleCollection->end();iter++){
       delete *iter;
     }
+    mThirdParticleCollection->clear();
     delete mThirdParticleCollection;
     mThirdParticleCollection = 0;
   }

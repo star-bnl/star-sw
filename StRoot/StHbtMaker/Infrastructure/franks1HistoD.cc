@@ -130,14 +130,12 @@ void franks1HistoD::Fill( double value) {
   mPos = (int) fabs( (value-mXmin)/mStep );
   if ( mPos>=0 && mPos < mBins) 
     vec[mPos]++;
-  cout << ".";
 }
 // *************************************************************************************************
 void franks1HistoD::Fill( double value, double weight) {
   mPos = (int) fabs( (value-mXmin)/mStep );
   if ( mPos>=0 && mPos < mBins) 
     vec[mPos] = vec[mPos] + weight;
-  cout << ".";
 }
 
 #endif // __ROOT__

@@ -4,7 +4,7 @@
 #ifndef __ROOT__
 
 #include <iostream.h>
-#include <stdio>
+#include <cstdio>
 #include <math.h>
 #include <stddef.h>
 
