@@ -1,13 +1,16 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.4 2000/10/02 23:06:33 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.5 2000/10/02 23:21:29 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 2.4  2000/10/02 23:06:33  horsley
+ * Revision 2.5  2000/10/02 23:21:29  horsley
  * *** empty log message ***
  *
+ *
+ * Revision 2.16  2000/11/21 19:49:13  lasiuk
+ * fill the photon d in the StRichPid
  * remove parameterized dip angle dependence
  * of the mean/sigma d.  Setting of hitflags
  * in fillPidTraits
@@ -34,7 +37,7 @@
  *
  * Revision 2.9  2000/10/19 15:41:57  horsley
  * added set format option to TFile, file->SetFormat(1);
-#define myRICH_WITH_NTUPLE 1
+ *
  * Revision 2.8  2000/10/19 06:12:52  horsley
  *
 #define myrICH_WITH_NTUPLE 1
@@ -122,10 +125,10 @@ using std::max;
 //#include "StarCallf77.h"
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.4 2000/10/02 23:06:33 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.5 2000/10/02 23:21:29 horsley Exp $";
 
 	track->geometry() && 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.4 2000/10/02 23:06:33 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.5 2000/10/02 23:21:29 horsley Exp $";
 	(fabs(track->geometry()->momentum().pseudoRapidity()) < mEtaCut) &&
 Int_t StRichPIDMaker::Make() { 
   
