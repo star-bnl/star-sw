@@ -2,13 +2,16 @@
 #define StQACosmicMaker_HH
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.h,v 1.13 2000/07/14 23:18:25 snelling Exp $
+ * $Id: StQACosmicMaker.h,v 1.14 2000/08/18 20:34:47 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking, 
  *               geometry etc.)
  *
  * $Log: StQACosmicMaker.h,v $
+ * Revision 1.14  2000/08/18 20:34:47  snelling
+ * Added hit errors to ntuple
+ *
  * Revision 1.13  2000/07/14 23:18:25  snelling
  * Added the z-residual histograms
  *
@@ -61,7 +64,7 @@ class StQACosmicMaker : public StMaker {
   virtual void   WriteHistogramsOff(){WriteHistograms();}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.13 2000/07/14 23:18:25 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.14 2000/08/18 20:34:47 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  private:
 
@@ -142,7 +145,7 @@ class StQACosmicMaker : public StMaker {
   enum {nResHist = 4, nChargeHist = 4, nClusterHist = 4,
 	nMorphHist = 4 };
 
-  enum {hflag,hrow,hx,hy,hz,hq,dedx,halpha,hlambda,hdalpha,hdlambda,resy,resz,trknfit,trkp,enumLast};
+  enum {hflag,hrow,hsector,hx,hy,hz,hdx,hdy,hdz,hq,dedx,halpha,hlambda,hdalpha,hdlambda,resy,resz,trknfit,trkp,enumLast};
   float ntEntries[enumLast];
  
   TNtuple *mTNtupleTPC; //!
