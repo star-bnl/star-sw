@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.39 2003/05/02 21:09:41 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.40 2003/05/15 06:08:41 aihong Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -686,7 +686,7 @@ void StFlowEvent::SetPidsDeviant() {
        itr != TrackCollection()->end(); itr++) {
 
     StFlowTrack* pFlowTrack = *itr;
-    Char_t pid[10] = "none";
+    Char_t pid[10] = "NA";
     Short_t charge = pFlowTrack->Charge();
 
     bool bPiPlus       = kFALSE;
@@ -801,7 +801,7 @@ void StFlowEvent::SetPidsProb() {
        itr != TrackCollection()->end(); itr++) {
 
     StFlowTrack* pFlowTrack = *itr;
-    Char_t pid[10] = "none";
+    Char_t pid[10] = "NA";
 
     if (pFlowTrack->MostLikelihoodPID() == 8 &&  
 	pFlowTrack->MostLikelihoodProb() > 0.9)
@@ -944,6 +944,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.40  2003/05/15 06:08:41  aihong
+// default PID is changed from none to NA, SetDedxPtsPart() added
+//
 // Revision 1.39  2003/05/02 21:09:41  posk
 // Reduced the number of harmonics from 3 to 2.
 //

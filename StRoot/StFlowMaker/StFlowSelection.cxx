@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.18 2002/06/12 22:36:44 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.19 2003/05/15 06:08:41 aihong Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -32,6 +32,8 @@ StFlowSelection::StFlowSelection() : mSubevent(-1) {
   mEtaPart[1]           = 0.;
   mFitPtsPart[0]        = 0;
   mFitPtsPart[1]        = 0;
+  mDedxPtsPart[0]        = 0;
+  mDedxPtsPart[1]        = 0;
   mFitOverMaxPtsPart[0] = 0.;
   mFitOverMaxPtsPart[1] = 0.;
   mChiSqPart[0]         = 0.;
@@ -104,6 +106,12 @@ Bool_t StFlowSelection::SelectPart(StFlowTrack* pFlowTrack) {
   if (mFitPtsPart[1] > mFitPtsPart[0] && 
       (fitPts < mFitPtsPart[0] || fitPts >= mFitPtsPart[1])) return kFALSE;
 
+  // Dedx Points
+  int dedxPts = pFlowTrack->NdedxPts();
+  if (mDedxPtsPart[1] > mDedxPtsPart[0] && 
+      (dedxPts < mDedxPtsPart[0] || dedxPts >= mDedxPtsPart[1])) return kFALSE;
+
+
   // Fit Points over Max Points
   int maxPts = pFlowTrack->MaxPts();
   float fitOverMaxPts = (float)(fitPts-1) / (float)maxPts;
@@ -149,6 +157,8 @@ void StFlowSelection::PrintList() const {
     mYPart[0] << " to " << mYPart[1] <<endl;
   cout << "# Fit Points for particles correlated with the event plane: " << 
     mFitPtsPart[0] << " to " << mFitPtsPart[1] <<endl;
+  cout << "# Dedx Points for particles correlated with the event plane: " << 
+    mDedxPtsPart[0] << " to " << mDedxPtsPart[1] <<endl;
   cout << "# Fit/Max Points for particles correlated with the event plane: " 
        << mFitOverMaxPtsPart[0] << " to " << mFitOverMaxPtsPart[1] <<endl;
   cout << "# Chi2 for particles correlated with the event plane: " << 
@@ -163,6 +173,9 @@ void StFlowSelection::PrintList() const {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.19  2003/05/15 06:08:41  aihong
+// default PID is changed from none to NA, SetDedxPtsPart() added
+//
 // Revision 1.18  2002/06/12 22:36:44  posk
 // FitOverMax points cut/selection is now done on (FitPts - 1)/MaxPts.
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.16 2002/01/31 01:04:55 posk Exp $
+// $Id: StFlowSelection.h,v 1.17 2003/05/15 06:08:41 aihong Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -43,6 +43,7 @@ class StFlowSelection : public StObject {
   void    SetEtaPart(const Float_t, const Float_t);
   void    SetYPart(const Float_t, const Float_t);
   void    SetFitPtsPart(const Int_t, const Int_t);
+  void    SetDedxPtsPart(const Int_t, const Int_t);
   void    SetFitOverMaxPtsPart(const Float_t, const Float_t);
   void    SetChiSqPart(const Float_t, const Float_t);
   void    SetDcaGlobalPart(const Float_t, const Float_t);
@@ -60,6 +61,7 @@ class StFlowSelection : public StObject {
   Float_t mEtaPart[2];                       // for parts. wrt plane
   Float_t mYPart[2];                         // for parts. wrt plane 
   Int_t   mFitPtsPart[2];                    // for parts. wrt plane
+  Int_t   mDedxPtsPart[2];                   // for parts. wrt plane
   Float_t mFitOverMaxPtsPart[2];             // for parts. wrt plane
   Float_t mChiSqPart[2];                     // for parts. wrt plane
   Float_t mDcaGlobalPart[2];                 // for parts. wrt plane
@@ -104,6 +106,9 @@ inline void StFlowSelection::SetYPart(Float_t lo, Float_t hi) {
 inline void StFlowSelection::SetFitPtsPart(Int_t lo, Int_t hi) {
   mFitPtsPart[0] = lo; mFitPtsPart[1] = hi; }
 
+inline void StFlowSelection::SetDedxPtsPart(Int_t lo, Int_t hi) {
+  mDedxPtsPart[0] = lo; mDedxPtsPart[1] = hi; }
+
 inline void StFlowSelection::SetFitOverMaxPtsPart(Float_t lo, Float_t hi) {
   mFitOverMaxPtsPart[0] = lo; mFitOverMaxPtsPart[1] = hi; }
 
@@ -136,6 +141,9 @@ inline void StFlowSelection::SetSubevent(const Int_t& subN) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.17  2003/05/15 06:08:41  aihong
+// default PID is changed from none to NA, SetDedxPtsPart() added
+//
 // Revision 1.16  2002/01/31 01:04:55  posk
 // *** empty log message ***
 //
