@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.21 2001/04/05 04:00:49 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.22 2001/04/23 19:28:13 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.22  2001/04/23 19:28:13  ullrich
+ * Added StClusteringHints and methods to access it.
+ *
  * Revision 2.21  2001/04/05 04:00:49  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -85,6 +88,7 @@
 #include <typeinfo>
 #include <algorithm>
 #include "StEvent.h"
+#include "StEventClusteringHints.h"
 #include "StEventInfo.h"
 #include "StEventSummary.h"
 #include "StSoftwareMonitor.h"
@@ -109,8 +113,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.21 2001/04/05 04:00:49 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.21 2001/04/05 04:00:49 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.22 2001/04/23 19:28:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.22 2001/04/23 19:28:13 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -598,6 +602,22 @@ StEvent::numberOfPsds(StPwg p) const
 
 StSPtrVecObject&
 StEvent::content() { return mContent; }
+
+const StEventClusteringHints*
+StEvent::clusteringHints() const
+{
+    StEventClusteringHints *hints = 0;
+    _lookupOrCreate(hints, mContent);
+    return hints;
+}
+
+StEventClusteringHints*
+StEvent::clusteringHints()
+{
+    StEventClusteringHints *hints = 0;
+    _lookupOrCreate(hints, mContent);
+    return hints;
+}
 
 void
 StEvent::setType(const char* val)

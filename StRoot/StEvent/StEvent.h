@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.18 2001/04/05 04:00:36 ullrich Exp $
+ * $Id: StEvent.h,v 2.19 2001/04/23 19:28:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.19  2001/04/23 19:28:14  ullrich
+ * Added StClusteringHints and methods to access it.
+ *
  * Revision 2.18  2001/04/05 04:00:36  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -82,6 +85,7 @@
 class event_header_st;
 class dst_event_summary_st;
 class dst_summary_param_st;
+class StEventClusteringHints;
 class StEventInfo;
 class StEventSummary;
 class StSoftwareMonitor;
@@ -173,8 +177,12 @@ public:
     unsigned int                        numberOfPsds() const;
     unsigned int                        numberOfPsds(StPwg) const;
     
-    StSPtrVecObject&                    content();       // for IO purposes only
-    void                                statistics();    // *MENU*
+    StSPtrVecObject&                    content();               // for IO purposes only
+
+    const StEventClusteringHints*       clusteringHints() const; // for IO purposes only
+    StEventClusteringHints*             clusteringHints();       // for IO purposes only
+    
+    void                                statistics();      // *MENU*
 
     void setType(const char*);
     void setRunId(int);
