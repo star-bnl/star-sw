@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.17 2001/01/30 16:38:44 horsley Exp $
+ * $Id: StRichTrack.cxx,v 2.18 2001/01/30 22:13:10 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
+ *  Revision 2.18  2001/01/30 22:13:10  horsley
+ *  trajectory correction now default, added trajectory correction comments for log file
+ *
  *  Revision 2.17  2001/01/30 16:38:44  horsley
  *  updated PID maker for next production run, included new class for TTree
  *
@@ -744,10 +747,17 @@ bool StRichTrack::correctTrajectory() {
 	  //StThreeVectorF normalVector(0,0,-1);
       
 	  //this->setProjectedMIP(correctedProjectedMIP);
+	  cout << "TrajectoryCorrection:  original impact point (cm) = " 
+	       << this->getImpactPoint() << endl;
+	  cout << "                                    new  impact point (cm) = " 
+	       << impact << endl;
+
 	  this->setImpactPoint(impact);
 	  //this->setMomentum(tempRichLocalMomentum);
       }
   }
+  
+
   
   //this->setCorrectedMomentum(correctedMomentum);
   return true;
