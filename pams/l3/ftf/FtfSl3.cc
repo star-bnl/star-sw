@@ -153,6 +153,7 @@ int FtfSl3::setup ( int maxHitsIn, int maxTracksIn ) {
   para.trackDebug = 24 ;
   para.debugLevel =  1 ;
 #endif
+  return 0;
 }
 //******************************************************************
 //    Read cluster data from TPCMZCLD bank (using daqFormats.h)
@@ -209,7 +210,7 @@ int FtfSl3::readMezzanine (int sector, struct TPCMZCLD_local *mzcld) {
 		   ft = (double) xt->t / 64.0 ;
 		   //printf("%02d %02d %9.5f %9.5f %6d %3d\n", SB, row,
 		   //       fp, ft, c->c , c->f) ;
-		   rawToGlobal(sector, row, fp, ft, x, y, z);
+		   rawToGlobal(sector, row, fp, ft, &x, &y, &z);
 
 		   //printf(" %d  %d  %f  %f  %f  %d  %d\n",
 		   //	  sector, row, x, y, z, c->c, c->f);
@@ -375,5 +376,5 @@ int FtfSl3::setParameters ( ) {
    para.dxVertex         = 0.005F ;
    para.dyVertex         = 0.005F ;
    para.phiVertex        = 0.F    ;
-
+   return 0;
 }
