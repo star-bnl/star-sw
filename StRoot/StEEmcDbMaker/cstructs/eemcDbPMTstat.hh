@@ -2,19 +2,17 @@
 #define TAB_EEMC_DB_PMTSTAT__hh
 #include "eemcConstDB.hh"
 /*
- * description:  EEMC status of Tower
+ * description:  EEMC status of Tower/Strip/Shower
  */
 
-struct eemcDbPMTStatus {
-  char            name[EEMCDbMaxPmtName];   /* channel name, eg 06TB12 */
-  unsigned short  stat[EEMCDbMaxPmt];       /* status  code, see eemcConstDB.hh for bits definition */
-  unsigned short  fail[EEMCDbMaxPmt];       /* failure code, see eemcConstDB.hh for bits definition */
-  char            note[EEMCDbMaxPmtName];   /* short, up to 16 char/PMT */
+struct eemcDbPMTstat {
+  char            name[EEMCDbMaxAdcName];  /* sector/subsector/tower of strip/pre/post/tower */
+  unsigned short  stat[EEMCDbMaxAdc];      /* status  code, see eemcConstDB.hh for definitions */
+  unsigned short  fail[EEMCDbMaxAdc];      /* failure code, see eemcConstDB.hh for definitions */
   char            comment[EEMCDbMaxComment];
 };
 #endif
 
 
 
--- 
 
