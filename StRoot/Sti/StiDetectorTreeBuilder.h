@@ -19,11 +19,10 @@ public:
     StiDetectorTreeBuilder();
     virtual ~StiDetectorTreeBuilder();
 
-    data_node* build(const char* path, data_node_factory* nodefactory, 
-                     detector_factory* detfactory);
+    data_node* build(data_node_factory* nodefactory, detector_factory* detfactory);
     
 private:
-    void loopOnDetectors(const char* path);
+    void loopOnDetectors();
     void buildRoot();
     void addToTree(StiDetector*);
     data_node* hangWhere(data_node* parent, StiOrderKey_t order, 

@@ -35,9 +35,8 @@ StiDetectorTreeBuilder::~StiDetectorTreeBuilder()
   cout <<"StiDetectorTreeBuilder::~StiDetectorTreeBuilder()"<<endl;
 }
 
-data_node* StiDetectorTreeBuilder::build(
-    const char* path, data_node_factory* nodefactory,
-    detector_factory* detfactory)
+data_node* StiDetectorTreeBuilder::build(data_node_factory* nodefactory,
+					 detector_factory* detfactory)
 {
     if (mroot) {
       cout << "StiDetectorTreeBuilder::build()\tError!\t" 
@@ -48,7 +47,7 @@ data_node* StiDetectorTreeBuilder::build(
     mnodefactory = nodefactory;
     mdetfactory = detfactory;
     buildRoot();
-    loopOnDetectors(path);
+    loopOnDetectors();
     SortDaughters<data_t> mysorter;
     mysorter(mregion);
     
@@ -115,7 +114,7 @@ data_node* StiDetectorTreeBuilder::hangWhere(
     }
 }
 
-void StiDetectorTreeBuilder::loopOnDetectors(const char* buildDirectory)
+void StiDetectorTreeBuilder::loopOnDetectors()
 {
 
   while(mDetectorBuilder->hasMore()){
@@ -129,7 +128,7 @@ void StiDetectorTreeBuilder::loopOnDetectors(const char* buildDirectory)
     StiDetectorFinder *pFinder = StiDetectorFinder::instance();
     pFinder->addDetector(layer);
 
-    cout << "Added detector " << layer->getName() << endl;
+    //cout << "Added detector " << layer->getName() << endl;
   }
 
   return;

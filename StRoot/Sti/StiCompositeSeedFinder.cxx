@@ -53,7 +53,7 @@ void StiCompositeSeedFinder::StiSeedFinderRep::build()
     for (int sector=mMinSector; sector<=mMaxSector; ++sector) {
 	StiDetectorVec_t temp;
 	for (int padrow=mMinPadrow; padrow<=mMaxPadrow; ++padrow) {
-	    cout <<"Building sector: "<<sector<<"\tpadrow: "<<padrow<<endl;
+	    //cout <<"Building sector: "<<sector<<"\tpadrow: "<<padrow<<endl;
 	    char szBuf[100];
 	    sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d", padrow, sector);
 	    StiDetector* layer = StiDetectorFinder::instance()->findDetector(szBuf);

@@ -12,7 +12,7 @@ using std::for_each;
 #include <utility>
 
 //StEvent
-#include "StEventTypes.h"
+//#include "StEventTypes.h"
 
 //StMcEvent
 #include "StMcEventTypes.hh"
@@ -27,7 +27,6 @@ using std::for_each;
 #include "StiDetectorContainer.h"
 #include "StiHitContainer.h"
 #include "StiEvaluableTrack.h"
-#include "StiStTrackFilter.h"
 #include "StiGeometryTransform.h"
 #include "StiKalmanTrack.h"
 #include "StiKalmanTrackNode.h"
@@ -36,7 +35,7 @@ using std::for_each;
 ostream& operator<<(ostream&, const StiHit&);
 
 StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(StAssociationMaker* assoc)
-    : mAssociationMaker(assoc), mevent(0), mMcEvent(0)
+    : mAssociationMaker(assoc), mMcEvent(0)
 {
     cout <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder()"<<endl;
     if (!assoc) {
@@ -49,32 +48,21 @@ StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()
     cout <<"StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()"<<endl;
 }
 
-void StiEvaluableTrackSeedFinder::setEvent(StEvent* evt, StMcEvent* mcevt) 
+void StiEvaluableTrackSeedFinder::setEvent(StMcEvent* mcevt) 
 {
-    mevent = evt;
     mMcEvent = mcevt;
-
-    if (mcevt!=0) {
-	//Get StMcTrack list from StMcEvent
-	cout <<"StiEvaluableTrackSeedFinder::setEvent().  GetMcTrackContainer"<<endl;
-	StSPtrVecMcTrack& tracks = mMcEvent->tracks();
-	mBeginMc = tracks.begin();
-	mEndMc = tracks.end();
-	mCurrentMc = mBeginMc;
+    if (mcevt==0) {
+	cout <<"StiEvaluableTrackSeedFinder::setEvent(). ERROR:\tmcEvent==0"<<endl;
+	return;
     }
+
+    //Get StMcTrack list from StMcEvent
+    cout <<"StiEvaluableTrackSeedFinder::setEvent().  GetMcTrackContainer"<<endl;
+    StSPtrVecMcTrack& tracks = mMcEvent->tracks();
+    mBeginMc = tracks.begin();
+    mEndMc = tracks.end();
+    mCurrentMc = mBeginMc;
     
-    return;
-}
-
-void StiEvaluableTrackSeedFinder::addStTrackFilter(StiStTrackFilter* filter)
-{
-    mfiltervector.push_back(filter);
-    return;
-}
-
-void StiEvaluableTrackSeedFinder::setStTrackType(StTrackType thetype)
-{
-    mtype = thetype;
     return;
 }
 

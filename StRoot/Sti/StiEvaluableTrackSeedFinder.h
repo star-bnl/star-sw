@@ -12,54 +12,37 @@
 #include <map>
 
 #include "StiSeedFinder.h"
-#include "StEvent/StEnumerations.h"
-
 #include "StiGui/StiRootDrawableStiEvaluableTrack.h" //For factory
 
-class StEvent;
-class StiDetector;
-class StiTrack;
 class StiKalmanTrack;
-class StTrack;
-class StiStTrackFilter;
 class StMcEvent;
 class StMcTrack;
 class StAssociationMaker;
 class StTrackPairInfo;
+
 class StiEvaluableTrackSeedFinder : public StiSeedFinder
 {
 public:
-    typedef vector<StiStTrackFilter*> st_trackfilter_vector;
-    //typedef StiObjectFactory<StiEvaluableTrack> StiEvaluableTrackFactory;
-    
     StiEvaluableTrackSeedFinder(StAssociationMaker*);
     virtual ~StiEvaluableTrackSeedFinder();
     
     //Sets
-    void setEvent(StEvent*, StMcEvent* mcevt=0);
+    void setEvent(StMcEvent* mcevt=0);
     void setFactory(StiEvaluableTrackFactory* val);
-    
-    void addStTrackFilter(StiStTrackFilter*);
-    void setStTrackType(StTrackType);
     
     //User query interface to StiKalmanTracks
     virtual bool hasMore();
     virtual StiKalmanTrack* next();
 
-    //Utilites
-    void printStTracks() const;
-
 protected:
     StiEvaluableTrack* makeTrack(StMcTrack*);
     
 private:
-    StiEvaluableTrackSeedFinder(); //Not implemented
+    StiEvaluableTrackSeedFinder(); //Not implemented, gotta have association maker
+    
     StAssociationMaker* mAssociationMaker;
-    StEvent* mevent;
     StMcEvent* mMcEvent;
     StiEvaluableTrackFactory* mfactory;
-    StTrackType mtype; //enumeration to the type of track we get from StEvent
-    st_trackfilter_vector mfiltervector;
 
     vector<StMcTrack*>::iterator mCurrentMc;
     vector<StMcTrack*>::iterator mBeginMc;

@@ -42,6 +42,9 @@ public:
     inline double deltaD() const {return mdeltad;}
     inline double deltaZ() const {return mdeltaz;}
 
+    //Provide for drawable derived class(es?)
+    virtual void update();
+    
     //STL wrappers
     virtual void push_back(StiHit*);
     virtual unsigned int size() const;
