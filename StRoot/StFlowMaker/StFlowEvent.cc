@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cc,v 1.14 2000/02/18 22:49:54 posk Exp $
+// $Id: StFlowEvent.cc,v 1.15 2000/02/29 01:26:11 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cc,v $
+// Revision 1.15  2000/02/29 01:26:11  snelling
+// removed static const int& nxxx = Flow::nxxx;
+//
 // Revision 1.14  2000/02/18 22:49:54  posk
 // Added PID and centrality.
 //
@@ -151,17 +154,7 @@ Int_t StFlowEvent::checkInput(Int_t harN, Int_t selN, Int_t subN) const {
 void StFlowEvent::SetPhiWeight(const Flow::PhiWgt_t &pPhiWgt) {
   // Transfers PhiWgt array from StFlowMaker
 
-  static const int& nHars    = Flow::nHars;
-  static const int& nSels    = Flow::nSels;
-  static const int& nPhiBins = Flow::nPhiBins;
-
-  for (int k = 0; k < nSels; k++) {
-    for (int j = 0; j < nHars; j++) {
-      for (int n = 0; n < nPhiBins; n++) {
-	mPhiWgt[k][j][n] = pPhiWgt[k][j][n];
-      }
-    }
-  }
+  memcpy (mPhiWgt, pPhiWgt, sizeof(Flow::PhiWgt_t));
 
 }
 
@@ -265,16 +258,14 @@ Float_t StFlowEvent::q(Int_t harN, Int_t selN, Int_t subN) {
 
 void StFlowEvent::SetSelections() {
 
-  static const int& nHars = Flow::nHars;
-  static const int& nSels = Flow::nSels;
   
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
     Double_t mEta = pFlowTrack->Eta();
     Float_t  mPt  = pFlowTrack->Pt();
-    for (int selN = 0; selN < nSels; selN++) {
-      for (int harN = 0; harN < nHars; harN++) {
+    for (int selN = 0; selN < Flow::nSels; selN++) {
+      for (int harN = 0; harN < Flow::nHars; harN++) {
 
 	// Eta
 	if (mEtaCuts[1][harN][selN] > mEtaCuts[0][harN][selN] && 
@@ -298,10 +289,6 @@ void StFlowEvent::SetSelections() {
 
 void StFlowEvent::MakeSubEvents() {
 
-  static const int& nHars = Flow::nHars;
-  static const int& nSels = Flow::nSels;
-  static const int& nSubs = Flow::nSubs;
-
   StFlowTrackIterator itr;
   int eventMult[Flow::nHars][Flow::nSels] = {{0}};
   int harN, selN, subN = 0;
@@ -313,8 +300,8 @@ void StFlowEvent::MakeSubEvents() {
   // loop to count the total number of tracks for each selection
   for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
-    for (selN = 0; selN < nSels; selN++) {
-      for (harN = 0; harN < nHars; harN++) {
+    for (selN = 0; selN < Flow::nSels; selN++) {
+      for (harN = 0; harN < Flow::nHars; harN++) {
 	if (pFlowTrack->Select(harN, selN)) {
 	    eventMult[harN][selN]++;
 	}
@@ -323,9 +310,9 @@ void StFlowEvent::MakeSubEvents() {
   }
 
   // loop to set the SubEvent member variable
-  for (selN = 0; selN < nSels; selN++) {
-    for (harN = 0; harN < nHars; harN++) {
-      int subEventMult = eventMult[harN][selN] / nSubs;
+  for (selN = 0; selN < Flow::nSels; selN++) {
+    for (harN = 0; harN < Flow::nHars; harN++) {
+      int subEventMult = eventMult[harN][selN] / Flow::nSubs;
       if (subEventMult) {
 	subN = 0;
 	int countN = 0;
@@ -380,9 +367,6 @@ void StFlowEvent::PrintSelectionList() {
   // Prints the list of selection cuts
   // Call in Finish
 
-  static const int& nHars    = Flow::nHars;
-  static const int& nSels    = Flow::nSels;
-
   cout << "#######################################################" << endl;
   cout << "# Pid Cuts:" << endl; 
   cout << "#    PiPlus cuts=  " << mPiPlusCuts[0] << ", " 
@@ -393,8 +377,8 @@ void StFlowEvent::PrintSelectionList() {
        << mProtonCuts[1] << endl;
   cout << "#######################################################" << endl;
   cout << "# Track Selections List:" << endl; 
-  for (int k = 0; k < nSels; k++) {
-    for (int j = 0; j < nHars; j++) {
+  for (int k = 0; k < Flow::nSels; k++) {
+    for (int j = 0; j < Flow::nHars; j++) {
       cout << "#  selection= " << k+1 << " harmonic= " 
 	   << j+1 << endl;
       cout << "#    abs(Eta) cuts= " << mEtaCuts[0][j][k] << ", " 

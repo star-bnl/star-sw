@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.15 2000/02/18 23:44:05 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.16 2000/02/29 01:26:11 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.16  2000/02/29 01:26:11  snelling
+// removed static const int& nxxx = Flow::nxxx;
+//
 // Revision 1.15  2000/02/18 23:44:05  posk
 // Removed some more lines for CC5 which still do not work.
 //
@@ -111,7 +114,7 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.15 2000/02/18 23:44:05 posk Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.16 2000/02/29 01:26:11 snelling Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 
 }
@@ -151,10 +154,6 @@ Int_t StFlowMaker::Finish() {
 Int_t StFlowMaker::readPhiWgtFile() {
   // Read the PhiWgt root file
 
-  static const int& nHars    = Flow::nHars;
-  static const int& nSels    = Flow::nSels;
-  static const int& nPhiBins = Flow::nPhiBins;
-
   TDirectory* dirSave = gDirectory;
   TFile* pPhiWgtFile = new TFile("flowPhiWgt.hist.root", "READ");
   if (!pPhiWgtFile->IsOpen()) {
@@ -164,10 +163,10 @@ Int_t StFlowMaker::readPhiWgtFile() {
 
   // Fill mPhiWgt
   // for each selection and each harmonic
-  for (int k = 0; k < nSels; k++) {
+  for (int k = 0; k < Flow::nSels; k++) {
     char countSels[2];
     sprintf(countSels,"%d",k+1);
-    for (int j = 0; j < nHars; j++) {
+    for (int j = 0; j < Flow::nHars; j++) {
       char countHars[2];
       sprintf(countHars,"%d",j+1);
       TString* histTitle = new TString("Flow_Phi_Weight_Sel");
@@ -176,11 +175,11 @@ Int_t StFlowMaker::readPhiWgtFile() {
       histTitle->Append(*countHars);
       if (pPhiWgtFile->IsOpen()) {
 	TH1* phiWgtHist = (TH1*)pPhiWgtFile->Get(histTitle->Data());
-	for (int n = 0; n < nPhiBins; n++) {
+	for (int n = 0; n < Flow::nPhiBins; n++) {
 	  mPhiWgt[k][j][n] = (phiWgtHist) ? phiWgtHist->GetBinContent(n+1) : 1.;
 	}
       } else {
-	for (int n = 0; n < nPhiBins; n++) mPhiWgt[k][j][n] = 1.;
+	for (int n = 0; n < Flow::nPhiBins; n++) mPhiWgt[k][j][n] = 1.;
       }
       delete histTitle;
     }
