@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3.h,v 1.2 2000/01/07 00:17:10 fisyak Exp $ */
+/* $Id: TGeant3.h,v 1.3 2000/01/07 17:51:24 fisyak Exp $ */
 
 //////////////////////////////////////////////// 
 //  C++ interface to Geant3 basic routines    // 
@@ -718,6 +718,7 @@ public:
    virtual  void  Glmoth(const char* iudet, Int_t iunum, Int_t &nlev, 
                          Int_t *lvols, Int_t *lindx); 
    virtual  void  Gmedia(Float_t *x, Int_t &numed); 
+   virtual  void  Gtmedi(Float_t *x, Int_t &numed); 
    virtual  void  Gmtod(Float_t *xm, Float_t *xd, Int_t &iflag); 
    virtual  void  Gsdvn(const char *name, const char *mother, Int_t ndiv, Int_t iaxis); 
    virtual  void  Gsdvn2(const char *name, const char *mother, Int_t ndiv, Int_t iaxis, Float_t c0i, Int_t numed); 
