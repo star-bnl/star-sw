@@ -56,17 +56,48 @@ private:
   double         mTimeBinWidth;
   double         mTau;
   double         mSamplingFrequency;
-  double         mPadRespondFunctionSigma;
-
+  double         mFractionSampled;  
+  double         mPadResponseFunctionSigma;
+const double         mPadResponseFunctionSigmaOuter;
+const double         mPadResponseFunctionSigmaInner;
+  double         mChargeFraction[4]; 
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
-  vector<double> mChargeFraction;
-  vector<double> mErrorFuctionTable;
+  vector<double> mErrorFunctionTable;
 #else
-  vector<double, allocator<double> > mChargeFraction;
-  vector<double, allocator<double> > mErrorFuctionTable;
+  vector<double, allocator<double> > mErrorFunctionTable;
 #endif
-   double        mNumberOfEntriesInTable;
+  double         mNumberOfEntriesInTable;
   double         mRangeOfTable ;
+    //To avoid initialization, define the following data members.
+    StTpcPadCoordinate    mTpcRaw;
+    int            mCentralPad;
+    int            mCentralRow;
+    int            mNumberOfRows;
+    int            mNumberOfInnerRows;
+    int            mFrischGrid;
+    double yb1, yb2, yb3, yb4;
+    double rowNormalization;
+    double padWidth, padLength;
+    double zoffset, wire_to_plane_coupling;
+    double xCentroidOfPad, yCentroidOfPad;
+    double delx, gridMinusZ, sigma_x, localXDirectionCoupling;
+    double dely, constant, localYDirectionCoupling;
+    double timeOfSignal, chargeOfSignal;
+    double t, tzero, K, sigmaLoverTau, lambda;
+    
 };
+
+inline double StTrsParameterizedAnalogSignalGenerator::signalSampler(double tt, StTrsAnalogSignal& sig)
+{
+    //
+    // This is where the function for the Signal Sampling is selected
+    // Add a function that returns the amplitude of a signal at
+    // a time 't' given the position in time and amplitude of all
+    // the other signals (contained in the StTrsAnalogSignal 'sig'
+  
+
+  return realShaperResponse(tt,sig);
+  
+}
 
 #endif

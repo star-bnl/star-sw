@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSector.cc,v 1.5 1999/02/16 23:36:42 lasiuk Exp $
+ * $Id: StTrsSector.cc,v 1.6 1999/11/11 19:45:12 calderon Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,14 @@
  ***************************************************************************
  *
  * $Log: StTrsSector.cc,v $
+ * Revision 1.6  1999/11/11 19:45:12  calderon
+ * Made variables-> data members in analog signal generator to avoid
+ * initialization time when member functions are called.
+ * Inlined:
+ *  StTrsParameterizedAnalogSignalGenerator::signalSampler()
+ *  StTrsSector::addEntry()
+ *  StTrsSector::assignTimeBins()
+ *
  * Revision 1.5  1999/02/16 23:36:42  lasiuk
  * carefull...row>0
  *
@@ -76,15 +84,15 @@ void StTrsSector::clear() // clears only the time bins
 
 // Caution: rowN specifies rowNumber 1..45
 // Below, rowIndex specifies index 0..44
-void StTrsSector::addEntry(int rowN, int padN, StTrsAnalogSignal& signl)
-{
-    //cout << "rowN " << rowN << " padN " << padN << endl;
-#ifdef ST_SECTOR_BOUNDS_CHECK
-    if( (rowN > 0 && row <= mSector.size()) )
-	if( (padN > 0 && pad <= mSector[(rowN-1)].size()) )
-#endif
-	    mSector[(rowN-1)][(padN-1)].push_back(signl);
-}
+// void StTrsSector::addEntry(int rowN, int padN, StTrsAnalogSignal& signl)
+// {
+//     //cout << "rowN " << rowN << " padN " << padN << endl;
+// #ifdef ST_SECTOR_BOUNDS_CHECK
+//     if( (rowN > 0 && row <= mSector.size()) )
+// 	if( (padN > 0 && pad <= mSector[(rowN-1)].size()) )
+// #endif
+// 	    mSector[(rowN-1)][(padN-1)].push_back(signl);
+// }
 
 void StTrsSector::addEntry(StTpcPadCoordinate& coord, StTrsAnalogSignal& sig)
 {
@@ -93,14 +101,14 @@ void StTrsSector::addEntry(StTpcPadCoordinate& coord, StTrsAnalogSignal& sig)
 
 // Caution: rowIndex specifies index 0..44
 // Above: rowN specifies rowNumber 1..45
-void StTrsSector::assignTimeBins(int rowN, int padN, tpcTimeBins& tbins)
-{
-#ifdef ST_SECTOR_BOUNDS_CHECK
-    if( (rowIndex > 0 && rowIndex <= mSector.size()) )
-	if( (padIndex > 0 && padIndex <= mSector[rowIndex].size()) )
-#endif
-	    mSector[(rowN-1)][(padN-1)] = tbins;
-}
+// void StTrsSector::assignTimeBins(int rowN, int padN, tpcTimeBins& tbins)
+// {
+// #ifdef ST_SECTOR_BOUNDS_CHECK
+//     if( (rowIndex > 0 && rowIndex <= mSector.size()) )
+// 	if( (padIndex > 0 && padIndex <= mSector[rowIndex].size()) )
+// #endif
+// 	    mSector[(rowN-1)][(padN-1)] = tbins;
+// }
 
 void StTrsSector::assignTimeBins(StTpcPadCoordinate& coord, tpcTimeBins& tbins)
 {
