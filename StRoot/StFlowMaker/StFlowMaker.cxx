@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.43 2000/10/12 22:46:37 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.44 2000/11/02 18:19:09 fine Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.44  2000/11/02 18:19:09  fine
+// protection against of the crash with traits.size() == 0 and pid == 0. May be one has to change the logic of this code
+//
 // Revision 1.43  2000/10/12 22:46:37  snelling
 // Added support for the new pDST's and the probability pid method
 //
@@ -300,7 +303,7 @@ Int_t StFlowMaker::Init() {
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.43 2000/10/12 22:46:37 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.44 2000/11/02 18:19:09 fine Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -504,13 +507,17 @@ void StFlowMaker::FillFlowEvent() {
 	pFlowTrack->SetPidPositron(nSigma);
 	
 	// dE/dx
-	StPtrVecTrackPidTraits traits = pTrack->pidTraits(kTpcId);
-	StDedxPidTraits* pid;
-	for (unsigned int i = 0; i < traits.size(); i++) {
-	  pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
-	  if (pid && pid->method() == kTruncatedMeanId) break;
-	}
-	pFlowTrack->SetDedx(pid->mean());
+        
+  	StPtrVecTrackPidTraits traits = pTrack->pidTraits(kTpcId);
+        unsigned int size = traits.size();
+        if (size) {
+	  StDedxPidTraits* pid;
+	  for (unsigned int i = 0; i < traits.size(); i++) {
+	    pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
+	    if (pid && pid->method() == kTruncatedMeanId) break;
+	  }
+	  assert(pid); pFlowTrack->SetDedx(pid->mean());
+        }
 
 	// Probability pid
 	const StParticleDefinition* def = pTrack->pidTraits(uPid);
