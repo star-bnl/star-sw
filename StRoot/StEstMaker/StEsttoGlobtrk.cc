@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEsttoGlobtrk.cc,v 1.3 2001/01/31 16:59:54 lmartin Exp $
+ * $Id: StEsttoGlobtrk.cc,v 1.4 2001/02/21 23:50:21 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEsttoGlobtrk.cc,v $
+ * Revision 1.4  2001/02/21 23:50:21  caines
+ * Add some more info to SVT track for kalman fitting initial guess
+ *
  * Revision 1.3  2001/01/31 16:59:54  lmartin
  * mParams[]->debug replaced by mDebug.
  *
@@ -30,6 +33,11 @@
 #include "tables/St_svm_evt_match_Table.h"
 #include "tables/St_stk_track_Table.h"
 #include "tables/St_sgr_groups_Table.h"
+#include "math_constants.h"
+
+#include "StarCallf77.h"
+extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
+#define gufld F77_NAME(gufld,GUFLD)
 
 //class St_stk_track;
 //class St_sgr_groups;
@@ -38,12 +46,18 @@
 void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
 				St_sgr_groups* svtgrps,
 				St_svm_evt_match* EstMatch){
-				    
+ 
+  float x[3] = {0,0,0};
+  float b[3];
+  gufld(x,b);			    
+  
+
   if (mDebugLevel>0)
     cout<<"StEstTracker::StEsttoGlobtrk : Saving into the global tables"<<endl;
   int CountHits=0;
   int CountMatch=0;
-  int SaveHit;
+  int SaveHit, lsav ;
+  double r,rnew,pathl,q;
   
   StEstBranch *branch;
   StEstHit *hit;
@@ -70,6 +84,9 @@ void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
     svtMatchPtr->idsvt = svtTrkPtr->id;
     svtMatchPtr->idtpc = mTrack[i]->mTPCTrack->GetId();
  
+    rnew=0.;
+    r = 999.;
+
     for( int j=0;j<mTrack[i]->GetNBranches();j++) {
       branch = mTrack[i]->GetBranch(j);
       for ( int k=0;k<branch->GetNHits();k++) {
@@ -84,11 +101,16 @@ void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
 	    groups->ident = 3;
 	    groups++;
 	    CountHits++;
+	    rnew = mSvtHit[l]->mXG->x()*mSvtHit[l]->mXG->x()+
+	      mSvtHit[l]->mXG->y()*mSvtHit[l]->mXG->y();
+	    if( rnew < r) {
+	      r = rnew;
+	      lsav=l;
+	    }
 	  }
 	}
       }
     }
-
     if(svtTrkPtr->nspt > 0){
       groups -= svtTrkPtr->nspt;
       //Now reorder hits so track goes from inner barrel out
@@ -98,9 +120,25 @@ void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
 	groups[svtTrkPtr->nspt-nHits-1].id2 = SaveHit;
       }
       groups += svtTrkPtr->nspt;
+      pathl = mTrack[i]->GetHelix()->pathLength(mSvtHit[lsav]->mXG->x(),
+					  mSvtHit[lsav]->mXG->y());
+      mTrack[i]->GetHelix()->moveOrigin(pathl);
+
+      svtTrkPtr->z0 = mTrack[i]->GetHelix()->z(0);
+      svtTrkPtr->psi = mTrack[i]->GetHelix()->phase()*C_DEG_PER_RAD+
+	mTrack[i]->GetHelix()->h()*M_PI_2;
+      svtTrkPtr->tanl = tan(mTrack[i]->GetHelix()->dipAngle());
+      q = ((b[2] * mTrack[i]->GetHelix()->h()) > 0 ? -1 : 1);
+      svtTrkPtr->invpt = q/mTrack[i]->GetTPCTrack()->GetPt();
+      svtTrkPtr->r0 = sqrt(mTrack[i]->GetHelix()->x(0)*
+			   mTrack[i]->GetHelix()->x(0)
+			   +mTrack[i]->GetHelix()->y(0)*
+			   mTrack[i]->GetHelix()->y(0));
+      svtTrkPtr->phi0 =  atan2(mTrack[i]->GetHelix()->y(0),
+			       mTrack[i]->GetHelix()->x(0))*C_DEG_PER_RAD;
       svtTrkPtr++;
       svtMatchPtr++;
-
+      
     }
     else{         
       CountMatch--;
