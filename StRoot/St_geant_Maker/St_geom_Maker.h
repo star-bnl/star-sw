@@ -1,5 +1,8 @@
-// $Id: St_geom_Maker.h,v 1.3 1998/12/16 20:56:24 fisyak Exp $
+// $Id: St_geom_Maker.h,v 1.4 1998/12/25 21:02:14 nevski Exp $
 // $Log: St_geom_Maker.h,v $
+// Revision 1.4  1998/12/25 21:02:14  nevski
+// Add Set/Get method
+//
 // Revision 1.3  1998/12/16 20:56:24  fisyak
 // Add gstar to ROOT
 //
@@ -37,14 +40,14 @@
 class TNode;
 
 #endif
-//class St_stk_stkpar;
+
 class St_geom_Maker : public StMaker {
  private:
-   Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_geom_Maker.h,v 1.3 1998/12/16 20:56:24 fisyak Exp $";
-// Int_t          m_mode;        // mode 1 = primaries;
-// St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
- TNode*   fNode;
+  Bool_t drawinit;
+  Int_t  nwgeant;     // No. of words in GCBANK common block
+  Int_t  nwpaw;       // No. of words in PAWC  common block
+  Int_t  iwtype;      // HIGZ interface (=0 no HIGZ)
+  TNode*   fNode;
  
  protected:
  public: 
@@ -52,14 +55,17 @@ class St_geom_Maker : public StMaker {
    virtual       ~St_geom_Maker();
    virtual Int_t  Finish(){SafeDelete(m_DataSet); return kStOK;}
    virtual Int_t  Init();
-   virtual Int_t  Make();
-   virtual void   PrintInfo();
    virtual void   Clear(Option_t *option){}; // No clearance for parameters
    void Draw();  
    void Do  (const char*);  
+   virtual Int_t  Make();
+   virtual void   PrintInfo();
+   virtual void   SetNwGEANT (Int_t n=100000) {nwgeant = n;} // *MENU
+   virtual void   SetNwPAW   (Int_t n=     0) {nwpaw   = n;} // *MENU
+   virtual void   SetIwtype  (Int_t n=     0) {iwtype  = n;} // *MENU
    void Work();  
    TNode* GetNode() { return fNode; }
-// virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
+
    ClassDef(St_geom_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
