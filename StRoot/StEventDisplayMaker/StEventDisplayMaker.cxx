@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.70 2000/08/29 04:39:22 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.71 2000/08/29 19:26:00 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -130,7 +130,7 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   mDateTimeLabel     = 0;
 
   m_ListDataSetNames = 0;
-
+  m_VolumeList       = 0;
   m_FilterArray   = new TObjArray(kEndOfEventList);
   Int_t i; 
   for (i =0;i<kEndOfEventList;i++) {
@@ -142,6 +142,15 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   ((StVirtualEventFilter *)m_FilterArray->At(kTable))->TurnOn();
 
   gROOT->GetListOfBrowsables()->Add(this,GetName());
+ 
+  // Create the default geometry model
+
+  const Char_t *volumeNames[] = {"TPSS","STSI"}; // STLI"};  // tpc + svt
+// emc   const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB"}; // STSI"};
+//       const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB","BTOF"};
+  const Int_t lvolumeNames = sizeof(volumeNames)/sizeof(Char_t *);
+  for (i=0;i<lvolumeNames;i++) AddVolume(volumeNames[i]);
+
 }
 //_____________________________________________________________________________
 StEventDisplayMaker::~StEventDisplayMaker(){
@@ -157,6 +166,12 @@ StEventDisplayMaker::~StEventDisplayMaker(){
      delete m_ListDataSetNames;
      m_ListDataSetNames = 0;
   }
+  if (m_VolumeList) {
+     m_VolumeList->Delete();
+     delete m_VolumeList;
+     m_VolumeList = 0;
+  }
+
 }
 
 //_____________________________________________________________________________
@@ -189,15 +204,9 @@ Int_t StEventDisplayMaker::BuildGeometry()
   TDataSetIter volume(m_Hall,0);
 // ---  Create "standard" TPC and SVT views ----
   TVolume *sector = 0;
-  const Char_t *volueNames[] = {"TPSS","STSI"}; // STLI"};  // tpc + svt
-// emc   const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB"}; // STSI"};
-//       const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB","BTOF"};
-  const Int_t lvolueNames = sizeof(volueNames)/sizeof(Char_t *);
   while ( (sector = ( TVolume *)volume()) ){
     Bool_t found = kFALSE;
-    Int_t i;
-    for (i =0; i < lvolueNames; i++) 
-    if (strcmp(sector->GetName(),volueNames[i]) == 0 ) {found = kTRUE; break; }
+    found = (m_VolumeList && m_VolumeList->FindObject(sector->GetName()));
     if (found) {
       sector->SetVisibility(TVolume::kBothVisible);
       sector->Mark();
@@ -208,12 +217,6 @@ Int_t StEventDisplayMaker::BuildGeometry()
         strcmp(sector->GetName(),"TPSS")==0 ) {	 
         ((TTUBE *)myShape)->SetNumberOfDivisions(1);
       }
-#if 0      
-      if (!i) {  // special case for TPSS sectors
-        TTUBE *tubs = (TTUBE *)sector->GetShape();
-        tubs->SetNumberOfDivisions(1);
-      }
-#endif      
     } else { 
       sector->UnMark();
       sector->SetVisibility(TVolume::kThisUnvisible);
@@ -234,16 +237,61 @@ void StEventDisplayMaker::AddName(const Char_t *name)
   //   Attention:     NO EXPRESSION, yet !!!
 
   if (!m_ListDataSetNames) m_ListDataSetNames = new TList;
-  if (!m_LockedNames->FindObject(name)) m_LockedNames->Add(new TObjString(name));
+  if (!m_ListDataSetNames->FindObject(name)) 
+        m_ListDataSetNames->Add(new TObjString(name));
 }
 //______________________________________________________________________________
-inline void StEventDisplayMaker::RemoveName(const char *name)
+void StEventDisplayMaker::RemoveName(const char *name)
 {
    TObject *o = 0;
    if (m_ListDataSetNames) {
      o = m_ListDataSetNames->FindObject(name);
      if (o) delete m_ListDataSetNames->Remove(o);
   }
+}
+
+//______________________________________________________________________________
+void StEventDisplayMaker::PrintNames()
+{
+ if(m_ListDataSetNames) {
+   TIter next(m_ListDataSetNames);
+   TObjString *str;
+   while ( (str = (TObjString *)next()) ) {
+     printf(" table: \"%s\"\n",str->String().Data());
+   }
+ }
+}
+
+//______________________________________________________________________________
+void StEventDisplayMaker::AddVolume(const Char_t *name)
+{
+  // Add "GEANT" volume name to the detector model
+  if (!m_VolumeList) m_VolumeList = new TList;
+  if (!m_VolumeList->FindObject(name)) 
+        m_VolumeList->Add(new TObjString(name));
+}
+//______________________________________________________________________________
+void StEventDisplayMaker::RemoveVolume(const char *name)
+{
+  // Remove "GEANT" volume name to the detector model
+   TObject *o = 0;
+   if (m_VolumeList) {
+     o = m_VolumeList->FindObject(name);
+     if (o) delete m_VolumeList->Remove(o);
+  }
+}
+
+//______________________________________________________________________________
+void StEventDisplayMaker::PrintVolumes()
+{
+  // Print the "GEANT" volume names for the detector model
+ if(m_VolumeList) {
+   TIter next(m_VolumeList);
+   TObjString *str;
+   while ( (str = (TObjString *)next()) ) {
+     printf(" GEANT volume: \"%s\"\n",str->String().Data());
+   }
+ }
 }
 
 //______________________________________________________________________________
@@ -761,6 +809,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.71  2000/08/29 19:26:00  fine
+// New method to add/remove volumes and tables
+//
 // Revision 1.70  2000/08/29 04:39:22  fine
 // RemoveName method introduced
 //

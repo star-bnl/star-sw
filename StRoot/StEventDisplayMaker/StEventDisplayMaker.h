@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.21 2000/08/29 04:39:25 fine Exp $
+// $Id: StEventDisplayMaker.h,v 1.22 2000/08/29 19:26:00 fine Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.22  2000/08/29 19:26:00  fine
+// New method to add/remove volumes and tables
+//
 // Revision 1.21  2000/08/29 04:39:25  fine
 // RemoveName method introduced
 //
@@ -43,7 +46,7 @@ class TPaveLabel;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.21 2000/08/29 04:39:25 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.22 2000/08/29 19:26:00 fine Exp $";
  private: 
     TList         *m_HitCollector;     //!
     TList         *m_TrackCollector;   //!
@@ -57,9 +60,9 @@ class StEventDisplayMaker : public StMaker {
     TVolume      *m_EventsNode;   //!
     TVolumeView  *m_EventsView;   //!
     TList        *m_ListDataSetNames; // The list of the names to be drawn
+    TList        *m_VolumeList;   // The list of the names of TVolume object
     TTable       *m_Table;        //! The table to be drawn if any
     TObjArray    *m_FilterArray;  // Array of the "event" user supplied filters
-    TList        *m_LockedNames;  // The names of the dataset loked temporary
 
     TCanvas      *m_PadBrowserCanvas; //!
     TPaveLabel   *mRunNumberLabel;    //!
@@ -74,7 +77,8 @@ class StEventDisplayMaker : public StMaker {
  public: 
                   StEventDisplayMaker(const char *name="EventDisplay");
    virtual       ~StEventDisplayMaker();
-   virtual void   AddName(const Char_t *name="StEvent");
+   virtual void   AddName(const Char_t *name);   // *MENU*
+   virtual void   AddVolume(const Char_t *name); // *MENU*
    virtual Int_t  BuildGeometry();
    virtual Int_t  Init();
    virtual Int_t  Make();
@@ -92,9 +96,12 @@ class StEventDisplayMaker : public StMaker {
    virtual TVolume     *GetEventsNode(){ return m_EventsNode;}
    virtual Color_t      GetColorAttribute(Int_t adc);
    virtual void         PrintFilterStatus(); // *MENU*
+   virtual void         PrintNames();   // *MENU*
+   virtual void         PrintVolumes(); // *MENU*
    virtual void         SetMode       (Int_t   m = 0){StMaker::SetMode(m);} // *MENU*
    virtual Int_t        ReDraw(){ClearCanvas(); return Make();} // *MENU*
    virtual void         RemoveName(const char *name); // *MENU*
+   virtual void         RemoveVolume(const char *name); // *MENU*
    virtual void         TurnOn() { SetMode(); }  // *MENU*
    virtual void         TurnOff(){ SetMode(1); } // *MENU*
 
@@ -131,7 +138,7 @@ class StEventDisplayMaker : public StMaker {
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.21 2000/08/29 04:39:25 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.22 2000/08/29 19:26:00 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
