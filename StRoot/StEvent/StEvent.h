@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.1 1999/10/28 22:25:10 ullrich Exp $
+ * $Id: StEvent.h,v 2.2 1999/11/04 13:30:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 2.1  1999/10/28 22:25:10  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.2  1999/11/04 13:30:42  ullrich
+ * Added constructor without summary table
  *
  * Revision 2.9  2000/05/15 18:35:37  ullrich
  * All data member related to collections and containers are now
@@ -49,6 +49,7 @@
 #define StEvent_hh
 #include "St_DataSet.h"
 #include "StContainers.h"
+
 class event_header_st;
 class dst_event_summary_st;
 class StRichPixelCollection;
@@ -139,6 +140,7 @@ public:
 
     StSPtrVecTrackDetectorInfo   mTrackDetectorInfo;
     StSPtrVecTrackNode           mTrackNodes;
+
     StSPtrVecPrimaryVertex       mPrimaryVertices;
     StSPtrVecV0Vertex            mV0Vertices;
     StSPtrVecXiVertex            mXiVertices;
