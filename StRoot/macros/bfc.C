@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.52 1999/05/13 20:34:54 snelling Exp $
+// $Id: bfc.C,v 1.53 1999/05/13 23:48:24 snelling Exp $
 // $Log: bfc.C,v $
+// Revision 1.53  1999/05/13 23:48:24  snelling
+// changed switch QA to SQA because -qa at end of input would not work: changed EvalTPC to Eval to make it more general
+//
 // Revision 1.52  1999/05/13 20:34:54  snelling
 // added a ChainFlag for TPC evaluation
 //
@@ -91,22 +94,22 @@ Int_t NoEvents = 0;
 Bool_t DefaultSet = kFALSE;
 //_____________________________________________________________________
 enum EChainOptions { 
-  kNULL =0 ,kEvalTPC ,
+  kNULL =0 ,kEval    ,
   kXINDF   ,kXOUTDF  ,kGSTAR   ,kMINIDAQ ,kFZIN    ,kGEANT   ,kCTEST   ,
   kField_On,kNo_Field,kTPC     ,kTSS     ,kTRS     ,kTFS     ,kFPC     ,
   kFSS     ,kEMC     ,kCTF     ,kL3      ,kRICH    ,kSVT     ,kGLOBAL  ,
-  kDST     ,kQA      ,kEVENT   ,kANALYS  ,kTREE    ,kAllEvent,kLAST    
+  kDST     ,kSQA     ,kEVENT   ,kANALYS  ,kTREE    ,kAllEvent,kLAST    
 };
 Char_t *ChainOptions[] = {
-  "NULL    ","EvalTPC ",
+  "NULL    ","Eval    ",
   "XINDF   ","XOUTDF  ","GSTAR   ","MINIDAQ ","FZIN    ","GEANT   ","CTEST   ",
   "FieldOn ","NoField ","TPC     ","TSS     ","TRS     ","TFS     ","FPC     ",
   "FSS     ","EMC     ","CTF     ","L3      ","RICH    ","SVT     ","GLOBAL  ",
-  "DST     ","QA      ","EVENT   ","ANALYS  ","TREE    ","AllEvent","LAST    "
+  "DST     ","SQA     ","EVENT   ","ANALYS  ","TREE    ","AllEvent","LAST    "
 };
 Char_t *ChainComments[] = {
   "Nothing to comment",
-  "Turn on TPC evaluation switches",
+  "Turn on evaluation switch for different makers",
   "Read XDF input file with g2t",
   "Write dst to XDF file",
   "Run gstar for 10 muon track with pT = 10 GeV in |eta|<1",
@@ -129,7 +132,7 @@ Char_t *ChainComments[] = {
   "SVT in chain",
   "GLOBAL in chain",
   "DST in chain",
-  "QA in chain",
+  "STAR QA in chain",
   "StEvent in chain",
   "Analysis with StEvent in chain",
   "write event to StTree",
@@ -145,7 +148,7 @@ UChar_t  ChainFlags[] = {
 };
 //_____________________________________________________________________
 void SetChainOff(){// set all OFF
-  for (Int_t k = kEvalTPC;k<=kLAST;k++) ChainFlags[k] = kFALSE;
+  for (Int_t k = kEval;k<=kLAST;k++) ChainFlags[k] = kFALSE;
 }
 //_____________________________________________________________________
 void SetDefaultChain(){// default for standard chain
@@ -165,7 +168,7 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
   Int_t k, kgo;
   if (!strlen(Chain)) {
                                printf ("============= \tPossible Chain Options are: \n");
-    for (k=kXINDF;k<kLAST;k++) printf ("============ %2d \t[-]%s : \t%s \n",k,ChainOptions[k],ChainComments[k]);
+    for (k=kEval;k<kLAST;k++) printf ("============ %2d \t[-]%s : \t%s \n",k,ChainOptions[k],ChainComments[k]);
     gSystem->Exit(1);
   }
   TString opt;
@@ -173,7 +176,7 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
   TString tChain(Chain);
   tChain.ToLower(); //printf ("Chain %s\n",tChain.Data());
   SetChainOff();
-  for (k = kEvalTPC; k<kLAST; k++){
+  for (k = kEval; k<kLAST; k++){
     opt = TString(ChainOptions[k],3);
     opt.ToLower();
     if (!strstr(tChain.Data(),opt.Data())) continue;
@@ -190,14 +193,14 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
       ChainFlags[kTPC]     = kTRUE;
       ChainFlags[kCTEST]   = kTRUE;
       ChainFlags[kNo_Field]= kTRUE;
-      ChainFlags[kEvalTPC] = kTRUE;
+      ChainFlags[kEval] = kTRUE;
       printf(" Switch off everything but\n");
       printf(" Switch on  %s\n",ChainOptions[kXINDF]);
       printf(" Switch on  %s\n",ChainOptions[kMINIDAQ]);
       printf(" Switch on  %s\n",ChainOptions[kTPC]);
       printf(" Switch on  %s\n",ChainOptions[kCTEST]);
       printf(" Switch on  %s\n",ChainOptions[kNo_Field]);
-      printf(" Switch on  %s\n",ChainOptions[kEvalTPC]);
+      printf(" Switch on  %s\n",ChainOptions[kEval]);
       break;
     case kGSTAR:
       SetDefaultChain();
@@ -262,7 +265,7 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
     ChainFlags[kGEANT] = kTRUE;
   }
   if (!ChainFlags[kGEANT] && !ChainFlags[kNo_Field]) ChainFlags[kField_On] = kTRUE;
-  for (k = kXINDF; k<kLAST;k++) 
+  for (k = kEval; k<kLAST;k++) 
     if (ChainFlags[k]     ) 
       printf ("================== %2d \t%s \tis ON: \t%s \n",k,ChainOptions[k],ChainComments[k]);
   //  gSystem->Exit(1);
@@ -504,7 +507,7 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar",Char_t *infile=0, C
       cout<<"initializing input for the tpc DB"<<endl;
       //      tclMk->SetInput("params","tpcdb:params");  
     }
-    if (ChainFlags[kEvalTPC]) {//Additional switches
+    if (ChainFlags[kEval]) {//Additional switches
       tclMk->tclPixTransOn(); //Turn on flat adcxyz table
       tclMk->tclEvalOn(); //Turn on the hit finder evaluation
     }
@@ -525,7 +528,7 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar",Char_t *infile=0, C
       tptMk->Set_final(kTRUE);// Turn on the final ntuple.
     }
     else tptMk->tteEvalOn(); //Turn on the tpc evaluation
-    if (ChainFlags[kEvalTPC]) {//Additional switches
+    if (ChainFlags[kEval]) {//Additional switches
       tptMk->tptResOn();      // Turn on the residual table
     }
     tptMk->SetDebug();
@@ -568,7 +571,7 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar",Char_t *infile=0, C
 	anaMk->SetDebug(0);
       }
     }
-    if (ChainFlags[kQA]) St_QA_Maker          *qa         = new St_QA_Maker;  
+    if (ChainFlags[kSQA]) St_QA_Maker *qa = new St_QA_Maker;  
   }
   if (ChainFlags[kTREE]) {//		Tree
     treeMk = new StTreeMaker("tree",FileOut.Data());
