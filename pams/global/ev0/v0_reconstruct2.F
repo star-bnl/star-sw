@@ -337,10 +337,9 @@ C---- find square of impact param of reconstructed particle------
                        vertex(vertex_h.nok).det_id = 
      +                      (100*trak(i).det_id)+trak(j).det_id
                        vertex(vertex_h.nok).vtx_id= kV0VtxId
-                       vertex(vertex_h.nok).sigma(1) = 0
-                       vertex(vertex_h.nok).sigma(2) = 0
-                       vertex(vertex_h.nok).sigma(3) = 0
-                       vertex(vertex_h.nok).pchi2 = 0
+                       vertex(vertex_h.nok).covar(1) = 0
+                       vertex(vertex_h.nok).covar(2) = 0
+                       vertex(vertex_h.nok).covar(3) = 0
                        vertex(vertex_h.nok).id_aux_ent= ok
                        vertex(vertex_h.nok).id = vertex_h.nok
                        vertex(vertex_h.nok).n_daughters = 2
