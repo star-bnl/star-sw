@@ -3,8 +3,9 @@
 **: HISTORY:
 **:           aug 23, 1999  add setup with number of hits and tracks
 **:           oct  6, 1999  ppy new version from Christof
+**:           oct 11, 1999  ppy call rawToLocal with variables instead of pointers
+**:           oct 11, 1999  ppy phiMin, phiMax changed to 0 and 2 pi
 **:   
-**:  
 **:<------------------------------------------------------------------*/
 #include "FtfSl3.h"
 
@@ -142,8 +143,8 @@ int FtfSl3::setup ( int maxHitsIn, int maxTracksIn ) {
   sl3Track   = new sl3MPTrack[maxTracks] ;
 //
 //
-  para.phiMin = 75.F * pi / 180.F ;
-  para.phiMax =105.F * pi / 180.F  ;
+  para.phiMin =  0.F * pi / 180.F ;
+  para.phiMax =360.F * pi / 180.F  ;
   para.etaMin = 0.F ;
   para.etaMax = 2.F ;
   para.mergePrimaries = 0 ;
@@ -152,7 +153,6 @@ int FtfSl3::setup ( int maxHitsIn, int maxTracksIn ) {
   para.trackDebug = 24 ;
   para.debugLevel =  1 ;
 #endif
-  return 0 ;
 }
 //******************************************************************
 //    Read cluster data from TPCMZCLD bank (using daqFormats.h)
@@ -209,7 +209,7 @@ int FtfSl3::readMezzanine (int sector, struct TPCMZCLD_local *mzcld) {
 		   ft = (double) xt->t / 64.0 ;
 		   //printf("%02d %02d %9.5f %9.5f %6d %3d\n", SB, row,
 		   //       fp, ft, c->c , c->f) ;
-		   rawToGlobal(sector, row, fp, ft, &x, &y, &z);
+		   rawToGlobal(sector, row, fp, ft, x, y, z);
 
 		   //printf(" %d  %d  %f  %f  %f  %d  %d\n",
 		   //	  sector, row, x, y, z, c->c, c->f);
@@ -376,5 +376,4 @@ int FtfSl3::setParameters ( ) {
    para.dyVertex         = 0.005F ;
    para.phiVertex        = 0.F    ;
 
-   return 0 ;
 }
