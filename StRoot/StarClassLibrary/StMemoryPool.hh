@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemoryPool.hh,v 1.1 1999/11/09 19:29:13 ullrich Exp $
+ * $Id: StMemoryPool.hh,v 1.2 1999/11/18 17:55:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, Nov 1999
  ***************************************************************************
@@ -8,7 +8,7 @@
  * Description:
  *
  * Idea taken from:
- * B. Stroustrup, The C++ Programmin Language, 2nd edition,
+ * B. Stroustrup, The C++ Programming Language, 3ed edition,
  * Chapter 19 (page 570)
  *
  * Should be used if a large number of small objects has to be
@@ -36,8 +36,8 @@
  ***************************************************************************
  *
  * $Log: StMemoryPool.hh,v $
- * Revision 1.1  1999/11/09 19:29:13  ullrich
- * Initial Revision
+ * Revision 1.2  1999/11/18 17:55:46  ullrich
+ * Corrected reference to Stroustrup.
  *
  * Revision 1.1  1999/11/09 19:29:13  ullrich
  * Initial Revision
