@@ -27,5 +27,5 @@ typedef struct _ ## BBB { \
    unsigned long _maximum; \
    unsigned long _length; \
    AAA *_buffer; \
-} BBB ;
+} BBB 
 
