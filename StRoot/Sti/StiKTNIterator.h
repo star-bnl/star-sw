@@ -11,185 +11,101 @@
   \note Singularity (i.e., 'end') is represented by setting mNode=0.
   \note StiKTNIterator is a non-virtual class.
 */
-
 #ifndef StiKTNIterator_HH
 #define StiKTNIterator_HH
-#ifdef GNU_GCC
-  #if __GNUC__<3
-    #define HACK_forward_iterator
-  #endif
-#endif
 
-#include <iterator>
-using namespace std;
-
+#include <assert.h>
 #include "StiKalmanTrackNode.h"
 typedef StiKalmanTrackNode KTN_t;
+class StiKTNIterator;
+typedef StiKTNIterator StiKTNBidirectionalIterator;
+
 
 //This is a temp hack to get around old gcc ansi-non-compliant STL implementation
-class StiKTNForwardIterator
-#ifndef HACK_forward_iterator
-    : public iterator<forward_iterator_tag, KTN_t, ptrdiff_t, KTN_t*, KTN_t&>
-#else
-    : public forward_iterator<KTN_t, int>
-#endif
+class StiKTNIterator
+
 {
 public:
     
 public:
     ///ctr-dstr
-    StiKTNForwardIterator() : mNode(0) {};
-    StiKTNForwardIterator(StiKalmanTrackNode* leaf) : mNode(leaf) {};
-    StiKTNForwardIterator(StiKalmanTrackNode& leaf) : mNode(&leaf) {};
-    ~StiKTNForwardIterator() {};
+    StiKTNIterator(KTN_t* leaf=0,int dir=0) : mDir(dir),mNode( leaf) {};
+    StiKTNIterator(KTN_t& leaf  ,int dir=0) : mDir(dir),mNode(&leaf) {};
 
     ///equality:
-    bool operator==(const StiKTNForwardIterator& rhs);
+    bool operator==(const StiKTNIterator& rhs);
 
     ///inequlity
-    bool operator!=(const StiKTNForwardIterator& rhs);
+    bool operator!=(const StiKTNIterator& rhs);
 
     ////Dereference
-    StiKalmanTrackNode& operator*();
+    KTN_t& operator*();
+    KTN_t* operator()();
     
     ///prefix
-    StiKTNForwardIterator& operator++ ();
+    StiKTNIterator& operator++ ();
     
     ///postfix
-    StiKTNForwardIterator operator++(int);
+    StiKTNIterator operator++(int);
+
+    ///prefix
+    StiKTNIterator& operator-- ();
+    
+    ///postfix
+    StiKTNIterator operator--(int);
 
     ///We demarcate the end of the traversal via  a singular iterator
-    StiKTNForwardIterator end();
+static const StiKTNIterator&  end();
+static const StiKTNIterator& rend();
+
+static    StiKTNIterator   begin(KTN_t* fist);
+static    StiKTNIterator  rbegin(KTN_t* last);
+
+
+static const StiKTNIterator mgEnd;
+
 
 private:
-    StiKalmanTrackNode* mNode;
+    int mDir;
+    KTN_t* mNode;
 };
 
+class StiKTNForwardIterator: public StiKTNIterator{
+public:
+    StiKTNForwardIterator(KTN_t* leaf=0) : StiKTNIterator(leaf,1){};
+    StiKTNForwardIterator(KTN_t& leaf  ) : StiKTNIterator(leaf,1){};
+static const StiKTNForwardIterator& end(){return (StiKTNForwardIterator&)mgEnd;}
+};
 //inlines --
 
-inline bool StiKTNForwardIterator::operator==(const StiKTNForwardIterator& rhs)
+inline bool StiKTNIterator::operator==(const StiKTNIterator& rhs)
 {
     return mNode==rhs.mNode;
 }
 
-inline bool StiKTNForwardIterator::operator!=(const StiKTNForwardIterator& rhs)
+inline bool StiKTNIterator::operator!=(const StiKTNIterator& rhs)
 {
     return !(mNode==rhs.mNode);
 }
 
-inline StiKalmanTrackNode& StiKTNForwardIterator::operator*()
+inline KTN_t& StiKTNIterator::operator*()
 {
     return *mNode;
+}
+inline KTN_t* StiKTNIterator::operator()()
+{
+    return mNode;
 }
 
 //prefix
 /*! In the case where the prefix operator increments beyond the root of the tree,
   the pointer to mNode is set to 0.   This demarcates the end of the traversal.
  */
-inline StiKTNForwardIterator& StiKTNForwardIterator::operator++ ()
+inline StiKTNIterator& StiKTNIterator::operator-- ()
 {
-    if (mNode->isRoot() ) {
-	mNode=0;
-    }
-    else {
-	mNode = static_cast<StiKalmanTrackNode*>(mNode->getParent());
-    }
-    return *this;
-}
-    
-
-//postfix
-/*! In the case where the prefix operator increments beyond the root of the tree,
-  the pointer to mNode is set to 0.   This demarcates the end of the traversal.
-*/
-inline StiKTNForwardIterator StiKTNForwardIterator::operator++(int)
-{
-    StiKTNForwardIterator temp = *this;
+    mDir = !mDir;
     ++(*this);
-    return temp;
-}
-
-inline StiKTNForwardIterator StiKTNForwardIterator::end()
-{
-    return StiKTNForwardIterator(0);
-}
-
-
-//This is a temp hack to get around old gcc ansi-non-compliant STL implementation
-class StiKTNBidirectionalIterator
-#ifndef HACK_forward_iterator
-    : public iterator<bidirectional_iterator_tag, KTN_t, ptrdiff_t, KTN_t*, KTN_t&>
-#else
-    : public bidirectional_iterator<KTN_t, int>
-#endif
-{
-public:
-    
-public:
-    ///ctr-dstr
-    StiKTNBidirectionalIterator() : mNode(0) {};
-    StiKTNBidirectionalIterator(StiKalmanTrackNode* leaf) : mNode(leaf) {};
-    StiKTNBidirectionalIterator(StiKalmanTrackNode& leaf) : mNode(&leaf) {};
-    ~StiKTNBidirectionalIterator() {};
-
-    ///equality:
-    bool operator==(const StiKTNBidirectionalIterator& rhs);
-
-    ///inequlity
-    bool operator!=(const StiKTNBidirectionalIterator& rhs);
-
-    ////Dereference
-    StiKalmanTrackNode& operator*();
-    
-    ///prefix
-    StiKTNBidirectionalIterator& operator++ ();
-    
-    ///postfix
-    StiKTNBidirectionalIterator operator++(int);
-
-    ///prefix
-    StiKTNBidirectionalIterator& operator-- ();
-    
-    ///postfix
-    StiKTNBidirectionalIterator operator--(int);
-
-    ///We demarcate the end of the traversal via  a singular iterator
-    StiKTNBidirectionalIterator end();
-
-private:
-    StiKalmanTrackNode* mNode;
-};
-
-//inlines --
-
-inline bool StiKTNBidirectionalIterator::operator==(const StiKTNBidirectionalIterator& rhs)
-{
-    return mNode==rhs.mNode;
-}
-
-inline bool StiKTNBidirectionalIterator::operator!=(const StiKTNBidirectionalIterator& rhs)
-{
-    return !(mNode==rhs.mNode);
-}
-
-inline StiKalmanTrackNode& StiKTNBidirectionalIterator::operator*()
-{
-    return *mNode;
-}
-
-//prefix
-/*! In the case where the prefix operator increments beyond the root of the tree,
-  the pointer to mNode is set to 0.   This demarcates the end of the traversal.
- */
-//inline StiKTNBidirectionalIterator& StiKTNBidirectionalIterator::operator++ ()
-inline StiKTNBidirectionalIterator& StiKTNBidirectionalIterator::operator-- ()
-{
-    if (mNode->isRoot() ) {
-	mNode=0;
-    }
-    else {
-	mNode = static_cast<StiKalmanTrackNode*>(mNode->getParent());
-    }
+    mDir = !mDir;
     return *this;
 }
     
@@ -198,9 +114,9 @@ inline StiKTNBidirectionalIterator& StiKTNBidirectionalIterator::operator-- ()
 /*! In the case where the prefix operator increments beyond the root of the tree,
   the pointer to mNode is set to 0.   This demarcates the end of the traversal.
 */
-inline StiKTNBidirectionalIterator StiKTNBidirectionalIterator::operator++(int)
+inline StiKTNIterator StiKTNIterator::operator++(int)
 {
-    StiKTNBidirectionalIterator temp = *this;
+    StiKTNIterator temp = *this;
     ++(*this);
     return temp;
 }
@@ -209,32 +125,50 @@ inline StiKTNBidirectionalIterator StiKTNBidirectionalIterator::operator++(int)
 /*! In the case where the prefix operator increments beyond the last leaf of the tree,
   the pointer to mNode is set to -.  This demarcates the end of traversal.
 */
-//inline StiKTNBidirectionalIterator& StiKTNBidirectionalIterator::operator-- ()
-inline StiKTNBidirectionalIterator& StiKTNBidirectionalIterator::operator++ ()
+inline StiKTNIterator& StiKTNIterator::operator++ ()
 {
-    if (mNode->isLeaf() ) {
-	mNode=0;
-    }
-    else {
-	mNode = static_cast<StiKalmanTrackNode*>(mNode->getFirstChild());
-    }
-    return *this;
+  assert(mNode);
+  if(!mDir) { //forward direction  
+    if (mNode->isLeaf()) {mNode=0;}
+    else                 {mNode = static_cast<KTN_t*>(mNode->getFirstChild());}
+
+  } else { //backward direction
+
+    if (mNode->isRoot()) {mNode=0;}
+    else                 {mNode = static_cast<KTN_t*>(mNode->getParent()    );}
+  }
+
+  return *this;
 }
 
 //postfix decrement
 /*! In the case where the prefix operator increments beyond the root of the tree,
   the pointer to mNode is set to 0.   This demarcates the end of the traversal.
 */
-inline StiKTNBidirectionalIterator StiKTNBidirectionalIterator::operator--(int)
+inline StiKTNIterator StiKTNIterator::operator--(int)
 {
-    StiKTNBidirectionalIterator temp = *this;
+    StiKTNIterator temp = *this;
     --(*this);
     return temp;
 }
 
-inline StiKTNBidirectionalIterator StiKTNBidirectionalIterator::end()
+inline const StiKTNIterator& StiKTNIterator::end()
 {
-    return StiKTNBidirectionalIterator(0);
+    return mgEnd;
 }
+inline const StiKTNIterator& StiKTNIterator::rend()
+{
+    return mgEnd;
+}
+
+inline StiKTNIterator  StiKTNIterator::begin(KTN_t* fist)
+{
+  return StiKTNIterator(fist,0);
+}  
+
+inline StiKTNIterator StiKTNIterator::rbegin(KTN_t* last)
+{
+  return StiKTNIterator(last,1);
+}  
 
 #endif

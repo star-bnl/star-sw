@@ -2,3 +2,4 @@
 
 //Sti
 #include "StiKTNIterator.h"
+const StiKTNIterator StiKTNIterator::mgEnd;

@@ -98,8 +98,8 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
   else
     {
       //cout << " set ++" << endl;
-      last  = track->begin();
-      first = track->end();
+      last  = track->rend();
+      first = track->rbegin();
       //cout << " <<<<<<<<<<"<<endl;
       /*
       cout << " FIT != TRACKING --- Original Track" << endl;
@@ -132,7 +132,7 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	  //begin refit at first hit
 	  if (!targetHit && !started)
 	    {
-	      source--; continue;
+	      source++; continue;
 	    }
 	  started = true;
 	  //cout << "  ==== " << *source << endl;
@@ -166,7 +166,7 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	      //cout << " truncation 2 completed +++++++++++++++++++++++++++++" << endl;
 	      //break;
 	    }
-	  source--;//cout<<"!="<<endl;
+	  source++;//cout<<"!="<<endl;
 	}
       //cout << "   <<<<<<<<<<<Done Refit" << endl;
     }
