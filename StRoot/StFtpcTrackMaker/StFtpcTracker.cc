@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.27 2003/09/16 16:52:48 jeromel Exp $
+// $Id: StFtpcTracker.cc,v 1.28 2003/09/16 20:49:34 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.28  2003/09/16 20:49:34  oldi
+// One more pointer initialized to zero. Code clean-up.
+//
 // Revision 1.27  2003/09/16 16:52:48  jeromel
 // Multiple constructor entry, zeroing mBench everywhere + doxygenized
 //
@@ -176,10 +179,11 @@ StFtpcTracker::StFtpcTracker()
 /// Usual used constructor. Sets up the pointers and the cut value for the momentum fit.
 StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, StFtpcVertex *vertex, Bool_t bench, Double_t max_Dca)
 {
-  mBench  = 0;
   if (bench) {
     mBench = new TBenchmark();
   }
+
+  else mBench = 0;
 
   mTime = 0.;
 
@@ -433,7 +437,7 @@ void StFtpcTracker::CalcEnergyLoss()
   Int_t acc_hit;          // accepted number of hits
   
   Double_t *dedx_arr;     // tmp array to store delta_E of hits on a track
-  Int_t *index_arr;
+  Int_t *index_arr = 0;
   
   StFtpcTrack *track;     // track
   StFtpcPoint *hit;       // hit
