@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StMuPmdCollection.h,v 1.3 2004/05/02 04:10:14 perev Exp $
+ * $Id: StMuPmdCollection.h,v 1.4 2004/10/19 01:39:35 mvl Exp $
  *
  * Class : StMuPmdCollection
  * Author: Supriya Das & Subhasis Chattopadhyay
@@ -8,6 +8,9 @@
  * Description: This class holds the PMD clusters for MuDst
  * ****************************************************************
  * $Log: StMuPmdCollection.h,v $
+ * Revision 1.4  2004/10/19 01:39:35  mvl
+ * Changed for splitting on file. Added support for hits
+ *
  * Revision 1.3  2004/05/02 04:10:14  perev
  * private => protected
  *
@@ -27,6 +30,7 @@
 #include "Stiostream.h"
 
 class StMuPmdCluster;
+class StMuPmdHit;
 
 enum {pmd=1, cpv=2};
 class StMuPmdCollection: public TObject
@@ -44,14 +48,22 @@ class StMuPmdCollection: public TObject
 
     void              addCluster(int detector);
         
+    int               getNHits(int detector);
+    StMuPmdHit*       getHit(int hitId,int detector);    
+
+    void              addHit(int detector);
+
+    void              setPmdHitArray(TClonesArray *array) {mPmdHits[0]=array;}
+    void              setCpvHitArray(TClonesArray *array) {mPmdHits[1]=array;}
+    void              setPmdClusterArray(TClonesArray *array) {mPmdClusters[0]=array;}
+    void              setCpvClusterArray(TClonesArray *array) {mPmdClusters[1]=array;}
   protected:
     void              init(int detector);
-    void              packbits(unsigned char*, unsigned int, unsigned int, unsigned int);
-    unsigned int      unpackbits(unsigned char*, unsigned int, unsigned int);
     
     TClonesArray*     mPmdClusters[2];
+    TClonesArray*     mPmdHits[2];
     
-    ClassDef(StMuPmdCollection,1)
+    ClassDef(StMuPmdCollection,2)
 };
 
 
