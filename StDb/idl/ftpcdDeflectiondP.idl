@@ -8,6 +8,7 @@
 
 struct ftpcdDeflectiondP { 
 
-   float  dpsi_dp[7610];   /*   dpsi/dpress per padrow, e-field bin press norm to 20 degC,1013.25hPa  */
+   float  dpsi_dp[11010];   /*   dpsi/dpress per padrow, e-field bin */
+                            /*   press norm to 20 degC,1013.25hPa    */
 
  };  
