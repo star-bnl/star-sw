@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.50 2000/06/20 19:21:44 wdeng Exp $
+// $Id: St_tpt_Maker.cxx,v 1.51 2000/06/22 21:07:10 wdeng Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.51  2000/06/22 21:07:10  wdeng
+// New iflag for cluster vertex.
+//
 // Revision 1.50  2000/06/20 19:21:44  wdeng
 // Plug in function estimateVertexZ.
 //
@@ -300,13 +303,14 @@ Int_t St_tpt_Maker::Make(){
   ::memset(&dstVertexRow, 0, sizeof(dstVertexRow));
   dstVertexRow.z = vertexZ;
   dstVertexRow.id = 1;
-  dstVertexRow.iflag = 109;
+  dstVertexRow.iflag = 105;
   dstVertexRow.det_id = 1;
   dstVertexRow.vtx_id = 1;
 
   St_dst_vertex  *clusterVertex = new St_dst_vertex("clusterVertex",1); 
   m_DataSet->Add(clusterVertex);
   clusterVertex->AddAt(&dstVertexRow, 0);
+//
 
   St_tcl_tpc_index *index = (St_tcl_tpc_index *) gime("index");
   if (!index) {index = new St_tcl_tpc_index("index",10*maxNofTracks);  m_DataSet->Add(index);}
