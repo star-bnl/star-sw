@@ -152,8 +152,9 @@ created   22 april 98
       Ld=0; Do i=1,12 { if (Cdir(i:i)==' '|Cdir(i:i)==o) Break; Ld=i; }
       edir = Cdir(1:ld)//o;  Call TDM_CLEAR_ALL(edir)
 
-      IQUEST(1)=IEOTRI
+      IQUEST(1)=IEOTRI+1
       check NTRACK>0 & NVERTX>0 & IEOTRI==0
+
 *     map ghea_* headers and  hepe_* particle tables:
       call agstrut('/evnt/@HEPE',Edir)
       call agstrut('/evnt/@GHEA',Edir)
@@ -195,6 +196,7 @@ created   22 april 98
       enddo
       if (ld>0) i = DUI_CDIR('..'//o)
 *
+      IQUEST(1)   = IEOTRI
       IQUEST(100) = NTRACK
       G2T_MAIN = i
       END
