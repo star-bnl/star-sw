@@ -1,21 +1,97 @@
 #! /usr/local/bin/tcsh -f
 set SETS = "b0_20/year2a/hadronic_on\
             b0_20/year2x/hadronic_on\
-            b0_20/year_1b/hadronic_off\
             b0_2/year1a/hadronic_off\
             b0_2/year1a/hadronic_on\
             b0_2/year2a/hadronic_off\
-            b0_2/year2a/hadronic_on\
             b0_2/year2y/hadronic_on\
-            b0_3/year1a/hadronic_off\
-            b0_3/year1a/hadronic_on\
             b0_3/year2a/hadronic_on\
             b0_3/year2x/hadronic_on\
-            b0_3/year_1b/hadronic_off"
+            b0_3/year_1b/hadronic_off\
+            b0_2/year2a/hadronic_on\
+            b0_20/year_1b/hadronic_off\
+            b0_3/year1a/hadronic_off\
+            b0_3/year1a/hadronic_on"
+while (1) 
+set DATE = `date`;
+if (-f html) rm html
+cat > html <<EOF
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+          <title>MDC1 summary</title>
+  </head>
+
+  <body BGCOLOR="#ccffff"> 
+      <h1>Production summary</h1>
+     <h4>
+     <br>
+
+<TABLE BORDER=5 CELLSPACING=1 CELLPADDING=2 >
+<TR>
+
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD WIDTH="30%" HEIGHT=110><B>Set<br>available</B></TD>
+<TD WIDTH="10%" HEIGHT=110><B>GEANT input<br>size (GB)</B></TD>
+<TD WIDTH="10%" HEIGHT=110><B>GEANT input <br>No. of events</B></TD>
+<TD WIDTH="10%" HEIGHT=110><B>DST on HPSS<br>size (GB)</B></TD>
+<TD WIDTH="10%" HEIGHT=110><B>DST on DISK1<br>size (GB)</B></TD>
+<TD WIDTH="10%" HEIGHT=110><B>Total DST<br> size (GB)</B></TD>
+<TD WIDTH="10%" HEIGHT=110><B>Total DST<br>No. of events<br></B></TD>
+<TD WIDTH="10%" HEIGHT=110><B>Objy DST<br> size (GB)</B></TD>
+</TR>
+
+EOF
 foreach set ($SETS)
 # raw data
-  set gen_set = `echo $set | sed -e 's/ear//g' -e 's/hadronic//g' -e 's/\///g'`
-  catalog.pl $set | tee temp.catalog
-  mv temp.catalog ${gen_set}.catalog
+  if ("$set" != "") then
+    set gen_set = `echo $set | sed -e 's/ear//g' -e 's/hadronic//g' -e 's/\///g'`
+    rm *${gen_set}*.list
+    catalog.pl $set | tee temp.catalog
+    mv temp.catalog ${gen_set}.catalog
+cat >> html <<EOF
+
+<TR ALIGN=CENTER VALIGN=CENTER>
+<td>${set}</td>
+EOF
+grep GEANT ${gen_set}.catalog | grep Objy | awk '{print "<td>"$3"</td><td>"$6"</td><td>"$10"</td><td>"$13"</td><td>"$16"</td><td>"$19"</td><td>"$23"</td></tr>\n"}' >> html
+cat >> html <<EOF
+</TR>
+EOF
+  endif
 end 
- grep GEANT *.catalog | grep Objy | awk 'BEGIN {g=0; nt=0; d=0; nd=0;} {g+= $4; nt+=$7; d+=$17;nd+=$20;} END {printf("GEANT=%8.2f GB with %d events  DST=%8.2f with %d events\n",g,nt,d,nd)}'
+cat >> html <<EOF
+<TR ALIGN=CENTER VALIGN=CENTER>
+<td>Total</td>
+EOF
+grep GEANT *.catalog | grep Objy | awk 'BEGIN {a=0; b=0; c=0; d=0; e=0; f=0; g=0;} {a+= $4; b+=$7; c+=$11;d+=$14;e+=$17;f+=$20;g+=$24} END {print "<td>"a"</td><td>"b"</td><td>"c"</td><td>"d"</td><td>"e"</td><td>"f"</td><td>"g"</td></tr>\n"}' >> html
+cat >> html <<EOF
+</TR>
+
+</TR>
+
+
+</TABLE>
+
+
+
+      <h5>
+      <p>
+      <h5>
+      <address><a href="mailto:didenko@bnl.gov">Lidia Didenko</a></address>
+<!-- Created: Tue Oct 6 05:29:25 MET 1998 -->
+<!-- hhmts start -->
+Last modified: ${DATE}
+<!-- hhmts end -->
+  </body>
+
+</html>
+
+
+EOF
+set tstam = `date +"%T_%d_%h_%y"`
+mv html MDC1.summary.html.${tstam}
+rm MDC1.summary.html
+ln -s MDC1.summary.html.${tstam} MDC1.summary.html
+end
+#end of the script
