@@ -18,7 +18,7 @@ StTpcDbMaker::StTpcDbMaker(const char *name):StMaker(name){
 }
 //_____________________________________________________________________________
 StTpcDbMaker::~StTpcDbMaker(){
-delete m_TpcDb;
+  //delete m_TpcDb;
 }
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::Init(){

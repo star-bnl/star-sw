@@ -33,11 +33,13 @@ StTpcDb::StTpcDb(St_DataSet* input) {
    int lBases = sizeof(bases)/sizeof(Char_t *);
    St_DataSetIter dataBase(input);
    for (int i = 0;i<lBases;i++,dataBase.Cd("/") )
-     if ( !(tpc[i] = dataBase.Cd(bases[i]) ? dataBase("tpc") : 0 ) )
-         gMessMgr->Message("StTpcDb::Error Getting TPC Calibrations database","E");
+     if ( !(tpc[i] = dataBase.Cd(bases[i]) ? dataBase("tpc") : 0 ) ){
+      char message[80];
+      cout << message << "StTpcDb::Error Getting TPC database: " << bases[i];
+      gMessMgr->Message(message,"E");}
  }
  else{
-   gMessMgr->Message("StTpcDb::Error Getting TPC database","E");
+   gMessMgr->Message("StTpcDb::Error Creating StTpcDb: Need to specify input DataSet","E");
  }
  gStTpcDb = this;
 }
@@ -62,7 +64,10 @@ void StTpcDb::GetDataBase(StMaker* maker) {
      dbFullPath += dbPath;
      if ( ( tpc[i] = maker->GetDataBase(dbPath)) || 
           ( tpc[i] = maker->GetDataBase(dbFullPath)) ) continue;
-     gMessMgr->Message("StTpcDb::Error Getting TPC Calibrations database","E");
+      char message[80];
+      cout << message << "StTpcDb::Error Getting TPC database: " << bases[i] << "   ";
+      gMessMgr->Message(message,"E");
+   //     gMessMgr->Message("StTpcDb::Error Getting TPC Calibrations database","E");
    }
  }
  else{
@@ -72,14 +77,14 @@ void StTpcDb::GetDataBase(StMaker* maker) {
 
 //_____________________________________________________________________________
 StTpcDb::~StTpcDb() {
-delete PadPlane;
-delete WirePlane;
-delete dimensions;
-delete slowControlSim;
-delete electronics;
+  //delete PadPlane;
+  //delete WirePlane;
+  //delete dimensions;
+  //delete slowControlSim;
+  //delete electronics;
 
 for (int i = 0;i<24;i++) {
-    delete gain[i]; delete t0[i];
+  //    delete gain[i]; delete t0[i];
 }
 
 gStTpcDb = 0;
@@ -89,12 +94,14 @@ gStTpcDb = 0;
 StTpcPadPlaneI* StTpcDb::PadPlaneGeometry(){
   if (!PadPlane){            // get pad plane from data base
    const int dbIndex = kGeometry;
-   St_DataSet *tpd = tpc[dbIndex]->Find("tpcPadPlanes");
-   if (!tpd) {
-     gMessMgr->Message("StTpcDb::Error Finding Tpc Pad Planes","E");
-     return 0;
-   }
+   if (tpc[dbIndex]){
+    St_DataSet *tpd = tpc[dbIndex]->Find("tpcPadPlanes");
+    if (!tpd) {
+      gMessMgr->Message("StTpcDb::Error Finding Tpc Pad Planes","E");
+      return 0;
+    }   
    PadPlane = new StRTpcPadPlane((St_tpcPadPlanes*)tpd);
+   }
   }
   return PadPlane;
 }
@@ -103,12 +110,14 @@ StTpcPadPlaneI* StTpcDb::PadPlaneGeometry(){
 StTpcWirePlaneI* StTpcDb::WirePlaneGeometry(){
   if (!WirePlane){            // get wire plane from data base
    const int dbIndex = kGeometry;
-   St_DataSet* tpd = tpc[dbIndex]->Find("tpcWirePlanes");
-   if (!(tpd && tpd->HasData()) ){
-    gMessMgr->Message("StTpcDb::Error Finding Tpc Wire Planes","E");
-    return 0;
-   }   
-   WirePlane = new StRTpcWirePlane((St_tpcWirePlanes*)tpd);
+   if (tpc[dbIndex]){
+    St_DataSet* tpd = tpc[dbIndex]->Find("tpcWirePlanes");
+    if (!(tpd && tpd->HasData()) ){
+     gMessMgr->Message("StTpcDb::Error Finding Tpc Wire Planes","E");
+     return 0;
+    }   
+    WirePlane = new StRTpcWirePlane((St_tpcWirePlanes*)tpd);
+   }
   }
  return WirePlane;
 }
@@ -117,12 +126,14 @@ StTpcWirePlaneI* StTpcDb::WirePlaneGeometry(){
 StTpcDimensionsI* StTpcDb::Dimensions(){
   if (!dimensions){            // get wire plane from data base
    const int dbIndex = kGeometry;
-   St_DataSet* tpd = tpc[dbIndex]->Find("tpcDimensions");
-   if (!(tpd && tpd->HasData()) ){
-    gMessMgr->Message("StTpcDb::Error Finding Tpc Dimensions","E");
-    return 0;
+   if (tpc[dbIndex]){
+    St_DataSet* tpd = tpc[dbIndex]->Find("tpcDimensions");
+    if (!(tpd && tpd->HasData()) ){
+     gMessMgr->Message("StTpcDb::Error Finding Tpc Dimensions","E");
+     return 0;
+    }
+    dimensions =  new StRTpcDimensions((St_tpcDimensions*)tpd);
    }
-   dimensions =  new StRTpcDimensions((St_tpcDimensions*)tpd);
   }
  return dimensions;
 }
@@ -131,12 +142,14 @@ StTpcDimensionsI* StTpcDb::Dimensions(){
 StTpcSlowControlSimI* StTpcDb::SlowControlSim(){
   if (!slowControlSim){            // get wire plane from data base
    const int dbIndex = kCalibrarion;
-   St_DataSet* tpd = tpc[dbIndex]->Find("tpcSlowControlSim");
-   if (!(tpd && tpd->HasData()) ){
-    gMessMgr->Message("StTpcDb::Error Finding Slow Control Simulations Parameters","E");
-    return 0;
-   }
+   if (tpc[dbIndex]){
+    St_DataSet* tpd = tpc[dbIndex]->Find("tpcSlowControlSim");
+    if (!(tpd && tpd->HasData()) ){
+     gMessMgr->Message("StTpcDb::Error Finding Slow Control Simulations Parameters","E");
+     return 0;
+    }
    slowControlSim = new StRTpcSlowControlSim((St_tpcSlowControlSim*)tpd);
+   }
   }
  return slowControlSim;
 }
@@ -145,12 +158,14 @@ StTpcSlowControlSimI* StTpcDb::SlowControlSim(){
 StTpcElectronicsI* StTpcDb::Electronics(){
   if (!electronics){            // get electronics from data base
    const int dbIndex = kGeometry;
-   St_DataSet* tpd = tpc[dbIndex]->Find("tpcElectronics");
-   if (!(tpd && tpd->HasData()) ){
-    gMessMgr->Message("StTpcDb::Error Finding Tpc Electronics","E");
-    return 0;
+   if (tpc[dbIndex]){
+    St_DataSet* tpd = tpc[dbIndex]->Find("tpcElectronics");
+    if (!(tpd && tpd->HasData()) ){
+     gMessMgr->Message("StTpcDb::Error Finding Tpc Electronics","E");
+     return 0;
+    }
+    electronics = new StRTpcElectronics((St_tpcElectronics*)tpd);
    }
-   electronics = new StRTpcElectronics((St_tpcElectronics*)tpd);
   }
  return electronics;
 }
@@ -166,14 +181,16 @@ StTpcGainI* StTpcDb::Gain(int sector){
    char dbname[25];
    sprintf(dbname,"Sector_%.2d/tpcGainFactors",sector);
    printf("Getting %s \n",dbname);
-   St_DataSet* tpd = tpc[dbIndex]->Find(dbname);
-   if (!(tpd && tpd->HasData()) ){
-    gMessMgr->Message("StTpcDb::Error Finding Tpc Gain Factors","E");
-    return 0;
+   if (tpc[dbIndex]){
+    St_DataSet* tpd = tpc[dbIndex]->Find(dbname);
+    if (!(tpd && tpd->HasData()) ){
+     gMessMgr->Message("StTpcDb::Error Finding Tpc Gain Factors","E");
+     return 0;
+    }
+    StRTpcGain* wptemp = new StRTpcGain((St_tpcGainFactors* )tpd);
+    wptemp->SetPadPlanePointer(PadPlaneGeometry());
+    gain[sector-1] = (StTpcGainI*)wptemp;
    }
-   StRTpcGain* wptemp = new StRTpcGain((St_tpcGainFactors* )tpd);
-   wptemp->SetPadPlanePointer(PadPlaneGeometry());
-   gain[sector-1] = (StTpcGainI*)wptemp;
   }
  return gain[sector-1];
 }
@@ -189,14 +206,16 @@ StTpcT0I* StTpcDb::T0(int sector){
    char dbname[25];
    sprintf(dbname,"Sector_%.2d/tpcTimeOffsets",sector);
    printf("Getting %s \n",dbname);
-   St_DataSet* tpd = (St_DataSet*)tpc[dbIndex]->Find(dbname);
-   if (!(tpd && tpd->HasData()) ){
-    gMessMgr->Message("StTpcDb::Error Finding Tpc Time Offsets","E");
-    return 0;
+   if (tpc[dbIndex]){
+    St_DataSet* tpd = (St_DataSet*)tpc[dbIndex]->Find(dbname);
+    if (!(tpd && tpd->HasData()) ){
+     gMessMgr->Message("StTpcDb::Error Finding Tpc Time Offsets","E");
+     return 0;
+    }
+    StRTpcT0* wptemp = new StRTpcT0((St_tpcTimeOffsets*)tpd);
+    wptemp->SetPadPlanePointer(PadPlaneGeometry());
+    t0[sector-1] = (StTpcT0I*)wptemp;
    }
-   StRTpcT0* wptemp = new StRTpcT0((St_tpcTimeOffsets*)tpd);
-   wptemp->SetPadPlanePointer(PadPlaneGeometry());
-   t0[sector-1] = (StTpcT0I*)wptemp;
   }
  return t0[sector-1];
 }
