@@ -67,6 +67,7 @@ void StBarrelHitMaker::findHits()
 
     const int maxHits = 4800;
     for(int hitId = 0; hitId < maxHits; ++hitId) {
+	/*
 	if (data->TowerStatus[hitId] != 1) {
 	    //cout <<"skip tower:\t"<<hitId<<endl;
 	    continue;
@@ -80,12 +81,6 @@ void StBarrelHitMaker::findHits()
 	    float x,y,z;
 	    geom->getXYZ(hitId+1, x, y, z);
 	    StThreeVectorD position(x,y,z);
-	    /*
-	    float eta, phi;
-	    geom->getEtaPhi(hitId+1, eta, phi); //indexed from 1!
-	    cout <<"From eta/phi: eta:\t"<<eta<<"\tphi:\t"<<phi<<endl;
-	    cout <<"From positi : eta:\t"<<position.pseudoRapidity()<<"\tphi:\t"<<position.phi()<<endl;
-	    */
 	    
 	    //Here you have all your "good" towers above a specific energy threshold -- so fill up your container!
 	    BemcHit h;
@@ -95,6 +90,7 @@ void StBarrelHitMaker::findHits()
 	    mHits.push_back(h);
     
 	}
+	*/
     }
 }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.3 2004/10/13 15:32:33 mmiller Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.4 2004/10/25 22:19:09 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -34,12 +34,18 @@ using namespace std;
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEmcUtil.h"
 
+//StEvent
+#include "StEventTypes.h"
+
 //StEmc
 #include "StEmcClusterCollection.h"
 #include "StEmcPoint.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEmcUtil/others/emcDetectorName.h"
 #include "StEmcADCtoEMaker/StBemcData.h"
+#include "StEmcRawMaker/defines.h"
+#include "StEmcRawMaker/StBemcRaw.h"
+#include "StEmcRawMaker/StBemcTables.h"
 
 //StJetMaker
 #include "StJetMaker/StMuTrackFourVec.h"
@@ -203,47 +209,68 @@ Int_t StEmcTpcFourPMaker::Make() {
 	 <<badr<<" for badr, "<<badhits<<" for hits"<<endl;
     
     cout <<"Added:\t"<<ntkept<<"\ttracks to the binmap"<<endl;
-
     
     // Retreive the points
-    StEmcCollection *emc = NULL;
-    if (!adc2E) {
-	cout <<"StEmcTpcFourPMaker::Make().  ERROR. adc2E==0, undefined behavior, so we abort"<<endl;
-	abort();
-    }
-    
     cout <<"use hits"<<endl;
-
-    emc = adc2E->getEmcCollection();
     double twoPi = M_PI*2.0;
-    int numHits = 0;
-    StEmcGeom* geom = StEmcGeom::getEmcGeom(detname[0].Data());
-      
-    StBemcData* data = adc2E->getBemcData();
-    numHits = data->NTowerHits;
-    cout << "Number Hits: " << numHits<<endl;
+    
+    StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
+    assert(adc2E);
 
-    for(int hitId = 1; hitId <= maxHits; hitId++) {
-	float eta, phi, energy;
-	geom->getEtaPhi(hitId, eta, phi);
-	if(data->TowerStatus[hitId-1] != 1) {
-	    continue;
+    //Get status tables.
+    StBemcTables* tables = adc2E->getBemcData()->getTables();
+    assert(tables);
+
+    //Now loop on emc data
+    StEmcCollection *emc = uDst->emcCollection();
+    assert(emc);
+
+    // now it is like StEvent, getting energies for towers
+    StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
+    assert(detector);
+
+    int hitId=0;
+    for(int m = 1; m<=120;m++) { //loop on modules... 
+	StEmcModule* module = detector->module(m);
+	assert(module);
+	StSPtrVecEmcRawHit& rawHit=module->hits();
+	
+	for(UInt_t k=0;k<rawHit.size();k++) { //loop on hits in modules
+
+	    float energy = rawHit[k]->energy();
+
+	    //Get eta, phi
+	    int m=rawHit[k]->module();
+            int e=rawHit[k]->eta();
+            int s=abs(rawHit[k]->sub());
+            int id, status;
+	    float eta, phi; 
+	    geom->getId(m,e,s,id); // to get the software id
+	    geom->getEtaPhi(id,eta,phi); // to convert software id into eta/phi
+
+	    //now check the status: (//BTOW defined in StEmcRawMaker/defines.h
+	    tables->getStatus(BTOW, id, status);
+	    if( status!= 1) {
+		continue;
+	    }
+
+	    while(phi < 0) phi += twoPi;
+	    while(phi > twoPi) phi -= twoPi;
+	    
+	    sumEMC += energy;
+	    if(energy < 0.01) continue;
+	    
+	    // now add a fake point to the binmap
+	    //int hitId = m+1000*k; //module+1000*hit, dummy value now, MLM 10/25/04
+	    StMuEmcPoint& point = fakePoints[hitId];
+	    point.setEta(eta);
+	    point.setPhi(phi);
+	    point.setEnergy(energy);
+	    binmap.insertPoint(&point, hitId);
+	    //sumEMC += point.getEnergy();
+	    
+	    ++hitId;
 	}
-	energy = data->TowerEnergy[hitId-1];
-
-	while(phi < 0) phi += twoPi;
-	while(phi > twoPi) phi -= twoPi;
-	  
-	sumEMC += energy;
-	if(energy < 0.01) continue;
-	  
-	// now add a fake point to the binmap
-	StMuEmcPoint& point = fakePoints[hitId];
-	point.setEta(eta);
-	point.setPhi(phi);
-	point.setEnergy(energy);
-	binmap.insertPoint(&point, hitId);
-	//sumEMC += point.getEnergy();
     }
 
     // Now Bail if the energy is absurd
@@ -353,41 +380,34 @@ Int_t StEmcTpcFourPMaker::Make() {
     if(lasttrack != NULL)
 	deposit = (binmap.moddTracks[lasttrack]).depE();
     DistanceToPointMap pointsDist;
-    for(trackToPoints::iterator trackit = binmap.t2p.begin(); 
-	trackit != binmap.t2p.end(); ++trackit)
-	{
-	    if((*trackit).first != lasttrack)
-		{
-		    for(DistanceToPointMap::iterator d2p = pointsDist.begin();
-			d2p != pointsDist.end(); ++d2p)
-			{
-			    StCorrectedEmcPoint& point = binmap.moddPoints[(*d2p).second];
-			    if(point.E() > deposit)
-				{
-				    point.SubE(deposit);
-				    sumSubtracted += deposit;
-				    deposit = 0;
-				    break;
-				}
-			    else
-				{
-				    deposit -= point.E();
-				    sumSubtracted += point.E();
-				    point.SetE(0);
-				}
-			}
-		    pointsDist.clear();
-		    lasttrack = (*trackit).first;
-		    deposit = (binmap.moddTracks[lasttrack]).depE();
-		    sumTheorySubtracted += deposit;
+    for(trackToPoints::iterator trackit = binmap.t2p.begin(); trackit != binmap.t2p.end(); ++trackit) {
+	if((*trackit).first != lasttrack) {
+	    for(DistanceToPointMap::iterator d2p = pointsDist.begin(); d2p != pointsDist.end(); ++d2p) {
+		StCorrectedEmcPoint& point = binmap.moddPoints[(*d2p).second];
+		if(point.E() > deposit)	 {
+		    point.SubE(deposit);
+		    sumSubtracted += deposit;
+		    deposit = 0;
+		    break;
 		}
-
-	    StProjectedTrack& track = binmap.moddTracks[(*trackit).first];
-	    StCorrectedEmcPoint& point = binmap.moddPoints[(*trackit).second];
-	    pointsDist.insert(DistanceToPointMap::value_type
-			      (binmap.trackPointRadiusSqr(track, point), 
-			       (*trackit).second));
+		else  {
+		    deposit -= point.E();
+		    sumSubtracted += point.E();
+		    point.SetE(0);
+		}
+	    }
+	    pointsDist.clear();
+	    lasttrack = (*trackit).first;
+	    deposit = (binmap.moddTracks[lasttrack]).depE();
+	    sumTheorySubtracted += deposit;
 	}
+
+	StProjectedTrack& track = binmap.moddTracks[(*trackit).first];
+	StCorrectedEmcPoint& point = binmap.moddPoints[(*trackit).second];
+	pointsDist.insert(DistanceToPointMap::value_type
+			  (binmap.trackPointRadiusSqr(track, point), 
+			   (*trackit).second));
+    }
     cout << "sumTheorySubtracted: " << sumTheorySubtracted << endl;
     cout << "sumSubtracted: " << sumSubtracted << endl;
 

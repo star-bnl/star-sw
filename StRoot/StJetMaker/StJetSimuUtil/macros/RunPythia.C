@@ -104,13 +104,13 @@ void RunPythia(
     cpars->setRequireStableMidpoints(true);
     cpars->setDoSplitMerge(true);
     cpars->setDebug(false);
-    emcJetMaker->addAnalyzer(anapars, cpars, pythiaFourPMaker, "MkConeJetsPt02R07");
+    emcJetMaker->addAnalyzer(anapars, cpars, pythiaFourPMaker, "MkPythiaConeJetsPt02R07");
  
     //Setup the kt=finder (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
     StKtCluPars* ktpars = new StKtCluPars();
     ktpars->setR(1.0);
     ktpars->setDebug(false);
-    emcJetMaker->addAnalyzer(anapars, ktpars, pythiaFourPMaker, "MkKtJet");
+    emcJetMaker->addAnalyzer(anapars, ktpars, pythiaFourPMaker, "MkPythiaKtJet");
 
     
     chain->Init();

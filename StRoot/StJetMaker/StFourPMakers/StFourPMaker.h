@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StFourPMaker.h,v 1.1 2004/10/12 18:18:04 mmiller Exp $
+ * $Id: StFourPMaker.h,v 1.2 2004/10/25 22:19:09 mmiller Exp $
  * $Log: StFourPMaker.h,v $
+ * Revision 1.2  2004/10/25 22:19:09  mmiller
+ * Updates to deal with new storage/retreival of emc data from mudst.
+ *
  * Revision 1.1  2004/10/12 18:18:04  mmiller
  * Add StFourPMakers subdirectory
  *
@@ -64,7 +67,6 @@ public:
     virtual Int_t Finish();
     virtual void Clear(const Option_t*);
 
-    StMuEmcCollection* getStMuEmcCollection(void);
     FourList &getTracks() { return tracks; };
     Int_t numTracks(void) { return tracks.size(); };
 
@@ -76,7 +78,6 @@ public:
     TrackPile tPile; 
 protected:
 
-    StMuEmcCollection* muEmcCol;    //!
     FourList tracks;       //!
     StMuDstMaker *muDst;           //!
 

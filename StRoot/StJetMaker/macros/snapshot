@@ -1,8 +1,8 @@
 
 #rm, make the directory:
 cd scheduler
-#ln -s ../.rh80_gcc32/ .
 rm -rf macros
 cp -r ../StRoot/StJetMaker/macros/ .
+cp -r ../StRoot/StJetMaker/StJetSimuUtil/macros/* macros/.
 cd ..
 

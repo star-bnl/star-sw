@@ -164,7 +164,7 @@ Int_t StJetSimuTrigMaker::Make()
     EJPmaxt=0;   //Holds max JP sum for whole EEMC
     EJPsumt=0;  //Holds sum of all JP in EEMC
 
-    muEmcCol=muDstMaker->muDst()->emcCollection();
+    muEmcCol=muDstMaker->muDst()->muEmcCollection();
     if(muEmcCol) {
     
 	//GET BARREL points 
