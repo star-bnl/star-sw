@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.h,v 2.5 2000/01/05 16:04:14 ullrich Exp $
+ * $Id: StDedxPidTraits.h,v 2.6 2000/12/18 17:25:14 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.h,v $
+ * Revision 2.6  2000/12/18 17:25:14  fisyak
+ * Add track length used in dE/dx calculations
+ *
  * Revision 2.5  2000/01/05 16:04:14  ullrich
  * Changed method name sigma() to errorOnMean().
  *
@@ -43,6 +46,7 @@ public:
     StDedxMethod method() const;
     Short_t      encodedMethod() const;
     UShort_t     numberOfPoints() const;
+    Float_t      length() const;
     Float_t      mean() const;
     Float_t      errorOnMean() const;
     
