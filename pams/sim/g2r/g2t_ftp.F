@@ -13,21 +13,20 @@
      >                Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
       Equivalence     (QQ(1),IQQ(1),id)
 *    - - - - - - - - -
-      INTEGER   G2T_FTP,G2R_GET_HIT,Iprin/0/,i
+      INTEGER   G2T_FTP,G2R_GET_HIT,ISLFLAG,Iprin/0/,Idigi,i
       logical   Local/.true./
 *
-      G2T_FTP=STAFCV_OK
-      call G2R_GET_SYS ('FTPC','FSEC')
+      G2T_FTP =STAFCV_OK
       if (g2t_ftp_hit_h.maxlen.le.0) return
+*
+      call G2R_GET_SYS ('FTPC','FSEC',Iprin,Idigi)
+      if (Iprin.lt.0) return
+      Local   = Idigi.ge.2
 *
       i=0
       g2t_ftp_hit_h.nok = 0
       Do While (G2R_GET_HIT('ftp') .eq. 0)
          i=i+1
-         if (i.gt.g2t_ftp_hit_h.maxlen) then
-           print *,' getting i=',i,trac,' out of ',g2t_ftp_hit_h.maxlen
-           return
-         endif
          g2t_ftp_hit_h.nok            = i
          g2t_ftp_hit(i).id            = i
          If (local) then
@@ -47,7 +46,8 @@
          endif
          g2t_ftp_hit(i).tof           = tof
          g2t_ftp_hit(i).de            = Elos
-*        g2t_ftp_hit(i).ds            = Step   ! not present
+         g2t_ftp_hit(i).ds            = Step  
+*        g2t_ftp_hit(i).s_track       = Slen
          g2t_ftp_hit(i).track_p       = trac
          g2t_ftp_hit(i).volume_id     = volume
 *
@@ -60,3 +60,4 @@
 
       RETURN
       END
+

@@ -1,5 +1,5 @@
 * ----------------------------------------------
-      subroutine  G2R_GET_SYS (Cset,Cdet)
+      subroutine  G2R_GET_SYS (Cset,Cdet,iprin,idigi)
       IMPLICIT    NONE
 *
       character*4     Cset, Cdet
@@ -30,18 +30,20 @@
 *
       Real            Hits(Nmh),FHmin(Nmh),FHmax(Nmh),FHbin(Nmh)
       Character*4     Csys*4/' '/,chit(Nmh)*4
-      Integer         AgFHIT0,ISLFLAG,Iprin,i,j,k,nh
+      Integer         AgFHIT0,ISLFLAG,Iprin,Idigi,i,j,k,nh
       External        AgFHIT0,ISLFLAG
 *   
-*
+      Iprin = -1
       if (AgFHIT0(Cset,Cdet) .ne. 0) return
-      Iprin = ISLFLAG('G2TM','PRIN')
+      Iprin = ISLFLAG(Cset,'PRIN')
+      Idigi = ISLFLAG(Cset,'DIGI')
+      if (ISLFLAG('G2TM','PRIN').gt.0) 
+     >    print *,' for idet= ',Cset,' iprin,idigi= ',Iprin,Idigi
 
       call vzero (QQ,   Lnmax)
       call vzero (iflg, Lnmax)
       call vzero (iadr, Nmh)
       call vzero (hits, Nmh)
-      iprin = 1
 *
 *     1. flag  hardwired information
       iX  = 0
