@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.14 2003/09/11 05:49:20 perev Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.15 2003/09/24 20:54:07 thenry Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.15  2003/09/24 20:54:07  thenry
+ * Fixed ANSI compatibility problems.
+ *
  * Revision 1.14  2003/09/11 05:49:20  perev
  * ansi corrs
  *
@@ -72,7 +75,7 @@
 #ifndef StEmcTpcFourPMaker_h
 #define StEmcTpcFourPMaker_h
 using namespace std;
-#include "Stiostream.h"
+#include <iostream>
 #include <sstream>
 #include <iterator>
 #include <map>
@@ -95,16 +98,18 @@ class BadPathLengthException : public string
   BadPathLengthException() : string("Failed to solve PathLength.") {};
 };
 
+extern double SMDR;
+extern double mSMDR;
+extern double mHSMDR;
+extern double mtwoPi;
+extern double mme;	
+extern double mmpr;
+extern double mmpi;
+extern double mmk;
+
 class StCorrectedEmcPoint
 {
  public:
-//VP    static const double SMDR = 2.2625;
-//VP    static const double HSMDR = 1.13125;
-//VP    static const double twoPi = M_PI*2.0;
-    static const double SMDR;
-    static const double HSMDR;
-    static const double twoPi;
-
     StCorrectedEmcPoint() : correctedE(0), mPoint(0), thetaShift(0), index(0) {};
     StCorrectedEmcPoint(StMuEmcPoint* p, int _index) : correctedE(0), 
       mPoint(p), thetaShift(0), index(_index) {};
@@ -138,9 +143,10 @@ class StCorrectedEmcPoint
       {
 	mPoint = p;
         if(p)
-	  correctedE = p->getEnergy();
-        thetaShift = ::atan2(zv/100.0, SMDR);
-        return 0;
+	    correctedE = p->getEnergy();
+	else return false;
+        thetaShift = atan2(zv/100.0, SMDR);
+	return true;
       };
     inline double pEta(void) { return Eta(); };
     inline double Eta(void) { 
@@ -151,8 +157,8 @@ class StCorrectedEmcPoint
     inline double Phi(void) { 
       if(!mPoint) return 0.0;
       double phi = mPoint->getPhi(); 
-      while(phi < 0) phi+=twoPi;
-      while(phi > twoPi) phi -= twoPi;
+      while(phi < 0) phi+=mtwoPi;
+      while(phi > mtwoPi) phi -= mtwoPi;
       return phi;
     };
     inline double pTheta(void) { return 2.0*atan(exp(-Eta())); };
@@ -184,23 +190,15 @@ class StCorrectedEmcPoint
 class StProjectedTrack
 {
  public:
-    static const double SMDR ;// = 231.23;
-    static const double HSMDR;// = 115.615;
-    static const double twoPi;// = M_PI*2.0;
-    static const double me   ;// =.000511;	
-    static const double mpr  ;// =.9383;
-    static const double mpi  ;// =.1396;
-    static const double mk   ;// =.4937;
-
     StProjectedTrack() : mTrack(0), index(0) { };
     StProjectedTrack(StMuTrack* t, int _index) : mTrack(t), index(_index) 
     {
       initProbabilities(t);
       fourP = StLorentzVectorD(eBar(), mom());
       StPhysicalHelixD helix = mTrack->outerHelix();
-      pairD s = helix.pathLength(SMDR);
+      pairD s = helix.pathLength(mSMDR);
       if(isnan(s.first) || isnan(s.second)) throw BadPathLengthException();
-      double path = ((s.first < 0) || (s.second < 0)) ? ::max(s.first, s.second) : ::min(s.first, s.second);
+      double path = ((s.first < 0) || (s.second < 0)) ? std::max(s.first, s.second) : std::min(s.first, s.second);
       projection = helix.at(path);
     };
     StProjectedTrack(StMuTrack* t, int _index, StThreeVectorD vertex) : 
@@ -209,9 +207,9 @@ class StProjectedTrack
       initProbabilities(t);
       fourP = StLorentzVectorD(eBar(), mom());
       StPhysicalHelixD helix = mTrack->outerHelix();
-      pairD s = helix.pathLength(SMDR);
+      pairD s = helix.pathLength(mSMDR);
       if(isnan(s.first) || isnan(s.second)) throw BadPathLengthException();
-      double path = ((s.first < 0) || (s.second < 0)) ? ::max(s.first, s.second) : ::min(s.first, s.second);
+      double path = ((s.first < 0) || (s.second < 0)) ? std::max<double>(s.first, s.second) : std::min<double>(s.first, s.second);
       projection = helix.at(path) - vertex;
     };
     StProjectedTrack(const StProjectedTrack &t) { 
@@ -233,9 +231,13 @@ class StProjectedTrack
 	  probKaon = probProton = probElectron = 0; 
 	  return; }
 	probPion = t->pidProbPion();
+	if((probPion < 0) || (probPion > 1)) probPion = 0;
 	probKaon = t->pidProbKaon();
+	if((probKaon < 0) || (probKaon > 1)) probKaon = 0;
 	probProton = t->pidProbProton();
+	if((probProton < 0) || (probProton > 1)) probProton = 0;
 	probElectron = t->pidProbElectron();
+	if((probElectron < 0) || (probElectron > 1)) probElectron = 0;
 	if((probPion == 0) && (probKaon == 0) && 
 	   (probProton == 0) && (probElectron == 0))
 	  {
@@ -254,15 +256,17 @@ class StProjectedTrack
     bool init(StMuTrack *t, int _index, StThreeVectorD vertex)
       {
 	mTrack = t;
+	if(t == NULL) return false;
 	index = _index;
 	initProbabilities(t);
 	fourP = StLorentzVectorD(eBar(), mom());
 	StPhysicalHelixD helix = mTrack->outerHelix();
-	pairD s = helix.pathLength(SMDR);
+	pairD s = helix.pathLength(mSMDR);
         if(isnan(s.first) || isnan(s.second)) throw BadPathLengthException();
 	double path = ((s.first < 0) || (s.second < 0)) 
-	  ? ::max(s.first, s.second) : ::min(s.first, s.second);
+	  ? std::max(s.first, s.second) : std::min(s.first, s.second);
 	projection = helix.at(path) - vertex;
+	return true;
       };
     inline double Eta(void) { return fourP.pseudoRapidity(); };
     inline double Phi(void) { return fourP.phi(); };
@@ -280,10 +284,10 @@ class StProjectedTrack
     inline double mass(void) { return fourP.m(); };
     inline double eBar(void) { return probElectron*eElectron() + 
       probPion*ePion() + probProton*eProton() + probKaon*eKaon(); };
-    inline double eElectron(void) { return ePart(me); };
-    inline double eKaon(void) { return ePart(mk); };
-    inline double eProton(void) { return ePart(mpr); };
-    inline double ePion(void) { return ePart(mpi); };
+    inline double eElectron(void) { return ePart(mme); };
+    inline double eKaon(void) { return ePart(mmk); };
+    inline double eProton(void) { return ePart(mmpr); };
+    inline double ePion(void) { return ePart(mmpi); };
     inline double ePart(double parMass) 
       { return ::sqrt(parMass*parMass + mom().mag2()); };
     inline StThreeVectorD mom(void) { return mTrack->momentum(); };

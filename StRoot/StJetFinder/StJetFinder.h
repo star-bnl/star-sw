@@ -5,7 +5,7 @@
 #ifndef StJetFinder_HH
 #define StJetFinder_HH
 
-#include <Stiostream.h>
+#include <iostream>
 
 #include <list>
 using std::list;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TowerSanityMaker.h,v 1.3 2003/09/10 19:47:20 perev Exp $
+ * $Id: TowerSanityMaker.h,v 1.4 2003/09/24 20:54:08 thenry Exp $
  * 
  * Author: Thomas Henry August 2003
  ***************************************************************************
@@ -22,6 +22,7 @@
 #include <iostream>
 #include <vector>
 #include <typeinfo>
+#include <set>
 
 class CumuTowerException
 {
@@ -208,6 +209,8 @@ class EMCRunDB
 
 #include "StEmcTpcFourPMaker.h"
 
+typedef set<unsigned int, less<unsigned int> > moduleSet;
+
 class TowerSanityMaker : public SafetyArray {
  public:
   enum dataBaseUse {toRead=0, toWrite=1, toMerge=2};
@@ -223,6 +226,7 @@ class TowerSanityMaker : public SafetyArray {
   double runThreshold;
   double maxTowerThreshold;
   double avgTowerThreshold;
+  moduleSet badModules;
 
  public:
   TowerSanityMaker(const char* name,
@@ -258,7 +262,9 @@ class TowerSanityMaker : public SafetyArray {
     maxTowerThreshold = maxTowerThresh; };
   void setAvgTowerThreshold(double avgTowerThresh) {
     avgTowerThreshold = avgTowerThresh; };
-    
+  void removeModule(int badModule) { badModules.insert(badModule); };
+
+
   ClassDef(TowerSanityMaker,0)
 };
 

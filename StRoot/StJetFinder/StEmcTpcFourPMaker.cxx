@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.16 2003/09/15 20:07:10 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.17 2003/09/24 20:54:07 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -36,7 +36,6 @@ using namespace std;
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEmcUtil/others/emcDetectorName.h"
 #include "StEmcADCtoEMaker/StBemcData.h"
-//#include "St_db_Maker/St_db_Maker.h"
 
 
 ClassImp(StEmcTpcFourPMaker)
@@ -46,6 +45,15 @@ double KaonAveDepRatio;
 double ProtonAveDepRatio;
 double ElectronAveDepRatio;
 double ChargedAveDep;
+
+double SMDR;
+double mSMDR;
+double mHSMDR;
+double mtwoPi;
+double mme;	
+double mmpr;
+double mmpi;
+double mmk;
 
   // This is the Energy deposit function.  It calculates the amount of 
   // energy deposited by a charged particle 
@@ -97,6 +105,15 @@ StEmcTpcFourPMaker::StEmcTpcFourPMaker(const char* name,
   maxPoints = 10000;
   minPointThreshold = .01;
   towerProxy = new SafetyArray("towerProxy");
+
+  SMDR = 2.2625;
+  mSMDR = 231.23;
+  mHSMDR = 115.615;
+  mtwoPi = M_PI*2.0;
+  mme = .000511;	
+  mmpr = .9383;
+  mmpi = .1396;
+  mmk = .4937;
 }
 
 Int_t StEmcTpcFourPMaker::Make() {
@@ -263,7 +280,9 @@ Int_t StEmcTpcFourPMaker::Make() {
       for(hitId = 1; hitId <= maxHits; hitId++)
 	{
 	  float eta, phi, energy;
-	  if(towerProxy->isGood(runNumber, hitId-1) == false) continue;
+	  if(towerProxy->isGood(runNumber, hitId-1) == false) { 
+	    //cout << "throwing away tower: " << hitId-1 << endl; 
+	    continue; }
 	  if(adc2E)
 	    {
 	      if(data->TowerStatus[hitId-1] != 1) continue;

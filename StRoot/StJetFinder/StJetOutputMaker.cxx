@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetOutputMaker.cxx,v 1.5 2003/09/02 17:58:39 perev Exp $
+ * $Id: StJetOutputMaker.cxx,v 1.6 2003/09/24 20:54:07 thenry Exp $
  * 
  * Author: Thomas Henry May 2003
  ***************************************************************************
@@ -14,7 +14,7 @@
  */
 
 #ifdef __ROOT__
-#include "Stiostream.h"
+#include <iostream>
 #include <fstream>
 #include "TLorentzVector.h"
 #include "StSpinMaker/StJets.h"

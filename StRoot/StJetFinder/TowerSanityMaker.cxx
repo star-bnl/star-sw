@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TowerSanityMaker.cxx,v 1.4 2003/09/11 18:14:04 thenry Exp $
+ * $Id: TowerSanityMaker.cxx,v 1.5 2003/09/24 20:54:08 thenry Exp $
  * 
  * Author: Thomas Henry August 2003
  ***************************************************************************
@@ -59,6 +59,8 @@ TowerSanityMaker::TowerSanityMaker(const char* name,
 
 Int_t TowerSanityMaker::Make()
 {
+  if(dbUse == toRead)
+    return kStOK;
   StMuDst* uDst = muDstMkr->muDst();
   StMuEvent* uEvent = uDst->event();
   unsigned int runNumber = uEvent->runNumber();
@@ -123,6 +125,14 @@ Int_t TowerSanityMaker::Finish()
 
 bool TowerSanityMaker::isGood(unsigned int runNumber, long index)
 {
+  StEmcGeom* geom = StEmcGeom::getEmcGeom(detname[0].Data());
+  Int_t module, eta, s;
+  geom->getBin(static_cast<const Int_t>(index), module, eta, s);
+  if(badModules.count(module) > 0) 
+    {
+      cout << "Bad module #: " << module << endl;
+      return false;
+    }
   if(runAverageEnergyPerTower(runNumber) > runThreshold)
     {
       cout << "runAverageEnergyPerTower(runNumber)=" <<

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetOutputMaker.h,v 1.7 2003/09/10 19:47:20 perev Exp $
+ * $Id: StJetOutputMaker.h,v 1.8 2003/09/24 20:54:08 thenry Exp $
  * $Log: StJetOutputMaker.h,v $
+ * Revision 1.8  2003/09/24 20:54:08  thenry
+ * Fixed ANSI compatibility problems.
+ *
  * Revision 1.7  2003/09/10 19:47:20  perev
  * ansi corrs
  *
@@ -41,7 +44,7 @@
 #define _JetEvent_h
 #include <map>
 #include <string>
-#include "Stiostream.h"
+#include <iostream>
 #include <vector>
 #include <typeinfo>
 using namespace std;
@@ -328,10 +331,11 @@ istream& read(istream &is, char *toRead, int size);
 template <class T>
 ostream& write(ostream &os, vector<T> &toWrite)
 {
-  typedef typename vector<T>::iterator vectorTiter;
   unsigned short size = toWrite.size();
   write(os, reinterpret_cast<char*>(&size), sizeof(size));
-  for(vectorTiter it = toWrite.begin(); 
+  typedef vector<T> vectorT;
+  typedef typename vectorT::iterator vectorTit;
+  for(vectorTit it = toWrite.begin(); 
       it != toWrite.end(); ++it)
     {
       write(os, *it);
@@ -366,7 +370,9 @@ ostream& operator << (ostream &os, vector<T> &toWrite)
 {
   short size = toWrite.size();
   os << typeid(T).name() << " (Size: " << size << ")" << endl;
-  for(typename vector<T>::iterator it = toWrite.begin(); 
+  typedef vector<T> vectorT;
+  typedef typename vectorT::iterator vectorTit;
+  for(vectorTit it = toWrite.begin(); 
       it != toWrite.end(); ++it)
     {
       os << (*it) << " ";
