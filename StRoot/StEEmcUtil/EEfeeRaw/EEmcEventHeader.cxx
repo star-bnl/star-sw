@@ -1,5 +1,8 @@
-// $Id: EEmcEventHeader.cxx,v 1.7 2003/09/02 17:57:55 perev Exp $ 
+// $Id: EEmcEventHeader.cxx,v 1.8 2003/09/05 15:04:20 zolnie Exp $ 
 // $Log: EEmcEventHeader.cxx,v $
+// Revision 1.8  2003/09/05 15:04:20  zolnie
+// remove Stiostream/iostream from the source code
+//
 // Revision 1.7  2003/09/02 17:57:55  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -25,7 +28,7 @@
 
 #include "EEmcEventHeader.h"
  
-#include <Stiostream.h>
+//#include <Stiostream.h>
 
 ClassImp(EEmcEventHeader)
 
