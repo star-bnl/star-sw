@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.h,v 2.7 2002/02/22 22:56:53 jeromel Exp $
+ * $Id: StZdcTriggerDetector.h,v 2.8 2004/02/11 01:42:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.h,v $
+ * Revision 2.8  2004/02/11 01:42:09  ullrich
+ * Added new constructor to load data from StTriggerData.
+ *
  * Revision 2.7  2002/02/22 22:56:53  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -43,11 +46,13 @@
 #include "StEnumerations.h"
 
 class dst_TrgDet_st;
+class StTriggerData;
 
 class StZdcTriggerDetector : public StObject {
 public:
     StZdcTriggerDetector();
     StZdcTriggerDetector(const dst_TrgDet_st&);
+    StZdcTriggerDetector(const StTriggerData&);
     // StZdcTriggerDetector(const StZdcTriggerDetector&);            use default
     // StZdcTriggerDetector& operator=(const StZdcTriggerDetector&); use default
     virtual ~StZdcTriggerDetector();

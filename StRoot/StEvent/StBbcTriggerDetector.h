@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.h,v 2.5 2003/01/23 23:23:29 ullrich Exp $
+ * $Id: StBbcTriggerDetector.h,v 2.6 2004/02/11 01:42:09 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.h,v $
+ * Revision 2.6  2004/02/11 01:42:09  ullrich
+ * Added new constructor to load data from StTriggerData.
+ *
  * Revision 2.5  2003/01/23 23:23:29  ullrich
  * Modified to cope with changes in how BBC data is loaded for Run3.
  *
@@ -41,11 +44,13 @@
 #include "StObject.h"
 
 class dst_TrgDet_st;
+class StTriggerData;
 
 class StBbcTriggerDetector : public StObject {
 public:
     StBbcTriggerDetector();
     StBbcTriggerDetector(const dst_TrgDet_st&);
+    StBbcTriggerDetector(const StTriggerData&);
     virtual ~StBbcTriggerDetector();
     // StBbcTriggerDetector(const StBbcTriggerDetector&);            use default
     // StBbcTriggerDetector& operator=(const StBbcTriggerDetector&); use default

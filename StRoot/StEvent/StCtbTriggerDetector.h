@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StCtbTriggerDetector.h,v 2.5 2002/11/19 20:21:00 ullrich Exp $
+ * $Id: StCtbTriggerDetector.h,v 2.6 2004/02/11 01:42:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StCtbTriggerDetector.h,v $
+ * Revision 2.6  2004/02/11 01:42:09  ullrich
+ * Added new constructor to load data from StTriggerData.
+ *
  * Revision 2.5  2002/11/19 20:21:00  ullrich
  * Added method to sum all mips.
  *
@@ -36,11 +39,13 @@
 #include "StObject.h"
 
 class dst_TrgDet_st;
+class StTriggerData;
 
 class StCtbTriggerDetector : public StObject {
 public:
     StCtbTriggerDetector();
     StCtbTriggerDetector(const dst_TrgDet_st&);
+    StCtbTriggerDetector(const StTriggerData&);
     virtual ~StCtbTriggerDetector();
     // StCtbTriggerDetector(const StCtbTriggerDetector&);            use default
     // StCtbTriggerDetector& operator=(const StCtbTriggerDetector&); use default

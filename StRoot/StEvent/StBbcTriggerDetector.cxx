@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.cxx,v 2.5 2003/09/02 17:58:05 perev Exp $
+ * $Id: StBbcTriggerDetector.cxx,v 2.6 2004/02/11 01:42:09 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.cxx,v $
+ * Revision 2.6  2004/02/11 01:42:09  ullrich
+ * Added new constructor to load data from StTriggerData.
+ *
  * Revision 2.5  2003/09/02 17:58:05  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -29,8 +32,9 @@
 #include "StBbcTriggerDetector.h"
 #include "Stiostream.h"
 #include "tables/St_dst_TrgDet_Table.h"
+#include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.5 2003/09/02 17:58:05 perev Exp $";
+static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.6 2004/02/11 01:42:09 ullrich Exp $";
 
 ClassImp(StBbcTriggerDetector)
 
@@ -73,14 +77,43 @@ StBbcTriggerDetector::StBbcTriggerDetector(const dst_TrgDet_st& t)
     for(i=0; i<mMaxPedData; i++)   {mPed[i] = 0;}
     for(i=0; i<mMaxScalars; i++)   {mScl[i] = 0;}
     
-    for(i=0; i<5; i++){
-	for(int j=0; j<16; j++){
-	    if(j==8) cout << " : ";
-	    cout << (unsigned short)(t.BBC[i*16+j]) << "  ";
-	}
-	cout << endl;
+//     for(i=0; i<5; i++){
+// 	for(int j=0; j<16; j++){
+// 	    if(j==8) cout << " : ";
+// 	    cout << (unsigned short)(t.BBC[i*16+j]) << "  ";
+// 	}
+// 	cout << endl;
+//     }
+//     dump();
+}
+
+StBbcTriggerDetector::StBbcTriggerDetector(const StTriggerData& t)
+{
+    //
+    //  This is a temporary fix only. In future this
+    //  class will become obsolete and users should
+    //  get this info from StTriggerData.
+    //  This info is only a subset of what is available
+    //  in StTriggerData.
+    //  tu 2/10/2004
+    //
+    int i;
+    mYear = t.year();
+    
+    for(i=0; i<24; i++){ 
+	mAdc[i   ] = (unsigned short) t.bbcADC(east, i+1); 
+	mAdc[i+24] = (unsigned short) t.bbcADC(west, i+1); 
     }
-    dump();
+    for(i=0; i<16; i++){ 
+	mTdc[i   ] = (unsigned short) t.bbcTDC(east, i+1); 
+	mTdc[i+24] = (unsigned short) t.bbcTDC(west, i+1); 
+    }
+    
+    for(i=16;i<24; i++)            mTdc[i] = 0;
+    for(i=40;i<48; i++)            mTdc[i] = 0;
+    for(i=0; i<mMaxRegisters; i++) mReg[i] = 0;
+    for(i=0; i<mMaxPedData; i++)   mPed[i] = 0;
+    for(i=0; i<mMaxScalars; i++)   mScl[i] = 0;
 }
 
 StBbcTriggerDetector::~StBbcTriggerDetector() {/* noop */}
