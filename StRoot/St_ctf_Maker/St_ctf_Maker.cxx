@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.cxx,v 1.9 1999/02/25 21:11:46 kathy Exp $
+// $Id: St_ctf_Maker.cxx,v 1.10 1999/02/26 14:49:54 kathy Exp $
 // $Log: St_ctf_Maker.cxx,v $
+// Revision 1.10  1999/02/26 14:49:54  kathy
+// fixed histogram limits as per Bill's request
+//
 // Revision 1.9  1999/02/25 21:11:46  kathy
 // fix histograms
 //
@@ -102,7 +105,7 @@ Int_t St_ctf_Maker::Init(){
   m_cts_tof          = (St_cts_mpara    *) params("ctf/cts/cts_tof");
   // Create Histograms  
   m_adcc  = new TH1F("CtfCtbrawAdc","CTB ADCs",128,0.,1024.);
-  m_adct  = new TH1F("CtfTofrawAdc","TOF ADCs",128,0.,1024.);
+  m_adct  = new TH1F("CtfTofrawAdc","TOF ADCs",128,0.,2048.);
   m_tsvsp = new TH2F("CtfDsttoftrkTsvsp","TOF 1/beta vs. Ptrk",80,0.1,4.1,100,0.,10.);
   m_tsvsp->SetXTitle("TPC track momentum (GeV/c)");
   m_tsvsp->SetYTitle("1/beta from TOFp");
@@ -186,7 +189,7 @@ Int_t St_ctf_Maker::Make(){
 //_____________________________________________________________________________
 void St_ctf_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ctf_Maker.cxx,v 1.9 1999/02/25 21:11:46 kathy Exp $\n");
+  printf("* $Id: St_ctf_Maker.cxx,v 1.10 1999/02/26 14:49:54 kathy Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
