@@ -15,6 +15,9 @@
 
 /*
 $Log: TGeant3.cxx,v $
+Revision 1.7  2000/04/24 15:37:35  fisyak
+Merge with last Alice update
+
 Revision 1.6  2000/04/23 19:18:09  fisyak
 Merge with Alice V3.03
 
@@ -76,7 +79,9 @@ Introduction of the Copyright and cvs Log
 
 #include "TGeant3.h" 
 #include "TROOT.h" 
-#include "THIGZ.h" 
+#ifdef __HIGZ__
+#include <THIGZ.h>
+#endif
 #include <ctype.h> 
 #include <TDatabasePDG.h>
 #ifndef __CINT__
@@ -97,6 +102,7 @@ Introduction of the Copyright and cvs Log
 #define    gfmate	 F77_NAME(gfmate,GFMATE)
 #define    gfpart	 F77_NAME(gfpart,GFPART)
 #define    gftmed	 F77_NAME(gftmed,GFTMED)
+#define    gftmat        F77_NAME(gftmat,GFTMATE)
 #define    gmate	 F77_NAME(gmate,GMATE)
 #define    gpart	 F77_NAME(gpart,GPART)
 #define    gsdk	         F77_NAME(gsdk,GSDK)
@@ -357,6 +363,8 @@ extern "C"
   void type_of_call gsvolu(DEFCHARD, DEFCHARD, Int_t &, Float_t *, Int_t &,
 			   Int_t & DEFCHARL DEFCHARL); 
 
+  void type_of_call glvolu(Int_t *, Int_t *, Int_t *, Int_t *);
+    
   void type_of_call gsatt(DEFCHARD, DEFCHARD, Int_t & DEFCHARL DEFCHARL); 
 
   void type_of_call gfpara(DEFCHARD , Int_t&, Int_t&, Int_t&, Int_t&, Float_t*,
@@ -410,7 +418,7 @@ extern "C"
 			    Float_t &, Float_t & DEFCHARL); 
   void type_of_call gcomad(DEFCHARD, Int_t*& DEFCHARL); 
 
-  void type_of_call ertrak(const Float_t *const x1, const Float_t *const p1,
+  Int_t type_of_call ertrak(const Float_t *const x1, const Float_t *const p1,
 			   const Float_t *x2, const Float_t *p2,
 			   const Int_t &ipa, DEFCHARD DEFCHARL);
 
@@ -444,7 +452,10 @@ extern "C"
 //
 // Geant3 global pointer
 //
+#ifdef __HIGZ__
 static Int_t defSize = 600;
+#endif
+TGeant3 *TGeant3::fgGeant = 0; 
 
 ClassImp(TGeant3) 
  
@@ -508,11 +519,13 @@ void TGeant3::DefaultRange()
   //
   // Set range of current drawing pad to 20x20 cm
   //
+#ifdef __HIGZ__
   if (!higz) {
     new THIGZ(defSize); 
     gdinit();
   }
   higz->Range(0,0,20,20);
+#endif
 }
 
 //____________________________________________________________________________ 
@@ -521,10 +534,12 @@ void TGeant3::InitHIGZ()
   //
   // Initialise HIGZ
   //
+#ifdef __HIGZ__
   if (!higz) {
     new THIGZ(defSize); 
     gdinit();
   }
+#endif
 }
  
 //____________________________________________________________________________ 
@@ -714,6 +729,7 @@ Int_t TGeant3::PDGFromId(Int_t id) const
 //_____________________________________________________________________________
 void TGeant3::DefineParticles() 
 {
+#if 0
   //
   // Define standard Geant 3 particles
   Gpart();
@@ -971,7 +987,7 @@ void TGeant3::DefineParticles()
     ipa = 115;
     Gsdk(ipa, bratio, mode);
     */
-
+#endif
 }
 
 //_____________________________________________________________________________
@@ -2145,7 +2161,9 @@ void  TGeant3::Gtreve_root()
   //
   //   Controls tracking of all particles belonging to the current event
   //
+#if 0
   gtreve_root(); 
+#endif
 } 
 
 //_____________________________________________________________________________
@@ -2198,7 +2216,7 @@ void  TGeant3::Gdcxyz()
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
 //_____________________________________________________________________________
-void  TGeant3::Gdtom(Float_t *xd, Float_t *xm, Int_t iflag) 
+void  TGeant3::Gdtom(Float_t *xd, Float_t *xm, Int_t &iflag) 
 { 
   //
   //  Computes coordinates XM (Master Reference System
@@ -2508,6 +2526,29 @@ Int_t TGeant3::Gsvolu(const char *name, const char *shape, Int_t nmed,
 	 PASSCHARL(vname) PASSCHARL(vshape)); 
   return ivolu; 
 } 
+//___________________________________________ 
+Int_t TGeant3::Glvolu(const Int_t Nlev, Int_t *Lnam, Int_t *Lnum)
+{ 
+   Int_t Ierr = 0; 
+   glvolu((Int_t*)&Nlev, Lnam, Lnum, &Ierr);
+   return Ierr; 
+} 
+//___________________________________________ 
+Float_t* TGeant3::Gufld(Float_t *x, Float_t *bf)
+{ 
+   gufld(x,bf);
+   return bf; 
+} 
+//___________________________________________ 
+void TGeant3::Gfnhit(const Char_t *cset, const Char_t *cdet, Int_t &nhits){
+  gfnhit(PASSCHARD(cset), PASSCHARD(cdet), nhits PASSCHARL(cset) PASSCHARL(cdet));
+}
+//___________________________________________ 
+Bool_t  TGeant3::Agsens(const Char_t *name)
+{ 
+  // defines whether the node "name" is "sensible"
+   return (Bool_t) agsens(PASSCHARD(name) PASSCHARL(name));
+} 
  
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 //
@@ -2711,8 +2752,10 @@ void TGeant3::Gdopen(Int_t iview)
   //  with solid colours can now be stored in a view bank or in 'PICTURE FILES'
   //
   InitHIGZ();
+#ifdef __HIGZ__
   higz->Clear();
   gdopen(iview);
+#endif
 }
  
 //_____________________________________________________________________________
@@ -2816,6 +2859,7 @@ void TGeant3::Gdraw(const char *name,Float_t theta, Float_t phi, Float_t psi,
   //  string for the NAME of the volume can be found using the command DTREE).
   //
   InitHIGZ();
+#ifdef __HIGZ__
   higz->Clear();
   char vname[5];
   Vname(name,vname);
@@ -2824,6 +2868,7 @@ void TGeant3::Gdraw(const char *name,Float_t theta, Float_t phi, Float_t psi,
   } else {
     gdrayt(PASSCHARD(vname), theta,phi,psi,u0,v0,ul,vl PASSCHARL(vname)); 
   }
+#endif
 } 
  
 //_____________________________________________________________________________
@@ -2847,10 +2892,12 @@ void TGeant3::Gdrawc(const char *name,Int_t axis, Float_t cut,Float_t u0,
   //  the CVOL/BOX function.
   //  
   InitHIGZ();
+#ifdef __HIGZ__
   higz->Clear();
   char vname[5];
   Vname(name,vname);
   gdrawc(PASSCHARD(vname), axis,cut,u0,v0,ul,vl PASSCHARL(vname)); 
+#endif
 } 
  
 //_____________________________________________________________________________
@@ -2876,11 +2923,13 @@ void TGeant3::Gdrawx(const char *name,Float_t cutthe, Float_t cutphi,
   //  The resulting picture is seen from the viewing angles theta,phi.
   //
   InitHIGZ();
+#ifdef __HIGZ__
   higz->Clear();
   char vname[5];
   Vname(name,vname);
   gdrawx(PASSCHARD(vname), cutthe,cutphi,cutval,theta,phi,u0,v0,ul,vl
 	 PASSCHARL(vname)); 
+#endif
 }
  
 //_____________________________________________________________________________
@@ -2947,10 +2996,12 @@ void TGeant3::Gdspec(const char *name)
   //  volume.
   //  
   InitHIGZ();
+#ifdef __HIGZ__
   higz->Clear();
   char vname[5];
   Vname(name,vname);
   gdspec(PASSCHARD(vname) PASSCHARL(vname)); 
+#endif
 } 
  
 //_____________________________________________________________________________
@@ -2960,6 +3011,7 @@ void TGeant3::DrawOneSpec(const char *name)
   //  Function called when one double-clicks on a volume name
   //  in a TPavelabel drawn by Gdtree.
   //
+#ifdef __HIGZ__
   THIGZ *higzSave = higz;
   higzSave->SetName("higzSave");
   THIGZ *higzSpec = (THIGZ*)gROOT->FindObject("higzSpec");
@@ -2976,6 +3028,7 @@ void TGeant3::DrawOneSpec(const char *name)
   higzSave->cd();
   higzSave->SetName("higz");
   higz = higzSave;
+#endif
 } 
 
 //_____________________________________________________________________________
@@ -2994,12 +3047,14 @@ void TGeant3::Gdtree(const char *name,Int_t levmax, Int_t isel)
   //    - drawing tree
   //    - drawing tree of parent
   //  
+#ifdef __HIGZ__
   InitHIGZ();
   higz->Clear();
   char vname[5];
   Vname(name,vname);
   gdtree(PASSCHARD(vname), levmax, isel PASSCHARL(vname)); 
   higz->fPname = "";
+#endif
 } 
 
 //_____________________________________________________________________________
@@ -3012,6 +3067,7 @@ void TGeant3::GdtreeParent(const char *name,Int_t levmax, Int_t isel)
   //
   //  This function draws the logical tree of the parent of name.
   //  
+#ifdef __HIGZ__
   InitHIGZ();
   higz->Clear();
   // Scan list of volumes in JVOLUM
@@ -3034,6 +3090,7 @@ void TGeant3::GdtreeParent(const char *name,Int_t levmax, Int_t isel)
       }
     }
   }
+#endif
 } 
  
 //_____________________________________________________________________________
@@ -3981,24 +4038,4 @@ void TGeant3::WriteEuclid(const char* filnam, const char* topvol,
 }
 
 //_____________________________________________________________________________
-void TGeant3::Streamer(TBuffer &R__b)
-{
-  //
-  // Stream an object of class TGeant3.
-  //
-  if (R__b.IsReading()) {
-    Version_t R__v = R__b.ReadVersion(); if (R__v) { }
-    StarMC::Streamer(R__b);
-    R__b >> fNextVol;
-    R__b >> fNPDGCodes;
-    R__b.ReadStaticArray(fPDGCode);
-  } else {
-    R__b.WriteVersion(TGeant3::IsA());
-    StarMC::Streamer(R__b);
-    R__b << fNextVol;
-    R__b << fNPDGCodes;
-    R__b.WriteArray(fPDGCode, fNPDGCodes);
-  }
-}
-
 
