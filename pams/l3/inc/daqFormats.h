@@ -64,7 +64,7 @@ typedef unsigned char UINT8 ;
 
 #define TPC_MZP_BANKS_NUM	12
 
-/* gloabal character names *.
+/* gloabal character names */
 #define CHAR_LRHD	"LRHD    "
 #define CHAR_BEGR	"BEGR    "
 #define CHAR_ENDR	"ENDR    "
