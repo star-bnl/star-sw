@@ -1,5 +1,5 @@
 //*********************************************************************
-//   $Id: trsLandau.cc,v 1.1 1998/11/10 17:12:00 fisyak Exp $
+//   $Id: trsLandau.cc,v 1.2 1998/11/12 22:39:57 lasiuk Exp $
 //
 //   Author: brian, October 1998
 //
@@ -9,6 +9,9 @@
 //            -- Primary Energy Distribution
 //
 //   $Log: trsLandau.cc,v $
+//   Revision 1.2  1998/11/12 22:39:57  lasiuk
+//   compatibility at BNL
+//
 //   Revision 1.1  1998/11/10 17:12:00  fisyak
 //   Put Brian trs versin into StRoot
 //
@@ -26,15 +29,21 @@
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
+
+#define HBOOK
+#ifdef HBOOK
 #include "StHbook.hh"
+#endif
 #include "Randomize.h"
 
 // TRS
 #include "StTrsDeDx.hh"
 
+
 //         --------------------- MAIN --------------------------       //
 int main()
 {
+#ifdef HBOOK
     const int tupleSize = 3;
     StHbookFile hbookFile("hbook");
     StHbookTuple theTuple("dedx", tupleSize);
@@ -46,6 +55,7 @@ int main()
     float tuple2[tupleSize2];
     
     secTuple << "energy" << "sec" << book;
+#endif
 
     string gas("Ar");
     StTrsDeDx myEloss(gas);  // default pad Length
@@ -67,26 +77,30 @@ int main()
 
 	    secondary = myEloss.secondary(&xysec);
 	    totalSecondary += secondary;
+#ifdef HBOOK
 	    tuple2[0] = static_cast<float>(xysec/eV);
 	    tuple2[1] = static_cast<float>(secondary);
 	    secTuple.fill(tuple2);
-
+#endif
 	    totalSecondary +=secondary;
 	}
 
 	// Total number of electrons in the ionization interaction
 	total = primary+totalSecondary;
 
+#ifdef HBOOK
 	tuple[0] = static_cast<float>(primary);
 	tuple[1] = static_cast<float>(total);
 	tuple[2] = static_cast<float>(pnt);
 	
 	theTuple.fill(tuple);		// write the tuple
+#endif
     }
     
     cout <<"Done: " << endl;
 
+#ifdef HBOOK
     hbookFile.saveAndClose();
-
+#endif
     return 0;
 }
