@@ -1,5 +1,6 @@
 #include <iostream>
 
+Bool_t   doProfile = false;
 Int_t    usePath = 0;
 Int_t    nFile = 0;
 TString  thePath;
@@ -28,11 +29,11 @@ void RunStiMaker2(Int_t, const Char_t **, const Char_t *qaflag = "");
 //const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
 
 void RunStiMaker2(Int_t nevents=1,
-		 //const Char_t *path="/star/data13/reco/dev/2002/01/",
-		 const Char_t *path = "/star/data22/ITTF/data/simple_geant/DEV_10_8_01/",
+                  //const Char_t *path="/star/data13/reco/dev/2002/01/",
+                  const Char_t *path = "/star/data22/ITTF/data/simple_geant/DEV_10_8_01/",
 		      
-		 //const Char_t *file="*3007007*.event.root",
-		 const Char_t *file= "muon_10_neg.event.root",
+                  //const Char_t *file="*3007007*.event.root",
+                  const Char_t *file= "muon_10_neg.event.root",
 		      
 		      const Char_t *qaflag = "off",
 		      const Int_t wrStEOut = 0);
@@ -91,6 +92,8 @@ void RunStiMaker2(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, 
     gSystem->Load("StAssociationMaker");
     gSystem->Load("StDaqLib");
     gSystem->Load("StDAQMaker");
+    
+    gSystem->Load("StDetectorDbMaker");
 
     gSystem->Load("StSvtClassLibrary");
     gSystem->Load("StSvtDaqMaker");
@@ -121,6 +124,13 @@ void RunStiMaker2(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, 
     
     cout <<"Loading StiMaker"<<endl;
     gSystem->Load("StiMaker");
+
+    if(doProfile){
+      cout <<"Loading Jprof"<<endl;
+      gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001");
+      gSystem->Load("libJprof");
+    }
+
     //
     // Handling depends on whether file is a ROOT file or XDF file
     //
@@ -179,6 +189,11 @@ void RunStiMaker2(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, 
     // SVT Db maker
     // 
     svtDbMk  = new StSvtDbMaker("svtDb");
+
+    //
+    // Detector Db Maker (TPC rdos, etc)
+    //
+    detDbMk = new StDetectorDbMaker("detDb");
 
     //StMcEventMaker
     StMcEventMaker* mcEventReader = 0;

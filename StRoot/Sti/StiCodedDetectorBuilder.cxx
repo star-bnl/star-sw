@@ -26,6 +26,10 @@ using std::string;
 #include "StiDetector.h"
 #include "Messenger.h"
 #include "StiToolkit.h"
+#include "StiIsActiveFunctor.h"
+#include "StiTpcIsActiveFunctor.h"
+#include "StiSvtIsActiveFunctor.h"
+#include "StiNeverActiveFunctor.h"
 
 #include "StiCodedDetectorBuilder.h"
 
@@ -222,7 +226,7 @@ void StiCodedDetectorBuilder::buildDetectors(){
       pDetector->setName(szName);
       
       pDetector->setIsOn(true);
-      pDetector->setIsActive(true);
+      pDetector->setIsActive(new StiTpcIsActiveFunctor(iSector, iPadrow));
       pDetector->setIsContinuousMedium(true);
       pDetector->setIsDiscreteScatterer(false);
 
@@ -301,7 +305,7 @@ void StiCodedDetectorBuilder::buildDetectors(){
       pLadder->setName(szName);
 
       pLadder->setIsOn(true);
-      pLadder->setIsActive(true);
+      pLadder->setIsActive(new StiSvtIsActiveFunctor);
       pLadder->setIsContinuousMedium(true);
       pLadder->setIsDiscreteScatterer(true);
 
@@ -327,7 +331,7 @@ void StiCodedDetectorBuilder::buildDetectors(){
       pHybrid1->setName(szName);
      
       pHybrid1->setIsOn(true);
-      pHybrid1->setIsActive(false);
+      pHybrid1->setIsActive(new StiNeverActiveFunctor);
       pHybrid1->setIsContinuousMedium(true);
       pHybrid1->setIsDiscreteScatterer(true);
 
@@ -388,7 +392,7 @@ void StiCodedDetectorBuilder::buildDetectors(){
     pDetector->setName(szName);
     
     pDetector->setIsOn(true);
-    pDetector->setIsActive(false);
+    pDetector->setIsActive(new StiNeverActiveFunctor);
     pDetector->setIsContinuousMedium(false);
     pDetector->setIsDiscreteScatterer(true);
     
