@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.8 2000/08/09 21:38:23 snelling Exp $
+// $Id: StFlowTrack.h,v 1.9 2000/09/05 16:11:39 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.9  2000/09/05 16:11:39  snelling
+// Added global DCA, electron and positron
+//
 // Revision 1.8  2000/08/09 21:38:23  snelling
 // PID added
 //
@@ -84,6 +87,10 @@ public:
   Float_t       PidKaonPlus()   const;
   Float_t       PidAntiProton() const;
   Float_t       PidDeuteron()   const;
+  Float_t       PidAntiDeuteron()   const;
+  Float_t       PidElectron()   const;
+  Float_t       PidPositron()   const;
+
   const Char_t* Pid()        const;
   Float_t       Phi()        const;
   Float_t       Eta()        const;
@@ -91,6 +98,7 @@ public:
   Float_t       Pt()         const;
   Short_t       Charge()     const;
   Float_t       Dca()        const;
+  Float_t       DcaGlobal()  const;
   Float_t       Chi2()       const;
   Int_t         FitPts()     const;
   Int_t         MaxPts()     const;
@@ -103,6 +111,9 @@ public:
   void SetPidKaonPlus(Float_t);
   void SetPidAntiProton(Float_t);
   void SetPidDeuteron(Float_t);
+  void SetPidAntiDeuteron(Float_t);
+  void SetPidElectron(Float_t);
+  void SetPidPositron(Float_t);
   void SetPid(const Char_t*);
   void SetPhi(Float_t);
   void SetEta(Float_t);
@@ -110,6 +121,7 @@ public:
   void SetPt(Float_t);
   void SetCharge(Short_t);
   void SetDca(Float_t);
+  void SetDcaGlobal(Float_t);
   void SetChi2(Float_t);
   void SetFitPts(Int_t);
   void SetMaxPts(Int_t);
@@ -125,20 +137,23 @@ private:
   Int_t   mPidKaonMinus;
   Int_t   mPidAntiProton;
   Int_t   mPidDeuteron;
+  Int_t   mPidAntiDeuteron;
+  Int_t   mPidElectron;
+  Int_t   mPidPositron;
   Char_t  mPid[10];
   Float_t mPhi;
   Float_t mEta;
   Float_t mDedx;
   Float_t mPt;
   Short_t mCharge;
-  UInt_t  mDca;
-  UInt_t  mChi2;
+  Float_t mDca;
+  Float_t mDcaGlobal;
+  Float_t mChi2;
   Int_t   mFitPts;
   Int_t   mMaxPts;
   Int_t   mSelection;
   Short_t mSubevent[Flow::nHars][Flow::nSels];
   static  Float_t maxInt;
-  static  Float_t maxUInt;
 
   ClassDef(StFlowTrack, 1)                     // macro for rootcint
 };
@@ -150,14 +165,18 @@ inline Float_t  StFlowTrack::PidKaonMinus()  const { return mPidKaonMinus/1000.;
 inline Float_t  StFlowTrack::PidKaonPlus()   const { return mPidKaonPlus/1000.; }
 inline Float_t  StFlowTrack::PidAntiProton() const { return mPidAntiProton/1000.; }
 inline Float_t  StFlowTrack::PidDeuteron() const { return mPidDeuteron/1000.; }
+inline Float_t  StFlowTrack::PidAntiDeuteron() const { return mPidAntiDeuteron/1000.; }
+inline Float_t  StFlowTrack::PidElectron() const { return mPidElectron/1000.; }
+inline Float_t  StFlowTrack::PidPositron() const { return mPidPositron/1000.; }
 inline const Char_t* StFlowTrack::Pid()   const { return mPid; }
 inline Float_t  StFlowTrack::Phi()        const { return mPhi; }   
 inline Float_t  StFlowTrack::Eta()        const { return mEta; }     
 inline Float_t  StFlowTrack::Dedx()       const { return mDedx; }     
 inline Float_t  StFlowTrack::Pt()         const { return mPt; }                
 inline Short_t  StFlowTrack::Charge()     const { return mCharge; }   
-inline Float_t  StFlowTrack::Dca()        const { return mDca/10000.; }
-inline Float_t  StFlowTrack::Chi2()       const { return mChi2/10000.; } 
+inline Float_t  StFlowTrack::Dca()        const { return mDca; }
+inline Float_t  StFlowTrack::DcaGlobal()  const { return mDcaGlobal; }
+inline Float_t  StFlowTrack::Chi2()       const { return mChi2; } 
 inline Int_t    StFlowTrack::FitPts()     const { return mFitPts; }  
 inline Int_t    StFlowTrack::MaxPts()     const { return mMaxPts; }  
 
@@ -171,25 +190,34 @@ inline Int_t    StFlowTrack::Select(Int_t harmonic, Int_t selection,
 }
 
 inline void StFlowTrack::SetPidPiPlus(Float_t pid)  {
-  if (pid > maxInt) pid = maxInt; mPidPiPlus = (Int_t)(pid*1000.); }
+  if (fabs(pid) > maxInt) pid = maxInt; mPidPiPlus = (Int_t)(pid*1000.); }
 
 inline void StFlowTrack::SetPidPiMinus(Float_t pid) {
-  if (pid > maxInt) pid = maxInt; mPidPiMinus = (Int_t)(pid*1000.); }
+  if (fabs(pid) > maxInt) pid = maxInt; mPidPiMinus = (Int_t)(pid*1000.); }
 
 inline void StFlowTrack::SetPidProton(Float_t pid)  {
-  if (pid > maxInt) pid = maxInt; mPidProton = (Int_t)(pid*1000.); }
+  if (fabs(pid) > maxInt) pid = maxInt; mPidProton = (Int_t)(pid*1000.); }
 
 inline void StFlowTrack::SetPidKaonMinus(Float_t pid)  {
-  if (pid > maxInt) pid = maxInt; mPidKaonMinus = (Int_t)(pid*1000.); }
+  if (fabs(pid) > maxInt) pid = maxInt; mPidKaonMinus = (Int_t)(pid*1000.); }
 
 inline void StFlowTrack::SetPidKaonPlus(Float_t pid)  {
-  if (pid > maxInt) pid = maxInt; mPidKaonPlus = (Int_t)(pid*1000.); }
+  if (fabs(pid) > maxInt) pid = maxInt; mPidKaonPlus = (Int_t)(pid*1000.); }
 
 inline void StFlowTrack::SetPidAntiProton(Float_t pid)  {
-  if (pid > maxInt) pid = maxInt; mPidAntiProton = (Int_t)(pid*1000.); }
+  if (fabs(pid) > maxInt) pid = maxInt; mPidAntiProton = (Int_t)(pid*1000.); }
 
 inline void StFlowTrack::SetPidDeuteron(Float_t pid)  {
-  if (pid > maxInt) pid = maxInt; mPidDeuteron = (Int_t)(pid*1000.); }
+  if (fabs(pid) > maxInt) pid = maxInt; mPidDeuteron = (Int_t)(pid*1000.); }
+
+inline void StFlowTrack::SetPidAntiDeuteron(Float_t pid)  {
+  if (fabs(pid) > maxInt) pid = maxInt; mPidAntiDeuteron = (Int_t)(pid*1000.); }
+
+inline void StFlowTrack::SetPidElectron(Float_t pid)  {
+  if (fabs(pid) > maxInt) pid = maxInt; mPidElectron = (Int_t)(pid*1000.); }
+
+inline void StFlowTrack::SetPidPositron(Float_t pid)  {
+  if (fabs(pid) > maxInt) pid = maxInt; mPidPositron = (Int_t)(pid*1000.); }
 
 inline void StFlowTrack::SetPid(const Char_t* pid)  { strncpy(mPid, pid, 9);
                                                          mPid[9] = '\0'; }
@@ -203,11 +231,11 @@ inline void StFlowTrack::SetPt(Float_t pt)          { mPt = pt; }
 
 inline void StFlowTrack::SetCharge(Short_t charge)  { mCharge = charge; }     
 
-inline void StFlowTrack::SetDca(Float_t dca)        {
-  if (dca > maxUInt) dca = maxUInt; mDca = (UInt_t)(dca*10000.); }
+inline void StFlowTrack::SetDca(Float_t dca)        {mDca = dca; }
 
-inline void StFlowTrack::SetChi2(Float_t chi2)      {
-  if (chi2 > maxUInt) chi2 = maxUInt; mChi2 = (UInt_t)(chi2*10000.); }
+inline void StFlowTrack::SetDcaGlobal(Float_t gdca) {mDcaGlobal = gdca; }
+
+inline void StFlowTrack::SetChi2(Float_t chi2)      { mChi2 = chi2; }
 
 inline void StFlowTrack::SetFitPts(Int_t fitPts)    { mFitPts = fitPts; }
 

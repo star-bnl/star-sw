@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.h,v 1.5 2000/08/31 18:58:25 posk Exp $
+// $Id: StFlowPicoEvent.h,v 1.6 2000/09/05 16:11:35 snelling Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.h,v $
+// Revision 1.6  2000/09/05 16:11:35  snelling
+// Added global DCA, electron and positron
+//
 // Revision 1.5  2000/08/31 18:58:25  posk
 // For picoDST, added version number, runID, and multEta for centrality.
 // Added centrality cut when reading picoDST.
@@ -35,6 +38,7 @@
 #ifndef StFlowPicoEvent__h
 #define StFlowPicoEvent__h
 #include <iostream.h>
+#include "StFlowPicoTrack.h"
 #include "TObject.h"
 #include "TClonesArray.h"
 
@@ -47,6 +51,7 @@ class StFlowPicoEvent : public TObject {
                 StFlowPicoEvent();
   virtual       ~StFlowPicoEvent() { Clear(); }
   void          Clear(Option_t *option ="");
+  void          AddTrack(StFlowPicoTrack* pFlowPicoTrack);
   TClonesArray* Tracks()     const { return fTracks; }
   Int_t         GetNtrack()  const { return mNtrack; }
 
@@ -99,71 +104,6 @@ class StFlowPicoEvent : public TObject {
   static TClonesArray* fgTracks;
   
   ClassDef(StFlowPicoEvent,1)
-};
-
-
-//-----------------------------------------------------------
-
-class StFlowPicoTrack : public TObject {
-
-public:
-
-            StFlowPicoTrack() { }
-            StFlowPicoTrack(Float_t pt, 
-                            Float_t eta, 
-                            Float_t Dedx, 
-                            Float_t phi,
-          		    Short_t charge,
-                            Float_t dca,
-                            Float_t chi2,
-                            Int_t   fitPts,
-                            Int_t   maxPts,
-                            Float_t pidPiPlus,
-                            Float_t pidPiMinus,
-                            Float_t pidProton,
-			    Float_t pidKaonPlus,
-			    Float_t pidKaonMinus,
-			    Float_t pidAntiProton,
-                            Float_t pidDeuteron
-			    );
-   virtual  ~StFlowPicoTrack() { }
-
-   Float_t  Pt()         const { return mPt; }
-   Float_t  Eta()        const { return mEta; }
-   Float_t  Phi()        const { return mPhi; }
-   Short_t  Charge()     const { return (Short_t)mCharge; }
-   Float_t  Dca()        const { return mDca/10000.; }
-   Float_t  Chi2()       const { return mChi2/10000.; }
-   Int_t    FitPts()     const { return (Int_t)mFitPts; }
-   Int_t    MaxPts()     const { return (Int_t)mMaxPts; }
-   Float_t  PidPiPlus()  const { return mPidPiPlus/1000.; }
-   Float_t  PidPiMinus() const { return mPidPiMinus/1000.; }
-   Float_t  PidProton()  const { return mPidProton/1000.; }
-   Float_t  PidKaonMinus()  const { return mPidKaonMinus/1000.; }
-   Float_t  PidKaonPlus()   const { return mPidKaonPlus/1000.; }
-   Float_t  PidAntiProton() const { return mPidAntiProton/1000.; }
-   Float_t  PidDeuteron()   const { return mPidDeuteron/1000.; }
-   Float_t  Dedx()          const { return mDedx; }
-
-private:
-   Float_t   mPt;
-   Float_t   mEta;
-   Float_t   mDedx;
-   Float_t   mPhi;
-   Char_t    mCharge;
-   UShort_t  mDca;
-   UShort_t  mChi2;
-   UChar_t   mFitPts;
-   UChar_t   mMaxPts;
-   Short_t   mPidPiPlus;      
-   Short_t   mPidPiMinus;
-   Short_t   mPidProton;
-   Short_t   mPidKaonPlus;
-   Short_t   mPidKaonMinus;
-   Short_t   mPidAntiProton;
-   Short_t   mPidDeuteron;
-
-   ClassDef(StFlowPicoTrack,1)
 };
 
 #endif
