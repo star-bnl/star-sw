@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.26 2000/10/17 17:25:23 laue Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.27 2001/02/07 17:53:14 rcwells Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.27  2001/02/07 17:53:14  rcwells
+ * Corrected missing SetNHitsPossible in standard reader
+ *
  * Revision 1.26  2000/10/17 17:25:23  laue
  * Added the dE/dx information for v0s
  *
@@ -414,6 +417,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     hbtTrack->SetTrackId(pTrack->key());
 
     hbtTrack->SetNHits(nhits);
+    hbtTrack->SetNHitsPossible( pTrack->numberOfPossiblePoints(kTpcId) );
 
     float nsige = PidAlgorithm->numberOfSigma(Electron);
     //cout << "nsige\t\t" << nsige << endl;
