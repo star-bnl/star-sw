@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.13 2000/02/15 22:11:18 lansdell Exp $
+// $Id: StHistUtil.cxx,v 1.14 2000/02/28 19:03:01 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.14  2000/02/28 19:03:01  kathy
+// print list for FlowTag Maker histograms
+//
 // Revision 1.13  2000/02/15 22:11:18  lansdell
 // simplified default logy hist code
 //
@@ -1132,6 +1135,25 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   sdefList = sdefList3;
   lengofList = sizeof(sdefList3)/4;  
   }
+
+
+
+// FTPC Table QA list.........................................................
+  if (strcmp(dirName,"FlowTag")==0 && strcmp(analType,"MDC3")==0) {
+   Char_t* sdefList4[] = {
+     "FlowPsi0Harmonic1",
+     "FlowPsi0Harmonic2",
+     "FlowMeanPt0Harmonic1",
+     "FlowMeanPt0Harmonic2",
+     "FlowMult0Harmonic1",
+     "FlowMult0Harmonic2",
+     "Flow_q0Harmonic1",
+     "Flow_q0Harmonic2"
+   };
+  sdefList = sdefList4;
+  lengofList = sizeof(sdefList4)/4;  
+  }
+
 
 
   Int_t numPrt = 0;
