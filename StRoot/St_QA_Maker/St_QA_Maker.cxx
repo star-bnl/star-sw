@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.29 1999/05/10 20:03:54 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.30 1999/06/11 20:05:51 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.30  1999/06/11 20:05:51  kathy
+// put in method FindHists to find the histogram directory, since it can be in different places depending on how/where you make the histograms
+//
 // Revision 1.29  1999/05/10 20:03:54  kathy
 // add new member function ExamineLogYList and RemoveFromLogYList
 //
@@ -349,7 +352,6 @@ Int_t St_QA_Maker::DrawHists()
 {
 // Method DrawHists -->
 // Plot the selected  histograms and generate the postscript file as well 
-
   
   cout << " **** Now in St_QA_Maker::DrawHists  **** " << endl;
 
@@ -380,18 +382,26 @@ Int_t St_QA_Maker::DrawHists()
   const Char_t *firstHistName = m_FirstHistName.Data();
   const Char_t *lastHistName  = m_LastHistName.Data();
 
-  TObject *obj = 0;
-//  TList *dirList = gDirectory->GetList();
-  TList *dirList = Histograms();
+
+// Now find the histograms
+// get the TList pointer to the histograms:
+  TList  *dirList = 0;
+  Char_t *dirHistName = "QAHist";
+  dirList = FindHists(dirHistName);
+ 
+
   Int_t padCount = 0;
   
-// Create an iterator
+// Create an iterator called nextHist - use TIter constructor
   TIter nextHist(dirList);
   Int_t histCounter = 0;
   Int_t histReadCounter = 0;
   Bool_t started = kFALSE;
 
+//NOTE!! the () used by nextHist below is an overloaded operator 
+//     in TIter that returns a TObject* 
 
+  TObject *obj = 0;
   while (obj = nextHist()) {
 //    cout << " **** Now in St_QA_Maker::DrawHists - in loop: " << endl;
 //    cout << "               name = " << obj->GetName() << endl;
@@ -431,6 +441,73 @@ Int_t St_QA_Maker::DrawHists()
 //_____________________________________________________________________________
 
 
+TList* St_QA_Maker::FindHists(Char_t *histBranchName) 
+{  
+// Method FindHists -->
+// Find pointer to histograms
+
+  TList *dList=0;
+
+  //cout << " Beg: FindHists, dList pointer = " << dList << endl;
+
+//---- First look in your current Maker for histograms ==>
+//---- If you've made the histograms on your own, they
+//     should show up in your Maker's directory, so search for them there,
+//     i.e. MakerName/.hist is where they'd be
+// Note: Histograms is a method of StMaker
+//---- If you have a chain, you'll always have the .hist directory, so
+//     have to check if there's really anything there (so use First method)
+
+  dList = Histograms();
+
+  TObject *test=0;
+  if (dList) test = dList->First();
+  if (test){ 
+      cout << " FindHists - found hist. in Maker-Branch " << endl;
+     }
+
+  //  cout << " Mid: FindHists, dList pointer = " << dList << endl;
+  //cout << " Mid: FindHists, test pointer =  " << test << endl;
+
+// If you have the pointer but the hist. really aren't here, set
+//  the pointer back to zero
+  if (!test) dList = 0;
+
+  //cout << " Mid2: FindHists, dList pointer = " << dList << endl;
+  //cout << " Mid2: FindHists, test pointer =  " << test << endl;
+
+
+  if (!dList) {
+
+//-------------- Now try and see if they're in histBranch from output of bfc
+
+  St_DataSet *hist=0;
+  hist = GetDataSet("hist");
+  hist->ls(9);
+
+  //find particular branch
+  St_DataSet *QAH = hist->Find(histBranchName);
+
+  // or can create iterator and look over all branches
+
+  //now get the list of histograms
+   dList = (TList *)QAH->GetObject();
+
+  // now have we found them?
+  if (dList){ 
+      cout << " FindHists - found hist. in histBranch, with name:  " 
+	   << histBranchName <<  endl;
+     }
+
+  }
+
+  //cout << " End: FindHists, dList pointer = " << dList << endl;
+  
+ return dList;
+}
+//_____________________________________________________________________________
+
+
 Int_t St_QA_Maker::ListHists() 
 {  
 // Method ListHists -->
@@ -438,13 +515,17 @@ Int_t St_QA_Maker::ListHists()
 
   cout << " **** Now in St_QA_Maker::ListHists **** " << endl;
 
-  TObject *obj = 0;
-//  TList *dirList = gDirectory->GetList();
-  TList *dirList = Histograms();
-  
+// get the TList pointer to the histograms:
+  TList  *dirList = 0;
+  Char_t *dirHistName = "QAHist";
+  dirList = FindHists(dirHistName);
+
+
+//Now want to loop over all histograms
 // Create an iterator
   TIter nextObj(dirList);
   Int_t histReadCount = 0;
+  TObject *obj = 0;
 
 // use = here instead of ==, because we are setting obj equal to nextObj and then seeing if it's T or F
   while (obj = nextObj()) {
@@ -1278,7 +1359,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.29 1999/05/10 20:03:54 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.30 1999/06/11 20:05:51 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
