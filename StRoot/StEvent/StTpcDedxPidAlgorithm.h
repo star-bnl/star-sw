@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.h,v 2.2 1999/10/28 22:27:04 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.h,v 2.3 1999/11/29 15:33:34 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.h,v $
- * Revision 2.2  1999/10/28 22:27:04  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/11/29 15:33:34  ullrich
+ * Changed Macro for SUN CC
  *
  * Revision 2.5  1999/12/21 15:09:14  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -40,7 +40,7 @@ class StTpcDedxPidAlgorithm : public StPidAlgorithm {
 public:
     StTpcDedxPidAlgorithm();
     
-#if defined(__SUNPRO_CC)
+    StParticleDefinition*  operator() (const StTrack&, const StSPtrVecTrackPidTraits&);
     const StDedxPidTraits* traits() const;    
     double numberOfSigma(const StParticleDefinition*) const;
     double meanPidFunction(const StParticleDefinition*) const;
