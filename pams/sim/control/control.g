@@ -7,12 +7,16 @@
 
       subroutine agudigi
       implicit   none
-+CDE,gcnum,gcflag.
++CDE,gcbank,gcnum,gcflag.
       integer IEV/0/,Itrac,Ipart,Ivert,Nu,NtpcHit,Iad,
      >        Iw,Ihit,Ltra,Ntbeam,Nttarg,Nhit,N10,
      >        Nvs(15)/15*0/,NBV(15)
       real    Tofg,vert(4),pvert(4),ubuf(100),Digi(15)
 *
+   
+* do not allow run without geometry
+      if (JVOLUM<=0) STOP ' NO GEOMETRY LOADED '
+* 
       IEV=IEV+1
       call xntup ('Ieotri',Ieotri)
       call xntup ('Ntrack',Ntrack)
