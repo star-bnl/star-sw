@@ -1,4 +1,4 @@
-#ifndef ASU_MALLOC_OFF
+#ifdef ASU_MALLOC_ON
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,5 +19,5 @@ void  operator delete [] (void *ptr) {operator delete (ptr) ;}
 #endif /*NEW_ARRAY_ON*/
 
 
-#endif /* ASU_MALLOC_OFF */
+#endif /* ASU_MALLOC_ON */
 
