@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.cxx,v 1.2 2001/02/25 22:11:46 lasiuk Exp $
+ * $Id: StRichSpectraMaker.cxx,v 1.3 2001/08/21 17:58:34 lasiuk Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichSpectraMaker.cxx,v $
+ * Revision 1.3  2001/08/21 17:58:34  lasiuk
+ * for 2000 analysis
+ *
  * Revision 1.2  2001/02/25 22:11:46  lasiuk
  * quality assessment
  *
@@ -24,15 +27,19 @@
 #include <iostream.h>
 #include <fstream.h>
 #include <assert.h>
+#include <vector>
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
 
 #include "StGlobals.hh"
+#include "StThreeVector.hh"
+#include "StPhysicalHelixD.hh"
 #include "SystemOfUnits.h"
-
 #ifndef ST_NO_NAMESPACES
 using namespace units;
+using std::vector;
+using std::unique;
 #endif
 
 #define VERBOSE 0
@@ -51,11 +58,21 @@ using namespace units;
 // Database
 #include "StRrsMaker/StRichGeometryDb.h"
 #include "StRrsMaker/StRichMomentumTransform.h"
+#include "StRrsMaker/StRichCoordinates.h"
 
 // Internal Rch
 #include "StRchMaker/StRichSimpleHit.h"
-
 #include "StRichPIDMaker/StRichTrack.h"
+
+// SpectraMaker
+#include "StPairD.h"
+#include "StRichRayTracer.h"
+#include "StRichCerenkovHistogram.h"
+
+// g2t tables
+#include "tables/St_g2t_tpc_hit_Table.h"
+#include "tables/St_g2t_rch_hit_Table.h"
+#include "tables/St_g2t_track_Table.h"
 
 ClassImp(StRichSpectraMaker) // macro
    
@@ -82,7 +99,7 @@ Int_t StRichSpectraMaker::Init() {
     cout << "StRichSpectraMaker::init()" << endl;
     
 #ifdef RICH_SPECTRA_HISTOGRAM
-    mFile = new TFile("/star/rcf/scratch/lasiuk/production/Spectra.root","RECREATE","Pid Ntuples");
+    mFile = new TFile("/star/rcf/scratch/lasiuk/theta/Spectra.root","RECREATE","Pid Ntuples");
     mFile->SetFormat(1);
 
     
@@ -97,14 +114,34 @@ Int_t StRichSpectraMaker::Init() {
 
     mCorrected = new TNtuple("cphoton","pid2", "evt:vtx:p:pt:theta:res:pipsi:pig:pid:pi1sig:pi2sig:kpsi:kg:kd:k1sig:k2sig:ppsi:pg:pd:p1sig:p2sig:q:pia:pita:ka:kta:pa:pta");
 
+    //
+    // this is at the event level
+    //
     mEvt = new TNtuple("evt","evt1","p:pt:q:res:theta:lx:ly:lz:lp:rx:ry");
 
-    mCerenkov = new TNtuple("cer","angle","no:px:py:pz:d:sigma:phi:x:y:c");
+    mTrack = new TNtuple("track","trk1","zvtx:p:px:py:pz:pt:eta:sdca2:sdca3:x:y:dx:dy:theta:sig:mp:mass:q:flag");
+    //
+    // this is at the Cerenkov photon level
+    //
+    mCerenkov = new TNtuple("cer","angle","p:px:py:pz:alpha:phx:phy:l3:phi:ce:stat:dx:dy:id:q");
+
+    mSim = new TNtuple("sim","photon","e:l");
 #endif
 
     this->initCutParameters();
 
     mGeometryDb = StRichGeometryDb::getDb();
+
+    mNormalRadiationPoint =
+	StThreeVectorF(0.,
+		       0.,
+		       8.605*centimeter);
+    
+// 		       (mGeometryDb->proximityGap() +
+// 			mGeometryDb->quartzDimension().z() +
+// 			mGeometryDb->radiatorDimension().z()/2.)); // 9mm
+    PR(mNormalRadiationPoint);
+    
     mMomTform  = StRichMomentumTransform::getTransform(mGeometryDb);  
 
     //
@@ -114,10 +151,40 @@ Int_t StRichSpectraMaker::Init() {
     mKaon = StKaonMinus::instance();
     mProton = StAntiProton::instance();
 
-    mIndex = 1.28; // should take from materials db
+    mMeanWavelength = 171.*nanometer;
+    PR(mMeanWavelength/nanometer);
+    
+    StRichMaterialsDb* materialsDb = StRichMaterialsDb::getDb();
+    mIndex = materialsDb->indexOfRefractionOfC6F14At(mMeanWavelength);
+    PR(mIndex);
+
+    ////////////////////////////////////////////////////////////////////////
+    double ii;
+    for(double ii=160.*nanometer; ii<220.*nanometer; ii+=1.*nanometer)
+ 	cout << (ii/nanometer) << " ";
+    cout << "\n nc6f14" << endl;
+    for(double ii=160.*nanometer; ii<220.*nanometer; ii+=1.*nanometer)
+ 	cout << (materialsDb->indexOfRefractionOfC6F14At(ii)) << " ";
+    cout << "\n lc6f14" << endl;
+    for(double ii=160.*nanometer; ii<220.*nanometer; ii+=1.*nanometer)
+ 	cout << (materialsDb->absorptionCoefficientOfC6F14At(ii)) << " ";
+    cout << "\n nquartz" << endl;
+    for(double ii=160.*nanometer; ii<220.*nanometer; ii+=1.*nanometer)
+ 	cout << (materialsDb->indexOfRefractionOfQuartzAt(ii)) << " ";
+    cout << "\n lquartz" << endl;
+    for(double ii=160.*nanometer; ii<220.*nanometer; ii+=1.*nanometer)
+ 	cout << (materialsDb->absorptionCoefficientOfQuartzAt(ii)) << " ";
+    cout << "\n csiqe" << endl;
+    for(double ii=160.*nanometer; ii<220.*nanometer; ii+=1.*nanometer)
+ 	cout << (materialsDb->quantumEfficiencyOfCsIAt(ii)) << " ";
+    cout << endl;
     
     this->printCutParameters();
 
+    mTracer = new StRichRayTracer(mMeanWavelength);
+    mHistogram = new StRichCerenkovHistogram();
+
+    
     return StMaker::Init();
 }
 
@@ -139,7 +206,7 @@ void StRichSpectraMaker::initCutParameters() {
     mPadPlaneCut = 2.0*centimeter;
     mRadiatorCut = 2.0*centimeter;
 
-    mMomentumThreshold = 2.*GeV;
+    mMomentumThreshold = 1.5*GeV;
     mMomentumLimit = 3.*GeV;
 }
 
@@ -152,7 +219,50 @@ Int_t StRichSpectraMaker::Make() {
     // ptr initialization for StEvent
     //
     mTheRichCollection = 0;
-    
+
+#ifdef NEVER
+    ////////////////////////////////// <-------------------------
+    if (!m_DataSet->GetList())  {
+	St_DataSetIter geant(GetDataSet("geant"));
+	St_g2t_rch_hit *g2t_rch_hit =
+	    static_cast<St_g2t_rch_hit *>(geant("g2t_rch_hit"));
+
+	if (!g2t_rch_hit) {
+	    // For backwards compatibility look in dst branch
+	    cout << "look in dst" << endl;
+	    St_DataSetIter dstDstI(GetDataSet("dst"));
+	    g2t_rch_hit = static_cast<St_g2t_rch_hit*>(dstDstI("g2t_rch_hit"));
+	}
+	if(!g2t_rch_hit){
+	    cout << "StRichSpectraMaker::Make()";
+	    cout << "\tNo g2t_rch_hit pointer";
+	    cout << "\treturn from StRrsMaker::Make()" << endl;
+	    return kStWarn;
+	}
+
+	
+	g2t_rch_hit_st *rch_hit     =  g2t_rch_hit->GetTable();
+	int numberOfRichHits = g2t_rch_hit->GetNRows();
+	PR(numberOfRichHits);
+
+	float simTuple[2];
+	int goodPhotons = 0;
+	for(int ii=0; ii<numberOfRichHits; ii++) {
+
+	    if(rch_hit->de<0) {
+		goodPhotons++;
+		simTuple[0] = fabs(rch_hit->de);
+		simTuple[1] = fabs(1240./rch_hit->de)/1.e9;
+		mSim->Fill(simTuple);
+	    }
+
+	    rch_hit++;
+
+	}
+	PR(goodPhotons);
+    }
+#endif
+    ////////////////////////////////// <-------------------------
     //
     // Try get StEvent Structure
     //
@@ -181,16 +291,16 @@ Int_t StRichSpectraMaker::Make() {
     }
     
     
-    mMagField    = 2.49117;    
+    mMagField    = .249117*tesla;    
     if (mEvent->summary()) {
 	mMagField  = mEvent->summary()->magneticField();
-	cout << "  B field = " << mMagField << endl;
+	cout << "  B field = " << (mMagField/tesla) << " T" << endl;
     } 
     else {
 	cout << "StRichSpectraMaker::Make().\n";
 	cout << "\tWARNING!\n";
 	cout << "\tCannot get B field from mEvent->summary().\n";
-	cout << "\tUse B= " << mMagField << endl;
+	cout << "\tUse B= " << (mMagField/tesla) << " T" << endl;
     } 
 
     //
@@ -204,23 +314,26 @@ Int_t StRichSpectraMaker::Make() {
 	return kStWarn;
     }
     mVertexPos = mEvent->primaryVertex()->position();
-    
+
     //
     // Number of tracks to loop over
     //
     mNumberOfPrimaries = mEvent->primaryVertex()->numberOfDaughters();  
     PR(mNumberOfPrimaries);
+
+
+    
     //
     // does the hit collection exist
     //
     if(mEvent->tpcHitCollection()) {
 	cout << "StRichSpectraMaker::Make()\n";
-	cout << "\tHit collection exists" << endl;
+	cout << "\tTpcHit collection exists" << endl;
     }
     else {
 	cout << "StRichSpectraMaker::Make()\n";
 	cout << "\tWARNING\n";
-	cout << "\tHit collection DOES NOT exist!!!!" << endl;
+	cout << "\tTpcHit collection DOES NOT exist!!!!" << endl;
 	cout << "\tContinuing..." << endl;
     }
 
@@ -237,20 +350,22 @@ Int_t StRichSpectraMaker::Make() {
     this->drawRichHits(mEvent->richCollection());
 #endif
 
-     this->qualityAssessment();
-
+    this->qualityAssessment();
+     
     //
     //
     // The track loop
     //
     //
+    float trackTuple[19];
+    trackTuple[0] = mVertexPos.z();
 
     cout << "Looping over " << mNumberOfPrimaries << " primary Tracks" << endl;
     for(size_t ii=0; ii<mNumberOfPrimaries; ii++) { // primaries
 
-// 	cout << "==> Track " << ii << "/" << (mNumberOfPrimaries-1);
+ 	cout << "==> Track " << ii << "/" << (mNumberOfPrimaries-1);
 	StTrack* track = mEvent->primaryVertex()->daughter(ii);
-// 	cout << " p= " << track->geometry()->momentum().mag() << endl;
+ 	cout << " p= " << track->geometry()->momentum().mag() << endl;
 
 	//if( !this->checkMomentumWindow(track) ) continue;
 // 	if (!this->checkTrack(track)) continue;
@@ -264,53 +379,118 @@ Int_t StRichSpectraMaker::Make() {
 	if(!theRichPidTraits.size()) continue;
   	cout << " (" << theRichPidTraits.size() << ") Pid Traits.   p= ";
 
+	StThreeVectorF trackMomentum = track->geometry()->momentum();
 	cout << (track->geometry()->momentum().mag()) << endl;
 
+	trackTuple[1] = abs(trackMomentum);
+	trackTuple[2] = trackMomentum.x();
+	trackTuple[3] = trackMomentum.y();
+	trackTuple[4] = trackMomentum.z();
+	trackTuple[5] = trackMomentum.perp();
+	trackTuple[6] = trackMomentum.pseudoRapidity();
+
+	//
+	// info from the traits
+	//
+	
+	StTrackPidTraits* theSelectedTrait =
+	    theRichPidTraits[theRichPidTraits.size()-1];
+	
+	StRichPidTraits *richPidTrait =
+	    dynamic_cast<StRichPidTraits*>(theSelectedTrait);
+
+
+	trackTuple[7] = 0.;//richPidTrait->signedDca2d();
+	trackTuple[8] = 0.;//richPidTrait->signedDca3d();
+
+	//
+	// this should not be necessary for the
+	// next round of production
+	//
+	
 	StRichTrack* richTrack = new StRichTrack(track,mMagField);
 	
-// 	richTrack->assignMIP(&(mEvent->richCollection()->getRichHits()));
+ 	richTrack->assignMIP(&(mEvent->richCollection()->getRichHits()));
 	
-// 	StThreeVectorF projectedMIP  = richTrack->getProjectedMIP();
-// 	if(!richTrack->getAssociatedMIP()) {
-// 	    cout << "StRichSpectraMaker::Make()\n";
-// 	    cout << "\tNo Associated MIP\n";
-// 	    cout << "\tSkip this track" << endl;
-// 	    delete richTrack;
-// 	    continue;
-// 	}	    
-// 	StThreeVectorF associatedMIP = richTrack->getAssociatedMIP()->local();
-// 	PR(projectedMIP);
-// 	PR(associatedMIP);
-// 	double residual = (projectedMIP - associatedMIP).perp();
-// 	PR(residual);
+ 	StThreeVectorF projectedMIP  = richTrack->getProjectedMIP();
+ 	if(!richTrack->getAssociatedMIP()) {
+ 	    cout << "StRichSpectraMaker::Make()\n";
+ 	    cout << "\tNo Associated MIP\n";
+ 	    cout << "\tSkip this track" << endl;
+ 	    delete richTrack;
+ 	    continue;
+ 	}	    
+ 	StThreeVectorF associatedMIP = richTrack->getAssociatedMIP()->local();
+//  	PR(projectedMIP);
+//  	PR(associatedMIP);
+ 	StThreeVectorF residual = (projectedMIP - associatedMIP);
+
+#ifdef RICH_WITH_PAD_MONITOR
+	// 25 = open box
+	mPadMonitor->drawMarker(associatedMIP, 25, 3);
+	mPadMonitor->update();
+#endif
+
+	// 	PR(residual);
+
+	//
+	//
+	//
+	trackTuple[9] = associatedMIP.x();
+	trackTuple[10] = associatedMIP.y();
+	trackTuple[11] = residual.x();
+	trackTuple[12] = residual.y();
+
+	this->doIdentification(track);
+
+	unsigned short iflag;
+	double cerenkovAngle = mHistogram->cerenkovAngle(&iflag);
+	trackTuple[13] = (cerenkovAngle/degree);
+	trackTuple[14] = (mHistogram->cerenkovSigma()/degree);
+	trackTuple[15] = (mHistogram->cerenkovMostProbable()/degree);
+
+	PR(mHistogram->bestAngle()/radian);
+	double beta = 1./(mIndex*cos(cerenkovAngle));
+	double gamma = 1./(sqrt(1-sqr(beta)));
+	PR(gamma);
+	PR(abs(trackMomentum));
+
+	double mass2 = sqr(abs(trackMomentum))/(sqr(gamma)-1);
+
+	double mass = -1.;
+	if(mass2>0 && mass2<10) {
+	    mass = sqrt(mass2);
+	}
+	trackTuple[16] =  mass;
+	trackTuple[17] = track->geometry()->charge();
+	trackTuple[18] = iflag;
 	
+	mTrack->Fill(trackTuple);
+	cout << "okay tuple" << endl;
 // 	StRichPidTraits *richPidTrait =
 // 	    dynamic_cast<StRichPidTraits*>(theRichPidTraits[0]);
 
 // 	cout << "theRichPidTraits.begin()" << endl;
 
-	StTrackPidTraits* theMostRecentTrait =
-	    theRichPidTraits[theRichPidTraits.size()-1];
-	
-	StRichPidTraits *richPidTrait =
-	    dynamic_cast<StRichPidTraits*>(theMostRecentTrait);
 
 	//
 	//
 	//
 
-	if( track->geometry()->momentum().mag()  < 1) {
-	    delete richTrack;
-	    continue;
-	}
-	this->evaluateEvent(richTrack, richPidTrait);
-	
+// 	if( track->geometry()->momentum().mag()  < 1) {
+// 	    delete richTrack;
+// 	    continue;
+// 	}
+	cout << "eval event" << endl;
+// 	this->evaluateEvent(richTrack, richPidTrait);
+	cout << "okay" << endl;
 	if( !this->checkMomentumWindow(track) ) {
 	    delete richTrack;
 	    continue;
 	}
-	this->lookAtPhotonInfo(richTrack, richPidTrait);
-	
+	cout << "lok at photon" << endl;
+ 	this->lookAtPhotonInfo(richTrack, richPidTrait);
+	cout << "ok" << endl;
 	//
 	//
 	//
@@ -319,6 +499,8 @@ Int_t StRichSpectraMaker::Make() {
 	
     } // loop over the tracks
 
+
+    mHistogram->clearData();
     
     return kStOk;
 }
@@ -393,7 +575,7 @@ void StRichSpectraMaker::lookAtPhotonInfo(StRichTrack* richTrack,
 	    theRichPids[jj]->getPhotonInfo();
 
 	float cAngle  = theRichPids[jj]->getConstantAreaCut(); 
-	PR(cAngle);
+// 	PR(cAngle);
 	    
 	cout << "associatedHits + infos "
 	     << associatedHits.size() << " " << infos.size() << endl;
@@ -629,7 +811,7 @@ bool StRichSpectraMaker::evaluateEvent(StRichTrack* richTrack, StRichPidTraits* 
 void StRichSpectraMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRichSpectraMaker.cxx,v 1.2 2001/02/25 22:11:46 lasiuk Exp $\n");
+    printf("* $Id: StRichSpectraMaker.cxx,v 1.3 2001/08/21 17:58:34 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -780,14 +962,13 @@ float StRichSpectraMaker::expectedNumberOfPhotons(float p, int pid) const
     float fraction = (beta2*index2-1)/(beta2*(index2-1));
     return fraction;
 }
-
+					     
 void StRichSpectraMaker::qualityAssessment() {
 
     //vertex
-    cout << "StRichSpectraMaker::qualityAssessment()" << endl;
+    cout << "\nStRichSpectraMaker::qualityAssessment()" << endl;
     PR(mVertexPos);
     PR(mNumberOfPrimaries);
-    
     
     StPtrVecTrack richTracks = mEvent->richCollection()->getTracks();
     PR(richTracks.size());
@@ -818,6 +999,7 @@ void StRichSpectraMaker::qualityAssessment() {
  	    }
  	    else {
  		PR(theRichPidTraits[jj].associatedMip()->local());
+
  		PR(theRichPidTraits[jj].mipResidual());
  		PR(theRichPidTraits[jj].refitResidual());
  	    }
@@ -849,11 +1031,285 @@ void StRichSpectraMaker::qualityAssessment() {
 
 	
     }
-    
+
     //loop over these tracks
     cout << "StRichSpectraMaker::qualityAssessment()\n";
     cout << "================== END ==================" << endl;
 }
+
+void StRichSpectraMaker::doIdentification(StTrack* track) {
+
+//     cout << "\nStRichSpectraMaker::doIdentification()\n";
+    mHistogram->clearData();
+    
+    StSPtrVecRichHit richHits = mEvent->richCollection()->getRichHits();
+//      PR(richHits.size());
+    
+    const StPtrVecTrackPidTraits&
+	thePidTraits = track->pidTraits(kRichId);
+
+    //
+    // loop over the PID traits
+    // and extract the PIDs
+    //
+
+    vector<StRichHit*> theRingHits;
+    StThreeVectorF trackMip(-999.,-999.,-999);
+    bool doAssociation = false;
+    
+    for(size_t jj=0; jj<thePidTraits.size(); jj++) {
+
+	StRichPidTraits* theRichPidTraits =
+	    dynamic_cast<StRichPidTraits*>(thePidTraits[jj]);
+
+	if(!theRichPidTraits) {
+	    cout << "StRichSpectraMaker::doIdentification()\n";
+	    cout << "\tBad pid traits.  Continuing..." << endl;
+	    continue;
+	}
+
+ 	if(!theRichPidTraits[jj].associatedMip()) {
+	    cout << "StRichSpectraMaker::doIdentification()\n";
+	    cout << "\tNo Associated MIP\n";
+	    cout << "\tNo MIP Residual" << endl;
+	    if(richHits.size()) {
+		cout << "try association" << endl;
+		doAssociation = true;
+	    }
+	    else {
+		trackMip =  theRichPidTraits[jj].associatedMip()->local();
+	    }
+	}
+
+// 	PR(doAssociation);
+	
+	const StSPtrVecRichPid& theRichPids =
+	    theRichPidTraits[jj].getAllPids();
+	    
+	for(size_t kk=0; kk<theRichPids.size(); kk++) {
+
+// 	    const StSPtrVecRichPhotonInfo& photonInfo =
+// 		theRichPids[kk]->getPhotonInfo();
+// 	    PR(photonInfo.size());
+
+// 	    PR(theRichPids[kk]->getConstantAreaCut()/degree);
+	    mHistogram->setPhi( max(static_cast<double>(theRichPids[kk]->getConstantAreaCut()),
+				    mHistogram->phi()) );
+
+// 	    PR(mHistogram->phi()/degree);
+	    const StPtrVecRichHit& hits =
+		theRichPids[kk]->getAssociatedRichHits();
+
+	    if(!hits.size()) {
+		cout << "StRichSpectraMaker:doIdentification()\n";
+		cout << "\tNo hits in (" << kk << ")...next StRichPid" << endl;
+		continue;
+	    }
+
+	    for(size_t ll=0; ll<hits.size(); ll++) {
+		theRingHits.push_back(hits[ll]);
+	    }
+	    
+// 	    PR(theRingHits.size());
+	}
+    }
+    
+    //
+    // only the unique hits
+    //
+//     PR(theRingHits.size());
+
+    sort(theRingHits.begin(),theRingHits.end());
+    vector<StRichHit*> uniqueRingHits( theRingHits.begin(),
+				       unique(theRingHits.begin(),
+					      theRingHits.end()) );
+
+//     PR(uniqueRingHits.size());
+    
+	    
+    StRichTrack extrapolateTrack(track, mMagField/kilogauss);
+
+    //
+    // Argh this is wrong!
+    //  but that is the way StRichTrack is coded
+    //
+    StThreeVectorF trackLocalMomentum = extrapolateTrack.getMomentumAtPadPlane()/GeV;
+    StThreeVectorF impactPoint = extrapolateTrack.getImpactPoint();
+
+
+    if(doAssociation) {
+	extrapolateTrack.assignMIP(&richHits);
+	if(!extrapolateTrack.getAssociatedMIP()) {
+	    cout << "StRichSpectraMaker::doIdentification()\n";
+	    cout << "\tCannot get an associated Track";
+	}
+	else {
+	    trackMip = extrapolateTrack.getAssociatedMIP()->local();
+// 	    PR(trackMip);
+	}
+    }
+
+    StThreeVectorF trackResidual(-999.,-999.,-999);
+    if(trackMip.x() < -900) {
+	//trackResidual = trackMip;
+    }
+    else {
+	trackResidual = (trackMip - impactPoint);
+    }
+    
+
+    StThreeVectorF radiationPoint = this->calculateRadiationPoint(track);
+
+//     PR(trackLocalMomentum/GeV);
+//     PR(impactPoint);
+//     PR(radiationPoint);
+//     PR(trackResidual);
+    
+    float tuple[15];
+    
+    tuple[0] = abs(trackLocalMomentum);
+    tuple[1] = trackLocalMomentum.x();
+    tuple[2] = trackLocalMomentum.y();
+    tuple[3] = trackLocalMomentum.z();
+    
+    mTracer->setTrack(trackLocalMomentum, radiationPoint, mNormalRadiationPoint);
+    tuple[4] = (mTracer->trackAngle()/degree);
+
+//     cout << "Made the TRACER...loop over (" << uniqueRingHits.size() << ") hits" << endl;
+
+    for(size_t mm=0; mm<uniqueRingHits.size(); mm++) {
+	
+	StThreeVectorF photonPosition = uniqueRingHits[mm]->local();
+// 	PR(photonPosition);
+	
+// 	double distance = abs(photonPosition - trackMip);
+// 	PR(distance);
+	
+ 	mTracer->setPhotonPosition(photonPosition);
+// #ifdef RICH_WITH_PAD_MONITOR
+// 	// 4 = open circle
+// 	mPadMonitor->drawMarker(photonPosition,4,2);
+// 	mPadMonitor->update();
+// #endif
+	
+ 	tuple[5] = photonPosition.x();
+ 	tuple[6] = photonPosition.y();
+	
+ 	float status;
+ 	double cerenkovAngle;
+ 	if(mTracer->processPhoton(&cerenkovAngle)) {
+//  	    cout << "\n****True...(" << (cerenkovAngle/degree) << ")" << endl;
+ 	    status = 1;
+ 	}
+ 	else {
+//  	    cout << "\n****False...(" << (cerenkovAngle/degree) << ")" << endl;
+ 	    status = 0;
+ 	}
+	
+//  	PR(mTracer->cerenkovAngle()/degree);
+ 	tuple[7] = (mTracer->epsilon());
+ 	tuple[8] = (mTracer->azimuth()/degree);
+ 	tuple[9] = (mTracer->cerenkovAngle()/degree);
+ 	tuple[10] = status;
+
+ 	tuple[11] = trackResidual.x();
+ 	tuple[12] = trackResidual.y();
+ 	tuple[13] = mEvent->id();
+	tuple[14] = track->geometry()->charge();
+
+ 	mCerenkov->Fill(tuple);
+
+	mHistogram->addEntry(StRichCerenkovPhoton(mTracer->cerenkovAngle(),
+						  mTracer->azimuth(),
+						  uniqueRingHits[mm]));
+#ifdef RICH_WITH_PAD_MONITOR
+ 	// 4 = open circle
+ 	mPadMonitor->drawMarker(photonPosition,4,2);
+ 	mPadMonitor->update();
+#endif
+
+    } // loop over the hits
+
+    mHistogram->status();
+    unsigned short flag;
+    PR(mHistogram->cerenkovAngle(&flag)/degree);
+//     cout << "Next Event? <ret>: " << endl;
+//     do {
+// 	if(getchar()) break;
+//     } while (true);
+//     cout << "================== ID END ==================" << endl;
+}
+
+
+StThreeVectorF StRichSpectraMaker::calculateRadiationPoint(StTrack* track) {
+
+    //StRichGeometryDb* mGeometryDb  = StRichGeometryDb::getDb();
+    StRichCoordinateTransform* mTransform = StRichCoordinateTransform::getTransform(mGeometryDb);
+    StRichMomentumTransform* mMomentumTransform = StRichMomentumTransform::getTransform(mGeometryDb);
+    double mAnodeToPad = mGeometryDb->anodeToPadSpacing();
+    StThreeVectorF mRichNormal(mGeometryDb->normalVectorToPadPlane().x(),
+			       mGeometryDb->normalVectorToPadPlane().y(),
+			       mGeometryDb->normalVectorToPadPlane().z());
+
+    
+    StRichLocalCoordinate lWirePlane(0., 0., mAnodeToPad);	
+    StGlobalCoordinate    gWirePlane;
+    (*mTransform)(lWirePlane,gWirePlane);
+    StThreeVectorF globalWirePlane(gWirePlane.position().x(),
+				   gWirePlane.position().y(),
+				   gWirePlane.position().z());
+    
+    StPhysicalHelixD mHelix = track->geometry()->helix();
+    PR(abs(mHelix.momentum(mMagField))/GeV);
+    double pathLengthAtAnode = mHelix.pathLength(globalWirePlane, mRichNormal);
+    StThreeVectorF globalMomentumAtAnode = mHelix.momentumAt(pathLengthAtAnode, mMagField);
+    //PR(globalMomentumAtAnode);
+
+    // TFORMATIONS
+    StThreeVector<double> gMomentumAtAnode(globalMomentumAtAnode.x(),
+					   globalMomentumAtAnode.y(),
+					   globalMomentumAtAnode.z());
+    StThreeVector<double> lMomentumAtAnode;
+    mMomentumTransform->localMomentum(gMomentumAtAnode,lMomentumAtAnode);
+
+    StThreeVectorF localMomentumAtAnode(lMomentumAtAnode.x(),
+					lMomentumAtAnode.y(),
+					lMomentumAtAnode.z());
+//     PR(localMomentumAtAnode);
+
+
+    StThreeVectorF globalPositionAtAnode = mHelix.at(pathLengthAtAnode);
+//     PR(globalPositionAtAnode);
+    StGlobalCoordinate gPositionAtAnode(globalPositionAtAnode.x(),
+					globalPositionAtAnode.y(),
+					globalPositionAtAnode.z());
+    StRichLocalCoordinate lPositionAtAnode;
+    (*mTransform)(gPositionAtAnode, lPositionAtAnode);
+
+//     PR(lPositionAtAnode);
+    StThreeVectorF localPositionAtAnode(lPositionAtAnode.position().x(),
+					lPositionAtAnode.position().y(),
+					lPositionAtAnode.position().z());
+//     PR(localPositionAtAnode);
+
+    StPhysicalHelixD mLocalHelix(localMomentumAtAnode,
+				 localPositionAtAnode,
+				 mMagField,
+				 mHelix.charge(mMagField));
+
+    //
+    // the radiation point is here:
+    //
+    StThreeVectorF r(mNormalRadiationPoint);
+    StThreeVectorF n(0.,0.,1);
+    double s = mLocalHelix.pathLength(r, n);
+//     PR(s);
+    StThreeVectorF radPoint = mLocalHelix.at(s);
+//     PR(radPoint);
+    
+    return radPoint;
+}
+
 
 void StRichSpectraMaker::printCutParameters(ostream& os) const
 {

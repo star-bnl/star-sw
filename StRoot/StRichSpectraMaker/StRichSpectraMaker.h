@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.h,v 1.2 2001/02/25 22:11:46 lasiuk Exp $
+ * $Id: StRichSpectraMaker.h,v 1.3 2001/08/21 17:58:34 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRichSpectraMaker.h,v $
+ * Revision 1.3  2001/08/21 17:58:34  lasiuk
+ * for 2000 analysis
+ *
  * Revision 1.2  2001/02/25 22:11:46  lasiuk
  * quality assessment
  *
@@ -49,12 +52,19 @@ class StRichSimpleHit;
 class StRichSimpleHitCollection;
 class StRichPidTraits;
 
+// PID Maker
 class StRichTrack;
 
+// RRS
 class StRichGeometryDb;
 class StRichMomentumTransform;
 
+// Pad Monitor
 class StRichPadMonitor;
+
+//
+class StRichRayTracer;
+class StRichCerenkovHistogram;
 
 #include "StThreeVectorF.hh"
 #include "StThreeVector.hh"
@@ -70,6 +80,8 @@ public:
     Int_t  Make();
     void   PrintInfo();
     Int_t  Finish();
+
+    StThreeVectorF normalRadiationPoint() const;
 
 protected:
     void  initCutParameters();
@@ -89,8 +101,10 @@ protected:
     void drawRichPixels(StRichCollection*) const;
     void drawRichHits(StRichCollection*)   const;
     void drawTracks()                      const;
-
+    
     void qualityAssessment();
+    void doIdentification(StTrack*);
+    StThreeVectorF calculateRadiationPoint(StTrack*);
     
 protected:
     StEvent*                    mEvent;//!
@@ -138,6 +152,19 @@ protected:
     StRichGeometryDb*        mGeometryDb;//!
 
     StRichPadMonitor*        mPadMonitor;//!
+
+    //
+    // Cerenkov Angle determination
+    //
+
+    StRichRayTracer*         mTracer;//!
+    double mMeanWavelength;//!
+    StRichCerenkovHistogram*  mHistogram;//!
+    
+    //
+    // geometry
+    //
+    StThreeVectorF mNormalRadiationPoint;
     
 #ifdef RICH_SPECTRA_HISTOGRAM
     TFile*   mFile; //!
@@ -145,8 +172,9 @@ protected:
     TNtuple* mCorrected;   //!
 
     TNtuple* mEvt;//!
-
+    TNtuple* mTrack;//!
     TNtuple* mCerenkov;//!
+    TNtuple* mSim;//!
     
     int      mTupleSize;
     int      mTuple2Size;
@@ -154,7 +182,7 @@ protected:
     
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.2 2001/02/25 22:11:46 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.3 2001/08/21 17:58:34 lasiuk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 public:
@@ -166,5 +194,7 @@ private:
     ClassDef(StRichSpectraMaker, 1)   //StAF chain virtual base class for Makers
 	};
 
-#endif 
+inline StThreeVectorF StRichSpectraMaker::normalRadiationPoint() const { return mNormalRadiationPoint;}
+
+#endif
 #endif /* __ROOT__ */

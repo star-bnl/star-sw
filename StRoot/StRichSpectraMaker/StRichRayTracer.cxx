@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichRayTracer.cxx,v 1.1 2001/02/25 22:11:20 lasiuk Exp $
+ * $id: StRichRayTracer.cxx,v 1.1 2001/02/25 22:11:20 lasiuk Exp $
  *
  * Author:  bl Feb 21, 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichRayTracer.cxx,v $
+ * Revision 1.2  2001/08/21 17:58:34  lasiuk
+ * for 2000 analysis
+ *
  * Revision 1.1  2001/02/25 22:11:20  lasiuk
  * Initial Revision
  *
@@ -18,60 +21,143 @@
 #include "StRichRayTracer.h"
 #include "StGlobals.hh"
 
+#include "StRrsMaker/StRichGeometryDb.h"
+#include "StRichPIDMaker/StRichMaterialsDb.h"
+
 StRichRayTracer::StRichRayTracer()
 {
-    cout << "Should never be called" << endl;
+    cout << "StRichRayTracer::StRichRayTracer()\n";
+    cout << "\tERROR\n";
+    cout << "\tCANNOT call. Must specify a mean wavelength." << endl;
+    abort();
+    
 }
 
 // ----------------------------------------------------
-StRichRayTracer::StRichRayTracer(StThreeVectorF& pLocal,
-				 StPairD& mipLocal,
-				 StPairD& radIntercept)
-    : mLocalTrackMomentum(pLocal),
-      mLocalMipPosition(mipLocal),
-      mLocalRadiatorIntercept(radIntercept)
+StRichRayTracer::StRichRayTracer(double wavelength)
 {
-    this->init();
-    this->shiftOriginToMipIntersectionOnPadPlane();
+    this->init(wavelength);    
+}
+
+// ----------------------------------------------------
+StRichRayTracer::StRichRayTracer(double wavelength,
+				 StThreeVectorF& pLocal,
+				 StThreeVectorF& radiationPoint,
+				 StThreeVectorF& normalRadiationPoint)
+{
+    this->init(wavelength);
+    this->setTrack(pLocal, radiationPoint, normalRadiationPoint);
+
+//     PR(mNormalRadiationPoint);
 }
 
 // ----------------------------------------------------
 StRichRayTracer::~StRichRayTracer() {/*nopt*/}
 
 // ----------------------------------------------------
-void StRichRayTracer::init()
+void StRichRayTracer::setTrack(StThreeVectorF& pLocal,
+			       StThreeVectorF& radiationPoint,
+			       StThreeVectorF& normalRadiationPoint) {
+
+    mLocalTrackMomentum     = pLocal;
+    mExpectedRadiationPoint = radiationPoint;
+    mNormalRadiationPoint   = normalRadiationPoint;
+
+    this->calculateTrackAngle();
+}
+
+// ----------------------------------------------------
+void StRichRayTracer::init(double wavelength)
 {
+//     cout << "StRichRayTracer::init()" << endl;
     m2Pi   = 2.*M_PI;
-    mPiBy2 = M_PI/2.;
-    
+
+    mMeanWavelength = wavelength;
+//     PR(mMeanWavelength);
+
     //
     // Db initialization
     //
-    indexQuartz = 1.6;
-    indexFreon  = 1.26;
-    indexCH4    = 1.000;
 
-    gapThickness    = 8.0*centimeter;
-    quartzThickness = 5.*millimeter;
-    radiatorThickness = 1.0*centimeter;
+    StRichMaterialsDb* materialsDb = StRichMaterialsDb::getDb();
 
-    mPrecision = 1.*millimeter;
-    //mPrecision = 50.*micrometer;
-    mDeltaTheta = 1.*degree;
+//    mIndexQuartz = 1.6;
+//    mIndexFreon  = 1.28;
+//    mIndexCH4    = 1.00044;
+
+    mIndexFreon  = materialsDb->indexOfRefractionOfC6F14At(mMeanWavelength);
+    mIndexQuartz = materialsDb->indexOfRefractionOfQuartzAt(mMeanWavelength);
+    mIndexCH4    = materialsDb->indexOfRefractionOfMethaneAt(mMeanWavelength);
+
+     PR(mIndexFreon);
+     PR(mIndexQuartz);
+     PR(mIndexCH4);
+
+    StRichGeometryDb* geometryDb = StRichGeometryDb::getDb();
+    
+    mRadiatorThickness =  geometryDb->radiatorDimension().z();  //1.0*centimeter;
+    mQuartzThickness = geometryDb->quartzDimension().z();       //5.*millimeter;
+    mGapThickness    = geometryDb->proximityGap();              //8.0*centimeter;
+
+//     PR(mRadiatorThickness/millimeter);
+//     PR(mQuartzThickness/millimeter);
+//     PR(mGapThickness/millimeter);
+
+    //mxyPrecision = 1.*millimeter;
+    mxyPrecision = 50.*micrometer;
+    mzPrecision  = 1.*millimeter;
+
+    mInitialIncrement = 1.*degree;
+    mDeltaTheta = mInitialIncrement;
 
     mMaximumNumberOfIterations = 50;
-    
-    this->calculateTrackAngle();
-    this->calculateRotatedGeometry();
 
+    this->calculateGeometry();
+}
+
+// ----------------------------------------------------
+void StRichRayTracer::setxyPrecision(double p) {
+
+    cout << "StRichRayTracer::setxyPrecision()\n";
+    cout << "\tWARNING:\n";
+    cout << "\tDo you know what you are doing?\n" << endl;
+    cout << "\t" << (mxyPrecision/millimeter) << " mm changing to ";
+
+    mxyPrecision = p;
+    cout << (mxyPrecision/millimeter) << " mm" << endl;
+}
+
+// ----------------------------------------------------
+void StRichRayTracer::calculateGeometry()
+{
+//     cout << "StRichRayTracer::calculateGeometry()" << endl;
+    
+    mNormalBottomQuartz = StThreeVectorF(0., 0., mGapThickness);
+    mNormalTopQuartz    = StThreeVectorF(0., 0., mGapThickness + mQuartzThickness);
+    mNormalTopRadiator  = StThreeVectorF(0., 0., mNormalTopQuartz.z() + mRadiatorThickness);
+
+    // MUST BE THE SAME AS THAT IN SPECTRA_MAKER
+    //mNormalRadiationPoint = StThreeVectorF(0., 0., mNormalTopQuartz.z() + mRadiatorThickness/2.);
+
+//     PR(mNormalBottomQuartz);
+//     PR(mNormalTopQuartz);
+//     PR(mNormalTopRadiator);
+//     PR(mNormalRadiationPoint);
 }
 
 // ----------------------------------------------------
 void StRichRayTracer::calculateTrackAngle()
 {
-    cout << "\nStRichRayTracer::calculateTrackAngle()" << endl;
+//     cout << "StRichRayTracer::calculateTrackAngle()" << endl;
     //
     // Calculate the incident track angle (mAlpha):
+    //
+    // BUT...must determine the sign first:
+    //
+    // The sign of mAlpha is given by the sign of px
+    // if (px>0) rotation is in the negative sense
+    //
+
     //
     //    pt
     //   \  |
@@ -80,26 +166,10 @@ void StRichRayTracer::calculateTrackAngle()
     //                |
     //                 -- mAlpha
     //
-    //  This is accompanied by finding the axis about which
-    //  the photons must be rotated about in the x-y plane
-    //  before being shifted out of plane by the angle mAlpha
     //
     
-    //mAlpha = atan(mLocalTrackMomentum.perp()/mLocalTrackMomentum.z());
-    PR(mLocalTrackMomentum);
-    PR(mLocalTrackMomentum.theta()/degree);
-
-    //
-    // the track angle,
-    // mAlpha = acos(pz/p)
-    //       OR
-    //          asin(abs(axis))
-    //
-    // BUT...must determine the sign first:
-    //
-    // The sign of mAlpha is given by the sign of px
-    // if (px>0) rotation is in the negative sense
-    //
+//     PR(mLocalTrackMomentum/GeV);
+//     PR(mLocalTrackMomentum.theta()/degree);
 
     if( sign(mLocalTrackMomentum.x()) > 0 ) {
 	//cout << " +alpha " << endl;
@@ -113,259 +183,114 @@ void StRichRayTracer::calculateTrackAngle()
 	//cout << " -alpha " << endl;
 	mAlpha = M_PI - mLocalTrackMomentum.theta();
     }
-	
-    mSinAlpha = sin(mAlpha);
-    mCosAlpha = cos(mAlpha);
-    mTanAlpha = tan(mAlpha);
 
-    PR(mAlpha/degree);
-    PR(mSinAlpha);
-    PR(mCosAlpha);
-    PR(mTanAlpha);
-
-    //
-    // Exception handling:
-    // if (px == 0), angle between py/px is 0
-    //
+    if(mAlpha > M_PI)
+	mAlpha -= m2Pi;
     
-    double angleBetweenPxPy = 0;
-    if( mLocalTrackMomentum.x() ) {
-	angleBetweenPxPy = mLocalTrackMomentum.phi();
-    }
-    
-    PR(angleBetweenPxPy/degree);
-
-    if(abs(angleBetweenPxPy) > mPiBy2) {
-	//
-	// Adjustment is necessary
-	//
-	if(angleBetweenPxPy < 0) {
-	    cout << " - " << endl;
-	    angleBetweenPxPy = angleBetweenPxPy - M_PI;
-	}
-	else {
-	    cout << " + " << endl;
-	    angleBetweenPxPy = M_PI + angleBetweenPxPy;
-	}
-    }
-
-    PR(angleBetweenPxPy/degree);
-    ////////////////////////////////////////////////
-//     if(angleBetweenPxPy > mPiBy2) {
-// 	cout << " pos" << endl;	
-// 	angleBetweenPxPy -= M_PI;
-//     }
-//     if(angleBetweenPxPy < -mPiBy2) {
-// 	cout << " neg" << endl;
-// 	angleBetweenPxPy += M_PI;
-//     }
-
-    /////////////////////////////////////////////////
-    
-    
-    StThreeVectorF pz(0.,0.,mLocalTrackMomentum.z());
-     StThreeVectorF axis = (pz.unit()).cross(mLocalTrackMomentum.unit());
-     PR(axis);
-
-    mPhotonInPlaneRotation = -angleBetweenPxPy;
-
-
-    PR(mPhotonInPlaneRotation/degree);
-    
-    cout << endl;
+//     PR(mAlpha/degree);
 }
 
 // ----------------------------------------------------
-void StRichRayTracer::shiftOriginToMipIntersectionOnPadPlane()
+bool StRichRayTracer::adjustPropagator()
 {
-    cout << "StRichRayTracer::shiftOriginToMipIntersectionOnPadPlane()" << endl;
-    // defined as the orgin
-    mTrackOnPadPlane =
-	mLocalMipPosition - mLocalMipPosition;
-
-    mTrackOnRadiator = 
-	mLocalRadiatorIntercept - mLocalMipPosition;
-}
-
-// ----------------------------------------------------
-void StRichRayTracer::calculateRotatedGeometry()
-{
-    cout << "StRichRayTracer::calculateRotatedGeometry()" << endl;
+    cout << "StRichRayTracer::adjustPropagator()" << endl;
     
-    mRGapThickness = gapThickness/mCosAlpha;
-    mRQuartzThickness = quartzThickness/mCosAlpha;
-    mRRadiatorThickness = radiatorThickness/mCosAlpha;
-
-    mRBottomQuartz = mRGapThickness;
-    mRTopQuartz    = mRGapThickness + mRQuartzThickness;
-    mRTopRadiator  = mRTopQuartz + mRRadiatorThickness;
-    
-    mRRadiationPoint = mRTopQuartz + mRRadiatorThickness/2.;
-
-    PR(mRGapThickness);
-    PR(mRQuartzThickness);
-    PR(mRRadiatorThickness);
-
-    PR(mRBottomQuartz);
-    PR(mRTopQuartz);
-    PR(mRTopRadiator);
-
-    PR(mRRadiationPoint);
-
-}
-
-// ----------------------------------------------------
-void StRichRayTracer::setPhotonPosition(StPairD& pos)
-{
-    cout << "StRichRayTracer::setPhotonPosition()" << endl;
-    mLocalPhotonPosition = pos;
-
-    mPhotonOnPadPlane =
-	mLocalPhotonPosition - mLocalMipPosition;
-
-    PR(mTrackOnPadPlane);
-    PR(mTrackOnRadiator);
-    PR(mPhotonOnPadPlane);
-    
-}
-
-// ----------------------------------------------------
-void StRichRayTracer::doTrackRotation()
-{
-    cout << "StRichRayTracer::doTrackRotation()" << endl;
-
-    mTrackOnPadPlane.rotate(mAlpha);
-    mTrackOnRadiator.rotate(mAlpha);
-    
-    PR(mTrackOnPadPlane);
-    PR(mTrackOnRadiator);
-}
-
-void StRichRayTracer::doPhotonRotation()
-{
-    cout << "StRichRayTracer::doPhotonRotation()" << endl;
-
-    //
-    // do the rotation in the x-y plane, then
-    // about the track
-    //
-    // StPairD(l,z)
-    //
-    PR(mPhotonOnPadPlane);
-
-    mPhotonOnPadPlane.rotate(mPhotonInPlaneRotation);
-
-    PR(mPhotonOnPadPlane);
-
-    //
-    //  now rotation with respect to the track
-    //
-    
-    mPhotonOnPadPlane.rotate(mAlpha);
-    PR(mPhotonOnPadPlane);
-    
-}
-
-// ----------------------------------------------------
-void StRichRayTracer::calculateFastTrigFunctions()
-{
-    mTanTheta = tan(mTheta);
-}
-
-// ----------------------------------------------------
-bool StRichRayTracer::setTheta(double theta)
-{
-    cout << "StRichRayTracer::setTheta()" << endl;
-    PR(mTheta/degree);
-    PR(theta/degree);
-    //
-    // Must assign:
-    //   mTheta
-    //   mSlope
-    //   mLZero
-    //
-
-    if(mTheta == mPiBy2) {
-	cout << "StRichRayTracer::setTheta()\n";
-	cout << "\tCannot assign angle as 90 degrees\n";
-	cout << "\tSkip this!" << endl;
-	return false;
-    }
-
-    mTheta = theta;
-    mSlope = tan(theta);
-
-    //
-    // eqn for the new line:
-    // z(l) = tan(theta)*(l-l2) + z2
-    //   where:
-    //     (z2,l2) are the rotated photon points
-    //
-
-    mLZero =
-	mPhotonOnPadPlane.l() - (mPhotonOnPadPlane.z())/mSlope;
-    cout << "**** setTheta()\n";
-    cout << "\tmLZero= (" << mLZero << ")" << endl;
-
-    mTanTheta = tan(mTheta);
-
     return true;
 }
 
 // ----------------------------------------------------
-bool StRichRayTracer::initialTheta()
+void StRichRayTracer::setPhotonPosition(StThreeVectorF& pos)
 {
-    cout << "StRichRayTracer::initalTheta()" << endl;
+//     cout << "StRichRayTracer::setPhotonPosition()" << endl;
+    mLocalPhotonPosition = pos;
+
+    //
+    // reset the step for optimizing theta
+    //
+    mDeltaTheta = mInitialIncrement;
+}
+
+// ----------------------------------------------------
+bool StRichRayTracer::initialPropagator()
+{
+//     cout << "\nStRichRayTracer::initalPropagator()" << endl;
+
     //
     // Take an initial guess at the angle the photon
     // path makes with the pad plane
-    // by taking a line from the
-    // rotated photon position and extrapolating
-    // it to the freon/quartz interface.  Check that
-    // there was a finite rotation done.
-    //
-    // Quantities calculated:
-    //    mSlope
-    //    mLZero
-    //    mTheta
+    // by taking a line (propagator) from the
+    // photon position on the pad plane and extrapolating
+    // it to the expected radiation point.
     //
 
-    double epsilon = 2.*millimeter;
-    if( abs(mPhotonOnPadPlane.z()) < epsilon) {
-	cout << "Warning: mPhotonOnPadPlane.z()=(";
-	cout << mPhotonOnPadPlane.z() << ")" << endl;
-    }
+//     PR(mExpectedRadiationPoint);
+//     PR(mLocalPhotonPosition);
 
-    double dz = mRTopQuartz-mPhotonOnPadPlane.z();
-    double dl = -mPhotonOnPadPlane.l();
-    mSlope = dz/dl;
+    mGapPropagator = mExpectedRadiationPoint - mLocalPhotonPosition;
+//     PR(mGapPropagator);
 
-    PR(mSlope);
+    //
+    // angle with the normal
+    //
 
-    mLZero =
-	mPhotonOnPadPlane.l() - mPhotonOnPadPlane.z()/(mSlope);
-
-    PR(mLZero);
-
-    mTheta = atan2(dz,dl);
+    //mTheta = mGapPropagator.theta();
+//     PR(mGapPropagator.theta()/degree);
     
-    PR(mTheta/degree);
+    mPhotonRadPointTransverseDistance = mGapPropagator.perp();
+
+//     PR(mPhotonRadPointTransverseDistance);
 
     return true;
 }
 
 // ----------------------------------------------------
+bool StRichRayTracer::checkConvergence(StThreeVectorF& point) const
+{
+    bool convergence = false;
+    
+    if( ( (point-mExpectedRadiationPoint).perp() < mxyPrecision) ) {
+//  	cout << "StRichRayTracer::checkConvergence()\n";
+//  	cout << "\tConvergence!!!" << endl;
+//  	cout << "\tCerenkov Angle= ";
+//  	cout << (mCerenkovAngle/degree) <<  " degrees" << endl;
+		    
+ 	convergence = true;
+     }
+	    
+    return convergence;
+}
+
+// ----------------------------------------------------
+bool  StRichRayTracer::processPhoton(double* angle) {
+
+//     cout << "StRichRayTracer::processPhoton()" << endl;
+    
+    if(!this->initialPropagator()) {
+	cout << "initialPropagator is BAD***" << endl;
+    }
+    else {
+// 	cout << "initialPropagator is okay" << endl;
+    }
+    
+    //mGapPropagator.setTheta(70.*degree);
+    //cout << "--> findCerenkovAngle" << endl;
+
+    if(this->findCerenkovAngle()) {
+	// cout << "\n**** Convergence..." << endl;
+	*angle = mCerenkovAngle;
+    }
+    else {
+	// cout << "\n**** No Convergence..." << endl;
+	*angle = FLT_MAX;
+    }
+    return true;
+    
+}
+
+// -------------------------------------------------------
 bool StRichRayTracer::propagateToRadiator()
 {
-    cout << "\nStRichRayTracer::propagateToRadiator()" << endl;
-
-    // is there a better place for this?
-    this->calculateFastTrigFunctions();
-
-    PR(mTheta/degree);
-    PR(mTanTheta);
-    PR(mTanAlpha);
-    PR(mLZero);
+//      cout << "\nStRichRayTracer::propagateToRadiator()" << endl;
 
     //
     // find the linear distance (mLOne) which is covered
@@ -374,339 +299,212 @@ bool StRichRayTracer::propagateToRadiator()
     // Calculate the intersection at the bottom
     // of the quartz window
     //
-    // eqn of light ray:
-    //  z(l) = (lZero-l)*tan(theta)
-    // eqn of quartz:
-    //  z(l) = +tan(alpha)*l + mRBottomQuartz
     //
 
-    do {
-	mLOne =
-	    ( (mLZero * mTanTheta) + mRBottomQuartz )/
-	    ( mTanTheta - mTanAlpha );
+//     PR(mGapPropagator);
 
-	PR(mLOne);
-	
-	if( sign(mLOne * mLZero) < 0 ) {
-	    cout << "StRichRayTracer::propagateToRadiator()\n";
-	    cout << "\tWARNING\n";
-	    cout << "\tLOne & lZero have opposite signs\n";
-	    cout << "\t--> decrease theta " << endl;
-	    this->setTheta( (mTheta -= mDeltaTheta) );
-	    return false;
-	}
-	else {
-	    cout << " valid mLOne...BREAK " << endl;
-	    break;
-	}
-	
-    } while ( sign(mLOne * mLZero) > 0);
+    StThreeVectorF propagator = mGapPropagator;
 
-    double zAtBottomQuartz = mTanAlpha*mLOne + mRGapThickness;
-    PR(zAtBottomQuartz);
-	
-	
-    //
-    // calculate the refraction at the quartz/methane boundary
-    // but it is altered because of the rotated track
-    // Make sure you are in the absolute angular coordinate
-    // system
-    //
-    // n_CH4 sin(theta_CH4) = n_Q sin(theta_Q)
-    //
-    // theta_CH4 = mPiBy2 - theta + alpha
-    //   testAngle = theta - alpha
-    // theta_CH4 = mPiBy2 - (testAngle)
-    //
-
-    double testAngle = mTheta - mAlpha;
-    PR(testAngle/degree);
-    if(testAngle < 0) {
-	testAngle += m2Pi;
-	PR(testAngle/degree);
-    }
-
-    //
-    // I'm not suer this is a necessary check
-    //
-
-    PR(testAngle/degree);
-     if(testAngle < mPiBy2) {
- 	cout << "StRichRayTracer::propagateToRadiator()\n";
- 	cout << "\tWARNING\n";
- 	cout << "\tConvergence not possible\n";
- 	cout << "\tIncrease mTheta" << endl;
- 	cout << "........................." << endl;
-// 	this->setTheta( (mTheta += mDeltaTheta) );
-// 	return false;
-     }
+//     PR(propagator);
+//     PR(propagator.theta()/degree);
+//     PR(propagator.phi()/degree);
     
-    double methaneAngle = mPiBy2 - testAngle;
-    PR(methaneAngle/degree);
-    double quartzAngle =
-	asin(indexCH4/indexQuartz*sin(methaneAngle));
-    PR(quartzAngle/degree);
-
-//     testAngle = quartzAngle - mAlpha;
-//     PR(testAngle);
-//     if(testAngle < 0) {
-// 	cout << "StRichRayTracer::propagateToRadiator()\n";
-// 	cout << "The quartz angle will not converge:\n";
-// 	cout << "Decrease mTheta" << endl;
-// 	this->setTheta( (mTheta -= mDeltaTheta) );
-// 	return false;
-//     }
-
-    //
-    // find the linear distance (mLTwo) which is covered
-    // while the light ray propagates through the
-    // quartz.
-    // Calculate the intersection at the top
-    // of the quartz window
-    //
-    // eqn of light ray in quartz:
-    //  z(l) = tan(quartzPropagationAngle)*(mL-mLOne) + zAtBottomQuartz
-    // eqn of quartz:
-    //  z(l) = +tan(alpha)*l + mRTopQuartz
-    //
-
-    testAngle = mAlpha - quartzAngle;
-    PR(testAngle/degree);
-
-    if(testAngle < 0)
-	testAngle += m2Pi;
-    else if(testAngle > m2Pi)
-	testAngle -= m2Pi;
-
-    PR(testAngle/degree);
-    double quartzPropagationAngle = mPiBy2 + (testAngle);
-    PR(quartzPropagationAngle/degree);
-    if(quartzPropagationAngle>m2Pi) {
-	quartzPropagationAngle -= m2Pi;
-    }
-    PR(quartzPropagationAngle);
-    double quartzRaySlope = tan(quartzPropagationAngle);
-    PR(quartzRaySlope);
-
-    mLTwo =
-	( mRTopQuartz - zAtBottomQuartz + mLOne*(quartzRaySlope) )/
-	( quartzRaySlope -mTanAlpha );
-
-    PR(mLTwo);
+//     PR(mNormalBottomQuartz);
 
 
     //
-    // not needed
-    //
-//     if(mLTwo<0) {
-// 	cout << "StRichRayTracer::propagateToRadiator()\n";
-// 	cout << "\tWARNING\n";
-// 	cout << "\tmLTwo<0" << endl;
-//     }
-	
-    if( sign(mLTwo * mLZero) < 0 ) {
-	cout << "StRichRayTracer::propagateToRadiator()\n";
-	cout << "\tquartz Distance & lZero have opposite signs\n";
-	cout << "\t--> decrease theta" << endl;
-	this->setTheta( (mTheta -= mDeltaTheta) );
-	return false;
-    }
-
-	
-    double zAtTopQuartz = mTanAlpha*mLTwo + mRTopQuartz;
-    PR(zAtTopQuartz);
-		
-    //
-    // calculate the refraction at the quartz/freon boundary
-    // and propogate the light ray to the centroid of the
-    // radiator.  This is the same operation as at the
-    // first quartz interface
-    //
-    // light ray in the radiator:
-    //  z(l) = tan(freonPropagationAngle)*l+zAtTopQuartz
-    // radiator mid plane:
-    //  z(l) = +tan(alpha)*l+(rGap + rQuartz + rRadiator/2);
+    // propagate to the bottom quartz
     //
     
-    double freonAngle =
-	asin(indexQuartz/indexFreon*sin(quartzAngle));
-    PR(freonAngle/degree);
+    double scale =
+	(mLocalPhotonPosition.dot(mNormalBottomQuartz) - mNormalBottomQuartz.dot(mNormalBottomQuartz))/
+	(propagator.dot(mNormalBottomQuartz));
 
-    testAngle = mAlpha - freonAngle;
-    PR(testAngle/degree);
+//     PR(scale);
 
-    if(testAngle > m2Pi) {
-	testAngle -= m2Pi;
-    }
+    StThreeVectorF zAtBottomQuartz =
+	mLocalPhotonPosition - scale*propagator;
 
-    PR(testAngle/degree);
-    if(testAngle<0) {
-	cout << "StRichRayTracer::propagateToRadiator()\n";
-	cout << "\tWARNING freonAngle will not converge:\n";
-	cout << "\tDecrease theta" << endl;
-	cout << ".............." << endl;
-	//this->setTheta( (mTheta -= mDeltaTheta) );
-	//return false;
-    }
+//     PR(zAtBottomQuartz);
+//     PR(zAtBottomQuartz.perp());
+//     PR((zAtBottomQuartz-mLocalPhotonPosition).perp());
 
-    double freonPropagationAngle = mPiBy2 + testAngle;
-    PR(freonPropagationAngle/degree);
+    //
+    // angle wrt quartz?
+    //
 
-    double freonRaySlope = tan(freonPropagationAngle);
-    PR(freonRaySlope);
-    
-    mLThree =
-	( mRRadiationPoint - zAtTopQuartz  + mLTwo*freonRaySlope )/
-	( freonRaySlope - mTanAlpha );
+    double cosGapAngle = (propagator.unit()).dot(mNormalBottomQuartz.unit());
+    double gapAngle = acos( cosGapAngle );
+//     PR(gapAngle/degree);
 
-    PR(mLThree);
+    double quartzAngle = asin(mIndexCH4/mIndexQuartz*sin(gapAngle));
+//     PR(quartzAngle/degree);
 
+//     PR(quartzAngle/degree);
+//     PR(propagator);
+    propagator.setTheta(quartzAngle);
+//     PR(propagator);
+//     PR(propagator.phi()/degree);
 
-    mCerenkovAngle = (freonPropagationAngle > mPiBy2) ?
-	freonPropagationAngle - mPiBy2 :
-	mPiBy2 - freonPropagationAngle;
+    //
+    // at what point does it hit the top of the quartz
+    //
+
+    scale =
+	(zAtBottomQuartz.dot(mNormalTopQuartz) - mNormalTopQuartz.dot(mNormalTopQuartz))/
+	(propagator.dot(mNormalTopQuartz));
+//     PR(scale);
+
+    StThreeVectorF zAtTopQuartz =
+	zAtBottomQuartz - scale*propagator;
+//     PR(zAtTopQuartz);
+//     PR(zAtTopQuartz.perp());
+//     PR((zAtTopQuartz-mLocalPhotonPosition).perp());
 	
-    PR(mCerenkovAngle/degree);
+    
+    //
+    // angle wrt freon
+    //
 
-//     if(mCerenkovAngle > m2Pi) {
-// 	cout << "2pi" << endl;
-// 	mCerenkovAngle -= m2Pi;
-//     }
+    double cosQuartzAngle = (propagator.unit()).dot(mNormalTopQuartz.unit());
+    quartzAngle = acos(cosQuartzAngle);
 
-//     if(mCerenkovAngle > mPiBy2) {
-// 	cout << "pi" << endl;
-// 	mCerenkovAngle = M_PI - mPiBy2;
-//     }
+    double freonAngle = asin(mIndexQuartz/mIndexFreon*sin(quartzAngle));
+//     PR(freonAngle/degree);
+
+//     PR(freonAngle/degree);
+//     PR(propagator);
+    propagator.setTheta(freonAngle);
+//     PR(propagator);
+//     PR(propagator.phi()/degree);
+
+    //
+    // at what point does it hit the 1/2 way point of the radiator
+    //
+
+    scale =
+	(zAtTopQuartz.dot(mNormalRadiationPoint) - mNormalRadiationPoint.dot(mNormalRadiationPoint))/
+	(propagator.dot(mNormalRadiationPoint));
+//     PR(scale);
+
+    mTheCalculatedRadiationPoint = zAtTopQuartz - scale*propagator;
+//     PR(mTheCalculatedRadiationPoint);
+//     PR(mTheCalculatedRadiationPoint.perp());
+//     PR((mTheCalculatedRadiationPoint-mLocalPhotonPosition).perp());
+
+    mConvergenceValue = (mTheCalculatedRadiationPoint-mLocalPhotonPosition).perp();
+//     PR(mConvergenceValue);
+
+    mPhi = propagator.phi();
+//     PR(mPhi);
+    
+    double cosCerenkovAngle =
+	-1.*(propagator.unit()).dot(mLocalTrackMomentum.unit());
+    mCerenkovAngle = acos(cosCerenkovAngle);
+
 //     PR(mCerenkovAngle/degree);
-
-    //
-    // Decide what to do with the next iteration
-    //
-	
-	
-    return true;
-}
-
-// ----------------------------------------------------
-bool StRichRayTracer::checkConvergence(double l3) const
-{
-    bool convergence = false;
-    if( (abs(l3) < mPrecision) ) {
-	cout << "StRichRayTracer::checkConvergence()\n";
-	cout << "\tConvergence!!!" << endl;
-	cout << "\tCerenkov Angle= ";
-	cout << (mCerenkovAngle/degree) <<  " degrees" << endl;
-		    
-	convergence = true;
-    }
-	    
-    return convergence;
-}
-
-// ----------------------------------------------------
-bool  StRichRayTracer::processPhoton(double* angle) {
-
-    this->doPhotonRotation();
-
-    if(!this->initialTheta()) {
-	cout << "Argh initial theta" << endl;
-    }
-    else {
-	cout << " initial theta okay" << endl;
-    }
     
-    //if(!this->setTheta(70.*degree)) { cout << "Error in setting theta" << endl;}
-    cout << "--> findCerenkovAngle" << endl;
-    if(this->findCerenkovAngle()) {
-	cout << "\n**** Convergence..." << endl;
-	*angle = mCerenkovAngle;
-    }
-    else {
-	cout << "\n**** No Convergence..." << endl;
-	*angle = FLT_MAX;
-    }
-    return true;
     
+    return true;
 }
 
 // ----------------------------------------------------
 bool StRichRayTracer::findCerenkovAngle()
 {
-    cout << "StRichRayTracer::findCerenkovAngle()" << endl;
+//     cout << "StRichRayTracer::findCerenkovAngle()" << endl;
     bool validAngle = false;
 
     //
     // the first iteration to get a starting point
     //
-    
+
+    int safetyMargin = 100;
+    int ctr = 0;
     while (!validAngle) {
-	cout << "...new iteration" << endl;
+	ctr++;
+	//cout << "...new iteration" << endl;
 	validAngle = this->propagateToRadiator();
-	PR(validAngle);
+	if(ctr>safetyMargin) break;
     };
 
-    double oldL3 = mLThree;
-    PR(oldL3);
+    StThreeVectorF oldRadiationPoint = mTheCalculatedRadiationPoint;
+//     PR(oldRadiationPoint);
 
-    if(this->checkConvergence(oldL3)) {
-	cout << " StRichRayTracer::findCerenkovAngle()\n";
-	cout << " \tConvergence in first iteration" << endl;
+    if(this->checkConvergence(oldRadiationPoint)) {
+// 	cout << " StRichRayTracer::findCerenkovAngle()\n";
+// 	cout << " \tConvergence in first iteration" << endl;
 	return true;
     }
     
     //
     // adjust theta and continue with next iterations
-    //
+    // if x^2 + y^2 bounds are NOT exceeded
 
-    cout << "Adjust mTheta" << endl;
-
-    if(oldL3 < 0) {
+    if(mConvergenceValue > mPhotonRadPointTransverseDistance) {
+// 	cout << "mConvergenceValue > mPhotonRadPointTransverseDistance" << endl;
 	//
-	// decrease theta (saves an iteration)
-	//
+	// went to far(overshot)
+ 	// decrease theta (saves an iteration)
+ 	//
 	mDeltaTheta *= -1.;
     }
-    PR(mDeltaTheta/degree);
-    this->setTheta( (mTheta += mDeltaTheta) );
+    
+//     PR(mGapPropagator.theta()/degree);
+    mGapPropagator.setTheta(mGapPropagator.theta() + mDeltaTheta);
+//     PR(mGapPropagator);
+//     PR(mGapPropagator.theta()/degree);
 
     int iteration=0;
     do {
 	iteration++;
 	validAngle = false;
+
+	ctr=0;
 	while (!validAngle) {
+	    ctr++;
 	    validAngle = this->propagateToRadiator();
+	    if(ctr>safetyMargin) break;
+	    
 	};
 	
-	double newL3 = mLThree;
-	PR(newL3);
+ 	StThreeVectorF newRadiationPoint = mTheCalculatedRadiationPoint;
+//  	PR(newRadiationPoint);
 	
 	//
 	// Did we converge?
 	//
 
-	if(this->checkConvergence(newL3)) {
-	    cout << " StRichRayTracer::findCerenkovAngle()\n";
-	    cout << " \tConvergence in (" << iteration << ") iteration" << endl;
+	if(this->checkConvergence(newRadiationPoint)) {
+// 	    cout << " StRichRayTracer::findCerenkovAngle()\n";
+// 	    cout << " \tConvergence in (" << iteration << ") iteration" << endl;
 	    return true;
 	}
-	
-	if( abs(oldL3) > abs(newL3) ) {
+
+// 	cout << "test for convergence: old=" << abs(oldRadiationPoint-mExpectedRadiationPoint)
+// 	     << " newL3=" << abs(newRadiationPoint-mExpectedRadiationPoint) << endl;
+// 	PR(abs(oldRadiationPoint-mExpectedRadiationPoint));
+// 	PR(abs(newRadiationPoint-mExpectedRadiationPoint))
+	if( abs(oldRadiationPoint-mExpectedRadiationPoint) >
+	    abs(newRadiationPoint-mExpectedRadiationPoint) ) {
 	    //
 	    // good, leave deltaTheta alone
 	    //
+// 	    cout << "okay" << endl;
 	}
 	else {
 	    //
 	    // Wrong way
 	    // change of sign
 	    //
+// 	    cout << "wrong way scale -.5" << endl;
 	    mDeltaTheta *= -0.5;
 	}
 
-	oldL3 = newL3;
+	oldRadiationPoint = newRadiationPoint;
 	
-	PR(mDeltaTheta/degree);
-	this->setTheta( (mTheta += mDeltaTheta) );
+// 	PR(mDeltaTheta/degree);
+// 	PR(mGapPropagator.theta()/degree);
+	mGapPropagator.setTheta(mGapPropagator.theta() + mDeltaTheta);
 
     } while (iteration < mMaximumNumberOfIterations);
 
@@ -714,12 +512,9 @@ bool StRichRayTracer::findCerenkovAngle()
 }
 
 // ----------------------------------------------------
-double StRichRayTracer::cerenkovAngle() const {return mCerenkovAngle;}
-
-// ----------------------------------------------------
 void StRichRayTracer::status() const
 {
     cout << "StRichRayTracer::status()\n";
-    cout << "  ==> mLZero= (" << mLZero << ")" << endl;
-    cout << "  ==> mSlope= (" << mSlope << ")" << endl;
+    cout << "===========================" << endl;
 }
+
