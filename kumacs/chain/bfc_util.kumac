@@ -324,14 +324,14 @@ ABEND:
      (rgst) trig 1
      (rg2t) cd [geantE]
           for/call g2t
-          tdm/table/rowcount g2t_vertex
+          cd /dui
+          tdm/table/rowcount rvent/geant/Event/g2t_vertex
           no_vert=$format(staf_result(1),i10)
-          tdm/table/rowcount g2t_track
+          tdm/table/rowcount event/geant/Event/g2t_track
           no_track=$format(staf_result(1),i10)
           string = '---<bfc>---rg2t: Event  No.vertices ='//no_vert//' No.Tracks = '//no_track
 	  fmessage $quote([string])    [log_file]
           message $quote([string])
-          cd /dui
       (svg)    nextl 1
       (tpg)    nextl 1
       (sss)    exec run_sss
