@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.36 1999/03/19 20:30:48 perev Exp $
+// $Id: StChain.cxx,v 1.37 1999/06/11 17:45:56 perev Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.37  1999/06/11 17:45:56  perev
+// assert StMaker::Streamer to forbid to write it
+//
 // Revision 1.36  1999/03/19 20:30:48  perev
 // GetCVSTag introduced
 //
@@ -256,7 +259,7 @@ StChain *fgStChain;
 ClassImp(StChain)
 //_____________________________________________________________________________
 const char  *StChain::GetCVSIdC()
-{static const char cvs[]="$Id: StChain.cxx,v 1.36 1999/03/19 20:30:48 perev Exp $";
+{static const char cvs[]="$Id: StChain.cxx,v 1.37 1999/06/11 17:45:56 perev Exp $";
  return cvs;};
 
 //_____________________________________________________________________________
@@ -306,7 +309,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.36 1999/03/19 20:30:48 perev Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.37 1999/06/11 17:45:56 perev Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
@@ -318,4 +321,8 @@ void StChain::PrintInfo()
       maker->PrintInfo();
    }
 }
-//void StChain::Streamer(TBuffer &){}
+void StChain::Streamer(TBuffer &)
+{ Error("Streamer"," attempt to write %s\n ",GetName());
+  assert(0);
+}
+
