@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.cxx,v 1.2 2004/08/23 19:12:13 msd Exp $
+ * $Id: StEStructCuts.cxx,v 1.3 2005/02/09 23:08:44 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -45,8 +45,8 @@ void StEStructCuts::initVars(){
 
   mvarName = new char*[mMaxStore];
   mvalues  = new float[mMaxStore];
-  mvarHistsNoCut = new TH1F*[mMaxStore];
-  mvarHistsCut   = new TH1F*[mMaxStore];
+  mvarHistsNoCut = new TH1*[mMaxStore];
+  mvarHistsCut   = new TH1*[mMaxStore];
   mnumVars=0;
 }
 
@@ -261,6 +261,27 @@ int StEStructCuts::createCutHists(const char* name, float* range, int nvals){
   return retVal;
 }
 
+
+//------------------------------------------------------------------------
+void StEStructCuts::addCutHists(TH1* before, TH1* after, const char* name){
+
+  if(mnumVars==mMaxStore)resize();
+
+  mvarHistsNoCut[mnumVars]=before;
+  mvarHistsCut[mnumVars]=after;
+  if(name){
+   mvarName[mnumVars] = new char[strlen(name)+1];
+   strcpy(mvarName[mnumVars],name);
+  } else {
+    mvarName[mnumVars]=new char[5];
+    strcpy(mvarName[mnumVars],"none");
+  } 
+  mvalues[mnumVars]=-9999.;
+
+  mnumVars++;
+}
+
+//------------------------------------------------------------------------
 void StEStructCuts::fillHistogram(const char* name, float value, bool passed){
 
   int i;
@@ -276,8 +297,8 @@ void StEStructCuts::fillHistogram(const char* name, float value, bool passed){
 void StEStructCuts::fillHistograms(bool passed){
 
   for(int i=0;i<mnumVars; i++){
-    mvarHistsNoCut[i]->Fill(mvalues[i]);
-    if(passed)mvarHistsCut[i]->Fill(mvalues[i]);
+    mvarHistsNoCut[i]->Fill(mvalues[i],1.0);
+    if(passed)mvarHistsCut[i]->Fill(mvalues[i],1.0);
   }
 
 }
@@ -303,13 +324,13 @@ void StEStructCuts::resize(){
     delete [] mvarName;
     mvarName=tmpC;
 
-    TH1F** tmpH = new TH1F*[newMax];
-    memcpy(tmpH,mvarHistsNoCut,mMaxStore*sizeof(TH1F*));
+    TH1** tmpH = new TH1*[newMax];
+    memcpy(tmpH,mvarHistsNoCut,mMaxStore*sizeof(TH1*));
     delete [] mvarHistsNoCut;
     mvarHistsNoCut=tmpH;
 
-    tmpH = new TH1F*[newMax];
-    memcpy(tmpH,mvarHistsCut,mMaxStore*sizeof(TH1F*));
+    tmpH = new TH1*[newMax];
+    memcpy(tmpH,mvarHistsCut,mMaxStore*sizeof(TH1*));
     delete [] mvarHistsCut;
     mvarHistsCut=tmpH;
 
@@ -332,6 +353,11 @@ void StEStructCuts::printCuts(const char* fileName){
 /***********************************************************************
  *
  * $Log: StEStructCuts.cxx,v $
+ * Revision 1.3  2005/02/09 23:08:44  porter
+ * added method to add histograms directly instead of under
+ * the control of the class. Useful for odd 2D hists that don't
+ * fit the current model.
+ *
  * Revision 1.2  2004/08/23 19:12:13  msd
  * Added pre-compiled cut database, minor changes to cut base class
  *

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.h,v 1.2 2004/08/23 19:12:13 msd Exp $
+ * $Id: StEStructCuts.h,v 1.3 2005/02/09 23:08:44 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -18,7 +18,7 @@
 // -> for rootcint preprocessing
 #include "TROOT.h"
 
-class TH1F;
+class TH1;
 class TFile;
 
 // local name-id mapping
@@ -41,8 +41,8 @@ protected:
   char** mvarName; //!
   float* mvalues; //!
   int    mnumVars; //!
-  TH1F**  mvarHistsNoCut; //!
-  TH1F**  mvarHistsCut; //!
+  TH1**  mvarHistsNoCut; //!
+  TH1**  mvarHistsCut; //!
 
   void resize();
   void initVars();
@@ -64,6 +64,8 @@ public:
   virtual int createCutHists(const char* name, double* range, int nvals=2);
   virtual int createCutHists(const char* name, int* range, int nvals=2);
   virtual int createCutHists(const char* name, unsigned int* range, int nvals=2);
+  virtual void addCutHists(TH1* before, TH1* after, const char* name=NULL);
+
 
   virtual void fillHistogram(const char* name, float value, bool passed);
   virtual void fillHistograms(bool passed);
@@ -121,6 +123,11 @@ inline bool StEStructCuts::isLoaded(){ return (mcutFileName) ? true : false ; }
 /***********************************************************************
  *
  * $Log: StEStructCuts.h,v $
+ * Revision 1.3  2005/02/09 23:08:44  porter
+ * added method to add histograms directly instead of under
+ * the control of the class. Useful for odd 2D hists that don't
+ * fit the current model.
+ *
  * Revision 1.2  2004/08/23 19:12:13  msd
  * Added pre-compiled cut database, minor changes to cut base class
  *
