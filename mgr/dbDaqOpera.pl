@@ -29,6 +29,7 @@ my $debugOn = 0;
  my $disk0        =  "/star/rcf/dst";
  my $topHpssSink  =  "/home/starsink/raw";
  my $topHpssReco  =  "/home/starreco/reco/dst";
+ my $sumDir       =  "/star/rcf/disk00001/star/prod4/sum";
 
 struct DaqAttr => {
     daqName   => '$', 
@@ -211,6 +212,22 @@ print "\nFind dst files in HPSS\n";
 print "Total files: ".@hpssRecoFiles."\n";
 $ftpHpss->quit();
 
+## find running jobs
+
+my  $jline = 0;
+my @j_name;
+my @j_status;
+
+  my @CRS_JOB = `ssh rcf.rhic.bnl.gov crs_node_status.pl -c`;
+  foreach my $job_line (@CRS_JOB) {
+     chop $job_line; 
+    my @job_word = split ("_", $job_line);
+    my @word_part = split ("%", $job_word[10]);
+    $j_name[$jline] = $job_word[6]."_". $job_word[7]."_". $job_word[8]."_". $job_word[8]."_". $word_part[0];
+    $j_status[$jline] = $word_part[1];
+     $jline++; 
+ } 
+
 
 
 ## connect to the DB
@@ -307,6 +324,46 @@ my $dqfiles;
         $jobfile_nm = $jSet . "_" . $basename;
         job_file($run_chain,$jobfile_nm);
 
+## summary info check
+my $sumDirDaq;
+
+    $sumDirDaq = $sumDir . "/daq";
+    opendir(DIR, $sumDirDaq) or die "can't open $sumDirDaq\n";
+    while( defined($filename = readdir(DIR)) ) {
+      next if $filename =~ /^\.\.?$/;
+      next if ( !($filename =~ /.sum$/) );
+
+      if ( $filename =~ /$basename/ ) {
+        $msumFile = "yes";
+        my $summ_File = "$sumDirDaq/$basename\.sum";
+        &sum_info("$summ_File",1);
+        last;
+  }
+     else {
+       next;
+      }
+    }
+    closedir DIR;
+
+# check if job is running
+
+   if($mjobStatus eq "n\/a") {
+      my $jj = 0;
+     foreach my $job_fname (@j_name) {
+    if( $job_fname =~ /$basename/ ) {
+      $mjobStatus = $j_status[$jj];
+#   print $job_fname, "\n";
+#   print $basename, "\n";
+#   print $mjobStatus, "\n";
+  last;
+}
+   else {   
+    next; 
+  } 
+      $jj++;
+ }
+}
+
 ## find attributes for dst files on disk
 
    foreach $mdiskFile (@diskFiles) {
@@ -393,6 +450,96 @@ chdir $jarch_dir;
 if (-f $jfile_nm) {$mjobFile = "archive"};
 chdir $jnew_dir;
 if (-f $jfile_nm) {$mjobFile = "new_jobs"};
+ 
+}
+
+#==================================================================
+sub sum_info  {
+
+my ($jb_sum,$useless) = @_;   
+my $sum_line ;
+my @word_sum;
+my $mlibTag;
+ 
+my @output = `more $jb_sum`; 
+  foreach my $sum_line (@output) {
+           chop $sum_line;
+
+# get job status
+     if ($sum_line =~ /Segmentation violation/) {
+             $mjobStatus = "crash";
+         }
+    elsif ($sum_line =~ /bus error/) {
+            $mjobStatus = "bus_err";
+       }  
+    elsif ($sum_line =~ /Job status:/) {
+       @word_sum = split (":", $sum_line);
+         $mjobStatus = $word_sum[1];
+       } 
+
+#  get number of events done
+   
+    if ($sum_line =~ /Number of Events Done/ ) {
+      @word_sum = split (":", $sum_line);          
+        $mdstEvts = $word_sum[1];
+    } 
+       
+# get library tag
+         if ($sum_line =~ /Library version/)  {
+          @word_sum = split (":", $sum_line); 
+           $mlibVer = $word_sum[1];
+        }
+       if ($sum_line =~ /from Tag/) {
+         @word_sum = split (" ", $sum_line) ;       
+           $mlibTag = $word_sum[9];    
+       }
+# get chain
+          if( $sum_line =~ /QAInfo:Requested chain is/ ) {
+            @word_sum = split (":", $sum_line); 
+              $mchain = $word_sum[2];
+              $mchain =~ s/ /_/g;
+             if ( $mchain =~ /^\s*_/ ) {
+                  my $mIndex = index $mchain, "_";
+                 $mchain = substr( $mchain, $mIndex+1);
+              } 
+
+           }
+# get max memory size during execution
+           if ($sum_line =~ /Package   tree:/ ) {
+             @word_sum = split (" ", $sum_line);
+               $mmemSize = $word_sum[5];
+           }
+# get CPU per event
+           if($sum_line =~ /bfc/ ) {
+            @word_sum = split (" ", $sum_line);
+           if($word_sum[7] =~ /Cpu/) {
+              $mcpu = $word_sum[10];  
+          }
+        }
+         
+#  get everage number of tracks in the event
+
+     if($sum_line =~ /QAinfo: number of tracks/) {
+      @word_sum = split (" ", $sum_line) ;  
+       $mTrk = $word_sum[4];
+    }   
+#  get everage number of vertex in the event
+
+     if($sum_line =~ /QAinfo: number of vertices/) {     
+         @word_sum = split (" ", $sum_line) ;
+          $mVtx = $word_sum[4]; 
+     }
+
+   }
+#  define if not defined
+
+        if (!defined $job_status)  {  
+         $job_status = "Not defined"; 
+       }
+
+           if(!defined $lb_tag)  {
+          $lb_tag = $lb_ver;
+        }
  
 }
 
