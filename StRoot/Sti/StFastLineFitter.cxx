@@ -9,6 +9,7 @@
 
 #include <math.h>
 #include <iostream>
+#include <iostream.h>
 #include "StFastLineFitter.h"
 
 StFastLineFitter::StFastLineFitter()

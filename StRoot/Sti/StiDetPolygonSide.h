@@ -33,10 +33,4 @@ private:
 
 //Inlines
 
-//Non-memebers
-inline ostream& operator<<(ostream& os, const StiDetPolygonSide& side)
-{
-    return os <<(*(side.detector()));
-}
-
 #endif

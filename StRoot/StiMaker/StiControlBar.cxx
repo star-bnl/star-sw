@@ -26,6 +26,8 @@
 int StiControlBar::mnevent = 0;
 StChain* StiControlBar::mchain = 0;
 
+ostream& operator<<(ostream&, const StiDetector&);
+
 ClassImp(StiControlBar)
 
 StiControlBar::StiControlBar()

@@ -7,12 +7,15 @@
 #ifndef StiHitFiller_HH
 #define StiHitFiller_HH
 
+#include <iostream.h>
 #include <vector>
 #include <map>
 #include "../pams/global/inc/StDetectorId.h" //for detector enumerations
 #include "StiFactoryTypedefs.h"
 
-class ostream;
+using std::vector;
+using std::map;
+
 class StiHitContainer;
 class StiGeometryTransform;
 class StTpcCoordinateTransform;

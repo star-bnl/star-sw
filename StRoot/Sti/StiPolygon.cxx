@@ -12,6 +12,8 @@
 //Sti
 #include "StiPolygon.h"
     
+inline ostream& operator<<(ostream& os, const StiPolygon& p);
+
 StiPolygon::StiPolygon()
 {
 }
@@ -73,4 +75,11 @@ void StiPolygon::build(const char* file)
     StGetConfigValue(file, "mphi0", mphi0);
     StGetConfigValue(file, "mradius", mradius);
     return;
+}
+
+inline ostream& operator<<(ostream& os, const StiPolygon& p)
+{
+    return os <<"mnsides:\t"<<p.numberOfSides()<<"\n"
+	      <<"mphi0:\t"<<p.phi0()<<"\n"
+	      <<"mradius:\t "<<p.radius();
 }

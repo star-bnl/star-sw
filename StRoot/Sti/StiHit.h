@@ -8,7 +8,6 @@
 #define StiHit_HH
 
 class StHit;
-class ostream;
 
 class StiHit 
 {
@@ -164,9 +163,5 @@ inline void StiHit::copyToThis(const StiHit& rhs)
     msyz = rhs.msyz;
     mused = rhs.mused;
 }
-
-//Non-member functions
-
-ostream& operator<<(ostream&, const StiHit&);
 
 #endif

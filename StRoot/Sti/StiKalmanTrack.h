@@ -3,7 +3,6 @@
 
 #include <math.h>
 #include "StiTrack.h"
-//#include "StiFactoryTypedefs.h"
 #include "StiObjectFactory.h"
 #include "StiTrackNode.h"
 

@@ -21,6 +21,9 @@
 
 StiDetectorContainer* StiDetectorContainer::sinstance = 0;
 
+ostream& operator<<(ostream&, const DetectorMapKey&);
+ostream& operator<<(ostream&, const MaterialMapKey&);
+
 StiDetectorContainer* StiDetectorContainer::instance()
 {
     return (sinstance) ? sinstance : new StiDetectorContainer();
@@ -292,7 +295,7 @@ void StiDetectorContainer::print() const
 {
     cout <<"\nStiDetecotrContainer::print()\n"<<endl;
     for (detectormap::const_iterator it=begin(); it!=end(); ++it) {
-	cout <<"\t"<<(*it).first<<"\t"<<*((*it).second)<<endl;
+	cout <<"\t"<<(*it).first<<"\t";
 	(*it).second->print();
     }
 }

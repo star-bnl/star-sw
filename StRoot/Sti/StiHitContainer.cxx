@@ -15,8 +15,17 @@
 
 using std::sort;
 using std::find;
+using std::lower_bound;
+using std::upper_bound;
 
 StiHitContainer* StiHitContainer::sinstance = 0;
+
+ostream& operator<<(ostream& os, const StiHit& hit);
+//Non member functions
+ostream& operator<<(ostream&, const HitMapKey&);
+ostream& operator<<(ostream&, const DetectorMapKey&);
+ostream& operator<<(ostream&, const MaterialMapKey&);
+
 
 StiHitContainer* StiHitContainer::instance()
 {

@@ -2,7 +2,7 @@
 //M.L. Miller (Yale Software)
 //06/01
 
-#include <iostream>
+#include <iostream.h>
 #include <algorithm>
 #include <math.h>
 #include <cmath>
@@ -11,6 +11,8 @@
 #include "StiDetPolygonSide.h"
 #include "StiDetPolygon.h"
     
+ostream& operator<<(ostream& os, const StiDetPolygonSide& side);
+
 StiDetPolygon::StiDetPolygon()
 {
 }

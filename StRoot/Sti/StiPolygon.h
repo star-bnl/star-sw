@@ -57,12 +57,6 @@ private:
 };
 
 //inlines--------------------------------------
-inline ostream& operator<<(ostream& os, const StiPolygon& p)
-{
-    return os <<"mnsides:\t"<<p.numberOfSides()<<"\n"
-	      <<"mphi0:\t"<<p.phi0()<<"\n"
-	      <<"mradius:\t "<<p.radius();
-}
 
 #endif
 

@@ -21,6 +21,9 @@
 #include <map>
 #include "StiPolygon.h"
 
+using std::map;
+using std::multimap;
+
 class StiDetector;
 class StiDetPolygonSide;
 

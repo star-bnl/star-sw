@@ -75,7 +75,7 @@ double  StiKalmanTrack::getTanL()           const
   return lastNode->getTanL();
 }
 
-double  StiKalmanTrack::getDca(StiHit *h=0)    const
+double  StiKalmanTrack::getDca(StiHit * h)    const
 {
   // Return the distance of closest approach to given point/hit
   // If no hit is specified assume the primary vertex i.e the last point 

@@ -4,8 +4,11 @@
 
 //Sti
 //#include "StiHitContainer.h"
+#include <iostream.h>
 #include "StiDetector.h"
 #include "StiDetPolygonSide.h"
+
+ostream& operator<<(ostream& os, const StiDetector& d);
 
 StiDetPolygonSide::StiDetPolygonSide() : mdetector(0) //, mhitvector(0)
 {
@@ -29,3 +32,10 @@ void StiDetPolygonSide::setDetector(StiDetector* val)
 //{
 //  return mhitvector->size();
 //}
+
+//Non-memebers
+ostream& operator<<(ostream& os, const StiDetPolygonSide& side)
+{
+    return os <<(*(side.detector()));
+}
+

@@ -40,7 +40,7 @@ public:
     
 protected:
     virtual StiKalmanTrack* makeTrack(const tvector&) const;
-    const StiHitContainer* mhitstore;
+    StiHitContainer* mhitstore;
     combo_iterator* miterator;
     int mnlayers;
 };

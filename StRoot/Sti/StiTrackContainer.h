@@ -20,6 +20,7 @@
 #define StiTrackContainer_HH
 
 #include <vector>
+using std::vector;
 
 class StiTrack;
 
