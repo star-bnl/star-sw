@@ -43,7 +43,7 @@ public:
     virtual void    getMomentum(double p[3], double e[6]) const =0;
 
     //Simple gets
-    virtual StThreeVector<double> getMomentumAtOrigin() =0; //3-momentum at first point
+    virtual StThreeVector<double> getMomentumAtOrigin() const =0; //3-momentum at first point
     virtual StThreeVector<double> getMomentumNear(double x) =0; //3-momentum at arb. point
     virtual StThreeVector<double> getHitPositionNear(double x) const =0; //3-position at arb. point
     

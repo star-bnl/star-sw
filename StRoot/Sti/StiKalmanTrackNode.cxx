@@ -640,8 +640,10 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 	}
       density = (gasDensity*gapT + 2*matDensity*detHT)/s;
       radThickness  = s*(gapT/gasRL+2*detHT/matRL)/dx;
-      if (density<0) // problem abort MCS
-	return;
+      if (density<0) { // problem abort MCS 
+	  *s_pMessenger << "SKTN::propagate() - Severe Error" << endl;
+	  throw runtime_error("SKTN::propagate() - density<0");
+      }
       double d=sqrt((x1-fX)*(x1-fX)
 		    +(y1-fP0)*(y1-fP0)  +(z1-fP1)*(z1-fP1));
       double tanl  = fP4;
