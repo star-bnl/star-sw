@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.8 1999/08/10 17:10:51 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.9 1999/08/10 17:15:10 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.9  1999/08/10 17:15:10  fisyak
+// Add xin == in
+//
 // Revision 1.8  1999/08/10 17:10:51  fisyak
 // Exprot EChainOptions into rootcint
 //
@@ -150,7 +153,7 @@ StBFChain::~StBFChain(){}
 //_____________________________________________________________________________
 void StBFChain::SetFlags(const Char_t *Chain )
 {
-  Int_t k, kgo;
+  Int_t k;
   for (k = kFIRST;k<NoChainOptions;k++)  ChainFlags[k] = kFALSE;
   TString STAR_VERSION("$STAR_VERSION");
   gSystem->ExpandPathName(STAR_VERSION);
@@ -180,6 +183,7 @@ void StBFChain::SetFlags(const Char_t *Chain )
 	opt.ToLower();
 	nopt = TString("-");
 	nopt += opt;
+	if       (Tag == "in") Tag = "xin";
 	if       (Tag ==  opt) kgo =  k;
 	else {if (Tag == nopt) kgo = -k;}
 	if (kgo) {SetOption(kgo); break;}
