@@ -190,6 +190,7 @@ foreach $diskDir (@diskRecoDirs) {
   opendir(DIR, $diskDir) or die "can't open $diskDir\n";
   while( defined($flname = readdir(DIR)) ) {
      next if $flname =~ /^\.\.?$/;
+     next if $flname =~ /geant.root/;
 
 #        @fields = split(/\s+/, $diskDir);
         $maccess = "-rw-r--r--"; 
