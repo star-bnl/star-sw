@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: addHists.C,v 1.7 2002/11/15 22:38:14 posk Exp $
+// $Id: addHists.C,v 1.8 2003/01/24 23:10:24 posk Exp $
 //
 // Author:       Art Poskanzer, Feb 2001
 // Description:  Macro to add histograms together with weighting.
@@ -13,7 +13,7 @@
 #include <iostream.h>
 
 // // pions
-// .x addHists.C(11,21,31,41)  // at 40 GeV only 31
+// .x addHists.C(11,21,31,41) 
 // .x addHists.C(12,22,32,42)
 // .x addHists.C(13,23,33,43)
 // .x addHists.C(14,24,44)
@@ -27,6 +27,8 @@
 // .x addHists.C(54,64,84)
 // .x addHists.C(55,65,85)
 // .x addHists.C(56,66,86)
+
+// at 40 GeV there are no ana3 or ana7
 
 Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t thirdRunNo,
 	       Int_t outputRunNo) {
@@ -251,6 +253,9 @@ Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t outputRunNo=99) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: addHists.C,v $
+// Revision 1.8  2003/01/24 23:10:24  posk
+// For version 37 of the paper.
+//
 // Revision 1.7  2002/11/15 22:38:14  posk
 // updates.
 //
