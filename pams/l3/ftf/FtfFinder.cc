@@ -2,11 +2,9 @@
 //: FILE:       FtfFinder.cpp
 //: HISTORY:
 //:             28oct1996 version 1.00
-//:             03jun1999 ppy para.fillTracks included. Merging only when tracks filled
-//:             03jun1999 ppy add a function for real time, clock gives cpu time 
-//:             06may1999 ppy getTracks returns 1 for error
-//:             10aug1999 ppy nHitsForSegment set to at least 3 for
-//:                           secondary search.
+//:             03jun1999 para.fillTracks included. Merging only when tracks filled
+//:             03jun1999 add a function for real time, clock gives cpu time 
+//:             06may1999 ppy  getTracks returns 1 for error
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfFinder, steers track finding
@@ -87,18 +85,18 @@ void FtfFinder::dEdx ( ) {
 //	Recontruct primary tracks 
 //**********************************************************************
 int FtfFinder::getTracks ( ) {
+   short   nhitsSegment ;
 //
 //     Set conformal coordinates if we are working with primaries
 //
-   short nHitsSegment   = (short)para.nHitsForSegment;  
    if ( para.primaries ) {
       setConformalCoordinates ( ) ;
       para.minHitsForFit = 1 ;
-      para.nHitsForSegment = max(2,nHitsSegment);
+      nhitsSegment   = (short)para.nHitsForSegment;
    }
    else {
       para.minHitsForFit = 2 ;
-      para.nHitsForSegment = max(3,nHitsSegment);
+      nhitsSegment   = (short)max(para.nHitsForSegment,3) ;
    }
 //
 //               Loop over rows   
@@ -165,9 +163,6 @@ int FtfFinder::getTracks ( ) {
 //       End loop over rows                           
 //
    }
-//
-   para.nHitsForSegment = nHitsSegment ;  
-//
    return 0 ;
 }
 //********************************************************************
@@ -180,6 +175,7 @@ void FtfFinder::mergePrimaryTracks ( ) {
 //
 //    Loop over tracks
 //
+// FtfTrack* currentTrack ;
 
    for ( int i = 0 ; i < nTracks ; i++ ) {
       currentTrack = &(track[i]);

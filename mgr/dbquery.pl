@@ -1,11 +1,8 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbquery.pl,v 1.3 1999/08/08 18:54:38 wenaus Exp $
+# $Id: dbquery.pl,v 1.2 1999/07/07 13:22:11 wenaus Exp $
 #
 # $Log: dbquery.pl,v $
-# Revision 1.3  1999/08/08 18:54:38  wenaus
-# Add dubna
-#
 # Revision 1.2  1999/07/07 13:22:11  wenaus
 # incorporate run log
 #
@@ -34,7 +31,7 @@ require "dbsetup.pl";
          "bfc" => "evg,gst,tfs,trs,tss",
          "format" => "daq,xdf,fz,fzd,root,root-MDC2",
          "component" => "dst,event,geant,hist,tpc_hits,tpc_tracks,trg,l3t",
-         "site" => "psc,set,ric,rcf,uta,pet,dub",
+         "site" => "psc,set,ric,rcf,uta,pet",
          "location" => "hpss-rcf,disk-rcf",
          "size" => "=0,<1kB,>100MB,>1GB"
          );

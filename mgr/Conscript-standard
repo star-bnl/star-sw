@@ -1,9 +1,8 @@
 #!/usr/local/bin/perl
 #use Env;
 Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
-#my $path = ConsPath "."; print "conspath $path\n";
-(my $build = $OBJ) =~ s/\#//g;  #print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
-(my $Dir = DirPath '.') =~ s/$build\///g; #print "Dir = $Dir\n";
+(my $build = $BUILD) =~ s/\#//g;  #print "BUILD = $BUILD build = $build MAIN = $MAIN\n";
+(my $Dir = DirPath '.') =~ s/$build\///g;
 my $CPPPATH = "$Dir:$env->{CPPPATH}"; #print "CPPPATH = $CPPPATH\n";
 $env2 = $env->clone(
 		    'CPPPATH'      => $CPPPATH
@@ -12,7 +11,7 @@ my $CPPFLAGS = cppflags($env2);
 my $PKG  = basename($Dir); print "Run cons in $Dir for $PKG\n";
 my $SO_PKG = $PKG . ".so";
 my @CintFiles = ($PKG . "_Cint.cxx", $PKG . "_Cint.h", "LinkDef.h"); 
-my @src  = find_sources($Dir);#  my $i=0; for my $s (@src) {print "i=",$i++," src = ",$s,"\n";}
+my @src  = find_sources($Dir);  #my $i=0; for my $s (@src) {print "i=",$i++," src = ",$s,"\n";}
 my @Defs = find_hfiles($Dir); #for my $s (@Defs) {print "i=",$i++," Defs = ",$s,"\n";}
 if ($#Defs > -1) {
   Command $env [@CintFiles], @Defs,  qq( RootCint.pl "%>" "%<" "$CPPFLAGS" );
