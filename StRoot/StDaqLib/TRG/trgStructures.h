@@ -23,6 +23,8 @@
 /*  28Jun01 JMN Added definition of ADD_BITs                                           */
 /***************************************************************************************/
 
+#ifndef trgStructures_h
+#define trgStructures_h
 #define MAX_RAW_DATA_BLOCKS   11              /* Maximum number of Raw Data Blocks:  current + npre + npost */
 #define FORMAT_VERSION   0x13                 /* Format Version number for trigger data */
 #define EVT_HEAD_LEN     sizeof(TrgEvtHeader) /* Trigger Event Header Length */
@@ -200,11 +202,11 @@ typedef struct {
 
 /*  Trigger Event Structure */
 
-typedef struct {
+struct TrgDataType {
   TrgEvtHeader   TrgHead; 
   EvtDescData    EvtDesc;                     /* L1 Event Descriptor Data */  
   TrgSumData     TrgSum;                      /* Summary data */
   RawTrgDet      RAW[MAX_RAW_DATA_BLOCKS];    /* Raw Detector Data with pre and post History */
-} TrgDataType;                                /* 6360 bytes */
+} ;                                /* 6360 bytes */
 
-
+#endif

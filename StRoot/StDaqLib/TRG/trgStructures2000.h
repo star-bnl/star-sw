@@ -9,9 +9,10 @@
 /*                                                                                     */
 /*  06Dec99 zm  Created so offline can use and after modification for mod 8 DMA reads  */
 /*  08Dec99 zm  Changed Event Descriptor Structure to previous length                  */
-/*  03Feb00 zm  Changed "ushort ZDCDSM[8]" to "BYTE ZDC[16]" in L0_DSM_Data structure  */
+/*  03Feb00 zm  Changed "unsigned short ZDCDSM[8]" to "unsigned char ZDC[16]" in L0_DSM_Data structure  */
 /***************************************************************************************/
-
+#ifndef trgStructures2000_h
+#define trgStructures2000_h
 #undef FORMAT_VERSION
 #undef EVT_HEAD_LEN
 #undef EV_DESC_LEN
@@ -20,21 +21,6 @@
 #undef TRG_SUM_LEN
 
 /* several shortcut definitions */
-
-#ifndef uint
-#define uint unsigned int
-#endif
-
-#ifndef ushort
-#define ushort unsigned short
-#endif
-
-#ifndef ulong
-#define ulong unsigned long
-#endif
-
-typedef unsigned char BYTE;
-typedef unsigned int  WORD;
 
 #define MAX_RAW_DATA_BLOCKS   11   /* Maximum number of Raw Data Blocks:  current + npre + npost */
                                
@@ -65,7 +51,7 @@ typedef struct {
   unsigned short TrgDataBytes;
   unsigned short TrgFiller;
   unsigned short TCUdataBytes;
-  BYTE           TrgDataFmtVer;
+  unsigned char  TrgDataFmtVer;
   char           TCUEvtDesc;
   unsigned short TrgSumBytes;
   char           TrgSumHeader[2];
@@ -114,8 +100,8 @@ typedef union {      /* The contents of Info Fifo 2 */
 
 typedef union {      /* The contents of Info Fifo 3 */
   struct {
-    BYTE             DetectorBusy;      /* detector Busy Bits */
-    BYTE             addBits;           /* filler Bits - bit 0=pileup; bit 1=priority; bit 7=1 is fake data */
+    unsigned char    DetectorBusy;      /* detector Busy Bits */
+    unsigned char    addBits;           /* filler Bits - bit 0=pileup; bit 1=priority; bit 7=1 is fake data */
     unsigned short   TriggerWd;         /* Trigger Word */
   } FIFO3;
   unsigned long      fifo3;
@@ -126,14 +112,14 @@ typedef union {      /* The contents of Info Fifo 3 */
 typedef struct {
   unsigned short TCUdataBytes;
   char           TCUEvtDesc;
-  BYTE           TrgDataFmtVer;
-  uint           bunchXing_hi;
-  uint           bunchXing_lo;   /* Two parts of RHIC bunch crossing number */
+  unsigned char  TrgDataFmtVer;
+  unsigned int           bunchXing_hi;
+  unsigned int           bunchXing_lo;   /* Two parts of RHIC bunch crossing number */
   Info12000          TCU1;           /* TCU Info Fifo's */  
   Info22000          TCU2;
   Info32000          TCU3;
-  ushort         npre;
-  ushort         npost;          /* Dummy to bring total size of struct to modulo 8 bytes */
+  unsigned short         npre;
+  unsigned short         npost;          /* Dummy to bring total size of struct to modulo 8 bytes */
 } EvtDescData2000;          /* 28 bytes total */ 
 
 /* Trigger Summary  Data Structures */
@@ -141,11 +127,11 @@ typedef struct {
 /* L0 DSM data structures */
 
 typedef struct {
-  ushort             CPA[32];        /* Contents of 4 CTB+MWC DSM Input Buffers (IB's) - coarse pixel array*/
-  ushort             quadDSM[8];     /* Contents of 1 CTB+MWC DSM IB - outputs of previous 4 */
-  ushort             lastDSM[8];     /* Contents of last DSM IB - results of all DSM trees */
-  BYTE               ZDC[16];        /* Contents of ZDC DSM IB - raw data from ZDC */
-  ushort             BCdata[16];     /* Contents of 2 Bunch Crossing DSMs IB's */
+  unsigned short             CPA[32];        /* Contents of 4 CTB+MWC DSM Input Buffers (IB's) - coarse pixel array*/
+  unsigned short             quadDSM[8];     /* Contents of 1 CTB+MWC DSM IB - outputs of previous 4 */
+  unsigned short             lastDSM[8];     /* Contents of last DSM IB - results of all DSM trees */
+  unsigned char               ZDC[16];        /* Contents of ZDC DSM IB - raw data from ZDC */
+  unsigned short             BCdata[16];     /* Contents of 2 Bunch Crossing DSMs IB's */
 } L0_DSM_Data2000;          /* 144 bytes total */
 
 
@@ -154,17 +140,17 @@ typedef struct {
 typedef struct {
   unsigned short TrgSumBytes;
   char           TrgSumHeader[2];
-  uint           L1Sum[2];        /* L1 Summary */
-  uint           L2Sum[2];        /* L2 Summary */
+  unsigned int           L1Sum[2];        /* L1 Summary */
+  unsigned int           L2Sum[2];        /* L2 Summary */
   unsigned short L0SumBytes;
   char           L0SumHeader[2];
   L0_DSM_Data2000    DSM;             /* L0 DSM Data from DSM Tree */
   unsigned short L1SumBytes;
   char           L1SumHeader[2];
-  uint           L1Result[32];       /* Result from L1 CPU */
+  unsigned int           L1Result[32];       /* Result from L1 CPU */
   unsigned short L2SumBytes;
   char           L2SumHeader[2];
-  uint           L2Result[32];       /* Result from L2 CPU */
+  unsigned int   L2Result[32];       /* Result from L2 CPU */
 } TrgSumData2000;        /* 432 bytes total */
 
 
@@ -183,11 +169,11 @@ typedef struct {
   char           RawDetHeader[2];
   unsigned short CTBdataBytes;
   char           CTBdataHeader[2];
-  BYTE           CTB[256];         /* CTB raw data */
+  unsigned char           CTB[256];         /* CTB raw data */
   unsigned short MWCdataBytes;
   char           MWCdataHeader[2];
   unsigned long  MWCfiller;        /* dummy to bring header to mod 8 */
-  BYTE           MWC[128];         /* MWC raw data */
+  unsigned char           MWC[128];         /* MWC raw data */
   unsigned short EMCdataBytes;
   char           EMCdataHeader[2];
   unsigned long  EMCfiller;        /* dummy to bring header to mod 8 */
@@ -195,9 +181,10 @@ typedef struct {
 
 /*  Trigger Event Structure */
 
-typedef struct {
+class TrgDataType2000 { public:
   TrgEvtHeader2000   TrgHead; 
   EvtDescData2000    EvtDesc;       /* L1 Event Descriptor Data */  
   TrgSumData2000     TrgSum;        /* summary data */
   RawTrgDet2000      RAW[MAX_RAW_DATA_BLOCKS]; /* raw Detector Data with pre and post History */
-} TrgDataType2000;          /* 4952 bytes */
+};          /* 4952 bytes */
+#endif 

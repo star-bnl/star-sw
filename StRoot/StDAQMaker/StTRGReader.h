@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTRGReader.h,v 1.2 2000/06/12 15:04:02 perev Exp $
+ * $Id: StTRGReader.h,v 1.3 2003/07/16 19:58:29 perev Exp $
  *
  * Author: Herbert Ward
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTRGReader.h,v $
+ * Revision 1.3  2003/07/16 19:58:29  perev
+ * Cleanup of StTriggerData2003 at all
+ *
  * Revision 1.2  2000/06/12 15:04:02  perev
  * SVT + cleanup
  *
@@ -23,11 +26,13 @@
 
 #ifndef __CINT__
 #include "StDaqLib/GENERIC/EventReader.hh"
+#include "StDaqLib/TRG/trgStructures2000.h"
+#include "StDaqLib/TRG/trgStructures2003.h"
 #endif /*__CINT__*/
 
 #include "StDaqLib/TRG/TRG_Reader.hh"
 
-class  EventReader;
+class EventReader;
 class StDAQReader;
 
 class  StTRGReader {
@@ -37,10 +42,15 @@ class  StTRGReader {
   char thereIsTriggerData(); // returns FALSE if there is no trigger data in the .daq file
   virtual ~StTRGReader();
   virtual  int close();
-  TRG_Reader  *fTRGImpReader; // Making this public saves a double layer of accessor functions.
+  int   getYear() const;
+
+  const char            *getData()         const;
+  const TrgDataType2003 *getDataType2003() const;
+  const TrgDataType2000 *getDataType2000() const;
 
   virtual void Update();
 protected:
+  TRG_Reader  *fTRGImpReader; // Making this protected hide implementation from the user
 
   StDAQReader *fDAQReader;
 };

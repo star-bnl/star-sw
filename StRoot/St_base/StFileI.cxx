@@ -4,7 +4,7 @@
 #include <assert.h>
 #include "StFileI.h"
 
-
+ClassImp(StFileI)
 //______________________________________________________________________________
 StUKey::StUKey(const char *name,UInt_t *uk,int nk)
 {

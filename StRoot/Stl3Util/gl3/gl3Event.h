@@ -34,7 +34,7 @@
 
 // offline
 #include "Stl3Util/foreign/daqFormats.h"
-#include "Stl3Util/foreign/TRG/trgStructures.h"
+#include "StDaqLib/TRG/trgStructures.h"
 
 //#include "l3GeneralHeaders.h"
 #include "Stl3Util/ftf/FtfGeneral.h"

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.41 2003/01/29 21:09:31 ward Exp $
+ * $Id: EventReader.cxx,v 1.42 2003/07/16 19:58:30 perev Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.42  2003/07/16 19:58:30  perev
+ * Cleanup of StTriggerData2003 at all
+ *
  * Revision 1.41  2003/01/29 21:09:31  ward
  * Accomodate nominally zero data words in TOFP.
  *
@@ -641,16 +644,16 @@ EventInfo EventReader::getEventInfo()
   ei.TrigWord = dp->TriggerWord;
   ei.TrigInputWord = dp->TriggerInWord;
   printf("EventReader::getEventInfo  detector presence = %x\n",dp->DetectorPresence);
-  ei.TPCPresent = (dp->DetectorPresence & 0x1);
-  ei.SVTPresent = (dp->DetectorPresence & 0x2);
-  ei.TOFPresent = (dp->DetectorPresence & 0x4);
-  ei.EMCPresent = (dp->DetectorPresence & 0x8);
-  ei.FPDPresent  = (dp->DetectorPresence & 0x10);
-  ei.FTPCPresent = (dp->DetectorPresence & 0x20);
-  ei.PMDPresent  = (dp->DetectorPresence & 0x40);
-  ei.RICHPresent = (dp->DetectorPresence & 0x80);
-  ei.TRGDetectorsPresent = (dp->DetectorPresence & 0x100);
-  ei.L3Present = (dp->DetectorPresence & 0x200);
+  ei.TPCPresent = (dp->DetectorPresence & 0x1)!=0;
+  ei.SVTPresent = (dp->DetectorPresence & 0x2)!=0;
+  ei.TOFPresent = (dp->DetectorPresence & 0x4)!=0;
+  ei.EMCPresent = (dp->DetectorPresence & 0x8)!=0;
+  ei.FPDPresent  = (dp->DetectorPresence & 0x10)!=0;
+  ei.FTPCPresent = (dp->DetectorPresence & 0x20)!=0;
+  ei.PMDPresent  = (dp->DetectorPresence & 0x40)!=0;
+  ei.RICHPresent = (dp->DetectorPresence & 0x80)!=0;
+  ei.TRGDetectorsPresent = (dp->DetectorPresence & 0x100)!=0;
+  ei.L3Present = (dp->DetectorPresence & 0x200)!=0;
   return ei;
 }
 

@@ -35,8 +35,8 @@
  *              dsm nodes to l2 
  */
 
-#ifndef trgStructures_h
-#define trgStructures_h
+#ifndef trgStructures2003_h
+#define trgStructures2003_h
 
 #define MAX_L0_DATA_BLOCKS    11              /* Maximum number of L0 Data Blocks:  current + npre + npost */
 #define MAX_RAW_DATA_BLOCKS   11              /* Maximum number of Raw Data Blocks:  current + npre + npost */
@@ -106,7 +106,7 @@ typedef struct {
   unsigned short npre;                        /* pre value for detector raw data */
   unsigned short npost;                       /* post value for detector raw data */
   unsigned short dummy;                       /* dummy - filler */
-} EvtDescData;        /* 40 bytes total */ 
+} EvtDescData2003;        /* 40 bytes total */
 
 /* Trigger Summary Data Structures */
 
@@ -121,7 +121,7 @@ typedef struct {
   unsigned short     BCdata[16];              /* Contents of 2 Bunch Crossing DSMs IB's */       
   unsigned short     specialTriggers[8];      /* Contents of 1 Special Trigger DSM - all the special trigger requests */
   unsigned short     FPD[8];                  /* Contents of 1 FPD IB - we are installing this DSM this year but it */
-} L0_DSM_Data;       /* 192 bytes total */
+} L0_DSM_Data2003;       /* 192 bytes total */
 
 
 /* Summary data */
@@ -133,21 +133,21 @@ typedef struct {
   unsigned int   L2Sum[2];          /* L2 Summary */
   unsigned short L0SumBytes;
   unsigned short L0SumHeader;
-  L0_DSM_Data    DSMdata;           /* L0 DSM Data from DSM Tree */
+  L0_DSM_Data2003    DSMdata;           /* L0 DSM Data from DSM Tree */
   unsigned short L1SumBytes;
   unsigned short L1SumHeader;
   unsigned int   L1Result[32];      /* Result from L1 CPU */
   unsigned short L2SumBytes;
   unsigned short L2SumHeader;
   unsigned int   L2Result[32];      /* Result from L2 CPU */
-} TrgSumData;     /* 480 bytes total */
+} TrgSumData2003;     /* 480 bytes total */
 
 /* Data structure passed between L1ANA and L2 */
 
 typedef struct {
-  EvtDescData    EvtDesc;           /* L1 Event Descriptor Data */  
-  TrgSumData     TrgSum;            /* Summary data */
-} L1dataType;     /* 520 bytes */
+  EvtDescData2003    EvtDesc;           /* L1 Event Descriptor Data */
+  TrgSumData2003     TrgSum;            /* Summary data */
+} L1dataType2003;     /* 520 bytes */
   
 /* Raw Trigger Detector data structures */
 
@@ -190,15 +190,16 @@ typedef struct {
   unsigned short BBClayer1[16];         /* this is the layer1 DSM that feeds the VTX DSM  */
   unsigned char  ZDC[16];               /* this is the original ZDC DSM   */
   unsigned short ZDClayer1[8];          /* this is the new layer1 ZDC DSM that also feeds the VTX DSM    */
-} RawTrgDet;           /* 1744 bytes total */
+} RawTrgDet2003;           /* 1744 bytes total */
 
 /*  Trigger Event Structure */
 
-typedef struct {
-  EvtDescData    EvtDesc;            /* L1 Event Descriptor Data */  
-  TrgSumData     TrgSum;             /* Summary data */
-  RawTrgDet      rawTriggerDet[MAX_RAW_DATA_BLOCKS];    /* Raw Detector Data with pre and post History */
-} TrgDataType;         /* 19704 bytes */
+struct TrgDataType2003{
+  EvtDescData2003    EvtDesc;            /* L1 Event Descriptor Data */
+  TrgSumData2003     TrgSum;             /* Summary data */
+  RawTrgDet2003      rawTriggerDet[MAX_RAW_DATA_BLOCKS];    
+} ;         /* 19704 bytes */
+                                           /* Raw Detector Data with pre and post History */
 
 
 #endif

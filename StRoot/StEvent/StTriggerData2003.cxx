@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.cxx,v 2.2 2003/05/21 03:58:44 ullrich Exp $
+ * $Id: StTriggerData2003.cxx,v 2.3 2003/07/16 19:58:31 perev Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.cxx,v $
+ * Revision 2.3  2003/07/16 19:58:31  perev
+ * Cleanup of StTriggerData2003 at all
+ *
  * Revision 2.2  2003/05/21 03:58:44  ullrich
  * Added more methods to retrieve spin bits.
  *
@@ -17,16 +20,13 @@
  * Initial Revision.
  *
  **************************************************************************/
+#include <string.h>
+#include <assert.h>
 #include "StTriggerData2003.h"
-#include "StTriggerDataMaker/trgStructures2003.h"
+#include "StDaqLib/TRG/trgStructures2003.h"
 
 ClassImp(StTriggerData2003)
   
-StTriggerData2003::StTriggerData2003(char* data)
-{
-    mYear=2003;
-    mData=(TrgDataType2003*)data;
-}
 
 StTriggerData2003::StTriggerData2003()
 {
@@ -34,16 +34,29 @@ StTriggerData2003::StTriggerData2003()
     mData=0;
 }
 
-StTriggerData2003::StTriggerData2003(TrgDataType2003* data)
+StTriggerData2003::StTriggerData2003(const TrgDataType2003* data)
 {
     mYear=2003;
-    mData=data;
+    mData= new TrgDataType2003;
+    int npre  = data->EvtDesc.npre;
+    int npost = data->EvtDesc.npost;
+    assert(npre >=0);    
+    assert(npre <=5);    
+    assert(npost>=0);    
+    assert(npost<=5);    
+    int size = sizeof(EvtDescData2003)+sizeof(TrgSumData2003)
+	     + sizeof(RawTrgDet2003)*(npre+npost+1);
+        
+    memcpy(mData,data,size); 
+    memset((char*)mData+size,0,sizeof(TrgDataType2003)-size);
 }
 
 unsigned int StTriggerData2003::version() const
 {
     return mData->EvtDesc.TrgDataFmtVer;
 }
+ StTriggerData2003::~StTriggerData2003()
+{delete mData;}
 
 unsigned int StTriggerData2003::token() const
 {

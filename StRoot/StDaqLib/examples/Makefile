@@ -9,6 +9,7 @@ TPC_DIR = ../TPC
 SVT_DIR = ../SVT
 SSD_DIR = ../SSD
 EMC_DIR = ../EMC
+EEMC_DIR = ../EEMC
 FTPC_DIR = ../FTPC
 RICH_DIR = ../RICH
 TRG_DIR  = ../TRG
@@ -17,18 +18,18 @@ TOF_DIR = ../TOF
 FPD_DIR = ../FPD
 PMD_DIR = ../PMD
 
-OBJECTS =  EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o TPCV1P0.Banks.o TPCV2P0.Banks.o  swaps.o RICH_Reader.o TRG_Reader.o FTPV1P0.o FTPV1P0.Banks.o FTPV1P0_ADCR_SR.o FTPV1P0_CPP_SR.o FTPV1P0_ZS_SR.o SVTV1P0.o SVTV1P0.Banks.o SVTV1P0_ADCR_SR.o SVTV1P0_CPP_SR.o SVTV1P0_ZS_SR.o L3_Reader.o L3_Banks.o TOF_Reader.o PMD_Reader.o FPD_Reader.o EMC_Reader.o EMC_SmdReader.o StEmcDecoder.o EMC_BarrelReader.o code2003.o
+OBJECTS =  EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o TPCV1P0.Banks.o TPCV2P0.Banks.o  swaps.o RICH_Reader.o TRG_Reader.o FTPV1P0.o FTPV1P0.Banks.o FTPV1P0_ADCR_SR.o FTPV1P0_CPP_SR.o FTPV1P0_ZS_SR.o SVTV1P0.o SVTV1P0.Banks.o SVTV1P0_ADCR_SR.o SVTV1P0_CPP_SR.o SVTV1P0_ZS_SR.o L3_Reader.o L3_Banks.o TOF_Reader.o PMD_Reader.o FPD_Reader.o EMC_Reader.o  EEMC_Reader.o EMC_SmdReader.o StEmcDecoder.o EMC_BarrelReader.o code2003.o
 
 client: client.o $(OBJECTS)	
 	g++ $(CFLAGS) client.o $(OBJECTS) -o client
 
-client.o:	client.cxx $(EMC_DIR)/EMC_Reader.hh $(RICH_DIR)/RICH_Reader.hh $(TRG_DIR)/TRG_Reader.hh $(L3_DIR)/L3_Reader.hh
+client.o:	client.cxx $(EMC_DIR)/EMC_Reader.hh $(EEMC_DIR)/EEMC_Reader.hh $(RICH_DIR)/RICH_Reader.hh $(TRG_DIR)/TRG_Reader.hh $(L3_DIR)/L3_Reader.hh
 	g++ $(CFLAGS) -c client.cxx
 
 EventReader.o:	$(IFACE_DIR)/EventReader.hh $(IFACE_DIR)/EventReader.cxx
 	g++ $(CFLAGS) -c $(IFACE_DIR)/EventReader.cxx
 
-DetectorReader.o:	$(IFACE_DIR)/EventReader.hh $(IFACE_DIR)/DetectorReader.cxx $(TPC_DIR)/TPCV1P0_Reader.hh $(TPC_DIR)/TPCV2P0_Reader.hh $(SVT_DIR)/SVT_Reader.hh $(EMC_DIR)/EMC_Reader.hh $(FTPC_DIR)/FTPV1P0_Reader.hh $(RICH_DIR)/RICH_Reader.hh  $(SSD_DIR)/SSD_Reader.hh $(TRG_DIR)/TRG_Reader.hh $(L3_DIR)/L3_Reader.hh
+DetectorReader.o:	$(IFACE_DIR)/EventReader.hh $(IFACE_DIR)/DetectorReader.cxx $(TPC_DIR)/TPCV1P0_Reader.hh $(TPC_DIR)/TPCV2P0_Reader.hh $(SVT_DIR)/SVT_Reader.hh $(EMC_DIR)/EMC_Reader.hh $(EEMC_DIR)/EEMC_Reader.hh $(FTPC_DIR)/FTPV1P0_Reader.hh $(RICH_DIR)/RICH_Reader.hh  $(SSD_DIR)/SSD_Reader.hh $(TRG_DIR)/TRG_Reader.hh $(L3_DIR)/L3_Reader.hh
 	g++ $(CFLAGS) -c $(IFACE_DIR)/DetectorReader.cxx
 
 TPCV1P0.o:	$(IFACE_DIR)/EventReader.hh $(TPC_DIR)/TPCV1P0.hh $(TPC_DIR)/TPCV1P0.cxx 
@@ -133,6 +134,9 @@ FPD_Reader.o:	$(IFACE_DIR)/EventReader.hh $(FPD_DIR)/FPD_Reader.hh $(FPD_DIR)/FP
 
 EMC_Reader.o:	$(IFACE_DIR)/EventReader.hh $(EMC_DIR)/EMC_Reader.hh $(EMC_DIR)/EMC_BarrelReader.hh $(EMC_DIR)/EMC_SmdReader.hh $(EMC_DIR)/EMC_Reader.cxx 
 	g++ $(CFLAGS) -c $(EMC_DIR)/EMC_Reader.cxx
+
+EEMC_Reader.o:	$(IFACE_DIR)/EventReader.hh $(EEMC_DIR)/EEMC_Reader.hh  $(EEMC_DIR)/EEMC_Reader.cxx 
+	g++ $(CFLAGS) -c $(EEMC_DIR)/EEMC_Reader.cxx
 
 EMC_SmdReader.o:	$(IFACE_DIR)/EventReader.hh $(EMC_DIR)/EMC_Reader.hh  $(EMC_DIR)/StEmcDecoder.h $(EMC_DIR)/EMC_SmdReader.cxx 
 	g++ $(CFLAGS) -c $(EMC_DIR)/EMC_SmdReader.cxx

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.h,v 2.2 2003/05/21 03:58:44 ullrich Exp $
+ * $Id: StTriggerData2003.h,v 2.3 2003/07/16 19:58:31 perev Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.h,v $
+ * Revision 2.3  2003/07/16 19:58:31  perev
+ * Cleanup of StTriggerData2003 at all
+ *
  * Revision 2.2  2003/05/21 03:58:44  ullrich
  * Added more methods to retrieve spin bits.
  *
@@ -28,8 +31,8 @@ struct TrgDataType2003;
 class StTriggerData2003 : public StTriggerData {
 public:
     StTriggerData2003();
-    StTriggerData2003(char*);
-    StTriggerData2003(TrgDataType2003*);
+    StTriggerData2003(const TrgDataType2003*);
+virtual ~StTriggerData2003();
   
     void dump() const;  //dump data into text
   
