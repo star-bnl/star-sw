@@ -1,10 +1,7 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_TLA_Maker.cxx,v 1.13 1999/12/19 16:07:01 perev Exp $
+// $Id: St_TLA_Maker.cxx,v 1.12 1999/07/15 13:57:44 perev Exp $
 // $Log: St_TLA_Maker.cxx,v $
-// Revision 1.13  1999/12/19 16:07:01  perev
-// Add README
-//
 // Revision 1.12  1999/07/15 13:57:44  perev
 // cleanup
 //
@@ -26,9 +23,6 @@
 #include "St_TLA_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
-#include "StDAQMaker/StDAQReader.h"
-
-
 ClassImp(St_TLA_Maker)
 
 //_____________________________________________________________________________
@@ -74,36 +68,7 @@ Int_t St_TLA_Maker::Make(){
  //  ({) of a member function are considered as a member function description 
  //  see: begin_html <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A> end_html   //
  //  PrintInfo();
- int nArray; unsigned char *Array;
-
- St_ObjectSet *os = (St_ObjectSet*)GetDataSet("StDAQReader");
- assert(os);
- StDAQReader *dr = (StDAQReader*)os->GetObject();
- StTPCReader *tr = dr->getTPCReader();
- int sec=0;
- for (sec=1;sec<=12;sec++){
-  int padrow;
-   for (padrow=1;padrow<20; padrow++) {
-     int maxpad = tr->getMaxPad(padrow);
-     int pad;
-     for (pad=1;pad<=maxpad; pad++) {     
-       int ans =  tr->getPedestals(sec,padrow,pad,nArray,Array);
-       if (ans<=0) continue;
-       if (!Array) continue;
-       printf(" %d %d %d %d\n",sec,padrow,pad,nArray);
-
- } } }
-
 
  return kStOK;
 }
-
-
-
-
-
-
-
-
-
 

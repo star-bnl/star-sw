@@ -1,44 +1,165 @@
 #ifndef TGeant3_H 
 #define TGeant3_H 
-/* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
- * See cxx source for full Copyright notice                               */
-
-/* $Id: TGeant3.h,v 1.14 1999/12/07 15:44:26 fisyak Exp $ */
-
 //////////////////////////////////////////////// 
 //  C++ interface to Geant3 basic routines    // 
 //////////////////////////////////////////////// 
  
-#include "StarMC.h"
-typedef long int (*addrfun)();
-//______________________________________________________________
-//
-//       Geant3 prototypes for commons
-//
-//______________________________________________________________
-//
+#include "TNamed.h" 
+#include "St_Node.h"
+  
+class TGeant3 : public TNamed { 
 
+private:
+  Int_t fNextVol;    // Iterator for GeomIter
+  
+public: 
+   TGeant3(); 
+   TGeant3(const char *name, const char *title, Int_t nwgeant=2000000, Int_t nwpaw=0, Int_t iwtype=0); 
+   virtual ~TGeant3(); 
+   virtual void LoadAddress(); 
+ 
+   virtual Int_t  GetSetNumber(const char *name); 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                               //
+//                                                                                                               //
+//     Here are the service routines from the geometry which could be implemented also in other geometries       //
+//                                                                                                               //
+//                                                                                                               //
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  void  GeomIter();
+  Int_t NextVolUp(Text_t *name, Int_t &copy);
+  Int_t CurrentVol(Text_t *name, Int_t &copy) const;
+  Int_t CurrentVolOff(Int_t off, Text_t *name, Int_t &copy) const;
+  Int_t VolId(Text_t *name) const;
+  void  TrackPosition(Float_t *xyz) const;
+  Float_t TrackCharge() const;
+  Bool_t TrackInside();
+  Bool_t TrackEntering();
+  Bool_t TrackExiting();
+  Bool_t TrackOut();
+
+//////////////////////////////////////////////////////////
+//                                                      //
+//     Here are the interface functions with GEANT3.21  //
+//                                                      //
+//                                                      //
+//////////////////////////////////////////////////////////
+
+ 
+      // functions from GBASE 
+   virtual  void  Gpcxyz(); 
+   virtual  void  Ggclos(); 
+   virtual  void  Gfile(const char *filename, const char *option="I"); 
+   virtual  void  Glast(); 
+   virtual  void  Gprint(const char *name); 
+   virtual  void  Grun(); 
+   virtual  void  Gtrig(); 
+   virtual  void  Gtrigc(); 
+   virtual  void  Gtrigi(); 
+   virtual  void  Gwork(Int_t nwork); 
+   virtual  void  Gzinit(); 
+ 
+      // functions from GCONS 
+   virtual  void  Gfmate(Int_t imat, char *name, Float_t &a, Float_t &z, Float_t &dens, 
+                         Float_t &radl, Float_t &absl); 
+   virtual  void  Gfpart(Int_t ipart, char *name, Int_t &itrtyp,  
+                         Float_t &amass, Float_t &charge, Float_t &tlife); 
+   virtual  void  Gftmed(Int_t numed, char *name, Int_t &nmat, Int_t &isvol,  
+                         Int_t &ifield, Float_t &fieldm, Float_t &tmaxfd, 
+                         Float_t &stemax, Float_t &deemax, Float_t &epsil, 
+                         Float_t &stmin); 
+   virtual  void  Gmate(); 
+   virtual  void  Gpart(); 
+   virtual  void  Gsdk(Int_t ipart, Float_t *bratio, Int_t *mode); 
+   virtual  void  Gsmate(Int_t imat, const char *name, Float_t a, Float_t z,  
+                         Float_t dens, Float_t radl, Float_t absl); 
+   virtual  void  Gsmixt(Int_t imat, const char *name, Float_t a, Float_t z,  
+                         Float_t dens, Int_t nlmat, Float_t *wmat); 
+   virtual  void  Gspart(Int_t ipart, const char *name, Int_t itrtyp,  
+                         Float_t amass, Float_t charge, Float_t tlife); 
+   virtual  void  Gstmed(Int_t numed, const char *name, Int_t nmat, Int_t isvol,  
+                         Int_t ifield, Float_t fieldm, Float_t tmaxfd, 
+                         Float_t stemax, Float_t deemax, Float_t epsil, 
+                         Float_t stmin); 
+   virtual  void  Gstpar(Int_t itmed, const char *param, Float_t parval); 
+ 
+      // functions from GKINE 
+   virtual  void  Gfkine(Int_t itra, Float_t *vert, Float_t *pvert, 
+                         Int_t &ipart, Int_t &nvert); 
+   virtual  void  Gfvert(Int_t nvtx, Float_t *v, Int_t &ntbeam, Int_t &nttarg, Float_t &tofg); 
+   virtual  Int_t Gskine(Float_t *plab, Int_t ipart, Int_t nv, Float_t *ubuf=0, Int_t nwbuf=0); 
+   virtual  Int_t Gsvert(Float_t *v, Int_t ntbeam, Int_t nttarg, Float_t *ubuf=0, Int_t nwbuf=0); 
+ 
+      // functions from GPHYS 
+   virtual  void  Gphysi(); 
+ 
+      // functions from GTRAK 
+   virtual  void  Gdebug(); 
+   virtual  void  Gekbin(); 
+   virtual  void  Gfinds(); 
+   virtual  void  Gsking(Int_t igk); 
+   virtual  void  Gsstak(Int_t iflag); 
+   virtual  void  Gsxyz(); 
+   virtual  void  Gtrack(); 
+   virtual  void  Gtreve(); 
+ 
+      // functions from GGEOM 
+   virtual  void  Gdtom(Float_t *xd, Float_t *xm, Int_t iflag); 
+   virtual  void  Glmoth(Int_t iudet, Int_t iunum, Int_t &nlev, 
+                         Int_t *lvols, Int_t *lindx); 
+   virtual  void  Gmedia(Float_t *x, Int_t &numed); 
+   virtual  void  Gmtod(Float_t *xm, Float_t *xd, Int_t iflag); 
+   virtual  void  Gsdvn(const char *name, const char *mother, Int_t ndiv, Int_t iaxis); 
+   virtual  void  Gsdvn2(const char *name, const char *mother, Int_t ndiv, Int_t iaxis, Float_t c0i, Int_t numed); 
+   virtual  void  Gsdvs(const char *name, const char *mother, Float_t step, Int_t iaxis, Int_t numed); 
+   virtual  void  Gsdvs2(const char *name, const char *mother, Float_t step, Int_t iaxis, Float_t c0, Int_t numed); 
+   virtual  void  Gsdvt(const char *name, const char *mother, Float_t step, Int_t iaxis, Int_t numed, Int_t ndvmx); 
+   virtual  void  Gsord(const char *name, Int_t iax); 
+   virtual  void  Gspos(const char *name, Int_t nr, const char *mother,  
+                         Float_t x, Float_t y, Float_t z, Int_t irot, const char *konly="ONLY"); 
+   virtual  void  Gsposp(const char *name, Int_t nr, const char *mother,  
+                         Float_t x, Float_t y, Float_t z, Int_t irot, const char *konly, Float_t *upar, Int_t np); 
+   virtual  void  Gsrotm(Int_t nmat, Float_t theta1, Float_t phi1, Float_t theta2, Float_t phi2, 
+                         Float_t theta3, Float_t phi3); 
+   virtual  void  Gprotm(Int_t nmat=0); 
+   virtual  Int_t Gsvolu(const char *name, const char *shape, Int_t nmed,  
+                         Float_t *upar, Int_t np); 
+   virtual  Int_t Glvolu(const Int_t Nlev, Int_t *Lnam, Int_t *Lnum);  
+
+   static TGeant3 *Geant3(){ return fgGeant;}
+   static TGeant3 *fgGeant; 
+
+   virtual  Float_t* Gufld(Float_t *x, Float_t *bf);  
+   virtual  Bool_t   Agsens(const Char_t *name);
+   ClassDef(TGeant3,1)  //C++ interface to Geant basic routines 
+    TGeant3 *geant; 
+}; 
+ 
+ 
+//----------GCBANK
+//      PARAMETER (KWBANK=69000,KWWORK=5200)
+//      COMMON/GCBANK/NZEBRA,GVERSN,ZVERSN,IXSTOR,IXDIV,IXCONS,FENDQ(16)
+//     +             ,LMAIN,LR1,WS(KWBANK)
+//      DIMENSION IQ(2),Q(2),LQ(8000),IWS(2)
+//      EQUIVALENCE (Q(1),IQ(1),LQ(9)),(LQ(1),LMAIN),(IWS(1),WS(1))  
+typedef struct {
+  Int_t   nzebra;
+
+
+
+  Float_t gversion,zversn;
+  Int_t   ixstor,ixdiv,ixcons;
+  Float_t fendq[15];
+  Int_t   lq[8],iq[1];
+} common_gcbank;
 //----------QUEST 
 //      COMMON/QUEST/IQUEST(100) 
 typedef struct { 
   Int_t    iquest[100]; 
-} Quest_t; 
+} common_quest; 
  
-//----------GCBANK
-//      COMMON/GCBANK/NZEBRA,GVERSN,ZVERSN,IXSTOR,IXDIV,IXCONS,FENDQ(16)
-//     +             ,LMAIN,LR1,WS(KWBANK)
-typedef struct {
-  Int_t nzebra;
-  Float_t gversn;
-  Float_t zversn;
-  Int_t ixstor;
-  Int_t ixdiv;
-  Int_t ixcons;
-  Float_t fendq[16];
-  Int_t lmain;
-  Int_t lr1;
-} Gcbank_t;
-
 //----------GCLINK 
 //      COMMON/GCLINK/JDIGI ,JDRAW ,JHEAD ,JHITS ,JKINE ,JMATE ,JPART 
 //     +      ,JROTM ,JRUNG ,JSET  ,JSTAK ,JGSTAT,JTMED ,JTRACK,JVERTX 
@@ -64,8 +185,26 @@ typedef struct {
   Int_t    jgpar; 
   Int_t    jgpar2; 
   Int_t    jsklt; 
-} Gclink_t; 
+} common_gclink; 
  
+ 
+//----------GCCUTS 
+//      COMMON/GCCUTS/CUTGAM,CUTELE,CUTNEU,CUTHAD,CUTMUO,BCUTE,BCUTM 
+//     +             ,DCUTE ,DCUTM ,PPCUTM,TOFMAX,GCUTS(5) 
+typedef struct { 
+  Float_t  cutgam; 
+  Float_t  cutele; 
+  Float_t  cutneu; 
+  Float_t  cuthad; 
+  Float_t  cutmuo; 
+  Float_t  bcute; 
+  Float_t  bcutm; 
+  Float_t  dcute; 
+  Float_t  dcutm; 
+  Float_t  ppcutm; 
+  Float_t  tofmax; 
+  Float_t  gcuts[5]; 
+} common_gcuts; 
  
 //----------GCFLAG 
 //      COMMON/GCFLAG/IDEBUG,IDEMIN,IDEMAX,ITEST,IDRUN,IDEVT,IEORUN 
@@ -84,7 +223,7 @@ typedef struct {
   Int_t    ifinit[20]; 
   Int_t    nevent; 
   Int_t    nrndm[2]; 
-} Gcflag_t; 
+} common_gcflag; 
  
 //----------GCKINE 
 //      COMMON/GCKINE/IKINE,PKINE(10),ITRA,ISTAK,IVERT,IPART,ITRTYP 
@@ -104,7 +243,7 @@ typedef struct {
   Float_t  vert[3]; 
   Float_t  pvert[4]; 
   Int_t    ipaold; 
-} Gckine_t; 
+} common_gckine; 
  
 //----------GCKING 
 //      COMMON/GCKING/KCASE,NGKINE,GKIN(5,MXGKIN), 
@@ -113,25 +252,11 @@ typedef struct {
 typedef struct  { 
   Int_t    kcase; 
   Int_t    ngkine; 
-  Float_t  gkin[MXGKIN][5]; 
+  Int_t    gkin[MXGKIN][5]; 
   Int_t    tofd[MXGKIN]; 
   Int_t    iflgk[MXGKIN]; 
-} Gcking_t; 
-
-//----------GCKIN2
-//      COMMON/GCKIN2/NGPHOT,XPHOT(11,MXPHOT)
-#define MXPHOT 800
-typedef struct {
-  Int_t ngphot;
-  Float_t xphot[MXPHOT][11];
-} Gckin2_t;
-
-//----------GCKIN3 
-//      COMMON/GCKIN3/GPOS(3,MXGKIN)
-typedef struct {
-  Float_t gpos[MXGKIN][3];
-} Gckin3_t;
-
+} common_gcking; 
+ 
 //----------GCMATE 
 //      COMMON/GCMATE/NMAT,NAMATE(5),A,Z,DENS,RADL,ABSL 
 typedef struct { 
@@ -142,7 +267,7 @@ typedef struct {
   Float_t  dens; 
   Float_t  radl; 
   Float_t  absl; 
-} Gcmate_t; 
+} common_gcmate; 
  
 //----------GCTMED 
 //      COMMON/GCTMED/NUMED,NATMED(5),ISVOL,IFIELD,FIELDM,TMAXFD,STEMAX 
@@ -163,7 +288,7 @@ typedef struct {
   Int_t    iupd; 
   Int_t    istpar; 
   Int_t    numold; 
-} Gctmed_t; 
+} common_gctmed; 
  
 //----------GCTRAK 
 #define MAXMEC 30 
@@ -205,7 +330,7 @@ typedef struct {
   Int_t    nlevin; 
   Int_t    nlsav; 
   Int_t    istory; 
-} Gctrak_t; 
+} common_gctrak; 
  
 //----------GCVOLU 
 //      COMMON/GCVOLU/NLEVEL,NAMES(15),NUMBER(15), 
@@ -225,7 +350,7 @@ typedef struct {
   Float_t  grmat[15][10]; 
   Float_t  gonly[15]; 
   Float_t  glx[3]; 
-} Gcvolu_t; 
+} common_gcvolu; 
  
 //----------GCSETS 
 //  COMMON/GCSETS/IHSET,IHDET,ISET,IDET,IDTYPE,NVNAME,NUMBV(20) 
@@ -237,7 +362,7 @@ typedef struct {
   Int_t    idtype; 
   Int_t    nvname; 
   Int_t    numbv[20]; 
-} Gcsets_t; 
+} common_gcsets; 
  
 //----------GCNUM 
 //   COMMON/GCNUM/NMATE ,NVOLUM,NROTM,NTMED,NTMULT,NTRACK,NPART 
@@ -254,7 +379,7 @@ typedef struct {
   Int_t    nvertx; 
   Int_t    nhead; 
   Int_t    nbit; 
-} Gcnum_t; 
+} common_gcnum; 
  
 //----------GCCUTS 
 //  COMMON/GCCUTS/CUTGAM,CUTELE,CUTNEU,CUTHAD,CUTMUO,BCUTE,BCUTM 
@@ -272,120 +397,7 @@ typedef struct {
   Float_t ppcutm; 
   Float_t tofmax; 
   Float_t gcuts[5]; 
-} Gccuts_t; 
-
-//----------GCPHYS
-//      COMMON/GCPHYS/IPAIR,SPAIR,SLPAIR,ZINTPA,STEPPA
-//     +             ,ICOMP,SCOMP,SLCOMP,ZINTCO,STEPCO
-//     +             ,IPHOT,SPHOT,SLPHOT,ZINTPH,STEPPH
-//     +             ,IPFIS,SPFIS,SLPFIS,ZINTPF,STEPPF
-//     +             ,IDRAY,SDRAY,SLDRAY,ZINTDR,STEPDR
-//     +             ,IANNI,SANNI,SLANNI,ZINTAN,STEPAN
-//     +             ,IBREM,SBREM,SLBREM,ZINTBR,STEPBR
-//     +             ,IHADR,SHADR,SLHADR,ZINTHA,STEPHA
-//     +             ,IMUNU,SMUNU,SLMUNU,ZINTMU,STEPMU
-//     +             ,IDCAY,SDCAY,SLIFE ,SUMLIF,DPHYS1
-//     +             ,ILOSS,SLOSS,SOLOSS,STLOSS,DPHYS2
-//     +             ,IMULS,SMULS,SOMULS,STMULS,DPHYS3
-//     +             ,IRAYL,SRAYL,SLRAYL,ZINTRA,STEPRA
-//      COMMON/GCPHLT/ILABS,SLABS,SLLABS,ZINTLA,STEPLA
-//     +             ,ISYNC
-//     +             ,ISTRA
-typedef struct { 
-  Int_t    ipair;
-  Float_t  spair;
-  Float_t  slpair;
-  Float_t  zintpa;
-  Float_t  steppa;
-  Int_t    icomp;
-  Float_t  scomp;
-  Float_t  slcomp;
-  Float_t  zintco;
-  Float_t  stepco;
-  Int_t    iphot;
-  Float_t  sphot;
-  Float_t  slphot;
-  Float_t  zintph;
-  Float_t  stepph;
-  Int_t    ipfis;
-  Float_t  spfis;
-  Float_t  slpfis;
-  Float_t  zintpf;
-  Float_t  steppf;
-  Int_t    idray;
-  Float_t  sdray;
-  Float_t  sldray;
-  Float_t  zintdr;
-  Float_t  stepdr;
-  Int_t    ianni;
-  Float_t  sanni;
-  Float_t  slanni;
-  Float_t  zintan;
-  Float_t  stepan;
-  Int_t    ibrem;
-  Float_t  sbrem;
-  Float_t  slbrem;
-  Float_t  zintbr;
-  Float_t  stepbr;
-  Int_t    ihadr;
-  Float_t  shadr;
-  Float_t  slhadr;
-  Float_t  zintha;
-  Float_t  stepha;
-  Int_t    imunu;
-  Float_t  smunu;
-  Float_t  slmunu;
-  Float_t  zintmu;
-  Float_t  stepmu;
-  Int_t    idcay;
-  Float_t  sdcay;
-  Float_t  slife;
-  Float_t  sumlif;
-  Float_t  dphys1;
-  Int_t    iloss;
-  Float_t  sloss;
-  Float_t  soloss;
-  Float_t  stloss;
-  Float_t  dphys2;
-  Int_t    imuls;
-  Float_t  smuls;
-  Float_t  somuls;
-  Float_t  stmuls;
-  Float_t  dphys3;
-  Int_t    irayl;
-  Float_t  srayl;
-  Float_t  slrayl;
-  Float_t  zintra;
-  Float_t  stepra;
-} Gcphys_t; 
- 
-//----------GCOPTI 
-//      COMMON/GCOPTI/IOPTIM
-typedef struct { 
-  Int_t   ioptim;
-} Gcopti_t; 
- 
-//----------GCTLIT 
-//      COMMON/GCTLIT/THRIND,PMIN,DP,DNDL,JMIN,ITCKOV,IMCKOV,NPCKOV
-typedef struct { 
-  Float_t   thrind;
-  Float_t   pmin;
-  Float_t   dp;
-  Float_t   dndl;
-  Int_t     jmin;
-  Int_t     itckov;
-  Int_t     imckov;
-  Int_t     npckov;
-} Gctlit_t; 
- 
-//----------GCVDMA 
-//      COMMON/GCVDMA/NVMANY,MANYLE(20),MANYNA(20,15),
-//     +MANYNU(20,15),NFMANY,MYCOUN,IMYSE,RAYTRA,VECCOS(3)
-typedef struct { 
-  Int_t     vdma[624];
-  Float_t   raytra;
-  Float_t   veccos[3];
-} Gcvdma_t; 
+} common_gccuts; 
  
 //----------GCTPOL 
 #define MAXME1 30 
@@ -393,460 +405,325 @@ typedef struct {
 typedef struct { 
   Float_t polar[3]; 
   Int_t   namec1[MAXME1]; 
-} Gctpol_t; 
-
-/************************************************************************
- *                                                                      *
- *      Commons for GEANE                                               *
- *                                                                      *
- ************************************************************************/
-
-//------------ERTRIO
-//    INTEGER          MXPRED
-//    PARAMETER (MXPRED = 10)
-//    DOUBLE PRECISION ERDTRP
-//    REAL             ERRIN, ERROUT, ERTRSP, ERXIN, ERXOUT, ERPIN,
-//   +                 ERPOUT
-//    INTEGER          NEPRED, INLIST, ILPRED, IEPRED
-//    COMMON /ERTRIO/  ERDTRP(5,5,MXPRED), ERRIN(15), ERROUT(15,MXPRED),
-//   +                 ERTRSP(5,5,MXPRED), ERXIN( 3), ERXOUT( 3,MXPRED),
-//   +                 ERPIN(3), ERPOUT(3,MXPRED), NEPRED,INLIST,ILPRED,
-//   +                 IEPRED(MXPRED)
-//
-
-#define MXPRED 10
-typedef struct {
-  Double_t erdtrp[MXPRED*5*5];
-  Float_t  errin[5];
-  Float_t  errout[MXPRED*15];
-  Float_t  ertrsp[MXPRED*5*5];
-  Float_t  erxin[3];
-  Float_t  erxout[MXPRED*3];
-  Float_t  erpin[3];
-  Float_t  erpout[MXPRED*3];
-  Int_t    nepred;
-  Int_t    inlist;
-  Int_t    ilpred;
-  Int_t    iepred;
-} Ertrio_t;
-
-//-----------EROTPS
-//    CHARACTER*8     CHOPTI
-//    LOGICAL         LEEXAC, LELENG, LEONLY, LEPLAN, LEPOIN, LEVOLU
-//    REAL            ERPLI, ERPLO, ERLENG
-//    INTEGER         NAMEER, NUMVER, IOVLER
-//    COMMON /EROPTS/ ERPLI(3,2), ERPLO(3,4,MXPRED), ERLENG(MXPRED),
-//   +                NAMEER(MXPRED), NUMVER(MXPRED), IOVLER(MXPRED),
-//   +                LEEXAC, LELENG, LEONLY, LEPLAN, LEPOIN, LEVOLU
-//    COMMON /EROPTC/CHOPTI
-
-typedef struct {
-  Float_t   erpli[3*2];
-  Float_t   erplo[MXPRED*3*4];
-  Float_t   erleng[MXPRED];
-  Int_t     nameer[MXPRED];
-  Int_t     numver[MXPRED];
-  Int_t     iovler[MXPRED];
-  Bool_t    leexac;
-  Bool_t    leleng;
-  Bool_t    leonly;
-  Bool_t    leplan;
-  Bool_t    lepoin;
-  Bool_t    levolu;
-} Eropts_t;
-
-typedef struct {
-  char chopti[8];
-} Eroptc_t;
-
-//-------ERWORK
-//    DOUBLE PRECISION EI, EF, ASDSC
-//    COMMON /ERWORK/ EI(15), EF(15), ASDSC(5,5),
-//   +                   XI(3), PPI(3), HI(9),
-//   +                   XF(3), PF(3),  HF(9),
-//   +                   CHTR, DEDX2, BACKTR, CUTEK, TLGCM2, TLRAD
-
-typedef struct {
-  Double_t  ei[15];
-  Double_t  ef[15];
-  Double_t  asdsc[5*5];
-  Float_t   xi[3];
-  Float_t   ppi[3];
-  Float_t   hi[9];
-  Float_t   xf[3];
-  Float_t   pf[3];
-  Float_t   hf[9];
-  Float_t   chtr;
-  Float_t   dedx2;
-  Float_t   backtr;
-  Float_t   cutek;
-  Float_t   tlgcm2;
-  Float_t   tlrad;
-} Erwork_t;
-
-/************************************************************************
- *                                                                      *
- *      Commons for GEANE                                               *
- *                                                                      *
- ************************************************************************/
-class St_Node;
-
-class TGeant3 : public StarMC { 
-
-private:
-  Int_t fNextVol;    //! Iterator for GeomIter
-
+} common_gctpol; 
+#ifndef __CINT__
+#if never
+R__EXTERN common_gcbank *cbank;
+R__EXTERN common_quest  *cquest; 
+R__EXTERN common_gclink *clink; 
+R__EXTERN common_gccuts *ccuts; 
+R__EXTERN common_gcflag *cflag; 
+R__EXTERN common_gckine *ckine; 
+R__EXTERN common_gcking *cking; 
+R__EXTERN common_gcmate *cmate; 
+R__EXTERN common_gctmed *ctmed; 
+R__EXTERN common_gctrak *ctrak; 
+R__EXTERN common_gctpol *ctpol; 
+R__EXTERN common_gcvolu *cvolu; 
+R__EXTERN common_gcnum  *cnum; 
+R__EXTERN common_gcsets *csets; 
 //--------------Declarations for ZEBRA--------------------- 
-  Int_t *fZiq, *fZlq;  //!
-  Float_t *fZq;        //!
-
-  Quest_t  *fQuest;    //!
-  Gcbank_t *fGcbank;   //!
-  Gclink_t *fGclink;   //! 
-  Gccuts_t *fGccuts;   //! 
-  Gcmate_t *fGcmate;   //! 
-  Gctpol_t *fGctpol;   //! 
-  Gcnum_t  *fGcnum;    //! 
-  Gcsets_t *fGcsets;   //! 
-  Gcopti_t *fGcopti;   //! 
-  Gctlit_t *fGctlit;   //! 
-  Gcvdma_t *fGcvdma;   //! 
-  Gcvolu_t *fGcvolu;   //! 
-  Gckine_t *fGckine;   //! 
-  Gcflag_t *fGcflag;   //! 
-  Gctmed_t *fGctmed;   //! 
-  Gcphys_t *fGcphys;   //! 
-  Gcking_t *fGcking;   //! 
-  Gckin2_t *fGckin2;   //! 
-  Gckin3_t *fGckin3;   //! 
-  Gctrak_t *fGctrak;   //! 
-
-
-  // commons for GEANE
-  Ertrio_t *fErtrio;   //!
-  Eropts_t *fEropts;   //!
-  Eroptc_t *fEroptc;   //!
-  Erwork_t *fErwork;   //!
-
-  enum {kMaxParticles = 100};
-
-  Int_t fNPDGCodes;
-
-  Int_t fPDGCode[kMaxParticles];
-
-public: 
-  TGeant3(); 
-  TGeant3(const char *title, Int_t nwgeant=5000000, Int_t nwpaw=0, Int_t iwtype=1); 
-  virtual ~TGeant3() {} 
-  virtual void LoadAddress(); 
- 
-///////////////////////////////////////////////////////////////////////
-//                                                                   //
-//                                                                   //
-//     Here are the service routines from the geometry               //
-//     which could be implemented also in other geometries           //
-//                                                                   //
-//                                                                   //
-///////////////////////////////////////////////////////////////////////
-
-  void  GeomIter();
-  Int_t CurrentMaterial(Float_t &a, Float_t &z, Float_t &dens, Float_t &radl, Float_t &absl) const;
-  Int_t NextVolUp(Text_t *name, Int_t &copy);
-  Int_t CurrentVolID(Int_t &copy) const;
-  Int_t CurrentVolOffID(Int_t off, Int_t &copy) const;
-  const char* CurrentVolName() const;
-  const char *CurrentVolOffName(Int_t off) const;
-  Int_t VolId(Text_t *name) const;
-  Int_t IdFromPDG(Int_t pdg) const;
-  Int_t PDGFromId(Int_t pdg) const;
-  void  DefineParticles();
-  const char* VolName(Int_t id) const;
-  Float_t Xsec(char*, Float_t, Int_t, Int_t);
-  void  TrackPosition(TLorentzVector &xyz) const;
-  void  TrackMomentum(TLorentzVector &xyz) const;  
-  Int_t NofVolumes() const;
-  Float_t TrackTime() const;  
-  Float_t TrackCharge() const;
-  Float_t TrackMass() const;
-  Float_t TrackStep() const;
-  Float_t TrackLength() const;
-  Int_t   TrackPid() const;
-  Bool_t IsTrackInside() const;
-  Bool_t IsTrackEntering() const;
-  Bool_t IsTrackExiting() const;
-  Bool_t IsTrackOut() const;
-  Bool_t IsTrackDisappeared() const;
-  Bool_t IsTrackStop() const;
-  Bool_t IsTrackAlive() const;
-  Int_t  NSecondaries() const;
-  Int_t  CurrentEvent() const;
-  const char*  ProdProcess() const;
-  void   GetSecondary(Int_t, Int_t&, TLorentzVector&, TLorentzVector&);
-  void   StopTrack();
-  void   StopEvent();
-  Float_t MaxStep() const;
-  void   SetColors();
-  void  SetMaxStep(Float_t maxstep);
-  void  SetMaxNStep(Int_t maxnstp);
-  Int_t GetMaxNStep() const;
-  //  void GetParticle(const Int_t pdg, char *name, Float_t &mass) const;
-  virtual Int_t GetMedium() const;
-  virtual Float_t Edep() const;
-  virtual Float_t Etot() const;
-  virtual void    Rndm(Float_t* r, const Int_t n) const;
-  virtual void    Material(Int_t&, const char*, Float_t, Float_t, Float_t, Float_t,
-			    Float_t, Float_t* buf=0, Int_t nwbuf=0);
-  virtual void    Mixture(Int_t&, const char*, Float_t*, Float_t*, Float_t, Int_t, Float_t*);
-  virtual void    Medium(Int_t&, const char*, Int_t, Int_t, Int_t, Float_t, Float_t, 
-		   Float_t, Float_t, Float_t, Float_t, Float_t* ubuf=0, Int_t nbuf=0);
-  virtual void    Matrix(Int_t&, Float_t, Float_t, Float_t, Float_t, Float_t, Float_t);
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                         //
-//                                                                                         //
-//     Here are the interface functions with GEANT3.21                                     //
-//                                                                                         //
-//                                                                                         //
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-  // access functions to commons
- 
-  virtual Quest_t* Quest() const {return fQuest;}
-  virtual Gcbank_t* Gcbank() const {return fGcbank;}
-  virtual Gclink_t* Gclink() const {return fGclink;}
-  virtual Gccuts_t* Gccuts() const {return fGccuts;}
-  virtual Gcmate_t* Gcmate() const {return fGcmate;}
-  virtual Gctpol_t* Gctpol() const {return fGctpol;}
-  virtual Gcnum_t* Gcnum() const {return fGcnum;}
-  virtual Gcsets_t* Gcsets() const {return fGcsets;}
-  virtual Gcopti_t* Gcopti() const {return fGcopti;}
-  virtual Gctlit_t* Gctlit() const {return fGctlit;}
-  virtual Gcvdma_t* Gcvdma() const {return fGcvdma;}
-  virtual Gcvolu_t* Gcvolu() const {return fGcvolu;}
-  virtual Gckine_t* Gckine() const {return fGckine;}
-  virtual Gcflag_t* Gcflag() const {return fGcflag;}
-  virtual Gctmed_t* Gctmed() const {return fGctmed;}
-  virtual Gcphys_t* Gcphys() const {return fGcphys;}
-  virtual Gcking_t* Gcking() const {return fGcking;}
-  virtual Gckin2_t* Gckin2() const {return fGckin2;}
-  virtual Gckin3_t* Gckin3() const {return fGckin3;}
-  virtual Gctrak_t* Gctrak() const {return fGctrak;}
-  virtual Int_t* Iq() const {return fZiq;}
-  virtual Int_t* Lq() const {return fZlq;}
-  virtual Float_t* Q() const {return fZq;}
-
-
-  // Access to GEANE commons
-
-  virtual Ertrio_t* Ertrio() const {return fErtrio;}
-  virtual Eropts_t* Eropts() const {return fEropts;}
-  virtual Eroptc_t* Eroptc() const {return fEroptc;}
-  virtual Erwork_t* Erwork() const {return fErwork;}
-
-
-
-      // functions from GBASE 
-   virtual  void  Gpcxyz(); 
-   virtual  void  Ggclos(); 
-   virtual  void  Gfile(const char *filename, const char *option="I"); 
-   virtual  void  Glast(); 
-   virtual  void  Gprint(const char *name); 
-   virtual  void  Grun(); 
-   virtual  void  Gtrig(); 
-   virtual  void  Gtrigc(); 
-   virtual  void  Gtrigi(); 
-   virtual  void  Gwork(Int_t nwork); 
-   virtual  void  Gzinit(); 
- 
-      // functions from GCONS 
-   virtual  void  Gfmate(Int_t imat, char *name, Float_t &a, Float_t &z, Float_t &dens, 
-                         Float_t &radl, Float_t &absl, Float_t* ubuf, Int_t& nbuf); 
-   virtual  void  Gfpart(Int_t ipart, char *name, Int_t &itrtyp,  
-                         Float_t &amass, Float_t &charge, Float_t &tlife); 
-   virtual  void  Gftmed(Int_t numed, char *name, Int_t &nmat, Int_t &isvol,  
-                         Int_t &ifield, Float_t &fieldm, Float_t &tmaxfd, 
-                         Float_t &stemax, Float_t &deemax, Float_t &epsil, 
-                         Float_t &stmin, Float_t *buf=0, Int_t *nbuf=0); 
-   virtual  void  Gmate(); 
-   virtual  void  Gpart(); 
-   virtual  void  Gsckov(Int_t itmed, Int_t npckov, Float_t *ppckov,
-			 Float_t *absco, Float_t *effic, Float_t *rindex); 
-   virtual  void  Gsdk(Int_t ipart, Float_t *bratio, Int_t *mode); 
-   virtual  void  Gsmate(Int_t imat, const char *name, Float_t a, Float_t z,  
-                         Float_t dens, Float_t radl, Float_t absl); 
-   virtual  void  Gsmixt(Int_t imat, const char *name, Float_t *a, Float_t *z,  
-                         Float_t dens, Int_t nlmat, Float_t *wmat); 
-   virtual  void  Gspart(Int_t ipart, const char *name, Int_t itrtyp,  
-                         Float_t amass, Float_t charge, Float_t tlife); 
-   virtual  void  Gstmed(Int_t numed, const char *name, Int_t nmat, Int_t isvol,  
-                         Int_t ifield, Float_t fieldm, Float_t tmaxfd, 
-                         Float_t stemax, Float_t deemax, Float_t epsil, 
-                         Float_t stmin); 
-   virtual  void  Gstpar(Int_t itmed, const char *param, Float_t parval); 
- 
-      // functions from GKINE 
-   virtual  void  Gfkine(Int_t itra, Float_t *vert, Float_t *pvert, 
-                         Int_t &ipart, Int_t &nvert); 
-   virtual  void  Gfvert(Int_t nvtx, Float_t *v, Int_t &ntbeam, Int_t &nttarg, Float_t &tofg); 
-   virtual  Int_t Gskine(Float_t *plab, Int_t ipart, Int_t nv, Float_t *ubuf=0, Int_t nwbuf=0); 
-   virtual  Int_t Gsvert(Float_t *v, Int_t ntbeam, Int_t nttarg, Float_t *ubuf=0, Int_t nwbuf=0); 
- 
-      // functions from GPHYS 
-   virtual  void  Gphysi(); 
- 
-      // functions from GTRAK 
-   virtual  void  Gdebug(); 
-   virtual  void  Gekbin(); 
-   virtual  void  Gfinds(); 
-   virtual  void  Gsking(Int_t igk); 
-   virtual  void  Gskpho(Int_t igk); 
-   virtual  void  Gsstak(Int_t iflag); 
-   virtual  void  Gsxyz(); 
-   virtual  void  Gtrack(); 
-   virtual  void  Gtreve(); 
-   virtual  void  Gtreve_root(); 
-   virtual  void  Grndm(Float_t *rvec, const Int_t len) const; 
-   virtual  void  Grndmq(Int_t &is1, Int_t &is2, const Int_t iseq, const Text_t *chopt); 
- 
-      // functions from GGEOM 
-   virtual  void  Gdxyz(Int_t ); 
-   virtual  void  Gdcxyz(); 
-
-      // functions from GGEOM 
-   virtual  void  Gdtom(Float_t *xd, Float_t *xm, Int_t &iflag); 
-   virtual  void  Glmoth(const char* iudet, Int_t iunum, Int_t &nlev, 
-                         Int_t *lvols, Int_t *lindx); 
-   virtual  void  Gmedia(Float_t *x, Int_t &numed); 
-   virtual  void  Gmtod(Float_t *xm, Float_t *xd, Int_t &iflag); 
-   virtual  void  Gsdvn(const char *name, const char *mother, Int_t ndiv, Int_t iaxis); 
-   virtual  void  Gsdvn2(const char *name, const char *mother, Int_t ndiv, Int_t iaxis, Float_t c0i, Int_t numed); 
-   virtual  void  Gsdvs(const char *name, const char *mother, Float_t step, Int_t iaxis, Int_t numed); 
-   virtual  void  Gsdvs2(const char *name, const char *mother, Float_t step, Int_t iaxis, Float_t c0, Int_t numed); 
-   virtual  void  Gsdvt(const char *name, const char *mother, Float_t step, Int_t iaxis, Int_t numed, Int_t ndvmx); 
-   virtual  void  Gsdvt2(const char *name, const char *mother, Float_t step, Int_t iaxis,
-			 Float_t c0, Int_t numed, Int_t ndvmx); 
-   virtual  void  Gsord(const char *name, Int_t iax); 
-   virtual  void  Gspos(const char *name, Int_t nr, const char *mother,  
-                         Float_t x, Float_t y, Float_t z, Int_t irot, const char *konly="ONLY"); 
-   virtual  void  Gsposp(const char *name, Int_t nr, const char *mother,  
-                         Float_t x, Float_t y, Float_t z, Int_t irot, const char *konly, Float_t *upar, Int_t np); 
-   virtual  void  Gsrotm(Int_t nmat, Float_t theta1, Float_t phi1, Float_t theta2, Float_t phi2, 
-                         Float_t theta3, Float_t phi3); 
-   virtual  void  Gprotm(Int_t nmat=0); 
-   virtual  Int_t Gsvolu(const char *name, const char *shape, Int_t nmed,  
-                         Float_t *upar, Int_t np); 
-   virtual  Int_t Glvolu(const Int_t Nlev, Int_t *Lnam, Int_t *Lnum);  
-
-   virtual  void  Gsatt(const char *name, const char *att, Int_t val);
-   virtual  void  Gfpara(const char *name, Int_t number, Int_t intext, Int_t& npar,
-			 Int_t& natt, Float_t* par, Float_t* att);
-   virtual  void  Gckpar(Int_t, Int_t, Float_t*);
-   virtual  void  Gckmat(Int_t, char*);
-    
-      // functions from GDRAW 
-   virtual  void  DefaultRange();
-   virtual  void  InitHIGZ();
-   virtual  void  Gdopen(Int_t view);
-   virtual  void  Gdclose();
-   virtual  void  Gdelete(Int_t view);
-   virtual  void  Gdshow(Int_t view);
-   virtual  void  Gdopt(const char *name,const char *value);
-   virtual  void  Gdraw(const char *name,Float_t theta=30, Float_t phi=30, Float_t psi=0,Float_t u0=10,Float_t v0=10,Float_t ul=0.01,Float_t vl=0.01);
-   virtual  void  Gdrawc(const char *name,Int_t axis=1, Float_t cut=0,Float_t u0=10,Float_t v0=10,Float_t ul=0.01,Float_t vl=0.01);
-   virtual  void  Gdrawx(const char *name,Float_t cutthe, Float_t cutphi, Float_t cutval,
-                         Float_t theta=30, Float_t phi=30,Float_t u0=10,Float_t v0=10,Float_t ul=0.01,Float_t vl=0.01);
-   virtual  void  Gdhead(Int_t isel, const char *name, Float_t chrsiz=0.6);   
-   virtual  void  Gdman(Float_t u0, Float_t v0, const char *type="MAN");
-   virtual  void  Gdspec(const char *name);
-   virtual  void  DrawOneSpec(const char *name);
-   virtual  void  Gdtree(const char *name,Int_t levmax=15,Int_t ispec=0);
-   virtual  void  GdtreeParent(const char *name,Int_t levmax=15,Int_t ispec=0);
-
-   virtual  void  WriteEuclid(const char*, const char*, Int_t, Int_t);
-
-   virtual  void  SetABAN(Int_t par=1);
-   virtual  void  SetANNI(Int_t par=1);
-   virtual  void  SetAUTO(Int_t par=1);
-   virtual  void  SetBOMB(Float_t bomb=1);
-   virtual  void  SetBREM(Int_t par=1);
-   virtual  void  SetCKOV(Int_t par=1);
-   virtual  void  SetClipBox(const char *name,Float_t xmin=-9999,Float_t xmax=0, Float_t ymin=-9999,Float_t ymax=0,Float_t zmin=-9999,Float_t zmax=0);
-   virtual  void  SetCOMP(Int_t par=1);
-   virtual  void  SetCUTS(Float_t cutgam,Float_t cutele,Float_t cutneu,Float_t cuthad,
-                      Float_t cutmuo ,Float_t bcute ,Float_t bcutm ,Float_t dcute ,
-                      Float_t dcutm ,Float_t ppcutm, Float_t tofmax);
-   virtual  void  SetDCAY(Int_t par=1);
-   virtual  void  SetDEBU(Int_t emin=1, Int_t emax=999, Int_t emod=1);
-   virtual  void  SetDRAY(Int_t par=1);
-   virtual  void  SetHADR(Int_t par=1);
-   virtual  void  SetKINE(Int_t kine, Float_t xk1=0, Float_t xk2=0, Float_t xk3=0, Float_t xk4=0,
-                         Float_t xk5=0, Float_t xk6=0, Float_t xk7=0, Float_t xk8=0, Float_t xk9=0,
-                         Float_t xk10=0);
-   virtual  void  SetLOSS(Int_t par=2);
-   virtual  void  SetMULS(Int_t par=1);
-   virtual  void  SetMUNU(Int_t par=1);
-   virtual  void  SetOPTI(Int_t par=2);
-   virtual  void  SetPAIR(Int_t par=1);
-   virtual  void  SetPFIS(Int_t par=1);
-   virtual  void  SetPHOT(Int_t par=1);
-   virtual  void  SetRAYL(Int_t par=1);
-   virtual  void  SetSWIT(Int_t sw, Int_t val=1);
-   virtual  void  SetTRIG(Int_t nevents=1);
-   virtual  void  SetUserDecay(Int_t ipart);
-
-   virtual  void  Vname(const char *name, char *vname);
-
-   virtual  void  InitLego();
-
-  // Routines from GEANE
-
-   virtual void Ertrgo();
-   virtual Int_t Ertrak(Float_t *x1, Float_t *p1, 
-		        Float_t *x2, Float_t *p2,
-			Int_t &ipa,  Option_t *chopt);
-   virtual void Eufill(Int_t &n, Float_t* ein, Float_t* xlf);
-   virtual void Eufilp(Int_t &n, Float_t* ein, Float_t* pli, Float_t * plf);
-   virtual void Eufilv(Int_t &n, Float_t* ein, const Char_t *cnamv, Int_t *numv, Int_t &Iovl);
-   virtual void     Agmain(Int_t &nwgeant,Int_t &nwpaw,Int_t &iwtype);
-   virtual Float_t* Gufld(Float_t *x, Float_t *bf);  
-   virtual void     Agxuser();
-   virtual void     Agxinit();
-   virtual void     Geometry();
-   virtual Int_t    Agstroot();
-   virtual void     Kuexel(const char* line);
-   virtual void     Gfrotm(Int_t & Nmat, 
-			   Float_t &Theta1, Float_t & Phi1,
-			   Float_t &Theta2, Float_t & Phi2,
-			   Float_t &Theta3, Float_t & Phi3);
-   virtual void     Gfxzrm(Int_t & Nlevel, 
-		     Float_t &x, Float_t &y, Float_t &z,
-		     Float_t &Theta1, Float_t & Phi1,
-		     Float_t &Theta2, Float_t & Phi2,
-		     Float_t &Theta3, Float_t & Phi3,
-		     Float_t &Type);  
-   virtual void     Agnzgete (Int_t &ILK, Int_t &IDE,
-			      Int_t &NPART, Int_t &IRUN,
-			      Int_t &IEVT, const Char_t *CGNAM,
-			      Float_t *VERT,Int_t &IWTFL,Float_t &WEIGH);
-   virtual Bool_t   Agsens(const Char_t *name);
-   virtual void     Gfnhit(const Char_t *cset, const Char_t *cdet, Int_t &nhits);
-#if 0
-   virtual ULong_t  Csaddr(const Char_t *name);
-   virtual Int_t    Csjcal(
-                            addrfun *fun, /* addres of external routine */
-                            Int_t  &narg,   /* number   of arguments      */
-                            ...);         /* other narg arguments       */
+R__EXTERN Int_t *z_iq, *z_lq; 
+R__EXTERN Float_t *z_q; 
 #endif
-   virtual void     Dzddiv(Int_t& idiv ,Int_t &Ldummy,
-			   const Char_t* path,const Char_t* opt,
-			   Int_t& one,Int_t &two,Int_t &three,Int_t& iw);
-   virtual Int_t    G2t_volume_id(const Char_t *name, Int_t *numbv);
-   virtual Int_t    Agvolume(St_Node *&node,Float_t *&par,Float_t *&pos,Float_t *&mot,
-			     Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar);
-   static TGeant3  *Geant3(){ return fgGeant;}
-   static TGeant3  *fgGeant; 
+#ifndef WIN32 
+# define hlimit  hlimit_ 
+# define gzebra  gzebra_ 
+# define grfile  grfile_ 
+# define gpcxyz  gpcxyz_ 
+# define ggclos  ggclos_ 
+# define glast   glast_ 
+# define ginit   ginit_ 
+# define grun    grun_ 
+# define gtrig   gtrig_ 
+# define gtrigc  gtrigc_ 
+# define gtrigi  gtrigi_ 
+# define gwork   gwork_ 
+# define gzinit  gzinit_ 
+# define gfmate  gfmate_ 
+# define gfpart  gfpart_ 
+# define gftmed  gftmed_ 
+# define gmate   gmate_ 
+# define gpart   gpart_ 
+# define gsdk    gsdk_ 
+# define gsmate  gsmate_ 
+# define gsmixt  gsmixt_ 
+# define gspart  gspart_ 
+# define gstmed  gstmed_ 
+# define gstpar  gstpar_ 
+# define gfkine  gfkine_ 
+# define gfvert  gfvert_ 
+# define gskine  gskine_ 
+# define gsvert  gsvert_ 
+# define gphysi  gphysi_ 
+# define gdebug  gdebug_ 
+# define gekbin  gekbin_ 
+# define gfinds  gfinds_ 
+# define gsking  gsking_ 
+# define gsstak  gsstak_ 
+# define gsxyz   gsxyz_ 
+# define gtrack  gtrack_ 
+# define gtreve  gtreve_ 
+# define gdtom   gdtom_ 
+# define glmoth  glmoth_ 
+# define gmedia  gmedia_ 
+# define gmtod   gmtod_ 
+# define gsdvn   gsdvn_ 
+# define gsdvn2  gsdvn2_ 
+# define gsdvs   gsdvs_ 
+# define gsdvs2  gsdvs2_ 
+# define gsdvt   gsdvt_ 
+# define gsord   gsord_ 
+# define gspos   gspos_ 
+# define gsposp  gsposp_ 
+# define gsrotm  gsrotm_ 
+# define gprotm  gprotm_ 
+# define gsvolu  gsvolu_ 
+# define glvolu  glvolu_ 
+# define gufld   gufld_
+# define gprint  gprint_ 
+# define dzshow  dzshow_ 
+# define agmain  agmain_ 
+# define agxuser agxuser_
+# define agxinit agxinit_
+# define geometry geometry_
+# define agstroot agstroot_
+# define kuexel  kuexel_
+# define set_kupatl set_kupatl_
+# define dzddiv  dzddiv_
+# define gfrotm  gfrotm_
+# define gfxzrm  gfxzrm_
+# define agsens  agsens_ 
 
-   ClassDef(TGeant3,1)  //C++ interface to Geant basic routines 
-}; 
+#ifndef Geant3Dummy
+# define type_of_call 
+# define DEFCHARD     const char* 
+# define DEFCHARL   , const int 
+# define PASSCHARD(string) string 
+# define PASSCHARL(string) , strlen(string) 
+#endif /* not Geant3Dummy */
+#else 
+# define hlimit  HLIMIT 
+# define gzebra  GZEBRA 
+# define grfile  GRFILE 
+# define gpcxyz  GPCXYZ 
+# define ggclos  GGCLOS 
+# define glast   GLAST 
+# define ginit   GINIT 
+# define grun    GRUN 
+# define gtrig   GTRIG 
+# define gtrigc  GTRIGC 
+# define gtrigi  GTRIGI 
+# define gwork   GWORK 
+# define gzinit  GZINIT 
+# define gfmate  GFMATE 
+# define gfpart  GFPART 
+# define gftmed  GFTMED 
+# define gmate   GMATE 
+# define gpart   GPART 
+# define gsdk    GSDK 
+# define gsmate  GSMATE 
+# define gsmixt  GSMIXT 
+# define gspart  GSPART 
+# define gstmed  GSTMED 
+# define gstpar  GSTPAR 
+# define gfkine  GFKINE 
+# define gfvert  GFVERT 
+# define gskine  GSKINE 
+# define gsvert  GSVERT 
+# define gphysi  GPHYSI 
+# define gdebug  GDEBUG 
+# define gekbin  GEKBIN 
+# define gfinds  GFINDS 
+# define gsking  GSKING 
+# define gsstak  GSSTAK 
+# define gsxyz   GSXYZ 
+# define gtrack  GTRACK 
+# define gtreve  GTREVE 
+# define gdtom   GDTOM 
+# define glmoth  GLMOTH 
+# define gmedia  GMEDIA 
+# define gmtod   GMTOD 
+# define gsdvn   GSDVN 
+# define gsdvn2  GSDVN2 
+# define gsdvs   GSDVS 
+# define gsdvs2  GSDVS2 
+# define gsdvt   GSDVT 
+# define gsord   GSORD 
+# define gspos   GSPOS 
+# define gsposp  GSPOSP 
+#ifndef Geant3Dummy
+# define gsrotm  GSROTM 
+#endif /* not Geant3Dummy */
+# define gprotm  GPROTM 
+# define gsvolu  GSVOLU 
+# define glvolu  GLVOLU 
+# define gufld   GUFLD
+# define gprint  GPRINT 
+# define dzshow  DZSHOW 
+# define agmain  AGMAIN
+# define agxuser AGXUSER
+# define agxinit AGXINIT
+# define geometry GEOMETRY
+# define agstroot AGSTROOT
+# define kuexel  KUEXEL
+# define set_kupatl SET_KUPATL
+# define dzddiv  DZDDIV
+# define gfrotm  GFROTM
+# define gfxzrm  GFXZRM
+# define agsens  AGSENS
 
+#ifndef Geant3Dummy
+ 
+# define type_of_call  _stdcall 
+# define DEFCHARD   const char* , const int        
+# define DEFCHARL          
+# define PASSCHARD(string) string, strlen(string) 
+# define PASSCHARL(string) 
+#endif /* not Geant3Dummy */
+#endif 
+ 
+#ifndef Geant3Dummy
+extern "C" void type_of_call hlimit(const int&); 
+extern "C" void type_of_call gzebra(const int&); 
+extern "C" void type_of_call gpcxyz(); 
+extern "C" void type_of_call ggclos(); 
+extern "C" void type_of_call glast(); 
+extern "C" void type_of_call ginit(); 
+extern "C" void type_of_call grun(); 
+extern "C" void type_of_call gtrig(); 
+extern "C" void type_of_call gtrigc(); 
+extern "C" void type_of_call gtrigi(); 
+extern "C" void type_of_call gwork(const int&); 
+extern "C" void type_of_call gzinit(); 
+extern "C" void type_of_call gmate(); 
+extern "C" void type_of_call gpart(); 
+extern "C" void type_of_call gsdk(Int_t &, Float_t *, Int_t *); 
+extern "C" void type_of_call gfkine(Int_t &, Float_t *, Float_t *, Int_t &, Int_t &, Float_t *, Int_t &); 
+extern "C" void type_of_call gfvert(Int_t &, Float_t *, Int_t &, Int_t &, Float_t &, Float_t *, Int_t &); 
+extern "C" void type_of_call gskine(Float_t *,Int_t &, Int_t &, Float_t *, Int_t &, Int_t &); 
+extern "C" void type_of_call gsvert(Float_t *,Int_t &, Int_t &, Float_t *, Int_t &, Int_t &); 
+extern "C" void type_of_call gphysi(); 
+extern "C" void type_of_call gdebug(); 
+extern "C" void type_of_call gekbin(); 
+extern "C" void type_of_call gfinds(); 
+extern "C" void type_of_call gsking(Int_t &); 
+extern "C" void type_of_call gsstak(Int_t &); 
+extern "C" void type_of_call gsxyz(); 
+extern "C" void type_of_call gtrack(); 
+extern "C" void type_of_call gtreve(); 
+extern "C" void type_of_call gdtom(Float_t *, Float_t *, Int_t &); 
+extern "C" void type_of_call glmoth(Int_t &, Int_t &, Int_t &, Int_t *, Int_t *, Int_t *); 
+extern "C" void type_of_call gmedia(Float_t *, Int_t &); 
+extern "C" void type_of_call gmtod(Float_t *, Float_t *, Int_t &); 
+extern "C" void type_of_call gsrotm(const Int_t &, const Float_t &, const Float_t &, const Float_t &, const Float_t &, const Float_t &, const Float_t &); 
+extern "C" void type_of_call gprotm(const Int_t &); 
+extern "C" void type_of_call grfile(const Int_t&, DEFCHARD, DEFCHARD DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gfmate(const Int_t&, DEFCHARD, Float_t &, Float_t &, Float_t &, Float_t &, Float_t &, Float_t *, Int_t & DEFCHARL); 
+extern "C" void type_of_call gfpart(const Int_t&, DEFCHARD, Int_t &, Float_t &, Float_t &, Float_t &, Float_t *, Int_t & DEFCHARL); 
+extern "C" void type_of_call gftmed(const Int_t&, DEFCHARD, Int_t &, Int_t &, Int_t &, Float_t &, Float_t &, Float_t &, Float_t &, Float_t &, Float_t &, Float_t *, Int_t & DEFCHARL); 
+extern "C" void type_of_call gsmate(const Int_t&, DEFCHARD, Float_t &, Float_t &, Float_t &, Float_t &, Float_t &, Float_t *, Int_t & DEFCHARL); 
+extern "C" void type_of_call gsmixt(const Int_t&, DEFCHARD, Float_t &, Float_t &, Float_t &, Int_t &, Float_t * DEFCHARL); 
+extern "C" void type_of_call gspart(const Int_t&, DEFCHARD, Int_t &, Float_t &, Float_t &, Float_t &, Float_t *, Int_t & DEFCHARL); 
+extern "C" void type_of_call gstmed(const Int_t&, DEFCHARD, Int_t &, Int_t &, Int_t &, Float_t &, Float_t &, Float_t &, Float_t &, Float_t &, Float_t &, Float_t *, Int_t & DEFCHARL); 
+extern "C" void type_of_call gstpar(const Int_t&, DEFCHARD, Float_t & DEFCHARL); 
+extern "C" void type_of_call gsdvn(DEFCHARD,DEFCHARD, Int_t &, Int_t & DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gsdvn2(DEFCHARD,DEFCHARD, Int_t &, Int_t &, Float_t &, Int_t & DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gsdvs(DEFCHARD,DEFCHARD, Float_t &, Int_t &, Int_t & DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gsdvs2(DEFCHARD,DEFCHARD, Float_t &, Int_t &, Float_t &, Int_t & DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gsdvt(DEFCHARD,DEFCHARD, Float_t &, Int_t &, Int_t &, Int_t & DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gsord(DEFCHARD, Int_t & DEFCHARL);
+extern "C" void type_of_call gspos(DEFCHARD, Int_t &, DEFCHARD, Float_t &, Float_t &, Float_t &, Int_t &, DEFCHARD DEFCHARL DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gsposp(DEFCHARD, Int_t &, DEFCHARD, Float_t &, Float_t &, Float_t &, Int_t &, DEFCHARD,  
+				    Float_t *, Int_t & DEFCHARL DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gsvolu(DEFCHARD, DEFCHARD, Int_t &, Float_t *, Int_t &, Int_t & DEFCHARL DEFCHARL); 
+extern "C" void type_of_call glvolu(Int_t *, Int_t *, Int_t *, Int_t *);
+extern "C" void type_of_call gufld(Float_t *, Float_t *);
+extern "C" void type_of_call gprint(DEFCHARD,const int& DEFCHARL); 
+extern "C" void type_of_call dzshow(DEFCHARD,const int&,const int&,DEFCHARD,const int&, const int&, const int&, const int& DEFCHARL DEFCHARL);
+extern "C" void type_of_call agmain(Int_t*,Int_t*,Int_t*);
+extern "C" void type_of_call agxuser();
+extern "C" void type_of_call agxinit();
+extern "C" void type_of_call geometry();
+extern "C" Int_t type_of_call agstroot();
+extern "C" void type_of_call kuexel   (const Char_t*,Int_t);
+extern "C" void type_of_call set_kupatl(const Char_t*,Int_t*,Int_t);
+extern "C" void type_of_call dzddiv   (Int_t*,Int_t*,Char_t*,Char_t*,Int_t*,Int_t*,Int_t*,Int_t*,Int_t,Int_t);
+extern "C" void type_of_call gfrotm   (Int_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*);
+extern "C" void type_of_call gfxzrm   (Int_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*);
+extern "C" Int_t type_of_call agsens   (DEFCHARD DEFCHARL);
+ 
+#else  /* Geant3Dummy */
+#endif
+ // Geant3 common blocks mapped to C structures 
+#ifndef WIN32 
+//#  define pawc   pawc_
+#  define gcbank gcbank_
+#  define quest  quest_ 
+#  define gclink gclink_ 
+#  define gccuts gccuts_ 
+#  define gcflag gcflag_ 
+#  define gckine gckine_ 
+#  define gcking gcking_ 
+#  define gcmate gcmate_ 
+#  define gctmed gctmed_ 
+#  define gctrak gctrak_ 
+#  define gctpol gctpol_ 
+#  define gcvolu gcvolu_ 
+#  define gcstak gcstak_ 
+#  define gcnum  gcnum_ 
+#  define gcsets gcsets_ 
+#else 
+//#  define pawc   PAWC
+#  define gcbank GCBANK
+#  define quest  QUEST 
+#  define gclink GCLINK 
+#  define gccuts GCCUTS 
+#  define gcflag GCFLAG 
+#  define gckine GCKINE 
+#  define gcking GCKING 
+#  define gcmate GCMATE 
+#  define gctmed GCTMED 
+#  define gctrak GCTRAK 
+#  define gctpol GCTPOL 
+#  define gcvolu GCVOLU 
+#  define gcstak GCSTAK 
+#  define gcnum  GCNUM 
+#  define gcsets GCSETS 
+#endif 
+ 
+#ifndef Geant3Dummy
+extern "C" common_gcbank gcbank;
+extern "C" common_quest  quest; 
+extern "C" common_gclink gclink; 
+extern "C" common_gccuts gccuts; 
+extern "C" common_gcflag gcflag; 
+extern "C" common_gckine gckine; 
+extern "C" common_gcking gcking; 
+extern "C" common_gcmate gcmate; 
+extern "C" common_gctmed gctmed; 
+extern "C" common_gctrak gctrak; 
+extern "C" common_gctpol gctpol; 
+extern "C" common_gcvolu gcvolu; 
+extern "C" common_gcnum  gcnum; 
+extern "C" common_gcsets gcsets; 
+#else /* Geant3Dummy */
+Int_t  gcbank;
+Int_t  quest;
+Int_t  gclink;
+Int_t  gccuts;
+Int_t  gcflag;
+Int_t  gckine;
+Int_t  gcking;
+Int_t  gcmate;
+Int_t  gctmed;
+Int_t  gctrak;
+Int_t  gctpol;
+Int_t  gcvolu;
+Int_t  gcnum ;
+Int_t  gcsets;
+#endif /* Geant3Dummy */
+//--------------Declarations for ZEBRA--------------------- 
+ 
+#endif /* __CINT__ */ 
 #endif 

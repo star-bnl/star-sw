@@ -51,7 +51,7 @@ long type_of_call l3totphit_(
 
     
     /* get supersector */
-    bank = (long*) hitarray;
+    bank = hitarray;
     supersector = (int) (bank[3]+1)/2;
     /*printf("l3totphit :  now converting supersector :%d \n",(bank[3]+1)/2); */
     /*printf("\nsupsec : %d",(bank[3]+1)/2); */
@@ -115,7 +115,7 @@ long type_of_call l3totphit_(
 						};
 					    /* extract the pad & time center of gravity */
 					    padinfo = bank[rboffset+mzoffset+10+2+rowoffset+(2*clusindex-1)];
-					    dword = (struct dataword*) &padinfo;
+					    dword = &padinfo;
 					    pad = (double)(dword->info1)/64;
                                             time = (double)(dword->info2)/64;
 					    /* etract flag & time

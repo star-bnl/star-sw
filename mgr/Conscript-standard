@@ -45,7 +45,7 @@ if ($pkg =~ /^StDb/) {
 }
 if ($pkg =~ /^pyth$/){
   my $CERN_ROOT = $env->{ENV}->{CERN_ROOT};# print "CERN_ROOT = $CERN_ROOT\n" if $param::debug;
-  $LIBPATH .= ":" . $CERN_ROOT . "/lib -lpythia";
+  $LIBPATH .= ":" . $CERN_ROOT . "/lib -lpythia6134";
 }
 (my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g;# print "new share $share\n" if $param::debug;
 $share =~ s/\/StRoot//g;

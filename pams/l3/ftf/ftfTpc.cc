@@ -41,7 +41,7 @@ extern "C" long type_of_call ftfTpc_(
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
   FtfFinder      tracker ;
-//float toDeg = 57.29577951F ;
+  float toDeg = 57.29577951F ;
 //
 //    Set parameters
 //

@@ -244,8 +244,7 @@ Int_t StTreeMaker::Finish()
     StBranch *br;
     fTree->Clear(); 
     while ((br = (StBranch*)nextBr())) {
-      if (strncmp("hist",br->GetName() ,4)
-      &&  strncmp("runco",br->GetName(),5)) continue;
+      if (strncmp("hist",br->GetName(),4)) continue;
       FillHistBranch(br);
     }
     fTree->WriteEvent((ULong_t)(-2));	

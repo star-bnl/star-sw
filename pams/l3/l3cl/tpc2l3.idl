@@ -1,0 +1,36 @@
+/*	tpc2l3.idl
+*
+*	Module: tpc2l3      
+*	description: tpc data format transformation
+*       	     for l3 chain
+*
+*/
+#include "PAM.idl"
+#include "raw_sec_m.idl"
+#include "raw_row.idl"
+#include "raw_pad.idl"
+#include "raw_seq.idl"
+#include "l3clPad.idl"
+#include "type_shortdata.idl"
+#include "tpc2l3Para.idl"
+#include "l3clPara.idl"
+
+interface tpc2l3 : amiModule{
+	STAFCV_T call
+		( in  raw_sec_m      raw_sec_m
+		, in  raw_row  	     raw_row_in
+		, in  raw_pad  	     raw_pad_in
+		, in  raw_seq  	     raw_seq_in
+		, in  type_shortdata pixel_data_in
+		, in  raw_row  	     raw_row_out
+		, in  raw_pad  	     raw_pad_out
+		, in  raw_seq  	     raw_seq_out
+		, in  type_shortdata pixel_data_out
+		, out l3clPad        l3clPad
+                , out type_shortdata l3cl_pixel
+		, in  tpc2l3Para     tpc2l3Para
+		, out l3clPara       l3clPara
+		);
+};
+/* Last mod. for tpc2l3: cs
+*  Date: 1998/09/17 */

@@ -16,11 +16,8 @@
 
 #define innerSectorPadPitch     0.335    /* cm */ 
 #define outerSectorPadPitch     0.67     /* cm */
-/*#define driftLength             208.   */  /* cm */
-/*#define lengthPerTb             0.5977 */  /* = 208/348 */
-
-#define driftLength             200.515  /* db ... at 8.12.99 */
-#define lengthPerTb             0.5865   /* db ... at 8.12.99 */
+#define driftLength             208.     /* cm */
+#define lengthPerTb             0.5977   /* = 208/348 */
 
 
 /* number of pads in padrow */

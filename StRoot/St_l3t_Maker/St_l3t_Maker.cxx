@@ -1,8 +1,5 @@
-// $Id: St_l3t_Maker.cxx,v 1.14 1999/12/16 21:01:39 flierl Exp $
+// $Id: St_l3t_Maker.cxx,v 1.13 1999/11/18 17:08:54 fisyak Exp $
 // $Log: St_l3t_Maker.cxx,v $
-// Revision 1.14  1999/12/16 21:01:39  flierl
-// feed tracker with banks instead of tcl_tphit structs
-//
 // Revision 1.13  1999/11/18 17:08:54  fisyak
 // Add protection against absense of tphit
 //
@@ -55,14 +52,11 @@
 #include "St_XDFFile.h"
 #include "tpc/St_tpt_Module.h"
 #include "l3/St_ftfTpc_Module.h"
-#include "FtfSl3.h"
-#include "daqFormats.h"
 //#include "tpc/St_tpt_residuals_Module.h"
 //#include "tpc/St_tte_track_Module.h"
 //#include "tpc/St_tde_new_Module.h"
 //#include "tpc/St_tte_Module.h"
 #include "TH1.h"
-#include "tables/St_hitarray_Table.h"
 ClassImp(St_l3t_Maker)
   
   //_____________________________________________________________________________
@@ -202,62 +196,21 @@ Int_t St_l3t_Maker::Init(){
 }
 //_____________________________________________________________________________
 Int_t St_l3t_Maker::Make(){
-
-   FtfSl3 tracker ;
-//
-//    Set parameters
-//
-  tracker.setup (  ) ;
-
-   //loop over hits_in_sec_xx 
-    for(Int_t sec_index=1;sec_index<=12; sec_index++)
-	{
-	    // get l3 dataset
-	    St_DataSet* sec_bank_set = GetInputDS("l3Clufi");
-
-	    // create iterator
-	    St_DataSetIter sec_bank_iter(sec_bank_set);
-	    Char_t secname[15] = "hits_in_sec_00";
-	    if ( sec_index < 10 )
-		{
-		    Char_t sec_char = 48+sec_index;
-		    secname[13] = sec_char;
-		}
-	    else if ( sec_index == 10 || sec_index == 11 || sec_index == 12 )
-		{
-		    secname[12] = '1';
-		    Char_t sec_char = 48+(sec_index-10);
-		    secname[13] = (Char_t) sec_char;
-		}
-	    // get hit array (=bank)
-	    St_hitarray* bank_entries = (St_hitarray*)sec_bank_iter(secname);
-	    hitarray_st* bank_entries_st = (hitarray_st*) bank_entries->GetTable();
-	     
-
-	    // call tracker
-
-           tracker.readSector((TPCSECLP *)bank_entries_st) ;
-
-           tracker.processSector();
-
-	   
-	}
-
-
-  /*int iMake = kStOK;
+  int iMake = kStOK;
   Int_t maxNofTracks = 20000; 
 
-
-
-    St_DataSet *tpc_data =  GetDataSet("tpc_hits");
-  if (tpc_data) {
+  St_DataSet *tpc_data =  GetDataSet("tpc_hits");
+  if (tpc_data) {// Clusters exist -> do tracking
     St_tcl_tphit   *tphit = (St_tcl_tphit     *) tpc_data->Find("tphit");
     if (!tphit) return kStWarn;
     Int_t nHits = tphit->GetNRows();
     St_tcl_tphit   *l3hit = new St_tcl_tphit("l3Hit",nHits);
     m_DataSet->Add(l3hit);
+//
+//    Copy tpc table to l3
+//
     *l3hit = *tphit ;
-
+//
     maxNofTracks = nHits / 10 ;
     maxNofTracks = nHits  ;
     if ( maxNofTracks < 1 ) maxNofTracks = 1 ;
@@ -271,9 +224,9 @@ Int_t St_l3t_Maker::Make(){
     printf ( "l3 Tracker Done\n" ) ;
     if (l3out != kSTAFCV_OK) iMake = kStWarn;
   }
-  
-  MakeHistograms();*/ // tracking histograms
-  return 1;
+
+  MakeHistograms(); // tracking histograms
+  return iMake;
 }
 void St_l3t_Maker::MakeHistograms() {
 
