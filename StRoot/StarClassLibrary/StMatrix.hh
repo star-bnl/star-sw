@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.3 1999/02/17 11:38:54 ullrich Exp $
+ * $Id: StMatrix.hh,v 1.4 1999/03/04 18:12:24 ullrich Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,8 +18,8 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
- * Revision 1.3  1999/02/17 11:38:54  ullrich
- * Removed specialization for 'long double'.
+ * Revision 1.4  1999/03/04 18:12:24  ullrich
+ * Added namespace 'std'.
  *
  * Revision 1.4  1999/03/04 18:12:24  ullrich
  * Added namespace 'std'.
@@ -184,6 +184,9 @@
 #include <iostream.h>
 #include <math.h>
 #include <vector>
+#ifndef ST_NO_EXCEPTIONS
+#   include <stdexcept>
+#endif
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif
