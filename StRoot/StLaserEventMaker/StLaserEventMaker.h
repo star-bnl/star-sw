@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.h,v 1.19 2003/03/01 17:44:57 pfachini Exp $
+// $Id: StLaserEventMaker.h,v 1.20 2003/07/08 14:54:10 pfachini Exp $
 // $Log: StLaserEventMaker.h,v $
+// Revision 1.20  2003/07/08 14:54:10  pfachini
+// *** empty log message ***
+//
 // Revision 1.19  2003/03/01 17:44:57  pfachini
 // Changing the value of minValidTracks from 20 to 500.
 //
@@ -74,7 +77,8 @@ class StLaserEvent;
 
 enum { 
   //minValidTracks = 700,
-  minValidTracks = 500,
+  //minValidTracks = 500,
+  minValidTracks = 350,
   maxNofTracks   = 8000
 };
 
@@ -156,7 +160,7 @@ public:
   double velocityWest;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.19 2003/03/01 17:44:57 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.20 2003/07/08 14:54:10 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker, 1)   //StAF chain virtual base class for Makers
 };
