@@ -36,8 +36,9 @@ class StiTrackFilter
 public:
 
     StiTrackFilter();
+    virtual ~StiTrackFilter();
   
-    virtual void initialize();
+    virtual void initialize()=0;
     virtual bool accept(StiTrack * track) const =0;
 
     bool filter(StiTrack * track);

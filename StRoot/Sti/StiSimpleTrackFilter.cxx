@@ -5,11 +5,15 @@
 
 StiSimpleTrackFilter::StiSimpleTrackFilter()
   : Parameters("SimpleTrackFilter","SimpleTrackFilter")
-{}
+{
+  initialize();
+}
 
 StiSimpleTrackFilter::StiSimpleTrackFilter(const string & name, const string & description)
   : Parameters(name,description)
-{}
+{
+  initialize();
+}
 
 StiSimpleTrackFilter::~StiSimpleTrackFilter()
 {}

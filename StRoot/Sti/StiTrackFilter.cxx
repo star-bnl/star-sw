@@ -6,6 +6,9 @@ StiTrackFilter::StiTrackFilter()
     acceptedTrackCount(0)
 {}
 
+StiTrackFilter::~StiTrackFilter()
+{}
+
 StiTrackFilterFactory::StiTrackFilterFactory(const string& newName,
 					       int original,
 					       int incremental, 

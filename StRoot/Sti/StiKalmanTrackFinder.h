@@ -26,7 +26,6 @@ class StiTrackFilter;
 class StiDetectorContainer;
 class StiHitContainer;
 class StiTrackContainer;
-class StiDynamicTrackFilter;
 class StiTrack;
 class StEvent;
 class StMcEvent;

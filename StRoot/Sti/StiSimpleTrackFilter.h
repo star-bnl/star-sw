@@ -74,7 +74,10 @@ public:
 
  protected:
   ///Return a pointer to a new StiSimpleTrackFilter object on the heap.
-  virtual void * makeNewObject() const;
+  virtual void * makeNewObject() const
+    {
+      return new StiSimpleTrackFilter();
+    }
   
  private:
   StiSimpleTrackFilterFactory(); //Not implemented
