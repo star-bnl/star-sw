@@ -1,10 +1,13 @@
 /*
  *
- * $Id: standardPlots.C,v 1.4 2002/07/08 14:32:48 pruneau Exp $
+ * $Id: standardPlots.C,v 1.5 2002/08/19 19:33:20 pruneau Exp $
  *  A. Rose, WSU
  *  
  *
  * $Log: standardPlots.C,v $
+ * Revision 1.5  2002/08/19 19:33:20  pruneau
+ * eliminated cout when unnecessary, made helix member of the EventFiller
+ *
  * Revision 1.4  2002/07/08 14:32:48  pruneau
  * added efficiency plots
  *
@@ -60,7 +63,7 @@ void standardPlots::Loop()
    nbytes = 0;
    nb = 0;
    for (Int_t jentry=0; jentry<nentries;jentry++) {
-      Int_t ientry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
+      iEntry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
       nb = fChain->GetEntry(jentry);   nbytes += nb;
    }
 }
@@ -76,12 +79,12 @@ void standardPlots::makeTrackEffPlots()
    TProfile* globalTrackEffMult=new TProfile("globalTrackEffMult","GlobalTrack Finding Efficiency vs. McMult",100,0,MAX_TRACKS);
 
 
-   TH1D* primaryTrackPt=new TH1D("primaryTrackPt","PrimaryTrack Pt",100,0,5);
-   TH1D* primaryTrackEta=new TH1D("primaryTrackEta","PrimaryTrack Eta",100,-1,1);
+   //TH1D* primaryTrackPt=new TH1D("primaryTrackPt","PrimaryTrack Pt",100,0,5);
+   //TH1D* primaryTrackEta=new TH1D("primaryTrackEta","PrimaryTrack Eta",100,-1,1);
    TH1D* mcTrackEffPt=new TH1D("mcTrackEffPt","McTrack Pt",100,0,5);
    TH1D* mcTrackEffEta=new TH1D("mcTrackEffEta","McTrack Eta",100,-1,1);
-   TProfile* globalTrackEffPt=new TProfile("globalTrackEffPt","GlobalTrack Finding Efficiency vs. McPt",100,0,5);
-   TProfile* globalTrackEffEta=new TProfile("globalTrackEffEta","GlobalTrack Finding Efficiency vs. McEta",100,-1,1);
+   //TProfile* globalTrackEffPt=new TProfile("globalTrackEffPt","GlobalTrack Finding Efficiency vs. McPt",100,0,5);
+   //TProfile* globalTrackEffEta=new TProfile("globalTrackEffEta","GlobalTrack Finding Efficiency vs. McEta",100,-1,1);
 
    
    TH1D * pMcPtM0 = new TH1D("pMcPtM0","primaries MC Pt M0", 20, 0., 4.);
@@ -113,9 +116,9 @@ void standardPlots::makeTrackEffPlots()
    nbytes = 0;
    nb = 0;
    for (Int_t jentry=0; jentry<nentries;jentry++) {
-      Int_t ientry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
+      iEntry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
       nb = fChain->GetEntry(jentry);   nbytes += nb;
-      if (!Cut(ientry)) continue;
+      if (!Cut(iEntry)) continue;
       //cout <<"mMatchedPairs: "<<mMatchedPairs_<<endl
       //   <<"mMcTracks: "<<mMcTracks_<<endl
       //;
@@ -141,7 +144,7 @@ void standardPlots::makeTrackEffPlots()
       //make Pt and Eta spectra of MC tracks
       for(iTrack=0;iTrack<mMcTracks_;iTrack++)
 	{
-	  //if(!mcTrackCut(ientry,iTrack)) continue;  //next track if mcTrackCut doesn't pass
+	  //if(!mcTrackCut(iEntry,iTrack)) continue;  //next track if mcTrackCut doesn't pass
 	  pt    = mMcTracks_mPtMc[iTrack];
 	  eta   = mMcTracks_mEtaMc[iTrack];
 	  nHits = mMcTracks_mNHitMc[iTrack];
@@ -170,15 +173,15 @@ void standardPlots::makeTrackEffPlots()
       //make Pt and Eta spectra of matched tracks
       for(iTrack=0;iTrack<mMatchedPairs_;iTrack++)
 	{
-	  //if (!trackCut(ientry,iTrack)) continue;  //next track if trackCut 
+	  //if (!trackCut(iEntry,iTrack)) continue;  //next track if trackCut 
 	  pt    = mMatchedPairs_mPtMc[iTrack];
 	  eta   = mMatchedPairs_mEtaMc[iTrack];
 	  nHits = mMatchedPairs_mNHitMc[iTrack];
 	  gId   = mMatchedPairs_mGeantId[iTrack];
 	  q     = mMatchedPairs_mChargeMc[iTrack];
 
-	  primaryTrackEffEta->Fill(eta);
-	  primaryTrackEffPt->Fill(pt);
+	  //primaryTrackEffEta->Fill(eta);
+	  //primaryTrackEffPt->Fill(pt);
 	  switch (centralityClass)
 	    {
 		case 0:  
@@ -257,12 +260,12 @@ void standardPlots::makeMomentumPlots()
    
    for (int jentry=0; jentry<nentries;jentry++)
    {
-      int ientry = LoadTree(jentry); //in case of a TChain, ientry
+      LoadTree(jentry); //in case of a TChain, iEntry
                                        //is the entry number in the
                                        //current file
       nb = fChain->GetEntry(jentry);
       nbytes += nb;
-      // if (Cut(ientry) < 0) continue;
+      // if (Cut(iEntry) < 0) continue;
 
       //now loop over all Matched tracks in event
       for(int tMatched=0;tMatched<mMatchedPairs_;tMatched++)
@@ -366,11 +369,11 @@ void standardPlots::makeMomentumPlots()
     nbytes = 0;
     nb = 0;
    for (Int_t jentry=0; jentry<nentries;jentry++) {
-      Int_t ientry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
-      nb = fChain->GetEntry(jentry);   nbytes += nb;
-      for(int iTrack=0; iTrack<mMatchedPairs_; iTrack++)
-	{
-	  if(!trackCut(ientry,iTrack)) continue;
+     iEntry = LoadTree(jentry); //in case of a TChain, iEntry is the entry number in the current file
+     nb = fChain->GetEntry(jentry);   nbytes += nb;
+     for(int iTrack=0; iTrack<mMatchedPairs_; iTrack++)
+       {
+	  if(!trackCut(iEntry,iTrack)) continue;
 	     totalM=mMatchedPairs_mPtPr[iTrack]*mMatchedPairs_mPtPr[iTrack]
 	       +mMatchedPairs_mPzPr[iTrack]*mMatchedPairs_mPzPr[iTrack];
 	     totalM=sqrt(totalM);
@@ -406,7 +409,7 @@ void standardPlots::makeFitPointsPlots()
    nbytes = 0;
    nb = 0;
    for (Int_t jentry=0; jentry<nentries;jentry++) {
-      Int_t ientry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
+      iEntry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
       nb = fChain->GetEntry(jentry);
       nbytes += nb;
       // if (Cut(ientry) < 0) continue;
@@ -449,10 +452,10 @@ void standardPlots::makeHitEffPlots()
    nb = 0;
    for (Int_t jentry=0; jentry<nentries;jentry++)
    {
-      Int_t ientry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
+      iEntry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
       nb = fChain->GetEntry(jentry);
       nbytes += nb;
-      // if (Cut(ientry) < 0) continue;
+      // if (Cut(iEntry) < 0) continue;
 
       for(Int_t nMatched = 0; nMatched<mMatchedPairs_;nMatched++)
 	{

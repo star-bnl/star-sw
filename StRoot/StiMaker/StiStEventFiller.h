@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 1.5 2002/08/12 21:39:57 calderon Exp $
+ * $Id: StiStEventFiller.h,v 1.6 2002/08/19 19:33:01 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 1.6  2002/08/19 19:33:01  pruneau
+ * eliminated cout when unnecessary, made helix member of the EventFiller
+ *
  * Revision 1.5  2002/08/12 21:39:57  calderon
  * Introduced fillPidTraits, which uses the values obtained from
  * Andrews brand new dEdxCalculator to create two instances of an
@@ -54,6 +57,7 @@ using std::map;
     \note 
  */
 #include "Sti/StiDedxCalculator.h"
+#include "StPhysicalHelix.hh"
 
 class StEvent;
 class StTrackNode;
@@ -61,6 +65,7 @@ class StiTrackContainer;
 class StiTrack;
 class StiKalmanTrack;
 class StiDedxCalculator;
+
 
 class StiStEventFiller
 {
@@ -88,6 +93,9 @@ private:
 
     StiDedxCalculator dEdxTpcCalculator;
     StiDedxCalculator dEdxSvtCalculator;
+
+    StPhysicalHelix helix;
+
 };
 
 #endif

@@ -7,6 +7,9 @@
 //
 //
 // $Log: StiMaker.cxx,v $
+// Revision 1.99  2002/08/19 19:32:59  pruneau
+// eliminated cout when unnecessary, made helix member of the EventFiller
+//
 // Revision 1.98  2002/06/26 23:05:31  pruneau
 // changed macro
 //
@@ -337,7 +340,7 @@ void StiMaker::finishEvent()
 	  //
 	  clock.start();  
 	  cout <<"StiMaker::finishEvent() - INFO - Call StEvent Filler for Primaries"  << endl;
-	  //mevent = mStEventFiller->fillEventPrimaries(mevent, toolkit->getTrackContainer());
+	  mevent = mStEventFiller->fillEventPrimaries(mevent, toolkit->getTrackContainer());
 	  clock.stop();
 	  cout <<"StiMaker::finishEvent() - Time to fill StEvent Primaries: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
 
