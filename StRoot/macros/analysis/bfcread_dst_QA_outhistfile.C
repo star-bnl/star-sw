@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QA_outhistfile.C,v 1.18 2000/06/05 17:25:03 lansdell Exp $
+// $Id: bfcread_dst_QA_outhistfile.C,v 1.19 2000/06/05 17:42:44 lansdell Exp $
 // $Log: bfcread_dst_QA_outhistfile.C,v $
+// Revision 1.19  2000/06/05 17:42:44  lansdell
+// restored StTpcDb and added libtpc_Tables (necessary to run on Linux as well as Solaris!)
+//
 // Revision 1.18  2000/06/05 17:25:03  lansdell
 // StTpcDb no longer loaded
 //
@@ -127,13 +130,13 @@ void bfcread_dst_QA_outhistfile(
   gSystem->Load("libsim_Tables");
   gSystem->Load("libglobal_Tables");
 
-
   gSystem->Load("StUtilities");
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StDbUtilities");
-
+  gSystem->Load("libtpc_Tables");
+  gSystem->Load("StTpcDb");
   gSystem->Load("St_QA_Maker");
   gSystem->Load("tls");
   gSystem->Load("St_tpc");
