@@ -185,7 +185,7 @@ int tfc_store
     unsigned char mapRow[nBoards][nGroups][nChans],
     unsigned char mapPad[nBoards][nGroups][nChans]);
 
-long type_of_call reformat_
+long reformat_
    (TABLE_HEAD_ST         *fmtpar_h,     TFC_FMTPAR_ST           *fmtpar ,
     TABLE_HEAD_ST       *indextbl_h,     TYPE_INDEX_ST         *indextbl ,
     TABLE_HEAD_ST       *bytedata_h,  TYPE_BYTEDATA_ST         *bytedata ,
