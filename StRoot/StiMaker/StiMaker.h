@@ -22,6 +22,7 @@ class StiEvaluableTrackSeedFinder;
 class StiTrackSeedFinder;
 class StiTrackFinder;
 class StiKalmanTrackFinder;
+class StiCompositeSeedFinder;
 
 class StiMaker : public StMaker {
  public:
@@ -36,7 +37,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.15 2001/08/27 13:16:44 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.16 2001/08/28 21:58:55 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -80,6 +81,10 @@ private:
     StiHitFiller* mhitfiller; //!
     StiEvaluableTrackSeedFinder* mtrackseedfinder; //!
     StiTrackSeedFinder* mkalmanseedfinder; //!
+
+    //TEST!!!!!!!
+    StiTrackSeedFinder* mtempseedfinder; //!
+    StiCompositeSeedFinder* mcompseedfinder; //!
 
     //Tracker
     StiKalmanTrackFinder* mtracker; //!
