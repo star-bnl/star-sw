@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.8 2000/04/12 21:32:05 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.9 2000/04/18 00:55:14 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.9  2000/04/18 00:55:14  calderon
+ * added printout of local momentum to operator<<
+ *
  * Revision 2.8  2000/04/12 21:32:05  calderon
  * Chech particle definition pointer before writing name
  *
@@ -62,7 +65,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.8 2000/04/12 21:32:05 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.9 2000/04/18 00:55:14 calderon Exp $";
 
 StMcTrack::StMcTrack() 
 {
@@ -150,8 +153,13 @@ ostream&  operator<<(ostream& os, const StMcTrack& t)
     os << "No. Tpc  Hits : " << t.tpcHits().size() << endl;
     os << "No. Svt  Hits : " << t.svtHits().size() << endl;
     os << "No. Ftpc Hits : " << t.ftpcHits().size() << endl;
+    os << "No. Rich Hits : " << t.richHits().size() << endl;
     os << "Is Shower     : " << t.isShower() << endl;
     os << "Geant Id      : " << t.geantId()  << endl;
+    os << "Pdg Code      : " << t.pdgId()  << endl;
+    os << "Event Gen. Lab: " << t.eventGenLabel()  << endl;
+    os << "Key from g2t  : " << t.key()  << endl;
+    
     return os;
 }
 

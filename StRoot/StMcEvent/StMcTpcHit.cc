@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.cc,v 2.4 2000/04/17 23:01:15 calderon Exp $
+ * $Id: StMcTpcHit.cc,v 2.5 2000/04/18 00:55:14 calderon Exp $
  * $Log: StMcTpcHit.cc,v $
+ * Revision 2.5  2000/04/18 00:55:14  calderon
+ * added printout of local momentum to operator<<
+ *
  * Revision 2.4  2000/04/17 23:01:15  calderon
  * Added local momentum to hits as per Lee's request
  *
@@ -28,7 +31,7 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_tpc_hit_Table.h"  
 
-static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.4 2000/04/17 23:01:15 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.5 2000/04/18 00:55:14 calderon Exp $";
 
 StMemoryPool StMcTpcHit::mPool(sizeof(StMcTpcHit));
 
@@ -61,6 +64,7 @@ StMcTpcHit::~StMcTpcHit() {/* noop */}
 ostream&  operator<<(ostream& os, const StMcTpcHit& h)
 {
     os << "Position      : " << h.position() << endl; 
+    os << "Local Momentum: " << h.localMomentum() << endl; 
     os << "Sector        : " << h.sector()     << endl;
     os << "Pad Row       : " << h.padrow()     << endl;
     return os;

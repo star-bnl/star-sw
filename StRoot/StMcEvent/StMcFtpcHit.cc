@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.cc,v 2.4 2000/04/17 23:01:15 calderon Exp $
+ * $Id: StMcFtpcHit.cc,v 2.5 2000/04/18 00:55:14 calderon Exp $
  * $Log: StMcFtpcHit.cc,v $
+ * Revision 2.5  2000/04/18 00:55:14  calderon
+ * added printout of local momentum to operator<<
+ *
  * Revision 2.4  2000/04/17 23:01:15  calderon
  * Added local momentum to hits as per Lee's request
  *
@@ -30,7 +33,7 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_ftp_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.4 2000/04/17 23:01:15 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.5 2000/04/18 00:55:14 calderon Exp $";
 
 StMemoryPool StMcFtpcHit::mPool(sizeof(StMcFtpcHit));
 
@@ -58,6 +61,7 @@ StMcFtpcHit::~StMcFtpcHit() {/* noop */ }
 ostream&  operator<<(ostream& os, const StMcFtpcHit& h)
 {
     os << "Position      : " << h.position() << endl; 
+    os << "Local Momentum: " << h.localMomentum() << endl; 
     os << "Plane         : " << h.plane()    << endl;
     return os;
 }

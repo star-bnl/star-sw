@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcRichHit.cc,v 2.1 2000/03/06 18:05:21 calderon Exp $
+ * $Id: StMcRichHit.cc,v 2.2 2000/04/18 00:55:14 calderon Exp $
  * $Log: StMcRichHit.cc,v $
+ * Revision 2.2  2000/04/18 00:55:14  calderon
+ * added printout of local momentum to operator<<
+ *
  * Revision 2.1  2000/03/06 18:05:21  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.
@@ -14,7 +17,7 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_rch_hit_Table.h"
 
-static const char rcsid[] = "$Id: StMcRichHit.cc,v 2.1 2000/03/06 18:05:21 calderon Exp $";
+static const char rcsid[] = "$Id: StMcRichHit.cc,v 2.2 2000/04/18 00:55:14 calderon Exp $";
 
 StMemoryPool StMcRichHit::mPool(sizeof(StMcRichHit));
 
@@ -47,9 +50,9 @@ StMcRichHit::~StMcRichHit() {/* noop */}
 ostream&  operator<<(ostream& os, const StMcRichHit& h)
 {
     os << "Position       : " << h.position() << endl; 
+    os << "Local Momentum : " << h.localMomentum()    << endl;
     os << "Pad            : " << h.pad()    << endl;
     os << "Row            : " << h.row()   << endl;
-    os << "Local Momentum : " << h.localMomentum()    << endl;
     os << "T. of Flight   : " << h.tof()   << endl;
     return os;
 }
