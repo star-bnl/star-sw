@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.16 2003/10/06 23:39:21 perev Exp $
+ * $Id: StHelix.cc,v 1.17 2003/10/19 20:17:00 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
+ * Revision 1.17  2003/10/19 20:17:00  perev
+ * Protection agains overfloat added into pathLength(StThreeVector,StThreeVector)
+ *
  * Revision 1.16  2003/10/06 23:39:21  perev
  * sqrt(-ve) == no solution. infinity returns
  *
@@ -413,7 +416,7 @@ double StHelix::pathLength(const StThreeVector<double>& r,
     else {
         const double MaxPrecisionNeeded = micrometer;
         const int    MaxIterations      = 20;
-	
+        	
 	double A = mCurvature*(mOrigin*n - r*n) -
 	           n.x()*mCosPhase - 
 	           n.y()*mSinPhase;
@@ -421,8 +424,13 @@ double StHelix::pathLength(const StThreeVector<double>& r,
 	
 	double a, f, fp;
 	double sOld = s = 0;  
-    int i;
-	for (i=0; i<MaxIterations; i++) {
+//		(cos(angMax)-1)/angMax = 0.1
+        const double angMax = 0.21;
+        int maxSteps = int((6.28/angMax)*1.1);
+        double deltas = fabs(angMax/mCurvature/mCosDipAngle);
+
+	for (int i=0; i<MaxIterations; i++) {
+	  if (i == MaxIterations) return NoSolution;
 	    a  = t*s+mPhase;
 	    f  = A +
 		 n.x()*cos(a) +
@@ -431,11 +439,19 @@ double StHelix::pathLength(const StThreeVector<double>& r,
 	    fp = -n.x()*sin(a)*t +
 		  n.y()*cos(a)*t +
 		  n.z()*mCurvature*mSinDipAngle;
-	    s -= f/fp;
+            if ( fabs(fp)*deltas <= fabs(f) ) { //too big step
+               i++;if ((maxSteps--)<0) return NoSolution;
+               int sgn = 1;
+               if (fp<0.) sgn = -sgn;
+               if (f <0.) sgn = -sgn;
+               s -= sgn*deltas;
+            } else {
+               s -= f/fp;
+               if (s < 0.) s = sOld+deltas;
+            }
 	    if (fabs(sOld-s) < MaxPrecisionNeeded) break;
 	    sOld = s;
 	}
-	if (i == MaxIterations) s = NoSolution;
     }
     return s;
 }
