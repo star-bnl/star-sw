@@ -57,18 +57,18 @@ ClassImp(StV0FinderMaker)
          ev0par2(0),pars(0),pars2(0),event(0),v0Vertex(0),
          prepared(kFALSE),useExistingV0s(kFALSE),dontZapV0s(kFALSE),
          useTracker(kTrackerUseBOTH),useSVT(kUseSVT),useEventModel(kUseStEvent),
-	 useV0Language(kV0LanguageUseCpp),useXiLanguage(kXiLanguageUseCppOnCppV0),
-	 useLanguage(kLanguageUseRun),useLikesign(kLikesignUseStandard),
-	 useRotating(kRotatingUseStandard)
+         useV0Language(kV0LanguageUseCpp),useXiLanguage(kXiLanguageUseCppOnCppV0),
+         useLanguage(kLanguageUseRun),useLikesign(kLikesignUseStandard),
+         useRotating(kRotatingUseStandard)
 {
   // Initializes everything that wasn't yet :
   ptV0sq = 0.;
-  Bfield = 0.;
   trks = 0;
   ptrks = 0;
   ntrks = 0;
   det_id_v0 = 0;
   ITTFflag = 0;
+  TPTflag = 0;
   mainv.setX(0.);
   mainv.setY(0.);
   mainv.setZ(0.);
@@ -232,10 +232,10 @@ Int_t StV0FinderMaker::Init()
 //____________________________________________________________________________
 
 /*Int_t StV0FinderMaker::InitRun( int RunNumber){
-	  float gufldX[3]= {0,0,0};
-	  float gufldB[3];
-	  gufld(gufldX,gufldB);
-	  Bfield = gufldB[2]*kilogauss;
+          float gufldX[3]= {0,0,0};
+          float gufldB[3];
+          gufld(gufldX,gufldB);
+          Bfield = gufldB[2]*kilogauss;
           return 0;
 }*/
 
@@ -261,6 +261,7 @@ Int_t StV0FinderMaker::Prepare() {
   // Get pars
   GetPars();
   ITTFflag=kITKalmanFitId;
+  TPTflag=kHelix3DIdentifier;
 
   // Get event 
 
@@ -317,7 +318,7 @@ Int_t StV0FinderMaker::Prepare() {
       ///End Betty
 
       //Cut: track type
-      if ((tri->fittingMethod() != ITTFflag && (GetTrackerUsage() == kTrackerUseITTF)) ||
+      if ((tri->fittingMethod() == TPTflag && (GetTrackerUsage() == kTrackerUseITTF)) ||
           (tri->fittingMethod() == ITTFflag && (GetTrackerUsage() == kTrackerUseTPT))) continue;
 
       //Cut: track flag
@@ -327,17 +328,17 @@ Int_t StV0FinderMaker::Prepare() {
       const StTrackTopologyMap& map = tri->topologyMap();
       Bool_t tpcHit = map.hasHitInDetector(kTpcId);
       Bool_t silHit = map.hasHitInDetector(kSvtId) ||
-	map.hasHitInDetector(kSsdId);
+        map.hasHitInDetector(kSsdId);
       if (tpcHit) {
-	if (silHit)
-	  detId[trks] = 3; //SVT+TPC
-	else
-	  detId[trks] = 1; //TPC-only
+        if (silHit)
+          detId[trks] = 3; //SVT+TPC
+        else
+          detId[trks] = 1; //TPC-only
       } else if (silHit)
-	detId[trks] = 2; //SVT-only
+        detId[trks] = 2; //SVT-only
       else
-	//ignore this track
-	continue;
+        //ignore this track
+        continue;
       
       trk[trks] = tri;
       
@@ -354,20 +355,20 @@ Int_t StV0FinderMaker::Prepare() {
       
       // Determine number of hits (in SVT+TPC)
       hits[trks] = map.numberOfHits(kTpcId) +
-	map.numberOfHits(kSvtId) +
-	map.numberOfHits(kSsdId);
+        map.numberOfHits(kSvtId) +
+        map.numberOfHits(kSsdId);
       //Cut: number of hits
       pars2 = ev0par2->GetTable(detId[trks]-1);
       if (hits[trks] < pars2->n_point) continue;
       
       if (!trks)
-	{StThreeVectorD p1 = triGeom->momentum();
-	StThreeVectorD p2 = heli[trks].momentum(Bfield);
-	if (p2.x() != 0) Bfield *= p1.x()/p2.x();
-	else Bfield *= p1.y()/p2.y();
-	if (triGeom->charge()*triGeom->helicity() > 0) Bfield = -fabs(Bfield);
+        {StThreeVectorD p1 = triGeom->momentum();
+        StThreeVectorD p2 = heli[trks].momentum(Bfield);
+        if (p2.x() != 0) Bfield *= p1.x()/p2.x();
+        else Bfield *= p1.y()/p2.y();
+        if (triGeom->charge()*triGeom->helicity() > 0) Bfield = -fabs(Bfield);
                else Bfield = fabs(Bfield);
-	}
+        }
       
       if (triGeom->charge() > 0) ptrk[ptrks++] = trks;
       else if (triGeom->charge() < 0) ntrk[ntrks++] = trks;
@@ -452,8 +453,8 @@ Int_t StV0FinderMaker::Make() {
       j = ntrk[jj];
 
       if (GetTrackerUsage() == kTrackerUseBOTH)
-         {if ((trk[i]->fittingMethod() == ITTFflag) && (trk[j]->fittingMethod() != ITTFflag)) continue;
-          if ((trk[i]->fittingMethod() != ITTFflag) && (trk[j]->fittingMethod() == ITTFflag)) continue;
+         {if ((trk[i]->fittingMethod() == ITTFflag) && (trk[j]->fittingMethod() == TPTflag)) continue;
+          if ((trk[i]->fittingMethod() == TPTflag) && (trk[j]->fittingMethod() == ITTFflag)) continue;
           }
 
       // Determine detector id of V0 for pars
@@ -461,7 +462,7 @@ Int_t StV0FinderMaker::Make() {
 
       // Primary   V0 cut parameters
       pars  = ev0par2->GetTable(det_id_v0+2);
-      // Secondary V0 cut parameters
+      // Primary and secondary V0 cut parameters
       pars2 = ev0par2->GetTable(det_id_v0-1);
 
       //Cut: number of hits
@@ -762,8 +763,8 @@ void StV0FinderMaker::Clear(Option_t *option){
   if(useEventModel){
     if(mMuDstMaker){
       if(event){
-	delete event;
-	event=0;
+        delete event;
+        event=0;
       }
     }
   }
@@ -810,8 +811,11 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.18 2004/03/04 18:31:03 faivre Exp $
+// $Id: StV0FinderMaker.cxx,v 1.19 2004/04/02 08:57:23 faivre Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.19  2004/04/02 08:57:23  faivre
+// Use actual TPT flag rather than "not ITTF" for TPT tracks. Minor changes.
+//
 // Revision 1.18  2004/03/04 18:31:03  faivre
 // Add cut number of hits for Xi's bachelors.
 //
