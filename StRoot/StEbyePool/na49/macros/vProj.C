@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: vProj.C,v 1.2 2001/03/06 17:33:04 posk Exp $
+// $Id: vProj.C,v 1.3 2001/03/16 22:35:10 posk Exp $
 //
 // Author:       Art Poskanzer, May 2000
 // Description:  Projects v(y,pt) on the y and Pt axes
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: vProj.C,v $
+// Revision 1.3  2001/03/16 22:35:10  posk
+// plotGraphs.C makes the final graphs.
+//
 // Revision 1.2  2001/03/06 17:33:04  posk
 // All macros now work.
 //
@@ -46,7 +49,7 @@ float    xMin;
 float    xMax;
 float    yMin;
 float    yMax;
-double   yCM = 2.98;
+double   yCM = 2.92;
 char     temp[10];
 int      runNumber = 0;
 char     runName[6];
@@ -122,7 +125,8 @@ void vProj(int sel=2, int har=2) {
 	  } else {
 	    yield = yieldHist->GetCellContent(xBin, yBin);
 	  }
-	  yieldSum += yield;
+	  if(hist->GetCellContent(xBin, yBin) != 0.0)
+	    yieldSum += yield;
 	  vSum     += yield * hist->GetCellContent(xBin, yBin);
 	  err2Sum  += pow(yield * hist->GetCellError(xBin, yBin), 2.);
 	}
@@ -175,7 +179,8 @@ void vProj(int sel=2, int har=2) {
 	} else {
 	  yield = yieldHist->GetCellContent(xBin, yBin);
 	}
-	yieldSum += yield;
+	if(v != 0.0)
+	  yieldSum += yield;
 	vSum     += yield * v;
 	err2Sum  += pow(yield * hist->GetCellError(xBin, yBin), 2.);
       }

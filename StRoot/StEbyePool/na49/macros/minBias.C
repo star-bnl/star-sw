@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.3 2001/03/06 17:32:57 posk Exp $
+// $Id: minBias.C,v 1.4 2001/03/16 22:35:01 posk Exp $
 //
 // Author:       Art Poskanzer, Mar 2001
 // Description:  Macro to add histograms together.
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: minBias.C,v $
+// Revision 1.4  2001/03/16 22:35:01  posk
+// plotGraphs.C makes the final graphs.
+//
 // Revision 1.3  2001/03/06 17:32:57  posk
 // All macros now work.
 //
@@ -31,7 +34,7 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
   char   fileName[30];
   int    nSels =    2;
   int    nHars =    6;
-  float  yCM   = 2.98;
+  float  yCM   = 2.92;
   bool   twoD;
   
   // names of histograms to be added with statistics weighting
@@ -66,9 +69,9 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
     histFile[0]->cd();
     //key->ls();
     obj = key->ReadObj();
-    hist[0] = (TH1*)obj;
-    char* objName = key->GetName();
-    if (obj->IsA()->InheritsFrom("TH1")) { // TH1 or TProfile
+    if (obj->InheritsFrom("TH1")) { // TH1 or TProfile
+      hist[0] = (TH1*)obj;
+      char* objName = key->GetName();
       cout << " hist name= " << objName << endl;
       for (int n = 1; n < nCens; n++) {
 	hist[1] = (TH1*)histFile[n]->Get(objName);
@@ -206,8 +209,7 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
   }
   
   //histFile[nCens]->ls();
-  histFile[nCens]->Write();
-  //histFile[nCens]->Write(0, TObject::kOverwrite);
+  histFile[nCens]->Write(0, TObject::kOverwrite);
   histFile[nCens]->Close();
   delete histFile[nCens];
   

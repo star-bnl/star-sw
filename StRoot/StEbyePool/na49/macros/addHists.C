@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: addHists.C,v 1.2 2001/03/06 17:32:51 posk Exp $
+// $Id: addHists.C,v 1.3 2001/03/16 22:34:59 posk Exp $
 //
 // Author:       Art Poskanzer, Feb 2001
 // Description:  Macro to add histograms together with weighting.
@@ -12,6 +12,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: addHists.C,v $
+// Revision 1.3  2001/03/16 22:34:59  posk
+// plotGraphs.C makes the final graphs.
+//
 // Revision 1.2  2001/03/06 17:32:51  posk
 // All macros now work.
 //
@@ -83,19 +86,21 @@ Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t outputRunNo=99) {
     histFile[0]->cd();
     //key->ls();
     obj = key->ReadObj();
-    hist[0] = (TH1*)obj;
-    char* objName = key->GetName();
-    if (!stripes || strstr(objName,"Corr")!=0
-	|| strstr(objName,"Yield2D")!=0 
-	|| (strstr(objName,"Flow_Cos")!=0 && strstr(objName,"Lab")==0)) {
-      cout << " hist name= " << objName << endl;
-      hist[1] = (TH1*)histFile[1]->Get(objName);
-      hist[0]->Add(hist[1]);
+    if (obj->InheritsFrom("TH1")) { // TH1 or TProfile
+      hist[0] = (TH1*)obj;
+      char* objName = key->GetName();
+      if (!stripes || strstr(objName,"Corr")!=0
+	  || strstr(objName,"Yield2D")!=0 
+	  || (strstr(objName,"Flow_Cos")!=0 && strstr(objName,"Lab")==0)) {
+	cout << " hist name= " << objName << endl;
+	hist[1] = (TH1*)histFile[1]->Get(objName);
+	hist[0]->Add(hist[1]);
+      }
+      histFile[2]->cd();
+      obj->Write(objName);
+      delete obj;
+      obj = NULL;
     }
-    histFile[2]->cd();
-    obj->Write(objName);
-    delete obj;
-    obj = NULL;
   }
   
   // add histograms with weighting
@@ -129,8 +134,8 @@ Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t outputRunNo=99) {
 	
 	// get the histograms
 	hist[0] = dynamic_cast<TH1*>(histFile[0]->Get(histName->Data()));
-	hist[1] = (TH1*)histFile[1].Get(histName->Data());
-	histOut = (TH1*)histFile[2].Get(histName->Data());
+	hist[1] = (TH1*)histFile[1]->Get(histName->Data());
+	histOut = (TH1*)histFile[2]->Get(histName->Data());
 	if (!hist[0]) {
 	  cout << "### Can't find histogram " << histName->Data() << endl;
 	  return;
