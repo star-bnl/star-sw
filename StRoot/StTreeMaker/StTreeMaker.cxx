@@ -15,7 +15,14 @@ ClassImp(StTreeMaker)
 StTreeMaker::StTreeMaker(const char *name, const char *ioFile,const char *treeName )
 :StIOInterFace(name,"0")
 {
-  fFile = ioFile; fIOMode="0";fTreeName=treeName;fTree=0;fFinished=0;
+  fFile = ioFile; fIOMode="0";fTree=0;fFinished=0;
+
+  if ( treeName ) {
+    fTreeName=treeName;
+  } else {
+    Warning("StTreeMaker", "%s default treeName == bfcTree is used",name);
+    fTreeName = "bfcTree";
+  }
 }
 //_____________________________________________________________________________
 StTreeMaker::~StTreeMaker(){
@@ -23,7 +30,7 @@ StTreeMaker::~StTreeMaker(){
 //_____________________________________________________________________________
 Int_t StTreeMaker::Init()
 {
-  assert(strchr("rw",fIOMode[0]));
+  assert(strchr("rwu",fIOMode[0]));
   assert(!fTree);
 
   if (fTreeName.IsNull()) SetTreeName();
@@ -57,11 +64,6 @@ Int_t StTreeMaker::Init()
       fTree->UpdateFile(fFile);
     }
 
-//   	Set filename for runcontBranch
-    StBranch *h = (StBranch*)fTree->Find("histBranch");
-    StBranch *r = (StBranch*)fTree->Find("runcontBranch");
-    if (h && r) r->SetFile(h->GetFile(),0,1);
-      
 //   
     Open();
     
@@ -72,7 +74,8 @@ Int_t StTreeMaker::Init()
     TString BaseName,FileName;
     
 //  	Try to get it from Read  StTreeMaker       
-    fTree = (StTree*)GetDataSet(GetTreeName());
+    fTree = 0;
+    if (fIOMode[0]=="u") fTree = (StTree*)GetDataSet(GetTreeName());
     if (fTree) {		// Fantastic, we found it!!!
 
       StMaker *mk = GetMaker(fTree);  assert(mk);
@@ -88,6 +91,12 @@ Int_t StTreeMaker::Init()
 
 //    		?????? Compatibility ???????
       if ( fTreeName=="bfcTree") SetBranch("dstBranch");
+
+//   	Set filename for runcontBranch
+    StBranch *h = (StBranch*)fTree->Find("histBranch");
+    StBranch *r = (StBranch*)fTree->Find("runcontBranch");
+    if (h && r) r->SetFile(h->GetFile(),0,1);
+      
 
     }//end of new tree
     
@@ -180,7 +189,7 @@ void StTreeMaker::UpdateTree(Int_t flag)
     } //endif SetBranch block*
     
     br = (StBranch*)fTree->Find(updName);
-    if (!br && fIOMode=="w") { 
+    if (!br && fIOMode!="r") { 
       br = new StBranch(updName,fTree);
       updMode = "w";
     }
