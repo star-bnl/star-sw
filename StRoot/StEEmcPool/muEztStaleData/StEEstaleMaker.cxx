@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEstaleMaker.cxx,v 1.3 2004/11/12 20:10:39 balewski Exp $
+// $Id: StEEstaleMaker.cxx,v 1.4 2004/11/29 19:37:24 balewski Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -12,10 +12,6 @@
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
-
-#include "StEvent/StTriggerData2003.h"
-#include "StEvent/StTriggerData2004.h"
-#include "StEvent/StTriggerData2005.h"
 
 #include "StMuDSTMaker/EZTREE/EztEventHeader.h"
 #include "StMuDSTMaker/EZTREE/EztTrigBlob.h"
@@ -29,7 +25,6 @@ StEEstaleMaker::StEEstaleMaker( const char* self ,const char* muDstMakerName) : 
   mMuDstMaker = (StMuDstMaker*)GetMaker(muDstMakerName);
   assert(mMuDstMaker);
 
-  trgAkio=0;
   nInpEve=0;
   HList=0;
   timeFirst=0;
@@ -48,7 +43,7 @@ StEEstaleMaker::StEEstaleMaker( const char* self ,const char* muDstMakerName) : 
 //___________________ _____________________________
 //________________________________________________
 StEEstaleMaker::~StEEstaleMaker(){
-  delete trgAkio;
+ 
 }
 
 //___________________ _____________________________
@@ -113,7 +108,6 @@ Int_t StEEstaleMaker::Make(){
   test1(mMuDstMaker->muDst()->eztESmd(),0);
   header->print();
   // ............. acuire TRIGGER data 
-  unpackTrigEzt();
   //..........  do the job
   return kStOK;
 #endif
@@ -184,41 +178,6 @@ float StEEstaleMaker::getTwChi2(EztEmcRawData* tw0,EztEmcRawData* tw1){
 
 //________________________________________________
 //________________________________________________
-void StEEstaleMaker::unpackTrigEzt(){
-  
-  gMessMgr->Message("","D") <<GetName()<<"::unpackTrigEzt() is called "<<endm;
-
-  EztTrigBlob * trigBlob=mMuDstMaker->muDst()->eztTrig(); 
-  assert(trigBlob);
-  trigBlob->print(0);
- 
-  time_t  timeStamp=trigBlob->getTimeStamp();  
-  //  printf("event time stamp=%d %s\n", (int)timeStamp, ctime((const time_t *)&timeStamp));
-  
-  const int timeStamp2003=1041397201; //==Wed Jan  1 00:00:01 2003
-  const int timeStamp2004=1072933201; //==Thu Jan  1 00:00:01 2004
-  const int timeStampNovember04=1099371601; //=Tue Nov  2 00:00:01 2004;
-
-  delete trgAkio;// clear old event
-  void *blob=trigBlob->trgd->GetArray();
-
-  if( timeStamp>timeStampNovember04) {
-     trgAkio= new StTriggerData2005( (const TrgDataType2005 *)blob);
-  } else if( timeStamp>timeStamp2004) {
-    trgAkio= new StTriggerData2004( (const TrgDataType2004 *)blob);
-  } else if( timeStamp>timeStamp2003) {
-    trgAkio= new StTriggerData2003( (const TrgDataType2003 *)blob);
-  } else {
-    printf("now TRigger decoder before 2003, STOP\n"); assert(1==2);
-  }
-
-  trgAkio->dump();// lot of print out per eve
-}
-
-
-
-//________________________________________________
-//________________________________________________
 void StEEstaleMaker::test1(EztEmcRawData* tw, int flag){
   int nOk=0;
   int ib;
@@ -249,6 +208,9 @@ void StEEstaleMaker::test1(EztEmcRawData* tw, int flag){
 
 //---------------------------------------------------
 // $Log: StEEstaleMaker.cxx,v $
+// Revision 1.4  2004/11/29 19:37:24  balewski
+// fix to match EZTREE evolution
+//
 // Revision 1.3  2004/11/12 20:10:39  balewski
 // *** empty log message ***
 //
