@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.48 2004/08/24 20:24:33 oldi Exp $
+// $Id: StFlowEvent.cxx,v 1.49 2004/11/16 21:22:21 aihong Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -418,17 +418,6 @@ Double_t StFlowEvent::G_New(StFlowSelection* pFlowSelect, Double_t Zx, Double_t 
   return theG;
 }
 
-//-----------------------------------------------------------------------
-
-Double_t StFlowEvent::G_Old(StFlowSelection* pFlowSelect, Double_t Zx, Double_t Zy) { 
-  // Generating function for the old cumulant method.
-  // If expanded in Taylor series, one recovers G_New() in new new cumulant method.
-
-  TVector2 normQ = NormQ(pFlowSelect);
-
-  return exp(2*Zx*normQ.X() + 2*Zy*normQ.Y());
-
-}
 
 //-------------------------------------------------------------
 
@@ -490,82 +479,6 @@ Double_t StFlowEvent::SumWeightSquare(StFlowSelection* pFlowSelect) {
   return SumOfWeightSqr;
 }
 
-//-------------------------------------------------------------
-
-Double_t StFlowEvent::WgtMult_q4(StFlowSelection* pFlowSelect) { 
-  // Used only for the old cumulant method, for getting q4 when weight is on.
-  // Replace multiplicity in Eq.(74b) by this quantity when weight is on.
-  // This is derived based on (A4) in the old cumulant paper.
-
-  int selN = pFlowSelect->Sel();
-  int harN = pFlowSelect->Har();
-  double theMult        = 0.;
-  double theMeanWj4     = 0.;
-  double theMeanWj2     = 0.;
-  double theSumOfWgtSqr = 0;
-  double phiWgtSq;
-
-  StFlowTrackIterator itr;
-  for (itr = TrackCollection()->begin(); 
-       itr != TrackCollection()->end(); itr++) {
-    StFlowTrack* pFlowTrack = *itr;
-    if (pFlowSelect->Select(pFlowTrack)) {
-      
-      double phiWgt   = PhiWeight(selN, harN, pFlowTrack);
-      phiWgtSq        = phiWgt*phiWgt;
-      theSumOfWgtSqr += phiWgtSq;
-      theMeanWj4     += phiWgtSq*phiWgtSq;
-      theMult        += 1.;      
-    }
-  }
-  
-  if (theMult <= 0.) return theMult;
-
-  theMeanWj4 /= theMult;
-  theMeanWj2  = theSumOfWgtSqr / theMult;
-
-  return (theSumOfWgtSqr*theSumOfWgtSqr)/(theMult*(-theMeanWj4+2*theMeanWj2*theMeanWj2));
-}
-
-//-------------------------------------------------------------
-
-Double_t StFlowEvent::WgtMult_q6(StFlowSelection* pFlowSelect) { 
-  // Used only for the old cumulant method. For getting q6 when weight is on.
-  // Replace multiplicity in Eq.(74c) by this quantity when weight is on.
-  // This is derived based on (A4) in the old cumulant paper.
-
-  int selN = pFlowSelect->Sel();
-  int harN = pFlowSelect->Har();
-  double theMult        = 0.;
-  double theMeanWj6     = 0.;
-  double theMeanWj4     = 0.;
-  double theMeanWj2     = 0.;
-  double theSumOfWgtSqr = 0;
-  double phiWgtSq;
-
-  StFlowTrackIterator itr;
-  for (itr = TrackCollection()->begin(); 
-       itr != TrackCollection()->end(); itr++) {
-    StFlowTrack* pFlowTrack = *itr;
-    if (pFlowSelect->Select(pFlowTrack)) {
-      
-      double phiWgt   = PhiWeight(selN, harN, pFlowTrack);
-      phiWgtSq        = phiWgt*phiWgt;
-      theSumOfWgtSqr += phiWgtSq;
-      theMeanWj4     += phiWgtSq*phiWgtSq;
-      theMeanWj6     += phiWgtSq*phiWgtSq*phiWgtSq;
-      theMult        += 1.;
-    }
-  }
-    
-  if (theMult <= 0.) return theMult*theMult;
-
-  theMeanWj6 /= theMult;
-  theMeanWj4 /= theMult;
-  theMeanWj2  = theSumOfWgtSqr / theMult;
-
-  return 4.*(theSumOfWgtSqr*theSumOfWgtSqr*theSumOfWgtSqr)/(theMult*(theMeanWj6-9.*theMeanWj2*theMeanWj4+12.*theMeanWj2*theMeanWj2*theMeanWj2));
-}
 
 //-------------------------------------------------------------
 
@@ -1042,6 +955,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.49  2004/11/16 21:22:21  aihong
+// removed old cumulant method
+//
 // Revision 1.48  2004/08/24 20:24:33  oldi
 // Minor modifications to avoid compiler warnings.
 // Small bug fix (didn't affect anyone yet).
