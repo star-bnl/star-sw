@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.2 1999/03/14 00:25:40 perev Exp $
+// $Id: St_trg_Maker.cxx,v 1.3 1999/06/24 18:02:46 druss Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.3  1999/06/24 18:02:46  druss
+// add a line to make sure that the table exists...
+//
 // Revision 1.2  1999/03/14 00:25:40  perev
 // New makers
 //
@@ -62,17 +65,19 @@ Int_t St_trg_Maker::Make(){
   if (!ctu_cor ||  !mwc_raw) return kStWarn;
 
   St_dst_TriggerDetectors *dst = new St_dst_TriggerDetectors("dst_TriggerDetectors",1);
+
+  if (!dst) return kStWarn;
   m_DataSet->Add(dst);
   Int_t Res = trg_fillDst (ctu_cor,mwc_raw,dst);
   if (Res != kSTAFCV_OK) return kStWarn;
+
   return kStOK;
 }
 //_____________________________________________________________________________
 void St_trg_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_trg_Maker.cxx,v 1.2 1999/03/14 00:25:40 perev Exp $\n");
+  printf("* $Id: St_trg_Maker.cxx,v 1.3 1999/06/24 18:02:46 druss Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
-
