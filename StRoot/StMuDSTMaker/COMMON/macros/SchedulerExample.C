@@ -1,34 +1,15 @@
 // NOTE - chain needs to be declared global so for StHbtEventReader
 //==========================================================================================
-//#include "StRoot/StMuDSTMaker/COMMON/StMuTypes.hh"
+#ifndef SchedulerExample_C
+#define SchedulerExample_C
+
 
 class StMiniEventMaker;
 class StMuDbReader;
-class StChain;
-
-
-void load() {
-  gSystem->Load("St_base");
-  gSystem->Load("StChain");
-  gSystem->Load("St_Tables");
-  gSystem->Load("StMagF");
-  gSystem->Load("StUtilities");  // new addition 22jul99
-  gSystem->Load("StTreeMaker");
-  gSystem->Load("StIOMaker");
-  gSystem->Load("StarClassLibrary");
-  gSystem->Load("StTpcDb");
-  gSystem->Load("StDbUtilities");
-  gSystem->Load("StEvent");
-  gSystem->Load("StEventUtilities"); 
-  gSystem->Load("StEmcUtil");
-  gSystem->Load("StStrangeMuDstMaker");
-  gSystem->Load("StMuDSTMaker");
-  cout << "loding done " << endl;
-}
-
 
 void SchedulerExample(const char* fileList, const char* outFile="SchedulerExample.root") {
-  load();
+    gROOT->LoadMacro("StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+    loadSharedLibraries();
 
   // create the chain"
   StChain * chain = new StChain("StChain"); 
@@ -44,12 +25,12 @@ void SchedulerExample(const char* fileList, const char* outFile="SchedulerExampl
   // 1e9 : maximum number of files to read
   // MuDstMaker : name of the maker
   //cout << " press any key " << endl; cin.ignore();
-  StMuDebug::setLevel(0);
-  StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,"",fileList,"",10,"MuDstMaker");
+  //StMuDebug::setLevel(0);
+  //  StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,"",fileList,"",10,"MuDstMaker");
 
 
   // now add your analysis maker
-  SchedulerExample* analysis = new SchedulerExample(outFile);
+  //  SchedulerExample* analysis = new SchedulerExample(outFile);
  
   // Init the chain
   chain->Init(); // This should call the Init() method in ALL makers
@@ -68,5 +49,5 @@ void SchedulerExample(const char* fileList, const char* outFile="SchedulerExampl
 }
     
 
-
+#endif
 
