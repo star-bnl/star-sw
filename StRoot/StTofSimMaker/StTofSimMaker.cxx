@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofSimMaker.cxx,v 1.7 2004/04/01 21:22:47 dongx Exp $
+ * $Id: StTofSimMaker.cxx,v 1.8 2004/04/01 21:33:46 jeromel Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTofSimMaker.cxx,v $
- * Revision 1.7  2004/04/01 21:22:47  dongx
- * use m_Mode as a switch for the output histograms
+ * Revision 1.8  2004/04/01 21:33:46  jeromel
+ * More than one place where m_Mode should be used
  *
  * Revision 1.6  2003/09/17 19:49:10  geurts
  * zeroed pointers in constructor
@@ -97,16 +97,18 @@ Int_t StTofSimMaker::Init(){
   mSimDb = new StTofSimParam();
   mSimDb->init();
   
-  // book histograms
-  mdE = new TH1F("energy deposition","dE",100,0.,0.011);
-  mdS = new TH1F("distance","ds",100,0.,10);
-  mNumberOfPhotoelectrons = new TH1F("number of photoelectrons","nphe",1000,0,5000);
-  mT = new TH1F("delay corrected tof","time",100,0.,12e-7);
-  mTime = new TH1F("only hit-pos resolution added","tt",100,0.,12e-7);
-  mTime1 = new TH1F("fully corrected tof","tt1",100,0.,120e-7);
-  mPMlength = new TH1F("distance in slat","length",100,0,22);
-  mAdc = new TH1F("adc","adc",1025,-0.5,1024.5);
-  mTdc = new TH1F("tdc","tdc",2049,-0.5,2048.5);
+  if (m_Mode){
+    // book histograms
+    mdE = new TH1F("energy deposition","dE",100,0.,0.011);
+    mdS = new TH1F("distance","ds",100,0.,10);
+    mNumberOfPhotoelectrons = new TH1F("number of photoelectrons","nphe",1000,0,5000);
+    mT = new TH1F("delay corrected tof","time",100,0.,12e-7);
+    mTime = new TH1F("only hit-pos resolution added","tt",100,0.,12e-7);
+    mTime1 = new TH1F("fully corrected tof","tt1",100,0.,120e-7);
+    mPMlength = new TH1F("distance in slat","length",100,0,22);
+    mAdc = new TH1F("adc","adc",1025,-0.5,1024.5);
+    mTdc = new TH1F("tdc","tdc",2049,-0.5,2048.5);
+  }
 
   return StMaker::Init();
 }
@@ -355,16 +357,16 @@ StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
     float tt =  tof_hit->tof + (float) random.shoot()* resl;
     float tt1 =  time +  (float) random.shoot()* mSimDb->start_res();
 
-    //#ifdef TOFSIM_HIST
     // fill the histograms
-    mPMlength->Fill(length);
-    mdE->Fill(tof_hit->de);
-    mdS->Fill(tof_hit->ds);
-    mNumberOfPhotoelectrons->Fill(numberOfPhotoelectrons);
-    mT->Fill(time);
-    mTime->Fill(tt);
-    mTime1->Fill(tt1);
-    //#endif
+    if(m_Mode){
+      mPMlength->Fill(length);
+      mdE->Fill(tof_hit->de);
+      mdS->Fill(tof_hit->ds);
+      mNumberOfPhotoelectrons->Fill(numberOfPhotoelectrons);
+      mT->Fill(time);
+      mTime->Fill(tt);
+      mTime1->Fill(tt1);
+    }
 
     // fill or update the mcInfo structure of StTofMCslat
     StTofMCSlat slat;
@@ -402,9 +404,11 @@ StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
     if (adc>1024) adc=1024;
     slat.setAdc(adc);
     slat.setTdc(tdc);
-    mAdc->Fill(adc);
-    mTdc->Fill(tdc);
 
+    if(m_Mode){
+      mAdc->Fill(adc);
+      mTdc->Fill(tdc);
+    }
 
     if (Debug()){
       cout << "StTofmcInfo slatId " << slatId << "  " << slatData;
@@ -435,8 +439,7 @@ float StTofSimMaker::slatResponseExp(float& dz)
 /// write histograms to file
 Int_t StTofSimMaker::Finish(){
 
-  //#ifdef TOFSIM_HIST
-  if(m_Mode) {
+  if(m_Mode){
     cout << "StTofSimMaker::Finish  writing tofsim.root ...";
     TFile theFile("tofsim.root","RECREATE","tofsim");
     theFile.cd();
@@ -450,7 +453,6 @@ Int_t StTofSimMaker::Finish(){
     mAdc->Write();
     mTdc->Write();
     cout << "done"<<endl;
-    //#endif
   }
   return kStOK;
 }
