@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.35 2000/07/31 16:29:05 flierl Exp $
+// $Id: St_l3t_Maker.cxx,v 1.36 2000/07/31 20:50:29 flierl Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -585,7 +585,7 @@ Int_t St_l3t_Maker::fillStEvent(St_dst_track* trackS, St_dst_dedx* dedxS, St_tcl
     StEvent* myStEvent = (StEvent *) GetInputDS("StEvent") ;
     if (!myStEvent)
 	{ 
-	    cout << "No StEvent\n" ;
+	    printf("No StEvent\n") ;
 	    return 0 ;
 	}
     
@@ -602,7 +602,7 @@ Int_t St_l3t_Maker::fillStEvent(St_dst_track* trackS, St_dst_dedx* dedxS, St_tcl
     const Int_t MaxNTracks = 10000 ;
     if (trackS->GetNRows()>MaxNTracks ) 
       {
-	cout <<"Too many tracks for stevent ..."<< endl ;
+	printf("Too many tracks for stevent ...\n") ;
 	return 0 ;
       }
     StGlobalTrack* Store_Track_ids[MaxNTracks] ;
@@ -655,7 +655,7 @@ Int_t St_l3t_Maker::fillStEvent(St_dst_track* trackS, St_dst_dedx* dedxS, St_tcl
 	      }
 	    else 
 	      {
-		cout << "Bad track id.\n"; 
+		printf("Bad track id.\n"); 
 	      }
       }
     
