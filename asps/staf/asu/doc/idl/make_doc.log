@@ -1,6 +1,0 @@
-idl:47% ln -s ../../../asu .
-idl:48% which idldoc
-/usr/local/bin/idldoc
-idl:49% idldoc asu/idl/*.idl
-idl:50% rm asu
-idl:51% 
