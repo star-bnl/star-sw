@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.40 2000/11/07 01:48:25 fisyak Exp $
+// $Id: St_db_Maker.cxx,v 1.41 2000/11/07 15:02:05 fisyak Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.41  2000/11/07 15:02:05  fisyak
+// Fix typo
+//
 // Revision 1.40  2000/11/07 01:48:25  fisyak
 // Add one more protection agaist fDataBase==NULL
 //
@@ -201,7 +204,7 @@ Int_t St_db_Maker::Init()
      
      if (Debug()) fDataBase->ls("*");
    }
-   OnOfaf();
+   OnOff();
    return 0;
 }
 //_____________________________________________________________________________
