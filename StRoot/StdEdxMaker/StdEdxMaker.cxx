@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.2 2000/11/25 23:19:53 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.3 2000/11/26 20:26:37 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -183,7 +183,9 @@ Int_t StdEdxMaker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StdEdxMaker::Make(){ 
-  St_DataSet *dst = GetDataSet("dst"); assert(dst);
+  St_DataSet *Dst = GetDataSet("dst"); assert(Dst);
+  St_DataSet *dst = Dst->Find(".data/dst");
+  if (!dst) dst = Dst;
   St_dst_dedx *dst_dedx     = (St_dst_dedx *) dst->Find("dst_dedx");
   if (m_tpcGain) {SafeDelete(dst_dedx);}
   if (!dst_dedx) {
@@ -353,11 +355,13 @@ Int_t StdEdxMaker::Make(){
       }
       Int_t SectN = sector; // drift distance
       if (padrow < 14) SectN += 24;
-      TpcDriftDistCorr_st *cor = m_drift->GetTable() + SectN - 1;
       Double_t z = pointC->GetZ(ipoint);
       if (sector > 12) z = - z;
+#if 0
+      TpcDriftDistCorr_st *cor = m_drift->GetTable() + SectN - 1;
       Double_t DriftCorr = TMath::Exp(-(cor->a0+z*(cor->a1 + z*cor->a2)));
       dE *= DriftCorr;
+#endif
       dE *= (*m_tpcTime)[0].ScaleFactor; // time
       TrackLength += dx;
       dEdxN[NdEdx] = dE/dx;
