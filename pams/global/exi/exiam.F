@@ -289,8 +289,11 @@ c*** loop over the two intersection points
 
             xpp(1)=(xn1(1)+xp(1))/2.
             xpp(2)=(xn1(2)+xp(2))/2.
-            xpp(3)=(trkb(3)+zcom(jk))/2.
-            rv=sqrt(xpp(1)**2+xpp(2)**2+xpp(3)**2)
+            xpp(3)=(trkb(3)+zcom(jk))/2
+
+C*** Problem with vmain not being a 0,0,0 again fixed HLC 3/3/98.
+            rv=sqrt((xpp(1)-vmain(1))**2+(xpp(2)-vmain(2))**2+
+     >           (xpp(3)-vmain(3))**2)
 
 c*** decide here if it is a good candidate (pgj: removed lambda mass check)
 
