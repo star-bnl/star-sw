@@ -246,13 +246,16 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
 					"&Next Event", M_Tracking_EventStep);
     fNextEventButton->Associate(this);
     fNextEventButton->SetToolTipText("Step To Next Event");
-    
+
+    fTrackingFrame->AddFrame(fDoTrackStepButton,
+			     new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 0, 2, 2));
     fTrackingFrame->AddFrame(fFinishTrackButton,
 			     new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 0, 2, 2));
     fTrackingFrame->AddFrame(fFinishEventButton,
-			     new TGLayoutHints(kLHintsTop | kLHintsLeft, 10, 2, 2, 2));
+			     new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 0, 2, 2));
+
     fTrackingFrame->AddFrame(fNextEventButton,
-			     new TGLayoutHints(kLHintsTop | kLHintsLeft, 18, 2, 2, 2));
+			     new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 0, 2, 2));
 
     AddFrame(fTrackingFrame, new TGLayoutHints(kLHintsBottom | kLHintsExpandX,
 					       0, 0, 1, 0));

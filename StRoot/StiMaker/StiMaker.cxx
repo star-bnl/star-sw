@@ -366,7 +366,7 @@ void StiMaker::printStatistics() const
 void StiMaker::finishEvent()
 {
     while (mtracker->hasMore()) {
-	doNextAction();
+	finishTrack();
     }
     StiEvaluator::instance()->evaluateForEvent(mtrackstore);
 }
