@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.24 2004/05/26 21:30:36 jwebb Exp $
+// $Id: StEEmcDbMaker.h,v 1.25 2004/06/04 13:30:24 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -65,7 +65,7 @@ class StEEmcDbMaker : public StMaker {
   // private:
  public:
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.24 2004/05/26 21:30:36 jwebb Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.25 2004/06/04 13:30:24 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -149,8 +149,12 @@ class StEEmcDbMaker : public StMaker {
   //
 
   void setTimeStampDay( int ); ///< to fix  time stamp for all events, default =not fixed 
-  void setPreferedFlavor(const char *flavor, const char *tableNameMask);   // typo... 
+
   void setPreferredFlavor(const char *flavor, const char *tableNameMask); 
+  void setPreferedFlavor(const char *flavor, const char *tableNameMask){    
+     setPreferredFlavor( flavor, tableNameMask); // typo...
+  }
+
 
   void setDBname(TString name){ dbName=name;}
 
@@ -165,7 +169,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.24 2004/05/26 21:30:36 jwebb Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.25 2004/06/04 13:30:24 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -176,6 +180,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.25  2004/06/04 13:30:24  balewski
+// use gMessMgr for most of output
+//
 // Revision 1.24  2004/05/26 21:30:36  jwebb
 // Fixed typo, added setPreferredFlavor method.  Kept setPreferedFlavor for
 // backwards compatibility.
