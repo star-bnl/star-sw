@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLCMSFrame3DCorrFctn.cxx,v 1.1 2000/08/17 20:48:39 lisa Exp $
+ * $Id: BPLCMSFrame3DCorrFctn.cxx,v 1.2 2000/08/23 19:43:43 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: BPLCMSFrame3DCorrFctn.cxx,v $
+ * Revision 1.2  2000/08/23 19:43:43  lisa
+ * added alternate normalization algorithm to 3d CorrFctns in case normal one fails
+ *
  * Revision 1.1  2000/08/17 20:48:39  lisa
  * Adding correlationfunction in LCMS frame
  *
@@ -64,8 +67,21 @@ BPLCMSFrame3DCorrFctn::~BPLCMSFrame3DCorrFctn(){
 //_________________________
 void BPLCMSFrame3DCorrFctn::Finish(){
   // here is where we should normalize, fit, etc...
-  double NumFact = double(mNumRealsNorm);
-  double DenFact = double(mNumMixedNorm);
+  double NumFact,DenFact;
+  if ((mNumRealsNorm !=0) && (mNumMixedNorm !=0)){
+    NumFact = double(mNumRealsNorm);
+    DenFact = double(mNumMixedNorm);
+  }
+  // can happen that the mNumRealsNorm and mNumMixedNorm = 0 if you do non-standard
+  //   things like making a new CorrFctn and just setting the Numerator and Denominator
+  //   from OTHER CorrFctns which you read in (like when doing parallel processing) 
+  else{
+    cout << "Warning! - no normalization constants defined - I do the best I can..." << endl;
+    int nbins = mNumerator->GetNbinsX();
+    int half_way = nbins/2;
+    NumFact = mNumerator->Integral(half_way,nbins,half_way,nbins,half_way,nbins);
+    DenFact = mDenominator->Integral(half_way,nbins,half_way,nbins,half_way,nbins);
+  }
 
   mRatio->Divide(mNumerator,mDenominator,DenFact,NumFact);
 }
