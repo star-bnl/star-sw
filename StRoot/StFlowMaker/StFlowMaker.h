@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.13 2000/06/30 14:48:34 posk Exp $
+//  $Id: StFlowMaker.h,v 1.14 2000/07/12 17:54:38 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -13,6 +13,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.14  2000/07/12 17:54:38  posk
+//  Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
+//  Apply cuts when reading picoevent file.
+//
 //  Revision 1.13  2000/06/30 14:48:34  posk
 //  Using MessageMgr, changed Eta Symmetry cut.
 //
@@ -119,7 +123,7 @@ public:
   void          SetNanoEventFileName(const Char_t* name="flownanoevent.root");
   void          SetPicoEventFileName(const Char_t* name="flowpicoevent.root");
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.13 2000/06/30 14:48:34 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.14 2000/07/12 17:54:38 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -148,9 +152,9 @@ private:
   Int_t            InitFlowEventRead();       // open StFlowEvent
   void             FillFlowEvent();           // fill the flow event
   void             FillNanoEvent();           // fill nano-DST
-  Bool_t           FillFromNanoDST(const StFlowNanoEvent* pNanoEvent);
+  Bool_t           FillFromNanoDST(StFlowNanoEvent* pNanoEvent);
   void             FillPicoEvent();           // fill nano-DST
-  Bool_t           FillFromPicoDST(const StFlowPicoEvent* pPicoEvent);
+  Bool_t           FillFromPicoDST(StFlowPicoEvent* pPicoEvent);
   void             WriteFlowEvent();          // write StFlowEvent
   void             CloseEventRead();          // close StEvent
   void             PrintSubeventMults();      // for testing

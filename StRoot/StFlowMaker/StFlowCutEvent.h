@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.h,v 1.3 2000/06/30 14:48:30 posk Exp $
+// $Id: StFlowCutEvent.h,v 1.4 2000/07/12 17:54:34 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -13,6 +13,10 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.h,v $
+// Revision 1.4  2000/07/12 17:54:34  posk
+// Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
+// Apply cuts when reading picoevent file.
+//
 // Revision 1.3  2000/06/30 14:48:30  posk
 // Using MessageMgr, changed Eta Symmetry cut.
 //
@@ -46,6 +50,7 @@
 #include <stdlib.h>
 #include "Rtypes.h"
 class StEvent;
+class StFlowPicoEvent;
 
 class StFlowCutEvent {
 
@@ -55,7 +60,9 @@ class StFlowCutEvent {
   virtual      ~StFlowCutEvent();
 
   static Bool_t CheckEvent(StEvent* pEvent);
+  static Bool_t CheckEvent(StFlowPicoEvent* pPicoEvent);
   static Bool_t CheckEtaSymmetry(StEvent* pEvent);
+  static Bool_t CheckEtaSymmetry(StFlowPicoEvent* pPicoEvent);
   static void   PrintCutList();
   static void   SetMult(const Int_t lo, const Int_t hi);
   static void   SetVertexX(const Float_t lo, const Float_t hi);
