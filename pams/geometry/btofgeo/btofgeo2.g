@@ -1,7 +1,10 @@
-* $Id: btofgeo2.g,v 1.9 2004/03/16 18:10:23 llope Exp $
+* $Id: btofgeo2.g,v 1.10 2004/07/06 20:47:45 geurts Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo2.g,v $
+* Revision 1.10  2004/07/06 20:47:45  geurts
+* Replaced zero-dimension volumes with explicit dimensions
+*
 * Revision 1.9  2004/03/16 18:10:23  llope
 * fixed posit1 pieces and added comments for readabilityd
 *
@@ -58,6 +61,8 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
 *            23 Feb  2004 WJL- fine-tuning of run-4 geometry
 *                                 use choice==7 for run-4
 *                                 BTOG_posit1b reflects move of TOFp in run-IV
+*
+*            See CVS Log for comments.
 *
 *
 *******************************************************************************
@@ -525,7 +530,8 @@ Block BTTC  is  the Main Tray Cavity filled with the details for TOFp
       Create and Position BMAA  X=0.0 Z=toff_Slat01z konly='MANY'
 
 *---- interior cooling rails and tubing....
-      Create and Position  BCOO X=0 Y=0 dx=0 dy=0 dz=0
+      Create and Position  BCOO X=0 Y=0 
+
 *---- front end electronics boards
       Create    BFEE       dx=toff_ElecThck/2, 
                            dy=toff_ElecWid/2, 
@@ -784,7 +790,9 @@ EndBlock
 Block BFEE is a G10 FrontEndElectronics board for TOF
       Attribute BFEE seen=0   colo=3
       Material  G10
-      Shape     BOX  dx=0  dy=0  dz=0
+      Shape     BOX  dx=toff_ElecThck/2, 
+                     dy=toff_ElecWid/2, 
+                     dz=toff_ElecLen/2
       Create    BLEM
       Position  BLEM x=toff_ElecThck+(0.7/2) y=-7.0 z=2 
       Position  BLEM x=toff_ElecThck+(0.7/2) y=-3.5 z=2 
@@ -804,7 +812,9 @@ Block BFEE is a G10 FrontEndElectronics board for TOF
 EndBlock
 Block BLEM is a Lemo connector on the FEE boards
       Attribute BLEM seen=0   colo=3
-      Shape     BOX   dx=0 dy=0 dz=0
+        Shape     BOX   dx=(0.68/2 + (0.9-0.72)/2),
+                        dy=(0.68/2),
+                        dz=(2.0/2 + (0.8+1.0)/2)
 **      Create    BRAI  dx=0.9/2    dy=0.7/2    dz=0.7/2
 **      Create    BPIP  Rmin=0.62/2 Rmax=0.68/2 dz=1.0/2
 **      Position  BRAI  x=0            y=0 z=0
