@@ -327,13 +327,22 @@ long cts_detector_response (
 //
 //  Get distance to counter edge
 //
-      float Length = (slat_eta[i_eta].z_max - mhit[i_hit].x[2])
-                     / slat_eta[i_eta].cosang ;
+      float Length;
+      float max_distance;
+      if (geo->detector == 2) {     //WJL
+            Length = (slat_eta[i_eta].z_min - mhit[i_hit].x[2])   //was backwards for TOFp...
+                   /  slat_eta[i_eta].cosang ;
+      max_distance = (slat_eta[i_eta].z_min - slat_eta[i_eta].z_max) 
+                   /  slat_eta[i_eta].cosang ;
+      } else {
+            Length = (slat_eta[i_eta].z_max - mhit[i_hit].x[2])   //leave ctb alone (backwards?)...
+                   /  slat_eta[i_eta].cosang ;
+      max_distance = (slat_eta[i_eta].z_max - slat_eta[i_eta].z_min) 
+                   /  slat_eta[i_eta].cosang ;
+      }
 //
 //    Check length makes sense
 //
-      float max_distance = ( slat_eta[i_eta].z_max - slat_eta[i_eta].z_min ) 
-                           / slat_eta[i_eta].cosang ;
       if ( Length < -1 * mpara->position_tolerance || 
            Length - mpara->position_tolerance > max_distance  ) { 
            sprintf ( OutMessage, 
