@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <iostream>
 
-
 //StEmc
 #include "StEmcClusterCollection.h"
 #include "StEmcPoint.h"
@@ -22,6 +21,7 @@
 #include "TFriendElement.h"
 #include "TFile.h"
 
+
 //StMuDst
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -34,8 +34,14 @@
 
 ClassImp(StJetSimuReader)
 
-    double gDeltaPhi(double p1, double p2);
+double gDeltaPhi(double p1, double p2);
+
 double gDeltaR(const TLorentzVector* jet, const StThreeVectorF& track);
+
+bool verifySimu(int dst, int stored){
+  if (dst==stored) return true;
+  else return false;
+}
 
 StJetSimuReader::StJetSimuReader(const char* name, StMuDstMaker* uDstMaker)
     : StMaker(name), mFile(0), mTree(0), mDstMaker(uDstMaker), mCounter(0), mOfstream(0)
@@ -55,6 +61,7 @@ Int_t StJetSimuReader::Init()
 
 void StJetSimuReader::InitFile(const char* file, const char* simufile)
 {
+  /*
     cout <<"StJetSimuReader::InitFile()"<<endl;
 
     cout <<"open file:\t"<<file<<"\tfor reading"<<endl;
@@ -83,6 +90,7 @@ void StJetSimuReader::InitFile(const char* file, const char* simufile)
 
     cout <<"\tGet Simu Branches"<<endl;
     stree->SetBranchAddress("pid",&pid);
+    stree->SetBranchAddress("evtid",&evtid);
     stree->SetBranchAddress("BHTmax",&BHTmax);
     stree->SetBranchAddress("BJPmax",&BJPmax);
     stree->SetBranchAddress("BJPsum",&BJPsum);
@@ -90,7 +98,7 @@ void StJetSimuReader::InitFile(const char* file, const char* simufile)
     stree->SetBranchAddress("EJPmax",&EJPmax);
     stree->SetBranchAddress("EJPsum",&EJPsum);
     stree->SetBranchAddress("bbc",&bbc);
-    stree->SetBranchAddress("Badc",Badc);
+    stree->SetBranchAddress("Badc",Badc); 
     EveNum=0;
 
     if (!branches) {cout <<"StJetSimuReader::InitFile().  Null branches"<<endl; abort();}
@@ -123,12 +131,13 @@ void StJetSimuReader::InitFile(const char* file, const char* simufile)
     }
     
     cout <<"\tfinished!"<<endl;
-
+  */
     return ;
 }
 
 void StJetSimuReader::InitTree(TTree* tree)
 {
+  /*
     cout <<"StJetSimuReader::InitTree()"<<endl;
 
     cout <<"\tset tree pointer"<<endl;
@@ -172,12 +181,12 @@ void StJetSimuReader::InitTree(TTree* tree)
     }
 
     cout <<"\tfinished!"<<endl;
-
+  */
     return ;
 }
 
 Int_t StJetSimuReader::Make()
-{
+{/*
     if (mTree) { //handle the reading ourselves...
 	int status = mTree->GetEntry(mCounter++);
 	if (status<0) {
@@ -197,7 +206,7 @@ Int_t StJetSimuReader::Make()
 		abort();
 	    }
 	}
-    }
+	}*/
     return kStOk;
 }
 
@@ -214,11 +223,20 @@ Int_t StJetSimuReader::Finish()
 
 void StJetSimuReader::exampleSimuAna()
 {
+  /*
     stree->GetEntry(EveNum);
     cout <<"StJetSimuReader::exampleSimuAna()"<<endl;
+
+    StMuDst* muDst = mDstMaker->muDst();
+    StMuEvent* muEvent = muDst->event();
+    StEventInfo &info=muEvent->eventInfo();
+    int dstid=info.id();
+    cout << "Event # = "<< info.id() << "evtID=  " << evtid <<endl;
+    assert(verifySimu(dstid,evtid));
+
     printf("Event PID=%d,BBCtrig=%d\n",pid,bbc);
     printf("Event BHT=%d,BJP=%d,BSUM=%d,EHT=%d,EJP=%d,ESUM=%d\n",BHTmax,BJPmax,BJPsum,EHTmax,EJPmax,EJPsum);
-    EveNum++;
+    EveNum++;*/
 }
 
 void dumpProtojetToStream(int event, ostream& os, StJets* stjets);
@@ -231,6 +249,7 @@ void StJetSimuReader::exampleEventAna()
 {
     cout <<"StJetSimuReader::exampleEventAna()"<<endl;
 
+    
     //Get pointers to retreive the emc info
     //StEmcGeom* geom = StEmcGeom::getEmcGeom(detname[0].Data());
     //StEmcADCtoEMaker* adc2e =dynamic_cast<StEmcADCtoEMaker*>( GetMaker("Eread") );
@@ -239,6 +258,7 @@ void StJetSimuReader::exampleEventAna()
     //int numHits = data->NTowerHits;
     //cout << "Number Hits: " << numHits;
 	
+    /*
     StMuDst* muDst = 0;
     if (mDstMaker!=0) {
 	muDst = mDstMaker->muDst();
@@ -284,7 +304,7 @@ void StJetSimuReader::exampleEventAna()
 		
 	    }
 	}
-    }
+	}*/
 }
 
 

@@ -50,8 +50,8 @@ public:
     ///An example analysis method, look here for a demonstration of jet/track histogramming
     void exampleEventAna();
     void exampleSimuAna();
-
-private:
+    
+ private:
     JetBranchesMap mStJetsMap;
     TFile* mFile;
     TFile* sFile;
@@ -60,8 +60,9 @@ private:
     StMuDstMaker* mDstMaker;
     int mCounter;
     int EveNum;
-
+    
     int pid;//subprocess id
+    int evtid;//event id 
     int BHTmax;//Barrel HT in event
     int BJPmax;//Barrel max JP in event
     int BJPsum;//Barrle JP sum in event
@@ -72,8 +73,7 @@ private:
     int EJP[6];//EEMC JP Sums
     int bbc;//1 if BBC trigger is met
     int Badc[48];//BBC pmt adc
-    
-    
+
     //temp, MLM
     ofstream* mOfstream; //!
 

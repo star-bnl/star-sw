@@ -33,11 +33,11 @@ Int_t StJetSimuTreeMaker::Init()
     
     //get Makers
     
-    trigMaker=(StJetSimuTrigMaker *)GetMaker("SimuTrig");
-    assert(trigMaker);
+  trigMaker=(StJetSimuTrigMaker *)GetMaker("SimuTrig");
+  assert(trigMaker);
   weightMaker=(StJetSimuWeightMaker *)GetMaker("SimuWeight");
   assert(weightMaker);
-
+  
   //root output file,tree & its branches   
   outfile = new TFile(m,"recreate");
   jTree  = new TTree("Event","Trigger, Pythia and Jet Data");
@@ -53,9 +53,6 @@ Int_t StJetSimuTreeMaker::Init()
   jTree->Branch("EJP",EJP,"EJP[6]/I");
   jTree->Branch("bbc",&bbc,"bbc/I");
   jTree->Branch("Badc",Badc,"Badc[48]/I");
-
-
-
 
 
   pid=0;
@@ -86,6 +83,8 @@ Int_t StJetSimuTreeMaker::Make(){
   //SubProcess ID from StMcEventMaker
   pid=weightMaker->pid;
   if (print) printf("Weight Maker PID=%d\n",pid);
+  evtid=weightMaker->evtid;
+  if (print) printf("Weight Maker evtid=%d\n",evtid);
 
   //BBC TRIGGER
   bbc = trigMaker->bbcTrig;
