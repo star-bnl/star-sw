@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.84 1999/06/09 22:47:29 fisyak Exp $
+# $Id: MakeDll.mk,v 1.85 1999/06/10 21:45:54 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.85  1999/06/10 21:45:54  fisyak
+# More fixes for StDaqLib
+#
 # Revision 1.84  1999/06/09 22:47:29  fisyak
 # Add more stuff for double directory levels
 #
@@ -207,18 +210,19 @@ endif
 #	Skip up to the end
 #
 SRC_DIRS  :=$(SRC_DIR)
-FILES_ALL := $(filter %.c %.cc %.cxx %.f %.F %g, $(wildcard $(addprefix $(SRC_DIR)/*,.c .cc .cxx .f .F .g)))
-ALL_DIRS  :=$(strip $(sort $(dir $(wildcard $(addprefix $(SRC_DIR)/*/*,.c .cc .cxx .f .F .g)))))
+suffixes  :=.c .cc .cxx .f .F .g
+FILES_ALL := $(wildcard $(addprefix $(SRC_DIR)/*,$(suffixes)))
+ALL_DIRS  :=$(strip $(sort $(dir $(wildcard $(addprefix $(SRC_DIR)/*/*,$(suffixes))))))
 ifneq (,$(ALL_DIRS))
 ALL_DIRS  := $(subst / , ,$(ALL_DIRS) )
 ALL_DIRS  := $(strip $(filter-out $(addprefix $(SRC_DIR)/,run examples doc local), $(ALL_DIRS)))
 endif
 ifneq (,$(ALL_DIRS))
-FILES_ALL += $(filter %.c %.cc %.cxx %.f %.F %g, $(wildcard $(addprefix $(SRC_DIRS)/*,.c .cc .cxx .f .F .g)))
+FILES_ALL += $(filter-out $(ALL_DIRS), $(wildcard $(addprefix $(ALL_DIRS)/*,$(suffixes))))
 SRC_DIRS  += $(ALL_DIRS)
 endif
 ifneq ($(GEN_DIR),$(SRC_DIR))
-FILES_ALL += $(filter-out $(SRC_DIRS), $(wildcard $(addprefix $(SRC_DIRS)/, *.f *.F *.g)))
+FILES_ALL += $(filter-out $(wildcard $(addprefix $(SRC_DIRS)/,*.f *.F *.g)), $(FILES_ALL))
 FILES_ALL := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_ALL)))
 endif
 FILES_SRC  = $(filter-out      %Cint.cxx, $(FILES_ALL))
@@ -549,11 +553,11 @@ test:
 	@echo MY_SO_CINT := $(MY_SO_CINT)
 	@echo SL_NEW_CINT := $(SL_NEW_CINT)
 
+	@echo FILES_ALL := $(FILES_ALL)
 	@echo FILES_SRC   := $(FILES_SRC)
 	@echo FILES_D     := $(FILES_D)
 	@echo FILES_O     := $(FILES_O)
 	@echo ALL_DIRS  := $(ALL_DIRS)
-	@echo FILES_ALL := $(FILES_ALL)
 	@echo FILES_ORD := $(FILES_ORD)
 	@echo FILES_DEF := $(FILES_DEF)
 	@echo FILES_SYM := $(FILES_SYM)
