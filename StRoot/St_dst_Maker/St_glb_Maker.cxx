@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.44 1999/03/03 17:13:43 caines Exp $
+// $Id: St_glb_Maker.cxx,v 1.45 1999/03/04 00:06:22 caines Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.45  1999/03/04 00:06:22  caines
+// Fixed so that tte_eval is made if no tracks - for pp events
+//
 // Revision 1.44  1999/03/03 17:13:43  caines
 // Reduced v0,xi table memory allocations
 //
@@ -404,7 +407,9 @@ Int_t St_glb_Maker::Make(){
     evaltrk   = (St_tte_eval   *) tpc_tracks("evaltrk");
     mctrk     = (St_tte_mctrk  *) tpc_tracks("mctrk");
   }
-  St_DataSet         *tpchits = gStChain->DataSet("tpc_hits");
+   if (! evaltrk)    {evaltrk = new St_tte_eval("evaltrk",1); temp->Add(evaltrk);}
+   if (! mctrk)    {mctrk = new St_tte_mctrk("mctrk",1); temp->Add(mctrk);}
+  St_DataSet       *tpchits = gStChain->DataSet("tpc_hits");
   St_tcl_tphit     *tphit     = 0;
   St_tcl_tpcluster *tpcluster = 0;
   if (tpchits) {
@@ -747,7 +752,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.44 1999/03/03 17:13:43 caines Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.45 1999/03/04 00:06:22 caines Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
