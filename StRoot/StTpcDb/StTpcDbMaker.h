@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.4 2000/02/10 00:29:09 hardtke Exp $
+ * $Id: StTpcDbMaker.h,v 1.5 2000/02/17 19:43:21 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.5  2000/02/17 19:43:21  hardtke
+ * fixes to tpc functions
+ *
  * Revision 1.4  2000/02/10 00:29:09  hardtke
  * Add tpg functions to StTpcDbMaker, fix a few bugs
  *
@@ -35,12 +38,16 @@
 #define numberOfPadsAtRow_ F77_NAME(numberofpadsatrow,NUMBEROFPADSATROW)
 #define tpc_row_to_y_ F77_NAME(tpc_row_to_y,TPC_ROW_TO_Y)
 #define tpc_pad_to_x_ F77_NAME(tpc_pad_to_x,TPC_PAD_TO_X)
+#define tpc_x_to_pad_ F77_NAME(tpc_x_to_pad,TPC_X_TO_PAD)
 #define tpc_local_to_global_ F77_NAME(tpc_local_to_global,TPC_LOCAL_TO_GLOBAL)
 #define tpc_global_to_local_ F77_NAME(tpc_global_to_local,TPC_GLOBAL_TO_LOCAL)
 #define tpc_drift_velocity_ F77_NAME(tpc_drift_velocity,TPC_DRIFT_VELOCITY)
 #define tpc_time_to_z_ F77_NAME(tpc_time_to_z,TPC_TIME_TO_Z)
-#define tpc_time_to_z_ F77_NAME(tpc_time_to_z,TPC_TIME_TO_Z)
+#define tpc_z_to_time_ F77_NAME(tpc_z_to_time,TPC_Z_TO_TIME)
 #define tpc_drift_velocity_ F77_NAME(tpc_drift_velocity,TPC_DRIFT_VELOCITY)
+#define tpc_drift_volume_length_ F77_NAME(tpc_drift_volume_length,TPC_DRIFT_VOLUME_LENGTH)
+#define tpc_row_par_ F77_NAME(tpc_row_par,TPC_ROW_PAR)
+#define tpc_global_to_sector_ F77_NAME(tpc_global_to_sector,TPC_GLOBAL_TO_SECTOR)
 extern "C" {
 R__EXTERN int type_of_call numberOfPadsAtRow_(int *);
 }
@@ -49,6 +56,9 @@ R__EXTERN int type_of_call tpc_row_to_y_(float *,float *);
 }
 extern "C" {
 R__EXTERN int type_of_call tpc_pad_to_x_(float *,float *,float *);
+}
+extern "C" {
+R__EXTERN int type_of_call tpc_x_to_pad_(float *,float *,float *);
 }
 extern "C" {
 R__EXTERN int type_of_call tpc_local_to_global_(int *,float *,float *);
@@ -60,7 +70,19 @@ extern "C" {
 R__EXTERN int type_of_call tpc_time_to_z_(int *,int *,int *,int *,float *);
 }
 extern "C" {
+R__EXTERN int type_of_call tpc_z_to_time_(float *,int *,int *,int *,int *);
+}
+extern "C" {
 R__EXTERN int type_of_call tpc_drift_velocity_(float *);
+}
+extern "C" {
+R__EXTERN int type_of_call tpc_drift_volume_length_(float *);
+}
+extern "C" {
+R__EXTERN int type_of_call tpc_row_par_(int *,float *,float *,float *);
+}
+extern "C" {
+R__EXTERN int type_of_call tpc_global_to_sector_(int*, float*);
 }
 #endif
 class StTpcDb;
@@ -83,7 +105,7 @@ class StTpcDbMaker : public StMaker {
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.4 2000/02/10 00:29:09 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.5 2000/02/17 19:43:21 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker, 1)   //StAF chain virtual base class for Makers
 };
