@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDbReader.h,v 1.4 2002/05/04 23:56:30 laue Exp $
+ * $Id: StMuDbReader.h,v 1.5 2003/04/15 18:48:34 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -42,12 +42,15 @@ class StMuDbReader  {
 
 #endif
 
-/// number of entries in internal data base
-inline int StMuDbReader::entriesDb() { return mDb.size(); }
 
 /***************************************************************************
  *
  * $Log: StMuDbReader.h,v $
+ * Revision 1.5  2003/04/15 18:48:34  laue
+ * Minor changes to be able to filter MuDst.root files and an example
+ * how to do this. The StMuDstFilterMaker is just an example, it has to be
+ * customized (spoilers, chrome weels, etc.) by the user.
+ *
  * Revision 1.4  2002/05/04 23:56:30  laue
  * some documentation added
  *

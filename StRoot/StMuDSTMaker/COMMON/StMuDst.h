@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.10 2003/01/23 21:59:50 laue Exp $
+ * $Id: StMuDst.h,v 1.11 2003/04/15 18:48:34 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -64,7 +64,9 @@ public:
   void set(TClonesArray**, TClonesArray**, TClonesArray** emc=0);
   /// resets the pointers to the TClonesArrays to 0
   void unset();
-  /// checks and if necessary corrects the indecies of elements pointing to each other (e.g., a primary track's index to the corresponding gloabl track)
+  /// checks and if necessary corrects the indecies of elements pointing to each other (e.g., a primary track's index to the corresponding global track)
+  static void fixTrackIndices(TClonesArray* primary, TClonesArray* global);
+  /// checks and if necessary corrects the indecies of elements pointing to each other (e.g., a primary track's index to the corresponding global track)
   void fixTrackIndices();
   /// creates a StEvent from the StMuDst (this) and returns a pointer to it. (This function is not yet finished)  
   StEvent* createStEvent();
@@ -183,6 +185,11 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.11  2003/04/15 18:48:34  laue
+ * Minor changes to be able to filter MuDst.root files and an example
+ * how to do this. The StMuDstFilterMaker is just an example, it has to be
+ * customized (spoilers, chrome weels, etc.) by the user.
+ *
  * Revision 1.10  2003/01/23 21:59:50  laue
  * Modification to compile on Solaris.
  *

@@ -1,12 +1,13 @@
 /***************************************************************************
  *
- * $Id: StMuDst2StEventMaker.cxx,v 1.2 2003/03/19 18:58:04 laue Exp $
+ * $Id: StMuDst2StEventMaker.cxx,v 1.3 2003/04/15 18:48:35 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDst2StEventMaker.h"
 
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuDebug.h"
 #include "StEvent/StEventTypes.h"
 #include "StEvent/StTriggerIdCollection.h"
 #include "StEvent/StTriggerId.h"
@@ -25,7 +26,8 @@ int StMuDst2StEventMaker::Init(){
 }
  
 void StMuDst2StEventMaker::Clear() {
-  /* no-op */
+    if ( mStEvent ) delete mStEvent;
+    mStEvent =0;
 }
 
 int StMuDst2StEventMaker::Make(){  ///< create a StEvent from the muDst and put it into the .data tree 
@@ -47,28 +49,36 @@ int StMuDst2StEventMaker::Make(){  ///< create a StEvent from the muDst and put 
     if (mStEvent) {
 	if ( mStEvent->triggerIdCollection() ) {
 	    if ( mStEvent->triggerIdCollection()->l1() ) {
-		cout << "l1 triggers: ";
-		vector<unsigned int> v = mStEvent->triggerIdCollection()->l1()->triggerIds();	
-		for ( unsigned int i=0; i<v.size(); i++) cout << v[i] << " "; 
-		cout << endl;
+		if ( StMuDebug::level()>0 ) {
+		    cout << "l1 triggers: ";
+		    vector<unsigned int> v = mStEvent->triggerIdCollection()->l1()->triggerIds();	
+		    for ( unsigned int i=0; i<v.size(); i++) cout << v[i] << " "; 
+		    cout << endl;
+		}
 	    }
 	    if ( mStEvent->triggerIdCollection()->l2() ) {
-		cout << "l2 triggers: ";
-		vector<unsigned int> v = mStEvent->triggerIdCollection()->l2()->triggerIds();	
-		for ( unsigned int i=0; i<v.size(); i++) cout << v[i] << " "; 
-		cout << endl;
+		if ( StMuDebug::level()>0 ) {
+		    cout << "l2 triggers: ";
+		    vector<unsigned int> v = mStEvent->triggerIdCollection()->l2()->triggerIds();	
+		    for ( unsigned int i=0; i<v.size(); i++) cout << v[i] << " "; 
+		    cout << endl;
+		}
 	    }
 	    if ( mStEvent->triggerIdCollection()->l3() ) {
-		cout << "l3 triggers: ";
-		vector<unsigned int> v = mStEvent->triggerIdCollection()->l3()->triggerIds();	
-		for ( unsigned int i=0; i<v.size(); i++) cout << v[i] << " "; 
-		cout << endl;
+		if ( StMuDebug::level()>0 ) {
+		    cout << "l3 triggers: ";
+		    vector<unsigned int> v = mStEvent->triggerIdCollection()->l3()->triggerIds();	
+		    for ( unsigned int i=0; i<v.size(); i++) cout << v[i] << " "; 
+		    cout << endl;
+		}
 	    }
 	    if ( mStEvent->triggerIdCollection()->nominal() ) {
-		cout << "nominal triggers: ";
-		vector<unsigned int> v = mStEvent->triggerIdCollection()->nominal()->triggerIds();	
-		for ( unsigned int i=0; i<v.size(); i++) cout << v[i] << " "; 
-		cout << endl;
+		if ( StMuDebug::level()>0 ) {
+		    cout << "nominal triggers: ";
+		    vector<unsigned int> v = mStEvent->triggerIdCollection()->nominal()->triggerIds();	
+		    for ( unsigned int i=0; i<v.size(); i++) cout << v[i] << " "; 
+		    cout << endl;
+		}
 	    }
 	}
     }
@@ -86,6 +96,11 @@ ClassImp(StMuDst2StEventMaker)
 /***************************************************************************
  *
  * $Log: StMuDst2StEventMaker.cxx,v $
+ * Revision 1.3  2003/04/15 18:48:35  laue
+ * Minor changes to be able to filter MuDst.root files and an example
+ * how to do this. The StMuDstFilterMaker is just an example, it has to be
+ * customized (spoilers, chrome weels, etc.) by the user.
+ *
  * Revision 1.2  2003/03/19 18:58:04  laue
  * StMuChainMaker: updates for moved file catalog
  * StTriggerIdCollection added to the createStEvent function in StMuDst.cxx
