@@ -5,9 +5,6 @@ macro/global/import *
 
 message 'start tpt_run'
 
-  alias/create STAFCV_OK  1
-  alias/create STAFCV_BAD 0
-
   cd /dui
   tdm/table/rowcount [data]/tpc/tracks/tptrack 0
 
@@ -32,9 +29,6 @@ macro/global/import *
 
 message 'start run_tpt_residuals'
 
-
-  alias/create STAFCV_OK  1
-  alias/create STAFCV_BAD 0
 
   cd /dui
   tdm/table/rowcount [data]/tpc/hits/res 0

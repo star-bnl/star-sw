@@ -6,8 +6,6 @@ macro run_tte_track
 
  message 'start run_tte_track'
 
- alias/create STAFCV_OK  1
- alias/create STAFCV_BAD 0
 
  ami/module/call tte_track _
                         [data]/tpc/tracks/tptrack _
@@ -36,8 +34,6 @@ macro/global/import *
 
 message 'start run_tte'
 
- alias/create STAFCV_OK  1
- alias/create STAFCV_BAD 0
 
  ami/module/call tte _
                [data]/tpc/tracks/tptrack _
@@ -70,8 +66,6 @@ macro/global/import *
 
 message 'start run_tte_hit_match'
 
-alias/create STAFCV_OK  1
-alias/create STAFCV_BAD 0
 
 
  ami/module/call tte_hit_match _

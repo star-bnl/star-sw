@@ -61,8 +61,7 @@ macro run_old
 
   message 'start tss_run'
 
-  alias/create STAFCV_OK 1
-  alias/create STAFCV_BAD 0
+
 *
   ami/module/call tssam_
         [params]/tpc/tsspars/tsspar_

@@ -4,9 +4,6 @@ macro init
   macro/global/import *
   message 'start run tfc_load_native_gains'
 
-  alias/create STAFCV_OK 1
-  alias/create STAFCV_BAD 0
-  
   do j = 1,6
      cd [params]/tpc/BEGIN_RUN
      rowcount IT[j]

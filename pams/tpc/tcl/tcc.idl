@@ -1,0 +1,25 @@
+/*  tcc.idl
+*   This is the staf interface file for Tpc Cluster Characterization (tcc.cc)
+*
+*   written by L. D. Carr -- lcarr@u.washington.edu
+*/
+#include "PAM.idl"
+#include "type_shortdata.idl"
+#include "tcl_tp_seq.idl"
+#include "tcl_tpcluster.idl"
+#include "tcc_morphology.idl"
+#include "tcc_params.idl"
+#include "tcc_cluster_index.idl"
+
+interface tcc : amiModule{
+        STAFCV_T call (
+                  in    type_shortdata aInnerSectorAdcTable
+                , in    type_shortdata aOuterSectorAdcTable
+                , in    tcl_tp_seq aSequenceTable
+                , in    tcl_tpcluster aClusterTable
+                , inout tcc_morphology aMorphologyTable
+		, in    tcc_params  aTccParameterTable
+		, inout tcc_cluster_index aClusterIndexTable
+                );
+};
+/* last mod. for tcc.idl : $Date: 1998/11/25 19:42:56 $ */

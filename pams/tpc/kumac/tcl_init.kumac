@@ -2,7 +2,7 @@
 **************************************************************************
 **************************************************************************
  
-macro read
+macro read_tcl
 macro/global/import *
 
 
@@ -18,16 +18,51 @@ cd [params]/tpc
 return
  
 *********************************************************************
- macro init
+ macro init_tcl
    macro/global/import *
 
  return
  
 **********************************************************************
-*********************************************************************
-**********************************************************************
+  macro init_tcc
+   macro/global/import *
 
+ return
+ 
+* ********************************************************************
+ macro read_tcc
+   macro/global/import *
+     
+   cd [params]/tpc
 
+  message 'reading tcc_params.xdf'
+  dio/newfilestream tccp [top]/tcc_params.xdf r
+  dio/stream/getevent    tccp
+  dio/stream/close       tccp
+  soc/object/oid tccp; oid = staf_result(1); soc/deleteoid [oid]
+ cd /dui
+
+     
+ return
+* 
+* ********************************************************************
+ macro fill_tcc
+   macro/global/import *
+     
+  cd [params]/tpc/tccpars
+     
+  tdm/table/cell/putvalue 'tcc_params[0].numTimeBins'         512.0  
+  tdm/table/cell/putvalue 'tcc_params[0].tpcLength'           2100.0  
+  tdm/table/cell/putvalue 'tcc_params[0].linearizationFactor' 1.2 
+  tdm/table/cell/putvalue 'tcc_params[0].numTpcSlices'        5
+  tdm/table/cell/putvalue 'tcc_params[0].tpcSlice' 0.0 420.0 840.0 1260.0 1680.0
+ 
+  tdm/table/cell/putvalue 'tcc_cluster_index[0].cluster_index' 0
+  tdm/table/cell/putvalue 'tcc_cluster_index[0].current_sector' 0
+  cd /dui
+   
+ return
+* ************************************************************
 
 
 
