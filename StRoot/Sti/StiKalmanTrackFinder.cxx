@@ -358,7 +358,7 @@ void StiKalmanTrackFinder::doInitLayer()
     StiDetector * currentDet = **detectorContainer;
     detectorContainer->moveIn();
     tDet = **detectorContainer;
-    //leadDet = tDet;
+    leadDet = tDet;
     trackMes << "TDET:" << *tDet<<endl;
     if (tDet==0) 
 	throw logic_error("StiKalmanTrackFinder::doInitLayer() ERROR - tDet==0");
@@ -398,7 +398,7 @@ void StiKalmanTrackFinder::doNextDetector()
     //trackMes << "SKTF::doNextDetector()\t- Begins" << endl;
     tNode = trackNodeFactory->getObject();
     if (tNode==0) 
-	throw logic_error("SKTF::followTrackAt()\t- ERROR - tNode==null");
+			throw logic_error("SKTF::followTrackAt()\t- ERROR - tNode==null");
     tNode->reset();			
     trackMes << "New Detector================================ \n ParentNode:"<<*sNode<<endl;
     position = tNode->propagate(sNode, tDet); 
