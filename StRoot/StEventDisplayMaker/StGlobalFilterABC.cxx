@@ -1,11 +1,12 @@
-// $Id: StGlobalFilterABC.cxx,v 1.1 2004/09/28 03:55:23 perev Exp $
+// $Id: StGlobalFilterABC.cxx,v 1.2 2004/10/07 19:41:23 perev Exp $
 #include "StGlobalFilterABC.h"
 #include "TObjArray.h"
+#include "TList.h"
 
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-//  StGlobalFilterABC  class to filter the events from DST                //
+//  StGlobalFilterABC  class to filter the events from DST              //
 //                                                                      //
 //  It can manage the following tables:                                 //
 //  St_dst_dedx , St_dst_point, St_dst_track                            //
@@ -34,11 +35,24 @@
 //////////////////////////////////////////////////////////////////////////
 
 ClassImp(StGlobalFilterABC)
+TList *StGlobalFilterABC::fgGlobalList=0;
 //_____________________________________________________________________________
 StGlobalFilterABC::StGlobalFilterABC(const char *name,const char *title):
                       TNamed(name,title),fRun(0),fEvent(0),fNewEvent(0)
 {
+   SetActive();
+   SetMode(0);
+   SetMaker(0);
+   if (!fgGlobalList) fgGlobalList= new TList;
+   fgGlobalList->Add(this);
 }
+//_____________________________________________________________________________
+StGlobalFilterABC::~StGlobalFilterABC()
+{
+   fgGlobalList->Remove(this);
+}
+
+
 //_____________________________________________________________________________
 void StGlobalFilterABC::Filter(TObjArray *ebjs, int flag)
 {

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.34 2004/09/28 03:55:23 perev Exp $
+// $Id: StEventDisplayMaker.h,v 1.35 2004/10/07 19:41:23 perev Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.35  2004/10/07 19:41:23  perev
+// Tuning
+//
 // Revision 1.34  2004/09/28 03:55:23  perev
 // Global filter introduced
 //
@@ -88,7 +91,7 @@ class StEventDisplayInfo;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.34 2004/09/28 03:55:23 perev Exp $";
+// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.35 2004/10/07 19:41:23 perev Exp $";
 
  private: 
  enum {kCOLORS=20};
@@ -118,7 +121,6 @@ static StEventDisplayInfo *fgInfo;
     TPaveLabel   *mDateTimeLabel;     	//!
 
     TList*        mFilterList;		//! list of filters for StEvent
-    TList*        mGilterList;		//! list of global filters for StEvent
 
     TVolume *fColCash[kCOLORS];
     
@@ -135,7 +137,6 @@ static StEventDisplayInfo *fgInfo;
            void   AddVolume(const char *name); // *MENU*
    virtual const  TList *GetVolumeNameList()   { return m_VolumeList;}
    virtual void   AddFilter(StFilterABC*       filt); 
-   virtual void   AddFilter(StGlobalFilterABC* filt); 
    virtual Int_t  BuildGeometry();
    virtual void   ClearGeometry();
    virtual Int_t  Init();
@@ -194,7 +195,7 @@ static StEventDisplayInfo *fgInfo;
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.34 2004/09/28 03:55:23 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.35 2004/10/07 19:41:23 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:

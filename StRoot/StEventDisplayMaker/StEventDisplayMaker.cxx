@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.102 2004/09/28 03:55:23 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.103 2004/10/07 19:41:23 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -84,6 +84,8 @@
 #include "StHits3DPoints.h"
 #include "StVertices3DPoints.h"
 #include "StHelix3DPoints.h"
+#include "tables/St_dst_point_Table.h"
+#include "tables/St_dst_track_Table.h"
 #include "TTable3Points.h"
 #include "St_Table3PackedPoints.h"
 #include "StVirtualEventFilter.h"
@@ -180,7 +182,6 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   m_ListDataSetNames = 0;
   m_VolumeList       = 0;
   mFilterList        = 0;
-  mGilterList        = 0;
   memset(fColCash,0,sizeof(fColCash));
   
   m_FilterArray   = new TObjArray(kEndOfEventList);
@@ -326,13 +327,6 @@ void StEventDisplayMaker::AddFilter(StFilterABC* filt)
 #ifdef R__QT
     if (fEventControlPanel) fEventControlPanel->AddFilter((TObject*)filt); 
 #endif
-}
-//______________________________________________________________________________
-void StEventDisplayMaker::AddFilter(StGlobalFilterABC* filt)
-{
-    if (!mGilterList) mGilterList = new TList;
-    if (mGilterList->FindObject(filt->GetName())) return;
-    mGilterList->Add(filt);
 }
 //______________________________________________________________________________
 void StEventDisplayMaker::RemoveName(const char *name)
@@ -690,11 +684,25 @@ Color_t StEventDisplayMaker::GetColorAttribute(Int_t adc)
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeTable(const char **positions)
 {
+  int nskip = 500;
   StVirtualEventFilter *filter = 0;
   Int_t tableCounter = 0;
 //  StTrackChair &tracks = *StTrackChair::Instance(m_Table);
 //  if (!(&tracks)) {
   if (StTrackChair::IsTrack(m_Table)==-1) {
+
+     St_dst_point *dstp = (St_dst_point *)m_Table;
+     int nrow = dstp->GetNRows();
+     dst_point_st *dst = dstp->GetTable();
+     int jrow = 0;
+     for (int irow=0;irow<nrow;irow++) {
+       if(!dst[irow].id_track)		continue;
+       if(dst[irow].id_track%nskip) 	continue;
+       if(irow!=jrow) dst[jrow]=dst[irow];
+       jrow++;
+     }
+     dstp->SetNRows(jrow);
+
     filter = (StVirtualEventFilter *)m_FilterArray->At(kTable);
     if (!filter || filter->IsOn() ) {
        tableCounter += MakeTableHits(m_Table,filter,positions[1],&positions[2]);
@@ -702,6 +710,18 @@ Int_t StEventDisplayMaker::MakeTable(const char **positions)
     }
   }
   else {
+     St_dst_track *dstt = (St_dst_track *)m_Table;
+     int nrow = dstt->GetNRows();
+     dst_track_st *dst = dstt->GetTable();
+     int jrow = 0;
+     for (int irow=0;irow<nrow;irow++) {
+       if(!dst[irow].id) 		continue;
+       if(dst[irow].id%nskip) 		continue;
+       if(irow!=jrow) dst[jrow]=dst[irow];
+       jrow++;
+     }
+     dstt->SetNRows(jrow);
+
     filter = (StVirtualEventFilter *)m_FilterArray->At(kTptTrack);
     if (!filter || filter->IsOn() ) {
        StTrackChair tracks(m_Table);
@@ -803,9 +823,10 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
 
   if (!stevs) return 0;
   garbage.Add(stevs);
-  TListIter nextGilter(mGilterList);
+  TListIter nextGilter(StGlobalFilterABC::GetList());
   StGlobalFilterABC *gilt=0;
   while ((gilt=(StGlobalFilterABC*)nextGilter())) {
+    if (!gilt->IsActive()) continue;
     gilt->SetEvent( GetRunNumber(),GetEventNumber());
     gilt->Filter(stevs,kase);
   }
@@ -969,6 +990,7 @@ Int_t StEventDisplayMaker::MakeTableHits(const TTable *points,StVirtualEventFilt
 )
 {
   Int_t totalHits = 0;
+     
   TTable &ttt = *((TTable *)points);
   TString tr = keyColumn; 
   const char *packedList[] = {"dst_point_st"};
@@ -1168,6 +1190,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.103  2004/10/07 19:41:23  perev
+// Tuning
+//
 // Revision 1.102  2004/09/28 03:55:23  perev
 // Global filter introduced
 //
