@@ -1,5 +1,8 @@
-// $Id: StMultiH1F.cxx,v 1.3 2000/08/25 22:03:39 genevb Exp $
+// $Id: StMultiH1F.cxx,v 1.4 2000/08/28 18:47:50 genevb Exp $
 // $Log: StMultiH1F.cxx,v $
+// Revision 1.4  2000/08/28 18:47:50  genevb
+// Better handling of 1 y-bin case
+//
 // Revision 1.3  2000/08/25 22:03:39  genevb
 // Fixed entries problem
 //
@@ -32,7 +35,7 @@ void StMultiH1F::Draw(Option_t *option) {
 
   Int_t ybins = GetNbinsY();
   if (ybins == 1) {
-    TH1F* temp0 = (TH1F*) ProjectionX(GetName(),0,(ybins-1));
+    TH1F* temp0 = (TH1F*) ProjectionX(GetName());
     temp0->SetStats((!TestBit(kNoStats)));
     temp0->Draw();
     return;
