@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.20 2002/04/29 15:50:16 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.21 2002/06/04 13:41:35 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.21  2002/06/04 13:41:35  oldi
+// Minor change: 'west' -> 'hemisphere' (just a naming convention)
+//
 // Revision 1.20  2002/04/29 15:50:16  oldi
 // All tracking parameters moved to StFtpcTrackingParameters.cc/hh.
 // In a future version the actual values should be moved to an .idl file (the
@@ -297,22 +300,22 @@ void StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, UChar_t iterations)
 }
 
 
-void StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t west, UChar_t iterations)
+void StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere, UChar_t iterations)
 {
   // Vertex estiamtion with fit tracks.
   StFtpcVertex v = *vertex;
 
   for (Int_t i = 0; i < iterations; i++) {
-    StFtpcVertex v_new = StFtpcVertex(mTrack, &v, west);
+    StFtpcVertex v_new = StFtpcVertex(mTrack, &v, hemisphere);
     v = v_new;
   }
 
-  if (west == 1) {
+  if (hemisphere == 1) {
     *mVertexWest = v;
   }
 
   else {
-    // west == -1
+    // hemisphere == -1
     *mVertexEast = v;
   }
 

@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.hh,v 1.9 2002/04/05 16:51:20 oldi Exp $
+// $Id: StFtpcVertex.hh,v 1.10 2002/06/04 13:43:54 oldi Exp $
 // $Log: StFtpcVertex.hh,v $
+// Revision 1.10  2002/06/04 13:43:54  oldi
+// Minor change: 'west' -> 'hemisphere' (just a naming convention)
+//
 // Revision 1.9  2002/04/05 16:51:20  oldi
 // Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
 // Each Track inherits from StHelix, now.
@@ -89,7 +92,7 @@ public:
   StFtpcVertex(TObjArray *hits, TH1F *vtx_pos = 0);                                  // constructor from point array   
   StFtpcVertex(St_DataSet *const geant);                                             // constructor from geant
   StFtpcVertex(dst_vertex_st *vertex);                                               // constructor from dst vertex
-  StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t west);                // constructor form track array
+  StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemisphere);          // constructor form track array
   StFtpcVertex(Double_t pos[6]);                                                     // constructor from array of doubles
   StFtpcVertex(Double_t pos[3], Double_t err[3]);                                    // constructor from arrays of doubles (with errors)
   StFtpcVertex(Double_t x,     Double_t y,     Double_t z, 

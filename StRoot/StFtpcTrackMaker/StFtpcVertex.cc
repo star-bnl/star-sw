@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.cc,v 1.9 2002/04/29 15:50:29 oldi Exp $
+// $Id: StFtpcVertex.cc,v 1.10 2002/06/04 13:43:52 oldi Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.10  2002/06/04 13:43:52  oldi
+// Minor change: 'west' -> 'hemisphere' (just a naming convention)
+//
 // Revision 1.9  2002/04/29 15:50:29  oldi
 // All tracking parameters moved to StFtpcTrackingParameters.cc/hh.
 // In a future version the actual values should be moved to an .idl file (the
@@ -373,7 +376,7 @@ StFtpcVertex::StFtpcVertex(dst_vertex_st *vertex)
 }  
 
 
-StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t west)
+StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemisphere)
 {
   // constructor from track array
 
@@ -404,7 +407,7 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t west)
     
     StFtpcTrack *track = (StFtpcTrack*)tracks->At(i);
 
-    if (track->GetHemisphere() == west) {
+    if (track->GetHemisphere() == hemisphere) {
       z_hist.Fill(track->z(track->pathLength(v.GetX(), v.GetY())));
     }
   }
@@ -420,7 +423,7 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t west)
     
     StFtpcTrack *track = (StFtpcTrack*)tracks->At(i);
     
-    if (track->GetHemisphere() == west) {
+    if (track->GetHemisphere() == hemisphere) {
       StThreeVector<Double_t> rv(0, 0, GetZ());
       StThreeVector<Double_t> nv(0,0,1);
       Double_t pl = track->pathLength(rv, nv);
