@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- *  $Id: hbookTest2.cc,v 1.1 1999/02/17 12:43:58 ullrich Exp $
+ *  $Id: hbookTest2.cc,v 1.2 1999/05/19 21:12:48 ullrich Exp $
  *
  *  Author: brian
  *
@@ -11,8 +11,8 @@
  *************************************************************************
  *
  * $Log: hbookTest2.cc,v $
- * Revision 1.1  1999/02/17 12:43:58  ullrich
- * New Revision
+ * Revision 1.2  1999/05/19 21:12:48  ullrich
+ * Change printout
  *
  * Revision 1.2  1999/05/19 21:12:48  ullrich
  * Change printout
@@ -66,11 +66,12 @@ void init_files(string name)
     // histogram
     theHisto = new StHbookHisto("gauss distribution", 100, -10, 10);
 }
-    cout <<"Terminate..." << endl;
+
 void cleanUp()
 {
     cout << "Saving files and cleaning up ... ";
     hbookFile->saveAndClose();
+
     delete hbookFile;
     delete theTuple;
     cout << "done" << endl;
@@ -122,7 +123,6 @@ int main(int argc, char* argv[])
     cout << "N-tuple ID:      " << theTuple->id()      << endl;
     cout << "N-tuple entries: " << theTuple->entries() << endl;
     cout << "N-tuple length:  " << theTuple->length()  << endl;
-    hbookFile->list();
 
     cout << "\nFile information" << endl;
     cout << "hbookFile status: (1) is good " << hbookFile->isGood() << endl;
