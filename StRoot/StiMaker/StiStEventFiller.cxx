@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.11 2003/03/14 19:02:55 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 2.12 2003/04/04 14:48:34 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.12  2003/04/04 14:48:34  pruneau
+ * *** empty log message ***
+ *
  * Revision 2.11  2003/03/14 19:02:55  pruneau
  * various updates - DCA is a bitch
  *
@@ -454,7 +457,7 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
     node = track->getInnerMostHitNode();
   StThreeVectorF origin(node->getRefPosition(),node->getY(),node->getZ());
   origin.rotateZ(node->getRefAngle());
-  StTrackGeometry* geometry =new StHelixModel(short(node->getCharge()),
+  StTrackGeometry* geometry =new StHelixModel(short(track->getCharge()),
 					      node->getPhase(),
 					      fabs(node->getCurvature()),
 					      node->getDipAngle(),
