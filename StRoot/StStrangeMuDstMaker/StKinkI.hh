@@ -11,6 +11,7 @@
 #ifndef  STAR_StKinkI
 #define  STAR_StKinkI
 #include "TROOT.h"
+#include "TMath.h"
 
 class StKinkI {
 public:
@@ -29,6 +30,7 @@ public:
   virtual Float_t parentPrimMomentumX() const=0; // Momenta at the origin
   virtual Float_t parentPrimMomentumY() const=0;
   virtual Float_t parentPrimMomentumZ() const=0;
+  virtual Float_t parentPrimPsi() const;
   virtual Float_t daughterMomentumX() const=0;
   virtual Float_t daughterMomentumY() const=0;
   virtual Float_t daughterMomentumZ() const=0;
@@ -85,6 +87,10 @@ public:
   virtual Float_t  lenDedxParent()      const {return 0;}
   /// Length of dE/dX track of daughter
   virtual Float_t  lenDedxDaughter()    const {return 0;}
+  /// Track id of parent
+  virtual UShort_t keyParent()     const {return 0;}
+  /// Track id of daughter
+  virtual UShort_t keyDaughter()   const {return 0;}
   //@}
 
   /// @name DCAs
@@ -111,13 +117,19 @@ public:
   //@}
 };
 
+inline Float_t StKinkI::parentPrimPsi() const
+             { return TMath::ATan2(parentPrimMomentumY(),
+	                           parentPrimMomentumX()); }
 
 #endif
 
 
 /***********************************************************************
- * $Id: StKinkI.hh,v 3.4 2003/05/30 21:20:18 genevb Exp $
+ * $Id: StKinkI.hh,v 3.5 2004/02/03 03:49:27 genevb Exp $
  * $Log: StKinkI.hh,v $
+ * Revision 3.5  2004/02/03 03:49:27  genevb
+ * Added keys (IDs) for Kink parent and daughter
+ *
  * Revision 3.4  2003/05/30 21:20:18  genevb
  * doxygen savvy, encoding of FTPC mults, change virtual funcs
  *

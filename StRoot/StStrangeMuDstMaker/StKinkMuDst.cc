@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.cc,v 3.9 2003/09/02 17:59:04 perev Exp $
+ * $Id: StKinkMuDst.cc,v 3.10 2004/02/03 03:49:27 genevb Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.cc,v $
+ * Revision 3.10  2004/02/03 03:49:27  genevb
+ * Added keys (IDs) for Kink parent and daughter
+ *
  * Revision 3.9  2003/09/02 17:59:04  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -98,6 +101,7 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex) : StKinkBase()
   mParentMomentumZ = parentMom.z();
   mParentMomentum  = parentMom.mag();
   mParentCharge = kinkVertex->parent()->geometry()->charge();
+  mKeyParent = kinkVertex->parent()->key();
 
   const StThreeVectorF daughterMom = kinkVertex->daughterMomentum();
   mDaughterMomentumX = daughterMom.x();
@@ -105,6 +109,7 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex) : StKinkBase()
   mDaughterMomentumZ = daughterMom.z();
   mDaughterMomentum  = daughterMom.mag();
   mDaughterCharge = kinkVertex->daughter()->geometry()->charge();
+  mKeyDaughter = kinkVertex->daughter()->key();
 
   const StThreeVectorF pos = kinkVertex->position();
   mPositionX = pos.x();
