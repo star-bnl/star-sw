@@ -565,8 +565,7 @@ int FtfSl3::readSector ( struct TPCSECLP *seclp ) {
    }
 
    // run over receiver boards
-// for (iRb=0; iRb<SB_RB_NUM; iRb++) {
-   for (iRb=0; iRb<6; iRb++) {
+   for (iRb=0; iRb<SB_RB_NUM; iRb++) {
 
       if (iRb==6) { 
 	 sector++ ;	// the other Sector
