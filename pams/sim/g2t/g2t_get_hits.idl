@@ -2,8 +2,8 @@
 *           Module: g2t_get_kine
 *           Description: general hit filling 
 *
-*include "PAM.idl"
 */
+#include "PAM.idl"
 #include "g2t_vertex.idl"
 #include "g2t_track.idl"
 #include "g2t_hits.idl"
@@ -13,7 +13,7 @@ interface g2t_get_hits : amiModule{
 			, inout    g2t_hits           p_hits
                         );
 };
-/* Last mod. for g2t: $Date: 1998/01/03 23:46:32 $ */
+/* Last mod. for g2t: $Date: 1998/05/16 19:29:52 $ */
 
 
 
