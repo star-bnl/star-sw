@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.4 1999/03/04 18:12:24 ullrich Exp $
+ * $Id: StMatrix.hh,v 1.5 1999/04/14 23:12:07 fisyak Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,8 +18,11 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
- * Revision 1.4  1999/03/04 18:12:24  ullrich
- * Added namespace 'std'.
+ * Revision 1.5  1999/04/14 23:12:07  fisyak
+ * Add __CINT__ to handle references
+ *
+ * Revision 1.5  1999/04/14 23:12:07  fisyak
+ * Add __CINT__ to handle references
  *
  * Revision 1.4  1999/03/04 18:12:24  ullrich
  * Added namespace 'std'.
@@ -251,7 +254,11 @@ public:
     // classes for implementing m[i][j]
     class StMatrixRow {
     public:
+	StMatrixRow(StMatrix<DataType>&, size_t);
 	DataType& operator[](size_t);
+    private:
+#ifndef __CINT__
+	StMatrix<DataType>& _a;
 #else
 	StMatrix<DataType>* _a;
 #endif
@@ -259,7 +266,11 @@ public:
     };
     class StMatrixRowConst {
     public:
+	StMatrixRowConst (const StMatrix<DataType>&, size_t);
 	const DataType & operator[](size_t) const;
+    private:
+#ifndef __CINT__
+	const StMatrix<DataType>& _a;
 #else
 	const StMatrix<DataType>* _a;
 #endif
