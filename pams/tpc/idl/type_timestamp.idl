@@ -1,0 +1,9 @@
+struct type_timestamp {
+        unsigned long year;
+	unsigned month;
+	unsigned day;
+	unsigned hour;
+	unsigned minute;
+	unsigned second;
+	unsigned systime;
+};
