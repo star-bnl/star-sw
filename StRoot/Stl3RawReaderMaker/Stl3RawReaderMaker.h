@@ -1,7 +1,10 @@
 //
-//  $Id: Stl3RawReaderMaker.h,v 1.4 2001/08/20 22:32:00 struck Exp $
+//  $Id: Stl3RawReaderMaker.h,v 1.5 2001/08/29 20:24:49 struck Exp $
 //
 //  $Log: Stl3RawReaderMaker.h,v $
+//  Revision 1.5  2001/08/29 20:24:49  struck
+//  makes Solaris compiler happy
+//
 //  Revision 1.4  2001/08/20 22:32:00  struck
 //  first version filling L3 counters and algorithm info into StEvent
 //
@@ -62,21 +65,21 @@ class Stl3RawReaderMaker : public StMaker {
     StL3Trigger*       myStL3Trigger ; //!
 
     // switches
-    Bool_t             mWriteMiniEvent ; //!
-    Bool_t             mWriteStEvent ; //!
-    Int_t              mCalculateVertex ; //!
-    Bool_t             mL3On;
+    bool               mWriteMiniEvent ; //!
+    bool               mWriteStEvent ; //!
+    int                mCalculateVertex ; //!
+    bool               mL3On;
 
     // counter
     GlobalCounter      mGlobalCounter[10];
     AlgorithmCounter   mAlgorithmCounter[10][20];
 
-    Int_t              mNumberOfGl3Nodes;
-    Int_t              mNumberOfAlgorithms;
+    int                mNumberOfGl3Nodes;
+    int                mNumberOfAlgorithms;
 
     // limits
-    Int_t              mMaxNumberOfGl3Nodes;
-    Int_t              mMaxNumberOfAlgorithms;
+    int                mMaxNumberOfGl3Nodes;
+    int                mMaxNumberOfAlgorithms;
 
 
  protected:
@@ -105,7 +108,7 @@ class Stl3RawReaderMaker : public StMaker {
    TTree* GetGlobalTrackTree() {return mGlobalTrackTree;} ;
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: Stl3RawReaderMaker.h,v 1.4 2001/08/20 22:32:00 struck Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: Stl3RawReaderMaker.h,v 1.5 2001/08/29 20:24:49 struck Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(Stl3RawReaderMaker, 1)   //StAF chain virtual base class for Makers
 };
