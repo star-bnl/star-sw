@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpMatchMaker.cxx,v 1.2 2003/09/02 17:59:11 perev Exp $
+ * $Id: StTofpMatchMaker.cxx,v 1.3 2003/09/13 19:15:52 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofpMatchMaker.cxx,v $
+ * Revision 1.3  2003/09/13 19:15:52  geurts
+ * Changed passing of StSPtrVecTofData for strobeEvent (see bugtracker ticket #172)
+ *
  * Revision 1.2  2003/09/02 17:59:11  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -987,7 +990,7 @@ void StTofpMatchMaker::writeHistogramsToFile(){
 
 //---------------------------------------------------------------------------
 /// determine pVPD event type (strobe or beam)
-bool StTofpMatchMaker::strobeEvent(StSPtrVecTofData tofData){
+bool StTofpMatchMaker::strobeEvent(StSPtrVecTofData& tofData){
   // determine strobe event from pVPD TDC data
   int strobeTdcMin(0), strobeTdcMax(0);
 
