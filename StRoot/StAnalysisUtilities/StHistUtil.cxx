@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.0 2000/08/25 15:47:38 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.1 2000/08/25 22:06:50 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.1  2000/08/25 22:06:50  genevb
+// Added histo descriptor in top right
+//
 // Revision 2.0  2000/08/25 15:47:38  genevb
 // New revision: cleaned up, multiple PS files
 //
@@ -24,6 +27,7 @@
 #include "TMath.h"
 #include "TString.h"
 #include "TPaveLabel.h"
+#include "TPaveText.h"
 #include "TLegend.h"
 #include "TDatime.h"
 
@@ -36,6 +40,12 @@
 
 Int_t numOfPosPrefixes = 4;
 char* possiblePrefixes[4] = {"","LM","MM","HM"};
+char* possibleSuffixes[4] = {
+  "General",
+  "Low Mult",
+  "Mid Mult",
+  "High Mult"
+};
 
 
 ClassImp(StHistUtil)
@@ -98,6 +108,9 @@ Bool_t StHistUtil::CheckPSFile(const Char_t *histName) {
     m_CurFileName.Insert(insertPos,possiblePrefixes[m_CurPrefix]);
     if (psf) psf->Close();
     if (!m_PsFileName.IsNull()) psf = new TPostScript(m_CurFileName.Data());
+    Ldesc->Clear();
+    Ldesc->AddText(possibleSuffixes[m_CurPrefix]);
+    Ldesc->AddText("Hists");
     return kTRUE;
   }
   return kFALSE;
@@ -113,8 +126,6 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   // set output ps file name
   psf = 0;
 
-  // set global title which goes at top of each page of histograms
-  const Char_t *gtitle = m_GlobalTitle.Data();
 
   //set Style of Plots
   const Int_t numPads = m_PadColumns*m_PadRows;  
@@ -132,13 +143,18 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   //  TCanvas *HistCanvas = new TCanvas("CanvasName","Canvas Title",30*m_PaperWidth,30*m_PaperHeight);
   TCanvas *HistCanvas = new TCanvas("CanvasName"," STAR Maker Histogram Canvas",600,780);
 
-
   // write title at top of canvas - first page
-  TPaveLabel *Ltitle = new TPaveLabel(0.1,0.96,0.9,1.0,(char *)gtitle,"br");
+  Ltitle = new TPaveLabel(0.08,0.96,0.88,1.0,m_GlobalTitle.Data(),"br");
   Ltitle->SetFillColor(18);
   Ltitle->SetTextFont(32);
   Ltitle->SetTextSize(0.5);
   Ltitle->Draw();
+
+  // write descriptor at top of canvas - first page
+  Ldesc = new TPaveText(0.90,0.96,0.99,1.0,"br");
+  Ldesc->SetFillColor(18);
+  Ldesc->SetTextFont(32);
+  Ldesc->Draw();
 
   // now put in date & time at bottom right of canvas - first page
   TDatime HistTime;
@@ -154,7 +170,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   Char_t Ctmp[10];
   ostrstream Cpagenum(Ctmp,10);
   Cpagenum << Ipagenum << ends;
-  TPaveLabel *Lpage = new TPaveLabel(0.1,0.01,0.2,0.03,Ctmp,"br");
+  TPaveLabel *Lpage = new TPaveLabel(0.1,0.01,0.16,0.03,Ctmp,"br");
   Lpage->SetTextSize(0.6);
   Lpage->Draw();
 
@@ -1134,11 +1150,8 @@ Int_t StHistUtil::Overlay1D(Char_t *dirName,Char_t *inHist1,
     TCanvas *newCanvas = new TCanvas("c1d","Combined 1D Histogram",600,780);
     newCanvas->Draw();
 
-// set global title which goes at top of each page of histograms
-    const Char_t *gtitle = m_GlobalTitle.Data();
-
 // write title at top of canvas
-    TPaveLabel *Ltitle = new TPaveLabel(0.1,0.96,0.9,1.0,(char *)gtitle,"br");
+    Ltitle = new TPaveLabel(0.1,0.96,0.9,1.0,m_GlobalTitle.Data(),"br");
     Ltitle->SetFillColor(18);
     Ltitle->SetTextFont(32);
     Ltitle->SetTextSize(0.5);
@@ -1253,15 +1266,12 @@ Int_t StHistUtil::Overlay2D(Char_t *dirName,Char_t *inHist1,
     hist2f1->SetTitle(hist2f1->GetTitle()+(TString)" and "+hist2f2->GetTitle());
     hist2f2->SetTitle(hist2f1->GetTitle());
 
-// set global title which goes at top of each page of histograms
-    const Char_t *gtitle = m_GlobalTitle.Data();
-
 // create a new canvas and pad to write to
     TCanvas *newCanvas = new TCanvas("c2d","Combined 2D Histogram",600,780);
     newCanvas->Draw();
 
 // write title at top of canvas
-    TPaveLabel *Ltitle = new TPaveLabel(0.1,0.96,0.9,1.0,(char *)gtitle,"br");
+    Ltitle = new TPaveLabel(0.1,0.96,0.9,1.0,m_GlobalTitle.Data(),"br");
     Ltitle->SetFillColor(18);
     Ltitle->SetTextFont(32);
     Ltitle->SetTextSize(0.5);

@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.0 2000/08/25 15:47:38 genevb Exp $
+// $Id: StHistUtil.h,v 2.1 2000/08/25 22:06:50 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.1  2000/08/25 22:06:50  genevb
+// Added histo descriptor in top right
+//
 // Revision 2.0  2000/08/25 15:47:38  genevb
 // New revision: cleaned up, multiple PS files
 //
@@ -29,6 +32,7 @@
 class TCanvas;
 class StMaker;
 class TPaveLabel;
+class TPaveText;
 class TDatime;
 class TPostScript;
 
@@ -48,6 +52,8 @@ class StHistUtil {
   TPostScript* psf;      //! Pointer to the current PostScript file
   Int_t   m_CurPrefix;
   TString m_GlobalTitle; // Title at top of each page of output
+  TPaveLabel* Ltitle;   //! PaveLabel with title for pages
+  TPaveText*  Ldesc;    //! PaveLabel with descriptor for hists
   TList*  m_ListOfLogY; //! list of histogram names that will be drawn with logY scale
   TList*  m_ListOfLogX; //! list of histogram names that will be drawn with logX scale
   TList*  m_ListOfPrint;//! list of histogram names that will be drawn,printed
@@ -104,7 +110,7 @@ class StHistUtil {
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.0 2000/08/25 15:47:38 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.1 2000/08/25 22:06:50 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
