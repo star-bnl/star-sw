@@ -10,10 +10,10 @@
 #include "StiHit.h"
 typedef StiObjectFactory<StiHit> StiHitFactory;
 
-//#include "StiTrackNode.h"
-//typedef StiObjectFactory<StiTrackNode> StiTrackNodeFactory;
-
 #include "StiKalmanTrack.h"
 typedef StiObjectFactory<StiKalmanTrack> StiKalmanTrackNodeFactory;
+
+#include "StiEvaluableTrack.h"
+typedef StiObjectFactory<StiEvaluableTrack> StiEvaluableTrackFactory;
 
 #endif

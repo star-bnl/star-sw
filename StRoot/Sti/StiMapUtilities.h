@@ -4,6 +4,7 @@
 #ifndef TpcMapUtilities_h
 #define TpcMapUtilities_h
 
+class StHit;
 class StiHit;
 
 //Structure for hit map key
@@ -40,6 +41,11 @@ struct MaterialMapKey {
 };
 
 //Functors for ordering hits
+struct StHitRadiusLessThan
+{
+    bool operator() (const StHit*, const StHit*) const;
+};
+
 struct StiHitLessThan
 {
     bool operator() (const StiHit*, const StiHit*) const;

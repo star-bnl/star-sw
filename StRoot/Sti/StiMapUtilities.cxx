@@ -5,6 +5,9 @@
 #include <iostream.h>
 #include <math.h>
 
+#include "StThreeVectorD.hh"
+#include "StEventTypes.h"
+
 #include "StiHit.h"
 #include "StiMapUtilities.h"
 
@@ -49,6 +52,15 @@ bool MapKeyLessThan::operator() (const HitMapKey& key1, const HitMapKey& key2) c
     return val;
 }
 
+//Order StHits (NOT Sti!) by radius
+bool StHitRadiusLessThan::operator() (const StHit* hit1, const StHit* hit2) const
+{
+    const StThreeVectorD& pos1 = hit1->position();
+    const StThreeVectorD& pos2 = hit2->position();
+    return (sqrt( pos1.x()*pos1.x() + pos1.y()*pos1.y() + pos1.z()*pos1.z() ) <
+	    sqrt( pos2.x()*pos2.x() + pos2.y()*pos2.y() + pos2.z()*pos2.z() ) );
+}
+	
 //Order by distance along position, then by z
 bool StiHitLessThan::operator() (const StiHit* lhs, const StiHit* rhs) const
 {

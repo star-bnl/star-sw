@@ -67,14 +67,27 @@ bool StiEvaluableTrackSeedFinder::hasMore()
 StiKalmanTrack* StiEvaluableTrackSeedFinder::next()
 {
     bool go=true;
+    StTrack* track = 0;
+    StiEvaluableTrack* returntrack = 0;
+
     while (go && mcurrent!=mend) {
-	StTrack* track = (*mcurrent)->track(mtype);
+	track = (*mcurrent)->track(mtype);
 	if (track && track->flag()>=0) {
 	    go=false;
 	    //mtrackpair->second = track;
 	    ++mcurrent;
+	    returntrack = makeTrack(track);
 	}
 	else ++mcurrent;
     }
-    return 0;
+    return returntrack;
+}
+
+StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StTrack* sttrack)
+{
+    StiEvaluableTrack* track = mfactory->getObject();
+    track->setStTrack(sttrack);
+    //StMcTrack* dummy=0;
+    //track->setMcTrack(dummy);
+    return track;
 }
