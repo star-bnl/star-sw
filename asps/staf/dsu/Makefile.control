@@ -1,9 +1,17 @@
-# Makefile.control
-# Customize these variables to control SLM (STAR Library Make).
+# Sample Makefile.control - You should customize this file.
 #
-# MANDATORY PARAMETERS -------------------------------------------------
-# --NONE--
+# Specify the ASPs and PAMs upon which this package depends.
+#ASPS := nio tbr ami dio dui tdm spx soc
+#PAMS := pam
 #
-# OPTIONAL PARAMETERS --------------------------------------------------
-# --NONE--
+# Specify special user libraries against which to link.
+USER_LIBS := -ldsl
+#
+# Choose flags controlling make.
+DEBUG := TRUE
+#SHARE := TRUE
+#MOTIF := TRUE
+#
+# Specify which CERN libraries against which to link, or take default.
+#CERNLIBS := pawlib packlib mathlib kernlib
 #

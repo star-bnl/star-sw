@@ -2,14 +2,18 @@
 /***********************************************************  INCLUDES  **/
 #include <stdio.h>
 #include <math.h>
+#ifndef sun
 #include <strings.h>
+#else
+#include <string.h>
+#endif /*sun*/
 #include <stdlib.h>
 #include "dstype.h"
 #include "dsxdr.h"
 /* #include "ds.h" */
 #define EXTERN extern
 #include "brow.h"
-#include "cuts.h"
+#include "dscuts.h"
 /***********************************************************  FUNCTIONS  **/
 void GetRidOfWindows(void);
 void CreateDsPointer(char *fn,FILE **ff,XDR *xdr,DS_DATASET_T **dsPtr) {
