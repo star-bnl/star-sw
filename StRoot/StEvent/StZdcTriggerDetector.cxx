@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.cxx,v 2.3 1999/12/21 15:09:28 ullrich Exp $
+ * $Id: StZdcTriggerDetector.cxx,v 2.4 2000/07/13 12:51:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.cxx,v $
- * Revision 2.3  1999/12/21 15:09:28  ullrich
- * Modified to cope with new compiler version on Sun (CC5.0).
+ * Revision 2.4  2000/07/13 12:51:09  ullrich
+ * Added new method numberOfZdcWords to replace old one with wrong name.
  *
  * Revision 2.3  1999/12/21 15:09:28  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -31,22 +31,22 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.3 1999/12/21 15:09:28 ullrich Exp $";
+static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.4 2000/07/13 12:51:09 ullrich Exp $";
 
 ClassImp(StZdcTriggerDetector)
 
 StZdcTriggerDetector::StZdcTriggerDetector()
 {
-    fill_n(mAdc, static_cast<int>(mMaxZdcCounter), 0);
-    fill_n(mTdc, static_cast<int>(mMaxZdcCounter), 0);
+    fill_n(mAdc, static_cast<int>(mMaxZdcWords), 0);
+    fill_n(mTdc, static_cast<int>(mMaxZdcWords), 0);
     fill_n(mSumAdc, 2, 0);
     mSum = 0;
 }
 
 StZdcTriggerDetector::StZdcTriggerDetector(const dst_TrgDet_st& t)
 {
-    copy(t.adcZDC+0, t.adcZDC+mMaxZdcCounter, mAdc);
-    copy(t.tdcZDC+0, t.tdcZDC+mMaxZdcCounter, mTdc);
+    copy(t.adcZDC+0, t.adcZDC+mMaxZdcWords, mAdc);
+    copy(t.tdcZDC+0, t.tdcZDC+mMaxZdcWords, mTdc);
     mSumAdc[east] = t.adcZDCEast;
     mSumAdc[west] = t.adcZDCWest;
     mSum          = t.adcZDCsum;
@@ -55,12 +55,15 @@ StZdcTriggerDetector::StZdcTriggerDetector(const dst_TrgDet_st& t)
 StZdcTriggerDetector::~StZdcTriggerDetector() {/* noop */}
 
 UInt_t
-StZdcTriggerDetector::numberOfZdcCounters() const {return mMaxZdcCounter;}
+StZdcTriggerDetector::numberOfZdcCounters() const {return mMaxZdcWords;}
+
+UInt_t
+StZdcTriggerDetector::numberOfZdcWords() const {return mMaxZdcWords;}
 
 Float_t
 StZdcTriggerDetector::adc(UInt_t i) const
 {
-    if (i < mMaxZdcCounter)
+    if (i < mMaxZdcWords)
         return mAdc[i];
     else
         return 0;
@@ -69,7 +72,7 @@ StZdcTriggerDetector::adc(UInt_t i) const
 Float_t
 StZdcTriggerDetector::tdc(UInt_t i) const
 {
-    if (i < mMaxZdcCounter)
+    if (i < mMaxZdcWords)
         return mTdc[i];
     else
         return 0;
@@ -87,14 +90,14 @@ StZdcTriggerDetector::adcSum() const {return mSum;}
 void
 StZdcTriggerDetector::setAdc(UInt_t i, Float_t val)
 {
-    if (i < mMaxZdcCounter)
+    if (i < mMaxZdcWords)
         mAdc[i] = val;
 }
 
 void
 StZdcTriggerDetector::setTdc(UInt_t i, Float_t val)
 {
-    if (i < mMaxZdcCounter)
+    if (i < mMaxZdcWords)
         mTdc[i] = val;
 }
 
