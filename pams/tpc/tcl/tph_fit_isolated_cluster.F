@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.6 1998/08/26 20:34:21 hardtke Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.7 1998/09/25 20:38:13 sakrejda Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.7  1998/09/25 20:38:13  sakrejda
+* added check in calculation of skewness and curtosis to protect against NaN for 1 pad hits
+*
 * Revision 1.6  1998/08/26 20:34:21  hardtke
 * set clusters of 0 width to 1/sqrt(12)
 *
@@ -297,8 +300,13 @@ C
 
         mu1(1) = rmu(1)
         mu2(1) = sqrt(rmu(2))
-        mu3(1) = rmu(3)/rmu(2)**1.5
-        mu4(1) = rmu(4)/rmu(2)**2 - 3.
+        if(rmu(2).le.0) then
+          mu3(1)=0
+          mu4(1)=0
+        else
+          mu3(1) = rmu(3)/rmu(2)**1.5
+          mu4(1) = rmu(4)/rmu(2)**2 - 3.
+        endif
         mu5(1) = float(ipad_range)
 C------------------------------------------------------------------
 c mal 30aug97 - just put the damn things to zero-- they seem to be randomly
