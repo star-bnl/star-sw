@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.h,v 1.3 2001/02/21 13:14:09 jcs Exp $
+// $Id: StFtpcTrackMaker.h,v 1.4 2001/07/12 13:05:01 oldi Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.4  2001/07/12 13:05:01  oldi
+// QA histogram of FTPC vertex estimation is generated.
+// FTPC vertex estimation is stored as pre vertex (id = 301) in any case, now.
+//
 // Revision 1.3  2001/02/21 13:14:09  jcs
 // Add CVS Id strings in correct place
 //
@@ -32,6 +36,7 @@ class StFtpcTrackMaker : public StMaker {
  private:
 
   protected:
+       TH1F          *m_vtx_pos;    //! vertex position
        TH1F          *m_q;          //! charge
        TH1F          *m_theta;      //! theta
        TH1F          *m_ndedx;      //! # points used in de/dx calulation
@@ -47,7 +52,7 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  Init();                                           // Initialisation 
    virtual Int_t  Make();                                           // actual program
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.3 2001/02/21 13:14:09 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.4 2001/07/12 13:05:01 oldi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
            void   MakeHistograms();                                 // makes histograms
 

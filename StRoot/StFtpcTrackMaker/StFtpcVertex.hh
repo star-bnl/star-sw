@@ -1,5 +1,9 @@
-// $Id: StFtpcVertex.hh,v 1.6 2001/01/25 15:22:43 oldi Exp $
+// $Id: StFtpcVertex.hh,v 1.7 2001/07/12 13:05:03 oldi Exp $
 // $Log: StFtpcVertex.hh,v $
+// Revision 1.7  2001/07/12 13:05:03  oldi
+// QA histogram of FTPC vertex estimation is generated.
+// FTPC vertex estimation is stored as pre vertex (id = 301) in any case, now.
+//
 // Revision 1.6  2001/01/25 15:22:43  oldi
 // Review of the complete code.
 // Fix of several bugs which caused memory leaks:
@@ -49,6 +53,7 @@
 
 #include "TObject.h"
 #include "TObjArray.h"
+#include "TH1.h"
 #include "TVector3.h"
 #include "St_DataSet.h"
 
@@ -63,13 +68,13 @@ private:
 
 public:
 
-  StFtpcVertex();                                                 // default constructor
-  StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints);   // constructor from points        
-  StFtpcVertex(TObjArray *hits);                                  // constructor from point array   
-  StFtpcVertex(St_DataSet *const geant);                          // constructor from geant
-  StFtpcVertex(Double_t pos[3]);                                  // constructor from array of doubles
-  StFtpcVertex(Double_t x, Double_t y, Double_t z);               // constructor from doubles
-  virtual  ~StFtpcVertex();                                       // destructor
+  StFtpcVertex();                                                                    // default constructor
+  StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F *vtx_pos = 0);   // constructor from points        
+  StFtpcVertex(TObjArray *hits, TH1F *vtx_pos = 0);                                  // constructor from point array   
+  StFtpcVertex(St_DataSet *const geant);                                             // constructor from geant
+  StFtpcVertex(Double_t pos[3]);                                                     // constructor from array of doubles
+  StFtpcVertex(Double_t x, Double_t y, Double_t z);                                  // constructor from doubles
+  virtual  ~StFtpcVertex();                                                          // destructor
 
   // getter
   Double_t GetX()     const { return mCoord.X(); }
