@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.13 2001/12/05 17:16:35 porter Exp $
+ * $Id: StDbSql.cc,v 1.14 2001/12/19 20:44:52 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.14  2001/12/19 20:44:52  porter
+ * fixed endTime for run-level queries
+ *
  * Revision 1.13  2001/12/05 17:16:35  porter
  * stand-alone make file no longer had "DLINUX" in compile but this is still needed
  * and returned. Also retrieve elementID list  in query by whereClause for plotting
@@ -524,14 +527,13 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
        Db<<" select unix_timestamp(beginTime) as eTime from "<<dataTables[i];
        Db<<" where beginTime>from_unixtime("<<t1<<")";
        Db<<" and elementID In("<<getElementList(elements,retRows)<<")";
-       Db<<" Order by beginTime desc limit 1"<<endsql;
+       Db<<" Order by beginTime limit 1"<<endsql;
      
        sendMess(DbQInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
        if(Db.Output(&buff)){
-         unsigned int eTime;
- 	 buff.ReadScalar(eTime,"endTime");
-         if(eTime<table->getEndTime())table->setEndTime(eTime);
+         unsigned int eTime=0;
+ 	 if(buff.ReadScalar(eTime,"eTime") && eTime && eTime<table->getEndTime())table->setEndTime(eTime);
          buff.Raz();
        }    
        Db.Release();       
