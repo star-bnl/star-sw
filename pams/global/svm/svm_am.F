@@ -126,7 +126,7 @@ c
 c ! arfinc = search area increase factor (typically = 4.0)
 c            real*4  arfinc
 c
-c ! bmag = magnetic field (t)
+c ! bmag = magnetic field (kG)
 c          if .gt. 0.0 is assumed along the +z-axis
 c          if .lt. 0.0 is assumed along the -z-axis
 c          bmag must not be 0.0, no field calculations require
@@ -245,6 +245,7 @@ ccc
 ccc  staf include statements
 ccc
 #include "svm_am.inc"
+#include "math_constants.inc"
 
 ccc
 ccc  variable declarations
@@ -252,11 +253,11 @@ ccc
       real   ang,angerr,arfac,chisq,chimax,chimin,chisav,chisav_2
       real   chitmp,chi5,cosphi,delpj
       real   dirsvt,dirtpc,dirvec,dirdif,dsp,eangsv,eangtp
-      real   errsvt,errtpc,eta,fac1,phidf2,phidif,phier1
-      real   phier2,phierr,pi,pmass,pmdif,pthgas,pthifc,pthsdd
+      real   errsvt,errtpc,eta,phidf2,phidif,phier1
+      real   phier2,phierr,pmass,pmdif,pthgas,pthifc,pthsdd
       real   partal,pcov,persvt,pertpc,phisvt,phitpc,pin
       real   pmsvt,pmtpc,poserr,pout,psvt,ptmp,ptpc,pthtpc_gas
-      real   pthtot,pthtub,td,tmcs,rad_tpc,rad,slpdif,themcs
+      real   pthtot,pthtub,td,tmcs,slpdif,themcs
       real   xdif,ydif,zdif,zerr,zerr1,zerr2,zeta,zp
       real   zersvt,zertpc,zint,zsvt,ztpc
 
@@ -348,15 +349,11 @@ c
          return
       endif        
 
+
+
       print *,'Begin matching'
-c
-ccc
-ccc   set parameters:
-ccc
-      pi = 3.141592654
-      rad = 180.00/pi
-      fac1 = 0.0029980
-      rad_tpc = rad
+
+      write(6,*) 'Using a field of',vvctrl(1).bmag
 
       NO_TKS_MAX= svtin_h.nok + tpcin_h.nok
 
@@ -476,9 +473,9 @@ ccc
          
       end if
       pin(1) = svtin(i).r0
-      pin(2) = svtin(i).phi0/rad
+      pin(2) = svtin(i).phi0/C_DEG_PER_RAD
       pin(3) = svtin(i).z0
-      pin(4) = svtin(i).psi/rad
+      pin(4) = svtin(i).psi/C_DEG_PER_RAD
       pin(5) = svtin(i).tanl
       pin(6) = abs(svtin(i).invpt)/sqrt(1.0 + pin(5)*pin(5))
 ccc
@@ -490,27 +487,27 @@ ccc
       pcov(l,4) = 0.0
 78    continue
       pcov(1,1) = svtin(i).cov(6)
-      pcov(1,2) = svtin(i).cov(5)/rad
+      pcov(1,2) = svtin(i).cov(5)/C_DEG_PER_RAD
       pcov(1,3) = svtin(i).cov(13)
       pcov(1,5) = svtin(i).cov(9)
       pcov(1,6) = svtin(i).cov(4)
-      pcov(2,1) = svtin(i).cov(5)/rad
-      pcov(2,2) = svtin(i).cov(3)/(rad*rad)
-      pcov(2,3) = svtin(i).cov(12)/rad
-      pcov(2,5) = svtin(i).cov(8)/rad
-      pcov(2,6) = svtin(i).cov(2)/rad
+      pcov(2,1) = svtin(i).cov(5)/C_DEG_PER_RAD
+      pcov(2,2) = svtin(i).cov(3)/(C_DEG_PER_RAD*C_DEG_PER_RAD)
+      pcov(2,3) = svtin(i).cov(12)/C_DEG_PER_RAD
+      pcov(2,5) = svtin(i).cov(8)/C_DEG_PER_RAD
+      pcov(2,6) = svtin(i).cov(2)/C_DEG_PER_RAD
       pcov(3,1) = svtin(i).cov(13)
-      pcov(3,2) = svtin(i).cov(12)/rad
+      pcov(3,2) = svtin(i).cov(12)/C_DEG_PER_RAD
       pcov(3,3) = svtin(i).cov(15)
       pcov(3,5) = svtin(i).cov(14)
       pcov(3,6) = svtin(i).cov(11)
       pcov(5,1) = svtin(i).cov(9)
-      pcov(5,2) = svtin(i).cov(8)/rad
+      pcov(5,2) = svtin(i).cov(8)/C_DEG_PER_RAD
       pcov(5,3) = svtin(i).cov(14)
       pcov(5,5) = svtin(i).cov(10)
       pcov(5,6) = svtin(i).cov(7)
       pcov(6,1) = svtin(i).cov(4)
-      pcov(6,2) = svtin(i).cov(2)/rad
+      pcov(6,2) = svtin(i).cov(2)/C_DEG_PER_RAD
       pcov(6,3) = svtin(i).cov(11)
       pcov(6,5) = svtin(i).cov(7)
       pcov(6,6) = svtin(i).cov(1)
@@ -519,7 +516,7 @@ ccc
       if(svtin(i).invpt .lt. 0.0) pidsvt(ksvt) = 9
       pmsvt(ksvt) = 1.00/pin(6)
       call pid(pidsvt(ksvt),pmass,zp)
-      call cnvrt(pin,pout,zp,vvctrl(1).bmag,fac1,pi)
+      call cnvrt(pin,pout,zp,vvctrl(1).bmag)
       do 71 k = 1,6
 71    psvt(k,ksvt) = pout(k)
       call ipt(pout,vvctrl(1).rsdd3,zp,vvctrl(1).bmag,ang(1),td(1),
@@ -578,9 +575,9 @@ ccc
       if(vvctrl(1).ktrl1.eq.0) go to 77
       do 73 j = 1,6
       ptmp(1) = svtin(i).r0
-      ptmp(2) = svtin(i).phi0/rad
+      ptmp(2) = svtin(i).phi0/C_DEG_PER_RAD
       ptmp(3) = svtin(i).z0
-      ptmp(4) = svtin(i).psi/rad
+      ptmp(4) = svtin(i).psi/C_DEG_PER_RAD
       ptmp(5) = svtin(i).tanl
       ptmp(6) = abs(svtin(i).invpt)
       if(ptmp(j) .eq. 0.0) then
@@ -591,7 +588,7 @@ ccc
          ptmp(j) = 1.01*ptmp(j)
       end if
       ptmp(6) = ptmp(6)/sqrt(1.0 + ptmp(5)*ptmp(5))
-      call cnvrt(ptmp,pout,zp,vvctrl(1).bmag,fac1,pi)
+      call cnvrt(ptmp,pout,zp,vvctrl(1).bmag)
       call ipt(pout,vvctrl(1).rmatch,zp,vvctrl(1).bmag,ang(1),td(1),
      1     cosphi(1),zint(1),iercod,dirvec)
       zeta = dirsvt(1,ksvt)*dirvec(1) + dirsvt(2,ksvt)*dirvec(2)
@@ -650,9 +647,9 @@ ccc
          goto 999
       end if
       pin(1) = tpcin(i).r0
-      pin(2) = tpcin(i).phi0/rad_tpc
+      pin(2) = tpcin(i).phi0/C_DEG_PER_RAD
       pin(3) = tpcin(i).z0
-      pin(4) = tpcin(i).psi/rad_tpc
+      pin(4) = tpcin(i).psi/C_DEG_PER_RAD
       pin(5) = tpcin(i).tanl
       pin(6) = tpcin(i).invp/sqrt(1.0 + pin(5)*pin(5))
 cc
@@ -664,27 +661,27 @@ cc
       pcov(l,4) = 0.0
 88    continue
       pcov(1,1) = tpcin(i).cov(6)
-      pcov(1,2) = tpcin(i).cov(5)/rad_tpc
+      pcov(1,2) = tpcin(i).cov(5)/C_DEG_PER_RAD
       pcov(1,3) = tpcin(i).cov(13)
       pcov(1,5) = tpcin(i).cov(9)
       pcov(1,6) = tpcin(i).cov(4)
-      pcov(2,1) = tpcin(i).cov(5)/rad_tpc
-      pcov(2,2) = tpcin(i).cov(3)/(rad_tpc*rad_tpc)
-      pcov(2,3) = tpcin(i).cov(12)/rad_tpc
-      pcov(2,5) = tpcin(i).cov(8)/rad_tpc
-      pcov(2,6) = tpcin(i).cov(2)/rad_tpc
+      pcov(2,1) = tpcin(i).cov(5)/C_DEG_PER_RAD
+      pcov(2,2) = tpcin(i).cov(3)/(C_DEG_PER_RAD*C_DEG_PER_RAD)
+      pcov(2,3) = tpcin(i).cov(12)/C_DEG_PER_RAD
+      pcov(2,5) = tpcin(i).cov(8)/C_DEG_PER_RAD
+      pcov(2,6) = tpcin(i).cov(2)/C_DEG_PER_RAD
       pcov(3,1) = tpcin(i).cov(13)
-      pcov(3,2) = tpcin(i).cov(12)/rad_tpc
+      pcov(3,2) = tpcin(i).cov(12)/C_DEG_PER_RAD
       pcov(3,3) = tpcin(i).cov(15)
       pcov(3,5) = tpcin(i).cov(14)
       pcov(3,6) = tpcin(i).cov(11)
       pcov(5,1) = tpcin(i).cov(9)
-      pcov(5,2) = tpcin(i).cov(8)/rad_tpc
+      pcov(5,2) = tpcin(i).cov(8)/C_DEG_PER_RAD
       pcov(5,3) = tpcin(i).cov(14)
       pcov(5,5) = tpcin(i).cov(10)
       pcov(5,6) = tpcin(i).cov(7)
       pcov(6,1) = tpcin(i).cov(4)
-      pcov(6,2) = tpcin(i).cov(2)/rad_tpc
+      pcov(6,2) = tpcin(i).cov(2)/C_DEG_PER_RAD
       pcov(6,3) = tpcin(i).cov(11)
       pcov(6,5) = tpcin(i).cov(7)
       pcov(6,6) = tpcin(i).cov(1)
@@ -693,7 +690,7 @@ cc
       if(tpcin(i).q .lt. 0) pidtpc(ktpc) = 9
       pmtpc(ktpc) = 1.00/pin(6)
       call pid(pidtpc(ktpc),pmass,zp)
-      call cnvrt(pin,pout,zp,vvctrl(1).bmag,fac1,pi)
+      call cnvrt(pin,pout,zp,vvctrl(1).bmag)
       do 81 k = 1,6
 81    ptpc(k,ktpc) = pout(k)
       call ipt(pout,tpcin(i).r0 - 0.1,zp,vvctrl(1).bmag,ang(1),
@@ -757,9 +754,9 @@ ccc
       if(vvctrl(1).ktrl1.eq.0) go to 870
       do 83 j = 1,6
       ptmp(1) = tpcin(i).r0
-      ptmp(2) = tpcin(i).phi0/rad_tpc
+      ptmp(2) = tpcin(i).phi0/C_DEG_PER_RAD
       ptmp(3) = tpcin(i).z0
-      ptmp(4) = tpcin(i).psi/rad_tpc
+      ptmp(4) = tpcin(i).psi/C_DEG_PER_RAD
       ptmp(5) = tpcin(i).tanl
       ptmp(6) = tpcin(i).invp
       if(ptmp(j) .eq. 0.0) then
@@ -770,7 +767,7 @@ ccc
          ptmp(j) = 1.01*ptmp(j)
       end if
       ptmp(6) = ptmp(6)/sqrt(1.0 + ptmp(5)*ptmp(5))
-      call cnvrt(ptmp,pout,zp,vvctrl(1).bmag,fac1,pi)
+      call cnvrt(ptmp,pout,zp,vvctrl(1).bmag)
       call ipt(pout,vvctrl(1).rmatch,zp,vvctrl(1).bmag,ang(1),td(1),
      1     cosphi(1),zint(1),iercod,dirvec)
       zeta = dirtpc(1,ktpc)*dirvec(1) + dirtpc(2,ktpc)*dirvec(2)
@@ -832,7 +829,7 @@ ccc  and tpc tracks.
 ccc
       if(pidsvt(i) .ne. pidtpc(j)) go to 92
       phidif = abs(phisvt(i) - phitpc(j))
-      phidf2 = abs(2.00*pi - phidif)
+      phidf2 = abs(C_2PI - phidif)
       phidif = min(phidif,phidf2)
       phierr = persvt(i) + pertpc(j)
       if(phidif.gt.(phierr*arfac)) go to 92
@@ -1200,27 +1197,29 @@ ccc
 
       return
       end
-      subroutine cnvrt(pin,pout,q,bmag,fac1,pi)
+      subroutine cnvrt(pin,pout,q,bmag)
       implicit none
+#include "math_constants.inc"
+#include "phys_constants.inc"
 ccc
 ccc   This subr: takes the LBL helix parameters: (r0, phi0, z0, psi,
 ccc   tan(theta), and p**(-1) ) and converts to the Wayne State form:
 ccc
 ccc   q = charge
-ccc   bmag = magnetic field in tesla, .gt. 0.0 if along +z-axis
+ccc   bmag = magnetic field in kGauss, .gt. 0.0 if along +z-axis
 ccc   fac1 = factor (see notes)
 ccc   pi = 3.14...
 ccc
 ccc   variable and array type declarations
 ccc
-      real bmag,cth,fac1,pi,q,radius,sgn,t0,xctr,yctr,pin,pout
+      real bmag,cth,q,radius,sgn,t0,xctr,yctr,pin,pout
       dimension pin(6), pout(7)
       sgn = (q/abs(q))*(bmag/abs(bmag))
       cth = atan(pin(5))
-      radius = cos(cth)/(abs(q)*abs(bmag)*fac1*pin(6))
-      xctr = pin(1)*cos(pin(2)) + radius*cos(pin(4) - sgn*pi
+      radius = cos(cth)/(abs(q)*abs(bmag)*C_D_CURVATURE*pin(6))
+      xctr = pin(1)*cos(pin(2)) + radius*cos(pin(4) - sgn*C_PI
      1       /2.00)
-      yctr = pin(1)*sin(pin(2)) + radius*sin(pin(4) - sgn*pi
+      yctr = pin(1)*sin(pin(2)) + radius*sin(pin(4) - sgn*C_PI
      1       /2.00)
       t0 = atan2(pin(1)*sin(pin(2)) - yctr,
      1           pin(1)*cos(pin(2)) - xctr)
@@ -1263,13 +1262,14 @@ ccc                    particle momentum at the intercept point.
 ccc
 ccc  variable and array type declarations
 ccc
+
+#include "math_constants.inc"
       real ang,cosphi,ddd,dsx,dsy,dsz,eq,fac1,fac2,r,rd,sl,t0
       real xc,yc,z0,zint,zp,dirvec,p
-      real bmag,xint,yint,xintpp,yintpp,tint,xid,pi,angint
+      real bmag,xint,yint,xintpp,yintpp,tint,xid,angint
       integer iercod
       dimension p(7), dirvec(3)
       iercod = 0
-      pi = 3.141592654
       eq = (zp/abs(zp))*(bmag/abs(bmag))
       xc = p(1)
       yc = p(2)
@@ -1297,9 +1297,9 @@ ccc
       tint = atan2(yintpp,xintpp)
       xid = -eq*tint
       if(p(7).le.rd) then
-           if(xid.lt.0.0) xid = 2.0*pi + xid
+           if(xid.lt.0.0) xid = C_2PI + xid
       else
-           if(xid.gt.0.0) xid = xid - 2.0*pi
+           if(xid.gt.0.0) xid = xid - C_2PI
       end if
       zint = z0 + r*sl*xid
       angint = -eq*xid + t0
