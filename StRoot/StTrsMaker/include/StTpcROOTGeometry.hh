@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcROOTGeometry.hh,v 1.1 1999/03/23 03:38:48 lasiuk Exp $
+ * $Id: StTpcROOTGeometry.hh,v 1.2 1999/04/07 00:47:50 lasiuk Exp $
  *
  * Author: brian March 22, 1999
  *
@@ -12,6 +12,9 @@
  **********************************************************************
  *
  * $Log: StTpcROOTGeometry.hh,v $
+ * Revision 1.2  1999/04/07 00:47:50  lasiuk
+ * add z offset for driftLength
+ *
  * Revision 1.1  1999/03/23 03:38:48  lasiuk
  * Initial Revision
  *
@@ -99,6 +102,8 @@ public:
     double ifcRadius()                  const;
     double ofcRadius()                  const;
     double frischGrid()                 const;
+    double innerSectorzOffSet()         const;
+    double outerSectorzOffSet()         const;
     
     bool   acceptance(StThreeVector<StDouble>&) const;
 
@@ -146,6 +151,10 @@ private:
     
     double mFrischGrid;
     double mDriftDistance;
+    double mInnerSectorzOffSet;
+    double mOuterSectorzOffSet;
+    
+    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<int> mPadsInRow;
     vector<double> mRadialDistanceAtRow;
@@ -200,6 +209,9 @@ inline double StTpcROOTGeometry::outerSectorPadPitch() const {return (mOuterSect
 inline double StTpcROOTGeometry::frischGrid() const {return (mFrischGrid);}
 inline double StTpcROOTGeometry::endCapZ()    const {return (mEndCapZ);}
 inline double StTpcROOTGeometry::driftDistance() const {return (mDriftDistance);}
+inline double StTpcROOTGeometry::innerSectorzOffSet() const {return mInnerSectorzOffSet;}
+inline double StTpcROOTGeometry::outerSectorzOffSet() const {return mOuterSectorzOffSet;}
+
 inline double StTpcROOTGeometry::ifcRadius()    const {return (mIfcRadius);}
 inline double StTpcROOTGeometry::ofcRadius()    const {return (mOfcRadius);}
 

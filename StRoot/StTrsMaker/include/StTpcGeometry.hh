@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcGeometry.hh,v 1.2 1998/12/15 11:20:36 lasiuk Exp $
+ * $Id: StTpcGeometry.hh,v 1.3 1999/04/07 00:47:49 lasiuk Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTpcGeometry.hh,v $
+ * Revision 1.3  1999/04/07 00:47:49  lasiuk
+ * add z offset for driftLength
+ *
  * Revision 1.2  1998/12/15 11:20:36  lasiuk
  * add i/o sector spacing = 3 mm
  *
@@ -106,6 +109,8 @@ public:
     virtual double ifcRadius()              const = 0;
     virtual double ofcRadius()              const = 0;
     virtual double endCapZ()                const = 0;
+    virtual double innerSectorzOffSet()     const = 0;
+    virtual double outerSectorzOffSet()     const = 0;
 
     // careful for sun
     virtual bool   acceptance(StThreeVector<StDouble>&) const = 0;
