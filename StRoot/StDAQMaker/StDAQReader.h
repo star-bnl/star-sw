@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.18 2001/07/16 21:38:44 perev Exp $
+ * $Id: StDAQReader.h,v 1.19 2002/01/17 21:14:38 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.19  2002/01/17 21:14:38  perev
+ * Akio FPD reader
+ *
  * Revision 1.18  2001/07/16 21:38:44  perev
  * EMC added
  *
@@ -81,9 +84,11 @@ class StSVTReader ;
 #include "StDaqLib/RICH/RICH_Reader.hh"
 #include "StDaqLib/L3/L3_Reader.hh"
 #include "StDaqLib/TOF/TOF_Reader.hh"
+#include "StDaqLib/FPD/FPD_Reader.hh"
 typedef RICH_Reader StRICHReader;
 typedef L3_Reader   StL3Reader;
 typedef TOF_Reader  StTOFReader;
+typedef FPD_Reader  StFPDReader;
 
 #endif /*__CINT__*/
 
@@ -92,6 +97,7 @@ typedef TOF_Reader  StTOFReader;
 class StRICHReader;
 class StL3Reader;
 class StTOFReader;
+class StFPDReader;
 
 #endif /*__CINT__*/
 
@@ -120,6 +126,7 @@ public:
   virtual int TPCPresent () const;  
   virtual int SVTPresent () const; 
   virtual int TOFPresent () const;
+  virtual int FPDPresent () const;
   virtual int EMCPresent () const;
   virtual int SMDPresent () const;
   virtual int FTPCPresent() const;
@@ -139,6 +146,7 @@ public:
   StSVTReader  *getSVTReader ();
   StL3Reader   *getL3Reader  ();
   StTOFReader  *getTOFReader ();
+  StFPDReader  *getFPDReader ();
   virtual void printEventInfo();
   virtual int  getEventSize() const;
   virtual EventReader *getEventReader() const {return fEventReader;}  
@@ -155,6 +163,7 @@ protected:
   StSVTReader  *fSVTReader;
   StL3Reader   *fL3Reader;
   StTOFReader  *fTOFReader;
+  StFPDReader  *fFPDReader;
   long fOffset;
   DAQEventInfo *fEventInfo;
   char *fFile;
