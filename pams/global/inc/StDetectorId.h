@@ -3,7 +3,7 @@ enum StDetectorId {
   kUnknownId = kUnknownIdentifier,
   kTpcId = kTpcIdentifier,
   kSvtId = kSvtIdentifier,
-  RichId = kRichIdentifier,
+  kRichId = kRichIdentifier,
   kFtpcWestId = kFtpcWestIdentifier,
   kFtpcEastId = kFtpcEastIdentifier,
   kTofPatchId = kTofPatchIdentifier,
