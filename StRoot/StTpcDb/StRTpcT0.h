@@ -1,13 +1,13 @@
 #ifndef __STRTPCT0__
 #define __STRTPCT0__
 #include <StTpcT0I.h>
-#include <timeOffsets.time.h>
+#include "StDbLib/Calibrations/tpcTimeOffsets.h"
 
 class StRTpcT0 : public StTpcT0I {
 
 private:
 
-  time_offsets mT0;
+  tpcTimeOffsets* mT0;
   int mSector;
   StTpcPadPlaneI* padplane;
 
@@ -15,7 +15,7 @@ public:
 
   StRTpcT0(){}
   ~StRTpcT0(){}
-  void AddData(time_offsets T0In) {
+  void AddData(tpcTimeOffsets* T0In) {
       mT0 = T0In;
    }
 
