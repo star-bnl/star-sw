@@ -2,7 +2,12 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.cxx,v $
+// Revision 1.9  2001/02/01 22:23:11  suaide
+// Fixed some memory leaks
+//
 // Revision 1.8  2000/12/01 21:15:42  suaide
+//
+//
 // Small fixes in StPreEclMaker::Make()
 //       if some detector fails to find clusters it was aborting the chain
 //
@@ -142,6 +147,12 @@ StEmcPreClusterCollection::StEmcPreClusterCollection(const Char_t *Name, StEmcDe
      
   
   kIsOk=kTRUE;
+}
+//_____________________________________________________________________________
+StEmcPreClusterCollection::~StEmcPreClusterCollection()
+{
+  delete geo;
+  mClusters.Delete();
 }
 //_____________________________________________________________________________
 Int_t StEmcPreClusterCollection::findClusters()
@@ -597,9 +608,10 @@ void StEmcPreClusterCollection::setNewClusters(Int_t mod,Int_t ini,Int_t shift,T
   }  
   eta/=en;
   phi/=en;
-  StEmcPreCluster *c=new StEmcPreCluster(mod,&newhits,mDetector);
-  c->calcMeanAndRms(mDet,mod);
-  mClusters.AddAt(c,applyOnThese[ini]+idBeforeClustering);
+//  StEmcPreCluster *c=new StEmcPreCluster(mod,&newhits,mDetector);
+//  c->calcMeanAndRms(mDet,mod);
+//  mClusters.AddAt(c,applyOnThese[ini]+idBeforeClustering); 
+  mClusters.AddAt(new StEmcPreCluster(mod,&newhits,mDetector,mDet),applyOnThese[ini]+idBeforeClustering);
   for(Int_t i=ini+1;i<=ini+shift;i++) mClusters[applyOnThese[i]+idBeforeClustering]=0;
 
 }
@@ -635,9 +647,11 @@ Float_t StEmcPreClusterCollection::profile(Float_t x,Float_t xavg,Float_t e)
 //_____________________________________________________________________________
 void StEmcPreClusterCollection::addPreCluster(Int_t mod, TArrayI *hid)
 {
-  StEmcPreCluster *cluster = new StEmcPreCluster(mod,hid,mDetector);
+/*  StEmcPreCluster *cluster = new StEmcPreCluster(mod,hid,mDetector);
   cluster->calcMeanAndRms(mDet,mod);
-  mClusters.Add(cluster);
+  mClusters.Add(cluster);*/
+  mClusters.Add(new StEmcPreCluster(mod,hid,mDetector,mDet));
+  
   mNclusters  += 1;
 }
 //_____________________________________________________________________________

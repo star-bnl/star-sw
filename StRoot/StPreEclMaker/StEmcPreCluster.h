@@ -1,8 +1,13 @@
 //
-// $Id: StEmcPreCluster.h,v 1.4 2000/08/24 22:11:34 suaide Exp $
+// $Id: StEmcPreCluster.h,v 1.5 2001/02/01 22:23:10 suaide Exp $
 //
 // $Log: StEmcPreCluster.h,v $
+// Revision 1.5  2001/02/01 22:23:10  suaide
+// Fixed some memory leaks
+//
 // Revision 1.4  2000/08/24 22:11:34  suaide
+//
+//
 // restored some files for background compatibility
 //
 // Revision 1.3  2000/08/24 19:45:37  suaide
@@ -48,6 +53,7 @@
 class StEmcPreCluster : public TObject {
 
 private:
+  Int_t             mDetector;
   Int_t             mModule;
   Float_t           mEta;
   Float_t           mPhi;
@@ -59,6 +65,7 @@ private:
 public: 
                     StEmcPreCluster(TArrayI*);
                     StEmcPreCluster(Int_t,TArrayI*,Int_t);
+                    StEmcPreCluster(Int_t,TArrayI*,Int_t,StEmcDetector*);
                     ~StEmcPreCluster();
   Float_t           Eta() const;
   Float_t           Phi() const;
