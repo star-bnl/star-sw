@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSector.hh,v 1.1 1998/11/10 17:12:12 fisyak Exp $
+ * $Id: StTrsSector.hh,v 1.2 1999/01/18 21:03:32 lasiuk Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StTrsSector.hh,v $
- * Revision 1.1  1998/11/10 17:12:12  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/18 21:03:32  lasiuk
+ * Jan 18,1999
  *
  * Revision 1.1  1998/11/10 17:12:12  fisyak
  * Put Brian trs versin into StRoot
@@ -85,10 +85,10 @@ public:
 private:
     tpcSector mSector;
 };
-inline tpcTimeBins& StTrsSector::timeBinsOfRowAndPad(int row, int pad) { return (mSector[row][pad]); }
-inline tpcPadRow&   StTrsSector::padsOfRow(int row) { return (mSector[row]); }
+inline tpcTimeBins& StTrsSector::timeBinsOfRowAndPad(int rowN, int padN) { return (mSector[(rowN-1)][(padN-1)]); }
+inline tpcPadRow&   StTrsSector::padsOfRow(int rowN) { return (mSector[(rowN-1)]); }
 inline tpcSector&   StTrsSector::rows() { return (mSector); }
 inline int          StTrsSector::size() const { return mSector.size();}
 inline int          StTrsSector::numberOfRows() const { return mSector.size();}
-inline int          StTrsSector::numberOfPadsInRow(int r) const { return mSector[r].size();}
+inline int          StTrsSector::numberOfPadsInRow(int rowN) const { return mSector[(rowN-1)].size();}
 #endif
