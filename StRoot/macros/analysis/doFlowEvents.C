@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.49 2003/08/26 21:18:12 posk Exp $
+// $Id: doFlowEvents.C,v 1.50 2003/09/05 18:01:37 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -84,26 +84,28 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   // First load some shared libraries we need
   // (Do it in this order)
   //
-  gSystem->Load("St_base");
-  gSystem->Load("StChain");
 
+//   gSystem->Load("St_base");
+//   gSystem->Load("StChain");
+//   gSystem->Load("St_Tables");
+//   gSystem->Load("StUtilities");
+//   gSystem->Load("StTreeMaker");
+//   gSystem->Load("StIOMaker");
+//   gSystem->Load("StarClassLibrary");
+//   gSystem->Load("StEvent");
+//   gSystem->Load("StEventUtilities");
+//   gSystem->Load("StEmcUtil");
+//   gSystem->Load("StStrangeMuDstMaker");
+//   gSystem->Load("StMuDSTMaker"); 
+  gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+  loadSharedLibraries();
   gSystem->Load("libgen_Tables");
   gSystem->Load("libsim_Tables");
   gSystem->Load("libglobal_Tables");
-
-  gSystem->Load("StUtilities");
-  gSystem->Load("StIOMaker");
-  gSystem->Load("StTreeMaker");
-  gSystem->Load("StarClassLibrary");
-  gSystem->Load("StEvent");
-  gSystem->Load("StEventUtilities");
   gSystem->Load("StMagF");
 
   gSystem->Load("StFlowMaker");
   gSystem->Load("StFlowAnalysisMaker");
-
-  gSystem->Load("StStrangeMuDstMaker");
-  gSystem->Load("StMuDSTMaker");
   
   // Make a chain with a file list
   chain  = new StChain("StChain");
@@ -530,6 +532,14 @@ void doFlowEvents(const Int_t nevents, Bool_t phiWgtOnly) {
 //     Char_t* fileExt="*.MuDst.root";
 //   }
 
+  // muDST files
+//   Char_t* filePath="/auto/pdsfdv10/starprod/reco/ProductionMinBias/ReversedFullField/P03id/2001/308/";
+//   if (nevents < 250) {
+//     Char_t* fileExt="st_physics_2308016_raw_0001.MuDst.root";
+//   } else {
+//     Char_t* fileExt="*.MuDst.root";
+//   }
+
   // event.root files
 //   Char_t* filePath="/beta/starprod/kirill/";
 //   Char_t* fileExt="st_physics_2269002_raw_0177.event.root"; 
@@ -540,6 +550,9 @@ void doFlowEvents(const Int_t nevents, Bool_t phiWgtOnly) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.50  2003/09/05 18:01:37  posk
+// Updated list of shared libraries.
+//
 // Revision 1.49  2003/08/26 21:18:12  posk
 // update
 //
