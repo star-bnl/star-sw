@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.37 2001/10/30 03:59:22 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.38 2001/11/02 22:10:53 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -57,6 +57,8 @@
     $SRPFLAGS = "";                  # -DR__SRP -I" . $SRPDIR . "/include";
     $SRPLIBS  = "";                  # -L" . $SRPDIR . "/lib -lsrp -lgmp";
 
+    chomp($HOST = `hostname`);
+
     ##### use shadow passwords for authentication #####
     $SHADOWFLAGS = "";               #-DR__SHADOWPW
     $SHADOWLIBS  = "";
@@ -64,10 +66,11 @@
     $AUTHLIBS      = $SHADOWLIBS . " " . $AFSLIBS . " " . $SRPLIBS;
 #    $R_CPPFLAGS    = "-DG__LONGBUF -DR__AFS -DHAVE_CONFIG";
     $R_CPPFLAGS    = "-DR__AFS -DHAVE_CONFIG";
-    $CPP           = "";                                              #"gcc -E";
+    $CPP           = "";                           #"gcc -E";
     $CPPPATH       = "";
     $EXTRA_CPPPATH = "";
     $CXX           = "g++";
+    $CXX           = "/usr/bin/g++" if ($HOST =~ "rplay6");
     $CXXFLAGS      = "-fpic -w";
     $EXTRA_CXXFLAGS = "";
     $CXXOPT         = "";
@@ -75,6 +78,7 @@
     $PLATFORM       = "linux";
     $ARCH          = "linuxegcs";
     $CC            = "gcc";
+    $CC            = "/usr/bin/gcc" if ($HOST =~ "rplay6");
     $CFLAGS        = "-fpic -w";
     $EXTRA_CFLAGS  = "";
     $CINTCFLAGS    = "";
