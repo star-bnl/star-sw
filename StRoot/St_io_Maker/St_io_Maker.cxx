@@ -68,7 +68,9 @@ inline void StIOHeader::SetAddress(){
 ClassImp(St_io_Maker)
 
 //_____________________________________________________________________________
-St_io_Maker::St_io_Maker(const char *name, const char *title,TTree *tree):StMaker(name,title){
+St_io_Maker::St_io_Maker(const char *name, const char *title,Bool_t split,TTree *tree)
+ :StMaker(name,title), fSplit(split)
+{
    m_ListOfBranches = 0;
    SetTree(tree);
    drawinit=kFALSE;
@@ -104,8 +106,10 @@ void St_io_Maker::Add(const Char_t *dataName, const Char_t *fileName)
   StIOHeader *o =  new StIOHeader(dataname,tree);
   m_BranchName += ".root";
   b = o->GetBranch();
-  if (fileName && strlen(fileName)) b->SetFile(fileName);
-  else                              b->SetFile(m_BranchName);
+  if (fSplit) {
+    if (fileName && strlen(fileName)) b->SetFile(fileName);
+    else                              b->SetFile(m_BranchName);
+  }
   m_ListOfBranches->Add(o);
 //  m_ListOfBranches->Add(new StIOHeader(dataName,b));
 }
@@ -137,7 +141,24 @@ void St_io_Maker::Add(TString &dataName,const Char_t *fileName)
 void St_io_Maker::Clear(Option_t *option)
 {
   TTree *tree = GetTree();
-  if (tree) tree->AutoSave();
+  if (tree) {
+    TFile *file =  tree->GetCurrentFile();
+    if (file && file->IsWritable()) {
+       tree->AutoSave();
+       file->Flush();     
+       // Flush all separate file
+       if (fSplit) {
+         TBranch *nextb = 0;
+         TObjArray *branches = tree->GetListOfBranches();
+         if (branches) {
+           TIter next(branches);
+           while (nextb = (TBranch *)next())  
+                  nextb->GetFile()->Flush();
+         }
+       }
+     }
+  }
+  printf ("St_io_Maker::Clear\n");
   StMaker::Clear();
 }
 //_____________________________________________________________________________
@@ -318,7 +339,7 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.7 1999/02/24 17:12:26 fisyak Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.8 1999/02/25 17:14:14 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
