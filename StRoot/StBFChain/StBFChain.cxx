@@ -131,7 +131,7 @@ BfcItem BFC[] = {
   {"fss"         ,"ftpc_raw","ftpc","SCL"                 ,"St_fss_Maker","St_ftpc,St_fss_Maker","",kFALSE},
   {"Fcl"         ,"ftpc_hits","ftpc","SCL"
                           ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,St_ftpc,StFtpcClusterMaker","",kFALSE},
-  {"fpt"         ,"ftpc_tracks","ftpc","SCL"              ,"St_fpt_Maker","St_ftpc,St_fpt_Maker","",kFALSE},
+  {"fpt"         ,"ftpc_tracks","ftpc","SCL"              ,"StFtpcTrackMaker","St_ftpc,StFtpcTrackMaker","",kFALSE},
   {"emc"         ,"emc","","geant,emc_T,tpc_T,db,calib,ems,emh"        ,"StChainMaker","StChain","",kFALSE},
   {"ems"         ,"emc_raw","emc","geant,emc_T"            ,"St_ems_Maker","St_emc,St_ems_Maker","",kFALSE},
   {"emh"         ,"emc_hits","emc","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
@@ -685,8 +685,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.87 2000/05/01 22:28:23 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.88 2000/05/10 21:12:02 didenko Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.88  2000/05/10 21:12:02  didenko
+// change to switch to StFtpcTrackMaker
+//
 // Revision 1.87  2000/05/01 22:28:23  fisyak
 // Update from James C Dunlop for RICH
 //
