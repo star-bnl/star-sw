@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.233 2001/09/26 18:37:27 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.234 2001/09/27 22:51:49 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -63,11 +63,11 @@ Bfc_st BFC[] = {
   {"drawDst"     ,""  ,"","xin,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                  ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
   {"C1default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits"    ,"","","Year 1 chain",kFALSE}, 
-  {"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt,emcY2"
-   //{"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt"
+  //{"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt,emcY2"
+  {"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt"
                                                                               ,"","","Year 2 chain",kFALSE}, 
-  {"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt,emcY2"
-   //{"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt"
+  //{"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt,emcY2"
+  {"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt"
                                                                          ,"","","Assymptotic chain",kFALSE}, 
   {"Cy1a"        ,""  ,"","y1a,C1default"                                ,"","","Turn on chain y1a",kFALSE},
   {"Cy1b"        ,""  ,"","y1b,C1default"                                ,"","","Turn on chain y1b",kFALSE},
@@ -99,10 +99,10 @@ Bfc_st BFC[] = {
 
   // all above P2001x are TEMPORARY chains. We will shift the numbering up
   // as soon as the code will be toroughly tested. NoHits will be turned on
-  // later as a final touch.
-  {"P2001a"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,svt_daq,SvtD,emcY2,ftpc,l3onl,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""              ,"Production chain for summer 2001 data (tpc, rich, ftpc, svt, emc, l3)",kFALSE},
+  // later as a final touch. emcY2 removed on Sept 27th 2001.
+  {"P2001a"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,svt_daq,SvtD,ftpc,l3onl,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""              ,"Production chain for summer 2001 data (tpc, rich, ftpc, svt, l3)",kFALSE},
 
-  {"P2001b"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,emcY2,ftpc,l3onl,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""                          ,"Production chain for summer 2001 data (P2001a - Svt )",kFALSE},
+  {"P2001b"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,ftpc,l3onl,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""                                 ,"Production chain for summer 2001 data (P2001a - Svt)",kFALSE},
 
 
 
