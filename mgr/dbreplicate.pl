@@ -1,6 +1,6 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbreplicate.pl,v 1.2 2000/01/25 21:35:15 porter Exp $
+# $Id: dbreplicate.pl,v 1.3 2000/01/28 21:41:47 porter Exp $
 #
 ######################################################################
 #
@@ -13,6 +13,9 @@
 # Usage:    dbreplicate.pl 
 #
 # $Log: dbreplicate.pl,v $
+# Revision 1.3  2000/01/28 21:41:47  porter
+# added Conditions_trg for global trg time offset access in offline
+#
 # Revision 1.2  2000/01/25 21:35:15  porter
 # added Calibrations_ftpc, Calibrations_emc, Geometry_ftpc to replicate on db1
 #
@@ -51,6 +54,7 @@ $debugOn = 0;
                'Calibrations_emc' => 1,
                'Conditions' => 1,
                'Conditions_tpc' => 1,
+               'Conditions_trg' => 1,
                'Configurations' => 1,
                'Configurations_daq' => 1,
                'Geometry' => 1,
