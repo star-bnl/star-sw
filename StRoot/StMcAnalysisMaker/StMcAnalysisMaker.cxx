@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.22 2004/01/13 21:06:04 fisyak Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.23 2004/01/17 19:12:28 fisyak Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.23  2004/01/17 19:12:28  fisyak
+ * Add protection when StMcAnalysisMaker is not running within StBFChain and/or TFile is not coming from StBFChain parameters
+ *
  * Revision 1.22  2004/01/13 21:06:04  fisyak
  * Add TpcHitNtuple usind IdTruth info
  *
@@ -140,7 +143,8 @@ static TpcHitMRPair_t TpcHitMRPair;
 ClassImp(StMcAnalysisMaker)
 
 //_________________________________________________
-StMcAnalysisMaker::StMcAnalysisMaker(const char *name, const char *title):StMaker(name,title)
+StMcAnalysisMaker::StMcAnalysisMaker(const char *name, const char *title):
+  StMaker(name,title), mNtupleFile(0)
 {
     //  StMcAnalysisMaker Constructor
     // - zero all pointers defined in the header file
@@ -180,6 +184,10 @@ void StMcAnalysisMaker::Clear(const char*)
 //_________________________________________________
 Int_t StMcAnalysisMaker::Finish()
 {
+  if (mNtupleFile) {
+    mNtupleFile->Write();
+    mNtupleFile->Close();
+  }
     return StMaker::Finish();
 }
 
@@ -192,9 +200,9 @@ Int_t StMcAnalysisMaker::Init()
     SetZones();  // This is my method to set the zones for the canvas.
 
     StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
-    mNtupleFile = chain->GetTFile();
-    assert (mNtupleFile);
-    mNtupleFile->cd();
+    if (chain) mNtupleFile = chain->GetTFile();
+    if (mNtupleFile) {mNtupleFile->cd(); mNtupleFile = 0;}
+    else {mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");}
     // Book Histograms Here so they can be found and deleted by Victor's chain (I hope).
     mHitResolution = new TH2F("hitRes","Delta Z Vs Delta X for Hits",
 			     mNumDeltaX,mMinDeltaX,mMaxDeltaX,mNumDeltaZ,mMinDeltaZ,mMaxDeltaZ);
@@ -297,8 +305,7 @@ Int_t StMcAnalysisMaker::Make()
     // 2 iterators, the lower bound and upper bound, so that then we can loop over them.
     
     cout << "Position of First Rec. Hit and Associated (if any) MC Hit:" << endl;
-    pair<rcTpcHitMapIter,rcTpcHitMapIter> hitBounds = theHitMap->equal_range(firstHit);
-    
+    pair<rcTpcHitMapIter,rcTpcHitMapIter> hitBounds = theHitMap->equal_range(firstHit);    
     for (rcTpcHitMapIter it=hitBounds.first; it!=hitBounds.second; ++it) 
       cout << "[" << (*it).first->position() << ", " << (*it).second->position() << "]" << endl;
   }
