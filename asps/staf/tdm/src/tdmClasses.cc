@@ -18,6 +18,7 @@
 #include <string.h>
 #include "asuAlloc.h"
 #include "emlLib.h"
+#include "sutLib.h"
 #include "socLib.h"
 #include "tdmClasses.hh"
 
@@ -32,7 +33,7 @@
 #define EMPTY_ROW(R) (rowCount() <= R && R < maxRowCount())
 
 //:----------------------------------------------- PROTOTYPES         --
-extern CC_P int dsTypeSpecifier(char **ptr, size_t *pLen, size_t tid);
+//extern CC_P int dsTypeSpecifier(char **ptr, size_t *pLen, size_t tid);
 extern CC_P void dsuPrintData(FILE *stream , DS_TYPE_CODE_T type
 		, unsigned int count , void *data);
 
@@ -311,6 +312,11 @@ STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
 }
 
 //----------------------------------
+char * tdmTable:: printRow (long nrow) {
+   return NULL;
+}
+
+//----------------------------------
 STAFCV_T tdmTable:: show () {
    char* tspec=NULL;
 
@@ -582,7 +588,11 @@ tdmDataset:: tdmDataset(const char* name, long setDim)
 		: socObject(name, "tdmDataset") {
    myPtr = (SOC_PTR_T)this;
    pDSthis = NULL;
+#ifdef	OLD_DSL
    if( !dsNewDataset(&pDSthis, (char*)name, setDim) ){
+#else	/*OLD_DSL*/
+   if( !dsNewDataset(&pDSthis, (char*)name) ){
+#endif	/*OLD_DSL*/
       dsPerror("unable to create dataset pointer");
       pDSthis = NULL;
    }
@@ -919,7 +929,7 @@ STAFCV_T tdmFactory:: getTypeName (long tid, char *& name) {
    int ll;
 
    if( !dsTypeSpecifier(&c,&l,(size_t)tid)
-   ||  !(0 == strstr("struct ",c))
+   ||  !(0 == strstr("struct ",c))	/* BUG ????????????????? */
    ||  !(NULL != (cc = strchr(c,'{')))
    ||  !(l >= (ll = (int)cc - (int)c))
    ){
@@ -944,6 +954,28 @@ STAFCV_T tdmFactory:: getTypeSpecification (long tid, char *& spec) {
    spec = (char*)ASUALLOC(l+1);
    strcpy(spec,c);
    EML_SUCCESS(STAFCV_OK);
+}
+
+//----------------------------------
+STAFCV_T tdmFactory:: findTypeSpecification (const char * name
+		, char *& spec) {
+   char *n=NULL;
+   char *nn=NULL;
+   size_t nnl=0;
+
+   for(int i=1;;i++){
+      if( !getTypeName(i,n) ){
+	 EML_SUCCESS(STAFCV_OK);
+      }
+      if( 0<= (nnl = sutStripWhitespace(&nn,n)) ){
+	 if( 0== strncmp(name,nn,nnl) ){
+	    ASUFREE(nn);
+	    getTypeSpecification(i,spec);
+	    EML_SUCCESS(STAFCV_OK);
+	 }
+      }
+      ASUFREE(nn);
+   }
 }
 
 //:----------------------------------------------- PRIV FUNCTIONS     --

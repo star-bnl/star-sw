@@ -80,6 +80,7 @@ public:
    virtual STAFCV_T getColumn (TDM_COLUMN_T& column, long ncol);
 
    virtual STAFCV_T printRows (long ifirst, long nrows);
+   virtual char * printRow (long nrow);
    virtual STAFCV_T show ();
 
 //- Column attributes
@@ -188,6 +189,7 @@ public:
 
    virtual STAFCV_T getTypeName (long tid, char *& name);
    virtual STAFCV_T getTypeSpecification (long tid, char *& spec);
+   virtual STAFCV_T findTypeSpecification (const char * name, char *& spec);
 
 protected:
 //:----------------------------------------------- PROT VARIABLES     --
