@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.14 2002/01/26 03:04:07 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.15 2002/02/12 18:42:00 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.15  2002/02/12 18:42:00  genevb
+// Additional FTPC histograms
+//
 // Revision 2.14  2002/01/26 03:04:07  genevb
 // Fixed some problems with fcl histos
 //
@@ -253,8 +256,10 @@ void StQAMakerBase::BookHistFcl(){
       AddHist(hists->m_ftpc_chargestepW);
       hists->m_ftpc_chargestepE = (TH1F*) (fhMaker->GetHist("fcl_chargestepE"));
       AddHist(hists->m_ftpc_chargestepE);
-      hists->m_ftpc_fcl_radius = (TH1F*) (fhMaker->GetHist("fcl_radius"));
-      AddHist(hists->m_ftpc_fcl_radius);
+      hists->m_ftpc_fcl_radialW = (TH1F*) (fhMaker->GetHist("fcl_radialW"));
+      AddHist(hists->m_ftpc_fcl_radialW);
+      hists->m_ftpc_fcl_radialE = (TH1F*) (fhMaker->GetHist("fcl_radialE"));
+      AddHist(hists->m_ftpc_fcl_radialE);
     } else {
       // "ftpc_hits" maker doesn't exist, so look in hist branch
       // *** Currently isn't working for bfcread_event_QAhist.C ***
@@ -269,9 +274,12 @@ void StQAMakerBase::BookHistFcl(){
           hists->m_ftpc_chargestepE =
 	    (TH1F*) (fhDS->FindObject("fcl_chargestepE"));
           AddHist(hists->m_ftpc_chargestepE);
-          hists->m_ftpc_fcl_radius =
-	    (TH1F*) (fhDS->FindObject("fcl_radius"));
-          AddHist(hists->m_ftpc_fcl_radius);
+          hists->m_ftpc_fcl_radialW =
+	    (TH1F*) (fhDS->FindObject("fcl_radialW"));
+          AddHist(hists->m_ftpc_fcl_radialW);
+          hists->m_ftpc_fcl_radialE =
+	    (TH1F*) (fhDS->FindObject("fcl_radialE"));
+          AddHist(hists->m_ftpc_fcl_radialE);
         }
       }
     }

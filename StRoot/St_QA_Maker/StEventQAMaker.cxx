@@ -67,7 +67,8 @@ Int_t StEventQAMaker::Init() {
 Int_t StEventQAMaker::InitRun(int runnumber) {
 
   if(! mHitHist){
-    mHitHist = new HitHistograms("QaDedxAllSectors","dE/dx for all TPC sectors",100,0.,1.e-5,2);
+    mHitHist = new HitHistograms("QaDedxAllSectors","dE/dx for all TPC sectors",
+                                 100,0.,1.e-5,2,this);
   }
   
   if ((gROOT->GetClass("StEmcMath")) && (gROOT->GetClass("StEmcGeom"))) {
@@ -605,6 +606,7 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_momF->Fill(gmom,0.);
         hists->m_lengthF->Fill(globtrk->length(),0.);
         hists->m_chisq0F->Fill(chisq0,0.);
+        hists->m_chisq1F->Fill(chisq1,0.);
         hists->m_glb_impactF->Fill(logImpact,0.);
         hists->m_glb_impactrF->Fill(globtrk->impactParameter(),0.);
 
@@ -652,6 +654,7 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_momFE->Fill(gmom);
         hists->m_lengthFE->Fill(globtrk->length());
         hists->m_chisq0FE->Fill(chisq0);
+        hists->m_chisq1FE->Fill(chisq1);
 
         hists->m_pT_eta_recFE->Fill(eta,lmevpt);
         hists->m_globtrk_xf_yfFE->Fill(firstPoint.x(),
@@ -680,6 +683,7 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_momF->Fill(gmom,1.);
         hists->m_lengthF->Fill(globtrk->length(),1.);
         hists->m_chisq0F->Fill(chisq0,1.);
+        hists->m_chisq1F->Fill(chisq1,1.);
         hists->m_glb_impactF->Fill(logImpact,1.);
         hists->m_glb_impactrF->Fill(globtrk->impactParameter(),1.);
 
@@ -719,6 +723,7 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_momFW->Fill(gmom);
         hists->m_lengthFW->Fill(globtrk->length());
         hists->m_chisq0FW->Fill(chisq0);
+        hists->m_chisq1FW->Fill(chisq1);
 
         hists->m_pT_eta_recFW->Fill(eta,lmevpt);
         hists->m_globtrk_xf_yfFW->Fill(firstPoint.x(),
@@ -756,6 +761,8 @@ void StEventQAMaker::MakeHistPrim() {
   Int_t cnttrkgTS=0;
   Int_t cnttrkgFE=0;
   Int_t cnttrkgFW=0; 
+  Int_t pTcnttrkgFE=0;
+  Int_t pTcnttrkgFW=0; 
   Float_t mean_ptT=0;
   Float_t mean_ptTS=0;
   Float_t mean_ptFE=0;
@@ -1089,8 +1096,11 @@ void StEventQAMaker::MakeHistPrim() {
 // now fill all FTPC East histograms ------------------------------------------
         else if (map.trackFtpcEast()) {
 
+          if ( pT<2 ){
+             mean_ptFE += geom->momentum().perp();
+             pTcnttrkgFE++;
+          }
 	  cnttrkgFE++;
-	  mean_ptFE += geom->momentum().perp();
 	  mean_etaFE += eta;
 // these are TPC & FTPC
 	  // east and west in same histogram
@@ -1138,8 +1148,11 @@ void StEventQAMaker::MakeHistPrim() {
 // now fill all FTPC West histograms ------------------------------------------
         else if (map.trackFtpcWest()) {
 
+          if ( pT<2 ){
+             mean_ptFW += geom->momentum().perp();
+             pTcnttrkgFW++;
+          }
 	  cnttrkgFW++;
-	  mean_ptFW += geom->momentum().perp();
 	  mean_etaFW += eta;
 // these are TPC & FTPC
 	  // east and west in same histogram
@@ -1192,8 +1205,8 @@ void StEventQAMaker::MakeHistPrim() {
   }
   mean_ptT /= cnttrkgT;
   mean_ptTS /= cnttrkgTS;
-  mean_ptFE /= cnttrkgFE;
-  mean_ptFW /= cnttrkgFW;
+  mean_ptFE /= pTcnttrkgFE;
+  mean_ptFW /= pTcnttrkgFW;
   mean_etaT /= cnttrkgT;
   mean_etaTS /= cnttrkgTS;
   mean_etaFE /= cnttrkgFE;
@@ -1575,10 +1588,16 @@ void StEventQAMaker::MakeHistPoint() {
     for (UInt_t i=0; i<ftpcHits->numberOfPlanes(); i++) {
       for (UInt_t j=0; j<ftpcHits->plane(i)->numberOfSectors(); j++)
 	for (UInt_t k=0; k<ftpcHits->plane(i)->sector(j)->hits().size(); k++) {
-	  if (i<10)
+          Float_t x  = ftpcHits->plane(i)->sector(j)->hits()[k]->position().x();
+          Float_t y  = ftpcHits->plane(i)->sector(j)->hits()[k]->position().y();
+	  if (i<10) {
 	    hists->m_pnt_planeF->Fill(i+1,1.); // physical numbering starts at 1
-	  else
+            hists->m_pnt_xyFW->Fill(x,y);
+          }
+	  else {
 	    hists->m_pnt_planeF->Fill(i+1,0.); // physical numbering starts at 1
+            hists->m_pnt_xyFE->Fill(x,y);
+          }
 	}
       if (i<10)
 	ftpcHitsW += ftpcHits->plane(i)->numberOfHits();
@@ -1815,8 +1834,11 @@ void StEventQAMaker::MakeHistEval() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.33 2002/02/10 16:48:28 jeromel Exp $
+// $Id: StEventQAMaker.cxx,v 2.34 2002/02/12 18:41:59 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.34  2002/02/12 18:41:59  genevb
+// Additional FTPC histograms
+//
 // Revision 2.33  2002/02/10 16:48:28  jeromel
 // Attempt to prevent re-creation of mHitHist.
 //

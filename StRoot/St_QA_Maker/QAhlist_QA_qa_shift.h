@@ -1,5 +1,8 @@
-// $Id: QAhlist_QA_qa_shift.h,v 2.6 2002/01/26 03:04:07 genevb Exp $
+// $Id: QAhlist_QA_qa_shift.h,v 2.7 2002/02/12 18:41:59 genevb Exp $
 // $Log: QAhlist_QA_qa_shift.h,v $
+// Revision 2.7  2002/02/12 18:41:59  genevb
+// Additional FTPC histograms
+//
 // Revision 2.6  2002/01/26 03:04:07  genevb
 // Fixed some problems with fcl histos
 //
@@ -30,7 +33,8 @@
      "TabQaEvsumTotChg",
      "fcl_chargestepW",
      "fcl_chargestepE",
-     "fcl_radius",
+     "fcl_radialW",
+     "fcl_radialE",
 
      "TabQaGtrkRnfT",
      "TabQaGtrkR0T",

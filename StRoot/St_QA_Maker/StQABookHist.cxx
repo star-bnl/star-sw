@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.28 2002/01/21 22:09:24 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.29 2002/02/12 18:41:59 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.29  2002/02/12 18:41:59  genevb
+// Additional FTPC histograms
+//
 // Revision 2.28  2002/01/21 22:09:24  genevb
 // Include some ftpc histograms from StFtpcClusterMaker
 //
@@ -188,7 +191,8 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
 
   m_ftpc_chargestepW=0;
   m_ftpc_chargestepE=0;
-  m_ftpc_fcl_radius=0;
+  m_ftpc_fcl_radialW=0;
+  m_ftpc_fcl_radialE=0;
 
   m_pointT=0;
   m_pointF=0;
@@ -272,6 +276,9 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_chisq0F=0;
   m_chisq0FE=0;
   m_chisq0FW=0;
+  m_chisq1F=0;
+  m_chisq1FE=0;
+  m_chisq1FW=0;
   m_chisq1T=0;
   m_chisq1TTS=0;
   m_glb_impactT=0; 
@@ -468,6 +475,9 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pchisq0F=0;
   m_pchisq0FE=0;
   m_pchisq0FW=0;
+  m_pchisq1F=0;
+  m_pchisq1FE=0;
+  m_pchisq1FW=0;
   m_pchisq1T=0;
   m_pchisq1TTS=0;
   m_prim_impactT=0; 
@@ -658,7 +668,7 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_good_tot->Rebin(1,"TPC/total");
   m_globtrk_good_tot->SetStats(kFALSE);
   m_globtrk_goodTTS  = QAH::H1F("QaGtrkGoodTTS","globtrk: tot good tracks - tpc,tpc+svt",40,0.,10000.);
-  m_globtrk_goodF    = QAH::H2F("QaGtrkGoodF","globtrk: tot good tracks - ftpc",40,0.,4000.,40,0.,4000.);
+  m_globtrk_goodF    = QAH::H2F("QaGtrkGoodF","globtrk: tot good tracks - ftpc",40,0.,1000.,40,0.,1000.);
   m_globtrk_goodF->SetXTitle("FTPC East");
   m_globtrk_goodF->SetYTitle("FTPC West");
   m_globtrk_fit_prob = QAH::H1F("QaGtrkFitProb","globtrk: prob. fit is correct",100,0,1.2);
@@ -1065,15 +1075,19 @@ void StQABookHist::BookHistGlob(){
   m_momF->Rebin(0,"East");
   m_momF->Rebin(1,"West");
   m_momF->SetStats(kFALSE);
-  m_chisq0F     = QAH::MH1F("QaGtrkChisq0F",  "globtrk: chisq0, ftpc",50,0.,5.,2);
+  m_chisq0F     = QAH::MH1F("QaGtrkChisq0F",  "globtrk: residuals, ftpc",50,0.,5.,2);
   m_chisq0F->Rebin(0,"East");
   m_chisq0F->Rebin(1,"West");
   m_chisq0F->SetStats(kFALSE);
+  m_chisq1F     = QAH::MH1F("QaGtrkChisq1F",  "globtrk: probabiliy, ftpc",50,0.,5.,2);
+  m_chisq1F->Rebin(0,"East");
+  m_chisq1F->Rebin(1,"West");
+  m_chisq1F->SetStats(kFALSE);
   m_glb_impactF = QAH::MH1F("QaGtrkImpactF", "globtrk: log10 impact param from prim vtx, ftpc",120,-3.0,3.,2);
   m_glb_impactF->Rebin(0,"East");
   m_glb_impactF->Rebin(1,"West");
   m_glb_impactF->SetStats(kFALSE);
-  m_glb_impactrF = QAH::MH1F("QaGtrkImpactrF", "globtrk: impact param from prim vtx, ftpc",100,0.,30.,2);
+  m_glb_impactrF = QAH::MH1F("QaGtrkImpactrF", "globtrk: impact param from prim vtx, ftpc",100,0.,10.,2);
   m_glb_impactrF->Rebin(0,"East");
   m_glb_impactrF->Rebin(1,"West");
   m_glb_impactrF->SetStats(kFALSE);
@@ -1104,8 +1118,10 @@ void StQABookHist::BookHistGlob(){
   m_pTFW         = QAH::H1F("QaGtrkPtFW",      "globtrk: pT, ftpc west",50,0.,10.);
   m_momFE        = QAH::H1F("QaGtrkPFE",       "globtrk: momentum, ftpc east ",50,0.,5.);
   m_momFW        = QAH::H1F("QaGtrkPFW",       "globtrk: momentum, ftpc west ",50,0.,5.);
-  m_chisq0FE     = QAH::H1F("QaGtrkChisq0FE",  "globtrk: chisq0, ftpc east", 50, 0.,5.);
-  m_chisq0FW     = QAH::H1F("QaGtrkChisq0FW",  "globtrk: chisq0, ftpc west", 50, 0.,5.);
+  m_chisq0FE     = QAH::H1F("QaGtrkChisq0FE",  "globtrk: residuals, ftpc east", 50, 0.,5.);
+  m_chisq0FW     = QAH::H1F("QaGtrkChisq0FW",  "globtrk: residuals, ftpc west", 50, 0.,5.);
+  m_chisq1FE     = QAH::H1F("QaGtrkChisq1FE",  "globtrk: probability, ftpc east", 50, 0.,5.);
+  m_chisq1FW     = QAH::H1F("QaGtrkChisq1FW",  "globtrk: probability, ftpc west", 50, 0.,5.);
 
 // 2D - ftpc
 
@@ -1146,7 +1162,7 @@ void StQABookHist::BookHistPrim(){
   m_primtrk_good    = QAH::H1F("QaPtrkGood",  "primtrk: tot num tracks iflag>0",50,0.,5000.);
   m_primtrk_good_sm = QAH::H1F("QaPtrkGoodsm","primtrk: tot num tracks iflag>0",50,0.,500.);
   m_primtrk_goodTTS = QAH::H1F("QaPtrkGoodTTS","primtrk: tot num tracks iflag>0, tpc,svt",50,0.,5000.);
-  m_primtrk_goodF   = QAH::H2F("QaPtrkGoodF",  "primtrk: tot num tracks iflag>0, ftpc",50,0.,3000.,50,0.,3000.);
+  m_primtrk_goodF   = QAH::H2F("QaPtrkGoodF",  "primtrk: tot num tracks iflag>0, ftpc",50,0.,1000.,50,0.,1000.);
   m_primtrk_goodF->SetXTitle("East");
   m_primtrk_goodF->SetYTitle("West");
   m_primglob_good   = QAH::H1F("QaPtrkGlob","primtrk: ratio primary/global tracks w/ iflag>0",50,0,1);
@@ -1458,6 +1474,10 @@ void StQABookHist::BookHistPrim(){
   m_pchisq0F->Rebin(0,"East");
   m_pchisq0F->Rebin(1,"West");
   m_pchisq0F->SetStats(kFALSE);
+  m_pchisq1F     = QAH::MH1F("QaPtrkChisq1F",  "primtrk: probability, ftpc",50,0.,5.,2);
+  m_pchisq1F->Rebin(0,"East");
+  m_pchisq1F->Rebin(1,"West");
+  m_pchisq1F->SetStats(kFALSE);
   m_prim_impactF = QAH::MH1F("QaPtrkImpactF", "primtrk: log10 impact param from prim vtx, ftpc",120,-3.0,3.,2);
   m_prim_impactF->Rebin(0,"East");
   m_prim_impactF->Rebin(1,"West");
@@ -1495,6 +1515,8 @@ void StQABookHist::BookHistPrim(){
   m_pmomFW        = QAH::H1F("QaPtrkPFW",       "primtrk: momentum, ftpc west ",50,0.,5.);
   m_pchisq0FE     = QAH::H1F("QaPtrkChisq0FE",  "primtrk: chisq0, ftpc east", 50, 0.,5.);
   m_pchisq0FW     = QAH::H1F("QaPtrkChisq0FW",  "primtrk: chisq0, ftpc west", 50, 0.,5.);
+  m_pchisq1FE     = QAH::H1F("QaPtrkChisq1FE",  "primtrk: probability, ftpc east", 50, 0.,5.);
+  m_pchisq1FW     = QAH::H1F("QaPtrkChisq1FW",  "primtrk: probability, ftpc west", 50, 0.,5.);
 
 // 2D - ftpc
   m_ppT_eta_recFE = QAH::H2F("QaPtrkPtVsEtaFE","primtrk: log pT vs eta, ftpcE",20,-4.5,-2.,40,1.,4.);
@@ -1640,6 +1662,8 @@ void StQABookHist::BookHistPoint(){
   m_pnt_barrelS = QAH::H1F("QaPointBarrelS","point: barrel distribution of hits, svt",3,0.5,3.5);
   m_pnt_barrelS->SetXTitle("barrel number");
 
+  m_pnt_xyFE    = QAH::H2F("QaPointXYFtpcE","point: x-y distribution of hits, ftpcE",70,-35,35,70,-35,35);
+  m_pnt_xyFW    = QAH::H2F("QaPointXYFtpcW","point: x-y distribution of hits, ftpcW",70,-35,35,70,-35,35);
   m_pnt_planeF  = QAH::MH1F("QaPointPlaneF","point: plane distribution of hits, ftpc",20,0.5,20.5,2);
   m_pnt_planeF->Rebin(0,"East");
   m_pnt_planeF->Rebin(1,"West");

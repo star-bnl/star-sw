@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: HitHistograms.h,v 1.3 2000/08/25 16:04:09 genevb Exp $
+// $Id: HitHistograms.h,v 1.4 2002/02/12 18:41:59 genevb Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: HitHistograms.h,v $
+// Revision 1.4  2002/02/12 18:41:59  genevb
+// Additional FTPC histograms
+//
 // Revision 1.3  2000/08/25 16:04:09  genevb
 // Introduction of files
 //
@@ -27,12 +30,14 @@
 
 class TH1F;
 class TH2F;
+class StMaker;
 
 class HitHistograms : public TpcHitUtilities {
 public:
     HitHistograms();
     HitHistograms(const char *name,const char *title,
-		  Int_t nbinsx,Axis_t xlow,Axis_t xup, Int_t nbinxy);
+		  Int_t nbinsx,Axis_t xlow,Axis_t xup, Int_t nbinxy,
+		  StMaker* mk=0);
     virtual ~HitHistograms();
 
     //Access---------------------------------------

@@ -1,5 +1,8 @@
-// $Id: QAhlist_logy.h,v 2.6 2002/01/21 22:09:24 genevb Exp $
+// $Id: QAhlist_logy.h,v 2.7 2002/02/12 18:41:59 genevb Exp $
 // $Log: QAhlist_logy.h,v $
+// Revision 2.7  2002/02/12 18:41:59  genevb
+// Additional FTPC histograms
+//
 // Revision 2.6  2002/01/21 22:09:24  genevb
 // Include some ftpc histograms from StFtpcClusterMaker
 //
@@ -121,16 +124,12 @@
  "QaGtrkChisq0T",
  "QaGtrkChisq0TS",
  "QaGtrkChisq0TTS",
- "QaGtrkChisq0F",
- "QaGtrkChisq0FE",
- "QaGtrkChisq0FW",
  "QaGtrkChisq1T",
  "QaGtrkChisq1TS",
  "QaGtrkChisq1TTS",
  "QaGtrkImpactrT",
  "QaGtrkImpactrTS",
  "QaGtrkImpactrTTS",
- "QaGtrkImpactrF",
 
  "QaPtrkDetId",
  "QaPtrkFlag",
@@ -261,10 +260,7 @@
 */
  "QaDedxNum",
  "QaDedxDedx0T", 
- "QaDedxDedx0F",
  "QaDedxDedx1T",
- "QaDedxDedx0FE", 
- "QaDedxDedx0FW", 
  "QaPointId",
  "QaEvgenPt",
  "QaEvgenVtxX",

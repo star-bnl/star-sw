@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: HitHistograms.cxx,v 1.4 2001/05/16 20:57:02 lansdell Exp $
+// $Id: HitHistograms.cxx,v 1.5 2002/02/12 18:41:59 genevb Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: HitHistograms.cxx,v $
+// Revision 1.5  2002/02/12 18:41:59  genevb
+// Additional FTPC histograms
+//
 // Revision 1.4  2001/05/16 20:57:02  lansdell
 // new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
 //
@@ -24,6 +27,7 @@
 
 #include "StMultiH1F.h"
 #include "HitHistograms.h"
+#include "StMaker.h"
 
 //Root
 #include "TH1.h"
@@ -35,11 +39,14 @@
 HitHistograms::HitHistograms()
 {
   /* noop */
+  printf("HHHH1 Construct Hit Histo1\n");
 }
 
 HitHistograms::HitHistograms(const char *name,const char *title,
-			     Int_t nbinsx,Axis_t xlow,Axis_t xup, Int_t nbinsy)
+			     Int_t nbinsx,Axis_t xlow,Axis_t xup, Int_t nbinsy,
+			     StMaker* mk)
 {
+  printf("HHHH2 Construct Hit Histo2\n");
   // if you change these constants, be sure to change them in StQABookHist
   // for the "dE/dx for all TPC sectors" histogram (m_dedx_all_sectors)
   double xmin = 0.;
@@ -58,6 +65,11 @@ HitHistograms::HitHistograms(const char *name,const char *title,
   if (nbinsy == 2) {
     m_allSectorsDeDxHist->Rebin(0,"Outer");
     m_allSectorsDeDxHist->Rebin(1,"Inner");
+  }
+  if (mk) {
+    mk->AddHist(m_innerSectorDeDxHist);
+    mk->AddHist(m_outerSectorDeDxHist);
+    mk->AddHist(m_allSectorsDeDxHist);
   }
 }
 
