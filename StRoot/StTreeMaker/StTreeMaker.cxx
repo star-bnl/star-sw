@@ -217,13 +217,13 @@ Int_t StTreeMaker::MakeBfcStatus()
   {
     name = ds->GetName();
     kont = kContinue;
-    if (strcmp(".make",name)==0) 		break;
+    if (strcmp(".make",name)==0) 		continue;
     kont = kPrune;
-    if (name[0]=='.') 				break;
+    if (name[0]=='.') 				continue;
     kont = kContinue;
-    if (!ds->InheritsFrom(StMaker::Class()))	break;
+    if (!ds->InheritsFrom(StMaker::Class()))	continue;
     int ret = ((StMaker*)ds)->GetMakeReturn();
-    if (!ret) 					break;
+    if (!ret) 					continue;
     fBfcStatus->SetNRows(++nrows);
     char * mkName = (*fBfcStatus)[nrows-1].maker_name;   
     mkName[0]=0; strncat(mkName,name,11);
@@ -265,7 +265,7 @@ void StTreeMaker::UpdateHddr()
     hdd->SetName ("RunEvent");
     hdd->SetTitle(ts);
     ds->AddFirst(hdd);
-    if (fBfcStatus->GetNRows()) ds->AddFirst(fBfcStatus);
+    if (fBfcStatus->GetNRows()) br->Add(fBfcStatus);
   }
 }          
 
