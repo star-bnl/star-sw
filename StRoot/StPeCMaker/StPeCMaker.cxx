@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.16 2001/02/21 20:42:05 yepes Exp $
+// $Id: StPeCMaker.cxx,v 1.17 2001/04/23 21:44:33 meissner Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.17  2001/04/23 21:44:33  meissner
+// add dEdx z variable to tree, setFormat(1) for tree, use private BetheBloch (temp solution)
+//
 // Revision 1.16  2001/02/21 20:42:05  yepes
 // Add ctb signals to tree
 //
@@ -89,7 +92,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.16 2001/02/21 20:42:05 yepes Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.17 2001/04/23 21:44:33 meissner Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -128,7 +131,11 @@ Int_t StPeCMaker::Init() {
   cout << "StPeCMaker: uDst output file: " << uDstFileName << endl;
 
   m_outfile   = new TFile( uDstFileName,"recreate");
-
+  // Get the standard root format to be independent of Star IO   
+  m_outfile->SetFormat(1);
+  m_outfile->SetCompressionLevel(1);
+  
+  
   uDstTree = new TTree("uDst","Pcol uDst");
 //  geantTree = new TTree("geant","Pcol geant Tree");
 
@@ -186,12 +193,12 @@ Int_t StPeCMaker::Make() {
   // Do this way since call to event->summary->numberOfTracks() crashes
   StSPtrVecTrackNode& tempn = event->trackNodes();
   Int_t NTracks=tempn.size();
-
-
+  cout<<"StPeCMaker: Number of  tracks: "<<NTracks<<endl;
+  
   Int_t flag = kStOk ;
 
-  if( NTracks > 10 ){
-    cout<<"StPeCMaker: Number of good tracks: "<<NTracks<<endl;
+  if( NTracks > StPeCnMaxTracks ){
+    cout<<"StPeCMaker: Number of tracks: "<<NTracks<<endl;
     cout<<"Not a peripheral event (NTracks>15)"<<endl;
     flag = kStErr;
   }
@@ -257,6 +264,7 @@ Int_t StPeCMaker::Cuts4Prong(StEvent *event, StPeCEvent *pevent){
 }
 
 Int_t StPeCMaker::Finish() {
+  cout << "StPeCMaker: Finish" << endl;
   m_outfile->Write();
   m_outfile->Close();
   StMaker::Finish();

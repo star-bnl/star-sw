@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.7 2001/02/21 20:41:58 yepes Exp $
+// $Id: StPeCEvent.cxx,v 1.8 2001/04/23 21:44:30 meissner Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.8  2001/04/23 21:44:30  meissner
+// add dEdx z variable to tree, setFormat(1) for tree, use private BetheBloch (temp solution)
+//
 // Revision 1.7  2001/02/21 20:41:58  yepes
 // Add ctb signals to tree
 //
@@ -26,18 +29,25 @@
 // Revision 1.0  2000/03/20 23:28:50  nystrand
 //
 //////////////////////////////////////////////////////////////////////
+// TODO: 
+//  Understand what the redifinition of the TClone Array does
+//   -> dereferencing the pointer to get  just the array 
+//  Place the cut on  track->flag() in a unuque place (Internal track array?)
+//  Understand the dublication of StPeCTrack  (does a tree work with pointers)
+// ///////////////////////////////////////////////////////////////////
 #include <iostream.h>
 #include "StPeCEvent.h"
 #include "StEventTypes.h"
+#include "StPeCEnumerations.h"
 
 
 ClassImp(StPeCEvent)
 
 StPeCEvent::StPeCEvent() {
-
-  pPairs  = new TClonesArray ("StPeCPair", 10);
-  sPairs  = new TClonesArray ("StPeCPair", 10);
-  tracks  = new TClonesArray ("StPeCTrack", 10);
+  // StPeCMaxTracks ..... looks more like Fortran......
+  pPairs  = new TClonesArray ("StPeCPair", StPeCnMaxTracks);
+  sPairs  = new TClonesArray ("StPeCPair", StPeCnMaxTracks);
+  tracks  = new TClonesArray ("StPeCTrack",StPeCnMaxTracks);
   nPPairs  = 0 ;
   nSPairs  = 0 ;
   nTracks  = 0 ;
@@ -91,28 +101,41 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
   // Get the track nodes
   StSPtrVecTrackNode& exnode = event->trackNodes();
   Int_t nnode=exnode.size();
-  TClonesArray &pTracks = *tracks;
+  // This only dereferences a pointer
+  // TClonesArray &pTracks = *tracks;
 
+  // local pointer array for track needed for cuts
   for( Int_t in=0; in<nnode; in++ ) {
     UInt_t nprim = exnode[in]->entries(primary);
     UInt_t nglob = exnode[in]->entries(global);
     if( nprim>1 || nglob>1 ){
       cout<<"There could be a problem! nprim= "<<nprim<<"  nglob= "<<nglob<<endl;
+      // HERE must flag be tested. 
+
     }
     if( nprim==1 ){
-      NPrimaries++;
       StTrack *tp = exnode[in]->track(primary);
+      // DANGER THAT SHOULD BE DONE IN A PROPPER WAY, CHECK 4 PLACES !
+      if (! (tp->flag()>0)) continue;
+      // -----------------------------------------------------------
+      NPrimaries++;
       float px = tp->geometry()->momentum().x();
       float py = tp->geometry()->momentum().y();
       SumPx = SumPx + px; SumPy = SumPy + py;
       SumQ  = SumQ  + tp->geometry()->charge();
-      new(pTracks[nTracks++]) StPeCTrack(1,tp) ;
+      // new(pTracks[nTracks++]) StPeCTrack(1,tp) ;
+      // need to dereference the Array pointer first 
+      new((*tracks)[nTracks++]) StPeCTrack(1,tp) ;
       // Store the Primaries in a vector for formation of pairs
     }
     if( nprim==0 && nglob==1 ){
-      NGlobal++; 
       StTrack *tnp = exnode[in]->track(global);
-      new(pTracks[nTracks++]) StPeCTrack(0,tnp) ;
+      // DANGER THAT SHOULD BE DONE IN A PROPPER WAY, CHECK 4 PLACES !
+      if (! (tnp->flag()>0)) continue;
+      // -----------------------------------------------------------
+      NGlobal++; 
+      // new(pTracks[nTracks++]) StPeCTrack(0,tnp) ;
+      new((*tracks)[nTracks++]) StPeCTrack(0,tnp) ;
     }
   }
 
@@ -138,6 +161,7 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
     cout<<"StPeCEvent: There was no primary vertex!"<<endl;
   }
 
+  // HERE  flag must  be tested. 
   StPeCPair* lPair ; 
   nPPairs = 0 ;
   StTrack *trk1, *trk2 ;
@@ -148,8 +172,14 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
  
         trk1 = exnode[i1]->track(primary);
         trk2 = exnode[i2]->track(primary);
-        TClonesArray &ppairs = *pPairs;
-        lPair = new(ppairs[nPPairs++]) StPeCPair(trk1,trk2,1,event) ;
+	// DANGER 
+	if (! (trk1->flag()>0)) continue;
+	if (! (trk2->flag()>0)) continue;
+	// --------
+	// get pointer to memebr ?
+        // TClonesArray &ppairs = *pPairs;
+        // lPair = new(ppairs[nPPairs++]) StPeCPair(trk1,trk2,1,event) ;
+        lPair = new((*pPairs)[nPPairs++]) StPeCPair(trk1,trk2,1,event) ;
 #ifdef PECPRINT
         cout << "StPeCEvent : Primary Pair : " 
            << "  sumQ = " << lPair->getSumCharge()
@@ -163,6 +193,7 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
 //
 //   Look for V0
 //
+  // HERE must flag be tested. 
   for( Int_t i=0; i<nnode-1; i++ ) {
      if ( exnode[i]->entries(primary)  ) continue ; 
      if ( exnode[i]->entries(global)  !=1 ) continue ;
@@ -171,6 +202,11 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
         if ( exnode[j]->entries(global)  !=1 ) continue ;
         StTrack *trk1 = exnode[i]->track(global);
         StTrack *trk2 = exnode[j]->track(global);
+
+	// DANGER 
+	if (! (trk1->flag()>0)) continue;
+	if (! (trk2->flag()>0)) continue;
+	// --------
 	StPhysicalHelixD h1 = trk1->geometry()->helix() ;
 	StPhysicalHelixD h2 = trk2->geometry()->helix() ;
 
@@ -180,8 +216,9 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
         StThreeVectorD x = (x1-x2) ;
 	if ( x.mag() > 10 ) continue ; // Hardwire cut
 
-        TClonesArray &spairs = *sPairs;
-        lPair = new(spairs[nSPairs++]) StPeCPair(trk1,trk2,0,event) ;
+        // TClonesArray &spairs = *sPairs;
+        // lPair = new(spairs[nSPairs++]) StPeCPair(trk1,trk2,0,event) ;
+        lPair = new((*sPairs)[nSPairs++]) StPeCPair(trk1,trk2,0,event) ;
 #ifdef PECPRINT
         cout << "StPeCEvent : Secondary Pair : " 
            << "  sumQ = " << lPair->getSumCharge()

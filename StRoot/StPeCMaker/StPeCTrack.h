@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrack.h,v 1.2 2001/02/21 20:54:25 yepes Exp $
+// $Id: StPeCTrack.h,v 1.3 2001/04/23 21:44:38 meissner Exp $
 // $Log: StPeCTrack.h,v $
+// Revision 1.3  2001/04/23 21:44:38  meissner
+// add dEdx z variable to tree, setFormat(1) for tree, use private BetheBloch (temp solution)
+//
 // Revision 1.2  2001/02/21 20:54:25  yepes
 // *** empty log message ***
 //
@@ -50,16 +53,29 @@ public:
   Int_t                           charge ;
   Bool_t                          primary ;
   Float_t                         pt ;
+  Float_t                         p ;   // momentum
   Float_t                         eta ;
   Float_t                         psi ; 
   Float_t                         phi0 ;
   Float_t                         r0 ;
   Float_t                         z0 ;
   Float_t                         dedx ;
+  Float_t                         dedxZel ; // This is not c++ !!
+  Float_t                         dedxZmu;
+  Float_t                         dedxZpi ;
+  Float_t                         dedxZk ;
+  Float_t                         dedxZp ;
   Float_t                         nHits ;
 
-  ClassDef(StPeCTrack,1)
+  
+
+  Float_t                         getZdEdx(Float_t mass);
+
+  ClassDef(StPeCTrack,1)  
 };
+
+
+
 
 #endif
 
