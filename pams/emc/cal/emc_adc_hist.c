@@ -8,8 +8,11 @@
 #include "emc_adc_hist.h"
 #include "emc_def.h" 
 #include "cfortran.h"
+#ifndef __hpux
 #include "hbook.h"
-
+#else
+#include "hbook_hpux.h"
+#endif
 #define BOOK     0
 #define FILL     1
 #define RESET    2
