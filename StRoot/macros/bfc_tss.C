@@ -1,4 +1,4 @@
-// $Id: bfc_tss.C,v 1.4 1999/02/24 19:45:45 fisyak Exp $
+// $Id: bfc_tss.C,v 1.5 1999/02/26 20:18:18 didenko Exp $
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -48,21 +48,34 @@ void Load(){
     gSystem->Load("St_io_Maker");
 }
 
-bfc_tss(const Int_t Nevents=10000,
+bfc_tss (const Int_t Nevents=1000,
      const Char_t *fzfile ="/disk1/star/test/psc0049_08_40evts.fzd",
      TString* FileOut=0)
 {                              
+  //set I/O for crs
+  TString InFile = "$input_file";
+  gSystem->ExpandPathName(InFile);
+  if (!strcmp("$input_file",InFile.Data())) {InFile = fzfile;}
+  Int_t NoEvents = atoi(strrchr(InFile.Data(),'_')+1);
+  if (NoEvents <=0) {NoEvents = Nevents;}  
+  if (NoEvents > Nevents) {NoEvents = Nevents;}  
+  cout << "Input file name = "<< InFile.Data() <<"  with No.Events to process = " << NoEvents << endl;
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load();
   if (!FileOut){
-    FileOut = new TString(gSystem->BaseName(fzfile));
+    FileOut = new TString(gSystem->BaseName(InFile.Data()));
     FileOut->ReplaceAll(".fzd",".root");
     FileOut->ReplaceAll(".fz",".root");
     FileOut->Strip();
   }
   cout << "File for chain " << FileOut.Data() << endl;
   TFile       *root_out  =  new TFile(FileOut->Data(),"RECREATE");
-
+  St_XDFFile  *xdf_out = 0;
+  TString *XdfFile = new TString(FileOut->Data());
+  XdfFile->ReplaceAll(".root","_dst.xdf");
+  xdf_out = new St_XDFFile(XdfFile->Data(),"wb"); 
+  cout << "Open xdf file  = " << XdfFile->Data() << endl;
+  cout << "+++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   // Create the main chain object
   if (chain) delete chain;
   chain = new StChain("bfc");
@@ -74,11 +87,10 @@ bfc_tss(const Int_t Nevents=10000,
   geant->SetNwGEANT(40 000 000);
   //  geant->SetNwPAW(1000000);
   TString cmd("gfile p ");
-  cmd += fzfile;
+  cmd += InFile;
   geant->Do(cmd.Data());
   //  geant->Do("mode tpce prin 1 digi 2");   // make tpc_hit in local coordinates
   St_calib_Maker       *calib = new St_calib_Maker("calib","calib"); 
-  //  St_evg_Maker     *evgen = new St_evg_Maker("evgen","event/evgen");
   St_fss_Maker         *ftpc_raw = new St_fss_Maker("ftpc_raw","event/raw_data/ftpc");
   St_tss_Maker         *tpc_raw = new St_tss_Maker("tpc_raw","event/raw_data/tpc");
   // Set parameters
@@ -124,15 +136,16 @@ bfc_tss(const Int_t Nevents=10000,
   if (root_out) {chain->Write();}
   gBenchmark->Start("bfc");
   Int_t i=0;
-  for (Int_t i =1; i <= Nevents; i++){
+  for (Int_t i =1; i <= NoEvents; i++){
     if (chain->Make(i)) break;
-    if (i != Nevents) chain->Clear();
+    if (xdf_out) {xdf_out->NextEventPut(dstSet);}// xdf output
+    if (i != NoEvents) chain->Clear();
     printf ("===========================================\n");
     printf ("=========================================== Done with Event no. %d\n",i);
     printf ("===========================================\n");
   }
 
-  if (Nevents > 1) {
+  if (NoEvents > 1) {
     chain->Finish();
     if (root_out){
       root_out->Write();
@@ -140,6 +153,7 @@ bfc_tss(const Int_t Nevents=10000,
       delete root_out;
       gBenchmark->Print("root i/o");
     }
+    if (xdf_out){ delete xdf_out;}
     gBenchmark->Print("bfc");
   }
   else {if (!b)   b = new TBrowser;}
