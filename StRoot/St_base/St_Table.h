@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.14 1998/12/06 00:38:17 fisyak Exp $
+// $Id: St_Table.h,v 1.15 1998/12/06 00:45:49 fisyak Exp $
 // $Log: St_Table.h,v $
+// Revision 1.15  1998/12/06 00:45:49  fisyak
+// Add SavePrimitive
+//
 // Revision 1.14  1998/12/06 00:38:17  fisyak
 // Add SavePrimitive
 // 
@@ -29,7 +32,7 @@
 #ifndef __CINT__
 #  include <string.h>
 #endif
- 
+#include <fstream.h>
 enum  EBufSizes { kChar1Byte   =sizeof(Char_t) 
                  ,kShort2Bytes =sizeof(Short_t)
                  ,kLong4Bytes  =sizeof(Long_t)
