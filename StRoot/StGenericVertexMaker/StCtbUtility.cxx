@@ -105,7 +105,7 @@ void  StCtbUtility::collectCTBhitsMC(St_DataSet *gds){// M-C CTB
     long iPhi,iEta;
     cts_get_ctb_indexes(ctb_hit->volume_id,iPhi,iEta);
     iPhi--; iEta--; // change range to [0,N-1]
-    printf("iPhi=%d,iEta=%d de/MeV=%f \n",(int)iPhi,(int)iEta,de_mev);
+    // printf("iPhi=%d,iEta=%d de/MeV=%f \n",(int)iPhi,(int)iEta,de_mev);
     assert(iPhi >= 0 && iPhi<60 && iEta>=0 && iEta<4);
     //printf("ctb_indexes , hit=%d, vol_id=%d, iPhi=%d, iEta=%d, de/MeV=%f\n",i,(int)ctb_hit->volume_id,(int)iPhi,(int)iEta );
     

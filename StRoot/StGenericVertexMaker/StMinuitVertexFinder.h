@@ -70,7 +70,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.6 2004/07/23 02:24:39 jeromel Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.7 2004/08/04 21:57:56 balewski Exp $
  *
  */
 
@@ -92,6 +92,7 @@ public:
     virtual         ~StMinuitVertexFinder();
     bool            fit(StEvent*);       
     int             NCtbMatches();
+    int            NCtbSlats();
     void            printInfo(ostream& = cout) const;
     void            UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
 
@@ -133,6 +134,9 @@ private:
 /***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.7  2004/08/04 21:57:56  balewski
+ * toward smarter ppLMV5
+ *
  * Revision 1.6  2004/07/23 02:24:39  jeromel
  * Oops ... Worng swithc (had twice Minuit). Now corrected.
  *

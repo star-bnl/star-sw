@@ -170,6 +170,7 @@ Bool_t StGenericVertexMaker::DoFit(){
     gMessMgr->Error() << "StGenericVertexMaker::DoFit: vertex fit failed, no vertex." << endm;
     return kFALSE;
   }
+
   return kTRUE;
   
 }
