@@ -1,11 +1,14 @@
 //StiResidualMaker.h
 /***************************************************************************
  *
- * $Id: StiResidualMaker.h,v 2.1 2003/03/16 16:52:12 andrewar Exp $
+ * $Id: StiResidualMaker.h,v 2.2 2003/03/16 21:57:45 andrewar Exp $
  *
  * Author: Andrew Rose, Wayne State University, October 2002
  ***************************************************************************
  * $Log: StiResidualMaker.h,v $
+ * Revision 2.2  2003/03/16 21:57:45  andrewar
+ * Fixed filling bug, removed couts and improved functionality
+ *
  * Revision 2.1  2003/03/16 16:52:12  andrewar
  * Add histograms, removed redundant checks on hits
  *
@@ -20,11 +23,17 @@
  *
  */
 
+
+#ifndef StiResidualMaker_HH
+#define StiResidualMaker_HH
+
 //forward declarations
 class TH3D;
 class StiHit;
 class StiTrack;
 class StiKalmanTrack;
+
+#include "StDetectorId.h"
 
 class StiResidualMaker: StiResiduals
 {
@@ -50,6 +59,9 @@ class StiResidualMaker: StiResiduals
      TH3D *mYResidualZY;
      TH3D *mZResidualCrossDip;
      TH3D *mZResidualZY;
+     TH3D *mResidualCrossDip;
+     TH3D *mResidualZY;
 };
   
 
+#endif
