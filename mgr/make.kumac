@@ -2,7 +2,9 @@ macro make
 if [#]>0 then
 for pam in [*]
   t = $word([pam],1,1,'/')
-  if $index([t],'pams')<1 then
+  if $index([t],'g2t')>0 .or. $index([t],'gstar')>0 then
+    p = pams/sim/[pam]
+  elseif $index([t],'pams')<1 then
     p = pams/[pam]
   else
     p = [pam]
@@ -10,7 +12,7 @@ for pam in [*]
   exec makes pam=[p]
 endfor
 else
-for pam in geometry  mwc sim svt vpd ctf ftpc magnet tpc emc global
+for pam in geometry  mwc sim/gstar sim/g2t svt vpd ctf ftpc magnet tpc emc global
    exec makes pam=pams/[pam]
 endfor
 endif
