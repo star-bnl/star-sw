@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.15 2002/01/11 22:49:22 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.16 2002/04/22 14:52:54 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.16  2002/04/22 14:52:54  caines
+// Add the .h too
+//
 // Revision 1.15  2002/01/11 22:49:22  caines
 // Fix sequence merging bugs-hopefully
 //
@@ -130,6 +133,7 @@ class StSvtSeqAdjMaker : public StMaker
   TH1F* mCommonModePitch; //!
   TH1F* mCommonModeCount; //!
   TH2F** mTimeAn; //!
+  TH1F** mRawPixel; //!
   int mNumOfSeq;
   int m_n_seq_lo;
   int m_n_seq_hi;
