@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.33 2001/04/06 18:13:11 akio Exp $
+* $Id: g2t_volume_id.g,v 1.34 2001/07/03 15:59:01 nevski Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.34  2001/07/03 15:59:01  nevski
+* phmd added
+*
 * Revision 1.33  2001/04/06 18:13:11  akio
 * Modifications for FPD
 *
@@ -581,7 +584,8 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 *15*                                 pmd,     Bedanga
       else If (Csys=='pmd') then
-        volume_id = numbv(1)*1000+numbv(2)
+        volume_id = numbv(1)*1000000+numbv(2)*100000+numbv(3)*1000+numbv(4)*10_
+                    +numv(5)
 
 *16*
       else
