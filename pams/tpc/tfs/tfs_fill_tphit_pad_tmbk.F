@@ -65,21 +65,21 @@ c     >  ',old flag=',tphit(ihit).flag
 
           if(min_pad.le.0.or.
      > min_pad.gt.pad_plane(1).npads(irow))then
-             tphit(ihit).flag=-14
+             tphit(ihit).flag=14
              min_pad=1
           endif
 
           if(max_pad.le.0.or.
      >  max_pad.gt.pad_plane(1).npads(irow)) then
-             tphit(ihit).flag=-14
+             tphit(ihit).flag=14
              max_pad=pad_plane(1).npads(irow)
           endif
           
           npads=max_pad-min_pad+1
           if(npads.le.0.or.npads.gt.pad_plane(1).npads(irow))then
-c              print *,'wrong npads, mark it to flag=14, npad=',npads,
+c              print *,'wrong npads, mark it to flag=-14, npad=',npads,
 c     >   ',ihit=',ihit,',old flag=',tphit(ihit).flag
-             tphit(ihit).flag=14
+             tphit(ihit).flag=-14
           endif              
 
           tphit(ihit).npads=npads
