@@ -19,7 +19,7 @@
 #include "geant321/gcnum.inc"
 #include "geant321/gcflag.inc"
 #include "genhit.h"
-#include "gentit.inc"
+#include "atlsim/gentit.inc"
       Integer         G2R_GET_HIT,AgHITGET,G2T_VOLUME_ID,i
       real            XYZTr(nmh)
       character*3     Csys
