@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.24 2000/01/12 16:49:04 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.25 2000/01/12 23:10:34 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.25  2000/01/12 23:10:34  kathy
+// changes so it can print from a list
+//
 // Revision 1.24  2000/01/12 16:49:04  kathy
 // add new methods so that one can set a list which will be used to print,draw a subset of the histograms corresponding to a given maker; new methods are SetDefaultPrintList,AddToPrintList,RemoveFromPrintList,ExaminePrintList; can't test it yet because seems can't find directory of histograms in DEV anymore and there are conflicts in NEW; updates to DrawHist method to use this new list are not done yet
 //
@@ -235,7 +238,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
   Int_t chkdim=0;
   while ((obj = nextHist())) {
 //   cout << " **** Now in StHistUtil::DrawHists - in loop: " << endl;
-   cout << "               name = " << obj->GetName() << endl;
+//   cout << "               name = " << obj->GetName() << endl;
 
 
     if (obj->InheritsFrom("TH1")) { 
@@ -243,13 +246,16 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
       histReadCounter++;
       printf(" %d. Reading ... %s::%s; Title=\"%s\"\n",histReadCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
       if (! started && (strcmp("*",firstHistName)==0 || strcmp(obj->GetName(),firstHistName)==0 ))  started = kTRUE;
+
+// Here is the actual loop over histograms !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       if (started) {
 	if (strcmp(obj->GetName(),lastHistName)==0) started = kFALSE;
 	histCounter++;
-	printf("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",histCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
-// Switch to a new page
+
+// Switch to a new page.....................................................
 	if (padCount == numPads) {
 	  if (psf) psf->NewPage();
+
 // update the page number
           Ipagenum++;
           ostrstream Cpagenumt(Ctmp,10);
@@ -263,25 +269,46 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
         HistCanvas->Update();
 	  padCount=0;
 	}
+//...........................................................................
 
-// go to next pad & set logy scale off
-	graphPad->cd(++padCount);
-          gPad->SetLogy(0);	  
 
-// set logy scale on if: there is a loglist, if the hist name is on the list, if it has entries
-// and if the max entries in all bins is > 0
+// go to next pad 
+	 graphPad->cd(++padCount);
+
+// set logY scale off
+	 gPad->SetLogy(0);	  
+
+// Set logy scale on if: there is a loglist, if the hist name is on the list, if it has entries
+//    and if the max entries in all bins is > 0
 	if (m_ListOfLog && m_ListOfLog->FindObject(obj->GetName()) && ((TH1 *)obj)->GetEntries()
             && ((TH1 *)obj)->GetMaximum() ){
 	  gPad->SetLogy(1);
-          cout << "StHistUtil::DrawHists -- Will draw in log scale: " << obj->GetName() <<endl;
+          cout << "             -- Will draw in log scale: " << obj->GetName() <<endl;
+	 }
+
+// If there's no print list, then print all histograms in directory
+// If there is a print list, then only print if hist name is on list
+
+	if (!m_ListOfPrint || (m_ListOfPrint && m_ListOfPrint->FindObject(obj->GetName()) )){
+
+// this histogram will actually be printed/drawn!!
+        printf("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",
+	  histCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
+
+// check dimension of histogram
+          chkdim = ((TH1 *)obj)->GetDimension();
+	  //	  cout << " name " << obj->GetName() << " dimension " << chkdim << endl;
+
+// actually draw,print
+          if (chkdim == 2) obj->Draw("box");
+          else 
+              obj->Draw();   
+	  if (gPad) gPad->Update();
         }
-        chkdim = ((TH1 *)obj)->GetDimension();
-	//	  cout << " name " << obj->GetName() << " dimension " << chkdim << endl;
-        if (chkdim == 2) obj->Draw("box");
-        else 
-            obj->Draw();   
-	if (gPad) gPad->Update();
+
       }
+// just ended  actual loop over histograms !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
     }
   }
 
@@ -453,7 +480,6 @@ Int_t StHistUtil::ExamineLogYList()
   return LogYCount;
 }
 
-
 //_____________________________________________________________________________
 
 
@@ -465,6 +491,13 @@ Int_t StHistUtil::ExaminePrintList()
   cout << " **** Now in StHistUtil::ExaminePrintList **** " << endl;
 
 // m_ListOfPrint -  is a list of hist to print,draw
+
+// check if there is a list
+  if (!m_ListOfPrint){
+    cout << "      no subset print list was setup - all hist in directory will be printed " << endl;
+    //    return PrintCount;
+    return 0;
+  }
 
 // construct a TObject
   TObject *obj = 0;
@@ -482,7 +515,7 @@ Int_t StHistUtil::ExaminePrintList()
   }
 
   cout << " Now in StHistUtil::ExaminePrintList, No. Hist. to Print,Draw = " << PrintCount <<endl;
-  return PrintCount;
+  return m_ListOfPrint->GetSize();
 }
 
 //_____________________________________________________________________________
@@ -508,7 +541,7 @@ Int_t StHistUtil::AddToLogYList(const Char_t *HistName){
 // now can use Add method of TList
     if (!lobj) {
        m_ListOfLog->Add(HistNameObj);
-       cout << " StHistUtil::AddToLogYList: " << HistName  <<endl;
+//       cout << " StHistUtil::AddToLogYList: " << HistName  <<endl;
     }
     else  cout << " StHistUtil::AddToLogYList: " << HistName << " already in list - not added" <<endl;
  
@@ -542,7 +575,7 @@ Int_t StHistUtil::AddToPrintList(const Char_t *HistName){
 // now can use Add method of TList
     if (!lobj) {
        m_ListOfPrint->Add(HistNameObj);
-       cout << " StHistUtil::AddToPrintList: " << HistName  <<endl;
+//       cout << " StHistUtil::AddToPrintList: " << HistName  <<endl;
     }
     else  cout << " StHistUtil::AddToPrintList: " << HistName << " already in list - not added" <<endl;
  
@@ -864,14 +897,17 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
   //  { cout << " StHistUtil::SetDefaultLogYList - no hist set in def logy list " << endl; } 
   //   cout <<  " !! HERE I AM1 " << lengofList << endl ;
 
+  Int_t numLog = 0;
+
   if (lengofList) {
     Int_t ilg = 0;
-    Int_t numLog = 0;
     for (ilg=0;ilg<lengofList;ilg++) {
      numLog = AddToLogYList(sdefList[ilg]);
-     cout <<  " !!! adding histogram " << sdefList[ilg] << " to LogY list "  << endl ;
+     //     cout <<  " !!! adding histogram " << sdefList[ilg] << " to LogY list "  << endl ;
     }
   }
+
+  cout <<  " !!!  StHistUtil::SetDefaultLogYList, # histogram put in list " << numLog << endl;
 
 }
 
@@ -886,6 +922,12 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 
   Char_t **sdefList=0;
   Int_t lengofList = 0;
+
+// If not analysis Type is set, then don't setup a list
+  if ( strcmp(analType,"")==0 || strcmp(analType,"All")==0 ) {
+      cout << " All histograms in directory will be printed/drawn, no list set" << endl;
+      return;
+  }
 
 // Cosmic Data Table QA list .............................................
   if (strcmp(dirName,"QA")==0 && strcmp(analType,"Cosmic")==0) {
@@ -935,23 +977,25 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   }
 
 // Full Table QA list.........................................................
-  if (strcmp(dirName,"QA")==0 && strcmp(analType,"FullTable")==0) {
+  if (strcmp(dirName,"QA")==0 && strcmp(analType,"TestQATable")==0) {
    Char_t* sdefList2[] = {
- "TabQaVtxX",
+     "TabQaVtxX",
    };
   sdefList = sdefList2;
   lengofList = sizeof(sdefList2)/4;  
   }
 
+  Int_t numPrt = 0;
 
   if (lengofList) {
     Int_t ilg = 0;
-    Int_t numLog = 0;
     for (ilg=0;ilg<lengofList;ilg++) {
-     numLog = AddToPrintList(sdefList[ilg]);
-     cout <<  " !!! adding histogram " << sdefList[ilg] << " to print list "  << endl ;
+     numPrt = AddToPrintList(sdefList[ilg]);
+     //     cout <<  " !!! adding histogram " << sdefList[ilg] << " to print list "  << endl ;
     }
   }
+  
+  cout <<  " !!!  StHistUtil::SetDefaultPrintList, # histogram put in list " << numPrt << endl;
 
 }
 
