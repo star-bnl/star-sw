@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: StRichIonization.cxx,v 1.6 2000/02/14 01:14:06 lasiuk Exp $
+ * $Id: StRichIonization.cxx,v 1.7 2000/03/12 23:56:34 lasiuk Exp $
  *
  * Description:
  *  StRichIonization simulates the charged particle track through the gas.
@@ -22,8 +22,12 @@
  *
  *********************************************************************
  * $Log: StRichIonization.cxx,v $
- * Revision 1.6  2000/02/14 01:14:06  lasiuk
- * add track_p to GHit c'tor
+ * Revision 1.7  2000/03/12 23:56:34  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
+ *
+ * Revision 1.8  2000/03/17 14:54:44  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.7  2000/03/12 23:56:34  lasiuk
  * new coordinate system
@@ -71,7 +75,7 @@ StRichIonization::~StRichIonization() { /* nopt */ }
     StRichInduceSignal induceSignal;
 
 
-    int numberOfInteractions = mRandom.Poisson( mRound(hit.ds() * mAverageNumberOfInteractions) );
+void StRichIonization::splitSegment(const StRichGHit* hit, list<StRichMiniHit*>& aList) const
 {
     // locals
 	

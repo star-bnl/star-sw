@@ -1,5 +1,5 @@
 /*********************************************************Writer.h**\
- * $Id: StRichWriter.h,v 1.4 2000/02/14 01:10:40 lasiuk Exp $
+ * $Id: StRichWriter.h,v 1.5 2000/03/12 23:56:34 lasiuk Exp $
  *
  * Description:
  *   Writer is the output module for  
@@ -10,9 +10,13 @@
  *
  ********************************************************************
  * $Log: StRichWriter.h,v $
- * Revision 1.4  2000/02/14 01:10:40  lasiuk
- * interface for StRichID is changed
+ * Revision 1.5  2000/03/12 23:56:34  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
  *
+ * Revision 1.5  2000/03/12 23:56:34  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
  *
  * Revision 1.4  2000/02/14 01:10:40  lasiuk
  * interface for StRichID is changed
@@ -38,7 +42,7 @@
 #endif
 #ifndef ST_NO_NAMESPACES
 //namespace StRichRawData {
-#include "StRichOtherAlgorithms.h"
+#endif
 #include "StRichRrsMacros.h"
 #include "StRichPadPlane.h"
 #include "StRichPhysicsDb.h"
@@ -69,7 +73,6 @@ protected:
     StRichWriter();
     StRichWriter(StRichPadPlane*);
     
-    MyRound      mRound;
 private:
     StRichPadPlane* mStorage;
     StRichPhysicsDb* mPhysicsDb;

@@ -1,13 +1,17 @@
 /*****************************************************
- * $Id: StRichWriter.cxx,v 1.6 2000/02/14 01:10:40 lasiuk Exp $
+ * $Id: StRichWriter.cxx,v 1.7 2000/03/12 23:56:33 lasiuk Exp $
  *
  * Description:
  *  Implementation of the StRichWriter output object.
  ******************************************************
  * $Log: StRichWriter.cxx,v $
- * Revision 1.6  2000/02/14 01:10:40  lasiuk
- * interface for StRichID is changed
+ * Revision 1.7  2000/03/12 23:56:33  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
  *
+ * Revision 1.7  2000/03/12 23:56:33  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
  *
  * Revision 1.6  2000/02/14 01:10:40  lasiuk
  * interface for StRichID is changed
@@ -42,9 +46,8 @@
 //#include "rd_rd2.h"
 
 #ifndef ST_NO_NAMESPACES
-//#include "StRichGeometryDb.h"
+//namespace StRichRawData {
 #endif
-    
 
 #include "StRichWriter.h"
 #include "StRichOtherAlgorithms.h"
@@ -85,7 +88,7 @@ StRichWriter::~StRichWriter()
 { /* nopt */ }
 
 void StRichWriter::putSignal(int row, int col, double s, int id, int track_p)
-						 mRound(s/mAdcConversion)));
+{
     (*mStorage)[row][col].signal += s;
     (*mStorage)[row][col].IDs.push_back(StRichID(id,
 						 track_p,

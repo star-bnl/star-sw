@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StRichAnalogSignalGenerator.h,v 1.3 2000/02/08 16:21:43 lasiuk Exp $
+ * $Id: StRichAnalogSignalGenerator.h,v 1.4 2000/03/12 23:56:33 lasiuk Exp $
  *
  * Description:
  *   StRichAnalogSignalGenerator is a function object containing the 
@@ -15,9 +15,13 @@
  *
  ***************************************************************************
  * $Log: StRichAnalogSignalGenerator.h,v $
- * Revision 1.3  2000/02/08 16:21:43  lasiuk
- * use coordinate transformation routines for pad limits
- * incorporation of dbs
+ * Revision 1.4  2000/03/12 23:56:33  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
+ *
+ * Revision 1.4  2000/03/12 23:56:33  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
  *
  * Revision 1.3  2000/02/08 16:21:43  lasiuk
  * use coordinate transformation routines for pad limits
@@ -49,7 +53,7 @@ using std::pair;
 //namespace StRichRawData {
 #endif
 #include "StRichRrsMacros.h"
-#include "StRichOtherAlgorithms.h"
+#include "StRichGeometryDb.h"
 #include "StRichWriter.h"
 #include "StRichGHit.h"
 #include "StRichCoordinates.h"
@@ -67,9 +71,9 @@ public:
     pair<int, int> calculatePadLimits(const StRichRawCoordinate&) const;
     pair<int, int> calculateRowLimits(const StRichRawCoordinate&) const;
 
-    StRichGeometryDb*  mGeomDb;
-    StRichWriter*      mOutput;
-    MyRound            mRound;
+private:
+    double induceTension(double, double) const;
+
 private:
     StRichCoordinateTransform* mTransform;
     StRichGeometryDb*          mGeomDb;

@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: StRichSelectWire.cxx,v 1.4 2000/02/12 21:55:13 lasiuk Exp $
+ * $Id: StRichSelectWire.cxx,v 1.5 2000/03/12 23:56:33 lasiuk Exp $
  *
  * Description:
  *
@@ -15,9 +15,13 @@
  *
  *********************************************************************
  * $Log: StRichSelectWire.cxx,v $
- * Revision 1.4  2000/02/12 21:55:13  lasiuk
- * take into account gap between top and bottom of
- * chamber
+ * Revision 1.5  2000/03/12 23:56:33  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
+ *
+ * Revision 1.5  2000/03/12 23:56:33  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
  *
  * Revision 1.4  2000/02/12 21:55:13  lasiuk
  * take into account gap between top and bottom of
@@ -48,31 +52,30 @@
 wirePosition StRichSelectWire::operator()( const StRichGHit& hit ) const 
 {
     static StRichGeometryDb* geoDB     = StRichGeometryDb::getDb();  // locals
-    static MyRound round;
     //static double first_wire_pos = geoDB->wire_x0;
     //static double first_wire_pos = geoDB->firstWirePositionInX();
     //static double wire_spacing   = geoDB->wire_spacing;
     static double wire_spacing   = geoDB->wirePitch();
 
-    if(hit.position().x() >= 0) {
+    
     int wireNumber;  // wire Number starts at zero
-	    round((geoDB->firstWirePositionInX(1)-hit.position().x())/geoDB->wirePitch());
+    double wirePosition;
     
     if(hit.position().y() >= 0) {
 	wireNumber =
 	    nearestInteger((geoDB->firstWirePositionInY(1)-hit.position().y())/geoDB->wirePitch());
 	if(wireNumber<0)
-	    geoDB->firstWirePositionInX(1)-(wireNumber)*geoDB->wirePitch();
+	    wireNumber = 0;
 	else if (wireNumber>(geoDB->numberOfWires()/2-1))
 	    wireNumber = geoDB->numberOfWires()/2-1;
 	wirePosition =
-	    round((geoDB->firstWirePositionInX(-1)-hit.position().x())/geoDB->wirePitch())+geoDB->numberOfWires()/2.;
+	    geoDB->firstWirePositionInY(1)-(wireNumber)*geoDB->wirePitch();
     }
     else {
 	wireNumber =
 	    nearestInteger((geoDB->firstWirePositionInY(-1)-hit.position().y())/geoDB->wirePitch())+geoDB->numberOfWires()/2.;
 	if(wireNumber>(geoDB->numberOfWires()-1))
-	    geoDB->firstWirePositionInX(-1)-(wireNumber-geoDB->numberOfWires()/2)*geoDB->wirePitch();
+	    wireNumber = geoDB->numberOfWires()-1;
 	else if(wireNumber<geoDB->numberOfWires()/2)
 	    wireNumber = geoDB->numberOfWires()/2;
 	wirePosition =
