@@ -24,7 +24,27 @@ macro bfc_start domain='geometry tpc svt global'
    nw = $words([test])
    do i = 1, [nw]
      mod = $word([test],[i],1)
-     make [mod]
+     n = $words([mod],'/') 
+     module = $word([mod],[n],[n],'/')
+     test_done = [module]_done
+     if ($vexist([test_done])=0) then
+       vec/cre [test_done]
+       if ([module]=geometry) then
+            exec  set_hadr_phys_on
+            Mode TRAC  SIMU 1  | save secondaries which produced TPC hits
+            detp TRAC  DCAY 210 210 0.1 0.01
+            mode tpce  simu 2
+            mode svtt  simu 2
+            mode ftpc  simu 2
+            detp svtt  svtg.nlayer = 6 | switch off shell 4
+            ghist star.his  STAR
+            gstat time size mult stak
+        endif
+        make [mod]
+        if $iquest(1)<>0 then
+            message "<bfc> Shared libraries have not been loaded : ABend"
+         endif
+     endif
      if $iquest(1)<>0 then
        message "<bfc> Shared libraries have not been loaded : ABend"
      endif
@@ -55,24 +75,11 @@ macro bfc_init _
    (gethij) 
            newfile hij_in [input_file] r; 
            user/input u evgen/particle.staf
-   (gst) 
-            if ($vexist(geometry_done)=0) then
-            exec  set_hadr_phys_on
-            Mode TRAC  SIMU 1  | save secondaries which produced TPC hits
-            detp TRAC  DCAY 210 210 0.1 0.01
-            mode tpce  simu 2
-            mode svtt  simu 2
-            mode ftpc  simu 2
-            detp svtt  svtg.nlayer = 6 | switch off shell 4
-              make geometry sim/g2t sim/gstar |  load g2t and geometry
-              if $iquest(1)<>0 then
-                message "<bfc> Shared libraries have not been loaded : ABend"
-              endif
-              vec/cre geometry_done
-            endif
-            ghist star.his  STAR
-            gstat time size mult stak
-    (g2t)   cd [geant]; 
+   (gst)   if ($vexist(geometry_done)=0) then
+             exec [TOP]/kumacs/chain/bfc_util#bfc_start domain=geometry
+           endif
+    (fzd)  user/output o [output_fzd_file]
+    (g2t)   cd [geant];
             dio/newfilestream G2Tfile [input_file] r | open file & read header 
             getev G2Tfile         | get Run
             if (STAF_STATUS(1).ne. STAFCV_OK) then
@@ -200,7 +207,7 @@ macro bfc_init _
       if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
    ENDCASE
 	     
- sigma v[mod] = v[mod] + $cptime
+ sigma v[mod] = v[mod] + abs($cptime)
  sigma t[mod] = t[mod] + v[mod]
  ccc = '---'
  fmt = [ccc]//'<bfc>: Event  '//[ievent]//[ccc]//[mod]//' =' 
