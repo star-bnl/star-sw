@@ -18,9 +18,9 @@
 #ifndef dummyV0Cut_hh
 #define dummyV0Cut_hh
 
-#ifndef StMaker_H
-#include "StMaker.h"
-#endif
+//#ifndef StMaker_H
+//#include "StMaker.h"
+//#endif
 
 #include "StHbtMaker/Base/StHbtV0Cut.h"
 
@@ -35,7 +35,9 @@ public:
   virtual StHbtString Report();
 
 
+#ifdef __ROOT__ 
   ClassDef(dummyV0Cut, 1)
+#endif
 
 private:
   long mNpassed;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mikesEventCut.h,v 1.3 1999/10/15 01:57:04 lisa Exp $
+ * $Id: mikesEventCut.h,v 1.4 2000/01/25 17:35:02 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,18 @@
  ***************************************************************************
  *
  * $Log: mikesEventCut.h,v $
+ * Revision 1.4  2000/01/25 17:35:02  laue
+ * I. In order to run the stand alone version of the StHbtMaker the following
+ * changes have been done:
+ * a) all ClassDefs and ClassImps have been put into #ifdef __ROOT__ statements
+ * b) unnecessary includes of StMaker.h have been removed
+ * c) the subdirectory StHbtMaker/doc/Make has been created including everything
+ * needed for the stand alone version
+ *
+ * II. To reduce the amount of compiler warning
+ * a) some variables have been type casted
+ * b) some destructors have been declared as virtual
+ *
  * Revision 1.3  1999/10/15 01:57:04  lisa
  * Important enhancement of StHbtMaker - implement Franks CutMonitors
  * ----------------------------------------------------------
@@ -40,9 +52,10 @@
 #ifndef mikesEventCut_hh
 #define mikesEventCut_hh
 
-#ifndef StMaker_H
-#include "StMaker.h"
-#endif
+// do I need these lines ?
+//#ifndef StMaker_H
+//#include "StMaker.h"
+//#endif
 
 #include "StHbtMaker/Base/StHbtEventCut.h"
 
@@ -70,7 +83,9 @@ private:   // here are the quantities I want to cut on...
   long mNEventsPassed;
   long mNEventsFailed;
 
+#ifdef __ROOT__
   ClassDef(mikesEventCut, 1)
+#endif
 
 };
 

@@ -13,8 +13,9 @@
 #include "StHbtMaker/CorrFctn/OpeningAngleCorrFctn.h"
 #include <cstdio>
 
+#ifdef __ROOT__
 ClassImp(OpeningAngleCorrFctn)
-
+#endif
 //____________________________
 OpeningAngleCorrFctn::  OpeningAngleCorrFctn(char* title, const int& nbinsQ, const float& QLo, const float& QHi,
 					     const int& nbinsAng, const float& AngLo, const float& AngHi){

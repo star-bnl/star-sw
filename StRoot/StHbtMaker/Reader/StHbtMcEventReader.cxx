@@ -70,8 +70,9 @@
 #include "StParticleDefinition.hh"
 #include "StPhysicalHelix.hh"
 
-
-//ClassImp(StHbtMcEventReader)
+#ifdef __ROOT__
+ClassImp(StHbtMcEventReader)
+#endif
 
 #ifndef ST_NO_NAMESPACES
 using namespace std;
@@ -164,7 +165,7 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
   // ******************
   // Event properties
   // ******************
-  unsigned long RunNumber = mcEvent->runNumber();
+  //unsigned long RunNumber = mcEvent->runNumber();
   //cout << " MC : run: #" << RunNumber;
   unsigned long EventNumber = mcEvent->eventNumber();
   //cout << " * event: #" << EventNumber;
@@ -323,16 +324,16 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
     StMcVertex*  vertex = *vIter;
     int nDaughters = vertex->numberOfDaughters();
     long geantProcess = vertex->geantProcess();
-    //cout << " daughters : " << nDaughters  << endl;
     if ( nDaughters!=2) {
+      cout << " geant Process : " << geantProcess  << endl;
+      cout << " daughters : " << nDaughters  << endl;
       continue; // not a v0
     }
 
-    StMcTrack* parent = vertex->parent();
+    //StMcTrack* parent = vertex->parent();
     StMcTrack* daughter1 = *(vertex->daughters().begin());
     StMcTrack* daughter2 = *(vertex->daughters().end()-1);
     //cout << parent << " " << daughter1 << " " << daughter2 << " " << endl;
-
     /*
       if (!(parent && daughter1 && daughter2)) {
       cout << " two daughters, but no parent " << endl;

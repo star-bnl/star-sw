@@ -16,9 +16,9 @@
 #ifndef mikesTrackCut_hh
 #define mikesTrackCut_hh
 
-#ifndef StMaker_H
-#include "StMaker.h"
-#endif
+//#ifndef StMaker_H
+//#include "StMaker.h"
+//#endif
 
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 
@@ -59,8 +59,9 @@ private:   // here are the quantities I want to cut on...
   long              mNTracksPassed;
   long              mNTracksFailed;
 
+#ifdef __ROOT__ 
   ClassDef(mikesTrackCut, 1)
-
+#endif
 };
 
 

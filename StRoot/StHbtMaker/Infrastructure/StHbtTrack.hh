@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.9 2000/01/07 22:16:14 laue Exp $
+ * $Id: StHbtTrack.hh,v 1.10 2000/01/25 17:35:17 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,18 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.10  2000/01/25 17:35:17  laue
+ * I. In order to run the stand alone version of the StHbtMaker the following
+ * changes have been done:
+ * a) all ClassDefs and ClassImps have been put into #ifdef __ROOT__ statements
+ * b) unnecessary includes of StMaker.h have been removed
+ * c) the subdirectory StHbtMaker/doc/Make has been created including everything
+ * needed for the stand alone version
+ *
+ * II. To reduce the amount of compiler warning
+ * a) some variables have been type casted
+ * b) some destructors have been declared as virtual
+ *
  * Revision 1.9  2000/01/07 22:16:14  laue
  * missing 'const' in Helix() added
  *
@@ -68,7 +80,7 @@ public:
   float ChiSquaredZ() const;
   StHbtThreeVector P() const;
   float Pt() const;
-  StPhysicalHelixD& Helix() const;
+  const StPhysicalHelixD& Helix() const;
 
   void SetCharge(const char&);
   void SetNHits(const unsigned short&);
@@ -137,6 +149,6 @@ inline float StHbtTrack::ChiSquaredXY() const {return mChiSqXY;}
 inline float StHbtTrack::ChiSquaredZ() const {return mChiSqZ;}   
 inline StHbtThreeVector StHbtTrack::P() const {return mP;}
 inline float StHbtTrack::Pt() const {return mPt;}                
-inline StPhysicalHelixD& StHbtTrack::Helix() const {return mHelix;}
+inline const StPhysicalHelixD& StHbtTrack::Helix() const {return mHelix;}
 
 #endif

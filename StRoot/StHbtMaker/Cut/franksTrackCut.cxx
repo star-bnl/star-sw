@@ -16,8 +16,9 @@
 #include "StHbtMaker/Cut/franksTrackCut.h"
 #include <cstdio>
 
-
-ClassImp(franksTrackCut)
+#ifdef __ROOT__
+  ClassImp(franksTrackCut)
+#endif
 
 franksTrackCut::franksTrackCut(){
   mNTracksPassed = mNTracksFailed = 0;
@@ -30,6 +31,24 @@ franksTrackCut::~franksTrackCut(){
 //------------------------------
 bool franksTrackCut::Pass(const StHbtTrack* track){
   // cout << " *** franksTrackCut::Pass(const StHbtTrack* track) " << endl;
+  float TEnergy = sqrt(track->P().mag2()+mMass*mMass);
+  float TRapidity = 0.5*log((TEnergy+track->P().z())/
+			    (TEnergy-track->P().z()));
+
+  /*
+    cout << 
+    track->NSigmaPion() << " " <<
+    track->NSigmaKaon() << " " <<
+    track->NSigmaProton() << " " <<
+    track->DCAxy() << " " <<
+    track->NHits() << " " << 
+    track->P().mag() << " " <<
+    track->Pt() << " " << 
+    TRapidity << " " <<
+    track->Charge() << " " <<
+    endl;
+  */
+
   bool goodPID = ((track->NSigmaPion()   >= mNSigmaPion[0]) &&
                   (track->NSigmaPion()   <= mNSigmaPion[1]) &&
                   (track->NSigmaKaon()   >= mNSigmaKaon[0]) &&
@@ -39,21 +58,17 @@ bool franksTrackCut::Pass(const StHbtTrack* track){
                   (track->Charge() == mCharge));
 
   if (goodPID){
-    float TEnergy = sqrt(track->P().mag2()+mMass*mMass);
-    float TRapidity = 0.5*log((TEnergy+track->P().z())/
-			    (TEnergy-track->P().z()));
-
     bool goodTrack=
-      ((track->DCAxy()  > mDCA[0]) &&
-       (track->DCAxy()  < mDCA[1]) &&
-       (track->NHits() > mNHits[0]) &&
-       (track->NHits() < mNHits[1]) &&
-       (track->P().mag() > mP[0]) &&
-       (track->P().mag() < mP[1]) &&
-       (track->Pt()    > mPt[0]) &&
-       (track->Pt()    < mPt[1]) &&
-       (TRapidity      > mRapidity[0]) &&
-       (TRapidity      < mRapidity[1]));
+      ((track->DCAxy()  >= mDCA[0]) &&
+       (track->DCAxy()  <= mDCA[1]) &&
+       (track->NHits() >= mNHits[0]) &&
+       (track->NHits() <= mNHits[1]) &&
+       (track->P().mag() >= mP[0]) &&
+       (track->P().mag() <= mP[1]) &&
+       (track->Pt()    >= mPt[0]) &&
+       (track->Pt()    <= mPt[1]) &&
+       (TRapidity      >= mRapidity[0]) &&
+       (TRapidity      <= mRapidity[1]));
 
     
     //goodTrack = goodTrack && ( fabs(track->NSigmaPion()) > 1/ abs(track->P()) );

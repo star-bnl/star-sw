@@ -39,7 +39,9 @@ private:
   StHbt2DHisto* mDenominator2D;
   StHbt2DHisto* mRatio2D;
 
+#ifdef __ROOT__
   ClassDef(ExitSepCorrFctn, 1)
+#endif
 
 };
 

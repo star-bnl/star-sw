@@ -16,8 +16,9 @@
 
 #include "StHbtMaker/Cut/dummyV0Cut.h"
 
+#ifdef __ROOT__ 
 ClassImp(dummyV0Cut)
-
+#endif
 //________________________
 dummyV0Cut::dummyV0Cut(){
   mNpassed = mNfailed = 0;

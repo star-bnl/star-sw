@@ -4,7 +4,9 @@
 #include <cstdio>
 #include <typeinfo>
 
+#ifdef __ROOT__ 
 ClassImp(trackCutMonitor_Pt)
+#endif
 
 trackCutMonitor_Pt::trackCutMonitor_Pt(){
   mHisto = new StHbt1DHisto("Pt","Pt (GeV/c)",20,0.,2.);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: QinvCorrFctnC.cxx,v 1.1 1999/09/23 23:28:01 lisa Exp $
+ * $Id: QinvCorrFctnC.cxx,v 1.2 2000/01/25 17:34:45 laue Exp $
  *
  * Author: Randy Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,18 @@
  ***************************************************************************
  *
  * $Log: QinvCorrFctnC.cxx,v $
+ * Revision 1.2  2000/01/25 17:34:45  laue
+ * I. In order to run the stand alone version of the StHbtMaker the following
+ * changes have been done:
+ * a) all ClassDefs and ClassImps have been put into #ifdef __ROOT__ statements
+ * b) unnecessary includes of StMaker.h have been removed
+ * c) the subdirectory StHbtMaker/doc/Make has been created including everything
+ * needed for the stand alone version
+ *
+ * II. To reduce the amount of compiler warning
+ * a) some variables have been type casted
+ * b) some destructors have been declared as virtual
+ *
  * Revision 1.1  1999/09/23 23:28:01  lisa
  * add helensV0Cut  AND  rename mikes and franks ParticleCuts to TrackCuts  AND  update documentation
  *
@@ -31,8 +43,9 @@
 //#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 #include <cstdio>
 
-
+#ifdef __ROOT__ 
 ClassImp(QinvCorrFctnC)
+#endif
 
 //____________________________
 QinvCorrFctnC::QinvCorrFctnC(char* title, const int& nbins, const float& QinvLo, const float& QinvHi){
@@ -108,7 +121,7 @@ void QinvCorrFctnC::AddRealPair(const StHbtPair* pair){
 //____________________________
 void QinvCorrFctnC::AddMixedPair(const StHbtPair* pair){
   double Qinv = fabs(pair->qInv());   // note - qInv() will be negative for identical pairs...
-  double pionMass = 0.139;
+  //double pionMass = 0.139;
   double charge = 1.0;
   // I call SetRadius(7.0) in my macro so don't need to use it here.
   //  double weight = mCorrection.CoulombCorrect(charge,pionMass,pionMass,Qinv,radius);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: QvecCorrFctn.cxx,v 1.3 1999/07/29 02:47:09 lisa Exp $
+ * $Id: QvecCorrFctn.cxx,v 1.4 2000/01/25 17:34:45 laue Exp $
  *
  * Author: Randy Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,18 @@
  ***************************************************************************
  *
  * $Log: QvecCorrFctn.cxx,v $
+ * Revision 1.4  2000/01/25 17:34:45  laue
+ * I. In order to run the stand alone version of the StHbtMaker the following
+ * changes have been done:
+ * a) all ClassDefs and ClassImps have been put into #ifdef __ROOT__ statements
+ * b) unnecessary includes of StMaker.h have been removed
+ * c) the subdirectory StHbtMaker/doc/Make has been created including everything
+ * needed for the stand alone version
+ *
+ * II. To reduce the amount of compiler warning
+ * a) some variables have been type casted
+ * b) some destructors have been declared as virtual
+ *
  * Revision 1.3  1999/07/29 02:47:09  lisa
  * 1) add OpeningAngle correlation function 2) add StHbtMcEventReader 3) make histos in CorrFctns do errors correctly
  *
@@ -25,12 +37,14 @@
 #include "StHbtMaker/CorrFctn/QvecCorrFctn.h"
 //#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 #include <cstdio>
-#ifndef StMaker_H
-#include "StMaker.h"
-#endif
+// do I need these lines ?
+//#ifndef StMaker_H
+//#include "StMaker.h"
+//#endif
 
+#ifdef __ROOT__ 
 ClassImp(QvecCorrFctn)
-
+#endif
 //____________________________
 QvecCorrFctn::QvecCorrFctn(char* title, const int& nbins, const float& QinvLo, const float& QinvHi){
   // set up numerator
@@ -76,8 +90,8 @@ void QvecCorrFctn::Finish(){
   // of the code.  Do it instead at root command line with browser.
   //  mNumerator->Draw();
   //  mDenominator->Draw();
-  int mTop = mNumerator->GetBinContent(52);
-  int mBottom = mDenominator->GetBinContent(52);
+  int mTop = (int)mNumerator->GetBinContent(52);
+  int mBottom = (int)mDenominator->GetBinContent(52);
   mRatio->Divide(mNumerator,mDenominator,mBottom,mTop,"PE");
   //mRatio->Draw();
 }

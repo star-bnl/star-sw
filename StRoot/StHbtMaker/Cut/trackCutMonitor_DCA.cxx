@@ -4,7 +4,9 @@
 #include <cstdio>
 #include <typeinfo>
 
+#ifdef __ROOT__ 
 ClassImp(trackCutMonitor_DCA)
+#endif
 
 trackCutMonitor_DCA::trackCutMonitor_DCA(){
   mHisto = new StHbt1DHisto("DCA","DCA (cm)",20,0.,10.);

@@ -21,7 +21,9 @@ public:
   virtual void Fill(const StHbtTrack* track);
   StHbt1DHisto* Histo() {return mHisto;}
 
+#ifdef __ROOT__ 
  ClassDef(trackCutMonitor_DCA, 1)
+#endif
 };
 
 #endif

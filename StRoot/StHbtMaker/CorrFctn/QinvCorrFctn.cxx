@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: QinvCorrFctn.cxx,v 1.3 1999/07/29 02:47:09 lisa Exp $
+ * $Id: QinvCorrFctn.cxx,v 1.4 2000/01/25 17:34:45 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,18 @@
  ***************************************************************************
  *
  * $Log: QinvCorrFctn.cxx,v $
+ * Revision 1.4  2000/01/25 17:34:45  laue
+ * I. In order to run the stand alone version of the StHbtMaker the following
+ * changes have been done:
+ * a) all ClassDefs and ClassImps have been put into #ifdef __ROOT__ statements
+ * b) unnecessary includes of StMaker.h have been removed
+ * c) the subdirectory StHbtMaker/doc/Make has been created including everything
+ * needed for the stand alone version
+ *
+ * II. To reduce the amount of compiler warning
+ * a) some variables have been type casted
+ * b) some destructors have been declared as virtual
+ *
  * Revision 1.3  1999/07/29 02:47:09  lisa
  * 1) add OpeningAngle correlation function 2) add StHbtMcEventReader 3) make histos in CorrFctns do errors correctly
  *
@@ -26,7 +38,9 @@
 //#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 #include <cstdio>
 
+#ifdef __ROOT__ 
 ClassImp(QinvCorrFctn)
+#endif
 
 //____________________________
 QinvCorrFctn::QinvCorrFctn(char* title, const int& nbins, const float& QinvLo, const float& QinvHi){

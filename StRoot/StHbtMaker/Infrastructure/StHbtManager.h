@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.h,v 1.7 1999/10/04 15:38:58 lisa Exp $
+ * $Id: StHbtManager.h,v 1.8 2000/01/25 17:35:17 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,18 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.h,v $
+ * Revision 1.8  2000/01/25 17:35:17  laue
+ * I. In order to run the stand alone version of the StHbtMaker the following
+ * changes have been done:
+ * a) all ClassDefs and ClassImps have been put into #ifdef __ROOT__ statements
+ * b) unnecessary includes of StMaker.h have been removed
+ * c) the subdirectory StHbtMaker/doc/Make has been created including everything
+ * needed for the stand alone version
+ *
+ * II. To reduce the amount of compiler warning
+ * a) some variables have been type casted
+ * b) some destructors have been declared as virtual
+ *
  * Revision 1.7  1999/10/04 15:38:58  lisa
  * include Franks new accessor methods StHbtAnalysis::CorrFctn and StHbtManager::Analysis as well as McEvent example macro
  *
@@ -45,7 +57,6 @@
 #include "StHbtMaker/Infrastructure/StHbtAnalysis.h"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Base/StHbtEventReader.hh"
-#include "StMaker.h"
 
 class StHbtManager{
 
@@ -56,7 +67,7 @@ private:
 
 public:
   StHbtManager();
-  ~StHbtManager();
+  virtual ~StHbtManager();
 
   // Gets and Sets...
   StHbtAnalysisCollection* AnalysisCollection();
@@ -73,9 +84,9 @@ public:
   void Finish();
 
   StHbtString Report(); //!
-
+#ifdef __ROOT__
   ClassDef(StHbtManager, 0)
-
+#endif
 };
 
 inline StHbtAnalysisCollection* StHbtManager::AnalysisCollection(){return mAnalysisCollection;}

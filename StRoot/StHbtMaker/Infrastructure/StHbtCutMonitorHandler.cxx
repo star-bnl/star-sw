@@ -2,8 +2,9 @@
 #include "StHbtMaker/Infrastructure/StHbtCutMonitorHandler.h"
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 
+#ifdef __ROOT__
 ClassImp(StHbtCutMonitorHandler)
-
+#endif
 // ---------------------------------------------------------------------------
 StHbtCutMonitorHandler::StHbtCutMonitorHandler() {
   cout << " *** StHbtCutMonitorHandler::StHbtCutMonitorHandler() " << endl;
@@ -104,7 +105,7 @@ void StHbtCutMonitorHandler::AddCutMonitorFail(StHbtCutMonitor* cutMoni) {
 // ---------------------------------------------------------------------------
 StHbtCutMonitor* StHbtCutMonitorHandler::PassMonitor(int n) { 
   StHbtCutMonitorIterator iter = mPassColl->begin();
-  if (mPassColl->size() <= n ) return NULL;
+  if ( (int)mPassColl->size() <= n ) return NULL;
   for ( int i=0; i<n; i++)
     iter++;
   return *iter;
@@ -112,7 +113,7 @@ StHbtCutMonitor* StHbtCutMonitorHandler::PassMonitor(int n) {
 // ---------------------------------------------------------------------------
 StHbtCutMonitor* StHbtCutMonitorHandler::FailMonitor(int n) { 
   StHbtCutMonitorIterator iter = mFailColl->begin();
-  if (mFailColl->size() <= n ) return NULL;
+  if ( (int)mFailColl->size() <= n ) return NULL;
   for ( int i=0; i<n; i++)
     iter++;
   return *iter;

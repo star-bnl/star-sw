@@ -49,7 +49,9 @@ class StHbtMcEventReader : public StHbtEventReader{
   StHbtTrackCut* TrackCut();
   StHbtV0Cut*    V0Cut();
 
-  //ClassDef(StHbtMcEventReader, 1)
+#ifdef __ROOT__  
+  ClassDef(StHbtMcEventReader, 1)
+#endif
 };
     
 inline void StHbtMcEventReader::SetTheMcEventMaker(StMaker* mcMaker){mTheMcEventMaker=mcMaker;}

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMaker.h,v 1.3 1999/07/26 16:21:25 lisa Exp $
+ * $Id: StHbtMaker.h,v 1.4 2000/01/25 17:33:38 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,18 @@
  ***************************************************************************
  *
  * $Log: StHbtMaker.h,v $
+ * Revision 1.4  2000/01/25 17:33:38  laue
+ * I. In order to run the stand alone version of the StHbtMaker the following
+ * changes have been done:
+ * a) all ClassDefs and ClassImps have been put into #ifdef __ROOT__ statements
+ * b) unnecessary includes of StMaker.h have been removed
+ * c) the subdirectory StHbtMaker/doc/Make has been created including everything
+ * needed for the stand alone version
+ *
+ * II. To reduce the amount of compiler warning
+ * a) some variables have been type casted
+ * b) some destructors have been declared as virtual
+ *
  * Revision 1.3  1999/07/26 16:21:25  lisa
  * always convert string to char when output - needed on solaris
  *
@@ -25,15 +37,23 @@
 #ifndef StHbtMaker_HH
 #define StHbtMaker_HH
 
+#ifdef __ROOT__
 #ifndef StMaker_H
 #include "StMaker.h"
+#endif
+#else
+typedef int Int_t;
 #endif
 
 #include "StHbtMaker/Infrastructure/StHbtManager.h"
 //class StHbtManager;
 
 
-class StHbtMaker : public StMaker {
+class StHbtMaker
+#ifdef __ROOT__ 
+: public StMaker 
+#endif
+{
  
  private:
   StHbtManager* mHbtManager;//! tells cint to skip it
@@ -48,16 +68,18 @@ class StHbtMaker : public StMaker {
   virtual Int_t Make();
   virtual Int_t Finish();//!
 
+#ifdef __ROOT__
   StMaker* currentChain;
+#endif
   //  StHbtManager* HbtManager();//! tells cint to skip that
   StHbtManager* HbtManager();
 
   
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHbtMaker.h,v 1.3 1999/07/26 16:21:25 lisa Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-
+  {static const char cvs[]="Tag $Name:  $ $Id: StHbtMaker.h,v 1.4 2000/01/25 17:33:38 laue Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+#ifdef __ROOT__
   ClassDef(StHbtMaker, 1)
-
+#endif
 };
 
 inline StHbtManager* StHbtMaker::HbtManager(){return mHbtManager;}

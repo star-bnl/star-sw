@@ -5,7 +5,9 @@
 #include <typeinfo>
 #include "StLorentzVector.hh"
 
+#ifdef __ROOT__ 
 ClassImp(trackCutMonitor_P_vs_Dedx)
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 trackCutMonitor_P_vs_Dedx::trackCutMonitor_P_vs_Dedx(){ // default constructor

@@ -39,8 +39,9 @@ private:
   StHbt2DHisto* mDenominator2D;
   StHbt2DHisto* mRatio2D;
 
+#ifdef __ROOT__
   ClassDef(OpeningAngleCorrFctn, 1)
-
+#endif
 };
 
 inline  StHbt2DHisto* OpeningAngleCorrFctn::Numerator2D(){return mNumerator2D;}

@@ -30,9 +30,9 @@ public:
 
 private:
   ParityEventCut* mParityEventCut;  // this is used to access the Event-wise quantity and increment it
-
+#ifdef __ROOT__
   ClassDef(ParityCorrFctn, 0)
-
+#endif
 };
 
 

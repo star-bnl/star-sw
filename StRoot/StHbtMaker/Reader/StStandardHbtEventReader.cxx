@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.14 1999/12/03 22:24:37 lisa Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.15 2000/01/25 17:35:27 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,18 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.15  2000/01/25 17:35:27  laue
+ * I. In order to run the stand alone version of the StHbtMaker the following
+ * changes have been done:
+ * a) all ClassDefs and ClassImps have been put into #ifdef __ROOT__ statements
+ * b) unnecessary includes of StMaker.h have been removed
+ * c) the subdirectory StHbtMaker/doc/Make has been created including everything
+ * needed for the stand alone version
+ *
+ * II. To reduce the amount of compiler warning
+ * a) some variables have been type casted
+ * b) some destructors have been declared as virtual
+ *
  * Revision 1.14  1999/12/03 22:24:37  lisa
  * (1) make Cuts and CorrFctns point back to parent Analysis (as well as other way). (2) Accommodate new PidTraits mechanism
  *
@@ -110,8 +122,9 @@
 #include "StEventMaker/StEventMaker.h"
 #define HBT_B_FIELD 0.5*tesla
 
+#ifdef __ROOT__
 ClassImp(StStandardHbtEventReader)
-
+#endif
 
 //__________________
 StStandardHbtEventReader::StStandardHbtEventReader(){
