@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.5 1999/12/13 20:16:19 ullrich Exp $
+ * $Id: StSvtHit.cxx,v 2.6 2000/06/01 21:39:03 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
- * Revision 2.5  1999/12/13 20:16:19  ullrich
- * Changed numbering scheme for hw_position unpack methods (STAR conventions).
+ * Revision 2.6  2000/06/01 21:39:03  ullrich
+ * Added member mFlag and access member flag() and setFlag().
  *
  * Revision 2.5  1999/12/13 20:16:19  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
@@ -36,7 +36,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.5 1999/12/13 20:16:19 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.6 2000/06/01 21:39:03 ullrich Exp $";
 
 ClassImp(StSvtHit)
     
@@ -53,14 +53,12 @@ StSvtHit::StSvtHit(const StThreeVectorF& p,
 StSvtHit::StSvtHit(const dst_point_st& pt)
 {
     //
-    // Unpack charge:
-    // The charge is decoded together with its error.
-    // Currently only the charge is used but the corresponding
-    // error can easily be added.
+    // Unpack charge and status flag
     //
-    const ULong_t svtdq = pt.charge/(1L<<16);
-    const ULong_t svtq  = pt.charge - svtdq*(1L<<16);
+    const ULong_t iflag = pt.charge/(1L<<16);
+    const ULong_t svtq  = pt.charge - iflag*(1L<<16);
     mCharge = Float_t(svtq)/(1<<21);
+    mFlag = static_cast<UChar_t>(iflag);
 
     //
     // Unpack position in xyz

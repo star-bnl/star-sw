@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.5 1999/12/01 15:56:28 ullrich Exp $
+ * $Id: StTpcHit.cxx,v 2.6 2000/06/01 21:39:07 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
- * Revision 2.5  1999/12/01 15:56:28  ullrich
- * Renamed xxxInCluster() methods to xxxInHit()
+ * Revision 2.6  2000/06/01 21:39:07  ullrich
+ * Added member mFlag and access member flag() and setFlag().
  *
  * Revision 2.5  1999/12/01 15:56:28  ullrich
  * Renamed xxxInCluster() methods to xxxInHit()
@@ -36,7 +36,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.5 1999/12/01 15:56:28 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.6 2000/06/01 21:39:07 ullrich Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
@@ -53,14 +53,12 @@ StTpcHit::StTpcHit(const StThreeVectorF& p,
 StTpcHit::StTpcHit(const dst_point_st& pt)
 {
     //
-    // Unpack charge:
-    // The charge is decoded together with its error.
-    // Currently only the charge is used but the corresponding
-    // error can easily be added.
+    // Unpack charge and status flag
     //
-    const ULong_t tpcdq = pt.charge/(1L<<16);
-    const ULong_t tpcq  = pt.charge - tpcdq*(1L<<16);
+    const ULong_t iflag = pt.charge/(1L<<16);
+    const ULong_t tpcq  = pt.charge - iflag*(1L<<16);
     mCharge = Float_t(tpcq)/(1<<25);
+    mFlag = static_cast<UChar_t>(iflag);
 
     //
     // Unpack position in xyz

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.1 1999/10/28 22:25:50 ullrich Exp $
+ * $Id: StHit.h,v 2.2 2000/06/01 21:38:56 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
- * Revision 2.1  1999/10/28 22:25:50  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.2  2000/06/01 21:38:56  ullrich
+ * Added member mFlag and access member flag() and setFlag().
  *
  * Revision 2.2  2000/06/01 21:38:56  ullrich
  * Added member mFlag and access member flag() and setFlag().
@@ -46,10 +46,12 @@ public:
     Int_t operator==(const StHit&) const;
     Int_t operator!=(const StHit&) const;
     
+    Float_t         charge() const;
     UChar_t         trackReferenceCount() const;
     StDetectorId    detector() const;
     UChar_t         flag() const;
     StThreeVectorF  positionError() const;     // overwrite inherited
+    StMatrixF       covariantMatrix() const;   // overwrite inherited
     
     void setCharge(Float_t);
     void setFlag(UChar_t);
@@ -63,6 +65,7 @@ protected:
     ULong_t bits(UInt_t, UInt_t) const;
     
     ULong_t        mHardwarePosition;
+    Float_t        mCharge;
     UChar_t        mTrackRefCount;
     StThreeVectorF mPositionError;
     UChar_t        mFlag;

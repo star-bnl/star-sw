@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.cxx,v 2.5 1999/12/13 20:16:12 ullrich Exp $
+ * $Id: StFtpcHit.cxx,v 2.6 2000/06/01 21:38:49 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.cxx,v $
- * Revision 2.5  1999/12/13 20:16:12  ullrich
- * Changed numbering scheme for hw_position unpack methods (STAR conventions).
+ * Revision 2.6  2000/06/01 21:38:49  ullrich
+ * Added member mFlag and access member flag() and setFlag().
  *
  * Revision 2.5  1999/12/13 20:16:12  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
@@ -36,7 +36,7 @@
 #include "tables/St_dst_point_Table.h"
 #include "StTrack.h"
 
-static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.5 1999/12/13 20:16:12 ullrich Exp $";
+static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.6 2000/06/01 21:38:49 ullrich Exp $";
 
 StMemoryPool StFtpcHit::mPool(sizeof(StFtpcHit));
 
@@ -53,14 +53,12 @@ StFtpcHit::StFtpcHit(const StThreeVectorF& p,
 StFtpcHit::StFtpcHit(const dst_point_st& pt)
 {
     //
-    // Unpack charge:
-    // The charge is decoded together with the max. ADC value.
-    // Currently only the charge is used but the corresponding
-    // ADC can easily be added.
+    // Unpack charge and status flag
     //
-    const ULong_t maxadc = pt.charge/(1L<<16);
-    const ULong_t ftpcq  = pt.charge - maxadc*(1L<<16);
+    const ULong_t iflag = pt.charge/(1L<<16);
+    const ULong_t ftpcq  = pt.charge - iflag*(1L<<16);
     mCharge = Float_t(ftpcq)/(1<<16);
+    mFlag = static_cast<UChar_t>(iflag);
 
     //
     // Unpack position in xyz
