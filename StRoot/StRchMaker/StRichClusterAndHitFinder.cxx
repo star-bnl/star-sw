@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 2.11 2003/09/02 17:58:51 perev Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 2.12 2003/09/24 02:39:31 hippolyt Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
+ * Revision 2.12  2003/09/24 02:39:31  hippolyt
+ * init pointers and arrays
+ *
  * Revision 2.11  2003/09/02 17:58:51  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -118,6 +121,8 @@ using std::back_inserter;
 
 StRichClusterAndHitFinder::StRichClusterAndHitFinder()
 {
+    mGeometryDb = 0;
+    mTransform  = 0;
     this->init();
     
     mX = mGeometryDb->numberOfPadsInARow();
@@ -136,6 +141,8 @@ StRichClusterAndHitFinder::StRichClusterAndHitFinder()
 StRichClusterAndHitFinder::StRichClusterAndHitFinder(unsigned int x,
 						     unsigned int y)
 {
+    mGeometryDb = 0;
+    mTransform  = 0;
     this->init();
     
     cout << "StRichClusterAndHitFinder::StRichClusterAndHitFinder(int,int)";
