@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   29/06/99  (E-mail: fine@bnl.gov)
-// $Id: St_geom_Maker.cxx,v 1.5 1999/07/02 20:04:11 fine Exp $
+// $Id: St_geom_Maker.cxx,v 1.6 1999/07/13 00:52:52 fine Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.6  1999/07/13 00:52:52  fine
+// Some corrections
+//
 // Revision 1.5  1999/07/02 20:04:11  fine
 // Init() can not be called from StDataSet since the last os const
 //
@@ -95,14 +98,17 @@ Int_t St_geom_Maker::Init() {
 //--
 //  reading STAR GEANT geometry database
 //--
+  PrintInfo();
+
   TString fileName = "http://www.star.bnl.gov/~fine/";
   fileName += GetName();
-  TWebFile f(fileName.Data());
+  TWebFile *f =  new TWebFile(fileName.Data());
   // read STAR geometry database remotely
-  TGeometry *star = (TGeometry *)f.Get("STAR");
+  TGeometry *star = (TGeometry *)f->Get("STAR");
+  star->SetName("STARGEOMNODE");
   if (!star) {
     printf("Sorry, STAR was not found !\n");
-    return kStErr;;
+    return kStErr;
   }
 //--
 // Remove hall from the list of ROOT nodes
@@ -116,6 +122,7 @@ Int_t St_geom_Maker::Init() {
   listOfNode->Remove(hall);
 // Add "hall" into ".const" area of this maker
    AddConst(hall);
+   if (Debug()) hall->ls(3);
 
    return StMaker::Init();
 }
@@ -128,7 +135,7 @@ Int_t St_geom_Maker::Make(){
 //_____________________________________________________________________________
 void St_geom_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geom_Maker.cxx,v 1.5 1999/07/02 20:04:11 fine Exp $\n");
+  printf("* $Id: St_geom_Maker.cxx,v 1.6 1999/07/13 00:52:52 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
