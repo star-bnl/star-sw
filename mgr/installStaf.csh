@@ -21,7 +21,7 @@ if ( ! $?STAF_MAKE_HOME ) then
     setenv STAF_MAKE_HOME ${STAR}/mgr
   endif
 endif
-
+echo installStaf: STAF_MAKE_HOME = $STAF_MAKE_HOME
 #
 # setup stage: create OUTPUT directories and logon file makestaflogon.mk
 #  info about INP_DIR and OUT_DIR is saved into this file
