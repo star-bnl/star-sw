@@ -1,6 +1,9 @@
 /*
-* $Id: memget.c,v 1.2 2004/06/26 00:17:51 potekhin Exp $
+* $Id: memget.c,v 1.3 2004/09/19 00:10:34 perev Exp $
 * $Log: memget.c,v $
+* Revision 1.3  2004/09/19 00:10:34  perev
+* Walgrind pseudo leak fixed
+*
 * Revision 1.2  2004/06/26 00:17:51  potekhin
 * Added stdlib.h
 *
@@ -28,10 +31,13 @@
  */
 
 #include <stdlib.h>
-
+void *fakePerevPointer=0;
 unsigned long memget_  (unsigned int *n)
 {  return ( (unsigned long) malloc(*n) );  }
 
 unsigned long memgetf_ (unsigned int *n)
-{  return ( (unsigned long) malloc(*n<<2)>>2);  }
+{
+  fakePerevPointer=malloc(*n<<2);
+  return ( ((unsigned long)fakePerevPointer)>>2);  
+}
 
