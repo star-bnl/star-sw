@@ -33,11 +33,11 @@ my @SetG = (
              "auau200/hijing/beamgas/hydrogen/year_1h/hadronic_on",
              "auau200/hijing/beamgas/nitrogen/year_1h/hadronic_on", 
              "auau130/mevsim/vanilla_flow/central/year_1h/hadronic_on",
-             "auau200/single/default/central/year_1e/hadronic_on",
+#             "auau200/single/default/central/year_1e/hadronic_on",
              "auau200/hijing135/default/b0_3/year_1h/hadronic_on", 
 #             "pp200/pythia/default/minibias/year_2a/hadronic_on",
-#             "auau128/hijing/b0_3/halffield/year_1e/hadronic_on",
-#             "auau128/hijing/b0_12/halffield/year_1e/hadronic_on",
+             "auau128/hijing/b0_3/halffield/year_1e/hadronic_on",
+             "auau128/hijing/b0_12/halffield/year_1e/hadronic_on",
 );
 
 my @recoDir = ("tfs_7", "trs_7");
@@ -108,7 +108,7 @@ for( $ll = 0; $ll<scalar(@SetG); $ll++) {
     $kk++;
 
  print "hpssRecoDir: $hpssRecoDirs[$ll]\n" if $debugOn;
-#print "hpssRecoDir: ", $hpssRecoDirs[$ll], "\n";
+print "hpssRecoDir: ", $hpssRecoDirs[$ll], "\n";
  }
 #}
 
@@ -436,10 +436,10 @@ foreach my $jobnm (@jobFSum_set){
       $newset = $mdataSet;
       $newset =~ s/\//_/g;
     
-     if ( $mfName =~ /$jfile/ and $mjobFname =~ /$newset/) {
+     if ( $mfName =~ /$jfile/) {
 
       print "updating FileCatalogT table\n";
-#  print "File = ",$mfName, "Path = ", $mpath, "Job ID = ", $mJobId , "\n"; 
+  print "File = ",$mfName, "Path = ", $mpath, "Job ID = ", $mJobId , "\n"; 
      &fillDbTable();
          last;
       }  else {
