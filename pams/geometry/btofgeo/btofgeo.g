@@ -37,6 +37,7 @@ Module  BTOFGEO is the Geometry of Barrel Trigger / Time Of Flight system
 *                          FG- increased version number to 3
 *                          FG- default TOF_choice is now 4 (single-tray TOF)
 *            04 May  2000  FG- removed the (unused) BMTM block
+*            27 Jul  2000  FG- TOFp is now on the EAST side, position 32
 *
 *******************************************************************************
 +CDE,AGECOM,GCUNIT,GCONST.
@@ -90,7 +91,7 @@ Module  BTOFGEO is the Geometry of Barrel Trigger / Time Of Flight system
          Rmax      = 219.5     ! maximum CTB/TOF system radius
          dz        = 246.0     ! CTB/TOF tube half length
          choice    = 4         ! 1=CTB, 2=TOF, 3=25% TOF+CTB, 4=1 tray TOF+CTB
-         posit1    = 24        ! TOF tray position for choice 4
+         posit1    = 32        ! TOF tray position for choice 4
 *
       Fill TRAY ! general tray stats        
          Height    =  8.89      ! tray height
@@ -194,9 +195,9 @@ Block BTOF is the whole CTF system envelope
       Medium    Standard
       Shape     Tube      rmin=btog_Rmin  Rmax=btog_Rmax  dz=btog_dz
       choice = btog_choice
-      Create and Position BTOH  z=+btog_dz/2    alphay=180
-      if (choice != 2) choice = 1
       Create and Position BTOH  z=-btog_dz/2
+      if (choice != 2) choice = 1
+      Create and Position BTOH  z=+btog_dz/2    alphay=180
 EndBlock
 *
 *------------------------------------------------------------------------------
