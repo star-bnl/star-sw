@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.h,v 1.5 1999/02/23 21:25:43 llope Exp $
+// $Id: St_ctf_Maker.h,v 1.6 1999/03/11 03:55:07 perev Exp $
 // $Log: St_ctf_Maker.h,v $
+// Revision 1.6  1999/03/11 03:55:07  perev
+// new schema
+//
 // Revision 1.5  1999/02/23 21:25:43  llope
 // fixed histograms, added 1/beta vs p
 //
@@ -70,7 +73,7 @@ class St_ctf_Maker : public StMaker {
    TH2F *m_tsvsp;  //!
    TH2F *m_tsvsp1; //!
  public: 
-                  St_ctf_Maker(const char *name="ctf", const char *title="event/data/ctf");
+                  St_ctf_Maker(const char *name="ctf");
    virtual       ~St_ctf_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();
