@@ -2,7 +2,13 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.cxx,v $
+// Revision 1.7  2000/10/17 19:37:17  suaide
+// Small bug fixed
+//
 // Revision 1.6  2000/09/08 22:55:05  suaide
+//
+//
+//
 // some modifications to compile on Solaris
 //
 // Revision 1.5  2000/09/08 21:47:59  suaide
@@ -161,7 +167,7 @@ Int_t StEmcPreClusterCollection::findClusters()
         jh=ih-first;
         energyw[jh] = hits[ih]->energy();
         ew[jh]=hits[ih]->eta();
-        sw[jh]=abs(hits[jh]->sub());
+        sw[jh]=abs(hits[ih]->sub());
       }
 
       idBeforeClustering=mNclusters;
