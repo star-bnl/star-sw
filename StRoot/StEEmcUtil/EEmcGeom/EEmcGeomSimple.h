@@ -5,12 +5,15 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.15 2004/01/26 21:12:19 zolnie Exp $
+ * $Id: EEmcGeomSimple.h,v 1.16 2004/05/20 21:12:08 zolnie Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
  *********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.16  2004/05/20 21:12:08  zolnie
+ * added a static instance of EEmcGeomSimple
+ *
  * Revision 1.15  2004/01/26 21:12:19  zolnie
  * added one one more quick member getPhiMean with one argument
  * returns phi for a sector rather than a subsector
@@ -115,6 +118,8 @@ public:
   inline Bool_t  isClockwise()           const { return ( mClock == Clockwise        ); };
   inline Bool_t  isCounterClockwise()    const { return ( mClock == CounterClockwise ); }
 
+  static EEmcGeomSimple& Instance() { return sInstance; } 
+
 protected:  
   Float_t  mZ1   ;   // z1  
   Float_t  mZ2   ;   // z2
@@ -129,7 +134,9 @@ protected:
   void    useDefaultGeometry();
 
 private:
-  ClassDef(EEmcGeomSimple,1)  // STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
+  static EEmcGeomSimple sInstance; //! 
+
+  ClassDef(EEmcGeomSimple,2)  // STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
    
 };
 
