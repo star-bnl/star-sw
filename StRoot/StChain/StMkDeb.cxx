@@ -28,12 +28,16 @@ int StMkDeb::Register  (StMaker *mk)
 //_____________________________________________________________________________
 void StMkDeb::Cancel(const TObject *mk)
 {
+  if (!fgArr) return;
+  if (!mk   ) return;
   int i = fgArr->IndexOf(mk);
   fgArr->AddAt(0,i);
 } 
 //_____________________________________________________________________________
 void StMkDeb::Cancel(StMaker *mk)
 {
+  if (!fgArr) return;
+  if (!mk   ) return;
   int id = int(((TObject*)mk)->TObject::GetUniqueID())-1;
   if (id<0) return;
   ((TObject*)mk)->TObject::SetUniqueID(0);
@@ -71,7 +75,8 @@ int StMkDeb::SetCurrent(int curr)
 //_____________________________________________________________________________
 void StMkDeb::Ready()
 {
-  if (fgCurr>-2003) return;
+  if (fgCurr>-2003) 	return;
+  if (!fgArr) 		return;
   fgCurr=0;
   int lst = fgArr->GetLast();
   for (int i=0;i<=lst; i++) {
@@ -91,6 +96,7 @@ void StMkDeb::Ready()
 //_____________________________________________________________________________
 const char *StMkDeb::GetName(int id)  
 {
+   if (!fgArr) 	return 0;
    static TString ts;
    int lst = fgArr->GetLast();
    if (id     < 0  ) return "";
@@ -103,6 +109,7 @@ const char *StMkDeb::GetName(int id)
 //_____________________________________________________________________________
 int StMkDeb::SetUser(TObject *us) 
 {
+  if (!fgArr) 	return 0;
   us->TObject::SetUniqueID(fgCurr+1);
   return fgCurr;
 }
