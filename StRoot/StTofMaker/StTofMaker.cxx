@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.cxx,v 1.4 2001/09/28 18:40:03 llope Exp $
+ * $Id: StTofMaker.cxx,v 1.5 2001/10/05 21:08:40 geurts Exp $
  *
  * Author: W.J. Llope / Wei-Ming Zhang / Frank Geurts
  *
@@ -26,6 +26,9 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.cxx,v $
+ * Revision 1.5  2001/10/05 21:08:40  geurts
+ * clean-up histograms and private root file
+ *
  * Revision 1.4  2001/09/28 18:40:03  llope
  * first release
  *
@@ -68,8 +71,8 @@ Int_t StTofMaker::Init(){
     
 //  create histograms?
 #ifdef TOFP_HISTOS
- nadchits = new TH1S("nadchit","Crude No. ADC Hits/Event",51,-1.,50.);
- ntdchits = new TH1S("ntdchit","Crude No. TDC Hits/Event",51,-1.,50.);
+ nadchits = new TH1S("tof_nadchit","Crude No. ADC Hits/Event",51,-1.,50.);
+ ntdchits = new TH1S("tof_ntdchit","Crude No. TDC Hits/Event",51,-1.,50.);
 #endif
 
   return StMaker::Init();
@@ -275,10 +278,10 @@ Int_t StTofMaker::Finish(){
 
 cout << "StTofMaker Finish() starting..." << endl;
 #ifdef TOFP_HISTOS
-  TFile theFile("my.root","RECREATE","mystudy");
-  theFile.cd();
-  nadchits->Write();
-  ntdchits->Write();
+//  TFile theFile("tof.root","RECREATE","tofstudy");
+//  theFile.cd();
+//  nadchits->Write();
+//  ntdchits->Write();
 #endif
 
   return kStOK;
