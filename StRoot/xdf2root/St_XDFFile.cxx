@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.10 1998/08/14 16:49:42 fisyak Exp $ 
+// $Id: St_XDFFile.cxx,v 1.11 1998/08/18 14:05:07 fisyak Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.11  1998/08/18 14:05:07  fisyak
+// Add to bfc dst
+//
 // Revision 1.10  1998/08/14 16:49:42  fisyak
 // reduce level of print out
 //
@@ -169,7 +172,7 @@ Int_t St_XDFFile::NextEventPut(St_DataSet *dataset)
    if (ds) { 
      if (!::xdr_dataset(fStream,&ds))
      {
-        printf("*** Error: WriteEvent() xdf_next_record: %s",fName); 
+        printf("*** Error: WriteEvent() xdf_next_record: %s\n",fName); 
         return 0;
      };
      Delete(ds);
@@ -240,10 +243,10 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
   if (ds->tid) 
   {
       Char_t *data;
-      UInt_t nrows;
+      UInt_t nrows; 
       UInt_t rsize;
-      Char_t *name;
-      Char_t *type;
+      const Char_t *name;
+      const Char_t *type;
       const Char_t *classprefix="St_";
       const Int_t extralen = strlen(classprefix) + 1;
 
@@ -269,8 +272,9 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
       }
       else 
       {
-        table = new St_Table(name,type, nrows, data, rsize);
+        table = new St_Table((char *)name,(char *)type, nrows, data, rsize);
         Printf(" Error: MakeDataSet the share lib /DLL for the table <%s> was not loaded",type);
+        SafeDelete(table);
       }
 
       dataset = table;
@@ -311,7 +315,7 @@ DS_DATASET_T *St_XDFFile::MakeDataSet(St_DataSet *dataset)
     Char_t tablespec[1000];
     if(!dsNewTable(&ds,(Char_t *)ta->GetName(),ta->Print(tablespec,1000), 
                        ta->GetNRows(), ta->GetArray())) {  
-        printf("MakeDataSet. Error, can not create table \"%s\"\n",ta->GetName());
+        printf("MakeDataSet. Error, can not create table \"%s\"\n %s \n",ta->GetName(), tablespec);
         return 0;
     }
   }

@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.7 1998/08/07 19:34:53 fisyak Exp $
+// $Id: StChain.h,v 1.8 1998/08/18 14:05:02 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.8  1998/08/18 14:05:02  fisyak
+// Add to bfc dst
+//
 // Revision 1.7  1998/08/07 19:34:53  fisyak
 // Add St_run_Maker
 //
@@ -38,9 +41,9 @@
 class TBrowser;
 class TChain;
 class St_XDFFile; 
-//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.7 1998/08/07 19:34:53 fisyak Exp $";//StChain header CVS version
+//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.8 1998/08/18 14:05:02 fisyak Exp $";//StChain header CVS version
 
-class StChain : public TNamed {
+class StChain : public StMaker {
 
 typedef  enum {kNormal, kDebug} EDebugLevel;
 private:
@@ -50,7 +53,6 @@ private:
    Int_t               m_Event;             //Event event number
    Int_t               m_Mode;              //Run mode
    EDebugLevel         m_DebugLevel;        //Debug level
-   St_DataSet         *m_DataSet;           //The main chain dataset structure
    St_DataSet         *m_RunSet;            //Run
    St_DataSet         *m_EventSet;          //Event
    TTree              *m_Tree;              //Pointer to the Root tree
@@ -64,7 +66,7 @@ public:
    virtual           ~StChain();
    virtual void       Browse(TBrowser *b);
    virtual void       Draw(Option_t *option="");  // *MENU*
-   St_DataSet        *DataSet(){return m_DataSet;}
+   St_DataSet        *DataSet(){return StMaker::DataSet();}
    St_DataSet        *DataSet(Char_t *makername); // find the maker by name and return its dataset
    EDebugLevel        Debug(){return m_DebugLevel;}
    Int_t              GetVersion() {return m_Version;}
@@ -83,7 +85,8 @@ public:
    St_DataSet        *GetRawData();
    virtual void       Init();
    Bool_t             IsFolder() {return kTRUE;}
-   virtual Int_t      Make(Int_t i=0);
+   virtual Int_t      Make() {return 0;}
+   virtual Int_t      Make(Int_t i);
    virtual void       Paint(Option_t *option="");
    virtual void       PrintInfo();
    void               SetDebug(EDebugLevel debug){m_DebugLevel = debug;}
@@ -105,12 +108,13 @@ public:
 
    virtual void   SetRun(Int_t run=1)     {m_Run=run;}
    virtual void   SetEvent(Int_t event=1) {m_Event=event;}
+   
    virtual void   SetMode(Int_t mode=0)   {m_Mode=mode;}
 
    void           FillTree();
    void           InitChain(TChain *chain);
+   virtual void   MakeBranch();   
    void           MakeTree(const char* name="T", const char*title="StChain tree");
-
    void           SortDown(Int_t n, Float_t *a, Int_t *index, Bool_t down=kTRUE);
 
    ClassDef(StChain, 1)   //StChain control class

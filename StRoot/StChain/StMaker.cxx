@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.5 1998/07/20 15:08:09 fisyak Exp $
+// $Id: StMaker.cxx,v 1.6 1998/08/18 14:05:02 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.6  1998/08/18 14:05:02  fisyak
+// Add to bfc dst
+//
 // Revision 1.5  1998/07/20 15:08:09  fisyak
 // Add tcl and tpt
 //
@@ -162,14 +165,20 @@ void StMaker::MakeBranch()
    if (m_Save == 0) return;
 
    TTree *tree = gStChain->Tree();
-   if (tree == 0  || m_Fruits == 0  || m_BranchName.Length() == 0) return;
+//   if (tree == 0  || m_Fruits == 0  || m_BranchName.Length() == 0) return;
 
 //  Make a branch tree if a branch name has been set
    Int_t buffersize = 4000;
-   if (m_Fruits->InheritsFrom("TClonesArray")) {
-      tree->Branch(m_BranchName.Data(), &m_Fruits, buffersize);
-   } else {
-      tree->Branch(m_BranchName.Data(),m_Fruits->ClassName(), &m_Fruits, buffersize);
+   if (m_Fruits){
+     if (m_Fruits->InheritsFrom("TClonesArray")) {
+       tree->Branch(m_BranchName.Data(), &m_Fruits, buffersize);
+     } else {
+       tree->Branch(m_BranchName.Data(),m_Fruits->ClassName(), &m_Fruits, buffersize);
+     }
+   }
+   if (m_DataSet){
+     m_BranchName = m_DataSet->GetName();
+     tree->Branch(m_BranchName.Data(),m_DataSet->ClassName(), &m_DataSet, buffersize);
    }
 }
 

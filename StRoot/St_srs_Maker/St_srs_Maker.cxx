@@ -60,14 +60,14 @@ Int_t St_srs_Maker::Make(){
      Int_t res =  srs_am (srs_result,g2t_svt_hit,scs_spt,
                           m_geom,m_config,m_shape,m_srs_srspar,m_srs_direct,m_srs_activea);
    }
-     m_DataSet->ls("*");
+   if (gStChain->Debug()) m_DataSet->ls("*");
   //  PrintInfo();
  return kSTAFCV_OK;
 }
 //_____________________________________________________________________________
 void St_srs_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_srs_Maker.cxx,v 1.7 1998/08/12 13:09:04 fisyak Exp $\n");
+  printf("* $Id: St_srs_Maker.cxx,v 1.8 1998/08/18 14:05:03 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

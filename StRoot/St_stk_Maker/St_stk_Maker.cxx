@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.1 1998/08/12 13:09:04 fisyak Exp $
+// $Id: St_stk_Maker.cxx,v 1.2 1998/08/18 14:05:03 fisyak Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.2  1998/08/18 14:05:03  fisyak
+// Add to bfc dst
+//
 // Revision 1.1  1998/08/12 13:09:04  fisyak
 // Add stk_Maker
 //
@@ -45,7 +48,7 @@ St_stk_Maker::St_stk_Maker(){
    m_long_tracks = 1;
    m_th_init = .5;
    m_th_max = 10.0;
-   m_nitermax = 7.0;
+   m_nitermax = 7;
    m_niternull = 1000;
    m_sec_factor = 6.0;
    m_ifstk = kTRUE;
@@ -67,7 +70,7 @@ St_stk_Maker::St_stk_Maker(const char *name, const char *title):StMaker(name,tit
    m_long_tracks = 1;
    m_th_init = .5;
    m_th_max = 10.0;
-   m_nitermax = 7.0;
+   m_nitermax = 7;
    m_niternull = 1000;
    m_sec_factor = 6.0;
    m_ifstk = kTRUE;
@@ -128,8 +131,8 @@ void St_stk_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_stk_Maker::Make(){
   //  PrintInfo();
-   if (!m_DataSet->GetList())  {
-     St_DataSetIter local(m_DataSet);
+  if (!m_DataSet->GetList()){  
+     St_DataSetIter local(m_DataSet);// event/data/svt/tracks
      St_sgr_groups *candidate_groups = new St_sgr_groups("candidate_groups",30000);
           local.Add(candidate_groups);
      St_sgr_groups *groups      = new St_sgr_groups("groups",30000); local.Add(groups);
@@ -205,7 +208,7 @@ return kSTAFCV_OK;
 //_____________________________________________________________________________
 void St_stk_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_stk_Maker.cxx,v 1.1 1998/08/12 13:09:04 fisyak Exp $\n");
+  printf("* $Id: St_stk_Maker.cxx,v 1.2 1998/08/18 14:05:03 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

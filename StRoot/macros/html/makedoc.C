@@ -51,9 +51,9 @@
                        ,"table_head_st"
                        ,"St_srs_Maker","St_tpt_Maker","St_xdfin_Maker"
                        ,"St_evg_Maker","St_tcl_Maker","St_tss_Maker"
-                       ,"St_ebye_Maker.cxx"
+                       ,"St_ebye_Maker","St_laser_Maker"
                         };
-  Int_t nclass = 19;
+  Int_t nclass = 20;
   // Creat the definitions of the classes not derived from TObjects
   TClass header1("table_head_st",1,"table_header.h","table_header.h");
   // Make class descriptions
@@ -64,13 +64,17 @@
   // Make HTML docs for the "plain" text files those are not in the dictionaries
 
   html.Convert("./../Chain/xdf.C","STAR chain example");
-  html.Convert("./XDFCopy.c","How to read/write XDF file");
+  html.Convert("./../test/XDFcopy.C","How to read/write XDF file");
   html.Convert("./par_anal.cxx","How to create several histrograms from XDF file");
-  html.Convert("./test10.c","How to use the dataset iterator class");
-  html.Convert("./test9.c","How to read the event from XDF file and build some histograms with ROOT");
+  html.Convert("./../test/test10.C","How to use the dataset iterator class");
+  html.Convert("./../test/test9.C","How to read the event from XDF file and build some histograms with ROOT");
   html.Convert("./makedoc.C","How to create the HTML documentation");
-  html.Convert("./tss.C","An example of the production chain");
+  html.Convert("./tss.C","\"TPC slow simulator\" chain");
+  html.Convert("./bfc.C","An example of the \"Big Full Chain\" production chain");
+  html.Convert("./bfcx.C","An example of the \"Big Full Chain\" production chain");
   html.Convert("./ebye.C","An example of\"Event by Event\" production chain");
+  html.Convert("./laser.C","An example of the analysis of laser events equivalent to Iwona's old tst.kumac");
+  html.Convert("./tst.kumac","An example of  Iwona's old tst.kumac of the analysis of laser events");
   if (NT) {
     html.Convert("//hepburn/common/p32/root/star/macros/CallMevSaveXDF.cxx","How to call STAF module");
     html.Convert("//hepburn/common/p32/root/star/macros/par_anal.cxx","How to pick the XDF file up with ROOT");

@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.h,v 1.1 1998/08/12 13:09:05 fisyak Exp $
+// $Id: St_stk_Maker.h,v 1.2 1998/08/18 14:05:03 fisyak Exp $
 // $Log: St_stk_Maker.h,v $
+// Revision 1.2  1998/08/18 14:05:03  fisyak
+// Add to bfc dst
+//
 // Revision 1.1  1998/08/12 13:09:05  fisyak
 // Add stk_Maker
 //
@@ -31,7 +34,7 @@ class St_svg_geom;
 class St_stk_Maker : public StMaker {
  private:
                Bool_t drawinit;
-// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.1 1998/08/12 13:09:05 fisyak Exp $";
+// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.2 1998/08/18 14:05:03 fisyak Exp $";
                Int_t  m_mode;      // mode 1 = primaries;
 	                           // mode 2 = secondaries;
 	                           // mode 3 = primaries to secondaries 
@@ -105,11 +108,11 @@ class St_stk_Maker : public StMaker {
    virtual void Set_long_tracks(Int_t   m =      1){m_long_tracks= m;} // *MENU*
    virtual void Set_th_init    (Float_t m =     .5){m_th_init 	 = m;} // *MENU*
    virtual void Set_th_max     (Float_t m =   10.0){m_th_max	 = m;} // *MENU*
-   virtual void Set_nitermax   (Float_t m =    7.0){m_nitermax	 = m;} // *MENU*
-   virtual void Set_niternull  (Float_t m =   1000){m_niternull  = m;} // *MENU*
+   virtual void Set_nitermax   (Int_t   m =      7){m_nitermax	 = m;} // *MENU*
+   virtual void Set_niternull  (Int_t   m =   1000){m_niternull  = m;} // *MENU*
    virtual void Set_sec_factor (Float_t m =    6.0){m_sec_factor = m;} // *MENU*
    virtual void Set_ifstk      (Bool_t  m =  kTRUE){m_ifstk 	 = m;} // *MENU*
-   ClassDef(St_stk_Maker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(St_stk_Maker, 1)   //STAR chain virtual base class for Makers
 };
 
 #endif
