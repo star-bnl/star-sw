@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.5 2000/02/17 19:43:21 hardtke Exp $
+ * $Id: StTpcDbMaker.h,v 1.6 2000/02/23 15:09:58 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.6  2000/02/23 15:09:58  hardtke
+ * move tpg_detector and tpg_pad_plane from .const to .data
+ *
  * Revision 1.5  2000/02/17 19:43:21  hardtke
  * fixes to tpc functions
  *
@@ -48,6 +51,7 @@
 #define tpc_drift_volume_length_ F77_NAME(tpc_drift_volume_length,TPC_DRIFT_VOLUME_LENGTH)
 #define tpc_row_par_ F77_NAME(tpc_row_par,TPC_ROW_PAR)
 #define tpc_global_to_sector_ F77_NAME(tpc_global_to_sector,TPC_GLOBAL_TO_SECTOR)
+#define tpc_sec24_to_sec12_ F77_NAME(tpc_sec24_to_sec12,TPC_SEC24_TO_SEC12)
 extern "C" {
 R__EXTERN int type_of_call numberOfPadsAtRow_(int *);
 }
@@ -84,6 +88,9 @@ R__EXTERN int type_of_call tpc_row_par_(int *,float *,float *,float *);
 extern "C" {
 R__EXTERN int type_of_call tpc_global_to_sector_(int*, float*);
 }
+extern "C" {
+  R__EXTERN int type_of_call tpc_sec24_to_sec12_(int*, int*);
+}
 #endif
 class StTpcDb;
 class St_tpg_pad_plane;
@@ -105,7 +112,7 @@ class StTpcDbMaker : public StMaker {
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.5 2000/02/17 19:43:21 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.6 2000/02/23 15:09:58 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker, 1)   //StAF chain virtual base class for Makers
 };
