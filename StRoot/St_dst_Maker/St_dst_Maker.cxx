@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.2 1999/01/20 23:58:03 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.3 1999/02/19 16:28:55 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.3  1999/02/19 16:28:55  fisyak
+// Reactivate dst Maker
+//
 // Revision 1.2  1999/01/20 23:58:03  fisyak
 // Tree 2 GetTree
 //
@@ -37,15 +40,20 @@
 #include "St_DataSetIter.h"
 #include "TRandom.h"
 #include "TSystem.h"
-#include "StVertex.h"
-#include "StTrack.h"
-//#include "StPoint.h"
+#include "St_particle_Table.h"
+#include "St_dst_event_header_Table.h"
+#include "St_dst_track_Table.h"
+#include "St_dst_track_aux_Table.h"
+#include "St_dst_vertex_Table.h"
+#include "St_dst_v0_vertex_Table.h"
+#include "St_dst_xi_vertex_Table.h"
+#include "St_dst_dedx_Table.h"
+#include "St_dst_point_Table.h"
+#include "St_dst_event_summary_Table.h"
+#include "St_dst_monitor_soft_Table.h"
+#include "St_dst_TriggerDetectors_Table.h"
+#include "St_tpt_track_Table.h"
 
-const Int_t St_dst_Maker::maxNoVertex = 100000;
-const Int_t St_dst_Maker::maxNoTrack  = 100000;
-const Int_t St_dst_Maker::maxNoPoint  = 200000;
-//TClonesArray St_dst_Maker::*m_Vertex = 0;
-//TClonesArray St_dst_Maker::*m_Track = 0;
 
 ClassImp(St_dst_Maker)
 
@@ -58,111 +66,71 @@ St_dst_Maker::~St_dst_Maker(){
 }
 //_____________________________________________________________________________
 Int_t St_dst_Maker::Init(){
-// Create CloneArrays
-  if (! m_Vertex) m_Vertex = new TClonesArray("StVertex",maxNoVertex); // vertex
-  if (! m_Track)  m_Track  = new TClonesArray("StTrack", maxNoTrack);  // globtrk globtrk_aux dst_dedx
-  //  if (! m_Point)  m_Point  = new TClonesArray("StDstPoint", maxNoPoint);  // point
-
 // Create Histograms    
    return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_dst_Maker::Make(){
-//  PrintInfo();
-  //  Create and Fill the Track objects
-  TClonesArray &vertices = *m_Vertex;
-  TClonesArray &tracks   = *m_Track;
-  Char_t VertexName[80];
-  Char_t TrackName[80];
-  Int_t  Nchar;
-  St_DataSetIter dst(gStChain->DataSet("global"));
-  if (dst.Cd("dst")) {
-    StVertex *vertex = 0;
-    dst_vertex_st *vert = 0;
-    St_dst_vertex *dst_vertex = (St_dst_vertex *) dst("vertex");
-    if (dst_vertex) {
-      vert = dst_vertex->GetTable();
-      for (Int_t fN=0; fN< dst_vertex->GetNRows(); fN++, fNvertex++, vert++){
-	Nchar = sprintf(VertexName,"Vertex_%i",vert->id);
-	//	vertex = new (vertices[m_Vertex->IndexOf(0)]) StVertex(VertexName);
-	vertex = new (vertices[vert->id-1]) StVertex(VertexName);
-        printf ("*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-  %s \n", vertex->IsA()->GetName());
-	*vertex = *vert;
-        m_DataSet->Add(new St_ObjectSet(vertex));
-      }
-    }
-    St_dst_track *prim_track = (St_dst_track *) dst("primtrk");
-    if (prim_track) {
-      dst_track_st *trck = prim_track->GetTable();
-      for (Int_t i=0; i< prim_track->GetNRows(); i++, fNtrack++, trck++){
-	Nchar = sprintf(TrackName,"Track_%i_%i",trck->id_start_vertex,fNtrack);
-	//        StTrack *track = new(tracks[m_Track->IndexOf(0)]) StTrack(TrackName);
-        StTrack *track = new(tracks[fNtrack]) StTrack(TrackName);
-	*track = *trck;
-        Nchar = sprintf(VertexName,"Vertex_%i",trck->id_start_vertex);
-	St_ObjectSet *vert = (St_ObjectSet *) dst(VertexName);
-        if (vert){
-	  vert->Add( new St_ObjectSet(track));
-	  ((StVertex *)vert->GetObject())->AddNtrack();
-	}
-	else {
-          m_DataSet->Add( new St_ObjectSet(track));
-	}
-      }
-    }
-  }
   if (!m_DataSet->GetList())  {//if DataSet is empty fill it
+    St_DataSet *geant = gStChain->DataSet("geant");
+    if (geant) {
+      St_DataSetIter geantI(geant);
+      St_particle *particle = (St_particle *) geantI["particle"];
+      if (particle) m_DataSet->Add(particle);
+    }
+    St_DataSet *global = gStChain->DataSet("global");
+    if (global) {
+      St_DataSetIter dst(global);
+      dst.Cd("dst");
+      St_dst_event_header  *event_header  = (St_dst_event_header  *) dst("event_header");
+      St_dst_track      *globtrk     = (St_dst_track     *) dst("globtrk");
+      St_dst_track_aux  *globtrk_aux = (St_dst_track_aux *) dst("globtrk_aux");
+      St_dst_track      *globtrk2     = (St_dst_track     *) dst("globtrk2");
+      St_dst_track      *primtrk     = (St_dst_track     *) dst("primtrk");
+      St_dst_track_aux  *primtrk_aux = (St_dst_track_aux *) dst("primtrk_aux");
+      St_dst_vertex     *vertex      = (St_dst_vertex    *) dst("vertex");
+      St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex    *) dst("dst_v0_vertex"); 
+      St_dst_xi_vertex  *dst_xi_vertex = (St_dst_xi_vertex    *) dst("dst_xi_vertex");
+      St_dst_dedx       *dst_dedx    = (St_dst_dedx      *) dst("dst_dedx");
+      St_dst_point      *point       = (St_dst_point     *) dst("point");
+      St_dst_event_summary *event_summary = (St_dst_event_summary *) dst("event_summary");
+      St_dst_monitor_soft  *monitor_soft  = (St_dst_monitor_soft  *) dst("monitor_soft");
+
+      if (event_header) m_DataSet->Add(event_header);
+      if (globtrk)      m_DataSet->Add(globtrk);
+      if (globtrk2)     m_DataSet->Add(globtrk2);
+      if (globtrk_aux)  m_DataSet->Add(globtrk_aux);
+      if (primtrk)      m_DataSet->Add(primtrk);
+      if (primtrk_aux)  m_DataSet->Add(primtrk_aux);
+      if (vertex)       m_DataSet->Add(vertex);
+      if (dst_v0_vertex)m_DataSet->Add(dst_v0_vertex);
+      if (dst_xi_vertex)m_DataSet->Add(dst_xi_vertex);
+      if (dst_dedx)     m_DataSet->Add(dst_dedx);
+      if (point)        m_DataSet->Add(point);
+      if (event_summary)m_DataSet->Add(event_summary);
+      if (monitor_soft) m_DataSet->Add(monitor_soft);
+    }
+    St_DataSet *trg = gStChain->DataSet("trg");
+    if (trg) {
+      St_DataSetIter trgI(trg);
+      St_dst_TriggerDetectors *dst = (St_dst_TriggerDetectors *) trgI("dst_TriggerDetectors");
+      if (dst)          m_DataSet->Add(dst);
+    }
+    St_DataSet *l3t = gStChain->DataSet("l3Tracks");
+    if (l3t) {
+      St_DataSetIter l3tI(l3t);
+      St_tpt_track   *track = (St_tpt_track *) l3tI("tptrack");
+      if (track)         m_DataSet->Add(track);
+    }
   }
  return kStOK;
 }
 //_____________________________________________________________________________
-void St_dst_Maker::MakeBranch()
-{
-//   Adds the list of physics objects to the ATLFast tree as a new branch
-#if 0
-   if (m_Save == 0) return;
-
-   TTree *tree = GetTree();
-   if (!tree) return;
-
-   Int_t buffersize = 4000;
-
-   if (m_Vertex && m_Vertex->InheritsFrom("TClonesArray")) 
-       tree->Branch("vertex", &m_Vertex, buffersize);
-    
-   if (m_Track && m_Track->InheritsFrom("TClonesArray")) 
-       tree->Branch("track", &m_Track, buffersize);
-#endif
-   StMaker::MakeBranch();
-}
-//_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_dst_Maker.cxx,v 1.2 1999/01/20 23:58:03 fisyak Exp $\n");
+  printf("* $Id: St_dst_Maker.cxx,v 1.3 1999/02/19 16:28:55 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
 
-//_____________________________________________________________________________
-void St_dst_Maker::Clear(Option_t *option)
-{
- SafeDelete(m_DataSet);
- m_Vertex->Delete();
- m_Track->Delete();
-}
-//_____________________________________________________________________________
-void St_dst_Maker::SetBranch()
-{
-#if 0
-    TTree *tree = GetTree();
-    if (!tree) return;
-
-    TBranch *cloneBranch = tree->GetBranch("vertex");
-    if (cloneBranch) cloneBranch->SetAddress(& m_Vertex);
-
-    cloneBranch = tree->GetBranch("track");
-    if (cloneBranch) cloneBranch->SetAddress(&m_Track);
-#endif
-    StMaker::SetBranch();
-}

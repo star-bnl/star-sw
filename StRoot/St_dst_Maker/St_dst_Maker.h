@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.h,v 1.2 1999/01/20 23:58:03 fisyak Exp $
+// $Id: St_dst_Maker.h,v 1.3 1999/02/19 16:28:55 fisyak Exp $
 // $Log: St_dst_Maker.h,v $
+// Revision 1.3  1999/02/19 16:28:55  fisyak
+// Reactivate dst Maker
+//
 // Revision 1.2  1999/01/20 23:58:03  fisyak
 // Tree 2 GetTree
 //
@@ -52,18 +55,12 @@ class St_dst_Maker : public StMaker {
    //   TClonesArray *m_Point;
  protected:
  public: 
-                  St_dst_Maker(const char *name="dst", const char *title="event/data/global/dst");
+                  St_dst_Maker(const char *name="dst", const char *title="dst");
    virtual       ~St_dst_Maker();
-   virtual void Clear(Option_t *option="");
-   virtual Int_t Init();
-   virtual TClonesArray *GetVertex () { return m_Vertex;}
-   virtual TClonesArray *GetTrack ()  { return m_Track;}
+   virtual Int_t  Init();
    virtual Int_t  Make();
-   virtual void   MakeBranch();
    virtual void   PrintInfo();
-   virtual void   SetBranch();
    
-// virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
    ClassDef(St_dst_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
