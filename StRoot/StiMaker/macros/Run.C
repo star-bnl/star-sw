@@ -38,7 +38,7 @@ void loadLibrairies(bool doProfile)
 		 "StSvtDbMaker","StDbUtilities", "StTpcDb","StEvent","StEventMaker","StEmcUtil", 
 		 "StMcEvent","StMcEventMaker","StAssociationMaker","StDaqLib","StDAQMaker",
 		 "StDetectorDbMaker", "StSvtClassLibrary","StSvtDaqMaker",
-		 "StSvtCalibMaker", "StSvtSeqAdjMaker",
+		 "StSvtCalibMaker", "StSvtSeqAdjMaker","StGenericVertexMaker",
 		 "StSvtClusterMaker","StMiniMcEvent","StMiniMcMaker",
 		 "Sti","StiGui", "StiEvaluator",
 		 "StiPixel",
