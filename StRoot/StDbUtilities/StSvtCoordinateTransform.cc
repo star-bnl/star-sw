@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.9 2001/06/13 16:01:22 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.10 2001/06/15 20:37:05 jeromel Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -570,7 +570,7 @@ double StSvtCoordinateTransform::UnCalcDriftLength(double x){
   //   v1 = velocity in focusing region ( y < ofoc cm)
   //     a,b = parameters from Sanjeev's fit 
 
-  double aa,bb,cc,v2,v1,t,distance;
+  double aa,bb,cc,v2,v1,t;
   
   double a=1.80;
   double b=240000;
