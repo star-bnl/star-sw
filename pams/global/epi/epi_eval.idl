@@ -8,7 +8,7 @@
 #include "stk_svt_ctrack.idl"
 #include "stk_svt_track.idl"
 #include "tpt_track.idl"
-#include "tte_tpeval.idl"
+#include "tte_eval.idl"
 #include "epi_epipar.idl"
 #include "egr_globtrk.idl"
 #include "epi_hypo_pid.idl"
@@ -22,7 +22,7 @@ interface epi_eval   :        amiModule {
                 , in    stk_svt_ctrack  svt_ctrack 
                 , in    stk_svt_track   svt_track 
                 , in    tpt_track       tptrack
-                , in    tte_tpeval      tpeval
+                , in    tte_eval        tpeval
                 , in    epi_epipar      epipar
                 , in    egr_globtrk     globtrk
                 , in    epi_hypo_pid    hypo_pid
@@ -30,4 +30,4 @@ interface epi_eval   :        amiModule {
                 , out   epi_glob_pid_eval     glob_pid_eval
         );
 };
-/* Last mod. for epi_eval: $Date: 1997/12/31 14:33:25 $ */
+/* Last mod. for epi_eval: $Date: 1998/08/21 00:36:28 $ */
