@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.20 2000/02/10 01:47:30 snelling Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.21 2000/02/18 23:44:52 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.21  2000/02/18 23:44:52  posk
+// Added PID and centrality.
+//
 // Revision 1.20  2000/02/10 01:47:30  snelling
 // Make changes for HP compiler
 //
@@ -170,7 +173,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.20 2000/02/10 01:47:30 snelling Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.21 2000/02/18 23:44:52 posk Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
@@ -189,13 +192,13 @@ Int_t StFlowAnalysisMaker::Init() {
   const float chargeMin       =   -3.;
   const float chargeMax       =    3.; 
   const float dcaMin          =    0.;
-  const float dcaMax          =    1.; 
+  const float dcaMax          =   0.3; 
   const float chi2Min         =    0.;
   const float chi2Max         =    3.; 
   const float fitPtsMin       =    0.;
-  const float fitPtsMax       =  100.; 
+  const float fitPtsMax       =   60.; 
   const float maxPtsMin       =    0.;
-  const float maxPtsMax       =  100.; 
+  const float maxPtsMax       =   60.; 
   const float fitOverMaxMin   =    0.;
   const float fitOverMaxMax   =    2.; 
   const float origMultMin     =    0.;
@@ -219,12 +222,16 @@ Int_t StFlowAnalysisMaker::Init() {
   const float multMin         =    0.;
   const float multMax         = 2000.;
   const float qMin            =    0.;
+  const float pidMin          =  -10.;
+  const float pidMax          =   10.;
+  const float centMin         =   0.5;
+  const float centMax         =   7.5;
 
   enum { nChargeBins       = 50,
 	 nDcaBins          = 50,
 	 nChi2Bins         = 50,
-	 nFitPtsBins       = 50,
-	 nMaxPtsBins       = 50,
+	 nFitPtsBins       = 60,
+	 nMaxPtsBins       = 60,
 	 nFitOverMaxBins   = 50,
 	 nOrigMultBins     = 50,
 	 nTotalMultBins    = 50,
@@ -235,7 +242,9 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nPhi3DBins        = 18,
 	 nPsiBins          = 36,
 	 nMultBins         = 50,
-	 nMeanPtBins       = 50 };
+	 nMeanPtBins       = 50,
+	 nPidBins          = 50,
+         nCentBins         =  7 };
   
   // Charge
   mHistCharge = new TH1F("Flow_Charge", "Flow_Charge",
@@ -342,6 +351,36 @@ Int_t StFlowAnalysisMaker::Init() {
     nHars, 0.5, (float)(nHars) + 0.5, -100., 100., "");
   mHistCosPhi->SetXTitle("Harmonic");
   mHistCosPhi->SetYTitle("cos(n*PhiLab) (%)");
+    
+  // PID pi+
+  mHistPidPiPlus = new TH1F("Flow_PidPiPlus", "Flow_PidPiPlus",
+      nPidBins, pidMin, pidMax);
+  mHistPidPiPlus->SetXTitle("(PID - Mean) / Resolution");
+  mHistPidPiPlus->SetYTitle("Counts");
+    
+  // PID pi-
+  mHistPidPiMinus = new TH1F("Flow_PidPiMinus", "Flow_PidPiMinus",
+      nPidBins, pidMin, pidMax);
+  mHistPidPiMinus->SetXTitle("(PID - Mean) / Resolution");
+  mHistPidPiMinus->SetYTitle("Counts");
+    
+  // PID proton
+  mHistPidProton = new TH1F("Flow_PidProton", "Flow_PidProton",
+      nPidBins, pidMin, pidMax);
+  mHistPidProton->SetXTitle("(PID - Mean) / Resolution");
+  mHistPidProton->SetYTitle("Counts");
+    
+  // PID multiplicities
+  mHistPidMult = new TProfile("Flow_prof_PidMult", "Flow_prof_PidMult",
+    4, 0.5, 4.5, 0., 10000., "");
+  mHistPidMult->SetXTitle("All, Pi+, Pi-, Proton");
+  mHistPidMult->SetYTitle("Multiplicity");
+    
+  // Centrality
+  mHistCent = new TH1F("Flow_Cent", "Flow_Cent",
+      nCentBins, centMin, centMax);
+  mHistCent->SetXTitle("Centrality Bin");
+  mHistCent->SetYTitle("Counts");
     
   TString* histTitle;
   for (int i = 0; i < nSels + nSubs; i++) {
@@ -619,7 +658,7 @@ void StFlowAnalysisMaker::fillFromTags() {
       mQ[k][j]      = mQSub[2*k][j] + mQSub[2*k+1][j];
       mPsi[k][j]    = mQ[k][j].Phi() / order;
       mMult[k][j]   = mMultSub[2*k][j] + mMultSub[2*k+1][j];
-      m_q[k][j]     = (mMult[k][j] > 0) ? mQ[k][j].Mod()/sqrt((float)mMult[k][j])
+      m_q[k][j]     = (mMult[k][j] > 0) ? mQ[k][j].Mod()/sqrt((double)mMult[k][j])
 	: 0.;
       mMeanPt[k][j] = (mMeanPtSub[2*k][j] + mMeanPtSub[2*k+1][j])/2.;
     }
@@ -664,9 +703,11 @@ void StFlowAnalysisMaker::fillEventHistograms() {
   static const int& nSels = Flow::nSels;
   static const int& nSubs = Flow::nSubs;
 
-  // no selections: OrigMult, Mult, MultOverOrig, VertexZ, VertexXY
+  // no selections: OrigMult, Centrality, Mult, MultOverOrig, VertexZ, VertexXY
   int origMult = pFlowEvent->OrigMult();
   mHistOrigMult->Fill((float)origMult);
+  int cent = pFlowEvent->Centrality();
+  mHistCent->Fill((float)cent);
   int totalMult = pFlowEvent->TrackCollection()->size();
   mHistMult->Fill((float)totalMult);
   if (origMult) mHistMultOverOrig->Fill((float)totalMult / (float)origMult);
@@ -701,13 +742,13 @@ void StFlowAnalysisMaker::fillEventHistograms() {
 	} else if (j==2) {
 	  j1 = 2, j2 = 4;	
 	}
-	psiSubCorrDiff = fmod((double)mPsiSub[2*k][j1-1], twopi/(float)j2) - 
-	  fmod((double)mPsiSub[2*k+1][j2-1], twopi/(float)j2);
+	psiSubCorrDiff = fmod((double)mPsiSub[2*k][j1-1], twopi/(double)j2) - 
+	  fmod((double)mPsiSub[2*k+1][j2-1], twopi/(double)j2);
 	if (psiSubCorrDiff < 0.) psiSubCorrDiff += twopi/(float)j2;
 	histFull[k].histFullHar[j].mHistPsiSubCorrDiff->
 	  Fill(psiSubCorrDiff);
-	psiSubCorrDiff = fmod((double)mPsiSub[2*k][j2-1], twopi/(float)j2) - 
-	  fmod((double)mPsiSub[2*k+1][j1-1], twopi/(float)j2);
+	psiSubCorrDiff = fmod((double)mPsiSub[2*k][j2-1], twopi/(double)j2) - 
+	  fmod((double)mPsiSub[2*k+1][j1-1], twopi/(double)j2);
 	if (psiSubCorrDiff < 0.) psiSubCorrDiff += twopi/(float)j2;
 	histFull[k].histFullHar[j].mHistPsiSubCorrDiff->
 	  Fill(psiSubCorrDiff);
@@ -732,6 +773,9 @@ void StFlowAnalysisMaker::fillParticleHistograms() {
 
   float etaSymPosN = 0.;
   float etaSymNegN = 0.;
+  float piPlusN    = 0.;
+  float piMinusN   = 0.;
+  float protonN    = 0.;
 
   // Initialize Iterator
   StFlowTrackCollection* pFlowTracks = pFlowEvent->TrackCollection();
@@ -741,21 +785,30 @@ void StFlowAnalysisMaker::fillParticleHistograms() {
     StFlowTrack* pFlowTrack = *itr;
     float phi       = pFlowTrack->Phi();
     if (phi < 0.) phi += twopi;
-    float eta       = pFlowTrack->Eta();
-    float pt        = pFlowTrack->Pt();
-    int   charge    = pFlowTrack->Charge();
-    float dca       = pFlowTrack->ImpactPar();
-    float chi2      = pFlowTrack->Chi2();
-    int fitPts      = pFlowTrack->FitPts();
-    int maxPts      = pFlowTrack->MaxPts();
+    float eta        = pFlowTrack->Eta();
+    float pt         = pFlowTrack->Pt();
+    int   charge     = pFlowTrack->Charge();
+    float dca        = pFlowTrack->ImpactPar();
+    float chi2       = pFlowTrack->Chi2();
+    int fitPts       = pFlowTrack->FitPts();
+    int maxPts       = pFlowTrack->MaxPts();
 
-    // no selections: Charge, Dca, Chi2, FitPts, MaxPts, FitOverMax
+    // no selections: Charge, Dca, Chi2, FitPts, MaxPts, FitOverMax, PID
     mHistCharge->Fill((float)charge);
     mHistDca->Fill(dca);
     mHistChi2->Fill(chi2);
     mHistFitPts->Fill((float)fitPts);
     mHistMaxPts->Fill((float)maxPts);
     if (maxPts) mHistFitOverMax->Fill((float)fitPts/(float)maxPts);
+    if (charge == 1) {
+      float piPlus  = pFlowTrack->PidPiPlus();
+      mHistPidPiPlus->Fill(piPlus);
+      float proton  = pFlowTrack->PidProton();
+      mHistPidProton->Fill(proton);
+    } else if (charge == -1) {
+      float piMinus = pFlowTrack->PidPiMinus();
+      mHistPidPiMinus->Fill(piMinus);
+    }
 
     // Yield3D, Yield2D, BinEta, BinPt
     mHistEtaPtPhi3D->Fill(eta, pt, phi);
@@ -766,18 +819,25 @@ void StFlowAnalysisMaker::fillParticleHistograms() {
     // cos(n*phiLab)
     for (int j = 0; j < nHars; j++) {
       float order  = (float)(j+1);
-      float vIn = cos(order * phi)/perCent;
+      float vIn = cos((double)order * phi)/perCent;
       if (eta < 0 && (j+1) % 2 == 1) vIn *= -1;
       mHistCosPhi->Fill(order, vIn);
     }
 
-    //For Eta symmetry
+    // For Eta symmetry
     if (eta > 0.) { etaSymPosN++; }
     else { etaSymNegN++; }
 
+    // For PID multiplicites
+    Char_t pid[10];
+    strcpy(pid, pFlowTrack->Pid());
+    if (strcmp(pid, "pi+") == 0)    piPlusN++;
+    if (strcmp(pid, "pi-") == 0)    piMinusN++;
+    if (strcmp(pid, "proton") == 0) protonN++;
+
     for (int k = 0; k < nSels; k++) {
       for (int j = 0; j < nHars; j++) {
-	float order  = (float)(j+1);
+	double order  = (double)(j+1);
 	float psi_i = mQ[k][j].Phi() / order;
 	//if (psi_i < 0.) psi_i += twopi / order;
 	if (pFlowTrack->Select(j, k)) {
@@ -821,6 +881,13 @@ void StFlowAnalysisMaker::fillParticleHistograms() {
   float etaSym = (etaSymPosN - etaSymNegN) / (etaSymPosN + etaSymNegN);
   mHistEtaSym->Fill(etaSym);
 
+  // PID multiplicities
+  float totalMult = (float)pFlowEvent->TrackCollection()->size();
+  mHistPidMult->Fill(1., totalMult);
+  mHistPidMult->Fill(2., piPlusN);
+  mHistPidMult->Fill(3., piMinusN);
+  mHistPidMult->Fill(4., protonN);
+
 }
 
 //-----------------------------------------------------------------------
@@ -830,7 +897,7 @@ static Double_t qDist(double* q, double* par) {
 
   double expo = par[1]*par[0]*par[0]*perCent*perCent + q[0]*q[0];
   Double_t dNdq = par[2] * (2. * q[0] * exp(-expo) * 
-    besi0_(2*q[0]*par[0]*perCent*sqrt(par[1])));
+    (double)besi0_(2.*q[0]*par[0]*perCent*sqrt(par[1])));
 
   return dNdq;
 }
@@ -840,10 +907,11 @@ static Double_t qDist(double* q, double* par) {
 static Double_t resEventPlane(double chi) {
   // Calculates the event plane resolution as a function of chi
 
-  float con = 0.626657;                   // sqrt(pi/2)/2
-  float arg = chi * chi / 4.;
+  double con = 0.626657;                   // sqrt(pi/2)/2
+  double arg = chi * chi / 4.;
+  float farg = (float)arg;
 
-  Double_t res = con * chi * exp(-arg) * (besi0_(arg) + besi1_(arg)); 
+  Double_t res = con * chi * exp(-arg) * (double)(besi0_(farg) + besi1_(farg)); 
 
   return res;
 }
@@ -853,8 +921,9 @@ static Double_t resEventPlane(double chi) {
 static Double_t chi(double res) {
   // Calculates chi from the event plane resolution
 
-  double chi = 1.5;
-  double delta = 0.75;
+  double chi = 2.0;
+  double delta = 1.0;
+
   for (int i = 0; i < 15; i++) {
     chi = (resEventPlane(chi) < res) ? chi + delta : chi - delta;
     delta = delta / 2.;
@@ -885,9 +954,9 @@ Int_t StFlowAnalysisMaker::Finish() {
   double zero[nEtaBins+2][nPtBins+2] = {{0.}};
   histYield2DZero->SetError(&zero[0][0]);
 
-  // Calculate resolution = from sqrt(mHistCos)
-  float cosPair[Flow::nSels][Flow::nHars];
-  float cosPairErr[Flow::nSels][Flow::nHars];
+  // Calculate resolution from sqrt(mHistCos)
+  double cosPair[Flow::nSels][Flow::nHars];
+  double cosPairErr[Flow::nSels][Flow::nHars];
   for (int k = 0; k < nSels; k++) {
     char countSels[2];
     sprintf(countSels,"%d",k+1);
@@ -896,18 +965,19 @@ Int_t StFlowAnalysisMaker::Finish() {
       sprintf(countHars,"%d",j+1);
       cosPair[k][j]    = histFull[k].mHistCos->GetBinContent(j+1);
       cosPairErr[k][j] = histFull[k].mHistCos->GetBinError(j+1);
-      if (cosPair[k][j] > 0.86) {      // resolution saturates
-	mRes[k][j]    = 0.98;
-	mResErr[k][j] = 0.01;
+      if (cosPair[k][j] > 0.92) {      // resolution saturates
+	mRes[k][j]    = 0.99;
+	mResErr[k][j] = 0.007;
       } else if (cosPair[k][j] > 0.) {
-	float deltaResSub = 0.01;  // differential for the error propergation
+	double deltaResSub = 0.005;  // differential for the error propergation
 	double resSub = sqrt(cosPair[k][j]);
 	double resSubErr = cosPairErr[k][j] / (2. * resSub);
 	double chiSub = chi(resSub);
 	double chiSubDelta = chi(resSub + deltaResSub);
 	mRes[k][j] = resEventPlane(sqrt(2.) * chiSub); // full event plane res.
 	double mResDelta = resEventPlane(sqrt(2.) * chiSubDelta);
-	mResErr[k][j] = resSubErr * fabs(mRes[k][j] - mResDelta) / deltaResSub;
+	mResErr[k][j] = resSubErr * fabs((double)mRes[k][j] - mResDelta) 
+	  / deltaResSub;
       } else {
 	mRes[k][j]    = 0.;     // subevent correlation must be positive
 	mResErr[k][j] = 0.;

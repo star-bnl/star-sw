@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.11 2000/02/04 16:26:43 posk Exp $
+// $Id: plot.C,v 1.12 2000/02/18 23:44:54 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker
@@ -9,6 +9,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.12  2000/02/18 23:44:54  posk
+// Added PID and centrality.
+//
 // Revision 1.11  2000/02/04 16:26:43  posk
 // Added correct calculation of event plane resolution for large flow.
 //
@@ -84,6 +87,11 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   			     "Flow_YieldAll2D",
   			     "Flow_YieldAll.Eta",
   			     "Flow_YieldAll.Pt",
+  			     "Flow_PidPiPlus",
+  			     "Flow_PidPiMinus",
+  			     "Flow_PidProton",
+  			     "Flow_prof_PidMult",
+  			     "Flow_Cent",
    			     "Flow_Bin_Eta",
    			     "Flow_Bin_Pt",
                              "Flow_prof_CosPhi",
@@ -112,7 +120,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_v.Pt_Sel"};
   //const int nNames = sizeof(baseName) / sizeof(baseName[0]);
   const int nNames = sizeof(baseName) / 4;
-  const int nSingles = 21 + 1;
+  const int nSingles = 26 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -251,7 +259,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  gStyle->SetOptStat(10);
 	  if (projX) projX->Draw("H");
 	} else if (strcmp(shortName[pageNumber],"Flow_v.Eta")==0) {
-	  projX->SetYTitle("Flow (%)");
+	  projX->SetYTitle("Sum Flow (%)");
 	  gStyle->SetOptStat(0);
 	  if (projX) projX->Draw("E1");
 	}
@@ -266,7 +274,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  gStyle->SetOptStat(100110);
 	  if (projY) projY->Draw("H");
 	} else if (strcmp(shortName[pageNumber],"Flow_v.Pt")==0) {
-	  projY->SetYTitle("Flow (%)");
+	  projY->SetYTitle("Sum Flow (%)");
 	  gStyle->SetOptStat(0);
 	  if (projY) projY->Draw("E1");
 	}
@@ -432,7 +440,10 @@ TCanvas* plotSingles(char* shortName){
     return;
   }
 
-  if (strstr(shortName,".PhiEta")!=0) {        // 3D Phi Eta projection
+  if (strstr(shortName,"3D")!=0) {             // 3D
+    gStyle->SetOptStat(10);
+    hist->Draw("");
+  } else if (strstr(shortName,".PhiEta")!=0) { // 3D Phi Eta projection
     TH2D* projZX = hist->Project3D("zxe");
     projZX->SetName(histProjName->Data());
     projZX->SetYTitle("azimuthal angle (rad)");
@@ -446,8 +457,7 @@ TCanvas* plotSingles(char* shortName){
     projZY->SetXTitle("Pt (GeV)");
     gStyle->SetOptStat(10);
     if (projZY) projZY->Draw("COLZ");
-  } else 
-  if (strstr(shortName,"2D")!=0) {             // 2D
+  } else if (strstr(shortName,"2D")!=0) {      // 2D
     gStyle->SetOptStat(10);
     hist->Draw("COLZ");
   } else if (strstr(shortName,".Eta")!=0) {    // 2D Eta projection
@@ -481,6 +491,12 @@ TCanvas* plotSingles(char* shortName){
     gStyle->SetOptStat(0);
     hist->Draw();
     lineZeroHar->Draw();
+  } else if (strstr(shortName,"PidMult")!=0) { // PID Mult
+    gStyle->SetOptStat(0);
+    hist->Draw();
+  } else if (strstr(shortName,"Pid")!=0) {     // PID
+    gStyle->SetOptStat(110110);
+    hist->Draw();
   } else {
     gStyle->SetOptStat(100110);
     hist->Draw();
