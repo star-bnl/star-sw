@@ -1,14 +1,28 @@
 /***************************************************************************
  *
- * $Id: StRandyTopMapMaker.cxx,v 1.1 2000/04/02 19:56:20 rcwells Exp $
+ * $Id: StRandyTopMapMaker.cxx,v 1.2 2000/04/02 20:41:17 rcwells Exp $
  *
- * Author: Randy Wells, Ohio State,
+ * Author: Torre Wenaus, BNL,
+ *         Thomas Ullrich, Nov 1999
  ***************************************************************************
  *
- * Description:  This is used to fix the topology map in StEvent
- *
+ * Description:  This is an example of a maker to perform analysis
+ *               using StEvent.
+ *               Use this as a template and customize it for your
+ *               studies.
  *
  ***************************************************************************
+ *
+ * $Log: StRandyTopMapMaker.cxx,v $
+ * Revision 1.2  2000/04/02 20:41:17  rcwells
+ * Fixed the FTPC bit check.
+ *
+ * Revision 2.1  1999/12/30 01:54:57  ogilvie
+ * added countPrimaryPions as example how to use PID
+ *
+ * Revision 2.0  1999/11/04 16:10:03  ullrich
+ * Revision for new StEvent
+ *
  **************************************************************************/
 #include "StRandyTopMapMaker.h"
 #include "StChain.h"
@@ -18,7 +32,7 @@
 #include "StTrackGeometry.h"
 #include "StTrackTopologyMap.h"
 
-static const char rcsid[] = "$Id: StRandyTopMapMaker.cxx,v 1.1 2000/04/02 19:56:20 rcwells Exp $";
+static const char rcsid[] = "$Id: StRandyTopMapMaker.cxx,v 1.2 2000/04/02 20:41:17 rcwells Exp $";
 
 ClassImp(StRandyTopMapMaker)
 
@@ -67,17 +81,14 @@ StRandyTopMapMaker::Make()
     // This only fixes TPC pad rows and the turnaround flag
     StTrack* rTrack;
     int mult = mEvent->trackNodes().size();
-    unsigned long mask1 = 127;
     unsigned long mask2 = 2147483648;
     unsigned long temp1;
-    unsigned long temp2;
     for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
       rTrack = mEvent->trackNodes()[icount]->track(global);
       // This checks bits that should not be set
-      temp1 = rTrack->topologyMap().data(0) & mask1;
-      if ( int(temp1) ) cout << " something wrong with map(0) " << temp1 << endl;
-      temp2 = rTrack->topologyMap().data(1) & mask2;
-      if ( int(temp2) ) cout << " something wrong with map(1) " << temp2 << endl;
+      temp1 = rTrack->topologyMap().data(1) & mask2;
+      // If FTPC track, don't do anything
+      if ( int(temp1) ) continue;
       // End check of bits that should not be set
       int numHits = rTrack->detectorInfo()->hits(kTpcId).size();
       bool padRow[46];
