@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.cc,v 2.7 2001/04/23 16:02:02 perev Exp $
+ * $Id: StRootEventManager.cc,v 2.8 2001/09/12 23:48:33 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.cc,v $
+ * Revision 2.8  2001/09/12 23:48:33  ullrich
+ * Removed code to load run_header and run_summary tables.
+ *
  * Revision 2.7  2001/04/23 16:02:02  perev
  * small fix
  *
@@ -96,9 +99,7 @@ _NAME2_(TABLE_TYPE,_st)* StRootEventManager::_NAME2_(returnTable_,TABLE_TYPE)(lo
 
 
 RETURN_TABLE(particle,-)
-RETURN_TABLE(run_header,run_header)
 RETURN_TABLE(event_header,event_header)
-RETURN_TABLE(dst_run_summary,run_summary)
 RETURN_TABLE(dst_event_summary,event_summary)
 RETURN_TABLE(dst_summary_param,summary_param)
 RETURN_TABLE(dst_TrgDet,TrgDet)
