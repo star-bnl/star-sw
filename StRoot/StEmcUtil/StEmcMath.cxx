@@ -48,7 +48,7 @@ UInt_t
 StEmcMath::detectorId(const StDetectorId stId)
 {
   // Transition from STAR numeration to internal EMC numeration
-  Int_t id = stId - kBarrelEmcTowerIdentifier;
+  Int_t id = stId - kBarrelEmcTowerIdentifier + 1;
   if(id<BEMC || id> ESMDP) return 0; // Wrong value of stId
   else                     return UInt_t(id);
 }
@@ -57,7 +57,7 @@ StDetectorId
 StEmcMath::detectorId(const UInt_t id)
 {
   // Transition from internal EMC numeration numeration to STAR
-  StDetectorId stId = StDetectorId(id + kBarrelEmcTowerIdentifier);
+  StDetectorId stId = StDetectorId(id + kBarrelEmcTowerIdentifier - 1);
   if(stId<kBarrelEmcTowerIdentifier || stId >kEndcapSmdVStripIdentifier) 
   return kUnknownId;
   else return stId; 
