@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.hh,v 1.6 2002/06/21 17:47:37 genevb Exp $
+ * $Id: StThreeVectorF.hh,v 1.7 2003/05/07 20:34:12 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.hh,v $
+ * Revision 1.7  2003/05/07 20:34:12  perev
+ * functions for CINT added
+ *
  * Revision 1.6  2002/06/21 17:47:37  genevb
  * Added pseudoProduct
  *
@@ -129,7 +132,7 @@ protected:
     ClassDef(StThreeVectorF,2)
 #endif
 };
-#ifndef __CINT__
+//VP#ifndef __CINT__
 //
 //        Declaration of non-member functions and operators
 //
@@ -515,5 +518,5 @@ inline StThreeVectorF operator/ (const StThreeVectorF& v, double c)
 {
     return StThreeVectorF(v) /= c;
 }
-#endif
+//VP#endif
 #endif
