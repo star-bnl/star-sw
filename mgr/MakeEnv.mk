@@ -1,3 +1,7 @@
+# $Id: MakeEnv.mk,v 1.6 1998/12/01 01:53:17 fisyak Exp $
+# $Log: MakeEnv.mk,v $
+# Revision 1.6  1998/12/01 01:53:17  fisyak
+# Merge with NT
 #
 #	Determine Make variables
 ALL_TAGS = $@
@@ -8,33 +12,31 @@ NEW_DEPS = $?
 FUL_DEPS = $+
 STEM     = $*
 
-WINDOWNT := $(OS)
+ifneq (,$(findstring $(OS),Windows_NT))
+NT := $(OS)
+endif
 
-#
-# Current Working Directory
-#
-  CWD := $(shell pwd)
 
 #
 # Determine STAF main env variables.
 #
 
 
-
 ifndef AFS
   AFS := /afs
-  ifdef WINDOWNT
+  ifdef NT
     AFS :=//sol/afs
   endif  
 endif  
 ifndef AFS_RHIC
   AFS_RHIC := /afs/rhic
-  ifdef WINDOWNT
+  ifdef NT
     AFS_RHIC :=//sol/afs_rhic
   endif  
 endif  
 # 	
 
+ifndef NT
 UNAMES := $(shell uname -s)
 UNAMER := $(shell uname -r)
 ifneq ($(UNAMES),HP-UX)
@@ -42,6 +44,10 @@ ifneq ($(UNAMES),HP-UX)
 endif
 
 UNAMESRP := $(UNAMES)_$(UNAMER)_$(UNAMEP)
+else
+UNAMEP := $(PROCESSOR_ARCHITECTURE)
+UNAMESRP := $(UNAMEP)
+endif
 #
 # Determine TULL_ARCH variable.
 #
@@ -92,7 +98,13 @@ endif
 ifdef STAR_SYS
   STAF_ARCH := $(STAR_SYS)
 else
-  STAF_ARCH := $(shell sys)
+ifndef NT
+  STAF_ARCH := $(shell $(SYS))
+else
+  STAF_ARCH := intel_wnt
+  STAR_SYS := intel_wnt
+  STAR_HOST_SYS := $(STAR_SYS)
+endif
 endif
 #
 #	Default value for STAF_SYS

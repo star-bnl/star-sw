@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.67 1998/11/25 21:51:07 fisyak Exp $
+# $Id: MakePam.mk,v 1.68 1998/12/01 01:53:28 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.68  1998/12/01 01:53:28  fisyak
+# Merge with NT
+#
 # Revision 1.67  1998/11/25 21:51:07  fisyak
 # remove tcc trg and l3 from directories list for hp_ux102
 #
@@ -166,7 +169,7 @@ endif #/* NT */
 ifndef NT
       FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(IDLS))
 endif #/* NT */
-    endif
+endif
     FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g)
 #_________________________________________________________________________
 SUFFIXES := .c .cc .C .cxx .f .F .g .h .hh .hpp .inc .idl
@@ -177,19 +180,19 @@ INC_DIRS:= $(wildcard $(OUT_DIR)/pams/*/inc $(STAR)/pams/*/inc)
 VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_DIR) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS) $(INC_DIRS)
 #-------------------------------includes----------------------------
 STICFLAGS =  $(addprefix -I,  $(STAR)/inc $(SRC_DIR) $(IDL_DIRS))
-ifndef NT
-CPPFLAGS += -I. -I../ -I/usr/include -I$(STAR)/inc \
+INCLUDES := -I. -I../ -I/usr/include -I$(STAR)/inc \
              $(addprefix -I, $(SRC_DIR) $(GEN_TAB) $(GEN_DIR) $(INC_DIRS)) \
             -I$(CERN_ROOT)/include
-else #/* NT */
-
-#  I had to move -I$(STAR)/inc  and  -I$(CERN_ROOT)/include to set INCLUDE to reduce the line size
-  CPPFLAGS += -I../  $(addprefix -I, $(SRC_DIR) $(GEN_TAB) $(GEN_DIR) $(INC_DIRS)) 
-  INCLUDE  +=  -I$(STAR)/inc -I$(CERN_ROOT)/include
-endif #/* NT */
 ifneq ($(OUT_DIR),$(STAR))        
-CPPFLAGS +=  -I$(STAR)/.share/$(DOMAIN) -I$(STAR)/.share/tables
+INCLUDES := $(INCLUDES) -I$(STAR)/.share/$(DOMAIN) -I$(STAR)/.share/tables
 endif                          
+ifndef NT
+CPPFLAGS := $(CPPFLAGS) $(INCLUDES)
+else #/* NT */
+  INCLUDES := $(INCLUDES) -I$(SUNRPC)
+  INCLUDES := $(addsuffix I-,$(INCLUDES))
+  INCLUDE := $(subst ;;,;,$(INCLUDE);$(subst /,\,$(subst I-,,$(subst I- ;,;,$(subst -I,;,$(INCLUDES))))))
+endif #/* NT */
 FFLAGS   += -DCERNLIB_TYPE
 #                                   -I$(CERN_ROOT)/src/geant321 
 #                 I have idl- or g-files
@@ -249,7 +252,8 @@ ifneq (,$(QWE))
   QWE  := $(shell expr $(QWE) + 1)
   SL_NEW := $(SL_PKG).$(QWE)
 endif
-endif                          
+endif
+endif #/NT/                          
 ifneq (,$(strip $(FILES_O)))
 LIB_PKG := $(LIB_DIR)/lib$(DOMAIN).$(A)
 ifndef NT
@@ -267,9 +271,11 @@ override  NAMES_IDM := $(sort $(NAMES_IDM))
 endif                           
 endif #/* NT */
 endif                       
+ifndef NT
 ifneq (,$(NAMES_IDM))          
 FILES_init  := $(addprefix $(OBJ_DIR)/, $(PKG)_init.$(O))
-endif                          
+endif    
+endif                      
 ifneq (,$(NAMES_CDF))          
 FILES_O    += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CDF)))
 endif                          
@@ -283,7 +289,7 @@ FILES_D     += $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(
 endif                          
 ifneq (,$(NAMES_CXX))            
 FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CXX))))
-FILES_D     += $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_CXX)))))
+FILES_D     += $(addprefix $(DEP_DIR)/,$(addsuffix .d, $(basename $(notdir $(FILES_CXX)))))
 endif                          
 ifndef LIBRARIES
   LIBRARIES := $(LIB_PKG)	               
@@ -292,8 +298,6 @@ ifneq ($(STAR_PATH),$(OUT_DIR))
     LIBRARIES += $(wildcard  $(STAR_LIB)/lib$(PKG).$(A))
   endif                           
 endif                           
-####LIBRARIES += -L$(STAR)/asps/../.$(STAR_HOST_SYS)/lib -ltls -lmsg
-endif                          
 ifeq (,$(strip $(LIB_PKG) $(SL_PKG)))
 all:
 	@echo Nothing to do for package $(PKG)
@@ -353,13 +357,15 @@ endif #/* NT */
 endif                           
 endif                           # NO idl- or g-files
 #_________________dependencies_____________________________
-ifneq (, $(strip $(FILES_DM)))
+ifndef NODEPEND
+ifneq (,$(strip $(FILES_DM)))
 include $(FILES_DM)
 endif                               # 
-ifneq (, $(strip $(FILES_D))) 
+ifneq (,$(strip $(FILES_D))) 
 include $(FILES_D)
 endif                               #
 endif                            # end if of FILES_O FILES_SL
+endif
 #--------  idm, idl --------
 ifneq (,$(FILES_ALL_TAB))
 $(FILES_TAH) : $(GEN_TAB)/%.h : %.idl
@@ -376,8 +382,8 @@ $(GEN_TAB)/.rootrc:
 	@echo '# for all ROOT applications for either Unix or Windows.'>>  $(ALL_TAGS)
 	@echo 'Unix.*.Root.DynamicPath:    .:.$$(STAR_SYS)/lib:$$(STAR)/lib:$$(STAF_LIB)'>>  $(ALL_TAGS)
 	@echo 'Unix.*.Root.MacroPath:      .:./StRoot/macros:$$(STAR)/StRoot/macros:$$(STAR)/StRoot/test:$$(STAR)/.share/tables:$$(ROOTSYS)/macros'>>  $(ALL_TAGS)
-	@echo 'WinNT.*.Root.DynamicPath:   ./;$$(ROOTSYS)/star/bin;//Sol/afs_rhic/star/packages/dev/.intel_wnt/bin;$$(ROOTSYS);$$(ROOTSYS)/bin;$$(PATH)'>>  $(ALL_TAGS)
-	@echo 'WinNT.*.Root.MacroPath:     ./;$$(home)/root/macros;$$(ROOTSYS)/tutorials;$$(ROOTSYS)/star/macros;//Sol/afs_rhic/star/packages/dev/.intel_wnt/bin;$$(ROOTSYS)/macros'>>  $(ALL_TAGS)
+	@echo 'WinNT.*.Root.DynamicPath:   ./;$$(ROOTSYS)/star/bin;$(AFS_RHIC)/star/packages/dev/.intel_wnt/bin;$$(ROOTSYS);$$(ROOTSYS)/bin;$$(PATH)'>>  $(ALL_TAGS)
+	@echo 'WinNT.*.Root.MacroPath:     ./;$$(home)/root/macros;$$(ROOTSYS)/tutorials;$$(ROOTSYS)/star/macros;$(AFS_RHIC)/star/packages/dev/.intel_wnt/bin;$$(ROOTSYS)/macros'>>  $(ALL_TAGS)
 	@echo '# Show where library or macro is found (in path specified above)'>>  $(ALL_TAGS)
 	@echo 'Root.ShowPath:           false'>>  $(ALL_TAGS)
  
@@ -439,18 +445,19 @@ $(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(GEN_DIR)/geant3.def
 	$(CP)$(1ST_DEPS) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(1ST_DEPS) -o  $(GEN_DIR)/$(STEM).F
 	$(FOR72) $(subst /,\\,$(subst \,/,$(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  $(FOUT)$(ALL_TAGS)))
 $(FILES_OBJ) $(FILES_ORJ) $(FILES_OTJ): $(OBJ_DIR)/%.$(O): %.cxx
-	$(CXX) $(CXXFLAGS) $(CXXOPT) $(subst \,/, $(CPPFLAGS) -c $(CXXINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O))
+	$(CXX) $(CXXFLAGS) $(CXXOPT) $(subst \,/, $(CPPFLAGS) -c $(CXXINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN)
 $(FILES_SL) : $(OBJ_DIR)/%.$(O): %.cc
-	$(CXX) $(CXXFLAGS) $(CXXOPT) $(subst \,/, $(CPPFLAGS) -c $(CXXINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O))
+	echo $(FILES_SL) : $(OBJ_DIR)/%.$(O): %.cc
+	$(CXX) $(CXXFLAGS) $(CXXOPT) $(subst \,/, $(CPPFLAGS) -c $(CXXINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN))
 $(OBJ_DIR)/%.$(O): %.F
 	$(RM) $(subst /,\\,$(subst \,/,$(OBJ_DIR)/$(STEM).$(O)))
-	$(FC) $(subst /,\\,$(subst \,/,$(CPPFLAGS)  $(FFLAGS) -c $(1ST_DEPS) $(FOUT)$(OBJ_DIR)/$(STEM).$(O)))
+	$(FC) $(subst /,\\,$(subst \,/,$(CPPFLAGS)  $(FFLAGS) -c $(1ST_DEPS) $(FOUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN) ))
 $(OBJ_DIR)/%.$(O): %.c
 	$(RM) $(subst /,\\,$(subst \,/,$(OBJ_DIR)/$(STEM).$(O)))
-	$(CC) $(subst \,/,$(CPPFLAGS) $(CFLAGS) $(COPT) -c $(CINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O))
+	$(CC) $(subst \,/,$(CPPFLAGS) $(CFLAGS) $(COPT) -c $(CINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN))
 $(OBJ_DIR)/%.$(O): %.cc
 	$(RM) $(subst /,\\,$(subst \,/,$(OBJ_DIR)/$(STEM).$(O)))
-	$(CXX) $(subst \,/,$(CPPFLAGS) $(CXXFLAGS) $(CXXOPT) -c $(CXXINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O))
+	$(CXX) $(subst \,/,$(CPPFLAGS) $(CXXFLAGS) $(CXXOPT) -c $(CXXINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN))
 $(OBJ_DIR)/%.$(O): %.cdf
 	$(RM) $(subst /,\\,$(subst \,/,$(OBJ_DIR)/$(STEM).$(O)))
 endif #/* NT */
@@ -459,7 +466,7 @@ ifndef NT
 	$(CC)  $(CPPFLAGS) $(CFLAGS)   -c $(GEN_DIR)/$(STEM).c $(COUT) $(OBJ_DIR)/$(STEM).$(O); \
         $(RM)  $(GEN_DIR)/$(STEM).c
 else #/* NT */
-	$(CC)  $(subst \,/,$(CPPFLAGS) $(CFLAGS) $(COPT) -c $(CINP)$(GEN_DIR)/$(STEM).c $(COUT)$(OBJ_DIR)/$(STEM).$(O)) &&  \
+	$(CC)  $(subst \,/,$(CPPFLAGS) $(CFLAGS) $(COPT) -c $(CINP)$(GEN_DIR)/$(STEM).c $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN)) &&  \
         $(RM)  $(subst /,\\,$(subst \,/,$(GEN_DIR)/$(STEM).c))
 endif #/* NT */
 ifndef NT
@@ -551,6 +558,8 @@ clean: clean_obj clean_lib clean_dep
 clean_share:
 ifndef NT
 	rm -rf $(GEN_DIR) $(FILES_ALL_TAB)
+else #/* NT */
+#	$(RMDIR) $(subst /,\\,$(subst \,/,$(GEN_DIR) $(FILES_ALL_TAB)))
 endif #/* NT */
 clean_obj:
 ifndef NT
@@ -561,10 +570,14 @@ endif #/* NT */
 clean_dep:
 ifndef NT
 	rm -rf $(DEP_DIR) 
+else #/* NT */
+#	$(RMDIR) $(subst /,\\,$(subst \,/,$(DEP_DIR) ))
 endif #/* NT */
 clean_lib:
 ifndef NT
 	rm -rf $(SL_PKG) $(LIB_PKG)
+else #/* NT */
+	for %i in ($(subst /,\\,$(subst \,/,$(SL_PKG) $(LIB_PKG)))) if exist %i\\. $(RMDIR)  %i
 endif #/* NT */
 endif
 test: test_dir test_files test_mk
@@ -609,7 +622,6 @@ test_mk:
 	@echo MAKE      = $(MAKE)  
 	@echo VPATH     = $(VPATH) 
 	@echo SHELL     = $(SHELL) 
-	@echo MAKE      = $(MAKE) 
 	@echo MAKELEVEL = $(MAKELEVEL) 
 	@echo MAKEFILE  = $(MAKEFILE) 
 	@echo MAKFLAGS  = $(MAKEFLAGS) 
@@ -664,3 +676,7 @@ test_dir:
 	@echo STAF_MAKE_HOME= $(STAF_MAKE_HOME)
 	@echo CERNLIB       = $(MAKECERNLIB)
 	@echo FILES_O       = $(FILES_O) 
+ifdef NT
+        @echo INCLUDE       = $(INCLUDE) 
+endif
+

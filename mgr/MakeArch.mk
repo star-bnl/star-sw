@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.46  1998/12/01 01:52:47  fisyak
+#  Merge with NT
+#
 #  Revision 1.45  1998/11/29 21:19:16  fisyak
 #  new merge with NT
 #
@@ -116,7 +119,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/11/29 21:19:16 $ 
+#             Last modification $Date: 1998/12/01 01:52:47 $ 
 #. default setings
 
 PWD   := pwd
@@ -179,6 +182,7 @@ Cxx   :=cc
 CLIBS    :=
 FLIBS    :=
 STIC       := $(STAR_BIN)/stic
+
 GEANT3     := $(STAR_BIN)/geant3
 
 CPPFLAGS := $(STAR_SYS) $(TULL_ARCH) QUIET_ASP 
@@ -206,7 +210,9 @@ LEXLIB   := -ll
 ifneq (,$(findstring $(STAR_SYS),intel_wnt))
 #  case WIN32
 #  ====================
-  SUNRPC:= E:/staf/sunrpc
+
+  GEANT3:= $(STAR_BIN)/geant3.exe
+  SUNRPC:= $(AFS_RHIC)/star/packages/dsl/intel_wnt/inc
   MAKE  := make.exe
   PWD   := pwd.exe
   GETCWD:= getcwd.exe
@@ -231,7 +237,9 @@ ifneq (,$(findstring $(STAR_SYS),intel_wnt))
   A     :=lib
   Cxx   :=cc
   So    :=dll
-
+ifndef STAF_MAKE_HOME
+  STAF_MAKE_HOME := $(STAR)/mgr
+endif
   MAKECERNLIB := $(subst \,\\,$(subst /,\,$(STAF_MAKE_HOME)/cernlib.bat)) 
 # MAKECERNLIB = call Y:\wrk\mgr\cernlib.bat
 
@@ -329,6 +337,7 @@ ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50))
   LEX      := flex
   LEXLIB   := -lfl
 endif
+
 ifneq (,$(findstring $(STAR_SYS),i386_redhat51))
 #    case linux but gcc is EGCS
 #  ====================
