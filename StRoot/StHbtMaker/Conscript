@@ -37,7 +37,7 @@ my $PKG = $pkg;
 		  Reader/StStandardHbtEventReader.cxx
 		  Reader/StHbtAsciiReader.cxx
 		  StHbtMaker.cxx
-		 ); print "src = @src\n";
+		 )#; print "src = @src\n";
 my @h_files = qw (StHbtMaker.h
 		  CorrFctn/ExitSepCorrFctn.h
 		  CorrFctn/MinvCorrFctn.h
@@ -59,7 +59,7 @@ my @h_files = qw (StHbtMaker.h
 		  Reader/StHbtAsciiReader.h
 		  Reader/StHbtMcEventReader.h
 		  Reader/StStandardHbtEventReader.h
-		 ); print "h_files = @h_files\n";
+		 );# print "h_files = @h_files\n";
 printf ("Run Conscript  in %-30s  for %-20s\n",$Dir, $PKG) unless ($param::quiet);
 my $obj  = $ObjDir;  #print "obj = $obj\n";
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; #print "SO_PKG = $SO_PKG\n";
@@ -71,7 +71,7 @@ my $CPPP =  $INCLUDE . "/" . $pkg
   .  ":" . $Dir . "/Cut" 
   .  ":" . $Dir . "/Infrastructure"
   .  ":" . $Dir . "/Reader"
-  .  ":" . $env->{CPPPATH};  print "CPPP = $CPPP\n";
+  .  ":" . $env->{CPPPATH};#  print "CPPP = $CPPP\n";
 my $include = $INCLUDE . "/" . $pkg;
 my $LIBPKG = "";
 my $CXXFLAGS = $env->{CXXFLAGS};
