@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.9 2000/11/25 11:48:40 lasiuk Exp $
+ * $Id: StEnumerations.h,v 2.10 2000/11/26 15:07:55 lasiuk Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
- * Revision 2.9  2000/11/25 11:48:40  lasiuk
- * Modify the StRichHitFlags to account for ambiguities
+ * Revision 2.10  2000/11/26 15:07:55  lasiuk
+ * replace multiplyassigned bit for RICH
  *
  * Revision 2.9  2000/11/25 11:48:40  lasiuk
  * Modify the StRichHitFlags to account for ambiguities
@@ -78,6 +78,7 @@ enum StRichHitFlag {eDeconvoluted=1,
 		    eSaturatedPad=4 ,
 		    ePhotoElectron=8,
 		    eAssociatedMip=16,
+		    eMultiplyAssigned=32,
 		    eInAreaPi=64,
 		    eInAreaK=128,
 		    eInAreap=256,
