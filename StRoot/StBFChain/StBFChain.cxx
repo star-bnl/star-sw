@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.38 1999/12/01 02:06:19 didenko Exp $
+// $Id: StBFChain.cxx,v 1.39 1999/12/18 00:23:46 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.39  1999/12/18 00:23:46  fisyak
+// Add runco branch
+//
 // Revision 1.38  1999/12/01 02:06:19  didenko
 // Add tpc to y1b, dependence of St_global from St_tpc and St_svt
 //
@@ -716,6 +719,7 @@ void StBFChain::SetDataBases(const Char_t* TimeStamp){
 void StBFChain::SetTreeOptions()
 {
   treeMk->SetBranch("histBranch");
+  treeMk->SetBranch("runcoBranch");
   if (GetOption("dst"))      treeMk->IntoBranch("dstBranch","dst");
   if (GetOption("Event"))    treeMk->IntoBranch("eventBranch","StEvent");
   if (GetOption("AllEvent")) {
