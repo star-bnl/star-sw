@@ -132,7 +132,7 @@ C     =======
 C     EXECUTABLE CODE:
 C     ================
 
-      call StInfo('STK_AM_FIT: Starting ################################')
+C      call StInfo('STK_AM_FIT: Starting ################################')
 
       if (stkpar(1).c1norm(1).eq.0) then
          call StError('Setting chi1 normalization to 1.0')
@@ -946,7 +946,7 @@ c      first point
 
       track_h.nok       = itrack-1
 
-      call StInfo('STK_AM_FIT: Stopping ###############################')
+C      call StInfo('STK_AM_FIT: Stopping ###############################')
       STK_AM_FIT=STAFCV_OK
       RETURN
       END

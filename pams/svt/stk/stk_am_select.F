@@ -51,7 +51,7 @@ C     EXECUTABLE CODE:
 C     ================
 c     check if the svt track table is empty
 
-      call StInfo( 'STK_AM_SELECT: Starting #############################')
+C      call StInfo( 'STK_AM_SELECT: Starting #############################')
       
       if (track_h.nok.eq.0) then
          stk_am_select = stafcv_ok
@@ -280,7 +280,7 @@ C     space point as used
          
       groups_h.nok = k-1
 
-      call StInfo('STK_AM_SELECT: Stopping #############################')
+C      call StInfo('STK_AM_SELECT: Stopping #############################')
       STK_AM_SELECT=STAFCV_OK
       RETURN
       END
