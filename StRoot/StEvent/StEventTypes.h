@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.14 2001/09/13 03:04:21 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.15 2001/09/18 00:14:55 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.15  2001/09/18 00:14:55  ullrich
+ * Added StRunInfo.
+ *
  * Revision 2.14  2001/09/13 03:04:21  ullrich
  * Removed StRun and StRunSummary.
  *
@@ -105,6 +108,7 @@
 #include "StRichPidTraits.h"
 #include "StRichSoftwareMonitor.h"
 #include "StRichPixel.h"
+#include "StRunInfo.h"
 #include "StSoftwareMonitor.h"
 #include "StSsdHit.h"
 #include "StSsdHitCollection.h"
