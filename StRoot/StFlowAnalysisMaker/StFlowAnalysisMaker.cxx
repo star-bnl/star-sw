@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.33 2000/07/12 17:49:37 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.34 2000/08/01 21:51:18 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.34  2000/08/01 21:51:18  posk
+// Added doubly integrated v.
+//
 // Revision 1.33  2000/07/12 17:49:37  posk
 // Changed EtaSym plots.
 //
@@ -221,11 +224,11 @@ Int_t StFlowAnalysisMaker::Init() {
   const float fitOverMaxMin   =    0.;
   const float fitOverMaxMax   =   1.2; 
   const float origMultMin     =    0.;
-  const float origMultMax     = 4000.; 
+  const float origMultMax     = 2000.; 
   const float totalMultMin    =    0.;
-  const float totalMultMax    = 4000.; 
+  const float totalMultMax    = 2000.; 
   const float corrMultMin     =    0.;
-  const float corrMultMax     = 4000.; 
+  const float corrMultMax     = 2000.; 
   const float multOverOrigMin =    0.;
   const float multOverOrigMax =    1.; 
   const float vertexZMin      = -150.;
@@ -243,7 +246,7 @@ Int_t StFlowAnalysisMaker::Init() {
   const float meanPtMin       =    0.;
   const float meanPtMax       =    1.;
   const float multMin         =    0.;
-  const float multMax         = 4000.;
+  const float multMax         = 2000.;
   const float qMin            =    0.;
   const float pidMin          =  -10.;
   const float pidMax          =   10.;
@@ -453,7 +456,7 @@ Int_t StFlowAnalysisMaker::Init() {
     char countSels[2];
     sprintf(countSels,"%d",k+1);
 
-    // for sub-event pairs
+    // for each selection
 
     // cos(n*delta_Psi)
     histTitle = new TString("Flow_Cos_Sel");
@@ -473,6 +476,15 @@ Int_t StFlowAnalysisMaker::Init() {
     histFull[k].mHistRes->SetYTitle("Resolution");
     delete histTitle;
 
+    // vObs
+    histTitle = new TString("Flow_vObs_Sel");
+    histTitle->Append(*countSels);
+    histFull[k].mHist_vObs = new TProfile(histTitle->Data(), histTitle->Data(),
+      Flow::nHars, 0.5, (float)(Flow::nHars) + 0.5, -100., 100., "");
+    histFull[k].mHist_vObs->SetXTitle("Harmonic");
+    histFull[k].mHist_vObs->SetYTitle("vObs (%)");
+    delete histTitle;
+    
     // for each harmonic
     for (int j = 0; j < Flow::nHars; j++) {
       float order  = (float)(j+1);
@@ -652,7 +664,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.33 2000/07/12 17:49:37 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.34 2000/08/01 21:51:18 posk Exp $");
 
   return StMaker::Init();
 }
@@ -895,6 +907,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  histFull[k].histFullHar[j].mHist_vObs2D-> Fill(eta, pt, v);
 	  histFull[k].histFullHar[j].mHist_vObsEta->Fill(eta, v);
 	  histFull[k].histFullHar[j].mHist_vObsPt-> Fill(pt, vFlip);
+	  histFull[k].mHist_vObs->Fill(order, vFlip);
 	  
 	  // Correlation of Phi of all particles with Psi
 	  float phi_i = phi;
@@ -993,9 +1006,22 @@ Int_t StFlowAnalysisMaker::Finish() {
   // Calculate resolution from sqrt(mHistCos)
   double cosPair[Flow::nSels][Flow::nHars];
   double cosPairErr[Flow::nSels][Flow::nHars];
+  double content;
+  double error;
   for (int k = 0; k < Flow::nSels; k++) {
     char countSels[2];
     sprintf(countSels,"%d",k+1);
+    // Creat the 1D v histogram
+    histTitle = new TString("Flow_v_Sel");
+    histTitle->Append(*countSels);
+    histFull[k].mHist_v = 
+      histFull[k].mHist_vObs->ProjectionX(histTitle->Data());
+    histFull[k].mHist_v->SetTitle(histTitle->Data());
+    histFull[k].mHist_v->SetXTitle("Harmonic");
+    histFull[k].mHist_v->SetYTitle("Flow (%)");
+    delete histTitle;
+    AddHist(histFull[k].mHist_v);
+
     for (int j = 0; j < Flow::nHars; j++) {
       char countHars[2];
       sprintf(countHars,"%d",j+1);
@@ -1068,12 +1094,18 @@ Int_t StFlowAnalysisMaker::Finish() {
 	histFull[k].histFullHar[j].mHist_v2D-> Scale(1. / mRes[k][j]);
 	histFull[k].histFullHar[j].mHist_vEta->Scale(1. / mRes[k][j]);
 	histFull[k].histFullHar[j].mHist_vPt ->Scale(1. / mRes[k][j]);
+	content = histFull[k].mHist_v->GetBinContent(j+1);
+	histFull[k].mHist_v->SetBinContent(j+1, content / mRes[k][j]);
+	error = histFull[k].mHist_v->GetBinError(j+1);
+	histFull[k].mHist_v->SetBinError(j+1, error / mRes[k][j]);
       } else {
 	cout << "##### Resolution of the " << j+1 << "th harmonic was zero."
 	     << endl;
 	histFull[k].histFullHar[j].mHist_v2D-> Reset();
 	histFull[k].histFullHar[j].mHist_vEta->Reset();
 	histFull[k].histFullHar[j].mHist_vPt ->Reset();
+	histFull[k].mHist_v->SetBinContent(j+1, 0.);
+	histFull[k].mHist_v->SetBinError(j+1, 0.);
       }
 
       // Fit q distribution
