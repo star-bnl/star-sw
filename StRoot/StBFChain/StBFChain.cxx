@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.381 2004/02/12 00:34:57 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.382 2004/02/23 14:09:42 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1363,7 +1363,7 @@ Int_t StBFChain::Instantiate()
 	    tk->setMcEnabled(kFALSE);
 	    pars->doStEventInput=kTRUE; // We always want to have this I think?
 	    pars->doStEventOutput=kTRUE;
-	    pars->baseName="_pars.txt";
+	    //pars->baseName="_pars.txt";
 	    pars->useSvt=kTRUE;         // SVT used in IT but not active. ??
 	                                // Pre-2001 data, will build only 1 ladder?
 	    if (GetOption("SvtIT")) pars->activeSvt=kTRUE;
