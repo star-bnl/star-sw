@@ -1,5 +1,8 @@
-* $Id: bfc_mdc.kumac,v 1.17 1998/08/10 15:51:04 kathy Exp $
+* $Id: bfc_mdc.kumac,v 1.18 1998/08/12 15:48:29 kathy Exp $
 * $Log: bfc_mdc.kumac,v $
+* Revision 1.18  1998/08/12 15:48:29  kathy
+* more comments; combine geomtype+phystype into gstar_settings, use gstar_settings=field_only as default when not running gstar
+*
 * Revision 1.17  1998/08/10 15:51:04  kathy
 * added comments for fzin
 *
@@ -76,17 +79,26 @@
 * editted 7/28/98 K. Turner - now can read in txt file and run gstar (gtxin)
 * editted 8/1/98  K. Turner - separated out tid from tpt as requested
 * editted 8/3/98  K. Turner - use detp geometry command for gstar setup
+* editted 8/12/98 K. Turner - more comments; combine geomtype+phystype into
+*                             gstar_settings; use gstar_settings=field_only
+*                             if not running gstar 
 * *****************************************************************************
 *               
 * -- DICTIONARY OF INPUTS TO BFC.KUMAC --
 * TOP        - top level directory to search for kumacs 
 *            - change if you copy stuff to your area! 
+* - files must be in standard directory structure format:
+*                                  ~workdir/kumacs/domain
+*                                  ~workdir/pams/domain
 * tpc_sector_first - first sector # of tpc to simulation using tss
 * tpc_sector_last -  last sector # of tpc to simulation using tss
-* geomtype   - for gstar: tpc_only, field_only, complete, 
-*                         4th_off (for svt 4th layer off)
-* phystype   - for gstar:  hadr_on, hadr_off, decay_only
-*    *** can put 'help' as a value for geomtype or phystype too ***
+* gstar_settings - settings for loading gstar libraries 
+*        when running gstar, set 'complete 4th_off hadr_on' 
+*                   (4th_off = svt 4th layer off)
+*    !!! when not running gstar, should use 'field_only' !!!
+*     *** can put 'help' as a value in gstar_settings  ***
+*            See $STAR/pams/geometry/geometry/geometry.g 
+*               for list of other available settings
 * domain     - list of domains to load [domain='tpc svt global]
 * chain      - list of modules to run **** HAVE TO BE IN ORDER ****
 *            - see more details below
@@ -103,8 +115,10 @@
 *   tpc
 *   svt
 *   global
-* !! In order to get tpc code, you must load BOTH geometry and tpc 
-* e.g. domain='geometry tpc'
+* !! In order to run tpc code, you must load BOTH geometry and tpc 
+*     e.g. domain='geometry tpc'
+* !! In order to run global code, you must load svt,tpc & global
+*     e.g. domain='tpc svt global'
 * 
 * 
 * -- CHAINS --
@@ -121,7 +135,6 @@
 * sss        - SVT slow simulator - not implemented yet
 * tss        - TPC slow simulator
 * tfc        - unpacks tpc raw data into adcxyz table for diagnostics
-* evin       - to read from tpc raw data file that already has results of tss
 * tcl        - TPC clustering - slow sim only !
 * tcl_e      - TPC cluster evaluation - slow sim only
 * tfs        - TPC fast simulator
@@ -137,11 +150,14 @@
 * evout      - write event & run directories into xdf file
 *
 * 
+* 
 * -- EXAMPLE CHAINS --
 * for #1-5, use domain='geometry tpc svt global' 
 *       -> take out ones you don't need
 * !! In order to get tpc code, you must load BOTH geometry and tpc 
 *     e.g. domain='geometry tpc'
+* !! In order to run global code, you must load svt,tpc & global
+*     e.g. domain='tpc svt global'
 * example input file is:  $AFS_RHIC/star/data/samples/auau_central_hijing.xdf _
 * 
 * 
@@ -150,44 +166,59 @@
 *                            tid particle id,
 *                            global tracking, global refitting, v0 finder
 *                            & write event out
+*      gstar_settings=field_only _
 *      chain=' g2tin svg tpg srs tfs sgr tpt tte_e tid svm egr ev0 evout'_
-*
+*      domain=' geometry tpc svt global'
+* 
 * 2. read from geant file, svt fast sim, tpc slow sim, tpc clustering
 *                            sgr tracker, tpt tracker, tte track evaluator
 *                            tid particle id,
 *                            global tracking, global refitting, v0 finder
 *                            & write event out
+* gstar_settings=field_only _
 * chain=' g2tin svg tpg srs tss tcl tcl_e sgr tpt tte_e tid svm egr ev0 evout'_
-*
+* domain=' geometry tpc svt global'
+* 
 * 3. read from geant file, svt fast sim, sgr tracker & write event out
-*      chain=' g2tin svg srs sgr evout'_
+*     gstar_settings=field_only _
+*     chain=' g2tin svg srs sgr evout'_
+*     domain=' svt ' _
+* 
 * 
 * 4. read from geant file, tpc fast sim, tpt tracker, tte track eval,
-*                             tid particle id,
-*                             & write event out
-*      chain=' g2tin tpg tfs tpt tte_e tid evout'
+*                             tid particle id  & write event out
+* 
+*     gstar_settings=field_only _
+*     chain=' g2tin tpg tfs tpt tte_e tid evout'
+*     domain=' geometry tpc ' _
 * 
 * 5. read from geant file, tpc slow sim, tpc clustering, tpt tracker,
 *                             tid particle id, 
 *                             tte track evaluator, write event out
-*    chain=' g2tin tpg tss tcl tcl_e tpt tte_e tid evout'
+*     gstar_settings=field_only _
+*     chain=' g2tin tpg tss tcl tcl_e tpt tte_e tid evout'
+*     domain=' geometry tpc ' _
 * 
 * 6. to read in event generator file, run gstar & g2t & write out to xdf file
-*     domain=' geometry sim/gstar sim/g2t ' _
-*     chain=' evgin rgst rg2t evout'
-*      example input files:  
-*          /star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2_1_200.xdf 
+*      gstar_settings='complete 4th_off hadr_on'
+*      chain=' evgin rgst rg2t evout'
+*      domain=' geometry sim/gstar sim/g2t ' _
+*   example input files:  
+*      /star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2_1_200.xdf 
 * 
 * 7. to read from an xdf file that already has raw data simulated on it
 *    and then doing tpc clustering and tracking and write out results:
-*    domain=' tpc '
-* chain=' evin tpg tcl tpt'
+*      gstar_settings='field_only'
+*      domain='geometry tpc '
+*      chain=' evin tpg tcl tpt'
 * 
 *  8. to read in event text file, run gstar & g2t & write out to xdf file
+*     gstar_settings='complete 4th_off hadr_on'
 *     domain=' geometry sim/gstar sim/g2t ' _
 *     chain=' gtxin rgst rg2t evout'
-*      example input files:  
+*   example input files:  
 *          $AFS_RHIC/star/data/samples/muons_central_2.txt
+*  
 *  
 * 
 *****************************************************************
@@ -200,8 +231,7 @@ MACRO bfc_mdc _
    TOP=$STAR _
    tpc_sector_first=1 _
    tpc_sector_last=24 _
-   geomtype='complete 4th_off' _
-   phystype=hadr_on _
+   gstar_settings=' field_only'
    domain='geometry sim/g2t sim/gstar tpc svt global' _
    chain='evgin rgst rg2t svg tpg srs tss '_ 
    first=401 _
@@ -235,8 +265,7 @@ MACRO bfc_mdc _
  macro/global/create tpc_sector_last  [tpc_sector_last]   'last sector in TPC'
  macro/global/create ievent           1                   'Event counter'
  macro/global/create TOP              [TOP]
- macro/global/create geomtype         [geomtype]
- macro/global/create phystype         [phystype]   
+ macro/global/create gstar_settings [gstar_settings]
  macro/global/create output_fzd_file   ""      'Output fz file'
  macro/global/create output_xdf_file   ""      'Output xdf file' 
 * trace off
@@ -257,9 +286,9 @@ MACRO bfc_mdc _
  message ' *** Output file name        --> ' [output_file]
  message ' *** tpc_sector_first        --> ' [tpc_sector_first]
  message ' *** tpc_sector_last         --> ' [tpc_sector_last]
- message ' *** physics type            --> ' [phystype]
- message ' *** geometry type           --> ' [geomtype]   
- 
+ message ' *** gstar settings          --> ' [gstar_settings]
+  
+   
 ***********************************************************
 * BEGINNING STUFF 
 * **********************************************************
@@ -269,7 +298,7 @@ MACRO bfc_mdc _
  exec setup#setup
  
   exec bfc_util#bfc_start _
-    domain=[domain] chain=[chain] phystype=[phystype] geomtype=[geomtype]
+    domain=[domain] chain=[chain] gstar_settings=[gstar_settings]
   
  macro/global/import *
  if $iquest(1)<>0 goto ABEND
