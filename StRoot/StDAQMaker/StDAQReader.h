@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.12 2000/06/12 15:41:19 perev Exp $
+ * $Id: StDAQReader.h,v 1.13 2000/06/30 21:53:40 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.13  2000/06/30 21:53:40  perev
+ * L3 stuff added
+ *
  * Revision 1.12  2000/06/12 15:41:19  perev
  * StTPCRead.h added into StDAQReader.h
  *
@@ -56,9 +59,13 @@ class StFTPCReader;
 class StTRGReader ;
 class StSVTReader ;
 #ifndef __CINT__
+
 #include "StDaqLib/RICH/RICH_Reader.hh"
-#endif /*__CINT__*/
+#include "StDaqLib/L3/L3_Reader.hh"
 typedef RICH_Reader StRICHReader;
+typedef L3_Reader   StL3Reader;
+
+#endif /*__CINT__*/
 //
 
  
@@ -99,6 +106,7 @@ public:
   StFTPCReader *getFTPCReader(); 
   StTRGReader  *getTRGReader ();
   StSVTReader  *getSVTReader ();
+  StL3Reader   *getL3Reader  ();
   virtual void printEventInfo();
   virtual int  getEventSize() const;
   virtual EventReader *getEventReader() const {return fEventReader;}  
@@ -112,6 +120,7 @@ StFTPCReader *fFTPCReader;
 StRICHReader *fRICHReader;
 StTRGReader  *fTRGReader;
 StSVTReader  *fSVTReader;
+StL3Reader   *fL3Reader;
 long fOffset;
 DAQEventInfo *fEventInfo;
 char *fFile;
