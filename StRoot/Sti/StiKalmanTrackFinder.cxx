@@ -226,13 +226,7 @@ void StiKalmanTrackFinder::doNextTrackStep()
 	    }
 	  doFinishLayer();
 	  if (trackDone)
-	    {
-	      if (pars->useTrackFilter && trackFilter->accept(track)) 
-		trackContainer->push_back(track);
-	      else
-		trackContainer->push_back(track);
 	      state=0;
-	    }
 	  break;
 	}
       trackMes << "Track state:" << state << endl;
@@ -261,21 +255,31 @@ void StiKalmanTrackFinder::findTracks()
   try 
     {
       StiKalmanTrack * track;
+			int debugCount=0;
+			double pp[3];
       while (trackSeedFinder->hasMore())
-	{ 
-	  // obtain track seed from seed finder
-	  track = trackSeedFinder->next();
-	  if (!track) 
-	    throw runtime_error("StiKalmanTrackFinder::findTracks() - trackSeedFinder returned track==0");
-	  track->find();
-	}
-    }
-  catch (runtime_error & rte) 
-    {
-      trackMes << "StiKalmanTrackFinder::findTracks() - Run Time Error :" << rte.what() << endl;
-    }
-  catch (exception & e) 
-    {
+				{ 
+					// obtain track seed from seed finder
+					track = trackSeedFinder->next();
+					if (!track) 
+						break;
+					try
+						{
+							track->find();
+
+							if (pars->useTrackFilter && trackFilter->filter(track)) 
+								trackContainer->push_back(track);
+							else
+								trackContainer->push_back(track);
+						}
+					catch (runtime_error & rte) 
+						{
+							trackMes << "StiKalmanTrackFinder::findTracks() - Run Time Error :" << rte.what() << endl;
+						}
+				}
+		}
+	catch (exception & e) 
+		{
       cout << "StiKalmanTrackFinder::findTracks() - Internal Error :" << e.what() << endl;
     }
   catch (...) 
@@ -498,10 +502,7 @@ void StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
       doFinishLayer(); //cout <<"finished layer"<<endl;
     }
 
-  if (pars->useTrackFilter && trackFilter->filter(track)) 
-    trackContainer->push_back(track);
-  else
-    trackContainer->push_back(track);
+
   track->update();  //This updates the track on the display
   trackDone = true;
 }
