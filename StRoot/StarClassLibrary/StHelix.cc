@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.3 1999/03/07 14:55:41 wenaus Exp $
+ * $Id: StHelix.cc,v 1.4 1999/11/29 21:45:38 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 26 1997
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
- * Revision 1.3  1999/03/07 14:55:41  wenaus
- * fix scope problem
+ * Revision 1.4  1999/11/29 21:45:38  fisyak
+ * fix abs for HP
+ *
+ * Revision 1.9  2000/05/22 21:38:28  ullrich
+ * Add parenthesis to make Linux compiler happy.
  *
  * Revision 1.8  2000/05/22 21:11:21  ullrich
  * In pathLength(StThreeVector&): Increased number of max iteration
@@ -404,7 +407,7 @@ double StHelix::pathLength(const StThreeVector<double>& r,
 	    ds /= 10;
 	    if (s == s1) {
 		s1 -= d;
-	    abs(mH) == 1              &&
+    return pair<double, double>(s, h.pathLength(at(s)));
 		s2 -= d;
    
 	    else if (s == slast) {
