@@ -563,15 +563,23 @@ Text_t *St_NodeView::GetObjectInfo(Int_t px, Int_t py)
 {
    if (!gPad) return "";
    static char info[512];   
-   Axis_t x[3];
+   Axis_t x[3] = {0,0,0.5};
    ((TPad *)gPad)->AbsPixeltoXY(px,py,x[0],x[1]);
    TView *view =gPad->GetView();
-   if (view) view->NDCtoWC(x, x);  
+   if (view) {
+       Float_t min[3], max[3];
+       view->GetRange(min,max);
+       for (int i =0; i<3;i++) min[i] = (max[i]+min[i])/2;
+       view->WCtoNDC(min,max);
+       min[0] = x[0]; min[1] = x[1];
+       min[2] = max[2];
+       view->NDCtoWC(min, x);  
+   }
    TShape *shape = GetShape();
    if (shape) 
-     sprintf(info,"%6.2f/%6.2f: %s/%s, shape=%s/%s",x[0],x[1],GetName(),GetTitle(),shape->GetName(),shape->ClassName());
+     sprintf(info,"%6.2f/%6.2f/%6.2f: %s/%s, shape=%s/%s",x[0],x[1],x[2],GetName(),GetTitle(),shape->GetName(),shape->ClassName());
    else
-     sprintf(info,"%6.2f/%6.2f: %s/%s",x[0],x[1],GetName(),GetTitle());
+     sprintf(info,"%6.2f/%6.2f/%6.2f: %s/%s",x[0],x[1],x[2],GetName(),GetTitle());
    return info;
 }
 
