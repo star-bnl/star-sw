@@ -1,4 +1,4 @@
-// $Id: EEsoloPi0.cxx,v 1.4 2004/08/09 20:28:30 balewski Exp $
+// $Id: EEsoloPi0.cxx,v 1.5 2004/08/17 15:46:56 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -88,7 +88,6 @@ void EEsoloPi0::init( MYDB*dbx, TObjArray * HList ){
 
   // Mix/noMix histos
   hR[0]=(TH1F*)new TH2F ("iE2","Eneregy (GeV) for any pair of clusters",40,0.,Emax,40,0.,Emax);
-  
   
   hR[1]=new TH1F ("invm","Invariant mass of 2 gammas (GeV)",80,0.,1.2);
   
@@ -336,7 +335,7 @@ int  EEsoloPi0:: findTowerClust() {
      soloMip[k1].id=nClust;
      tagCluster(k1);     
   }
-  printf("nClust=%d\n",nClust);
+  // printf("nClust=%d\n",nClust);
   //if(nClust<2) return ;
   
   //............  sum energy of clusters, find centroid
@@ -353,7 +352,7 @@ int  EEsoloPi0:: findTowerClust() {
     clustG[nClustG++]=clust[ic];
   }
 
-  printf(" nClustG=%d\n",nClustG);
+  // printf(" nClustG=%d\n",nClustG);
 
   //.....  copy only good clusters
   for(ic=0;ic<nClustG;ic++) {
@@ -363,7 +362,7 @@ int  EEsoloPi0:: findTowerClust() {
   nClust=nClustG;
     
   hA[4]->Fill(nClust);
-  printf("doneE nCl=%d %f %d\n",nClust,clust[0].eC,clust[0].k1);
+  //  printf("doneE nCl=%d %f %d\n",nClust,clust[0].eC,clust[0].k1);
   return nClust;
 }
 
