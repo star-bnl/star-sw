@@ -88,11 +88,11 @@ C---- Initialize nok counter and variable arrays
 
 *     Load Neutral Energy and total Energy
       do itwr = 1,ems_hits_bemc_h.nok
-        ebin_in = ems_hits_bemc(itwr).tower_eta_bin
-        pbin_in = ems_hits_bemc(itwr).tower_phi_bin
+        ebin_in = ems_hits_bemc(itwr).eta_bin
+        pbin_in = ems_hits_bemc(itwr).phi_bin
         if(ems_hits_bemc(itwr).tower_dep.eq.0)then     ! tower sum in depth=0...
-         en_mct(pbin_in,ebin_in) = ems_hits_bemc(itwr).eb_neut
-         en_cpr(pbin_in,ebin_in) = ems_hits_bemc(itwr).eb_sum
+         en_mct(pbin_in,ebin_in) = ems_hits_bemc(itwr).e_neut
+         en_cpr(pbin_in,ebin_in) = ems_hits_bemc(itwr).e_sum
         end if
       enddo
 
