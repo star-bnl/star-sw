@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.30 2003/01/12 20:38:23 jeromel Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.31 2003/04/10 21:30:59 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.31  2003/04/10 21:30:59  hardtke
+ * Allow multiple InitRun calls
+ *
  * Revision 1.30  2003/01/12 20:38:23  jeromel
  * fabs() not abs() for doube
  *
@@ -404,7 +407,7 @@ Int_t StTpcDbMaker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::InitRun(int runnumber){
-   m_TpcDb = 0;
+    if (m_TpcDb) return 0;
     float x[3] = {0,0,0};
     float b[3];
     gufld(x,b);
