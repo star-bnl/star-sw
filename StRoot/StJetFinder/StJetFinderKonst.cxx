@@ -12,7 +12,7 @@
 #include <TCanvas.h>
 #include <TPad.h>
 #include "TObject.h"
-#include "Stiostream.h"
+#include <iostream>
 
 extern "C" void ktjetp_(int &, float &, float &, float &, float &);
 extern "C" void ktjet_(int &, float *, int *, int &, float &);

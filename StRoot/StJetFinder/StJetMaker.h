@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.8 2003/09/10 19:47:20 perev Exp $
+ * $Id: StJetMaker.h,v 1.9 2003/09/24 20:54:07 thenry Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.9  2003/09/24 20:54:07  thenry
+ * Fixed ANSI compatibility problems.
+ *
  * Revision 1.8  2003/09/10 19:47:20  perev
  * ansi corrs
  *
@@ -54,7 +57,7 @@
 #include "StMaker.h"
 #include "StSpinMaker/StppJetAnalyzer.h"
 #include <string>
-#include "Stiostream.h"
+#include <iostream>
 #include <map>
 #include <algorithm>
 using namespace std;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcFourPMaker.cxx,v 1.8 2003/09/23 19:37:56 thenry Exp $
+ * $Id: StTpcFourPMaker.cxx,v 1.9 2003/09/24 20:54:08 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -76,7 +76,7 @@ Int_t StTpcFourPMaker::Make() {
        (probProton == 0) && (probElectron == 0))
       {
 	probPion = 1.0;
-	return;
+	return kStOK;
       }
     double sum = probPion + probKaon + probProton + probElectron;
     if(fabs(sum-1.0) < .01)

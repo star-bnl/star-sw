@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.7 2003/09/03 00:48:00 thenry Exp $
+ * $Id: StJetMaker.cxx,v 1.8 2003/09/24 20:54:07 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -30,27 +30,27 @@
 #include "TTree.h"
 
 #include "StChain.h"
-#include "StEventTypes.h"
-#include "StMessMgr.h"
-#include "StIOMaker/StIOMaker.h"
+//#include "StEventTypes.h"
+//#include "StMessMgr.h"
+//#include "StIOMaker/StIOMaker.h"
 #include "StEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
-#include "StMuDSTMaker/EMC/StEmcMicroEvent.h"
+//#include "StMuDSTMaker/EMC/StEmcMicroEvent.h"
 
 #include "StJetMaker.h"
 #define _NoJet_
-#include "StSpinMaker/StppEvent.h"
-#include "StSpinMaker/StppGeant.h"
-#include "StTriggerDetectorCollection.h"
-#include "StBbcTriggerDetector.h"
-#include "StFpdCollection.h"
+//#include "StSpinMaker/StppEvent.h"
+//#include "StSpinMaker/StppGeant.h"
+//#include "StTriggerDetectorCollection.h"
+//#include "StBbcTriggerDetector.h"
+//#include "StFpdCollection.h"
 #include "St_trg_Maker/St_trg_Maker.h"
-#include "StEmcClusterCollection.h"
-#include "StMuDSTMaker/EMC/StEmcMicroCollection.h"
+//#include "StEmcClusterCollection.h"
+//#include "StMuDSTMaker/EMC/StEmcMicroCollection.h"
 #include "StSpinMaker/StJet.h"
-#include "StEmcPoint.h"
+//#include "StEmcPoint.h"
 #include "StFourPMaker.h"
 #include "StJetOutputMaker.h"
 
