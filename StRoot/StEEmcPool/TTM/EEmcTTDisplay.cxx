@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2004/01/19
-// $Id: EEmcTTDisplay.cxx,v 1.2 2004/01/26 21:08:31 zolnie Exp $
+// $Id: EEmcTTDisplay.cxx,v 1.3 2004/01/26 21:51:53 zolnie Exp $
 // doxygen info here
 
 #include "TList.h"
@@ -13,10 +13,10 @@
 #include "StarClassLibrary/StPhysicalHelixD.hh"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
-#include "EETowTrackMatchMaker.h"
-#include "EETowDisplay.h"
+#include "EEmcTTMMaker.h"
+#include "EEmcTTDisplay.h"
 
-EETowDisplay::EETowDisplay(const char *name) : EEmcGeomSimple()
+EEmcTTDisplay::EEmcTTDisplay(const char *name) : EEmcGeomSimple()
 { 
   mEEmc=NULL;
 
@@ -27,7 +27,7 @@ EETowDisplay::EETowDisplay(const char *name) : EEmcGeomSimple()
 
 };
 
-EETowDisplay::~EETowDisplay() 
+EEmcTTDisplay::~EEmcTTDisplay() 
 { 
   if(mEEmc)      delete mEEmc;
   if(mTrackHits) delete mTrackHits;
@@ -36,7 +36,7 @@ EETowDisplay::~EETowDisplay()
 
 
 void
-EETowDisplay::initGeometry(const char *topName)
+EEmcTTDisplay::initGeometry(const char *topName)
 {
   char rotName[256];
   if(mEEmc!=NULL) return; // already initialized;
@@ -101,7 +101,7 @@ EETowDisplay::initGeometry(const char *topName)
 
 
 void
-EETowDisplay::DrawHits()
+EEmcTTDisplay::DrawHits()
 {
   TIter nextTower(mTowerHits);
   TIter nextTrack(mTrackHits);
@@ -123,7 +123,7 @@ EETowDisplay::DrawHits()
 
 
 void
-EETowDisplay::Clear(const Option_t*)
+EEmcTTDisplay::Clear(const Option_t*)
 {
   TIter nextTower(mTowerHits);
   TGeoNode *gnode;
@@ -141,7 +141,7 @@ EETowDisplay::Clear(const Option_t*)
 
 
 Bool_t
-EETowDisplay::towerHit(const char *vname)
+EEmcTTDisplay::towerHit(const char *vname)
 {
   const int kSecLen=2;
   const int kSubLen=4;
@@ -166,14 +166,14 @@ EETowDisplay::towerHit(const char *vname)
 }
 
 Bool_t       
-EETowDisplay::towerHit(const EEmcTower& tower)
+EEmcTTDisplay::towerHit(const EEmcTower& tower)
 {
   return towerHit(volumeName(tower.sec,tower.sub,tower.eta));
 }
 
 
 Bool_t       
-EETowDisplay::trackHit(Double_t x, Double_t y, Double_t z, Double_t px, Double_t py, Double_t pz, Double_t qB)
+EEmcTTDisplay::trackHit(Double_t x, Double_t y, Double_t z, Double_t px, Double_t py, Double_t pz, Double_t qB)
 {
   THelix *helix = new THelix(x,y,z,px,py,pz,qB);
   helix->SetRange(z,mZ2);
@@ -182,7 +182,7 @@ EETowDisplay::trackHit(Double_t x, Double_t y, Double_t z, Double_t px, Double_t
 }
 
 Bool_t       
-EETowDisplay::trackHit(const StMuTrack& track)
+EEmcTTDisplay::trackHit(const StMuTrack& track)
 {
   const double Bfield = 0.5*tesla;
   const double cLight = 3e10*centimeter/second;
@@ -200,7 +200,7 @@ EETowDisplay::trackHit(const StMuTrack& track)
 
 
 void         
-EETowDisplay::Out(ostream &out, const StMuTrack& track, const EEmcTower &tower)
+EEmcTTDisplay::Out(ostream &out, const StMuTrack& track, const EEmcTower &tower)
 {
   ::Out(out,tower);
   ::Out(out,track);
@@ -212,7 +212,7 @@ EETowDisplay::Out(ostream &out, const StMuTrack& track, const EEmcTower &tower)
 // sub [0,mNumSSec)
 // eta [0,mNumEta)
 char *
-EETowDisplay::volumeName (int sec, int sub, int eta)
+EEmcTTDisplay::volumeName (int sec, int sub, int eta)
 {
   const  int  vnameLen=1024;
   static char vname[vnameLen];
@@ -235,6 +235,9 @@ EETowDisplay::volumeName (int sec, int sub, int eta)
 
 
 // $Log: EEmcTTDisplay.cxx,v $
+// Revision 1.3  2004/01/26 21:51:53  zolnie
+// shorter names
+//
 // Revision 1.2  2004/01/26 21:08:31  zolnie
 // working track/tower display (before big farewell cleanup)
 //

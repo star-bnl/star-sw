@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.6 2004/01/26 21:08:32 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.7 2004/01/26 21:51:54 zolnie Exp $
 // doxygen info here
 /** 
     \mainpage TTM - an endcap Tower to Track Match maker
@@ -64,7 +64,7 @@
 #include "TTree.h"
 #include "TH1F.h"
 
-#include "EETowTrackMatchMaker.h"
+#include "EEmcTTMMaker.h"
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -99,14 +99,14 @@ using std::ostream;
 #endif
 
 
-ClassImp(EETowTrackMatchMaker);
+ClassImp(EEmcTTMMaker);
 
 ClassImp(EEmcTower);
 
 
-const Int_t    EETowTrackMatchMaker::kDefMinTrackHits   =  5; 
-const Double_t EETowTrackMatchMaker::kDefMinTrackLength = 20.0;
-const Double_t EETowTrackMatchMaker::kDefMinTrackPt     =  0.5;
+const Int_t    EEmcTTMMaker::kDefMinTrackHits   =  5; 
+const Double_t EEmcTTMMaker::kDefMinTrackLength = 20.0;
+const Double_t EEmcTTMMaker::kDefMinTrackPt     =  0.5;
 
 
 
@@ -115,7 +115,7 @@ const Double_t EETowTrackMatchMaker::kDefMinTrackPt     =  0.5;
 /// \param self     this maker name (const char*)
 /// \param mumaker a pointer to a StMuDstMaker 
 /// \param dbmaker a pointer to a StEEmcDbMaker 
-EETowTrackMatchMaker::EETowTrackMatchMaker(
+EEmcTTMMaker::EEmcTTMMaker(
 					   const char* self      , // this maker name
 					   StMuDstMaker  *mumaker,
 					   StEEmcDbMaker *dbmaker
@@ -123,14 +123,14 @@ EETowTrackMatchMaker::EETowTrackMatchMaker(
   : StMaker(self),mMuDstMaker(mumaker),mEEmcDb(dbmaker) {
 
   if( mMuDstMaker == NULL )  
-    Fatal("EETowTrackMatchMaker","invalid StMuDstMaker");
+    Fatal("EEmcTTMMaker","invalid StMuDstMaker");
   
   if( mEEmcDb == NULL ) 
-    Fatal("EETowTrackMatchMaker","invalid StEEmcDbMaker");
+    Fatal("EEmcTTMMaker","invalid StEEmcDbMaker");
   
   // simple EEMC geometry description
   if( (mGeom = new EEmcGeomSimple()) == NULL) 
-    Fatal("EETowTrackMatchMaker","cannot create EEmcGeomSimple class");
+    Fatal("EEmcTTMMaker","cannot create EEmcGeomSimple class");
 
   //mDebugLevel   = kWarning;
 
@@ -171,7 +171,7 @@ EETowTrackMatchMaker::EETowTrackMatchMaker(
 
 //_____________________________________________________________________________
 /// destructor - cleanup
-EETowTrackMatchMaker::~EETowTrackMatchMaker(){
+EEmcTTMMaker::~EEmcTTMMaker(){
   if( mTree  !=NULL ) delete mTree;
   if( mFile  !=NULL ) delete mFile;
   if( mMatch !=NULL ) delete mMatch;
@@ -186,7 +186,7 @@ EETowTrackMatchMaker::~EETowTrackMatchMaker(){
 //_____________________________________________________________________________
 /// Init()
 Int_t 
-EETowTrackMatchMaker::Init(){
+EEmcTTMMaker::Init(){
 
   ResetStats();
 
@@ -262,7 +262,7 @@ EETowTrackMatchMaker::Init(){
 //_____________________________________________________________________________
 /// Make()
 Int_t 
-EETowTrackMatchMaker::Make(){
+EEmcTTMMaker::Make(){
   mNEvents++;
   //
   mMatchMap->Clear();
@@ -439,7 +439,7 @@ EETowTrackMatchMaker::Make(){
 //_____________________________________________________________________________
 /// clear maker (does nothing at the moment)
 void
-EETowTrackMatchMaker::Clear(Option_t *option ) {
+EEmcTTMMaker::Clear(Option_t *option ) {
   //TString opt = option;
   //opt.ToLower();
   //if(opt.Contains("A")) { doSth() }  elseif (opt.Contains("B")) { doSthElse() };
@@ -449,7 +449,7 @@ EETowTrackMatchMaker::Clear(Option_t *option ) {
 //_____________________________________________________________________________
 /// finish the job, write TTree 
 Int_t 
-EETowTrackMatchMaker::Finish () {
+EEmcTTMMaker::Finish () {
   if(mFile)      mFile->Write();
   return kStOK;
 }
@@ -459,7 +459,7 @@ EETowTrackMatchMaker::Finish () {
 //! default criterion of track acceptance
 //! \param track a pointer to a current StMuTrack
 Bool_t 
-EETowTrackMatchMaker::AcceptTrack(const StMuTrack *track) {
+EEmcTTMMaker::AcceptTrack(const StMuTrack *track) {
   if(! track->topologyMap().trackTpcOnly()  ) return kFALSE;
   if(  track->type()     != 1               ) return kFALSE;
   if(  track->flag()     <= 0               ) return kFALSE;
@@ -477,7 +477,7 @@ EETowTrackMatchMaker::AcceptTrack(const StMuTrack *track) {
 /// \param etahw a tower half-width in eta
 /// \return Bool_t 
 Bool_t 
-EETowTrackMatchMaker::MatchTrack(
+EEmcTTMMaker::MatchTrack(
 				 const double dphi , // track hit to tower center distance
 				 const double deta,  
 				 const double phihw, // tower half-widths
@@ -497,7 +497,7 @@ EETowTrackMatchMaker::MatchTrack(
 /// \param r     a TVector (returned)
 /// \return boolean indicating if track crosses a plane
 Bool_t
-EETowTrackMatchMaker::ExtrapolateToZ(const StMuTrack *track, const double   z, TVector3 &r)
+EEmcTTMMaker::ExtrapolateToZ(const StMuTrack *track, const double   z, TVector3 &r)
 {
   const double kMinDipAngle   = 1.0e-13;
   //const float kMinCurvature =  1e+00;
@@ -521,9 +521,9 @@ EETowTrackMatchMaker::ExtrapolateToZ(const StMuTrack *track, const double   z, T
 /// \param out an ostream to print to 
 /// \return ostream 
 ostream& 
-EETowTrackMatchMaker::Summary(ostream &out ) const
+EEmcTTMMaker::Summary(ostream &out ) const
 {
-  out << "<EETowTrackMatchMaker:Summary>\n";
+  out << "<EEmcTTMMaker:Summary>\n";
   out << " <Maker Name=\"" << GetName() << "\" />\n";
 
   out.setf(ios_base::fixed,ios_base::floatfield);
@@ -553,7 +553,7 @@ EETowTrackMatchMaker::Summary(ostream &out ) const
     out << "     # of matched tracks/event " << float(mNMatched)/mNEvents << "\n";
     out << " </Statistics>\n";
   }
-  out << "</EETowTrackMatchMaker:Summary>\n";
+  out << "</EEmcTTMMaker:Summary>\n";
   out.setf(ios_base::fmtflags(0),ios_base::floatfield);
   return out;
 }
@@ -597,20 +597,23 @@ Out(ostream &out , const EEmcTower &t)
 
 // ======================================================================================================
 
-ostream&  operator<<(ostream &out, const EETowTrackMatchMaker& ttm)  { 
+ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm)  { 
   return ttm.Summary(out); 
 };
 
-ostream&  operator<<(ostream &out, const EEmcTower&           t  )  {
+ostream&  operator<<(ostream &out, const EEmcTower    &t  )  {
   return t.Out(out);
 }
 
-ostream&  operator<<(ostream &out, const StMuTrack&           t  )  {
+ostream&  operator<<(ostream &out, const StMuTrack    &t  )  {
   return Out(out,t);
 }
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.7  2004/01/26 21:51:54  zolnie
+// shorter names
+//
 // Revision 1.6  2004/01/26 21:08:32  zolnie
 // working track/tower display (before big farewell cleanup)
 //

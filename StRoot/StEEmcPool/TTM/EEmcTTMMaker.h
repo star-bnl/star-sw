@@ -1,11 +1,11 @@
 // Hey Emacs this is -*-c++-*-
-#ifndef STAR_EETowTrackMatchMaker
-#define STAR_EETowTrackMatchMaker
-// $Id: EEmcTTMMaker.h,v 1.6 2004/01/26 21:08:32 zolnie Exp $
+#ifndef STAR_EEmcTTMMaker
+#define STAR_EEmcTTMMaker
+// $Id: EEmcTTMMaker.h,v 1.7 2004/01/26 21:51:54 zolnie Exp $
 
 /*!
  *                                                                     
- * \class  EETowTrackMatchMaker
+ * \class  EEmcTTMMaker
  * \author Piotr A. Zolnierczuk
  * \date   2003/12/08
  *
@@ -70,7 +70,7 @@ public:
   ClassDef(EEmcTower, 1)   // 
 };
 
-class EETowTrackMatchMaker : public StMaker {
+class EEmcTTMMaker : public StMaker {
 public: 
 
   /// default values for the cuts
@@ -81,7 +81,7 @@ public:
   static const Double_t kDefMinTrackPt     ;  
 
 
-  /// structure to hold the results from EETowTrackMatchMaker
+  /// structure to hold the results from EEmcTTMMaker
   struct NTupleTTM_t {
     Int_t    numtracks;                      /**<- number of tracks */
     Int_t    sector  [kNTupleTTM_MaxTracks]; /**<- sector */
@@ -115,11 +115,11 @@ public:
   /// \param self     this maker name (const char*)
   /// \param mumaker a pointer to a StMuDstMaker 
   /// \param dbmaker a pointer to a StEEmcDbMaker 
-  EETowTrackMatchMaker(const char          *self    = "EETowTrackMatchMaker", 
+  EEmcTTMMaker(const char          *self    = "EEmcTTMMaker", 
 		       class StMuDstMaker  *mumaker =  NULL,
 		       class StEEmcDbMaker *dbmaker =  NULL);
 
-  virtual       ~EETowTrackMatchMaker();
+  virtual       ~EEmcTTMMaker();
 
   // MAKER STUFF 
   virtual Int_t  Init();   
@@ -219,23 +219,26 @@ public:
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.6 2004/01/26 21:08:32 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.7 2004/01/26 21:51:54 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
-  ClassDef(EETowTrackMatchMaker, 1)   // 
+  ClassDef(EEmcTTMMaker, 1)   // 
 };
 
 /// for nice printing
 ostream&  Out(ostream &out , const StMuTrack &t);
 ostream&  Out(ostream &out , const EEmcTower &t);
-ostream&  operator<<(ostream &out, const EETowTrackMatchMaker& ttm); 
-ostream&  operator<<(ostream &out, const EEmcTower&            t  );
-ostream&  operator<<(ostream &out, const StMuTrack&            t  );  
+ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm); 
+ostream&  operator<<(ostream &out, const EEmcTower    &t  );
+ostream&  operator<<(ostream &out, const StMuTrack    &t  );  
 #endif
 
 
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.7  2004/01/26 21:51:54  zolnie
+// shorter names
+//
 // Revision 1.6  2004/01/26 21:08:32  zolnie
 // working track/tower display (before big farewell cleanup)
 //
