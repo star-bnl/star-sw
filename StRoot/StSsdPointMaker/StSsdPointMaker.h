@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.5 2005/03/22 13:48:57 lmartin Exp $
+// $Id: StSsdPointMaker.h,v 1.6 2005/03/23 16:07:26 lmartin Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.6  2005/03/23 16:07:26  lmartin
+// PrintClusterSummary and PrintPointSummary methods added
+//
 // Revision 1.5  2005/03/22 13:48:57  lmartin
 // PrintStripSummary method added
 //
@@ -88,6 +91,8 @@ class StSsdPointMaker : public StMaker {
   void writeScmCtrlHistograms();       //!
   void debugUnPeu(StSsdBarrel *mySsd); 
   void PrintStripSummary(StSsdBarrel *mySsd); //!
+  void PrintClusterSummary(StSsdBarrel *mySsd); //!
+  void PrintPointSummary(StSsdBarrel *mySsd); //!
  protected:
 
   StEvent                *mCurrentEvent;   //!
@@ -119,7 +124,7 @@ class StSsdPointMaker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.5 2005/03/22 13:48:57 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.6 2005/03/23 16:07:26 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };
