@@ -9,12 +9,12 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.28 2000/01/20 19:43:06 fisyak Exp $
+# $Id: cons,v 1.29 2000/01/21 16:11:33 fisyak Exp $
 
 $ver_num = 1.7;
 $ver_rev = "";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.28 2000/01/20 19:43:06 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.29 2000/01/21 16:11:33 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -69,17 +69,17 @@ $| = 1;
 srand(time . $$); # this works better than time ^ $$ in perlfunc manpage.
 
 $usage = q(
-Usage: cons <arguments> -- <construct-args>
+Usage: cons [arguments] -- [construct-args]
 
 Arguments can be any of the following, in any order:
 
-  <targets>	Build the specified targets. If <target> is a directory
+  [targets]	Build the specified targets. If [target] is a directory
 		recursively build everything within that directory.
 
-  +<pattern>	Limit the cons scripts considered to just those that
-		match <pattern>. Multiple + arguments are accepted.
+  +[pattern]	Limit the cons scripts considered to just those that
+		match [pattern]. Multiple + arguments are accepted.
 
-  <name>=<val>	Sets <name> to value <val> in the ARG hash passed to the
+  [name]=[val]	Sets [name] to value [val] in the ARG hash passed to the
 		top-level Construct file.
 
   -cc           Show command that would have been executed, when
@@ -103,14 +103,14 @@ Arguments can be any of the following, in any order:
 
   -g            Enable Construct/Conscript debug print out
 
-  -f <file>	Use the specified file instead of "Construct" (but first
-		change to containing directory of <file>).
+  -f [file]	Use the specified file instead of "Construct" (but first
+		change to containing directory of [file]).
 
   -i            Don\'t force to search for include file in default include directory
   -lh           Show a help message local to the current build if
 		one such is defined,  and exit.
 
-  -o <file>	Read override file <file>.
+  -o [file]	Read override file [file].
 
   -k		Keep going as far as possible after errors.
 
@@ -120,11 +120,11 @@ Arguments can be any of the following, in any order:
 
   -q		Be quiet about Installing and Removing targets.
 
-  -wf <file>    Write all filenames considered into <file>.
+  -wf [file]    Write all filenames considered into [file].
 
-  -r		Remove construction products associated with <targets>
+  -r		Remove construction products associated with [targets]
 
-  -R <repos>	Search for files in <repos>.  Multiple -R <repos>
+  -R [repos]	Search for files in [repos].  Multiple -R [repos]
 		directories are searched in the order specified.
 
   -noR 	        Do not search for files in repositories.
