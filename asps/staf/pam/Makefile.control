@@ -13,11 +13,14 @@ PAMS := pam
 #
 # Choose flags controlling make.
 DEBUG := TRUE
-#SHARE := TRUE
+IRIX := IRIX
+ifneq ($(IRIX),$(shell uname))
+SHARE := FALSE
+endif
 #MOTIF := TRUE
 #
 # Specify which CERN libraries against which to link.
-#CERNLIBS := pawlib graflib grafX11 packlib mathlib kernlib
+##CERNLIBS := pawlib graflib grafX11 packlib mathlib kernlib
 #
 # Specify binaries to install.
 #INSTALL_BIN_FILES :=

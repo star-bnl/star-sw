@@ -593,6 +593,7 @@ int dioSockStream:: openServer() {
 
 /* signal(SIGCHLD, reaper);// eliminate zombies */
    signal_reaper();
+   return 1;		//INS++: RETURN_INCONSISTENT - BUGFIX?
 }
 
 //----------------------------------

@@ -292,8 +292,10 @@ STAFCV_T tdm_type_load(char * fname)
    }
    printf("\n---\n%s\n---\n",spec); fflush(0);
 
-   if( !tdm->newTable("tdm_temporary",spec,1)
-   ||  !tdm->deleteTable("tdm_temporary")
+     if( !tdm->newTable("tdm_temporary",spec,1)
+     ||  !tdm->deleteTable("tdm_temporary")
+// DS_DATASET_T *T=NULL; HACK ???????????????????????????????
+// if( !dsNewTable(&T,"t__tmp" HACK ?????????????????????????
    ){
       EML_FAILURE(KAM_METHOD_FAILURE);
    }
@@ -658,7 +660,7 @@ STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
 	    lv = 0;
 	    for( iv=0;iv<nv;iv++ ){ lv += strlen(values[iv]); }
 	    value = (char*)MALLOC(lv +1);
-	    strncpy(value,values[0],strlen(value));
+	    strncpy(value,values[0],lv + 1); //4aug97 - BUGFIX
 	    for( iv=1;iv<nv;iv++ ){ strcat(value,values[iv]); }
 	    value[strlen(value)] = 0;
 	    strncpy(cellData.data.c,value,col.size);

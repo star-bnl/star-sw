@@ -77,6 +77,7 @@ unsigned char amiInvoker :: implementsInterface (const char * iface) {
    return FALSE;
 }
 
+//----------------------------------
 STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
 
    STAFCV_T status;
@@ -187,6 +188,7 @@ unsigned char amiBroker :: implementsInterface (const char * iface) {
    return FALSE;
 }
 
+//----------------------------------
 STAFCV_T amiBroker:: callInvoker (const char * name
 		, const STRING_SEQ_T& tnames) {
 
@@ -257,7 +259,7 @@ STAFCV_T amiBroker:: deleteInvoker (const char * name ) {
    EML_SUCCESS(STAFCV_OK);
 }
 
-//----------------------------------
+//----------------------------------//INS++:PARSER_WARNING
 amiInvoker * amiBroker:: findInvoker (const char * name) {
    amiInvoker*& invoker=NULL;
    socObject* obj;

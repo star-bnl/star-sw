@@ -9,6 +9,10 @@
 
 #include "tdmLib.h"
 
+extern "C" int tdm_init();
+extern "C" int tdm_start();
+extern "C" int tdm_stop();
+
 tdmFactory *tdm;
 
 //:>--------------------------------------------------------------------

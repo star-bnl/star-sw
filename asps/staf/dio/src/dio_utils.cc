@@ -264,14 +264,14 @@ int dio_clearDataset(DS_DATASET_T *pDS)
    ||  !(isDataset || isTable)
    ){
       EML_WARNING("corrupt DS_DATASET_T pointer");
-      return FALSE;
+      return (int)FALSE;	/*INS++:RETURN_INCONSISTENT-BUGFIX?*/
    }
 
 /* Handle datasets recursively. */
    if(isDataset){
       if( !dsDatasetEntryCount(&count,pDS) ){
 	 EML_WARNING("error clearing dataset");
-	 return FALSE;
+	 return (int)FALSE;
       }
       for( i=0;i<count;i++ ){
 	 pEntry = NULL;
@@ -279,7 +279,7 @@ int dio_clearDataset(DS_DATASET_T *pDS)
 	 ||  !dio_clearDataset(pEntry)
 	 ){
 	    EML_WARNING("error clearing entry");
-	    return FALSE;
+	    return (int)FALSE;
 	 }
       }
    }
@@ -287,7 +287,7 @@ int dio_clearDataset(DS_DATASET_T *pDS)
    else if(isTable){
       if( !dsSetTableRowCount(pDS,0) ){
 	 EML_WARNING("error clearing table");
-	 return FALSE;
+	 return (int)FALSE;
       }
    }
 }

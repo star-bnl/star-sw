@@ -4,6 +4,7 @@
 //:DESCRIPTION:	Dataset Unix-like Interface Orbix-objects
 //:AUTHOR:	cet - Craig E. Tull, cetull@lbl.gov
 //:BUGS:	-- STILL IN DEVELOPMENT --
+//:HISTORY:	16jul97-v005a-cet- out args => return values
 //:HISTORY:	02feb97-v004b-cet- rename file
 //:HISTORY:	08dec95-v004a-cet- move cwd & root from tdm to dui,
 //					change base class to socObject
@@ -20,23 +21,17 @@ interface duiFactoryI : tdmFactoryI {
 
 //:----------------------------------------------- ATTRIBUTES         --
 attribute string cwd;
-readonly attribute tdmDatasetI cwdDO;
-readonly attribute tdmDatasetI rootDO;
 
 //:----------------------------------------------- FUNCTIONS          --
 STAFCV_T cd(in string dirPath);
 STAFCV_T cp(in string fromPath, in string toPath);
-STAFCV_T ls(in string path, out string result);
+string ls(in string path);
+STAFCV_T ln(in string origPath, in string lnkdPath);
 STAFCV_T mkdir(in string dirPath);
-STAFCV_T mkTable(in string filePath, in string spec, in long rows);
 STAFCV_T mv(in string fromPath, in string toPath);
-STAFCV_T pwd(out string result);
+string pwd();
 STAFCV_T rm(in string filePath);
 STAFCV_T rmdir(in string dirPath);
 
-//STAFCV_T cvtRelAbs(in string relPath,out string absPath);
-
-//STAFCV_T findDatasetPath(in string dirPath, out tdmDatasetI dataset);
-//STAFCV_T findTablePath(in string filePath, out tdmTableI table);
 };
 

@@ -43,10 +43,10 @@ public:
 // Unix-Like commands
    virtual STAFCV_T cd (const char * dirPath);
    virtual STAFCV_T cp (const char * fromPath, const char * toPath);
-   virtual STAFCV_T ls (const char * path, char *& result);
+   virtual char * ls (const char * path);
    virtual STAFCV_T mkdir (const char * dirPath);
    virtual STAFCV_T mv (const char * fromPath, const char * toPath);
-   virtual STAFCV_T pwd (char *& result);
+   virtual char * pwd ();
    virtual STAFCV_T rm (const char * filePath);
    virtual STAFCV_T rmdir (const char * dirPath);
 
