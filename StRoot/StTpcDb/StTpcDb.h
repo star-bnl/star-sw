@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.14 2000/02/10 00:29:09 hardtke Exp $
+ * $Id: StTpcDb.h,v 1.15 2000/03/27 21:21:22 fine Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.15  2000/03/27 21:21:22  fine
+ * Adjusted to ROOT 2.24
+ *
  * Revision 1.14  2000/02/10 00:29:09  hardtke
  * Add tpg functions to StTpcDbMaker, fix a few bugs
  *
@@ -68,8 +71,8 @@
 #include "StRTpcGain.h"
 #include "StRTpcT0.h"
 #include "StRTpcSlowControlSim.h"
+#include "St_DataSet.h"
 class StMaker;
-class St_Table;
 class St_tpcDriftVelocity;
 //class StTpcCoordinateTransform;
 
