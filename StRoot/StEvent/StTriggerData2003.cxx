@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.cxx,v 2.7 2004/06/30 00:12:09 ullrich Exp $
+ * $Id: StTriggerData2003.cxx,v 2.8 2004/07/20 18:02:26 jeromel Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.cxx,v $
+ * Revision 2.8  2004/07/20 18:02:26  jeromel
+ * Updates from Akio to fix CTB issues.
+ *
  * Revision 2.7  2004/06/30 00:12:09  ullrich
  * Added ZDC info to dump().
  *
@@ -185,6 +188,11 @@ unsigned int StTriggerData2003::spinBitBlueUnpol() const
   return (sb/128)%2;
 }
 
+unsigned short  StTriggerData2003::ctbRaw(int address, int prepost) const
+{
+  return mData->rawTriggerDet[prepostAddress(prepost)].CTB[address];
+}
+
 unsigned short  StTriggerData2003::ctb(int pmt, int prepost) const
 {
     static const unsigned char ctbMap[240] = {
@@ -214,6 +222,36 @@ unsigned short  StTriggerData2003::ctb(int pmt, int prepost) const
 	237, 236, 235, 234, 233, 253, 252, 251, 250, 249,
     } ;
     return mData->rawTriggerDet[prepostAddress(prepost)].CTB[ctbMap[pmt]];
+}
+
+unsigned short StTriggerData2003::ctbTraySlat(int tray, int slat, int prepost) const{
+  static const unsigned char ctbMap[2][120] = {
+    { 109, 108, 107, 106, 105,   7,   6,   5,   4,   3,
+      2,   1,   0,  15,  14,  13,  12,  11,  10,   9,
+      39,  38,  37,  36,  35,  34,  33,  32,  47,  46,
+      45,  44,  43,  42,  41,  71,  70,  69,  68,  67,
+      66,  65,  64,  79,  78,  77,  76,  75,  74,  73,
+      103, 102, 101, 100,  99,  98,  97,  96, 111, 110,
+      141, 140, 139, 138, 137, 167, 166, 165, 164, 163,
+      162, 161, 160, 175, 174, 173, 172, 171, 170, 169,
+      199, 198, 197, 196, 195, 194, 193, 192, 207, 206,
+      205, 204, 203, 202, 201, 231, 230, 229, 228, 227,
+      226, 225, 224, 239, 238, 237, 236, 235, 234, 233,
+      135, 134, 133, 132, 131, 130, 129, 128, 143, 142},
+    { 125, 124, 123, 122, 121,  23,  22,  21,  20,  19,
+      18,  17,  16,  31,  30,  29,  28,  27,  26,  25,
+      55,  54,  53,  52,  51,  50,  49,  48,  63,  62,
+      61,  60,  59,  58,  57,  87,  86,  85,  84,  83,
+      82,  81,  80,  95,  94,  93,  92,  91,  90,  89,
+      119, 118, 117, 116, 115, 114, 113, 112, 127, 126,
+      157, 156, 155, 154, 153, 183, 182, 181, 180, 179,
+      178, 177, 176, 191, 190, 189, 188, 187, 186, 185,
+      215, 214, 213, 212, 211, 210, 209, 208, 223, 222,
+      221, 220, 219, 218, 217, 247, 246, 245, 244, 243,
+      242, 241, 240, 255, 254, 253, 252, 251, 250, 249,
+      151, 150, 149, 148, 147, 146, 145, 144, 159, 158}
+  };
+  return mData->rawTriggerDet[prepostAddress(prepost)].CTB[ctbMap[slat][tray]];
 }
 
 unsigned short StTriggerData2003::mwc(int pmt, int prepost) const
