@@ -1,15 +1,16 @@
 /****************************************************************
- * $Id: StRichSinglePixel.h,v 1.2 2000/02/29 18:26:17 lasiuk Exp $
+ * $Id: StRichSinglePixel.h,v 1.3 2000/04/05 16:05:34 lasiuk Exp $
  *
  * Description:
  *  Definition of a single pixel object
+ * *** typdef at end of file
  *
  *
  ****************************************************************
  *
  * $Log: StRichSinglePixel.h,v $
- * Revision 1.2  2000/02/29 18:26:17  lasiuk
- * unsigned long in cluster number changed to int
+ * Revision 1.3  2000/04/05 16:05:34  lasiuk
+ * add operator==
  *
  * Revision 1.3  2000/04/05 16:05:34  lasiuk
  * add operator==
@@ -18,10 +19,16 @@
  * unsigned long in cluster number changed to int
  *
  * Revision 1.1  2000/02/29 18:14:10  lasiuk
-#ifndef ST_RICH_SINGLEPIXEL_H
-#define ST_RICH_SINGLEPIXEL_H
+ * Initial Revision
+ *
  ****************************************************************/
 #ifndef ST_RICH_SINGLE_PIXEL_H
+#define ST_RICH_SINGLE_PIXEL_H
+
+#include <iostream.h>
+#include <stack>
+
+#ifndef ST_NO_NAMESPACES
 using namespace std::stack;
 #endif
 
@@ -34,6 +41,8 @@ public:
 
     virtual ~StRichSinglePixel();
     
+    //StRichSinglePixel(const StRichSinglePixel&) {/*use default*/}
+    //StRichSinglePixel& operator=(const StRichSinglePixel&) {/*use default*/|
 
     bool operator==(const StRichSinglePixel&) const;
     
@@ -51,7 +60,7 @@ public:
 
     // FLAG OPERATIONS
     bool isSet(StRichSinglePixelFlag f)      const;
-private:
+    void setBit(StRichSinglePixelFlag f);
     void unSetBit(StRichSinglePixelFlag f);    
 
     double        mAmplitude;
@@ -66,13 +75,26 @@ inline int StRichSinglePixel::row() const { return mRow; }
 inline float StRichSinglePixel::charge() const { return mCharge; }
 inline void StRichSinglePixel::setAmplitude(double amp) { mAmplitude = amp; }
 inline void StRichSinglePixel::setPad(int p) { mPad = p; }
+inline void StRichSinglePixel::setRow(int r) { mRow = r; } 
+inline void StRichSinglePixel::setCharge(float q) { mCharge = q; }
+    return (mPad==pix.pad() && mRow==pix.row() && mAmplitude==pix.amplitude());
+inline bool StRichSinglePixel::operator==(const StRichSinglePixel& pix) const
+{
     return (mPad==pix.pad() && mRow==pix.row() && mCharge==pix.charge());
 }
-inline void StRichSinglePixel::unSetBit(StRichSinglePixelFlag b) { mFlags &= ~(1<<b);}
+
 
 inline void StRichSinglePixel::setBit(StRichSinglePixelFlag b) { mFlags |= b; }
 inline void StRichSinglePixel::unSetBit(StRichSinglePixelFlag b) { mFlags &= ~(b);}
 inline bool StRichSinglePixel::isSet(StRichSinglePixelFlag b) const { return (mFlags & b); }
+
+// Non-member
+ostream& operator<<(ostream& os, const StRichSinglePixel& pix);
+
+// typedef
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+typedef stack<StRichSinglePixel*> PixelStack;
+#else
 typedef stack<StRichSinglePixel*, allocator<StRichSinglePixel*> > PixelStack;
 #endif
 
