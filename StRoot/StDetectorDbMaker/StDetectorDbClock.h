@@ -11,6 +11,7 @@ public:
     static StDetectorDbClock*  instance();
     unsigned int               getRunNumber();
     unsigned int               getNumRows();
+    double                     getCurrentFrequency();
     double                     getFrequency(unsigned int time = 0);
     bool                       getStatus(unsigned int time);
     friend ostream& operator<<(ostream& os, StDetectorDbClock& v);
@@ -28,6 +29,7 @@ protected:
     starClockOnl_st * mStarClockOnl; // points to clock struct
     TTable* mTable; // points to table, need to re-intilize mStarClockOnl every event
     unsigned int mNumRows;
+    StMaker * mMaker; // Holds pointer to maker
 private:
     static StDetectorDbClock* sInstance;
 };
