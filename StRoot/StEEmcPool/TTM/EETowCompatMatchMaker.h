@@ -1,4 +1,4 @@
-// $Id: EETowCompatMatchMaker.h,v 1.2 2003/12/30 15:10:56 zolnie Exp $
+// $Id: EETowCompatMatchMaker.h,v 1.3 2004/01/06 17:45:10 zolnie Exp $
 
 #ifndef STAR_EETowCompatMatchMaker
 #define STAR_EETowCompatMatchMaker
@@ -8,7 +8,7 @@
  * \class  EETowCompatMatchMaker
  * \author Piotr A. Zolnierczuk
  * \date   2003/12/08
- * \brief  EEMC tower calibration using TPC tracks
+ * \brief  EEMC tower calibration using TPC tracks (basically translation of zniwo)
  *
  * This a MuDST based class to get tower calibration from matching TPC tracks
  *
@@ -85,7 +85,7 @@ class EETowCompatMatchMaker : public StMaker {
  public: 
   enum ADCMode_t { kRawAdc, kPedSub, kPedAndGain };
 
-  EETowCompatMatchMaker(const char          *self      ="MuEmcTowerCalib", 
+  EETowCompatMatchMaker(const char   *self      ="EETowCompatMatchMaker",
 		       StMuDstMaker  *mumaker = NULL,
 		       StEEmcDbMaker *dbmaker = NULL);
   virtual       ~EETowCompatMatchMaker();
@@ -151,7 +151,7 @@ class EETowCompatMatchMaker : public StMaker {
   //  StMaker jumbo mumbo
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: EETowCompatMatchMaker.h,v 1.2 2003/12/30 15:10:56 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: EETowCompatMatchMaker.h,v 1.3 2004/01/06 17:45:10 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -163,6 +163,9 @@ class EETowCompatMatchMaker : public StMaker {
 
 
 // $Log: EETowCompatMatchMaker.h,v $
+// Revision 1.3  2004/01/06 17:45:10  zolnie
+// close to release
+//
 // Revision 1.2  2003/12/30 15:10:56  zolnie
 // working version
 //

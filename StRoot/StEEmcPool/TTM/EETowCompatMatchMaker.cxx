@@ -1,5 +1,5 @@
 // *-- Author : Piotr A. Zolnierczuk
-// $Id: EETowCompatMatchMaker.cxx,v 1.3 2003/12/30 15:10:55 zolnie Exp $
+// $Id: EETowCompatMatchMaker.cxx,v 1.4 2004/01/06 17:45:09 zolnie Exp $
 
 #include "TFile.h"
 #include "TTree.h"
@@ -7,12 +7,11 @@
 
 
 #include "EETowCompatMatchMaker.h"
+
 #include "StChain.h"
 #include "St_DataSetIter.h"
 
 #include "StIOMaker/StIOMaker.h"
-
-
 
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh"
@@ -35,10 +34,6 @@
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
 #include "StEEmcDbMaker/StEEmcDbIndexItem1.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
-
-
-#include "EEmcTowerHit.h"
-
 
 
 
@@ -249,7 +244,7 @@ EETowCompatMatchMaker::Make(){
 	TVector3 r,dr1,dr2;
 	if(!matchTrack(track,kEEmcZPRE1+0.1,sec,sub,eta,dr1)) continue;
 	if(!matchTrack(track,kEEmcZPOST-0.1,sec,sub,eta,dr2)) continue;
-	//	cerr << "<!!!MATCHED!!!>"<< endl;
+
 	mNMatch++;
 
 	mMatch->sector[nt]=sec;
@@ -278,6 +273,8 @@ EETowCompatMatchMaker::Make(){
         extrapolateToZ(track,kEEmcZPRE1+0.1,r);
         mMatch->detapres[nt]=r.PseudoRapidity() - tc.PseudoRapidity();
         mMatch->dphipres[nt]=r.Phi()            - tc.Phi();
+
+
 	
 	//
         extrapolateToZ(track,kEEmcZPOST-0.1,r);
@@ -290,6 +287,7 @@ EETowCompatMatchMaker::Make(){
         mMatch->yvert[nt]=dca.y();
         mMatch->zvert[nt]=dca.z();
         //
+
 
 	nt++;  
       }
@@ -413,7 +411,9 @@ EETowCompatMatchMaker::extrapolateToZ(const StMuTrack *track, const double   z, 
  // hit at depth z
   r.SetXYZ(0.0,0.0,0.0);
   StPhysicalHelixD   helix = track->helix();
-  if(helix.dipAngle()<1e-13) return false;
+  if(helix.dipAngle()<1e-13) { 
+    return false;
+  }
   double s  = ( z - helix.origin().z() ) / sin( helix.dipAngle())  ;
   
   StThreeVectorD hit = helix.at(s);
@@ -427,6 +427,9 @@ EETowCompatMatchMaker::extrapolateToZ(const StMuTrack *track, const double   z, 
 
 
 // $Log: EETowCompatMatchMaker.cxx,v $
+// Revision 1.4  2004/01/06 17:45:09  zolnie
+// close to release
+//
 // Revision 1.3  2003/12/30 15:10:55  zolnie
 // working version
 //
