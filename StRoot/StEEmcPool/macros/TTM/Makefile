@@ -7,7 +7,7 @@ CXXFLAGS = -Wall -g -O2 -DDEBUG
 LDFLAGS  = 
 SRCS     = 
 PROGS    = mipcalib
-VPATH    = macros
+VPATH    = macros:StRoot/StEEmcPool/macros/TTM
 # =============================================================================
 # ROOT FLAGS/LIBS
 ROOTCFLAGS    = $(shell root-config --cflags)
