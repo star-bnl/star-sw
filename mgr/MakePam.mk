@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.127 1999/10/18 19:16:49 fisyak Exp $
+# $Id: MakePam.mk,v 1.128 1999/10/20 21:14:05 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.128  1999/10/20 21:14:05  fisyak
+# Remove from the list all directories under examples,doc,local,hold
+#
 # Revision 1.127  1999/10/18 19:16:49  fisyak
 # Remove run examples doc local hold CVS from list of source directories
 #
@@ -277,7 +280,7 @@ FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g)
 SUFFIXES := .c .cc .C .cxx .f .F .g .h .hh .hpp .inc .idl
 sources :=$(strip $(sort $(dir $(foreach s, $(SUFFIXES), $(wildcard $(SRC_DIR)/*$(s) $(SRC_DIR)/*/*$(s) $(SRC_DIR)/*/*/*$(s))))))
 SRC_DIRS:= $(subst /TAIL, ,$(addsuffix TAIL, $(sources)))
-SRC_DIRS :=$(strip $(filter-out $(addprefix $(SRC_DIR)/,run examples doc local hold CVS), $(SRC_DIRS)))
+SRC_DIRS :=$(strip $(filter-out $(addprefix $(SRC_DIR)/,run% examples% doc% local% hold% CVS), $(SRC_DIRS)))
 ifeq (,$(SRC_DIRS))
   all:
 	@echo Nothing to do for package $(PKG), no source files
