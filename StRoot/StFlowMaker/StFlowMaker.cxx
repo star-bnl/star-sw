@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.54 2001/05/23 18:11:14 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.55 2001/06/04 18:57:05 rcwells Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -43,6 +43,8 @@
 #include "StTpcDedxPidAlgorithm.h"
 #include "StuProbabilityPidAlgorithm.h"
 #include "StMessMgr.h"
+#include "StHbtMaker/StHbtMaker.h"
+#include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #define PR(x) cout << "##### FlowMaker: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowMaker)
@@ -174,7 +176,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.54 2001/05/23 18:11:14 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.55 2001/06/04 18:57:05 rcwells Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -437,6 +439,143 @@ void StFlowMaker::FillFlowEvent() {
   (pFlowEvent->ProbPid()) ? pFlowEvent->SetPidsProb() : 
     pFlowEvent->SetPidsDeviant();
 
+}
+
+//----------------------------------------------------------------------
+
+void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
+  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFlowEvent(HbtEvent)" << endm;
+
+  // Delete previous StFlowEvent
+  if (pFlowEvent) delete pFlowEvent;
+  pFlowEvent = NULL;
+  // Instantiate a new StFlowEvent
+  pFlowEvent = new StFlowEvent;
+
+  cout << "Inside FlowMaker::FillFlowEvent(HbtEvent)..." << endl;
+  // Fill flow event
+  // Weight file
+  pFlowEvent->SetPtWgt();
+  pFlowEvent->SetPhiWeight(mPhiWgt);
+  pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
+  pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
+
+  // Event ID and Run ID
+  // ????????
+  // Primary Vertex
+  pFlowEvent->SetVertexPos( hbtEvent->PrimVertPos() );
+  // Triggers
+  pFlowEvent->SetCTB( hbtEvent->CtbMult() );
+  pFlowEvent->SetZDCe( hbtEvent->ZdcAdcEast() );
+  pFlowEvent->SetZDCw( hbtEvent->ZdcAdcWest() );
+  // Get initial multiplicity before TrackCuts
+  UInt_t origMult = hbtEvent->NumberOfTracks();
+  pFlowEvent->SetOrigMult(origMult);
+  PR(origMult);
+  // define functor for pid probability algorithm
+  // Randy removed this
+  //StuProbabilityPidAlgorithm uPid(*pEvent);
+  // Fill track info
+  double nSigma;
+  int goodTracks    = 0;
+  int goodTracksEta = 0;
+  StHbtTrack* pParticle;
+  StHbtTrackIterator pIter;
+  StHbtTrackIterator startLoop = hbtEvent->TrackCollection()->begin();
+  StHbtTrackIterator endLoop   = hbtEvent->TrackCollection()->end();
+  for (pIter=startLoop;pIter!=endLoop;pIter++){
+    pParticle = *pIter;
+    // Instantiate new StFlowTrack
+    StFlowTrack* pFlowTrack = new StFlowTrack;
+    if (!pFlowTrack) return;
+    double px = pParticle->P().x();
+    double py = pParticle->P().y();
+    double phi = atan2(py,px);
+    if (phi<0.0) phi+=twopi;
+    pFlowTrack->SetPhi( phi );
+    pFlowTrack->SetPhiGlobal( phi );
+    double pz = pParticle->P().z();
+    double pTotal = pParticle->P().mag();
+    double eta = 0.5*log( (1.0+pz/pTotal)/(1.0-pz/pTotal) );
+    pFlowTrack->SetEta( eta );
+    pFlowTrack->SetEtaGlobal( eta );
+    pFlowTrack->SetPt( pParticle->Pt() );
+    pFlowTrack->SetPtGlobal( pParticle->Pt() );
+    pFlowTrack->SetCharge( int(pParticle->Charge()) );
+    double dcaXY = pParticle->DCAxy();
+    double dcaZ = pParticle->DCAz();
+    double dca = sqrt( dcaXY*dcaXY + dcaZ*dcaZ );
+    pFlowTrack->SetDca( dca );
+    pFlowTrack->SetDcaGlobal( dca );
+    pFlowTrack->SetChi2( pParticle->ChiSquaredXY() );
+    pFlowTrack->SetFitPts( pParticle->NHits() );
+    pFlowTrack->SetMaxPts( pParticle->NHitsPossible() );
+    // Here are some couts
+    //cout << "HBT--> " << pParticle->NHits() << "    " << pParticle->NHitsPossible() << endl;
+    //cout << "Flow--> " << pFlowTrack->FitPts() << "    " << pFlowTrack->MaxPts() << endl;
+    // PID
+    pFlowTrack->SetPidPiPlus( pParticle->NSigmaPion() );
+    pFlowTrack->SetPidPiMinus( pParticle->NSigmaPion() );
+    pFlowTrack->SetPidProton( pParticle->NSigmaProton() );
+    pFlowTrack->SetPidAntiProton( pParticle->NSigmaProton() );
+    pFlowTrack->SetPidKaonMinus( pParticle->NSigmaKaon() );
+    pFlowTrack->SetPidKaonPlus( pParticle->NSigmaKaon() );
+    pFlowTrack->SetPidDeuteron( 0.0 );
+    pFlowTrack->SetPidAntiDeuteron( 0.0 );
+    pFlowTrack->SetPidElectron( pParticle->NSigmaElectron() );
+    pFlowTrack->SetPidPositron( pParticle->NSigmaElectron() );
+    // dEdx
+    // Randy's temporary change
+    if ( pParticle->NSigmaKaon() > 2.0 ) {
+      if (pParticle->Charge() > 0 ) {
+	pFlowTrack->SetMostLikelihoodPID(14); // proton
+	pFlowTrack->SetMostLikelihoodProb( 0.99 ); // guaranteed
+      }
+      else {
+	pFlowTrack->SetMostLikelihoodPID(15); // anti-proton
+	pFlowTrack->SetMostLikelihoodProb( 0.99 ); // guaranteed
+      }
+    }
+    if ( pParticle->NSigmaPion() > 2.0 ) {
+      if (pParticle->Charge() > 0 ) {
+	pFlowTrack->SetMostLikelihoodPID(11); // kaon
+	pFlowTrack->SetMostLikelihoodProb( 0.99 ); // guaranteed
+      }
+      else {
+	pFlowTrack->SetMostLikelihoodPID(12); // anti-kaon
+	pFlowTrack->SetMostLikelihoodProb( 0.99 ); // guaranteed
+      }
+    }
+    if ( pParticle->NSigmaPion() < -2.0 ) {
+      if (pParticle->Charge() < 0 ) {
+	pFlowTrack->SetMostLikelihoodPID(3); // electron
+	pFlowTrack->SetMostLikelihoodProb( 0.99 ); // guaranteed
+      }
+      else {
+	pFlowTrack->SetMostLikelihoodPID(2); // positron
+	pFlowTrack->SetMostLikelihoodProb( 0.99 ); // guaranteed
+      }
+    }
+    pFlowTrack->SetExtrapTag(0); // none are in the PID merging area
+    pFlowEvent->TrackCollection()->push_back(pFlowTrack);
+    goodTracks++;
+  }
+
+  // Check Eta Symmetry
+  // rcwells took this out
+  /*
+  if (!StFlowCutEvent::CheckEtaSymmetry(pEvent)) {
+    delete pFlowEvent;             //  delete this event
+    pFlowEvent = NULL;
+    return;
+  }
+  */
+  pFlowEvent->SetMultEta(goodTracksEta);
+  pFlowEvent->SetCentrality(goodTracksEta);
+  pFlowEvent->TrackCollection()->random_shuffle();
+  pFlowEvent->SetSelections();
+  pFlowEvent->MakeSubEvents();
+  //pFlowEvent->SetPidsProb();
 }
 
 //----------------------------------------------------------------------
@@ -924,6 +1063,9 @@ Int_t StFlowMaker::InitPicoEventRead() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.55  2001/06/04 18:57:05  rcwells
+// Adding filling from HbtEvents
+//
 // Revision 1.54  2001/05/23 18:11:14  posk
 // Removed SetPids().
 //
