@@ -1,6 +1,9 @@
 #!/usr/local/bin/tcsh
-#  $Id: t3e,v 1.1 1998/08/25 21:32:26 didenko Exp $
+#  $Id: t3e,v 1.2 1998/09/08 06:46:08 fisyak Exp $
 #  $Log: t3e,v $
+#  Revision 1.2  1998/09/08 06:46:08  fisyak
+#  Standard extension for HP StAF libraries
+#
 #  Revision 1.1  1998/08/25 21:32:26  didenko
 #  new script to run mds files
 #
@@ -125,7 +128,7 @@ debug on
    TOP=$STAR _
    list_of_files='${list_of_files}' _
    mds=${mds} _
-   hpps=${hpss} _
+   hpss=${hpss} _
    set=${data} _
    log=$log_file 
 exit 

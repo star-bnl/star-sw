@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.24  1998/09/08 06:46:07  fisyak
+#  Standard extension for HP StAF libraries
+#
 #  Revision 1.23  1998/08/28 22:46:48  perev
 #  MakeArch introduce flag NEW_ARRAY_ON for SGI,GCC and aCC
 #
@@ -50,7 +53,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/08/28 22:46:48 $ 
+#             Last modification $Date: 1998/09/08 06:46:07 $ 
 #. default setings
 
 RM := rm -f
@@ -278,7 +281,7 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
     SOFLAGS   := $(DEBUG) -b +a1 -z 
     CLIBS   :=   -L/usr/lib/X11R5 -lXm -lXt -lX11 -lm -lPW -ldld
   endif
-  So := sl
+#  So := sl
   FC        :=fort77
 ##FLIBS     := /opt/fortran/lib/libU77.a /opt/langtools/lib/end.o
   FLIBS     := /opt/fortran/lib/libU77.a 
