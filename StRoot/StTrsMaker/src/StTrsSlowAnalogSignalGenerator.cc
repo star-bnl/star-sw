@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.12 1999/02/19 10:35:04 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.13 1999/02/26 18:26:09 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
- * Revision 1.12  1999/02/19 10:35:04  lasiuk
- * Function prototype for StTpcCoordinateTransform
+ * Revision 1.13  1999/02/26 18:26:09  lasiuk
+ * to offset must be used uniformly.  Correction to
+ * "timeOfSignal" should be merged with coordinate transform
  *
  * Revision 1.14  1999/02/28 20:12:50  lasiuk
  * threshold/noise additions
@@ -343,9 +344,9 @@ void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wire
 //  	    PR(xyCoord);
 
 
-	    //PR(centralPad);
-	    //PR(mDeltaRow);
-	    //PR(mDeltaPad);
+// 	    cout << "**Transform2Raw" << endl;
+	    transformer(xyCoord,tpcRaw);
+// 	    cout << "AnsigGen r/p " << centralRow << '/' << centralPad << endl;
 	    //PR(centralRow);
 //  	    cout << "AnsigGen r/p " << centralRow << '/' << centralPad << endl;
 // 	    //PR(mDeltaRow);
@@ -413,24 +414,33 @@ void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wire
 // 		    cout << "  xl " << xl << " xu " << xu << endl;
 // 		    cout << "  yl " << yl << " yu " << yu << endl;
 
-//  		    PR(chargeOfSignal);
-//  		    PR(iter->numberOfElectrons());
+		    // charge location:  iter->position().x(), ycoord
+		    // pad centroid:     xyCoord  // used to calculate integral limits
 
-//  		    PR(chargeOfSignal);
+		    // signalOnPad assumes charge of 1!
 		    double chargeOfSignal =
+		        signalOnPad(iter->position().x(), ycoord,  // charge location
+				    xl, xu, yl, yu);               // integral limits
 //   		    PR(chargeOfSignal);
-			iter->position().z()/mSCDb->driftVelocity();
+//   		    PR(iter->numberOfElectrons());
+		    chargeOfSignal *= iter->numberOfElectrons();
+//   		    PR(chargeOfSignal);
+
+		    //
+		    // This should really be from the Coordinate transform!
+		    // otherwise code has to be changed twice!
 		    //
 // 		    PR(iter->position());
-// 		    PR(chargeOfSignal);
-// 		    PR(timeOfSignal/nanosecond);
-// 		    PR(iter->position());
-		    // Make an analog signal
+		    double timeOfSignal =
+			(iter->position().z() + mElectronicsDb->tZero()*mSCDb->driftVelocity())
+			/mSCDb->driftVelocity();
+		    // OH-OH OFFSET (replaced!...)
+//  		    PR(*iter);
 
 		    //timeOfSignal = iter->position().z()/mSCDb->driftVelocity();
-// 		    PR(ipad);
-//  		    PR(irow);
-//    		    PR(padSignal);
+
+
+		    // Check the threshold before you
 		    // make and store an analog signal
 //  		    PR(ipad);
 //   		    PR(irow);
