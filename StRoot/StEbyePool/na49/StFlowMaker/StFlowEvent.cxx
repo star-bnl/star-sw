@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.5 2001/11/06 17:05:28 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.6 2002/01/16 18:16:57 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.6  2002/01/16 18:16:57  posk
+// Normalized q by sum of weights instead of multiplicity.
+//
 // Revision 1.5  2001/11/06 17:05:28  posk
 // New 40 Gev centrality bins. Using only sin terms at 40 GeV.
 //
@@ -237,20 +240,41 @@ Float_t StFlowEvent::Psi(StFlowSelection* pFlowSelect) {
 //-------------------------------------------------------------
 
 Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) {
-  Float_t q = 0.;
+  //return normalized Q = Q / sqrt(sum of weights**2)
 
-  if (mPtWgt || mYWgt) return q;
-  TVector2 mQ   = Q(pFlowSelect);
-  UInt_t mult   = Mult(pFlowSelect);
-  Float_t sumPt = SumPt(pFlowSelect);
+  TVector2 mQ;
+  Int_t  selN  = pFlowSelect->Sel();
+  Int_t  harN  = pFlowSelect->Har();
+  Double_t mQx=0., mQy=0.;
+  Double_t SumOfWeightSqr = 0;
+  Double_t order = (Double_t)(harN + 1);
+
+
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    if (pFlowSelect->Select(pFlowTrack)) {
+      Float_t mPhi = pFlowTrack->Phi();
+      Double_t phiWgt = PhiWeight(mPhi, selN, harN);
+      if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
+      if (mPtWgt) {
+	Float_t pt = pFlowTrack->Pt();
+	phiWgt *= pt;
+      }
+      SumOfWeightSqr += phiWgt*phiWgt;
+      mQx += phiWgt * cos(mPhi * order);
+      mQy += phiWgt * sin(mPhi * order);
+    }
+  }
   
-  if (!mPtWgt && mult) {
-    q = mQ.Mod() / sqrt((double)mult);
-  } else if (mPtWgt && sumPt != 0.) { 
-    q = mQ.Mod() * (double)mult / (sqrt(sumPt) * sumPt);  // wrong
+  if (SumOfWeightSqr) {
+    mQ.Set(mQx/sqrt(SumOfWeightSqr), mQy/sqrt(SumOfWeightSqr));
+  } else {
+    mQ.Set(0.,0.);
   }
 
-  return q;
+  return mQ.Mod();
 }
 
 //-----------------------------------------------------------------------
