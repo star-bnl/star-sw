@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.4 2003/05/02 21:43:48 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.5 2003/05/09 20:48:16 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -27,7 +27,7 @@
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
-#include "../StSpinMaker/StMuTrackFourVec.h"
+#include "StSpinMaker/StMuTrackFourVec.h"
 
 #include "StEmcClusterCollection.h"
 #include "StMuDSTMaker/COMMON/StMuEmcCollection.h"

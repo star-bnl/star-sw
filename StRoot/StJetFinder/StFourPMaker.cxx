@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFourPMaker.cxx,v 1.2 2003/04/24 14:15:16 thenry Exp $
+ * $Id: StFourPMaker.cxx,v 1.3 2003/05/09 20:48:19 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -23,7 +23,7 @@
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
-#include "../StSpinMaker/StMuTrackFourVec.h"
+#include "StSpinMaker/StMuTrackFourVec.h"
 
 #include "StEmcClusterCollection.h"
 #include "StMuDSTMaker/COMMON/StMuEmcCollection.h"
@@ -71,4 +71,7 @@ Int_t StFourPMaker::Finish()
   //StMaker::Finish();
   return StMaker::Finish();
 }
+
+
+
 

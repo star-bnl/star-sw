@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHWJetMaker.cxx,v 1.2 2003/05/01 19:51:43 thenry Exp $
+ * $Id: StHWJetMaker.cxx,v 1.3 2003/05/09 20:48:19 thenry Exp $
  * 
  * Author: Thomas Henry April 2003
  ***************************************************************************
@@ -25,7 +25,7 @@
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/EMC/StEmcMicroEvent.h"
-#include "../StSpinMaker/StppCdfChargedConeJetAnalyzer.h"
+#include "StSpinMaker/StppCdfChargedConeJetAnalyzer.h"
 
 #include "StHWJetMaker.h"
 #include "StEmcPoint.h"
