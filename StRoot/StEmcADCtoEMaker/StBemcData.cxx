@@ -26,6 +26,14 @@ Bool_t StBemcData::getSMDStatus(Int_t c)
 	if(c<4 && EventDate>=20020301) return kTRUE;
 	return kFALSE;
 } 
+Bool_t StBemcData::checkTDC(Int_t i,Int_t crate)
+{
+	Bool_t ok = kTRUE;
+  if(TDCError[i]!=0) ok = kFALSE;
+	if(TDCCrateId[i]!=crate) ok = kFALSE;
+	if(TDCCount[i]!=164) ok = kFALSE;
+  return ok;
+}
 void StBemcData::validateData()
 {
 	//towers first
@@ -38,9 +46,7 @@ void StBemcData::validateData()
 	{
 		Int_t crate;
 		Decoder->GetTowerCrateFromTDC(i,crate);
-		if(TDCError[i]==1) ok = kFALSE;
-		if(TDCCrateId[i]!=crate) ok = kFALSE;
-		if(TDCCount[i]!=164) ok = kFALSE;
+    ok = checkTDC(i,crate);
 	}
 	ValidTowerEvent = ok;
 	
