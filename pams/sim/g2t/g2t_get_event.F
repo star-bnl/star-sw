@@ -1,6 +1,10 @@
-* $Id: g2t_get_event.F,v 1.7 2003/05/14 22:55:53 potekhin Exp $
+* $Id: g2t_get_event.F,v 1.8 2003/07/30 03:51:32 potekhin Exp $
 *
 * $Log: g2t_get_event.F,v $
+* Revision 1.8  2003/07/30 03:51:32  potekhin
+* Update the format of the event header, including the new
+* field -- the rejected events scaler
+*
 * Revision 1.7  2003/05/14 22:55:53  potekhin
 * Introducing new data elements in teh event record -- number of
 * wounded nucleaons etc. Changed interface to the mheadrd sub.
@@ -39,9 +43,10 @@
       Parameter           (NBytPW=4)
 
       INTEGER             NUMPRIM,NUMFINS
-      INTEGER             SUB_ID,NBIN_COLL,NWE,NWW,NJETS
+      common /HDRNFO/     SUB_ID,NBIN_COLL,NWE,NWW,NJETS,NREJ
+      INTEGER             SUB_ID,NBIN_COLL,NWE,NWW,NJETS,NREJ
+
       common /g2tevtcnt/  NUMPRIM,NUMFINS 
-      common /HDRNFO/     SUB_ID,NBIN_COLL,NWE,NWW,NJETS
 *
 *     make g2t_event:
       G2T_GET_EVENT   = 1
@@ -87,6 +92,8 @@
       g2t_event(1).n_wounded_east= NWE
       g2t_event(1).n_wounded_west= NWW
       g2t_event(1).njets         = NJETS
+      g2t_event(1).n_rejected    = NREJ
+
 
       END
 
