@@ -1,5 +1,5 @@
 
- macro init
+ macro fill
 
  macro/global/import *
 
@@ -8,3 +8,10 @@
 *cd /dui
 
 return
+* *************************************************
+ macro init
+
+ macro/global/import *
+
+return
+* **************************************************

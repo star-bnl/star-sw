@@ -1,4 +1,11 @@
-macro init
+* ***********************************************
+ macro init
+ macro/global/import *
+   
+ return
+ 
+* *************************************************
+   macro fill
  macro/global/import *
 
  cd [params]/global/evrpars
