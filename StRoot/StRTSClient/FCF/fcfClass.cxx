@@ -42,7 +42,7 @@
 #include <rtsSystems.h>
 #include <fcfClass.hh>
 
-
+static char *fcf_CVS_revision = "$Revision: 1.17 $" ;
 
 #ifdef __ROOT__	// STAR Offline
 
