@@ -1,0 +1,13 @@
+/*    tpcGain.idl
+*
+*  Table: tpcGain
+*
+*       description:
+*/ 
+
+
+struct tpcGain { 
+
+   float  Gain[45][182];   /*  Gains per */
+
+ };  
