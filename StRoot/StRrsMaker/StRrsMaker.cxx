@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.18 2000/04/14 22:38:09 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 1.19 2000/04/26 18:58:39 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
+ * Revision 1.19  2000/04/26 18:58:39  lasiuk
+ * comment diagnostics
+ *
  * Revision 1.18  2000/04/14 22:38:09  lasiuk
  * add print diagnostic for crash
  * extra careful on clearing the dataset
@@ -229,6 +232,7 @@ Int_t StRrsMaker::Init()
     mPadPlane =
 	new StRichPadPlane(mGeometryDb->numberOfRowsInAColumn(),
 			   mGeometryDb->numberOfPadsInARow());
+
     AddConst(new St_ObjectSet("richPixels", mPadPlane));
 
     // Data Writer is here
@@ -324,14 +328,16 @@ Int_t StRrsMaker::Make()
     info->print();
 #endif
 
+    //cout << "Clear Pad Plane" << endl;
     mPadPlane->clear();
+    //cout << "Done clear" << endl;
 
 #ifdef RICH_DIAGNOSTIC
     ofstream raw("/afs/rhic/star/users/lasiuk/data/rings.txt");
 #endif
 
     StRichGHit hit;
-    mWriter->clear();
+    //mWriter->clear();  // Done already in padplane
 
 #ifdef RICH_WITH_PADMONITOR
     vector<StRichG2TInfo> g2tInfo;
@@ -579,20 +585,19 @@ Int_t StRrsMaker::Make()
 	    info->snapshot();
 	    info->print();
 #endif
-
+// 	    cout << "Signals on Pads" << endl;
 	    //
 	    // Now generate the signal on the pad plane
 	    //
 	    //PR(theList.size());
 	    double wireNumber;
 	    double chargeMultiplied;
-	    //int numberOfSegments = 0;
+	    int numberOfSegments = 0;
 	    for(iter  = theList.begin();
 		iter != theList.end();
 		iter++) {
-		
 		wireNumber = mWireSelector.whichWire(*iter);
-		chargeMultiplied = mAmplification.avalanche(*iter, wireNumber, theList);
+ 		chargeMultiplied = mAmplification.avalanche(*iter, wireNumber, theList);
 		mAnalogSignalGenerator->induceSignal(*iter,chargeMultiplied);
 
 
@@ -603,6 +608,7 @@ Int_t StRrsMaker::Make()
 						    (*iter)->trackp(),"f"));
 		}
 #endif
+		numberOfSegments++;
 	    }
 	    
 	}  // if (m_DataSet)
@@ -610,7 +616,7 @@ Int_t StRrsMaker::Make()
     } //else process from stream
 
 
-    cout << "Try Write" << endl;
+//     cout << "Try Write" << endl;
     for ( int i = 0; i < mWriter->rows(); i++ ) {
 	for ( int j = 0; j < mWriter->cols(); j++ ) {
 
@@ -627,7 +633,7 @@ Int_t StRrsMaker::Make()
 	}
     }
 
-    cout << "cleanup" << endl;
+//     cout << "cleanup" << endl;
     mWriter->cleanUpMCInfo();
     
     if(mWriteToFile) {
@@ -639,7 +645,7 @@ Int_t StRrsMaker::Make()
 
     //
     // clear up the list<StRichMiniHit*>
-    cout << "Try clear" << endl;
+//     cout << "Try clear" << endl;
     for(iter  = theList.begin();
 	iter != theList.end();
 	iter++) {
