@@ -5,7 +5,7 @@
 //std
 #include <iostream.h>
 #include <math.h>
-
+#include <float.h>
 #include <algorithm>
 using std::sort;
 using std::for_each;

@@ -1,3 +1,5 @@
+#include <math.h>
+#include <float.h>
 
 #include <algorithm>
 using std::transform;
@@ -10,7 +12,6 @@ using std::less;
 
 #include "StiDedxCalculator.h"
 
-#include <math.h>
 
 StiDedxCalculator::StiDedxCalculator()
     : mFraction(0.) //Default to zero so that user must set

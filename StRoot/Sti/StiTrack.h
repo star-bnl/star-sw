@@ -72,6 +72,10 @@ public:
     void  setPointCount(int v)    ;  // number of points currently assigned to the track;
     void  setVertex(StiHit *v);
     void setSeedHitCount(int c) {mSeedHitCount=c;}
+
+    //Flag:
+    void setFlag(long v) {mFlag = v;}
+    long getFlag() const {return mFlag;}
   
     
 protected:
@@ -83,6 +87,7 @@ protected:
     int    nPts;       // number of points on the track
     int    nFitPts;    // number of points included in the fit of the track
     int mSeedHitCount; //number of points used to seed the track
+    long mFlag; //A flag to pack w/ topo info
     StiHit * vertex; // parent vertex of this track
     double  m;          // mass hypothesis
     double  chi2;

@@ -263,6 +263,7 @@ void StiKalmanTrackFinder::doTrackFind()
       trackMes <<"StiKalmanTrackFinder::doTrackFind()\t Got Valid track"<<endl;
 
       findTrack(track);
+
       trackMes << " SKTFinder::doTrackFind() - Track Parameters" << endl << *track;
       reserveHits(track->getLastNode());
       trackContainer->push_back(track);
@@ -301,6 +302,7 @@ void StiKalmanTrackFinder::findTracks()
     }
 }
 
+//careful, it will throw an excpetion
 void StiKalmanTrackFinder::findTrack(StiTrack * t) 
 {
   //-----------------------------------------------------------------
@@ -317,6 +319,9 @@ void StiKalmanTrackFinder::findTrack(StiTrack * t)
       throw logic_error("SKTF::findTrack()\t - ERROR - dynamic_cast<StiKalmanTrack *>  returned 0");
     }
   StiKalmanTrackNode * lastNode = track->getLastNode();
+
+  track->setFlag(1);
+  
   try
     {
       lastNode = followTrackAt(lastNode);
@@ -324,6 +329,7 @@ void StiKalmanTrackFinder::findTrack(StiTrack * t)
   catch (exception & e)
     {
       cout << "SKTF::findTrack() exception: " << e.what();
+      track->setFlag(0);
     }
   pruneNodes(lastNode);
   reserveHits(lastNode);

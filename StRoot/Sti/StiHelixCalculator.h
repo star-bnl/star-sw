@@ -6,6 +6,7 @@
 #define StiHelixCalculator_HH
 
 #include <math.h>
+#include <float.h>
 
 #include "StiCircleCalculator.h"
 
