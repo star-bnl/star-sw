@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.240 2001/10/15 14:11:16 didenko Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.241 2001/10/26 14:39:07 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -623,6 +623,13 @@ Int_t StBFChain::Instantiate()
 	    if (mode) mk->SetMode(mode);
 	  }
 	  if (maker == "StdEdxMaker" &&GetOption("Simu"))  mk->SetMode(-10);
+	  if (maker == "StTpcDbMaker"){  
+            mk->SetMode(0);
+	    // this change may be temporary i.e. if Simulation includes
+	    // rotation/translation, this won't be necessarily true.
+	    // Will investigate further.
+            if (GetOption("Simu")) mk->SetMode(1);
+	  }
 	  if (GetOption("dst") && GetOption("NoHits") && maker == "StEventMaker") {
 	    StEventMaker *EvMk = (StEventMaker *) mk;
 	    EvMk->doLoadTpcHits  = kFALSE;
