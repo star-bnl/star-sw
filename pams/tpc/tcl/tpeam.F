@@ -160,14 +160,14 @@ c
 
          
          integer nquota,nvar,icycle,nvar2,nvar3,nvar4,nvar5,nvar6
-         parameter (nvar=9,nvar2=26,nvar3=5,nvar4=5,nvar5=5,nvar6=4)
+         parameter (nvar=9,nvar2=27,nvar3=5,nvar4=5,nvar5=5,nvar6=4)
          character*4 chtags(nvar),chtags2(nvar2)
          character*4 chtags3(nvar3),chtags4(nvar4),chtags5(nvar5)
          character*4 chtags6(nvar6)
 C-----------------------------------------------------------------------
          logical lstat,first
 
-         real vec(26)
+         real vec(27)
          real vec2(4)
 
          integer istat
@@ -199,6 +199,7 @@ c         real tphit_q(mxhits),mchit_q(mxhits) ****
          integer numpix_seq,kadc,ktdc,kpix_count
          integer kmcid,krowtemp,ksectortemp
          logical kstatus,tpg_local_to_global,tpg_global_to_local
+         logical tpg_global_to_local_p
          double precision tpg_pad_to_x,tpg_row_to_y
          double precision invec(3),outvec(3)
          real time_bucket
@@ -265,7 +266,8 @@ C-----------------------------------------------------------------------
          data chtags2/'itrk','mcx ','mcy ','mcz ','tpx ','tpy ','tpz '
      +,              'delx','dely','delz','nrow', 'clus','nseq',
      +                'dx','dy','dz','mhit','nmc',
-     +                'phi','lamd','malf','ralf','rhit','flag','q','prf'/
+     +                'phi','rlam','malf','ralf','rhit','flag','q','prf',
+     +		      'mlam'/
          data chtags3/'prec','mce','tpe','rde','pre2'/
 *	 data chtags4/'hit ','clus','sect','row ','pad ',
 *     +		      'tdc ','adc ','mcid','xpix','ypix','zpix',
@@ -631,12 +633,14 @@ c  kind of stuff can be tricky
      +                       dble(
      +                       mhits_tpc(mcptr(idummy,i_incidence)).p(3))
                         kstatus=
-     +                       tpg_global_to_local(ksectortemp,
+     +                       tpg_global_to_local_p(ksectortemp,
      +                       invec,outvec)
                         if (real(outvec(2)).ne.0.0) then
                            vec(21)=atand(sngl(outvec(1)/outvec(2)))
+                           vec(27)=atand(sngl(outvec(3)/outvec(2)))
                         else
                            vec(21)=90.0
+                           vec(23)=90.0
                         endif
 
                         vec(17)=real(
@@ -902,11 +906,13 @@ c  kind of stuff can be tricky
      +                 dble(mhits_tpc(mcptr(idummy,i_incidence)).p(2))
                   invec(3) =
      +                 dble(mhits_tpc(mcptr(idummy,i_incidence)).p(3))
-                  kstatus=tpg_global_to_local(ksectortemp,invec,outvec)
+                  kstatus=tpg_global_to_local_p(ksectortemp,invec,outvec)
                   if (real(outvec(2)).ne.0.0) then
                      vec(21)=atand(sngl(outvec(1)/outvec(2)))
+                     vec(27)=atand(sngl(outvec(3)/outvec(2)))
                   else
                      vec(21)=90.0
+                     vec(27)=90.0
                   endif
                   closest=100.0
                   do i_maybe_ghost=1,n_maybe_ghost(idummy)
@@ -1044,6 +1050,7 @@ c-------------------------------------------
                      vec(16)=tphit(ptr_ghost).dz
                      vec(17)=0.0
                      vec(21)=0.0
+                     vec(27)=0.0
                      vec(19) = tphit(ptr_ghost).phi
                      vec(20) = tphit(ptr_ghost).lambda
                      vec(22) = tphit(ptr_ghost).alpha
