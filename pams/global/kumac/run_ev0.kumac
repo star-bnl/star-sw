@@ -2,9 +2,13 @@ MACRO ev0_am i=1
 i = [1]
 
 if [i] = 1 then
-exec init_ev0
+  exec init_ev0
 endif
+
 message 'Calling ev0...'
+message 'Warning Im Zeroing dst_vertex table'
+
+rowcount /dui/data/global/vertices/vertex 0
 
 ami/mod/call ev0_am _
       	/dui/constants/global/params/ev0par _
@@ -30,6 +34,11 @@ MACRO ev0_eval2 i=1
 
 i = [1]
 
+if ( [i] .eq. 1 ) then
+ tdm/newtable /dui/data/global/vertices/ev0_eval ev0_eval 10000
+ maxrow  /dui/data/global/vertices/ev0_eval 10000
+endif
+
 message ' Calling ev0_eval2..'
 
 tdm/table/maxrowcount /dui/data/svt/tracks/stk_track
@@ -37,9 +46,6 @@ if ( staf_result(1) .eq. 0) then
   tdm/newtable /dui/data/svt/tracks/stk_track stk_track 1
 endif
 
-rowcount /dui/data/global/vertices/ev0out 
-tdm/newtable /dui/data/global/vertices/ev0_eval ev0_eval staf_result(1)
-maxrow  /dui/data/global/vertices/ev0_eval staf_result(1)
 rowcount /dui/data/global/vertices/ev0_eval 0
 
 ami/mod/call ev0_eval2 _
