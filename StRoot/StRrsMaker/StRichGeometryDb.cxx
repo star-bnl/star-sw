@@ -1,13 +1,17 @@
 /*******************************************************************
- * $Id: StRichGeometryDb.cxx,v 1.7 2000/03/17 14:54:39 lasiuk Exp $
+ * $Id: StRichGeometryDb.cxx,v 1.8 2000/05/15 18:03:45 lasiuk Exp $
  *
  * Description:
  *
  *******************************************************************
  * $Log: StRichGeometryDb.cxx,v $
- * Revision 1.7  2000/03/17 14:54:39  lasiuk
- * Large scale revisions after ROOT dependent memory leak
+ * Revision 1.8  2000/05/15 18:03:45  lasiuk
+ * change survey parameter distance to pad plane.
+ * Shift to .13 for t'formation routines.  (gjk)
  *
+ * Revision 1.8  2000/05/15 18:03:45  lasiuk
+ * change survey parameter distance to pad plane.
+ * Shift to .13 for t'formation routines.  (gjk)
  *
  * Revision 1.7  2000/03/17 14:54:39  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -86,8 +90,10 @@ void StRichGeometryDb::my_fill()
     length            = 1310  * millimeter;          // verified
     width             = 836   * millimeter;          // verified
     height            = 2     * millimeter;          // verified
-    mRadialDistanceToRich   = 242.925 * centimeter;
-	
+
+    //
+    // Survey Geometry
+    mInclinationAngle       = 30.  * degree;
     //mRadialDistanceToRich   = 242.925 * centimeter;
     // change from gjk (May 15,2000)
     mRadialDistanceToRich   =	243.130 *centimeter;
