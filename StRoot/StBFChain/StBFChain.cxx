@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.164 2001/01/31 18:22:23 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.165 2001/02/06 21:28:53 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -61,7 +61,7 @@ Bfc_st BFC[] = {
   {"cy1e"        ,""  ,"","y1e,Cdefault"                                 ,"","","Turn on chain y1h",kFALSE},
   {"cy1h"        ,""  ,"","y1h,Cdefault"                                 ,"","","Turn on chain y1e",kFALSE},
   {"Cy2a"        ,""  ,"","y2a,tpc,ftpc,emc,l0,l3,Cdst,tags,Tree,svt"    ,"","","Turn on chain y2a",kFALSE},
-  {"Cy2b"        ,""  ,"","y2b,tpc,rich,Physics,ftpc,emc,svt,l0,l3,Cdst,Kalman,tags,Tree,evout"
+  {"Cy2b"        ,""  ,"","y2b,tpc,rich,ftpc,emc,svt,l0,l3,Cdst,Kalman,tags,Tree,evout"
                                                                          ,"","","Turn on chain y2b",kFALSE},
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
@@ -870,7 +870,7 @@ void StBFChain::SetGeantOptions(){
       if (GetOption("gstar")) {
 	geantMk->Do("subevent 0;");
 	// gkine #particles partid ptrange yrange phirange vertexrange 
-	geantMk->Do("gkine 10 6 1. 1. -1. 1. 0 6.28  0. 0.;");
+	geantMk->Do("gkine 80 6 1. 1. -4. 4. 0 6.28  0. 0.;");
 	geantMk->Do("mode g2tm prin 1;");
 	//  geantMk->Do("next;");
 	//  geantMk->Do("dcut cave z 1 10 10 0.03 0.03;");
