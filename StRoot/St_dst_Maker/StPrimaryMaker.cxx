@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.26 1999/12/17 03:46:08 didenko Exp $
+// $Id: StPrimaryMaker.cxx,v 1.27 1999/12/17 22:27:22 margetis Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.27  1999/12/17 22:27:22  margetis
+// selection of primtrk is based on id_start_vertex (dca) not iflag
+//
 // Revision 1.26  1999/12/17 03:46:08  didenko
 // Spiros version
 //
@@ -395,37 +398,43 @@ Int_t StPrimaryMaker::Make(){
   // copy n_max_point from globtrk to primtrk for all rows
   // calculate impact parameter variable
 
+  //  Int_t keep_vrtx_id;
   dst_vertex_st *myvrtx = vertex->GetTable();
   if( myvrtx->vtx_id != kEventVtxId || myvrtx->iflag != 1){
     for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,myvrtx++){
       if( myvrtx->vtx_id == kEventVtxId && myvrtx->iflag == 1 ) break;
     }
   }
-  if (myvrtx->vtx_id == kEventVtxId && myvrtx->iflag == 1) {
-    
-    Float_t *myv0 = &myvrtx->x;
-
-   dst_track_st* globtrkPtr = globtrk->GetTable();
-  dst_track_st* primtrkPtr = primtrk->GetTable();  
-  for( Int_t i=0; i<primtrk->GetNRows(); i++, globtrkPtr++, primtrkPtr++) {
-    primtrkPtr->id_start_vertex = globtrkPtr->id_start_vertex;
-    primtrkPtr->n_max_point = globtrkPtr->n_max_point;
-    Float_t xStart = primtrkPtr->r0 * cos(primtrkPtr->phi0 * C_RAD_PER_DEG);
-    Float_t yStart = primtrkPtr->r0 * sin(primtrkPtr->phi0 * C_RAD_PER_DEG);
-    Float_t zStart = primtrkPtr->z0;
-    double qwe = pow(xStart-myv0[0],2)+pow(yStart-myv0[1],2)+pow(zStart-myv0[2],2);
-    
-    primtrkPtr->impact = TMath::Sqrt(qwe);
-  }
-  } 
-
-  Int_t keep_vertex_id = 0;
+  if (myvrtx->vtx_id == kEventVtxId && myvrtx->iflag == 1) 
+    {
+      
+      Float_t *myv0 = &myvrtx->x;
+      
+      dst_track_st* globtrkPtr = globtrk->GetTable();
+      dst_track_st* primtrkPtr = primtrk->GetTable();  
+      for( Int_t i=0; i<primtrk->GetNRows(); i++, globtrkPtr++, primtrkPtr++) 
+        {
+          primtrkPtr->id_start_vertex = globtrkPtr->id_start_vertex;
+          //          if(primtrkPtr->id_start_vertex != 0)
+          //  keep_vrtx_id=primtrkPtr->id_start_vertex;
+          primtrkPtr->n_max_point = globtrkPtr->n_max_point;
+          Float_t xStart = primtrkPtr->r0 * cos(primtrkPtr->phi0 * C_RAD_PER_DEG);
+          Float_t yStart = primtrkPtr->r0 * sin(primtrkPtr->phi0 * C_RAD_PER_DEG);
+          Float_t zStart = primtrkPtr->z0;
+          double qwe = pow(xStart-myv0[0],2)+pow(yStart-myv0[1],2)+pow(zStart-myv0[2],2);
+          
+          primtrkPtr->impact = TMath::Sqrt(qwe);
+        }
+    } 
+  
   Int_t nrows = primtrk->GetNRows();
   dst_track_st *squeezePtr = primtrk->GetTable();
   Int_t n2rows = 0;
   for (Int_t irow=0;irow<nrows;irow++){
-    if(squeezePtr[irow].iflag <= 0) continue;
+    if(squeezePtr[irow].id_start_vertex == 0) continue;
+    //    if(squeezePtr[irow].iflag <= 0) continue;
     squeezePtr[n2rows++]= squeezePtr[irow];    
+    //   squeezePtr[n2rows++].id_start_vertex = keep_vrtx_id;    
   }
   nrows = n2rows;
   primtrk->SetNRows(nrows);  
