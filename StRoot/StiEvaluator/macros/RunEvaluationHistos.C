@@ -40,9 +40,9 @@ void RunEvaluationHistos(const char *MainFile= "/star/data22/ITTF/EvalData/MCNtu
     TStopwatch timer;
     timer.Start();
 
-    effeval->initialize();
-    effeval->makehistograms();
-    effeval->writehistograms();
+    effeval.initialize();
+    effeval.makehistograms();
+    effeval.writehistograms();
     
     timer.Stop();
     cout << "Real time = " << timer.RealTime() << " , Cpu Time = " << timer.CpuTime() << endl;
