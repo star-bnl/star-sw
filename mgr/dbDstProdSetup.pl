@@ -21,6 +21,7 @@ $SystemData="system_data";
 
 # Tables
 $DstProductionT = "DstProduction";
+$ProdOptionsT = "ProdOptions";
 
 ######################
 sub StDbDstProdConnect {
