@@ -6,6 +6,7 @@
 //Compares momentum components for Pi- (GEANTID=9
 //
 
+#include <iostream>
 
 void SetResiduals()
 {
