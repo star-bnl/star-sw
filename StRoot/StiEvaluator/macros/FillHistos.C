@@ -3,12 +3,9 @@ void FillHistos(
 	 const char *outName="Output.root",
 	 const char *outDir="")
 {
-  char * list[]={"St_base","StChain","StUtilities", "St_Tables", "StarClassLibrary",
-		 "libsim_Tables","libglobal_Tables","geometry","St_g2t","St_geant_Maker","libGui",
-		 "StIOMaker","StTreeMaker", "St_db_Maker","StDbLib","StDbBroker",
-		 "StSvtDbMaker","StDbUtilities", "StTpcDb","StEvent","StEventMaker",
-		 "StMcEvent","StMcEventMaker","StMiniMcEvent","StAssociationMaker",
-		 "Sti", "StiEvaluator",
+  char * list[]={"St_base","StChain", "St_Tables","StUtilities","StarClassLibrary",
+		 "StIOMaker","StEvent", "StMcEvent","StMcEventMaker","StMiniMcEvent",
+		 "StAssociationMaker","Sti","StiEvaluator",
 		 "last"};
 
   int i=0;  
@@ -42,9 +39,9 @@ void FillHistos(
   TStopwatch timer;
   timer.Start();
   
-  effeval->initialize();
-  effeval->makehistograms();
-  effeval->writehistograms();
+  effeval.initialize();
+  effeval.makehistograms();
+  effeval.writehistograms();
   
   timer.Stop();
   cout << "Real time = " << timer.RealTime() << " , Cpu Time = " << timer.CpuTime() << endl;
