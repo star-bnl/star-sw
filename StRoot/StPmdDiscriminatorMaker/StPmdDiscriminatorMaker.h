@@ -4,10 +4,10 @@
  */
 /******************************************************************
  *
- * $Id: StPmdDiscriminatorMaker.h,v 1.1 2002/08/27 12:11:02 subhasis Exp $
+ * $Id: StPmdDiscriminatorMaker.h,v 1.2 2003/05/29 13:12:51 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay
- *         Gopika Sood
+ *
  ******************************************************************
  *
  * Description: This routine describes methods for photon/hadron
@@ -15,8 +15,8 @@
  ******************************************************************
  *
  * $Log: StPmdDiscriminatorMaker.h,v $
- * Revision 1.1  2002/08/27 12:11:02  subhasis
- * First version
+ * Revision 1.2  2003/05/29 13:12:51  subhasis
+ * several changes to include NN
  *
  ******************************************************************/
 
@@ -25,12 +25,34 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+
+//For CC5 compatibility
+#include <vector>
+#if !defined(ST_NO_NAMESPACES)
+using std::vector;
+#endif
+
+#ifdef ST_NO_TEMPLATE_DEF_ARGS
+// Syntax currently required by Solaris compiler
+#define StVector(T) vector<T, allocator<T> >
+#else
+#define StVector(T) vector<T>
+#endif
+// *************************
 #include <TH2.h>
 #include <TH1.h>
 #include <TCanvas.h>
+
+class StPmdCollection;
+class StPhmdCollection;
 class StPmdDetector;
 class StPmdCluster;
+class StPhmdClusterCollection;
+class StPhmdCluster;
+class StNNCluster;
 
+//typedef StVector(StPhmdCluster*) StPmdCl;
+typedef StVector(StNNCluster*) StPmdCl;
 
 class StPmdDiscriminatorMaker: public StMaker{
 
@@ -39,18 +61,19 @@ class StPmdDiscriminatorMaker: public StMaker{
 	  Float_t mEdepThreshold;
 	  Float_t mDeltaEta;
 	  Float_t mDeltaPhi;
+	  Int_t mApplyFlagNN;
   protected:
-  TH1F *mSmPmdCluster;    //! 1-D  
   TH1F *mEdepPmd;    //! 1-D EDep Display for PMD
-  TH1F *mDeltaE;    //!  1-D delta eta distribution 
-  TH1F *mDeltaP;    //!  1-D delts phi distribution
+  TH1F *mEtaPmd;    //!  1-D Eta PMD
+  TH1F *mPhiPmd;    //!  1-D Phi PMD
+  TH1F *mEtadiff;    //!  1-D delta eta distribution 
+  TH1F *mPhidiff;    //!  1-D delts phi distribution
+  TH1F *mMCPID;    //!  1-D delts phi distribution
   TH2F *mEtaPhi;    //!  DeltaEta-DeltaPhi Distribution 
-  TH2F *mEtaPhim;    //! Eta-Phi Disrtibution of Matched ones
-  TH2F *mPmdClusterm; //! 2-D PmdClusters vs Matched Clusters
-  TH2F *mCpvClusterm; //! 2-D CpvClusters vs Matched Clusters
   TH1F *mClusterPID;    //! 1-D plot for PID through Matching  
   TH1F *mClusterEdepPID;    //! 1-D plot for PID through E-cut
-  TH1F *mAboveEdep;    //!  1-D plot for No. of clusters above e-cut
+  TH2F *mEdepVsPID; //! 2-D CpvClusters vs Matched Clusters
+  TH1F *mcpvmatched; //! No of cpv clusters  Matched Clusters
   
    public:
   StPmdDiscriminatorMaker(const char *name="StPmdDiscriminator"); 
@@ -58,21 +81,29 @@ class StPmdDiscriminatorMaker: public StMaker{
 
   virtual Int_t Init();  
   virtual Int_t Make();
+  virtual Int_t Finish();
   void getEdepThreshold(Float_t); //! Getting Energy value (3 MIP)
   void SetDeltaEta(Float_t);      //! Setting DeltaEta for Matching
   void SetDeltaPhi(Float_t);      //! Setting DeltaPhi for Matching
+  void SetApplyFlag(Int_t);      //! Setting Traininbg or testing flag
   void bookHistograms();          
   void fillHistograms(StPmdDetector*, StPmdDetector*);
   void Matching(StPmdDetector*, StPmdDetector*);
+  Int_t PrepareInputforNN(StPmdDetector*,StPmdDetector*,StPhmdClusterCollection*,StPhmdClusterCollection*);
+  //void Matching();
+  void fillStEvent(StPmdCollection*,StPhmdCollection*);
   void  Browse(TBrowser* b);
+//NN hist outs (made public to be accessed from StPmdNeunet
+  TH1F *mNNoutput; //! No of cpv clusters  Matched Clusters
 
   ClassDef(StPmdDiscriminatorMaker, 1) 
 };
 
-#endif
 inline void StPmdDiscriminatorMaker::getEdepThreshold(Float_t de){mEdepThreshold=de;}
 inline void StPmdDiscriminatorMaker::SetDeltaEta(Float_t deta){mDeltaEta=deta;}
 inline void StPmdDiscriminatorMaker::SetDeltaPhi(Float_t dphi){mDeltaPhi=dphi;}
+inline void StPmdDiscriminatorMaker::SetApplyFlag(Int_t flag){mApplyFlagNN=flag;}
+#endif
 
 
 
