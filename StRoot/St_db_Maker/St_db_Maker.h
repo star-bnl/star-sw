@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.13 2000/05/20 01:00:43 perev Exp $
+// $Id: St_db_Maker.h,v 1.14 2000/06/26 20:58:41 perev Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.14  2000/06/26 20:58:41  perev
+// multiple DBs
+//
 // Revision 1.13  2000/05/20 01:00:43  perev
 // SetFlavor() added
 //
@@ -44,24 +47,25 @@ enum DBConst {kMinTime = 19950101, kMaxTime = 20380101};
 class St_db_Maker : public StMaker {
 private:
 
-  TDataSet *fDataBase;       	//! DB structure
-  StDbBroker *fDBBroker;	//!MySql broker 
+  TDataSet    *fDataBase;       //! DB structure
+  StDbBroker  *fDBBroker;	//!MySql broker 
   St_dbConfig *fHierarchy; 	//!
-  TString     fMainDir;        	//! The main root directory for the calibrarion data
-  TString     fUserDir;        	//! The user root directory for the calibrarion data
-  TString     fCurrentDir;     	//! The current root directory for the calibrarion data
+  TString     fDirs[10];        //! Array of dirs with DBs
   TString     fFlavor;     	//! Flavor selection
-  Int_t       fIsDBTime;	//! flag to use owb time stamp
+  Int_t       fIsDBTime;	//! flag to use own time stamp
   TDatime     fDBTime;		//! Own DB time stamp
   Int_t       fUpdateMode;	//! 
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.13 2000/05/20 01:00:43 perev Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.14 2000/06/26 20:58:41 perev Exp $";
  protected:
  public: 
-                   St_db_Maker(const char *name,const char *maindir,const char *userdir=0);
+                   St_db_Maker(const char *name
+			      ,const char *dir0
+			      ,const char *dir1 = ""
+			      ,const char *dir2 = ""
+			      ,const char *dir3 = ""
+                   );
    virtual        ~St_db_Maker();
-   virtual TString GetMainDir(){ return fMainDir;}
-   virtual TString GetUserDir(){ return fUserDir;}
    virtual const char *GetFlavor(){ return fFlavor;}
    virtual TDatime GetDateTime();
    virtual Int_t   GetValidity(const TTable *tb, TDatime *val) const;
@@ -70,8 +74,6 @@ private:
    virtual Int_t   Init();
    virtual Int_t   Make();
    virtual Int_t   Save(const char *path);
-   virtual void    SetMainDir(const Char_t *db);
-   virtual void    SetUserDir(const Char_t *db);
    virtual void    SetOff(const Char_t *path);
    virtual void    SetOn (const Char_t *path);
    virtual void    SetFlavor(const char *flav){fFlavor=flav;}
@@ -92,7 +94,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.13 2000/05/20 01:00:43 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.14 2000/06/26 20:58:41 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   //StAF chain virtual base class for Makers
 };
