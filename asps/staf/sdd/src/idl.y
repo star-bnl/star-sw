@@ -52,7 +52,7 @@
 #define COMMENTS 1200
 #define OLC 82
 #define SINGL (int)yytext[0]
-#define TSIZE 21 /* big enuf for "unsigned short" */
+#define TSIZE 50 /* big enuf for "unsigned short" */
 #define CVSVERSION 100
 #define MODULETAB 80 /* max number of in/out/inout table for a module */
 #define INPUTTAB 80 /* max number of included tables for a module idl file */
@@ -91,7 +91,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.18 1999/09/20 20:16:21 fisyak Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.19 1999/10/01 19:04:27 ward Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -1270,6 +1270,7 @@ ArgType(char *theName) {  /* STEP 2 */
     F"No more than %d arguments per prototype.\n",ARGS); exit(2);
   }
   strncpy(gDataType[whichProto][gNArgName[whichProto]],theName,TSIZE);
+  gDataType[whichProto][gNArgName[whichProto]][TSIZE]=0;
 }
 ArgName(char *theName) {  /* STEP 3 */
   int whichProto; whichProto=gNProto-1;
