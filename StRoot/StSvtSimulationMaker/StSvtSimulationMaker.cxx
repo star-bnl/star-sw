@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.9 2001/08/13 15:34:18 bekele Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.10 2001/11/06 20:12:06 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.10  2001/11/06 20:12:06  caines
+ * Add include for new compiler
+ *
  * Revision 1.9  2001/08/13 15:34:18  bekele
  * Debugging tools added
  *
@@ -471,7 +474,7 @@ Int_t  StSvtSimulationMaker::setEval()
 //____________________________________________________________________________
 Int_t StSvtSimulationMaker::CreateHistograms()
 { 
-  //mNtFile = new TFile("spacepoints.root","RECREATE","SpacePoints");
+  mNtFile = new TFile("spacepoints.root","RECREATE","SpacePoints");
   
   mNTuple = new TNtuple("SpacePoints","SpacePoints","xl:yl:x:y:z:peak:unShoot:sumAdc:widthInTime:widthInAnode:shiftInTime");
 
@@ -755,6 +758,7 @@ Int_t StSvtSimulationMaker::Make()
       for (int j=0;j<mNumOfHitsPerHyb ;j++)
 	{
 	  volId = trk_st[j].volume_id;
+	  cout << volId << " " << trk_st[j].x[0] << " " << trk_st[j].x[1] << " " << endl;
 	  if( volId > 7000) continue; // SSD hit
 	  VecG.setX( trk_st[j].x[0]);
 	  VecG.setY( trk_st[j].x[1]);
@@ -1647,8 +1651,8 @@ Int_t StSvtSimulationMaker::Finish()
 			       << endm;
 
 
-   //mNtFile->Write();
-   //mNtFile->Close();
+   mNtFile->Write();
+   mNtFile->Close();
 
   //mSvtSimulation->closeFiles(); 
   //mElectronCloud->closeFiles();

@@ -2,6 +2,7 @@
 #define STSVTSIGNAL_HH
 
 #include <iostream.h>
+#include <string.h>
 #include <math.h>
 
 class StSvtElectronCloud;

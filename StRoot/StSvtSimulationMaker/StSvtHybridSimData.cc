@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridSimData.cc,v 1.2 2001/05/10 04:29:52 caines Exp $
+ * $Id: StSvtHybridSimData.cc,v 1.3 2001/11/06 20:12:06 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridSimData.cc,v $
+ * Revision 1.3  2001/11/06 20:12:06  caines
+ * Add include for new compiler
+ *
  * Revision 1.2  2001/05/10 04:29:52  caines
  * Change pedestal offset to match real raw data
  *
@@ -32,7 +35,7 @@ ClassImp(StSvtHybridSimData)
 
 StSvtHybridSimData::StSvtHybridSimData(int barrel, int ladder, int wafer, int hybrid,StSvtHybridPixels* mSimDataPixels):StSvtHybridData(barrel, ladder, wafer,hybrid)
 {
-  mOffSet=25;
+  mOffSet=10;
   if (mSimDataPixels)
     setSimHybridData(mSimDataPixels);
 }
