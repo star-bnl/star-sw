@@ -13,11 +13,12 @@ This class is the description of the StiSsdDetectorBuilder
 #include "Sti/StiHitErrorCalculator.h"
 #include "StThreeVector.hh"
 
-
-class svg_geom_st;
 class StiSsdDetectorBuilder : public StiDetectorBuilder
 {
 
+ private :
+  StSsdConfig*   mSsdConfig;    //!
+  StSsdGeometry* mSsdGeom;      //!
  public:
         StiSsdDetectorBuilder(bool active,const string & inputFile);
 	virtual ~StiSsdDetectorBuilder(); 
@@ -25,14 +26,16 @@ class StiSsdDetectorBuilder : public StiDetectorBuilder
 	virtual void setDefaults();
   
  protected:
-	//! test 1
-        double phiForSsdLadder(unsigned int iLadder) const;
-        //double radiusForSsdLadder(unsigned int iLadder) const;
-	StiMaterial *_gasMat;        //!< 
+        float phiForSsdLadder(unsigned int iLadder) const;
+        float radiusForSsdLadder(unsigned int iLadder) const;
+	StiMaterial *_gasMat;        
 	StiMaterial *_siMat;
+	StiMaterial *_hybridMat;
 	StiPlanarShape * _waferShape[1];
+	StiPlanarShape * _hybridShape[1];
 	StSsdConfig   * _config;
 	StSsdGeometry * _geometry;
+	StSsdGeometry * _dimensions;
 	StiDefaultHitErrorCalculator _hitCalculator;
 };
 #endif 
