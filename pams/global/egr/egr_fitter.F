@@ -915,7 +915,7 @@ CCC  L.Ray - 9/16/98
             if(globtrk(i).invpt .ge. -999999. .and. globtrk(i).invpt .le. 999999.) then
                continue 
             else 
-               write(6,998) i
+*              write(6,998) i
 998   Format(5XFx,'BAD Value of globtrk(i=',I7,').invpt detected - set to -999999')
                globtrk(i).invpt = -999999.
                globtrk(i).iflag = -999
