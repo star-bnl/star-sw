@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.27 2001/11/02 20:50:03 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.28 2001/11/02 21:57:44 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.28  2001/11/02 21:57:44  genevb
+// Fix mistake in trigger word histogram
+//
 // Revision 2.27  2001/11/02 20:50:03  genevb
 // Changed histogram ranges for momenta
 //
@@ -193,7 +196,6 @@ Int_t StEventQAMaker::Make() {
         } else {
           mTrigWord->Fill(8.); // "Other"
         }
-        mTrigWord->Fill(TMath::Log2((Double_t) tword));
         for (int bitn=0; bitn<32; bitn++) {
           if (tword>>(bitn) & 1U)
             mTrigBits->Fill((Float_t) bitn);
