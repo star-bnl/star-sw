@@ -1,5 +1,8 @@
-// $Id: trs.C,v 1.2 1999/01/23 18:38:53 fisyak Exp $
+// $Id: trs.C,v 1.3 1999/01/28 00:11:55 fisyak Exp $
 // $Log: trs.C,v $
+// Revision 1.3  1999/01/28 00:11:55  fisyak
+// add g2r
+//
 // Revision 1.2  1999/01/23 18:38:53  fisyak
 // Cleanup for SL98l
 //
@@ -75,6 +78,8 @@
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
+class St_geant_Maker;
+St_geant_Maker *geant=0;
 void Load(){
   gSystem->Load("St_base");
   gSystem->Load("StChain");
@@ -82,29 +87,26 @@ void Load(){
   gSystem->Load("St_Tables");
   gSystem->Load("libscl");
   gSystem->Load("St_params_Maker");
-  //  gSystem->Load("geometry");
-  //  gSystem->Load("St_geant_Maker");
+  gSystem->Load("geometry");
+  gSystem->Load("g2r");
+  gSystem->Load("St_g2r");
+  gSystem->Load("St_geant_Maker");
   gSystem->Load("St_TLA_Maker");
   gSystem->Load("St_xdfin_Maker");
   gSystem->Load("StTrsMaker");
 }
-void trs(
-const Int_t Nevents=1,
-const Char_t *fileinp= "/afs/rhic/star/data/samples/hijet-g2t.xdf")
+void trs(const Int_t Nevents=1)
 {
   if (gClassTable->GetID("StChain") < 0) Load();
-  St_XDFFile   *xdf_in   = 0;
-  if (fileinp)  xdf_in   = new St_XDFFile(fileinp,"r");
   chain = new StChain("trs");
   St_params_Maker  *params = new St_params_Maker("params","params");
-  St_TLA_Maker       *geom = new St_TLA_Maker("geom","run/geant/Run");
-  //  St_geant_Maker   *geant = new St_geant_Maker("geant","event/geant/Event");
+  //  St_TLA_Maker       *geom = new St_TLA_Maker("geom","run/geant/Run");
+  geant = new St_geant_Maker("geant","event/geant/Event");
+  geant->SetNwGEANT(20 000 000);
+  //  geant->SetNwPAW(1000000);
+  geant->SetIwtype(1);
+  geant->Do("gfile p /disk1/star/test/psc0049_08_40evts.fzd");
   //  geant->LoadGeometry("detp geometry field_only");
-  if (xdf_in) {
-    St_xdfin_Maker *xdf = new St_xdfin_Maker("xdfin");
-    chain->SetInputXDFile(xdf_in);
-  }
-  St_TLA_Maker   *geant = new St_TLA_Maker("geant","event/geant/Event");
   StTrsMaker    *tpc_raw = new StTrsMaker("tpc_raw","event/raw_data/tpc");
   //  chain->PrintInfo();
 // Init the mai chain and all its makers
@@ -122,11 +124,6 @@ const Char_t *fileinp= "/afs/rhic/star/data/samples/hijet-g2t.xdf")
   }
   if (Nevents > 1) {
     chain->Finish();
-    delete xdf_in;
-    if (xdf_out){
-      delete xdf_out;;
-      gBenchmark->Print("xdf out");
-    }
     gBenchmark->Print("trs");
   }
   else b = new TBrowser;

@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.35 1999/01/26 16:04:13 fine Exp $
+// $Id: bfc.C,v 1.36 1999/01/28 00:11:54 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.36  1999/01/28 00:11:54  fisyak
+// add g2r
+//
 // Revision 1.35  1999/01/26 16:04:13  fine
 // GetEvent.C print out of the current input file name
 //
@@ -70,6 +73,8 @@ void Load(){
     gSystem->Load("libEG");
     gSystem->Load("St_evg_Maker");
     gSystem->Load("geometry");
+    gSystem->Load("g2r");
+    gSystem->Load("St_g2r");
     gSystem->Load("St_geant_Maker");
     gSystem->Load("St_TLA_Maker");
     gSystem->Load("tpc");
