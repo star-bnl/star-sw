@@ -40,15 +40,4 @@ class StiSvtDetectorBuilder : public StiDetectorBuilder
 	StSvtCoordinateTransform * _transform;
 	StiDefaultHitErrorCalculator * _calc;
 };
-
-
-inline double StiSvtDetectorBuilder::phiForSvtBarrelLadder(unsigned int layer, 
-							   unsigned int ladder) const
-{
-  if(layer<0 || layer>=getNRows())
-    cout << "phiForSvtLayerLadder(" << layer << ", " << ladder<< "): invalid layer" << endl;
-  if(ladder<0 || ladder>=getNSectors(layer))
-    cout << "phiForSvtLayerLadder(" << layer << ", " << ladder<< "): invalid ladder" << endl;
-  return phiForSector(ladder, getNSectors(layer));
-} // phiForSvtLayerLadder
 #endif 

@@ -163,16 +163,20 @@ void StiSvtHitLoader::loadHits(StEvent* source,
 		  detector = _detector->getDetector(layer,ladder);
 		  if (hit && detector && hit->flag()<4) 
 		    {
-		      cout << "StiSvtHitLoader::loadHits() - INFO - set global"<<endl;
 		      stiHit = _hitFactory->getInstance();
 		      stiHit->setGlobal(detector,hit,
 					hit->position().x(),
 					hit->position().y(),
 					hit->position().z(),
 					hit->charge() );
-		      cout << "push the hit back"<<endl;
 		      _hitContainer->push_back( stiHit );
-		      
+		      if (fabs(stiHit->y())>4.)
+			{
+			  cout << " hit from :"<<*detector<<endl;
+			  cout << " stHit-x"<<hit->position().x()<<" x:"<<stiHit->x()<<endl;
+			  cout << " stHit-y"<<hit->position().y()<<" y:"<<stiHit->y()<<endl;
+			  cout << " stHit-z"<<hit->position().z()<<" z:"<<stiHit->z()<<endl <<endl;
+			}
 		    }
 		}
 	    }
