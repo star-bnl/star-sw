@@ -58,8 +58,27 @@ public:
     bool hasMore() const;
     StiHit* getHit();
 
+    //Add vertex information
+    void addVertex(StiHit*); //push_back
+    void removeVertex(StiHit*); //look for, remove this vertex if found
+    void removeAllVertices(); //clear
+    unsigned int numberOfVertices() const;
+    
+    void resetVertexIterator(); //set iterator to begin()
+    
+    StiHit* vertex(unsigned int i) const;
+    StiHit* firstVertex() const; //first in container
+    StiHit* lastVertex() const; //last in container
+    StiHit* nextVertex(); //next in container
+    StiHit* previousVertex(); //previous
+    
 protected:
     StiHitContainer();
+
+private:
+    //Vertex implementation
+    hitvector mvertexvec; //! Container for primary vertices
+    hitvector::const_iterator mvertexiterator;
 
 private:
     static StiHitContainer* sinstance;
