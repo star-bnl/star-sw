@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichArea.cxx,v 2.6 2001/04/25 00:31:40 lasiuk Exp $
+ * $Id: StRichArea.cxx,v 2.7 2001/06/22 15:05:18 jeromel Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichArea.cxx,v $
+ *  Revision 2.7  2001/06/22 15:05:18  jeromel
+ *  Removed unused variables cosineOfD idist testangle
+ *
  *  Revision 2.6  2001/04/25 00:31:40  lasiuk
  *  HP changes.  removal of reprocessTraits()
  *
@@ -1645,7 +1648,7 @@ vector<StThreeVectorF> StRichArea::getMonteCarloPoints() {
 
 int StRichArea::monteCarloHitFinder(double angleCut,double& angle) {
 
-  double testangle=100;
+  //double testangle=100;
   int oldmethod=0;
   if (mCorrectForGap) {
     // gap check 
@@ -1695,7 +1698,7 @@ int StRichArea::monteCarloHitFinder(double angleCut,double& angle) {
     // Find the minimum distance to the InnerRing
     // from the hit
     //
-    float idist = (closestInnerRingPoint - mMonteCarloPoint).perp();
+    //float idist = (closestInnerRingPoint - mMonteCarloPoint).perp();
     
     
     mInnerRing->getPoint(innerAngle,pointOnRing);
@@ -1945,7 +1948,7 @@ int StRichArea::monteCarloHitFinder(double angleCut,double& angle) {
     //
     StThreeVectorF hitDVector = mMonteCarloPoint - newInnerPointOnRing;
     int signOfD = sign(lengthOfD*hitDVector);
-    float cosineOfD = lengthOfD.unit()*hitDVector.unit();
+    //float cosineOfD = lengthOfD.unit()*hitDVector.unit();
     // double normalizedD = signOfD * (abs(hitDVector)/abs(lengthOfD));
     double normalizedD = signOfD*(hitDVector.perp()/lengthOfD.perp());		
     
