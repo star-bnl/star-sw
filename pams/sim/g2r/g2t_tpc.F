@@ -14,7 +14,7 @@
      >                Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
       Equivalence     (QQ(1),IQQ(1),id)
 *    - - - - - - - - -
-      INTEGER         G2T_TPC,G2R_GET_HIT,Iprin,Idigi,Ip0,N,ish,npar,n0,i
+      INTEGER         G2T_TPC,G2R_GET_HIT,Iprin,Idigi,Ip0,N,ish,npar,n0,i,jtra
       REAL            G2T_FIELD,par(50),U(100),Pt,Vr,dphi,dtr,Vc,FieldZ
       logical         Local
       Character       Cp*20
@@ -30,21 +30,26 @@
 *
       i    = 0
       itra = 0
+      jtra = 0
       ip0  = 0
       n0   = 0
       g2t_tpc_hit_h.nok = 0
 *
       Do While (G2R_GET_HIT('tpc') .eq. 0)
 *
+*        skip short after-steps
+         If (Volume.eq.n0 .and. trac.eq.jtra .and. step.lt.0.01) go to 90
+*
          If (Volume.ne.n0) call Agfpara(ish,npar,par)
          If (Ish.ne.1)     print *,' Awful error in TPC, shape=',Ish,Npar
-         if (trac.ne.itra) call gfkine(trac,vert,pvert,ipart,ivert,U,n)
-         if (ipart.ne.ip0) call gfpart(ipart,cp,itrtyp,amass,charge,tlife,U,n)
          n0   = Volume
-         itra = trac
-         ip0  = ipart
+         jtra = trac
 *                             correct old straight line parametrization
          if (Elos.lt.0) then
+            if(trac.ne.itra)call gfkine(trac,vert,pvert,ipart,ivert,U,n)
+            if(ipart.ne.ip0)call gfpart(ipart,cp,itrtyp,amass,charge,tlife,U,n)
+            itra = trac
+            ip0  = ipart
             Vr   = 1.e9
             Pt   = p(4)*sqrt(c(1)**2+c(2)**2)
             if (Pt.gt.0)  Vr = 0.0003*FieldZ/Pt
@@ -57,7 +62,6 @@
 *                              flag uncomplete segments
          if (abs(Step*c(1)) .lt. 2*par(1)-0.1) Elos=-abs(Elos)
 *
-         if (step.ge.0.01 .or. charge.ne.0) then
             i=i+1
             g2t_tpc_hit_h.nok            = i
             g2t_tpc_hit(i).id            = i
@@ -89,8 +93,7 @@
             g2t_track(trac).hit_tpc_p    = i
             g2t_track(trac).n_tpc_hit    = g2t_track(trac).n_tpc_hit + 1
 
-         endif
-      enddo
+ 90   enddo
       RETURN
       END
 

@@ -1,5 +1,8 @@
-* $Id: g2rmain.g,v 1.3 2000/01/11 17:29:57 nevski Exp $
+* $Id: g2rmain.g,v 1.4 2000/01/12 00:08:51 nevski Exp $
 * $Log: g2rmain.g,v $
+* Revision 1.4  2000/01/12 00:08:51  nevski
+* clean-up: control skip headers, g2t/r tpc corrections speed-up
+*
 * Revision 1.3  2000/01/11 17:29:57  nevski
 * a separate g2t_field function provided to extract nominal field
 *
@@ -29,7 +32,7 @@ created   22 april 98
       structure GTTC  { int version, int nsys , char edir(3), char rdir(3)}
       structure dete  { onoff, char ctab, char spec, char csys, char cdet }
       structure deten { onoff, char ctab, char spec, char csys, char cdet }
-      Integer        G2R_MAIN,AgFHIT0,DUI_CDIR
+      Integer        G2R_MAIN,DUI_CDIR,AgHITSET
       Integer        TDM_NEW_TABLE,AMI_CALL,G2T_NEW_TABLE
       External       TDM_NEW_TABLE,AMI_CALL,G2T_NEW_TABLE
       Integer        i,j,ld,nhits,nnhits,Iprin
@@ -182,8 +185,9 @@ created   22 april 98
 
       IQUEST(1)=IEOTRI+1
       if (.not. ( NTRACK>0 & NVERTX>0 & IEOTRI==0) ) then
-         prin1 IQUEST(1); (' g2r quiting with IQUEST(1)=',i7)
-         prin1 NTRACK,NVERTX,IEOTRI; (' NTRACK,NVERTX,IEOTRI=',3i7)
+         If (NTRACK+NVERTX>0) <w>;(' G2R: something wrong !')
+         If (NTRACK+NVERTX+IEOTRI>0) <w> NTRACK,NVERTX,IEOTRI
+            (' G2R: quit with NTRACK,NVERTX,IEOTRI=',3i7)
          return
       endif
 *     map ghea_* headers and  hepe_* particle tables:
@@ -206,34 +210,30 @@ created   22 april 98
       prin5 i; (' g2tmain: get_kine done with i=',i6)
 
       Use GTTC
-      ctabo = ' '
+
+      nnhits = 0
       do j=1,GTTC_Nsys
 
         use dete (j) 
-        use deten(j+1)
 
-        Nhits=0
-        If (dete_onoff>0) call  GFNHIT  (dete_Csys(1:3)//'H',dete_Cdet,Nhits)
-
+        call GFNHIT (dete_Csys(1:3)//'H',dete_Cdet,Nhits)
         ctab='g2t_'//dete_ctab(1:3)//'_hit'//o
-        prin3 ctab,dete_Csys,dete_Cdet,nhits
+        prin4 ctab,dete_Csys,dete_Cdet,nhits
         (' in G2Tmain: found ',3(1x,a),'   Nhits = ',i6)
-
-        if (ctabo .ne. ctab ) nnhits = 0
-        ctabo  = ctab
         nnhits = nnhits + Nhits
 
-        check dete_ctab != deten_ctab & nnhits>0
+        use deten(j+1) 
+        check dete_ctab != deten_ctab & nnHits>0
 
         i = G2T_NEW_TABLE (ctab, dete_spec, nnhits)
-        prin5 i; (' g2rmain ===> tdm table for g2t_hits = ',i6)
+        prin3 i,nnhits; (' g2rmain ===> tdm table for g2t_hits = ',2i6)
 
-        names(1)='g2t_track'//o
-        names(2)=ctab
-        hitter  ='g2t_'//dete_Ctab(1:3)//o
-
-        i = AMI_CALL (hitter,2,names)
+        names(1) = 'g2t_track'//o
+        names(2) =  ctab
+        hitter   = 'g2t_'//dete_Ctab(1:3)//o
+        i        =  AMI_CALL (hitter,2,names)
         prin5 hitter,i; (' g2rmain ===> ami_call ',a7,' = ',i6)
+        nnhits   = 0
 
       enddo
 *
