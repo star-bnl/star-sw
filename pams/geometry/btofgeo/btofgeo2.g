@@ -1,7 +1,10 @@
-* $Id: btofgeo2.g,v 1.7 2004/02/25 19:21:33 llope Exp $
+* $Id: btofgeo2.g,v 1.8 2004/03/12 20:32:29 llope Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo2.g,v $
+* Revision 1.8  2004/03/12 20:32:29  llope
+* only added print statement to confirm "choice" selection at run-time
+*
 * Revision 1.7  2004/02/25 19:21:33  llope
 * fine-tuning TOFp and TOFr for Run-IV - use choice=7 for these
 *
@@ -357,6 +360,9 @@ Block BTOF is the whole CTF system envelope
       Material  Air
       Medium    Standard
       Shape     Tube      rmin=btog_Rmin  Rmax=btog_Rmax  dz=btog_dz
+
+	  if (btog_choice == 7) print *,' TOF: btog_choice=7: This is the Run-IV geometry...'
+
       choice = 1                                     ! ctb
       if (btog_choice == 2) choice=btog_choice       ! full tofp
       if (btog_choice == 6) choice=btog_choice       ! full tofr
