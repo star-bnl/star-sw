@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.32 2002/01/21 22:10:38 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.33 2002/01/22 02:53:09 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.33  2002/01/22 02:53:09  jcs
+// remove extra test from if statement
+//
 // Revision 1.32  2002/01/21 22:10:38  jcs
 // calculate FTPC gas temperature adjusted air pressure using online db
 //
@@ -331,7 +334,7 @@ Int_t StFtpcClusterMaker::Make()
           return kStWarn;
       }
       // Barometric Pressure
-      if (gas->getBarometricPressure() >= paramReader->minPressure() && gas->getBarometricPressure() <= paramReader->maxPressure() && gas->getBarometricPressure() != paramReader->normalizedNowPressure()) {
+      if (gas->getBarometricPressure() >= paramReader->minPressure() && gas->getBarometricPressure() <= paramReader->maxPressure()) {
           gMessMgr->Info() <<"Change normalizedNowPressure from "<<paramReader->normalizedNowPressure()<<" to "<<gas->getBarometricPressure()<<endm; 
           paramReader->setNormalizedNowPressure(gas->getBarometricPressure());
       }
