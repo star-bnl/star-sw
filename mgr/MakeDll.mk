@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.40 1998/12/12 00:58:33 fisyak Exp $
+# $Id: MakeDll.mk,v 1.41 1998/12/17 18:01:16 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.41  1998/12/17 18:01:16  fisyak
+# remove duplicated includes
+#
 # Revision 1.40  1998/12/12 00:58:33  fisyak
 # remove STAF
 #
@@ -133,7 +136,8 @@ INC_DIRS :=$(strip \
            $(foreach dir, $(OUT_DIR)/.share/ $(ROOT_DIR)/StRoot/ $(STAR)/.share/ $(STAR)/StRoot/,\
            $(wildcard $(addprefix $(dir),$(INC_NAMES)))) \
            $(wildcard $(OUT_DIR)/.share $(STAR)/.share $(SRC_DIR) $(SRC_DIR)/include $(GEN_DIR) $(ROOT_DIR)/inc  $(STAR)/inc  $(STAF_UTILS_INCS)) \
-                      $(ROOTSYS)/src )
+                      $(ROOTSYS)/src \
+           $(STAF_SYS_INCS) $(CERN_ROOT)/include $(SRC_DIR) $(GEN_TAB) $(GEN_DIR))
 INCINT := $(INC_DIRS)
 ifdef NT
 INC_DIRS := $(INC_DIRS) $(SUNRPC)
@@ -153,9 +157,7 @@ ifdef NT
 endif
 
 
-CPPFLAGS += -D__ROOT__ -I$(STAF_SYS_INCS) \
-             $(addprefix -I, $(SRC_DIR) $(GEN_TAB) $(GEN_DIR) $(INC_DIRS)) \
-            -I$(CERN_ROOT)/include
+CPPFLAGS += -D__ROOT__ 
 
 #
 #	If NO source , NOTHING to do
