@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <TITLE>Cons - Software Construction System</TITLE>
-<LINK REV="made" HREF="mailto:lionel.cons@cern.ch">
+<LINK REV="made" HREF="mailto:root@porky.devel.redhat.com">
 </HEAD>
 
 </TITLE> 
@@ -2824,6 +2824,67 @@ dependencies are calculated automatically from a combination of the
 explicit dependencies set up by the method invocation or by scanning source
 files.
 
+<P>
+A set of identical dependencies for multiple targets may be specified using
+a reference to a list of targets. In Perl, a list reference can be created
+by enclosing a list in square brackets. Hence the following command:
+
+<P>
+<PRE>  Depends $env ['foo', 'bar'], 'input_file_1', 'input_file_2';
+</PRE>
+<P>
+specifies that both the <EM>foo</EM> and <EM>bar</EM> files depend on the listed input files.
+
+<P>
+<HR>
+<H2><A NAME="The_C_Ignore_method">The &lt;CODE&gt;Ignore&lt;/CODE&gt; method</A></H2>
+<P>
+The <CODE>Ignore</CODE> method allows you to ignore explicitly dependencies that Cons infers on its
+own. It is invoked as follows:
+
+<P>
+<PRE>  Ignore &lt;patterns&gt;;
+</PRE>
+<P>
+This can be used to avoid recompilations due to changes in system header
+files or utilities that are known to not affect the generated targets.
+
+<P>
+If, for example, a program is built in an NFS-mounted directory on multiple
+systems that have different copies of <EM>stdio.h</EM>, the differences will affect the signatures of all derived targets built
+from source files that <CODE>#include &amp;lt;stdio.h&amp;gt;</CODE>. This will cause all those targets to be rebuilt when changing systems. If
+this is not desirable behavior, then the following line will remove the
+dependencies on the <EM>stdio.h</EM> file:
+
+<P>
+<PRE>  Ignore '^/usr/include/stdio\.h$';
+</PRE>
+<P>
+Note that the arguments to the <CODE>Ignore</CODE> method are regular expressions, so special characters must be escaped and
+you may wish to anchor the beginning or end of the expression with <CODE>^</CODE> or <CODE>$</CODE> characters.
+
+<P>
+<HR>
+<H2><A NAME="The_C_Salt_method">The &lt;CODE&gt;Salt&lt;/CODE&gt; method</A></H2>
+<P>
+The <CODE>Salt</CODE> method adds a constant value to the signature calculation for every derived
+file. It is invoked as follows:
+
+<P>
+<PRE>  Salt $string;
+</PRE>
+<P>
+Changing the Salt value will force a complete rebuild of every derived
+file. This can be used to force rebuilds in certain desired circumstances.
+For example,
+
+<P>
+<PRE>  Salt `uname -s`;
+</PRE>
+<P>
+Would force a complete rebuild of every derived file whenever the operating
+system on which the build is performed (as reported by <CODE>uname
+-s</CODE>) changes.
 
 <P>
 
@@ -3180,8 +3241,22 @@ them. If you want to know what script installs <CODE>export/include/foo.h</CODE>
 
 <PRE>  cons -pw export/include/foo.h
 </PRE>
+<P>
+The subroutine referenced by CODEREF is expected to return a list of
+filenames included directly by FILE. These filenames will, in turn, be
+scanned. The optional PATH argument supplies a lookup path for finding
+FILENAME and/or files returned by the user-supplied subroutine. The PATH
+may be a reference to an array of lookup-directory names, or a string of
+names separated by the system's separator character (':' on UNIX systems,
+';' on Windows NT).
 
 <P>
+The subroutine is called once for each line in the file, with
+<CODE>$_</CODE> set to the current line. If the subroutine needs to look at
+additional lines, or, for that matter, the entire file, then it may read
+them itself, from the filehandle SCAN. It may also terminate the loop, if
+it knows that no further include information is available, by closing the
+filehandle.
 
 <H1><A NAME="B_Using_and_writing_dependency_s"><STRONG>Using and writing dependency scanners</STRONG>
 
