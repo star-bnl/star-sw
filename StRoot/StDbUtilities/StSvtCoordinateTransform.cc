@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.6 2001/02/07 19:14:25 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.7 2001/02/10 20:44:25 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -157,7 +157,7 @@ void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StGloba
 
   StThreeVector<double> x(0,0,0);
   
-  LocaltoGlobal(a, x);
+  LocaltoGlobal(a, x, -1);
   
   b.setPosition(x);
 		 
@@ -301,7 +301,7 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
     }
     if( Found) break;
     ibarrel++;
-  }while (ibarrel<barrel*2);
+  }while (ibarrel<=barrel*2);
   
   if( !Found && ladderMax !=0){
     
@@ -329,7 +329,7 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
     b.setLayer(ibarrel);
     b.setLadder(iladder);
     
-    GlobaltoLocal( a.position(), b, HardWarePos);
+    GlobaltoLocal( a.position(), b, HardWarePos, -1);
 
     b.setHybrid(2);
     if( b.position().x() < 0) b.setHybrid(1);
@@ -339,7 +339,7 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
 
 //_____________________________________________________________________________
 
-void  StSvtCoordinateTransform::LocaltoGlobal(const StSvtLocalCoordinate& a, StThreeVector<double>& x){
+int StSvtCoordinateTransform::LocaltoGlobal(const StSvtLocalCoordinate& a, StThreeVector<double>& x, int index){
 /***********************************************************************/
 /*                       TRANSFORMATION ROUTINES                       */
 
@@ -366,24 +366,26 @@ void  StSvtCoordinateTransform::LocaltoGlobal(const StSvtLocalCoordinate& a, StT
   //     Error Conditions: none
 
   float xl[3];
-  int index, HardWarePos, Gotit=0;
+  int  HardWarePos, Gotit=0;
 
-  HardWarePos = 1000*a.layer()+100*a.wafer()+a.ladder();
-  for( index=0; index< 216; index++){
-    if( mgeom[index].id ==  HardWarePos) {
-      Gotit++;
-      break;
+
+  if( index < 0){
+    HardWarePos = 1000*a.layer()+100*a.wafer()+a.ladder();
+    for( index=0; index< 216; index++){
+      if( mgeom[index].id ==  HardWarePos) {
+	Gotit++;
+	break;
+      }
     }
+    
+    if( !Gotit) {
+      x.setX(-999);
+      x.setY(-999);
+      x.setZ(-999);
+      return 0;
+    }
+    
   }
-  
-  if( !Gotit) {
-    x.setX(-999);
-    x.setY(-999);
-    x.setZ(-999);
-    return;
-  }
-  
-  
   xl[0] = a.position().x();
   xl[1] = a.position().y();
   xl[2] = a.position().z();
@@ -392,11 +394,12 @@ void  StSvtCoordinateTransform::LocaltoGlobal(const StSvtLocalCoordinate& a, StT
   x.setY(mgeom[index].x[1] + xl[0]*mgeom[index].d[1] + xl[1]*mgeom[index].t[1] + xl[2]*mgeom[index].n[1]);
   x.setZ(mgeom[index].x[2] + xl[0]*mgeom[index].d[2] + xl[1]*mgeom[index].t[2] + xl[2]*mgeom[index].n[2]); 
   
+  return index;
 }
 
 //___________________________________________________________________________
 
-void StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StSvtLocalCoordinate& b , int HardWarePos  )
+int StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StSvtLocalCoordinate& b , int HardWarePos, int index  )
 {
 
 /*     DESCRIPTION:   global to local mapping for svt points
@@ -423,28 +426,30 @@ void StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, St
        c
 */
 
-  int index, Gotit=0;
+  int Gotit=0;
   float  xl[3];
   
   //     Executable Code
   //     ===============
   
 
-  for( index=0; index< 216; index++){
-    if( mgeom[index].id == HardWarePos ) {
-      Gotit++;
-      break;
+  if( index < 0){
+    for( index=0; index< 216; index++){
+      if( mgeom[index].id == HardWarePos ) {
+	Gotit++;
+	break;
+      }
     }
+    
+    
+    if( !Gotit) {
+      b.position().setX(-998);
+      b.position().setY(-998);
+      b.position().setZ(-998);
+      return -1;
+    }
+    
   }
-  
-
-  if( !Gotit) {
-    b.position().setX(-999);
-    b.position().setY(-999);
-    b.position().setZ(-999);
-    return;
-  }
-
   
   xl[0] = x.x() - mgeom[index].x[0];
   xl[1] = x.y() - mgeom[index].x[1];
@@ -452,7 +457,9 @@ void StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, St
   
   b.position().setX(xl[0]*mgeom[index].d[0] + xl[1]*mgeom[index].d[1] + xl[2]*mgeom[index].d[2]);
   b.position().setY(xl[0]*mgeom[index].t[0] + xl[1]*mgeom[index].t[1] + xl[2]*mgeom[index].t[2]);
-  b.position().setZ(xl[0]*mgeom[index].n[0] + xl[1]*mgeom[index].n[1] + xl[2]*mgeom[index].n[2]); 
+  b.position().setZ(xl[0]*mgeom[index].n[0] + xl[1]*mgeom[index].n[1] + xl[2]*mgeom[index].n[2]);
+ 
+  return index;
   
 }
 
@@ -569,7 +576,7 @@ int StSvtCoordinateTransform::IsOnWaferZ(   const StThreeVector<double>& GlobalP
   StSvtLocalCoordinate LocalPosition;
 
 
-  GlobaltoLocal(GlobalPosition, LocalPosition, HardWarePos);
+  GlobaltoLocal(GlobalPosition, LocalPosition, HardWarePos, -1);
 
   if( LocalPosition.position().y() > -3. && LocalPosition.position().y() < 3.)
     return 1;
@@ -586,9 +593,13 @@ int StSvtCoordinateTransform::IsOnWaferR(   const StThreeVector<double>& GlobalP
 
   StSvtLocalCoordinate LocalPosition;
 
-  GlobaltoLocal(GlobalPosition, LocalPosition, HardWarePos);
+  GlobaltoLocal(GlobalPosition, LocalPosition, HardWarePos, -1);
 
-  if( LocalPosition.position().x() > -3. && LocalPosition.position().x() < 3.)
+
+  if( LocalPosition.position().x() > -3.    &&
+      LocalPosition.position().x() < 3.     &&
+      LocalPosition.position().z() > -.05   &&
+      LocalPosition.position().z() < .05    )
     return 1;
   else
     return 0;
