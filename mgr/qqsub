@@ -1,10 +1,13 @@
 #!/bin/csh -f
-set batch = `echo ${*} | sed -e 's/ /_/g'`
+set run = $1
+shift
+set batch = r`echo ${*} | sed -e 's/ //g' -e 's/-/_/g'`
+echo ${batch}
 rm -f ${batch}
 cat > ${batch} <<EOF
-${*}
+${run} ${*}
 EOF
 more ${batch}
 set PWD = `pwd`
-/usr/local/bin/qsub ${PWD}/${batch}  
-
+echo /usr/local/bin/qsub -M ${USER} ${PWD}/${batch}
+/usr/local/bin/qsub -M ${USER} ${PWD}/${batch}   
