@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.34 1999/11/12 18:12:37 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.35 1999/11/16 14:40:15 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -436,7 +436,8 @@ Int_t StEventDisplayMaker::Make()
          if (Debug()) Warning("Make","No object \"%s\" found",foundName);
          continue;
       }
-      if (event->InheritsFrom("St_Table") && (( type == 5) || (type == 1)) ) 
+      if (event->InheritsFrom("St_Table") && 
+          (( type == 5) || (type == 1) || (type == 2)) ) 
       {
         //  ----- Draw "table" events -------------------------- //
           m_Table = (St_Table *)event;                           //
@@ -805,6 +806,7 @@ Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEvent
               printf(" no track position %d\n",trackCounter);
            }
         }
+        else if (trackColor == -1) break;
       }
     }
   }
@@ -852,6 +854,7 @@ Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFi
          nextKeyIndx += s; 
          if (!pp && totalHits) printf(" no track position %d\n",totalHits);
        }
+       else if (hitColor == -1) break;
        else {
          const void *newID = track2Line->GetKeyAddress(nextKeyIndx);
          nextKeyIndx      += track2Line->CountKey(newID,nextKeyIndx,kFALSE); 
@@ -963,6 +966,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 // --  end of filter list --
 
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.35  1999/11/16 14:40:15  fine
+// reference type has been introduced
+//
 // Revision 1.34  1999/11/12 18:12:37  fine
 // SVT view has been introduced
 //
