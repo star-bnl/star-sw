@@ -6,41 +6,27 @@ C
 #include "math_constants.inc"
 
 C
-      REAL    trk(6),rr,xc(2)
-      INTEGER nmax,i,l,ipad1(8),ipad2(5),ipad3(31)
-      REAL    dia,zpl,bf,sav2
-      REAL    ypad(45),xwidth(45),x(2),y(2),x1,x2,f2,y0
-C     
-      DATA ipad1/0,8,8,8,6,8,8,8/
-      DATA ipad2/8,6,10,8,10/
-      DATA ipad3/4*2,0,3*2,0,5*2,0,3*2,0,4*2,0,4*2,3*0/
-      
-C//  first job is to initialize ypad, xwidth ( lengths in cm )
-      ypad(1) = 60.0            !radial position of innermost padrow
-      xwidth(1) = 29.48         !full width 88pads x .335 cm spacing 
-      DO i =2,8
-         ypad(i) = ypad(i -1) + 4.8
-         xwidth(i) = xwidth(i -1) +  float(ipad1(i))*.335
-      ENDDO
-      DO i =9,13
-         ypad(i) = ypad(i-1) + 5.20
-	 xwidth(i) = xwidth(i-1) +  float(ipad2(i-8))*.335
-      ENDDO
-C     // 14th row is first padrow in the outer sector
-      ypad(14) = ypad(13) + 7.6 !radial position of first outer sector padrow
-      xwidth(14) = 65.77        !98 pads x .67 cm spacing
-      DO i = 15,45
-         ypad(i) = ypad(i-1) +2.00
-         xwidth(i) = xwidth(i-1) + float(ipad3(i-14))*.67
-      ENDDO
-      
-C***  z position of padplane
+      REAL    trk(6),rr,xc(2)               !TPC parametrization (tpt_track.idl)
+      INTEGER nmax,i,k,l
+      REAL    ath(2),dia,b,zpl,hit(8),bf,sav2
+      REAL    ypad(2),x(8),y(8),x1,x2,f2,y0
+
+C***Angles of sector-1 sides and y0 in y=y0+ath(i)*x
+      ath(1) = tan(1.31)
+      ath(2) = tan(1.83)     
+      y0     = 5.25   
+
+C***y positions of first/last padrow
+      ypad(1) = 59.9
+      ypad(2) = 189.5
+
+C*** z position of padplane
       zpl = 210.
       
 C***  Rotate track so its sector pads are normal to y-axis
 C***  Watch out. This is not as trivial as it seems.
       sav2 = trk(2)
-      IF(amod(trk(2),0.5236).gt.0.2618) THEN !0.2618 = 15 degrees
+      IF(amod(trk(2),0.5236).gt.0.2618) THEN  !0.2618 = 15 degrees
          trk(2)=amod(trk(2),0.5236)+1.0472 !only 60 degrees
       ELSE
          trk(2)=amod(trk(2),0.5236)+1.5708 ! 0.5236 = 30 degrees
@@ -54,53 +40,182 @@ C***  Loop over three adjacent sectors
       trk(2) = trk(2) - 2.*0.5236
       trk(4) = trk(4) - 2.*0.5236
       DO 75 l=1,3
-         
+
 C***  Clear variables
-         DO i=1,2
+         DO i=1,8
             x(i) = 0.
             y(i) = 0.
          ENDDO
-         
+
          trk(2) = trk(2) + 0.5236
          trk(4) = trk(4) + 0.5236
          call nmax_circle_param(trk,xc,rr,bf)         
          
+C***  Intersections of track circle with sector sides (line)
+         k = 0
+         DO 15 i=1,2
+            b = ath(i)*xc(1)+y0-xc(2)
+            dia=(ath(i)*b)*(ath(i)*b)-(1+ath(i)*ath(i))*(b*b-rr*rr)
+            IF(dia.lt.0.) goto 15 ! No solution
+            
+            x1 = (-ath(i)*b + sqrt(dia))/(1 + ath(i)*ath(i))
+            x2 = (-ath(i)*b - sqrt(dia))/(1 + ath(i)*ath(i))
+C***  First pair of possible solutions
+            x(k+1) = x1 + xc(1)
+            y(k+1) = y0 + ath(i)*x(k+1)
+C***  Second pair
+            x(k+2) = x2 + xc(1)
+            y(k+2) = y0 + ath(i)*x(k+2)
+            
+            IF(y(k+1).le.60.) y(k+1)=0.
+            IF(y(k+2).le.60.) y(k+2)=0.
+            IF(y(k+1).ge.189.5) y(k+1)=0.
+            IF(y(k+2).ge.189.5) y(k+2)=0.
+            
+            k = k + 2
+            
+ 15      CONTINUE   
          
 C***  Intersections of track with first-last padrow
-         DO 30 i=1,45
-            IF( (trk(5).ne.0.).and.
-     +           (ypad(i).le.(abs(trk(1)*sin(trk(2)))+
-     +           (zpl-abs(trk(3)))/abs(trk(5))))
-     +           ) THEN
-               f2 = (ypad(i)-xc(2))*(ypad(i)-xc(2))
-               dia = rr*rr - f2
-               IF(dia.lt.0.) goto 30 ! No solution
-               
-               x1 =  sqrt(dia)
-               x2 = -sqrt(dia)
+         DO 30 i=1,2
+            f2 = (ypad(i)-xc(2))*(ypad(i)-xc(2))
+            dia = rr*rr - f2
+            IF(dia.lt.0.) goto 30 ! No solution
+            
+            x1 =  sqrt(dia)
+            x2 = -sqrt(dia)
 C***  First pair of possible solutions
-               x(1) = x1 + xc(1)
+            x(k+1) = x1 + xc(1)
+            y(k+1) = ypad(i)
 C***  Second pair
-               x(2) = x2 + xc(1)
-               
-               IF( abs(x(1)).lt.0.5*xwidth(i) ) nmax = nmax + 1
-               IF( abs(x(2)).lt.0.5*xwidth(i) ) nmax = nmax + 1
+            x(k+2) = x2 + xc(1)
+            y(k+2) = ypad(i)
+
+            IF(i.eq.1) THEN     !inner padrow limits left-right
+               IF( abs(x(k+1)).gt.14.74 ) y(k+1)=0.
+               IF( abs(x(k+2)).gt.14.74 ) y(k+2)=0.
+            ELSE                !outer padrow limits left-right
+               IF( abs(x(k+1)).gt.48.24 ) y(k+1)=0.
+               IF( abs(x(k+2)).gt.48.24 ) y(k+2)=0.
             ENDIF
+            
+            k = k + 2
+
  30      CONTINUE
+
+C***  Deal with spirals contained within a sector with up/down touching
+
+         IF( (k.eq.2).and.(l.eq.2).and.(y(1).eq.y(2)) ) THEN
+            IF( abs(y(2)-xc(2)).lt.rr ) THEN
+               hit(1)=xc(2)-rr
+               hit(2)=y(2)
+            ELSE
+               hit(1)=y(1)
+               hit(2)=xc(2)+rr
+            ENDIF
+            IF(hit(1).le.123) THEN ! inner sector
+               IF(hit(2).le.123) THEN
+                  nmax = int(abs(hit(2)-hit(1))/5.)
+               ELSE             ! some inner, some outer
+                  nmax = int(abs(123.-hit(1))/5.) + 1
+                  nmax = nmax + int(abs(127.2-hit(2))/2.) + 1
+               ENDIF
+            ELSE                ! outer sector
+               nmax = nmax + int(abs(hit(2)-hit(1))/2.)
+            ENDIF   
+            nmax = 2*nmax - 1     ! spiral loops around
+            GOTO 90
+         ENDIF
+
+C***  Deal with spirals contained within a sector with side touching
+
+         IF( (k.eq.2).and.(l.eq.2) ) THEN
+            IF( abs(y(1)-y(2)).lt.(2.*rr) ) THEN
+               hit(1)=xc(2)-rr
+               hit(2)=xc(2)+rr
+               IF(hit(1).le.123) THEN ! inner sector
+                  IF(hit(2).le.123) THEN
+                     nmax = int(abs(hit(2)-hit(1))/5.)
+                  ELSE          ! some inner, some outer
+                     nmax = int(abs(123.-hit(1))/5.) + 1
+                     nmax = nmax + int(abs(127.2-hit(2))/2.) + 1
+                  ENDIF
+               ELSE             ! outer sector
+                  nmax = nmax + int(abs(hit(2)-hit(1))/2.)
+               ENDIF   
+               nmax = 2*nmax - 3 ! spiral loops around
+               GOTO 90
+            ENDIF
+         ENDIF
+C***  Deal with spirals contained within a sector w/out touching
+
+         IF( (k.eq.0).and.(l.eq.2) ) THEN
+            hit(1)=xc(2)-rr
+            hit(2)=xc(2)+rr
+            IF(hit(1).le.123) THEN ! inner sector
+               IF(hit(2).le.123) THEN
+                  nmax = int(abs(hit(2)-hit(1))/4.95)
+               ELSE             ! some inner, some outer
+                  nmax = int(abs(123.-hit(1))/4.95) + 1
+                  nmax = nmax + int(abs(127.2-hit(2))/2.) + 1
+               ENDIF
+            ELSE                ! outer sector
+               nmax = nmax + int(abs(hit(2)-hit(1))/2.)
+            ENDIF   
+            nmax = 2*nmax - 2     ! spiral loops around
+            GOTO 90
+         ENDIF
+
+
+C***  Arrange possible solutions in increasing y-order
+         
+         DO 45 i=1,8
+            hit(i)=0.
+            IF( (trk(5).ne.0.).and.
+     +    (y(i).gt.(abs(trk(1)*sin(trk(2)))+
+     +    (zpl-abs(trk(3)))/abs(trk(5))))
+     +        ) THEN
+      hit(i) = abs(trk(1)*sin(trk(2)))+
+     +    (zpl-abs(trk(3)))/abs(trk(5))
+            ELSE
+               hit(i) = y(i)
+            ENDIF
+            IF(y(i).le.59.) hit(i) = 200.
+ 45      CONTINUE
+         k = 8
+C***  short the "hit" array (name 'hit' is misleading)
+         CALL FLPSOR(hit,k)
+c         CALL MY_SORT(hit) !my slow sorting routine
+
+         
+C***  Calculate padrow crossings
+         DO 60 i=1,8,2
+            IF(hit(i).gt.190.) goto 75 ! jump out, no solutions
+            IF(hit(i).le.123) THEN ! inner sector
+               IF(hit(i+1).le.123) THEN
+                  nmax = nmax + int(abs(hit(i+1)-hit(i))/4.95)  !average spacing in inner sector
+               ELSE             ! some inner, some outer
+                  nmax = nmax + int(abs(123.-hit(i))/4.95) + 1
+                  nmax = nmax + int(abs(127.2-hit(i+1))/2.) + 1
+               ENDIF
+            ELSE                ! outer sector
+               nmax = nmax + int(abs(hit(i+1)-hit(i))/2.)
+            ENDIF   
+ 60      CONTINUE
          
          
  75   CONTINUE                  ! over three sectors
-      
+
  90   IF(nmax.eq.0) nmax = 2    ! protect divisions
-      
+
       RETURN
       END
 C=======================================================================
-      
-      SUBROUTINE nmax_circle_param(trk,xc,r,beta)
+
+       SUBROUTINE nmax_circle_param(trk,xc,r,beta)
       IMPLICIT NONE
 C   Input arguments  :	trk(6)	!Helix parameters of track
-C                               !radius of circle
+C			r	!radius of circle
 C                       beta    !MAg field in tesla
 C   Output arguments :	xc(2)	!coordinates of the centre of circle
 C   Functional Description : Returns the x-y coordinates and the radius
@@ -195,6 +310,29 @@ C-SM       IF(iflag.eq.5) THEN
   999 CONTINUE
       RETURN
       END
+
+C***********************************************************************
+
+      SUBROUTINE MY_SORT(a)
+      IMPLICIT NONE
+      REAL     a(8), temp
+      INTEGER  i, j
+
+      DO  i=1,7
+         DO  j=(i+1),8
+         IF(a(i).gt.a(j)) THEN
+            temp = a(i)
+            a(i) = a(j)
+            a(j) = temp
+         ENDIF
+         ENDDO
+      ENDDO
+
+
+      RETURN
+      END
+
+
 
 
 

@@ -1,3 +1,21 @@
+#if 0
+#ifdef __CINT__
+
+#pragma link off all globals;
+#pragma link off all classes;
+#pragma link off all functions;
+#pragma link C++ class StRegistry-;
+#pragma link C++ class StObjArrayIter-;
+#pragma link C++ class StObjArray-;
+#pragma link C++ class StRefArray-;
+#pragma link C++ class StStrArray-;
+#pragma link C++ class QWERTY;
+#pragma link C++ class QWERTYRef-;
+#pragma link C++ class QWERTYStr-;
+#pragma link C++ class QWERTYIter-;
+#pragma link C++ function testqwe();
+#endif //__CINT__
+#endif // 0
 #ifndef _StRegistry_
 #define _StRegistry_
  
@@ -12,33 +30,151 @@
 //////////////////////////////////////////////////////////////////////////
  
 #include <assert.h>
-#include "TString.h"
+#include "TList.h"
+#include "TObjArray.h"
+#include "TNamed.h"
 #include "StObject.h"
-#include <vector>
 
+class StObject;
 class StObjArray;
 class StStrArray;
 class StRefArray;
-typedef vector<TObject*> VecTObj;
-typedef vector<TObject*>::iterator VecTObjIter;
-typedef VecTObjIter StObjArrayIter;
-typedef VecTObjIter StStrArrayIter;
-typedef VecTObjIter StRefArrayIter;
+class StRegistry : public TObject
+{
+ protected: 
+    static TObjArray *fgReg;				// pointer to container of containers
+    static Int_t      fgFree;
+ public:
+ StRegistry(){};
+ static void Clear();
+ static Int_t SetColl (StStrArray *coll); 		// Register new container
+ static void  RemColl (StStrArray *coll); 		// UnRegister container
+ static Int_t GetColl (const char *name); 	 	// get index of container
+ static const char    *GetCollName (Int_t idx );	// get name of cont by index
+ static StStrArray    *GetColl (Int_t idx );		// get name of cont by index
+ static void  List() ;					// print list of registered conts    
+ static UInt_t Ident(Int_t colidx,Int_t objidx);
+ static void    Ident(UInt_t ident,Int_t &colidx,Int_t &objidx);
+ static Int_t GetNColl();				// Number of collections
+ static void  Init();
+ClassDef(StRegistry,0)
+};
+class StObjArrayIter;
+//	Intermediate class differs from TObjArray only by one supressed method [] 
+class StTObjArray : public TSeqCollection {
 
-class StObjArray : public VecTObj , public StObject {
-public:
-             StObjArray(){}
-   virtual  ~StObjArray(){}
-virtual void Browse(TBrowser *b);
-virtual void random_shuffle(int start,int end);
-virtual Bool_t IsFolder();
+    protected:
+    TObjArray *fArr;
+    public:
 
-private:
-TString fName;
+                         StTObjArray(Int_t s = TCollection::kInitCapacity, Int_t lowerBound = 0)
+                         { fArr = new TObjArray(s,lowerBound); }
+                         StTObjArray(const StTObjArray& a){ fArr = new TObjArray(*a.fArr);}
+            virtual  ~StTObjArray(){delete fArr;}
+            virtual void operator =(const StTObjArray &a){ delete fArr;fArr = new TObjArray(*a.fArr);} 
+            virtual void Add(TObject* obj){fArr->Add(obj);}
+            virtual void AddAfter(TObject* after, TObject* obj){fArr->AddAfter(after,obj);}
+            virtual void AddAt(TObject* obj, Int_t idx){fArr->AddAt(obj,idx);}
+            virtual void AddAtAndExpand(TObject* obj, Int_t idx){fArr->AddAtAndExpand(obj,idx);}
+            virtual Int_t AddAtFree(TObject* obj){return fArr->AddAtFree(obj);}
+            virtual void AddBefore(TObject* before, TObject* obj){fArr->AddBefore(before,obj);}
+            virtual void AddFirst(TObject* obj){fArr->AddFirst(obj);}
+            virtual void AddLast(TObject* obj){fArr->AddLast(obj);}
+        virtual TObject* After(TObject* obj) const {return fArr->After(obj);}
+        virtual TObject* At(Int_t idx) const {return fArr->At(idx);}
+        virtual TObject* Before(TObject* obj) const {return fArr->Before(obj) ;}
+           virtual Int_t Capacity() const { return fArr->Capacity();}
+            virtual Int_t BinarySearch(TObject* obj, Int_t upto = kMaxInt){return fArr->BinarySearch(obj,upto);}
+            virtual void Clear(Option_t* option=""){fArr->Clear(option);}
+            virtual void Compress(){fArr->Compress();}
+            virtual void Delete(Option_t* option=""){fArr->Delete(option);}
+            virtual void Expand(Int_t newSize){fArr->Expand(newSize);}
+        virtual TObject* First() const {return fArr->First() ;}
+           virtual Int_t GetEntries() const {return fArr->GetEntries();}
+           virtual Int_t GetEntriesFast() const {return fArr->GetEntriesFast();}
+           virtual Int_t GetLast() const {return fArr->GetLast();}
+           virtual Int_t GetSize() const {return fArr->GetSize();}
+           virtual Int_t IndexOf(TObject* obj) const {return fArr->IndexOf(obj);}
+        virtual TObject* Last() const {return fArr->Last();}
+        virtual    Int_t LowerBound() const {return fArr->LowerBound();}
+      virtual TIterator* MakeIterator(Bool_t dir = kIterForward) const {return fArr->MakeIterator(dir);}
+//VP supressed       virtual TObject*& operator[](Int_t i)
+        virtual TObject* Remove(TObject* obj){return fArr->Remove(obj);}
+        virtual TObject* RemoveAt(Int_t idx){return fArr->RemoveAt(idx);}
+            virtual void SetLast(Int_t last){fArr->SetLast (last);}
+            virtual void Sort(Int_t upto = kMaxInt){fArr->Sort(upto);}
+                TObject* UncheckedAt(Int_t i) const {return fArr->UncheckedAt(i);}
+            virtual TObjArray* GetTObjArray() const {return fArr;}
+            virtual void SetTitle(const char *title);
+            virtual const char *GetTitle() const;
 
-ClassDef(StObjArray,2)
+ClassDef(StTObjArray,1)
 };
 
+class StObjArray : public StTObjArray
+{
+friend class StObjArrayIter;
+protected:
+            virtual const TIterator *Begin() const;
+            virtual const TIterator *End() const;
+
+public:
+            StObjArray(Int_t s = TCollection::kInitCapacity):StTObjArray(s,0){fOrBrowser=this;};
+            StObjArray(const StObjArray& from):StTObjArray(from){fOrBrowser=this;};
+                
+            
+virtual        ~StObjArray(){};
+
+virtual void 	Browse(TBrowser *b);
+virtual Bool_t  IsFolder();
+virtual void 	pop_back(){RemoveAt(GetLast());};
+virtual UInt_t  size() const;
+virtual void    Resize(Int_t num);
+virtual void    resize(Int_t num);
+virtual Int_t 	capacity() const ;
+virtual TObject* Back() const ;
+virtual TObject* Front() const;
+virtual void 	clear(){Clear();}
+virtual StObjArrayIter *Erase(StObjArrayIter *fr=0,StObjArrayIter *to=0,int flag=0);
+virtual Bool_t 	empty() const ;
+virtual TIterator* MakeIterator(Bool_t dir = kIterForward) const;
+virtual TObject** GetCell(Int_t idx) const;
+virtual void    random_shuffle(int start=0,int end = 0x7fffffff);
+TObject *fOrBrowser; //! temporary VP
+
+ClassDef(StObjArray,1)
+};
+
+class StObjArrayIter : public TObjArrayIter
+{
+public:
+StObjArrayIter(const StObjArray* col=0, Bool_t dir = kIterForward) :  TObjArrayIter(0, dir)
+{ 
+  fColl = col; if (col) { SetCollection(fColl->fArr); Reset();}
+};
+
+StObjArrayIter(const StObjArrayIter &init) :  TObjArrayIter(0,kIterForward)
+{ *this=init;};
+
+virtual       ~StObjArrayIter(){}; 
+virtual void   SetCursor(Int_t kursor);
+virtual Int_t  GetCursor() const;
+virtual void   SetDirection(Bool_t dir = kIterForward);
+virtual Bool_t GetDirection() const;
+virtual void   SetCollection(const TCollection *coll);
+virtual TObject* GetObject() const;
+virtual StObjArrayIter &operator++();
+virtual StObjArrayIter &operator--();
+virtual StObjArrayIter &operator++(int);
+virtual StObjArrayIter &operator--(int);
+virtual void operator=(const StObjArrayIter &iter);
+virtual Bool_t operator==(const StObjArrayIter &iter) const;
+virtual Bool_t operator!=(const StObjArrayIter &iter) const;
+
+protected:
+const StObjArray* fColl;
+ClassDef(StObjArrayIter,1)
+};
 
 class StStrArray : public StObjArray {
 protected:
@@ -46,74 +182,72 @@ protected:
 //NONMONO void Book(TObject* obj,int idx);
 
 public:
- StStrArray(const Char_t *name="");
+ StStrArray(const Char_t *name=0, Int_t s=0);
  StStrArray(const StStrArray &from);
  virtual ~StStrArray();
  virtual void operator =(const StStrArray &a); 
 
- const char *GetIDName() const ;
- void                SetIDName(const char* name);
- virtual void        SetName(const char *name);
- virtual const char *GetName() const;
+ virtual const Char_t *GetIDName() const ;
+ virtual void          SetIDName(const char* name);
 
- void push_back(TObject *to){VecTObj::push_back(to);}
- VecTObjIter erase(VecTObjIter fst,VecTObjIter lst=0);
- void clear();
-private:
-TString fIDName;
-TString fName;
+ virtual void AddFirst(TObject* obj);
+
+ virtual void AddLast(TObject* obj);
+
+ virtual void AddAt(TObject* obj, Int_t idx);
  
-ClassDef(StStrArray,2)
+ virtual void AddAtAndExpand(TObject* obj, Int_t idx);
+
+ virtual void 	clear(){Delete();}
+ 
+ClassDef(StStrArray,1)
 };
 
 
 class StRefArray : public StObjArray
 {
 public:
-  StRefArray(){};
-  StRefArray(const StRefArray &from);
-   ~StRefArray(){};
-ClassDef(StRefArray,2)
+  StRefArray(Int_t s = TCollection::kInitCapacity):StObjArray(s){};
+  StRefArray(const StRefArray &from):StObjArray(from){};
+  virtual ~StRefArray(){};
+ClassDef(StRefArray,1)
 };
 
 //	Utilities
-//void random_shuffle(StObjArrayIter &start,StObjArrayIter &end);
+void random_shuffle(StObjArrayIter &start,StObjArrayIter &end);
 
 //	Macros
 
 #ifndef __CINT__
 #define StCollectionDef(QWERTY) \
 class St ## QWERTY;\
-typedef St ## QWERTY**  St ## QWERTY ## Iterator;\
+class St ## QWERTY ## Iterator;\
 \
 class StPtrVec ## QWERTY : public StRefArray \
 { \
 public: \
-StPtrVec ## QWERTY();\
+StPtrVec ## QWERTY(Int_t s = TCollection::kInitCapacity);\
 StPtrVec ## QWERTY(const StPtrVec ## QWERTY &from);\
 virtual        ~StPtrVec ## QWERTY ##(){};\
 \
-const St ## QWERTY  *&at(Int_t idx) const {return (const St ## QWERTY  *&)(*this)[idx];}\
-      St ## QWERTY  *&at(Int_t idx)       {return (      St ## QWERTY  *&)(*this)[idx];}\
+const St ## QWERTY  *&at(Int_t idx) const;\
+      St ## QWERTY  *&at(Int_t idx)\
+      {return (St ## QWERTY  *&)((const StPtrVec ## QWERTY*)this)->at(idx);}\
 \
-const St ## QWERTY  *& front() const { return (const St ## QWERTY  *&)VecTObj::front();}\
-      St ## QWERTY  *& front()       { return (      St ## QWERTY  *&)VecTObj::front();}\
+const St ## QWERTY  *& front() const { return at(0);}\
+      St ## QWERTY  *& front()       { return at(0);}\
 \
-const St ## QWERTY  *& back()  const { return (const St ## QWERTY  *&)VecTObj::back();}\
-      St ## QWERTY  *& back()        { return (      St ## QWERTY  *&)VecTObj::back();}\
+const St ## QWERTY  *& back() const  { return at(size()-1);}\
+      St ## QWERTY  *& back()        { return at(size()-1);}\
 \
-const St ## QWERTY ## Iterator begin() const {return (const St ## QWERTY ## Iterator)VecTObj::begin();}\
-      St ## QWERTY ## Iterator begin()       {return (      St ## QWERTY ## Iterator)VecTObj::begin();}\
-const St ## QWERTY ## Iterator end()   const {return (const St ## QWERTY ## Iterator)VecTObj::end();}\
-      St ## QWERTY ## Iterator end()         {return (      St ## QWERTY ## Iterator)VecTObj::end();}\
-      St ## QWERTY ## Iterator erase(St ## QWERTY ## Iterator  it)\
-      {return (St ## QWERTY ## Iterator)VecTObj::erase((VecTObjIter)it);}\
-      St ## QWERTY ## Iterator erase(St ## QWERTY ## Iterator fst,St ## QWERTY ## Iterator lst)\
-      {return (St ## QWERTY ## Iterator)VecTObj::erase((VecTObjIter)fst,(VecTObjIter)lst);}\
+      void push_back(const St ## QWERTY  *obj){AddLast((TObject*)obj);}\
+\
+const St ## QWERTY ## Iterator begin() const ;\
+const St ## QWERTY ## Iterator end()   const ;\
+      St ## QWERTY ## Iterator erase(StObjArrayIter &it);\
+      St ## QWERTY ## Iterator erase(StObjArrayIter &fst,StObjArrayIter &lst);\
       St ## QWERTY *& operator[](Int_t i)       {return at(i);}\
 const St ## QWERTY *& operator[](Int_t i) const {return at(i);}\
-void  push_back(const St ## QWERTY *to){VecTObj::push_back((TObject*)to);}\
-\
 ClassDef(StPtrVec ## QWERTY ##,1) \
 };\
 \
@@ -121,30 +255,40 @@ ClassDef(StPtrVec ## QWERTY ##,1) \
 class StSPtrVec ## QWERTY : public StStrArray \
 { \
 public: \
-StSPtrVec ## QWERTY(const Char_t *name=0);\
+StSPtrVec ## QWERTY(const Char_t *name=0,Int_t s = TCollection::kInitCapacity);\
 StSPtrVec ## QWERTY(const StSPtrVec ## QWERTY &from);\
 \
+const St ## QWERTY *&at(Int_t idx) const;\
+      St ## QWERTY *&at(Int_t idx)\
+      {return (St ## QWERTY  *&)((const StSPtrVec ## QWERTY*)this)->at(idx);}\
 \
-const St ## QWERTY  *&at(Int_t idx) const {return (const St ## QWERTY  *&)(*this)[idx];}\
-      St ## QWERTY  *&at(Int_t idx)       {return (      St ## QWERTY  *&)(*this)[idx];}\
+const St ## QWERTY  *& front() const { return at(0);}\
+      St ## QWERTY  *& front()       { return at(0);}\
 \
-const St ## QWERTY  *& front() const { return (const St ## QWERTY  *&)VecTObj::front();}\
-      St ## QWERTY  *& front()       { return (      St ## QWERTY  *&)VecTObj::front();}\
+const St ## QWERTY  *& back() const  { return at(size()-1);}\
+      St ## QWERTY  *& back()        { return at(size()-1);}\
 \
-const St ## QWERTY  *& back()  const { return (const St ## QWERTY  *&)VecTObj::back();}\
-      St ## QWERTY  *& back()        { return (      St ## QWERTY  *&)VecTObj::back();}\
+      void push_back(const St ## QWERTY  *obj){AddLast((TObject*)obj);}\
 \
-const St ## QWERTY ## Iterator begin() const {return (const St ## QWERTY ## Iterator)VecTObj::begin();}\
-      St ## QWERTY ## Iterator begin()       {return (      St ## QWERTY ## Iterator)VecTObj::begin();}\
-const St ## QWERTY ## Iterator end()   const {return (const St ## QWERTY ## Iterator)VecTObj::end();}\
-      St ## QWERTY ## Iterator end()         {return (      St ## QWERTY ## Iterator)VecTObj::end();}\
-      St ## QWERTY ## Iterator erase(St ## QWERTY ## Iterator fst,St ## QWERTY ## Iterator lst=0)\
-         {return (St ## QWERTY ## Iterator)StStrArray::erase((VecTObjIter)fst,(VecTObjIter)lst);}\
+const St ## QWERTY ## Iterator begin() const ;\
+const St ## QWERTY ## Iterator end()   const ;\
+      St ## QWERTY ## Iterator erase(StObjArrayIter &it);\
+      St ## QWERTY ## Iterator erase(StObjArrayIter &fst,StObjArrayIter &lst);\
       St ## QWERTY *& operator[](Int_t i)       {return at(i);}\
 const St ## QWERTY *& operator[](Int_t i) const {return at(i);}\
-void  push_back(const St ## QWERTY *to){StStrArray::push_back((TObject*)to);}\
 \
 ClassDef(StSPtrVec ## QWERTY,1) \
+};\
+class St ## QWERTY ## Iterator : public StObjArrayIter \
+{ \
+public: \
+ \
+St ## QWERTY ## Iterator(const StObjArray* col=0, Bool_t dir = kIterForward);\
+ \
+St ## QWERTY ## Iterator(const StObjArrayIter &init):StObjArrayIter(init){};\
+virtual       ~St ## QWERTY ## Iterator(){};  \
+virtual St ## QWERTY *operator*() const;\
+ClassDef(St ## QWERTY ## Iterator,1) \
 };\
 typedef St ## QWERTY ## Iterator     StPtrVec  ## QWERTY ## Iterator;\
 typedef St ## QWERTY ## Iterator     StPtrVec  ## QWERTY ## ConstIterator;\
@@ -154,16 +298,34 @@ typedef St ## QWERTY ## Iterator     StSPtrVec ## QWERTY ## ConstIterator;\
 //______________________________________________________________
 #define StCollectionImp(QWERTY) \
 \
+ClassImp(St ## QWERTY ## Iterator) \
+void 		St       ## QWERTY ## Iterator	::Streamer	(TBuffer& ){} \
+void 		StPtrVec ## QWERTY  		::Streamer	(TBuffer& b){StRefArray::Streamer(b);} \
+\
 ClassImp(StPtrVec ## QWERTY ##) \
-		StPtrVec ## QWERTY::StPtrVec ## QWERTY():StRefArray(){};\
-		StPtrVec ## QWERTY::StPtrVec ## QWERTY(const StPtrVec ## QWERTY &from):StRefArray(from){}\
-void 		StPtrVec ## QWERTY::Streamer    (TBuffer& b){StRefArray::Streamer(b);} \
+		StPtrVec ## QWERTY::StPtrVec ## QWERTY(Int_t s):StRefArray(s){};\
+		StPtrVec ## QWERTY::StPtrVec ## QWERTY(const StPtrVec ## QWERTY &from):StRefArray(from){};\
+\
+const St ## QWERTY ## Iterator 	StPtrVec ## QWERTY::begin() const { return *((St ## QWERTY ## Iterator*)Begin());}\
+const St ## QWERTY ## Iterator 	StPtrVec ## QWERTY::end()   const { return *((St ## QWERTY ## Iterator*)End());}  \
+const St ## QWERTY*& StPtrVec ## QWERTY::at(Int_t i) const{return *((St ## QWERTY**)GetCell(i));};\
+      St ## QWERTY ## Iterator StPtrVec ## QWERTY::erase(StObjArrayIter &it){return *Erase(&it);}\
+      St ## QWERTY ## Iterator StPtrVec ## QWERTY::erase(StObjArrayIter &fst,StObjArrayIter &lst){return *Erase(&fst,&lst);}\
 \
 ClassImp(StSPtrVec ## QWERTY) \
-	StSPtrVec ## QWERTY::StSPtrVec ## QWERTY(const Char_t *name):StStrArray(name){}\
-	StSPtrVec ## QWERTY::StSPtrVec ## QWERTY(const StSPtrVec ## QWERTY &from):StStrArray(from){}\
+	StSPtrVec ## QWERTY::StSPtrVec ## QWERTY(const Char_t *name,Int_t s ):StStrArray(name,s){};\
+	StSPtrVec ## QWERTY::StSPtrVec ## QWERTY(const StSPtrVec ## QWERTY &from):StStrArray(from){};\
 \
 void 		StSPtrVec ## QWERTY::Streamer    (TBuffer& b){StStrArray::Streamer(b);} \
+\
+      St ## QWERTY ## Iterator StSPtrVec ## QWERTY::erase(StObjArrayIter &it){return *Erase(&it,0,1);}\
+      St ## QWERTY ## Iterator StSPtrVec ## QWERTY::erase(StObjArrayIter &fst,StObjArrayIter &lst){return *Erase(&fst,&lst,1);}\
+const St ## QWERTY ## Iterator StSPtrVec ## QWERTY::begin() const { return *((St ## QWERTY ## Iterator*)Begin());};\
+const St ## QWERTY ## Iterator StSPtrVec ## QWERTY::end()   const { return *((St ## QWERTY ## Iterator*)End());};\
+      St ## QWERTY ## Iterator::St ## QWERTY ## Iterator(const StObjArray* col, Bool_t dir ) :  StObjArrayIter(col, dir){};\
+\
+St ## QWERTY *St ## QWERTY ## Iterator::operator*() const {return (St ## QWERTY ## *)GetObject();} \
+const St ## QWERTY*& StSPtrVec ## QWERTY::at(Int_t i) const{return *((St ## QWERTY**)GetCell(i));};\
 
 #endif /*End not __CINT__*/
 #endif

@@ -2,35 +2,45 @@
 #define ROOT_StTree
  
 
+////#ifdef __CINT__
+////
+////#pragma link off all globals;
+////#pragma link off all classes;
+////#pragma link off all functions;
+////#pragma link C++ class StBranch;
+////#pragma link C++ class StTree;
+////#endif
 
 #include "TSystem.h"
 #include "TROOT.h"
 #include "TFile.h"
 #include "TList.h"
-#include "TDataSet.h"
+#include "St_DataSet.h"
 #include "St_ObjectSet.h"
-#include "TDataSetIter.h"
+#include "St_DataSetIter.h"
 #include "StFileI.h"
 
-
+const ULong_t kUMAX = (ULong_t)(-1);
 
 class StIO 
 {
+enum {kStSorted = 0x00100000};
 
  public:
  
- static Int_t    Write    (TFile *file, const StUKey &ukey, TObject  *obj);
+ static Int_t    Write    (TFile *file, const Char_t *name, ULong_t  ukey, TObject  *obj);
  static TObject *Read     (TFile *file, const Char_t *name);
- static TObject *Read     (TFile *file, const StUKey &ukey);
- static Int_t   GetNextKey(TFile *file,       StUKey &ukey);
- static TObject *ReadNext (TFile *file,       StUKey &ukey);
- static TString  RFIOName (const char *name);
+ static TObject *Read     (TFile *file, const Char_t *name, ULong_t  ukey);
+ static ULong_t GetNextKey(TFile *file, const Char_t *name, ULong_t  ukey);
+ static TObject *ReadNext (TFile *file, const Char_t *name, ULong_t &ukey);
+ static TString &MakeKey  (const Char_t *name, ULong_t ukey);
+ static TString RFIOName  (const char *name);
  static TFile   *Open     (const char *name, Option_t *option="",const char *title="",Int_t compress=1);
- static Int_t    IfExi(const char *file);
+ static Int_t   IfExi(const char *file);
 };
 
 class StTree;
-class StBranch : public TDataSet {
+class StBranch : public St_DataSet {
 //friend class StBranch;
 friend class StTree;
 public:
@@ -48,15 +58,14 @@ public:
   virtual Int_t SetFile(const Char_t *file,const Char_t *iomode=0,int insist=0);
   virtual Int_t SetTFile(TFile *tfile);
   virtual TFile        *GetTFile(){return fTFile;};
-  virtual void SetName(const char *name){fUKey=name;TDataSet::SetName(name);};
-  virtual void SetUKey(Int_t ukey){fUKey=ukey;};
-  virtual StUKey GetUKey()  const {return fUKey;};
+  virtual void SetUKey(ULong_t ukey){if (ukey!=kUMAX) fUKey=ukey;};
+  virtual ULong_t GetUKey()  const {return fUKey;};
   virtual Int_t GetNEvents() const {return fNEvents;};
   virtual Int_t GetEvent(Int_t mode);
-  virtual Int_t ReadEvent (const StUKey &ukey);
-  virtual Int_t NextEvent (      StUKey &ukey);
+  virtual Int_t ReadEvent (ULong_t  ukey=kUMAX);
+  virtual Int_t NextEvent (ULong_t &ukey);
   virtual Int_t NextEvent ();
-  virtual Int_t WriteEvent(const StUKey &ukey);
+  virtual Int_t WriteEvent(ULong_t  ukey=kUMAX);
   virtual void Clear(const char *opt=0);
   virtual void Close(const char *opt=0);
   virtual Int_t Open();
@@ -65,10 +74,10 @@ public:
 
 protected:
   virtual void OpenTFile();
-  void SetParAll(TDataSet *par,TList *savList);
+  void SetParAll(St_DataSet *par,TList *savList);
   void SetParAll(TList *savList);
   Int_t fNEvents; 		//  Number of written events in file
-  StUKey  fUKey;          	//! Current RunEvent number 
+  ULong_t fUKey;          	//! Current RunEvent number 
   Char_t fIOMode;		//! r=ReadOnly; w=WriteOnly; u=Update;0=do nothing
   TString fFile;		//  File name
   TString fOption;		//  Option string
@@ -84,10 +93,10 @@ public:
  ~StTree();
 
   virtual void  SetIOMode (Option_t *iomode="0");			//Set for all branches
-  virtual Int_t ReadEvent (const StUKey &ukey);
-  virtual Int_t NextEvent (      StUKey &ukey);
+  virtual Int_t ReadEvent (ULong_t  ukey=kUMAX);
+  virtual Int_t NextEvent (ULong_t &ukey);
   virtual Int_t NextEvent ();
-  virtual Int_t WriteEvent(const StUKey &ukey);
+  virtual Int_t WriteEvent(ULong_t  ukey=kUMAX);
   virtual void  Close(const char *opt=0);
   virtual Int_t Open();
   virtual void Clear(Option_t *opt="");
@@ -127,7 +136,6 @@ public:
   virtual Int_t AddFile(const Char_t *file,const Char_t *comp=0);
   virtual Int_t AddFile(const Char_t **fileList);
   virtual Int_t AddWild(const Char_t *file);
-  virtual Int_t AddEvent(UInt_t r,UInt_t e=0);
   virtual Int_t GetNBundles();
   virtual Int_t GetNFiles();
   virtual Int_t GetBundleSize(){return 1;};
@@ -136,16 +144,13 @@ public:
   virtual const Char_t *GetCompName(Int_t idx=0);
   virtual const Char_t *GetFormat(Int_t idx=0);
   virtual Int_t GetNextBundle();
-  virtual StUKey GetNextEvent();
-  
 protected:
-  void SetInfo(TDataSet *ds);
+  void SetInfo(St_DataSet *ds);
   void RefreshIter();
-  const Char_t *GetAttr(TDataSet *ds,const char *att);
-  TDataSet *GetFileDS(int idx);
-  TDataSet *fDS;
-  TDataSetIter *fIter; 
-  TDataSetIter *fKeyIter; 
+  const Char_t *GetAttr(St_DataSet *ds,const char *att);
+  St_DataSet *GetFileDS(int idx);
+  St_DataSet *fDS;
+  St_DataSetIter *fIter; 
   ClassDef(StFile,1)
 };
 #endif

@@ -5,11 +5,40 @@
 #include "TBrowser.h"
 #include "TRandom.h"
 
-//TObjArray *StRegistry::fgReg  = 0;
-//Int_t      StRegistry::fgFree = 0;
+TObjArray *StRegistry::fgReg  = 0;
+Int_t      StRegistry::fgFree = 0;
 //______________________________________________________________________________
+ClassImp(StTObjArray)
+//______________________________________________________________________________
+void StTObjArray::Streamer(TBuffer &b)
+{
+  char nonEmpty;
+  if (b.IsReading()){
+    Clear(); fName = ""; fArr->SetName("");
+    b >> nonEmpty;
+    if (nonEmpty==0) return; 
+    fName.Streamer(b);
+    if (nonEmpty==1) return; 
+    fArr->Streamer(b);
+  } else { 
+    nonEmpty = 0;
+    if (!fName.IsNull()) 	nonEmpty = 1;    
+    if (fArr->GetEntries()) 	nonEmpty = 2;
+    b << nonEmpty;
+    if (nonEmpty==0) 		return;
+    fName.Streamer(b);
+    if (nonEmpty==1) 		return;
+    fArr->Streamer(b);
+}
+}
+//______________________________________________________________________________
+void StTObjArray::SetTitle(const char *title)
+{ fArr->SetName(title);}
+//______________________________________________________________________________
+const char *StTObjArray::GetTitle() const
+{ return fArr->GetName();}
 
-#if 0
+//______________________________________________________________________________
 ClassImp(StRegistry)
 //______________________________________________________________________________
 void StRegistry::Clear()
@@ -167,41 +196,34 @@ void StRegistry::List()
   }
   printf("\n");
 }
-#endif /*0*/
 //______________________________________________________________________________
 
 ClassImp(StObjArray)
+UInt_t  StObjArray::size() const {return GetLast()+1;}
+//______________________________________________________________________________
+void    StObjArray::resize(Int_t num){Resize(num);}
+//______________________________________________________________________________
+Int_t 	StObjArray::capacity() const {return Capacity();}
+//______________________________________________________________________________
+TObject* StObjArray::Back() const {return Last();}
+//______________________________________________________________________________
+TObject* StObjArray::Front() const {return First();}
+//______________________________________________________________________________
+Bool_t 	StObjArray::empty() const {return IsEmpty();}
+//______________________________________________________________________________
+TObject** StObjArray::GetCell(Int_t idx) const{return &((*fArr)[idx]);}
 
 //______________________________________________________________________________
 void StObjArray::Streamer(TBuffer &b)
-{
-
-   // Stream all objects in the array to or from the I/O buffer.
-
-   Int_t nobjects;
-   if (b.IsReading()) {
-      Version_t v = b.ReadVersion(); if (v){/*touch*/}
-      fName.Streamer(b);
-      clear();
-      b >> nobjects;
-      if (!nobjects) return;
-      TObject *obj;
-      for (Int_t i = 0; i < nobjects; i++) {
-         b >> obj;  push_back(obj);}
-   } else {
-      b.WriteVersion(IsA());
-      fName.Streamer(b);
-      nobjects = size();
-      b << nobjects;
-
-      for (Int_t i = 0; i < nobjects; i++) {
-         b << (*this)[i];
-      }
-   }
+{StTObjArray::Streamer(b);}
+//______________________________________________________________________________
+const TIterator *StObjArray::Begin() const
+{ 
+  static  TIterator *iter=0;
+  if (iter) delete iter;
+  iter =  MakeIterator();
+  return iter;
 }
-
-
-
 //______________________________________________________________________________
 void StObjArray::Browse(TBrowser *b)
 {
@@ -212,11 +234,12 @@ void StObjArray::Browse(TBrowser *b)
    //         This means TObject::Inspect() will be invoked indirectly
  
    if (!b) return;
+   TIter next(fArr);
    TObject *obj;
     
    Int_t counter = 0;
-   Int_t totalSize = size();
-   for (int i=0; i<totalSize && ++counter <  maxBrowsable ; i++) {
+   Int_t totalSize = GetEntries();
+   while ((obj = next()) && ++counter <  maxBrowsable ) {
        TString browseName = obj->GetName();
        char buffer[100];
        sprintf(buffer,"_%d(%d)",counter,totalSize);
@@ -225,14 +248,58 @@ void StObjArray::Browse(TBrowser *b)
    }
 }
 //______________________________________________________________________________
-Bool_t StObjArray::IsFolder(){ return size();}
+Bool_t StObjArray::IsFolder(){ return GetEntries();}
    
+//______________________________________________________________________________
+const TIterator *StObjArray::End() const
+{ 
+  static  TIterator *iter=0;  
+  if (iter) delete iter; 
+  iter =  MakeIterator();
+  ((StObjArrayIter*)iter)->SetCursor(GetLast()+1);
+  return iter;
+}
+//______________________________________________________________________________
+void StObjArray::Resize(Int_t num)
+{
+  if (num > Capacity() ) Expand(num+Capacity());
+  if (num <0 ) num = 0;
+  SetLast(num-1);
+}
+TIterator* StObjArray::MakeIterator(Bool_t dir) const
+{
+  return (TIterator*)(new StObjArrayIter(this,dir));
+}
+//______________________________________________________________________________
+StObjArrayIter *StObjArray::Erase(StObjArrayIter *fist,StObjArrayIter *last,int flag)
+{
+    
+    static StObjArrayIter *iteret = 0;
+    
+    int idxf = fist->GetCursor();
+    int idxl = idxf+1;
+    if (last) idxl = last->GetCursor();      
+    if (idxl > GetLast()+1)  idxl  = GetLast()+1; 
+    if (idxf >= idxl) return 0;
+    for (int i=idxf; i<idxl; i++) {
+      TObject *to = At(i); 
+      if (flag && to) delete to;
+      AddAt(0,i);    
+    }
+    Compress();
+    delete iteret;
+    iteret = (StObjArrayIter*)MakeIterator();
+    iteret->SetCursor(idxf);
+    
+    return iteret;
+}
+
 //______________________________________________________________________________
 void StObjArray::random_shuffle(int start,int end)
 {
   static TRandom *ran = 0;
   if(!ran) ran = new TRandom();
-  int lst = size()-1;
+  int lst = GetLast();
   if (start > lst)	return;
   if (end   > lst) 	end = lst;
   if (start >= end)	return;
@@ -240,18 +307,100 @@ void StObjArray::random_shuffle(int start,int end)
   for (int i=start; i<end; i++) {
     int j = i + (int)(ran->Rndm()*(end-i+1)); 
     if (i==j) 	continue;
-    TObject *ti = (*this)[i];
-    TObject *tj = (*this)[j];
-    (*this)[j] = ti;
-    (*this)[i] = tj;
+    TObject *ti = At(i);
+    TObject *tj = At(j);
+    AddAt(ti,j);
+    AddAt(tj,i);
   }    
 }
+//______________________________________________________________________________
+void random_shuffle(StObjArrayIter &start,StObjArrayIter &end)
+{
+  StObjArray *coll =  (StObjArray *)start.GetCollection();
+  StObjArray *koll =  (StObjArray *)end  .GetCollection();
+  assert(coll==koll);
+  int istart = start.GetCursor();
+  int iend   = end.  GetCursor();
+  coll->random_shuffle(istart,iend);
+}
+//______________________________________________________________________________
+ClassImp(StObjArrayIter)
+//______________________________________________________________________________
+// void StObjArrayIter::ShowMembers(TMemberInspector &, char *){}
+//______________________________________________________________________________
+void StObjArrayIter::SetCursor(Int_t kursor)
+{
+  *((int*)((int*)((void*)(this))+2)) = kursor;
+}
+//______________________________________________________________________________
+void StObjArrayIter::Streamer(TBuffer& ){}
+//______________________________________________________________________________
+Int_t   StObjArrayIter::GetCursor() const
+{
+  return *((int*)((int*)((void*)(this))+2));
+}
+//______________________________________________________________________________
+void   StObjArrayIter::SetDirection(Bool_t dir)
+{
+  *((Bool_t*)((int*)((void*)(this))+3)) = dir;
+}
+//______________________________________________________________________________
+Bool_t   StObjArrayIter::GetDirection() const
+{
+  return *((Bool_t*)((int*)((void*)(this))+3));
+}
+//______________________________________________________________________________
+void   StObjArrayIter::SetCollection(const TCollection *coll)
+{
+  *((const TCollection**)((int*)((void*)(this))+1)) = coll;
+  assert(GetCollection()==coll);
+}
+//______________________________________________________________________________
+TObject* StObjArrayIter::GetObject() const
+{return ((TObjArray*)GetCollection())->At(GetCursor());}
+
+//______________________________________________________________________________
+StObjArrayIter &StObjArrayIter::operator++()
+{ Int_t kursor=GetCursor(); SetCursor(++kursor); return *this;}
+//______________________________________________________________________________
+StObjArrayIter &StObjArrayIter::operator++(int)
+{ Int_t kursor=GetCursor(); SetCursor(++kursor); return *this;}
+//______________________________________________________________________________
+StObjArrayIter &StObjArrayIter::operator--()
+{ Int_t kursor=GetCursor(); SetCursor(--kursor); return *this;}
+//______________________________________________________________________________
+StObjArrayIter &StObjArrayIter::operator--(int)
+{ Int_t kursor=GetCursor(); SetCursor(--kursor); return *this;}
+
+//______________________________________________________________________________
+Bool_t StObjArrayIter::operator==(const StObjArrayIter &iter) const
+{
+  if (GetCursor() != iter.GetCursor()) return 0;
+  if (GetCollection() != iter.GetCollection()) return 0;
+  return 1;
+}  
+//______________________________________________________________________________
+Bool_t StObjArrayIter::operator!=(const StObjArrayIter &iter) const
+{
+  if (GetCursor() != iter.GetCursor()) return 1;
+  if (GetCollection() != iter.GetCollection()) return 1;
+  return 0;
+}  
+
+//______________________________________________________________________________
+void StObjArrayIter::operator=(const StObjArrayIter &iter)
+{
+ SetCollection(iter.GetCollection());
+ SetCursor(iter.GetCursor());
+ SetDirection(iter.GetDirection());
+} 
+
 //______________________________________________________________________________
 ClassImp(StRefArray)
 
 //______________________________________________________________________________
 void StRefArray::Streamer(TBuffer &R__b)
-#ifdef NONMONO
+#ifdef NONMOMO
 {
    // Stream all objects in the array to or from the I/O buffer.  
 
@@ -316,7 +465,7 @@ void StRefArray::Streamer(TBuffer &R__b)
 //______________________________________________________________________________
 ClassImp(StStrArray)
 //______________________________________________________________________________
-StStrArray::StStrArray(const Char_t *name)
+StStrArray::StStrArray(const Char_t *name, Int_t s):StObjArray(s)
 { 
 //NONMONO  StRegistry::SetColl(this);
   if (name) SetName(name); 
@@ -331,30 +480,17 @@ StStrArray::StStrArray(const StStrArray &from )
 {
   int n,i; TObject *sto;
   
-  clear();
+  if (fArr) fArr->Delete(); delete fArr;
   SetName(a.GetName());
   SetIDName(0);
-  n = a.size();
+  n = a.GetSize();
+  fArr = new TObjArray(n);
   for (i=0; i<n; i++)
   {
-    sto = a[i];       
+    sto = a.At(i);       
     if (sto) sto = ((StObject*)sto)->clone(); 
-    push_back(sto);
+    Add(sto);
   }
-} 
-//______________________________________________________________________________
- VecTObjIter StStrArray::erase(VecTObjIter fst,VecTObjIter lst)
-{
-   VecTObjIter it;
-   if(!lst) lst = fst;
-   for (it = fst; it < lst; it++) delete *it;
-   return VecTObj::erase(fst,lst);
-}
-//______________________________________________________________________________
- void StStrArray::clear()
-{ 
-  erase(begin(),end());
-  VecTObj::clear();
 } 
 //______________________________________________________________________________
 //NONMONO void StStrArray::Book(TObject* obj,int idx)
@@ -366,11 +502,38 @@ StStrArray::StStrArray(const StStrArray &from )
 //NONMONO}
 
 //______________________________________________________________________________
+ void StStrArray::AddFirst(TObject* obj)
+{ 
+  StObjArray::AddFirst(obj);
+//NONMONO  Book(obj,1);
+}
+
+//______________________________________________________________________________
+void StStrArray::AddLast(TObject* obj)
+{ 
+  StObjArray::AddLast(obj);
+//NONMONO  Book(obj,GetLast()+1);
+}
+
+//______________________________________________________________________________
+ void StStrArray::AddAt(TObject* obj, Int_t idx)
+{
+  StObjArray::AddAt(obj,idx);
+//NONMONO Book(obj,idx+1);
+}
+ 
+//______________________________________________________________________________
+ void StStrArray::AddAtAndExpand(TObject* obj, Int_t idx)
+ {
+  StObjArray::AddAtAndExpand(obj,idx);
+//NONMONO  Book(obj,idx+1);
+ };
+//______________________________________________________________________________
 //void StStrArray::ShowMembers(TMemberInspector &, char *){}
 //______________________________________________________________________________
 StStrArray::~StStrArray()
 {
-  clear(); 
+  Delete(); 
 //NONMONO StRegistry::RemColl(this);
 }
 
@@ -383,7 +546,6 @@ const Char_t *StStrArray::GetIDName() const
 //______________________________________________________________________________
 void StStrArray::SetIDName(const Char_t *idname)
 {
-#if 0
   if (idname) 
   {
     SetTitle(idname); 
@@ -396,14 +558,7 @@ void StStrArray::SetIDName(const Char_t *idname)
     sprintf(buf+strlen(buf),"%x", dt.Get()); 
     SetTitle(buf);
   }
-#endif /*0*/
 }
-//______________________________________________________________________________
-void StStrArray::SetName(const char *name)
-{ fName = name;}
-//______________________________________________________________________________
-const char *StStrArray::GetName() const
-{ return fName;}
 //______________________________________________________________________________
 void StStrArray::Streamer(TBuffer &R__b)
 {
@@ -418,9 +573,71 @@ void StStrArray::Streamer(TBuffer &R__b)
    }
 
 }
-// $Id: StArray.cxx,v 1.28 2000/06/19 01:28:25 perev Exp $
+// $Id: StArray.cxx,v 1.27 2000/06/01 16:32:21 perev Exp $
 // $Log: StArray.cxx,v $
-// Revision 1.28  2000/06/19 01:28:25  perev
-// STL StEvent
+// Revision 1.27  2000/06/01 16:32:21  perev
+// bug in random_shuffle fixed
 //
+// Revision 1.26  2000/05/20 01:12:20  perev
+// Big cleanup of StArray
+//
+// Revision 1.25  2000/05/09 22:05:21  fine
+// re-invent wheel to fix the memeory leak
+//
+// Revision 1.24  2000/04/23 20:37:18  perev
+// random shuffle and one byte for empty collection I/O
+//
+// Revision 1.23  2000/04/23 01:00:45  perev
+// StEvent monolitic I/O
+//
+// Revision 1.21  2000/04/18 02:57:25  perev
+// StEvent browse
+//
+// Revision 1.20  2000/01/28 20:37:03  perev
+// Home made SetLast removed
+//
+// Revision 1.19  1999/11/19 20:40:12  perev
+// StObjArray::Streamer==TCollection::Streamer(b)
+//
+// Revision 1.18  1999/11/17 14:22:09  perev
+// bug in dtor fix
+//
+// Revision 1.17  1999/11/15 23:09:10  perev
+// Streamer for StrArray and auto remove
+//
+// Revision 1.16  1999/11/06 18:01:47  perev
+// StArray cleanup
+//
+// Revision 1.15  1999/10/30 02:10:54  perev
+// CleanUp of StArray for new StEvent
+//
+// Revision 1.14  1999/10/22 22:24:00  perev
+// Minor fixes
+//
+// Revision 1.13  1999/10/21 00:13:58  perev
+// Version of StArray for new StEvent
+//
+// Revision 1.12  1999/07/30 01:12:05  perev
+// StArray const(antisation)
+//
+// Revision 1.11  1999/07/17 19:00:12  perev
+// fix destructor of StStrArray
+//
+// Revision 1.10  1999/06/23 20:31:04  perev
+// StArray I/O + browser
+//
+// Revision 1.7  1999/05/11 01:10:50  fine
+// StArray::Browse() method jas been introduced
+//
+// Revision 1.6  1999/05/10 19:19:35  fisyak
+// Add Valery's update for Browser
+//
+// Revision 1.5  1999/05/04 22:45:22  perev
+// Default ctr for StArray
+//
+// Revision 1.4  1999/04/30 13:15:55  fisyak
+// Ad StObject, modification StArray for StRootEvent
+//
+// Revision 1.2  1999/01/21 21:14:43  fisyak
+// assert
 //

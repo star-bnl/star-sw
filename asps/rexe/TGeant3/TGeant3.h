@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3.h,v 1.8 2000/06/21 18:17:25 fisyak Exp $ */
+/* $Id: TGeant3.h,v 1.7 2000/04/24 15:37:36 fisyak Exp $ */
 
 //////////////////////////////////////////////// 
 //  C++ interface to Geant3 basic routines    // 
@@ -858,8 +858,6 @@ public:
 			   Float_t &Theta3, Float_t & Phi3);
    virtual Bool_t   Agsens(const Char_t *name);
    virtual void     Gfnhit(const Char_t *cset, const Char_t *cdet, Int_t &nhits);
-   virtual void     Gfrung(Int_t & Nwrung, Int_t *Irung, Int_t & Nwbuf, Float_t * Ubuf);
-   virtual void     Gfhead(Int_t & Nwhead, Int_t *Ihead, Int_t & Nwbuf, Float_t * Ubuf);
 #if 0
    virtual ULong_t  Csaddr(const Char_t *name);
    virtual Int_t    Csjcal(

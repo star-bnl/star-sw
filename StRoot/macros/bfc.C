@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.138 2000/06/23 16:54:03 fisyak Exp $
+// $Id: bfc.C,v 1.137 2000/06/16 23:33:35 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -60,6 +60,8 @@ void bfc(const Int_t First,
   if (!chain) gSystem->Exit(1);
   chain->SetFlags(Chain);
   if (TreeFile) chain->SetTFile(new TFile(TreeFile,"RECREATE"));
+  if (chain->GetOption("LAna") && !chain->GetTFile()) 
+    chain->SetTFile(new TFile("Laser.root","RECREATE"));
   printf ("QAInfo:Process [First=%6i/Last=%6i/Total=%6i] Events\n",First,Last,Last-First+1);
   chain->Set_IO_Files(infile,outfile);
   if (chain->Load() > kStOk) 
@@ -137,7 +139,6 @@ void bfc(const Int_t First,
   // Init the chain and all its makers
   if (Last >= 0) {
     Int_t iInit = chain->Init();
-    if (iInit >=  kStEOF) goto END;
     StEvtHddr *hd = (StEvtHddr*)chain->GetDataSet("EvtHddr");
     hd->SetRunNumber(-2); // to be sure that InitRun calls at least once
     // skip if any
@@ -175,7 +176,6 @@ void bfc(const Int_t First,
    }
    i++; goto EventLoop;
  }
- END:
   fflush(stdout);
   printf ("QAInfo:Run completed ");
   gSystem->Exec("date");

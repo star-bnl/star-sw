@@ -1,11 +1,8 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.62 2000/06/23 16:52:12 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.61 2000/03/26 02:43:22 fine Exp $
 // $Log: St_geant_Maker.cxx,v $
-// Revision 1.62  2000/06/23 16:52:12  fisyak
-// Add filling of Run/Event no./Type from geant
-//
 // Revision 1.61  2000/03/26 02:43:22  fine
-//  adjusted to ROOT 2.24
+// adjusted to ROOT 2.24
 //
 // Revision 1.60  2000/03/03 22:00:53  nevski
 // protection against bad track number
@@ -205,11 +202,11 @@
 #include "St_geant_Maker.h"
 #include "StChain.h"
 #include "TDataSetIter.h"
-#include "TTable.h"
+#include "St_Table.h"
 #include <iostream.h>
 #include <stdio.h>
 #include <string.h>
-#include "TSystem.h"
+extern "C" int isprint (int);
 #include "GtHash.h"
 #include "TGeometry.h"
 #include "TMaterial.h"
@@ -341,9 +338,7 @@ TDataSet *St_geant_Maker::fgGeom = 0;
 TGeant3  *St_geant_Maker::geant3 = 0;
 //_____________________________________________________________________________
 St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int_t iwtype):
-StMaker(name),
-fInputFile("")
-{
+StMaker(name){
   fVolume    = 0;
   fNwGeant = nwgeant;
   fNwPaw   = nwpaw;
@@ -416,19 +411,18 @@ Int_t St_geant_Maker::Make()
 
     // check EoF
     if (cquest->iquest[0]) {return kStEOF;}
-    Int_t Nwhead,Ihead[100];
-    Int_t Nwbuf;
-    Float_t Ubuf[100];
     // empty g2t_event
     St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
     m_DataSet->Add(g2t_event);
     Agnzgete(link,ide,npart,irun,ievt,cgnam,vert,iwtfl,weigh);
-    geant3->Gfhead(Nwhead,Ihead,Nwbuf,Ubuf);
-    if (clink->jhead) {
-      fEvtHddr->SetRunNumber(*(z_iq+clink->jhead+1));
-      fEvtHddr->SetEventNumber(*(z_iq+clink->jhead+2));
-    }
-    if (fInputFile != "") fEvtHddr->SetEventType(TString(gSystem->BaseName(fInputFile.Data()),7));
+
+    fEvtHddr->SetRunNumber(irun);
+    fEvtHddr->SetEventNumber(ievt);
+    int i;
+    for (i=0; i<20 && isprint(cgnam[i]); i++);
+    cgnam[i] = 0;
+    
+    if (i) fEvtHddr->SetEventType(cgnam);
 
     if (npart>0) 
     {  

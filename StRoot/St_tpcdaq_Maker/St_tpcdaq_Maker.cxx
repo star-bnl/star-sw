@@ -1,17 +1,5 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
-// Revision 1.55  2000/06/24 19:26:31  ward
-// changed the name of the function to ExcludeTheseTimeBins
-//
-// Revision 1.54  2000/06/24 19:18:41  ward
-// changed meaning of SetMinMaxTimeBucket args
-//
-// Revision 1.53  2000/06/24 19:13:27  ward
-// added SetMinMaxTimeBucket(int lo,int hi) for Dave H.
-//
-// Revision 1.52  2000/06/20 01:43:35  fisyak
-// Change calibrations => Calibrations to match with MySQL Db
-//
 // Revision 1.51  2000/06/14 17:40:39  ward
 // added db stuff for gains
 //
@@ -197,7 +185,6 @@ int gSector;
 St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name),gConfig(daqOrTrs)
 {
   printf("This is St_tpcdaq_Maker, name = \"%s\".\n",name);
-  alreadySet=0; // FALSE
 }
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
 }
@@ -209,7 +196,7 @@ Int_t St_tpcdaq_Maker::Init() {
   /*WriteStructToScreenAndExit();*/
 #endif
 #ifdef ASIC_THRESHOLDS
-  TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc");
+  TDataSet *tpc_calib  = GetDataBase("calibrations/tpc");
   assert(tpc_calib);
   St_asic_thresholds *asic = (St_asic_thresholds *) tpc_calib->Find("asic_thresholds");
   assert(asic);
@@ -439,7 +426,7 @@ int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequenc
 void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) { // www
   register int row,pad;
 
-  TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc"); assert(tpc_calib);
+  TDataSet *tpc_calib  = GetDataBase("calibrations/tpc"); assert(tpc_calib);
 
   St_tpcGain *gainObj = (St_tpcGain*) tpc_calib->Find("tpcGain"); assert(gainObj);
 
@@ -463,7 +450,7 @@ void St_tpcdaq_Maker::SetNoiseEliminationStuff() {
 
   for(sector=0;sector<24;sector++) { noiseElim[sector].npad=0; noiseElim[sector].nbin=0; }
 
-  TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc"); assert(tpc_calib);
+  TDataSet *tpc_calib  = GetDataBase("calibrations/tpc"); assert(tpc_calib);
 
   St_noiseElim *noiseObj = (St_noiseElim*) tpc_calib->Find("noiseElim"); assert(noiseObj);
 
@@ -480,25 +467,14 @@ void St_tpcdaq_Maker::SetNoiseEliminationStuff() {
       noiseElim[sector].pad[i]=noise[sector].pad[i];
     }
 
-    if(!alreadySet) {
-      noiseElim[sector].nbin=noise[sector].nbin;
-      assert(noise[sector].nbin<=3); // Limit (3) is in both the St_tpcdaq_Maker.h and StDb/idl/noiseElim.idl.
-      for(i=0;i<noise[sector].nbin;i++) {
-        noiseElim[sector].low[i]=noise[sector].low[i];
-        noiseElim[sector].up[i]=noise[sector].up[i];
-      }
+    noiseElim[sector].nbin=noise[sector].nbin;
+    assert(noise[sector].nbin<=3); // Limit (3) is in both the St_tpcdaq_Maker.h and StDb/idl/noiseElim.idl.
+    for(i=0;i<noise[sector].nbin;i++) {
+      noiseElim[sector].low[i]=noise[sector].low[i];
+      noiseElim[sector].up[i]=noise[sector].up[i];
     }
 
-  }
-}
-void St_tpcdaq_Maker::ExcludeTheseTimeBins(int lo,int hi) {
-  int sector;
-  assert(lo<=hi);
-  alreadySet=7; // TRUE
-  for(sector=0;sector<24;sector++) {
-    noiseElim[sector].nbin=1;
-    noiseElim[sector].low[0]=lo;
-    noiseElim[sector].up [0]=hi;
+
   }
 }
 void St_tpcdaq_Maker::WriteStructToScreenAndExit() {

@@ -203,7 +203,7 @@ my $jbset;
            $mjobSt = "n\/a";
            $mchName = $mNikName;
           @parts =  split ("/", $jpath);
-
+           next if ($mflName =~ /st_physics_1176008/);
     $jbset = $prodPeriod . "_" . $parts[5] . "_" . $parts[6];
           $mjobFname = $jbset ."_". $jfile;
 
