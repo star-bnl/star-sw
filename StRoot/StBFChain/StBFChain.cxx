@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.3 1999/09/08 00:14:06 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.4 1999/09/12 21:23:04 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.4  1999/09/12 21:23:04  fisyak
+// Add multiple input files to chain
+//
 // Revision 1.3  1999/09/08 00:14:06  fisyak
 // Add kReverseField option
 //
@@ -143,6 +146,7 @@ Char_t *ChainComments[] = {
   "Set debug flag",
   "Pop HIGZ window"
 };
+StFile  *setFiles= 0;
 TString *InFile = 0;
 TString *FileOut= 0;
 TString *XdfFile = 0;
@@ -319,8 +323,8 @@ Int_t StBFChain::Load()
   //  gSystem->Exit(1);
   // Instantiate makers
   //  Create the makers to be called by the current chain
-  if (GetOption(kXIN)) {
-    StIOMaker *inpMk = new StIOMaker("inputStream","r",InFile->Data());
+  if (GetOption(kXIN) && setFiles) {
+    StIOMaker *inpMk = new StIOMaker("inputStream","r",setFiles);
     if (inpMk) {
       SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
       SetInput("geant",".make/inputStream/.make/inputStream_XDF/.data/event/geant/Event");
@@ -551,10 +555,13 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
   }
   if (Infile) {
     InFile = new TString(Infile);
-    if (gSystem->AccessPathName(InFile->Data())) {// file does not exist
+    if (!strstr(InFile->Data(),"*") &&
+	gSystem->AccessPathName(InFile->Data())) {// file does not exist
       printf (" *** NO FILE: %s, exit!\n", InFile->Data());
       gSystem->Exit(1); 
     }
+    setFiles= new StFile();
+    setFiles->AddFile(InFile->Data());
   }
   if (GetOption(kGSTAR)) {
     if (!Outfile) FileOut = new TString("gtrack.root");
@@ -566,6 +573,8 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
     if (Outfile) FileOut = new TString(Outfile);
     else {
       FileOut = new TString(gSystem->BaseName(InFile->Data()));
+      FileOut->ReplaceAll("*","");
+      FileOut->ReplaceAll("..",".");
       FileOut->ReplaceAll(".daq",".root");
       FileOut->ReplaceAll(".fzd",".root");
       FileOut->ReplaceAll(".fz",".root");
