@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.21 2002/05/08 16:03:52 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.22 2002/05/09 16:55:40 munhoz Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.22  2002/05/09 16:55:40  munhoz
+ * add reading bad anodes from DB
+ *
  * Revision 1.21  2002/05/08 16:03:52  caines
  * Fix again memory leak - accidentally pput back in data has to be a const() not data()
  *
@@ -83,7 +86,7 @@
 #include "StSvtClassLibrary/StSvtHybridData.hh"
 #include "StSvtClassLibrary/StSvtHybridPixels.hh"
 #include "StSvtClassLibrary/StSvtData.hh"
-#include "StSvtSeqAdjMaker/StSvtBadAnode.hh"
+#include "StSvtClassLibrary/StSvtHybridBadAnodes.hh"
 #include "StSequence.hh"
 #include "StSvtAnalysis.hh"
 #include "StSvtAnalysedHybridClusters.hh"
@@ -148,8 +151,9 @@ Int_t StSvtClusterAnalysisMaker::Init()
   CreateClusterHist(mTotalNumberOfHybrids);
 
   St_DataSet* dataSet;
-  dataSet = GetDataSet("SvtBadAnodeSet"); 
-  mSvtBadAnodeSet = (StSvtHybridCollection*)(dataSet->GetObject());
+  dataSet = GetDataSet("StSvtBadAnodes"); 
+  if (dataSet)
+    mSvtBadAnodeSet = (StSvtHybridCollection*)(dataSet->GetObject());
 
   mSvtAnalysis = new StSvtAnalysis(mTotalNumberOfHybrids);
 
@@ -354,7 +358,7 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
           mNumOfClusters = mHybridCluster->getNumberOfClusters(); 
  
 	  mSvtBadAnode=0;
-	  if( mSvtBadAnodeSet) mSvtBadAnode = (StSvtBadAnode*)mSvtBadAnodeSet->at(index);
+	  if( mSvtBadAnodeSet) mSvtBadAnode = (StSvtHybridBadAnodes*)mSvtBadAnodeSet->at(index);
           mSvtAnalysis->SetPointers(mHybridAdjData,mHybridRawData,
 				    mHybridCluster,mSvtBadAnode,
 				    mSvtAdjEvent->getTotalNumberOfHybrids(),

@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.16 2002/04/22 14:52:54 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.17 2002/05/09 16:55:08 munhoz Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.17  2002/05/09 16:55:08  munhoz
+// add reading bad anodes from DB
+//
 // Revision 1.16  2002/04/22 14:52:54  caines
 // Add the .h too
 //
@@ -111,7 +114,6 @@ class StSvtSeqAdjMaker : public StMaker
     
  protected:
   St_ObjectSet* mSvtDataSet;             //!
-  St_ObjectSet* mSvtBadAnodeSet;          //!
   StSvtData* mSvtRawData;            //!
   StSvtData* mSvtAdjData;    //!
   StSvtHybridData* mHybridRawData ;       //!

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.15 2002/04/25 20:34:50 caines Exp $
+ * $Id: StSvtAnalysis.cc,v 1.16 2002/05/09 16:55:39 munhoz Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -51,6 +51,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.16  2002/05/09 16:55:39  munhoz
+ * add reading bad anodes from DB
+ *
  * Revision 1.15  2002/04/25 20:34:50  caines
  * Pass bad anode information into cluster fitter
  *
@@ -109,7 +112,7 @@
 #include "StSequence.hh"
 #include "StDAQMaker/StSVTReader.h"
 #include "StSvtClassLibrary/StSvtHybridData.hh"
-#include "StSvtSeqAdjMaker/StSvtBadAnode.hh"
+#include "StSvtClassLibrary/StSvtHybridBadAnodes.hh"
 #include "StSvtAnalysis.hh"
 
 int    Compare_Point ( const void *, const void *);   //nedd to declare here for some odd reason.
@@ -251,7 +254,7 @@ StSvtAnalysis::~StSvtAnalysis()
 void StSvtAnalysis::SetPointers(StSvtHybridData* hybAdjData,
 				StSvtHybridData* hybRawData,  
                                 StSvtHybridCluster* hybClu,
-				StSvtBadAnode* BadAnodes,
+				StSvtHybridBadAnodes* BadAnodes,
 				int NumberOfHybrids, int PedOffset )
 // This is how the Maker communicates with this object to tell it where the data is. We also 
 // want access to the raw data for the deconvolution and for the one anode hits to get a better
@@ -1256,7 +1259,7 @@ int StSvtAnalysis::FillRawAdc()
   for(int an = 0; an < numAnodes; an++) {
     actualAn = anodeList[an];
     if( mSvtBadAnode)
-      if(mSvtBadAnode->IsBadAnode(actualAn)) continue; //Dont fill pixel array if anode is bad
+      if(mSvtBadAnode->isBadAnode(actualAn)) continue; //Dont fill pixel array if anode is bad
     mHybridRawData->getListSequences(an,numOfSeq,svtSequence);
     for(int seq = 0; seq < numOfSeq; seq++) {
       seqStart =  svtSequence[seq].startTimeBin;
