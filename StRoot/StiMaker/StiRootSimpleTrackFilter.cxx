@@ -22,8 +22,8 @@ void StiRootSimpleTrackFilter::initialize()
   cout << "StiRootSimpleTrackFilter::initialize() - INFO - Starting" << endl;
   parameterVector.clear();
   add("Chi2Used", "Use Chi2",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kChi2);
-  add("Chi2Min",  "Minimum Chi2", 0., 0., 0., 100.,2,Parameter::Double, StiTrack::kChi2);
-  add("Chi2Max",  "Maximum Chi2", 20., 20., 0., 100.,2,Parameter::Double, StiTrack::kChi2);
+  add("Chi2Min",  "Minimum Chi2", 0., 0., 0., 100.,1,Parameter::Double, StiTrack::kChi2);
+  add("Chi2Max",  "Maximum Chi2", 20., 20., 0., 100.,1,Parameter::Double, StiTrack::kChi2);
   
   add("PhiUsed",  "Use Phi",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPhi);
   add("PhiMin",   "Minimum Phi", 0.,   0.,  0., 6.3,2,Parameter::Double, StiTrack::kPhi);
@@ -48,6 +48,11 @@ void StiRootSimpleTrackFilter::initialize()
   add("nGapsUsed","Use nGaps",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kGapCount);
   add("nGapsMin", "Minimum nGaps", 0., 0., 0., 100.,1,Parameter::Integer, StiTrack::kGapCount);
   add("nGapsMax", "Maximum nGaps", 60., 60., 0., 100.,1,Parameter::Integer, StiTrack::kGapCount);
+
+  add("chargeUsed","Use Charge",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kCharge);
+  add("chargeMin", "Minimum Charge", -1., -1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge);
+  add("chargeMax", "Maximum Charge",  1.,  1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge);
+
 
   //add("NToNmaxPtsUsed", "Use NToNmaxPts",false,false,0,1,1,Parameter::Boolean);
   //add("NToNmaxPtsMin","Minimum NToNmaxPts",0.25, 0.25, 0.,1.,1.,Parameter::Double);
