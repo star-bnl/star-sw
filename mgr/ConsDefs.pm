@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.2 2000/02/22 20:54:07 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.3 2000/02/23 20:14:48 fisyak Exp $
 {
  if (defined($AFS)) {$File::Find::dont_use_nlink;}
  use File::Basename;
@@ -225,9 +225,9 @@
    $SO        = $CXX;
    $SOFLAGS   = "-G";
    my $STDHOME= "/afs/rhic/star/packages/ObjectSpace/2.0m";
-   $EXTRA_CXXFLAGS.= " -I" . $STDHOME . " -I" . $STDHOME . "/ospace/std"; 
-   $EXTRA_CXXFLAGS.= " -I" . $STDHOME . "/ospace/stl  -I" . $STDHOME . "/ospace"; 
-   $EXTRA_CXXFLAGS.= " -I/usr/openwin/include -I/usr/local/include";
+   $EXTRA_CPPPATH.= " -I" . $STDHOME . " -I" . $STDHOME . "/ospace/std"; 
+   $EXTRA_CPPPATH.= " -I" . $STDHOME . "/ospace/stl  -I" . $STDHOME . "/ospace"; 
+   $EXTRA_CPPPATH.= " -I/usr/openwin/include -I/usr/local/include";
    $MAKELIB = "test -d %>:d/Templates.DB &&";
    $MAKELIB.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %>:d/Templates.DB/*.o %_LDIRS %LIBS ||";
    $MAKELIB.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS ";
