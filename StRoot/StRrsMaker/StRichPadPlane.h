@@ -1,12 +1,11 @@
 /*****************************************************************
- * $Id: StRichPadPlane.h,v 1.3 2000/01/26 23:39:20 lasiuk Exp $   
+ * $Id: StRichPadPlane.h,v 1.4 2000/02/08 16:36:45 lasiuk Exp $   
  *   StRichPadPlane is a special container specialized to store 
  *   RICH Raw Data. 
  *
  * $Log: StRichPadPlane.h,v $
- * Revision 1.3  2000/01/26 23:39:20  lasiuk
- * Forward declaration of classes to bypass CINT evaluation
- * comment the list data member in StRichID
+ * Revision 1.4  2000/02/08 16:36:45  lasiuk
+ * Bring into line with HP
  *
  * Revision 1.4  2000/02/08 16:36:45  lasiuk
  * Bring into line with HP
@@ -26,7 +25,7 @@
 #include "TObject.h"
 
 #endif
-#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+#include <list>
 #include <vector>
 
 #ifndef ST_NO_NAMESPACES

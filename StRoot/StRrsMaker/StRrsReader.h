@@ -1,9 +1,9 @@
 /*************************************************************
- * $Id: StRrsReader.h,v 1.2 2000/01/25 22:02:23 lasiuk Exp $
+ * $Id: StRrsReader.h,v 1.3 2000/02/08 16:36:52 lasiuk Exp $
  *
  * $Log: StRrsReader.h,v $
- * Revision 1.2  2000/01/25 22:02:23  lasiuk
- * Second Revision
+ * Revision 1.3  2000/02/08 16:36:52  lasiuk
+ * Bring into line with HP
  *
  * Revision 1.2  2000/01/25 22:02:23  lasiuk
  * Second Revision
@@ -14,7 +14,9 @@
 #ifndef ST_RRS_READER
 #define ST_RRS_READER
 
+#ifdef __ROOT__
 #include "StDaqLib/RICH/RICH_Reader.hh"
+#endif
 
 #ifndef ST_NO_NAMESPACES
 //namespace StRichRawData {
@@ -22,7 +24,11 @@
 #include "StRichRrsMacros.h"
 #include "StRichPadPlane.h"
     
-class StRrsReader : public StRichReaderInterface {
+class StRrsReader
+#ifdef __ROOT__
+    : public StRichReaderInterface
+#endif
+{
 public:
     StRrsReader(); // shouldn't really call this one
     // (but ifso must use setEvent)

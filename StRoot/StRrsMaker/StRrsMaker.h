@@ -1,5 +1,5 @@
 /**********************************************************
- * $Id: StRrsMaker.h,v 1.4 2000/01/27 17:10:04 lasiuk Exp $
+ * $Id: StRrsMaker.h,v 1.5 2000/02/08 16:36:51 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
@@ -15,8 +15,8 @@
  *  memory.
  ***********************************************************
  *  $Log: StRrsMaker.h,v $
- *  Revision 1.4  2000/01/27 17:10:04  lasiuk
- *  modify to work stand-alone from ROOT
+ *  Revision 1.5  2000/02/08 16:36:51  lasiuk
+ *  Bring into line with HP
  *
  *  Revision 1.5  2000/02/08 16:36:51  lasiuk
  *  Bring into line with HP
@@ -75,7 +75,9 @@ using namespace units;
 class StRichPhysicsDb;
 class StRichCoordinateTransform;
 class StRichMomentumTransform;
-#include "StRichFilter.h"
+class StRichPadPlane;
+#include "StRichIonize.h"
+
 //#include "StRichFilter.h"
 #include "StRichIonization.h"
 #include "StRichInduceSignal.h"
@@ -121,7 +123,9 @@ private:
 
 
     StRichCoordinateTransform      *mCoordinateTransform;//!
-    StRichFilter                    mFilter;//!
+    /*StRichFilter                    mFilter;*/
+    StRichIonization                mIonize;
+    StRichInduceSignal              mInduceSignal;
     // Processing
     StRichIonization                mIonize;//!
     StRichInduceSignal              mInduceSignal;//!
@@ -142,10 +146,10 @@ private:
     
     //   Flags settable at macro level!
     int       mAddPedestal;
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.4 2000/01/27 17:10:04 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.5 2000/02/08 16:36:51 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
     
     virtual const char *GetCVS() const
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.4 2000/01/27 17:10:04 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.5 2000/02/08 16:36:51 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StRrsMaker, 1)            // StAF chain
 };
