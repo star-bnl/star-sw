@@ -5,12 +5,15 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.8 2003/03/06 18:54:21 zolnie Exp $
+ * $Id: EEmcGeomSimple.h,v 1.9 2003/03/22 22:44:57 zolnie Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
  *********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.9  2003/03/22 22:44:57  zolnie
+ * make it standalone library
+ *
  * Revision 1.8  2003/03/06 18:54:21  zolnie
  * improvements for track/tower matching
  *
@@ -28,11 +31,11 @@
  *
  *********************************************************************/
 #include "TObject.h"
-#include "StThreeVectorD.hh"
+#include "TVector3.h"
 
 
-class StEmcRawHit;
-class StTrack;
+//class StEmcRawHit;
+//class StTrack;
 
 
 class  EEmcGeomSimple : public TObject { 
@@ -43,35 +46,34 @@ public:
   virtual ~EEmcGeomSimple();
 
   // 
-  inline StThreeVectorD getTrackPoint (const StTrack&     track, Double_t z ) const ;
+  //inline StThreeVectorD getTrackPoint (const StTrack&     track, Double_t z ) const ;
 
-  inline StThreeVectorD getTowerCenter(const UInt_t sec, const UInt_t sub, const UInt_t etabin) const;
-  inline StThreeVectorD getTowerCenter(const StEmcRawHit& hit               ) const; 
+  inline TVector3 getTowerCenter(const UInt_t sec, const UInt_t sub, const UInt_t etabin) const;
+  //inline StThreeVectorD getTowerCenter(const StEmcRawHit& hit               ) const; 
   
   
   //given point return tower as EmcRawHit
-  Int_t   getHit   (const StThreeVectorD& point,       StEmcRawHit& hit)     const;
+  //Int_t   getHit   (const StThreeVectorD& point,       StEmcRawHit& hit)     const;
   // get an r^2 (in x-y plane) distance between a point and the tower center
-  Float_t getR2Dist(const StThreeVectorD& point, const StEmcRawHit& hit)     const;
+  //Float_t getR2Dist(const StThreeVectorD& point, const StEmcRawHit& hit)     const;
   // checks if point matches tower hit
-  Bool_t  pointMatch(const StThreeVectorD& point, const StEmcRawHit& hit,
-		     Float_t deta=0.0, Float_t dphi=0.0, Float_t dz=0.0)   
-    const;
+  //Bool_t  pointMatch(const StThreeVectorD& point, const StEmcRawHit& hit,
+  //		     Float_t deta=0.0, Float_t dphi=0.0, Float_t dz=0.0)  const;
 
   //wrappers for the above a track & z is given
   // (implicitely assumed that the center of the world is at z==0) 
-  inline Int_t getHit(const StTrack& track, Double_t z, StEmcRawHit& hit)           const {
-    return getHit(getTrackPoint(track,z),hit);
-  }
-  inline Float_t getR2Dist(const StTrack& track, Double_t z,const StEmcRawHit& hit) const { 
-    return getR2Dist(getTrackPoint(track,z),hit);
-  }
-  inline Bool_t trackMatch(const StTrack& track, Double_t z, 
-			   const StEmcRawHit& hit, 
-			   Float_t deta=0.0,Float_t dphi=0.0,Float_t dz=0.0) 
-    const {
-    return(pointMatch(getTrackPoint(track,z),hit,deta,dphi,dz));
-  }
+  //inline Int_t getHit(const StTrack& track, Double_t z, StEmcRawHit& hit)           const {
+  //  return getHit(getTrackPoint(track,z),hit);
+  //}
+  //inline Float_t getR2Dist(const StTrack& track, Double_t z,const StEmcRawHit& hit) const { 
+  //  return getR2Dist(getTrackPoint(track,z),hit);
+  // }
+  //inline Bool_t trackMatch(const StTrack& track, Double_t z, 
+  //			   const StEmcRawHit& hit, 
+  //			   Float_t deta=0.0,Float_t dphi=0.0,Float_t dz=0.0) 
+  //  const {
+  //  return(pointMatch(getTrackPoint(track,z),hit,deta,dphi,dz));
+  //}
 
   
   inline Float_t getZ1()   const { return mZ1;  };

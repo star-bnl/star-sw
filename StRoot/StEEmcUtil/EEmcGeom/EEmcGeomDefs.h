@@ -3,12 +3,15 @@
 #ifndef EEmcGeom_EEmcDefs_h
 #define EEmcGeom_EEmcDefs_h
 /*********************************************************************
- * $Id: EEmcGeomDefs.h,v 1.2 2003/03/06 18:54:20 zolnie Exp $
+ * $Id: EEmcGeomDefs.h,v 1.3 2003/03/22 22:44:57 zolnie Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Definitions (temp file)
  *********************************************************************
  * $Log: EEmcGeomDefs.h,v $
+ * Revision 1.3  2003/03/22 22:44:57  zolnie
+ * make it standalone library
+ *
  * Revision 1.2  2003/03/06 18:54:20  zolnie
  * improvements for track/tower matching
  *
@@ -27,10 +30,10 @@ const int kEEmcNumEtas       = 12;
 const int kEEmcNumStrips     =288;
 
 
-const Float_t kEEmcZPRE1=270.190; // [cm] z preshower1
-const Float_t kEEmcZPRE2=271.695; // [cm] z preshower2
-const Float_t kEEmcZSMD =279.542; // [cm] z location of the EEMC SMD layer 
-const Float_t kEEmcZPOST=306.158; // [cm] z postshower  
+const float kEEmcZPRE1=270.190; // [cm] z preshower1
+const float kEEmcZPRE2=271.695; // [cm] z preshower2
+const float kEEmcZSMD =279.542; // [cm] z location of the EEMC SMD layer 
+const float kEEmcZPOST=306.158; // [cm] z postshower  
 
 
 #endif

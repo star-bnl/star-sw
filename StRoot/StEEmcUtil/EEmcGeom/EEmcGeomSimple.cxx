@@ -1,5 +1,8 @@
-// $Id: EEmcGeomSimple.cxx,v 1.8 2003/03/06 18:54:21 zolnie Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.9 2003/03/22 22:44:57 zolnie Exp $
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.9  2003/03/22 22:44:57  zolnie
+// make it standalone library
+//
 // Revision 1.8  2003/03/06 18:54:21  zolnie
 // improvements for track/tower matching
 //
@@ -17,6 +20,9 @@
 //
 #include <math.h>
 
+#include "TVector3.h"
+
+#if 0
 #include "SystemOfUnits.h"
 #include "StThreeVectorD.hh"
 #include "StPhysicalHelixD.hh"
@@ -24,6 +30,7 @@
 #include "StEmcRawHit.h"
 #include "StTrackGeometry.h"
 #include "StTrack.h"
+#endif
 
 #include "EEmcGeomDefs.h"
 #include "EEmcGeomSimple.h"
@@ -71,10 +78,27 @@ EEmcGeomSimple::useDefaultGeometry()
   mZ1     =  kEEmcZPRE1; // preshower
   mZ2     =  kEEmcZPOST; // postshower
   mZSMD   =  kEEmcZSMD;  // 
-  mPhi0   =  75.0*degree;       
+  mPhi0   =  75.0*M_PI/180.0;       
   mClock  =  CounterClockwise;  
 }
 
+
+inline TVector3 
+EEmcGeomSimple::getTowerCenter(const UInt_t sec, const UInt_t sub, const UInt_t etabin) const 
+{
+  Double_t  phi   = getPhiMean(sec,sub);
+  Double_t  eta   = getEtaMean(etabin);
+  if(eta<0.0) return TVector3();
+  Double_t  z     = getZMean();
+  Double_t  rho   = z*tan(2.0*atan(exp(-1.0*eta)));  
+
+  // create vector pointing toward the center of the tower
+  return TVector3(rho*cos(phi),rho*sin(phi),z);
+}
+
+
+
+#if 0
 // =========================================================================
 // gets a hit vector r checks if inside the EEmc
 // and returns sector (0..mNumSec-1), subsector (0..mNumSSec-1) 
@@ -168,3 +192,4 @@ EEmcGeomSimple::getTrackPoint(const StTrack& track, Double_t z) const
   double s  = ( z - helix.origin().z() ) / sin( helix.dipAngle())  ;
   return StThreeVectorD(helix.at(s));
 } 
+#endif
