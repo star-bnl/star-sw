@@ -1,7 +1,4 @@
-
-
-
-/* Yacc code for STAR idl compiler, begun October 5 1995 by Herb Ward.
+/* Yacc code for Scientific Table IDL compiler, begun October 5 1995 by Herb Ward.
 ** See bottom of file for mnemonicity tables (whatever those are).
 */
 /******************************************************** yacc declarations */
@@ -31,9 +28,8 @@
 #define PROTOTYPES 4 /* max prototypes in interface def */
 #define INCDIR 37	/* max -I on command line */
 #define INCDIRS 80	/* max size of path spec in a -I */
-#define ERROR_FORMAT "STAR idl compiler.\
-  Error on line %d of your idl file:\n%s\n%s\n"
-#define ERR_FORMAT2 "Error on line %d of your idl file: unused character: %s\n"
+#define ERROR_FORMAT "stic: error on line %d:\n%s\n%s\n"
+#define ERR_FORMAT2 "stic: error on line %d: unused character: %s\n"
 #define OUTFILE 43
 #define NOUTFILE 80
 #define ARGS 90 /* max args per prototype */
@@ -71,6 +67,10 @@ char gOrigInputFile[81];
 int gNincDir,gNOutFile=0,gNoMoreComments=0;
 int  gOptionH,gOptiont,gOptioni,gOptionM,gOptionstatic,gOptiondynamic;
 int  gOptionf;
+
+/* An option to process files _quietly_ */
+int  gOptionq;
+
 char gOlc[COL][OLC],gOutFile[NOUTFILE][OUTFILE+2];
 char gInFile[INFILE][INFILES+1];
 int gNInFile=0;
@@ -89,7 +89,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.2 1998/04/28 18:04:27 ward Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.3 1998/05/11 18:16:14 dave Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -437,7 +437,7 @@ FILE *OpenOnePamOutput(char *x) {
   ModeFromFn(fn,mode);
   if(gOptionM) return NULL;
   gFile=fopen(fn,mode); /* gOptionf OK */
-  if(!strcmp(mode,"w")) PP"  out: %s\n",fn);
+  if(!strcmp(mode,"w") && !gOptionq) PP"  out: %s\n",fn);
   StandardBlurb(fortranOrC,mode,gFile);
   if(gFile==NULL) { F"Can't write %s.\n",fn); exit(2); }
   return gFile;
@@ -590,7 +590,9 @@ void PamTemplateFortran(void) {
   TemplateFMiddle(ff);
   if(gNProto!=1) ERR; StarFortranComment(initOrCall,ff);
   TemplateFEnd(ff);
-  fclose(ff); F"  out: %s\n",fn);
+  fclose(ff); 
+  if (!gOptionq) 
+     F"  out: %s\n",fn);
 }
 void PamCC(void) {
   char headerName[111],tableType[111],fn[100]; FILE *ff; int ii,jj,initOrCall;
@@ -670,7 +672,9 @@ void PamCC(void) {
   /* FF"  printf(\"\\n\");\n"); 960606 */
   FF"  return TRUE;\n");
   FF"}\n");
-  fclose(ff); F"  out: %s\n",fn);
+  fclose(ff); 
+  if (!gOptionq) 
+     F"  out: %s\n",fn);
 }
 void PamTemplateC(void) {
   int type,lookfor;
@@ -726,7 +730,9 @@ void PamTemplateC(void) {
     }
   }
   TemplateCEnd(ff);
-  fclose(ff); F"  out: %s\n",fn);
+  fclose(ff); 
+  if (!gOptionq) 
+     F"  out: %s\n",fn);
 }
 void GenerateStaticLenght(const char *in,char *out) {
   strcpy(out,in); strcat(out,"_h.maxlen");
@@ -835,7 +841,7 @@ void CheckThatAllTablesHaveBeenIncluded(void) {
       PP"for table\n");
       PP"type '%s', which is mentioned in %s.\n",
       gModuleTable[i],gOrigInputFile); 
-      PP"Press return to continue.   "); gets(junk);
+      PP"Press return to continue.   "); fgets(junk, 10, stdin);
     }
   }
 }
@@ -953,7 +959,7 @@ void Help(void) {
  Usage();
 }
 void Usage(void) {
-  F"Usage: %s [-h?Mivft] [-Iincdir] [-static|-dynamic] [xxx.idl]\n",
+  F"Usage: %s [-h?Mivftq] [-Iincdir] [-static|-dynamic] [xxx.idl]\n",
   gExeName);
   F"All options are optional.\n");
   F"\n");
@@ -971,6 +977,7 @@ void Usage(void) {
   F"-i Ignore case (upper converted to lower).\n");
   F"-I Mechanism for specifying list of include directories.\n");
   F"-M Write string to stdout for use in a Makefile, no other output.\n");
+  F"-q Operate quietly.\n");
   F"-static  Static tables.\n");
   F"-t Produce only the template files.\n");
   F"-v Write version info to stdout, no other output is produced.\n");
@@ -988,7 +995,7 @@ void OpenAllTblOutput(void) {
   } else {
     gFpInc=fopen(fn,mode); /* gOptionf OK */
     if(gFpInc==NULL) { F"Can't write %s.\n",fn); exit(2); }
-    if(!gOptionM&&!strcmp(mode,"w")) P"  out: %s\n",fn);
+    if(!gOptionM && !strcmp(mode,"w") && !gOptionq) P"  out: %s\n",fn);
     StandardBlurb(1,mode,gFpInc);
   }
 
@@ -998,7 +1005,7 @@ void OpenAllTblOutput(void) {
   } else {
     gFpH=fopen(fn,mode); /* gOptionf OK */
     if(gFpH==NULL) { F"Can't write %s.\n",fn); exit(2); }
-    if(!gOptionM&&!strcmp(mode,"w")) P"  out: %s\n",fn); 
+    if(!gOptionM && !strcmp(mode,"w") && !gOptionq) P"  out: %s\n",fn); 
     StandardBlurb(2,mode,gFpH);
   }
 }
@@ -1070,7 +1077,8 @@ void DumpOptionsAndExit(void) {
 void ReadOptions(int nnn,char *aaa[]) {
   int jj,filenameCount=0,ii; char die=0;
   gOptionstatic=0; gOptiondynamic=0; gOptionM=0; gOptioni=0; gOptionH=0;
-  gOptiont=0; gOptionf=0;
+  gOptiont=0; gOptionf=0; 
+  gOptionq = 0;
   gNincDir=0; strcpy(gIncDir[gNincDir++],".");
   for(ii=1;ii<nnn;ii++) {
     if(aaa[ii][0]=='-') {
@@ -1086,6 +1094,7 @@ void ReadOptions(int nnn,char *aaa[]) {
           else if(aaa[ii][jj]=='M') gOptionM=7;
           else if(aaa[ii][jj]=='f') gOptionf=7;
           else if(aaa[ii][jj]=='i') gOptioni=7;
+          else if(aaa[ii][jj]=='q') gOptionq=7;
           else if(aaa[ii][jj]=='h') Usage();
           else if(aaa[ii][jj]=='?') Usage();
           else if(aaa[ii][jj]=='v') PrintVersionAndExit();
@@ -1099,7 +1108,8 @@ void ReadOptions(int nnn,char *aaa[]) {
       strncpy(gInFileNameNoPath,aaa[ii]+jj+1,INFILES);
       strcpy(gOrigInputFile,aaa[ii]+jj+1);
       strncpy(      gInFileName,aaa[ii],     INFILES);
-      PP"Input file %s\n",gInFileNameNoPath);
+      if (!gOptionq) 
+        PP"Input file %s\n",gInFileNameNoPath);
       filenameCount++;
     }
   }
@@ -1145,7 +1155,7 @@ void RecursiveProcessingOfIncludeFiles(const char *curFile) {
       if(line[ii]!='\"') { PP"Did not find quotes %s\n",line); exit(2); }
       quote=ii; strtok(line+quote+1,"\""); incFile=line+quote+1;
       if(strstr(incFile,".idl")) {
-        if(!gOptionM) PP"Processing %23s included in %23s\n",incFile,curFile);
+        if(!gOptionM && !gOptionq) PP"Processing %23s included in %23s\n",incFile,curFile);
         for(ii=0;ii<gNincDir;ii++) {
           sprintf(incFileFullPath,"%s/%s",gIncDir[ii],incFile);
           incFileFp=fopen(incFileFullPath,"r");
@@ -1176,10 +1186,13 @@ void HandleOneInputFile(char *inFile) { /* maybe inFile=gInFileName */
     if(gFpInc) Err(__LINE__);
     if(gFpH) Err(__LINE__);
   } else { 
-    fclose(gFpInc); fclose(gFpH); 
+    if (gFpInc)
+      fclose(gFpInc); 
+    if (gFpH) 
+      fclose(gFpH); 
   }
   RecursiveProcessingOfIncludeFiles(buffer);
-  if(!gOptionM) PP"----- finished with %s\n",buffer);
+  if(!gOptionM && !gOptionq) PP"----- finished with %s\n",buffer);
 } /* save inFile buffer gInFileName */
 void FixVersionInfo(void) {
   int ii;
@@ -1195,7 +1208,7 @@ int main(int nnn,char *aaa[]) {
   sprintf(gOptioniTempFile,"/tmp/stic.option.i.%d",getpid());
   if(nnn<2) Usage();
   ReadOptions(nnn,aaa);
-  if(!gOptionM) P"For help, type \"%s help\".\n",gExeName);
+  if(!gOptionM && !gOptionq) P"For help, type \"%s help\".\n",gExeName);
   if(!strcmp(gInFileName,"help")) Help();
   HandleOneInputFile(gInFileName);
   CheckThatAllTablesHaveBeenIncluded();
