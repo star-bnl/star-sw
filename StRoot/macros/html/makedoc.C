@@ -1,4 +1,4 @@
-// $Id: makedoc.C,v 1.48 1999/12/13 17:05:42 fine Exp $
+// $Id: makedoc.C,v 1.49 1999/12/15 22:29:55 fine Exp $
 //=======================================================================
 // owner: Valery Fine
 // what it does: 
@@ -7,7 +7,7 @@
  //*-- Author :    Valery Fine   25/12/98
  gROOT.Reset();
   Char_t *libs[] = { "St_base","xdf2root","St_Tables"                    
-                    , "StChain"};
+                    , "StChain","StUtilities","StBFChain"};
 
  TString AFS; // STAR root directory
 
@@ -40,6 +40,8 @@
 //     gSystem->Load("global.sl");
 //     gSystem->Load("St_global");
      gSystem->Load("StChain");
+     gSystem->Load("StUtilities");
+     gSystem->Load("StBFChain");
    
      gSystem->Load("St_TLA_Maker.so");
      gSystem->Load("St_io_Maker.so");
@@ -158,10 +160,10 @@
                        ,"StObjArray",    "StHit",            "StHelixD"
                        ,"StTrack",       "St_TableElementDescriptor"
                        ,"St_geom_Maker", "StPadDisplayMaker", "St_TLA_Maker"
-                       ,"StEventDisplayMaker"
-                       ,"St_srs_Maker",  "St_xdfin_Maker",   "StBFChain"
+                       ,"StBFChain",     "StEventDisplayMaker", "TAxis3D"
+                       ,"St_srs_Maker",  "St_xdfin_Maker"
                       };
-  Int_t nclass = 39;
+  Int_t nclass = 40;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("$STAF/inc/table_header.h");
@@ -204,11 +206,10 @@
      , "/test/test9.C",                "How to read the event from XDF file and build some histograms with ROOT"
      , "/test/XDFcopy.C",              "How to read/write XDF file"
      , "/test/XDFtest.C",              "How to read/write XDF and ROOT files"
-
      , "/graphics/TurnDisplay.C",     "Macro to plug StEventDisplayMaker in to chain and trun it on."
      , "/graphics/SetObjectFilter.C",  "Macro to adjust the parameters of the current \"event filter\"."
-     , "/graphics/StTrackFilters/StTrackFilter.cxx", "an example of the implementation of the \"advanced\"  event filter.");
-     , "/graphics/StTrackFilters/StTrackFilter.h",   "an example of the definition of the \"advanced\"  event filter.");
+     , "/graphics/StTrackFilters/StTrackFilter.cxx", "an example of the implementation of the \"advanced\"  event filter."
+     , "/graphics/StTrackFilters/StTrackFilter.h",   "an example of the definition of the \"advanced\"  event filter."
      , "/graphics/boldStyle.C",        "Style file for making presentation histograms."
      , "/graphics/videoStyle.C",       "Style file for video presentation histograms."
      , "/graphics/PadBrowser.C",       "How to use St_geom_Maker and StPadDisplayMaker"
@@ -272,6 +273,9 @@
 //___________________________________________________________________________
 //___________________________________________________________________________
 // $Log: makedoc.C,v $
+// Revision 1.49  1999/12/15 22:29:55  fine
+// new macros added
+//
 // Revision 1.48  1999/12/13 17:05:42  fine
 // new marcos TurnDisplay.C SetObjectFilter included
 //
