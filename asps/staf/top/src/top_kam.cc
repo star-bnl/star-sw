@@ -453,6 +453,7 @@ STAFCV_T topcut_agent_function(char* agent)
   char *s;
   printf("%s\n",s=cut->cutFunction());
   free(s); /*fix memory leak -akio*/
+  EML_SUCCESS(STAFCV_OK);
 }
 /*-------------------------------------------------------------------*/
 void kam_topcut_agent_filter_()
