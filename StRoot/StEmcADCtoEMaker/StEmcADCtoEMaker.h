@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.34 2003/10/03 16:02:57 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.35 2003/10/03 21:13:15 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.35  2003/10/03 21:13:15  suaide
+// some histograms are created only in debug mode to save memory
+//
 // Revision 1.34  2003/10/03 16:02:57  suaide
 // version changed
 //
@@ -171,6 +174,7 @@ class StEmcADCtoEMaker : public StMaker
   Bool_t            mPrint;
   Bool_t            mSave[MAXDETBARREL]; 
   Bool_t            mFillHisto;
+  Bool_t            mDebug;
   
   TString           mMuName;
 					 
@@ -203,7 +207,7 @@ class StEmcADCtoEMaker : public StMaker
   void                      setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
   void                      setPrint(Bool_t a) {mPrint = a; } ///< Set it to kFALSE if you do not want to print messages
   void                      setFillHisto(Bool_t a) {mFillHisto = a;} ///< Turns on/off histogram filling
-  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.34 2003/10/03 16:02:57 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.35 2003/10/03 21:13:15 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcADCtoEMaker, 2)  
 };

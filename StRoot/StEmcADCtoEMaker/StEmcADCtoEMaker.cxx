@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.57 2003/10/03 16:02:57 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.58 2003/10/03 21:12:59 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.58  2003/10/03 21:12:59  suaide
+// some histograms are created only in debug mode to save memory
+//
 // Revision 1.57  2003/10/03 16:02:57  suaide
 // version changed
 //
@@ -178,7 +181,7 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
     mEnergySpec[i][2] = NULL; //!
     mAdc1d[i] = NULL;  //!           
     mEn1d[i] = NULL;  //!           
-    mADCSpec[i] = NULL;          //!           
+    mADCSpec[i] = NULL;          //!         
     mGeo[i] = NULL; 
   } 
   mNhit = NULL;           //! 
@@ -194,6 +197,7 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
   mData = NULL;                      
   mDBRunNumber = 0;
   mFillHisto = kTRUE;
+  mDebug = kFALSE;
 
 }
 //_____________________________________________________________________________
@@ -237,7 +241,7 @@ Int_t StEmcADCtoEMaker::Init()
 	{
     char name[40];
     sprintf(name,"ADCSpec-%s",detname[i].Data());
-    mADCSpec[i]=new TH2F(name,name,a[i],0.5,a[i]+0.5,1024,-64,b[i]);
+    if(mDebug) mADCSpec[i]=new TH2F(name,name,a[i],0.5,a[i]+0.5,1024,-64,b[i]);
   }     
   // SMD time bin
   mSmdTimeBinHist = new TH2F("SmdTimeBin","SMD Time bin",8,-0.5,7.5,128,0.5,128.5);
@@ -310,15 +314,15 @@ Int_t StEmcADCtoEMaker::Init()
     mEnergyHist[i] = new TH2F(name_e,title_e,2*nEta+2-1,EtaBins.GetArray(),60*(nSub+1)-1,PhiBins.GetArray());
     if(i<2)
     {
-      mEnergySpec[i][0] = new TH2F(name_s.Data(),title_s,nbins[i],0.5,(float)nbins[i]+0.5,500,0,5);
-      mEnergySpec[i][1] = mEnergySpec[i][0];
-      mEnergySpec[i][2] = mEnergySpec[i][0];
+      if(mDebug) mEnergySpec[i][0] = new TH2F(name_s.Data(),title_s,nbins[i],0.5,(float)nbins[i]+0.5,500,0,5);
+      if(mDebug) mEnergySpec[i][1] = mEnergySpec[i][0];
+      if(mDebug) mEnergySpec[i][2] = mEnergySpec[i][0];
     }
     else for(int k=0;k<3;k++)
     {
       char name[40];
       sprintf(name,"%s for capacitor %d",name_s.Data(),k);
-      mEnergySpec[i][k] = new TH2F(name,title_s,nbins[i],0.5,(float)nbins[i]+0.5,500,0,5);
+      if(mDebug) mEnergySpec[i][k] = new TH2F(name,title_s,nbins[i],0.5,(float)nbins[i]+0.5,500,0,5);
     }
     mAdc[i]    = new TH2F(name_a,title_a,2*nEta+2-1,EtaBins.GetArray(),60*(nSub+1)-1,PhiBins.GetArray());
     mAdc1d[i]  = new TH1F(name_a1,title_a1,1000,0,8);   
@@ -845,7 +849,7 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 			{
 				TOTALE+=EN;
 				NHITS++;
-        if(mFillHisto) mEnergySpec[det][cap]->Fill(id,EN);			  
+        if(mFillHisto) if(mEnergySpec[det][cap]) mEnergySpec[det][cap]->Fill(id,EN);			  
         if(!mSave[det]) mSave[det] = kTRUE;
         //if(det==0) cout <<"id = "<<id<<"  ADC = "<<ADC<<"  PED = "<<PED<<"  CAP = "<<cap<<"  ADCSUB = "<<ADCSUB<<"  E = "<<EN<<endl;
 			}
@@ -898,7 +902,7 @@ Bool_t StEmcADCtoEMaker::fillHistograms()
 				if(det==0) { ADC = (Float_t)mData->TowerADC[i]; E = mData->TowerEnergy[i]; }
 				if(det==2) { ADC = (Float_t)mData->SmdeADC[i]; E = mData->SmdeEnergy[i]; }
 				if(det==3) { ADC = (Float_t)mData->SmdpADC[i]; E = mData->SmdpEnergy[i]; }
-			  if(ADC!=0) mADCSpec[det]->Fill(i+1,ADC-mPed[det][i][0]);
+			  if(ADC!=0) if(mADCSpec[det]) mADCSpec[det]->Fill(i+1,ADC-mPed[det][i][0]);
         //if(det==2) cout <<"id = "<<i+1<<"  ADC = "<<ADC<<"  E = "<<E<<endl;
 				totalE+=E;
 				totalADC+=ADC;
