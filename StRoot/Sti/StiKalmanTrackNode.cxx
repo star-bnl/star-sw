@@ -22,6 +22,7 @@ bool StiKalmanTrackNode::elossCalculated = false;
 bool StiKalmanTrackNode::mcsCalculated   = false;
 double StiKalmanTrackNode::kField = 0.25;
 double StiKalmanTrackNode::massHypothesis = 0.13957018;
+double StiKalmanTrackNode::unitCharge = 1;
 
 //_____________________________________________________________________________
 void StiKalmanTrackNode::reset()
@@ -219,7 +220,7 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
   else if (c>-1e-9 && c<0)
     c = -1e-9;
   // with "c" in 1/meter, kField in tesla, pt is in GeV/c
-  pt = 0.3*kField/c;
+  pt = 0.003*kField/c;
   sinPhi = c*fX-fP2;
   double ss = sinPhi*sinPhi;
   if (ss>1.)
@@ -384,7 +385,7 @@ double StiKalmanTrackNode::getPt() const
     c = 1e-9;
   else if (c>-1e-9 && c<0)
     c = -1e-9;
-  pt = 0.3*kField/c;
+  pt = 0.003*kField/c;
   return pt;
 }
 
@@ -397,7 +398,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   StiPlacement * tPlace = tDet->getPlacement();
   double tAlpha = tPlace->getNormalRefAngle();
   double dAlpha = tAlpha - fAlpha;
-	cout << " Propagate : tAlpha/fAlpha :" << tAlpha << "\t" << fAlpha << endl;
+	//cout << " Propagate : tAlpha/fAlpha :" << tAlpha << "\t" << fAlpha << endl;
   if (dAlpha>1e-4)   // perform rotation if needed
 		{
 			cout << " doing rotation <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
@@ -486,7 +487,7 @@ void  StiKalmanTrackNode::propagate(double xk,
 	  return;
       }
 			
-      double pt = 0.3*kField/fP3;
+      double pt = 0.003*kField/fP3;
       double p2=(1.+tanl*tanl)*pt*pt;
       double beta2=p2/(p2 + massHypothesis*massHypothesis);
       double theta2=14.1*14.1/(beta2*p2*1e6)*d/x0*rho;

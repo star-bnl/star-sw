@@ -71,6 +71,8 @@ class StiKalmanTrackNode : public StiTrackNode
   static void    setMCSCalculated(bool option);
   static bool StiKalmanTrackNode::getElossCalculated();
   static bool StiKalmanTrackNode::getMCSCalculated();  
+	static double  unitCharge;
+
   friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
 
 	static bool  recurse;
