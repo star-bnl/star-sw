@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.16 2003/10/30 20:07:32 perev Exp $
+ * $Id: StTrack.h,v 2.17 2003/10/31 16:00:04 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.17  2003/10/31 16:00:04  ullrich
+ * Added setKey() method.
+ *
  * Revision 2.16  2003/10/30 20:07:32  perev
  * Check of quality added
  *
@@ -120,6 +123,7 @@ public:
     const StTrackNode*             node() const;
     
     void         setFlag(short);
+    void         setKey(unsigned short);
     void         setEncodedMethod(unsigned short);
     void         setImpactParameter(float);
     void         setLength(float);
