@@ -83,17 +83,19 @@ public:
    virtual     void      *At(Int_t i);
    virtual     void       Browse(TBrowser *b);
    virtual     void       CopySet(St_Table &array);
+   virtual     void      *GetArray() const ;
+   virtual     TClass    *GetRowClass() const ;
    virtual     Long_t     GetNRows() const;
    virtual     Long_t     GetRowSize() const;
    virtual     Long_t     GetTableSize() const;
-   virtual     void      *GetArray() const ;
    virtual     const Char_t *GetType() const;
    virtual     Long_t     HasData() const { return 1; }
    virtual     Bool_t     IsFolder();
    virtual     void       ls(Option_t *option="");
    virtual     void       ls(Int_t deep);
    virtual     Char_t    *Print(Char_t *buf,Int_t n) const ;
-   virtual     void       Print(Option_t *buf="") { Print(0,0); }
+   virtual     void       Print(Option_t *buf="") { Print((Char_t *)0,Int_t(0)); }
+   virtual  const Char_t *Print(Int_t row, Int_t rownumber=10, const Char_t *colfirst="", const Char_t *collast="") const;
                void      *ReAllocate(Int_t newsize);
    virtual     table_head_st *GetHeader() const;
    void        MakeHeader(const Char_t *prefix,const Char_t *tablename,const Char_t *suffix, FILE *fl=0); // Create header file for STAF table class
