@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.14 2000/11/24 15:02:33 hummler Exp $
+// $Id: StFtpcFastSimu.cc,v 1.15 2000/12/08 10:06:32 jcs Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.15  2000/12/08 10:06:32  jcs
+// replace cmath.h and math_constants.h with PhysicalConstants.h
+//
 // Revision 1.14  2000/11/24 15:02:33  hummler
 // commit changes omitted in last commit
 //
@@ -42,10 +45,9 @@
 #include "StFtpcFastSimu.hh"
 #include "StFtpcParamReader.hh"
 #include "StFtpcGeantReader.hh"
-#include "math_constants.h"
 #include <iostream.h>
 #include <stdlib.h>
-#include <cmath>
+#include "PhysicalConstants.h"
 #include "Random.h"
 #include "RanluxEngine.h"
 // random number engines from StarClassLibrary
@@ -185,7 +187,7 @@ int StFtpcFastSimu::ffs_gen_padres()
 	//       Azimuthal angle Phi (in radians)
 	phi = atan2((double) yi,(double) xi);
 	if(phi<0)
-	  phi += C_2PI;
+	  phi += twopi;
 
 	//       Radius of Hit
 	Rh = sqrt(xi*xi + yi*yi);
@@ -222,27 +224,27 @@ int StFtpcFastSimu::ffs_gen_padres()
 	      twist_cosine = 1.0;
 	    if ( twist_cosine < -1.0 ) 
 	      twist_cosine = -1.0;
-	    twist = C_DEG_PER_RAD*acos(twist_cosine);
+	    twist = (radian/degree)*acos(twist_cosine);
 
 	    // dip-angle:
-            theta = C_DEG_PER_RAD*
-	      atan2((double) (pt*cos(twist*C_RAD_PER_DEG)),
+            theta = (radian/degree)*
+	      atan2((double) (pt*cos(twist*degree)),
 		    (double) ((mGeant->z(k)
 			       /fabs(mGeant->z(k)))*
 			      mGeant->pLocalZ(k)));
 	    
 	    // crossing-angle: 
-            cross_ang = C_DEG_PER_RAD*
-	      atan2((double) (pt*cos(fabs(90.-twist)*C_RAD_PER_DEG)),   
+            cross_ang = (radian/degree)*
+	      atan2((double) (pt*cos(fabs(90.-twist)*degree)),   
 		    (double) ((mGeant->z(k)/fabs(mGeant->z(k)))*
 			      mGeant->pLocalZ(k)));
-	    alpha  = fabs(cross_ang*C_RAD_PER_DEG);
-            if(alpha>(C_PI_2))
-	      alpha=C_PI-alpha;
+	    alpha  = fabs(cross_ang*degree);
+            if(alpha>(halfpi))
+	      alpha=pi-alpha;
 	    
-	    lambda = fabs(theta*C_RAD_PER_DEG);
-            if(lambda>(C_PI_2)) 
-	      lambda=C_PI-lambda;
+	    lambda = fabs(theta*degree);
+            if(lambda>(halfpi)) 
+	      lambda=pi-lambda;
 
 	  }
 
@@ -343,8 +345,8 @@ int StFtpcFastSimu::ffs_hit_rd()
 	phi = atan2((double) mGeant->y(ih),
                     (double) mGeant->x(ih));
 	if ( phi < 0.0 ) 
-	  phi += C_2PI;
-	dphi = myModulo((phi-phimin+C_2PI), C_2PI);
+	  phi += twopi;
+	dphi = myModulo((phi-phimin+twopi), twopi);
         mPoint[ih].SetSector( int ( dphi/phisec ) + 1);  
 	
 	//de/dx
@@ -486,10 +488,10 @@ int StFtpcFastSimu::ffs_ini()
     Va = Vhm[0] + Vhm[1]*ra + Vhm[2]*sqr(ra) + Vhm[3]*ra*sqr(ra);
 
     //     phi of sector number 1 origin
-    phimin = C_RAD_PER_DEG * phi_origin;
+    phimin = degree * phi_origin;
 
     //     size of one sector in phi
-    phisec = C_RAD_PER_DEG * phi_sector;
+    phisec = degree * phi_sector;
 
     //     a cluster is too close to lower sector boundary if it is
     //     not more than 2 pads away 
@@ -528,7 +530,7 @@ int StFtpcFastSimu::ffs_merge_tagger()
 	phi1[i] = atan2((double) mPoint[i].GetY(),
                         (double) mPoint[i].GetX());
 	if ( phi1[i] < 0.0 ) 
-	  phi1[i] += C_2PI;
+	  phi1[i] += twopi;
 	
 	sig_azi_1 = s_azi[0] + s_azi[1]*r1[i] + 
 	  s_azi[2]*sqr(r1[i]) + s_azi[3]*sqr(r1[i])*r1[i];
@@ -635,9 +637,9 @@ int StFtpcFastSimu::ffs_merge_tagger()
     while(id_2 < nPoints)
       {
 	delta_azi = phi1[id_2] 
-	  -myModulo(((mPoint[id_2].GetSector()-1)*phisec+phimin),(C_2PI));
+	  -myModulo(((mPoint[id_2].GetSector()-1)*phisec+phimin),(twopi));
 	if (delta_azi<0.0) 
-	  delta_azi += C_2PI;
+	  delta_azi += twopi;
 
 	if((delta_azi < sector_phi_min) || 
            (delta_azi > sector_phi_max) ||
