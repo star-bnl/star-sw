@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtBinaryReader.h,v 1.9 2000/05/25 21:04:30 laue Exp $ 
+ * $Id: StHbtBinaryReader.h,v 1.10 2000/08/25 15:12:58 laue Exp $ 
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,11 @@
  ***************************************************************************
  *
  * $Log: StHbtBinaryReader.h,v $
+ * Revision 1.10  2000/08/25 15:12:58  laue
+ * Bux-fix. Private copy of mReaderStatus deleted. Now mReaderStatus from base
+ * is used. This will lead to termination of the event loop if no more
+ * files/events are left to read.
+ *
  * Revision 1.9  2000/05/25 21:04:30  laue
  * StStandarsHbtEventReader updated for the new StStrangMuDstMaker
  * 
@@ -54,7 +59,8 @@ private:
   unsigned short mStHbtTrackVersion;
   unsigned short mStHbtV0Version;
 
-  int mReaderStatus;                   //!
+  //  int mReaderStatus;                   //!
+
   const char* mFileName;               //!
   const char* mDirName;                //!
   const char* mAppendix;               //!
