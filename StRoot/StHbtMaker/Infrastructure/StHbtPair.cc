@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.20 2001/12/14 23:11:30 fretiere Exp $
+ * $Id: StHbtPair.cc,v 1.21 2002/02/28 14:18:36 rcwells Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.21  2002/02/28 14:18:36  rcwells
+ * Added emissionAngle function to StHbtPair
+ *
  * Revision 1.20  2001/12/14 23:11:30  fretiere
  * Add class HitMergingCut. Add class fabricesPairCut = HitMerginCut + pair purity cuts. Add TpcLocalTransform function which convert to local tpc coord (not pretty). Modify StHbtTrack, StHbtParticle, StHbtHiddenInfo, StHbtPair to handle the hit information and cope with my code
  *
@@ -153,6 +156,14 @@ double StHbtPair::rap() const
 			   (mTrack1->FourMomentum().e() + mTrack2->FourMomentum().e() - mTrack1->FourMomentum().z() - mTrack2->FourMomentum().z()) 
 			   ) ;
   return (tmp);
+}
+//_________________
+double StHbtPair::emissionAngle() {
+  double pxTotal = this->fourMomentumSum().x();
+  double pyTotal = this->fourMomentumSum().y();
+  double angle = atan2(pyTotal,pxTotal)*180.0/3.1415926536;
+  if (angle<0.0) angle+=360.0;
+  return angle;
 }
 //_________________
 // get rid of ambiguously-named method fourMomentum() and replace it with

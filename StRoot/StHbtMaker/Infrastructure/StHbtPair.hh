@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.15 2001/12/14 23:11:30 fretiere Exp $
+ * $Id: StHbtPair.hh,v 1.16 2002/02/28 14:18:36 rcwells Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
+ * Revision 1.16  2002/02/28 14:18:36  rcwells
+ * Added emissionAngle function to StHbtPair
+ *
  * Revision 1.15  2001/12/14 23:11:30  fretiere
  * Add class HitMergingCut. Add class fabricesPairCut = HitMerginCut + pair purity cuts. Add TpcLocalTransform function which convert to local tpc coord (not pretty). Modify StHbtTrack, StHbtParticle, StHbtHiddenInfo, StHbtPair to handle the hit information and cope with my code
  *
@@ -108,6 +111,7 @@ public:
   double mInv() const;
   // pair rapidity
   double rap() const;
+  double emissionAngle();
 
   // Bertsch-Pratt momentum components in Pair Frame - written by Bekele/Humanic
   double qSidePf() const;
