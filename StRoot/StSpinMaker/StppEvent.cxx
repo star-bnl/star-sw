@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.5 2002/02/13 17:15:10 jeromel Exp $
+// $Id: StppEvent.cxx,v 1.6 2002/02/15 14:50:13 jeromel Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.6  2002/02/15 14:50:13  jeromel
+// Re-enabled changes. StEvent commited as well.
+//
 // Revision 1.5  2002/02/13 17:15:10  jeromel
 // Commented out recent addition from Akio to prevent compilation collapse.
 // Need StEvent addition.
@@ -364,8 +367,6 @@ Int_t StppEvent::fill(StEvent *event){
     fpdSouthVeto    = fpd->southVeto();
   }
   
-  StL0Trigger* l0;
-  /*
   StL0Trigger* l0=event->l0Trigger();
   if(l0){
     token = l0->triggerToken();
@@ -387,7 +388,6 @@ Int_t StppEvent::fill(StEvent *event){
 	   <<diff<<" != "<<BunchIdDifference<<endl;
     }
   }
-  */  
 
   cout << "AKIO-Run#/Token/Unix-Time/BunchID/7Bit/SpinBits:" 
        << runN << " " << token << " " << time << " " 
