@@ -12,7 +12,7 @@
 * 1. call_bfc_read_dst.kumac 
 *    - read in dst 
 
-* 2. call_bfc_read_dst_check.kumac
+* 2. call_bfc_read_dst_check_event_summary.kumac
 *    - read in dst 
 *    - execute dchkt package which writes out log file with summary info
 *    - write out ntuple of event_summary table

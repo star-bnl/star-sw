@@ -57,6 +57,10 @@ hi/file 21 [ntuple_file]
  2dhist 202 ' mult pt vs pt   ' 5 0. 1.5 100 0. 3000. 
  2dhist 203 ' mult phi vs phi ' 8 -180. 180. 100 0. 1000.
  
+ 1dhist 301 ' mult eta vs eta ' 5 -2.0 2.0
+ 1dhist 302 ' mult pt  vs pt  ' 5 0. 1.5
+ 1dhist 303 ' mult phi vs phi ' 8 -180. 180.
+    
 * --- Fill Histograms ---------------------------------------------------- 
  nt/proj 101 111.glb_trk_tot
  nt/proj 102 111.glb_trk_good
@@ -73,12 +77,29 @@ hi/file 21 [ntuple_file]
  nt/proj 122 111.prim_vrtx(2)
  nt/proj 123 111.prim_vrtx(3)
  
+* mult_eta histograms
  
  nt/proj 124 111.mult_eta(1)
  nt/proj 125 111.mult_eta(2)
  nt/proj 126 111.mult_eta(3)
  nt/proj 127 111.mult_eta(4)
  nt/proj 128 111.mult_eta(5)
+ 
+ vec/create vmeta(5) 
+ vec/input vmeta(1) $hinfo(124,'mean')
+ vec/input vmeta(2) $hinfo(125,'mean')
+ vec/input vmeta(3) $hinfo(126,'mean')
+ vec/input vmeta(4) $hinfo(127,'mean')
+ vec/input vmeta(5) $hinfo(128,'mean') 
+ hi/put_vect/contents 301 vmeta 
+ 
+ nt/proj 201 111.mult_eta(1)%-1.6 
+ nt/proj 201 111.mult_eta(2)%-0.8 
+ nt/proj 201 111.mult_eta(3)%-0.
+ nt/proj 201 111.mult_eta(4)%0.8 
+ nt/proj 201 111.mult_eta(5)%1.6 
+ 
+* mult phi histograms
  
  nt/proj 131 111.mult_phi(1)
  nt/proj 132 111.mult_phi(2)
@@ -89,24 +110,6 @@ hi/file 21 [ntuple_file]
  nt/proj 137 111.mult_phi(7)
  nt/proj 138 111.mult_phi(8)
  
- nt/proj 141 111.mult_pt(1)
- nt/proj 142 111.mult_pt(2)
- nt/proj 143 111.mult_pt(3)
- nt/proj 144 111.mult_pt(4)
- nt/proj 145 111.mult_pt(5) 
-   
- nt/proj 201 111.mult_eta(1)%-1.6 
- nt/proj 201 111.mult_eta(2)%-0.8 
- nt/proj 201 111.mult_eta(3)%-0
- nt/proj 201 111.mult_eta(4)%0.8 
- nt/proj 201 111.mult_eta(5)%1.6 
- 
- nt/proj 202 111.mult_pt(1)%0.15
- nt/proj 202 111.mult_pt(2)%0.45
- nt/proj 202 111.mult_pt(3)%0.75
- nt/proj 202 111.mult_pt(4)%1.05
- nt/proj 202 111.mult_pt(5)%1.35
-  
  nt/proj 203 111.mult_phi(1)%-157.5
  nt/proj 203 111.mult_phi(2)%-112.5
  nt/proj 203 111.mult_phi(3)%-67.5
@@ -116,8 +119,40 @@ hi/file 21 [ntuple_file]
  nt/proj 203 111.mult_phi(7)%112.5
  nt/proj 203 111.mult_phi(8)%157.5
  
-* or use nt/plot 
+ vec/create vmphi(8) 
+ vec/input vmphi(1) $hinfo(131,'mean')
+ vec/input vmphi(2) $hinfo(132,'mean')
+ vec/input vmphi(3) $hinfo(133,'mean')
+ vec/input vmphi(4) $hinfo(134,'mean')
+ vec/input vmphi(5) $hinfo(135,'mean')
+ vec/input vmphi(6) $hinfo(136,'mean')
+ vec/input vmphi(7) $hinfo(137,'mean')
+ vec/input vmphi(8) $hinfo(138,'mean')
+ hi/put_vect/contents 303 vmphi 
  
+* mult pt histograms
+ 
+ nt/proj 141 111.mult_pt(1)
+ nt/proj 142 111.mult_pt(2)
+ nt/proj 143 111.mult_pt(3)
+ nt/proj 144 111.mult_pt(4)
+ nt/proj 145 111.mult_pt(5) 
+      
+ nt/proj 202 111.mult_pt(1)%0.15
+ nt/proj 202 111.mult_pt(2)%0.45
+ nt/proj 202 111.mult_pt(3)%0.75
+ nt/proj 202 111.mult_pt(4)%1.05
+ nt/proj 202 111.mult_pt(5)%1.35
+  
+ vec/create vmpt(5) 
+ vec/input vmpt(1) $hinfo(141,'mean')
+ vec/input vmpt(2) $hinfo(142,'mean')
+ vec/input vmpt(3) $hinfo(143,'mean')
+ vec/input vmpt(4) $hinfo(144,'mean')
+ vec/input vmpt(5) $hinfo(145,'mean') 
+ hi/put_vect/contents 302 vmpt 
+  
+   
 * --- Write out histograms to ps file -------------------------------------
  for/file 40 [ntuple_file].ps
  meta 40 -111
@@ -183,9 +218,16 @@ hi/file 21 [ntuple_file]
 * PLOT 3 ----------
     zone 1 3
 * multiplicity phi,pt,eta
-    hi/pl 201
-    hi/pl 202
-    hi/pl 203
+* hi/pl 201
+* hi/pl 202
+* hi/pl 203
+    
+* PLOT 4 -------
+    zone 1 3
+    hi/pl 301
+    hi/pl 302
+    hi/pl 303
+
 * --------------------------
 * 
    close 40
