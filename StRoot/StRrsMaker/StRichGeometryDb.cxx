@@ -1,10 +1,13 @@
 /*******************************************************************
- * $Id: StRichGeometryDb.cxx,v 2.2 2000/11/21 21:40:45 dunlop Exp $
+ * $Id: StRichGeometryDb.cxx,v 2.3 2001/08/22 16:42:59 lasiuk Exp $
  *
  * Description:
  *
  *******************************************************************
  * $Log: StRichGeometryDb.cxx,v $
+ * Revision 2.3  2001/08/22 16:42:59  lasiuk
+ * data base functionality to check library environment variable
+ *
  * Revision 2.2  2000/11/21 21:40:45  dunlop
  * Tweak for ExB effects
  *
@@ -48,7 +51,7 @@
  * Initial Revision
  *
  *******************************************************************/
-
+#include <stdlib.h>
 #include "SystemOfUnits.h"
 #ifndef ST_NO_NAMESPACES
 using namespace units;
@@ -111,34 +114,6 @@ void StRichGeometryDb::my_fill()
     // mRadialDistanceToRich   =	240.1246 *centimeter;
     //
 
-     //    // Ideal Geometry
-#ifdef RICH_SIM_GEOMETRY     
-    // Cylindrical coordinates: 5 o'clock = -60 degrees
-    mLocalOriginAngle       = -60.  * degree;
-    mLocalOriginR           = 243.13 * centimeter;    
-    mLocalOriginZ           = 0. * centimeter;
-     
-    mLocalAngleZ            = 30. * degree;
-    mLocalAngleY            = 0. * degree;
-    mLocalAngleX           = 0. * degree;
-#else 
-    // Survey Geometry
-    // Euler-like
-    mLocalAngleX = -0.0200353082209942 * degree ;
-    mLocalAngleY = 0.037884454328129 * degree ;
-    mLocalAngleZ = 29.8171493344754 * degree ;
- 
-     // Cylindrical coordinates: 5 o'clock = -60 degrees
-//    mLocalOriginAngle = -59.9911296661538 * degree ; 
-//    mLocalOriginR = 240.126958857466 * centimeter ;
-//    mLocalOriginZ = -0.558878974855719 * centimeter ; 
-    // local shift of (0.25,0.17,-0.1)
-    mLocalOriginAngle = -59.9506239157014*degree;
-    
-    mLocalOriginR = 240.22755151829*centimeter;
-    mLocalOriginZ = -0.3089772 * centimeter;
-    
-#endif    
     // Calculate the positions of the uppermost left had
     // corner pads in the pad plane quadrant.  Located in
     // StRichGeometryDbInterface.cxx!
@@ -198,26 +173,138 @@ void StRichGeometryDb::my_fill()
     mPadPlaneDimension = StThreeVector<double>(131./2.,83.6/2.,0.)*centimeter;
 
 //Change on July 14, 2000 to make switchable, use survey flexibility
-#ifdef RICH_SIM_GEOMETRY
-     mProximityGap = 9.65*centimeter; 
-#else
-     mProximityGap = 8.*centimeter;
-#endif
-     mNormalVectorToPadPlane = 
-       StThreeVector<double>(
- 			    (
- 			     cos(mLocalAngleZ)*sin(mLocalAngleY)*sin(mLocalAngleX)
- 			     -
- 			     sin(mLocalAngleZ) * cos(mLocalAngleX)
- 			     ),
- 			    (sin(mLocalAngleZ)*sin(mLocalAngleY)*sin(mLocalAngleX)
- 			     +
- 			     cos(mLocalAngleZ)*cos(mLocalAngleX)
- 			     ),
- 			    cos(mLocalAngleY)*sin(mLocalAngleX)
- 			    );
- 
 
+    mProximityGap = 8.*centimeter;
+
+#ifdef RICH_SIM_GEOMETRY
+
+    //
+    // This is ideal geometry for historical reasons only
+    //
+    // Cylindrical coordinates: 5 o'clock = -60 degrees
+    //
+    cout << "StRichGeometryDB::my_fill() use ideal" << endl;
+    mLocalOriginAngle       = -60.  * degree;
+    mLocalOriginR           = 243.13 * centimeter;    
+    mLocalOriginZ           = 0. * centimeter;
+    
+    mLocalAngleZ            = 30. * degree;
+    mLocalAngleY            = 0. * degree;
+    mLocalAngleX           = 0. * degree;
+
+#else
+
+     //
+     // this would be so much easier with
+     // strings, but...
+     //
+     const char* starVersion = getenv("STAR_VERSION");
+     cout << "starVersion= " << starVersion << endl;
+     
+     if(strstr(starVersion, "00")) {
+	cout << "Year 2000 Geometry: " << endl;
+	this->fill2000();
+     }
+     else if(strstr(starVersion, "01he") || strstr(starVersion, "01e")) {
+	cout << "Year 2000 Geometry 2nd production: " << endl;
+	this->fill2001he();	 
+     }
+     else if(strstr(starVersion, "01")) {
+	cout << "Year 2001 Geometry: " << endl;
+	this->fill2001();	 
+     }
+     else {
+	 cout << "ERROR\n";
+	 cout << "\tStRichGeometry::my_fill()\n";
+	 cout << "\tUnknown starVersion: " << starVersion << endl;
+	 cout << "\tUse Year 2000 Geometry" << endl;
+	 this->fill2000();
+     }
+
+     mNormalVectorToPadPlane = 
+	 StThreeVector<double>(
+			       (cos(mLocalAngleZ)*sin(mLocalAngleY)*sin(mLocalAngleX)
+				- sin(mLocalAngleZ) * cos(mLocalAngleX)),
+			       (sin(mLocalAngleZ)*sin(mLocalAngleY)*sin(mLocalAngleX)
+				+ cos(mLocalAngleZ)*cos(mLocalAngleX)),
+			       (cos(mLocalAngleY)*sin(mLocalAngleX))
+			       );
+     
+#endif
+
+}
+
+
+void StRichGeometryDb::fill2000() {
+
+    //
+    // This is the standard 2000 geometry that
+    // was used for the 2000 november-december
+    // production
+    //
+    // Euler-like angles
+    //
+    
+    mLocalAngleX = -0.0200353082209942 * degree ;
+    mLocalAngleY = 0.037884454328129 * degree ;
+    mLocalAngleZ = 29.8171493344754 * degree ;
+
+    //
+    // Cylindrical coordinates: 5 o'clock = -60 degrees
+    //    mLocalOriginAngle = -59.9911296661538 * degree ; 
+    //    mLocalOriginR = 240.126958857466 * centimeter ;
+    //    mLocalOriginZ = -0.558878974855719 * centimeter ; 
+    // local shift of (0.25,0.17,-0.1)
+    //
+    
+    mLocalOriginAngle = -59.9506239157014*degree;
+    mLocalOriginR = 240.22755151829*centimeter;
+    mLocalOriginZ = -0.3089772 * centimeter;
+}
+
+void StRichGeometryDb::fill2001he() {
+
+    cout << "*******************WARNING ************************\a\a" << endl;
+    cout << "\tStRichGeometryDb::fill2001he()\n";
+    cout << "\tNo Geometry defined for year 2001he just yet\n";
+    cout << "\tThis is the Year 2000 data produced in the spring/summer 2001\n";
+    cout << "\tUsing Year 2000" << endl;
+    this->fill2000();
+    
+    //
+    // 2001 Survey Geometry
+    // Euler-like rotations
+    //
+    
+    //mLocalAngleX = 
+    //mLocalAngleY = 
+    //mLocalAngleZ = 
+
+    //mLocalOriginAngle =
+    //mLocalOriginR     =
+    //mLocalOriginZ     =
+
+}
+void StRichGeometryDb::fill2001() {
+
+    cout << "*******************WARNING ************************\a\a" << endl;
+    cout << "\tStRichGeometryDb::fill2001()\n";
+    cout << "\tNo Geometry defined for year 2001 just yet\n";
+    cout << "\tUsing Year 2000" << endl;
+    this->fill2000();
+    
+    //
+    // 2001 Survey Geometry
+    // Euler-like rotations
+    //
+    
+    //mLocalAngleX = 
+    //mLocalAngleY = 
+    //mLocalAngleZ = 
+
+    //mLocalOriginAngle =
+    //mLocalOriginR     =
+    //mLocalOriginZ     =
 }
 
 
