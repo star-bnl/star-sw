@@ -1,5 +1,8 @@
-* $Id: tfs_gen_padres.F,v 1.12 1999/10/15 00:54:02 nevski Exp $
+* $Id: tfs_gen_padres.F,v 1.13 1999/11/23 00:39:52 sakrejda Exp $
 * $Log: tfs_gen_padres.F,v $
+* Revision 1.13  1999/11/23 00:39:52  sakrejda
+* Flag for hits from kEv tracks set to 3 (haven't seen any)
+*
 * Revision 1.12  1999/10/15 00:54:02  nevski
 * pgf->g77 cleanup
 *
@@ -224,7 +227,7 @@ C     calculate the dip angle
                pbend = sqrt( px**2 + py**2 )
                if( pbend .lt. 0.000001)  then
 C     flag hit for discarding
-                  tphit(k).flag = tphit(k).flag + 3
+                  tphit(k).flag =  3
                   go to 100
                endif
 
