@@ -1,5 +1,8 @@
-* $Id: tpt_row_sect_pnt.F,v 1.4 1998/04/04 14:35:36 fisyak Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.5 1998/05/26 04:15:13 sakrejda Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.5  1998/05/26 04:15:13  sakrejda
+* message type set to E to limit printing
+*
 * Revision 1.4  1998/04/04 14:35:36  fisyak
 * Increase message-generating space
 *
@@ -101,7 +104,7 @@ C       loop through row-sorted list
           irow = hit(ipnt).row - isect*100
           if( isect.lt.1 .or. isect.gt.mxsector .or. irow.lt.1 .or.
      >    irow.gt.mxrow ) then
-          write(m132,*) ' TPT-RSP row,sector info invalid '
+          write(m132,*) ' TPTRSP-E1 row,sector info invalid '
           call Message( m132, 1, id1 )
           else
             if( hit(ipnt).row .eq. inew ) then
@@ -191,12 +194,12 @@ C       loop through row-sorted list
      >         loc_hit(ipnt+k-1)
             end do
            else if(ic.gt.2000) then
-               write(m132,*) ' TPT-RSP not enough storage to sort data in z'
+               write(m132,*) 'TPTRSP-E1 not enough storage to sort data in z'
                call Message( m132, 1, id1 )
            endif
          end do
       end do
-      write(m132,*) ' TPT-RSP done setting up pointers'
+      write(m132,*) ' TPTRSP-E1 done setting up pointers'
       call Message( m132, 1, id1 )
       tpt_row_sect_pnt=0
       end

@@ -1,5 +1,8 @@
-* $Id: tpt_helix_fit.F,v 1.2 1998/01/27 00:35:47 fisyak Exp $
+* $Id: tpt_helix_fit.F,v 1.3 1998/05/26 04:15:13 sakrejda Exp $
 * $Log: tpt_helix_fit.F,v $
+* Revision 1.3  1998/05/26 04:15:13  sakrejda
+* message type set to E to limit printing
+*
 * Revision 1.2  1998/01/27 00:35:47  fisyak
 * Split sources
 *
@@ -104,7 +107,7 @@ C        evaluate errors
              tpt_helix_fit =  STAFCV_BAD 
              if(tpar(ipass).debug(2).eq.1) then
              write(eromes,'(a50,i5)') 
-     >    'TPT_HELIX_FIT-W1 linear fit error, track',ipt
+     >    'TPT_HELIX_FIT-E1 linear fit error, track',ipt
              call message(eromes, 1, ier1)
              endif
          else

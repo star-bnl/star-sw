@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.9 1998/04/22 15:57:55 sakrejda Exp $
+* $Id: tpt.F,v 1.10 1998/05/26 04:15:12 sakrejda Exp $
 * $Log: tpt.F,v $
+* Revision 1.10  1998/05/26 04:15:12  sakrejda
+* message type set to E to limit printing
+*
 * Revision 1.9  1998/04/22 15:57:55  sakrejda
 * write to unit 6 replaced by message calls
 *
@@ -101,10 +104,10 @@ C     initialize timing counters
       time_merge = 0
       ipass=1
       if(tpar(ipass).debug(1).eq.1) then
-          call Msg_Enable( 'TPT-I1' )
-          call Msg_Enable( 'TPT-I2' )
-          call Msg_Enable( 'TPT-I3' )
-          call Msg_Enable( 'TPT-ROOT1' )
+          call Msg_Enable( 'TPTI1-E1' )
+          call Msg_Enable( 'TPTI2-E1' )
+          call Msg_Enable( 'TPTI3-E1' )
+          call Msg_Enable( 'TPTROOT1-E1' )
       endif
 
       write(m132,*) 'TPT-I3 starting in the main tracking subroutine ...'
@@ -122,7 +125,7 @@ c     make sure that there is enough space in local arrays
 c     if not, truncate number of hits to track...
 c
       if(hit_h.nok.gt.tpt_mxhit) then
-        write(m132,*) ' TPT-I1 tpt local arays not big enough',
+        write(m132,*) ' TPTI1-E1 tpt local arays not big enough',
      >                  hit_h.nok,tpt_mxhit
         call Message( m132, 1, idI1 )
         hit_h.nok=tpt_mxhit
@@ -149,7 +152,7 @@ c        check what xy and z says about the sector.
          iret=tgc_global_to_sector(isec2,xglobal)
          isec3=int(hit(i).row/100)
          if(isec3.ne.isec2) then
-           write(m132,*) 'TPT-I1 sector missmatch',isec3,isec2,xglobal
+           write(m132,*) 'TPTI1-E1 sector missmatch',isec3,isec2,xglobal
            call message(m132,1,idI1)
            isec3=isec2
          endif
@@ -174,12 +177,12 @@ c     Set up tables so that hit could be found within rows and sectors.
      >         tpar_h,tpar,next_hit,slice_loc,slice_pnt,ipass)
 
       if(iret.ne.0) then
-         write(m132,*) 'TPT-I2 unable to set pointers to hits'
+         write(m132,*) 'TPTI2-E1 unable to set pointers to hits'
          call message(m132, 1, idI2)
          tpt=STAFCV_BAD
          return
       else 
-         write(m132,*) 'TPT-I2 pointers set, iret: ',iret
+         write(m132,*) 'TPTI2-E1 pointers set, iret: ',iret
          call message(m132, 1,id I2)
       endif
 C
@@ -210,12 +213,12 @@ C     Then do the regular segment formation from what is left out.
       endif
       if(iret.ne.STAFCV_OK) then
 C           failed while generating segments
-            write(m132,*) 'TPT-I2 problem in segment finding'
+            write(m132,*) 'TPTI2-E1 problem in segment finding'
             call Message(m132, 1, idI2)
             tpt=STAFCV_BAD
             return
       endif
-      write(m132,*) 'TPT-I3 back from segment finding ...'
+      write(m132,*) 'TPTI3-E1 back from segment finding ...'
       call message(m132, 1, idI3)
 c
       if(tpar(ipass).extend.eq.1) then
@@ -231,7 +234,7 @@ C             extend track segments crossing the sector boundries
               time_ext = time_now
               if(iret.ne.STAFCV_OK) then
 C               failed while extending segments
-                write(m132,*) 'TPT-I2 problem in extending segments'
+                write(m132,*) 'TPTI2-E1 problem in extending segments'
                 call message(m132, 1, idI2)
                 tpt=STAFCV_BAD
                 return
@@ -247,14 +250,14 @@ C             merge pieces of tracks together
               time_all = time_all + time_now
               time_merge = time_now
               if(iret.eq.STAFCV_BAD) then
-                write(132,*) 'TPT-I2 problems in segment merging'
+                write(132,*) 'TPTI2-E1 problems in segment merging'
                 call message(m132, 1, idI2)
                 tpt=STAFCV_BAD
               endif
       endif
 c
 C     write out timing information
-      write(m132(1),*) 'TPT-I3 TIME_SORT  : ',time_sort
+      write(m132(1),*) 'TPTI3-E1 TIME_SORT  : ',time_sort
       write(m132(2),*) '       TIME_SEGUV : ',time_seguv
       write(m132(3),*) '       TIME_SEG   : ',time_seg
       write(m132(4),*) '       TIME_EXT   : ',time_ext

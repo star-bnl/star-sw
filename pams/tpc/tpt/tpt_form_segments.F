@@ -1,5 +1,8 @@
-* $Id: tpt_form_segments.F,v 1.5 1998/04/09 23:08:23 sakrejda Exp $
+* $Id: tpt_form_segments.F,v 1.6 1998/05/26 04:15:13 sakrejda Exp $
 * $Log: tpt_form_segments.F,v $
+* Revision 1.6  1998/05/26 04:15:13  sakrejda
+* message type set to E to limit printing
+*
 * Revision 1.5  1998/04/09 23:08:23  sakrejda
 * write to unit 6 replaced by a message call
 *
@@ -162,7 +165,7 @@ C	                better than the saved one
                     endif
                   end do ! end of loop on l (number of roots)
                else
-                  write(m132(1),*)'TPT-MAKES1 too many track candidates'
+                  write(m132(1),*)'TPTMAKES1-E1 too many track candidates'
                   write(m132(2),*)'track table size', mxtrack
                   call Message( m132, 2, idI1 )
                endif ! end of check on room in the tracks table
@@ -182,11 +185,11 @@ C              memorize the final best segment
                  do ld=1,trk(ntrk).nhit
                    ient = trk(ntrk).ipnt(ld)
                    if(ient.gt.hit_h.nok.or.ient.lt.1) then
-                     write(m132(1),*) 'TPT-MAKES2 WRONG POINTER*',ient
+                     write(m132(1),*) 'TPTMAKES2-E1 WRONG POINTER*',ient
                      call Message( m132, 1, idI2 )
                    endif
                    if(hit(ient).track.ne.0) then
-                     write(m132(1),*) 'TPT-MAKES3 hit overwritten'
+                     write(m132(1),*) 'TPTMAKES3-E1 hit overwritten'
      >                                ,ient,hit(ient).track
                      call Message( m132, 1, idI3 )
                    endif
