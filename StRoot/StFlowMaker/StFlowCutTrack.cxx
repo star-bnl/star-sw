@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.13 2000/07/12 17:54:35 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.14 2000/07/20 17:25:50 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.14  2000/07/20 17:25:50  posk
+// Fixed bug in readPico checkEvent.
+//
 // Revision 1.13  2000/07/12 17:54:35  posk
 // Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
 // Apply cuts when reading picoevent file.
@@ -196,16 +199,16 @@ void StFlowCutTrack::PrintCutList() {
   cout << "#######################################################" << endl;
   cout << "# Track Cut List:" << endl;
   cout << "#   FitPts cuts= " << mFitPtsCuts[0] << ", " << mFitPtsCuts[1] 
-       << " :\t " << setprecision(4) << (float)mFitPtsCutN/(float)mTrackN/perCent 
+       << " :\t " << setprecision(3) << (float)mFitPtsCutN/(float)mTrackN/perCent 
        << "% cut" << endl;
   cout << "#   FitOverMax cuts= " << mFitOverMaxCuts[0] << ", " 
-       << mFitOverMaxCuts[1] << " :\t " << setprecision(4)
+       << mFitOverMaxCuts[1] << " :\t " << setprecision(3)
        << (float)mFitOverMaxCutN/(float)mTrackN/perCent << "% cut" << endl;
   cout << "#   ChiSq cuts= " << mChiSqCuts[0] << ", " 
-       << mChiSqCuts[1] << " :\t " << setprecision(4)
+       << mChiSqCuts[1] << " :\t\t " << setprecision(3)
        << (float)mChiSqCutN/(float)mTrackN/perCent << "% cut" << endl;
   cout << "#   Dca cuts= " << mDcaCuts[0] << ", " 
-       << mDcaCuts[1] << " :\t " << setprecision(4)
+       << mDcaCuts[1] << " :\t\t " << setprecision(3)
        << (float)mDcaCutN/(float)mTrackN/perCent << "% cut" << endl;
   cout << "# Good Tracks = " << (float)mGoodTrackN/(float)mTrackN/perCent
        << "%" << endl;
