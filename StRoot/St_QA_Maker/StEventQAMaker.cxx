@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.14 2000/01/05 23:20:50 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.15 2000/01/07 01:02:55 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.15  2000/01/07 01:02:55  lansdell
+// fixed theta histogram and filled psi vs phi
+//
 // Revision 1.14  2000/01/05 23:20:50  lansdell
 // changed sigma() to errorOnMean() for dedx histos
 //
@@ -148,6 +151,7 @@ void StEventQAMaker::MakeHistGlob() {
       pT = TMath::Abs(globtrk->geometry()->momentum().perp());
       Float_t lmevpt = TMath::Log10(pT*1000.0);
       Float_t theta = TMath::ASin(1.) - globtrk->geometry()->dipAngle();
+      Float_t thetad = theta/degree;
       Float_t eta = globtrk->geometry()->momentum().pseudoRapidity();
       //      Float_t gmom  = pT/TMath::Sin(theta);
       Float_t gmom = abs(globtrk->geometry()->momentum());
@@ -210,7 +214,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_psiT->Fill(globtrk->geometry()->psi()/degree);
 	//originally was t->tanl -CL
 	m_tanlT->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
-	m_glb_thetaT->Fill(theta);
+	m_glb_thetaT->Fill(thetad);
 	m_etaT->Fill(eta);
 	m_pTT->Fill(pT);
 	m_momT->Fill(gmom);
@@ -242,6 +246,11 @@ void StEventQAMaker::MakeHistGlob() {
 	m_chisq1_zfT->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq1);
 	m_nfptonpt_momT->Fill(lmevmom,nfitntot);
 	m_nfptonpt_etaT->Fill(eta,nfitntot);
+	// had to make psi_deg and phi_deg b/c ROOT won't compile otherwise
+	// for some strange reason... -CL
+	Float_t psi_deg = globtrk->geometry()->origin().phi()/degree;
+	Float_t phi_deg = globtrk->geometry()->psi()/degree;
+	m_psi_phiT->Fill(phi_deg,psi_deg);
       }
 
 // now fill all TPC+SVT histograms --------------------------------------------
@@ -274,7 +283,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_psiTS->Fill(globtrk->geometry()->psi()/degree);
 	//originally was t->tanl -CL
 	m_tanlTS->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
-	m_glb_thetaTS->Fill(theta);
+	m_glb_thetaTS->Fill(thetad);
 	m_etaTS->Fill(eta);
 	m_pTTS->Fill(pT);
 	m_momTS->Fill(gmom);
@@ -304,6 +313,11 @@ void StEventQAMaker::MakeHistGlob() {
 	m_chisq1_zfTS->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq1);
 	m_nfptonpt_momTS->Fill(lmevmom,nfitntot);
 	m_nfptonpt_etaTS->Fill(eta,nfitntot);
+	// had to make psi_deg and phi_deg b/c ROOT won't compile otherwise
+	// for some strange reason... -CL
+	Float_t psi_deg = globtrk->geometry()->origin().phi()/degree;
+	Float_t phi_deg = globtrk->geometry()->psi()/degree;
+	m_psi_phiTS->Fill(phi_deg,psi_deg);
       }
 
 // now fill all FTPC East histograms ------------------------------------------
@@ -324,8 +338,6 @@ void StEventQAMaker::MakeHistGlob() {
 	//(degree=(pi/180)*radian, where radian=1.) -CL
 	m_psiFE->Fill(globtrk->geometry()->psi()/degree);
 	//originally was t->tanl -CL
-	//	m_tanlFE->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
-	//m_glb_thetaFE->Fill(theta);
 	m_etaFE->Fill(eta);
 	m_pTFE->Fill(pT);
 	m_momFE->Fill(gmom);
@@ -362,8 +374,6 @@ void StEventQAMaker::MakeHistGlob() {
 	//(degree=(pi/180)*radian, where radian=1.) -CL
 	m_psiFW->Fill(globtrk->geometry()->psi()/degree);
 	//originally was t->tanl -CL
-	//m_tanlFW->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
-	//m_glb_thetaFW->Fill(theta);
 	m_etaFW->Fill(eta);
 	m_pTFW->Fill(pT);
 	m_momFW->Fill(gmom);
@@ -458,6 +468,7 @@ void StEventQAMaker::MakeHistPrim() {
 	pT = TMath::Abs(primtrk->geometry()->momentum().perp());
         Float_t lmevpt = TMath::Log10(pT*1000.0);
 	Float_t theta = TMath::ASin(1.) - primtrk->geometry()->dipAngle();
+	Float_t thetad = theta/degree;
 	Float_t eta   = primtrk->geometry()->momentum().pseudoRapidity();
 	//	Float_t gmom  = pT/TMath::Sin(theta);
 	Float_t gmom = abs(primtrk->geometry()->momentum());
@@ -497,7 +508,7 @@ void StEventQAMaker::MakeHistPrim() {
 	m_ppsi->Fill(primtrk->geometry()->psi()/degree);
 	// originally was t->tanl -CL
         m_ptanl->Fill(TMath::Tan(primtrk->geometry()->dipAngle()));
-        m_prim_theta->Fill(theta);
+        m_prim_theta->Fill(thetad);
 	m_peta->Fill(eta);
 	m_ppT->Fill(pT);
         m_pmom->Fill(gmom);
