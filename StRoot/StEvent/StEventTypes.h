@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.5 2000/02/23 17:36:05 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.6 2000/03/29 16:54:19 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
- * Revision 2.5  2000/02/23 17:36:05  ullrich
- * Changes due to the addition of the EMC to StEvent
+ * Revision 2.6  2000/03/29 16:54:19  ullrich
+ * Added L3 trigger.
  *
  * Revision 2.8  2000/05/22 21:43:06  ullrich
  * Add RICH related containers.
@@ -42,6 +42,7 @@
  **************************************************************************/
 #ifndef StEventTypes_hh
 #define StEventTypes_hh
+ 
 #include "StCtbSoftwareMonitor.h"
 #include "StCtbTriggerDetector.h"
 #include "StDedxPidTraits.h"
@@ -59,6 +60,7 @@
 #include "StFtpcHit.h"
 #include "StFtpcHitCollection.h"
 #include "StFtpcPlaneHitCollection.h"
+#include "StFtpcSectorHitCollection.h"
 #include "StFtpcSoftwareMonitor.h"
 #include "StFunctional.h"
 #include "StGlobalSoftwareMonitor.h"
