@@ -18,7 +18,7 @@ extern "C" void ftfSetParameters ( L3T_TPC_PARA_ST* para ) ;
 
 typedef FTF_Hit* PHit ; // type is hit pointer 
 
-extern "C" long ftf_tpc_(
+extern "C" long type_of_call ftf_tpc_(
   TABLE_HEAD_ST     *para_h,       L3T_TPC_PARA_ST    *para,         
   TABLE_HEAD_ST     *tphit_h,      TCL_TPHIT_ST       *tphit,        
   TABLE_HEAD_ST     *tptrack_h,    TPT_TRACK_ST       *tptrack,   
