@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.22 2004/02/17 04:56:36 jeromel Exp $
+ * $Id: StMuChainMaker.cxx,v 1.23 2004/04/08 23:58:39 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -19,6 +19,7 @@
 #include "TTree.h"
 #include "TChain.h"
 #include "TSystem.h"
+#include "StMessMgr.h"
 
 extern TSystem* gSystem;
 
@@ -215,14 +216,19 @@ void StMuChainMaker::add( StMuStringIntPair filenameEvents) {
     if (entries==0) { // try to read the number of event from the db reader 
 	entries = mDbReader->entries(file.c_str());
     }
-    if (entries==0) { // open the file and get the number of events
-	TFile f1(file.c_str());
-	TTree* tree = (TTree*)dynamic_cast<TTree*>(f1.Get("MuDst"));
+    TFile *f1 = TFile::Open(file.c_str());
+    if (entries==0 && f1) { // open the file and get the number of events
+	TTree* tree = (TTree*)dynamic_cast<TTree*>(f1->Get("MuDst"));
 	if (tree) entries = (int)tree->GetEntries();
-	f1.Close();
+    } 
+    if ( f1 ){
+      f1->Close();
+      delete f1;
+      mChain->Add( file.c_str(), entries );
+      mFileCounter++;
+    } else {
+      gMessMgr->Error() << "StMuChainMaker::add: Could not add " << file << endm;
     }
-    mChain->Add( file.c_str(), entries );
-    mFileCounter++;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -370,6 +376,9 @@ void StMuChainMaker::fromFile(string file) {
  /***************************************************************************
   *
   * $Log: StMuChainMaker.cxx,v $
+  * Revision 1.23  2004/04/08 23:58:39  jeromel
+  * Used to crash on opening file if zero size. Corrected
+  *
   * Revision 1.22  2004/02/17 04:56:36  jeromel
   * Extended help, added crs support, restored __GNUC__ for PRETTY_FUNCTION(checked once
   * more and yes, it is ONLY defined in GCC and so is __FUCTION__),  use of a consistent
