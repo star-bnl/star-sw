@@ -1,6 +1,5 @@
 //*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
-// 
-// 
+// $Id: St_TableSorter.cxx,v 1.21 1999/12/01 14:03:35 fine Exp $
 
 #include <stdlib.h> 
 #include "St_TableSorter.h"
@@ -337,6 +336,46 @@ St_TableSorter::~St_TableSorter()
            break;                                     \
       };                                              \
 }                                                     \
+Int_t St_TableSorter::BSearch(valuetype value) {      \
+  union {  Char_t   Char;                             \
+           UChar_t  UChar;                            \
+           Short_t  Short;                            \
+           UShort_t UShort;                           \
+           Int_t    Int;                              \
+           UInt_t   UInt;                             \
+           Long_t   Long;                             \
+           ULong_t  ULong;                            \
+           Float_t  Float;                            \
+           Double_t Double;                           \
+         } Value;                                     \
+                                                      \
+   switch (m_colType) {                               \
+         case  kFloat:                                \
+           Value.Float = value; break;                \
+         case  kInt :                                 \
+           Value.Int   = value; break;                \
+         case  kLong :                                \
+           Value.Long  = value; break;                \
+         case  kShort :                               \
+           Value.Short = value; break;                \
+         case  kDouble :                              \
+           Value.Double= value; break;                \
+         case  kUInt:                                 \
+           Value.UInt  = value; break;                \
+         case  kULong :                               \
+           Value.ULong = value; break;                \
+         case  kUShort:                               \
+           Value.UShort= value; break;                \
+         case  kUChar:                                \
+           Value.UChar = value; break;                \
+         case  kChar:                                 \
+           Value.Char  = value; break;                \
+         default:                                     \
+           return -1;                                 \
+           break;                                     \
+   };                                                 \
+   return BSearch(&Value);                            \
+}                                                     \
 Int_t St_TableSorter::SelectSearch(valuetype value) {               \
    valuetype **array = (valuetype **)m_SortIndex;                   \
    Int_t nabove, nbelow, middle;                                    \
@@ -407,43 +446,6 @@ BINARYSEARCH(valuetype)
 #define SEARCHORDER(valuetype) Search##valuetype
 
 //_____________________________________________________________________________
-#ifdef NOINLINES
-//_____________________________________________________________________________
-Int_t St_TableSorter::BSearch(Float_t value)
-{
-  return BSearch(&value);
-}
-//_____________________________________________________________________________
-Int_t St_TableSorter::BSearch(Int_t value)
-{
-  return BSearch(&value);
-}
-
-//_____________________________________________________________________________
-Int_t St_TableSorter::BSearch(Long_t value)
-{
-  return BSearch(&value);
-}
-
-//_____________________________________________________________________________
-Int_t St_TableSorter::BSearch(Double_t value)
-{
-  return BSearch(&value);
-}
-
-//_____________________________________________________________________________
-Int_t St_TableSorter::BSearch(const Char_t *value)
-{
-  return BSearch(value);
-}
-
-//_____________________________________________________________________________
-Int_t St_TableSorter::BSearch(TString &value) 
-{
-  return BSearch(value.Data());
-}
-#endif
-
 //_____________________________________________________________________________
 Int_t St_TableSorter::BSearch(const void *value) {
   Int_t index = -1;
@@ -786,3 +788,12 @@ void St_TableSorter::ShowMembers(TMemberInspector &R__insp, char *R__parent)
 #undef COMPAREORDER
 #undef COMPAREFLOATVALUES
 #undef BINARYSEARCH
+
+//______________________________________________________________________________
+//______________________________________________________________________________
+// $Log: St_TableSorter.cxx,v $
+// Revision 1.21  1999/12/01 14:03:35  fine
+// operator[] fixed for mixed types
+//
+//______________________________________________________________________________
+
