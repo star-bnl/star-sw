@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.cxx,v 1.16 2001/04/03 21:04:35 kisiel Exp $
+ * $Id: StHbtAnalysis.cxx,v 1.17 2001/04/05 21:57:45 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,11 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.cxx,v $
- * Revision 1.16  2001/04/03 21:04:35  kisiel
- * Changes needed to make the Theoretical code
- *   work. The main code is the ThCorrFctn directory.
- *   The most visible change is the addition of the
- *   HiddenInfo to StHbtPair.
+ * Revision 1.17  2001/04/05 21:57:45  laue
+ * current pico-event becomes a member of the analysis (mPicoEvent) and gets
+ * an access-function (CurrentPicoEvent)
  *
  * Revision 1.15  2000/09/13 18:09:09  laue
  * Bux fix: Delete track cut only once for identical particle hbt
@@ -168,6 +166,7 @@ StHbtAnalysis::StHbtAnalysis(){
   mCorrFctnCollection = new StHbtCorrFctnCollection;
   mMixingBuffer = new StHbtPicoEventCollection;
   mNeventsProcessed = 0;
+  mPicoEvent=0;
 }
 //____________________________
 
@@ -181,6 +180,7 @@ StHbtAnalysis::StHbtAnalysis(const StHbtAnalysis& a) : StHbtBaseAnalysis() {
   mCorrFctnCollection = new StHbtCorrFctnCollection;
   mMixingBuffer = new StHbtPicoEventCollection;
   mNeventsProcessed = 0;
+  mPicoEvent=0;
 
   // find the right event cut
   mEventCut = a.mEventCut->Clone();
@@ -238,11 +238,13 @@ StHbtAnalysis::~StHbtAnalysis(){
   }
   delete mCorrFctnCollection;
   // now delete every PicoEvent in the EventMixingBuffer and then the Buffer itself
-  StHbtPicoEventIterator piter;
-  for (piter=mMixingBuffer->begin();piter!=mMixingBuffer->end();piter++){
-    delete *piter;
+  if (mMixingBuffer) {
+    StHbtPicoEventIterator piter;
+    for (piter=mMixingBuffer->begin();piter!=mMixingBuffer->end();piter++){
+      delete *piter;
+    }
+    delete mMixingBuffer;
   }
-  delete mMixingBuffer;
 }
 //______________________
 StHbtCorrFctn* StHbtAnalysis::CorrFctn(int n){  // return pointer to n-th correlation function
@@ -283,6 +285,7 @@ StHbtString StHbtAnalysis::Report()
 //_________________________
 void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
   // Add event to processed events
+  mPicoEvent=0; // we will get a new pico event, if not prevent corr. fctn to access old pico event
   AddEventProcessed();
   // startup for EbyE 
   EventBegin(hbtEvent);  
@@ -293,13 +296,14 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
     cout << "StHbtAnalysis::ProcessEvent() - Event has passed cut - build picoEvent from " <<
       hbtEvent->TrackCollection()->size() << " tracks in TrackCollection" << endl;
     // OK, analysis likes the event-- build a pico event from it, using tracks the analysis likes...
-    StHbtPicoEvent* picoEvent = new StHbtPicoEvent;       // this is what we will make pairs from and put in Mixing Buffer
-    FillHbtParticleCollection(mFirstParticleCut,(StHbtEvent*)hbtEvent,picoEvent->FirstParticleCollection());
+    mPicoEvent = new StHbtPicoEvent; // this is what we will make pairs from and put in Mixing Buffer
+    // no memory leak. we will delete picoevents when they come out of the mixing buffer
+    FillHbtParticleCollection(mFirstParticleCut,(StHbtEvent*)hbtEvent,mPicoEvent->FirstParticleCollection());
     if ( !(AnalyzeIdenticalParticles()) )
-      FillHbtParticleCollection(mSecondParticleCut,(StHbtEvent*)hbtEvent,picoEvent->SecondParticleCollection());
+      FillHbtParticleCollection(mSecondParticleCut,(StHbtEvent*)hbtEvent,mPicoEvent->SecondParticleCollection());
     cout <<"StHbtAnalysis::ProcessEvent - #particles in First, Second Collections: " <<
-      picoEvent->FirstParticleCollection()->size() << " " <<
-      picoEvent->SecondParticleCollection()->size() << endl;
+      mPicoEvent->FirstParticleCollection()->size() << " " <<
+      mPicoEvent->SecondParticleCollection()->size() << endl;
       
     // OK, pico event is built
     // make real pairs...
@@ -312,17 +316,17 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
     StHbtParticleIterator PartIter1;
     StHbtParticleIterator PartIter2;
     StHbtCorrFctnIterator CorrFctnIter;
-    StHbtParticleIterator StartOuterLoop = picoEvent->FirstParticleCollection()->begin();  // always
-    StHbtParticleIterator EndOuterLoop   = picoEvent->FirstParticleCollection()->end();    // will be one less if identical
+    StHbtParticleIterator StartOuterLoop = mPicoEvent->FirstParticleCollection()->begin();  // always
+    StHbtParticleIterator EndOuterLoop   = mPicoEvent->FirstParticleCollection()->end();    // will be one less if identical
     StHbtParticleIterator StartInnerLoop;
     StHbtParticleIterator EndInnerLoop;
     if (AnalyzeIdenticalParticles()) {             // only use First collection
       EndOuterLoop--;                                               // outer loop goes to next-to-last particle in First collection
-      EndInnerLoop = picoEvent->FirstParticleCollection()->end() ;  // inner loop goes to last particle in First collection
+      EndInnerLoop = mPicoEvent->FirstParticleCollection()->end() ;  // inner loop goes to last particle in First collection
     }
     else {                                                          // nonidentical - loop over First and Second collections
-      StartInnerLoop = picoEvent->SecondParticleCollection()->begin(); // inner loop starts at first particle in Second collection
-      EndInnerLoop   = picoEvent->SecondParticleCollection()->end() ;  // inner loop goes to last particle in Second collection
+      StartInnerLoop = mPicoEvent->SecondParticleCollection()->begin(); // inner loop starts at first particle in Second collection
+      EndInnerLoop   = mPicoEvent->SecondParticleCollection()->end() ;  // inner loop goes to last particle in Second collection
     }
     for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
       if (AnalyzeIdenticalParticles()){
@@ -358,12 +362,12 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
     }
     if (MixingBufferFull()){
       StHbtPicoEvent* storedEvent;
-      StHbtPicoEventIterator picoEventIter;
-      for (picoEventIter=MixingBuffer()->begin();picoEventIter!=MixingBuffer()->end();picoEventIter++){
-	storedEvent = *picoEventIter;
+      StHbtPicoEventIterator mPicoEventIter;
+      for (mPicoEventIter=MixingBuffer()->begin();mPicoEventIter!=MixingBuffer()->end();mPicoEventIter++){
+	storedEvent = *mPicoEventIter;
 	if (AnalyzeIdenticalParticles()){
-	  StartOuterLoop = picoEvent->FirstParticleCollection()->begin();
-	  EndOuterLoop   = picoEvent->FirstParticleCollection()->end();
+	  StartOuterLoop = mPicoEvent->FirstParticleCollection()->begin();
+	  EndOuterLoop   = mPicoEvent->FirstParticleCollection()->end();
 	  StartInnerLoop = storedEvent->FirstParticleCollection()->begin();
 	  EndInnerLoop = storedEvent->FirstParticleCollection()->end();
 	  for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
@@ -385,8 +389,8 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 	} /* if identical particles */ 
 	else { // non identical particles
 	  // mix current first collection with second collection from the mixing buffer
-	  StartOuterLoop = picoEvent->FirstParticleCollection()->begin();
-	  EndOuterLoop   = picoEvent->FirstParticleCollection()->end();
+	  StartOuterLoop = mPicoEvent->FirstParticleCollection()->begin();
+	  EndOuterLoop   = mPicoEvent->FirstParticleCollection()->end();
  	  StartInnerLoop = storedEvent->SecondParticleCollection()->begin();
 	  EndInnerLoop = storedEvent->SecondParticleCollection()->end();
 	  for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
@@ -406,14 +410,14 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 	    } // loop over second particle
 	  } // loop over first particle
 	  // mix current second collection with first collection from the mixing buffer
-	  StartOuterLoop = picoEvent->SecondParticleCollection()->begin();
-	  EndOuterLoop   = picoEvent->SecondParticleCollection()->end();
+	  StartOuterLoop = mPicoEvent->SecondParticleCollection()->begin();
+	  EndOuterLoop   = mPicoEvent->SecondParticleCollection()->end();
  	  StartInnerLoop = storedEvent->FirstParticleCollection()->begin();
 	  EndInnerLoop = storedEvent->FirstParticleCollection()->end();
 	  for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
-	    ThePair->SetTrack2(*PartIter1);
+	    ThePair->SetTrack1(*PartIter1);
 	    for (PartIter2=StartInnerLoop;PartIter2!=EndInnerLoop;PartIter2++){
-	      ThePair->SetTrack1(*PartIter2);
+	      ThePair->SetTrack2(*PartIter2);
 	      // testing...	      cout << "ThePair defined... going to pair cut... ";
 	      if (mPairCut->Pass(ThePair)){
 		// testing...		cout << " ThePair passed PairCut... ";
@@ -434,7 +438,7 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
       MixingBuffer()->pop_back();
     }  // if mixing buffer is full
     delete ThePair;
-    MixingBuffer()->push_front(picoEvent);  // store the current pico-event in buffer
+    MixingBuffer()->push_front(mPicoEvent);  // store the current pico-event in buffer
   }   // if currentEvent is accepted by currentAnalysis
   EventEnd(hbtEvent);  // cleanup for EbyE 
   //cout << "StHbtAnalysis::ProcessEvent() - return to caller ... " << endl;

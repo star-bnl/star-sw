@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.h,v 1.14 2000/08/31 22:31:30 laue Exp $
+ * $Id: StHbtAnalysis.h,v 1.15 2001/04/05 21:57:45 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,10 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.h,v $
+ * Revision 1.15  2001/04/05 21:57:45  laue
+ * current pico-event becomes a member of the analysis (mPicoEvent) and gets
+ * an access-function (CurrentPicoEvent)
+ *
  * Revision 1.14  2000/08/31 22:31:30  laue
  * StHbtAnalysis: output changed (a little bit less)
  * StHbtEvent: new version, members for reference mult added
@@ -107,8 +111,10 @@
 #include "StHbtMaker/Base/StHbtCorrFctn.hh"
 #include "StHbtMaker/Infrastructure/StHbtCorrFctnCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtPicoEventCollection.hh"
+#include "StHbtMaker/Infrastructure/StHbtPicoEvent.hh"
 
 //#include <string>
+
 
 class StHbtAnalysis : public StHbtBaseAnalysis {
 
@@ -136,6 +142,7 @@ public:
 
   unsigned int NumEventsToMix();
   void SetNumEventsToMix(const unsigned int&);
+  StHbtPicoEvent* CurrentPicoEvent();
   StHbtPicoEventCollection* MixingBuffer();
   bool MixingBufferFull();
 
@@ -160,7 +167,8 @@ protected:
   StHbtEventCut*            mEventCut;
   StHbtParticleCut*         mFirstParticleCut;
   StHbtParticleCut*         mSecondParticleCut;
-  StHbtPicoEventCollection*  mMixingBuffer;
+  StHbtPicoEventCollection* mMixingBuffer;
+  StHbtPicoEvent*           mPicoEvent;
   unsigned int mNumEventsToMix;
   unsigned int mNeventsProcessed;
 
@@ -177,6 +185,7 @@ inline StHbtParticleCut*         StHbtAnalysis::FirstParticleCut() {return mFirs
 inline StHbtParticleCut*         StHbtAnalysis::SecondParticleCut() {return mSecondParticleCut;}
 inline StHbtCorrFctnCollection*  StHbtAnalysis::CorrFctnCollection() {return mCorrFctnCollection;}
 inline unsigned int              StHbtAnalysis::NumEventsToMix(){return mNumEventsToMix;}
+inline StHbtPicoEvent*           StHbtAnalysis::CurrentPicoEvent() {return mPicoEvent;}
 
 inline StHbtPicoEventCollection*  StHbtAnalysis::MixingBuffer() {return mMixingBuffer;}
 
