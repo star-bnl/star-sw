@@ -45,15 +45,11 @@ void processMuDst( Char_t *jobId= "5117072.",
   myChain->SetDebug(0);
   StMuDebug::setLevel(0);
   StMuDstMaker *muDstMaker = new StMuDstMaker(0,0,dir,file,"",numberOfFilesInt,"MuDst");
-//  StMuDst2StEventMaker *mu2StEventMaker = new StMuDst2StEventMaker();
 
   St_db_Maker *dbMaker = new St_db_Maker("StarDb","MySQL:StarDb");
   StEmcADCtoEMaker *adc2EMaker = new StEmcADCtoEMaker();
   adc2EMaker->setPrint(kFALSE);
   
-//  StEEmcDbMaker *eemcdbMaker = new StEEmcDbMaker("eemcDb");
-//  eemcdbMaker->setThreshold(0);
-
   StBemcStatusMaker* myBemcStatusMaker = new StBemcStatusMaker(muDstMaker);
   myBemcStatusMaker->setOutputDirectory(scratchDir);
   myBemcStatusMaker->setOutputFilePrefix(jobId);

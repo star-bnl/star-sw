@@ -12,6 +12,9 @@
 
 class CSMStatusUtils : public TObject {
   public:
+  CSMStatusUtils() {mZerobit=512;}
+  ~CSMStatusUtils() {}
+      
   // analysis functions
   Int_t createStatusHistograms(TString directory);
   Int_t analyseStatusHistogram(TH2F* hist);
@@ -45,6 +48,8 @@ class CSMStatusUtils : public TObject {
   TString mDetectorFlavor;
   int mDetectorSize;
   int mDetectorActualSize;
+  
+  Short_t mZerobit;
 
   TString getDateTimeString(int runnumber,TTree* ttree=0);
   void findFillEnds();
@@ -56,6 +61,8 @@ class CSMStatusUtils : public TObject {
                         std::vector<Float_t>& pedestalchi);
   Int_t analyseStatusHistogram(TH2F* hist, TString directory, 
             Float_t& averageNumberOfHitsPerChannel,
+            Int_t dateStamp,
+            Int_t timeStamp,
             std::vector<Short_t>& statusVector,
             std::vector<Float_t>& pedestalmean,
             std::vector<Float_t>& pedestalwidth,
