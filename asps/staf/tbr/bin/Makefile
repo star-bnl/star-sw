@@ -13,7 +13,7 @@ endif
 #
 export VPATH := $(BINDIR) $(SRCMDIR) $(LIBDIRS) $(INCDIRS)
 #
-VERSION := "$Id: Makefile,v 1.6 1997/02/25 20:14:20 ward Exp $"
+VERSION := "$Id: Makefile,v 1.7 1997/05/13 00:24:16 tull Exp $"
 # 
 #-- Object files
 SUFS := *.cc *.c *.F
@@ -47,11 +47,17 @@ all: $(BINDIR) bins staf
 #?                   main program.
 bins: $(BINDIR)
 ifeq ($(EMPTY),$(strip $(BINS)))
-	@echo "### No binaries to make ###"
+	@echo "########################################################"
+	@echo "###               No binaries to make.               ###"
+	@echo "########################################################"
+
 else
 	cd $(BINDIR); \
 	$(MAKE) -f $(BINROOT)/Makefile $(BINS)
-	@echo "### Binaries made ###"
+	@echo "########################################################"
+	@echo "###                  Binaries made.                  ###"
+	@echo "########################################################"
+
 endif
 #
 LDFLAGS += -L$(LIBDIR)
@@ -87,7 +93,9 @@ endif
 staf: $(BINDIR)
 	cd $(BINDIR); \
 	$(MAKE) -f $(BINROOT)/Makefile $(STAF)
-	@echo "### STAF made ###"
+	@echo "########################################################"
+	@echo "###                    STAF made.                    ###"
+	@echo "########################################################"
 #
 $(STAF).cc: $(BASE_DIR)/$(BASE_NAME).config
 	-stafGen -asp $(ASPS) -pam $(PAMS) > $@
@@ -96,7 +104,9 @@ $(STAF).o: $(STAF).cc
 #
 UNDEPENDS := -L% -R% -lX11 -lgen -lucb -ldl
 $(STAF): $(STAF).o $(filter-out $(UNDEPENDS),$(STAFLIBS)) $(USRLIBS)
-	@echo "### Making $@ ###"
+	@echo "########################################################"
+	@echo "###                    Making $@                     ###"
+	@echo "########################################################"
 	$(LD) $(LDFLAGS) -o $@ \
 	$(patsubst %,-L%,$(LIBDIRS)) \
 	$(STAF).o $(STAFLIBS) $(USRLIBS) \
@@ -132,19 +142,25 @@ endif
 objs: $(BINDIR)
 	cd $(BINDIR); \
 	$(MAKE) -f $(BINROOT)/Makefile $(OBJS)
-	@echo "### Objects made ###"
+	@echo "########################################################"
+	@echo "###                   Objects made.                  ###"
+	@echo "########################################################"
 #
 #
 #?make install     - Install binaries in $STAR_LIB/dev/bin area.
 #?                   Change INSTALL_BIN_FILES in pkg/Makefile.control.
 install:
 ifneq ($(EMPTY),$(strip $(INSTALL_BIN_FILES)))
-	@echo "### Installing binary files. ###"
+	@echo "########################################################"
+	@echo "###             Installing binary files.             ###"
+	@echo "########################################################"
 	cd $(BINDIR); \
 	$(INSTALL) $(INSTALL_BIN_FILES) \
 	$(STAR_LIB)/dev/$(BRANCH_NAME)/bin;
 else
-	@echo "### No binary files to install. ###"
+	@echo "########################################################"
+	@echo "###            No binary files to install.           ###"
+	@echo "########################################################"
 endif
 #
 $(BINDIR):
