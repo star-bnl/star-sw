@@ -53,9 +53,18 @@ void St_xdfin_Maker::Close(Option_t *)
 //_____________________________________________________________________________
 Int_t St_xdfin_Maker::Make(){
   const char Skip[] = "ROSIE_RESET SLOW_CONTROL";
-  const char Cons[] = "run BEGIN_RUN";
-  const char Data[] = "event Event dst TPC_DATA";
-  TString dsname, curdirname;
+  const char *Patern[] = {
+    	"dst"		,"event/data/global"	,0,
+    	"run"		,0       		,"const",
+	"Run"		,"run/geant"		,"const",  				
+	"params"	,"run"			,"const", 
+	"BEGIN_RUN"	,0			,"const",
+	"Event"		,"event/geant"		,0,
+	"event"		,0			,0,
+	"TPC_DATA"	,0			,0,
+	0};
+
+  TString dsname;
   const char *mkdir = 0;
   St_DataSet *curdir = 0, *set = 0;
   Bool_t      CONST;
@@ -76,36 +85,28 @@ Int_t St_xdfin_Maker::Make(){
       
     mkdir = 0;
     CONST = kFALSE;
+    for (int ipat=0; Patern[ipat]; ipat+=3)
+    {
+      if (strcmp(dsname,Patern[ipat])) continue;
+      mkdir = Patern[ipat+1];
+      CONST = Patern[ipat+2]!=0;
+      break;
+    }
+
     if (!strcmp("dst",dsname)) {
-      if (set->Find("globtrk")) m_InitDone=1999;
-      if (!m_InitDone)         
-      {
-        mkdir = "run";  CONST = kTRUE;
-      }else {
-        mkdir = "event/data/global"; 
-      }  
-    }
-    if (!strcmp("run",dsname)) 		{                     CONST = kTRUE;}
-    if (!strcmp("Run",dsname)) 		{mkdir = "run/geant"; CONST = kTRUE;}
-    if (!strcmp("params",dsname)) 	{mkdir = "run";       CONST = kTRUE;}
-    if (!strcmp("BEGIN_RUN",dsname))	{                     CONST = kTRUE;}
-    if (!strcmp("Event",dsname)) 	 mkdir = "event/geant";
-    if (CONST) {
-      if (mkdir) {cons.Mkdir(mkdir); cons.Cd(mkdir);}
-      curdir = cons.Mkdir(dsname);
-    }
-    else {
-      if (mkdir) {local.Mkdir(mkdir); local.Cd(mkdir);}
-      curdir = local.Mkdir(dsname);
-    }
+      CONST = (!set->Find("globtrk")) ;
+      if (CONST) mkdir = "run";}
+
+    St_DataSetIter *dsit = (CONST) ? &cons : &local;
+    if (mkdir) {dsit->Mkdir(mkdir); dsit->Cd(mkdir);}
+    curdir = dsit->Mkdir(dsname);
+    
     if (GetDebug()) set->ls(1);
-    curdir->Update(set); if(GetDebug()) curdir->ls(1);
-    curdir->Purge();     if(GetDebug()) curdir->ls(1);
+    curdir->Update(set);
+    curdir->Purge();     if(GetDebug()) curdir->ls(99);
     if (!CONST && !strcmp("dst",dsname)) SetOutput("dst",curdir);
-    SafeDelete(set);
-    if (CONST) {if (!m_InitDone) {m_InitDone = CONST; return kStOK;} else continue;}
-    if (strstr(Data,dsname)) return kStOK;
-    SafeDelete(curdir);
+    delete set;
+    if (!CONST) return kStOK;
   }
   return kStEOF;
 }
