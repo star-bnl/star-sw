@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPhysicalHelixD.cc,v 1.1 1999/01/30 03:59:05 fisyak Exp $
+ * $Id: StPhysicalHelixD.cc,v 1.2 1999/02/17 11:08:03 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,8 +15,8 @@
  ***************************************************************************
  *
  * $Log: StPhysicalHelixD.cc,v $
- * Revision 1.1  1999/01/30 03:59:05  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/02/17 11:08:03  ullrich
+ * Fix bug in momentum calculation.
  *
  * Revision 1.2  1999/02/17 11:08:03  ullrich
  * Fix bug in momentum calculation.
@@ -76,7 +76,7 @@ StThreeVectorD StPhysicalHelixD::momentum(double B) const
     else {
 #ifndef ST_NO_NAMESPACES
 	{
-		fabs(c_light*nanosecond/meter*B/tesla)/(fabs(mCurvature)/meter)/GeV;
+	    using namespace units;
 #endif
 	    double pt =
 		fabs(c_light*nanosecond/meter*B/tesla)/(fabs(mCurvature)*meter)/GeV;
