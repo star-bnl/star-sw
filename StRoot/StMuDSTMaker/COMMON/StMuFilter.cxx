@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFilter.cxx,v 1.3 2002/06/12 16:02:43 laue Exp $
+ * $Id: StMuFilter.cxx,v 1.4 2002/09/11 21:02:41 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -29,6 +29,19 @@ bool StMuFilter::accept( const StKinkMuDst* k) { cout << "StMuFilter::accept(con
 
 
 bool StMuFilter::accept(const StTrack* track) {
+
+  /** if the list of encoding methods is empty, then accept all methods
+      else check for at least one good encoding method
+  */
+  bool method = false;
+  if (mEncodedMethods.size()) {
+    for ( UnsignedShortIterator iter = mEncodedMethods.begin(); iter!=mEncodedMethods.end(); iter++) {
+      //      cout << *iter << " " << track->encodedMethod() << endl;
+      if (track->encodedMethod() == *iter) method=true;
+    }
+    if (!method) return false;
+  } 
+
   if ( !track->detectorInfo() ) return false;
   if ( track->detectorInfo()->numberOfPoints(kTpcId)<__MIN_HITS_TPC__ &&
        track->detectorInfo()->numberOfPoints(kFtpcWestId)<__MIN_HITS_FTPC__ && 
@@ -42,6 +55,9 @@ bool StMuFilter::accept(const StTrack* track) {
 /***************************************************************************
  *
  * $Log: StMuFilter.cxx,v $
+ * Revision 1.4  2002/09/11 21:02:41  laue
+ * added cut on track encoded method for ITTF
+ *
  * Revision 1.3  2002/06/12 16:02:43  laue
  * Change of the number of hits cut, so that also FTPC tracks are written out.
  *
