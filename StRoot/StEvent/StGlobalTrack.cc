@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cc,v 1.4 1999/02/12 02:01:16 wenaus Exp $
+ * $Id: StGlobalTrack.cc,v 1.5 1999/02/15 16:17:02 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cc,v $
- * Revision 1.4  1999/02/12 02:01:16  wenaus
- * New track constructor to load helix params independently of table
+ * Revision 1.5  1999/02/15 16:17:02  wenaus
+ * fix double& -> double referencing bug
+ *
+ * Revision 1.8  1999/02/22 19:53:51  wenaus
+ * cleaner deleting
  *
  * Revision 1.7  1999/02/22 19:25:18  genevb
  * StGlobalTrack constructor had a memory leak
@@ -25,7 +28,7 @@
  * Revision 1.5  1999/02/15 16:17:02  wenaus
  * fix double& -> double referencing bug
  *
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.4 1999/02/12 02:01:16 wenaus Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.5 1999/02/15 16:17:02 wenaus Exp $";
  * New track constructor to load helix params independently of table
  *
  * Revision 1.3  1999/02/10 21:50:30  wenaus
@@ -36,10 +39,10 @@ static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.4 1999/02/12 02:01:16 wen
  * Revision 1.2  1999/01/15 22:53:44  wenaus
  * version with constructors for table-based loading
  *
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.4 1999/02/12 02:01:16 wenaus Exp $";
-                             double& curvature,
-                             double& dip,
-                             double& phase,
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.5 1999/02/15 16:17:02 wenaus Exp $";
+#include "StEvent/StGlobalTrack.hh"
+StGlobalTrack::StGlobalTrack()
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.5 1999/02/15 16:17:02 wenaus Exp $";
  
 StGlobalTrack::StGlobalTrack() : mPidTraits(*this)
 {

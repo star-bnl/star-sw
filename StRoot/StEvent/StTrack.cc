@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cc,v 1.3 1999/02/12 02:01:19 wenaus Exp $
+ * $Id: StTrack.cc,v 1.4 1999/02/15 16:17:03 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTrack.cc,v $
- * Revision 1.3  1999/02/12 02:01:19  wenaus
- * New track constructor to load helix params independently of table
+ * Revision 1.4  1999/02/15 16:17:03  wenaus
+ * fix double& -> double referencing bug
+ *
+ * Revision 1.4  1999/02/15 16:17:03  wenaus
+ * fix double& -> double referencing bug
  *
  * Revision 1.3  1999/02/12 02:01:19  wenaus
  * New track constructor to load helix params independently of table
@@ -22,10 +25,10 @@
  * Revision 1.2  1999/01/15 22:54:02  wenaus
  * version with constructors for table-based loading
  *
-static const char rcsid[] = "$Id: StTrack.cc,v 1.3 1999/02/12 02:01:19 wenaus Exp $";
+ **************************************************************************/
 #include "StEvent/StTrack.hh"
 
-static const char rcsid[] = "$Id: StTrack.cc,v 1.3 1999/02/12 02:01:19 wenaus Exp $";
+static const char rcsid[] = "$Id: StTrack.cc,v 1.4 1999/02/15 16:17:03 wenaus Exp $";
 
 StTrack::StTrack() : mHelix(0, 0, 0, StThreeVector<double>())
 {
@@ -38,9 +41,9 @@ StTrack::StTrack(dst_track_st* trk) : mFitTraits(trk),
 {
     mStartVertex = 0;
     mStopVertex   = 0;
-                 double& curvature,
-                 double& dip,
-                 double& phase,
+}
+
+StTrack::StTrack(dst_track_st* trk,
                  double curvature,
                  double dip,
                  double phase,

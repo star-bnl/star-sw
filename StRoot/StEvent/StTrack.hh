@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.hh,v 1.4 1999/02/12 02:01:20 wenaus Exp $
+ * $Id: StTrack.hh,v 1.5 1999/02/15 16:17:04 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTrack.hh,v $
- * Revision 1.4  1999/02/12 02:01:20  wenaus
- * New track constructor to load helix params independently of table
+ * Revision 1.5  1999/02/15 16:17:04  wenaus
+ * fix double& -> double referencing bug
+ *
+ * Revision 1.7  1999/03/23 21:47:39  ullrich
+ * Member function made virtual
  *
  * Revision 1.6  1999/02/24 12:49:01  ullrich
  * Added argument (h) to constructor needed to instatiate helix
@@ -37,9 +40,9 @@
 #include "StPhysicalHelix.hh"
 #include "StEvent/StTrackPidTraits.hh"
 #include "StEvent/StTrackFitTraits.hh"
-            double& curvature,
-            double& dip,
-            double& phase,
+#include "tables/dst_track.h"
+class StVertex;
+
 class StTrack {
 public:
     StTrack();
