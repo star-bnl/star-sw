@@ -1,0 +1,15 @@
+/*****************************************************************************
+*   Table: emcJetTrigger
+*        description: Table which contains Jet Patch Trigger
+*        auther:      SUAIDE, Alexandre
+*        compile with stic -f <name.idl>
+******************************************************************************/
+   struct emcJetTrigger 
+   { 
+       long   JetPatchNumber;     /* Patch Number*/
+              
+       long   FirstModule;        /* First module of patch (FirstModule <=module <FirstModule+8) */
+       
+       float  JetEt6bits;         /* Jet Patch Et */
+       long   JetBits[32];        /* Jet bits (for this jet patch only) */
+   };

@@ -1,0 +1,23 @@
+/*****************************************************************************
+*   Table: emcPatchTrigger
+*        description: Table which contains Patch and High Tower Trigger
+*        auther:      SUAIDE, Alexandre
+*        compile with stic -f <name.idl>
+******************************************************************************/
+   struct emcPatchTrigger 
+   { 
+       long   PatchNumber;         /* Patch Number*/
+              
+       long   FirstModule;         /* First module of patch (FirstModule <= module <FistModule+2) */
+       long   FirstEta;            /* First eta of patch (FirstEta <= Eta <FistEta+4) */
+       
+       float  PatchEt6bits;        /* Patch Et */
+       float  HighTowerEt6bits;    /* High Tower Et */
+       long   HighTowerId;         /* High Tower Id */
+       float  Ratio;               /* HT/Patch */
+       
+       long   PatchBits[32];       /* Patch bits (for this patch only) */
+       long   HighTowerBits[32];   /* High Tower bits (for this patch only)  */
+       long   RatioBits[32];       /* Ratio bits (for this patch only) */ 
+       
+   };
