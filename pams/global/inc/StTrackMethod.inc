@@ -2,7 +2,7 @@
       INTEGER  kHelix3DId,kKalmanFitId
       INTEGER  kLine2StepId,kLine3DId
 
-#include "StDedxDefinitions.h" 
+#include "StTrackDefinitions.h" 
 
       PARAMETER (kUndefinedFitterId = kUndefinedFitterIdentifier)
       PARAMETER (kHelix2StepId = kHelix2StepIdentifier)
