@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.122 2002/02/25 00:27:33 jeromel Exp $
+# $Id: Construct,v 1.123 2003/01/11 20:18:54 jeromel Exp $
 use Env;
 use lib $STAR . "/mgr";    # Modify perl include path
 use ConsDefs;
@@ -52,8 +52,10 @@ if ($def->{CXX}  =~ m/-Zoi/ ){
 }
 $INCLUDE = "#" . $include;
 $EXPORT  = "#.share";
+#$EXPORT  = $BUILD."/.share";
 $LIBPATH = $LIB;
-print "Set LIB = $LIB BIN = $BIN OBJ = $OBJ INCLUDE = $INCLUDE LIBPATH = $LIBPATH\n";
+print "Set LIB = $LIB BIN = $BIN OBJ = $OBJ SHARE = $BUILD\n";
+print "    INCLUDE = $INCLUDE LIBPATH = $LIBPATH\n";
 my $ROOTLIBS = "";
 my $ROOTGLIBS = "";
 my $RINTLIBS  = "-lRint ";
@@ -61,8 +63,8 @@ my $RINTLIBS  = "-lRint ";
 if ( defined( $ARG{ROOTLIBS} ) ) {
     $ROOTLIBS = $ARG{ROOTLIBS};
     print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
-}
-else {
+
+} else {
   if ( !defined( $ARG{NoNew} ) ) { $ROOTLIBS = " -lNew "; }
   if( $ENV{ROOT_LEVEL} gt "3.02.00"){
       # New root scheme
@@ -76,6 +78,7 @@ else {
   print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
   
 }
+
 if( defined( $ARG{CPPPATH} ) ){
     $CPPPATH = $ARG{CPPPATH};
 } else {
@@ -83,6 +86,7 @@ if( defined( $ARG{CPPPATH} ) ){
     $CPPPATH .= $main::PATH_SEPARATOR . 
 	$CERN_ROOT . "/include" . $EXTRA_CPPPATH;
 }
+
 $FCPPPATH = "";
 ( my $DirPath = cwd() ) =~ s/\/$//g;
 print "DirPath    = $DirPath\n" unless ($param::quiet);
@@ -249,12 +253,16 @@ foreach my $dir( "pams", "StRoot" ,"StPiD" ) {
         foreach my $subsub_dir(@subsubdirS) {
             my $subsub_DIR = $sub_DIR . "/" . $subsub_dir;
             if ( -d $subsub_DIR ) {
-                if ( $subsub_dir =~ /\./ || $subsub_dir =~ /\.\./
-                  || $subsub_dir =~ /CVS/ || $subsub_dir    =~ /^doc/
-                  || $subsub_dir =~ /^local/ || $subsub_dir =~ /^run/
-                  || $subsub_dir =~ /^wrk$/ || $subsub_dir  =~ /^example/
-                  || $subsub_dir =~ /^kumac/ )
-                {
+                if ( $subsub_dir =~ m/\./        || 
+		     $subsub_dir =~ m/\.\./      ||
+		     $subsub_dir =~ m/CVS/       || 
+		     $subsub_dir =~ m/^doc/      ||
+		     $subsub_dir =~ m/^local/    || 
+		     $subsub_dir =~ m/^run/      ||
+		     $subsub_dir =~ m/^wrk$/     || 
+		     $subsub_dir =~ m/^example/  ||
+		     $subsub_dir =~ m/^macros/   ||
+		     $subsub_dir =~ m/^kumac/ ){
 		    #print "=== Skipping $subsub_dir in $subsub_DIR\n";
                     next;
                 }
@@ -283,9 +291,9 @@ foreach my $dir( "pams", "StRoot" ,"StPiD" ) {
                     next;
                 }
 
-                if ( ( $sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/
-                  || $sub_dir =~ /Pool$/ ) )
-                {
+                if ( ( $sub_dir =~ /^sim$/ || 
+		       $sub_dir =~ /^gen$/ ||
+		       $sub_dir =~ /Pool$/ ) ){
                     if ( $SKIP_DIRS && $SKIP_DIRS =~ $subsub_dir ) {
                         print "skip dir: $subsub_dir \t=> $SKIP_DIRS\n";
                         next;
