@@ -86,6 +86,7 @@ void StHbtExampleQQ(const Int_t nevents, const Char_t **fileList, const Char_t* 
   //  To use a different PID file than the default, uncomment and
   // modify the above
   //  maker->setProbabilityPidFile("Path/PIDTable.root");
+  maker->setProbabilityPidFile();
   
   StMuL3Filter* l3Filter = new StMuL3Filter(); maker->setL3TrackFilter(l3Filter);
   StMuFilter* filter = new StMuFilter();       maker->setTrackFilter(filter);
