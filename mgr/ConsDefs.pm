@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.58 2003/09/23 01:03:09 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.59 2003/09/30 18:15:39 starlib Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -528,6 +528,7 @@
           'TEMP'            => $TEMP,
           'TMP'             => $TMP,
           'STAR_SYS'        => $STAR_HOST_SYS,
+	  'STAR_VERSION'    => $STAR_VERSION,
           'OPTSTAR'         => $OPTSTAR
       }
     );
