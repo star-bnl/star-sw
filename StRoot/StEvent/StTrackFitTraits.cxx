@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.1 1999/10/28 22:27:32 ullrich Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.2 1999/11/01 12:45:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
- * Revision 2.1  1999/10/28 22:27:32  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.2  1999/11/01 12:45:14  ullrich
+ * Modified unpacking of point counter
  *
  * Revision 2.4  2000/01/20 14:43:39  ullrich
  * Fixed bug in numberOfFitPoints(). Sum was wrong.
@@ -37,7 +37,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.1 1999/10/28 22:27:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.2 1999/11/01 12:45:14 ullrich Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
@@ -58,7 +58,36 @@ StTrackFitTraits::StTrackFitTraits(const dst_track_st& t)
 StTrackFitTraits::StTrackFitTraits(UShort_t pid, UShort_t nfp,
                  Float_t chi[2], Float_t cov[15])
 {
-StTrackFitTraits::numberOfFitPoints() const {return mNumberOfFitPoints;}
+    mPidHypothesis = pid;
+    mNumberOfFitPoints = nfp;
+    copy(chi, chi+2, mChi2);
+    copy(cov, cov+15, mCovariantMatrix);
+}
+
+StTrackFitTraits::~StTrackFitTraits() {/* noop */}
+
+    // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
+    return (mNumberOfFitPoints%1000) +
+	((mNumberOfFitPoints%10000)/1000) +
+	(mNumberOfFitPoints/10000);
+    return (numberOfFitPoints(kTpcId) +
+	    numberOfFitPoints(kSvtId) +
+	    numberOfFitPoints(kSsdId));
+}
+
+UShort_t
+StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
+    switch (det) {
+    case kFtpcWestId:
+    case kFtpcEastId:
+    case kTpcId:
+	return mNumberOfFitPoints%1000;
+	break;
+    case kSvtId:
+	return (mNumberOfFitPoints%10000)/1000;
+	break;
+    case kFtpcWestId:
+    case kFtpcEastId:
 	return mNumberOfFitPoints;
 	break;
     case kSsdId:
