@@ -1,5 +1,5 @@
 #include "StEmcPmtSimulator.h"
-#include "../StEmcUtil/emcInternalDef.h"
+#include "StEmcUtil/emcInternalDef.h"
 #include "StMessMgr.h"
 
 ClassImp(StEmcPmtSimulator)
@@ -105,8 +105,11 @@ Int_t StEmcPmtSimulator::getAdc(const Double_t de, const Double_t eta)
 }
 
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcPmtSimulator.cxx,v 1.1 2000/10/23 22:53:13 pavlinov Exp $
+//  $Id: StEmcPmtSimulator.cxx,v 1.2 2001/05/14 01:30:13 pavlinov Exp $
 //  $Log: StEmcPmtSimulator.cxx,v $
+//  Revision 1.2  2001/05/14 01:30:13  pavlinov
+//  Cleanup
+//
 //  Revision 1.1  2000/10/23 22:53:13  pavlinov
 //  First working C++ version
 //
