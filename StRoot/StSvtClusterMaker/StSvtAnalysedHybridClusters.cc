@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.cc,v 1.9 2003/04/05 22:36:10 caines Exp $
+ * $Id: StSvtAnalysedHybridClusters.cc,v 1.10 2003/07/17 22:49:31 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.cc,v $
+ * Revision 1.10  2003/07/17 22:49:31  caines
+ * Change errors to 300 microns
+ *
  * Revision 1.9  2003/04/05 22:36:10  caines
  * Fix filling on local coords so its time and anode not cm
  *
@@ -128,9 +131,9 @@ int StSvtAnalysedHybridClusters::setSvtHit(StSvtAnalysis* mSvtAnalysis,
     mGlobalPos.setY(sqrt(mSvtAnalysis->GetCluYCov(hit)));
     mGlobalPos.setZ(0.0042);
 
-    mGlobalPos.setX(0.1);
-    mGlobalPos.setY(0.1);
-    mGlobalPos.setZ(0.1);
+    mGlobalPos.setX(0.03);
+    mGlobalPos.setY(0.03);
+    mGlobalPos.setZ(0.03);
     
     mSvtHit[hit].setPositionError(mGlobalPos); 
 
