@@ -4,8 +4,11 @@
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f112/top.html 
 //
-// $Id: RMath.cxx,v 1.5 1999/09/26 23:37:50 fine Exp $
+// $Id: RMath.cxx,v 1.6 1999/09/27 00:14:46 fine Exp $
 // $Log: RMath.cxx,v $
+// Revision 1.6  1999/09/27 00:14:46  fine
+// some bugs for double have been fixed
+//
 // Revision 1.5  1999/09/26 23:37:50  fine
 // Bug fixes for F112
 //
@@ -385,7 +388,7 @@ void RMath::mxtrp(double *a, double *b, int i, int j)
 //___________________________________________________________________________
 
 //____________________________________________________________
-/* Subroutine */ float *RMath::traat(float *a, float *s, int m, int n)
+float *RMath::traat(float *a, float *s, int m, int n)
 {
 //
 // CERN PROGLIB# F112    TRAAT           .VERSION KERNFOR  4.15  861204 
@@ -423,7 +426,7 @@ void RMath::mxtrp(double *a, double *b, int i, int j)
 } /* traat_ */
 
 //____________________________________________________________
-/* Subroutine */ float *RMath::tral(float *a, float *u, float *b, int m, int n)
+float *RMath::tral(float *a, float *u, float *b, int m, int n)
 {
   // tral.F -- translated by f2c (version 19970219).
 
@@ -468,7 +471,7 @@ void RMath::mxtrp(double *a, double *b, int i, int j)
 
 //____________________________________________________________
 // tralt.F -- translated by f2c (version 19970219).
-/* Subroutine */ float *RMath::tralt(float *a, float *u, float *b, int m, int n)
+float *RMath::tralt(float *a, float *u, float *b, int m, int n)
 {
     /* System generated locals */
 
@@ -509,7 +512,7 @@ void RMath::mxtrp(double *a, double *b, int i, int j)
 //____________________________________________________________
 // tras.F -- translated by f2c (version 19970219).
 
-/* Subroutine */ float *RMath::tras(float *a, float *s, float *b, int m, int n)
+float *RMath::tras(float *a, float *s, float *b, int m, int n)
 {
     /* Local variables */
      int inds, i__, j, k, ia, ib, is;
@@ -564,7 +567,7 @@ L30:
 //____________________________________________________________
 // trasat.F -- translated by f2c (version 19970219).
 
-/* Subroutine */ float *RMath::trasat(float *a, float *s, float *r__, int m, int n)
+float *RMath::trasat(float *a, float *s, float *r__, int m, int n)
 {
      int imax, i__, k;
      int ia, mn, ir, is, iaa, ind;
@@ -615,7 +618,7 @@ L30:
 } /* trasat_ */
 
 //____________________________________________________________
-/* Subroutine */ float *RMath::trata(float *a, float *r__, int m, int n)
+float *RMath::trata(float *a, float *r__, int m, int n)
 {
 // trata.F -- translated by f2c (version 19970219).
 // CERN PROGLIB# F112    TRATA           .VERSION KERNFOR  4.15  861204 */
@@ -654,7 +657,7 @@ L30:
 
 //____________________________________________________________
 // trats.F -- translated by f2c (version 19970219).
-/* Subroutine */ float *RMath::trats(float *a, float *s, float *b, int m, int n)
+float *RMath::trats(float *a, float *s, float *b, int m, int n)
 {
     /* Local variables */
      int inds, i__, j, k, ia, ib, is;
@@ -753,7 +756,7 @@ L30:
 
 //____________________________________________________________
 // trchlu.F -- translated by f2c (version 19970219).
-/* Subroutine */ float *RMath::trchlu(float *a, float *b, int n)
+float *RMath::trchlu(float *a, float *b, int n)
 {
     /* Local variables */
      int ipiv, kpiv, i__, j;
@@ -1041,7 +1044,7 @@ L42:
 } /* trpck_ */
 
 //____________________________________________________________
-/* Subroutine */ float *RMath::trqsq(float *q, float *s, float *r__, int m)
+float *RMath::trqsq(float *q, float *s, float *r__, int m)
 {
 // trqsq.F -- translated by f2c (version 19970219).
 // CERN PROGLIB# F112    TRQSQ           .VERSION KERNFOR  4.15  861204 */
@@ -1102,7 +1105,7 @@ L42:
 } /* trqsq_ */
 
 //____________________________________________________________
-/* Subroutine */ float *RMath::trsa(float *s, float *a, float *b, int m, int n)
+float *RMath::trsa(float *s, float *a, float *b, int m, int n)
 {
 // trsa.F -- translated by f2c (version 19970219).
 // CERN PROGLIB# F112    TRSA            .VERSION KERNFOR  4.15  861204 */
@@ -1319,7 +1322,7 @@ L42:
 // ------  double 
 
 //____________________________________________________________
-/* Subroutine */ double *RMath::traat(double *a, double *s, int m, int n)
+double *RMath::traat(double *a, double *s, int m, int n)
 {
 //
 // CERN PROGLIB# F112    TRAAT           .VERSION KERNFOR  4.15  861204 
@@ -1357,7 +1360,7 @@ L42:
 } /* traat_ */
 
 //____________________________________________________________
-/* Subroutine */ double *RMath::tral(double *a, double *u, double *b, int m, int n)
+double *RMath::tral(double *a, double *u, double *b, int m, int n)
 {
   // tral.F -- translated by f2c (version 19970219).
 
@@ -1400,7 +1403,7 @@ L42:
 
 //____________________________________________________________
 // tralt.F -- translated by f2c (version 19970219).
-/* Subroutine */ double *RMath::tralt(double *a, double *u, double *b, int m, int n)
+double *RMath::tralt(double *a, double *u, double *b, int m, int n)
 {
     /* Local variables */
      int indu, j, k, ia, ib, iu;
@@ -1439,7 +1442,7 @@ L42:
 //____________________________________________________________
 // tras.F -- translated by f2c (version 19970219).
 
-/* Subroutine */ double *RMath::tras(double *a, double *s, double *b, int m, int n)
+double *RMath::tras(double *a, double *s, double *b, int m, int n)
 {
 
     /* Local variables */
@@ -1495,7 +1498,7 @@ L30:
 //____________________________________________________________
 // trasat.F -- translated by f2c (version 19970219).
 
-/* Subroutine */ double *RMath::trasat(double *a, double *s, double *r__, int m, int n)
+double *RMath::trasat(double *a, double *s, double *r__, int m, int n)
 {
      int imax, i__, k;
      int ia, mn, ir, is, iaa, ind;
@@ -1547,7 +1550,7 @@ L30:
 
 //____________________________________________________________
 // trata.F -- translated by f2c (version 19970219).
-/* Subroutine */ double *RMath::trata(double *a, double *r__, int m, int n)
+double *RMath::trata(double *a, double *r__, int m, int n)
 {
 
     /* Local variables */
@@ -1588,7 +1591,7 @@ L30:
 
 //____________________________________________________________
 // trats.F -- translated by f2c (version 19970219).
-/* Subroutine */ double *RMath::trats(double *a, double *s, double *b, int m, int n)
+double *RMath::trats(double *a, double *s, double *b, int m, int n)
 {
     /* Local variables */
      int inds, i__, j, k, ia, ib, is;
@@ -1686,9 +1689,9 @@ L30:
 } /* tratsa_ */
 
 //____________________________________________________________
-// trchlu.F -- translated by f2c (version 19970219).
-/* Subroutine */ double *RMath::trchlu(double *a, double *b, int n)
+double *RMath::trchlu(double *a, double *b, int n)
 {
+// trchlu.F -- translated by f2c (version 19970219).
     /* Local variables */
      int ipiv, kpiv, i__, j;
      double r__, dc;
@@ -1745,7 +1748,7 @@ L42:
 
 //____________________________________________________________
 // trchul.F -- translated by f2c (version 19970219).
-/* Subroutine */double *RMath::trchul(double *a, double *b, int n)
+double *RMath::trchul(double *a, double *b, int n)
 {
     /* Local variables */
      int ipiv, kpiv, i__;
@@ -1805,18 +1808,16 @@ L42:
 } /* trchul_ */
 
 //____________________________________________________________
-// trinv.F -- translated by f2c (version 19970219).
-/* Subroutine */double *RMath::trinv(double *t, double *s, int n)
+double *RMath::trinv(double *t, double *s, int n)
 {
-     int lhor, ipiv, lver, i__, j;
+// trinv.F -- translated by f2c (version 19970219).
+// CERN PROGLIB# F112    TRINV           .VERSION KERNFOR  4.15  861204 */
+// ORIG. 18/12/74 WH */
+//
+     int lhor, ipiv, lver,  j;
      double r__;
      int mx, ndstep, ind;
      double sum;
-
-
-/* CERN PROGLIB# F112    TRINV           .VERSION KERNFOR  4.15  861204 */
-/* ORIG. 18/12/74 WH */
-
 
     /* Parameter adjustments */
     --s;    --t;
@@ -1825,20 +1826,20 @@ L42:
     mx = (n * n + n) / 2;
     ipiv = mx;
 
-    i__ = n;
+    int i = n;
     do {
-      r__ = (double)0.;
-      if (t[ipiv] > (double)0.) 	r__ = (double)1. / t[ipiv];
+      r__ = 0.;
+      if (t[ipiv] > 0.)  r__ = (double)1. / t[ipiv];
       s[ipiv] = r__;
       ndstep = n;
-      ind = mx - n + i__;
+      ind = mx - n + i;
 
-      while (ind == ipiv) {
+      while (ind != ipiv) {
         sum = 0.;
-        if (r__ != (double)0.) {
+        if (r__ != 0.) {
           lhor = ipiv;
           lver = ind;
-          j = i__;
+          j = i;
 
           do {
             lhor += j;
@@ -1852,25 +1853,25 @@ L42:
         ind -= ndstep;
       }
 
-      ipiv -= i__;
-      --i__;
-    } while (i__ > 0);
+      ipiv -= i;
+      --i;
+    } while (i > 0);
 
     return 0;
 } /* trinv_ */
 
 //____________________________________________________________
-// trla.F -- translated by f2c (version 19970219).
 /* Subroutine */double *RMath::trla(double *u, double *a, double *b, int m, int n)
 {
+//
+// trla.F -- translated by f2c (version 19970219).
+// CERN PROGLIB# F112    TRLA            .VERSION KERNFOR  4.15  861204 */
+// ORIG. 18/12/74 WH */
+//
      int ipiv, ia, ib, iu;
      double sum;
 
-/* CERN PROGLIB# F112    TRLA            .VERSION KERNFOR  4.15  861204 */
-/* ORIG. 18/12/74 WH */
-
-
-    /* Parameter adjustments */
+  /* Parameter adjustments */
     --b;    --a;    --u;
 
     /* Function Body */
@@ -1882,7 +1883,7 @@ L42:
         ia = ib;
         iu = ipiv;
   
-        sum = (double)0.;
+        sum = 0.;
         do {
           sum += a[ia] * u[iu];
           --iu;
@@ -1900,16 +1901,14 @@ L42:
 } /* trla_ */
 
 //____________________________________________________________
-/* trlta.F -- translated by f2c (version 19970219).
-// Subroutine */double *RMath::trlta(double *u, double *a, double *b, int m, int n)
+double *RMath::trlta(double *u, double *a, double *b, int m, int n)
 {
+// trlta.F -- translated by f2c (version 19970219).
+// CERN PROGLIB# F112    TRLTA           .VERSION KERNFOR  4.15  861204 
+// ORIG. 18/12/74 WH 
+
      int ipiv, mxpn, i__, nstep, ia, ib, iu, mx;
      double sum;
-
-
-/* CERN PROGLIB# F112    TRLTA           .VERSION KERNFOR  4.15  861204 */
-/* ORIG. 18/12/74 WH */
-
 
     /* Parameter adjustments */
     --b;    --a;    --u;
@@ -1931,7 +1930,7 @@ L42:
         ++ib;
         ia = ib;
     
-        sum = (double)0.;
+        sum = 0.;
         do {
           sum += a[ia] * u[iu];
           ia += n;
@@ -1964,7 +1963,7 @@ L42:
     ipiv = 0;
 
     for (i__ = 1; i__ <= n; ++i__) {
-	    ipiv += i__;
+      ipiv += i__;
       do {
         ++ia;
         ++ind;
@@ -1977,7 +1976,7 @@ L42:
 } /* trpck_ */
 
 //____________________________________________________________
-/* Subroutine */ double *RMath::trqsq(double *q, double *s, double *r__, int m)
+double *RMath::trqsq(double *q, double *s, double *r__, int m)
 {
 // trqsq.F -- translated by f2c (version 19970219).
 // CERN PROGLIB# F112    TRQSQ           .VERSION KERNFOR  4.15  861204 */
@@ -2006,7 +2005,7 @@ L42:
         indq += j;
         is = inds;
         iq = indq;
-        sum = (double)0.;
+        sum = 0.;
         k = 0;
     
         do {
@@ -2038,7 +2037,7 @@ L42:
 } /* trqsq_ */
 
 //____________________________________________________________
-/* Subroutine */ double *RMath::trsa(double *s, double *a, double *b, int m, int n)
+double *RMath::trsa(double *s, double *a, double *b, int m, int n)
 {
 // trsa.F -- translated by f2c (version 19970219).
 // CERN PROGLIB# F112    TRSA            .VERSION KERNFOR  4.15  861204 */
@@ -2061,7 +2060,7 @@ L42:
       for (j = 1; j <= n; ++j) {
   	    ia = j;
   	    is = inds;
-  	    sum = (double)0.;
+  	    sum = 0.;
   	    k = 0;
   
         do {
@@ -2149,7 +2148,7 @@ L42:
 	      lver = lpiv;
 	      lhor = ind;
 	      sum = 0.;
-	      for (k = i__; k <= n; ++k,lhor += k,lver += k) 
+	      for (k = i__; k <= n;lhor += k,lver += k,++k) 
 		      sum += g[lver] * g[lhor];	      
 	      gi[ind] = sum;
     	}
@@ -2205,18 +2204,15 @@ L42:
 } /* trupck_ */
 
 //____________________________________________________________
-/* trsat.F -- translated by f2c (version 19970219).
-// Subroutine */ double *RMath::trsat(double *s, double *a, double *b, int m, int n)
+double *RMath::trsat(double *s, double *a, double *b, int m, int n)
 {
+// trsat.F -- translated by f2c (version 19970219)
+// CERN PROGLIB# F112    TRSAT           .VERSION KERNFOR  4.15  861204 
+// ORIG. 18/12/74 WH 
 
     /* Local variables */
      int inds, i__, j, k, ia, ib, mn, is;
      double sum;
-
-
-/* CERN PROGLIB# F112    TRSAT           .VERSION KERNFOR  4.15  861204 */
-/* ORIG. 18/12/74 WH */
-
 
     /* Parameter adjustments */
     --b;    --a;    --s;
