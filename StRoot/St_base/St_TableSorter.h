@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableSorter.h,v 1.16 1999/05/18 14:41:29 fine Exp $
+// $Id: St_TableSorter.h,v 1.17 1999/05/18 17:59:22 fine Exp $
 // $Log: St_TableSorter.h,v $
+// Revision 1.17  1999/05/18 17:59:22  fine
+// Clean up and some comments
+//
 // Revision 1.16  1999/05/18 14:41:29  fine
 // New methods: CountKey(), CountKeys(), FindFirstKey() have beent introduced
 //
@@ -146,7 +149,7 @@ class St_TableSorter : public TNamed {
     Int_t BinarySearch(Char_t   value );
  
     virtual const Text_t   *GetColumnName() const { return m_colName.Data();}
-    virtual       Int_t     GetIndex(UInt_t index) const;
+    virtual       Int_t     GetIndex(UInt_t sortedIndex) const;
     virtual       Int_t     GetLastFound()  const { return m_LastFound; }
     virtual const Text_t   *GetTableName()  const;
     virtual const Text_t   *GetTableTitle() const;

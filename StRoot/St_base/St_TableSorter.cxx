@@ -58,6 +58,12 @@
 //          Int_t index =  sorter(id); // Look for the row index with id "nearest" to 5
 //                                     // using the internal "BinarySearch" method
 //
+//    3. Some usefule medthod of this class:
+//
+//        3.1. CountKeys()
+//        3.2  CountKey(const void *key, Int_t firstIndx=0,Bool_t bSearch=kTRUE,Int_t *firstRow=0)
+//        3.3. FindFirstKey(const void *key)
+//
 /////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -454,11 +460,11 @@ Int_t St_TableSorter::BSearch(const void *value) {
 }
 
 //_____________________________________________________________________________
-Int_t St_TableSorter::GetIndex(UInt_t index) const
+Int_t St_TableSorter::GetIndex(UInt_t sortedIndex) const
 {
    Int_t indx = -1;
-   if (index < UInt_t(m_numberOfRows) )  {
-     void *p = m_SortIndex[index];
+   if (sortedIndex < UInt_t(m_numberOfRows) )  {
+     void *p = m_SortIndex[sortedIndex];
      if (p) {
          const Char_t *res = (const Char_t *)p;
          // calculate index:
@@ -501,43 +507,23 @@ Int_t St_TableSorter::CountKey(const void *key, Int_t firstIndx, Bool_t bSearch,
  //
 
   Int_t count = 0;
+  if (firstRow) *firstRow = -1;         
   if (m_searchMethod) {
     Int_t indx = firstIndx;  
     Int_t nRows = GetNRows();
     if (!bSearch) {
        while ( indx < nRows && m_searchMethod(key,(const void **)&m_SortIndex[indx])){indx++;}
-       // Remember the first row it been asked:
-       while ( indx < nRows &&!m_searchMethod(key,(const void **)&m_SortIndex[indx])){indx++; count++;}
-       if (firstRow && count) *firstRow = indx-count;
+       // Remember the first row been asked:
     } else {
        indx = FindFirstKey(key);
-#if 0
-//--------
-       Int_t indx = -1;
-       if (BSearch(key)>=0) 
-       {
-         indx = GetLastFound();
-         if (indx >=0) 
-             while (indx > 0 && !m_searchMethod(key,(const void **)&m_SortIndex[indx-1])) indx--;  
-       }
-  return indx;
-
-//--------
-#endif
-       if (indx >=0 ) {  // Key was found let's count it
-         if (firstRow) *firstRow = indx;
-         Int_t sIndx = TMath::Max(indx,firstIndx);
+       if (indx >= 0 ) {  // Key was found let's count it
+         count = TMath::Max(0,GetLastFound() - indx + 1);
+         indx  = TMath::Max(GetLastFound()+1,firstIndx);
          // Forward pass
-         while ( sIndx < nRows && !m_searchMethod(key,(const void **)&m_SortIndex[sIndx]))
-               {sIndx++; count++;}
-#if 0
-         // Backward pass
-         sIndx = indx;
-         while ( sIndx > firstIndx &&!m_searchMethod(key,(const void **)&m_SortIndex[sIndx-1]))
-               {sIndx--; count++;}
-#endif
        }
     }
+    while ( indx < nRows &&!m_searchMethod(key,(const void **)&m_SortIndex[indx])){indx++; count++;}
+    if (firstRow && count) *firstRow = indx-count;
   }
   return count;
 }
