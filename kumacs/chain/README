@@ -32,14 +32,19 @@
 * no_events  - number of events to process
 * input_data_file   - directory + input file name
 * output_file       - output file name for use with chain=fzout or evout
+* log     - log file 
 * nunit   - output ntuple file unit #
 * nfile   - output ntuple file name
 * nid     - output ntuple i.d.
 * ntable   - output ntuple table - starts from event/data/ (i.e. list your
 *           table from under this directory)
+* nid2     - output ntuple i.d. #2  (same ntuple file as above!)
+* ntable2   - output ntuple table #2
+*
 * *********************************************************************
 * 
 * --DOMAINS --
+*   gen
 *   geometry
 *   sim/gstar
 *   sim/g2t
