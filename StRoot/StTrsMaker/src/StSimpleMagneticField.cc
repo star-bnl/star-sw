@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSimpleMagneticField.cc,v 1.1 1998/11/10 17:12:20 fisyak Exp $
+ * $Id: StSimpleMagneticField.cc,v 1.2 1999/01/18 21:02:45 lasiuk Exp $
  *
  * Author: Thomas Ullrich, May 1998 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSimpleMagneticField.cc,v $
- * Revision 1.1  1998/11/10 17:12:20  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/18 21:02:45  lasiuk
+ * comment diagnostics
  *
  * Revision 1.1  1998/11/10 17:12:20  fisyak
  * Put Brian trs versin into StRoot
@@ -36,6 +36,7 @@ StSimpleMagneticField::StSimpleMagneticField(const StThreeVector<double>& v)
 StSimpleMagneticField::StSimpleMagneticField(const char* filename)
 {
     StGetConfigValue(filename, "StSimpleMagneticField.mB", mB);
+    PR(mB);
 }
 
 StSimpleMagneticField::~StSimpleMagneticField() {/* noop */}

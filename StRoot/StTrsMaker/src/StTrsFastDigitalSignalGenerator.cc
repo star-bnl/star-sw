@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.4 1999/01/18 10:25:23 lasiuk Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.5 1999/01/18 21:02:49 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
- * Revision 1.4  1999/01/18 10:25:23  lasiuk
- * add conversion code for StTrsDigitalSector
+ * Revision 1.5  1999/01/18 21:02:49  lasiuk
+ * comment diagnostics
  *
  * Revision 1.7  1999/01/23 02:32:22  lasiuk
  * sun friendly
@@ -77,9 +77,8 @@ StTrsDigitalSignalGenerator*
 StTrsFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec)
 {
     if(!mInstance) {
-    cout << "digitize here " << endl;
-    PR(mSimpleConversion);
-    // Loop over the sector
+	mInstance = new StTrsFastDigitalSignalGenerator(el, sec);
+    }
     // else  do nothing
     cout << "Got to StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
     return mInstance;
@@ -87,16 +86,14 @@ StTrsFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec
     cout << "StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
     //PR(mSimpleConversion);
 void StTrsFastDigitalSignalGenerator::digitizeSignal()
-    for(int irow=25; irow<+mSector->numberOfRows(); irow++) {
+{
     vector<short> digitalPad;
 
     vector<unsigned char> digitalPadZeros;
+#else
 	    // should use an STL operation here
-	    PR(currentPad.size());
-	    if(!currentPad.size()) continue;
     vector<unsigned char, allocator<unsigned char> > digitalPadZeros;
 #endif
-	    PR(digitalPad.size());
 	    cout << "r/p " << irow << '/' << ipad << endl;
     for(int irow=1; irow<=mSector->numberOfRows(); irow++) {
 	    digitalPad.clear();

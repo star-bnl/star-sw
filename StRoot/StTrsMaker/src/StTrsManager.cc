@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsManager.cc,v 1.1 1998/11/10 17:12:25 fisyak Exp $
+ * $Id: StTrsManager.cc,v 1.2 1999/01/18 21:02:51 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,8 +12,8 @@
  ***************************************************************************
  *
  * $Log: StTrsManager.cc,v $
- * Revision 1.1  1998/11/10 17:12:25  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/18 21:02:51  lasiuk
+ * comment diagnostics
  *
  * Revision 1.1  1998/11/10 17:12:25  fisyak
  * Put Brian trs versin into StRoot
@@ -137,7 +137,7 @@ bool StTrsManager::processEvent()
 	list<StTrsMiniChargeSegment, allocator<StTrsMiniChargeSegment> > splitSegment;
 #endif
 	mData[ii].split(mGasDb, mMagneticFieldDb,
-			mNumberOfSubSegments, segmentLength, &splitSegment);
+			mNumberOfSubSegments, &splitSegment);
 
 	//
 	// Loop over list of MiniSegments

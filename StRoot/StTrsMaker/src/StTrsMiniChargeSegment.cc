@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsMiniChargeSegment.cc,v 1.1 1998/11/10 17:12:25 fisyak Exp $
+ * $Id: StTrsMiniChargeSegment.cc,v 1.2 1999/01/18 21:02:53 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsMiniChargeSegment.cc,v $
- * Revision 1.1  1998/11/10 17:12:25  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/18 21:02:53  lasiuk
+ * comment diagnostics
  *
  * Revision 1.1  1998/11/10 17:12:25  fisyak
  * Put Brian trs versin into StRoot
@@ -36,7 +36,7 @@ StTrsMiniChargeSegment::StTrsMiniChargeSegment(StThreeVector<double> pos, double
 
 StTrsMiniChargeSegment::~StTrsMiniChargeSegment() { /*nopt*/ }
 
-ostream& operator<<(ostream& os, StTrsMiniChargeSegment& seg)
+ostream& operator<<(ostream& os, const StTrsMiniChargeSegment& seg)
 {
     return os << '(' << seg.position() << ", " << seg.charge() << ", " << seg.dl() << ')';
 }

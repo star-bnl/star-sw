@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSector.cc,v 1.2 1998/11/16 14:49:06 lasiuk Exp $
+ * $Id: StTrsSector.cc,v 1.3 1999/01/18 21:02:57 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsSector.cc,v $
- * Revision 1.2  1998/11/16 14:49:06  lasiuk
- * make sure of index when filling sector
+ * Revision 1.3  1999/01/18 21:02:57  lasiuk
+ * comment diagnostics
  *
  * Revision 1.3  1999/01/18 21:02:57  lasiuk
  * comment diagnostics
@@ -42,7 +42,7 @@ StTrsSector::StTrsSector(StTpcGeometry* geoDb)
 {
     tpcTimeBins  timeBins;
     tpcPadRow    padRow;
-	cout << " NumberOfPadsAtRow(" << irow << "): " << geoDb->numberOfPadsAtRow(irow+1) << endl;
+    int          irow;
 
     for(irow=0; irow< geoDb->numberOfRows(); irow++) {
 	//cout << " NumberOfPadsAtRow(" << irow << "): " << geoDb->numberOfPadsAtRow(irow+1) << endl;
@@ -51,10 +51,10 @@ StTrsSector::StTrsSector(StTpcGeometry* geoDb)
 	mSector.push_back(padRow);
     }
 
-    cout << "  NumberOfRows in Sector: " << mSector.size() << endl;
-    for(int ii=0; ii<mSector.size(); ii++) {
- 	cout << "  PadsInRow(" << ii << "): " << mSector[ii].size() << endl;
-    }
+    
+    // tmp
+    // check size at creation?
+//     cout << "  NumberOfRows in Sector: " << mSector.size() << endl;
 //     for(int ii=0; ii<mSector.size(); ii++) {
 //  	cout << "  PadsInRow(" << ii << "): " << mSector[ii].size() << endl;
 //     }
@@ -69,14 +69,16 @@ void StTrsSector::clear() // clears only the time bins
 	for(int ipad=0; ipad<mSector[irow].size(); ipad++) {
 	    mSector[irow][ipad].clear();
 	}
-void StTrsSector::addEntry(int row, int pad, StTrsAnalogSignal& sign)
+    }
+}
+
 // Caution: rowN specifies rowNumber 1..45
-    cout << "row " << row << " pad " << pad << endl;
+    cout << "rowN " << rowN << " padN " << padN << endl;
 void StTrsSector::addEntry(int rowN, int padN, StTrsAnalogSignal& signl)
-    if( (row > 1 && row <= mSector.size()) )
-	if( (pad > 1 && pad <= mSector[row].size()) )
+{
+    //cout << "rowN " << rowN << " padN " << padN << endl;
 #ifdef ST_SECTOR_BOUNDS_CHECK
-	    mSector[(row-1)][(pad-1)].push_back(sign);
+    if( (rowN > 0 && row <= mSector.size()) )
 	if( (padN > 0 && pad <= mSector[(rowN-1)].size()) )
 #endif
 	    mSector[(rowN-1)][(padN-1)].push_back(signl);
@@ -84,13 +86,15 @@ void StTrsSector::addEntry(int rowN, int padN, StTrsAnalogSignal& signl)
 
 void StTrsSector::addEntry(StTpcPadCoordinate& coord, StTrsAnalogSignal& sig)
 {
-void StTrsSector::assignTimeBins(int row, int pad, tpcTimeBins& tbins)
+    addEntry(coord.row(), coord.pad(), sig);
+}
+
 // Caution: rowIndex specifies index 0..44
 // Above: rowN specifies rowNumber 1..45
-    if( (row > 1 && row <= mSector.size()) )
-	if( (pad > 1 && pad <= mSector[row].size()) )
+void StTrsSector::assignTimeBins(int rowN, int padN, tpcTimeBins& tbins)
+{
 #ifdef ST_SECTOR_BOUNDS_CHECK
-	    mSector[(row-1)][(pad-1)] = tbins;
+    if( (rowIndex > 0 && rowIndex <= mSector.size()) )
 	if( (padIndex > 0 && padIndex <= mSector[rowIndex].size()) )
 #endif
 	    mSector[(rowN-1)][(padN-1)] = tbins;
