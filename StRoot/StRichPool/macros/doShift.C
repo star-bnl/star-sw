@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doShift.C,v 1.1 2002/11/19 18:52:10 dunlop Exp $
+// $Id: doShift.C,v 1.2 2002/11/19 22:38:29 dunlop Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -159,7 +159,7 @@ void doShift(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const C
     
     gSystem->Load("StMcEvent");
     
-    gSystem->Load("StRichPool");
+    gSystem->Load("StUndoDistortionMaker");
     
     //
     // Handling depends on whether file is a ROOT file or XDF file
@@ -355,6 +355,9 @@ void doShift(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doShift.C,v $
+// Revision 1.2  2002/11/19 22:38:29  dunlop
+// Reverting loading to the subdirectory-named .so
+//
 // Revision 1.1  2002/11/19 18:52:10  dunlop
 // Runs the StUndoDistortionMaker
 //
