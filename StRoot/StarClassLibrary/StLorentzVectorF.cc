@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVectorF.cc,v 1.4 2000/09/28 02:06:10 perev Exp $
+ * $Id: StLorentzVectorF.cc,v 1.5 2000/11/27 17:33:49 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StLorentzVectorF.cc,v $
- * Revision 1.4  2000/09/28 02:06:10  perev
- * non automatic streamer added
+ * Revision 1.5  2000/11/27 17:33:49  ullrich
+ * Enclosed streamer in macro __ROOT__.
  *
  * Revision 1.4  2000/09/28 02:06:10  perev
  * non automatic streamer added
@@ -116,7 +116,8 @@ istream&  operator>>(istream& is, StLorentzVectorF& v)
     v.setT(t);
     return is;
 }
-//______________________________________________________________________________
+
+#ifdef __ROOT__
 void StLorentzVectorF::Streamer(TBuffer &R__b)
 {
 //	Stream an object of class StLorentzVectorF.
@@ -130,6 +131,6 @@ void StLorentzVectorF::Streamer(TBuffer &R__b)
       mThreeVector.Streamer(R__b);
       R__b << mX4;
    }
-
 }
+#endif
 

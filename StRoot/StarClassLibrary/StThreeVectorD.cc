@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.cc,v 1.6 2000/10/26 21:13:59 perev Exp $
+ * $Id: StThreeVectorD.cc,v 1.7 2000/11/27 17:33:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.cc,v $
- * Revision 1.6  2000/10/26 21:13:59  perev
- * assert.h include added
+ * Revision 1.7  2000/11/27 17:33:51  ullrich
+ * Enclosed streamer in macro __ROOT__.
  *
  * Revision 1.6  2000/10/26 21:13:59  perev
  * assert.h include added
@@ -116,7 +116,8 @@ istream&  operator>>(istream& is, StThreeVectorD& v)
     v.setZ(z);
     return is;
 }
-//______________________________________________________________________________
+
+#ifdef __ROOT__
 void StThreeVectorD::Streamer(TBuffer &R__b)
 {
 //	Stream an object of class StThreeVectorD.
@@ -149,4 +150,4 @@ void StThreeVectorD::Streamer(TBuffer &R__b)
       R__b << mX3;
    }
 }
-
+#endif
