@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.12 1999/11/16 20:58:41 wdeng Exp $
+// $Id: StMatchMaker.cxx,v 1.13 1999/11/27 18:21:41 fisyak Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.13  1999/11/27 18:21:41  fisyak
+// Add test that primary vertex exists
+//
 // Revision 1.12  1999/11/16 20:58:41  wdeng
 // Spiros's temporary solution to id_start_vertex puzzle
 //
@@ -392,10 +395,8 @@ Int_t StMatchMaker::Make(){
   St_dst_track     *globtrk     = new St_dst_track("globtrk",20000);  
   AddData(globtrk);
   
-  const dst_track_st* globtrkStart = globtrk->GetTable();
-  dst_track_st* globtrkPtr;
-  for( Int_t i=0; i<globtrk->GetTableSize(); i++) {
-    globtrkPtr = globtrkStart + i;
+  dst_track_st* globtrkPtr  = globtrk->GetTable();
+  for( Int_t i=0; i<globtrk->GetTableSize(); i++, globtrkPtr++) {
     globtrkPtr->id_start_vertex = 0;
   } 
  
