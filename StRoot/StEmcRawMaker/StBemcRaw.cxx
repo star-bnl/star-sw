@@ -1,6 +1,10 @@
 // 
-// $Id: StBemcRaw.cxx,v 1.4 2004/10/20 15:45:19 suaide Exp $
+// $Id: StBemcRaw.cxx,v 1.5 2004/10/21 00:01:42 suaide Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.5  2004/10/21 00:01:42  suaide
+// small changes in histogramming and messages for BEMC
+// Complete version for EEMC done by Jan Balewski
+//
 // Revision 1.4  2004/10/20 15:45:19  suaide
 // few bugs fixed
 //
@@ -36,7 +40,6 @@ ClassImp(StBemcRaw)
 */
 StBemcRaw::StBemcRaw():TObject()
 {  
-  mPrint = kTRUE;
   mSaveAllStEvent = kFALSE;
   mDecoder = 0;
   mDate = 0;
@@ -72,6 +75,28 @@ void StBemcRaw::createDecoder(Int_t date, Int_t time)
 {
   if(mDecoder) delete mDecoder;
   mDecoder = new StEmcDecoder(date,time);
+}
+void StBemcRaw::initHisto()
+{
+  mBarrelNHitHist         = new TH2F("BarrelNHit","BarrelNHit",500,0.0,18000.0,4,0.5,4.5);
+  mBarrelEtotHist         = new TH2F("BarrelEtot","BarrelEtot",500,0.0,10000.0,4,0.5,4.5);
+  mBarrelAdcSumHist       = new TH2F("BarrelAdcSum","BarrelAdcSum",500,0.0,1000000.0,4,0.5,4.5);
+  mBarrelNCratesHist      = new TH2F("BarrelNCrates","BarrelNCrates",31,0.0,31.0,4,0.5,4.5);
+  mBarrelCrateStatusHist  = new TH2F("BarrelCrateStatus","BarrelCrateStatus",6,-0.5,5.5,30,0.5,30.5);
+}
+void StBemcRaw::fillHisto()
+{
+  for(Int_t det = 1;det<=MAXDETBARREL; det++)
+  {
+    mBarrelNHitHist->Fill(getTotalSaved(det),det);
+    mBarrelEtotHist->Fill(getTotalE(det),det);
+    mBarrelAdcSumHist->Fill(getTotalADC(det),det);
+    mBarrelNCratesHist->Fill(getNCratesOK(det),det);
+  }
+  for(Int_t crate = 1;crate<=MAXCRATES; crate++)
+  {
+    mBarrelCrateStatusHist->Fill(getCrateStatus(BTOW,crate),crate);
+  }
 }
 Bool_t StBemcRaw::make(TDataSet* TheData, StEvent* event)
 {
@@ -110,7 +135,7 @@ Bool_t StBemcRaw::make(StEmcRawData* bemcRaw, StEvent* event)
       Int_t S = makeHit(emc,det,id,ADC,crate,cap,E);
       updateStats(det,S,ADC,E);
     }
-    if(mPrint) printStats(det);
+    printStats(det);
     StDetectorId did = static_cast<StDetectorId>(det+kBarrelEmcTowerId-1);
     StEmcDetector* detector=emc->detector(did);
     if(detector)
@@ -128,30 +153,30 @@ Bool_t StBemcRaw::make(StEmcRawData* bemcRaw, StEvent* event)
 */
 Bool_t StBemcRaw::convertFromDaq(TDataSet* DAQ, StEmcRawData* RAW)
 {
-  if(!DAQ) { if(mPrint) gMessMgr->Warning() <<"Could not find DAQ DataSet "<<endm; return kFALSE; }
-  if(!RAW) { if(mPrint) gMessMgr->Warning() <<"Could not find StEmcRawData pointer "<<endm; return kFALSE; }
+  if(!DAQ) { gMessMgr->Warning() <<"Could not find DAQ DataSet "<<endm; return kFALSE; }
+  if(!RAW) { gMessMgr->Warning() <<"Could not find StEmcRawData pointer for BEMC"<<endm; return kFALSE; }
 	
   StDAQReader* TheDataReader=(StDAQReader*)(DAQ->GetObject());
-  if(!TheDataReader || !TheDataReader->EMCPresent()) { if(mPrint) gMessMgr->Warning() <<"Data Reader is not present "<<endm; return kFALSE; }
+  if(!TheDataReader || !TheDataReader->EMCPresent()) { gMessMgr->Warning() <<"Data Reader is not present "<<endm; return kFALSE; }
 
   StEMCReader* TheEmcReader=TheDataReader->getEMCReader();
-  if(!TheEmcReader) { if(mPrint) gMessMgr->Warning() <<"Could not find EMC Reader "<<endm; return kFALSE; }
+  if(!TheEmcReader) { gMessMgr->Warning() <<"Could not find BEMC Reader "<<endm; return kFALSE; }
 	
-	EMC_Reader* reader = TheEmcReader->getBemcReader();
-	if(!reader) { if(mPrint) gMessMgr->Warning() <<"Could not find Barrel Reader "<<endm; return kFALSE; }
+  EMC_Reader* reader = TheEmcReader->getBemcReader();
+  if(!reader) {gMessMgr->Warning() <<"Could not find Barrel Reader "<<endm; return kFALSE; }
       
   if(reader->isTowerPresent())
-	{
-		Bank_BTOWERADCR& tower = reader->getBTOWERADCR();
+  {
+    Bank_BTOWERADCR& tower = reader->getBTOWERADCR();
     if(RAW->header(BTOWBANK)) RAW->deleteBank(BTOWBANK);
     RAW->createBank(0,BTOWHEADER,BTOWSIZE);
     for(Int_t i = 0; i<BTOWHEADER  ;i++) RAW->setHeader(BTOWBANK,i,tower.TDCHeader[i]);
-		for(Int_t i = 0; i<BTOWSIZE ;i++) RAW->setData(BTOWBANK,i,tower.TowerADCArray[i]);
-	}		
-	// smd data  
-	if(reader->isSmdPresent())
-	{
-		Bank_BSMDADCR& smd =  reader->getSMD_ADCR();
+    for(Int_t i = 0; i<BTOWSIZE ;i++) RAW->setData(BTOWBANK,i,tower.TowerADCArray[i]);
+  }		
+  // smd data  
+  if(reader->isSmdPresent())
+  {
+    Bank_BSMDADCR& smd =  reader->getSMD_ADCR();
     Int_t NSMD = MAXSMDCRATES;
     // there is only 4 SMD Crates before that data and some
     // of them are PSD crates. For Y2004 AuAu runs PSD do
@@ -195,12 +220,12 @@ Bool_t StBemcRaw::convertFromDaq(TDataSet* DAQ, StEmcRawData* RAW)
       }
     }
     /////////////////////////////////////////////////////////////////////
-	}
+  }
   return kTRUE;    
 }
 void StBemcRaw::checkHeaders(StEmcRawData* RAW)
 {
-	for(Int_t det=1;det<=MAXDETBARREL; det++)
+  for(Int_t det=1;det<=MAXDETBARREL; det++)
     for(Int_t crate = 1; crate<=MAXCRATES;crate++) mCrateStatus[det-1][crate-1] = crateUnknown;
   
   checkBtowCrates(RAW);
@@ -231,8 +256,8 @@ void StBemcRaw::checkHeaders(StEmcRawData* RAW)
 }
 void StBemcRaw::emptyEmcCollection(StEmcCollection *emc)
 {
-	if(!emc) return;
-	StSPtrVecEmcPoint& pvec = emc->barrelPoints();
+  if(!emc) return;
+  StSPtrVecEmcPoint& pvec = emc->barrelPoints();
   if(pvec.size()>0)  pvec.clear(); 
  
   for(Int_t i=0; i<MAXDETBARREL; i++)
@@ -242,19 +267,19 @@ void StBemcRaw::emptyEmcCollection(StEmcCollection *emc)
     if(detector)
     {
       if(detector->cluster())
-			{
+      {
       	StSPtrVecEmcCluster& cluster=detector->cluster()->clusters();
       	if(cluster.size()>0) cluster.clear();  
       }
       for(UInt_t j=1;j<=detector->numberOfModules() ;j++)
-			{
-				StEmcModule *module = detector->module(j);
-				if(module)
-				{
-					StSPtrVecEmcRawHit&  hits=module->hits();
-					hits.clear();
-				}
-			}
+      {
+        StEmcModule *module = detector->module(j);
+        if(module)
+        {
+          StSPtrVecEmcRawHit&  hits=module->hits();
+          hits.clear();
+        }
+      }
     }
   }
   return;
@@ -334,8 +359,8 @@ Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t
 {
   CAP = 0;
   CRATE = 0;
-  if(!RAW) { if(mPrint) gMessMgr->Warning() <<"Could not find StEmcRawData pointer "<<endm; return 0; }
-  if(!mDecoder) { if(mPrint) gMessMgr->Warning() <<"Could not find StEmcmDecoderoder pointer "<<endm; return 0; }
+  if(!RAW) {gMessMgr->Warning() <<"Could not find StEmcRawData pointer for BEMC "<<endm; return 0; }
+  if(!mDecoder) {gMessMgr->Warning() <<"Could not find StEmcDecoderoder pointer "<<endm; return 0; }
   if(det==BTOW) // tower
   {
     Int_t daq;
@@ -386,7 +411,7 @@ Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t
     CRATE = RDO+1;
     if(S==1 && RAW->header(RDO+BSMDOFFSET) && RDO>=0 && RDO<MAXSMDCRATES)     
     {
-       CAP = RAW->header(RDO+BSMDOFFSET,SMDCAPACITOR);
+      CAP = RAW->header(RDO+BSMDOFFSET,SMDCAPACITOR);
       return RAW->data(RDO+BSMDOFFSET,index); 
     }
     return 0;
@@ -403,7 +428,7 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
   E=0;
     
   if(CRATE>0 && CRATE<=MAXCRATES) 
-    if((mCrateStatus[det-1][CRATE-1]!=crateOK || 
+    if((mCrateStatus[det-1][CRATE-1]!=crateOK && 
         mCrateStatus[det-1][CRATE-1]!=crateUnknown) && 
         !mSaveAllStEvent) return kCrate;
   
@@ -421,7 +446,7 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
     // PSD and SMD as valid hits
     if(det>=BPRS && !mSaveAllStEvent) if(CAP==CAP1 || CAP==CAP2) return kPed;
   }
-  
+ 
   if(mControlADCtoE->CutOffType[det-1]==1 && !mSaveAllStEvent) // pedestal cut
   {
     if(RMS<=0) return kRms;

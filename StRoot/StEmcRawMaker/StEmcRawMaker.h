@@ -1,16 +1,5 @@
-// $Id: StEmcRawMaker.h,v 1.3 2004/10/19 23:48:49 suaide Exp $
-// $Log: StEmcRawMaker.h,v $
-// Revision 1.3  2004/10/19 23:48:49  suaide
-// Initial implementation of the endcap detector done by Jan Balewski
-//
-// Revision 1.2  2004/10/19 17:53:00  suaide
-// code clean up
-//
-// Revision 1.1  2004/10/18 18:20:07  suaide
-// New Maker. Will replace StEmcADCtoEMaker in production.
-// It reads only DAQ structures. Output is StEvent.
-//
-//
+// $Id: StEmcRawMaker.h,v 1.4 2004/10/21 00:01:50 suaide Exp $
+
 /*!\class StEmcRawMaker
 \author Alexandre A. P. Suaide
 
@@ -49,24 +38,15 @@ class StEemcRaw;
 class StEmcRawMaker : public StMaker 
 {
  protected: 
-   // BARREL HISTOGRAMS
-   TH2F*                    mBarrelNHitHist;            
-   TH2F*                    mBarrelEtotHist;           
-   TH2F*                    mBarrelAdcSumHist;           
-   TH2F*                    mBarrelNCratesHist;           
-   TH2F*                    mBarrelCrateStatusHist;            
-   
    StEvent*                 mEvent; 
    StBemcRaw*               mBemcRaw;
    StEemcRaw*               mEemcRaw;
-   
-   Bool_t                   mPrint;
-   void              fillHistograms();///<Fill QA histograms
-  
-   Bool_t            prepareEnvironment();///< Prepare the StEvent environment to fill the EMC data
-   Bool_t            makeBemc(); ///< Make the Barrel-EMC detector
-   Bool_t            makeEemc(); ///< Make the Endcap-EMC detector
-   StEEmcDbMaker * eeStDb; ///< to assess EEMC DB
+   StEEmcDbMaker*           eeStDb; ///< to assess EEMC DB
+
+   void                     fillHistograms();///<Fill QA histograms  
+   Bool_t                   prepareEnvironment();///< Prepare the StEvent environment to fill the EMC data
+   Bool_t                   makeBemc(); ///< Make the Barrel-EMC detector
+   Bool_t                   makeEemc(); ///< Make the Endcap-EMC detector
                       
  public:                  
                             StEmcRawMaker(const char *name="EmcRaw"); ///< StEmcRawMaker constructor
@@ -77,11 +57,28 @@ class StEmcRawMaker : public StMaker
   virtual Int_t             Finish(); ///< Finish function. 
 
   StBemcRaw*                getBemcRaw() { return mBemcRaw;} ///< Return the StBemcRaw pointer
-  void                      setPrint(Bool_t a) { mPrint = a; mBemcRaw->setPrint(a);} ///< Set it to kFALSE if you do not want to print messages
+  void                      setPrint(Bool_t a);///< Set it to kFALSE if you do not want to print messages
     
-  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcRawMaker.h,v 1.3 2004/10/19 23:48:49 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcRawMaker.h,v 1.4 2004/10/21 00:01:50 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcRawMaker, 1)  
 };
 
 #endif
+
+// $Log: StEmcRawMaker.h,v $
+// Revision 1.4  2004/10/21 00:01:50  suaide
+// small changes in histogramming and messages for BEMC
+// Complete version for EEMC done by Jan Balewski
+//
+// Revision 1.3  2004/10/19 23:48:49  suaide
+// Initial implementation of the endcap detector done by Jan Balewski
+//
+// Revision 1.2  2004/10/19 17:53:00  suaide
+// code clean up
+//
+// Revision 1.1  2004/10/18 18:20:07  suaide
+// New Maker. Will replace StEmcADCtoEMaker in production.
+// It reads only DAQ structures. Output is StEvent.
+//
+//

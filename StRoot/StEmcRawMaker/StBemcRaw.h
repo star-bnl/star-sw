@@ -1,5 +1,9 @@
-// $Id: StBemcRaw.h,v 1.3 2004/10/19 17:53:00 suaide Exp $
+// $Id: StBemcRaw.h,v 1.4 2004/10/21 00:01:50 suaide Exp $
 // $Log: StBemcRaw.h,v $
+// Revision 1.4  2004/10/21 00:01:50  suaide
+// small changes in histogramming and messages for BEMC
+// Complete version for EEMC done by Jan Balewski
+//
 // Revision 1.3  2004/10/19 17:53:00  suaide
 // code clean up
 //
@@ -30,7 +34,7 @@ bemcRawData is also filled in the StEmcCollection.
 
 #include "tables/St_controlADCtoE_Table.h"
 #include "defines.h"
-
+#include "TH2.h"
 class StEvent;
 class StEmcRawData;
 class StEmcCollection;
@@ -39,12 +43,18 @@ class StBemcRaw : public TObject
 {
  protected: 
    enum {kZero, kCrate, kStatus, kRms, kPed, kEn, kCalib, kOK};
-   
+  
+   // BARREL HISTOGRAMS
+   TH2F*                    mBarrelNHitHist;
+   TH2F*                    mBarrelEtotHist;
+   TH2F*                    mBarrelAdcSumHist;
+   TH2F*                    mBarrelNCratesHist;
+   TH2F*                    mBarrelCrateStatusHist;
+
    StEmcDecoder*            mDecoder;
    StBemcTables*            mTables;
    controlADCtoE_st*        mControlADCtoE;
    
-   Bool_t                   mPrint;
    Bool_t                   mSaveAllStEvent;
    
    Int_t                    mDate;
@@ -64,6 +74,9 @@ class StBemcRaw : public TObject
                  
                             StBemcRaw(); ///< StBemcRaw constructor
   virtual                   ~StBemcRaw(); ///< StBemcRaw destructor
+
+  void                      initHisto();
+  void                      fillHisto();
   
   Bool_t                    make(TDataSet*,StEvent*); ///< Make the BEMC detector from DAQ
   Bool_t                    make(StEmcRawData*,StEvent*); ///< Make the BEMC detector from StEmcRaw
@@ -79,7 +92,6 @@ class StBemcRaw : public TObject
   void                      updateStats(Int_t,Int_t,Int_t, Float_t); ///< Update statistics for detector 'det'
   void                      printStats(Int_t); ///< Print statistics for detector 'det'
   
-  void                      setPrint(Bool_t a)         { mPrint = a; } ///< Set it to kFALSE if you do not want to print messages
   void                      setDate(Int_t d)           { mDate = d;} ///<Set event date.
   void                      saveAllStEvent(Bool_t a)   { mSaveAllStEvent = a;} ///< Set to kTRUE if all hits are to be saved on StEvent
   
