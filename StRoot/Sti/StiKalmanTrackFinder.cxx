@@ -379,7 +379,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 								}
 							// add best node to track if it has a hit or
 							// if the maximum of node with null hit has NOT been exceeded
-							cout << "CURRENT NODE:" << testNode<<endl;
+							//cout << "CURRENT NODE:" << testNode<<endl;
 							if (testNode.getHit() ||
 									(testNode.nullCount  <  _pars->maxNullCount &&
 									 testNode.contiguousNullCount  <  _pars->maxContiguousNullCount) )
