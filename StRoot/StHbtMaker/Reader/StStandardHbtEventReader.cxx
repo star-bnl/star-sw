@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.2 1999/06/29 17:50:28 fisyak Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.3 1999/07/06 22:33:24 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,7 +12,7 @@
  *
  *  Since this StHbtEventReader class gets its input from StEvent in root4star,
  *  it needs to know what chain has the StEventReaderMaker on it.  So you have
- *  to initialize (thru SetTheChain()).
+ *  to initialize (thru SetTheEventMaker()).
  *  Other StHbtEventReader classes (that might read ASCII files for example)
  *  would need other information, like the filename I guess, and so would
  *  have other private data members that they access.
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.3  1999/07/06 22:33:24  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.2  1999/06/29 17:50:28  fisyak
  * formal changes to account new StEvent, does not complie yet
  *
@@ -30,12 +33,23 @@
 
 #include "StHbtMaker/Reader/StStandardHbtEventReader.h"
 #include "StChain/StChain.h"
-#include "StEvent.h"
-#include "StGlobalTrack.h"
-#include "StTpcDedxPid.h"
-#include "StDedxPid.h"
+
+// these StEvent files keep oscillating between ".hh" and ".h" files
+// fortunately, they are used only here
+/* .h files
+   #include "StEvent.h"
+   #include "StGlobalTrack.h"
+   #include "StTpcDedxPid.h"
+   #include "StDedxPid.h"
+*/
+#include "StEvent/StEvent.hh"
+#include "StEvent/StGlobalTrack.hh"
+#include "StEvent/StTpcDedxPid.hh"
+#include "StEvent/StDedxPid.hh"
+//
 #include "SystemOfUnits.h"   // has "tesla" in it
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
+#include "StEventMaker/StEventMaker.h"
 #define HBT_B_FIELD 0.5*tesla
 
 ClassImp(StStandardHbtEventReader)
@@ -55,10 +69,18 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   cout << "StStandardHbtEventReader::ReturnHbtEvent" << endl;
 
   StEvent* rEvent = 0;
-#if 0
+
+  /* Yuri put this "if 0" and DS stuff here, but it doesn't work
+  #if 0
   rEvent = ((StEventReaderMaker*) mTheChain->Maker("events"))->event();
-#endif
+  #endif
   rEvent =  (StEvent *) GetInputDS("StEvent");
+  */
+
+  StEventMaker* tempMaker = (StEventMaker*) mTheEventMaker;
+
+  rEvent = tempMaker->event();
+
   if (!rEvent){
     cout << "StStandardHbtEventReader - No StEvent!!! " << endl;
     return 0;
@@ -67,33 +89,41 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 
 
   int mult = rEvent->trackCollection()->size();
-  cout << "StStandardHbtReader::ReturnHbtEvent() - mult, size() : "
-       << mult << rEvent->trackCollection()->size() << endl;
   hbtEvent->SetMult(mult);
-  StThreeVectorD vp = rEvent->primaryVertex()->position();
+  StHbtThreeVector vp = rEvent->primaryVertex()->position();
   hbtEvent->SetPrimVertPos(vp);
   
   StGlobalTrack* rTrack;
   cout << "StStandardHbtReader::ReturnHbtEvent - We have " << mult << " tracks to store - we skip tracks with nhits==0" << endl;
-  StHbtTrackCollection dummyTrackCollection;
+  // what the hell is this?  StHbtTrackCollection dummyTrackCollection;
   int icount=0;
   for (StTrackIterator iter=rEvent->trackCollection()->begin();
        iter!=rEvent->trackCollection()->end();iter++){
     //    cout << "Doing track number " << ++icount << endl;
     rTrack = *iter;
     int nhits = rTrack->numberOfTpcHits();
-    //cout << "nhits\t" << nhits << endl;
+    //    cout << "nhits\t" << nhits << endl;
     if (nhits==0) {
       //      cout << "No hits -- skipping track (because it crashes otherwise)" << endl;
       continue;
     }
+
+    //    cout << "Now getting the pidTraits" << endl;
+    //StTrackPidTraits pidTraitsTemp = rTrack->pidTraits();
+    //cout << " Got it"<<endl;
+
     const StDedxPid* tpcDedxPid = rTrack->pidTraits().tpcDedxPid();
     if (!tpcDedxPid) {
       cout << "No dEdx information - skipping track with " << nhits << " hits"<<endl;
       continue;
     }
 
+    //    cout << "Getting readty to instantiate new StHbtTrack " << endl;
+
     StHbtTrack* hbtTrack = new StHbtTrack;
+
+    //cout << "StHbtTrack instantiated " << endl;
+
     hbtTrack->SetNHits(nhits);
 
     float nsigpi = tpcDedxPid->numberOfSigma(0.139);
@@ -106,9 +136,11 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     //cout << "nsigprot\t\t\t\t" << nsigprot << endl;
     hbtTrack->SetNSigmaProton(nsigprot);
 
+    //    cout << "Nsig pion,kaon,proton : " << nsigpi << " " << nsigk << " " << nsigprot << endl;
+
     double pathlength = rTrack->helix().pathLength(vp);
     //cout << "pathlength\t" << pathlength << endl;
-    StThreeVectorD p = rTrack->helix().momentumAt(pathlength,HBT_B_FIELD);
+    StHbtThreeVector p = rTrack->helix().momentumAt(pathlength,HBT_B_FIELD);
     //cout << "p: " << p << endl;
     hbtTrack->SetP(p);
 

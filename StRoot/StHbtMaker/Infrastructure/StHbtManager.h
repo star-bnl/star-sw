@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.h,v 1.1.1.1 1999/06/29 16:02:57 lisa Exp $
+ * $Id: StHbtManager.h,v 1.2 1999/07/06 22:33:22 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.h,v $
+ * Revision 1.2  1999/07/06 22:33:22  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:57  lisa
  * Installation of StHbtMaker
  *
@@ -21,8 +24,8 @@
 #ifndef StHbtManager_hh
 #define StHbtManager_hh
 
-#include <string>
 
+#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtAnalysisCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtAnalysis.h"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
@@ -50,7 +53,7 @@ public:
   void ProcessEvent();
   void Finish();
 
-  string Report();
+  StHbtString Report(); //!
 
   ClassDef(StHbtManager, 0)
 

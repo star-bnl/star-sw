@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtMaker.cxx,v 1.1.1.1 1999/06/29 16:02:56 lisa Exp $
+ * $Id: StHbtMaker.cxx,v 1.2 1999/07/06 22:33:18 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtMaker.cxx,v $
+ * Revision 1.2  1999/07/06 22:33:18  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:56  lisa
  * Installation of StHbtMaker
  *
@@ -19,7 +22,7 @@
 
 #include <iostream.h>
 #include <stdlib.h>
-#include <string>
+//#include <string>
 #include <vector>
 #include "StChain/StChain.h"
 #include "StHbtMaker.h"
@@ -76,7 +79,7 @@ Int_t StHbtMaker::Finish()
 //_____________________________________________________________________________
 Int_t StHbtMaker::Make()
 {
-  cout << "StHbtMaker::Make -- processing event" << endl;
+  cout << "\nStHbtMaker::Make -- processing event" << endl;
   mHbtManager->ProcessEvent();
   return kStOK;
 }

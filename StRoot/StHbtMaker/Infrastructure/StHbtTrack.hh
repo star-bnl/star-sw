@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.2 1999/06/29 17:50:27 fisyak Exp $
+ * $Id: StHbtTrack.hh,v 1.3 1999/07/06 22:33:23 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.3  1999/07/06 22:33:23  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.2  1999/06/29 17:50:27  fisyak
  * formal changes to account new StEvent, does not complie yet
  *
@@ -24,7 +27,7 @@
 #ifndef StHbtTrack_hh
 #define StHbtTrack_hh
 
-#include "StThreeVectorD.hh"
+#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 
 class StHbtTrack{
 public:
@@ -38,7 +41,7 @@ public:
   float Pt() const;
   float DCA() const;
   int Charge() const;
-  StThreeVectorD P() const;
+  StHbtThreeVector P() const;
 
   void SetNHits(const int&);
   void SetNSigmaPion(const float&);
@@ -46,7 +49,7 @@ public:
   void SetNSigmaProton(const float&);
   void SetPt(const float&);
   void SetDCA(const float&);
-  void SetP(const StThreeVectorD&);
+  void SetP(const StHbtThreeVector&);
   void SetCharge(const int&);
 
 private:
@@ -56,7 +59,7 @@ private:
   float mNSigmaProton;
   float mPt;
   float mDCA;
-  StThreeVectorD mP;
+  StHbtThreeVector mP;
   int mCharge;
 };
 
@@ -67,7 +70,7 @@ inline void StHbtTrack::SetNSigmaKaon(const float& x){mNSigmaKaon = x;}
 inline void StHbtTrack::SetNSigmaProton(const float& x){mNSigmaProton = x;}
 inline void StHbtTrack::SetPt(const float& x){mPt = x;}
 inline void StHbtTrack::SetDCA(const float& x){mDCA = x;}
-inline void StHbtTrack::SetP(const StThreeVectorD& p){mP = p;}
+inline void StHbtTrack::SetP(const StHbtThreeVector& p){mP = p;}
 
 inline int StHbtTrack::Charge() const {return mCharge;}
 inline int StHbtTrack::NHits() const {return mNHits;}
@@ -76,6 +79,6 @@ inline float StHbtTrack::NSigmaKaon() const {return mNSigmaKaon;}
 inline float StHbtTrack::NSigmaProton() const {return mNSigmaProton;}
 inline float StHbtTrack::Pt() const {return mPt;} 
 inline float StHbtTrack::DCA() const {return mDCA;}
-inline StThreeVectorD StHbtTrack::P() const {return mP;}
+inline StHbtThreeVector StHbtTrack::P() const {return mP;}
 
 #endif

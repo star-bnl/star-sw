@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mikesParticleCut.cxx,v 1.1.1.1 1999/06/29 16:02:56 lisa Exp $
+ * $Id: mikesParticleCut.cxx,v 1.2 1999/07/06 22:33:21 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: mikesParticleCut.cxx,v $
+ * Revision 1.2  1999/07/06 22:33:21  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:56  lisa
  * Installation of StHbtMaker
  *
@@ -63,7 +66,7 @@ bool mikesParticleCut::Pass(const StHbtTrack* track){
   }
 }
 //------------------------------
-string mikesParticleCut::Report(){
+StHbtString mikesParticleCut::Report(){
   string Stemp;
   char Ctemp[100];
   sprintf(Ctemp,"Particle mass:\t%E\n",this->Mass());
@@ -86,5 +89,6 @@ string mikesParticleCut::Report(){
   Stemp+=Ctemp;
   sprintf(Ctemp,"Number of tracks which passed:\t%ld  Number which failed:\t%ld\n",mNTracksPassed,mNTracksFailed);
   Stemp += Ctemp;
-  return (Stemp);
+  StHbtString returnThis = Stemp;
+  return returnThis;
 }

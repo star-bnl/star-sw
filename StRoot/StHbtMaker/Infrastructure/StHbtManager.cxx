@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.1.1.1 1999/06/29 16:02:57 lisa Exp $
+ * $Id: StHbtManager.cxx,v 1.2 1999/07/06 22:33:22 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
+ * Revision 1.2  1999/07/06 22:33:22  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:57  lisa
  * Installation of StHbtMaker
  *
@@ -54,7 +57,7 @@ void StHbtManager::Finish(){
   }
 }
 //____________________________
-string StHbtManager::Report(){
+StHbtString StHbtManager::Report(){
   string stemp;
   cout << "StHbtManager Starting report " << endl;
   cout << mAnalysisCollection->size() << endl;
@@ -69,7 +72,8 @@ string StHbtManager::Report(){
     currentAnalysis = *AnalysisIter;
     stemp+=currentAnalysis->Report();
   }
-  return stemp;
+  StHbtString returnThis = stemp;
+  return returnThis;
 }
 //____________________________
 void StHbtManager::ProcessEvent(){
@@ -140,7 +144,7 @@ void StHbtManager::ProcessEvent(){
 	  StartInnerLoop++;
 	}
 	for (PartIter2 = StartInnerLoop; PartIter2!=EndInnerLoop;PartIter2++){
-	  StHbtPair* pair = new StHbtPair(**PartIter1,**PartIter2);
+	  StHbtPair* pair = new StHbtPair(*PartIter1,*PartIter2);
 	  if (currentAnalysis->PairCut()->Pass(pair)){
 	    for (CorrFctnIter=currentAnalysis->CorrFctnCollection()->begin();
 		 CorrFctnIter!=currentAnalysis->CorrFctnCollection()->end();CorrFctnIter++){
@@ -178,7 +182,7 @@ void StHbtManager::ProcessEvent(){
 	  }
 	  for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
 	    for (PartIter2=StartInnerLoop;PartIter2!=EndInnerLoop;PartIter2++){
-	      StHbtPair* pair = new StHbtPair(**PartIter1,**PartIter2);
+	      StHbtPair* pair = new StHbtPair(*PartIter1,*PartIter2);
 	      if (currentAnalysis->PairCut()->Pass(pair)){
 		for (CorrFctnIter=currentAnalysis->CorrFctnCollection()->begin();
 		     CorrFctnIter!=currentAnalysis->CorrFctnCollection()->end();CorrFctnIter++){

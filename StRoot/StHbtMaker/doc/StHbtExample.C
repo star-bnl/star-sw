@@ -23,6 +23,7 @@ void StHbtExample(Int_t nevents=1,
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StEvent");
     gSystem->Load("StEventReaderMaker");
+    //gSystem->Load("StEventMaker");
     gSystem->Load("StHbtMaker");
 
     cout << "Dynamic loading done" << endl;
@@ -42,9 +43,9 @@ void StHbtExample(Int_t nevents=1,
     ioMaker->SetBranch("dstBranch",0,"r"); //activate EventBranch
 
 
-    StEventReaderMaker* eventReader = new StEventReaderMaker("events","title"); //our way
+    StEventReaderMaker* eventMaker = new StEventReaderMaker("events","title");
 
-    cout << "Just instantiated StEventReaderMaker... lets go StHbtMaker!" << endl;
+    cout << "Just instantiated StEventMaker... lets go StHbtMaker!" << endl;
 
     StHbtMaker* hbtMaker = new StHbtMaker("HBT","title");
     cout << "StHbtMaker instantiated"<<endl;
@@ -59,7 +60,7 @@ void StHbtExample(Int_t nevents=1,
     // here, we instantiate the appropriate StHbtEventReader
     // for STAR analyses in root4star, we instantiate StStandardHbtEventReader
     StStandardHbtEventReader* Reader = new StStandardHbtEventReader;
-    Reader->SetTheChain(chain);     // gotta tell the reader where it should read from
+    Reader->SetTheEventMaker(eventMaker);     // gotta tell the reader where it should read from
     TheManager->SetEventReader(Reader);
 
     cout << "READER SET UP.... " << endl;
@@ -117,9 +118,9 @@ void StHbtExample(Int_t nevents=1,
     phiAnal->SetEventCut(phiEvcut);          // this is the event cut object for this analsys
     // 2) set the Track (particle) cuts for the analysis
     mikesParticleCut* kaonTrkcut = new mikesParticleCut;  // use "mike's" particle cut object
-    kaonTrkcut->SetNSigmaPion(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
+    kaonTrkcut->SetNSigmaPion(3,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
     kaonTrkcut->SetNSigmaKaon(-3.0,3.0);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
-    kaonTrkcut->SetNSigmaProton(-1000.0,1000.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
+    kaonTrkcut->SetNSigmaProton(-1000.,-1.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
     kaonTrkcut->SetNHits(0,50);            // range on number of TPC hits on the track
     kaonTrkcut->SetPt(0.1,2.0);            // range in Pt
     kaonTrkcut->SetRapidity(-2.0,2.0);     // range in rapidity
@@ -128,9 +129,9 @@ void StHbtExample(Int_t nevents=1,
     kaonTrkcut->SetMass(0.494);             // kaon mass
     phiAnal->SetFirstParticleCut(kaonTrkcut);  // this is the track cut for the "first" particle
     mikesParticleCut* antikaonTrkcut = new mikesParticleCut;  // use "mike's" particle cut object
-    antikaonTrkcut->SetNSigmaPion(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
+    antikaonTrkcut->SetNSigmaPion(3.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
     antikaonTrkcut->SetNSigmaKaon(-3.0,3.0);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
-    antikaonTrkcut->SetNSigmaProton(-1000.0,1000.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
+    antikaonTrkcut->SetNSigmaProton(-1000.0,-1.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
     antikaonTrkcut->SetNHits(0,50);            // range on number of TPC hits on the track
     antikaonTrkcut->SetPt(0.1,2.0);            // range in Pt
     antikaonTrkcut->SetRapidity(-2.0,2.0);     // range in rapidity
@@ -163,6 +164,7 @@ void StHbtExample(Int_t nevents=1,
   chain->PrintInfo();
 
   for (Int_t iev=0;iev<nevents; iev++) {
+    cout << "StHbtExample -- Working on eventNumber " << iev << endl;
     chain->Clear();
     int iret = chain->Make(iev); // This should call the Make() method in ALL makers
     if (iret) break;

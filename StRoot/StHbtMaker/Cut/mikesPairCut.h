@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mikesPairCut.h,v 1.1.1.1 1999/06/29 16:02:56 lisa Exp $
+ * $Id: mikesPairCut.h,v 1.2 1999/07/06 22:33:21 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: mikesPairCut.h,v $
+ * Revision 1.2  1999/07/06 22:33:21  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:56  lisa
  * Installation of StHbtMaker
  *
@@ -33,7 +36,7 @@ public:
 
   virtual bool Pass(const StHbtPair*);
 
-  virtual string Report();
+  virtual StHbtString Report();
 
 
 private:

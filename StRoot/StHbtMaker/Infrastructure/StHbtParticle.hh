@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.1.1.1 1999/06/29 16:02:57 lisa Exp $
+ * $Id: StHbtParticle.hh,v 1.2 1999/07/06 22:33:23 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
+ * Revision 1.2  1999/07/06 22:33:23  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:57  lisa
  * Installation of StHbtMaker
  *
@@ -22,7 +25,7 @@
 #ifndef StHbtParticle_hh
 #define StHbtParticle_hh
 
-#include "StLorentzVector.hh"
+#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 
 class StHbtParticle{
@@ -31,13 +34,13 @@ public:
   StHbtParticle(const StHbtTrack* hbtTrack, const double& mass);
   ~StHbtParticle();
 
-  StLorentzVector<double> FourMomentum() const;
+  StHbtLorentzVector FourMomentum() const;
 
 private:
-  StLorentzVector<double> mFourMomentum;
+  StHbtLorentzVector mFourMomentum;
 };
 
-inline StLorentzVector<double> StHbtParticle::FourMomentum() const {return mFourMomentum;}
+inline StHbtLorentzVector StHbtParticle::FourMomentum() const {return mFourMomentum;}
 
 
 #endif

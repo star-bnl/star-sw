@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.hh,v 1.2 1999/06/29 17:50:27 fisyak Exp $
+ * $Id: StHbtEvent.hh,v 1.3 1999/07/06 22:33:22 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.hh,v $
+ * Revision 1.3  1999/07/06 22:33:22  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.2  1999/06/29 17:50:27  fisyak
  * formal changes to account new StEvent, does not complie yet
  *
@@ -24,7 +27,7 @@
 #ifndef StHbtEvent_hh
 #define StHbtEvent_hh
 
-#include "StThreeVectorD.hh"
+#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 
 class StHbtEvent{
@@ -33,25 +36,25 @@ public:
   ~StHbtEvent();
 
   int Mult() const;
-  StThreeVectorD PrimVertPos() const;
+  StHbtThreeVector PrimVertPos() const;
   StHbtTrackCollection* TrackCollection() const;
 
   void SetMult(const int&);
-  void SetPrimVertPos(const StThreeVectorD&);
+  void SetPrimVertPos(const StHbtThreeVector&);
 
 private:
   int mMult;
-  StThreeVectorD mPrimVertPos;
+  StHbtThreeVector mPrimVertPos;
   StHbtTrackCollection* mTrackCollection;
 
 };
 
 inline void StHbtEvent::SetMult(const int& m){mMult=m;}
-inline void StHbtEvent::SetPrimVertPos(const StThreeVectorD& vp){mPrimVertPos = vp;}
+inline void StHbtEvent::SetPrimVertPos(const StHbtThreeVector& vp){mPrimVertPos = vp;}
 
 inline StHbtTrackCollection* StHbtEvent::TrackCollection() const {return mTrackCollection;}
 inline int StHbtEvent::Mult() const {return mMult;}
-inline StThreeVectorD StHbtEvent::PrimVertPos() const {return mPrimVertPos;}
+inline StHbtThreeVector StHbtEvent::PrimVertPos() const {return mPrimVertPos;}
 
 
 #endif

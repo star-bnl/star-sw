@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.1.1.1 1999/06/29 16:02:57 lisa Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.2 1999/07/06 22:33:24 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,9 +20,17 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
+ * Revision 1.2  1999/07/06 22:33:24  lisa
+ * Adjusted all to work in pro and new - dev itself is broken
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:57  lisa
  * Installation of StHbtMaker
  *
+ * With the .DEV->DEV revolution of June 1999, must change
+ * the way that this thing gets StEvent object
+ * no more going through the chain.  Now, we have to have
+ * a pointer to the object (of type StEventMaker, which is
+ * derived from StMaker) which has a method to get the StEvent.
  **************************************************************************/
 
 #ifndef StStandardHbtEventReader_hh
@@ -35,7 +43,7 @@
 class StStandardHbtEventReader : public StHbtEventReader{
 
 private:
-  StMaker* mTheChain;      //! this is the chain where the StEventReaderMaker is
+  StMaker* mTheEventMaker;      //! this is the chain where the StEventReaderMaker is
 
 public:
   StStandardHbtEventReader();
@@ -43,14 +51,14 @@ public:
 
   virtual StHbtEvent* ReturnHbtEvent();
 
-  void SetTheChain(StMaker*);
-  StMaker* TheChain();
+  void SetTheEventMaker(StMaker*);
+  StMaker* TheEventMaker();
 
   ClassDef(StStandardHbtEventReader, 1)
 
 };
 
-inline void StStandardHbtEventReader::SetTheChain(StMaker* chain){mTheChain=chain;}
-inline StMaker* StStandardHbtEventReader::TheChain(){return mTheChain;}
+inline void StStandardHbtEventReader::SetTheEventMaker(StMaker* maker){mTheEventMaker=maker;}
+inline StMaker* StStandardHbtEventReader::TheEventMaker(){return mTheEventMaker;}
 
 #endif
