@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.1 1999/02/06 01:51:22 yepes Exp $
+// $Id: St_trg_Maker.cxx,v 1.2 1999/03/14 00:25:40 perev Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.2  1999/03/14 00:25:40  perev
+// New makers
+//
 // Revision 1.1  1999/02/06 01:51:22  yepes
 // Add trg maker
 //
@@ -34,7 +37,7 @@
 ClassImp(St_trg_Maker)
 
 //_____________________________________________________________________________
-St_trg_Maker::St_trg_Maker(const char *name, const char *title):StMaker(name,title){
+St_trg_Maker::St_trg_Maker(const char *name):StMaker(name){
    drawinit=kFALSE;
 }
 //_____________________________________________________________________________
@@ -43,36 +46,33 @@ St_trg_Maker::~St_trg_Maker(){
 //_____________________________________________________________________________
 Int_t St_trg_Maker::Init(){
 // Create tables
-   St_DataSetIter       local(gStChain->DataSet("params"));
 // Create Histograms    
    return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_trg_Maker::Make(){
-//  PrintInfo();
-  if (!m_DataSet->GetList())  {//if DataSet is empty fill it
-    St_DataSet *ctf = gStChain->DataSet("ctf");
-    St_DataSet *mwc = gStChain->DataSet("mwc");
-    if (ctf && mwc) {
-      St_DataSetIter ctff(ctf);
-      St_ctu_cor   *ctu_cor   = (St_ctu_cor   *) ctff("ctb_cor");
-      St_DataSetIter mwcf(mwc);
-      St_mwc_raw    *mwc_raw  = (St_mwc_raw   *) mwcf("raw");
-      if (ctu_cor && mwc_raw) {
-	St_dst_TriggerDetectors *dst = new St_dst_TriggerDetectors("dst_TriggerDetectors",1);
-	m_DataSet->Add(dst);
-	Int_t Res = trg_fillDst (ctu_cor,mwc_raw,dst);
-      }
-    }
-  }
+
+  St_DataSet *ctf = GetInputDS("ctf");
+  St_DataSet *mwc = GetInputDS("mwc");
+
+  if (!ctf || !mwc) return kStWarn;
+
+  St_ctu_cor   *ctu_cor  = (St_ctu_cor   *) ctf->Find("ctb_cor");
+  St_mwc_raw   *mwc_raw  = (St_mwc_raw   *) mwc->Find("raw"    );
+  if (!ctu_cor ||  !mwc_raw) return kStWarn;
+
+  St_dst_TriggerDetectors *dst = new St_dst_TriggerDetectors("dst_TriggerDetectors",1);
+  m_DataSet->Add(dst);
+  Int_t Res = trg_fillDst (ctu_cor,mwc_raw,dst);
+  if (Res != kSTAFCV_OK) return kStWarn;
   return kStOK;
 }
 //_____________________________________________________________________________
 void St_trg_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_trg_Maker.cxx,v 1.1 1999/02/06 01:51:22 yepes Exp $\n");
+  printf("* $Id: St_trg_Maker.cxx,v 1.2 1999/03/14 00:25:40 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
 

@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.h,v 1.8 1999/03/01 18:24:08 sakrejda Exp $
+// $Id: St_tpt_Maker.h,v 1.9 1999/03/14 00:23:38 perev Exp $
 // $Log: St_tpt_Maker.h,v $
+// Revision 1.9  1999/03/14 00:23:38  perev
+// New makers
+//
 // Revision 1.8  1999/03/01 18:24:08  sakrejda
 // evaluation and residuals calculation made switchable
 //
@@ -45,47 +48,50 @@ class St_tpipar;
 class TH1F;
 class TNtuple;
 
-class St_tpt_Maker : public StMaker {
- private:
-               Bool_t drawinit;
-	       Bool_t m_iftteTrack;
-	       Bool_t m_mkfinal;   //control flag for final ntuple production
-	       Bool_t m_tteEvalOn; //switch for the evaluation
-	       Bool_t m_tptResOn;  //switch for the residuals calculation
-//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.8 1999/03/01 18:24:08 sakrejda Exp $";
-               St_tpg_pad_plane *m_tpg_pad_plane; //! Constants that describe TPC pad plane
-               St_tcl_tpc_index_type *m_type;   //!  Table of many-to-many index 
-	                                        // correlations for tpc evaluations
-               St_tpt_pars  *m_tpt_pars;  //! Parameters for the track finding
-               St_tpt_spars *m_tpt_spars; //! Parameters for the track finding
-               St_tte_control *m_tte_control;//! Control switches for the evaluation 
-               St_tdeparm   *m_tdeparm;   //! Parameters for the tde dedx module
-               St_tpipar    *m_tpipar;    //! parameter file for tpi package
-               void              MakeHistograms();// Histograms for tracking
- protected:
-	       TH1F *m_hits_on_track; //!number of hits assigned to a reconstructed track
-	       TH1F *m_hits_in_fit;   //!number of hits used in a fit
-               TH1F *m_azimuth;       //!azimuthal angle
-               TH1F *m_tan_dip;       //!tangent of the dip angle
-               TH1F *m_r0;            //!radius for the first point
-               TH1F *m_invp;          //!inverse momentum
-               TNtuple                *m_final; //! Final track-hit Ntuple
- public: 
-                  St_tpt_Maker(const char *name="tpc_tracks", const char *title="event/data/tpc/tracks");
-   virtual       ~St_tpt_Maker();
-   virtual void   tteEval(Bool_t flag=kFALSE){m_tteEvalOn=flag;}
-   virtual void   tteEvalOn() {tteEval(kTRUE);}                       // *MENU*
-   virtual void   tteEvalOff(){tteEval();}                            // *MENU
-   virtual void   tptRes(Bool_t flag=kFALSE){m_tptResOn=flag;}
-   virtual void   tptResOn() {tptRes(kTRUE);}                       // *MENU*
-   virtual void   tptResOff(){tptRes();}                            // *MENU
+enum { maxNofTracks = 20000}; 
 
-   virtual Int_t Init();
-   virtual Int_t  Make();
-   virtual void   PrintInfo();
-   virtual void   Set_tte(Bool_t m=kFALSE){m_iftteTrack = m;}
-   virtual void   Set_final(Bool_t m=kFALSE){m_mkfinal = m;}
-   ClassDef(St_tpt_Maker, 1)   //StAF chain virtual base class for Makers
+class St_tpt_Maker : public StMaker {
+private:
+  Bool_t m_iftteTrack;
+  Bool_t m_mkfinal;   	//control flag for final ntuple production
+  Bool_t m_tteEvalOn; 	//switch for the evaluation
+  Bool_t m_tptResOn;  	//switch for the residuals calculation
+//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.9 1999/03/14 00:23:38 perev Exp $";
+  St_tpg_pad_plane      *m_tpg_pad_plane;	//! Constants that describe TPC pad plane
+  St_tcl_tpc_index_type *m_type;   		//! Table of many-to-many index 
+	                                        //! correlations for tpc evaluations
+  St_tpt_pars           *m_tpt_pars;  		//! Parameters for the track finding
+  St_tpt_spars          *m_tpt_spars; 		//! Parameters for the track finding
+  St_tte_control        *m_tte_control;		//! Control switches for the evaluation 
+  St_tdeparm            *m_tdeparm;   		//! Parameters for the tde dedx module
+  St_tpipar             *m_tpipar;    		//! parameter file for tpi package
+  void         MakeHistograms();// Histograms for tracking
+
+protected:
+ TH1F *m_hits_on_track; //!number of hits assigned to a reconstructed track
+ TH1F *m_hits_in_fit;   //!number of hits used in a fit
+ TH1F *m_azimuth;       //!azimuthal angle
+ TH1F *m_tan_dip;       //!tangent of the dip angle
+ TH1F *m_r0;            //!radius for the first point
+ TH1F *m_invp;          //!inverse momentum
+ TNtuple                *m_final; //! Final track-hit Ntuple
+
+public: 
+  St_tpt_Maker(const char *name="tpc_tracks");
+  virtual       ~St_tpt_Maker();
+  virtual void   tteEval(Bool_t flag=kFALSE){m_tteEvalOn=flag;}
+  virtual void   tteEvalOn() {tteEval(kTRUE);}                       // *MENU*
+  virtual void   tteEvalOff(){tteEval();}                            // *MENU
+  virtual void   tptRes(Bool_t flag=kFALSE){m_tptResOn=flag;}
+  virtual void   tptResOn() {tptRes(kTRUE);}                         // *MENU*
+  virtual void   tptResOff(){tptRes();}                              // *MENU
+
+  virtual Int_t  Init();
+  virtual Int_t  Make();
+  virtual void   PrintInfo();
+  virtual void   Set_tte(Bool_t m=kFALSE){m_iftteTrack = m;}
+  virtual void   Set_final(Bool_t m=kFALSE){m_mkfinal = m;}
+ClassDef(St_tpt_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
 #endif

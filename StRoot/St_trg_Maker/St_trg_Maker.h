@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.h,v 1.1 1999/02/06 01:51:24 yepes Exp $
+// $Id: St_trg_Maker.h,v 1.2 1999/03/14 00:25:40 perev Exp $
 // $Log: St_trg_Maker.h,v $
+// Revision 1.2  1999/03/14 00:25:40  perev
+// New makers
+//
 // Revision 1.1  1999/02/06 01:51:24  yepes
 // Add trg maker
 //
@@ -36,13 +39,13 @@
 class St_trg_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_trg_Maker.h,v 1.1 1999/02/06 01:51:24 yepes Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_trg_Maker.h,v 1.2 1999/03/14 00:25:40 perev Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
  
  protected:
  public: 
-                  St_trg_Maker(const char *name="trg", const char *title="trg");
+                  St_trg_Maker(const char *name="trg");
    virtual       ~St_trg_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();
