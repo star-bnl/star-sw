@@ -2,8 +2,9 @@
 ******************** Create Tables ***************************
  
 macro sgr
+macro/global/import *
 * Book groups tables
- cd /dui/data/svt/tracks
+ cd [data]/svt/tracks
  tdm/newtable candidate_groups sgr_groups 30000
  tdm/newtable groups sgr_groups 30000
  tdm/newtable mcgroups sgr_groups 30000
@@ -13,8 +14,9 @@ return
 ***************************************************************
  
 macro srs
+macro/global/import *
 
-  cd /dui/data/svt/hits
+  cd [data]/svt/hits
     newtable scs_spt scs_spt 20000
     newtable srs_result srs_result 20000
   cd /dui
@@ -23,7 +25,8 @@ return
  
 ***************************************************************
  macro ste
-   cd /dui/data/svt/tracks
+macro/global/import *
+   cd [data]/svt/tracks
    newtable ste_teval ste_teval 10000
    cd /dui
  return
@@ -31,8 +34,9 @@ return
 **************************************************************
  
 macro stk
+macro/global/import *
    
-  cd /dui/data/svt/tracks
+  cd [data]/svt/tracks
   tdm/newtable stk_track stk_track 6000
   tdm/newtable stk_kine stk_kine 6000
   tdm/newtable stk_mctrack stk_track 6000
@@ -43,7 +47,7 @@ macro stk
   *-------------------------------------------------------------------------
   message 'initializing the stk vtx direct table...'
 
-  cd /dui/data/global/vertices
+  cd [data]/global/vertices
 
   newtable stk_vtx_direct stk_vtx_direct 1
   tdm/table/rowcount stk_vtx_direct 1

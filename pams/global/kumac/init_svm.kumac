@@ -7,10 +7,10 @@
 **************************************************************************
 
 *make svm control table
-
+macro/global/import *
 message 'making svm_am tables...'
 
-cd /dui/constants/global/params
+cd [params]/global
 
 tdm/newtable svm_ctrl svm_ctrl 1
 tdm/table/rowcount svm_ctrl 1
@@ -48,7 +48,7 @@ tdm/table/cell/putvalue 'svm_ctrl[0].rtpc_gas' 47.476
 tdm/table/cell/putvalue 'svm_ctrl[0].rltpc_gas' 10949.0
 
 
-cd /dui/data/global/tracks
+cd [data]/global/tracks
 
 tdm/newtable evt_match svm_evt_match 3000
 tdm/table/rowcount evt_match 3000

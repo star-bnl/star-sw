@@ -1,4 +1,5 @@
 MACRO init_egr
+macro/global/import *
 
 message ' Creating egr tables...' 
 
@@ -52,7 +53,7 @@ message ' Creating egr tables...'
 
 * set egr refitting parameters here
 
-cd /dui/constants/global/params
+cd [params]/global
 tdm/newtable egr_egrpar egr_egrpar 1
 tdm/table/rowcount egr_egrpar 1
 *
@@ -83,13 +84,13 @@ tdm/table/cell/putvalue 'egr_egrpar[0].usesvt' 1
 tdm/table/cell/putvalue 'egr_egrpar[0].usevert' 0
 tdm/table/cell/putvalue 'egr_egrpar[0].useglobal' 2
 
+cd [data]/global/tracks
+tdm/newtable globtrk egr_globtrk 100000
+maxrowcount [data]/global/tracks/globtrk 100000
 
-tdm/newtable /dui/data/global/tracks/globtrk egr_globtrk 100000
-maxrowcount /dui/data/global/tracks/globtrk 100000
-
-cd /dui/data/global/vertices
-tdm/newtable /dui/data/global/vertices/evr_privert evr_privert 1
-tdm/table/rowcount /dui/data/global/vertices/evr_privert 1
+cd [data]/global/vertices
+tdm/newtable evr_privert evr_privert 1
+tdm/table/rowcount [data]/global/vertices/evr_privert 1
 tdm/table/cell/putvalue 'evr_privert[0].x' 0.
 tdm/table/cell/putvalue 'evr_privert[0].y' 0.
 tdm/table/cell/putvalue 'evr_privert[0].z' 0.

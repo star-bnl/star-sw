@@ -21,7 +21,10 @@
 
 message 'initializing the stk stkpar table...'
 
-cd /dui/constants/svt/params
+macro/global/import *
+
+exec create_tables_svt#stk
+cd [params]/svt
 
 tdm/newtable stk_stkpar stk_stkpar 1
 tdm/table/rowcount stk_stkpar 1
@@ -102,7 +105,7 @@ tdm/table/cell/putvalue 'stk_stkpar[0].sec_factor' 6.0
 message 'initializing the stk filler table...'
 
 
-cd /dui/constants/svt/params
+cd [params]/svt
 newtable stk_filler stk_filler 1
 tdm/table/rowcount stk_filler 1
 
@@ -140,6 +143,15 @@ tdm/table/cell/putvalue 'stk_filler[0].wth87' 120.0
 
 cd /dui
 
-
+ message ' *** Warning vertex not found just filled fron MC ***'
+  cd [data]/global/vertices
+  tdm/newtable stk_vtx stk_vtx 1
+  tdm/table/rowcount stk_vtx 1
+  tdm/table/cell/putvalue 'stk_vtx[0].id' 1
+  tdm/table/cell/putvalue 'stk_vtx[0].flag' 1
+  tdm/table/cell/putvalue 'stk_vtx[0].t' 0
+  tdm/table/cell/putvalue 'stk_vtx[0].x' 0.0 0.0 0.0
+  tdm/table/cell/putvalue 'stk_vtx[0].cov' 0.0 0.0 0.0 0.0 0.0 0.0 
+cd /dui
 
 

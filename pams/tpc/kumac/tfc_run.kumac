@@ -6,21 +6,22 @@
 ************************************************************************
 
 macro run 
+macro/global/import *
 
 message 'start tfc_run'
 
   cd /dui
-  tdm/table/rowcount /dui/raw_data/tpc/pixels/adcxyz 0
+  tdm/table/rowcount [raw_data]/tpc/pixels/adcxyz 0
 
   alias/create STAFCV_OK 1
   alias/create STAFCV_BAD 0
 
   ami/module/call xyz_
-       /dui/constants/tpc/geometry/tpgpar/tpg_pad_plane_
-       /dui/constants/tpc/geometry/tpgpar/tpg_detector_
-       /dui/raw_data/tpc/pixels/tppixel_
-       /dui/raw_data/tpc/pixels/tppad_
-       /dui/raw_data/tpc/pixels/adcxyz
+       [geometry]/tpc/tpgpar/tpg_pad_plane_
+       [geometry]/tpc/tpgpar/tpg_detector_
+       [raw_data]/tpc/pixels/tppixel_
+       [raw_data]/tpc/pixels/tppad_
+       [raw_data]/tpc/pixels/adcxyz
 
   if ( staf_status(1) .ne. STAFCV_OK) then
 	message 'Problem running tfc...'

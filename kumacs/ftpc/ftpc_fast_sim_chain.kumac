@@ -16,6 +16,7 @@ macro ftpc_fast_sim_chain_
        nskip=0_
        nevents=1
 
+macro/global/import *
 *
 DEFAULT = _
 ./kumacs/util,_
@@ -88,7 +89,7 @@ do i=1,[nevents]
     exec fpt_run#run_fast_sim
     exec fte_run#run_fast_sim
   * Output Event
-    exec write_table_to_file#write ftpc_fast_out /dui/data/ftpc/tracks
+    exec write_table_to_file#write ftpc_fast_out [data]/ftpc/tracks
 enddo
 
 * Close input data stream

@@ -11,8 +11,8 @@
 * 
 ************************************************
 message "making config/shape/geom table..."
-
-cd /dui/constants/svt/geometry/
+macro/global/import *
+cd [geometry]/svt/
 
 newtable  config svg_config  1
 tdm/table/rowcount config   1
@@ -90,9 +90,9 @@ tdm/table/cell/putvalue 'config[0].cap_position'  29.5
 *  Initialize the shape and geom tables by calling svg_am
 ****************************************************************************************
 message "call svg_am to setup the geom table"
-ami/module/call svg_am /dui/constants/svt/geometry/config _
-                       /dui/constants/svt/geometry/shape _
-                       /dui/constants/svt/geometry/geom
+ami/module/call svg_am [geometry]/svt/config _
+                       [geometry]/svt/shape _
+                       [geometry]/svt/geom
 
 
  

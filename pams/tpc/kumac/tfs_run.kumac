@@ -1,25 +1,26 @@
 ***************************************************************
 
 macro run 
+macro/global/import *
 
 message 'start tfs_run'
 
   cd /dui
-  tdm/table/rowcount /dui/data/tpc/hits/tphit 0
-  tdm/table/rowcount /dui/data/tpc/hits/index 0
+  tdm/table/rowcount [data]/tpc/hits/tphit 0
+  tdm/table/rowcount [data]/tpc/hits/index 0
 
   alias/create STAFCV_OK 1
   alias/create STAFCV_BAD 0
 
   ami/module/call tfs_g2t _
-		/dui/geant/Event/g2t_tpc_hit _
-		/dui/geant/Event/g2t_track _
-		/dui/constants/tpc/params/tfspars/tfs_fspar _ 
-  		/dui/constants/tpc/params/tfspars/tfs_bmpar _
-		/dui/constants/tpc/params/tfspars/tfs_fsctrl _
-		/dui/data/tpc/hits/index _
-	        /dui/constants/tpc/params/tclpars/type _
-		/dui/data/tpc/hits/tphit
+	 [geant]/Event/g2t_tpc_hit _
+	 [geant]/Event/g2t_track _
+		[params]/tpc/tfspars/tfs_fspar _ 
+  		[params]/tpc/tfspars/tfs_bmpar _
+		[params]/tpc/tfspars/tfs_fsctrl _
+	 [data]/tpc/hits/index _
+	        [params]/tpc/tclpars/type _
+	 [data]/tpc/hits/tphit
 
   if ( staf_status(1) .ne. STAFCV_OK) then
 	message 'Problem running tfs_g2t...'
@@ -28,7 +29,7 @@ message 'start tfs_run'
 
 
   ami/module/call tfs_filt _
-                /dui/data/tpc/hits/tphit
+                [data]/tpc/hits/tphit
 
   if ( staf_status(1) .ne. STAFCV_OK) then
 	message 'Problem running tfs_filt...'
