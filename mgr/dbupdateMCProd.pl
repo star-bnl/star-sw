@@ -21,21 +21,18 @@ my $debugOn=0;
 
 ###Set directories to be created for jobfiles
 my $DISK1 = "/star/rcf/prodlog";
-my $DISKD = "/star/rcf";
+my $DISK = "/star/data11/MDC4/reco";
 
-my $prodSr = "P00hi";
-my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
+my $prodSr = "MDC4";
+my $jobFDir = "/star/u/starreco/" . $prodSr ."/requests/";
 
 my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetG = (
-#            "auau130/hijing/b0_3_jet05/year_1h/halffield/hadronic_on",
-#            "auau130/hijing/b0_15/year_1h/halffield/hadronic_on",
-            "auau130/hijing/b0_3/year_1e/halffield/hadronic_on",
-#            "auau130/hijing/b3_6/year_1e/halffield/hadronic_on",
+             "auau200/mevsim/mdc4_cocktail/central/year2001/hadronic_on",
 );
 
-my @recoDir = ("trs_1i", "tfs_7");
+my @recoDir = ("trs", "tfs_7");
 
 
 struct JFileAttr => {
@@ -50,7 +47,7 @@ struct JFileAttr => {
           LstEvt => '$',
 		    };
 
- my $jbSt = "n\/a";
+ my $jbSt = "n/a";
  my $eachRecoFile;
  my $eachDstFile;
 
@@ -100,10 +97,8 @@ my $kl = 0;
 for( $ll = 0; $ll<scalar(@SetG); $ll++) {
 #  for ($kl = 0; $kl<scalar(@recoDir); $kl++) { 
   $hpssRecoDirs[$kk] = $topHpssReco ."/" .$SetG[$ll]. "/" . $recoDir[$kl];
+print "hpssRecoDir: ", $hpssRecoDirs[$kk], "\n";
     $kk++;
-
- print "hpssRecoDir: $hpssRecoDirs[$ll]\n" if $debugOn;
-print "hpssRecoDir: ", $hpssRecoDirs[$ll], "\n";
  }
 #}
 
@@ -120,9 +115,74 @@ print "\nFinding reco files in HPSS\n";
 
 
 my $maccess; 
- my $mdowner;
- my $flname;
+my $mdowner;
+my $flname;
+my $nDiskFiles = 0;
+my @diskRecoDirs;
+my $fullname;
 
+$kl = 0;
+$kk = 0;
+
+for( $ll = 0; $ll<scalar(@SetG) ; $ll++) { 
+#  for ($kl = 0; $kl<scalar(@recoDir); $kl++) {
+  $diskRecoDirs[$kk] = $DISK . "/" . $SetG[$ll] . "/" . $recoDir[$kl];
+  print "diskRecoDir: $diskRecoDirs[$ll]\n";
+ $kk++;
+}
+#}
+
+print "\nFinding reco files in disk\n";
+ 
+foreach $diskDir (@diskRecoDirs) {
+  if (-d $diskDir) {
+  opendir(DIR, $diskDir) or die "can't open $diskDir\n";
+  while( defined($flname = readdir(DIR)) ) {
+     next if $flname =~ /^\.\.?$/;
+#     next if $flname =~ /geant.root/;
+     next if $flname =~ /hold/;
+
+#        @fields = split(/\s+/, $diskDir);
+        $maccess = "-rw-r--r--"; 
+        $mdowner = "starreco";
+
+     $fullname = $diskDir."/".$flname;
+     my @dirF = split(/\//, $diskDir); 
+     my $set = sprintf("%s\/%s\/%s\/%s\/%s\/%s",$dirF[5],$dirF[6],$dirF[7],
+                                                $dirF[8],$dirF[9],$dirF[10]);
+    ($size, $mTime) = (stat($fullname))[7, 9];
+    ($sec,$min,$hr,$dy,$mo,$yr) = (localtime($mTime))[0,1,2,3,4,5];
+    $mo = sprintf("%2.2d", $mo+1);
+    $dy = sprintf("%2.2d", $dy);
+  
+    if( $yr > 97 ) {
+      $fullyear = 1900 + $yr;
+    } else {
+      $fullyear = 2000 + $yr;
+    }
+
+
+#    $timeS = sprintf ("%4.4d%2.2d%2.2d",
+#                      $fullyear,$mo,$dy);
+    $timeS = sprintf ("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:00",
+                        $fullyear,$mo,$dy,$hr,$min);
+    
+    $fObjAdr = \(FileAttr->new());
+    ($$fObjAdr)->filename($flname);
+    ($$fObjAdr)->fpath($diskDir);
+    ($$fObjAdr)->dset($set);
+    ($$fObjAdr)->dsize($size);
+    ($$fObjAdr)->timeS($timeS);
+    ($$fObjAdr)->faccess($maccess);
+    ($$fObjAdr)->fowner($mdowner);
+    $hpssRecoFiles[$nHpssFiles] = $fObjAdr;
+   $nHpssFiles++;
+   $nDiskFiles++;
+  }
+closedir DIR;
+}
+}
+print "Total reco files: $nDiskFiles\n";
 
 ### connect to the DB
 
@@ -130,7 +190,7 @@ my $maccess;
 
 ### select from JobStatus table files which should be updated
 
- $sql="SELECT prodSeries, JobID,sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobfileName like 'auau130%' AND jobStatus = 'n/a'";
+ $sql="SELECT prodSeries, JobID,sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND JobID like '%MDC4/trs%' AND jobStatus = 'n/a'";
 
   $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
@@ -174,8 +234,8 @@ my $first_evts = 0;
 my $last_evts = 0;
 ######### declare variables needed to fill the JobStatus table
 
-my $msJobId = "n\/a";
-my $mjobSt = "n\/a";
+my $msJobId = "n/a";
+my $mjobSt = "n/a";
 my $mNev  = 0;
 my $mEvtSk = 0;
 my $mCPU = 0;
@@ -183,7 +243,7 @@ my $mRealT = 0;
 my $mmemSz = 0;
 my $mNoTrk = 0;
 my $mNoVert = 0;
-my $mnodeId = "n\/a";
+my $mnodeId = "n/a";
 my $jb_sumFile;
 my $msumFile;
 my $msumDir;
@@ -210,7 +270,7 @@ foreach my $jobnm (@jobSum_set){
      $mmemSz = 0;
      $mNoTrk = 0;
      $mNoVert = 0;
-     $mnodeId = "n\/a";
+     $mnodeId = "n/a";
 
      @parts = split ("/",$msumDir);
  
@@ -236,7 +296,7 @@ foreach my $jobnm (@jobSum_set){
       $mjobSt = "n\/a"; 
 
           &sumInfo("$jb_sumFile",1);
-     print "JobFile=", $mjobFname," % ", "Job Status: ", $mjobSt, " % ",$mNev," % ",$mEvtSk, " % ", $mnodeId, "\n";
+     print "JobFile=", $msJobId," % ", $mjobFname," % ", "Job Status: ", $mjobSt, " % ",$mNev," % ",$mEvtSk, " % ", $mnodeId, "\n";
 
 ### update JobStatus table with info for jobs completed
 
@@ -270,24 +330,24 @@ foreach my $jobnm (@jobSum_set){
 ######## declare variables needed to fill the database table
 ## for database filling
 
-my $mJobId = "n\/a";
+my $mJobId = "n/a";
 my $mrunId = 0;
 my $mfileSeq = 0;
 my $mevtType = 0;
-my $mfName = "n\/a";
-my $mpath  = "n\/a";
-my $mdataSet = "n\/a";
+my $mfName = "n/a";
+my $mpath  = "n/a";
+my $mdataSet = "n/a";
 my $msize = 0;
 my $mcTime = 00-00-00;
 my $mNevts = 0;
 my $mNevtLo = 0;
 my $mNevtHi = 0;
-my $mowner = "n\/a";
+my $mowner = "n/a";
 my $mprotc = "-rw-r-----";
-my $mtype = "n\/a";
-my $mcomp = "n\/a";
-my $mformat = "n\/a";
-my $msite = "n\/a";
+my $mtype = "n/a";
+my $mcomp = "n/a";
+my $mformat = "n/a";
+my $msite = "n/a";
 my $mhpss = "Y";
 my $mstatus = 0;
 my $mdtstat = "OK";
@@ -302,26 +362,26 @@ my @prtFS;
 
 ## reinitialize variables
 
-  $mJobId = "n\/a"; 
+  $mJobId = "n/a"; 
   $mrunId = 0;
   $mfileSeq = 0;
   $mevtType = 0;
-  $mfName = "n\/a";
-  $mpath  = "n\/a";
-  $mdataSet = "n\/a";
+  $mfName = "n/a";
+  $mpath  = "n/a";
+  $mdataSet = "n/a";
   $msize = 0;
   $mcTime = 00-00-00;
   $mNevts = 0;
   $mNevtLo = 0;
   $mNevtHi = 0;
-  $mowner = "n\/a";
+  $mowner = "n/a";
   $mprotc = "-rw-r-----";
-  $mtype = "n\/a";
-  $mcomp = "n\/a";
-  $mformat = "n\/a";
-  $msite = "n\/a";
+  $mtype = "n/a";
+  $mcomp = "n/a";
+  $mformat = "n/a";
+  $msite = "n/a";
   $mhpss = "Y";
-  $mcalib = "n\/a";
+  $mcalib = "n/a";
   $mstatus = 0;
   $mdtstat = "OK";
   $mcomnt = " "; 
@@ -340,25 +400,12 @@ my $newset;
    $mowner = ($$eachRecoFile)->fowner;
    $msize = ($$eachRecoFile)->dsize;
    $mName = $mfName;
-  if($mfName =~ /rcf150_p/ and $mfName =~ /_100000evts/) {
-   $mrunId = 150;
-   $mfileSeq = 0; 
- }
-  elsif($mfName =~ /rcf150_p/) {
-   $mrunId = 150;
-   @prtFS = split("_",$mfName);
-   $mfileSeq = $prtFS[2];
- }else { 
    $mName =~ m/(^[a-z0-9]+)_([0-9]+)_([0-9]+)/;  
    $mfileSeq = $2 ; 
    $mrun = $1;
    $mrunId = substr($1,3) + 0;    
- }
-   if($mfName =~ /dst.xdf/ ) {
-     $mformat = "xdf";
-     $mcomp = "dst";
-   }
-  elsif($mfName =~  /root/) {
+
+    if($mfName =~  /root/) {
      $mformat = "root";
      my $compont = basename("$mfName",".root");
      if ($compont =~ m/\.([a-z0-9_]{3,})$/) {
@@ -428,7 +475,7 @@ sub updateJSTable {
     $sql.="RealTime_per_evt='$mRealT',";
     $sql.="NoEventSkip='$mEvtSk',"; 
     $sql.="nodeID='$mnodeId'";
-    $sql.=" WHERE sumFileName = '$msumFile' AND sumFileDir = '$msumDir' AND prodSeries = '$mproSr'";
+    $sql.=" WHERE sumFileName = '$msumFile' AND JobID like '%MDC4/trs%' AND prodSeries = '$mproSr'";
     print "$sql\n" if $debugOn;
 #    print "$sql\n";
     $rv = $dbh->do($sql) || die $dbh->errstr;
@@ -577,10 +624,10 @@ my @output = `more $jb_sum`;
         @word_sum = split (":", $sum_line);
          $mjobSt = $word_sum[1];
      } 
-      if ($sum_line =~ /Segmentation violation/) {
+      if ($sum_line =~ /segmentation violation/) {
               $mjobDg = "Segmentation violation";
           }
-     elsif ($sum_line =~ /buss error/) {
+     elsif ($sum_line =~ /bus error/) {
              $mjobDg = "bus_error";
         }  
     if($sum_line =~ /Error message/)  {
@@ -619,7 +666,7 @@ my @output = `more $jb_sum`;
               
             }
 ##get max memory size during execution
-            if ($sum_line =~ /Package   tree:/ ) {
+            if ($sum_line =~ /Package   outputStream/ ) {
               @word_sum = split (" ", $sum_line);
                 $mmemSz = $word_sum[5];
             }
