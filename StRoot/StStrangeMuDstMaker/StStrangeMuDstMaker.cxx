@@ -26,6 +26,8 @@
 
 #define EachController(proc) EachDoT(cont[i]->proc);
 
+Int_t thisRun,thisEvent,lastRun,lastEvent;
+
 ClassImp(StStrangeMuDstMaker)
 //_____________________________________________________________________________
 StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
@@ -40,6 +42,7 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
   SetNumber(-2);
   outFileNum = 1;
   doT0JitterAbort = kFALSE;
+  iMake = kFALSE;
 
   TString suffix = "MuDst.root";
   for (Int_t i=0; i<strDstT; i++) {
@@ -64,6 +67,10 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
 
   bsize[evT] = 64000;
 
+  thisRun = -1;
+  thisEvent = -1;
+  lastRun = -1;
+  lastEvent = -1;
 }
 //_____________________________________________________________________________
 StStrangeMuDstMaker::~StStrangeMuDstMaker() {
@@ -228,10 +235,25 @@ Int_t StStrangeMuDstMaker::MakeReadDst() {
     }
   }
   if ((tree->GetEvent(event_number)) <= 0) return kStErr;   // Read the event
-  EachController(MakeReadDst());
- 
   if (cutsArray->GetEntriesFast()) cuts->Reset(cutsArray);
 
+  // Overcome a bug where event wasn't meant to be recorded into 
+  // a muDst, but was anyhow (with the previous event's info)
+  thisRun = GetEvent()->run();
+  thisEvent = GetEvent()->event();
+  if ((thisRun == lastRun) && (thisEvent == lastEvent)) {
+    // Skip to next event (which should be fine)
+    if (iMake) {
+      // If user is using IMake(int), they must skip to next event themselves
+      gMessMgr->Warning("StStrangeMuDstMaker: file has bad event info - skip");
+      return kStSkip;
+    } else return MakeReadDst();
+  }
+  lastRun = thisRun;
+  lastEvent = thisEvent;
+
+  EachController(MakeReadDst());
+ 
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -256,6 +278,10 @@ Int_t StStrangeMuDstMaker::MakeCreateDst() {
   // Get event
   StEvent* event = (StEvent*) GetInputDS("StEvent");
   if (!event) return kStOK; 
+
+  new((*evClonesArray)[0]) StStrangeEvMuDst(*event);
+  cuts->UpdateArray(cutsArray);
+
   if (doT0JitterAbort && t0JitterAbort(event)) {
     gMessMgr->Warning("StStrangeMuDstMaker: T0 jitter; skipping event.");
     return kStWarn;
@@ -265,12 +291,10 @@ Int_t StStrangeMuDstMaker::MakeCreateDst() {
     return kStWarn;
   }
 
-  new((*evClonesArray)[0]) StStrangeEvMuDst(*event);
   EachController(MakeCreateDst(*event));
   if (doMc) MakeCreateMcDst();
 
   CheckFile();
-  cuts->UpdateArray(cutsArray);
   tree->Fill();
 
   return kStOK;
@@ -588,8 +612,11 @@ void StStrangeMuDstMaker::SetFractionFile(char* fname) {
 }
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.19 2002/06/19 15:08:40 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.20 2002/06/21 02:43:59 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.20  2002/06/21 02:43:59  genevb
+// handle events without primary vertex better
+//
 // Revision 3.19  2002/06/19 15:08:40  genevb
 // Allow all MC kinks to be kept
 //

@@ -97,6 +97,7 @@ class StStrangeMuDstMaker : public StMaker {
   StStrangeCuts& Cuts();  virtual Int_t Init();
   
   virtual Int_t Make();
+  virtual Int_t IMake(int number);
   virtual void  Clear(Option_t *option="");
   virtual Int_t Finish();
   
@@ -150,6 +151,7 @@ class StStrangeMuDstMaker : public StMaker {
 
   Bool_t abortEvent;
   Bool_t firstEvent;
+  Bool_t iMake;
   Int_t evNumber;
   Int_t outFileNum;
 
@@ -229,13 +231,19 @@ inline Int_t StStrangeMuDstMaker::MatchName(const char* name) const
             { for (Int_t i=1; i<strDstT; i++)
 	        if (!(strcmp(name,strTypeNames[i]))) return i;
               return 0; }
+inline Int_t StStrangeMuDstMaker::IMake(int number)
+            { iMake = kTRUE; Int_t res = StMaker::IMake(number);
+              iMake = kFALSE; return res; }
 
 #endif
 
 //____________________________________________________________________
 //
-// $Id: StStrangeMuDstMaker.h,v 3.9 2002/05/29 19:08:16 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.10 2002/06/21 02:44:10 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.10  2002/06/21 02:44:10  genevb
+// handle events without primary vertex better
+//
 // Revision 3.9  2002/05/29 19:08:16  genevb
 // Better handling of improperly closed files
 //
