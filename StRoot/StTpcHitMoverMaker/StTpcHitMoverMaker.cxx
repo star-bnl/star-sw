@@ -23,8 +23,7 @@ StTpcHitMover::StTpcHitMover(const Char_t *name) : StMaker(name),
 }
 
 StTpcHitMover::~StTpcHitMover() {
-  if (mSectorAligner) delete mSectorAligner;
-  if (mExB)           delete mExB;
+  FlushDB();
 }
 
 Int_t StTpcHitMover::Init() {
@@ -45,10 +44,17 @@ Int_t StTpcHitMover::Init() {
 }
 
 Int_t StTpcHitMover::InitRun(Int_t runnumber) {
-  // delete StMagUtilities just to be sure... <-- no (would reload maps)
-  // if (mExB) delete mExB;
+  FlushDB();
   return kStOk;
 }
+
+
+void StTpcHitMover::FlushDB() {
+  if (mSectorAligner) delete mSectorAligner; mSectorAligner= 0;
+  if (mExB)           delete mExB;           mExB          = 0;
+
+}
+
 
 Int_t StTpcHitMover::Make() {
   St_DataSet *tpc_data = GetInputDS(mInputDataSetName);
