@@ -1,5 +1,8 @@
-// $Id: summarizeEvent.cc,v 1.9 1999/08/09 21:48:10 kathy Exp $
+// $Id: summarizeEvent.cc,v 1.10 1999/09/03 16:36:42 kathy Exp $
 // $Log: summarizeEvent.cc,v $
+// Revision 1.10  1999/09/03 16:36:42  kathy
+// checking in Curtis' new version of summarizeEvent.cc that uses the QAInfo message manager method
+//
 // Revision 1.9  1999/08/09 21:48:10  kathy
 // fix the call to MessMgr Info method so it does not print out the time - time we checked the DST is not needed here
 //
@@ -46,27 +49,27 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "StEvent.h"
  *
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 1.9 1999/08/09 21:48:10 kathy Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 1.10 1999/09/03 16:36:42 kathy Exp $";
  * Revision 2.1  1999/11/16 12:28:44  ullrich
 void summarizeEvent(StEvent& event, Int_t &nevents) {
  *
   nevents++;
-  gMessMgr->Info("","to") << "QAInfo: StAnalysisMaker,  Reading Event: " << nevents <<
+  gMessMgr->QAInfo("","to") << "StAnalysisMaker,  Reading Event: " << nevents <<
     "  Type: " << event.type() << "  Run: " << event.runNumber() << endm;
     gMessMgr->QAInfo() << "StAnalysisMaker,  Reading Event: " << nevents
-  gMessMgr->Info("","to") << "QAInfo:  # tracks:         " << 
-              event.trackCollection()->size() << endm;
-  gMessMgr->Info("","to") << "QAInfo:  # vertices:       " << 
-              event.vertexCollection()->size() << endm;
-  gMessMgr->Info("","to") << "QAInfo:  # TPC hits:       " << 
-             event.tpcHitCollection()->size() << endm;
-  gMessMgr->Info("","to") << "QAInfo:  # SVT hits:       " << 
-             event.svtHitCollection()->size() << endm;
-  gMessMgr->Info("","to") << "QAInfo:  # FTPC hits:      " << 
-             event.ftpcHitCollection()->size() << endm;
+  gMessMgr->QAInfo("","to") << "# tracks:         "
+                            << event.trackCollection()->size() << endm;
+  gMessMgr->QAInfo("","to") << "# vertices:       "
+                            << event.vertexCollection()->size() << endm;
+  gMessMgr->QAInfo("","to") << "# TPC hits:       "
+                            << event.tpcHitCollection()->size() << endm;
+  gMessMgr->QAInfo("","to") << "# SVT hits:       "
+                            << event.svtHitCollection()->size() << endm;
+  gMessMgr->QAInfo("","to") << "# FTPC hits:      "
+                            << event.ftpcHitCollection()->size() << endm;
   if (event.primaryVertex()) {
-  gMessMgr->Info("","to") << "QAInfo:  primary vertex:   " << 
-             event.primaryVertex()->position() << endm;
+    gMessMgr->QAInfo("","to") << "primary vertex:   "
+                              << event.primaryVertex()->position() << endm;
   }
 		       << (event.svtHitCollection() ? event.svtHitCollection()->numberOfHits() : 0) << endm;
     
