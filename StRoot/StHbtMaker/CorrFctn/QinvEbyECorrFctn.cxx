@@ -120,7 +120,7 @@ void QinvEbyECorrFctn::AddMixedPair(const StHbtPair* pair){
 }
 //_____________________________
 void QinvEbyECorrFctn::SetCorrection(const StHbt1DHisto* correc){
-    mCorrection = correc;
+    mCorrection = (StHbt1DHisto*)correc;
 }
 //_____________________________
 void QinvEbyECorrFctn::EventBegin(const StHbtEvent* myev)
