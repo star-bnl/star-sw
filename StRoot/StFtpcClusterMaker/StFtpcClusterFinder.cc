@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.22 2001/08/20 00:35:17 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.23 2001/11/21 12:51:27 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.23  2001/11/21 12:51:27  jcs
+// replace malloc/free with new/delete; prevent overstepping table boundaries
+//
 // Revision 1.22  2001/08/20 00:35:17  jcs
 // check index (j) before using it
 //
@@ -100,7 +103,9 @@ StFtpcClusterFinder::~StFtpcClusterFinder()
 
 int StFtpcClusterFinder::search()
 {
-  double *pradius, *pdeflection;
+
+  Double_t  *pradius;
+  Double_t  *pdeflection;
   int iRow, iSec, iPad, iPadBuf, iHardSec, iHardRow;
   int iRowBuf, iSecBuf;
   int bNewSec;
@@ -137,10 +142,10 @@ int StFtpcClusterFinder::search()
 //   cout << "maxpads: " << mReader->getMaxPad(1) << endl;
 
   /* allocate memory for padtrans table */
-  pradius = (double *)malloc(mParam->numberOfDriftSteps()
-			     *mDb->numberOfPadrowsPerSide()*sizeof(double));
-  pdeflection = (double *)malloc(mParam->numberOfDriftSteps()
-				 *mDb->numberOfPadrowsPerSide()*sizeof(double));
+  pradius = new Double_t[mParam->numberOfDriftSteps()
+                           *mDb->numberOfPadrowsPerSide()];
+  pdeflection = new Double_t[mParam->numberOfDriftSteps()
+                               *mDb->numberOfPadrowsPerSide()];
 
   if(pradius == NULL || pdeflection == 0)
     {
@@ -663,8 +668,8 @@ int StFtpcClusterFinder::search()
   
 #endif
   
-  free(pradius);
-  free(pdeflection);
+  delete[] pradius;        // release the pradius array
+  delete[] pdeflection;   // release the pdeflection array
   
 #ifdef DEBUG 
   cout<<"finished running cluster search"<<endl;
@@ -1185,9 +1190,12 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	gMessMgr->Message("Hit rejected because of an error in the FTPC data. (x, y, z) = (0. ,0., z)", "W", "OST");
       }
 
+/*
       if(!isnan(Peak->x) && !isnan(Peak->y) && !isnan(Peak->PadSigma) &&
 !isnan(Peak->TimeSigma) // && Peak->PeakHeight>=mParam->minimumClusterMaxADC())
 	 && Peak->Rad <= mDb->sensitiveVolumeOuterRadius() && Peak->Rad >= mDb->sensitiveVolumeInnerRadius() )
+*/
+      if(!isnan(Peak->x) && !isnan(Peak->y) && !isnan(Peak->PadSigma) && !isnan(Peak->TimeSigma))
 
 	{
 	  // create new point
@@ -1624,12 +1632,14 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	  /* in very complicated clusters some hits may have been unfolded
 	     with errors while the rest of the cluster is okay, don't fill 
 	     these hits into array: */
+/*
 	  if(!isnan(Peak[iPeakIndex].x) && !isnan(Peak[iPeakIndex].y) &&
 !isnan(Peak[iPeakIndex].PadSigma) && !isnan(Peak[iPeakIndex].TimeSigma) // && Peak[iPeakIndex].PeakHeight>=mParam->minimumClusterMaxADC())
 	     && Peak[iPeakIndex].Rad <= mDb->sensitiveVolumeOuterRadius() 
              && Peak[iPeakIndex].Rad >= mDb->sensitiveVolumeInnerRadius() )
-	                                                             
-	                                                            
+*/
+          if(!isnan(Peak[iPeakIndex].x) && !isnan(Peak[iPeakIndex].y) &&
+                  !isnan(Peak[iPeakIndex].PadSigma) && !isnan(Peak[iPeakIndex].TimeSigma))
 	    {
 	      // create new point
 	      Int_t numPoint = mPoint->GetEntriesFast();
@@ -1856,9 +1866,9 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
       pradius[padrow]=mDb->sensitiveVolumeOuterRadius();
       pdeflection[padrow]=0;
       e_now = mDb->radiusTimesField() / (0.5*r_last);
-      for(j=v_buf; j<mDb->numberOfMagboltzBins()
+      for(j=v_buf; j<mDb->numberOfMagboltzBins()-1
 	    && mDb->magboltzEField(j) < e_now; j++);
-      if(j<1 || j>=mDb->numberOfMagboltzBins())
+      if(j<1 || j>mDb->numberOfMagboltzBins())
 	{
 	  gMessMgr->Message("", "E", "OST") << "Error 1: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
 	  return FALSE;
@@ -1880,7 +1890,7 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
 	       *mParam->lorentzAngleFactor()
 	       *(e_now-mDb->magboltzEField(v_buf)))
 	/(mDb->magboltzEField(j)-mDb->magboltzEField(v_buf));
-      for (i=0; i<mParam->numberOfDriftSteps() 
+      for (i=0; i<mParam->numberOfDriftSteps()-1 
 	     && e_now < mDb->magboltzEField(mDb->numberOfMagboltzBins()-2)
 	     ; i++) 
 	{
@@ -1889,10 +1899,10 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
 	  r_next = r_last - v_now * step_size * mDb->microsecondsPerTimebin();
 	  e_now = mDb->radiusTimesField() / (0.5*(r_last+r_next));
 	  
-	  for(j=v_buf; j<mDb->numberOfMagboltzBins()
+	  for(j=v_buf; j<mDb->numberOfMagboltzBins()-1
 		       && mDb->magboltzEField(j) < e_now; j++);
 	  
-	  if(j<1 || j>=mDb->numberOfMagboltzBins())
+	  if(j<1 || j>mDb->numberOfMagboltzBins())
 	    {
 	      gMessMgr->Message("", "E", "OST") << "Error 2: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
 	      return FALSE;

@@ -1,6 +1,9 @@
-// $Id: StFtpcChargeStep.cc,v 1.13 2001/10/12 14:33:09 jcs Exp $
+// $Id: StFtpcChargeStep.cc,v 1.14 2001/11/21 12:50:02 jcs Exp $
 //
 // $Log: StFtpcChargeStep.cc,v $
+// Revision 1.14  2001/11/21 12:50:02  jcs
+// replace malloc/free with new/delete; prevent overstepping table boundaries
+//
 // Revision 1.13  2001/10/12 14:33:09  jcs
 // create and fill charge step histograms for FTPC East and West
 //
@@ -64,7 +67,7 @@ StFtpcChargeStep::StFtpcChargeStep(TH2F *histo,
 				   StFtpcParamReader *paramReader,
                                    StFtpcDbReader *dbReader)
 {
-  //   cout << "StFtpcChargeStep constructed" << endl;  
+  //  cout << "StFtpcChargeStep constructed" << endl;  
   mHisto=histo;
   mHistoW=histoW;
   mHistoE=histoE;
@@ -105,7 +108,7 @@ int StFtpcChargeStep::histogram(int setPressure)
     }
 
    /* allocate memory for padtrans table */
-   pRadius = (double *)malloc(mParam->numberOfDriftSteps()*sizeof(double));
+   double *pRadius = new double[mParam->numberOfDriftSteps()];
 
    if(pRadius == NULL)
      {
@@ -314,8 +317,9 @@ int StFtpcChargeStep::histogram(int setPressure)
     }
   }
 
+  delete proHisto;
   delete[] dCharge;
-  free(pRadius);
+  delete[] pRadius;
   return 1;
 }
 
@@ -342,12 +346,11 @@ int StFtpcChargeStep::calcpadtrans(double *pradius)
       r_last=mDb->sensitiveVolumeOuterRadius();
       pradius[padrow]=mDb->sensitiveVolumeOuterRadius();
       e_now = mDb->radiusTimesField() / (0.5*r_last);
-      for(j=v_buf; j<mDb->numberOfMagboltzBins() 
+      for(j=v_buf; j<mDb->numberOfMagboltzBins()-1
 	    && mDb->magboltzEField(j) < e_now; j++);
-      if(j<1 || j>=mDb->numberOfMagboltzBins())
+      if(j<1 || j>mDb->numberOfMagboltzBins())
 	{
-	  printf("Error 1: j=%d, v_buf=%d e_drift=%f, e_now=%f\n", 
-		 j, v_buf, mDb->magboltzEField(j), e_now);
+          gMessMgr->Message("", "E", "OST") << "Error 1: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
 	  return FALSE;
 	}
       v_buf=j-1;
@@ -365,7 +368,7 @@ int StFtpcChargeStep::calcpadtrans(double *pradius)
 		 +deltap*mDb->magboltzdDeflectiondP(j,padrow))
 	       *(e_now-mDb->magboltzEField(v_buf)))
 	/(mDb->magboltzEField(j)-mDb->magboltzEField(v_buf));
-      for (i=0; i<mParam->numberOfDriftSteps() 
+      for (i=0; i<mParam->numberOfDriftSteps()-1 
 	     && e_now < mDb->magboltzEField(mDb->numberOfMagboltzBins()-2)
 	     ; i++) 
 	{
@@ -374,13 +377,12 @@ int StFtpcChargeStep::calcpadtrans(double *pradius)
 	  r_next = r_last - v_now * step_size * mDb->microsecondsPerTimebin();
 	  e_now = mDb->radiusTimesField() / (0.5*(r_last+r_next));
 	  
-          for(j=v_buf; j<mDb->numberOfMagboltzBins()
+          for(j=v_buf; j<mDb->numberOfMagboltzBins()-1
                        && mDb->magboltzEField(j) < e_now; j++);
 	  
-	  if(j<1 || j>=mDb->numberOfMagboltzBins())
+	  if(j<1 || j>mDb->numberOfMagboltzBins())
 	    {
-	      printf("Error 2: j=%d, v_buf=%d e_drift=%f, e_now=%f\n", 
-		     j, v_buf, mDb->magboltzEField(j), e_now);
+              gMessMgr->Message("", "E", "OST") << "Error 2: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
 	      return FALSE;
 	    }
 	  
