@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.144  2005/01/17 01:32:13  perev
+// parameters protected
+//
 // Revision 1.143  2004/08/04 21:06:17  pruneau
 // Added an "if" statement predicated on m_Mode to clear the memory used by the
 // factories at the end of StiMaker::Make().
@@ -425,7 +428,6 @@ Int_t StiMaker::Make()
       return -1;
     }
 
-  
   if (_toolkit->isMcEnabled() )
     {
       if (!mMcEventMaker)

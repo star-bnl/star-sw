@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.49 2004/12/21 20:46:00 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.50 2005/01/17 01:32:13 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.50  2005/01/17 01:32:13  perev
+ * parameters protected
+ *
  * Revision 2.49  2004/12/21 20:46:00  perev
  * Cleanup. All known bugs fixed
  *
@@ -625,11 +628,11 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 		  while (it!=end) 
 		    {
 		      const StiKalmanTrackNode& node = *it;
-		      if (node._refX>2. && node._refX<4.5)
+		      if (node.getRefPosition()>2. && node.getRefPosition()<4.5)
 			{
 			  piped = true;
 			}
-		      if (node._refX>40. && node._x<50.)
+		      if (node.getRefPosition()>40. && node.getX()<50.)
 			{
 			  ifced = true;
 			}
@@ -640,9 +643,9 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 		      StiHit * theHit = node.getHit();
 		      if (theHit)
 			{
-			  double dx = fabs(theHit->x() - node._x);
-			  double dy = fabs(theHit->y() - node._p0);
-			  double dz = fabs(theHit->z() - node._p1);
+			  double dx = fabs(theHit->x() - node.getX());
+			  double dy = fabs(theHit->y() - node.getY());
+			  double dz = fabs(theHit->z() - node.getZ());
 			  if (dx>3 || dy>5 || dz>5)
 			    bad++;
 			}//theHit
