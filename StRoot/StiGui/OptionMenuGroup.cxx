@@ -28,6 +28,7 @@ void OptionMenuGroup::create(TGMenuBar *menuBar, TGLayoutHints *itemLayout)
   menu->AddEntry("Seed Finder",          _offset+_cmdSeedFinderOptions);
   menu->AddEntry("Kalman Finder",        _offset+_cmdTrackFinderOptions);
   menu->AddEntry("Hit Filter",           _offset+_cmdHitFilterOptions);
+  menu->AddEntry("MC Hit Filter",        _offset+_cmdMcHitFilterOptions);
   menu->AddEntry("McLoader Track Filter",_offset+_cmdMcTrackLoaderFilterOptions);
   menu->AddEntry("Gui Track Filter",     _offset+_cmdGuiTrackFilterOptions);
   menu->AddEntry("Gui MC Track Filter",  _offset+_cmdGuiMcTrackFilterOptions);
@@ -46,11 +47,12 @@ void OptionMenuGroup::dispatch(int option)
     case _cmdMessengerOptions           : setMessengerOptions();     break;
     case _cmdSeedFinderOptions          : setSeedFinderOptions();    break;
     case _cmdTrackFinderOptions         : setTrackFinderOptions();   break;
+    case _cmdMcHitFilterOptions         : setMcHitFilterOptions();   break;
     case _cmdHitFilterOptions           : setHitFilterOptions();     break;
     case _cmdMcTrackLoaderFilterOptions : setMcTrackLoaderFilterOptions();   break;
-    case _cmdGuiTrackFilterOptions      : setGuiTrackFilterOptions();   break;
-    case _cmdGuiMcTrackFilterOptions    : setGuiMcTrackFilterOptions(); break;
-    case _cmdFinderTrackFilterOptions   : setFinderTrackFilterOptions(); break;
+    case _cmdGuiTrackFilterOptions      : setGuiTrackFilterOptions();        break;
+    case _cmdGuiMcTrackFilterOptions    : setGuiMcTrackFilterOptions();      break;
+    case _cmdFinderTrackFilterOptions   : setFinderTrackFilterOptions();     break;
     }
 }
 
@@ -106,12 +108,29 @@ void OptionMenuGroup::setTrackFinderOptions()
 void OptionMenuGroup::setHitFilterOptions()
 {	
   cout << "OptionMenuGroup::setHitFilterOptions() -I- Started" <<endl;
-  //EditableParameters * pars = dynamic_cast<EditableParameters *>(getDisplay()->getHitFilter()->getParameters() );
-  //if (pars)
-  //	new StiOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
-  //else
-  cout << "OptionMenuGroup::setHitFinderOptions() -E- Hit Finder options not available"<<endl;
+  EditableParameters * pars = dynamic_cast<EditableParameters *>(getDisplay()->getHitFilter());
+  if (pars)
+    {
+      new StiOptionFrame(getClient()->GetRoot(), getDisplay(), pars); 
+      getDisplay()->draw();
+    }
+  else
+    cout << "OptionMenuGroup::setHitFinderOptions() -E- Hit Finder options not available"<<endl;
   cout << "OptionMenuGroup::setHitFinderOptions() -I- Done" <<endl;
+}
+
+void OptionMenuGroup::setMcHitFilterOptions()
+{	
+  cout << "OptionMenuGroup::setMcHitFilterOptions() -I- Started" <<endl;
+  EditableParameters * pars = dynamic_cast<EditableParameters *>(getDisplay()->getMcHitFilter());
+  if (pars)
+    {
+      new StiOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
+      getDisplay()->draw();
+    }
+  else
+    cout << "OptionMenuGroup::setMcHitFinderOptions() -E- Mc Hit Finder options not available"<<endl;
+  cout << "OptionMenuGroup::setMcHitFinderOptions() -I- Done" <<endl;
 }
 
 void OptionMenuGroup::setGuiTrackFilterOptions()

@@ -13,6 +13,7 @@ class OptionMenuGroup : public MenuGroup
       _cmdSeedFinderOptions,
       _cmdTrackFinderOptions,
       _cmdHitFilterOptions,
+      _cmdMcHitFilterOptions,
       _cmdMcTrackLoaderFilterOptions,
       _cmdGuiTrackFilterOptions,
       _cmdGuiMcTrackFilterOptions,
@@ -33,6 +34,7 @@ class OptionMenuGroup : public MenuGroup
   void setSeedFinderOptions();
   void setTrackFinderOptions();
   void setHitFilterOptions();
+  void setMcHitFilterOptions();
   void setMcTrackLoaderFilterOptions();
   void setGuiTrackFilterOptions();
   void setGuiMcTrackFilterOptions();
