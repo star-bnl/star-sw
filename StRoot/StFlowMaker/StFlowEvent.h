@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.28 2001/07/24 22:29:12 snelling Exp $
+// $Id: StFlowEvent.h,v 1.29 2001/07/27 01:26:14 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -36,7 +36,8 @@ public:
   Short_t        BeamMassNumberEast() const;
   Short_t        BeamMassNumberWest() const;
   UInt_t         OrigMult() const;
-  UInt_t         UncorrMult() const;
+  UInt_t         UncorrNegMult() const;
+  UInt_t         UncorrPosMult() const;
   UInt_t         MultEta() const;
   UInt_t         FlowEventMult() const;
   UInt_t         Centrality() const;
@@ -68,7 +69,8 @@ public:
   void SetBeamMassNumberEast(const Short_t&);
   void SetBeamMassNumberWest(const Short_t&);
   void SetOrigMult(const UInt_t&);
-  void SetUncorrMult(const UInt_t&);
+  void SetUncorrPosMult(const UInt_t&);
+  void SetUncorrNegMult(const UInt_t&);
   void SetMultEta(const UInt_t&);
   void SetCentrality(const UInt_t&);
   void SetVertexPos(const StThreeVectorF&);
@@ -107,7 +109,8 @@ private:
   Short_t             mBeamMassNumberEast;                       //
   Short_t             mBeamMassNumberWest;                       //
   UInt_t              mOrigMult;                                 // number of tracks
-  UInt_t              mUncorrMult;                               // number of h-
+  UInt_t              mUncorrNegMult;                            // number of h-
+  UInt_t              mUncorrPosMult;                            // number of h+
   UInt_t              mMultEta;                                  // number of tracks
   // with pos. flag in 1.5 unit of eta
   UInt_t              mCentrality;                               // centrality bin
@@ -161,7 +164,9 @@ inline Short_t StFlowEvent::BeamMassNumberWest() const { return mBeamMassNumberW
 
 inline UInt_t StFlowEvent::OrigMult() const { return mOrigMult; }
 
-inline UInt_t StFlowEvent::UncorrMult() const { return mUncorrMult; }
+inline UInt_t StFlowEvent::UncorrNegMult() const { return mUncorrNegMult; }
+
+inline UInt_t StFlowEvent::UncorrPosMult() const { return mUncorrPosMult; }
 
 inline UInt_t StFlowEvent::MultEta() const { return mMultEta; }
 
@@ -219,8 +224,11 @@ inline void StFlowEvent::SetBeamMassNumberWest(const Short_t& bmw) { mBeamMassNu
 inline void StFlowEvent::SetOrigMult(const UInt_t& tracks) {
   mOrigMult = tracks; }
 
-inline void StFlowEvent::SetUncorrMult(const UInt_t& tracks) {
-  mUncorrMult = tracks; }
+inline void StFlowEvent::SetUncorrNegMult(const UInt_t& negtracks) {
+  mUncorrNegMult = negtracks; }
+
+inline void StFlowEvent::SetUncorrPosMult(const UInt_t& postracks) {
+  mUncorrPosMult = postracks; }
 
 inline void StFlowEvent::SetMultEta(const UInt_t& goodtracks) {
   mMultEta = goodtracks; }
@@ -281,6 +289,9 @@ inline void StFlowEvent::SetPtWgt(Bool_t PtWgt) { mPtWgt = PtWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.29  2001/07/27 01:26:14  snelling
+// Added and changed variables for picoEvent. Changed trackCut class to StTrack
+//
 // Revision 1.28  2001/07/24 22:29:12  snelling
 // First attempt to get a standard root pico file again, added variables
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.h,v 1.11 2001/05/22 20:17:23 posk Exp $
+// $Id: StFlowCutTrack.h,v 1.12 2001/07/27 01:26:10 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -18,8 +18,7 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include "Rtypes.h"
-class StPrimaryTrack;
-class StGlobalTrack;
+class StTrack;
 class StFlowPicoTrack;
 
 class StFlowCutTrack {
@@ -29,8 +28,7 @@ class StFlowCutTrack {
                  StFlowCutTrack();
   virtual        ~StFlowCutTrack();
 
-  static Int_t   CheckTrack(StPrimaryTrack* pTrack);
-  static Int_t   CheckTrack(StGlobalTrack* gTrack);
+  static Int_t   CheckTrack(StTrack* pTrack);
   static Int_t   CheckTrack(StFlowPicoTrack* pPicoTrack);
   static void    PrintCutList();
   static UInt_t  EtaSymPos();
@@ -155,6 +153,9 @@ inline void StFlowCutTrack::SetEtaFtpc(Float_t lo_neg, Float_t hi_neg,
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.h,v $
+// Revision 1.12  2001/07/27 01:26:10  snelling
+// Added and changed variables for picoEvent. Changed trackCut class to StTrack
+//
 // Revision 1.11  2001/05/22 20:17:23  posk
 // Now can do pseudorapidity subevents.
 //

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.h,v 1.9 2001/07/24 22:29:32 snelling Exp $
+// $Id: StFlowPicoEvent.h,v 1.10 2001/07/27 01:26:35 snelling Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -30,7 +30,8 @@ class StFlowPicoEvent : public TObject {
 
   Int_t         Version()    const { return mVersion; }
   UInt_t        OrigMult()   const { return mOrigMult; }
-  UInt_t        UncorrMult() const { return mUncorrMult; }
+  UInt_t        UncorrNegMult() const { return mUncorrNegMult; }
+  UInt_t        UncorrPosMult() const { return mUncorrPosMult; }
   UInt_t        MultEta()    const { return mMultEta; }
 
   UInt_t        Centrality() const { return mCentrality; }
@@ -55,7 +56,8 @@ class StFlowPicoEvent : public TObject {
   void SetBeamMassNumberWest(const Short_t bmw) { mBeamMassNumberWest = bmw; }
   void SetNtrack(const Int_t ntrk)      { mNtrack = ntrk; }
   void SetOrigMult(const UInt_t mult)   { mOrigMult = mult; }
-  void SetUncorrMult(const UInt_t mult)   { mUncorrMult = mult; }
+  void SetUncorrNegMult(const UInt_t mult)   { mUncorrNegMult = mult; }
+  void SetUncorrPosMult(const UInt_t mult)   { mUncorrPosMult = mult; }
   void SetMultEta(const UInt_t goodtracks) { mMultEta = goodtracks; }
   void SetCentrality(const UInt_t cent) { mCentrality = cent; }
   void SetVertexPos(const Float_t x, const Float_t y, const Float_t z) { 
@@ -74,7 +76,8 @@ class StFlowPicoEvent : public TObject {
   Short_t        mBeamMassNumberEast;   // Mass Number of East Beam
   Short_t        mBeamMassNumberWest;   // Mass Number of West Beam
   UInt_t         mOrigMult;             // number of tracks
-  UInt_t         mUncorrMult;           // number of h-
+  UInt_t         mUncorrNegMult;        // number of h-
+  UInt_t         mUncorrPosMult;        // number of h+
   UInt_t         mMultEta;              // number of tracks with 
                                         // positive flag in 1.5 units of eta
   UInt_t         mCentrality;           // centrality bin
@@ -88,7 +91,7 @@ class StFlowPicoEvent : public TObject {
   TClonesArray*        fTracks;
   static TClonesArray* fgTracks;
   
-  ClassDef(StFlowPicoEvent,1)
+  ClassDef(StFlowPicoEvent,4)
 };
 
 #endif
@@ -96,6 +99,9 @@ class StFlowPicoEvent : public TObject {
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.h,v $
+// Revision 1.10  2001/07/27 01:26:35  snelling
+// Added and changed variables for picoEvent. Changed trackCut class to StTrack
+//
 // Revision 1.9  2001/07/24 22:29:32  snelling
 // First attempt to get a standard root pico file again, added variables
 //

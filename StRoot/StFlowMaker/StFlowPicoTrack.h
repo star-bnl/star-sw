@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoTrack.h,v 1.7 2001/07/24 22:29:39 snelling Exp $
+// $Id: StFlowPicoTrack.h,v 1.8 2001/07/27 01:26:40 snelling Exp $
 //
 // Author: Raimond Snellings, March 2000
 //
@@ -37,6 +37,7 @@ public:
    Int_t    FitPts()        const { return mFitPts; }
    Int_t    MaxPts()        const { return mMaxPts; }
    Int_t    Nhits()         const { return mNhits; }
+   Int_t    NdedxPts()      const { return mNdedxPts; }
    Float_t  TrackLength()   const { return mTrackLength; }
    Float_t  PidPion()       const { return mPidPion/1000.; }
    Float_t  PidProton()     const { return mPidProton/1000.; }
@@ -51,9 +52,9 @@ public:
    Float_t  PionPlusMinusProb()     const { return mPionPlusMinusProb; }
    Float_t  KaonPlusMinusProb()     const { return mKaonPlusMinusProb; }
    Float_t  ProtonPbarProb()        const { return mProtonPbarProb; }
-   Float_t  FirstPointX()           const { return mFirstPointX; }
-   Float_t  FirstPointY()           const { return mFirstPointY; }
-   Float_t  FirstPointZ()           const { return mFirstPointZ; }
+   Double_t  DcaGlobalX()           const { return (Double_t)mDcaGlobalX; }
+   Double_t  DcaGlobalY()           const { return (Double_t)mDcaGlobalY; }
+   Double_t  DcaGlobalZ()           const { return (Double_t)mDcaGlobalZ; }
    UInt_t   TopologyMap0()          const { return mTopologyMap0; }
    UInt_t   TopologyMap1()          const { return mTopologyMap1; }
 
@@ -72,6 +73,7 @@ public:
    void  SetFitPts(Int_t fitPts)     { mFitPts = fitPts; }
    void  SetMaxPts(Int_t maxPts)     { mMaxPts = maxPts; }
    void  SetNhits(Int_t nhits)       { mNhits = nhits; }
+   void  SetNdedxPts(Int_t ndedxPts) { mNdedxPts = ndedxPts; }
    void  SetTrackLength(Float_t tl)  { mTrackLength = tl; }
    void  SetPidPion(Float_t pid)     { mPidPion = (Int_t)(pid*1000.); }
    void  SetPidProton(Float_t pid)   { mPidProton = (Int_t)(pid*1000.); }
@@ -85,48 +87,49 @@ public:
    void  SetPionPlusMinusProb(Float_t val) { mPionPlusMinusProb = val; }
    void  SetKaonPlusMinusProb(Float_t val) { mKaonPlusMinusProb = val; }
    void  SetProtonPbarProb(Float_t val) { mProtonPbarProb = val; }
-   void  SetFirstPoint(const Float_t x, const Float_t y, const Float_t z) {
-     mFirstPointX = x; mFirstPointY = y; mFirstPointZ = z; }
+   void  SetDcaGlobal3(const Double_t x, const Double_t y, const Double_t z) {
+     mDcaGlobalX = (Float_t)x; mDcaGlobalY = (Float_t)y; mDcaGlobalZ = (Float_t)z; }
    void  SetTopologyMap(const UInt_t map0, const UInt_t map1) { 
      mTopologyMap0 = map0; mTopologyMap1 = map1; }
 
 private:
 
-   Float_t   mPt;
-   Float_t   mPtGlobal;
-   Float_t   mEta;
-   Float_t   mEtaGlobal;
-   Float_t   mDedx;
-   Float_t   mPhi;
-   Float_t   mPhiGlobal;
-   Short_t   mCharge;
-   Float_t   mDca;
-   Float_t   mDcaSigned;
-   Float_t   mDcaGlobal;
-   Float_t   mChi2;
-   Int_t     mFitPts;
-   Int_t     mMaxPts;
-   Int_t     mNhits;
-   Float_t   mTrackLength;
-   Int_t     mPidPion; 
-   Int_t     mPidProton;
-   Int_t     mPidKaon;
-   Int_t     mPidDeuteron;
-   Int_t     mPidElectron;
-   Int_t     mMostLikelihoodPID;  
-   Float_t   mMostLikelihoodProb;
-   Int_t     mExtrapTag;                  //merging area tag.
-   Float_t   mElectronPositronProb;
-   Float_t   mPionPlusMinusProb;
-   Float_t   mKaonPlusMinusProb;
-   Float_t   mProtonPbarProb;
-   Float_t   mFirstPointX;
-   Float_t   mFirstPointY;
-   Float_t   mFirstPointZ;
-   UInt_t    mTopologyMap0;
-   UInt_t    mTopologyMap1;
+   Float_t   mPt;                         // transverse momentum
+   Float_t   mPtGlobal;                   // transverse momentum (global track)
+   Float_t   mEta;                        // pseudorapidity
+   Float_t   mEtaGlobal;                  // pseudorapidity (global track)
+   Float_t   mDedx;                       // specific energy loss
+   Float_t   mPhi;                        // azimuthal angle
+   Float_t   mPhiGlobal;                  // azimuthal angle (global track)
+   Short_t   mCharge;                     // charge
+   Float_t   mDca;                        // distance of closest approach (? track model)
+   Float_t   mDcaSigned;                  // 2D dca with sign (circle fit)
+   Float_t   mDcaGlobal;                  // distance of closest approach for global track
+   Float_t   mChi2;                       // chi squared
+   Int_t     mFitPts;                     // number of hits used in fit
+   Int_t     mMaxPts;                     // maximum possible number of hits 
+   Int_t     mNhits;                      // number of hits on the track
+   Int_t     mNdedxPts;                   // number of hits use for dE/dx
+   Float_t   mTrackLength;                // lenght of the track (cm)
+   Int_t     mPidPion;                    // deviant pid for pi+ and pi-
+   Int_t     mPidProton;                  // deviant pid for p and pbar
+   Int_t     mPidKaon;                    // deviant pid for K+ and K- 
+   Int_t     mPidDeuteron;                // deviant pid for d and dbar 
+   Int_t     mPidElectron;                // deviant pid for e+ and e-
+   Int_t     mMostLikelihoodPID;          // pid with highest probability
+   Float_t   mMostLikelihoodProb;         // probability for most likely pid
+   Int_t     mExtrapTag;                  // merging area tag.
+   Float_t   mElectronPositronProb;       // probability to be e+ or e-
+   Float_t   mPionPlusMinusProb;          // probability to be pi+ or pi- 
+   Float_t   mKaonPlusMinusProb;          // probability to be k+ or k-
+   Float_t   mProtonPbarProb;             // probability to be p or pbar
+   Float_t   mDcaGlobalX;                 // dca.x for global tracks (helix) 
+   Float_t   mDcaGlobalY;                 // dca.y for global tracks (helix) 
+   Float_t   mDcaGlobalZ;                 // dca.z for global tracks (helix) 
+   UInt_t    mTopologyMap0;               // First 32 bits of Topology map
+   UInt_t    mTopologyMap1;               // second 32 bits of Topology map
 
-   ClassDef(StFlowPicoTrack,1)
+   ClassDef(StFlowPicoTrack,4)
 };
 
 #endif
@@ -134,6 +137,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoTrack.h,v $
+// Revision 1.8  2001/07/27 01:26:40  snelling
+// Added and changed variables for picoEvent. Changed trackCut class to StTrack
+//
 // Revision 1.7  2001/07/24 22:29:39  snelling
 // First attempt to get a standard root pico file again, added variables
 //

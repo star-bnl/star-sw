@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.58 2001/07/24 22:29:17 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.59 2001/07/27 01:26:19 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -54,7 +54,7 @@ ClassImp(StFlowMaker)
 
 StFlowMaker::StFlowMaker(const Char_t* name): 
   StMaker(name), 
-  mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), pEvent(NULL) {
+  mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), pRun(NULL), pEvent(NULL) {
   pFlowSelect = new StFlowSelection();
   SetPicoEventDir("./");
 }
@@ -62,7 +62,7 @@ StFlowMaker::StFlowMaker(const Char_t* name):
 StFlowMaker::StFlowMaker(const Char_t* name,
 			 const StFlowSelection& flowSelect) :
   StMaker(name), 
-  mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), pEvent(NULL), pRun(NULL) {
+  mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), pRun(NULL), pEvent(NULL) {
   pFlowSelect = new StFlowSelection(flowSelect); //copy constructor
   SetPicoEventDir("./");
 }
@@ -188,7 +188,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.58 2001/07/24 22:29:17 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.59 2001/07/27 01:26:19 snelling Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -350,9 +350,8 @@ void StFlowMaker::FillFlowEvent() {
   UInt_t origMult = pEvent->primaryVertex(0)->numberOfDaughters(); 
   pFlowEvent->SetOrigMult(origMult);
   PR(origMult);
-  UInt_t uncorrMult = uncorrectedNumberOfNegativePrimaries(*pEvent);
-  pFlowEvent->SetUncorrMult(uncorrMult);
-  PR(uncorrMult);
+  pFlowEvent->SetUncorrNegMult(uncorrectedNumberOfNegativePrimaries(*pEvent));
+  pFlowEvent->SetUncorrPosMult(uncorrectedNumberOfPositivePrimaries(*pEvent));
 
   // define functor for pid probability algorithm
   StuProbabilityPidAlgorithm uPid(*pEvent);
@@ -392,13 +391,19 @@ void StFlowMaker::FillFlowEvent() {
 	pFlowTrack->SetPtGlobal(g.perp());
 	pFlowTrack->SetCharge(pTrack->geometry()->charge());
 	pFlowTrack->SetDca(pTrack->impactParameter());
-	dcaSigned = calcDcaSigned(vertex,pTrack);
+
+	dcaSigned = calcDcaSigned(vertex,gTrack);
 	pFlowTrack->SetDcaSigned(dcaSigned);
+
 	pFlowTrack->SetDcaGlobal(gTrack->impactParameter());
 	pFlowTrack->SetChi2((Float_t)(pTrack->fitTraits().chi2()));
 	pFlowTrack->SetFitPts(pTrack->fitTraits().numberOfFitPoints());
 	pFlowTrack->SetMaxPts(pTrack->numberOfPossiblePoints());
-	pFlowTrack->SetFirstPoint(pTrack->detectorInfo()->firstPoint());
+
+	Double_t pathLength = gTrack->geometry()->helix().pathLength(vertex);
+	StThreeVectorD distance = gTrack->geometry()->helix().at(pathLength);
+	pFlowTrack->SetDcaGlobal3(distance - vertex);
+
 	pFlowTrack->SetTrackLength(pTrack->length());
 	pFlowTrack->SetNhits(pTrack->detectorInfo()->numberOfPoints(kTpcId));
 	
@@ -436,7 +441,9 @@ void StFlowMaker::FillFlowEvent() {
 	    pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
 	    if (pid && pid->method() == kTruncatedMeanId) break;
 	  }
-	  assert(pid); pFlowTrack->SetDedx(pid->mean());
+	  assert(pid); 
+	  pFlowTrack->SetDedx(pid->mean());
+	  pFlowTrack->SetNdedxPts(pid->numberOfPoints());
         }
 
 	// Probability pid
@@ -641,7 +648,8 @@ void StFlowMaker::FillPicoEvent() {
   pPicoEvent->SetBeamMassNumberWest(pFlowEvent->BeamMassNumberWest());
 
   pPicoEvent->SetOrigMult(pFlowEvent->OrigMult());
-  pPicoEvent->SetUncorrMult(pFlowEvent->UncorrMult());
+  pPicoEvent->SetUncorrNegMult(pFlowEvent->UncorrNegMult());
+  pPicoEvent->SetUncorrPosMult(pFlowEvent->UncorrPosMult());
   pPicoEvent->SetMultEta(pFlowEvent->MultEta());
   pPicoEvent->SetCentrality(pFlowEvent->Centrality());
   pPicoEvent->SetVertexPos(pFlowEvent->VertexPos().x(),
@@ -671,9 +679,10 @@ void StFlowMaker::FillPicoEvent() {
     pFlowPicoTrack->SetFitPts(pFlowTrack->FitPts());
     pFlowPicoTrack->SetMaxPts(pFlowTrack->MaxPts());
     pFlowPicoTrack->SetNhits(pFlowTrack->Nhits());
-    pFlowPicoTrack->SetFirstPoint(pFlowTrack->FirstPoint().x(),
-				  pFlowTrack->FirstPoint().y(),
-				  pFlowTrack->FirstPoint().z());
+    pFlowPicoTrack->SetNdedxPts(pFlowTrack->NdedxPts());
+    pFlowPicoTrack->SetDcaGlobal3(pFlowTrack->DcaGlobal3().x(),
+				  pFlowTrack->DcaGlobal3().y(),
+				  pFlowTrack->DcaGlobal3().z());
     pFlowPicoTrack->SetTrackLength(pFlowTrack->TrackLength());
     pFlowPicoTrack->SetMostLikelihoodPID(pFlowTrack->MostLikelihoodPID()); 
     pFlowPicoTrack->SetMostLikelihoodProb(pFlowTrack->MostLikelihoodProb());
@@ -1033,7 +1042,8 @@ Bool_t StFlowMaker::FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent) {
   UInt_t origMult = pPicoEvent->OrigMult();
   pFlowEvent->SetOrigMult(origMult);
   PR(origMult);
-  pFlowEvent->SetUncorrMult(pPicoEvent->UncorrMult());
+  pFlowEvent->SetUncorrNegMult(pPicoEvent->UncorrNegMult());
+  pFlowEvent->SetUncorrPosMult(pPicoEvent->UncorrPosMult());
   pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
 					  pPicoEvent->VertexY(),
 					  pPicoEvent->VertexZ()) );
@@ -1073,9 +1083,10 @@ Bool_t StFlowMaker::FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetFitPts(pPicoTrack->FitPts());
       pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
       pFlowTrack->SetNhits(pPicoTrack->Nhits());
-      pFlowTrack->SetFirstPoint(StThreeVectorF(pPicoTrack->FirstPointX(),
-					       pPicoTrack->FirstPointY(),
-					       pPicoTrack->FirstPointZ()) );
+      pFlowTrack->SetNdedxPts(pPicoTrack->NdedxPts());
+      pFlowTrack->SetDcaGlobal3(StThreeVectorD(pPicoTrack->DcaGlobalX(),
+					       pPicoTrack->DcaGlobalY(),
+					       pPicoTrack->DcaGlobalZ()) );
       pFlowTrack->SetTrackLength(pPicoTrack->TrackLength());
       pFlowTrack->SetMostLikelihoodPID(pPicoTrack->MostLikelihoodPID()); 
       pFlowTrack->SetMostLikelihoodProb(pPicoTrack->MostLikelihoodProb());
@@ -1215,9 +1226,9 @@ Int_t StFlowMaker::InitPicoEventRead() {
 //-----------------------------------------------------------------------
 
 Float_t StFlowMaker::calcDcaSigned(const StThreeVectorF pos, 
-				   const StPrimaryTrack* track) {
+				   const StTrack* track) {
 
-  // find the distance between the center of the circle and pos.
+  // find the distance between the center of the circle and pos (vertex).
   // if the radius of curvature > distance, then call it positive
   // Bum Choi
 
@@ -1234,6 +1245,9 @@ Float_t StFlowMaker::calcDcaSigned(const StThreeVectorF pos,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.59  2001/07/27 01:26:19  snelling
+// Added and changed variables for picoEvent. Changed trackCut class to StTrack
+//
 // Revision 1.58  2001/07/24 22:29:17  snelling
 // First attempt to get a standard root pico file again, added variables
 //
