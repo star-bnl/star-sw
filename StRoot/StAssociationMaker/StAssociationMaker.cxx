@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.22 2000/03/29 16:14:08 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.23 2000/04/04 23:12:08 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.23  2000/04/04 23:12:08  calderon
+ * Speed up FTPC Hit association, taking advantage of hit sorting
+ * and using the STL algorithm find_if.
+ *
  * Revision 1.22  2000/03/29 16:14:08  calderon
  * Keep storing Vertices in V0 map that come from event generator, and hence don't
  * have a parent.
@@ -105,10 +109,12 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <math.h>
 #if !defined(ST_NO_NAMESPACES)
 using std::string;
 using std::vector;
+using std::find_if;
 #endif
 
 #include "StAssociationMaker.h"
@@ -197,6 +203,17 @@ using std::vector;
     
 // }
     
+class compFuncMcFtpcHit{
+public:
+    bool operator()(const StMcFtpcHit*) const;
+    void setReferencePhi(float phi) { mRefPhi = phi; }
+    float mRefPhi;
+};
+bool compFuncMcFtpcHit::operator()(const StMcFtpcHit* h) const {
+    // comparison is btw hits in the same plane, so
+    // z coordinate is irrelevant
+	return  (h->position().phi()/degree) > mRefPhi;
+}
 
 bool compTrack::operator()(const StGlobalTrack* t1, const StGlobalTrack* t2) const {
     return t1 < t2;
@@ -580,11 +597,11 @@ Int_t StAssociationMaker::Make()
     mMcTpcHitMap = new mcTpcHitMapType;
 
     float tpcHitDistance;
-    
+    cout << "In Sector : ";
     for (unsigned int iSector=0;
 	 iSector<rcTpcHitColl->numberOfSectors(); iSector++) {
 	
-	cout << "In Sector : " << iSector + 1 << endl;
+	cout << iSector + 1 << " "; flush(cout);
 	StTpcSectorHitCollection* tpcSectHitColl = rcTpcHitColl->sector(iSector);
 	for (unsigned int iPadrow=0;
 	     iPadrow<tpcSectHitColl->numberOfPadrows();
@@ -638,7 +655,7 @@ Int_t StAssociationMaker::Make()
 	} // End of Padrow Loop for Rec. Hits
     } // End of Sector Loop for Rec. Hits
     
-    cout << "Finished Making TPC Hit Associations *********" << endl;
+    cout << "\nFinished Making TPC Hit Associations *********" << endl;
     
     //
     // Loop over SVT hits and make Associations
@@ -654,10 +671,11 @@ Int_t StAssociationMaker::Make()
 
     float svtHitDistance;
     unsigned int nSvtHits = rcSvtHitColl->numberOfHits();
+    cout << "In Barrel : ";
     for (unsigned int iBarrel=0;  nSvtHits &&
 	     iBarrel<rcSvtHitColl->numberOfBarrels(); iBarrel++) {
 	
-	cout << "In Barrel : " << iBarrel + 1 << endl;
+	cout << iBarrel + 1 << " "; flush(cout);
 	
 	for (unsigned int iLadder=0;
 	     iLadder<rcSvtHitColl->barrel(iBarrel)->numberOfLadders();
@@ -721,58 +739,66 @@ Int_t StAssociationMaker::Make()
     //
     cout << "Making FTPC Hit Associations..." << endl;
     
-    StFtpcHit*   rcFtpcHit;
-    StMcFtpcHit* mcFtpcHit;
+    StFtpcHit*   rcFtpcHit = 0;
+    StMcFtpcHit* mcFtpcHit = 0;
     
     // Instantiate the Ftpc Hit maps
     mRcFtpcHitMap = new rcFtpcHitMapType;
     mMcFtpcHitMap = new mcFtpcHitMapType;
 
-    float ftpcHitDistance;
-    float minHitDistance;
-    
+    float ftpcHitDistance = 0;
+    float minHitDistance = 0;
+    cout << "In Plane : ";
     for (unsigned int iPlane=0;
 	 iPlane<rcFtpcHitColl->numberOfPlanes(); iPlane++) {
 	
-	cout << "In Plane : " << iPlane + 1 << endl;
+	cout << iPlane + 1 << " "; flush(cout);
 		
 	for (unsigned int iSector=0;
 	     iSector<rcFtpcHitColl->plane(iPlane)->numberOfSectors();
 	     iSector++) {
-	   
+
+	    compFuncMcFtpcHit ftpcComp;
 	    //PR(iSector);
+
 	    for (unsigned int iHit=0;
 		 iHit<rcFtpcHitColl->plane(iPlane)->sector(iSector)->hits().size();
 		 iHit++){
 		//PR(iHit); 
 
 		rcFtpcHit = rcFtpcHitColl->plane(iPlane)->sector(iSector)->hits()[iHit];
-				
-		StMcFtpcHit* closestFtpcHit = 0;
-		float rDiff;
-		float phiDiff;
-		float rDiffMin;
-		float phiDiffMin;
-		for (unsigned int jHit=0;
-		     jHit<mcFtpcHitColl->plane(iPlane)->hits().size();
+
+		ftpcComp.setReferencePhi((rcFtpcHit->position().phi()/degree) - parDB->phiCutFtpc());
+		
+		float rDiff, phiDiff, rDiffMin, phiDiffMin;
+		rDiff = phiDiff = rDiffMin = phiDiffMin =0;
+
+		//PR(mcFtpcHitColl->plane(iPlane)->hits().size());
+
+		StMcFtpcHitIterator ftpcHitSeed = find_if (mcFtpcHitColl->plane(iPlane)->hits().begin(),
+							   mcFtpcHitColl->plane(iPlane)->hits().end(),
+							   ftpcComp);
+		bool isFirst = true;
+		for (StMcFtpcHitIterator jHit = ftpcHitSeed;
+		     jHit<mcFtpcHitColl->plane(iPlane)->hits().end();
 		     jHit++){
-		    //PR(jHit); 
-		    mcFtpcHit = mcFtpcHitColl->plane(iPlane)->hits()[jHit];
+		    
+		    mcFtpcHit = *jHit;
 		    rDiff   = mcFtpcHit->position().perp() - rcFtpcHit->position().perp();
 		    phiDiff = (mcFtpcHit->position().phi()  - rcFtpcHit->position().phi())/degree;
+
 		    if ( phiDiff > parDB->phiCutFtpc() ) break; //mc hits are sorted, save time!
 		    
 		    ftpcHitDistance = (mcFtpcHit->position() - rcFtpcHit->position()).mag2();
-		    		    
-		    if (jHit==0) {
+		    
+		    if (isFirst) {
 			minHitDistance=ftpcHitDistance;
-			closestFtpcHit = mcFtpcHit;
 			rDiffMin=rDiff;
 			phiDiffMin=phiDiff;
+			isFirst = false;
 		    }
-		    if (ftpcHitDistance<minHitDistance) {
+		    if (ftpcHitDistance < minHitDistance) {
 			minHitDistance = ftpcHitDistance;
-			closestFtpcHit = mcFtpcHit;
 			rDiffMin=rDiff;
 			phiDiffMin=phiDiff;
 		    }
@@ -784,13 +810,14 @@ Int_t StAssociationMaker::Make()
 		    }
 		    
 		} // End of Hits in PLANE loop for MC Hits
-		if (closestFtpcHit)
+		if (!isFirst)
 		    mFtpcHitResolution->Fill(rDiffMin,phiDiffMin); //!
 	    } // End of Hits in Sector loop for Rec. Hits
 	} // End of Sector Loop for Rec. Hits
     } // End of Plane Loop for Rec. Hits
     
-    cout << "Finished Making FTPC Hit Associations *********" << endl;
+    cout << "\nFinished Making FTPC Hit Associations *********" << endl;
+    cout << "Number of Entries in Ftpc Hit Maps: " << mRcFtpcHitMap->size() << endl;
     
 
     //
