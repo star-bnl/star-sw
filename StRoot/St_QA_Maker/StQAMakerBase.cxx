@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.7 2001/05/23 00:14:53 lansdell Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.8 2001/08/07 07:51:28 lansdell Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.8  2001/08/07 07:51:28  lansdell
+// primvtx check for different multiplicities crashed for MC data, now fixed
+//
 // Revision 2.7  2001/05/23 00:14:53  lansdell
 // more changes for qa_shift histograms
 //
@@ -74,7 +77,8 @@ Int_t StQAMakerBase::Init(){
 //_____________________________________________________________________________
 Int_t StQAMakerBase::Make(){
 
-  gMessMgr->Info(" In StQAMakerBase::Make()");
+  if (Debug())
+    gMessMgr->Info(" In StQAMakerBase::Make()");
 
   if (firstEvent) BookHist();
   // See BookHist() for definitions of histsSet values,
@@ -125,8 +129,9 @@ Int_t StQAMakerBase::Make(){
 //_____________________________________________________________________________
 void StQAMakerBase::NewQABookHist(const char* prefix) {  
 
-  gMessMgr->Info() <<
-    "StQAMakerBase: booking histograms with prefix: " << prefix << endm;
+  if (Debug())
+    gMessMgr->Info() <<
+      "StQAMakerBase: booking histograms with prefix: " << prefix << endm;
   hists = new StQABookHist(prefix);
   histsList->Add(hists);
 }

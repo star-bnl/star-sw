@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.17 2001/08/03 20:33:55 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 2.18 2001/08/07 07:51:27 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.18  2001/08/07 07:51:27  lansdell
+// primvtx check for different multiplicities crashed for MC data, now fixed
+//
 // Revision 2.17  2001/08/03 20:33:55  lansdell
 // added primvtx check histos for different multiplicities; separated x-y plot of first point on track, tpc into east and west histos
 //
@@ -140,22 +143,18 @@ Int_t StEventQAMaker::Make() {
       BookHist();
     }
     // only process if a primary vertex exists !!!
-    if (event->info()->type() == "NONE") {
-      histsSet = 1;
-    } else {
-      // process Monte Carlo events
-      histsSet = 0;
-    }
     if (event->primaryVertex()) {
       multiplicity = event->trackNodes().size();
       int makeStat = StQAMakerBase::Make();
       mNullPrimVtx->Fill(1);
-      hists->mNullPrimVtxMult->Fill(1);
+      if (histsSet == 1)
+	hists->mNullPrimVtxMult->Fill(1);
       return makeStat;
     } else {
       gMessMgr->Warning("StEventQAMaker::Make(): no primary vertex found!");
       mNullPrimVtx->Fill(-1);
-      hists->mNullPrimVtxMult->Fill(-1);
+      if (histsSet == 1)
+	hists->mNullPrimVtxMult->Fill(-1);
       return kStOk;
     }
   } else {
