@@ -1,6 +1,17 @@
-* $Id: svttgeo2.g,v 1.1 2003/09/11 16:16:19 potekhin Exp $
+* $Id: svttgeo2.g,v 1.2 2003/09/12 20:46:36 potekhin Exp $
 *
 * $Log: svttgeo2.g,v $
+* Revision 1.2  2003/09/12 20:46:36  potekhin
+* Still work in progress -- added the first cut
+* of the model for the water feeds from the manifold to the boards.
+*
+* The circular distribution pipes will need to be modeled differently
+* in the next cut as the simple circular description doesn't fir too
+* well with various other volumes around.
+*
+* Modified the copper cable bundle geometry to allow for the inclusion
+* of the water feeds. Chnaged the strut material from Be to Carbon.
+*
 * Revision 1.1  2003/09/11 16:16:19  potekhin
 * This is a seriously updated version of the SVT geometry.
 * It comes in a new file to decouple it from the previous
@@ -13,12 +24,6 @@
 *
 * This is a milestone check-in: further improvements will be made
 * later. Some optimization of the volume nesting has already been done.
-*
-* Revision 1.3  2003/08/05 23:38:23  potekhin
-* Correct the comment typo
-*
-* Revision 1.2  2003/08/05 22:37:07  potekhin
-* Added Id and Log tags
 *
 *
 *
@@ -48,7 +53,7 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
                        SFSS,SFCP,SFCF,SFCT,SFCX,SFCW,
                        SBSP,SAKM,SCKM,SBSR,SBCR,SBRX,SBRL,
                        SBMM,SBMO,SBMI,SMRD,SALM,SISH,SSSH,SOSH,
-                       SCBM,SCBL
+                       SCBM,SCBL,SFED,SOUM,SOUR
 *
       structure SVTG { Version,   Nlayer,    RsizeMin,  RsizeMax,
 		       ZsizeMax,  Angoff}
@@ -100,7 +105,9 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
                        AlMeshId, AlMeshOd, AlMshThk, AlMshPos} 
 *     
       structure SCBP { Layer,Len,Rmin1,Rmax1,Rmin2,Rmax2,Vol}
-      structure SWCX { Version,Length,dR, offset, wall}
+      structure SFEP { Layer,Len,Rmin1,Rmax1,Rmin2,Rmax2,Vol}
+      structure SWCX { Version,Length,dR, offset, wall, rOffset}
+      structure SOUP { Version,Length,Rout,dR,Phi1,Phi2,DiamOut, DiamIn}
 
       Integer        iLayer,s,side,ilad,iwaf,i,j
       Real           ladthk,cone_thk1,cone_thk2,roffset,RsizeMax,deg,rad,c0
@@ -109,7 +116,8 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
       Real           endrng_z,brack_z,screw_z,ir_rmin,ang,wafpckLen,dthk,radtilt
       Real           xbuf, phi, xbuf1, xbuf2
       Real           yPCB, A, CuThk, sq
-      Real           radii(6), rad_offset
+      Real           radii(6), rad_cones_in(5),rad_cones_out(5), rad_offset, shield_phi(4)
+      Integer        i_phi
 
 *******************************************************************************
 * Turns out it's more convenient to store these here:
@@ -119,6 +127,11 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
       radii(4)=11.27
       radii(5)=14.19
       radii(6)=15.13
+***************************
+      shield_phi(1)=9.0
+      shield_phi(2)=27.0
+      shield_phi(3)=45.0
+      shield_phi(4)=63.0
 ***************************
    Fill SVTG ! Basic SVT dimensions 
       Version   = 2          ! geometry version
@@ -322,24 +335,30 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
       AlMshPos  = 53.5      ! Aluminum shield mesh z position
    EndFill
 *
-*      Len = SWAM_zmin - SWCA_Length/2   ! Length
+   do i=1,5
+     rad_cones_out(i)=SWAM_Rmin+(i-1)*(SWAM_Rmax-SWAM_Rmin)/4.0
+     rad_cones_in(i) =radii(1) +(i-1)*(radii(6)-radii(1))/4.0
+   enddo
+
    Fill SCBP                ! Cabling
       Layer=1               ! Layer
-      Len  =1.8             ! Length
-      Rmin1=radii(1)        ! Min radius closer to wafers
-      Rmin2=SWAM_Rmin       ! Min radius further from wafers
+      Len  =1.85             ! Length
+      Rmin1=rad_cones_in(1) ! Min radius closer to wafers
+      Rmin2=rad_cones_out(1)! Min radius further from wafers
       Vol  =7.24+3.21       ! Volume of copper, LV+HV cables
    EndFill
 *
    Fill SCBP                ! Cabling
       Layer=2               ! Layer
-      Rmin1=radii(2)        ! Min radius closer to wafers
+      Rmin1=rad_cones_in(2) ! Min radius closer to wafers
+      Rmin2=rad_cones_out(2)! Min radius further from wafers
       Vol  =15.54+5.7       ! Volume of copper, LV+HV cables
    EndFill
 *
    Fill SCBP                ! Cabling
       Layer=3               ! Layer
-      Rmin1=radii(3)        ! Min radius closer to wafers
+      Rmin1=rad_cones_in(3) ! Min radius closer to wafers
+      Rmin2=rad_cones_out(3)! Min radius further from wafers
       Vol  =4.05+2.02       ! Volume of copper, LV+HV cables
    EndFill
 *
@@ -347,26 +366,68 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
 * hence the different Rmin2
    Fill SCBP                ! Cabling
       Layer=4               ! Layer
-      Rmin1=radii(4)        ! Min radius closer to wafers
-      Rmin2=SWAM_Rmax       ! Min radius further from wafers
+      Rmin1=rad_cones_in(4) ! Min radius closer to wafers
+      Rmin2=rad_cones_out(4)! Min radius further from wafers
       Vol  =3.67+1.69       ! Volume of copper, LV+HV cables
    EndFill
 *
    Fill SCBP                ! Cabling
       Layer=5               ! Layer
-      Rmin1=radii(5)        ! Min radius closer to wafers
-      Rmin2=SWAM_Rmax       ! Min radius further from wafers
+      Rmin1=rad_cones_in(5) ! Min radius closer to wafers
+      Rmin2=rad_cones_out(5)! Min radius further from wafers
       Vol  =6.95+2.43       ! Volume of copper, LV+HV cables
+   EndFill
+***********************************************
+   Fill SFEP                ! Water feed
+      Layer=1               ! Layer
+      Len  =1.85             ! Length
+      Rmin1=0.5*(rad_cones_in(2)+rad_cones_in(1))     ! Min radius closer to wafers
+      Rmin2=0.5*(rad_cones_out(2)+rad_cones_out(1))   ! Min radius further from wafers
+      Vol  =50       ! Volume of water
+   EndFill
+*
+   Fill SFEP                ! Water feed
+      Layer=2               ! Layer
+      Rmin1=0.5*(rad_cones_in(3)+rad_cones_in(4))     ! Min radius closer to wafers
+      Rmin2=0.5*(rad_cones_out(3)+rad_cones_out(4))   ! Min radius further from wafers
+      Vol  =60       ! Volume of water
+   EndFill
+*
+   Fill SFEP                ! Water feed
+      Layer=3               ! Layer
+      Rmin1=0.5*(rad_cones_in(4)+rad_cones_in(5))     ! Min radius closer to wafers
+      Rmin2=0.5*(rad_cones_out(4)+rad_cones_out(5))   ! Min radius further from wafers
+      Vol  =70       ! Volume of water
+   EndFill
+*
+   Fill SFEP                ! Water feed
+      Layer=4               ! Layer
+      Rmin1=rad_cones_in(5)+1     ! Min radius closer to wafers
+      Rmin2=rad_cones_out(5)+0.5   ! Min radius further from wafers
+      Vol  =200       ! Volume of water
    EndFill
 ***********************************************
    Fill SWCX                ! Circular water distribution pipes (2)
       Version=1             ! version
-      Length =2.35          ! of the ring in the Z direction
-      dR     =1.5           ! thickness
+      Length =2.7           ! of the ring in the Z direction
+      dR     =1.3           ! thickness
+*      Length =2.35          ! of the ring in the Z direction
+*      dR     =1.5           ! thickness
       offset =1.5           ! from the edge of the ladder support, inward
+      rOffset=0.5           ! Radial offset
       wall   =0.3           ! thisckness of the plastic pipe wall
    EndFill
 *
+   Fill SOUP                ! Mother of the outer shielding cage, parameters
+      Version = 1           ! Version
+      Length  = 82.5        ! Length
+      Rout    = 19.41       ! Outer radius of the shield
+      dR      = 0.711       ! Diameter of the tubes constituting the cage (also dR of the mother)
+      Phi1    = 0.0         ! Starting angle of the mother
+      Phi2    = 70.0        ! Finishing angle of the mother
+      DiamOut = 0.711       ! Outer diam of the carbon tube
+      DiamIn  = 0.620       ! Inner diam of the carbon tube
+   EndFill
 
       USE SVTG
       USE SWCA
@@ -380,6 +441,7 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
       USE SSLD
       USE SCBP
       USE SWCX
+      USE SOUP
 
 * introduce common materials here
 *
@@ -481,27 +543,22 @@ Block SVTT is the mother of all SVT volumes
 * 
 * SVT support cones
 *
-      Create    SCON  " support cone mother"
+      Create    SCON  "Support cone mother"
       Position  SCON
       Position  SCON              ThetaZ=180 
 *
 * The beampipe support
-*
-      Create    SBSP  " Beampipe support mother "
-      Position  SBSP z=(ssup_RodLen/2-
-                        ssub_KMntThk/2)
-      Position  SBSP z=-(ssup_RodLen/2-
-                         ssub_KMntThk/2),
-                     ThetaZ=180
+      Create    SBSP  "Beampipe support mother "
+      Position  SBSP z = (ssup_RodLen/2- ssub_KMntThk/2)
+      Position  SBSP z= -(ssup_RodLen/2- ssub_KMntThk/2), ThetaZ=180
 * 
-* SVT support rods
-*
-      Create    SROD  " Be support rod"
-      Position  SROD  y=ssup_rodDist+ssup_rodOD/2
-      Position  SROD  y=-ssup_rodDist-ssup_rodOD/2
+* SVT support rods -- previously incorrectly described as Be,
+* carbon compound in reality
+      Create    SROD  "Support rod"
+      Position  SROD  y = ssup_rodDist+ssup_rodOD/2
+      Position  SROD  y =-ssup_rodDist-ssup_rodOD/2
 *
 * The SVT layers 
-*
       radmax=svtg_rSizeMax
       Do ilayer = 1, min(6,nint(svtg_Nlayer))
          if (ilayer<6) then
@@ -541,21 +598,24 @@ Block SVTT is the mother of all SVT volumes
       Position SALM z=-(ssld_AlMshPos-ssld_AlMshThk/2)
 
 * The bundles of cables connecting PCBs with the transition boards:
-
-*      Do ilayer=1,5
-*         Use SCBP Layer=ilayer
-*         create SCBL "bundles of cables"
-*         Position SCBL x=0.0 y=0.0 z=  SWAM_Zmin-SCBP_Len
-*         Position SCBL x=0.0 y=0.0 z=-(SWAM_Zmin-SCBP_Len) ThetaZ=180.0
-*      enddo
-
-      Create SCBM "mother of all cables"
+* modeled as conical layers of equivalent mass, withing their own
+* mother volume
+      Create SCBM "Mother of All Cables"
       Position SCBM x=0.0 y=0.0 z=  SWAM_Zmin-SCBP_Len
       Position SCBM x=0.0 y=0.0 z=-(SWAM_Zmin-SCBP_Len) ThetaZ=180.0
 
+* Circular water feeds
       Create SWCL
       Position SWCL x=0.0 y =0.0 z= SWCA_Length/2.0-SWCX_offset
       Position SWCL x=0.0 y =0.0 z=-SWCA_Length/2.0+SWCX_offset
+
+* Outer shileding structure
+      Create SOUM
+      Position SOUM x=0.0 y=0.0 z=0.0
+      Position SOUM x=0.0 y=0.0 z=0.0 AlphaY=180.0
+      Position SOUM x=0.0 y=0.0 z=0.0 AlphaY=180.0 AlphaZ=180
+      Position SOUM x=0.0 y=0.0 z=0.0 AlphaZ=180
+
 *
 EndBlock
 *
@@ -568,8 +628,8 @@ Block SWCL is the mother of the circular water pipes
       USE SVTL Layer=6
 
       Shape TUBE _
-      rmin=SVTL_Radius-SWCX_wall _
-      rmax=SVTL_Radius+SWCX_dR+SWCX_wall _
+      rmin=SWCX_rOffset+SVTL_Radius-SWCX_wall _
+      rmax=SWCX_rOffset+SVTL_Radius+SWCX_dR+SWCX_wall _
       dz=(SWCX_Length/2.0)+2.0*SWCX_wall
 
       Create SWCP
@@ -595,7 +655,9 @@ Block SWCP is an approximation of water in the circular pipe, a rectangular one
 * two rectangular ones, of same combined cross section:
 * 1.5x2.35cm total, for both
 
-      Shape TUBE rmin=SVTL_Radius rmax=SVTL_Radius+SWCX_dR dz=SWCX_Length/4.0
+      Shape TUBE rmin=SWCX_rOffset+SVTL_Radius _
+                 rmax=SWCX_rOffset+SVTL_Radius+SWCX_dR _
+                 dz=SWCX_Length/4.0
 
 EndBlock
 *
@@ -608,8 +670,9 @@ Block SWCU is an approximation of the upper wall of the water pipe
 
       Attribute SWCP    seen=1    colo=4
       USE SVTL Layer=6
-      Shape TUBE rmin=SVTL_Radius+SWCX_dR _
-      rmax=SVTL_Radius+SWCX_dR+SWCX_wall _
+      Shape TUBE _
+      rmin=SWCX_rOffset+SVTL_Radius+SWCX_dR _
+      rmax=SWCX_rOffset+SVTL_Radius+SWCX_dR+SWCX_wall _
       dz=SWCX_Length/2.0+2.0*SWCX_wall
 
 EndBlock
@@ -624,8 +687,8 @@ Block SWCD is an approximation of the lower wall of the water pipe
       Attribute SWCP    seen=1    colo=4
       USE SVTL Layer=6
       Shape TUBE _
-      rmin=SVTL_Radius-SWCX_wall _
-      rmax=SVTL_Radius _
+      rmin=SWCX_rOffset+SVTL_Radius-SWCX_wall _
+      rmax=SWCX_rOffset+SVTL_Radius _
       dz=SWCX_Length/2.0+2.0*SWCX_wall
 
 EndBlock
@@ -640,8 +703,35 @@ Block SWCF is an approximation of the side wall of the water pipe
       Attribute SWCP    seen=1    colo=4
       USE SVTL Layer=6
       Shape TUBE _
-      rmin=SVTL_Radius  rmax=SVTL_Radius+SWCX_dR dz=SWCX_wall/2.0
+      rmin=SWCX_rOffset+SVTL_Radius  rmax=SWCX_rOffset+SVTL_Radius+SWCX_dR dz=SWCX_wall/2.0
 
+EndBlock
+*******************************************************************************
+*
+Block SOUM is the mother of the array of the outer shileding support tubes
+      Material Air
+      Attribute SOUM    seen=0   colo=1
+      Shape TUBS Rmin=SOUP_Rout-SOUP_dR Rmax=SOUP_Rout _
+      DZ=SOUP_Length/2.0 Phi1=SOUP_Phi1 Phi2=SOUP_Phi2
+
+      Create SOUR
+      do i_phi=1,4
+      Position SOUR x=cos(shield_phi(i_phi)*3.1415926/180.0)*(SOUP_Rout-SOUP_dR/2.0) _
+                    y=sin(shield_phi(i_phi)*3.1415926/180.0)*(SOUP_Rout-SOUP_dR/2.0) _
+                    z=0.0
+      enddo
+
+
+EndBlock
+*
+*******************************************************************************
+*
+Block SOUR is the outer shileding support tubes (rods)
+      Material Air
+      Attribute SOUM seen=1 colo=4
+      Shape TUBE Rmin=SOUP_DiamIn/2.0 _
+		 Rmax=SOUP_DiamOut/2.0 _
+                 dz=SOUP_Length/2.0
 EndBlock
 *
 *******************************************************************************
@@ -861,6 +951,13 @@ Block SCBM is the mother for the bundle of cables going from PCBs
          Position SCBL x=0.0 y=0.0 z=0.0
       enddo
 
+      Do ilayer=1,4
+         Use SFEP Layer=ilayer
+         create SFED "bundles of cables"
+         Position SFED x=0.0 y=0.0 z=0.0
+      enddo
+
+
 EndBlock
 *------------------------------------------------------------------------------
 *
@@ -879,6 +976,25 @@ Block SCBL is the bundle of cables going from PCBs to manifolds
                        Rmx1=SCBP_Rmin1+CuThk,
                        Rmn2=SCBP_Rmin2,
                        Rmx2=SCBP_Rmin2+CuThk
+*
+endblock
+*------------------------------------------------------------------------------
+*
+Block SFED is the bundle of cables going from PCBs to manifolds
+      Material  Water
+      Attribute SFED   Seen=1   Colo=2
+
+      sq=SFEP_Len**2/(SFEP_Rmin2-SFEP_Rmin1)**2
+      A=3.1415*(SFEP_Rmin1**2+SFEP_Rmin2**2)*sqrt(1+sq)
+
+      CuThk=(SFEP_Vol/A)*sqrt(1.0+1.0/sq)
+*      write(*,*) 'A, Th=',A,CuThk
+
+      SHAPE     CONE   Dz  =SFEP_Len,
+                       Rmn1=SFEP_Rmin1,
+                       Rmx1=SFEP_Rmin1+CuThk,
+                       Rmn2=SFEP_Rmin2,
+                       Rmx2=SFEP_Rmin2+CuThk
 *
 endblock
 *------------------------------------------------------------------------------
@@ -1117,7 +1233,7 @@ EndBlock
 * ****************************************************************************
 *
 Block SROD is the SVT Be support rod
-      Material  Berillium
+      Material  Carbon
       Attribute SROD  Seen=1  Colo=2
       Shape     TUBE   rmin=ssup_RodID/2,
                        rmax=ssup_RodOD/2,
@@ -1700,7 +1816,7 @@ Block SFCF is the carbon fiber structure container
 		 dy=sfpa_smThk/2.,
 		 dz=sfpa_ssLen/2
 
-      Create   SFCT " carbon tube"
+      Create   SFCT "Carbon Tube"
       Position SFCT y= sfpa_smThk/2.-sfpa_cfrad
        
       Position SFCT x= sfpa_smThk*tan(pi/6.)-sfpa_cfrad,
@@ -1710,7 +1826,7 @@ Block SFCF is the carbon fiber structure container
                     y=-sfpa_smThk/2.+sfpa_cfrad
 
 
-      Create   SFCX " carbon tube (crossing)"
+      Create   SFCX "Carbon Tube (crossing)"
       Position SFCX y=-sfpa_smThk/2.+sfpa_cfrad,
                     ort=yzx
 
