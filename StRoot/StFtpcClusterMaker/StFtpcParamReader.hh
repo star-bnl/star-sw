@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.11 2001/01/15 16:08:52 jcs Exp $
+// $Id: StFtpcParamReader.hh,v 1.12 2001/01/27 20:07:47 jcs Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.12  2001/01/27 20:07:47  jcs
+// change name of parameter
+//
 // Revision 1.11  2001/01/15 16:08:52  jcs
 // get phiOrigin and phiPerSector fro ftpcDimensions
 //
@@ -141,7 +144,7 @@ protected:
   Float_t mPhiOrigin;
   Float_t mPhiPerSector;
   Float_t mRadiusTolerance;
-  Float_t mSigmaSpacingFactorForCluster;
+  Float_t mSigmaSpacingFactor;
   Float_t mAdcConversionFactor;
   Float_t mClusterChargeConversionFactor;
   //SlowSimulator parameters
@@ -276,7 +279,7 @@ public:
   Float_t phiOrigin() {return mPhiOrigin;}
   Float_t phiPerSector() {return mPhiPerSector;}
   Float_t radiusTolerance() {return mRadiusTolerance;}
-  Float_t sigmaSpacingFactorForCluster() {return mSigmaSpacingFactorForCluster;}
+  Float_t sigmaSpacingFactor() {return mSigmaSpacingFactor;}
   Float_t adcConversionFactor() {return mAdcConversionFactor;}
   Float_t clusterChargeConversionFactor() {return mClusterChargeConversionFactor;}
   Int_t numberOfFssGasValues() {return mNumberOfFssGasValues;}

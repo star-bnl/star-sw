@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.20 2001/01/25 15:25:44 oldi Exp $
+// $Id: StFtpcFastSimu.cc,v 1.21 2001/01/27 20:10:42 jcs Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.21  2001/01/27 20:10:42  jcs
+// change name of parameter
+//
 // Revision 1.20  2001/01/25 15:25:44  oldi
 // Fix of several bugs which caused memory leaks:
 //  - Some arrays were not allocated and/or deleted properly.
@@ -546,7 +549,7 @@ int StFtpcFastSimu::ffs_merge_tagger()
 	  s_azi[2]*sqr(r1[i]) + s_azi[3]*sqr(r1[i])*r1[i];
 	mPoint[i].SetSigmaPhi(sig_azi_1*micrometer*(r1[i]/ra));
 
-	sig_azi_1 = (mParam->sigmaSpacingFactorForCluster()*sig_azi_1)*micrometer;
+	sig_azi_1 = (mParam->sigmaSpacingFactor()*sig_azi_1)*micrometer;
 	sigazi[i] = sig_azi_1*(r1[i]/ra);
 
 	// radial direction
@@ -557,7 +560,7 @@ int StFtpcFastSimu::ffs_merge_tagger()
 
 	mPoint[i].SetSigmaR(sig_rad_1*micrometer*(v1/Va));
 
-	sig_rad_1 = (mParam->sigmaSpacingFactorForCluster()*sig_rad_1)*micrometer;
+	sig_rad_1 = (mParam->sigmaSpacingFactor()*sig_rad_1)*micrometer;
 	sigrad[i] = sig_rad_1*(v1/Va);
 
       }
