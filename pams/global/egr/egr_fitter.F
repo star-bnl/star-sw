@@ -160,7 +160,9 @@ C  Abort if the TPC is needed but there are no TPC tracks
             gtrk(i).nhit = 0
             gtrk(i).ntpc = 0
             gtrk(i).nfit = 0
-            gtrk(i).nmax = 0
+C** Spiros put this after Helen suggested it!
+            gtrk(tptrack(i).id).nmax = tptrack(i).npos
+C**
             tpc(tptrack(i).id) = i
 *--- reset foreign keys that are set here SM ---------*
 	    tptrack(i).id_globtrk = 0
@@ -665,9 +667,6 @@ C     +           tptrack(itrk).nrec .gt. 10 )    then
 
 
                   gtrk(itrk).nfit = tptrack(itrk).nfit
-C*** Spiros' addition here
-                  gtrk(itrk).nmax = tptrack(itrk).npos
-C***
 		  ifull = 1
 		  if (globtrk_h.nok .ge. globtrk_h.maxlen) go to 1313
                   globtrk_h.nok = globtrk_h.nok + 1
