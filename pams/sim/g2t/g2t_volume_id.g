@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.29 2000/11/17 02:55:21 nevski Exp $
+* $Id: g2t_volume_id.g,v 1.30 2000/11/19 21:27:13 nevski Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.30  2000/11/19 21:27:13  nevski
+* comments updated
+*
 * Revision 1.29  2000/11/17 02:55:21  nevski
 * TOF geometry 3 - tof tray moved to east
 *
@@ -233,7 +236,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
            innout     = numbv(4)
            volume_id  = 100000*rileft+1000*innout+10*sector+sub_sector   
         elseif (btog_version==2) then
-*          simulations done in 2000
+*          simulations done in 2000 - one tof tray on west side
            if (btog_choice==4) then
               rileft     = 1
               sector     = btog_posit1
@@ -251,7 +254,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
              innout     = numbv(3)       !     4wide(1)/5wide(2) sections
              sub_sector = numbv(4)       !     theta-tray(4w:1-4, 5w:1-5)
              section    = numbv(5)       !     phi-tray(4w:1-9,5w:1)
-           elseif (btog_choice==3) then  ! ~25% TOF (only on west side)
+           elseif (btog_choice==3) then  ! ~25% TOF (only on east side)
              rileft     = 2              !     east (pre-set)
              sector     = numbv(1)       !     tray
              innout     = numbv(2)       !     4wide/5wide section
