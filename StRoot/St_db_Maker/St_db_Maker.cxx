@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.85 2004/08/18 20:33:56 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.86 2004/09/16 02:05:18 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.86  2004/09/16 02:05:18  perev
+// Add option to use saved dbConfig file. speedup
+//
 // Revision 1.85  2004/08/18 20:33:56  perev
 // Timers added for MySQL and maker itself
 //
@@ -125,6 +128,35 @@ enum eDBMAKER {kUNIXOBJ = 0x2000};
 /////////////////////////////////////////////////////////////////////////  
                                             
 TableClassImpl(St_dbConfig,dbConfig_st)
+//_____________________________________________________________________________
+static int MyConfig(StMaker *mk,St_dbConfig *conf,int flag)
+{
+   int ians=0;
+   TFile *tfConfig = 0;
+   const char *fname = mk->SAttr("MyDbConfig");
+   if (!fname || !*fname) 					return 0;
+   switch (flag) {
+     case 0://Read
+     if (gSystem->AccessPathName(fname, kFileExists)) 		return 0;
+     if (gSystem->AccessPathName(fname, kReadPermission))	return 0;
+     tfConfig = TFile::Open(fname,"READ");
+     if (!tfConfig) 						return 0;
+     if (tfConfig->IsZombie()) {delete tfConfig; 		return 0;}
+     ians = conf->Read("MyConfig");
+     break;
+     
+     case 1://Write
+     if (gSystem->AccessPathName(fname, kFileExists)) 		return 0;
+     if (gSystem->AccessPathName(fname, kWritePermission))	return 0;
+     tfConfig = TFile::Open(fname,"WRITE");
+     if (!tfConfig) 						return 0;
+     if (tfConfig->IsZombie()) {delete tfConfig; 		return 0;}
+     ians = conf->Write("MyConfig",TObject::kOverwrite);
+     break;
+   }
+   delete tfConfig;
+   return ians;
+}
 
 //_________________________ class St_Validity ____________________________________
 class St_ValiSet : public TDataSet{
@@ -335,14 +367,17 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
 
    TString ts(dbname); ts+="_hierarchy";
    fHierarchy = new St_dbConfig((char*)ts.Data());    
-   thy = fDBBroker->InitConfig(dbname,nrows);
-   fTimer[0].Start(0); fTimer[2].Stop();
-   if (!thy || !nrows){
-     Warning("OpenMySQL","***Can not open MySQL DB %s ***",dbname);
-     return 0;}
+   int sav = MyConfig(this,fHierarchy,0);
+   if (sav) { thy = fHierarchy->GetTable(); nrows=fHierarchy->GetNRows();}
+   else {
+     thy = fDBBroker->InitConfig(dbname,nrows);
+     fTimer[0].Start(0); fTimer[2].Stop();
+     if (!thy || !nrows){
+         Warning("OpenMySQL","***Can not open MySQL DB %s ***",dbname);
+         return 0;}
 
-
-   fHierarchy->Adopt(nrows,thy);
+      fHierarchy->Adopt(nrows,thy);
+   }
    if (GetDebug()>1)  fHierarchy->Print(0,nrows);  
 
    top = new TDataSet(thy->parname);
@@ -391,6 +426,7 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
 
    delete [] dss;
    //   top->ls(99);
+   MyConfig(this,fHierarchy,1);
    return top;   
 }
 
