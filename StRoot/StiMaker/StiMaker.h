@@ -7,13 +7,9 @@
 
 #include "StMaker.h"
 #include "StEvent/StEnumerations.h"
-#include "Sti/StiHit.h" //For StiHitFactory
-#include "Sti/StiCompositeTreeNode.h" //For data_node_factory
-#include "Sti/StiTrackNode.h"
-#include "Sti/StiKalmanTrackNode.h"
-
-#include "StiGui/StiRootDrawableStiEvaluableTrack.h" //For EvaluableTrackFactory
-#include "StiGui/StiRootDrawableDetector.h"
+#include "Sti/StiCompositeTreeNode.h" //For typedefs
+#include "Sti/StiObjectFactoryInterface.h"
+#include "Sti/StiFactoryTypes.h"
 
 class StEvent;
 class StiHitContainer;
@@ -21,17 +17,19 @@ class StiHitFiller;
 class StiDisplayManager;
 class StiDetectorContainer;
 class StiTrackContainer;
+class StiEvaluableTrack;
 class StiEvaluableTrackSeedFinder;
 class StiTrackSeedFinder;
 class StiTrackFinder;
 class StiKalmanTrackFinder;
+class StiKalmanTrackNode;
+class StiKalmanTrack;
 class StiCompositeSeedFinder;
 class StMcEventMaker;
 class StAssociationMaker;
 
 class StiMaker : public StMaker {
  public:
-    typedef StiObjectFactory<StiKalmanTrack> StiKalmanTrackFactory;
     enum SeedFinderType {kUndefined=0, kComposite=1, kEvaluable=3};
     
     virtual ~StiMaker();
@@ -42,7 +40,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.23 2001/09/17 17:48:12 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.24 2001/09/18 17:29:51 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -68,6 +66,7 @@ private:
 
     //flags
     bool mSimulation;//! true->m.c.
+    bool mUseGui; //! true->gui version.  Defaults to true
     SeedFinderType mSeedFinderType;
     
     //Containers
@@ -76,12 +75,12 @@ private:
     StiTrackContainer* mtrackstore; //!
 
     //Factories
-    StiHitFactory* mhitfactory; //!
-    StiEvaluableTrackFactory* mtrackfactory; //!
-    StiKalmanTrackNodeFactory* mktracknodefactory; //!
-    detector_factory* mdetectorfactory; //!
-    data_node_factory* mdatanodefactory; //!
-    StiKalmanTrackFactory* mkalmantrackfactory; //!
+    StiObjectFactoryInterface<StiHit>* mhitfactory; //!
+    StiObjectFactoryInterface<StiKalmanTrack>* mtrackfactory; //!
+    StiObjectFactoryInterface<StiKalmanTrackNode>* mktracknodefactory; //!
+    StiObjectFactoryInterface<StiDetector>* mdetectorfactory; //!
+    StiObjectFactoryInterface<StiDetectorNode>* mdatanodefactory; //!
+    StiObjectFactoryInterface<StiKalmanTrack>* mkalmantrackfactory; //!
 
     //Display
     StiDisplayManager* mdisplay; //!
