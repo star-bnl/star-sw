@@ -5,6 +5,8 @@
 **:     clusterfinder support functions
 **:     author: dirk schmischke, ikf, kraut@ikf.uni-frankfurt.de
 **:     last change: 06/02/98 cs
+**:                  06/15/98 py corr. init_cluster and Coord trans
+**:                  06/18/98 cs corr geometry
 **:
 **:>-----------------------------------------------------------------*/
 
@@ -52,7 +54,7 @@ extern struct DATA_RAM **data_ram;
 extern struct DATA_RAM *phys_data_ram;
 
 #if defined(__cplusplus)
-	   }
+}
 #endif
 
 void init_phys_map()
@@ -163,22 +165,23 @@ void init_table()
 TSS_TPPAD_ST* init_clusters( int                sector,
                              TSS_TPPAD_ST       *pad_pointer,
                              TABLE_HEAD_ST      *tppad_h,      
-        		             TSS_TPPAD_ST       *tppad,        
-		                     TSS_TPPIXEL_ST     *tppixel   )
+			     TSS_TPPAD_ST       *tppad,        
+			     TSS_TPPIXEL_ST     *tppixel   )
 {
 	int ipadrow, ipad, i, j, k, start,len, sequence[512];
 	int offset;
-//	int sec;
+
 //
-//    Set cluster counter to zero
+// Set cluster counter to zero
 //
-    for (ipadrow=0; ipadrow<NPADROWS; ipadrow++) {
-       for (ipad=iFirstPad[ipadrow]; ipad<=iLastPad[ipadrow]; ipad++)
-       {
-          i = padlist[ipadrow][ipad];
-          (*n_cluster[i]) = 0;
-       }
-    }
+	for (ipadrow=0; ipadrow<NPADROWS; ipadrow++)
+	{
+	    for (ipad=iFirstPad[ipadrow]; ipad<=iLastPad[ipadrow]; ipad++)
+	    {
+	        i = padlist[ipadrow][ipad];
+		(*n_cluster[i]) = 0;
+	    }
+	}
 //
 // has to be done sector by sector !!!
 //
@@ -189,22 +192,22 @@ TSS_TPPAD_ST* init_clusters( int                sector,
 	    // printf("nseq: %d\n", pad_pointer->nseq);
 	    for( j=0; j<pad_pointer->nseq; j++ )
 	    {
-            ipad = pad_pointer->secpad;
-            len = tppixel[pad_pointer->jpix+offset-1].datum >> 20;
-            start = ( tppixel[pad_pointer->jpix+offset-1].datum >> 10 ) & 0x3FF;
+	        ipad = pad_pointer->secpad;
+		len = tppixel[pad_pointer->jpix+offset-1].datum >> 20;
+		start = ( tppixel[pad_pointer->jpix+offset-1].datum >> 10 ) & 0x3FF;
 	        ipadrow = pad_pointer->tpc_row % 100;
-		    for( k=0; k<len; k++)
-		    {
-		        sequence[k] = tppixel[pad_pointer->jpix+offset-1].datum & 0x3FF;
-		        offset++;
-            }
+		for( k=0; k<len; k++)
+		{
+		    sequence[k] = tppixel[pad_pointer->jpix+offset-1].datum & 0x3FF;
+		    offset++;
+		}
 
-		    make_cluster(ipadrow-MIN_PADROW,ipad,start,len,sequence);
+		make_cluster(ipadrow-MIN_PADROW,ipad,start,len,sequence);
 	    }
 	    pad_pointer++;
 	}
 
-    return pad_pointer ;
+	return pad_pointer ;
 //	printf("init_cluster done.\n");
 
 }
@@ -216,10 +219,11 @@ void make_cluster(int pr,int off,int mbeg,int mlen, int* seq)
 
 // 06/10/98 cs: bug in calculating the seq. padnumber
 	i = padlist[pr][iFirstPad[pr]+off-1];
-    if (*n_cluster[i] >= MAX_CLUSTERSUC ) {
-        printf ( "\n Max clusters reached for pad %d ", i ) ;
-		return; /* max 31 clusters in list */
-    }
+	if (*n_cluster[i] >= MAX_CLUSTERSUC )
+	{
+	    printf ( "\n Max clusters reached for pad %d ", i ) ;
+	    return; /* max 31 clusters in list */
+	}
 	cptr = cluster_seq[i];
 	cptr->a_run[*(n_cluster[i])].Part.Begin=mbeg;
 	cptr->a_run[*(n_cluster[i])].Part.End=mbeg+mlen-1;
@@ -231,10 +235,10 @@ void make_cluster(int pr,int off,int mbeg,int mlen, int* seq)
 	/* fill in the data RAM values (not properly mapped to 8 bits )*/
 	for (t=mbeg; t<mbeg+mlen;t++)
 	{
-		data_ram[i]->t_sam[t] = min(seq[t-mbeg] >> 2,255);
-		// printf("  >%d", data_ram[i]->t_sam[t]);
+	    data_ram[i]->t_sam[t] = min(seq[t-mbeg] >> 2,255);
+ // printf("  >%d", data_ram[i]->t_sam[t]);
 	}
-	//	printf("\n");
+ // printf("\n");
 	return;
 }
 
@@ -257,7 +261,7 @@ void init_other()
 
 void WriteDataToTable( int sector, 
                        TABLE_HEAD_ST *hit_h, 
-		               TCL_TPHIT_ST  *hit )
+		       TCL_TPHIT_ST  *hit )
 {
     int i, nok ;
     float x, y, z ;
@@ -269,19 +273,20 @@ void WriteDataToTable( int sector,
 /*
     Returns coordinates in cm
 */
-	   ConvertRawToDetector( sector, (p->PadRow)+1, ((float)p->CenterPad)/64, 
-                             ((float)p->CenterTime)/64,
-			                  &x, &y, &z );
-       hit[nok].id = nok ;
-       hit[nok].row = sector * 100 + p->PadRow+1 ;
-	   hit[nok].x  = x ;
-	   hit[nok].y  = y ;
-	   hit[nok].z  = z ;
-	   hit[nok].dx = 0.2F ;
-	   hit[nok].dy = 0.2F ;
-	   hit[nok].dz = 0.2F ;
-	   nok++ ;
-	   p++;
+        ConvertRawToDetector( sector, (p->PadRow)+1,
+			      ((float)p->CenterPad)/64, 
+			      ((float)p->CenterTime)/64,
+			      &x, &y, &z );
+	hit[nok].id  = nok ;
+	hit[nok].row = sector * 100 + p->PadRow+1 ;
+	hit[nok].x   = x ;
+	hit[nok].y   = y ;
+	hit[nok].z   = z ;
+	hit[nok].dx  = 0.2F ;
+	hit[nok].dy  = 0.2F ;
+	hit[nok].dz  = 0.2F ;
+	nok++ ;
+	p++;
     }
     hit_h->nok = nok ;
 }
@@ -294,13 +299,15 @@ void ConvertRawToDetector(int sector, int padrow, float pad, float timeslice,
                           float* x, float* y, float* z)
 {
 	float cart_x, cart_y;
+	int is ;
+
 	/* statics
 	   padrow-offset (center pad) from detector-center in mm */
 	static float PadrowOffset [] = 
 	{
-	    60.0F, 64.8F, 69.6F, 74.4F, 79.2F, 84.0F, 88.8F, 93.60F, /*  7 * 4.80 cm spacing  */
-		98.8F, 104.F, 109.20F, 114.4F, 119.6F, /*  5 * 52 mm spacing  */
-		127.195F, 129.195F, 131.195F, 133.195F, 135.195F, /*  32 * 2.0 cm spacing  */
+	        60.0F, 64.8F, 69.6F, 74.4F, 79.2F, 84.0F, 88.8F, 93.60F, /*   7 * 4.80 cm spacing  */
+		98.8F, 104.F, 109.20F, 114.4F, 119.6F,                   /*   5 * 5.20 cm spacing  */
+		127.195F, 129.195F, 131.195F, 133.195F, 135.195F,        /*  32 * 2.00 cm spacing  */
 		137.195F, 139.195F, 141.195F, 143.195F, 145.195F,
 		147.195F, 149.195F, 151.195F, 153.195F, 155.195F,
 		157.195F, 159.195F, 161.195F, 163.195F, 165.195F,
@@ -311,7 +318,7 @@ void ConvertRawToDetector(int sector, int padrow, float pad, float timeslice,
 	/* cross-spacings between adjacent pads in cm */
 	static float PadSpacing [] =
 	{
-        .335F, .335F, .335F, .335F, .335F, /*  13 * .335 cm  */
+                .335F, .335F, .335F, .335F, .335F, /*  13 * .335 cm  */
 		.335F, .335F, .335F, .335F, .335F,
 		.335F, .335F, .335F,
 		.670F, .670F, .670F, .670F, .670F, /*  32 * .670 cm  */
@@ -325,63 +332,63 @@ void ConvertRawToDetector(int sector, int padrow, float pad, float timeslice,
 	/* number of pads in padrow */
 	static short NumberOfPadsInRow[45] = 
 	{
-		88,96,104,112,118,126,134,142,150,156,166,174,184,
-		98,100,102,104,106,106,108,110,112,112,114,116,
-		118,120,122,122,124,126,128,128,130,132,134,136,
-		136,138,140,142,144,144,144,144 
+	    88,96,104,112,118,126,134,142,150,158,166,174,182,
+	    98,100,102,104,106,106,108,110,112,112,114,116,
+	    118,120,122,122,124,126,128,128,130,132,134,136,
+	    138,138,140,142,144,144,144,144 
 	};
 	/* sector-rotation factors */
 	static float SectorSinus [] =
 	{
-       	        /*  30 deg each segment */
-        0.9659258262891F,  /*  75 deg */
-        0.7071067811866F,  /*  45 deg */
-	0.2588190451025F,  /*  15 deg */
-       -0.2588190451025F,  /* 345 deg */
-       -0.7071067811866F,  /* 315 deg */
-       -0.9659258262891F,  /* 285 deg */
-       -0.9659258262891F,  /* 255 deg */
-       -0.7071067811866F,  /* 225 deg */
-       -0.2588190451025F,  /* 195 deg */
-        0.2588190451025F,  /* 165 deg */
-    	0.7071067811866F,  /* 135 deg */
-        0.9659258262891F   /* 105 deg */
+       	          /*  30 deg each segment */
+	    0.2588190451025F,  /*  15 deg */
+	    0.7071067811866F,  /*  45 deg */
+	    0.9659258262891F,  /*  75 deg */
+	    0.9659258262891F,  /* 105 deg */
+	    0.7071067811866F,  /* 135 deg */
+	    0.2588190451025F,  /* 165 deg */
+	   -0.2588190451025F,  /* 195 deg */
+	   -0.7071067811866F,  /* 225 deg */
+	   -0.9659258262891F,  /* 255 deg */
+	   -0.9659258262891F,  /* 285 deg */
+	   -0.7071067811866F,  /* 315 deg */
+	   -0.2588190451025F,  /* 345 deg */
  	};
 	static float SectorCosinus [] =
 	{
-	    0.2588190451025F,  /* 75 */
-            0.7071067811866F,  /* 45 */
             0.9659258262891F,  /* 15 */
-            0.9659258262891F,  /* 345 */
-            0.7071067811866F,  /* 315 */
-            0.2588190451025F,  /* 285 */
-	   -0.2588190451025F,  /* 255 */
-	   -0.7071067811866F,  /* 225 */
-	   -0.9659258262891F,  /* 195 */
-	   -0.9659258262891F,  /* 165 */
+            0.7071067811866F,  /* 45 */
+	    0.2588190451025F,  /* 75 */
+	   -0.2588190451025F,  /* 105 */
 	   -0.7071067811866F,  /* 135 */
-	   -0.2588190451025F   /* 105 */
+	   -0.9659258262891F,  /* 165 */
+	   -0.9659258262891F,  /* 195 */
+	   -0.7071067811866F,  /* 225 */
+	   -0.2588190451025F,  /* 255 */
+            0.2588190451025F,  /* 285 */
+            0.7071067811866F,  /* 315 */
+            0.9659258262891F,  /* 345 */
 	};
+
 	/* scaling in time-direction */
 	static float TimeScale = 250.0 / 512.0;
-    int is ;
+ 
 /*
      Make sure sector makes sense
 */
     
-    if ( sector < 1 || sector > 24 ) {
-        printf ( " \n sector out of range %d ", sector ) ;
-        *x = *y = *z = 0.F ;
-    }
+	if ( sector < 1 || sector > 24 )
+	{
+	    printf ( " \n sector out of range %d ", sector ) ;
+	    *x = *y = *z = 0.F ;
+	}
 //
 //    Get sector index
 //
-    if ( sector > 12 ) {
-        is = 24 - sector - 1 ;
-        if ( is < 0 ) is = 11 ;
-    }
-    else
-        is = sector -1 ;
+	if ( sector > 12 )
+	    is = sector - 13;
+	else 
+	    is = sector -1 ;
 
 /* calculate unrotated cartesian base-coordinates */
 	cart_y = PadrowOffset[padrow-1];
@@ -394,8 +401,8 @@ void ConvertRawToDetector(int sector, int padrow, float pad, float timeslice,
 /* calculate time-direction */
 	if (sector > 12)
 /* negative direction */
-		*z = 250. - timeslice * TimeScale;
+	    *z = 250. - timeslice * TimeScale;
 	else
 /* positive direction */
-		*z = -250. + timeslice * TimeScale;
+	    *z = -250. + timeslice * TimeScale;
 }
