@@ -24,6 +24,7 @@
 #include <utility>
 using std::pair;
 #include <cmath>
+#include <float.h>
 #include <iostream>
 
 //StiIncludes

@@ -35,7 +35,7 @@ public:
     //inherited
     virtual void findTracks();
 		virtual void fitTracks(); 
-		virtual void extendTracksToVertex(const StiHit & vertex);
+		virtual void extendTracksToVertex(StiHit* vertex);
 		virtual void findNextTrack();
 		virtual void fitNextTrack();
 		virtual void findNextTrackSegment();
@@ -53,7 +53,7 @@ public:
     void removeNodeFromTrack(StiKalmanTrackNode * node, StiKalmanTrack* track);
     void pruneNodes(StiKalmanTrackNode * node);
     void reserveHits(StiKalmanTrackNode * node);
-    void extendTrackToVertex(StiKalmanTrackNode * node, const StiHit & vertex);
+    void extendTrackToVertex(StiKalmanTrackNode * node, StiHit* vertex);
 
     void doInitTrackSearch();
     void doScanLayer();
