@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.48 2003/02/11 21:51:37 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.49 2003/03/04 02:52:56 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -110,16 +110,6 @@
     $SYSLIBS       = "";
     $OSFID         = "";
 
-    #if (defined($QTDIR) && -d $QTDIR . "/include" ) {
-    #   $CPPPATH .= $main::PATH_SEPARATOR . 
-    #           $QTDIR . "/include";	       
-    #   if ( -r $ROOTSYS . "/include/TQt.h")	{
-    #      $CPPFLAGS .= "-DR__QT";
-    #   }
-    #   
-    #}
-
-    # $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
     $date   = `date +\%d\%b-%T`;
     $CXXCOM =
 "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS -c %CXXinp%< %Cout%>";
@@ -147,10 +137,16 @@
     $_ = $STAR_HOST_SYS;
     print "System: ", $_, "\n" unless ($param::quiet);
 
-    if (/^i386_/) {
 
-        #    case linux
-        #  ====================
+
+
+    #  ============================================================
+    # Platform support should be concentrated here
+    #  ============================================================
+    if (/^i386_/) {
+        #
+        # Case linux
+        #
         $PLATFORM = "linux";
         $ARCH     = "linuxegcs";
         $OSFID    = "f2cFortran";
@@ -254,9 +250,9 @@
         }
         $F77LIBS = " -lg2c -lnsl";
         $FLIBS .= $F77LIBS;
-    }
-    elsif (/^hp_ux102/) {
 
+
+    } elsif (/^hp_ux102/) {
         #    case "hp":
         #  ====================
         $PLATFORM = "hpux";
@@ -294,8 +290,48 @@
         $F77LD      = $FC;
         $F77LDFLAGS = "-K +ppu";
         print "SHLIB_PATH = $SHLIB_PATH\n";
-    }
-    elsif (/^sun4x_5./) {
+
+    } elsif (/^alpha_dux40/) {
+	#
+	# Trying True64
+	#
+	$PLATFORM      = "OSF1";
+	$ARCH          = "True64";
+	$OSFID         = " ST_NO_NAMESPACES ST_NO_EXCEPTIONS QUIET_ASP";
+	$EXTRA_CPPPATH = "";
+
+	$CC            = "cc";
+	$CXX           = "cxx";
+	$CXXCOM        = "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS -I%<:d  %_IFLAGS -c %CXXinp%< %Cout%>";
+	$CXXFLAGS      = "";
+	$CFLAGS        = "";
+	$EXTRA_CXXFLAGS= "";
+	$EXTRA_CFLAGS  = "";
+
+	$CLIBS         = "-lmalloc -lm -ltermcap -ldl -lnsl -lsocket -lgen";
+
+	$FC            = "f77";
+	$FLIBS         = "";
+	$FFLAGS        = "-w";
+	$FEXTEND       = "-e";
+	
+
+	$R_CPPFLAGS    = "";
+	$CINTCFLAGS    = $CFLAGS   . " " . $R_CPPFLAGS;
+	$CINTCXXFLAGS  = $CXXFLAGS . " " . $R_CPPFLAGS;
+
+	$XLIBS         = "-L" . $ROOTSYS . "/lib -lXpm  -lX11";
+	$SYSLIBS       = "-lmalloc -lm -ldl -lnsl -lsocket";
+
+	$LD            = $CXX;
+	$LDFLAGS       = "";    # -Bdynamic
+	$SO            = $CXX;
+	$SOFLAGS       = "-G "; #-ptr%ObjDir";
+
+    } elsif (/^sun4x_5./) {
+	#
+	# Solaris
+	#
         $PLATFORM = "solaris";
         $ARCH     = "solarisCC5";
         if (/^sun4x_56/) {$OSFID    = "__SunOS_5_6";}
@@ -353,6 +389,8 @@
             $SO  = $CXX;
         }
     }
+
+
 
     if ( $STAR_SYS ne $STAR_HOST_SYS ) { $OSFID .= " " . $STAR_HOST_SYS; }
     my $FLAGS = $OSFID . " CERNLIB_TYPE" . " __ROOT__";
