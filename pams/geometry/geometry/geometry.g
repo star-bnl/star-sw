@@ -1,5 +1,12 @@
-* $Id: geometry.g,v 1.57 2003/07/03 04:45:20 potekhin Exp $
+* $Id: geometry.g,v 1.58 2003/08/05 23:37:09 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.58  2003/08/05 23:37:09  potekhin
+* Continued to use the CorrNum "correction level" to
+* correct older geometry bugs in a controlled and versioned
+* manner. Keep the newer version of the FTPC support pieces,
+* and add a call the new SVTT module, which will
+* include a number of corrections.
+*
 * Revision 1.57  2003/07/03 04:45:20  potekhin
 * Added the "special" variation of the year 2003 geometry, which has
 * a complete set of the barrel and endcap calorimeter elements. This
@@ -283,7 +290,7 @@ If LL>1
                      mwc=on " Wultiwire chambers are read-out ";
                      pse=on " inner sector has pseudo padrows ";
                   "ctb: central trigger barrer             ";
-                     Itof=2 " vyzyvat' btofgeo2            ";
+                     Itof=2 "  btofgeo2  ";
                      btofconfig=5;
                   "calb" 
                      ems=on   "endcap "
@@ -322,9 +329,9 @@ If LL>1
                      Itof=2 " call btofgeo2 ";
                      btofconfig=5;
                   "calb" 
-                     ems=on   "endcap " 
+                     ems=on
                      nmod={60,0}; shift={75,0}; " 60 sectors " 
-                  "ecal" 
+                  "ecal"
                      ecal_config=1   " one ecal patch, west "
                      ecal_fill=1     " sectors 2-5 filled "
                   "beam-beam counter "
@@ -421,7 +428,9 @@ If LL>1
    if (upst)        Call upstgeo
 
    Call AGSFLAG('SIMU',2)
+
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6 
+
    If (LL>1 & svtt) then
      call AgDETP new ('SVTT')
      if (Nsi < 7)   call AgDETP add ('svtg.nlayer=',   Nsi,1)
@@ -430,7 +439,15 @@ If LL>1
      if (wdm > 0)   call AgDETP add ('swca.WaferLen=', wdm,1)
      if (.not.svtw) call AgDETP add ('swam.Len=',       0, 1)
    endif
-   if (svtt) Call svttgeo
+
+* Take care of the correction level:
+           if (svtt) then
+              if(CorrNum==0) then
+                 call svttgeo
+              else 
+                 call svttgeo1
+              endif
+           endif
  
 * - MWC or pseudo padrows needed ? DETP TPCE TPCG(1).MWCread=0 TPRS(1).super=1
 *   CRAY does not accept construction: IF (mwc==off) ... I do it differntly:
@@ -449,13 +466,11 @@ If LL>1
    if (ftpc) then
 * FTPC proper
 	Call ftpcgeo
-* Take care of the support structure:
-	if(CorrNum==0) then
-* Default, buggy version
-		Call supogeo
-	else
-* New, corrected version
-		Call supogeo1
+* Take care of the correction level:
+	if(CorrNum==0) then ! Default, buggy version
+           Call supogeo
+	else                ! New, corrected version
+           Call supogeo1
 	endif
    endif
 
