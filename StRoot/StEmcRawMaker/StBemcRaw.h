@@ -1,5 +1,8 @@
-// $Id: StBemcRaw.h,v 1.2 2004/10/19 13:10:38 suaide Exp $
+// $Id: StBemcRaw.h,v 1.3 2004/10/19 17:53:00 suaide Exp $
 // $Log: StBemcRaw.h,v $
+// Revision 1.3  2004/10/19 17:53:00  suaide
+// code clean up
+//
 // Revision 1.2  2004/10/19 13:10:38  suaide
 // small fix
 //
@@ -42,6 +45,7 @@ class StBemcRaw : public TObject
    controlADCtoE_st*        mControlADCtoE;
    
    Bool_t                   mPrint;
+   Bool_t                   mSaveAllStEvent;
    
    Int_t                    mDate;
    Int_t                    mNZ[MAXDETBARREL];
@@ -77,6 +81,7 @@ class StBemcRaw : public TObject
   
   void                      setPrint(Bool_t a)         { mPrint = a; } ///< Set it to kFALSE if you do not want to print messages
   void                      setDate(Int_t d)           { mDate = d;} ///<Set event date.
+  void                      saveAllStEvent(Bool_t a)   { mSaveAllStEvent = a;} ///< Set to kTRUE if all hits are to be saved on StEvent
   
   StBemcTables*             getTables()                { return mTables;} ///< Return the StBemcTable pointer
   StEmcDecoder*             getDecoder()               { return mDecoder;}///< Return the StEmcDecoder pointer
