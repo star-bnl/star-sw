@@ -27,6 +27,7 @@ my @Sets = (
              "auau200/mevsim/vanilla/resonance/year_1h/hadronic_on", 
              "auau200/mevsim/vanilla/trigger/year_1h/hadronic_on", 
              "auau200/vni/default/b0_3/year_1h/hadronic_on",
+             "auau200/vni/default/b0_3/year_1h1/hadronic_on",
              "auau200/hijing/b0_3_jetq_off/jet05/year_1h/hadronic_on",
              "auau200/hijing/b0_3_jetq_on/jet05/year_1h/hadronic_on",
              "auau200/hijing/b8_15_jetq_off/jet05/year_1h/hadronic_on",
@@ -45,6 +46,8 @@ my @Sets = (
              "auau200/hemicosm/default/none/year_1h/hadronic_on",
              "pau200/hijing/b0_7/gam15/year_1h/hadronic_on",
              "pau200/hijing/b0_7/jet15/year_1h/hadronic_on", 
+             "pau200/hijing/b0_7/gam15/year_2a/hadronic_on",
+             "pau200/hijing/b0_7/jet15/year_2a/hadronic_on", 
              "auau200/mevsim/vcascade/central/year_1h/hadronic_on",       
              "auau200/mevsim/vcascade/flow/year_1h/hadronic_on", 
              "auau200/mevsim/vcascade/fluct/year_1h/hadronic_on",
@@ -163,11 +166,11 @@ my @diskRecoDirs;
 
 my $inext =scalar(@Sets); 
 
-for( $ll = 0; $ll<29; $ll++) { 
+for( $ll = 0; $ll<32; $ll++) { 
   $diskRecoDirs[$ll] = $DISK2 . "/" . $Sets[$ll] . "/tfs_6";
   print "diskRecoDir: $diskRecoDirs[$ll]\n";
 }
-for( $ii = 29; $ii< 35; $ii++) { 
+for( $ii = 32; $ii< 38; $ii++) { 
 $diskRecoDirs[$ii] = $DISK1 . "/" . $Sets[$ii] . "/tfs_6";
   print "diskRecoDir: $diskRecoDirs[$ii]\n";
 }
@@ -526,7 +529,7 @@ my $newset;
        $mJobId   = ($$jobnm)->job_id;
        $msumFile = ($$jobnm)->smFile;
        $mNevts   = ($$jobnm)->NoEvt;
-#       $mjobFname = ($$jobnm)->jbFile;
+       $mjobFname = ($$jobnm)->jbFile;
      my $jfile = $msumFile;
       $jfile =~ s/.sum//g;
       $mNevtLo = 1;
