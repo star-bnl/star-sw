@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.12 2000/04/13 02:58:47 perev Exp $
+// $Id: St_db_Maker.h,v 1.13 2000/05/20 01:00:43 perev Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.13  2000/05/20 01:00:43  perev
+// SetFlavor() added
+//
 // Revision 1.12  2000/04/13 02:58:47  perev
 // Method Save is added & default CintDB loaded if exists
 //
@@ -43,21 +46,23 @@ private:
 
   TDataSet *fDataBase;       	//! DB structure
   StDbBroker *fDBBroker;	//!MySql broker 
-  St_dbConfig *fHierarchy; //!
+  St_dbConfig *fHierarchy; 	//!
   TString     fMainDir;        	//! The main root directory for the calibrarion data
   TString     fUserDir;        	//! The user root directory for the calibrarion data
   TString     fCurrentDir;     	//! The current root directory for the calibrarion data
+  TString     fFlavor;     	//! Flavor selection
   Int_t       fIsDBTime;	//! flag to use owb time stamp
   TDatime     fDBTime;		//! Own DB time stamp
   Int_t       fUpdateMode;	//! 
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.12 2000/04/13 02:58:47 perev Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.13 2000/05/20 01:00:43 perev Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name,const char *maindir,const char *userdir=0);
    virtual        ~St_db_Maker();
    virtual TString GetMainDir(){ return fMainDir;}
    virtual TString GetUserDir(){ return fUserDir;}
+   virtual const char *GetFlavor(){ return fFlavor;}
    virtual TDatime GetDateTime();
    virtual Int_t   GetValidity(const TTable *tb, TDatime *val) const;
    virtual void    SetDateTime(int idat,int itim);
@@ -69,6 +74,7 @@ private:
    virtual void    SetUserDir(const Char_t *db);
    virtual void    SetOff(const Char_t *path);
    virtual void    SetOn (const Char_t *path);
+   virtual void    SetFlavor(const char *flav){fFlavor=flav;}
    virtual void    OnOff();
    virtual void Clear(Option_t *opt=""){if(opt){/*unused*/}};
 
@@ -86,7 +92,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.12 2000/04/13 02:58:47 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.13 2000/05/20 01:00:43 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   //StAF chain virtual base class for Makers
 };
