@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.160 2004/11/13 00:28:57 fine Exp $
+// $Id: StMaker.cxx,v 1.161 2004/11/16 17:48:10 fine Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -824,13 +824,16 @@ Int_t StMaker::Make()
 void StMaker::FatalErr(int Ierr, const char *com)
 {
 #ifdef STAR_LOGGER     
-    LOG_QA << Form("QAInfo:%s::Fatal: Error %d %s\n",GetName(),Ierr,com) << endm;
+    LOG_QA    << Form("QAInfo:%s::Fatal: Error %d %s\n",GetName(),Ierr,com) << endm;
+    LOG_FATAL << Form("QAInfo:%s::Fatal: Error %d %s\n",GetName(),Ierr,com) << endm;
 #else
     printf("QAInfo:%s::Fatal: Error %d %s\n",GetName(),Ierr,com);
 #endif        
    StMaker *parent = (StMaker *)GetParent();
    if (parent) ((StMaker*)parent)->FatalErr(Ierr,com);
+#ifndef STAR_LOGGER     
    fflush(stdout);
+#endif        
 }
 //_____________________________________________________________________________
 StMaker *StMaker::GetMaker(const TDataSet *ds) 
@@ -945,7 +948,7 @@ void StMaker::PrintTimer(Option_t *option)
    if(option){};
 #ifdef STAR_LOGGER       
    LOG_QA << Form("QAInfo:%-20s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds, Entries = %d",GetName()
-           ,m_Timer.RealTime(),m_Timer.CpuTime(),m_Timer.Counter());
+           ,m_Timer.RealTime(),m_Timer.CpuTime(),m_Timer.Counter()) << endm;
 #else   
    Printf("QAInfo:%-20s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds, Entries = %d",GetName()
            ,m_Timer.RealTime(),m_Timer.CpuTime(),m_Timer.Counter());
@@ -1244,13 +1247,13 @@ static void doPs(const char *who, const char *where)
     ps = (ps) ? "yes" : "";
   }
   if (!ps[0]) return;
-#ifdef STAR_LOGGER  
+#ifdef STAR_LOGGER_BUG  
   LOG_QA << Form("QAInfo: doPs for %20s:%12s \t",who,where);
 #else
   printf("QAInfo: doPs for %20s:%12s \t",who,where);
 #endif    
   TMemStat::PrintMem(0);
-#ifdef STAR_LOGGER  
+#ifdef STAR_LOGGER_BUG  
   LOG_QA << endm;
 #else  
   printf("\n");
@@ -1259,7 +1262,7 @@ static void doPs(const char *who, const char *where)
 
 //_____________________________________________________________________________
 void StMaker::Streamer(TBuffer &)
-{ LOG_FATAL << Form("%s::Streamer - attempt to write %s",ClassName(),GetName());
+{ LOG_FATAL << Form("%s::Streamer - attempt to write %s",ClassName(),GetName()) << endm;
   assert(0);
 }
 //______________________________________________________________________________
@@ -1579,6 +1582,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.161  2004/11/16 17:48:10  fine
+// fixed the doPs method printout
+//
 // Revision 1.160  2004/11/13 00:28:57  fine
 // move the logger instantiation away of the ctor to be able to get the csubclass name
 //
