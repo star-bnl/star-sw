@@ -358,7 +358,7 @@ Int_t StEmcSimulatorMaker::makeAllRawHitsForBemc()
   //
   // Transition from deposit energy to adc (and energy) 
   //
-  UInt_t  m, eta, sub, adc; Float_t de, energy;
+  UInt_t  m, mf, eta, sub, adc; Float_t de, energy;
   Float_t rEta;
   emc_hits_st rawHit;
 
@@ -371,17 +371,18 @@ Int_t StEmcSimulatorMaker::makeAllRawHitsForBemc()
     rawHit.det = i + 1;
     if(nhits > 0) {
       for(m=0; m<mEmcMcHits[i]->numberOfModules(); m++){ // Cycle on module
+        mf = m + 1; // m - C style index; mf - Fortran style index !!!!
         const StMcEmcModuleHitCollection* module = mEmcMcHits[i]->module(m);
         const ULong_t nhm = module->numberOfHits();
         if(nhm>0){
-          rawHit.module = m + 1;
+          rawHit.module = mf;
           const StSPtrVecMcCalorimeterHit hits = module->hits(); 
           for(UInt_t ihm=0; ihm<nhm; ihm++){
             eta = hits[ihm]->eta();
             sub = hits[ihm]->sub();
             de  = hits[ihm]->dE();
 
-            if(mGeom[i]->getEta(m,eta, rEta) == 0) { 
+            if(mGeom[i]->getEta(mf, eta, rEta) == 0) { // (m => mf) 15-mar-2001
               adc    = mSimulator[i]->getAdc((Double_t)de, (Double_t)rEta);
               if(adc>0) { // Zero suppression
                 energy = mSimulator[i]->getEnergy();
@@ -393,8 +394,8 @@ Int_t StEmcSimulatorMaker::makeAllRawHitsForBemc()
                 mEmcRawHits[i]->AddAt(&rawHit);
               }
             }
-            else gMessMgr->Warning()<<"StEmcSimulatorMaker::makeAllRawHitsForBemc() m "
-				    <<m<<" eta "<<eta<<" and bad rEta "<<rEta<<endm; 
+            else gMessMgr->Warning()<<"StEmcSimulatorMaker::makeAllRawHitsForBemc() Bad m "
+				    <<m<<" or eta "<<eta <<endm; 
           }
         }
       }
@@ -445,8 +446,11 @@ void StEmcSimulatorMaker::printmBEMC()
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.2 2001/02/02 23:59:59 pavlinov Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.3 2001/03/15 17:21:32 pavlinov Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.3  2001/03/15 17:21:32  pavlinov
+// Fixed error for module=1
+//
 // Revision 1.2  2001/02/02 23:59:59  pavlinov
 // New function Browse() and cleanup for new version of BFC
 //
