@@ -37,8 +37,9 @@ else if ( "$STAR_ARCH" == "hpux" ) then
    setenv ARFLAGS     " lqv "
    setenv FFLAGS      " +e +es -c +ppu "
    setenv FFLAGS_DBG  " +e +es -c -g +ppu "
-   setenv CCFLAGS     " -c -DHPUX "
-   setenv CCFLAGS_DBG " -c -g -DHPUX "
+   setenv CCFLAGS     " -c -Aa -DHPUX "
+   setenv CCFLAGS_DBG " -c -Aa -g -DHPUX "
+   setenv _HPUX_SOURCE "/usr/include"
 else if ( "$STAR_ARCH" == "irix" ) then
    setenv ARCH_TAG    "_sgi"
    setenv ARFLAGS     " slqv "
@@ -77,13 +78,14 @@ if ( -e $OBJLIB_DBG ) then
 	rm -f $OBJLIB_DBG
 endif
 #
-#set OBJFILES = ( $STAR_ARCH/*.o )
-#if( $OBJFILES == "" ) then
-#	echo "No objects to remove"
-#else
+set OBJFILES = ( `(ls ../lib/$STAR_ARCH/*.o |& grep -v "No match")` )
+#if( -e $OBJFILES ) then
+if( $OBJFILES == "" ) then
+	echo "No objects to remove"
+else
 	echo "Removing all object files"
 	rm -f ../lib/$STAR_ARCH/*.o
-#endif
+endif
 #
 echo "Setting up include file links."
 #D.O. 8-Mar-93rmlink *
@@ -107,7 +109,7 @@ make -e all
 echo "Moving all .a files to ../lib/$STAR_ARCH"
 mv *.a ../lib/$STAR_ARCH
 echo "Removing all .o files"
-rm -f *.o
+rm -f *.o >& /dev/null
 #
 echo "cleaning up include file links.."
 rmlink *
