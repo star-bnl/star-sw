@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.19 2000/01/10 23:14:31 lasiuk Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.20 2000/02/24 16:42:22 long Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,12 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.20  2000/02/24 16:42:22  long
+ * StTrsWireBinEntry
+ * 		theNewSegment(position,0);--->
+ * StTrsWireBinEntry
+ * 		theNewSegment(position,0,bin.sigmaL(),bin.sigmaT());
+ *
  * Revision 1.19  2000/01/10 23:14:31  lasiuk
  * Include MACROS for compatiblity with SUN CC5
  *
@@ -243,7 +249,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 	    		 bin.position().z());//HL,8/31/99
              
 	    StTrsWireBinEntry
-		theNewSegment(position,0);
+		theNewSegment(position,0,bin.sigmaL(),bin.sigmaT());
 	     
 	    //
 	    // Establish integration Limits:
