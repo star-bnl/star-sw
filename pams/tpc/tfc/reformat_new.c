@@ -131,12 +131,12 @@ long type_of_call reformat_new_
    	            if(row<=13){
 	            /* for the inner sector */
 	                /* first check whether this row has been found before */
-                        irepeatrow=0;
+                        irepeatrow=-1;
 	                for(ij=0;ij<raw_row_in_h->nok;ij++){
 		             if(raw_row_in[ij].RowId==row&&raw_row_in[ij].npad!=0) irepeatrow=ij;
                         }
 
-                        if(irepeatrow==0)   /* fill raw tables directly */
+                        if(irepeatrow==-1)   /* fill raw tables directly */
                            err=reformat_fill_row(sptr,dptr,sector,row,npad,  indextbl_h,   indextbl,
                            shortdata_h,shortdata ,structtbl_h,structtbl,raw_sec_m_h,raw_sec_m ,
                            raw_row_in_h,raw_row_in ,raw_pad_in_h, raw_pad_in ,raw_seq_in_h, 
@@ -151,12 +151,12 @@ long type_of_call reformat_new_
 	                    /* for the outer sector */
 
                	            /* first check whether this row has been found before */
-                           irepeatrow=0;
+                           irepeatrow=-1;
 	                   for(ij=0;ij<raw_row_out_h->nok+1;ij++){
 		                  if(raw_row_out[ij].RowId==row&&raw_row_out[ij].npad!=0) irepeatrow=ij;
                             }
 
-                            if(irepeatrow==0)   
+                            if(irepeatrow==-1)   
                                 err=reformat_fill_row(sptr,dptr,sector,row,npad, indextbl_h,   indextbl,
                                        shortdata_h,shortdata ,structtbl_h,structtbl,raw_sec_m_h,raw_sec_m ,
                                        raw_row_out_h,raw_row_out ,raw_pad_out_h, raw_pad_out ,raw_seq_out_h, 
