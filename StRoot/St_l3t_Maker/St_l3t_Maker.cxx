@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.40 2001/07/18 23:26:57 struck Exp $
+// $Id: St_l3t_Maker.cxx,v 1.41 2001/08/06 17:53:30 dietel Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -71,6 +71,10 @@
 // St_l3t_Maker class for Makers                                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
+#include "Stl3Util/ftf/FtfSl3.h"
+#include "Stl3Util/gl3/gl3Conductor.h"
+#include "Stl3Util/base/St_l3_Coordinate_Transformer.h"
+
 #include <stdio.h>
 #include <iostream.h>
 #include "St_l3t_Maker.h"
@@ -80,20 +84,23 @@
 #include "StDedxDefinitions.h"
 #include "tables/St_dst_track_Table.h"
 #include "tables/St_dst_dedx_Table.h"
-#include "FtfSl3.h"
-#include "gl3Conductor.h"
-#include "gl3GeneralHistos.h"
-#include "gl3JPsi.h"
-#include "gl3GammaGamma.h"
-#include "gl3dEdx.h"
-#include "gl3HighPt.h"
+
+
+// #include "gl3GeneralHistos.h"
+// #include "gl3JPsi.h"
+// #include "gl3GammaGamma.h"
+// #include "gl3dEdx.h"
+// #include "gl3HighPt.h"
+
 #include "TH1.h"
 #include "tables/St_hitarray_Table.h"
-#include "St_l3_Coordinate_Transformer.h"
 #include "StEventTypes.h"
 
 #define gufld   gufld_
 extern "C" {void gufld(Float_t *, Float_t *);}
+
+// i386 is little endian:
+#define UNIX_LITTLE_ENDIAN
 
 ClassImp(St_l3t_Maker)
   
@@ -168,292 +175,317 @@ Int_t St_l3t_Maker::Make(){
 Int_t St_l3t_Maker::MakeOnLine(){
 
 
-   printf("run my l3t_maker-->>\n");
+    printf("run my l3t_maker-->>\n");
+    
+    St_l3_Coordinate_Transformer transformer ;
+    transformer.Use_transformation_provided_by_db() ;
+    transformer.LoadTPCLookupTable("map.bin");
+    
+    // get l3 dataset
+    St_DataSet* sec_bank_set = 0 ;
+    sec_bank_set = GetInputDS("l3Clufi");
+    if ( !sec_bank_set ) {
+	fprintf ( stderr, "St_l3t_Maker:MakeOnLine: no L3 data \n" ) ;
+	return kStWarn;
+    }
+    
+    if ( !sec_bank_set->GetListSize() ) {
+	fprintf ( stderr, "St_l3t_Maker:MakeOnLine: no L3 data \n" ) ;
+	return kStWarn;
+    }
+    fprintf ( stderr, "St_l3t_Maker:MakeOnLine: Online buffer space points as input for L3T \n" ) ;
+    //
+    //    Create tracker and gl3 objects
+    //
 
-   St_l3_Coordinate_Transformer transformer ;
-   transformer.Use_transformation_provided_by_db() ;
-   
-// get l3 dataset
-   St_DataSet* sec_bank_set = 0 ;
-   sec_bank_set = GetInputDS("l3Clufi");
-   if ( !sec_bank_set ) {
-      fprintf ( stderr, "St_l3t_Maker:MakeOnLine: no L3 data \n" ) ;
-      return kStWarn;
-   }
+    FtfSl3   tracker(&transformer) ;
+    gl3Conductor gl3;
+    gl3.setup(&transformer,1,32);
+    //   gl3Conductor gl3(&transformer) ;
+    
+    //    gl3GeneralHistos  fillHistoModule ;
+    //    gl3JPsi           jPsiM ;
+    //    gl3GammaGamma     gammaGammaM ;
+    //    gl3dEdx           dEdxM ;
+    //    gl3HighPt         highPtM ;
+    
+    //    gl3.add ( &fillHistoModule ) ;
+    //    gl3.add ( &jPsiM   ) ;
+    //    gl3.add ( &gammaGammaM ) ;
+    //    gl3.add ( &dEdxM ) ;
+    //    gl3.add ( &highPtM ) ;
+    
+    printf("Initialising gl3\n");
+    gl3.init();
+    gl3.setHitProcessing(2) ; // fill gl3Hit info
+    
 
-   if ( !sec_bank_set->GetListSize() ) {
-      fprintf ( stderr, "St_l3t_Maker:MakeOnLine: no L3 data \n" ) ;
-      return kStWarn;
-   }
-   fprintf ( stderr, "St_l3t_Maker:MakeOnLine: Online buffer space points as input for L3T \n" ) ;
-//
-//    Create tracker and gl3 objects
-//
-   FtfSl3   tracker(&transformer) ;
-   gl3Conductor gl3(&transformer) ;
-   gl3GeneralHistos  fillHistoModule ;
-   gl3JPsi           jPsiM ;
-   gl3GammaGamma     gammaGammaM ;
-   gl3dEdx           dEdxM ;
-   gl3HighPt         highPtM ;
+    printf("Allocating buffer\n");
+    int const maxBytes = 5000000 ;
+    char* buffer = new char[maxBytes] ;
+    char* endTrackBuffer = buffer + maxBytes;     
+    L3_P *gl3Header = (L3_P *) buffer;
+    memset (buffer, 0, sizeof (L3_P));
+    memcpy (gl3Header->bh.bank_type, CHAR_L3_P, 8);
+    gl3Header->bh.bank_id = 1;
+    gl3Header->bh.format_ver = DAQ_RAW_FORMAT_VERSION;
+    gl3Header->bh.byte_order = DAQ_RAW_FORMAT_ORDER;
+    gl3Header->bh.format_number = 0;
+    gl3Header->bh.token = 1;
+    gl3Header->bh.w9 = DAQ_RAW_FORMAT_WORD9;
+    gl3Header->bh.crc = 0;		//don't know yet....    
+    
+    char* trackDataPointer = buffer + sizeof(L3_P)  ;
+    char* endTrackDataPointer = buffer + maxBytes ;
+    //
+    //    Set parameters
+    //
+    tracker.setup ( 30000, 3000 ) ;
+    tracker.para.infoLevel = 10 ;
+    //   for ( int ie = 0 ; ie < gl3.nEvents ; ie++ ) gl3.event[ie].bField = 0.5 ;
+    tracker.para.infoLevel = 10 ;
+    tracker.para.hitChi2Cut   = 50 ;
+    tracker.para.trackChi2Cut = 10 ;
+    tracker.para.goodHitChi2  = 20 ;
+    tracker.para.dphi=0.1;
+    tracker.para.deta=0.1;
+    tracker.para.distanceMerge = 5 ;
+    tracker.setXyError ( 0.12 ) ;
+    tracker.setZError  ( 0.24 ) ;
+    
+    tracker.para.bField = 0.5;
+    //tracker.para.bFieldPolarity = 1;
 
-   gl3.add ( &fillHistoModule ) ;
-   gl3.add ( &jPsiM   ) ;
-   gl3.add ( &gammaGammaM ) ;
-   gl3.add ( &dEdxM ) ;
-   gl3.add ( &highPtM ) ;
+    tracker.para.ptMinHelixFit = 0.0;
+    tracker.para.maxChi2Primary = 0;
+    //tracker.para.maxChi2Primary = 50; // all tracks primary
 
-   gl3.init();
-   gl3.setHitProcessing(2) ; // fill gl3Hit info
 
-   int const maxBytes = 5000000 ;
-   char* buffer = new char[maxBytes] ;
-   char* endTrackBuffer = buffer + maxBytes;     
-   L3_P *gl3Header = (L3_P *) buffer;
-   memset (buffer, 0, sizeof (L3_P));
-   memcpy (gl3Header->bh.bank_type, CHAR_L3_P, 8);
-   gl3Header->bh.bank_id = 1;
-   gl3Header->bh.format_ver = DAQ_RAW_FORMAT_VERSION;
-   gl3Header->bh.byte_order = DAQ_RAW_FORMAT_ORDER;
-   gl3Header->bh.format_number = 0;
-   gl3Header->bh.token = 1;
-   gl3Header->bh.w9 = DAQ_RAW_FORMAT_WORD9;
-   gl3Header->bh.crc = 0;		//don't know yet....    
-
-   char* trackDataPointer = buffer + sizeof(L3_P)  ;
-   char* endTrackDataPointer = buffer + maxBytes ;
-//
-//    Set parameters
-//
-   tracker.setup ( 30000, 3000 ) ;
-   tracker.para.infoLevel = 10 ;
-   for ( int ie = 0 ; ie < gl3.nEvents ; ie++ ) gl3.event[ie].bField = 0.5 ;
-   tracker.para.infoLevel = 10 ;
-   tracker.para.hitChi2Cut   = 30 ;
-   tracker.para.trackChi2Cut = 10 ;
-   tracker.para.goodHitChi2  = 5 ;
-   tracker.para.dphi=0.1;
-   tracker.para.deta=0.1;
-   tracker.para.distanceMerge = 5 ;
-   tracker.para.parameterLocation = 0 ;
-   tracker.setXyError ( 0.3 ) ;
-   tracker.setZError  ( 1.0 ) ;
-
-   tracker.reset();
-//
-//   Print parameters for first event
-//
-   if ( firstEvent ) {
-      printf ( "LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL \n" ) ;
-      printf ( "333333333333333333333333333333333333333333333333333333 \n" ) ;
-      printf ( "St_l3t_Maker: tracking parameters \n" ) ;
-      printf ( "FtfSl3: xyError          %f  \n", tracker.getXyError());
-      printf ( "FtfSl3: zError           %f  \n", tracker.getZError());
-      printf ( "FtfSl3: minTimeBin       %d  \n", tracker.minTimeBin);
-      printf ( "FtfSl3: maxTimeBin       %d  \n", tracker.maxTimeBin);
-      printf ( "FtfSl3: minClusterCharge %d  \n", tracker.minClusterCharge);
-      printf ( "FtfSl3: maxClusterCharge %d  \n", tracker.maxClusterCharge);
-      tracker.para.write ( stdout ) ;
-      transformer.Print_parameters() ;
-      printf ( "LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL \n" ) ;
-      printf ( "333333333333333333333333333333333333333333333333333333 \n" ) ;
-      firstEvent = 0 ;
-   } 
-//
-//    Create hit table to store L3 clusters in offline format
-//
-   int maxHits = 500000 ;
-   int nHits = 0 ;
-   int token ;
-   St_tcl_tphit *hitS = new St_tcl_tphit("l3Hit",maxHits); 
-   m_DataSet->Add(hitS);
-   tcl_tphit_st*  hit  = (tcl_tphit_st  *)hitS->GetTable();
-
-// create iterator
-
-   St_DataSetIter sec_bank_iter(sec_bank_set);
-//
-//    Loop over hits_in_sec_xx 
-//
-   Char_t secname[15] = "hits_in_sec_00";
-   for(Int_t secIndex=1;secIndex<=12; secIndex++) {
-      if ( secIndex < 10 ) sprintf ( &(secname[13]), "%1d", secIndex ) ;
-      else sprintf ( &(secname[12]), "%2d", secIndex ) ;
-//
-//    Get hit array (=bank) and check it is there
-//
-      St_hitarray* bankEntries = 0 ;
-      bankEntries = (St_hitarray*)sec_bank_iter(secname);
-      if ( !bankEntries ) {
-         fprintf ( stderr, "St_l3t_Maker:MakeOnLine: no L3 data for Supersector %d\n",
-                   secIndex ) ;
-         continue ; 
-      }
-//
-//   Get table and check it is there
-//
-      hitarray_st* bankEntriesSt = 0 ;
-      bankEntriesSt = (hitarray_st*) bankEntries->GetTable();
-      if ( !bankEntriesSt ){ 
-         fprintf ( stderr, 
-                   "St_l3t_Maker:MakeOnLine: no L3 data table for Supersector %d\n",
-                   secIndex ) ;
-         continue ; 
-      }
-      //
-      L3_SECP* sectorHeader = (L3_SECP *)trackDataPointer ;
-      memset ( trackDataPointer, 0, sizeof(L3_SECP) ) ;   
-      trackDataPointer += sizeof(L3_SECP);
-      if ( trackDataPointer > endTrackDataPointer ) {
-         printf ( "St_l3tMaker::MakeOnline: maxBytes %d too short a buffer", maxBytes ) ;
-         return kStWarn;
-      }
-//
-      sectorHeader->bh.bank_id = (secIndex-1) * 2 + 1 ;
-//
-// Read clusters in DAQ format
-//
-      tracker.readSector((TPCSECLP *)bankEntriesSt) ;
-      if ( tracker.nHits < 1 ) continue ;
-//
-//    Call tracker
-//
-      tracker.processSector();
-//
+    tracker.reset();
+    
+    gl3.setBField(0.5);
+    
+    //   Print parameters for first event
+    if ( firstEvent ) {
+	printf("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL \n");
+	printf( "333333333333333333333333333333333333333333333333333333 \n");
+	printf( "St_l3t_Maker: tracking parameters \n");
+	printf("FtfSl3: xyError          %f  \n", tracker.getXyError());
+	printf("FtfSl3: zError           %f  \n", tracker.getZError());
+	printf("FtfSl3: minTimeBin       %d  \n", tracker.minTimeBin);
+	printf("FtfSl3: maxTimeBin       %d  \n", tracker.maxTimeBin);
+	printf("FtfSl3: minClusterCharge %d  \n", tracker.minClusterCharge);
+	printf("FtfSl3: maxClusterCharge %d  \n", tracker.maxClusterCharge);
+	tracker.para.write ( stdout ) ;
+	transformer.Print_parameters() ;
+	printf("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL \n");
+	printf("333333333333333333333333333333333333333333333333333333 \n");
+	firstEvent = 0 ;
+    } 
+    
+    //
+    //    Create hit table to store L3 clusters in offline format
+    //
+    int maxHits = 500000 ;
+    int nHits = 0 ;
+    int token ;
+    St_tcl_tphit *hitS = new St_tcl_tphit("l3Hit",maxHits); 
+    m_DataSet->Add(hitS);
+    tcl_tphit_st*  hit  = (tcl_tphit_st  *)hitS->GetTable();
+    
+    // create iterator
+    
+    St_DataSetIter sec_bank_iter(sec_bank_set);
+    //
+    //    Loop over hits_in_sec_xx 
+    //
+    Char_t secname[15] = "hits_in_sec_00";
+    for(Int_t secIndex=1;secIndex<=12; secIndex++) {
+	if ( secIndex < 10 ) sprintf ( &(secname[13]), "%1d", secIndex ) ;
+	else sprintf ( &(secname[12]), "%2d", secIndex ) ;
+	//
+	//    Get hit array (=bank) and check it is there
+	//
+	St_hitarray* bankEntries = 0 ;
+	bankEntries = (St_hitarray*)sec_bank_iter(secname);
+	if ( !bankEntries ) {
+	    fprintf ( stderr, "St_l3t_Maker:MakeOnLine: no L3 data for Supersector %d\n",
+		      secIndex ) ;
+	    continue ; 
+	}
+	//
+	//   Get table and check it is there
+	//
+	hitarray_st* bankEntriesSt = 0 ;
+	bankEntriesSt = (hitarray_st*) bankEntries->GetTable();
+	if ( !bankEntriesSt ){ 
+	    fprintf ( stderr, 
+		      "St_l3t_Maker:MakeOnLine: no L3 data table for Supersector %d\n",
+		      secIndex ) ;
+	    continue ; 
+	}
+	//
+	L3_SECP* sectorHeader = (L3_SECP *)trackDataPointer ;
+	memset ( trackDataPointer, 0, sizeof(L3_SECP) ) ;   
+	trackDataPointer += sizeof(L3_SECP);
+	if ( trackDataPointer > endTrackDataPointer ) {
+	    printf("St_l3tMaker::MakeOnline: maxBytes %d too short a buffer", 
+		   maxBytes ) ;
+	    return kStWarn;
+	}
+	//
+	sectorHeader->bh.bank_id = (secIndex-1) * 2 + 1 ;
+	//
+	// Read clusters in DAQ format
+	//
+	
+	tracker.readSector((TPCSECLP *)bankEntriesSt) ;
+	if ( tracker.nHits < 1 ) continue ;
+	//
+	//    Call tracker
+	//
+	tracker.processSector();
+	//
 //      Write online track buffer
-//
-      token = ((TPCSECLP *)bankEntriesSt)->bh.token ;
-      int nBytes = tracker.fillTracks ( endTrackDataPointer-trackDataPointer,
-                                        trackDataPointer,
+	//
+	token = ((TPCSECLP *)bankEntriesSt)->bh.token ;
+	int nBytes = tracker.fillTracks ( endTrackDataPointer-trackDataPointer,
+					  trackDataPointer,
 	                                token ) ;
-      if ( nBytes <= 0 ) continue ;
+	if ( nBytes <= 0 ) continue ;
+	
+	sectorHeader->trackp.off = (trackDataPointer-(char *)sectorHeader)/4;
+	sectorHeader->trackp.len = nBytes/4;
+	
+	trackDataPointer += nBytes ;
+	
+	nBytes=tracker.fillHits (endTrackBuffer-trackDataPointer, trackDataPointer, token );
+	//  set cluster offset and lenght
+	sectorHeader->sl3clusterp.off = (trackDataPointer-(char *)sectorHeader)/4;
+	sectorHeader->sl3clusterp.len = nBytes/4;
+	
+	trackDataPointer+=nBytes;                    
+	//
+	//   Update gl3 header
+	//
+	gl3Header->bh.token = token ;
+	gl3Header->sector[secIndex].len = (trackDataPointer-(char *)sectorHeader)/4 ;
+	gl3Header->sector[secIndex].off = ((char *)sectorHeader - buffer)/4  ; ;
+	trackDataPointer += nBytes ;
+	//
+	//   Fill histos
+	//
+	m_l3_nHitsSector->Fill    ( tracker.nHits ) ;
+	m_l3_nTracksSector->Fill  ( tracker.nTracks ) ;
+	m_l3_cpuTimeSector->Fill  ( 1000.*tracker.cpuTime ) ;
+	m_l3_realTimeSector->Fill ( 1000.*tracker.realTime ) ;
+	fprintf (stderr, "St_sl3Maker: %d tracks, %d hits out of range \n", 
+		 tracker.nTracks, tracker.nHitsOutOfRange ) ;
+    } //for(Int_t secIndex=1;secIndex<=12; secIndex++)
+    //
+    //  Read event in gl3Event
+    //
+    
+    EventDescriptor ed;
+    ed.token = token;
+    ed.TRG_DAQ_cmds = 16*4+0; // TRG_cmd = 4, DAQ_cmd=0
+    ed.TRG_word = 0; //currently ignored
 
-      sectorHeader->trackp.off = (trackDataPointer-(char *)sectorHeader)/4;
-      sectorHeader->trackp.len = nBytes/4;
-
-      trackDataPointer += nBytes ;
-
-      nBytes=tracker.fillHits (endTrackBuffer-trackDataPointer, trackDataPointer, token );
-//  set cluster offset and lenght
-      sectorHeader->sl3clusterp.off = (trackDataPointer-(char *)sectorHeader)/4;
-      sectorHeader->sl3clusterp.len = nBytes/4;
-
-      trackDataPointer+=nBytes;                    
-      //
-      //   Update gl3 header
-      //
-      gl3Header->bh.token = token ;
-      gl3Header->sector[secIndex].len = (trackDataPointer-(char *)sectorHeader)/4 ;
-      gl3Header->sector[secIndex].off = ((char *)sectorHeader - buffer)/4  ; ;
-      trackDataPointer += nBytes ;
-      //
-      //   Fill histos
-      //
-      m_l3_nHitsSector->Fill    ( tracker.nHits ) ;
-      m_l3_nTracksSector->Fill  ( tracker.nTracks ) ;
-      m_l3_cpuTimeSector->Fill  ( 1000.*tracker.cpuTime ) ;
-      m_l3_realTimeSector->Fill ( 1000.*tracker.realTime ) ;
-      fprintf (stderr, "St_sl3Maker: %d tracks, %d hits out of range \n", 
-                     tracker.nTracks, tracker.nHitsOutOfRange ) ;
-   } //for(Int_t secIndex=1;secIndex<=12; secIndex++)
-   //
-   //  Read event in gl3Event
-   //
-   gl3.processEvent ( trackDataPointer-buffer, buffer ) ;
-   gl3Event* eventP = 0 ;
-   eventP = gl3.getEvent(token);
-   //
-   //   Generate output table
-   //
-   int nTracks = 1;
-   int nMergedTracks = 1;
-   if ( eventP ) nTracks       = max(1,eventP->getNTracks());   
-   if ( eventP ) nMergedTracks = max(1,eventP->getNMergedTracks());   
-   St_dst_track *trackS = new St_dst_track("l3Track", nTracks);
-   St_dst_dedx  *dedxS  = new St_dst_dedx("l3Dedx", nTracks); 
-   m_DataSet->Add(trackS);
-   m_DataSet->Add(dedxS);
-   fprintf(stderr," %s on-line:  Tracks %d Merged Tracks %d \n",
-                  GetName(),nTracks, nMergedTracks );
-
-   //
-   dst_track_st *track     = (dst_track_st *)trackS->GetTable(); 
-   dst_dedx_st  *trackDedx = (dst_dedx_st *)dedxS->GetTable();
-   //
-   //   Copy gl3 to dst_track_st table
-   //
-   int nTracksWithDedx;
-   nTracksWithDedx = 0;
-
-   if ( eventP ) {
-//
-//   Loop over hits
-//
-      gl3Hit* gHit ;
-      for (int ihit = 0; ihit < eventP->getNHits (); ihit++)
-      {
-         gHit = eventP->getHit (ihit);
-         hit[ihit].id = nHits + 1;
-         hit[ihit].row = gHit->getRowSector ();
-         hit[ihit].x = gHit->getX ();
-         hit[ihit].y = gHit->getY ();
-         hit[ihit].z = gHit->getZ ();
-         hit[ihit].dx = tracker.getXyError();
-         hit[ihit].dy = tracker.getXyError();
-         hit[ihit].dz = tracker.getZError();
-         hit[ihit].q = gHit->getCharge ();
-         hit[ihit].track = gHit->getTrackId ();
-	 hit[ihit].flag = (long) gHit->getFlags ();
-      }
-
-      nHits = eventP->getNHits ();
-
-      gl3Track     *gTrk ;
-      dst_track_st *tTrk ;
-      dst_dedx_st  *tDedx;
-      for ( int i = 0 ; i < (int)eventP->getNTracks() ; i++ ) {
-         gTrk = eventP->getTrack(i);
-         if ( !gTrk ) continue ;
-         tTrk = &(track[i]);
-         tTrk->id       = gTrk->id ;
-         tTrk->invpt    = 1./fabs(gTrk->pt);
-         tTrk->n_point  = gTrk->nHits ;
-         tTrk->icharge  = gTrk->q ;
-         tTrk->chisq[0] = gTrk->chi2[0] ;
-         tTrk->chisq[1] = gTrk->chi2[1] ;
-         tTrk->length   = gTrk->length ;
-         tTrk->phi0     = gTrk->phi0 * toDeg ;
-         tTrk->psi      = gTrk->psi  * toDeg ;
-         tTrk->r0       = gTrk->r0   ;
-         tTrk->tanl     = gTrk->tanl ;
-         tTrk->z0       = gTrk->z0   ;
-
-	 // fill dst_dedx table only for those tracks which have valid dedx information
-	 if ( gTrk->dedx!=0 ) {
-	       tDedx = &(trackDedx[nTracksWithDedx]);
-	       tDedx->id_track = gTrk->id;
-	       tDedx->method   = kTruncatedMeanIdentifier;
-	       tDedx->dedx[0]  = gTrk->dedx ;
-	       tDedx->dedx[1]  = 0;
-	       tDedx->ndedx    = gTrk->nDedx;
-	       nTracksWithDedx++;
-	 }
-
-      }
-   }
-   trackS->SetNRows(nTracks);
-   dedxS->SetNRows(nTracksWithDedx);
-   hitS->SetNRows(nHits);
-   MakeHistograms();
-
-   // Fill StEvent
-   fillStEvent(trackS,dedxS,hitS) ;
-   //
-   //  delete buffer
-   //
-   delete []buffer ;
-
-   return kStOk ;
+    gl3.processEvent(&ed, (L3_P*)buffer);
+    //gl3.processEvent ( trackDataPointer-buffer, buffer ) ;
+    gl3Event* eventP = 0 ;
+    eventP = gl3.getEvent(token);
+    //
+    //   Generate output table
+    //
+    int nTracks = 1;
+    int nMergedTracks = 1;
+    if ( eventP ) nTracks       = max(1,eventP->getNTracks());   
+    if ( eventP ) nMergedTracks = max(1,eventP->getNMergedTracks());   
+    St_dst_track *trackS = new St_dst_track("l3Track", nTracks);
+    St_dst_dedx  *dedxS  = new St_dst_dedx("l3Dedx", nTracks); 
+    m_DataSet->Add(trackS);
+    m_DataSet->Add(dedxS);
+    fprintf(stderr," %s on-line:  Tracks %d Merged Tracks %d \n",
+	    GetName(),nTracks, nMergedTracks );
+    
+    //
+    dst_track_st *track     = (dst_track_st *)trackS->GetTable(); 
+    dst_dedx_st  *trackDedx = (dst_dedx_st *)dedxS->GetTable();
+    //
+    //   Copy gl3 to dst_track_st table
+    //
+    int nTracksWithDedx;
+    nTracksWithDedx = 0;
+    
+    if ( eventP ) {
+	//
+	//   Loop over hits
+	//
+	gl3Hit* gHit ;
+	for (int ihit = 0; ihit < eventP->getNHits (); ihit++) {
+	    gHit = eventP->getHit (ihit);
+	    hit[ihit].id = nHits + 1;
+	    hit[ihit].row = gHit->getRowSector ();
+	    hit[ihit].x = gHit->getX ();
+	    hit[ihit].y = gHit->getY ();
+	    hit[ihit].z = gHit->getZ ();
+	    hit[ihit].dx = tracker.getXyError();
+	    hit[ihit].dy = tracker.getXyError();
+	    hit[ihit].dz = tracker.getZError();
+	    hit[ihit].q = gHit->getCharge ();
+	    hit[ihit].track = gHit->getTrackId ();
+	    hit[ihit].flag = (long) gHit->getFlags ();
+	}
+	
+	nHits = eventP->getNHits ();
+	
+	gl3Track     *gTrk ;
+	dst_track_st *tTrk ;
+	dst_dedx_st  *tDedx;
+	for ( int i = 0 ; i < (int)eventP->getNTracks() ; i++ ) {
+	    gTrk = eventP->getTrack(i);
+	    if ( !gTrk ) continue ;
+	    tTrk = &(track[i]);
+	    tTrk->id       = gTrk->id ;
+	    tTrk->invpt    = 1./fabs(gTrk->pt);
+	    tTrk->n_point  = gTrk->nHits ;
+	    tTrk->icharge  = gTrk->q ;
+	    tTrk->chisq[0] = gTrk->chi2[0] ;
+	    tTrk->chisq[1] = gTrk->chi2[1] ;
+	    tTrk->length   = gTrk->length ;
+	    tTrk->phi0     = gTrk->phi0 * toDeg ;
+	    tTrk->psi      = gTrk->psi  * toDeg ;
+	    tTrk->r0       = gTrk->r0   ;
+	    tTrk->tanl     = gTrk->tanl ;
+	    tTrk->z0       = gTrk->z0   ;
+	    
+	    // fill dst_dedx table only for those tracks which have valid dedx information
+	    if ( gTrk->dedx!=0 ) {
+		tDedx = &(trackDedx[nTracksWithDedx]);
+		tDedx->id_track = gTrk->id;
+		tDedx->method   = kTruncatedMeanIdentifier;
+		tDedx->dedx[0]  = gTrk->dedx ;
+		tDedx->dedx[1]  = 0;
+		tDedx->ndedx    = gTrk->nDedx;
+		nTracksWithDedx++;
+	    }
+	    
+	}
+    }
+    trackS->SetNRows(nTracks);
+    dedxS->SetNRows(nTracksWithDedx);
+    hitS->SetNRows(nHits);
+    MakeHistograms();
+    
+    // Fill StEvent
+    fillStEvent(trackS,dedxS,hitS) ;
+    //
+    //  delete buffer
+    //
+    delete []buffer ;
+    
+    return kStOk ;
 }
 //_____________________________________________________________________________
 Int_t St_l3t_Maker::MakeOffLine(){
@@ -646,14 +678,15 @@ Int_t St_l3t_Maker::fillStEvent(St_dst_track* trackS, St_dst_dedx* dedxS, St_tcl
 	// calculate helicity:
 	short h = ((bval[2] * q) > 0 ? -1 : 1);
 
-	StHelixModel* helixModel = new StHelixModel( 
-						    q,
-						    dstTracks[trackindex].psi,
-						    0.0,
-						    atan(dstTracks[trackindex].tanl), 
-						    origin, 
-						    momentum,
-						    h) ;
+	StHelixModel* helixModel = 
+	    new StHelixModel( q,
+			      dstTracks[trackindex].psi,
+			      0.0,
+			      atan(dstTracks[trackindex].tanl), 
+			      origin, 
+			      momentum);
+// 			      momentum,
+// 			      h) ;
 	// global track
 	StGlobalTrack* globalTrack = new StGlobalTrack(dstTracks[trackindex]) ;
 	globalTrack->setDetectorInfo(info) ;
