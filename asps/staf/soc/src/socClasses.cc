@@ -6,10 +6,15 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.21 1998/03/11 21:40:16 ward Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.22 1998/03/16 01:51:29 fisyak Exp $"
 
 //:----------------------------------------------- INCLUDES           --
-#include <stream.h>
+#include <sys/types.h>
+#ifndef Linux
+#include <sys/stream.h>
+#else
+#include <g++/stream.h>
+#endif
 #include <math.h>
 
 #define KUIP

@@ -15,7 +15,7 @@
 >GUIDANCE
 Service_and_Object_Catalog commands.
 .
- #(@)$Id: soc_def.cdf,v 1.6 1998/03/11 21:40:18 ward Exp $
+ #(@)$Id: soc_def.cdf,v 1.7 1998/03/16 01:51:29 fisyak Exp $
 .
 SOC is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -130,7 +130,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_SOC_COUNT
+>ACTION kam_soc_count_%C
 **
 ** ---------------------------------------------------------------------
 ** SOC/LIST
@@ -226,7 +226,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_SOC_LIST
+>ACTION kam_soc_list_%C
 **
 ** ---------------------------------------------------------------------
 ** SOC/NEWOBJECT NAME
@@ -275,7 +275,7 @@ SEE ALSO:
 .
    SOC/OBJECT
 .
->ACTION KAM_SOC_NEWOBJECT
+>ACTION kam_soc_newobject_%C
 **
 ** ---------------------------------------------------------------------
 ** SOC/BIND PKG [ SOLIB ]
@@ -369,7 +369,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_SOC_BIND
+>ACTION kam_soc_bind_%C
 **
 ** ---------------------------------------------------------------------
 ** SOC/DELETEOID OID
@@ -413,7 +413,7 @@ BUGS:
 SEE ALSO: 
    SOC/OBJECT/LOCK
 .
->ACTION KAM_SOC_DELETEOID
+>ACTION kam_soc_deleteoid_%C
 **
 ** ---------------------------------------------------------------------
 ** SOC/DELETEID OID
@@ -429,7 +429,7 @@ This command is obsolete.  Please use SOC/DELETEOID instead.
 SEE ALSO: 
    SOC/DELETEOID
 .
->ACTION KAM_SOC_DELETEID
+>ACTION kam_soc_deleteid_%C
 **
 ** ---------------------------------------------------------------------
 ** SOC/DELETEOBJECT NAME [ TYPE ]
@@ -480,7 +480,7 @@ BUGS:
 SEE ALSO: 
    SOC/OBJECT/LOCK
 .
->ACTION KAM_SOC_DELETEOBJECT
+>ACTION kam_soc_deleteobject_%C
 **
 ** ---------------------------------------------------------------------
 ** SOC/IDOBJECT NAME [ TYPE ]
@@ -527,7 +527,7 @@ BUGS:
 SEE ALSO: 
  SOC/OBJECT/OID
 .
->ACTION KAM_SOC_IDOBJECT
+>ACTION kam_soc_idobject_%C
 **
 ** ---------------------------------------------------------------------
 ** SOC/RELEASE PKG
@@ -569,7 +569,7 @@ BUGS:
 SEE ALSO: 
    SOC/BIND
 .
->ACTION KAM_SOC_RELEASE
+>ACTION kam_soc_release_%C
 **
 ************************************************************************
 ** SOC/OBJECT
@@ -652,7 +652,7 @@ return OBJECT_NOT_FOUND but KAM_INVALID_IDREF.
 .
 SEE ALSO: 
 .
->ACTION KAM_SOCOBJECT_LOCK
+>ACTION kam_socobject_lock_%C
 **
 ** ---------------------------------------------------------------------
 ** SOC/OBJECT/NAME OID
@@ -704,7 +704,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_SOCOBJECT_NAME
+>ACTION kam_socobject_name_%C
 **
 ** ---------------------------------------------------------------------
 ** SOC/OBJECT/OID NAME [ TYPE ]
@@ -756,7 +756,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_SOCOBJECT_OID
+>ACTION kam_socobject_oid_%C
 **
 ** ---------------------------------------------------------------------
 ** SOC/OBJECT/TYPE OID
@@ -805,7 +805,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_SOCOBJECT_TYPE
+>ACTION kam_socobject_type_%C
 **
 ** ---------------------------------------------------------------------
 ** SOC/OBJECT/VERSION OID
@@ -855,7 +855,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_SOCOBJECT_VERSION
+>ACTION kam_socobject_version_%C
 **
 ** ---------------------------------------------------------------------
 ** SOC/OBJECT/DELETE NAME TYPE
@@ -916,7 +916,7 @@ SEE ALSO:
    SOC/DELETEOBJECT
    SOC/DELETEOID
 .
->ACTION KAM_SOCOBJECT_DELETE
+>ACTION kam_socobject_delete_%C
 **
 ** ---------------------------------------------------------------------
 ** SOC/OBJECT/IMPLEMENTS SOREF INTERFACE
@@ -982,5 +982,5 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_SOCOBJECT_IMPLEMENTS
+>ACTION kam_socobject_implements_%C
 **

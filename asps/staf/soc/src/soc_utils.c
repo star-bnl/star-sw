@@ -1,6 +1,10 @@
 #include "asuAlloc.h"
 #include <math.h>
-#include <strings.h>
+
+#ifndef WIN32
+# include <strings.h>
+#endif /* WIN32 */
+
 
 extern char *id2name(char *base, long id);
 extern char *shortname(char *longname, size_t length);

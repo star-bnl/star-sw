@@ -569,4 +569,22 @@ static void * findMain(void)
 	free(buf);
 	return ret;
 }
+#else
+#ifdef WIN32
+void *dlopen(const char *path, int mode)
+{
+}
+char *dlerror(void)
+{
+	return (char *)0;
+}
+
+int dlclose(void *handle)
+{
+  return -1;
+}
+void *dlsym(void *handle, const char *symbol)
+{
+}
+#endif
 #endif /* AIX */
