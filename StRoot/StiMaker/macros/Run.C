@@ -24,9 +24,9 @@ void loadLibrairies(bool doProfile)
 		 "StDetectorDbMaker", "StSvtClassLibrary","StSvtDaqMaker",
 		 "StSvtSimulationMaker","StSvtCalibMaker", "StSvtSeqAdjMaker",
 		 "StSvtClusterMaker","Sti","StiGui", "StiEvaluator",
-		 //"StiAps",
+		 "StiPixel",
 		 "StiMaker",
-		 "StFtpcClusterMaker",		 
+		 "StFtpcClusterMaker",
 		 "StiTpc","StiSvt","StiEmc","StiFtpc","StMiniMcEvent","StMiniMcMaker","last"};
 
   int i=0;  
@@ -64,7 +64,7 @@ void RunMany(int firstEvent = 0,
 	     bool useSvt=false,
 	     bool useEmc=false,
 	     bool useFtpc=false,
-	     bool useAps=false,
+	     bool usePixel=false,
 	     bool useResidualCalculator=false,
 	     bool doProfile=false	 )
 {
@@ -86,7 +86,7 @@ void RunMany(int firstEvent = 0,
       useSvt,
       useEmc,
       useFtpc,
-      useAps,
+      usePixel,
       useResidualCalculator,
       doProfile);
 }
@@ -109,7 +109,7 @@ void RunResiduals(int firstEvent = 0,
 		  bool useSvt=false,
 		  bool useEmc=false,
 		  bool useFtpc=false,
-		  bool useAps=false,
+		  bool usePixel=false,
 		  bool useResidualCalculator=true,
 		  bool doProfile=false	 )
 {
@@ -131,7 +131,7 @@ void RunResiduals(int firstEvent = 0,
       useSvt,
       useEmc,
       useFtpc,
-      useAps,
+      usePixel,
       useResidualCalculator,
       doProfile);
 }
@@ -149,8 +149,6 @@ void RunGui(int firstEvent = 0,
 	    bool doSimulation=true,
 	    bool doAssociation=false,
 	    bool doMiniMcEvent=false,
-	    //bool doAssociation=true,
-	    //bool doMiniMcEvent=true,
 	    bool doDst=false,
 	    bool doStEventOutput=false,
 	    bool doStEventInput=true,
@@ -158,7 +156,7 @@ void RunGui(int firstEvent = 0,
 	    bool useSvt=false,
 	    bool useEmc=false,
 	    bool useFtpc=false,
-	    bool useAps=true,
+	    bool usePixel=false,
 	    bool useResidualCalculator=false,
 	    bool doProfile=false
 	    )
@@ -181,7 +179,7 @@ void RunGui(int firstEvent = 0,
       useSvt,
       useEmc,
       useFtpc,
-      useAps,
+      usePixel,
       useResidualCalculator,
       doProfile);
 } 
@@ -205,7 +203,7 @@ void Run(int firstEvent,
 	 bool useSvt,
 	 bool useEmc,
 	 bool useFtpc,
-	 bool useAps,
+	 bool usePixel,
 	 bool useResidualCalculator,
 	 bool doProfile	 )
 {
@@ -235,7 +233,7 @@ void Run(int firstEvent,
       useSvt,
       useEmc,
       useFtpc,
-      useAps,
+      usePixel,
       useResidualCalculator,
       doProfile);
 }
@@ -257,7 +255,7 @@ void Run(Int_t firstEvent,
 	 bool useSvt,
 	 bool useEmc,
 	 bool useFtpc,
-	 bool useAps,
+	 bool usePixel,
 	 bool useResidualCalculator,
 	 bool doProfile)
 {
@@ -277,7 +275,7 @@ void Run(Int_t firstEvent,
   pars->useSvt          = useSvt;
   pars->useEmc          = useEmc;
   pars->useFtpc         = useFtpc;
-  //pars->useAps          = useAps;
+  pars->usePixel          = usePixel;
   pars->useResidualCalculator = useResidualCalculator;
   miniChain->run(firstEvent,nEvents,filePrefix,fileList);
 }
