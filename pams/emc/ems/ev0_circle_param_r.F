@@ -1,6 +1,6 @@
       SUBROUTINE ev0_circle_param_r(trk,xc,r)
 c:>------------------------------------------------------------------
-C:ROUTINE:      ev0_circle_param
+C:ROUTINE:      ev0_circle_param_r
 C:DESCRIPTION:  returns x,y coordinates and radius of circle in bending plane
 C:ARGUMENTS:    see code
 C:ARGUMENTS:    see code
