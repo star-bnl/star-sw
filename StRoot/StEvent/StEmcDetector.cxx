@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcDetector.cxx,v 2.9 2003/09/12 22:00:57 jeromel Exp $
+ * $Id: StEmcDetector.cxx,v 2.10 2003/10/02 22:34:05 jeromel Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.cxx,v $
+ * Revision 2.10  2003/10/02 22:34:05  jeromel
+ * LEAK_SCOPE patch (Alex)
+ *
  * Revision 2.9  2003/09/12 22:00:57  jeromel
  * Forgot the void
  *
@@ -43,7 +46,7 @@
 #include "StEmcModule.h"
 #include "StEmcClusterCollection.h"
 
-static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.9 2003/09/12 22:00:57 jeromel Exp $";
+static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.10 2003/10/02 22:34:05 jeromel Exp $";
 
 ClassImp(StEmcDetector)
 
@@ -58,8 +61,9 @@ StEmcDetector::StEmcDetector(StDetectorId id, unsigned int n)
   mNumberOfModules = n;
   for(int i=0; i<120;i++)
     {
-      StEmcModule * module = new StEmcModule();
-      this->setModule(module,i);
+      mModules[i] = new StEmcModule();
+      //StEmcModule * module = new StEmcModule();
+      //this->setModule(new StEmcModule(),i);
     }
 }
 
