@@ -1,5 +1,11 @@
-* $Id: tfs_tpchit_merge.F,v 1.13 1999/10/11 16:53:14 sakrejda Exp $
+* $Id: tfs_tpchit_merge.F,v 1.14 1999/11/23 00:45:35 sakrejda Exp $
 * $Log: tfs_tpchit_merge.F,v $
+* Revision 1.14  1999/11/23 00:45:35  sakrejda
+* Hits that had de<0 or were merged with hits with de<0 flagged with flagset
+* to 5. tfs does not handle them correctly. They are mostly edge hits
+* (close to the sector edges, close to the padplanes or close to the central
+* membrane.
+*
 * Revision 1.13  1999/10/11 16:53:14  sakrejda
 * Obsolete parameters removed and the old code to do the pileup
 * deleted (not Akio's , akio's is still in!). It did not work anyway.
@@ -122,7 +128,7 @@ C Local variables
       REAL XOUTK(3),XOUTL(3),XGLOB(3)
 
       integer  tgc_global_to_local, tgc_local_to_global
-      integer  iret,irowl,i_rows(10),ii_rows
+      integer  iret,irowl,i_rows(100),ii_rows, hit_id, counter
       integer  tls_Quick_Sort_r, tls_Quick_Sort_i,tls_Search_i
 
       integer IsectorDummy
@@ -152,9 +158,6 @@ C     the tpc_index table after tpc hit merging.
 C     loop over sector-rows
       do i = 1, par(1).nsect
          do j = 1, par(1).nrow
-*
-*     This is a very ugly patch.....
-            if(i.gt.24) go to 666
 C     chose pad size
             ipad = 2
             if (j .le. par(1).irmax) ipad = 1
@@ -244,6 +247,7 @@ C     flag with the table-row number of the lowest order hit
             enddo               ! end merging itteration
             
 C     ------- final pass does the merging ----------------------------------
+            counter=0
 C     hits are sorted in time - merge them
             do 100 k = istart, iend
                
@@ -420,9 +424,37 @@ C     04/16/1997  DSW
            
          enddo                  ! loop over rows
       enddo                     ! loop over sectors
-*     jump here if the index gets past the loop limit 
-*     (the end of that ugly patch)
- 666  continue
-
+C     Now go over all the gstar hits. Fish out all those that had
+C     negative de and flag coresponding reconstructed hits
+C     Sort the hit table so we could search it:
+      iret = tls_quick_sort_i(tphit_h.nok,tphit(1).id,tphit(2).id,tphit)
+c     sort the index table so we could search it:
+      iret = tls_quick_sort_i(tpc_index_h.nok,tpc_index(1).key1,tpc_index(2).key1,tpc_index)
+      do k=1,g2t_hit_h.nok
+         if(g2t_hit(k).volume_id.lt.2446.and.g2t_hit(k).de.lt.0)then
+C        find id in the index table and find the id of reconstructed point
+         ii_rows=1
+         i_rows(1) = g2t_hit(k).id
+         iret = tls_Search_i(tpc_index_h.nok,tpc_index(1).key1, 
+     >   tpc_index(2).key1,g2t_hit(k).id,i_rows,ii_rows)  
+         if (ii_rows.gt.0) then
+            irowl = i_rows(1)
+            if(irowl.gt.tpc_index_h.nok) then
+               call StError('TFS_TPCHIT_MERGE - *** internal ERROR #4***')
+            else
+               hit_id = tpc_index(irowl).key2
+C              now find this hit in the hit table 
+               ii_rows=1
+               iret = tls_Search_i(tphit_h.nok,tphit(1).id,tphit(2).id,
+     >         hit_id,i_rows,ii_rows)
+               if (ii_rows.eq.0) then
+                  call StError('TFS_TPCHIT_MERGE - *** internal ERROR #3***')
+               else
+                  tphit(i_rows(1)).flag=5
+               endif
+            endif               
+         endif
+         endif
+      end do
       return
       end
