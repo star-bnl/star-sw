@@ -8,12 +8,12 @@ Authors:	Art Poskanzer and Raimond Snellings
 Date:		Dec 1999
 Description:
 
-Makes histograms for the flow analysis. If the FlowTagDB exist, it
+Makes histograms for the flow analysis. If the FlowTagDB exists, it
 reads from it. Otherwise, it reads the event quantities from
 StFlowEvent. In either case it reads the particle quantities from
 StFlowEvent. It removes autocorrelations of each particle with respect
-to the event plane and for each harmonic makes a 2D histogram of v
-vs. y and p_t.
+to the event plane and for each harmonic makes a 2D histogram of the
+number flow, v, vs. y and p_t.
 
 In Finish, it calculates the event plane resolution from the
 correlation of sub-event event planes. It then corrects the v
@@ -21,7 +21,7 @@ histograms for the event plane resolution. It fits the q histogram
 with the q distribution. It calculates the PhiWgts needed to make the
 event plane isotropic in the lab and outputs them as
 flowPhiWgtNew.hist.root . To use these PhiWgts in the next analysis
-you have to copy the root file to flowPhiWgt.hist.root . If the file
+you have to copy this root file to flowPhiWgt.hist.root . If the file
 flowPhiWgt.hist.root is missing the PhiWgts are set to 1.0 .
 
 Plot.C is a macro for plotting the histograms and their
@@ -32,6 +32,4 @@ with that number as an argument. If you execute the macro with all
 three arguments (plot number, selection number, harmonics number) for
 a graph that has multiple harmonics and selections, it will plot only
 the histogram for that selection and harmonic. After it has been
-loaded and executed once it can be rerun simply with plot(). For
-better graphics you can first execute boldStyle.C or videoStyle.C .
-
+loaded and executed once it can be rerun simply with plot().
