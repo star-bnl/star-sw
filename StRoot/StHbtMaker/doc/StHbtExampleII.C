@@ -318,13 +318,14 @@ cout << "READER SET UP.... " << endl;
 #if ASCIIREADER
  //   set up a microDstWriter 
  StHbtAsciiReader* Reader = new StHbtAsciiReader;
- Reader->SetFileName(*fileList);
+ // Reader->SetFileName(*fileList);
+ Reader->SetFileName("test1.asc");
  TheManager->SetEventReader(Reader);
  cout << "READER SET UP.... " << endl;
 #endif
 #if BINARYWRITER
  //   set up a microDstWriter 
- StHbtBinaryReader* binaryWriter = new StHbtBinaryReader;
+ StHbtBinaryReader* binaryWriter = new StHbtBinaryReader(ioMaker);
  binaryWriter->SetFileName("test1.bin");
  TheManager->AddEventWriter(binaryWriter);
  // set up the front loaded cuts
@@ -364,7 +365,8 @@ cout << "READER SET UP.... " << endl;
 #endif
 #if GSTARTXTREADER
  StHbtGstarTxtReader* Reader = new StHbtGstarTxtReader;
- Reader->SetFileName("/star/rcf/pwg/hbt/GstarTextFiles/blended_events.txt");
+ // Reader->SetFileName("/star/rcf/pwg/hbt/GstarTextFiles/blended_events.txt");
+ Reader->SetFileName("/star/rcf/data06/evgen/auau200/hbt/default/midcentral/year_2000/hadronic_on/gen/evgen.41.evt");
  TheManager->SetEventReader(Reader);
 #endif 
 
@@ -385,8 +387,6 @@ cout << "READER SET UP.... " << endl;
  // define example track cut monitor
  trackCutMonitor_P_vs_Dedx* aDedxMoniPos = new trackCutMonitor_P_vs_Dedx(+1,"P_vs_Dedx +","Momentum (GeV/c) vs Energy loss (a.u.)",100,0.,1.2,100,0.,1e-5);
  trackCutMonitor_P_vs_Dedx* aDedxMoniNeg = new trackCutMonitor_P_vs_Dedx(-1,"P_vs_Dedx -","Momentum (GeV/c) vs Energy loss (a.u.)",100,0.,1.2,100,0.,1e-5);
- // define example v0 cut monitor
- v0CutMonitor_ArmenterosPodolanski* aArmPodMoni = new v0CutMonitor_ArmenterosPodolanski("ArmenterosPodolanski","ArmenterosPodolanski",100,-20.,20.,100,-20.,20.);
 
  // now, we define another analysis that runs simultaneously with the previous one.
  // this one looks at K+K- correlations (so NONidentical particles) in invariant mass
