@@ -1,7 +1,10 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.8 2003/04/16 20:33:51 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.9 2003/04/25 14:42:00 jeromel Exp $
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.9  2003/04/25 14:42:00  jeromel
+// Minor change in messaging
+//
 // Revision 1.8  2003/04/16 20:33:51  balewski
 // small fixes in eemc daq reader
 //
@@ -263,7 +266,9 @@ void  StEEmcDbMaker::mReloadDb  (){
   
   TDataSet *eedb=GetDataBase("Calibrations/eemc");
   if(eedb==0) {
-    printf(" \n\n Did you setup 'setenv Calibrations_eemc VerE' or other VerX and/or ~dbServers.xml ?, JB\n\n");
+    printf(" \n\nCould not find Calibrations/eemc\n\n");
+    // do not assert() ; return
+    // down-stream makers should check for presence of dataset
     assert(eedb);
   }
   eedb->ls(2);
