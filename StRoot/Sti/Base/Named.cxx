@@ -6,15 +6,17 @@
 
 Named::Named(const string & aName)
 {
-   _name = aName;
+  setName(aName);
 }
 
 Named::~Named()
 {}
 
-void Named::setName(const string & newName)
+void Named::setName(const string & aName)
 {
-    _name = newName;
+   int i = aName.size()-1;
+   for(;i>=0 && aName[i]==' ';i--) {};
+    _name = string(aName,0,i+1);
 }
 
 const string& Named::getName() const
@@ -27,13 +29,15 @@ bool Named::isNamed() const
    return (_name.size()>0 && _name!=" ");
 }
 
-bool Named:: isName(const string & aName) const
+bool Named::isName(const string &aName) const
 {
-   return _name==aName;
+   int i = aName.size()-1;
+   for(;i>=0 && aName[i]==' ';i--) {}
+   return _name==string(aName,0,i+1);
 }
 
-bool Named::isNamedAs(const Named & named) const
+bool Named::isNamedAs(const Named &named) const
 {
-  return _name==named._name;
+  return isName(named._name);
 }
 
