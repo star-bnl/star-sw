@@ -29,6 +29,7 @@ StTableDescriptorI* mdescriptor;//!
   virtual void getElementSpecs(int elementNum, char*& c, char*& name, unsigned int& length,StTypeE& type);
 
   bool createMemory();
+  void checkDescriptor();
 
 public:
 
@@ -156,6 +157,7 @@ void StDbTable::setDescriptor(StTableDescriptorI* descriptor){
  if(mdescriptor) delete mdescriptor;
  mdescriptor=descriptor;
  mhasDescriptor=true;
+ //checkDescriptor();
 };
 
 inline StDbTableI* 

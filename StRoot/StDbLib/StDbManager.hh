@@ -75,7 +75,7 @@ public:
 
   virtual bool IsValid(StDbTableI* table, int time);
   virtual void fetchDbTable(StDbTableI* table, int time);
-
+  virtual void storeDbTable(StDbTableI* table);
 };
 
 

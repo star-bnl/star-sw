@@ -13,6 +13,7 @@ mMax = 4;
 offsetToNextEmptyByte = 0;
 offsetToLast4Bytes = -4;
 mnumElements = 0;
+lastType=Stdouble;
 
 mcols = new tableDescriptor[mMax+1];
 
@@ -82,7 +83,7 @@ bool ClientMode;
    //  cout << " name = " << mcols[i].name << " type = " << mcols[i].type << "    //   size = " << mcols[i].size << " offset = " << mcols[i].offset << endl;
    mCur++;
    mnumElements++;
-   mtableSize = offsetToNextEmptyByte-1;
+   mtableSize = offsetToNextEmptyByte;
 
  if(!ClientMode)buff->SetStorageMode();  // reset to StorageMode
 }
@@ -175,11 +176,18 @@ int i = elementNum;
 
   } else {
 
+    if(type==Stdouble && lastType!=Stdouble){
+      offsetToLast4Bytes+=4;
+      offsetToNextEmptyByte+=4;
+    }
      mcols[i].offset=offsetToLast4Bytes+4;
      offsetToNextEmptyByte = mcols[i].offset + mcols[i].size;
      j = 4* ((int) floor ( (mcols[i].size-1)/4 ));
      offsetToLast4Bytes = mcols[i].offset + j;// + 4;
   }
+
+  if(offsetToLast4Bytes<0)offsetToLast4Bytes=0;
+  lastType=type;
 }
 
 /////////////////////////////////////////////////////////////////////////

@@ -51,6 +51,7 @@ public:
   virtual void QueryDb(StDbTable* table);
   virtual void QueryDb(StDbConfigNode* node);
   virtual void QueryDescriptor(StDbTable* table);
+  virtual void WriteDb(StDbTable* table);
 
 };
 

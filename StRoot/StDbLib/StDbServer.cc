@@ -157,6 +157,19 @@ StDbServer::QueryDb(StDbTable* table) {
 ////////////////////////////////////////////////////////////////
 
 void 
+StDbServer::WriteDb(StDbTable* table) { 
+
+  if(!mdatabase->WriteDb(table)){
+    if(table) cout << "Wrote table ["<<table->getTableName()<<"] ";
+    cout << "Table is not Updated" << endl;
+  }
+}
+
+
+
+////////////////////////////////////////////////////////////////
+
+void 
 StDbServer::QueryDescriptor(StDbTable* table) { 
 
   if(!mdatabase->QueryDescriptor(table)){

@@ -483,9 +483,24 @@ StDbTable::PassElement(char* ptr, char* name, int len, StTypeE type, typeAccepto
 
 }
 
+void
+StDbTable::checkDescriptor(){
+
+int i = mdescriptor->getNumElements();
+unsigned int size = mdescriptor->getTotalSizeInBytes();
+
+ cout <<"Descriptor for Table = " << mtableName<<endl;
+ cout <<" number of elements = "<<i<< " with size = " << size << endl;
+
+ for(int k=0; k<i;k++){
+   cout <<"Name = " << mdescriptor->getElementName(k);
+   cout <<" size = " << mdescriptor->getElementSize(k);
+   cout <<" offset = " <<mdescriptor->getElementOffset(k);
+   cout <<" type = " <<(int)mdescriptor->getElementType(k)<<endl;
+ }
 
 
-
+}
 
 
 

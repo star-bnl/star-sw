@@ -276,6 +276,21 @@ StDbManager::fetchDbTable(StDbTableI* table, int time){
   }
 }
 
+void
+StDbManager::storeDbTable(StDbTableI* table){
+
+  if(!table){
+    cout << "Cannot Update StDbTable=0" << endl;
+  } else {
+
+    //  table->setRequestTime(time);
+
+  StDbServer* server = findServer(table->getDbType(),table->getDbDomain());
+  server->WriteDb((StDbTable*)table);  // table is filled 
+
+  }
+}
+
 ////////////////////////////////////////////////////////////////
 
 void
