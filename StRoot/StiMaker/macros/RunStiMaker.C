@@ -16,7 +16,8 @@ void RunStiMaker(Int_t nevents=1,
 		 //bool doFit=false, /* false->find track only */
 		 
                  //const char *MainFile="/scr20/ittf/data/DEV_9_12_01/*.event.root")
-                 const char *MainFile="/scr20/ittf/data/DEV_10_04_01/*.event.root")
+                 //const char *MainFile="/scr20/ittf/data/DEV_10_04_01/*.event.root")
+                 const char* MainFile="/star/rcf/pwg/spectra/mmiller/data/*.event.root")
     
 {    
     // Dynamically link needed shared libs
@@ -191,7 +192,7 @@ void RunStiMaker(Int_t nevents=1,
 	canvas1->Divide(2,2);
 	
 	canvas1->cd(1);
-	TestTree->Draw("sqrt(stiTrackPx*stiTrackPx+stiTrackPy*stiTrackPy)");
+	TestTree->Draw("stiTrackPt");
 	htemp->SetXTitle("Pt (GeV)");
 	cout <<"\t\tPt\t\t"<<htemp->GetMean()<<"\t\t"<<htemp->GetRMS()<<endl;
 	
@@ -210,7 +211,7 @@ void RunStiMaker(Int_t nevents=1,
 	canvas2->Divide(2,2);
 	
 	canvas2->cd(1);
-	TestTree->Draw("sqrt(globalTrackPx*globalTrackPx+globalTrackPy*globalTrackPy)");
+	TestTree->Draw("globalTrackPt");
 	htemp->SetXTitle("Pt (GeV)");
 	cout <<"\t\tPt\t\t"<<htemp->GetMean()<<"\t\t"<<htemp->GetRMS()<<endl;
 	
