@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.9 2001/04/20 07:52:46 lmartin Exp $
+ * $Id: StEstMaker.cxx,v 1.10 2001/04/23 12:20:33 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.10  2001/04/23 12:20:33  lmartin
+ * ptmax of the first pass set to a large value to allow tracking of no field events.
+ *
  * Revision 1.9  2001/04/20 07:52:46  lmartin
  * Looking for the geantBranch dataset when the geant dataset is absent in case
  * of a chain done in two steps.
@@ -227,7 +230,7 @@ Int_t StEstMaker::Init(){
   mParams[1]->ptmin = 0.7;
   mParams[1]->ptmax = 1.0;  
   mParams[0]->ptmin = 1.0;
-  mParams[0]->ptmax = 100;
+  mParams[0]->ptmax = 10000000;
 
   mParams[0]->geomcutl[3] = 1.0;
   mParams[0]->geomcutl[2] = 0.5;
@@ -379,6 +382,7 @@ Int_t StEstMaker::Make() {
 
   const Int_t maxNofTracks = 50000;
 
+  gMessMgr->Info()<<"StEstMaker : Creating the output tables"<<endm;
   // Creating the output tables
   St_stk_track     *svttrk     = new St_stk_track("EstSvtTrk",maxNofTracks);
   AddData(svttrk);
@@ -387,6 +391,7 @@ Int_t StEstMaker::Make() {
   St_svm_evt_match  *EstMatch  = new St_svm_evt_match("EstMatch",maxNofTracks);
   AddData(EstMatch);
 
+  gMessMgr->Info()<<"StEstMaker : Getting the input tables"<<endm;
   // Getting the input tables
   St_dst_vertex  *preVertex =0;
   preVertex = (St_dst_vertex *)GetDataSet("preVertex/.data/preVertex"); 
