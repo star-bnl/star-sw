@@ -1,5 +1,8 @@
-// $Id: StEmcHitCollection.h,v 1.4 1999/07/16 18:04:08 pavlinov Exp $
+// $Id: StEmcHitCollection.h,v 1.5 1999/09/08 00:25:32 fisyak Exp $
 // $Log: StEmcHitCollection.h,v $
+// Revision 1.5  1999/09/08 00:25:32  fisyak
+// Add tables/ for table includes
+//
 // Revision 1.4  1999/07/16 18:04:08  pavlinov
 // Little correction for StEclMake
 //
@@ -28,10 +31,10 @@
 #include "TArrayS.h"
 #include "TArrayF.h"
 #include "TArrayI.h"
-#include "St_emc_hits_Table.h"
-#include "St_emc_pedestal_Table.h"
-#include "St_emc_adcslope_Table.h"
-#include "St_emc_calib_header_Table.h"
+#include "tables/St_emc_hits_Table.h"
+#include "tables/St_emc_pedestal_Table.h"
+#include "tables/St_emc_adcslope_Table.h"
+#include "tables/St_emc_calib_header_Table.h"
 //
 //#include <vector>
 //#include "StEvent/StEmcHit.hh"
