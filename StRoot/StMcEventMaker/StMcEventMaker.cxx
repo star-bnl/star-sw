@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.32 2000/06/06 03:00:18 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.33 2000/06/09 19:52:42 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.33  2000/06/09 19:52:42  calderon
+ * use compMcHit instead of compMcTpcHit and compMcSvtHit
+ *
  * Revision 1.32  2000/06/06 03:00:18  calderon
  * Introduction of Calorimeter classes.  Filled according to algorithm from
  * Aleksei, plus some additional checks.
@@ -165,7 +168,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.32 2000/06/06 03:00:18 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.33 2000/06/09 19:52:42 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -734,7 +737,7 @@ Int_t StMcEventMaker::Make()
 		 iPadrow<mCurrentMcEvent->tpcHitCollection()->sector(iSector)->numberOfPadrows();
 		 iPadrow++) {
 		StSPtrVecMcTpcHit& tpcHits = mCurrentMcEvent->tpcHitCollection()->sector(iSector)->padrow(iPadrow)->hits();
-		sort (tpcHits.begin(), tpcHits.end(), compMcTpcHit() );
+		sort (tpcHits.begin(), tpcHits.end(), compMcHit() );
 	        
 	    }
 	}
@@ -783,7 +786,7 @@ Int_t StMcEventMaker::Make()
 			 iWafer<mCurrentMcEvent->svtHitCollection()->barrel(iBarrel)->ladder(iLadder)->numberOfWafers();
 			 iWafer++) {
 			StSPtrVecMcSvtHit& svtHits = mCurrentMcEvent->svtHitCollection()->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits();
-			sort (svtHits.begin(), svtHits.end(), compMcSvtHit() );
+			sort (svtHits.begin(), svtHits.end(), compMcHit() );
 	        
 	    }
 
