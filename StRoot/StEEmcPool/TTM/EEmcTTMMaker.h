@@ -1,5 +1,5 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTTMMaker.h,v 1.1 2004/01/06 17:45:11 zolnie Exp $
+// $Id: EEmcTTMMaker.h,v 1.2 2004/01/06 21:33:51 zolnie Exp $
 
 #ifndef STAR_EETowTrackMatchMaker
 #define STAR_EETowTrackMatchMaker
@@ -22,15 +22,15 @@
 #include "StMaker.h"
 #endif
 
-#include <cstring>
-#include <vector>
+#include <ostream>
 #include <map>
-#include <string>
+
 #include "TString.h"
 #include "TVector3.h"
 
 #if !defined(ST_NO_NAMESPACES)
 using std::map;
+using std::ostream;
 #endif
 
 class TH1F;
@@ -102,14 +102,9 @@ public:
   virtual Int_t  Finish();
 
 
-  // debug level manipulations
-  Int_t   SetDebugLevel(const int d) { mDebugLevel=d; return d; } // use kInfo,kWarning,etc. 
-  Int_t   GetDebugLevel(           ) { return mDebugLevel;      } //
-
-
   // z positions to match
   void     ResetZPositionsArray()                           { mZ.clear(); }
-  void     AddZPosition(const TString s, const double zpos) { mZ[s]=zpos; }
+  void     AddZPosition(const TString s, const double zpos) { mZ[zpos]=s; }
 
 
   // cuts
@@ -126,18 +121,18 @@ public:
   void     SetEtaFactor(Double_t v=1.0) { mEtaFac=v;  }
 
   //
-  void     PrintCutSummary();
+  ostream& PrintCutSummary( ostream &out ) const ;
 
   // output file name 
   void     SetFileName( const char *string) { mFileName=TString(string); }
 
   // 
-  ULong_t  GetNMatched() { return mNMatch; };
+  ULong_t  GetNMatched() const { return mNMatch; };
 
 
 
  protected:
-  Int_t    mDebugLevel           ;  // debug level:  use kInfo,kWarning,etc. from TError.h
+  //Int_t    mDebugLevel           ;  // debug level:  use kInfo,kWarning,etc. from TError.h
 
   // cuts
   Int_t    mMinTrackHits;        ;  // min hits/track required
@@ -179,23 +174,29 @@ public:
 
   NTupleTTM_t    *mMatch;      // data in "compatible" format 
 
-  map<TString,double> mZ;      // a map that hold z positions 
+  map<double,TString> mZ;      // a map that hold z positions 
 
  public:
   //  StMaker jumbo mumbo
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.1 2004/01/06 17:45:11 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.2 2004/01/06 21:33:51 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
   ClassDef(EETowTrackMatchMaker, 1)   // 
 };
 
+
+ostream&  operator<<(ostream &out, const EETowTrackMatchMaker& ttm); 
+
 #endif
 
 
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.2  2004/01/06 21:33:51  zolnie
+// release
+//
 // Revision 1.1  2004/01/06 17:45:11  zolnie
 // close to release
 //
