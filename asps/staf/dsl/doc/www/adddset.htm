@@ -1,0 +1,50 @@
+<!doctype html public "-//IETF//DTD HTML//EN">
+<HTML>
+
+<HEAD>
+
+<META NAME="BUILD" CONTENT="Feb 10 1995">
+<META NAME="BUILD" CONTENT="Feb 10 1995">
+<META NAME="BUILD" CONTENT="Feb 10 1995">
+<META NAM >
+<META NAME="GENERATOR" CONTENT="Internet Assistant for Word 1.00">
+<META NAME="AUTHOR" CONTENT="bill">
+<META NAME="DOCCOMM" CONTENT="r                                      ">
+</HEAD>
+
+<BODY>
+
+<H2>dsAddDataset</H2>
+
+<P>
+The <B>dsAddDataset</B> function adds a child dataset to a parent
+dataset.
+<P>
+<B>int dsAddDataset(DS_DATASET_T</B> *<I>pDataset</I><B>, char
+*</B><I>dsetName</I><B>, size_t</B> <I>setDim</I><B>, DS_DATASET_T</B><I>
+</I>*<I>pChild</I><B>);</B> 
+<H3>Parameters </H3>
+
+<DL>
+<DT><I>pDataset</I> 
+<DD>Handle of parent dataset
+<DT><I>dsetName</I> 
+<DD>Name of added dataset
+<DT><I>setDim</I> 
+<DD>Dimension of added dataset
+<DT><I>pChild</I> 
+<DD>Address of array for added dataset
+</DL>
+
+<H3>Return Value</H3>
+
+<P>
+If the function succeeds, the return value is TRUE.
+<P>
+If the function fails, the return value is FALSE. To get extended
+error information, call <A HREF="dserror.htm">dsErrorCode</A>
+. To print error information call <A HREF="dsperr.htm">dsPerror</A>.
+
+</BODY>
+
+</HTML>
