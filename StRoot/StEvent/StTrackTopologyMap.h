@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.h,v 2.4 2000/04/12 19:44:03 genevb Exp $
+ * $Id: StTrackTopologyMap.h,v 2.5 2000/05/17 17:21:38 ullrich Exp $
  *
  * Author: Thomas Ullrich, AUg 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.h,v $
- * Revision 2.4  2000/04/12 19:44:03  genevb
- * Reimplement mMap data members as individual unsigned ints
+ * Revision 2.5  2000/05/17 17:21:38  ullrich
+ * New method largestGap() and new output operator.
  *
  * Revision 2.4  2000/04/12 19:44:03  genevb
  * Reimplement mMap data members as individual unsigned ints
@@ -29,6 +29,7 @@
 #ifndef StTrackTopologyMap_hh
 #define StTrackTopologyMap_hh
 
+#include <iostream.h>
 #include "StObject.h"
 #include "StEnumerations.h"
 
@@ -47,6 +48,8 @@ public:
     Bool_t   hasHitInSvtLayer(UInt_t) const;          // first layer = 1
     Bool_t   turnAroundFlag() const;
     ULong_t  data(UInt_t) const;
+
+    Int_t    largestGap(StDetectorId) const;
     
 protected:
     Bool_t bit(Int_t) const;             // range 0-63
@@ -62,4 +65,5 @@ private:
     ClassDef(StTrackTopologyMap,1)
 };
 
+ostream& operator<< (ostream&, const StTrackTopologyMap&);
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.7 2000/04/12 19:44:03 genevb Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.8 2000/05/17 17:21:34 ullrich Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
- * Revision 2.7  2000/04/12 19:44:03  genevb
- * Reimplement mMap data members as individual unsigned ints
+ * Revision 2.8  2000/05/17 17:21:34  ullrich
+ * New method largestGap() and new output operator.
  *
  * Revision 2.7  2000/04/12 19:44:03  genevb
  * Reimplement mMap data members as individual unsigned ints
@@ -36,8 +36,16 @@
  *
  **************************************************************************/
 #include "StTrackTopologyMap.h"
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#if !defined(ST_NO_NAMESPACES)
+using std::vector;
+using std::adjacent_difference;
+using std::max_element;
+#endif
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.7 2000/04/12 19:44:03 genevb Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.8 2000/05/17 17:21:34 ullrich Exp $";
 
 ClassImp(StTrackTopologyMap)
 
@@ -48,14 +56,14 @@ StTrackTopologyMap::StTrackTopologyMap()
 
 StTrackTopologyMap::StTrackTopologyMap(ULong_t m1, ULong_t m2)
 {
-    mMap0 = (Int_t) m1;
-    mMap1 = (Int_t) m2;
+    mMap0 = static_cast<Int_t>(m1);
+    mMap1 = static_cast<Int_t>(m2);
 }
 
 StTrackTopologyMap::StTrackTopologyMap(const ULong_t* m)
 {
-    mMap0 = (Int_t) m[0];
-    mMap1 = (Int_t) m[1];
+    mMap0 = static_cast<Int_t>(m[0]);
+    mMap1 = static_cast<Int_t>(m[1]);
 }
 
 StTrackTopologyMap::~StTrackTopologyMap() { /* noop */ }
@@ -72,11 +80,10 @@ StTrackTopologyMap::ftpcFormat() const
     return bit(63);
 }
 
-
 ULong_t
 StTrackTopologyMap::data(UInt_t i) const
 {
-    return (ULong_t) (i<2 ? (i<1 ? mMap0 : mMap1) : 0);
+    return static_cast<ULong_t>(i<2 ? (i<1 ? mMap0 : mMap1) : 0);
 }
 
 Bool_t
@@ -164,10 +171,56 @@ StTrackTopologyMap::numberOfHits(StDetectorId id) const
     case kEndcapSmdEtaStripId:
     case kEndcapSmdPhiStripId:
         if (bit(58)) n++;
-	break;
+        break;
     default:
-	n = 0;
-	break;
+        n = 0;
+        break;
     }
     return n;
 }
+
+Int_t
+StTrackTopologyMap::largestGap(StDetectorId id) const
+{
+    if (ftpcFormat() && !(id == kFtpcWestId || id == kFtpcEastId))
+	return -1;
+
+    vector<int> rows;
+    int i;
+
+    switch (id) {
+    case kSvtId:
+        for (i=1; i<7; i++)
+            if (hasHitInSvtLayer(i)) rows.push_back(i);
+        break;
+    case kFtpcWestId:
+    case kFtpcEastId:
+        for (i=1; i<11; i++)
+            if (hasHitInRow(id, i)) rows.push_back(i);
+        break;
+    case kTpcId:
+        for (i=1; i<46; i++)
+            if (hasHitInRow(id, i)) rows.push_back(i);
+        break;
+    default:
+        return -1;
+    }
+
+    if (rows.size() < 2) return -1;
+
+    vector<int> diffs(rows.size());
+    adjacent_difference(rows.begin(), rows.end(), diffs.begin());
+    return *max_element(diffs.begin()+1, diffs.end()) - 1;  // skip first
+}
+
+ostream& operator<< (ostream& os, const StTrackTopologyMap& m)
+{
+    for (int i=0; i<64; i++) {
+        if (i>31)
+            os << ((m.data(1)>>(i-32) & 1U) ? 1 : 0);
+        else
+            os << ((m.data(0)>>i & 1U) ? 1 : 0);
+    }
+    return os;
+}
+
