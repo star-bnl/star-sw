@@ -1,6 +1,11 @@
-// $Id: StFtpcParamReader.hh,v 1.1 2000/08/03 14:39:01 hummler Exp $
+// $Id: StFtpcParamReader.hh,v 1.2 2000/09/18 14:26:51 hummler Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.2  2000/09/18 14:26:51  hummler
+// expand StFtpcParamReader to supply data for slow simulator as well
+// introduce StFtpcGeantReader to separate g2t tables from simulator code
+// implement StFtpcGeantReader in StFtpcFastSimu
+//
 // Revision 1.1  2000/08/03 14:39:01  hummler
 // Create param reader to keep parameter tables away from cluster finder and
 // fast simulator. StFtpcClusterFinder now knows nothing about tables anymore!
@@ -20,6 +25,8 @@
 #include "tables/St_fcl_det_Table.h"
 #include "tables/St_fcl_zrow_Table.h"
 #include "tables/St_ffs_gaspar_Table.h"
+#include "tables/St_fss_gas_Table.h"
+#include "tables/St_fss_param_Table.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -28,6 +35,7 @@ class StFtpcParamReader : public TObject
 {
   
 protected:
+  //ClusterFinder parameters (also used by other classes)
   Float_t *mAmplitudeOffset;
   Float_t *mAmplitudeSlope;
   Float_t *mTimeOffset;
@@ -79,6 +87,7 @@ protected:
   Float_t m3PadGaussError;
   Float_t mZDirectionError;
   Float_t *mPadrowZPosition;
+  //FastSimulator parameters
   Int_t mOrderOfFastEstimates;
   Float_t *mVDriftEstimates;
   Float_t *mTDriftEstimates;
@@ -86,8 +95,28 @@ protected:
   Float_t *mSigmaAzimuthalEstimates;
   Float_t *mErrorRadialEstimates;
   Float_t *mErrorAzimuthalEstimates;
+  //SlowSimulator parameters
+  Int_t mNumberOfFssGasValues;
+  Float_t *mFssGasEField;
+  Float_t *mFssGasVDrift;
+  Float_t *mFssGasDiffusionX;
+  Float_t *mFssGasDiffusionY;
+  Float_t *mFssGasDiffusionZ;
+  Float_t *mFssGasLorentzAngle;
+  Int_t mRandomNumberGenerator;
+  Int_t mZeroSuppressThreshold;
+  Float_t mSimulationPhiStart;
+  Float_t mSimulationPhiEnd;
+  Float_t mChamberCathodeVoltage;
+  Float_t mGasAttenuation;
+  Float_t mGasGain;
+  Float_t mGasIonizationPotential;
+  Float_t mPadLength;
+  Float_t mSigmaPadResponseFuntion;
+  Float_t mReadoutShaperTime;
   
 public:
+  // constructor used by StFtpcClusterMaker:
   StFtpcParamReader(St_fcl_ampoff *ampoff,
 		    St_fcl_ampslope *ampslope,
 		    St_fcl_timeoff *timeoff,
@@ -95,6 +124,12 @@ public:
 		    St_fcl_det *det,
 		    St_fcl_zrow *zrow,
 		    St_ffs_gaspar *gaspar);
+  // constructor used by StFtpcSlowSimMaker:
+  StFtpcParamReader(St_fss_gas *gas,
+		    St_fss_param *param,
+		    St_fcl_padtrans *padtrans,
+		    St_fcl_det *det,
+		    St_fcl_zrow *zrow);
   ~StFtpcParamReader();
   Float_t amplitudeOffset(Int_t i);
   Float_t amplitudeSlope(Int_t i);
@@ -113,6 +148,12 @@ public:
   Float_t sigmaAzimuthalEstimates(Int_t i); 
   Float_t errorRadialEstimates(Int_t i); 
   Float_t errorAzimuthalEstimates(Int_t i); 
+  Float_t fssGasEField(Int_t i);
+  Float_t fssGasVDrift(Int_t i);
+  Float_t fssGasDiffusionX(Int_t i);
+  Float_t fssGasDiffusionY(Int_t i);
+  Float_t fssGasDiffusionZ(Int_t i);
+  Float_t fssGasLorentzAngle(Int_t i);
 
 
   Int_t numberOfCalibrationValues() {return mNumberOfCalibrationValues;}
@@ -154,6 +195,19 @@ public:
   Float_t threePadWeightedError() {return m3PadWeightedError;}
   Float_t threePadGaussError() {return m3PadGaussError;}
   Float_t zDirectionError() {return mZDirectionError;}
+  Int_t numberOfFssGasValues() {return mNumberOfFssGasValues;}
+  Int_t randomNumberGenerator() {return mRandomNumberGenerator;}
+  Int_t zeroSuppressThreshold() {return mZeroSuppressThreshold;}
+  Float_t simulationPhiStart() {return mSimulationPhiStart;}
+  Float_t simulationPhiEnd() {return mSimulationPhiEnd;}
+  Float_t chamberCathodeVoltage() {return mChamberCathodeVoltage;}
+  Float_t gasAttenuation() {return mGasAttenuation;}
+  Float_t gasGain() {return mGasGain;}
+  Float_t gasIonizationPotential() {return mGasIonizationPotential;}
+  Float_t padLength() {return mPadLength;}
+  Float_t sigmaPadResponseFuntion() {return mSigmaPadResponseFuntion;}
+  Float_t readoutShaperTime() {return mReadoutShaperTime;}
+  Float_t padPitch() {return mRadiansPerPad*mSensitiveVolumeOuterRadius;}
 };
 
 #endif
