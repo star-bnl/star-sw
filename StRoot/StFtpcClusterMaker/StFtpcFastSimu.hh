@@ -1,6 +1,14 @@
-// $Id: StFtpcFastSimu.hh,v 1.11 2001/01/08 17:10:04 jcs Exp $
+// $Id: StFtpcFastSimu.hh,v 1.12 2001/01/25 15:25:49 oldi Exp $
 //
 // $Log: StFtpcFastSimu.hh,v $
+// Revision 1.12  2001/01/25 15:25:49  oldi
+// Fix of several bugs which caused memory leaks:
+//  - Some arrays were not allocated and/or deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way in StFtpcTrackMaker form where Holm cut and pasted it).
+//    I changed all occurences to TObjArray which makes the program slightly
+//    slower but much more save (in terms of memory usage).
+//
 // Revision 1.11  2001/01/08 17:10:04  jcs
 // move remaining constants from code to database
 //
@@ -37,7 +45,7 @@
 #define STAR_StFtpcFastSimu
 #include "ffs_gepoint.h"
 #include "fcl_fppoint.h"
-#include "TClonesArray.h"
+#include "TObjArray.h"
 #include "StFtpcGeantPoint.hh"
 #include "StFtpcReducedPoint.hh"
 
@@ -84,8 +92,8 @@ class StFtpcFastSimu
  public:
   StFtpcFastSimu(StFtpcGeantReader *geantReader,
 		 StFtpcParamReader *paramReader,
-		 TClonesArray *pointarray,
-		 TClonesArray *geantarray);
+		 TObjArray *pointarray,
+		 TObjArray *geantarray);
   ~StFtpcFastSimu();
   int ffs_gen_padres();
   int ffs_hit_rd();

@@ -1,5 +1,13 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.16 2000/11/24 15:02:33 hummler Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.17 2001/01/25 15:25:35 oldi Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.17  2001/01/25 15:25:35  oldi
+// Fix of several bugs which caused memory leaks:
+//  - Some arrays were not allocated and/or deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way in StFtpcTrackMaker form where Holm cut and pasted it).
+//    I changed all occurences to TObjArray which makes the program slightly
+//    slower but much more save (in terms of memory usage).
+//
 // Revision 1.16  2000/11/24 15:02:33  hummler
 // commit changes omitted in last commit
 //
@@ -66,7 +74,7 @@
 #include "St_DataSetIter.h"
 #include "TH1.h"
 #include "TH2.h"
-#include "TClonesArray.h"
+#include "TObjArray.h"
 
 #include "tables/St_fcl_fppoint_Table.h"
 #include "tables/St_fcl_ftpcsqndx_Table.h"
@@ -156,10 +164,10 @@ Int_t StFtpcClusterMaker::Make()
 							 m_zrow,
 							 m_gaspar);
   
-  TClonesArray *hitarray = new TClonesArray("StFtpcPoint", 0);  
+  TObjArray *hitarray = new TObjArray(10000);  
 
   // ghitarray will only be used if fast simulator is active
-  TClonesArray *ghitarray = new TClonesArray("StFtpcGeantPoint", 0);  
+  TObjArray *ghitarray = new TObjArray(10000);  
 
   St_DataSet *raw = GetDataSet("ftpc_raw");
   if (raw) {

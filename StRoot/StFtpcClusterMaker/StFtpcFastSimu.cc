@@ -1,6 +1,14 @@
-// $Id: StFtpcFastSimu.cc,v 1.19 2001/01/15 16:08:28 jcs Exp $
+// $Id: StFtpcFastSimu.cc,v 1.20 2001/01/25 15:25:44 oldi Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.20  2001/01/25 15:25:44  oldi
+// Fix of several bugs which caused memory leaks:
+//  - Some arrays were not allocated and/or deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way in StFtpcTrackMaker form where Holm cut and pasted it).
+//    I changed all occurences to TObjArray which makes the program slightly
+//    slower but much more save (in terms of memory usage).
+//
 // Revision 1.19  2001/01/15 16:08:28  jcs
 // get phiOrigin and phiPerSector fro ftpcDimensions
 //
@@ -70,8 +78,8 @@ static RanluxEngine engine;
 
 StFtpcFastSimu::StFtpcFastSimu(StFtpcGeantReader *geantReader,
 			       StFtpcParamReader *paramReader,
-			       TClonesArray *pointarray,
-			       TClonesArray *geantarray)
+			       TObjArray *pointarray,
+			       TObjArray *geantarray)
 {
   //-----------------------------------------------------------------------
   
@@ -104,16 +112,16 @@ StFtpcFastSimu::StFtpcFastSimu(StFtpcGeantReader *geantReader,
   
   ffs_merge_tagger();
   
-  TClonesArray &point = *pointarray;
-  TClonesArray &gpoint = *geantarray;
-  
+  pointarray->Expand(nPoints);
+  geantarray->Expand(nPoints);
+
   for (Int_t i = 0; i < nPoints; i++) {
     // use (default) copy constructor for StFtpcGeantPoint
-    new(gpoint[i]) StFtpcGeantPoint(mGeantPoint[i]);
+    geantarray->AddAt(new StFtpcGeantPoint(mGeantPoint[i]), i);
     // as StFtpcPoint is in different package, we have to copy data 
     // from StFtpcReducedPoint
     // hgrrrumpf!!!
-    new(point[i]) StFtpcPoint();
+    pointarray->AddAt(new StFtpcPoint(), i);
     ((StFtpcPoint *)pointarray->At(i))->SetX(mPoint[i].GetX());
     ((StFtpcPoint *)pointarray->At(i))->SetY(mPoint[i].GetY());
     ((StFtpcPoint *)pointarray->At(i))->SetZ(mPoint[i].GetZ());

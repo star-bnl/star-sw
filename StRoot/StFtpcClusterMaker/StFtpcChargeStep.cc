@@ -1,6 +1,14 @@
-// $Id: StFtpcChargeStep.cc,v 1.3 2000/11/27 14:08:54 hummler Exp $
+// $Id: StFtpcChargeStep.cc,v 1.4 2001/01/25 15:25:09 oldi Exp $
 //
 // $Log: StFtpcChargeStep.cc,v $
+// Revision 1.4  2001/01/25 15:25:09  oldi
+// Fix of several bugs which caused memory leaks:
+//  - Some arrays were not allocated and/or deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way in StFtpcTrackMaker form where Holm cut and pasted it).
+//    I changed all occurences to TObjArray which makes the program slightly
+//    slower but much more save (in terms of memory usage).
+//
 // Revision 1.3  2000/11/27 14:08:54  hummler
 // implement tzero and lorentz angle correction factor
 //
@@ -238,7 +246,7 @@ int StFtpcChargeStep::histogram(int setPressure)
       cout << "StFtpcChargeStep set normalized pressure to " << newPressure << endl;
     }      
       
-  delete dCharge;
+  delete[] dCharge;
   free(pRadius);
   return 1;
 }

@@ -1,5 +1,13 @@
-// $Id: StFtpcReducedPoint.hh,v 1.1 2000/11/24 15:02:34 hummler Exp $
+// $Id: StFtpcReducedPoint.hh,v 1.2 2001/01/25 15:25:55 oldi Exp $
 // $Log: StFtpcReducedPoint.hh,v $
+// Revision 1.2  2001/01/25 15:25:55  oldi
+// Fix of several bugs which caused memory leaks:
+//  - Some arrays were not allocated and/or deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way in StFtpcTrackMaker form where Holm cut and pasted it).
+//    I changed all occurences to TObjArray which makes the program slightly
+//    slower but much more save (in terms of memory usage).
+//
 // Revision 1.1  2000/11/24 15:02:34  hummler
 // commit changes omitted in last commit
 //
@@ -14,7 +22,6 @@
 #define STAR_StFtpcReducedPoint
 
 #include "TObject.h"
-#include "TClonesArray.h"
 #include "TVector3.h"
 
 #include "tables/St_fcl_fppoint_Table.h"

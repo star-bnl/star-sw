@@ -1,6 +1,14 @@
-// $Id: StFtpcClusterFinder.hh,v 1.6 2000/08/03 14:39:00 hummler Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.7 2001/01/25 15:25:30 oldi Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.7  2001/01/25 15:25:30  oldi
+// Fix of several bugs which caused memory leaks:
+//  - Some arrays were not allocated and/or deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way in StFtpcTrackMaker form where Holm cut and pasted it).
+//    I changed all occurences to TObjArray which makes the program slightly
+//    slower but much more save (in terms of memory usage).
+//
 // Revision 1.6  2000/08/03 14:39:00  hummler
 // Create param reader to keep parameter tables away from cluster finder and
 // fast simulator. StFtpcClusterFinder now knows nothing about tables anymore!
@@ -28,7 +36,7 @@
 #include "fcl_timeoff.h"
 #include "fcl_ampoff.h"
 #include "fcl_ampslope.h"
-#include "TClonesArray.h"
+#include "TObjArray.h"
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDAQMaker/StDAQReader.h"
 #include "StDAQMaker/StFTPCReader.h"
@@ -96,14 +104,14 @@ class StFtpcClusterFinder
 
  private:
   TPCSequence test;
-  TClonesArray *mPoint;
+  TObjArray *mPoint;
   StFTPCReader *mReader; 
   StFtpcParamReader *mParam;
 
  public:
   StFtpcClusterFinder(StFTPCReader *reader, 
 		      StFtpcParamReader *paramReader, 
-		      TClonesArray *pointarray);
+		      TObjArray *pointarray);
   ~StFtpcClusterFinder();
   int search();
   int findHits(TClusterUC *Cluster, int, int, double*, double*, float *);//!
