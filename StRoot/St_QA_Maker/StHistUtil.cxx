@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.22 1999/12/22 17:16:43 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.23 1999/12/29 17:52:30 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.23  1999/12/29 17:52:30  kathy
+// changes to hist limits and list of logY scales
+//
 // Revision 1.22  1999/12/22 17:16:43  kathy
 // fix so that it doesn't try to print/draw in logY scale if the max entries in any bins is 0
 //
@@ -630,7 +633,8 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "TabQaEvgenVtxZ",
  "TabQaVtxX",
  "TabQaVtxY",
- "TabQaVtxZ"
+ "TabQaVtxZ",
+ "TabQaVtxChisq"
    };
   sdefList = sdefList1;
   lengofList = sizeof(sdefList1)/4;  
@@ -748,7 +752,8 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "StEQaEvgenVtxZ",
  "StEQaVtxX",
  "StEQaVtxY",
- "StEQaVtxZ"
+ "StEQaVtxZ",
+ "StEQaVtxChisq"
    };
   sdefList = sdefList2;
   lengofList = sizeof(sdefList2)/4;  

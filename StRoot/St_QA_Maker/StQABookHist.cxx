@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.21 1999/12/21 23:10:59 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.22 1999/12/29 17:52:30 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.22  1999/12/29 17:52:30  kathy
+// changes to hist limits and list of logY scales
+//
 // Revision 1.21  1999/12/21 23:10:59  kathy
 // unpack number of points correctly in primtrk table; change some limits
 //
@@ -522,13 +525,13 @@ void StQABookHist::BookHistEvSum(){
   m_glb_trk_plusminus  = QAH1F("QaEvsumPlusMinusTrk", "evsum: num pos. over neg trks",
                              ntrk,0.8,1.4);
   m_glb_trk_prim    = QAH1F("QaEvsumTrkPrim","evsum: num good tracks from primaries ",
-                             ntrk, mintrk, maxtrk);
+                             80, 0.,4000.);
 	  
-  m_vert_total = QAH1F("QaEvsumVertTot", "evsum: total num of vertices",80,0.,8000.);
+  m_vert_total = QAH1F("QaEvsumVertTot", "evsum: total num of vertices",80,0.,2000.);
   //  m_vert_V0    = QAH1F("QaEvsumVertV0", "evsum: num V0 vertices",80,0.,8000.); 
  
   m_mean_pt    = QAH1F("QaEvsumMeanPt",   "evsum: mean pt", nmnpt, 0., 2.0);
-  m_mean_eta   = QAH1F("QaEvsumMeanEta",  "evsum: mean eta", nmneta, -0.25,0.25);
+  m_mean_eta   = QAH1F("QaEvsumMeanEta",  "evsum: mean eta", nmneta, -0.4,0.4);
   m_rms_eta    = QAH1F("QaEvsumRmsEta",   "evsum: rms eta", nmneta, -2.5,2.5);
   //  m_T_average  = QAH1F("QaEvsumMeanTemp", "evsum: mean Temp", nmneta, 0., 0.5);
   m_prim_vrtx0 = QAH1F("QaEvsumPrimVertX","evsum: X of primary vertex", 40, -1.,1.);
@@ -859,10 +862,10 @@ void StQABookHist::BookHistPrim(){
 // for method MakeHistPrim - from table primtrk
 
 // 1D
-  m_primtrk_tot   = QAH1F("QaPtrkTot",  "primtrk: tot # tracks",40,0.,10000.);
+  m_primtrk_tot   = QAH1F("QaPtrkTot",  "primtrk: tot num tracks",100,0.,5000.);
   m_primtrk_iflag = QAH1F("QaPtrkFlag", "primtrk: iflag ",160,-799.,801.);
 
-  m_primtrk_good  = QAH1F("QaPtrkGood",  "primtrk: tot # good tracks",40,0.,10000.);  
+  m_primtrk_good  = QAH1F("QaPtrkGood",  "primtrk: tot num good tracks",50,0.,2500.);  
   m_pdet_id     = QAH1F("QaPtrkDetId",   "primtrk: Detector ID for tracks",25,0.,25.);
   m_ppoint      = QAH1F("QaPtrkNPnt",    "primtrk: N points on track",     60, 0.,60.);
   m_pmax_point  = QAH1F("QaPtrkNPntMax", "primtrk: N max points on track", 50, 0.,100.);
@@ -970,11 +973,11 @@ void StQABookHist::BookHistPrim(){
 void StQABookHist::BookHistDE(){
   
   // for method MakeDE - from table dst_dedx
-  m_ndedxr  = QAH1F("QaDedxNum",     "dedx: number of tracks", 50,0., 10000.); 
+  m_ndedxr  = QAH1F("QaDedxNum",     "dedx: number of tracks", 64,0., 16000.); 
 
   m_ndedxT   = QAH1F("QaDedxNdedxT", "dedx: number of point to define dE/dx, tpc", 50,0., 50.);  
   m_dedx0T   = QAH1F("QaDedxDedx0T", "dedx: dE/dx mean (GeV/cm), tpc", ndedx, 0., 0.0005);
-  m_dedx1T   = QAH1F("QaDedxDedx1T", "dedx: dE/dx sigma, tpc", ndedx, 0., 0.005);
+  m_dedx1T   = QAH1F("QaDedxDedx1T", "dedx: dE/dx error on mean, tpc", ndedx, 0., 0.0001);
   
   m_ndedxFE   = QAH1F("QaDedxNdedxFE", "dedx: number of point to define dE/dx, ftpcE", 20,0., 20.);  
   m_dedx0FE   = QAH1F("QaDedxDedx0FE", "dedx: dE/dx mean, ftpcE", ndedx,  0., 750.);
@@ -1006,7 +1009,7 @@ void StQABookHist::BookHistGen(){
 void StQABookHist::BookHistV0(){
   
   // for MakeHistV0 - from table dst_v0_vertex
-  m_v0             = QAH1F("QaV0Vtx","dst_v0_vertex: Number V0 found ",50,0.,10000.);
+  m_v0             = QAH1F("QaV0Vtx","dst_v0_vertex: Number V0 found ",50,0.,2000.);
   m_ev0_lama_hist  = QAH1F("QaV0LambdaMass","dst_v0_vertex: Lambda mass",50,1.05,1.15);
   m_ev0_k0ma_hist  = QAH1F("QaV0K0Mass","dst_v0_vertex: k0 mass",50,.4,.6);
   
@@ -1028,7 +1031,7 @@ void StQABookHist::BookHistVertex(){
   // for MakeHistVertex - from table dst_vertex
   
   
-  m_v_num   = QAH1F("QaVtxNum",  " vertex: num vertices ",50,0.,10000.);
+  m_v_num   = QAH1F("QaVtxNum",  " vertex: num vertices ",50,0.,2000.);
 
   m_v_detid = QAH1F("QaVtxDetId"," vertex,2ndary: Detector ID ",100,0.,10000.);
   m_v_vtxid = QAH1F("QaVtxVtxId"," vertex,2ndary: Vertex ID ",10,0.,10.);
@@ -1048,13 +1051,13 @@ void StQABookHist::BookHistVertex(){
 //_____________________________________________________________________________
 void StQABookHist::BookHistXi(){
 
-  m_xi_tot   = QAH1F("QaXiVtxTot",  "dst_xi_vertex: tot # vertices ",50,0.,2500.);
+  m_xi_tot   = QAH1F("QaXiVtxTot",  "dst_xi_vertex: tot # vertices ",80,0.,800.);
 
 }
 //_____________________________________________________________________________
 void StQABookHist::BookHistPoint(){
 
-  m_pnt_tot   = QAH1F("QaPointTot",  "point: # tpc hits ",50,200000.,250000.);
+  m_pnt_tot   = QAH1F("QaPointTot",  "point: # tpc hits ",100, 0.,250000.);
 
 }
 //_____________________________________________________________________________
@@ -1072,13 +1075,13 @@ void StQABookHist::BookHistL3(){
 //_____________________________________________________________________________
 void StQABookHist::BookHistV0Eval(){
 
-  m_v0eval_tot   = QAH1F("QaV0EvalTot",  "ev0_eval: # vertices ",50,0.,5000.);
+  m_v0eval_tot   = QAH1F("QaV0EvalTot",  "ev0_eval: # vertices ",50,0.,2000.);
 
 }
 //_____________________________________________________________________________
 void StQABookHist::BookHistRich(){
 
-  m_rich_tot   = QAH1F("QaRichTot",  "g2t_rch_hit: multiplicity ",50,0.,2000.);
+  m_rich_tot   = QAH1F("QaRichTot",  "g2t_rch_hit: multiplicity ",50,0.,1000.);
 
 }
 //_____________________________________________________________________________
