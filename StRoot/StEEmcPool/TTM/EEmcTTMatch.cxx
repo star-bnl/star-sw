@@ -1,59 +1,31 @@
-#include <iostream>
+// $Id: EEmcTTMatch.cxx,v 1.3 2004/05/05 21:37:38 zolnie Exp $
+/*!
+ *                                                                     
+ * \class  EEmcTTMatch
+ * \author Piotr A. Zolnierczuk
+ * \date   2004/04/30
+ *
+ * \brief  EEmcTTMatch class contains results of TPC track to EEMC tower matching
+ *
+ */                                                                      
+
+
+#include <ostream>
 
 #include "TList.h"
 
-//#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
-//#include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
-//#include "StMuDSTMaker/COMMON/StMuEmcCollection.h"
 
-
+#include "EEmcTower.h"
 #include "EEmcTTMatch.h"
 
 #if !defined(ST_NO_NAMESPACES)
-using std::map;
 using std::ostream;
 #endif
 
-ClassImp(EEmcTower);
 
-//=============================================================================
-EEmcTower::EEmcTower(const char* label, float ene)
-{
-	ParseLabel(label);
-	mEdep = ene;
-}
-
-
-void 
-EEmcTower::ParseLabel(const char *label)
-{
-	//const int kMaxLabelLen = 16;
-	if(label==NULL) return;
-	//int len = strnlen(label,kMaxLabelLen);
-	// TO BE continued
-	assert(0); // not yet implemented
-}
-
-void
-EEmcTower::WriteLabel()
-{
-	// FIXME
-	const int kMaxLabelLen = 16;
-	if(mLabel) delete mLabel;
-	mLabel = new char[kMaxLabelLen];
-	sprintf(mLabel,"%02dT%1c%02d",SecLabel(),SubSecLabel(),EtaLabel());
-}
-
-  
-//=============================================================================
-ostream& 
-EEmcTower::Out(ostream &out ) const
-{
-  out << "<EEmcTower TOWER=" << mLabel << " EDEP=" << mEdep << " />\n";
-  return out;
-}
+ClassImp(EEmcTTMatch);
 
 
 EEmcTTMatch::EEmcTTMatch()
@@ -78,10 +50,16 @@ EEmcTTMatch::Clear(Option_t *opt)
 
 
 void 
+EEmcTTMatch::Add(EEmcTower *t) 
+{ 
+  mTower = t; 
+}
+
+void 
 EEmcTTMatch::Add(StMuTrack *t) 
 {
-	mTracks->Add(t);
-	mNTracks++;  // do not trust ROOT :)
+  mTracks->Add(t);
+  mNTracks++;  // do not trust ROOT :)
 }
 
 
@@ -95,7 +73,6 @@ Bool_t
 EEmcTTMatch::ExtrapolateToZ(const StMuTrack *track, const double   z, TVector3 &r)
 {
   const double kMinDipAngle   = 1.0e-13;
-  //const float kMinCurvature =  1e+00;
 
   StPhysicalHelixD   helix  = track->helix();
   double             dipAng = helix.dipAngle();
@@ -129,10 +106,6 @@ ostream&  operator<<(ostream &out, const StMuTrack    &t  )  {
   out << " MOMENTUM=\"" << t.momentum()   << "\"";
   out << "/>\n"; 
   return out;
-}
-// ================================================================================================
-ostream&  operator<<(ostream &out, const EEmcTower    &t  )  {
-  return t.Out(out);
 }
 // ================================================================================================
 ostream&  operator<<(ostream &out, const EEmcTTMatch  &m  )  {

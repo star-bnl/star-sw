@@ -1,22 +1,7 @@
 // Hey Emacs this is -*-c++-*-
+// $Id: EEmcTTMMaker.h,v 1.12 2004/05/05 21:37:37 zolnie Exp $
 #ifndef STAR_EEmcTTMMaker
 #define STAR_EEmcTTMMaker
-// $Id: EEmcTTMMaker.h,v 1.11 2004/05/04 18:28:56 zolnie Exp $
-
-/*!
- *                                                                     
- * \class  EEmcTTMMaker
- * \author Piotr A. Zolnierczuk
- * \date   2003/12/08
- *
- * \brief  EEMC tower to track matching
- *
- * This a MuDST based class to get tower calibration from matching TPC tracks
- * See README file for detailed info/instructions
- * 
- */                                                                      
-
-
 
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -148,7 +133,7 @@ public:
   TList *GetTracks() { return mTrackList; };
   /// returns a list of good EEmcTower
   TList *GetTowers() { return mTowerList; };
-  /// returns a map  of matches
+  /// returns a list of matches
   TList *GetMatchList()  { return mMatchList ; }; 
 
   /// prints a summary of run
@@ -206,7 +191,7 @@ public:
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.11 2004/05/04 18:28:56 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.12 2004/05/05 21:37:37 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -218,6 +203,9 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm);
 #endif
 
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.12  2004/05/05 21:37:37  zolnie
+// ver 2.0 released
+//
 // Revision 1.11  2004/05/04 18:28:56  zolnie
 // version after split
 //

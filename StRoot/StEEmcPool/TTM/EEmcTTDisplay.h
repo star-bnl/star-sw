@@ -1,25 +1,7 @@
 // Hey Emacs this is -*-c++-*-
+// $Id: EEmcTTDisplay.h,v 1.10 2004/05/05 21:37:37 zolnie Exp $
 #ifndef STAR_EEmcTTDisplay
 #define STAR_EEmcTTDisplay
-// $Id: EEmcTTDisplay.h,v 1.9 2004/05/04 18:28:55 zolnie Exp $
-
-/*!
- *                                                                     
- * \class  EEmcTTDisplay
- * \author Piotr A. Zolnierczuk
- * \date   2003/12/08
- *
- * \brief  EEmc Tower and Track display
- *
- * This is a simple root TGeoXXXX based class. It displays EEMC tower geometry
- * (the class inherits from EEmcGeomSimple) and allows for "turining on/off" individual
- * towers as well as displays muDST tracks (StMuTrack).
- * 
- * use 
- *  
- * example see StRoot/StEEmcPool/macros/TTM/show.C
- * \image html snapshot.jpg "Sample snapshot"
- */                                                                      
 
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 class TString;
@@ -29,6 +11,7 @@ class TList;
 //
 class StMuTrack;
 class EEmcTower;
+class EEmcTTMatch;
 
 class EEmcTTDisplay : public EEmcGeomSimple {
 public: 
@@ -43,6 +26,8 @@ public:
   TGeoVolume* operator() () { return mEEmc; }; 
   /// returns top TGeoVolume 
   TGeoVolume* GetVolume()   { return mEEmc; }; 
+
+
 
   //! adds tower to the list
   /// \param tile name (in the form of 05TC11) 
@@ -72,14 +57,23 @@ public:
   /// \param py    y-component of the track momentum
   /// \param pz    z-component of the track momentum
   /// \param qB    sign sensitive product of the particle charge and magnetic field 
+  /// \param zMin  to BE DOCUMENTED
   /// \param zMax  to BE DOCUMENTED
   /// \return      kTRUE on success and kFALSE on failure
   Bool_t       AddTrack(Double_t x, Double_t y, Double_t z, 
-			   Double_t px, Double_t py, Double_t pz, Double_t qB, Double_t zMin=0.0, Double_t zMax=0.0);
-  //! adds track to the list
+			Double_t px, Double_t py, Double_t pz, 
+			Double_t qB, Double_t zMin=0.0, Double_t zMax=0.0);
+
+  //! adds a track to the list
   /// \param track a refence to StMuTrack
   /// \return      kTRUE on success and kFALSE on failure
   Bool_t       AddTrack(const StMuTrack& track);
+
+
+  //! adds  a match to the list
+  /// \param tmatch a refence to EEmcTTMatchp
+  /// \return      kTRUE on success and kFALSE on failure
+  Bool_t       AddMatch(EEmcTTMatch& tmatch);
 
   //! draws towers/tracks from the list
   /// \param option - not uset at the moment
@@ -89,18 +83,19 @@ public:
   /// \param option - not uset at the moment
   void         Clear( const Option_t* option = ""); 
 
-  //! prints StMuTrack and EEmcTower to ostream
-  /// \param out    a reference to std::ostream
-  /// \param track  a reference to class  StMuTrack
-  /// \param tower  a reference to struct EEmcTower
-  void         Out(ostream &out, const StMuTrack &track, const EEmcTower &tower);
 
-  //! prints StMuTrack and EEmcTower to TString
+  //! prints EEmcTTMatch
+  /// \param out    a reference to std::ostream
+  /// \param tmatch a reference to struct EEmcTTMatch
+  void         Out(ostream &out, EEmcTTMatch &tmatch);
+
+  //! prints EEmcTTMatch 
   /// \param out    a reference to TString
-  /// \param track  a reference to class  StMuTrack
-  /// \param tower  a reference to struct EEmcTower
-  void         Out(TString &out, const StMuTrack &track, const EEmcTower &tower);
+  /// \param tmatch a reference to struct EEmcTTMatch
+  void         Out(TString &out, EEmcTTMatch &tmatch);
   
+
+
   //! sets STAR magnetic field 
   /// \param B magnetic field (sign sensitive) in Tesla
   void   SetMagneticField(double B) { mBField = B;    }
@@ -115,7 +110,7 @@ public:
   //! gets a flag that controls how TPC trackcs are displayed, 
   /// if f is true  - tracks are plotted from vertex to endcap 
   /// if f is false - tracks are plotted from first to last point in the track 
-  /// \param f flag true/false
+  /// \return true or false
   bool   GetShowExtrapolatedTracks() { return mShowExtrapolatedTracks; }
 
 
@@ -149,7 +144,11 @@ public:
 #endif
 
 
+
 // $Log: EEmcTTDisplay.h,v $
+// Revision 1.10  2004/05/05 21:37:37  zolnie
+// ver 2.0 released
+//
 // Revision 1.9  2004/05/04 18:28:55  zolnie
 // version after split
 //

@@ -1,7 +1,24 @@
-// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
+/// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2004/01/19
-// $Id: EEmcTTDisplay.cxx,v 1.8 2004/05/04 18:28:55 zolnie Exp $
+// $Id: EEmcTTDisplay.cxx,v 1.9 2004/05/05 21:37:36 zolnie Exp $
 // doxygen info here
+/**
+ * \class  EEmcTTDisplay
+ * \author Piotr A. Zolnierczuk
+ * \date   2003/12/08
+ *
+ * \brief  EEmc Tower and Track display class
+ *
+ * This is a simple root TGeoXXXX based class. It displays EEMC tower geometry
+ * (the class inherits from EEmcGeomSimple) and allows for "turining on/off" individual
+ * towers as well as displays muDST tracks (StMuTrack).
+
+ * \section displayexample  Short example how to use EEmcTTDisplay
+ * for details consult  StRoot/StEEmcPool/macros/TTM/show.C
+ * \include show.C
+ *  
+ * \image html snapshot.jpg "Sample snapshot"
+ */
 
 #include <ostream>
 #include <sstream>
@@ -17,6 +34,7 @@
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
+#include "EEmcTower.h"
 #include "EEmcTTMatch.h"
 #include "EEmcTTMMaker.h"
 #include "EEmcTTDisplay.h"
@@ -24,11 +42,23 @@
 
 static const double cLight = 3e10*centimeter/second;
 
-// FIXME
-static const int    Sec12Color=kRed;
-static const int    Sec03Color=kGreen;
-static const int    Sec06Color=kBlue;
-static const int    Sec09Color=kYellow;
+// FIXME sector color assignement
+static const int  kSectorColors[] = {
+  kBlack,  // SEC01
+  kBlack,  // SEC02
+  kGreen,  // SEC03
+  kBlack,  // SEC04
+  kBlack,  // SEC05
+  kBlue ,  // SEC06
+  kBlack,  // SEC07
+  kBlack,  // SEC08
+  kYellow, // SEC09
+  kBlack,  // SEC10
+  kBlack,  // SEC11
+  kRed  ,  // SEC12
+  kWhite,  
+  kWhite,  
+};
 
 
 EEmcTTDisplay::EEmcTTDisplay(const char *name) : EEmcGeomSimple()
@@ -54,6 +84,7 @@ EEmcTTDisplay::~EEmcTTDisplay()
 void
 EEmcTTDisplay::initGeometry(const char *topName)
 {
+  const double kDPhi = -15.0/180.0*M_PI;   // FIXME hard coded offset
   char rotName[256];
   if(mEEmc!=NULL) return; // already initialized;
 
@@ -66,39 +97,27 @@ EEmcTTDisplay::initGeometry(const char *topName)
   double rmin2 = mZ2/TMath::SinH(eta1);
   double rmax2 = mZ2/TMath::SinH(eta2);
 
-  cerr << rmin1 << " " << rmax1 << endl; 
-
   double dz    = TMath::Abs(mZ2-mZ1)/2.0;
 
+  int numSSec  = mNumSec*mNumSSec;
+  
   TGeoMedium   *medVac = new TGeoMedium  ("Vacuum",1, new TGeoMaterial("Vacuum",0,0,0) );
   TGeoCone     *econe  = new TGeoCone(dz,rmin1,rmax1,rmin2,rmax2);
   mEEmc                = new TGeoVolume(topName,econe,medVac);
   mEEmc->SetLineColor(kWhite);
   TGeoConeSeg  *geosector = new TGeoConeSeg(dz,rmin1,rmax1,rmin2,rmax2,0.0,360.0/mNumSec);
-  TGeoConeSeg  *geosubsec = new TGeoConeSeg(dz,rmin1,rmax1,rmin2,rmax2,0.0,360.0/mNumSec/mNumSSec);
-  // FIXME !!!!
-  double dPhi = -15.0/180.0*M_PI;
+  TGeoConeSeg  *geosubsec = new TGeoConeSeg(dz,rmin1,rmax1,rmin2,rmax2,0.0,360.0/numSSec);
   for(unsigned s=0;s<mNumSec;s++) {
-    double phi = getPhiMean(s)+dPhi;
+    double phi = getPhiMean(s)+kDPhi;
     sprintf(rotName,"RotSec%02d",s+1);
     TGeoRotation *rots = new TGeoRotation(rotName,phi/M_PI*180.0,0.0,0.0);
     TGeoVolume *sector = new TGeoVolume(volumeName(s),geosector,medVac);
     sector->SetVisibility(kTRUE);
-    // color coded sectors
-    switch(s+1) {
-    case 12: sector->SetLineColor(Sec12Color);break;
-    case  3: sector->SetLineColor(Sec03Color);break;
-    case  6: sector->SetLineColor(Sec06Color);break;
-    case  9: sector->SetLineColor(Sec09Color);break;
-    default: break;
-    }
-    //sector->SetVisibility(kFALSE);
+    sector->SetLineColor (kSectorColors[s]); 
     mEEmc->AddNode(sector,1,rots);
-    
     //
     for(unsigned ss=0;ss<mNumSSec;ss++) {
-      // FIXME: assumed counter-clockwise 
-      double phi = getPhiMean(0,ss)-getPhiMean(0,mNumSSec-1);
+      double phi = getPhiMean(0,ss)-getPhiMean(0,mNumSSec-1); // FIXME: assumed counter-clockwise 
       sprintf(rotName,"Rot%02dT%1c",s+1,ss+'A');
       TGeoRotation *rotss   = new TGeoRotation(rotName,phi/M_PI*180.0,0.0,0.0);
       TGeoVolume *subsector = new TGeoVolume(volumeName(s,ss),geosubsec,medVac); 
@@ -113,8 +132,7 @@ EEmcTTDisplay::initGeometry(const char *topName)
 	rmin2 = mZ2/TMath::SinH(eta1);	
 	rmax2 = mZ2/TMath::SinH(eta2);
 
-
-	TGeoConeSeg  *geotile = new TGeoConeSeg(dz,rmin1,rmax1,rmin2,rmax2,0.0,360.0/mNumSec/mNumSSec);
+	TGeoConeSeg  *geotile = new TGeoConeSeg(dz,rmin1,rmax1,rmin2,rmax2,0.0,360.0/numSSec);
 	TGeoVolume   *tile    = new TGeoVolume(volumeName(s,ss,e),geotile,medVac);
 	tile->SetVisibility(kFALSE);
 	subsector->AddNode(tile,1);
@@ -195,10 +213,10 @@ EEmcTTDisplay::AddTower(const EEmcTower& tower)
 
 
 Bool_t       
-EEmcTTDisplay::AddTrack(Double_t x, Double_t y, Double_t z, Double_t px, Double_t py, Double_t pz, Double_t qB, 
-			Double_t zMin, Double_t zMax)
+EEmcTTDisplay::AddTrack(Double_t x,  Double_t y,    Double_t z, 
+			Double_t px, Double_t py,   Double_t pz, 
+			Double_t qB, Double_t zMin, Double_t zMax)
 {
-
   THelix *helix    = new THelix(x,y,z,px,py,pz,cLight*qB);
 
   if(zMin<=0.0) zMin=z;
@@ -215,10 +233,7 @@ EEmcTTDisplay::AddTrack(Double_t x, Double_t y, Double_t z, Double_t px, Double_
     helixExt->SetLineWidth(1);
     mTrackHits->Add(helixExt);
   }
-
   mTrackHits->Add(helix);
-
-
   return kTRUE;
 }
 
@@ -231,52 +246,75 @@ EEmcTTDisplay::AddTrack(const StMuTrack& track)
   double         q   = h.charge(mBField*tesla);
   double         zMin= track.firstPoint().z();
   double         zMax= track.lastPoint().z();
-  return AddTrack(o.x(),o.y(),o.z(),p.x(),p.y(),p.z(),q*mBField*tesla,zMin,zMax);
+  return AddTrack(o.x(),o.y(),o.z(),
+		  p.x(),p.y(),p.z(),
+		  q*mBField*tesla,zMin,zMax);
+}
+
+
+Bool_t       
+EEmcTTDisplay::AddMatch(EEmcTTMatch& tmatch)
+{
+  EEmcTower *tower =tmatch.Tower(); 
+  StMuTrack *track =NULL;
+  if(!AddTower(*tower)) return kFALSE;
+  TIter nextTrack(tmatch.Tracks());
+  while((track=(StMuTrack *)nextTrack())) AddTrack(*track);
+  return kTRUE;
 }
 
 
 void         
-EEmcTTDisplay::Out(ostream &out, const StMuTrack& track, const EEmcTower &tower)
+EEmcTTDisplay::Out(ostream &out, EEmcTTMatch &tmatch)
 {
-  out << tower ;
-  out << track ;
-  //tower->Out(out);
-  //track->Out(out);
+  EEmcTower *tower =tmatch.Tower(); 
+  StMuTrack *track =NULL;
+  out << *tower;
+  TIter nextTrack(tmatch.Tracks());
+  while((track=(StMuTrack *)nextTrack())) 
+    out << *track;
 }
 
 void         
-EEmcTTDisplay::Out(TString &out, const StMuTrack& track, const EEmcTower &tower)
+EEmcTTDisplay::Out(TString &out, EEmcTTMatch &tmatch)
 {
-  const  int  bufLen=1024;
+  const  int  bufLen=1024; // FIXME buffer length
   static char buff[bufLen];
-  sprintf(buff,"ADC(%s)=%.0f pT=%.2f GeV/c",volumeName(tower),tower.dE(),track.pt());
-  out = buff;
+
+
+  EEmcTower *tower =tmatch.Tower(); 
+  StMuTrack *track =NULL;
+  TIter nextTrack(tmatch.Tracks());
+  while((track=(StMuTrack *)nextTrack())) {
+    sprintf(buff,"ADC(%s)=%4.1f pT=%.2f GeV/c\n",volumeName(*tower),tower->ADC(),track->pt());
+    out.Append(buff);
+  }
 }
+
+
+
 
 
 // a lousy ..... lousy
-// sec [0,mNumSec)
-// sub [0,mNumSSec)
-// eta [0,mNumEta)
+// sec [0,mNumSec)   sub [0,mNumSSec)  eta [0,mNumEta)
 char *
 EEmcTTDisplay::volumeName (int sec, int sub, int eta)
 {
   const  int  vnameLen=1024;
   static char vname[vnameLen];
   int    kCase=0x00;
-
+  
   memset(vname,0x00,vnameLen);
   if( 0<=sec && sec<int(mNumSec ) ) kCase |=0x4; else kCase &=0x3; 
   if( 0<=sub && sub<int(mNumSSec) ) kCase |=0x2; else kCase &=0x5;
   if( 0<=eta && eta<int(mNumEta ) ) kCase |=0x1; else kCase &=0x6;
-  
+
   switch(kCase) {
   case 0x07: sprintf(vname,"%02dT%1c%02d",sec+1,sub+'A',eta+1);  break;
   case 0x06: sprintf(vname,"%02dT%1c"    ,sec+1,sub+'A');        break;
   case 0x04: sprintf(vname,"%02d"        ,sec+1)              ;  break;
   default:   break;
   }
-  //printf("'%s': 0%x %d %d %d\n",vname,kCase,sec,sub,eta);
   return vname;
 }
 
@@ -288,6 +326,9 @@ EEmcTTDisplay::volumeName(const EEmcTower& tower)
 
 
 // $Log: EEmcTTDisplay.cxx,v $
+// Revision 1.9  2004/05/05 21:37:36  zolnie
+// ver 2.0 released
+//
 // Revision 1.8  2004/05/04 18:28:55  zolnie
 // version after split
 //
