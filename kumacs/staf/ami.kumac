@@ -22,11 +22,11 @@ MESS ****    Enter the mod you want to test ami calls on         ******
 MESS ****    type venus for loaded pams/gen/ven                  ******
 MESS ******************************************************************
  
-read mod 
+ 
 
-ami/mod/rank [mod]
+ami/mod/rank venus
 
-ami/mod/show [mod]
+ami/mod/show venus
 
 WAIT 'Hit <CR> to continue:' 0
 

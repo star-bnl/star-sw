@@ -23,7 +23,7 @@ MESS ************************************************************
 
 mkdir tnt_test
 cd tnt_test
-dio/newfile idat12 /afs/rhic/star/data/samples/test_data.xdf R
+dio/newfile idat12 $STAR_DATA/samples/test_data.xdf R
 dio/stream/getevent idat12
 dio/stream/getevent idat12
 cd Event

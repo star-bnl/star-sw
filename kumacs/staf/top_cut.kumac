@@ -115,7 +115,7 @@ MESS
 MESS **************************************************
 MESS *** Now try cut on real data with a vector    ****
 MESS **************************************************
-	NEWFILE dave test_data.xdf R
+	NEWFILE dave $STAR_DATA/samples/test_data.xdf R
 	MKDIR testcut
 	CD testcut
 	stream/GETEVENT dave

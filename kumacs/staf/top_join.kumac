@@ -72,7 +72,7 @@ MESS *** selectspec doesn't work if defined        ****
 MESS *** with a ! get a seg. violation             ****
 MESS **************************************************
 
-#TOP/JOIN_AGENT/SELECTSPEC jn
+*TOP/JOIN_AGENT/SELECTSPEC jn
 TOP/JOIN_AGENT/SELECTSPEC jn2
 TOP/JOIN_AGENT/WHERECLAUSE jn
 TOP/JOIN_AGENT/WHERECLAUSE jn2
@@ -103,7 +103,7 @@ MESS ***** First get data and sort tables in track_p ****
 MESS **************************************************
 
 
-dio/newf fjoin /afs/rhic/star/data/samples/test_data.xdf R
+dio/newf fjoin $STAR_DATA/samples/test_data.xdf R
 dio/stream/getevent fjoin
 dio/stream/getevent fjoin
 cd Event

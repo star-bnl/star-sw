@@ -137,6 +137,17 @@ TDM/TABLE/MAXROWCOUNT fum
 TDM/TABLE/MAXROWCOUNT fum 40
 TDM/TABLE/MAXROWCOUNT fum
 MESS ************************************************************
+MESS **** Fill fum rows                                      ****
+MESS ************************************************************
+MESS
+TDM/TABLE/CELL/PUTVALUE 'fum[0].x' 11
+TDM/TABLE/CELL/PUTVALUE 'fum[0].y' 2222
+TDM/TABLE/CELL/PUTVALUE 'fum[0].z' 3333.3333
+TDM/TABLE/CELL/PUTVALUE 'fum[1].x' 1100
+TDM/TABLE/CELL/PUTVALUE 'fum[1].y' 222200
+TDM/TABLE/CELL/PUTVALUE 'fum[1].z' 333333.33
+TDM/TABLE/PRINT fum
+MESS ************************************************************
 MESS **** Check other fum quantities                         ****
 MESS ************************************************************
 MESS
@@ -146,16 +157,6 @@ TDM/TABLE/SPECIFIER fum
 TDM/TABLE/ROWSIZE fum
 TDM/TABLE/PRINT fum
 TDM/TABLE/SHOW fum
-MESS ************************************************************
-MESS **** Fill fum rows                                      ****
-MESS ************************************************************
-MESS
-TDM/TABLE/CELL/GETVALUE 'fum[0].x'
-TDM/TABLE/CELL/PUTVALUE 'fum[0].x' 11
-TDM/TABLE/CELL/GETVALUE 'fum[0].x'
-TDM/TABLE/CELL/PUTVALUE 'fum[1].y' 999
-TDM/TABLE/CELL/PUTVALUE 'fum[0].z' 3.1415
-TDM/TABLE/PRINT fum
 WAIT 'Hit <CR> to continue:' 0
 
 MESS
