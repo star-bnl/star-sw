@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.29 2001/11/20 21:53:45 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 2.30 2001/12/20 03:11:07 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.30  2001/12/20 03:11:07  genevb
+// pp trigger words 0x2XXX
+//
 // Revision 2.29  2001/11/20 21:53:45  lansdell
 // added x-y dist of hits, tpc east&west histos
 //
@@ -193,6 +196,9 @@ Int_t StEventQAMaker::Make() {
 	  doEvent = kTRUE;
         } else if ((tword >= 0x1200) && (tword < 0x2000)) {
           mTrigWord->Fill(3.); // "Other Physics"
+	  doEvent = kTRUE;
+        } else if ((tword >= 0x2000) && (tword < 0x3000)) {
+          mTrigWord->Fill(4.); // "pp Physics"
 	  doEvent = kTRUE;
         } else if (tword == 0xF200) {
           mTrigWord->Fill(7.); // "Laser"

@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.10 2001/09/10 18:00:13 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.11 2001/12/20 03:11:08 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.11  2001/12/20 03:11:08  genevb
+// pp trigger words 0x2XXX
+//
 // Revision 2.10  2001/09/10 18:00:13  genevb
 // Another trigger word
 //
@@ -202,7 +205,7 @@ void StQAMakerBase::BookHistGeneral(){
   }
 
   mTrigWord = QAH::H1F("QaTrigWord","trigger word",8,0.5,8.5);
-  mTrigWord->SetXTitle("1=MinBias, 2=Central, 3=Other Physics, 7=Laser, 8=Other");
+  mTrigWord->SetXTitle("1=MinBias, 2=Central, 3=Other Physics, 4=pp, 7=Laser, 8=Other");
   mTrigBits = QAH::H1F("QaTrigBits","trigger bits",32,-0.5,31.5);
 }
 //_____________________________________________________________________________
