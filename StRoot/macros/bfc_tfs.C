@@ -1,6 +1,6 @@
-// $Id: bfcz.C,v 1.12 1999/04/18 23:45:05 fisyak Exp $
-// $Log: bfcz.C,v $
-// Revision 1.12  1999/04/18 23:45:05  fisyak
+// $Id: bfc_tfs.C,v 1.11 1999/04/18 23:45:05 fisyak Exp $
+// $Log: bfc_tfs.C,v $
+// Revision 1.11  1999/04/18 23:45:05  fisyak
 // New schema
 //
 // macro to read fz files, xdf files and minidaq data 

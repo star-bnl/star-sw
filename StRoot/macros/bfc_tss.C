@@ -1,6 +1,6 @@
-// $Id: bfcz.C,v 1.12 1999/04/18 23:45:05 fisyak Exp $
-// $Log: bfcz.C,v $
-// Revision 1.12  1999/04/18 23:45:05  fisyak
+// $Id: bfc_tss.C,v 1.17 1999/04/18 23:45:06 fisyak Exp $
+// $Log: bfc_tss.C,v $
+// Revision 1.17  1999/04/18 23:45:06  fisyak
 // New schema
 //
 // macro to read fz files, xdf files and minidaq data 
@@ -34,10 +34,10 @@
 #define TPC
 //#define tclPixTransOn
 //#define TRS
-//#define TSS
+#define TSS
 #if defined(FZIN) || defined(GTRACK)
 #define FTPC
-//#define FSS
+#define FSS
 #define SVT
 #define EMC
 #define CTF
@@ -127,7 +127,7 @@ void Load(){
 #endif /* GLOBAL */
 }
 
-void bfc_tfs (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
+void bfc_tss (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
 {
   Int_t NoEvents = Nevents;
   // define input file
