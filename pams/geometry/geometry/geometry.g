@@ -15,7 +15,7 @@
               zcal,mfld,mwc,pse,tof,t25,t1,four,ems,alpipe,
               on/.true./,off/.false./
    real       Par(1000),field,dcay(5),shift(2)
-   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),Nleft,Mleft,Rv
+   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),Nleft,Mleft,Rv,Wfr
    character  Commands*4000
 * - - - - - - - - - - - - - - - - -
 +CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE,QUEST.
@@ -42,7 +42,7 @@ replace[;ON#{#;] with [
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
    {mwc,four,pse}=on      "MultiWire Chambers, 4th Si layer, pseudopadrows"   
    {tof,t25,t1,ems,rich,alpipe}=off   "TimeOfFlight, EM calorimeter Sector"
-   field=5;  Nsi=7;  Rv=1;                             "defaults constants"
+   field=5;  Nsi=7;  Rv=1;  Wfr=0;                     "defaults constants"
    Commands=' '
 *
 * -------------------- select USERS configuration ------------------------
@@ -85,6 +85,9 @@ If LL>1
                                   {vpdd,ecal}=off;  {rich,ems,t1}=on;  Nsi=0; }
   on YEAR_1H    { even better y1:  TPC+CTB+FTPC+caloPatch+svtLadder;  
                           Rv=2;   {vpdd,ecal}=off;  {rich,ems,t1}=on;  Nsi=-3;}
+  on YEAR_1E    { even better y1:  TPC+CTB+caloPatch+svtLadder(4);  
+*    HELEN:       one ladder at R=10.16cm with 7 wafers at the 12 O'Clock...
+                  Wfr=7; Rv=2; {vpdd,ecal,ftpc}=off; {rich,ems,t1}=on; Nsi=-3;}
   on YEAR_1C    { not a year1:  TPC+CTB+FTPC+calo;  {vpdd,ecal}=off;   Nsi=0; }
   on YEAR_2A    { asymptotic STAR;                                   tof=off; }
   on HADR_ON    { all Geant Physics On;                                       }
@@ -138,7 +141,8 @@ If LL>1
    Call AGSFLAG('SIMU',2)
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6 
    If (LL>1) call AgDETP new ('SVTT')
-   if (svtt & Nsi < 7) call AgDETP add ('svtg.nlayer=',Nsi,1)
+   if (svtt & Nsi < 7) call AgDETP add ('svtg.nlayer=',   Nsi,1)
+   if (svtt & Wfr > 0) call AgDETP add ('svtl(3).nwafer=',wfr,1)
    if (svtt) Call svttgeo
  
 * - MWC or pseudo padrows needed ? DETP TPCE TPCG(1).MWCread=0 TPRS(1).super=1
