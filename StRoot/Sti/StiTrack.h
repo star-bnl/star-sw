@@ -1,3 +1,22 @@
+/** 
+ * \file  StiKalmanTrack.h
+ * \brief Definition of Kalman Track
+ * 
+ * Subclass of StiTrack defining a Kalman track to be used by the Kalman Track Finder.
+ *
+ * \author Claude A Pruneau, Wayne State University, 
+ * \date   March 2001
+ * \copyright 2001, STAR  Experiment at BNL, All rights reserved.  
+ *  
+ * Permission to use, copy, modify and distribute this software and its
+ * documentation strictly for non-commercial purposes is hereby granted 
+ * without fee, provided that the above copyright notice appears in all
+ * copies and that both the copyright notice and this permission notice
+ * appear in the supporting documentation. The authors make no claims 
+ * about the suitability of this software for any purpose. It is     
+ * provided "as is" without express or implied warranty.             
+ */
+
 #ifndef StiTrack_H
 #define StiTrack_H 1
 
@@ -16,11 +35,19 @@ using namespace std;
 class StiHit;
 class StHit;
 
+/*! 
+   \class StiKalmanTrack
+   \brief  Abstract definition of a Track
+   
+   Abstract definition of a track used in the Sti package.
+	 <p>
+	 \author Claude A Pruneau (Wayne State University)
+*/
 class StiTrack 
 {
 public:
 
-	enum StiTrackType {kGlobal=0, kPrimary};
+	//enum StiTrackType {kGlobal=0, kPrimary};
   // static methods
 
   static void setTrackFitter(StiTrackFitter * fitter);

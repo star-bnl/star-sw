@@ -11,6 +11,8 @@
 #include "StiDetector.h"
 #include "StiPlacement.h"
 #include "StiKTNIterator.h"
+#include "StPhysicalHelix.hh"
+#include "StiGeometryTransform.h"
 
 ostream& operator<<(ostream&, const StiHit&);
 
@@ -681,21 +683,6 @@ int StiKalmanTrack::getFitPointCount()    const
 	return getPointCount();
 }
 
-/*! Return track length.
-  <h3>Notes</h3> 
-   <ol>
-   <li>Call "calculateTrackLength" method.</li>
-   <li>Using only inner most and outer most hits associated with this track.</li>
-   <li>First node reference frame used for this calculation: local geometry transform
-       done on 2nd point as needed to use the same reference frame. </li>  
-   </ol>
-*/
-double StiKalmanTrack::getTrackLength() const
-{
-  return calculateTrackLength();
-}
-
-
 /*! Convenience method used to return a track node iterator initialized to the track first node.
 */
 StiKTNBidirectionalIterator StiKalmanTrack::begin() const 
@@ -710,108 +697,115 @@ StiKTNBidirectionalIterator StiKalmanTrack::end() const
 	return StiKTNBidirectionalIterator(lastNode);
 }
 
-/*! Work method used to calculate the track length.
+/*! Calculate and return the track length.
   <h3>Note</h3> 
    <ol>
-   <li>Using helix track model in local reference frame.</li>
+   <li>Using helix track model in global reference frame.</li>
    <li>Using only inner most and outer most hits associated with this track.</li>
    <li>First node reference frame used for this calculation: local geometry transform
        done on 2nd point as needed to use the same reference frame. </li>  
    </ol>
 */
-double StiKalmanTrack::calculateTrackLength() const
+double StiKalmanTrack::getTrackLength() const
 {
   double length = 0;
-	double x1,y1,z1,a1,c1,t1,e1,x2,y2,z2,a2,c2,t2,e2;
-	double dx,dy,dz,cos1,cos2,xp,yp,cda,sda,da,d;
-	double x0,y0;
-  if (firstNode)
-    {
-      StiKTNBidirectionalIterator first(getOuterMostHitNode());
-      StiKTNBidirectionalIterator last(getInnerMostHitNode());
-      StiKTNBidirectionalIterator it;
-			//cout << "Outer:" << (*first) << endl;
-			x1=(*first).fX; y1=(*first).fP0; z1=(*first).fP1; 
-			e1=(*first).fP2; a1=(*first).fAlpha; c1=(*first).fP3; t1=(*first).fP4;
-			cos1=c1*x1-e1;
-			//cout << "Inner:" << (*last) << endl;
-			//cout << "(x1,y1)="<<x1<<"\t"<<y1<<endl;
-			x2=(*last).fX; y2=(*last).fP0; z2=(*last).fP1; 
-			e2=(*last).fP2; a2=(*last).fAlpha; c2=(*last).fP3; t2=(*last).fP4;
-			if (a2!=a1)
-				{//rotate (x0,y0) first as we need x2,y2 in the original frame
-					da=a2-a1; cda=cos(da); sda=sin(da);
-					//cout << " rotby:" << da*180/3.1415<<endl;
-					x0=e2/c2; //center of circle
-					d=c2*x2-e2;
-					y0=y2+sqrt(1-d*d)/c2;
-					//cout << "(x0,y0)="<<x0<<"\t"<<y0<<endl;
-					xp=cda*x0-sda*y0;
-					e2=c2*xp;
-					// now rotate (x2,y2)
-					//cout << "(x2,y2)="<<x2<<"\t"<<y2<<endl;
-					xp=cda*x2-sda*y2;
-					yp=sda*x2+cda*y2;
-					x2=xp;y2=yp;
-					//cout << "(x2',y2')="<<x2<<"\t"<<y2<<endl;
-				}
-			cos2=c2*x2-e2;
-			if (c1<1e-12 || (fabs(cos1)>1.) || (fabs(cos2)>1.) )
-				{	// straight track case
-					dx = x2-x1;	dy = y2-y1;	dz = z2-z1;
-					length += sqrt(dx*dx+dy*dy+dz*dz);
-				}
-			else
-				{	// helix case
-					length += fabs(acos(cos1)-acos(cos2))*sqrt(1+t1*t1)/c1;
-				}
-			//x1=x2;y1=y2;z1=z2;e1=e2;c1=c2;t1=t2,cos1=cos2; //a does not change...
-			/*
-				it = first;
-			x1=(*it).fX; y1=(*it).fP0; z1=(*it).fP1; e1=(*it).fP2; a1=(*it).fAlpha; c1=(*it).fP3; t1=(*it).fP4;
-			cos1=c1*x1-e1;
-      while (it!=last)
-				{
-					cout << " a1:"<<a1<<" c1:"<<c1<<" cos1:"<<cos1;
-					it++;
-					x2=(*it).fX; y2=(*it).fP0; z2=(*it).fP1; e2=(*it).fP2; a2=(*it).fAlpha; c2=(*it).fP3; t2=(*it).fP4;
-					if (a2!=a1)
-						{//rotate (x0,y0) first as we need x2,y2 in the original frame
-							da=a2-a1; cda=cos(da); sda=sin(da);
-							cout << " rotby:" << da*180/3.1415;
-							x0=e2/c2; //center of circle
-							d=c2*x2-e2;
-							y0=y2+sqrt(1-d*d)/c2;
-							xp=cda*x0-sda*y0;
-							// now rotate (x2,y2)
-							e2=c2*xp;
-							xp=cda*x2-sda*y2;
-							yp=sda*x2+cda*y2;
-							x2=xp;y2=yp;
-						}
-					cos2=c2*x2-e2;
-					if (c1<1e-12 || (fabs(cos1)>1.) || (fabs(cos2)>1.) )
-						{	// straight track case
-							dx = x2-x1;	dy = y2-y1;	dz = z2-z1;
-							length += sqrt(dx*dx+dy*dy+dz*dz);
-						}
-					else
-						{	// helix case
-							length += fabs(acos(cos1)-acos(cos2))*sqrt(1+t1*t1)/c1;
-						}
-					x1=x2;y1=y2;z1=z2;e1=e2;c1=c2;t1=t2,cos1=cos2; //a does not change...
-					cout << "\n : " << length<<endl;
-				}
-			*/
-		}
+	//double x1,y1,z1,a1,c1,t1,e1,x2,y2,z2,a2,c2,t2,e2;
+	//double dx,dy,dz,cos1,cos2,xp,yp,cda,sda,da,d;
+	//double x0,y0;
+
+	StPhysicalHelix helix(StThreeVector<double>(0,0,0),StThreeVector<double>(0,0,0), 0, 0);
+	(*StiGeometryTransform::instance())(getInnerMostHitNode(), &helix);
+	const StThreeVectorF &p = getOuterMostHitNode()->getHit()->globalPosition();
+	StThreeVector<double> point(p.x(), p.y(), p.z());
+	length = helix.pathLength(point);
 	return length;
 }
+	/*
+		StiKTNBidirectionalIterator it;
+		cout << "Outer:" << (*first) << endl;
+		x1=(*first).fX; y1=(*first).fP0; z1=(*first).fP1; 
+		e1=(*first).fP2; a1=(*first).fAlpha; c1=(*first).fP3; t1=(*first).fP4;
+		cos1=c1*x1-e1;
+		cout << "Inner:" << (*last) << endl;
+		cout << "(x1,y1)="<<x1<<"\t"<<y1<<endl;
+		x2=(*last).fX; y2=(*last).fP0; z2=(*last).fP1; 
+		e2=(*last).fP2; a2=(*last).fAlpha; c2=(*last).fP3; t2=(*last).fP4;
+		if (a2!=a1)
+		{//rotate (x0,y0) first as we need x2,y2 in the original frame
+		if (a1<0) a1+=2*M_PI;
+		if (a2<0) a2+=2*M_PI;
+		da=a1-a2; cda=cos(da); sda=sin(da);
+		cout << " rotby:" << da*180/3.1415<<endl;
+		x0=e2/c2; //center of circle
+		d=c2*x2-e2;
+		y0=y2+sqrt(1-d*d)/c2;
+		cout << "(x0,y0)="<<x0<<"\t"<<y0<<endl;
+		xp=cda*x0-sda*y0;
+		e2=c2*xp;
+		// now rotate (x2,y2)
+		cout << "(x2,y2)="<<x2<<"\t"<<y2<<endl;
+		xp=cda*x2-sda*y2;
+		yp=sda*x2+cda*y2;
+		x2=xp;y2=yp;
+		cout << "(x2',y2')="<<x2<<"\t"<<y2<<endl;
+		}
+		cos2=c2*x2-e2;
+		if (c1<1e-12 || (fabs(cos1)>1.) || (fabs(cos2)>1.) )
+		{	// straight track case
+		cout <<"SL:";
+		dx = x2-x1;	dy = y2-y1;	dz = z2-z1;
+		length += sqrt(dx*dx+dy*dy+dz*dz);
+		}
+		else
+		{	// helix case
+		cout <<"H:";
+		length += fabs(acos(cos1)-acos(cos2))*sqrt(1+t1*t1)/c1;
+		}
+		
+		//ignore this patch of code...
+		x1=x2;y1=y2;z1=z2;e1=e2;c1=c2;t1=t2,cos1=cos2; //a does not change...
+		it = first;
+		x1=(*it).fX; y1=(*it).fP0; z1=(*it).fP1; e1=(*it).fP2; a1=(*it).fAlpha; c1=(*it).fP3; t1=(*it).fP4;
+		cos1=c1*x1-e1;
+		while (it!=last)
+		{
+		cout << " a1:"<<a1<<" c1:"<<c1<<" cos1:"<<cos1;
+		it++;
+		x2=(*it).fX; y2=(*it).fP0; z2=(*it).fP1; e2=(*it).fP2; a2=(*it).fAlpha; c2=(*it).fP3; t2=(*it).fP4;
+		if (a2!=a1)
+		{//rotate (x0,y0) first as we need x2,y2 in the original frame
+		da=a2-a1; cda=cos(da); sda=sin(da);
+		cout << " rotby:" << da*180/3.1415;
+		x0=e2/c2; //center of circle
+		d=c2*x2-e2;
+		y0=y2+sqrt(1-d*d)/c2;
+		xp=cda*x0-sda*y0;
+		// now rotate (x2,y2)
+		e2=c2*xp;
+		xp=cda*x2-sda*y2;
+		yp=sda*x2+cda*y2;
+		x2=xp;y2=yp;
+		}
+		cos2=c2*x2-e2;
+		if (c1<1e-12 || (fabs(cos1)>1.) || (fabs(cos2)>1.) )
+		{	// straight track case
+		dx = x2-x1;	dy = y2-y1;	dz = z2-z1;
+		length += sqrt(dx*dx+dy*dy+dz*dz);
+		}
+		else
+		{	// helix case
+		length += fabs(acos(cos1)-acos(cos2))*sqrt(1+t1*t1)/c1;
+		}
+		x1=x2;y1=y2;z1=z2;e1=e2;c1=c2;t1=t2,cos1=cos2; //a does not change...
+		cout << "\n : " << length<<endl;
+		}
+	*/
 
 /*! Accessor method to get the dca.
   <h3>Note</h3> 
-   <ol>
-   <li>Not implemented</li>
-   </ol>
+	<ol>
+	<li>Not implemented</li>
+	</ol>
 */
 double StiKalmanTrack::getPrimaryDca() const
 {
