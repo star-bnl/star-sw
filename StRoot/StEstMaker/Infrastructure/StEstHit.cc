@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstHit.cc,v 1.2 2001/01/25 18:15:21 lmartin Exp $
+ * $Id: StEstHit.cc,v 1.3 2001/01/26 09:49:25 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StEstHit.cc,v $
+ * Revision 1.3  2001/01/26 09:49:25  lmartin
+ * Minor changes. Useless data member mEvalTrack removed. Short description of the
+ * data members added.
+ *
  * Revision 1.2  2001/01/25 18:15:21  lmartin
  * New method DetachFromWafer.
  *
@@ -36,7 +40,6 @@ StEstHit::StEstHit(long id, StThreeVectorD *xg, StThreeVectorD *xl, long maxbran
   mNBranch    = 0;
   mDebugLevel = 0;
   mFlag       = 0;
-  mEvalTrack  = 0;
   if(!mBranch)
     cerr << "ERROR!!! StEstHit::StEstHit mBrach=NULL" << endl;
 }
