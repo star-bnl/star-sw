@@ -1,11 +1,7 @@
 #include "StSpectraCutNhit.h"
 
-StSpectraCutNhit::StSpectraCutNhit(){
-
-}
-StSpectraCutNhit::StSpectraCutNhit(int lowLimit, int highLimit){
- mLowLimit = lowLimit;
- mHighLimit = highLimit;
+StSpectraCutNhit::StSpectraCutNhit(double lowLimit, double highLimit) 
+   : StSpectraCut(lowLimit, highLimit) {
 }
 
 StSpectraCutNhit::~StSpectraCutNhit() {

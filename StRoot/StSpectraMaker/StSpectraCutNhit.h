@@ -6,14 +6,12 @@
 class StSpectraCutNhit : public StSpectraCut {
 
  private:
- int mLowLimit;
- int mHighLimit;
 
  protected:
 
  public:
-  StSpectraCutNhit();
-  StSpectraCutNhit(int lowLimit, int highLimit);
+
+  StSpectraCutNhit(double lowLimit, double highLimit);
 
   ~StSpectraCutNhit();
  
