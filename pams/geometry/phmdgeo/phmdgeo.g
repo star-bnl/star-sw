@@ -1,7 +1,10 @@
-* $Id: phmdgeo.g,v 1.1 2000/11/29 17:02:41 nevski Exp $
+* $Id: phmdgeo.g,v 1.2 2000/12/01 15:40:46 nevski Exp $
 * $Log: phmdgeo.g,v $
+* Revision 1.2  2000/12/01 15:40:46  nevski
+* age spelling corrected
+*
 * Revision 1.1  2000/11/29 17:02:41  nevski
-* first official version
+*  first official version
 *
 **********************************************************************
  Module  PHMDGEO  is the geometry of photon multiplicity detector
@@ -51,7 +54,7 @@
     endfill
 *
     Use  PMDG  version=1
-    Create and Position PHMD in CAVE z=pmdg_ZDIST Konly=Many
+    Create and Position PHMD in CAVE z=pmdg_ZDIST Konly='Many'
 *
 * -----------------------------------------------------------------------
 Block PHMD the PMD box volume and fill with air 
