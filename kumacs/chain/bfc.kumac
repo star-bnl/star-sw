@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.28 1998/08/07 23:44:50 kathy Exp $
+* $Id: bfc.kumac,v 1.29 1998/08/10 15:51:03 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.29  1998/08/10 15:51:03  kathy
+* added comments for fzin
+*
 * Revision 1.28  1998/08/07 23:44:50  kathy
 * made output_file to be used for fzout or evout; removed unnecessary user/input from bfc_util with evgin
 *
@@ -114,9 +117,9 @@
 * 
 * -- CHAINS --
 * evgin      - read in event generator file for running gstar
-* g2tin      - read G2T xdf file
-* evin       - read in simulated-data file 
-* fzin       - read in fz file
+* g2tin      - read G2T xdf file (post gstar)
+* evin       - read in simulated-data file (post gstar + more) 
+* fzin       - read in fz file (post gstar but haven't run g2t)
 * gtxin      - read in txt file for running gstar
 * rgst       - run gstar from evgin file
 * rg2t       - run g2t from rungst(gstar) stuff
