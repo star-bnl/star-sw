@@ -22,5 +22,5 @@
        float p6;         /* 6th parameter for pad direction polynomial */
    };
 
-/*  Last mod. for fcl_padtrans: $Date: 1998/02/23 14:32:57 $ */
+/*  Last mod. for fcl_padtrans: $Date: 1998/03/25 10:43:22 $ */
 

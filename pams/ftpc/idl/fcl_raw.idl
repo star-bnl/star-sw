@@ -9,11 +9,11 @@
 
    /*******************  Row struct *******************/
    struct fcl_raw {    
-       long      pixel[1024];      /* raw data for one chip */
-                                   /* four timebins per long word */
+       unsigned long      pixel[1024];      /* raw data for one chip */
+                                            /* four timebins per long word */
     };
 
-/*  Last mod. for fcl_raw: $Date: 1998/02/23 14:32:57 $ */
+/*  Last mod. for fcl_raw: $Date: 1998/03/25 10:43:22 $ */
 
 
 
