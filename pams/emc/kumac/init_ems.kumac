@@ -7,7 +7,7 @@
     
   cd [params]/emc
   tdm/newtable ems_control ems_control 1
-  tdm/newtable ems_jetpar  ems_jetpar  1  
+
  
  tdm/table/rowcount ems_control 1
 * 
@@ -60,16 +60,6 @@
  tdm/table/cell/putvalue 'ems_control[0].chrg_eta_max'       2.0
  tdm/table/cell/putvalue 'ems_control[0].ideal_jet_mode'     1
 *
-* tdm/table/rowcount ems_jetpar 1
-* tdm/table/cell/putvalue 'ems_jetpar[0].jetmethod'    1
-* tdm/table/cell/putvalue 'ems_jetpar[0].jetweighting' 0
-* tdm/table/cell/putvalue 'ems_jetpar[0].cone_rad'     0.7
-* tdm/table/cell/putvalue 'ems_jetpar[0].ej_min'       5.0
-* tdm/table/cell/putvalue 'ems_jetpar[0].et_min'       0.05
-* tdm/table/cell/putvalue 'ems_jetpar[0].et_seed'      1.0
-* tdm/table/cell/putvalue 'ems_jetpar[0].par'          0. 0. 0. 0. 0.
-* tdm/table/cell/putvalue 'ems_jetpar[0].phi_dev'      360.
- 
  
   return
 
