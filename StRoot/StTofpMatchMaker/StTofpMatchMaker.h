@@ -9,10 +9,13 @@
  *  tofCollection->tofData() and will store the matches in
  *  tofCollection->tofSlats().
  *
- * $Id: StTofpMatchMaker.h,v 1.2 2003/09/10 19:47:38 perev Exp $
+ * $Id: StTofpMatchMaker.h,v 1.3 2003/09/13 19:15:52 geurts Exp $
  */    
 /*  -------------------------------------------------------------------------
  * $Log: StTofpMatchMaker.h,v $
+ * Revision 1.3  2003/09/13 19:15:52  geurts
+ * Changed passing of StSPtrVecTofData for strobeEvent (see bugtracker ticket #172)
+ *
  * Revision 1.2  2003/09/10 19:47:38  perev
  * ansi corrs
  *
@@ -84,7 +87,7 @@ protected:
 
 
 private:
-  Bool_t strobeEvent(StSPtrVecTofData);// check pVPD data for strobe event
+  Bool_t strobeEvent(StSPtrVecTofData&);// check pVPD data for strobe event
   void bookHistograms();
   void writeHistogramsToFile();
   StTofGeometry *mTofGeom; //! pointer to the TOF geometry utility class
@@ -162,7 +165,7 @@ private:
   TH2D *hTofpMatchNoHit[NTOFP]; //!
 
   virtual const char *GetCVS() const 
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMatchMaker.h,v 1.2 2003/09/10 19:47:38 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMatchMaker.h,v 1.3 2003/09/13 19:15:52 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StTofpMatchMaker,0)
 };
