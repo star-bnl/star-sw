@@ -1,20 +1,78 @@
 #!/usr/local/bin/perl
-# Conscript file for directory
-Import qw ( env INCLUDE LIB BIN OBJ);
-# Install the products of this directory
-#Install $env $LIB, 'libworld.a';
-#Install $env $INCLUDE, 'world.h';
-# Internal products
-#Library $env 'libworld.a', 'world.c';
-#Install $env $LIB, 'St_dst_Maker.so';
-print "OBJ == ",$OBJ,"\n";
+Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
 my $PWD = `pwd`;
 print "Build in $PWD\n";
-#Link $OBJ => 'StRoot';
-#Link $OBJ => 'St_dst_Maker';
-#Link  'build' => 'St_dst_Maker';
-#my $obj = $OBJ . "/Conscript";
-#Build $obj;
-#Build qw( $obj );
-
-Build ( "St_dst_Maker/Conscript" );
+#Build qw( St_dst_Maker/Conscript St_geant_Maker/Conscript St_tpt_Maker/Conscript);
+Build qw( St_base/Conscript  StarClassLibrary/Conscript );
+#Build qw (
+#	  StAnalysisMaker/Conscript
+#	  StAngleCorrMaker/Conscript
+#	  StAssociationMaker/Conscript
+#	  StChain/Conscript
+#	  StDAQMaker/Conscript
+#	  StDaqLib/Conscript
+#	  StDbLib/Conscript
+#	  StDbMaker/Conscript
+#	  StDisplay/Conscript
+#	  StDisplayMaker/Conscript
+#	  StEbyeScaMaker/Conscript
+#	  StEbyeScaTagsMaker/Conscript
+#	  StEclMaker/Conscript
+#	  StEvent/Conscript
+#	  StEventDisplayMaker/Conscript
+#	  StEventMaker/Conscript
+#	  StFlowTagMaker/Conscript
+#	  StFtpcV0Maker/Conscript
+#	  StHbtMaker/Conscript
+#	  StIOMaker/Conscript
+#	  StMagF/Conscript
+#	  StMcAnalysisMaker/Conscript
+#	  StMcEvent/Conscript
+#	  StMcEventMaker/Conscript
+#	  StMinidaqMaker/Conscript
+#	  StPadDisplayMaker/Conscript
+#	  StPeCMaker/Conscript
+#	  StRchMaker/Conscript
+#	  StSmdstMaker/Conscript
+#	  StSpectraTagsMaker/Conscript
+#	  StStrangeTagsMaker/Conscript
+#	  StTpcDb/Conscript
+#	  StTreeMaker/Conscript
+#	  StTrsMaker/Conscript
+#	  StUtilities/Conscript
+#	  StV0MiniDstMaker/Conscript
+#	  StXiMiniDstMaker/Conscript
+#	  St_LSEvent_Maker/Conscript
+#	  St_QA_Maker/Conscript
+#	  St_TLA_Maker/Conscript
+#	  St_base/Conscript
+#	  St_ctf_Maker/Conscript
+#	  St_db_Maker/Conscript
+#	  St_dst_Maker/Conscript
+#	  St_ebye_Maker/Conscript
+#	  St_ecl_Maker/Conscript
+#	  St_emc_Maker/Conscript
+#	  St_ems_Maker/Conscript
+#	  St_evg_Maker/Conscript
+#	  St_fcl_Maker/Conscript
+#	  St_fpt_Maker/Conscript
+#	  St_fss_Maker/Conscript
+#	  St_geant_Maker/Conscript
+#	  St_geom_Maker/Conscript
+#	  St_io_Maker/Conscript
+#	  St_l3cl_Maker/Conscript
+#	  St_l3t_Maker/Conscript
+#	  St_mwc_Maker/Conscript
+#	  St_rl0_Maker/Conscript
+#	  St_smdst_Maker/Conscript
+#	  St_srs_Maker/Conscript
+#	  St_stk_Maker/Conscript
+#	  St_tcl_Maker/Conscript
+#	  St_tpcdaq_Maker/Conscript
+#	  St_tpt_Maker/Conscript
+#	  St_tptsts_Maker/Conscript
+#	  St_trg_Maker/Conscript
+#	  St_tss_Maker/Conscript
+#	  St_xdfin_Maker/Conscript
+#	  StarClassLibrary/Conscript
+#);
