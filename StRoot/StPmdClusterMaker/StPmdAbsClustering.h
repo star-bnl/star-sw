@@ -4,7 +4,7 @@
  */
 /******************************************************
  *
- * $Id: StPmdAbsClustering.h,v 1.4 2004/06/24 13:47:19 subhasis Exp $
+ * $Id: StPmdAbsClustering.h,v 1.5 2004/09/07 23:02:43 fisyak Exp $
  *
  * Author: Subhasis
  ******************************************************
@@ -14,6 +14,9 @@
  ******************************************************
  *
  * $Log: StPmdAbsClustering.h,v $
+ * Revision 1.5  2004/09/07 23:02:43  fisyak
+ * Add missing default ctors
+ *
  * Revision 1.4  2004/06/24 13:47:19  subhasis
  * several changes in clustering code
  *
@@ -45,8 +48,7 @@ class StPmdAbsClustering
   StPmdDetector *m_cpv_det;  
 
    public:
-  StPmdAbsClustering(StPmdDetector *, StPmdDetector*);
-  StPmdAbsClustering();
+  StPmdAbsClustering(StPmdDetector *pmd_det = 0, StPmdDetector* cpv_det=0);
   virtual ~StPmdAbsClustering();
   //  virtual void findPmdClusters() =0;
   //  virtual void findPmdClusters(StPmdDetector*) =0;
