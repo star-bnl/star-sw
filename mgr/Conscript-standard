@@ -53,11 +53,11 @@ $share =~ s/\/StRoot//g;
 $share =~ s/\/(sim|gen)//g; 
 my $CPPP = $env->{CPPPATH};
 if ($pkg =~ /^StTrsMaker$/) {
-  $CPPP = ":#" . $Dir . ":#" . $Dir . "/include:" . $env->{CPPPATH}; print "CPPP = $CPPP\n" if $param::debug;
+  $CPPP = "#" . $Dir . ":#" . $Dir . "/include:" . $env->{CPPPATH}; print "CPPP = $CPPP\n" if $param::debug;
 }
-if ($pkg =~ /^StDaqLib$/) {$CPPP = ":#" . $Dir . ":" . $env->{CPPPATH}; print "CPPP = $CPPP\n"  if $param::debug;}
+if ($pkg =~ /^StDaqLib$/) {$CPPP = "#" . $Dir . ":" . $env->{CPPPATH}; print "CPPP = $CPPP\n"  if $param::debug;}
 if ($Dir =~ /pams\//) {
-  $CPPP = ":" . $INCLUDE . "/" . $pkg . ":" . $env->{CPPPATH}; print "CPPP = $CPPP\n" if $param::debug;
+  $CPPP = $INCLUDE . "/" . $pkg . ":" . $env->{CPPPATH}; print "CPPP = $CPPP\n" if $param::debug;
 }
 my $LIBPKG = "";
 my @srco = @src;
@@ -79,7 +79,7 @@ my $CXXFLAGS = $env->{CXXFLAGS};
 my $FCCOM    = $env->{FCCOM};
 if ($STAR_SYS =~ /^sun4x_5.$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
 if ($STAR_SYS =~ /kcc$/)  {$LIBPATH = ""; $LIBS = "";}
-if ($STAR_SYS =~ /^sun4x_56_CC5$/) {$LIBPATH .= ":/opt/WS5.0/SC5.0/lib -lCstd";}
+if ($STAR_SYS =~ /^sun4x_56_CC5$/) {$LIBS .= " -L/opt/WS5.0/SC5.0/lib -lCstd -liostream";}
 print "$STAR_SYS $LIBPATH\n"  if $param::debug;
 $env2 = $env->clone('CPPPATH'      => $CPPP,
 		    'CXXFLAGS'     => $CXXFLAGS,
@@ -98,9 +98,10 @@ foreach my $cpp ($Dir,@cpps) {
       $cpp =~ /openwin/
      )  {next;}
   if ($ROOTCINT_CPP) {$ROOTCINT_CPP .= ":" . $cpp;}
-  else               {$ROOTCINT_CPP .= $cpp;}
+  else               {$ROOTCINT_CPP  = $cpp;}
   if ($cpp =~ /ROOT/) {next};
-  $STIC_CPP .= ":" . $cpp;
+  if ($STIC_CPP) {$STIC_CPP .= ":" . $cpp;}
+  else           {$STIC_CPP = $cpp;}
 }
 $cscanner= find scan::cpp($env2->{_cwd}, $ROOTCINT_CPP); print "ROOTCINT_CPP = $ROOTCINT_CPP\n" if $param::debug;
 my $ROOTCINT_CPPPATH = $cscanner->iflags; print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n" if $param::debug;
@@ -225,7 +226,6 @@ if ($#idlL > -1) {
     Install $env $INCLUDE, @idlT;# print "Install $env $INCLUDE, @idlT\n";
     #___________________________________
     my $ROOTCINT_CPP = $INCLUDE . ":" . $INCLUDE . "/tables:" . $shareT . ":" . $env->{ENV}->{ROOTSRC};
-    #   $ROOTCINT_CPP.= ":" . $env->{ENV}->{STAF} . "/inc:" 
     my $CXXFLAGS = $env->{CXXFLAGS};
     my $LINKMODULECOM = $env->{LINKMODULECOM};
     if ($STAR_SYS =~ /^sun4x_5.$/) {
