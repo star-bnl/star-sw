@@ -1,7 +1,12 @@
 <pre><h3>SUBROUTINE STRMOVE(COUNT,SOURCE,DEST)</h3>
 
-*  Description:
-*	SGI interface routine to (equivalent) to LIB$MOVC3.
+*	AIX interface routine to (equivalent) to LIB$MOVC3.
 *	COUNT is a 32-bit word-count, not a byte-count.
+
+
+	INTEGER COUNT
+	INTEGER SOURCE(*),DEST(*)
+
+	INTEGER I
 
 </pre>
