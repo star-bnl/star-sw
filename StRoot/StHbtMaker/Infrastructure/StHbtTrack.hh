@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.14 2001/04/03 21:04:36 kisiel Exp $
+ * $Id: StHbtTrack.hh,v 1.15 2001/04/05 22:25:15 kisiel Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,8 +13,13 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.15  2001/04/05 22:25:15  kisiel
+ * Correct the problems detected by Insure++.
+ *
  * Revision 1.14  2001/04/03 21:04:36  kisiel
- * Changes needed to make the Theoretical code
+ *
+ *
+ *   Changes needed to make the Theoretical code
  *   work. The main code is the ThCorrFctn directory.
  *   The most visible change is the addition of the
  *   HiddenInfo to StHbtPair.
@@ -208,7 +213,7 @@ inline unsigned long StHbtTrack::TopologyMap(const int word) const { return mMap
 inline unsigned long StHbtTrack::TrackId() const { return mTrackId; }
 
 inline  void StHbtTrack::SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo) {mHiddenInfo=aHiddenInfo;}
-inline  bool StHbtTrack::ValidHiddenInfo() const {return (bool)mHiddenInfo;}
+inline  bool StHbtTrack::ValidHiddenInfo() const { if (mHiddenInfo) return true; else return false; }
 inline  const StHbtHiddenInfo* StHbtTrack::HiddenInfo() const {return mHiddenInfo;}
 
 #endif
