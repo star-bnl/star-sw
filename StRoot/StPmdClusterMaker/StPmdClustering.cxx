@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.14 2004/07/15 13:32:41 subhasis Exp $
+ * $Id: StPmdClustering.cxx,v 1.15 2004/07/19 13:23:34 subhasis Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,6 +17,9 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.15  2004/07/19 13:23:34  subhasis
+ * checks applied on clust_cell dimension
+ *
  * Revision 1.14  2004/07/15 13:32:41  subhasis
  * clust dimension changed
  *
@@ -489,8 +492,9 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
 	    }
 	  // End of finding l,ocal maxima	
 	  
-	  CentroidCal(ncl[i],ig,x[0],y[0],z[0],xc[0],yc[0],zc[0],rcl[0],rcs[0],cells[0]);
-	  
+	  Int_t censtat=CentroidCal(ncl[i],ig,x[0],y[0],z[0],xc[0],yc[0],zc[0],rcl[0],rcs[0],cells[0]);
+	 if(censtat==kStOK){
+
 	  icl=icl+ig+1;
 	  
 	  //! Assign the cluster properties for SuperCluster having more than Two cells
@@ -527,9 +531,10 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
 		    StPmdHit* phit = GetHit(m_pmd_det,supmod,x_org[jk],y_org[jk]);
 		    if(phit)pclust->addHitCollection(phit);
 		    // attach the hits
-		  } // if loop
+		  } // if dist loop
 		} //for loop 'jk
 	    } //for 'k' loop
+	 }//censtat check
 	} // 'else' loop
     }// for loop 'i<nsupcl'
   //  cout<<"CLUSTER NUMBER IS "<<clno<<"supmod**"<<supmod<<endl;
@@ -538,7 +543,7 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
 //-------------------------------------------------------
 
 
-void StPmdClustering::CentroidCal(Int_t ncell,Int_t nclust,Double_t &x,
+Int_t StPmdClustering::CentroidCal(Int_t ncell,Int_t nclust,Double_t &x,
 				  Double_t &y,Double_t &z,Double_t &xc,
 				  Double_t &yc,Double_t &zc,
 				  Double_t &rcl,Double_t &rcs,Double_t &cells)
@@ -553,6 +558,11 @@ void StPmdClustering::CentroidCal(Int_t ncell,Int_t nclust,Double_t &x,
   Double_t str[2000],str1[2000], cln[2000];
   Double_t xcl[2000], ycl[2000],clust_cell[200][2000];
   //Initialisation part starts
+  if(nclust>200 || ncell >2000){
+	  cout<<"Number of cluster of Ncell crosses limit "<<nclust<<" "<<ncell<<endl;
+	  return kStWarn;
+  }
+
   for(i=0;i<=nclust;i++)
     {
       xxc[i] = *(&xc+i);
@@ -773,6 +783,8 @@ void StPmdClustering::CentroidCal(Int_t ncell,Int_t nclust,Double_t &x,
       
       
     }
+  return kStOK;
+
 }
 
 //---------------------------------------------------
