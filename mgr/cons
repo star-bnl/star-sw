@@ -9,7 +9,7 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.5 1999/08/16 16:32:18 fisyak Exp $
+# $Id: cons,v 1.6 1999/08/19 12:49:27 fisyak Exp $
 $cons_history =
   q(
     Modification History:
@@ -43,7 +43,7 @@ $cons_history =
 $ver_num = 1.6;
 $ver_rev = "a3";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.5 1999/08/16 16:32:18 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.6 1999/08/19 12:49:27 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -2289,7 +2289,8 @@ sub mkdir {
     return if $_[0]->{exists};
     futil::mkdir($_[0]->{dir}); # Recursively make parent.
     my($path) = $_[0]->path;
-    if (!-d $path && !mkdir($path, 0777)) {
+#    if (!-d $path && !mkdir($path, 0777)) {
+    if (!-d $path && !mkdir($path, 0755)) {
 	die("$0: can't create directory $path ($!).\n");
     }
     $dir->{exists} = 1;
