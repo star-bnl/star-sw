@@ -762,7 +762,7 @@ void cts_get_ctb_indexes ( long volume, long &i_phi, long &i_eta ) {
 //
     long i1 ;
     i1     = int(volume/100) ;
-    i_phi  = fmod(volume,100) ;
+    i_phi  = fmod((double)volume,100.) ;
     if ( i1 < 20 ) {
        i_phi = 14 - i_phi ;
        if ( i_phi < 1 ) i_phi = i_phi + 60 ;
@@ -800,9 +800,9 @@ void cts_get_tof_indexes ( long volume, long &i_phi, long &i_eta ) {
 
 //WJL - tofp heierarchy is different, but pavel changed g2t_volume_id...
     i_tray_eta    = int(volume/100000) ;
-    i_counter_eta = (short)fmod(volume,100000)/1000 ;
-    i_tray_phi    = (short)fmod(volume,1000)/10 ;
-    i_counter_phi = (short)fmod(volume,10) ;
+    i_counter_eta = (short)fmod((double)volume,100000.)/1000 ;
+    i_tray_phi    = (short)fmod((double)volume,1000.)/10 ;
+    i_counter_phi = (short)fmod((double)volume,10.) ;
 
 //    i_tray_eta    =  1;
 //    i_counter_phi = int(volume/100000);
