@@ -3,13 +3,13 @@
 *======================================================================
 *-----------------------------------------------------------------------
 macro run
-exec test#init
-exec test#loop 10
+exec init
+exec loop 10
 graphics/opt stat
 zone 2 1
 ntuple/plot 200.resz -.5<resz<1
 ntuple/plot 200.resxy -.5<resxy<1
-exec test#end
+exec end
 return
 
 macro init_
@@ -26,13 +26,13 @@ macro init_
 trace off
 * Create Table Definitions / Set up Switches
 exec $STAR_REF/sim/tfc/wrk/setup_fmt [mapfile]
-exec test#strack setup [sector]
+exec strack setup [sector]
 cell/putvalue 'Switches/fmtpar[0].ped_subtract' 2
 cell/putvalue 'Switches/fmtpar[0].data_size' 2
 cell/putvalue 'Switches/fmtpar[0].thresh' 6.0
 cell/putvalue 'Switches/fmtpar[0].printf' 0
 *initialise plotting setup
-exec test#xyz setup
+exec xyz setup
 
 *initialise residuals calculations
 if [res]=on then
@@ -187,12 +187,12 @@ while [istat]=1 .and. [i]<=[maxevents] do
         message Mixed tables from events [newevent] and [ievent] !!!
 	nmixed = [nmixed]+1
 	if [nmixed]>3 then
-	  exec test#warning_message
+	  exec warning_message
 	endif
         goto READIT
       else
 	if [nmixed]>0 then
-	  exec test#self_corrected [nmixed]
+	  exec self_corrected [nmixed]
 	  nmixed=0
 	endif
       endif
@@ -239,12 +239,12 @@ while [istat]=1 .and. [i]<=[maxevents] do
 
 * Perform Cluster/Hit/Track-finding
   if [strack]=on.or.[strack]=both  then 
-     exec test#strack 
+     exec strack 
      message finished strack
   endif
 
   if [strack]=off.or.[strack]=both then
-    exec test#xyz unpack
+    exec xyz unpack
   endif
 
 
@@ -268,7 +268,7 @@ while [istat]=1 .and. [i]<=[maxevents] do
 
      if [strack]=on.or.[strack]=both then
         cdir //PAWC
-        exec test#draw_track on [lx] [hx] [ly] [hy] [ievent] [strack] [laser]
+        exec draw_track on [lx] [hx] [ly] [hy] [ievent] [strack] [laser]
      endif
 
   endif
@@ -581,7 +581,7 @@ if [1]=plot then
   set pmci 2
   nt/plot 10.y%x adc>19 ! ! ! s
 
-  exec test#draw_sector
+  exec draw_sector
   f/cl 76
   shell rm temp.nt
   cdir //PAWC
@@ -633,7 +633,7 @@ if [new]=on then ;  hplot/null [xmin] [xmax] [ymin] [ymax] ; endif
 igset plci 4
 
 * Draw the X-Y outline
-exec test#draw_sector
+exec draw_sector
      set txal 23
      itx [xmin]+10 [ymax]-10 'Event '//[ievent]
      itx [xmin]+10 [ymax]-20 'Tracks '//[ntracks]
@@ -722,7 +722,7 @@ enddo
 v/del xa,ya,xx,yy
 
      if [strack]=off.or.[strack]=both then
-        exec test#xyz plot
+        exec xyz plot
      endif
 *wait
 if [ntracks]>0 then
