@@ -3,70 +3,64 @@
 
 #include "Stiostream.h"
 #include <stdlib.h>
-#include "TObject.h"
+#include "StMaker.h"
 
+class StSvtConfig;
 class StSvtHybridPixelsC;
+class StSvtHybridPixelsD;
+//class StSvtHybridData;
 class StSvtHybridCollection;
-class StSvtHybridSimData;
+class StSvtData;
 
-//there is no bad anode list in this adjuster compared to reality
-//this doesn't mater as long as the offline anode list constains the whole online anode list
+//used bad anode list is the same as in StSvtSeqAdjMaker => no difference between online and offline
 
-//also there is no inverse product criterium implememented
-class StSvtOnlineSeqAdjSim
+
+class StSvtOnlineSeqAdjSim:public StMaker
 {
 public:
-  StSvtOnlineSeqAdjSim();
+  StSvtOnlineSeqAdjSim(const char* name = "SvtOnlineSeqAdj");
   ~StSvtOnlineSeqAdjSim();
-
-  void  Make();
-
-  void SetPixelData(StSvtHybridPixelsC* data);
-  StSvtHybridPixelsC* GetPixelData(){return mData;} 
-
-  void SetRawData(StSvtHybridSimData *data);
-  StSvtHybridSimData *GetRawData(){return mRawData;}
-
 
   void SetKillBadAnodes(bool doit){mKillBadAnodes=doit;}
   bool GetKillBadAnodes(){return mKillBadAnodes;}
-
   void SetSaveAnode2Raw(bool doit){mSaveAnode2Raw=doit;}
   bool GetSaveAnode2Raw(){return mSaveAnode2Raw;}
-
   void SetSaveAnode239Raw(bool doit){mSaveAnode239Raw=doit;}
   bool GetSaveAnode239Raw(){return mSaveAnode239Raw;}
   
   void SetNumberTBinsToClear(int n){mNumberTBinsToClear=n;}
   int GetNumberTBinsToClear(){return mNumberTBinsToClear;}
-  
   void SetExtraPixelsBefore(int num){mExtraBefore=num;}
   int GetExtraPixelsBefore(){return mExtraBefore;}
-
   void SetExtraPixelsAfter(int num){mExtraAfter=num;}
   int GetExtraPixelsAfter(){return mExtraAfter;}
 
   void Set_n_seq_lo(int num){m_n_seq_lo=num;}
   int Get_n_seq_lo(){return m_n_seq_lo;}
-
   void Set_n_seq_hi(int num){m_n_seq_hi=num;}
   int Get_n_seq_hi(){return m_n_seq_hi;}
-  
   void Set_thresh_lo(int num){m_thresh_lo=num;}
   int Get_thresh_lo(){return m_thresh_lo;}
-
   void Set_thresh_hi(int num){m_thresh_hi=num;}
   int Get_thresh_hi(){return m_thresh_hi;}
-
   void SetPedOffset(int num){mPedOffset=num;}
   int GetPedOffset(){return mPedOffset;}
   
-  
-  void SetBadAnodes(StSvtHybridCollection* anodes){mSvtBadAnodes=anodes;}
+  void SetAdjParams(int thresh_lo,int n_seq_lo,int thresh_hi,int n_seq_hi);
+ 
+ //inherited maker routines
+  virtual Int_t Init();
+  virtual Int_t Make();
+  virtual void  Clear(const char *opt);
+  virtual Int_t Finish();
+  virtual Int_t InitRun(int runumber); //caled when run number changes
+
 private:
-  StSvtHybridPixelsC* mData;
-  StSvtHybridSimData *mRawData;
-  StSvtHybridCollection* mSvtBadAnodes;
+  StSvtData                         *mPixelColl;    //! the simulated data - created for each run InitRun{in beginAnalyses} 
+  StSvtData                         *m8bitPixelColl;   //! simulated final result written to 8 bits
+  StSvtData                         *mRawData;
+  StSvtHybridCollection             *mSvtBadAnodes;
+  StSvtConfig                       *mConfig;
   bool  mKillBadAnodes;
   int   mNumberTBinsToClear;   //number of first time bins which are set to 0 by DAQ - default 2
   bool  mSaveAnode2Raw;
@@ -82,8 +76,19 @@ private:
   int m_thresh_lo;
   int m_thresh_hi;
   int mPedOffset;
-  
-  Bool_t mMask[128*240]; 
+  Bool_t mMask[128*240];
+
+  //global variables for temporary store in the loop
+  StSvtHybridPixelsD  *mCurrentPixelData;
+  StSvtHybridPixelsC  *mCurrent8bitPixelData;
+  int mCurrentIndex;
+
+  Int_t GetConfig();
+  void GetBadAnodes();
+  void GetPixelData();
+  void SetRawData();
+
+  void  Conversion10to8bit();
   void  KillBadAnodes();
   void  ClearMask();
   void  RawAnodes();
@@ -92,6 +97,8 @@ private:
   void  WriteMask();
   void  WriteSequence(int anode,int begins, int ends, int NumOfHigh);
   void  FillRawData();
+  
+ ClassDef(StSvtOnlineSeqAdjSim,1)
 };
 
 #endif

@@ -35,7 +35,7 @@ void StSvtTable::setFreq(int i)
           else 
            mFreq[j][k] = prob1(num,width);
            if(i == 1 && j == 33 && k == 132)
-             cout<<"mFreq"<<"\["<<j<<"]"<<"\["<<k<<"] = "<<mFreq[j][k]<<"\t"; 
+             cout<<"mFreq"<<" ["<<j<<"]"<<" ["<<k<<"] = "<<mFreq[j][k]<<"\t"; 
               
 	 }
       }

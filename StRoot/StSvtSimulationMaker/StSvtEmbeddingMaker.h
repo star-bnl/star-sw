@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.h,v 1.2 2003/09/10 19:47:37 perev Exp $
+ * $Id: StSvtEmbeddingMaker.h,v 1.3 2003/11/30 20:51:48 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.h,v $
+ * Revision 1.3  2003/11/30 20:51:48  caines
+ * New version of embedding maker and make OnlSeqAdj a stand alone maker
+ *
  * Revision 1.2  2003/09/10 19:47:37  perev
  * ansi corrs
  *
@@ -25,43 +28,59 @@
 #endif
 
 
-class TObjectSet;
-class StSvtHybridCollection;
-class StSvtHybridPixelsC;
 class StSvtHybridData;
-class StSvtHybridSimData;
+class StSvtData;
+class StSvtHybridCollection;
+class StSvtHybridPixelsD;
 class TH2F;
 class TFile;
 
 class StSvtEmbeddingMaker : public StMaker
 {
 
-  public:
-
-      StSvtEmbeddingMaker(const char* name = "SvtEmbedding");
-      virtual ~StSvtEmbeddingMaker();
-
-     virtual Int_t Init();
-     virtual Int_t Make();
-     virtual Int_t Finish();
- 
-     void mixData();
-
-     void bookHistograms();
-     void fillHistograms();
-
-  private:
-
-    StSvtHybridCollection*               mSimPixelDataColl;   //!
-    StSvtHybridCollection*               mRealDataColl;       //!
-    StSvtHybridPixelsC*                   mSimPixelData;       //!
-    StSvtHybridData*                     mRealData;           //!
-    StSvtHybridSimData*                  mSvtEmbeddedData;    //!
+public:
+  
+  StSvtEmbeddingMaker(const char* name = "SvtEmbedding");
+  virtual ~StSvtEmbeddingMaker();
+  
+  virtual Int_t Init();
+  virtual Int_t Make();
+  virtual Int_t Finish();
+  virtual Int_t InitRun(int runumber);
     
-    TH2F** mDataHist;      //!
-    TFile* mFile;          //!
+  void setBackGround(Bool_t backgr,double backgSigma);
+ 
+private:
+  void GetSvtData();
+  void GetPedRMS();
+  void ClearMask();
+  void AddRawData();
+  void CreateBackground();
+ 
+  //for debugging
+  void bookHistograms();
+  //void fillHistograms();
+  double  MakeGaussDev(double sigma);
 
-  ClassDef(StSvtEmbeddingMaker,0)
+  StSvtData*               mSimPixelColl;   //!
+  StSvtData*               mRealDataColl;       //!
+  StSvtHybridCollection*   mPedColl;            //!
+  StSvtHybridCollection*   mPedRMSColl;         //!
+
+  double mBackGSigma;  //default value if individiual RMS are not available 
+  Bool_t mBackGrOption;
+  Bool_t mMask[128*240];
+
+//global variables for temporary store in the loop
+  StSvtHybridPixelsD  *mCurrentPixelData;
+  int mCurrentIndex;
+
+
+  //+++++++++++
+  TH2F** mDataHist;      //!
+  TFile* mFile;          //!
+  
+  ClassDef(StSvtEmbeddingMaker,1)
 
 };
 

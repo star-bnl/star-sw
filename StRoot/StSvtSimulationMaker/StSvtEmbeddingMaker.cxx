@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.cxx,v 1.2 2003/09/07 03:49:06 perev Exp $
+ * $Id: StSvtEmbeddingMaker.cxx,v 1.3 2003/11/30 20:51:46 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.cxx,v $
+ * Revision 1.3  2003/11/30 20:51:46  caines
+ * New version of embedding maker and make OnlSeqAdj a stand alone maker
+ *
  * Revision 1.2  2003/09/07 03:49:06  perev
  * gcc 3.2 + WarnOff
  *
@@ -34,19 +37,23 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClassLibrary/StSvtHybridData.hh"
 #include "StSvtClassLibrary/StSvtData.hh"
-#include "StSvtClassLibrary/StSvtHybridPixelsC.hh"
+#include "StSvtClassLibrary/StSvtHybridPixelsD.hh"
+#include "StSvtClassLibrary/StSvtHybridPixels.hh"
 #include "StSvtClassLibrary/StSvtConfig.hh"
-#include "StSvtHybridSimData.hh"
+#include "StSvtClassLibrary/StSvtHybridPed.hh"
 
 ClassImp(StSvtEmbeddingMaker)
 
 //____________________________________________________________________________
 StSvtEmbeddingMaker::StSvtEmbeddingMaker(const char *name):StMaker(name)
 {
-  mSimPixelData = NULL;
-  mRealData = NULL;
-  mSimPixelDataColl = NULL;
+  mBackGrOption = kTRUE;  // genrate noise under simulated hits
+  mBackGSigma = 1.8;      //default RMS-1.8 seems to be so far the best value
+
+  mSimPixelColl = NULL;
   mRealDataColl = NULL;
+  mPedColl = NULL;
+  mPedRMSColl = NULL;
 }
 
 //____________________________________________________________________________
@@ -58,113 +65,195 @@ StSvtEmbeddingMaker::~StSvtEmbeddingMaker()
 //____________________________________________________________________________
 Int_t StSvtEmbeddingMaker::Init()
 {
-
-  if (Debug()) gMessMgr->Debug() << "In StSvtEmbeddingMaker::Init() ..."  << 
-		 GetName() << endm;
-
-  St_DataSet *dataSet = GetDataSet("StSvtRawData");
-  assert(dataSet); 
-  mRealDataColl= (StSvtData*)(dataSet->GetObject());
-  assert(mRealDataColl);
-
-  dataSet = GetDataSet("StSvtSimPixels");
-  assert(dataSet); 
-  mSimPixelDataColl= (StSvtData*)(dataSet->GetObject());
-  assert(mSimPixelDataColl);
-
-  bookHistograms();
+  //bookHistograms();
 
   return StMaker::Init();
 }
 
 //____________________________________________________________________________
+Int_t StSvtEmbeddingMaker::InitRun(int runumber)
+{
+  GetPedRMS();
+  //bookHistograms();
+
+  return StMaker::InitRun(runumber);
+}
+
+//____________________________________________________________________________
 Int_t StSvtEmbeddingMaker::Make()
 {
-  mixData();
+  GetSvtData();
 
-  fillHistograms();
-
+  for(int Barrel = 1;Barrel <= mSimPixelColl->getNumberOfBarrels();Barrel++) {
+    for (int Ladder = 1;Ladder <= mSimPixelColl->getNumberOfLadders(Barrel);Ladder++) {
+      for (int Wafer = 1;Wafer <= mSimPixelColl->getNumberOfWafers(Barrel);Wafer++) {
+	for( int Hybrid = 1;Hybrid <= mSimPixelColl->getNumberOfHybrids();Hybrid++){
+	  
+	  mCurrentIndex = mSimPixelColl->getHybridIndex(Barrel,Ladder,Wafer,Hybrid);
+	  if( mCurrentIndex < 0) continue; 
+	  
+	  mCurrentPixelData  = (StSvtHybridPixelsD*)mSimPixelColl->at(mCurrentIndex);
+	    
+	  if(!mCurrentPixelData) { //no data from simulation Maker
+	    gMessMgr->Info()<<"Error  in StSvtEmbeddingMaker::Make(): Something is wrong in no data from simulator for hybrid index:"<<mCurrentIndex<<endm;
+	    mCurrentPixelData = new StSvtHybridPixelsD(Barrel, Ladder, Wafer, Hybrid);
+	    mSimPixelColl->put_at(mCurrentPixelData,mCurrentIndex);
+           }
+	   
+	   ClearMask();
+	   AddRawData();
+           if (mBackGrOption) CreateBackground();
+	}
+      }
+    }
+  }
+ 
+  //  fillHistograms();
   return kStOK;
 }
 
 //____________________________________________________________________________
-void StSvtEmbeddingMaker::mixData()
+void  StSvtEmbeddingMaker::GetPedRMS()
 {
-  StSequence* Sequence;
-  int numOfSeq ,startTimeBin, length, adcVal, time, index, pixelIndex, status, previous, newAdc, offset;
-  unsigned char* adc;
-  int* anolist;
+  mPedRMSColl=NULL;
+  mPedColl=NULL;
 
-  for(int Barrel = 1;Barrel <= mRealDataColl->getNumberOfBarrels();Barrel++) {  
-    for (int Ladder = 1;Ladder <= mRealDataColl->getNumberOfLadders(Barrel);Ladder++) {      
-      for (int Wafer = 1;Wafer <= mRealDataColl->getNumberOfWafers(Barrel);Wafer++) {	
-	for( int Hybrid = 1;Hybrid <= mRealDataColl->getNumberOfHybrids();Hybrid++){
+  St_DataSet* dataSet=NULL;
+  dataSet = GetDataSet("StSvtRMSPedestal");
+  if (dataSet)  mPedRMSColl= (StSvtHybridCollection*)dataSet->GetObject();
+      
+  dataSet=NULL;
+  dataSet = GetDataSet("StSvtPedestal");
+  if (dataSet) mPedColl= (StSvtHybridCollection*)dataSet->GetObject();
 
-	  index = mRealDataColl->getHybridIndex(Barrel,Ladder,Wafer,Hybrid);
+  if ((!mPedRMSColl)&&(!mPedColl))
+    cout<<"Warning: no SVT RMS information available from StSvtPedestal  - using default backgroung:"<<mBackGSigma<<endl;
+}
 
-	  if( index < 0) continue;
 
-	  mRealData = (StSvtHybridData *)mRealDataColl->at(index);
-	  if (!mRealData) continue; 
-            
-	  mSimPixelData = (StSvtHybridPixelsC *)mSimPixelDataColl->at(index);
-	  if (!mSimPixelData) continue;
-            
-	  //cout << "mSimPixelData = " << mSimPixelData << endl;
-	  offset =  mSimPixelData->getPedOffset();
-	  anolist = 0;
+//____________________________________________________________________________
+void StSvtEmbeddingMaker::GetSvtData()
+{
+  St_DataSet *dataSet = GetDataSet("StSvtRawData");
+  assert(dataSet); 
+  mRealDataColl= (StSvtData*)(dataSet->GetObject());
+  assert(mRealDataColl);
 
-	  for (int iAnode= 0; iAnode<mRealData->getAnodeList(anolist); iAnode++){
-              
-	    int Anode = anolist[iAnode];
-	    status= mRealData->getSequences(Anode,numOfSeq,Sequence);
+  dataSet = GetDataSet("StSvtPixelData");
+  assert(dataSet); 
+  mSimPixelColl= (StSvtData*)(dataSet->GetObject());
+  assert(mSimPixelColl);
+}
 
-	    for (int nSeq=0; nSeq< numOfSeq ; nSeq++){
+//____________________________________________________________________________
+void StSvtEmbeddingMaker::AddRawData()
+{ //mixes raw data into pixel data
   
-	      adc=Sequence[nSeq].firstAdc;
-	      length = Sequence[nSeq].length;
-	      startTimeBin=Sequence[nSeq].startTimeBin;
+  StSequence* Sequence;
+  
+  int numOfSeq;
+  int* anolist;
+  
 
-	      for(int t = 0; t<length; t++){
-		time = startTimeBin + t;
-		adcVal = (int)adc[t];
-		pixelIndex = mSimPixelData->getPixelIndex(Anode,time);
-		/*
-		if ((Anode == 109) && (time == 10) ) {
-		  cout << "pixel(before) = " << (int)mSimPixelData->getPixelContent(Anode,time) << endl;
-		  cout << "offset = " << offset << ", adc = " << adcVal << endl;
-		}
-		*/
-	    
-		previous = (int)mSimPixelData->getPixelContent(Anode,time);
-		if (previous > 0)
-		  previous -= offset;
-		newAdc = previous + adcVal;
+  StSvtHybridData* realData = (StSvtHybridData *)mRealDataColl->at(mCurrentIndex);
+  if (!realData) return; 
+    
+  double *adcArray=mCurrentPixelData->GetArray();      
+  double offset =  mCurrentPixelData->getPedOffset(); //this could be problem if offset differs between real and simulated data!!!
 
-		if (newAdc >=0 && newAdc<255)
-		  mSimPixelData->AddAt((unsigned char)newAdc,pixelIndex);
-		else if (newAdc < 0)
-		  mSimPixelData->AddAt((unsigned char)0,pixelIndex);
-		else if (newAdc > 255)
-		  mSimPixelData->AddAt((unsigned char)255,pixelIndex);
-		//mSimPixelData->setPedOffset(0);
-		/*
-		if ((Anode == 109) && (time == 10) )
-		  cout << "pixel(after) = " << (int)mSimPixelData->getPixelContent(Anode,time) << endl;
-		*/
-	      }
-	    }
-	  }
-          
-	  if(mRealData) 
-	    delete mRealData;
+  anolist = NULL;
+  for (int iAnode= 0; iAnode<realData->getAnodeList(anolist); iAnode++){
+              
+    int Anode = anolist[iAnode]; //goes from 1
+    realData->getSequences(Anode,numOfSeq,Sequence);
 
-	  mSvtEmbeddedData = new StSvtHybridSimData(Barrel,Ladder,Wafer,Hybrid);
-	  mSvtEmbeddedData->setSimHybridData(mSimPixelData);
-	  mRealDataColl->put_at(mSvtEmbeddedData,index);
+    for (int nSeq=0; nSeq< numOfSeq ; nSeq++){ 
+      unsigned char* adc=Sequence[nSeq].firstAdc;
+      int length = Sequence[nSeq].length;
+      int startTimeBin=Sequence[nSeq].startTimeBin;
+      
+      for(int t = 0; t<length; t++){
+	int time = startTimeBin + t;
+	unsigned char adcVal = adc[t];
+	//pixelIndex = mSimPixelData->getPixelIndex(Anode,time);
+	//less clean but faster
+	int pixelIndex=(Anode-1)*128+time;
+	//there already is pedestal offset
+	adcArray[pixelIndex]=adcArray[pixelIndex]+(double)adcVal-offset;
 
-	  mSimPixelData->Reset();
-	}
+	//don't do noise here
+	mMask[pixelIndex]=kFALSE;
+      }
+    }
+  }
+}
+
+//____________________________________________________________________________
+double StSvtEmbeddingMaker::MakeGaussDev(double sigma)
+{
+
+ static int iset = 0;
+ static double gset;
+ double fac,rsq,v1,v2;
+
+ //if(*idum < 0) iset = 0;
+ if(iset == 0)
+   {
+     do {
+       v1 = 2.0*((float)rand()/(float)RAND_MAX) - 1.0;
+       v2 = 2.0*((float)rand()/(float)RAND_MAX) - 1.0;
+       rsq = v1*v1 + v2*v2;
+       
+     } while(rsq >= 1.0 || rsq == 0.0);
+     
+     fac = sigma*::sqrt(-2.0*::log(rsq)/rsq);
+     
+     gset = v1*fac;  // gset = 3.0*::sqrt(-2.0*::log(rsq))*(v1/::sqrt(rsq))
+     iset = 1;
+     return v2*fac;
+   }
+ else
+   {
+     iset = 0;
+     return gset;
+   }
+}
+
+//____________________________________________________________________________
+void StSvtEmbeddingMaker::CreateBackground()
+{
+  const double rmsScale=16.;
+  double *mAdcArray=mCurrentPixelData->GetArray(); // array of [128*240]
+  double pedOffset=mCurrentPixelData->getPedOffset();
+  
+  //find out what background to use
+  StSvtHybridPixels* pedRms=NULL;
+  if (mPedRMSColl) pedRms = (StSvtHybridPixels*)mPedRMSColl->at(mCurrentIndex);
+  
+  if(pedRms)
+    {// I have rms for each pixel
+      for(int an = 0; an < 240; an++)  for(int tim = 0; tim < 128; tim++){
+	//cout<<pedRms<<"indiv rms="<<pedRms->At(pedRms->getPixelIndex(an+1,tim))/rmsScale<<endl;
+	int pIndex=an*128 + tim;
+	if ((mAdcArray[pIndex]!=pedOffset)&&(mMask[pIndex])) mAdcArray[pIndex]+=MakeGaussDev(pedRms->At(pedRms->getPixelIndex(an+1,tim))/rmsScale);// !! mAdcArray already contains PedOffset
+      }
+    }
+  else {
+    //one value for hybrid
+    double backgsigma;
+    StSvtHybridPed *ped=NULL;
+    if (mPedColl) ped=(StSvtHybridPed *)mPedColl->at(mCurrentIndex);
+    if (ped) backgsigma=ped->getRMS(); else  backgsigma=mBackGSigma; //the default value
+    if (backgsigma<=0.){ //check agains to high RMS's
+      cout<<"Warnig for index "<<mCurrentIndex<<" pedestal RMS is:"<<backgsigma<<" => seting to default"<<endl;
+      backgsigma=mBackGSigma;
+    }
+    if (Debug()) cout<<"for index "<<mCurrentIndex<<" pedestal RMS is:"<< backgsigma<<endl;
+    //t->Fill(backgsigma);
+    for(int an = 0; an < 240; an++){
+      for(int tim = 0; tim < 128; tim++){
+	int pIndex=an*128 + tim;
+	if ((mAdcArray[pIndex]!=pedOffset)&&(mMask[pIndex])) mAdcArray[pIndex]+=MakeGaussDev(backgsigma);// !! mAdcArray already contains PedOffset             
       }
     }
   }
@@ -173,13 +262,23 @@ void StSvtEmbeddingMaker::mixData()
 //____________________________________________________________________________
 Int_t StSvtEmbeddingMaker::Finish()
 { 
-  if (Debug()) gMessMgr->Debug() << "In StSvtSimulationMaker::Finish() ..."
-			       << endm;
   
-  mFile->Write();
-  mFile->Close();
+  //  mFile->Write();
+  //mFile->Close();
 
   return kStOK;
+}
+
+//____________________________________________________________________________
+void  StSvtEmbeddingMaker::setBackGround(Bool_t backgr,double backgSigma){
+  mBackGrOption = backgr;
+  mBackGSigma = backgSigma;
+}
+
+//____________________________________________________________________________
+void  StSvtEmbeddingMaker::ClearMask()
+{
+  for (int  i=0;i<128*240;i++)mMask[i]=kTRUE;
 }
 
 //____________________________________________________________________________
@@ -215,9 +314,10 @@ void StSvtEmbeddingMaker::bookHistograms()
   }
 }
 
-//____________________________________________________________________________
+/* not implemented im this version /____________________________________________________________________________
 void StSvtEmbeddingMaker::fillHistograms()
 {
+  
   int* anolist; 
   int mSequence,index;
   int stTimeBin,len,status;
@@ -234,7 +334,7 @@ void StSvtEmbeddingMaker::fillHistograms()
 	 
 	 if( index < 0) continue; 
 	 
-	 mSvtEmbeddedData = (StSvtHybridSimData *)mRealDataColl->at(index);
+	 mSvtEmbeddedData = (StSvtHybridData *)mRealDataColl->at(index);
 	 if(!mSvtEmbeddedData)
 	   continue;
 	 
@@ -262,3 +362,4 @@ void StSvtEmbeddingMaker::fillHistograms()
    }
  }
 }
+*/
