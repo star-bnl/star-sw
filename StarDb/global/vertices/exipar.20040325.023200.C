@@ -20,7 +20,7 @@ TDataSet *CreateTable() {
   memset(&row,0,size);
   row.use_pid	 =          0; // logical flag to control usage of global pid ;
   row.dca_max	 =        1.2; // cut on dca between the two tracks ;
-  row.bxi_max	 =      10000; // cut on impact param. of xi from prim. vertex ;
+  row.bxi_max	 =        1.2; // cut on impact param. of xi from prim. vertex ;
   row.rv_xi	 =          2; // cut on min. dist. of decay from prim. vertex ;
   row.rv_v0	 =          4; // cut on min. dist. of decay from prim. vertex ;
   row.dmass	 =       0.01; // v0 mass cut +/- [dmass] ;
@@ -44,7 +44,7 @@ TDataSet *CreateTable() {
   memset(&row,0,size);
   row.use_pid	 =          0; // logical flag to control usage of global pid ;
   row.dca_max	 =        1.2; // cut on dca between the two tracks ;
-  row.bxi_max	 =      10000; // cut on impact param. of xi from prim. vertex ;
+  row.bxi_max	 =        1.2; // cut on impact param. of xi from prim. vertex ;
   row.rv_xi	 =          2; // cut on min. dist. of decay from prim. vertex ;
   row.rv_v0	 =          4; // cut on min. dist. of decay from prim. vertex ;
   row.dmass	 =       0.01; // v0 mass cut +/- [dmass] ;
