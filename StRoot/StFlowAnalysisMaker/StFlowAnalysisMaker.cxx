@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.24 2000/03/15 23:32:03 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.25 2000/03/21 00:24:43 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,8 +11,11 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.25  2000/03/21 00:24:43  posk
+// Added GetCVS and changed some plot names.
+//
 // Revision 1.24  2000/03/15 23:32:03  posk
-// *** empty log message ***
+// Added StFlowSelection.
 //
 // Revision 1.23  2000/03/02 22:55:32  posk
 // Changed header file extensions from .hh to .h .
@@ -195,7 +198,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.24 2000/03/15 23:32:03 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.25 2000/03/21 00:24:43 posk Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
@@ -373,10 +376,10 @@ Int_t StFlowAnalysisMaker::Init() {
   mHistBinPt->SetYTitle("<Pt> (GeV)");
   
   // cos(n*phiLab)
-  mHistCosPhi = new TProfile("Flow_prof_CosPhi", "Flow_prof_CosPhi",
+  mHistCosPhi = new TProfile("Flow_CosPhiLab", "Flow_CosPhiLab",
     Flow::nHars, 0.5, (float)(Flow::nHars) + 0.5, -100., 100., "");
   mHistCosPhi->SetXTitle("Harmonic");
-  mHistCosPhi->SetYTitle("cos(n*PhiLab) (%)");
+  mHistCosPhi->SetYTitle("<cos(n*PhiLab)> (%)");
     
   // PID pi+
   mHistPidPiPlus = new TH1F("Flow_PidPiPlus", "Flow_PidPiPlus",
@@ -397,7 +400,7 @@ Int_t StFlowAnalysisMaker::Init() {
   mHistPidProton->SetYTitle("Counts");
     
   // PID multiplicities
-  mHistPidMult = new TProfile("Flow_prof_PidMult", "Flow_prof_PidMult",
+  mHistPidMult = new TProfile("Flow_PidMult", "Flow_PidMult",
     4, 0.5, 4.5, 0., 10000., "");
   mHistPidMult->SetXTitle("All, Pi+, Pi-, Proton");
   mHistPidMult->SetYTitle("Multiplicity");
@@ -440,12 +443,12 @@ Int_t StFlowAnalysisMaker::Init() {
     // for sub-event pairs
 
     // cos(n*delta_Psi)
-    histTitle = new TString("Flow_prof_Cos_Sel");
+    histTitle = new TString("Flow_Cos_Sel");
     histTitle->Append(*countSels);
     histFull[k].mHistCos = new TProfile(histTitle->Data(), histTitle->Data(),
       Flow::nHars, 0.5, (float)(Flow::nHars) + 0.5, -1., 1., "");
     histFull[k].mHistCos->SetXTitle("Harmonic");
-    histFull[k].mHistCos->SetYTitle("cos(n*delta_Psi)");
+    histFull[k].mHistCos->SetYTitle("<cos(n*delta_Psi)>");
     delete histTitle;
     
     // resolution

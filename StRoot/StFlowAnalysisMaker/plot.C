@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.14 2000/03/15 23:32:05 posk Exp $
+// $Id: plot.C,v 1.15 2000/03/21 00:24:45 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -10,8 +10,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.15  2000/03/21 00:24:45  posk
+// Added GetCVS and changed some plot names.
+//
 // Revision 1.14  2000/03/15 23:32:05  posk
-// *** empty log message ***
+// Added StFlowSelection.
 //
 // Revision 1.13  2000/02/29 21:55:14  posk
 // Removed static const int& statements.
@@ -98,11 +101,11 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   			     "Flow_PidPiPlus",
   			     "Flow_PidPiMinus",
   			     "Flow_PidProton",
-  			     "Flow_prof_PidMult",
+  			     "Flow_PidMult",
   			     "Flow_Cent",
    			     "Flow_Bin_Eta",
    			     "Flow_Bin_Pt",
-                             "Flow_prof_CosPhi",
+                             "Flow_CosPhiLab",
 			     "Flow_Phi_Sel",
 			     "Flow_Phi_Weight_Sel",
 			     "Flow_Phi_Flat_Sel",
@@ -123,9 +126,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_vObsPt_Sel",
 			     "Flow_v2D_Sel",
 			     "Flow_vEta_Sel",
-			     "Flow_vPt_Sel",
-			     "Flow_v.Eta_Sel",
-			     "Flow_v.Pt_Sel"};
+			     "Flow_vPt_Sel"};
   const int nNames = sizeof(baseName) / sizeof(char*);
   const int nSingles = 26 + 1;
 
@@ -368,13 +369,13 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
 // macro for the resolution plot
 TCanvas* plotResolution(){
-  char* profName[] = {"Flow_prof_Cos_Sel","Flow_Res_Sel"};
+  char* resName[] = {"Flow_Cos_Sel","Flow_Res_Sel"};
   int columns = nSels;
   int rows = 2;
   int pads = rows*columns;
 
   // make the graph page
-  TCanvas* c = new TCanvas(profName[1],profName[1],600,780);
+  TCanvas* c = new TCanvas(resName[1],resName[1],600,780);
   c->ToggleEventStatus();
   TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runNumber);  
   run->Draw();
@@ -389,13 +390,13 @@ TCanvas* plotResolution(){
 
   // make the plots
   for (int j = 0; j < rows; j++) {
-    int profNumber = j;
-    cout << "resolution name= " << profName[profNumber] << endl;
+    int resNumber = j;
+    cout << "resolution name= " << resName[resNumber] << endl;
     for (int k = 0; k < columns; k++) {
       char countColumns[2];
       sprintf(countColumns,"%d",k+1);
       int padN = j*columns + k +1;
-      TString* histName = new TString(profName[profNumber]);
+      TString* histName = new TString(resName[resNumber]);
       histName->Append(*countColumns);
       cout << "row= " << j << " col= " << k << " pad= " << padN << "\t" 
 	   << histName->Data() << endl;
