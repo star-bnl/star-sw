@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.h,v 1.16 2000/08/04 21:03:58 perev Exp $
+// $Id: StTrsMaker.h,v 1.17 2002/02/05 22:21:28 hardtke Exp $
 //
 // $Log: StTrsMaker.h,v $
+// Revision 1.17  2002/02/05 22:21:28  hardtke
+// Move Init code to InitRun
+//
 // Revision 1.16  2000/08/04 21:03:58  perev
 // Leaks + Clear() cleanup
 //
@@ -125,7 +128,7 @@ class StTrsMaker : public StMaker {
  private:
     StTrsMaker(const StTrsMaker&);
     StTrsMaker& operator=(const StTrsMaker&);
-// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.16 2000/08/04 21:03:58 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.17 2002/02/05 22:21:28 hardtke Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
@@ -182,6 +185,7 @@ public:
     StTrsMaker(const char *name="Trs");
     ~StTrsMaker();
     Int_t  Init();
+    Int_t  InitRun(int runnumber);
     Int_t  Make();
     Int_t  Finish();
     void   Clear(const char *opt="");
@@ -195,7 +199,7 @@ public:
     
   virtual const char *GetCVS() const
   {
-      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.16 2000/08/04 21:03:58 perev Exp $ built __DATE__ __TIME__" ; return cvs;}
+      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.17 2002/02/05 22:21:28 hardtke Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StTrsMaker, 1)   //StAF chain virtual base class for Makers
 

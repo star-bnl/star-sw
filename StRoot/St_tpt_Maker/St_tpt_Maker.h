@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.h,v 1.19 2001/08/31 20:45:55 hardtke Exp $
+// $Id: St_tpt_Maker.h,v 1.20 2002/02/05 22:22:15 hardtke Exp $
 // $Log: St_tpt_Maker.h,v $
+// Revision 1.20  2002/02/05 22:22:15  hardtke
+// Move Init code to InitRun
+//
 // Revision 1.19  2001/08/31 20:45:55  hardtke
 // Add bums hit moving option
 //
@@ -93,7 +96,7 @@ private:
   TString m_InputDataSetName; //! 
   TString m_InputHitName; //!
 
-//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.19 2001/08/31 20:45:55 hardtke Exp $";
+//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.20 2002/02/05 22:22:15 hardtke Exp $";
   St_tpg_pad_plane      *m_tpg_pad_plane;	//! Constants that describe TPC pad plane
   St_tcl_tpc_index_type *m_type;   		//! Table of many-to-many index 
 	                                        //! correlations for tpc evaluations
@@ -212,11 +215,12 @@ public:
   virtual void   AlignHits(Bool_t flag=kFALSE){m_AlignSector=flag;}    //
 
   virtual Int_t  Init();
+  virtual Int_t  InitRun(int runnumber);
   virtual Int_t  Make();
   virtual Int_t  Finish();
   virtual void   Set_final(Bool_t m=kFALSE){m_mkfinal = m;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpt_Maker.h,v 1.19 2001/08/31 20:45:55 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpt_Maker.h,v 1.20 2002/02/05 22:22:15 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  ClassDef(St_tpt_Maker, 1)   //StAF chain virtual base class for Makers
 };

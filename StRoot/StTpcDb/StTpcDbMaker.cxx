@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.26 2002/01/03 00:01:09 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.27 2002/02/05 22:21:08 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.27  2002/02/05 22:21:08  hardtke
+ * Move Init code to InitRun
+ *
  * Revision 1.26  2002/01/03 00:01:09  hardtke
  * Add switches for type of drift velocity data (i.e. laser vs. t0 analysis).  Default to use either.
  *
@@ -89,6 +92,12 @@
 #include "tables/St_tpg_pad_plane_Table.h"
 #include "tables/St_tpg_detector_Table.h"
 #include "math_constants.h"
+#include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
+#include "StDetectorDbMaker/StDetectorDbMagnet.h"
+#ifndef gufld
+#define gufld gufld_
+extern "C" void gufld(float *,float *);
+#endif
 ClassImp(StTpcDbMaker)
 
 //
@@ -321,6 +330,29 @@ int type_of_call tpc_pad_time_offset_(int *isec, int *irow, int *ipad, float *t0
   }
   return 1;
 }
+int type_of_call tpc_rdo_mask_(int *isect, int* irow){
+  StDetectorDbTpcRDOMasks* mask = StDetectorDbTpcRDOMasks::instance ();
+  int RDO;
+  if (*irow>=1&&*irow<=8){
+    RDO = 1;
+  }
+  else if (*irow>8&&*irow<=13){
+    RDO = 2;
+  }
+  else if (*irow>13&&*irow<=21){
+    RDO = 3;
+  }
+  else if (*irow>21&&*irow<=29){
+    RDO = 4;
+  }
+  else if (*irow>29&&*irow<=37){
+    RDO = 5;
+  }
+  else if (*irow>37&&*irow<=45){
+    RDO = 6;
+  }
+  return (int)mask->isOn(*isect,RDO);
+} 
   
 //_____________________________________________________________________________
 StTpcDbMaker::StTpcDbMaker(const char *name):StMaker(name){
@@ -334,7 +366,13 @@ StTpcDbMaker::~StTpcDbMaker(){
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::Init(){
 
+
+   return StMaker::Init();
+}
+//_____________________________________________________________________________
+Int_t StTpcDbMaker::InitRun(int runnumber){
    m_TpcDb = 0;
+  // Set Table Flavors
    if (m_Mode==1){
      gMessMgr->Info()  << "StTpcDbMaker::Setting Sim Flavor tag for database " << endm;
      SetFlavor("sim","tpcGlobalPosition");
@@ -356,6 +394,32 @@ Int_t StTpcDbMaker::Init(){
      gMessMgr->Info() << "StTpcDbMaker::Undefined drift velocity flavor requested" << endm;
    }
 
+ 
+//
+  if (m_Mode!=1){
+    float x[3] = {0,0,0};
+    float b[3];
+    gufld(x,b);
+    float gFactor = b[2]/4.980;
+    cout << "Magnetic Field = " << b[2] << endl;
+   if (gFactor<-0.8) {
+     gMessMgr->Info() << "StTpcDbMaker::Full Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
+     SetFlavor("FullMagFNegative","tpcGlobalPosition");
+   }
+   else if (gFactor<-0.2) {
+     gMessMgr->Info() << "StTpcDbMaker::Half Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
+     SetFlavor("HalfMagFNegative","tpcGlobalPosition");
+   }
+   else if (gFactor<0.8) {
+     gMessMgr->Info() << "StTpcDbMaker::Half Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
+     SetFlavor("HalfMagFPositive","tpcGlobalPosition");
+   }
+   else if (gFactor<1.2) {
+     gMessMgr->Info() << "StTpcDbMaker::Full Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
+     SetFlavor("FullMagFPositive","tpcGlobalPosition");
+   }
+  }
+
 // Create Needed Tables:    
    if (!m_TpcDb) m_TpcDb = new StTpcDb(this);
   m_tpg_pad_plane = new St_tpg_pad_plane("tpg_pad_plane",1);
@@ -369,7 +433,6 @@ Int_t StTpcDbMaker::Init(){
   if (tpcDbInterface()->Electronics()&&tpcDbInterface()->Dimensions()&&
       tpcDbInterface()->DriftVelocity()) 
    Update_tpg_detector();
- 
   //Here I fill in the arrays for the row parameterization ax+by=1
   for (int i=0;i<24;i++){
     for (int j=0;j<45;j++){
@@ -402,11 +465,9 @@ Int_t StTpcDbMaker::Init(){
      bline[i][j] = (float) 1.0/bb;
     }
   }
-//
-   return StMaker::Init();
+  return 0;
 }
 //_____________________________________________________________________________
-
 Int_t StTpcDbMaker::Make(){
 
   if (!m_TpcDb) m_TpcDb = new StTpcDb(this);
@@ -420,7 +481,7 @@ Int_t StTpcDbMaker::Make(){
 
 //---------------------------------------------------------------------------
 void StTpcDbMaker::Clear(const char *opt){
-  m_TpcDb->Clear();
+  if (m_TpcDb) m_TpcDb->Clear();
 }
 
 //_____________________________________________________________________________

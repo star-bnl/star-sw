@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.13 2002/01/03 00:01:09 hardtke Exp $
+ * $Id: StTpcDbMaker.h,v 1.14 2002/02/05 22:21:08 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.14  2002/02/05 22:21:08  hardtke
+ * Move Init code to InitRun
+ *
  * Revision 1.13  2002/01/03 00:01:09  hardtke
  * Add switches for type of drift velocity data (i.e. laser vs. t0 analysis).  Default to use either.
  *
@@ -78,6 +81,7 @@
 #define tpc_global_to_sector_ F77_NAME(tpc_global_to_sector,TPC_GLOBAL_TO_SECTOR)
 #define tpc_sec24_to_sec12_ F77_NAME(tpc_sec24_to_sec12,TPC_SEC24_TO_SEC12)
 #define tpc_pad_time_offset_ F77_NAME(tpc_pad_time_offset,TPC_PAD_TIME_OFFSET)
+#define tpc_rdo_mask_ F77_NAME(tpc_rdo_mask,TPC_RDO_MASK)
 extern "C" {
 R__EXTERN int type_of_call numberOfPadsAtRow_(int *);
 }
@@ -132,6 +136,9 @@ extern "C" {
 extern "C" {
   R__EXTERN int type_of_call tpc_pad_time_offset_(int*, int*, int*, float*);
 }
+extern "C" {
+  R__EXTERN int type_of_call tpc_rdo_mask_(int*, int*);
+}
 #endif
 class StTpcDb;
 class St_tpg_pad_plane;
@@ -143,7 +150,7 @@ static float aline[24][45];  //hold parameterization
 static float bline[24][45];  //ax+by=0
 #endif
 
-class StTpcDbMaker : public StMaker {
+class StTpcDbMaker : public StMaker { 
  private:
   StTpcDb* m_TpcDb;               //! tpc database class
   St_tpg_pad_plane* m_tpg_pad_plane; //!
@@ -154,6 +161,7 @@ class StTpcDbMaker : public StMaker {
                   StTpcDbMaker(const char *name="TLA");
    virtual       ~StTpcDbMaker();
    virtual Int_t Init();
+   virtual Int_t InitRun(int runnumber);
    virtual Int_t  Make();
    virtual void Clear(const char *opt);
    virtual void Update_tpg_pad_plane();
@@ -164,7 +172,7 @@ class StTpcDbMaker : public StMaker {
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.13 2002/01/03 00:01:09 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.14 2002/02/05 22:21:08 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker, 1)   //StAF chain virtual base class for Makers
 };
