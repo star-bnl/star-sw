@@ -156,6 +156,7 @@ BfcItem BFC[] = {
   {"PreVtx"     ,"","tpcChain","tpt,SCL,sim_T,tpc_T,svt_T,ftpcT,globT,ctf_T",
                                        "StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
   {"svt"         ,"svtChain","","svt_T,srs,stk"                             ,"StMaker","StChain","",kFALSE},
+  {"ssd"         ,"","","sls,spa,scf,scm,sce"                                             ,"","","",kFALSE},
   {"srs"         ,"svt_hits","svtChain","tls,Simu"  ,"St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
   {"sls"      ,"","svtChain","tls,Simu"     ,"St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
   {"spa"      ,"","svtChain","tls,Simu"     ,"St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
@@ -802,5 +803,5 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.124 2000/07/28 21:06:12 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.125 2000/07/30 21:29:03 fisyak Exp $
 //_____________________________________________________________________
