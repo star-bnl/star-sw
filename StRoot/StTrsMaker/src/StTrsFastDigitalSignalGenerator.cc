@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.6 1999/01/22 08:08:36 lasiuk Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.7 1999/01/23 02:32:22 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
- * Revision 1.6  1999/01/22 08:08:36  lasiuk
- * unsigned char; use of pair<> for two arrays
+ * Revision 1.7  1999/01/23 02:32:22  lasiuk
+ * sun friendly
+ *
+ * Revision 1.8  1999/01/28 02:52:22  lasiuk
+ * printout for SUN
  *
  * Revision 1.7  1999/01/23 02:32:22  lasiuk
  * sun friendly
@@ -88,9 +91,13 @@ StTrsFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec
     //PR(mSimpleConversion);
 void StTrsFastDigitalSignalGenerator::digitizeSignal()
 {
+//     cout << "StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
     // Loop over the sector
 
+    tpcTimeBins currentPad;
 
+    // Make a digital Pad!
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<unsigned char> digitalPadData;
     vector<unsigned char> digitalPadZeros;
 #else
@@ -141,7 +148,9 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 		}
 	    PR(digitalPadData.size());
 	    for(int ii=0; ii<digitalPadData.size(); ii++) {
+#ifndef __sun
 		cout << (ii) << '\t' << (static_cast<int>(digitalPadData[ii])) << '\t' << (static_cast<int>(digitalPadZeros[ii])) << endl;
+#endif
 	    }
 	    cout << endl;
 
