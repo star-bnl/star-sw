@@ -52,9 +52,9 @@ double StDetectorDbMagnet::currentToScaleFactor(double current){
 
     double value = -9999;
 
-    if(current > -4450 && current < -4550)
+    if(current < -4450 && current > -4550)
 	value = -1.0;
-    else if(current > -2200 && current < -2300)
+    else if(current < -2200 && current > -2300)
 	value = -0.5;
     else if(current > -50 && current < 50)
 	value = 0.0;
