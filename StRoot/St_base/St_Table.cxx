@@ -1,5 +1,5 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: St_Table.cxx,v 1.93 2000/01/28 23:40:17 fine Exp $ 
+// $Id: St_Table.cxx,v 1.94 2000/02/22 00:59:01 fine Exp $ 
 // 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
@@ -2425,13 +2425,17 @@ void St_Table::StreamerHeader(TBuffer &b)
 {
   if (b.IsReading()) 
   {
+   long rbytes;
    b.ReadStaticArray(s_TableHeader->name);         /* table name */
    b.ReadStaticArray(s_TableHeader->type);         /* table type */
    b >> s_TableHeader->maxlen;       /* # rows allocated */
    b >> s_TableHeader->nok;          /* # rows filled */
-   b >> s_TableHeader->rbytes;       /* number of bytes per row */
+   b >> rbytes;                      /* number of bytes per row */
+//   b >> s_TableHeader->rbytes;       /* number of bytes per row */
    b >> s_TableHeader->dsl_pointer;  /* swizzled (DS_DATASET_T*) */
    b >> s_TableHeader->data_pointer; /* swizzled (char*) */
+   if (rbytes - GetRowSize()) 
+      Warning("StreamerHeader","Wrong row size: must be %d, read %d bytes\n",GetRowSize(),rbytes);
   }
   else {
    b.WriteArray(s_TableHeader->name,sizeof(s_TableHeader->name));    /* table name */
@@ -2699,6 +2703,9 @@ St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {
 
 
 // $Log: St_Table.cxx,v $
+// Revision 1.94  2000/02/22 00:59:01  fine
+// check the row size of the table read vs the current table defintion
+//
 // Revision 1.93  2000/01/28 23:40:17  fine
 // some warnings were removed. Thanks Rene Brun
 //
