@@ -1,14 +1,15 @@
+#include <stdio.h>
+#include <string.h>
 #include "asuAlloc.h"
 #include "cdl.h"
-#include "fortranc.h"  
-#include "dlfcn.h"   /*added by VP*/
-/* I not understand why typedef for strdup is needed */
 
-extern char *strdup(const char *);
-
+static FuncPtr procList = NULL;
+static FilesPtr fileList = NULL;
+static int debug_level = 0;
 struct cdldefs cdl_def;
  
-void cdl_init()
+void 
+cdl_init()
 {
 
 /*
@@ -104,12 +105,14 @@ void cdl_init()
 
 /* to call from Fortran level, maybe will better use cfortran.h */
 
-void cdl_init_()
+void 
+cdl_init_()
 {
  cdl_init();
 }
 
-void cdl_set_opt(char *text, char *chvar)
+void 
+cdl_set_opt(char *text, char *chvar)
 {
     if (*chvar == 'p') {
         strcpy(cdl_def.path, text);
@@ -152,7 +155,7 @@ void cdl_set_opt(char *text, char *chvar)
       }
 }
 
-#ifdef AIX
+#if defined(AIX)
 
 void cdl_create_imp(char *import, char *prog);
 void cdl_fnparse(char *command,char *path,char *file,char *ext);
@@ -186,7 +189,8 @@ int iarg=0, lcomm;
     strcpy(fname,import);
 }
 
-void cdl_create_imp(char *import, char *prog)
+void 
+cdl_create_imp(char *import, char *prog)
 {
 
 FILE *st;
@@ -212,7 +216,8 @@ int ierr;
 #endif
 
 
-int cdl_script(char *fexec, char *path, char *name, char *fext)
+int 
+cdl_script(char *fexec, char *path, char *name, char *fext)
 {
     FILE *st;
 #if defined (AIX)
@@ -340,7 +345,7 @@ int cdl_create(char *filename)
     strcpy(chline, "/bin/sh ");
     strcat(chline, fexec);
 
-    if (ierr  = system(chline) != 0)
+    if ((ierr  = system(chline)) != 0)
         return ierr;
 
     strcpy(chline, "/bin/rm -f ");
@@ -455,27 +460,26 @@ void cdl_delete_all(FilesPtr f)
 
 }
 
-int cdl_load(char *lib_name)
+int 
+cdl_load(char *lib_name)
 {
    FilesPtr   f;
    FileHandle file_handle;
 #ifdef HPUX
-   int        flags=BIND_IMMEDIATE;
+   int        flags=BIND_DEFERRED;
    long       address=0L;
    extern int errno;
 
    file_handle = shl_load(lib_name, flags, address);
    if (file_handle==0){
-      printf(" Could not load shared library: %s\n",lib_name);
       perror("cdl_load: ");
       return (errno);
     }
 #else
     /* hjw, for porting to low-version irix int flags=RTLD_NOW|RTLD_GLOBAL; */
-    int flags=RTLD_NOW;
+    int flags = RTLD_LAZY | RTLD_GLOBAL;
     file_handle = dlopen(lib_name, flags);
     if (file_handle ==  NULL) {
-       printf(" Could not load shared library: %s\n",lib_name);
        printf("cdl_load:  %s\n",dlerror() );
        return 1;
      }
@@ -616,7 +620,7 @@ void cdl_print_lib_()
 
      printf(" --- list of loaded libraries ----\n");
      n = 0;
-     while (name = cdl_get_lib( &n ) ){
+     while ((name = cdl_get_lib(&n))){
        printf(" %d %s\n", n, name);
        n++;
      }
@@ -705,7 +709,6 @@ int cdl_proto(char *func_proto)
   int      narg, i;
   int      ispointer;
 
-  FilesPtr  fp;
   FuncPtr   pp;
 
 #define compress(ps)  \
@@ -726,7 +729,7 @@ int cdl_proto(char *func_proto)
     fname = strtok(proto,"(");
     *temp = '\0';
 
-    if( temp = strchr(fname, '*') ){
+    if ((temp = strchr(fname, '*'))){
       ispointer = 1;
       ftype = strtok(fname, "*");
       fname = strtok(0, " ");
@@ -794,7 +797,7 @@ int cdl_proto(char *func_proto)
     return 0;
   err:
     free (proto); 
-    printf("---%s---\n");
+    /*    printf("---%s---\n");  What is %s supposed to refer to? */
     printf("cdl_proto: syntax error\n");
     return 1;
 }
