@@ -1,7 +1,7 @@
-// $Id: St_QA_Maker.cxx,v 1.31 1999/06/15 14:39:26 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.32 1999/06/15 14:44:52 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
-// Revision 1.31  1999/06/15 14:39:26  kathy
-// recheck in my latest versions of St_QA_Maker - somehow the time stamps were wrong before?
+// Revision 1.32  1999/06/15 14:44:52  kathy
+// fix St_QA_Maker
 //
 // Revision 1.30  1999/06/11 20:05:51  kathy
 // put in method FindHists to find the histogram directory, since it can be in different places depending on how/where you make the histograms
@@ -111,7 +111,6 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #include <iostream.h>
 #include <stdlib.h>
 #include <string.h>
@@ -123,6 +122,7 @@
 #include <math.h>
 #include "TMath.h"
 #include "St_QA_Maker.h"
+
 
 #include "St_particle_Table.h"
 #include "St_hepe_gent_Table.h"
@@ -352,7 +352,7 @@ St_QA_Maker::~St_QA_Maker(){
 }
 //_____________________________________________________________________________
 
-Int_t St_QA_Maker::DrawHists(const Char_t *histSet) 
+Int_t St_QA_Maker::DrawHists() 
 {
 // Method DrawHists -->
 // Plot the selected  histograms and generate the postscript file as well 
@@ -390,9 +390,8 @@ Int_t St_QA_Maker::DrawHists(const Char_t *histSet)
 // Now find the histograms
 // get the TList pointer to the histograms:
   TList  *dirList = 0;
-
-  //  Char_t *dirHistName = "QAHist";
-  dirList = FindHists(histSet);
+  Char_t *dirHistName = "QAHist";
+  dirList = FindHists(dirHistName);
  
 
   Int_t padCount = 0;
@@ -446,7 +445,7 @@ Int_t St_QA_Maker::DrawHists(const Char_t *histSet)
 //_____________________________________________________________________________
 
 
-TList* St_QA_Maker::FindHists(const Char_t *histBranchName) 
+TList* St_QA_Maker::FindHists(Char_t *histBranchName) 
 {  
 // Method FindHists -->
 // Find pointer to histograms
@@ -513,7 +512,7 @@ TList* St_QA_Maker::FindHists(const Char_t *histBranchName)
 //_____________________________________________________________________________
 
 
-Int_t St_QA_Maker::ListHists(const Char_t *histSet) 
+Int_t St_QA_Maker::ListHists() 
 {  
 // Method ListHists -->
 // List of all histograms
@@ -522,8 +521,8 @@ Int_t St_QA_Maker::ListHists(const Char_t *histSet)
 
 // get the TList pointer to the histograms:
   TList  *dirList = 0;
-//  Char_t *dirHistName = "QAHist";
-  dirList = FindHists(histSet);
+  Char_t *dirHistName = "QAHist";
+  dirList = FindHists(dirHistName);
 
 
 //Now want to loop over all histograms
@@ -1364,7 +1363,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.31 1999/06/15 14:39:26 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.32 1999/06/15 14:44:52 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();

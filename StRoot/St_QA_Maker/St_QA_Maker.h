@@ -1,7 +1,7 @@
-//! $Id: St_QA_Maker.h,v 1.20 1999/06/15 14:39:27 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.21 1999/06/15 14:44:57 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
-//! Revision 1.20  1999/06/15 14:39:27  kathy
-//! recheck in my latest versions of St_QA_Maker - somehow the time stamps were wrong before?
+//! Revision 1.21  1999/06/15 14:44:57  kathy
+//! fix St_QA_Maker
 //!
 //! Revision 1.19  1999/06/11 20:05:54  kathy
 //! put in method FindHists to find the histogram directory, since it can be in different places depending on how/where you make the histograms
@@ -95,7 +95,6 @@
 //! St_QA_Maker virtual base class for Maker                            //
 //!                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
@@ -114,10 +113,12 @@
 class TCanvas;
 
 
+
+
 class St_QA_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.20 1999/06/15 14:39:27 kathy Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.21 1999/06/15 14:44:57 kathy Exp $";
   //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -332,8 +333,8 @@ class St_QA_Maker : public StMaker {
  public: 
   St_QA_Maker(const char *name="QA", const char *title="evet/QA");
   virtual       ~St_QA_Maker();
-  virtual Int_t  DrawHists(const Char_t *hSet="");
-  virtual Int_t  ListHists(const Char_t *hSet="");
+  virtual Int_t  DrawHists();
+  virtual Int_t  ListHists();
   virtual Int_t  Init();
   virtual Int_t  Finish();
   virtual Int_t  Make();
@@ -375,7 +376,7 @@ class St_QA_Maker : public StMaker {
   virtual Int_t  AddToLogYList(const Char_t *HistName="");
   virtual Int_t  RemoveFromLogYList(const Char_t *HistName="");
   virtual Int_t  ExamineLogYList();
-  virtual TList*  FindHists(const Char_t *histBranchName="");
+  virtual TList*  FindHists(Char_t *histBranchName="");
   
 
 // the following is a ROOT macro  that is needed in all ROOT code
