@@ -24,6 +24,8 @@
 #define DERR FatalError(7,__LINE__)
 #define PASS 300
 #define DIRSIZE 150
+#define DIR     94
+#define FN      80
 #define FREE 1000 /* sum of number of tables and number of directories */
 /****************************************************  GLOBALS  **********/
 int gEventCnt,gOptionC,gOptionE,gOptionG,gOptionEIndex;
@@ -31,7 +33,7 @@ int gNfreeOld,gNfree;
 char *gFree[FREE];
 char *gFreeOld[FREE];
 char gBaseDir[DIRSIZE];
-char *gDir[]={ "tmp1.xdf2root", "tmp2.xdf2root" };
+char gDir[2][DIR+1];
 char gPass[PASS]; /* To pass a string w/o declaring memory in calling fnct. */
 FILE *gXdfIn;
 XDR gXdrPtr;
@@ -616,7 +618,7 @@ void WriteStrucAllocFiles() {
   }
 }
 void WriteEventC() {
-  char *typename,*cn,*cc; int iotwhtt,i,ncol,icol,ndim,idim;
+  char *scalVec,*typename,*cn,*cc; int iotwhtt,i,ncol,icol,ndim,idim;
   FILE *ff=Fopen("Event.C","w");
   if(!ff) ERR;
   FF"#include \"TRandom.h\"\n");
@@ -643,6 +645,23 @@ void WriteEventC() {
   for(i=0;i<gNtable;i++) {
     cc=Slash2X(gTableName[i]);
     FF"  rows_%s->Clear();\n",cc);
+  }
+  FF"}\n");
+  FF"void Event::PrintColumnNames(char *table) {\n");
+  for(i=0;i<gNtable;i++) {
+    FF"  if(!strcmp(table,\"%s\")) {\n",gTableName[i]);
+    ncol=NumberColumns(i);
+    for(icol=0;icol<ncol;icol++) {
+      if(Dimensions(i,icol)>1) scalVec="vector"; else scalVec="scalar";
+      cn=ColName(i,icol);
+      FF"    printf(\"%s %s\\n\");\n",scalVec,cn);
+    }
+    FF"  }\n");
+  }
+  FF"}\n");
+  FF"void Event::PrintTables() {\n");
+  for(i=0;i<gNtable;i++) {
+    FF"  printf(\"%s\\n\");\n",gTableName[i]);
   }
   FF"}\n");
   FF"Float_t Event::GetVal(char *table,char *col,Int_t irow) {\n");
@@ -818,6 +837,8 @@ void WriteEventH() {
   FF"   void    Clear();\n");
   FF"   void    Finish();\n");
   FF"   void    AddRow(int row,char *table);\n");
+  FF"   void    PrintColumnNames(char *table);\n");
+  FF"   void    PrintTables();\n");
   FF"   Float_t   GetVal(char *table,char *col,Int_t irow,Int_t vecIndex);\n");
   FF"   Float_t   GetVal(char *table,char *col,Int_t irow);\n");
   FF"   Int_t   Nrow(char *table);\n");
@@ -908,26 +929,25 @@ void WriteMainEventC() {
 void WriteTestGetVal(int macroNumber) {
   int itbl,icol,ncol,ndim,idim; char *tn,*cn; char didOne=0;
   FILE *ff;
-  if(macroNumber==1) ff=Fopen("RootMacro1.C","w");
-  if(macroNumber==2) ff=Fopen("RootMacro2.C","w");
+  if(macroNumber==1) ff=Fopen("small.C","w");
+  if(macroNumber==2) ff=Fopen("large.C","w");
   FF"{\n");
   FF"// This ROOT macro shows how to access the table values from the\n");
   FF"// xdf file using class member functions.  If you prefer a\n");
   FF"// more STAR-like syntax (eg, to import STAR PAM C code), see\n");
-  FF"// the other sample macro made by xdf2root (RootMacro3.C).\n");
+  FF"// the other sample macro made by xdf2root (struc.C).\n");
   FF"//\n");
-  FF"// You probably want to save a copy of this file for reference.\n");
-  FF"//\n");
-  FF"// You may want to comment or delete many of the lines\n");
-  FF"// (eg, you don't want to look at all columns of all tables).\n");
-  FF"//\n");
-  FF"// You may not want to look at all rows.    Search for 'nrows'.\n");
-  FF"//\n");
-  FF"// You may not want to look at all events.  Search for 'nevent'.\n");
-  FF"//\n");
+  if(macroNumber==2) {
+    FF"// You may want to comment or delete many of the lines\n");
+    FF"// (eg, you don't want to look at all columns of all tables).\n");
+    FF"//\n");
+    FF"// You may not want to look at all rows.    Search for 'nrows'.\n");
+    FF"//\n");
+    FF"// You may not want to look at all events.  Search for 'nevent'.\n");
+    FF"//\n");
+  }
   FF"// Note that GetVal() has an extra argument for vector columns.\n");
   FF"//\n");
-  FF"   #include \"table_structs.h\"\n");
   FF"   gROOT->Reset(); TFile f(\"Event.root\"); ");
   FF"TTree *T = (TTree*)f.Get(\"T\");\n");
   FF"   TStopwatch timer; timer.Start();\n");
@@ -1002,14 +1022,14 @@ void WriteTestGetVal(int macroNumber) {
 }
 void WriteTestStruct() {
   char *tx,*ttype,*cn,*tn; int itbl,ncol,icol,idim,ndim;
-  FILE *ff=Fopen("RootMacro3.C","w");
+  FILE *ff=Fopen("struc.C","w");
   FF"{\n");
   FF"// THIS MACRO IS NOT GUARANTEED TO RUN.  It is supplied to\n");
   FF"// you, along with the st_*.C load files, to serve as a guide\n");
   FF"// in case you insist on using star-like codisms such as\n");
   FF"// tableName[rowNumber].columnName.  YOU WILL PROBABLY BE\n");
   FF"// BETTER OFF TO IGNORE THIS FILE AND THE st_*.C FILES,\n");
-  FF"// and simply use RootMacro1.C and RootMacro2.C.  Your root code\n");
+  FF"// and simply use small.C and large.C.  Your root code\n");
   FF"// will be much simpler and more maintainable.\n");
   FF"//\n");
   FF"// The STAR-like structures used in this file are malloc()'d by\n");
@@ -1086,6 +1106,72 @@ void WriteTestStruct() {
   FF"}\n");
   fclose(ff);
 }
+void WriteHist() {
+  FILE *ff=Fopen("hist.C","w");
+  FF"{\n");
+  FF"  gROOT->Reset();\n");
+  FF"  Int_t nbin; Float_t val;\n");
+  FF"  char ans[10],table[100],column[100];\n");
+  FF"  Axis_t xmax,xmin;\n");
+  FF"  TFile f(\"Event.root\"); TTree *T = (TTree*)f.Get(\"T\");\n");
+  FF"  Event *event = new Event();\n");
+  FF"  Int_t ii,ncol,nrow;\n");
+  FF"  TBranch *branch  = T.GetBranch(\"event\");\n");
+  FF"  branch->SetAddress(event);\n");
+  FF"  Int_t nevent = T.GetEntries();\n");
+  FF"  Int_t whichEvent=nevent/2;\n");
+  FF"  T.GetEvent(whichEvent);\n");
+  FF"  printf(\"Using event number %%d ");
+  FF"(count from one, like FORTRAN).\\n\",\n");
+  FF"      1+whichEvent);\n");
+  FF"  event->PrintTables();\n");
+  FF"  printf(\"Please type a table from the ");
+  FF"above list:\\n\"); gets(table);\n");
+  FF"  event->PrintColumnNames(table);\n");
+  FF"  printf(\"Type a column ");
+  FF"(do not include the 'scalar' or 'vector')");
+  FF":\\n\"); gets(column);\n");
+  FF"  nrow=event->Nrow(\"small_dir/smallTable\");\n");
+  FF"  printf(\"There are %%d rows.\\n\",nrow);\n");
+  FF"  printf(\"How many bins do you want?\\n\"); ");
+  FF"gets(ans); nbin=atoi(ans);\n");
+  FF"\n");
+  FF"  c1 = new TCanvas(\"c1\",\"xdf2root\",200,10,700,500);\n");
+  FF"  c1->SetFillColor(42);\n");
+  FF"  c1->GetFrame()->SetFillColor(21);\n");
+  FF"  c1->GetFrame()->SetBorderSize(6);\n");
+  FF"  c1->GetFrame()->SetBorderMode(-1);\n");
+  FF"  xmax=-1e20; xmin=1e20;\n");
+  FF"  for(ii=0;ii<nrow;ii++) {\n");
+  FF"    val=event->GetVal(table,column,ii);\n");
+  FF"    if(xmax<val) xmax=val; if(xmin>val) xmin=val;\n");
+  FF"  }\n");
+  FF"  printf(\"The minimum value is %%g, ");
+  FF"and the max is %%g.\\n\",xmin,xmax);\n");
+  FF"  xmax+=(xmax-xmin)*0.05;\n");
+  FF"  xmin-=(xmax-xmin)*0.05;\n");
+  FF"  hpxpy  = new TH1F(\"xdf2root\",\"xdf2root\",nbin,xmin,xmax);\n");
+  FF"  hpxpy->SetFillColor(48);\n");
+  FF"  gRandom->SetSeed();\n");
+  FF"  Float_t px;\n");
+  FF"  const Int_t kUPDATE = 1000;\n");
+  FF"  printf(\"There will be %%d entries on the 2D histogram.\\n\",nrow);\n");
+  FF"  for ( Int_t i=0; i<nrow; i++) {\n");
+  FF"     px=event->GetVal(table,column,i);\n");
+  FF"     // printf(\"Adding %%g to the histogram.\\n\",px);\n");
+  FF"     hpxpy->Fill(px);\n");
+  FF"  }\n");
+  FF"  hpxpy->Draw();\n");
+  FF"  c1->Modified();\n");
+  FF"  c1->Update();\n");
+  FF"  printf(\" * * * * * * * * * * * * * * * * * * * * * * * *\\n\");\n");
+  FF"  printf(\" *   You may have to use the Refresh menu item  * \\n\");\n");
+  FF"  printf(\" *   under the Options menu to get the stuff    * \\n\");\n");
+  FF"  printf(\" *   to appear in the new window.               * \\n\");\n");
+  FF"  printf(\" * * * * * * * * * * * * * * * * * * * * * * * *\\n\");\n");
+  FF"}\n");
+  fclose(ff);
+}
 void WriteTheOutputFiles() {
   WriteMakefile();
   WriteStrucFile();
@@ -1099,6 +1185,7 @@ void WriteTheOutputFiles() {
   WriteTestGetVal(2);
   WriteTestStruct();
   WriteRecipe();
+  WriteHist();
 }
 void MakeTwoSubdirectories() {
   char com[123];
@@ -1186,8 +1273,12 @@ int FileExists(char *fn) {
 }
 void MoveFilesFromScratchToOutputDir() {
   char *cc,com[222]; int ii;
-  char *files[]={ "Event.root", "RootMacro1.C", "RootMacro2.C", "libEvent.so",
-  "st_*.C", "recipe.txt", "table_structs.h", "RootMacro3.C", NULL };
+  /*-----------------------------  old 
+  char *files[]={ "Event.root", "small.C", "large.C", "libEvent.so",
+  "st_*.C", "help.txt", "table_structs.h", "struc.C", NULL };
+  -------------------------------------*/
+  char *files[]={ "hist.C", "Event.root", "small.C", "large.C", "libEvent.so",
+  "help.txt", NULL };
   Ose();
   for(ii=0;;ii++) {
     cc=files[ii]; if(!cc) break;
@@ -1202,8 +1293,8 @@ void MoveFilesFromScratchToOutputDir() {
 }
 void WriteRecipe() {
   FILE *ff; int ii;
-  ff=Fopen("recipe.txt","w");
-  FF"The files ending in .C are root macro files (see below).  They\n");
+  ff=Fopen("help.txt","w");
+  FF"The files ending in .C are root macro files.  They\n");
   FF"are offered\n");
   FF"      1. to help root beginners\n");
   FF"      2. to save typing for root experts\n");
@@ -1211,30 +1302,23 @@ void WriteRecipe() {
   FF"Their use (except as documenation) is optional.\n");
   FF"\n");
   FF"The file named Event.root is the root data file.\n");
-  FF"You will need the file libEvent.so to read the data file (see below).\n");
+  FF"You will need the file libEvent.so to read the data file.\n");
   FF"\n");
-  FF"The file RootMacro1.C accesses the data with class methods.\n");
+  FF"The file small.C shows how to access the data.\n");
   FF"It does only one table and produces a moderate amount of screen\n");
   FF"output.\n");
-  FF"The file RootMacro2.C is the same as RootMacro1.C, except\n");
+  FF"\n");
+  FF"The file large.C is the same as small.C, except\n");
   FF"it prints all columns of all rows of all tables for all events.\n");
   FF"\n");
-  FF"The file RootMacro3.C accesses the data with STAR-like code.\n");
-  FF"IT IS NOT GUARANTEED TO RUN.  IT IS SUPPLIED AS DOCU-\n");
-  FF"MENTATION ONLY.  YOU CAN DO EVERYTHING WITH RootMacro1.C\n");
-  FF"AND RootMacro2.C.\n");
-  FF"The files st_*.C must be loaded before running RootMacro3.C,\n");
+  /*
+  FF"The files st_*.C must be loaded before running struc.C,\n");
   FF"they are not needed for the other two macro files.\n");
-  FF"\n");
-  FF"Recipe:\n");
-  FF"Start root and enter these at the prompt:\n");
-  FF"       gSystem.Load(\"libEvent.so\");\n");
-  FF"       .x RootMacro1.C\n");
+  */
   /*------------------------------------------
   for(ii=0;ii<gNtable;ii++) FF"       .L st_%s.C\n",Slash2X(gTableName[ii]));
-  FF"       .x RootMacro3.C  // SUPPLIED AS DOCUMENTATION, MAY NOT RUN.\n");
+  FF"       .x struc.C  // SUPPLIED AS DOCUMENTATION, MAY NOT RUN.\n");
   ---------------------------------------------------*/
-  FF"       .q\n");
   FF"\n");
   fclose(ff);
 }
@@ -1263,11 +1347,12 @@ void EndingBlurb() {
   PP">> Here are a few commands for mouse capture:\n");
   PP">>    For the UNIX prompt:\n");
   PP"         cd %s/%s # go to output dir\n", gBaseDir,gDir[0]);
-  PP"         ls # check that the files are there\n");
-  PP"         $ROOTSYS/bin/root   # Start root.\n");
+  PP"         ls -l  # check that the files are there\n");
+  PP"         root   # Start root.\n");
   PP">>    For the root prompt.\n");
   PP"         gSystem.Load(\"libEvent.so\");\n");
-  PP"         .x RootMacro1.C\n");
+  PP"         .x small.C\n");
+  PP"         .x hist.C\n");
   PP"         .q\n");
   PP">>\n");
 }
@@ -1359,6 +1444,21 @@ void CheckEnvironmentalVariables() {
     }
   }
 }
+void Set_gDir(char *fullpath) {
+  char fn[FN+1]; int i;
+  char *prefix1="dir.good";
+  char *prefix2="dir.junk";
+  for(i=strlen(fullpath)-1;i>=0;i--) if(fullpath[i]=='/') break;
+  if(strlen(fullpath+i+1)>FN) ERR;
+  strcpy(fn,fullpath+i+1);
+  for(i=strlen(fn)-1;i>=0;i--) if(fn[i]=='.') break;
+  if(i<2) ERR;
+  fn[i]=0;
+  if(strlen(prefix1)+1+strlen(fn)>DIR) ERR;
+  if(strlen(prefix2)+1+strlen(fn)>DIR) ERR;
+  sprintf(gDir[0],"%s.%s",prefix1,fn);
+  sprintf(gDir[1],"%s.%s",prefix2,fn);
+}
 void main(int nnnn,char *aaaa[]) {
   char *inFile,absolutePathForInputFile[APFIF+1];
   inFile=ReadOptions(nnnn,aaaa);
@@ -1371,6 +1471,7 @@ void main(int nnnn,char *aaaa[]) {
     if(strlen(gBaseDir)+1+strlen(inFile)>APFIF) ERR;
     sprintf(absolutePathForInputFile,"%s/%s",inFile);
   }
+  Set_gDir(absolutePathForInputFile);
   SetEnvironmentalVariables();
   CheckEnvironmentalVariables();
   PP">> Input file = %s\n",absolutePathForInputFile);
