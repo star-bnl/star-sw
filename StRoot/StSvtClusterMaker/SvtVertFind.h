@@ -1,12 +1,13 @@
 #define SPT_PTR_NMAX 20000
 #define SPT_X 40
-#define SPT_Z 1200
+#define SPT_Z 1000
 #define PIX_NMAX SPT_X*SPT_Z
-
+#define DEBUG 1
+  
 typedef struct SftInternalSpt{      
 	long layer;
         long track;
-        long wafer; 
+        long wafer;  
         double x[3];
         double xc;
         double zc;
