@@ -224,7 +224,7 @@ void EventDisplay::draw(StiDetectorContainer * detectorContainer)
 		      string name = (*bIter)->getName();
 		      //cout <<"\tTest detector:\t"<<name<<endl;
 		      unsigned int found = name.find("Ftpc");
-		      unsigned int found2 = name.find("Aps");
+		      unsigned int found2 = name.find("Pixel");
 		      unsigned int found3 = name.find("Svt");
 		      if (found!=name.npos || found2!=name.npos || found3!=name.npos) { //it'sone of these
 			  rootDrawableDetector->setVisible(true);
