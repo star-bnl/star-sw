@@ -1,5 +1,11 @@
-// $Id: St_QA_Maker.cxx,v 1.85 2000/02/07 19:49:07 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.87 2000/02/09 19:22:23 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.87  2000/02/09 19:22:23  kathy
+// protect MakeHistEval method so that if there is no geant dataset, it skips out
+//
+// Revision 1.86  2000/02/09 16:10:26  kathy
+// fill all new small range histograms - forgot to fill some of them a few days ago...
+//
 // Revision 1.85  2000/02/07 19:49:07  kathy
 // removed L3 trigger histograms and methods that created them - this table is no longer standard on the DST; created methods BookHistEval and MakeHistEval for geant vs reco evaluation histograms; filled geant vs reco evaluation histograms for table-based data
 //
@@ -829,6 +835,7 @@ void St_QA_Maker::MakeHistPrim(){
     Int_t cnttrkg=0;
     cnttrk = primtrk->GetNRows();
     m_primtrk_tot->Fill(cnttrk);
+    m_primtrk_tot_sm->Fill(cnttrk);
 
     for (Int_t i = 0; i < primtrk->GetNRows(); i++,t++){
 
@@ -964,6 +971,7 @@ void St_QA_Maker::MakeHistPrim(){
       }
     }
     m_primtrk_good->Fill(cnttrkg);
+    m_primtrk_good_sm->Fill(cnttrkg);
   }       
 }
 
@@ -976,6 +984,7 @@ void St_QA_Maker::MakeHistGen(){
   
   St_particle   *part     = (St_particle  *) dstI["particle"];
   if (!part) part = (St_particle  *) DataSet("geant/particle");
+
   if (part){
     particle_st *p = part->GetTable();
     Int_t nchgpart=0;
@@ -1016,7 +1025,9 @@ void St_QA_Maker::MakeHistGen(){
       }
     }
     m_H_npart->Fill(totpart);
+    m_H_npart_sm->Fill(totpart);
     m_H_ncpart->Fill(nchgpart);
+    m_H_ncpart_sm->Fill(nchgpart);
   }
 }
 
@@ -1296,6 +1307,7 @@ void St_QA_Maker::MakeHistEval(){
   geant = GetDataSet("geant");
   if( !geant ){ 
      cout << " St_QA_Maker::Make - No pointer to GEANT DataSet \n" << endl; 
+     return;
   }
 
   St_DataSetIter geantI(geant);

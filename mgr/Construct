@@ -97,9 +97,9 @@ if (/^i386_/) {
     $FEXTEND  = "-ffixed-line-length-132"; 
   }
   elsif (/kcc$/) {
-#    $OSFID    = "f2cFortran";
-#    $OSFID   .= " lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC";
-#    $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
+    $OSFID    = "f2cFortran";
+    $OSFID   .= " lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC";
+    $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS";
     $DEBUG    = "-g";
     $CXXOPT   = "+K0 -O0 --no_exceptions";
     $CXX      = "KCC";
@@ -172,7 +172,6 @@ elsif (/^sun4x_56_CC5$/) {
   $CXX       = "/opt/WS5.0/bin/CC";
   $FC        = "/opt/WS5.0/bin/f77";
   $CXXFLAGS  = "-KPIC -I/usr/openwin/include -D__SunOS_5_6 -library=iostream,no_Cstd";
-#  $CXXFLAGS  = "-KPIC -I/usr/openwin/include -D__SunOS_5_6 -library=iostream";
   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen";#4 -L/usr/ucblib -lucb -L/usr/ccs/lib -lgen";
   $FLIBS     = "-L/opt/WS5.0/lib -lM77 -lF77 -lsunmath";
   $FFLAGS    = "-KPIC -w";

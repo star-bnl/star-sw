@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.11 2000/01/12 16:52:58 lasiuk Exp $
+ * $Id: StRchMaker.cxx,v 1.9 1999/09/24 01:23:22 fisyak Exp $
  *
  * Author: Jon Gans
  ***************************************************************************
@@ -10,48 +10,53 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 1.11  2000/01/12 16:52:58  lasiuk
+ * Revision 1.9  1999/09/24 01:23:22  fisyak
+ * Reduced Include Path
+ *
+ * Revision 1.8  1999/07/21 13:33:55  gans
+ * *** empty log message ***
+ *
+ * Revision 1.8 1999/07/19 00:00:00 gans
+ * makes 3-d histogram to check data 	
+ * Revision 1.7  1999/07/15 13:57:22  perev
+ * cleanup
+ *	 
+ * Revision 1.6  1999/03/20 22:00:19  perev
+ * new maker schema
+ *
+ * Revision 1.5  1999/02/12 23:59:30  lyons
+ * Hopefully working version.  Compiles, but untested.
+ *
+ * Revision 1.4  1999/02/12 21:47:16  lyons
+ * *** empty log message ***
+ *
+ * Revision 1.3  1999/02/12 18:28:53  lyons
+ * Another revision, merge fisyak additions with a couple changes...
+ * trying to get to compile...
+ *
+ * Revision 1.2  1999/02/12 17:29:00  fisyak
+ * Make it compiled
+ *
+ * Revision 1.1  1999/02/12 00:12:32  lyons
+ * Trail version... untested
+ *
  * comment out assert statement
  *
- * Revision 1.13  2000/02/21 23:20:10  lasiuk
- * debug output formatting and reduce output to screen
- *
- * Revision 1.12  2000/02/14 20:50:29  lasiuk
- * use DAQ/sim interface with a switch settable at the c'tor
- *
- * Revision 1.11  2000/01/12 16:52:58  lasiuk
- * comment out assert statement
- *
+//#define RCH_DEBUG
+
  * debug macros;
  * used in first DAQ data
  *
  * Revision 1.9  1999/09/24 01:23:22  fisyak
-
-#include "StRchMaker.h"
-#include "StChain.h"
-
-
-#include "StRichSingleHitCollection.h"
+// Data set definitions:
 #endif
-
 // Internal Rch
-#include "StRichSimpleHit.h"
-#include "StRichClusterAndHitFinder.h"
-#include "StRichSimpleHitCollection.h"
 
-//
 // dst tables in $STAR/include/tables/
 #include "tables/St_g2t_rch_hit_Table.h"
 #include "tables/St_dst_rch_pixel_Table.h"
 
-StRchMaker::StRchMaker(const char *name)
-    : StMaker(name)
-// in $STAR/include
-ClassImp(StRchMaker) // macro
-StRchMaker::StRchMaker(const char *name, int daq, int matrix, int sa)
-    : StMaker(name), mDaq(daq), mUseMatrix(matrix), mWithDstPixels(sa)
-
-    StRchMaker::StRchMaker(const char *name, int daq, int matrix, int cf)
+StRchMaker::StRchMaker(const char *name) : StMaker(name) {
 	: StMaker(name), mDaq(daq), mUseMatrix(matrix), mCfOnly(cf)
 {
 
@@ -62,141 +67,75 @@ StRchMaker::StRchMaker(const char *name, int daq, int matrix, int sa)
     
 #endif
     drawinit=kFALSE;
-}
-
-//-----------------------------------------------------------------
-
-StRchMaker::~StRchMaker() {}
-
-//-----------------------------------------------------------------
-
-    mRows = 96;
-    mPads = 160;
-    mNumberOfPads = mRows*mPads;
-    mGeometryDb = StRichGeometryDb::getDb();
-    mSingleHitCollection = new  StRichSingleHitCollection();
-    AddConst(new St_ObjectSet("richHits",mSingleHitCollection));
-    mClusterFinder = new StRichClusterAndHitFinder();
-    mmc            = new TH1F("cmaxadc","Cluster max ADC",50,0,500);
-    mrms           = new TH1F("crms2","Cluster RMS2",50,0,1000);
-    mpad           = new TH1F("cpads","Cluster pads",15,0,15);
-    mqpad          = new TH1F("caveq","Cluster q/pad",20,0,150);
+    // Create tables
+    // Create Histograms    
+  cerr << "before declare\n";
+  
+  hist = new TH3S("hist","test hist",200,0.,200,250,-250,0,150,-75,75);
+  
+  cerr << "after declare\n";
+  return StMaker::Init();
     mcratio        = new TH1F("cq2max","Cluster q/maxadc",50,0,5);
 
 			   unsigned long* pad, unsigned long* row, unsigned long* adc)
 {
     *pad = ( code        & 0xff);
-#ifdef RCH_DEBUG
-}
 
-//-----------------------------------------------------------------
-    ofstream raw("./sa.txt");
-    cout << "  # " << mEventNumber << endl;
-#endif
-    St_DataSet *theRichData;
+ St_DataSet *dst = GetDataSet("dst");    
+ St_DataSetIter dstI(dst);  
+ 
+ St_g2t_rch_hit *g2t_rch_hit = (St_g2t_rch_hit *) dstI["g2t_rch_hit"];
 
-    StDAQReader *theDataReader;
-    
-    //if(mDAQ)
-    theRichData = GetDataSet("StDAQReader");
+  if (!g2t_rch_hit) return kStWarn;
+  cout << " found g2t_rch_hit table" << endl;
 
-#ifdef RCH_DEBUG
-    cout << "  is the data here assert()" << endl;
-    //assert(theRichData);
-#endif
+  Int_t no_rch_hits =  g2t_rch_hit->GetNRows();
+  cout << " no rows in g2t_rch_hit = " << no_rch_hits << endl;
+  if (!no_rch_hits) return kStWarn;
 
-    //
-    // get the Reader from the DAQ (mike's) Library
-    theDataReader =
-	(StDAQReader*)(theRichData->GetObject());
+  g2t_rch_hit_st *rch_hit =  g2t_rch_hit->GetTable();
+  assert(rch_hit);
 
-    //
-    // RICH Specific Reader
-    RICH_Reader *theRichDataReader =
-	theDataReader->getRICHReader();
+  int maxX = 0 ;
+  int maxY = 0 ;
+  int maxZ = 0 ;
 
-    if(!theRichDataReader) {
-	cout << "Error::StRchMaker::Make() cannot get the Rich Reader" << endl;
-	cout << "Skip Event" << endl;
-	//return kStNOTCRITICAL;
-    }
-    else {
-	//
-	// Create the table...right now with the maximum number of entries
-	// this is cleaned up immediately
-	//
-	St_dst_rch_pixel* richPixelTable =
-	    new St_dst_rch_pixel("dst_rch_pixel",mNumberOfPads);
-	    //cout << "DAQ" << endl;
-	// Loop over the data:
-	//The TIC data was 96x24 => 2304
-	//The RICH data is 160x96 (pad x row)
-	//                           960x16 (channelxsequencer)
-		clearPadMonitor();
-	// Write to the DST!
+    for(int i=0;i<no_rch_hits;i++,rch_hit++) {
+      cout << "Hit number " << i << "of" << no_rch_hits << endl;
+      cout << " id: " << rch_hit->id << endl;
+      cout << " track_p: " << rch_hit->track_p << endl;
+      cout << " volume_id: " << rch_hit->volume_id << endl;
+      cout << " de: " << rch_hit->de << endl;
+      cout << " tof: " << rch_hit->tof << endl;
+      cout << " x[3]: ("
+	   << rch_hit->x[0] << ","
+	   << rch_hit->x[1] << ","
+	   << rch_hit->x[2] << ")" << endl;
+      cout << " p[3]: ("
+	   << rch_hit->p[0] << ","
+	   << rch_hit->p[1] << ","
+	   << rch_hit->p[2] << ")" << endl;
+      
+      /*    if(rch_hit->x[0] < maxX)
+	maxX = rch_hit->x[0];
 
-	 // this is used in order to index the table entry!
-	//
-	int currentTableRow = 0;
-	for(unsigned long iPad=0; iPad<mPads; iPad++) {  //x--> 160
-	    for(unsigned long iRow=0; iRow<mRows; iRow++) { // y -> 96
+       if(rch_hit->x[1] < maxY)
+	maxY = rch_hit->x[1];
+ 
+       if(rch_hit->x[2] < maxZ)
+	maxZ = rch_hit->x[2];
+      */
+       	
+      hist->Fill3(rch_hit->x[0],rch_hit->x[1],rch_hit->x[2],1);
+      hist->Draw();
+    }		
 
-		unsigned long theADCValue =
-		    theRichDataReader->GetADCFromCoord(iPad,iRow);
-	// If the StRichPixelCollection hasn't been retrieved from StEvent
-		//pack adc/row/pad into a single long.  Use:
-		// the first 8 bits for the Pad (0-159)
-		// the next  8 bits for the Row (0-96)
-		// the next 10 bits for the ADC (0-1023)
+  no_rch_hits =  g2t_rch_hit->GetNRows();
+  cout << " no rows in g2t_rch_hit = " << no_rch_hits << endl;
 
-		unsigned long codedValue = 0;
-		codedValue = (theADCValue << 16) | (iRow << 8) | iPad;
-		
-		//
-		// fill the dst structure
-		//
-		if(theADCValue) {
-		    dst_rch_pixel_st* aPixel = new dst_rch_pixel_st;
-		    aPixel->codedData = codedValue;
-	    }
-		    //
-		    // add to the table
-		    //
-		    richPixelTable->AddAt(&aPixel, currentTableRow);
-		    currentTableRow++;
-								   theADCValue));
-			//
-		    if (theADCValue > 10) {
-			cout << "row: "  << iRow
-			     << " pad: " << iPad
-			     << " adc: " << theADCValue
-			     << " code " << codedValue << endl;
-			
-			short decodepad = (codedValue         & 0xff);
-			short decoderow = ((codedValue >> 8)  & 0xff);
-			short decodeadc = ((codedValue >> 16) & 0x3ff);
-			cout << decoderow << "/"
-			     << decodepad << "/"
-			     << decodeadc << endl;
-		    }
-#ifdef RCH_HISTOGRAM
-		    
-		    
-		    
-#ifdef RCH_HISTOGRAM
-		    mRawData[0] = iRow;
-		    mRawData[1] = iPad;
-		    mRawData[2] = theADCValue;
-		    mRawData[3] = mEventNumber;
-		    mPadPlane->Fill(mRawData);
-#endif
-		} // if (theADCvalue) ?fill the dst structure 
-	    } // loop over rows
-	} // loop over pads
-    } // else if I couldn't get the reader!
-    // ...then, write it into StEvent...if possible
+  cerr << "Max (x,y,z) " << maxX <<"  " << maxY << "  " << "  " << maxZ ;
 
-//     for(int zz=0; zz<mSingleHitCollection->mTheHits.size(); zz++) {
+ return kStOK;
 // 	PR(mSingleHitCollection->mTheHits[zz]);
 	}
 //     for(int zz=0; zz<mSimpleHitCollection->mTheHits.size(); zz++) {
@@ -204,24 +143,15 @@ StRchMaker::~StRchMaker() {}
 //     }
 	mTheRichReader = 0;
   printf("**************************************************************\n");
-  printf("* $Id: StRchMaker.cxx,v 1.11 2000/01/12 16:52:58 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.9 1999/09/24 01:23:22 fisyak Exp $\n");
 	}
     AddData(new St_ObjectSet("StRichEvent", richCollection));
-  printf("* $Id: StRchMaker.cxx,v 1.11 2000/01/12 16:52:58 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.9 1999/09/24 01:23:22 fisyak Exp $\n");
 }
 //-----------------------------------------------------------------
-  printf("* $Id: StRchMaker.cxx,v 1.11 2000/01/12 16:52:58 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.9 1999/09/24 01:23:22 fisyak Exp $\n");
   printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-    printf("* $Id: StRchMaker.cxx,v 1.11 2000/01/12 16:52:58 lasiuk Exp $\n");
-    printf("**************************************************************\n");
-    if (Debug()) StMaker::PrintInfo();
-
-
-    cout << "close the files!!!!!!" << endl;
-
-    cout << "StRchMaker::Finish()" << endl;
-
+Int_t StRchMaker::Finish() {  
     cout << "Delete the cluster finder" << endl;
     delete mClusterFinder;
 
