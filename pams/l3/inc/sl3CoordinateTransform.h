@@ -93,23 +93,23 @@ inline int rawToLocal ( int row, double pad, double tb,
   // needs access to db probably
   //     Brian's version (see TRS lib):
   //     double z = frischGrid - driftVelocity * (tZero + tb*timebinWidth);
-  //*zLocal = driftLength - tb*lengthPerTb;
+  *zLocal = driftLength - tb*lengthPerTb;
   
   //
   // temporary patch for inner and outer rows
   //
-   if (row<13)
-      {
-	  double driftlen = 209.86;
-	  double lengthpertimebucket = driftlen/512;
-	  *zLocal = driftlen - tb*lengthpertimebucket;
-      }
-   else
-       {
-	   double driftlen = 210.34;
-	   double lengthpertimebucket = driftlen/512;
-	   *zLocal = driftlen - tb*lengthpertimebucket;  
-       }
+  /*  if (row<13) */
+  /*       { */
+  /* 	  double driftlen = 209.86; */
+  /* 	  double lengthpertimebucket = driftlen/512; */
+  /* 	  *zLocal = driftlen - tb*lengthpertimebucket; */
+  /*       } */
+  /*    else */
+  /*        { */
+  /* 	   double driftlen = 210.34; */
+  /* 	   double lengthpertimebucket = driftlen/512; */
+  /* 	   *zLocal = driftlen - tb*lengthpertimebucket;   */
+  /*        } */
   //printf("z coordinate: %f\n", *zLocal);
   return 0;
 }
