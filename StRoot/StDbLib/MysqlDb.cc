@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.15 2001/03/30 18:48:26 porter Exp $
+ * $Id: MysqlDb.cc,v 1.16 2001/03/31 15:03:46 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.16  2001/03/31 15:03:46  porter
+ * fix bug in StDbManagerImpl::getDbName accidently introduced yesterday
+ * & added new diagnostic message in MysqlDb
+ *
  * Revision 1.15  2001/03/30 18:48:26  porter
  * modified code to keep Insure from wigging-out on ostrstream functions.
  * moved some messaging into a StDbSql method.
@@ -161,8 +165,9 @@ bool MysqlDb::reConnect(){
 if(mysql_real_connect(&mData,mdbhost,mdbuser,mdbpw,mdbName,mdbPort,NULL,0))
     return true;
 
-char myMessage[256]; ostrstream mm(myMessage,256);
-mm<<" Upon re-connecting to DB "<<mdbName<<" MySQL returns error"<<ends;
+ ostrstream mm;
+ mm<<" Upon re-connecting to DB "<<mdbName<<" MySQL returns error"<<ends;
+ char* myMessage = mm.str(); mm.freeze(0);
 
 return (bool) StDbManager::Instance()->printInfo(myMessage,mysql_error(&mData),dbMErr,__LINE__,__CLASS__,__METHOD__);
 
