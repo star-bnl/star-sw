@@ -2,7 +2,7 @@
 *
 *******************************************************************************
 Module  BTOFGEO is the Geometry of Barrel Trigger / Time Of Flight system 
-  Author     W.J. Llope, Geary Eppley, Harlan Howe, Pablo Yepes
+  Author     W.J. Llope et al.
   Created    23 March 1996
 *---Version 1------------------------------------------------------------------
 * Original   Version of Harlan Howe, Pablo Yepes modified by Pavel Nevski
@@ -24,16 +24,32 @@ Module  BTOFGEO is the Geometry of Barrel Trigger / Time Of Flight system
 *                          WJL-    added interior cooling rails and pipes
 * modified   09 Dec  1998, GE - add btog.choice: 4: 1 TOF at 5 o'clock west
 * modified   08 Apr  1999, PN - water (BWAT) is inside the tube (BCOV), Rmin=0
+*---Version 3------------------------------------------------------------------
+* modified   29 Dec  1999, WJL- many changes to implement actual "TOFp Detector" 
+*	better HVSys cell geometry....
+*	slat length now 20cm...
+*	big changes to divisioning scheme for phi segmentation!!! 
+*	slat positioning based on AutoCAD file...
+*	foam-support plastic angles included...
+*	FEE dimensioning updated, FEE posns from AutoCAD, including lemo connectors...
+* modified   ~9 Apr  2000  PN?- rearranged phi segmentation scheme
+* modified   27 Apr  2000  FG- removed posit2 from BTOG structure
+*                          FG- increased version number to 3
+*                          FG- default TOF_choice is now 4 (single-tray TOF)
+*            04 May  2000  FG- removed the (unused) BMTM block
+*
 *******************************************************************************
 +CDE,AGECOM,GCUNIT,GCONST.
 *
 *   List of GEANT volumes produce here:
       Content   BTOF,BTOH,BSEC,BTRA,BUND,BTFT,BASE,BARM,BANG,
-                BWAT,BCOV,BXTR,BMTC,BTTC,BMTM,BMTD,BASS,BXSA,BCSB,BCCV,
-                BCPM,BCSK,BTSK,BZEL,BCEL,BFEE,BCOO,BRAI,BPIP
+                BWAT,BCOV,BXTR,BMTC,BTTC,BMAA,BMTD,
+                BASS,BXSA,BCSB,BCCV,BFEE,BLEM,
+                BCPM,BCSK,BTSK,BZEL,BCEL,BCEB,BCON,BPLA,
+                BCOO,BRAI,BPIP,BPIQ
 *
 *   Data Base interface staff:
-      Structure BTOG { Version, Rmin, Rmax, dz, choice, posit1, posit2 }
+      Structure BTOG { Version, Rmin, Rmax, dz, choice, posit1 }
 *
       Structure TRAY { Height, Width, Length, WallThk, SupFullH, SupFullW,
                        SupLen,
@@ -48,24 +64,29 @@ Module  BTOFGEO is the Geometry of Barrel Trigger / Time Of Flight system
                        BaseLen,  BaseMaxR, BaseMinR, 
                        ElecThck, Wrap,     Shim   }
 *
-      Structure TOFF { Slat1Len, Slat1z,   SlatDz,   
+      Structure TOFF { SlatLen, 
+                       Slat01z,  Slat02z,  Slat03z,  Slat04z,  Slat05z, 
+                       Slat06z,  Slat07z,  Slat08z,  Slat09z,  Slat10z, 
                        SlatThck, SlatWid,  SlatAng,
                        PmtLen,   PmtMaxR,  PmtMinR, 
-                       BaseLen,  BaseMaxR, BaseMinR,
-                       ElecX,    Elec1z,   ElecDz,
-                       ElecThck, ElecWid,  ElecLen,
+                       BaseLen,  BaseMaxR, BaseMinR, SockLen,
+                       CellWid,  CellHgt,
+                       ElecHgt,  ElecThck, ElecWid,  ElecLen,
+                       Elec01z,  Elec02z,  Elec03z,  Elec04z,  Elec05z, 
+                       Elec06z,  Elec07z,  Elec08z,  Elec09z,  Elec10z, 
                        RailThck, RailWid,
                        CoolInnR, CoolOutR } 
 *
       real      support_arm_width,  support_arm_Xpos,  support_arm_Ypos,
                 support_aile_width, support_aile_Ypos, 
-                xpos, ypos, zpos, totlen, zpbass, zpfee
-      integer   i, is, choice, tof
+                xpos, ypos, zpos, totlen, zpbass, zpfee,
+                sublen, subcen
+      integer   i, is, choice, tof,iwid
 *
 * -------------------------------------------------------------------------
 *
       Fill BTOG ! Barrel Trigger, CTB/TOF Basic dimensions 
-         Version   = 2         ! geometry version
+         Version   = 3         ! geometry version
          Rmin      = 207.80    ! minimum CTB/TOF system radius (as built)
          Rmax      = 219.5     ! maximum CTB/TOF system radius
          dz        = 246.0     ! CTB/TOF tube half length
@@ -113,28 +134,47 @@ Module  BTOFGEO is the Geometry of Barrel Trigger / Time Of Flight system
          Shim      = 0.26       ! thickness of shim to position slat 2
 *
       Fill TOFF ! time of flight stats
-         Slat1Len  = 22.0        ! slat length
-         Slat1z    = 101.5       ! slat 1 Z position
-         SlatDz    = 24.         ! slat Z separation (Same as toff_ElecDz)
-         SlatThck  = 2.0         ! scintillator slab thicknesses
-         SlatWid   = 4.0         ! scintillator slab width
-         SlatAng   = 8.          ! slat assy. angle w.r.t. tray
-         PmtLen    = 5.0         ! PMT length
-         PmtMaxR   = 1.91        ! PMT max radius
-         PmtMinR   = 1.8         ! PMT min radius
-         BaseLen   = 5.1         ! Base length
-         BaseMaxR  = 1.91        ! Base max radius
-         baseMinR  = 1.8         ! Base min radius  
-         ElecX     = 4.1         ! FEE Board x position
-         Elec1z    = 104.0       ! FEE Board 1 z position
-         ElecDz    = toff_SlatDz ! FEE Board Dz (Same as toff_SlatDz)
-         ElecThck  = 0.17        ! FEE Board thickness (67 mils)
-         ElecWid   = 21.0        ! FEE Board width
-         ElecLen   = 16.0        ! FEE Board length
-         RailThck  = 0.2         ! Cooling loop rail thickness
-         RailWid   = 1.0         ! Cooling loop rail width
-         CoolOutR  = 0.375       ! Cooling loop pipe outer radius
-         CoolInnR  = 0.350       ! Cooling loop pipe inner radius
+         SlatLen   = 20.0     ! slat length
+         Slat01z   =  104.956 ! 5_wide_slat Z position for row 1 from AutoCAD
+         Slat02z   =   82.798 ! 4_wide_slat Z position for row 2 from AutoCAD
+         Slat03z   =   60.764 ! 4_wide_slat Z position for row 3 from AutoCAD
+         Slat04z   =   38.634 ! 4_wide_slat Z position for row 4 from AutoCAD
+         Slat05z   =   16.014 ! 4_wide_slat Z position for row 5 from AutoCAD
+         Slat06z   =   -5.886 ! 4_wide_slat Z position for row 6 from AutoCAD
+         Slat07z   =  -28.286 ! 4_wide_slat Z position for row 7 from AutoCAD
+         Slat08z   =  -50.806 ! 4_wide_slat Z position for row 8 from AutoCAD
+         Slat09z   =  -73.466 ! 4_wide_slat Z position for row 9 from AutoCAD
+         Slat10z   =  -96.296 ! 4_wide_slat Z position for row 10 from AutoCAD
+         SlatThck  = 2.0      ! scintillator slab thicknesses
+         SlatWid   = 4.0      ! scintillator slab width
+         SlatAng   = 11.5     ! slat assy. angle w.r.t. tray
+         PmtLen    = 5.0      ! PMT length
+         PmtMaxR   = 1.91     ! PMT max radius
+         PmtMinR   = 1.8      ! PMT min radius
+         SockLen   = 1.0      ! thickness of socket
+         BaseLen   = 5.0      ! Base length
+         BaseMaxR  = 1.91     ! Base max radius
+         baseMinR  = 1.8      ! Base min radius  
+         CellWid   = 3.1      ! Cell width 
+         CellHgt   = 1.6      ! Cell height
+         ElecHgt   = 3.0      ! FEE Board height in tray... (rails/loop too).
+         ElecThck  = 0.17     ! FEE Board thickness (67 mils)
+         ElecWid   = 20.3     ! FEE Board width (was 21)
+         ElecLen   = 5.1      ! FEE Board length (was 16)
+         Elec01z   = 106.350  ! FEE Z position for row 1 from AutoCAD
+         Elec02z   =  84.049  ! FEE Z position for row 2 from AutoCAD
+         Elec03z   =  61.981  ! FEE Z position for row 3 from AutoCAD
+         Elec04z   =  39.851  ! FEE Z position for row 4 from AutoCAD
+         Elec05z   =  17.231  ! FEE Z position for row 5 from AutoCAD
+         Elec06z   =  -4.669  ! FEE Z position for row 6 from AutoCAD
+         Elec07z   = -27.069  ! FEE Z position for row 7 from AutoCAD
+         Elec08z   = -49.589  ! FEE Z position for row 8 from AutoCAD
+         Elec09z   = -72.249  ! FEE Z position for row 9 from AutoCAD
+         Elec10z   = -95.079  ! FEE Z position for row 10 from AutoCAD
+         RailThck  = 0.2      ! Cooling loop rail thickness
+         RailWid   = 1.5      ! Cooling loop rail width
+         CoolOutR  = 0.635    ! Cooling loop pipe outer radius, 0.5in/2
+         CoolInnR  = 0.561    ! Cooling loop pipe inner radius, (0.5in-0.058in)/2
       EndFill
 *
       USE   BTOG
@@ -172,7 +212,7 @@ Block BTOH is a half of trigger system (west-east)
       do is=1,60
          tof=0
          if (choice==2)                      tof=1
-         if (choice==3 & 51<=is&is<=65)      tof=1
+         if (choice==3 & 46<=is&is<=60)      tof=1
          if (choice==4 & is==btog_posit1)    tof=1
          Create and Position BSEC  alphaz = 102+6*is
       enddo
@@ -201,8 +241,8 @@ EndBlock
 *
 *------------------------------------------------------------------------------
 *
-Block BXTR  is a Main TRay covering box for CTB
-      Attribute BXTR      seen=1   colo=2
+Block BXTR  is a Main TRay covering box for CTB or TOF
+      Attribute  BXTR     seen=0   colo=2
       Material   Aluminium
       Shape      BOX      DX=tray_height/2,
                           dz=tray_length/2  
@@ -215,7 +255,7 @@ EndBlock
 *
 *------------------------------------------------------------------------------
 *
-Block BMTC  is  the Main Tray Cavity filled with MANY details for CTB
+Block BMTC  is  the Main Tray Cavity filled with thedetails for CTB
       Attribute  BMTC     seen=1   colo=5
       Material   Air
       Shape      BOX      dx=tray_height/2-tray_WallThk,  
@@ -263,78 +303,124 @@ Block BMTC  is  the Main Tray Cavity filled with MANY details for CTB
 EndBlock
 *
 *-------------------------------------------------------------------------------
-Block BTTC  is  the Main Tray Cavity filled with MANY details for TOF
-      Attribute  BTTC      seen=1  colo=6
+Block BTTC  is  the Main Tray Cavity filled with the details for TOF
+      Attribute  BTTC      seen=0  colo=3
       Component  C         A=12 Z=6 W=1
       Component  H2        A=1  Z=1 W=2
       Mixture    LastAFoam Dens=0.048
       Shape      BOX       dx=tray_height/2-tray_WallThk,  
                            dy=tray_Width/2-tray_WallThk,
                            dz=tray_Length/2-tray_WallThk
+*---- the 4wide mother box...
+      sublen             = ((toff_Slat02z+15.5)-(toff_Slat10z-15.5))
+      subcen             = (toff_Slat02z+15.5)-sublen/2.
+
+      iwid=4
+      Create and Position BMAA  X=0   Z=subcen konly='MANY'
+*---- the 5wide mother box...
+      iwid=5
+      Create and Position BMAA  X=0.0 Z=toff_Slat01z konly='MANY'
+
+*---- interior cooling rails and tubing....
+      Create and Position  BCOO X=0 Y=0 dx=0 dy=0 dz=0
+*---- front end electronics boards
       Create    BFEE       dx=toff_ElecThck/2, 
                            dy=toff_ElecWid/2, 
                            dz=toff_ElecLen/2
-      zpfee     = toff_Elec1z
-      Do i      = 1,9
-       Position BFEE X=toff_ElecX Z=zpfee
-       zpfee    = zpfee - toff_ElecDz
-      Enddo
-   if (1>2) then
-      Create and Position  BCOO X=0 Y=0 dx=0 dy=0 dz=0
-   endif
-      Create and Position  BMTM   
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elec01z-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elec02z-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elec03z-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elec04z-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elec05z-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elec06z-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elec07z-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elec08z-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elec09z-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elec10z-toff_ElecLen/2 
+*---- plastic angles...
+      Create    BPLA
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec01z+3.0
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec02z+3.0
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec03z+3.0
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec04z+3.0
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec05z+3.0
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec06z+3.0
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec07z+3.0
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec08z+3.0
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec09z+3.0
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec10z+3.0
 EndBlock
 *
 *------------------------------------------------------------------------------
-*           BMTM has the identical size as BTTC and exists to allow the division
-*           of BTTC into 5 strips in phi while BTTC is also containing other 
-*           stuff. 
-*
-Block BMTM  is  the Main Tray cavity divisions Mother volume for TOF
-      Attribute BMTM      seen=0   colo=1
-      Material  Air
-      Shape     BOX      dx=tray_height/2-tray_WallThk,  
-                         dy=tray_Width/2-tray_WallThk,
-                         dz=tray_Length/2-tray_WallThk
-      Create    BMTD  " dont need to positition it, because this is division "
+Block BMAA is a box for a 4wide AND 5wide phi column of TOF Scintillators
+      Attribute BMAA  seen=0   colo=2
+      if (iwid==4) then
+*  ----  the 4wide mother box...
+         Shape  BOX    dx=tray_height/2-tray_WallThk,  
+                       dy=0.81*(tray_Width/2-tray_WallThk),
+                       dz=sublen/2. 
+      else
+*---- the 5wide mother box...
+         Shape  BOX    dx=tray_height/2-tray_WallThk,  
+                       dy=tray_Width/2-tray_WallThk,
+                       dz=15.5 
+      endif
+      Create    BMTD  " dont need to positition it, because this is division" 
 EndBlock
 *
-*------------------------------------------------------------------------------
-Block BMTD is a phi column of TOF Scintillators
-      Attribute BMTD      seen=1   colo=1
-      Shape     division  Iaxis=2  Ndiv=5  
-
-      Create    BASS
-      zpbass    = toff_Slat1z
-      Do i      = 1,9
-       Position BASS X=-0.8 Z=zpbass alphay=toff_SlatAng konly='MANY'
-       zpbass   = zpbass - toff_SlatDz
-      Enddo
+* - - *
+Block BMTD is a 5wide phi column of TOF Scintillators
+      Attribute BMTD      seen=0   colo=1
+      Shape     division  Iaxis=2  Ndiv=iwid  
+      Create BASS
+      if (iwid==5) then
+        Position BASS X=-1.7                       alphay=5.0 konly='MANY'
+      else
+        Position BASS X=-0.4 Z=toff_Slat02z-subcen alphay=10.0 konly='MANY'
+        Position BASS X=-0.2 Z=toff_Slat03z-subcen alphay=11.0 konly='MANY'
+        Position BASS X=-0.2 Z=toff_Slat04z-subcen alphay=11.0 konly='MANY'
+        Position BASS X=-0.2 Z=toff_Slat05z-subcen alphay=11.0 konly='MANY'
+        Position BASS X=-0.2 Z=toff_Slat06z-subcen alphay=11.0 konly='MANY'
+        Position BASS X=-0.2 Z=toff_Slat07z-subcen alphay=11.0 konly='MANY'
+        Position BASS X=-0.2 Z=toff_Slat08z-subcen alphay=11.0 konly='MANY'
+        Position BASS X=-0.2 Z=toff_Slat09z-subcen alphay=11.0 konly='MANY'
+        Position BASS X=-0.2 Z=toff_Slat10z-subcen alphay=11.0 konly='MANY'
+     endif
 EndBlock
+* - - *
 *
-*------------------------------------------------------------------------------
+*******************************************************************************
+*******************************************************************************
 Block BASS is a single TOF Slat Assembly (slat+PMT+base)
-      Attribute BASS seen=1 colo=6
-      totlen = toff_Slat1Len+toff_PmtLen+toff_BaseLen
+      Attribute BASS seen=0 colo=6
+      totlen = toff_SlatLen+toff_PmtLen+toff_BaseLen
       Shape BOX dx=toff_PmtMaxR, 
                 dy=(tray_Width/2-tray_WallThk)/5.,
                 dz=totlen/2.
-      zpos = -(totlen-toff_Slat1Len)/2
+      zpos = -(totlen-toff_SlatLen)/2
       Create and Position BCSB  Z=zpos
-      zpos = zpos + (toff_Slat1Len+toff_PmtLen)/2
+      zpos = zpos + (toff_SlatLen+toff_PmtLen)/2
       Create and Position BCPM  X=0                Z=zpos,
                                 Rmin=toff_PmtMinR  Rmax=toff_PmtMaxR,  
                                 Dz=toff_PmtLen/2
-      zpos = zpos + (toff_PmtLen + toff_BaseLen)/2
-      Create and Position BTSK  X=0                Z=zpos,
+      zpos = zpos + toff_PmtLen/2.
+      Create and Position BTSK  X=0                Z=zpos+(toff_SockLen/2),
                                 Rmin=toff_PmtMinR  Rmax=toff_PmtMaxR,  
-                                Dz=toff_BaseLen/2
-      Create BCEL               Rmin=0             Rmax=toff_PmtMinR,
+                                Dz=toff_SockLen/2
+      Create and Position BCEL  X=0                Z=zpos+(toff_ElecThck/2),
+                                Rmin=0             Rmax=toff_PmtMinR,
                                 Dz=toff_ElecThck/2
-      zpos = zpos + 0.4 - toff_BaseLen/2
-      Do i = 1,4
-       Position BCEL  Z=zpos + i
-      Enddo
+      zpos = zpos + toff_BaseLen/2
+      Create BCEB      dx=toff_ElecThck/2,
+                       dy=toff_CellWid/2,
+                       dz=toff_BaseLen/2
+      Position BCEB X=toff_CellHgt/2 Z=zpos
+      Position BCEB X=-toff_CellHgt/2 Z=zpos
+      zpos = zpos + toff_BaseLen/2 - 0.6
+      Create and Position BCON X=0 Y=0 Z=zpos,
+                    dx=(toff_CellHgt-toff_ElecThck)/2,
+                    dy=1.25,
+                    dz=0.6
 EndBlock
 *
 *------------------------------------------------------------------------------
@@ -355,10 +441,10 @@ EndBlock
 *
 *------------------------------------------------------------------------------
 Block BCSB  is  the active trigger scintillator SLAB for tof
-      Attribute BCSB      seen=1   colo=4
+      Attribute BCSB      seen=1   colo=7
       Material polystyren
       Medium   sensitive    IsVol=1
-      Shape   BOX    dx=toff_SlatThck/2  dy=toff_SlatWid/2  dz=toff_Slat1Len/2 
+      Shape   BOX    dx=toff_SlatThck/2  dy=toff_SlatWid/2  dz=toff_SlatLen/2 
 *
 *   hit options: H - put in GEANT hit field (instead of PseudoVolumes)
 *                S - Single step
@@ -375,32 +461,28 @@ Block BCCV  is  a  Ctb optical ConVerter
       Material polystyren 
       Shape   TRD2   Dx1=0   Dx2=0   Dy1=0   Dy2=0  dz=0
 EndBlock
-* 
+Block BCSK  is a CTB Linear Base tube
+      Attribute BCSK      seen=1   colo=2
+      Material  polystyren 
+      Shape   TUBE   Rmin=0  Rmax=0   Dz=0
+EndBlock
+Block BZEL  is a Ctb PM electronics
+      Attribute BZEL      seen=1   colo=6
+      Material silicon
+      Shape   BOX    dx=0  dy=0  dz=0
+EndBlock
 Block BCPM  is a PhotoMultiplier Tube (same for CTB and TOF)
       Attribute BCPM      seen=1   colo=1
       Material polystyren 
       Shape   TUBE   Rmin=0  Rmax=0  Dz=0
 EndBlock
 *
-Block BCSK  is a CTB Linear Base tube
-      Attribute BCSK      seen=1   colo=2
-      Material  polystyren 
-      Shape   TUBE   Rmin=0  Rmax=0   Dz=0
-EndBlock
-*
 Block BTSK  is the outer shell of a TOF CW Base 
-      Attribute BTSK      seen=1   colo=2
-      Material  Aluminium
+      Attribute BTSK      seen=1   colo=7
+      Material  polystyren
       Shape   TUBE   Rmin=0  Rmax=0   Dz=0
 EndBlock
-*
-Block BZEL  is a Ctb PM electronics
-      Attribute BZEL      seen=1   colo=6
-      Material silicon
-      Shape   BOX    dx=0  dy=0  dz=0
-EndBlock
-*
-Block BCEL is a G10 board in the CW Base for TOF
+Block BCEL is a circular G10 board in the CW Base for TOF
       Attribute BCEL seen=1   colo=3
       Component Si   A=28.08  Z=14   W=0.6*1*28./60.
       Component O    A=16     Z=8    W=0.6*2*16./60.
@@ -410,9 +492,8 @@ Block BCEL is a G10 board in the CW Base for TOF
       Mixture   G10  Dens=1.7
       Shape     TUBE Rmin=0  Rmax=0   Dz=0
 EndBlock
-*
-Block BFEE is a G10 discriminator/CW control board for TOF
-      Attribute BFEE seen=1   colo=3
+Block BCEB is a square G10 board in the CW Base for TOF
+      Attribute BCEL seen=1   colo=3
       Component Si   A=28.08  Z=14   W=0.6*1*28./60.
       Component O    A=16     Z=8    W=0.6*2*16./60.
       Component C    A=12     Z=6    W=0.4*8*12./174.
@@ -422,48 +503,119 @@ Block BFEE is a G10 discriminator/CW control board for TOF
       Shape     BOX  dx=0  dy=0  dz=0
 EndBlock
 *
+Block BPLA is the plastic angle pieces that hold the upper foam supports...
+      Attribute BPLA      seen=0   colo=4
+      Material  polystyren 
+      Shape     BOX       dx=0 dy=0 dz=0
+      Create and Position BCON  x=0 y=0 z=(-0.5*2.54)/2,
+                                dx=0.08*2.54/2,
+                                dy=tray_Width/2-tray_WallThk-0.5,
+                                dz=0.5*2.54/2
+      Position  BCON            x=(-0.08*2.54 - 0.25*2.54)/2,
+                                y=0,
+                                z=(-0.08*2.54)/2,
+                                dx=0.25*2.54/2,
+                                dy=tray_Width/2-tray_WallThk-2.0,
+                                dz=0.08*2.54/2
+EndBlock
+Block BCON is a generic plastic block for various connectors, foam-support-angles, etc......
+      Attribute BCON      seen=1   colo=6
+      Material  polystyren 
+      Shape     BOX       dx=0 dy=0 dz=0
+EndBlock
+*
+Block BFEE is a G10 FrontEndElectronics board for TOF
+      Attribute BFEE seen=1   colo=3
+      Component Si   A=28.08  Z=14   W=0.6*1*28./60.
+      Component O    A=16     Z=8    W=0.6*2*16./60.
+      Component C    A=12     Z=6    W=0.4*8*12./174.
+      Component H    A=1      Z=1    W=0.4*14*1./174.
+      Component O    A=16     Z=8    W=0.4*4*16./174.
+      Mixture   G10  Dens=1.7
+      Shape     BOX  dx=0  dy=0  dz=0
+      Create    BLEM
+      Position  BLEM x=toff_ElecThck+(0.7/2) y=-7.0 z=2 
+      Position  BLEM x=toff_ElecThck+(0.7/2) y=-3.5 z=2 
+      Position  BLEM x=toff_ElecThck+(0.7/2) y=0.   z=2 
+      Position  BLEM x=toff_ElecThck+(0.7/2) y=3.5  z=2 
+      Position  BLEM x=toff_ElecThck+(0.7/2) y=7    z=2 
+      Position  BLEM x=toff_ElecThck+(0.7/2) y=-7.0 z=-2 alphax=180 
+      Position  BLEM x=toff_ElecThck+(0.7/2) y=-3.5 z=-2 alphax=180 
+      Position  BLEM x=toff_ElecThck+(0.7/2) y=0.   z=-2 alphax=180 
+      Position  BLEM x=toff_ElecThck+(0.7/2) y=3.5  z=-2 alphax=180 
+      Position  BLEM x=toff_ElecThck+(0.7/2) y=7    z=-2 alphax=180 
+      Position  BLEM x=toff_ElecThck+(0.7/2) y=-6.0 z=-2 alphax=180 
+      Position  BLEM x=toff_ElecThck+(0.7/2) y=-2.5 z=-2 alphax=180 
+      Position  BLEM x=toff_ElecThck+(0.7/2) y=1.   z=-2 alphax=180 
+      Position  BLEM x=toff_ElecThck+(0.7/2) y=4.5  z=-2 alphax=180 
+      Position  BLEM x=toff_ElecThck+(0.7/2) y=8.   z=-2 alphax=180 
+EndBlock
+Block BLEM is a Lemo connector on the FEE boards
+      Attribute BLEM seen=1   colo=3
+      Shape     BOX   dx=0 dy=0 dz=0
+**      Create    BRAI  dx=0.9/2    dy=0.7/2    dz=0.7/2
+**      Create    BPIP  Rmin=0.62/2 Rmax=0.68/2 dz=1.0/2
+**      Position  BRAI  x=0            y=0 z=0
+**      Position  BPIP  x=(0.9-0.72)/2 y=0 z=(0.7+1.0)/2
+      Create and Position    BPIP  x=(0.9-0.72)/2 y=0 z=(0.8+1.0)/2,
+                                   Rmin=0.62/2 Rmax=0.68/2 dz=2.0/2
+EndBlock
+*
+*******************************************************************************
+*******************************************************************************
 Block BCOO  are the cooling rails/loops
       Attribute BCOO  seen=1  colo=2
       Shape     BOX   dx=0 dy=0 dz=0
       Create    BRAI  dx=toff_RailThck/2,
                       dy=toff_RailWid/2,
                       dz=tray_Length/2-tray_WallThk
-      Position  BRAI  X=toff_ElecX-toff_RailThck,
+      Position  BRAI  X=toff_ElecHgt-toff_RailThck,
                       Y= (tray_width/2-toff_RailWid/2-tray_WallThk),
                       konly='MANY'
-      Position  BRAI  X=toff_ElecX-toff_RailWid/2-toff_RailThck/2,
+      Position  BRAI  X=toff_ElecHgt-toff_RailWid/2-toff_RailThck/2,
                       Y= (tray_width/2-toff_RailThck/2-tray_WallThk),
                       alphaz=90,
                       konly='MANY'
-      Position  BRAI  X=toff_ElecX-toff_RailThck,
+      Position  BRAI  X=toff_ElecHgt-toff_RailThck,
                       Y=-(tray_width/2-toff_RailWid/2-tray_WallThk),
                       konly='MANY'
-      Position  BRAI  X=toff_ElecX-toff_RailWid/2-toff_RailThck/2,
+      Position  BRAI  X=toff_ElecHgt-toff_RailWid/2-toff_RailThck/2,
                       Y=-(tray_width/2-toff_RailThck/2-tray_WallThk),
                       alphaz=90,
                       konly='MANY'
       Create    BPIP  Rmin=toff_CoolInnR Rmax=toff_CoolOutR,
                       dz=tray_Length/2-tray_WallThk
-      Position  BPIP  X=toff_ElecX-3.*toff_RailThck/2.-toff_CoolOutR,
+      Position  BPIP  X=toff_ElecHgt-3.*toff_RailThck/2.-toff_CoolOutR,
              Y= (tray_width/2-toff_RailThck-tray_WallThk-toff_CoolOutR),
              konly='MANY'
-      Position  BPIP  X=toff_ElecX-3.*toff_RailThck/2.-toff_CoolOutR,
+      Position  BPIP  X=toff_ElecHgt-3.*toff_RailThck/2.-toff_CoolOutR,
              Y=-(tray_width/2-toff_RailThck-tray_WallThk-toff_CoolOutR),
              konly='MANY'
+      Create    BPIQ  Rmin=toff_CoolInnR Rmax=toff_CoolOutR,
+                      dz=tray_width/2-tray_WallThk-2.*toff_CoolOutR-toff_RailThck
+      Position  BPIQ  X=toff_ElecHgt-3.*toff_RailThck/2.-toff_CoolOutR Y=0.0,
+             Z=tray_Length/2-tray_WallThk-toff_RailThck-toff_CoolOutR,
+             alphaX=90,
+             konly='MANY'
 EndBlock
-*
 Block BRAI  is the Rail for the cooling loop
-      Attribute BRAI   seen=1  colo=1
+      Attribute BRAI   seen=1  colo=7
       Material  Aluminium
       Shape     BOX    dx=0.0  dy=0.0  dz=0.0 
 EndBlock
-*
-Block BPIP  is the Pipe for the cooling loop
-      Attribute BPIP seen=1  colo=1
+Block BPIP  is the Long Pipe for the cooling loop
+      Attribute BPIP seen=1  colo=7
+      Material  Aluminium
+      Shape     TUBE Rmin=0  Rmax=0  Dz=0
+EndBlock
+Block BPIQ  is the Short Pipe for the cooling loop
+      Attribute BPIP seen=1  colo=7
       Material  Aluminium
       Shape     TUBE Rmin=0  Rmax=0  Dz=0
 EndBlock
 *
+*
+*******************************************************************************
 *******************************************************************************
 Block BUND   is  Undercarriage support tray - same both for CTB and TOF 
       Attribute BUND      seen=0   colo=1   serial=0
@@ -500,34 +652,28 @@ Block BUND   is  Undercarriage support tray - same both for CTB and TOF
                  Position  BANG   Y=+support_aile_Ypos   thetaX=270
       Create and Position  BCOV   X=-tray_SupFullH/2+tray_CoolOutR
 EndBlock
-*
 Block BTFT  is the Foot structure    ( Material  Aluminium )
       Attribute BTFT      seen=1   colo=2
       Shape     BOX    dx = 0.0  dy = 0.0  dz = 0.0 
 EndBlock
-*
 Block BARM  is  a TPC cooling structure arm             ( Material  Aluminium )
       Attribute BARM      seen=1   colo=2
       Shape     BOX    Dx=tray_SupArmT/2   DY=support_arm_width/2
 EndBlock
-*
 Block BANG  is  an angled part of TPC cooling structure ( Aile )
       Attribute BANG   seen=1   colo=2
       Shape     PARA   dx=tray_SupArmT/2   Dy=support_aile_width/2,
                        Alph=-60   thet=0   phi=0
 EndBlock
-*
 Block BASE  is  a bottom of TPC coolant structure       
       Attribute BASE   seen=1   colo=2
       Shape     BOX    Dx=tray_SupBaseT/2  Dy=tray_SupBaseW/2
 EndBlock
-*
 Block BCOV  is  a whole TPC cooling channel
       Attribute BCOV   seen=1   colo=2
       Shape     TUBE   Rmin=0   Rmax=tray_CoolOutR
       Create and Position BWAT 
 EndBlock
-*
 Block BWAT  is  TPC cooling water
       Attribute BWAT   seen=1   colo=3
       Component H2     A=1   Z=1   W=2
@@ -538,4 +684,3 @@ EndBlock
 *
 * ----------------------------------------------------------------------------
    end
-
