@@ -37,28 +37,6 @@ class StEvtHddr;
 
 class StMessMgr;
 
-#ifndef __CINT__
-#ifdef LOGGERMESSAGE
-#error An attempt to redefine the LOGGERMESSAGE macro
-#else
-#  define LOGGERMESSAGE(MESSAGELEVEL)                            \
-   GetLogger(ClassName())->MESSAGELEVEL("",__FUNCTION__, __LINE__) 
-
-#  define LOG_INFO  LOGGERMESSAGE(Info)
-#  define LOG_WARN  LOGGERMESSAGE(Warning)
-#  define LOG_ERROR LOGGERMESSAGE(Error)
-#  define LOG_FATAL LOGGERMESSAGE(Fatal)
-#  define LOG_DEBUG LOGGERMESSAGE(Debug)
-#  define LOG_QA    LOGGERMESSAGE(QAInfo)
-
-#define STAR_INFO(name) \
-   GetLogger(_QUITE_(name))->MESSAGELEVEL__FUNCTION__, __LINE__) 
-
-#define MSG_INFO(name) \
-   GetLogger(_QUITE_(name))->MESSAGELEVEL__FUNCTION__, __LINE__) 
-
-#endif
-#endif 
 class StTestMaker;
 class StMaker : public TDataSet{
 
@@ -227,7 +205,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.68 2004/09/01 22:09:56 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.69 2004/11/03 01:30:29 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -285,8 +263,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.68 2004/09/01 22:09:56 perev Exp $
+// $Id: StMaker.h,v 1.69 2004/11/03 01:30:29 fine Exp $
 // $Log: StMaker.h,v $
+// Revision 1.69  2004/11/03 01:30:29  fine
+// remove the redundant logger macro. They have been moved to the abstarct messager
+//
 // Revision 1.68  2004/09/01 22:09:56  perev
 // new methods SetAttr and IAttr,DAttr,SAttr added
 //
