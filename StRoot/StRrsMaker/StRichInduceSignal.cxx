@@ -1,5 +1,5 @@
-/*******************************************************
- * $Id: StRichInduceSignal.cxx,v 1.2 2000/01/25 22:02:20 lasiuk Exp $
+/*********************************************************************
+ * $Id: StRichInduceSignal.cxx,v 1.3 2000/02/08 16:26:51 lasiuk Exp $
  *
  * Description:
  *  StRichInduceSignal calculates an analog signal on pads.
@@ -11,10 +11,10 @@
  *  pads. 
  *
  *
- *******************************************************
+ *********************************************************************
  * $Log: StRichInduceSignal.cxx,v $
- * Revision 1.2  2000/01/25 22:02:20  lasiuk
- * Second Revision
+ * Revision 1.3  2000/02/08 16:26:51  lasiuk
+ * rm viewer dependence
  *
  * Revision 1.3  2000/02/08 16:26:51  lasiuk
  * rm viewer dependence
@@ -22,36 +22,25 @@
  * Revision 1.2  2000/01/25 22:02:20  lasiuk
  * Second Revision
  *
- *******************************************************/
  * Revision 1.1  2000/01/18 21:32:02  lasiuk
  * Initial Revision
  *********************************************************************/
 
 #ifndef ST_NO_NAMESPACES
+//namespace StRichRawData {
 #endif
 
 #include "StRichInduceSignal.h"
-#include "StRichInduceSignal.h"
-#ifdef RICH_WITH_VIEWER
-#include "StRichViewer.h"
-#endif
-
 #include "StRichSelectWire.h"
-    void StRichInduceSignal::operator()(StRichGHit& hit)
-    {
-	StRichSelectWire selectWire;
-	StRichGasGain amplify;
-	StRichAnalogSignalGenerator ASG;
+#include "StRichGasGain.h"
+#include "StRichAnalogSignalGenerator.h"
+
+void StRichInduceSignal::operator()(StRichGHit& hit)
+{
     StRichSelectWire selectWire;
-#ifdef RICH_WITH_VIEWER
-	if (StRichViewer::histograms ) {
-	    StRichViewer::getView()->mWhichQuadrant->Fill( hit.quad );
-	    StRichViewer::getView()->mParticleId->Fill( hit.id );
-	}
-#endif
-	ASG( hit, amplify ( hit, selectWire( hit ) ) );    
+    StRichGasGain amplify;
     StRichAnalogSignalGenerator ASG;
-    }
+	
     ASG( hit, amplify ( hit, selectWire( hit ) ) );    
 	
 }
