@@ -12,6 +12,8 @@ public:
     double                     getSpaceChargeCorrection();
     double                     getSpaceChargeCorrection(double scaleFactor);
     double                     getSpaceChargeSatRate();
+    double                     getSpaceChargeCoulombs();
+    double                     getSpaceChargeCoulombs(double scaleFactor);
     friend ostream& operator<<(ostream& os, StDetectorDbSpaceCharge& v);
 
     // These fuction will be public
