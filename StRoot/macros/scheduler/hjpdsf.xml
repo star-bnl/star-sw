@@ -1,0 +1,132 @@
+<job nProcesses="2" simulateSubmission ="false">
+   <command>       
+    time
+    # ----  at  BNL -----
+    set finalDirectory=/star/data05/scratch/didenko/gridwork/hj/register/$REQUESTID 
+    set finalNode=gsiftp://stargrid02.rcf.bnl.gov
+
+    # ----- at PDSF ----
+    set packageDirectory=~/gridwork/hj 
+    set finalPackageDirectory=${finalNode}/${finalDirectory}
+    set packageDirectoryBin=${packageDirectory}/bin
+    set registerDirectory=${packageDirectory}/register/$REQUESTID
+ 
+    set ZEBRAOUTPUT=testpyth.fz
+    set JOBSEED = $PROCESSID$REQUESTID
+    set nSimulatedEvents=5
+    module load globus
+    mkdir -p ${registerDirectory}
+    mkdir -p ${packageDirectoryBin}
+    echo "The job   $PROCESSID.$REQUESTID has been started"  &gt;${registerDirectory}/$PROCESSID
+
+    cd ${packageDirectoryBin}
+    stardev
+    echo "${STAR_LIB} ${STAR_PATH}"
+    lndir $STAR/pams/gen/hijing_382 .
+    make -f  hijing.mk
+    cd $SCRATCH
+    # generate custom input file
+    cat &gt;hijev.inp &lt;&lt;HIJPARAMETERS
+'  ====================================================== '   
+'  =====         Hijing Control file                ===== '   
+'  ====================================================== ' 
+' Events                          '  ${nSimulatedEvents}
+' Frame/Energy                    '  'CMS'  62.              
+' Projectile  type/A/Z            '  'A'  197 79             
+' Target      type/Z/Z            '  'A'  197 79         
+' Impact parameter min/max (fm)   '  0.   20.                  
+' Jet quenching (1=yes/0=no)      '  0                        
+' Hard scattering/pt jet          '  0   2.0                   
+' Max # jets per nucleon (D=10)   '  10                        
+' Set ihpr2(11) and ihpr2(12)     '  1   1
+' Set ihpr2(21) and ihpr2(18)     '  1   0
+' set B production                '  1.5  
+' istat=1 old istat>1 new         '  2                                    
+HIJPARAMETERS
+#    -------------------------------
+#   start hijjet from the bin directory
+#    -------------------------------
+    ${packageDirectoryBin}/hijjet.x
+   if (! -f evgen.1.nt) then
+      echo "hijjet.x ERROR. The output file was not created. Abort !!! "
+      exit $status
+   endif
+
+#    -------------------------------
+#    register the result file (for the sake of the debugging)
+#    -------------------------------
+    # rm -rf  ${registerDirectory}
+    ls -l evgen.1.nt &gt;&gt;${registerDirectory}/$PROCESSID
+    
+#    -------------------------------
+#    -------------------------------
+#    starting GEANT3 simulation
+#    -------------------------------
+
+#    -------------------------------
+#    define the source of the GEANT geometry
+#    -------------------------------
+#=============  set GEOMETRYLIB=${STAR_LIB}/geometry.so
+    
+#    -------------------------------
+#    Create GEANT3 kumac
+#    -------------------------------
+   set StafKumacMacroName=hijjet
+    cat &gt;${StafKumacMacroName}.kumac &lt;&lt;STAFKUMAC
+macro ${StafKumacMacroName}
+***************BEGIN OF STAF KUMAC***********************
+ detp geom y2004
+ make geometry
+ make gstar
+ gclose all
+ vsig  0.01  60.0
+ gkine -1 0 0 31 -6.3 6.3 0 6.28 -35.0 35.0
+ user/input user evgen.1.nt 
+ gfile o $ZEBRAOUTPUT
+ trig ${nSimulatedEvents}
+****************END OF STAF KUMAC ***********************
+STAFKUMAC
+ 
+     more ${StafKumacMacroName}.kumac&gt;&gt;${registerDirectory}/$PROCESSID
+
+#    -------------------------------
+#    Launching GEANT3 simulation
+#    -------------------------------
+    staf -w 0 -b ${StafKumacMacroName}.kumac       
+    time
+    
+      ls -l $ZEBRAOUTPUT              &gt;&gt;${registerDirectory}/$PROCESSID
+      
+#    -------------------------------
+#    Copy output files to the permanent place
+#    -------------------------------
+      
+#      cp  evgen.1.nt $packageDirectory/evgen.$PROCESSID.nt
+#      cp  $ZEBRAOUTPUT $packageDirectory/gstar.$PROCESSID.fz
+     echo " Starting evgen.1.nt transfering to BNL" &gt;&gt;${registerDirectory}/$PROCESSID
+     echo " Starting evgen.1.nt transfering to BNL"
+     time
+     echo "Invoking: globus-job-run  stargrid02.rcf.bnl.gov /bin/mkdir -p ${finalDirectory} "
+     globus-job-run  stargrid02.rcf.bnl.gov /bin/mkdir -p ${finalDirectory}
+     echo "globus-job-run  stargrid02.rcf.bnl.gov /bin/mkdir -p ${finalDirectory} with $status"
+     globus-url-copy -p 20 -vb  file:$SCRATCH/evgent.1.nt    ${finalPackageDirectory}/evgen.$PROCESSID.nt
+     echo " evgen.1.nt has been transfered  to ${finalPackageDirectory}/evgen.$PROCESSID.nt with status=$status" &gt;&gt;${registerDirectory}/$PROCESSID
+     echo " evgen.1.nt has been transfered  to ${finalPackageDirectory}/evgen.$PROCESSID.nt with status=$status"
+     globus-job-run  stargrid02.rcf.bnl.gov /bin/ls /star/data05/scratch/didenko/gridwork/hj  &gt;&gt;${registerDirectory}/$PROCESSID
+     time
+     echo "Starting $ZEBRAOUTPUT  transfering to BNL" &gt;&gt;${registerDirectory}/$PROCESSID
+     echo "Starting $ZEBRAOUTPUT  transfering to BNL"
+     globus-url-copy  file:$SCRATCH/$ZEBRAOUTPUT  ${finalPackageDirectory}/gstar.$PROCESSID.fz 
+     globus-job-run   -p 20 -vb  stargrid04.rcf.bnl.gov /bin/ls /star/data05/scratch/didenko/gridwork/hj  &gt;&gt;${registerDirectory}/$PROCESSID
+     time
+     echo "  $ZEBRAOUTPUT has been transfered  to  ${finalPackageDirectory}/gstar.$PROCESSID.fz with status=$status" &gt;&gt;${registerDirectory}/$PROCESSID
+     echo "  $ZEBRAOUTPUT has been transfered  to  ${finalPackageDirectory}/gstar.$PROCESSID.fz  with status=$status"
+
+      time &gt;&gt;${registerDirectory}/$PROCESSID
+   </command>  
+    <stdout URL="file:./$JOBID.out" />
+    <output fromScratch="$ZEBRAOUTPUT" >
+       <copy ref="pyResult" URI="file:$packageDirectory/testpyth.$PROCESSID.fz" />
+       <register ref="pyResult" URI="catalog:star.bnl.gov?att1=nt1,att2=nt2" />
+    </output>
+</job>
