@@ -35,7 +35,7 @@ foreach f (`find $inputDir -name '*.event.root' | grep $dataSet | grep -v BadFil
     if ($user == "") then
       @ s++
 #-o $outfile -e $outfile 
-     bsub  -u laue -q star_cas_short  -L /usr/local/bin/tcsh  -o $outfile -e $outfile root4star -q -b StRoot/StMuDSTMaker/COMMON/macros/StMuDstMaker.C\(100000,\"-\",\"$f:q\",\"$outputDir:q\"\)  >& /dev/null 
+     bsub  -u $USER -q star_cas_short  -L /usr/local/bin/tcsh  -o $outfile -e $outfile root4star -q -b StRoot/StMuDSTMaker/COMMON/macros/StMuDstMaker.C\(100000,\"-\",\"$f:q\",\"$outputDir:q\"\)  >& /dev/null 
      echo $baseName $time >>& $theDB
 #      echo "submitted"
     endif
