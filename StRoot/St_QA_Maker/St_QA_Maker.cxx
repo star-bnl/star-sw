@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.75 2000/01/04 15:18:45 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.76 2000/01/07 20:35:01 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.76  2000/01/07 20:35:01  kathy
+// make some corrections to filling hist; add point hist for each det separately
+//
 // Revision 1.75  2000/01/04 15:18:45  kathy
 // comment out unused variables so we don't get compilation warnings - needed for getting working with the new compiler
 //
@@ -1055,13 +1058,14 @@ void St_QA_Maker::MakeHistVertex(){
 	if (!isnan(double(t->z))) m_pv_z->Fill(t->z);     
 	m_pv_pchi2->Fill(t->chisq[0]);
       }
+      else {                                                         // plot of 2ndary vertex only
       m_v_detid->Fill(t->det_id); 
       m_v_vtxid->Fill(t->vtx_id);
       if (!isnan(double(t->x))) m_v_x->Fill(t->x);     
       if (!isnan(double(t->y))) m_v_y->Fill(t->y);     
       if (!isnan(double(t->z))) m_v_z->Fill(t->z);     
       m_v_pchi2->Fill(t->chisq[0]); 
-      // }
+      }
     }
   }
 }

@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.22 1999/12/29 17:52:30 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.23 2000/01/07 20:35:00 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.23  2000/01/07 20:35:00  kathy
+// make some corrections to filling hist; add point hist for each det separately
+//
 // Revision 1.22  1999/12/29 17:52:30  kathy
 // changes to hist limits and list of logY scales
 //
@@ -1057,7 +1060,12 @@ void StQABookHist::BookHistXi(){
 //_____________________________________________________________________________
 void StQABookHist::BookHistPoint(){
 
-  m_pnt_tot   = QAH1F("QaPointTot",  "point: # tpc hits ",100, 0.,250000.);
+  m_pnt_tot     = QAH1F("QaPointTot",  "point: # hits total ",100, 0.,250000.);
+  m_pnt_tpc     = QAH1F("QaPointTpc",  "point: # hits tpc ",100, 0.,250000.);
+  m_pnt_svt     = QAH1F("QaPointSvt",  "point: # hits svt ",100, 0.,250000.);
+  m_pnt_ssd     = QAH1F("QaPointSsd",  "point: # hits ssd ",100, 0.,250000.);
+  m_pnt_ftpcE   = QAH1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,250000.);
+  m_pnt_ftpcW   = QAH1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,250000.);
 
 }
 //_____________________________________________________________________________

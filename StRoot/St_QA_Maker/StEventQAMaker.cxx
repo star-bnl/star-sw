@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.15 2000/01/07 01:02:55 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.16 2000/01/07 20:35:00 kathy Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.16  2000/01/07 20:35:00  kathy
+// make some corrections to filling hist; add point hist for each det separately
+//
 // Revision 1.15  2000/01/07 01:02:55  lansdell
 // fixed theta histogram and filled psi vs phi
 //
@@ -614,10 +617,11 @@ void StEventQAMaker::MakeHistV0() {
 
   StSPtrVecV0Vertex &v0vertices = event->v0Vertices();
 
+  Int_t cntrows=0;
+  cntrows = v0vertices.size();
+  m_v0->Fill(cntrows);
+
   if (v0vertices.size() > 0) {
-    Int_t cntrows=0;
-    cntrows = v0vertices.size();   //Is there a better way of doing this? -CL
-    m_v0->Fill(cntrows);
     Float_t m_prmass2 = proton_mass_c2*proton_mass_c2;
     Float_t m_pimass2 = (0.139567*0.139567);
 
@@ -752,6 +756,7 @@ void StEventQAMaker::MakeHistVertex() {
 	  m_pv_z->Fill(primVtx->position().z());
 	m_pv_pchi2->Fill(primVtx->chiSquared());
       }
+      else{
       //m_v_detid->Fill(aPrimVtx->det_id); 
       m_v_vtxid->Fill(aPrimVtx->type());
       if (!isnan(double(aPrimVtx->position().x())))
@@ -761,63 +766,58 @@ void StEventQAMaker::MakeHistVertex() {
       if (!isnan(double(aPrimVtx->position().z())))
 	m_v_z->Fill(aPrimVtx->position().z());     
       m_v_pchi2->Fill(aPrimVtx->chiSquared()); 
+      }
     }
   }
 
   StSPtrVecV0Vertex &v0Vtx = event->v0Vertices();
 
-  if (v0Vtx.size() > 0) {
-    for (UInt_t k=0; k<v0Vtx.size(); k++) {
-      StV0Vertex *v0 = v0Vtx[k];
-      if (v0) {
-	//m_v_detid->Fill(v0->det_id); 
-	m_v_vtxid->Fill(v0->type());
-	if (!isnan(double(v0->position().x())))
-	  m_v_x->Fill(v0->position().x());     
-	if (!isnan(double(v0->position().y())))
-	  m_v_y->Fill(v0->position().y());     
-	if (!isnan(double(v0->position().z())))
-	  m_v_z->Fill(v0->position().z());     
-	m_v_pchi2->Fill(v0->chiSquared()); 
-      }
+  for (UInt_t k=0; k<v0Vtx.size(); k++) {
+    StV0Vertex *v0 = v0Vtx[k];
+    if (v0) {
+      //m_v_detid->Fill(v0->det_id); 
+      m_v_vtxid->Fill(v0->type());
+      if (!isnan(double(v0->position().x())))
+	m_v_x->Fill(v0->position().x());     
+      if (!isnan(double(v0->position().y())))
+	m_v_y->Fill(v0->position().y());     
+      if (!isnan(double(v0->position().z())))
+	m_v_z->Fill(v0->position().z());     
+      m_v_pchi2->Fill(v0->chiSquared()); 
     }
   }
 
   StSPtrVecXiVertex &xiVtx = event->xiVertices();
 
-  if (xiVtx.size() > 0) {
-    for (UInt_t l=0; l<xiVtx.size(); l++) {
-      StXiVertex *xi = xiVtx[l];
-      if (xi) {
-	//m_v_detid->Fill(xi->det_id); 
-	m_v_vtxid->Fill(xi->type());
-	if (!isnan(double(xi->position().x())))
-	  m_v_x->Fill(xi->position().x());     
-	if (!isnan(double(xi->position().y())))
-	  m_v_y->Fill(xi->position().y());     
-	if (!isnan(double(xi->position().z())))
-	  m_v_z->Fill(xi->position().z());     
-	m_v_pchi2->Fill(xi->chiSquared()); 
-      }
+  for (UInt_t l=0; l<xiVtx.size(); l++) {
+    StXiVertex *xi = xiVtx[l];
+    if (xi) {
+      //m_v_detid->Fill(xi->det_id); 
+      m_v_vtxid->Fill(xi->type());
+      if (!isnan(double(xi->position().x())))
+	m_v_x->Fill(xi->position().x());     
+      if (!isnan(double(xi->position().y())))
+	m_v_y->Fill(xi->position().y());     
+      if (!isnan(double(xi->position().z())))
+	m_v_z->Fill(xi->position().z());     
+      m_v_pchi2->Fill(xi->chiSquared()); 
     }
   }
 
   StSPtrVecKinkVertex &kinkVtx = event->kinkVertices();
 
-  if (kinkVtx.size() > 0) {
-    for (UInt_t m=0; m<kinkVtx.size(); m++) {
-      StKinkVertex *kink = kinkVtx[m];
-      if (kink) {
-	//m_v_detid->Fill(kink->det_id); 
-	m_v_vtxid->Fill(kink->type());
-	if (!isnan(double(kink->position().x())))
-	  m_v_x->Fill(kink->position().x());     
-	if (!isnan(double(kink->position().y())))
-	  m_v_y->Fill(kink->position().y());     
-	if (!isnan(double(kink->position().z())))
-	  m_v_z->Fill(kink->position().z());     
-	m_v_pchi2->Fill(kink->chiSquared()); 
-      }
+  for (UInt_t m=0; m<kinkVtx.size(); m++) {
+    StKinkVertex *kink = kinkVtx[m];
+    if (kink) {
+      //m_v_detid->Fill(kink->det_id); 
+      m_v_vtxid->Fill(kink->type());
+      if (!isnan(double(kink->position().x())))
+	m_v_x->Fill(kink->position().x());     
+      if (!isnan(double(kink->position().y())))
+	m_v_y->Fill(kink->position().y());     
+      if (!isnan(double(kink->position().z())))
+	m_v_z->Fill(kink->position().z());     
+      m_v_pchi2->Fill(kink->chiSquared()); 
     }
   }
   UInt_t cntrows = 0;
@@ -833,11 +833,9 @@ void StEventQAMaker::MakeHistXi() {
   if (Debug()) cout << " *** in StEventQAMaker - filling dst_xi_vertex histograms " << endl;
 
   StSPtrVecXiVertex &xi = event->xiVertices();
-  if (xi.size() > 0) {
-    Int_t cntrows=0;
-    cntrows = xi.size();  //Is there a better way of getting this? -CL
-    m_xi_tot->Fill(cntrows);
-  }
+  Int_t cntrows=0;
+  cntrows = xi.size();  //Is there a better way of getting this? -CL
+  m_xi_tot->Fill(cntrows);
 }
 
 //_____________________________________________________________________________
@@ -857,11 +855,9 @@ void StEventQAMaker::MakeHistKink() {
   if (Debug()) cout << " *** in StEventQAMaker - filling kink histograms " << endl;
 
   StSPtrVecKinkVertex &kink = event->kinkVertices();
-  if (kink.size() > 0) {
-    Int_t cntrows=0;
-    cntrows = kink.size();   // Is there a better way of doing this? -CL
-    m_kink_tot->Fill(cntrows);
-  }
+  Int_t cntrows=0;
+  cntrows = kink.size();   // Is there a better way of doing this? -CL
+  m_kink_tot->Fill(cntrows);
 }
 
 //_____________________________________________________________________________
