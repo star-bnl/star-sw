@@ -1,5 +1,9 @@
-// $Id: St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp $Id: 1999/03/11 00:15:22 perev Exp $
+//  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
+// $Id: St_geant_Maker.cxx,v 1.38 1999/04/20 21:40:17 nevski Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.38  1999/04/20 21:40:17  nevski
+// all shapes are going via Victors hash
+//
 // Revision 1.37  1999/04/19 06:29:30  nevski
 // update of user parameter extraction
 //
@@ -460,7 +464,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.38 1999/04/20 21:40:17 nevski Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -733,15 +737,18 @@ void St_geant_Maker::Call(const Char_t *name)
 //_____________________________________________________________________________
 St_Node *St_geant_Maker::Work()
 {  
-  struct   Medium 
+  struct  Medium 
     { Char_t name[20]; Int_t nmat, isvol, ifield; Float_t fieldm; };
-  St_Node  *node=0;
-  Float_t  *volu=0, *position=0, *mother=0, *p=0;
-  Int_t    who=0, copy=0, npar=0;
-  Int_t    nvol=cnum->nvolum;
-  Float_t  theta1,phi1, theta2,phi2, theta3,phi3, type;
+  struct  Volume
+    { Char_t name[4],nick[4]; Int_t npar; Float_t par[50]; };
 
+  St_Node   *node=0;
+  Float_t   *volu=0, *position=0, *mother=0, *p=0;
+  Int_t     who=0, copy=0, npar=0;
+  Int_t     nvol=cnum->nvolum;
+  Float_t   theta1,phi1, theta2,phi2, theta3,phi3, type;
   TObjArray nodes(nvol+1);
+
   new TGeometry("STAR","nash STAR");
   GtHash *H = new GtHash;
  
@@ -766,18 +773,13 @@ St_Node *St_geant_Maker::Work()
     if (mother)  nin = (Int_t) mother[2];
     St_Node *Hp      = 0;
 
-  strncpy(nick,(const Char_t*)&cvolu->names[cvolu->nlevel-1],4);
-  strncpy(name,(const Char_t*)(volu-5),4);
+    strncpy(nick,(const Char_t*)&cvolu->names[cvolu->nlevel-1],4);
+    strncpy(name,(const Char_t*)(volu-5),4);
 
-  Hp = (St_Node *) H->GetPointer(p,npar);
-
-  if (nodes[who]==0 || Hp==0)
-  {
-    t=(TShape*)gGeometry->GetListOfShapes()->FindObject(nick);
-    if (t==0 || Hp==0) 
-    { 
-      printf(" creating object %s  %f  %f  %f  %f \n",
-                           name,p0[0],p[0],p[1],p[2]);
+    Hp = (St_Node *) H->GetPointer(p,npar+1);
+    if (Hp)  newNode = Hp; 
+    else
+      { // printf(" creating object %s  %f  %f  %f \n", name,p[0],p[1],p[2]);
       switch (shape) 
       { case BOX:  t=new TBRIK(nick,"BRIK","void",
                          p[0],p[1],p[2]);                         break;
@@ -824,30 +826,19 @@ St_Node *St_geant_Maker::Work()
                          p[0],p[1],p[2]);                         break;
       };
       t->SetLineColor(att[4]);
-    };
+ 
+      // to build a compressed tree, name should be checked for repetition
+      newNode = new St_Node(name,nick,t);
+      newNode -> SetVisibility(att[1]);
+      H->SetPointer(newNode);
+    }
 
-    // Int_t ivol   = (Int_t) *(position+1);
-    // Int_t irot   = (Int_t) *(position+3);
-    // strncpy(nick,(const Char_t*)&cvolu->names[cvolu->nlevel-1],4);
-
-    // to build a compressed tree, name should be checked for repetition
-    newNode = new St_Node(name,nick,t);
-    newNode -> SetVisibility(att[1]);
-
-    nodes[who]=newNode;
-   }
-   //  if (np>0)  { newNode = (St_Node *)nodes[who]; }
-
-   if (Hp)       { newNode = Hp; }
-   else          { H->SetPointer(newNode); }
-
-    gfxzrm_ (&nlev, &xx[0],&xx[1],&xx[2], &theta1,&phi1, 
-                    &theta2,&phi2, &theta3,&phi3, &type);
-
-     if (node)
-     {  TRotMatrix *matrix=GetMatrix(theta1,phi1,theta2,phi2,theta3,phi3);
-        node->Add(newNode,xx[0],xx[1],xx[2],matrix,UInt_t(copy));
-     }
+    if (node)
+    {  gfxzrm_ (&nlev, &xx[0],&xx[1],&xx[2], &theta1,&phi1, 
+                       &theta2,&phi2, &theta3,&phi3, &type);
+       TRotMatrix *matrix=GetMatrix(theta1,phi1,theta2,phi2,theta3,phi3);
+       node->Add(newNode,xx[0],xx[1],xx[2],matrix,UInt_t(copy));
+    }
     node = newNode;
   };
 
