@@ -4,7 +4,7 @@
 */
 class StChain;
 StChain *chain=0;
-void doEmcEmbedEvent(int nevents = 10,char* file="*.event.root",Bool_t print = kFALSE)
+void doEmcEmbedEvent(int nevents = 10,char* file="*.event.root",Bool_t print = kTRUE)
 {
   gSystem->Load("St_base");
   gSystem->Load("St_base");
@@ -21,6 +21,8 @@ void doEmcEmbedEvent(int nevents = 10,char* file="*.event.root",Bool_t print = k
   gSystem->Load("StEventUtilities"); 
   gSystem->Load("StMcEvent"); 
   gSystem->Load("StMcEventMaker"); 
+  gSystem->Load("StDaqLib");
+  gSystem->Load("StEmcUtil");
   gSystem->Load("StAssociationMaker");
   gSystem->Load("StMcAnalysisMaker");
   gSystem->Load("StStrangeMuDstMaker");
@@ -29,8 +31,6 @@ void doEmcEmbedEvent(int nevents = 10,char* file="*.event.root",Bool_t print = k
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
   gSystem->Load("libgeometry_Tables");
-  gSystem->Load("StDaqLib");
-  gSystem->Load("StEmcUtil");
   gSystem->Load("StEmcADCtoEMaker");
   gSystem->Load("StPreEclMaker");
   gSystem->Load("StEpcMaker");
@@ -85,6 +85,7 @@ void doEmcEmbedEvent(int nevents = 10,char* file="*.event.root",Bool_t print = k
     
   StAssociationMaker    *association = new StAssociationMaker();       // TPC association maker
   StEmcAssociationMaker *emcAssociation = new StEmcAssociationMaker(); // EMC association maker
+  emcAssociation->setPrint(print);
   
   ///////////////////////////////////////////////////////////////
   //
