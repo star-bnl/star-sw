@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.57 2003/09/09 21:21:00 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.58 2003/09/23 01:03:09 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -165,13 +165,14 @@
         }
         $R_CPPFLAGS .=
 " -DGNU_CC -DR__GLIBC -DG__REGEXP -DG__UNIX -DG__SHAREDLIB -DG__OSFDLL -DG__ROOT -DG__REDIRECTIO";
-        $CXXFLAGS     = "-pipe -fPIC";# -march=pentiumpro";
-#	$CXXFLAGS    .= " -ansi -pedantic"; 
-	$CXXFLAGS    .= " -Wall";# -W -Wwrite-strings -Wpointer-arith";# -Wnested-externs";
-	$CXXFLAGS    .= " -Woverloaded-virtual";# -Wbad-function-cast";
-#	$CXXFLAGS    .= " -Werror";# warning==error;
-	$CXXFLAGS    .= " -ansi -pedantic -Wno-long-long";#ansi;
-#	$CXXFLAGS    .= " -fnonnull-objects";
+        $CXXFLAGS     = "-pipe -fPIC";
+	$CXXFLAGS    .= " -Wall";
+	$CXXFLAGS    .= " -Woverloaded-virtual";
+	if ($STAR_HOST_SYS =~ /^rh/){
+            # ansi works only with gcc3.2 actually ...
+	    # may be removed later ...
+	    $CXXFLAGS    .= " -ansi -pedantic -Wno-long-long";
+	}
 	if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
 	    if ($STAR_HOST_SYS =~ /gcc/){
 		# this naming convention starts at gcc 3.2 which happens to
@@ -187,11 +188,9 @@
 	    print "set DEBUG = $DEBUG\n" unless ($param::quiet);
 	}
         $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
-        #                                             -fpipe
-        $CFLAGS     = "-pipe -fPIC -Wall";               # -march=pentiumpro";
-#	$CFLAGS    .= " -ansi -pedantic";
-	$CFLAGS    .= " -Wall";# -W -Wwrite-strings -Wpointer-arith";# -Wnested-externs";
-	$CFLAGS    .= " -Wshadow";# -Wbad-function-cast";
+        $CFLAGS     = "-pipe -fPIC -Wall";
+	$CFLAGS    .= " -Wall";
+	$CFLAGS    .= " -Wshadow";
         $CINTCFLAGS = $CFLAGS . " " . $R_CPPFLAGS;
         $LDFLAGS  = "";    #$DEBUG . " " . $CXXFLAGS . " -Wl,-Bdynamic";
         $SOFLAGS   = "-shared -Wl,-Bdynamic";
