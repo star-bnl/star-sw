@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.16 2000/06/12 13:46:37 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.17 2000/06/15 14:41:53 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -116,7 +116,7 @@
    $LDFLAGS  = "";#$DEBUG . " " . $CXXFLAGS . " -Wl,-Bdynamic";
    $F77FLAGS      = "";
    $SOFLAGS  = "-shared -Wl,-Bdynamic";  
-   $XLIBS    = "-L/usr/X11R6/lib -lX11 -lXpm";
+   $XLIBS    = "-L/usr/X11R6/lib -lXpm -lX11";
    $THREAD   = "-lpthread";
    $CRYPTLIBS= "-lcrypt";
    $SYSLIBS  = "-lm -ldl -rdynamic";

@@ -12,13 +12,13 @@ use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
 
-# $Id: cons,v 1.43 2000/06/14 22:52:41 fisyak Exp $
+# $Id: cons,v 1.44 2000/06/15 14:41:54 fisyak Exp $
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 $ver_num = 2.0;
 $ver_rev = ".1";
 $version = sprintf "This is Cons %2.1f%s " .
-	    '($Id: cons,v 1.43 2000/06/14 22:52:41 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.44 2000/06/15 14:41:54 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -245,7 +245,10 @@ sub showcom {
      },
      'SUFOBJ'	    => '.o',
      'OBJMAP'       => {
+	 '.o'  => '.o',
 	 '.c'  => '.o',
+	 '.f'  => '.o',
+	 '.F'  => '.o',
 	 '.s'  => '.o',
 	 '.S'  => '.o',
 	 '.C'  => '.o',
@@ -293,7 +296,10 @@ if ($main::_WIN32) {
 	'SUFLIBS'        => '.dll:.lib',
 	'SUFOBJ'         => '.obj',
 	'OBJMAP'       => {
+	    '.obj'=> '.obj',
 	    '.c'  => '.obj',
+	    '.f'  => '.obj',
+	    '.F'  => '.obj',
 	    '.s'  => '.obj',
 	    '.S'  => '.obj',
 	    '.C'  => '.obj',
