@@ -19,8 +19,8 @@ public:
 
   virtual StHbtString Report();
 
-  void SetXiType(const char* type);
   void SetXiMassRange(const float& lo, const float& hi);
+  void SetOmegaMassRange(const float& lo, const float& hi);
   void SetdcaXidaughters(const float& lo, const float& hi);
   void SetdcaXiToPrimVertex(const float& lo, const float& hi);
   void SetdecayLengthXi(const float& lo, const float& hi);
@@ -36,6 +36,7 @@ public:
 private:   // here are the quantities we want to cut on...
 
   float             mXiMassRange[2];        //Invariant mass limits
+  float             mOmegaMassRange[2];        //Invariant mass limits
   float             mdcaXidaughters[2];     //DCA between 2 tracks
   float             mdcaXiToPrimVertex[2];  //DCA between V0 and event vertex
   float             mdecayLengthXi[2];      //decay length from prim. vertex
@@ -51,7 +52,6 @@ private:   // here are the quantities we want to cut on...
   long              mNXisPassed;
   long              mNXisFailed;
 
-  char*             XiType;                // String selecting v0 (la,antil,k0)
 
 #ifdef __ROOT__ 
   ClassDef(franksXiCut, 1)
@@ -61,6 +61,8 @@ private:   // here are the quantities we want to cut on...
 
 inline void franksXiCut::SetXiMassRange(const float& lo, const float& hi) {
 mXiMassRange[0] =lo; mXiMassRange[1]=hi;}
+inline void franksXiCut::SetOmegaMassRange(const float& lo, const float& hi) {
+mOmegaMassRange[0] =lo; mOmegaMassRange[1]=hi;}
 inline void franksXiCut::SetdcaXidaughters(const float& lo, const float& hi)
 {mdcaXidaughters[0]=lo; mdcaXidaughters[1]=hi;}
 inline void franksXiCut::SetdcaXiToPrimVertex(const float& lo, const float& hi)
@@ -88,8 +90,6 @@ inline void franksXiCut::SetPt(const float& lo, const float& hi)
 inline void franksXiCut::SetRapidity(const float& lo,const float& hi)
 {mRapidity[0]=lo; mRapidity[1]=hi;}
 
-inline void franksXiCut::SetXiType(const char* type)
-{XiType = (char*)type;}
 
 #endif
 

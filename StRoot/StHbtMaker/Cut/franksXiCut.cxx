@@ -11,6 +11,9 @@ franksXiCut::franksXiCut(){
   
   mXiMassRange[0] =0;
   mXiMassRange[1]=10000;
+
+  mOmegaMassRange[0] =0;
+  mOmegaMassRange[1]=10000;
   
   mdcaXidaughters[0]=0; 
   mdcaXidaughters[1]=1000;
@@ -45,7 +48,6 @@ franksXiCut::franksXiCut(){
   mRapidity[0]=-100000;
   mRapidity[1]=100000;
 
-  XiType = "XiMinus";
   mMass  = 1.32131;
 
 
@@ -75,15 +77,9 @@ bool franksXiCut::Pass(const StHbtXi* Xi){
   inMassRange=0;
   // Find out what particle is desired
 
-  if( strstr(XiType,"xi") || strstr(XiType,"XI") || strstr(XiType,"Xi")){
-     if( Xi->massXi() < (mXiMassRange[1]) && 
-	 Xi->massXi() > (mXiMassRange[0]) ) inMassRange=1;
-  }
-  else if( (strstr(XiType,"omega") || strstr(XiType,"OMEGA"))){
-     if( Xi->massOmega() < (mXiMassRange[1]) && 
-	 Xi->massOmega() > (mXiMassRange[0]) ) inMassRange=1;
-  }
-
+  if ( (Xi->massXi() > mXiMassRange[0]) || (Xi->massXi() < mXiMassRange[1]) ) inMassRange=1;
+  if ( (Xi->massOmega() > mOmegaMassRange[0]) || (Xi->massOmega() < mOmegaMassRange[1]) ) inMassRange=1;
+  
 
   bool goodPID = ( inMassRange &&
 		  (Xi->dcaXiDaughters()   > mdcaXidaughters[0]) &&
