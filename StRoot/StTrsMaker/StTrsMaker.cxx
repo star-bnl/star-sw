@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.34 1999/05/28 02:55:44 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.35 1999/06/16 14:26:49 fisyak Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.35  1999/06/16 14:26:49  fisyak
+// Add flags for egcs on Solaris
+//
 // Revision 1.34  1999/05/28 02:55:44  lasiuk
 // change default settings for testing.  Only in the Maker!
 // Remove histograms
@@ -191,7 +194,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.34 1999/05/28 02:55:44 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.35 1999/06/16 14:26:49 fisyak Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -635,12 +638,13 @@ Int_t StTrsMaker::Make(){
 		// CHARGE COLLECTION AND AMPLIFICATION
 	        //
 		
-#ifndef __sun   // Bug in the sun iterators.  Must Explicitly dereference!
-		StTrsWireBinEntry anEntry(iter->position(), iter->charge());
+		//#if  defined(__sun) && !defined(__GNUG__)   
+// Bug in the sun iterators.  Must Explicitly dereference!
+		//		StTrsWireBinEntry anEntry(iter->position(), iter->charge());
 // 		PR(anEntry);
-#else
+		//#else
 		StTrsWireBinEntry anEntry((*iter).position(), (*iter).charge());
-#endif
+		//#endif
 		mWireHistogram->addEntry(anEntry);
 		
 	    } // Loop over the list of iterators
@@ -797,7 +801,7 @@ Int_t StTrsMaker::Finish()
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.34 1999/05/28 02:55:44 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.35 1999/06/16 14:26:49 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireBinEntry.hh,v 1.2 1999/01/18 10:17:54 lasiuk Exp $
+ * $Id: StTrsWireBinEntry.hh,v 1.3 1999/06/16 14:26:51 fisyak Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireBinEntry.hh,v $
+ * Revision 1.3  1999/06/16 14:26:51  fisyak
+ * Add flags for egcs on Solaris
+ *
  * Revision 1.2  1999/01/18 10:17:54  lasiuk
  * constructor by reference
  * set functions by reference
@@ -29,7 +32,7 @@
 #define ST_TRS_WIRE_BIN_ENTRY_HH
 #include <iostream.h>
 
-#ifdef __sun
+#if  defined(__sun) && ! defined(__GNUG__)
 #include <stdcomp.h>  // bool type
 #endif
 
