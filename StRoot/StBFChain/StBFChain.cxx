@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.14 1999/10/12 23:13:30 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.15 1999/10/14 14:23:17 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.15  1999/10/14 14:23:17  fisyak
+// Take out MySQL from chain
+//
 // Revision 1.14  1999/10/12 23:13:30  fisyak
 // Add AddBefore and AddAfter methods
 //
@@ -410,7 +413,7 @@ Int_t StBFChain::Load()
   }
   const char *mainDB = "$STAR/StDb/params";
   //DbInit from StDbBroker.so checks that mysql db1 server is accessible
-  if (StDbBroker::DbInit("params")==0) mainDB = "MySQL:params";
+  //  if (StDbBroker::DbInit("params")==0) mainDB = "MySQL:params";
   printf ("QAInfo: Main DataBase == %s\n",mainDB);  
   dbMk = new St_db_Maker("db",mainDB);
   if (GetOption(kSD97)) { dbMk->SetDateTime("sd97");}
