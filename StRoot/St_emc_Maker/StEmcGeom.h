@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.5 2000/04/11 19:48:40 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.6 2000/04/18 20:38:09 pavlinov Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.6  2000/04/18 20:38:09  pavlinov
+ * Added ctor from Geant geometry
+ *
  * Revision 1.5  2000/04/11 19:48:40  pavlinov
  * Merge versions of Pavlinov and Ogawa
  *
@@ -36,9 +39,29 @@
 #include <iostream.h>
 #include "math_constants.h"
 #include <math.h>
-#include "TArrayF.h"
+#include <TArrayF.h>
+#include <TString.h>
+#include <StBFChain.h>
+#include "tables/St_calb_calg_Table.h"
+#include "tables/St_calb_calr_Table.h"
+
 class StEmcGeom {
+
 private:
+  StBFChain*    mChain;    //!
+  St_DataSet*   mGeom;     //!
+  St_calb_calg* mCalg;     //!
+  calb_calg_st* mCalg_st;  //!
+  St_calb_calr* mCalr;     //!  
+  calb_calr_st* mCalr_st;  //!
+
+  void    defineDefaultCommonConstants();
+  void    defineCommonConstants();
+  void    defineModuleGridOnPhi();
+  Float_t relativeError(Float_t, Float_t);
+
+protected:
+  TString mMode;     // Empty, "geant" or "db"
   Int_t   mDetector; // Detectors number => see emc/inc/emc_def.h
   Int_t   mNModule;  // Number of modeles (120 is default)
   Int_t   mNEta;     // Number of eta bins
@@ -62,8 +85,10 @@ private:
 public: 
   StEmcGeom(const Int_t );
   StEmcGeom(const Char_t*);
+  StEmcGeom(const Int_t ,const Char_t*);
   virtual ~StEmcGeom();
-
+  
+  TString* Mode();
   Int_t    Detector() const;
   Int_t    NModule()  const;
   Int_t    NEta()  const;
@@ -73,6 +98,16 @@ public:
   Float_t  Radius()  const;
   Float_t  YWidth() const;
   Float_t  EtaMax() const;
+  Float_t* PhiModule();
+  Float_t* PhiOffset();
+  Float_t* PhiStep();
+  Float_t* PhiBound();
+  Float_t* Zlocal(); 
+  Float_t* Eta();
+  Float_t* Ylocal();  
+  Float_t* Phi();
+
+
   void     setDetector(const Int_t);
   void     setRadius(const Float_t);
   void     setYWidth(const Float_t);
@@ -82,9 +117,10 @@ public:
   Int_t    checkSub(const Int_t );
   Int_t    checkId(const Int_t );
 
-  Int_t    getBin(const Int_t,Int_t &,Int_t &,Int_t &);        // From raw# to bin#; 
+  Int_t    getBin(const Int_t,Int_t &,Int_t &,Int_t &);  // From raw# to bin#; 
   Int_t    getBin(const Float_t, const Float_t, Int_t &,Int_t &,Int_t &); //From eta,phi to bin
   Int_t    getId(const Int_t,const Int_t,const Int_t,Int_t &); // From bin# to raw#;
+  Int_t    getVolIdBemc(const Int_t,Int_t&, Int_t &,Int_t &,Int_t &);
   
   Int_t    getZlYl(const Int_t,Float_t &,Float_t &);  // Get (x,y) local in the raw#;
   Int_t    getEta(const Int_t, const Int_t, Float_t &);
@@ -101,6 +137,10 @@ public:
   void     initESMDE();
   void     initESMDP();
   void     printGeom();
+  void     print() {printGeom();}
+  void     compare(StEmcGeom &, Bool_t);
+  void     compare(StEmcGeom *g, Bool_t key) {compare(*g,key);};
+  void     printError(Float_t);
 
   Float_t  toDeg(const Float_t angR) {return C_DEG_PER_RAD*angR;} // Service
   Float_t  toRad(const Float_t angD) {return angD/C_DEG_PER_RAD;} // functions
@@ -108,6 +148,7 @@ public:
   ClassDef(StEmcGeom,1)                      // Standard Root macro;
 };
 
+inline TString* StEmcGeom::Mode() {return &mMode;}
 inline Int_t   StEmcGeom::Detector() const {return mDetector;}
 inline Int_t   StEmcGeom::NModule()  const {return mNModule;}
 inline Int_t   StEmcGeom::NEta()     const {return mNEta;}
@@ -117,6 +158,15 @@ inline Int_t   StEmcGeom::NRaw()     const {return mNRaw;}
 inline Float_t StEmcGeom::Radius()   const {return mRadius;}
 inline Float_t StEmcGeom::YWidth()   const {return mYWidth;}
 inline Float_t StEmcGeom::EtaMax()   const {return mEtaMax;}
+inline Float_t* StEmcGeom::PhiModule() {return mPhiModule.GetArray();} 
+inline Float_t* StEmcGeom::PhiOffset() {return mPhiOffset.GetArray();}
+inline Float_t* StEmcGeom::PhiStep()   {return mPhiStep.GetArray();}
+inline Float_t* StEmcGeom::PhiBound()  {return mPhiBound.GetArray();}
+inline Float_t* StEmcGeom::Zlocal() {return mZlocal.GetArray();} 
+inline Float_t* StEmcGeom::Eta() {return mEta.GetArray();} 
+inline Float_t* StEmcGeom::Ylocal()  {return mYlocal.GetArray();}
+inline Float_t* StEmcGeom::Phi() {return mPhi.GetArray();} 
+
 inline void    StEmcGeom::setDetector(const Int_t val) { mDetector = val;} 
 inline void    StEmcGeom::setRadius(const Float_t val) { mRadius = val;}
 inline void    StEmcGeom::setYWidth(const Float_t val) { mYWidth = val;}
