@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.40 2000/06/13 00:32:38 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.41 2000/06/13 00:36:14 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.41  2000/06/13 00:36:14  lansdell
+// PID histogram now only uses primary tracks
+//
 // Revision 1.40  2000/06/13 00:32:38  lansdell
 // added SVT,TPC vertex resolution check; check that pidTraits()[0] exists
 //
@@ -849,7 +852,7 @@ void StEventQAMaker::MakeHistPID() {
   StSPtrVecTrackNode &theNodes = event->trackNodes();
 
   for (UInt_t i=0; i<theNodes.size(); i++) {
-    StTrack *theTrack = theNodes[i]->track(0);
+    StTrack *theTrack = theNodes[i]->track(primary);
     if (!theTrack) continue;
 
     StSPtrVecTrackPidTraits &trkPidTr = theTrack->pidTraits();
