@@ -1,4 +1,4 @@
-// $Id: St_geant_Maker.h,v 1.13 1999/04/19 06:25:36 nevski Exp $
+// $Id: St_geant_Maker.h,v 1.14 1999/04/29 19:29:28 nevski Exp $
 
 #ifndef STAR_St_geant_Maker
 #define STAR_St_geant_Maker
@@ -57,8 +57,7 @@ public:
                                  float theta3, float phi3);
 
    virtual void  SetDebug(EDebugLevel dbl=kDebug); 
-   void  SetInputFile(const char* file);
-
+           Int_t SetInputFile(const char* file);
 
    St_Node* GetNode() { return fNode; }
    //----------------------------------------------------------------------

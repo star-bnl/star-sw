@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.38 1999/04/20 21:40:17 nevski Exp $
+// $Id: St_geant_Maker.cxx,v 1.39 1999/04/29 19:29:27 nevski Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.39  1999/04/29 19:29:27  nevski
+// SetInputFile returns status
+//
 // Revision 1.38  1999/04/20 21:40:17  nevski
 // all shapes are going via Victors hash
 //
@@ -464,7 +467,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.38 1999/04/20 21:40:17 nevski Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.39 1999/04/29 19:29:27 nevski Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -899,11 +902,13 @@ void  St_geant_Maker::SetDebug(EDebugLevel dbl)
   if (GetDebug()) { Do("debug on;"); } else {Do("debug off;"); }
 }
 //------------------------------------------------------------------------
-void  St_geant_Maker::SetInputFile(const char *file)
+Int_t St_geant_Maker::SetInputFile(const char *file)
 {
   fInputFile = file;
   TString kuip("gfile p "); kuip += fInputFile;
-  Do((const char*)kuip);
+  Do((const char*)kuip); 
+  if (cquest->iquest[0]) {return kStEOF;}
+  return kStOK;
 }
 //------------------------------------------------------------------------
 
