@@ -6,8 +6,11 @@
 // matrix / vector "derived" from  
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: StMicky.cxx,v 1.3 1999/09/30 15:50:20 fine Exp $
+// $Id: StMicky.cxx,v 1.4 1999/10/02 21:58:07 fine Exp $
 // $Log: StMicky.cxx,v $
+// Revision 1.4  1999/10/02 21:58:07  fine
+// double precision
+//
 // Revision 1.3  1999/09/30 15:50:20  fine
 // ClassDef has been introduced
 //
@@ -78,6 +81,9 @@ void StMicky::Minit()
 
     ia = (int *)(&(_BLNK__1.a));
     ib = (int *)(&(_BLNK__1.b));
+
+    da = (double *)(&(_BLNK__1.a));
+    db = (double *)(&(_BLNK__1.b));
 
     param_1.iqbitw = 32;
     param_1.iqchaw = 4;
