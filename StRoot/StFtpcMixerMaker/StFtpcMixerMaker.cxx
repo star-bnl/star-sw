@@ -48,7 +48,6 @@
 
 // FTPC tables for SlowSimulator
 
-#include "tables/St_fcl_fppoint_Table.h"
 #include "tables/St_fcl_ftpcsqndx_Table.h"
 #include "tables/St_fcl_ftpcadc_Table.h"
 
@@ -411,9 +410,12 @@ Int_t StFtpcMixerMaker::Finish()
 
  /***************************************************************************
  *
- * $Id: StFtpcMixerMaker.cxx,v 1.4 2003/09/02 17:58:15 perev Exp $
+ * $Id: StFtpcMixerMaker.cxx,v 1.5 2004/03/04 15:49:00 jcs Exp $
  *
  * $Log: StFtpcMixerMaker.cxx,v $
+ * Revision 1.5  2004/03/04 15:49:00  jcs
+ * remove unnecessary fcl_fppoint include
+ *
  * Revision 1.4  2003/09/02 17:58:15  perev
  * gcc 3.2 updates + WarnOff
  *
