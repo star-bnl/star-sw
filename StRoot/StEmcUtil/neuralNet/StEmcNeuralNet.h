@@ -84,6 +84,6 @@ class StEmcNeuralNet
       
       float       getNNGuess(float*);                             ///< Returns NN evaluation for a set of parameters
       
-   ClassDef(StEmcNeuralNet,1)
+   ClassDef(StEmcNeuralNet,0)
 };
 #endif
