@@ -24,7 +24,7 @@
   THtml html;
   TString htmlDir = "$STAR/StRoot/html";
   html.SetOutputDir(htmlDir.Data());
-  html.SetSourceDir("$ROOTSYS:$ROOTSYS/include");
+  html.SetSourceDir("$ROOTSYS:$ROOTSYS/include:$ROOTSYS/ROOT/root/STAR:");
   for (int i=0; i < lClasses; i++) {
       html.MakeClass(cls[i],kTRUE);
       // Create links for the sake of the backward compatibility
@@ -40,6 +40,9 @@
 //_____________________________________________
 // $id: $
 // $Log: STARDoc.C,v $
+// Revision 1.3  2000/05/12 23:13:29  fine
+// Macro to create HTML for ROOT-based STAR classes
+//
 // Revision 1.2  2000/04/28 19:47:00  fine
 // Creates symbolik links for the obsolete names
 //
