@@ -1,4 +1,7 @@
 #  $Log: Makefile,v $
+#  Revision 1.4  1998/01/31 23:32:51  fisyak
+#  New Environment variables
+#
 #  Revision 1.3  1998/01/30 12:42:14  fisyak
 #  Save changes before moving to SL97b
 #
@@ -7,7 +10,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/01/30 12:42:14 $ 
+#             Last modification $Date: 1998/01/31 23:32:51 $ 
 #.SILENT:
 ALL_DEPS  = $^
 FIRST_DEP = $<
@@ -18,20 +21,34 @@ PWD      = /bin/pwd
 CWD     := $(shell $(PWD))
 EMPTY   :=
 ifndef MAKEFILE
-  MAKEFILE = $(STAR_ROOT)/mgr/Makefile
+  MAKEFILE = $(ROOT_STAR)/mgr/Makefile
 endif
 ifndef INP_DIR
   override INP_DIR := $(CWD)
 endif
- 
-ifndef OUT_DIR
-  override OUT_DIR := $(shell cd $(INP_DIR)/../../../; $(PWD))/lib
-endif
+NAME    := $(notdir $(INP_DIR))
+# define level pams -> domain -> package from *.idlm and *.g files
+SRC_DIR := $(INP_DIR)
+SUBDIRS :=
+# default is domain
+FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(SRC_DIR)/*/*.idlm) 
+FILES_G  := $(wildcard $(SRC_DIR)/*/*.g)
+ifneq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G)))  # domain level ?
+ROOT    := $(shell cd $(INP_DIR)/../../; $(PWD))
+DOM_DIR := $(shell cd $(INP_DIR); $(PWD))
+sources := $(SRC_DIR)/*
+else # module level
+FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(SRC_DIR)/*.idlm)  
+FILES_G  := $(wildcard $(SRC_DIR)/*.g)
+ifneq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G)))  # module level
+ROOT    := $(shell cd $(INP_DIR)/../../../; $(PWD))
+DOM_DIR := $(shell cd $(INP_DIR)/../; $(PWD))
+sources := $(SRC_DIR)
+else # pams level
+FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(SRC_DIR)/*/*/*.idlm)  
+FILES_G  := $(wildcard $(SRC_DIR)/*/*/*.g)
+ifneq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G)))  # pam level
 DIRS    := $(strip $(wildcard *))
-ifneq (,$(DIRS)) 
-ifeq ($(filter pams,$(DIRS)),pams)
-SUBDIRS := pams
-else
 SUBDIRS := $(foreach dir, $(DIRS), $(shell test -d $(dir) && echo $(dir))) 
 SUBDIRS := $(filter-out sys, $(SUBDIRS))
 SUBDIRS := $(filter-out inc, $(SUBDIRS))
@@ -42,37 +59,34 @@ SUBDIRS := $(filter-out wrk, $(SUBDIRS))
 SUBDIRS := $(filter-out src, $(SUBDIRS))
 SUBDIRS := $(filter-out exa, $(SUBDIRS))
 SUBDIRS := $(strip $(sort $(SUBDIRS)))
-endif
-endif
+endif                                              # pam level
+endif                                              # module level
+endif                                              # domain level     
 ifeq ($(EMPTY),$(SUBDIRS))
 #          I have no subdrs
-NAME    := $(notdir $(INP_DIR))
-SRC_DIR := $(INP_DIR)
-ROOT    := $(shell cd $(INP_DIR)/../../../; $(PWD))
-DOM_DIR := $(shell cd $(INP_DIR)/../; $(PWD))
-DOMAIN  := $(notdir $(DOM_DIR))
-DOM_DIRS:= $(addprefix $(ROOT)/pams/,$(shell cd $(INP_DIR)/../../; ls))
-IDL_DIRS:= $(wildcard $(ROOT)/pams/*/idl $(STAR_ROOT)/pams/*/idl)
-INC_DIRS:= $(wildcard $(ROOT)/pams/*/inc $(STAR_ROOT)/pams/*/inc)
-LIB_DIR := $(OUT_DIR)/$(STAR_SYS_HOST)
-OBJ_DIR := $(LIB_DIR)/$(NAME).obj
-DIR_GEN := $(OUT_DIR)/share
-GEN_DIR := $(OUT_DIR)/share/$(NAME).gen
-VPATH   := $(SRC_DIR) $(GEN_DIR) $(OBJ_DIR) $(IDL_DIRS)
 # all files:
-#FILES_IDM:= $(wildcard $(SRC_DIR)/*.idlm)
-FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(SRC_DIR)/*.idlm) 
-FILES_G  := $(wildcard $(SRC_DIR)/*.g)
 ifeq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G)))
 #                 I have NO idlm- and NO g-files
 .PHONY               : default
 all:
-	@echo "Nothing to do for module" $(NAME)
+	@echo "Nothing to do for domain/module" $(NAME)
 else
+ifndef OUT_DIR
+  override OUT_DIR := $(shell cd $(ROOT); $(PWD))/lib
+endif
+DOMAIN  := $(notdir $(DOM_DIR))
+DOM_DIRS:= $(addprefix $(ROOT)/pams/,$(shell cd $(INP_DIR)/../; ls))
+IDL_DIRS:= $(wildcard $(ROOT)/pams/*/idl $(ROOT_STAR)/pams/*/idl)
+INC_DIRS:= $(wildcard $(ROOT)/pams/*/inc $(ROOT_STAR)/pams/*/inc)
+LIB_DIR := $(OUT_DIR)/$(SYS_HOST_STAR)
+OBJ_DIR := $(LIB_DIR)/$(DOMAIN).obj
+DIR_GEN := $(OUT_DIR)/share
+GEN_DIR := $(OUT_DIR)/share/$(DOMAIN).gen
+VPATH   := $(wildcard $(sources)) $(GEN_DIR) $(OBJ_DIR) $(IDL_DIRS)
 #                 I have idlm- or g-files
-FILES_CC := $(wildcard $(SRC_DIR)/*.cc)
-FILES_C  := $(wildcard $(SRC_DIR)/*.c)
-FILES_F  := $(wildcard $(SRC_DIR)/*.F)
+FILES_CC := $(wildcard $(sources)/*.cc)
+FILES_C  := $(wildcard $(sources)/*.c)
+FILES_F  := $(wildcard $(sources)/*.F)
 
 NAMES_IDM:= $(basename $(notdir $(FILES_IDM)))
 NAMES_G  := $(basename $(notdir $(FILES_G)))
@@ -100,8 +114,8 @@ endif
 #
 #-------------------------------includes----------------------------
 STICFLAGS =  $(addprefix -I, $(SRC_DIR) $(IDL_DIRS))
-ifneq ($(STAR_SYS),hp_ux102)
-CPPFLAGS  = -D$(STAR_SYS) -D$(shell uname) 
+ifneq ($(SYS_STAR),hp_ux102)
+CPPFLAGS  = -D$(SYS_STAR) -D$(shell uname) 
 endif
 CPPFLAGS +=              -I. -I/usr/include \
              $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) 
@@ -117,9 +131,10 @@ endif
     CERN_LIBS := $(shell cernlib mathlib kernlib)
 #endif
 ifndef LIBRARIES
-  LIBRARIES :=  -L$(STAR_ROOT)/staf/$(STAR_SYS) \
-                -L$(LIB_DIR) -L$(STAR_LIB)     -lmsg -ltls  
-#                                            -l$(DOMAIN)
+  LIBRARIES :=  -L$(ROOT_STAR)/staf/$(SYS_HOST_STAR) \
+                -L$(LIB_DIR) -L$(LIB_STAR)  -l$(DOMAIN)   -lmsg  -ltls  
+#                                                                
+#                                            
 endif
 #-------------------------------rules-------------------------------
 # phony - not a file
@@ -153,10 +168,9 @@ endif    #
 $(GEN_DIR)/%.h $(GEN_DIR)/%.inc %.h %.inc: %.idl
 	cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(ALL_DEPS)
 #--- compilation -
-$(GEN_DIR)/geant3.def: $(STAR_ROOT)/bin/share/geant3.def
-	ln -s $(ALL_DEPS) $(ALL_TAGS)
-$(OBJ_DIR)/%.o: $(GEN_DIR)/geant3.def %.g
-	cd $(GEN_DIR); geant3    $(SRC_DIR)/$(STEM).g  -o  $(GEN_DIR)/$(STEM).f 
+$(OBJ_DIR)/%.o: %.g
+	test -h $(GEN_DIR)/geant3.def || ln -s $(ROOT_STAR)/bin/share/geant3.def  $(GEN_DIR)/geant3.def
+	cd $(GEN_DIR); geant3    $(FIRST_DEP)  -o  $(GEN_DIR)/$(STEM).f 
 	$(FC) $(FFLAGS) -c $(GEN_DIR)/$(STEM).f  -o  $(ALL_TAGS)
 
 $(OBJ_DIR)/%.o: %.F
@@ -179,29 +193,29 @@ $(OUT_DIR) $(DIR_GEN) $(GEN_DIR) $(LIB_DIR)  $(OBJ_DIR):
 #-----dependencies-------
 $(GEN_DIR)/%.didlm $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idlm 
 	test -d $(GEN_DIR) || mkdir -p $(GEN_DIR)
-	cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm; \
-        gcc  $(MKDEPFLAGS) $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm | \
+	cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(FIRST_DEP); \
+        gcc  $(MKDEPFLAGS) $(STICFLAGS) $(FIRST_DEP) | \
         sed -e 's/.idlm.o/.didlm/g' > $(GEN_DIR)/$(STEM).didlm
-	$(STIC) -M  $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm | grep ":" >> $(GEN_DIR)/$(STEM).didlm
+	$(STIC) -M  $(STICFLAGS) $(FIRST_DEP) | grep ":" >> $(GEN_DIR)/$(STEM).didlm
 #       temporarly, until stic is fixed:
 	@sed -e 's/broker->newInvoker(\(.*\),/broker->deleteInvoker(\1); broker->newInvoker(\1,/' \
                 $(GEN_DIR)/$(STEM)_i.cc > temp
 	@mv  -f temp $(GEN_DIR)/$(STEM)_i.cc
 $(OBJ_DIR)/%.d: %.cc 
 	test -d $(OBJ_DIR) || mkdir -p $(OBJ_DIR);
-	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(STEM).cc | \
+	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | \
         sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM)).o $(subst /,\/,$(ALL_TAGS))/g' > $(ALL_TAGS)
 $(OBJ_DIR)/%.d: %.c
 	test -d $(OBJ_DIR) || mkdir -p $(OBJ_DIR);
-	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(STEM).c | \
+	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | \
         sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM)).o $(subst /,\/,$(ALL_TAGS))/g' > $(ALL_TAGS)
 $(OBJ_DIR)/%.d: %.F
 	test -d $(OBJ_DIR) || mkdir -p $(OBJ_DIR);
-	gcc  $(MKDEPFLAGS) $(CPPFLAGS) $(STEM).F | \
+	gcc  $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | \
         sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM)).o $(subst /,\/,$(ALL_TAGS))/g' > $(ALL_TAGS)
 $(OBJ_DIR)/%.d: %.cdf
 	cd $(SRC_DIR); \
-        echo "$(notdir $(STEM)).c $(ALL_TAGS): $^" > $(ALL_TAGS) ;/
+        echo "$(notdir $(STEM)).c $(ALL_TAGS): $(ALL_DEPS)" > $(ALL_TAGS) ;/
         echo "$(STEM).o: $(STEM).c" >> $(ALL_TAGS)
 #-----cleaning------------------------------
 clean:

@@ -10,16 +10,17 @@ for pam in [*]
 endfor
 return
 **************************************************
-macro makes pam=pams/tpc/tpt makefile=$STAR_ROOT/mgr/Makefile
+macro makes pam=pams/tpc/tpt makefile=$ROOT_STAR/mgr/Makefile
 cut = ' \( -type d -a ! -name CVS -a ! -name idl _
                    -a ! -name exa -a ! -name inc _
-                   -a ! -name "src/*" -a ! -name doc _
-                   -a ! -name . -a ! -name wrk \) -print'
+                   -a ! -name "src/*" _
+                   -a ! -name doc _
+                   -a ! -name . -a ! -name wrk \) -prune -print'
 list = ''
 if $fexist([pam])=1 then
 list = $shell('find '//[pam]//[cut]);
 endif
-listr= $shell('find $STAR_ROOT/'//[pam]//[cut]);
+listr= $shell('find $ROOT_STAR/'//[pam]//[cut]);
 exec load [list] [listr] 
 ami/list
 return
@@ -53,7 +54,7 @@ macro ld_standard
   pam = [1]
   n = $words([pam],'/') 
   p = $word([pam],[n],[n],'/')
-  slib = $STAR_LIB/[p].sl
+  slib = $LIB_STAR/[p].sl
   sl = $fexist([slib])
   if [sl]=1 then
      message  '================ Load standard shared library:' [slib] '================'
@@ -65,20 +66,13 @@ macro ld_private
   pam = [1]
   n = $words([pam],'/') 
   p = $word([pam],[n],[n],'/')
-    list = $shell('cd '//[pam]//';ls *.idl* *.g')
-    lidm    = $index([list],'.idl') 
-    lg      = $index([list],'.g')
-    if [lidm]>0 .or. [lg]>0 then
-      shell make -f $STAR_ROOT/mgr/Makefile -C [pam]
-      slib = lib/$STAR_SYS/[p].sl
-      sl = $fexist([slib])
-      if [sl]=1 then
-         message  '================ Load private shared library:' [slib] '================'
-         gexec [slib]; for/call [p]_init;
-      endif
-    else
-         message 'No modules in ' [pam]
-    endif
+  shell make -f $ROOT_STAR/mgr/Makefile -C [pam]
+  slib = lib/$SYS_STAR/[p].sl
+  sl = $fexist([slib])
+  if [sl]=1 then
+    message  '================ Load private shared library:' [slib] '================'
+    gexec [slib]; for/call [p]_init;
+  endif
 return
 endkumac
 **************************************************
