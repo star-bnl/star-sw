@@ -21,36 +21,47 @@ void StiDetector::build(const char* buildfile)
     StGetConfigValue(buildfile, "active", active);
     StGetConfigValue(buildfile, "continuousMedium", continuousMedium);
     StGetConfigValue(buildfile, "discreteScatterer", discreteScatterer);
-    StGetConfigValue(buildfile, "density",density);
-    StGetConfigValue(buildfile,"thickness",thickness);
+    
+    string materialName;
+    StGetConfigValue(buildfile, "gas", materialName);
+    gas = StiMaterial::findMaterial(materialName.c_str());
+    StGetConfigValue(buildfile, "material", materialName);
+    material = StiMaterial::findMaterial(materialName.c_str());
+
+    int code;
+    StGetConfigValue(buildfile, "shapeCode", code);
+    shapeCode = code;
+
+    // we only store & read one representation of the geometry
+    StGetConfigValue(buildfile, "centerRadius", centerRadius);
+    StGetConfigValue(buildfile, "centerRefAngle", centerRefAngle);
+    StGetConfigValue(buildfile, "orientationAngle", orientationAngle);
+    StGetConfigValue(buildfile, "halfWidth", halfWidth);
+    updateCenterRep();
+
     StGetConfigValue(buildfile,"activePosition",activePosition);
-    //StGetConfigValue(buildfile,"halfWidth",halfWidth);
-    StGetConfigValue(buildfile,"yMax",yMax);
-    StGetConfigValue(buildfile,"yMin",yMin);
     StGetConfigValue(buildfile,"zCenter",zCenter);
     StGetConfigValue(buildfile,"halfDepth",halfDepth);
-    StGetConfigValue(buildfile,"radLength",radLength);
-    StGetConfigValue(buildfile,"position",position);
-    StGetConfigValue(buildfile,"refAngle",refAngle);
+    StGetConfigValue(buildfile, "thickness", thickness);
+
     StGetConfigValue(buildfile,"sector",sector);
     StGetConfigValue(buildfile,"padrow",padrow);
-    //StGetConfigValue(buildfile,"name",name);
-    
-    name = new char[200];
-    sprintf(name,"Sector_%i_Padrow_%i",sector, padrow);
-    int dummy_sc=-1;
-    StGetConfigValue(buildfile,"shapeCode",dummy_sc);
-    if (dummy_sc==1) shapeCode=kPlanar;
-    if (dummy_sc==2) shapeCode=kCircular;
-    
+    StGetConfigValue(buildfile,"name",name);
+
     return;
 }
 
 ostream& operator<<(ostream& os, const StiDetector& d)
 {
-    return os <<d.isActive()<<" "<<d.isContinuousMedium()<<" "<<d.isDiscreteScatterer()<<" "
-	      <<d.getDensity()<<" "<<d.getThickness()<<" "<<d.getActivePosition()<<" "<<d.getYmax()<<" "<<d.getYmin()<<" "<<d.getHalfDepth()<<" "
-	      <<d.getZCenter()<<" "<<d.getMaterialRadLength()<<" "<<d.getRadLengthThickness()<<" "
-	      <<d.getPosition()<<" "<<d.getRefAngle()<<" "<<d.getShapeCode()<<" "
-	      <<d.getSector()<<" "<<d.getPadrow()<<" "<<d.getName();
+  return os <<d.isOn()<<" "<<d.isActive()<<" "<<d.isContinuousMedium()<<" "
+            <<d.isDiscreteScatterer()<<" "
+            <<*(d.getGas())<<" "<<*(d.getMaterial())<<" "
+            <<d.getShapeCode()<<" "
+            <<d.getCenterRadius()<<" "<<d.getCenterRefAngle()<<" "
+            <<d.getOrientationAngle()<<" "<<d.getHalfWidth()<<" "
+            <<d.getNormalRadius()<<" "<<d.getNormalRefAngle()<<" "
+            <<d.getYmin()<<" "<<d.getYmax()<<" "
+	    <<d.getActivePosition()<<" "<<d.getZCenter()<<" "
+            <<d.getHalfDepth()<<" "<<d.getThickness()<<" "
+            <<d.getSector()<<" "<<d.getPadrow()<<" "<<d.getName();
 }
