@@ -154,8 +154,8 @@ created   22 april 98
 
       IQUEST(1)=IEOTRI+1
       if (.not. ( NTRACK>0 & NVERTX>0 & IEOTRI==0) ) then
-         print *,' g2t quiting with IQUEST(1)=',Iquest(1)
-         print *,' NTRACK,NVERTX,IEOTRI=',NTRACK,NVERTX,IEOTRI
+         prin1 IQUEST(1); (' g2t quiting with IQUEST(1)=',i7)
+         prin1 NTRACK,NVERTX,IEOTRI; (' NTRACK,NVERTX,IEOTRI=',3i7)
          return
       endif
 *     map ghea_* headers and  hepe_* particle tables:

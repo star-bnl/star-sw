@@ -642,9 +642,13 @@ end
 * 
 *    Valid hits are marked with positive dE, unvalid - negative:
       If (valid_hit) then
-         Call GDtoM( Vect_middle(1), hits(1), 1 )
-         Call GDtoM( Vect_middle(4), hits(4), 2 )
-         Call Vscale (hits(4), (Vect(7)+Vect0(7))/2, hits(4), 3)
+*        Call GDtoM ( Vect_middle(1), hits(1), 1 )
+*        Call GDtoM ( Vect_middle(4), hits(4), 2 )
+*        Call Vscale(hits(4), (Vect(7)+Vect0(7))/2, hits(4), 3)
+*
+         Call Ucopy ( Vect_middle, hits, 6 )
+         hits(1)=vect_middle(3)
+         hits(3)=vect_middle(1)
          Hit = +AdEStep
       else
          Hit = -AdEStep
