@@ -150,9 +150,6 @@ BfcItem BFC[] = {
   {"ctf"         ,"ctf","l0","ctf_T,db"                    ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE}, 
   {"mwc"         ,"mwc","l0","mwc_T,db"                    ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
   {"trg"         ,"trg","l0","trg_T,db"                    ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
-  {"l3"          ,"l3","","l3cl,l3t"                                 ,"StChainMaker","StBFChain","",kFALSE},
-  {"l3cl"        ,"","l3","l3_T"                    ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
-  {"l3t"         ,"","l3","l3_T"                            ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
   {"global"      ,"global","","globT,Match,primary,v0,xi,kink,dst,SCL"
                                                          ,"StChainMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","global","SCL,tpc_T,svt_T,globT,tls"
@@ -169,6 +166,9 @@ BfcItem BFC[] = {
   {"PreEcl"      ,"preecl","emc","emh"                          ,"StPreEclMaker","StPreEclMaker","",kFALSE},
   {"Rrs"         ,"","","sim_T"                                       ,"StRrsMaker","StRrsMaker","",kFALSE},
   {"rich"        ,"","","sim_T,globT"                      ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
+  {"l3"          ,"l3","","l3cl,l3t"                                 ,"StChainMaker","StBFChain","",kFALSE},
+  {"l3cl"        ,"","l3","l3_T"                    ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
+  {"l3t"         ,"","l3","l3_T"                            ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
   {"analysis"    ,"","","Event"           ,"StAnalysisMaker","StAnalysisMaker","Exampe of Analysis",kFALSE},
   {"TagsChain"   ,"","TagsChain",""                                    ,"StChainMaker","StChain","",kFALSE},
   {"TpcTag"      ,"","TagsChain",""                             ,"StTpcTagMaker","StTpcTagMaker","",kFALSE},
@@ -715,8 +715,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.95 2000/06/05 22:44:40 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.96 2000/06/09 13:02:53 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.96  2000/06/09 13:02:53  fisyak
+// Move l3 chain after StEventMaker
+//
 // Revision 1.95  2000/06/05 22:44:40  fisyak
 // Add chain P00h for year 1 data production
 //
