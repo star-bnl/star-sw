@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.143 2000/09/27 19:34:57 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.144 2000/09/30 14:24:53 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -154,7 +154,7 @@ Bfc_st BFC[] = {
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE}, 
   {"mwc"         ,"mwc","l0Chain","mwc_T,db,tpcDB"         ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
   {"trg"         ,"trg","l0Chain","trg_T,globT,db"         ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
-  {"tpc"       ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"     ,"StMaker","StChain","",kFALSE},
+  {"tpc"         ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StMaker","StChain","",kFALSE},
   {"Trs"         ,"","tpcChain","scl,tpcDB,tpc_daq,Simu"              ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"Mixer"         ,"tpc_raw","","","StMixerMaker","StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
   {"tpc_daq"     ,"tpc_raw","tpcChain","tpc_T"              ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
@@ -205,8 +205,10 @@ Bfc_st BFC[] = {
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain","emh"                    ,"StPreEclMaker","StPreEclMaker","",kFALSE},
   {"Epc"         ,"epc","PostChain","PreEcl,Match"                    ,"StEpcMaker","StEpcMaker","",kFALSE},
-  {"Rrs"         ,"","","sim_T,Simu"                                  ,"StRrsMaker","StRrsMaker","",kFALSE},
-  {"rich"        ,"","","sim_T,globT"                      ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
+  {"rich"        ,"RichChain","","rch,RichPiD",                    "StMaker","StChain","RICH chain",kFALSE},
+  {"Rrs"         ,"","RichChain","sim_T,Simu"                         ,"StRrsMaker","StRrsMaker","",kFALSE},
+  {"rch"         ,"","RichChain","sim_T,globT"             ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
+  {"RichPiD"     ,"","RichChain","Event"                      ,"StRichPIDMaker","StRichPIDMaker","",kFALSE},
   {"l3"          ,"l3Chain","","l3cl,l3t"                                   ,"StMaker","StChain","",kFALSE},
   {"l3cl"        ,"","l3Chain","l3_T"               ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3Chain","l3_T"                       ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
@@ -226,7 +228,8 @@ Bfc_st BFC[] = {
   {"QA"          ,"QA","","globT,SCL,global"                        ,"St_QA_Maker","St_QA_Maker","",kFALSE},
   {"EventQA"     ,"EventQA","","Event"                           ,"StEventQAMaker","St_QA_Maker","",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
-  {"dEdxTree"    ,"dEdx","","in,globT,tpcDb,Event"          ,"StDeDxTreeMaker","StDeDxTreeMaker","",kFALSE},
+  {"dEdxTree"    ,"dEdx","","in,globT,tpcDb,Event","StDeDxTreeMaker","StAnalysisMaker,StDeDxTreeMaker"
+                                                                                                ,"",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display"     ,"","","SCL,St_geom"               ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
   {"Mc"          ,"McChain","","sim_T,globT,McAss,McAna"                    ,"StMaker","StChain","",kFALSE},
@@ -690,12 +693,10 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 	ParseString((const TString )*fInFile,Files);
 	TIter next(&Files);
 	TObjString *File;
-	Bool_t daqF = kFALSE;
 	while ((File = (TObjString *) next())) {
 	  TString string = File->GetString();
 	  char *filename = string.Data();
 	  int lfilename = strlen(filename);
-	  if (!strcmp(filename+lfilename-4,".daq" )) daqF = kTRUE;
 	  if (!strstr(string.Data(),"*") &&
 	      gSystem->AccessPathName(string.Data())) {// file does not exist
 	    printf (" *** NO FILE: %s, exit!\n", string.Data());
@@ -704,10 +705,6 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 	  else fSetFiles->AddFile(File->String().Data());
 	}
 	Files.Delete();
-	if (!daqF) {
-	  SafeDelete(m_EvtHddr);
-	  SetInput("EvtHddr","dst/RunEvent");
-	}
       }
     }
   }
