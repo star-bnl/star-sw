@@ -9,14 +9,14 @@
 #define StV0FinderMaker_hh
 
 #include "StMaker.h"
-#include "StThreeVectorD.hh"
+#include "StPhysicalHelixD.hh"
+#include <vector>
 
 class St_ev0_ev0par2;
 class ev0_ev0par2_st;
 class StEvent;
 class StV0Vertex;
 class StTrack;
-class StPhysicalHelixD;
 
 
 //Betty
@@ -174,7 +174,7 @@ class StV0FinderMaker : public StMaker {
   //end Betty
   
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StV0FinderMaker.h,v 1.8 2004/04/02 08:56:22 faivre Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StV0FinderMaker.h,v 1.9 2004/08/11 21:26:38 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
  protected:
   virtual Int_t Prepare();         //!
@@ -191,8 +191,6 @@ class StV0FinderMaker : public StMaker {
   double ptV0sq;                   //! 
   double Bfield;		   //!
   unsigned short trks;		   //!
-  unsigned short ptrks;		   //!
-  unsigned short ntrks;		   //!
   Bool_t prepared;		   //!
   Bool_t useExistingV0s;           //!
   Bool_t dontZapV0s;		   //!
@@ -208,17 +206,21 @@ class StV0FinderMaker : public StMaker {
   int ITTFflag;		           //!
   int TPTflag;                     //!
   
-  int maxtracks;                   //!
-  StTrack** trk;                   //!
-  unsigned short* ntrk;            //!
-  unsigned short* ptrk;            //!
-  short* hits;                     //!
-  int* detId;                      //!
-  double* pt;                      //!
-  double* ptot;                    //!
-  unsigned short *trkID;           //!
-  StPhysicalHelixD* heli;          //!
+  vector<StTrack*> trk;            //!
+  vector<unsigned short> ntrk;     //!
+  vector<unsigned short> ptrk;     //!
+  vector<short> hits;              //!
+  vector<int> detId;               //!
+  vector<double> pt;               //!
+  vector<double> ptot;             //!
+  vector<StPhysicalHelixD> heli;   //!
+  vector<unsigned short> trkID;    //!
+  void ExpandVectors(unsigned short size);
+
   StThreeVectorD mainv;            //!
+
+ private:
+  static StV0FinderMaker* mInstance;      //!
 
   ClassDef(StV0FinderMaker,0)
 
@@ -227,8 +229,11 @@ class StV0FinderMaker : public StMaker {
 #endif
 
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.h,v 1.8 2004/04/02 08:56:22 faivre Exp $
+// $Id: StV0FinderMaker.h,v 1.9 2004/08/11 21:26:38 genevb Exp $
 // $Log: StV0FinderMaker.h,v $
+// Revision 1.9  2004/08/11 21:26:38  genevb
+// Trade static arrays for vectors
+//
 // Revision 1.8  2004/04/02 08:56:22  faivre
 // Use actual TPT flag rather than "not ITTF" for TPT tracks.
 //

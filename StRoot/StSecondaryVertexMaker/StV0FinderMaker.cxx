@@ -32,23 +32,8 @@
  #define gufld F77_NAME(gufld,GUFLD) */
 
 
-#define MAXTRACKS 10000
-#define MAXSTRACK  6500
 
-
-
-
-static StTrack* STATtrk[MAXTRACKS];
-static unsigned short STATptrk[MAXSTRACK];
-static unsigned short STATntrk[MAXSTRACK];
-static short STAThits[MAXTRACKS];
-static int  STATdetId[MAXTRACKS];
-static double STATpt[MAXTRACKS];
-static double STATptot[MAXTRACKS];
-static StPhysicalHelixD STATheli[MAXTRACKS];
-static unsigned short STATtrkID[MAXTRACKS];
-
-
+StV0FinderMaker* StV0FinderMaker::mInstance = 0;
 
 ClassImp(StV0FinderMaker)
  
@@ -64,8 +49,6 @@ ClassImp(StV0FinderMaker)
   // Initializes everything that wasn't yet :
   ptV0sq = 0.;
   trks = 0;
-  ptrks = 0;
-  ntrks = 0;
   det_id_v0 = 0;
   ITTFflag = 0;
   TPTflag = 0;
@@ -73,26 +56,16 @@ ClassImp(StV0FinderMaker)
   mainv.setY(0.);
   mainv.setZ(0.);
   
-  // Assign pointers for static arrays
-  maxtracks = MAXTRACKS;
-  trk = STATtrk;
-  ptrk = STATptrk;
-  ntrk = STATntrk;
-  hits = STAThits;
-  detId = STATdetId;
-  pt = STATpt;
-  ptot = STATptot;
-  heli = STATheli;
-  trkID = STATtrkID;
-
   // Check for multiple instances
-  if (hits[maxtracks-1] == -2)
+  if (mInstance != 0)
     gMessMgr->Warning() << "StV0FinderMaker(" << name <<
       ") : MORE THAN ONE INSTANCE!" << endm;
-  else hits[maxtracks-1] = -2;
+  else mInstance = this;
 
   ptV0sq = 3.5*3.5;
   Bfield = 1.e-10; //Random value for initialisation.
+                   //If it isn't changed to correct value in
+                   // Prepare() then something has gone wrong!
 }
 
 
@@ -301,8 +274,6 @@ Int_t StV0FinderMaker::Prepare() {
   
   // Find which global tracks to use
   trks=0;
-  ntrks=0;
-  ptrks=0;
   for (i=0; i<nNodes; i++) {
     for (j=0; j<theNodes[i]->entries(global); j++) {
 
@@ -328,6 +299,8 @@ Int_t StV0FinderMaker::Prepare() {
       //Cut: track flag
       if (tri->flag() <= 0) continue;
       
+      if (trks >= trk.size()) ExpandVectors(trks);
+
       // Determine detector id of track i
       const StTrackTopologyMap& map = tri->topologyMap();
       Bool_t tpcHit = map.hasHitInDetector(kTpcId);
@@ -374,8 +347,8 @@ Int_t StV0FinderMaker::Prepare() {
                else Bfield = fabs(Bfield);
         }
       
-      if (triGeom->charge() > 0) ptrk[ptrks++] = trks;
-      else if (triGeom->charge() < 0) ntrk[ntrks++] = trks;
+      if (triGeom->charge() > 0) ptrk.push_back(trks);
+      else if (triGeom->charge() < 0) ntrk.push_back(trks);
       trks++;
     }
   }
@@ -444,7 +417,7 @@ Int_t StV0FinderMaker::Make() {
   // Loop over track pairs to find V0s
 
   //i track is positive
-  for (ii=0; ii<ptrks; ii++) {
+  for (ii=0; ii<ptrk.size(); ii++) {
     i = ptrk[ii];
 
     xci.Set(heli[i].xcenter(),heli[i].ycenter());
@@ -453,7 +426,7 @@ Int_t StV0FinderMaker::Make() {
     rad_i = ri.Mod();
 
     //j track is negative
-    for (jj=0; jj<ntrks; jj++) {
+    for (jj=0; jj<ntrk.size(); jj++) {
       j = ntrk[jj];
 
       if (GetTrackerUsage() == kTrackerUseBOTH)
@@ -769,6 +742,8 @@ Int_t StV0FinderMaker::Make() {
 
 void StV0FinderMaker::Clear(Option_t *option){
   prepared = kFALSE;
+  ptrk.clear();
+  ntrk.clear();
   if(useEventModel){
     if(mMuDstMaker){
       if(event){
@@ -820,8 +795,25 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.22 2004/04/15 19:41:35 jeromel Exp $
+void StV0FinderMaker::ExpandVectors(unsigned short size) {
+  unsigned int newsize = trk.size();
+  while (newsize <= size) newsize += 512;
+  for (unsigned int i=trk.size(); i<newsize; i++) {
+    trk.push_back(0);
+    hits.push_back(0);
+    detId.push_back(0);
+    pt.push_back(0);
+    ptot.push_back(0);
+    heli.push_back(StPhysicalHelixD());
+    trkID.push_back(0);
+  }
+}
+//_____________________________________________________________________________
+// $Id: StV0FinderMaker.cxx,v 1.23 2004/08/11 21:26:38 genevb Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.23  2004/08/11 21:26:38  genevb
+// Trade static arrays for vectors
+//
 // Revision 1.22  2004/04/15 19:41:35  jeromel
 // Mainly undo recent patch which is logically right (but over-estimate actual coding standards)
 //
