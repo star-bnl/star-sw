@@ -56,7 +56,7 @@ for ($i = 0; $i < 2; $i++) {
      for ($j = 0; $j < 2; $j++) {
       for ($ll = 0; $ll < scalar(@hc_dir); $ll++) {
    $OUT_DIR[$ii] = $TOP_DIRD . $node_dir[$i] . "/". $dir_year[$j] . "/" . $hc_dir[$ll];
-    print "Output Dir for NEW :", $OUT_DIR[$ii], "\n";
+#    print "Output Dir for NEW :", $OUT_DIR[$ii], "\n";
         $ii++;
       }
   }
@@ -84,6 +84,7 @@ struct FileAttr => {
 struct JFileAttr => {
        oldjbId   => '$',
        oldpath   => '$',
+       oldTime   => '$',
        oldfile   => '$',
        oldvail   => '$',
 };
@@ -174,7 +175,6 @@ struct JFileAttr => {
  my $logName; 
  my $crCode = "n\/a"; 
  my $pvpath;
- my $pvpath;
  my $pvjbId;
  my $pvavail;
 
@@ -188,7 +188,7 @@ $newAvail = "n\/a";
 
 #####  select files from JobStatusT with avail = 'Y' 
 
- $sql="SELECT jobID, path, logFile, avail FROM $JobStatusT WHERE path LIKE '%/test/new%' and avail = 'Y'";
+ $sql="SELECT jobID, path, logFile,  createTime, avail FROM $JobStatusT WHERE path LIKE '%/test/new%' and avail = 'Y'";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
    $cursor->execute;
@@ -205,7 +205,8 @@ $newAvail = "n\/a";
 
         ($$fObjAdr)->oldjbId($fvalue)   if( $fname eq 'jobID');
         ($$fObjAdr)->oldpath($fvalue)   if( $fname eq 'path');
-        ($$fObjAdr)->oldfile($fvalue)   if( $fname eq 'logFile');  
+        ($$fObjAdr)->oldfile($fvalue)   if( $fname eq 'logFile');
+        ($$fObjAdr)->oldTime($fvalue)   if( $fname eq 'createTime');  
         ($$fObjAdr)->oldvail($fvalue)   if( $fname eq 'avail'); 
    }
 
@@ -224,21 +225,6 @@ $newAvail = "n\/a";
    $rv = $dbh->do($sql) || die $dbh->errstr;
    $new_id = $dbh->{'mysql_insertid'};
 
-
-##### mark previous files as unavailable
-      
-        foreach my $eachOldJob (@old_jobs) {
-          $pvjbId = ($$eachOldJob)->oldjbId;
-          $pvpath = ($$eachOldJob)->oldpath;
-          $pvfile = ($$eachOldJob)->oldfile;
-          $pvavail = ($$eachOldJob)->oldvail;
-          
-          $newAvail = "N";
-  print  "Changing availability for test files", "\n";
-  print  "files to be updated:", $pvjbId, " % ", $pvpath, " % ", $newAvail, "\n"; 
-
-         &updateJSTable();
-	}
 
 ####### read log files and fill in JobStatus
 
@@ -303,6 +289,24 @@ $newAvail = "n\/a";
 
            if( $ltime > 3600 ){         
 #   print "Log time: ", $ltime, "\n";
+
+       foreach my $eachOldJob (@old_jobs) {
+          $pvjbId = ($$eachOldJob)->oldjbId;
+          $pvpath = ($$eachOldJob)->oldpath;
+          $pvfile = ($$eachOldJob)->oldfile;
+          $pvTime = ($$eachOldJob)->oldTime;
+          $pvavail = ($$eachOldJob)->oldvail;
+          $pfullName = $pvpath . "/" . $pvfile;
+        
+       if( ($fullname eq $pfullName) and ($pvavail eq "Y") ) {
+
+         if( $timeS ne $pvTime) {
+ 
+          $newAvail = "N";
+  print  "Changing availability for old log files", "\n";
+  print  "files to be updated:", $pvjbId, " % ",$mpath, " % ",$pvTime, " % ", $newAvail, "\n"; 
+
+     &updateJSTable();
       
         &logInfo("$fullname", "$platf");
 
@@ -313,8 +317,8 @@ $newAvail = "n\/a";
       $crCode = "n\/a"; 
 
   print  "Filling JobStatus with NEW log files \n";
-  print  "files to be inserted:", $mjID, " % ",$mpath, " % ",$logName, " % ", $mavail, "\n";  
-         &fillJSTable();
+  print  "files to be inserted:", $mjID, " % ",$mpath, " % ",$timeS , " % ", $mavail, "\n";  
+      &fillJSTable();
 
        $fObjAdr = \(LFileAttr->new());
       ($$fObjAdr)->jbId($mjID);
@@ -325,11 +329,19 @@ $newAvail = "n\/a";
       ($$fObjAdr)->evSkp($EvSkip);
       $testJobStFiles[$nJobStFiles] = $fObjAdr;
       $nJobStFiles++;
-    }
+      }else{
+      } 
+     }else{
+     next;
+     }
+      last;
+        }
+     }
     }else {
       next;
     }
    }
+
  closedir DIR;
    }
  }
@@ -401,8 +413,6 @@ foreach  $eachOutNDir (@OUT_DIR) {
  
 	       if ( $jfpath eq $lgFile ) {
  
-#       print "File info: ", $libL," % ", $platf, " % ", $fullname, " % ", $geom, " % ", $EvType," % ", $EvGen, " % ", $EvReq," % ", $comp," % ", $EvDone," % ", $libV,  "\n";
-   
      ($size, $mTime) = (stat($fullname))[7, 9];
      ($sec,$min,$hr,$dy,$mo,$yr) = (localtime($mTime))[0,1,2,3,4,5];
      $mo = sprintf("%2.2d", $mo+1);
@@ -467,7 +477,7 @@ $nold_set= 0;
 
 #####  select all files from FilesCatalog from NEW direcroties
 
- $sql="SELECT jobID, path, fName, avail FROM $FilesCatalogT WHERE path LIKE '%test/new%' AND avail = 'Y'";
+ $sql="SELECT jobID, path, fName, createTime, avail FROM $FilesCatalogT WHERE path LIKE '%test/new%' AND avail = 'Y'";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
    $cursor->execute;
@@ -484,7 +494,8 @@ $nold_set= 0;
         
         ($$fObjAdr)->oldjbId($fvalue)   if( $fname eq 'jobID');
         ($$fObjAdr)->oldpath($fvalue)   if( $fname eq 'path');
-        ($$fObjAdr)->oldfile($fvalue)   if( $fname eq 'fName'); 
+        ($$fObjAdr)->oldfile($fvalue)   if( $fname eq 'fName');
+        ($$fObjAdr)->oldTime($fvalue)   if( $fname eq 'createTime');  
         ($$fObjAdr)->oldvail($fvalue)   if( $fname eq 'avail'); 
    }
 
@@ -513,22 +524,6 @@ $nold_set= 0;
  my $mformat = "n\/a";
  my $mstatus = 0;
 
-#####  change avail for old files in NEW
-#####  in FilesCatalogT if new files available and fill in new files
-
-
-   foreach my $eachOldFile (@old_set) {
-          $pvjbId = ($$eachOldFile)->oldjbId;
-          $pvpath = ($$eachOldFile)->oldpath;
-          $pvfile = ($$eachOldFile)->oldfile;
-          $pvavail = ($$eachOldFile)->oldvail;
-          $pfullName = $pvpath . "/" . $pvfile;
-              $newAvail = "N";
-   print "Changing availability for test files", "\n";
-   print "file to be updated:", $pvjbId, " % ", $pfullName, " % ", $newAvail, "\n"; 
-   &updateDbTable();
-
-        }
 
         foreach my $eachTestFile (@testOutNFiles) {
 
@@ -572,9 +567,32 @@ $nold_set= 0;
             $mcomp    = ($$eachTestFile)->fcomp;
             $mavail   = "Y";
 
+  foreach my $eachOldFile (@old_set) {
+          $pvjbId = ($$eachOldFile)->oldjbId;
+          $pvpath = ($$eachOldFile)->oldpath;
+          $pvfile = ($$eachOldFile)->oldfile;
+          $pvTime = ($$eachOldFile)->oldTime;
+          $pvavail = ($$eachOldFile)->oldvail;
+          $pfullName = $pvpath . "/" . $pvfile;
+
+           if ($pfullName eq $thfullName) {
+             if ( $mcTime ne $pvTime ) {
+
+              $newAvail = "N";
+   print "Changing availability for test files", "\n";
+   print "file to be updated:", $pvjbId, " % ", $pfullName, " % ",$pvTime, " % ", $newAvail, "\n"; 
+   &updateDbTable();
+
+
     print "Filling Files Catalog with NEW output files\n";
-    print "file to be inserted:", $mjID, " % ",$thfullName, " % ", $mavail, "\n";
+    print "file to be inserted:", $mjID, " % ",$thfullName, " % ", $mcTime," % ", $mavail, "\n";
    &fillDbTable();
+           }else{
+            }
+        }else{          
+         next; 
+       }
+       }
 
       }
 
