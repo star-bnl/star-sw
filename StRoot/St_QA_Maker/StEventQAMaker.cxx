@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.50 2000/08/08 16:18:34 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.51 2000/08/17 17:47:53 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.51  2000/08/17 17:47:53  lansdell
+// for real data, only process events with # global tracks between 50 and 500 -> will later add code for various multiplicities
+//
 // Revision 1.50  2000/08/08 16:18:34  lansdell
 // combined MakeHistDE and MakeHistPID code and simplified dE/dx code (factor of 7 faster)
 //
@@ -199,12 +202,35 @@ Int_t StEventQAMaker::Make() {
   event = (StEvent *)GetInputDS("StEvent");
   if (event) {
     // only process if a primary vertex exists !!!
+    //cout << "event type : " << event->info()->type() << endl;
     if (event->primaryVertex()) {
+      int multiplicity = event->trackNodes().size();
       mNullPrimVtx->Fill(1);
-      return StQABookHist::Make();
+      // process real events depending on multiplicity
+      if (event->info()->type() == "NONE") {
+	if (multiplicity >= 50 && multiplicity <= 500) {
+	  // fill low multiplicity histogram set
+	  return StQABookHist::Make();
+	}
+	if (multiplicity > 500 && multiplicity <= 1000) {
+	  // fill medium multiplicity histogram set
+	}
+	if (multiplicity > 1000) {
+	  // fill high multiplicity histogram set
+	}
+      }
+      // process Monte Carlo events
+      else if (event->info()->type() == "VENU") {
+	return StQABookHist::Make();
+      }
+      else {
+	// if unknown type, go ahead and fill histograms
+	cout << "Warning in StEventQAMaker::Make(): unknown event type!" << endl;
+	return StQABookHist::Make();
+      }
     }
     else {
-      cout << "Error in StEventQAMaker::Make(): no primary vertex found!" << endl;
+      cout << "Warning in StEventQAMaker::Make(): no primary vertex found!" << endl;
       mNullPrimVtx->Fill(-1);
       return kStOk;
     }
