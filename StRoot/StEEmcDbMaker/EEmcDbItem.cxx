@@ -1,4 +1,4 @@
-// $Id: EEmcDbItem.cxx,v 1.8 2004/03/12 21:53:39 balewski Exp $
+// $Id: EEmcDbItem.cxx,v 1.9 2004/03/19 21:31:53 balewski Exp $
 
 #include <stdio.h>
 #include <string.h>
@@ -25,7 +25,7 @@ int EEmcDbItem::isEmpty() const{
 //--------------------------------------------------
 //--------------------------------------------------
 void EEmcDbItem::print() const{
-  printf("DbIndexItem:");
+  printf("EEmcDbItem:");
 
   if(name[0]==0) {
     printf(" item not defined ???\n");
@@ -141,7 +141,7 @@ setTube(text);
 //--------------------------------------------------
 //--------------------------------------------------
 void EEmcDbItem::setTube(char *text) {
-  strncpy(tube,text,StEEmcNameLen); 
+  strncpy(tube,text,StEEmcNameLen-1); 
   // cleanup termintaing character
   int i;
   for(i=0;i<StEEmcNameLen;i++) {
@@ -157,7 +157,7 @@ void EEmcDbItem::setTube(char *text) {
 //--------------------------------------------------
 //--------------------------------------------------
 void EEmcDbItem::setName(char *text) {
-  strncpy(name,text,StEEmcNameLen); 
+  strncpy(name,text,StEEmcNameLen-1); 
   sec=atoi(text);
   if(name[2]=='U' || name[2]=='V' ) {
     plane=name[2];
@@ -180,6 +180,9 @@ void EEmcDbItem::setName(char *text) {
 }
 
 // $Log: EEmcDbItem.cxx,v $
+// Revision 1.9  2004/03/19 21:31:53  balewski
+// new EEMC data decoder
+//
 // Revision 1.8  2004/03/12 21:53:39  balewski
 // bug with not cleared 'plane'
 //
