@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.22 2002/04/22 22:48:11 laue Exp $
+ * $Id: StHbtPair.cc,v 1.23 2002/09/25 19:23:25 rcwells Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.23  2002/09/25 19:23:25  rcwells
+ * Added const to emissionAngle()
+ *
  * Revision 1.22  2002/04/22 22:48:11  laue
  * corrected calculation of opening angle
  *
@@ -161,7 +164,7 @@ double StHbtPair::rap() const
   return (tmp);
 }
 //_________________
-double StHbtPair::emissionAngle() {
+double StHbtPair::emissionAngle() const {
   double pxTotal = this->fourMomentumSum().x();
   double pyTotal = this->fourMomentumSum().y();
   double angle = atan2(pyTotal,pxTotal)*180.0/3.1415926536;
