@@ -1,5 +1,8 @@
-// $Id: StPreVertexMaker.cxx,v 1.2 2000/02/02 19:53:55 wdeng Exp $
+// $Id: StPreVertexMaker.cxx,v 1.3 2000/02/16 16:13:08 genevb Exp $
 // $Log: StPreVertexMaker.cxx,v $
+// Revision 1.3  2000/02/16 16:13:08  genevb
+// Correction to not call evr_am with <1 tracks
+//
 // Revision 1.2  2000/02/02 19:53:55  wdeng
 // Assigned -1 to covariance entry of evrpar.
 //
@@ -70,6 +73,9 @@ Int_t StPreVertexMaker::Make(){
   // If tptrack exists, we call evr_am
   if( !tptrack ) {
     gMessMgr->Warning() << "StPreVertexMaker: no tptrack. Exit without doing anything!" << endm;
+    return kStWarn;    
+  } else if ( !(tptrack->GetNRows() ) {
+    gMessMgr->Warning() << "StPreVertexMaker: zero rows in tptrack. Exit without doing anything!" << endm;
     return kStWarn;    
   } else {
     Int_t numRowTptrack = tptrack->GetNRows();
