@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.h,v 1.10 1999/07/20 02:16:59 lasiuk Exp $
+// $Id: StTrsMaker.h,v 1.11 1999/10/04 17:33:43 long Exp $
 //
 // $Log: StTrsMaker.h,v $
+// Revision 1.11  1999/10/04 17:33:43  long
+// add mUseParameterizedSignalGenerator
+//
 // Revision 1.10  1999/07/20 02:16:59  lasiuk
 // bring in line with new options (TSS algorithms)
 //
@@ -77,7 +80,7 @@ class StTrsUnpacker;
 
 class StTrsMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.10 1999/07/20 02:16:59 lasiuk Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.11 1999/10/04 17:33:43 long Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
@@ -110,6 +113,9 @@ class StTrsMaker : public StMaker {
     // should be a boolean
     int                         mProcessPseudoPadRows;
     
+    // Which Algorithm to be used:
+  int                           mUseParameterizedSignalGenerator;
+
 protected:
 
 public: 
@@ -125,7 +131,7 @@ public:
     
   virtual const char *GetCVS() const
   {
-      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.10 1999/07/20 02:16:59 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.11 1999/10/04 17:33:43 long Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StTrsMaker, 1)   //StAF chain virtual base class for Makers
 
