@@ -1,7 +1,7 @@
-* $Id: tfs_gen_padres.F,v 1.5 1998/04/01 19:45:06 sakrejda Exp $
+* $Id: tfs_gen_padres.F,v 1.6 1998/04/02 20:54:40 sakrejda Exp $
 * $Log: tfs_gen_padres.F,v $
-* Revision 1.5  1998/04/01 19:45:06  sakrejda
-* crossing angle calculation protected against gstar mementa being EXACTLY 0
+* Revision 1.6  1998/04/02 20:54:40  sakrejda
+* more proofing...
 *
 * Revision 1.4  1998/03/28 01:08:17  sakrejda
 * Protected agains dividing by 0, sometimes gstar gives hits with 0 ionisation which translates into 0 electrons. In such cases I set number of electrons to 1
@@ -175,10 +175,11 @@ C     pad-crossing angle.  -- Apr 10, 96  --- DSW ---
                p_global(2) = py
                p_global(3) = pz
                iret  = tgc_global_to_local_p(i,p_global,p_local)
+C
                if(abs(p_local(2)).gt.0.001) then
                     alpha = atan(p_local(1)/p_local(2)) ! angle wrt normal
                else
-                    alpha = C_PI_2
+                    alpha = C_PI_2-0.01
                endif
 c
                theta = C_PI_2 - abs(alpha) ! angle wrt pad row
