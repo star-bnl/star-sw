@@ -12,7 +12,7 @@
    Call magpgeo
    Call mfldgeo
    Call ggclos
-   call agphysi
+*  call agphysi
 *
    end
 
