@@ -52,12 +52,12 @@
      gSystem->Load("St_evg_Maker");
      gSystem->Load("St_tcl_Maker");
      gSystem->Load("St_tss_Maker");
-     gSystem->Load("St_ebye_Maker");
-     gSystem->Load("St_laser_Maker");
-     gSystem->Load("St_run_Maker");
-     gSystem->Load("St_tpctest_Maker");
+//     gSystem->Load("St_ebye_Maker");
+//     gSystem->Load("St_laser_Maker");
+//     gSystem->Load("St_run_Maker");
+//     gSystem->Load("St_tpctest_Maker");
 
-     gSystem->Load("St_calib_Maker");
+//     gSystem->Load("St_calib_Maker");
    }
    
    
@@ -112,10 +112,8 @@
                        ,"StMaker",     "StChain",       "St_NodeView"
                        ,"table_head_st"
                        ,"St_srs_Maker","St_tpt_Maker","St_xdfin_Maker"
-                       ,"St_evg_Maker","St_tcl_Maker","St_tss_Maker"
-                       ,"St_ebye_Maker","St_laser_Maker","St_run_Maker"
-                        };
-  Int_t nclass = 24;
+                      };
+  Int_t nclass = 15;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
