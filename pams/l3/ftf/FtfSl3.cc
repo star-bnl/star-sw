@@ -6,6 +6,7 @@
 **:           oct 11, 1999  ppy call rawToLocal with variables instead of pointers
 **:           oct 11, 1999  ppy phiMin, phiMax changed to 0 and 2 pi
 **:           oct 21, 1999  ppy call to rawToGlobal with variables rather than pointers
+**:           oct 22, 1999  ppy back to pointers to make Christof happy
 **:   
 **:<------------------------------------------------------------------*/
 #include "FtfSl3.h"
@@ -211,7 +212,7 @@ int FtfSl3::readMezzanine (int sector, struct TPCMZCLD_local *mzcld) {
 		   ft = (double) xt->t / 64.0 ;
 		   //printf("%02d %02d %9.5f %9.5f %6d %3d\n", SB, row,
 		   //       fp, ft, c->c , c->f) ;
-		   rawToGlobal(sector, row, fp, ft, x, y, z);
+		   rawToGlobal(sector, row, fp, ft, &x, &y, &z);
 
 		   //printf(" %d  %d  %f  %f  %f  %d  %d\n",
 		   //	  sector, row, x, y, z, c->c, c->f);
