@@ -136,23 +136,23 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 	//Clear the hit entry
 	fillHitEntry(track);
 
-	  cout <<"Look at the array"<<endl;
-	  for (unsigned int h=0; h<mEntry->hitCounter(); ++h) {
-	     TObject* temp = mEntry->array()[h];
-	     StiHitEntry* hit = static_cast<StiHitEntry*>(temp);
-	     /*cout <<"\tGlobal Pos:\t"
-	            <<hit->hitGlobalX<<"\t"
-	            <<hit->hitGlobalY<<"\t"
-	            <<hit->hitGlobalZ<<endl;
-	     */
-	     mEntry->stiTrackResX+=hit->hitLocalX-hit->nodeLocalX;
-	     mEntry->stiTrackResY+=hit->hitLocalY-hit->nodeLocalY;
-	     mEntry->stiTrackResZ+=hit->hitLocalZ-hit->nodeLocalZ;
-	  }
-	  mEntry->stiTrackResX=mEntry->stiTrackResX/mEntry->hitCounter();
-	  mEntry->stiTrackResY=mEntry->stiTrackResY/mEntry->hitCounter();
-	  mEntry->stiTrackResZ=mEntry->stiTrackResZ/mEntry->hitCounter();
-
+	//cout <<"Look at the array"<<endl;
+	for (unsigned int h=0; h<mEntry->hitCounter(); ++h) {
+	    TObject* temp = mEntry->array()[h];
+	    StiHitEntry* hit = static_cast<StiHitEntry*>(temp);
+	    /*cout <<"\tGlobal Pos:\t"
+	      <<hit->hitGlobalX<<"\t"
+	      <<hit->hitGlobalY<<"\t"
+	      <<hit->hitGlobalZ<<endl;
+	    */
+	    mEntry->stiTrackResX+=hit->hitLocalX-hit->nodeLocalX;
+	    mEntry->stiTrackResY+=hit->hitLocalY-hit->nodeLocalY;
+	    mEntry->stiTrackResZ+=hit->hitLocalZ-hit->nodeLocalZ;
+	}
+	mEntry->stiTrackResX=mEntry->stiTrackResX/mEntry->hitCounter();
+	mEntry->stiTrackResY=mEntry->stiTrackResY/mEntry->hitCounter();
+	mEntry->stiTrackResZ=mEntry->stiTrackResZ/mEntry->hitCounter();
+	
 	mTree->Fill();
     }
 }
