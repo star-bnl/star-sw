@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEnumerations.h,v 1.2 2000/04/21 19:11:47 nystrand Exp $
+// $Id: StPeCEnumerations.h,v 1.3 2001/02/12 21:15:40 yepes Exp $
 // $Log: StPeCEnumerations.h,v $
+// Revision 1.3  2001/02/12 21:15:40  yepes
+// New version of StPeCMaker, lots of changes
+//
 // Revision 1.2  2000/04/21 19:11:47  nystrand
 // Add muons, electrons
 //
@@ -13,5 +16,6 @@
 //////////////////////////////////////////////////////////////////////
 #ifndef StPeCEnumerations_hh
 #define StPeCEnumerations_hh
-enum StPeCParticle {pion, kaon, proton, electron, muon};
+const Int_t nSpecies = 5 ;
+enum StPeCSpecies {pion, kaon, proton, electron, muon};
 #endif
