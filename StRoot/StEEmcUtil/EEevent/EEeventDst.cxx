@@ -1,57 +1,4 @@
-// $Id: EEeventDst.cxx,v 1.5 2003/10/02 20:52:45 balewski Exp $
-// $Log: EEeventDst.cxx,v $
-// Revision 1.5  2003/10/02 20:52:45  balewski
-// more functionality for print()
-//
-// Revision 1.4  2003/09/11 19:40:56  zolnie
-// updates for gcc3.2
-//
-// Revision 1.3  2003/07/01 14:13:13  balewski
-// no clue
-//
-// Revision 1.2  2003/02/21 22:21:47  balewski
-// time stamp added
-//
-// Revision 1.1  2003/02/20 05:15:14  balewski
-// reorganization
-//
-// Revision 1.1  2003/01/28 23:16:06  balewski
-// start
-//
-// Revision 1.8  2002/11/30 20:03:15  balewski
-// consistent with FeeRawTTree
-//
-// Revision 1.7  2002/11/12 20:08:29  balewski
-// some cleanup
-//
-// Revision 1.6  2002/11/11 21:22:48  balewski
-// EEMC added to StEvent
-//
-// Revision 1.5  2002/10/01 06:03:15  balewski
-// added smd & pre2 to TTree, tof removed
-//
-// Revision 1.4  2002/09/26 14:48:28  balewski
-// biger buffer
-//
-// Revision 1.3  2002/09/25 16:47:55  balewski
-// cleanup , cut in geant time for twoer-like detectors
-//
-// Revision 1.2  2002/09/20 21:58:13  balewski
-// sum of MC hits over activ detectors
-// produce total tower energy with weight 1 1 1 1
-//
-// Revision 1.1.1.1  2002/09/19 18:58:54  zolnie
-// Imported sources
-//
-// Revision 1.1.1.1  2002/08/29 19:32:01  zolnie
-// imported sources
-//
-// Revision 1.2  2002/08/28 01:43:42  zolnie
-// version alpha - 2
-//
-// Revision 1.1  2002/08/26 19:46:12  zolnie
-// Initial revision
-//
+// $Id: EEeventDst.cxx,v 1.6 2003/11/12 19:59:06 balewski Exp $
 
 #include <cassert>
 #include <TClonesArray.h>
@@ -172,4 +119,62 @@ void EEeventDst:: sumRawMC(EEeventDst* eveOut,float minE) {
   }
      
 }
+
+
+// $Log: EEeventDst.cxx,v $
+// Revision 1.6  2003/11/12 19:59:06  balewski
+// I forgot what has changed
+//
+// Revision 1.5  2003/10/02 20:52:45  balewski
+// more functionality for print()
+//
+// Revision 1.4  2003/09/11 19:40:56  zolnie
+// updates for gcc3.2
+//
+// Revision 1.3  2003/07/01 14:13:13  balewski
+// no clue
+//
+// Revision 1.2  2003/02/21 22:21:47  balewski
+// time stamp added
+//
+// Revision 1.1  2003/02/20 05:15:14  balewski
+// reorganization
+//
+// Revision 1.1  2003/01/28 23:16:06  balewski
+// start
+//
+// Revision 1.8  2002/11/30 20:03:15  balewski
+// consistent with FeeRawTTree
+//
+// Revision 1.7  2002/11/12 20:08:29  balewski
+// some cleanup
+//
+// Revision 1.6  2002/11/11 21:22:48  balewski
+// EEMC added to StEvent
+//
+// Revision 1.5  2002/10/01 06:03:15  balewski
+// added smd & pre2 to TTree, tof removed
+//
+// Revision 1.4  2002/09/26 14:48:28  balewski
+// biger buffer
+//
+// Revision 1.3  2002/09/25 16:47:55  balewski
+// cleanup , cut in geant time for twoer-like detectors
+//
+// Revision 1.2  2002/09/20 21:58:13  balewski
+// sum of MC hits over activ detectors
+// produce total tower energy with weight 1 1 1 1
+//
+// Revision 1.1.1.1  2002/09/19 18:58:54  zolnie
+// Imported sources
+//
+// Revision 1.1.1.1  2002/08/29 19:32:01  zolnie
+// imported sources
+//
+// Revision 1.2  2002/08/28 01:43:42  zolnie
+// version alpha - 2
+//
+// Revision 1.1  2002/08/26 19:46:12  zolnie
+// Initial revision
+//
 

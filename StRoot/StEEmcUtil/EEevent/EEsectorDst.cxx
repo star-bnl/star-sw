@@ -1,58 +1,4 @@
-// $Id: EEsectorDst.cxx,v 1.6 2003/10/02 20:52:45 balewski Exp $
-// $Log: EEsectorDst.cxx,v $
-// Revision 1.6  2003/10/02 20:52:45  balewski
-// more functionality for print()
-//
-// Revision 1.5  2003/09/11 19:40:56  zolnie
-// updates for gcc3.2
-//
-// Revision 1.4  2003/07/01 14:13:13  balewski
-// no clue
-//
-// Revision 1.3  2003/02/20 20:13:15  balewski
-// fixxy
-// xy
-//
-// Revision 1.2  2003/02/20 05:15:14  balewski
-// reorganization
-//
-// Revision 1.1  2003/01/28 23:16:07  balewski
-// start
-//
-// Revision 1.8  2002/11/30 20:03:15  balewski
-// consistent with FeeRawTTree
-//
-// Revision 1.7  2002/10/03 00:30:46  balewski
-// tof taken away
-//
-// Revision 1.6  2002/10/01 06:03:16  balewski
-// added smd & pre2 to TTree, tof removed
-//
-// Revision 1.5  2002/09/27 19:10:37  balewski
-// aaa
-//
-// Revision 1.4  2002/09/25 16:47:55  balewski
-// cleanup , cut in geant time for twoer-like detectors
-//
-// Revision 1.3  2002/09/25 01:36:13  balewski
-// fixed TOF in geant
-//
-// Revision 1.2  2002/09/20 21:58:13  balewski
-// sum of MC hits over activ detectors
-// produce total tower energy with weight 1 1 1 1
-//
-// Revision 1.1.1.1  2002/09/19 18:58:54  zolnie
-// Imported sources
-//
-// Revision 1.1.1.1  2002/08/29 19:32:01  zolnie
-// imported sources
-//
-// Revision 1.2  2002/08/28 01:43:42  zolnie
-// version alpha - 2
-//
-// Revision 1.1  2002/08/26 19:46:12  zolnie
-// Initial revision
-//
+// $Id: EEsectorDst.cxx,v 1.7 2003/11/12 19:59:06 balewski Exp $
 
 #include <cassert>
 #include <TClonesArray.h>
@@ -168,6 +114,7 @@ void EEsectorDst::sumRawMC(EEsectorDst *outSec, float minE) {
 
   sumRawMCtw(Pre1Hits,sum1,mx);
   sumRawMCtw(Pre2Hits,sum2,mx);
+
   sumRawMCsmd(SmdUHits ,sumU,mx2); 
   sumRawMCsmd(SmdVHits ,sumV,mx2); 
   sumRawMCtw(TwHits  ,sum3,mx); 
@@ -199,7 +146,7 @@ void EEsectorDst::sumRawMC(EEsectorDst *outSec, float minE) {
       addTwHit(sub,eta,ener1,outSec->Pre1Hits); 
     
     if(ener2>minE)  //Pre2
-      addTwHit(sub,eta,ener1,outSec->Pre2Hits); 
+      addTwHit(sub,eta,ener2,outSec->Pre2Hits); 
     
     if(ener14>minE)  //Tower
       addTwHit(sub,eta,ener14,outSec->TwHits); 
@@ -234,7 +181,8 @@ void EEsectorDst::sumRawMC(EEsectorDst *outSec, float minE) {
 //---------------------------------------------------
 //---------------------------------------------------
 void EEsectorDst::sumRawMCtw(TClonesArray *inH, float* sum, int mx) {
-  
+  //printf("\n \ncall  EEsectorDst::sumRawMCtw\n");
+
   int j;
   for(j=0;j<mx;j++) sum[j]=0;
   
@@ -248,7 +196,7 @@ void EEsectorDst::sumRawMCtw(TClonesArray *inH, float* sum, int mx) {
     float ener;
 
     hit->get(sub,eta,ener);
-    // printf("    index=%d sub=%c etaBin=%d ener=%f \n",index, sub, eta,ener);
+    //printf("    index=%d sub=%c etaBin=%d ener=%f \n",index, sub, eta,ener);
     
     nOK++;
 
@@ -256,7 +204,7 @@ void EEsectorDst::sumRawMCtw(TClonesArray *inH, float* sum, int mx) {
     assert(index>=0 && index<mx);
     sum[index]+=ener; 
   }
-  //  printf("sumRawMCtw() accepted %d of %d raw GEANT hits\n",nOK,inH->GetEntries());
+  // printf("sumRawMCtw() accepted %d of %d raw GEANT hits\n",nOK,inH->GetEntries());
 }
 
 
@@ -286,6 +234,63 @@ void EEsectorDst::sumRawMCsmd(TClonesArray *inH, float* sum, int mx) {
   //  printf("sumRawMCsmd() accepted %d of %d raw GEANT hits\n",nOK,inH->GetEntries());
 }
 
+// $Log: EEsectorDst.cxx,v $
+// Revision 1.7  2003/11/12 19:59:06  balewski
+// I forgot what has changed
+//
+// Revision 1.6  2003/10/02 20:52:45  balewski
+// more functionality for print()
+//
+// Revision 1.5  2003/09/11 19:40:56  zolnie
+// updates for gcc3.2
+//
+// Revision 1.4  2003/07/01 14:13:13  balewski
+// no clue
+//
+// Revision 1.3  2003/02/20 20:13:15  balewski
+// fixxy
+// xy
+//
+// Revision 1.2  2003/02/20 05:15:14  balewski
+// reorganization
+//
+// Revision 1.1  2003/01/28 23:16:07  balewski
+// start
+//
+// Revision 1.8  2002/11/30 20:03:15  balewski
+// consistent with FeeRawTTree
+//
+// Revision 1.7  2002/10/03 00:30:46  balewski
+// tof taken away
+//
+// Revision 1.6  2002/10/01 06:03:16  balewski
+// added smd & pre2 to TTree, tof removed
+//
+// Revision 1.5  2002/09/27 19:10:37  balewski
+// aaa
+//
+// Revision 1.4  2002/09/25 16:47:55  balewski
+// cleanup , cut in geant time for twoer-like detectors
+//
+// Revision 1.3  2002/09/25 01:36:13  balewski
+// fixed TOF in geant
+//
+// Revision 1.2  2002/09/20 21:58:13  balewski
+// sum of MC hits over activ detectors
+// produce total tower energy with weight 1 1 1 1
+//
+// Revision 1.1.1.1  2002/09/19 18:58:54  zolnie
+// Imported sources
+//
+// Revision 1.1.1.1  2002/08/29 19:32:01  zolnie
+// imported sources
+//
+// Revision 1.2  2002/08/28 01:43:42  zolnie
+// version alpha - 2
+//
+// Revision 1.1  2002/08/26 19:46:12  zolnie
+// Initial revision
+//
 
 
 
