@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.185 2001/04/03 15:53:22 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.186 2001/04/03 16:43:15 didenko Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -204,7 +204,7 @@ Bfc_st BFC[] = {
                                        "StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
   {"svt"         ,"svtChain","","svt_T,SvtCL,Est"                           ,"StMaker","StChain","",kFALSE},
   {"sss"         ,"","","SvtSlowSim"                              ,"","","Short cut for SvtSlowSim",kFALSE},
-  {"SvtSlowSim"  ,"SvtSlowSim","svtChain","SvtCL,Simu,SvtSeq,SvtClu,SvtCluAnal"
+  {"SvtSlowSim"  ,"SvtSlowSim","svtChain","SvtCL,Simu,SvtSeq,SvtClu,SvtCluAnal,SvtHit"
                                                   ,"StSvtSimulationMaker","StSvtSimulationMaker","",kFALSE},
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                                             ,"","","",kFALSE},
   {"srs"         ,"svt_hits","svtChain","tls,Simu,SvtCL,-SvtCL,-sss,-SvtSlowSim,Simu"
