@@ -1,6 +1,9 @@
-//$Id: StLaserEvent.h,v 1.5 2001/03/23 15:27:59 love Exp $
+//$Id: StLaserEvent.h,v 1.6 2001/07/17 17:16:41 love Exp $
 // Header file for TPC Laser event - Bill Love
 //$Log: StLaserEvent.h,v $
+//Revision 1.6  2001/07/17 17:16:41  love
+//Add phi to laser track def
+//
 //Revision 1.5  2001/03/23 15:27:59  love
 //Updated README text
 //
@@ -108,7 +111,7 @@ public:
          Int_t q, Float_t Chixy, Float_t Chiyz, Float_t dedx,
          Float_t invp, Float_t curvature, Float_t psi, Float_t tanl,
          Float_t phi0, Float_t r0, Float_t z0, Int_t sector, 
-         Float_t xl, Float_t yl, Float_t zl);
+         Float_t xl, Float_t yl, Float_t zl, Float_t phi);
 
    void          AddHit(Float_t q,Float_t x,Float_t y,Float_t z, 
                         Int_t row, Int_t track, Int_t flag);
@@ -226,6 +229,7 @@ private:
        Float_t     fxl;         // x of point of close app. to laser source.
        Float_t     fyl;         // y of point of closest approach
        Float_t     fzl;         // z of point of closest approach
+       Float_t     fphi;        // phi of track at the xl, yl, zl point.
        Int_t       fsector;     // sector of laser source point.
  
 public:
@@ -235,7 +239,7 @@ public:
          Int_t q, Float_t Chixy, Float_t Chiyz, Float_t dedx,
          Float_t invp, Float_t curvature, Float_t psi, Float_t tanl,
          Float_t phi0, Float_t r0, Float_t z0, Int_t sector, Float_t xl,
-         Float_t yl, Float_t zl);
+         Float_t yl, Float_t zl, Float_t phi);
 
    virtual ~Track() { }
    // Float_t       GetPx() const { return fPx; }
@@ -252,7 +256,7 @@ public:
    Float_t       GetPsi() const { return fpsi; }
    Int_t         GetQ() const { return fq; }
 
-   ClassDef(Track,1)  //A tpt_track rep of a laser track. 
+   ClassDef(Track,1)  //An expanded tpt_track rep of a laser track. 
 };
 
 
