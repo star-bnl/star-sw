@@ -1,0 +1,14 @@
+StAnalysisMaker
+===============
+
+Sample analysis maker using StEvent. Incorporates some of Thomas Ullrich's
+examples.
+
+Author: Torre Wenaus, BNL
+
+Mod history
+===========
+
+02/10/1999 T. Wenaus
+- protection against null event
+- separate out event analysis into separate functions

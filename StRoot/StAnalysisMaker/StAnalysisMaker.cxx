@@ -1,5 +1,8 @@
-// $Id: StAnalysisMaker.cxx,v 1.1 1999/02/05 17:54:55 wenaus Exp $
+// $Id: StAnalysisMaker.cxx,v 1.2 1999/02/10 23:59:52 wenaus Exp $
 // $Log: StAnalysisMaker.cxx,v $
+// Revision 1.2  1999/02/10 23:59:52  wenaus
+// cleanup
+//
 // Revision 1.1  1999/02/05 17:54:55  wenaus
 // initial commit
 //
@@ -25,9 +28,10 @@
 #include "StEvent/StRun.hh"
 #include "StEvent/StEvent.hh"
 
-static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.1 1999/02/05 17:54:55 wenaus Exp $";
+static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.2 1999/02/10 23:59:52 wenaus Exp $";
 #include "StMessMgr.h"
-long countPrimaryTracks(StEvent* event);
+void summarizeEvent(StEvent& event);
+//  specific analysis tasks.
 void summarizeEvent(StEvent& event, Int_t &nevents);
 StAnalysisMaker::StAnalysisMaker(const Char_t *name, const Char_t *title) : StMaker(name, title) {
   drawinit = kFALSE;
@@ -42,17 +46,15 @@ Int_t StAnalysisMaker::Init() {
 
 Int_t StAnalysisMaker::Make() {
   StEventReaderMaker* evMaker = (StEventReaderMaker*) gStChain->Maker("events");
+  if (! evMaker->event()) {
+    // No event. We're done.
+    return kStOK;
+  }
   StEvent& ev = *(evMaker->event());
   StRun& run = *(evMaker->run());
-  cout << "StAnalysisMaker:  Reading Event " << 
-    " Type " << ev.type() << " Run " << ev.runNumber() << endl;
-  cout << " N vertex " << ev.vertexCollection()->size() << endl;
-  cout << " N track " << ev.trackCollection()->size() << endl;
-  cout << " N TPC hit " << ev.tpcHitCollection()->size() << endl;
-  cout << " N FTPC hit " << ev.ftpcHitCollection()->size() << endl;
-  cout << " N SVT hit " << ev.svtHitCollection()->size() << endl;
 
-  long ntk = countPrimaryTracks(evMaker->event());
+  summarizeEvent(ev);
+  long ntk = countPrimaryTracks(ev);
   cout << "Primary tracks: " << ntk << endl;
 
   return kStOK;
@@ -64,7 +66,7 @@ void StAnalysisMaker::MakeBranch() {
 
 void StAnalysisMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StAnalysisMaker.cxx,v 1.1 1999/02/05 17:54:55 wenaus Exp $\n");
+  printf("* $Id: StAnalysisMaker.cxx,v 1.2 1999/02/10 23:59:52 wenaus Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
@@ -82,36 +84,6 @@ Int_t StAnalysisMaker::Finish() {
 }
 
 ClassImp(StAnalysisMaker)
-
-
-long countPrimaryTracks(StEvent *event)
-{
-  // count vertex daughters
-  StVertexCollection* theVertexCollection = event->vertexCollection();
-  StVertexIterator itr;
-  StVertex *vtx;
-  for (itr = theVertexCollection->begin();
-       itr != theVertexCollection->end(); itr++) {
-    vtx = *itr;
-    cout << vtx->index() << " " << vtx->daughters().size() << endl;
-  }
-  
-
-  long counter = 0;
-  StTrackCollection *tracks = event->trackCollection();
-  StTrackIterator iter;
-  StGlobalTrack *track;
-  StVertex *vertex;
-  for (iter = tracks->begin();
-       iter != tracks->end(); iter++) {
-    track = *iter;
-    vertex = track->startVertex();
-    if (vertex &&
-        vertex->type() == primary)
-      counter++;
-  }
-  return counter;
-}
     
     return kStOK;
 }
