@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2004.cxx,v 2.1 2003/12/23 21:56:51 ullrich Exp $
+ * $Id: StTriggerData2004.cxx,v 2.2 2004/01/13 21:00:21 fisyak Exp $
  *
  * Author: Akio Ogawa, Feb 2004
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2004.cxx,v $
+ * Revision 2.2  2004/01/13 21:00:21  fisyak
+ * remove default parameter set from implimentation, make icc happy
+ *
  * Revision 2.1  2003/12/23 21:56:51  ullrich
  * Initial Revision.
  *
@@ -405,7 +408,7 @@ unsigned short StTriggerData2004::fpdSum(int eastwest, int module) const
     return mData->TrgSum.DSMdata.FPD[map[eastwest][module]] % nbit[eastwest][module];
 }
 
-unsigned short StTriggerData2004::zdcSMD(int eastwest, int verthori, int strip, int prepost=0) const
+unsigned short StTriggerData2004::zdcSMD(int eastwest, int verthori, int strip, int prepost) const
 {
   static const int zdcsmd_map[2][2][8] ={
     { { 6, 5, 4, 3, 2, 1, 0, 7} ,  
