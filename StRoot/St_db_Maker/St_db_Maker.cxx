@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.27 2000/04/07 15:44:42 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.28 2000/04/13 02:58:47 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.28  2000/04/13 02:58:47  perev
+// Method Save is added & default CintDB loaded if exists
+//
 // Revision 1.27  2000/04/07 15:44:42  perev
 // Error return when MySQL is not available
 //
@@ -109,6 +112,8 @@ St_db_Maker::St_db_Maker(const char *name, const char *maindir,const char *userd
    fIsDBTime = 0;
    fMainDir = maindir;
    if (userdir) fUserDir=userdir;
+   else if (maindir && strncmp(maindir,"MySQL:",6)==0) fUserDir = maindir+6; 
+     
    fDataBase = 0;
    fUpdateMode = 0;
 }
@@ -131,29 +136,33 @@ Int_t St_db_Maker::Init()
 // 		recreate a memory resided data-structure
    fCurrentDir = fMainDir;
    if (!fDataBase && !fCurrentDir.IsNull()) {
-     fileset = new TFileSet(fCurrentDir);
-     fileset->Purge(); 
-     fileset->Sort(); 
-     fileset->Pass(PrepareDB,&fCurrentDir);
-     fileset->Purge(); 
-     if (fDataBase) {
-       assert(strcmp(fDataBase->GetName(),fileset->GetName())==0);
-       fDataBase->Update(fileset); delete fileset;
-     } else          {fDataBase = fileset; }
-   }
+     fileset = new TFileSet(fCurrentDir,gSystem->BaseName(fCurrentDir));
+     if (!fileset->First()) {delete fileset; fileset = 0;}
+     if(fileset) {
+       fileset->Purge(); 
+       fileset->Sort(); 
+       fileset->Pass(PrepareDB,&fCurrentDir);
+       fileset->Purge(); 
+       if (fDataBase) {
+	 assert(strcmp(fDataBase->GetName(),fileset->GetName())==0);
+	 fDataBase->Update(fileset); delete fileset;
+       } else          {fDataBase = fileset; }
+   } }
 
    fCurrentDir = fUserDir; fileset = 0;
    if (!fCurrentDir.IsNull()) {
-     fileset = new TFileSet(fCurrentDir);
-     fileset->Purge();
-     fileset->Sort(); 
-     fileset->Pass(PrepareDB,&fCurrentDir);
-     fileset->Purge();
-     if (fDataBase) {
-       assert(strcmp(fDataBase->GetName(),fileset->GetName())==0);
-       fDataBase->Update(fileset); delete fileset;
-     } else          {fDataBase = fileset; }
-   }
+     fileset = new TFileSet(fCurrentDir,gSystem->BaseName(fCurrentDir));
+     if (!fileset->First()) {delete fileset; fileset = 0;}
+     if(fileset) {
+       fileset->Purge(); 
+       fileset->Sort(); 
+       fileset->Pass(PrepareDB,&fCurrentDir);
+       fileset->Purge(); 
+       if (fDataBase) {
+	 assert(strcmp(fDataBase->GetName(),fileset->GetName())==0);
+	 fDataBase->Update(fileset); delete fileset;
+       } else          {fDataBase = fileset; }
+   } }
    fDataBase->Sort();
 
    AddData(fDataBase);
@@ -571,6 +580,56 @@ void   St_db_Maker::SetDateTime(const char *alias)
 //_____________________________________________________________________________
 void   St_db_Maker::SetOn(const char *path)
 { AddAlias("On" ,path,".onoff"); OnOff();}
+//_____________________________________________________________________________
+Int_t  St_db_Maker::Save(const char *path) 
+{
+  ofstream out;
+  int nakt=0,i,l;
+  TDataSet *top,*ds;
+  TTable   *tb;
+  TString ts,dir;  
+  TDatime val[2];
+  char cbuf[20];
+  top = GetDataBase(path);
+  if (!top) return 1;
+  TDataSetIter nextDS(top,999);
+  while((ds = nextDS())) {
+    if (!ds->InheritsFrom(TTable::Class()))continue;    
+    ts = ds->Path();
+    i = ts.Index(".data/"); assert(i>0); ts.Replace(0  ,i+6,"");
+    if (ts.Index(".")>=0)		continue;
+    l = ts.Length();
+    for (i=0;i<l;i++) {
+      if (ts[i]!='/') continue;
+      dir.Replace(0,999,ts,i);
+      gSystem->MakeDirectory(dir);
+    }
+    tb = (TTable*)ds;
+    i = GetValidity(tb,val); assert(!i);
+    sprintf(cbuf,".%08d.%06d.C",val[0].GetDate(),val[0].GetTime());
+    ts += cbuf;
+    out.open((const char*)ts);       
+    tb->SavePrimitive(out,"");
+    out.close();
+    nakt++;
+  }
+  return (!nakt);
+}
+//_____________________________________________________________________________
+Int_t  St_db_Maker::GetValidity(const TTable *tb, TDatime *val) const
+{
+   if (!tb) 				return 1;
+   assert(val);
+   const TDataSet *par = tb->GetParent();
+   if (!par)				return 2;
+   TString ts = tb->GetName();
+   ts.Replace(0,0,".");
+   const St_ValiSet *vs =  (St_ValiSet*)par->Find(ts);
+   if (!vs) 				return 3;
+   val[0] = vs->fTimeMin;
+   val[1] = vs->fTimeMax;
+   return 0;
+}
 //_____________________________________________________________________________
 void   St_db_Maker::SetOff(const char *path)
 { AddAlias("Off",path,".onoff"); OnOff();}
