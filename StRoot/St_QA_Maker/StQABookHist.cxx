@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.35 2003/01/23 20:53:11 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.36 2003/01/24 15:24:48 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.36  2003/01/24 15:24:48  genevb
+// Further dAu changes
+//
 // Revision 2.35  2003/01/23 20:53:11  genevb
 // Additional dAu changes
 //
@@ -1671,8 +1674,8 @@ void StQABookHist::BookHistPoint(){
   m_pnt_id      = QAH::H1F("QaPointId","point: detector ID of hit",30,0.,30.);
 
   m_pnt_tpc     = QAH::H1F("QaPointTpc",  "point: # hits tpc ",100, 0.,300000.);
-  m_pnt_svt     = QAH::H1F("QaPointSvt",  "point: # hits svt ",100, 0.,15000.);
-  m_pnt_ssd     = QAH::H1F("QaPointSsd",  "point: # hits ssd ",100, 0.,5000.);
+  m_pnt_svt     = QAH::H1F("QaPointSvt",  "point: # hits svt ",600, 0.,15000.);
+  m_pnt_ssd     = QAH::H1F("QaPointSsd",  "point: # hits ssd ",200, 0.,5000.);
   // east and west on same plot
   m_pnt_ftpc   = QAH::MH1F("QaPointFtpc", "point: # hits ftpc",100,0.,25000.,2);
   m_pnt_ftpc->Rebin(0,"East");
