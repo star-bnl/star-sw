@@ -12,6 +12,7 @@ DESCRIPTION
 TBS ...
 */
 #include <stdlib.h>
+#define DS_PRIVATE
 #include "dstype.h"
 static void dumpTable(DS_DATASET_T *pTable, char *msg);
 /****************************************************************************
@@ -190,8 +191,8 @@ int testNatural()
  		goto fail;
  	}
  	/* get pointer to data and row count of join */
- 	if (!dsGetDataPtr(&joinVar, pJoinTable) ||
- 		!dsGetRowCount(&joinRowCount, pJoinTable)) {
+ 	if (!dsCellAddress((char **)&joinVar, pJoinTable, 0, 0) ||
+ 		!dsTableRowCount(&joinRowCount, pJoinTable)) {
  		dsPerror("get data pointer or row count failed");
  		goto fail;
  	}

@@ -18,7 +18,6 @@ xdr routines for intel based OS ...
 #include <stdlib.h>
 #include <string.h>
 #define DS_PRIVATE
-#include "dstype.h"
 #include "dsxdr.h"
 /******************************************************************************
 *

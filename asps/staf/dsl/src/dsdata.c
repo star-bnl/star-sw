@@ -18,13 +18,11 @@ and manage dataset structures
 #include <stdlib.h>
 #include <string.h>
 #define DS_PRIVATE
-#include "dscodes.h"
 #include "dstype.h"
 
 static int dsCreateDatasetR(DS_DATASET_T *pDataset, DS_BUF_T *bp,
 	DS_MEM_T *skel, size_t *tList);
 static int dsDatasetSpecifierR(DS_BUF_T *bp, DS_DATASET_T *pDataset, int level);
-
 /******************************************************************************
 *
 * dsAllocTables - allocate memory for dataset tables
@@ -69,11 +67,11 @@ int dsCreateDataset(DS_DATASET_T **ppDataset,
 	DS_DATASET_T *pDataset;
 	DS_MEM_T skel;
 
-	if (ptr) {
+	if (ptr != NULL) {
 		*ptr = str;
 	}
 	if (!dsFirstPass(&nField, map, &nDataSet, DS_MAX_DATASET, str)) {
-			return FALSE;	
+		return FALSE;	
 	}
 	n = nDataSet + nField + 1;
 	size = n*sizeof(DS_DATASET_T);
@@ -102,10 +100,10 @@ int dsCreateDataset(DS_DATASET_T **ppDataset,
 		goto fail;
 	}
 	if (*ppDataset == NULL) {
+		pDataset->flags |= DS_ALLOC_NODE;
 		*ppDataset = pDataset;
-		(*ppDataset)->flags |= DS_ALLOC_NODE;
 	}
-	if (ptr) {
+	if (ptr != NULL) {
 		*ptr = bp.out;
 	}
 	return TRUE;

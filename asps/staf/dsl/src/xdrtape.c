@@ -115,11 +115,11 @@ static void xdrtape_destroy(XDR *xdrs)
 }
 /*****************************************************************************
 *
-* xdrtape_errcode - return reason for failure
+* xdrtape_get_error - return reason for failure
 *
 */
 #define ERROR_CASE(c) case c: {ptr = #c; break;}
-int xdrtape_errcode(XDR *xdrs, char **pMsg)
+void xdrtape_get_error(XDR *xdrs, int *pCode, char **pMsg)
 {
 	char *ptr;
 
@@ -138,7 +138,10 @@ int xdrtape_errcode(XDR *xdrs, char **pMsg)
 	if (pMsg != NULL) {
 		*pMsg = ptr;
 	}
-	return xdrs->x_handy;
+	if (pCode != NULL) {
+		*pCode =xdrs->x_handy;
+	}
+	return;
 }
 /*****************************************************************************
 *
@@ -232,6 +235,7 @@ static unsigned xdrtape_getpos(XDR *xdrs)
 /*****************************************************************************
 *
 * xdrtape_inline - not implemented
+*
 */
 static long *xdrtape_inline(XDR *xdrs, int len)
 {
@@ -241,6 +245,7 @@ static long *xdrtape_inline(XDR *xdrs, int len)
 /*****************************************************************************
 *
 * xdrtape_perror - print last error message
+*
 */
 void xdrtape_perror(XDR *xdrs, char *msg)
 {
@@ -249,7 +254,7 @@ void xdrtape_perror(XDR *xdrs, char *msg)
 	if (msg == NULL) {
 		p = msg = "";
 	}
-	xdrtape_errcode(xdrs, &s);
+	xdrtape_get_error(xdrs, NULL, &s);
 	fprintf(stderr, "%s%s%s\n", msg, p, s);
 }
 /*****************************************************************************
@@ -300,6 +305,7 @@ static bool_t xdrtape_putlong(XDR *xdrs, long *lp)
 /*****************************************************************************
 *
 * xdrtape_setpos - not implemented
+*
 */
 static bool_t xdrtape_setpos(XDR *xdrs, unsigned pos)
 {

@@ -14,8 +14,6 @@ xdr interface for tables and datasets
 */
 #include <string.h>
 #define DS_PRIVATE
-#include "dscodes.h"
-#include "dstype.h"
 #include "dsxdr.h"
 
 /******************************************************************************

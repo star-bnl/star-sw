@@ -18,8 +18,6 @@ collection of routine to test ds lib
 #include <stdlib.h>
 
 #define DS_PRIVATE
-#include "dscodes.h"
-#include "dstype.h"
 #include "dsxdr.h"
 
 
@@ -29,6 +27,9 @@ collection of routine to test ds lib
 #define NLOOP 100
 #endif
 #define XDR_MEM_SIZE(nloop) ((nloop)*(300 + 40*(nloop)))
+#define DS_TEST_FAILED(msg) {dsErrorPrint("TEST FAILED: %s - %s.%d\n",\
+	 msg, __FILE__, __LINE__); dsPerror(""); return FALSE;}
+
 void dumpType(DS_TYPE_T *type);
 static void dumpTypeR(DS_TYPE_T *type, char *prefix);
 /******************************************************************************
@@ -89,6 +90,87 @@ int dsTestType()
 	dumpType(type);
 	return TRUE;
 
+}
+/******************************************************************************
+*
+* dsTestApi - simple test API
+*
+*/
+int dsTestApi(void)
+{
+	char buf[10], *dsName = "dsName", *name, *ptr;
+	char *pDataOne = NULL, *pDataTwo = NULL;
+	char *specOne = "struct typeOne {float x, y, z; long data;}";
+	char *specTwo = "struct typeTwo {char name[10]; long age; short flag;}";
+	char *specThree = "struct typeThree {octet b; double d; short a[2][3];}";
+	typedef struct typeTwo {char name[10]; long age; short flag;}TYPE_TWO;
+	TYPE_TWO *pRow;
+	char *tableNameOne = "tableNameOne", *tableNameTwo = "tableNameTwo";
+	bool_t result;
+	size_t count, dsDim = 5, rowCountOne = 10, rowCountTwo = 13;
+	char *specifier;
+	size_t colNumber = 0, dims[5], size;
+	DS_DATASET_T *pDataset, *pEntry, *pTable;
+	DS_TYPE_CODE_T code;
+
+	pDataset = NULL;
+	if (!dsNewDataset(&pDataset, dsName, dsDim) ||
+		!dsIsDataset(&result, pDataset) || !result ||
+		!dsDatasetName(&name, pDataset) ||
+		strcmp(name, dsName)) {
+		DS_TEST_FAILED("dsNewDataset");
+	}
+	if (!dsAddTable(pDataset, tableNameOne, specOne, rowCountOne, &pDataOne) ||
+		!dsAddTable(pDataset, tableNameTwo, specTwo, rowCountTwo, &pDataTwo) ||
+		!dsDatasetEntryCount(&count, pDataset) || count != 2 ||
+		!dsDatasetEntry(&pEntry, pDataset, 1) ||
+		!dsFindEntry(&pTable, pDataset, tableNameTwo) || pEntry != pTable || 
+		!dsIsTable(&result, pTable) || !result ||
+		!dsTableIsType(&result, pTable, specTwo) || !result) {
+		DS_TEST_FAILED("dsAddTable");
+	}
+	if (!dsTableColumnCount(&count, pTable) || count != 3 ||
+		!dsTableDataAddress(&ptr, pTable) || ptr != pDataTwo ||
+  		!dsTableMaxRowCount(&count, pTable) || count != rowCountTwo ||
+		!dsSetTableRowCount(pTable, 9) ||
+		!dsTableRowCount(&count, pTable) || count != 9 ||
+		!dsTableName(&name, pTable) || strcmp(name, tableNameTwo) ||
+		!dsTableRowSize(&size, pTable) || size != sizeof(TYPE_TWO) ||
+		!dsTableTypeName(&name, pTable) || strcmp(name, "typeTwo") ||
+		!dsTableTypeSpecifier(&specifier, pTable)) {
+		DS_TEST_FAILED("table attributes failed");
+	}
+	pRow = (TYPE_TWO *)pDataTwo;
+	printf("type specifier for tableTwo:\n\t%s\n", specifier);
+  	if (!dsCellAddress(&name, pTable, 2, 0) || name != (pDataTwo + 2*size) ||
+		!dsPutCell("test", pTable, 2, 0) ||
+		!dsGetCell(buf, pTable, 2, 0) || strcmp(buf, "test") ||
+		strcmp(pRow[2].name, "test")) {
+		DS_TEST_FAILED("cell function failed");
+	}
+
+	if (!dsColumnDimCount(&count, pTable, colNumber) || count != 1 ||
+		!dsColumnDimensions(dims, pTable, colNumber) || dims[0] != 10 ||
+		!dsColumnElcount(&count, pTable, colNumber) || count != 10 ||
+		!dsColumnName(&name, pTable, colNumber) || strcmp(name, "name") ||
+		!dsColumnSize(&size, pTable, colNumber) || size != 10 ||
+		!dsColumnTypeCode(&code, pTable, colNumber) || code != DS_TYPE_CHAR ||
+		!dsColumnTypeName(&name, pTable, colNumber) || strcmp(name, "char") ||
+		!dsFindColumn(&count, pTable, "flag") || count != 2) {
+		DS_TEST_FAILED("column attributes failed");
+ 	}
+	if (!dsAddDataset(pDataset, "childDataset", 6, NULL) ||
+		!dsFindEntry(&pEntry, pDataset, "childDataset") ||
+		!dsIsDataset(&result, pEntry) || !result ||
+		!dsAddTable(pEntry, "tableThree", specThree, 7, NULL)) {
+		DS_TEST_FAILED("dsAddDataset failed");
+	}
+	dsPrintSpecifiers(stdout, pDataset);
+	if (dsDeleteEntry(pEntry, pDataset)) {
+		DS_TEST_FAILED("dsDeleteEntry should fail");
+	}
+	dsFreeDataset(pDataset);
+	return TRUE;
 }
 /******************************************************************************
 *
@@ -200,13 +282,13 @@ int dsTestErr()
 	dsPerror("before error");
 	dsTypeId(&tid, "better be a syntax eror", NULL);
 	dsPerror("after dsTypeId");
-	printf("dsError %d\n", dsError);
+	printf("dsError %d\n", dsErrorCode());
 	printf("dsPerror with NULL msg:\n");
 	dsPerror(NULL);
 	printf("dsPerror with null string msg:\n");
 	dsPerror("");
-	dsClearError();
-	dsPerror("after dsClearError");
+	dsLogError(123, "test of dsLogError", __FILE__, __LINE__);
+	dsPerror("after dsLogError");
 	return TRUE;
 }
 /******************************************************************************
@@ -394,5 +476,5 @@ void testStats(void)
 	printf("\n");
 	dsDatasetAllocStats();
 	dsTidHashStats();
-	dsTypeLockStats();
+	dsSemStats();
 }

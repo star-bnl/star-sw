@@ -18,7 +18,6 @@ general routines for parsing and memory allocation
 #include <stdlib.h>
 #include <string.h>
 #define DS_PRIVATE
-#include "dscodes.h"
 #include "dstype.h"
 
 static int dsAllocCalls = 0;
@@ -86,7 +85,7 @@ int dsCopyName(char *dst, char *str, char **ptr)
 	DS_BUF_T bp;
 	int c;
     
-    DS_GET_INIT(&bp, str);
+	DS_GET_INIT(&bp, str);
 	if ((c = dsGetName(dst, &bp)) >= 0) {
 		str = bp.out;
 	}
@@ -112,7 +111,7 @@ void dsDatasetAllocStats(void)
 *
 * RETURNS: pointer to memory or NULL if size is zero or not enough memory
 */
-char *dsDsetAlloc(size_t size)
+void *dsDsetAlloc(size_t size)
 {
 	return dsDsetRealloc(NULL, size); 
 }
@@ -135,7 +134,7 @@ void dsDsetFree(void *ptr)
 *
 * RETURNS: pointer to memory or NULL if size is zero or not enough memory
 */
-char *dsDsetRealloc(char *old, size_t size)
+void *dsDsetRealloc(char *old, size_t size)
 {
 	char *ptr;
 	
@@ -375,7 +374,7 @@ int dsPutTabs(int n, DS_BUF_T *bp)
 *
 * RETURNS: pointer to memory or NULL if size is zero or not enough memory
 */
-char *dsTypeCalloc(size_t size)
+void *dsTypeCalloc(size_t size)
 {
 	char *ptr;
 

@@ -14,7 +14,6 @@ routines to verify data read by sample program
 */
 #include <stddef.h>
 #define DS_PRIVATE
-#include "dscodes.h"
 #include "dsxdr.h"
 /******************************************************************************
 *
@@ -58,7 +57,9 @@ static int dsCheckTest(TEST_TYPE_T *pTest, size_t count);
 static int dsSetTableR(void *pData, size_t count, DS_TYPE_T *type);
 /******************************************************************************
 *
-* dsCheckDataset - set all tables to have basic type code in each element
+* dsCheckDataset - check that all tables have basic type code in each element
+*
+* RETURN: TRUE if OK FALSE if error
 */
 int dsCheckDataset(DS_DATASET_T *pDataset)
 {
@@ -82,6 +83,7 @@ int dsCheckDataset(DS_DATASET_T *pDataset)
 *
 * dsCheckTable - verify that elements of a table contain their type code
 *
+* RETURN: TRUE if OK FALSE if error
 */
 int dsCheckTable(void *pData, char *decl, size_t nRow, size_t expectedNRow)
 {
@@ -102,6 +104,7 @@ int dsCheckTable(void *pData, char *decl, size_t nRow, size_t expectedNRow)
 *
 * dsCheckTableR - recursive part of dsCheckTable
 *
+* RETURN: TRUE if OK FALSE if error
 */
 static int dsCheckTableR(void *pData, size_t count, DS_TYPE_T *type)
 {
@@ -163,6 +166,7 @@ static int dsCheckTableR(void *pData, size_t count, DS_TYPE_T *type)
 *
 * dsCheckTest - check that alignment and values are correct
 *
+* RETURN: TRUE if OK FALSE if error
 */
 static int dsCheckTest(TEST_TYPE_T *pTest, size_t count)
 {
@@ -264,6 +268,8 @@ int dsReadTest(XDR *xdrs, size_t count)
 /******************************************************************************
 *
 * dsSetDataset - set all tables to have basic type code in each element
+*
+* RETURN: TRUE for success else FALSE
 */
 int dsSetDataset(DS_DATASET_T *pDataset)
 {
@@ -294,6 +300,7 @@ int dsSetDataset(DS_DATASET_T *pDataset)
 *
 * dsSetTableR - recursive part of dsSetTable
 *
+* RETURN: TRUE for success else FALSE
 */
 static int dsSetTableR(void *pData, size_t count, DS_TYPE_T *type)
 {
@@ -370,7 +377,7 @@ int dsWriteTest(XDR *xdrs, size_t count)
 	if (
 		!dsNewDataset(&pDataset, "test", 3) ||
 		!dsAddTable(pDataset, "empty", emptySpecifier, 0, NULL) ||
-		!dsAddTable(pDataset, "table", testSpecifier, count, &pData) ||
+		!dsAddTable(pDataset, "table", testSpecifier, count, (char **)&pData) ||
 		!dsFindTable(&pTable, pDataset, "table", testSpecifier) || 
 		!dsSetDataset(pDataset) ||
 		pTable->elcount != count || pTable->maxcount != count

@@ -17,7 +17,7 @@ definitions for xdrtape
 
 int xdrtape_create(XDR *xdrs, enum xdr_op op, int fd, unsigned size,
 	int (*iofcn)(int fd, char *buf, unsigned count));
-int xdrtape_errcode(XDR *xdrs, char **pMsg);
+void xdrtape_get_error(XDR *xdrs, int *pCode, char **pMsg);
 int xdrtape_flush(XDR *xdrs);
 void xdrtape_perror(XDR *xdrs, char *msg);
 

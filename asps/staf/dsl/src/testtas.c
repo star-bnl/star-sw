@@ -14,7 +14,7 @@ DESCRIPTION
 TBS ...
 */
 #include <string.h>
-#include "dstype.h"
+#define DS_PRIVATE
 #include "dsxdr.h"
 #ifdef sun
 int printf(char *fmt, ...);
@@ -268,8 +268,9 @@ fail:
 */
 int writeFile(char *fileName)
 {
+	char *pBase;
 	size_t i;
-	BASE_TYPE base[TABLE_DIM], *pBase = base;
+	BASE_TYPE base[TABLE_DIM];
 	DS_DATASET_T srcDset[DSET_DIM], *pSrcDset = srcDset;
 	XDR xdr;
 
@@ -279,6 +280,7 @@ int writeFile(char *fileName)
 		base[i].y = (float)(100*i +20);
 		base[i].z = (float)(100*i +30);
 	}
+	pBase = (char *)base;
 	if (
 		!dsNewDataset(&pSrcDset, "data", DSET_DIM) ||
 		!dsAddTable(pSrcDset, "base", BASE_DECL, BASE_LEN, &pBase) ||

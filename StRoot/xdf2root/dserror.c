@@ -5,30 +5,29 @@
 /*
 modification history
 --------------------
-10aug93,whg  written.
+10aug93,whg  written
+24apr95,whg  simple multi-thread version
 */
-
 /*
 DESCRIPTION
 error code routines...
 */
 #include <stdarg.h>
 #include <stddef.h>
-#include "dscodes.h"
+#include <string.h>
 #define DS_PRIVATE
 #include "dstype.h"
+/* error information struct */
+typedef struct ds_error_info_t{
+	unsigned age;
+	DS_ERROR_CODE_T code;
+	char *file;
+	int line;
+	char *msg;
+	int pid;
+}DS_ERROR_INFO_T;
 
-/******************************************************************************
-*
-* dsClearError - set error code to DS_E_OK
-*
-* RETURNS: TRUE
-*/
-int dsClearError()
-{
-	DS_LOG_ERROR(DS_E_OK);
-	return TRUE;
-}
+static DS_ERROR_INFO_T *dsErrorInfo(void);
 /******************************************************************************
 *
 * dsErrorCode
@@ -37,47 +36,70 @@ int dsClearError()
 */
 int dsErrorCode()
 {
-	return dsErrorLogger(0, NULL, NULL, 0);
+	return dsErrorInfo()->code;
 }
 /******************************************************************************
 *
-* dsErrorLogger - log, print or return error code
+* dsErrorInfo - return error area for this thread
 *
-* RETURNS: last error code
+* RETURNS: pointer to error struct
 */
-int dsErrorLogger(int code, char *msg, char *file, int line)
+static DS_ERROR_INFO_T *dsErrorInfo(void)
 {
-	static struct {
-		int pid;
-		int code;
-		char *file;
-		int line;
-		char *msg;
-	}errInfo[2], *err = NULL;
+	int i, pid;
+	DS_ERROR_INFO_T *pInfo;
+	static DS_ERROR_INFO_T errInfo[DS_MAX_ERR], *pLast = NULL;
 
-	/* need to find thread for VxWorks */
-	if (err == NULL) {
-		err = errInfo;
-		err->code = 0;
-		err->file = "<noFile>";
-		err->line = 0;
-		err->msg = "DS_E_OK";
+#ifdef VXWORKS
+	/* thread ID for VxWorks */
+	pid = taskIdSelf();
+#else
+	/* constant for UNIX */
+	pid = 1;
+#endif
+	pInfo = pLast;
+	if (pInfo == NULL || pInfo->pid != pid) {
+		/********* start critical section *********/
+		dsErrSemTake();
+		if (pLast == NULL) {
+			memset(errInfo, 0, sizeof(errInfo));
+		}
+		/* find error structure for this thread */
+		for (i = 0, pInfo = NULL; i < DS_MAX_ERR; i++) {
+			errInfo[i].age++;
+			if (pid == errInfo[i].pid) {
+				if(pInfo != NULL) {
+					dsErrorPrint("dsErrorInfo: corrupt structure");
+					dsErrorPrint(" - %s(%d)\n", __FILE__, __LINE__);
+				}
+				pInfo = &errInfo[i];
+			}
+		}
+		if (pInfo == NULL) {
+			/* recycle oldest error structure */
+			for (i = 0, pInfo = errInfo; i < DS_MAX_ERR; i++) {
+				if (pInfo->age < errInfo[i].age) {
+					pInfo = &errInfo[i];
+				}
+			}
+			pInfo->code = DS_E_OK;
+			pInfo->file = __FILE__;
+			pInfo->line = __LINE__;
+			pInfo->msg = "DS_E_OK";
+			pInfo->pid = pid;
+		}
+		pInfo->age = 0;
+		pLast = pInfo;
+		dsErrSemGive();
+		/********** end critical section **********/
 	}
-
-	if (line != 0) {
-		err->code = code;
-		err->msg = msg;
-		err->file = file;
-		err->line = line;
-	}
-	else if (msg != NULL) {
-		dsErrorPrint("%s%s%s - %s %d\n", msg, (*msg == '\0' ? "" : ": "),
-			err->msg, err->file, err->line);
-	}
-	return err->code;
+	return pInfo;
 }
 /******************************************************************************
 *
+* dsErrorPrint - print error message
+*
+* RETURN: number of characters written or a negative value if an error occurs
 */
  int dsErrorPrint(char *fmt, ...)
  {
@@ -92,14 +114,34 @@ int dsErrorLogger(int code, char *msg, char *file, int line)
 }
 /******************************************************************************
 *
+* dsLogError - log error info
+*
+* RETURNS: none
+*/
+void dsLogError(DS_ERROR_CODE_T code, char *msg, char *file, size_t line)
+{
+	DS_ERROR_INFO_T *pInfo;
+
+	pInfo = dsErrorInfo();
+	pInfo->code = code;
+	pInfo->msg = msg == NULL ? "<nullMsg>" : msg;
+	pInfo->file = file == NULL ? "<noFile>" : file;
+	pInfo->line = line;
+	return;
+}
+/******************************************************************************
+*
 * dsPerror - print info about last error
 *
-* RETURNS: last error code
+* RETURNS: none
 */
-int dsPerror(char *msg)
+void dsPerror(char *str)
 {
-	if (msg == NULL) {
-		msg = "";
+	DS_ERROR_INFO_T *pInfo;
+
+	pInfo = dsErrorInfo();
+	if (str != NULL && *str != '\0') {
+		dsErrorPrint("%s: ", str); 
 	}
-	return dsErrorLogger(0, msg, NULL, 0);
+	dsErrorPrint("%s - %s(%d)\n", pInfo->msg, pInfo->file, pInfo->line);
 }

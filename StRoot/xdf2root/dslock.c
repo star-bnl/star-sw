@@ -1,11 +1,12 @@
 /* Copyright 1993, Lawrence Berkeley Laboratory */
 
-/* dslock.c - lock and unlock routines for static type structures  */
+/* dslock.c - lock and unlock routines for static structures  */
 
 /*
 modification history
 --------------------
-27jul93,whg  written.
+27jul93,whg  written
+25apr95,whg  added error structures
 */
 
 /*
@@ -14,73 +15,115 @@ routines for sharing structures in VxWorks or other multi-threaded OS
 */
 #include <stdlib.h>
 #define DS_PRIVATE
-#include "dscodes.h"
 #include "dstype.h"
 #ifdef VXWORKS
 #include "semLib.h"
-
+SEM_ID errSemID = NULL;
 SEM_ID tidSemID = NULL;
 #endif
-static int semVal = 0, nLock = 0;
+static int errSemVal = 0, nErrTake, nTidTake = 0, tidSemVal = 0;
 /******************************************************************************
 *
-* dsTypeLock - lock type structures
+* dsErrSemGive - unlock error structures
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTypeLock(void)
+int dsErrSemGive(void)
 {
-	nLock++;
 #ifdef VXWORKS
-	if (semTake(tidSemID, WAIT_FOREVER)) {
+	if (errGive(tidSemID)) {
 #else
-	if (semVal++){
+	if (--errSemVal){
 #endif
-		DS_ERROR(DS_E_SEM_TAKE_ERROR);
+		dsErrorPrint("dsErrSemGive FAILED");
+		dsErrorPrint(" - %s(%d)\n", __FILE__, __LINE__);
+		return FALSE;
 	}
 	return TRUE;
 }
 /******************************************************************************
 *
-* dsTypeLockInit - intialize semaphore for vxWorks or dummy
+* dsErrSemTake - lock error structures
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTypeLockInit(void)
+int dsErrSemTake(void)
+{
+	nErrTake++;
+#ifdef VXWORKS
+	if (semTake(errSemID, WAIT_FOREVER)) {
+#else
+	if (errSemVal++){
+#endif
+		dsErrorPrint("dsErrSemTake FAILED");
+		dsErrorPrint(" - %s(%d)\n", __FILE__, __LINE__);
+		return FALSE;
+	}
+	return TRUE;
+}
+/******************************************************************************
+*
+* dsSemInit - intialize semaphore for vxWorks or dummy
+*
+* RETURNS: TRUE if success else FALSE
+*/
+int dsSemInit(void)
 {
 #ifdef VXWORKS
-	if (tidSemID != NULL ||
+	if (errSemId != NULLtidSemID != NULL ||
+		(errSemID = semBCreate(SEM_Q_PRIORITY, SEM_FULL)) == NULL) ||
 		(tidSemID = semBCreate(SEM_Q_PRIORITY, SEM_FULL)) == NULL) {
-		DS_ERROR(DS_E_SEM_CREATE_FAILED);
+		dsErrorPrint("dsSemInit FAILED");
+		dsErrorPrint(" - %s(%d)\n", __FILE__, __LINE__);
+		return FALSE;
 	}
 #endif
 	return TRUE;
 }
 /******************************************************************************
 *
-* dsTypeLockStats - print lock statsistics
+* dsSemStats - print lock statsistics
 *
 * RETURNS: TRUE
 */
-int dsTypeLockStats(void)
+int dsSemStats(void)
 {
-	printf("lockStats: semVal %d, nLock %d\n", semVal, nLock);
+	printf("semStats: errSemVal %d, tidSemVal %d, nErrTake %d, nTidTake %d\n",
+		errSemVal, tidSemVal, nErrTake, nTidTake);
 	return TRUE;
 }
 /******************************************************************************
 *
-* dsTypeUnock - unlock structures
+* dsTypeSemGive - unlock structures
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTypeUnlock(void)
+int dsTypeSemGive(void)
 {
 #ifdef VXWORKS
 	if (semGive(tidSemID)) {
 #else
-	if (--semVal){
+	if (--tidSemVal){
 #endif
 		DS_ERROR(DS_E_SEM_GIVE_ERROR);
+	}
+	return TRUE;
+}
+/******************************************************************************
+*
+* dsTypeSemTake - lock type structures
+*
+* RETURNS: TRUE if success else FALSE
+*/
+int dsTypeSemTake(void)
+{
+	nTidTake++;
+#ifdef VXWORKS
+	if (semTake(tidSemID, WAIT_FOREVER)) {
+#else
+	if (tidSemVal++){
+#endif
+		DS_ERROR(DS_E_SEM_TAKE_ERROR);
 	}
 	return TRUE;
 }
