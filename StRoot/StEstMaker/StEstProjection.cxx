@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstProjection.cxx,v 1.2 2001/01/25 18:00:09 lmartin Exp $
+ * $Id: StEstProjection.cxx,v 1.3 2001/01/31 16:54:40 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StEstProjection.cxx,v $
+ * Revision 1.3  2001/01/31 16:54:40  lmartin
+ * mParams[]->debug replaced by mDebug.
+ * phi and z params for StEstIndexGeom removed from StEstParams.
+ *
  * Revision 1.2  2001/01/25 18:00:09  lmartin
  * Methods declared as StEstTracker methods.
  * RAD_TO_DEG variable replaced by C_DEG_PER_RAD.
@@ -50,7 +54,7 @@ int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
   mPreprojNumber=0;
 
 
-  if(mParams[mPass]->debug>4){
+  if(mDebugLevel>4){
     cout<<"     branch  = "<<&branch<<endl;
     cout<<"     slayer  = "<<slayer<<endl;
   }
@@ -98,18 +102,18 @@ int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
     }
     else{
       vect1 = helix->at(sd);
-      phi=floor((atan2(vect1.y(), vect1.x())+M_PI)*C_DEG_PER_RAD/mParams[mPass]->phibin);
-      z=floor(vect1.z()/mParams[mPass]->zbin)+mParams[mPass]->nzbins/2; 
+      phi=floor((atan2(vect1.y(), vect1.x())+M_PI)*C_DEG_PER_RAD/mPhiBin);
+      z=floor(vect1.z()/mZBin)+mNZBins/2; 
 
       //last chance for track
       // need to be verified
 
       if(z==-1)
 	z++;
-      if(z==mParams[mPass]->nzbins)
+      if(z==mNZBins)
       z--;
       
-      if(z>=0 && z<mParams[mPass]->nzbins && phi>=0 && phi<mParams[mPass]->nphibins) {
+      if(z>=0 && z<mNZBins && phi>=0 && phi<mNPhiBins) {
 	for(jl=0; jl<mIndexGeom->getNWaf(phi,z,slayer); jl++){
 	  if(mPreprojNumber>=MAXFINDWAF){
 	    cout<<"       WARNING!!! too many wafers. "<<endl;
@@ -130,7 +134,7 @@ int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
     for(il=0; il<nwaf; il++){
       for(jl=0; jl<8; jl++){
 	if(mPreprojNumber>=MAXFINDWAF){
-	  if(mParams[mPass]->debug>0) 
+	  if(mDebugLevel>0) 
 	    cout<<"      WARNING!!! too many neighbours. mPreprojNumber="<<mPreprojNumber<<endl;
 	  for (lm=0;lm<mPreprojNumber;lm++) 
 	    cout<<" "<<mPreprojTable[lm]->GetId()<<" ";
@@ -152,13 +156,13 @@ int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
 
  PREPROJ_FINISH:;
   for(jl=0; jl<mPreprojNumber; jl++) {
-    if(mParams[0]->debug>4) {
+    if(mDebugLevel>4) {
       cout << "detector ="<<mPreprojTable[jl]->mId<<"  nhits ="<<mPreprojTable[jl]->GetNHits()<<" srodek (center)="<<*(mPreprojTable[jl]->GetX())<<"  direction = "<<*(mPreprojTable[jl]->GetN())<<endl;
     }
     mPreprojTable[jl]->mPreprojection=FREE;
   }
     
-  if(mParams[mPass]->debug>2){
+  if(mDebugLevel>2){
     cout << "    Wafers found: "<<mPreprojNumber<<endl;
     cout<<"**** Preprojection STOP ****"<<endl;    
   }
@@ -185,7 +189,7 @@ int StEstTracker::Projection(StEstBranch* branch, long slay) {
   StThreeVector<double> vect2;
   StThreeVector<double> vect3;
 
-  if(mParams[0]->debug>4) {
+  if(mDebugLevel>4) {
     StThreeVector<double> *vect0 = new StThreeVector<double>(0,0,0);
     cout << "  dist from (0,0,0)="<<helix->distance(*vect0)<<endl;
     cout << "  pathlength to (0,0,0)="<<helix->pathLength(*vect0)<<endl;
@@ -213,7 +217,7 @@ int StEstTracker::Projection(StEstBranch* branch, long slay) {
     
     sd=helix->pathLength(vect2, vect3);
     
-    if(mParams[mPass]->debug>4) {
+    if(mDebugLevel>4) {
       cout<<"  helix->pathLength="<<sd<<endl;
     }
     if(sd<1000) {
@@ -243,7 +247,7 @@ int StEstTracker::Projection(StEstBranch* branch, long slay) {
 	  mProjOut.nhit++;
 	else
 	  cerr <<  "mProjOut.nhit==MAXHITPROJ" <<endl;
-	if(mParams[mPass]->debug>4) 
+	if(mDebugLevel>4) 
 	  cout << "--- HIT ADDED TO PROJ TABLE ---  "<<mProjOut.nhit<<endl;
 	
 	// do pomyslenia :
@@ -266,7 +270,7 @@ int StEstTracker::Projection(StEstBranch* branch, long slay) {
 	    tmpd1b = tmpd2b;
 	    tmpd1c = tmpd2c;
 	  }
-	if(mParams[mPass]->debug>4) 
+	if(mDebugLevel>4) 
 	  for(kl=0; kl<mProjOut.nhit; kl++) {
 	    cout << "hit nr = "<<kl<<"\tdist = "<<mProjOut.dist[kl]<<endl;
 	  }
@@ -276,7 +280,7 @@ int StEstTracker::Projection(StEstBranch* branch, long slay) {
   } //end of for(il=0; il<mProjOut.nwaf; il++)
   // end of projection & hit information
 
-  if(mParams[0]->debug>2)
+  if(mDebugLevel>2)
     cout<<"Projection **** STOP ****"<<endl;
  
   return(1);
