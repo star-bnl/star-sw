@@ -1,5 +1,8 @@
-// $Id: rootlogon.C,v 1.15 1999/11/02 18:12:15 fine Exp $
+// $Id: rootlogon.C,v 1.16 1999/11/11 00:25:53 fisyak Exp $
 // $Log: rootlogon.C,v $
+// Revision 1.16  1999/11/11 00:25:53  fisyak
+// replace cout by printf
+//
 // Revision 1.15  1999/11/02 18:12:15  fine
 // STAR_Demos.C has been removed from rootlogon.C
 //
@@ -68,13 +71,13 @@
  int mm=(itime%10000)/100;
  int ss=itime%100;
 
- char* c[12]={"jan","feb","mar","apr","may","jun",
-              "jul","aug","sep","oct","nov","dec"};
+ char* c[12]={"Jan","Feb","Mar","Apr","May","Jun",
+              "Jul","Aug","Sep","Oct","Nov","Dec"};
 
- cout << " *** Start at Date : " << day << "-" << c[month-1] << "-" << year
-      << " Time : " << hh << ":" << mm << ":" << ss << " ***" << endl;
- cout << endl;
-
+ // cout << " *** Start at Date : " << day << "-" << c[month-1] << "-" << year
+ //      << " Time : " << hh << ":" << mm << ":" << ss << " ***" << endl;
+ // cout << endl;
+ printf(" *** Start at Date : %i-%s-%i Time : %i:%i:%i ***\n",day, c[month-1], year, hh, mm, ss);
    }
 
 
