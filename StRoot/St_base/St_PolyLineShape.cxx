@@ -246,10 +246,12 @@ Int_t St_PolyLineShape::DistancetoPrimitive(Int_t px, Int_t py)
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
  
  if (m_Points) {
-   return m_Points->DistancetoPrimitive( px, py);
- 
+   Int_t ret = m_Points->DistancetoPrimitive( px, py);
+   if (ret == -1) ret = PointDistancetoPrimitive(px, py);
+   return ret;
+#if 0
    const Int_t inaxis = 7;
-   Int_t dist = 99999;
+   Int_t dist = 999999;
  
    Int_t puxmin = gPad->XtoAbsPixel(gPad->GetUxmin());
    Int_t puymin = gPad->YtoAbsPixel(gPad->GetUymin());
@@ -293,9 +295,59 @@ Int_t St_PolyLineShape::DistancetoPrimitive(Int_t px, Int_t py)
       }
    }
    return dist;
+#endif
 }
  
  return 999999;
+}
+
+//______________________________________________________________________________
+Int_t St_PolyLineShape::PointDistancetoPrimitive(Int_t px, Int_t py)
+{
+//*-*-*-*-*-*-*Compute distance from point px,py to a 3-D points *-*-*-*-*-*-*
+//*-*          =====================================================
+//*-*
+//*-*  Compute the closest distance of approach from point px,py to each segment
+//*-*  of the polyline.
+//*-*  Returns when the distance found is below DistanceMaximum.
+//*-*  The distance is computed in pixels units.
+//*-*
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+ 
+   const Int_t inaxis = 7;
+   Float_t dist = 999999;
+ 
+   Int_t puxmin = gPad->XtoAbsPixel(gPad->GetUxmin());
+   Int_t puymin = gPad->YtoAbsPixel(gPad->GetUymin());
+   Int_t puxmax = gPad->XtoAbsPixel(gPad->GetUxmax());
+   Int_t puymax = gPad->YtoAbsPixel(gPad->GetUymax());
+ 
+   TView *view = 0;
+//*-*- return if point is not in the user area
+   if (px < puxmin - inaxis) goto END;
+   if (py > puymin + inaxis) goto END;
+   if (px > puxmax + inaxis) goto END;
+   if (py < puymax - inaxis) goto END;
+ 
+   view = gPad->GetView();
+   if (view) {
+     Int_t i;
+     Float_t dpoint;
+     Float_t xndc[3];
+     Int_t x1,y1;
+     Int_t pointSize = m_Points->Size();
+     for (i=0;i<pointSize;i++) {     
+        Float_t thisPoints[3];
+        view->WCtoNDC(m_Points->GetXYZ(thisPoints,i), xndc);
+        x1     = gPad->XtoAbsPixel(xndc[0]);
+        y1     = gPad->YtoAbsPixel(xndc[1]);
+        dpoint = (px-x1)*(px-x1) + (py-y1)*(py-y1);
+        if (dpoint < dist) dist = dpoint;
+     }
+     dist = (TMath::Sqrt(dist));
+   }
+END:
+   return Int_t(dist);
 }
 
 //______________________________________________________________________________
