@@ -1,5 +1,8 @@
-* $Id: tde_new.F,v 1.4 1998/07/07 17:21:48 ogilvie Exp $
+* $Id: tde_new.F,v 1.5 1998/08/05 21:58:30 fisyak Exp $
 * $Log: tde_new.F,v $
+* Revision 1.5  1998/08/05 21:58:30  fisyak
+* Correct parameters in hdelet for NT (VF)
+*
 * Revision 1.4  1998/07/07 17:21:48  ogilvie
 * removing hardwired B-field and math const
 *
@@ -382,7 +385,7 @@ c            hstep(2)=hxmax/100.
            call hfith(hhid,landau2,'QL',3,hparam,hstep,hpmin,hpmax,hsig,hchi2)
             track(j).dedx(1)=hparam(2)
             track(j).dedx(2)=hxamp
-            call hdelet(hhid,' ')
+            call hdelet(hhid)
          endif
 c
 c
