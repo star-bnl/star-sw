@@ -147,6 +147,7 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
   StMuDstMaker* maker = new StMuDstMaker(1,1,dirName);
   // You can change the PIDTable map using the above method.
   //maker->setProbabilityPidFile("Path/PIDTable.root");
+  maker->setProbabilityPidFile();
 
   StMuL3Filter* l3Filter = new StMuL3Filter(); maker->setL3TrackFilter(l3Filter);
   StMuFilter* filter = new StMuFilter();       maker->setTrackFilter(filter);
