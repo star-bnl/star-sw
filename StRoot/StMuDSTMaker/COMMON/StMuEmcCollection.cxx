@@ -66,6 +66,13 @@ StMuEmcCollection::~StMuEmcCollection()
   if(mEndcapEmcPoints) {mEndcapEmcPoints->Clear(); delete mEndcapEmcPoints;}
   if(mEndcapPrsHits) {mEndcapPrsHits->Clear(); delete mEndcapPrsHits;}
 }
+void StMuEmcCollection::DeleteThis()
+{
+    for ( int i=0; i<2; i++) mSmdHits[i]->Delete();    
+    for ( int i=0; i<4; i++) mEmcClusters[i]->Delete();    
+    mEmcPoints->Delete();  
+}
+
 void StMuEmcCollection::clear(Option_t *option)
 {
 /*  for(int i=0;i<7200;i++) mTowerADC[i]=0;

@@ -31,7 +31,7 @@ class StMuEmcCollection: public TObject
                       StMuEmcCollection(StMuEmcCollection&);
     virtual           ~StMuEmcCollection();
     void              clear(Option_t *option="");     
-    void              DeleteThis() {}
+    void              DeleteThis();
     
     int               getTowerADC(int id, int detector = bemc);    
     int               getNSmdHits(int detector);
