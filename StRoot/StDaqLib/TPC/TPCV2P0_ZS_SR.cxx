@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.14 2000/02/08 21:34:06 levine Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.15 2000/02/28 22:02:51 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -27,9 +27,16 @@
  * 27-Jul-99 MJL init RowSpacePts = 0 to make destructor robust
  * 29-Aug-99 MJL #include <iostream.h> for HP platform
  * 07-Feb-00 MJL add diagnostics when bad cluster data encountered
+ * 23-Feb-00 MJL fix bug (~line 229) which didn't handle split sequences
+ *               correctly. Thanks to Herb Ward.
+ * 24-Feb-00 MJL clean up loop structure, add comments everywhere
+ * 28-Feb-00 MJL protect against hardware quirks in VRAM
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.15  2000/02/28 22:02:51  levine
+ * add protection against illegal CPP sequences - was causing unitialized pointers
+ *
  * Revision 1.14  2000/02/08 21:34:06  levine
  * added diagnostics for bad cluster pointers
  *
@@ -74,7 +81,7 @@
  *
  **************************************************************************/
 #include <iostream.h>
-
+#include <assert.h>
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "TPCV2P0.hh"
 #define MAKE_THE_DAMNED_COMPILER_SILENT
@@ -130,6 +137,7 @@ int TPCV2P0_ZS_SR::initialize()
    
 
   // search through the  SEQD banks to build our tables of what's where
+
   // This stupid compiler thinks rcb's scope extends here, so I removed int
   // The original line should go in when we upgrade to a better compiler 
   //  for(int rcb = 0; rcb < 6; rcb++) {
@@ -163,13 +171,15 @@ int TPCV2P0_ZS_SR::initialize()
 	      (ASIC_Cluster *)(cppr->entry + 32*ent.offset);
 
 	    int lastbin = -2, len = 0;
-	    int i, start, stop, newseq;
+	    int i, start, stop=-1, newseq;
 	    for (i=0; i<TPC_MXSEQUENCE; i++) { //loop over ASIC sequences
 	      start = clusters[i].start_time_bin;
-	      if ((start < 0)||(start==511)) break;
-	      newseq = (start > lastbin+1) ; // sequence broken in pieces by MZ
+	      if ((start < 0)||(start==511)||(start<=stop)) break;
+	      //protect against hardware quirks in VRAM
+	      newseq = (start>lastbin+1);//sequence not broken in pieces by MZ
 	      stop = clusters[i].stop_time_bin;
-	      len = stop - start + 1;
+	      //MJL: not used:   len = stop - start + 1;
+	      // catch bad values of start, stop
 	      if (start<0 || start>511 || stop<0 || stop>511) {
 		struct EventInfo ei;
 		ei = detector->ercpy->getEventInfo();
@@ -184,29 +194,37 @@ int TPCV2P0_ZS_SR::initialize()
 	      lastbin = stop;
 	      if (newseq) Pad_array[row-1][pad-1].nseq++;
 	      //update the cluster counter for this pad
-	    }
+	      // ...nseq now has CORRECT count of distinct ASIC sequences
+	    } // loop over ASIC sequences
 	    if (i==TPC_MXSEQUENCE) {
 	      //did we overflow the ASIC cluster pointer array
 	      // do the rest here by hand
 	    }
+
+	    // finished scanning for total number of distinct sequences
+	    // this scan is only used to determine the number of sequences
 	    int nseq = Pad_array[row-1][pad-1].nseq;
-	    if (!nseq) continue;
-	    // only if there are sequences on this pad
-	    Pad_array[row-1][pad-1].seq= (Sequence *)malloc(nseq*sizeof(Sequence)); 
+	    if (!nseq) continue; // only if there are sequences on this pad
+	    Pad_array[row-1][pad-1].seq= 
+	      (Sequence *)malloc(nseq*sizeof(Sequence)); 
 	    if (Pad_array[row-1][pad-1].seq==NULL) {
 	      cout << "failed to malloc() Sequence structures " << endl;
 	      return FALSE;
 	    }
 	    lastbin = -2;
 	    len = 0;
+	    int seqCnt = 0;   
+
+	    // loop over sequences, filling in structs
 	    for (i=0; i<nseq; i++) { //loop over ASIC sequences
 	      if (i<TPC_MXSEQUENCE) {
 		start = clusters[i].start_time_bin;
 		if ((start < 0)||(start==511)) break;
-		newseq = (start > lastbin+1) ; // sequence broken in pieces by MZ
-		// sequence broken in pieces by MZ
+		newseq = (start>lastbin+1);
+		     //sequence not broken in pieces by MZ
 		stop = clusters[i].stop_time_bin;
 		len = stop - start + 1;
+		// catch bad values of start, stop
 		if (start<0 || start>511 || stop<0 || stop>511) {
 		  struct EventInfo ei;
 		  ei = detector->ercpy->getEventInfo();
@@ -221,22 +239,25 @@ int TPCV2P0_ZS_SR::initialize()
 		lastbin = stop;
 		if (newseq) {
 		  int offset = ent.offset * padkr->getADCBytes() + start;
-		  Pad_array[row-1][pad-1].seq[i].startTimeBin = start;
-		  Pad_array[row-1][pad-1].seq[i].Length = len;
-		  Pad_array[row-1][pad-1].seq[i].FirstAdc = (u_char *)(adcr->ADC + offset);
+		  Pad_array[row-1][pad-1].seq[seqCnt].startTimeBin = start;
+		  Pad_array[row-1][pad-1].seq[seqCnt].Length = len;
+		  Pad_array[row-1][pad-1].seq[seqCnt].FirstAdc = 
+		             (u_char *)(adcr->ADC + offset);
+		  seqCnt++;
 		}
 		else { // continuation of previous sequence
-		  Pad_array[row-1][pad-1].seq[i].Length += len;
+		  assert( seqCnt>=1 && seqCnt<=nseq );
+		  Pad_array[row-1][pad-1].seq[seqCnt-1].Length += len;
 		}
 	      }
 	      else {//did we overflow the ASIC cluster pointer array?
 		// do the rest here by hand (TBDL)
 	      }	     
-	    } 
-	  }
-	}
-      }
-
+	    } // loop on seq
+	  }   // loop on pad
+	}     // loop on row
+      }       // if TPCSEQD doesn't exist 
+      // use this loop when SEQD exists:
       else { //TPCSEQD bank exists
 	if (detector->ercpy->verbose) 
 	  printf("TPCSEQD found sector %d  RB%d MZ%d\n",sector+1,rcb+1,mz+1);
@@ -244,8 +265,8 @@ int TPCV2P0_ZS_SR::initialize()
 	int len = seqd_p[rcb][mz]->header.BankLength - (sizeof(Bank_Header)/4);
 	int numseq = (4*len)/sizeof(short); // find # sequences this bank
 	// go through the SEQD twice:
-	// First malloc the Sequence arrays needed
-	// Second fill in the Sequence structs
+	// First:  malloc the Sequence arrays needed
+	// Second: fill in the Sequence structs
 
 	// get a pointer to the CPPr bank for debugging only
 	//	classname(Bank_TPCCPPR) *cppr =
@@ -254,7 +275,7 @@ int TPCV2P0_ZS_SR::initialize()
 	//	TPCV2P0_PADK_SR *padkr = detector->getPADKReader(sector);
 
 	int i=0;
-	while (i<numseq) {
+	while (i<numseq) { // loop over the #sequences in TPCSEQD
 	  if (seqd_p[rcb][mz]->sequence[i]<0) { //padrow, pad
 	    padrow = (seqd_p[rcb][mz]->sequence[i]>>8)& 0x7f;
 	    pad = (seqd_p[rcb][mz]->sequence[i])& 0xff;
@@ -334,76 +355,72 @@ int TPCV2P0_ZS_SR::initialize()
 	      cout << "failed to malloc() Sequence structures " << endl;
 	      return FALSE;
 	    }
-	  }
-	}
-      }
-    }
-  }
+	  }// if Pad_array[padrow-1][pad-1].seq==NULL
+	}// if (nseq)
 
-      //second pass ***** this can be incorporated into the first loop !!
-  // This stupid compiler thinks rcb's scope extends here, so I removed int
-  // The original line should go in when we upgrade to a better compiler 
-  // for(int rcb = 0; rcb < 6; rcb++) { [Iwona]
-  for(rcb = 0; rcb < 6; rcb++) {
-    for(int mz = 0; mz < 3; mz++) {
-      if (seqd_p[rcb][mz] == (classname(Bank_TPCSEQD) *)NULL) continue;
-      u_char *adc_locn = (u_char *)adcd_p[rcb][mz]->ADC;
-      int padrow=-1, pad=-1, lastbin=-2, pad_seq, oldstart = 0;
-      int len = seqd_p[rcb][mz]->header.BankLength - (sizeof(Bank_Header)/4);
-      int numseq = (4*len)/sizeof(short); // find # sequences this bank
-      int i=0;
-      while  (i<numseq)  {
-	if (seqd_p[rcb][mz]->sequence[i]<0) { //padrow, pad
-	  padrow = (seqd_p[rcb][mz]->sequence[i]>>8)& 0x7f;
-	  pad = (seqd_p[rcb][mz]->sequence[i])& 0xff;
-	  if (pad==255) break; //pad 255 exists only in extraneous last word
-	  pad_seq = 0;
-	  oldstart=0;
-	  lastbin = -2;
-	  i++;
-	}
-	else { // (start|lastseq|len)
-	  unsigned short work = seqd_p[rcb][mz]->sequence[i];
-	  int start = work>>6;
-	  int len = work & 0x1f;
-	  if (start >= oldstart) { // still on same pad
-	  //is this sequence adjacent to previous one?
-	    if (start>lastbin+1)  { //no
-	      if (pad_seq>=Pad_array[padrow-1][pad-1].nseq)
-		printf("sequence overrun %s %d row %d pad %d seq %d\n",
-		       __FILE__,__LINE__,padrow,pad,pad_seq);
-	      Pad_array[padrow-1][pad-1].seq[pad_seq].startTimeBin = start;
-	      Pad_array[padrow-1][pad-1].seq[pad_seq].Length = len;
-	      Pad_array[padrow-1][pad-1].seq[pad_seq].FirstAdc = adc_locn;
-	      adc_locn +=len;
-	      pad_seq++;
-	    }
-	    else { // yes: just update the length
-	      if (pad_seq>Pad_array[padrow-1][pad-1].nseq)
-		printf("sequence overrun %s %d row %d pad %d seq %d\n",
-		       __FILE__,__LINE__,padrow,pad,pad_seq);
-	      Pad_array[padrow-1][pad-1].seq[pad_seq-1].Length += len;
-	      adc_locn +=len;
-	    }
-	    lastbin = start+len-1;
-	    oldstart = start;
-	    if (work & 0x20) {//last sequence ?
-	      pad++;    // default to next pad in this padrow
-	      pad_seq = 0;
-	      lastbin = -2; // set lastbin for new pad	
-	      oldstart=0;
-	    }
+	// process TPCSEQD to fill in the Pad_array[][].seq structs
+	u_char *adc_locn = (u_char *)adcd_p[rcb][mz]->ADC;
+	padrow=-1; pad=-1; lastbin=-2; oldstart = 0; i=0;
+	int pad_seq;
+
+	while  (i<numseq)  {
+	  if (seqd_p[rcb][mz]->sequence[i]<0) { //padrow, pad
+	    padrow = (seqd_p[rcb][mz]->sequence[i]>>8)& 0x7f;
+	    pad = (seqd_p[rcb][mz]->sequence[i])& 0xff;
+	    if (pad==255) break; //pad 255 exists only in extraneous last word
+	    pad_seq = 0;
+	    oldstart=0;
+	    lastbin = -2;
 	    i++;
 	  }
-	  else {    // starting new pad without bit 5 set!
-	    if (detector->ercpy->verbose) printf("new pad detected with bit 5 clear!\n");
-	    fflush(stdout);
-	    while (seqd_p[rcb][mz]->sequence[i]>0 && i<numseq) i++; // skip until next "switch=1"
-	  }
-	}  // (start|lastseq|len)
-      }    // while (i<numseq)
-    }
-  }
+	  else { // (start|lastseq|len)
+	    unsigned short work = seqd_p[rcb][mz]->sequence[i];
+	    int start = work>>6;
+	    int len = work & 0x1f;
+	    if (start >= oldstart) { // still on same pad
+	      //is this sequence adjacent to previous one?
+	      if (start>lastbin+1)  { //no
+		if (pad_seq>=Pad_array[padrow-1][pad-1].nseq)
+		  printf("sequence overrun %s %d row %d pad %d seq %d\n",
+			 __FILE__,__LINE__,padrow,pad,pad_seq);
+		Pad_array[padrow-1][pad-1].seq[pad_seq].startTimeBin = start;
+		Pad_array[padrow-1][pad-1].seq[pad_seq].Length = len;
+		Pad_array[padrow-1][pad-1].seq[pad_seq].FirstAdc = adc_locn;
+		adc_locn +=len;
+		pad_seq++;
+	      }
+	      else { // yes: just update the length
+		assert ( pad_seq>=1 && pad_seq<=Pad_array[padrow-1][pad-1].nseq);
+		if (pad_seq>Pad_array[padrow-1][pad-1].nseq)
+		  printf("sequence overrun %s %d row %d pad %d seq %d\n",
+			 __FILE__,__LINE__,padrow,pad,pad_seq);
+		Pad_array[padrow-1][pad-1].seq[pad_seq-1].Length += len;
+		adc_locn +=len;
+	      }
+	      lastbin = start+len-1;
+	      oldstart = start;
+	      if (work & 0x20) {//last sequence ?
+		pad++;    // default to next pad in this padrow
+		pad_seq = 0;
+		lastbin = -2; // set lastbin for new pad	
+		oldstart=0;
+	      }
+	      i++;
+	    }
+	    else {    // starting new pad without bit 5 set!
+	      if (detector->ercpy->verbose) {
+		printf("new pad detected with bit 5 clear!\n");
+		fflush(stdout);
+	      }
+	       // skip until next "switch=1"
+	      while (seqd_p[rcb][mz]->sequence[i]>0 && i<numseq) i++; 
+	    }  // new pad starting with bit 5 set
+	  }    // (start|lastseq|len)
+	}      // while (i<numseq)
+      }//TPCSEQD bank exists
+    }// loop over mz
+  }// loop over rcb
+
   return TRUE;
 }
 
