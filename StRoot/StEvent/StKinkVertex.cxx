@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StKinkVertex.cxx,v 2.1 1999/10/13 19:44:51 ullrich Exp $
+ * $Id: StKinkVertex.cxx,v 2.2 1999/10/14 11:07:57 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StKinkVertex.cxx,v $
- * Revision 2.1  1999/10/13 19:44:51  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/14 11:07:57  ullrich
+ * Fixed geantIdDaughter(). Was returning parent not daughter Id.
  *
  * Revision 2.3  1999/10/28 22:25:53  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -31,7 +31,7 @@
 
 ClassImp(StKinkVertex)
 
-static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.1 1999/10/13 19:44:51 ullrich Exp $";
+static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.2 1999/10/14 11:07:57 ullrich Exp $";
 
 StKinkVertex::StKinkVertex()
 {
@@ -104,7 +104,7 @@ StParticleDefinition*
 StKinkVertex::pidDaughter() const
 {
     return StParticleTable::instance()->findParticleByGeantId(mDaughterGeantId);
-StKinkVertex::geantIdDaughter() const { return mParentGeantId; }
+}
     
 UShort_t
 StKinkVertex::geantIdParent() const { return mParentGeantId; }
