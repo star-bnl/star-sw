@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.9 2001/08/03 20:33:55 lansdell Exp $ 
+// $Id: StQABookHist.h,v 2.10 2001/11/20 21:53:46 lansdell Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.10  2001/11/20 21:53:46  lansdell
+// added x-y dist of hits, tpc east&west histos
+//
 // Revision 2.9  2001/08/03 20:33:55  lansdell
 // added primvtx check histos for different multiplicities; separated x-y plot of first point on track, tpc into east and west histos
 //
@@ -58,7 +61,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.9 2001/08/03 20:33:55 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.10 2001/11/20 21:53:46 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -554,6 +557,8 @@ class StQABookHist : public TObject {
 // for method MakeHistPoint
   TH1F     *m_z_hits;      //! z dist. of hits, tpc
   TH1F     *m_pnt_zS;      //! z dist. of hits, svt
+  TH2F     *m_pnt_xyTE;    //! xy dist. of hits, tpcE
+  TH2F     *m_pnt_xyTW;    //! xy dist. of hits, tpcW
   TH2F     *m_pnt_phiT;    //! phi dist. of hits, tpc
   TH1F     *m_pnt_phiS;    //! phi dist. of hits, svt
   TH2F     *m_pnt_padrowT; //! padrow dist. of hits, tpc

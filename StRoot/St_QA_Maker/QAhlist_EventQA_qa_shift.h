@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.11 2001/08/29 20:45:15 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.12 2001/11/20 21:53:45 lansdell Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.12  2001/11/20 21:53:45  lansdell
+// added x-y dist of hits, tpc east&west histos
+//
 // Revision 2.11  2001/08/29 20:45:15  genevb
 // Trigger word histos
 //
@@ -46,6 +49,8 @@
   "StEQaPointTpc",
   "StEQaPointSvt",
   "StEQaPointFtpc",
+  "StEQaPointXYTpcE",
+  "StEQaPointXYTpcW",
   "StEQaPointZhits",
   "StEQaPointPhiT",
   "StEQaPointZhitsS",
@@ -162,6 +167,8 @@
   "StELMQaPointTpc",
   "StELMQaPointSvt",
   "StELMQaPointFtpc",
+  "StELMQaPointXYTpcE",
+  "StELMQaPointXYTpcW",
   "StELMQaPointZhits",
   "StELMQaPointPhiT",
   "StELMQaPointZhitsS",
@@ -273,6 +280,8 @@
   "StEMMQaPointTpc",
   "StEMMQaPointSvt",
   "StEMMQaPointFtpc",
+  "StEMMQaPointXYTpcE",
+  "StEMMQaPointXYTpcW",
   "StEMMQaPointZhits",
   "StEMMQaPointPhiT",
   "StEMMQaPointZhitsS",
@@ -384,6 +393,8 @@
   "StEHMQaPointTpc",
   "StEHMQaPointSvt",
   "StEHMQaPointFtpc",
+  "StEHMQaPointXYTpcE",
+  "StEHMQaPointXYTpcW",
   "StEHMQaPointZhits",
   "StEHMQaPointPhiT",
   "StEHMQaPointZhitsS",
