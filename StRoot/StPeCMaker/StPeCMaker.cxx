@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.17 2001/04/23 21:44:33 meissner Exp $
+// $Id: StPeCMaker.cxx,v 1.18 2001/08/07 19:52:35 akio Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.18  2001/08/07 19:52:35  akio
+// added a flag to make udst can have more than 1 depth of branches.
+//
 // Revision 1.17  2001/04/23 21:44:33  meissner
 // add dEdx z variable to tree, setFormat(1) for tree, use private BetheBloch (temp solution)
 //
@@ -92,7 +95,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.17 2001/04/23 21:44:33 meissner Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.18 2001/08/07 19:52:35 akio Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -136,7 +139,7 @@ Int_t StPeCMaker::Init() {
   m_outfile->SetCompressionLevel(1);
   
   
-  uDstTree = new TTree("uDst","Pcol uDst");
+  uDstTree = new TTree("uDst","Pcol uDst",99);
 //  geantTree = new TTree("geant","Pcol geant Tree");
 
   // Instantiate StPeCEvent
@@ -146,9 +149,9 @@ Int_t StPeCMaker::Init() {
   trigger->setInfoLevel ( infoLevel ) ;
   geant   = new StPeCGeant();
   //
-  uDstTree->Branch ("Event","StPeCEvent",&pevent,64000,1);
-  uDstTree->Branch ("Trigger","StPeCTrigger",&trigger,64000,1);
-  uDstTree->Branch ("Geant","StPeCGeant",&geant,64000,1);
+  uDstTree->Branch ("Event","StPeCEvent",&pevent,64000,99);
+  uDstTree->Branch ("Trigger","StPeCTrigger",&trigger,64000,99);
+  uDstTree->Branch ("Geant","StPeCGeant",&geant,64000,99);
 
 //geantTree->Branch ("AllGeant","StPeCGeant",&geant,64000,1);
 
