@@ -1,6 +1,15 @@
-// $Id: bfc_tfs.C,v 1.13 1999/04/20 12:56:03 fisyak Exp $
+// $Id: bfc_tfs.C,v 1.14 1999/05/01 01:47:30 fisyak Exp $
 // $Log: bfc_tfs.C,v $
-// Revision 1.13  1999/04/20 12:56:03  fisyak
+// Revision 1.14  1999/05/01 01:47:30  fisyak
+// Add new set of bfc s'
+//
+// Revision 1.16  1999/04/29 23:54:18  fisyak
+// Add StRootEvent and test on existing of input file
+//
+// Revision 1.15  1999/04/27 21:01:11  snelling
+// fixed a few switches
+//
+// Revision 1.14  1999/04/20 12:56:08  fisyak
 // Add ctf/mwc
 //
 // Revision 1.12  1999/04/19 13:43:19  fisyak
@@ -16,8 +25,8 @@
 // Macro for running chain with different inputs                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-//  default is g2t data
-//#define MINIDAQ /* TPC minidaq data */
+//  default is g2t data 
+//#define MINIDAQ   /* TPC minidaq data */
 #define FZIN    /* GEANT fz-file */
 //#define GTRACK  /* GEANT simulation on flight */
 #ifndef MINIDAQ
@@ -35,10 +44,11 @@
 #define CTEST
 #define StMagF
 #undef FZIN
-#undefine GTRACK
+#undef GTRACK
 #endif /* MINIDAQ */
 #define TPC
-//#define tclPixTransOn
+//#define tclPixTransOn // additional flat pixel table
+//#define tptResOn // fill table with residuals from tracking
 //#define TRS
 //#define TSS
 #if defined(FZIN) || defined(GTRACK)
@@ -47,10 +57,12 @@
 #define SVT
 #define EMC
 #define CTF
-//#define L3
+#define L3
 #define GLOBAL
+#define ANALYSIS
 #endif  /* new data only FZIN or GTRACK */
 //#define XDFOUT
+
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -70,18 +82,19 @@ void Load(){
 #else /* no StMagF, GEANT field */
     gSystem->Load("geometry");
 #endif /* StMagF */
+    gSystem->Load("StarClassLibrary");
 #ifdef TPC
     gSystem->Load("St_tpc");
     gSystem->Load("St_tcl_Maker");
     gSystem->Load("St_tpt_Maker");
-#ifdef TRS
-    gSystem->Load("StarClassLibrary");
+  #ifdef TRS
     gSystem->Load("StTrsMaker"); 
     gSystem->Load("St_tpcdaq_Maker");
-#else /* no TRS */
-#ifdef  TSS
+  #else /* no TRS */
+    #ifdef  TSS
     gSystem->Load("St_tss_Maker");
-#endif /* TSS */
+    #endif /* TSS */
+  #endif /* TRS */
 #endif /* TPC */
 #ifdef MINIDAQ
     gSystem->Load("StMinidaqMaker");
@@ -127,20 +140,24 @@ void Load(){
 #endif /* SVT */
 #ifdef GLOBAL
     gSystem->Load("St_global");
+    gSystem->Load("StRootEvent");
     gSystem->Load("St_dst_Maker");
+#ifdef ANALYSIS
+    gSystem->Load("StRAnalysisMaker");
+#endif
     gSystem->Load("St_QA_Maker");
     gSystem->Load("StTreeMaker");
 #endif /* GLOBAL */
 }
 
-void bfc_tfs (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
+void bfc_tfs (const Int_t Nevents=1,Char_t *infile=0, Char_t *outfile=0)
 {
   Int_t NoEvents = Nevents;
   // define input file
   if (!infile) {
 #ifdef MINIDAQ
     // laser data
-    *infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf";
+    infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf";
 #else /*not MINIDAQ */
 #ifdef FZIN
     // zebra file
@@ -173,9 +190,13 @@ void bfc_tfs (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
     if (NoEvents <=0) {NoEvents = Nevents;}  
     if (NoEvents > Nevents) {NoEvents = Nevents;}  
   }
-#else  /* not FZIN and not GTRACK */
-  TString InFile(infile);
 #endif /* FZIN */
+  TString InFile(infile);
+//      Check the input file
+  if (gSystem->AccessPathName(InFile.Data())) {// file does not exist
+    printf(" *** NO FILE: %s, exit!\n", InFile.Data());
+    gSystem->Exit(1); 
+  }
   if (outfile) FileOut = new TString(outfile);
   else {
     FileOut = new TString(gSystem->BaseName(InFile.Data()));
@@ -192,7 +213,6 @@ void bfc_tfs (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
 #endif /* GTRACK */
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load();
-#endif
 
 #ifdef XDFOUT
   if (!FileOut) {
@@ -203,15 +223,12 @@ void bfc_tfs (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
     printf ("Open xdf file  = %s \n +++++++++++++++++++++++++++++++++++++++++++++++\n",XdfFile->Data());
   }
 #endif
-
   // Create the main chain object
   chain = new StChain("bfc");
   chain->SetDebug();
-  chain->SetInput("EvtHddr",".make/geant/.const/EvtHddr");    
   //  Create the makers to be called by the current chain
-  const char *mainDB = "$STAR/StDb";
+  const char *mainDB = "$STAR/StDb/params";
   St_db_Maker *dbMk = new St_db_Maker("db",mainDB);
-  chain->SetInput("params","db:StDb/params");
   dbMk->SetDebug();
   St_db_Maker *dbMktpc = 0;
 #ifdef CTEST
@@ -224,24 +241,22 @@ void bfc_tfs (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
 
   const char *calibDB = "$STAR_ROOT/calib";
   St_db_Maker *calibMk = new St_db_Maker("calib",calibDB);
-  chain->SetInput("calib","calib:calib");
   calibMk->SetDebug();  
 #ifndef GEANT
   St_xdfin_Maker *xdfMk = new St_xdfin_Maker("xdfin",InFile.Data());
 #ifdef MINIDAQ
   // defined for MINIDAQ
-  chain->SetInput("TPC_DATA",".make/xdfin/.data/TPC_DATA");
-  chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
+  //  chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
 #else /* no MINIDAQ */
   // fix for xdf files to get geant input
-  chain->SetInput("geant",".make/xdfin/.data/event/geant/Event");
 #endif /* MINIDAQ */
 #else  /* GEANT */
   geant = new St_geant_Maker("geant");
   geant->SetNwGEANT(10 000 000);
+  chain->SetInput("geant",".make/geant/.data");
 #ifdef GTRACK
-  geant->SetIwtype(1);
-  geant->SetDebug();
+  //  geant->SetIwtype(1);
+  //  geant->SetDebug();
   geant->LoadGeometry("detp geometry YEAR_1B");
   geant->Do("subevent 0;");
   // gkine #particles partid ptrange yrange phirange vertexrange 
@@ -255,10 +270,7 @@ void bfc_tfs (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
 #else /* no GTRACK */
   geant->SetInputFile(InFile.Data());
 #endif /* GTRACK */
-  chain->SetInput("geom","geant:geom");
 #endif /* GEANT */
-
-
 
 #ifdef MINIDAQ
   StMagF         *field   = new StMagFC("field","STAR no field",0.00002);
@@ -337,6 +349,10 @@ void bfc_tfs (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
 #ifdef TPC
 //		tpt
   St_tpt_Maker *tptMk 	= new St_tpt_Maker("tpc_tracks");
+#ifdef tptResOn
+  // Turn on the residual table
+  tptMk->tptResOn(); 
+#endif /* tptResOn */
 #ifdef MINIDAQ
  // Turn on the final ntuple.
   tptMk->Set_final(kTRUE);
@@ -372,25 +388,30 @@ void bfc_tfs (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
 #ifdef L3
   St_l3t_Maker         *l3Tracks   = new St_l3t_Maker("l3Tracks");
 #endif
-  St_dst_Maker *dstMk = 0;
 #ifdef GLOBAL
 //		global
+  St_dst_Maker *dstMk = 0;
   St_glb_Maker *glbMk = new St_glb_Maker("global");
   glbMk->SetDebug();
 //		dst
                 dstMk = new St_dst_Maker("dst");
   dstMk->SetDebug();
+#ifdef ANALYSIS
+  StAnalysisMaker *anaMk = new StAnalysisMaker;
+#endif
   St_QA_Maker          *qa         = new St_QA_Maker;  
-#endif  /* GLOBAL */
 //		Tree
   if (dstMk) {
     StTreeMaker *treeMk = new StTreeMaker("tree",FileOut.Data());
     treeMk->SetIOMode("w");
     treeMk->SetDebug();
-    treeMk->SetInput("dst","dst");
+    treeMk->IntoBranch("dstBranch","dst/.data/dst");
+    //    treeMk->IntoBranch("geantBranch","geant/.data");
     //  treeMk->SetInput("global","global");
     //treeMk->SetInput(".default","Others");
+     
   }
+#endif  /* GLOBAL */
   
   // START the chain (may the force be with you)
   // Create HTML docs of all Maker's involved
@@ -418,4 +439,5 @@ void bfc_tfs (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
   }
   else {b = new TBrowser("BFC chain",chain);}
 }
+
 
