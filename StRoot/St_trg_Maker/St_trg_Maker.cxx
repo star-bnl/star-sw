@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.15 2000/07/27 18:06:18 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.16 2000/08/13 18:32:59 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.16  2000/08/13 18:32:59  ward
+// Returns kStErr for laser events.
+//
 // Revision 1.15  2000/07/27 18:06:18  ward
 // Put TriggerWd into DST instead of TrgToken (for Jan Belewski).
 //
@@ -212,6 +215,10 @@ int St_trg_Maker::Daq(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *ds
   GraceSlick=(MarilynMonroe_t*)ptr;
   Int_t Iret = SanityCheck();
   if (Iret !=  kStOK) return Iret;
+  if(GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd==0x9001) {
+     printf("Laser event detected in St_trg_Maker, returning kStErr.\n");
+     return kStErr; // Laser event, skip it.
+  }
   // dumpDataToScreenAndExit();
   VpdDaq(dst1);       // The function
   ZdcDaq(dst1);       // St_trg_Maker::Sim
