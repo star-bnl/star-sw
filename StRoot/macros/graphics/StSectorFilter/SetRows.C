@@ -1,7 +1,7 @@
 void SetRows(){
 
   // Author: Valerie Fine (fine@bnl.gov) 19 July 2000 BNL
-  // $Id: SetRows.C,v 1.1 2000/07/19 21:13:45 fine Exp $
+  // $Id: SetRows.C,v 1.2 2000/07/19 21:23:29 fine Exp $
   // This function defines the list of the (sector*100+padrow)
   // to be present by StEventDusplayMaker with StSectorHitFilter
 
