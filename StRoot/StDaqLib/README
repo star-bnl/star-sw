@@ -1,3 +1,24 @@
+/***************************************************************************
+ * $Id: README,v 1.2 1999/07/03 03:39:16 levine Exp $
+ * Author: M.J. LeVine
+ ***************************************************************************
+ * Description: README
+ *      
+ *
+ *   change log
+ * 02-Jul-99 MJL reorganized files. DetectorReader.cxx now in GENERIC,
+ *               supplied various detector directories including e.g., TRG_Reader.hh
+ *               so that all implementations which are detector-specific do not require
+ *               editing the GENERIC directory. Detector code supplied to navigate to 
+ *               detector pointer bank
+ *
+ ***************************************************************************
+ * $Log: README,v $
+ * Revision 1.2  1999/07/03 03:39:16  levine
+ * reorganization of files described
+ *
+ *
+ **************************************************************************/
 StDaqLib:
 =========
 
@@ -11,7 +32,12 @@ Organization:
 There are several directories -
 
 Top-level:
+=========
+README (this file)
 
+
+examples:
+========= 
 client.cxx - needed for self-standing executable. Not necessary for Root
 applications. In any case, use client.cxx as a tutorial of how to use
 the under-lying class libraries.
@@ -20,32 +46,27 @@ Makefile - Use to build a self-standing executable. Not for use with
 Root.
 
 
-
 GENERIC (common to all detectors):
+=================================
 EventReader. Returns pointer to the upper-level pointer bank,
 obtains information on the event (length, event number, time of creation,
 trigger bits, detectors present). 
 
-EventReader.hh - contains declarations common to all detectors plus some 
-unavoidable detector-dependent definitions (needed to be visible to
-top-level client for robust programming interface)
+EventReader.hh - contains declarations common to all detectors 
 
-RecordHeaderFormats. Methods for byte-swapping and printing banks common to
-all detectors.
+DetectorReader.cxx - factory for making the appropriate
+detector-specific readers, both specific to the detector and to the
+format version. #includes [det]_Reader.hh which contains function prototypes
+for all concrete methods required by the virtual DetectorReader class.
 
 swaps. methods for byte-swapping
 
 CRC - calculates CRC
 
-
 TPC (code for the TPC only)
-
+==========================
 trans_table.hh - needed to invert the 8-bit compression done in the
 DAQ front end. [See client.cxx for example of how to use.]
-
-DetectorReader.cxx - factory for making the appropriate
-detector-specific reader, both specific to the detector and to the
-format version. [Probably should be moved to the GENERIC directory]
 
 TPCV1(2)P0.hh - declarations of class members for TPC readers
 
@@ -70,10 +91,21 @@ to the data based on FEE/pin coordinates
 
 fee_pin.h - used by the FEE/pin access method above
 
+TPCStructs.hh - contains TPC struct definitions desirable to be available to
+the client code (top level), such as ASIC_params, ASIC_cluster, Sequence.
 
-OTHERS - other detector groups are expected to emulate the TPC
+
+
+OTHERS:
+======
+other detector groups are expected to emulate the TPC
 directory to describe their detectors in an appropriate manner. Please
 note that the methodology to locate the upper-most detector-specific
 pointer bank has changed. Please copy the method used in 
 TPCV2P0_Reader::TPCV2P0_Reader.
 
+[det]_Reader.hh supplied to satisfy linker. No methods are supplied except
+the constructor, which contains code to navigate to the detector-specific
+pointer bank (e.g., SVTP). This code should probably be moved to a .cxx file
+by the relevant group, and overrides should be supplied where appropriate
+(especially swap()). 
