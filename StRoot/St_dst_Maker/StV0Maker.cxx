@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.29 2000/10/12 18:26:38 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.30 2001/03/02 22:53:12 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.30  2001/03/02 22:53:12  genevb
+// Increased V0 table buffer
+//
 // Revision 1.29  2000/10/12 18:26:38  genevb
 // Edit some warning messages
 //
@@ -239,7 +242,7 @@ Int_t StV0Maker::Make(){
   if (vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1) {
     // ev0
     if(Debug()) gMessMgr->Info() << "StV0Maker::Make(): Calling ev0..." << endm;
-    Int_t v0_limit = globtrk->GetNRows()/80;
+    Int_t v0_limit = globtrk->GetNRows()/30;
     v0_limit = v0_limit*v0_limit;
     if (v0_limit < 15000) v0_limit=15000;
     if (! dst_v0_vertex) {
