@@ -390,8 +390,13 @@ void StiMaker::printStatistics() const
 void StiMaker::finishEvent()
 {
     cout <<"StiMaker::finishEvent()"<<endl;
+    double n=0.;
     while (mtracker->hasMore()) {
+	++n;
 	finishTrack();
+	if (fmod(n, 25.)==0.) {
+	    cout <<"Chugging on track: "<<n<<endl;
+	}
     }
     StiEvaluator::instance()->evaluateForEvent(mtrackstore);
     cout <<"\tStiMaker::finishEvent(). done"<<endl;
