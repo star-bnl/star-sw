@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: SystemOfUnits.h,v 1.2 1999/03/02 20:15:08 ullrich Exp $
+ * $Id: SystemOfUnits.h,v 1.3 1999/03/11 14:53:07 ullrich Exp $
  *
  * Author: blasiuk adapted from CLHEP
  ***************************************************************************
@@ -35,8 +35,8 @@
  ***************************************************************************
  *
  * $Log: SystemOfUnits.h,v $
- * Revision 1.2  1999/03/02 20:15:08  ullrich
- * Added millivolt.
+ * Revision 1.3  1999/03/11 14:53:07  ullrich
+ * Added definition of inch.
  *
  * Revision 1.2  1999/03/02 20:15:08  ullrich
  * Added millivolt.
@@ -86,6 +86,7 @@ namespace units {
     static const double millibarn   = 1.e-3*barn;
     static const double microbarn   = 1.e-6*barn;
     static const double  nanobarn   = 1.e-9*barn;
+    static const double      inch   = 2.54*centimeter;
     
     //
     // Angle
