@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.18 2003/11/09 02:06:28 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.19 2003/11/25 04:24:31 perev Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -739,7 +739,7 @@ Int_t StdEdxY2Maker::Make(){
     PressureScaleI = TMath::Exp(-CalcCorrection(cor+1,LogPressure));
   }
 #endif // PressureScaleFactor
-  }
+  } //! m_DoNotCorrectdEdx
 #ifdef GetTpcGainMonitor
   if (m_Calibration != 0 && m_tpcGainMonitor) {
     if (Center) {
@@ -826,9 +826,10 @@ Int_t StdEdxY2Maker::Make(){
 #endif // SpaceChargeStudy
   StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
   UInt_t nTracks = trackNode.size();
+  StTrackNode *node=0;
   for (unsigned int i=0; i < nTracks; i++) {
-    StGlobalTrack* gTrack = 
-      static_cast<StGlobalTrack*>(trackNode[i]->track(global));
+    node = trackNode[i]; if (!node) continue;
+    StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
     if (gTrack && gTrack->flag() > 0) {
       if (! m_DoNotCorrectdEdx) {
 	StPtrVecHit hvec = gTrack->detectorInfo()->hits(kTpcId);
@@ -838,9 +839,9 @@ Int_t StdEdxY2Maker::Make(){
 	//      if (pTrack) {pTrack->pidTraits().clear(); pTrack->pidTraits().resize(0);}
 	//      if (tTrack) {tTrack->pidTraits().clear(); tTrack->pidTraits().resize(0);}
 	StPrimaryTrack* pTrack = 
-	  static_cast<StPrimaryTrack*>(trackNode[i]->track(primary));
+	  static_cast<StPrimaryTrack*>(node->track(primary));
 	StTptTrack   *tTrack =
-	  static_cast<StTptTrack   *>(trackNode[i]->track(tpt));
+	  static_cast<StTptTrack    *>(node->track(tpt));
 	StTrack *track;
 	// clean old PiD traits
 	for (int l = 0; l < 3; l++) {
