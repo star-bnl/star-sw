@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.7 1999/06/24 17:31:22 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.8 1999/06/25 18:56:19 genevb Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.8  1999/06/25 18:56:19  genevb
+// Use StMessageManager
+//
 // Revision 1.7  1999/06/24 17:31:22  fisyak
 // Add protection for hits which do not belongs to any tracks
 //
@@ -105,8 +108,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.7 1999/06/24 17:31:22 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.8 1999/06/25 18:56:19 genevb Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.8  1999/06/25 18:56:19  genevb
+// Use StMessageManager
+//
 // Revision 1.7  1999/06/24 17:31:22  fisyak
 // Add protection for hits which do not belongs to any tracks
 //
@@ -191,6 +197,7 @@
  * Revision 2.24  2000/05/24 15:48:15  ullrich
  * Instance of StEvent now also created if no DST dataset
  * is available.
+#include "StMessageManager.h"
 
 #ifndef TRANSIENT_STEVENT
   #include "StThreeVectorD.hh"
@@ -223,7 +230,7 @@
 #endif
 #include "StEventMaker/StRootEventManager.hh"
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.7 1999/06/24 17:31:22 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.8 1999/06/25 18:56:19 genevb Exp $";
 #include "StEventManager.hh"
  * Revision 2.23  2000/05/22 21:53:41  ullrich
 const long detid_tpc = 1;
@@ -286,12 +293,12 @@ Int_t StEventMaker::Make(){
   if (!dstRunHeader) dstRunHeader = defRunHeader;
 
   if (dstRunHeader!=defRunHeader) {
-    cout << "StEventMaker: Run header: ID " << dstRunHeader->run_id << endl;
+    gMessMgr->Info() << "StEventMaker: Run header: ID " << dstRunHeader->run_id << endm;
     /* run summary not used
        dstRunsummary_st* dstRunSummary = theEventManager->returnTable_dst_run_summary (nrows);
        delete currentRun;
        if (dstRunSummary) {
-       cout << "StEventMaker: Run summary found" << endl;
+       gMessMgr->Info() << "StEventMaker: Run summary found" << endm;
        // Create transient run header
        currentRun = new StRun(*dstRunHeader, *dstRunSummary);
        } else {
@@ -304,7 +311,7 @@ Int_t StEventMaker::Make(){
   }
  * Revised to build new StEvent version
   
-  cout << "StEventMaker: Reading Event" << endl;
+  gMessMgr->Info() << "StEventMaker: Reading Event" << endm;
   dstEventHeader = theEventManager->returnTable_dst_event_header(nrows);
   if(!dstEventHeader) dstEventHeader=defEventHeader;
 
@@ -323,12 +330,12 @@ Int_t StEventMaker::Make(){
   
     dstMonitorHard = theEventManager->returnTable_dst_monitor_hard(nrows);
     if (dstMonitorHard) 
-          cout << "StEventMaker: Found dstMonitorHard" << endl;
+          gMessMgr->Info() << "StEventMaker: Found dstMonitorHard" << endm;
     else  dstMonitorHard = defMonitorHard;
 
     dstMonitorSoft = theEventManager->returnTable_dst_monitor_soft(nrows);
     if (dstMonitorSoft) 
-         cout << "StEventMaker: Found dstMonitorSoft" << endl;
+         gMessMgr->Info() << "StEventMaker: Found dstMonitorSoft" << endm;
     else dstMonitorSoft=defMonitorSoft;
   
 // 		Read and load trigger detector data
@@ -338,7 +345,7 @@ Int_t StEventMaker::Make(){
   if (status) {
     dstTriggerDetectors = theEventManager->returnTable_dst_TriggerDetectors(nrows); 
     if (dstTriggerDetectors){
-      cout << "StEventMaker: Loading triggerDetectors" << endl;
+      gMessMgr->Info() << "StEventMaker: Loading triggerDetectors" << endm;
       StTriggerDetectorCollection *trgDets =
 	currentEvent->triggerDetectorCollection();
       // Load CTB data
@@ -435,9 +442,9 @@ Int_t StEventMaker::Make(){
     // Second, deal with xi's
     dst_xi_vertex_st* dstXiVertex = theEventManager->returnTable_dst_xi_vertex(nXiVertex);
     if (nXiVertex > nVertex)
-      cout << "StEventMaker: Warning - more Xi's than vertices" << endl;
+      gMessMgr->Warning() << "StEventMaker: More Xi's than vertices" << endm;
     if (dstXiVertex) {
-      cout << "StEventMaker: " << nXiVertex << " dst_xi_vertex" << endl;
+      gMessMgr->Info() << "StEventMaker: " << nXiVertex << " dst_xi_vertex" << endm;
       // Add Xi vertices to vertex collection
       if (doLoad) {
 	StVertex* vtx = NULL;
@@ -457,9 +464,9 @@ Int_t StEventMaker::Make(){
     // Third, deal with v0's
     dst_v0_vertex_st* dstV0Vertex = theEventManager->returnTable_dst_v0_vertex(nV0Vertex);
     if (nV0Vertex > nVertex)
-      cout << "StEventMaker: Warning - more V0's than vertices" << endl;
+      gMessMgr->Warning() << "StEventMaker: More V0's than vertices" << endm;
     if (dstV0Vertex) {
-      cout << "StEventMaker: " << nV0Vertex << " dst_v0_vertex" << endl;
+      gMessMgr->Info() << "StEventMaker: " << nV0Vertex << " dst_v0_vertex" << endm;
       // Add V0 vertices to vertex collection
       if (doLoad) {
 	StVertex* vtx = NULL;
@@ -486,7 +493,7 @@ Int_t StEventMaker::Make(){
     
     // Last for the vertices, add any un-accounted-for vertices (primary)
     if (dstVertex) {
-      cout << "StEventMaker: " << nVertex << " dst_vertex" << endl;
+      gMessMgr->Info() << "StEventMaker: " << nVertex << " dst_vertex" << endm;
       // Build vertex collection
       if (doLoad) {
 	StVertex* vtx = NULL;
@@ -506,7 +513,7 @@ Int_t StEventMaker::Make(){
     
     dst_track_st* dstTrack = theEventManager->returnTable_dst_track(nTrack);
     if (dstTrack) {
-      cout << "StEventMaker: " << nTrack << " dst_track" << endl;
+      gMessMgr->Info() << "StEventMaker: " << nTrack << " dst_track" << endm;
       if (doLoad) {
 	StGlobalTrack* trk = NULL;
 	for (i=0; i<nTrack; i++, dstTrack++) {
@@ -550,8 +557,8 @@ Int_t StEventMaker::Make(){
 	    if ( idStartVertex > 0 && idStartVertex <= vtxPtr.size() ) {
 	      startVertex = vtxPtr[vertexMatchIndex[--idStartVertex]];
 	    } else {
-	      cout << "StEventMaker: WARNING: idStartVertex " << idStartVertex <<
-		" either null or larger than vertex list " << vtxPtr.size() << endl;
+	      gMessMgr->Warning() << "StEventMaker: idStartVertex " << idStartVertex <<
+		" either null or larger than vertex list " << vtxPtr.size() << endm;
 	    }
 	  }
 	  if (idStopVertex == 0) {
@@ -560,8 +567,8 @@ Int_t StEventMaker::Make(){
 	    if ( idStopVertex > 0 && idStopVertex <= vtxPtr.size() ) {
 	      stopVertex  = vtxPtr[vertexMatchIndex[--idStopVertex]];
 	    } else {
-	      cout << "StEventMaker: WARNING: idStopVertex " << idStopVertex <<
-		" either null or larger than vertex list " << vtxPtr.size() << endl;
+	      gMessMgr->Warning() << "StEventMaker: idStopVertex " << idStopVertex <<
+		" either null or larger than vertex list " << vtxPtr.size() << endm;
 	    }
 	  }
 	  // Load the appropriate vertex info using the vertex pointer vector
@@ -579,7 +586,7 @@ Int_t StEventMaker::Make(){
     
     dst_track_aux_st* dstTrackAux = theEventManager->returnTable_dst_track_aux(nTrackAux);
     if (dstTrackAux) {
-      cout << "StEventMaker: " << nTrackAux << " dst_track_aux" << endl;
+      gMessMgr->Info() << "StEventMaker: " << nTrackAux << " dst_track_aux" << endm;
       // Add auxiliary info to tracks
       if (doLoad) {
 	StGlobalTrack* theTrack;
@@ -602,7 +609,7 @@ const static int iTab[]={1,2, 1,3, 2,3, 1,4, 2,4, 3,4, 1,5, 2,5, 3,5, 4,5, 0};
 	      theTrack->fitTraits().covariantMatrix()(jTab[0],jTab[1]) = qwe; 
 	      theTrack->fitTraits().covariantMatrix()(jTab[1],jTab[0]) = qwe;}
 	  } else {
-	    cout << "StEventMaker: ERROR: Track find failed for ID " << itrk << endl;
+	    gMessMgr->Error() << "StEventMaker: Track find failed for ID " << itrk << endm;
 	  }
 	}
       }
@@ -610,7 +617,7 @@ const static int iTab[]={1,2, 1,3, 2,3, 1,4, 2,4, 3,4, 1,5, 2,5, 3,5, 4,5, 0};
     
     dst_dedx_st* dstDedx = theEventManager->returnTable_dst_dedx(nDedx);
     if (dstDedx) {
-      cout << "StEventMaker: " << nDedx << " dst_dedx" << endl;
+      gMessMgr->Info() << "StEventMaker: " << nDedx << " dst_dedx" << endm;
       // Add dedx info to tracks
       if (doLoad) {
 	StDedx* dedx = NULL;
@@ -635,13 +642,13 @@ const static int iTab[]={1,2, 1,3, 2,3, 1,4, 2,4, 3,4, 1,5, 2,5, 3,5, 4,5, 0};
 	    } else if (idet == detid_svt) {
 	      theTrack->setSvtDedx(dedx);
 	    } else {
-	      cout << "StEventMaker: ERROR: Dedx: Det ID " << idet << 
-		" not recognized" << endl;
+	      gMessMgr->Error() << "StEventMaker: Dedx: Det ID " << idet << 
+		" not recognized" << endm;
 	      delete dedx;
 	      dedx=0;
 	    }
 	  } else {
-	    cout << "StEventMaker: ERROR: Track find failed for ID " << itrk << endl;
+	    gMessMgr->Error() << "StEventMaker: Track find failed for ID " << itrk << endm;
 	  }
 	}
       }
@@ -655,7 +662,7 @@ const static int iTab[]={1,2, 1,3, 2,3, 1,4, 2,4, 3,4, 1,5, 2,5, 3,5, 4,5, 0};
     
     dst_tof_trk_st* dstTofTrk = theEventManager->returnTable_dst_tof_trk(nTofTrk);
     if (dstTofTrk) {
-      cout << "StEventMaker: " << nTofTrk << " dst_tof_trk" << endl;
+      gMessMgr->Info() << "StEventMaker: " << nTofTrk << " dst_tof_trk" << endm;
       if (doLoad) {
       }
     }    
@@ -663,7 +670,7 @@ const static int iTab[]={1,2, 1,3, 2,3, 1,4, 2,4, 3,4, 1,5, 2,5, 3,5, 4,5, 0};
     dst_point_st* dstPoint = theEventManager->returnTable_dst_point(nPoint);
     dst_point_st* thePoint = NULL;  
     if (dstPoint) {
-      cout << "StEventMaker: " << nPoint << " dst_point" << endl;
+      gMessMgr->Info() << "StEventMaker: " << nPoint << " dst_point" << endm;
       if (doLoad) {
 	StTpcHit* tpcHit = NULL;
 	StFtpcHit* ftpcHit = NULL;
@@ -676,7 +683,7 @@ const static int iTab[]={1,2, 1,3, 2,3, 1,4, 2,4, 3,4, 1,5, 2,5, 3,5, 4,5, 0};
 	  StGlobalTrack* theTrack = 0;
 	  if (itrk >=0) theTrack = (*theTrackCollection)[itrk];
 	  //	  if (! theTrack) {
-	  //	      cout << "StEventMaker: ERROR: Track find failed for ID " << itrk << endl;
+	  //	      gMessMgr->Error() << "StEventMaker: Track find failed for ID " << itrk << endm;
 	  //	  } else {
 	      // Handle point depending on what detector it comes from
 	  idet = thePoint->hw_position%16;
@@ -696,7 +703,7 @@ const static int iTab[]={1,2, 1,3, 2,3, 1,4, 2,4, 3,4, 1,5, 2,5, 3,5, 4,5, 0};
 	    if (theTrack) theTrack->addFtpcHit(ftpcHit);
 	  }
 	  else {
-	    cout << "StEventMaker: ERROR: Detector ID " << idet << " not known" << endl;
+	    gMessMgr->Error() << "StEventMaker: Detector ID " << idet << " not known" << endm;
 	  }
 	}
       }
@@ -720,7 +727,7 @@ void StEventMaker::setEventManager(StEventManager* mgr)
 //_____________________________________________________________________________
 void StEventMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StEventMaker.cxx,v 1.7 1999/06/24 17:31:22 fisyak Exp $\n");
+  printf("* $Id: StEventMaker.cxx,v 1.8 1999/06/25 18:56:19 genevb Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
