@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.25 2000/06/23 00:12:40 snelling Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.26 2000/07/30 02:38:36 long Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.26  2000/07/30 02:38:36  long
+ * comment out numberofLevel
+ *
  * Revision 1.25  2000/06/23 00:12:40  snelling
  * Removed dependence on local files now pointed to StDbUtilities
  *
@@ -417,10 +420,10 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
     //PR(gasDb->W());
     //PR(mNumberOfElectrons);
 
-    int numberOfLevels =
-	static_cast<int>(log(static_cast<double>(subSegments))/M_LN2 + .999);
+    //  int numberOfLevels =
+    //	static_cast<int>(log(static_cast<double>(subSegments))/M_LN2 + .999);
 	
-    numberOfLevels++;  // take care of the zero!
+    // numberOfLevels++;  // take care of the zero!
 
     double totalNumberOfSubSegments = pow(2.,(numberOfLevels-1));
 	
