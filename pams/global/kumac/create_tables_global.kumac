@@ -47,15 +47,18 @@ macro svm
     
 * ----------------------------------------------------
  
- macro ev0
-   
+ macro ev0   
    
   macro/global/import *
+      
+  rowcount [dst]/ev0out
+  if (staf_result(1).eq.0) then
+      cd [dst]
+      tdm/newtable ev0out ev0_aux 100000
+      maxrow [dst]/ev0out 100000
+  endif
     
-  cd [dst]
-   tdm/newtable ev0out ev0_aux 100000
-   
-   rowcount [dst]/vertex
+  rowcount [dst]/vertex
   if ( staf_result(1) .eq. 0 ) then
     cd [dst]
     tdm/newtable vertex dst_vertex 100000
@@ -73,6 +76,17 @@ macro svm
 
   cd /dui
 
+ return
+ 
+* ----------------------------------------------------
+ 
+ macro ev02
+      
+   macro/global/import *
+     
+     newtable [data]/global/tracks/ev0track2 ev0_track2 10000
+     maxrow   [data]/global/tracks/ev0track2 10000
+	
  return
  
 * ----------------------------------------------------
