@@ -1,5 +1,8 @@
-// $Id: StMessTypeList.h,v 1.4 1999/06/30 17:24:49 genevb Exp $
+// $Id: StMessTypeList.h,v 1.5 1999/09/10 21:05:55 genevb Exp $
 // $Log: StMessTypeList.h,v $
+// Revision 1.5  1999/09/10 21:05:55  genevb
+// Some workarounds for RedHat6.0
+//
 // Revision 1.4  1999/06/30 17:24:49  genevb
 // Better limit management, remove Bool_t
 //
@@ -68,7 +71,10 @@ class StMessTypeList {
         StMessTypePair* FindType(const char* type);
             const char* FindNumType(size_t typeNum);
             const char* FindNumText(size_t typeNum);
-            const char* Text(const char* type);
+            const char* Text(const char* type) {
+                          static StMessTypePair* temp = FindType(type);
+                          return ( (temp) ? temp->Text() : 0 );
+                          }
                     int ListTypes();
 };
 
