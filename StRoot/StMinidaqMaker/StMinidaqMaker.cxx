@@ -1,7 +1,10 @@
-// $Id: StMinidaqMaker.cxx,v 1.13 1999/05/10 13:38:23 love Exp $
+// $Id: StMinidaqMaker.cxx,v 1.14 1999/05/13 20:58:24 liq Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.14  1999/05/13 20:58:24  liq
+// set protections on table indexs
+//
 // Revision 1.13  1999/05/10 13:38:23  love
-// Book all reformat_new tables as 1 row, expand only when needed
+//   Book all reformat_new tables as 1 row, expand only when needed
 //
 // Revision 1.12  1999/05/05 14:07:12  love
 // Used Debug on debug messages, changed initraw sign, fixes some print statements
@@ -289,16 +292,20 @@ void StMinidaqMaker::TransferData(){
            if (Debug()) printf(" Sector = %d \n", indx);
            Int_t k;
            k = indx; if (k == m_first_sector) k = - indx;
-           tss_tsspar_st *tsspar = m_tsspar->GetTable();
-           tsspar->min_sect = k;
-           if(Debug())cout<<"run init_raw_table for sector= "<< k <<endl;
-           St_DataSetIter sect(sector);
-           St_raw_row         *raw_row_in     = (St_raw_row *) sect("raw_row_in");
-           St_raw_row         *raw_row_out    = (St_raw_row *) sect("raw_row_out");
-           Int_t initraw = init_raw_table(m_tsspar,  raw_sec_m,
-                           raw_row_in, 
-                           raw_row_out);
-           if(initraw!=kSTAFCV_OK) Warning("Make","init_raw_table== %d",initraw);
+           if(m_tsspar){
+               tss_tsspar_st *tsspar = m_tsspar->GetTable();
+               tsspar->min_sect = k;
+               if(Debug())cout<<"run init_raw_table for sector= "<< k <<endl;
+               St_DataSetIter sect(sector);
+               St_raw_row         *raw_row_in     = (St_raw_row *) sect("raw_row_in");
+               St_raw_row         *raw_row_out    = (St_raw_row *) sect("raw_row_out");
+               Int_t initraw=0;
+               if(raw_row_in&&raw_row_out){
+                     initraw = init_raw_table(m_tsspar,  raw_sec_m,
+                                              raw_row_in,  raw_row_out);
+               }
+              if(initraw!=kSTAFCV_OK) Warning("Make","init_raw_table== %d",initraw);
+          }
        }
      }
        //begin to call module reformat_new
@@ -320,9 +327,9 @@ void StMinidaqMaker::TransferData(){
        sprintf(name_of_sector,"Sector_%i",im);
        sector = raw_data_tpc(name_of_sector);
        if (!sector) {
-	 //         raw_data_tpc.Mkdir(name_of_sector);
-         //sector = raw_data_tpc(name_of_sector);
-        printf("there is no sector_%d \n", im);
+	 //        raw_data_tpc.Mkdir(name_of_sector);
+	 //sector = raw_data_tpc(name_of_sector);
+        printf(" there is no sector_%d in StMinidaqMaker::Make\n", im);
        }
  
       while ((sector=next())){
@@ -367,43 +374,51 @@ void StMinidaqMaker::TransferData(){
                  if (mmp==0) continue;
                  Int_t kj=mmp->sector;
                  if(m_it->GetNRows()&&m_st->GetNRows()&&m_sd->GetNRows()&&kj==k){
-                    tss_tsspar_st *tsspar = m_tsspar->GetTable();
-                    tsspar->min_sect = k;
-                    St_DataSetIter sect(sector);
+		   tss_tsspar_st *tsspar = m_tsspar->GetTable();
+		   tsspar->min_sect = k;
+		   St_DataSetIter sect(sector);
 
-                    St_raw_row         *raw_row_in     = (St_raw_row *) sect("raw_row_in");
-                    St_raw_row         *raw_row_out    = (St_raw_row *) sect("raw_row_out");
-                    St_raw_pad         *raw_pad_in     = (St_raw_pad *) sect("raw_pad_in");
-                    St_raw_pad         *raw_pad_out    = (St_raw_pad *) sect("raw_pad_out");
-                    St_raw_seq         *raw_seq_in     = (St_raw_seq *) sect("raw_seq_in");
-                    St_raw_seq         *raw_seq_out    = (St_raw_seq *) sect("raw_seq_out");
-                    St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
-                    St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
-
-		    raw_pad_in->ReAllocate(4000);
-		    raw_pad_out->ReAllocate(4000);
-		    raw_seq_in->ReAllocate(50000);
-		    raw_seq_out->ReAllocate(100000);
-		    pixel_data_in->ReAllocate(900000);
-		    pixel_data_out->ReAllocate(900000);
-                    Int_t res = reformat_new(m_tsspar,m_tfc_sector_index,
-                        		     m_it,m_sd,m_st,
-                        		     raw_sec_m,
-                        		     raw_row_in, raw_pad_in, raw_seq_in, pixel_data_in,
-                        		     raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out);
-                    if(res!=kSTAFCV_OK) Warning("TransferData","reformat_new==%d",res);
+		   St_raw_row         *raw_row_in     = (St_raw_row *) sect("raw_row_in");
+		   St_raw_row         *raw_row_out    = (St_raw_row *) sect("raw_row_out");
+		   St_raw_pad         *raw_pad_in     = (St_raw_pad *) sect("raw_pad_in");
+		   St_raw_pad         *raw_pad_out    = (St_raw_pad *) sect("raw_pad_out");
+		   St_raw_seq         *raw_seq_in     = (St_raw_seq *) sect("raw_seq_in");
+		   St_raw_seq         *raw_seq_out    = (St_raw_seq *) sect("raw_seq_out");
+		   St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
+		   St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
+		   
+		   raw_pad_in->ReAllocate(4000);
+		   raw_pad_out->ReAllocate(4000);
+		   raw_seq_in->ReAllocate(50000);
+		   raw_seq_out->ReAllocate(100000);
+		   pixel_data_in->ReAllocate(900000);
+		   pixel_data_out->ReAllocate(900000);
+		   
+		   Int_t res = 0;
+		   if(m_tsspar&&m_tfc_sector_index&&m_it&&m_sd&&m_st&&
+		      raw_row_in&&raw_row_out&&raw_pad_in&&raw_pad_out&&
+		      raw_seq_in&&raw_seq_out&&pixel_data_in&&pixel_data_out) {
+		     res=reformat_new(m_tsspar,m_tfc_sector_index,
+				      m_it,m_sd,m_st,
+				      raw_sec_m,
+				      raw_row_in, raw_pad_in, raw_seq_in, pixel_data_in,
+				      raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out);
+		   }
+		   else {
+		     Warning("TransferData","something wrong with tables pointers while calling reformat_new"); }
+		   if(res!=kSTAFCV_OK) Warning("TransferData","reformat_new==%d",res);
                  }
-             }
+	      }
           }
-       }
-    }
+      }
+     }
 }
 
 //_____________________________________________________________________________
 void StMinidaqMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StMinidaqMaker.cxx,v 1.13 1999/05/10 13:38:23 love Exp $\n");
-//  printf("* %s    *\n",m_VersionCVS);
+  printf("* $Id: StMinidaqMaker.cxx,v 1.14 1999/05/13 20:58:24 liq Exp $\n");
+  //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -411,7 +426,7 @@ void StMinidaqMaker::PrintInfo(){
 //_____________________________________________________________________________
 Int_t StMinidaqMaker::Finish()
 {
- Clear();
- SafeDelete(m_Params);
- return kStOK;
+  Clear();
+  SafeDelete(m_Params);
+  return kStOK;
 }
