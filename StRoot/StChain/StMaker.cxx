@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.47 1999/06/11 23:45:31 perev Exp $
+// $Id: StMaker.cxx,v 1.48 1999/07/09 22:00:22 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.48  1999/07/09 22:00:22  perev
+// GetCVS into StMaker
+//
 // Revision 1.47  1999/06/11 23:45:31  perev
 // cleanup
 //
@@ -130,7 +133,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.47 1999/06/11 23:45:31 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.48 1999/07/09 22:00:22 perev Exp $";
 return cvs;};
 static void doPs(const char *who,const char *where);
 
@@ -143,6 +146,16 @@ StMaker::StMaker()
 //_____________________________________________________________________________
 StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker")
 {
+   TString ts(".maker ");
+   ts += GetCVS();
+   if (ts.Contains("StMaker.h")) {// GetCVS not overloaded
+     Warning("StMaker","GetCVS is not overloaded");
+     printf("  Please add into file %s the following line: \n",IsA()->GetDeclFileName());
+     printf("  virtual const char *GetCVS()\n");
+     printf("  {static const char cvs[]=\"Tag $Name:  $ $Id: StMaker.cxx,v 1.48 1999/07/09 22:00:22 perev Exp $ built \"__DATE__\" \"__TIME__ ; return cvs;}\n\n");  
+   }
+   SetTitle(ts);
+   
    m_Inputs = 0;
    if (!fgStChain) {	// it is first maker, it is chain
      fgStChain = this;
@@ -562,7 +575,7 @@ void StMaker::Fatal(int Ierr, const char *com)
 StMaker *StMaker::GetMaker(const St_DataSet *ds) 
 { 
   const St_DataSet *par = ds;
-  while (par && (par = par->GetParent()) && strcmp(".maker",par->GetTitle())) {}
+  while (par && (par = par->GetParent()) && strncmp(".maker",par->GetTitle(),6)) {}
   return (StMaker*)par;
 }
 //_____________________________________________________________________________
