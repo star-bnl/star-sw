@@ -277,7 +277,8 @@ void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
     for(Int_t j=0;j<nh;j++)
     {
       Bool_t save = kTRUE;
-      Int_t m,e,s,a,cal,rid;
+      Int_t m,e,s,rid;
+      Int_t a=0,cal=0;
       Float_t energy=0;
       if(det==1 || det==5) // towers have only ADC
       {
@@ -287,7 +288,7 @@ void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
 	  if( getEndcapBin(det,j+1,m,e,s)) continue ;// on error
 	}
         energy = 0;
-        cal = 0;
+        cal    = 0;
         if(a==0) save = kFALSE;
       }      
       if(det==2 || det ==6) //prs
