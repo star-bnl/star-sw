@@ -3,9 +3,12 @@
 // Macro for plotting hits and pixels in combination with bfc.C
 //            plotting both sides of tpc seperately
 //
-// $Id: TwoSideDraw.C,v 1.2 1999/08/10 19:01:25 snelling Exp $
+// $Id: TwoSideDraw.C,v 1.3 1999/09/23 21:52:18 snelling Exp $
 //
 // $Log: TwoSideDraw.C,v $
+// Revision 1.3  1999/09/23 21:52:18  snelling
+// added gSystem->Load("StAnalysisUtilities") because that's not in bfc anymore
+//
 // Revision 1.2  1999/08/10 19:01:25  snelling
 // changed for new bfc
 //
@@ -96,16 +99,20 @@ void TwoSideDraw() {
    * -----------------------------------------------------------------
    *	draw TPC sectors with some options 
    * -----------------------------------------------------------------*/
+  gSystem->Load("StAnalysisUtilities");
+
 
   static int DrawPixels(Text_t*, Text_t*, Text_t*);
   static int DrawHits(Text_t*, Text_t*, Text_t*);
   static int DrawGeantHits(Text_t*, Text_t*, Text_t*);
 
+  /*
   if (chain->GetOption(kMINIDAQ)) {
     chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
     chain->SetInput("ChainFlags[kTPC]_DATA",".make/xdfin/.data/ChainFlags[kTPC]_DATA");
   }
-  
+  */
+
   gStyle->SetCanvasColor(10);              // white
   gStyle->SetPadColor(10);                 // white
   gStyle->SetFrameFillColor(10);           // white
