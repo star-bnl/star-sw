@@ -43,7 +43,7 @@ int rdMuDstEEmcDemo(//char* file    ="rcf1200_2301_2000evts.MuDst.root",
 
 // Load my maker
   gSystem->Load("StEEmcUtil");
-  gSystem->Load("StEEmcPool1");
+  gSystem->Load("StEEmcPool");
   gSystem->Load("StEEmcDbMaker");
 
 
