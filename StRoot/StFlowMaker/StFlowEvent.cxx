@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.23 2001/06/07 20:06:16 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.24 2001/08/08 10:35:07 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -608,7 +608,7 @@ void StFlowEvent::PrintSelectionList() {
       cout << "#    abs(Eta) Tpc cuts= " << mEtaTpcCuts[0][j][k] << ", " 
 	   << mEtaTpcCuts[1][j][k] << endl;
       cout << "#    abs(Eta) Ftpc cuts= " << mEtaFtpcCuts[0][j][k] << ", " 
-	   << mEtaTpcCuts[1][j][k] << endl;
+	   << mEtaFtpcCuts[1][j][k] << endl;
       cout << "#    Pt Tpc cuts= " << mPtTpcCuts[0][j][k] << ", "
 	   << mPtTpcCuts[1][j][k] << endl;
       cout << "#    Pt Ftpc cuts= " << mPtFtpcCuts[0][j][k] << ", "
@@ -622,6 +622,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.24  2001/08/08 10:35:07  oldi
+// Typo in output statement of cut lists fixed (mEtaTpcCuts[1][j][k] -> mEtaFtpcCuts[1][j][k]).
+//
 // Revision 1.23  2001/06/07 20:06:16  posk
 // Global Dca cut for event plane particles.
 // Removed SetPtWgt().
