@@ -21,7 +21,7 @@
 ostream& operator<<(ostream&, const StiDetector&);
 
 StiLocalTrackSeedFinder::StiLocalTrackSeedFinder(StiDetectorContainer* det,
-						 StiHitContainer* hits)    
+						 StiHitContainer* hits)
     : StiTrackSeedFinder(det, hits), mSubject(StiIOBroker::instance()), mDoHelixFit(false)
 {
     mMessenger <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder()"<<endl;
@@ -213,14 +213,16 @@ bool StiLocalTrackSeedFinder::extendHit(StiHit* hit)
     
     while (mHitStore->hasMore()) {
 	++nhits;
-	StiHit* theHit = mHitStore->getHit(); //Get hit and increment
-	double theDeltaZ = fabs( theHit->z()-hit->z() );
-	if ( theDeltaZ < dz ) {
-	    closestHit = theHit;
-	    dz = theDeltaZ;
+	StiHit* theHit = mHitStore->getHit();//Get hit and increment
+	if (theHit->isUsed()==false) {
+	    double theDeltaZ = fabs( theHit->z()-hit->z() );
+	    if ( theDeltaZ < dz ) {
+		closestHit = theHit;
+		dz = theDeltaZ;
+	    }
 	}
     }
-
+    
 #ifdef DEBUG
     mMessenger <<"StiLocalTrackSeedFinder.  Found "<<nhits<<" Candidate hits"<<endl;
 #endif
@@ -302,8 +304,8 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
 
 
    ------------------- x --------- pt2
-                        \
-		         \   
+   \
+   \   
    ---------------------- x ------ pt1
 
    We try to extrapolate the segment (pt1->pt2) to predict pt3.  We
@@ -317,7 +319,7 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
    then
    y3 = (r3 - b) / m, which is our prediction, since we know r3
    
- */
+*/
 bool StiLocalTrackSeedFinder::extrapolate()
 {
 #ifdef DEBUG
@@ -358,21 +360,56 @@ bool StiLocalTrackSeedFinder::extrapolate()
     double m_ry = dr/dy;
     double b_ry = hit2->x() - m_ry * hit2->y();
     double y3 = (r3 - b_ry) / m_ry;
+
+    //Now calculate the projection of window onto that plane:
+    double beta_ry = atan2(dr, dy);
+    double rho_ry = sqrt(dr*dr + dy*dy);
+    double alpha_ry = atan2(mExtrapDeltaY, 2.*rho_ry);
+    double tanplus_ry = tan(beta_ry+alpha_ry);
+    double tanminus_ry = tan(beta_ry-alpha_ry);
+    if (tanplus_ry==0. || tanminus_ry==0.) {
+#ifdef DEBUG
+	mMessenger<<"StiLocalTrackSeedFidner::extrapolate(). ERROR:\t"
+		  <<"tanplus_ry==0. || tanminus_ry==0."<<endl;
+#endif
+    }
+    double y3_minus = (r3-hit1->x())/tanplus_ry + hit1->y();
+    double y3_plus = (r3-hit1->x())/tanminus_ry + hit1->y();
     
     //Next, r-z plane
     double m_rz = dr/dz;
     double b_rz = hit2->x() - m_rz * hit2->z();
     double z3 = (r3 - b_rz) / m_rz;
 
+    double beta_rz = atan2(dr, dz);
+    double rho_rz = sqrt(dr*dr + dz*dz);
+    double alpha_rz = atan2(mExtrapDeltaZ, 2.*rho_rz);
+    double tanplus_rz = tan(beta_rz+alpha_rz);
+    double tanminus_rz = tan(beta_rz-alpha_rz);
+    if (tanplus_rz==0. || tanminus_rz==0.) {
+#ifdef DEBUG
+	mMessenger<<"StiLocalTrackSeedFidner::extrapolate(). ERROR:\t"
+		  <<"tanplus_rz==0. || tanminus_rz==0."<<endl;
+#endif
+    }
+    double z3_minus = (r3-hit1->x())/tanplus_rz + hit1->z();
+    double z3_plus = (r3-hit1->x())/tanminus_rz + hit1->z();
+
+#ifdef DEBUG
+    mMessenger<<"beta_ry: "<<beta_ry<<" alpha_ry: "<<alpha_ry
+	      <<" y3+: "<<y3_plus<<" y3: "<<y3<<" y3-: "<<y3_minus<<endl;
+    mMessenger<<"beta_rz: "<<beta_rz<<" alpha_rz: "<<alpha_rz
+	      <<" z3+: "<<z3_plus<<" z3: "<<z3<<" z3-: "<<z3_minus<<endl;
+    
+#endif
 #ifdef DEBUG
     mMessenger <<"query hit container for extension hits"<<endl;
 #endif
-
+    
     //Now get hits:
-    mHitStore->setDeltaD(mExtrapDeltaY);
-    mHitStore->setDeltaZ(mExtrapDeltaZ);
-    mHitStore->setRefPoint(r3,
-			   newLayer->getPlacement()->getCenterRefAngle(),
+    mHitStore->setDeltaD( fabs(y3_plus-y3_minus) /2.);
+    mHitStore->setDeltaZ( fabs(z3_plus-z3_minus) /2. );
+    mHitStore->setRefPoint(r3, newLayer->getPlacement()->getCenterRefAngle(),
 			   y3, z3);
     
     //Loop on hits, find closest to z3 prediction:
@@ -386,10 +423,12 @@ bool StiLocalTrackSeedFinder::extrapolate()
     while (mHitStore->hasMore()) {
 	++nhits;
 	StiHit* theHit = mHitStore->getHit(); //Get hit and increment
-	double theDeltaZ = fabs( theHit->z() - z3 );
-	if ( theDeltaZ < dz ) {
-	    closestHit = theHit;
-	    dz = theDeltaZ;
+	if (theHit->isUsed()==false) {
+	    double theDeltaZ = fabs( theHit->z() - z3 );
+	    if ( theDeltaZ < dz ) {
+		closestHit = theHit;
+		dz = theDeltaZ;
+	    }
 	}
     }
 

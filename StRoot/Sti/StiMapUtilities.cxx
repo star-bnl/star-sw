@@ -140,12 +140,10 @@ bool StTpcPadrowHitFilter::operator()(const StTpcHit& hit) const
 void SetHitUsed::operator()(StiTrackNode& node)
 {
     StiHit* hit = node.getHit();
-    if (hit) {
+    if(hit!=0) {
 	hit->setUsed(true);
     }
 }
-
-
 
 //----------------------- Streamers -------------------------------------------------
 ostream& operator<<(ostream& os, const HitMapKey& a)
