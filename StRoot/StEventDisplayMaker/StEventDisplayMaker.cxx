@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.101 2004/07/29 20:35:37 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.102 2004/09/28 03:55:23 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -98,6 +98,7 @@
 #include "StTrackChair.h"
 
 #include "StDefaultFilter.h"
+#include "StGlobalFilterABC.h"
 #include "StEventHelper.h"
 #include "StEventDisplayInfo.h"
 
@@ -179,7 +180,8 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   m_ListDataSetNames = 0;
   m_VolumeList       = 0;
   mFilterList        = 0;
-  memset(fColCash,0,kCOLORS*sizeof(void*));
+  mGilterList        = 0;
+  memset(fColCash,0,sizeof(fColCash));
   
   m_FilterArray   = new TObjArray(kEndOfEventList);
   Int_t i; 
@@ -324,6 +326,13 @@ void StEventDisplayMaker::AddFilter(StFilterABC* filt)
 #ifdef R__QT
     if (fEventControlPanel) fEventControlPanel->AddFilter((TObject*)filt); 
 #endif
+}
+//______________________________________________________________________________
+void StEventDisplayMaker::AddFilter(StGlobalFilterABC* filt)
+{
+    if (!mGilterList) mGilterList = new TList;
+    if (mGilterList->FindObject(filt->GetName())) return;
+    mGilterList->Add(filt);
 }
 //______________________________________________________________________________
 void StEventDisplayMaker::RemoveName(const char *name)
@@ -705,17 +714,18 @@ Int_t StEventDisplayMaker::MakeTable(const char **positions)
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
 {
-   static const Style_t UHitSty = 4; static const Size_t UHitSiz = 3.5; static const Color_t UHitCol= 0;
-   static const Style_t NHitSty = 1; static const Size_t NHitSiz = 1.00; static const Color_t NHitCol=18;
-   static const Style_t TrakSty = 1; static const Size_t TrakSiz = 1.00; static const Color_t TrakCol= 0;
-   static const Style_t VertSty = 5; static const Size_t VertSiz = 0.90; static const Color_t VertCol= 0;
+   static const Style_t UHitSty = 4; static const Size_t UHitSiz = 1.50; static const Color_t UHitCol=kBlue;
+   static const Style_t NHitSty = 1; static const Size_t NHitSiz = 1.00; static const Color_t NHitCol=kGreen;
+   static const Style_t TrakSty = 1; static const Size_t TrakSiz = 1.00; static const Color_t TrakCol=kRed;
+   static const Style_t VertSty = 5; static const Size_t VertSiz = 3.50; static const Color_t VertCol=kBlack;
+
+   TList garbage; garbage.SetOwner();
 
    if (VertCol){} // to supress the compilation warning
-   enum QWERTY {kTRK=1,kHIT=2,kUSE=4,kUNU=8};
 
 
   if (!pos[1] || !pos[1][0]) return 1;
-  memset(fColCash,0,kCOLORS*sizeof(void*));
+  memset(fColCash,0,sizeof(fColCash));
 
   if (!mEventHelper) mEventHelper = new StEventHelper;
   mEventHelper->Reset(event,"StL3.*");
@@ -723,76 +733,90 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
 
   int keyLen = strchr(pos[1],' ') - pos[1];
   int kase=0;
-  if (strstr(pos[1],"Track" )) kase |= kTRK;
-  if (strstr(pos[1],"Hit"   )) kase |= kHIT;
-  if (strstr(pos[1],"Used"  )) kase |= kUSE;
-  if (strstr(pos[1],"Unused")) kase |= kUNU;
-  int all = (strncmp(pos[1],"All",3)==0);
+  const char *word=0;
+  for (int i=1;(word=EHKindN[i]);i++) {
+    if (strstr(pos[1],word)) kase |= EHKindS[i];
+  }
+//TEmporary XI ==> Global
+  if (kase&kXI ) { kase &=(~kXI ); kase |= kTGB;}
+  if (kase&kKNK) { kase &=(~kKNK); kase |= kTPT;}
+//End of TEmporary
 
   TString sel("^StSPtrVec");
 
   Style_t defSty=0; Size_t defSiz = 0; Color_t defCol= 0;
-  TObjArray *shaps =0,*shapz=0;
+  TObjArray *stevs =0,*stevz=0;
 
 
   switch (kase) {
 
+
     case kHIT|kUNU:;
     case kHIT|kUSE:;
-      if (all) {sel +=".*";}
-      else     {sel.Append(pos[1],keyLen);} 
+//      if (kase&kALL) {sel +=".*";}
+//      else           {sel.Append(pos[1],keyLen);} 
+      sel.Append(pos[1],keyLen); 
       sel += ".*Hit$";
-      shaps = mEventHelper->SelHits  (sel.Data(),(kase>>2)&3);
+      stevs = mEventHelper->SelHits  (sel.Data(),kase);
       sel.ReplaceAll(".*Hit",".*Point");
-      shapz = mEventHelper->SelHits  (sel.Data(),(kase>>2)&3);
-      if (!shaps){ shaps = shapz; break;}
-      if ( shapz){ shaps->AddAll(shapz); delete shapz;}
+      stevz = mEventHelper->SelHits  (sel.Data(),kase);
+      if (!stevs){ stevs = stevz; break;}
+      if ( stevz){ stevs->AddAll(stevz); delete stevz;}
       break;
 
-    case kTRK:;
-      if (all) { 
-        shaps = mEventHelper->SelTracks(kTRK);
-      } else {
-        sel.Append(pos[1],keyLen); sel +="Vertex$";
-        shaps = mEventHelper->SelVertex(sel.Data(),kTRK);
-      } 
-      break;
-    case kTRK|kHIT:;
-      if (all) { 
-        shaps = mEventHelper->SelTracks(kHIT);
-      } else {
-        sel.Append(pos[1],keyLen); sel +="Vertex$";
-        shaps = mEventHelper->SelVertex(sel.Data(),kHIT);
-      } 
+    case kTRK|kTGB:;
+    case kTRK|kEGB:;
+    case kTRK|kTPT:;
+    case kTRK|kTGB|kHIT|kTHT:;
+    case kTRK|kEGB|kHIT|kTHT:;
+    case kTRK|kTPT|kHIT|kTHT:;
+    case      kTGB|kHIT|kTHT:;
+    case      kEGB|kHIT|kTHT:;
+    case      kTPT|kHIT|kTHT:;
+      if (kase&kHIT) kase |=kHRR;
+      stevz = mEventHelper->SelTracks("",kase);
+      stevs = mEventHelper->ExpandAndFilter(stevz,-1);
       break;
 
-     default: Assert(0);
+    case kPRM|kTRK:;
+    case kPRM|kTHT|kHIT:;
+    case kKNK|kTRK:;
+    case kKNK|kTHT|kHIT:;
+    case kV0 |kTRK:;
+    case kV0 |kTHT|kHIT:;
+    case kXI |kTRK:;
+    case kXI |kTHT|kHIT:;
+      if (kase&kHIT) kase |=kHRR;
+      sel.Append(pos[1],keyLen); sel +="Vertex$";
+      stevz = mEventHelper->SelVertex(sel.Data(),kase);
+      stevs = mEventHelper->ExpandAndFilter(stevz,-1);
+      delete stevz;
+      break;
+
+     default: 
+     Error("MakeEvent","Wrong case %o %s\n",kase,pos[1]);
+     for (int i=1;(word=EHKindN[i]);i++){if (kase&EHKindS[i]) printf("|%s",word);}
+     printf("\n");  
+     Assert(0);
   }
 
-  switch ( kase ) 
-  {
-    case (kHIT|kUNU):;
-      defSty = NHitSty; defSiz = NHitSiz; defCol = NHitCol; break;
 
-    case (kHIT|kUSE):;
-    case (kTRK|kHIT):;
-      defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;
-
-    case kTRK:;
-      defSty = TrakSty; defSiz = TrakSiz; defCol = TrakCol; break;      
-
-    default: Assert(0);
+  if (!stevs) return 0;
+  garbage.Add(stevs);
+  TListIter nextGilter(mGilterList);
+  StGlobalFilterABC *gilt=0;
+  while ((gilt=(StGlobalFilterABC*)nextGilter())) {
+    gilt->SetEvent( GetRunNumber(),GetEventNumber());
+    gilt->Filter(stevs,kase);
   }
-
-
-  if (!shaps) return 0;
+  TObjArray *points=mEventHelper->MakePoints(stevs,kase);
+  stevs=0;
   Int_t trackCounter = 0;
 
-  m_TrackCollector->Add(shaps);		//collect for garbage
-  int ntrk = shaps->GetLast()+1;
+  if (!points ) return 0;
+//  garbage.Add(points);
+  int ntrk = points->GetLast()+1;
   if (!ntrk ) return 0;
-
-  Color_t rndCol = kRed;
 
   TListIter nextFilter(mFilterList);
   int ncut = 0;
@@ -800,27 +824,28 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
   StFilterABC *filt=0;
   Style_t sty; Size_t siz;
   StPoints3DABC *pnt;
-  int P; const char *L;
+  const char *L;
 
   for (int i = 0; i < ntrk; i++ )
   {
-    // rndCol = (((rndCol-kRed)+1)%6)+kRed;
-    pnt = (StPoints3DABC*)shaps->At(i);
-    // default attributes
-    P = ( pnt->Size()==1 ) || ( kase & kHIT ) ;
-    L = (P) ? "P":"L";
-    sty = defSty; siz = defSiz;
-    if (P && !(kase&kHIT)) { sty = VertSty ; siz = VertSiz; }
-
-    Color_t paint = pnt->GetUniqueID();
-    // col = pnt->GetUniqueID();
-    if (!paint) paint = defCol;
-    if (paint) col = paint;
-
+    pnt = (StPoints3DABC*)points->At(i);
     //		Filtration
     nextFilter.Reset();
     while ((filt=(StFilterABC*)nextFilter())) {if (!filt->AcceptCB(pnt,col,siz,sty)) break;}
     if (filt) {ncut++; continue;}
+
+    int kind = pnt->Kind();
+    L = "P";
+    if (kind==3 && (kase&kUSE || pnt->Size()>1)) kind=4;
+    switch (kind) {
+      case 1:  defSty = VertSty; defSiz = VertSiz; defCol = VertCol;        break;
+      case 2:  defSty = TrakSty; defSiz = TrakSiz; defCol = TrakCol; L="L"; break;
+      case 3:  defSty = NHitSty; defSiz = NHitSiz; defCol = NHitCol;        break;
+      case 4:  defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol;	    break;
+    }
+
+    col = pnt->GetUniqueID();
+    if (!col) col = defCol;
 
 //  Draw it
 
@@ -1143,6 +1168,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.102  2004/09/28 03:55:23  perev
+// Global filter introduced
+//
 // Revision 1.101  2004/07/29 20:35:37  fine
 // Fix priblem with Emv his and default hit color
 //
