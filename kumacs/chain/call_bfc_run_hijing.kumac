@@ -8,7 +8,7 @@
  exec $STAR/kumacs/chain/bfc _
    TOP=$STAR _
    domain=' gen/hij' _
-   chain=' rhij evout ' _
+   chain=' rhij egout ' _
    no_events=5 _
    output_file=hijing_output _
    log=bfc_run_hijing.log

@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.78 1998/12/09 22:04:54 kathy Exp $
+* * $Id: bfc.kumac,v 1.79 1998/12/15 15:04:26 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.79  1998/12/15 15:04:26  kathy
+* fix for writing out hijing files
+*
 * Revision 1.78  1998/12/09 22:04:54  kathy
 * changed all examples and default chains to use ev02 ev0d instead of ev0
 *
@@ -288,6 +291,8 @@
 * 
 * editted 11/4/98 K. Turner - allow more than 1 ntuple in the ntuple file
 * 
+* editted 12/14/98 K.Turner - create name of output generator file
+* 
 ****************************************************************
 ***  see README file for explanation of BFC *** 
 *****************************************************************
@@ -333,7 +338,7 @@ MACRO bfc _
   output_xdf_file = [output_file].xdf
   output_fzd_file = [output_file].fzd
   output_dst_file = [output_file]_dst.xdf  
-  
+  output_gen_file = [output_file]_gen.xdf
   
 ***********************************************************
 * PRINT OUT INPUT VALUES
@@ -378,6 +383,7 @@ MACRO bfc _
  macro/global/create output_xdf_file  [output_xdf_file] 
  macro/global/create output_fzd_file  [output_fzd_file]
  macro/global/create output_dst_file  [output_dst_file]
+ macro/global/create output_gen_file  [output_gen_file]       
  macro/global/create log_file         [log]
  macro/global/create nunit            [nunit]
  macro/global/create nfile            [nfile]
