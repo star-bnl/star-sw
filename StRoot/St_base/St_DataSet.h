@@ -19,8 +19,11 @@
 // * purpose.  It is provided "as is" without express or implied warranty.
 // ************************************************************************
 
-// $Id: St_DataSet.h,v 1.39 1999/11/06 19:09:45 fisyak Exp $
+// $Id: St_DataSet.h,v 1.40 1999/11/10 00:49:25 fine Exp $
 // $Log: St_DataSet.h,v $
+// Revision 1.40  1999/11/10 00:49:25  fine
+// comment was changed
+//
 // Revision 1.39  1999/11/06 19:09:45  fisyak
 // Clean up for Valery
 //
@@ -73,7 +76,7 @@ class StBufferAbc;
 //----- dataset flags
 enum ESetBits {
      kMark        = BIT(22)   // if object is marked
-    ,kArray       = BIT(20)   // if object has StObjArray inside
+    ,kArray       = BIT(20)   // if object has TObjArray inside
 };
 
 enum EBitOpt { 
