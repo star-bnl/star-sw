@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.97 1999/07/13 14:41:42 fisyak Exp $
+# $Id: MakeDll.mk,v 1.98 1999/07/17 21:46:00 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.98  1999/07/17 21:46:00  fisyak
+# Clean up
+#
 # Revision 1.97  1999/07/13 14:41:42  fisyak
 # Add SKIP_LIB env. varibale to skip unwanted directory
 #
@@ -248,9 +251,7 @@ INC_DIRS += $(CERN_ROOT)/include
 
 #	Special includes & .a libraries
 #		MySQL
-ifeq ($(PKG),StDbLib)
-#  INC_DIRS += $(STAR_ROOT)/mysql/include
-#  SL_EXTRA_LIB += $(STAR_ROOT)/mysql/lib/libmysqlclient.a
+ifneq (,$(filter StDb%,$(PKG)))
   INC_DIRS += /opt/star/include/
   SL_EXTRA_LIB += -L/opt/star/lib/mysql/ -lmysqlclient
 endif
