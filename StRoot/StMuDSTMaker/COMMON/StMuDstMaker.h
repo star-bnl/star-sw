@@ -1,12 +1,16 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.16 2003/01/09 18:59:45 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.17 2003/01/23 21:59:50 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
 #define StMuDstMaker_hh
 
 #include <string>
+
+#ifndef ST_NO_NAMESPACES
+using namespace std;
+#endif
 
 #include "StMaker.h"
 #include "StChain.h"
@@ -72,7 +76,7 @@ class StMuDstMaker : public StMaker {
     StMuDstMaker(const char* name="MuDst");
     /// Constructor
     StMuDstMaker(int mode, int nameMode, const char* dirName="./", const char* fileName="", const char* filter=".", int maxfiles=10, 
-		 const char* filter="MuDst" );
+		 const char* name="MuDst" );
     ~StMuDstMaker();
     
   int Init();
@@ -110,7 +114,7 @@ class StMuDstMaker : public StMaker {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.16 2003/01/09 18:59:45 laue Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.17 2003/01/23 21:59:50 laue Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -271,6 +275,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.17  2003/01/23 21:59:50  laue
+ * Modification to compile on Solaris.
+ *
  * Revision 1.16  2003/01/09 18:59:45  laue
  * initial check in of new EMC classes and the changes required
  *

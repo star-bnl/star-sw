@@ -1,12 +1,13 @@
 /***************************************************************************
  *
- * $Id: StMuL3Filter.cxx,v 1.3 2002/05/04 23:56:30 laue Exp $
+ * $Id: StMuL3Filter.cxx,v 1.4 2003/01/23 21:59:50 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
 
 #include "StMuL3Filter.h"
 #include "StMuDebug.h"
+#include "StMuException.hh"
 #include "StEvent/StTrack.h"
 #include "StEvent/StTrackGeometry.h"
 #include "StEvent/StTrackDetectorInfo.h"
@@ -110,6 +111,9 @@ bool StMuL3Filter::accept(const StTrack* track) {
 /***************************************************************************
  *
  * $Log: StMuL3Filter.cxx,v $
+ * Revision 1.4  2003/01/23 21:59:50  laue
+ * Modification to compile on Solaris.
+ *
  * Revision 1.3  2002/05/04 23:56:30  laue
  * some documentation added
  *

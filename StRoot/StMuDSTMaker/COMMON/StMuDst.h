@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.9 2003/01/09 18:59:45 laue Exp $
+ * $Id: StMuDst.h,v 1.10 2003/01/23 21:59:50 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -37,7 +37,7 @@ class StPhysicalHelixD;
 
 #include "TObject.h"
 #include "StMuArrays.h"
-
+#include "StMuException.hh"
 
 
 
@@ -183,6 +183,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.10  2003/01/23 21:59:50  laue
+ * Modification to compile on Solaris.
+ *
  * Revision 1.9  2003/01/09 18:59:45  laue
  * initial check in of new EMC classes and the changes required
  *
