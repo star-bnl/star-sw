@@ -1,5 +1,0 @@
- struct ppSpinTag  {
-   float chargeLeadingParticlePt; 
- } ;
-
-
