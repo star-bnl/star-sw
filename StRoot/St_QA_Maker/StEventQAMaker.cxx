@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.42 2000/06/23 15:44:23 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.43 2000/06/29 05:18:40 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.43  2000/06/29 05:18:40  lansdell
+// removed unnecessary cout statement
+//
 // Revision 1.42  2000/06/23 15:44:23  lansdell
 // restore PID method to using global tracks & retitle PID histogram
 //
@@ -907,7 +910,7 @@ void StEventQAMaker::MakeHistVertex() {
 
       if (aPrimVtx->flag() == 201) z_svt = aPrimVtx->position().z();
       if (aPrimVtx->flag() == 101) z_tpc = aPrimVtx->position().z();
-      cout << " aPrimVtx->flag() : " << aPrimVtx->flag() << endl;
+
       if (aPrimVtx == primVtx) {
 	m_pv_vtxid->Fill(primVtx->type());
 	if (!isnan(double(primVtx->position().x())))
