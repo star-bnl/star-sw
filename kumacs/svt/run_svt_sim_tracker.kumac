@@ -1,5 +1,6 @@
 **************************************************
-MACRO run_all no_events=1 _
+ MACRO run _
+        no_events=1 _
 	INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
 	file=event_0000050.xdf _
 	svt_simul=srs _
@@ -20,6 +21,7 @@ MACRO run_all no_events=1 _
  *
  * History:
  *          MARCH 18, 98 - created
+*           June 3, 1998 - editted by Kathy Turner
  *************************************************
 
 
@@ -40,12 +42,14 @@ message ' *** SVT tracker           -->  ' [svt_tracker]
  DEFAULT = _
 ./kumacs/util,_
 ./kumacs/chain,_
+./kumacs/svt,_
 ./pams/emc/kumac,_
 ./pams/global/kumac,_
 ./pams/svt/kumac,_
 ./pams/tpc/kumac,_
 $STAR/kumacs/util,_
 $STAR/kumacs/chain,_
+$STAR/kumacs/svt,_
 $STAR/kumacs/tpc,_
 $STAR/pams/ctf/kumac,_
 $STAR/pams/emc/kumac,_
@@ -59,8 +63,7 @@ $STAR/pams/trg/kumac
  
  def [DEFAULT]
  message 'Define default kumac search path as' def
-
- make util
+ 
  make svt
 
  *****************************************
@@ -87,13 +90,15 @@ Message 'Doing' [no_events] 'events'
  *****************************************
  * one time package initialization phase for geometry
  *****************************************
- cd /dui/data/svt
 
  exec  init_svg
+ 
+  *****************************************
+ * initialize for slow simulator
+ *****************************************
+ 
  if [svt_simul] = sss then
-  message 'run_all-I1 : will use svt simulator sss/ssf'
-  exec init_sss
-  exec init_ssf
+   exec svt_slow_sim#initialization
  endif
 
 
@@ -114,46 +119,54 @@ Message 'Doing' [no_events] 'events'
  
     if (staf_status(1).ne.STAFCV_OK) goto EOF
 
-
- *  SVT detector response simulation 
-   cd /dui/data/svt
-$cptime 
-    if [svt_simul]= sss then
-      exec run_sss [ievent]
-	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
-      exec run_ssf [ievent] 
-	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
- *    exec run_scl [ievent]
-	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
-    elseif [svt_simul]= srs then
-      exec run_srs  [ievent]
-	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
-    endif
-
-
-
-
- *  svt track finding and momentum reconstruction
-    if [svt_tracker]= stk then
-      exec run_stk  [ievent]
-	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
-    elseif [svt_tracker]=sgr then
-      exec run_sgr  [ievent]
-	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
-
-     exec run_stk  [ievent]+1 
-	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
-    endif
-
-
- ls /dui/data/svt/tracks
-
-NEXT_EVENT:
+    
+    message 'part 1 '
+     pwd
+$cptime
  
+ *  SVT detector response simulation 
 
+    if [svt_simul]= sss then
+         exec svt_slow_sim#process_event [ievent]
+         if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
+    elseif [svt_simul]= srs then
+         exec svt_fast_sim#process_event  [ievent]
+         if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
+    else
+      message ' SVT simulator not valid!!'
+    endif
+
+    message ' part 2 '
+    pwd
+
+* SVT track finding and momentum reconstruction -----------------------
+
+    if [svt_tracker]= stk then
+      exec svt_tracker#process_event_stk [ievent]
+         if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
+    elseif [svt_tracker]=sgr then
+      exec svt_tracker#process_event_sgr [ievent]
+         if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
+    else
+      message ' svt_tracker not valid! '
+    endif
+    
+    message ' part 3 '
+    pwd
+    
+  ls /dui/data/svt/tracks
+
+  NEXT_EVENT:
+ 
+  message ' part 4 '
+  pwd
+  
 enddo
 
 *  task is completed
 EOF:
-
+ 
+ message ' part 5 '
+  pwd
 RETURN
+
