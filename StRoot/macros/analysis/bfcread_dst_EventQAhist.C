@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.24 2000/06/02 20:07:15 lansdell Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.25 2000/06/02 20:24:22 lansdell Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.25  2000/06/02 20:24:22  lansdell
+// ignore previous message; added check on Make() return codes
+//
 // Revision 1.24  2000/06/02 20:07:15  lansdell
 // removed RICH code (now written directly to StEvent)
 //
@@ -241,11 +244,11 @@ void bfcread_dst_EventQAhist(
   HU->DrawHists(MakerHistDir);
 
 //  overlay two histograms and print to screen
-  Int_t result = HU->Overlay1D(MakerHistDir,"StEQaGtrkRT","StEQaPtrkR");
+  Int_t result = HU->Overlay1D(MakerHistDir,"StEQaGtrkRT","StEQaPtrkRT");
   if (result == kStErr)
     cout << " !!! There was an error in Overlay1D !!!" << endl;  
 
-  result = HU->Overlay2D(MakerHistDir,"StEQaGtrkLengthVEtaT","StEQaPtrkLengthVEta");
+  result = HU->Overlay2D(MakerHistDir,"StEQaGtrkLengthVEtaT","StEQaPtrkLengthVEtaT");
   if (result == kStErr)
     cout << " !!! There was an error in Overlay2D !!!" << endl;  
 
