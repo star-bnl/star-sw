@@ -1,12 +1,12 @@
-/*    emcMipCalib.idl
+/*    bemcMipCalib.idl
 *
-*  Table: emcMipCalib
+*  Table: bemcMipCalib
 *
 *       description: //:  Table which contains MIP information
 */ 
 
 
-struct emcMipCalib { 
+struct bemcMipCalib { 
 
    long  Status;   /*  status of the etabin (0=problem, 1=ok)  */
    long  FirstModule;   /*   first module of this bin  */
