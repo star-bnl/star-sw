@@ -1,9 +1,31 @@
+/***************************************************************************
+ * $Id: TPCV2P0.cxx,v 1.3 1999/07/02 04:43:24 levine Exp $
+ * Author: Jeff Landgraf and M.J. LeVine
+ ***************************************************************************
+ * Description: common TPC (V2) implementation stuff
+ *      
+ *
+ *   change log
+ * 02-Jun-99 MJL fixed test on hypersector arg of getBankTPCSECP
+ * 11-Jun-99 MJL merged PEDR PedRMS readers from RAW version
+ * 23-Jun-99 MJL most output now supressed with EventReader.verbose
+ * 23-Jun-99 MJL can now navigate DATAP even though offset/len to various
+ *   lower banks are at arbitrary positions
+ *
+ ***************************************************************************
+ * $Log: TPCV2P0.cxx,v $
+ * Revision 1.3  1999/07/02 04:43:24  levine
+ * Many changes -
+ *  navigates to head of TPCP bank independent of position.
+ *  move declarations out of loops where they were upsetting some compilers
+ *  suppress output from class libraries with run-time switch EventReader.verbose
+ *  added TPCV2P0_CPP_SR::getAsicParams()
+ *
+ *
+ **************************************************************************/
 // TPCV2P0 implementation
 #include "TPCV2P0.hh"
 
-// change log
-// 02-Jun-99 MJL fixed test on hypersector arg of getBankTPCSECP
-// 11-Jun-99 MJL merged PEDR PedRMS readers from RAW version
 
 TPCV2P0_PADK_SR::TPCV2P0_PADK_SR(int s, TPCV2P0_Reader *det)
 {
@@ -87,12 +109,13 @@ void TPCV2P0_PADK_SR::unpack(PADK_entry *entry, short paddress)
 
 ZeroSuppressedReader *TPCV2P0_Reader::getZeroSuppressedReader(int sector)
 {
-  cout << "getTPCV2P0_ZS_SR sector(" << sector <<")" << endl;
+  if (ercpy->verbose) cout << "getTPCV2P0_ZS_SR sector(" << sector <<")" << endl;
   
   TPCV2P0_ZS_SR *zsp = new TPCV2P0_ZS_SR(sector, this);
   if(!zsp->initialize())
   {
-  cout << "ERROR: getTPCV2P0_ZS_SR FAILED sector(" << sector <<")" << endl;
+  if (ercpy->verbose) 
+    cout << "ERROR: getTPCV2P0_ZS_SR FAILED sector(" << sector <<")" << endl;
     delete zsp;
     zsp = NULL;
   }
@@ -141,7 +164,7 @@ PedestalRMSReader *TPCV2P0_Reader::getPedestalRMSReader(int sector)
 
 GainReader *TPCV2P0_Reader::getGainReader(int sector)
 {
-  cout << "getTPCV2P0_G_SR" << endl;
+  if (ercpy->verbose) cout << "getTPCV2P0_G_SR" << endl;
   return NULL;
 }
 
@@ -159,13 +182,13 @@ CPPReader *TPCV2P0_Reader::getCPPReader(int sector)
 
 BadChannelReader *TPCV2P0_Reader::getBadChannelReader(int sector)
 {
-  cout << "getTPCV2P0_BC_SR" << endl;
+  if (ercpy->verbose) cout << "getTPCV2P0_BC_SR" << endl;
   return NULL;
 }
 
 ConfigReader *TPCV2P0_Reader::getConfigReader(int sector)
 {
-  cout << "getTPCV2P0_CR_SR" << endl;
+  if (ercpy->verbose) cout << "getTPCV2P0_CR_SR" << endl;
   return NULL;
 }
 
@@ -180,7 +203,7 @@ TPCV2P0_PADK_SR *TPCV2P0_Reader::getPADKReader(int sector)
     p = new TPCV2P0_PADK_SR(sector, this);
     if(!p->initialize())
     {
-      cout << "Error Reading PADK banks, sector=" << sector 
+      if (ercpy->verbose) cout << "Error Reading PADK banks, sector=" << sector 
 	   << ": " << errstr() << endl;
       delete p;
       return NULL;
@@ -192,6 +215,7 @@ TPCV2P0_PADK_SR *TPCV2P0_Reader::getPADKReader(int sector)
 
 TPCV2P0_Reader::TPCV2P0_Reader(EventReader *er)
 {
+  ercpy = er; // squirrel away pointer eventreader for our friends
   //  cout << "TPCV2P0 constructor" << endl;
 
   // Fix up DATAP
@@ -201,16 +225,30 @@ TPCV2P0_Reader::TPCV2P0_Reader(EventReader *er)
   if (!pBankDATAP->test_CRC()) ERROR(ERR_CRC);
   if (pBankDATAP->swap() < 0) ERROR(ERR_SWAP);
   pBankDATAP->header.CRC = 0;
-
+#define DYNAMIC
+#ifdef DYNAMIC // position independent pointers to lower banks, variable DATAP length
+  int len = pBankDATAP->header.BankLength - sizeof(Bank_Header)/4;
+  Pointer *ptr = &pBankDATAP->TPC;
+ for (int i=0; i<len; i++, ptr++) {
+   if (ptr->length==0) continue;//invalid entry
+   pBankTPCP = (classname(Bank_TPCP) *)(((INT32 *)pBankDATAP)+ (ptr->offset)); 
+   if(!strncmp(pBankTPCP->header.BankType,"TPCP",4)) break;
+  }
+  if(strncmp(pBankTPCP->header.BankType,"TPCP",4)) {
+    printf("detector TPC not found in DATAP\n");
+    exit(0);
+  }
+#else // fixed position pointers, fixed DATAP length
   // Fix up TPCP
   pBankTPCP = (classname(Bank_TPCP) *)
               (((INT32 *)pBankDATAP) + pBankDATAP->TPC.offset);
   //  printf("Offset = %d\n",pBankDATAP->TPC.offset);
   //  printf("pBankTPCP.head: %s\n",pBankTPCP->header.BankType);
+#endif
+
   if (!pBankTPCP->test_CRC()) ERROR(ERR_CRC);
   if (pBankTPCP->swap() < 0) ERROR(ERR_SWAP);
   pBankTPCP->header.CRC = 0;
-
   // We can have a padk for each of 24 sectors
   for(int i=0;i<TPC_SECTORS;i++)
   {

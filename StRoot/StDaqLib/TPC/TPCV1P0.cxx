@@ -1,8 +1,27 @@
-// TPCV1P0 implementation
+/***************************************************************************
+ * $Id: TPCV1P0.cxx,v 1.3 1999/07/02 04:43:23 levine Exp $
+ * Author: M.J. LeVine
+ ***************************************************************************
+ * Description:  TPCV1P0 implementation
+ *      
+ *
+ *   change log
+ * 02-Jun-99 MJL fixed test on hypersector arg of getBankTPCSECP
+ *
+ ***************************************************************************
+ * $Log: TPCV1P0.cxx,v $
+ * Revision 1.3  1999/07/02 04:43:23  levine
+ * Many changes -
+ *  navigates to head of TPCP bank independent of position.
+ *  move declarations out of loops where they were upsetting some compilers
+ *  suppress output from class libraries with run-time switch EventReader.verbose
+ *  added TPCV2P0_CPP_SR::getAsicParams()
+ *
+ *
+ **************************************************************************/
+
 #include "TPCV1P0.hh"
 
-// change log
-// 02-Jun-99 MJL fixed test on hypersector arg of getBankTPCSECP
 
 
 TPCV1P0_PADK_SR::TPCV1P0_PADK_SR(int s, TPCV1P0_Reader *det)

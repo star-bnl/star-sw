@@ -1,4 +1,24 @@
-// Overrides (mostly for the swap functions, print functions of each bank)
+/***************************************************************************
+ * $Id: TPCV1P0.Banks.cxx,v 1.2 1999/07/02 04:43:22 levine Exp $
+ * Author: M.W. Shculz, Jeff Landgraf and M.J. LeVine
+ ***************************************************************************
+ * Description: Overrides (mostly for the swap functions, 
+ *              print functions of each bank)
+ *      
+ *
+ *   change log
+ *
+ ***************************************************************************
+ * $Log: TPCV1P0.Banks.cxx,v $
+ * Revision 1.2  1999/07/02 04:43:22  levine
+ * Many changes -
+ *  navigates to head of TPCP bank independent of position.
+ *  move declarations out of loops where they were upsetting some compilers
+ *  suppress output from class libraries with run-time switch EventReader.verbose
+ *  added TPCV2P0_CPP_SR::getAsicParams()
+ *
+ *
+ **************************************************************************/
 #include <assert.h>
 
 #include "StDaqLib/GENERIC/swaps.hh"

@@ -1,17 +1,36 @@
+/***************************************************************************
+ * $Id: TPCV1P0_ZS_SR.cxx,v 1.4 1999/07/02 04:43:23 levine Exp $
+ * Author: M.J. LeVine
+ ***************************************************************************
+ * Description: TPC V1.0 Zero Suppressed Reader
+ *      
+ *
+ * -------------change log ------------------------
+ * 31-May-99 MJL terminate on encountering pad 255
+ * 03-Jun-99 MJL added return TRUE to TPCV1P0_ZS_SR::initialize()
+ * 10-Jun-99 IS (Iwona Sakrejda) - The compiler we are using currently in Root
+ * cannot contain the scope of the "for" loop index within parenthesis.
+ * So if the next loop uses same index, it cannot be Declared again.
+ * I made 3 changes: 2 for rcg, one for row and marked them all in  the code.
+ * 23-Jun-99 MJL change declaration of row, rcb outside of all for loops
+ ***************************************************************************
+ * $Log: TPCV1P0_ZS_SR.cxx,v $
+ * Revision 1.4  1999/07/02 04:43:23  levine
+ * Many changes -
+ *  navigates to head of TPCP bank independent of position.
+ *  move declarations out of loops where they were upsetting some compilers
+ *  suppress output from class libraries with run-time switch EventReader.verbose
+ *  added TPCV2P0_CPP_SR::getAsicParams()
+ *
+ *
+ **************************************************************************/
 #include <iostream>
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "TPCV1P0.hh"
 #include "fee_pin.h"
-// TPC V1.0 Zero Suppressed Reader
 
-// -------------change log ------------------------
-// 31-May-99 MJL terminate on encountering pad 255
-// 03-Jun-99 MJL added return TRUE to TPCV1P0_ZS_SR::initialize()
-// 10-Jun-99 IS (Iwona Sakrejda) - The compiler we are using currently in Root
-// cannot contain the scope of the "for" loop index within parenthesis.
-// So if the next loop uses same index, it cannot be Declared again.
-// I made 3 changes: 2 for rcg, one for row and marked them all in  the code.
+
 
 TPCV1P0_ZS_SR::TPCV1P0_ZS_SR(int s, TPCV1P0_Reader *det)
 {
@@ -29,7 +48,8 @@ int TPCV1P0_ZS_SR::initialize()
 {
 
 
-  for (int row=0; row<TPC_PADROWS; row++) {
+  int row;
+  for (row=0; row<TPC_PADROWS; row++) {
     Row_array[row].pad = &Pad_array[row][0];
     Row_array[row].npads = 0;   // have to fill in PadRow.npads as we go.
     for (int pad=0; pad<TPC_MAXPADS; pad++) {
@@ -38,8 +58,9 @@ int TPCV1P0_ZS_SR::initialize()
     }
   }
 
+  int rcb;
   // store pointers to the ADCD, ADCX, SEQD banks
-  for(int rcb = 0; rcb < 6; rcb++)
+  for(rcb = 0; rcb < 6; rcb++)
   {
     for(int mz = 0; mz < 3; mz++)
     {

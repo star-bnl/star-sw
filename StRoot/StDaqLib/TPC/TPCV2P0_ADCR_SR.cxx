@@ -1,13 +1,31 @@
+/***************************************************************************
+ * $Id: TPCV2P0_ADCR_SR.cxx,v 1.2 1999/07/02 04:43:24 levine Exp $
+ * Author: Jeff Landgraf and M.J. LeVine
+ ***************************************************************************
+ * Description: // TPC V2.0 ADC Raw Reader
+ *      
+ *
+ *   change log
+ * 06-Jun-99 MJL added return TRUE to TPCV2P0_ADCR_SR::initialize()
+ * 06-Jun-99 MJL added return TRUE to TPCV2P0_PRMS_SR::initialize()
+ * 06-Jun-99 MJL added return TRUE to TPCV2P0_PEDR_SR::initialize()
+ *
+ ***************************************************************************
+ * $Log: TPCV2P0_ADCR_SR.cxx,v $
+ * Revision 1.2  1999/07/02 04:43:24  levine
+ * Many changes -
+ *  navigates to head of TPCP bank independent of position.
+ *  move declarations out of loops where they were upsetting some compilers
+ *  suppress output from class libraries with run-time switch EventReader.verbose
+ *  added TPCV2P0_CPP_SR::getAsicParams()
+ *
+ *
+ **************************************************************************/
 #include <iostream>
 
-// change log
-// 06-Jun-99 MJL added return TRUE to TPCV2P0_ADCR_SR::initialize()
-// 06-Jun-99 MJL added return TRUE to TPCV2P0_PRMS_SR::initialize()
-// 06-Jun-99 MJL added return TRUE to TPCV2P0_PEDR_SR::initialize()
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "TPCV2P0.hh"
-// TPC V2.0 Zero Suppressed Reader
 
 //==================== ADC Raw  Reader =============================
 
@@ -210,7 +228,7 @@ int TPCV2P0_PRMS_SR::initialize()
   for(int rcb = 0; rcb < 6; rcb++)
   {
     for(int mz = 0; mz < 3; mz++)
-    {
+   {
       banks[rcb][mz] = detector->getBankTPCRMSR(sector,rcb,mz);
       if (banks[rcb][mz] !=NULL) 
 	numEvents = banks[rcb][mz]->NumEvents;

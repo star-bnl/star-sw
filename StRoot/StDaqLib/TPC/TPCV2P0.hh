@@ -1,11 +1,33 @@
-// Implementation For TPC version 2/0
+/***************************************************************************
+ * $Id: TPCV2P0.hh,v 1.2 1999/07/02 04:43:24 levine Exp $
+ * Author: Jeff Landgraf and M.J. LeVine
+ ***************************************************************************
+ * Description: declarations For TPC version 2.0
+ *      
+ *
+ *   change log
+ * 22-Jun-99 MJL added TPCV2P0_CPP_SR::getAsicParams(ASIC_params *);
+ * 25-Jun-99 MJL remove #include "MemMan.hh"
+ *
+ ***************************************************************************
+ * $Log: TPCV2P0.hh,v $
+ * Revision 1.2  1999/07/02 04:43:24  levine
+ * Many changes -
+ *  navigates to head of TPCP bank independent of position.
+ *  move declarations out of loops where they were upsetting some compilers
+ *  suppress output from class libraries with run-time switch EventReader.verbose
+ *  added TPCV2P0_CPP_SR::getAsicParams()
+ *
+ *
+ **************************************************************************/
+
 #ifndef TPCV2P0_HH
 #define TPCV2P0_HH
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/GENERIC/RecHeaderFormats.hh"
 #include "TPCV2P0.Banks.hh"
-#include "MemMan.hh"
+//#include "MemMan.hh"
 #include "TPCV2P0_Reader.hh"
 
 class TPCV2P0_Reader;
@@ -133,7 +155,7 @@ class TPCV2P0_CPP_SR : public CPPReader
 public:
   int getClusters(int PadRow, int Pad, int *nClusters, 
 			  struct ASIC_Cluster **clusters);
-
+  int getAsicParams(ASIC_params *);
   int MemUsed();
   
   TPCV2P0_CPP_SR(int sector, TPCV2P0_Reader *);

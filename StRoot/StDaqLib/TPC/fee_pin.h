@@ -1,3 +1,24 @@
+/***************************************************************************
+ * $Id: fee_pin.h,v 1.2 1999/07/02 04:43:24 levine Exp $
+ * Author: M.J. LeVine
+ ***************************************************************************
+ * Description: TPC sector readout hardware configuration
+ *              row vs FEE/pin, pad vs FEE, RDo vs FEE, mezz vs FEE,
+ *              offset vs FEE/pin
+ *
+ *   change log
+ *
+ ***************************************************************************
+ * $Log: fee_pin.h,v $
+ * Revision 1.2  1999/07/02 04:43:24  levine
+ * Many changes -
+ *  navigates to head of TPCP bank independent of position.
+ *  move declarations out of loops where they were upsetting some compilers
+ *  suppress output from class libraries with run-time switch EventReader.verbose
+ *  added TPCV2P0_CPP_SR::getAsicParams()
+ *
+ *
+ **************************************************************************/
 static unsigned short row_vs_fee[182][32] = {
 /* fee 0 */ 
 {45, 45, 45, 45, 45, 45, 45, 45, 
