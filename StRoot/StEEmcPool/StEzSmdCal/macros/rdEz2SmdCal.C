@@ -1,11 +1,13 @@
 rdEz2SmdCal(
-	    char *runL="R5107005 R5112004 R5107008  R5109025 R5109026 ",
-	    char *outname="R5107005"
+	    char *runL=" R5107005 R5107005_1  R5107008 R5109025 R5109026 R5109027 R5109028a R5109028c R5109029a R5109030 R5109031  R5109034  R5112004",
+	    char *outname="allAE"
 	    ) {
 
-
+  // char *runL=" R5109034 R5109035 R5112004 R5132005 R5132007 R5132008 R5132009 R5132010 R5132011 R5132012 R5132013 R5132020 R5132021 ";
+  // char *runL=" R5107005 ";
+  
   TString iPath="/star/data04/sim/balewski/daq/ezTree/pp200/pp2/";
-  int mxEve=100000;
+  int mxEve=5000000;
   int nDot=8;
   int firstSec=5;
   int lastSec=5;
@@ -16,11 +18,13 @@ rdEz2SmdCal(
     "StRoot/StEEmcUtil/EEfeeRaw/libEEfeeRaw.so",
     "StRoot/StEEmcUtil/EEmcGeom/libEEmcGeom.so",
     "StRoot/StEEmcUtil/StEEmcSmd/libEEmcSmdGeom.so",
+    "StRoot/StEEmcUtil/EEmcSmdMap/libEEmcSmdMap.so",
     "StRoot/StEEmcPool/StEzSmdCal/libEzSmdCal.so",
     "EEmcDb/libEEmcDb.so",
     "libPhysics"
   };
   
+  gStyle->SetPalette(1,0);
   int i;
   for(i=0;i<sizeof(libL)/sizeof(char*);i++) {
     printf("   load '%s' ...\n",libL[i]);
@@ -66,26 +70,28 @@ rdEz2SmdCal(
 
  //............  DB-reader .................
   EEmcDb *db=new EEmcDb() ;
-  db->setThreshold(3.0);
+  db->setThreshold(3.0); 
   db->setPreferredFlavor("expoSlope1","eemcPIXcal");
 
   // set all DB flags before DB request
   db->requestDataBase(timeStamp,firstSec,lastSec); // range of sectors
   
-  // dump current DB content
-  // db->exportAscii("dbDump1.dat"); return;
-  
   TObjArray  HList;
   //........... sorters ..........
-  EzEEsmdCal *sorter=new  EzEEsmdCal(5); // sectID
-  sorter->set(&HList,db,eFee,eHead,eTrig);
-  float thrMipSmdE=0.2;
+  float thrMipSmdE=0.1;
   int emptyStripCount=nDot;
   float twMipEdev=0.5;
-  sorter->setMipCuts(thrMipSmdE,emptyStripCount, twMipEdev);
+  float presMipElow=0.3, presMipEhigh=3.;
+ 
+  EzEEsmdCal *sorter=new  EzEEsmdCal(5); // sectID
+  sorter->set(&HList,db,eFee,eHead,eTrig);
+  sorter->setMipCuts(thrMipSmdE,emptyStripCount, twMipEdev,presMipElow,presMipEhigh);
   sorter->init();
   sorter->initRun(eHead->getRunNumber());
 
+  // dump current DB content
+  // db->exportAscii("dbDump2.dat"); return;
+  
    
   printf("Sort %d  of total Events %d, use trigId=%d\n",mxEve, nEntries,oflTrigId);
 
@@ -94,7 +100,6 @@ rdEz2SmdCal(
   for(nEve=0; nEve<nEntries && nEve<mxEve; nEve++) {
     chain->GetEntry(nEve);
    if(nEve%2000==0)printf("in %d, acc %d  ok=%d\n",nEve,nAcc,nOK);
-   //if(oflTrigId>0 && ! eTrig->isTrigID(oflTrigId) ){ continue;}
    //   printf("%d %d %d\n",  eTrig->isTrigID(10), eTrig->isTrigID(45010), eTrig->isTrigID(45020));
 
    if(! eTrig->isTrigID(10) &&
