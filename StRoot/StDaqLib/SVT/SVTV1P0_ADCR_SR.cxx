@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0_ADCR_SR.cxx,v 1.2 2001/04/18 19:47:25 ward Exp $
+ * $Id: SVTV1P0_ADCR_SR.cxx,v 1.3 2001/05/10 15:19:08 jschamba Exp $
  *      
  * Author: Jeff Landgraf, M.J. LeVine, Marcelo Munhoz, J. Schambach
  *      
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: SVTV1P0_ADCR_SR.cxx,v $
+ * Revision 1.3  2001/05/10 15:19:08  jschamba
+ * unscrambling of Format = 2 data was done each time initialize was called. Rewrite header
+ * to indicate Format = 0 after unscrambling prevents this.
+ *
  * Revision 1.2  2001/04/18 19:47:25  ward
  * StDaqLib/SVT stuff from Jo Schambach.
  *
@@ -101,6 +105,9 @@ int SVTV1P0_ADCR_SR::initialize()
 	    }
 	}
 	memcpy((void *)adc_old, (const void *)adc_new, 6*256*128);
+	// since this now looks like unscrambled (format 0) data
+	// change the format number in the header to 0
+	banks->header.FormatNumber = 0;
       } // ...if (banks->header.FormatNumber == 2
     }   // ...if (banks
   }
@@ -249,6 +256,9 @@ int SVTV1P0_PEDR_SR::initialize()
 	  }
       }
       memcpy((void *)adc_old, (const void *)adc_new, 6*256*128);
+      // since this now looks like unscrambled (format 0) data
+      // change the format number in the header to 0
+      banks->header.FormatNumber = 0;
     } // ...if (banks->header.FormatNumber == 2
   }   // ...if (banks != NULL
 
@@ -398,6 +408,9 @@ int SVTV1P0_PRMS_SR::initialize()
 	  }
       }
       memcpy((void *)adc_old, (const void *)adc_new, 6*256*128);
+      // since this now looks like unscrambled (format 0) data
+      // change the format number in the header to 0
+      banks->header.FormatNumber = 0;
     } // ...if (banks->header.FormatNumber == 2
   }   // ...if (banks !=NULL
 
