@@ -153,6 +153,8 @@ void StiHitFiller::operator() (const StTpcHit* tpchit, StiHit* stihit)
 double gRefAnleForSector(unsigned int sector)
 {
     unsigned int numSectors = 24;
-    return (sector > 12) ?(numSectors-sector)*2.*M_PI/(static_cast<double>(numSectors)/2.) :
+    double tolerance = .00001;
+    double beta = (sector > 12) ?(numSectors-sector)*2.*M_PI/(static_cast<double>(numSectors)/2.) :
 	sector*2.*M_PI/(static_cast<double>(numSectors)/2.);
+    return ( fabs(2.*M_PI - beta) < tolerance ) ? fabs(2.*M_PI-beta) : beta;
 }
