@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.1 2000/01/18 16:42:40 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.2 2000/01/26 19:29:26 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.2  2000/01/26 19:29:26  kathy
+// add methods SetDefaultLogXList,AddToLogXList,ExamineLogXList,RemoveFromLogXList - requested by T.Trainor - impact param hists are now draw with LogX scale
+//
 // Revision 1.1  2000/01/18 16:42:40  kathy
 // move StHistUtil class from St_QA_Maker directory and put into StAnalysisUtilities
 //
@@ -114,7 +117,8 @@ ClassImp(StHistUtil)
 
 StHistUtil::StHistUtil(){
 
-  m_ListOfLog = 0;
+  m_ListOfLogY = 0;
+  m_ListOfLogX = 0;
   m_ListOfPrint = 0;
   m_HistCanvas = 0;
 
@@ -126,9 +130,13 @@ StHistUtil::StHistUtil(){
 
 StHistUtil::~StHistUtil(){
   SafeDelete(m_HistCanvas);
-  if (m_ListOfLog) {
-    m_ListOfLog->Delete();
-    SafeDelete(m_ListOfLog);
+  if (m_ListOfLogY) {
+    m_ListOfLogY->Delete();
+    SafeDelete(m_ListOfLogY);
+  }
+  if (m_ListOfLogX) {
+    m_ListOfLogX->Delete();
+    SafeDelete(m_ListOfLogX);
   }
   if (m_ListOfPrint) {
     m_ListOfPrint->Delete();
@@ -296,15 +304,27 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
 //  --> you can see the full list of global variables by starting ROOT and entering .g
 //  --> to find the full list of commands, type ? in ROOT 
 
-// set logY scale off
-	 gPad->SetLogy(0);	  
-// Set logy scale on if: there is a loglist, if the hist name is on the list, if it has entries
+// set logY & logX scale off
+	 gPad->SetLogy(0);
+	 gPad->SetLogx(0);	  
+
+// Set logY scale on if: there is a loglist, if the hist name is on the list, if it has entries
 //    and if the max entries in all bins is > 0
-	if (m_ListOfLog && m_ListOfLog->FindObject(obj->GetName()) && ((TH1 *)obj)->GetEntries()
+	if (m_ListOfLogY && m_ListOfLogY->FindObject(obj->GetName()) && ((TH1 *)obj)->GetEntries()
             && ((TH1 *)obj)->GetMaximum() ){
 	  gPad->SetLogy(1);
-          cout << "             -- Will draw in log scale: " << obj->GetName() <<endl;
+          cout << "             -- Will draw in logY scale: " << obj->GetName() <<endl;
 	 }
+
+
+// Set logX scale on if: there is a loglist, if the hist name is on the list, if it has entries
+//    and if the max entries in all bins is > 0
+	if (m_ListOfLogX && m_ListOfLogX->FindObject(obj->GetName()) && ((TH1 *)obj)->GetEntries()
+            && ((TH1 *)obj)->GetMaximum() ){
+	  gPad->SetLogx(1);
+          cout << "             -- Will draw in logX scale: " << obj->GetName() <<endl;
+	 }
+
 
 // check dimension of histogram
           chkdim = ((TH1 *)obj)->GetDimension();
@@ -477,11 +497,11 @@ Int_t StHistUtil::ExamineLogYList()
 
   cout << " **** Now in StHistUtil::ExamineLogYList **** " << endl;
 
-// m_ListOfLog -  is a list of log plots
+// m_ListOfLogY -  is a list of log plots
 // construct a TObject
   TObject *obj = 0;
 // construct a TIter ==>  () is an overloaded operator in TIter
-  TIter nextObj(m_ListOfLog);
+  TIter nextObj(m_ListOfLogY);
   Int_t LogYCount = 0;
 
 // use = here instead of ==, because we are setting obj equal to nextObj and then seeing if it's T or F
@@ -494,6 +514,35 @@ Int_t StHistUtil::ExamineLogYList()
 
   cout << " Now in StHistUtil::ExamineLogYList, No. Hist. in LogY scale = " << LogYCount <<endl;
   return LogYCount;
+}
+
+//_____________________________________________________________________________
+
+
+Int_t StHistUtil::ExamineLogXList() 
+{  
+// Method ExamineLogXList
+// List of all histograms that will be drawn with logX scale
+
+  cout << " **** Now in StHistUtil::ExamineLogXList **** " << endl;
+
+// m_ListOfLogX -  is a list of log plots
+// construct a TObject
+  TObject *obj = 0;
+// construct a TIter ==>  () is an overloaded operator in TIter
+  TIter nextObj(m_ListOfLogX);
+  Int_t LogXCount = 0;
+
+// use = here instead of ==, because we are setting obj equal to nextObj and then seeing if it's T or F
+  while ((obj = nextObj())) {
+
+    cout << " StHistUtil::ExamineLogXList has hist " <<  obj->GetName() << endl;
+    LogXCount++;
+
+  }
+
+  cout << " Now in StHistUtil::ExamineLogXList, No. Hist. in LogX scale = " << LogXCount <<endl;
+  return LogXCount;
 }
 
 //_____________________________________________________________________________
@@ -544,8 +593,8 @@ Int_t StHistUtil::AddToLogYList(const Char_t *HistName){
 //  cout << " **** Now in StHistUtil::AddToLogYList  **** " << endl;
 
 // Since I'm creating a new list, must delete it in the destructor!!
-//make a new TList on heap(persistant); have already defined m_ListOfLog in header file
-   if (!m_ListOfLog) m_ListOfLog = new TList;
+//make a new TList on heap(persistant); have already defined m_ListOfLogY in header file
+   if (!m_ListOfLogY) m_ListOfLogY = new TList;
 
 // the add method for TList requires a TObject input  (also can use TObjString)
 // create TObjString on heap
@@ -553,16 +602,48 @@ Int_t StHistUtil::AddToLogYList(const Char_t *HistName){
 
 // - check if it's already on the list - use FindObject method of TList
     TObject *lobj = 0;
-    lobj = m_ListOfLog->FindObject(HistName);
+    lobj = m_ListOfLogY->FindObject(HistName);
 // now can use Add method of TList
     if (!lobj) {
-       m_ListOfLog->Add(HistNameObj);
+       m_ListOfLogY->Add(HistNameObj);
 //       cout << " StHistUtil::AddToLogYList: " << HistName  <<endl;
     }
     else  cout << " StHistUtil::AddToLogYList: " << HistName << " already in list - not added" <<endl;
  
 // return using a method of TList (inherits GetSize from TCollection)
- return m_ListOfLog->GetSize();
+ return m_ListOfLogY->GetSize();
+}
+
+
+//_____________________________________________________________________________
+
+
+Int_t StHistUtil::AddToLogXList(const Char_t *HistName){  
+// Method AddToLogXList
+//   making list of all histograms that we want drawn with LogX scale
+
+//  cout << " **** Now in StHistUtil::AddToLogXList  **** " << endl;
+
+// Since I'm creating a new list, must delete it in the destructor!!
+//make a new TList on heap(persistant); have already defined m_ListOfLogX in header file
+   if (!m_ListOfLogX) m_ListOfLogX = new TList;
+
+// the add method for TList requires a TObject input  (also can use TObjString)
+// create TObjString on heap
+   TObjString *HistNameObj = new TObjString(HistName);
+
+// - check if it's already on the list - use FindObject method of TList
+    TObject *lobj = 0;
+    lobj = m_ListOfLogX->FindObject(HistName);
+// now can use Add method of TList
+    if (!lobj) {
+       m_ListOfLogX->Add(HistNameObj);
+//       cout << " StHistUtil::AddToLogXList: " << HistName  <<endl;
+    }
+    else  cout << " StHistUtil::AddToLogXList: " << HistName << " already in list - not added" <<endl;
+ 
+// return using a method of TList (inherits GetSize from TCollection)
+ return m_ListOfLogX->GetSize();
 }
 
 
@@ -609,22 +690,50 @@ Int_t StHistUtil::RemoveFromLogYList(const Char_t *HistName){
 //  cout << " **** Now in StHistUtil::RemoveFromLogYList  **** " << endl;
 
 // check if list exists:
-  if (m_ListOfLog) {
+  if (m_ListOfLogY) {
     
 // the remove method for TList requires a TObject input  
 // - check if it's  on the list - use FindObject method of TList
     TObject *lobj = 0;
-    lobj = m_ListOfLog->FindObject(HistName);
+    lobj = m_ListOfLogY->FindObject(HistName);
 // now can use Remove method of TList
     if (lobj) {
-      m_ListOfLog->Remove(lobj);
+      m_ListOfLogY->Remove(lobj);
       cout << " RemoveLogYList: " << HistName << " has been removed from list" <<endl;
     }
     else  cout << " RemoveLogYList: " << HistName << " not on list - not removing" <<endl;
 
   } 
 // return using a method of TList (inherits GetSize from TCollection)
- return m_ListOfLog->GetSize();
+ return m_ListOfLogY->GetSize();
+}
+
+
+//_____________________________________________________________________________
+
+Int_t StHistUtil::RemoveFromLogXList(const Char_t *HistName){  
+// Method RemoveFromLogXList
+//   remove hist from  list  that we want drawn with LogX scale
+
+//  cout << " **** Now in StHistUtil::RemoveFromLogXList  **** " << endl;
+
+// check if list exists:
+  if (m_ListOfLogX) {
+    
+// the remove method for TList requires a TObject input  
+// - check if it's  on the list - use FindObject method of TList
+    TObject *lobj = 0;
+    lobj = m_ListOfLogX->FindObject(HistName);
+// now can use Remove method of TList
+    if (lobj) {
+      m_ListOfLogX->Remove(lobj);
+      cout << " RemoveLogXList: " << HistName << " has been removed from list" <<endl;
+    }
+    else  cout << " RemoveLogXList: " << HistName << " not on list - not removing" <<endl;
+
+  } 
+// return using a method of TList (inherits GetSize from TCollection)
+ return m_ListOfLogX->GetSize();
 }
 
 
@@ -785,7 +894,7 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "TabQaVtxY",
  "TabQaVtxZ",
  "TabQaVtxChisq"
-   };
+  };
   sdefList = sdefList1;
   lengofList = sizeof(sdefList1)/4;  
   }
@@ -928,6 +1037,59 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
 }
 
 //_____________________________________________________________________________
+// Method SetDefaultLogXList
+//    - create default list of histograms we want plotted in LogX scale
+
+void StHistUtil::SetDefaultLogXList(Char_t *dirName)
+{  
+// Method SetDefaultLogXList
+//    - create default list of histograms we want plotted in LogX scale
+
+  cout << " **** Now in StHistUtil::SetDefaultLogXList  **** " << endl;
+
+
+  Char_t **sdefList=0;
+  Int_t lengofList = 0;
+
+  if (strcmp(dirName,"QA")==0) {
+   Char_t* sdefList1[] = {
+    "TabQaGtrkImpactT",
+    "TabQaGtrkImpactTS",
+    "TabQaPtrkImpact"
+   };
+  sdefList = sdefList1;
+  lengofList = sizeof(sdefList1)/4;  
+  }
+
+  if (strcmp(dirName,"EventQA")==0) {
+   Char_t* sdefList2[] = {
+    "StEQaGtrkImpactT",
+    "StEQaGtrkImpactTS",
+    "StEQaPtrkImpact"
+   };
+  sdefList = sdefList2;
+  lengofList = sizeof(sdefList2)/4;  
+  }
+
+  //  else 
+  //  { cout << " StHistUtil::SetDefaultLogXList - no hist set in def logX list " << endl; } 
+  //   cout <<  " !! HERE I AM1 " << lengofList << endl ;
+
+  Int_t numLog = 0;
+
+  if (lengofList) {
+    Int_t ilg = 0;
+    for (ilg=0;ilg<lengofList;ilg++) {
+     numLog = AddToLogXList(sdefList[ilg]);
+     //     cout <<  " !!! adding histogram " << sdefList[ilg] << " to LogX list "  << endl ;
+    }
+  }
+
+  cout <<  " !!!  StHistUtil::SetDefaultLogXList, # histogram put in list " << numLog << endl;
+
+}
+
+//_____________________________________________________________________________
 // Method SetDefaultPrintList
 //    - create default list of histograms we want drawn,printed
 
@@ -992,7 +1154,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   lengofList = sizeof(sdefList1)/4;  
   }
 
-// Full Table QA list.........................................................
+// Test Table QA list.........................................................
   if (strcmp(dirName,"QA")==0 && strcmp(analType,"TestQATable")==0) {
    Char_t* sdefList2[] = {
      "TabQaVtxX",
@@ -1001,6 +1163,17 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   sdefList = sdefList2;
   lengofList = sizeof(sdefList2)/4;  
   }
+
+// FTPC Table QA list.........................................................
+  if (strcmp(dirName,"QA")==0 && strcmp(analType,"Ftpc")==0) {
+   Char_t* sdefList3[] = {
+    "TabQaGtrkNPntFE",
+    "TabQaGtrkNPntFW"
+   };
+  sdefList = sdefList3;
+  lengofList = sizeof(sdefList3)/4;  
+  }
+
 
   Int_t numPrt = 0;
 
