@@ -3,15 +3,30 @@
 
 StiUnidentifiedTrackFilter::StiUnidentifiedTrackFilter()
 {
-  setDefaults();
+	filters.push_back(new StiFilter(0.,20.,"Chi2"));
+	filters.push_back(new StiFilter(0.,20.,"Phi"));
+	filters.push_back(new StiFilter(0.1,20.,"Pt"));
+	filters.push_back(new StiFilter(-0.75,0.75,"PseudoRapidity"));
+	filters.push_back(new StiFilter(-0.75,0.75,"Rapidity",false));
+	filters.push_back(new StiFilter(15.,60.,"NPts"));
+	filters.push_back(new StiFilter(15.,60.,"NFitPts"));
+	filters.push_back(new StiFilter(0.,2.,"NGaps",false));
+	filters.push_back(new StiFilter(0.5,2.,"FitToTotalPts",false));
+	filters.push_back(new StiFilter(0.,20.,"PrimaryDca",false));
+	filters.push_back(new StiFilter(0.,20.,"NTpcPts",false));
+	filters.push_back(new StiFilter(0.,20.,"NSvtPts",false));
+	filters.push_back(new StiFilter(0.,20.,"TpcDedx",false));
+	filters.push_back(new StiFilter(0.,20.,"SvtDedx",false));
+	filters.push_back(new StiFilter(0,"TrackType",false));
+	filters.push_back(new StiFilter(0,"Charged",false));
 }
-
 
 void StiUnidentifiedTrackFilter::setDefaults()
 {
   /** 
    * Set default values of this filters
    */ 
+	/*
   usePhi = false;
   useEta = false;
   usePt  = false;
@@ -32,8 +47,39 @@ void StiUnidentifiedTrackFilter::setDefaults()
   //setSvtPointCountRange(5, 50);
   setTpcDedxRange(0.25,50.);
   setDcaRange(0.,3.);            
+	*/
 }
 
+bool StiUnidentifiedTrackFilter::accept(StiTrack * t)
+{
+	StiFilter * f;
+
+	f = filters[kChi2];	          if (f&&f->isUsed()&&!f->accept(t->getChi2())) return false;
+	f = filters[kPt];	            if (f&&f->isUsed()&&!f->accept(t->getPt())) return false;
+	f = filters[kPseudoRapidity]; if (f&&f->isUsed()&&!f->accept(t->getPseudoRapidity())) return false;
+	f = filters[kRapidity];       if (f&&f->isUsed()&&!f->accept(t->getRapidity())) return false;
+	f = filters[kNPts];	          if (f&&f->isUsed()&&!f->accept(t->getPointCount())) return false;
+	f = filters[kNFitPts];	      if (f&&f->isUsed()&&!f->accept(t->getFitPointCount())) return false;
+	f = filters[kNGaps];          if (f&&f->isUsed()&&!f->accept(t->getGapCount())) return false;
+	f = filters[kFitToTotalPts];  
+	double pts,fitPts,ratio;
+
+	if (f&&f->isUsed())
+		{
+			pts    = t->getPointCount();
+			fitPts = t->getFitPointCount();			
+			if (pts>0) 
+				{
+					ratio  = fitPts/pts;						
+					if (f->accept(ratio)) return false;
+				}
+			else
+				return false;
+			f = filters[kPrimaryDca];	    if (f&&f->isUsed()&&!f->accept(t->getDca())) return false;
+		}
+}
+
+/********
 bool StiUnidentifiedTrackFilter::accept(StiTrack * t)
 {
   if (t)
@@ -225,3 +271,4 @@ void StiUnidentifiedTrackFilter::setChi2Range(double min, double max)
     useChi2 = false;
 }
 
+*/

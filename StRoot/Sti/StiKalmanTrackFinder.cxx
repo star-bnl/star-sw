@@ -88,17 +88,17 @@ void StiKalmanTrackFinder::getNewState()
 {
   StiIOBroker *  broker = StiIOBroker::instance();
   //cout <<"StiKalmanTrackFinder::getNewState()"<<endl;
-  setMCSCalculated(broker->ktfMcsCalculated());
-  setElossCalculated(broker->ktfElossCalculated());
-  setMaxChi2ForSelection(broker->ktfMaxChi2ForSelection());
-  setField(broker->ktfBField());
-  setMassHypothesis(broker->ktfMassHypothesis());
-  setMinContiguousHitCount(broker->ktfMinContiguousHitCount());
-  setMaxNullCount(broker->ktfMaxNullCount());
-  setMaxContiguousNullCount(broker->ktfMaxContiguousNullCount());
-  setMinSearchWindow(broker->ktfMinSearchRadius());
-  setMaxSearchWindow(broker->ktfMaxSearchRadius());
-  setSearchWindowScale(broker->ktfSearchWindowScale());
+  pars->setMCSCalculated(broker->ktfMcsCalculated());
+  pars->setElossCalculated(broker->ktfElossCalculated());
+  pars->setMaxChi2ForSelection(broker->ktfMaxChi2ForSelection());
+  pars->setField(broker->ktfBField());
+  //pars->setMassHypothesis(broker->ktfMassHypothesis());
+  pars->setMinContiguousHitCount(broker->ktfMinContiguousHitCount());
+  pars->setMaxNullCount(broker->ktfMaxNullCount());
+  pars->setMaxContiguousNullCount(broker->ktfMaxContiguousNullCount());
+  pars->setMinSearchWindow(broker->ktfMinSearchRadius());
+  pars->setMaxSearchWindow(broker->ktfMaxSearchRadius());
+  pars->setSearchWindowScale(broker->ktfSearchWindowScale());
 
   if (broker->ktfUseHelixExtrapolation()==true) 
     {
@@ -639,8 +639,8 @@ void StiKalmanTrackFinder::doFinishLayer()
 	  trackMes << "SKTF::doFinishLayer() "
 		   << "               nullCount:" << leadNode->nullCount << endl
 		   << "    contiguousNullCount :" << leadNode->contiguousNullCount << endl;
-	  if (leadNode->nullCount>StiKalmanTrackNode::maxNullCount ||
-	      leadNode->contiguousNullCount>StiKalmanTrackNode::maxContiguousNullCount)
+	  if (leadNode->nullCount>pars->maxNullCount ||
+	      leadNode->contiguousNullCount>pars->maxContiguousNullCount)
 	    trackDone = true;    
 	}
     }
@@ -718,7 +718,6 @@ double StiKalmanTrackFinder::getZWindow(StiKalmanTrackNode * n, StiHit * h) cons
     rv = 5.;
   return rv;
 }
-*/
 
 void StiKalmanTrackFinder::setElossCalculated(bool option)
 {
@@ -742,63 +741,5 @@ double StiKalmanTrackFinder::getMassHypothesis()
   return StiKalmanTrackNode::getMassHypothesis();
 };
 
+*/
 
-void   StiKalmanTrackFinder::setField(double f)
-{
-  //cout << "Field set to : " << f << endl;
-  StiKalmanTrackNode::setFieldConstant(f);
-}
-
-void   StiKalmanTrackFinder::setMinContiguousHitCount(int count)
-{
-  //cout << "minContiguousHitCount set to : " << count << endl;
-  StiKalmanTrackNode::minContiguousHitCountForNullReset = count;
-}
-
-void   StiKalmanTrackFinder::setMaxNullCount(int count)
-{
-  //cout << "maxNullCount set to : " << count << endl;
-  StiKalmanTrackNode::maxNullCount = count;
-}
-
-void   StiKalmanTrackFinder::setMaxContiguousNullCount(int count)
-{
-  //cout << "maxContiguousNullCount set to : " << count << endl;
-  StiKalmanTrackNode::maxContiguousNullCount = count;
-}
-
-void   StiKalmanTrackFinder::setMaxChi2ForSelection(double chi)
-{
-  //cout << " maxChi2ForSelection set to :" << chi << endl;
-  maxChi2ForSelection = chi;
-}
-
-void   StiKalmanTrackFinder::setMinSearchWindow(double val)
-{
-  StiKalmanTrackNode::minSearchWindow = val;
-}
-
-void   StiKalmanTrackFinder::setMaxSearchWindow(double val)
-{
-  StiKalmanTrackNode::maxSearchWindow = val;
-}
-
-void   StiKalmanTrackFinder::setSearchWindowScale(double val)
-{
-  StiKalmanTrackNode::searchWindowScale = val;
-}
-
-double   StiKalmanTrackFinder::getMinSearchWindow()
-{
-  return StiKalmanTrackNode::minSearchWindow;
-}
-
-double   StiKalmanTrackFinder::getMaxSearchWindow()
-{
-  return StiKalmanTrackNode::maxSearchWindow;
-}
-
-double   StiKalmanTrackFinder::getSearchWindowScale()
-{
-  return StiKalmanTrackNode::searchWindowScale;
-}
