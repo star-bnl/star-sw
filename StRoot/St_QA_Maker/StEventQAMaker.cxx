@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.55 2000/08/18 20:53:31 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.56 2000/08/22 15:37:04 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.56  2000/08/22 15:37:04  lansdell
+// changed ftpc iflag check from >700 to >=700
+//
 // Revision 1.55  2000/08/18 20:53:31  lansdell
 // fixed probability of fit bug
 //
@@ -575,7 +578,7 @@ void StEventQAMaker::MakeHistGlob() {
       }
 
 // now fill all FTPC East histograms ------------------------------------------
-      if (globtrk->flag()>700 && globtrk->flag()<800 && globtrk->topologyMap().numberOfHits(kFtpcEastId)>0) {
+      if (globtrk->flag()>=700 && globtrk->flag()<800 && globtrk->topologyMap().numberOfHits(kFtpcEastId)>0) {
 
 // these are TPC & FTPC
 	m_pointFE->Fill(globtrk->detectorInfo()->numberOfPoints());
@@ -609,7 +612,7 @@ void StEventQAMaker::MakeHistGlob() {
 
       }
 // now fill all FTPC West histograms ------------------------------------------
-      if (globtrk->flag()>700 && globtrk->flag()<800 && globtrk->topologyMap().numberOfHits(kFtpcWestId)>0) {
+      if (globtrk->flag()>=700 && globtrk->flag()<800 && globtrk->topologyMap().numberOfHits(kFtpcWestId)>0) {
 
 // these are TPC & FTPC
 	m_pointFW->Fill(globtrk->detectorInfo()->numberOfPoints());
@@ -910,7 +913,7 @@ void StEventQAMaker::MakeHistPrim() {
 
 /* The following are for the FTPC, which doesn't do primary tracking yet.
 // now fill all FTPC East histograms ------------------------------------------
-	if (primtrk->flag()>700 && primtrk->flag()<800 && primtrk->topologyMap().numberOfHits(kFtpcEastId)>0) {
+	if (primtrk->flag()>=700 && primtrk->flag()<800 && primtrk->topologyMap().numberOfHits(kFtpcEastId)>0) {
 
 // these are TPC & FTPC
 	  m_ppointFE->Fill(primtrk->detectorInfo()->numberOfPoints());
@@ -943,7 +946,7 @@ void StEventQAMaker::MakeHistPrim() {
 	}
 
 // now fill all FTPC West histograms ------------------------------------------
-	if (primtrk->flag()>700 && primtrk->flag()<800 && primtrk->topologyMap().numberOfHits(kFtpcWestId)>0) {
+	if (primtrk->flag()>=700 && primtrk->flag()<800 && primtrk->topologyMap().numberOfHits(kFtpcWestId)>0) {
 
 // these are TPC & FTPC
 	  m_ppointFW->Fill(primtrk->detectorInfo()->numberOfPoints());
