@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////
-// $Id: StFtpcMomentumFit.cc,v 1.9 2001/04/09 14:38:44 oldi Exp $
+// $Id: StFtpcMomentumFit.cc,v 1.10 2002/02/21 22:57:56 oldi Exp $
 //
 // $Log: StFtpcMomentumFit.cc,v $
+// Revision 1.10  2002/02/21 22:57:56  oldi
+// Fixes to avoid warnings during optimized compilation.
+//
 // Revision 1.9  2001/04/09 14:38:44  oldi
 // There's still a difference between 'delete' and 'delete[]'...
 //
@@ -600,10 +603,10 @@ int StFtpcMomentumFit::CircleFit(double x[],double y[], double xw[], double yw[]
   ///////////////////////////////////////////////////////
   // now solve the equation by Newton method
 
-  int MaxIter=100;
-  double w=1;
-  double wNew;
-  double f,fp;
+  int MaxIter = 100;
+  double w = 1.;
+  double wNew = 0.;
+  double f = 0., fp = 0.;
   double xc = 0., yc = 0.;
 
   if(debug)  
