@@ -1,10 +1,13 @@
-// $Id: Example_readfz_plot.C,v 1.2 1999/05/21 15:33:49 kathy Exp $
+// $Id: Example_readfz_plot.C,v 1.3 1999/05/21 15:45:02 kathy Exp $
 // $Log: Example_readfz_plot.C,v $
+// Revision 1.3  1999/05/21 15:45:02  kathy
+// fixed owner on Example_readfz_plot.C
+//
 // Revision 1.2  1999/05/21 15:33:49  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
 //=======================================================================
-// owner: Pavel Nevski ?
+// owner: Pavel Nevski 
 // what it does: 
 //=======================================================================
 
