@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.13 2003/02/19 14:50:39 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.14 2003/05/06 20:19:40 mora Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.14  2003/05/06 20:19:40  mora
+// Add a new constructor only with FTPC dimensions and geometry for ITTF
+//
 // Revision 1.13  2003/02/19 14:50:39  jcs
 // get default temperatures from database
 //
@@ -175,6 +178,11 @@ public:
                  St_ftpcdDeflectiondP *ddeflectiondp,
                  St_ftpcGas           *gas,
                  St_ftpcDriftField    *driftfield);
+  // constructor used by Sti/StFtpcDetectorBuilder:
+  StFtpcDbReader(St_ftpcDimensions    *dimensions,
+                 St_ftpcPadrowZ       *zrow        );
+
+
   ~StFtpcDbReader();
   Float_t padrowZPosition(Int_t i); 
   Float_t magboltzEField(Int_t i);
