@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.9 1999/08/06 15:08:12 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.10 1999/08/12 16:28:36 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.10  1999/08/12 16:28:36  kathy
+// changed QA_bfcred_dst_tables so that it can loop over many events - before was hardwired to only 1 event
+//
 // Revision 1.9  1999/08/06 15:08:12  kathy
 // removed for loop and put in goto checks - due to CINT problems
 //
@@ -47,9 +50,11 @@ StChain *chain;
 class St_DataSet;
 St_DataSet *Event;
 
-void QA_bfcread_dst_tables(const char 
-*MainFile="/disk00000/star/test/dev/tfs_Linux/Wed/year_2a/psc0208_01_40evts.dst.root",
-const char *fname="qa_tables.txt") {
+void QA_bfcread_dst_tables(
+ Int_t nevents=1, 
+ const char *MainFile=
+ "/disk00000/star/test/new/tfs_Linux/year_2a/psc0208_01_40evts.dst.root",
+ const char *fname="qa_tables.txt") {
 
   gSystem->Load("St_base");
   gSystem->Load("StChain");
@@ -74,6 +79,7 @@ const char *fname="qa_tables.txt") {
   St_DataSet *ds=0;
   St_Table *tabl=0;
   St_DataSet *obj=0;
+
   Int_t tabcntr=0;
   Int_t tabmiss=0;
 
@@ -96,8 +102,6 @@ const char *fname="qa_tables.txt") {
   Int_t cnt_kinkVertex=0;
   Int_t cnt_ev0_eval=0;
 
-// We will always just check 1 event!
-  Int_t nevents=1;
 
   ofstream fout(fname);
   fout << "Tester: " << endl;
@@ -126,11 +130,34 @@ const char *fname="qa_tables.txt") {
   int iret=0,iev=0;
   //for (iev=0;iev<nevents; iev++) {            // for loop code
  EventLoop: if (iev<nevents && !iret) {         // goto loop code
+
+   tabcntr=0;
+   tabmiss=0;
+
+   cnt_event_header=0;
+   cnt_event_summary=0;
+   cnt_globtrk=0;
+   cnt_globtrk_aux=0;
+   cnt_vertex=0;
+   cnt_point=0;
+   cnt_globtrk2=0;
+   cnt_primtrk=0;
+   cnt_primtrk_aux=0;
+   cnt_dst_v0_vertex=0;
+   cnt_dst_xi_vertex=0;
+   cnt_dst_dedx=0;
+   cnt_particle=0;
+   cnt_TrgDet=0;
+   cnt_monitor_soft=0;
+   cnt_g2t_rch_hit=0;
+   cnt_kinkVertex=0;
+   cnt_ev0_eval=0;
+
     chain->Clear();
     iret = chain->Make();
     iev++;                                      // goto loop code
     cout << "   ...iret = " << iret << endl;
-    //if (iret) break;                          // for loop code
+   //if (iret) break;                          // for loop code
     if (!iret) {
 
       ds=chain->GetDataSet("dst");
@@ -202,10 +229,13 @@ const char *fname="qa_tables.txt") {
           }
         }
 
+       }
 // ------------------------------------------------------------
 
-        cout << endl << "QAInfo: total # tables = " << tabcntr << endl;
-        fout << endl << "QAInfo: total # tables = " << tabcntr << endl;
+      cout << endl << "QAInfo: Ev# "
+	   << iev <<  ",  total # tables = " << tabcntr << endl;
+      fout << endl << "QAInfo: Ev# "
+	   << iev <<  ",  total # tables = " << tabcntr << endl;
 
         if (cnt_event_header == 0){
           cout << endl << "QA-> missing table: " << "event_header" << endl;
@@ -301,10 +331,11 @@ const char *fname="qa_tables.txt") {
         cout << endl << "QA-> # tables missing = " << tabmiss << endl;
         fout << endl << "QA-> # tables missing = " << tabmiss  << endl;
 
-        fout.close();
-        chain->Finish();    
-      }
     }
     goto EventLoop;
  }
+
+
+        fout.close();
+        chain->Finish();   
 }
