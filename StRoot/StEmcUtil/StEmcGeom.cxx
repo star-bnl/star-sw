@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.5 2001/04/25 02:41:45 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.6 2001/04/26 14:23:40 akio Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.6  2001/04/26 14:23:40  akio
+ * Quick and dirty fix for crashing non-bfc chain
+ *
  * Revision 1.5  2001/04/25 02:41:45  pavlinov
  * Fixed erorr for transition from ivid to EMC numeration
  *
@@ -59,7 +62,7 @@
 #include <assert.h>
 #include <strings.h>
 #include <TROOT.h>
-#include "StBFChain.h"
+#include "StMaker.h"
 #include "StEmcUtil/emcInternalDef.h"
 
 ClassImp(StEmcGeom)
@@ -438,7 +441,7 @@ Int_t &sub, Int_t &detector)
     }
     if     (rl==1) {
       //      cout<<" Phi 1 "<<phi<<endl;
-      //      phi += Int_t((mCalg_st->shift[0]-75.)/6.);
+      //phi += Int_t((mCalg_st->shift[0]-75.)/6.);
       phi += Int_t((75.-mCalg_st->shift[0])/6.);
       while (phi<=0)  phi+=60;
       while (phi>=61) phi-=60;
@@ -446,8 +449,8 @@ Int_t &sub, Int_t &detector)
       //      cout<<" Phi 2 "<<phi<<endl;
     }
     else if(rl==2) {
-      //      phi += Int_t((mCalg_st->shift[1]-105.)/6.);
-      phi += Int_t((105.-mCalg_st->shift[0])/6.);
+      //      phi += Int_t((shift[1]-105.)/6.);
+      phi += Int_t((105.-mCalg_st->shift[1])/6.);
       while (phi<=0)  phi+=60;
       while (phi>=61) phi-=60;
       module=phi+60;
@@ -804,24 +807,41 @@ StEmcGeom::getGeantGeometryTable()
 {
   // 24-apr-2000 for MDC4
   // Will be work if BFC has name "bfc" !!! Be carefull
-  TList *tl = (TList*)gROOT->GetListOfBrowsables();
-  if(tl) {
-    mChain=(StBFChain*)tl->FindObject("bfc"); 
-    if(mChain) mGeantGeom = mChain->GetDataSet("geom");
-  }
-  if(mGeantGeom == 0) {
-    mCalg = 0;
-    mCalr = 0;
-  }
-  else{
+  mGeantGeom = 0;
+  mCalg = 0;
+  mCalr = 0;
+  mCalg_st = 0;
+  mCalr_st = 0;
+  StMaker maker;
+  mChain = maker.GetChain();
+  //  TList *tl = (TList*)gROOT->GetListOfBrowsables();
+  //  if(tl) {
+  //  mChain=(StBFChain*)tl->FindObject("bfc"); 
+  if(mChain) mGeantGeom = mChain->GetDataSet("geom");
+  //}
+  if(mGeantGeom != 0) {
     mCalg    = (St_calb_calg   *) mGeantGeom->Find("calb_calg");
     if(mCalg) {
       mCalg_st = mCalg->GetTable();
       for(Int_t i=0;i<2;i++) 
-      printf(" Barrel %i Angle shift %6.0f \n", i+1, mCalg_st->shift[i]); 
+ 	printf(" Barrel %i Angle shift %6.0f \n", i+1, mCalg_st->shift[i]); 
     }
     mCalr = (St_calb_calr   *) mGeantGeom->Find("calb_calr");
     if(mCalr) mCalr_st = mCalr->GetTable(); // BARREL EMC RADIUSES
-    if(!mCalg_st && !mCalr_st) mMode.Append(" : No table");
+  }
+  if(!mCalg_st || !mCalr_st) {
+    mMode.Append(" : No table");
+    printf("StEmcGeom::getGeantGeometryTable() could not find geom\n");
+    printf("StEmcGeom::getGeantGeometryTable() create own calb_calg/r\n");
+    mCalg = new St_calb_calg("calg", 1);
+    mCalr = new St_calb_calr("calr", 1);
+    mCalg_st = mCalg->GetTable();
+    mCalr_st = mCalr->GetTable();
+    mCalg_st[0].shift[0]=75.0;
+    mCalg_st[0].shift[1]=105.0;
   }
 }
+
+
+
+
