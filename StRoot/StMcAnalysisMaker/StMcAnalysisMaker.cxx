@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.14 2000/03/28 02:28:04 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.15 2000/04/04 23:18:12 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.15  2000/04/04 23:18:12  calderon
+ * B -> B * kilogauss
+ *
  * Revision 1.14  2000/03/28 02:28:04  calderon
  * Return to calculating momentum at the origin, instead of taking the
  * momentum from the first point.
@@ -335,7 +338,7 @@ Int_t StMcAnalysisMaker::Make()
 	else
 	    s = trkHelix.pathLength(VertexPos);
 	
-	StThreeVectorD recMom(trkHelix.momentumAt(s,B));
+	StThreeVectorD recMom(trkHelix.momentumAt(s,B*kilogauss));
 	
 	cout << "[" << abs(recMom) << ", ";
 	cout << abs((*trackBounds.first).second->partnerMcTrack()->momentum()) << "]" << endl;
