@@ -7,6 +7,7 @@
 #include "PAM.idl"
 #include "g2t_tpc_hit.idl"
 #include "g2t_track.idl"
+#include "g2t_vertex.idl"
 #include "tfs_fspar.idl"
 #include "tfs_bmpar.idl"
 #include "tfs_fsctrl.idl"
@@ -18,6 +19,7 @@ interface tfs_g2t : amiModule {
         STAFCV_T call
                 ( in    g2t_tpc_hit g2t_hit
                 , in    g2t_track g2t_track
+                , in    g2t_vertex g2t_vertex
                 , in    tfs_fspar par
                 , in    tfs_bmpar bmpar
                 , in    tfs_fsctrl ctrl
@@ -26,4 +28,4 @@ interface tfs_g2t : amiModule {
                 , out   tcl_tphit tphit
                 );
 };
-/* Last mod. for tfs_g2t: $Date: 1998/04/24 22:27:28 $ */
+/* Last mod. for tfs_g2t: $Date: 1998/12/03 23:04:07 $ */
