@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.13 2001/02/13 16:33:58 yepes Exp $
+// $Id: StPeCMaker.cxx,v 1.14 2001/02/13 17:54:41 yepes Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.14  2001/02/13 17:54:41  yepes
+// still problems on differnt platforms
+//
 // Revision 1.13  2001/02/13 16:33:58  yepes
 // fix problem on Sun
 //
@@ -64,6 +67,7 @@
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 #endif
+
 #include "StTriggerDetectorCollection.h"
 #include "StCtbTriggerDetector.h"
 #include "StMwcTriggerDetector.h"
@@ -79,8 +83,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.13 2001/02/13 16:33:58 yepes Exp $";
-
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.14 2001/02/13 17:54:41 yepes Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -103,9 +106,11 @@ Int_t StPeCMaker::Init() {
   TString uDstFileName("StPecMaker.uDst.root");    
   StIOMaker* pIOMaker = (StIOMaker*)GetMaker("IO");
   if ( pIOMaker) {
-      TString temp = 0 ;
-      temp = strrchr(pIOMaker->GetFile(),'/') ;
-      if ( temp ) uDstFileName = temp+1 ;
+     char* ccc = "/" ;
+     Ssiz_t slashPosition = uDstFileName.Last(*ccc) ;
+     if ( slashPosition != -1 &&
+          slashPosition < uDstFileName.Length() ) 
+	     uDstFileName.Remove(0,slashPosition+1);
   }
 
   TString  tDst("dst");
