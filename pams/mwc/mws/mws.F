@@ -313,7 +313,7 @@ CC:>------------------------------------------------------------------
                sector(nsignal).tot_hit = tot_cell_hit(isec)
 *--
                raw(nsignal).sector = isec
-               if (wires_set .eq. .true.) then
+               if (wires_set) then
                  raw(nsignal).count = se_hit(isec)
 *--  Legacy code from the old days when STAR did not wire count
 *--  This code will be deleted soon - d.e. russ 1/27/99
