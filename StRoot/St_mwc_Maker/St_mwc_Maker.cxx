@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.10 1999/03/04 18:07:55 druss Exp $
+// $Id: St_mwc_Maker.cxx,v 1.11 1999/03/12 15:44:01 perev Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.11  1999/03/12 15:44:01  perev
+// New maker schema
+//
 // Revision 1.10  1999/03/04 18:07:55  druss
 // If no g2t_mwc_hit table, just return (instead of return error)
 //
@@ -79,7 +82,7 @@ Int_t St_mwc_Maker::Init(){
 
 // Read Parameter tables
 
-   St_DataSetIter params(gStChain->DataSet("params"));
+   St_DataSetIter params(GetDataBase("params"));
    m_geom = (St_mwc_geo  *) params("mwc/mwcpars/geom");
    m_cal  = (St_mwc_cal  *) params("mwc/mwcpars/cal");
    m_mpar = (St_mwc_mpar *) params("mwc/mwcpars/mpar");
@@ -114,7 +117,7 @@ Int_t St_mwc_Maker::Make(){
 
 // Read in Geant Tables
 
-     St_DataSetIter geant(gStChain->DataSet("geant"));
+     St_DataSetIter geant(GetDataSet("geant"));
      St_g2t_mwc_hit *g2t_mwc_hit = (St_g2t_mwc_hit *) geant("g2t_mwc_hit");
 
      if (!g2t_mwc_hit) {return kStOK;}
@@ -156,9 +159,9 @@ Int_t St_mwc_Maker::Make(){
 //_____________________________________________________________________________
 void St_mwc_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_mwc_Maker.cxx,v 1.10 1999/03/04 18:07:55 druss Exp $\n");
+  printf("* $Id: St_mwc_Maker.cxx,v 1.11 1999/03/12 15:44:01 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
      
