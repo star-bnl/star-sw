@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.11 2001/03/14 02:30:20 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.12 2001/03/14 02:33:37 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.12  2001/03/14 02:33:37  ullrich
+ * Fixed typo.
+ *
  * Revision 2.11  2001/03/14 02:30:20  ullrich
- * Added StPeg enum.
+ * Added StPwg enum.
  *
  * Revision 2.10  2000/11/26 15:07:55  lasiuk
  * replace multiplyassigned bit for RICH
