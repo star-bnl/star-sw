@@ -1,6 +1,6 @@
 ARFLAGS    = vqs
-FFLAGS     = -c -O -w
-FFLAGS_DBG = -c -g -w
+FFLAGS     = -c -O -w -extend_source
+FFLAGS_DBG = -c -g -w -extend_source
 
 all : libmsg.a libmsg_dbg.a
 

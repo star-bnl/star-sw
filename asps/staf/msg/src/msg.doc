@@ -4,7 +4,7 @@
 
 			And Message Handling
 
-			 February 24,  1993
+			 April 15,  1993
 
 
 
@@ -167,6 +167,79 @@ nodes occur.  In addition to the date, time and node appearing on the stamp,
 the total elapsed real and CPU time, since the MSG_INI call, also appear on
 the stamp.  The elapsed real time may be reset with a call to STRELA0, and
 the elapsed CPU time reset with STRCPU0 (see str.doc).
+
+
+                      msg Aborts
+
+Each message-prefix, when first defined, is given an "abort limit"
+of zero, which means there is no abort limit.  By setting an abort
+limit with the subroutine MSG_Set_Abort_Limit( <Prefix>, <Limit> ),
+or with MSG_Set_by_Command( <Command> ), with <Command>:
+
+   ABORT <Prefix>=<Limit>
+
+will cause msg to abort program execution when the specified prefix
+has counted up to the abort limit.  A message indicates the abort,
+and an msg summary is output to the journal file, if active.
+
+
+	         msg Summary Output
+
+A call to MSG_Summary( LUN ) will output the msg summary table to
+logical unit LUN.  A call to MSG_Summary_Event( LUN, Events ),
+with caller-specified event-count Events, produces the same table
+but with an extra column, being the number of counts of each prefix
+divided by Events, if not zero.  The summary has a one-line entry
+for each prefix, with information about each organized into columns.
+The columns are:
+
+	1)  Message-Prefix & Truncated Sample of last occurance  -- this is
+	(up to) 64 characters of the last message dispatched through msg
+	which has this prefix.
+
+	2)  Counts  -- this is the number of occurances of this prefix while
+	counting was enabled for this prefix (Counting can be disabled).
+
+	2a) Counts/evt -- MSG_Summary_Event only -- this is the occurance
+	frequency, with respect to a caller-specified event count.
+
+	3)  Limit   -- this it the count-limit, after which messages with this
+	prefixes stop producing output.  They continue to count.
+
+	4)  Lookups  -- this is the number of times each prefix had to be
+	looked up, as a character-string search, in the prefix table.  Optimal
+	usage puts this at (max) one per prefix, though infrequently occuring
+	messages can be harmlessly specifed (in the MESSAGE call, for example)
+	with a fast-reference ID of -1 (no ID), in which case Lookups = Counts.
+
+	5)  AbortLimit  -- this is the count beyond which (if AbortLimit is
+	positive) program execution will terminate from within msg.
+
+	6)  State   --  One of:
+
+	      Active  Prefix is active -- messages are displayed and counting.
+	    Counting  Prefix is inactive, but counting continues.
+	    Inactive  Prefix is inactive -- messages are neither displayed nor
+	              counted.
+	     Aborted  Prefix exceeded the abort limit and aborted the program.
+	              Only one prefix will have this state, at most, and only
+	              if the table was produced by an msg abort.
+
+
+The number of lines in a summary output page defaults to 66, but may be set
+with a call to MSG_Set_Summary_Page_Length( <Lines> ) .
+
+
+
+	              msg Template files
+
+There are currently three template files, ready to be included into application
+and then editted as needed.  They are:
+
+	msg_initialization.template  --  How to initialize msg, and set msg items.
+	msg.template                 --  How to make and use messages.
+	msg_trace.template           --  How to make and use dormant trace messages.
+
 
 
 	              msg Return Conditions

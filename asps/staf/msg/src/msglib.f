@@ -72,13 +72,14 @@
 *	Enter MSG's prefix in the index if needed.
 	CALL MSG_CHECK(MSG,LID,ACTIVE,COUNTING)
 
-	IF (ACTIVE) THEN !Display it:
-	  CALL MESSAGE_OUT(MSG,LINES)
-	END IF
-
 	IF (COUNTING) THEN !COUNTING is true only if found.
 	  CALL MSG_INCR(LID)
 	END IF !COUNTING
+
+	IF (ACTIVE) THEN !Display it:
+	  CALL MESSAGE_OUT(MSG,LINES)
+	  CALL MSG_Abort_Check( LID ) !Check if abort limit is exceeded, and maybe abort.
+	END IF
 
 	IF (ID.EQ.0) ID=LID !Ensure it's changed only if zero.
 
@@ -120,6 +121,46 @@
 	RETURN
 	END
 
+	SUBROUTINE MSG_Abort_Check( ID )
+
+	IMPLICIT NONE
+
+*  Input argument:
+	INTEGER ID !Fast-reference msg ID of a message to be checked.
+
+*  Functional description:
+*	Check the specified message-prefix's (ID) abort limit.  If it
+*	has been reached, display a message, then output the summary
+*	to the journal file, then abort.
+
+	INCLUDE 'msg_inc'
+
+	INTEGER TL, JL
+	LOGICAL Void
+	LOGICAL MSG_Journal_Close
+
+	IF ( MSG_Abort_Limit( ID ) .LE. 0 ) THEN !No abort limit -- do nothing.
+	
+	ELSE IF ( MSG_Counts( ID ) .GE. MSG_Abort_Limit( ID ) ) THEN !Time to abort.
+
+	  CALL MESSAGE_OUT( 'MSG_Abort_Check  Aborting on message [' // MSG_Prefix(ID)(:MSG_Length(ID)) // ']', 1 )
+
+	  IF (MSG_JOURNAL_ENABLE) THEN !Journal is open & enabled:
+	    CALL MSG_Get_LUN( TL, JL ) !Terminal LUN (don't care), Journal LUN.
+	    CALL MSG_Summary( JL ) !Put an msg summary on the journal file.
+	    Void = MSG_Journal_Close() !Close the file, ignore return status.
+	  END IF
+
+*	  Abort:
+	  CALL EXIT
+
+	END IF
+
+	RETURN
+	END
+
+ !Check if abort limit is exceeded, and maybe abort.
+
 	SUBROUTINE MSG_COUNT(PREFIX)
 
 	IMPLICIT NONE
@@ -151,7 +192,7 @@
 	  DO ID=1,MSG_Nprefixes
 	    MSG_Counting(ID)=.TRUE.
 	  END DO
-	  MSG_ALL_NOCOUNT=.FALSE.
+	  MSG_All_Nocount=.FALSE.
 
 	ELSE IF (WPT.GT.1) THEN !There's a wildcard.
 
@@ -266,14 +307,15 @@
 
 *	Check or set the ID & flags.
 *	Enter MSG's prefix in the index if needed.
-	CALL MSG_CHECK(MSG,LID,ACTIVE,COUNTING)
-
-	IF (ACTIVE) THEN !Display it:
-	  CALL MSG_DISPLAY_OUT(MSG,LINES)
-	END IF
+	CALL MSG_CHECK( MSG, LID, ACTIVE, COUNTING )
 
 	IF (COUNTING) THEN !COUNTING is true only if found.
 	  CALL MSG_INCR(LID)
+	END IF
+
+	IF (ACTIVE) THEN !Display it:
+	  CALL MSG_DISPLAY_OUT( MSG, LINES )
+	  CALL MSG_Abort_Check( LID ) !Check if abort limit is exceeded, and maybe abort.
 	END IF
 
 	IF (ID.EQ.0) ID=LID !Ensure it's changed only if zero.
@@ -321,12 +363,13 @@
 *	Enter MSG's prefix in the index if needed.
 	CALL MSG_CHECK(MSG,LID,ACTIVE,COUNTING)
 
-	IF (ACTIVE) THEN !Display it:
-	  CALL MSG_DISPLAY_AND_ECHO_OUT(MSG,LINES,LUN)
-	END IF
-
 	IF (COUNTING) THEN !COUNTING is true only if found.
 	  CALL MSG_INCR(LID)
+	END IF
+
+	IF (ACTIVE) THEN !Display it:
+	  CALL MSG_DISPLAY_AND_ECHO_OUT(MSG,LINES,LUN)
+	  CALL MSG_Abort_Check( LID ) !Check if abort limit is exceeded, and maybe abort.
 	END IF
 
 	IF (ID.EQ.0) ID=LID !Ensure it's changed only if zero.
@@ -418,7 +461,8 @@
 	IF (WPT.EQ.1) THEN !Wildcard in first position -- do them all:
 
 	  DO ID=1,MSG_Nprefixes
-	    MSG_Active(ID)=.TRUE.
+	    MSG_Active(ID)  =.TRUE.
+	    MSG_Counting(ID)=.TRUE. !Active, No-Counting is an illegal state.
 	  END DO
 	  MSG_ALL_DISABLE=.FALSE.
 
@@ -428,7 +472,8 @@
 	  SPT=MIN(WPT-1,MSG_Prefix_length_P)
 	  DO ID=1,MSG_Nprefixes
 	    IF ( PREFIX(:SPT).EQ.MSG_Prefix(ID)(:SPT) ) THEN	    
-	      MSG_Active(ID)=.TRUE.
+	      MSG_Active(ID)  =.TRUE.
+	      MSG_Counting(ID)=.TRUE. !Active, No-Counting is an illegal state.
 	    END IF
 	  END DO !ID=1,MSG_Nprefixes
 
@@ -593,14 +638,14 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_GET_LUN(TERMINAL_LUN,JOURNAL_LUN)
+	SUBROUTINE MSG_Get_LUN( Terminal_LUN, Journal_LUN )
 
 	IMPLICIT NONE
 
 *   Output arguments:
-	INTEGER TERMINAL_LUN !FORTRAN logical unit number of terminal
+	INTEGER Terminal_LUN !FORTRAN logical unit number of terminal
 	                     !for output, typically 6.
-	INTEGER JOURNAL_LUN  !FORTRAN logical unit number of journal file.
+	INTEGER Journal_LUN  !FORTRAN logical unit number of journal file.
 
 *   Functional Description:
 *	Get the message handler LUNs and pass them to the caller.
@@ -610,8 +655,8 @@
 	INCLUDE 'msg_inc'
 
 *	Get the LUNs from the COMMON:
-	TERMINAL_LUN=MSG_TL
-	JOURNAL_LUN=MSG_JL
+	Terminal_LUN = MSG_TL
+	Journal_LUN  = MSG_JL
 
 	RETURN
 	END
@@ -634,13 +679,14 @@
 	PARAMETER (TERMINAL_LUN=6)
 
 	MSG_Nprefixes=0
-	MSG_TOTAL_LOOKUPS=0 !Count of all prefix (character-search) lookups.
-	MSG_ALL_COUNT_LIMIT=2 000 000 000 !2 billion is default.
-	MSG_ALL_DISABLE=.FALSE.
-	MSG_ALL_NOCOUNT=.FALSE.
-	CALL MSG_JOURNAL_OFF
-	CALL MSG_SET_LUN(TERMINAL_LUN,JOURNAL_LUN)
-	CALL MSG_NAME_NODE(' ')
+	MSG_Total_Lookups=0 !Count of all prefix (character-search) lookups.
+	MSG_All_Count_Limit=0 !No count limit is the default.
+	MSG_All_Disable=.FALSE.
+	MSG_All_Nocount=.FALSE.
+	CALL MSG_Journal_Off
+	CALL MSG_Set_LUN(TERMINAL_LUN,JOURNAL_LUN)
+	CALL MSG_Set_Summary_Page_Length ( 66 ) !66 lines per page -- default.
+	CALL MSG_Name_Node(' ')
 
 	CALL STRELA0 !Initialize elapsed real-time.
 	CALL STRCPU0 !Initialize elapsed CPU-time.
@@ -848,7 +894,7 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_NAME_NODE(Node_name)
+	SUBROUTINE MSG_Name_Node(Node_name)
 
 	IMPLICIT NONE
 
@@ -895,9 +941,9 @@
 	IF (WPT.EQ.1) THEN !Wildcard in first position -- do them all:
 
 	  DO ID=1,MSG_Nprefixes
-	    MSG_Counting(ID)=.FALSE.
+	    MSG_Counting(ID)=MSG_Active(ID) !Can't "no-count" an active message!
 	  END DO
-	  MSG_ALL_NOCOUNT=.TRUE.
+	  MSG_All_Nocount=MSG_All_Disable   !Can't "no-count" an active message!
 
 	ELSE IF (WPT.GT.1) THEN !There's a wildcard.
 
@@ -905,7 +951,7 @@
 	  SPT=MIN(WPT-1,MSG_Prefix_length_P)
 	  DO ID=1,MSG_Nprefixes
 	    IF ( PREFIX(:SPT).EQ.MSG_Prefix(ID)(:SPT) ) THEN	    
-	      MSG_Counting(ID)=.FALSE.
+	      MSG_Counting(ID)=MSG_Active(ID) !Can't "no-count" an active message!
 	    END IF
 	  END DO !ID=1,MSG_Nprefixes
 
@@ -915,7 +961,7 @@
 *	  Check that the message-prefix is in the index, enter it
 *	  in the index if necessary, and return its ID:
 	  CALL MSG_CHECK(PREFIX,ID,ACTIVE,COUNTING)
-	  IF (ID.GT.0) MSG_Counting(ID)=.FALSE.
+	  IF (ID.GT.0) MSG_Counting(ID)=MSG_Active(ID) !Can't "no-count" an active message!
 
 	END IF !WPT.EQ.1
 
@@ -985,37 +1031,79 @@
 
 	END
 
-	SUBROUTINE MSG_SET_FROM_FILE(LUN)
+	SUBROUTINE MSG_Set_Abort_Limit( Prefix, Limit )
 
 	IMPLICIT NONE
 
-*  Input argument:
-	INTEGER LUN !FORTRAN Logical Unit Number, on which a command (ASCII)
-	            !file should be (already) open.
+*  Input arguments:
+	CHARACTER*(*) Prefix !A STAR-standard message prefix.
+	INTEGER Limit !Maximum no. of times to display a message before aborting.
 
-*  Functional description:
-*	Reads lines from LUN and interprets them as MSG_SET_BY_COMMAND commands
-*	until either an <EOF> or a line containing MSG_EXIT is encountered.
+*   Functional Description:
+*	Set the abort limit for the message recognized by Prefix;
+*	Program termination results when the prefix's
+*	count has exceeded Limit.  Wildcards are permitted.
+*	The existing count-limit (after which message-display is disabled
+*	for Prefix), is set to the same value -- aborting msg calls
+*	should not be quiet without deliberate intervention (ie, re-specify
+*	the count-limit after this call to obtain silent aborts -- don't
+*	do it!).
 
-	CHARACTER*132 COM
+*   Return conditions:  none
 
-	DO WHILE (.TRUE.) !Infinite loop -- exit on <EOF> or MSG_EXIT.
+*   Error conditions:  none
 
-	  COM=' '
-	  READ(LUN,100,ERR=1,END=1) COM
-100	FORMAT(A132)
-	  IF (COM.EQ.'MSG_EXIT') RETURN
-	  IF (COM.EQ.'msg_exit') RETURN
-	  CALL MSG_SET_BY_COMMAND(COM) !Set the feature.
+	INCLUDE 'msg_inc'
 
-	END DO !WHILE (.TRUE.)
 
-*	Come here on EOF or ERR on READ:
-1	CONTINUE
+	INTEGER ID,WPT,SPT
+	LOGICAL ACTIVE,COUNTING
+	CHARACTER*80 W80
+
+*	First check to see if there is a wildcard in the specified prefix:
+	WPT=INDEX(PREFIX,'*')
+
+	IF (WPT.EQ.1) THEN !Wildcard in first position -- do them all:
+
+	  DO ID=1,MSG_Nprefixes
+	    MSG_Abort_limit(ID)=LIMIT
+	    MSG_Count_limit(ID)=LIMIT
+	    MSG_Active  ( ID ) = .TRUE.
+	    MSG_Counting( ID ) = .TRUE.
+	  END DO
+
+	ELSE IF (WPT.GT.1) THEN !There's a wildcard.
+
+*	  Point to last character before the wildcard; protect against too-long:
+	  SPT=MIN(WPT-1,MSG_Prefix_length_P)
+	  DO ID=1,MSG_Nprefixes
+	    IF ( PREFIX(:SPT).EQ.MSG_Prefix(ID)(:SPT) ) THEN	    
+	      MSG_Abort_limit(ID)=LIMIT
+	      MSG_Count_limit(ID)=LIMIT
+	      MSG_Active  ( ID ) = .TRUE.
+	      MSG_Counting( ID ) = .TRUE.
+	    END IF
+	  END DO !ID=1,MSG_Nprefixes
+
+	ELSE !No wildcard.
+
+	  ID=0 !Clear this to do a lookup-by-prefix.
+*	  Check that the message-prefix is in the index, enter it
+*	  in the index if necessary, and return its ID:
+	  CALL MSG_CHECK(PREFIX,ID,ACTIVE,COUNTING)
+	  IF (ID.GT.0) THEN
+	    MSG_Abort_limit(ID)=LIMIT
+	    MSG_Count_limit(ID)=LIMIT
+	    MSG_Active  ( ID ) = .TRUE.
+	    MSG_Counting( ID ) = .TRUE.
+	  END IF
+
+	END IF !WPT.EQ.1
+
 	RETURN
 	END
 
-	SUBROUTINE MSG_SET_BY_COMMAND(COM)
+	SUBROUTINE MSG_Set_By_Command( COM )
 
 	IMPLICIT NONE
 
@@ -1041,6 +1129,12 @@
 
 *	To set message-limits on specific messages:
 *	LIMIT prefix-1=limit-1 prefix-2=limit-2 ... prefix-n=limit-n
+
+*	To set message-abort-limits on specific messages:
+*	ABORT prefix-1=limit-1 prefix-2=limit-2 ... prefix-n=limit-n
+
+*	To set the number of lines per page in the summary-output:
+*	LINES line-count
 
 *	Spacing is not critical in the command line, provided at least one
 *	or more spaces, tabs or commas separate the arguments.
@@ -1100,6 +1194,26 @@
 	      CALL MSG_SET_LIMIT(ARG(JARG),IARG(JARG+2))
 	    END IF
 	    JARG=JARG+3
+	  ELSE IF (ARG(1).EQ.'ABORT'  ) THEN
+	    IF (JARG+2.GT.NARGS) THEN !Not enough arguments are present.
+	      ERROR=.TRUE.
+	    ELSE IF (ARG(JARG+1).NE.'=') THEN !Wrong format.
+	      ERROR=.TRUE.
+	    ELSE IF (.NOT.VIARG(JARG+2)) THEN !Not a valid integer.
+	      ERROR=.TRUE.
+	    ELSE !All's well -- set this abort-limit:
+	      CALL MSG_Set_Abort_Limit(ARG(JARG),IARG(JARG+2))
+	    END IF
+	    JARG=JARG+3
+	  ELSE IF (ARG(1).EQ.'LINES'  ) THEN
+	    IF (JARG.GT.NARGS) THEN !Not enough arguments are present.
+	      ERROR=.TRUE.
+	    ELSE IF (.NOT.VIARG(JARG)) THEN !Not a valid integer.
+	      ERROR=.TRUE.
+	    ELSE !All's well -- set the summary page-length:
+	      CALL MSG_Set_Summary_Page_Length( IARG(JARG) )
+	    END IF
+	    JARG=JARG+1
 	  ELSE !Unrecognized command.
 	    ERROR=.TRUE.
 	  END IF
@@ -1114,7 +1228,7 @@
      1	        'MSG_SET_BY_COMMAND-E2 zero-length command given.',1)
 	    END IF
 	    CALL MESSAGE_OUT('    Legal commands are:'//
-     1	    ' COUNT, DISABLE, ENABLE, LIMIT, NOCOUNT.',1)
+     1	    ' COUNT, DISABLE, ENABLE, LIMIT, NOCOUNT, ABORT, LINES.',1)
 	    JARG=NARGS+1 !Force loop termination.
 	  END IF
 
@@ -1132,7 +1246,37 @@
 
 	END
 
-	SUBROUTINE MSG_SET_LIMIT(PREFIX,LIMIT)
+	SUBROUTINE MSG_Set_From_File(LUN)
+
+	IMPLICIT NONE
+
+*  Input argument:
+	INTEGER LUN !FORTRAN Logical Unit Number, on which a command (ASCII)
+	            !file should be (already) open.
+
+*  Functional description:
+*	Reads lines from LUN and interprets them as MSG_SET_BY_COMMAND commands
+*	until either an <EOF> or a line containing MSG_EXIT is encountered.
+
+	CHARACTER*132 COM
+
+	DO WHILE (.TRUE.) !Infinite loop -- exit on <EOF> or MSG_EXIT.
+
+	  COM=' '
+	  READ(LUN,100,ERR=1,END=1) COM
+100	FORMAT(A132)
+	  IF (COM.EQ.'MSG_EXIT') RETURN
+	  IF (COM.EQ.'msg_exit') RETURN
+	  CALL MSG_SET_BY_COMMAND(COM) !Set the feature.
+
+	END DO !WHILE (.TRUE.)
+
+*	Come here on EOF or ERR on READ:
+1	CONTINUE
+	RETURN
+	END
+
+	SUBROUTINE MSG_Set_Limit( PREFIX, LIMIT )
 
 	IMPLICIT NONE
 
@@ -1216,6 +1360,27 @@
 	RETURN
 	END
 
+	SUBROUTINE MSG_Set_Summary_Page_Length( Page_Length )
+
+	IMPLICIT NONE
+
+*  Input argument:
+	INTEGER Page_Length  !Length of summary page (lines).
+
+*   Functional Description:
+*	Set the number of lines per page for the summary output.
+
+*   Return conditions:  none
+
+*   Error conditions:  none
+
+	INCLUDE 'msg_inc'
+
+	MSG_Summary_Page_Length = Page_Length
+
+	RETURN
+	END
+
 	SUBROUTINE MSG_SUMMARY(LUN)
 
 	IMPLICIT NONE
@@ -1257,34 +1422,45 @@
 	INCLUDE 'msg_inc'
 
 	INTEGER MSG_Summary_width_P
-	PARAMETER (MSG_Summary_width_P=110)
+	PARAMETER (MSG_Summary_width_P=132)
 	INTEGER ID
 	LOGICAL SORTED
 	INTEGER SID(MSG_Nprefixes_max_P)
 	CHARACTER*(MSG_Summary_width_P) MSG(2)
+	CHARACTER*(MSG_Summary_width_P) Ghost
 	CHARACTER*(MSG_Prefix_length_P) Prefix_stripped_1,Prefix_stripped_2
 	CHARACTER*(MSG_Sample_length_P) Sample
 	CHARACTER*23 C23
+	CHARACTER*8 State
 	INTEGER Prefix_number_1,Prefix_number_2
 	INTEGER I
 	INTEGER LINE,EPT
 	REAL Fraction
 
+	INTEGER Header_Lines
+
+
+*	For Events = 0:
 100	FORMAT(T14'--- Message Accounting Summary --- ('A23')'/
      1	      'Message-Prefix & Truncated Sample of last occurance'
-     2	       T66'    Counts'T77'     Limit' T90'   Lookups')
+     1	       T66'    Counts'T77'     Limit' T90'   Lookups' T101' AbortLimit'T114'   State' )
 
-101	FORMAT(A,T65'|'I10,T77,I10, T90, I10 )
+101	FORMAT( A, T65 '|' I10, T77, I10, T90, I10, T101, I11, T114, A )
 
+
+
+*	For No Messages:
 102	FORMAT(T14'--- Message Accounting Summary --- ('A23')'/
      1	      '         ---------  No Messages  ----------')
 
+
+*	For Events > 0:
 103	FORMAT(T14'--- Message Accounting Summary --- ('A23')'/
      1	      'Message-Prefix & Truncated Sample of last occurance'
      2	       T66'    Counts'T77'  Counts/evt'T90'     Limit'
-     1	       T101'   Lookups')
+     1	       T101'   Lookups' T112' AbortLimit'T124'   State' )
 
-104	FORMAT(A,T65'|'I10,T77,F12.4,T90,I10,T101,I10)
+104	FORMAT( A, T65 '|' I10, T77, F12.4, T90, I10, T101, I10, T112, I11, T124, A )
 
 
 	DO ID=1,MSG_Nprefixes !Initialize the map.
@@ -1334,7 +1510,8 @@
 	    ELSE !Fractional occurances:
 	      WRITE(MSG,103) C23
 	    END IF
-	    CALL MSG_TO_LUN_OUT(MSG,2,LUN)
+	    Header_Lines = 2
+	    CALL MSG_TO_LUN_OUT( MSG, Header_Lines, LUN )
 	  END IF
 
 	  Sample=MSG_Sample(SID(ID))
@@ -1345,28 +1522,60 @@
 	    END DO
 	  ELSE !Few or no blanks -- no adulteration necessary:
 	  END IF
+
+*	  Determine the state:
+	  IF (MSG_Abort_Limit( SID(ID) ).LE.0) THEN
+	    State = ' '
+	  ELSE IF (MSG_Counts( SID(ID) ).GE.MSG_Abort_Limit( SID(ID) ) ) THEN
+*	    This message caused a program termination -- should only be one!
+	    State = ' Aborted'
+	  ELSE
+	    State = ' '
+	  END IF
+
+	  IF (State .NE. ' ') THEN !State already determined.
+	  ELSE IF ( MSG_Active( SID(ID) ) ) THEN
+	    State = '  Active'
+	  ELSE IF ( MSG_Counting( SID(ID) ) ) THEN
+	    State = 'Counting'
+	  ELSE
+	    State = 'Inactive'
+	  END IF
+
+
 	  IF (EVENTS.LE.0) THEN !No fractional occurances:
 	    WRITE(MSG,101)
      1	          Sample,MSG_Counts(SID(ID))
-     2	         ,MSG_Count_limit(SID(ID))
-     2	         ,MSG_Lookups(SID(ID))
+     1	         ,MSG_Count_limit(SID(ID))
+     1	         ,MSG_Lookups(SID(ID))
+     1	         ,MSG_Abort_Limit(SID(ID))
+     1	         ,State
 	  ELSE !Fractional occurances:
 	    Fraction=FLOAT(MSG_Counts(SID(ID)))/FLOAT(EVENTS)
 	    WRITE(MSG,104)
      1	          Sample,MSG_Counts(SID(ID)),Fraction
-     2	         ,MSG_Count_limit(SID(ID))
-     2	         ,MSG_Lookups(SID(ID))
+     1	         ,MSG_Count_limit(SID(ID))
+     1	         ,MSG_Lookups(SID(ID))
+     1	         ,MSG_Abort_Limit(SID(ID))
+     1	         ,State
 	  END IF
 	  CALL STREND(MSG,EPT) !Find last non-blank.
+	  Ghost = ' '
 	  DO I=MSG_Sample_length_P,EPT-2,2 !Fill in with alternating dots.
 	    IF (MSG(1)(I-1:I+1).EQ.' ') THEN !Three blanks in a row:
 	      MSG(1)(I:I)='.'
+	      Ghost(I:I)='.'
+	    END IF
+	  END DO
+	  DO I=MSG_Sample_length_P+2,EPT-4,2 !Check for lone (inserted) dots & remove them.
+	    IF (Ghost(I-2:I+2) .EQ. '  .  ' ) THEN
+	      MSG(1)(I:I) = ' '
 	    END IF
 	  END DO
 	  CALL MSG_TO_LUN_OUT(MSG,1,LUN)
 
-	  IF (LINE.GE.63) THEN
-	    LINE=0
+	  IF ( LINE + 1 + Header_Lines .GE. MSG_Summary_Page_Length) THEN
+	    LINE=0 !Start a new page.
 	  ELSE
 	    LINE=LINE+1
 	  END IF
@@ -1538,12 +1747,13 @@
 *	Enter MSG's prefix in the index if needed.
 	CALL MSG_CHECK(MSG,LID,ACTIVE,COUNTING)
 
-	IF (ACTIVE) THEN !Display it on the journal file:
-	  CALL MSG_TO_JOURNAL_OUT(MSG,LINES)
-	END IF
-
 	IF (COUNTING) THEN !COUNTING is true only if found.
 	  CALL MSG_INCR(LID)
+	END IF
+
+	IF (ACTIVE) THEN !Display it on the journal file:
+	  CALL MSG_TO_JOURNAL_OUT(MSG,LINES)
+	  CALL MSG_Abort_Check( LID ) !Check if abort limit is exceeded, and maybe abort.
 	END IF
 
 	IF (ID.EQ.0) ID=LID !Ensure it's changed only if zero.
@@ -1625,12 +1835,13 @@
 *	Enter MSG's prefix in the index if needed.
 	CALL MSG_CHECK(MSG,LID,ACTIVE,COUNTING)
 
-	IF (ACTIVE) THEN !Display it:
-	  CALL MSG_TO_LUN_OUT(MSG,LINES,LUN)
-	END IF
-
 	IF (COUNTING) THEN !COUNTING is true only if found.
 	  CALL MSG_INCR(LID)
+	END IF
+
+	IF (ACTIVE) THEN !Display it:
+	  CALL MSG_TO_LUN_OUT(MSG,LINES,LUN)
+	  CALL MSG_Abort_Check( LID ) !Check if abort limit is exceeded, and maybe abort.
 	END IF
 
 	IF (ID.EQ.0) ID=LID !Ensure it's changed only if zero.
