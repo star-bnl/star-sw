@@ -1,38 +1,35 @@
 /***************************************************************************
  *
- * $Id: BPLCMSFrame3DCorrFctn.cxx,v 1.3 2000/09/14 18:36:53 lisa Exp $
+ * $Id: BPLCMSFrame3DCorrFctn_SIM.cxx,v 1.1 2000/09/14 18:36:53 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
  *
  * Description: part of STAR HBT Framework: StHbtMaker package
  *   3D Bertsch-Pratt decomposition in the LCMS frame
+ *   THIS IS A SIMULATION CORRELATION FUNCTION CLASS !!!
+ *
  *
  ***************************************************************************
  *
- * $Log: BPLCMSFrame3DCorrFctn.cxx,v $
- * Revision 1.3  2000/09/14 18:36:53  lisa
+ * $Log: BPLCMSFrame3DCorrFctn_SIM.cxx,v $
+ * Revision 1.1  2000/09/14 18:36:53  lisa
  * Added Qinv and ExitSep pair cuts and BPLCMSFrame3DCorrFctn_SIM CorrFctn
  *
- * Revision 1.2  2000/08/23 19:43:43  lisa
- * added alternate normalization algorithm to 3d CorrFctns in case normal one fails
- *
- * Revision 1.1  2000/08/17 20:48:39  lisa
- * Adding correlationfunction in LCMS frame
  *
  *
  **************************************************************************/
 
-#include "StHbtMaker/CorrFctn/BPLCMSFrame3DCorrFctn.h"
+#include "StHbtMaker/CorrFctn/BPLCMSFrame3DCorrFctn_SIM.h"
 //#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 #include <cstdio>
 
 #ifdef __ROOT__ 
-ClassImp(BPLCMSFrame3DCorrFctn)
+ClassImp(BPLCMSFrame3DCorrFctn_SIM)
 #endif
 
 //____________________________
-BPLCMSFrame3DCorrFctn::BPLCMSFrame3DCorrFctn(char* title, const int& nbins, const float& QLo, const float& QHi){
+BPLCMSFrame3DCorrFctn_SIM::BPLCMSFrame3DCorrFctn_SIM(char* title, const int& nbins, const float& QLo, const float& QHi){
 
   // set some stuff...
   mQinvNormLo = 0.15;
@@ -42,6 +39,13 @@ BPLCMSFrame3DCorrFctn::BPLCMSFrame3DCorrFctn(char* title, const int& nbins, cons
   mCorrection = 0;  // pointer to Coulomb Correction object
 
   mPairCut = 0; // added Sept2000 - CorrFctn-specific PairCut
+
+  mToggleNumDen = 0; // this toggles between a pair being given to numerator or denominator.
+
+  mLambda=0.;
+  mRside2=25.0;
+  mRout2=25.0;
+  mRlong2=25.0;
 
   // set up numerator
   char TitNum[100] = "Num";
@@ -64,37 +68,23 @@ BPLCMSFrame3DCorrFctn::BPLCMSFrame3DCorrFctn(char* title, const int& nbins, cons
 }
 
 //____________________________
-BPLCMSFrame3DCorrFctn::~BPLCMSFrame3DCorrFctn(){
+BPLCMSFrame3DCorrFctn_SIM::~BPLCMSFrame3DCorrFctn_SIM(){
   delete mNumerator;
   delete mDenominator;
   delete mRatio;
 }
 //_________________________
-void BPLCMSFrame3DCorrFctn::Finish(){
-  // here is where we should normalize, fit, etc...
-  double NumFact,DenFact;
-  if ((mNumRealsNorm !=0) && (mNumMixedNorm !=0)){
-    NumFact = double(mNumRealsNorm);
-    DenFact = double(mNumMixedNorm);
-  }
-  // can happen that the mNumRealsNorm and mNumMixedNorm = 0 if you do non-standard
-  //   things like making a new CorrFctn and just setting the Numerator and Denominator
-  //   from OTHER CorrFctns which you read in (like when doing parallel processing) 
-  else{
-    cout << "Warning! - no normalization constants defined - I do the best I can..." << endl;
-    int nbins = mNumerator->GetNbinsX();
-    int half_way = nbins/2;
-    NumFact = mNumerator->Integral(half_way,nbins,half_way,nbins,half_way,nbins);
-    DenFact = mDenominator->Integral(half_way,nbins,half_way,nbins,half_way,nbins);
-  }
+void BPLCMSFrame3DCorrFctn_SIM::Finish(){
 
-  mRatio->Divide(mNumerator,mDenominator,DenFact,NumFact);
+  mRatio->Divide(mNumerator,mDenominator);
 }
 
 //____________________________
-StHbtString BPLCMSFrame3DCorrFctn::Report(){
+StHbtString BPLCMSFrame3DCorrFctn_SIM::Report(){
   string stemp = "LCMS Frame Bertsch-Pratt 3D Correlation Function Report:\n";
   char ctemp[100];
+  sprintf(ctemp,"    THIS IS A SIMULATION CORRELATION FUNCTION CLASS!!!\n");
+  stemp += ctemp;
   sprintf(ctemp,"Number of entries in numerator:\t%E\n",mNumerator->GetEntries());
   stemp += ctemp;
   sprintf(ctemp,"Number of entries in denominator:\t%E\n",mDenominator->GetEntries());
@@ -133,22 +123,17 @@ StHbtString BPLCMSFrame3DCorrFctn::Report(){
   return returnThis;
 }
 //____________________________
-void BPLCMSFrame3DCorrFctn::AddRealPair(const StHbtPair* pair){
+void BPLCMSFrame3DCorrFctn_SIM::AddRealPair(const StHbtPair* pair){
 
-  if (mPairCut){
-    if (!(mPairCut->Pass(pair))) return;
-  }
+  // note that in this SIMULATION correlation function class, we do NOTHING with real
+  // pairs.  The numerator is just a weighted denominator, filled in AddMixedPair (below)
 
-  double Qinv = fabs(pair->qInv());   // note - qInv() will be negative for identical pairs...
-  if ((Qinv < mQinvNormHi) && (Qinv > mQinvNormLo)) mNumRealsNorm++;
-  double qOut = fabs(pair->qOutCMS());
-  double qSide = fabs(pair->qSideCMS());
-  double qLong = fabs(pair->qLongCMS());
+  /* no-op */
+  return;
 
-  mNumerator->Fill(qOut,qSide,qLong);
 }
 //____________________________
-void BPLCMSFrame3DCorrFctn::AddMixedPair(const StHbtPair* pair){
+void BPLCMSFrame3DCorrFctn_SIM::AddMixedPair(const StHbtPair* pair){
 
   if (mPairCut){
     if (!(mPairCut->Pass(pair))) return;
@@ -159,13 +144,23 @@ void BPLCMSFrame3DCorrFctn::AddMixedPair(const StHbtPair* pair){
     {
       weight = mCorrection->CoulombCorrect(pair);
     }
-  double Qinv = fabs(pair->qInv());   // note - qInv() will be negative for identical pairs...
-  if ((Qinv < mQinvNormHi) && (Qinv > mQinvNormLo)) mNumMixedNorm++;
+  //  double Qinv = fabs(pair->qInv());   // note - qInv() will be negative for identical pairs...
+  //  if ((Qinv < mQinvNormHi) && (Qinv > mQinvNormLo)) mNumMixedNorm++;
   double qOut = fabs(pair->qOutCMS());
   double qSide = fabs(pair->qSideCMS());
   double qLong = fabs(pair->qLongCMS());
 
-  mDenominator->Fill(qOut,qSide,qLong,weight);
+  if (mToggleNumDen){
+    mDenominator->Fill(qOut,qSide,qLong,weight);
+  }
+  else{
+    double CorrWeight = 1.0 + 
+      mLambda*exp((-qOut*qOut*mRout2 -qSide*qSide*mRside2 -qLong*qLong*mRlong2)/0.038936366329);
+    CorrWeight *= weight;
+    mNumerator->Fill(qOut,qSide,qLong,CorrWeight);
+  }
+  mToggleNumDen = !mToggleNumDen;
+
 }
 
 
