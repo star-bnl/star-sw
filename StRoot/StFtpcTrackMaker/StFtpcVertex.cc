@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.cc,v 1.17 2003/10/23 04:17:31 perev Exp $
+// $Id: StFtpcVertex.cc,v 1.18 2003/12/05 04:10:54 perev Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.18  2003/12/05 04:10:54  perev
+// Fix typo, h1h.Set(&x_hist,low,upp) to h1h.Set(&y_hist,low,uppx)
+//
 // Revision 1.17  2003/10/23 04:17:31  perev
 // Protection aginst bad TH1::Fit added
 //
@@ -491,7 +494,7 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
   // fit only 3 cm in both directions of maximum
   low = y_hist.GetXaxis()->GetBinCenter(y_hist.GetMaximumBin())-3;
   upp = y_hist.GetXaxis()->GetBinCenter(y_hist.GetMaximumBin())+3;
-  h1h.Set(&x_hist,low,upp);
+  h1h.Set(&y_hist,low,upp);
   if (h1h.GetNonZeros()<=2) { //Bad case, fit will failed
     SetY(h1h.GetMean());
     SetYerr(h1h.GetRMS());
