@@ -1,7 +1,13 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.11 2003/03/07 23:46:59 thenry Exp $
+// $Id: StppEvent.cxx,v 1.12 2003/04/03 19:50:46 thenry Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.12  2003/04/03 19:50:46  thenry
+// Whae Major Evil Bug fix:
+// muDstJets NOW is CLEARED before adding the jets found in the event, so
+// that the first jet is now the first jet of the event, not the first jet of
+// the FILE.
+//
 // Revision 1.11  2003/03/07 23:46:59  thenry
 // Added Fill calls with different parameters
 //
@@ -560,6 +566,7 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
       JetList &cJets = thisAna->getJets();
       
       StJets *muDstJets = thisAna->getmuDstJets();
+      muDstJets->Clear();
       
       if (cJets.size()>0) foundJet = true;
       
