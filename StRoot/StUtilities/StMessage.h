@@ -1,5 +1,8 @@
-// $Id: StMessage.h,v 1.5 1999/07/08 22:58:18 genevb Exp $
+// $Id: StMessage.h,v 1.6 1999/08/18 18:28:33 fine Exp $
 // $Log: StMessage.h,v $
+// Revision 1.6  1999/08/18 18:28:33  fine
+// Various bugs have been fixed. share lib was not loaded under HP
+//
 // Revision 1.5  1999/07/08 22:58:18  genevb
 // Created an abstract interface with StMessMgr.h hiding template implementation from others, a few other small fixes
 //
@@ -48,7 +51,7 @@ class StMessage {
 
  public:
    StMessage(char* mess="", char* ty="I", char* opt="O");
-   StMessage(const StMessage&);
+   StMessage(const StMessage&){;}
    virtual ~StMessage();
    virtual           void PrintInfo();
    virtual          int Print(int nChars=-1);
