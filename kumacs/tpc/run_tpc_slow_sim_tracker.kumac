@@ -62,35 +62,11 @@
 * setup default table directory structure in STAF
 * load libraries [domain]
     
-   exec $STAR/kumacs/chain/bfc_util#bfc_defaults [domain]
+   exec $STAR/kumacs/chain/bfc_util#bfc_defaults 
    exec setup#setup
    macro/global/import *  
       
-   if $vexist(make_done)=0 then
-   message "Load domains:" [domain]
-   test = [domain]
-   nw = $words([test])
-   do i = 1, [nw]
-     mod = $word([test],[i],1)
-     n = $words([mod],'/') 
-     module = $word([mod],[n],[n],'/')
-     test_done = [module]_done
-     if ($vexist([test_done])=0) then
-       vec/cre [test_done]
-         message ' doing make ' [mod]
-         make [mod]
-       if $iquest(1)<>0 then
-            message "<bfc> Shared libraries have not been loaded : ABend"
-       endif
-     endif
-     if $iquest(1)<>0 then
-       message "<bfc> Shared libraries have not been loaded : ABend"
-     endif
-   enddo
-   vec/cre make_done
- endif
- 
- 
+   exec bfc_util#bfc_load [domain]
 * **************************************************************
 * --------- Setup and run tpc slow simulator & tracker pams -------------*
    
