@@ -11,8 +11,8 @@ use Sys::Hostname;
 #my $debugOn=0;
 
 my $hostname     = hostname();
-my $mdir_log      = "/star/rcf/disk00001/star/P00hd/log/";
-my $mdir_sum      = "/star/rcf/disk00001/star/P00hd/sum/"; 
+my $mdir_log      = "/star/rcf/disk00001/star/P00hd_1/log/";
+my $mdir_sum      = "/star/rcf/disk00001/star/P00hd_1/sum/"; 
 my @dir_ext      = ("daq","tfs");  
 my @set ;
 my @list;

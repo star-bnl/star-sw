@@ -63,8 +63,8 @@ my @SetS = (
              "auau200/hijing_quark/b0_3_jetq_on/jet05/year_1h/hadronic_on",
              "auau200/hijing_antinuc/b0_3_jetq_off/jet05/year_1h/hadronic_on",
              "auau200/hijing_antinuc/b0_3_jetq_on/jet05/year_1h/hadronic_on",
-             "pp200/pythia/default/minibias/year_2a/hadronic_on",
              "auau200/strongcp/broken/eb-400_90/year_1h/hadronic_on",
+             "auau200/strongcp/broken/eb-400_00/year_1h/hadronic_on",
  );
 
 my $SetD = "daq/2000/02/";
