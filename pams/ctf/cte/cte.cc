@@ -47,6 +47,7 @@ extern "C" void    MessageOut( const char *msg );
 /*------------------------------------------------------------------
      Declaration variableS
 ------------------------------------------------------------------ */
+#define M_PI            3.14159265358979323846
 #define MX_PHI        420
 #define MX_ETA         42
 #define CTF_SLAT_LEN 7000
