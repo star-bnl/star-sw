@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTTreeEvent.h,v 1.1 2001/06/21 19:15:47 laue Exp $
+ * $Id: StHbtTTreeEvent.h,v 1.2 2001/06/23 21:55:17 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************
@@ -8,6 +8,10 @@
  ***************************************************************************
  *
  * $Log: StHbtTTreeEvent.h,v $
+ * Revision 1.2  2001/06/23 21:55:17  laue
+ * StHbtCheckPdgIdList can take can not check for mother,particle,daughter
+ * Some output turned off
+ *
  * Revision 1.1  2001/06/21 19:15:47  laue
  * Modified fiels:
  *   CTH.hh : new constructor added
@@ -50,7 +54,6 @@ public:
   StHbtTTreeEvent(const StHbtEvent*, StHbtTrackCut*, StHbtV0Cut*, StHbtKinkCut*);
   virtual ~StHbtTTreeEvent();
   void clear();
-  void remove();
   void fill(const StHbtEvent*, StHbtTrackCut*, StHbtV0Cut*, StHbtKinkCut*); //!
   void SetMagneticField(double);
 private:

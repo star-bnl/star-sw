@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCheckPdgIdList.h,v 1.1 2000/05/25 21:23:03 laue Exp $
+ * $Id: StHbtCheckPdgIdList.h,v 1.2 2001/06/23 21:55:17 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -8,6 +8,10 @@
  * Description: part of STAR HBT Framework: StHbtMaker package
  *
  * $Log: StHbtCheckPdgIdList.h,v $
+ * Revision 1.2  2001/06/23 21:55:17  laue
+ * StHbtCheckPdgIdList can take can not check for mother,particle,daughter
+ * Some output turned off
+ *
  * Revision 1.1  2000/05/25 21:23:03  laue
  * Adding to CVS. Tool to select particle Ids from event generator input.
  *
@@ -48,9 +52,10 @@ public:
   void AddAcceptedParticle( int pdgCode );
   void AddAcceptedMother( int pdgCode );
   void AddAcceptedDaughter( int pdgCode );
-  int  CheckPdgIdLists();
-  int  CheckPdgIdList( pdgIdList* list);
-  int  CheckPdgIdList( pdgIdList* list, int pdgCode );
+  int  CheckPdgIdLists();                              // returns 1 if one of the three lists is not empty
+  int  CheckPdgIdList( pdgIdList* list);               // returns 1 if list is not empty
+  int  CheckPdgIdList( pdgIdList* list, int pdgCode ); // returns 1 if list is not empty or requested pdgCode is in list
+  int  CheckPdgIdList( int  pdgCode, int motherPdgCode, int daughterPdgCode);
 
 #ifdef __ROOT__
   ClassDef(StHbtCheckPdgIdList, 0)

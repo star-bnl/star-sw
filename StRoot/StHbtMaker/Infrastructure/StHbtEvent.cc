@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.11 2001/06/21 19:15:45 laue Exp $
+ * $Id: StHbtEvent.cc,v 1.12 2001/06/23 21:55:17 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,10 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.12  2001/06/23 21:55:17  laue
+ * StHbtCheckPdgIdList can take can not check for mother,particle,daughter
+ * Some output turned off
+ *
  * Revision 1.11  2001/06/21 19:15:45  laue
  * Modified fiels:
  *   CTH.hh : new constructor added
@@ -88,7 +92,9 @@
 #include "StHbtMaker/Infrastructure/StHbtTTreeKink.h"
 
 StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) {
+#ifdef STHBTDEBUG
   cout << "StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev)" << endl;
+#endif
   mEventNumber = ev->mEventNumber;
   mRunNumber = ev->mRunNumber;
   mTpcNhits = ev->mTpcNhits;
@@ -104,10 +110,12 @@ StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) {
   mPrimVertPos = StHbtThreeVector(ev->mVertexX,ev->mVertexY,ev->mVertexZ);
   mMagneticField = ev->mMagneticField;
   if (mMagneticField==0) {
+#if STHBTDEBUG
     cout << "StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) - mMagneticField=" << mMagneticField << endl;
+#endif
     mMagneticField = 2.5;
     ev->SetMagneticField(mMagneticField);
-    cout << "StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) - mMagneticField==" << mMagneticField << endl;
+    cout << "StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) - mMagneticField set to " << mMagneticField << endl;
   }
 
   // create collections
@@ -191,9 +199,9 @@ StHbtEvent::StHbtEvent(const StHbtEvent& ev, StHbtTrackCut* tCut, StHbtV0Cut* vC
 }
 //___________________
 StHbtEvent::~StHbtEvent(){
-  //#ifdef STHBTDEBUG
+#ifdef STHBTDEBUG
   cout << " StHbtEvent::~StHbtEvent() " << endl;
-  //#endif
+#endif
   for (StHbtTrackIterator iter=mTrackCollection->begin();iter!=mTrackCollection->end();iter++){
     delete *iter;
   }
