@@ -23,7 +23,7 @@ realclean:
 	cd hpux; $(MAKE) -f ../Makefile.bin clean
 	cd irix; $(MAKE) -f ../Makefile.bin clean
 	cd sun4; $(MAKE) -f ../Makefile.bin clean
-        cd sun4os5; $(MAKE) -f ../Makefile.bin clean
+	cd sun4os5; $(MAKE) -f ../Makefile.bin clean
 	cd vxw; $(MAKE) -f ../Makefile.bin vwclean
 
 vwtest:
