@@ -1,7 +1,10 @@
 *
-* $Id: ertrak.F,v 1.2 2000/09/28 00:36:20 fisyak Exp $
+* $Id: ertrak.F,v 1.3 2001/05/17 20:39:12 fisyak Exp $
 *
 * $Log: ertrak.F,v $
+* Revision 1.3  2001/05/17 20:39:12  fisyak
+* Add 'V' mode with 0 prediction
+*
 * Revision 1.2  2000/09/28 00:36:20  fisyak
 * Use g77 on linux instead of pgf77
 *
@@ -98,7 +101,7 @@
 *
 * *** Initialization
 *
-      IF (NEPRED.LE.0) THEN
+      IF (NEPRED.LE.0 .and. .not. LEVOLU) THEN
          WRITE (LOUT, 780)
          GO TO 99
       ENDIF
