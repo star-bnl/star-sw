@@ -84,39 +84,47 @@ C     Local variables
       globtrk(iglob).covar_diag(5) = 0
       globtrk(iglob).chisq(1) = gtrk(igtrk).p(8)
       globtrk(iglob).chisq(2) = gtrk(igtrk).p(9)
+      globtrk(iglob).length=99999.9
       if( isvtt .eq. 0) then
          firsthit = gtrk(igtrk).ipnt(gtrk(igtrk).ntpc)
-         globtrk(iglob).x_first(1) = tphit(firsthit).x
-         globtrk(iglob).x_first(2) = tphit(firsthit).y
-         globtrk(iglob).x_first(3) = tphit(firsthit).z
+         if (firsthit .gt. 0) then
+            globtrk(iglob).x_first(1) = tphit(firsthit).x
+            globtrk(iglob).x_first(2) = tphit(firsthit).y
+            globtrk(iglob).x_first(3) = tphit(firsthit).z
+         endif
       else
          firsthit = gtrk(igtrk).ipnt(gtrk(igtrk).ntpc+1)
-         globtrk(iglob).x_first(1) = svthit(firsthit).x(1)
-         globtrk(iglob).x_first(2) = svthit(firsthit).x(2)
-         globtrk(iglob).x_first(3) = svthit(firsthit).x(3)
-
+         if (firsthit .gt. 0) then
+            globtrk(iglob).x_first(1) = svthit(firsthit).x(1)
+            globtrk(iglob).x_first(2) = svthit(firsthit).x(2)
+            globtrk(iglob).x_first(3) = svthit(firsthit).x(3)
+         endif
       endif
 C     Now find last point on track and calculate track length.
-      if (itpct.ne.0) then
-         lasthit = gtrk(igtrk).ipnt(1)
-         globtrk(iglob).x_last(1) = tphit(lasthit).x
-         globtrk(iglob).x_last(2) = tphit(lasthit).y
-         globtrk(iglob).x_last(3) = tphit(lasthit).z
-         globtrk(iglob).length = 
-     +        sqrt((globtrk(iglob).x_last(1)- 
-     +        globtrk(iglob).x_first(1))**2 +
-     +        (globtrk(iglob).x_last(2)-globtrk(iglob).x_first(2))**2)
-
-      else
-         lasthit = gtrk(igtrk).ipnt(gtrk(igtrk).nhit)
-         globtrk(iglob).x_last(1) = svthit(lasthit).x(1)
-         globtrk(iglob).x_last(2) = svthit(lasthit).x(2)
-         globtrk(iglob).x_last(3) = svthit(lasthit).x(3)
-         globtrk(iglob).length = 
-     +        sqrt((globtrk(iglob).x_last(1)- 
-     +        globtrk(iglob).x_first(1))**2 +
-     +        (globtrk(iglob).x_last(2)-globtrk(iglob).x_first(2))**2)        
-         
+      if (firsthit .gt. 0) then
+         if (itpct.ne.0) then
+            lasthit = gtrk(igtrk).ipnt(1)
+            if (lasthit .gt. 0) then
+               globtrk(iglob).x_last(1) = tphit(lasthit).x
+               globtrk(iglob).x_last(2) = tphit(lasthit).y
+               globtrk(iglob).x_last(3) = tphit(lasthit).z
+               globtrk(iglob).length = 
+     +              sqrt((globtrk(iglob).x_last(1)- 
+     +              globtrk(iglob).x_first(1))**2 +
+     +              (globtrk(iglob).x_last(2)-globtrk(iglob).x_first(2))**2)
+            endif
+         else
+            lasthit = gtrk(igtrk).ipnt(gtrk(igtrk).nhit)
+            if (lasthit .gt. 0) then
+               globtrk(iglob).x_last(1) = svthit(lasthit).x(1)
+               globtrk(iglob).x_last(2) = svthit(lasthit).x(2)
+               globtrk(iglob).x_last(3) = svthit(lasthit).x(3)
+               globtrk(iglob).length = 
+     +              sqrt((globtrk(iglob).x_last(1)- 
+     +              globtrk(iglob).x_first(1))**2 +
+     +              (globtrk(iglob).x_last(2)-globtrk(iglob).x_first(2))**2)        
+            endif
+         endif
       endif
       if( itpct .ne. 0 .and. isvtt .ne. 0) then
          globtrk(iglob).det_id = 3
