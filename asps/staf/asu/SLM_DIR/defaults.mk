@@ -7,9 +7,9 @@
 ####################################
 # default directories
 DIRS	:= bin cdf doc idl inc lib src srcm wrk \
-	aix hpux irix sun4 sun4os5 osf1 \
-	bin/aix bin/hpux bin/irix bin/sun4 bin/sun4os5 bin/osf1 \
-	lib/aix lib/hpux lib/irix lib/sun4 lib/sun4os5 lib/osf1
+	aix hpux irix sun4 sun4os5 sun4os5pc osf1 \
+	bin/aix bin/hpux bin/irix bin/sun4 bin/sun4os5 bin/sun4os5pc bin/osf1 \
+	lib/aix lib/hpux lib/irix lib/sun4 lib/sun4os5 lib/sun4os5pc lib/osf1
 $(DIRS):
 	mkdir -p $@
 #
