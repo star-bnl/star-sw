@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.20 2001/09/13 16:54:54 porter Exp $
+ * $Id: StDbBroker.h,v 1.21 2001/10/24 04:05:56 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.21  2001/10/24 04:05:56  porter
+ * added zombie designation per Victor's suggestion
+ *
  * Revision 1.20  2001/09/13 16:54:54  porter
  * propogate falvor by table through the brokery
  *
@@ -150,6 +153,8 @@ struct oldDescriptor {
     dbConfig_st*  buildConfig(int& numRows);
     int           buildNodes(StDbConfigNode* node, int pID);
 
+    Bool_t         m_isZombie;
+
   public:
 
     StDbBroker();
@@ -186,6 +191,7 @@ struct oldDescriptor {
     UInt_t GetBeginTimeStamp()       {return m_beginTimeStamp; }
     UInt_t GetEndTimeStamp()         {return m_endTimeStamp; }
     UInt_t GetProdTime()             {return m_prodTime;}
+    Bool_t   IsZombie()              {return m_isZombie; }
 
     StTableDescriptorI* GetTableDescriptor();
 
@@ -243,6 +249,8 @@ struct oldDescriptor {
     void   SetEndTimeStamp(UInt_t utime)     {m_endTimeStamp     = utime; }
     void   SetProdTime(UInt_t ptime);
     void   SetFlavor(const char* flavor);
+    void   SetZombie(Bool_t zombie)          { m_isZombie=true; }
+    
 
     static int DbInit(const char *);  		//Sasha's dbInit 
     void   setVerbose(int isVerbose) { m_isVerbose = isVerbose; } 

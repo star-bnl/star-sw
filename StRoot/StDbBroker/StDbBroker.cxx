@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.28 2001/09/13 16:54:54 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.29 2001/10/24 04:05:56 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.29  2001/10/24 04:05:56  porter
+ * added zombie designation per Victor's suggestion
+ *
  * Revision 1.28  2001/09/13 16:54:54  porter
  * propogate falvor by table through the brokery
  *
@@ -399,6 +402,7 @@ void * StDbBroker::Use(int tabID, int parID)
   SetEndDate(20380101);
   SetEndTimeStamp(2145916799);
   SetEndTime(0);
+  SetZombie(false);
 
   StDbNode* anode = m_Nodes->getNode(tabID);
   StDbTable* node=dynamic_cast<StDbTable*>(anode);
@@ -406,7 +410,7 @@ void * StDbBroker::Use(int tabID, int parID)
   if(!node) return pData;
   if(!node->hasDescriptor())node->setDescriptor(GetTableDescriptor());
 
-  if(mgr->fetchDbTable(node)){
+  if(!mgr->fetchDbTable(node))SetZombie(true);
 
     m_nRows= node->GetNRows();
     pData  = node->GetTableCpy(); // gives the "malloc'd version"
@@ -434,7 +438,8 @@ void * StDbBroker::Use(int tabID, int parID)
     m_EndDate = (UInt_t)atoi(tmp1);
     m_EndTime = (UInt_t)atoi(tmp2);
     delete [] tmp1; tmp2-=8; delete [] tmp2;
-   }
+
+
 return pData;
 }
 
