@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.h,v 2.6 2000/12/18 17:25:14 fisyak Exp $
+ * $Id: StDedxPidTraits.h,v 2.7 2001/03/24 03:34:43 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.h,v $
+ * Revision 2.7  2001/03/24 03:34:43  perev
+ * clone() -> clone() const
+ *
  * Revision 2.6  2000/12/18 17:25:14  fisyak
  * Add track length used in dE/dx calculations
  *
@@ -20,7 +23,7 @@
  * Moved method() from StTrackPidTraits to StDedxPidTraits.cxx
  *
  * Revision 2.3  1999/11/23 15:56:25  ullrich
- * Added clone() method. Was pure virtual.
+ * Added clone() const method. Was pure virtual.
  *
  * Revision 2.2  1999/11/16 14:11:41  ullrich
  * Changed variance to sigma.
@@ -56,7 +59,7 @@ protected:
     Float_t  mSigma;
     Short_t  mMethod;
     
-    StObject* clone();
+    StObject* clone() const;
     ClassDef(StDedxPidTraits,1)
 };
 #endif

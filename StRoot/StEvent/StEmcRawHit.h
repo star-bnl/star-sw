@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcRawHit.h,v 2.3 2000/07/28 19:49:28 akio Exp $
+ * $Id: StEmcRawHit.h,v 2.4 2001/03/24 03:34:46 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcRawHit.h,v $
+ * Revision 2.4  2001/03/24 03:34:46  perev
+ * clone() -> clone() const
+ *
  * Revision 2.3  2000/07/28 19:49:28  akio
  * Change in Detector Id for Endcap SMD
  *
@@ -56,7 +59,7 @@ protected:
   UInt_t    mAdc;        
   Float_t   mEnergy;
   
-  StObject* clone();
+  StObject* clone() const;
   ClassDef(StEmcRawHit,1)  
 };
 #endif

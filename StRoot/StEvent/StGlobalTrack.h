@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.h,v 2.1 1999/10/28 22:25:39 ullrich Exp $
+ * $Id: StGlobalTrack.h,v 2.2 2001/03/24 03:34:48 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.h,v $
+ * Revision 2.2  2001/03/24 03:34:48  perev
+ * clone() -> clone() const
+ *
  * Revision 2.1  1999/10/28 22:25:39  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
@@ -34,7 +37,7 @@ public:
     const StVertex* vertex() const;
 
 protected:
-    StObject* clone();
+    StObject* clone() const;
     ClassDef(StGlobalTrack,1)
 };
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPsd.h,v 2.1 2001/03/14 02:27:50 ullrich Exp $
+ * $Id: StPsd.h,v 2.2 2001/03/24 03:34:54 perev Exp $
  *
  * Author: Thomas Ullrich, Mar 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPsd.h,v $
+ * Revision 2.2  2001/03/24 03:34:54  perev
+ * clone() -> clone() const
+ *
  * Revision 2.1  2001/03/14 02:27:50  ullrich
  * Initial Revision.
  *
@@ -34,7 +37,7 @@ public:
     void    setId(int);
     
 protected:
-    virtual StObject* clone() = 0;
+    virtual StObject* clone() const = 0;
 
 private:
     StPwg   mPwg;

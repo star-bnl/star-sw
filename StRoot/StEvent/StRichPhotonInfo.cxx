@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPhotonInfo.cxx,v 2.1 2000/11/25 11:51:03 lasiuk Exp $
+ * $Id: StRichPhotonInfo.cxx,v 2.2 2001/03/24 03:34:56 perev Exp $
  *
  * Author: Brian Lasiuk, Nov 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPhotonInfo.cxx,v $
+ * Revision 2.2  2001/03/24 03:34:56  perev
+ * clone() -> clone() const
+ *
  * Revision 2.1  2000/11/25 11:51:03  lasiuk
  * Initial Revision
  *
@@ -17,7 +20,7 @@
 
 #include "StRichPhotonInfo.h"
 
-static const char rcsid[] = "$Id: StRichPhotonInfo.cxx,v 2.1 2000/11/25 11:51:03 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPhotonInfo.cxx,v 2.2 2001/03/24 03:34:56 perev Exp $";
 
 ClassImp(StRichPhotonInfo)
     
@@ -41,5 +44,5 @@ operator<<(ostream& os, const StRichPhotonInfo& hit)
 }
 
 StObject*
-StRichPhotonInfo::clone() { return new StRichPhotonInfo(*this); }
+StRichPhotonInfo::clone() const { return new StRichPhotonInfo(*this); }
 

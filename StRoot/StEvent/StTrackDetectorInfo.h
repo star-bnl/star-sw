@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.h,v 2.4 2000/04/20 13:30:02 ullrich Exp $
+ * $Id: StTrackDetectorInfo.h,v 2.5 2001/03/24 03:35:00 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.h,v $
+ * Revision 2.5  2001/03/24 03:35:00  perev
+ * clone() -> clone() const
+ *
  * Revision 2.4  2000/04/20 13:30:02  ullrich
  * Added new methods and removed inconsistencies in numberOfPoints().
  *
@@ -63,7 +66,7 @@ public:
     void removeHit(StHit*&);
 
 protected:
-    virtual StObject* clone();
+    virtual StObject* clone() const;
     
 private:
     StThreeVectorF mFirstPoint;

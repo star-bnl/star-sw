@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.7 2000/07/28 23:29:42 calderon Exp $
+ * $Id: StTpcHit.cxx,v 2.8 2001/03/24 03:34:59 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
+ * Revision 2.8  2001/03/24 03:34:59  perev
+ * clone() -> clone() const
+ *
  * Revision 2.7  2000/07/28 23:29:42  calderon
  * Added handling of Fit Flag: use this flag to tell if the point
  * is used in the fit.
@@ -40,7 +43,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.7 2000/07/28 23:29:42 calderon Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.8 2001/03/24 03:34:59 perev Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
@@ -101,7 +104,7 @@ StTpcHit::StTpcHit(const dst_point_st& pt)
 StTpcHit::~StTpcHit() {/* noop */}
 
 StObject*
-StTpcHit::clone() { return new StTpcHit(*this); }
+StTpcHit::clone() const { return new StTpcHit(*this); }
 
 ULong_t
 StTpcHit::padsInHit() const

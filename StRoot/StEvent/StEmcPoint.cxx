@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcPoint.cxx,v 2.3 2000/07/28 19:49:27 akio Exp $
+ * $Id: StEmcPoint.cxx,v 2.4 2001/03/24 03:34:45 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.cxx,v $
+ * Revision 2.4  2001/03/24 03:34:45  perev
+ * clone() -> clone() const
+ *
  * Revision 2.3  2000/07/28 19:49:27  akio
  * Change in Detector Id for Endcap SMD
  *
@@ -24,7 +27,7 @@
 #include "StEmcPoint.h"
 #include <iostream.h>
 
-static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.3 2000/07/28 19:49:27 akio Exp $";
+static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.4 2001/03/24 03:34:45 perev Exp $";
 
 ClassImp(StEmcPoint)
 
@@ -151,7 +154,7 @@ StEmcPoint::track() const {return mTracks;}
 void
 StEmcPoint::addTrack(StTrack* track) {mTracks.push_back(track);}
 
-StObject* StEmcPoint::clone() { return new StEmcPoint(*this); };
+StObject* StEmcPoint::clone() const { return new StEmcPoint(*this); };
 
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcPoint.h,v 2.2 2000/05/22 19:21:54 akio Exp $
+ * $Id: StEmcPoint.h,v 2.3 2001/03/24 03:34:45 perev Exp $
  *
  * Author: Akio Ogawa, Mar 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.h,v $
+ * Revision 2.3  2001/03/24 03:34:45  perev
+ * clone() -> clone() const
+ *
  * Revision 2.2  2000/05/22 19:21:54  akio
  * Bug fix, add delta into EMcPoint, wider bits for Eta in RawHit
  *
@@ -81,7 +84,7 @@ protected:
   StPtrVecTrack      mTracks;
 
   Int_t getDetId(const StDetectorId) const;
-  StObject* clone();
+  StObject* clone() const;
   ClassDef(StEmcPoint,1)  
 };
 #endif

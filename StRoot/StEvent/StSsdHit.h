@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdHit.h,v 2.4 2000/01/05 16:05:39 ullrich Exp $
+ * $Id: StSsdHit.h,v 2.5 2001/03/24 03:34:58 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.h,v $
+ * Revision 2.5  2001/03/24 03:34:58  perev
+ * clone() -> clone() const
+ *
  * Revision 2.4  2000/01/05 16:05:39  ullrich
  * Updated for actual use in StEvent. Unpacking changed.
  *
@@ -54,7 +57,7 @@ public:
 
 protected:
     static StMemoryPool mPool;  //!
-    StObject* clone();
+    StObject* clone() const;
     
 private:
     enum {mWaferPerLadder=16};

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.6 2001/03/16 20:57:44 ullrich Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.7 2001/03/24 03:35:00 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.7  2001/03/24 03:35:00  perev
+ * clone() -> clone() const
+ *
  * Revision 2.6  2001/03/16 20:57:44  ullrich
  * Covariant matrix now stored in TArrayF.
  *
@@ -44,7 +47,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.6 2001/03/16 20:57:44 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.7 2001/03/24 03:35:00 perev Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
@@ -58,7 +61,7 @@ StTrackFitTraits::StTrackFitTraits(const dst_track_st& t)
     mPidHypothesis = t.pid;
     mNumberOfFitPoints = t.n_fit_point;
     copy(t.chisq+0, t.chisq+2, mChi2);
-    mCovariantMatrix.Set(15, t.covar);
+    mCovariantMatrix.Set(15, (float*)t.covar);	//tempHackVP
 }
 
 StTrackFitTraits::StTrackFitTraits(UShort_t pid, UShort_t nfp,
@@ -121,6 +124,7 @@ StTrackFitTraits::covariantMatrix() const
 {
     StMatrixF m(5,5);
     if (mCovariantMatrix.GetSize() == 15) {
+#define mCovariantMatrix ((TArrayF&)mCovariantMatrix) 	//temporary HACK VP
 	m(1,1) = mCovariantMatrix[0];
 	m(1,2) = m(2,1) = mCovariantMatrix[1];
 	m(1,3) = m(3,1) = mCovariantMatrix[2];
@@ -136,11 +140,55 @@ StTrackFitTraits::covariantMatrix() const
 	m(4,4) = mCovariantMatrix[12];
 	m(4,5) = m(5,4) = mCovariantMatrix[13];
 	m(5,5) = mCovariantMatrix[14];
+#undef mCovariantMatrix 				//temporary HACK VP
     }
     return m;
 }
 
 void
 StTrackFitTraits::clearCovariantMatrix() {mCovariantMatrix.Set(0);}
+
+//______________________________________________________________________________
+void StTrackFitTraits::Streamer(TBuffer &R__b)
+{
+//	Stream an object of class StTrackFitTraits.
+
+Version_t R__f = R__b.GetVersion();
+TBEvol R__e(Class(),&R__b);
+  Version_t R__v = 0;
+  if (R__b.IsReading()) {
+    R__v = R__b.ReadVersion();
+    {  R__e.MemberBegin();
+       StObject::Streamer(R__b);
+       R__e.MemberEnd();} 
+
+    R__b >> (unsigned short&)mPidHypothesis;
+    R__b >> (unsigned short&)mNumberOfFitPoints;
+    R__b.ReadStaticArray((float*)mChi2);
+    
+    if (R__v > 1)
+      {R__e.MemberBegin();
+       mCovariantMatrix.Streamer(R__b);
+       R__e.MemberEnd();
+    } else {
+      Float_t tmp[15];
+      R__b.ReadStaticArray(tmp);
+      mCovariantMatrix.Set(15,tmp);
+    }
+
+  } else {
+    R__b.WriteVersion(Class());
+      {R__e.MemberBegin();
+       StObject::Streamer(R__b);
+       R__e.MemberEnd();} 
+    R__b << (unsigned short )mPidHypothesis;
+    R__b << (unsigned short )mNumberOfFitPoints;
+    int R__i=0;if(R__i){};
+ R__b.WriteArray((float*)mChi2, 2);
+      {R__e.MemberBegin();
+      mCovariantMatrix.Streamer(R__b);
+      R__e.MemberEnd();}
+   }
+}
 
 

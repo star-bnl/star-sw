@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixModel.cxx,v 2.3 2000/03/17 14:52:23 ullrich Exp $
+ * $Id: StHelixModel.cxx,v 2.4 2001/03/24 03:34:49 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.cxx,v $
+ * Revision 2.4  2001/03/24 03:34:49  perev
+ * clone() -> clone() const
+ *
  * Revision 2.3  2000/03/17 14:52:23  ullrich
  * Method helix() now checks for q=0 and sets
  * curvature = 0 (which it should be anyhow).
@@ -29,7 +32,7 @@
 
 ClassImp(StHelixModel)
 
-static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.3 2000/03/17 14:52:23 ullrich Exp $";
+static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.4 2001/03/24 03:34:49 perev Exp $";
 
 StHelixModel::StHelixModel() : mModel(helixModel)
 {
@@ -72,7 +75,7 @@ StTrackGeometry*
 StHelixModel::copy() const { return new StHelixModel(*this); }
 
 StObject*
-StHelixModel::clone() { return new StHelixModel(*this); }
+StHelixModel::clone() const { return new StHelixModel(*this); }
 
 StTrackModel
 StHelixModel::model() const {return mModel;}

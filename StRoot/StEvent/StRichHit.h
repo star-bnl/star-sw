@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichHit.h,v 2.2 2000/11/01 16:44:22 lasiuk Exp $
+ * $Id: StRichHit.h,v 2.3 2001/03/24 03:34:54 perev Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichHit.h,v $
+ * Revision 2.3  2001/03/24 03:34:54  perev
+ * clone() -> clone() const
+ *
  * Revision 2.2  2000/11/01 16:44:22  lasiuk
  * SCHEMA EVOL: cluster number is now signed and the number of pads
  * that were used in creating a hit is stored.  Bit manipulation
@@ -66,7 +69,7 @@ public:
     ULong_t flags()                  const;
 
 protected:
-    StObject* clone();
+    StObject* clone() const;
     
     StThreeVectorF mLocal;
     StThreeVectorF mLError;

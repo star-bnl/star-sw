@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMeasuredPoint.h,v 2.3 1999/12/21 15:09:02 ullrich Exp $
+ * $Id: StMeasuredPoint.h,v 2.4 2001/03/24 03:34:52 perev Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMeasuredPoint.h,v $
+ * Revision 2.4  2001/03/24 03:34:52  perev
+ * clone() -> clone() const
+ *
  * Revision 2.3  1999/12/21 15:09:02  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
  *
@@ -47,7 +50,7 @@ public:
 protected:
     StThreeVectorF mPosition;
 
-    virtual StObject* clone() = 0;
+    virtual StObject* clone() const = 0;
     ClassDef(StMeasuredPoint,1)
 };
 #endif

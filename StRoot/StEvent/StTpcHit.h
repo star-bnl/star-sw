@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.5 1999/12/13 20:16:27 ullrich Exp $
+ * $Id: StTpcHit.h,v 2.6 2001/03/24 03:34:59 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.6  2001/03/24 03:34:59  perev
+ * clone() -> clone() const
+ *
  * Revision 2.5  1999/12/13 20:16:27  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
  *
@@ -57,7 +60,7 @@ public:
 
 protected:
     static StMemoryPool mPool;  //!
-    StObject* clone();
+    StObject* clone() const;
     ClassDef(StTpcHit,1)  
 };
 

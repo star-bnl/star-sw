@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.6 2000/06/01 21:39:03 ullrich Exp $
+ * $Id: StSvtHit.cxx,v 2.7 2001/03/24 03:34:59 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
+ * Revision 2.7  2001/03/24 03:34:59  perev
+ * clone() -> clone() const
+ *
  * Revision 2.6  2000/06/01 21:39:03  ullrich
  * Added member mFlag and access member flag() and setFlag().
  *
@@ -36,7 +39,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.6 2000/06/01 21:39:03 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.7 2001/03/24 03:34:59 perev Exp $";
 
 ClassImp(StSvtHit)
     
@@ -95,7 +98,7 @@ StSvtHit::StSvtHit(const dst_point_st& pt)
 StSvtHit::~StSvtHit() {/* noop */}
 
 StObject*
-StSvtHit::clone() { return new StSvtHit(*this); }
+StSvtHit::clone() const { return new StSvtHit(*this); }
 
 ULong_t
 StSvtHit::barrel() const { return (layer()+1)/2; }

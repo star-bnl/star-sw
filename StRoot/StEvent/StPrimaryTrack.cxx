@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.cxx,v 2.4 2000/04/03 15:12:50 ullrich Exp $
+ * $Id: StPrimaryTrack.cxx,v 2.5 2001/03/24 03:34:52 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.cxx,v $
+ * Revision 2.5  2001/03/24 03:34:52  perev
+ * clone() -> clone() const
+ *
  * Revision 2.4  2000/04/03 15:12:50  ullrich
  * Fixed bug in vertex(). Always returned 0 instead of
  * data member mVertex.
@@ -30,7 +33,7 @@
 
 ClassImp(StPrimaryTrack)
 
-static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.4 2000/04/03 15:12:50 ullrich Exp $";
+static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.5 2001/03/24 03:34:52 perev Exp $";
 
 StPrimaryTrack::StPrimaryTrack() : mVertex(0) {/* noop */}
 
@@ -56,7 +59,7 @@ StPrimaryTrack::operator=(const StPrimaryTrack& track)
 StPrimaryTrack::~StPrimaryTrack() {/* noop */}
 
 StObject*
-StPrimaryTrack::clone() { return new StPrimaryTrack(*this); }
+StPrimaryTrack::clone() const { return new StPrimaryTrack(*this); }
 
 StTrackType
 StPrimaryTrack::type() const { return primary; }

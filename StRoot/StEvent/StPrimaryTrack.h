@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.h,v 2.2 1999/10/28 22:26:13 ullrich Exp $
+ * $Id: StPrimaryTrack.h,v 2.3 2001/03/24 03:34:53 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.h,v $
+ * Revision 2.3  2001/03/24 03:34:53  perev
+ * clone() -> clone() const
+ *
  * Revision 2.2  1999/10/28 22:26:13  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
@@ -37,7 +40,7 @@ public:
     void setVertex(StVertex*);
 
 protected:
-    StObject* clone();
+    StObject* clone() const;
     
 private:
     StPrimaryVertex*  mVertex; //$LINK

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.8 2001/03/06 21:04:30 ullrich Exp $
+ * $Id: StHit.cxx,v 2.9 2001/03/24 03:34:50 perev Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.9  2001/03/24 03:34:50  perev
+ * clone() -> clone() const
+ *
  * Revision 2.8  2001/03/06 21:04:30  ullrich
  * Modified detector() method. Replaced switch
  * statement by simple static_cast.
@@ -45,7 +48,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.8 2001/03/06 21:04:30 ullrich Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.9 2001/03/24 03:34:50 perev Exp $";
 
 ClassImp(StHit)
 
@@ -69,7 +72,7 @@ StHit::StHit(const StThreeVectorF& p,
 StHit::~StHit() { /* noop */ }
 
 StObject*
-StHit::clone() { return new StHit(*this); }
+StHit::clone() const { return new StHit(*this); }
    
 Int_t
 StHit::operator==(const StHit& h) const

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.cxx,v 2.6 2000/06/01 21:38:49 ullrich Exp $
+ * $Id: StFtpcHit.cxx,v 2.7 2001/03/24 03:34:46 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.cxx,v $
+ * Revision 2.7  2001/03/24 03:34:46  perev
+ * clone() -> clone() const
+ *
  * Revision 2.6  2000/06/01 21:38:49  ullrich
  * Added member mFlag and access member flag() and setFlag().
  *
@@ -36,7 +39,7 @@
 #include "tables/St_dst_point_Table.h"
 #include "StTrack.h"
 
-static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.6 2000/06/01 21:38:49 ullrich Exp $";
+static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.7 2001/03/24 03:34:46 perev Exp $";
 
 StMemoryPool StFtpcHit::mPool(sizeof(StFtpcHit));
 
@@ -95,7 +98,7 @@ StFtpcHit::StFtpcHit(const dst_point_st& pt)
 StFtpcHit::~StFtpcHit() {/* noop */}
 
 StObject*
-StFtpcHit::clone() { return new StFtpcHit(*this); }
+StFtpcHit::clone() const { return new StFtpcHit(*this); }
 
 ULong_t
 StFtpcHit::sector() const

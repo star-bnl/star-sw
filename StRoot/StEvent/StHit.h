@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.4 2000/07/28 23:29:42 calderon Exp $
+ * $Id: StHit.h,v 2.5 2001/03/24 03:34:50 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.5  2001/03/24 03:34:50  perev
+ * clone() -> clone() const
+ *
  * Revision 2.4  2000/07/28 23:29:42  calderon
  * Added handling of Fit Flag: use this flag to tell if the point
  * is used in the fit.
@@ -76,7 +79,7 @@ protected:
     UChar_t        mFlag;
     UChar_t        mFitFlag;
     
-    StObject* clone();
+    StObject* clone() const;
     ClassDef(StHit,1)
 };
 

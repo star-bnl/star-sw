@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPidTraits.h,v 2.4 2001/02/22 21:05:02 lasiuk Exp $
+ * $Id: StRichPidTraits.h,v 2.5 2001/03/24 03:34:57 perev Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.h,v $
+ * Revision 2.5  2001/03/24 03:34:57  perev
+ * clone() -> clone() const
+ *
  * Revision 2.4  2001/02/22 21:05:02  lasiuk
  * add production version, associated MIP, dca residual 3Vectors
  *
@@ -89,7 +92,7 @@ private:
     Float_t          mSigned3dDca;
     Float_t          mSigned2dDca;
     
-    StObject* clone();
+    StObject* clone() const;
 
     ClassDef(StRichPidTraits,1)
 };
@@ -101,7 +104,7 @@ inline const StSPtrVecRichPid&  StRichPidTraits::getAllPids() const { return mTh
 
 inline void  StRichPidTraits::addPid(StRichPid* t) {mThePids.push_back(t);}
 
-inline StObject* StRichPidTraits::clone() {return new StRichPidTraits(*this);}
+inline StObject* StRichPidTraits::clone() const {return new StRichPidTraits(*this);}
 
 inline void StRichPidTraits::setProductionVersion(Int_t id) {mProductionVersion = id;}
 inline void StRichPidTraits::setId(Int_t id) {mId = id;} 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.h,v 2.2 1999/11/04 13:31:19 ullrich Exp $
+ * $Id: StXiVertex.h,v 2.3 2001/03/24 03:35:01 perev Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.h,v $
+ * Revision 2.3  2001/03/24 03:35:01  perev
+ * clone() -> clone() const
+ *
  * Revision 2.2  1999/11/04 13:31:19  ullrich
  * Changed order of constructor arguments
  *
@@ -70,7 +73,7 @@ protected:
     Float_t                mDcaParentToPrimaryVertex;
     StV0Vertex*            mV0Vertex;                   //$LINK
 
-    StObject* clone();
+    StObject* clone() const;
     ClassDef(StXiVertex,1)
 };
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.cxx,v 2.2 1999/11/04 13:31:17 ullrich Exp $
+ * $Id: StXiVertex.cxx,v 2.3 2001/03/24 03:35:01 perev Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.cxx,v $
+ * Revision 2.3  2001/03/24 03:35:01  perev
+ * clone() -> clone() const
+ *
  * Revision 2.2  1999/11/04 13:31:17  ullrich
  * Changed order of constructor arguments
  *
@@ -28,7 +31,7 @@
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_xi_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.2 1999/11/04 13:31:17 ullrich Exp $";
+static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.3 2001/03/24 03:35:01 perev Exp $";
 
 ClassImp(StXiVertex)
 
@@ -60,7 +63,7 @@ StXiVertex::StXiVertex(const dst_vertex_st& vtx,
 StXiVertex::~StXiVertex() { /* noop */ }
 
 StObject*
-StXiVertex::clone() { return new StXiVertex(*this); }
+StXiVertex::clone() const { return new StXiVertex(*this); }
 
 StVertexId
 StXiVertex::type() const { return kXiVtxId; }

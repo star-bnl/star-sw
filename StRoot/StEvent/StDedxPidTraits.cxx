@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.cxx,v 2.7 2000/12/18 17:25:13 fisyak Exp $
+ * $Id: StDedxPidTraits.cxx,v 2.8 2001/03/24 03:34:40 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.cxx,v $
+ * Revision 2.8  2001/03/24 03:34:40  perev
+ * clone() -> clone() const
+ *
  * Revision 2.7  2000/12/18 17:25:13  fisyak
  * Add track length used in dE/dx calculations
  *
@@ -20,7 +23,7 @@
  * Moved method() from StTrackPidTraits to StDedxPidTraits.cxx
  *
  * Revision 2.4  1999/11/23 15:56:23  ullrich
- * Added clone() method. Was pure virtual.
+ * Added clone() const method. Was pure virtual.
  *
  * Revision 2.3  1999/11/16 14:11:38  ullrich
  * Changed variance to sigma.
@@ -37,7 +40,7 @@
 
 ClassImp(StDedxPidTraits)
 
-static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.7 2000/12/18 17:25:13 fisyak Exp $";
+static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.8 2001/03/24 03:34:40 perev Exp $";
 
 StDedxPidTraits::StDedxPidTraits() :
     mNumberOfPoints(0), mDedx(0), mSigma(0), mMethod(0) { /* noop */ }
@@ -66,7 +69,7 @@ Float_t
 StDedxPidTraits::errorOnMean() const { return mSigma; }
 
 StObject*
-StDedxPidTraits::clone() { return new StDedxPidTraits(*this); }
+StDedxPidTraits::clone() const { return new StDedxPidTraits(*this); }
 
 Short_t
 StDedxPidTraits::encodedMethod() const { return mMethod; }

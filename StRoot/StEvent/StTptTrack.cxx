@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTptTrack.cxx,v 2.1 2000/08/17 00:10:34 ullrich Exp $
+ * $Id: StTptTrack.cxx,v 2.2 2001/03/24 03:34:59 perev Exp $
  *
  * Author: Thomas Ullrich, Aug 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTptTrack.cxx,v $
+ * Revision 2.2  2001/03/24 03:34:59  perev
+ * clone() -> clone() const
+ *
  * Revision 2.1  2000/08/17 00:10:34  ullrich
  * Initial Revision.
  *
@@ -20,7 +23,7 @@
 
 ClassImp(StTptTrack)
 
-static const char rcsid[] = "$Id: StTptTrack.cxx,v 2.1 2000/08/17 00:10:34 ullrich Exp $";
+static const char rcsid[] = "$Id: StTptTrack.cxx,v 2.2 2001/03/24 03:34:59 perev Exp $";
 
 StTptTrack::StTptTrack() {/* noop */}
 
@@ -39,7 +42,7 @@ StTptTrack::operator=(const StTptTrack& track)
 StTptTrack::~StTptTrack() {/* noop */}
 
 StObject*
-StTptTrack::clone() { return new StTptTrack(*this); }
+StTptTrack::clone() const { return new StTptTrack(*this); }
 
 StTrackType
 StTptTrack::type() const { return tpt; }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StKinkVertex.h,v 2.3 1999/11/04 16:33:26 ullrich Exp $
+ * $Id: StKinkVertex.h,v 2.4 2001/03/24 03:34:52 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StKinkVertex.h,v $
+ * Revision 2.4  2001/03/24 03:34:52  perev
+ * clone() -> clone() const
+ *
  * Revision 2.3  1999/11/04 16:33:26  ullrich
  * Fixed wrong option to ClassDef macro.
  *
@@ -88,7 +91,7 @@ protected:
     StThreeVectorF mParentMomentum;
     StThreeVectorF mDaughterMomentum;
 
-    StObject* clone();
+    StObject* clone() const;
     ClassDef(StKinkVertex,1)
 };
 #endif

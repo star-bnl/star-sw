@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPhotonInfo.h,v 2.1 2000/11/25 11:51:01 lasiuk Exp $
+ * $Id: StRichPhotonInfo.h,v 2.2 2001/03/24 03:34:56 perev Exp $
  *
  * Author: Brian Lasiuk, Nov 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPhotonInfo.h,v $
+ * Revision 2.2  2001/03/24 03:34:56  perev
+ * clone() -> clone() const
+ *
  * Revision 2.1  2000/11/25 11:51:01  lasiuk
  * Initial Revision
  *
@@ -41,7 +44,7 @@ public:
     Float_t azimuth() const;
     
 protected:
-    StObject* clone();
+    StObject* clone() const;
 
     Float_t    mD;
     Float_t    mSigma;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.h,v 2.3 1999/11/29 17:07:32 ullrich Exp $
+ * $Id: StTrackPidTraits.h,v 2.4 2001/03/24 03:35:00 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.h,v $
+ * Revision 2.4  2001/03/24 03:35:00  perev
+ * clone() -> clone() const
+ *
  * Revision 2.3  1999/11/29 17:07:32  ullrich
  * Moved method() from StTrackPidTraits to StDedxPidTraits.cxx
  *
@@ -44,7 +47,7 @@ public:
 protected:
     Short_t mDetectorId;
 
-    virtual StObject* clone() = 0;
+    virtual StObject* clone() const = 0;
     ClassDef(StTrackPidTraits,1)
 };
 #endif

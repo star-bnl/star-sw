@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcCluster.cxx,v 2.3 2000/07/31 22:12:22 akio Exp $
+ * $Id: StEmcCluster.cxx,v 2.4 2001/03/24 03:34:44 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCluster.cxx,v $
+ * Revision 2.4  2001/03/24 03:34:44  perev
+ * clone() -> clone() const
+ *
  * Revision 2.3  2000/07/31 22:12:22  akio
  * eliminate print() for L3(?)
  *
@@ -24,7 +27,7 @@
 
 ClassImp(StEmcCluster)
     
-static const char rcsid[] = "$Id: StEmcCluster.cxx,v 2.3 2000/07/31 22:12:22 akio Exp $";
+static const char rcsid[] = "$Id: StEmcCluster.cxx,v 2.4 2001/03/24 03:34:44 perev Exp $";
 
 StEmcCluster::StEmcCluster() {/* noop*/};
 
@@ -97,7 +100,7 @@ void
 StEmcCluster::addTrack(StTrack* track) {mTracks.push_back(track);}
 
 StObject*
-StEmcCluster::clone() {return new StEmcCluster(*this);}
+StEmcCluster::clone() const {return new StEmcCluster(*this);}
 
 ostream&
 operator<<(ostream &os, const StEmcCluster& cl)
