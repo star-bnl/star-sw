@@ -1,0 +1,117 @@
+* *************************************************************************
+* run_ctf.kumac
+* 
+* 7/21/98 K. Turner - editted to make it standard
+************************************************************************
+************************************************************************
+
+ macro run__
+          TOP=$STAR _
+          domain='ctf' _
+          INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
+          input_g2t_file=muons_100_ctb.dsl _
+          num_events=1 _
+          funit=21 _
+          nfile=ctb.ntup _
+          nid=111 _
+          table=ctf/ctb_raw
+* 
+*  this is an example!! you must change to fill your needs
+*  
+* --> to run
+*    - change the inputs above as desired
+*    - run staf
+*    -   exec run_ctb
+* 
+	  
+  message ' *** TOP directory to search for kumacs --> ' [TOP]
+  message ' *** domains to load  -->                   ' [domain]
+  message ' *** Data Sample directory -->              ' [INPUT_DATA_DIR]
+  message ' *** Input G2T file -->                     ' [input_g2t_file]
+  message ' *** Num Events to process -->              ' [num_events]
+  message ' *** ntup file unit -->                     ' [funit]
+  message ' *** output Ntuple filename  -->            ' [nfile]
+  message ' *** Ntuple ID # -->                        ' [nid]
+  message ' *** Table to write to ntup -->             ' [table]
+
+***********************************************************
+* General Setup
+***********************************************************
+  
+ macro/global/create TOP              [TOP]
+
+* setup default directories to search for kumacs in
+* setup default table directory structure in STAF
+* load libraries [domain]
+    
+   exec $STAR/kumacs/chain/bfc_util#bfc_defaults 
+   
+   exec setup#setup
+   macro/global/import *
+     
+   exec bfc_util#bfc_load [domain]
+
+* **************************************************************
+* --------- Setup and run tpc fast simulator & tracker pams -------------*
+   
+* open input g2t data file
+  exec input_g2t_file#init [INPUT_DATA_DIR][input_g2t_file]
+
+  if STAF_STATUS(1).eq.0 goto ENDOFDATA
+  
+* open output ntuple
+  exec write_table_to_ntuple#init_disk [funit] [nfile]  
+   
+* --------------------- initialization ----------------------------*
+   exec ctg_init
+   exec cts_init
+   exec ctu_init
+   
+
+  
+* ------------------- process events ------------------------------*
+
+* read event and then process thru simulator
+  do i=1,[num_events]
+    message ' run_ctb: processing event ' [i]
+* clear all event tables
+    tabclear [event]
+* read input file
+    exec input_g2t_file#read
+    if STAF_STATUS(1).eq.0 goto ENDOFDATA
+* simulation
+    exec cts_run
+    exec ctu_run
+* write table to ntuple
+    exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
+  enddo
+
+  
+* -------------------- end stuff -----------------------------*
+  
+  ENDOFDATA: 
+
+* close ntuple
+  message ' close ntuple'
+  exec write_table_to_ntuple#close_disk [funit]
+
+* close input file
+  message ' close input file'
+  exec input_g2t_file#close
+
+return
+ 
+************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
