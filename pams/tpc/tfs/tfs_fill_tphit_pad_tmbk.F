@@ -38,8 +38,8 @@ c calculate the pads used by this hit
 
           ret=tgc_global_to_local(jsect,xglobal,xlocal)
 
-          if(jsect.ne.isect) 
-     >   print *,'wrong sector number,isect=',isect,'jsect=',jsect
+c          if(jsect.ne.isect) 
+c     >   print *,'wrong sector number,isect=',isect,'jsect=',jsect
           row=irow
           ret=tgc_x_to_pad(row,xlocal(1),pad,pad_plane_h,pad_plane)
           
@@ -50,8 +50,8 @@ c (this actually came from na49)
           ipad=int(pad+0.5)
 
           if(ipad.le.0.or.ipad.gt.pad_plane(1).npads(irow))then
-             print *,'wrong hit location,mark it flag=14,ihit=',ihit,
-     >  ',old flag=',tphit(ihit).flag
+c             print *,'wrong hit location,mark it flag=14,ihit=',ihit,
+c     >  ',old flag=',tphit(ihit).flag
             tphit(ihit).flag=14
           endif
  
@@ -79,8 +79,8 @@ c (this actually came from na49)
           
           npads=max_pad-min_pad+1
           if(npads.le.0.or.npads.gt.pad_plane(1).npads(irow))then
-              print *,'wrong npads, mark it to flag=14, npad=',npads,
-     >   ',ihit=',ihit,',old flag=',tphit(ihit).flag
+c              print *,'wrong npads, mark it to flag=14, npad=',npads,
+c     >   ',ihit=',ihit,',old flag=',tphit(ihit).flag
              tphit(ihit).flag=14
           endif              
 
