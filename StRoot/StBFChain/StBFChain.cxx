@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.364 2003/11/09 20:59:14 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.365 2003/11/12 23:33:38 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -346,7 +346,7 @@ Bfc_st BFC1[] = {
   {"tfs"         ,"","tpcChain","Simu"                             ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"ZDCVtx"      ,"","tpcChain","db"                      ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
-  {"fcf"         ,"","tcpChain","",
+  {"fcf"         ,"","tpcChain","",
             "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker","Offline FCF Cluster finder",kFALSE},
   {"daqclf"      ,"","tpcChain","","StDaqClfMaker","StDaqClfMaker",    "Offline DAQ Cluster finder",kFALSE},
 
@@ -855,7 +855,7 @@ Bfc_st BFC2[] = {
   {"tfs"         ,"","tpcChain","Simu"                             ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"ZDCVtx"      ,"","tpcChain","db"                      ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
-  {"fcf"         ,"","tcpChain","",
+  {"fcf"         ,"","tpcChain","",
             "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker","Offline FCF Cluster finder",kFALSE},
   {"daqclf"      ,"","tpcChain","","StDaqClfMaker","StDaqClfMaker",    "Offline DAQ Cluster finder",kFALSE},
 
