@@ -2,8 +2,11 @@
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
-// $Id: St_DataSet.cxx,v 1.51 1999/06/26 01:40:55 fisyak Exp $
+// $Id: St_DataSet.cxx,v 1.52 1999/07/23 13:26:06 fine Exp $
 // $Log: St_DataSet.cxx,v $
+// Revision 1.52  1999/07/23 13:26:06  fine
+// Several new methods to mark the datasets have been introduced
+//
 // Revision 1.51  1999/06/26 01:40:55  fisyak
 // Add Valery's abstract buffer
 //
@@ -388,12 +391,38 @@ Bool_t St_DataSet::IsThisDir(const Char_t *dirname,int len,int ignorecase) const
     return 1;
   }
 }
+
 //______________________________________________________________________________
-void St_DataSet::Mark()
-{ Mark(kMark,kSet); }
+void St_DataSet::MarkAll()
+{
+  // Mark all members of this dataset
+  Mark();
+  St_DataSetIter nextMark(this,0);
+  St_DataSet *set = 0;
+  while ( (set = nextMark()) ) set->Mark();
+}
 //______________________________________________________________________________
-void St_DataSet::Mark(UInt_t flag,EBitOpt reset)
-{  SetBit(flag,reset); }
+void St_DataSet::UnMarkAll()
+{
+  // UnMark all members of this dataset
+  Mark(kMark,kReset);
+  St_DataSetIter nextMark(this,0);
+  St_DataSet *set = 0;
+  while ( (set = nextMark()) ) set->Mark(kMark,kReset);
+}
+//______________________________________________________________________________
+void St_DataSet::InvertAllMarks()
+{
+ // Invert mark bit for all members of this dataset
+  if (IsMarked()) Mark(kMark,kReset);
+  else Mark();
+  St_DataSetIter nextMark(this,0);
+  St_DataSet *set = 0;
+  while (( set = nextMark()) ) {
+   if (set->IsMarked()) set->Mark(kMark,kReset);
+   else set->Mark();
+ }
+}
 
 //______________________________________________________________________________
 TString St_DataSet::Path() const
@@ -546,7 +575,7 @@ void St_DataSet::SetWrite()
   fParent = saveParent;
 }
 //______________________________________________________________________________
-void St_DataSet::Shunt(St_DataSet *dataset)
+void St_DataSet::Shunt(St_DataSet *newParent)
 {
   //
   //  Remove the object from the original and add it to dataset 
@@ -556,7 +585,7 @@ void St_DataSet::Shunt(St_DataSet *dataset)
   //
   if (fParent) fParent->Remove(this);
   SetParent(0);
-  if (dataset) dataset->Add(this);
+  if (newParent) newParent->Add(this);
 }
 
 //______________________________________________________________________________
