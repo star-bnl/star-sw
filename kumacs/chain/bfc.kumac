@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.62 1998/09/23 19:33:10 kathy Exp $
+* * $Id: bfc.kumac,v 1.63 1998/09/23 19:48:27 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.63  1998/09/23 19:48:27  kathy
+* make global macros more standard
+*
 * Revision 1.62  1998/09/23 19:33:10  kathy
 * put line continuations in where missing
 *
@@ -524,25 +527,20 @@ MACRO bfc _
 * GLOBAL VARIABLES 
 * **********************************************************
  
- macro/global/create input_file  [input_file]   'Input file name'
- macro/global/create output_file [output_file]  'Output file name'
+ macro/global/create input_file       [input_file]   'Input file name'
+ macro/global/create output_file      [output_file]  'Output file name'
  macro/global/create tpc_sector_first [tpc_sector_first] 'first sector in TPC'
  macro/global/create tpc_sector_last  [tpc_sector_last]   'last sector in TPC'
- macro/global/create ievent           1          'Event counter'
  macro/global/create TOP              [TOP]
  macro/global/create gstar_settings   [gstar_settings]
  macro/global/create output_xdf_file  [output_xdf_file] 
  macro/global/create output_fzd_file  [output_fzd_file]
  macro/global/create output_dst_file  [output_dst_file]
      
- macro/global/create nev_proc 0
- macro/global/create nev_pass 0
- macro/global/create nev_total 0    
-   
- macro/global/create nunit  [nunit]
- macro/global/create nfile  [nfile]
- macro/global/create nid    [nid]
- macro/global/create ntable [ntable]
+ macro/global/create nunit            [nunit]
+ macro/global/create nfile            [nfile]
+ macro/global/create nid              [nid]
+ macro/global/create ntable           [ntable]
 	   
  macro/global/create calib_dir            [calib_dir]
  macro/global/create ebye_prior_switch    [ebye_prior_switch]
