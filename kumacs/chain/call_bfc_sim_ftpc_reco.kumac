@@ -1,0 +1,24 @@
+* 8/25/98 K. Turner
+* 
+* This kumac is to run bfc (98g version) in following way:
+* - read in g2t file
+* - run ftpc slow sim
+* - run ftpc tracking
+* - write out file
+* 
+ exec $STAR/kumacs/chain/bfc _
+   TOP=$STAR _
+   tpc_sector_first=1 _
+   tpc_sector_last=24 _
+   gstar_settings=' field_only' _
+   domain=' ftpc ' _
+   chain=' g2tin fss fcl fpt_s fte_s evout' _
+   first=1 _
+   no_events=1 _
+   input_data_prefix=$AFS_RHIC/star/users/jcs/public/ _
+   input_data_file=auau_gstar_g2t.tab _
+   output_file=bfc_ftpc_output _
+   log =''
+
+
+ 
