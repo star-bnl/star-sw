@@ -13,6 +13,12 @@
 #include "tbrClasses.hh"
 #include "tbr_globals.h"
 
+#include "fortranc.h"   /* The definition of the Fortran/C interface */
+
+#define tbr_def_ F77_NAME(tbr_def,TBR_DEF)
+extern "C" void type_of_call tbr_def_();
+
+#ifndef WIN32
 #include <X11/Intrinsic.h>
 
 tbrFactory *tbr;
@@ -53,7 +59,21 @@ int tbr_start()
 
    return TRUE;
 }
+#else
+/*  Define dummy for WIN32 */
+int tbr_init()
+{
+   EML_MESSAGE("TBR:Initializing.  Dummy ! ! ! ");
+   return FALSE;
+}
 
+int tbr_start()
+{
+   EML_MESSAGE("TBR:Starting. It is dummy under WIN32");
+   return FALSE;
+}
+
+#endif /* WIN32 */ 
 //:>--------------------------------------------------------------------
 //:ROUTINE:	int tbr_stop()
 //:DESCRIPTION:	Stop TBR
@@ -66,4 +86,3 @@ int tbr_stop()
 
    return TRUE;
 }
-

@@ -1,8 +1,9 @@
 /* Motif (gui) part of the STAR browser.  Begun April 22 1995, Herb Ward. */
 /***********************************************************  INCLUDES  **/
+#ifndef WIN32
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+# include <strings.h>
 #include <stdlib.h>
 #include "dstype.h"
 #include "dscuts.h"
@@ -1627,3 +1628,6 @@ void DoXStuff(void) {
     if(dsu_gDone) break;
   }
 }
+#endif
+
+

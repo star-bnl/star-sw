@@ -10,6 +10,7 @@
  * is provided without guarantee or warrantee expressed or implied.
  * This program is -not- in the public domain.
  */
+#ifndef WIN32
 /***********************************************************  TYPEDEFS  **/
 
 /**********************************************************  INCLUDES  **/
@@ -105,3 +106,5 @@ void DrawLineXOnly(int xx1,int yy1,int xx2,int yy2) {
      XtWindow(gDrawingArea),gGraphicsContext,x1,y1,x2,y2); */
 }
 /* XClearWindow (event->xany.display, XtWindow (XtParent (widget))); */
+
+#endif

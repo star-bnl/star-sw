@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_BRowser commands.
 .
- #(@)$Id: tbr_def.cdf,v 1.6 1998/03/11 21:40:25 ward Exp $
+ #(@)$Id: tbr_def.cdf,v 1.7 1998/03/16 02:00:19 fisyak Exp $
 .
 TBR is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -57,5 +57,5 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TBR_VIEWDATASET
+>ACTION kam_tbr_viewdataset_%C
 **
