@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.2 2001/09/19 15:50:45 suaide Exp $
+// $Id: StBemcTrigger.cxx,v 1.3 2001/09/24 13:34:13 suaide Exp $
 //
 //    
 
@@ -24,8 +24,8 @@ StBemcTrigger::StBemcTrigger():StEmcTrigger()
   JetTrigger=new St_emcJetTrigger("BemcJet",14);
   JetTrigger->SetNRows(14);
       
-  geo=new StEmcGeom("bemc");
-
+  //geo=new StEmcGeom("bemc");
+  geo=StEmcGeom::getEmcGeom("bemc");
 }
 //----------------------------------------------------    
 StBemcTrigger::~StBemcTrigger()
