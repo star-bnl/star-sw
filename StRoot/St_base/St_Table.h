@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.35 1999/08/30 23:15:09 fine Exp $
+// $Id: St_Table.h,v 1.36 1999/09/04 00:28:02 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.36  1999/09/04 00:28:02  fine
+// St_Table::NaN from VP and gloabl dataset have been introduced
+//
 // Revision 1.35  1999/08/30 23:15:09  fine
 // St_Table::Fit method has been introduced
 //
@@ -85,7 +88,7 @@
 #include "TArray.h"
 #include "table_header.h" 
 #include "tableDescriptor.h" 
-
+#include "TCut.h"
 
 
 #ifndef __CINT__
@@ -104,6 +107,8 @@ enum ETableBits {
 class G__DataMemberInfo;
 class St_XDFFile;
 class St_tableDescriptor;
+class TH1;
+
 
 extern "C" {
    void *ReAllocate(table_head_st *h, Int_t newsize);
@@ -165,7 +170,9 @@ public:
    virtual     void       Browse(TBrowser *b);
    virtual     void       CopySet(St_Table &array);
    virtual     void       Draw(Option_t *opt);
-   virtual     void       Draw(const Text_t *varexp, const Text_t *selection, Option_t *option=""
+   virtual     TH1       *Draw(TCut varexp, TCut selection, Option_t *option=""
+                         ,Int_t nentries=1000000000, Int_t firstentry=0);
+   virtual     TH1       *Draw(const Text_t *varexp, const Text_t *selection, Option_t *option=""
                               ,Int_t nentries=1000000000, Int_t firstentry=0); // *MENU*
    virtual     void      *GetArray() const ;
    virtual     TClass    *GetRowClass() const ;
@@ -182,6 +189,7 @@ public:
    virtual     Bool_t     IsFolder();
    virtual     void       ls(Option_t *option="");
    virtual     void       ls(Int_t deep);
+               Int_t      NaN();
    static      St_Table  *New(const Char_t *name, const Char_t *type, void *array, UInt_t size);
    virtual     Char_t    *MakeExpression(const Char_t *expressions[],Int_t nExpressions);
    virtual     Char_t    *Print(Char_t *buf,Int_t n) const ;

@@ -15,12 +15,9 @@
 
 #include "St_PolyLineShape.h"
 #include "X3DBuffer.h"
-#include "St_AttributesABC.h"
 #include <TPoints3DABC.h>
 
 class St_PolyLine3D : public St_PolyLineShape {
-protected:        
-        St_AttributesABC   *fAttributes; //!
 
 public:
         St_PolyLine3D(TPoints3DABC *points=0);
