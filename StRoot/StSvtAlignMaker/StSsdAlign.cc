@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdAlign.cc,v 1.2 2001/05/09 16:33:02 gaudiche Exp $
+ * $Id: StSsdAlign.cc,v 1.3 2001/06/16 00:14:42 jeromel Exp $
  *
  * Author: Ludovic Gaudichet
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSsdAlign.cc,v $
+ * Revision 1.3  2001/06/16 00:14:42  jeromel
+ * REmoved unused var
+ *
  * Revision 1.2  2001/05/09 16:33:02  gaudiche
  * bug on Solaris fixed - cleanup
  *
@@ -954,7 +957,7 @@ int  StSsdAlign::simulEvents(int ev, int numberOfTracks ,int level)
       phi = monrandom(2.*PI);
       n = monrandom(2.);
       teta = acos(1. - n);
-      globalPoint p, pOnWaf;
+      globalPoint p; //, pOnWaf;
       p.x = sin(teta)*cos(phi) +  vertex.x;
       p.y = sin(teta)*sin(phi) + vertex.y;
       p.z = cos(teta) + vertex.z;
