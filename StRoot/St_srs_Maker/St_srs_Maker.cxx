@@ -1,10 +1,13 @@
-//$Id: St_srs_Maker.cxx,v 1.21 2000/02/24 16:58:39 caines Exp $
+  //$Id: St_srs_Maker.cxx,v 1.22 2000/04/07 14:36:09 caines Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.22  2000/04/07 14:36:09  caines
+//Correct x y histogram filling
+//
 //Revision 1.21  2000/02/24 16:58:39  caines
 //Change srs histogram names to srs*
 //
@@ -156,9 +159,8 @@ Int_t St_srs_Maker::Make()
 	m_waf_no7->Fill(spc->x[2],ladder);
       }
 
-      if( ladder < 2){
       m_x_vs_y->Fill(spc->x[0],spc->x[1]);
-      }
+      
 	     
 
     }
