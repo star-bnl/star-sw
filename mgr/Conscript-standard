@@ -19,7 +19,7 @@ foreach my $Rep (@Repo) {
     foreach my $i (@idlR) {push @idlL, $i;}
   }
 }
-my @idlL   = sortu (@idlL); print "idlL = @idlL\n" if $param::debug;
+@idlL   = sortu (@idlL); print "idlL = @idlL\n" if $param::debug;
 if ($pkg =~ /^sim$/ || $pkg =~ /^gen$/) {goto Tables;}
 my $i;
 my @idlML    = find_idlM($Dir);    

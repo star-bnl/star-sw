@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.100 2000/09/14 21:22:42 fisyak Exp $
+# $Id: Construct,v 1.101 2000/09/20 13:13:23 fisyak Exp $
 use Env;
 #use lib qw($STAR . "/mgr"); # Modify perl include path
 use lib $STAR . "/mgr"; # Modify perl include path
@@ -18,22 +18,17 @@ $INCLUDE = "#" . $include;
 $EXPORT = "#.share";
 $FFLAGS .= " -DCERNLIB_TYPE";
 $OSFID .= " " . $STAR_SYS;
-my $ROOTLIBS;
-my $RINTLIBS;
-my $ROOTGLIBS;
-#$ROOTLIBS    = "-lNew -lCore -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui";
-$ROOTLIBS    = " -lNew  -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lHist -lGraf -lGraf3d -lTree -lGpad -lPhysics"; print "ROOTLIBS = $ROOTLIBS\n";
+my $ROOTLIBS    = " -lNew  -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lHist -lGraf -lGraf3d -lTree -lGpad -lPhysics"; print "ROOTLIBS = $ROOTLIBS\n";
+my $ROOTGLIBS = "";
+my $RINTLIBS    = "-lRint ";
 
 if (!defined($ARG{NoNew}))    {$ROOTLIBS    = " -lNew";}
 $ROOTLIBS .=  " -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui -lGpad -lPhysics -lMatrix";      
 print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
 if (defined($ARG{ROOTLIBS}))    {$ROOTLIBS = $ARG{ROOTLIBS}        ; print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);}
-$RINTLIBS    = "-lRint ";
 $CPPPATH  = $INCLUDE . ":#StRoot:" .  $ROOTSRC;
 $CPPPATH .= $main::PATH_SEPARATOR . $CERN_ROOT . "/include" . $EXTRA_CPPPATH;
 $FCPPPATH ="";
-(my $DirPath  = cwd()) =~ s/\/$//g;
-print "Build directory: $DirPath;" unless ($param::quiet);
 (my $DirPath  = cwd()) =~ s/\/$//g; print "DirPath = $DirPath \n" unless ($param::quiet);
 chdir($STAR); my $repository = cwd(); chdir($DirPath);# print "repository $repository\n";
 Repository ($repository);# unless $param::noRepository;
@@ -91,7 +86,7 @@ $env = new cons(
 		'LIBPATH'      => $LIBPATH,
 		'ROOTLIBS'     => $ROOTLIBS,
 		'ROOTGLIBS'    => $ROOTGLIBS,
-		'RINTLIBS'     => $RINTLIBS,
+		'RINTLIBS'     => $RINTLIBS
 	       );
 Ignore qw(
 	  include/geant321/incbeg.inc
@@ -111,7 +106,8 @@ if (! $param::quiet) {
   print "STAR_SYS = \t$env->{ENV}->{STAR_SYS}\n";
   print "ROOTSYS  = \t$env->{ENV}->{ROOTSYS}\n";
   print "DEBUG    = \t$env->{DEBUG}\n";
-  print "CPP      = \t$env->{CPP}   \tCPPFLAGS = \t$env->{CPPFLAGS}\nCPPPATH  = \t$env->{CPPPATH}\n";
+#  print "CPP      = \t$env->{CPP}   \tCPPFLAGS = \t$env->{CPPFLAGS}\nCPPPATH  = \t$env->{CPPPATH}\n";
+  print "CPPFLAGS = \t$env->{CPPFLAGS}\nCPPPATH  = \t$env->{CPPPATH}\n";
   print "CC       = \t$env->{CC}    \tCFLAGS   = \t$env->{CFLAGS} \tEXTRA_CFLAGS  = \t$env->{EXTRA_CFLAGS}     \tCLIBS    =\t$env->{CLIBS}\n"; 
   print "CXX      = \t$env->{CXX}    \tCXXFLAGS = \t$env->{CXXFLAGS} \tEXTRA_CXXFLAGS = \t$env->{EXTRA_CXXFLAGS}\n";
   print "FC       = \t$env->{FC}     \tFFLAGS   = \t$env->{FFLAGS}     \tFLIBS    =\t$env->{FLIBS}\n"; 
