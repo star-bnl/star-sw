@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNode.hh,v 1.5 2001/01/22 18:37:58 porter Exp $
+ * $Id: StDbNode.hh,v 1.6 2001/02/08 23:23:56 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbNode.hh,v $
+ * Revision 1.6  2001/02/08 23:23:56  porter
+ * fixed initialization of schemaID in table & fixed some warnings when
+ * compiled with NODEBUG
+ *
  * Revision 1.5  2001/01/22 18:37:58  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -83,7 +87,7 @@ protected:
 
 public:
 
-   StDbNode() : mname(0), mversion(0), mdbName(0), mnodeID(0), mnodeType(0) {};
+   StDbNode() : mname(0), mversion(0), mdbName(0), mnodeID(0), mnodeType(0), misConfigured(false), mcanRollBack(false) {};
    StDbNode(const char* name, const char* versionKey);
    StDbNode(const char* name);
    StDbNode(StDbNode& node);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.16 2001/01/22 18:38:00 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.17 2001/02/08 23:23:56 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.17  2001/02/08 23:23:56  porter
+ * fixed initialization of schemaID in table & fixed some warnings when
+ * compiled with NODEBUG
+ *
  * Revision 1.16  2001/01/22 18:38:00  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -348,7 +352,7 @@ StDbTableDescriptor::fillSizeAndOffset(char* length, int elementNum){
 StTypeE
 StDbTableDescriptor::getType(char* type) {
 
-StTypeE retVal;
+StTypeE retVal=Stchar;
 
 //char* typenames[] = {"Stchar","Stuchar","Stshort","Stushort","Stint","Stuint","Stlong","Stulong","Stfloat","Stdouble","Stascii","Ststring"};
 const char* typenames[] = {"char","uchar","short","ushort","int","uint","long","ulong","float","double","ascii","string"};
