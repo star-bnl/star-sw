@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.13 2000/01/11 16:05:34 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.14 2000/01/14 13:58:03 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,9 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.13  2000/01/11 16:05:34  ullrich
- * With Victors help now possible to read the dst_summary_param
- * table from the runco branch and build StEventSummary objects.
+ * Revision 2.14  2000/01/14 13:58:03  ullrich
+ * Create and fill the RICH pixel collection. Added also
+ * the debug output for the RICH to printEventInfo().
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -93,7 +93,7 @@
  * Revision 2.5  1999/11/11 10:02:58  ullrich
  * Added warning message in case some hits cannot be stored.
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.13 2000/01/11 16:05:34 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.14 2000/01/14 13:58:03 ullrich Exp $";
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -130,10 +130,10 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.13 2000/01/11 16:05:34 ul
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.13 2000/01/11 16:05:34 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.14 2000/01/14 13:58:03 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.13 2000/01/11 16:05:34 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.14 2000/01/14 13:58:03 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -747,6 +747,15 @@ StEventMaker::makeEvent()
         if (doLoadFtpcHits) {
             info    = 0;
             nfailed = 0;
+		    id = dstPoints[i].id_track;
+		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
+			info = vecGlobalTracks[id]->detectorInfo();
+			info->addHit(ftpcHit);
+		    }
+		    if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
+			if (vecPrimaryTracks[id]->detectorInfo() != info)
+			    vecPrimaryTracks[id]->detectorInfo()->addHit(ftpcHit);
+		}
 		else {
 		    nfailed++;
 		    delete ftpcHit;
@@ -1064,7 +1073,24 @@ StEventMaker::makeEvent()
 		for (i=0; !gotOneHit && i<svtColl->barrel(k)->ladder(j)->numberOfWafers(); i++)
 		    if (svtColl->barrel(k)->ladder(j)->wafer(i)->hits().size()) {
 			svtColl->barrel(k)->ladder(j)->wafer(i)->hits()[0]->Dump();
-        
+			gotOneHit = kTRUE;
+		    }
+    if (ftpcColl) {
+        nhits = ftpcColl->numberOfHits();
+        cout << "# of hits in collection = " << nhits << endl;
+        gotOneHit = kFALSE;
+        for (k=0; !gotOneHit && k<ftpcColl->numberOfPlanes(); k++)
+            for (j=0; !gotOneHit && j<ftpcColl->plane(k)->numberOfSectors(); j++)
+                if (ftpcColl->plane(k)->sector(j)->hits().size()) {
+                    ftpcColl->plane(k)->sector(j)->hits()[0]->Dump();
+	nhits = ssdColl->numberOfHits();
+	cout << "# of hits in collection = " << nhits << endl;
+	gotOneHit = kFALSE;
+	for (k=0; !gotOneHit && k<ssdColl->numberOfLadders(); k++)
+		for (i=0; !gotOneHit && i<ssdColl->ladder(j)->numberOfWafers(); i++)
+		    if (ssdColl->ladder(j)->wafer(i)->hits().size()) {
+			ssdColl->ladder(j)->wafer(i)->hits()[0]->Dump();
+			gotOneHit = kTRUE;
 		    }
     if (svtColl) {
         nhits = svtColl->numberOfHits();
