@@ -99,7 +99,6 @@ int StHbtIOBinary::readTrackList(StHbtEvent& ev, unsigned short trVersion){
   }
   StHbtThreeVector rVertexPosition(ev.PrimVertPos());
   StHbtThreeVector p;
-  double pathlength; 
   for (colSizeType itrk=0; itrk <NtracksInCollection; itrk++){
     StHbtTrack* trk = new StHbtTrack;
     iret =  read(  *trk, trVersion);
