@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cc,v 1.9 1999/02/23 21:24:32 ullrich Exp $
+ * $Id: StGlobalTrack.cc,v 1.10 1999/02/24 12:49:04 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cc,v $
- * Revision 1.9  1999/02/23 21:24:32  ullrich
- * Removed obsolete EMC/SMD hit information (future cluster).
+ * Revision 1.10  1999/02/24 12:49:04  ullrich
+ * Added argument (h) to constructor needed to instatiate helix
  *
  * Revision 1.12  1999/04/08 14:58:32  ullrich
  * Moved PID traits from StTrack to StGlobalTrack.
@@ -44,20 +44,21 @@
  * New track constructor to load helix params independently of table
  *
  * Revision 1.3  1999/02/10 21:50:30  wenaus
-
+ * Plug memory leaks
  *
  * Revision 1.2  1999/01/15 22:53:44  wenaus
  * version with constructors for table-based loading
  *
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.9 1999/02/23 21:24:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.10 1999/02/24 12:49:04 ullrich Exp $";
 #include "StEvent/StGlobalTrack.hh"
 StGlobalTrack::StGlobalTrack()
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.9 1999/02/23 21:24:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.10 1999/02/24 12:49:04 ullrich Exp $";
  
 StGlobalTrack::StGlobalTrack() : mPidTraits(*this)
 {
-                             StThreeVector<double>& origin) : 
-  StTrack(trk, curvature, dip, phase, origin)
+    mTpcDedx = 0; 
+    mFtpcDedx = 0;
+    mSvtDedx = 0; 
 }
 
 StGlobalTrack::StGlobalTrack(dst_track_st* trk,
