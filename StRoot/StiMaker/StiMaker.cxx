@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.148  2005/02/25 17:41:01  perev
+// Time count added
+//
 // Revision 1.147  2005/01/25 17:23:48  pruneau
 // removed references to html package
 //
@@ -218,6 +221,7 @@
 #include "tables/St_KalmanTrackFitterParameters_Table.h"
 #include "tables/St_HitError_Table.h"
 
+#include "Sti/StiTimer.h"
 
 ClassImp(StiMaker)
   
@@ -288,6 +292,8 @@ Int_t StiMaker::Finish()
 	_residualCalculator->write("StiHistograms.root", "UPDATE"); 
       //delete canvas;
     }
+  StiTimer::Print();
+  StiTimer::Clear();
   return StMaker::Finish();
 }
 
@@ -295,7 +301,9 @@ Int_t StiMaker::Init()
 {
 
   runField =0.;
-
+  StiTimer::Init("StiTrackFinder::find() TIMING"
+	        ,StiTimer::fgFindTimer,StiTimer::fgFindTally);
+  
   _loaderHitFilter = 0; // not using this yet.
   _loaderTrackFilter = new StiDefaultTrackFilter("LoaderTrackFilter","MC Tracks Filter"); 
   _loaderTrackFilter->add(new EditableParameter("PhiUsed",  "Use Phi",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPhi));
