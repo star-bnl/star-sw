@@ -24,15 +24,15 @@ my $DISK1 = "/star/rcf/disk00001/star";
 my $DISK2 =  "/star/rcf/data09/reco";
 my $DISK3 = "/star/rcf/data10/reco";
 
-my $prodSr = "P00hf";
+my $prodSr = "P00hg";
 my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
 
 my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetD = (
-             "P00hf/2000/06",
-             "P00hf/2000/07",
-             "P00hf/2000/08", 
+             "P00hg/2000/06",
+             "P00hg/2000/07",
+             "P00hg/2000/08", 
 #             "P00hf/2000/09", 
 );
 
@@ -218,8 +218,8 @@ my $kk = 0;
    print "diskDstDir: $diskDstDirs[$ll]\n";
     
  }
-   $diskDstDirs[$ll] = $DISK3 . "/" . $SetD[2];
-    print "diskDstDir: $diskDstDirs[$ll]\n";  
+#   $diskDstDirs[$ll] = $DISK3 . "/" . $SetD[2];
+#    print "diskDstDir: $diskDstDirs[$ll]\n";  
 
  foreach $diskDir (@diskDstDirs) {
              if (-d $diskDir) {
