@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.2 1999/01/18 10:14:26 lasiuk Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.3 1999/01/18 21:02:14 lasiuk Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,8 +11,8 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
- * Revision 1.2  1999/01/18 10:14:26  lasiuk
- * pressure in mbar
+ * Revision 1.3  1999/01/18 21:02:14  lasiuk
+ * frisch grid for +/-z
  *
  * Revision 1.3  1999/01/18 21:02:14  lasiuk
  * frisch grid for +/-z
@@ -55,11 +55,14 @@ StTrsFastChargeTransporter::StTrsFastChargeTransporter(StTpcGeometry* geodb, StT
 
 StTrsFastChargeTransporter::~StTrsFastChargeTransporter() {/* nopt */}
 
-    PR(mGeomDb->frischGrid());
+void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
+{
+    // Projection onto pad plane
 
-    // must keep time/z position of cluster! --> replace with transit distance!
-    double driftLength = mGeomDb->frischGrid() - seg.position().z();
-    PR(driftLength);
+    double frischGrid = (seg.position().z() > 0) ?
+	mGeomDb->frischGrid() : -mGeomDb->frischGrid();
+    double driftLength = frischGrid - seg.position().z();
+    //PR(driftLength);
 	cerr << "ERROR: Drift distance < 0" << endl;
 	//continue; // Do something!!!
     }
@@ -74,7 +77,7 @@ StTrsFastChargeTransporter::~StTrsFastChargeTransporter() {/* nopt */}
 	seg.position().setZ( (mGaussDistribution.shoot(driftLength, (mSigmaLongitudinal*sqrt(driftLength)) ) ) );
     }
     else {
-    PR(seg.position());
+    //PR(seg.position());
     }
 
 //     PR(seg.position());
@@ -86,15 +89,15 @@ StTrsFastChargeTransporter::~StTrsFastChargeTransporter() {/* nopt */}
 
     // O2 abosorption (stat)
     if(mChargeAttachment) {
-    PR(seg.charge());
+    //PR(seg.charge());
     }
     
 //     PR(seg.charge());
-	PR(wireGridTransmission());
+
     // Grid Transparency (stat)
     if(mGatingGridTransparency) {
 	//PR(wireGridTransmission());
-    PR(seg.charge());
+    //PR(seg.charge());
     }
 
 //     PR(seg.charge());
