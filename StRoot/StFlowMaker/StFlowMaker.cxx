@@ -1,13 +1,19 @@
 //////////////////////////////////////////////////////////////////////
-// $Id: StFlowMaker.cxx,v 1.7 1999/12/15 22:01:27 posk Exp $
+//
+// $Id: StFlowMaker.cxx,v 1.8 1999/12/16 18:05:23 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
+//////////////////////////////////////////////////////////////////////
+//
 // Description:  Maker to fill StFlowEvent from StEvent and
 //      base class for StFlowTagMaker and StFlowAnalysisMaker
 //
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.8  1999/12/16 18:05:23  posk
+// Fixed Linux compatability again.
+//
 // Revision 1.7  1999/12/15 22:01:27  posk
 // Added StFlowConstants.hh
 //
@@ -88,7 +94,7 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.7 1999/12/15 22:01:27 posk Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.8 1999/12/16 18:05:23 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 
 }
@@ -181,7 +187,6 @@ void StFlowMaker::fillFlowEvent() {
   pFlowEvent = new StFlowEvent;
 
   // Fill PhiWgt array
-  //Double_t* pPhiWgt = &mPhiWgt[0][0][0]; 
   pFlowEvent->SetPhiWeight(mPhiWgt);
 
   // Get event id 

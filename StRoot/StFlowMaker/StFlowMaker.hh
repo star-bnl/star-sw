@@ -1,7 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// StFlowMaker.hh
-//  $Id: StFlowMaker.hh,v 1.5 1999/12/15 22:01:28 posk Exp $
+//  $Id: StFlowMaker.hh,v 1.6 1999/12/16 18:05:24 posk Exp $
+//
+// Author List: 
+//  Raimond Snellings and Art Poskanzer, LBNL, 6/99
+///////////////////////////////////////////////////////////////////////////////
 //
 // Description: 
 //  Interface to StEvent for StFlowEvent and base class for
@@ -9,12 +12,12 @@
 //
 // Environment:
 //  Software developed for the STAR Detector at LBNL
+///////////////////////////////////////////////////////////////////////////////
 //
-// Author List: 
-//  Raimond Snellings and Art Poskanzer, LBNL, 6/99
-//
-// History:
 //  $Log: StFlowMaker.hh,v $
+//  Revision 1.6  1999/12/16 18:05:24  posk
+//  Fixed Linux compatability again.
+//
 //  Revision 1.5  1999/12/15 22:01:28  posk
 //  Added StFlowConstants.hh
 //

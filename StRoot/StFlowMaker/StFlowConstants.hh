@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.hh,v 1.1 1999/12/15 22:01:20 posk Exp $
+// $Id: StFlowConstants.hh,v 1.2 1999/12/16 18:05:21 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //////////////////////////////////////////////////////////////////////
@@ -9,12 +9,15 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.hh,v $
+// Revision 1.2  1999/12/16 18:05:21  posk
+// Fixed Linux compatability again.
+//
 // Revision 1.1  1999/12/15 22:01:20  posk
 // Added StFlowConstants.hh
 //
-// Revision 1.0  posk
 //
 //////////////////////////////////////////////////////////////////////
+
 #ifndef StFlowConstants_hh
 #define StFlowConstants_hh
 
