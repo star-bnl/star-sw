@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.39 2004/08/09 20:17:12 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.40 2004/09/20 13:32:59 balewski Exp $
  
 
 #include <time.h>
@@ -109,7 +109,8 @@ StEEmcDbMaker::~StEEmcDbMaker(){
   }
 
   delete mDbFiber;
-
+  delete [] chGainL;
+  delete [] chMaskL;
 }
 
 //________________________________________________________
@@ -1014,6 +1015,9 @@ void  StEEmcDbMaker::changeMaskAction(const char *fname) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.40  2004/09/20 13:32:59  balewski
+// to make Valgrind happy
+//
 // Revision 1.39  2004/08/09 20:17:12  balewski
 // a bit more printout
 //
