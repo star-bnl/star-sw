@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.hh,v 1.1 1999/01/30 03:59:02 fisyak Exp $
+ * $Id: StHelixD.hh,v 1.2 1999/03/02 19:47:43 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,8 +15,8 @@
  ***************************************************************************
  *
  * $Log: StHelixD.hh,v $
- * Revision 1.1  1999/01/30 03:59:02  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/03/02 19:47:43  ullrich
+ * Added method to find dca between two helices
  *
  * Revision 1.2  1999/03/02 19:47:43  ullrich
  * Added method to find dca between two helices
@@ -81,7 +81,7 @@ public:
     StThreeVectorD  at(double s) const;
 
     // returns period length of helix
-    pairD pathLength(double r)   const;
+    double       period()       const;
     
     // path length at given r (cylindrical r)
     pairD        pathLength(double r)   const;
@@ -93,11 +93,14 @@ public:
     double       pathLength(const StThreeVectorD& r,
 			    const StThreeVectorD& n) const;
 
+    // path length at distance of closest approach in the xy-plane to a given point
+    double       pathLength(double x, double y) const;
+    
     // path lengths at dca between two helices 
     pairD        pathLengths(const StHelixD&) const;
     
     // minimal distance between point and helix
-    int         valid() const;
+    double       distance(const StThreeVectorD&) const;    
     
     // checks for valid parametrization
     int          valid() const;
