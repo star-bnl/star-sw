@@ -1,6 +1,9 @@
 #!/usr/local/bin/perl
-# $Id: bfc,v 1.2 1999/05/20 21:58:31 didenko Exp $
+# $Id: bfc,v 1.3 1999/05/21 19:48:24 fisyak Exp $
 # $Log: bfc,v $
+# Revision 1.3  1999/05/21 19:48:24  fisyak
+# Add recognition of file name by . and no. of events to process from file name
+#
 # Revision 1.2  1999/05/20 21:58:31  didenko
 # Replace cshell version by perl one
 #
@@ -9,7 +12,11 @@ use File::Basename;
 system 'echo "Starting job execution at" `date` " on " $HOSTNAME';
 print "STAR_LEVEL = $STAR_LEVEL\n";
 die "No input Chain defined" if ! defined($ARGV[0]);
-my $Chain = $ARGV[0];
+my $Chain = "";
+
+for (my $i = 0;$i<=$#ARGV;$i++){
+  if ($ARGV[$i] && ! ($ARGV[$i] =~ /\./)) {$Chain .= " " .  $ARGV[$i];}
+}
 my  $input_file;
 if ($ACTUAL_INPUT0) {
   chomp ($ACTUAL_INPUT0);
@@ -40,12 +47,19 @@ if ($ACTUAL_INPUT0) {
   symlink $output_file2,  $OUTPUT2;
 }
 else {
-  if (defined($ARGV[1])) {
-    $input_file = $ARGV[1];
+  for (my $i = 0;$i<=$#ARGV;$i++){
+    if ($ARGV[$i] && $ARGV[$i] =~ /\./) {$input_file =  $ARGV[$i];}
   }
 }
 die "No input file has been defined" if ! $input_file;
-my $cmd = " root4star -b -q 'bfc.C(999,\"" . $Chain . "\",\"" . $input_file . "\")\'";
+my $NofEvents = 999;
+if ($input_file =~ /evts/){
+  my $dummy,  $evts, $ev;
+  ($dummy, $dummy, $evts)  = split /_/, $input_file;
+  ($ev, $dumm) = split /e/, $evts;
+  if ($ev > 0 && $ev < 100000000) {$NofEvents = $ev;}
+}
+my $cmd = " root4star -b -q 'bfc.C(" . $NofEvents . ",\"" . $Chain . "\",\"" . $input_file . "\")\'";
 print $cmd,"\n";
 system $cmd;
 system 'echo "Finished job execution at" `date` " on " `hostname`'; 
