@@ -319,7 +319,7 @@ c*** wkw: breakout if n_xi=maxlen
                 endif
 
                 if( xi_vertex_h.nok .ge. xi_vertex_h.maxlen ) then
-                  write(6,*) 'EXI - Error: exi_aux vertex table overflow'
+                  write(6,*) 'EXI - Error: exi_dst_vertex table overflow'
                   return
                 else
                   n_xi = xi_vertex_h.nok + 1
