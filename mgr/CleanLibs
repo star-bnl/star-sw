@@ -70,7 +70,10 @@ foreach my $dir (@dirs) {
 	      next;
 	  }
 	  print "Delete $s \n";
-	  unlink $s;
+	  if ( ! unlink $s ){
+	      print "Could not remove $s (check token or access)\n";
+	      exit;
+	  }
 	}
       }
     }
