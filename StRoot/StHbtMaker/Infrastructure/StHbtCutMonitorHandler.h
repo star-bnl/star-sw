@@ -7,6 +7,8 @@
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0.hh"
 #include "StHbtMaker/Infrastructure/StHbtKink.hh"
+#include "StHbtMaker/Infrastructure/StHbtPair.hh" //Gael 12/04/02
+#include "StHbtMaker/Infrastructure/StHbtParticleCollection.hh" // Gael 19/06/02
 #include "StHbtMaker/Infrastructure/StHbtCutMonitorCollection.hh"
 #include "StHbtMaker/Base/StHbtCutMonitor.hh"
 
@@ -28,7 +30,10 @@ class StHbtCutMonitorHandler{
   void FillCutMonitor(const StHbtEvent* event, bool pass); 
   void FillCutMonitor(const StHbtTrack* track, bool pass); 
   void FillCutMonitor(const StHbtV0* v0, bool pass); 
-  void FillCutMonitor(const StHbtKink* kink, bool pass); 
+  void FillCutMonitor(const StHbtKink* kink, bool pass);
+  void FillCutMonitor(const StHbtPair* pair, bool pass);//Gael 11/04/02
+  void FillCutMonitor(const StHbtParticleCollection* partColl);// Gael 19/06/02
+  void FillCutMonitor(const StHbtEvent* event, const StHbtParticleCollection* partColl);// Gael 19/06/02
   void Finish();
   
  private:

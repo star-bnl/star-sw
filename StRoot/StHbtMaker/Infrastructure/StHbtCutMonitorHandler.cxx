@@ -85,6 +85,47 @@ void StHbtCutMonitorHandler::FillCutMonitor(const StHbtKink* kink, bool pass) {
     }
   }
 }
+// ---------------------------------Gael/12/04/02-----------------------------
+void StHbtCutMonitorHandler::FillCutMonitor(const StHbtPair* pair, bool pass) { 
+  if (mCollectionsEmpty) return;
+  StHbtCutMonitorIterator iter;
+  StHbtCutMonitor* CM;
+  if ( pass) {
+    for (iter=mPassColl->begin(); iter!=mPassColl->end(); iter++){
+      CM = *iter;
+      CM->Fill(pair);
+    }
+  } else {
+    for (iter=mFailColl->begin(); iter!=mFailColl->end(); iter++){
+      CM = *iter;
+      CM->Fill(pair);
+    }
+  }
+}
+// ---------------------------------Gael/19/06/02-----------------------------
+void StHbtCutMonitorHandler::FillCutMonitor(const StHbtParticleCollection* partColl) {
+  if (mCollectionsEmpty) return;
+  StHbtCutMonitorIterator iter;
+  StHbtCutMonitor* CM;
+  
+  for (iter=mPassColl->begin(); iter!=mPassColl->end(); iter++){
+    CM = *iter;
+    CM->Fill(partColl);
+  }
+}
+// ------------------------------------Gael/19/06/02-------------------------
+void StHbtCutMonitorHandler::FillCutMonitor(const StHbtEvent* event,const StHbtParticleCollection* partColl) {
+  
+  cout<<"In StHbtCutMonitorHandler::FillCutMonitor(const StHbtEvent* event, StHbtPicoEvent* picoEvent)"<<endl;
+  if (mCollectionsEmpty) return;
+  StHbtCutMonitorIterator iter;
+  StHbtCutMonitor* CM;
+  
+  for (iter=mPassColl->begin(); iter!=mPassColl->end(); iter++){
+    CM = *iter;
+    CM->Fill(event,partColl);
+  }
+}
 // ---------------------------------------------------------------------------
 void StHbtCutMonitorHandler::Finish() { 
   StHbtCutMonitorIterator iter;
