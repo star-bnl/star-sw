@@ -16,7 +16,10 @@
 #include "TVector2.h"
 #include "tables/St_ev0_ev0par2_Table.h"
 
-
+///Begin Betty
+///#include "StEstMaker/StEstTracker.h"
+#include "StEvent/StTrack.h"
+///End Betty
 
 #include "math_constants.h"
 #include "phys_constants.h"
@@ -26,14 +29,6 @@
 
 #define MAXTRACKS 10000
 #define MAXSTRACK  6500
-
-
-
-enum ITTFusage{
-  kUseTPT = 0 ,
-  kUseITTF = 1,
-		kUseBOTH = 2
-};
 
 
 
@@ -63,11 +58,14 @@ ClassImp(StV0FinderMaker)
 
 
 
-	
+ 
 //_____________________________________________________________________________
   StV0FinderMaker::StV0FinderMaker(const char *name):StMaker(name),
-						   ev0par2(0),pars(0),pars2(0),event(0),v0Vertex(0),
-						     prepared(kFALSE),useExistingV0s(kFALSE),dontZapV0s(kFALSE),useITTFTracks(kUseTPT)
+         ev0par2(0),pars(0),pars2(0),event(0),v0Vertex(0),
+         prepared(kFALSE),useExistingV0s(kFALSE),dontZapV0s(kFALSE),
+         useTracker(kTrackerUseTPT),useSVT(kNoSVT),useV0Language(kV0LanguageUseCpp),
+         useXiLanguage(kXiLanguageUseCppOnCppV0),useLanguage(kLanguageUseRun),
+         useLikesign(kLikesignUseStandard),useRotating(kRotatingUseStandard)
 {
   // Assign pointers for static arrays
   maxtracks = MAXTRACKS;
@@ -146,20 +144,70 @@ void StV0FinderMaker::GetPars()
 
 
 //_____________________________________________________________________________
+Int_t StV0FinderMaker::Init()
+{if (useLanguage != kLanguageUseSpecial)
+    {int a,b,c;
+     a=1&(useLanguage>>2);
+     b=1&(useLanguage>>1);
+     c=1&useLanguage;
+     useV0Language=2*(~(a^c))+(a|c);
+     useXiLanguage=4*(b&(~(a^c)))+2*(a&b&(~c))+(a|c);
+     }
+ switch (useLanguage)
+    {case kLanguageUseOldRun : gMessMgr->Info()<<"StV0FinderMaker : Fortran run."<<endm;
+                               break;
+     case kLanguageUseRun : gMessMgr->Info()<<"StV0FinderMaker : C++ run."<<endm;
+                            gMessMgr->Info()<<"StV0FinderMaker : BE CAREFUL : you are NOT running the XiFinder !"<<endm;
+                            break;
+     case kLanguageUseTestV0Finder : gMessMgr->Info()<<"StV0FinderMaker : Test V0Finder."<<endm;
+                                     break;
+     case kLanguageUseTestXiFinder : gMessMgr->Info()<<"StV0FinderMaker : Test XiFinder."<<endm;
+                                     gMessMgr->Info()<<"StV0FinderMaker : BE CAREFUL : you are NOT running the XiFinder !"<<endm;
+                                     break;
+     case kLanguageUseTestBothFinders : gMessMgr->Info()<<"StV0FinderMaker : Test V0Finder and XiFinder."<<endm;
+                                        gMessMgr->Info()<<"StV0FinderMaker : BE CAREFUL : you are NOT running the XiFinder !"<<endm;
+                                        break;
+     default : gMessMgr->Info()<<"StV0FinderMaker : BE CAREFUL : you are NOT running the XiFinder !"<<endm;
+     }
+ if (1&useV0Language) gMessMgr->Info()<<"StV0FinderMaker :    Will store Fortran V0."<<endm;
+ if (2&useV0Language) gMessMgr->Info()<<"StV0FinderMaker :    Will store C++ V0."<<endm;
+ if (1&useXiLanguage) gMessMgr->Info()<<"StV0FinderMaker :    Will store Fortran Xi."<<endm;
+ if (2&useXiLanguage) gMessMgr->Info()<<"StV0FinderMaker :    BE CAREFUL : will NOT store C++ Xi, although asked."<<endm;
+ if (4&useXiLanguage) gMessMgr->Info()<<"StV0FinderMaker :    BE CAREFUL : will NOT store C++ Xi, although asked."<<endm;
+
+ return StMaker::Init();
+ }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//_____________________________________________________________________________
 Int_t StV0FinderMaker::Prepare() {
 
   if (prepared) return kStOk;
-  //if(UsingITTFTracks()) cout << "using ittf tracks" << endl;
-		if (UsingITTFTracks() == kUseTPT) cout << "Using TPT tracks" << endl;
-		if (UsingITTFTracks() == kUseITTF) cout << "Using ITTF tracks" << endl;
-		if (UsingITTFTracks() == kUseBOTH) cout << "Using TPT *and* ITTF tracks" << endl;
+  if (GetTrackerUsage() == kTrackerUseTPT) cout << "Using TPT tracks" << endl;
+  if (GetTrackerUsage() == kTrackerUseITTF) cout << "Using ITTF tracks" << endl;
+  if (GetTrackerUsage() == kTrackerUseBOTH) cout << "Using TPT *and* ITTF tracks" << endl;
+  if (GetSVTUsage() == kUseSVT) cout << "Using SVT points" << endl;///Betty
 
   unsigned short i,j,nNodes;
   StThreeVectorD p;
 
   // Get pars
   GetPars();
-		ITTFflag=kITKalmanFitId;
+  ITTFflag=kITKalmanFitId;
 
   // Get event 
   event = (StEvent*) GetInputDS("StEvent");
@@ -187,9 +235,17 @@ Int_t StV0FinderMaker::Prepare() {
     for (j=0; j<theNodes[i]->entries(global); j++) {
 
       StTrack* tri = theNodes[i]->track(global,j);
+      ///Begin Betty
+      if(useSVT){
+        StTrack* svtTrack = theNodes[i]->track(estGlobal,j);
+        if (svtTrack){  //if there is a track that uses an SVT point, set the track to estGlobal
+          tri=svtTrack;
+        }
+      }
+      ///End Betty
       //Cut: track type
-      if ((tri->fittingMethod() != ITTFflag && (UsingITTFTracks() == kUseITTF)) ||
-          (tri->fittingMethod() == ITTFflag && (UsingITTFTracks() == kUseTPT))) continue;
+      if ((tri->fittingMethod() != ITTFflag && (GetTrackerUsage() == kTrackerUseITTF)) ||
+          (tri->fittingMethod() == ITTFflag && (GetTrackerUsage() == kTrackerUseTPT))) continue;
 
       //Cut: track flag
       if (tri->flag() <= 0) continue;
@@ -216,11 +272,10 @@ Int_t StV0FinderMaker::Prepare() {
         heli[trks] = triGeom->helix();
        
         p = triGeom->momentum();
-//VPunused	Float_t bf = 4.97958;
 
-	pt[trks] = p.perp();
+ pt[trks] = p.perp();
         ptot[trks] = p.mag();
-	trkID[trks]=tri->key();
+ trkID[trks]=tri->key();
 
         // Determine number of hits (in SVT+TPC)
         hits[trks] = map.numberOfHits(kTpcId) +
@@ -234,7 +289,7 @@ Int_t StV0FinderMaker::Prepare() {
           else Bfield *= p1.y()/p2.y();
         }
 
-       	if (triGeom->charge() > 0) ptrk[ptrks++] = trks;
+        if (triGeom->charge() > 0) ptrk[ptrks++] = trks;
         else if (triGeom->charge() < 0) ntrk[ntrks++] = trks;
         trks++;
     }
@@ -279,7 +334,7 @@ Int_t StV0FinderMaker::Make() {
   ///Julien
   pairD paths1;
 
-  if (useExistingV0s) return kStOk;
+  if (! (2&useV0Language)) return kStOk;
 
   gMessMgr->Info("StV0FinderMaker::Make(): Starting...");
   
@@ -290,7 +345,7 @@ Int_t StV0FinderMaker::Make() {
 
   StSPtrVecV0Vertex& v0Vertices = event->v0Vertices();
 
-  if (!dontZapV0s) {
+  if (!(1&useV0Language)) {
     //Erase existing V0s and Xis
     // (must do Xis too as they point to the V0s!)
     StSPtrVecV0Vertex v0Vertices2;
@@ -316,10 +371,10 @@ Int_t StV0FinderMaker::Make() {
     for (jj=0; jj<ntrks; jj++) {
       j = ntrk[jj];
 
-      if (UsingITTFTracks() == kUseBOTH)
-						   {if ((trk[i]->fittingMethod() == ITTFflag) && (trk[j]->fittingMethod() != ITTFflag)) continue;
-									 if ((trk[i]->fittingMethod() != ITTFflag) && (trk[j]->fittingMethod() == ITTFflag)) continue;
-									 }
+      if (GetTrackerUsage() == kTrackerUseBOTH)
+         {if ((trk[i]->fittingMethod() == ITTFflag) && (trk[j]->fittingMethod() != ITTFflag)) continue;
+          if ((trk[i]->fittingMethod() != ITTFflag) && (trk[j]->fittingMethod() == ITTFflag)) continue;
+          }
 
       // Determine detector id of V0 for pars
       det_id_v0 = TMath::Min(detId[i],detId[j]);
@@ -365,16 +420,16 @@ Int_t StV0FinderMaker::Make() {
           path2 = heli[i].pathLength(rad_j,xcj.X(),xcj.Y());
           // Two possible solutions: process ones that aren't nans
           if (!isnan(path2.first))
-	     {solution = path2.first;
+      {solution = path2.first;
               if ((!isnan(path2.second)) && (path2.second != path2.first))
-	         {doSecond = kTRUE;
-		  }
+          {doSecond = kTRUE;
+    }
               goto ProcessSolution;
               }
-	      else if (isnan(path2.second))
-	     {// no solutions
-	      continue;
-	      }
+       else if (isnan(path2.second))
+      {// no solutions
+       continue;
+       }
               //else run only with the second solution
           SecondSolution:
           solution = path2.second;
@@ -389,7 +444,7 @@ Int_t StV0FinderMaker::Make() {
           xj = heli[j].at(paths.second);
           }
           else if (separation < pars2->dca)
-	 {// Helix circles are close, but not overlapping,
+  {// Helix circles are close, but not overlapping,
           // find dca to point halfway between circle centers
           tmp2V = (xci + xcj) * 0.5;
           paths.first  = heli[i].pathLength(tmp2V.X(),tmp2V.Y());
@@ -398,7 +453,7 @@ Int_t StV0FinderMaker::Make() {
           xj = heli[j].at(paths.second);
           }
           else
-	 {// Helix circles are too far apart
+  {// Helix circles are too far apart
           continue;
           }
       
@@ -408,7 +463,7 @@ Int_t StV0FinderMaker::Make() {
         dca_ij1 = dca_ij;
         xi1=xi;
         xj1=xj;
-	paths1=paths;
+ paths1=paths;
         goto SecondSolution;
       }
       if ((dca_ij1 != -9999) &&
@@ -417,7 +472,7 @@ Int_t StV0FinderMaker::Make() {
         dca_ij = dca_ij1;
         xi=xi1;
         xj=xj1;
-	paths=paths1;
+ paths=paths1;
       }
       // At this point, dca_ij is *signed* for use in 3D calc
 // *********************  END  OF DETERMINATION OF V0 GEOMETRY
@@ -441,7 +496,7 @@ Int_t StV0FinderMaker::Make() {
         temp = dca_ij/sin2ij;
         t1 = (-pi1.z()+pj1.z()*cosij)*temp;
         t2 = ( pj1.z()-pi1.z()*cosij)*temp;
-	
+ 
         temp = rad_i*(ptot[i]/pt[i]);
         temp *= sin(t1/temp);
         xi1 = xi + pi1.pseudoProduct(temp,temp,t1);
@@ -469,9 +524,9 @@ Int_t StV0FinderMaker::Make() {
             dca_ij = dca_ij1;
           }
         }
-								//This code is the new one.
+        //This code is the new one.
 
-	/*if (dca_ij1 < dca_ij) {
+ /*if (dca_ij1 < dca_ij) {
           paths.first  = heli[i].pathLength(xi1.x(),xi1.y());
           paths.second = heli[j].pathLength(xj1.x(),xj1.y());
           xi = xi1;
@@ -479,10 +534,10 @@ Int_t StV0FinderMaker::Make() {
           pi = heli[i].momentumAt(paths.first ,Bfield);
           pj = heli[j].momentumAt(paths.second,Bfield);
           dca_ij = dca_ij1;
-	  }*/
-			//And this one is the old one (comparison with Fortran).
+   }*/
+   //And this one is the old one (comparison with Fortran).
 
-	
+ 
       }
 // *********************  END  OF DETERMINATION OF 3D DCA
 
@@ -551,6 +606,11 @@ Int_t StV0FinderMaker::Make() {
       v0Vertex->setMomentumOfDaughter(negative,pj);
       v0Vertex->setDcaDaughters(dca_ij);
       v0Vertex->setDcaParentToPrimaryVertex(rmin);
+      v0Vertex->setChiSquared(-1.);
+      ///Begin Betty
+      //Set a chiSquared to -2 instead of -1 when (a) SVT point(s) was (were) used
+      if (detId[i]==2 || detId[j]==2 || detId[i]==3 || detId[j]==3) v0Vertex->setChiSquared(-2.);
+      ///End Betty
 
       // Use primary V0 cut parameters
       isPrimaryV0 =
@@ -629,8 +689,11 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.4 2003/05/02 21:21:08 lbarnby Exp $
+// $Id: StV0FinderMaker.cxx,v 1.5 2003/05/14 19:15:03 faivre Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.5  2003/05/14 19:15:03  faivre
+// Fancy choices Fortran/C++ V0's and Xi's. SVT tracks.
+//
 // Revision 1.4  2003/05/02 21:21:08  lbarnby
 // Now identify ITTF tracks by fittingMethod() equal to  kITKalmanFitId
 //
