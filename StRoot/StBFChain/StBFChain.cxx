@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.195 2001/04/24 00:06:19 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.196 2001/04/24 21:48:57 didenko Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -61,7 +61,7 @@ Bfc_st BFC[] = {
   {"drawDst"     ,""  ,"","xin,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                  ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
   {"C1default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits"    ,"","","Year 1 chain",kFALSE}, 
-  {"C2default"   ,""  ,"","C1default,ftpc,svt,emcY2"                          ,"","","Year 2 chain",kFALSE}, 
+  {"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt,emcY2" ,"","","Year 2 chain",kFALSE}, 
   {"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt,emcY2"
                                                                          ,"","","Assymptotic chain",kFALSE}, 
   {"Cy1a"        ,""  ,"","y1a,C1default"                                ,"","","Turn on chain y1a",kFALSE},
@@ -75,7 +75,7 @@ Bfc_st BFC[] = {
   {"C2000"       ,""  ,"","y2000,C1default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"C2001"       ,""  ,"","y2001,C2default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"MDC4"        ,""  ,"","C2001,trs,sss,fss,rrs,big,GeantOut"      ,"","","Turn on chain for MDC4",kFALSE},
-  {"ppMDC4"      ,""  ,"","pp,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,rrs,big,GeantOut"
+  {"ppMDC4"      ,""  ,"","pp,C2001,-PreVtx,VtxOffSet,ppMCTrig,mwc,ppLPeval1,trs,srs,rrs,big,GeantOut"
                                                                    ,"","","Turn on chain for ppMDC",kFALSE},
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
