@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.14 2000/03/06 18:07:36 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.15 2000/04/04 23:15:43 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.15  2000/04/04 23:15:43  calderon
+ * Report number of hits successfully stored and additional
+ * reporting of hits with bad volume id.
+ *
  * Revision 1.14  2000/03/06 18:07:36  calderon
  * 1) Check tpc hit volume id to not load hits in pseudo pad rows.
  * 2) Sort the hits in the collections, in order to save time
@@ -94,7 +98,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.14 2000/03/06 18:07:36 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.15 2000/04/04 23:15:43 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -475,8 +479,8 @@ Int_t StMcEventMaker::Make()
 	    
 	    th = new StMcTpcHit(&tpcHitTable[ihit]);
 	    
-	    mCurrentMcEvent->tpcHitCollection()->addHit(th); // adds hit th to collection
-	    
+	    if(!mCurrentMcEvent->tpcHitCollection()->addHit(th)) // adds hit th to collection
+		nBadVolId++;
 	    // point hit to its parent and add it to collection
 	    // of the appropriate track
 	    
@@ -486,8 +490,8 @@ Int_t StMcEventMaker::Make()
 	    ttemp[iTrkId]->addTpcHit(th);
 	    
 	}
-	cout << "Filled TPC Hits" << endl;
-	cout << "Found " << nPseudoPadrow << " Pseudo-Padrows." << endl;
+	cout << "Filled " << mCurrentMcEvent->tpcHitCollection()->numberOfHits() << " TPC Hits" << endl;
+	cout << "Found " << nPseudoPadrow << " Hits in Pseudo-Padrows." << endl;
 	if (nBadVolId) gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
 					   << " TPC hits, wrong Volume Id." << endm;
 	// Sort the hits
@@ -514,7 +518,8 @@ Int_t StMcEventMaker::Make()
 		    continue;
 		}
 		sh = new StMcSvtHit(&svtHitTable[ihit]);
-		mCurrentMcEvent->svtHitCollection()->addHit(sh); // adds hit sh to collection
+		if (!mCurrentMcEvent->svtHitCollection()->addHit(sh)) // adds hit sh to collection
+		    nBadVolId++; 
 		
 		// point hit to its parent and add it to collection
 		// of the appropriate track
@@ -524,7 +529,7 @@ Int_t StMcEventMaker::Make()
 		ttemp[iTrkId]->addSvtHit(sh);
 		
 	    }
-	    cout << "Filled SVT Hits" << endl;
+	    cout << "Filled " << mCurrentMcEvent->svtHitCollection()->numberOfHits() << " SVT Hits" << endl;
 	    if (nBadVolId)
 		gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
 				    << " SVT hits, wrong Volume Id." << endm;
@@ -559,8 +564,9 @@ Int_t StMcEventMaker::Make()
 		}
 
 		fh = new StMcFtpcHit(&ftpHitTable[ihit]);
-		mCurrentMcEvent->ftpcHitCollection()->addHit(fh); // adds hit fh to collection
-		
+
+		if (!mCurrentMcEvent->ftpcHitCollection()->addHit(fh)) // adds hit fh to collection
+		    nBadVolId++;
 		// point hit to its parent and add it to collection
 		// of the appropriate track
 		
@@ -569,7 +575,7 @@ Int_t StMcEventMaker::Make()
 		ttemp[iTrkId]->addFtpcHit(fh);
 		
 	    }
-	    cout << "Filled FTPC Hits" << endl;
+	    cout << "Filled " << mCurrentMcEvent->ftpcHitCollection()->numberOfHits() << " FTPC Hits" << endl;
 	    if (nBadVolId)
 		gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
 				    << " FTPC hits, wrong Volume Id." << endm;
