@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//   $Id: StFtpcGasUtilities.cc,v 1.3 2004/03/09 20:22:27 jcs Exp $
+//   $Id: StFtpcGasUtilities.cc,v 1.4 2004/03/09 20:58:00 jcs Exp $
 //
 //   StFtpcGasUtilities
 //
@@ -11,6 +11,10 @@
 ////////////////////////////////////////////////////////////////////////
 //
 //   $Log: StFtpcGasUtilities.cc,v $
+//   Revision 1.4  2004/03/09 20:58:00  jcs
+//   undo activation of additional body temperatures - they are not getting
+//   thru from offline database to here
+//
 //   Revision 1.3  2004/03/09 20:22:27  jcs
 //   activate use of additional body temperatures for y2004
 //
@@ -89,6 +93,7 @@ Int_t StFtpcGasUtilities::averageTemperatureWest(Int_t dbDate) {
       // as of 2003-10-31 there are 2 additional body temperature sensors
       if ( dbDate >= 20031031 ) {
          if (DEBUG) cout<<"dbDate = "<<dbDate<<" >= 20031031 activate additional body temperature sensors"<<endl;
+/*
          if (mGas->getBody5West() >= mDb->minGasTemperature() && mGas->getBody5West() <= mDb->maxGasTemperature() ) {
             averageBodyTemperatureWest = averageBodyTemperatureWest + mGas>getBody5West();	 
 	    numberBodyTemperaturesWest++;
@@ -98,6 +103,7 @@ Int_t StFtpcGasUtilities::averageTemperatureWest(Int_t dbDate) {
 	    averageBodyTemperatureWest = averageBodyTemperatureWest + mGas>getBody6West();
 	    numberBodyTemperaturesWest++;
 	    if (DEBUG) cout<<"mGas->getBody6West() = "<<mGas->getBody6West()<<endl;
+*/
 	 }  
 
    // calculate average body temperature west
@@ -141,6 +147,7 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate) {
       // as of 2003-10-31 there are 2 additional body temperature sensors
       if ( dbDate >= 20031031 ) {
         if (DEBUG)  cout<<"dbDate = "<<dbDate<<" >= 20031031 activate additional body temperature sensors"<<endl;
+/*	
          if (mGas->getBody5East() >= mDb->minGasTemperature() && mGas->getBody5East() <= mDb->maxGasTemperature() ) {
             averageBodyTemperatureEast = averageBodyTemperatureEast + mGas>getBody5East();	 
 	    numberBodyTemperaturesEast++;
@@ -150,6 +157,7 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate) {
 	    averageBodyTemperatureEast = averageBodyTemperatureEast + mGas>getBody6East();
 	    numberBodyTemperaturesEast++;
 	    if (DEBUG) cout<<"mGas->getBody6East() = "<<mGas->getBody6East()<<endl;
+*/	    
        }  
 
       // calculate average body temperature east
