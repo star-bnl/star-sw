@@ -38,11 +38,10 @@
 */
 void kam_soc_bind_()
 {
-   long npars = ku_npar();	/* number of KUIP parameters */
-   char* aspName = ku_gets();	/* ASP name */
-   char* solibName = ku_gets();	/* shared library */
+  char* pkgName = ku_gets();	/* ASP name */
+  char* solibName = ku_gets();	/* Library name */
 
-   STAFCV_T status = soc_bind(aspName,solibName);
+   soc_bind(pkgName, solibName);
 }
 
 
@@ -57,10 +56,9 @@ void kam_soc_bind_()
 */
 void kam_soc_release_()
 {
-   long npars = ku_npar();	/* number of KUIP parameters */
-   char* aspName = ku_gets();	/* ASP name */
+   char* pkgName = ku_gets();	/* ASP name */
 
-   STAFCV_T status = soc_release(aspName);
+   soc_release(pkgName);
 }
 
 
@@ -73,12 +71,12 @@ void kam_soc_release_()
 *:* SOC/OBJECT/NAME IDREF
 *:<---------------------------------------------------------------------
 */
-void kam_socobject_name_()
+void 
+kam_socobject_name_()
 {
-   long npars = ku_npar();	/* number of KUIP parameters */
    long idref = ku_geti();	/* idRef of object */
 
-   STAFCV_T status = socobject_name(idref);
+   socobject_name(idref);
 }
 
 
@@ -91,12 +89,12 @@ void kam_socobject_name_()
 *:* SOC/OBJECT/TYPE IDREF
 *:<---------------------------------------------------------------------
 */
-void kam_socobject_type_()
+void 
+kam_socobject_type_()
 {
-   long npars = ku_npar();	/* number of KUIP parameters */
    long idref = ku_geti();	/* idRef of object */
 
-   STAFCV_T status = socobject_type(idref);
+   socobject_type(idref);
 }
 
 
@@ -109,12 +107,12 @@ void kam_socobject_type_()
 *:* SOC/OBJECT/VERSION IDREF
 *:<---------------------------------------------------------------------
 */
-void kam_socobject_version_()
+void 
+kam_socobject_version_()
 {
-   long npars = ku_npar();	// number of KUIP parameters 
    long idref = ku_geti();	// idRef of object 
 
-   STAFCV_T status = socobject_version(idref);
+   socobject_version(idref);
 }
 
 
@@ -127,10 +125,10 @@ void kam_socobject_version_()
 *:* SOC/CATALOG/COUNT
 *:<---------------------------------------------------------------------
 */
-void kam_soc_count_(){
-   long npars = ku_npar();	/* number of KUIP parameters */
-
-   STAFCV_T status = soc_count();
+void 
+kam_soc_count_()
+{
+   soc_count();
 }
 
 /*
@@ -144,14 +142,13 @@ void kam_soc_count_(){
 */
 void kam_soc_deleteid_()
 {
-   long npars = ku_npar();	/* number of KUIP parameters */
    long id = ku_geti();		/* object id */
 
    EML_CONTEXT("ERROR: This is a functional, though obsolete command.\n"
    "Please use SOC/DELETEOID instead.\n");
    EML_WARNING(OBSOLETE_COMMAND);
 
-   STAFCV_T status = soc_deleteid(id);
+   soc_deleteid(id);
 }
 
 
@@ -164,12 +161,12 @@ void kam_soc_deleteid_()
 *:* SOC/CATALOG/DELETEOBJECT NAME [ TYPE ]
 *:<---------------------------------------------------------------------
 */
-void kam_soc_deleteoid_()
+void 
+kam_soc_deleteoid_()
 {
-   long npars = ku_npar();	/* number of KUIP parameters */
    long id = ku_geti();		/* object id */
 
-   STAFCV_T status = soc_deleteoid(id);
+   soc_deleteoid(id);
 }
 
 
@@ -182,9 +179,9 @@ void kam_soc_deleteoid_()
 *:* SOC/CATALOG/DELETEOBJECT NAME [ TYPE ]
 *:<---------------------------------------------------------------------
 */
-void kam_soc_deleteobject_()
+void 
+kam_soc_deleteobject_()
 {
-   long npars = ku_npar();	/* number of KUIP parameters */
    char* name = ku_gets();	/* object name */
    char* type = ku_gets();	/* object type */
 
@@ -192,7 +189,7 @@ void kam_soc_deleteobject_()
    "Please use SOC/OBJECT/DELETE instead.\n");
    EML_WARNING(OBSOLETE_COMMAND);
 
-   STAFCV_T status = soc_deleteobject(name, type);
+   soc_deleteobject(name, type);
 }
 
 
@@ -205,13 +202,13 @@ void kam_soc_deleteobject_()
 *: * SOC/IDOBJECT NAME [ TYPE ]
 *:<---------------------------------------------------------------------
 */
-void kam_soc_idobject_()
+void 
+kam_soc_idobject_()
 {
-   long npars = ku_npar();	/* number of KUIP parameters */
    char* name = ku_gets();	/* object name */
    char* type = ku_gets();	/* object type */
 
-   STAFCV_T status = soc_idobject(name, type);
+   soc_idobject(name, type);
 }
 
 
@@ -224,11 +221,10 @@ void kam_soc_idobject_()
 *:* SOC/CATALOG/LIST
 *:<---------------------------------------------------------------------
 */
-void kam_soc_list_()
+void 
+kam_soc_list_()
 {
-   long npars = ku_npar();	/* number of KUIP parameters */
-
-   STAFCV_T status = soc_list();
+  soc_list();
 }
 
 
@@ -241,12 +237,12 @@ void kam_soc_list_()
 *:* SOC/CATALOG/NEWOBJECT NAME [ TYPE ]
 *:<---------------------------------------------------------------------
 */
-void kam_soc_newobject_()
+void 
+kam_soc_newobject_()
 {
-   long npars = ku_npar();	/* number of KUIP parameters */
-   char* name = ku_gets();	/* object name */
-
-   STAFCV_T status = soc_newobject(name);
+  char* name = ku_gets();	/* object name */
+  
+  soc_newobject(name);
 }
 
 
@@ -259,13 +255,13 @@ void kam_soc_newobject_()
 *:* SOC/OBJECT/LOCK IDREF [ LOCK ]
 *:<---------------------------------------------------------------------
 */
-void kam_socobject_lock_()
+void
+kam_socobject_lock_()
 {
-   long npars = ku_npar();	/* number of KUIP parameters */
-   long idref = ku_geti();	/* idRef of object */
-   char* l = ku_gets();		/* lock value */
-
-   STAFCV_T status = socobject_lock(idref,l[0]);
+  long idref = ku_geti();	/* idRef of object */
+  char* l = ku_gets();		/* lock value */
+  
+  socobject_lock(idref,l[0]);
 }
 
 
@@ -278,13 +274,13 @@ void kam_socobject_lock_()
 *:* SOC/OBJECT/LOCK IDREF [ LOCK ]
 *:<---------------------------------------------------------------------
 */
-void kam_socobject_implements_()
+void 
+kam_socobject_implements_()
 {
-   long npars = ku_npar();	/* number of KUIP parameters */
    long idref = ku_geti();	/* idRef of object */
    char* iface = ku_gets();	/* interface name */
 
-   STAFCV_T status = socobject_implements(idref,iface);
+   socobject_implements(idref,iface);
 }
 
 
@@ -297,13 +293,13 @@ void kam_socobject_implements_()
 *:* SOC/OBJECT/DELETE NAME [ TYPE ]
 *:<---------------------------------------------------------------------
 */
-void kam_socobject_delete_()
+void 
+kam_socobject_delete_()
 {
-   long npars = ku_npar();	/* number of KUIP parameters */
    char* name = ku_gets();	/* object name */
    char* type = ku_gets();	/* object type */
 
-   STAFCV_T status = socobject_delete(name, type);
+   socobject_delete(name, type);
 }
 
 
@@ -316,13 +312,13 @@ void kam_socobject_delete_()
 *:* SOC/CATALOG/FINDOBJECT NAME [ TYPE ]
 *:<---------------------------------------------------------------------
 */
-void kam_socobject_oid_()
+void 
+kam_socobject_oid_()
 {
-   long npars = ku_npar();	/* number of KUIP parameters */
    char* name = ku_gets();	/* object name */
    char* type = ku_gets();	/* object type */
 
-   STAFCV_T status = socobject_oid(name, type);
+   socobject_oid(name, type);
 }
 
 

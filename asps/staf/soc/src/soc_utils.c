@@ -1,10 +1,10 @@
-#include "asuAlloc.h"
+#include <stdio.h>
 #include <math.h>
-
 #ifndef WIN32
-# include <strings.h>
+# include <string.h>
 #endif /* WIN32 */
 
+#include "asuAlloc.h"
 
 extern char *id2name(char *base, long id);
 extern char *shortname(char *longname, size_t length);
@@ -21,7 +21,7 @@ char *id2name(char *base, long id)
    else {
       name = (char*)MALLOC(strlen(base) +1
                 +(int)(1 +log10((double)id)));	/*INS++:BAD_DECL*/
-      sprintf(name,"%s%d",base,id);
+      sprintf(name,"%s%ld",base,id);
       return name;
    }
 }
@@ -35,7 +35,7 @@ char *shortname(char *longname, size_t length)
 	char *nn;
 	char *b;
 
-	n[length] = NULL;
+	n[length] = 0;
 	if( length < strlen(longname) ){
 		strncpy(n,longname,l1); 
 		n[l1]=0; /* hjw 19Feb98 */
