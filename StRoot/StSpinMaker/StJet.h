@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJet.h,v 1.3 2002/12/04 20:28:07 thenry Exp $
+// $Id: StJet.h,v 1.4 2003/07/17 23:47:11 akio Exp $
 // $Log: StJet.h,v $
+// Revision 1.4  2003/07/17 23:47:11  akio
+// bug fix. Thanks Dylan
+//
 // Revision 1.3  2002/12/04 20:28:07  thenry
 // StppuDstMaker was modified to allow multiple jet analysis modules to be
 // run simultaneosly with various parameters while the Maker loads the events
@@ -55,8 +58,8 @@ public:
     Int_t        nCell;
     int     charge;
     
-    Float_t      ez() const {return E()*sinh(Eta());}
-    Float_t      et() const {return E()*(1.0-sinh(Eta()));}
+    Float_t      ez() const {return E()*tanh(Eta());}
+    Float_t      et() const {return E()*pow(1.0-tanh(Eta())*tanh(Eta()),0.5);}
     ClassDef(StJet,3)
 };
 
