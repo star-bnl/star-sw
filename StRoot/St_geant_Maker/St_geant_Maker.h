@@ -1,4 +1,4 @@
-// $Id: St_geant_Maker.h,v 1.15 1999/07/09 02:18:03 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.16 1999/07/14 16:47:45 fisyak Exp $
 
 #ifndef STAR_St_geant_Maker
 #define STAR_St_geant_Maker
@@ -45,7 +45,6 @@ public:
    virtual void   G2root();
    virtual Int_t  Make();
    virtual void   LoadGeometry (Char_t *option = "detp geometry field_only");  // *MENU
-   virtual void   PrintInfo();
    virtual void   SetNwGEANT (Int_t n=2000000) {nwgeant = n;} // *MENU
    virtual void   SetNwPAW   (Int_t n=      0) {nwpaw   = n;} // *MENU
    virtual void   SetIwtype  (Int_t n=      0) {iwtype  = n;} // *MENU
@@ -65,6 +64,9 @@ static void RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, Int_t *k, Ch
 
 protected:
    static St_DataSet *fgGeom;
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.16 1999/07/14 16:47:45 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
 ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

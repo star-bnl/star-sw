@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.43 1999/07/09 02:18:03 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.44 1999/07/14 16:47:44 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.44  1999/07/14 16:47:44  fisyak
+// Set protection against empty event
+//
 // Revision 1.43  1999/07/09 02:18:03  fisyak
 // Add Skip
 //
@@ -274,8 +277,11 @@ StMaker(name){
   fgGeom = new St_DataSet("geom");  
   m_ConstSet->Add(fgGeom);
   SetOutput(fgGeom);	//Declare this "geom" for output
-  fEvtHddr = new StEvtHddr(m_ConstSet);
-  SetOutput(fEvtHddr);	//Declare this "EvtHddr" for output
+  fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
+  if (!fEvtHddr) {// Stand alone run
+    fEvtHddr = new StEvtHddr(m_ConstSet);
+    SetOutput(fEvtHddr);	//Declare this "EvtHddr" for output
+  }
 }
 
 //_____________________________________________________________________________
@@ -344,13 +350,13 @@ Int_t St_geant_Maker::Make()
 	fEvtHddr->SetProdDateTime();
       }
     }
+    if (!cnum->nvertx || !cnum->ntrack) return kStErr;
     St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",cnum->nvertx);
     m_DataSet->Add(g2t_vertex);
     St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",cnum->ntrack);
     m_DataSet->Add(g2t_track);
-
-    iRes = g2t_get_kine(g2t_vertex,g2t_track);
     
+    iRes = g2t_get_kine(g2t_vertex,g2t_track);
     
     //---------------------- inner part -------------------------//
 
@@ -482,12 +488,6 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
   geometry_();
 }
 //_____________________________________________________________________________
-void St_geant_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.43 1999/07/09 02:18:03 fisyak Exp $\n");
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
 //_____________________________________________________________________________
 void St_geant_Maker::Draw()
 { 
