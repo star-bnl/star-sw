@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.44 2000/01/07 01:04:57 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.45 2000/01/07 18:30:25 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.45  2000/01/07 18:30:25  fisyak
+// Add option big to increase NwGEANT to 40Mwords for venus events
+//
 // Revision 1.44  2000/01/07 01:04:57  fisyak
 // Add magF option to work with field map (WL) + take scale factor for the field from Db
 //
@@ -240,6 +243,7 @@ BfcItem BFC[] = {
   {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},
   {"Debug"       ,""  ,"",""                                                ,"","","Set debug flag",kFALSE},
   {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},  
+  {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
@@ -428,7 +432,10 @@ Int_t StBFChain::Instantiate()
 	      geantMk->SetNwGEANT(5000000);
 	      geantMk->SetActive(kFALSE);
 	    }
-	    else     geantMk->SetNwGEANT(10000000);
+	    else {
+	      if (GetOption("big")) geantMk->SetNwGEANT(40000000);
+	      else                  geantMk->SetNwGEANT(10000000);
+	    }
 	    SetGeantOptions();
 	  }
 	  continue;
