@@ -165,7 +165,7 @@ void StTpcHitMover::moveTpcHit(Float_t pos[3], Float_t posMoved[3],
   // transformation to global coordinates
   StTpcCoordinateTransform transform(gStTpcDb);
 
-  StTpcLocalCoordinate local(pos[0],pos[1],pos[2]);
+  StTpcLocalCoordinate local(pos[0],pos[1],pos[2],sector,row);
   StGlobalCoordinate global;
   transform(local,global);
 
