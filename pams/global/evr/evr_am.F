@@ -637,7 +637,7 @@ CC                            ! the remainder of tracks are skipped.
            if(globtrk_h.nok .lt. ntrkcut) then
               evr_am = STAFCV_BAD
            else
-              evr_am = STAFCV_ERR
+c              evr_am = STAFCV_ERR
            end if
            return
         endif
@@ -718,7 +718,7 @@ CCC  track parameters into temporary arrays:
            if(globtrk_h.nok .lt. ntrkcut) then
               evr_am = STAFCV_BAD
            else
-              evr_am = STAFCV_ERR
+c              evr_am = STAFCV_ERR
            end if
            return
         endif
@@ -828,7 +828,7 @@ C** straight line tracks, i.e. can put e.g. pt=1 then
            if(globtrk_h.nok .lt. ntrkcut) then
               evr_am = STAFCV_BAD
            else
-              evr_am = STAFCV_ERR
+c              evr_am = STAFCV_ERR
            end if
            return
         endif
@@ -940,7 +940,7 @@ CC                                              ! in final vertex fit
            if(globtrk_h.nok .lt. ntrkcut) then
               evr_am = STAFCV_BAD
            else
-              evr_am = STAFCV_ERR
+c              evr_am = STAFCV_ERR
            end if
            return
         endif

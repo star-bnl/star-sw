@@ -211,7 +211,7 @@ long  type_of_call fill_dst_event_summary_ (
   /* Count v0 candidates */
   for (ivtx=0;  ivtx<dst_vertex_h->nok; ivtx++)  { /* begin vertex loop */
     vtx_id = dst_vertex[ivtx].vtx_id;  /*  get vertex type */
-    iflag  = dst_vertex[ivtx].iflag
+    iflag  = dst_vertex[ivtx].iflag;
 
     if(vtx_id == 1 && iflag ==1 ) {
       /* Fill Primary vertex information */
@@ -232,7 +232,7 @@ long  type_of_call fill_dst_event_summary_ (
   dst_eventsummary->n_event = dst_eventheader->n_event;
   
   /* Fill DST production run ID */
-  dst_eventsummary->bfc_run_id = dst_runheader->run_id;
+  dst_eventsummary->bfc_run_id = dst_runheader->bfc_run_id;
   
   return STAFCV_OK;
 }  /*  End of fill_dst_event_summary  */
@@ -240,10 +240,10 @@ long  type_of_call fill_dst_event_summary_ (
 
 float  mt_inverse_slope(double *mthisto,int ibegin, int istop)
 {
-  
+  float mt_max, mt_min;
   float mtx, mt_binsize, invslope;
   float s=0, sx=0, sy=0, sxx=0, sxy=0, delta=0;
-  int   imtbin, index;
+  int   imtbin, index, NBINS=10;
 
   mt_binsize  = (mt_max - mt_min)/NBINS;
 
