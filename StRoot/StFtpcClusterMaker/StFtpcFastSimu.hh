@@ -1,19 +1,5 @@
-/***************************************************************************
- *
- * $Id: StFtpcFastSimu.hh,v 1.1 1999/11/02 09:41:30 jcs Exp $
- *
- * Author:   Holm Huemmler  (hummler@mppmu.mpg.de)
- ***************************************************************************
- *
- * Description:
- *
- ***************************************************************************
- *
- * $Log: StFtpcFastSimu.hh,v $
- * Revision 1.1  1999/11/02 09:41:30  jcs
- * add source files to empty StFtpcClusterMaker
- *
- **************************************************************************/
+#ifndef STAR_StFtpcFastSimu
+#define STAR_StFtpcFastSimu
 #include "g2t_ftp_hit.h"
 #include "g2t_track.h"
 #include "g2t_vertex.h"
@@ -119,3 +105,5 @@ class StFtpcFastSimu
 	      int fcl_fppoint_maxlen,
 	      FCL_FPPOINT_ST *fcl_fppoin);
 };
+
+#endif

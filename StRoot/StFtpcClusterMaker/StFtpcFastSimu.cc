@@ -1,23 +1,7 @@
-/***************************************************************************
- *
- * $Id: StFtpcFastSimu.cc,v 1.1 1999/11/02 09:41:29 jcs Exp $
- *
- * Author:   Holm Huemmler  (hummler@mppmu.mpg.de)
- ***************************************************************************
- *
- * Description:
- *
- ***************************************************************************
- *
- * $Log: StFtpcFastSimu.cc,v $
- * Revision 1.1  1999/11/02 09:41:29  jcs
- * add source files to empty StFtpcClusterMaker
- *
- **************************************************************************/
 #include "StFtpcFastSimu.hh"
 #include <iostream.h>
 #include <stdlib.h>
-#include <math.h>
+#include <cmath>
 #include "math_constants.h"
 // random number engines from StarClassLibrary
 #include "Random.h"
@@ -120,8 +104,8 @@ int StFtpcFastSimu::ffs_gen_padres(int *g2t_ftp_hit_nok,
 
     //mk Check: is s_rad=0 and s_azi=0 then no hit-shifting is wanted. 
 
-    check1 = fabs(s_rad[0])+fabs(s_rad[1])+fabs(s_rad[2])+fabs(s_rad[3]);
-    check2 = fabs(s_azi[0])+fabs(s_azi[1])+fabs(s_azi[2])+fabs(s_azi[3]);
+    check1 = abs(s_rad[0])+abs(s_rad[1])+abs(s_rad[2])+abs(s_rad[3]);
+    check2 = abs(s_azi[0])+abs(s_azi[1])+abs(s_azi[2])+abs(s_azi[3]);
 	
     if(check1==0. && check2 == 0. ) 
       {
@@ -185,19 +169,19 @@ int StFtpcFastSimu::ffs_gen_padres(int *g2t_ftp_hit_nok,
 	    // dip-angle:
             theta = C_DEG_PER_RAD*atan2((pt*cos(twist*C_RAD_PER_DEG)),
 				       ((g2t_ftp_hit[k].x[2]
-					 /fabs(g2t_ftp_hit[k].x[2]))*
+					 /abs(g2t_ftp_hit[k].x[2]))*
 					g2t_ftp_hit[k].p[2]));
 
 	    // crossing-angle: 
             cross_ang = C_DEG_PER_RAD*
-	      atan2((pt*cos(fabs(90.-twist)*C_RAD_PER_DEG)),   
-		   ((g2t_ftp_hit[k].x[2]/fabs(g2t_ftp_hit[k].x[2]))*
+	      atan2((pt*cos(abs(90.-twist)*C_RAD_PER_DEG)),   
+		   ((g2t_ftp_hit[k].x[2]/abs(g2t_ftp_hit[k].x[2]))*
 		    g2t_ftp_hit[k].p[2]));
-	    alpha  = fabs(cross_ang*C_RAD_PER_DEG);
+	    alpha  = abs(cross_ang*C_RAD_PER_DEG);
             if(alpha>(C_PI_2))
 	      alpha=C_PI-alpha;
 
-	    lambda = fabs(theta*C_RAD_PER_DEG);
+	    lambda = abs(theta*C_RAD_PER_DEG);
             if(lambda>(C_PI_2)) 
 	      lambda=C_PI-lambda;
 
@@ -581,9 +565,9 @@ int StFtpcFastSimu::ffs_merge_tagger(int *ffs_gepoint_nok,
  		   (fcl_fppoint[id_2].sector!=fcl_fppoint[id_1].sector))
  		  continue;
 		
-		delta_azi = fabs(phi1[id_1]-phi1[id_2])
+		delta_azi = abs(phi1[id_1]-phi1[id_2])
 		  *((r1[id_1]+r1[id_2])/2);
-		delta_r = fabs(r1[id_1]-r1[id_2]);
+		delta_r = abs(r1[id_1]-r1[id_2]);
 		
 		if((delta_r < (2 * sigrad[id_1])) &&
 		   (delta_azi < (2 * sigazi[id_1])))

@@ -1,19 +1,3 @@
-/***************************************************************************
- *
- * $Id: StFtpcClusterFinder.cc,v 1.1 1999/11/02 09:41:26 jcs Exp $
- *
- * Author:   Holm Huemmler  (hummler@mppmu.mpg.de)
- ***************************************************************************
- *
- * Description:
- *
- ***************************************************************************
- *
- * $Log: StFtpcClusterFinder.cc,v $
- * Revision 1.1  1999/11/02 09:41:26  jcs
- * add source files to empty StFtpcClusterMaker
- *
- **************************************************************************/
 #include <iostream.h>
 #include <stdlib.h>
 #include "StFtpcClusterFinder.hh"
@@ -21,16 +5,633 @@
 
 StFtpcClusterFinder::StFtpcClusterFinder()
 {
-  cout << "StFtpcClusterFinder constructed" << endl;
+  cout << "StFtpcClusterFinder constructed" << endl;  
 }
 
 StFtpcClusterFinder::~StFtpcClusterFinder()
 {
   cout << "StFtpcClusterFinder destructed" << endl;
-
 }
 
-int StFtpcClusterFinder::FindHits(TClusterUC *Cluster, 
+StFtpcCluster *StFtpcClusterFinder::search(fcl_det_st *det,
+					   fcl_padtrans_st *padtrans,
+					   fcl_zrow_st *zrow,
+					   fcl_ampoff_st *ampoff,
+					   fcl_ampslope_st *ampslope,
+					   fcl_timeoff_st *timeoff,
+					   fcl_ftpcsqndx_st *ftpcsqndx,
+					   fcl_ftpcadc_st *ftpcadc,
+					   St_fcl_fppoint *fcl_fppoint,
+					   int padtransRows,
+					   int ampslopeRows,
+					   int ampoffRows,
+					   int timeoffRows,
+					   int ftpcsqndxRows)
+{
+  double *pradius, *pdeflection;
+  int iRow, iSec, iPad, iPadBuf;
+  int iSecBuf, iRowBuf;
+  int clusters;
+  int iNowSeqIndex, iNewSeqIndex, iOldSeqNumber, iOldSeqIndex;
+  int iADCCounter;
+  int iNowPad;
+  int iNowSequence, iOldSeqBuf;
+  int iCUCSequence, iMoveSequence;
+  int bOldSequenceUsed, bLastSeqOnPad, bLastSequence;
+  TSequence OldSequencesMemory[MAXNUMSEQUENCES];
+  TSequence NewSequencesMemory[MAXNUMSEQUENCES];
+  TSequence *SequenceBuffer, *OldSequences, *NewSequences;
+  TClusterUC *FirstCUC, *CurrentCUC, *LastCUC, *DeleteCUC;
+  TClusterUC *SequenceInCUC;
+
+  int iIndex;
+  float fastlog[256];
+
+  /* variables for dynamic CUC memory handling */
+  TClusterUC CUCMemory[MAXNUMCUC];
+  int CUCMemoryArray[MAXNUMCUC];
+  int CUCMemoryPtr;
+
+#ifdef DEBUGFILE
+  FILE *fin, *fpoints;
+  char finname[100], fpointsname[100];
+  TPeak testpeak;
+  int iBin, iHeight;
+  int xLower, xUpper, yLower, yUpper, xNow, yNow;
+  int *maparray;
+  char getstring[100];
+  float xwrite, ywrite;
+
+  maparray= (int *)malloc(4000000*sizeof(int));
+#endif
+
+  /* is magboltz database loaded, if not exit */
+  if(padtransRows<1)
+    {
+      printf("Couldn't find magboltz data table, exiting!\n");
+      return NULL;
+    }
+
+  /* is calibration amplitude slope database loaded, if not load */
+  if(ampslopeRows<1)
+    {
+      printf("Couldn't find calibration amplitude slope table, exiting!\n");
+      return NULL;
+    }
+
+  /* is calibration amplitude offset database loaded, if not load */
+  if(ampoffRows<1)
+    {
+      printf("Couldn't find calibration amplitude offset data table, exiting!\n");
+      return NULL;
+    }
+
+  /* is calibration time offset database loaded, if not load */
+  if(timeoffRows<1)
+    {
+	  printf("Couldn't find calibration time offset data table, exiting!\n");
+	  return NULL;
+    }
+
+  /* allocate memory for padtrans table */
+  pradius = (double *)malloc(det->n_int_steps*10*sizeof(double));
+  pdeflection = (double *)malloc(det->n_int_steps*10*sizeof(double));
+
+  if(pradius == NULL || pdeflection == 0)
+    {
+      printf("Padtrans memory allocation failed, exiting!\n");
+      return NULL;
+    }
+
+  /* integrate padtrans table from magboltz database */
+  if(!calcpadtrans(det, padtrans, pradius, pdeflection))
+    {
+      printf("Couldn't calculate padtrans table, exiting!\n");
+      return NULL;
+    }
+
+  /* initialize CUC memory handling */
+  if(!cucInit(CUCMemory, CUCMemoryArray, &CUCMemoryPtr))
+    {
+      printf("Couldn't initialize CUC memory, exiting!\n");
+      return NULL;
+    }
+
+  /* calculate fastlog lookup */
+  for(iIndex=1; iIndex<256; iIndex++)
+    {
+      fastlog[iIndex] = log(iIndex);
+    }
+
+  /* reset counter for found clusters */
+  clusters = 0;
+
+  /* initialize sequence and cluster lists */ 
+  OldSequences=OldSequencesMemory;
+  NewSequences=NewSequencesMemory;
+  NewSequences[0].Length = 0;
+  FirstCUC = NULL;
+  iOldSeqNumber = 0;
+  iNewSeqIndex=0;
+
+
+  /* check if sequence table begins with a pad header */
+  if((ftpcsqndx[0].index & 32768) == 0)
+    {
+      printf("Raw data start entry damaged! Sequence[0] = %d\n", 
+	     ftpcsqndx[0].index);
+      return NULL;
+    }
+
+#ifdef DEBUGFILE
+  fin=fopen("test00", "w");
+  fpoints=fopen("points00", "w");
+#endif
+
+  /* loop over raw data sequences */
+  iNowSeqIndex = 0;
+  iADCCounter=0;
+  iPad=0;
+  iSec=0;
+  iRow=0;
+  iNowSequence=ftpcsqndx[0].index;
+  bLastSequence=0;
+
+  while(iNowSeqIndex < ftpcsqndxRows || bLastSequence==0)
+    {
+      if(iNowSeqIndex==ftpcsqndxRows && bLastSequence==0)
+	  {
+	      bLastSequence=1;
+	      iPad++;
+	  }
+       /* use next pad if iNowSequence is not a new pad header: */
+      iPad++;
+      iSecBuf = iSec;
+      iRowBuf = iRow;
+
+      if((iNowSequence & 32768) == 32768)
+	{
+	  iNowPad=ftpcsqndx[iNowSeqIndex].index;
+
+	  /* calculate current pad/sector/row */
+	  iPad = iNowPad & 255;
+	  iSec = ((iNowPad >> 8) & 127);
+	  iRow = iSec / 6; /* integer division! */
+	  iSec -= 6 * iRow;
+	  
+	  /* move to next entry in sequence table */
+	  iNowSequence=ftpcsqndx[++iNowSeqIndex].index;
+	}
+      if(iSec!=iSecBuf || iRow!=iRowBuf)
+	{
+	  /* set last analyzed pad out of reach, so there will be no matches */
+	  iPadBuf=-2;
+#ifdef DEBUG
+	  printf("Now on Sector %d, Row %d\n", iSec, iRow);
+#endif
+	}
+
+      /* search, fit and remove finished CUCs */ 
+      for(CurrentCUC = FirstCUC; CurrentCUC!=NULL; 
+	  CurrentCUC = CurrentCUC->NextClusterUC)
+	{
+	  if(iPad > CurrentCUC->EndPad + 1
+	     || iSecBuf !=iSec || iRowBuf != iRow)
+	    {
+	      /* CurrentCUC is finished */
+	      /* if CUC has not been lost by merging, process cluster */
+	      if(CurrentCUC->EndPad > CurrentCUC->StartPad)
+		{
+		  /* cluster processing: increment cluster counter */
+		  clusters ++;
+
+		  int numbuf=fcl_fppoint->GetNRows();
+		  int maxbuf=fcl_fppoint->GetHeader()->maxlen;
+		  /* cluster processing: call hitfinder */
+		  if(!findHits(CurrentCUC, iRowBuf, iSecBuf, pradius, pdeflection, 
+			       ftpcadc, det, zrow,
+			       fastlog, &numbuf, 
+			       &maxbuf, fcl_fppoint->GetTable(),
+			       ampslope, ampoff, timeoff)
+		     )
+		    {
+#ifdef DEBUG
+		      printf("Hitfinder failed! Cluster is lost.\n");
+#endif
+		    }
+		  fcl_fppoint->SetNRows(numbuf);
+		}
+	      DeleteCUC=CurrentCUC;
+	      /* bypass CurrentCUC in CUC list */
+	      if(CurrentCUC==FirstCUC)
+		{
+		  FirstCUC=CurrentCUC->NextClusterUC;
+		}
+	      else
+		{
+		  LastCUC->NextClusterUC=CurrentCUC->NextClusterUC;
+		  CurrentCUC=LastCUC;
+		}
+	      /* free CurrentCUC memory */
+	      if(!cucFree(CUCMemory, CUCMemoryArray, &CUCMemoryPtr, DeleteCUC))
+		{
+		  printf("Fatal memory management error.\n");
+		  return NULL;
+		}
+	    }
+	  LastCUC=CurrentCUC;
+	}
+
+#ifdef DEBUGFILE
+      if(iSec!=iSecBuf || iRow!=iRowBuf)
+	{
+	  fclose(fin);
+	  fclose(fpoints);
+	  sprintf(finname,"test%d%d", iRow,iSec); 
+	  sprintf(fpointsname,"points%d%d", iRow,iSec); 
+	  fin=fopen(finname, "w");
+	  fpoints=fopen(fpointsname, "w");
+	}
+#endif
+
+      /* initialize sequence lists: */
+      /* new-array is moved to old */
+      /* memory of old-array is used for new and first element initialized */
+      SequenceBuffer=OldSequences;
+      OldSequences=NewSequences;
+      NewSequences=SequenceBuffer;
+      iOldSeqNumber=iNewSeqIndex;
+      iNewSeqIndex=0;
+      
+      if(iPad!=iPadBuf+1)
+	{
+	  iOldSeqNumber=0;
+	}
+      iPadBuf=iPad;
+      
+      /* reset beginning of sequence comparison */
+      iOldSeqBuf=0;
+      bLastSeqOnPad=0;
+
+      /* loop over sequences while not a new pad header */
+      while(bLastSeqOnPad == 0 && bLastSequence == 0)
+	{
+	  /* unpack to Seq structure from STAF table */ 
+	  NewSequences[iNewSeqIndex].Length = (iNowSequence & 31)+1;
+	  NewSequences[iNewSeqIndex].StartTimebin = (iNowSequence >> 6) & 511; 
+	  NewSequences[iNewSeqIndex].StartADCEntry = iADCCounter;
+	  bLastSeqOnPad=iNowSequence & 32;
+	  iADCCounter += NewSequences[iNewSeqIndex].Length;
+	  /* concatenate split sequences (of over 32 bins) */
+	  while(((iNowSequence & 31) == 31) && 
+		((ftpcsqndx[iNowSeqIndex+1].index & 32768) == 0) && 
+		(((ftpcsqndx[iNowSeqIndex+1].index>> 6) & 511) == 
+		 NewSequences[iNewSeqIndex].StartTimebin + 
+		 NewSequences[iNewSeqIndex].Length)) 
+	    {
+	      iNowSequence=ftpcsqndx[++iNowSeqIndex].index;
+	      bLastSeqOnPad=iNowSequence & 32;
+	      NewSequences[iNewSeqIndex].Length += (iNowSequence & 31)+1;
+	      iADCCounter += (iNowSequence & 31)+1; 
+
+	    }
+	  /* mark sequence as unused */
+	  SequenceInCUC=NULL;
+
+	  /* compare this sequence to old sequences */
+	  for(iOldSeqIndex=iOldSeqBuf; iOldSeqIndex < iOldSeqNumber; 
+	      iOldSeqIndex++)
+	    {
+	      /* are beginning or end of new sequence between */
+	      /* beginning and end of old sequence? */
+	      if(((NewSequences[iNewSeqIndex].StartTimebin >= 
+		   OldSequences[iOldSeqIndex].StartTimebin) && 
+		  (NewSequences[iNewSeqIndex].StartTimebin <= 
+		   OldSequences[iOldSeqIndex].StartTimebin + 
+		   OldSequences[iOldSeqIndex].Length-1)) || 
+		 ((NewSequences[iNewSeqIndex].StartTimebin + 
+		   NewSequences[iNewSeqIndex].Length-1 >= 
+		   OldSequences[iOldSeqIndex].StartTimebin) && 
+		  (NewSequences[iNewSeqIndex].StartTimebin + 
+		   NewSequences[iNewSeqIndex].Length-1 <= 
+		   OldSequences[iOldSeqIndex].StartTimebin + 
+		   OldSequences[iOldSeqIndex].Length-1)) ||
+		 ((OldSequences[iOldSeqIndex].StartTimebin >= 
+		   NewSequences[iNewSeqIndex].StartTimebin) && 
+		  (OldSequences[iOldSeqIndex].StartTimebin <= 
+		   NewSequences[iNewSeqIndex].StartTimebin + 
+		   NewSequences[iNewSeqIndex].Length-1)))
+		{
+		  /* yes, matching sequence found */
+		  /* set beginning of search for next sequence */
+		  iOldSeqBuf=iOldSeqIndex;
+		  bOldSequenceUsed=0;
+ 
+		  /* compare matching sequences to old CUCs */ 
+		  /* loop over all active CUCs */
+		  for(CurrentCUC = FirstCUC; CurrentCUC!=NULL; 
+		      CurrentCUC = CurrentCUC->NextClusterUC)
+		    {
+		      LastCUC=CurrentCUC;
+		      /* loop over CUC Sequences on last pad */
+		      for(iCUCSequence=1; 
+			  iCUCSequence<CurrentCUC->NumSequences; 
+			  iCUCSequence++)
+			{
+			  if((OldSequences[iOldSeqIndex].StartTimebin == 
+			      CurrentCUC->Sequence[iCUCSequence].StartTimebin)
+			     && (CurrentCUC->SequencePad[iCUCSequence] == 
+				 iPad-1))
+			    {
+			      bOldSequenceUsed=1;
+			      /* matching old sequence is in CUC */
+			      /* check if new sequence is already used */
+			      if(SequenceInCUC!=CurrentCUC)
+				{
+				  if(SequenceInCUC!=NULL && SequenceInCUC!=CurrentCUC)
+				    {
+				      /* yes, already used, merge CUCs */
+				      /* mark old CUC for removal */ 
+				      SequenceInCUC->EndPad = 
+					SequenceInCUC->StartPad;
+				      /* set StartPad to the smaller StartPad */
+				      if(SequenceInCUC->StartPad < 
+					 CurrentCUC->StartPad)
+					{
+					  CurrentCUC->StartPad = 
+					    SequenceInCUC->StartPad;
+					}
+				      CurrentCUC->EndPad=iPad;
+				      /* copy all sequences to CurrentCUC */
+				      for(iMoveSequence=0; 
+					  (iMoveSequence
+					   <SequenceInCUC->NumSequences) &&
+					    (CurrentCUC->NumSequences+iMoveSequence+1
+					     <MAXNUMSEQUENCES); 
+					  iMoveSequence++)
+					{
+					  CurrentCUC->
+					    Sequence[iMoveSequence + 
+						    CurrentCUC->NumSequences] = 
+					    SequenceInCUC->
+					    Sequence[iMoveSequence];
+					  CurrentCUC->
+					    SequencePad[iMoveSequence + 
+						       CurrentCUC->NumSequences] = 
+					    SequenceInCUC->
+					    SequencePad[iMoveSequence];
+					  
+					}
+				      CurrentCUC->NumSequences += 
+					SequenceInCUC->NumSequences;
+
+				      if(CurrentCUC->NumSequences > MAXNUMSEQUENCES)
+					{
+					  CurrentCUC->NumSequences = MAXNUMSEQUENCES;
+					}
+
+				      SequenceInCUC=CurrentCUC;
+				    }
+				  else /* to: if(SequenceInCUC!=NULL) */
+				    {
+				      /* add sequence to CUC */
+				      if(CurrentCUC->NumSequences<MAXNUMSEQUENCES)
+					{
+					  CurrentCUC->Sequence[CurrentCUC->NumSequences]
+					    .Length = NewSequences[iNewSeqIndex].Length;
+					  CurrentCUC->Sequence[CurrentCUC->NumSequences]
+					    .StartTimebin
+					    =NewSequences[iNewSeqIndex].StartTimebin;
+					  CurrentCUC->Sequence[CurrentCUC->NumSequences]
+					    .StartADCEntry
+					    = NewSequences[iNewSeqIndex].StartADCEntry;
+					  CurrentCUC->SequencePad[CurrentCUC->NumSequences]
+					    =iPad;
+					  CurrentCUC->NumSequences++;
+				       
+					}
+				      CurrentCUC->EndPad=iPad;
+				      SequenceInCUC=CurrentCUC;
+				      
+				      /* check if new sequence touches sector limit */
+				      if(NewSequences[iNewSeqIndex].StartTimebin==0 ||
+					 NewSequences[iNewSeqIndex].StartTimebin
+					 +NewSequences[iNewSeqIndex].Length
+					 ==det[0].n_bins-1 || 
+					 iPad==det[0].n_pads-1)
+					{
+					  CurrentCUC->CutOff=1;
+					}
+				    } /* end of: if(SequenceInCUC!=NULL) ... else */
+				} /* end of: if(SequenceInCUC...) */
+			    } /* end of: if((OldSequences...)) */ 
+			}    /* end of: for(ICUCSequence...) */
+
+		    }    /* end of: for(CurrentCUC...) */
+		  if(SequenceInCUC==NULL && NewSequences[iNewSeqIndex].Length>1)
+		    {
+		      /* no matching CUC was found: create new CUC */
+		      /* allocate memory */
+		      CurrentCUC=cucAlloc(CUCMemory, CUCMemoryArray, 
+					  &CUCMemoryPtr);
+		      if(CurrentCUC == NULL)
+			{
+			  /* no free memory, overwrite last CUC */
+#ifdef DEBUG
+			  printf("Previous cluster is now lost.\n");
+#endif
+			  CurrentCUC=LastCUC;
+			  return NULL;
+			}
+		      else
+			{
+			  /* set pointers to this CUC */
+			  if(FirstCUC == NULL)
+			    {
+			      FirstCUC = CurrentCUC;
+			    }
+			  else
+			    {
+			      LastCUC->NextClusterUC=CurrentCUC;
+			    }
+			  
+			  /* this is the newest CUC */
+			  CurrentCUC->NextClusterUC=NULL;
+			}
+		      
+		      /* fill new CUC structure */
+		      CurrentCUC->StartPad=iPad-1;
+		      CurrentCUC->EndPad=iPad;
+		      CurrentCUC->NumSequences=2;
+		      
+		      /* copy sequences to CUC */
+		      CurrentCUC->Sequence[0].Length =
+			OldSequences[iOldSeqIndex].Length;
+		      CurrentCUC->Sequence[0].StartTimebin =
+			OldSequences[iOldSeqIndex].StartTimebin;
+		      CurrentCUC->Sequence[0].StartADCEntry = 
+			OldSequences[iOldSeqIndex].StartADCEntry;
+		      CurrentCUC->SequencePad[0] = iPad-1;
+		      
+		      CurrentCUC->Sequence[1].Length =
+			NewSequences[iNewSeqIndex].Length;
+		      CurrentCUC->Sequence[1].StartTimebin =
+			NewSequences[iNewSeqIndex].StartTimebin;
+		      CurrentCUC->Sequence[1].StartADCEntry =
+			NewSequences[iNewSeqIndex].StartADCEntry;
+		      CurrentCUC->SequencePad[1]=iPad;
+		      SequenceInCUC=CurrentCUC;
+		      
+		      /* check if new CUC touches sector limits */
+		      if(iPad==1 || iPad==det[0].n_pads-1 || 
+			 CurrentCUC->Sequence[0].StartTimebin==0 || 
+			 CurrentCUC->Sequence[0].StartTimebin
+			 +CurrentCUC->Sequence[0].Length
+			 ==det[0].n_bins-1 || 
+			 CurrentCUC->Sequence[1].StartTimebin==0 || 
+			 CurrentCUC->Sequence[1].StartTimebin
+			 +CurrentCUC->Sequence[1].Length
+			 ==det[0].n_bins-1)
+			{
+			  CurrentCUC->CutOff=1;
+			}
+		      else
+			{
+			  CurrentCUC->CutOff=0;
+			}
+		    }   /* end of: if(SequenceInCUC==NULL) */
+		  else
+		    {
+		      if(bOldSequenceUsed==0 && SequenceInCUC!=0)
+			{  
+			  /* new sequence has been used but old one hasn't */
+			  /* append to cluster */
+			  if(SequenceInCUC->NumSequences<MAXNUMSEQUENCES)
+			    {
+			      SequenceInCUC->Sequence[SequenceInCUC->NumSequences]
+				.Length = OldSequences[iOldSeqIndex].Length;
+			      SequenceInCUC->Sequence[SequenceInCUC->NumSequences]
+				.StartTimebin
+				=OldSequences[iOldSeqIndex].StartTimebin;
+			      SequenceInCUC->Sequence[SequenceInCUC->NumSequences]
+				.StartADCEntry
+				= OldSequences[iOldSeqIndex].StartADCEntry;
+			      SequenceInCUC->SequencePad[SequenceInCUC->NumSequences]
+				=iPad-1;
+			      SequenceInCUC->NumSequences++;
+			    }
+			  
+			  /* check if Old sequence touches sector limit */
+			  if(OldSequences[iOldSeqIndex].StartTimebin==0 ||
+			     OldSequences[iOldSeqIndex].StartTimebin
+			     +OldSequences[iOldSeqIndex].Length
+			     ==det[0].n_bins-1 || 
+			     iPad==det[0].n_pads-1)
+			    {
+			      SequenceInCUC->CutOff=1;
+			    }
+			}
+		    }
+		}     /* end of: if(sequence matching) */
+	      
+	    }     /* end of: for(iOldSeqIndex...) */
+	  /* increment counter for ftpcsqndx table */
+	  iNowSeqIndex++;
+	  /* increment counter for NewSequence array */
+	  iNewSeqIndex++;
+	  /* load next sequence */
+	  iNowSequence=ftpcsqndx[iNowSeqIndex].index;
+	}     /* end of: while((iNowSequence & 32768) == 0) */
+    }     /* end of: while(iNowSeqIndex < fcl_ftpcsqndx->GetNRows()) */
+  printf("Found %d clusters and processed to %d hits.\n", clusters,(int) fcl_fppoint->GetNRows() );
+
+#ifdef DEBUGFILE
+  fclose(fin);
+  fclose(fpoints);
+
+  for(iRow=0; iRow<20; iRow++)
+    {
+      for(iSec=0; iSec<6; iSec++)
+	{
+	  sprintf(finname, "test%d%d", iRow, iSec);
+	  sprintf(fpointsname, "charge%d%d", iRow, iSec);
+	  fin=fopen(finname, "r");
+	  fpoints=fopen(fpointsname, "w");
+	  for(xNow=0; xNow<2000; xNow++)
+	    {
+	      for(yNow=0; yNow<2000; yNow++)
+		{
+		  maparray[xNow+2000*yNow]=0;
+		}
+	    }
+
+	  sprintf(getstring, "\0");
+	  fgets(getstring, sizeof(getstring), fin);
+	  while(strlen(getstring)>3)
+	    {
+	      sscanf(getstring, "%d %d %d", &iPad, &iBin, &iHeight);
+	      
+	      testpeak.PadPosition=iPad-0.5;
+	      testpeak.TimePosition=iBin-0.5;
+	      padtrans(&testpeak, iRow, iSec, det, zrow, pradius, pdeflection);
+	      xLower=(int) ((1000 / 31) * testpeak.x + 1000);
+	      yLower=(int) ((1000 / 31) * testpeak.y + 1000);
+
+	      testpeak.PadPosition=iPad+0.5;
+	      testpeak.TimePosition=iBin+0.5;
+	      padtrans(&testpeak, iRow, iSec, det, zrow, pradius, pdeflection);
+	      xUpper=(int) ((1000 / 31) * testpeak.x + 1000);
+	      yUpper=(int) ((1000 / 31) * testpeak.y + 1000);
+
+	      for(xNow=0; xNow<abs(xUpper-xLower); xNow++)
+		{
+		  for(yNow=0; yNow<abs(yUpper-yLower); yNow++)
+		    {
+		      if(xUpper<xLower)
+			maparray[(xUpper+xNow)+2000*(yUpper+yNow)]=iHeight;
+		      else
+			maparray[(xLower+xNow)+2000*(yLower+yNow)]=iHeight;
+		    }
+		}
+
+	      sprintf(getstring, "\0");
+	      fgets(getstring, sizeof(getstring), fin);
+
+	    }
+	  
+	  for(xNow=0; xNow<2000; xNow++)
+	    {
+	      for(yNow=0; yNow<2000; yNow++)
+		{
+		  if(maparray[xNow+2000*yNow]!=0)
+		    {
+		      xwrite= ((float) xNow-1000)*31/1000;
+		      ywrite= ((float) yNow-1000)*31/1000;
+
+		      fprintf(fpoints, "%f %f %d\n", xwrite, ywrite, maparray[xNow+2000*yNow]);
+		    }
+		}
+	    }
+	  fclose (fin);
+	  fclose (fpoints);
+	}
+    }
+
+  free(maparray);
+
+#endif
+
+  free(pradius);
+  free(pdeflection);
+
+#ifdef DEBUG 
+  cout<<"finished running cluster search"<<endl;
+#endif
+  StFtpcCluster *dummy;
+  return dummy;
+}
+
+int StFtpcClusterFinder::findHits(TClusterUC *Cluster, 
 				 int iRow, 
 				 int iSec, 
 				 double *pRadius, 
@@ -76,7 +677,7 @@ int StFtpcClusterFinder::FindHits(TClusterUC *Cluster,
 	    {
 	      /* now looping over sequences in pad order */
 	      /* get peaks for this sequence */
-	      GetSeqPeaksAndCalibAmp(&(Cluster->Sequence[iSequence]), 
+	      getSeqPeaksAndCalibAmp(&(Cluster->Sequence[iSequence]), 
 				     iRow*det[0].n_sectors*det[0].n_pads,
 				     iSec*det[0].n_pads, iPad,
 				     PadPeaks[iNewPeakstore], &iThisPadPeaks,
@@ -267,7 +868,7 @@ int StFtpcClusterFinder::FindHits(TClusterUC *Cluster,
 	    }
 	}
     }
-  if(!FitPoints(Cluster, iRow, iSec, pRadius, pDeflection, Peaks, 
+  if(!fitPoints(Cluster, iRow, iSec, pRadius, pDeflection, Peaks, 
 		iNumPeaks, ftpcadc, det, zrow, fastlog, point_nok,
 		point_maxlen, fppoint, timeoff))
     {
@@ -291,7 +892,7 @@ int StFtpcClusterFinder::FindHits(TClusterUC *Cluster,
   return TRUE;
 }
 
-int StFtpcClusterFinder::GetSeqPeaksAndCalibAmp(TSequence *Sequence,
+int StFtpcClusterFinder::getSeqPeaksAndCalibAmp(TSequence *Sequence,
 					       int iRowTimesSeqsTimesPads,
 					       int iSeqTimesPads,
 					       int iPad,
@@ -307,7 +908,6 @@ int StFtpcClusterFinder::GetSeqPeaksAndCalibAmp(TSequence *Sequence,
   int iWidth;
   unsigned char cLastADC, cTemp;
   
-  bSlope=0;
   cLastADC=0;
   iWidth=0;
   iPadIndex=iRowTimesSeqsTimesPads+iSeqTimesPads+iPad;
@@ -372,7 +972,7 @@ int StFtpcClusterFinder::GetSeqPeaksAndCalibAmp(TSequence *Sequence,
   return TRUE;
 }
 
-int StFtpcClusterFinder::FitPoints(TClusterUC* Cluster, 
+int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster, 
 				  int iRow, 
 				  int iSec, 
 				  double *pRadius, 
@@ -576,7 +1176,7 @@ int StFtpcClusterFinder::FitPoints(TClusterUC* Cluster,
 	}
 
       /* transform from pad/time to x/y/z */
-      if(!Padtrans(Peak, iRow, iSec, det, zrow, 
+      if(!padtrans(Peak, iRow, iSec, det, zrow, 
 		   pRadius, pDeflection))
 	{
 #ifdef DEBUG
@@ -999,7 +1599,7 @@ int StFtpcClusterFinder::FitPoints(TClusterUC* Cluster,
       for(iPeakIndex=0; iPeakIndex < iNumPeaks; iPeakIndex++)
 	{
 	  /* transform from pad/time to x/y/z */
-	  if(!Padtrans(&(Peak[iPeakIndex]), iRow, iSec, det, zrow, 
+	  if(!padtrans(&(Peak[iPeakIndex]), iRow, iSec, det, zrow, 
 		       pRadius, pDeflection))
 	    {
 #ifdef DEBUG
@@ -1100,7 +1700,7 @@ int StFtpcClusterFinder::FitPoints(TClusterUC* Cluster,
   return TRUE;
 }
 
-int StFtpcClusterFinder::Padtrans(TPeak *Peak, 
+int StFtpcClusterFinder::padtrans(TPeak *Peak, 
 	     int iRow, 
 	     int iSec, 
 	     FCL_DET_ST *det, 
@@ -1247,7 +1847,7 @@ int StFtpcClusterFinder::calcpadtrans(FCL_DET_ST *det,
   return TRUE;
 }
 
-int StFtpcClusterFinder::CUCInit(TClusterUC memory[MAXNUMCUC], int RealMemory[MAXNUMCUC], int *pointer)
+int StFtpcClusterFinder::cucInit(TClusterUC memory[MAXNUMCUC], int RealMemory[MAXNUMCUC], int *pointer)
 {
   int i;
   
@@ -1259,7 +1859,7 @@ int StFtpcClusterFinder::CUCInit(TClusterUC memory[MAXNUMCUC], int RealMemory[MA
   return TRUE;
 }
 
-TClusterUC *StFtpcClusterFinder::CUCAlloc(TClusterUC memory[MAXNUMCUC], int RealMemory[MAXNUMCUC], int *pointer)
+TClusterUC *StFtpcClusterFinder::cucAlloc(TClusterUC memory[MAXNUMCUC], int RealMemory[MAXNUMCUC], int *pointer)
 {
 
   if((*pointer)+1 < MAXNUMCUC)
@@ -1277,7 +1877,7 @@ TClusterUC *StFtpcClusterFinder::CUCAlloc(TClusterUC memory[MAXNUMCUC], int Real
     }
 }
 
-int StFtpcClusterFinder::CUCFree(TClusterUC memory[MAXNUMCUC], int RealMemory[MAXNUMCUC], int *pointer, TClusterUC *OldCUC)
+int StFtpcClusterFinder::cucFree(TClusterUC memory[MAXNUMCUC], int RealMemory[MAXNUMCUC], int *pointer, TClusterUC *OldCUC)
 {
   if(*pointer >= 0)
     {
