@@ -1,4 +1,4 @@
-/* $Id: StarGenerator.cxx,v 1.1 2004/07/12 20:36:38 potekhin Exp $ */
+/* $Id: StarGenerator.cxx,v 1.2 2004/07/16 22:52:35 potekhin Exp $ */
 
 #include <TGenerator.h>
 #include <TMCProcess.h>
@@ -18,7 +18,7 @@ ClassImp(StarGenerator)
 
 //_______________________________________________________________________
 StarGenerator::StarGenerator():
-  _stack(0)
+  _stack(0),_seed(0)
  /*
   fMCEvGen(0),
   fThetaMin(0),
@@ -81,7 +81,7 @@ StarGenerator::StarGenerator():
 
 //_______________________________________________________________________
 StarGenerator::StarGenerator(Int_t npart):
-  _stack(0)
+  _stack(0),_seed(0)
 
  /*
   fMCEvGen(0),
@@ -146,7 +146,7 @@ StarGenerator::StarGenerator(Int_t npart):
 
 //_______________________________________________________________________
 StarGenerator::StarGenerator(const StarGenerator &gen): 
-  _stack(0)
+  _stack(0),_seed(0)
 
  /*
   TNamed(gen),
@@ -228,8 +228,6 @@ StarGenerator::~StarGenerator()
 }
 
 
-/*
-
 //_______________________________________________________________________
 void StarGenerator::Init()
 {   
@@ -237,6 +235,8 @@ void StarGenerator::Init()
   // Dummy initialisation
   //
 }
+
+/*
 
 //_______________________________________________________________________
 void StarGenerator::SetOrigin(Float_t ox, Float_t oy, Float_t oz)

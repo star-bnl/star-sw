@@ -1,4 +1,4 @@
-// $Id: StarParticle.cxx,v 1.1 2004/07/12 20:36:39 potekhin Exp $
+// $Id: StarParticle.cxx,v 1.2 2004/07/16 22:52:35 potekhin Exp $
 //
 
 #include "StarParticle.h"
@@ -14,30 +14,33 @@ ClassImp(StarParticle)
 
 //_____________________________________________________________________________
 StarParticle::StarParticle(Int_t id, TParticle* particle)
-  : fID(id),
-    fParticle(particle),
-    fMother(),
-    fDaughters()    
+  : _ID(id),
+    _particle(particle),
+    _mother(),
+    _daughters(),
+    _keep(0)
 {
 //
 }
 
 //_____________________________________________________________________________
 StarParticle::StarParticle(Int_t id, TParticle* particle, StarParticle* mother)
-  : fID(id),
-    fParticle(particle),
-    fMother(mother),
-    fDaughters()    
+  : _ID(id),
+    _particle(particle),
+    _mother(mother),
+    _daughters(),
+    _keep(0)
 {
 //
 }
 
 //_____________________________________________________________________________
 StarParticle::StarParticle()
-  : fID(0),
-    fParticle(0),
-    fMother(),
-    fDaughters()    
+  : _ID(0),
+    _particle(0),
+    _mother(),
+    _daughters(),
+    _keep(0)    
 {
 //   
 }
@@ -46,7 +49,7 @@ StarParticle::StarParticle()
 StarParticle::~StarParticle() 
 {
 //
-  delete fParticle;
+  delete _particle;
 }
 
 //
@@ -59,7 +62,7 @@ void StarParticle::SetMother(StarParticle* particle)
 // Adds particles daughter
 // ---
 
-  fMother.SetObject(particle);
+  _mother.SetObject(particle);
 }  
 
 //_____________________________________________________________________________
@@ -68,7 +71,7 @@ void StarParticle::AddDaughter(StarParticle* particle)
 // Adds particles daughter
 // ---
 
-  fDaughters.Add(particle);
+  _daughters.Add(particle);
 }  
 
 //_____________________________________________________________________________
@@ -77,9 +80,9 @@ void StarParticle::Print() const
 // Prints particle properties.
 // ---
 
-/*  cout << "Track ID:  " << fID << endl;
+/*  cout << "Track ID:  " << _ID << endl;
 
-  fParticle->Print();  
+  _particle->Print();  
   
   if (GetMother()) {
     cout << "Mother:    " << GetMother()->GetParticle()->GetName() 
@@ -111,7 +114,7 @@ Int_t  StarParticle:: GetID() const
 // Returs particle ID.
 // ---
 
-  return fID;
+  return _ID;
 }  
 
 
@@ -121,7 +124,7 @@ TParticle*  StarParticle::GetParticle() const
 // Returns particle definition (TParticle).
 // ---
 
-  return fParticle;
+  return _particle;
 }  
 
 //_____________________________________________________________________________
@@ -130,7 +133,7 @@ StarParticle* StarParticle::GetMother() const
 // Returns particle definition (TParticle).
 // ---
 
-  return (StarParticle*) fMother.GetObject();
+  return (StarParticle*) _mother.GetObject();
 }  
 
 //_____________________________________________________________________________
@@ -139,7 +142,7 @@ Int_t StarParticle::GetNofDaughters() const
 // Returns number of daughters.
 // ---
 
-  return fDaughters.GetEntriesFast();
+  return _daughters.GetEntriesFast();
 }  
 
 //_____________________________________________________________________________
@@ -151,6 +154,6 @@ StarParticle* StarParticle::GetDaughter(Int_t i) const
   if (i < 0 || i >= GetNofDaughters())
     Fatal("GetDaughter", "Index out of range"); 
 
-  return (StarParticle*) fDaughters.At(i);
+  return (StarParticle*) _daughters.At(i);
 }  
 
