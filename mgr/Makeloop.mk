@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.14  1998/09/13 22:58:34  fisyak
+#  ROOT documentation only for dev
+#
 #  Revision 1.13  1998/09/13 19:49:57  fisyak
 #  Add root documetation generation
 #
@@ -121,7 +124,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/09/13 19:49:57 $ 
+#           Last modification $Date: 1998/09/13 22:58:34 $ 
 #  default setings
 # Current Working Directory
 #
@@ -270,7 +273,9 @@ $(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.so:   $(wildcard $(ROOT_DIR)/StRoot/xdf2ro
 $(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so:  $(wildcard $(ROOT_DIR)/.share/tables/St*.*) \
                                                   $(ROOT_DIR)/StRoot/base/St_DataSet.h
 	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/.share/tables  SO_LIB=$(ALL_TAGS) NODEBUG=YES
+ifneq ($(EMPTY),$(findstring $(STAR_LEVEL),dev))
 	root.exe -b -q MakeHtmlTables.cxx
+endif
 $(ROOT_DIR)/.$(STAR_SYS)/lib/St_%_Maker.so: $(wildcard $(ROOT_DIR)/StRoot/St_%_Maker/St*.*) \
                                             $(wildcard $(ROOT_DIR)/StRoot/base/*.h)
 	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St_$(STEM)_Maker  SO_LIB=$(ALL_TAGS)
@@ -304,7 +309,7 @@ all:
 	$(MAKE) -f $(Makepam) $(MAKFLAGS)
 ifndef NOROOT
 	$(MAKE) -f $(MakeDll) $(MAKFLAGS) -C  $(GEN_DIR) SO_LIB=$(SO_LIB)
-endif
+ endif
 clean:;      $(MAKE) -f $(Makepam) $(MAKFLAGS)  clean
 clean_lib:;  $(MAKE) -f $(Makepam) $(MAKFLAGS)  clean_lib
 clean_share:;$(MAKE) -f $(Makepam) $(MAKFLAGS)  clean_share
