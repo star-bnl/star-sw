@@ -67,13 +67,19 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
   next if !$h;
   next if $h =~ /LinkDef/;
   if ($h =~ /Stypes/)  {$h_files .= " " . basename($h); next;}
-  #print "h = $h\n";
+
   my $hh = $h;
-  if (!-f $hh) {($hh = $h) =~ s/\.share/StRoot/;}
-  if (!-f $hh) {($hh = $h) =~ s/\.share/asps/;} 
-  if (!-f $hh) {($hh = $h) =~ s/\.share//;} 
-#  if (!-f $hh) {($hh = $h) =~ s/\.share/asps\/rexe/;} 
-  #print "open $hh\n";
+
+  if (!-f $hh) {($hh = $h) =~ s/.*\.share/StRoot/;}
+  if (!-f $hh) {($hh = $h) =~ s/.*\.share/asps/;} 
+  if (!-f $hh) {($hh = $h) =~ s/.*\.share//;} 
+
+  if ($h != $hh ){
+      print "=== RootCint-Info :: massaging h = hh = $h --> hh = $hh\n";
+  #} else {
+  #    print "=== RootCint-Info :: $h ok (without .share)\n";
+  }
+
   open (In,$hh) or die "Can't open $hh";
   my $dummy;
   my $class;
