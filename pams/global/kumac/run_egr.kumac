@@ -1,7 +1,10 @@
-macro egr i=1 GLOBAL_HOME=$STAR/pams/global/kumac
+**********************************************************
+
+macro egr i=1 
 
 i = [1]
-GLOBAL_HOME=[2]
+
+
 *
 * macro for testing the egr module in STAF
 *
@@ -9,13 +12,15 @@ GLOBAL_HOME=[2]
 * first generate the tables  needed and select scenario
 * some values for testing
 *
+
 if [i]=1 then
-  exec [GLOBAL_HOME]/init_egr
+  exec init_egr
 endif
+
 *
 * Call egr
 *
-message ' Calling EGR...'
+message ' Calling EGR_fitter'
 
 ami/mod/call egr_fitter_
         /dui/data/tpc/hits/tphit_
@@ -34,7 +39,8 @@ if ( staf_status(1) .ne. STAFCV_OK) then
 endif
 
 
-message '==================> DONE <================'
-return
+message ' finished calling egr_fitter'
 
+return
+********************************************************
 

@@ -1,37 +1,42 @@
-MACRO run_svm i=1 GLOBAL_HOME=$STAR/pams/global/kumac
+******************************************************************
+
+MACRO run_svm i=1 
 
 i = [1]
-GLOBAL_HOME = [2]	
+
+
 
 * initializations
 if [i] = 1 then
-  exec [GLOBAL_HOME]/init_svm
+  exec init_svm
 endif
 
-
 message 'Calling SVM...'
+
 ami/mod/call svm_am _
 	/dui/data/svt/tracks/stk_track _
 	/dui/data/tpc/tracks/tptrack _
 	/dui/constants/global/params/svm_ctrl _
 	/dui/data/global/tracks/evt_match
+
 if (staf_status(1) .ne. stafcv_ok) then
 	message 'Problem on return from SVM'
 endif
 
 
 return
-
-MACRO eval GLOBAL_HOME=$STAR/pams/global/kumac
+****************************************************************
+MACRO eval 
 
 i=[1]
-GLOBAL_HOME = [2]
+
 
 if ( [i]=1) then
-  exec [GLOBAL_HOME]/init_svm_svt_eval.kumac
+  exec init_svm_svt_eval.kumac
 endif
 
 message 'Calling SVM_EVAL2..'
+
 ami/mod/call svm_eval2 /dui/geant/Run/g2t_gepart _
 		   /dui/data/svt/hits/scs_spt _
 		   /dui/data/svt/tracks/groups _
@@ -42,11 +47,13 @@ ami/mod/call svm_eval2 /dui/geant/Run/g2t_gepart _
 		   /dui/constants/global/params/svm_eval_par _
 		   /dui/data/global/tracks/svm_eval_svt _
 		   /dui/data/global/tracks/svm_eval_tpc 
+
 if (staf_status(1) .ne. stafcv_ok) then
 	message 'Problem on return from SVM_EVAL2'
 endif
 	
 message 'Calling SVM_SVT_EVAL'
+
 ami/mod/call svm_svt_eval _ 
 	/dui/data/svt/hits/scs_spt _
 	/dui/data/svt/tracks/groups _
@@ -56,8 +63,10 @@ ami/mod/call svm_svt_eval _
 	/dui/data/global/tracks/evt_match _
 	/dui/constants/global/params/svm_eval_par _
 	/dui/data/global/tracks/svm_eval_strk
+
 if (staf_status(1) .ne. stafcv_ok) then
 		message 'Problem on return from SVM_SVT_EVAL'
-	endif
+endif
 
 return 
+********************************************************************
