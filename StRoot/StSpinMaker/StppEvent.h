@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.h,v 1.10 2003/10/16 19:48:37 akio Exp $ 
+// $Id: StppEvent.h,v 1.11 2004/01/23 00:54:44 akio Exp $ 
 // $Log: StppEvent.h,v $
+// Revision 1.11  2004/01/23 00:54:44  akio
+// update for ntp2003
+//
 // Revision 1.10  2003/10/16 19:48:37  akio
 // updates for 2003
 //
@@ -127,6 +130,9 @@ public:
     Float_t      yVertex;
     Float_t      zVertex;  
     Int_t        LCP;
+    Float_t      LCPpt;
+    Float_t      LCPeta;
+    Float_t      LCPphi;
     Float_t      sumPt;
     Float_t      vectorSumPt;
     Float_t      weightedEta;
