@@ -41,26 +41,26 @@ public:
     // xform routines
 
     //Local to global
-    StThreeVector<double> centerForTpcPadrow(int sector, int padrow);
-    StThreeVector<double> centerForSvgLadder(int layer, int ladder);
+    StThreeVector<double> centerForTpcPadrow(int sector, int padrow) const;
+    StThreeVector<double> centerForSvgLadder(int layer, int ladder) const;
 
     //Global to local
-    int sectorForTpcCoords(const StThreeVector<double> &vec);
-    int padrowForTpcCoords(const StThreeVector<double> &vec);
-    int layerForSvgCoords(const StThreeVector<double> &vec);
-    int ladderForSvgCoords(const StThreeVector<double> &vec);
+    int sectorForTpcCoords(const StThreeVector<double> &vec) const;
+    int padrowForTpcCoords(const StThreeVector<double> &vec) const;
+    int layerForSvgCoords(const StThreeVector<double> &vec) const;
+    int ladderForSvgCoords(const StThreeVector<double> &vec) const;
 
     // accessors
-    svg_config_st  getSvgConfig(){ return svgConfig; }
-    svg_geom_st   *getSvgGeom(){ return aSvgGeom; }
-    svg_shape_st  *getSvgShape(){ return aSvgShape; }
+    svg_config_st  getSvgConfig() const { return svgConfig; }
+    svg_geom_st   *getSvgGeom() const { return aSvgGeom; }
+    svg_shape_st  *getSvgShape() const{ return aSvgShape; }
 
     // generic transforms
-    double phiForWestSector(int iSector, int nSectors);
-    double phiForEastSector(int iSector, int nSectors);
-    double phiForSector(int iSector, int nSectors);
-    int westSectorForPhi(double phi, int nSectors);
-    int eastSectorForPhi(double phi, int nSectors);
+    double phiForWestSector(int iSector, int nSectors) const;
+    double phiForEastSector(int iSector, int nSectors) const;
+    double phiForSector(int iSector, int nSectors) const;
+    int westSectorForPhi(double phi, int nSectors) const;
+    int eastSectorForPhi(double phi, int nSectors) const;
 
 public:
     //Hit Transform Functors (Transfrom from first argument to second argument)
@@ -84,8 +84,8 @@ public:
     //refAngle is always defined [0,2pi] by each sector of the detector.
     
     //Go from global->Sti, expect refAngle positive
-    StThreeVector<double> operator() (const StThreeVector<double>& position, double refAngle);
-    StThreeVectorD operator() (const StThreeVectorD& position, double refAngle);
+    //StThreeVector<double> operator() (const StThreeVector<double>& position, double refAngle);
+    //StThreeVectorD operator() (const StThreeVectorD& position, double refAngle);
 
     pair<double, double> angleAndPosition(const StTpcHit*) const;
 

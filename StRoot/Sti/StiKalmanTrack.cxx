@@ -335,13 +335,12 @@ void StiKalmanTrack::initialize(double curvature,
       cout <<"StiKalmanTrack::initialize()\tERROR:\ttrackNodeFactory==0.  Abort"<<endl;
       return;
     }
-  StiGeometryTransform * t = StiGeometryTransform::instance();
   StiKalmanTrackNodeFactory * fac = dynamic_cast<StiKalmanTrackNodeFactory *>(trackNodeFactory);
   if (!fac) {
       cout <<"StiKalmanTrack::initialize(). ERROR:\tfactory cast failed.  Seg-fault"<<endl;
   }
   
-  StThreeVectorD stiOrigin;
+  //StThreeVectorD stiOrigin;
   double alpha,alphaP,eta;  
   hitvector::const_iterator it;
   double state[5];  
@@ -386,8 +385,9 @@ void StiKalmanTrack::initialize(double curvature,
 				alphaP = pNode->fAlpha; // value of the parent
       if (alphaP!=alpha)
 				{
-					stiOrigin = t->operator()(origin, alpha);
-					eta = curvature*stiOrigin.x();
+				    StThreeVectorD temp = origin;
+				    temp.rotateZ(alpha);
+				    eta = curvature*temp.x();
 				}
       state[0] = (*it)->y(); 
       state[1] = (*it)->z(); 

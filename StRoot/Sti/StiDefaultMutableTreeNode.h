@@ -58,8 +58,8 @@ class StiDefaultMutableTreeNode : public StiTreeNode
   void remove(int childIndex) ;
   void setParent(StiTreeNode *  newParent) ;
   StiTreeNode *  getParent() ;
-  StiTreeNode *  getChildAt(int index) ;
-  int getChildCount() ;
+  StiTreeNode *  getChildAt(int index) const;
+  int getChildCount() const;
   int getIndex(StiTreeNode *  aChild) ;
   void setAllowsChildren(bool allows);
   bool getAllowsChildren() ;
