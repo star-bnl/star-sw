@@ -1,5 +1,8 @@
-# $Id: MakeRexe.mk,v 1.21 1999/05/08 23:19:36 fisyak Exp $
+# $Id: MakeRexe.mk,v 1.22 1999/06/16 12:37:02 fisyak Exp $
 # $Log: MakeRexe.mk,v $
+# Revision 1.22  1999/06/16 12:37:02  fisyak
+# Changes for egcs-1.1.2 on Solaris
+#
 # Revision 1.21  1999/05/08 23:19:36  fisyak
 # Add rootPstar
 #
@@ -94,7 +97,7 @@ CPPFLAGS += $(INCL)
 CCload = YES
 
 # static linking of SCL and StEvent needed with current Solaris compiler
-ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
+ifeq ($(STAR_HOST_SYS),sun4x_56)
   STCLASS_OBJS =  $(wildcard $(STAR)/.$(STAR_HOST_SYS)/obj/StarClassLibrary/*.o \
 $(STAR)/.$(STAR_HOST_SYS)/obj/StarClassLibrary/Templates.DB/*.o) 
   STEVENT_OBJS = $(wildcard $(STAR)/.$(STAR_HOST_SYS)/obj/StEvent/*.o \
@@ -213,3 +216,4 @@ show:
 	@echo STAF_SYS_INCS=$(STAF_SYS_INCS)
 	@echo STAR_SYS=$(STAR_SYS)
 	@echo STAF_SYS=$(STAF_SYS)
+	@echo STCLASS_OBJS=$(STCLASS_OBJS)

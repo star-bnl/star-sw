@@ -73,7 +73,9 @@ LIB_LNK_DIR := 	$(OUT_DIR)/lib
 BIN_LNK_DIR := 	$(OUT_DIR)/bin
 OBJ_LNK_DIR := 	$(OUT_DIR)/obj
 DEP_LNK_DIR := 	$(OUT_DIR)/dep
+ifeq ($(STAR_SYS),$(STAR_HOST_SYS))
 ALL_LNK_DIRS := $(LIB_LNK_DIR) $(BIN_LNK_DIR) $(OBJ_LNK_DIR) $(DEP_LNK_DIR)
+endif
 endif
 endif
 
@@ -156,7 +158,7 @@ $(ALL_GEN_DIRS) :
 	$(MKDIR) $(TARGET)
 
 $(ALL_LNK_DIRS) : $(OUT_DIR)/% : $(OUT_DIR)/.$(STAF_ARCH)/%
-	$(LN)  $(OUT_DIR)/.@sys/$(STEM) $(OUT_DIR)/$(STEM)
+	$(LN)  $(OUT_DIR)/.$(STAF_ARCH)/$(STEM) $(OUT_DIR)/$(STEM)
 
 show: 
 	@echo STAF_SYS		:= $(STAF_SYS)
