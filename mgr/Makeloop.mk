@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.22  1998/10/08 15:39:51  perev
+#  add strip
+#
 #  Revision 1.21  1998/10/08 15:37:37  perev
 #  add strip
 #
@@ -142,7 +145,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/10/08 15:37:37 $ 
+#           Last modification $Date: 1998/10/08 15:39:51 $ 
 #  default setings
 # Current Working Directory
 #
@@ -178,10 +181,10 @@ endif
 
 Makeloop := $(strip $(wildcard $(CWD)/Makeloop.mk))
 ifndef Makeloop
-  Makeloop := $(wildcard $(CWD)/mgr/Makeloop.mk))  
+  Makeloop := $(wildcard $(CWD)/mgr/Makeloop.mk))
 endif
 ifndef Makeloop
-  Makeloop := $(strip $(wildcard $(STAR)/mgr/Makeloop.mk))  
+  Makeloop := $(strip $(wildcard $(STAR)/mgr/Makeloop.mk)) 
 endif
 
 ifndef INP_DIR 
