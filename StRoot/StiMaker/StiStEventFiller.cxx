@@ -1,11 +1,16 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.47 2004/12/02 04:18:06 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 2.48 2004/12/02 22:14:53 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.48  2004/12/02 22:14:53  calderon
+ * Only fill the fitTraits.chi2[1] data member for primaries.
+ * It holds node->getChi2() from the innerMostHitNode, which will be the
+ * vertex for primaries.
+ *
  * Revision 2.47  2004/12/02 04:18:06  pruneau
  * chi2[1] now set to incremental chi2 at inner most hit or vertex
  *
@@ -576,11 +581,15 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
       //throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- itKtrack == mTrkNodeMap.end()");
       StTrackNode* currentTrackNode = (*itKtrack).second;
       //double globalDca = currentTrackNode->track(global)->impactParameter();
+      //Even though this is filling of primary tracks, there are certain
+      // quantities that need to be filled for global tracks that are only known
+      // after the vertex is found, such as dca.  Here we can fill them.
+      // 
       StGlobalTrack* currentGlobalTrack = static_cast<StGlobalTrack*>(currentTrackNode->track(global));
       float globalDca = impactParameter(currentGlobalTrack);
       currentGlobalTrack->setImpactParameter(globalDca);
       kTrack->setGlobalDca(globalDca);
-
+      
       if (kTrack->isPrimary())
 	{
 	  fillTrackCount1++;
@@ -602,7 +611,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 		  int bad = 0;
 		  bool piped = false;
 		  bool ifced = false;
-		  bool out = false;
+		  //bool out = false; //unused, comment out to remove compiler warning
 		  while (it!=end) 
 		    {
 		      const StiKalmanTrackNode& node = *it;
@@ -648,7 +657,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 			  const StiKalmanTrackNode& node2 = *it2;
 			  double x_g = node2.x_g();
 			  double y_g = node2.y_g();
-			  double z_g = node2.z_g();
+			  //double z_g = node2.z_g(); //unused, remove to remove compiler warning
 			  double rt_g2 = sqrt(x_g*x_g+y_g*y_g);
 			  cout << "rt:" << rt_g2 << " --" << node2 << endl;
 			  ++it2;
@@ -794,9 +803,10 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   float chi2[2];
   //get chi2/dof
   chi2[0] = track->getChi2();  
-  //chi2[1] = -9999; // change: here goes an actual probability, need to calculate?
-  chi2[1] = node->getChi2();//incremental chi2 for adding the inner most hit (or vertex).
-    
+  chi2[1] = -999; // change: here goes an actual probability, need to calculate?
+  // December 04: The second element of the array will now hold the incremental chi2 of adding
+  // the vertex for primary tracks
+  if (gTrack->type()==primary) chi2[1]=node->getChi2();
 
   // @#$%^&
   // need to transform the covariant matrix from double's (Sti) to floats (StEvent)!
