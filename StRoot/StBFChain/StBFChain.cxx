@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.362 2003/10/28 20:47:49 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.363 2003/10/30 19:36:32 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1407,15 +1407,22 @@ Int_t StBFChain::Instantiate()
 	    Int_t DMode=0;
 	    St_tpcdaq_Maker *tcpdaqMk = (St_tpcdaq_Maker *) mk;
 
-	    if      (GetOption("Trs"))   mk->SetMode(1); // trs
-	    else if (GetOption("Simu"))  mk->SetMode(2); // daq, no gain
-	    else                         mk->SetMode(0); // daq
+	    // Beware of those ...
+	    if      (GetOption("Trs"))   tcpdaqMk->SetMode(1); // trs
+	    else if (GetOption("Simu"))  tcpdaqMk->SetMode(2); // daq, no gain
+	    else                         tcpdaqMk->SetMode(0); // daq
 
-	    if ( GetOption("onlcl") )   DMode = DMode | 0x2;  // use the online TPC clusters info if any
+	    // Correction depending on DAQ100 or not
+	    if ( GetOption("fcf")   )    tcpdaqMk->SetCorrection(0x0);
+	    else                         tcpdaqMk->SetCorrection(0x7);
+
+	    // DAQ100 or Raw switch options
+	    if ( GetOption("onlcl") )   DMode = DMode | 0x2;  // use the online TPC clusters (DAQ100) info if any
 	    if ( GetOption("onlraw") )  DMode = DMode | 0x1;  // use the TPC raw hit information
 	    tcpdaqMk->SetDAQFlag(DMode);                      // set flag
-	    (void) printf("StBFChain:: maker==St_tpcdaq_Maker SetDAQFlag(%d) SetMode(%d)\n",
-			  DMode,mk->GetMode());
+
+	    (void) printf("StBFChain:: maker==St_tpcdaq_Maker SetDAQFlag(%d) SetMode(%d) SetCorrection(%d)\n",
+			  DMode,tcpdaqMk->GetMode(),tcpdaqMk->GetCorrection());
 	  }
 
 	  if (maker == "StRchMaker") {
