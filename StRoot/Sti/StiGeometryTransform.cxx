@@ -40,6 +40,7 @@
 #include "StiKalmanTrack.h"
 #include "StiGeometryTransform.h"
 #include "StiHelixFitter.h"
+#include "StiHelixCalculator.h"
 #include "StiDetectorFinder.h"
 
 StiGeometryTransform* StiGeometryTransform::sinstance = 0;
@@ -487,7 +488,7 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
   double dCurvature = pTrackNode->fP3;
 
   // now calculate azimuthal angle of the helix origin wrt the helix axis
-  // in _local_ coordinates.  
+  // in _local_ coordinates.
   double dDeltaX = pTrackNode->fX - pTrackNode->fP2/dCurvature;
   double dDeltaY = sqrt(1./(dCurvature*dCurvature) - dDeltaX*dDeltaX) *
       (dCurvature>0 ? -1 : 1); // sign(curvature) == -sign(Y-Y0)
@@ -545,9 +546,8 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
     //now get hits
     StPtrVecHit hits = st->detectorInfo()->hits(kTpcId);
     sort( hits.begin(), hits.end(), StHitRadiusGreaterThan() );
-    //sort( hits.begin(), hits.end(), StHitRadiusLessThan() );
     hitvector hitvec;
-
+    
     for (vector<StHit*>::iterator it=hits.begin();
 	 it!=hits.end() && hitvec.size()<=maxHits; ++it) {
 	StTpcHit* hit = dynamic_cast<StTpcHit*>(*it);
@@ -588,14 +588,8 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 	    }
 	}
     }
-
     
-    //*(Messenger::instance(kGeometryMessage)) <<"Filled Hits: "<<endl;
-    //for (hitvector::const_iterator it=hitvec.begin(); it!=hitvec.end(); ++it) {
-    //*(Messenger::instance(kGeometryMessage)) <<(*(*it))<<endl;
-    //}
-    
-    //Now get the helix
+        //Now get the helix
     StPhysicalHelixD sthelix = st->geometry()->helix();
     
     //Get the (x-y) center of the circle and z0 in global coordinates,
@@ -606,30 +600,56 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
     double curvature = sthelix.curvature();
     if (sthelix.h()<0) 
 	curvature=-curvature;
-    //*(Messenger::instance(kGeometryMessage)) <<"StiGeometryTransform:  curvature: "<<curvature<<endl;
+    // *(Messenger::instance(kGeometryMessage)) <<"StiGeometryTransform:  curvature: "<<curvature<<endl;
     
     double tanLambda = tan(sthelix.dipAngle());
-    //*(Messenger::instance(kGeometryMessage)) <<"tanLambda: "<<tanLambda<<endl;
+	    
+    // *(Messenger::instance(kGeometryMessage)) <<"tanLambda: "<<tanLambda<<endl;
 
-    //Test transform:
-    //bool worked = StiHelixFitter::instance()->fit(hitvec);
-    //*(Messenger::instance(kGeometryMessage)) <<*(StiHelixFitter::instance())<<endl;
-	//*(Messenger::instance(kGeometryMessage)) <<"\t";
-	//*(Messenger::instance(kGeometryMessage)) <<stiGlobalOrigin<<" curvature: "<<curvature;
-	//*(Messenger::instance(kGeometryMessage)) <<" tanLambda: "<<tanLambda<<endl;
+    if (hitvec.size()<3) {
+	*(Messenger::instance(kGeometryMessage)) << " Track Transform Error:\t"
+						 <<" hitvec.size()<3.  Abort"<<endl;
+	return;
+    }
+    //int size = hitvec.size();
+
+    //StiHelixCalculator calc;
+    //Use the outer 3 hits
+    //const StThreeVectorF& outside = hitvec[size-3]->globalPosition();
+    //const StThreeVectorF& middle = hitvec[size-2]->globalPosition();
+    //const StThreeVectorF& inside = hitvec[size-1]->globalPosition();
+
+    //Try 3 hits over a wide distance:
+    //const StThreeVectorF& outside = hitvec.front()->globalPosition();
+    //const StThreeVectorF& inside = hitvec.back()->globalPosition();
+    //const StThreeVectorF& middle = (*(hitvec.begin()+hitvec.size()/2))->globalPosition();
+        
+    //calc.calculate( StThreeVector<double>(inside.x(),  inside.y(),  inside.z()),
+    //	    StThreeVector<double>(middle.x(),  middle.y(),  middle.z()),
+    //	    StThreeVector<double>(outside.x(), outside.y(), outside.z()) );
+    
+    // *(Messenger::instance(kSeedFinderMessage)) <<"origin: "<<calc.xCenter()<<" "
+    //				       <<calc.yCenter()<<" "
+    //				       <<calc.z0()<<" "
+    //				       <<" curvature: "<<calc.curvature()<<" "
+    //				       <<" tanLambda: "<<calc.tanLambda()<<endl;
+    
+    // *(Messenger::instance(kSeedFinderMessage)) <<"origin: "<<stiGlobalOrigin
+    //				       <<" curvature: "<<curvature
+    //				       <<" tanLambda: "<<tanLambda<<endl;
+    //Test the calculator
+    //sti->initialize( calc.curvature(), calc.tanLambda(),
+    //	     StThreeVectorD(calc.xCenter(), calc.yCenter(), 0.),
+    //	     hitvec);
     
     sti->initialize(curvature, tanLambda, stiGlobalOrigin, hitvec);
+    
+    //Test the fitter
     //StiHelixFitter* fitter = StiHelixFitter::instance();
+    //bool worked = StiHelixFitter::instance()->fit(hitvec);
+    // *(Messenger::instance(kSeedFinderMessage)) <<*(StiHelixFitter::instance())<<endl;
+    
     //StThreeVectorF fitOrigin(fitter->xCenter(), fitter->yCenter(), fitter->z0());
     //sti->initialize(fitter->curvature(), fitter->tanLambda(), fitOrigin, hitvec);
-
-    //Test track!
-    //*(Messenger::instance(kGeometryMessage)) <<"Test the track:"<<endl;
-    //for (double xLocal=hitvec.back()->x(); xLocal<=hitvec.front()->x(); xLocal+=10.) {
-    //for (double xLocal=0.; xLocal<=190.; xLocal+=10.) 
-    //	{
-    //for (doublee xLocal=hitvec.front()->x(); xLocal<=hitvec.back()->x(); xLocal+=10.) {
-    //		StThreeVector<double> pos = sti->getGlobalPointNear(xLocal);
-    //*(Messenger::instance(kGeometryMessage)) <<"\tx: "<<xLocal<<"\tpos: "<<pos<<endl;
-    //	}
+    
 }
