@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.59 1999/11/18 22:34:11 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.60 1999/11/18 22:48:42 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.60  1999/11/18 22:48:42  kathy
+// remove commented out lines
+//
 // Revision 1.59  1999/11/18 22:34:11  kathy
 // removed some histograms of variables that no longer exist and change some limits
 //
@@ -202,7 +205,6 @@
 #include "SystemOfUnits.h"
 
 #include "St_QA_Maker/St_QA_Maker.h"
-#include "St_QA_Maker/StHistUtil.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
 
@@ -464,25 +466,12 @@ ClassImp(St_QA_Maker)
 
 St_QA_Maker::~St_QA_Maker(){
 
-// St_QA_Maker - destructor
-//  SafeDelete(m_QACanvas);
-//  if (m_ListOfLog) {
-//  m_ListOfLog->Delete();
-//  SafeDelete(m_ListOfLog);
-//}
-
 }
 
 
 //_____________________________________________________________________________
 
 Int_t St_QA_Maker::Finish() {
-
-// St_QA_Maker - Finish, Draw histograms if SetDraw true
-//  Use DrawHists method from StHistUtil
-//    - must have pointer to StHistUtil from using SetHistUtil member function
-//  if (drawinit)  
-//  m_PntrToHistUtil->DrawHists();
 
   return StMaker::Finish();
 }
@@ -507,16 +496,6 @@ Int_t St_QA_Maker::Init(){
   BookHistV0Eval();
   BookHistRich();
   
-
-//  Set default values for all methods:
-//  SetDraw(kFALSE);
-
-  //  m_PntrToHistUtil->SetHistsNamesDraw();
-  //m_PntrToHistUtil->SetZones();
-  //m_PntrToHistUtil->SetPaperSize();
-  //m_PntrToHistUtil->SetPostScriptFile(); 
-  //m_PntrToHistUtil->SetDefaultLogYList();
-
   return StMaker::Init();
 }
 //_____________________________________________________________________________
