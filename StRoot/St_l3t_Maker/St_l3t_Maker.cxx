@@ -1,7 +1,7 @@
-// $Id: St_l3t_Maker.cxx,v 1.1 1999/02/12 13:52:50 fisyak Exp $
+// $Id: St_l3t_Maker.cxx,v 1.2 1999/02/19 14:39:31 fisyak Exp $
 // $Log: St_l3t_Maker.cxx,v $
-// Revision 1.1  1999/02/12 13:52:50  fisyak
-// l3t maker from Pablo
+// Revision 1.2  1999/02/19 14:39:31  fisyak
+// New version from Pablo, tpc safe
 //
 //
 //////////////////////////////////////////////////////////////////////////
@@ -133,7 +133,7 @@ Int_t St_l3t_Maker::Init(){
 
   for ( int i = 0 ; i < 24 ; i++ ) {
       para[0].sectorPhiShift[i] = 0. ;
-      if ( i < 13 ) { 
+      if ( i < 12 ) { 
          para[0].sectorEtaMin[i] = 0. ;
          para[0].sectorEtaMax[i] = 2. ;
       }
@@ -167,10 +167,18 @@ Int_t St_l3t_Maker::Make(){
     if (tpc_data) {// Clusters exist -> do tracking
       St_DataSetIter next(tpc_data);
       St_tcl_tphit   *tphit = (St_tcl_tphit     *) next("tphit");
-      St_tpt_track   *track = new St_tpt_track("tptrack",maxNofTracks); m_DataSet->Add(track);
+      Int_t nHits = tphit->GetNRows();
+      St_tcl_tphit   *l3hit = new St_tcl_tphit("l3Hit",nHits);
+      m_DataSet->Add(l3hit);
+//
+//    Copy tpc table to l3
+//
+      *l3hit = *tphit ;
+//
+      St_tpt_track   *track = new St_tpt_track("l3Track",maxNofTracks); m_DataSet->Add(track);
       St_sl3Monitor  *mon   = new St_sl3Monitor("sl3Monitor",1000); m_DataSet->Add(mon);
 	
-      Int_t l3out = ftfTpc ( m_sl3TpcPara, tphit, track, mon ) ;
+      Int_t l3out = ftfTpc ( m_sl3TpcPara, l3hit, track, mon ) ;
     }
   }
   MakeHistograms(); // tracking histograms
@@ -202,7 +210,7 @@ void St_l3t_Maker::MakeHistograms() {
 //_____________________________________________________________________________
 void St_l3t_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_l3t_Maker.cxx,v 1.1 1999/02/12 13:52:50 fisyak Exp $\n");
+  printf("* $Id: St_l3t_Maker.cxx,v 1.2 1999/02/19 14:39:31 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
