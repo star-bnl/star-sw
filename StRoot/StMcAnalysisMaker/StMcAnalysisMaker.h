@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcAnalysisMaker.h,v 1.7 2003/09/10 19:47:22 perev Exp $
+ * $Id: StMcAnalysisMaker.h,v 1.8 2004/01/13 21:06:04 fisyak Exp $
  * $Log: StMcAnalysisMaker.h,v $
+ * Revision 1.8  2004/01/13 21:06:04  fisyak
+ * Add TpcHitNtuple usind IdTruth info
+ *
  * Revision 1.7  2003/09/10 19:47:22  perev
  * ansi corrs
  *
@@ -76,6 +79,7 @@ class StMcAnalysisMaker : public StMaker {
     TH2F*     coordMcPartner;    //! X and Y coord of  MC  Track.
     TFile*    mNtupleFile;       //! File to contain the mTrackNtuple, otherwise it is deleted!
     TNtuple*  mTrackNtuple;      //! Miscellaneous info of the track pairs
+    TNtuple*  mTpcHitNtuple;     //! Miscellaneous info of the TPC hit pairs
     // Data-members to make up the output Canvases
     TCanvas*       mAssociationCanvas;    //!   
     Int_t          mPadColumns;     // Number of the columns (TPad's) on the single Canvas
@@ -94,7 +98,7 @@ private:
     static const Float_t mMaxDeltaZ;
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcAnalysisMaker.h,v 1.7 2003/09/10 19:47:22 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcAnalysisMaker.h,v 1.8 2004/01/13 21:06:04 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StMcAnalysisMaker,0)
