@@ -1,5 +1,10 @@
 //*CMZ :          05/08/98  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   05/08/98 
+// $Id: St_FileSet.h,v 1.4 1998/12/26 21:40:38 fisyak Exp $
+// $Log: St_FileSet.h,v $
+// Revision 1.4  1998/12/26 21:40:38  fisyak
+// Add Id and Log
+// 
 
 #ifndef ROOT_St_FileSet
 #define ROOT_St_FileSet

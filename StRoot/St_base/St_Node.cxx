@@ -1,5 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
- 
+// $Id: St_Node.cxx,v 1.2 1998/12/26 21:40:40 fisyak Exp $
+// $Log: St_Node.cxx,v $
+// Revision 1.2  1998/12/26 21:40:40  fisyak
+// Add Id and Log
+// 
 /*************************************************************************
  * Copyright(c) 1998, FineSoft, All rights reserved. Valery Fine (Faine) *
  *************************************************************************/

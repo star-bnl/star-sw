@@ -1,5 +1,10 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
+// $Id: St_FileSet.cxx,v 1.5 1998/12/26 21:40:38 fisyak Exp $
+// $Log: St_FileSet.cxx,v $
+// Revision 1.5  1998/12/26 21:40:38  fisyak
+// Add Id and Log
+// 
  
 #include "St_FileSet.h"
 #include "TBrowser.h"
