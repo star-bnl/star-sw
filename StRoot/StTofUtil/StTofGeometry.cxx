@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.cxx,v 1.1 2001/09/28 19:09:40 llope Exp $
+ * $Id: StTofGeometry.cxx,v 1.2 2002/01/22 01:55:05 geurts Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,31 +10,76 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.cxx,v $
+ * Revision 1.2  2002/01/22 01:55:05  geurts
+ * STAR dBase access routine, bugfixes and doxygenized
+ *
  * Revision 1.1  2001/09/28 19:09:40  llope
  * first version
  *
  *******************************************************************/
+//! Time-of-Flight Geometry Utilities
+/*! \class StTofGeometry
+    \author Frank Geurts
+
+    A package of geometry routines for the STAR Time-of-Flight detector.
+    Methods include initialization from STAR dbase or local table (xdf-file)
+    and extrapolation routines of tracks to the TOF slats.<p>
+
+    Also mappings for DAQ-id to Slat-Id and vice-versa are available
+    as through member functions.
+
+    To do:
+    <ul>
+    <li>Move away from ctf-tables by either introducing a local version or
+    discarding xdf use all together.</li>
+    <li>Calculate default values for slats from GSTAR parameters.<li>
+    <li>Include ADC-TDC mapping to correct for wrong cabling</li>
+    </ul>
+
+*/
 #include "StTofGeometry.h"
 #include "St_XDFFile.h"
 #include "St_DataSetIter.h"
 #include "PhysicalConstants.h"
 #include "ctf/St_ctg_Module.h"
+#include "tables/St_tofSlatGeom_Table.h"
+#include "StMaker.h"
 
+
+/// defaulty empty constructor
 StTofGeometry::StTofGeometry(){ /* nope */};
+/// default empty destructor
 StTofGeometry::~StTofGeometry(){ /* nope */};
 
+
+
+/// initialize geometry class from XDF file and set-up DAQ/Slat mappings
 void StTofGeometry::init(){
   initGeomFromXdf();
   initDaqMap();
 }
 
 
-void StTofGeometry::initGeomFromXdf(){
-  Char_t *InputXdfFile = "/afs/rhic/star/users/geurts/public/dbase/ctg_pars.xdf";
+
+/// initialize geometry class from STAR dBase and set-up DAQ/Slat mappings
+void StTofGeometry::init(StMaker* maker){
+  initGeomFromDbase(maker);
+  initDaqMap();
+}
+
+
+
+/// initialize TOF Slat parameters from XDF file
+void StTofGeometry::initGeomFromXdf(const Char_t* const InputXdfFile){
   cout << "StTofGeometry: loading dBase from " << InputXdfFile << endl;
   St_XDFFile xdf(InputXdfFile);
   St_DataSet *ctfg = xdf.NextEventGet();
   St_DataSetIter gime(ctfg);
+  if (!ctfg){
+    cout << " ERROR: unable read from file" << endl;
+    assert(0);
+    return;
+  }
 
   St_ctg_geo*      stafTofParam(0);
   St_ctg_slat_phi* stafSlatPhi(0);
@@ -47,27 +92,32 @@ void StTofGeometry::initGeomFromXdf(){
   stafSlatParam  = (St_ctg_slat     *) gime("tof_slat");
 
   ctg_geo_st *geo = stafTofParam->GetTable();
-  //mTofParam.detector          = geo->detector;
-  mTofParam.i_eta_max         = geo->i_eta_max;
-  mTofParam.i_eta_min         = geo->i_eta_min;
-  mTofParam.i_phi_max         = geo->i_phi_max;
-  mTofParam.i_phi_min         = geo->i_phi_min;
-  mTofParam.n_counter_eta     = geo->n_counter_eta;
-  mTofParam.n_counter_phi     = geo->n_counter_phi;
-  mTofParam.n_tray_eta        = geo->n_tray_eta;
-  mTofParam.n_tray_phi        = geo->n_tray_phi;
-  mTofParam.counter_thickness = geo->counter_thickness;
-  mTofParam.counter_width     = geo->counter_width;
-  mTofParam.r                 = geo->r;
-  mTofParam.tray_height       = geo->tray_height;
-  mTofParam.tray_width        = geo->tray_width;
-  mTofParam.tray_length       = geo->tray_length;
-  mTofParam.tray_phi_zero     = geo->tray_phi_zero;
-
-
+  if (geo){
+    //mTofParam.detector          = geo->detector;
+    mTofParam.i_eta_max         = geo->i_eta_max;
+    mTofParam.i_eta_min         = geo->i_eta_min;
+    mTofParam.i_phi_max         = geo->i_phi_max;
+    mTofParam.i_phi_min         = geo->i_phi_min;
+    mTofParam.n_counter_eta     = geo->n_counter_eta;
+    mTofParam.n_counter_phi     = geo->n_counter_phi;
+    mTofParam.n_tray_eta        = geo->n_tray_eta;
+    mTofParam.n_tray_phi        = geo->n_tray_phi;
+    mTofParam.counter_thickness = geo->counter_thickness;
+    mTofParam.counter_width     = geo->counter_width;
+    mTofParam.r                 = geo->r;
+    mTofParam.tray_height       = geo->tray_height;
+    mTofParam.tray_width        = geo->tray_width;
+    mTofParam.tray_length       = geo->tray_length;
+    mTofParam.tray_phi_zero     = geo->tray_phi_zero;
+  }
+  else {
+    cout << " ERROR: unable to read TOF param table" << endl;
+    return;
+  }
 
   // copy eta and phi database into two vectors first
   ctg_slat_eta_st *eta = stafSlatEta->GetTable();
+  if (eta){
     for(int iRow=0; iRow<stafSlatEta->GetNRows(); iRow++,eta++){
       StructTofSlatEta tofSlatEta;
       tofSlatEta.ieta = eta->ieta;
@@ -80,16 +130,28 @@ void StTofGeometry::initGeomFromXdf(){
       tofSlatEta.z_max   = eta->z_max;
       tofSlatEta.z_min   = eta->z_min;
       mTofSlatEtaVec.push_back(tofSlatEta);
+    }
   }
+  else {
+    cout << " ERROR: unable to read TOF eta table" << endl;
+    return;
+  }
+
   ctg_slat_phi_st *phi = stafSlatPhi->GetTable();
-  for(int iRow=0; iRow<stafSlatPhi->GetNRows(); iRow++,phi++){
-    StructTofSlatPhi tofSlatPhi;
-    tofSlatPhi.iphi    = phi->iphi;
-    // convert XDF 0..360 degrees to STAR -pi..pi range
-    tofSlatPhi.phi     = ((phi->phi>180)?phi->phi-360:phi>phi)*degree;
-    tofSlatPhi.phi_max = ((phi->phi_max>180)?phi->phi_max-360:phi->phi_max)*degree;
-    tofSlatPhi.phi_min = ((phi->phi_min>180)?phi->phi_min-360:phi->phi_min)*degree;
-    mTofSlatPhiVec.push_back(tofSlatPhi);
+  if (phi){
+    for(int iRow=0; iRow<stafSlatPhi->GetNRows(); iRow++,phi++){
+      StructTofSlatPhi tofSlatPhi;
+      tofSlatPhi.iphi    = phi->iphi;
+      // convert XDF 0..360 degrees to STAR -pi..pi range
+      tofSlatPhi.phi     = ((phi->phi>180)?phi->phi-360:phi>phi)*degree;
+      tofSlatPhi.phi_max = ((phi->phi_max>180)?phi->phi_max-360:phi->phi_max)*degree;
+      tofSlatPhi.phi_min = ((phi->phi_min>180)?phi->phi_min-360:phi->phi_min)*degree;
+      mTofSlatPhiVec.push_back(tofSlatPhi);
+    }
+  }
+  else {
+    cout << " ERROR: unable to read TOF phi table" << endl;
+    return;
   }
 
   // build the database vector.
@@ -102,7 +164,7 @@ void StTofGeometry::initGeomFromXdf(){
     else {cout << "StTofGeometry: slat eta out of range " << iEta << endl;
           iPhiMin=0; iPhiMax=-1;}
     for (int j=iPhiMin-1;j<iPhiMax;j++){
-      StructSlatGeom* tofSlat = new StructSlatGeom;
+      tofSlatGeom_st* tofSlat = new tofSlatGeom_st;
       tofSlat->ieta    = mTofSlatEtaVec[i].ieta;
       tofSlat->z       = mTofSlatEtaVec[i].z;
       tofSlat->z_min   = mTofSlatEtaVec[i].z_min;
@@ -124,13 +186,58 @@ void StTofGeometry::initGeomFromXdf(){
 }
 
 
-int StTofGeometry::calcSlatId(int iphi, int ieta) const {
+
+/// initialize TOF Slat parameters from STAR dBase
+void StTofGeometry::initGeomFromDbase(StMaker *maker){
+  if (!maker){
+    cout << "StTofGeometry: unable to initialize without maker" << endl;
+    return;
+  }
+  cout << "StTofGeometry: eventtime = ";
+  maker->GetDateTime().Print();
+  
+  TDataSet* mDbDataSet;
+  mDbDataSet= maker->GetDataBase("Geometry/tof");
+
+  assert(mDbDataSet);
+  St_tofSlatGeom* mSlatGeom = (St_tofSlatGeom*)mDbDataSet->Find("tofSlatGeom");
+  assert(mSlatGeom);
+  tofSlatGeom_st *mslats=(tofSlatGeom_st*)mSlatGeom->GetArray();
+  int numRows=mSlatGeom->GetNRows(); // should be 41 rows...
+  cout << "StTofGeometry: numRows = " << numRows << endl;
+  for (int i=0;i<numRows;i++) mTofSlatVec.push_back(mslats[i]);
+
+
+  mTofParam.i_eta_max         = 10;
+  mTofParam.i_eta_min         =  1;
+  mTofParam.i_phi_max         =  5;
+  mTofParam.i_phi_min         =  1;
+  mTofParam.n_counter_eta     = 10;
+  mTofParam.n_counter_phi     =  5;
+  mTofParam.n_tray_eta        =  1;
+  mTofParam.n_tray_phi        =  1;
+  mTofParam.counter_thickness =  2.159;
+  mTofParam.counter_width     =   1;
+  mTofParam.r                 = 213.95;
+  mTofParam.tray_height       =   4.7;
+  mTofParam.tray_width        =  10.795;
+  mTofParam.tray_length       = 120.81;
+  mTofParam.tray_phi_zero     =   0;
+   
+}
+
+
+
+/// Calculate and return SlatId from GEANT (ieta,iphi) coordinates
+int StTofGeometry::calcSlatId(const int iphi, const int ieta) const {
   return ((ieta - 1) * 4 + iphi);
 }
 
 
-StructSlatGeom StTofGeometry::tofSlat(Int_t slatId) const {
-  StructSlatGeom thisSlat;
+
+/// return slat geometry structure for slatId
+tofSlatGeom_st StTofGeometry::tofSlat(const Int_t slatId) const {
+  tofSlatGeom_st thisSlat;
   if(slatId > 0) 
     thisSlat = mTofSlatVec[slatId-1];
   else 
@@ -138,12 +245,13 @@ StructSlatGeom StTofGeometry::tofSlat(Int_t slatId) const {
   return thisSlat;
 }
 
+
+
+/// set-up the default Daq-to-SlatId and Slat-to-DaqId mappings
 void StTofGeometry::initDaqMap(){
-  /*
-    set-up the default DaqId to SlatId Map.
-  */
-  cout << "StTofGeometry: Initializing default DaqMap" << endl;
-// tray...
+  cout << "StTofGeometry: Initializing default DAQ and SlatId mappings" << endl;
+
+  // tray...
   mTofDaqMap[ 0]=37; mTofDaqMap[ 1]=38; mTofDaqMap[ 2]=39; mTofDaqMap[ 3]=40; mTofDaqMap[ 4]=41; 
   mTofDaqMap[ 5]=33; mTofDaqMap[ 6]=34; mTofDaqMap[ 7]=35; mTofDaqMap[ 8]=36; 
   mTofDaqMap[ 9]=29; mTofDaqMap[10]=30; mTofDaqMap[11]=31; mTofDaqMap[12]=32; 
@@ -154,7 +262,8 @@ void StTofGeometry::initDaqMap(){
   mTofDaqMap[29]= 9; mTofDaqMap[30]=10; mTofDaqMap[31]=11; mTofDaqMap[32]=12; 
   mTofDaqMap[33]= 5; mTofDaqMap[34]= 6; mTofDaqMap[35]= 7; mTofDaqMap[36]= 8; 
   mTofDaqMap[37]= 1; mTofDaqMap[38]= 2; mTofDaqMap[39]= 3; mTofDaqMap[40]= 4;
-// ramp and pvpd....
+
+  // ramp and pvpd....
   mTofDaqMap[41]=99;
   mTofDaqMap[42]=51;
   mTofDaqMap[43]=52;
@@ -162,14 +271,17 @@ void StTofGeometry::initDaqMap(){
   mTofDaqMap[45]=54;
   mTofDaqMap[46]=55;
   mTofDaqMap[47]=56; 
+
+  // determine  Slat-to-DaqId
+  for (int i=0;i<41;i++) mTofSlatMap[mTofDaqMap[i]]=i+1;
+  mTofSlatMap[0]=99;
 }
 
 
-StThreeVectorD StTofGeometry::tofSlatNormPoint(Int_t slatId) const {
-  /*
-    calculate the normal vector <r> to a slat
-  */
-  StructSlatGeom thisSlat = tofSlat(slatId);
+
+///  calculate the normal vector <r> to a slat
+StThreeVectorD StTofGeometry::tofSlatNormPoint(const Int_t slatId) const {
+  tofSlatGeom_st thisSlat = tofSlat(slatId);
   double cosAng = thisSlat.cosang;
   double sinAng = sqrt(1.0 - cosAng*cosAng);                 
   double tanAng = fabs(sinAng/cosAng);
@@ -182,14 +294,15 @@ StThreeVectorD StTofGeometry::tofSlatNormPoint(Int_t slatId) const {
 }
 
 
+
+/// calculate the normal vector to a slats-plane
+/*!
+  tofSlatNormPoint and tofPlaneNormPoint do not always match each other
+  because of uncertainties in phi measurments. but the difference is small.   
+*/
 StThreeVectorD StTofGeometry::tofPlaneNormPoint(Int_t slatId) const {
-  /*
-    calculate the normal vector to a slats-plane. 
-    tofSlatNormPoint and tofPlaneNormPoint do not always match each other
-    because of uncertainties in phi measurments. but the difference is small.   
-  */
   StThreeVectorD planeNormPoint(0.0, 0.0, 0.0);  
-  StructSlatGeom thisSlat = tofSlat(slatId);
+  tofSlatGeom_st thisSlat = tofSlat(slatId);
   int iEta = thisSlat.ieta;
   int iPhi, centerSlatId;
   if (iEta==10){  // for 5w rows take the centre (iphi=3)
@@ -210,6 +323,8 @@ StThreeVectorD StTofGeometry::tofPlaneNormPoint(Int_t slatId) const {
 }
 
 
+
+/// print global geometry parameters
 void StTofGeometry::printGeo(ostream& os) const {
   os << "------StTofGeometry::printGeo()------" << endl;
   os << "eta id max & min        = " << mTofParam.i_eta_max << " "
@@ -232,7 +347,8 @@ void StTofGeometry::printGeo(ostream& os) const {
 
 
 
-void StTofGeometry::printSlat(Int_t slatId, ostream& os) const {
+/// print slat-specific geometry parameters
+void StTofGeometry::printSlat(const Int_t slatId, ostream& os) const {
   os << "------StTofGeometry::printSlat()------" << endl;
   os << "Slat: id, tray, eta, phi    = " << " " << slatId << " "
      << tofSlat(slatId).trayId  << " " << tofSlat(slatId).ieta
@@ -255,10 +371,8 @@ void StTofGeometry::printSlat(Int_t slatId, ostream& os) const {
 
 
 
-int StTofGeometry::tofSlatCross(StThreeVectorD& point, StructSlatGeom tofSlat) const {
-  /*
-    check if a point is in a slat
-  */
+///  check if a point is in a slat
+int StTofGeometry::tofSlatCross(const StThreeVectorD& point, const tofSlatGeom_st tofSlat) const {
   int slatCross=0;
   float phi = point.phi();
 
@@ -278,27 +392,16 @@ int StTofGeometry::tofSlatCross(StThreeVectorD& point, StructSlatGeom tofSlat) c
   if((float) point.pseudoRapidity() >= etaMin &&
      (float) point.pseudoRapidity() <= etaMax) { 
 
-    // the 3rd phi of 5W slat can be special (phi_max = 0.5, phi_min = 359.5 degree) 
-    if((tofSlat.ieta == 1) &&
-        tofSlat.iphi == 3) {
-      if ((phi <= tofSlat.phi_max && phi >= 0.0) ||
-	  (phi >= tofSlat.phi_min && phi < twopi))
-	slatCross = 1;
-    }  
-    else  {      // all others
-      if (phi >= tofSlat.phi_min  &&
-	  phi <= tofSlat.phi_max)   
-	slatCross = 1;
-    }
+    if (phi >= tofSlat.phi_min && phi <= tofSlat.phi_max)   
+      slatCross = 1;
   }
   return slatCross;
 }
 
 
-int StTofGeometry::tofSlatCrossId(int volumeId) const {
-  /*
-    decode the volumeId and return a constructed slatId
-  */
+
+///  decode the volumeId and return a constructed slatId
+int StTofGeometry::tofSlatCrossId(const int volumeId) const {
   int phiId=-1;
   int etaId=-1;
 
@@ -334,90 +437,15 @@ int StTofGeometry::tofSlatCrossId(int volumeId) const {
 }
 
 
-int StTofGeometry::tofSlatCrossId(StThreeVectorD& point) const {
-  /*
-    return the index of a slat if the point is in the slat 
-  */
+
+/// return the index of a slat if the point is in the slat 
+int StTofGeometry::tofSlatCrossId(const StThreeVectorD& point) const {
   int etaId = -1;
   int phiId = -1;
 
-//FG  // rearrange database of STAF which does not meet StRoot standard
-//FG  //   phi in StThreeVectorD is between -pi to +pi (radius)
-//FG  //   phi in TOF database is between 0 to 360 (degree)
-//FG  //   the constant degree = pi/180 = 0.01745
-//FG
-//FG  float phi = point.phi();
-//FG  if(phi < 0) phi = (phi + twopi)/degree;
-//FG  else phi = phi/degree;
-//FG  
-//FG  int nEtas = mTofSlatEtaVec.size();
-//FG  for(int i=0; i<nEtas; i++) {
-//FG	float etaMin, etaMax;
-//FG	// swap eta min and max in STAF database for slats with eta > 0.     
-//FG	if(mTofSlatEtaVec[i].eta < 0) { 
-//FG	  etaMin = mTofSlatEtaVec[i].eta_min;
-//FG	  etaMax = mTofSlatEtaVec[i].eta_max;
-//FG	}
-//FG	else { 
-//FG	  etaMin = mTofSlatEtaVec[i].eta_max;
-//FG	  etaMax = mTofSlatEtaVec[i].eta_min;
-//FG	}
-//FG
-//FG	// get eta index if any
-//FG	if((float) point.pseudoRapidity() >= etaMin &&
-//FG	   (float) point.pseudoRapidity() <= etaMax)  {
-//FG	  etaId = mTofSlatEtaVec[i].ieta;
-//FG	  break;
-//FG	}
-//FG  }
-//FG	
-//FG  // determine the boundaries of a loop over phi for 5W and 4W slats
-//FG  int iPhiBegin, iPhiEnd;
-//FG  //fg  if(etaId == 10 || etaId == 11) {             // 5W rows
-//FG  if(etaId == 10) {             // 5W rows
-//FG	iPhiBegin = 1;
-//FG	//fg iPhiEnd = nPhiRows5w;
-//FG	iPhiEnd = 5;
-//FG  }
-//FG  //fg  else if (etaId == 9 || etaId == 12) {        // 4W[2] rows
-//FG  //fg  iPhiBegin = nPhiRows5w;
-//FG  //fg  iPhiEnd = offsetMult4w;
-//FG  else if (etaId == 9) {        // 4W[2] rows
-//FG	iPhiBegin = 6;
-//FG	iPhiEnd = 9;
-//FG  }
-//FG  else {                                         // 4W[3-10] rows
-//FG	//fg iPhiBegin =offsetMult4w;
-//FG	//fg iPhiEnd=offsetMult4w + nPhiRows4w;
-//FG	iPhiBegin =10;
-//FG	iPhiEnd=13;
-//FG  }
-//FG  
-//FG  // get phi index if any
-//FG  for(int i = iPhiBegin-1; i <iPhiEnd; i++) {
-//FG	// the 3rd phi of 5W slat is a special (phi_max = 0.5, phi_min = 359.5 degree) 
-//FG	//fg if((etaId == 10 || etaId == 11) && i == 2) {
-//FG	//if((etaId == 1) && i == 2) {
-//FG	//	if ((phi <= mTofSlatPhiVec[i].phi_max) ||
-//FG	//	    (phi >= mTofSlatPhiVec[i].phi_min)) {
-//FG	//	  phiId = mTofSlatPhiVec[i].iphi; 
-//FG	//	  break;
-//FG	//	}
-//FG	//}  
-//FG
-//FG	// all others
-//FG	//else  {
-//FG	  if (phi >= mTofSlatPhiVec[i].phi_min &&
-//FG	      phi <= mTofSlatPhiVec[i].phi_max) {  
-//FG	    phiId = mTofSlatPhiVec[i].iphi; 
-//FG	    break;
-//FG	  }
-//FG   //}
-//FG  }
-
   for (unsigned int i=0;i<mTofSlatVec.size();i++){
-    if((float) point.pseudoRapidity() >= mTofSlatVec[i].eta_min &&
-       (float) point.pseudoRapidity() <= mTofSlatVec[i].eta_max &&
+    if((float) point.z() >= mTofSlatVec[i].z_min &&
+       (float) point.z() <= mTofSlatVec[i].z_max &&
        (float) point.phi() >= mTofSlatVec[i].phi_min &&
        (float) point.phi() <= mTofSlatVec[i].phi_max) {
       etaId = mTofSlatVec[i].ieta;
@@ -431,16 +459,15 @@ int StTofGeometry::tofSlatCrossId(StThreeVectorD& point) const {
   int slatId;
   if(etaId > 0 && phiId > 0) slatId = calcSlatId(phiId,etaId);
   else slatId = -1;
-  
+
   return slatId;
 }
 
-tofSlatHitVector StTofGeometry::tofHelixToArray(StPhysicalHelixD& helix, 
-                                            idVector slatIdVec) {
-  /*
-    this member function finds slats in an array of trays which are
-    crossed by a track-helix. 
-  */
+
+
+/// finds slats in an array of trays which are crossed by a track-helix.
+tofSlatHitVector StTofGeometry::tofHelixToArray(const StPhysicalHelixD& helix, 
+						idVector slatIdVec) {
   idVector     idErasedVec = slatIdVec;
   idVectorIter slatIdIter, idErasedIter;
 
@@ -482,7 +509,7 @@ tofSlatHitVector StTofGeometry::tofHelixToArray(StPhysicalHelixD& helix,
     pathLength = helix.pathLength(slatNormOuter, slatNormal);
     StThreeVectorD hitAtOuter = helix.at(pathLength);
 
-    // loop over all slats in idErasedVec (=slatIdVec at the begnining of while)
+    // loop over all slats in idErasedVec (=slatIdVec at the begining of while)
     idErasedIter = idErasedVec.begin();
     while (idErasedIter != idErasedVec.end()) {
       
