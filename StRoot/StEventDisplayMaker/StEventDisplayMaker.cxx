@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.15 1999/08/04 03:52:01 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.16 1999/08/05 02:14:09 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.16  1999/08/05 02:14:09  fine
+// style attribute for hits has been fixed
+//
 // Revision 1.15  1999/08/04 03:52:01  fine
 // Helix drawing improvements
 //
@@ -690,7 +693,7 @@ Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFi
         m_HitCollector->Add(hitsPoints);    // Collect to remove  
          St_PolyLineShape *hitsShape   = new St_PolyLineShape(hitsPoints);
          hitsShape->SetVisibility(1);        hitsShape->SetLineColor(hitColor);
-         hitsShape->SetLineStyle(hitStyle);  hitsShape->SetLineWidth(hitSize);
+         hitsShape->SetMakerStyle(hitStyle);  hitsShape->SetLineWidth(hitSize);
        // Create a node to hold it
        St_Node *thisHit = new St_Node("hits",points->GetName(),hitsShape);
          thisHit->Mark();
