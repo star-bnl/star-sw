@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichGasGain.cxx,v 2.1 2002/04/01 21:54:50 lasiuk Exp $
+ * $Id: StRichGasGain.cxx,v 2.2 2002/04/12 19:49:13 lasiuk Exp $
  *
  * Description:
  *  StRichGasGain computes an amplification factor of an
@@ -35,6 +35,9 @@
  *
  ****************************************************************
  * $Log: StRichGasGain.cxx,v $
+ * Revision 2.2  2002/04/12 19:49:13  lasiuk
+ * gain to 2
+ *
  * Revision 2.1  2002/04/01 21:54:50  lasiuk
  * pedestal noise and difference in MIP/gamma
  *
@@ -122,7 +125,7 @@ double StRichGasGain::avalanche(StRichMiniHit* hit, double wirePos, list<StRichM
     q = mGasGainAmplification * p;
     // addition to alter character of MIP/photon amplification
     if(hit->process()==eCharged) {
-      q *= 3.;
+      q *= 2.;
     }
 
 
