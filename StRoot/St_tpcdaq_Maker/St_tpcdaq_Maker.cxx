@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.31  1999/07/29 23:07:05  ward
+// Fixed bug in noise suppression.  Put gConfig back.
+//
 // Revision 1.30  1999/07/29 00:49:52  fisyak
 // Add default ctor
 //
@@ -124,6 +127,7 @@ ClassImp(St_tpcdaq_Maker)
 char gDAQ; /* This is TRUE if using DAQ, FALSE if using Trs. */
 StDAQReader *victorPrelim;
 StTPCReader *victor;
+char gConfig[50];
 int gSector;
 // obsolete since we are moving to StIOMaker ZeroSuppressedReader *gZsr;  
 // obsolete since we are moving to StIOMaker DetectorReader *gDetectorReader;
@@ -133,7 +137,8 @@ St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name,d
   printf("This is St_tpcdaq_Maker, name = \"%s\".\n",name);
   if(daqOrTrs) {
     printf("St_tpcdaq_Maker constructor, getting data from %s.\n",daqOrTrs);
-  }
+    strcpy(gConfig,daqOrTrs);
+  } else strcpy(gConfig,"error44u");
 }
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
 }
@@ -152,13 +157,13 @@ Int_t St_tpcdaq_Maker::Init() {
                             "pad vs num seq" , 40 , 1.0 , 40.0 );
   m_pix_AdcValue      = new TH1F("tpcdaq_adcVal" , 
                             "pix vs ADC value" , 255 , 1.0 , 255.0 );
-  if(!strcmp(GetTitle(),"daq")) { // Update this for embedding.
+  if(!strcmp(gConfig,"daq")) { // Update this for embedding.
     gDAQ=7; 
     herb=GetDataSet("StDAQReader");
     assert(herb);
     victorPrelim=(StDAQReader*)(herb->GetObject());
     assert(victorPrelim);
-  } else if(!strcmp(GetTitle(),"trs")) {
+  } else if(!strcmp(gConfig,"trs")) {
     gDAQ=0;
   } else {
      PP"-----------------------------------------------------------------\n");
@@ -405,7 +410,7 @@ int St_tpcdaq_Maker::Output() {
   St_DataSetIter raw_data_tpc(m_DataSet); // m_DataSet set from name in ctor
   raw_sec_m_st singlerow;
   int pad,sectorStatus,ipadrow,npad,ipad,seqStatus,iseq,nseq,startTimeBin,ibin;
-  int prevStartTimeBin,rowR,padR,seqR;  // row counters
+  int numberOfUnskippedSeq,prevStartTimeBin,rowR,padR,seqR;  // row counters
   int iseqSave,pixTblWhere,seqLen,timeOff,numPadsWithSignal,pixOffset;
   int seqOffset,timeWhere;
   int nPixelThisPad,nSeqThisPadRow,offsetIntoPadTable;
@@ -472,6 +477,7 @@ int St_tpcdaq_Maker::Output() {
 #ifdef HISTOGRAMS
         m_pad_numSeq->Fill((Float_t)nseq);
 #endif
+        numberOfUnskippedSeq=0;
         for(iseq=0;iseq<nseq;iseq++) {
           startTimeBin=listOfSequences[iseq].startTimeBin;
           if(startTimeBin<0) startTimeBin=0;
@@ -498,6 +504,7 @@ int St_tpcdaq_Maker::Output() {
           m_seq_padNumber->Fill((Float_t)pad);
           m_seq_padRowNumber->Fill((Float_t)(ipadrow+1));
 #endif
+          numberOfUnskippedSeq++;
           for(ibin=0;ibin<seqLen;ibin++) {
             pixCnt++;
 #ifdef HISTOGRAMS
@@ -509,8 +516,8 @@ int St_tpcdaq_Maker::Output() {
           seqR++;
         } // seq loop
         if(nPixelPreviousPadRow<0x10000) pixTblWhere++;
-        PadWrite(raw_pad_gen,padR++,pixOffset,seqOffset,nseq,timeWhere,pad);
-        seqOffset+=nseq; pixOffset+=nPixelThisPad;
+        PadWrite(raw_pad_gen,padR++,pixOffset,seqOffset,numberOfUnskippedSeq,timeWhere,pad);
+        seqOffset+=numberOfUnskippedSeq; pixOffset+=nPixelThisPad;
       } // pad loop, don't confuse padR (table row #) with ipad (loop index)
       RowWrite(raw_row_gen,rowR++,pixSave,
           iseqSave,nPixelPreviousPadRow,nSeqThisPadRow,offsetIntoPadTable,
@@ -556,7 +563,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am Snow White. St_tpcdaq_Maker::Make().\n"); 
+  printf("I am Shakespeare. St_tpcdaq_Maker::Make().\n"); 
   errorCode=GetEventAndDecoder();
     victor=victorPrelim->getTPCReader();
   assert(victor);
