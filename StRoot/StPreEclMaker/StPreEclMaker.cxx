@@ -1,7 +1,11 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.12 2001/04/20 22:23:44 pavlinov Exp $
+// $Id: StPreEclMaker.cxx,v 1.13 2001/05/01 18:17:13 suaide Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.13  2001/05/01 18:17:13  suaide
+// modified to erase old EMC points and clusters if they exist, so it
+// is possible to run cluster maker again with different thresholds
+//
 // Revision 1.12  2001/04/20 22:23:44  pavlinov
 // Clean up
 //
@@ -232,7 +236,8 @@ Int_t StPreEclMaker::Make()
     if(emc==0) return kStWarn;
 
   }
-    
+  
+  ClearEmc(); 
 //
 // At this point, StEmcCollection should be Ok.
 //
@@ -265,6 +270,32 @@ Int_t StPreEclMaker::Make()
   cout <<"***** New EmcCollection on local .data\n";
     
   return kStOK;
+}
+//_____________________________________________________________________________
+Int_t StPreEclMaker::ClearEmc()
+{
+  StSPtrVecEmcPoint& pvec = emc->barrelPoints();
+  if(pvec.size()>0) 
+  {
+    cout <<"Deleting old EMC points...\n"; 
+    pvec.clear(); 
+  }
+ 
+  for(Int_t i=0; i<4; i++)
+  {
+    StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
+    StEmcDetector* detector=emc->detector(id);
+    if(detector)
+    {
+      StSPtrVecEmcCluster& cluster=detector->cluster()->clusters();
+      if(cluster.size()>0) 
+      {
+        cout <<"Deleting old clusters for "<<detname[i].Data()<<"\n";
+        cluster.clear();  
+      }
+    }
+  }
+  return kStOk;
 }
 //_____________________________________________________________________________
 void StPreEclMaker::MakeHistograms(Int_t idet,StEmcPreClusterCollection* cluster)
@@ -407,7 +438,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.12 2001/04/20 22:23:44 pavlinov Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.13 2001/05/01 18:17:13 suaide Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

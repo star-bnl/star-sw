@@ -1,8 +1,12 @@
 //
-// $Id: StPreEclMaker.h,v 1.9 2001/04/20 22:23:51 pavlinov Exp $
+// $Id: StPreEclMaker.h,v 1.10 2001/05/01 18:17:16 suaide Exp $
 //
 //
 // $Log: StPreEclMaker.h,v $
+// Revision 1.10  2001/05/01 18:17:16  suaide
+// modified to erase old EMC points and clusters if they exist, so it
+// is possible to run cluster maker again with different thresholds
+//
 // Revision 1.9  2001/04/20 22:23:51  pavlinov
 // Clean up
 //
@@ -89,6 +93,7 @@ public:
   virtual       ~StPreEclMaker();
   virtual Int_t Init();
   virtual Int_t Make();
+  virtual Int_t ClearEmc();
   virtual void  PrintInfo();
           void  SetClusterConditions(char*,Int_t,Float_t,Float_t,Float_t);
           void  SetClusterConditions(char*,Int_t,Float_t,Float_t,Float_t,Bool_t);
