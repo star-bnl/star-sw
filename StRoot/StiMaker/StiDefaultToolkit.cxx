@@ -280,6 +280,7 @@ StiTrackFitter       * StiDefaultToolkit::getTrackFitter()
 	if (trackFitter)
 		return trackFitter;
 	trackFitter = new StiKalmanTrackFitter();
+	StiTrack::setTrackFitter(trackFitter);
 	return trackFitter;
 }
 

@@ -267,14 +267,24 @@ void StiMaker::finishEvent()
 		tracker->findTracks();
 		clock.stop();
 		cout <<"Time to find tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
-		cout <<"Merge Tracks"<<endl;
-		clock.reset();
-		//clock.start();
-
-		//mTrackMerger->mergeTracks();
-		//clock.stop();
-		//cout <<"Time to merge tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
-
+		bool useTrackMerger=false;
+		if (useTrackMerger)
+			{
+				cout <<"Merge Tracks"<<endl;
+				clock.reset();
+				//clock.start();
+				//mTrackMerger->mergeTracks();
+				//clock.stop();
+				//cout <<"Time to merge tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
+			}
+		bool useExtendToVertex=true;
+		if (useExtendToVertex)
+			{
+				StiHit * vertex = toolkit->getHitFactory()->getObject();
+				// set vertex as (0,0,0) for now...
+				vertex->set(0.,0.,  0.,0.,0.,  0.01,0.01,0.01,0.01,0.01,0.01);
+				tracker->extendTracksToVertex(vertex);
+			}
 		clock.start();
 		mevent = mStEventFiller->fillEvent(mevent, toolkit->getTrackContainer());
 		clock.stop();
@@ -306,10 +316,10 @@ void StiMaker::finishTrack()
 {
 	//Add call to next tracker action here
 	if (ioBroker->doTrackFit()==true) {
-		tracker->doTrackFit();
+		tracker->fitNextTrack();
 	}
 	else {
-		tracker->doTrackFind();
+		tracker->findNextTrack();
 	}
 	return;
 }
