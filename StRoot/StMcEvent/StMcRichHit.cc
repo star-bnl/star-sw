@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcRichHit.cc,v 2.3 2000/05/05 15:25:43 calderon Exp $
+ * $Id: StMcRichHit.cc,v 2.4 2000/06/06 02:58:41 calderon Exp $
  * $Log: StMcRichHit.cc,v $
+ * Revision 2.4  2000/06/06 02:58:41  calderon
+ * Introduction of Calorimeter classes.  Modified several classes
+ * accordingly.
+ *
  * Revision 2.3  2000/05/05 15:25:43  calderon
  * Reduced dependencies and made constructors more efficient
  *
@@ -20,15 +24,16 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_rch_hit_Table.h"
 
-static const char rcsid[] = "$Id: StMcRichHit.cc,v 2.3 2000/05/05 15:25:43 calderon Exp $";
+static const char rcsid[] = "$Id: StMcRichHit.cc,v 2.4 2000/06/06 02:58:41 calderon Exp $";
 
 StMemoryPool StMcRichHit::mPool(sizeof(StMcRichHit));
 
 StMcRichHit::StMcRichHit() { /* noop */ };
 
 StMcRichHit::StMcRichHit(const StThreeVectorF& x,const StThreeVectorF& p,
-		       const float de, const float ds,
-		       StMcTrack* parent)  : StMcHit(x, p, de, ds, parent)
+			 const float de, const float ds, const long key,
+			 const long id,
+			 StMcTrack* parent)  : StMcHit(x, p, de, ds, key, id, parent)
 { /* noop */ }
 
 
@@ -37,8 +42,9 @@ StMcRichHit::StMcRichHit(g2t_rch_hit_st* pt)
 	  StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]),
 	  pt->de,
 	  0,
+	  pt->id,
+	  pt->volume_id,
 	  0),
-  mVolumeId(pt->volume_id),
   mTof(pt->tof)
 {/* noop */ }
 

@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.7 2000/05/11 14:27:23 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.8 2000/06/06 02:58:40 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.8  2000/06/06 02:58:40  calderon
+ * Introduction of Calorimeter classes.  Modified several classes
+ * accordingly.
+ *
  * Revision 2.7  2000/05/11 14:27:23  calderon
  * use clear() in destructors to reduce size of containers
  *
@@ -46,6 +50,7 @@
 #include "StMcFtpcHitCollection.hh"
 #include "StMcRichHitCollection.hh"
 #include "StMcSvtHitCollection.hh"
+#include "StMcEmcHitCollection.hh"
 #include "StMcContainers.hh" 
 #include "StMcVertex.hh"
 #include "StMcTrack.hh"
@@ -53,12 +58,13 @@
 #include "StMcFtpcHit.hh"
 #include "StMcRichHit.hh"
 #include "StMcSvtHit.hh"
+#include "StMcCalorimeterHit.hh"
 #include "tables/St_g2t_event_Table.h"
 
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.7 2000/05/11 14:27:23 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.7 2000/05/11 14:27:23 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.8 2000/06/06 02:58:40 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.8 2000/06/06 02:58:40 calderon Exp $";
 
 void StMcEvent::initToZero()
 {
@@ -71,38 +77,52 @@ void StMcEvent::initToZero()
     
     // Create the collections
     
-    mTpcHits = new StMcTpcHitCollection();
-    mSvtHits = new StMcSvtHitCollection();
+    mTpcHits  = new StMcTpcHitCollection();
+    mSvtHits  = new StMcSvtHitCollection();
     mFtpcHits = new StMcFtpcHitCollection();
     mRichHits = new StMcRichHitCollection();
+
+    mBemcHits  = new StMcEmcHitCollection();
+    mBprsHits  = new StMcEmcHitCollection();
+    mBsmdeHits = new StMcEmcHitCollection();
+    mBsmdpHits = new StMcEmcHitCollection();
     
 }
 
 StMcEvent::StMcEvent()
+    :mEventGeneratorEventLabel(0),
+     mEventNumber(0),
+     mRunNumber(0),
+     mType(0),
+     mZWest(0),
+     mNWest(0),
+     mZEast(0),
+     mNEast(0),
+     mPrimaryTracks(0),
+     mImpactParameter(0),
+     mPhiReactionPlane(0),
+     mTriggerTimeOffset(0)
 {
-    cout << "Inside StMcEvent Constructor" << endl;
     initToZero();
 }
 
-StMcEvent::StMcEvent(g2t_event_st* evTable) {
-    cout << "Inside StMcEvent Table Constructor" << endl;
-    mEventGeneratorEventLabel = evTable->eg_label;
-    mEventNumber = evTable->n_event;
-    mRunNumber   = evTable->n_run;
-    mType  = evTable->event_type;
-    mZWest = evTable->n_part_prot_west;
-    mNWest = evTable->n_part_neut_west;
-    mZEast = evTable->n_part_prot_east;
-    mNEast = evTable->n_part_neut_east;
-    mPrimaryTracks     = evTable->n_track_prim;
-    mImpactParameter   = evTable->b_impact;
-    mPhiReactionPlane  = evTable->phi_impact;
-    mTriggerTimeOffset = evTable->time_offset;
-
+StMcEvent::StMcEvent(g2t_event_st* evTable)
+    :mEventGeneratorEventLabel(evTable->eg_label),
+     mEventNumber(evTable->n_event),
+     mRunNumber(evTable->n_run),
+     mType (evTable->event_type),
+     mZWest(evTable->n_part_prot_west),
+     mNWest(evTable->n_part_neut_west),
+     mZEast(evTable->n_part_prot_east),
+     mNEast(evTable->n_part_neut_east),
+     mPrimaryTracks(evTable->n_track_prim),
+     mImpactParameter(evTable->b_impact),
+     mPhiReactionPlane(evTable->phi_impact),
+     mTriggerTimeOffset(evTable->time_offset)
+     
+{
     initToZero();
-
 }
-
 
 
 StMcEvent::StMcEvent(const StMcEvent&) { /* noop */} // private
@@ -124,14 +144,26 @@ StMcEvent::~StMcEvent()
     if (mRichHits) delete mRichHits;
     mRichHits=0;
 
-    for(StMcTrackIterator it=mTracks.begin(); // mTracks is not held by pointer
+    if (mBemcHits) delete mBemcHits;
+    mBemcHits=0;
+
+    if (mBprsHits) delete mBprsHits;
+    mBprsHits=0;
+
+    if (mBsmdeHits) delete mBsmdeHits;
+    mBsmdeHits=0;
+
+    if (mBsmdpHits) delete mBsmdpHits;
+    mBsmdpHits=0;
+
+    for(StMcTrackIterator it=mTracks.begin();
 	it != mTracks.end(); it++)
 	delete *it;    
-        
-    for(StMcVertexIterator iv=mVertices.begin(); // mVertices is not held by pointer
+    mTracks.clear();
+    
+    for(StMcVertexIterator iv=mVertices.begin();
 	iv != mVertices.end(); iv++)
 	delete *iv;
-    mTracks.clear();
     mVertices.clear();
 }
 
@@ -214,4 +246,28 @@ void StMcEvent::setRichHitCollection(StMcRichHitCollection* val)
 {
     if (mRichHits && mRichHits!= val) delete mRichHits;
     mRichHits = val;
+}              
+
+void StMcEvent::setBemcHitCollection(StMcEmcHitCollection* val)
+{
+    if (mBemcHits && mBemcHits!= val) delete mBemcHits;
+    mBemcHits = val;
+}              
+
+void StMcEvent::setBprsHitCollection(StMcEmcHitCollection* val)
+{
+    if (mBprsHits && mBprsHits!= val) delete mBprsHits;
+    mBprsHits = val;
+}              
+
+void StMcEvent::setBsmdeHitCollection(StMcEmcHitCollection* val)
+{
+    if (mBsmdeHits && mBsmdeHits!= val) delete mBsmdeHits;
+    mBsmdeHits = val;
+}              
+
+void StMcEvent::setBsmdpHitCollection(StMcEmcHitCollection* val)
+{
+    if (mBsmdpHits && mBsmdpHits!= val) delete mBsmdpHits;
+    mBsmdpHits = val;
 }              

@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.5 2000/04/17 23:01:15 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.6 2000/06/06 02:58:40 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.6  2000/06/06 02:58:40  calderon
+ * Introduction of Calorimeter classes.  Modified several classes
+ * accordingly.
+ *
  * Revision 2.5  2000/04/17 23:01:15  calderon
  * Added local momentum to hits as per Lee's request
  *
@@ -41,10 +45,6 @@
 
 #include <iostream.h>
 
-// #include "StMcTpcHitCollection.hh"
-// #include "StMcFtpcHitCollection.hh"
-// #include "StMcRichHitCollection.hh"
-// #include "StMcSvtHitCollection.hh"
 #include "StMcContainers.hh" 
 #include "TString.h"
 
@@ -52,6 +52,7 @@ class StMcTpcHitCollection;
 class StMcFtpcHitCollection;
 class StMcRichHitCollection;
 class StMcSvtHitCollection;
+class StMcEmcHitCollection;
 
 class StMcVertex;
 class g2t_event_st;
@@ -104,6 +105,16 @@ public:
     StMcRichHitCollection*         richHitCollection();
     const StMcRichHitCollection*   richHitCollection() const;
     
+    StMcEmcHitCollection*          bemcHitCollection();
+    const StMcEmcHitCollection*    bemcHitCollection() const;
+    StMcEmcHitCollection*          bprsHitCollection();
+    const StMcEmcHitCollection*    bprsHitCollection() const;
+
+    StMcEmcHitCollection*          bsmdeHitCollection();
+    const StMcEmcHitCollection*    bsmdeHitCollection() const;
+    StMcEmcHitCollection*          bsmdpHitCollection();
+    const StMcEmcHitCollection*    bsmdpHitCollection() const;
+    
     // "Set" Methods
     
     void setEventGeneratorEventLabel(unsigned long);
@@ -123,6 +134,10 @@ public:
     void setSvtHitCollection(StMcSvtHitCollection*);               
     void setFtpcHitCollection(StMcFtpcHitCollection*);              
     void setRichHitCollection(StMcRichHitCollection*);              
+    void setBemcHitCollection(StMcEmcHitCollection*);              
+    void setBprsHitCollection(StMcEmcHitCollection*);              
+    void setBsmdeHitCollection(StMcEmcHitCollection*);              
+    void setBsmdpHitCollection(StMcEmcHitCollection*);              
     
     
 protected:
@@ -145,6 +160,10 @@ protected:
     StMcSvtHitCollection*          mSvtHits;
     StMcFtpcHitCollection*         mFtpcHits;
     StMcRichHitCollection*         mRichHits;
+    StMcEmcHitCollection*          mBemcHits;
+    StMcEmcHitCollection*          mBprsHits;
+    StMcEmcHitCollection*          mBsmdeHits;
+    StMcEmcHitCollection*          mBsmdpHits;
     static TString                 mCvsTag;
 private:
     const StMcEvent& operator=(const StMcEvent&);
@@ -207,6 +226,15 @@ inline const StMcFtpcHitCollection* StMcEvent::ftpcHitCollection() const { retur
 inline StMcRichHitCollection* StMcEvent::richHitCollection() { return mRichHits;}
 
 inline const StMcRichHitCollection* StMcEvent::richHitCollection() const { return mRichHits;}
+
+inline StMcEmcHitCollection* StMcEvent::bemcHitCollection() { return mBemcHits;}
+inline const StMcEmcHitCollection* StMcEvent::bemcHitCollection() const {return mBemcHits;}
+inline StMcEmcHitCollection* StMcEvent::bprsHitCollection() { return mBprsHits;}
+inline const StMcEmcHitCollection* StMcEvent::bprsHitCollection() const {return mBprsHits;}
+inline StMcEmcHitCollection* StMcEvent::bsmdeHitCollection() { return mBsmdeHits;}
+inline const StMcEmcHitCollection* StMcEvent::bsmdeHitCollection() const {return mBsmdeHits;}
+inline StMcEmcHitCollection* StMcEvent::bsmdpHitCollection() { return mBsmdpHits;}
+inline const StMcEmcHitCollection* StMcEvent::bsmdpHitCollection() const {return mBsmdpHits;}
 
 #endif
 

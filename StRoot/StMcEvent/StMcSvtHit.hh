@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.hh,v 2.8 2000/05/05 15:25:44 calderon Exp $
+ * $Id: StMcSvtHit.hh,v 2.9 2000/06/06 02:58:41 calderon Exp $
  * $Log: StMcSvtHit.hh,v $
+ * Revision 2.9  2000/06/06 02:58:41  calderon
+ * Introduction of Calorimeter classes.  Modified several classes
+ * accordingly.
+ *
  * Revision 2.8  2000/05/05 15:25:44  calderon
  * Reduced dependencies and made constructors more efficient
  *
@@ -58,7 +62,7 @@ class StMcSvtHit : public StMcHit {
 public:
     StMcSvtHit();
     StMcSvtHit(const StThreeVectorF&,const StThreeVectorF&,
-	     const float, const float,
+	     const float, const float, const long, const long, 
 	     StMcTrack*);
     StMcSvtHit(g2t_svt_hit_st*);
     ~StMcSvtHit();
@@ -71,11 +75,9 @@ public:
     unsigned long wafer() const;      // wafer=[1-7] with SSD [1-16]
     unsigned long barrel() const;     // barrel=[1-3] with SSD [1-4]
     unsigned long hybrid() const;
-    long          volumeId() const;
 
 protected:
     static StMemoryPool mPool;  //!
-    long   mVolumeId;
 };
 
 ostream&  operator<<(ostream& os, const StMcSvtHit&);
@@ -110,8 +112,5 @@ StMcSvtHit::barrel() const { return (layer()+1)/2; }
 
 inline unsigned long
 StMcSvtHit::hybrid() const { return 0; } // to be implemented
-
-inline long
-StMcSvtHit::volumeId() const { return mVolumeId; }
 
 #endif

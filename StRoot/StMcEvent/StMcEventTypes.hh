@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEventTypes.hh,v 2.3 2000/03/06 20:33:08 calderon Exp $
+ * $Id: StMcEventTypes.hh,v 2.4 2000/06/06 02:58:41 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StMcEventTypes.hh,v $
+ * Revision 2.4  2000/06/06 02:58:41  calderon
+ * Introduction of Calorimeter classes.  Modified several classes
+ * accordingly.
+ *
  * Revision 2.3  2000/03/06 20:33:08  calderon
  * svt layer -> svt barrel
  *
@@ -28,6 +32,9 @@
 #define StMcEventTypes_hh
 
 #include "StMcContainers.hh"
+#include "StMcCalorimeterHit.hh"
+#include "StMcEmcModuleHitCollection.hh"
+#include "StMcEmcHitCollection.hh"
 #include "StMcEvent.hh"
 #include "StMcFtpcHit.hh"
 #include "StMcFtpcHitCollection.hh"

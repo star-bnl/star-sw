@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcHit.hh,v 2.4 2000/05/05 15:25:43 calderon Exp $
+ * $Id: StMcHit.hh,v 2.5 2000/06/06 02:58:41 calderon Exp $
  * $Log: StMcHit.hh,v $
+ * Revision 2.5  2000/06/06 02:58:41  calderon
+ * Introduction of Calorimeter classes.  Modified several classes
+ * accordingly.
+ *
  * Revision 2.4  2000/05/05 15:25:43  calderon
  * Reduced dependencies and made constructors more efficient
  *
@@ -39,7 +43,7 @@ class StMcHit {
 public:
     StMcHit();
     StMcHit(const StThreeVectorF&,const StThreeVectorF&,
-	  float, float,
+	  float, float, long, long,
 	  StMcTrack*);
     StMcHit(g2t_hits_st*);
     // StMcHit(const StSvtHit&);                  use default
@@ -55,14 +59,17 @@ public:
     virtual const StThreeVectorF& localMomentum() const;
     virtual float                            dE() const;
     virtual float                            dS() const;
+    virtual long                            key() const;
+    virtual long                       volumeId() const;
     virtual StMcTrack*              parentTrack() const;	
-
   // "Set" Methods
 
     virtual void setPosition(const StThreeVectorF&);
     virtual void setLocalMomentum(const StThreeVectorF&);
     virtual void setdE(float);
     virtual void setdS(float);
+    virtual void setKey(long);
+    virtual void setVolumeId(long);
     virtual void setParentTrack(StMcTrack*);
     
 protected:
@@ -70,6 +77,8 @@ protected:
     StThreeVectorF       mLocalMomentum;
     float                mdE;
     float                mdS;
+    long                 mKey;
+    long                 mVolumeId;
     StMcTrack*           mParentTrack;
 };
 
@@ -82,6 +91,10 @@ inline const StThreeVectorF& StMcHit::localMomentum() const { return mLocalMomen
 inline float StMcHit::dE() const { return mdE; }
 
 inline float StMcHit::dS() const { return mdS; }
+
+inline long StMcHit::key() const { return mKey; }
+
+inline long StMcHit::volumeId() const { return mVolumeId; }
 
 inline StMcTrack* StMcHit::parentTrack() const { return mParentTrack; }	
 

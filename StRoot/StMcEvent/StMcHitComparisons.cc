@@ -1,6 +1,6 @@
 /**********************************************
  *
- * $Id: StMcHitComparisons.cc,v 2.1 2000/03/07 15:09:54 calderon Exp $
+ * $Id: StMcHitComparisons.cc,v 2.2 2000/06/06 02:58:41 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez
  ***********************************************
@@ -10,6 +10,10 @@
  *
  ***********************************************
  * $Log: StMcHitComparisons.cc,v $
+ * Revision 2.2  2000/06/06 02:58:41  calderon
+ * Introduction of Calorimeter classes.  Modified several classes
+ * accordingly.
+ *
  * Revision 2.1  2000/03/07 15:09:54  calderon
  * Initial Revision.
  * Comparisons used for sorting the hit containers, and
@@ -17,13 +21,16 @@
  * 
  * 
  **********************************************/
-#include "StMcHitComparisons.hh"
-#include "StEventTypes.h"
+#include "StTpcHit.h"
+#include "StSvtHit.h"
+#include "StFtpcHit.h"
+#include "StRichHit.h"
 
 #include "StMcTpcHit.hh"
 #include "StMcSvtHit.hh"
 #include "StMcFtpcHit.hh"
 #include "StMcRichHit.hh"
+#include "StMcHitComparisons.hh"
 
 bool compTpcHit::operator()(const StTpcHit* h1, const StTpcHit* h2) const {
     if        (h1->position().z() != h2->position().z()) {

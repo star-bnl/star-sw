@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.hh,v 2.5 2000/05/05 15:25:43 calderon Exp $
+ * $Id: StMcFtpcHit.hh,v 2.6 2000/06/06 02:58:41 calderon Exp $
  * $Log: StMcFtpcHit.hh,v $
+ * Revision 2.6  2000/06/06 02:58:41  calderon
+ * Introduction of Calorimeter classes.  Modified several classes
+ * accordingly.
+ *
  * Revision 2.5  2000/05/05 15:25:43  calderon
  * Reduced dependencies and made constructors more efficient
  *
@@ -47,7 +51,7 @@ class StMcFtpcHit : public StMcHit {
 public:
     StMcFtpcHit();
     StMcFtpcHit(const StThreeVectorF&,const StThreeVectorF&,
-	     const float, const float, StMcTrack*);
+	     const float, const float, const long, const long, StMcTrack*);
     StMcFtpcHit(g2t_ftp_hit_st*);
     ~StMcFtpcHit();
 
@@ -57,7 +61,6 @@ public:
     unsigned long plane() const; // 1-20
     
 private:
-    long mVolumeId;
 
     static StMemoryPool mPool; //!
 };
