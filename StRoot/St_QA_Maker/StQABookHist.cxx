@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.27 2000/01/27 22:02:12 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.28 2000/01/31 17:23:00 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.28  2000/01/31 17:23:00  kathy
+// change scale of chisq plots for tpc,svt in globtrk,primtrk tables - change to be 5
+//
 // Revision 1.27  2000/01/27 22:02:12  kathy
 // changed titles of some hist to make clearer
 //
@@ -595,8 +598,8 @@ void StQABookHist::BookHistGlob(){
   m_etaT        = QAH1F("QaGtrkEtaT",    "globtrk: eta, tpc",40,-2.,2.);
   m_pTT         = QAH1F("QaGtrkPtT",     "globtrk: pT, tpc",50,0.,5.);
   m_momT        = QAH1F("QaGtrkPT",      "globtrk: momentum, tpc",50,0.,5.);
-  m_chisq0T     = QAH1F("QaGtrkChisq0T", "globtrk: chisq0 - xy, tpc", 50, 0.,15.);
-  m_chisq1T     = QAH1F("QaGtrkChisq1T", "globtrk: chisq1 - z, tpc", 50, 0.,15.);
+  m_chisq0T     = QAH1F("QaGtrkChisq0T", "globtrk: chisq0 - xy, tpc", 50, 0.,5.);
+  m_chisq1T     = QAH1F("QaGtrkChisq1T", "globtrk: chisq1 - z, tpc", 50, 0.,5.);
   m_glb_impactT = QAH1F("QaGtrkImpactT", "globtrk: impact param from prim vtx, tpc", 100,0.,500.);
 
 
@@ -635,35 +638,35 @@ void StQABookHist::BookHistGlob(){
     m_fpoint_lengthT->SetXTitle("trk length");
     m_fpoint_lengthT->SetYTitle("Npoints on trk");
 
-  m_chisq0_momT = QAH2F("QaGtrkChi0MomT","globtrk: Chisq0 vs log mom, tpc",40,1.,4.,50,0.,10.);
+  m_chisq0_momT = QAH2F("QaGtrkChi0MomT","globtrk: Chisq0 vs log mom, tpc",40,1.,4.,50,0.,5.);
     m_chisq0_momT->SetXTitle("log P (MeV)");
     m_chisq0_momT->SetYTitle("chisq0") ;
 
-  m_chisq1_momT = QAH2F("QaGtrkChi1MomT","globtrk: Chisq1 vs log mom, tpc",40,1.,4.,50,0.,10.);
+  m_chisq1_momT = QAH2F("QaGtrkChi1MomT","globtrk: Chisq1 vs log mom, tpc",40,1.,4.,50,0.,5.);
     m_chisq1_momT->SetXTitle("log P (MeV)");
     m_chisq1_momT->SetYTitle("chisq1");
 
-  m_chisq0_etaT = QAH2F("QaGtrkChi0EtaT","globtrk: Chisq0 vs eta, tpc",20,-2.,2.,20,0.,10.);
+  m_chisq0_etaT = QAH2F("QaGtrkChi0EtaT","globtrk: Chisq0 vs eta, tpc",20,-2.,2.,20,0.,5.);
     m_chisq0_etaT->SetXTitle("eta");
     m_chisq0_etaT->SetYTitle("chisq0");
 
-  m_chisq1_etaT = QAH2F("QaGtrkChi1EtaT","globtrk: Chisq1 vs eta, tpc",20,-2.,2.,20,0.,10.);
+  m_chisq1_etaT = QAH2F("QaGtrkChi1EtaT","globtrk: Chisq1 vs eta, tpc",20,-2.,2.,20,0.,5.);
     m_chisq1_etaT->SetXTitle("eta");
     m_chisq1_etaT->SetYTitle("chisq1");
 
-  m_chisq0_dipT = QAH2F("QaGtrkChi0TanlT","globtrk: Chisq0 vs tanl(dip), tpc",20,-5.,5.,20,0.,10.);
+  m_chisq0_dipT = QAH2F("QaGtrkChi0TanlT","globtrk: Chisq0 vs tanl(dip), tpc",20,-5.,5.,20,0.,5.);
     m_chisq0_dipT->SetXTitle("dip angle");
     m_chisq0_dipT->SetYTitle("chisq0");
 
-  m_chisq1_dipT = QAH2F("QaGtrkChi1TanlT","globtrk: Chisq1 vs tanl(dip), tpc",20,-5.,5.,20,0.,10.);
+  m_chisq1_dipT = QAH2F("QaGtrkChi1TanlT","globtrk: Chisq1 vs tanl(dip), tpc",20,-5.,5.,20,0.,5.);
     m_chisq1_dipT->SetXTitle("dip angle");
     m_chisq1_dipT->SetYTitle("chisq1");
 
-  m_chisq0_zfT = QAH2F("QaGtrkChi0zfT","globtrk: Chisq0 vs zfirst, tpc",20,-250.,250.,20,0.,10.);
+  m_chisq0_zfT = QAH2F("QaGtrkChi0zfT","globtrk: Chisq0 vs zfirst, tpc",20,-250.,250.,20,0.,5.);
     m_chisq0_zfT->SetXTitle("zfirst");
     m_chisq0_zfT->SetYTitle("chisq0");
 
-  m_chisq1_zfT = QAH2F("QaGtrkChi1zfT","globtrk: Chisq1 vs zfirst, tpc",20,-250.,250.,20,0.,10.);
+  m_chisq1_zfT = QAH2F("QaGtrkChi1zfT","globtrk: Chisq1 vs zfirst, tpc",20,-250.,250.,20,0.,5.);
     m_chisq1_zfT->SetXTitle("zfirst");
     m_chisq1_zfT->SetYTitle("chisq1");
 
@@ -707,8 +710,8 @@ void StQABookHist::BookHistGlob(){
   m_etaTS        = QAH1F("QaGtrkEtaTS",    "globtrk: eta, tpc+svt",40,-2.,2.);
   m_pTTS         = QAH1F("QaGtrkPtTS",     "globtrk: pT, tpc+svt",50,0.,5.);
   m_momTS        = QAH1F("QaGtrkPTS",      "globtrk: momentum, tpc+svt",50,0.,5.);
-  m_chisq0TS     = QAH1F("QaGtrkChisq0TS", "globtrk: chisq0 - xy, tpc+svt", 50, 0.,15.);
-  m_chisq1TS     = QAH1F("QaGtrkChisq1TS", "globtrk: chisq1 - z, tpc+svt", 50, 0.,15.);
+  m_chisq0TS     = QAH1F("QaGtrkChisq0TS", "globtrk: chisq0 - xy, tpc+svt", 50, 0.,5.);
+  m_chisq1TS     = QAH1F("QaGtrkChisq1TS", "globtrk: chisq1 - z, tpc+svt", 50, 0.,5.);
   m_glb_impactTS = QAH1F("QaGtrkImpactTS", "globtrk: impact param from prim vtx, tpc+svt", 100,0.,50.);
 
 
@@ -747,35 +750,35 @@ void StQABookHist::BookHistGlob(){
     m_fpoint_lengthTS->SetXTitle("trk length");
     m_fpoint_lengthTS->SetYTitle("Npoints on trk");
 
-  m_chisq0_momTS = QAH2F("QaGtrkChi0MomTS","globtrk: Chisq0 vs log mom, tpc+svt",40,1.,4.,50,0.,10.);
+  m_chisq0_momTS = QAH2F("QaGtrkChi0MomTS","globtrk: Chisq0 vs log mom, tpc+svt",40,1.,4.,50,0.,5.);
     m_chisq0_momTS->SetXTitle("log P (MeV)");
     m_chisq0_momTS->SetYTitle("chisq0") ;
 
-  m_chisq1_momTS = QAH2F("QaGtrkChi1MomTS","globtrk: Chisq1 vs log mom, tpc+svt",40,1.,4.,50,0.,10.);
+  m_chisq1_momTS = QAH2F("QaGtrkChi1MomTS","globtrk: Chisq1 vs log mom, tpc+svt",40,1.,4.,50,0.,5.);
     m_chisq1_momTS->SetXTitle("log P (MeV)");
     m_chisq1_momTS->SetYTitle("chisq1");
 
-  m_chisq0_etaTS = QAH2F("QaGtrkChi0EtaTS","globtrk: Chisq0 vs eta, tpc+svt",20,-2.,2.,20,0.,10.);
+  m_chisq0_etaTS = QAH2F("QaGtrkChi0EtaTS","globtrk: Chisq0 vs eta, tpc+svt",20,-2.,2.,20,0.,5.);
     m_chisq0_etaTS->SetXTitle("eta");
     m_chisq0_etaTS->SetYTitle("chisq0");
 
-  m_chisq1_etaTS = QAH2F("QaGtrkChi1EtaTS","globtrk: Chisq1 vs eta, tpc+svt",20,-2.,2.,20,0.,10.);
+  m_chisq1_etaTS = QAH2F("QaGtrkChi1EtaTS","globtrk: Chisq1 vs eta, tpc+svt",20,-2.,2.,20,0.,5.);
     m_chisq1_etaTS->SetXTitle("eta");
     m_chisq1_etaTS->SetYTitle("chisq1");
 
-  m_chisq0_dipTS = QAH2F("QaGtrkChi0TanlTS","globtrk: Chisq0 vs tanl(dip), tpc+svt",20,-5.,5.,20,0.,10.);
+  m_chisq0_dipTS = QAH2F("QaGtrkChi0TanlTS","globtrk: Chisq0 vs tanl(dip), tpc+svt",20,-5.,5.,20,0.,5.);
     m_chisq0_dipTS->SetXTitle("dip angle");
     m_chisq0_dipTS->SetYTitle("chisq0");
 
-  m_chisq1_dipTS = QAH2F("QaGtrkChi1TanlTS","globtrk: Chisq1 vs tanl(dip), tpc+svt",20,-5.,5.,20,0.,10.);
+  m_chisq1_dipTS = QAH2F("QaGtrkChi1TanlTS","globtrk: Chisq1 vs tanl(dip), tpc+svt",20,-5.,5.,20,0.,5.);
     m_chisq1_dipTS->SetXTitle("dip angle");
     m_chisq1_dipTS->SetYTitle("chisq1");
 
-  m_chisq0_zfTS = QAH2F("QaGtrkChi0zfTS","globtrk: Chisq0 vs zfirst, tpc+svt",20,-250.,250.,20,0.,10.);
+  m_chisq0_zfTS = QAH2F("QaGtrkChi0zfTS","globtrk: Chisq0 vs zfirst, tpc+svt",20,-250.,250.,20,0.,5.);
     m_chisq0_zfTS->SetXTitle("zfirst");
     m_chisq0_zfTS->SetYTitle("chisq0");
 
-  m_chisq1_zfTS = QAH2F("QaGtrkChi1zfTS","globtrk: Chisq1 vs zfirst, tpc+svt",20,-250.,250.,20,0.,10.);
+  m_chisq1_zfTS = QAH2F("QaGtrkChi1zfTS","globtrk: Chisq1 vs zfirst, tpc+svt",20,-250.,250.,20,0.,5.);
     m_chisq1_zfTS->SetXTitle("zfirst");
     m_chisq1_zfTS->SetYTitle("chisq1");
 
@@ -943,36 +946,36 @@ void StQABookHist::BookHistPrim(){
     m_pfpoint_length->SetXTitle("length");
     m_pfpoint_length->SetYTitle("Npoints");
 
-  m_pchisq0_mom = QAH2F("QaPtrkChi0Mom","primtrk: Chisq0 vs log mom",40,1.,4.,25,0.,5.);
+  m_pchisq0_mom = QAH2F("QaPtrkChi0Mom","primtrk: Chisq0 vs log mom",40,1.,4.,20,0.,5.);
     m_pchisq0_mom->SetXTitle("log P (MeV)");
     m_pchisq0_mom->SetYTitle("chisq0") ;
 
-  m_pchisq1_mom = QAH2F("QaPtrkChi1Mom","primtrk: Chisq1 vs log mom",40,1.,4.,25,0.,5.);
+  m_pchisq1_mom = QAH2F("QaPtrkChi1Mom","primtrk: Chisq1 vs log mom",40,1.,4.,20,0.,5.);
     m_pchisq1_mom->SetXTitle("log P (MeV)");
     m_pchisq1_mom->SetYTitle("chisq1");
 
 
-  m_pchisq0_eta = QAH2F("QaPtrkChi0Eta","primtrk: Chisq0 vs eta",20,-2.,2.,25,0.,5.);
+  m_pchisq0_eta = QAH2F("QaPtrkChi0Eta","primtrk: Chisq0 vs eta",20,-2.,2.,20,0.,5.);
     m_pchisq0_eta->SetXTitle("eta");
     m_pchisq0_eta->SetYTitle("chisq0");
 
-  m_pchisq1_eta = QAH2F("QaPtrkChi1Eta","primtrk: Chisq1 vs eta",20,-2.,2.,25,0.,5.);
+  m_pchisq1_eta = QAH2F("QaPtrkChi1Eta","primtrk: Chisq1 vs eta",20,-2.,2.,20,0.,5.);
     m_pchisq1_eta->SetXTitle("eta");
     m_pchisq1_eta->SetYTitle("chisq1");
 
-  m_pchisq0_dip = QAH2F("QaPtrkChi0Tanl","primtrk: Chisq0 vs tanl(dip)",20,-5.,5.,25,0.,5.);
+  m_pchisq0_dip = QAH2F("QaPtrkChi0Tanl","primtrk: Chisq0 vs tanl(dip)",20,-5.,5.,20,0.,5.);
     m_pchisq0_dip->SetXTitle("dip angle");
     m_pchisq0_dip->SetYTitle("chisq0");
 
-  m_pchisq1_dip = QAH2F("QaPtrkChi1Tanl","primtrk: Chisq1 vs tanl(dip)",20,-5.,5.,25,0.,5.);
+  m_pchisq1_dip = QAH2F("QaPtrkChi1Tanl","primtrk: Chisq1 vs tanl(dip)",20,-5.,5.,20,0.,5.);
     m_pchisq1_dip->SetXTitle("dip angle");
     m_pchisq1_dip->SetYTitle("chisq1");
 
-  m_pchisq0_zf = QAH2F("QaPtrkChi0zf","primtrk: Chisq0 vs zfirst",20,-250.,250.,25,0.,5.);
+  m_pchisq0_zf = QAH2F("QaPtrkChi0zf","primtrk: Chisq0 vs zfirst",20,-250.,250.,20,0.,5.);
     m_pchisq0_zf->SetXTitle("zfirst");
     m_pchisq0_zf->SetYTitle("chisq0");
 
-  m_pchisq1_zf = QAH2F("QaPtrkChi1zf","primtrk: Chisq1 vs zfirst",20,-250.,250.,25,0.,7.);
+  m_pchisq1_zf = QAH2F("QaPtrkChi1zf","primtrk: Chisq1 vs zfirst",20,-250.,250.,20,0.,5.);
     m_pchisq1_zf->SetXTitle("zfirst");
     m_pchisq1_zf->SetYTitle("chisq1");
 
