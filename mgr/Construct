@@ -124,8 +124,9 @@ elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $SOFLAGS   = "-G";
   my $STDHOME= "/afs/rhic/star/packages/ObjectSpace/2.0m";
   $CXXFLAGS .= " -I" . $STDHOME . " -I" . $STDHOME ."/ospace/std -I" . $STDHOME . "/ospace";
-  $LINKMODULECOM = 
-    "test -d %>:d/Templates.DB && %SO %DEBUG %SOFLAGS %SoOUT%> %<  %>:d/Templates.DB/*.o || %SO %DEBUG %SOFLAGS %SoOUT%> %< %SoLibs";
+  $LINKMODULECOM = "test -d %>:d/Templates.DB &&";
+  $LINKMODULECOM.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %>:d/Templates.DB/*.o %SoLibs ||";
+  $LINKMODULECOM.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %SoLibs";
 }
 elsif (/^intel_wnt/) {
 #  $DEBUG    = "-Zi";

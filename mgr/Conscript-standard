@@ -19,7 +19,8 @@ my $obj  = $ObjDir;  #print "obj = $obj\n";
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; #print "SO_PKG = $SO_PKG\n";
 my $LIBPKG = $PKG . "." . $env->{SUFLIB};
 my $SoLibs  = $env->{SoLibs};
-if ($PKG =~ /^StDb/) {$SoLibs .= " -L/opt/star/lib/mysql/ -lmysqlclient";}
+if ($pkg =~ /^StDb/) {$SoLibs .= " -L/opt/star/lib/mysql/ -lmysqlclient";}
+if ($pkg =~ /^pyth$/){$SoLibs .= " /cern/pro/lib/libpythia6125.a";}
 (my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g;# print "new share $share\n";
 $share =~ s/\/StRoot//g;
 $share =~ s/\/(sim|gen)//g; 
