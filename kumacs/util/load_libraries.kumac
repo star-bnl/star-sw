@@ -14,7 +14,7 @@
    
    macro/global/import *
      
-*  LOAD LIBRARIES
+* LOAD LIBRARIES
  if $vexist(make_done)=0 then
    message ' load_libraries: Load domains --> ' [domain]
    test = [domain]
@@ -36,7 +36,8 @@
        message "<bfc> Shared libraries have not been loaded : ABend"
      endif
    enddo
-   vec/cre make_done
+   vec/cre make_done   
+   vec/input staf_status(1) stafcv_ok
  endif
  
  
