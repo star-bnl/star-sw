@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>Current Available Macros</title>
-<!-- Changed by: Kathleen R. Turner, 11-Jan-2000 -->
+<!-- Changed by: Kathleen R. Turner, 13-Jan-2000 -->
 </head>
 <body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
 <basefont face="verdana,arial,helvetica,sans-serif">
@@ -64,7 +64,7 @@
         <li> StHistUtil - description and details on usage of methods -  <a href="#doc2d"> Go </A> 
       </ul>
    <li>
-      Standard Maker Names in BFC -  <a href="#doc3"> Go </A> 
+      Standard Maker Names which are set in bfc & doEvents -  <a href="#doc3"> Go </A> 
    <li>
      Library macros that use the code in St_QA_Maker -  <a href="#doc4"> Go </A> 
   </ul>
@@ -81,9 +81,10 @@
     <ul>
       <li> <font  size ="+1" color="red"> St_QA_Maker <font  size ="+1" color="black"> 
              <ul>
-               <li> ! Important note (11jan00) - to use St_QA_Maker class, you must also
-                    load the St_global library, since the function pams/global/egr/prop_one_track.c
-                    is needed
+               <li> ! Important note (13jan00) - to use St_QA_Maker class, you must also
+                    load the 
+                      tls,St_tpc,St_svt,St_global libraries, since the function pams/global/egr/prop_one_track.c
+                    is needed and the other libraries are needed to load St_global!
                <li>
                  books (using StQABookHist methods) and fills histograms (using separate filling
                   methods) from dst Table data structures
@@ -253,8 +254,12 @@
      &nbsp -  sets a default list of histograms, for given input
               Maker "dirName", that should be
               drawn in logY scale <br>
-     &nbsp - only has default list for "QA" maker so far <br>
      &nbsp - call this method *before* DrawHists
+     &nbsp - list names currently available for Maker Directory Names:
+        <ol>
+          <li> "QA" (goes with St_QA_Maker histograms)
+          <li> "EventQA" (goes with StEventQAMaker histograms)
+        </ol>
   <li> virtual Int_t   
     <font  size ="+1" color="red">AddToLogYList<font  size ="+1" color="black">(const Char_t *HistName="");<br>
      &nbsp -  adds "HistName" histogram name to list of those that
@@ -270,6 +275,33 @@
    <li> virtual Int_t   
     <font  size ="+1" color="red">ExamineLogYList();<font  size ="+1" color="black"><br>
      &nbsp - prints out list of histograms that will be drawn in logY scale  <br>
+  <li> virtual void    
+    <font  size ="+1" color="red">SetDefaultPrintList<font  size ="+1" color="black">(Char_t *dirName="QA");<br>
+     &nbsp -  sets a default list of histogram names, for given input
+              PrintList, that should be
+              drawn,printed  <br>
+     &nbsp - this list will be a subset of the histogram names for the given Maker
+     &nbsp - call this method *before* DrawHists
+     &nbsp - list names currently available:
+        <ol>
+          <li> "Cosmic" (goes with St_QA_Maker histograms)
+          <li> "TestQATable" (goes with StQAMaker histograms)
+        </ol>
+  <li> virtual Int_t   
+    <font  size ="+1" color="red">AddToPrintList<font  size ="+1" color="black">(const Char_t *HistName="");<br>
+     &nbsp -  adds "HistName" histogram name to list of those that
+           will be drawn,printed <br>
+     &nbsp - creates list if there isn't one already <br>
+     &nbsp - call this method *before* DrawHists <br>
+  <li> virtual Int_t   
+    <font  size ="+1" color="red">RemoveFromPrintList<font  size ="+1" color="black">(const Char_t *HistName="");<br>
+     &nbsp -   removes "HistName" histogram name to list of those that
+           will be drawn,printed <br>
+     &nbsp - first checks if there is a list <br>
+     &nbsp - call this method *before* DrawHists <br>
+   <li> virtual Int_t   
+    <font  size ="+1" color="red">ExaminePrintList();<font  size ="+1" color="black"><br>
+     &nbsp - prints out list of histograms names that will be drawn,printed  <br>
   <li> virtual void    
     <font  size ="+1" color="red">SetHistsNamesDraw<font  size ="+1" color="black">(const Char_t *firstName="*", 
     const Char_t *lastName="*");<br>
@@ -296,47 +328,19 @@
 
 <hr>
 <p>
+
 <a name="doc3">
  <font  size ="+1" color="blue">
- Standard Maker Names in BFC: <br>
- &nbsp (use these as input to StHistUtil methods shown above) <br>
+ Standard Maker Names in bfc: <br>
+ &nbsp (use these as input MakerDirName to StHistUtil methods shown above) <br>
  &nbsp NOTE: ones that have histograms are *'d
-<font  size ="+1" color="black">
- <h4>
- <pre>
-   name in bfc      Maker
-  ------------      ------
-  geant             St_geant_Maker
-  tpc_raw           St_tpcdaq_Maker
-  tpc_hits    *     St_tcl_Maker
-  tpc_tracks  *     St_tpt_Maker
-  tpc_tracks        StLaserEventMaker
-  svt_hits    *     St_srs_Maker
-  svt_tracks  *     St_stk_Maker
-  ftpc_raw          St_fss_Maker
-  ftpc_hits   *     StFtpcClusterMaker
-  ftpc_tracks *     St_fpt_Maker
-  emc_raw           St_ems_Maker
-  emc_hits          St_emc_Maker
-  ctf         *     St_ctf_Maker
-  mwc         *     St_mwc_Maker
-  trg               St_trg_Maker
-  l3Tracks    *     St_l3t_Maker
-  rch               StRchMaker 
-  match             StMatchMaker
-  primary           StPrimaryMaker
-  v0                StV0Maker
-  xi                StXiMaker
-  kink              StKinkMaker
-  dst               St_dst_Maker
-  StEventMaker      StEventMaker
-  analysis          StAnalysisMaker
-  QA          *     St_QA_Maker
-  CosmicsQA         StQACosmicMaker
-  EventDisplay      StEventDisplayMaker  
- </pre>
- </h4>
- 
+ <a href="http://www.star.bnl.gov/STAR/html/comp_l/train/tut/bfc_maker_names.html"> bfc Maker names tutorial </a>
+
+ <p>
+ <font  size ="+1" color="blue">
+ Standard Maker Names in doEvents: <br>
+ &nbsp (use these as input MakerDirName to StHistUtil methods shown above) <br>
+ <a href="//www.star.bnl.gov/STAR/html/comp_l/train/tut/doEvents_maker_names.html"> doEvents Maker names tutorial </a>
 
 <hr>
 <p>
