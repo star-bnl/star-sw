@@ -212,4 +212,19 @@ int EMC_Reader::getSMD_TIMEBIN(int fiber, unsigned int& TimeBin)
   } 
   else return 0;
 }
-  
+bool EMC_Reader::isTowerPresent()
+{
+	return mTowerPresent;
+}
+bool EMC_Reader::isSmdPresent()
+{
+	return mSmdPresent;
+}
+Bank_BTOWERADCR& EMC_Reader::getBTOWERADCR()
+{
+	return mTheTowerAdcR;
+}
+Bank_BSMDADCR& EMC_Reader::getSMD_ADCR()
+{
+	return mTheSmdAdcR;
+}

@@ -135,12 +135,13 @@ class EMC_Reader
                         ~EMC_Reader() {}; ///<EMC_Reader destructor
 
       Bank_BTOWERADCR&  getBTOWERADCR();
+			bool              isTowerPresent();
       int               getTowerADC(int,int,int,unsigned short&); ///<Get ADC value for one tower with given module, eta and sub
       int               getTowerADC(int,unsigned short&); ///<Get ADC value for one tower with given Daq Id    
       int               NTowerHits();///<Return number of valid hits on towers
 
       Bank_BSMDADCR&    getSMD_ADCR();
-
+			bool              isSmdPresent();
       int               getSMD_ADC(int,int,unsigned short&);///<Get SMD ADC for a given index and fiber (RDO) number
       int               getSMDE_ADC(int,int,unsigned short&); ///<Get ADC for SMDE with given module and stip number    
       int               getSMDP_ADC(int,int,int,unsigned short&);///<Get ADC for SMDP with given module, eta and sub
