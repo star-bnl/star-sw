@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuProbPidTraits.cxx,v 1.2 2003/11/07 15:23:26 laue Exp $
+ * $Id: StMuProbPidTraits.cxx,v 1.3 2004/10/19 01:34:53 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -13,12 +13,15 @@ StMuProbPidTraits::StMuProbPidTraits() : mNDF(0),
 					 mdEdxFit(0), mdEdxErrorFit(0),
 					 mdEdxTruncated(0),mdEdxErrorTruncated(0),
 					 mdEdxTrackLength(0) {
-        memset(mProbabilities, 0, sizeof(mProbabilities[__NPARTICLES__]));
+        memset(mProbabilities, 0, sizeof(mProbabilities));
 }
     
 /***************************************************************************
  *
  * $Log: StMuProbPidTraits.cxx,v $
+ * Revision 1.3  2004/10/19 01:34:53  mvl
+ * Fixed initialisation in constructor
+ *
  * Revision 1.2  2003/11/07 15:23:26  laue
  * added error on dEdx measurements to the StMuProbPidTraits
  *
