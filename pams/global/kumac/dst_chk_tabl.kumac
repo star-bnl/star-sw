@@ -8,7 +8,7 @@
  macro run_header
    macro/global/import *   
      
-         string = ' DST Run Header: '
+         string = ' DST Run Header: ================================'
          message $quote([string])
 	 fmessage $quote([string]) [dst_chk_log]
 	 
@@ -98,7 +98,7 @@
    macro/global/import *
 * 
 
-     string = ' DST Event Header: '
+     string = ' DST Event Header ------------------------------------ '
      message $quote([string])
      fmessage $quote([string]) [dst_chk_log]
      
@@ -193,7 +193,7 @@
   macro/global/import *   
 * 
 
-         string = ' DST Run Summary: '
+         string = ' DST Run Summary: ===================================== '
          message $quote([string])
 	 fmessage $quote([string]) [dst_chk_log]
 	 
