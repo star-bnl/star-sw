@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.26 2001/01/22 18:40:24 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.27 2001/02/09 23:07:16 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.27  2001/02/09 23:07:16  porter
+ * replaced several ostrstream into buffer for root+solarisCC5 iostream
+ * with ostrstream creating the buffer
+ *
  * Revision 1.26  2001/01/22 18:40:24  porter
  * Added a wrapper for StMessage so one can use it in StDbLib
  *
@@ -96,10 +100,10 @@
  *
  *
  **************************************************************************/
+#include <strstream.h>
 #include <iostream.h>
 #include <iomanip.h>
 #include <stdlib.h> 
-#include <strstream.h>
 
 #include "TString.h"
 
@@ -236,12 +240,12 @@ unsigned int numElements = mdescriptor->NumberOfColumns();
    if(!mdescriptor->Dimensions(i)){
       buff.WriteScalar("1","length");
    } else {
-     char* lengthString=new char[100];
-     ostrstream os(lengthString,100);
+     ostrstream os;
      const unsigned int* index = mdescriptor->IndexArray(i);
      for(int k=0; k<(int)mdescriptor->Dimensions(i)-1;k++) 
        os<<index[k]<<",";
      os<<index[mdescriptor->Dimensions(i)-1]<<ends;
+     char* lengthString = os.str(); 
      buff.WriteScalar(lengthString,"length");
      delete [] lengthString;
    }
@@ -323,19 +327,28 @@ StDbBroker::SetDateTime(UInt_t date, UInt_t time)
   // 20000127  002502
    m_DateTime[0] = date; 
    m_DateTime[1]= time;
+   //   cout<<" Date ="<<date << " & Time = " << time<<endl;
 
-   char dateTime[16];
-   ostrstream os(dateTime,16);
-   char timeCheck[7];
-   ostrstream ts(timeCheck,7);
+   //   char dateTime[16];
+   //   ostrstream ds(dateTime,16);
+   //   char timeCheck[7];
+   //   ostrstream ts(timeCheck,7);
+   char* dateTime;
+   ostrstream ds;
+   char* timeCheck;
+   ostrstream ts;
 
    ts<<m_DateTime[1]<<ends;
+   timeCheck = ts.str();
    int len = strlen(timeCheck);
-   os<<m_DateTime[0];
-   for(int i=0;i<6-len;i++)os<<"0";
-   os<<m_DateTime[1]<<ends;
+   ds<<m_DateTime[0];
+   for(int i=0;i<6-len;i++)ds<<"0";
+   ds<<m_DateTime[1]<<ends;
 
+   dateTime = ds.str();
    mgr->setRequestTime(dateTime);
+   delete [] timeCheck;
+   delete [] dateTime;
 }
 
 //____________________________________________________________________________
