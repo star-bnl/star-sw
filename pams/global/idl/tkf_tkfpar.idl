@@ -4,11 +4,21 @@
 *                              contains various starting values        
 */
 	struct tkf_tkfpar {
-       float     max_dist;   /* max. distance between 2 points at vertex */
-       float     pt_min;     /* parent min pt cut */
-       float     r_max;      /* decay vertex position r_max */
-       float     r_min;      /* decay vertex r_min */
-       float     theta_min;  /* minimum kink opening angle-degrees */
-   } ;
-/*  Last mod. for tkf_tkfpar:   $Date: 1997/12/31 14:33:29 $  */
+       float     dcaParentDaughterMax;  
+       float     parentPtMin;   
+       float     vertexRMax2D;  
+       float     vertexRMin2D;  
+       float     thetaMin;
+       short     numOfPadRows;  	
+       float     parentDipAngleMax;	
+       float     impactCut;
+       float     parentLastDaughterStart2D;
+       float     parentLastDaughterStartZ;
+       float     projectPointZDiff;
+       float     distanceKinkParent2D;
+       float     distanceKinkDaughter2D;
+       float     distanceKinkParentZ;
+       float     distanceKinkDaughterZ;
+ } ;
+/*  Last mod. for tkf_tkfpar:   $Date: 1999/06/21 22:21:27 $  */
 
