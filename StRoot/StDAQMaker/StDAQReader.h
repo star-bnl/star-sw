@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.7 2000/01/24 14:39:33 perev Exp $
+ * $Id: StDAQReader.h,v 1.8 2000/01/24 20:35:37 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.8  2000/01/24 20:35:37  ward
+ * Access trigger data.
+ *
  * Revision 1.7  2000/01/24 14:39:33  perev
  * FTPC (HolmMade) is added
  *
@@ -35,6 +38,8 @@
 #include "StDaqLib/RICH/RICH_Reader.hh"
 
 #endif /*__CINT__*/
+
+#include "StTRGReader.h" // Herb
 
 //		Forward declarations
 struct  EventInfo;
@@ -83,6 +88,7 @@ class StDAQReader
 {
 friend class StTPCReader;
 friend class StFTPCReader;
+friend class StTRGReader;
 public:
   StDAQReader(const char *file=0);
   virtual ~StDAQReader();
@@ -113,6 +119,7 @@ public:
   StTPCReader *getTPCReader(); 
   StRICHReader *getRICHReader(); 
   StFTPCReader *getFTPCReader(); 
+  StTRGReader *getTRGReader();
   virtual void printEventInfo();
 
 protected:
@@ -121,6 +128,7 @@ EventReader *fEventReader;
 StTPCReader *fTPCReader;  
 StFTPCReader *fFTPCReader;  
 StRICHReader *fRICHReader;
+StTRGReader *fTRGReader;
 long fOffset;
 DAQEventInfo *fEventInfo;
 char *fFile;
