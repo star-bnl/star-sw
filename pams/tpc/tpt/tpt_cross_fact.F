@@ -1,5 +1,8 @@
-* $Id: tpt_cross_fact.F,v 1.8 2000/02/23 21:05:52 hardtke Exp $
+* $Id: tpt_cross_fact.F,v 1.9 2000/02/23 22:20:25 hardtke Exp $
 * $Log: tpt_cross_fact.F,v $
+* Revision 1.9  2000/02/23 22:20:25  hardtke
+* use tpc_global_to_local_p
+*
 * Revision 1.8  2000/02/23 21:05:52  hardtke
 * replace tpg functions with tpc functions
 *
@@ -55,7 +58,7 @@ C______________________________________________________________________
       real    vlocal(3),vglobal(3)
       integer iret, isect
 
-      INTEGER tpc_sec24_to_sec12, tgc_global_to_local_p
+      INTEGER tpc_sec24_to_sec12, tpc_global_to_local_p
       real    atand
 C_____________________________________________________________________
 
@@ -66,7 +69,7 @@ C_____________________________________________________________________
          vglobal(1)= xnew-xold
          vglobal(2)= ynew-yold
          vglobal(3)= 0.0
-         iret= tgc_global_to_local_p(isect,vglobal,vlocal)
+         iret= tpc_global_to_local_p(isect,vglobal,vlocal)
 C
          cf = (vlocal(2))**2/(vlocal(2)**2+vlocal(1)**2)
 cc      
