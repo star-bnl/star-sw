@@ -134,6 +134,8 @@ c---- set up lookup from i_eta and i_phi to cts_mslat table...
       do i       = 1,cts_mslat_h.nok
        j         = cts_mslat(i).i_eta
        k         = cts_mslat(i).i_phi
+cTEST        write(*,*)' cts ',cts_mslat(i).i_eta,cts_mslat(i).i_phi,
+cTEST     1         cts_mslat(i).z_hit,cts_mslat(i).ptot,cts_mslat(i).s_length
        if((j.ge.1.and.j.le. 18).AND.
      1    (k.ge.1.and.k.le.300))then
         if(k.lt.251.or.k.gt.255)then
@@ -273,7 +275,10 @@ c            eta_hit  = -1.0*LOG(TAN(ATAN2(rval,z_int)/2.0))
            else
              slat_bin = IFIX((ang_int+3.*deg_to_rad)/(0.10472/5.)) + 300
            endif
-           slat_bin   = slat_bin + 5
+c!!!!!!!!!!!!!!!!!!!!!
+c!!!!!!!!!!!!!!!!!!!!!           slat_bin   = slat_bin + 5  ! needed for geant output made with g2t...
+c!!!!!!!!!!!!!!!!!!!!!  unnecesary for g2r data 
+c!!!!!!!!!!!!!!!!!!!!!
            if(slat_bin.lt.  01)slat_bin = slat_bin + 300
            if(slat_bin.gt. 300)slat_bin = slat_bin - 300
 
@@ -329,6 +334,15 @@ cTEST              write(*,*)'track not in TOFp acceptance ',eta_bin,slat_bin
               KEEPIT = .FALSE.
               imslat = 0
            end if
+
+cTEST        if(imslat.gt.0)then
+cTEST         write(*,*)'match? ',eta_bin,slat_bin,z_int,p_tot,s_trk,' .. ',
+cTEST     1     imslat,cts_mslat(imslat).z_hit,cts_mslat(imslat).ptot,
+cTEST     1     cts_mslat(imslat).s_length
+cTEST        elseif(eta_bin.ge.10.and.(slat_bin.ge.241.and.slat_bin.le.265))then
+cTEST         write(*,*)'no mat ',eta_bin,slat_bin,z_int,p_tot,s_trk,' .. ',
+cTEST     1     imslat,0.0,0.0,0.0
+cTEST        end if
 
 c---- fill dst_tof_trk...
           if(KEEPIT)then
@@ -438,10 +452,11 @@ c      write(*,*)iout,iout1,iout2,iout3,iout4
       dst_tof_evt(1).prhitmat     = prhitmat   
     
 999   FILL_DST_TOF=STAFCV_OK
-      GOTO 1001
+      WRITE(*,*)' FILL_DST_TOF: Exiting, no errors...'
+      RETURN
 1000  FILL_DST_TOF=STAFCV_BAD
-      WRITE(*,*)' FILL_DST_TOF: Exits with error...'
-1001  RETURN
+      WRITE(*,*)' FILL_DST_TOF: Exiting with error!!!'
+      RETURN
       END
 
 c______________________________________________________________________
