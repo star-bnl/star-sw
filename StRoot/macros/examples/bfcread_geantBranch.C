@@ -1,5 +1,8 @@
-// $Id: bfcread_geantBranch.C,v 1.11 2000/06/01 18:57:07 kathy Exp $
+// $Id: bfcread_geantBranch.C,v 1.12 2000/06/20 19:07:23 lansdell Exp $
 // $Log: bfcread_geantBranch.C,v $
+// Revision 1.12  2000/06/20 19:07:23  lansdell
+// had to load libglobal_Tables to prevent crashes
+//
 // Revision 1.11  2000/06/01 18:57:07  kathy
 // updating to separate out BfcStatus stats
 //
@@ -49,6 +52,7 @@ void bfcread_geantBranch(
     gSystem->Load("StChain");
     gSystem->Load("libsim_Tables");
     gSystem->Load("libgen_Tables");
+    gSystem->Load("libglobal_Tables");
     gSystem->Load("StIOMaker");
 
 
@@ -64,7 +68,7 @@ void bfcread_geantBranch(
 
 // --- now execute chain member functions
   chain->Init();
-
+  cout << " Finished Init()..." << endl;
   TDataSet *ddb=0;
   TTable   *tabl=0;
   TDataSet *obj=0;
@@ -93,7 +97,9 @@ EventLoop: if (iev < nevents && !istat) {
 
 
     chain->Clear();
+    cout << " Calling Make()..." << endl;
     istat = chain->Make(iev);
+    cout << " Make() finished..." << endl;
     
 //  count # times Make is called
     iev++;
