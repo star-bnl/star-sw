@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.10 1999/08/13 01:12:24 fine Exp $
+// $Id: StBFChain.cxx,v 1.11 1999/08/25 19:49:45 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.11  1999/08/25 19:49:45  fisyak
+// Add geant Input for IO
+//
 // Revision 1.10  1999/08/13 01:12:24  fine
 // StMaker::GetHist has been introduced
 //
@@ -332,8 +335,11 @@ Int_t StBFChain::Load()
   if (ChainFlags[kHalfField])field   = new StMagFC("field","STAR Half field",0.5);
   if (ChainFlags[kXIN]) {
     StIOMaker *inpMk = new StIOMaker("inputStream","r",InFile->Data());
-    if (inpMk && ChainFlags[kDEBUG]) inpMk->SetDebug();
-    SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
+    if (inpMk) {
+      if (ChainFlags[kDEBUG]) inpMk->SetDebug();
+      SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
+      SetInput("geant",".make/inputStream/.make/inputStream_XDF/.data/event/geant/Event");
+    }
   }
   if (ChainFlags[kGEANT])  {
     geant = new St_geant_Maker("geant");
