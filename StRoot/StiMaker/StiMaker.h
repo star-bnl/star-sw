@@ -32,6 +32,7 @@ class StAssociationMaker;
 class StiMaker : public StMaker {
  public:
     typedef StiObjectFactory<StiKalmanTrack> StiKalmanTrackFactory;
+    enum SeedFinderType {kUndefined=0, kComposite=1, kEvaluable=3};
     
     virtual ~StiMaker();
 
@@ -41,7 +42,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.22 2001/09/07 14:53:00 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.23 2001/09/17 17:48:12 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -52,6 +53,8 @@ public:
     //Gets/sets
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
+    void setSimulation(bool);
+    void setSeedFinderType(SeedFinderType);
 
     void printStatistics() const;
     
@@ -63,6 +66,10 @@ protected:
 
 private:
 
+    //flags
+    bool mSimulation;//! true->m.c.
+    SeedFinderType mSeedFinderType;
+    
     //Containers
     StiHitContainer* mhitstore; //!
     StiDetectorContainer* mdetector; //!
@@ -110,6 +117,10 @@ inline void StiMaker::setMcEventMaker(StMcEventMaker* val)
 inline void StiMaker::setAssociationMaker(StAssociationMaker* val)
 {
     mAssociationMaker = val;
+}
+
+inline void StiMaker::setSimulation(bool val) {
+    mSimulation=val;
 }
 
 #endif

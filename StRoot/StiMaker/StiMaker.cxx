@@ -51,8 +51,10 @@
 //#include "StiGui/StiRootDrawableHitContainer.h"
 #include "StiGui/StiDisplayManager.h"
 
+//StiEvaluator
+#include "StiEvaluator/StiEvaluator.h"
+
 // StiMaker
-#include "StiEvaluator.h"
 #include "StiMaker.h"
 
 StiMaker* StiMaker::sinstance = 0;
@@ -63,6 +65,8 @@ ostream& operator<<(ostream&, const StiHit&);
 ClassImp(StiMaker)
   
 StiMaker::StiMaker(const Char_t *name) : StMaker(name),
+					 //flags
+					 mSimulation(false), mSeedFinderType(kUndefined),
 					 //Containers
 					 mhitstore(0), mdetector(0), mtrackstore(0),
 					 //Factories
@@ -258,8 +262,21 @@ Int_t StiMaker::Init()
     //The Tracker
     mtracker = new StiKalmanTrackFinder();
     mtracker->setTrackNodeFactory(mktracknodefactory);
-    mtracker->setTrackSeedFinder(mEvaluableSeedFinder);
-    //mtracker->setTrackSeedFinder(mcompseedfinder);
+    if (mSeedFinderType==kEvaluable) {
+	mtracker->setTrackSeedFinder(mEvaluableSeedFinder);
+	cout <<"StiMaker::init(). Set tracker seed finder to kEvaluable"<<endl;
+    }
+    else if (mSeedFinderType==kComposite) {
+	mtracker->setTrackSeedFinder(mcompseedfinder);
+	cout <<"StiMaker::init(). Set tracker seed finder to kComposite"<<endl;
+    }
+    else if (mSeedFinderType==kUndefined) {
+	cout <<"StiMaker::init(). ERROR:\t SeedFinderType==kUndefined"<<endl;
+    }
+    else {
+	cout <<"StiMaker::init(). ERROR:\t unkown SeedFinderType"<<endl;
+    }
+    
     mtracker->isValid(true);
 
     mdisplay->setSkeletonView();
@@ -273,12 +290,17 @@ Int_t StiMaker::Make()
 {
     StEvent* rEvent = 0;
     rEvent = (StEvent*) GetInputDS("StEvent");
-    if (!mMcEventMaker) {
+    if (mSimulation && !mMcEventMaker) {
 	cout <<"StiMaker::Make(). ERROR!\tmMcEventMaker==0"<<endl;
 	return 0;
     }
-    StMcEvent* mc = mMcEventMaker->currentMcEvent();
-    if (!mc) {
+    
+    StMcEvent* mc = 0;
+    if (mSimulation) {
+	mc = mMcEventMaker->currentMcEvent();
+    }
+    
+    if (mSimulation==true && mc==0) {
 	cout <<"StiMaker::Make(). ERROR!\tMcEvent==0"<<endl;
 	return 0;
     }
@@ -305,10 +327,10 @@ Int_t StiMaker::Make()
 	mcompseedfinder->reset();
 
 	//Initialize the SeedFinder, loop on tracks
-	mEvaluableSeedFinder->setEvent(mc);
+	if (mSimulation) {
+	    mEvaluableSeedFinder->setEvent(mc);
+	}
 
-	//Test track finder
-	
     }
 
     StiEvaluator::instance()->evaluateForEvent(mtrackstore);
@@ -332,3 +354,18 @@ void StiMaker::doNextAction()
     return;
 }
 
+void StiMaker::setSeedFinderType(SeedFinderType val)
+{
+    if (val==kComposite) {
+	mSeedFinderType=kComposite;
+	cout <<"StiMaker::setSeedFinderType(). type==kComposite"<<endl;
+    }
+    else if (val==kEvaluable) {
+	mSeedFinderType=kEvaluable;
+	cout <<"StiMaker::setSeedFinderType(). type==kEvaluable"<<endl;
+    }
+    else {
+	cout <<"StiMaker::setSeedFinderType(). ERROR:\tUnkown SeedFinderType: "<<static_cast<int>(val)<<endl;
+	mSeedFinderType=kUndefined;
+    }
+}
