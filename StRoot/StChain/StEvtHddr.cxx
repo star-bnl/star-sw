@@ -1,7 +1,8 @@
-#include "StEvtHddr.h"
 #include <stdio.h>
 #include <time.h>
 #include <assert.h>
+#include "StEvtHddr.h"
+#include "TUnixTime.h"
 
 ClassImp(StEvtHddr)
 //_____________________________________________________________________________
@@ -41,16 +42,17 @@ void StEvtHddr::FillTag(EvtHddr_st *tag)
 //_____________________________________________________________________________
   void StEvtHddr::SetGMTime(UInt_t ut)
 {
-   struct tm *tp;
-   tp            = (tm*)gmtime((time_t*)&ut);
-   UInt_t year   = tp->tm_year;
-   if (year < 1900) year +=1900;
-   UInt_t month  = tp->tm_mon + 1;
-   UInt_t day    = tp->tm_mday;
-   UInt_t hour   = tp->tm_hour;
-   UInt_t min    = tp->tm_min;
-   UInt_t sec    = tp->tm_sec;
-   mEventTime.Set(year,month,day,hour,min,sec);
+   TUnixTime unixTime(ut);
+   Int_t dat,tim;
+   unixTime.GetGTime(dat,tim);
+   mEventTime.Set(dat,tim);
+}
+//_____________________________________________________________________________
+  UInt_t StEvtHddr::GetUTime() 	  const 
+{
+    TUnixTime unixTime;
+    unixTime.SetGTime(mEventTime.GetDate(),mEventTime.GetTime());
+    return unixTime.GetUTime();
 }
 //_____________________________________________________________________________
   void StEvtHddr::Print()

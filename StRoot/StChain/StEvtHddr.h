@@ -30,9 +30,9 @@ public:
   Float_t     	GetBImpact()      const {return mBImpact;};
   Float_t     	GetPhiImpact()    const {return mPhImpact;};
   Float_t     	GetPhImpact()     const {return GetPhiImpact();};
-  UInt_t     	GetUTime() 	  const {return mEventTime.Get();};
-  Int_t     	GetDate()  	  const {return ((TDatime *)&mEventTime)->GetDate();};
-  Int_t     	GetTime()  	  const {return ((TDatime *)&mEventTime)->GetTime();};
+  UInt_t     	GetUTime() 	  const ;
+  Int_t     	GetDate()  	  const {return mEventTime.GetDate();};
+  Int_t     	GetTime()  	  const {return mEventTime.GetTime();};
   TDatime       GetDateTime()     const {return mEventTime;};
   TDatime       GetProdDateTime() const {return mProdTime;};
   Int_t     	GetIventNumber()  const {return mIventNumber;};
