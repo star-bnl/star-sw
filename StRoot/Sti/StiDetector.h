@@ -8,6 +8,7 @@
 #define STI_DETECTOR_HH
 
 #include "TObject.h"
+#include <string>
 
 class StiDetector : public TObject{
     
@@ -33,6 +34,10 @@ public:
     double getRadLengthThickness() const { return thickness/radLength; }
     double getPosition() const { return position; }
     double getRefAngle() const { return refAngle; }
+    int getSector() const {return sector;}
+    int getPadrow() const {return padrow;}
+    const char* getName() const {return name;}
+    //const string& getName() const {return name;}
     Int_t getShapeCode() const { return shapeCode; }
     
     //Sets
@@ -49,6 +54,10 @@ public:
     void setPosition(double val) {position = val;}
     void setRefAngle(double val) {refAngle = val;}
     void setShapeCode(StiShapeCode val) {shapeCode = val;}
+    void setSector(int val) {sector = val;}
+    void setPadrow(int val) {padrow = val;}
+    void setName(char* val) {name = val;}
+    //void setName(const string& val) {name = val;}
 
     //action
     virtual void build(const char* infile);  //for now, build from SCL parsable ascii file
@@ -68,6 +77,10 @@ protected:
     double position;           // perpendicular distance to global origin
     double refAngle;           // angle of normal to object in global coords
     StiShapeCode shapeCode;            // 1 if planar, 2 if circular
+    int sector;  //Generalized sector
+    int padrow;  //Generalized padrow
+    char* name;               //Name of the class, a char so that we don't have any template problems
+    //string name;               //Name of the class
 
 };
 
