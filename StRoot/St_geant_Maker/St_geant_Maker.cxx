@@ -1,6 +1,9 @@
 /  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.66 2001/07/03 15:51:48 nevski Exp $
+// $Id: St_geant_Maker.cxx,v 1.67 2001/07/03 23:37:25 nevski Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.67  2001/07/03 23:37:25  nevski
+// forward pion detector added
+//
 // Revision 1.66  2001/07/03 15:51:48  nevski
 // phmd added
 //
@@ -563,7 +566,10 @@ Int_t St_geant_Maker::Make()
 //           ==============================
     }
 
-    geant3->Gfnhit("ECAH","ESCI", nhits);
+    geant3->Gfnhit("ECAH","ESCI", nhit1);
+    geant3->Gfnhit("ECAH","ELGR", nhit2);
+    geant3->Gfnhit("ECAH","EPCT", nhit3);
+    nhits = nhit1+nhit2+nhit3; 
     if (nhits>0) {
       St_g2t_emc_hit *g2t_eem_hit = new St_g2t_emc_hit("g2t_eem_hit",nhits);
       m_DataSet->Add(g2t_eem_hit);
