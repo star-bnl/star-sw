@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.16 1999/01/08 23:18:30 sakrejda Exp $
+// $Id: St_tcl_Maker.cxx,v 1.17 1999/01/20 23:59:56 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.17  1999/01/20 23:59:56  fisyak
+// Just clean up
+//
 // Revision 1.16  1999/01/08 23:18:30  sakrejda
 // index  table created only once and only for the mc run
 //
@@ -132,12 +135,13 @@ Int_t St_tcl_Maker::Init(){
 Int_t St_tcl_Maker::Make(){
   //  PrintInfo();
   const Int_t max_hit = 500000;
+  St_DataSetIter local(m_DataSet);
   if (!m_DataSet->GetList()) {// If DataSet list empty then create it
-    St_tcl_tphit     *tphit     = new St_tcl_tphit("tphit",max_hit);         m_DataSet->Add(tphit);
-    St_tcl_tphit_aux *tphitau   = new St_tcl_tphit_aux("tphitau",max_hit);   m_DataSet->Add(tphitau);
-    //    St_tcl_tpc_index *index     = new St_tcl_tpc_index("index",max_hit);     m_DataSet->Add(index);
-    St_tcl_tpcluster *tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); m_DataSet->Add(tpcluster);
-    St_tcl_tp_seq    *tpseq     = new St_tcl_tp_seq("tpseq",5*max_hit);      m_DataSet->Add(tpseq);
+    St_tcl_tphit     *tphit     = new St_tcl_tphit("tphit",max_hit);         local.Add(tphit);
+    St_tcl_tphit_aux *tphitau   = new St_tcl_tphit_aux("tphitau",max_hit);   local.Add(tphitau);
+    //    St_tcl_tpc_index *index     = new St_tcl_tpc_index("index",max_hit);     local.Add(index);
+    St_tcl_tpcluster *tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); local.Add(tpcluster);
+    St_tcl_tp_seq    *tpseq     = new St_tcl_tp_seq("tpseq",5*max_hit);      local.Add(tpseq);
     St_DataSet       *sector;
     St_DataSet       *raw_data_tpc = gStChain->DataSet("tpc_raw");
     Int_t sector_tot = 0;
@@ -184,11 +188,12 @@ Int_t St_tcl_Maker::Make(){
 	St_DataSetIter geant(gStChain->DataSet("geant"));
 	St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
         if (g2t_tpc_hit){//geant data exists too
-	// create the index table
-	St_tcl_tpc_index  *index = new St_tcl_tpc_index("index",2*max_hit); m_DataSet->Add(index);
+	// create the index table, if any
+	St_tcl_tpc_index  *index = (St_tcl_tpc_index *) local("index");
+	if (!index) {index = new St_tcl_tpc_index("index",2*max_hit); local.Add(index);}
 	
 	Int_t Res_tte =  tte_hit_match(g2t_tpc_hit,index,m_type,tphit); 
-	if (Res_tte !=  kSTAFCV_OK)  cout << "Problem with tte_hit_match.." << endl;
+        if (Res_tte !=  kSTAFCV_OK)  cout << "Problem with tte_hit_match.." << endl;
 	cout << "finish run_tte_hit_match" << endl;
 	}
       }
@@ -200,7 +205,9 @@ Int_t St_tcl_Maker::Make(){
       St_g2t_track   *g2t_track   = (St_g2t_track   *) geant("g2t_track");
       St_g2t_vertex  *g2t_vertex  = (St_g2t_vertex  *) geant("g2t_vertex");
       if (g2t_tpc_hit && g2t_track){
-	St_tcl_tpc_index  *index = new St_tcl_tpc_index("index",2*max_hit); m_DataSet->Add(index);
+	// create the index table, if any
+	St_tcl_tpc_index  *index = (St_tcl_tpc_index *) local("index");
+	if (!index) {index = new St_tcl_tpc_index("index",2*max_hit); local.Add(index);}
 	cout << "start tfs_run" << endl;
 	
 	Int_t Res_tfs_g2t =   tfs_g2t(g2t_tpc_hit, g2t_track, g2t_vertex,
@@ -221,7 +228,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.16 1999/01/08 23:18:30 sakrejda Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.17 1999/01/20 23:59:56 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
