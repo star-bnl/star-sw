@@ -1,8 +1,11 @@
 #ifndef MATH_CONSTANTS
 #define MATH_CONSTANTS
 #if 0
-/* $Id: math_constants.h,v 1.2 1998/11/30 16:06:10 fisyak Exp $ */
+/* $Id: math_constants.h,v 1.3 1999/12/23 23:21:22 fisyak Exp $ */
 /* $Log: math_constants.h,v $
+ * Revision 1.3  1999/12/23 23:21:22  fisyak
+ * remove egcs warning
+ *
  * Revision 1.2  1998/11/30 16:06:10  fisyak
  * Protection versus usage in FORTRAN
  *
