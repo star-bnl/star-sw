@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.31 1999/03/16 00:20:39 sakrejda Exp $
+// $Id: St_tcl_Maker.cxx,v 1.32 1999/03/17 02:02:43 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.32  1999/03/17 02:02:43  fisyak
+// New scheme
+//
 // Revision 1.31  1999/03/16 00:20:39  sakrejda
 // switch for the cluster morphology stuff added
 //
@@ -117,6 +120,16 @@ ClassImp(St_tcl_Maker)
   
 //_____________________________________________________________________________
   St_tcl_Maker::St_tcl_Maker(const char *name):
+    m_tclEvalOn(kFALSE),
+    m_tclMorphOn(kFALSE),
+    m_tpg_detector(0),
+    m_tpg_pad(0),
+    m_tpg_pad_plane(0),
+    m_tsspar(0),
+    m_tclpar(0),
+    m_type(0),
+    m_tfs_fspar(0),
+    m_tfs_fsctrl(0),
     StMaker(name){
 }
 //_____________________________________________________________________________
@@ -127,7 +140,7 @@ Int_t St_tcl_Maker::Init()
 {
 
 // 		Create tables
-  St_DataSet *tpc = GetDataSet("params/tpc");
+  St_DataSet *tpc = GetDataBase("params/tpc");
   assert(tpc);
   St_DataSetIter   local(tpc);
 
@@ -141,7 +154,8 @@ Int_t St_tcl_Maker::Init()
   assert ((m_tpg_pad_plane && m_tpg_detector)) ;
 
   m_tpg_pad = (St_tpg_pad*) tpgpar->Find("tpg_pad");
-  assert(m_tpg_pad);
+  if (!m_tpg_pad) {
+    m_tpg_pad =new St_tpg_pad("tpg_pad",1); AddConst(m_tpg_pad);} 
   
   Int_t res = tpg_main(m_tpg_pad_plane,m_tpg_detector,m_tpg_pad); 
 //	      ===================================================
@@ -466,7 +480,7 @@ Int_t St_tcl_Maker::Make(){
   }
   St_tcl_tp_seq    *tpseq     = new St_tcl_tp_seq("tpseq",5*max_hit);      local.Add(tpseq);
   St_DataSet       *sector;
-  St_DataSet       *raw_data_tpc = gStChain->DataSet("tpc_raw");
+  St_DataSet       *raw_data_tpc = GetInputDS("tpc_raw");
   Int_t sector_tot = 0;
 
   if (raw_data_tpc){// Row data exits -> make clustering
@@ -503,12 +517,12 @@ Int_t St_tcl_Maker::Make(){
 	if (m_tclMorphOn){
   // Create morphology table only if needed
 
-        if(Debug()) printf("Starting %20s for sector %2d.\n","cluster_morphology",indx);
+	  if(Debug()) printf("Starting %20s for sector %2d.\n","cluster_morphology",indx);
 
-        Int_t tcc_res = cluster_morphology( indx, pixel_data_in, pixel_data_out,
-                                            tpcluster, tpseq, morph);
+	  Int_t tcc_res = cluster_morphology( indx, pixel_data_in, pixel_data_out,
+					      tpcluster, tpseq, morph);
 //			=======================================================
-        if(tcc_res) { printf("ERROR %d, tcl maker\n",tcc_res); return kStErr; }
+	  if(tcc_res) { printf("ERROR %d, tcl maker\n",tcc_res); return kStErr; }
 	}
 	sector_tot++;
 
@@ -529,49 +543,52 @@ Int_t St_tcl_Maker::Make(){
 
     if (sector_tot && m_tclEvalOn) { //slow simulation exist
       if (Debug()) cout << "start run_tte_hit_match" << endl;
+      St_DataSet    *geant = GetInputDS("geant");
+      if (geant) {
+	St_DataSetIter geantI(geant);
+	St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geantI("g2t_tpc_hit");
+	if (g2t_tpc_hit){//geant data exists too
 
-      St_DataSetIter geant(GetDataSet("geant"));
-      St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
-      if (g2t_tpc_hit){//geant data exists too
-
-      // create the index table, if any
-      St_tcl_tpc_index  *index = (St_tcl_tpc_index *) local("index");
-      if (!index) {index = new St_tcl_tpc_index("index",2*max_hit); local.Add(index);}
-
-      Int_t Res_tte =  tte_hit_match(g2t_tpc_hit,index,m_type,tphit); 
-//		       ==============================================
-      if (Res_tte !=  kSTAFCV_OK)  cout << "Problem with tte_hit_match.." << endl;
-      if (Debug()) cout << "finish run_tte_hit_match" << endl;
+	  // create the index table, if any
+	  St_tcl_tpc_index  *index = (St_tcl_tpc_index *) local("index");
+	  if (!index) {index = new St_tcl_tpc_index("index",2*max_hit); local.Add(index);}
+	  
+	  Int_t Res_tte =  tte_hit_match(g2t_tpc_hit,index,m_type,tphit); 
+	  //		       ==============================================
+	  if (Res_tte !=  kSTAFCV_OK)  cout << "Problem with tte_hit_match.." << endl;
+	  if (Debug()) cout << "finish run_tte_hit_match" << endl;
+	}
       }
     }
   }
-
-
   else {
 
-// 		Raw data does not exit, check GEANT. if it does then use fast cluster simulation
-    St_DataSetIter geant(GetDataSet("geant"));
-    St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
-    St_g2t_track   *g2t_track   = (St_g2t_track   *) geant("g2t_track");
-    St_g2t_vertex  *g2t_vertex  = (St_g2t_vertex  *) geant("g2t_vertex");
-    if (g2t_tpc_hit && g2t_track){
-      // create the index table, if any
-      St_tcl_tpc_index  *index = (St_tcl_tpc_index *) local("index");
-      if (!index) {index = new St_tcl_tpc_index("index",2*max_hit); local.Add(index);}
-      if (Debug()) cout << "start tfs_run" << endl;
-
-      Int_t Res_tfs_g2t = tfs_g2t(g2t_tpc_hit, g2t_track, g2t_vertex,
-				  m_tfs_fspar,m_tfs_fsctrl,
-				  index, m_type, tphit);
-//			  ===========================================
-
-      if (Res_tfs_g2t != kSTAFCV_OK){cout << "Problem running tfs_g2t..." << endl;}
-      else {
-	Int_t Res_tfs_filt = tfs_filt(tphit);
+// 		Row data does not exit, check GEANT. if it does then use fast cluster simulation
+    St_DataSet    *geant = GetInputDS("geant");
+    if (geant) {
+      St_DataSetIter geantI(geant);
+      St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geantI("g2t_tpc_hit");
+      St_g2t_track   *g2t_track   = (St_g2t_track   *) geantI("g2t_track");
+      St_g2t_vertex  *g2t_vertex  = (St_g2t_vertex  *) geantI("g2t_vertex");
+      if (g2t_tpc_hit && g2t_track){
+	// create the index table, if any
+	St_tcl_tpc_index  *index = (St_tcl_tpc_index *) local("index");
+	if (!index) {index = new St_tcl_tpc_index("index",2*max_hit); local.Add(index);}
+	if (Debug()) cout << "start tfs_run" << endl;
+	
+	Int_t Res_tfs_g2t = tfs_g2t(g2t_tpc_hit, g2t_track, g2t_vertex,
+				    m_tfs_fspar,m_tfs_fsctrl,
+				    index, m_type, tphit);
+	//			  ===========================================
+	
+	if (Res_tfs_g2t != kSTAFCV_OK){cout << "Problem running tfs_g2t..." << endl;}
+	else {
+	  Int_t Res_tfs_filt = tfs_filt(tphit);
 //			     ================
-	if ( Res_tfs_filt !=  kSTAFCV_OK){cout << " Problem running tfs_filt..." << endl;} 
+	  if ( Res_tfs_filt !=  kSTAFCV_OK){cout << " Problem running tfs_filt..." << endl;} 
+	}
+	cout << "finish tfs_run" << endl;
       }
-      cout << "finish tfs_run" << endl;
     }
   }
 
@@ -582,7 +599,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.31 1999/03/16 00:20:39 sakrejda Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.32 1999/03/17 02:02:43 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

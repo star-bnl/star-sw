@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.22 1999/03/14 00:23:38 perev Exp $
+// $Id: St_tpt_Maker.cxx,v 1.23 1999/03/17 02:02:58 fisyak Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.23  1999/03/17 02:02:58  fisyak
+// New scheme
+//
 // Revision 1.22  1999/03/14 00:23:38  perev
 // New makers
 //
@@ -170,17 +173,6 @@ Int_t St_tpt_Maker::Make(){
       
   St_tpt_track  *tptrack = new St_tpt_track("tptrack",maxNofTracks); m_DataSet->Add(tptrack);
 
-//			TTE_E
-  St_tte_mctrk  *mctrk   = new St_tte_mctrk("mctrk"  ,maxNofTracks);   m_DataSet->Add(mctrk);
-  St_tte_eval *evaltrk   = new St_tte_eval ("evaltrk",maxNofTracks);   m_DataSet->Add(evaltrk);
-  St_tpt_res   *restpt   = new St_tpt_res  ("restpt" ,10*maxNofTracks);m_DataSet->Add(restpt);
-  
-  St_DataSet *gea = GetInputDS("geant");
-  assert (gea);
-  St_DataSetIter geant(gea);
-  
-  St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("g2t_track");
-  St_g2t_tpc_hit *g2t_tpc_hit  = (St_g2t_tpc_hit *)geant("g2t_tpc_hit");
 
 //			TPT
   if (!m_iftteTrack) {
@@ -192,11 +184,18 @@ Int_t St_tpt_Maker::Make(){
     if (Debug()) cout << " finish tpt_run " << endl;
 
   }  else {//tte_track
-    if (g2t_tpc_hit && g2t_track) {
-      if (Debug()) cout << "start run_tpt_residuals" << endl;
-      Int_t Res_tte_track =  tte_track(tptrack,tphit,g2t_tpc_hit,g2t_track,index,m_type);
-      if (Res_tte_track != kSTAFCV_OK) {cout << " Problem running tte_track " << endl;}
-      if (Debug()) cout << " finish run_tte_track " << endl; 
+    St_DataSet *geant = GetInputDS("geant");
+    if (geant) {
+      St_DataSetIter geantI(geant);
+      
+      St_g2t_track   *g2t_track    = (St_g2t_track  *) geantI("g2t_track");
+      St_g2t_tpc_hit *g2t_tpc_hit  = (St_g2t_tpc_hit *)geantI("g2t_tpc_hit");
+      if (g2t_tpc_hit && g2t_track) {
+	if (Debug()) cout << "start run_tpt_residuals" << endl;
+	Int_t Res_tte_track =  tte_track(tptrack,tphit,g2t_tpc_hit,g2t_track,index,m_type);
+	if (Res_tte_track != kSTAFCV_OK) {cout << " Problem running tte_track " << endl;}
+	if (Debug()) cout << " finish run_tte_track " << endl; 
+      }
     }
   }
 
@@ -217,28 +216,35 @@ Int_t St_tpt_Maker::Make(){
 
 //		TID
   if (Debug()) cout << " start tid_run " << endl;
-      Int_t Res_tde = tde_new(m_tdeparm,tphit,tptrack,m_tpg_pad_plane);
+  Int_t Res_tde = tde_new(m_tdeparm,tphit,tptrack,m_tpg_pad_plane);
 //	   	      ================================================
-      if (Res_tde != kSTAFCV_OK) {cout << " Problem with tde_new.. " << endl;}
+  if (Res_tde != kSTAFCV_OK) {cout << " Problem with tde_new.. " << endl;}
   else {if (Debug()) cout << " finish tid_run " << endl;}
 
 
 //		TTE
-  if (g2t_tpc_hit && g2t_track) {
-    if (Debug()) cout << " start run_tte " << endl;
-//		If tte on, create evaluation tables
-    St_tte_mctrk  *mctrk   = new St_tte_mctrk("mctrk",maxNofTracks);
-    m_DataSet->Add(mctrk);
-    St_tte_eval *evaltrk   = new St_tte_eval("evaltrk",maxNofTracks);
-    m_DataSet->Add(evaltrk);
+  St_DataSet *geant = GetInputDS("geant");
+  if (geant) {
+    St_DataSetIter geantI(geant);
+    
+    St_g2t_track   *g2t_track    = (St_g2t_track  *) geantI("g2t_track");
+    St_g2t_tpc_hit *g2t_tpc_hit  = (St_g2t_tpc_hit *)geantI("g2t_tpc_hit");
+    if (g2t_tpc_hit && g2t_track) {
+      if (Debug()) cout << " start run_tte " << endl;
+      //		If tte on, create evaluation tables
+      St_tte_mctrk  *mctrk   = new St_tte_mctrk("mctrk",maxNofTracks);
+      m_DataSet->Add(mctrk);
+      St_tte_eval *evaltrk   = new St_tte_eval("evaltrk",maxNofTracks);
+      m_DataSet->Add(evaltrk);
 
-    Int_t Res_tte = tte(tptrack,tphit,
-			g2t_tpc_hit,g2t_track,
-			index,m_type,evaltrk,mctrk,m_tte_control);
+      Int_t Res_tte = tte(tptrack,tphit,
+			  g2t_tpc_hit,g2t_track,
+			  index,m_type,evaltrk,mctrk,m_tte_control);
 //		    ==============================================
     
-	if (Res_tte != kSTAFCV_OK) {cout << " Problem with tte.. " << endl;}
-    else {if (Debug()) cout << " finish run_tte " << endl;}
+      if (Res_tte != kSTAFCV_OK) {cout << " Problem with tte.. " << endl;}
+      else {if (Debug()) cout << " finish run_tte " << endl;}
+    }
   }
 
   MakeHistograms(); // tracking histograms
@@ -250,10 +256,10 @@ Int_t St_tpt_Maker::Make(){
    Int_t evno = 0;
    if (m_mkfinal) {
 
-  St_DataSet *raw = gStChain->DataSet("tpc_raw");
+     St_DataSet *raw = GetInputDS("TPC_DATA");
   if (raw) {
     St_DataSetIter nex(raw);
-    St_type_index *I1 = (St_type_index *) nex("TPC_DATA/IT1");
+    St_type_index *I1 = (St_type_index *) nex("IT1");
     type_index_st *ii = I1->GetTable();
     evno = ii->data_row;
      }
@@ -281,7 +287,7 @@ Int_t St_tpt_Maker::Make(){
     St_tcl_tphit  *n_hit = 0;
     St_tcl_tpcluster *n_clus  = 0;
     St_tcl_tphit_aux *n_hitau = 0;
-    St_DataSet *tpc_hits = gStChain->DataSet("tpc_hits");
+    St_DataSet *tpc_hits = GetInputDS("tpc_hits");
     if (tpc_hits) {
       St_DataSetIter tpc_data(tpc_hits);
       n_hit      = (St_tcl_tphit *) tpc_data["hits/tphit"];
@@ -329,7 +335,7 @@ Int_t St_tpt_Maker::Make(){
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.22 1999/03/14 00:23:38 perev Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.23 1999/03/17 02:02:58 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
