@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.cxx,v 1.6 2001/05/17 20:38:26 fisyak Exp $
+// $Id: StMagFMaker.cxx,v 1.7 2001/05/21 21:40:36 fisyak Exp $
 // $Log: StMagFMaker.cxx,v $
+// Revision 1.7  2001/05/21 21:40:36  fisyak
+// Merge geant and production mag. fields
+//
 // Revision 1.6  2001/05/17 20:38:26  fisyak
 // Move check for mag. scale factor into InitRun
 //
@@ -31,36 +34,57 @@
 //////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
 #include "StMagFMaker.h"
-#include "StChain.h"
-#include "TDataSetIter.h"
-#include "StMagF/StMagF.h"
+#include "StBFChain.h"
+#include "St_geant_Maker/St_geant_Maker.h"
 #include "tables/St_MagFactor_Table.h"
+#ifndef __CINT__
+#include "StarCallf77.h"
+#define    agdetp_new	 F77_NAME(agdetpnew,AGDETPNEW)
+#define    agdetp_add	 F77_NAME(agdetpadd,AGDETPADD)
+#define    mfldgeo	 F77_NAME(mfldgeo,MFLDGEO)
+R__EXTERN  "C" {
+ void type_of_call     agdetp_new (DEFCHARD DEFCHARL);
+ void type_of_call     agdetp_add (DEFCHARD, Float_t*, Int_t*  DEFCHARL);
+ void type_of_call     mfldgeo();
+}
+#endif
 
 ClassImp(StMagFMaker)
   
   //_____________________________________________________________________________
-StMagFMaker::StMagFMaker(const char *name):StMaker(name),fMagFactor(0),fMagF(0),fScale(1){}
+StMagFMaker::StMagFMaker(const char *name):StMaker(name),fMagFactor(0),fMagF(kFALSE),fScale(1){}
 //_____________________________________________________________________________
 StMagFMaker::~StMagFMaker(){}
 //_____________________________________________________________________________
 Int_t StMagFMaker::InitRun(Int_t RunNo){
-  if (!fMagFactor) {
-    TDataSet *RunLog = GetDataBase("RunLog");
-    fMagFactor = (St_MagFactor *) RunLog->Find("MagFactor"); assert(fMagFactor);
+  StBFChain *chain = (StBFChain *) GetChain();
+  if (chain) {
+    if (!chain->GetOption("NoFieldSet")) {
+      if (chain->GetOption("FieldON"))      fScale = 1.0;
+      if (chain->GetOption("FieldOff"))     fScale = 0.0;
+      if (chain->GetOption("HalfField"))    fScale = 0.5;     
+      if (chain->GetOption("ReverseField")) fScale = - fScale;
+    }
+    else {
+      if (!fMagFactor) {
+	TDataSet *RunLog = GetDataBase("RunLog");
+	fMagFactor = (St_MagFactor *) RunLog->Find("MagFactor"); assert(fMagFactor);
+      }
+      Float_t Scale = (*fMagFactor)[0].ScaleFactor;
+      if (Scale == fScale && fMagF) return kStOK;
+      fScale = Scale;
+    }
   }
-  Float_t Scale = (*fMagFactor)[0].ScaleFactor;
-  if (Scale == fScale && fMagF) return kStOK;
-  fScale = Scale;
-  if (fMagF) {
-    cout << "Reset STAR magnetic field with scale factor " << fScale << endl;
-    fMagF->SetFactor(fScale);
-    return kStOK;
-  }
-  if (!m_Mode) fMagF = new StMagFCM("Star Full Field",
-				    "$STAR/StarDb/StMagF/bfp112.map",
-				    kConMesh,fScale);
-  else         fMagF = new StMagFC("Star Constant Field","Constant Field",fScale);
-  cout << "Initialize STAR magnetic field with scale factor " << fScale << endl;
+  if (fMagF) cout << "Reset STAR magnetic field with scale factor " << fScale << endl;
+  else       cout << "Initialize STAR magnetic field with scale factor " << fScale << endl;
+  fMagF = kTRUE;
+  agdetp_new (PASSCHARD("MFLD") PASSCHARL("MFLD"));
+  Int_t One   = 1;
+  Float_t Three   = 3;
+  agdetp_add (PASSCHARD("MFLG(1).Version="),&Three,&One PASSCHARL("MFLG(1).Version="));
+  Float_t Field = 5*fScale;
+  agdetp_add (PASSCHARD("MFLG(1).Bfield="),&Field,&One PASSCHARL("MFLG(1).Bfield="));
+  mfldgeo();
   return kStOK;
 }
 //_____________________________________________________________________________

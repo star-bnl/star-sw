@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.202 2001/05/04 20:48:04 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.203 2001/05/21 21:40:23 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -10,7 +10,6 @@
 #include "StEvtHddr.h"
 #include "StChain.h"
 #include "St_XDFFile.h"
-#include "StMagF/StMagF.h"
 #include "St_geant_Maker/St_geant_Maker.h"
 #include "StEventMaker/StEventMaker.h"
 #include "StDbBroker/StDbBroker.h"
@@ -61,7 +60,8 @@ Bfc_st BFC[] = {
   {"drawDst"     ,""  ,"","xin,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                  ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
   {"C1default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits"    ,"","","Year 1 chain",kFALSE}, 
-  {"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt,emcY2" ,"","","Year 2 chain",kFALSE}, 
+  {"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt,emcY2"
+                                                                              ,"","","Year 2 chain",kFALSE}, 
   {"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt,emcY2"
                                                                          ,"","","Assymptotic chain",kFALSE}, 
   {"Cy1a"        ,""  ,"","y1a,C1default"                                ,"","","Turn on chain y1a",kFALSE},
@@ -75,7 +75,7 @@ Bfc_st BFC[] = {
   {"C2000"       ,""  ,"","y2000,C1default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"C2001"       ,""  ,"","y2001,C2default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"MDC4"        ,""  ,"","C2001,trs,srs,fss,rrs,big,GeantOut"      ,"","","Turn on chain for MDC4",kFALSE},
-  {"PostMDC4"    ,""  ,"","C2001,trs,sss,fss,rrs,big,GeantOut"      ,"","","Turn on Post MDC4 chain",kFALSE},
+  {"PostMDC4"    ,""  ,"","C2001,trs,sss,fss,rrs,big,GeantOut"     ,"","","Turn on Post MDC4 chain",kFALSE},
   {"ppMDC4"      ,""  ,"","pp,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,srs,rrs,big,GeantOut",
                                                                     "","","Turn on chain for ppMDC",kFALSE},
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
@@ -96,11 +96,10 @@ Bfc_st BFC[] = {
   {"fzin"        ,""  ,"","geant,Simu","" ,""                                 ,"read gstar fz-file",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
   {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
-  {"NoFieldSet"  ,""  ,"","-FieldOn,-FieldOff,-HalfField,-ReverseField,-magF" ,"","","No Field Set",kFALSE},
-  {"FieldOn"     ,""  ,"","NoFieldSet"                ,"StMagFC","StMagF" ,"Constant nominal field",kFALSE},
-  {"FieldOff"    ,""  ,"","NoFieldSet"                       ,"StMagFC","StMagF" ,"No Field option",kFALSE},
-  {"HalfField"   ,""  ,"","NoFieldSet"                      ,"StMagFC","StMagF","Half Field option",kFALSE},
-  {"ReverseField",""  ,"","NoFieldSet"                   ,"StMagFC","StMagF","Reverse Field option",kFALSE},
+  {"FieldOn"     ,""  ,"",""                                 ,"","StMagF" ,"Constant nominal field",kFALSE},
+  {"FieldOff"    ,""  ,"",""                                        ,"","StMagF" ,"No Field option",kFALSE},
+  {"HalfField"   ,""  ,"",""                                       ,"","StMagF","Half Field option",kFALSE},
+  {"ReverseField",""  ,"",""                                    ,"","StMagF","Reverse Field option",kFALSE},
   {"NoCintDb"    ,""  ,"",""                                   ,"","","Switch off standard Cint Db",kFALSE},
   {"NoCintCalDb" ,""  ,"",""                                      ,"","","Switch off Cint Calib Db",kFALSE},
   {"NoMySQLDb"   ,""  ,"",""                                           ,"","","Switch off MySQL Db",kFALSE},
@@ -130,6 +129,7 @@ Bfc_st BFC[] = {
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
   {"pp"          ,""  ,"","ppLPfind1,SpinSortA,ppLPprojectA"    ,"","","Use pp specific parameters",kFALSE},
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
+  {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -158,13 +158,14 @@ Bfc_st BFC[] = {
   {"SvtCL"       ,""  ,"","",""                                             ,"StSvtClassLibrary","",kFALSE},
   {"TbUtil"      ,""  ,"","sim_T,tpc_t,globT,SCL",""    ,"StTableUtilities","Load StTableUtilities",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
+  {"StEvent"     ,""  ,"","globT,SCL",""                                              ,"StEvent","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"in"          ,""  ,"","xin"                                               ,"","","Alias to xin",kFALSE},
   {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
   {"xdf2root"    ,""  ,"",""                                   ,"","xdf2root","Read XDF input file",kFALSE},
-  {"geant"       ,"geant","","NoFieldSet,geomT,gen_T,sim_T"
+  {"geant"       ,"geant","","geomT,gen_T,sim_T"
                                          ,"St_geant_Maker","geometry,St_g2t,St_geant_Maker","GEANT",kFALSE}, 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -185,7 +186,7 @@ Bfc_st BFC[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"magF"        ,"","","NoFieldSet,StDbT,db","StMagFMaker","StMagF"
+  {"magF"        ,"","","geant,StDbT,db","StMagFMaker","geometry,StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE}, 
@@ -215,13 +216,13 @@ Bfc_st BFC[] = {
   {"SvtSlowSim"  ,"SvtSlowSim","svtChain","SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
                                                   ,"StSvtSimulationMaker","StSvtSimulationMaker","",kFALSE},
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                                             ,"","","",kFALSE},
-  {"srs"         ,"svt_hits","svtChain","tls,Simu,SvtCL,-sss,-SvtSlowSim"
-                          ,"St_srs_Maker","St_tpc,St_svt,StEvent,StSvtClusterMaker,St_srs_Maker","",kFALSE},
+  {"srs"         ,"svt_hits","svtChain","tls,Simu,SvtCL,-sss,-SvtSlowSim,StEvent"
+                                  ,"St_srs_Maker","St_tpc,St_svt,StSvtClusterMaker,St_srs_Maker","",kFALSE},
   {"sls"     ,"","svtChain","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
   {"spa"     ,"","svtChain","tls,Simu,SvtCL","St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
   {"svt_daq"     ,"svt_raw","svtChain","SvtCL"                  ,"StSvtDaqMaker","StSvtDaqMaker","",kFALSE},
   {"SvtSeqAdj"   ,"SvtSeqAdj","svtChain","SvtCL"          ,"StSvtSeqAdjMaker","StSvtSeqAdjMaker","",kFALSE},
-  {"SvtClu"      ,"SvtClu","svtChain","SvtCL"   ,"StSvtClusterMaker","StEvent,StSvtClusterMaker","",kFALSE},  
+  {"SvtClu"      ,"SvtClu","svtChain","StEvent,SvtCL"   ,"StSvtClusterMaker","StSvtClusterMaker","",kFALSE},  
   {"SvtCluAnal" ,"SvtCluAnal","svtChain","SvtCL","StSvtClusterAnalysisMaker","StSvtClusterMaker","",kFALSE},  
   {"SvtHit"      ,"svt_hits","svtChain","SvtCL"             ,"StSvtHitMaker","StSvtClusterMaker","",kFALSE},  
   {"SvtVtx"      ,"SvtVtx","SvtChain",""           ,"StSvtVertexFinderMaker","StSvtClusterMaker","",kFALSE},
@@ -236,7 +237,7 @@ Bfc_st BFC[] = {
                                   ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,StFtpcClusterMaker","",kFALSE},
   {"fpt"         ,"ftpc_tracks","ftpcChain","SCL"         ,"StFtpcTrackMaker","StFtpcTrackMaker","",kFALSE},
   {"emc"    ,"emcChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl"      ,"StMaker","StChain","",kFALSE},
-  {"ems","emc_raw","emcChain","geant,emc_T,EmcUtil","St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
+  {"ems","emc_raw","emcChain","geant,emc_T,StEvent,EmcUtil","St_ems_Maker","St_emc,St_ems_Maker","",kFALSE},
   {"emh" ,"emc_hits","emcChain","geant,emc_T,tpc_T,EmcUtil","St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
   {"emcY2"    ,"emcY2","","geant,emc_T,tpc_T,db,calib,emcSim,PreEcl,epc"      ,"StMaker","StChain",
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
@@ -251,7 +252,7 @@ Bfc_st BFC[] = {
   {"Primary"     ,"primary","globalChain","SCL,globT,tls"
                                                ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"V0"          ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Kink"      ,"kink","globalChain","SCL,globT,tls","StKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Kink"   ,"kink","globalChain","SCL,globT,tls","StKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Xi"          ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Fglobal"    ,"fglobal","globalChain","SCL,tables,tls"
                                                    ,"StFtpcGlobalMaker","St_global,St_dst_Maker","",kFALSE},
@@ -261,7 +262,7 @@ Bfc_st BFC[] = {
   {"dst"         ,"dst","globalChain","dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT","St_dst_Maker" 
                                                                 ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"dEdx"       ,"dEdx","globalChain","globT,tpcDb,TbUtil"          ,"StdEdxMaker","StdEdxMaker","",kFALSE},
-  {"Event"       ,"","","globT,SCL"                       ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
+  {"Event"       ,"","","StEvent"                                 ,"StEventMaker","StEventMaker","",kFALSE},
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",
                                          "StPreEclMaker,StEmcSimulatorMaker,St_emc,St_ems_Maker","",kFALSE},
@@ -279,13 +280,13 @@ Bfc_st BFC[] = {
   {"RichSpectra" ,"","",""                            ,"StRichSpectraMaker","StRichSpectraMaker","",kFALSE},
   {"TagsChain"   ,"TagsChain","",""                                         ,"StMaker","StChain","",kFALSE},
   {"TpcTag"      ,"","TagsChain",""                             ,"StTpcTagMaker","StTpcTagMaker","",kFALSE},
-  {"Flow"        ,"","TagsChain","Event"   ,"StFlowMaker","StEvent,StEventUtilities,StFlowMaker","",kFALSE},
-  {"FlowTag"     ,"","TagsChain","Event,Flow"                 ,"StFlowTagMaker","StFlowTagMaker","",kFALSE},
-  {"FlowAnalysis","","TagsChain","Event,Flow"       ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
-  {"StrangeTags" ,"","TagsChain","Event"              ,"StStrangeTagsMaker","StStrangeTagsMaker","",kFALSE},
-  {"SpectraTag"  ,"","TagsChain","Event"                ,"StSpectraTagMaker","StSpectraTagMaker","",kFALSE},
-  {"EbyeScaTags" ,"","TagsChain","Event"              ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
-  {"PCollTag"    ,"","TagsChain","Event"                    ,"StPCollTagMaker","StPCollTagMaker","",kFALSE},
+  {"Flow"        ,"","TagsChain","StEvent"         ,"StFlowMaker","StEventUtilities,StFlowMaker","",kFALSE},
+  {"FlowTag"     ,"","TagsChain","StEvent,Flow"               ,"StFlowTagMaker","StFlowTagMaker","",kFALSE},
+  {"FlowAnalysis","","TagsChain","StEvent,Flow"     ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
+  {"StrangeTags" ,"","TagsChain","StEvent"            ,"StStrangeTagsMaker","StStrangeTagsMaker","",kFALSE},
+  {"SpectraTag"  ,"","TagsChain","StEvent"              ,"StSpectraTagMaker","StSpectraTagMaker","",kFALSE},
+  {"EbyeScaTags" ,"","TagsChain","StEvent"            ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
+  {"PCollTag"    ,"","TagsChain","StEvent"                  ,"StPCollTagMaker","StPCollTagMaker","",kFALSE},
   {"tags"        ,"","TagsChain",
                  "TagsChain,globT,Event,FlowTag,StrangeTags,SpectraTag,EbyeScaTags,TpcTag,PCollTag"    
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
@@ -318,7 +319,6 @@ class St_db_Maker;
 static St_db_Maker *dbMk    = 0; 
 static St_db_Maker *calibMk = 0; 
 class StTreeMaker;    
-static Bool_t kMagF = kFALSE; 
 ClassImp(StBFChain)
 
 //_____________________________________________________________________________
@@ -391,16 +391,6 @@ Int_t StBFChain::Instantiate()
 	if (strlen(fBFC[i].Chain) > 0) {
 	  StMaker *chain = GetMaker(fBFC[i].Chain);
 	  if (chain) saveMk = chain->cd();
-	}
-	if (maker == "StMagFC" && !kMagF) {
-	  Float_t Scale = 1.0;
-	  TString FieldName("STAR Normal field");
-	  if (GetOption("FieldOff"))     {Scale = 0.00002; FieldName = "STAR no field";}
-	  if (GetOption("HalfField"))    {Scale = 0.5;     FieldName = "STAR Normal field";}
-	  if (GetOption("ReverseField")) {Scale = - Scale; FieldName += " Reverse";}
-	  new StMagFC("field",FieldName.Data(),Scale);
-	  kMagF = kTRUE;
-	  continue;
 	}
 	if (maker == "St_db_Maker"){
 	  St_db_Maker *mk = 0;
@@ -844,15 +834,29 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
     if (GetOption("gstar"))  fFileOut = new TString("gtrack.root");
     else {
       if (fInFile) {
-	fFileOut = new TString(gSystem->BaseName(fInFile->Data()));
-	fFileOut->ReplaceAll("*","");
-	fFileOut->ReplaceAll("..",".");
-	fFileOut->ReplaceAll(".daq","");
-	fFileOut->ReplaceAll(".fzd","");
-	fFileOut->ReplaceAll(".fz","");
-	fFileOut->ReplaceAll(".xdf","");
-	fFileOut->Strip();
-	fFileOut->Append(".root");
+	if (GetOption("fzin")) {
+	  TObjArray words;
+	  ParseString(*fInFile,words);
+	  TIter nextL(&words);
+	  TObjString *word = 0;
+	  while ((word = (TObjString *) nextL())) {
+	    if (word->GetString().Contains(".fz")) {
+	      fFileOut = new TString(gSystem->BaseName(word->GetString().Data()));
+	      break;
+	    }
+	  }
+	}
+	else fFileOut = new TString(gSystem->BaseName(fInFile->Data()));
+	if (  fFileOut) {
+	  fFileOut->ReplaceAll("*","");
+	  fFileOut->ReplaceAll("..",".");
+	  fFileOut->ReplaceAll(".daq","");
+	  fFileOut->ReplaceAll(".fzd","");
+	  fFileOut->ReplaceAll(".fz","");
+	  fFileOut->ReplaceAll(".xdf","");
+	  fFileOut->Strip();
+	  fFileOut->Append(".root");
+	}
       }
     }
   }
@@ -903,14 +907,25 @@ void StBFChain::SetGeantOptions(){
 	      geantMk->Do("mode g2tm prin 1;");
 	      //  geantMk->Do("next;");
 	      //  geantMk->Do("dcut cave z 1 10 10 0.03 0.03;");
-	      if (GetOption("Debug") ||GetOption("Debug2")) geantMk->Do("debug on;");
-	      geantMk->Do("swit 2 3;");
+	      if (GetOption("Debug") ||GetOption("Debug2")) {
+		geantMk->Do("debug on;");
+		geantMk->Do("swit 2 3;");
+	      }
 	    }
     }
     else {
-      if (fInFile && geantMk->SetInputFile(fInFile->Data()) > kStOK) {
-	printf ("File %s cannot be opened. Exit! \n",fInFile->Data());
-	gSystem->Exit(1);
+      if (fInFile) {
+	TObjArray words;
+	ParseString(*fInFile,words);
+	TIter nextL(&words);
+	TObjString *word = (TObjString *) nextL();
+	if (word->GetString().Contains(".fz")) {
+	  if (geantMk->SetInputFile(fInFile->Data()) > kStOK) {
+	    printf ("File %s cannot be opened. Exit! \n",fInFile->Data());
+	    gSystem->Exit(1);
+	  }
+	}
+	else geantMk->Do(fInFile->Data());
       }
     }
   }
