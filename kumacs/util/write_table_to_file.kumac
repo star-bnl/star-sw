@@ -32,12 +32,17 @@ MACRO close alias
 macro/global/import *
 
  cd /dui
-
+ 
+ message 'write_table_to_file: close and drop ' [alias]
+ 
  dio/stream/close [alias]
-  oid = staf_result(1); 
-  soc/deleteoid [oid] 
- cd /dui
+ soc/object/oid [alias]
+ oid = staf_result(1)
+ soc/deleteoid [oid]
 
+ cd /dui  
+ 
+ 
 return
 
 *********************************************************************
