@@ -246,7 +246,7 @@ CSMStatusUtils::saveAbbreviatedStatusTablesToASCII(TString directory) {
       if ( firstone && (statuscounter[i]/mRunStatusMapPtr->size() > 0.1 ) && mRunStatusMapPtr->size() > 3) {
 //account for the fake zero
         
-cout << "statcou is " << statuscounter[i] << " for channel " << i << " and size is " << mRunStatusMapPtr->size() << endl;
+//cout << "statcou is " << statuscounter[i] << " for channel " << i << " and size is " << mRunStatusMapPtr->size() << endl;
         if(totalStatusVector[i] & fakeZero) ofs << i << "\t" << "0" << endl;    
         else ofs << i << "\t" << totalStatusVector[i] << endl;        
 //otherwise, only write down the status if this is the first run,

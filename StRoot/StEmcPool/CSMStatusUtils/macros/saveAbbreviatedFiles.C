@@ -1,4 +1,4 @@
-void saveAbbreviatedFiles(const Char_t *dir="/star/u/relyea/star/bemc/abemc") {
+void saveAbbreviatedFiles(const Char_t *dir="/star/u/relyea/star/bemc/abemc/ALLRUNS") {
   //
   // load shared libs
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
