@@ -415,7 +415,8 @@ void StiMaker::setSeedFinderType(SeedFinderType val)
 	cout <<"StiMaker::setSeedFinderType(). type==kEvaluable"<<endl;
     }
     else {
-	cout <<"StiMaker::setSeedFinderType(). ERROR:\tUnkown SeedFinderType: "<<static_cast<int>(val)<<endl;
+	cout <<"StiMaker::setSeedFinderType(). ERROR:\t"
+	     <<"Unkown SeedFinderType: "<<static_cast<int>(val)<<endl;
 	mSeedFinderType=kUndefined;
     }
 }
