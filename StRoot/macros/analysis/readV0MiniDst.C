@@ -1,7 +1,10 @@
 // Using StV0MiniDstMaker to read a v0 mini-DST
 // Peter G. Jones, University of Birmingham, p.g.jones@bham.ac.uk
-// $Id: readV0MiniDst.C,v 1.2 1999/07/30 15:07:31 genevb Exp $
+// $Id: readV0MiniDst.C,v 1.3 1999/08/03 02:37:54 genevb Exp $
 // $Log: readV0MiniDst.C,v $
+// Revision 1.3  1999/08/03 02:37:54  genevb
+// StHFillObject now fills multiple histos simultaneously
+//
 // Revision 1.2  1999/07/30 15:07:31  genevb
 // Take advantage of StHFillObject inheritance
 //
@@ -68,10 +71,9 @@ void run() {
   clock.Start(kTRUE);
 
   // Loop over collection and fill histograms
-  collection->Draw("mX:position[0]");
-  collection->Draw("mY:position[1]");
-  collection->Draw("mZ:position[2]");
-  collection->Draw("mMassLambda:massLambda");
+  TString a1 = "mX:position[0] mY:position[1] mZ:position[2]";
+  a1+=" mMassLambda:massLambda";
+  collection->Draw(a1.Data());
   
 
   // Stop the stopwatch
