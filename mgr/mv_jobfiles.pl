@@ -7,11 +7,8 @@
 #  L.Didenko
 ###############################################################################
 
-#my $dir_arch = "/star/u2e/starreco/mdc3/requests/tfs/archive";
-#my $dir_job = "/star/u2e/starreco/mdc3/requests/tfs/jobfiles";
-
-my $dir_arch = "/star/u2e/starreco/P00hi/requests/daq/archive";
-my $dir_job = "/star/u2e/starreco/P00hi/requests/daq/jobfiles";
+my $dir_arch = "/star/u/starreco/MDC4/requests/trs/archive";
+my $dir_job = "/star/u/starreco/MDC4/requests/trs/jobfiles";
 
 my @maifile;
 my $mail_line;
@@ -39,7 +36,7 @@ foreach my $int ( $mon,$mday ){
 }
 
 $outname = "mail" . "_" .$thisday . "_" . "out";
-$outfile = "/star/u2e/starreco/" . $outname;
+$outfile = "/star/u/starreco/" . $outname;
 #print $outfile, "\n";
 
 open (MAILFILE, $outfile ) or die "cannot open $outfile: $!\n";
