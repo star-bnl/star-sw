@@ -1,0 +1,38 @@
+
+*	msg.ex3  --  msg example #3
+
+*	Application-specified values:
+*	<Subroutine Name>     CHARACTER*(*)
+*	<Message Line Count>  INTEGER*4
+
+*	A string for building multiple-line messages:
+	INTEGER Max_lines_P
+	PARAMETER (Max_lines_P = <Message Line Count>)
+	CHARACTER*132 M132(Max_lines_P)                   !"132" may be changed as needed.
+
+*	msg fast-reference ID for message:
+	INTEGER IDI1
+	SAVE IDI1    !Keep it static, or it does no good.
+	LOGICAL MSG_Enabled
+
+	DATA IDI1 / 0 /   !Always initialize fast-reference IDs to zero.
+
+
+*	Here's how to generate a message with a WRITE statement, and
+*	with the WRITE executing only if the message is enabled:
+
+*	  Note:  Use Message inside of a MSG_Enabled block, since
+*	  MSG_Enabled performs msg accounting only if it returns false.
+*	  If the prefix '<Subroutine Name>-T1' is undefined when this
+*	  call occurs, it gets defined, and is initialized to be Active,
+*	  unless all messages have been disabled with a wildcard-name.
+
+	IF (MSG_Enabled( '<Subroutine Name>-T1', IDI1 ) ) THEN
+*	  This write is strictly an example -- it's a two-line message:
+	  WRITE( M132, 101 ) Junque, Stuff, Nonsense
+	  CALL Message( M132, 2, IDI1 ) !2 line message.
+	END IF
+
+101	FORMAT('<Subroutine Name>-T1  Junque:  'I11'  Stuff:'E15.8 /
+     1	       '                      Nonsense:'I11 )
+
