@@ -7,14 +7,9 @@ $build =~ s/\\/\//g;# print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
 (my $Dir = $ObjDir) =~ s/$build\///g; #print "Dir = $Dir\n";
 $ObjDir = "#" . $ObjDir; #print "ObjDir = $ObjDir\n";
 (my $obj_dir = $ObjDir) =~ s/^\#//g;# print "obj_dir = $obj_dir\n";
-#my @St_base  = ("#lib/St_DataSet.h","#include/St_DataSetIter.h","#include/StMaker.h","#include/SystemOfUnits.");
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my @Repo = Repository_List; #print "Repositories = |@Repo|\n";
 my $pkg  = basename($Dir);# print "Run cons in $Dir for $PKG\n";
-#my @St_base  = ("#include/St_DataSet.h","#include/St_DataSetIter.h","#include/StMaker.h","#include/SystemOfUnits.");
-#my @base = ("St_base","StarClassLibrary","StChain");
-#my @St_base = ();
-#foreach my $i (@base) {next if "$i" eq "$pkg"; push @St_base, $LIB . "/" . $i . "." .  $env->{SUFSOLIB};}
 my $PKG = $pkg;
 my @idlML    = find_idlM($Dir);   #  $i = 0; for my $s (@idlM) {print "i=",$i++," idlM = ",$s,"\n";}
 my @srcL     = find_sources($Dir);#  my $i=0; for my $s (@src) {print "i=",$i++," src = ",$s,"\n";}
@@ -41,7 +36,6 @@ my $LIBS  = $env->{LIBS};
 my $LIBPATH = $env->{LIBPATH};
 if ($pkg =~ /^StDb/) {
   $LIBPATH .= ":/opt/star/lib/mysql";# print "LIBPATH = $LIBPATH\n";
-  #  $LIBS .= " -L/opt/star/lib/mysql/ -lmysqlclient";
   $LIBS .= " -lmysqlclient";
 }
 if ($pkg =~ /^pyth$/){
