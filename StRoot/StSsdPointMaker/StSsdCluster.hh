@@ -1,3 +1,10 @@
+// $Id: StSsdCluster.hh,v 1.2 2005/03/18 14:24:20 lmartin Exp $
+//
+// $Log: StSsdCluster.hh,v $
+// Revision 1.2  2005/03/18 14:24:20  lmartin
+// missing CVS header added
+//
+
 #ifndef STSSDCLUSTER_HH
 #define STSSDCLUSTER_HH
 #include "StSsdStrip.hh"

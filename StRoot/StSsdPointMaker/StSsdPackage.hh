@@ -1,3 +1,10 @@
+// $Id: StSsdPackage.hh,v 1.2 2005/03/18 14:21:44 lmartin Exp $
+//
+// $Log: StSsdPackage.hh,v $
+// Revision 1.2  2005/03/18 14:21:44  lmartin
+// missing CVS header added
+//
+
 #ifndef STSSDPACKAGE_HH
 #define STSSDPACKAGE_HH
 

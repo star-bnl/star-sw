@@ -1,3 +1,10 @@
+// $Id: StSsdClusterList.cc,v 1.2 2005/03/18 14:23:46 lmartin Exp $
+//
+// $Log: StSsdClusterList.cc,v $
+// Revision 1.2  2005/03/18 14:23:46  lmartin
+// missing CVS header added
+//
+
 #include "StSsdClusterList.hh"
 #include "StSsdClusterControl.h"
 #include "StSsdCluster.hh"

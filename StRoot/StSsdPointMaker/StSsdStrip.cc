@@ -1,3 +1,10 @@
+// $Id: StSsdStrip.cc,v 1.6 2005/03/18 14:15:51 lmartin Exp $
+//
+// $Log: StSsdStrip.cc,v $
+// Revision 1.6  2005/03/18 14:15:51  lmartin
+// missing CVS header added
+//
+
 #include "StSsdStrip.hh"
 
 StSsdStrip::StSsdStrip(int rNStrip, int rDigitSig, float rSigma, int rPedestal, int *rIdMcHit)

@@ -1,3 +1,10 @@
+// $Id: StSsdPoint.cc,v 1.2 2005/03/18 14:19:44 lmartin Exp $
+//
+// $Log: StSsdPoint.cc,v $
+// Revision 1.2  2005/03/18 14:19:44  lmartin
+// missing CVS header added
+//
+
 #include "StSsdPoint.hh"
 
 StSsdPoint::StSsdPoint(int rNPoint, int rNWafer, int rNumPackage, int rKindPackage)

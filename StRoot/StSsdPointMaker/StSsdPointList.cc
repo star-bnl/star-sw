@@ -1,3 +1,10 @@
+// $Id: StSsdPointList.cc,v 1.2 2005/03/18 14:19:05 lmartin Exp $
+//
+// $Log: StSsdPointList.cc,v $
+// Revision 1.2  2005/03/18 14:19:05  lmartin
+// missing CVS header added
+//
+
 #include "StSsdPointList.hh"
 #include "StSsdPoint.hh"
 

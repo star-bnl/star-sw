@@ -1,3 +1,10 @@
+// $Id: StSsdDynamicControl.h,v 1.4 2005/03/18 14:22:40 lmartin Exp $
+//
+// $Log: StSsdDynamicControl.h,v $
+// Revision 1.4  2005/03/18 14:22:40  lmartin
+// missing CVS header added
+//
+
 /*!
  * \class StSsdDynamicControl
  * \author B.Hippolyte, C.Suire

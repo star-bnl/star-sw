@@ -1,3 +1,10 @@
+// $Id: StSsdDynamicControl.cxx,v 1.4 2005/03/18 14:22:40 lmartin Exp $
+//
+// $Log: StSsdDynamicControl.cxx,v $
+// Revision 1.4  2005/03/18 14:22:40  lmartin
+// missing CVS header added
+//
+
 #include <Stiostream.h>
 #include "StSsdDynamicControl.h"
 #include "StMessMgr.h"

@@ -1,3 +1,10 @@
+// $Id: StSsdPackageList.cc,v 1.2 2005/03/18 14:20:21 lmartin Exp $
+//
+// $Log: StSsdPackageList.cc,v $
+// Revision 1.2  2005/03/18 14:20:21  lmartin
+// missing CVS header added
+//
+
 #include "StSsdPackageList.hh"
 #include "StSsdPackage.hh"
 
