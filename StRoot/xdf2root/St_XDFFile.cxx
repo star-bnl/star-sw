@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.23 1999/01/02 21:28:57 fine Exp $ 
+// $Id: St_XDFFile.cxx,v 1.24 1999/01/21 00:21:41 fine Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.24  1999/01/21 00:21:41  fine
+// Some print statement have been introduced
+//
 // Revision 1.23  1999/01/02 21:28:57  fine
 // St_XDFFile::MakeDataSet(DS_DATASET_T *ds): some protection against of the "wrong" tables
 //
@@ -311,7 +314,6 @@ St_DataSet *St_XDFFile::NextEventGet()
  } else 
    return 0;
 }
-#if 1
 //______________________________________________________________________________
 St_DataSet *St_XDFFile::NextEventList()
 {
@@ -330,7 +332,8 @@ St_DataSet *St_XDFFile::NextEventList()
  // It is the calling method responsibility to delete the object created with
  // this method to avoid any memory leak
  //
-
+ return 0;
+#if 0
  fMethodName = "NextEvent()";
  // printf("%s \n",fMethodName);
  if (!fFile) return 0;
@@ -352,8 +355,8 @@ St_DataSet *St_XDFFile::NextEventList()
    return set;
  } else 
    return 0;
-}
 #endif
+}
 //______________________________________________________________________________
 St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
 {
@@ -366,8 +369,8 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
  //  from DS_DATASET_T *ds C-structure
  //
  // This method moves the pointers of the STAF tables from 
- // DS_DATASET_T *ds into St_Table objects it creates. 
- // So NO real copy of the C-strucutre is performed. 
+ // DS_DATASET_T *ds into St_Table objects it is creating. 
+ // So NO real copy of the C-structure is performed. 
  // This means the original DS_DATASET_T *ds can not be used 
  // for the second time since it has no useful information anymore.
  //
@@ -427,7 +430,7 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
            table->Print();
            fprintf(stderr," -------------------------------\n\n");
          }
-         printf(" ** Error ** This table has been discarded !\n");
+         fprintf(stderr," ** Error ** This table has been discarded !\n");
          SafeDelete(table);
         }
       }
@@ -473,8 +476,8 @@ DS_DATASET_T *St_XDFFile::MakeDataSet(St_DataSet *dataset)
   DS_DATASET_T *ds=0;
   St_Table *ta = (St_Table *)dataset->Data();
   if (ta) {
-    Char_t tablespec[1000];
-    if(!dsNewTable(&ds,(Char_t *)ta->GetName(),ta->Print(tablespec,1000), 
+    Char_t tablespec[2000];
+    if(!dsNewTable(&ds,(Char_t *)ta->GetName(),ta->Print(tablespec,2000), 
                        ta->GetNRows(), ta->GetArray())) {  
         printf("MakeDataSet. Error, can not create table \"%s\"\n %s \n",ta->GetName(), tablespec);
         return 0;
