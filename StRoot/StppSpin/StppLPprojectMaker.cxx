@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: StppLPprojectMaker.cxx,v 1.6 2001/04/27 20:50:45 balewski Exp $
+// $Id: StppLPprojectMaker.cxx,v 1.7 2001/05/04 20:29:36 balewski Exp $
 // $Log: StppLPprojectMaker.cxx,v $
+// Revision 1.7  2001/05/04 20:29:36  balewski
+// *** empty log message ***
+//
 // Revision 1.6  2001/04/27 20:50:45  balewski
 // *** empty log message ***
 //
@@ -123,6 +126,10 @@ Int_t StppLPprojectMaker::Make(){
 
  //................................................
  hst[0]->Fill(my->pt); // all input events 
+ if(fabs(my->pt-0.5)<0.5 )hst[5]->Fill(my->psi);
+ if(fabs(my->pt-1.5)<0.5 )hst[6]->Fill(my->psi);
+ if(fabs(my->pt-2.5)<0.5 )hst[7]->Fill(my->psi);
+ if(fabs(my->pt-3.5)<0.5 )hst[8]->Fill(my->psi);
 
  if(m_Mode==1) {// applay cuts  !!!!!!!!!!!!!!!!!!!!!!!!!!!
    if(my->pt>10. ) return kStOK;// disqualify events with too high rLP PT
