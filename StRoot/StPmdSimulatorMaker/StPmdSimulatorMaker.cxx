@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdSimulatorMaker.cxx,v 1.2 2002/09/05 06:21:05 subhasis Exp $
+ * $Id: StPmdSimulatorMaker.cxx,v 1.3 2002/09/09 11:39:08 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  *         Premomoy Ghosh
  ***************************************************************
@@ -9,6 +9,9 @@
  *
  ****************************************************************
  * $Log: StPmdSimulatorMaker.cxx,v $
+ * Revision 1.3  2002/09/09 11:39:08  subhasis
+ * warning removed
+ *
  * Revision 1.2  2002/09/05 06:21:05  subhasis
  * Calibration and readout resolution added
  *
@@ -341,7 +344,7 @@ void StPmdSimulatorMaker::calAdc(StPmdDetector* pdet,Int_t id){
     for(Int_t im=0; im<nmh; im++)
       {
 	Float_t rawadc=0.;
-	Int_t ADC=0.;
+	Int_t ADC=0;
 	spmcl = (StPmdHit*)next();
 	if(spmcl){
 	  Float_t rawedep=spmcl->Edep();         
