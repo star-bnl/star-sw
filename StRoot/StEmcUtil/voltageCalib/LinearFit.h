@@ -1,7 +1,7 @@
 #include <map>
 #include <stdexcept>
 #include <string>
-
+#include <math.h>
 template<typename Number>
 class LinearFit
 {
