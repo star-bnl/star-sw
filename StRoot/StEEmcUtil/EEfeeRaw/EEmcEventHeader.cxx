@@ -1,5 +1,8 @@
-// $Id: EEmcEventHeader.cxx,v 1.5 2003/06/03 02:40:02 zolnie Exp $ 
+// $Id: EEmcEventHeader.cxx,v 1.6 2003/06/03 02:41:03 zolnie Exp $ 
 // $Log: EEmcEventHeader.cxx,v $
+// Revision 1.6  2003/06/03 02:41:03  zolnie
+// *** empty log message ***
+//
 // Revision 1.5  2003/06/03 02:40:02  zolnie
 // added run number
 //
@@ -69,6 +72,7 @@ void EEmcEventHeader :: clear() {
 //--------------------------------------------------
 void EEmcEventHeader :: print(FILE *fd) const{
   fprintf(fd,"EEmcEventHeader:\n");
+  fprintf(fd,"\trun number   : %-6d \n",mRunNumber);
   fprintf(fd,"\tevent number : %-6d (0x%06x)\n",mEventNumber,mEventNumber);
   fprintf(fd,"\ttoken        : %-6d (0x%03x)\n",mToken      ,mToken);
   fprintf(fd,"\ttime stamp   : %ld / %s",mTimeStamp,
