@@ -1,10 +1,13 @@
 /***************************************************************
- * $Id: StRichDrawableTPad.cxx,v 1.4 2000/05/17 22:18:40 lasiuk Exp $
+ * $Id: StRichDrawableTPad.cxx,v 1.5 2000/06/16 02:01:32 lasiuk Exp $
  *
  * Description:
  *
  ***************************************************************
  * $Log: StRichDrawableTPad.cxx,v $
+ * Revision 1.5  2000/06/16 02:01:32  lasiuk
+ * cast for integer ADC for drawing
+ *
  * Revision 1.4  2000/05/17 22:18:40  lasiuk
  * use charge() instead of adc()/amp()
  *
@@ -30,8 +33,10 @@ StRichPadMonitorText* StRichDrawableTPad::mText = 0;
 StRichDrawableTPad::StRichDrawableTPad() {/*nopt*/}
 
 StRichDrawableTPad::StRichDrawableTPad(double xl, double yl, double xu, double yu, const StRichSinglePixel* pix)
-    : TBox(xl,yl,xu,yu), mPad(pix->pad()), mRow(pix->row()), mAdc(pix->charge())
-{/* nopt */}
+    : TBox(xl,yl,xu,yu), mPad(pix->pad()), mRow(pix->row())
+{
+    mAdc=static_cast<int>(pix->charge());
+}
 
 StRichDrawableTPad::StRichDrawableTPad(double xl, double yl, double xu, double yu, int row, int pad, int adc)
     : TBox(xl,yl,xu,yu), mPad(pad), mRow(row), mAdc(adc) {/* nopt */}
