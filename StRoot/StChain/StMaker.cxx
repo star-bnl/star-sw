@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.36 1999/05/07 15:46:10 perev Exp $
+// $Id: StMaker.cxx,v 1.37 1999/05/07 20:51:31 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.37  1999/05/07 20:51:31  perev
+// AddData bug fix
+//
 // Revision 1.36  1999/05/07 15:46:10  perev
 // Added test for the same object into AddObj
 //
@@ -95,7 +98,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.36 1999/05/07 15:46:10 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.37 1999/05/07 20:51:31 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -190,7 +193,7 @@ St_DataSet *StMaker::AddData(St_DataSet *ds, const char* dir)
   St_DataSet *set = Find(dir);
   if (!set) { // No dir, make it
     set = new St_ObjectSet(dir); Add(set);}
-  if (ds) return set;
+  if (!ds) return set;
   TList *tl = set->GetList();
   if (!tl || !tl->FindObject(ds)) set->Add(ds);
   return set;
