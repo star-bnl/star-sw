@@ -1,5 +1,8 @@
-* $Id: tde_new.F,v 1.2 1998/01/27 01:54:47 fisyak Exp $
+* $Id: tde_new.F,v 1.3 1998/06/26 13:42:42 ogilvie Exp $
 * $Log: tde_new.F,v $
+* Revision 1.3  1998/06/26 13:42:42  ogilvie
+* adding landau fit option
+*
 * Revision 1.2  1998/01/27 01:54:47  fisyak
 * Split sources
 *
@@ -42,11 +45,18 @@ C-----------------------------------------------------------------------
       INTEGER iret
       INTEGER i,l,itrack,j,irow,isect,tgc_row_par,cros,k,last
       INTEGER imsg1, imsg2, imsg3,iret1,iret2,flag,nde,ndemax
-      INTEGER nlocmax,nloctrc
+      INTEGER nlocmax,nloctrc,nde_orig,nde_trunc
       REAL    x1,y1,xc,yc,radius,psic,cosl
       REAL    xa,xb,ya,yb,a,b,bi,bo,ai,ao,ds,half_pad
       REAL    bconv,rowtmp
 C
+c     variables for maximumum likeihood
+c
+      REAL hxmin,hxmax,hxamp
+      INTEGER hhid, hnbin
+      REAL hparam(3),hstep(3),hpmin(3),hpmax(3),hsig(3),hchi2
+
+c
       PARAMETER (ndemax=1000)
       PARAMETER (nlocmax=400000)
       PARAMETER  (nloctrc=10000)
@@ -58,6 +68,8 @@ c
 c      DATA    dtorad /0.0174532925/
 c      DATA    cpi /3.14159265/
       DATA    imsg1 /0/, imsg2 /0/, imsg3 /0/
+
+      EXTERNAL landau2
 C-----------------------------------------------------------------------
 
 *      call message('TDE_DEDX-I: Execution started',1,imsg1)
@@ -95,6 +107,16 @@ C Abort if there are too many TPC tracks to work with
          tde_new=STAFCV_BAD
          return
       endif
+c
+c as a test for the likelihood method
+c book a histigram, fill it, fit, then delete
+c if this works, find a more efficient way later
+c C. Ogilvie June 1998
+c
+c to run this option use
+c      tdpar(1).debug(2)=2
+c      tdpar(1).truncopt=4
+c      tdpar(1).truncfact=0.0
 
 
 C Sort the hit array according to the track number
@@ -113,8 +135,6 @@ C       and do some more initialisation for
            track(i).dedx(1) = 0.0
            track(i).dedx(2) = 0.0
            track(i).ndedx   = 0
-           track(i).cov(1)  = 0.0
-           track(i).cov(2)  = 0.0
       end do
 
 C Loop over tracks and calculate average de/dx for each point
@@ -151,13 +171,18 @@ C        and average charge
 C
 C        tdpar.truncopt=1   truncate tdpar.debug(1) points 
 C                            with larger dE/dx
+C        tdpar.truncopt=2   use all dedx points
 C        tdpar.truncopt=4   truncate P% of points with larger dE/dx
 C
 C        tdpar.debug(2)=0   calculate dE/dx=(sum of q)/(sum of s)
 C
 C        tdpar.debug(2)=1   calculate dE/dx=(sum of q/s)/(# of pnts)
+c     
+c        tdpar.debug(2)=2   calculate dE/dx as maximum likelihood
 C
 C        tdpar.usemerge=1   skipp  point flagged as merged 
+c                           implemented as default, with no
+c                           option yet to include merged
 C
 C        if row less than tdpar.minrow skipp the point
 C        options based on Jeff Mitchell's 
@@ -215,16 +240,23 @@ c
      >                  (loc_hit(l)).x,
      >                   hit(loc_hit(l)).y,xb,yb)
                endif
+
+               
                if(iret1.eq.0.and.iret2.eq.0) then
                   ds=radius*2.0*
      >            asin(0.5*sqrt((xa-xb)**2+(ya-yb)**2)
      >            /radius)*cosl
                   hit(loc_hit(l)).dq=ds
-                  if(nde.lt.ndemax) then
-                  nde=nde+1
-                  dedx(nde).length=ds
-                  dedx(nde).charge=hit(loc_hit(l)).q
-                  dedx(nde).adedx=dedx(nde).charge/ds
+c
+c check on quality of hit before including it into dedx
+c but currently (June 98) merged hits are filtered out before
+c they reach tde_new
+c
+                  if ((hit(loc_hit(l)).flag.eq.0).and.(nde.lt.ndemax)) then
+                    nde=nde+1
+                    dedx(nde).length=ds
+                    dedx(nde).charge=hit(loc_hit(l)).q
+                    dedx(nde).adedx=dedx(nde).charge/ds
                   endif
                else if((xc-hit(loc_hit(l)).x)**2+
      >            (yc-hit(loc_hit(l)).y)**2
@@ -249,16 +281,27 @@ c
          end do
          iret=tls_Quick_Sort_r(nde,dedx(1).adedx,
      >        dedx(2).adedx,dedx)
+c
+c truncating options
+c
+         nde_orig=nde
          if(tdpar(1).truncopt.eq.1) then
             nde=nde-tdpar(1).debug(1)
             if(nde.lt.0) nde=0
          else if(tdpar(1).truncopt.eq.4) then
             nde=nde-int(tdpar(1).truncfact*real(nde))
             if(nde.lt.0) nde=0
+         elseif (tdpar(1).truncopt.eq.2) then
+c
+c            no truncation nde=nde
+c
          endif
          track(j).ndedx=nde
          track(j).dedx(1)=0.
          track(j).dedx(2)=0.
+c
+c options for dE/dx calc
+c
          if(tdpar(1).debug(2).eq.0.and.nde.gt.0) then
             do k=1,nde
                track(j).dedx(1)=track(j).dedx(1)+ dedx(k).length
@@ -271,7 +314,62 @@ c
                track(j).dedx(2)=track(j).dedx(2)+ dedx(k).charge
             end do
             track(j).dedx(1)=track(j).dedx(1)/real(nde)
+         elseif (tdpar(1).debug(2).eq.2.and.nde.gt.10) then
+c
+c likelihood method
+c get standard (0.7) mean dE/dx (hxamp) 
+c for starting values and range of histogram
+c
+            hxamp=0.
+            nde_trunc=nde_orig-int(0.3*real(nde_orig))
+            do k=1,nde_trunc
+               hxamp= hxamp + dedx(k).adedx
+            end do
+            if (nde_trunc.gt.0) then
+               hxamp=hxamp/real(nde_trunc)
+            endif
+c histogram
+            hxmin=0.
+            hxmax=10.*hxamp
+            hhid=101
+            hnbin=50         
+            call hbook1(hhid,' ',hnbin,hxmin,hxmax,0)
+c
+c fill with dE/dx for each hit
+c
+            do k=1,nde
+               call hfill(hhid,dedx(k).adedx,0.,1.)
+            enddo
+c
+c set initial values
+c            hparam(1) = 20.
+c
+            hparam(1) = -6.267+ 1.864*real(nde)
+            hparam(2) = hxamp
+            hparam(3) = hxamp*0.2
+c
+c set bounds 
+c
+c            hpmin(1)=hparam(1)
+c            hpmax(1)=hparam(1)+0.0001
+c            hpmin(2)=0.
+c            hpmax(2)=hxmax
+c            hstep(1)=0.001
+c            hstep(2)=hxmax/100.
+
+           call hfith(hhid,landau2,'QL',3,hparam,hstep,hpmin,hpmax,hsig,hchi2)
+            track(j).dedx(1)=hparam(2)
+            track(j).dedx(2)=hxamp
+            call hdelet(hhid,' ')
          endif
       end do 
+c      if (tdpar(1).debug(2).eq.2) then
+c         call hdelet(hhid)
+c      endif
       tde_new=STAFCV_OK
       end
+
+
+
+
+
