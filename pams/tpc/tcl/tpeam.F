@@ -305,9 +305,11 @@ cc for cleanup -- try to match up ghost and lost hits...
          integer n_maybe_ghost_max
          parameter (n_maybe_ghost_max=400)
          integer maybe_ghost(n_maybe_ghost_max,1080)
-         integer maybe_lost(200,1080)
+         integer n_maybe_lost_max
+         parameter (n_maybe_lost_max=400)
+         integer maybe_lost(n_maybe_lost_max,1080)
          integer i_maybe_lost,i_maybe_ghost
-         logical lost_is_found(200),ghost_is_saved(n_maybe_ghost_max)
+         logical lost_is_found(n_maybe_lost_max),ghost_is_saved(n_maybe_ghost_max)
          integer ptr_lost,ptr_ghost
 
          real max_sep_same_mcid/3.0/ ! these are used as maximum seperation
@@ -378,6 +380,8 @@ c******************** we only want visualization ntuples 500,300,600
          icycle = 0
          if (tclpar(1).mc.eq.0) then
 c fill ntuple 500 = pixel information
+	WRITE(6,*)'OFFSETTING PIXELS BY ...',
+     +		3.0*tsspar(1).tau*tsspar(1).v_drift
             do kclus=1,tpclusterh.nok
                vec(4)=kclus
                nseq_hit=tpcluster(kclus).nseq
@@ -776,7 +780,7 @@ c  clean-up stage which follows, which tries to link up
 c     "lost" and "ghost"
 c  hits...
                            n_maybe_lost(idummy) = n_maybe_lost(idummy)+1
-                           if (n_maybe_lost(idummy).gt.200) then
+                           if (n_maybe_lost(idummy).gt.n_maybe_lost_max) then
                               write(6,*)
      +                             'Increase Possible Lost Array!!!'
                               goto 99
