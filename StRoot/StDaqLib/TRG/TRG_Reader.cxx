@@ -58,8 +58,8 @@ int TRG_Reader::YearOfData(char *data) {
   if(*data==0x21) return 2004; // trgStructures.h versions (eg, trgStructures2004.h).
   if(*data==0x22) return 2005; // trgStructures.h versions (eg, trgStructures2005.h).
   
-  printf("TRG_Reader::YearOfData : value %d=0x%x not treated\n",*data,*data);
-  assert(0);  // Should not be here.  My ne dolzhny byt6 zdec6.
+  (void) printf("TRG_Reader::YearOfData : value %d=0x%x not treated\n",*data,*data);
+  //assert(0);  // Should not be here.  My ne dolzhny byt6 zdec6.
 
   return 0;
 }
@@ -68,14 +68,14 @@ int TRG_Reader::YearOfData(char *data) {
 TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
   mErr = 0;
   pBankTRGP=pTRGP; //copy into class data member for use by other methods
-  ercpy=er; // squirrel away pointer eventreader for our friends
+  ercpy=er;        // squirrel away pointer eventreader for our friends
   if(!pBankTRGP->test_CRC()) { 
-    printf("CRC error: %s %d\n",__FILE__,__LINE__); 
+    (void) printf("TRG_Reader::TRG_Reader: CRC error: %s %d\n",__FILE__,__LINE__); 
   }
   if(pBankTRGP->swap()<0) { 
     // Use default swap.
     mErr = 1;
-    printf("swap error: %s %d\n",__FILE__,__LINE__); 
+    (void) printf("TRG_Reader::TRG_Reader: swap error: %s %d\n",__FILE__,__LINE__); 
   }
   pBankTRGP->header.CRC=0;
   pBankTRGD=(Bank_TRGD*) ((unsigned int)pBankTRGP + 4*pBankTRGP->theData.offset);
@@ -83,45 +83,68 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
 
   if(!pBankTRGD->test_CRC()) {
     mErr=2;
-    printf("CRC error: %s %d\n",__FILE__,__LINE__); 
+    (void) printf("TRG_Reader::TRG_Reader: CRC error: %s %d\n",__FILE__,__LINE__); 
   }
   char *ptr=(char*)pBankTRGD; ptr+=40; /* Skip the 10-word TRGD bank header. */ 
 
   switch(YearOfData(ptr)) {
+    case 0:
+      // An error occured with decoding the version / year number
+      (void) printf("TRG_Reader::TRG_Reader: YearOfData() returned a failure status\n");
+      mErr = 9999;
+      return;
+      break;
+
     case 2000:
       gs2000=(MarilynMonroe2000*)ptr;
       // SanityCheck2000(1);
-      if(pBankTRGD->HerbSwap2000()   <0) { mErr = 2000; printf("Swap error %s %d.\n",__FILE__,__LINE__); }
+      if(pBankTRGD->HerbSwap2000()   <0) { 
+	mErr = 2000; 
+	(void) printf("TRG_Reader::TRG_Reader: Swap error %s %d.\n",__FILE__,__LINE__); 
+      }
       break;
 
     case 2001:
       gs=(MarilynMonroe*)ptr;
       // SanityCheck(1);
-      if(pBankTRGD->HerbSwap()       <0) { mErr = 2001; printf("Swap error %s %d.\n",__FILE__,__LINE__); }
+      if(pBankTRGD->HerbSwap()       <0) { 
+	mErr = 2001; 
+	(void) printf("TRG_Reader::TRG_Reader: Swap error %s %d.\n",__FILE__,__LINE__); 
+      }
       break;
 
     case 2003:
       S_mode = 0;
       // SanityCheck2003(ptr,S_mode);
-      if(pBankTRGD->HerbSwap2003(ptr)<0) { mErr = 2003; printf("Swap error %s %d.\n",__FILE__,__LINE__); }
+      if(pBankTRGD->HerbSwap2003(ptr)<0) { 
+	mErr = 2003; 
+	(void) printf("TRG_Reader::TRG_Reader: Swap error %s %d.\n",__FILE__,__LINE__); 
+      }
       break;
 
     case 2004:
       S_mode = 0;
       // SanityCheck2004(ptr,S_mode);
-      if(pBankTRGD->HerbSwap2004(ptr)<0) { mErr = 2004; printf("Swap error %s %d.\n",__FILE__,__LINE__); }
+      if(pBankTRGD->HerbSwap2004(ptr)<0) { 
+	mErr = 2004; 
+	(void) printf("TRG_Reader::TRG_Reader: Swap error %s %d.\n",__FILE__,__LINE__); 
+      }
       break;
 
     case 2005:
       S_mode = 0;
       // SanityCheck2004(ptr,S_mode);
-      if(pBankTRGD->HerbSwap2005(ptr)<0) { mErr = 2005; printf("Swap error %s %d.\n",__FILE__,__LINE__); }
+      if(pBankTRGD->HerbSwap2005(ptr)<0) { 
+	mErr = 2005; 
+	(void) printf("TRG_Reader::TRG_Reader: Swap error %s %d.\n",__FILE__,__LINE__); 
+      }
       break;
 
-    default: assert(0);
+    default: 
+      assert(0);
   }
-  printf("Trigger reader instantiated, distance to data = %d bytes.\n",
-	 pBankTRGP->theData.offset);
+  (void) printf("TRG_Reader::TRG_Reader: Trigger reader instantiated, distance to data = %d bytes.\n",
+		pBankTRGP->theData.offset);
 }
 
 
