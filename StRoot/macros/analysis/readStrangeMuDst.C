@@ -1,5 +1,8 @@
-// $Id: readStrangeMuDst.C,v 1.2 2000/03/29 20:58:58 genevb Exp $
+// $Id: readStrangeMuDst.C,v 1.3 2000/04/05 14:09:23 genevb Exp $
 // $Log: readStrangeMuDst.C,v $
+// Revision 1.3  2000/04/05 14:09:23  genevb
+// Changed member functions again
+//
 // Revision 1.2  2000/03/29 20:58:58  genevb
 // Modified StV0MuDst member functions
 //
@@ -51,7 +54,7 @@ void run() {
   hMassLambda = new TH1F("mMassLambda","Lambda Mass",100,1.08,1.2);
 
   // Set number of events to analyse
-  const Int_t Nevents = 999;   // go to EOF
+  const Int_t Nevents = 10000;   // go to EOF
 
   StChain chain("myChain");
   StStrangeMuDstMaker strangeDst("strangeMuDst");
@@ -71,9 +74,9 @@ void run() {
 
     for( Int_t j=0; j<strangeDst.GetNV0(); j++ ) {
       StV0MuDst *v0m = strangeDst.GetV0(j);
-      hX->Fill(v0m->decayVertexV0(0));
-      hY->Fill(v0m->decayVertexV0(1));
-      hZ->Fill(v0m->decayVertexV0(2));
+      hX->Fill(v0m->decayVertexV0X());
+      hY->Fill(v0m->decayVertexV0Y());
+      hZ->Fill(v0m->decayVertexV0Z());
       hMassLambda->Fill(v0m->massLambda());
     }
 
