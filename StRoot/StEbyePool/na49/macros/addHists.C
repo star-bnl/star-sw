@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: addHists.C,v 1.1 2001/02/26 23:07:01 posk Exp $
+// $Id: addHists.C,v 1.2 2001/03/06 17:32:51 posk Exp $
 //
 // Author:       Art Poskanzer, Feb 2001
 // Description:  Macro to add histograms together with weighting.
@@ -12,6 +12,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: addHists.C,v $
+// Revision 1.2  2001/03/06 17:32:51  posk
+// All macros now work.
+//
 // Revision 1.1  2001/02/26 23:07:01  posk
 // Rearranged macros.
 //
@@ -84,7 +87,7 @@ Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t outputRunNo=99) {
     char* objName = key->GetName();
     if (!stripes || strstr(objName,"Corr")!=0
 	|| strstr(objName,"Yield2D")!=0 
-	|| (strstr(objName,"Cos")!=0 && strstr(objName,"Lab")==0)) {
+	|| (strstr(objName,"Flow_Cos")!=0 && strstr(objName,"Lab")==0)) {
       cout << " hist name= " << objName << endl;
       hist[1] = (TH1*)histFile[1]->Get(objName);
       hist[0]->Add(hist[1]);
@@ -168,7 +171,7 @@ Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t outputRunNo=99) {
   }
   
   //histFile[2]->ls();
-  histFile[2]->Write();
+  histFile[2]->Write(0, TObject::kOverwrite);
   histFile[2]->Close();
   delete histFile[2];
   

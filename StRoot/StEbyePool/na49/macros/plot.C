@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.2 2001/02/26 23:07:14 posk Exp $
+// $Id: plot.C,v 1.3 2001/03/06 17:32:59 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -16,6 +16,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.3  2001/03/06 17:32:59  posk
+// All macros now work.
+//
 // Revision 1.2  2001/02/26 23:07:14  posk
 // Rearranged macros.
 //
@@ -28,14 +31,15 @@
 
 #include <math.h> 
 //const Int_t nHars    = 6;
-const Int_t nHars    = 3;
-const Int_t nSels    = 2;
-const Int_t nSubs    = 2;
-Int_t runNumber      = 0;
-char  runName[6];
-char  fileNumber[4]  = "x";
-char  fileName[30];
+const  Int_t nHars    = 3;
+const  Int_t nSels    = 2;
+const  Int_t nSubs    = 2;
+Int_t  runNumber      = 0;
+char   runName[6];
+char   fileNumber[4]  = "x";
+char   fileName[30];
 TFile* histFile;
+char   tmp[10];
 
 TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
@@ -126,7 +130,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   // input the run number
   if (runNumber == 0) {
     cout << "     run number? ";    
-    cin >> runNumber;
+    fgets(tmp, sizeof(tmp), stdin);
+    runNumber = atoi(tmp);
     sprintf(runName, "ana%2d", runNumber);               // add ana prefix
     cout << " run name = " << runName << endl;
   }
@@ -134,7 +139,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   // input the file number (0 opens flow.hist.root)
   if (strstr(fileNumber, "x")!=0) {
     cout << "     anaXX.root file number? [0= flow.hist.root] ";
-    cin >> fileNumber;
+    fgets(fileNumber, sizeof(fileNumber), stdin);
+    fileNumber[strlen(fileNumber)-1] = '\0';
     if (strlen(fileNumber) == 1 && strstr(fileNumber,"0")) {
       sprintf(fileName, "flow.hist.root");
     } else {
@@ -147,9 +153,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   // input the page number
   while (pageNumber <= 1 || pageNumber > nNames) {
     if (pageNumber < 0) {                                 // plot all
-      char temp[3];
-      fgets(temp, sizeof(temp), stdin);
-      //fflush(stdin);
       plotAll(nNames, selN, harN, -pageNumber);
       return;
     }
@@ -162,7 +165,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       cout << i+1 << ":\t " << shortName[i] << endl;
     }
     cout << "     page number? ";
-    cin >> pageNumber;
+    fgets(tmp, sizeof(tmp), stdin);
+    pageNumber = atoi(tmp);
   }
   if (pageNumber > 0 && pageNumber <= nSingles) {         // plot singles
     singleGraph = kTRUE;
@@ -268,14 +272,14 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       bool threeD;
       if (histProjName) {
 	if (strstr(temp,"3D")) {                      // 2D projection
-	  TH3* hist3D = dynamic_cast<TH3*>(histFile.Get(histName->Data()));
+	  TH3* hist3D = dynamic_cast<TH3*>(histFile->Get(histName->Data()));
 	  if (!hist3D) {
 	    cout << "### Can't find histogram " << histName->Data() << endl;
 	    return;
 	  }
 	  twoD = kTRUE;
 	} else {                                      // 1D projection
-	  TH2* hist2D = dynamic_cast<TH2*>(histFile.Get(histName->Data()));
+	  TH2* hist2D = dynamic_cast<TH2*>(histFile->Get(histName->Data()));
 	  if (!hist2D) {
 	    cout << "### Can't find histogram " << histName->Data() << endl;
 	    return;
@@ -284,20 +288,20 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       } else {
 	if (strstr(shortName[pageNumber],"3D")!=0) {  // 3D
 	  threeD = kTRUE;
-	  TH3* hist3D = dynamic_cast<TH3*>(histFile.Get(histName->Data()));
+	  TH3* hist3D = dynamic_cast<TH3*>(histFile->Get(histName->Data()));
 	  if (!hist3D) {
 	    cout << "### Can't find histogram " << histName->Data() << endl;
 	    return;
 	  }
 	} else if (strstr(shortName[pageNumber],"2D")!=0) { // 2D
 	  twoD = kTRUE;
-	  TH2* hist2D = dynamic_cast<TH2*>(histFile.Get(histName->Data()));
+	  TH2* hist2D = dynamic_cast<TH2*>(histFile->Get(histName->Data()));
 	  if (!hist2D) {
 	    cout << "### Can't find histogram " << histName->Data() << endl;
 	    return;
 	  }
 	} else {                                            // 1D
-	  TH1* hist = dynamic_cast<TH1*>(histFile.Get(histName->Data()));
+	  TH1* hist = dynamic_cast<TH1*>(histFile->Get(histName->Data()));
 	  if (!hist) {
 	    cout << "### Can't find histogram " << histName->Data() << endl;
 	    return;
@@ -526,7 +530,7 @@ TCanvas* plotResolution(){
       histName->Append(*countColumns);
       cout << "row= " << j << " col= " << k << " pad= " << padN << "\t" 
 	   << histName->Data() << endl;
-      TH1* hist = dynamic_cast<TH1*>(histFile.Get(histName->Data()));
+      TH1* hist = dynamic_cast<TH1*>(histFile->Get(histName->Data()));
       if (!hist) {
 	cout << "### Can't find histogram " << histName->Data() << endl;
 	return;
@@ -549,14 +553,13 @@ TCanvas* plotResolution(){
 } 
 
 void plotAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
-  char temp[3];
   for (int i =  first; i < nNames + 1; i++) {
     TCanvas* c = plot(i, selN, harN);
     c->Update();
     cout << "save? y/[n], quit? q" << endl;
-    fgets(temp, sizeof(temp), stdin);
-    if (strstr(temp,"y")!=0) c->Print(".ps");
-    else if (strstr(temp,"q")!=0) return;
+    fgets(tmp, sizeof(tmp), stdin);
+    if (strstr(tmp,"y")!=0) c->Print(".ps");
+    else if (strstr(tmp,"q")!=0) return;
     c->Delete();
   }
   cout << "  plotAll Done" << endl;
