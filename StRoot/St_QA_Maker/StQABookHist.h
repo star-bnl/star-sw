@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.1 1999/11/19 22:44:43 kathy Exp $ 
+//! $Id: StQABookHist.h,v 1.2 1999/11/22 22:46:41 lansdell Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.2  1999/11/22 22:46:41  lansdell
+//! update to identify histogram method used (StEvent or DST tables) by Gene; StEventQAMaker code partially completed (run bfcread_dst_EventQAhist.C)
+//!
 //! Revision 1.1  1999/11/19 22:44:43  kathy
 //! took histogram booking out of St_QA_Maker as per Thomas' request and put it into separate class StQABookHist which can now be used also by Curtis' class to book histograms - thanks for your help Gene!
 //!
@@ -32,7 +35,7 @@
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.1 1999/11/19 22:44:43 kathy Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.2 1999/11/22 22:46:41 lansdell Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -93,8 +96,6 @@ class StQABookHist : public StMaker {
   static const Float_t cmaxp; 
   static const Float_t cmindedx; 
   static const Float_t cmaxdedx; 
-  
- public:
   
   // for method MakeEvSum - from table event_summary
   TH1F     *m_trk_tot_gd;         //! number of good global tracks divided by total
@@ -268,15 +269,29 @@ class StQABookHist : public StMaker {
   // for method MakeHistRich
    TH1F     *m_rich_tot;   //! number of rich hits
   
-   //   Char_t *QAHistType;  //! character string to prepend to each hist name
+ protected:
+   TString QAHistType;   // character string to prepend to each hist name/title
+   TString QAHistName;   // character string for each hist name
+   TString QAHistTitle;  // character string for each hist title
+   const char* NameIt(const char* name); // method for naming histograms
+   const char* TitleIt(const char* name); // method for titling histograms
+   TH1F* QAH1F(const Text_t* name, const Text_t* title,
+               Int_t nbinsx, Axis_t xlow, Axis_t xup);
+   TH2F* QAH2F(const Text_t* name, const Text_t* title,
+               Int_t nbinsx, Axis_t xlow, Axis_t xup,
+               Int_t nbinsy, Axis_t ylow, Axis_t yup); // method for 2d-hists
+
 
 //------------------------------------------------------------------------
   
- public: 
+ public:
 
-  StQABookHist(const char *name, const char *title);
+  StQABookHist(const char *name, const char *title, const char *type);
   virtual       ~StQABookHist();
   virtual Int_t  Init();
+
+ protected:
+
   virtual void   BookHistEvSum();
   virtual void   BookHistGlob();
   virtual void   BookHistDE();
@@ -292,10 +307,11 @@ class StQABookHist : public StMaker {
   virtual void   BookHistV0Eval();
   virtual void   BookHistRich();
   
+ public:
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.1 1999/11/19 22:44:43 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.2 1999/11/22 22:46:41 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };

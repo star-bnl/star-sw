@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.61 1999/11/19 22:44:43 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.62 1999/11/22 22:46:41 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.62  1999/11/22 22:46:41  lansdell
+// update to identify histogram method used (StEvent or DST tables) by Gene; StEventQAMaker code partially completed (run bfcread_dst_EventQAhist.C)
+//
 // Revision 1.61  1999/11/19 22:44:43  kathy
 // took histogram booking out of St_QA_Maker as per Thomas' request and put it into separate class StQABookHist which can now be used also by Curtis' class to book histograms - thanks for your help Gene!
 //
@@ -232,10 +235,7 @@
 ClassImp(St_QA_Maker)
   
 //_____________________________________________________________________________
-  St_QA_Maker::St_QA_Maker(const char *name, const char *title) : StQABookHist(name,title){
-
-  //   QAHistType = "Tab";
-
+  St_QA_Maker::St_QA_Maker(const char *name, const char *title) : StQABookHist(name,title,"Tab"){
 
 }
 //_____________________________________________________________________________
