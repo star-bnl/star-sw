@@ -372,7 +372,7 @@ foreach my $dir ("StRoot","pams") {
       if ($STAR_HOST_SYS =~ /^hp_ux102/ && 
 	  ($sub_dir =~ /^StDbLib$/ ||
 	   $sub_dir =~ /StHbt/)	  ) {next;}
-      if ($STAR_HOST_SYS =~ /sun4x/ && $sub_dir =~ /^StAssociationMaker$/) {next;}
+#      if ($STAR_HOST_SYS =~ /sun4x/ && $sub_dir =~ /^StAssociationMaker$/) {next;}
       my $sub_DIR = $dir . "/" . $sub_dir; #print "sub_DIR = $sub_DIR\n";
       if (-d $sub_DIR) {
 	if ($sub_dir =~  /\./ || $sub_dir =~ /\.\./ || $sub_dir =~ /CVS/ || 
@@ -442,9 +442,9 @@ foreach my $dir ("StRoot","pams") {
 	  }
 	}
 	else {
-	  if ($sub_dir =~ /Maker$/      || 
-	      $sub_dir =~ /^StDaqLib$/  ||
-	      $sub_dir =~ /LSEvent/     ) {#print "Export Maker includes for $sub_dir\n";
+#	  if ($sub_dir =~ /Maker$/      || 
+#	      $sub_dir =~ /^StDaqLib$/  ||
+#	      $sub_dir =~ /LSEvent/     ) {#print "Export Maker includes for $sub_dir\n";
 	    #print "sub_dir = $sub_dir sub_DIR = $sub_DIR\n";
 	    my @incs = find_inc($sub_DIR); #print "in $sub_DIR : @incs\n";
 	    foreach my $inc (@incs) {
@@ -456,7 +456,7 @@ foreach my $dir ("StRoot","pams") {
 	      my @lincT = ("#" . $inc); #print "$inc, @lincT\n";	      
 	      Install $env $local_install, @lincT; #print "Install $env $local_install, @lincT\n";
 	    }
-	  }
+#	  }
 	}
       }
     }

@@ -234,37 +234,6 @@ Int_t StTreeMaker::Finish()
   Close(); return 0;
 }
 //_____________________________________________________________________________
-Int_t StTreeMaker::Save()
-{ 
-  St_DataSetIter  nextBr(fTree);
-  StBranch *br,*brSave=0;
-  TString saveName,saveDir,regPath;
-  char *savePath; 
-  fTree->Clear(); 
-  while ((br = (StBranch*)nextBr())) {
-    if (strncmp("hist",br->GetName(),4)) continue;
-    brSave=br;
-    FillHistBranch(br);
-  }
-  if (!brSave) return 0;
-  regPath = brSave->GetFile();
-  if (!regPath.Contains(".root")) return 0;
-  saveDir  = gSystem->DirName (regPath);
-  saveName = gSystem->BaseName(regPath);
-  saveName.Replace(0,0,"save.");
-  savePath = gSystem->ConcatFileName(saveDir,saveName);
-  brSave->SetFile((const char*)savePath);
-  fTree->WriteEvent((ULong_t)(-2));	
-  brSave->Close();
-  fTree->Clear(); 
-  brSave->SetFile((const char*)regPath); 
-  delete [] savePath;
-  brSave->Open();  
-  
-   
-  return 0;
-}
-//_____________________________________________________________________________
 void StTreeMaker::Close(Option_t *)
 { 
   fTree->Close(); fTree->SetUKey(0);
@@ -316,7 +285,7 @@ void StTreeMaker::FillHistBranch(StBranch *histBr)
       if (!dothist)			continue;
       TList *tl = (TList*)((St_ObjectSet*)dothist)->GetObject();
       if (!tl || !tl->First())		continue;
-      os->SetObject(tl,0);}
+      os->SetObject(tl);}
       
     if (strncmp(bname,"runcont",7)==0) {//Run Control Branch
       dotrcp = ds->Find(".runcont");

@@ -130,7 +130,7 @@ C
          return
       endif
 
-      if(neg_t.ge.1000.or.pos_t.ge.1000)then  !no hits in one of VPDs
+      if(neg_t.ge.1000.or.pos_t.ge.1000)then  !no hits in one of VPD's
 *         print*,' ************************************************ '
 *         print*,' * No hit in one of the VPDs!                   * '
 *         print*,' ************************************************ '

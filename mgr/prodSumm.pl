@@ -196,6 +196,7 @@ $ftpHpss->quit();
 ## for database filling
 my $setName = "no";
 my $geantFile = "no";
+my $geant_size = 0;
 my $produced_date = "00000000";
 my $pr_chain = "no";
 
@@ -305,6 +306,7 @@ foreach $eachSet (@Sets) {
 
 ## reinitialize variables
     $geantFile = "no";
+    $geant_size = 0;
     $produced_date = "00000000";
     $pr_chain = "no";
     
@@ -339,8 +341,8 @@ foreach $eachSet (@Sets) {
     $produced_date  = ($$eachGeantFile)->timeS;
     
     $basename = basename("$geantFile",".fzd");
-
-    $geantInputSize += ( ($$eachGeantFile)->size )/1000000;
+    $geant_size = (($$eachGeantFile)->size)/1000000;
+    $geantInputSize += ($geant_size);
     $basename =~ m/(^[a-z0-9]+)_([0-9]+)_([0-9]+)/;
     $geantInputEvts += $3;
 
@@ -387,9 +389,9 @@ foreach $eachSet (@Sets) {
      foreach my $job_fname (@j_name) {
     if( $job_fname =~ /$basename/ ) {
       $job_status = $j_status[$jj];
-   print $job_fname, "\n";
-   print $basename, "\n";
-   print $job_status, "\n";
+#   print $job_fname, "\n";
+#   print $basename, "\n";
+#   print $job_status, "\n";
   last;
 }
    else {   
@@ -546,6 +548,7 @@ sub fillDbTable {
     $sql="insert into $OperationT set ";
     $sql.="SetName='".$setName."',";
     $sql.="GeantFile='$geantFile',";
+    $sql.="Geant_size=$geant_size,";
     $sql.="Produced_date='$produced_date',";
     $sql.="Chain='$pr_chain',";
     $sql.="JobStatus='$job_status',";
@@ -675,16 +678,14 @@ my $jarch_dir  = $prod_dir . $run_ch . "/" . "archive";
 my $jnew_dir   = $prod_dir . $run_ch . "/" . "new_jobs"; 
 my $jhold_dir  = $prod_dir . $run_ch . "/" . "jobs_hold";  
  
-  
+chdir $jhold_dir;
+if (-f $jfile_nm) {$jfile_status = "jobs_hold"};  
 chdir $jobf_dir;
 if (-f $jfile_nm) {$jfile_status = "jobfiles"};
 chdir $jarch_dir;
 if (-f $jfile_nm) {$jfile_status = "archive"};
 chdir $jnew_dir;
 if (-f $jfile_nm) {$jfile_status = "new_jobs"};
-chdir $jhold_dir;
-if (-f $jfile_nm) {$jfile_status = "jobs_hold"};    
-
  
 }
 	   
