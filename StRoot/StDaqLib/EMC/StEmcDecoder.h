@@ -38,6 +38,8 @@ class StEmcDecoder
     int       ReverseOrder[4800];
 		int       PMT_Box[60];
 		int       ReversePMT_Box[4800][2];
+    int       TriggerPatch[30];
+    int       TriggerSequence[10];
     
     int       SmdModules[8][15];
     int       FEE1[4],FEE2[4],FEE3[4];
@@ -75,6 +77,9 @@ class StEmcDecoder
     int       GetTowerTDCFromDaqId(int,int&);///< Get TDC channel from Daq Id for towers
 		int       GetPMTBoxFromTowerId(int,int&,int&); ///<Get PMT box and position from tower Id
     int       GetTowerBin(int,int&,int&,int&);///<Transition from environment rid to m,e,s for towers
+    
+    int       GetTriggerPatchFromCrate(int,int,int&); // returns the trigger patch from crate and sequence in the crate
+    int       GetCrateAndSequenceFromTriggerPatch(int,int&,int&); // returns the crate number and start point for a given trigger patch
     
     int       GetSmdCoord(int,int,int&,int&,int&,int&,bool=false);///<Get SMD detector (3==SMDE, 4==SMDP), m, e, s from RDO and position for SMD
     int       GetSmdRDO(int,int,int,int,int&,int&);///<Get SMD fiber and position from detector number (3==SMDE, 4==SMDP), m, e, s
