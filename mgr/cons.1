@@ -1,8 +1,8 @@
 .rn '' }`
-''' $RCSfile: cons.1,v $$Revision: 1.1.1.8 $$Date: 2000/11/27 23:12:33 $
+''' $RCSfile: cons.1,v $$Revision: 1.1.1.9 $$Date: 2000/12/10 18:14:27 $
 '''
 ''' $Log: cons.1,v $
-''' Revision 1.1.1.8  2000/11/27 23:12:33  fisyak
+''' Revision 1.1.1.9  2000/12/10 18:14:27  fisyak
 ''' *** empty log message ***
 '''
 '''
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH CONS 1 "2.3.0" "27/Nov/100" "Cons - Software Construction System"
+.TH CONS 1 "2.3.0" "10/Dec/100" "Cons - Software Construction System"
 .UC
 .if n .hy 0
 .if n .na
@@ -1776,13 +1776,15 @@ the following suffixes to select a portion of the expanded path name:
 Continuing with the above example, C<%<:f> would expand to \f(CWfoo bar baz\fR,
 and \f(CW%\fR:d> would expand to \f(CWtest\fR.
 .PP
+There are additional \f(CW%\fR elements which affect the command \fIline\fR\|(s):
+.Ip "%[ %]" 10
 It is possible to programmatically rewrite part of the command by
 enclosing part of it between \f(CW%[\fR and \f(CW%]\fR.  This will call the
 construction variable named as the first word enclosed in the brackets
 as a Perl code reference; the results of this call will be used to
 replace the contents of the brackets in the command line.  For example,
 given an existing input file named \fItgt.in\fR:
-.PP
+.Sp
 .Vb 6
 \&  @keywords = qw(foo bar baz);
 \&  $env = new cons(X_COMMA => sub { join(",", @_) });
@@ -1792,11 +1794,24 @@ given an existing input file named \fItgt.in\fR:
 \&  );
 .Ve
 This will execute:
-.PP
+.Sp
 .Vb 2
 \&  echo '# Keywords: foo,bar,baz' > tgt
 \&  cat tgt.in >> tgt
 .Ve
+.Ip "%( %)" 10
+Cons includes the text of the command line in the \s-1MD5\s0 signature for
+a build, so that targets get rebuilt if you change the command line,
+(to add or remove an option, for example).  Command-line text in between
+\f(CW%(\fR and \f(CW%)\fR, however, will be ignored for \s-1MD5\s0 signature calculation.
+.Sp
+Cons uses \f(CW%(\fR and \f(CW%)\fR around include and library directory options
+(\f(CW-I\fR and \f(CW-L\fR on \s-1UNIX\s0 systems, \f(CW/I\fR and \f(CW/LIBPATH\fR on Windows \s-1NT\s0)
+to avoid rebuilds just because the directory list changes.  Rebuilds occur
+only if the changed directory list causes any included \fIfiles\fR to change,
+and a changed include file is detected by the \s-1MD5\s0 signature calculation
+on the actual file contents.
+.PP
 After substitution occurs, strings of white space are converted into single
 blanks, and leading and trailing white space is eliminated. It is therefore
 not possible to introduce variable length white space in strings passed into
@@ -2344,9 +2359,14 @@ installs \fIexport/include/foo.h\fR, for example, just type:
 \&  % cons -pw export/include/foo.h
 .Ve
 .SH "Using and writing dependency scanners"
-QuickScan allows simple target-independent scanners to be set up for source
-files. Only one QuickScan scanner may be associated with any given source
-file and environment.
+QuickScan allows simple target-independent scanners to be set up for
+source files. Only one QuickScan scanner may be associated with any given
+source file and environment, although the same scanner may (and should)
+be used for multiple files of a given type.
+.PP
+A QuickScan scanner is only ever invoked once for a given source file,
+and it is only invoked if the file is used by some target in the tree
+(i.e., there is a dependency on the source file).
 .PP
 QuickScan is invoked as follows:
 .PP
@@ -2368,13 +2388,11 @@ filehandle SCAN. It may also terminate the loop, if it knows that no further
 include information is available, by closing the filehandle.
 .PP
 Whether or not a lookup path is provided, QuickScan first tries to lookup
-the file relative to the current directory (for the top-level file supplied
-directly to QuickScan), or from the directory containing the file which
-referenced the file. This is not very general, but seems good
-enough\*(--especially if you have the luxury of writing your own utilities and
-can control the use of the search path in a standard way. Finally, the
-search path is, currently, colon separated. This may not make the NT camp
-happy.
+the file relative to the current directory (for the top-level file
+supplied directly to QuickScan), or from the directory containing the
+file which referenced the file. This is not very general, but seems good
+enough\*(--especially if you have the luxury of writing your own utilities
+and can control the use of the search path in a standard way.
 .PP
 Here's a real example, taken from a \fIConstruct\fR file here:
 .PP
@@ -2394,20 +2412,17 @@ Here's a real example, taken from a \fIConstruct\fR file here:
 \&      }
 \&  }
 .Ve
+The subroutine above finds all names of the form <name>.smf in the
+file. It will return the names even if they're found within comments,
+but that's OK (the mechanism is forgiving of extra files; they're just
+ignored on the assumption that the missing file will be noticed when
+the program, in this example, smfgen, is actually invoked).
+.PP
 [NOTE that the form \f(CW$env->QuickScan ...\fR  and \f(CW$env->Command
 \&...\fR should not be necessary, but, for some reason, is required
 for this particular invocation. This appears to be a bug in Perl or
 a misunderstanding on my part; this invocation style does not always
 appear to be necessary.]
-.PP
-This finds all names of the form <name>.smf in the file. It will return the
-names even if they're found within comments, but that's OK (the mechanism is
-forgiving of extra files; they're just ignored on the assumption that the
-missing file will be noticed when the program, in this example, smfgen, is
-actually invoked).
-.PP
-A scanner is only invoked for a given source file if it is needed by some
-target in the tree. It is only ever invoked once for a given source file.
 .PP
 Here is another way to build the same scanner. This one uses an
 explicit code reference, and also (unecessarily, in this case) reads
@@ -2427,7 +2442,23 @@ end. This is because the first line is already read for you. This scanner
 can be attached to a source file by:
 .PP
 .Vb 1
-\&    QuickScan $env \emyscan, "$_.smf";
+\&  QuickScan $env \e&myscan, "$_.smf";
+.Ve
+This final example, which scans a different type of input file, takes
+over the file scanning rather than being called for each input line:
+.PP
+.Vb 11
+\&  $env->QuickScan(
+\&      sub { my(@includes) = ();
+\&          do {
+\&             push(@includes, $3)
+\&                 if /^(#include|import)\es+(\e")(.+)(\e")/ && $3
+\&          } while <SCAN>;
+\&          @includes
+\&      },
+\&      "$idlFileName",
+\&      "$env->{CPPPATH};$BUILD/ActiveContext/ACSCLientInterfaces"
+\&  );
 .Ve
 .SH "SUPPORT AND SUGGESTIONS"
 Cons is maintained by the user community.  To subscribe, send mail to
@@ -2587,6 +2618,10 @@ a part of the program itself.
 .IX Item "%1, %2, ..., %9"
 
 .IX Item "%<"
+
+.IX Item "%[ %]"
+
+.IX Item "%( %)"
 
 .IX Subsection "The \f(CWObjects\fR method"
 

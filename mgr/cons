@@ -13,14 +13,14 @@
 # Regression tests keep the code honest by checking for warnings
 # and "use strict" failures.
 
-# $Id: cons,v 1.1.1.21 2000/11/27 23:12:34 fisyak Exp $
+# $Id: cons,v 1.1.1.22 2000/12/10 18:14:28 fisyak Exp $
 
 use vars qw( $ver_num $ver_rev $version );
 
 $ver_num = "2.3";
 $ver_rev = ".0";
 $version = sprintf "This is Cons %s%s " .
-	    '($Id: cons,v 1.1.1.21 2000/11/27 23:12:34 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.1.1.22 2000/12/10 18:14:28 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -1623,13 +1623,9 @@ sub includes {
     my(@sigs);
     my(@names);
 
-    if ($main::_WIN32) {
-	# Pass %LIBS symbol through %-substituition
-	# <schwarze@isa.de> 1998-06-18
-	@names = split(' ', $env->_subst($env->{LIBS} || ''));
-    } else {
-	@names = split(' ', $env->{LIBS} || '');
-    }
+    # Pass %LIBS symbol through %-substituition
+    # <schwarze@isa.de> 1998-06-18
+    @names = split(' ', $env->_subst($env->{LIBS} || ''));
     my $name;
     for $name (@names) {
 	my ($lpath, @allnames);
@@ -5021,6 +5017,12 @@ the following suffixes to select a portion of the expanded path name:
 Continuing with the above example, C<%<:f> would expand to C<foo bar baz>,
 and C<%>:d> would expand to C<test>.
 
+There are additional C<%> elements which affect the command line(s):
+
+=over 10
+
+=item %[ %]
+
 It is possible to programmatically rewrite part of the command by
 enclosing part of it between C<%[> and C<%]>.  This will call the
 construction variable named as the first word enclosed in the brackets
@@ -5039,6 +5041,22 @@ This will execute:
 
   echo '# Keywords: foo,bar,baz' > tgt
   cat tgt.in >> tgt
+
+=item %( %)
+
+Cons includes the text of the command line in the MD5 signature for
+a build, so that targets get rebuilt if you change the command line,
+(to add or remove an option, for example).  Command-line text in between
+C<%(> and C<%)>, however, will be ignored for MD5 signature calculation.
+
+Cons uses C<%(> and C<%)> around include and library directory options
+(C<-I> and C<-L> on UNIX systems, C</I> and C</LIBPATH> on Windows NT)
+to avoid rebuilds just because the directory list changes.  Rebuilds occur
+only if the changed directory list causes any included I<files> to change,
+and a changed include file is detected by the MD5 signature calculation
+on the actual file contents.
+
+=back
 
 After substitution occurs, strings of white space are converted into single
 blanks, and leading and trailing white space is eliminated. It is therefore
@@ -5652,9 +5670,14 @@ installs F<export/include/foo.h>, for example, just type:
 
 =head1 Using and writing dependency scanners
 
-QuickScan allows simple target-independent scanners to be set up for source
-files. Only one QuickScan scanner may be associated with any given source
-file and environment.
+QuickScan allows simple target-independent scanners to be set up for
+source files. Only one QuickScan scanner may be associated with any given
+source file and environment, although the same scanner may (and should)
+be used for multiple files of a given type.
+
+A QuickScan scanner is only ever invoked once for a given source file,
+and it is only invoked if the file is used by some target in the tree
+(i.e., there is a dependency on the source file).
 
 QuickScan is invoked as follows:
 
@@ -5675,13 +5698,11 @@ filehandle SCAN. It may also terminate the loop, if it knows that no further
 include information is available, by closing the filehandle.
 
 Whether or not a lookup path is provided, QuickScan first tries to lookup
-the file relative to the current directory (for the top-level file supplied
-directly to QuickScan), or from the directory containing the file which
-referenced the file. This is not very general, but seems good
-enough--especially if you have the luxury of writing your own utilities and
-can control the use of the search path in a standard way. Finally, the
-search path is, currently, colon separated. This may not make the NT camp
-happy.
+the file relative to the current directory (for the top-level file
+supplied directly to QuickScan), or from the directory containing the
+file which referenced the file. This is not very general, but seems good
+enough--especially if you have the luxury of writing your own utilities
+and can control the use of the search path in a standard way.
 
 Here's a real example, taken from a F<Construct> file here:
 
@@ -5700,20 +5721,17 @@ Here's a real example, taken from a F<Construct> file here:
       }
   }
 
+The subroutine above finds all names of the form <name>.smf in the
+file. It will return the names even if they're found within comments,
+but that's OK (the mechanism is forgiving of extra files; they're just
+ignored on the assumption that the missing file will be noticed when
+the program, in this example, smfgen, is actually invoked).
+
 [NOTE that the form C<$env-E<gt>QuickScan ...>  and C<$env-E<gt>Command
 ...> should not be necessary, but, for some reason, is required
 for this particular invocation. This appears to be a bug in Perl or
 a misunderstanding on my part; this invocation style does not always
 appear to be necessary.]
-
-This finds all names of the form <name>.smf in the file. It will return the
-names even if they're found within comments, but that's OK (the mechanism is
-forgiving of extra files; they're just ignored on the assumption that the
-missing file will be noticed when the program, in this example, smfgen, is
-actually invoked).
-
-A scanner is only invoked for a given source file if it is needed by some
-target in the tree. It is only ever invoked once for a given source file.
 
 Here is another way to build the same scanner. This one uses an
 explicit code reference, and also (unecessarily, in this case) reads
@@ -5731,7 +5749,22 @@ Note that the order of the loop is reversed, with the loop test at the
 end. This is because the first line is already read for you. This scanner
 can be attached to a source file by:
 
-    QuickScan $env \myscan, "$_.smf";
+  QuickScan $env \&myscan, "$_.smf";
+
+This final example, which scans a different type of input file, takes
+over the file scanning rather than being called for each input line:
+
+  $env->QuickScan(
+      sub { my(@includes) = ();
+	  do {
+	     push(@includes, $3)
+		 if /^(#include|import)\s+(\")(.+)(\")/ && $3
+	  } while <SCAN>;
+	  @includes
+      },
+      "$idlFileName",
+      "$env->{CPPPATH};$BUILD/ActiveContext/ACSCLientInterfaces"
+  );
 
 =head1 SUPPORT AND SUGGESTIONS
 

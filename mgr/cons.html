@@ -2008,6 +2008,11 @@ following suffixes to select a portion of the expanded path name:
 Continuing with the above example, <CODE>%&lt;:f</CODE> would expand to <CODE>foo bar baz</CODE>, and <CODE>%</CODE>:d&gt; would expand to <CODE>test</CODE>.
 
 <P>
+There are additional <CODE>%</CODE> elements which affect the command <CODE>line(s):</CODE>
+
+<DL>
+<DT><STRONG><A NAME="item__">%[ %]</A></STRONG><DD>
+<P>
 It is possible to programmatically rewrite part of the command by enclosing
 part of it between <CODE>%[</CODE> and <CODE>%]</CODE>. This will call the construction variable named as the first word enclosed
 in the brackets as a Perl code reference; the results of this call will be
@@ -2029,6 +2034,19 @@ This will execute:
 <PRE>  echo '# Keywords: foo,bar,baz' &gt; tgt
   cat tgt.in &gt;&gt; tgt
 </PRE>
+<DT><STRONG><A NAME="item__">%( %)</A></STRONG><DD>
+<P>
+Cons includes the text of the command line in the MD5 signature for a
+build, so that targets get rebuilt if you change the command line, (to add
+or remove an option, for example). Command-line text in between
+<CODE>%(</CODE> and <CODE>%)</CODE>, however, will be ignored for MD5 signature calculation.
+
+<P>
+Cons uses <CODE>%(</CODE> and <CODE>%)</CODE> around include and library directory options (<CODE>-I</CODE> and <CODE>-L</CODE> on UNIX systems, <CODE>/I</CODE> and <CODE>/LIBPATH</CODE> on Windows NT) to avoid rebuilds just because the directory list changes.
+Rebuilds occur only if the changed directory list causes any included <EM>files</EM> to change, and a changed include file is detected by the MD5 signature
+calculation on the actual file contents.
+
+</DL>
 <P>
 After substitution occurs, strings of white space are converted into single
 blanks, and leading and trailing white space is eliminated. It is therefore
@@ -2687,7 +2705,13 @@ them. If you want to know what script installs <EM>export/include/foo.h</EM>, fo
 <P>
 QuickScan allows simple target-independent scanners to be set up for source
 files. Only one QuickScan scanner may be associated with any given source
-file and environment.
+file and environment, although the same scanner may (and should) be used
+for multiple files of a given type.
+
+<P>
+A QuickScan scanner is only ever invoked once for a given source file, and
+it is only invoked if the file is used by some target in the tree (i.e.,
+there is a dependency on the source file).
 
 <P>
 QuickScan is invoked as follows:
@@ -2718,9 +2742,7 @@ the file relative to the current directory (for the top-level file supplied
 directly to QuickScan), or from the directory containing the file which
 referenced the file. This is not very general, but seems good
 enough--especially if you have the luxury of writing your own utilities and
-can control the use of the search path in a standard way. Finally, the
-search path is, currently, colon separated. This may not make the NT camp
-happy.
+can control the use of the search path in a standard way.
 
 <P>
 Here's a real example, taken from a <EM>Construct</EM> file here:
@@ -2742,22 +2764,18 @@ Here's a real example, taken from a <EM>Construct</EM> file here:
   }
 </PRE>
 <P>
+The subroutine above finds all names of the form &lt;name&gt;.smf in the
+file. It will return the names even if they're found within comments, but
+that's OK (the mechanism is forgiving of extra files; they're just ignored
+on the assumption that the missing file will be noticed when the program,
+in this example, smfgen, is actually invoked).
+
+<P>
 [NOTE that the form <CODE>$env-&amp;gt;QuickScan ...</CODE>  and <CODE>$env-&amp;gt;Command
 ...</CODE> should not be necessary, but, for some reason, is required for this
 particular invocation. This appears to be a bug in Perl or a
 misunderstanding on my part; this invocation style does not always appear
 to be necessary.]
-
-<P>
-This finds all names of the form &lt;name&gt;.smf in the file. It will
-return the names even if they're found within comments, but that's OK (the
-mechanism is forgiving of extra files; they're just ignored on the
-assumption that the missing file will be noticed when the program, in this
-example, smfgen, is actually invoked).
-
-<P>
-A scanner is only invoked for a given source file if it is needed by some
-target in the tree. It is only ever invoked once for a given source file.
 
 <P>
 Here is another way to build the same scanner. This one uses an explicit
@@ -2779,7 +2797,24 @@ This is because the first line is already read for you. This scanner can be
 attached to a source file by:
 
 <P>
-<PRE>    QuickScan $env \myscan, &quot;$_.smf&quot;;
+<PRE>  QuickScan $env \&amp;myscan, &quot;$_.smf&quot;;
+</PRE>
+<P>
+This final example, which scans a different type of input file, takes over
+the file scanning rather than being called for each input line:
+
+<P>
+<PRE>  $env-&gt;QuickScan(
+      sub { my(@includes) = ();
+          do {
+             push(@includes, $3)
+                 if /^(#include|import)\s+(\&quot;)(.+)(\&quot;)/ &amp;&amp; $3
+          } while &lt;SCAN&gt;;
+          @includes
+      },
+      &quot;$idlFileName&quot;,
+      &quot;$env-&gt;{CPPPATH};$BUILD/ActiveContext/ACSCLientInterfaces&quot;
+  );
 </PRE>
 <P>
 <HR>
