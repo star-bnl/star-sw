@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.8 2003/08/25 17:57:12 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.9 2003/08/26 03:02:30 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -48,7 +48,7 @@ class  StEEmcDbIndexItem1;
 
 class StEEmcDbMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.8 2003/08/25 17:57:12 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.9 2003/08/26 03:02:30 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -66,8 +66,8 @@ class StEEmcDbMaker : public StMaker {
   eemcDbPMTstat_st  **mDbPMTstat ; //!
 
   // local fast look-up tables
-  StEEmcDbIndexItem1   *mDbItem1; //!
-  StEEmcDbIndexItem1   ***mLookup; //!
+  StEEmcDbIndexItem1   *mDbItem1; //!  assess via logical name (sec/sub/eta)
+  StEEmcDbIndexItem1   ***mLookup; //! access via crate/chan
   int mxAdcCrate, mxAdcChan;
 
   void mCleanDbNames(char*,int); ///< utility  
@@ -76,6 +76,7 @@ class StEEmcDbMaker : public StMaker {
   float KsigOverPed; // defines threshold
   int nFound;
   TString dbName; //name of the DB used 
+
   template <class St_T, class T_st> T_st * getTable(TDataSet *eedb, int secID, TString tabName);
   
 
@@ -87,6 +88,7 @@ class StEEmcDbMaker : public StMaker {
   void setThreshold(float x);// defines threshold for ADCs
 
   const  StEEmcDbIndexItem1* getT(int sec, char sub, int eta); ///< returns full DB info for one Tower channel
+  const  StEEmcDbIndexItem1* getByIndex(int index); ///< returns full DB info for one any channel
   const  StEEmcDbIndexItem1* get(int crate, int channel); ///< returns full DB info for any ADC channel
 
   void setTimeStampDay( int ); ///< to fix  time stamp for all events, default =not fixed 
@@ -104,7 +106,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.8 2003/08/25 17:57:12 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.9 2003/08/26 03:02:30 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -115,6 +117,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.9  2003/08/26 03:02:30  balewski
+// fix of pix-stat and other
+//
 // Revision 1.8  2003/08/25 17:57:12  balewski
 // use teplate to access DB-tables
 //

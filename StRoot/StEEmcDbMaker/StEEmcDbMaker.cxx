@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.14 2003/08/25 17:57:12 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.15 2003/08/26 03:02:30 balewski Exp $
  
 #include <TDatime.h>
 #include <time.h>
@@ -38,14 +38,16 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
   mDbItem1=new  StEEmcDbIndexItem1[EEindexMax];
 
 
-  mxAdcCrate=7;
-  mxAdcChan=128; 
+  mxAdcCrate=113;  // use 1-6 for tower data, [64-112] for  pre/post/smd of sector 6
+  mxAdcChan=192; 
   mLookup=new  StEEmcDbIndexItem1 ** [mxAdcCrate];
   
   int i;
-  for(i=0;i<mxAdcCrate;i++)
+  for(i=0;i<mxAdcCrate;i++){
+    mLookup[i]=NULL;
+    if(i==0 || (i>6 && i<64) ) continue; // to save memory for nonexisting crates
     mLookup[i]=new StEEmcDbIndexItem1 * [mxAdcChan];
-
+  }
   setDBname("Calibrations/eemc");
 }
 
@@ -57,8 +59,10 @@ StEEmcDbMaker::~StEEmcDbMaker(){
   delete [] mDbItem1;
 
   int i;
-  for(i=0;i<mxAdcCrate;i++)
-    delete [] mLookup[i];
+  for(i=0;i<mxAdcCrate;i++) {
+    if(mLookup[i])
+      delete [] mLookup[i];
+  }
   delete [] mLookup;
 
   if( mNSector) {
@@ -156,6 +160,16 @@ StEEmcDbMaker::getT(int sec, char sub, int eta){
   int index=EEname2Index(name);
   return mDbItem1+index;  
 }
+//__________________________________________________
+//__________________________________________________
+//__________________________________________________
+
+const StEEmcDbIndexItem1*  
+StEEmcDbMaker::getByIndex(int index){
+  assert(index>=0);
+  assert(index<EEindexMax);
+  return mDbItem1+index;  
+}
 
 //__________________________________________________
 //__________________________________________________
@@ -168,6 +182,8 @@ StEEmcDbMaker::get(int crate, int channel){
   assert(channel>=0);
   assert(channel<mxAdcChan);
   
+  assert( mLookup[crate]);
+
   return mLookup[crate][channel];  
 }
 
@@ -207,9 +223,11 @@ void  StEEmcDbMaker::mReloadDb  (){
     mDbItem1[i].clear();
   
   int j;
-  for(i=0;i<mxAdcCrate;i++)
+  for(i=0;i<mxAdcCrate;i++) {
+    if(mLookup[i]==NULL) continue;
     for(j=0;j<mxAdcChan;j++)
       mLookup[i][j]=0;
+  }
   
 
   St_db_Maker* mydb = (St_db_Maker*)GetMaker("StarDb");
@@ -332,6 +350,7 @@ void  StEEmcDbMaker::mOptimizeDb(){
 
       assert(t->crate[j]>=0 && t->crate[j]<mxAdcCrate);
       assert(t->channel[j]>=0 && t->channel[j]<mxAdcChan);
+      assert(mLookup[t->crate[j]]);
       mLookup[t->crate[j]][t->channel[j]]=&mDbItem1[index];
       
       //      if(j>300) break;
@@ -345,13 +364,13 @@ void  StEEmcDbMaker::mOptimizeDb(){
   printf("\nAcquire secondary info for active elements\n");
 
   int index;
-  for(index=0; index<EEindexMax; index++){
+  for(index=0; index<EEindexMax; index++){//main loop over all pixels
     if(mDbItem1[index].chan<0) continue;
     StEEmcDbIndexItem1 *item=mDbItem1+index;
 
     char *name=item->name;
     int secID=atoi(name);
-    //printf("update %s in sec=%d \n",name,secID);
+    // printf("update %s in sec=%d \n",name,secID);
 
 
     for(i=0; i<EEindexMax; i++) {
@@ -364,11 +383,12 @@ void  StEEmcDbMaker::mOptimizeDb(){
     
     for(j=0;j<EEMCDbMaxAdc; j++) { // loop within sector
       char *name1=cal->name+j*EEMCDbMaxName;
+      if(name1[0]==0) break;
       char *p=strstr(item->name,name1);
       if(p==0) continue;
       mDbItem1[index].gain=cal->gain[j];
       mDbItem1[index].hv=cal->hv[j];
-      //printf(" found=%d gain=%f hv=%f\n",found,mDbItem1[index].gain,mDbItem1[index].hv);
+      //  if(strchr(name1,'T')==0) printf(" xx=%s, index=%d j=%d  gain=%f hv=%f\n",name1,j,index,cal->gain[j],cal->hv[j]) ;
       break;
     }
     
@@ -377,11 +397,24 @@ void  StEEmcDbMaker::mOptimizeDb(){
     
     for(j=0;j<EEMCDbMaxAdc; j++) { // loop within sector
       char *name1=ped->name+j*EEMCDbMaxName;
+      if(name1[0]==0) break;
       char *p=strstr(item->name,name1);
-      //	printf("ppp %p %s %s \n",p,item->name,name1);
       if(p==0) continue;
       mDbItem1[index].ped=ped->ped[j];
       mDbItem1[index].thr=ped->ped[j]+KsigOverPed*ped->sig[j];
+      break;
+    }
+    
+    eemcDbPMTstat_st *stat= mDbPMTstat[i];
+    if(stat==0) continue; // DB data for this sector not loaded from DB
+    
+    for(j=0;j<EEMCDbMaxAdc; j++) { // loop within sector
+      char *name1=stat->name+j*EEMCDbMaxName;
+      if(name1[0]==0) break;
+      char *p=strstr(item->name,name1);
+      if(p==0) continue;
+      mDbItem1[index].stat=stat->stat[j];
+      mDbItem1[index].fail=stat->fail[j];
       break;
     }
     
@@ -501,6 +534,9 @@ template<class St_T, class T_st> T_st *  StEEmcDbMaker::getTable(TDataSet *eedb,
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.15  2003/08/26 03:02:30  balewski
+// fix of pix-stat and other
+//
 // Revision 1.14  2003/08/25 17:57:12  balewski
 // use teplate to access DB-tables
 //
