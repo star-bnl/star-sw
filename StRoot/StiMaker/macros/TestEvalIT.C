@@ -1,8 +1,13 @@
 //
-// $Id: TestEvalIT.C,v 1.7 2002/06/25 21:44:40 pruneau Exp $
+// $Id: TestEvalIT.C,v 1.8 2002/06/28 23:33:46 calderon Exp $
 //
 //
 // $Log: TestEvalIT.C,v $
+// Revision 1.8  2002/06/28 23:33:46  calderon
+// Changes to work with bug fixes and new conventions in StMiniMcMaker
+// Output file names will begin with "EvalItTest" and the rest of the input
+// filename will be appended to this prefix.
+//
 // Revision 1.7  2002/06/25 21:44:40  pruneau
 // *** empty log message ***
 //
@@ -114,15 +119,13 @@ void loadLibrairies(bool doProfile)
 	gSystem->Load("StSvtSeqAdjMaker");
 	//gSystem->Load("StSvtEvalMaker");
 	gSystem->Load("StSvtClusterMaker");
-	cout <<"/StMcEventMaker";	      gSystem->Load("StMcEventMaker");
-	cout <<"/AssociationMaker";     gSystem->Load("StAssociationMaker");
-	cout <<"/Sti";                  gSystem->Load("Sti");
-	cout <<"/StiGui";              	gSystem->Load("StiGui");
-	cout <<"/StiEvaluator";        	gSystem->Load("StiEvaluator");
-	cout <<"/libGui";               gSystem->Load("libGui");
-	cout <<"/StiMaker";           	gSystem->Load("StiMaker");
-	cout <<"/StMiniMcEvent";        gSystem->Load("StMiniMcEvent");
-	cout <<"/StMiniMcMaker";        gSystem->Load("StMiniMcMaker");
+	cout <<"/Sti" << endl;                 gSystem->Load("Sti");
+	cout <<"/StiGui"<< endl;               gSystem->Load("StiGui");
+	cout <<"/StiEvaluator"<< endl;         gSystem->Load("StiEvaluator");
+	cout <<"/libGui"<< endl;               gSystem->Load("libGui");
+	cout <<"/StiMaker"<< endl;             gSystem->Load("StiMaker");
+	cout <<"/StMiniMcEvent"<< endl;        gSystem->Load("StMiniMcEvent");
+	cout <<"/StMiniMcMaker"<< endl;        gSystem->Load("StMiniMcMaker");
 	if(doProfile)
 		{
 			cout <<"/Jprof";
@@ -132,24 +135,14 @@ void loadLibrairies(bool doProfile)
 	cout <<"\nDone.";
 }
 
-
-
-//void TestEvalIT(Int_t, 
-//								Int_t, 
-//								const Char_t **, 
-//								const Char_t *qaflag = "");
-
-								//const Char_t *path="/star/data13/reco/dev/2002/01/",
-								//const Char_t *path = "/star/data22/ITTF/data/simple_geant/DEV_10_8_01/",
-								//const Char_t *path = "data/simple_geant/DEV_10_8_01/",
-
 void TestEvalIT(Int_t firstEvtIndex=1, 
-								Int_t nevents=10,
-								const Char_t *path= "/star/data17/reco/auau200/hijing/b0_20/standard/year2001/hadronic_on/trs_gl/",
-								const Char_t *file="rcf0183_20_300evts.geant.root",
-								const Char_t *qaflag = "off",
-								const Int_t  wrStEOut = 0,
-								const int    associateStiTrack=1)
+		Int_t nevents=10,
+		const Char_t *path= "/star/data17/reco/auau200/hijing/b0_20/standard/year2001/hadronic_on/trs_gl/",
+		const Char_t *file="rcf0183_20_300evts.geant.root",
+		const Char_t *qaflag = "off",
+		const Int_t  wrStEOut = 0,
+		const int    associateStiTrack=1,
+		const char* filePrefix = "rcf")
 {
 	if (nevents==-1) 
 		{
@@ -165,19 +158,19 @@ void TestEvalIT(Int_t firstEvtIndex=1,
 		fileListQQ[0]=path;
 	else 
 		fileListQQ[0] = gSystem->ConcatFileName(path,file);
-	TestEvalIT(firstEvtIndex, nevents,fileListQQ,qaflag,wrStEOut,associateStiTrack);
+	TestEvalIT(firstEvtIndex, nevents,fileListQQ,qaflag,wrStEOut,associateStiTrack,filePrefix);
 }
-
 
 
 // ------------------ Here is the actual method -----------------------------------------
 
 void TestEvalIT(Int_t firstEvtIndex, 
-								Int_t nevents, 
-								const Char_t **fileList, 
-								const Char_t *qaflag, 
-								const Int_t   wrStEOut,
-								const int     associateStiTrack)
+		Int_t nevents, 
+		const Char_t **fileList, 
+		const Char_t *qaflag, 
+		const Int_t   wrStEOut,
+		const int     associateStiTrack,
+		const char* filePrefix)
 {
 	Int_t theRunNumber=0;
 	bool simulated = true;
@@ -193,8 +186,17 @@ void TestEvalIT(Int_t firstEvtIndex,
 		ilist++; 
 	}
 	cout << " TestEvalIT -  input qaflag   = " << qaflag << endl;
-	cout << " TestEvalIT -  input wrStEOut = " << wrStEOut << endl << endl << endl;
-	
+	cout << " TestEvalIT -  input wrStEOut = " << wrStEOut << endl;
+	cout << " TestEvalIT -  file Prefix    = " << filePrefix << endl << endl;
+
+	// String Manipulation to create the output name
+	TString fileName = "EvalItTest";
+	TString MainFile = fileList[0];
+	int fileBeginIndex = MainFile.Index(filePrefix,0);
+	MainFile.Remove(0,fileBeginIndex);
+	fileName.Append(MainFile);
+	cout << "Output MiniMcTree : " << fileName << endl;
+
 	loadLibrairies(doProfile);
 
 	// Handling depends on whether file is a ROOT file or XDF file
@@ -384,12 +386,12 @@ void TestEvalIT(Int_t firstEvtIndex,
 		if(associateStiTrack) assocMakerIt->useInTracker();
 		assocMakerIt->SetDebug();
 	}
-
 	StMiniMcMaker* minimcMaker = new StMiniMcMaker;
 	minimcMaker->setDebug();
-	minimcMaker->setOutDir(".");
-	minimcMaker->setFileName("EvalItTest.root");
-    
+	minimcMaker->setOutDir("./");
+	minimcMaker->setFileName(fileName);
+	minimcMaker->setFilePrefix(filePrefix);
+	
 	/*
 		dbaseMk->Init();
 		svtDbMk->setSvtDb_Reader();
