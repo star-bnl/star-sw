@@ -118,15 +118,15 @@ void MainFrame::createOptionMenu(TGMenuBar *menuBar, TGLayoutHints *itemLayout)
   menu->AddEntry("MC Track Colors", M_ShowRootColors);
   menu->AddEntry("Seed Finder Options", M_SeedFinderOptions);
   menu->AddEntry("Kalman Track Finder Options", M_TrackFinderOptions);
-  menu->AddEntry("MC Track Filter Options", M_McTrackFilterOptions);
   menu->AddEntry("Rec Track Filter Options", M_TrackFilterOptions); 
+  menu->AddEntry("Gui MC Track Filter Options", M_GuiMcTrackFilterOptions);
+  menu->AddEntry("Gui Rec Track Filter Options", M_GuiTrackFilterOptions); 
   menu->Associate(this);
   menuBar->AddPopup("&Options",menu, itemLayout);
 }
 
 void MainFrame::createViewMenu(TGMenuBar *menuBar, TGLayoutHints *itemLayout)
 { 
-  /*
   TGPopupMenu * menu = new TGPopupMenu(fClient->GetRoot());
   menu->AddEntry("Svt Visible", M_DetView_SvtVisible);
   menu->AddEntry("Svt Invisible", M_DetView_SvtInvisible);
@@ -149,17 +149,10 @@ void MainFrame::createViewMenu(TGMenuBar *menuBar, TGLayoutHints *itemLayout)
   menu->AddEntry("Manual View", M_DetView_ManualView);
   menu->AddEntry("Skeleton View", M_DetView_SkeletonView);
   menu->AddEntry("Zoom Skeleton View",M_DetView_ZoomSkeletonView);
-  menu->AddSeparator();
-  menu->AddPopup("&All",mAllViewMenu);
-  menu->Associate(this);
-  menu = new TGPopupMenu(fClient->GetRoot());
-  menu->AddPopup("&Tpc",menu);
-  menu->AddPopup("&Svt",menu);
-  menu->AddPopup("&Ifc",menu);
   menu->Associate(this);
 
-  menuBar->AddPopup("&File", menu, itemLayout);
-  */
+  menuBar->AddPopup("&View", menu, itemLayout);
+  
 }
 
 void MainFrame::createNavigationMenu(TGMenuBar *menuBar, TGLayoutHints *itemLayout)
@@ -268,113 +261,120 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
     {
     case kC_COMMAND:
       switch (GET_SUBMSG(msg)) 
-				{
-				case kCM_BUTTON:
-					if (parm1 == M_Tracking_DoTrackStep) doNextTrackStep();
-					else if (parm1 == M_Tracking_FinishTrack) finishTrack();
-					else if (parm1 == M_Tracking_FinishEvent) finishEvent();
-					else if (parm1 == M_Tracking_ResetEvent) 
-						{
-						  setCurrentDetectorToDefault();
-						  _toolkit->getTrackFinder()->reset();
-						  //_toolkit->getTrackFinder()->findTracks();
-						  _toolkit->getDisplayManager()->reset();
-						  _toolkit->getDisplayManager()->draw();
-						  _toolkit->getDisplayManager()->update();
-						  showCurrentDetector();
-						}
-					else if (parm1 == M_Tracking_EventStep) stepToNextEvent();
-					break;
-				case kCM_MENUSELECT:
-					break;
-				case kCM_MENU:
-					switch (parm1) 
-						{
-						case M_FILE_OPEN:
-							{
-								static TString dir("/star/data22/ITTF/");
-								TGFileInfo fi;
-								fi.fFileTypes = filetypes;
-								fi.fIniDir    = StrDup(dir);
-								new TGFileDialog(fClient->GetRoot(), this, kFDOpen, &fi);
-								printf("Open file: %s (dir: %s)\n", fi.fFilename,
-											 fi.fIniDir);
-								dir = fi.fIniDir;
-								mIoMaker->Close();
-								mIoMaker->SetFile(fi.fFilename);
-								stepToNextEvent();
-							}
-							break;
-						case M_Messenger:	new MessengerOptionsDialog(fClient->GetRoot(), this, 400, 200);break;
-						case M_DisplayOptions: break;//new EntryTestDlg(fClient->GetRoot(), this); break;
-						case M_SeedFinderOptions:
-							{	
-								EditableParameters * pars = dynamic_cast<EditableParameters *>(_toolkit->getTrackSeedFinder()->getParameters() );
-								if (pars)
-									new StiOptionFrame(fClient->GetRoot(), this, pars);
-								else
-									cout << "case M_TrackFinderOptions - null StiKalmanTrackFinderParameters * pars"<<endl;
-								break;
-							}
-						case M_TrackFinderOptions:
-							{
-								EditableParameters * pars = dynamic_cast<EditableParameters *>(_toolkit->getTrackFinder()->getParameters());
-								if (pars)
-									new StiOptionFrame(fClient->GetRoot(), this, pars);
-								else
-									cout << "case M_TrackFinderOptions - null StiKalmanTrackFinderParameters * pars"<<endl;
-								break;
-							}
-						case M_McTrackFilterOptions: 
-							{
-								StiDefaultTrackFilter * mcFilter;
-								Filter<StiTrack> * filter = _toolkit->getTrackFinder()->getGuiMcTrackFilter();
-								mcFilter = dynamic_cast<StiDefaultTrackFilter*>(filter);
-								if (mcFilter)
-									new StiOptionFrame(fClient->GetRoot(), this, mcFilter);
-								else
-									cout << "case M_McTrackFilterOptions: Null mcFilter." << endl;
-								break;
-							}
-						case M_TrackFilterOptions: 
-							{
-								StiDefaultTrackFilter * filter;
-								filter = static_cast<StiDefaultTrackFilter *>(_toolkit->getTrackFinder()->getGuiTrackFilter());
-								new StiOptionFrame(fClient->GetRoot(), this, filter);
-								break;
-							}
-						case M_DetView_AllVisible: 	 setAllVisible();  break;
-						case M_DetView_AllInvisible: setAllInvisible();break;
-						case M_DetView_TpcVisible:   setTpcVisible();    break;
-						case M_DetView_TpcInvisible: setTpcInvisible();  break;
-						case M_DetView_SvtVisible:   setSvtVisible();    break;
-						case M_DetView_SvtInvisible: setSvtInvisible();  break;
-						case M_DetView_IfcVisible:   setIfcVisible();    break;
-						case M_DetView_IfcInvisible: setIfcInvisible();  break;
-						case M_DetView_ManualView:   setManualView();    break;
-						case M_DetView_SkeletonView: setSkeletonView();  break;
-						case M_DetView_ZoomSkeletonView: setZoomSkeletonView(); break;
-						case M_DetOnOff:	 new DetectorActivator(fClient->GetRoot(), this, 800, 200); break;
-						case M_Det_Navigate: 
-							new Navigator(fClient->GetRoot(), this, 400, 200); break;
-						case M_DetNavigate_MoveIn:      moveIn();  break;
-						case M_DetNavigate_MoveOut:	    moveOut(); break;
-						case M_DetNavigate_MovePlusPhi: movePlusPhi();break;
-						case M_DetNavigate_MoveMinusPhi:moveMinusPhi();break;
-						case M_DetNavigate_SetLayer:    setLayer();	break;
-						case M_DetNavigate_SetLayerAndAngle:setLayerAndAngle();break;
-						case M_Tracking_ToggleFitFind:toggleFitFind();break;
-						case M_Tracking_DoTrackStep:doNextTrackStep();break;
-						case M_Tracking_FinishTrack:finishTrack();	break;
-						case M_Tracking_FinishEvent:finishEvent();	break;
-						case M_Tracking_EventStep:	stepToNextEvent();break;
-						case M_Tracking_NEventStep:	stepThroughNEvents();break;
-						case M_FILE_SAVE:	printf("M_FILE_SAVE\n");break;
-						case M_FILE_EXIT:	CloseWindow();  break;		
-						default:      break;
-						}
-				default:  break;
-				}
+	{
+	case kCM_BUTTON:
+	  if (parm1 == M_Tracking_DoTrackStep) doNextTrackStep();
+	  else if (parm1 == M_Tracking_FinishTrack) finishTrack();
+	  else if (parm1 == M_Tracking_FinishEvent) finishEvent();
+	  else if (parm1 == M_Tracking_ResetEvent) 
+	    {
+	      setCurrentDetectorToDefault();
+	      _toolkit->getTrackFinder()->reset();
+	      //_toolkit->getTrackFinder()->findTracks();
+	      _toolkit->getDisplayManager()->reset();
+	      _toolkit->getDisplayManager()->draw();
+	      _toolkit->getDisplayManager()->update();
+	      showCurrentDetector();
+	    }
+	  else if (parm1 == M_Tracking_EventStep) stepToNextEvent();
+	  break;
+	case kCM_MENUSELECT:
+	  break;
+	case kCM_MENU:
+	  switch (parm1) 
+	    {
+	    case M_FILE_OPEN:
+	      {
+		static TString dir("/star/data22/ITTF/");
+		TGFileInfo fi;
+		fi.fFileTypes = filetypes;
+		fi.fIniDir    = StrDup(dir);
+		new TGFileDialog(fClient->GetRoot(), this, kFDOpen, &fi);
+		printf("Open file: %s (dir: %s)\n", fi.fFilename,
+		       fi.fIniDir);
+		dir = fi.fIniDir;
+		mIoMaker->Close();
+		mIoMaker->SetFile(fi.fFilename);
+		stepToNextEvent();
+	      }
+	      break;
+	    case M_Messenger:	new MessengerOptionsDialog(fClient->GetRoot(), this, 400, 200);break;
+	    case M_DisplayOptions: break;//new EntryTestDlg(fClient->GetRoot(), this); break;
+	    case M_SeedFinderOptions:
+	      {	
+		EditableParameters * pars = dynamic_cast<EditableParameters *>(_toolkit->getTrackSeedFinder()->getParameters() );
+		if (pars)
+		  new StiOptionFrame(fClient->GetRoot(), this, pars);
+		else
+		  cout << "case M_TrackFinderOptions - null StiKalmanTrackFinderParameters * pars"<<endl;
+		break;
+	      }
+	    case M_TrackFinderOptions:
+	      {
+		EditableParameters * pars = dynamic_cast<EditableParameters *>(_toolkit->getTrackFinder()->getParameters());
+		if (pars)
+		  new StiOptionFrame(fClient->GetRoot(), this, pars);
+		else
+		  cout << "case M_TrackFinderOptions - null StiKalmanTrackFinderParameters * pars"<<endl;
+		break;
+	      }
+	     case M_TrackFilterOptions: 
+	      {
+		StiDefaultTrackFilter * filter;
+		filter = static_cast<StiDefaultTrackFilter *>(_toolkit->getTrackFinder()->getTrackFilter());
+		new StiOptionFrame(fClient->GetRoot(), this, filter);
+		break;
+	      }
+	    case M_GuiMcTrackFilterOptions: 
+	      {
+		StiDefaultTrackFilter * mcFilter;
+		Filter<StiTrack> * filter = _toolkit->getTrackFinder()->getGuiMcTrackFilter();
+		mcFilter = dynamic_cast<StiDefaultTrackFilter*>(filter);
+		if (mcFilter)
+		  new StiOptionFrame(fClient->GetRoot(), this, mcFilter);
+		else
+		  cout << "case M_McTrackFilterOptions: Null mcFilter." << endl;
+		break;
+	      }
+	    case M_GuiTrackFilterOptions: 
+	      {
+		StiDefaultTrackFilter * filter;
+		filter = static_cast<StiDefaultTrackFilter *>(_toolkit->getTrackFinder()->getGuiTrackFilter());
+		new StiOptionFrame(fClient->GetRoot(), this, filter);
+		break;
+	      }
+	    case M_DetView_AllVisible: 	 setAllVisible();  break;
+	    case M_DetView_AllInvisible: setAllInvisible();break;
+	    case M_DetView_TpcVisible:   setTpcVisible();    break;
+	    case M_DetView_TpcInvisible: setTpcInvisible();  break;
+	    case M_DetView_SvtVisible:   setSvtVisible();    break;
+	    case M_DetView_SvtInvisible: setSvtInvisible();  break;
+	    case M_DetView_IfcVisible:   setIfcVisible();    break;
+	    case M_DetView_IfcInvisible: setIfcInvisible();  break;
+	    case M_DetView_ManualView:   setManualView();    break;
+	    case M_DetView_SkeletonView: setSkeletonView();  break;
+	    case M_DetView_ZoomSkeletonView: setZoomSkeletonView(); break;
+	    case M_DetOnOff:	 new DetectorActivator(fClient->GetRoot(), this, 800, 200); break;
+	    case M_Det_Navigate: 
+	      new Navigator(fClient->GetRoot(), this, 400, 200); break;
+	    case M_DetNavigate_MoveIn:      moveIn();  break;
+	    case M_DetNavigate_MoveOut:	    moveOut(); break;
+	    case M_DetNavigate_MovePlusPhi: movePlusPhi();break;
+	    case M_DetNavigate_MoveMinusPhi:moveMinusPhi();break;
+	    case M_DetNavigate_SetLayer:    setLayer();	break;
+	    case M_DetNavigate_SetLayerAndAngle:setLayerAndAngle();break;
+	    case M_Tracking_ToggleFitFind:toggleFitFind();break;
+	    case M_Tracking_DoTrackStep:doNextTrackStep();break;
+	    case M_Tracking_FinishTrack:finishTrack();	break;
+	    case M_Tracking_FinishEvent:finishEvent();	break;
+	    case M_Tracking_EventStep:	stepToNextEvent();break;
+	    case M_Tracking_NEventStep:	stepThroughNEvents();break;
+	    case M_FILE_SAVE:	printf("M_FILE_SAVE\n");break;
+	    case M_FILE_EXIT:	CloseWindow();  break;		
+	    default:      break;
+	    }
+	default:  break;
+	}
     default:    break;
     }
   return kTRUE;
