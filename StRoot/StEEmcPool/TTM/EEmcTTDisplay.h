@@ -1,7 +1,7 @@
 // Hey Emacs this is -*-c++-*-
 #ifndef STAR_EEmcTTDisplay
 #define STAR_EEmcTTDisplay
-// $Id: EEmcTTDisplay.h,v 1.7 2004/04/13 14:53:38 zolnie Exp $
+// $Id: EEmcTTDisplay.h,v 1.8 2004/04/14 16:40:34 zolnie Exp $
 
 /*!
  *                                                                     
@@ -80,17 +80,22 @@ public:
 
   //! draws towers/tracks from the list
   /// \param option - not uset at the moment
-  void         Draw ( const Option_t* = "");
+  void         Draw ( const Option_t* option = "");
 
   //! clears tower/track lists
   /// \param option - not uset at the moment
-  void         Clear( const Option_t* = ""); 
+  void         Clear( const Option_t* option = ""); 
 
-  /// prints StMuTrack and EEmcTower to ostream
+  //! prints StMuTrack and EEmcTower to ostream
   /// \param out    a reference to std::ostream
   /// \param track  a reference to class  StMuTrack
   /// \param tower  a reference to struct EEmcTower
   void         Out(ostream &out, const StMuTrack &track, const EEmcTower &tower);
+
+  //! prints StMuTrack and EEmcTower to TString
+  /// \param out    a reference to TString
+  /// \param track  a reference to class  StMuTrack
+  /// \param tower  a reference to struct EEmcTower
   void         Out(TString &out, const StMuTrack &track, const EEmcTower &tower);
   
   //! sets STAR magnetic field 
@@ -131,6 +136,9 @@ public:
 
 
 // $Log: EEmcTTDisplay.h,v $
+// Revision 1.8  2004/04/14 16:40:34  zolnie
+// *** empty log message ***
+//
 // Revision 1.7  2004/04/13 14:53:38  zolnie
 // *** empty log message ***
 //
