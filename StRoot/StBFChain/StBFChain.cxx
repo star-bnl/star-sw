@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.349 2003/07/31 04:39:32 lbarnby Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.350 2003/07/31 17:05:56 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -245,6 +245,7 @@ Bfc_st BFC1[] = {
                                                             "Use pp-like + makers *** OBSOLETE ***",kFALSE},
   {"ppOpt"       ,""  ,"","","","",                      "pp option without enabling special cases",kFALSE},
 
+  {"SvtMatchVtx" ,""  ,"","",""                ,"","Use SVT matched tracks to find  Primary Vertex",kFALSE},
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
@@ -933,8 +934,10 @@ Bfc_st BFC2[] = {
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StBichsel,StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
-  {"V02"         ,"v02","","db,StEvent","StV0FinderMaker","StSecondaryVertexMaker","Find V0s from StEvent",kFALSE},
-  {"Xi2"      ,"xi2","","db,StEvent","StXiFinderMaker","StSecondaryVertexMaker","Xis AND V0s from StEvent",kFALSE},
+  {"V02"         ,"v02","","db,StEvent","StV0FinderMaker","StSecondaryVertexMaker",
+                                                                            "Find V0s from StEvent",kFALSE},
+  {"Xi2"      ,"xi2","","db,StEvent","StXiFinderMaker","StSecondaryVertexMaker",
+                                                                         "Xis AND V0s from StEvent",kFALSE},
 
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
@@ -1301,9 +1304,11 @@ Int_t StBFChain::Instantiate()
 	  }
 
 	  if (GetOption("ppOpt") ) {                         // pp specific stuff
+	    count << "QAInfo: ppOpt (pp mode) is turned ON" << endl;
 	    if (maker == "StTrsMaker") mk->SetMode(1);       // Pile-up correction
 	    if (maker == "StVertexMaker"){
-	      mk->SetMode(1);                                // Switch vertex finder to ppLMV
+	      if( GetOption("SvtMatchVtx")) mk->SetMode(4); // Switch vertex finder to ppLMV using EST
+	      else                          mk->SetMode(1); // Switch vertex finder to ppLMV
 	      StVertexMaker *pMk = (StVertexMaker*) mk;
 	      if( GetOption("beamLine")){
 		  pMk->SetBeam4ppLMV();                      // Add beam-line constrain
@@ -1320,7 +1325,21 @@ Int_t StBFChain::Instantiate()
 		pMk->SetCTBMode(0);                          // Else get from DAQ
 	      }
 	    }
+	  } else {
+	    // See section above associated to GetOption("ppOpt") for pp specific.
+	    // This part was reshaped to avoid confusion and possible
+	    // option overwrite if one is not carefull enough ... VtxOffset
+	    // way used in RY1h and RY2000 only and abandonned later. If re-appear,
+	    // maker == StVertexmaker would have to be its own block with a ppOpt
+	    // embedded logic.
+	    if ((maker == "StVertexMaker"  || maker == "StPreVertexMaker") &&
+		GetOption("VtxOffSet")){
+	      cout << "QAInfo: VtxOffSet is ON" << endl;
+	      if ( GetOption("SvtMatchVtx") )  mk->SetMode(3);
+	      else                             mk->SetMode(2);
+	    }
 	  }
+
 	  if (GetOption("CMuDST") && GetOption("StrngMuDST")) {
 	    if (maker == "StStrangeMuDstMaker"){
 	      StStrangeMuDstMaker *pMk = (StStrangeMuDstMaker*) mk;
@@ -1330,8 +1349,7 @@ Int_t StBFChain::Instantiate()
 	      pMk->SetNoKeep();                             // Set flag for output OFF
 	    }
 	  }
-	  if ((maker == "StVertexMaker"  || maker == "StPreVertexMaker") &&
-	      GetOption("VtxOffSet")) mk->SetMode(2);
+
 
 	  if (maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
 	  if (maker == "St_dst_Maker" && GetOption("HitsBranch")) mk->SetMode(2);
