@@ -22,6 +22,7 @@
        float     phi;        /* orientation of the hit w.r.t padplane */
        float     prf;        /* value of the pad response (cm) */
        float     zrf;        /* value of the drift response (cm) */
+       float     dedx;       /* de/dx for this hit */
        short     row;        /* 100*isector TPC row number */
        short     nseq;       /* number of sequences contributing to hit */
        short     npads;      /* number of pad fired in this hit */
@@ -30,7 +31,8 @@
        short     ntmbk;      /* number of time bucket fired in this hit */
        short     mintmbk;    /* lowest time bucket in hit */
        short     maxtmbk;    /* highest time bucket in hit */
+       short     truncTag;   /* a tag for ensemble truncation */
    };
-/*  Last mod. for tphit: $Date: 2000/03/03 23:23:58 $ */
+/*  Last mod. for tphit: $Date: 2000/04/07 18:30:31 $ */
 
 
