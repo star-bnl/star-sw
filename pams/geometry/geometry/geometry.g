@@ -1,5 +1,15 @@
-* $Id: geometry.g,v 1.56 2003/05/01 23:00:16 potekhin Exp $
+* $Id: geometry.g,v 1.57 2003/07/03 04:45:20 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.57  2003/07/03 04:45:20  potekhin
+* Added the "special" variation of the year 2003 geometry, which has
+* a complete set of the barrel and endcap calorimeter elements. This
+* is needed primarily for heavy flavor studies and other rare signals.
+* The tag is y2003x.
+*
+* Also, fixed a subtle bug in the configuration of the endcap calorimeter.
+* It did not affect previous simulations, but would manifest itself
+* in a complete configurations such as this one.
+*
 * Revision 1.56  2003/05/01 23:00:16  potekhin
 * Photon Multiplicity Detector is now part of the
 * GEANT geometry version "y2003a", with proper
@@ -102,7 +112,8 @@
    Integer    btofconfig
 
    real       Par(1000),field,dcay(5),shift(2),wdm
-   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),nonf(3),ecal_config,
+   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),nonf(3),
+              ecal_config, ecal_fill,
               Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,fieldbug,argonbug,
               CorrNum, PhmdVersion
 * Correction number within a year
@@ -152,7 +163,8 @@ replace[;ON#{#;] with [
    Rv=2                  " add non-sensetive hits to RICH system          "
    Rp=2                  " real RICH position and spectra inst.of nominal "
    nonf={1,2,2}          " ecal on right side, FPD parts on left side     "
-   ecal_config=0         " define a patch of Ecal                         "
+   ecal_config=0         " Ecal: east, west or both                       "
+   ecal_fill=3           " lets say its full wheel by default             "
    mf=2                  " default field - simetrical, as fitted by Bill  "
    ArgonBug=0            " in the future tsettting bug to 1 should introiduce "
    Fieldbug=0            "  old bugs in these places "
@@ -183,7 +195,7 @@ If LL>1
                   <W>;('Configurations : complete,tpc_only,field_only ');
                   <W>;('               : year_1a,s,b,h,c;  year_2a    ');
                   <W>;('               : year2000, year2001,year2002  ');
-                  <W>;('               : year2003, year2003a          ');
+                  <W>;('               : year2003, y2003a             ');
                   <W>;('Gcalor         : Gcalor_on, Gcalor_off        ');
                   <W>;('Geant Physics  : Hadr_on, Hadr_off            ');
                   <W>;('Geant Physics  : Phys_off, Decay_Only         ');
@@ -223,7 +235,7 @@ If LL>1
 
   on YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  bbcm=on;            }
 
-  on COMPLETE   { Complete STAR geometry; Itof=2; bbcm=on; ecal_Config=3;   }
+  on COMPLETE   { Complete STAR geometry; Itof=2; bbcm=on; ecal_fill=3; ecal_config=3;  }
 
   on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder; 
 *                 corrected: MWC readout, RICH reconstructed position, no TOF 
@@ -278,6 +290,7 @@ If LL>1
                      nmod={60,0}; shift={0,0}; " 60 sectors "
                   "ecal" 
                      ecal_config=1   "one ecal patch, west "
+                     ecal_fill=1     " sectors 2-5 filled "
                   "beam-beam counter "
                      bbcm=on
                   "forward pion detector "
@@ -313,6 +326,36 @@ If LL>1
                      nmod={60,0}; shift={75,0}; " 60 sectors " 
                   "ecal" 
                      ecal_config=1   " one ecal patch, west "
+                     ecal_fill=1     " sectors 2-5 filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+                  "geometry correction "
+                     CorrNum = 1;
+                  "Photon Multiplicity Detector Version "
+                     PhmdVersion = 1;
+                }
+
+  on Y2003X    { same as year2003 but with full calorimeters
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     btofconfig=5;
+                  "calb" 
+                     ems=on   "endcap " 
+                     nmod={60,60}; shift={75,75}; " 60 sectors " 
+                  "ecal" 
+                     ecal_config=3   "both wheels"
+                     ecal_fill=3     "all sectors filled "
                   "beam-beam counter "
                      bbcm=on
                   "forward pion detector "
@@ -442,13 +485,11 @@ If LL>1
    endif
    if (rich) Call richgeo
 
-*  - endcap calorimeter may be controled here
+*  - endcap calorimeter
    If (LL>1 & ecal) then
       call AgDETP new ('ECAL')
-      if (ecal_config>0)  
-      {  call AgDETP add ('emcg.OnOff='   ,1,1)
-         call AgDETP add ('emcg.FillMode=',ecal_config,1)
-      }
+      call AgDETP add ('emcg.OnOff='   ,ecal_config,1)
+      call AgDETP add ('emcg.FillMode=',ecal_fill,1)
    endif
 ******************************************************************
    if (ecal) Call ecalgeo
