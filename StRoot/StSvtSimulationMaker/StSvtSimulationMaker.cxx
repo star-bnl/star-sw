@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.18 2004/01/22 16:30:47 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.19 2004/01/27 02:45:42 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.19  2004/01/27 02:45:42  perev
+ * LeakOff
+ *
  * Revision 1.18  2004/01/22 16:30:47  caines
  * Getting closer to a final simulation
  *
@@ -343,7 +346,7 @@ void  StSvtSimulationMaker::setGeantData()
 
   if (set) {
     cout<<"Found StSvtGeantHits in the chain- replacing"<<endl;
-    delete set->GetObject();
+    set->SetObject(0);
   } 
   else{
     set =  new St_ObjectSet("StSvtGeantHits");

@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.50 2004/01/22 17:15:21 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.51 2004/01/27 02:44:16 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.51  2004/01/27 02:44:16  perev
+ * LeakOff
+ *
  * Revision 1.50  2004/01/22 17:15:21  caines
  * Remove gain calibration files and common mode moise subtraction
  *
@@ -257,10 +260,10 @@ Int_t StSvtSeqAdjMaker::InitRun( int runnumber)
     St_DataSet *dataSet = NULL;
     dataSet = GetDataSet("StSvtConfig");
     
-    if (dataSet)
-      mSvtRawData = new StSvtData((StSvtConfig*)(dataSet->GetObject()));
-    else
-      return kStWarn;
+    if (!dataSet) return kStWarn;
+
+    mSvtRawData = new StSvtData((StSvtConfig*)(dataSet->GetObject()));
+    AddData(new TObjectSet("StSvtRawData",mSvtRawData));
   }
 
   mTotalNumberOfHybrids = mSvtRawData->getTotalNumberOfHybrids();
@@ -487,7 +490,7 @@ Int_t StSvtSeqAdjMaker::Make()
   SetSvtData();
 
   // copy event information to adjusted data collection
-  (*mSvtAdjData) = (*mSvtRawData);
+//VP  (*mSvtAdjData) = (*mSvtRawData);  // already made in SetSvtData()
 
   gMessMgr->Info() << "Working On Event: " << mSvtAdjData->getEventNumber() << endm;
 
@@ -518,8 +521,8 @@ Int_t StSvtSeqAdjMaker::Make()
 	    BadAnode = (StSvtHybridBadAnodes*)mSvtBadAnodes->at(index);
 
           mHybridAdjData = (StSvtHybridData *)mSvtAdjData->at(index);
-	  if (mHybridAdjData)
-	    delete mHybridAdjData;
+	  mSvtAdjData->put_at(0,index);
+	  delete mHybridAdjData;
 	  mHybridAdjData = new StSvtHybridData(Barrel,Ladder,Wafer,Hybrid); 
 	  mHybridAdjData->setTimeZero(mHybridRawData->getTimeZero());
 	  mHybridAdjData->setSCAZero(mHybridRawData->getSCAZero());

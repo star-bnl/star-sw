@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.2 2004/01/22 16:30:47 caines Exp $
+ * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.3 2004/01/27 02:45:10 perev Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -144,12 +144,12 @@ void StSvtOnlineSeqAdjSimMaker::SetRawData()
 
   St_ObjectSet* set=(St_ObjectSet*)GetDataSet("StSvtRawData");
   
-  if (set) delete set;
-  set = new St_ObjectSet("StSvtRawData");
-  AddData(set);
-  
+  if (!set) {
+    set = new St_ObjectSet("StSvtRawData");
+    AddData(set);
+  }
   mRawData = new StSvtData(mConfig->getConfiguration());
-  set->SetObject((TObject*)mRawData);
+  set->SetObject(mRawData);
 }
 
 //____________________________________________________________________________
