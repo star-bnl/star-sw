@@ -1,5 +1,15 @@
-* $Id: geometry.g,v 1.80 2004/01/29 20:46:45 potekhin Exp $
+* $Id: geometry.g,v 1.81 2004/02/10 00:27:57 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.81  2004/02/10 00:27:57  potekhin
+* The SVT group wanted the correction in the SVT geometry,
+* which we discovered that we needed earlier this year, to
+* be applied RETROACTIVELY to year2001 geometry tag.
+* This breaks compatibility of the simulated SVT data
+* between earlier simulation runs and the ones to
+* follow, however this has been signed off by Helen
+* and Jerome as an acceptable compromise. The CorrNum
+* for year2001 is now set to 1.
+*
 * Revision 1.80  2004/01/29 20:46:45  potekhin
 * Disabled the long since obsoleted version of TOF,
 * because this piece of code would need to be rewritten
@@ -523,6 +533,15 @@ If LL>1
                   nmod={12,0}; shift={87,0}; Rp=2; Rv=2; Wfr=7; Mf=3;  Nsi=-3;}
 
   on YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
+
+* 02/09/2004  Jerome signed off on changing, retroactively, the
+* position of the wafers in year2001, which was incorrectly offset
+* by 250 um insterad of 150 um. The change is done via the
+* flag "CorrNum", which helps us keep track of corections of this kind.
+
+                  "geometry correction "
+                     CorrNum = 1;
+
                   btofconfig=4;
                   {rich,ems}=on;
 
