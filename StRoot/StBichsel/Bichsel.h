@@ -17,7 +17,7 @@ class Bichsel {
   TString               m_Tag;
   dEdxParameterization *m_dEdxParameterization; //!
  public:
-  Bichsel(const Char_t *tag="bich");
+  Bichsel(const Char_t *tag="P10");
   virtual ~Bichsel() {}
   static Double_t GetdEdxResolution(Int_t k=1, Double_t TrackLengthInTPC=60);
   static Double_t CalcCorrection(const tpcCorrection_st *cor,const Double_t x);
@@ -44,7 +44,17 @@ class Bichsel {
   Double_t    GetProbability(Double_t log10bg, Double_t log2dx, Double_t z, Int_t kase=0) {
     return m_dEdxParameterization->GetProbability(log10bg,log2dx,z,kase);}
   Double_t    TofCorrection(Double_t log10bg);
+  const dEdxParameterization *Parameterization() const {return m_dEdxParameterization;}
   virtual void Print();
+  const Char_t      *Tag() const {return    m_dEdxParameterization->Tag();}   
+  const TProfile2D  *P()   const {return     m_dEdxParameterization->P();}     
+  const TProfile2D  *A()   const {return     m_dEdxParameterization->A();}     
+  const TProfile2D  *I70() const {return   m_dEdxParameterization->I70();}   
+  const TProfile2D  *I60() const {return   m_dEdxParameterization->I60();}   
+  const TProfile2D  *D()   const {return     m_dEdxParameterization->D();}     
+  const TProfile2D  *Rms() const {return   m_dEdxParameterization->Rms();}   
+  const TProfile2D  *W()   const {return     m_dEdxParameterization->W();}     
+  const TH3D        *Phi() const {return   m_dEdxParameterization->Phi();}     
   ClassDef(Bichsel,0)
 };
 #endif

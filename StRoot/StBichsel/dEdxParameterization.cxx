@@ -29,9 +29,10 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag,
   fI60Shift(I60Shift)
 {
   TDirectory *dir = gDirectory;
-  Char_t            *rootf = "BichselT.root";
-  if (fTag == "pai") rootf = "PaiT.root";
-  else if (fTag == "p10") rootf = "P10T.root";
+  Char_t                                         *rootf = "P10T.root";
+  if (fTag.Contains("pai" ,TString::kIgnoreCase)) rootf = "PaiT.root";
+  if (fTag.Contains("p10" ,TString::kIgnoreCase)) rootf = "P10T.root";
+  if (fTag.Contains("bich",TString::kIgnoreCase)) rootf = "BichselT.root";
   static Char_t *path  = ".:./StarDb/dEdxModel:./StarDb/global/dEdx:./StRoot/StBichsel:$STAR/StarDb/dEdxModel:$STAR/StarDb/global/dEdx:$STAR/StRoot/StBichsel";
   Char_t *file = gSystem->Which(path,rootf,kReadPermission);
   if (! file) Fatal("dEdxParameterization::GetFile","File %s has not been found in path %s",rootf,path);
@@ -88,14 +89,16 @@ Double_t    dEdxParameterization::Interpolation(Int_t Narg, TH1 *hist, Double_t 
   assert (Ndim == Narg);
 #if defined(PRINT) || defined(PRINT2)
   cout << "Interpolation:";
-  PrP(X); PrP(Y); PrP(Z); 
+  PrP(XYZ[0]); PrP(XYZ[1]); PrP(XYZ[2]); 
   cout << endl;
 #endif
+  Double_t Value = 0;
   Int_t iXYZ[3], ixyz[3];
   Double_t dXYZ[3], pXYZ[3];
   Int_t i;
   for (i = 0; i< Ndim; i++) {
     iXYZ[i] = fAXYZ[i]->FindBin(XYZ[i]); 
+    //    if (iXYZ[i] <= 0 || iXYZ[i] >= fnBins[i]) return Value; // outside of the range
     if (iXYZ[i] < 2) iXYZ[i] = 2; 
     if (iXYZ[i] >= fnBins[i])  iXYZ[i] =  fnBins[i] - 1; 
     dXYZ[i] = (XYZ[i] - fAXYZ[i]->GetBinCenter(iXYZ[i]))/fbinW[i];
@@ -123,7 +126,6 @@ Double_t    dEdxParameterization::Interpolation(Int_t Narg, TH1 *hist, Double_t 
   PrP(iXYZ[0]);PrP(ixyz[1]);PrP(ixyz[2]); PrP(hist->GetBinContent(iXYZ[0],ixyz[1],ixyz[2])); cout << endl; 
   PrP(ixyz[0]);PrP(ixyz[1]);PrP(ixyz[2]); PrP(hist->GetBinContent(ixyz[0],ixyz[1],ixyz[2])); cout << endl;
 #endif  
-  Double_t Value = 0;
   switch (Ndim) {
   case 3:  Value = 
 	     pXYZ[0]*pXYZ[1]*pXYZ[2]*hist->GetBinContent(iXYZ[0],iXYZ[1],iXYZ[2]) + 
