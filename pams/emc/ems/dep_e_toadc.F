@@ -36,7 +36,7 @@ CC:      adc_emc2_h     - Header Structure for adc_emc
 CC: RETURNS:    STAF Condition Value
 CC:>--------------------------------------------------------------------
 
-      integer det, i, mode, module, ieta, sub
+      integer det, i, mode, module, ieta, sub, temp(1)
       integer key, ih, o1, o2, adc, nphe, ierr, mod, min, max
       real c1(MAXDET), c2(MAXDET), c3(MAXDET), radc, amu, phi, eta
      + , sf, samplefraction
@@ -101,8 +101,8 @@ CC:>--------------------------------------------------------------------
             return
          endif
          call find_pos_emc(ems_control,det,module,ieta,sub, phi,eta)
-         write(6,*) ' det ',det,' module ',module,' ieta ',ieta
-     +   , ' sub ',sub, ' phi ',phi,' eta ', eta
+c         write(6,*) ' det ',det,' module ',module,' ieta ',ieta
+c     +   , ' sub ',sub, ' phi ',phi,' eta ', eta
  
          mode=control_toadc(1).mode(det)
          if(mode .eq. 0) then ! No ADC
@@ -120,7 +120,11 @@ CC:>--------------------------------------------------------------------
             amu  = hits_ems(ih).energy / cosh(eta)        ! 1./cosh(eta)=sin(theta)
      +           * sf * control_toadc(1).c2(det)
             if(amu.gt.0.0) then
-               call poissn(amu, nphe, ierr)    !   See CERNLIB(mathlib) 
+c               write(*,*) '>>>' , amu, ierr
+               call gpoiss(amu, temp, 1)
+               nphe = temp(1)
+c               call poissn(amu, nphe, ierr)    !   See CERNLIB(mathlib) 
+c               write(*,*) '<<<' , nphe, ierr
                radc = float(nphe) * control_toadc(1).c3(det)
                adc  = int (radc+0.5) ! Nearest positive integer number  
                adc  = max(0,adc)
@@ -134,7 +138,7 @@ CC:>--------------------------------------------------------------------
      +        ,mode
             return
          endif                  ! mode .eq. 0,1,2
-         write(*,*) 'det ', det,' eta ', eta,' sf ', sf  ! For testing only         
+c         write(*,*) 'det ', det,' eta ', eta,' sf ', sf  ! For testing only         
 
          adc = min(ems_control(1).adcbits(det),adc)
              
