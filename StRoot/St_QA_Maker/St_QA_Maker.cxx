@@ -73,7 +73,7 @@ Int_t St_QA_Maker::Make(){
 
   if (dst) {
     St_DataSetIter dstI(dst);           
-    if (firstEvent) {
+    if (eventCount==0) {
       St_event_header* evHeader = (St_event_header*) dstI["event_header"];
       if (evHeader) {
         event_header_st* evh = evHeader->GetTable();
@@ -1355,8 +1355,11 @@ void St_QA_Maker::MakeHistEval(){
 }
 
 //_____________________________________________________________________________
-// $Id: St_QA_Maker.cxx,v 2.19 2004/01/10 01:10:18 genevb Exp $
+// $Id: St_QA_Maker.cxx,v 2.20 2004/02/12 05:03:18 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.20  2004/02/12 05:03:18  genevb
+// Year 4 AuAu changes. New SVT histos.
+//
 // Revision 2.19  2004/01/10 01:10:18  genevb
 // Preparations for Year 5, added some svt plots
 //

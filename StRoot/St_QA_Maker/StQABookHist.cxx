@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.43 2004/01/27 20:08:14 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.44 2004/02/12 05:03:10 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.44  2004/02/12 05:03:10  genevb
+// Year 4 AuAu changes. New SVT histos.
+//
 // Revision 2.43  2004/01/27 20:08:14  genevb
 // Modify SVT point hist
 //
@@ -626,6 +629,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pv_xy=0;    //! x versus y scatter plot
   m_pv_pchi2=0; //! row1-chisq per dof of vertex fit
   m_pv_r=0;     //! radius to primary vertex
+  m_pv_SvtvsTpc=0; //! SVT prim vtx vs TPC prim vtx
 
   m_vtx_z=0;    //! SVT vertex finder resolution relative to main finder
   m_vtx_phi_dist=0;  //! azimuthal distribution of V0s relative to primVtx
@@ -662,6 +666,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   // east and west on separate plots
   m_pnt_ftpcE=0;   //! number of hits ftpcE
   m_pnt_ftpcW=0;   //! number of hits ftpcW
+  m_pnt_svtLaser=0;   //! laser spots in svt
 
 // for method MakeHistRich
   m_rich_tot=0;   //! number of rich hits
@@ -1667,6 +1672,10 @@ void StQABookHist::BookHistVertex(){
   m_pv_xy    = QAH::H2F("QaVtxPrXY",   " vertex,prim: x versus y",50,-5.,5.,50,-5.,5.);
   m_pv_pchi2 = QAH::H1F("QaVtxPrChisq"," vertex,prim: chisq/dof ",40,0.,20.);
   m_pv_r     = QAH::H1F("QaVtxPrR",    " vertex,prim: r ",100,0,0.1);
+  m_pv_SvtvsTpc = QAH::H2F("QaVtxSvtvsTpc"," vertex,prim: z(svt) vs z(tpc)",
+            60,-30.,30.,60,-30.,30.);
+  m_pv_SvtvsTpc->SetXTitle("z(svt)");
+  m_pv_SvtvsTpc->SetYTitle("z(tpc)");
 
   m_vtx_z    = QAH::H1F("QaVtxZres"," vertex: z(tpc)-z(svt), resolution check",100,-1.,1.);
   
@@ -1682,11 +1691,11 @@ void StQABookHist::BookHistVertex(){
             "V0 Z distribution relative to primvtx",60,-30.,30.);
 
   m_v0             = QAH::H1F("QaV0Vtx","dst_v0_vertex: Number V0 found ",100,0.,2000.);
-  m_ev0_lama_hist  = QAH::H1F("QaV0LambdaMass","dst_v0_vertex: Lambda mass",50,1.05,1.15);
-  m_ev0_k0ma_hist  = QAH::H1F("QaV0K0Mass","dst_v0_vertex: k0 mass",50,.4,.6);
+  m_ev0_lama_hist  = QAH::H1F("QaV0LambdaMass","dst_v0_vertex: Lambda mass",25,1.05,1.15);
+  m_ev0_k0ma_hist  = QAH::H1F("QaV0K0Mass","dst_v0_vertex: k0 mass",25,.4,.6);
 
   m_xi_tot     = QAH::H1F("QaXiVtxTot", "dst_xi_vertex: tot # vertices",100,0.,4000.);
-  m_xi_ma_hist = QAH::H1F("QaXiaMass",  "dst_xi_vertex: Xi mass",50,1.2,1.4);
+  m_xi_ma_hist = QAH::H1F("QaXiaMass",  "dst_xi_vertex: Xi mass",25,1.2,1.4);
 
   m_kink_tot   = QAH::H1F("QaKinkTot",  "kinkVertex: # kinks ",25,0.,25.);
 
@@ -1710,6 +1719,8 @@ void StQABookHist::BookHistPoint(){
   // east and west on separate plots
   m_pnt_ftpcE   = QAH::H1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,25000.);
   m_pnt_ftpcW   = QAH::H1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,25000.);
+  m_pnt_svtLaser= QAH::H2F("QaPointSvtLaser","point: laser spots, svt ",150,0,600,65,0.,130.);
+  m_pnt_svtLaser->SetXTitle("event in file");
   m_pnt_xyS     = QAH::H2F("QaPointXYSvt","point: x-y distribution of hits, svt",96,-16,16,96,-16,16);
   m_pnt_xyTE    = QAH::H2F("QaPointXYTpcE","point: x-y distribution of hits, tpcE",40,-200,200,40,-200,200);
   m_pnt_xyTW    = QAH::H2F("QaPointXYTpcW","point: x-y distribution of hits, tpcW",40,-200,200,40,-200,200);

@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.25 2004/01/10 01:10:18 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.26 2004/02/12 05:03:14 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.26  2004/02/12 05:03:14  genevb
+// Year 4 AuAu changes. New SVT histos.
+//
 // Revision 2.25  2004/01/10 01:10:18  genevb
 // Preparations for Year 5, added some svt plots
 //
@@ -130,7 +133,7 @@ StQAMakerBase::~StQAMakerBase() {
 //_____________________________________________________________________________
 Int_t StQAMakerBase::Init() {
 // Histogram booking must wait until first event Make() to determine event type
-  firstEvent = kTRUE;
+  eventCount = 0;
   firstEventClass = kTRUE;
   return StMaker::Init();
 }
@@ -145,7 +148,7 @@ Int_t StQAMakerBase::Make() {
   if (Debug())
     gMessMgr->Info(" In StQAMakerBase::Make()");
 
-  if (firstEvent) BookHist();
+  if (!mNullPrimVtx) BookHist();
   // See BookHist() for definitions of histsSet values,
   // which should be set during Make() of the derived QA Maker class
   // event class also decided in derived Make()
@@ -197,6 +200,7 @@ Int_t StQAMakerBase::Make() {
   // histograms from FPD in StEvent
   if (histsSet!=StQA_dAu) MakeHistFPD();
 
+  eventCount++;
   return kStOk;
 }
 //_____________________________________________________________________________
@@ -226,7 +230,6 @@ TH2F* StQAMakerBase::MH1F(const Text_t* name, const Text_t* title,
 void StQAMakerBase::BookHist() {  
 // book histograms
 
-  firstEvent = kFALSE;
   Int_t tempClass = eventClass;
 
   switch (histsSet) {
@@ -244,7 +247,9 @@ void StQAMakerBase::BookHist() {
 
     case (StQA_AuAu) : {
       prefix[0] = QAMakerType;  // Minbias
-      eventClass = 1;
+      (prefix[1] = QAMakerType) += "CL";  // Central
+      (prefix[2] = QAMakerType) += "HT";  // HighTower
+      eventClass = 3;
       break; }
 
     case (StQA_dAu) : {

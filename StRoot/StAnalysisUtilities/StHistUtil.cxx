@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.17 2004/02/10 16:31:15 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.18 2004/02/12 05:02:59 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.18  2004/02/12 05:02:59  genevb
+// Year 4 AuAu changes. New SVT histos.
+//
 // Revision 2.17  2004/02/10 16:31:15  genevb
 // A few extra histo lines, features
 //
@@ -87,15 +90,17 @@
 
 typedef TH1* TH1ptr;
 
-Int_t numOfPosPrefixes = 6;
-char* possiblePrefixes[6] = {"","LM","MM","HM","HP","XX"};
-char* possibleSuffixes[6] = {
+Int_t numOfPosPrefixes = 8;
+char* possiblePrefixes[8] = {"","LM","MM","HM","HP","XX","CL","HT"};
+char* possibleSuffixes[8] = {
   "General",
   "Low Mult",
   "Mid Mult",
   "High Mult",
   "High Pt",
-  "Other Physics"
+  "Other Physics",
+  "Central",
+  "High Tower"
 };
 
 int sizeOfCharPtr = sizeof(Char_t*);
