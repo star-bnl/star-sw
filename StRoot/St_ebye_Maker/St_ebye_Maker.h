@@ -1,5 +1,11 @@
-// $Id: St_ebye_Maker.h,v 1.4 1998/10/31 00:26:13 fisyak Exp $
+// $Id: St_ebye_Maker.h,v 1.5 1999/01/21 19:13:46 dhammika Exp $
 // $Log: St_ebye_Maker.h,v $
+// Revision 1.5  1999/01/21 19:13:46  dhammika
+// Updated ebye stuff which works for one event only
+//
+// Revision 1.5  1999/01/05 14:11:08  dhammika
+// Updated to be in synch with stardev and the latest SCA V2.0 
+//
 // Revision 1.4  1998/10/31 00:26:13  fisyak
 // Makers take care about branches
 //
@@ -29,38 +35,39 @@
 class St_sca_switch;
 class St_sca_filter_const;
 class St_sca_const;
-class St_foo_dst_event_summary ;
-class St_foo_dst_track ;
+class St_dst_run_header;
+class St_dst_event_header ;
+class St_dst_track ;
 class St_XDFFile;
-class St_particle;
 class St_sca_in;
 class St_sca_out;
 class St_sca_prior;
 class St_ebye_Maker : public StMaker {
  private:
                Bool_t drawinit;
-               St_sca_switch   *m_sca_switch;        //!
-               St_sca_const    *m_sca_const;         //!
-               St_sca_filter_const *m_sca_filter_const;  //!
-               St_foo_dst_event_summary   *m_dst_event_summary;          //!
-               St_foo_dst_track    *m_dsttrack;          //!
-               St_particle     *m_particle;          //!
-               St_sca_in       *m_sca_in;            //!
-               St_sca_out *m_sca_out;            //!
-               St_sca_prior *m_sca_prior;            //!
-               St_sca_out *m_sca_ensemble_ave;            //!
+               St_sca_switch              *m_sca_switch;           //!
+               St_sca_const               *m_sca_const;            //!
+               St_sca_filter_const        *m_sca_filter_const;     //!
+               St_dst_run_header          *this_dst_run_header;    //!
+               St_dst_event_header        *this_dst_event_header;  //!
+               St_dst_track               *this_dst_track;         //!
+               St_sca_prior               *m_sca_prior;            //!
+               St_sca_out                 *m_sca_ensemble_ave;     //!
+               St_sca_in                  *this_sca_in;            //!
+               St_sca_out                 *this_sca_out;           //!
  protected:
  public: 
                   St_ebye_Maker(const char *name="ebye", const char *title="event/data/ebye");
    virtual       ~St_ebye_Maker();
-   virtual Int_t Init();
+   virtual Int_t  Init();
    virtual Int_t  Make();
    virtual void   PrintInfo();
-   void SetDeltaD(Bool_t flag=kFALSE);     // *MENU*
-   void SetDimension(Bool_t flag=kFALSE);  // *MENU*
-   void SetEntropy(Bool_t flag=kFALSE);    // *MENU*
-   void SetmakePrior(Bool_t flag=kFALSE);  // *MENU*
-   void SetdoAnalysis(Bool_t flag=kFALSE); // *MENU*
+   Int_t SetmakePrior(Bool_t flag=kFALSE);          // *MENU*
+   Int_t SetmakeEnsembleAve(Bool_t flag=kFALSE);    // *MENU*
+   Int_t SetdoAnalysis(Bool_t flag=kFALSE);         // *MENU*
+   Int_t SetnEvents(Int_t     nEvents=0);           // *MENU*
+   Int_t PutPrior();                                // *MENU*
+   Int_t PutEnsembleAve();                          // *MENU*
    ClassDef(St_ebye_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

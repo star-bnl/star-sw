@@ -1,5 +1,11 @@
-// $Id: ebye.C,v 1.4 1998/08/26 12:15:15 fisyak Exp $
+// $Id: ebye.C,v 1.5 1999/01/21 19:14:04 dhammika Exp $
 // $Log: ebye.C,v $
+// Revision 1.5  1999/01/21 19:14:04  dhammika
+// Updated ebye stuff which works for one event only
+//
+// Revision 1.5  1999/01/05 14:11:08  dhammika
+// Updated to be in synch with stardev and the latest SCA V2.0 
+//
 // Revision 1.4  1998/08/26 12:15:15  fisyak
 // Remove asu & dsl libraries
 //
@@ -12,67 +18,171 @@
 // Revision 1.1  1998/08/05 14:33:40  fisyak
 // Add ebye
 //
-// Revision 1.6  1998/07/23 11:32:42  fisyak
-// Small fixes
-//
-// Revision 1.5  1998/07/21 13:35:14  fine
-// The new version of the macros: MakeHtmlTables and makedoc have been introduced
-//
-// Revision 1.4  1998/07/21 01:04:41  fisyak
-// Clean up
-//
-// Revision 1.3  1998/07/21 00:36:49  fisyak
-// tcl and tpt
-//
-// Revision 1.2  1998/07/20 15:08:19  fisyak
-// Add tcl and tpt
-//
-{
-   gSystem->Load("St_base.so");
-   gSystem->Load("xdf2root.so");
-   gSystem->Load("St_Tables.so");
-   gSystem->Load("libmsg.so");
-   gSystem->Load("libtls.so");
-   //   gSystem->Load("geometry.sl");
-   gSystem->Load("ebye.sl");
-   gSystem->Load("St_ebye.so");
-   gSystem->Load("tpc.sl");
-   gSystem->Load("St_tpc.so");
-   gSystem->Load("svt.sl");
-   gSystem->Load("St_svt.so");
-   gSystem->Load("StChain.so"); 
-
-#ifndef __CINT__
-#include "Rtypes.h"
-#include "St_XDFFile.h"
-#include "St_DataSet.h"
-#include "St_Module.h"
-#include "St_Table.h"
+#ifdef   DEBUG
+#undef   DEBUG 
 #endif
-  Char_t *filename = "/star/u2/dhammika/data/DST_prodrun2_evt1-99.xdf";
-  St_XDFFile xdffile_in(filename,"r");
-// Create the main chain object
-  StChain chain("StChain");
-//  Create the makers to be called by the current chain
-  St_xdfin_Maker xdfin("xdfin_Maker","/");
-  chain.SetInputXDFile(&xdffile_in);
-  St_ebye_Maker ebye_Maker("ebye_Maker","event/ebey/sca");
+#define  DEBUG  1
 
-  chain.PrintInfo();
-// Init the mai chain and all its makers
-  chain.Init();
-  ebye_Maker.SetmakePrior(kTRUE);
-
-// Prepare TCanvas to show some histograms created by makers
-  gBenchmark->Start("ebye");
-
-for (Int_t i=0;i<90;i++){
-  chain.Make(i);
-  //  histCanvas->Modified();
-  //  histCanvas->Update();
-   chain.Clear();
+Int_t iret;
+TBrowser *b = 0;
+class StChain;
+StChain  *chain=0;
+void Load(){
+  printf (" Begin loading shared libraries  \n");
+  gSystem->Load("St_base");
+  gSystem->Load("StChain");
+  gSystem->Load("xdf2root");
+  gSystem->Load("St_Tables");
+  gSystem->Load("St_xdfin_Maker");
+  gSystem->Load("St_TLA_Maker");
+  gSystem->Load("libmsg");
+  gSystem->Load("libtls");
+  gSystem->Load("St_params_Maker");
+  gSystem->Load("St_calib_Maker");
+  gSystem->Load("St_dst_Maker");
+  gSystem->Load("St_run_summary_Maker");
+  //gSystem->Load("St_ana_Maker");
+  gSystem->Load("ebye");
+  gSystem->Load("St_ebye");
+  gSystem->Load("St_ebye_Maker");
+  printf (" Done loading shared libraries  \n"); 
 }
-  gBenchmark->Stop("ebye");
-  gBenchmark->Print("ebye");
-  TBrowser b;
+
+ebye(const Int_t   SetmakePrior            = 0,
+	  const Int_t   SetmakeEnsembleAve = 0,
+	  const Int_t   SetdoAnalysis      = 1,
+	  const Int_t   Nevents            = 2,
+	  const Char_t *fileinp            = 
+	  "/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/tfs_dst/psc362_02_160evts_h_dst.xdf",
+	  //const Char_t *fileprior          = "sca_prior_dir.xdf",
+	  const Char_t *fileprior          = 0,
+	  //const Char_t *fileensembleave    = "sca_ensemble_dir.xdf",
+	  const Char_t *fileensembleave    = 0,
+	  const Char_t *fileout            = "sca_out.xdf",
+	  //const Char_t *FileOut            = "sca_out.root")
+	  const Char_t *FileOut            = 0)
+{
+  // Dynamically link some shared libs
+  if (gClassTable->GetID("StChain") < 0) Load();
+  St_XDFFile                  *xdf_in  = 0;
+  if (fileinp)                 xdf_in  = new St_XDFFile(fileinp,"r");
+  St_XDFFile                 *xdf_out  = 0;
+  if (fileout)                xdf_out  = new St_XDFFile(fileout,"w");
+  St_XDFFile                *xdf_prior = 0;
+  if (fileprior)             xdf_prior = new St_XDFFile(fileprior, "w");
+  St_XDFFile          *xdf_ensembleave = 0;
+  if (fileensembleave) xdf_ensembleave = new St_XDFFile(fileensembleave, "w");
+  TFile                     *root_out  = 0; 
+  if (FileOut)               root_out  = new TFile(FileOut,"RECREATE");
+  // Create the main chain object
+  if (chain) delete chain;
+  chain = new StChain("ebye_ana");
+  //St_TLA_Maker      *params = new St_TLA_Maker("params","params");
+  St_params_Maker   *params = new St_params_Maker("params","params");
+  //St_calib_Maker    *calib  = new St_calib_Maker("calib","calib");
+  // Set input file
+  if (xdf_in) {
+    St_xdfin_Maker *my_xdfin = new St_xdfin_Maker("xdfin");
+    chain->SetInputXDFile(xdf_in);
+  }
+  //  Create the makers to be called by the current chain
+  //St_dst_Maker   *my_dst = new St_dst_Maker("dst","dst");
+  //St_TLA_Maker  *summary = new St_TLA_Maker("run_summary","dst");
+  St_run_summary_Maker *summary  = new St_TLA_Maker("run_summary","run/dst");
+  St_TLA_Maker   *dst    = new St_TLA_Maker("dst","event/data/global/dst");
+  //St_ana_Maker   *my_dst = new St_ana_Maker("dst","dst");
+  St_ebye_Maker *my_ebye = new St_ebye_Maker("ebye","event/data/ebye/sca");
+  // Create HTML docs of all Maker's involved
+  //chain->MakeDoc();
+  if (DEBUG) printf("====>ebye.C::Begin chain.PrintInfo\n");
+  chain->PrintInfo();
+  if (DEBUG) printf("====>ebye.C::End chain.PrintInfo\n");
+  // Init the chain and all its makers
+  if (DEBUG) printf("====>ebye.C::Begin chain.Init\n");
+  int iInit = chain->Init();
+  if (iInit) chain->Fatal(iInit,"on init");
+  if (DEBUG) printf("====>ebye.C::End chain.Init\n");
+  // Set SCA specific flags 
+  if (SetmakePrior){
+    iret = my_ebye->SetmakePrior(kTRUE);
+    if (iret){
+      printf("===>ebye.C::<<< ERROR >>> Problem with  my_ebye->SetmakePrior *****\n");
+      return;
+    }
+    else
+      printf("====>ebye.C::***** my_ebye->SetmakePrior successful *****\n");
+  }
+  if (SetmakeEnsembleAve){
+    iret = my_ebye->SetmakeEnsembleAve(kTRUE);
+    if (iret){
+      printf("====>ebye.C::<<< ERROR >>> Problem with  my_ebye->SetmakeEnsembleAve *****\n");
+      return;
+    }
+    else
+      printf("====>ebye.C::***** my_ebye->SetmakeEnsembleAve successful *****\n");
+  }
+  if (SetdoAnalysis){
+    iret = my_ebye->SetdoAnalysis(kTRUE);
+    if (iret){
+      printf("====>ebye.C::<<< ERROR >>> Problem with  my_ebye->SetdoAnalysis *****\n");
+      return;
+    }
+    else
+      printf("====>ebye.C::***** my_ebye->SetdoAnalysis successful *****\n");
+  }
+  
+  // Skip events?
+  //  St_DataSet *set =chain->XDFFile()->NextEventGet();  
+  //  delete set;
+  
+  gBenchmark->Start("ebye_ana");
+  printf("====>ebye.C::Beging Benchmark(ebye_ana) \n"); 
+  Int_t i=1;
+  for (Int_t i =1; i <= Nevents; i++){
+    iret = chain->Make(i);
+    if (iret) {
+      printf ("====>ebye.C:: <<< ERROR >>> <Chain::Make()>: failed in Event no. %d\n",i);
+      break;
+    }
+    if (i != Nevents) chain->Clear();
+    // Write out SCA output
+    if (SetdoAnalysis && xdf_out){
+      gBenchmark->Start("xdf_out");
+      St_DataSet *ebye_out = chain->DataSet("ebye");
+      //St_DataSetIter       ebyetables(ebye_out); ebyetables.Du();
+      xdf_out->NextEventPut(ebye_out); // xdf output
+      gBenchmark->Stop("xdf_out");
+    }
+    printf ("====>ebye.C::===========================================\n");
+    printf ("====>ebye.C::=========================================== ");
+    printf ("====>ebye.C:: Done with Event no. %d\n",i);
+    printf ("====>ebye.C::===========================================\n");
+  }
+  // Set the total #of good events processed.
+  my_ebye->SetnEvents(i);
+  // Write out prior
+  if (SetmakePrior && xdf_prior){
+    my_ebye->PutPrior();
+    St_DataSet *prior = chain->DataSet("calib/ebye/sca_prior_dir");
+    xdf_out->NextEventPut(prior); // xdf output
+    delete xdf_prior;
+  }
+  // Write out ensemble average
+  if (SetmakeEnsembleAve && xdf_ensembleave){
+    my_ebye->PutEnsembleAve();
+    St_DataSet *ensembleave = chain->DataSet("calib/ebye/sca_ensemble_dir");
+    xdf_out->NextEventPut(ensembleave); // xdf output
+    delete xdf_ensembleave;
+  }
+  if (Nevents > 1) {
+    chain->Finish();
+    delete xdf_in;
+    if (xdf_out){
+      delete xdf_out;
+      gBenchmark->Print("xdf_out");
+    }
+    gBenchmark->Print("ebye_ana");
+  }
+  else {if (!b)   b = new TBrowser;}
 }
+
