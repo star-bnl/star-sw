@@ -5,11 +5,11 @@
 **:  Id: idl.y,v 1.14 1998/08/28 21:22:28 fisyak Exp  
 **:<------------------------------------------------------------------*/
 #include "track_propagator.h"
-#include "stdio.h"
-#include "math.h"
+#include <stdio.h>
+#include <math.h>
 
 
-long track_propagator_(
+long type_of_call track_propagator_(
   TABLE_HEAD_ST         *gtrack_h,      DST_TRACK_ST           *gtrack ,
   TABLE_HEAD_ST         *target_h,  EGR_PROPAGATE_ST           *target ,
   TABLE_HEAD_ST         *ptrack_h,      DST_TRACK_ST           *ptrack )

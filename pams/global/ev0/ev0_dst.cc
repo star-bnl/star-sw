@@ -14,7 +14,7 @@
 /* ------- System includes -------------- */
 #include <iostream.h>
 
-  long ev0_dst_(
+  long type_of_call ev0_dst_(
     TABLE_HEAD_ST  *ev0out_h,         EV0_AUX_ST          *ev0out,
     TABLE_HEAD_ST  *dst_v0_vertex_h,  DST_V0_VERTEX_ST    *dst_v0_vertex)
 {
