@@ -13,8 +13,14 @@ my $O        = "o";
 my $A        = "a";
 my $Cxx      = "cxx";
 my $so       = "so";
-my $So       = $so;
+
 my $SoOUT    = "-o";
+my $Cout     = "-o ";
+my $Fout     = "-o ";
+my $Lout     = "-o ";
+my $Cinp     = "";
+my $CXXinp   = "";
+
 my $CPP      = "gcc";
 my $CPPFLAGS = "";
 my $CXX      = "g++";
@@ -105,6 +111,43 @@ elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $SO        =  $CXX;
   $SOFLAGS   =  " -G";
 }
+elsif (/^intel_wnt/) {
+  $EXESUF   = ".exe";
+  $O        = "obj";
+  $A        = "lib";
+  $Cxx      = "cxx";
+  $so       = "DLL";
+
+  $Cout     = "-Fo";
+  $Fout     = "-Fo";
+  $Lout     = "-out:";
+  $SoOUT    = "-out:";
+  $Cinp     = "-Tc";
+  $CXXinp   = "-Tp";
+  $Copt     = "-O2";
+  $CXXOpt   = "-O2";
+
+  $GEANT3   += $EXESUF;
+  $ROOTCINT += $EXESUF;
+
+  $ROOTCINTD = "-DWIN32";
+  $OSFID     =  "VISUAL_CPLUSPLUS CERNLIB_WINNT CERNLIB_MSSTDCALL WIN32";
+  $CPP       = "cl";
+  $CC        = "cl";
+  $CXX       = "cl";
+  $FC        = "fl32";
+  $CXXFLAGS  =  $DEBUG . "  -KPIC -features=no%castop -features=no%anachronisms +w";
+  $CLIBS     = "ws2_32.lib mswsock.lib user32.lib kernel32.lib msvcrt.lib oldnames.lib MSVCIRT.LIB";
+  $FLIBS     = "DFORDLL.LIB";
+  $FFLAGS    =  $DEBUG . " -MD -G5 -Zi -fpp -Oxp -nokeep -nologo";
+  $FEXTEND   = "-extend_source";
+  $CFLAGS    =  $DEBUG . " -MD -G5 -Zi -nologo -DASU_MALLOC_OFF";
+  $LD        =  $CXX;
+#  $LDFLAGS   =  $DEBUG . $(conlflags); 
+  $SO        =  "link";
+  $SOFLAGS   =  $DEBUG . " -DEBUG -NODEFAULTLIB -INCREMENTAL:NO -NOLOGO -DLL ";
+}
+
 $MAIN    = cwd();
 $INCLUDE = "#inc";
 $LIB     = "";
@@ -120,16 +163,15 @@ print "LD  =\t",$LD,";\t$LDFLGAS = \t",$LDFLAGS,"\n";
 print "SO  =\t",$SO,";\t$SOFLGAS = \t",$SOFLAGS,"\n";
 print "INCLUDE = ",$INCLUDE,"\n";
 (my $inc = $INCLUDE) =~ s/\#//g;
-$CPPPATH .= ".:" . $inc .":StRoot:pams:.share:.share/tables";
+$CPPPATH .= ".:" . $inc .":StRoot:pams:.share:.share/tables:StRoot/StDbLib:StRoot/StDbLib/Calibrations:StRoot/StDbLib/Conditions:StRoot/StDbLib/Geometry";
 my @includes = ("St_base","StChain","StUtilities","xdf2root","StarClassLibrary","StEvent");
 foreach my $inc (@includes) {
   $CPPPATH .= ":StRoot/" . $inc;
 }
 $CPPPATH .= ":" . $ROOTSYS . "/src:/opt/star/include";
+#$CPPPATH =~ s/:/$PATH_SEPARATOR/g;
 $FCPPPATH = "-I.. -I../.. -I" . $CERN_ROOT ."/include -I" . $CERN_ROOT . "/include/geant321";
 print "CPPPATH = ",$CPPPATH,"\n";
-my $DirPath  = cwd();
-print " in DirPath=",$DirPath," FilePath=",$FilePath,"\n";
 print " STAR = ",$STAR,"\n";
 push @Reps, $STAR;
 Repository ($STAR);
@@ -146,22 +188,28 @@ $env = new cons(
 		'FFLAGS'       => $FFLAGS,
 		'FEXTEND'      => $FEXTEND,
 		'FCPPPATH'     => $FCPPPATH,
-		'FCCOM'        => 'cd %<:d; %FC %FFLAGS %DEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %<:f -o %>:f',
+		'Fout'         => $Fout,
+		'CXXinp'       => $CXXinp,
+		'Cinp'         => $Cinp,
+		'Cout'         => $Cout,
+		'Lout'         => $Lout,
+		'SoOUT'        => $SoOUT,
+		'FCCOM'        => 'cd %<:d; %FC %FFLAGS %DEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %<:f %Fout%>:f',
 		'GEANT3'       => $GEANT3,
 		'GEANT3COM'    => 'cd %<:d; %GEANT3 %<:f -o %<:f.F; %FC %FFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %<:f.F -o %>:f',
 		'CC'	       => $CC,
 		'CFLAGS'       => $CFLAGS,
-		'CCCOM'        => 'cd %<:d; %CC %CFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %<:f -o %>:f',
+		'CCCOM'        => 'cd %<:d; %CC %CFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %Cinp%<:f %Cout%>:f',
 		'CXX'          => $CXX,
 		'CXXFLAGS'     => $CXXFLAGS,
-		'CXXCOM'       => 'cd %<:d; %CXX %CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %<:f -o %>:f',
+		'CXXCOM'       => 'cd %<:d; %CXX %CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %CXXinp%<:f %Cout%>:f',
 		'LINK'	       => $LD,
 		'LDFLAGS'      => $LDFLAGS,
-		'LINKCOM'      => '%LINK %DEBUG %LDFLAGS -o %> %<:f %_LDIRS %LIBS',
+		'LINKCOM'      => '%LINK %DEBUG %LDFLAGS %Lout%> %<:f %_LDIRS %LIBS',
 		'SO'           => $SO,
 		'SOFLAGS'      => $SOFLAGS, 
 		'SoOUT'        => $SoOUT,
-		'LINKMODULECOM'=> '%SO %DEBUG %SOFLAGS %SoOUT %> %<',
+		'LINKMODULECOM'=> '%SO %DEBUG %SOFLAGS %SoOUT%> %<',
 		'AR'	       => $AR,
 		'ARFLAGS'      => $ARFLAGS,
 		'ARCOM'        => "%AR %ARFLAGS %> %<;%RANLIB %>",
@@ -172,8 +220,9 @@ $env = new cons(
 		'LD'	       => 'ld',
 		'LDFLAGS'      => '',
 		'PREFLIB'      => 'lib',
-		'SUFLIB'       => '.a',
-		'SUFLIBS'      => '.so:.a',
+		'SUFLIB'       => $A,
+		'SUFLIBS'      => $so . ":" . $A,
+		'SUFSOLIB'     => $so,
 		'SUFMAP'       => {
 				   '.g'  => 'build::command::geant3',
 				   '.f'  => 'build::command::fc',
@@ -187,7 +236,7 @@ $env = new cons(
 				   '.cpp'=> 'build::command::cxx',
 				   '.idl'=> 'build::command::stic'
 				  },
-		'SUFOBJ'	=> '.o',
+		'SUFOBJ'	=> "." . $O,
 		'ENV'	        => { 'PATH' => $PATH,
 				     'ROOTSYS' => $ROOTSYS,
 				     'LD_LIBRARY_PATH' => $LD_LIBRARY_PATH,
@@ -198,35 +247,28 @@ $env = new cons(
 	       );
 #Command $env 
 my $build  = "." . $STAR_HOST_SYS; print "build = $build\n";
-if (! -d $build) {mkdir $build, 0664;}
+#if (! -d $build) {mkdir $build, 0664;}
 $BUILD  = "#" . $build;
 $LIB    = $BUILD . "/lib";
 $BIN    = $BUILD . "/bin"; 
 $OBJ    = $BUILD . "/obj";
 my $obj = $build . "/obj";
+my $DirPath  = cwd();
+print " in DirPath=$DirPath\n";
 Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n";
-if (! -d "$obj")   {mkdir $obj, 0664;}
+#if (! -d "$obj")   {mkdir $obj, 0664;}
 my @Targets = ();
-my @conscripts = ("StRoot/Conscript", "pams/Conscript","pams/tables/Conscript");
-#my @conscripts = ("pams/Conscript","tables/Conscript");
-#my @conscripts = ("pams/Conscript");
-for my $conscript (@conscripts) {
-  if (-f $conscript) {
-    my $target = $OBJ . "/" . $conscript;
+my @dirs = ("StRoot", "pams","pams/tables");
+for my $dir (@dirs) {
+  if (-d $dir) {
+    my $target = $OBJ . "/" . $dir . "/Conscript";
     push @Targets, $target; print "new taret = $target\n";
   }
 }
-#if (-d "./StRoot") {
-#  my $stroot = $build . "/StRoot";
-#  if (! -f "$stroot") {symlink obj, $stroot; print "symlink obj, $stroot\n";}
-#  $Targets .= "#" . $stroot . "/Conscript";
-#}
 print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ Targets = @Targets\n";
-#Link $OBJ => 'StRoot'; print "Link $OBJ => StRoot\n";
 Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
-#Default qw (   .  );
+Default qw (   .  );
 Build  @Targets;
-#Build ( "StRoot/Conscript" );
 #________________________________________________________________________________
 # Builder for a C++ module
 package build::command::cxx;
@@ -420,6 +462,7 @@ sub find_idlM {
 sub cpppath {
   my $ENV = $_[0]; 
   my @cpp = split /:/, $ENV->{CPPPATH};
+#  my @cpp = split /$PATH_SEPARATOR/, $ENV->{CPPPATH};
   my @repositories = Repository_List;
   my $PWD = cwd(); # print "cpppath PWD = $PWD\n";
   my $CPPPATH = "";
@@ -460,7 +503,7 @@ sub script::wanted {
       /^.*\.cxx$/     ||
       /^.*\.g$/       ||
 #     /^.*\.f$/       ||
-      /^.*\.F$/) {#print "$name\n";
+      /^.*\.F$/) {# print "$name\n";
     push @search_files, $name; 
   }
 }
@@ -482,7 +525,7 @@ sub script::wanted_idlM {
 	/^hold$/ ||
 	/^wrk$/)
      ) {$prune = 1; return;}
-  if (/^.*\.idl$/) {#print "$name\n";
+  if (/^.*\.idl$/) {# print "$name\n";
     push @search_files, $name; 
   }
 }
@@ -503,7 +546,7 @@ sub script::wanted_Def {
 	/^local$/    ||
 	/^hold$/     ||
 	/^wrk$/))       {$prune = 1; return;}
-  if (/^.*\.h$/      || /^.*\.hh$/ ) {#    print "$name\n"; 
+  if (/^.*\.h$/      || /^.*\.hh$/ ) {# print "$name\n"; 
 					 push @search_files, $name; }
 }
 #________________________________________
