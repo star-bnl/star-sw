@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.3 2004/07/01 00:34:52 porter Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.4 2004/09/16 23:44:05 chunhuih Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -35,10 +35,10 @@
 ClassImp(StEStruct2ptCorrelations)
 
 //--------------------------------------------------------------------------
-StEStruct2ptCorrelations::StEStruct2ptCorrelations(int mode): manalysisMode(mode), mskipPairCuts(false), mdoPairCutHistograms(false) , mInit(false), mDeleted(false) {  init();  }
+StEStruct2ptCorrelations::StEStruct2ptCorrelations(int mode): manalysisMode(mode), mskipPairCuts(false), mdoPairCutHistograms(false) , mInit(false), mDeleted(false) {   }
 
 //--------------------------------------------------------------------------
-StEStruct2ptCorrelations::StEStruct2ptCorrelations(const char* cutFileName, int mode): manalysisMode(mode), mskipPairCuts(false), mdoPairCutHistograms(false), mInit(false), mDeleted(false), mPair(cutFileName) {  init(); }
+StEStruct2ptCorrelations::StEStruct2ptCorrelations(const char* cutFileName, int mode): manalysisMode(mode), mskipPairCuts(false), mdoPairCutHistograms(false), mInit(false), mDeleted(false), mPair(cutFileName) {  }
 
 //--------------------------------------------------------------------------
 StEStruct2ptCorrelations::~StEStruct2ptCorrelations(){ cleanUp(); };
@@ -95,6 +95,7 @@ void StEStruct2ptCorrelations::cleanUp(){
 //--------------------------------------------------------------------------
 bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
   if(!event) return false;
+  if(mInit == false) init();
 
   if(2>event->Ntrack()){
     delete event;
@@ -739,6 +740,11 @@ void StEStruct2ptCorrelations::deleteArraysAndHistograms(){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.4  2004/09/16 23:44:05  chunhuih
+ * call init() from doEvent() instead of the constructor. This is needed
+ * because we want to use the polymorphic feature of this virtual function.
+ * The constructor would always call the local version of a virtual function.
+ *
  * Revision 1.3  2004/07/01 00:34:52  porter
  * correct accounting for possible pairs in stats files
  *
