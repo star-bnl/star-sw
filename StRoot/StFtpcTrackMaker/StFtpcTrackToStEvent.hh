@@ -1,7 +1,7 @@
 //StFtpcTrackToStEvent.h
 /*******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.hh,v 1.1 2004/04/06 20:23:49 oldi Exp $
+ * $Id: StFtpcTrackToStEvent.hh,v 1.2 2004/05/07 14:39:39 oldi Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -13,7 +13,6 @@
 #define StFtpcTrackToStEvent_HH
 #include <map>
 using std::map;
-//#include "Sti/StiDedxCalculator.h"
 #include "StFtpcPoint.hh"
 #include "StFtpcTrack.hh"
 #include "TObjArray.h"
@@ -47,8 +46,9 @@ public:
   void FillGeometry(StTrack* track, StFtpcTrack* kTrack, bool outer);
   void FillFitTraits(StTrack* track, StFtpcTrack* kTrack);
   void FillPidTraits(StTrack* track, StFtpcTrack* kTrack);
-  void FilldEdxInfo(/*StiDedxCalculator&,*/ StTrack* track, StFtpcTrack* kTrack);
+  void FilldEdxInfo(StTrack* track, StFtpcTrack* kTrack);
   void FillTrack(StTrack* track, StFtpcTrack* kTrack);
+  void FillTopologyMap(StTrack* track, StFtpcTrack* kTrack);
   unsigned short EncodedStEventFitPoints(StFtpcTrack* kTrack); 
   float ImpactParameter(StFtpcTrack* kTrack);
 
@@ -57,9 +57,6 @@ private:
   TObjArray* mTrackStore;
   map<StFtpcTrack*, StTrackNode*> mTrkNodeMap;
   
-  //StiDedxCalculator dEdxFtpcWestCalculator;
-  //StiDedxCalculator dEdxFtpcEastCalculator;
-
   unsigned short mStiEncoded;
   //helix parameters
   StThreeVectorD *originD;
