@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: PIDFitter.cxx,v 1.2 2002/02/25 18:31:24 jeromel Exp $
+// $Id: PIDFitter.cxx,v 1.3 2002/03/27 14:19:21 aihong Exp $
 //
 // Authors: Aihong Tang
 //
@@ -1010,9 +1010,14 @@ void  PIDFitter::ExtrapAmp(Char_t* fileNameOfInput, Char_t* fileNameOfOutput){
 
 
 
-  TF1* EFcn = new TF1("EFcn","expo",EAmpFitBegin,EAmpFitBegin+0.22);
-  EAmpHisto->Fit("EFcn","RW+");
-  if (EFcn)  delete EFcn;
+  TF1* EFcnLeft = new TF1("EFcnLeft","expo",EAmpFitBegin,EAmpFitBegin+0.22);
+  EAmpHisto->Fit("EFcnLeft","RW+");
+  if (EFcnLeft)  delete EFcnLeft;
+
+  TF1* EFcnRight = new TF1("EFcnRight","expo",0.3,0.8);
+  EAmpHisto->Fit("EFcnRight","RW+");
+  if (EFcnRight)  delete EFcnRight;
+
 
   //now fit K 
   low        = 0.4; 
@@ -1086,6 +1091,9 @@ Double_t sigmaNSampleFitFcn(Double_t* x, Double_t *par){
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: PIDFitter.cxx,v $
+// Revision 1.3  2002/03/27 14:19:21  aihong
+// use two functions to fit e+/- amp. instead of one
+//
 // Revision 1.2  2002/02/25 18:31:24  jeromel
 // More SetFormat() stripped.
 //

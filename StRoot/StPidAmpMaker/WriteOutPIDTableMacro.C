@@ -99,9 +99,11 @@ void WriteOutPIDTableMacro( char* myOutputName){
            {PidTag="P";  BandCenterPtr=PBandCenter;}
 
      //set file names
-  for (int i=0; i<mMultiplicityBins; i++)
-    for (int j=0; j<mNDcaBins; j++) 
-      for (int k=0; k<mNChargeBins; k++) {
+   for (int i=0; i<mMultiplicityBins; i++)
+     for (int j=0; j<mNDcaBins; j++) 
+        for (int k=0; k<mNChargeBins; k++) {
+
+
 
       //-------------amp file
       mInputAmpFileName[i][j][k]= new char[80];
@@ -285,7 +287,6 @@ void WriteOutPIDTableMacro( char* myOutputName){
    sigmaFile>>ie;  sigmaFile>>mSigmaOfSingleTrail[h];
  }
 
-
       sigmaFile.close();
 
 
@@ -366,20 +367,28 @@ void WriteOutPIDTableMacro( char* myOutputName){
 
      } else if (OutPutName.Contains("EPIDTable")) { //1 fcn for E
 
-       TF1* EFcn = theAmpHist->GetFunction("EFcn");
-       EFcn->SetRange(0.15, mPEnd);
-
-       if (     pPosition<=EFcn->GetXmax()
-	     && pPosition >EFcn->GetXmin() && EFcn->GetParameter(1)<0 )
-             theAmp = EFcn->Eval(pPosition,0.,0.);
+       TF1* EFcnLeft = theAmpHist->GetFunction("EFcnLeft");
+       EFcnLeft->SetRange(0.15, mPEnd);
+       // can not get a good fit with a single expo. has to split to "left" and "right"
+       // left
+       if (     pPosition<=EFcnLeft->GetXmax()
+	     && pPosition >EFcnLeft->GetXmin() && EFcnLeft->GetParameter(1)<0 )
+             theAmp = EFcnLeft->Eval(pPosition,0.,0.);
        else  theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
                   (theAmpHist->GetBinContent(pIdx+1)) : 0.;
+
+      // right fit for e-k e-p amp.
+       TF1* EFcnRight = theAmpHist->GetFunction("EFcnRight");
+       EFcnRight->SetRange(EFcnRight->GetXmin(), mPEnd);
+       if (     pPosition<=EFcnRight->GetXmax()
+	     && pPosition >EFcnRight->GetXmin() && EFcnRight->GetParameter(1)<0 )
+             theAmp = EFcnRight->Eval(pPosition,0.,0.);
+       else  theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
+                  (theAmpHist->GetBinContent(pIdx+1)) : 0.;       
 
       if (nhitsPosition<=5)  //ndedx<5, E fcn fitting not good. use hist.
          theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
                   (theAmpHist->GetBinContent(pIdx+1)) : 0.;
-
-
 
      } else if (OutPutName.Contains("KPIDTable")) {//3 fcn for K
 
@@ -424,6 +433,7 @@ void WriteOutPIDTableMacro( char* myOutputName){
      theCenter=BandCenterPtr->Eval(pPosition);
      theSigma=
     mSigmaOfSingleTrail[etaIdx]*theCenter/TMath::Sqrt(nhitsPosition);
+
 
 
      //    theSigma *=1.12; //temp fix. the calculated resolution is a little bigger 
