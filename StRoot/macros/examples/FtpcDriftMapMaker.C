@@ -1,5 +1,8 @@
-// $Id: FtpcDriftMapMaker.C,v 1.8 2003/04/30 20:40:11 perev Exp $
+// $Id: FtpcDriftMapMaker.C,v 1.9 2003/09/30 08:13:14 jcs Exp $
 // $Log: FtpcDriftMapMaker.C,v $
+// Revision 1.9  2003/09/30 08:13:14  jcs
+// StarClassLibrary must be loaded before StDbUtilities (needs StThreeVectorF)
+//
 // Revision 1.8  2003/04/30 20:40:11  perev
 // Warnings cleanup. Modified lines marked VP
 //
@@ -41,11 +44,11 @@ void FtpcDriftMapMaker(const Int_t map=2, const Float_t factor=1.0)
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
     gSystem->Load("StUtilities");
+    gSystem->Load("StarClassLibrary");
     gSystem->Load("StDbUtilities");
     gSystem->Load("StDbLib");
     gSystem->Load("StDbBroker");
     gSystem->Load("St_db_Maker");
-    gSystem->Load("StarClassLibrary");
     gSystem->Load("StMagF");
     gSystem->Load("libftpc_Tables");
     gSystem->Load("StFtpcDriftMapMaker");
