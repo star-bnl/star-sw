@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.1 1999/10/28 22:25:07 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 2.1  1999/10/28 22:25:07  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.2  1999/11/04 13:30:40  ullrich
+ * Added constructor without summary table
  *
  * Revision 2.11  2000/05/15 18:35:38  ullrich
  * All data member related to collections and containers are now
@@ -35,8 +35,8 @@
  * Primary vertices automatically sorted in addPrimaryVertex().
  * add rich pixel info/containers
  *
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.1 1999/10/28 22:25:07 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.1 1999/10/28 22:25:07 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
  *
  * Revision 2.0  1999/10/12 18:41:53  ullrich
 
@@ -44,16 +44,26 @@ static const char rcsid[] = "$Id: StEvent.cxx,v 2.1 1999/10/28 22:25:07 ullrich 
 #include <typeinfo>
 #include <algorithm>
 #include "StEvent.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.1 1999/10/28 22:25:07 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.1 1999/10/28 22:25:07 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
 #include "StTpcHitCollection.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.1 1999/10/28 22:25:07 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.1 1999/10/28 22:25:07 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
 #include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
 #include "StRichCollection.h"
 #include "StTrackDetectorInfo.h"
-    
+#include "StL0Trigger.h"
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
+#include "tables/St_dst_event_summary_Table.h"
+#include "tables/St_dst_summary_param_Table.h"
+#ifndef ST_NO_NAMESPACES
+using std::swap;
+#endif
+    mRunId = 0;
+    mId = 0;
+    mTime = 0;
     mBunchCrossingNumber = 0;
     mSummary = 0;
     mSoftwareMonitor = 0;
@@ -66,13 +76,15 @@ static const char rcsid[] = "$Id: StEvent.cxx,v 2.1 1999/10/28 22:25:07 ullrich 
     mV0Vertices = 0;
     mXiVertices = 0;
     mKinkVertices = 0;
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
+void
+StEvent::initToZero()
+
+    mContent.resize(mContentLength);
     mType  = evtHdr.event_type;
     mRunId = evtHdr.exp_run_id;
     mId    = evtHdr.n_event;
     mTime  = evtHdr.time;
-    mTriggerMask = evtHdr.trig_mask;
-    mBunchCrossingNumber = evtHdr.bunch_cross;
-void
     mTriggerMask = evtHdr.trig_mask;
     mBunchCrossingNumber = evtHdr.bunch_cross;
 	    return;

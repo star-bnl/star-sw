@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBrowsableEvent.cxx,v 2.2 1999/10/28 22:24:50 ullrich Exp $
+ * $Id: StBrowsableEvent.cxx,v 2.3 1999/11/04 13:29:49 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StBrowsableEvent.cxx,v $
- * Revision 2.2  1999/10/28 22:24:50  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/11/04 13:29:49  ullrich
+ * Added constructor without summary table
  *
  * Revision 2.5  2000/02/23 17:35:52  ullrich
  * Changes due to the addition of the EMC to StEvent
@@ -44,8 +44,11 @@
 #include "StEmcCollection.h"
 #include "StRichPixelCollection.h"
 
-static const char rcsid[] = "$Id: StBrowsableEvent.cxx,v 2.2 1999/10/28 22:24:50 ullrich Exp $";
+static const char rcsid[] = "$Id: StBrowsableEvent.cxx,v 2.3 1999/11/04 13:29:49 ullrich Exp $";
 
+ClassImp(StBrowsableEvent)
+
+StBrowsableEvent::StBrowsableEvent() { /* noop */ }
   
 StBrowsableEvent::StBrowsableEvent(const event_header_st& evtHdr,
                                    const dst_event_summary_st& evtSum,
