@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.67 2004/04/05 20:06:46 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.68 2004/04/06 17:50:47 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.68  2004/04/06 17:50:47  suaide
+// ghost pedestal removal procedure introduced
+//
 // Revision 1.67  2004/04/05 20:06:46  suaide
 // added feature to print maps
 //
@@ -232,13 +235,13 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
   mPrint = kTRUE;  
   mDb = NULL;
   mEmc = NULL;            
-  mDecoder = NULL;          
-  mData = NULL;       
   mDBRunNumber = 0;
   mFillHisto = kTRUE;
   mDebug = kFALSE;
   mSaveAllStEvent = kFALSE;
   mRawData = NULL;               
+  mData = new StBemcData(); 
+  mDecoder = new StEmcDecoder();
 
 }
 //_____________________________________________________________________________
@@ -255,8 +258,6 @@ program
 */
 Int_t StEmcADCtoEMaker::Init()
 {     
-  mData = new StBemcData(); 
-  mDecoder = new StEmcDecoder();
   for (Int_t i=0; i<MAXDETBARREL; i++) 
 	{
 		mGeo[i]=StEmcGeom::getEmcGeom(detname[i].Data());
@@ -276,6 +277,7 @@ Int_t StEmcADCtoEMaker::Init()
  
   mNhit = new TH2F("EmcNHitsVsDet" ,"Number of hit with energy > 0 .vs. Detector #",1000,0.0,18000,8,0.5,8.5);
   mEtot = new TH2F("EmcEtotVsDet" ,"Total energy(log10) .vs. Detector #",500,-4.0,15.0,8,0.5,8.5);
+  mAverageTDC = new TH2F("AverageTDC","Average ADC value for each TDC channel",30,-0.5,29.5,50,-0.5,499.5);
  
   //tower spectra for gain monitoring  
   int a[]={4800,4800,18000,18000};
@@ -852,6 +854,7 @@ Bool_t StEmcADCtoEMaker::getEmcFromStEvent(StEmcCollection *emc)
       }
     } 
   }
+	mData->validateData();
   return kTRUE;
 }
 //_____________________________________________________________________________
@@ -1119,6 +1122,9 @@ This method fills QA histograms
 Bool_t StEmcADCtoEMaker::fillHistograms()
 {
   
+  float TDCSum[30],TDCHits[30];
+  for(int i=0;i<30;i++) {TDCSum[i] = 0; TDCHits[i] = 0;}
+  
   for(Int_t det=0;det<MAXDETBARREL;det++)
 	{
 		Int_t nHits = 0;
@@ -1145,7 +1151,16 @@ Bool_t StEmcADCtoEMaker::fillHistograms()
 			{
 				Float_t ADC = 0;
 				Float_t E = 0;
-				if(det==0) { ADC = (Float_t)mData->TowerADC[i]; E = mData->TowerEnergy[i]; }
+				if(det==0) 
+        { 
+          ADC = (Float_t)mData->TowerADC[i]; 
+          E = mData->TowerEnergy[i]; 
+          int daq,tdc;
+          mDecoder->GetDaqIdFromTowerId(i+1,daq);
+          mDecoder->GetTowerTDCFromDaqId(daq,tdc);
+          TDCSum[tdc]+=ADC;
+          TDCHits[tdc]++;
+        }
 				if(det==1) { ADC = (Float_t)mData->PsdADC[i]; E = mData->PsdEnergy[i]; }
 				if(det==2) { ADC = (Float_t)mData->SmdeADC[i]; E = mData->SmdeEnergy[i]; }
 				if(det==3) { ADC = (Float_t)mData->SmdpADC[i]; E = mData->SmdpEnergy[i]; }
@@ -1162,6 +1177,10 @@ Bool_t StEmcADCtoEMaker::fillHistograms()
 				if(E!=0) mEnergyHist[det]->Fill(eta,phi,E);
 			}
 		}
+    for(int i=0;i<30;i++)
+    {
+      if(TDCHits[i]>0 && TDCSum[i]>0) mAverageTDC->Fill(i,TDCSum[i]/TDCHits[i]);
+    }
     if(mPrint) cout <<"HISTOGRAM: det = "<<det+1<<"  NHits = "<<nHits<<"  totalE = "<<totalE<<endl;
 		if(nHits>0)    mNhit->Fill((Float_t)nHits,(Float_t)det+1);
 		if(totalE>0)   mEtot->Fill(log10(totalE),(Float_t)det+1);
@@ -1389,5 +1408,71 @@ void StEmcADCtoEMaker::printMap(Int_t detector,char*file)
     if(detector==4) mDecoder->PrintSmdMap(&f);
     f.close();
     return;
+}
+//_____________________________________________________________________________
+/*!
+Set the threshold for ghost pedestal removal
+
+\param TDC is the TDC channel (0 to 30). Set it to -1 to apply the same
+configuration for all the TDC channels.
+
+\param BOARD is the threshold in the number of bad boards for each TDC channel.
+Set it to zero in order to check only the global average
+
+\param value is the threshold for ghost pedestal removal
+
+The ghost pedestal removal is done by calculating the average ADC value (not
+pedestal subtracted) for each TDC channel.
+
+The ghost pedestal removal works the following way
+
+1. Case BOARD > 0
+
+The average ADC value (not pedestal subtracted) is calculated for each
+FEE board in the tower digitizer crate
+
+The program compares the average of each board with the user defined threshold.
+The code counts how many boards have average above the threshold
+
+If the number of boards above threshold is greater than BOARD the code
+flags the TDC channel as bad (ghost event)
+
+2. Case BOARD = 0
+
+if BOARD is set to 0, then the average on the entire crate is calculated.
+This average is compared with the threshold and, if above, the TDC channel
+is flagged as bad (ghost event)
+
+if setRemoveGhost() is set to kTRUE and there is at least one ghost TDC
+channel in the event, the entire event is dropped. If not, the corresponding
+TDC channel is zeroed but the remaining event is intact.
+ 
+*/
+void StEmcADCtoEMaker::setGhostPedestal(Int_t TDC, Int_t BOARD, Float_t value)
+{
+  if(!mData) return;
+  if(TDC<0) for(int i=0;i<30;i++) 
+  {
+    mData->TDCGhost[i] = value;
+    mData->TDCGhostMode[i] = BOARD;
+  }
+  else 
+  {
+    mData->TDCGhost[TDC] = value;
+    mData->TDCGhostMode[TDC] = BOARD;
+  }
+  return;
+}
+//_____________________________________________________________________________
+/*!
+if setRemoveGhost() is set to kTRUE and there is at least one ghost TDC
+channel in the event, the entire event is dropped. If not, the corresponding
+TDC channel is zeroed but the remaining event is intact.
+*/
+void StEmcADCtoEMaker::setRemoveGhostEvent(Bool_t value)
+{
+  if(!mData) return;
+  mData->TowerRemoveGhost = value;
+  return;
 }
 

@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.42 2004/04/05 20:06:46 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.43 2004/04/06 17:50:47 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.43  2004/04/06 17:50:47  suaide
+// ghost pedestal removal procedure introduced
+//
 // Revision 1.42  2004/04/05 20:06:46  suaide
 // added feature to print maps
 //
@@ -169,6 +172,7 @@ class StEmcADCtoEMaker : public StMaker
   TH2F              *mADCSpec[MAXDETBARREL];          //!           
   TH2F              *mSmdTimeBinHist; //!
   TH2F              *mValidEvents;    //!
+  TH2F              *mAverageTDC;    //!
            
   controlADCtoE_st  *mControlADCtoE; 
   
@@ -234,10 +238,15 @@ class StEmcADCtoEMaker : public StMaker
   void                      setSMDEnergyCut(Float_t a = 0.07,Float_t b = 0.07); ///< Turns on SMD hit cut based on energy and set the thresholds for eta and phi planes
   void                      setSMDRmsCut(Float_t a = 1.5,Float_t b = 1.5); ///< Turns on SMD hit cut based on pedestal RMS and set the thresholds for eta and phi planes
   void                      setSMDPhiIdMinus1Bug(Bool_t a = kFALSE) { mSMDPidMinus1Bug = a;} ///< Turns on the correction for the SMD-phi id-1 Pedestal bug if using old Pedestal tables for the y2003 d+Au and p+p runs
+
+  void                      setGhostPedestal(Int_t,Int_t, Float_t); ///<Configure the maker for ghost pedestal removal
+  void                      setRemoveGhostEvent(Bool_t); ///<Set to kTRUE if you want to remove the full event in case of a ghost pedestal
+  
   void                      saveAllStEvent(Bool_t a) { mSaveAllStEvent = a;} ///< Set to kTRUE if all hits are to be saved on StEvent
+  
   void                      printMap(Int_t,char*); ///< print map for an EMC detector
   
-  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.42 2004/04/05 20:06:46 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.43 2004/04/06 17:50:47 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcADCtoEMaker, 2)  
 };
