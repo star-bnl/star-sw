@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.58 1999/11/09 20:37:33 fisyak Exp $
+// $Id: St_QA_Maker.cxx,v 1.59 1999/11/18 22:34:11 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.59  1999/11/18 22:34:11  kathy
+// removed some histograms of variables that no longer exist and change some limits
+//
 // Revision 1.58  1999/11/09 20:37:33  fisyak
 // Correct tables
 //
@@ -293,15 +296,15 @@ ClassImp(St_QA_Maker)
   m_glb_trk_plusminus=0;  //! # trks pos/neg. 
   m_glb_trk_prim=0;        //! # trks from primaries
   m_vert_total=0;    //! total number of vertices
-  m_vert_V0=0;       //! number of V0 vertices
+  //  m_vert_V0=0;       //! number of V0 vertices
   m_mean_pt=0;       //! mean pt value
   m_mean_eta=0;      //! mean eta value 
   m_rms_eta=0;       //! rms eta value 
-  m_T_average=0;     //! mean Temp
+  //  m_T_average=0;     //! mean Temp
   m_prim_vrtx0=0;    //! primary vrtx x position
   m_prim_vrtx1=0;    //! primary vrtx y position
   m_prim_vrtx2=0;    //! primary vrtx z position
-  m_vrtx_chisq=0;    //! primary vrtx chisq
+  //  m_vrtx_chisq=0;    //! primary vrtx chisq
   
 // for method MakeGlob - from table globtrk
 
@@ -329,7 +332,6 @@ ClassImp(St_QA_Maker)
   m_chisq1=0;     
   m_length=0;     
   m_glb_impact=0; 
-  m_glb_ndf=0;    
 
   m_pT_eta_rec = 0;
   m_globtrk_xf_yf = 0;
@@ -382,7 +384,7 @@ ClassImp(St_QA_Maker)
   m_pchisq1=0;     
   m_plength=0;     
   m_prim_impact=0; 
-  m_prim_ndf=0;    
+
 
   m_ppT_eta_rec = 0;
   m_primtrk_xf_yf = 0;
@@ -575,16 +577,16 @@ void St_QA_Maker::BookHistEvSum(){
                              ntrk, mintrk, maxtrk);
 	  
   m_vert_total = new TH1F("QaEvsumVertTot", "evsum: total num of vertices",80,0.,8000.);
-  m_vert_V0    = new TH1F("QaEvsumVertV0", "evsum: num V0 vertices",80,0.,8000.); 
+  //  m_vert_V0    = new TH1F("QaEvsumVertV0", "evsum: num V0 vertices",80,0.,8000.); 
  
   m_mean_pt    = new TH1F("QaEvsumMeanPt",   "evsum: mean pt", nmnpt, 0., 2.0);
   m_mean_eta   = new TH1F("QaEvsumMeanEta",  "evsum: mean eta", nmneta, -0.25,0.25);
   m_rms_eta    = new TH1F("QaEvsumRmsEta",   "evsum: rms eta", nmneta, -2.5,2.5);
-  m_T_average  = new TH1F("QaEvsumMeanTemp", "evsum: mean Temp", nmneta, 0., 0.5);
+  //  m_T_average  = new TH1F("QaEvsumMeanTemp", "evsum: mean Temp", nmneta, 0., 0.5);
   m_prim_vrtx0 = new TH1F("QaEvsumPrimVertX","evsum: X of primary vertex", 40, -1.,1.);
   m_prim_vrtx1 = new TH1F("QaEvsumPrimVertY","evsum: Y of primary vertex", 40,-1.,1.);
   m_prim_vrtx2 = new TH1F("QaEvsumPrimVertZ","evsum: Z of primary vertex", nxyz,-50., 50.);
-  m_vrtx_chisq = new TH1F("QaEvsumVrtxChisq","evsum: chisq of primary vertex",nchisq, 0., 10.); 
+  //  m_vrtx_chisq = new TH1F("QaEvsumVrtxChisq","evsum: chisq of primary vertex",nchisq, 0., 10.); 
   
 }
 
@@ -621,7 +623,7 @@ void St_QA_Maker::BookHistGlob(){
   m_chisq1     = new TH1F("QaGlobtrkChisq1",  "globtrk: chisq1 - z", 50, 0.,15.);
   m_length     = new TH1F("QaGlobtrkLength",  "globtrk: track length", 50,0.,300.);
   m_glb_impact = new TH1F("QaGlobtrkImpact",  "globtrk: impact param from prim vtx ", 50,0.,500.);
-  m_glb_ndf    = new TH1F("QaGlobtrkNdof",    "globtrk: num deg of freedom", 100,0.,100.);
+
 
 
 // 2D
@@ -737,8 +739,8 @@ void St_QA_Maker::BookHistPrim(){
   m_pchisq0     = new TH1F("QaPrimtrkChisq0",  "primtrk: chisq0 - xy", 50, 0.,5.);
   m_pchisq1     = new TH1F("QaPrimtrkChisq1",  "primtrk: chisq1 - z", 50, 0.,5.);
   m_plength     = new TH1F("QaPrimtrkLength",  "primtrk: track length", 50,0.,300.);
-  m_prim_impact = new TH1F("QaPrimtrkImpact",  "primtrk: impact param from prim vtx ", 50,0.,500.);
-  m_prim_ndf    = new TH1F("QaPrimtrkNdof",    "primtrk: num deg of freedom", 100, 0.,100.);
+  m_prim_impact = new TH1F("QaPrimtrkImpact",  "primtrk: impact param from prim vtx ", 50,0.,5.);
+
 
 
 // 2D
@@ -962,7 +964,7 @@ void St_QA_Maker::MakeHistEvSum(St_DataSet *dst){
       if(!isnan((double)(tt->prim_vrtx[2])))  m_prim_vrtx2->Fill(tt->prim_vrtx[2]);
       
 // not in 99i tables
-//      m_glb_trk_prim->Fill(tt->glb_trk_prim);
+      m_glb_trk_prim->Fill(tt->glb_trk_prim);
 //      m_T_average->Fill(tt->T_average);    
 //      m_vert_V0->Fill(tt->n_vert_V0);
 //      m_vrtx_chisq->Fill(tt->prim_vrtx_chisq); 
@@ -1064,11 +1066,6 @@ void St_QA_Maker::MakeHistGlob(St_DataSet *dst){
 	m_chisq1_zf->Fill(t->x_first[2],chisq1  );
         m_nfptonpt_mom->Fill(lmevmom,nfitntot);
         m_nfptonpt_eta->Fill(eta,nfitntot);
-
-//  not in 99i tables	
-//        Float_t xdif =  (t->x_first[0])-(t->x0);
-//        Float_t ydif =  (t->x_first[1])-(t->y0);
-//        m_glb_ndf->Fill(t->ndegf);
 
       }
     }
@@ -1185,11 +1182,6 @@ void St_QA_Maker::MakeHistPrim(St_DataSet *dst){
 	m_pchisq1_zf->Fill(t->x_first[2],chisq1);
         m_pnfptonpt_mom->Fill(lmevmom,nfitntot);
         m_pnfptonpt_eta->Fill(eta,nfitntot);
-
-// not in 99i tables
-//   m_prim_ndf->Fill(t->ndegf);
-//   Float_t xdif = (t->x_first[0]) - (t->x0);
-//   Float_t ydif = (t->x_first[1]) - (t->y0);
 
       }
     }

@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.33 1999/09/29 16:46:32 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.34 1999/11/18 22:34:14 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.34  1999/11/18 22:34:14  kathy
+//! removed some histograms of variables that no longer exist and change some limits
+//!
 //! Revision 1.33  1999/09/29 16:46:32  kathy
 //! changed code so it would compile in .dev due to changes in DST tables - I even used cons instead of makel - wow! - I just changed variables or commented out some histograms that use now-non-existant variables so it would compile - later I will go through and redefine histograms as needed
 //!
@@ -156,7 +159,7 @@ class St_QA_Maker : public StMaker {
   Bool_t drawinit;
 //  StHistUtil *m_PntrToHistUtil;    //! pointer to an StHistUtil
 
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.33 1999/09/29 16:46:32 kathy Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.34 1999/11/18 22:34:14 kathy Exp $";
 //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -225,15 +228,15 @@ class St_QA_Maker : public StMaker {
   TH1F     *m_glb_trk_plusminus;  //! # trks pos/neg. 
   TH1F     *m_glb_trk_prim;       //! # trks from primaries
   TH1F     *m_vert_total;         //! total number of vertices
-  TH1F     *m_vert_V0;            //! number of V0 vertices
+  //  TH1F     *m_vert_V0;            //! number of V0 vertices
   TH1F     *m_mean_pt;       //! mean pt value
   TH1F     *m_mean_eta;      //! mean eta value 
   TH1F     *m_rms_eta;       //! rms eta value 
-  TH1F     *m_T_average;     //! mean Temp
+  //  TH1F     *m_T_average;     //! mean Temp
   TH1F     *m_prim_vrtx0;    //! primary vrtx x position
   TH1F     *m_prim_vrtx1;    //! primary vrtx y position
   TH1F     *m_prim_vrtx2;    //! primary vrtx z position
-  TH1F     *m_vrtx_chisq;    //! primary vrtx chisq
+  //  TH1F     *m_vrtx_chisq;    //! primary vrtx chisq
   
   // for method MakeGlob - from table globtrk
   TH1F     *m_globtrk_tot;   //! # tracks in table
@@ -262,7 +265,6 @@ class St_QA_Maker : public StMaker {
   TH1F     *m_chisq1;        //! chi square [1]
   TH1F     *m_length;        //! length of track
   TH1F     *m_glb_impact;    //! impact parameter from primary vertex
-  TH1F     *m_glb_ndf;       //! no. deg. of freedom for track fit.
 
   TH2F     *m_pT_eta_rec;    //! pT versus eta Spectra for reconstructed
   TH2F     *m_globtrk_xf_yf; //! Y vs X of first hit on trk
@@ -318,7 +320,6 @@ class St_QA_Maker : public StMaker {
   TH1F     *m_pchisq1;        //! chi square [1]
   TH1F     *m_plength;        //! length of track
   TH1F     *m_prim_impact;    //! impact parameter from primary vertex
-  TH1F     *m_prim_ndf;       //! no. deg. of freedom for track fit.
 
   TH2F     *m_ppT_eta_rec;    //! pT versus eta Spectra for reconstructed
   TH2F     *m_primtrk_xf_yf;  //! Y vs X of first hit on trk
@@ -437,7 +438,7 @@ class St_QA_Maker : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.33 1999/09/29 16:46:32 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.34 1999/11/18 22:34:14 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
     };
