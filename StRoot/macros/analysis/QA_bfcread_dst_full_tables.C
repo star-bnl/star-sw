@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_full_tables.C,v 1.1 1999/07/01 19:01:53 kathy Exp $
+// $Id: QA_bfcread_dst_full_tables.C,v 1.2 1999/07/13 00:29:52 kathy Exp $
 // $Log: QA_bfcread_dst_full_tables.C,v $
+// Revision 1.2  1999/07/13 00:29:52  kathy
+// updated macros to take out StRootEvent
+//
 // Revision 1.1  1999/07/01 19:01:53  kathy
 // new QA macro to read dst, loop over all events, count # times each DST table is there
 //
@@ -43,7 +46,7 @@ const char *fname="qa_full_tables.txt")
   gSystem->Load("St_Tables");
   gSystem->Load("StTreeMaker");
   gSystem->Load("StarClassLibrary");
-  gSystem->Load("StRootEvent");
+
 
   ofstream fout(fname);
 
@@ -86,7 +89,7 @@ const char *fname="qa_full_tables.txt")
    Int_t cnt_dst_xi_vertex=0;
    Int_t cnt_dst_dedx=0;
    Int_t cnt_particle=0;
-   Int_t cnt_dst_TriggerDetectors=0;
+   Int_t cnt_dst_TrgDet=0;
    Int_t cnt_monitor_soft=0;
    Int_t cnt_g2t_rch_hit=0;
 
@@ -142,8 +145,8 @@ const char *fname="qa_full_tables.txt")
                cnt_dst_dedx++;
             if (strcmp(obj->GetName(),"particle")==0) 
                cnt_particle++;
-            if (strcmp(obj->GetName(),"dst_TriggerDetectors")==0) 
-               cnt_dst_TriggerDetectors++;
+            if (strcmp(obj->GetName(),"dst_TrgDet")==0) 
+               cnt_dst_TrgDet++;
             if (strcmp(obj->GetName(),"monitor_soft")==0) 
                cnt_monitor_soft++;
             if (strcmp(obj->GetName(),"g2t_rch_hit")==0) 
@@ -234,10 +237,10 @@ const char *fname="qa_full_tables.txt")
 	 cnt_particle << endl;
 
 
-      cout << "QA-> total # dst_TriggerDetectors tables = " << 
-         cnt_dst_TriggerDetectors << endl;
-      fout << "QA-> total # dst_TriggerDetectors tables = " << 
-	 cnt_dst_TriggerDetectors << endl;
+      cout << "QA-> total # dst_TrgDet tables = " << 
+         cnt_dst_TrgDet << endl;
+      fout << "QA-> total # dst_TrgDet tables = " << 
+	 cnt_dst_TrgDet << endl;
 
 
       cout << "QA-> total # monitor_soft tables = " << 
