@@ -28,9 +28,15 @@ my @Sets = (
              "2000/06",
              "2000/07",
              "2000/08",
-             "2000/09",
+#             "2000/09",
 );
 
+my @DirD = (
+            "P00hf/2000/06",
+            "P00hf/2000/07",
+            "P00hf/2000/08",
+#            "P00hf/2000/09",
+	  );
 
 struct FileAttr => {
       filename  => '$',
@@ -140,6 +146,9 @@ my $jobIn_no = 0;
 
 my @jobSum_set;
 my $jobSum_no = 0;
+my @jobFSum_set;
+my $jobFSum_no = 0;
+my $jbSt = "n\/a";
 
 ########## Find reconstruction files in HPSS
 
@@ -225,6 +234,7 @@ print "Total reco files: $nDiskFiles\n";
 
 
  $sql="SELECT fName, path, size, createTime, redone FROM $FileCatalogT  WHERE fName LIKE '%root' AND jobID LIKE '%$prodSr%' ";
+
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
           $cursor->execute;
@@ -252,7 +262,7 @@ print "Total reco files: $nDiskFiles\n";
 
 ### select reco files status from JobStatus
 
- $sql="SELECT JobID, prodSeries, jobfileName, sumFileName, sumFileDir, jobStatus, NoEvents, CPU_per_evt_sec FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobStatus <> 'n/a'";
+ $sql="SELECT JobID, prodSeries, jobfileName, sumFileName, sumFileDir, jobStatus, NoEvents, CPU_per_evt_sec FROM $JobStatusT WHERE JobID like '%$prodSr%' AND jobStatus <> 'n/a'";
 
   $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
@@ -303,8 +313,6 @@ my $mjbStat;
 my $mcpuEvt;
 my $mEvtSk = 0;
 
-my @jobFSum_set;
-my $jobFSum_no = 0;
 
 #########  update JobStatus Table
 
@@ -343,17 +351,6 @@ foreach my $jobnm (@jobSum_set){
       $mjobSt = "n\/a"; 
 
           &sumInfo("$jb_sumFile",1);
-       chop $mjobSt;
-#      if ($mjobSt ne $mjbStat) { 
-# print "Job Status :",$mjobSt," % ",$mjbStat," % ","\n";
-      if ( ($mjobSt ne $mjbStat) or ($mNev != $mNoEvt) ) {
-     print  "JobFile=", $mjobFname," % ", "Job Status: ", $mjobSt, " % ", "Job Status Old: ", $mjbStat, "\n";
-
-### update JobStatus table with info for jobs completed
-
-      print "updating JobStatus table\n";
- 
-     &updateJSTable(); 
 
        $fObjAdr = \(JSFileAttr->new());
        
@@ -367,7 +364,19 @@ foreach my $jobnm (@jobSum_set){
 
       $jobFSum_set[$jobFSum_no] = $fObjAdr;
       $jobFSum_no++; 
-    
+
+       chop $mjobSt;
+#      if ($mjobSt ne $mjbStat) { 
+# print "Job Status :",$mjobSt," % ",$mjbStat," % ","\n";
+      if ( ($mjobSt ne $mjbStat) or ($mNev != $mNoEvt) ) {
+     print  "JobFile=", $mjobFname," % ", "Job Status: ", $mjobSt, " % ", "Job Status Old: ", $mjbStat, "\n";
+
+### update JobStatus table with info for jobs completed
+
+      print "updating JobStatus table\n";
+ 
+#     &updateJSTable(); 
+
       }else {
        }
          last;
@@ -400,7 +409,7 @@ my $mformat = "n\/a";
 my $msite = "n\/a";
 my $mhpss = "Y";
 my $mstatus = 0;
-my $mdataset = "n\/a"; 
+my $mdataSet = "n\/a"; 
 my $dbset;
 my $dbfname;
 my $dbfsize;
@@ -468,7 +477,7 @@ my $mName;
   $mevtType = 0;
   $mfName = "n\/a";
   $mpath  = "n\/a";
-  $mdataset = "n\/a";
+  $mdataSet = "n\/a";
   $msize = 0;
   $mcTime = 0;
   $mNevts = 0;
@@ -531,8 +540,8 @@ my $mName;
    }     
   
    if( $gflag != 0 ) {
-
-    foreach my $jobnm (@jobSum_set){
+#print "File name to be inserted :",$fullName, "\n"; 
+    foreach my $jobnm (@jobFSum_set){
        $mproSr   = ($$jobnm)->prSer;
        $mJobId   = ($$jobnm)->job_id;
        $msumFile = ($$jobnm)->smFile;
@@ -540,6 +549,7 @@ my $mName;
        $mNevtLo =($$jobnm)->FstEvt;
        $mNevtHi =($$jobnm)->LstEvt;
        $mjobFname = ($$jobnm)->jbFile;
+
      my $jfile = $msumFile;
       $jfile =~ s/.sum//g;
 
@@ -568,8 +578,8 @@ elsif ( $gflag == 2) {
      if($mfName eq $mName) {
         $mdone++;
 
-  print "Job ID: ", $mJobId, " % ","Path: ", $mpath," % ","File:", $mfName, " % ","Date:", $mcTime, "\n";
-  print "Redone, Number of Events: Evts, EvtLo, EvtHi :", $mdone," % ", $mNevts," % ",$mNevtLo," % ",$mNevtHi, "\n",      
+  print "Job ID: ", $mJobId, " % ","Path: ", $mpath," % ","File:", $mfName, " % ","Date:", $mcTime," % ","Redone :", $mdone, "\n";
+
 ##### update RECO DAQ files in Files Catalog if rerun 
    print "Updating Files Catalog\n";
    &updateDbTable();  
@@ -597,7 +607,7 @@ my $myRun;
 
  for ($ll = 0; $ll<scalar(@DirD); $ll++) {
 
- $sql="SELECT DISTINCT runID FROM $FileCatalogT WHERE path like '%$Sets' AND dataset = 'n/a' ";
+ $sql="SELECT DISTINCT runID FROM $FileCatalogT WHERE path like '%$DirD[$ll]' AND dataset = 'n/a' ";
   
       $cursor =$dbh->prepare($sql)
 
@@ -673,7 +683,7 @@ my $cEMnt;
 my $ccn;
 my $enrg;
 my $magF;
-my $mdataset = "n/a";
+my $mdataset = "n\/a";
 my $mrunID;
 
  &StDbProdConnect();
