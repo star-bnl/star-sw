@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.25 2000/12/08 05:12:25 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.26 2000/12/08 06:32:48 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.26  2000/12/08 06:32:48  lasiuk
+ * fillcorrectedNtuple (ifdefs)
+ *
  * Revision 2.25  2000/12/08 05:12:25  lasiuk
  * correct SUN iostream problem
  *
@@ -212,7 +215,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.25 2000/12/08 05:12:25 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.26 2000/12/08 06:32:48 lasiuk Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -651,9 +654,10 @@ Int_t StRichPIDMaker::Make() {
 	 } // loop over particles
 
      } // loop over all tracks
-    
-     this->fillCorrectedNtuple();
 
+#ifdef  myRICH_WITH_NTUPLE
+     this->fillCorrectedNtuple();
+#endif
 
 //     //
 //     // Original reprocssing of the hit flags to
@@ -3877,6 +3881,215 @@ StThreeVectorF StRichPIDMaker::getTheGeantHitOnPadPlane(StMcTrack* mcTrack, StTh
 }
 
 #endif
+
+
+void StRichPIDMaker::fillCorrectedNtuple() {
+  
+  for (size_t trackIndex=0;trackIndex<mListOfStRichTracks.size();trackIndex++) {
+#ifdef myRICH_WITH_MC    
+    StRichMCTrack* track = dynamic_cast<StRichMCTrack*>(mListOfStRichTracks[trackIndex]);
+#else
+    StRichTrack* track = mListOfStRichTracks[trackIndex];
+#endif    
+    if (track) {
+      int PionTotalHits = track->getOrigTotHits(pion->mass());
+      int PionConstantHits = track->getOrigConstHits(pion->mass());
+      int pioncHits = track->getNewTotHits(pion->mass());
+      int pionctHits = track->getNewConstHits(pion->mass());
+      
+      int KaonTotalHits = track->getOrigTotHits(kaon->mass());
+      int KaonConstantHits = track->getOrigConstHits(kaon->mass());
+      int kaoncHits = track->getNewTotHits(kaon->mass());
+      int kaonctHits = track->getNewConstHits(kaon->mass());
+      
+      int ProtonTotalHits = track->getOrigTotHits(proton->mass());
+      int ProtonConstantHits = track->getOrigConstHits(proton->mass());
+      int protoncHits = track->getNewTotHits(proton->mass());
+      int protonctHits = track->getNewConstHits(proton->mass());
+
+      StThreeVectorF mip;
+      
+      if (track->getAssociatedMIP()) {
+	
+	mip =  track->getAssociatedMIP()->local();
+
+	cout << "tracks mip = " << track->getAssociatedMIP()->local() << endl;
+	cout << "tracks resid = " << (track->getAssociatedMIP()->local() - track->getProjectedMIP()).perp() << endl;
+
+#ifdef myRICH_WITH_MC    	
+	cout << endl << endl << "  tracks impact point residual:: orig   -  geant  = " 
+	     << (track->getUnCorrectedImpactPoint()-track->getGeantImpactPointAtRadiator()).perp()
+	     << endl << "              corrected  -  geant =  " 
+	     << (track->getImpactPoint() - track->getGeantImpactPointAtRadiator()).perp()
+	     << endl << endl;
+#endif
+	cout << "pion:: totals = " << PionTotalHits << "     " << pioncHits << endl;
+	cout << "pion:: constants = " << PionConstantHits << "     " << pionctHits << endl;
+	
+	cout << "kaon:: totals = " << KaonTotalHits << "     " << kaoncHits << endl;
+	cout << "kaon:: constants = " << KaonConstantHits << "     " << kaonctHits << endl;
+	
+	cout << "proton:: totals = " << ProtonTotalHits << "     " << protoncHits << endl;
+	cout << "proton:: constants = " << ProtonConstantHits << "     " << protonctHits << endl;
+      }
+      
+      
+      
+      StRichRingCalculator* PiRingCalc = new StRichRingCalculator(track,pion);
+      if (track->fastEnough(pion) && track->isGood(pion)) {PiRingCalc->calculateArea();}
+      double PionTotalArea = PiRingCalc->getTotalConstantAreaOnPadPlane();
+      double PionConstantArea = PiRingCalc->getTotalConstantAreaOnActivePadPlane();
+      double PionConstantAreaAngle = PiRingCalc->getTotalConstantAngleOnActivePadPlane();
+      double PionTotalAreaAngle = PiRingCalc->getTotalConstantAngleOnPadPlane();
+            
+      StRichRingCalculator* KaRingCalc = new StRichRingCalculator(track,kaon);
+      if (track->fastEnough(kaon) && track->isGood(kaon)) {KaRingCalc->calculateArea();}
+      double KaonTotalArea = KaRingCalc->getTotalConstantAreaOnPadPlane();
+      double KaonConstantArea = KaRingCalc->getTotalConstantAreaOnActivePadPlane();
+      double KaonConstantAreaAngle = KaRingCalc->getTotalConstantAngleOnActivePadPlane();
+      double KaonTotalAreaAngle = KaRingCalc->getTotalConstantAngleOnPadPlane();    
+      
+      StRichRingCalculator* PrRingCalc = new StRichRingCalculator(track,proton);
+      if (track->fastEnough(proton) && track->isGood(proton)) {PrRingCalc->calculateArea();}
+      double ProtonTotalArea = PrRingCalc->getTotalConstantAreaOnPadPlane();
+      double ProtonConstantArea = PrRingCalc->getTotalConstantAreaOnActivePadPlane();
+      double ProtonConstantAreaAngle = PrRingCalc->getTotalConstantAngleOnActivePadPlane();
+      double ProtonTotalAreaAngle = PrRingCalc->getTotalConstantAngleOnPadPlane();
+      
+      
+      double PionFactor,KaonFactor,ProtonFactor;
+      
+#ifdef myRICH_WITH_MC
+      const Int_t entries=61;
+#else
+      const Int_t entries=58;
+#endif
+      
+      float trackArray[entries];
+      
+      StThreeVectorF  globalp(track->getStTrack()->geometry()->momentum());
+      int counter=0;
+      float defaultValue = -999;
+      
+      trackArray[counter++] = mVertexPos.z();
+      trackArray[counter++] = mNumberOfPrimaries;
+      
+      trackArray[counter++] = globalp.x();
+      trackArray[counter++] = globalp.y();
+      trackArray[counter++] = globalp.z();
+      
+      trackArray[counter++] = track->getMomentum().x();
+      trackArray[counter++] = track->getMomentum().y();
+      trackArray[counter++] = track->getMomentum().z();
+      
+      trackArray[counter++] = track->getCorrectedMomentum().x();
+      trackArray[counter++] = track->getCorrectedMomentum().y();
+      trackArray[counter++] = track->getCorrectedMomentum().z(); // 10
+      
+      trackArray[counter++] = globalp.pseudoRapidity();
+      if (track->getStTrack() && track->getStTrack()->geometry()) {
+	trackArray[counter++] = track->getStTrack()->geometry()->charge();
+      }
+      else {trackArray[counter++] = defaultValue;}
+      
+      if (track->getAssociatedMIP()) {
+	trackArray[counter++] = track->getAssociatedMIP()->charge();    
+	trackArray[counter++] = track->getAssociatedMIP()->local().x();
+	trackArray[counter++] = track->getAssociatedMIP()->local().y();
+      }
+      else {
+	trackArray[counter++] = defaultValue;
+	trackArray[counter++] = defaultValue;
+	trackArray[counter++] = defaultValue; 
+      }
+  
+      trackArray[counter++] = track->getProjectedMIP().x();
+      trackArray[counter++] = track->getProjectedMIP().y();
+      
+      trackArray[counter++] = track->getImpactPoint().x();  
+      trackArray[counter++] = track->getImpactPoint().y();
+
+      trackArray[counter++] = track->getUnCorrectedImpactPoint().x();  // 20
+      trackArray[counter++] = track->getUnCorrectedImpactPoint().y();
+
+      trackArray[counter++] = track->getUnCorrectedProjectedMIP().x();
+      trackArray[counter++] = track->getUnCorrectedProjectedMIP().y();
+
+      trackArray[counter++] = track->getLastHit().x();
+      trackArray[counter++] = track->getLastHit().y();
+      trackArray[counter++] = track->getLastHit().z();
+
+      trackArray[counter++] = track->getStTrack()->detectorInfo()->numberOfPoints(kTpcId);
+      trackArray[counter++] = track->getStTrack()->fitTraits().numberOfFitPoints(kTpcId);
+
+      trackArray[counter++] = PionFactor; 
+
+      trackArray[counter++] = PionTotalArea; // 30
+      trackArray[counter++] = PionConstantArea;  
+      trackArray[counter++] = PionTotalAreaAngle;
+      trackArray[counter++] = PionConstantAreaAngle;
+      trackArray[counter++] = PionTotalHits;  
+
+      trackArray[counter++] = PionConstantHits;
+      trackArray[counter++] = KaonFactor;
+      trackArray[counter++] = KaonTotalArea;  
+      trackArray[counter++] = KaonConstantArea;
+      trackArray[counter++] = KaonTotalAreaAngle; 
+
+      trackArray[counter++] = KaonConstantAreaAngle; // 40  
+      trackArray[counter++] = KaonTotalHits;
+      trackArray[counter++] = KaonConstantHits;
+      trackArray[counter++] = ProtonFactor; 
+      trackArray[counter++] = ProtonTotalArea;  
+
+      trackArray[counter++] = ProtonConstantArea;
+      trackArray[counter++] = ProtonTotalAreaAngle;  
+      trackArray[counter++] = ProtonConstantAreaAngle;
+      trackArray[counter++] = ProtonTotalHits;
+      trackArray[counter++] = ProtonConstantHits; 
+
+      trackArray[counter++] = pioncHits; // 50
+      trackArray[counter++] = pionctHits;
+
+      trackArray[counter++] = kaoncHits;
+      trackArray[counter++] = kaonctHits;
+
+      trackArray[counter++] = protoncHits;
+      trackArray[counter++] = protonctHits;
+
+      trackArray[counter++] = mMaterialDb->innerWavelength()/nanometer;
+      trackArray[counter++] = mMaterialDb->outerWavelength()/nanometer; // 57 
+
+#ifdef myRICH_WITH_MC            
+      trackArray[counter++] = track->getGeantImpactPointAtRadiator().x();
+      trackArray[counter++] = track->getGeantImpactPointAtRadiator().y();
+
+      if (track->getStMcTrack()) {
+	trackArray[counter++] = track->getStMcTrack()->particleDefinition()->mass();
+	cout << "mass = " <<  track->getStMcTrack()->particleDefinition()->mass() << endl;
+      }
+
+      else {
+	trackArray[counter++] = -999;
+      }
+#endif
+      if (counter != entries) {
+	cout << "StRichPIDMaker:: fillPIDNtuple. counter = " 
+	     << counter << "   --> abort." << endl; 
+	abort();
+      } 
+
+      trackCorrectedNtuple->Fill(trackArray);
+      
+      delete PiRingCalc; PiRingCalc=0;
+      delete KaRingCalc; KaRingCalc=0;
+      delete PrRingCalc; PrRingCalc=0;
+
+    }
+
+  }
+}
+
 
 #ifdef RICH_WITH_L3_TRACKS
 double StRichPIDMaker::findL3ZVertex(globalTrack * trackVec,int nTracks){
