@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.6 1999/12/07 16:50:43 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.7 1999/12/07 23:14:18 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.7  1999/12/07 23:14:18  kathy
+// fix primary vtx histograms for dst tables; split apart the ftpc and tpc in the dedx histograms
+//
 // Revision 1.6  1999/12/07 16:50:43  kathy
 // fix limits on histograms
 //
@@ -210,9 +213,18 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   
 // for method MakeDE - from table dst_dedx
   m_ndedxr=0;        //! number of tracks with dedx info
-  m_ndedx=0;         //! number of point to find dE/dx
-  m_dedx0=0;         //! dE/dx [0]
-  m_dedx1=0;         //! dE/dx [1] 
+
+  m_ndedxT=0;         //! number of point to find dE/dx
+  m_dedx0T=0;         //! dE/dx [0] *1e6
+  m_dedx1T=0;         //! dE/dx [1] *1e6
+  
+  m_ndedxFE=0;         //! number of point to find dE/dx
+  m_dedx0FE=0;         //! dE/dx [0]
+  m_dedx1FE=0;         //! dE/dx [1] 
+  
+  m_ndedxFW=0;         //! number of point to find dE/dx
+  m_dedx0FW=0;         //! dE/dx [0]
+  m_dedx1FW=0;         //! dE/dx [1] 
   
 // for method MakeHistPrim - from table primtrk
 
@@ -753,10 +765,19 @@ void StQABookHist::BookHistPrim(){
 void StQABookHist::BookHistDE(){
   
   // for method MakeDE - from table dst_dedx
-  m_ndedxr  = QAH1F("QaDedxNum", "dedx: number of tracks", 50,0., 10000.); 
-  m_ndedx   = QAH1F("QaDedxNdedx", "dedx: number of point to define dE/dx", 50,0., 50.);  
-  m_dedx0   = QAH1F("QaDedxDedx0","dedx: dE/dx[0]", ndedx, mindedx, maxdedx/10.);
-  m_dedx1   = QAH1F("QaDedxDedx1","dedx: dE/dx[1]", ndedx, mindedx, maxdedx);
+  m_ndedxr  = QAH1F("QaDedxNum",     "dedx: number of tracks", 50,0., 10000.); 
+
+  m_ndedxT   = QAH1F("QaDedxNdedxT", "dedx: number of point to define dE/dx, tpc", 50,0., 50.);  
+  m_dedx0T   = QAH1F("QaDedxDedx0T", "dedx: dE/dx[0]*1e6, tpc", ndedx, mindedx, maxdedx/10.);
+  m_dedx1T   = QAH1F("QaDedxDedx1T", "dedx: dE/dx[1]*1e6, tpc", ndedx, mindedx, maxdedx);
+  
+  m_ndedxFE   = QAH1F("QaDedxNdedxFE", "dedx: number of point to define dE/dx, ftpcE", 50,0., 50.);  
+  m_dedx0FE   = QAH1F("QaDedxDedx0FE", "dedx: dE/dx[0], ftpcE", ndedx, mindedx, maxdedx);
+  m_dedx1FE   = QAH1F("QaDedxDedx1FE", "dedx: dE/dx[1], ftpcE", ndedx, mindedx, maxdedx);
+  
+  m_ndedxFW   = QAH1F("QaDedxNdedxFW", "dedx: number of point to define dE/dx, ftpcW", 50,0., 50.);  
+  m_dedx0FW   = QAH1F("QaDedxDedx0FW", "dedx: dE/dx[0], ftpcW", ndedx, mindedx, maxdedx);
+  m_dedx1FW   = QAH1F("QaDedxDedx1FW", "dedx: dE/dx[1], ftpcW", ndedx, mindedx, maxdedx);
   
 }
 //_____________________________________________________________________________
@@ -803,7 +824,7 @@ void StQABookHist::BookHistVertex(){
   
   
   m_v_num   = QAH1F("QaVertexNum"," vertex: num vertices ",50,0.,10000.);
-  m_v_detid = QAH1F("QaVertexDetId"," vertex: Detector ID ",100,0.,100.);
+  m_v_detid = QAH1F("QaVertexDetId"," vertex: Detector ID ",100,0.,1000.);
   m_v_vtxid = QAH1F("QaVertexVtxId"," vertex: Vertex ID ",10,0.,10.);
   m_v_x     = QAH1F("QaVertexX"," vertex: x ",50,-25.,25.);
   m_v_y     = QAH1F("QaVertexY"," vertex: y ",50,-25.,25.);

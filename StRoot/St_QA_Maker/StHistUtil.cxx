@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.9 1999/12/07 21:54:15 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.10 1999/12/07 23:14:18 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.10  1999/12/07 23:14:18  kathy
+// fix primary vtx histograms for dst tables; split apart the ftpc and tpc in the dedx histograms
+//
 // Revision 1.9  1999/12/07 21:54:15  kathy
 // added date and time to DrawHist method in StHistUtil class so that this is printed at bottom right of histogram output
 //
@@ -521,10 +524,14 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "TabQaPrimtrkEta",
  "TabQaPrimtrkLength",
  "TabQaPrimtrkImpact",
- "TabQaPrimtrkNdof",
- "TabQaDstDedxNdedx",
- "TabQaDstDedxDedx0", 
- "TabQaDstDedxDedx1",
+ "TabQaPrimtrkNdof"
+ "TabQaDedxNum",
+ "TabQaDedxDedx0T", 
+ "TabQaDedxDedx1T",
+ "TabQaDedxDedx0FE", 
+ "TabQaDedxDedx1FE",
+ "TabQaDedxDedx0FW", 
+ "TabQaDedxDedx1FW",
  "TabQaParticlePt",
  "TabQaParticleVtxX",
  "TabQaParticleVtxY",
@@ -608,9 +615,13 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "StEQaPrimtrkLength",
  "StEQaPrimtrkImpact",
  "StEQaPrimtrkNdof",
- "StEQaDstDedxNdedx",
- "StEQaDstDedxDedx0", 
- "StEQaDstDedxDedx1",
+ "StEQaDedxNum",
+ "StEQaDedxDedx0T", 
+ "StEQaDedxDedx1T",
+ "StEQaDedxDedx0FE", 
+ "StEQaDedxDedx1FE",
+ "StEQaDedxDedx0FW", 
+ "StEQaDedxDedx1FW",
  "StEQaParticlePt",
  "StEQaParticleVtxX",
  "StEQaParticleVtxY",
