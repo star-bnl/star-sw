@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2004.cxx,v 2.5 2004/02/11 01:39:52 ullrich Exp $
+ * $Id: StTriggerData2004.cxx,v 2.6 2004/04/02 01:21:44 jeromel Exp $
  *
  * Author: Akio Ogawa, Feb 2004
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2004.cxx,v $
+ * Revision 2.6  2004/04/02 01:21:44  jeromel
+ * Proper mapping added (Akio/Aihong)
+ *
  * Revision 2.5  2004/02/11 01:39:52  ullrich
  * Use enumeration StBeamDirector for east/west. Add member for ZDC vertex.
  *
@@ -465,19 +468,25 @@ unsigned short StTriggerData2004::zdcTDC(StBeamDirection eastwest, int prepost) 
 unsigned short StTriggerData2004::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost) const
 {
   static const int zdcsmd_map[2][2][8] ={
-    { { 6, 5, 4, 3, 2, 1, 0, 7} ,  
-      {15,14,13,12,11,10, 9, 8} } ,
-    { {22,21,20,19,18,17,16,23} ,
-      {31,30,29,28,27,26,25,24} }
+    // wrong mapping
+    //{ { 6, 5, 4, 3, 2, 1, 0, 7} ,  
+    //  {15,14,13,12,11,10, 9, 8} } ,
+    //{ {22,21,20,19,18,17,16,23} ,
+    //  {31,30,29,28,27,26,25,24} }
+    // correct mapping from Xzb
+    { { 7, 6, 5, 4, 3, 2, 1, 11} ,  
+      { 0,15,14,13,12,8,10, 9} } ,
+    { {23,22,21,20,19,18,17,24} ,
+      {16,31,30,29,28,27,26,25} }
   };
   //  if(eastwest<0 || eastwest>1) return 0;
   if(verthori<0 || verthori>1) return 0;
   if(verthori==0){
-    if(strip<1  || strip>7   ) return 0;
+    if(strip<1 || strip>8) return 0; //the last one in vertical strips is for LED. Could be used for Forward counter later. T.A.H.
   }else{
-    if(strip<1  || strip>8   ) return 0;
+    if(strip<1 || strip>8) return 0;
   }
-  return mData->rawTriggerDet[prepostAddress(prepost)].BBC[zdcsmd_map[eastwest][verthori][strip-1]];  
+  return mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[zdcsmd_map[eastwest][verthori][strip-1]];  
 };
 
 
