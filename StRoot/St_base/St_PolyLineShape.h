@@ -16,7 +16,7 @@ class St_PolyLineShape : public TShape, public TAttMarker {
    EShapeTypes   m_ShapeType;   // shape of the segment connections
    TShape       *m_Shape;       // shape for draw each segment of the polylins
    TShape       *m_Connection;  // shape to represent the each "end" of the polyline
-   TPoints3DABC   *m_Points;        // PolyLine itself
+   TPoints3DABC   *m_Points;    // PolyLine itself
    Float_t       m_WidthFactor; // factor to calculate the the tube diameters 
    Bool_t        m_HasDrawn;    // flag to avoid multiply plots
    Bool_t        m_Smooth;      // Make smooth connections
@@ -32,18 +32,19 @@ public:
    St_PolyLineShape();
    St_PolyLineShape(TPoints3DABC *points,Option_t* option="P");
    virtual ~St_PolyLineShape();
-   static  void Axis(TVirtualPad *p=0, Float_t width=0.5);
+   static  void Axis(TVirtualPad *p=0, Float_t width=0.5, Float_t axisFactor=0.2);
    virtual Int_t        DistancetoPrimitive(Int_t px, Int_t py);
    virtual void         Draw(Option_t *opt="");
    virtual void         ExecuteEvent(Int_t event, Int_t px, Int_t py);
-   virtual TShape      *GetConnection(){ return m_Connection;}
-   virtual Color_t      GetColorAttribute();
-   virtual Width_t      GetSizeAttribute();
-   virtual TPoints3DABC *GetMarker(){ return m_Points;}
-   virtual TPoints3DABC *GetPoints(){ return m_Points;}
-   virtual TShape      *GetShape(){ return m_Shape;}
-   virtual Bool_t       GetSmooth(){ return m_Smooth;}
-   virtual Float_t      GetWidthFactor(){ return m_WidthFactor;}
+   virtual TShape      *GetConnection() const { return m_Connection;}
+   virtual Color_t      GetColorAttribute() const;
+   virtual Width_t      GetSizeAttribute()  const;
+   virtual Style_t      GetStyleAttribute() const;
+   virtual TPoints3DABC *GetMarker() const { return m_Points;}
+   virtual TPoints3DABC *GetPoints() const { return m_Points;}
+   virtual TShape      *GetShape() const { return m_Shape;}
+   virtual Bool_t       GetSmooth() const { return m_Smooth;}
+   virtual Float_t      GetWidthFactor() const { return m_WidthFactor;}
    virtual void         PaintNode(Float_t *start,Float_t *end,Option_t *option);
    virtual void         Paint(Option_t *opt);
    virtual void         Paint3d(Option_t *opt);
@@ -59,7 +60,9 @@ public:
    virtual Int_t        SetConnection(EShapeTypes connection=kBrik);
    virtual void         SetShape(TShape *shape);
    virtual void         SetSmooth(Bool_t smooth=kTRUE){ m_Smooth=smooth;}
+   virtual Style_t      SetStyleAttribute(Style_t style);
    virtual void         SetWidthFactor(Float_t fact=1.0){m_WidthFactor = fact;} //*MENU 
+   virtual Int_t        Size() const;
    virtual void         Sizeof3D() const;
    ClassDef(St_PolyLineShape,0)
 };
