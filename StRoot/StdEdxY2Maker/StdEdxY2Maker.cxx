@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.12 2003/03/10 13:02:04 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.13 2003/08/20 17:09:03 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -180,6 +180,10 @@ StdEdxY2Maker::StdEdxY2Maker(const char *name):
     m_Calibration(0)
 {
   if (!gMinuit) gMinuit = new TMinuit(2);
+  for (int i = 0; i < 24; i++) 
+    for (int j = 0; j < 45; j++) 
+      for (Int_t k = 0; k < 3; k++) 
+	mRowPosition[i][j][k] = 0;
 }
 //_____________________________________________________________________________
 StdEdxY2Maker::~StdEdxY2Maker(){}
@@ -196,6 +200,7 @@ Int_t StdEdxY2Maker::Init(){
     if (! m_Calibration) gMessMgr->Warning() << "StdEdxY2Maker:: Calibration Mode" << m_Calibration << endm;
   }
   m_Bichsel = new Bichsel();
+  
   if (m_Calibration != 0) {// calibration mode
     StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
     TFile *f = 0;
@@ -517,6 +522,8 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
       StTpcLocalSectorCoordinate lsMidCoord; transform(padCoord, lsMidCoord);
       StTpcLocalSectorCoordinate  lsPos(0,lsMidCoord.position().y(),0, sector);
       StGlobalCoordinate          gMidCoord; transform(lsPos, gMidCoord);
+      for (Int_t l = 0; l < 3; l++) 
+	if (mRowPosition[sector-1][row-1][l]) SafeDelete(mRowPosition[sector-1][row-1][l]);
       mRowPosition[sector-1][row-1][0] = new  StThreeVectorD(gMidCoord.position().x(), // gMidPos 
 							     gMidCoord.position().y(),
 							     gMidCoord.position().z());
@@ -546,16 +553,14 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
   m_tpcGainMonitor = (St_tpcGainMonitor *) GetDataBase("Conditions/tpc/tpcGainMonitor");
 #endif
   TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc"); assert(tpc_calib);
-  if (! m_tpcGas) {
+  if (! m_Simulation) { // calibration constants
     m_tpcGas = (St_tpcGas *) tpc_calib->Find("tpcGas");
     if (!m_tpcGas) cout << "=== tpcGas is missing ===" << endl;
     m_tpcPressure = (St_tpcPressure *) tpc_calib->Find("tpcPressure");
     if (!m_tpcPressure) {
       cout << "=== tpcPressure is missing ===" << endl;
     }
-    if (! m_Simulation) assert (m_tpcPressure && m_tpcGas);
-  }
-  if (! m_Simulation) { // calibration constants
+    assert (m_tpcPressure && m_tpcGas);
 
 #ifdef DriftDistanceCorrection
     if (! m_drift) {
@@ -606,28 +611,7 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
 }
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::FinishRun(Int_t OldRunNumber) {
-  // Clean up
-  Int_t NoSector = 24;
-  Int_t NoRow    = 45;
-  for (Int_t sector=1; sector<=NoSector; sector++) {
-    SafeDelete(mNormal[sector-1]);
-    for (Int_t row = 1; row <= NoRow; row++) {
-      for (int i = 0; i<3; i++) SafeDelete(mRowPosition[sector-1][row-1][i]);
-    }
-  }
-  SafeDelete(m_TpcSecRow);
-  SafeDelete(m_tpcGas); 
-  SafeDelete(m_drift); 
-  SafeDelete(m_Multiplicity); 
-  SafeDelete(m_AdcCorrection); 
-  SafeDelete(m_zCorrection); 
-  SafeDelete(m_dXCorrection); 
-  SafeDelete(m_TpcLengthCorrection); 
-  SafeDelete(m_trigDetSums);
-  //   SafeDelete(m_trig[0]);
-  //   SafeDelete(m_trig[1]);
-  //   SafeDelete(m_trig[2]);
-  //   delete [] m_trig; m_trig = 0;
+  // Move Clean up to InitRun
   m_InitDone = kFALSE;
   return StMaker::FinishRun(OldRunNumber);
 }
