@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cc,v 1.6 1999/02/10 21:50:27 wenaus Exp $
+ * $Id: StEvent.cc,v 1.7 1999/02/10 23:26:53 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cc,v $
- * Revision 1.6  1999/02/10 21:50:27  wenaus
- * Plug memory leaks
+ * Revision 1.7  1999/02/10 23:26:53  wenaus
+ * fix setPrimaryVertex in StEvent to set the vertex type to primary
+ *
+ * Revision 1.8  1999/02/22 19:53:51  wenaus
+ * cleaner deleting
  *
  * Revision 1.7  1999/02/10 23:26:53  wenaus
  * fix setPrimaryVertex in StEvent to set the vertex type to primary
@@ -33,13 +36,13 @@
  * Fix for Sun compiler peculiarity
  *
  * Revision 1.2  1999/01/15 22:53:39  wenaus
-static const char rcsid[] = "$Id: StEvent.cc,v 1.6 1999/02/10 21:50:27 wenaus Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.7 1999/02/10 23:26:53 wenaus Exp $";
  *
 #if !defined(ST_NO_NAMESPACES)
-static const char rcsid[] = "$Id: StEvent.cc,v 1.6 1999/02/10 21:50:27 wenaus Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.7 1999/02/10 23:26:53 wenaus Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEvent.cc,v 1.6 1999/02/10 21:50:27 wenaus Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.7 1999/02/10 23:26:53 wenaus Exp $";
 
 StEvent::StEvent()
 {
@@ -69,9 +72,7 @@ const StEvent&
     delete mTracks;            
     for(StVertexIterator iv=mVertices->begin(); iv != mVertices->end(); iv++) delete *iv;
     delete mVertices;
-    long nht=0;
-    for(StTpcHitIterator iht=mTpcHits->begin(); iht != mTpcHits->end(); iht++) { delete *iht; nht++;}
-    cout << "Deleted TPC hits: " << nht << endl;
+    for(StTpcHitIterator iht=mTpcHits->begin(); iht != mTpcHits->end(); iht++) delete *iht;
     delete mTpcHits;           
     for(StSvtHitIterator ihs=mSvtHits->begin(); ihs != mSvtHits->end(); ihs++) delete *ihs;
     delete mSvtHits;           
@@ -163,7 +164,10 @@ void StEvent::setRunNumber(unsigned long val) { mRunNumber = val; }
 
 void StEvent::setTriggerMask(unsigned long val) { mTriggerMask = val; }              
 
-void StEvent::setPrimaryVertex(StVertex* val) { mPrimaryVertex = val; }                  
+void StEvent::setBunchCrossingNumber(unsigned long val) { mBunchCrossingNumber = val; }      
+
+  val->setType(primary);
+
 void StEvent::setRun(StRun* val) { mRun = val; }                            
 
 void StEvent::setPrimaryVertex(StVertex* val) {
