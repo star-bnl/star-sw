@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: dbStruct.hh,v 1.7 1999/12/07 21:25:25 porter Exp $
+ * $Id: dbStruct.hh,v 1.8 1999/12/28 21:31:42 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: dbStruct.hh,v $
+ * Revision 1.8  1999/12/28 21:31:42  porter
+ * added 'using std::vector' and 'using std::list' for Solaris CC5 compilation.
+ * Also fixed some warnings arising from the CC5 compiles
+ *
  * Revision 1.7  1999/12/07 21:25:25  porter
  * some fixes for linux warnings
  *
@@ -26,6 +30,7 @@
 #define DBSTRUCT_HH
 
 #include <vector>
+
 
 class basic {
 
@@ -79,6 +84,7 @@ class elem : public basic {
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<elem*, allocator<elem*> > elemVec;
 #else
+using std::vector;
 typedef vector<elem*> elemVec;
 #endif
 
@@ -135,6 +141,10 @@ class dbTable : public basic {
 
 
 #endif
+
+
+
+
 
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbFactoryI.hh,v 1.4 1999/10/19 14:30:38 porter Exp $
+ * $Id: StDbFactoryI.hh,v 1.5 1999/12/28 21:31:42 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbFactoryI.hh,v $
+ * Revision 1.5  1999/12/28 21:31:42  porter
+ * added 'using std::vector' and 'using std::list' for Solaris CC5 compilation.
+ * Also fixed some warnings arising from the CC5 compiles
+ *
  * Revision 1.4  1999/10/19 14:30:38  porter
  * modifications relevant to use with StDbBroker and future merging with
  * "params" database structure + some docs + suppressing diagnostics messages
@@ -29,10 +33,14 @@
 
 class StDbTable;
 
+
+
 #include <list>
+
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef list<StDbTableID*, allocator<StDbTableID*> > IDList;
 #else
+using std::list;
 typedef list<StDbTableID*> IDList;
 #endif
 

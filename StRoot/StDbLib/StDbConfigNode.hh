@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.hh,v 1.8 1999/12/03 22:24:01 porter Exp $
+ * $Id: StDbConfigNode.hh,v 1.9 1999/12/28 21:31:41 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.hh,v $
+ * Revision 1.9  1999/12/28 21:31:41  porter
+ * added 'using std::vector' and 'using std::list' for Solaris CC5 compilation.
+ * Also fixed some warnings arising from the CC5 compiles
+ *
  * Revision 1.8  1999/12/03 22:24:01  porter
  * expanded functionality used by online, fixed bug in
  * mysqlAccessor::getElementID(char*), & update StDbDataSet to
@@ -39,9 +43,12 @@ class TableIter;
 
 #ifndef __CINT__
 #include <list>
+
+
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef list<StDbTable*, allocator<StDbTable*> > TableList;
 #else
+using std::list;
 typedef list<StDbTable*> TableList;
 #endif
 #endif
@@ -120,8 +127,8 @@ public:
   virtual bool hasData();
   virtual void printTree();
 
-  virtual StDbTable* addDbTable(const char* tableName, char* version="default", bool isBaseLine = false);
-  virtual StDbTable* addTable(const char* tableName, char* version="default", bool isBaseLine = false);
+  virtual StDbTable* addDbTable(const char* tableName, const char* version="default", bool isBaseLine = false);
+  virtual StDbTable* addTable(const char* tableName, const char* version="default", bool isBaseLine = false);
   // virtual StDbTable* findTable(const char* tableName, const char* version, int elementID);
   virtual StDbTable* findLocalTable(const char* name);
   virtual void removeTable(StDbTable* table);
