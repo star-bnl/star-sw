@@ -114,6 +114,7 @@
 	INTEGER     Zone
 
 	INTEGER Month_Days(12)
+	INTEGER TIME
 
 *	Table of months' days:
 	DATA Month_Days / 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 /
@@ -124,7 +125,7 @@
 	CALL STRTime_Get_Current_Zone( Zone, Zone_Name ) !Get it as set by application or from system.
 
 *	"TIME" gives seconds since 01-Jan-1970, midnight.
-	CALL TIME(Itime) !System routine.
+	Itime = TIME() !System routine.
 
 	Days  = Itime / 86400
 	Secs  = Itime - Days * 86400
@@ -520,7 +521,9 @@
 	INTEGER     Zone
 	CHARACTER*4 Zone_Name
 
-	CALL TIME(ITIME) !Observed to return seconds since 1-jan-1970.
+	INTEGER TIME
+
+	ITIME = TIME() !System routine.
 	DAYS=ITIME/86400
 	SECS=ITIME-DAYS*86400
 	HOUR=SECS/3600
@@ -528,7 +531,6 @@
 	SEC=(SECS-HOUR*3600-MIN*60)
 
 	CALL STRTime_Get_Current_Zone( Zone, Zone_Name )
-
 	HOUR = HOUR - Zone !Convert UT to the current time zone.
 
 	IF ( HOUR .LT. 0 ) THEN
@@ -816,7 +818,8 @@
 	INTEGER Seconds_Since_1970
 *  Description:
 *	Get the number of seconds since 1-Jan-1970, 00:00:00 GMT.
-	CALL TIME( Seconds_Since_1970 ) !Observed to return seconds since 1-jan-1970.
+	INTEGER TIME
+	Seconds_Since_1970 = TIME() !Observed to return seconds since 1-jan-1970.
 	RETURN
 	END
 *
