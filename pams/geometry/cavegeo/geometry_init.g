@@ -1,4 +1,4 @@
-   subroutine star
+   subroutine geometry_init
 *
    Call cavegeo
    Call pipegeo
