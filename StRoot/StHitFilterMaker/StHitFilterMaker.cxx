@@ -1,7 +1,10 @@
 //*-- Author : James Dunlop
 // 
-// $Id: StHitFilterMaker.cxx,v 1.2 2003/07/30 15:27:00 caines Exp $
+// $Id: StHitFilterMaker.cxx,v 1.3 2004/04/08 19:28:55 caines Exp $
 // $Log: StHitFilterMaker.cxx,v $
+// Revision 1.3  2004/04/08 19:28:55  caines
+// Make Hitfilter take out those SVT hits not on tracks defined in the constructor - same as TPC filtering
+//
 // Revision 1.2  2003/07/30 15:27:00  caines
 // Set options so you delete TPC and SVT hit if Zert >30. If ZVert<30cm save all good svt hits and TPC hits on tracks
 //
@@ -111,6 +114,7 @@ Int_t StHitFilterMaker::Make(){
       keptTrackNodes.size() << "track nodes " << endm;
     
     this->removeTpcHitsNotOnTracks(event,keptTrackNodes);
+    this->removeSvtHitsNotOnTracks(event,keptTrackNodes);
     this->removeBadSvtHits(event);
     
     return kStOK;
@@ -214,6 +218,78 @@ bool StHitFilterMaker::removeTpcHitsNotOnTracks(StEvent *event,
   else
     return false;
 }
+
+/*!
+  searches the vector of keptTrackNodes
+  for good nodes, rather than relying on zombies. and removes SVT hits not on tracks
+*/	
+bool StHitFilterMaker::removeSvtHitsNotOnTracks(StEvent *event, 
+						vector<StTrackNode*>& keptTrackNodes) 
+{
+  Int_t removedHits = 0;
+    
+  if (event && event->svtHitCollection()) {
+    // first remove all hits not associated with a track at all
+    StSvtHitCollection *theHits = event->svtHitCollection();
+    for (unsigned int l=0; l<theHits->numberOfBarrels(); l++) {
+      for (unsigned int m=0; m<theHits->barrel(l)->numberOfLadders(); m++) {
+	for (unsigned int n=0; n<theHits->barrel(l)->ladder(m)->numberOfWafers(); n++) {
+	  for (unsigned int h=0; h<theHits->barrel(l)->ladder(m)->wafer(n)->hits().size(); h++) {   
+	    
+	    if (theHits->barrel(l)->ladder(m)->wafer(n)->hits()[h]->trackReferenceCount() == 0) {
+	      if (! (theHits->barrel(l)->ladder(m)->wafer(n)->hits()[h]->isZombie())) {
+		theHits->barrel(l)->ladder(m)->wafer(n)->hits()[h]->makeZombie();
+		++removedHits;
+	      }
+	    }
+	  }
+	}
+      }
+    }
+
+    gMessMgr->Info() << "StHitFilterMaker::removedSvtHitsNotOnTracks.  Removed " <<
+      removedHits << " SVT hits not on any tracks" << endm;
+    removedHits = 0;
+	
+    // now all hits not associated 
+    StSPtrVecTrackNode& nodes = event->trackNodes();
+    for (unsigned int i = 0; i < nodes.size(); i++) {   // loop nodes
+      StTrackNode* node = nodes[i];
+      if (!binary_search(keptTrackNodes.begin(),
+			 keptTrackNodes.end(),
+			 node)) 
+	{
+	  
+	  for (unsigned int j = 0; j < node->entries(); j++) {   // loop tracks in node
+	    StTrack* track = node->track(j);
+	    // Don't do anything if it doesn't have a SVT hit
+	    if (!(track->topologyMap().hasHitInDetector(kSvtId))) {
+	      continue;
+	    }
+	    
+	    StTrackDetectorInfo* info = track->detectorInfo();
+	    if (info) {
+	      StPtrVecHit& hitList = info->hits();
+	      for (unsigned int k = 0; k < hitList.size(); k++)   // loop hits
+		if (hitList[k]->detector() == kSvtId && 
+		    !(hitList[k]->isZombie()) ) {
+		  hitList[k]->makeZombie();
+		  ++removedHits;
+		}
+	      
+	    }
+	  }
+	}
+    }
+    gMessMgr->Info() << "StHitFilterMaker::removeSvtHitsNotOnTracks.  Removed " <<
+      removedHits << " SVT hits not on passed tracks" << endm;
+    
+    return true;
+  }
+  else
+    return false;
+}
+
 
 /*!
   This is a pretty simple cut and paste + extension from StEventScavenger

@@ -1,4 +1,4 @@
-// $Id: StHitFilterMaker.h,v 1.3 2003/09/10 19:47:19 perev Exp $
+// $Id: StHitFilterMaker.h,v 1.4 2004/04/08 19:28:55 caines Exp $
 
 #ifndef STAR_StHitFilterMaker
 #define STAR_StHitFilterMaker
@@ -54,6 +54,7 @@ class StHitFilterMaker : public StMaker {
   bool accept(StHit *);
     
   bool removeTpcHitsNotOnTracks(StEvent *, vector<StTrackNode*>&); //!
+  bool removeSvtHitsNotOnTracks(StEvent *, vector<StTrackNode*>&); //!
   bool removeBadSvtHits(StEvent *); //!
   void setPtLowerCut(Double_t pt) {mPtLowerCut = pt;}
   void setPtUpperCut(Double_t pt) {mPtUpperCut = pt;}
@@ -69,7 +70,7 @@ class StHitFilterMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StHitFilterMaker.h,v 1.3 2003/09/10 19:47:19 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StHitFilterMaker.h,v 1.4 2004/04/08 19:28:55 caines Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
     
@@ -81,6 +82,9 @@ class StHitFilterMaker : public StMaker {
 
 
 // $Log: StHitFilterMaker.h,v $
+// Revision 1.4  2004/04/08 19:28:55  caines
+// Make Hitfilter take out those SVT hits not on tracks defined in the constructor - same as TPC filtering
+//
 // Revision 1.3  2003/09/10 19:47:19  perev
 // ansi corrs
 //
