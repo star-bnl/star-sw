@@ -1,35 +1,10 @@
-// $Id: tpcdraw.C,v 1.13 2000/01/20 02:18:28 snelling Exp $
+// $Id: tpcdraw.C,v 1.14 2000/03/08 22:52:49 snelling Exp $
 // $Log: tpcdraw.C,v $
+// Revision 1.14  2000/03/08 22:52:49  snelling
+// Changed View settings (thanks Ian)
+//
 // Revision 1.13  2000/01/20 02:18:28  snelling
 // fixed St_TableSorter under Linux still crash under SUN (CINT related)
-//
-// Revision 1.12  1999/11/24 02:01:43  snelling
-// Apllied couple fixes from Li Qun
-//
-// Revision 1.11  1999/11/23 19:50:24  snelling
-// changed variable order
-//
-// Revision 1.10  1999/11/20 23:45:51  snelling
-// Used Table member function Draw instead of making TableNtuple
-//
-// Revision 1.9  1999/11/16 19:28:08  snelling
-// Changed kOption to "Option" in chain->GetOption()
-//
-// Revision 1.8  1999/11/10 00:16:16  snelling
-// Removed drawing of pseudo-padrow hits for GEANT points
-//
-// Revision 1.7  1999/09/23 21:52:35  snelling
-// added gSystem->Load("StAnalysisUtilities") because that's not in bfc anymore
-//
-// Revision 1.6  1999/08/10 18:38:19  snelling
-// made it compatible with the new bfc.C
-//
-// Revision 1.5  1999/06/10 22:45:15  snelling
-// disabled nr of track limit
-//
-// Revision 1.4  1999/05/21 15:34:02  kathy
-// made sure Log & Id are in each file and also put in standard comment line with name of owner
-//
 //=======================================================================
 // owner: Raimond Snellings
 // what it does: Macro for plotting hits and pixels in combination with bfc.C 
@@ -41,53 +16,48 @@ int InitDraw() {
    * -----------------------------------------------------------------
    *	draw TPC sectors, two sections, inner and outer.
    * -----------------------------------------------------------------*/
-  Float_t r1=51.9;
-  Float_t r2=126.5;
-  Float_t r3=127.5;
-  Float_t r4=202.9;
+  Float_t RminInner = 51.9/2;
+  Float_t RmaxInner = 126.5/2;
+  Float_t RminOuter = 127.5/2;
+  Float_t RmaxOuter = 202.9/2;
+  Float_t Zmin = -210.;
+  Float_t Zmax = 210.;
   
   // Define the TPC sector outlines. 
-  TPGON   *insect = new TPGON("insect","TPC inner sector","void",-15,360,12,2);
-  insect->DefineSection(0,-210,r1,r2);
-  insect->DefineSection(1,210,r1,r2);
-  insect->SetLineColor(2);
+  TPGON   *InnerSector = new TPGON("InnerSector","TPC inner sector","void",-15,360,12,2);
+  InnerSector->DefineSection(0, Zmin, RminInner, RmaxInner);
+  InnerSector->DefineSection(1, Zmax, RminInner, RmaxInner);
+  InnerSector->SetLineColor(2);
+  TNode *m_node1 = new TNode("m_node1","inner sector",InnerSector);
   
-  TNode *m_node1 = new TNode("m_node1","inner sector",insect);
-  m_node1->BuildListOfNodes();
-  m_node1->cd();
-  
-  TPGON   *outsect = new TPGON("outsect","TPC outer sector","void",-15,360,12,2);
-  outsect->DefineSection(0,-210,r3,r4);
-  outsect->DefineSection(1,210,r3,r4);
-  outsect->SetLineColor(2);
-
-  TNode *m_node2 = new TNode("node2","outer sector",outsect);
+  TPGON   *OuterSector = new TPGON("OuterSector","TPC outer sector","void",-15,360,12,2);
+  OuterSector->DefineSection(0,Zmin,RminOuter,RmaxOuter);
+  OuterSector->DefineSection(1,Zmax,RminOuter,RmaxOuter);
+  OuterSector->SetLineColor(4);
+  TNode *m_node2 = new TNode("m_node2","outer sector",OuterSector);
 
   return kStOK;
 }
 //______________________________________________________________________
-//int draw_event(TPad &padname) {
-int DrawEvent(TPad &padname, Float_t theta, Float_t phi) {
-  /*-----------------------------------------------------------------------
-   * Plot hits and tracks in the TPC */
+
+int DrawEvent(TPad *padname, Float_t theta, Float_t phi) {
+
+  //   * Plot hits and tracks in the TPC */
   
   char tkstring[10];
+  Float_t  zmin=-210;
+  Float_t  zmax=210;
+  Float_t rmin[3]={ -200., -200., -200.};
+  Float_t rmax[3]={ 200., 200., 200.};
 
-  // Plot the part of the TPC with tracks 
-  padname.SetTheta(theta);
-  padname.SetPhi(phi);
-  padname.Modified();
-  padname.Update();
-  m_node1->Draw();
+  TView *view = new TView(rmin,rmax);
+  padname->SetView(view);
+  view->RotateView(phi,theta);
+  //  view->ShowAxis();
+  view->Draw();
 
-  TView *view = padname.GetView();
-  Float_t rmin[3]={ -180, -180,-210};
-  Float_t rmax[3]={ 180,  180, 210};
-  Float_t p[6];
-  
-  view->SetRange(rmin,rmax);
-  view->SetLongitude(15.0);
-  view->SetLatitude(90.0);
+  m_node2->Draw("same");
+  m_node1->Draw("same");
 
   // Create iterators for the two datasets
   St_DataSetIter tpc_data(chain->DataSet("tpc_hits"));
@@ -111,10 +81,8 @@ int DrawEvent(TPad &padname, Float_t theta, Float_t phi) {
   Int_t ntracks = track->GetNRows();
   if (ntracks == 0) {cout << "Error: tptrack table contains zero rows " << endl; return kStWarn;}
 
-  // Show the tpc event in z slices.
-  Float_t  zmin=-210;
-  Float_t  zmax=210;
 
+  // Draw hits
   Int_t k=0; 
   Float_t *pts = new Float_t[3*nhits];
   for (Int_t j = 0; j < nhits; j++) {
@@ -128,8 +96,9 @@ int DrawEvent(TPad &padname, Float_t theta, Float_t phi) {
   cout << "total hits " << k << endl; 
   TPolyMarker3D *hit = new TPolyMarker3D(k,pts,2);
   hit->SetMarkerColor(1);
-  hit->Draw();
+  hit->Draw("same");
 
+  //Draw Hits on track with different colors
   Int_t ngoodtrks = 0;
   for (j = 0; j < ntracks; j++) {
     Int_t trkid = track1[j]->id;
@@ -162,8 +131,11 @@ int DrawEvent(TPad &padname, Float_t theta, Float_t phi) {
     }
     TPolyMarker3D *thit = new TPolyMarker3D(k,tkpts,mark);
     thit->SetMarkerColor(incolor);
-    thit->Draw();
+    thit->Draw("same");
+
+
     // Draw good tracks as polylines.
+    Float_t p[6];
     if (trkflag < 0) {continue;}
     Float_t ay = 1.0/tan(0.0174533*track1[j]->psi);
     Float_t x0 = track1[j]->r0*cos(0.0174533*track1[j]->phi0);
@@ -193,30 +165,14 @@ int DrawEvent(TPad &padname, Float_t theta, Float_t phi) {
       p[5] = track1[j]->tanl*(y0-p[4]) + track1[j]->z0;
       TPolyLine3D *trk = new TPolyLine3D(2,p);
       trk->SetLineColor(incolor);
-      trk->Draw();
+      trk->Draw("same");
       ngoodtrks++;
     }
   }
-  
-  // put the slice number and number of tracks in a separate pad
-  TPad *event = new TPad("event","event",0.75,0.75,0.95,0.95);
-  event->Draw();
-  event->cd();
-  event->Range(0,0,1,1);
-  event->SetFillColor(0);
-  event->SetBorderSize(0);
-  event->SetBorderMode(0);
 
-  // label counts only the good tracks.
-  //  sprintf(tkstring," %d Good Tracks",ngoodtrks);
-  //  TText *ttext = new TText(0.125,0.11,tkstring);
-  //  ttext->SetTextSize(0.5);
-  //  cout << "nr good tracks " << ngoodtrks << endl;
-  //  ttext->Draw();
-  event->Modified();
-  padname.cd();
-  padname.Modified();
-  padname.Update();
+
+  padname->Modified();
+  padname->Update();
 
   return kStOK;
 }
@@ -373,9 +329,9 @@ void tpcdraw() {
   InitDraw();
   
   pad3->cd();
-  DrawEvent(*pad3,90.0,0.0);
+  DrawEvent(pad3,0.,-90.);
   
   pad4->cd();
-  DrawEvent(*pad4,0.0,0.0);
+  DrawEvent(pad4,90.,-90.);
 }
 
