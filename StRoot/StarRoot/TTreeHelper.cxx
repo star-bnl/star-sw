@@ -583,7 +583,8 @@ void TTreeHelper::WhichTree(const char *fileName)
    TKey *key; const char *ttName=0;
    while ( (key = (TKey*)NextKey()) ) 
    { 
-     if (strcmp("TTree",key->GetClassName())) continue;
+     if (strcmp("TTree"  ,key->GetClassName())!=0
+     &&  strcmp("TNtuple",key->GetClassName())!=0) continue;
      ttName = key->GetName(); break;
    }  
    printf(" Got TTree = %s\n",ttName);
