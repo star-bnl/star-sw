@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.hh,v 1.3 2003/04/14 15:51:55 munhoz Exp $
+ * $Id: St_SvtDb_Reader.hh,v 1.4 2004/01/27 02:39:14 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.hh,v $
+ * Revision 1.4  2004/01/27 02:39:14  perev
+ * ClassVers=0 nonpersistent
+ *
  * Revision 1.3  2003/04/14 15:51:55  munhoz
  * reading t0 from DB
  *
@@ -44,7 +47,7 @@ class St_SvtDb_Reader
 {
  private:
   St_DataSet* svtDb[3];        //!
-
+  StSvtHybridCollection *mSvtDriftVeloc;
   StSvtConfig* mSvtConfig;      //!
 
  protected:
@@ -67,7 +70,7 @@ class St_SvtDb_Reader
   StSvtT0* getT0();
 
 #ifdef __ROOT__
-  ClassDef(St_SvtDb_Reader, 1)   //StAF chain virtual base class for Makers
+  ClassDef(St_SvtDb_Reader, 0)   //StAF chain virtual base class for Makers
 #endif
 };
 
