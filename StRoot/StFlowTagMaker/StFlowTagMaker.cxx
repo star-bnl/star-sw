@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.9 2000/01/13 21:49:14 posk Exp $
+// $Id: StFlowTagMaker.cxx,v 1.10 2000/01/13 23:22:05 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.10  2000/01/13 23:22:05  snelling
+// modified sum pt (spt) to mean pt (mpt)
+//
 // Revision 1.9  2000/01/13 21:49:14  posk
 // Updates and corrections.
 //
@@ -102,7 +105,7 @@ Int_t StFlowTagMaker::Make()
 
 void StFlowTagMaker::PrintInfo() 
 {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.9 2000/01/13 21:49:14 posk Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.10 2000/01/13 23:22:05 snelling Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -229,7 +232,7 @@ void StFlowTagMaker::fillFlowTag() {
     pFlowTag->qxa[j]  = Q.X();
     pFlowTag->qya[j]  = Q.Y();
     pFlowTag->na[j]   = pFlowEvent->Mult(j, selN, subN);
-    pFlowTag->spta[j] = pFlowEvent->MeanPt(j, selN, subN);
+    pFlowTag->mpta[j] = pFlowEvent->MeanPt(j, selN, subN);
 
     // fill sub2 tags
     selN = 0, subN = 1;
@@ -237,7 +240,7 @@ void StFlowTagMaker::fillFlowTag() {
     pFlowTag->qxb[j]  = Q.X();
     pFlowTag->qyb[j]  = Q.Y();
     pFlowTag->nb[j]   = pFlowEvent->Mult(j, selN, subN);
-    pFlowTag->sptb[j] = pFlowEvent->MeanPt(j, selN, subN);
+    pFlowTag->mptb[j] = pFlowEvent->MeanPt(j, selN, subN);
 
     // fill sub3 tags
     selN = 1, subN = 0;
@@ -245,7 +248,7 @@ void StFlowTagMaker::fillFlowTag() {
     pFlowTag->qxc[j]  = Q.X();
     pFlowTag->qyc[j]  = Q.Y();
     pFlowTag->nc[j]   = pFlowEvent->Mult(j, selN, subN);
-    pFlowTag->sptc[j] = pFlowEvent->MeanPt(j, selN, subN);
+    pFlowTag->mptc[j] = pFlowEvent->MeanPt(j, selN, subN);
 
     // fill sub4 tags
     selN = 1, subN = 1;
@@ -253,7 +256,7 @@ void StFlowTagMaker::fillFlowTag() {
     pFlowTag->qxd[j]  = Q.X();
     pFlowTag->qyd[j]  = Q.Y();
     pFlowTag->nd[j]   = pFlowEvent->Mult(j, selN, subN);
-    pFlowTag->sptd[j] = pFlowEvent->MeanPt(j, selN, subN);
+    pFlowTag->mptd[j] = pFlowEvent->MeanPt(j, selN, subN);
 
   }
 }
@@ -270,25 +273,25 @@ Int_t StFlowTagMaker::fillHistograms()
     float order = (float)(j+1);
 
     histSubEvents[0].histHarmonics[j].mHistMeanPt->
-      Fill(pFlowTag->spta[j]);
+      Fill(pFlowTag-mpta[j]);
     histSubEvents[0].histHarmonics[j].mHistMult->Fill(pFlowTag->na[j]);
     histSubEvents[0].histHarmonics[j].mHist_q->
       Fill(sqrt(pFlowTag->qxa[j]*pFlowTag->qxa[j] +
 	pFlowTag->qya[j]*pFlowTag->qya[j]) / sqrt((float)(pFlowTag->na[j])));
     histSubEvents[1].histHarmonics[j].mHistMeanPt->
-      Fill(pFlowTag->sptb[j]);
+      Fill(pFlowTag->mptb[j]);
     histSubEvents[1].histHarmonics[j].mHistMult->Fill(pFlowTag->nb[j]);
     histSubEvents[1].histHarmonics[j].mHist_q->
       Fill(sqrt(pFlowTag->qxb[j]*pFlowTag->qxb[j] +
 	pFlowTag->qyb[j]*pFlowTag->qyb[j]) / sqrt((float)(pFlowTag->nb[j])));
     histSubEvents[2].histHarmonics[j].mHistMeanPt->
-      Fill(pFlowTag->sptc[j]);
+      Fill(pFlowTag->mptc[j]);
     histSubEvents[2].histHarmonics[j].mHistMult->Fill(pFlowTag->nc[j]);
     histSubEvents[2].histHarmonics[j].mHist_q->
       Fill(sqrt(pFlowTag->qxc[j]*pFlowTag->qxc[j] +
         pFlowTag->qyc[j]*pFlowTag->qyc[j]) / sqrt((float)(pFlowTag->nc[j])));
     histSubEvents[3].histHarmonics[j].mHistMeanPt->
-      Fill(pFlowTag->sptd[j]);
+      Fill(pFlowTag->mptd[j]);
     histSubEvents[3].histHarmonics[j].mHistMult->Fill(pFlowTag->nd[j]);
     histSubEvents[3].histHarmonics[j].mHist_q->
       Fill(sqrt(pFlowTag->qxd[j]*pFlowTag->qxd[j] +
