@@ -1,110 +1,3 @@
-// $Id: StMessageManager.cxx,v 1.35 2003/09/24 22:02:48 perev Exp $
-// $Log: StMessageManager.cxx,v $
-// Revision 1.35  2003/09/24 22:02:48  perev
-// Back to Gene solution of operator<<
-//
-// Revision 1.34  2003/09/22 01:30:41  perev
-//  some cleanup
-//
-// Revision 1.33  2003/09/02 17:59:20  perev
-// gcc 3.2 updates + WarnOff
-//
-// Revision 1.32  2001/05/14 20:53:20  genevb
-// Add features to examine memory use, switch from TDatime to time_t
-//
-// Revision 1.31  2000/05/23 19:03:38  genevb
-// Correct interface for MessageOut(), update docs
-//
-// Revision 1.30  2000/03/01 05:54:59  genevb
-// Further refinements to FORTRAN routines
-//
-// Revision 1.29  2000/02/29 16:41:57  genevb
-// Fortran-compliant interface
-//
-// Revision 1.28  2000/01/05 19:53:46  genevb
-// Fixed CC5 warnings, and several other small improvements under the hood
-//
-// Revision 1.27  1999/12/07 19:47:02  genevb
-// Increased length of mess ptr list for Linux
-//
-// Revision 1.26  1999/10/28 16:06:58  genevb
-// Fixed bug in C msg_enable routine - same as earlier fix for StMessage routines
-//
-// Revision 1.25  1999/09/16 15:50:25  genevb
-// Fixed a bug in over-writing memory when calling from FORTRAN, use char=0 instead of strcpy
-//
-// Revision 1.24  1999/09/14 16:57:56  genevb
-// Forgot to remove a debug print statement
-//
-// Revision 1.23  1999/09/14 15:42:03  genevb
-// Some bug fixes, workaround for nulls in strings
-//
-// Revision 1.22  1999/09/10 21:05:55  genevb
-// Some workarounds for RedHat6.0
-//
-// Revision 1.21  1999/08/12 22:34:28  genevb
-// Additional crash protection for Linux when omitting parameter strings (opt=strlen(mess))
-//
-// Revision 1.20  1999/08/10 22:07:35  genevb
-// Added QAInfo message types
-//
-// Revision 1.19  1999/07/25 05:27:45  genevb
-// Better protection against empty option strings in FORTRAN
-//
-// Revision 1.18  1999/07/23 16:56:40  genevb
-// Fix extern C prototypes, default options for omitted types, Linux bug with multi-line messages
-//
-// Revision 1.17  1999/07/22 00:19:31  genevb
-// Add MessageOut(), fix Linux bugs with character array lengths passed from FORTRAN
-//
-// Revision 1.16  1999/07/17 00:23:24  genevb
-// Fixed bug when option fields are empty in FORTRAN, and let type limits be set before types are even added
-//
-// Revision 1.15  1999/07/08 22:58:18  genevb
-// Created an abstract interface with StMessMgr.h hiding template implementation from others, a few other small fixes
-//
-// Revision 1.14  1999/07/01 23:32:52  genevb
-// Change default message typing
-//
-// Revision 1.13  1999/07/01 15:58:44  genevb
-// Fixed linux crash with Summary
-//
-// Revision 1.12  1999/07/01 01:24:46  genevb
-// Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
-//
-// Revision 1.11  1999/06/30 17:24:50  genevb
-// Better limit management, remove Bool_t
-//
-// Revision 1.10  1999/06/30 04:18:45  genevb
-// Fixes: summary wrap-around, unsigned ints, last character of message, <> for time; no KNOWN remaining bugs
-//
-// Revision 1.9  1999/06/29 23:32:42  genevb
-// Handle multi-line calls to fortran routines better
-//
-// Revision 1.8  1999/06/29 17:37:31  genevb
-// Lots of fixes...
-//
-// Revision 1.7  1999/06/28 15:42:12  genevb
-// Added Debug message class
-//
-// Revision 1.6  1999/06/28 02:40:56  genevb
-// Additional backward compatibilit with MSG (msg_enable, msg_enabled, msg_disable
-//
-// Revision 1.5  1999/06/26 00:24:53  genevb
-// Fixed const type mismatches
-//
-// Revision 1.4  1999/06/25 22:57:58  genevb
-// Fixed a small bug in MSG compatibiliti
-//
-// Revision 1.3  1999/06/24 23:23:58  genevb
-// Added message call for compatibility with old fortran code
-//
-// Revision 1.2  1999/06/24 16:30:42  genevb
-// Fixed some memory leaks
-//
-// Revision 1.1  1999/06/23 15:17:52  genevb
-// Introduction of StMessageManager
-//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StMessageManager                                                     //
@@ -123,22 +16,37 @@
 #endif
 
 #include "StMessageManager.h"
+#include "StMessageStream.h"
 #include <string.h>
 #ifdef LINUX
 #include <math.h>
 #endif
 
 StMessMgr* gMessMgr = 0;
-StMessage* gMessage=0;
-StMessage* endm=0;
+StMessage* gMessage = 0;
+StMessage* endm     = 0;
+
 ostream& operator<<(ostream& os, StMessage* stm) {
-  StMessMgr *mm = dynamic_cast<StMessMgr*>(&os);
-  if (mm) {mm->Print();return os;}
-  // something strange happened
-  if (!stm) return os;
-  os << stm->GetMessage();
+  if (((&os) == (ostream*) gMessMgr) && (stm == endm)) {
+    gMessMgr->Print();                 // This was a StMessage terminator
+  } else {
+    if (stm) os << stm->GetMessage();  // Output this message to the ostream
+  }
   return os;
 }
+ostream& operator++(StMessMgr&) {
+  return gMessMgr->Info();
+}
+ostream& operator--(StMessMgr&) {
+  return gMessMgr->Error();
+}
+ostream& operator~(StMessMgr&) {
+  return gMessMgr->out();
+}
+ostream& operator-(StMessMgr&) {
+  return gMessMgr->err();
+}
+
 static const char defaultMessType = 'I';
 static char emptyString[] = "";
 static char oOpt[] = "O";
@@ -373,8 +281,8 @@ StMessageManager::StMessageManager() : StMessMgr()
 //
   messTypeList=0;     
   messCounter =0;
-  curType     = new char[  2];  curType[0] = 0; curType[1] = 0;
-  curOpt      = new char[120];  curOpt [0] = 0; 
+  curType     = new char[ 2];  curType[0] = 0; curType[1] = 0;
+  curOpt      = new char[32];  curOpt [0] = 0; 
   building    =0;
   remember    =0;
   gMessMgr = (StMessMgr*) this;
@@ -404,7 +312,7 @@ StMessageManager::~StMessageManager() {
     delete (*current);
   for (size_t i=1; i<messCollection.size(); i++)
     delete (messCollection[i]);
-  cout << "WARNING!!! DELETING StMessageManager!" << endl;
+  myout << "WARNING!!! DELETING StMessageManager!" << endl;
   gMessMgr = 0;
 }
 //_____________________________________________________________________________
@@ -456,7 +364,7 @@ StMessMgr& StMessageManager::Message(const char* mess, const char* type,
     strcpy(curOpt,opt);
     seekp(0);
   }
-  return *this;
+  return *((StMessMgr*) this);
 }
 //_____________________________________________________________________________
 void StMessageManager::BuildMessage(const char* mess, const char* type,
@@ -475,7 +383,7 @@ void StMessageManager::BuildMessage(const char* mess, const char* type,
   } else {
     if (!building) *curType = *type;
   }
-  if (opt[0]) {
+  if (!(opt[0])) {
     if ((*type == 'E') || (*type == 'W'))     // Error and Warning messages
       strcpy(curOpt,eOpt);                    // default to stderr,
     else                                      // otherwise
@@ -488,12 +396,12 @@ void StMessageManager::BuildMessage(const char* mess, const char* type,
     typeN = 1;                                // type number for Info is 1
   }
   gMessage = new StMessage(mess, curType, curOpt);
-  if ((!remember) || (strchr(curOpt,'-'))) {
-    if (gMessage) delete gMessage;
+  if ((!remember) || (gMessage->GetOption() & kMessOptDash)) {
+    if (gMessage) delete gMessage;            // not keeping in memory
     gMessage = endm;
   } else {
 #ifndef i386_redhat60
-    messList.push_back(gMessage);
+    messList.push_back(gMessage);             // add to message lists
     messCollection[typeN]->push_back(gMessage);
 #endif
     endm = gMessage;
@@ -513,7 +421,7 @@ void StMessageManager::Print() {
     if (gMessage) {
       gMessage->Print(-1);
     } else {
-      cout << "No current message." << endl;
+      myout << "No current message." << endl;
     }
   }
 }
@@ -632,7 +540,7 @@ void StMessageManager::Summary(size_t nTerms) {
   size_t k;
   int agree;
   char* temp;
-  cout << "  ***** StMessageManager message summary *****" << endl;
+  myout << "  ***** StMessageManager message summary *****" << endl;
   for (i=0; i<nMess; i++) {
     done.push_back(0);
     temp = const_cast<char*> (messList[i]->GetType());
@@ -668,15 +576,15 @@ void StMessageManager::Summary(size_t nTerms) {
         }
       }
       done[i] = 1;
-      for (j = messList[i]->Print(max); j<max; j++) cout << ".";
-      cout << "..";
+      for (j = messList[i]->Print(max); j<max; j++) myout << ".";
+      myout << "..";
       seekp(0);
       *this << count << ends;
       if (tellp() > 6) {
-        cout << ">999999";
+        myout << ">999999";
       } else {
-        for (j=tellp(); j<6; j++) cout << ".";
-        cout << " " << count << endl;
+        for (j=tellp(); j<6; j++) myout << ".";
+        myout << " " << count << endl;
       }
     }
     mType[i] = NULL;
@@ -723,7 +631,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.35 2003/09/24 22:02:48 perev Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.36 2003/09/25 21:19:22 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -732,3 +640,116 @@ void StMessageManager::PrintInfo() {
 // Instantiate the (singleton) class upon loading
 //
 StMessMgr* temp=StMessageManager::Instance();
+StMessMgr& gMess = (*temp);
+
+//_____________________________________________________________________________
+// $Id: StMessageManager.cxx,v 1.36 2003/09/25 21:19:22 genevb Exp $
+// $Log: StMessageManager.cxx,v $
+// Revision 1.36  2003/09/25 21:19:22  genevb
+// Some new cout-like functions and friend functions, some doxygen-ization
+//
+// Revision 1.35  2003/09/24 22:02:48  perev
+// Back to Gene solution of operator<<
+//
+// Revision 1.34  2003/09/22 01:30:41  perev
+//  some cleanup
+//
+// Revision 1.33  2003/09/02 17:59:20  perev
+// gcc 3.2 updates + WarnOff
+//
+// Revision 1.32  2001/05/14 20:53:20  genevb
+// Add features to examine memory use, switch from TDatime to time_t
+//
+// Revision 1.31  2000/05/23 19:03:38  genevb
+// Correct interface for MessageOut(), update docs
+//
+// Revision 1.30  2000/03/01 05:54:59  genevb
+// Further refinements to FORTRAN routines
+//
+// Revision 1.29  2000/02/29 16:41:57  genevb
+// Fortran-compliant interface
+//
+// Revision 1.28  2000/01/05 19:53:46  genevb
+// Fixed CC5 warnings, and several other small improvements under the hood
+//
+// Revision 1.27  1999/12/07 19:47:02  genevb
+// Increased length of mess ptr list for Linux
+//
+// Revision 1.26  1999/10/28 16:06:58  genevb
+// Fixed bug in C msg_enable routine - same as earlier fix for StMessage routines
+//
+// Revision 1.25  1999/09/16 15:50:25  genevb
+// Fixed a bug in over-writing memory when calling from FORTRAN, use char=0 instead of strcpy
+//
+// Revision 1.24  1999/09/14 16:57:56  genevb
+// Forgot to remove a debug print statement
+//
+// Revision 1.23  1999/09/14 15:42:03  genevb
+// Some bug fixes, workaround for nulls in strings
+//
+// Revision 1.22  1999/09/10 21:05:55  genevb
+// Some workarounds for RedHat6.0
+//
+// Revision 1.21  1999/08/12 22:34:28  genevb
+// Additional crash protection for Linux when omitting parameter strings (opt=strlen(mess))
+//
+// Revision 1.20  1999/08/10 22:07:35  genevb
+// Added QAInfo message types
+//
+// Revision 1.19  1999/07/25 05:27:45  genevb
+// Better protection against empty option strings in FORTRAN
+//
+// Revision 1.18  1999/07/23 16:56:40  genevb
+// Fix extern C prototypes, default options for omitted types, Linux bug with multi-line messages
+//
+// Revision 1.17  1999/07/22 00:19:31  genevb
+// Add MessageOut(), fix Linux bugs with character array lengths passed from FORTRAN
+//
+// Revision 1.16  1999/07/17 00:23:24  genevb
+// Fixed bug when option fields are empty in FORTRAN, and let type limits be set before types are even added
+//
+// Revision 1.15  1999/07/08 22:58:18  genevb
+// Created an abstract interface with StMessMgr.h hiding template implementation from others, a few other small fixes
+//
+// Revision 1.14  1999/07/01 23:32:52  genevb
+// Change default message typing
+//
+// Revision 1.13  1999/07/01 15:58:44  genevb
+// Fixed linux crash with Summary
+//
+// Revision 1.12  1999/07/01 01:24:46  genevb
+// Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
+//
+// Revision 1.11  1999/06/30 17:24:50  genevb
+// Better limit management, remove Bool_t
+//
+// Revision 1.10  1999/06/30 04:18:45  genevb
+// Fixes: summary wrap-around, unsigned ints, last character of message, <> for time; no KNOWN remaining bugs
+//
+// Revision 1.9  1999/06/29 23:32:42  genevb
+// Handle multi-line calls to fortran routines better
+//
+// Revision 1.8  1999/06/29 17:37:31  genevb
+// Lots of fixes...
+//
+// Revision 1.7  1999/06/28 15:42:12  genevb
+// Added Debug message class
+//
+// Revision 1.6  1999/06/28 02:40:56  genevb
+// Additional backward compatibilit with MSG (msg_enable, msg_enabled, msg_disable
+//
+// Revision 1.5  1999/06/26 00:24:53  genevb
+// Fixed const type mismatches
+//
+// Revision 1.4  1999/06/25 22:57:58  genevb
+// Fixed a small bug in MSG compatibiliti
+//
+// Revision 1.3  1999/06/24 23:23:58  genevb
+// Added message call for compatibility with old fortran code
+//
+// Revision 1.2  1999/06/24 16:30:42  genevb
+// Fixed some memory leaks
+//
+// Revision 1.1  1999/06/23 15:17:52  genevb
+// Introduction of StMessageManager
+//

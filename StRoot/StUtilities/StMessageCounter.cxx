@@ -1,54 +1,3 @@
-// $Id: StMessageCounter.cxx,v 1.17 2003/09/02 17:59:20 perev Exp $
-// $Log: StMessageCounter.cxx,v $
-// Revision 1.17  2003/09/02 17:59:20  perev
-// gcc 3.2 updates + WarnOff
-//
-// Revision 1.16  2000/06/07 00:05:36  genevb
-// Added FixOn(), enforcing no limits on a specific message type/string
-//
-// Revision 1.15  2000/03/30 16:12:55  genevb
-// Add NoLimits() capability to turn off message limiting.
-//
-// Revision 1.14  2000/03/24 14:48:39  genevb
-// Insurance on end-of-strings
-//
-// Revision 1.13  2000/01/05 19:53:46  genevb
-// Fixed CC5 warnings, and several other small improvements under the hood
-//
-// Revision 1.12  1999/07/17 00:38:03  genevb
-// Small typo
-//
-// Revision 1.11  1999/07/17 00:23:23  genevb
-// Fixed bug when option fields are empty in FORTRAN, and let type limits be set before types are even added
-//
-// Revision 1.10  1999/07/15 05:15:06  genevb
-// Fixed an odd bug with seekp(0) on an empty stream buffer
-//
-// Revision 1.9  1999/07/01 01:24:46  genevb
-// Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
-//
-// Revision 1.7  1999/06/30 04:18:45  genevb
-// Fixes: summary wrap-around, unsigned ints, last character of message, <> for time; no KNOWN remaining bugs
-//
-// Revision 1.6  1999/06/29 17:37:31  genevb
-// Lots of fixes...
-//
-// Revision 1.5  1999/06/28 02:40:55  genevb
-// Additional backward compatibilit with MSG (msg_enable, msg_enabled, msg_disable
-//
-// Revision 1.4  1999/06/26 00:24:52  genevb
-// Fixed const type mismatches
-//
-// Revision 1.3  1999/06/25 22:57:56  genevb
-// Fixed a small bug in MSG compatibiliti
-//
-// Revision 1.2  1999/06/24 16:30:42  genevb
-// Fixed some memory leaks
-//
-// Revision 1.1  1999/06/23 15:17:49  genevb
-// Introduction of StMessageManager
-//
-//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StMessageCounter                                                     //
@@ -60,6 +9,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "StMessageCounter.h"
+#include "StMessageStream.h"
 
 StMessageCounter* StMessageCounter::mInstance = 0;
 
@@ -165,37 +115,37 @@ int StMessageCounter::GetLimit(const char* str) {
 //_____________________________________________________________________________
 void StMessageCounter::ListLimits() {
   if (yesLimits) {
-    cout << "StMessage Limits: negative limit means no limit, ";
-    cout << "-5 means fixed with no limit\n";
-    cout << "  Limits :   counts : on message types" << endl;
+    myout << "StMessage Limits: negative limit means no limit, ";
+    myout << "-5 means fixed with no limit\n";
+    myout << "  Limits :   counts : on message types" << endl;
     for (index = 1; index < limitTList.size(); index++) {
-      cout.width(8);
-      cout << limitTList[index] << " : ";
-      cout.width(8);
-      cout << limitTCountList[index] << " : ";
-      cout << messTypeList->FindNumType(index) << " - ";
-      cout << messTypeList->FindNumText(index) << endl;
+      myout.width(8);
+      myout << limitTList[index] << " : ";
+      myout.width(8);
+      myout << limitTCountList[index] << " : ";
+      myout << messTypeList->FindNumType(index) << " - ";
+      myout << messTypeList->FindNumText(index) << endl;
     }
     for (index = 0; index < limitWList.size(); index++) {
-      cout.width(8);
-      cout << limitWNList[index] << " : ";
-      cout.width(8);
-      cout << 0 << " : ";
-      cout << limitWList[index] << " - ";
-      cout << "???" << endl;
+      myout.width(8);
+      myout << limitWNList[index] << " : ";
+      myout.width(8);
+      myout << 0 << " : ";
+      myout << limitWList[index] << " - ";
+      myout << "???" << endl;
     }
-    cout << "  Limits :   counts : on message strings" << endl;
+    myout << "  Limits :   counts : on message strings" << endl;
     index=0;
     for (curString=limitList.begin(); curString!=limitList.end();
                                       curString++) {
-      cout.width(8);
-      cout << limitNList[index] << " : ";
-      cout.width(8);
-      cout << limitNCountList[index++] << " : ";
-      cout << (*curString) << endl;
+      myout.width(8);
+      myout << limitNList[index] << " : ";
+      myout.width(8);
+      myout << limitNCountList[index++] << " : ";
+      myout << (*curString) << endl;
     }
   } else {
-    cout << "No limits have been set on messages." << endl;
+    myout << "No limits have been set on messages." << endl;
   }
   return;
 }
@@ -257,3 +207,58 @@ void StMessageCounter::AddType(const char* type) {
     }
   }
 }
+
+//_____________________________________________________________________________
+// $Id: StMessageCounter.cxx,v 1.18 2003/09/25 21:19:22 genevb Exp $
+// $Log: StMessageCounter.cxx,v $
+// Revision 1.18  2003/09/25 21:19:22  genevb
+// Some new cout-like functions and friend functions, some doxygen-ization
+//
+// Revision 1.17  2003/09/02 17:59:20  perev
+// gcc 3.2 updates + WarnOff
+//
+// Revision 1.16  2000/06/07 00:05:36  genevb
+// Added FixOn(), enforcing no limits on a specific message type/string
+//
+// Revision 1.15  2000/03/30 16:12:55  genevb
+// Add NoLimits() capability to turn off message limiting.
+//
+// Revision 1.14  2000/03/24 14:48:39  genevb
+// Insurance on end-of-strings
+//
+// Revision 1.13  2000/01/05 19:53:46  genevb
+// Fixed CC5 warnings, and several other small improvements under the hood
+//
+// Revision 1.12  1999/07/17 00:38:03  genevb
+// Small typo
+//
+// Revision 1.11  1999/07/17 00:23:23  genevb
+// Fixed bug when option fields are empty in FORTRAN, and let type limits be set before types are even added
+//
+// Revision 1.10  1999/07/15 05:15:06  genevb
+// Fixed an odd bug with seekp(0) on an empty stream buffer
+//
+// Revision 1.9  1999/07/01 01:24:46  genevb
+// Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
+//
+// Revision 1.7  1999/06/30 04:18:45  genevb
+// Fixes: summary wrap-around, unsigned ints, last character of message, <> for time; no KNOWN remaining bugs
+//
+// Revision 1.6  1999/06/29 17:37:31  genevb
+// Lots of fixes...
+//
+// Revision 1.5  1999/06/28 02:40:55  genevb
+// Additional backward compatibilit with MSG (msg_enable, msg_enabled, msg_disable
+//
+// Revision 1.4  1999/06/26 00:24:52  genevb
+// Fixed const type mismatches
+//
+// Revision 1.3  1999/06/25 22:57:56  genevb
+// Fixed a small bug in MSG compatibiliti
+//
+// Revision 1.2  1999/06/24 16:30:42  genevb
+// Fixed some memory leaks
+//
+// Revision 1.1  1999/06/23 15:17:49  genevb
+// Introduction of StMessageManager
+//

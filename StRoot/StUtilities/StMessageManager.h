@@ -1,75 +1,16 @@
-// $Id: StMessageManager.h,v 1.20 2001/05/14 20:53:20 genevb Exp $
-// $Log: StMessageManager.h,v $
-// Revision 1.20  2001/05/14 20:53:20  genevb
-// Add features to examine memory use, switch from TDatime to time_t
-//
-// Revision 1.19  2000/06/07 00:05:36  genevb
-// Added FixOn(), enforcing no limits on a specific message type/string
-//
-// Revision 1.18  2000/05/23 19:03:38  genevb
-// Correct interface for MessageOut(), update docs
-//
-// Revision 1.17  2000/03/30 16:12:55  genevb
-// Add NoLimits() capability to turn off message limiting.
-//
-// Revision 1.16  2000/02/29 16:41:57  genevb
-// Fortran-compliant interface
-//
-// Revision 1.15  2000/01/25 16:01:29  fisyak
-// Devorce with StAF
-//
-// Revision 1.14  2000/01/05 19:53:46  genevb
-// Fixed CC5 warnings, and several other small improvements under the hood
-//
-// Revision 1.13  1999/08/10 22:07:35  genevb
-// Added QAInfo message types
-//
-// Revision 1.12  1999/07/23 16:56:40  genevb
-// Fix extern C prototypes, default options for omitted types, Linux bug with multi-line messages
-//
-// Revision 1.11  1999/07/17 00:23:24  genevb
-// Fixed bug when option fields are empty in FORTRAN, and let type limits be set before types are even added
-//
-// Revision 1.10  1999/07/08 22:58:18  genevb
-// Created an abstract interface with StMessMgr.h hiding template implementation from others, a few other small fixes
-//
-// Revision 1.9  1999/07/01 23:32:53  genevb
-// Change default message typing
-//
-// Revision 1.8  1999/07/01 01:24:46  genevb
-// Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
-//
-// Revision 1.7  1999/06/29 23:32:42  genevb
-// Handle multi-line calls to fortran routines better
-//
-// Revision 1.5  1999/06/28 15:42:13  genevb
-// Added Debug message class
-//
-// Revision 1.4  1999/06/28 02:40:56  genevb
-// Additional backward compatibilit with MSG (msg_enable, msg_enabled, msg_disable
-//
-// Revision 1.3  1999/06/24 23:23:59  genevb
-// Added message call for compatibility with old fortran code
-//
-// Revision 1.2  1999/06/24 16:30:43  genevb
-// Fixed some memory leaks
-//
-// Revision 1.1  1999/06/23 15:17:53  genevb
-// Introduction of StMessageManager
-//
-//
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// StMessageManager                                                     //
-//                                                                      //
-// This class manages the messages in STAR software. It is a singleton. //
-// It inherits from StMessMgr, which provides the external interface.   //
-// Messages are stored in a vector, and come in several types           //
-// (i.e. info, error, debug ). The types "I" (info), "W" (warning),     //
-// "E" (error), "D" (debug), and "Q" (QAInfo) are predefined. Message   //
-// finding and summary tools are also available.                        //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
+/*!
+  \class StMessageManager
+  \author G. Van Buren, BNL
+
+  This class manages the messages in STAR software. It is a singleton.
+  It inherits from StMessMgr, which provides the external interface.
+  Messages are stored in a vector, and come in several types
+  (i.e. info, error, debug ). The types "I" (info), "W" (warning),
+  "E" (error), "D" (debug), and "Q" (QAInfo) are predefined.
+  Message finding and summary tools are also available.
+  \sa http://www.star.bnl.gov/STAR/comp/pkg/dev/StRoot/StUtilities/doc/StMessMgr.html
+
+*/
 
 #ifndef ClassStMessageManager
 #define ClassStMessageManager
@@ -252,6 +193,12 @@ class StMessageManager : public StMessMgr {
          const char* s3="", const char* s4="")
 	 {return FindMessageList(s1,s2,s3,s4,messCollection[5]);}
 
+// "As is" Messages:
+   virtual StMessMgr& out(const char* mess="")
+	 {return Message(mess,"I","OTP-");}
+   virtual StMessMgr& err(const char* mess="")
+	 {return Message(mess,"E","ETP-");}
+
    virtual       void PrintInfo();
 #ifdef __ROOT__
    ClassDef(StMessageManager,0)
@@ -260,3 +207,67 @@ class StMessageManager : public StMessMgr {
 
 
 #endif
+
+// $Id: StMessageManager.h,v 1.21 2003/09/25 21:19:22 genevb Exp $
+// $Log: StMessageManager.h,v $
+// Revision 1.21  2003/09/25 21:19:22  genevb
+// Some new cout-like functions and friend functions, some doxygen-ization
+//
+// Revision 1.20  2001/05/14 20:53:20  genevb
+// Add features to examine memory use, switch from TDatime to time_t
+//
+// Revision 1.19  2000/06/07 00:05:36  genevb
+// Added FixOn(), enforcing no limits on a specific message type/string
+//
+// Revision 1.18  2000/05/23 19:03:38  genevb
+// Correct interface for MessageOut(), update docs
+//
+// Revision 1.17  2000/03/30 16:12:55  genevb
+// Add NoLimits() capability to turn off message limiting.
+//
+// Revision 1.16  2000/02/29 16:41:57  genevb
+// Fortran-compliant interface
+//
+// Revision 1.15  2000/01/25 16:01:29  fisyak
+// Devorce with StAF
+//
+// Revision 1.14  2000/01/05 19:53:46  genevb
+// Fixed CC5 warnings, and several other small improvements under the hood
+//
+// Revision 1.13  1999/08/10 22:07:35  genevb
+// Added QAInfo message types
+//
+// Revision 1.12  1999/07/23 16:56:40  genevb
+// Fix extern C prototypes, default options for omitted types, Linux bug with multi-line messages
+//
+// Revision 1.11  1999/07/17 00:23:24  genevb
+// Fixed bug when option fields are empty in FORTRAN, and let type limits be set before types are even added
+//
+// Revision 1.10  1999/07/08 22:58:18  genevb
+// Created an abstract interface with StMessMgr.h hiding template implementation from others, a few other small fixes
+//
+// Revision 1.9  1999/07/01 23:32:53  genevb
+// Change default message typing
+//
+// Revision 1.8  1999/07/01 01:24:46  genevb
+// Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
+//
+// Revision 1.7  1999/06/29 23:32:42  genevb
+// Handle multi-line calls to fortran routines better
+//
+// Revision 1.5  1999/06/28 15:42:13  genevb
+// Added Debug message class
+//
+// Revision 1.4  1999/06/28 02:40:56  genevb
+// Additional backward compatibilit with MSG (msg_enable, msg_enabled, msg_disable
+//
+// Revision 1.3  1999/06/24 23:23:59  genevb
+// Added message call for compatibility with old fortran code
+//
+// Revision 1.2  1999/06/24 16:30:43  genevb
+// Fixed some memory leaks
+//
+// Revision 1.1  1999/06/23 15:17:53  genevb
+// Introduction of StMessageManager
+//
+//
