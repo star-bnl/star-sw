@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.4 1999/01/23 02:33:03 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.5 1999/01/23 05:03:18 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.5  1999/01/23 05:03:18  lasiuk
+// ready for test
+//
 // Revision 1.4  1999/01/23 02:33:03  lasiuk
 // sun compatible
 //
@@ -68,8 +71,8 @@
 #include "StTrsDigitalSector.hh"
 
 // g2t tables
-//#include "St_g2t_tpc_hit_Table.h"
-//#include "St_g2t_track_Table.h"
+#include "St_g2t_tpc_hit_Table.h"
+#include "St_g2t_track_Table.h"
 
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
@@ -146,9 +149,12 @@ Int_t StTrsMaker::Init()
     mElectronicsDb =
 	StTpcSimpleElectronics::instance(electronicsFile.c_str());
 
-    
+#ifndef __sun
     string gas("Ar");
     mGasDb = new StTrsDeDx(gas);
+#else
+    mGasDb = new StTrsDeDx();
+#endif
     mGasDb->print();
 
     //
@@ -225,14 +231,33 @@ Int_t StTrsMaker::Make(){
     St_DataSetIter geant(gStChain->DataSet("geant"));
     // $STAR/pams/sim/idl/g2t_tpc_hit.idl 
 
-//      St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
-//      Int_t no_tpc_hits =  g2t_tpc_hit->GetNRows(); // $STAR/StRoot/base/St_DataSet.h & St_Table.h 
-//      g2t_tpc_hit_st *tpc_hit =  g2t_tpc_hit->GetTable();
+      St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
+      Int_t no_tpc_hits =  g2t_tpc_hit->GetNRows(); // $STAR/StRoot/base/St_DataSet.h & St_Table.h 
+      g2t_tpc_hit_st *tpc_hit =  g2t_tpc_hit->GetTable();
 
-//     for (int i=0; i< no_tpc_hits; i++){
-// 	printf("id =%f  de%f  tof=%f \n",tpc_hit->id,tpc_hit->de,tpc_hit->tof);
-// 	tpc_hit++;
-//     }
+      for (int i=0; i< no_tpc_hits; i++, tpc_hit++){
+	cout << i << '\t' 
+	     << tpc_hit->id   << ' '
+	     << tpc_hit->de   << ' '
+	     << tpc_hit->ds   << ' '
+	     << tpc_hit->x[0] << ' '
+	     << tpc_hit->p[0] << endl;
+
+	StThreeVector<double> hitPosition(tpc_hit->x[0]*centimeter,
+					  tpc_hit->x[1]*centimeter,
+					  tpc_hit->x[2]*centimeter);
+	StThreeVector<double> hitMomentum(tpc_hit->p[0]*GeV,
+					  tpc_hit->p[1]*GeV,
+					  tpc_hit->p[2]*GeV);
+
+	StTrsChargeSegment aHit(hitPosition,
+				hitMomentum,
+				tpc_hit->de*GeV,
+				tpc_hit->ds*centimeter);
+
+	PR(aHit);
+
+      }
 //     St_g2t_track   *g2t_track   = (St_g2t_track *)   geant("g2t_track");
     
     // Read a charge Segment (g2t) from GEANT:
@@ -322,7 +347,7 @@ Int_t StTrsMaker::Make(){
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.4 1999/01/23 02:33:03 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.5 1999/01/23 05:03:18 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
