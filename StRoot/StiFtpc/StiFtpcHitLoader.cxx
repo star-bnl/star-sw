@@ -27,7 +27,9 @@ StiFtpcHitLoader::StiFtpcHitLoader(StiHitContainer* hitContainer,
 StiFtpcHitLoader::~StiFtpcHitLoader()
 {}
 
-void StiFtpcHitLoader::loadHits(StEvent* source)
+void StiFtpcHitLoader::loadHits(StEvent* source,
+				Filter<StiTrack> * trackFilter, 
+				Filter<StiHit> * hitFilter)
 {
   double nhit=0;
   double nprint = 10000.;
@@ -66,7 +68,10 @@ void StiFtpcHitLoader::loadHits(StEvent* source)
     }
 }
 
-void StiFtpcHitLoader::loadMcHits(StMcEvent* source)
+void StiFtpcHitLoader::loadMcHits(StMcEvent* source,
+				  bool useMcAsRec,
+				  Filter<StiTrack> * trackFilter, 
+				  Filter<StiHit> * hitFilter)
 {
   /* not yet implemented */
 }
