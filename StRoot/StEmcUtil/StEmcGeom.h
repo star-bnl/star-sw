@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.9 2001/07/30 00:16:22 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.10 2001/08/08 00:33:15 pavlinov Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.10  2001/08/08 00:33:15  pavlinov
+ * New Jose's ID
+ *
  * Revision 1.9  2001/07/30 00:16:22  pavlinov
  * Correct numbering scheme for BSMDE
  *
@@ -73,6 +76,7 @@
  **************************************************************************/
 #ifndef STAR_StEmcGeom
 #define STAR_StEmcGeom
+
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StEmcGeom main class for <FONT COLOR="RED"> Geometry of BEMC for OFFline </FONT>      //
@@ -399,6 +403,70 @@ inline Int_t StEmcGeom::getEtaPhi(const Int_t rid, Float_t &eta, Float_t &phi)
 }
 
 inline Int_t 
+StEmcGeom::getIndex(const Float_t x, TArrayF &arr)
+{
+  // Arr is array of boundaries
+  for(Int_t i=1; i<arr.GetSize(); i++){
+    if(x>=arr[i-1] && x<arr[i]) return i; // x is in i cell
+  }
+  return -1;
+}
+
+#ifndef WSUJoseMarch
+inline Int_t 
+StEmcGeom::getId(const Int_t m, const Int_t e, const Int_t s,Int_t &rid)
+{
+// 7-aug-2001 - "new" Jose numbering scheme (similar old offline scheme, but not the same)
+  if(!checkModule(m) && !checkEta(e) && !checkSub(s)){
+    rid = mNes*(m-1) + mNEta*(s-1) + e;
+    return 0;
+  }
+  else {
+    printf("<W> getId(2001 Aug Scheme) | Det %i bad index m %i e %i s %i \n",mDetector,m,e,s); 
+    return 1;
+  }
+}
+
+inline Int_t 
+StEmcGeom::getBin(const Int_t rid,Int_t &m,Int_t &e,Int_t &s)
+{
+// 7-aug-2001 -> transition from raw # to bin #
+  static Int_t j, wid;
+  if(!checkId(rid)) { 
+    wid = rid - 1;  // from 0 to MAX-1
+    m = wid/mNes + 1;
+    j = wid - mNes*(m-1);
+    s = j/mNEta  + 1;
+    e = j%mNEta  + 1; 
+    return 0;
+  }
+  else return 1;
+}
+#endif
+
+#ifdef WSUJoseMarch
+//
+// March 2001  - now obsolete (7 Aug 2001)
+//
+inline Int_t 
+StEmcGeom::getId(const Int_t m, const Int_t e, const Int_t s,Int_t &rid)
+{
+  if(!checkModule(m) && !checkEta(e) && !checkSub(s)){
+    if(mDetector==1 || mDetector==2) { // only for bemc and bprs
+      rid = 40*(m-1) + 20*(s-1) + (21-e);
+    }
+    if(mDetector==3 || mDetector==4) { // for BSMDE and BSDDP
+      rid = mNes*(m-1) + mNEta*(s-1) + (mNEta - e) + 1;
+    }
+    return 0;
+  }
+  else {
+    printf("<W> Det %i bad index m %i e %i s %i \n", mDetector, m, e, s); 
+    return 1;
+  }
+}
+
+inline Int_t 
 StEmcGeom::getBin(const Int_t rid,Int_t &m,Int_t &e,Int_t &s)
 {
   //
@@ -431,32 +499,6 @@ StEmcGeom::getBin(const Int_t rid,Int_t &m,Int_t &e,Int_t &s)
   }
 }
 
-inline Int_t 
-StEmcGeom::getId(const Int_t m, const Int_t e, const Int_t s,Int_t &rid)
-{
-  if(!checkModule(m) && !checkEta(e) && !checkSub(s)){
-    if(mDetector==1 || mDetector==2) { // only for bemc and bprs
-      rid = 40*(m-1) + 20*(s-1) + (21-e);
-    }
-    if(mDetector==3 || mDetector==4) { // for BSMDE and BSDDP
-      rid = mNes*(m-1) + mNEta*(s-1) + (mNEta - e) + 1;
-    }
-    return 0;
-  }
-  else {
-    printf("<W> Det %i bad index m %i e %i s %i \n", mDetector, m, e, s); 
-    return 1;
-  }
-}
-
-inline Int_t 
-StEmcGeom::getIndex(const Float_t x, TArrayF &arr)
-{
-  // Arr is array of boundaries
-  for(Int_t i=1; i<arr.GetSize(); i++){
-    if(x>=arr[i-1] && x<arr[i]) return i; // x is in i cell
-  }
-  return -1;
-}
+#endif
 
 #endif
