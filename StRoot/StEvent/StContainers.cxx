@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.13 2001/11/10 23:53:22 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.14 2001/12/01 15:39:19 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.14  2001/12/01 15:39:19  ullrich
+ * Added macros for StDetectorState.
+ *
  * Revision 2.13  2001/11/10 23:53:22  ullrich
  * Added calibration vertices.
  *
@@ -52,6 +55,7 @@
  **************************************************************************/
 #include "StCalibrationVertex.h"
 #include "StContainers.h"
+#include "StDetectorState.h"
 #include "StSvtHit.h"
 #include "StSsdHit.h"
 #include "StTpcHit.h"
@@ -81,6 +85,7 @@
 
 StCollectionImp(Object)
 StCollectionImp(CalibrationVertex)
+StCollectionImp(DetectorState)
 StCollectionImp(Hit)
 StCollectionImp(PrimaryTrack)
 StCollectionImp(PrimaryVertex)

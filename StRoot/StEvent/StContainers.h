@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.13 2001/11/10 23:53:22 ullrich Exp $
+ * $Id: StContainers.h,v 2.14 2001/12/01 15:39:19 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.14  2001/12/01 15:39:19  ullrich
+ * Added macros for StDetectorState.
+ *
  * Revision 2.13  2001/11/10 23:53:22  ullrich
  * Added calibration vertices.
  *
@@ -56,6 +59,7 @@
 
 class StObject;
 class StCalibrationVertex;
+class StDetectorState;
 class StHit;
 class StPrimaryTrack;
 class StPrimaryVertex;
@@ -87,6 +91,7 @@ class StL3AlgorithmInfo;
 
 StCollectionDef(Object)
 StCollectionDef(CalibrationVertex)
+StCollectionDef(DetectorState)
 StCollectionDef(Hit)
 StCollectionDef(PrimaryTrack)
 StCollectionDef(PrimaryVertex)
