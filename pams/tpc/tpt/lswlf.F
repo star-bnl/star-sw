@@ -1,5 +1,8 @@
-* $Id: lswlf.F,v 1.2 1998/01/27 00:35:42 fisyak Exp $
+* $Id: lswlf.F,v 1.3 1999/07/19 19:15:53 genevb Exp $
 * $Log: lswlf.F,v $
+* Revision 1.3  1999/07/19 19:15:53  genevb
+* Use StMessMgr
+*
 * Revision 1.2  1998/01/27 00:35:42  fisyak
 * Split sources
 *
@@ -48,14 +51,16 @@ C     REAL       varsq
       REAL       a,b,siga,sigb,chi,chisq
       REAL  X(*),Y(*),W(*)
       INTEGER I,N
+      CHARACTER*80 m80
 
       CHI=99999999.0
 C________________________________________________________________
 C     N must be > 2
 C________________________________________________________________
       if(n.le.2) then
-           write(6,*)' Only',n,' points input'
-           write(6,*)' Not enought data to fit the straight line !'
+           write(m80,*)' Only',n,' points input'
+           call StError(m80)
+           call StError(' Not enought data to fit the straight line !')
            LSWLF=-1
            return
        endif  

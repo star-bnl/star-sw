@@ -1,5 +1,8 @@
-* $Id: tte_track.F,v 1.6 1999/03/06 21:08:15 perev Exp $
+* $Id: tte_track.F,v 1.7 1999/07/19 19:15:58 genevb Exp $
 * $Log: tte_track.F,v $
+* Revision 1.7  1999/07/19 19:15:58  genevb
+* Use StMessMgr
+*
 * Revision 1.6  1999/03/06 21:08:15  perev
 * some small fixes
 *
@@ -93,6 +96,7 @@ c                                             !on a track
       integer   id_first_real                 !id of a first reconstructed
 c                                             !hit
       real      tof_first                     !tof to the first point
+      character*132 m132                      !character string for messages
 C______________________________________________________________________
       STRUCTURE /track_local/
                 REAL    tof
@@ -110,8 +114,9 @@ C
       do i=1,g2t_hit_h.nok
          if(g2t_hit(i).id.gt.list_size.or.g2t_hit(i).id.lt.1) then
              tte_track=STAFCV_BAD
-             write(6,*) 'list_size not big enough ','i = ', i,
+             write(m132,*) 'TTE_TRACK - list_size not big enough ','i = ', i,
      >      'list_size = ', list_size, 'g2t_hit(i).id = ', g2t_hit(i).id
+             call StWarning(m132)
          else
              list_g2t_hits(g2t_hit(i).id)=i
          endif   
@@ -125,8 +130,9 @@ c     but first clean up the list
       do i=1,hit_h.nok
          if(hit(i).id.gt.list_size.or.hit(i).id.lt.1) then
              tte_track=STAFCV_BAD
-             write(6,*)'list_size not big enough ','i = ', i,
+             write(m132,*)'TTE_TRACK - list_size not big enough ','i = ', i,
      >      'list_size = ', list_size, 'hit(i).id = ', hit(i).id
+             call StWarning(m132)
          else
              list_hits(hit(i).id)=i
          endif
@@ -139,10 +145,11 @@ c     track id
       do i=1,g2t_track_h.nok
          if(g2t_track(i).id.gt.track_size.or.g2t_track(i).id.lt.1) then
              tte_track=STAFCV_BAD
-             write(6,*) 'track_size not big enough, i = ',i,
+             write(m132,*) 'TTE_TRACK - track_size not big enough, i = ',i,
      >       ' track_size = ',track_size,' g2t_track(i).id = ',
      >        g2t_track(i).id
-              return
+             call StWarning(m132)
+             return
          endif
          list_g2t_track(g2t_track(i).id)=i
       end do
@@ -206,9 +213,10 @@ c            hits.................
                 if(tindex(index_mc).key2.gt.hit_size.or.
      >             tindex(index_mc).key2.lt.1) then
                    tte_track=STAFCV_BAD
-                   write(6,*) 'long_list not long enough, hit_size = ',
+                   write(m132,*) 'TTE_TRACK - long_list not long enough, hit_size = ',
      >             hit_size, ' tindex(index_mc).key2 = ',
      >             tindex(index_mc).key2
+                   call StWarning(m132)
                    return
                 endif
 
@@ -255,14 +263,15 @@ c          sort the time of flight info
 c
 c          go through all the points on the long_list list
            if(track_h.nok   .gt.track_size) then	!!!VP
-              write(6,*) 'track_size not big enough', track_size,
+              write(m132,*) 'TTE_TRACK - track_size not big enough', track_size,
      >         track_h.nok 
+              call StWarning(m132)
            endif
 c
            if(long_list_nok.gt.0) then
              evmc_nok=evmc_nok+1
              if(evmc_nok.gt.track_h.maxlen) then
-                write(6,*) ' track array not big enough....'
+                call StWarning('TTE_TRACK - track array not big enough....')
                 track_h.nok=evmc_nok-1
                 tte_track=STAFCV_BAD
                 return

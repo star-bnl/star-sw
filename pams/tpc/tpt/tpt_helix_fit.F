@@ -1,7 +1,10 @@
-* $Id: tpt_helix_fit.F,v 1.4 1999/03/30 15:55:01 love Exp $
+* $Id: tpt_helix_fit.F,v 1.5 1999/07/19 19:15:54 genevb Exp $
 * $Log: tpt_helix_fit.F,v $
+* Revision 1.5  1999/07/19 19:15:54  genevb
+* Use StMessMgr
+*
 * Revision 1.4  1999/03/30 15:55:01  love
-* Spelling.  make_segment_uv removed doubling of tolerance on row skip.
+*  Spelling.  make_segment_uv removed doubling of tolerance on row skip.
 *  row_sect_point remove check on sector z position
 *
 * Revision 1.3  1998/05/26 04:15:13  sakrejda
@@ -50,7 +53,7 @@ C____________________________________________________________________
       REAL    dtanl,dzint,h(3,3)
       REAL    xcir(*),ycir(*),wcir(*),zcir(*),wlin(*)
       LOGICAL good
-      CHARACTER*80 eromes
+      CHARACTER*80 m80
       INTEGER ier1,ipass
 C___________________________________________________________________
       DATA ier1 /0/
@@ -70,13 +73,13 @@ C
       ier =utcfit(xcir,ycir,wcir,ncir,sgn,rad,acent,bcent,chit)
       if(ier.ne.0) then
           if(tpar(ipass).debug(2).eq.1) then
-             write(6,*) 'out with error'
+             call StInfo('TPT_HELIX_FIT - out with error')
           endif
           tpt_helix_fit =  STAFCV_BAD
       else
 C        evaluate charge
          if(tpar(ipass).debug(2).eq.1) then
-            write(6,*) 'out from utcfit - no error'
+            call StInfo('TPT_HELIX_FIT - out from utcfit - no error')
          endif
          charge = (acent-xcir(ncir/2))*(ycir(ncir/2)-ycir(ncir/2-1))
      >          - (bcent-ycir(ncir/2))*(xcir(ncir/2)-xcir(ncir/2-1))
@@ -110,15 +113,17 @@ C        evaluate errors
          if(ier.ne.0) then
              tpt_helix_fit =  STAFCV_BAD 
              if(tpar(ipass).debug(2).eq.1) then
-             write(eromes,'(a50,i5)') 
+             write(m80,'(a50,i5)') 
      >    'TPT_HELIX_FIT-E1 linear fit error, track',ipt
-             call message(eromes, 1, ier1)
+             call message(m80, 1, ier1)
              endif
          else
 C            calculate parameters of the first fitted point
              if(tpar(ipass).debug(2).eq.1) then
-               write(6,*) 'initialising track', ipt,ncir
-               write(6,*) chil,trk(ipt).nhit
+               write(m80,*) 'TPT_HELIX_FIT - initialising track', ipt,ncir
+               call StInfo(m80)
+               write(m80,*) chil,trk(ipt).nhit
+               call StInfo(m80)
              endif
              trk(ipt).flag=1
              trk(ipt).p(1) = 1

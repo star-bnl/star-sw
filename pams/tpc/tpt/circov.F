@@ -1,5 +1,8 @@
-* $Id: circov.F,v 1.2 1998/01/27 00:35:41 fisyak Exp $
+* $Id: circov.F,v 1.3 1999/07/19 19:15:53 genevb Exp $
 * $Log: circov.F,v $
+* Revision 1.3  1999/07/19 19:15:53  genevb
+* Use StMessMgr
+*
 * Revision 1.2  1998/01/27 00:35:41  fisyak
 * Split sources
 *
@@ -59,6 +62,7 @@ C       REAL GAMMA
         REAL H(3,3)
         REAL S1, C1, RATIO, HYP
         INTEGER I,J,K,N,L,IK(3),JK(3),NOD
+        CHARACTER*80 m80
 
         circov = 0
 
@@ -66,8 +70,9 @@ C-----------------------
 C     N must be > 3
 C----------------------
         if(n.lT.3) then
-           write(6,*)' Only',n,' points input'
-           write(6,*)' Not enough data to fit the CIRCLE !'
+           write(m80,*)' Only',n,' points input'
+           call StError(m80)
+           call StError(' Not enough data to fit the CIRCLE !')
            CIRCOV=-1
            return
          endif  
@@ -122,7 +127,7 @@ C        GAMMA=R*R-A*A-B*B
            ENDDO
         ENDDO
         IF(R.EQ.0.0)THEN
-           WRITE(6,*)' FITTED RADIUS IS 0 !!'
+           CALL STERROR(' FITTED RADIUS IS 0 !!')
            RETURN
         ENDIF
 C
