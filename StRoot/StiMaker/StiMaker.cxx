@@ -25,6 +25,7 @@
 #include "Sti/StiHitFiller.h"
 #include "Sti/StiDetectorLayerContainer.h"
 #include "Sti/StiDrawableDetector.h"
+#include "Sti/StiTrackContainer.h"
 
 // StiMaker
 #include "StiDisplayManager.h"
@@ -68,6 +69,7 @@ StiMaker::~StiMaker()
     mdisplay = 0;
     StiDetectorLayerContainer::kill();
     mdetector = 0;
+    StiTrackContainer::kill();
 }
 
 void StiMaker::Clear(const char*)
@@ -85,6 +87,7 @@ Int_t StiMaker::Init()
 {
     mdisplay = StiDisplayManager::instance(); //Must come before anything that you want to be drawn
 
+    mtrackstore = StiTrackContainer::instance();
     mhitstore = new StiHitContainer();
     mhitfactory = new StiHitFactory();
     mhitfiller = new StiHitFiller();
@@ -102,14 +105,13 @@ Int_t StiMaker::Init()
 
     const char* buildfile = "/star/rcf/pwg/spectra/mmiller/StiGeometryParameters/Detectors/";
     mdetector = StiDetectorLayerContainer::instance();
-    mdetector->setSectors(1, 3);
-    mdetector->setPadrows(1, 45);
-    mdetector->buildReset();
-    while (mdetector->hasMoreToBuild()) {
-	mdetector->buildNext(buildfile);
-	//mdisplay->draw();
-	//mdisplay->update();
-    }
+    
+    //mdetector->setSectors(0, 0);
+    //mdetector->setPadrows(0, 0);
+    //mdetector->buildReset();
+    //while (mdetector->hasMoreToBuild()) {
+    //mdetector->buildNext(buildfile);
+    //}
     mdetector->reset();
     
     mdisplay->draw();
