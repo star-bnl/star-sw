@@ -1,8 +1,7 @@
 //*CMZ :          23/02/99  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@bnl.gov)   03/07/98
 //
-//  
-//  
+// $Id: St_io_Maker.cxx,v 1.22 2000/05/04 20:03:59 fine Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -512,3 +511,10 @@ TTree *St_io_Maker::SetNextTree()
   }  
   return GetTree();
 }
+
+//__________________
+// $Log: St_io_Maker.cxx,v $
+// Revision 1.22  2000/05/04 20:03:59  fine
+// CVS id introduced
+// 
+//__________________
