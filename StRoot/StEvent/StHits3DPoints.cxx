@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   18/05/99  (E-mail: fine@bnl.gov)
-// $Id: StHits3DPoints.cxx,v 1.2 1999/05/22 18:59:32 fine Exp $
+// $Id: StHits3DPoints.cxx,v 1.3 1999/07/13 23:32:23 fine Exp $
 // $Log: StHits3DPoints.cxx,v $
-// Revision 1.2  1999/05/22 18:59:32  fine
-// New class to draw StHelix3D and StTrack has been introduced
+// Revision 1.3  1999/07/13 23:32:23  fine
+// Methods GetXYZ has been removed since it is defined by base class
+//
+// Revision 1.3  1999/07/13 23:32:23  fine
+// Methods GetXYZ has been removed since it is defined by base class
 //
 // Revision 1.2  1999/05/22 18:59:32  fine
 // New class to draw StHelix3D and StTrack has been introduced
@@ -53,21 +56,7 @@ Int_t StHits3DPoints::SetLastPosition(Int_t ){return 0;}
 //________________________________________________________________________________
 void StHits3DPoints::SetOption(Option_t *){;}
 //________________________________________________________________________________
- 
-//________________________________________________________________________________
-Float_t *StHits3DPoints::GetXYZ(Float_t *xyz,Int_t idx, Int_t num)const
-{
-  if (xyz) {
-    Int_t size = TMath::Min(idx+num,Size());
-    Int_t j=0;
-    for (Int_t i=idx;i<size;i++) {
-      xyz[j++] = GetX(i);
-      xyz[j++] = GetY(i);
-      xyz[j++] = GetZ(i);
-    }
-  }
-  return xyz;
-}
+  //
   }
   return xyz;
 }

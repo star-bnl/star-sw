@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   18/05/99  (E-mail: fine@bnl.gov)
-// $Id: StHits3DPoints.h,v 1.1 1999/05/19 22:46:39 fine Exp $
+// $Id: StHits3DPoints.h,v 1.2 1999/07/13 23:32:25 fine Exp $
 // $Log: StHits3DPoints.h,v $
-// Revision 1.1  1999/05/19 22:46:39  fine
-// New class to 3D drawing operation for StHit commections have been introduced
+// Revision 1.2  1999/07/13 23:32:25  fine
+// Methods GetXYZ has been removed since it is defined by base class
+//
+// Revision 1.2  1999/07/13 23:32:25  fine
+// Methods GetXYZ has been removed since it is defined by base class
 //
 // Revision 1.1  1999/05/19 22:46:39  fine
 //  New class to 3D drawing operation for StHit commections have been introduced
@@ -24,7 +27,6 @@ public:
         virtual Int_t     GetLastPosition()const;
         virtual Float_t   GetAnyPoint(Int_t idx,Int_t iAxis)  const;
         virtual Float_t   GetX(Int_t idx)  const { return GetAnyPoint(idx,0);}
-        virtual Float_t  *GetXYZ(Float_t *xyz,Int_t idx, Int_t num)const;
         virtual Float_t   GetZ(Int_t idx)  const { return GetAnyPoint(idx,2);}
         virtual const Float_t  *GetXYZ(Int_t) {return 0;}
         virtual Float_t  *GetXYZ(Float_t *xyz,Int_t idx=0,Int_t num=1)  const;
