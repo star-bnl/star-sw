@@ -14,7 +14,7 @@
    Implicit   None   
    Integer    LENOCC,CSADDR,Iadr,i,J,ier,L,N,idot
    Character  file*(*),C*1,Table*120
-   common     /agcuser/ Table
+   common     /agcuser/ Igate,Table
 *
 +CDE,AGCKINE.
 *
@@ -23,7 +23,7 @@
     Do i=1,L-1  {  check file(i:i)='.'; idot=i; C=file(i+1:i+1);  }
     Call CLTOU(C)
 *
-    N=LENOCC(CCOMMAND)+1
+    N=LENOCC(CCOMMAND)+1;  Igate=N
     print *,' AgUsOpen: input from ',file,' mode ',C 
 *
     if      C=='E'                       " egz format "
