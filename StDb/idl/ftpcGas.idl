@@ -15,5 +15,8 @@ struct ftpcGas {
    float  gasGain;                  /*   */
    float  gasAttenuation;           /* [1/cm] */
    float  gasIonizationPotential;   /* [eV] */
+   float  baseTemperature;          /* degree Centigrade */
+   float  basePressure;             /* Torr  */
+   float  pressureOffset;           /* Torr  */
 
  };  
