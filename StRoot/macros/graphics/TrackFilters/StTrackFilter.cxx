@@ -52,7 +52,7 @@ Int_t StTrackFilter::Reset(Int_t reset)
  return reset; 
 }
 //_____________________________________________________________________________
-Int_t StTrackFilter::SubChannel(St_tcl_tphit &hit, Int_t rowNumber,Width_t &size, Style_t &style)
+Int_t StTrackFilter::SubChannel(St_tcl_tphit &hit, Int_t rowNumber,Size_t &size, Style_t &style)
 {
   if ( m_Lid_globtrk)  { 
     for (int i =0; i <m_Lid_globtrk; i++) {
@@ -66,7 +66,7 @@ Int_t StTrackFilter::SubChannel(St_tcl_tphit &hit, Int_t rowNumber,Width_t &size
   return 0;
 }
 //_____________________________________________________________________________
-Int_t StTrackFilter::SubChannel(St_g2t_svt_hit &hit, Int_t rowNumber,Width_t &size,Style_t &style)
+Int_t StTrackFilter::SubChannel(St_g2t_svt_hit &hit, Int_t rowNumber,Size_t &size,Style_t &style)
 {
   if ( m_LTrackP)  { 
     for (int i =0; i <m_LTrackP; i++) {
@@ -80,7 +80,7 @@ Int_t StTrackFilter::SubChannel(St_g2t_svt_hit &hit, Int_t rowNumber,Width_t &si
   return 0;
 }
 //_____________________________________________________________________________
-Int_t StTrackFilter::SubChannel(St_g2t_tpc_hit &hit, Int_t rowNumber,Width_t &size,Style_t &style)
+Int_t StTrackFilter::SubChannel(St_g2t_tpc_hit &hit, Int_t rowNumber,Size_t &size,Style_t &style)
 {
  Int_t color = 0;
  style = 4;
@@ -132,7 +132,7 @@ Int_t StTrackFilter::SubChannel(St_g2t_tpc_hit &hit, Int_t rowNumber,Width_t &si
 }
 
 //_____________________________________________________________________________
-Int_t StTrackFilter::Channel(const St_TableSorter *tableObject,Int_t index,Width_t &size,Style_t &style)
+Int_t StTrackFilter::Channel(const St_TableSorter *tableObject,Int_t index,Size_t &size,Style_t &style)
 {
  Int_t rowNumber = tableObject->GetIndex(UInt_t(index));
 
@@ -163,7 +163,7 @@ Int_t StTrackFilter::Channel(const St_TableSorter *tableObject,Int_t index,Width
 }
 
 //_____________________________________________________________________________
-Int_t StTrackFilter::Channel(const St_Table *tableObject,Int_t rowNumber,Width_t &size,Style_t &style)
+Int_t StTrackFilter::Channel(const St_Table *tableObject,Int_t rowNumber,Size_t &size,Style_t &style)
 {
   // Introduce in here your own rule to select a particular row of the given tableObjectvertex
   //
