@@ -1,4 +1,4 @@
-#define HBT_BFIELD 0.5*tesla
+#define HBT_BFIELD 0.25*tesla
 #define DIFF_CUT_OFF 1.
 
 #include "StHbtMaker/Reader/StHbtMcEventReader.h"
@@ -98,6 +98,10 @@ StHbtMcEventReader::StHbtMcEventReader(){
   mV0Cut=0;
   mReaderStatus = 0;  // "good"
   mV0=0;
+
+  mMotherMinvYPt = new StHbt3DHisto("Mother_MinvYPt","Mother_MinvYPt",      100,0.,5., 80,-2.,2., 80,0.,4.);
+  mMotherMinvYMt = new StHbt3DHisto("Mother_MinvYMt","Mother_MinvYMt",      100,0.,5., 80,-2.,2., 80,0.,4.);
+  mMotherMinvEtaPt = new StHbt3DHisto("Mother_MinvEtaPt","Mother_MinvEtaPt",100,0.,5., 80,-2.,2., 80,0.,4.);
 }
 //__________________
 StHbtMcEventReader::~StHbtMcEventReader(){
@@ -163,6 +167,13 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
 
   StHbtThreeVector VertexPosition = mcEvent->primaryVertex()->position();  // using templates, everything is fine
   //cout << " *  primary Vertex = " << VertexPosition << endl;
+
+  if (VertexPosition.x() == VertexPosition.y() &&
+      VertexPosition.y() == VertexPosition.z() ){//x==y==z --> mark for bad events from embedding
+    cout << "StHbtMcEventReader - bad vertex !!! " << endl;
+    return 0;
+  }
+
     
   StHbtEvent* hbtEvent = new StHbtEvent;
   hbtEvent->SetEventNumber(EventNumber);
@@ -178,39 +189,64 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
 
   // By now, all event-wise information has been extracted and stored in hbtEvent
   // see if it passes any front-loaded event cut
-  if (mEventCut){
-    cout << " performing event cut " << endl;
-    if (!(mEventCut->Pass(hbtEvent))){    // event failed! - return null pointer (but leave Reader status flag as "good")
-      delete hbtEvent;
-      return 0;
-    }
-  }
+//   if (mEventCut){
+//     cout << " performing event cut " << endl;
+//     if (!(mEventCut->Pass(hbtEvent))){    // event failed! - return null pointer (but leave Reader status flag as "good")
+//       delete hbtEvent;
+//       return 0;
+//     }
+//   }
 
-  
   StHbtThreeVector p;
   
   for (StMcTrackIterator iter=mcEvent->tracks().begin(); iter!=mcEvent->tracks().end(); iter++){
     StMcTrack*  track = *iter;
 
-    if ( track->geantId() == 151) {
-      cout << " phi found " << endl;
-      int nDaughters = track->stopVertex()->numberOfDaughters();
-      cout << " momentum " << track->momentum().mag() << endl;
-      cout << " number of daughters = " << nDaughters << endl;
-      if (nDaughters == 2) {
-	cout << track->stopVertex()->daughters()[0]->geantId() << endl;
-	cout << track->stopVertex()->daughters()[1]->geantId() << endl;
-	cout << abs(track->stopVertex()->daughters()[0]->fourMomentum() +
-		    track->stopVertex()->daughters()[1]->fourMomentum()) << endl;
+    // y-pt for mother particles
+    if (track->particleDefinition()) {
+      if (CheckPdgIdList(mAcceptedMothers,track->particleDefinition()->pdgEncoding())) {
+	mMotherMinvYPt->Fill(track->fourMomentum().m(),track->rapidity(),track->pt());
+	mMotherMinvYMt->Fill(track->fourMomentum().m(),track->rapidity(),track->fourMomentum().mt());
+	mMotherMinvEtaPt->Fill(track->fourMomentum().m(),track->pseudoRapidity(),track->pt());
       }
-      cout << " no key for starnew reasons " << endl;
     }
 
-    if ( track->startVertex()->parent() ==0 )
-      continue;
-    else
-      if ( track->startVertex()->parent()->geantId() != 151 ) 
+
+    // check Pdg Id of the StMcTrack and its mc-mother and mc-daughters
+    int pdgCode = 0;
+    int motherPdgCode = 0;
+    int daughterPdgCode = 0;
+    int motherTrackId = 0;
+    if (CheckPdgIdLists()) {
+      int check=0;
+      if (!track->particleDefinition()) {
+	cout << " track has no particle definiton " << endl;
 	continue;
+      }
+      pdgCode = track->particleDefinition()->pdgEncoding();
+      motherPdgCode = track->parent(); // 0 if no start vertex 
+      if (motherPdgCode) { 
+	motherPdgCode = track->parent()->pdgId();
+	motherTrackId = track->parent()->key();
+      }
+      if (motherPdgCode==333) cout << " phi  333" << endl;
+
+      if ( track->stopVertex() == 0 ) {
+	check += CheckPdgIdList(pdgCode,motherPdgCode,0);
+	// 	    cout << " no stop vertex " << endl;
+      }
+      else {
+	for (int iDaughter=0; iDaughter < track->stopVertex()->daughters().size()-1; iDaughter++) {
+	  daughterPdgCode = track->stopVertex()->daughters()[iDaughter]->pdgId();
+	  check += CheckPdgIdList(pdgCode,motherPdgCode,daughterPdgCode);
+	  // 		cout << " daughterPdgCode " << daughterPdgCode;
+	}
+      }
+      // 	cout << " check " << check << endl;
+      if ( !(check) ) {
+	continue;   // particle failed, continue with next track
+      }
+    }
 
     int nTpcHits = track->tpcHits().size();
 
@@ -237,7 +273,7 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
 #endif
     //cout << " P     " << hbtTrack->P() << endl;
 
-    hbtTrack->SetTrackId(track->key());
+    hbtTrack->SetTrackId(track->key()+motherTrackId*pow(2,16));
 
     hbtTrack->SetNHits( nTpcHits );               // hits in Tpc
     hbtTrack->SetNHitsPossible(nTpcHits );        // hits in Tpc

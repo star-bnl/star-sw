@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.33 2001/06/21 19:18:42 laue Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.34 2001/06/23 21:55:45 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.34  2001/06/23 21:55:45  laue
+ * *** empty log message ***
+ *
  * Revision 1.33  2001/06/21 19:18:42  laue
  * Modified Files: (to match the changed base classes)
  * 	StHbtAsciiReader.cxx StHbtAsciiReader.h
@@ -181,13 +184,14 @@
 
 #include "StEventMaker/StEventMaker.h"
 
-
 #include "StFlowTagMaker/StFlowTagMaker.h"
 #include "tables/St_FlowTag_Table.h"
 #include "StFlowMaker/StFlowMaker.h"
 #include "StFlowMaker/StFlowEvent.h"
 #include "StFlowAnalysisMaker/StFlowAnalysisMaker.h"
 #include "StFlowMaker/StFlowSelection.h"
+
+//#define STHBTDEBUG
 
 #ifdef __ROOT__
 ClassImp(StStandardHbtEventReader)
@@ -199,7 +203,7 @@ ClassImp(StStandardHbtEventReader)
 
 
 //__________________
-StStandardHbtEventReader::StStandardHbtEventReader() : mTrackType(primary) {
+StStandardHbtEventReader::StStandardHbtEventReader() : mTrackType(primary), mReadTracks(1), mReadV0s(1) {
   mTheEventMaker=0;
   mTheV0Maker=0;
   mTheTagReader = 0;
@@ -219,6 +223,10 @@ StHbtString StStandardHbtEventReader::Report(){
   StHbtString temp = "\n This is the StStandardHbtEventReader\n";
   char ccc[100];
   sprintf(ccc," Track type is %d\n",mTrackType);
+  temp += ccc;
+  sprintf(ccc," mReadTracks is %d\n",mReadTracks);
+  temp += ccc;
+  sprintf(ccc," mReadV0s is %d\n",mReadV0s);
   temp += ccc;
   temp += "---> EventCuts in Reader: ";
   if (mEventCut) {
@@ -296,7 +304,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   
 
   StHbtEvent* hbtEvent = new StHbtEvent;
-  int mult = rEvent->trackNodes().size();
+  unsigned int mult = rEvent->trackNodes().size();
 
   if ( rEvent->numberOfPrimaryVertices() != 1) {
     cout << " StStandardHbtEventReader::ReturnHbtEvent() -  rEvent->numberOfPrimaryVertices()=" << 
@@ -355,13 +363,22 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   int iWrongTrackType =0;
 
   // loop over all the tracks, accept only global
-  {for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
+  for (unsigned int icount=0; icount<(unsigned int)mult; icount++){
     cTrack = rEvent->trackNodes()[icount]->track(mTrackType);
     if (cTrack) {
       iTracks++;
       if (cTrack->flag()>=0) iGoodTracks++;
+#ifdef STHBTDEBUG
+      cout << iTracks << " " << iGoodTracks << " : ";
+      cout << cTrack->type() << " ";
+      cout << cTrack->flag() << " ";
+      cout << cTrack->key() << " ";
+      cout << cTrack->impactParameter() << " ";
+      cout << cTrack->numberOfPossiblePoints() << " ";
+      cout << endl;
+#endif STHBTDEBUG
     }
-  }}
+  }
 
   hbtEvent->SetNumberOfTracks(iTracks);
   hbtEvent->SetNumberOfGoodTracks(iGoodTracks);
@@ -370,9 +387,14 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   hbtEvent->SetUncorrectedNumberOfNegativePrimaries(uncorrectedNumberOfNegativePrimaries(*rEvent));
   hbtEvent->SetEventNumber(rEvent->info()->id());
   
-  StZdcTriggerDetector zdc = rEvent->triggerDetectorCollection()->zdc();
-  hbtEvent->SetZdcAdcWest(zdc.adc(10)); // Zdc West sum attenuated
-  hbtEvent->SetZdcAdcEast(zdc.adc(13)); // Zdc East sum attenuated
+  if (rEvent->triggerDetectorCollection()) {
+    StZdcTriggerDetector zdc = rEvent->triggerDetectorCollection()->zdc();
+    hbtEvent->SetZdcAdcWest(zdc.adc(10)); // Zdc West sum attenuated
+    hbtEvent->SetZdcAdcEast(zdc.adc(13)); // Zdc East sum attenuated
+  }
+  else {
+    cout << "StStandardHbtEventReader::Return(...) - no triggerDetectorCollection " << endl;
+  }
 
   /*
   // Randy commented this out since the RP is obtained from the FlowMaker now
@@ -391,176 +413,141 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   }
   */
 
-    // For Aihong's pid
-    StuProbabilityPidAlgorithm aihongsPid(*rEvent);
 
-  {for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
+  // For Aihong's pid
+  StuProbabilityPidAlgorithm aihongsPid(*rEvent);
+  if (mReadTracks) {
+    for (unsigned int icount=0; icount<(unsigned int)mult; icount++){
 #ifdef STHBTDEBUG
-    cout << " track# " << icount << endl;
+      cout << " track# " << icount << endl;
 #endif
-    gTrack = rEvent->trackNodes()[icount]->track(global);
-    pTrack = rEvent->trackNodes()[icount]->track(primary);
-    cTrack = rEvent->trackNodes()[icount]->track(mTrackType);
-
-    // don't make a hbtTrack if not a primary track
-    if (!cTrack) {
-      iWrongTrackType++;
-      continue;
-    }
-    if (cTrack->flag() < 0) {
-      iBadFlag++;
-      continue;
-    }
-
-    if (!gTrack) {
-      cout << "StStandardHbtEventReader::Return(...) - no global track pointer !?! " << endl;
-      continue;
-    }
-
-    // check number points in tpc
-    int nhits = cTrack->detectorInfo()->numberOfPoints(kTpcId);
-    if (nhits==0) {
-      iNoHits++;
-      //cout << "No hits -- skipping track (because it crashes otherwise)" << endl;
-      continue;
-    }
-
-    StTrackPidTraits* trackPidTraits=0; 
-    size_t iPidTraitsCounter=0;
-
-    // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
-    // pointers to track and pidTraits are set 
-    StParticleDefinition* BestGuess = (StParticleDefinition*)cTrack->pidTraits(*PidAlgorithm);
-    //    if (BestGuess) cout << "best guess for particle is " << BestGuess->name() << endl; //2dec9
-    if (!BestGuess){
-      iNoBestGuess++;
-      continue;
-    }
-
-    // get fitTraits
-    StTrackFitTraits fitTraits = cTrack->fitTraits();
-    //cout << " got fitTraits " << endl;
-
-    //cout << "Getting readty to instantiate new StHbtTrack " << endl;
-
-
-    // o.k., we got the track with all we need, let's create the StHbtTrack
-    StHbtTrack* hbtTrack = new StHbtTrack;
-    //cout << "StHbtTrack instantiated " << endl;
-
-
-    
-    hbtTrack->SetTrackId(cTrack->key());
-
-    hbtTrack->SetNHits(nhits);
-    hbtTrack->SetNHitsPossible( cTrack->numberOfPossiblePoints(kTpcId) );
-
-    float nsige = PidAlgorithm->numberOfSigma(Electron);
-    //cout << "nsige\t\t" << nsige << endl;
-    hbtTrack->SetNSigmaElectron(nsige);
-
-    float nsigpi = PidAlgorithm->numberOfSigma(Pion);
-    //cout << "nsigpi\t\t" << nsigpi << endl;
-    hbtTrack->SetNSigmaPion(nsigpi);
-
-    float nsigk = PidAlgorithm->numberOfSigma(Kaon);
-    //cout << "nsigk\t\t\t" << nsigk << endl;
-    hbtTrack->SetNSigmaKaon(nsigk);
-
-    float nsigprot = PidAlgorithm->numberOfSigma(Proton);
-    //cout << "nsigprot\t\t\t\t" << nsigprot << endl;
-    hbtTrack->SetNSigmaProton(nsigprot);
-
-
-
-    //cout << "Nsig electron,pion,kaon,proton : " << nsige << " " << nsigpi << " " << nsigk << " " << nsigprot << endl;
-    
-    //cout << "dEdx\t" << PidAlgorithm->traits()->mean() << endl; 
-    hbtTrack->SetdEdx(PidAlgorithm->traits()->mean());
-    
-    double pathlength = cTrack->geometry()->helix().pathLength(vp);
-    //cout << "pathlength\t" << pathlength << endl;
-    StHbtThreeVector p = cTrack->geometry()->momentum();
-    //cout << "p: " << p << endl;
-    hbtTrack->SetP(p);
-
-
-
-    StHbtThreeVector  DCAxyz = cTrack->geometry()->helix().at(pathlength)-vp;
-    //cout << "DCA\t\t" << DCAxyz << " " << DCAxyz.perp() << endl;
-    hbtTrack->SetDCAxy( DCAxyz.perp() );
-    hbtTrack->SetDCAz(  DCAxyz.z()  );
-
-    hbtTrack->SetChiSquaredXY( cTrack->fitTraits().chi2(0) );
-    hbtTrack->SetChiSquaredZ( cTrack->fitTraits().chi2(1) ); 
-
-    StPhysicalHelixD  helix = cTrack->geometry()->helix();
-    hbtTrack->SetHelix( helix );
-
-    float pt = sqrt(p[0]*p[0]+p[1]*p[1]);
-    //cout << "pt\t\t\t" << pt << endl;
-    //hbtTrack->SetPt(pt);
-    
-    hbtTrack->SetPt(pt);   // flag secondary tracks
-    
-    int charge = (cTrack->geometry()->charge());
-    //cout << "charge\t\t\t\t" << charge << endl;
-    hbtTrack->SetCharge(charge);
-    
-    hbtTrack->SetTopologyMap( 0, gTrack->topologyMap().data(0) ); // take map from globals
-    hbtTrack->SetTopologyMap( 1, gTrack->topologyMap().data(1) ); // take map from globals
-
-
-    // >>> Fabrice 6/12/2001 add Aihong's pid probability
-    hbtTrack->SetNHitsDedx(PidAlgorithm->traits()->numberOfPoints());
-
-    pTrack->pidTraits(aihongsPid); //invoke functor.
-    int tPid;
-    hbtTrack->SetPidProbElectron(0.);
-    hbtTrack->SetPidProbPion(0.);
-    hbtTrack->SetPidProbKaon(0.);
-    hbtTrack->SetPidProbProton(0.);
-    for(int ti=0;ti<3;ti++){
-      tPid = aihongsPid.getParticleGeantID(ti);
-      if(tPid==8 || tPid==9){
-	hbtTrack->SetPidProbPion(aihongsPid.getProbability(ti));
-      }
-      else{
-	if(tPid==2 || tPid==3){
-	  hbtTrack->SetPidProbElectron(aihongsPid.getProbability(ti));
-	}
-	else{	  
-	  if(tPid==11 || tPid==12){
-	    hbtTrack->SetPidProbKaon(aihongsPid.getProbability(ti));
-	  }
-	  else{
-	    if(tPid==13 || tPid==15){
-	      hbtTrack->SetPidProbProton(aihongsPid.getProbability(ti));
-	    }	      
-	  }
-	}
-      }
-    }
-    // <<<
-
-
-    // cout << "pushing..." <<endl;
-
-    
-    // By now, all track-wise information has been extracted and stored in hbtTrack
-    // see if it passes any front-loaded event cut
-    if (mTrackCut){
-      if (!(mTrackCut->Pass(hbtTrack))){                  // track failed - delete it and skip the push_back
-	iFailedCut++;
-	delete hbtTrack;
+      gTrack = rEvent->trackNodes()[icount]->track(global);
+      pTrack = rEvent->trackNodes()[icount]->track(primary);
+      cTrack = rEvent->trackNodes()[icount]->track(mTrackType);
+      
+      // don't make a hbtTrack if not a primary track
+      if (!cTrack)            { iWrongTrackType++; continue; }
+      if (cTrack->flag() < 0) { iBadFlag++; continue; }
+      
+      if (!gTrack) {
+	cout << "StStandardHbtEventReader::Return(...) - no global track pointer !?! " << endl;
 	continue;
       }
+      
+      // check number points in tpc
+      if (!cTrack->detectorInfo()) {
+	cout << "StStandardHbtEventReader::Return(...) - no detector info " << endl; 
+	assert(0);
+      }
+      
+      int nhits = cTrack->detectorInfo()->numberOfPoints(kTpcId);
+      if (nhits==0) {
+	iNoHits++;
+#ifdef STHBTDEBUG
+	cout << "No hits -- skipping track (because it crashes otherwise)" << endl;
+#endif
+	continue;
+      }
+      
+      // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
+      // pointers to track and pidTraits are set 
+      StParticleDefinition* BestGuess = (StParticleDefinition*)cTrack->pidTraits(*PidAlgorithm);
+      //    if (BestGuess) cout << "best guess for particle is " << BestGuess->name() << endl; //2dec9
+      if (!BestGuess){
+	iNoBestGuess++;
+	continue;
+      }
+      
+#ifdef STHBTDEBUG
+      cout << "Getting readty to instantiate new StHbtTrack " << endl;
+#endif    
+      
+      // o.k., we got the track with all we need, let's create the StHbtTrack
+      StHbtTrack* hbtTrack = new StHbtTrack;
+      //cout << "StHbtTrack instantiated " << endl;
+      
+      hbtTrack->SetTrackId(cTrack->key());
+      
+      hbtTrack->SetNHits(nhits);
+      hbtTrack->SetNHitsPossible( cTrack->numberOfPossiblePoints(kTpcId) );
+      
+      hbtTrack->SetNSigmaElectron(PidAlgorithm->numberOfSigma(Electron));
+      hbtTrack->SetNSigmaPion(PidAlgorithm->numberOfSigma(Pion));
+      hbtTrack->SetNSigmaKaon(PidAlgorithm->numberOfSigma(Kaon));
+      hbtTrack->SetNSigmaProton(PidAlgorithm->numberOfSigma(Proton));
+      
+      
+      //cout << "dEdx\t" << PidAlgorithm->traits()->mean() << endl; 
+      hbtTrack->SetdEdx(PidAlgorithm->traits()->mean());
+      
+      double pathlength = cTrack->geometry()->helix().pathLength(vp);
+      //cout << "pathlength\t" << pathlength << endl;
+      
+      hbtTrack->SetP(cTrack->geometry()->momentum());
+      hbtTrack->SetPt(cTrack->geometry()->momentum().perp());
+      
+      StHbtThreeVector  DCAxyz = cTrack->geometry()->helix().at(pathlength)-vp;
+      //cout << "DCA\t\t" << DCAxyz << " " << DCAxyz.perp() << endl;
+      hbtTrack->SetDCAxy( DCAxyz.perp() );
+      hbtTrack->SetDCAz(  DCAxyz.z()  );
+      
+      hbtTrack->SetChiSquaredXY( cTrack->fitTraits().chi2(0) );
+      hbtTrack->SetChiSquaredZ( cTrack->fitTraits().chi2(1) ); 
+      
+      hbtTrack->SetHelix( cTrack->geometry()->helix() );
+      
+      
+      //cout << "charge\t\t\t\t" << cTrack->geometry()->charge() << endl;
+      hbtTrack->SetCharge(cTrack->geometry()->charge());
+      
+      hbtTrack->SetTopologyMap( 0, gTrack->topologyMap().data(0) ); // take map from globals
+      hbtTrack->SetTopologyMap( 1, gTrack->topologyMap().data(1) ); // take map from globals
+      
+      hbtTrack->SetNHitsDedx(PidAlgorithm->traits()->numberOfPoints());
+      
+      pTrack->pidTraits(aihongsPid); //invoke functor.
+      int tPid;
+      hbtTrack->SetPidProbElectron(0.);
+      hbtTrack->SetPidProbPion(0.);
+      hbtTrack->SetPidProbKaon(0.);
+      hbtTrack->SetPidProbProton(0.);
+      for(int ti=0;ti<3;ti++){
+	tPid = aihongsPid.getParticleGeantID(ti);
+	if(tPid==8 || tPid==9){
+	  hbtTrack->SetPidProbPion(aihongsPid.getProbability(ti));
+	}
+	else{
+	  if(tPid==2 || tPid==3){
+	    hbtTrack->SetPidProbElectron(aihongsPid.getProbability(ti));
+	  }
+	  else{	  
+	    if(tPid==11 || tPid==12){
+	      hbtTrack->SetPidProbKaon(aihongsPid.getProbability(ti));
+	    }
+	    else{
+	      if(tPid==13 || tPid==15){
+		hbtTrack->SetPidProbProton(aihongsPid.getProbability(ti));
+	      }	      
+	    }
+	  }
+	}
+      }
+      // cout << "pushing..." <<endl;
+      
+      
+      // By now, all track-wise information has been extracted and stored in hbtTrack
+      // see if it passes any front-loaded event cut
+      if (mTrackCut){
+	if (!(mTrackCut->Pass(hbtTrack))){                  // track failed - delete it and skip the push_back
+	  iFailedCut++;
+	  delete hbtTrack;
+	  continue;
+	}
+      }
+      
+      hbtEvent->TrackCollection()->push_back(hbtTrack);
     }
-
-    hbtEvent->TrackCollection()->push_back(hbtTrack);
-  }}
-  delete PidAlgorithm;
-
+  }
   printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i tracks of type %i           \n",iTracks,mTrackType);
   printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i good tracks of type %i      \n",iGoodTracks,mTrackType);
   printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i wrong type tracks \n",iWrongTrackType);
@@ -569,14 +556,15 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i failed tracks cuts, track skipped \n",iFailedCut);
   printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i bad flag,           track skipped \n",iBadFlag);
   printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i(%i) tracks pushed into collection \n",hbtEvent->TrackCollection()->size(),	 mult); 
-
+  
+  delete PidAlgorithm;
   //Now do v0 stuff
-
-
+  
+  
   //Pick up pointer v0 minidst maker
   //StV0MiniDstMaker* v0Maker = (StV0MiniDstMaker *) mTheV0Maker;
   StStrangeMuDstMaker* v0Maker = (StStrangeMuDstMaker *) mTheV0Maker;
-  if( ! v0Maker ) {
+  if( ! v0Maker && mReadV0s ) {
     cout << " StStandardHbtEventReader::ReturnHbtEvent() - Not doing v0 stuff" << endl;
     return hbtEvent; 
   }

@@ -45,7 +45,7 @@ void StHbtTagReader::init() {
 }
 
 StHbtTagReader::~StHbtTagReader(){
-  mTFile->Close();
+  if (mTFile) mTFile->Close();
 }
 
 int StHbtTagReader::EventMatch(int runNumber, int eventNumber) {
@@ -55,7 +55,10 @@ int StHbtTagReader::EventMatch(int runNumber, int eventNumber) {
       if (strcmp(mDstFileName.c_str(),mIOMaker->GetFile())  ) {// file names doesn't match
 	  cout <<  " new file " << endl;
 	  mTagFileName = mIOMaker->GetFile();
-	  mTagFileName.replace(mTagFileName.find(".dst."),5,".tags.");
+	  if (mTagFileName.find(".dst.") != string::npos) 
+	    mTagFileName.replace(mTagFileName.find(".dst."),5,".tags.");
+	  else if (mTagFileName.find(".event.") != string::npos) 
+	    mTagFileName.replace(mTagFileName.find(".event."),7,".tags.");
 	  init();
       }
   }
