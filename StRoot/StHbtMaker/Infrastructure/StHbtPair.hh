@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.3 1999/07/22 18:49:10 lisa Exp $
+ * $Id: StHbtPair.hh,v 1.4 1999/07/29 16:16:34 lisa Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
+ * Revision 1.4  1999/07/29 16:16:34  lisa
+ * Selemons upgrade of StHbtPair class
+ *
  * Revision 1.3  1999/07/22 18:49:10  lisa
  * Implement idea of Fabrice to not create and delete StHbtPair all the time
  *
@@ -43,7 +46,6 @@ public:
   //StHbtPair(const StHbtPair&);
   //StHbtPair& operator=(const StHbtPair&);
 
-  StHbtLorentzVector fourMomentum() const;
   // track Gets:
   StHbtParticle* track1() const;
   StHbtParticle* track2() const;
@@ -51,11 +53,29 @@ public:
   void SetTrack1(const StHbtParticle* trkPtr);
   void SetTrack2(const StHbtParticle* trkPtr);
 
+  StHbtLorentzVector fourMomentum() const;
   double qInv() const;
   double kT()   const;
-  double qOut() const;
-  double qSide() const;
   double mInv() const;
+
+  // Bertsch-Pratt momentum components in Pair Frame - written by Bekele/Humanic
+  double qSidePf() const;
+  double qOutPf() const;
+  double qLongPf() const;
+   
+  // Bertsch-Pratt momentum components in Local CMS (longitudinally comoving) frame
+  // - written by Bekele/Humanic
+  double qSideCMS() const;
+  double qOutCMS() const;
+  double qLongCMS() const;
+
+  // Bertsch-Pratt momentum components in a longitudinally boosted frame
+  // the argument is the beta of the longitudinal boost (default is 0.0, meaning lab frame)
+  // - written by Bekele/Humanic
+  double qSideBf(double beta=0.0) const;
+  double qOutBf(double beta=0.0) const;
+  double qLongBf(double beta=0.0) const;
+
 
 private:
   StHbtParticle* mTrack1;
