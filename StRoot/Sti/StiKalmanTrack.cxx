@@ -1,10 +1,16 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.24 2003/05/06 15:33:49 mmiller Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.25 2003/05/14 21:37:59 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.25  2003/05/14 21:37:59  pruneau
+ * Fixed "chi2" problem. 5 first nodes on a track did not have
+ * relevant errors. Fix the problem by inserting a call to calculateError()
+ * inside the add(stiHit*...) method used while initializing tracks from the
+ * seed finder. CP
+ *
  * Revision 2.24  2003/05/06 15:33:49  mmiller
  * iCommitting changes to turn on multiple regions (StiPlacement::StiRegion -> kMidRapidity, kForwardRapidity, etc).
  * Also added a point to StiToolkit for StiMaker.  This allows for the req. GetDataSet calls in the FTPC code.
@@ -75,6 +81,7 @@
 #include "StiDetector.h"
 #include "StiPlacement.h"
 #include "StiMaterial.h"
+#include "StiHitErrorCalculator.h"
 
 ostream& operator<<(ostream&, const StiHit&);
 
@@ -142,6 +149,16 @@ StiKalmanTrackNode * StiKalmanTrack::add(StiHit *h,double alpha, double eta, dou
     }
   TRACKMESSENGER << "StiKalmanTrack::add(...) -I- have valid n"<<endl;
   n->initialize(h,alpha,eta,curvature,tanl);
+
+  // calculate the estimate error of this node
+  const StiHitErrorCalculator * calc = h->detector()->getHitErrorCalculator();
+  if (!calc)
+    {
+      cout << "SKT::add(...) -E- Detector:"<<h->detector()->getName()<<" has no calculator"<<endl;
+      throw runtime_error("SKT::add(...) -E- calc==0");
+    }
+  calc->calculateError(n);
+
   if (lastNode!=0)
     lastNode->add(n);
   else 
@@ -412,7 +429,10 @@ double  StiKalmanTrack::getChi2() const
       for (it=begin();it!=end();it++)
 	{
 	  if ((*it).getHit())
-	    theChi2 += (*it)._chi2;
+	    {
+	      //cout << " Chi2:"<< (*it)._chi2<<endl;
+	      theChi2 += (*it)._chi2;
+	    }
 	}
     }
   return theChi2;
@@ -934,10 +954,10 @@ bool StiKalmanTrack::find(int direction)
     {
       if (trackFinder->find(this,kOutsideIn))
 	{
-	  if (debugCount<5) TRACKMESSENGER<<"/fit(InOut);";
+	  //cout<<"/fit(InOut)";
 	  fit(kInsideOut);
 	  trackExtended = true;
-	}		
+	}	
     }
   catch (runtime_error & error)
     {
