@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.23 1999/01/13 20:29:15 fine Exp $
+// $Id: St_Table.h,v 1.24 1999/01/19 03:13:32 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.24  1999/01/19 03:13:32  fine
+// St_DataSet::Fine and St_DataSet::FindObject methods have been introduced
+//
 // Revision 1.23  1999/01/13 20:29:15  fine
 // St_DataSet::Pass() method - the option kUp has been introduced
 //
@@ -141,7 +144,7 @@ public:
    virtual     void       StafStreamer(Char_t *structname=0, FILE *fl=0);
    virtual     void       Set(Int_t n);
    virtual     void       Set(Int_t n, Char_t *array);
-   virtual     void       SetNRows(Int_t n){SetUsedRows(n);} 
+   virtual     void       SetNRows(Int_t n);
    virtual     void       Reset(Int_t c=0);
    virtual     void       Update();
    virtual     void       Update(St_DataSet *set,UInt_t opt=0);
@@ -155,6 +158,7 @@ inline  Bool_t St_Table::IsFolder(){ return fList && fList->Last() ? kTRUE : kFA
 inline  void   St_Table::SetUsedRows(Int_t n) {if (s_TableHeader) *s_MaxIndex = n;}
 inline  void   St_Table::SetTitle(const Char_t *title){SetType(title);}
 inline  void   St_Table::SetHeader(table_head_st *table){s_TableHeader = table;} 
+inline  void   St_Table::SetNRows(Int_t n) {SetUsedRows(n);} 
 //   ULong_t   &operator(){ return GetTable();}
 
 inline void *St_Table::At(Int_t i)

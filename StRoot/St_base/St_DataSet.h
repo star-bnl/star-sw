@@ -60,6 +60,8 @@ class St_DataSet : public TNamed
     virtual TObject     *Clone();
     virtual St_DataSet  *Data() const { return HasData() ? (St_DataSet *)this : 0; }  // returns this pointer the derived classes if any
     virtual void         Delete(Option_t *opt="");   
+    virtual St_DataSet  *Find(const Char_t *path);
+    virtual St_DataSet  *FindObject(const Char_t *name,const Char_t *path="",Option_t *opt="");
             TObject     *GetMother() const { return fMother; }
     virtual St_DataSet  *GetParent() const { return (St_DataSet *)fMother;}
             TList       *GetList()   const { return fList; }

@@ -1,8 +1,8 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
-
-// Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
- 
+//  
+//  
+// Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved 
 //*KEEP,TDataset,T=C++.
 #include <iostream.h>
 #include "St_DataSetIter.h"
@@ -135,6 +135,15 @@ TObject *St_DataSet::Clone() {
 }
 //______________________________________________________________________________
 void St_DataSet::Delete(Option_t *opt){
+  //
+  //  Delete(Option_t *opt)
+  //
+  //  Deletes all "structural" links
+  //  removes all "references"
+  // then
+  //  delets the internal container (TList)
+  //
+
   // First we should break our relationship with the parent if any
   if (fMother && !TestBit(kCanDelete) ) 
   {
@@ -159,6 +168,35 @@ void St_DataSet::Delete(Option_t *opt){
     delete fList;
     fList = 0;
   }
+}
+//______________________________________________________________________________
+St_DataSet *St_DataSet::Find(const Char_t *path)
+{
+  //
+  // Full description see: St_DataSetIter::Find
+  //
+  // Note. This is method is quite expansive. 
+  // ----- It is done to simplify the user's code when one wants to find ONLY object.
+  //       If you need to find more then 1 object in this dataset,
+  //       regard using St_DataSetIter class yourself.
+  //
+  St_DataSetIter next(this);
+  return next.Find(path);
+}
+//______________________________________________________________________________
+St_DataSet *St_DataSet::FindObject(const Char_t *name,const Char_t *path,Option_t *opt)
+{
+  //
+  // Full description see: St_DataSetIter::FindObject
+  //
+  // Note. This is method is quite expansive. 
+  // ----- It is done to simplify the user's code when one wants to find ONLY object.
+  //       If you need to find more then 1 object in this dataset,
+  //       regard using St_DataSetIter class yourself.
+  //
+
+  St_DataSetIter next(this);
+  return next.FindObject(path,path,opt);
 }
  
 //______________________________________________________________________________
