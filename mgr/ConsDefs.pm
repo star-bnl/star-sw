@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.81 2005/02/06 23:27:15 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.82 2005/02/15 16:57:48 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -275,11 +275,11 @@
 	  $DEBUG = "-O -g";
 	  $FDEBUG = "-O -g";
 	  if ($CXX_VERSION < 3){
-	    $optflags = "-march=pentium -mcpu=pentium -malign-loops=2 -malign-jumps=2 -malign-functions=2";
+	    $optflags = "-malign-loops=2 -malign-jumps=2 -malign-functions=2";
 	  } else {
 	    # this naming convention starts at gcc 3.2 which happens to
 	    # have a change in the options
-	    $optflags = "-march=pentium -mcpu=pentium -falign-loops=2 -falign-jumps=2 -falign-functions=2";
+	    $optflags = "-falign-loops=2 -falign-jumps=2 -falign-functions=2";
 	  }
 	  print "set DEBUG = $DEBUG\n" unless ($param::quiet);
 	}
