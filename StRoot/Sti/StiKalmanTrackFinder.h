@@ -64,7 +64,7 @@ public:
     void removeNodeFromTrack(StiKalmanTrackNode * node, StiKalmanTrack* track);
     void pruneNodes(StiKalmanTrackNode * node);
     void reserveHits(StiKalmanTrackNode * node);
-    bool extendToMainVertex(StiKalmanTrackNode * node);
+    void extendToMainVertex(StiKalmanTrackNode * node);
     
     void doInitTrackSearch();
     void doScanLayer();

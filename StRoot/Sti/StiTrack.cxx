@@ -1,4 +1,5 @@
 #include <iostream.h>
+#include <stdexcept>
 #include <stdlib.h>
 
 //StEvent
@@ -40,13 +41,25 @@ void StiTrack::fit() //throw (Exception)
 
 ostream& operator<<(ostream& os, const StiTrack& track)
 {
-    return os <<"q: "<<track.getCharge()
-	      <<" pt: "<<track.getPt()
-	      <<" eta: "<<track.getPseudoRapidity()
-	      <<" tanLambda: "<<track.getTanL()
-	      <<" Chi2: "<<track.getChi2()
-	      <<" points: "<<track.getPointCount()
-	      <<" fitPoints: "<<track.getFitPointCount();
+	try 
+		{
+			os <<"q: "<<track.getCharge()
+				 <<" pt: "<<track.getPt()
+				 <<" eta: "<<track.getPseudoRapidity()
+				 <<" tanLambda: "<<track.getTanL()
+				 <<" Chi2: "<<track.getChi2()
+				 <<" points: "<<track.getPointCount()
+				 <<" fitPoints: "<<track.getFitPointCount();
+		}
+	catch (runtime_error & rte)
+		{
+			os << " Run-time Error while accessing track parameters: " << rte.what() << endl;
+		}
+	catch (logic_error & le)
+		{
+			os << " Logic Error while accessing track parameters: " << le.what() << endl;
+		}
+	return os;
 }
 
 void StiTrack::setTrackFitter(StiTrackFitter * fitter)
