@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridData.cc,v 1.6 2002/01/05 21:44:06 caines Exp $
+ * $Id: StSvtHybridData.cc,v 1.7 2002/02/12 23:09:50 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridData.cc,v $
+ * Revision 1.7  2002/02/12 23:09:50  munhoz
+ * fixing problems for new compiler
+ *
  * Revision 1.6  2002/01/05 21:44:06  caines
  * Initialise TimeZero and first sca always
  *
@@ -80,8 +83,8 @@ StSvtHybridData::StSvtHybridData(const StSvtHybridData& hybrid)
   mWafer    = hybrid.mWafer;
   mHybrid   = hybrid.mHybrid;
   nAnodes   = hybrid.nAnodes;
-  mTimeZero = hybrid.getTimeZero();
-  mSCAZero  = hybrid.getSCAZero();
+  mTimeZero = hybrid.mTimeZero;
+  mSCAZero  = hybrid.mSCAZero;
 
   anodeList = new int[nAnodes];
   nSeq = new int[nAnodes];
@@ -110,8 +113,8 @@ StSvtHybridData& StSvtHybridData::operator = (const StSvtHybridData& hybrid)
   mWafer    = hybrid.mWafer;
   mHybrid   = hybrid.mHybrid;
   nAnodes   = hybrid.nAnodes;
-  mTimeZero = hybrid.getTimeZero();
-  mSCAZero  = hybrid.getSCAZero();
+  mTimeZero = hybrid.mTimeZero;
+  mSCAZero  = hybrid.mSCAZero;
   
   anodeList = new int[nAnodes];
   nSeq = new int[nAnodes];
