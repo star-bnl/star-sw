@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtGeantHits.cc,v 1.3 2001/08/13 15:34:18 bekele Exp $
+ * $Id: StSvtGeantHits.cc,v 1.4 2003/07/31 19:18:09 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtGeantHits.cc,v $
+ * Revision 1.4  2003/07/31 19:18:09  caines
+ * Petrs improved simulation code
+ *
  * Revision 1.3  2001/08/13 15:34:18  bekele
  * Debugging tools added
  *
@@ -31,6 +34,7 @@ ClassImp(StSvtGeantHits)
 StSvtGeantHits::StSvtGeantHits(int barrel, int ladder, int wafer, int hybrid):StSvtHybridObject(barrel,ladder,wafer,hybrid)
 {
  mNumOfHits = 0;
+ mPeak = new float[MAX_HITS];
  mWaferCoord = new StSvtWaferCoordinate[MAX_HITS];
  mGlobalCoord = new StGlobalCoordinate[MAX_HITS];
  mLocalCoord = new StSvtLocalCoordinate[MAX_HITS];
@@ -46,6 +50,11 @@ StSvtGeantHits::~StSvtGeantHits()
 void  StSvtGeantHits::setNumOfHits(int nhits)
 {
  mNumOfHits = nhits;
+}
+
+void  StSvtGeantHits::setPeak(int index ,float peak)
+{
+ mPeak[index] = peak;
 }
 
 void  StSvtGeantHits::setGeantHit(int index ,int* svtAtt, float* AnTime)

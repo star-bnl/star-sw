@@ -1,5 +1,8 @@
-// $Id: StSvtSimulationMaker.h,v 1.6 2001/08/13 15:34:19 bekele Exp $
+// $Id: StSvtSimulationMaker.h,v 1.7 2003/07/31 19:18:10 caines Exp $
 // $Log: StSvtSimulationMaker.h,v $
+// Revision 1.7  2003/07/31 19:18:10  caines
+// Petrs improved simulation code
+//
 // Revision 1.6  2001/08/13 15:34:19  bekele
 // Debugging tools added
 //
@@ -23,10 +26,10 @@
 #define STAR_StSvtSimulationMaker
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StSvtSeqAdj base class                                     //
+// StSvtSeqAdj base class                                               //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#ifndef StMaker_H
+#ifndef StMaker_H  //is it necesary?
 #include "StMaker.h"
 #endif
 
@@ -34,139 +37,144 @@
 
 class StChain;
 class TFile;
+//class TDirectory;
 class TNtuple;
 class TH1D;
 class TH2D;
 class TString;
 
-class St_g2t_svt_hit;
-class svg_shape_st;
-class srs_srspar_st;
-class svg_geom_st;
+//class St_g2t_svt_hit;
+class StSvtGeometry;
 
 class StSvtHybridCollection;
+class StSvtData;
 class StSvtHybridData;
 class StSvtConfig;
 class StSvtGeantHits;
-class StSvtHybridPixels;
+class StSvtHybridPixelsC;
+class StSvtHybridPixelsD;
 class StSvtHybridSimData;
 class StSvtSimulation;
-class StSvtSignal;
 class StSvtElectronCloud;
 class StSvtAngles;
 class StSvtWaferCoordinate;
 class StSvtCoordinateTransform;
+class StSvtT0;
 
 class StSvtSimulationMaker : public StMaker
 {
  public:
   StSvtSimulationMaker(const char* name = "SvtSimulator");
-  ~StSvtSimulationMaker();
+  virtual ~StSvtSimulationMaker(); //** destructor should be virtual
 
+  //seting different options and configurations
+ 
+  Int_t setOptions(char* option1, int option2, int option3, int option4);
+  Int_t setConst(double timBinSize, double anodeSize, int offset );
+  Int_t setBackGround(Bool_t backgr,double backgSigma);
+  
+  //t+ Int_t setEval(Bool_t key);
+  //t+ Int_t setEmbedding(Bool_t key);
+ 
+  //inherited maker routines
   virtual Int_t Init();
   virtual Int_t Make();
+  virtual void  Clear(const char *opt);
   virtual Int_t Finish();
+  virtual Int_t InitRun(int runumber); //caled when run number changes
+   
 
-  Int_t setEmbedding(char* embedding);
-  Int_t setOptions(char* option1, int option2, int option3, int option4);
-  Int_t setConst(char* backgr,double backgSigma, double timBinSize, double anodeSize );
-  Int_t setConfig(const char* config);
-  Int_t setConfig(StSvtConfig* config);
-  Int_t setEval();
-  Int_t setSvtPixelData();
-  Int_t setSvtRawData(); 
-  Int_t setTables();
-  Int_t setHybrid();
-  Int_t createBackGrData(double backgsigma);
-  void mixData();
-  Int_t getRealData();
-  Int_t checkCoordTrans();
-  Int_t setDriftTimeShift(int driftTimeShift);
-  Int_t setHybridToCheck(int oneHybrid, int allHybrids, int numOfHitsperHyb,int pasaSigAttributes);
-  Int_t setHitAttributes(double anode, double time,double energy, double theta, double phi);
-  Int_t checkOneHybrid(StSvtHybridPixels* mSvtSimDataPixels);
-  Int_t checkAllHybrids();
-  Int_t doDriftTimeShift(StSvtHybridPixels* SvtSimDataPixels);
-  Int_t fillEval(int* svtAttrib, float* anodeTim);
-  Int_t fillEval(int barrel, int ladder, int wafer, int hybrid, StSvtWaferCoordinate& waferCoord, StThreeVector<double>& VecG,StThreeVector<double>& VecL);
+  void  setSvtPixelData();
+  void  setSvtRawData();
+  void  setGeantData();
 
-  Int_t CreateHistograms();
-  Int_t MakeHistograms1();
-  Int_t MakeHistograms2();
-  void  histTimeDist(int hit);
-  void  histChargeDist(int hit);
+  void resetPixelData();
+  void createBackGrData(double backgsigma);
+  void FillGeantHit(int barrel, int ladder, int wafer, int hybrid,
+                    StSvtWaferCoordinate& waferCoord,StThreeVector<double>& VecG,
+                    StThreeVector<double>& VecL, double peak);
+
+  void RawDataFromPixels();
+  void Conversion10to8bit(StSvtHybridPixelsD *from, StSvtHybridPixelsC *to);
+  void ClearFirst2Tbins();
+
+  Int_t getConfig();
+  Int_t getSvtGeometry();
+  Int_t getSvtDriftSpeeds();
+  Int_t getSvtT0();
+
+//+++++++++++++++++++++++
+  void MakePixelHistos();
+  void MakeRawDataHistos();
+  void MakeGeantHitsHistos();
+
+ 
+
+ 
+  //Int_t getRealData();
+  void CreateHistograms();
+ 
+
+  Int_t GetNumOfHybrids(){return mNumOfHybrids;}
+  //TH2D* GetHitPlusBkgrHist(int i){ return hit_plus_backgr[i];}
+  //TH2D* GetGeantHitHist(int i){ return geant_hit[i];}
+  TNtuple* GetNTuple(){return mNTuple;}
+  //TH2D* GetDataBeforeSeqAdjHist(int i){ return mDataBeforeSeqAdj[i];}
 
  private:
-  TString                      mConfigString;  
-  
-  StSvtConfig                  *mConfig;             //!
-  StSvtAngles                  *mSvtAngles;          //!
-  StSvtElectronCloud           *mElectronCloud;      //!
-  StSvtSimulation              *mSvtSimulation;      //!
-  StSvtSignal                  *mSvtSignal;          //!
-  StSvtCoordinateTransform     *mCoordTransform;     //!
 
-  StSvtHybridCollection        *mSvtSimPixelColl;    //!
-  StSvtHybridCollection        *mSvtSimDataColl;     //!
-  StSvtHybridCollection        *mSvtGeantHitColl;    //!
-  StSvtHybridCollection        *mRealDataColl;       //!
+  // initial options
+  double mTimeBinSize;
+  double mAnodeSize;    
+  int    mPedOffset;
 
+  double mBackGSigma;
+  Bool_t mBackGrOption;
 
-  StSvtGeantHits               *mSvtGeantHit;        //!
-  StSvtHybridPixels            *mBackGrDataPixels;   //!
-  StSvtHybridPixels            *mSvtSimDataPixels;   //!
-  StSvtHybridSimData           *mSimHybridData;      //!
-  StSvtHybridData              *mSvtRealData;      //!
-
-  St_ObjectSet                 *mGeantHitSet;        //!
-  St_ObjectSet                 *mSimDataSet;         //!
-   St_ObjectSet                 *mSimPixelSet;       //!
-
-  St_g2t_svt_hit               *mG2tSvtHit;       //!
-  svg_shape_st                 *mSvtShape;        //!
-  svg_geom_st                  *mSvtGeom;         //!
-  srs_srspar_st                *mSvtSrsPar;       //!
-
-  TFile                        *mNtFile;          //! 
-  TNtuple                      *mNTuple;          //!
-
-  char* mDoEmbedding;       //!
-  Int_t mNumOfHybrids;
-  char* mBackGrOption ;    //! 
   char* mExpOption;    //!  
   Int_t mWrite;        // for signal width outputs
   Int_t mFineDiv;      // mFineDiv = 0 to use finer scales for signal width outputs 
   Int_t mSigOption;
-  Int_t mCheckOneHybrid;
-  Int_t mCheckAllHybrids;
-  Int_t mNumOfHitsPerHyb;
-  Int_t mPasaSigAttributes;
-  Int_t mDoDriftTimeShift;
-  Float_t mAdcArray[128*240];
+  
+  //t+ Bool_t  mDoEmbedding;
+  //Bool_t  mDoEval;
+ 
 
-  double mAnode;
-  double mTime;    
+  Int_t mNumOfHybrids;   //could be used to override number of simulated hybrids
+  double mDefaultDriftVelocity;  //should be from database
 
-  double mTimeBinSize;
-  double mAnodeSize;    
-  double mDriftVelocity;
-  double mEnergy;
-  double mTheta;
-  double mPhi;
-   
-  double mBackGSigma;
+  //data for whole simulation
+  StSvtConfig                  *mConfig;              //! created in constructor (desctructor kills)
 
-  TH1D* mTimeDist[7];          //!
-  TH1D* mChargeDist;           //!
-  TH2D** hit_plus_backgr;      //!
-  TH2D** geant_hit;            //!
-  TH2D** mDataBeforeSeqAdj;            //! 
+  //tools-owned by maker
+  StSvtAngles                  *mSvtAngles;          //! created in Init (desctructor kills)
+  StSvtElectronCloud           *mElectronCloud;      //! created in Init (desctructor kills)
+  StSvtSimulation              *mSvtSimulation;      //! created in Init (desctructor kills)
+  StSvtCoordinateTransform     *mCoordTransform;     //! created in Init (desctructor kills)
+  
+  //data for each run
+  StSvtGeometry                *mSvtGeom;            //! read for each run in InitRun(owned by SvtDbMaker - don't kill)
+  StSvtHybridCollection        *mDriftSpeedColl; 
+  StSvtT0                      *mT0;
+ 
+  
+  //data for each event
+  StSvtData/*HybridCollection*/     *mSvtSimPixelColl;    //! the simulated data - created for each run InitRun{in beginAnalyses} 
+  StSvtData                         *mSvt8bitPixelColl;   //! simulated final result written to 8 bits
+  StSvtData/*HybridCollection*/     *mSvtSimDataColl;     //! "StSvtRawData" from simulation (output for chain)
+  StSvtData/*HybridCollection*/     *mSvtGeantHitColl;    //!
+  
+  //  TFile                        *mDebugFile;         //!
+  TFile                        *mNtFile;        //! asi taky zlikvidovat
+  TNtuple                      *mNTuple;          //! udelat lokalne
+    
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.6 2001/08/13 15:34:19 bekele Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.7 2003/07/31 19:18:10 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
 
-  ClassDef(StSvtSimulationMaker,1)
+  ClassDef(StSvtSimulationMaker,2)
 
+  
 };
 
 #endif

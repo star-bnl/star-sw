@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtElectronCloud.cc,v 1.1 2000/11/30 20:47:48 caines Exp $
+ * $Id: StSvtElectronCloud.cc,v 1.2 2003/07/31 19:18:09 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtElectronCloud.cc,v $
+ * Revision 1.2  2003/07/31 19:18:09  caines
+ * Petrs improved simulation code
+ *
  * Revision 1.1  2000/11/30 20:47:48  caines
  * First version of Slow Simulator - S. Bekele
  *
@@ -23,7 +26,7 @@
 
 //ClassImp(StSvtElectronCloud)
 
-fstream out1N, out2N, out3N, out4N,out5N, out6N;
+fstream out1N, out2N, out3N;
 
 StSvtElectronCloud::StSvtElectronCloud(char* option1, int option2,int option3)
 {
@@ -43,9 +46,12 @@ StSvtElectronCloud::StSvtElectronCloud(char* option1, int option2,int option3)
  mWrite = option2;
  mFineDiv = option3;
 
- cout<<"mOption = "<<mOption<<endl;
- cout<<"mWrite = "<<mWrite<<endl;
- cout<<"mFineDiv ="<<mFineDiv<<endl;
+ //cout<<"mOption = "<<mOption<<endl;
+ //cout<<"mWrite = "<<mWrite<<endl;
+ //cout<<"mFineDiv ="<<mFineDiv<<endl;
+
+ if(mWrite)
+  openFiles();
 
  for(int i = 0; i < 4; i++)
    {
@@ -63,26 +69,10 @@ void StSvtElectronCloud::openFiles()
 {
 
  if(mWrite){
-  if(!mFineDiv)
-   {
-    if(!strncmp(mOption , "coulomb", strlen("coulomb")))
-      out1N.open("coulOnly.dat",ios::out);
-    else if(!strncmp(mOption,"diffusion",strlen("diffusion")))
-      out2N.open("diffOnly.dat",ios::out);
-    else if(!strncmp(mOption,"both",strlen("both")))
-      out3N.open("coulAndDiff.dat",ios::out);
-   }
 
- else
-   {
-   
-     if(!strncmp(mOption , "coulomb", strlen("coulomb")))
-      out4N.open("coulOnly.dat",ios::out);
-    else if(!strncmp(mOption,"diffusion",strlen("diffusion")))
-      out5N.open("diffOnly.dat",ios::out);
-    else if(!strncmp(mOption,"both",strlen("both")))
-      out6N.open("coulAndDiff.dat",ios::out);
-   }
+   out1N.open("coulOnlyNew.dat",ios::out);
+   out2N.open("diffOnlyNew.dat",ios::out);
+   out3N.open("coulAndDiffNew.dat",ios::out);
  }
 
  //out3N<<"Writing to file"<<endl;
@@ -108,20 +98,24 @@ void StSvtElectronCloud::setPar(double energy,double theta, double phi, double t
   mTheta = theta;
   mPhi = phi;
   //mTheta = 2*acos(-1.0)/360;
-  mTheta = 0.01745329251994;
-  mPhi = 0.01745329251994;
   
   //mTotCharge = mEnergy/mSi_EnergyGap;
   mTotCharge = mEnergy*0.27777777777777;    // in number of electrons
   //cout<<"mTotCharge = "<<mTotCharge<<endl;
-  //mSigma10 = 0.288675134*fabs(mSDD_thickness*tan(mTheta));  //  [mm]
-  mSigma10 = 0.001;
-  mSigma20 = 0.001;                                         //  [mm]
+ 
  }
 
-void StSvtElectronCloud::setInitWidths()
+
+void StSvtElectronCloud::setInitWidths(double w1, double w2)
 {
  double sigma1 = 0,sigma2 = 0;
+
+if(mTheta == 0.)
+   mSigma10 = w1;  //  [mm]
+ else
+   mSigma10 = 0.288675134*fabs(mSDD_thickness*tan(mTheta));  //  [mm]
+
+  mSigma20 = w2;                                         //  [mm]
 
  mSigmaSq1Prev = mSigma10*mSigma10;
  mSigmaSq2Prev = mSigma20*mSigma20;
@@ -144,24 +138,68 @@ void StSvtElectronCloud::calculateWidthAtAnode(double mTc)
   int timeBin, binDiv, numSteps, status;
   double steplen;
 
-  binDiv = 15;
-  steplen  = (1.0/binDiv)*mTimBinSize;     //in micro seconds
-  timeBin = (int) mTc;
-  numSteps = (int) (mTc*mTimBinSize/steplen);
+  if(mWrite){
 
-  //cout<<"mTc = "<<mTc<<endl;
-  //cout<<"steplen  = "<<steplen<<endl;
+    char temp[3][250];
+    strcpy(temp[0],"diffusion");
+    strcpy(temp[1],"coulomb");
+    strcpy(temp[2],"both");
 
+    for(int i = 0; i < 3; i++){
 
-  for(int n = 1; n <= timeBin + 1; n++)
-    {
-     if(n > timeBin) binDiv = numSteps - binDiv*timeBin;
-     if( n < 4)
-       status = runge_kutta4(n - 1, binDiv, steplen);
-     else
-      status = adamsBushFort(n, binDiv, steplen);
-   }
+      mOption = temp[i];
+
+      binDiv = 2000;
  
+      steplen  = (1.0/binDiv)*mTimBinSize;     //in micro seconds
+      timeBin = (int) mTc;
+      numSteps = (int) (mTc*mTimBinSize/steplen);
+
+      //cout<<"numSteps = "<<numSteps<<endl;
+
+      mSigmaSq1Prev = mSigma10*mSigma10;
+      mSigmaSq2Prev = mSigma20*mSigma20;
+
+      dSigma1SqBydt[0] = func1(0.0,sqrt(mSigmaSq1Prev),sqrt(mSigmaSq2Prev));
+      dSigma2SqBydt[0] = func2(0.0,sqrt(mSigmaSq1Prev),sqrt(mSigmaSq2Prev)); 
+
+      for(int i = 1; i < 4; i++)
+	{
+	  dSigma1SqBydt[i] = 0;
+	  dSigma2SqBydt[i] = 0;
+	}
+     
+      for(int n = 1; n <= timeBin + 1; n++)
+	{
+	  if(n > timeBin) binDiv = numSteps - binDiv*timeBin;
+	  if( n < 4)
+	    status = runge_kutta4(n - 1, binDiv, steplen);
+	  else 
+	    status = adamsBushFort(n, binDiv, steplen);
+	}
+    }
+
+  } else {
+
+    binDiv = 15;
+
+    steplen  = (1.0/binDiv)*mTimBinSize;     //in micro seconds
+    timeBin = (int) mTc;
+    numSteps = (int) (mTc*mTimBinSize/steplen);
+
+    for(int n = 1; n <= timeBin + 1; n++)
+      {
+	if(n > timeBin) binDiv = numSteps - binDiv*timeBin;
+	if( n < 4)
+	  status = runge_kutta4(n - 1, binDiv, steplen);
+	else 
+	  status = adamsBushFort(n, binDiv, steplen);
+      }
+
+  }
+ 
+  mWrite = 0;
+
   //cout<<"status = passed"<<endl;
 }
 
@@ -190,41 +228,37 @@ int StSvtElectronCloud::runge_kutta4(int stepBefore, int numBinDiv, double stepl
 
   if(!stepBefore && mWrite)
    {
-    if(!mFineDiv)
-      {
-        if(!strncmp(mOption , "coulomb", strlen("coulomb")))
-           out1N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
-        else if(!strncmp(mOption,"diffusion",strlen("diffusion")))
-           out2N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
-        else if(!strncmp(mOption,"both",strlen("both")))
-           out3N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
-        
-      }   
-    else 
-      {
-        if(!strncmp(mOption , "coulomb", strlen("coulomb")))
-           out4N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
-        else if(!strncmp(mOption,"diffusion",strlen("diffusion")))
-           out5N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
-        else if(!strncmp(mOption,"both",strlen("both")))
-           out6N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
-      }
-    //cout<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<endl;
+     if(!strncmp(mOption , "coulomb", strlen("coulomb")))
+       out1N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
+     else if(!strncmp(mOption,"diffusion",strlen("diffusion")))
+       out2N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
+     else if(!strncmp(mOption,"both",strlen("both")))
+       out3N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
+
+     //cout<<"I got here 1st"<<endl;  
+     //cout<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<endl;
    }
 
  tim = stepBefore*mTimBinSize;
+ //cout<<"tim = "<<tim<<endl;
 
+ if(stepBefore == 0 && mWrite){
+   //cout<<"I got here 2nd"<<endl;
+   //cout<<"tim = "<<tim<<endl;
+   //cout<<"mTimBinSize =  "<<mTimBinSize<<endl;
+   //cout<<"stepBefore = "<<stepBefore<<endl;
+ }
 
  for(int m = 1; m <= numBinDiv; m++)
   {
    tim = tim  + steplen;
-   /*
-   if(numBinDiv == m)
-     {
-      cout<<"tim = "<<tim<<endl;
-      cout<<"steplen = "<<steplen<<endl;
-      }
-   */
+  
+   //if(numBinDiv == m)
+   // {
+   //   cout<<"tim = "<<tim<<endl;
+   //  cout<<"steplen = "<<steplen<<endl;
+      //  }
+  
 
    m1 = func1(tim,sigma1,sigma2);
    //cout<<m1<<endl;
@@ -248,14 +282,18 @@ int StSvtElectronCloud::runge_kutta4(int stepBefore, int numBinDiv, double stepl
   
    if(mFineDiv && mWrite)
      {
-       if(!strncmp(mOption , "coulomb", strlen("coulomb")))
-           out4N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
-        else if(!strncmp(mOption,"diffusion",strlen("diffusion")))
-           out5N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
-        else if(!strncmp(mOption,"both",strlen("both")))
-           out6N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
-      
-    //cout<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<endl;
+       if(!strncmp(mOption , "coulomb", strlen("coulomb"))){
+           out1N<<tim<<setw(20)<<sqrt(sigma1)*a<<setw(20)<<sqrt(sigma2)*a<<"\n";
+	   //cout<<tim<<setw(20)<<sqrt(sigma1)*a<<setw(20)<<sqrt(sigma2)*a<<endl;
+       }
+       else if(!strncmp(mOption,"diffusion",strlen("diffusion"))){
+           out2N<<tim<<setw(20)<<sqrt(sigma1)*a<<setw(20)<<sqrt(sigma2)*a<<"\n";
+	   //cout<<tim<<setw(20)<<sqrt(sigma1)*a<<setw(20)<<sqrt(sigma2)*a<<endl;
+       }
+       else if(!strncmp(mOption,"both",strlen("both"))){
+           out3N<<tim<<setw(20)<<sqrt(sigma1)*a<<setw(20)<<sqrt(sigma2)*a<<"\n";
+	   //cout<<tim<<setw(20)<<sqrt(sigma1)*a<<setw(20)<<sqrt(sigma2)*a<<endl;
+       }
      }
   
   }
@@ -283,7 +321,7 @@ int StSvtElectronCloud::runge_kutta4(int stepBefore, int numBinDiv, double stepl
            out2N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
         else if(!strncmp(mOption,"both",strlen("both")))
            out3N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
-      //cout<<tim<<setw(20)<<sqrt(mSigmaSq1Now)*a<<setw(20)<<sqrt(mSigmaSq2Now)*a<<endl;
+       //cout<<tim<<setw(20)<<sqrt(mSigmaSq1Now)*a<<setw(20)<<sqrt(mSigmaSq2Now)*a<<endl;
      }
 
 return 0;
@@ -299,6 +337,7 @@ int StSvtElectronCloud::adamsBushFort(int n, int  numBinDiv, double steplen)
  stepNow = n;
  tim = (stepNow - 1)*mTimBinSize + numBinDiv*steplen;
 
+ //cout<<"time = "<<tim<<endl;
 
  // tim = tim  + steplen;
  if(stepNow >= 4)
@@ -334,13 +373,18 @@ int StSvtElectronCloud::adamsBushFort(int n, int  numBinDiv, double steplen)
      if(mFineDiv && mWrite)
      {
       
-      if(!strncmp(mOption , "coulomb", strlen("coulomb")))
-           out4N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
-        else if(!strncmp(mOption,"diffusion",strlen("diffusion")))
-           out5N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
-        else if(!strncmp(mOption,"both",strlen("both")))
-           out6N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
-      //cout<<tim<<setw(20)<<sqrt(sigma1SqCor)*a<<setw(20)<<sqrt(sigma2SqCor)*a<<endl;
+      if(!strncmp(mOption , "coulomb", strlen("coulomb"))){
+	out1N<<tim<<setw(20)<<sqrt(sigma1SqCor)*a<<setw(20)<<sqrt(sigma2SqCor)*a<<"\n";
+	//cout<<tim<<setw(20)<<sqrt(sigma1SqCor)*a<<setw(20)<<sqrt(sigma2SqCor)*a<<endl;
+	}
+      else if(!strncmp(mOption,"diffusion",strlen("diffusion"))){
+	out2N<<tim<<setw(20)<<sqrt(sigma1SqCor)*a<<setw(20)<<sqrt(sigma2SqCor)*a<<"\n";
+	//cout<<tim<<setw(20)<<sqrt(sigma1SqCor)*a<<setw(20)<<sqrt(sigma2SqCor)*a<<endl;
+	}
+      else if(!strncmp(mOption,"both",strlen("both"))){
+	out3N<<tim<<setw(20)<<sqrt(sigma1SqCor)*a<<setw(20)<<sqrt(sigma2SqCor)*a<<"\n";
+	//cout<<tim<<setw(20)<<sqrt(sigma1SqCor)*a<<setw(20)<<sqrt(sigma2SqCor)*a<<endl;
+      }
      }
 
    }
@@ -545,8 +589,5 @@ if(mWrite){
  out1N.close();
  out2N.close();
  out3N.close();
- out4N.close();
- out5N.close();
- out6N.close();
  }
 }

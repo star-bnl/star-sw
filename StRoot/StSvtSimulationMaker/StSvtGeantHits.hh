@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtGeantHits.hh,v 1.5 2001/08/13 15:34:18 bekele Exp $
+ * $Id: StSvtGeantHits.hh,v 1.6 2003/07/31 19:18:09 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtGeantHits.hh,v $
+ * Revision 1.6  2003/07/31 19:18:09  caines
+ * Petrs improved simulation code
+ *
  * Revision 1.5  2001/08/13 15:34:18  bekele
  * Debugging tools added
  *
@@ -50,12 +53,14 @@ public:
   virtual ~StSvtGeantHits();
 
   void setNumOfHits(int nhits);
+  void setPeak(int index, float peak);
   void setGeantHit(int index ,int* svtAtt, float* AnTime);
   void setGeantHit(int index , StSvtWaferCoordinate& waferCoord);
   void setLocalCoord( int index, StThreeVector<double>& x );
   void setGlobalCoord(int index, StThreeVector<double>& x);
 
   int numberOfHits();
+  float peak(int index);
   StSvtWaferCoordinate* waferCoordinate();
   StSvtLocalCoordinate* localCoordinate();
   StGlobalCoordinate*   globalCoordinate();
@@ -67,10 +72,13 @@ private:
   StSvtLocalCoordinate* mLocalCoord;  //!
   StGlobalCoordinate*   mGlobalCoord; //!
  
+  float *mPeak; // mV
+
   ClassDef(StSvtGeantHits,1)
 };
 
 inline int StSvtGeantHits::numberOfHits(){return mNumOfHits;}
+inline float StSvtGeantHits::peak(int index){return mPeak[index];}
 inline StSvtWaferCoordinate* StSvtGeantHits::waferCoordinate(){return mWaferCoord;}
 inline StGlobalCoordinate* StSvtGeantHits::globalCoordinate(){return mGlobalCoord;}
 inline StSvtLocalCoordinate* StSvtGeantHits::localCoordinate(){ return mLocalCoord;}

@@ -9,89 +9,105 @@ class StSvtElectronCloud;
 
 class StSvtSignal
 {
- public:
-    StSvtSignal();
-    ~StSvtSignal();
+public:
+  StSvtSignal();
+  ~StSvtSignal();
 
-    void setOption(int option);
-    void setParam(double timeBinSize,double anodeSize,double driftVel);    
-    void getCloud(StSvtElectronCloud* elCloud);
-    double chargeFraction(int an, double anHit);
-    int timeCenterAndWidth(double anHit,double timeHit);
-    void setTimeWidth(double timWidth);
-    void calcConvSignal(double chargeOnAnode);
-    void selemonSignal(int nMin,int nMax, double tStep, double charge);
-    void rykovSignal(int nMin,int nMax, double tStep);
-    void pasaRelatedStuff();
-    void peakingTime();
-    void halfWidthAtHalfMax();
-    void unNormPasaConst();
-    void normPasaConst();
-    void arrays();
-    double signal(double t);
-    double getShortSignal(double localTime);
-    double getLongSignal(double localTime);
-    double useArrays5And6(double ds1,double dsc);
-    double useArrays3And4Or1And2(double ds1,double dsc);
-    double simpsonInt(int nMin , int n, int numOfIntPoints, double tStep, double t);
-    double analConvInt(double tim, double sigmat, double tc);
-    double sum(int numOfIntPoints,double lowlim, double step, double t); 
-    double gausInput(double tim);
-    double pasaRes(double tim);
-    double freq(double num);
-    double prob1(double anOrTimeDiff , double  sigma);
-    double prob2(double num , double  sigma);
-    double getTimeCenter();
-    double getTimeWidth();
-    double getPeak();
-    double getMinUnderShoot();
-    double getSignal(int n);
-    void setPeakAndUnderShoot();
-    void setSignal();
+  void setOption(int option);
+  void setParam(double timeBinSize,double anodeSize,double driftVel);    
+  void getCloud(StSvtElectronCloud* elCloud);
+  double chargeFraction(int an, double anHit);
+  int timeCenterAndWidth(double anHit,double timeHit);
+  void setTimeWidth(double timWidth);
+  void calcConvSignal(double chargeOnAnode);
+  void selemonSignal(int nMin,int nMax, double tStep, double charge);
+  void rykovSignal(int nMin,int nMax, double tStep);
+  void pasaRelatedStuff();
+  void doPasaOnly(int option);
+  void peakingTimeR();
+  void halfWidthAtHalfMaxR();
+  void peakingTimeS();
+  void halfWidthAtHalfMaxS();
+  void unNormPasaConst();
+  void normPasaConst();
+  void arrays();
+  double signal(double t);
+  double getShortSignal(double localTime);
+  double getLongSignal(double localTime);
+  double useArrays5And6(double ds1,double dsc);
+  double useArrays3And4Or1And2(double ds1,double dsc);
+  double numConvInt(int nMin , int n, int numOfIntPoints, double tStep, double t);
+  double analConvInt(double tim, double sigmat, double tc);
+  double simpsonInt(int numOfIntPoints,double lowlim, double step, double t); 
+  double gausInput(double tim);
+  double pasaRes(double tim);
+  double freq(double num);
+  double prob1(double anOrTimeDiff , double  sigma);
+  double prob2(double num , double  sigma);
+  int getLowTBin();
+  int getHiTBin();
+  double getTimeCenter();
+  double getTimeWidth();
+  double getPeak();
+  double getMinUnderShoot();
+  double getSignal(int n);
+  void resetPeakAndUnderShoot();
+  void resetSignal(int lBin, int hBin);
 
-  private:
-    double mAnHit, mPhi; 
-    double mAnRightEdge;
-    double mAnLeftEdge;
-    double mChargeAtAnodes;
-    double mFractionOfCharge;
-    double mCollectedCharge;
+private:
+  double mAnHit, mPhi; 
+  double mAnRightEdge;
+  double mAnLeftEdge;
+  double mChargeAtAnodes;
+  double mFractionOfCharge;
+  double mCollectedCharge;
 
-    int mOption;
-    double mDriftVel;
-    double mTimeBinSize;
-    double mAnodeSize;
+  int mOption;
+  int mLowTBin;
+  int mHiTBin;
 
-    double mSigmaMajor;
-    double mSigmaMajor2;
-    double mSigmaMinor;
-    double mSigmaMinor2;
-    double mTimeCenter;
-    double mTimeWidth;
-    double mPeakSignal;
-    double mMinUnderShoot;
+  double mDriftVel;
+  double mTimeBinSize;
+  double mAnodeSize;
 
-    double GAP_TWIDTH;
-    double mPasaGain;
-    double mPasaMax;
-    double mPeakTime;
-    double mFwhm;
+  double mSigmaMajor;
+  double mSigmaMajor2;
+  double mSigmaMinor;
+  double mSigmaMinor2;
+  double mTimeCenter;
+  double mTimeWidth;
+  double mPeakSignal;
+  double mMinUnderShoot;
+
+  double GAP_TWIDTH;
+  double mPasaGain;
+
+  //for selemon's piece of code
+  double mPasaNorm;
+  double mPeakTimeS;
+  double mPasaMaxS;         
+  double mFwhmS;
+
+  //for Rykoves piece of code( fortran converted to c++)
+  double mPasaMaxR;
+  double mPeakTimeR;
+  double mFwhmR;
     
-    double mTau_s;
-    double mTau_l;
+  double mTau_s;
+  double mTau_l;
 
-    double mC1;
-    double mC2;
-    double mC3;
+  double mC1;
+  double mC2;
+  double mC3;
 
-    double mSignal[128];    
-    double mPasa[5];
-    double mArray1[9];
-    double mArray2[9];
-    double mArray3[7];
-    double mArray4[7];
-    double mArray5[6];
-    double mArray6[6];
+  double mSignal[128];    
+  double mPasa[5];
+  double mArray1[9];
+  double mArray2[9];
+  double mArray3[7];
+  double mArray4[7];
+  double mArray5[6];
+  double mArray6[6];
 
   //ClassDef(StSvtSignal,1)
 
