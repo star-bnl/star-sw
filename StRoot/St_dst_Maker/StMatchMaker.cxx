@@ -196,10 +196,17 @@ St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
     
     egr_egrpar_st *egr_egrpar = m_egr_egrpar->GetTable();
     egr_egrpar->useglobal = 3;
+    St_g2t_track   *g2t_track    = 0;
+    St_DataSet *geant = GetInputDS("geant");
+    if (geant) {
+      St_DataSetIter geantI(geant);
+      g2t_track    = (St_g2t_track  *) geantI("g2t_track");
+    }
+    if (!g2t_track) {g2t_track = new St_g2t_track("g2t_track",1); AddGarb(g2t_track);}
     iRes = est_am(m_svt_geom, m_svt_shape,  m_srs_activea,
 		  m_srspar,m_svt_config,scs_spt,tphit,
 		  tptrack,evaltrk,mctrk,m_est_ctrl,
-		  est_match,m_egr_egrpar);
+		  est_match,g2t_track,m_egr_egrpar);
     //          ==============================================
     if (iRes !=kSTAFCV_OK) iMake = kStWarn;
     if(Debug()) cout << "Calling EST_TOGLOB2" << endl;
@@ -235,7 +242,7 @@ St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
 //_____________________________________________________________________________
 void StMatchMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StMatchMaker.cxx,v 1.2 1999/07/01 17:30:45 fisyak Exp $\n");
+  printf("* $Id: StMatchMaker.cxx,v 1.3 1999/07/08 18:40:30 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();

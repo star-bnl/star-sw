@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.15 1999/07/01 17:27:42 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.16 1999/07/08 18:40:31 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.16  1999/07/08 18:40:31  fisyak
+// Wensheng Deng global chain
+//
 // Revision 1.15  1999/07/01 17:27:42  fisyak
 // New global chain from  Wensheng Deng
 //
@@ -44,7 +47,7 @@
 #include "St_dst_summary_param_Table.h"
 #include "St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.15 1999/07/01 17:27:42 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.16 1999/07/08 18:40:31 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -206,7 +209,12 @@ Int_t  St_dst_Maker::Filler(){
   
   if(Debug()) cout << " run_dst: Calling dst_point_filler" << endl;
   // dst_point_filler
-  St_dst_point   *point = new St_dst_point("point",200000);  dstI.Add(point);
+  St_DataSet *ftpc_hits   = GetInputDS("ftpc_hits");
+  St_fcl_fppoint *fcl_fppoint = 0;
+  if (ftpc_hits) fcl_fppoint = (St_fcl_fppoint *) ftpc_hits->Find("fcl_fppoint");
+  if (!fcl_fppoint) {fcl_fppoint = new St_fcl_fppoint("fcl_fppoint",1); AddGarb(fcl_fppoint);}
+  Int_t no_of_points    = tphit->GetNRows() + scs_spt->GetNRows() + fcl_fppoint->GetNRows();
+  St_dst_point   *point = new St_dst_point("point",no_of_points);  dstI.Add(point);
   iRes = dst_point_filler(tphit, scs_spt, point);
   //	   ========================================
   if (iRes !=kSTAFCV_OK) {
@@ -243,15 +251,15 @@ Int_t  St_dst_Maker::Filler(){
     if(Debug()) cout << " run_dst: finshed calling dst_dedx_filler" << endl;
   }
   
-  St_DataSet *ftpc_hits   = GetInputDS("ftpc_hits");
-  St_fcl_fppoint *fcl_fppoint = 0;
-  if (ftpc_hits) fcl_fppoint = (St_fcl_fppoint *) ftpc_hits->Find("fcl_fppoint");
   St_DataSet *ftpc_tracks = GetInputDS("ftpc_tracks");
   St_fpt_fptrack *fpt_fptrack = 0;
   if (ftpc_tracks)  fpt_fptrack = (St_fpt_fptrack *) ftpc_tracks->Find("fpt_fptrack");
   if (fcl_fppoint &&  fpt_fptrack) {
     if(Debug()) cout<<" run_dst: Calling fill_ftpc_dst"<<endl;
-    
+    Int_t No_of_Tracks = globtrk->GetNRows() + fpt_fptrack->GetNRows();
+    globtrk->ReAllocate(No_of_Tracks);
+    globtrk_aux->ReAllocate(No_of_Tracks);
+    dst_dedx->ReAllocate(No_of_Tracks);
     iRes = fill_ftpc_dst(fpt_fptrack, fcl_fppoint, globtrk,
                          globtrk_aux,point,vertex,dst_dedx);
     //             ==========================================================
@@ -263,7 +271,6 @@ Int_t  St_dst_Maker::Filler(){
   }
   
  // dst_mon_soft
-  if (!fcl_fppoint) {fcl_fppoint = new St_fcl_fppoint("fcl_fppoint",1); AddGarb(fcl_fppoint);}
   if (!fpt_fptrack) {fpt_fptrack = new St_fpt_fptrack("fpt_fptrack",1); AddGarb(fpt_fptrack);}
   if (!evt_match)   {evt_match   = new St_svm_evt_match("evt_match",1); AddGarb(evt_match);}
   St_DataSet *ctf = GetInputDS("ctf");
@@ -304,7 +311,7 @@ Int_t  St_dst_Maker::Filler(){
     // count printable chars
     const Char_t *type = evthdr->GetEventType();
     Int_t n=0;
-    for (Int_t i=0;i<80;i++) {if (isprint((int) type[i])) n++; else break;} 
+    for (Int_t i=0;i<80;i++) {if (isprint(type[i])) n++; else break;} 
     if (n>0) strncpy (run.event_type,type,n);
     run.sqrt_s = evthdr->GetCenterOfMassEnergy();
     run.east_a = evthdr->GetAEast();
@@ -329,7 +336,7 @@ Int_t  St_dst_Maker::Filler(){
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_dst_Maker.cxx,v 1.15 1999/07/01 17:27:42 fisyak Exp $\n");
+  printf("* $Id: St_dst_Maker.cxx,v 1.16 1999/07/08 18:40:31 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
