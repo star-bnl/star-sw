@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.89 1999/06/19 20:31:50 fisyak Exp $
+# $Id: MakeDll.mk,v 1.90 1999/06/21 12:46:04 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.90  1999/06/21 12:46:04  fisyak
+# Fix rtti and exceptions for ROOT_LEVEL < 2.22
+#
 # Revision 1.89  1999/06/19 20:31:50  fisyak
 # Fix bugs with include path
 #
@@ -606,3 +609,35 @@ test:
 	@echo DOIT        := $(DOIT)
 	@echo PKGNAME     := $(PKGNAME)	
 	@echo PKG         := $(PKG)
+test_mk:
+	@echo "STAR_HOST_SYS= "$(STAR_HOST_SYS)" ; OPSYS = "$(OPSYS)
+	@echo "HOST      =" $(HOST)"  ; STAR_HOST_SYS = "$(STAR_HOST_SYS)
+	@echo MAKE      = $(MAKE)  
+	@echo VPATH     = $(VPATH) 
+	@echo SHELL     = $(SHELL) 
+	@echo MAKELEVEL = $(MAKELEVEL) 
+	@echo MAKEFILE  = $(MAKEFILE) 
+	@echo MAKEFLAGS = $(MAKEFLAGS) 
+	@echo SUFFIXES  = $(SUFFIXES) 
+	@echo STIC      = $(STIC) 
+	@echo STICFLAGS	= $(STICFLAGS)
+	@echo AR        = $(AR)
+	@echo ARFLAGS 	= $(ARFLAGS)
+	@echo "AS       ="$(AS)"; ASFLAGS 	="	$(ASFLAGS)
+	@echo "CC       ="$(CC)"; CFLAGS 	="	$(CFLAGS)
+	@echo "CXX      =" $(CXX)"	; CXXFLAGS 	="	$(CXXFLAGS)
+	@echo "CPP      =" $(CPP)"	; CPPFLAGS 	="	$(CPPFLAGS)
+	@echo "FC       =" $(FC)"	; FFLAGS 	="	$(FFLAGS)
+	@echo "CFLAGS   =" $(CFLAGS)
+	@echo "FEXTEND  =" $(FEXTEND)
+	@echo "SO       =" $(SO)"	; SOFLAGS	="	$(SOFLAGS)
+	@echo "FLIBS  =" $(FLIBS)" ; CLIBS	="	$(CLIBS)
+	@echo "LDS      =" $(LDS)"     ; LDS_FLAGS   	="     $(LDS_FLAGS)
+	@echo RM        = $(RM)
+	@echo LIBRARIES = $(LIBRARIES)
+	@echo CERN_LIBS = $(CERN_LIBS)
+	@echo DIRS      = $(DIRS)
+	@echo GEANT3    = $(GEANT3)
+	@echo STIC      = $(STIC)
+	@echo KUIPC     = $(KUIPC)
+	@echo KUIPC_FLAGS= $(KUIPC_FLAGS)
