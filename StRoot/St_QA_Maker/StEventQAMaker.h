@@ -1,16 +1,7 @@
-// $Id: StEventQAMaker.h,v 1.6 2000/07/26 19:57:50 lansdell Exp $
+// $Id: StEventQAMaker.h,v 2.0 2000/08/25 16:02:40 genevb Exp $
 // $Log: StEventQAMaker.h,v $
-// Revision 1.6  2000/07/26 19:57:50  lansdell
-// new histograms and functionality added (e.g., overlay several histograms, new printlist option qa_shift)
-//
-// Revision 1.5  2000/05/25 03:52:11  lansdell
-// mirrored globtrk histograms for primtrk; removed ev0_eval, vertex: detector id histograms; added generator pT for TPC (|eta|<1), vertex: radial position histograms; merged vertex methods
-//
-// Revision 1.4  2000/02/07 19:49:06  kathy
-// removed L3 trigger histograms and methods that created them - this table is no longer standard on the DST; created methods BookHistEval and MakeHistEval for geant vs reco evaluation histograms; filled geant vs reco evaluation histograms for table-based data
-//
-// Revision 1.3  1999/11/23 19:00:51  lansdell
-// Reorganized Make() and include files (Gene)
+// Revision 2.0  2000/08/25 16:02:40  genevb
+// New revision: new structure, multiplicity classes
 //
 //
 ///////////////////////////////////////////////////////////////////////////
@@ -23,16 +14,15 @@
 #ifndef STAR_StEventQAMaker
 #define STAR_StEventQAMaker
 
-#include "StQABookHist.h"
+#include "StQAMakerBase.h"
 
 class StEvent;
 class HitHistograms;
 
 //////////////////////////////////////////////////////////////////////////
 
-class StEventQAMaker : public StQABookHist {
+class StEventQAMaker : public StQAMakerBase {
  private:
-  //! static Char_t m_VersionCVS = "$Id: StEventQAMaker.h,v 1.6 2000/07/26 19:57:50 lansdell Exp $";
  
   StEvent *event;          //! pointer to current event
   HitHistograms *mHitHist; //!
@@ -42,7 +32,7 @@ class StEventQAMaker : public StQABookHist {
  public: 
 
   StEventQAMaker(const char *name="EventQA", const char *title="StEvent/QA");
-  virtual       ~StEventQAMaker();
+  virtual       ~StEventQAMaker() {}
   virtual Int_t  Init();
   virtual Int_t  Finish();
   virtual Int_t  Make();
@@ -62,9 +52,9 @@ class StEventQAMaker : public StQABookHist {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 1.6 2000/07/26 19:57:50 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.0 2000/08/25 16:02:40 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StEventQAMaker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
     };
     
 #endif
