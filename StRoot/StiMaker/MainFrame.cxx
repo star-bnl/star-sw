@@ -28,6 +28,7 @@ using std::find_if;
 #include "Sti/StiDetector.h"
 #include "Sti/StiPlacement.h"
 #include "Sti/StiDetectorContainer.h"
+#include "Sti/StiTrackContainer.h"
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiTrackSeedFinder.h"
@@ -274,12 +275,13 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 					else if (parm1 == M_Tracking_FinishEvent) finishEvent();
 					else if (parm1 == M_Tracking_ResetEvent) 
 						{
-							setCurrentDetectorToDefault();
-							_toolkit->getTrackFinder()->reloadEvent();
-							_toolkit->getDisplayManager()->reset();
-							_toolkit->getDisplayManager()->draw();
-							_toolkit->getDisplayManager()->update();
-							showCurrentDetector();
+						  setCurrentDetectorToDefault();
+						  _toolkit->getTrackFinder()->reset();
+						  //_toolkit->getTrackFinder()->findTracks();
+						  _toolkit->getDisplayManager()->reset();
+						  _toolkit->getDisplayManager()->draw();
+						  _toolkit->getDisplayManager()->update();
+						  showCurrentDetector();
 						}
 					else if (parm1 == M_Tracking_EventStep) stepToNextEvent();
 					break;
@@ -405,6 +407,8 @@ void MainFrame::finishEvent()
   cout<<"MainFrame::finishEvent() - INFO - Started"<<endl;
   setCurrentDetectorToDefault();
   _toolkit->getTrackFinder()->findTracks();
+  cout << "MainFrame::finishEvent() -I-"
+       << "Number of tracks:" << _toolkit->getTrackContainer()->getTrackCount(0)<<endl;
   showCurrentDetector();
   cout<<"MainFrame::finishEvent() - INFO - Done"<<endl;
 }

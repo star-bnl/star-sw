@@ -49,10 +49,8 @@ void StiRootDrawableKalmanTrack::fillHitsForDrawing()
     //be sure to reset internal state
     _line->clear();
     _hits->clear();
-
     //Set color and line type
     _line->clearLine();
-    
     //Loop over nodes by hand (faster than using StiKalmanTrack interface)
     //This is essentailly the guts of an interpolation routine that should become
     // a class at some point.
@@ -62,14 +60,27 @@ void StiRootDrawableKalmanTrack::fillHitsForDrawing()
     double xLocal = lastNode->_x;
     StiKTNForwardIterator it(lastNode);
     StiKTNForwardIterator end = it.end();
+    StiHit * hit;
     while(it!=end ) 
       {
 	StiKalmanTrackNode& node = *it;
+	hit=node.getHit();
+	if (hit)
+	  {
+	    const StThreeVectorF& pos = hit->globalPosition();
+	    _hits->push_back( pos.x() );
+	    _hits->push_back( pos.y() );
+	    _hits->push_back( pos.z() );
+	  }
+	const StThreeVector<double>& pos = node.getGlobalPoint();
+	_line->push_back( pos.x() );
+	_line->push_back( pos.y() );
+	_line->push_back( pos.z() );	
 	++it;
+	/*
 	if (it==end)   
 	  break;
 	StiKalmanTrackNode& next = *it;
-
 	// Fill node position itself.
 	StiHit * hit = node.getHit();
 	if (hit)
@@ -78,9 +89,9 @@ void StiRootDrawableKalmanTrack::fillHitsForDrawing()
 	    _hits->push_back( pos.x() );
 	    _hits->push_back( pos.y() );
 	    _hits->push_back( pos.z() );
-	  }
+	    }
 	// Fill interpolation to muck up a continuous track
-	StThreeVector<double> pos;
+
 	while (xLocal<next._x) 
 	  {
 	    try 
@@ -100,6 +111,7 @@ void StiRootDrawableKalmanTrack::fillHitsForDrawing()
 	      }
 	    xLocal+=step;
 	  }
+	*/
       }
 	
     _line->fillHitsForDrawing();

@@ -32,7 +32,7 @@ bool HitMapKey::operator==(const HitMapKey& key2) const
 //Return true if key2 < key1.  Order first by refangle, then by position.
 bool MapKeyLessThan::operator() (const HitMapKey& key1, const HitMapKey& key2) const
 {
-    //cout <<"HitMapKey::operator<()"<<endl;
+    //cout <<"HitMapKey::operator()"<<endl;
     bool val = false;
     if ( fabs(key1.refangle-key2.refangle) < reftolerance) {
 	//Call these equal, check position
@@ -51,6 +51,7 @@ bool MapKeyLessThan::operator() (const HitMapKey& key1, const HitMapKey& key2) c
     return val;
 }
 
+/*
 //Order StHits (NOT Sti!) by radius
 bool StHitRadiusLessThan::operator() (const StHit* hit1, const StHit* hit2) const
 {
@@ -59,6 +60,7 @@ bool StHitRadiusLessThan::operator() (const StHit* hit1, const StHit* hit2) cons
     return (sqrt( pos1.x()*pos1.x() + pos1.y()*pos1.y() + pos1.z()*pos1.z() ) <
 	    sqrt( pos2.x()*pos2.x() + pos2.y()*pos2.y() + pos2.z()*pos2.z() ) );
 }
+*/
 
 bool StiHitIsUsed::operator() (const StiHit* hit) const
 {
@@ -66,6 +68,7 @@ bool StiHitIsUsed::operator() (const StiHit* hit) const
     return (hit->timesUsed()==0);
 }
 
+/*
 //Order StHits (NOT Sti!) by radius
 bool StHitRadiusGreaterThan::operator() (const StHit* hit1, const StHit* hit2) const
 {
@@ -74,6 +77,7 @@ bool StHitRadiusGreaterThan::operator() (const StHit* hit1, const StHit* hit2) c
     return (sqrt( pos1.x()*pos1.x() + pos1.y()*pos1.y() + pos1.z()*pos1.z() ) >
 	    sqrt( pos2.x()*pos2.x() + pos2.y()*pos2.y() + pos2.z()*pos2.z() ) );
 }
+*/
 	
 //Order by distance along position
 bool StidHitLessThan::operator() (const StiHit* lhs, const StiHit* rhs) const
@@ -100,10 +104,12 @@ bool StiDetectorNodePositionLessThan::operator() (const StiCompositeTreeNode<Sti
     return lhsp->getCenterRadius()<rhsp->getCenterRadius();
 }
 
+/*
 bool SameStHit::operator()(const StiHit* rhs) const
 {
     return (stHit == rhs->stHit() );
 };
+*/
 
 //----------------------- Detector Map Utilities ------------------------------------
 

@@ -1,12 +1,13 @@
 #include <stdexcept>
 #include "StEvent.h"
+#include "StMcEvent.hh"
 #include "StiTpcDetectorGroup.h"
 #include "StiTpcDetectorBuilder.h"
 #include "StiTpcHitLoader.h"
 
 
 StiTpcDetectorGroup::StiTpcDetectorGroup(bool active)
-  : StiDetectorGroup<StEvent>("TPC",
+  : StiDetectorGroup<StEvent,StMcEvent>("TPC",
 			      active?new StiTpcHitLoader():0,
 			      new StiTpcDetectorBuilder(),0,0)
 {

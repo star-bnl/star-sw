@@ -3,7 +3,7 @@
 #include "TObject.h"
 class StChain;
 class StiMaker;
-class MiniChainParameters;
+class StiMakerParameters;
 class StiDefaultToolkit;
 class StIOMaker;
 
@@ -13,14 +13,14 @@ class MiniChain : public TObject
   MiniChain();
   virtual ~MiniChain();
 	
-	MiniChainParameters * getParameters();
+  StiMakerParameters * getParameters();
   void run(int first, 
 	   int nEvents, 
 	   const char *  filePrefix,
 	   const char ** fileList );
   
  protected:
-
+  
   void setupInput(const char ** fileList);
   void setupOutput(const char * filePrefix,
 		   const char * fileTemplate);
@@ -28,8 +28,8 @@ class MiniChain : public TObject
   void setupDatabase();
   void setupGui();
   void eventLoop(int first, int last); 
- 
-  MiniChainParameters * _pars;
+  
+  StiMakerParameters  * _pars;
   StChain             * _chain;
   StiMaker            * _stiMaker;
   StIOMaker           * _ioMaker;

@@ -70,9 +70,10 @@ void StiRootDisplayManager::cd()
 
 void StiRootDisplayManager::draw()
 {
-  cout <<"StiRootDisplayManager::draw() - INFO - Started"<<endl;
+  //cout <<"StiRootDisplayManager::draw() -I- Started"<<endl;
   mnode->Draw();
   StiDrawableHits* val;
+  //cout <<"StiRootDisplayManager::draw() -I- mmap.size() : "<< mmap.size() <<endl;
   for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) 
     {
       val = dynamic_cast<StiDrawableHits*>((*it).second);
@@ -83,7 +84,7 @@ void StiRootDisplayManager::draw()
 
 void StiRootDisplayManager::reset()
 {
-  cout << "StiRootDisplayManager::reset() - INFO - Starting" << endl;
+  //cout << "StiRootDisplayManager::reset() - INFO - Starting" << endl;
   for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) 
     {
       if ((*it).second->canBeRemoved()) mmap.erase(it);
@@ -171,8 +172,8 @@ void StiRootDisplayManager::setView(int view)
 	  switch (view)
 	    {
 	    default:
-	    case skeletonView : where = (*it).first.find("Padrow_45"); break;
-	    case zoomSkeletonView : where = (*it).first.find("Padrow_1/"); break;
+	    case skeletonView : where = (*it).first.find("Padrow_44"); break;
+	    case zoomSkeletonView : where = (*it).first.find("Padrow_0/"); break;
 	    }
 	  if ( where != (*it).first.npos ) 
 	    { 

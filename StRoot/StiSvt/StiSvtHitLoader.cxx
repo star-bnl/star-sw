@@ -4,6 +4,7 @@
 
 #include "StEventTypes.h"
 #include "StEvent.h"
+#include "StMcEvent.hh"
 #include "Sti/Base/Factory.h"
 #include "StiSvt/StiSvtHitLoader.h"
 #include "Sti/StiHit.h"
@@ -13,13 +14,14 @@
 #include "Sti/StiDetector.h"
 
 StiSvtHitLoader::StiSvtHitLoader()
-  : StiHitLoader<StEvent,StiDetectorBuilder>("SvtHitLoader")
+  : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("SvtHitLoader")
 {}
     
 StiSvtHitLoader::StiSvtHitLoader(StiHitContainer* hitContainer,
+				 StiHitContainer* mcHitContainer,
 				 Factory<StiHit>*hitFactory,
 				 StiDetectorBuilder*detector)
-  : StiHitLoader<StEvent,StiDetectorBuilder>("SvtHitLoader",hitContainer,hitFactory,detector)
+  : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("SvtHitLoader",hitContainer,mcHitContainer,hitFactory,detector)
 {}
 
 StiSvtHitLoader::~StiSvtHitLoader()
@@ -92,6 +94,12 @@ void StiSvtHitLoader::loadHits(StEvent* source)
 	}
     }
   _messenger <<"StiSvtHitLoader::loadHits() - INFO - Done"<<endl;
+}
+	
+
+void StiSvtHitLoader::loadMcHits(StMcEvent* source,bool useMcAsRec)
+{
+  return;
 }
 	
 

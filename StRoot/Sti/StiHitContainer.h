@@ -74,14 +74,8 @@
   <p>
   StiHitContainer must be cleared, filled, and sorted for each
   event.  A manual call to sortHits() is necessary to achieve the most
-  efficient container implementation.  The filling is performed via
-  StiHitFiller.
+  efficient container implementation.  
   <p>
-  Finally, StiHitContainer is implemented via the singelton pattern.  This
-  provides a guaruntee that there is only one instance of StiHitContainer.
-  Additionally, it provides for safe global access.  Other classes
-  may be derived from StiHitContainer.  For more on how to handle this
-  situation, please see the documenation for the instance() method.
   
   \author M.L. Miller (Yale Software)
 
@@ -99,13 +93,6 @@
   have very slightly differing values for the doubles they store.  These
   tolerances are currently set in the definition of the struct HitMapKey.
 
-  \warning You do <b>not</b> have to call kill() to avoid a memory leak.  A
-  call to kill() will invalidate all existing pointers to
-  StiHitContainer::instance().
-  
- */
-
-/*! \example StiHitContainer_ex.cxx
  */
 
 #ifndef StiHitContainer_HH
@@ -148,133 +135,78 @@ class StiHitContainer
 {
 public:
     
-    ///Implementation of the singleton design pattern.
     StiHitContainer();
-    ///Implementation of the singleton design pattern.
     virtual ~StiHitContainer();
-    
-    ///We include this to avoid unneccessary compiler warnings triggered by
-    ///the design singleton pattern.
-    //friend class nobody;
-    
-    //Singleton access
-
-    ///Access to the singleton instance.
-    //static StiHitContainer* instance(bool drawable=false);
-
-    ///Kill the singleton instance.
-    //static void kill();
-
     ///Set the half-width of the search window in distance along the pad.
     void setDeltaD(double);
-
     ///Set the half-width of the search window in distance along global z.
     void setDeltaZ(double);
-
     ///Return the value of deltaD (cm).
     double deltaD() const;
-
     ///Return the value of deltaZ (cm).
     double deltaZ() const;
-
     ///Provide for drawable derived class(es?)
     virtual void update();
-    
     //STL wrappers
-
     ///Add a hit to the container.
     virtual void push_back(StiHit*);
-
     ///Return the total number of hits in the container.
     virtual unsigned int size() const;
-
+    ///Declare all hits as unused.
+    virtual void reset();
     ///Clear all hits from the container.
     virtual void clear();
-
     ///Sort all of the hits in the container.
     virtual void sortHits();
-
     ///Ignore hits marked as used (std::stable_partition)
     void partitionUsedHits();
-
-    //Gets
-
     ///Return a const reference to a vector of hits.
     const hitvector& hits(double refangle, double position);
-
     ///Return a reference to the vectore of hits, or iterators marking it's bounds
     hitvector& hits(const StiDetector*);
     hitvector::iterator hitsBegin(const StiDetector*);
     hitvector::iterator hitsEnd(const StiDetector*);
-
     ///Return a const reference ot the hit-vector map.
     const hitmap& hits() const;
-    
-    //User Query Interface
-    
     ///Set the reference point to define sub-volume of hits to be accessed.
     void setRefPoint(StiHit* ref);
-    
     ///Set the reference point to define sub-volume of hits to be accessed.
     void setRefPoint(double position, double refAngle, double y, double z);
-
     ///Set reference point to be the location of the given node
-    void setRefPoint(const StiKalmanTrackNode &);
-
-    //Iterator interface:
-
+    void setRefPoint(StiKalmanTrackNode &);
     ///Return a boolean that reflects whether there are more hits available in the specified sub-volume.
     bool hasMore() const;
-
     ///Return a pointer to the StiHit object currently pointed to from the specified sub-volume.
     StiHit* getCurrentHit(); //get current
-
     ///Return a pointer to the StiHit object currently pointed to from the specified sub-volume.
     StiHit* getHit();  //get current hit and increment
-
-    //Add vertex information
-
     ///Add a vertex to the hit-container.
     void addVertex(StiHit*); //push_back
-
     ///Return the number of vertices stored in the container.
     unsigned int numberOfVertices() const;
-
     ///Return a const reference to the a vector of vertices.
     const hitvector& vertices() const;
-    
 protected:
-
     Messenger& mMessenger;
-
 private:
     //Vertex implementation
     hitvector mvertexvec; //! Container for primary vertices
-
-private:
     //static StiHitContainer* sinstance;
     friend ostream& operator<<(ostream&, const StiHitContainer&);
-    
     HitMapKey mkey; //store a map key member to avoid constructor call per hit
-
     double mdeltad; //Search limit in local d-direction
     double mdeltaz; //Search limit in local z-direction
-
     //Used to search for points that satisfy users query
     StiHit* mminpoint;
     StiHit* mmaxpoint;
     StiHit mUtilityHit;
     hitvector::iterator mstart;
     hitvector::iterator mstop;
-
     //Used to return points that satisfy users query
     hitvector::const_iterator mcurrent;
     hitvector mcandidatevec; //! container of candidate points near to ref
-    
     hitmap mmap; //! the hit container
 };
-
-//inlines
 
 inline const hitmap& StiHitContainer::hits() const 
 {
@@ -336,8 +268,6 @@ inline StiHit* StiHitContainer::getHit()
     return (*(mcurrent++));
 }
 
-//vertex inlines
-
 /*! Each vertex can be mapped to a StiHit object
 */
 inline void StiHitContainer::addVertex(StiHit* val)
@@ -357,10 +287,7 @@ inline const hitvector& StiHitContainer::vertices() const
     return mvertexvec;
 }
 
-// Non -memebers
-
 ostream& operator<<(ostream&, const hitvector&);
-
 ostream& operator<<(ostream&, const StiHitContainer&);
 
 #endif

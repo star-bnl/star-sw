@@ -50,44 +50,7 @@ void StiTpcDetectorBuilder::buildMaterials()
 
 void StiTpcDetectorBuilder::buildShapes()
 {
-  _messenger << "StiTpcDetectorBuilder::buildShapes() - INFO - Started" << endl;
-  char name[50];
-  unsigned int _nInnerPadrows = _padPlane->numberOfInnerRows();
-  unsigned int row;
-  for(row = 0; row<getNRows(); row++)
-    {
-      StiPlanarShape *pShape = new StiPlanarShape;
-      if(row<_nInnerPadrows){
-	pShape->setThickness(_padPlane->innerSectorPadLength());
-      }else{
-	pShape->setThickness(_padPlane->outerSectorPadLength());
-      }
-      pShape->setHalfDepth(_dimensions->tpcTotalLength()/2.);
-      pShape->setHalfWidth(_padPlane->PadPitchAtRow(row) *
-			   _padPlane->numberOfPadsAtRow(row) / 2.);
-      sprintf(name, "Tpc/Padrow_%d", row+1);
-      pShape->setName(name);
-      add(pShape);
-    }
-  
-  // Inner field cage
-  StiCylindricalShape *ifcShape = new StiCylindricalShape;
-  ifcShape->setName("tpc/ifc");
-  ifcShape->setThickness(1.27); 
-  ifcShape->setHalfDepth( _dimensions->tpcTotalLength()/2. );
-  ifcShape->setOpeningAngle( M_PI/6. );
-  ifcShape->setOuterRadius(_dimensions->ifcRadius() + ifcShape->getThickness()/2.);
-  add(ifcShape);
-  
-  //Outer  field cage
-  StiCylindricalShape *ofcShape = new StiCylindricalShape;
-  ofcShape->setName("tpc/ofc");
-  ofcShape->setThickness(1.27); 
-  ofcShape->setHalfDepth( _dimensions->tpcTotalLength()/2. );
-  ofcShape->setOpeningAngle( M_PI/6. );
-  ofcShape->setOuterRadius(_dimensions->ofcRadius() + ofcShape->getThickness()/2.);
-  add(ofcShape);
-  _messenger << "StiTpcDetectorBuilder::buildShapes() - INFO - Done" << endl;
+  _messenger << "StiTpcDetectorBuilder::buildShapes() - INFO - Started/Done" << endl;
 }
 
 /*! Build all detector components of the TPC.
@@ -103,20 +66,31 @@ void StiTpcDetectorBuilder::buildDetectors()
   _messenger << "StiTpcDetectorBuilder::buildDetectors() - INFO - Started" << endl;
   unsigned int row;
 
-
-  // IFC and OFC
-  StiShape *ifcShape = findShape("tpc/ifc");  
-  StiShape *ofcShape = findShape("tpc/ofc");  
+  // Inner field cage
+  StiCylindricalShape *ifcShape = new StiCylindricalShape;
+  ifcShape->setName("tpc/ifc");
+  ifcShape->setThickness(1.27); 
+  ifcShape->setHalfDepth( _dimensions->tpcTotalLength()/2. );
+  ifcShape->setOpeningAngle( M_PI/6. );
+  ifcShape->setOuterRadius(_dimensions->ifcRadius() + ifcShape->getThickness()/2.);
+  //Outer  field cage
+  StiCylindricalShape *ofcShape = new StiCylindricalShape;
+  ofcShape->setName("tpc/ofc");
+  ofcShape->setThickness(1.27); 
+  ofcShape->setHalfDepth( _dimensions->tpcTotalLength()/2. );
+  ofcShape->setOpeningAngle( M_PI/6. );
+  ofcShape->setOuterRadius(_dimensions->ofcRadius() + ofcShape->getThickness()/2.);
   if (!ifcShape || !ofcShape)
     throw runtime_error("StiTpcDetectorBuilder::buildDetectors() - FATAL - ifcShape==0||ofcShape==0");
   float fIfcRadius = _dimensions->ifcRadius();   
   float fOfcRadius = _dimensions->ofcRadius();   
 
-  //for(unsigned int sector = 0; sector<getNSectors(); sector++)
+  StiPlacement *p;
+  //for(unsigned int sector = 0; sector<getNSectors(); sector++) 
   for(unsigned int sector = 0; sector<12; sector++)
     {
       // inner field cage
-      StiPlacement *p = new StiPlacement;
+      p = new StiPlacement;
       p->setZcenter(0.);
       p->setLayerRadius(fIfcRadius);
       p->setNormalRep(phiForTpcSector(sector), fIfcRadius, 0.);
@@ -154,16 +128,25 @@ void StiTpcDetectorBuilder::buildDetectors()
       // remove it for now...
       //add(ofcVolume);
   } 
-
-  //Active TPC padrows
+  StiPlanarShape *pShape;
+  //Active TPC padrows 
+  unsigned int _nInnerPadrows = _padPlane->numberOfInnerRows();
   for(row = 0; row<getNRows(); row++)
     {
       // create properties shared by all sectors in this padrow
       float fRadius = _padPlane->radialDistanceAtRow(row+1);
-      sprintf(name, "Tpc/Padrow_%d", row+1);
-      StiPlanarShape *pShape = (StiPlanarShape *)findShape(name);
+      sprintf(name, "Tpc/Padrow_%d", row);
+      pShape = new StiPlanarShape;
       if (!pShape)
 	throw runtime_error("StiTpcDetectorBuilder::buildDetectors() - FATAL - pShape==0||ofcShape==0");
+      if(row<_nInnerPadrows)
+	pShape->setThickness(_padPlane->innerSectorPadLength());
+      else
+	pShape->setThickness(_padPlane->outerSectorPadLength());
+      pShape->setHalfDepth(_dimensions->tpcTotalLength()/2.);
+      pShape->setHalfWidth(_padPlane->PadPitchAtRow(row+1) *
+			   _padPlane->numberOfPadsAtRow(row+1) / 2.);
+      pShape->setName(name);
       for(unsigned int sector = 0; sector<getNSectors(); sector++)
 	{
 	  // create unique detector properties (placement & name)
@@ -171,7 +154,7 @@ void StiTpcDetectorBuilder::buildDetectors()
 	  pPlacement->setZcenter(0.);
 	  pPlacement->setNormalRep(phiForTpcSector(sector), fRadius, 0.); 
 	  pPlacement->setLayerRadius(fRadius);
-	  sprintf(name, "Tpc/Padrow_%d/Sector_%d", row+1, sector+1);
+	  sprintf(name, "Tpc/Padrow_%d/Sector_%d", row, sector);
 	  // fill in the detector object and save it in our vector
 	  StiDetector *pDetector = _detectorFactory->getInstance();
 	  pDetector->setName(name);

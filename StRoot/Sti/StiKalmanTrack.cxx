@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.19 2003/03/17 17:45:31 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.20 2003/03/31 17:18:47 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.20  2003/03/31 17:18:47  pruneau
+ * various
+ *
  * Revision 2.19  2003/03/17 17:45:31  pruneau
  * *** empty log message ***
  *
@@ -375,7 +378,7 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
 */
 int StiKalmanTrack::getCharge() const
 {
-  return  (lastNode->getCurvature()*pars->field>0)?-1:1;
+  return  lastNode->getCharge();
 }
 
 /*! Return the track chi2
@@ -414,17 +417,17 @@ double  StiKalmanTrack::getChi2() const
 */
 int StiKalmanTrack::getPointCount() const
 {
-	int nPts = 0;
-	if (firstNode)
-		{
-		  StiKTNBidirectionalIterator it;
-		  for (it=begin();it!=end();it++)
-		    {
-		      if ((*it).getHit())
-			    nPts++;
-		    }
-		}
-	return nPts;
+  int nPts = 0;
+  if (firstNode)
+    {
+      StiKTNBidirectionalIterator it;
+      for (it=begin();it!=end();it++)
+	{
+	  if ((*it).getHit())
+	    nPts++;
+	}
+    }
+  return nPts;
 }
 
 /*! Calculate and return the maximum possible number of hits on this track. 
@@ -908,12 +911,20 @@ bool StiKalmanTrack::find(int direction)
   setFlag(0);
   // invoke tracker to find or extend this track
   TRACKMESSENGER<<"StiKalmanTrack::find(int) -I- Outside-in"<<endl;
-  if (trackFinder->find(this,kOutsideIn))
+  try 
     {
-      if (debugCount<5) TRACKMESSENGER<<"/fit(InOut);";
-      fit(kInsideOut);
-      trackExtended = true;
-    }		
+      if (trackFinder->find(this,kOutsideIn))
+	{
+	  if (debugCount<5) TRACKMESSENGER<<"/fit(InOut);";
+	  fit(kInsideOut);
+	  trackExtended = true;
+	}		
+    }
+  catch (runtime_error & error)
+    {
+      cout << "SKT:find(int dir) -W- HEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEELP"<<endl
+	   << " ERROR:" << error.what()<<endl;
+    }
   // decide if an outward pass is needed.
   const StiKalmanTrackNode * outerMostNode = getOuterMostHitNode();
   if (outerMostNode->getX()<190. )
@@ -936,13 +947,14 @@ bool StiKalmanTrack::find(int direction)
       catch (...)
 	{
 	  cout << "StiKalmanTrack::find(int direction) -W- Exception while in OutsideIn fit"<<endl;
-	}
+	} 
+      TRACKMESSENGER<<"StiKalmanTrack::find(int) -I- Swap back track"<<endl;
       swap();
       setTrackingDirection(kOutsideIn);
     }
   reserveHits();
   setFlag(1);
-  return trackExtended;
+  return trackExtended||trackExtendedOut;
 }
 
 void StiKalmanTrack::setParameters(StiKalmanTrackFinderParameters *parameters)

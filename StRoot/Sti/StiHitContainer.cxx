@@ -2,97 +2,40 @@
 //M.L. Miller (Yale Software)
 //03/01
 
-//STD
 #include <iostream>
 #include <fstream>
 #include <math.h>
-
-// STL
 #include <algorithm>
-
-//StiGui
-//#include "StiGui/StiRootDrawableHitContainer.h"
-
-//Sti
 #include "Sti/Base/Messenger.h"
 #include "StiKalmanTrackNode.h"
 #include "StiHit.h"
 #include "StiPlacement.h"
 #include "StiDetector.h"
 #include "StiHitContainer.h"
-
 using std::sort;
 using std::find;
 using std::lower_bound;
 using std::upper_bound;
 using std::stable_partition;
-
-//StiHitContainer* StiHitContainer::sinstance = 0;
-
 ostream& operator<<(ostream& os, const StiHit& hit);
-//Non member functions
 ostream& operator<<(ostream&, const HitMapKey&);
-
-/*! StiHitContainer is a singleton that serves as a base class for
-  StiRootDrawableHitContainer.  A call to instance will always return a
-  valid pointer to a StiHitContainer.  However, if the call to instance()
-  happens to be the first call, then we must be sure to create the correct 
-  type of object.  We solve this problem in a rather sloppy way, by adding a
-  boolean parameter <b>drawable</b> that defaults to false.  This parameter
-  is only checked if the singleton instance of StiHitContainer has not yet
-  been created.  In that situation, bool==true guaruntees the creation of a
-  StiRootDrawableHitContainer object, while bool==false guaruntees the
-  creation of a StiHitContainer object.  This implies two things: \n
-  1) The user must guaruntee that the first call to instance properly
-  specifies the type of object to be created. \n
-  2) Any call to instance after the first call can be treated normally.
-  That is, one need not specify the boolean argument to the instance() call.
-*/
-/*
-  StiHitContainer* StiHitContainer::instance(bool drawable)
-  {
-  if (sinstance==0) {
-  //Switch on what type to create based on some variable
-  if (drawable==true) {
-  sinstance = new StiRootDrawableHitContainer();
-  }
-  else {
-  sinstance = new StiHitContainer();
-  }
-  }
-  
-  return sinstance;
-  }
-*/
-
-/*! Use this wisely, if at all.  See the above warning regarding use of kill().
- */
-/*
-  void StiHitContainer::kill()
-  {
-  if (sinstance) {
-  delete sinstance;
-  sinstance = 0;
-  }
-  }
-*/
 
 StiHitContainer::StiHitContainer()
     : mMessenger(*(Messenger::instance(MessageType::kHitMessage)))
 {
-    cout <<"StiHitContainer::StiHitContainer()"<<endl;
-    mminpoint = new StiHit();
-    mmaxpoint = new StiHit();
-    //mMessenger <<"\tLeaving StiHitContainer()"<<endl;
+  cout <<"StiHitContainer::StiHitContainer()"<<endl;
+  mminpoint = new StiHit();
+  mmaxpoint = new StiHit();
+  //mMessenger <<"\tLeaving StiHitContainer()"<<endl;
 }
 
 StiHitContainer::~StiHitContainer()
 {
-    cout <<"StiHitContainer::~StiHitContainer()"<<endl;
-    delete mminpoint;
-    mminpoint=0;
-    delete mmaxpoint;
-    mmaxpoint=0;
+  cout <<"StiHitContainer::~StiHitContainer()"<<endl;
+  delete mminpoint;
+  mminpoint=0;
+  delete mmaxpoint;
+  mmaxpoint=0;
 }
 
 /*! Null implementation.  We provide this virtual function for the situation
@@ -102,8 +45,7 @@ StiHitContainer::~StiHitContainer()
   class to perform necessary tasks (e.g., append hits to display).
  */
 void StiHitContainer::update()
-{
-}
+{}
 
 /*! The time complexity of push_back has two components:\n
   1) The correct hit-vector must be retrieved (or inserted if it doesn't
@@ -119,22 +61,30 @@ void StiHitContainer::update()
  */
 void StiHitContainer::push_back(StiHit* hit)
 {
-    //mkey.refangle = hit->refangle();
-    //mkey.position = hit->position();
-    
-    const StiDetector* det = hit->detector();
-    if (!det) {
-	cout <<"StiHitContainer::push_back(). ERROR:\t"
-	     <<"Null detector.  Abort"<<endl;
-	return;
-    }
-    //This is a coupling that I would like to get rid of, not in the spirit of the hit container!
-    mkey.refangle = det->getPlacement()->getCenterRefAngle();
-    mkey.position = det->getPlacement()->getCenterRadius();
+  const StiDetector* det = hit->detector();
+  if (!det) 
+    throw runtime_error("StiHitContainer::push_back() -E- Given hit has no associated detector");
+  //This is a coupling that I would like to get rid of, not in the spirit of the hit container!
+  mkey.refangle = det->getPlacement()->getCenterRefAngle();
+  mkey.position = det->getPlacement()->getCenterRadius();
+  //mkey.refangle = hit->refangle();
+  //mkey.position = hit->position();
+  mmap[mkey].theHitVec.push_back(hit);
+  return;
+}
 
-    //mmap[mkey].push_back(hit);
-    mmap[mkey].theHitVec.push_back(hit);
-    return;
+void StiHitContainer::reset()
+{
+   hitmap::iterator it;
+   hitvector::iterator iter;
+   for (it=mmap.begin(); it!=mmap.end(); it++) 
+     {
+       hitvector &hits = (*it).second.theHitVec;
+       for (iter=hits.begin();iter!=hits.end();iter++)
+	 {
+	   (*iter)->setTimesUsed(0);
+	 }
+     }
 }
 
 /*! A call to clear() must call std::vector<StiHit*>::clear() for all vectors
@@ -146,7 +96,6 @@ void StiHitContainer::clear()
 {
     hitmap::iterator it;
     for (it=mmap.begin(); it!=mmap.end(); it++) {
-	//(*it).second.clear();
 	(*it).second.theHitVec.clear();
 	(*it).second.theEffectiveEnd = (*it).second.theHitVec.end();
     }
@@ -163,7 +112,6 @@ unsigned int StiHitContainer::size() const
     unsigned int thesize = 0;
     hitmap::const_iterator it;
     for (it=mmap.begin(); it!=mmap.end(); it++) {
-	//thesize+=(*it).second.size();
 	thesize+=(*it).second.theHitVec.size();
     }
     return thesize;
@@ -183,7 +131,6 @@ const hitvector& StiHitContainer::hits(double refangle, double position)
 {
     mkey.refangle = refangle;
     mkey.position = position; 
-    //return mmap[mkey];
     return mmap[mkey].theHitVec;
 }
 
@@ -191,7 +138,6 @@ hitvector& StiHitContainer::hits(const StiDetector* layer)
 {
     mkey.refangle = layer->getPlacement()->getCenterRefAngle();
     mkey.position = layer->getPlacement()->getCenterRadius();
-    //return mmap[mkey];
     return mmap[mkey].theHitVec;
 }
 
@@ -199,7 +145,6 @@ hitvector::iterator StiHitContainer::hitsBegin(const StiDetector* layer)
 {
     mkey.refangle = layer->getPlacement()->getCenterRefAngle();
     mkey.position = layer->getPlacement()->getCenterRadius();
-    //return mmap[mkey].begin();
     return mmap[mkey].theHitVec.begin();
 }
 
@@ -207,7 +152,6 @@ hitvector::iterator StiHitContainer::hitsEnd(const StiDetector* layer)
 {
     mkey.refangle = layer->getPlacement()->getCenterRefAngle();
     mkey.position = layer->getPlacement()->getCenterRadius();
-    //return mmap[mkey].end();
     //if (mmap[mkey].theHitVec.end() != mmap[mkey].theEffectiveEnd) {
     //cout <<"StiHitContainer::hitsEnd(const StiDetector*). ERROR:\t"
     //     <<"theEffectiveEnd != theHitVec.end()"<<endl
@@ -231,7 +175,7 @@ void StiHitContainer::setRefPoint(double position, double refAngle,
   setRefPoint(&mUtilityHit);
 }
 
-void StiHitContainer::setRefPoint(const StiKalmanTrackNode & node)
+void StiHitContainer::setRefPoint(StiKalmanTrackNode & node)
 {
   mdeltad = node.getWindowY();
   mdeltaz = node.getWindowZ();
@@ -332,14 +276,14 @@ void StiHitContainer::setRefPoint(StiHit* ref)
  */
 void StiHitContainer::sortHits()
 {
-    hitmap::iterator it;
-    for (it=mmap.begin(); it!=mmap.end(); ++it) {
-	//hitvector& tempvec = (*it).second;
-	hitvector& tempvec = (*it).second.theHitVec;
-	sort(tempvec.begin(), tempvec.end(), StizHitLessThan());
-	(*it).second.theEffectiveEnd =(*it).second.theHitVec.end();
+  hitmap::iterator it;
+  for (it=mmap.begin(); it!=mmap.end(); ++it) 
+    {
+      hitvector& tempvec = (*it).second.theHitVec;
+      sort(tempvec.begin(), tempvec.end(), StizHitLessThan());
+      (*it).second.theEffectiveEnd =(*it).second.theHitVec.end();
     }
-    return;
+  return;
 }
 
 void StiHitContainer::partitionUsedHits()

@@ -39,6 +39,7 @@ template<class OBJECT>
 OBJECT * Vectorized<OBJECT>::add(OBJECT * object)
 {
   _objects.push_back(object);
+  return object;
 }
 
 template<class OBJECT>

@@ -1,3 +1,4 @@
+
 void help();
 void loadLibrairies();
 
@@ -40,18 +41,20 @@ void loadLibrairies(bool doProfile)
 }
 
 void Run(int firstEvent=0,
-	 int nEvents=10,
+	 int nEvents=50,
 	 //const char * filePrefix = "st_physics_",
 	 const char * filePrefix = "rcf",
 	 //const char * path= "/star/data13/reco/ppMinBias/FullField/P02gf/2002/019/",
 	 //const char * path ="/star/data22/ITTF/EvalData/Event/ppMinBias/",
   	 //const char * file="st_physics_3019045_raw_0031.event.root",
-	 const char * path= "/star/data06/ITTF/EvalData/MCFiles/auau200",
-	 //const char * path= "/data/r20b/ittf/auau200/hijing/b0_20/standard/year2001/",
-	 const char * file="rcf0183_12_300evts.event.root",
-	 //const char * file="rcf0183_05_300evts.geant.root",
+	 //const char * path= "/star/data06/ITTF/EvalData/MCFiles/auau200",
+	 const char * path= "/data/r20b/ittf/auau200/hijing/b0_20/standard/year2001/",
+	 //const char * file="rcf0183_12_300evts.event.root",
+	 const char * file="rcf0183_05_300evts.geant.root",
 	 
 	 bool useGui=false,
+	 bool useMcAsRec=true,
+	 bool doPlots=true,
 	 bool doSimulation=true,
 	 bool doAssociation=true,
 	 bool doMiniMcEvent=true,
@@ -74,6 +77,7 @@ void Run(int firstEvent=0,
       filePrefix,
       fileList,
       useGui,
+      useMcAsRec,
       doSimulation,
       doAssociation,
       doMiniMcEvent,
@@ -88,6 +92,8 @@ void Run(Int_t firstEvent,
 	 const char *  filePrefix,
 	 const char ** fileList,
 	 bool useGui,
+	 bool useMcAsRec,
+	 bool doPlots,
 	 bool doSimulation,
 	 bool doAssociation,
 	 bool doMiniMcEvent,
@@ -98,13 +104,16 @@ void Run(Int_t firstEvent,
 {
   loadLibrairies(doProfile);
   MiniChain * miniChain = new MiniChain();
-  MiniChainParameters * pars = miniChain->getParameters();
+  
+  StiMakerParameters* pars = miniChain->getParameters();
   pars->useGui=useGui;
+  pars->useMcAsRec=useMcAsRec;
   pars->doSimulation=doSimulation;
   pars->doAssociation=doAssociation;
   pars->doMiniMcEvent=doMiniMcEvent;
   pars->doDst=doDst;
   pars->doStEventOutput=doStEventOutput;
   pars->doStEventInput=doStEventInput;  
+  pars->doPlots = doPlots;
   miniChain->run(firstEvent,nEvents,filePrefix,fileList);
 }

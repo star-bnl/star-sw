@@ -155,7 +155,7 @@ public:
   double getField()  const;
   int    getHelicity()  const;
   double getPhase()   const;
-  double getWindowY() const;
+  double getWindowY();
   double getWindowZ() const;
   double pitchAngle() const;
   double crossAngle() const;
@@ -255,8 +255,8 @@ inline void StiKalmanTrackNode::reset()
 
 inline double StiKalmanTrackNode::nice(double angle) const
 { 
-  if (angle < -M_PI) angle += 2*M_PI;
-  if (angle >= M_PI) angle -= 2*M_PI;
+  if (angle <= -M_PI) angle += 2*M_PI;
+  if (angle >  M_PI) angle -= 2*M_PI;
   return angle;
 }
 
@@ -386,7 +386,11 @@ inline int StiKalmanTrackNode::locate(StiPlacement*place,StiShape*sh)
 {
   int position;
   double yOff, yAbsOff, detHW, detHD,edge,innerY, outerY, innerZ, outerZ, zOff, zAbsOff;
-  
+
+  //if (_refX<70. && _refX>57.)
+  //  cout << "_refX:"<<_refX<<" _p0:"<<_p0<<" p1:"<<_p1<<" NormalYoffset:"
+  // << place->getNormalYoffset()<<" zOff:"<< place->getZcenter() ;
+
   yOff = _p0 - place->getNormalYoffset();
   yAbsOff = fabs(yOff);
   zOff = _p1 - place->getZcenter();
@@ -397,8 +401,8 @@ inline int StiKalmanTrackNode::locate(StiPlacement*place,StiShape*sh)
       {
 	planarShape = static_cast<StiPlanarShape *>(sh);
 	detHW = planarShape->getHalfWidth();
-	detHW = planarShape->getHalfWidth();
 	detHD = planarShape->getHalfDepth();
+	//if (_refX<65. && _refX>57.) cout << "   detHW:"<< detHW<<" detHD:"<<detHD<<endl;
 	edge  = 4.;//shape->getEdgeHalfWidth();
 	break;
       }
@@ -549,10 +553,7 @@ inline  void StiKalmanTrackNode::initialize(StiHit*h,double alpha, double eta, d
   _p4      = tanl;
   _sinCA   = _p3*_x-_p2;
   if (fabs(_sinCA)>1.) 
-    {
-      cout << "SKTN::initialize() -E- fabs(_sinCA)>1."<<endl;
       throw runtime_error("SKTN::initialize() - ERROR - fabs(_sinCA)>1.");
-    }
   _cosCA   = sqrt(1.-_sinCA*_sinCA);
   //cout << "StiKalmanTrackNode::initialize(...) -I- Done"<<endl;
 };

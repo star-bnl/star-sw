@@ -74,17 +74,19 @@ double  StiMcTrack::getPt()             const
 
 double  StiMcTrack::getRapidity()       const
 {
-  return 0;
+  return mcTrack->rapidity();
 }
 
 double  StiMcTrack::getPseudoRapidity() const
 {
-  return 0;
+  return mcTrack->pseudoRapidity();
 }
 
 double  StiMcTrack::getPhi()            const
 {
-  return 0;
+  StThreeVectorF mom = mcTrack->momentum();
+
+  return atan2(mom.y(),mom.x());
 }
 
 double  StiMcTrack::getTanL()           const
@@ -114,12 +116,12 @@ double  StiMcTrack::getDca3(StiTrack *t) const
 
 int     StiMcTrack::getPointCount() const
 {
-  return 0;
+  return mcTrack->tpcHits().size();
 }
 
 int     StiMcTrack::getFitPointCount() const
 {
-  return 0;
+  return mcTrack->tpcHits().size();
 }
  
 int     StiMcTrack::getGapCount() const

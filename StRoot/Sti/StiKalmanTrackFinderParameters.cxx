@@ -35,6 +35,11 @@ void StiKalmanTrackFinderParameters::initialize()
       cout << "StiLocalTrackSeedFinder::initialize() -F- Parameter factory is null" << endl; 
       throw logic_error("StiKalmanTrackFinderParameters::initialize() -F- Parameter factory is null"); 
     } 
+  add(f->getInstance()->set("useMcAsRec",
+                            "useMcAsRec",
+                            &useMcAsRec, 
+                            false,  
+                            0)); 
   add(f->getInstance()->set("mcsCalculated",       
                             "mcsCalculated",    
                             &mcsCalculated, 
@@ -51,7 +56,7 @@ void StiKalmanTrackFinderParameters::initialize()
   add(f->getInstance()->set("maxNullCount",     
                             "maxNullCount", 
                             &maxNullCount, 
-                            15, 
+                            12, 
                             0, 
                             30, 
                             1, 
@@ -59,7 +64,7 @@ void StiKalmanTrackFinderParameters::initialize()
   add(f->getInstance()->set("maxContiguousNullCount",  
                             "maxContiguousNullCount",  
                             &maxContiguousNullCount,   
-                            10, 
+                            8, 
                             0, 
                             20, 
                             1, 
@@ -75,23 +80,23 @@ void StiKalmanTrackFinderParameters::initialize()
   add(f->getInstance()->set("minSearchWindow",     
                             "minSearchWindow",   
                             &minSearchWindow,  
-                            1., 0.5, 20., 0.1, 0)); 
+                            1.5, 0.5, 20., 0.1, 0)); 
   add(f->getInstance()->set("maxSearchWindow", 
                             "maxSearchWindow", 
                             &maxSearchWindow,   
-                            4., 0.5, 20., 0.1, 0)); 
+                            4.5, 0.5, 20., 0.1, 0)); 
   add(f->getInstance()->set("searchWindowScale", 
                             "searchWindowScale",  
                             &searchWindowScale, 
-                            2., 0.5, 20., 0.1, 0)); 
+                            1.5, 0.5, 20., 0.1, 0)); 
   add(f->getInstance()->set("maxChi2ForSelection",  
                             "maxChi2ForSelection",   
                             &maxChi2ForSelection, 
-                            5., 0.5, 200., 0.1, 0)); 
+                            2., 0.5, 200., 0.1, 0)); 
   add(f->getInstance()->set("maxChi2Vertex",  
                             "maxChi2Vertex",   
                             &maxChi2Vertex, 
-                            10000., 0., 20000., 0.1, 0)); 
+                            100., 0., 20000., 0.1, 0)); 
   add(f->getInstance()->set("massHypothesis", 
                             "massHypothesis",  
                             &massHypothesis,  

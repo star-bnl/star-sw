@@ -6,7 +6,7 @@ using namespace std;
 #include "StMiniMcMaker/StMiniMcMaker.h"
 #include "StiMaker/StiMaker.h"
 #include "StiMaker/MiniChain.h"
-#include "StiMaker/MiniChainParameters.h"
+#include "StiMaker/StiMakerParameters.h"
 #include "StiMaker/MainFrame.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StDetectorDbMaker/StDetectorDbMaker.h"
@@ -23,28 +23,21 @@ using namespace std;
 ClassImp(MiniChain)
 
 MiniChain::MiniChain()
-	: _pars( new MiniChainParameters() ),
-		_chain(0),
-		_stiMaker(0),
-		_ioMaker(0),
-		_toolkit(new StiDefaultToolkit())
+	: _pars( new StiMakerParameters() ),
+	  _chain(0),
+	  _stiMaker(0),
+	  _ioMaker(0),
+	  _toolkit(new StiDefaultToolkit())
 { 
   StiToolkit::setToolkit(_toolkit);
-  /*  _guiIoroker->setUnMarkedHitSize(.3);
-  _guiIoroker->setUnMarkedHitColor(4);
-  _guiIoroker->setUnMarkedHitStyle(8);
-  _guiIoroker->setUpdateEachTrack(false);
-  _guiIoroker->setMarkedHitSize(.3);
-  _guiIoroker->setMarkedHitColor(2);
-  _guiIoroker->setMarkedHitStyle(3);*/
 }
 
 MiniChain::~MiniChain()
 {}
 
-MiniChainParameters * MiniChain::getParameters()
+StiMakerParameters * MiniChain::getParameters()
 {
-	return _pars;
+  return _pars;
 }
 
 void MiniChain::run(int first, 
@@ -70,21 +63,22 @@ void MiniChain::run(int first,
       StAssociationMaker * assocMaker=0;
       if (_pars->doSimulation)
     	{
-	    mcEventMaker = new StMcEventMaker();
-	    assocMaker   = new StAssociationMaker("EgrStAssociationMaker");
-	    }
-      _stiMaker = StiMaker::instance();
+	  mcEventMaker = new StMcEventMaker();
+	  assocMaker   = new StAssociationMaker("EgrStAssociationMaker");
+	}
+      _stiMaker = new StiMaker("StiMaker");
+      _stiMaker->setParameters(_pars);
       if (_pars->doSimulation) 
-	    {
-				_toolkit->setMcEnabled(true);
-	      _stiMaker->setMcEventMaker(mcEventMaker);
-	      _stiMaker->setAssociationMaker(assocMaker);
-	    }
+	{
+	  _toolkit->setMcEnabled(true);
+	  _stiMaker->setMcEventMaker(mcEventMaker);
+	  _stiMaker->setAssociationMaker(assocMaker);
+	}
       if (_pars->useGui)      
-				{
-					_toolkit->setGuiEnabled(true);
-					setupGui();
-				}
+	{
+	  _toolkit->setGuiEnabled(true);
+	  setupGui();
+	}
       setupOutput(filePrefix,fileList[0]);
       eventLoop(first, first+nEvents);
     }
