@@ -30,7 +30,7 @@
       g2t_event(1).ge_rndm(1)         = IHEAD(3)
       g2t_event(1).ge_rndm(2)         = IHEAD(4)
 
-      if (Istat.eg.10) then
+      if (Istat .eq. 10) then
         g2t_event(1).eg_label         = VERT(2)    ! run number
         g2t_event(1).event_type       = VERT(1)    ! event number
         i =  AMASS                                 ! Awest.Aeast
