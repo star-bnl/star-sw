@@ -4,8 +4,11 @@
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f112/top.html 
 //
-// $Id: StCL.cxx,v 1.6 1999/10/27 23:57:56 fine Exp $
+// $Id: StCL.cxx,v 1.7 2000/01/28 23:40:17 fine Exp $
 // $Log: StCL.cxx,v $
+// Revision 1.7  2000/01/28 23:40:17  fine
+// some warnings were removed. Thanks Rene Brun
+//
 // Revision 1.6  1999/10/27 23:57:56  fine
 // Clean up: const has been introduced instead of non-const
 //
@@ -515,6 +518,7 @@ end_html
 */
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include <assert.h>
 #include "StCL.h"
 #include "TMath.h"
 
@@ -539,6 +543,7 @@ ClassImp(StCL)
       case 2: iia = 1; ioa = j; iib = 1; iob = j; break;  \
       case 3: iia = i; ioa = 1; iib = k; iob = 1; break;  \
       case 4: iia = i; ioa = 1; iib = 1; iob = j; break;  \
+      default: iia = ioa = iib = iob = 0; assert(iob);    \
     };                                                    \
                                                           \
     ia = 1; ic = 1;                                       \

@@ -1,5 +1,5 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: St_Table.cxx,v 1.92 2000/01/21 02:09:52 fine Exp $ 
+// $Id: St_Table.cxx,v 1.93 2000/01/28 23:40:17 fine Exp $ 
 // 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
@@ -142,6 +142,54 @@ const void *St_Table::At(Int_t i) const
 }
 
 //______________________________________________________________________________
+Int_t St_Table::CopyRows(const St_Table *srcTable, Int_t srcRow, Int_t dstRow, Int_t nRows, Bool_t expand)
+{
+ // CopyRows copies nRows from starting from the srcRow of srcTable 
+ // to the dstRow in this table upto nRows or by the end of this table.
+ //
+ // This table if automaticaly increased if expand = kTRUE.
+ // The old values of this table rows are to be destroyed and 
+ // replaced with the new ones.
+ //
+ // PARAMETERS:
+ //   srcTable - a pointer to the table "donor"
+ //   srcRow   - the index of the first row of the table donor to copy from
+ //   dstRow   - the index of the first row of this table to copy to
+ //   nRows    - the total number of rows to be copied. This table will be expanded
+ //              as needed if expand = kTRUE (it is kFALSE "by default")
+ //          = 0 to copy ALL remain rows from the srcTable.
+ //   expand   - flag whether this table should reallocated if needed.
+ //
+ // RETURN:
+ //          the number of the rows been copied
+
+ assert(!TestBit(kIsNotOwn));
+ if (!(srcTable && srcTable->GetNRows()) ||
+          srcRow > srcTable->GetNRows()-1   )   return 0;
+
+
+ if (strcmp(GetType(),srcTable->GetType())) {
+   // check this table current capacity
+   if (!nRows) nRows = srcTable->GetNRows();
+   Long_t tSize = GetTableSize();
+   Int_t extraRows = (tSize - dstRow) - nRows;
+   if (extraRows < 0) {
+     if (expand) {
+       ReAllocate(tSize - extraRows);
+       extraRows = 0;
+     }
+     nRows += extraRows; 
+   }
+   if (dstRow+nRows > GetNRows()) SetNRows(dstRow+nRows);
+   ::memcpy((*this)[dstRow],(*srcTable)[srcRow],GetRowSize()*nRows);
+   return nRows;
+ } else
+     Error("CopyRows",
+           "This table is <%s> but the src table has a wrong type <%s>",GetType()
+           ,srcTable->GetType());
+ return 0;
+}
+//______________________________________________________________________________
 TH1  *St_Table::Draw(TCut varexp, TCut selection, Option_t *option, Int_t nentries, Int_t firstentry)
 {
 //*-*-*-*-*-*-*-*-*-*-*Draw expression varexp for specified entries-*-*-*-*-*
@@ -250,8 +298,9 @@ TH1 *St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
    if (GetNRows() == 0 || varexp00 == 0 || varexp00[0]==0) return 0;
    TString  opt;
    Text_t *hdefault = (char *)"htemp";
-   Text_t *varexp;
-   Int_t i,j,hkeep, action;
+   Text_t *varexp="";
+   Int_t i,j,action;
+   Int_t hkeep = 0;
    opt = option;
    opt.ToLower();
    Text_t *varexp0 = StrDup(varexp00);
@@ -978,8 +1027,7 @@ void St_Table::Append(St_Table *donorTable, Int_t nRows, Int_t firstRows)
   assert(!TestBit(kIsNotOwn));
 
   // Check whether the new table has the same type 
-  if (strcmp(GetTitle(),donorTable->GetTitle()) == 0 ) 
-  {
+  if (strcmp(GetTitle(),donorTable->GetTitle()) == 0 ) {
     // Calculate the number of the rows to copy
     if (!nRows) nRows = donorTable->GetNRows();
     Int_t extraRows = firstRows+nRows - donorTable->GetNRows();
@@ -2651,6 +2699,9 @@ St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {
 
 
 // $Log: St_Table.cxx,v $
+// Revision 1.93  2000/01/28 23:40:17  fine
+// some warnings were removed. Thanks Rene Brun
+//
 // Revision 1.92  2000/01/21 02:09:52  fine
 // several parameters were converted to be const
 //
