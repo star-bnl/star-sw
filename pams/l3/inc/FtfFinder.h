@@ -6,6 +6,8 @@
 //:             26jan2000 ppy destructor added
 //:             27jan2000 ppy VOLUME, ROW and AREA classes replaced by
 //:                           FtfContainer
+//:             11feb2000 ppy timeout added, variables initialCpuTime and
+//:                           initialRealTime added
 //:<------------------------------------------------------------------
 
 #ifndef FTFFINDER
@@ -56,6 +58,8 @@ public:
    FtfContainer  *volumeC ;
    FtfContainer  *rowC    ;
    FtfContainer  *trackC  ;
+   double        initialCpuTime ;
+   double        initialRealTime ;
    double        cpuTime ;
    double        realTime ;
 private: 

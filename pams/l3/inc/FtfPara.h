@@ -9,6 +9,7 @@
 //:             11aug1999 ppy add vertexConstrainedFit variable
 //:             23aug1999 ppy add ROOT option
 //:             19nov1999 ppy add maxChi2Primary to decide whether track is primary
+//:             11feb2000 ppy add maxTime
 //:
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
@@ -89,6 +90,7 @@
        float     xyWeightVertex;  // Weight vertex in x-y
        float     phiVertex      ;
        float     rVertex        ;
+       float     maxTime        ; // maxTime tracker can run
        short     phiClosed ;
        short     primaries  ;
        int       nRowsPlusOne, nPhiPlusOne   ; // Number volumes + 1

@@ -51,7 +51,8 @@ public:
    };
    void* first() { 
       current = head ;
-      return head->e;
+      if ( head ) return head->e;
+      else return 0 ;
    };
    void* next() { 
       current = current->succ ;
