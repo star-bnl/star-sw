@@ -1,17 +1,6 @@
-// $Id: DstStruct.C,v 3.3 2000/08/02 16:39:50 fine Exp $
-// $Log: DstStruct.C,v $
-// Revision 3.3  2000/08/02 16:39:50  fine
-// Change order of Skip and Init methods
-//
-// Revision 3.2  2000/08/02 16:36:39  fine
-// Fixed wrong counter
-//
-// Revision 3.1  2000/08/02 01:32:02  fine
-// New macro to print the struture of the selected event from the DST file
-//
-//
-//
+// $Id: DstStruct.C,v 3.4 2000/08/15 15:24:48 fine Exp $
 
+#include <iomanip.h>
 class StChain;
 StChain *chain;
 
@@ -73,18 +62,53 @@ void DstStruct(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
      ds=chain->GetDataSet("dst");
      if (ds) {
          TDataSetIter next(ds);
-         cout << next.Du() << " datasets found" << endl;
+         cout << endl << ds->Path().Data() << " datasets found" << endl;
          TDataSet *nextDs = 0;
+          cout << endl 
+               << setw(15) << "Table Name  " 
+               << setw(25) << "Table type     " 
+               << setw(10) << "# rows"
+               << setw(14) << "Size (KBytes)"
+               << endl;
+
+          cout << setfill('-')
+               << setw(15) << " " 
+               << setw(25) << " " 
+               << setw(10) << " "
+               << setw(14) << " "
+               << setw(3)  << ""
+               << endl;
+          cout << setfill(' ');
+
          while (nextDs = (TDataSet *)next()){
-            if (nextDs->HasData()) {
-               cout << endl << "----------------- next table " 
-                    << nextDs->GetName() 
-                    << " size = " << ((TTable *)nextDs)->GetNRows() 
-                    << " row(s) ---------------------" 
-                    << endl;
-           }
-	   nextDs->Print();
-        }  
+          if (!strcmp(nextDs->GetName(),"RunEvent")) {continue;}
+          TTable &t = *(TTable *)nextDs;
+          cout << setw(15) << t.GetName() 
+               << setw(25) << t.GetType() 
+               << setw(10) << t.GetNRows() 
+               << setw(14) << setprecision(3) << t.GetTableSize()*t.GetRowSize()/1024.
+               << setw(3)  << "Kb"
+               << endl;
+         }
+          cout << setfill('-')
+               << setw(15) << " " 
+               << setw(25) << " " 
+               << setw(10) << " "
+               << setw(14) << " "
+               << endl;
+          cout << setfill(' ')
+               << endl;
+         // next.Reset();
+         // while (nextDs = (TDataSet *)next()){
+         //   if (nextDs->HasData()) {
+         //      cout << endl << "----------------- next table " 
+         //           << nextDs->GetName() 
+         //           << " size = " << ((TTable *)nextDs)->GetNRows() 
+         //           << " row(s) ---------------------" 
+         //           << endl;
+         //  }
+	 //  nextDs->Print();
+         // }  
      }
      cout << " =================  END OF EVENT " << iev+1 << "  ================= " << endl << endl;
   }
@@ -94,8 +118,13 @@ void DstStruct(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
    " events starting from " << firstEvent << " have been printed out" << endl << endl; 
   }
   else {
-   cout << "DstStruct.C - no events were printed" << endl;
+    cout << "DstStruct.C - no events were printed" << endl;
   }
+  cout << "See: \"http://www.rhic.bnl.gov/STAR/html/comp_l/ofl/dst_table_model.html\""
+       << endl 
+       << "      Web site for further information" 
+       << endl << endl;
+
   chain->Finish();   
 }
 
@@ -120,4 +149,21 @@ void DstStruct(Int_t firstEvent, const char *MainFile)
 //__________________________________________________________________________
 void DstStruct(const char *MainFile="/afs/rhic/star/data/samples/gstar.dst.root")
 {   DstStruct(1,1,MainFile); }
+
+//__________________________________________________________________________
+//__________________________________________________________________________
+// $Log: DstStruct.C,v $
+// Revision 3.4  2000/08/15 15:24:48  fine
+// new output format
+//
+//__________________________________________________________________________
+// Revision 3.3  2000/08/02 16:39:50  fine
+// Change order of Skip and Init methods
+//
+// Revision 3.2  2000/08/02 16:36:39  fine
+// Fixed wrong counter
+//
+// Revision 3.1  2000/08/02 01:32:02  fine
+// New macro to print the struture of the selected event from the DST file
+//__________________________________________________________________________
 

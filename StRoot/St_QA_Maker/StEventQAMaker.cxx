@@ -1,5 +1,14 @@
-// $Id: StEventQAMaker.cxx,v 1.50 2000/08/08 16:18:34 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.53 2000/08/17 21:13:55 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.53  2000/08/17 21:13:55  lansdell
+// loop over all TPC hits for the z-hit distribution histogram
+//
+// Revision 1.52  2000/08/17 18:52:29  lansdell
+// added z distribution of hits histogram to StEventQA set
+//
+// Revision 1.51  2000/08/17 17:47:53  lansdell
+// for real data, only process events with # global tracks between 50 and 500 -> will later add code for various multiplicities
+//
 // Revision 1.50  2000/08/08 16:18:34  lansdell
 // combined MakeHistDE and MakeHistPID code and simplified dE/dx code (factor of 7 faster)
 //
@@ -199,12 +208,34 @@ Int_t StEventQAMaker::Make() {
   event = (StEvent *)GetInputDS("StEvent");
   if (event) {
     // only process if a primary vertex exists !!!
+    //cout << "event type : " << event->info()->type() << endl;
     if (event->primaryVertex()) {
+      int multiplicity = event->trackNodes().size();
       mNullPrimVtx->Fill(1);
-      return StQABookHist::Make();
+      // process real events depending on multiplicity
+      if (event->info()->type() == "NONE") {
+	if (multiplicity >= 50 && multiplicity <= 500) {
+	  // fill low multiplicity histogram set
+	  return StQABookHist::Make();
+	}
+	//if (multiplicity > 500 && multiplicity <= 1000) {
+	  // fill medium multiplicity histogram set
+	//}
+	//if (multiplicity > 1000) {
+	  // fill high multiplicity histogram set
+	//}
+	// skip event if not in multiplicity range
+	else {
+	  return kStOk;
+	}
+      }
+      // process Monte Carlo events
+      else {
+	return StQABookHist::Make();
+      }
     }
     else {
-      cout << "Error in StEventQAMaker::Make(): no primary vertex found!" << endl;
+      cout << "Warning in StEventQAMaker::Make(): no primary vertex found!" << endl;
       mNullPrimVtx->Fill(-1);
       return kStOk;
     }
@@ -351,6 +382,11 @@ void StEventQAMaker::MakeHistGlob() {
       if (globtrk->topologyMap().numberOfHits(kTpcSvtId)>0) m_det_id->Fill(kTpcSvtId);
       if (globtrk->topologyMap().numberOfHits(kTpcSsdSvtId)>0) m_det_id->Fill(kTpcSsdSvtId);
       if (globtrk->topologyMap().numberOfHits(kSsdSvtId)>0) m_det_id->Fill(kSsdSvtId);
+
+      // z-dist of hits
+      //for (UInt_t i=0; i<globtrk->detectorInfo()->hits().size(); i++) {
+      //m_z_hits->Fill(globtrk->detectorInfo()->hits()[i]->position().z());
+      //}
 
 // now fill all TPC histograms ------------------------------------------------
       if (globtrk->flag()>=100 && globtrk->flag()<200) {
@@ -1176,6 +1212,11 @@ void StEventQAMaker::MakeHistPoint() {
   ULong_t ftpcHitsW = 0;
 
   if (tpcHits) {
+    // z-dist of hits
+    for (UInt_t i=0; i<24; i++)
+      for (UInt_t j=0; j<45; j++)
+	for (UInt_t k=0; k<tpcHits->sector(i)->padrow(j)->hits().size(); k++)
+	  m_z_hits->Fill(tpcHits->sector(i)->padrow(j)->hits()[k]->position().z());
     m_pnt_tpc->Fill(tpcHits->numberOfHits());
     totalHits += tpcHits->numberOfHits();
   }

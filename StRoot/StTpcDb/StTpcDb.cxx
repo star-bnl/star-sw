@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.27 2000/08/10 18:41:34 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.28 2000/08/18 17:19:21 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.28  2000/08/18 17:19:21  hardtke
+ * use laser velocity, if available
+ *
  * Revision 1.27  2000/08/10 18:41:34  hardtke
  * only look for L0_trigger table once per event -- improves timing
  *
@@ -342,7 +345,8 @@ float StTpcDb::DriftVelocity(){
     dvel = (St_tpcDriftVelocity*)tpd;
    }
   }
-  float driftvel = 1e6*(*dvel)[0].cathodeDriftVelocityEast;
+  float driftvel = 1e6*(*dvel)[0].laserDriftVelocityEast;
+  if (driftvel<=0.0) driftvel = 1e6*(*dvel)[0].cathodeDriftVelocityEast;
   return driftvel;
 }
 

@@ -1,5 +1,11 @@
-// $Id: StHistUtil.cxx,v 1.25 2000/07/31 19:29:47 lansdell Exp $
+// $Id: StHistUtil.cxx,v 1.27 2000/08/17 21:13:53 lansdell Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.27  2000/08/17 21:13:53  lansdell
+// loop over all TPC hits for the z-hit distribution histogram
+//
+// Revision 1.26  2000/08/17 18:52:27  lansdell
+// added z distribution of hits histogram to StEventQA set
+//
 // Revision 1.25  2000/07/31 19:29:47  lansdell
 // primary vertex check histogram now contains entries for events with or without a primary vertex (with = 1, without = -1)
 //
@@ -1627,6 +1633,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // St_QA_Maker histograms without the svt and ftpc histograms
   if (strcmp(dirName,"EventQA")==0 && strcmp(analType,"year1")==0) {
     Char_t* sdefList6[] = {
+     "StEQaPointZhits",
      "StEQaNullPrimVtx",
      "QaInnerSectorDeDx",
      "QaOuterSectorDeDx",
@@ -1878,6 +1885,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // St_QA_Maker histograms for QA shift
   if (strcmp(dirName,"EventQA")==0 && strcmp(analType,"qa_shift")==0) {
     Char_t* sdefList8[] = {
+     "StEQaPointZhits",
      "StEQaNullPrimVtx",
      "QaDedxAllSectors",
      "StEQaEvsumTrkGoodDTotal",

@@ -7,7 +7,7 @@
 //
 //
 //
-// $Id: bfcMixer.C,v 1.7 2000/09/05 21:28:18 pfachini Exp $
+// $Id: bfcMixerL3.C,v 1.4 2000/09/05 21:28:09 pfachini Exp $
 //////////////////////////////////////////////////////////////////////////
 
 TBrowser *b = 0;
@@ -34,7 +34,7 @@ void Load(){
   if (chain) delete chain;
 }
 //_____________________________________________________________________
-void bfcMixer(const Int_t Nevents=9999,
+void bfcMixerL3(const Int_t Nevents=9999,
              const Char_t *kind1="fz",
              const Char_t *file1="/star/rcf/data06/reco/embedding/fz/pi-/st_physics_1185015_raw_0002.fz",
              const Char_t *kind2="daq",

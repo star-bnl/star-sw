@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.2 1999/12/01 15:58:05 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.5 2000/08/28 17:08:58 didenko Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,11 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
- * Revision 2.2  1999/12/01 15:58:05  ullrich
- * New decoding for dst_track::method. New enum added.
- *
- * Revision 2.3  2000/08/17 00:12:18  ullrich
- * Added tpt to enum StTrackType
+ * Revision 2.5  2000/08/28 17:08:58  didenko
+ * get back revision 2.2
  *
  * Revision 2.9  2000/11/25 11:48:40  lasiuk
  * Modify the StRichHitFlags to account for ambiguities
@@ -29,6 +26,9 @@
  * Added enum tpt and removed CINT pragmas.
  *
  * Revision 2.5  2000/08/28 17:08:58  didenko
+ * get back revision 2.2
+ *
+ * Revision 2.2  1999/12/01 15:58:05  ullrich
 #ifdef __CINT__
 #pragma link C++ enum StBeamDirection;
 #pragma link C++ enum StBeamPolarizationAxis;
@@ -42,18 +42,15 @@
 #pragma link C++ enum StTrackFittingMethod;
 #endif
 
-#pragma link C++ enum StTrackFittingMethod;
-#endif
-
  * New decoding for dst_track::method. New enum added.
  *
  * Revision 2.1  1999/11/15 18:48:16  ullrich
  * Adapted new enums for dedx and track reco methods.
  *
-enum StTrackType {global, primary, secondary};
+ * Revision 2.0  1999/10/12 18:41:45  ullrich
  * Completely Revised for New Version
  *
-enum StTrackType {global, primary, tpt, secondary};
+ **************************************************************************/
 #ifndef StEnumerations_hh
 #define StEnumerations_hh
 enum StTrackType {global, primary, secondary};

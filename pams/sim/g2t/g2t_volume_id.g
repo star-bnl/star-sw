@@ -1,11 +1,5 @@
-* $Id: g2t_volume_id.g,v 1.28 2000/08/14 20:43:49 nevski Exp $
+* $Id: g2t_volume_id.g,v 1.26 2000/05/24 15:02:50 nevski Exp $
 * $Log: g2t_volume_id.g,v $
-* Revision 1.28  2000/08/14 20:43:49  nevski
-* bug corrected
-*
-* Revision 1.27  2000/08/10 22:10:57  nevski
-* vpd versionning introduced
-*
 * Revision 1.26  2000/05/24 15:02:50  nevski
 * rich volume numbering done in g2t_volume ONLY
 *
@@ -24,7 +18,7 @@
       integer  g2t_volume_id
 * 
       Character*3      Csys
-      Integer          NUMBV(15),itpc/0/,ibtf/0/,ical/0/,ivpd/0/
+      Integer          NUMBV(15),itpc/0/,ibtf/0/,ical/0/
       Integer          innout,sector,sub_sector,volume_id
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          endcap,zslice,innour,lnumber,wafer,phi_30d
@@ -37,8 +31,7 @@
       Character*4                   cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
       Structure  TPCG  {version}
-      Structure  VPDG  {version}
-      Structure  BTOG  {version, choice, posit1 }
+      Structure  BTOG  {version, Rmin, Rmax, dz, choice, posit1, }
       Structure  CALG  {version, int Nmodule(2), int NetaT, int MaxModule, 
                                  int Nsub, int NetaSMDp, int NPhistr,
      + 	                         int Netfirst, int Netsecon}
@@ -52,11 +45,9 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           USE  /DETM/TPCE/TPCG  stat=itpc
           USE  /DETM/BTOF/BTOG  stat=ibtf
           USE  /DETM/CALB/CALG  stat=ical
-          USE  /DETM/VPDD/VPDG  stat=ivpd
 
           call RBPOPD
           if (itpc>=0) print *,' g2t_volume_id: TPC version =',tpcg_version
-          if (ivpd>=0) print *,'              : VPD version =',vpdg_version
           if (ibtf>=0) print *,'              : TOF version =',btog_version,
      >                         ' choice  =',btog_choice,btog_posit1
           if (ical>=0) print *,'              : CALB patch  =',calg_nmodule
@@ -408,21 +399,14 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         endcap    = numbv(1)
         zslice    = numbv(2)
         volume_id = 100*endcap+zslice
-*
-      else If (Csys=='vpd') then
-*11*    Vertex position detector - Frank Geurts <geurts@rice.edu>
 
-        if (vpdg_version == 1) then
-          rileft    = numbv(1)
-          innout    = numbv(2)
-          sector    = numbv(3)
-        else
-          rileft    = numbv(1)
-          innout    = 0
-          sector    = numbv(2)
-        endif
-        volume_id  =  1000*rileft + 100*innout + sector
-*
+      else If (Csys=='vpd') then
+*11*
+        rileft    = numbv(1)
+        innout    = numbv(2)
+        sector    = numbv(3)
+        volume_id = 1000*rileft+100*innout+sector
+
       else If (Csys=='pgc') then
 *12*
       else If (Csys=='psc') then

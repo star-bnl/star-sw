@@ -52,11 +52,11 @@ my $thistime;
 
 ##### setup output directories for NEW 
 
-for ($i = 0; $i < 2; $i++) {
-     for ($j = 0; $j < 3; $j++) {
+for ($i = 0; $i < 3; $i++) {
+     for ($j = 0; $j < 2; $j++) {
       for ($ll = 0; $ll < scalar(@hc_dir); $ll++) {
    $OUT_DIR[$ii] = $TOP_DIRD . $node_dir[$i] . "/". $dir_year[$j] . "/" . $hc_dir[$ll];
-#    print "Output Dir for NEW :", $OUT_DIR[$ii], "\n";
+    print "Output Dir for NEW :", $OUT_DIR[$ii], "\n";
         $ii++;
       }
   }
@@ -791,7 +791,7 @@ my $Anflag = 0;
               @word_tr = split /:/,$string;
               $no_tracks = $word_tr[2];
               $tot_tracks += $no_tracks; 
-#               print $word_tr[2], $no_tracks, "\n";
+#              print $word_tr[2], $no_tracks, "\n";
               $string = $logfile[$num_line + 1];
               @word_tr = split /:/,$string;
               $no_prtracks = $word_tr[2]; 
@@ -855,7 +855,7 @@ my $Anflag = 0;
 ##### get CPU and Real Time per event
       
  if ($EvCom != 0) {
-    @cpu_output = `tail -250 $fl_log`;
+    @cpu_output = `tail -400 $fl_log`;
      
   foreach $end_line (@cpu_output){
           chop $end_line;
