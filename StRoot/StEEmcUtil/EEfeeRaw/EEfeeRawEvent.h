@@ -1,7 +1,7 @@
 #ifndef EEfeeRawEvent_h
 #define EEfeeRawEvent_h
 /*********************************************************************
- * $Id: EEfeeRawEvent.h,v 1.8 2003/12/10 04:43:19 balewski Exp $
+ * $Id: EEfeeRawEvent.h,v 1.9 2004/04/02 06:38:52 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw FEE Events
@@ -24,7 +24,7 @@ class EEfeeRawEvent :public TObject {
   void setID(int i){ ID=i; }
   int  getID() const{return ID;};
   void addFeeDataBlock(EEfeeDataBlock*);
-  void maskWrongCrates( long timeStamp,   unsigned token);
+  void maskWrongCrates( long timeStamp,   unsigned token); // tmp, should be changed
   UShort_t  getValue(int crateID, int channel) const;
   ClassDef(EEfeeRawEvent,1) 
 };
@@ -32,6 +32,9 @@ class EEfeeRawEvent :public TObject {
 
 /*
  * $Log: EEfeeRawEvent.h,v $
+ * Revision 1.9  2004/04/02 06:38:52  balewski
+ * *** empty log message ***
+ *
  * Revision 1.8  2003/12/10 04:43:19  balewski
  * first QA
  *

@@ -49,8 +49,8 @@ EEfeeDataBlock ::  ~EEfeeDataBlock() {
 //--------------------------------------------------
 void EEfeeDataBlock :: print(int flag){
   printf("feeDataBlock Head: 0x%04hx 0x%04hx 0x%04hx 0x%04hx ",head[0],head[1],head[2],head[3]);
-  printf("\n --> token=0x%2x  crateID=0x%x  trigType=0x%x  NpositiveData=%d\n",
-	 getToken(),getCrateID(),getTrigType(),getNData(0));
+  printf("\n --> token=0x%2x  crateID=0x%x  trigComm=0x%x  lenCount=0x%x  errFlag=0x%x\n   NpositiveData=%d\n",
+	 getToken(),getCrateID(),getTrigComm(),getLenCount(),getErrFlag(),getNData(0));
   
   if(flag<=0) return;
 
@@ -64,6 +64,7 @@ void EEfeeDataBlock :: print(int flag){
   printf("\n");
 
 }
+
 
 //--------------------------------------------------
 //--------------------------------------------------
@@ -155,12 +156,31 @@ void EEfeeDataBlock :: clear(){
 //--------------------------------------------------
 //--------------------------------------------------
 int  EEfeeDataBlock :: isValid(){
-      	return (getCrateID()< MaxAnyCrate);// add more conditions as emerge
+      	return (getCrateID()!=0x00ff);// add more conditions as emerge
 }
+
+//--------------------------------------------------
+//--------------------------------------------------
+//--------------------------------------------------
+int  EEfeeDataBlock 
+::isHeadValid(int token, int crId, int len, int trigComm, int errFlag){
+  // printf("ask/0x: %x %x %x %x %x\n", token,crId,len,trigComm,errFlag);
+  // print(0);
+  if(getCrateID()!=crId) return 0; // discard
+  if(getToken()!=token) return 0; // discard
+  if(getLenCount()!=len) return 0;
+  if(getTrigComm()!=trigComm) return 0;
+  if(getErrFlag()!=errFlag) return 0;
+  return 1; // good header
+}
+
 
 
 /*
  * $Log: EEfeeDataBlock.cxx,v $
+ * Revision 1.12  2004/04/02 06:38:52  balewski
+ * *** empty log message ***
+ *
  * Revision 1.11  2004/03/25 16:54:58  balewski
  * cleanup of arguments
  *

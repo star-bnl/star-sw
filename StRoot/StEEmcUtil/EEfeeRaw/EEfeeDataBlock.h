@@ -2,7 +2,7 @@
 #ifndef EEfeeDataBlock_h
 #define EEfeeDataBlock_h
 /*********************************************************************
- * $Id: EEfeeDataBlock.h,v 1.9 2004/03/25 16:54:59 balewski Exp $
+ * $Id: EEfeeDataBlock.h,v 1.10 2004/04/02 06:38:52 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw FEE Data Block
@@ -13,7 +13,7 @@
 class EEfeeDataBlock :public TObject {
 
 public:
-  enum { EVTYPE=0,WRDCNT=1,TOKEN=2,CRATE=3};
+  enum { WRDCNT=0,ERRFLG=1,TOKEN=2,CRATE=3};
   static const int DefaultMaxHead;
   static const int DefaultMaxData;
  
@@ -43,20 +43,53 @@ public:
   int       getValidDataLen() const {return getDataLen(); } //bckwd compat.  
   int       getHeadLen() const { return MaxHead; }
 
-  UShort_t  getToken()    const { return  head[TOKEN];           }
-  UChar_t   getTrigType() const { return  head[CRATE] / 0x0100 ; }
+  UShort_t  getErrFlag() const { return  head[ERRFLG] & 0x0FFF; }
+  UShort_t  getLenCount() const { return  head[WRDCNT] & 0x0FFF; }
+  UShort_t  getToken()    const { return  head[TOKEN] & 0x0FFF; }
+  UChar_t   getTrigComm() const { return  (head[CRATE] / 0x0100) &0x000F ; }
   UChar_t   getCrateID()  const { return  head[CRATE] & 0x00FF ; }
   int       getNData(int thres) const;
   void      maskCrate() {head[CRATE]=0xFFFF;}
   void      setCrateID(UShort_t id ) { head[CRATE]= (head[CRATE]&0xFF00) + ( id& 0x00FF);}
-  int       isValid();
-  
+  int       isValid(); 
+  int     isHeadValid(int token, int crId, int len, int trigComm, int errFlag);
+
   ClassDef(EEfeeDataBlock,1) // Endcap Emc event
 };
 #endif
 
 /*
+Date: Fri, 02 Apr 2004 00:10:36 -0500
+From: Gerard Visser <gvisser@iucf.indiana.edu>
+To: Jan Balewski <balewski@iucf.indiana.edu>
+Subject: Re: header
+
+Hi Jan,
+        First of all ALL numbers reported by ETOW and ESMD are 12-bits. DAQ
+reads them as 16, but only the 12 least significant come over the fiber.
+Tonko fills in the upper nibble with 0 but I don't know about any
+guarantees.
+        The 0th word is the length count. ESMD has 192+4 words, length count is
+196=0x0c4. ETOW has 128+4 words, length count is 132=0xa4.
+        The 1th word is the "error flags".
+        The 2nd word is the token.
+        The 3rd word is the trigger command nibble put together with the "RDO
+ID" or "crate ID".
+        The 4th and following words are the data (ADC values).
+        See
+http://www.iucf.indiana.edu/U/gvisser/STAR_EEMC/STAR_EEMC_DAQ_Data_Formats.pdf
+(page 2 for instance).
+
+        - Gerard
+
+*/
+
+
+/*
  * $Log: EEfeeDataBlock.h,v $
+ * Revision 1.10  2004/04/02 06:38:52  balewski
+ * *** empty log message ***
+ *
  * Revision 1.9  2004/03/25 16:54:59  balewski
  * cleanup of arguments
  *

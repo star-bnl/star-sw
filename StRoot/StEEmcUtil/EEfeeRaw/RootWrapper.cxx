@@ -133,7 +133,7 @@ eemcfeerootfill_(unsigned short& evtype, unsigned short& evtoken, unsigned short
       }
     }
     if(wordcnt>4) wordcnt -= 4;
-    head[EEfeeDataBlock::EVTYPE] = evtype;
+    head[EEfeeDataBlock::ERRFLG] = evtype; // use free slot
     head[EEfeeDataBlock::WRDCNT] = wordcnt;
     head[EEfeeDataBlock::TOKEN]  = token;
     head[EEfeeDataBlock::CRATE]  = cratrig;
