@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.28 2000/08/17 00:38:48 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.29 2000/08/30 05:37:02 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.28  2000/08/17 00:38:48  ullrich
- * Allow loading of tpt tracks.
+ * Revision 2.29  2000/08/30 05:37:02  ullrich
+ * Obtain trigger mask from StEvtHddr dataset.
+ *
+ * Revision 2.29  2000/08/30 05:37:02  ullrich
+ * Obtain trigger mask from StEvtHddr dataset.
  *
  * Revision 2.28  2000/08/17 00:38:48  ullrich
  * Allow loading of tpt tracks.
@@ -120,6 +123,8 @@
 #include "SystemOfUnits.h"
 #include "StEventTypes.h"
 #include "StMessMgr.h"
+#include "StMemoryInfo.hh"
+#include "StTimer.hh"
 #include "StGlobals.hh"
 #include "StEvtHddr.h"
 
@@ -132,10 +137,10 @@ using std::pair;
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.28 2000/08/17 00:38:48 ullrich Exp $";
+#define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.28 2000/08/17 00:38:48 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.29 2000/08/30 05:37:02 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -396,7 +401,7 @@ StEventMaker::makeEvent()
     else if (dstEventSummary && mDstSummaryParam) {	
 	mCurrentEvent = new StEvent();
 	mCurrentEvent->setSummary(new StEventSummary(*dstEventSummary, *mDstSummaryParam));
-
+    }
     else
         mCurrentEvent = new StEvent;
     
@@ -901,6 +906,14 @@ StEventMaker::makeEvent()
             }
             mCurrentEvent->setFtpcHitCollection(ftpcHitColl);
             if (nfailed)
+                gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
+                                    << " FTPC hits, wrong hardware address." << endm;
+        }
+    }
+    
+    //
+    //  Add data from StEvtHddr we cannot get elsewhere
+    //
     StEvtHddr* header = dynamic_cast<StEvtHddr*>(GetInputDS("EvtHddr"));
     if (header) {
 	mCurrentEvent->setTriggerMask(header->GetTriggerMask());
