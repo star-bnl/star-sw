@@ -54,7 +54,7 @@ public:
 
 protected:
   Int_t v0;
-  ClassDef(StXiMc,4)
+  ClassDef(StXiMc,5)
 };
 
 inline Int_t   StXiMc::charge() const {return parentCharge();}
@@ -75,8 +75,11 @@ inline Int_t   StXiMc::decayMode() const {return StKinkMc::decayMode();}
 
 
 /***********************************************************************
- * $Id: StXiMc.hh,v 3.4 2003/05/30 21:20:20 genevb Exp $
+ * $Id: StXiMc.hh,v 3.5 2003/06/01 04:25:19 genevb Exp $
  * $Log: StXiMc.hh,v $
+ * Revision 3.5  2003/06/01 04:25:19  genevb
+ * Update ClassDef version for altered inheritance
+ *
  * Revision 3.4  2003/05/30 21:20:20  genevb
  * doxygen savvy, encoding of FTPC mults, change virtual funcs
  *
