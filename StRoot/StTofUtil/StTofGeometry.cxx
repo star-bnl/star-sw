@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.cxx,v 1.7 2003/09/13 00:42:32 perev Exp $
+ * $Id: StTofGeometry.cxx,v 1.8 2004/04/28 18:58:16 dongx Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.cxx,v $
+ * Revision 1.8  2004/04/28 18:58:16  dongx
+ * fix a bug on the mis-matching by the opposite direction tracks
+ *
  * Revision 1.7  2003/09/13 00:42:32  perev
  * XDF obsolete + small fixes
  *
@@ -533,8 +536,9 @@ tofSlatHitVector StTofGeometry::tofHelixToArray(const StPhysicalHelixD& helix,
     }
     StThreeVectorD hitAtLayer[mMaxSlatLayers];
     for (unsigned int ll=0;ll<mMaxSlatLayers;ll++){
-	pathLength = helix.pathLength(slatNormLayer[ll], slatNormalVec);
-	hitAtLayer[ll] = helix.at(pathLength);
+      pathLength = helix.pathLength(slatNormLayer[ll], slatNormalVec);
+      pathLength = (pathLength>0) ? pathLength : 1.0e+33;
+      hitAtLayer[ll] = helix.at(pathLength);
     }
 
     // loop over all slats in idErasedVec (=slatIdVec at the begining of while)
