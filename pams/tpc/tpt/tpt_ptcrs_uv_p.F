@@ -1,5 +1,8 @@
-* $Id: tpt_ptcrs_uv_p.F,v 1.2 1998/01/27 00:35:51 fisyak Exp $
+* $Id: tpt_ptcrs_uv_p.F,v 1.3 1998/03/30 22:10:26 sakrejda Exp $
 * $Log: tpt_ptcrs_uv_p.F,v $
+* Revision 1.3  1998/03/30 22:10:26  sakrejda
+* **2 was missing in the constant calculation, it is marked in the text of the routine TPT_PTCRS_UV_P
+*
 * Revision 1.2  1998/01/27 00:35:51  fisyak
 * Split sources
 *
@@ -34,7 +37,7 @@ C<---------------------------------------------------------------------
       REAL as,bs,at,bt,xp1(2),yp1(2),x0,y0
       REAL a,b,c,delta
 C______________________________________________________________________
-      if(abs(as).gt.0.000001) then
+      if(abs(as).gt.abs(bs)) then
         a=(bt+bt*bs**2/as**2)
         b=(-at*bs/as-2.0*bt*bs/as*(1.0/as-x0)-2.0*bt*y0+1)
         c=(at*(1.0/as-x0)+bt*(1.0/as-x0)**2+bt*y0**2-y0)
@@ -51,7 +54,7 @@ C______________________________________________________________________
       else
         a=(bt+bt*as**2/bs**2)
         b=(at-2.0*bt*x0-2.0*bt*as/bs*(1.0/bs-y0)-as/bs)
-        c=(-at*x0+bt*x0**2+bt*(1.0/bs-y0)+1.0/bs-y0)
+        c=(-at*x0+bt*x0**2+bt*(1.0/bs-y0)**2+1.0/bs-y0)
         delta=b**2-4.0*a*c
         if(delta.ge.0) then
           xp1(1)=(-b-sqrt(delta))*0.5/a
