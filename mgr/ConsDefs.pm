@@ -1,10 +1,10 @@
-# $Id: ConsDefs.pm,v 1.7 2000/04/13 16:38:04 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.8 2000/04/19 20:05:27 fisyak Exp $
 {
- if (defined($AFS)) {$File::Find::dont_use_nlink;}
  use File::Basename;
  use Sys::Hostname;
  use Cwd;
  use File::Find ();
+ if (defined($AFS)) {$File::Find::dont_use_nlink;}
  #________________________________________
  *name           = *File::Find::name;
  *prune          = *File::Find::prune;
@@ -223,6 +223,12 @@
      $CXX      = "insure -g -Zoi \"compiler_cpp CC\"";
      $LD       = $CXX;
      $SO       = $CXX;
+   }
+   else {
+     $MAKELIB = "%SO %DEBUG %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS ;"; 
+     $MAKELIB.= "test -d %>:d/SunWS_cache && rm -rf %>:d/SunWS_cache";
+     $LINKCOM = "%LD %DEBUG %LDFLAGS %EXTAR_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%> ;";
+     $LINKCOM.= "test -d %>:d/SunWS_cache && rm -rf %>:d/SunWS_cache";
    }
  }
  elsif (/^sun4x_5.$/) {
