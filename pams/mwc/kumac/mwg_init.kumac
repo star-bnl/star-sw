@@ -1,6 +1,13 @@
-macro mwg_init
-macro/global/import *
-
+ 
+ macro init
+   macro/global/import *
+     
+ return
+* *********************************************************
+ 
+ macro fill
+   macro/global/import *
+     
 
 cd [params]/mwc
 
@@ -22,9 +29,18 @@ tdm/table/cell/putvalue 'geom[0].r2min'    125.488
 rowcount cal 384
 *
 tdm/table/cell/putvalue 'cal[0].cc'        1.00
-*
-ami/module/call mwg geom cal 
+
 
 cd /dui
 
-RETURN
+ return
+* ************************************************************
+ 
+
+ macro mwg
+   macro/global/import *
+     
+     ami/module/call mwg [params]/mwc/geom [params]/mwc/cal 
+ return
+
+* **********************************************************

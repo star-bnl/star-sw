@@ -1,6 +1,13 @@
-macro mws_init
-macro/global/import *
-*
+ macro init
+   macro/global/import *
+     
+ return
+  
+* ******************************************************************
+macro fill
+  macro/global/import *
+    
+* 
 *    Define tables
 *
 cd [params]/mwc
@@ -10,11 +17,13 @@ newtable mpar mwc_mpar 1
 *
 rowcount mpar 1
 *
-tdm/table/cell/putvalue 'mpar[0].gain'               1.0       1.0
-tdm/table/cell/putvalue 'mpar[0].de_thresh'          0.0       0.0
-tdm/table/cell/putvalue 'mpar[0].tof_thresh'         0.0       0.0
+tdm/table/cell/putvalue 'mpar[0].gain'               1.0      
+tdm/table/cell/putvalue 'mpar[0].de_thresh'          0.0      
+tdm/table/cell/putvalue 'mpar[0].tof_thresh'         0.0      
 tdm/table/cell/putvalue 'mpar[0].num_counts_out'   384.0
 tdm/table/cell/putvalue 'mpar[0].num_wires_count'   20.0
 tdm/table/cell/putvalue 'mpar[0].wires'              1
 *
 cd /dui
+ 
+ return
