@@ -9,7 +9,11 @@
 #define StiEvaluableTrackSeedFinder_HH
 
 #include <vector>
+using std::vector;
 #include <map>
+using std::map;
+#include <string>
+using std::string;
 
 #include "StiSeedFinder.h"
 #include "StiGui/StiRootDrawableStiEvaluableTrack.h" //For factory
@@ -19,6 +23,7 @@ class StMcEvent;
 class StMcTrack;
 class StAssociationMaker;
 class StTrackPairInfo;
+class StTpcHitFilter;
 
 class StiEvaluableTrackSeedFinder : public StiSeedFinder
 {
@@ -29,6 +34,7 @@ public:
     //Sets
     void setEvent(StMcEvent* mcevt=0);
     void setFactory(StiEvaluableTrackFactory* val);
+    void setBuildPath(const string&);
     
     //User query interface to StiKalmanTracks
     virtual bool hasMore();
@@ -43,7 +49,10 @@ private:
     
     StAssociationMaker* mAssociationMaker;
     StMcEvent* mMcEvent;
-    StiEvaluableTrackFactory* mfactory;
+    StiEvaluableTrackFactory* mFactory;
+    StTpcHitFilter* mTpcHitFilter; //deep memeber, requires non-defualt assignment and copy
+    string mBuildPath;
+    bool mBuilt;
 
     vector<StMcTrack*>::iterator mCurrentMc;
     vector<StMcTrack*>::iterator mBeginMc;
@@ -51,6 +60,7 @@ private:
 };
 
 //Stl utility functors
+
 class BestCommonHits
 {
 public:
@@ -69,9 +79,13 @@ private:
     
 inline void StiEvaluableTrackSeedFinder::setFactory(StiEvaluableTrackFactory* val)
 {
-    mfactory=val;
+    mFactory=val;
 }
 
+inline void StiEvaluableTrackSeedFinder::setBuildPath(const string& val)
+{
+    mBuildPath = val;
+}
 #endif
 
 
