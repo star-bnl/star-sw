@@ -12,13 +12,13 @@ use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
 
-# $Id: cons,v 1.39 2000/06/07 17:05:52 fisyak Exp $
+# $Id: cons,v 1.40 2000/06/12 13:46:43 fisyak Exp $
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 $ver_num = 2.0;
 $ver_rev = "";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.39 2000/06/07 17:05:52 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.40 2000/06/12 13:46:43 fisyak Exp $)'. "\n";
 
 # Cons: A Software Construction Tool.
 # Copyright (c) 1996-2000 Free Software Foundation, Inc.
@@ -114,8 +114,6 @@ Arguments can be any of the following, in any order:
   -lh           Show a help message local to the current build if
 		one such is defined,  and exit.
 
-  -o [file]	Read override file [file].
-
   -k		Keep going as far as possible after errors.
 
   -o <file>	Read override file <file>.
@@ -125,8 +123,6 @@ Arguments can be any of the following, in any order:
   -pw		Show products and where they are defined.
 
   -q		Be quiet about Installing and Removing targets.
-
-  -wf [file]    Write all filenames considered into [file].
 
   -r		Remove construction products associated with [targets]
 
@@ -165,7 +161,7 @@ $0 = $file;
 # Default parameters.
 $param::topfile = 'Construct';	# Top-level construction file.
 $param::defaultConstruct = $STAR . "/mgr/Construct";	# Default construction file.
-#$param::defaultConscript = $STAR . "/mgr/Conscript-standard";	# Default construction file.
+$param::defaultConscript = "";	# Default construction file.
 $param::defaultInclude   = 1;   # Force to use default include path
 $param::install = 1;		# Show installations
 $param::build = 1;		# Build targets
@@ -190,7 +186,6 @@ sub showcom {
 
 # Default environment.
 @param::defaults = (
-
      'CC'	    => 'cc',
      'CFLAGS'	    => '',
      'CCCOM'	    => '%CC %CFLAGS %_IFLAGS -c %< -o %>',
@@ -273,7 +268,7 @@ sub option {
 		    'cd' =>   sub { $param::cachedisable = 1; },
 		    'cr' =>   sub { $param::random = 1; },
 		    'cs' =>   sub { $param::cachesync = 1; },
-		    'd'  =>   sub { $param::depends = 1; },
+		    'd' =>    sub { $param::depends = 1; },
 		    'lh' =>   sub { $param::localhelp = 1; },
 		    'k' =>    sub { $param::kflag = 1; },
 		    'p' =>    sub { $param::pflag = 1;
@@ -329,7 +324,7 @@ sub option {
 	return;
     }
     if ($_) {
-	die qq($0: unrecognized option "-$_".  Use -x or -h for a usage message.\n);
+	die qq($0: unrecognized option "-$_".  Use -x for a usage message.\n);
     }
 }
 
@@ -418,7 +413,7 @@ sub Override {
 package main;
 # Check script inclusion regexps
 my $pwd = cwd();# print "Pwd = $pwd\n"; 
-(my $Rpwd = $pwd) =~ s/\/(pams|StRoot|asps|ROOT\/root).*//;# print "Root pwd = $Rpwd\n";
+(my $Rpwd = $pwd) =~ s/\/(pams|StRoot|asps|ROOT\/root|root\StDb).*//;# print "Root pwd = $Rpwd\n";
 if ($1) {
   chdir($Rpwd) if $Rpwd;
   (my $Lpwd = $pwd) =~ s/$Rpwd\///;#print "Local pwd = $Lpwd\n";
@@ -513,6 +508,7 @@ sub buildtarget {
 		# but there's no File::Spec method for hidden files,
 		# so leave it alone until we know what cross-OS
 		# conventions make sense.
+#yf		next if $entry =~ /^\./; # ignore hidden files
 	        next if $entry eq '.' or  $entry eq '..' or $entry eq '.consign'; # ignore hidden files
 		my($tgt) = $members->{$entry};
 		next if ref($tgt) eq "file" && !exists($tgt->{builder});
@@ -611,10 +607,12 @@ sub main::doscripts {
 # so we've replaced it with the following code.
 	my($key,$val);
 	while (($key,$val) = each %script::) {
+#	    next if $key eq 'env';
 	    local(*priv::script) = $val;
 	    undef $priv::script;
 	    undef @priv::script;
 	    undef %priv::script;
+#	    print "$key $val $env->{INCDIRPREFIX}\n";
 	}
     }
     die("$0: script errors encountered: construction aborted\n")
@@ -1036,7 +1034,7 @@ sub wanted_Def {
 }
 #________________________________________
 sub find_idl {
-  if (defined($AFS)) {$File::Find::dont_use_nlink;}
+#  if (defined($AFS)) {$File::Find::dont_use_nlink;}
   @search_files   = ();
   &File::Find::find(\&wanted_idl, @_);
   for my $dir (@_) {
@@ -1158,6 +1156,8 @@ sub _subst {
     } else {
 	while (($str =~ s/\%\{([_a-zA-Z]\w*)\}/$env->{$1}/ge) ||
 	       ($str =~ s/\%([_a-zA-Z]\w*)/$env->{$1}/ge)) {}
+    $str =~ s/-features=no_/-features=no\%/g; # no% option for Sun
+    $str =~ s/-library=iostream,no_Cstd/-library=iostream,no%Cstd/g;
 	return $str;
     }
 }
@@ -1203,7 +1203,6 @@ sub InstallAs {
 	}
     }
 }
-
 
 # Installation in a local build directory,
 # copying from the repository if it\'s already built there.
@@ -1275,21 +1274,22 @@ sub LinkedModule {
     my($env) = shift;
     my($tgt) = $dir::cwd->lookupfile($env->_subst(shift));
     my($progenv) = $env->_resolve($tgt);
-    $tgt->bind(find build::command::linkedmodule
+#    $tgt->bind(find build::command::linkedmodule
+    $tgt->bind(find build::command::link
 	       ($progenv, $progenv->{LINKMODULECOM}),
 	       $env->_Objects(map($dir::cwd->lookupfile($env->_subst($_)), @_)));
 }
 
-sub LinkedTables {
-    my($env) = shift;
-    my($tgt) = $dir::cwd->lookup($env->_subst(shift));
-    my($progenv) = $env->_resolve($tgt);
-    $tgt->bind(find build::command::linkedmodule
-	       ($progenv, $progenv->{LINKMODULECOM}),
-	       $env->_Objects(map(@_, @_)));
-#	       @_);
-#	       $env->_Objects(map($dir::cwd->lookup($env->_subst($_)), @_)));
-}
+#sub LinkedTables {
+#    my($env) = shift;
+#    my($tgt) = $dir::cwd->lookup($env->_subst(shift));
+#    my($progenv) = $env->_resolve($tgt);
+#    $tgt->bind(find build::command::linkedmodule
+#	       ($progenv, $progenv->{LINKMODULECOM}),
+#	       $env->_Objects(map(@_, @_)));
+##	       @_);
+##	       $env->_Objects(map($dir::cwd->lookup($env->_subst($_)), @_)));
+#}
 
 sub Library {
     my($env) = shift;
@@ -1744,116 +1744,14 @@ BEGIN { @ISA = qw(build::command) }
 
 # Find an appropriate linker.
 sub find {
-    my($class, $env, $command) = @_;
-    if (!exists $env->{_LDIRS}) {
-	my($ldirs);
-	my($wd) = $env->{_cwd};
-	my($pdirs) = $env->{LIBPATH};
-	if (ref($pdirs) ne 'ARRAY') {
-	    $pdirs = [ split(/$main::PATH_SEPARATOR/o, $pdirs) ];
-	}
-	# On Win32, build library search path as /LIBPATH:A
-	# <schwarze@isa.de> 1998-05-13
-	# Move its invariant calculation outside the loop
-	# <knight@baldmt.com> 1998-09-22
-	my($flagprefix) = " ${main::LIB_FLAG_PREFIX}";
-	for $dir (map($wd->lookupdir($_), @$pdirs)) {
-	    my($dpath) = $dir->path;
-	    $ldirs .= $flagprefix . $dpath;
-	    next if $dpath =~ m#^$dir::MATCH_SEPARATOR#o;
-	    if (@param::rpath) {
-		my($suffix);
-		if ($dpath ne '.' && $dpath !~ '^#') {
-		    $suffix = $dir::SEPARATOR . $dpath;
-		}
-		my($d);
-		foreach $d (@param::rpath) {
-		    $ldirs .= $flagprefix . $d->path . $suffix;
-		}
-	    }
-	}
-	$env->{_LDIRS} = "%($ldirs%)";
-    }
-
-    # Introduce a new magic _LIBS symbol which allows to use the
-    # Unix-style -lNAME syntax for Win32 only. -lNAME will be replaced
-    # with %{PREFLIB}NAME%{UFLIB}. <schwarze@isa.de> 1998-06-18
-
-    if ($main::_WIN32 && !exists $env->{_LIBS}) {
-	my($libs);
-	for $name (split(' ', $env->_subst($env->{LIBS}))) {
-	    if ($name =~ /^-l(.*)/) {
-		$name = "$env->{PREFLIB}$1$env->{SUFLIB}";
-	    }
-	    $libs .= ' ' . $name;
-	}
-	$env->{_LIBS} = "%($libs%)";
-    }
-    bless find build::command($env, $command);
+  build::command::link::find(@_);
 }
 
 # Called from file::build. Make sure any libraries needed by the
 # environment are built, and return the collected signatures
 # of the libraries in the path.
 sub includes {
-    return $_[0]->{sig} if exists $_[0]->{sig};
-    my($self, $tgt) = @_;
-    my($env) = $self->{env};
-    my($ewd) = $env->{_cwd};
-    my($ldirs) = $env->{LIBPATH};
-    if (ref($ldirs) ne 'ARRAY') {
-	$ldirs = [ split(/$main::PATH_SEPARATOR/o, $ldirs) ];
-    }
-    my(@lpath) = map($ewd->lookupdir($_), @$ldirs);
-    my(@sigs);
-    my(@names);
-
-    if ($main::_WIN32) {
-      # Pass %LIBS symbol through %-substituition
-      # <schwarze@isa.de> 1998-06-18
-      @names = split(' ', $env->_subst($env->{LIBS}));
-    } else {
-      @names = split(' ', $env->{LIBS});
-    }
-    for $name (@names) {
-      my($lpath,@allnames);
-	if ($name =~ /^-l(.*)/) {
-	    # -l style names are looked up on LIBPATH, using all
-	    # possible lib suffixes in the same search order the
-	    # linker uses (according to SUFLIBS).
-	    # Recognize new PREFLIB symbol, which should be 'lib' on
-	    # Unix, and empty on Win32. TODO: What about shared
-	    # library suffixes?  <schwarze@isa.de> 1998-05-13
-	   @allnames = map("$env->{PREFLIB}$1$_",
-			   split(/:/, $env->{SUFLIBS}));
-	    $lpath = \@lpath;
-	} else {
-	    @allnames = ($name);
-	    # On Win32, all library names are looked up in LIBPATH
-	    # <schwarze@isa.de> 1998-05-13
-	    if ($main::_WIN32) {
-		$lpath = [$dir::top, @lpath];
-	    }
-	    else {
-		$lpath = [$dir::top];
-	    }
-	}
-	DIR: for $dir (@$lpath) {
-	    for $n (@allnames) {
-		my($lib) = $dir->lookup($n);
-		if ($lib->accessible) {
-		    last DIR if $lib->ignore;
-		    if ((build $lib) eq 'errors') {
-			$tgt->{status} = 'errors';
-			return undef;
-		    }
-		    push(@sigs, sig->signature($lib));
-		    last DIR;
-		}
-	    }
-	}
-    }
-    $self->{sig} = sig->collect(@sigs);
+  build::command::link::includes(@_);
 }
 
 # Always compatible with other such builders, so the user
@@ -1897,7 +1795,7 @@ sub find {
     $_[1]->{_kuip} || do {
 	my($class, $env) = @_;
 	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
-	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
+	$env->{_IFLAGS} = "%(" . $cscanner->iflags($env) . "%)";
 	my($self) = find build::command($env, $env->{KUIPCOM});
 	$self->{scanner} = $cscanner;
 	bless $env->{_kuip} = $self;
@@ -1920,7 +1818,7 @@ sub find {
     $_[1]->{_stic} || do {
 	my($class, $env) = @_;
 	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
-	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
+	$env->{_IFLAGS} = "%(" . $cscanner->iflags($env) . "%)";
 	my($self) = find build::command($env, $env->{STICCOM});
 	$self->{scanner} = $cscanner;
 	bless $env->{_stic} = $self;
@@ -1943,7 +1841,7 @@ sub find {
     $_[1]->{_fc} || do {
 	my($class, $env) = @_;
 	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
-	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
+	$env->{_IFLAGS} = "%(" . $cscanner->iflags($env) . "%)";
 	my($self) = find build::command($env, $env->{FCCOM});
 	$self->{scanner} = $cscanner;
 	bless $env->{_fc} = $self;
@@ -1966,7 +1864,7 @@ sub find {
     $_[1]->{_geant3} || do {
 	my($class, $env) = @_;
 	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
-	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
+	$env->{_IFLAGS} = "%(" . $cscanner->iflags($env) . "%)";
 	my($self) = find build::command($env, $env->{GEANT3COM});
 	$self->{scanner} = $cscanner;
 	bless $env->{_geant3} = $self;
@@ -2263,7 +2161,7 @@ sub scan {
 	return () unless open(SCAN, $file->rpath);
 	while (<SCAN>) {
 	    next unless /^\s*#/;
-	  $_ =~ s/\/\/.*$//g; # remove c++ comments '//'
+	  $_ =~ s/\/\/.*$//g; # remove c++ comments '//' yf
 	    if (/^\s*#\s*include\s*([<"])(.*?)[>"]/) {
 		if ($1 eq "<") {
 		    push(@anglenames, $2);
@@ -2298,28 +2196,21 @@ sub scan {
       my $default_include  = "";
 	foreach $dir(@longpath) {
 	    my($include) = $dir->lookup_accessible($name);
-	    if ($dir->path =~ /^include$/) {
-	      $default_include = $include;
-	    }
-	    if ($include->accessible) {
+	    if ($include) {
+	      if ($dir->path =~ /^include$/) {
+		$default_include = $include;
+	      }
+	      if ($include->accessible) {
 		push(@includes, $include) unless $include->ignore;
 		$default_include = "";
 		last;
+	      }
 	    }
-	}
+	  }
       if ($param::defaultInclude && $default_include) { 
-#	if ($default_include->path !~ /incbeg\.inc$/ &&
-#	    $default_include->path !~ /incend\.inc$/ &&
-#	    $default_include->path !~ /math\.h$/ &&
-#	    $default_include->path !~ /descrip\.h$/ &&
-#	    $default_include->path !~ /fortran\.h$/ &&
-#	    $default_include->path !~ /not_cern/    &&
-#	    $default_include->path !~ /compiledata\.h$/    
-#	   ) {
 	  if (!$default_include->ignore) {
 	    push @includes, $default_include;
 	  }
-#	}
       }
     }
 
@@ -2330,19 +2221,21 @@ sub scan {
 sub iflags {
     my($self, $env) = @_;
     my($iflags);
-#    my($rflags);
-#    my($oflags);
     my($dpath);
     # Recognize /I style include directive on Win32
     # <schwarze@isa.de> 1998-05-13
     # Move its invariant calculation outside the loop
     # <knight@baldmt.com> 1998-09-22
-    my($flagprefix) = " ${main::FLAG_CHARACTER}I";
+#yf    my($flagprefix) = " ${main::FLAG_CHARACTER}I";
 #    my $PWD = `pwd`; chomp($PWD);
     for $dpath (map($_->path, @{$self->{path}})) {
-#y      if ($dpath =~ /^$dir::MATCH_SEPARATOR/) {$oflags .= $flagprefix . $dpath; next;} 
+#yf     if ($dpath =~ /^$dir::MATCH_SEPARATOR/) {$oflags .= $flagprefix . $dpath; next;} 
 #	$iflags .= $flagprefix . $PWD . "/" . $dpath;
 #yf	$iflags .= $flagprefix . $dpath;
+#      print "iflags: $env->{INCDIRPREFIX}\n";
+#	$iflags .= " ".$env->{INCDIRPREFIX}.$dpath;
+#	$iflags .= " -I".$dpath;
+#yf	next if File::Spec->file_name_is_absolute($dpath);
 	$iflags .= " ".$env->{INCDIRPREFIX}.$dpath;
 	next if File::Spec->file_name_is_absolute($dpath);
 	if (@param::rpath) {
@@ -2359,9 +2252,7 @@ sub iflags {
 	}
     }
     $iflags
-#            . $rflags . $oflags
 }
-
 package File::Spec;
 
 # Cons is migrating to using File::Spec for portable path name
@@ -2486,8 +2377,7 @@ BEGIN {
     # A fast-path regular expression to match a directory separator
     # anywhere in a path name.
     if ($SEPARATOR eq '/') {
-#yf    $MATCH_SEPARATOR = "\Q$SEPARATOR\E";
-    $MATCH_SEPARATOR = $SEPARATOR;
+	$MATCH_SEPARATOR = "\Q$SEPARATOR\E";
     } else {
 	$MATCH_SEPARATOR = "[\Q/$SEPARATOR\E]";
     }
@@ -2767,16 +2657,6 @@ sub path {
     $_[0]->{path} ||
 	($_[0]->{path} = $_[0]->{dir}->prefix . $_[0]->{entry});
 }
-# Return the pathname of a file relative to the
-# indicated directory.
-# Addition from Eric Shienbrood <ers@wildfire.com>
-sub relpath {
-    my($pname) = $_[0]->path;
-
-    $pname =~ s,${_[1]->path}$dir::SEPARATOR,,;
-    $pname;
-}
-
 
 # Return the pathname as a prefix to be concatenated with an entry.
 sub prefix {
@@ -2858,7 +2738,6 @@ sub init {
     ($cwd_vol, undef, undef) = File::Spec->splitpath($path);
     $cwd_vol = '' if ! defined $cwd_vol;
 }
-
 package file;
 
 BEGIN { @ISA = qw(dir); $level = 0 }
@@ -3253,8 +3132,8 @@ sub install {
     my $dir_prefix = "";
     if ($sp !~ /^$dir::MATCH_SEPARATOR/) {
       $dir_prefix = File::Basename::dirname($tp);
-      $dir_prefix .= $dir::MATCH_SEPARATOR;
-      $dir_prefix =~ s/[\w|\.|\+]*$dir::MATCH_SEPARATOR/\.\.$dir::MATCH_SEPARATOR/g;
+      $dir_prefix .= $dir::SEPARATOR;
+      $dir_prefix =~ s#[\w|\.|\+]*$dir::SEPARATOR#\.\.$dir::SEPARATOR#g;
     }
     my $lsp = $dir_prefix . $sp;
     return 1 if $tp eq $sp;
@@ -3263,7 +3142,8 @@ sub install {
     if (! futil::mkdir($tgt->{dir})) {
 	return undef;
     }
-    return 1 if eval { symlink($lsp, $tp) };
+    return 1 if eval { link($sp, $tp) };
+    return 1 if eval { symlink($lsp, $tp) }; #yf 
     futil::copy($sp, $tp);
 }
 
@@ -3298,7 +3178,7 @@ sub mkdir {
 	return undef;
     }
     my($path) = $_[0]->path;
-    if (!-d $path && !mkdir($path, 0755)) {
+    if (!-d $path && !mkdir($path, 0755)) {#yf
 	warn qq($0: can't create directory $path ($!).\n); #'
 	return undef;
     }
@@ -3479,7 +3359,6 @@ sub signature {
 	    # builds going on... In principle, we could use the source
 	    # path and only compute this once.
 	    my($sig) = srcsig($path);
-#	    my($sig) = srcsig($srcpath);
 	    sig::hash::out($file, $sig);
 	    return $file->{sig} = $sig;
 	} else {
@@ -3493,14 +3372,13 @@ sub signature {
 # instantiation of the target (and does the target exist)?
 sub current {
     my($self, $file, $sig) = @_;
-#    if ($param::debug) {
-#    # Uncomment this to debug checks for signature currency.
-#    # <knight@baldmt.com> 1998-10-29
-#      my $fsig = $self->signature($file); 
-#      print STDOUT "\$self->signature(${\$file->path}) '$fsig' eq \$sig '$sig'\n"; 
-#      return $fsig eq $sig;
-#    }
-    $self->signature($file) eq $sig
+    # Uncomment this to debug checks for signature currency.
+    # <knight@baldmt.com> 1998-10-29
+    # my $fsig = $self->signature($file);
+    # print STDOUT "\$self->signature(${\$file->path})
+    #    '$fsig' eq \$sig '$sig'\n";
+    # return $fsig eq $sig;
+    $self->signature($file) eq $sig;
 }
 
 # Store the signature for a file.
@@ -3517,7 +3395,6 @@ sub collect {
     # The following sequence is faster than calling the hex interface.
     $md5->reset();
     $md5->add(join('', $param::salt, @sigs));
-
 #    if ($param::debug) {
 #    # Uncomment this to debug dependency signatures.
 #    # <schwarze@isa.de> 1998-05-08
@@ -3538,10 +3415,11 @@ sub srcsig {
     $md5->addfile(FILE);
     close(FILE);
 #    if ($param::debug) {
-#      # Uncomment this to print the result of file signature calculation.
-#      # <knight@baldmt.com> 1998-10-13
-#      my $buf = unpack("H*", $md5->digest()); print STDOUT "$path=|$buf|\n"; return $buf;
-#    }
+    # Uncomment this to print the result of file signature calculation.
+    # <knight@baldmt.com> 1998-10-13
+    # my $buf = unpack("H*", $md5->digest());
+    # print STDOUT "$path=|$buf|\n";
+    # return $buf;
     unpack("H*", $md5->digest());
 }
 __END__;
@@ -3852,8 +3730,6 @@ associated with them.
 This could also be written as a multi-level script. For example, the
 F<Construct> file might contain this command:
 
-
-
   Build qw(
 	parser/Conscript
 	drivers/Conscript
@@ -3861,7 +3737,6 @@ F<Construct> file might contain this command:
   );
 
 and the F<Conscript> file in the F<drivers> directory might contain this:
-
 
   Build qw(
 	display/Conscript
@@ -4049,8 +3924,6 @@ The F<world> directory's F<Conscript> file looks like this:
 
   # Internal products
   Library $CONS 'libworld.a', 'world.c';
-
-and the C<hello> directory's C<Conscript> file looks like this:
 
 and the F<hello> directory's F<Conscript> file looks like this:
 
@@ -4690,7 +4563,6 @@ and so they will be built if they are out-of-date.
 
 If we do, instead:
 
-
   % cons export
 
 then only the files that should be installed in the export directory will be
@@ -4824,9 +4696,6 @@ Let's suppose that we have a construction environment like this:
 	CDBG => '-g',
 	CFLAGS => '%COPT %CDBG',
   );
-
-Then if we have an override file C<over> containing this command:
-
 
 Then if we have an override file F<over> containing this command:
 
@@ -5118,8 +4987,6 @@ There are several pseudo variables which will also be expanded:
 
 =item %>
 
-=item C<%>>
-
 The target file name (in a multi-target command, this is always the first
 target mentioned).
 
@@ -5143,7 +5010,6 @@ F<Conscript> file in the F<test> directory:
 	echo %< -i %2 >> %>
 	echo %< -i %3 >> %>
   );
-
 
 If F<tgt> needed to be updated, then this would result in the execution of
 the following commands, assuming that no remapping has been established for

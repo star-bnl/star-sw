@@ -112,7 +112,7 @@ $env2 = $env->clone('CPPPATH'      => $CPPPATH,
 print "LIBPATH = |", $env2->{LIBPATH}, "|\n LIBS = |",$env2->{LIBS},"|\n"  if $param::debug;
 print "LINKMODULECOM |",$env2->{LINKMODULECOM},"|\n"  if $param::debug;
 my $cscanner= find scan::cpp($env2->{_cwd}, $env2->{CPPPATH});
-my $CPPPATH = $cscanner->iflags;  print "CPPPATH = $CPPPATH\n" if $param::debug;
+my $CPPPATH = $cscanner->iflags($env2);  print "CPPPATH = $CPPPATH\n" if $param::debug;
 my @cpps = split /:/,$env2->{CPPPATH}; print "@cpps\n" if $param::debug;
 my $ROOTCINT_CPP ="";
 my $STIC_CPP = "";
@@ -129,11 +129,11 @@ foreach my $cpp ($Dir,@cpps) {
   else           {$STIC_CPP = $cpp;}
 }
 $cscanner= find scan::cpp($env2->{_cwd}, $ROOTCINT_CPP); print "ROOTCINT_CPP = $ROOTCINT_CPP\n" if $param::debug;
-my $ROOTCINT_CPPPATH = $cscanner->iflags; 
+my $ROOTCINT_CPPPATH = $cscanner->iflags($env2); 
 #$ROOTCINT_CPPPATH .= " -I" . $env->{ENV}->{ROOTSYS} . "/root/cint/stl";
 print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n" if $param::debug;
 $cscanner= find scan::cpp($env2->{_cwd}, $STIC_CPP);
-my $STIC_CPPPATH = $cscanner->iflags;
+my $STIC_CPPPATH = $cscanner->iflags($env2); print "STIC_CPPPATH  = $STIC_CPPPATH\n";
 my $DIR = cwd(); print "DIR = $DIR\n" if $param::debug;
 my $line;
 my @Defs = ();
@@ -255,7 +255,7 @@ if ($#idlL > -1) {
 			 );
     }
     my $cscanner= find scan::cpp($env->{_cwd}, $ROOTCINT_CPP);# print "ROOTCINT_CPP = $ROOTCINT_CPP\n";
-    my $ROOTCINT_CPPPATH = $cscanner->iflags;# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
+    my $ROOTCINT_CPPPATH = $cscanner->iflags($env3);# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
     
     foreach my $idll (@idlT) { 
       my $stem     = basename ($idll, ".idl"); print "stem = $stem; idll: $idll\n" if $param::debug;

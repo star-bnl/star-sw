@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.15 2000/06/05 17:29:23 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.16 2000/06/12 13:46:37 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -487,7 +487,7 @@
 				     'TEMP' => $TEMP,
 				     'TMP'  => $TMP,
 				     'STAR_SYS' => $STAR_HOST_SYS
-				   },
+				   }
 );
  push(@param::defaults, @params);
 

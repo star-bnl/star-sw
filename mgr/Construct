@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.95 2000/06/05 17:29:24 fisyak Exp $
+# $Id: Construct,v 1.96 2000/06/12 13:46:43 fisyak Exp $
 use Env;
 #use lib qw($STAR . "/mgr"); # Modify perl include path
 use lib $STAR . "/mgr"; # Modify perl include path
@@ -112,6 +112,7 @@ if (! $param::quiet) {
   #    \nEXEFLAGS =\t$env->{EXEFLAGS}\n";
   print "LIBPATH  = \t$env->{LIBPATH}\tLIBS     = \t$env->{LIBS}       \tLibraries=\t$env->{Libraries}\n";
   print "SO       = \t$env->{SO}     \tSOFLAGS  = \t$env->{SOFLAGS}\n";
+  if ($param::debug) {foreach  my $key (sort keys %$env) {print "\$env->{",$key,"}= \t$env->{$key}\n";}}
 }
 my @subdirs = ();
 # make Targets and install includes
