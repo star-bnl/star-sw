@@ -15,6 +15,25 @@ using std::list;
 
 #include "StProtoJet.h"
 
+/*!
+  \class StJetPars
+  \author M.L. Miller (MIT Software)
+  A base class useful for the interface to StJetMaker::addAnalyzer() method.
+ */
+class StJetPars
+{
+private:
+    ClassDef(StJetPars,1)
+};
+
+/*!
+  \class StJetFinder
+  \author M.L. Miller (Yale Software)
+  An abstract base class to define the interface for all jet finding algorithms.  A list
+  of StProtoJet objects is passed in the call to findJets().  The user is responsible for
+  filtering the jets from the beam jets after this call.
+ */
+
 class StJetFinder
 {
 public:
@@ -22,28 +41,6 @@ public:
     typedef StProtoJet::FourVecList FourVecList;
     StJetFinder();
     virtual ~StJetFinder();
-
-    //access
-
-    void setDebug(bool v);
-    bool debug() const;
-
-    void setR(double r) {mR=r;}
-    double r() const {return mR;}
-    virtual void setNBinEta(Int_t nBins) {};
-    virtual void setEtaMin(Double_t etaMin) {};
-    virtual void setEtaMax(Double_t etaMax) {};
-    virtual void setNBinPhi(Int_t nBins) {};
-    virtual void setPhiMin(Double_t phiMin) {};
-    virtual void setPhiMax(Double_t phiMax) {};
-    virtual void setPtMax(Double_t ptMax) {};
-    virtual Int_t getNBinEta(void) { return 0; };
-    virtual Double_t getEtaMin(void) { return 0.0; };
-    virtual Double_t getEtaMax(void) { return 0.0; };
-    virtual Int_t getNBinPhi(void) { return 0; };
-    virtual Double_t getPhiMin(void) { return 0.0; };
-    virtual Double_t getPhiMax(void) { return 0.0; };
-    virtual Double_t getPtMax(void) { return 0.0; };
 
     //action
 
@@ -54,24 +51,10 @@ public:
     virtual void clear() = 0;
     virtual void print() = 0;
 
-    virtual void setSeedEtMin(double v) {};
-    virtual void setAssocEtMin(double v) {};
 
 protected:
     JetList mJets;
-    bool mDebug;
-    double mR;
 };
-
-inline void StJetFinder::setDebug(bool v)
-{
-    mDebug = v;
-}
-
-inline bool StJetFinder::debug() const
-{
-    return mDebug;
-}
 
 #endif
 

@@ -9,6 +9,15 @@
 
 double deltaphi(double p1, double p2);
 
+/*!
+  \class StProtoJetPair
+  \author M.L. Miller (Yale Software)
+  StProtoJetPair is a simple class used internally by the kt cluster algorithm.  It calculates
+  the et-weighted distance measure between two protojets.  In principle, StProtoJetPair
+  could be transformed to a polymorphic design, allowing for the use of the same kt-cluster
+  algorithm, but with differing distance measures.  Currently only the Ellis/Soper distance
+  measure is available.
+ */
 class StProtoJetPair
 {
 public:

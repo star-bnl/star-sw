@@ -14,6 +14,15 @@ using std::list;
 
 double deltaphi(double p1, double p2);
 
+/*!
+  \class StJetEtCell
+  \author M.L. Miller (Yale Software)
+  The work object of StConeJetFinder and derived classes.  A collection of cells constitutes a
+  grid.  Protojets are filled into the grid by calling StJetEtCell::add(StProtoJet&).  The protojets
+  are stored in a container, so there is no loss of information.  Thus, StJetEtCell is used for
+  computation efficiency.
+ */
+
 class StJetEtCell
 {
 public:
@@ -35,52 +44,61 @@ public:
     double phiMax() const;
     int nTimesUsed() const;
 
-    //Allow jet-finder power to over-ride eT
+    ///Allow jet-finder power to over-ride eT
     void setEt(double v) {mEt=v;}
 
-    //operators (sort by Et)
+    ///operators (sort by Et)
     virtual bool operator>(const StJetEtCell& rhs) const {
 	return eT() > rhs.eT();
     }
+    
+    ///operators (sort by Et)
     virtual bool operator<(const StJetEtCell& rhs) const {
 	return eT() < rhs.eT();
     }
 
-    //equality via cell geometry
+    ///equality via cell geometry/location
     bool operator==(const StJetEtCell* rhs) const {
 	return ( (*this)==(*rhs) );
     };
+
+    ///equality via cell geometry/location
     bool operator==(const StJetEtCell& rhs) const {
 	return (mEtaMin==rhs.mEtaMin && mEtaMax==rhs.mEtaMax
 		&& mPhiMin==rhs.mPhiMin && mPhiMax==rhs.mPhiMax);
     };
 
-    //access to the centroid.  If mUpToDate==true, just return.  Else calculate, store, return
+    ///access to the centroid.  If mUpToDate==true, just return.  Else calculate, store, return
     const StFourVec& centroid();
 
-    //action
+    ///Add a protojet to this cell
     virtual void add(const StProtoJet&);
+    ///Add another cell to this cell
     virtual void add(StJetEtCell* cell);
 
-    void setNtimesUsed(int); ///count how many jets ref this cell
-    virtual void clear(); ///internal reset for next pass at jet-finding
+    ///count how many jets ref this cell
+    void setNtimesUsed(int);
+    ///internal reset for next pass at jet-finding
+    virtual void clear(); 
 
-    //distance measures (to be moved to polymorphic behavior)
+    ///distance measures (to be moved to polymorphic behavior)
     double deltaPhi(const StJetEtCell& rhs) const;
+    ///distance measures (to be moved to polymorphic behavior)
     double deltaEta(const StJetEtCell& rhs) const;
+    ///distance measures (to be moved to polymorphic behavior)
     double distance(const StJetEtCell& rhs) const;
 
-    //write access to the contents of the cell
+    ///write access to the contents of the cell
     StProtoJet& protoJet() {return mProtoJet;}
 
-    //daugter cells of this one
+    ///daugter cells of this one
     CellList& cellList();
     const CellList& cellList() const;
 
-    //does this cell itself have any energy
+    ///does this cell itself have any energy
     bool empty() const {return mProtoJet.size()==0;}
 
-    //number of particles in protojet
+    ///number of particles in protojet
     unsigned int size() const; 
 
 protected:
@@ -96,12 +114,12 @@ protected:
     double mEt;
     int mNtimesUsed;
 
-    //lazy cache of centroid
+    ///lazy cache of centroid
     bool mUpToDate;
     StFourVec mCentroid;
 
-    //JetList mProtoJets; //remember the particles that make up cell!
-    CellList mCells;    //remember the cells cluster w/ this one
+    ///remember the cells cluster w/ this one
+    CellList mCells;
     StProtoJet mProtoJet;
 };
 

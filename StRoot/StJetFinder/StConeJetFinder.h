@@ -7,6 +7,9 @@
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
+#include "TObject.h"
+
+
 //std
 #include <utility>
 #include <map>
@@ -22,43 +25,31 @@ using std::pair;
 #include "StJetEtCell.h"
 
 class StJetSpliterMerger;
+class StConeJetFinder;
 
-class StConeJetFinder : public StJetFinder
+/*!
+  \class StConePars
+  \author M.L. Miller (MIT Software)
+  A simple class to encapsulate the requisite run-time parameters of the cone jet algorithm.
+*/
+
+///Run time pars
+class StConePars : public StJetPars
 {
 public:
-	
-    ///Run time pars
-    struct StConeJetFinderPars {
-	int mNeta;
-	int mNphi;
-	double mEtaMin;
-	double mEtaMax;
-	double mPhiMin;
-	double mPhiMax;
-    };
-	
-    //useful typdefs
-    typedef map<StEtGridKey, StJetEtCell*, StEtGridKeyLessThan> CellMap;
-    typedef CellMap::value_type CellMapValType;
-    typedef vector<StJetEtCell*> CellVec;
-    typedef StJetEtCell::CellList CellList;
-    typedef list<StJetEtCell> ValueCellList;
-	
-    //cstr-dstr
-    StConeJetFinder(StConeJetFinderPars& pars);
-    virtual ~StConeJetFinder();
-	
-    //simple access 
-    StConeJetFinderPars pars() const; //return by value to prevent changes to pars
-	
+
+    ///Set the grid spacing:
+    void setGridSpacing(int nEta, double etaMin, double etaMax,
+			int nPhi, double phiMin, double phiMax);
+    
     ///minimum et threshold to be considered a seed
     void setSeedEtMin(double);
     double seedEtMin() const;
-	
+    
     ///minimum et threshold to be considered for addition to the seed
     void setAssocEtMin(double);
     double assocEtMin() const;
-	
+    
     ///split jets if E_shared/E_neighbor>splitFraction
     void setSplitFraction(double v);
     double splitFraction() const;
@@ -75,30 +66,93 @@ public:
     void setDoSplitMerge(bool v) {mDoSplitMerge=v;}
     bool doSplitMerge() const {return mDoSplitMerge;}
 
-    ///Use r/::sqrt(2) for iteration search?
-    void setDoMidpointFix(bool v) {mDoMidpointFix=v;}
-    bool doMidpointFix() const {return mDoMidpointFix;}
-
     ///Require stable midpoints?
     void setRequireStableMidpoints(bool v) {mRequireStableMidpoints=v;}
     bool requiredStableMidpoints() const {return mRequireStableMidpoints;}
 
-    //inherited interface
-    virtual void findJets(JetList& protojets);
+    ///Set cone radius:
+    void setConeRadius(double v) {mR = v;}
+    double coneRadius() const {return mR;}
+
+    ///Toggle debug streams on/off
+    void setDebug(bool v) {mDebug = v;}
+    bool debug() const {return mDebug;}
+    
+private:
+    friend class StConeJetFinder;
+    friend class StCdfChargedConeJetFinder;
+
+    int mNeta;
+    int mNphi;
+    double mEtaMin;
+    double mEtaMax;
+    double mPhiMin;
+    double mPhiMax;
+
+    double mR;
+    
+    double mAssocEtMin;
+    double mSeedEtMin;
+    
+    double mphiWidth;
+    double metaWidth;
+    int mdeltaPhi;
+    int mdeltaEta;
+    
+    bool mDoMinimization;
+    bool mAddMidpoints;
+    bool mDoSplitMerge;
+    double mSplitFraction;
+    bool mRequireStableMidpoints;
+    bool mDebug;
+    
+    ClassDef(StConePars,1)
+	};
+
+
+/*!
+  \class StConeJetFinder
+  \author M.L. Miller (Yale Software)
+  Implementation of the cone algorithm, circa Tevatron RunII Jet Physics working group specification.
+*/
+class StConeJetFinder : public StJetFinder
+{
+public:
+	
+    ///useful typdefs
+    typedef map<StEtGridKey, StJetEtCell*, StEtGridKeyLessThan> CellMap;
+    typedef CellMap::value_type CellMapValType;
+    typedef vector<StJetEtCell*> CellVec;
+    typedef StJetEtCell::CellList CellList;
+    typedef list<StJetEtCell> ValueCellList;
+	
+    ///cstr-dstr
+    StConeJetFinder(const StConePars& pars);
+    virtual ~StConeJetFinder();
+	
+    ///simple access to the parameters
+    StConePars pars() const; 
+	
+    ///inherited interface
+    virtual void findJets(JetList& protojets);     
     virtual void clear();
     virtual void print();
 	
 protected:
 		
-    friend struct PreJetInitializer; //needs access to the grid
+    ///needs access to the grid
+    friend struct PreJetInitializer; 
 	
-    StConeJetFinder(); ///Only available for derived classes
+    ///Only available for derived classes
+    StConeJetFinder();
 
-    //make a polymorphic cell
+    ///make a polymorphic cell
     virtual StJetEtCell* makeCell(double etaMin, double etaMax, double phiMin, double phiMax);
-    virtual void buildGrid(); ///build the grid at construction time
+    ///build the grid at construction time
+    virtual void buildGrid();
 	
-    virtual void fillGrid(JetList& protoJets); ///put 'em in the grid
+    ///put 'em in the grid
+    virtual void fillGrid(JetList& protoJets); 
 	
     void clearAndDestroy();
 
@@ -111,7 +165,6 @@ protected:
     enum SearchResult {kTooManyTries=0, kLeftVolume=1, kConverged=2, kContinueSearch=3};	
     SearchResult doSearch();
 	
-    //void doMinimization(StJetEtCell& workCell);
     void doMinimization();
 	
     void addSeedsAtMidpoint();
@@ -123,43 +176,30 @@ protected:
 	
     const StProtoJet& collectCell(StJetEtCell* seed);
 	
-    //action
+    ///action
     int findPhiKey(double phi) const;
     int findEtaKey(double eta) const;
 	
-    //is this point in the detector volume?
+    ///is this point in the detector volume?
     bool inVolume(double eta, double phi);
 	
-    //find a key.  If out of bounds, it aborts program flow.  otherwise, nasty run-time errors!
+    ///find a key.  If out of bounds, it aborts program flow.  otherwise, nasty run-time errors!
     StEtGridKey findKey(double eta, double phi) const;
 	
-    //find iterators into grid
+    ///find iterators into grid
     CellMap::iterator findIterator(double eta, double phi);
+    ///find iterators into grid
     CellMap::iterator findIterator(const StEtGridKey&);
 	
     void setSearchWindow();
 	
 protected:
 	
-    StConeJetFinderPars mPars; ///run-time pars
+    StConePars mPars; ///run-time pars
 	
     CellMap mMap; ///the map references the objects in the vector
     CellVec mVec; ///the vector holds the actual objects
     CellVec::iterator mTheEnd;
-	
-    double mAssocEtMin;
-    double mSeedEtMin;
-	
-    double mphiWidth;
-    double metaWidth;
-    int mdeltaPhi;
-    int mdeltaEta;
-	
-    bool mDoMinimization;
-    bool mAddMidpoints;
-    bool mDoSplitMerge;
-    bool mDoMidpointFix;
-    bool mRequireStableMidpoints;
 	
     StJetEtCell mWorkCell;
     int mSearchCounter;
@@ -175,7 +215,7 @@ protected:
 
 //inlines
 
-inline StConeJetFinder::StConeJetFinderPars StConeJetFinder::pars() const
+inline StConePars StConeJetFinder::pars() const
 {
     return mPars;
 }
@@ -192,24 +232,42 @@ inline int StConeJetFinder::findPhiKey(double phi) const
     return int( (phi-mPars.mPhiMin)/(mPars.mPhiMax-mPars.mPhiMin)*mPars.mNphi );
 }
 
-inline void StConeJetFinder::setSeedEtMin(double v)
+inline void StConePars::setSeedEtMin(double v)
 {
     mSeedEtMin = v;
 }
 
-inline double StConeJetFinder::seedEtMin() const
+inline double StConePars::seedEtMin() const
 {
     return mSeedEtMin;
 }
 
-inline void StConeJetFinder::setAssocEtMin(double v)
+inline void StConePars::setAssocEtMin(double v)
 {
     mAssocEtMin = v;
 }
 
-inline double StConeJetFinder::assocEtMin() const
+inline double StConePars::assocEtMin() const
 {
     return mAssocEtMin;
+}
+
+
+inline void StConePars::setSplitFraction(double v)
+{
+   mSplitFraction = v;
+}
+
+inline double StConePars::splitFraction() const
+{
+    return mSplitFraction;
+}
+
+inline void StConePars::setGridSpacing(int nEta, double etaMin, double etaMax,
+				int nPhi, double phiMin, double phiMax)
+{
+    mNeta = nEta; mEtaMin = etaMin; mEtaMax = etaMax;
+    mNphi = nPhi; mPhiMin = phiMin; mPhiMax = phiMax;
 }
 
 //non-members

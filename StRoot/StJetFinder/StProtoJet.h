@@ -22,6 +22,13 @@ using std::ostream_iterator;
 
 #include "FourVec.h"
 
+/*!
+  \class StProtoJet
+  \author M.L. Miller (Yale Software)
+  StProtoJet encapsulates the concept of a jet.  It is the work object to be used by the jet finding
+  algorithms.  It implements the interface of a four vector and contains a list of
+  AbstractFourVec objects.  That way, protojets can be "clustered" to form jets.
+ */
 class StProtoJet : public StFourVec
 {
 public:
@@ -48,9 +55,6 @@ public:
     void add(const StProtoJet&);
     void remove(StProtoJet&);
 
-    ///Retrieve the indices of the tracks associated with this protojet
-    vector<int> tracks(void); 
-	
     ///update the parameters of this protojet (in case some have been added via add())
     void update();
 	

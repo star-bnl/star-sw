@@ -18,7 +18,7 @@ class StCdfChargedConeJetFinder : public StConeJetFinder
 public:
 
     //cstr-dstr
-    StCdfChargedConeJetFinder(StConeJetFinderPars& pars);
+    StCdfChargedConeJetFinder(StConePars& pars);
     virtual ~StCdfChargedConeJetFinder();
     
     //inherited interface
@@ -27,7 +27,7 @@ public:
     virtual void print();
     
 protected:
-    //create a StCdfChargedJetEtCell object
+    ///create a StCdfChargedJetEtCell object
     virtual StJetEtCell* makeCell(double etaMin, double etaMax, double phiMin, double phiMax);
     virtual bool acceptSeed(const StJetEtCell* cell);
     virtual bool acceptPair(const StJetEtCell* center, const StJetEtCell* assoc) const;
