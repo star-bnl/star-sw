@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.3 2003/04/25 22:52:28 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.4 2003/05/02 21:43:48 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -136,6 +136,7 @@ Int_t StEmcTpcFourPMaker::Make() {
 
   // Add TPC tracks
   long index = 0;
+  tracks.clear();
   for(trackMap::iterator track = binmap.moddTracks.begin(); 
       track != binmap.moddTracks.end(); ++track)
   {
