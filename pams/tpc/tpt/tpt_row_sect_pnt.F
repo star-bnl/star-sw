@@ -1,5 +1,8 @@
-* $Id: tpt_row_sect_pnt.F,v 1.6 1998/07/12 05:29:07 sakrejda Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.7 1998/09/01 13:32:39 sakrejda Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.7  1998/09/01 13:32:39  sakrejda
+* restored sector numbering 1-24 in tphit.row
+*
 * Revision 1.6  1998/07/12 05:29:07  sakrejda
 * space in local array increased
 *
@@ -59,14 +62,53 @@ C______________________________________________________________________
       INTEGER next_hit(tpt_mxhit),slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic),loc_hit_tmp(4000)
       INTEGER iret, tls_Index_Sort_r,nhalf,itim1,ipos1,kc
-      INTEGER tgc_drift_volume_length,id1
 
+      INTEGER rhit(tpt_mxhit)
+      integer isec2, isec3, isect
+      INTEGER tls_Index_Sort_i
+C             sort hits in the TPC table according to row/sec field
+      real    xglobal(3)
+
+      INTEGER tgc_global_to_sector
+      INTEGER tgc_sec24_to_sec12
+      INTEGER tgc_drift_volume_length
+      INTEGER id1,idI1
       REAL    dzslic, z_hit, dvl, dummy
       character*256 m132  ! And some message-generating space.
-      data id1 /0/
-      save id1
+      data id1, idI1 /2*0/
+      save id1, idI1
 
 C______________________________________________________________________
+      do i=1,hit_h.nok
+C        clean up sector assignement.
+         xglobal(1)=hit(i).x
+         xglobal(2)=hit(i).y
+         xglobal(3)=hit(i).z
+c        check what xy and z says about the sector.
+         iret=tgc_global_to_sector(isec2,xglobal)
+         isec3=int(hit(i).row/100)
+         if(isec3.ne.isec2) then
+           write(m132,*) 'TPTI1-E1 sector missmatch',isec3,isec2,xglobal
+           call message(m132,1,idI1)
+           isec3=isec2
+         endif
+         if(xglobal(3).gt.0) then
+            rhit(i)=hit(i).row
+         else
+            iret=tgc_sec24_to_sec12(isec3,isect)
+            rhit(i) = isect*100+mod(hit(i).row,100)
+         endif
+      end do
+
+      if(hit_h.nok.eq.1)then
+c       if there is just one hit, sorting routine has problems,
+c       so deal with it separately
+        loc_hit(1)=1
+      else
+        iret=tls_Index_Sort_i(hit_h.nok,rhit(1),rhit(2),loc_hit,
+     >  tpt_mxhit)
+      endif
+
       call Msg_Enable( 'TPT-RSP' )
 C     set up information about the slices
       ic = 0
@@ -103,19 +145,20 @@ C     set up information about the slices
 C       loop through row-sorted list
         ipnt = loc_hit(i)
         if(hit(ipnt).track.le.0) then
-          isect = hit(ipnt).row / 100
-          irow = hit(ipnt).row - isect*100
+          isect = rhit(ipnt)/100
+          irow = mod(rhit(ipnt),100)
           if( isect.lt.1 .or. isect.gt.mxsector .or. irow.lt.1 .or.
      >    irow.gt.mxrow ) then
-          write(m132,*) ' TPTRSP-E1 row,sector info invalid '
+          write(m132,*) ' TPTRSP-E1 row,sector info invalid ',
+     >    isect,irow,mxsector
           call Message( m132, 1, id1 )
           else
-            if( hit(ipnt).row .eq. inew ) then
+            if( rhit(ipnt).eq. inew ) then
                tpcount(irow,isect) = tpcount(irow,isect) + 1
             else
                tpcount(irow,isect) = 1
                tpstart(irow,isect) = i
-               inew = hit(ipnt).row
+               inew = rhit(ipnt)
             endif
           endif
         endif
@@ -206,3 +249,4 @@ C       loop through row-sorted list
       call Message( m132, 1, id1 )
       tpt_row_sect_pnt=0
       end
+c

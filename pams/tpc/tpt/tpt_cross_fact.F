@@ -1,5 +1,8 @@
-* $Id: tpt_cross_fact.F,v 1.4 1998/08/25 21:46:32 sakrejda Exp $
+* $Id: tpt_cross_fact.F,v 1.5 1998/09/01 13:32:34 sakrejda Exp $
 * $Log: tpt_cross_fact.F,v $
+* Revision 1.5  1998/09/01 13:32:34  sakrejda
+* restored sector numbering 1-24 in tphit.row
+*
 * Revision 1.4  1998/08/25 21:46:32  sakrejda
 * crossing angle in degrees, STAR convention
 *
@@ -40,14 +43,16 @@ C______________________________________________________________________
       INTEGER idet
       REAL    xnew,ynew,xold,yold,cf,theta
       real    vlocal(3),vglobal(3)
-      integer iret,tgc_global_to_local_p,isect
+      integer iret, isect
+
+      INTEGER tgc_sec24_to_sec12, tgc_global_to_local_p
 
 C_____________________________________________________________________
 
       if(cf.lt.0) then 
          cf=1.0
       else
-         isect = idet/100
+         iret      = tgc_sec24_to_sec12(idet/100,isect)
          vglobal(1)= xnew-xold
          vglobal(2)= ynew-yold
          vglobal(3)= 0.0

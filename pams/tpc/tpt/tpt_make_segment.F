@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment.F,v 1.3 1998/03/23 18:26:01 sakrejda Exp $
+* $Id: tpt_make_segment.F,v 1.4 1998/09/01 13:32:36 sakrejda Exp $
 * $Log: tpt_make_segment.F,v $
+* Revision 1.4  1998/09/01 13:32:36  sakrejda
+* restored sector numbering 1-24 in tphit.row
+*
 * Revision 1.3  1998/03/23 18:26:01  sakrejda
 * tpg_pad-plane removed from the tpt module, it was not used there anyway
 *
@@ -57,8 +60,9 @@ C______________________________________________________________________
 C_____________________________________________________________________
 C
 C     Local variables
-      INTEGER ntrk,ir1,ir2,npnt,ip2,ip3,ip4,isect,nfound,iret
-      INTEGER irow_last,irow_start,irow_step,ngap,isec1
+      INTEGER ntrk,ir1,ir2,npnt,ip2,ip3,ip4,nfound,iret
+      INTEGER isect, isect_trunc, isec1
+      INTEGER irow_last,irow_start,irow_step,ngap
       INTEGER tgc_row_par, tpt_ptcrs
       INTEGER next_hit(tpt_mxhit),slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic)
@@ -66,15 +70,19 @@ C     Local variables
       INTEGER tpt_fit_track
       INTEGER is_pnt,islic,ipass,tte_skip
       INTEGER tpt_find_slic, irets
-      integer tgc_global_to_local
+
+      INTEGER tgc_global_to_sector
+      INTEGER tgc_sec24_to_sec12
+
       REAL    ax,ay,az,ar,bx,by,bz,br,dydx,oxy,dzdr,as,bs,xp1,yp1
       REAL    zp1,rp1,drp,dis0,dy,dx,dz,dfir,tolr2,disr2,r2
-      real    xlocal(3), xglobal(3), dummy
+      REAL    xglobal(3), dummy
 
 C     Find what was the innermost row number and continue the search 
 C     towards the inside of the chamber
       irow_start = mod(hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row,100)-1
       isect      = hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row/100
+      iret       = tgc_sec24_to_sec12(isect,isect_trunc)
       irow_last  = tpar(ipass).irow_seg_end
       irow_step = -1
 C
@@ -112,17 +120,15 @@ C           if there was a gap parametrisation for a row won't change
          endif
 C        find what is the parametrisation for the row ir1 in sector 
 C        isect
-         iret = tgc_row_par(isect,real(ir1),as,bs,dummy,dummy)
+         iret = tgc_row_par(isect_trunc,real(ir1),as,bs,dummy,dummy)
 C        find what is the prediction for this row
          iret = tpt_ptcrs(as,bs,dydx,oxy,xp1,yp1)
 C        and check whether it lies in the same sector
          xglobal(1)=xp1
          xglobal(2)=yp1
          xglobal(3)=10.0
-         iret =  tgc_global_to_local(isec1,xglobal,xlocal)
-         if(isec1.gt.12) isec1=24-isec1
-         if(isec1.eq.0) isec1=12
-         if( isect.eq.isec1 ) then
+         iret =  tgc_global_to_sector(isec1,xglobal)
+         if( isect_trunc.eq.isec1 ) then
            rp1 = sqrt(xp1**2+yp1**2)
            drp = r2 - rp1
            zp1 = hit(ip2).z - dzdr*drp

@@ -1,5 +1,8 @@
-* $Id: tpt_find_root.F,v 1.7 1998/07/12 21:54:09 sakrejda Exp $
+* $Id: tpt_find_root.F,v 1.8 1998/09/01 13:32:35 sakrejda Exp $
 * $Log: tpt_find_root.F,v $
+* Revision 1.8  1998/09/01 13:32:35  sakrejda
+* restored sector numbering 1-24 in tphit.row
+*
 * Revision 1.7  1998/07/12 21:54:09  sakrejda
 * protecion against 0 denominator
 *
@@ -59,6 +62,7 @@ C     Local variables
       INTEGER k                            !pointer to the hit we start with
       INTEGER nroot                        !number of track roots starting from this point
       INTEGER isect,ir3,ir2,ir1
+      INTEGER isect_trunc                  !sector number truncated to 1-12
       INTEGER gap_1                        !gap counter between ir2 and ir1
       INTEGER gap_2                        !gap counter between ir3 and ir2
       INTEGER nh1,nh2
@@ -67,6 +71,7 @@ C     Local variables
       INTEGER tpt_ptcrs                    !function calculating a crossing point of 2 lines
       INTEGER islic,is_pnt,js_pnt
       INTEGER tpt_find_slic, irets
+      INTEGER tgc_sec24_to_sec12
       REAL    zp3
       REAL    zorigl,r3,r2,delr23,zp2,delz2p,dely23
       REAL    delx23,delz23,an,bn,sl23,zp1,xp1,yp1
@@ -85,7 +90,8 @@ C_____________________________________________________________________
 
 C     get information about the seed
       isect = int(hit(k).row/100)
-      ir3   = hit(k).row-isect*100
+      iret  = tgc_sec24_to_sec12(isect,isect_trunc)
+      ir3   = mod(hit(k).row,100)
       zp3   = hit(k).z
       r3    = sqrt(hit(k).x**2+hit(k).y**2)
        
@@ -104,7 +110,7 @@ C     find in what slice the hits for the next row are going to be
       zp2 = zp3*(1.0-delrow/r3)
       if(abs(zp2).gt.200.0) zp2=sign(200.0,zp2)
       irets=tpt_find_slic(zp2,tpar(ipass).nzslic,islic)
-      is_pnt = slice_loc(isect,ir2,islic) 
+      is_pnt = slice_loc(isect_trunc,ir2,islic) 
       nh2 = slice_pnt(2,is_pnt)
       gap_2 = gap_2 - 1
 c
@@ -168,7 +174,7 @@ c                   calculate the prediction in the r-z plane
                     if(abs(zp1).gt.209.0) zp1=sign(209.0,zp1)
 c                   find the slice number for the prediction and look for a hit there
                     irets=tpt_find_slic(zp1,tpar(ipass).nzslic,islic)
-                    js_pnt = slice_loc(isect,ir1,islic) 
+                    js_pnt = slice_loc(isect_trunc,ir1,islic) 
                     j = slice_pnt(1,js_pnt)
 C                   next j'th hit is set at enddo
                     do jlc=1,slice_pnt(2,js_pnt)

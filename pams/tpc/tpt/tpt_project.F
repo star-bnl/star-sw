@@ -1,5 +1,8 @@
-* $Id: tpt_project.F,v 1.4 1998/08/26 17:03:06 sakrejda Exp $
+* $Id: tpt_project.F,v 1.5 1998/09/01 13:32:38 sakrejda Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.5  1998/09/01 13:32:38  sakrejda
+* restored sector numbering 1-24 in tphit.row
+*
 * Revision 1.4  1998/08/26 17:03:06  sakrejda
 * calculation of the dip angle for hits on tracks added
 *
@@ -65,26 +68,28 @@ C
 C     Local variables
       INTEGER next_hit(tpt_mxhit),slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic)
-      INTEGER itrk,irow,ient,isect,is(3),i,np,ixpnt
+      INTEGER itrk,irow,ient,isect,isect_full,is(3),i,np,ixpnt
       INTEGER iret, tpt_helix_pred ,l,ip_in,ip_out,row_in,row_out,llc
       INTEGER row_start(2),row_end(2),st(2),mdir,ip(2)
       INTEGER nf,lk,imem,ib,tpt_fit_track,tpt_cross_fact
       INTEGER tpt_load_track
       INTEGER islic,is_pnt,ipass,tte_skip
       INTEGER tpt_find_slic, irets,save_flag
+      INTEGER tgc_sec24_to_sec12
+
       LOGICAL more
       REAL    xp(2),yp(2),devsum0,dist,dc,alpha,devsum
       REAL    xold,yold,cf,zp
 C_____________________________________________________________________
 C
 
-      ient = trk(itrk).ipnt(1)
-      isect = hit(ient).row/100
-      is(1) = isect
-      is(2) = isect-1
+      ient       = trk(itrk).ipnt(1)
+      isect_full = hit(ient).row/100
+      iret       = tgc_sec24_to_sec12(isect_full,isect)
+      is(1)      = isect
+      is(2)      = isect-1
       if(is(2).eq.0) is(2)=12
-      is(3) = isect+1
-      if(is(3).eq.13)is(3)=1
+      is(3)      = mod(isect+1,12)
 C
       do i=1,3
          isect = is(i)
