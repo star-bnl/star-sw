@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.114 1999/10/21 20:28:36 didenko Exp $
+// $Id: bfc.C,v 1.115 1999/11/04 22:21:48 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -17,8 +17,8 @@ class StEventMaker; StEventMaker *evMk = 0;
 //_____________________________________________________________________
 void Load(){
   gSystem->Load("St_base");
+  gSystem->Load("StUtilities");
   gSystem->Load("StChain");
-  gSystem->Load("StDbLib"); 
   gSystem->Load("StBFChain");}
 //_____________________________________________________________________
 void bfc(const Int_t First,
@@ -40,22 +40,42 @@ void bfc(const Int_t First,
   chain->Set_IO_Files(infile,outfile);
 
   chain->Load();
-  if (chain->GetOption(kTCL) && chain->GetOption(kEval)) {
+#if 0
+  // Insert your maker before "tpc_hits"
+  Char_t *myMaker = "St_TLA_Maker";
+  if (gClassTable->GetID(myMaker) < 0) gSystem->Load(myMaker);
+  StMaker *myMk = chain->GetMaker(myMaker);
+  if (myMk) delete myMk;
+  myMk = chain->New(myMaker,"before");
+  if (myMk) {
+    Char_t *before = "tpc_hits";
+    StMaker *tclmk = chain->GetMaker(before);
+    if (tclmk) chain->AddBefore(before,myMk);
+  }
+  // Insert your maker after "tpc_hits"
+  myMk = chain->New(myMaker,"after");
+  if (myMk) {
+    Char_t *after = "tpc_hits";
+    StMaker *tclmk = chain->GetMaker(after);
+    if (tclmk) chain->AddAfter(after,myMk);
+  }
+#endif
+  if (chain->GetOption("TCL") && chain->GetOption("Eval")) {
     St_tcl_Maker *tclMk= (St_tcl_Maker *) chain->GetMaker("tpc_hits");
     if (tclMk) {
 	tclMk->tclPixTransOn(); //Turn on flat adcxyz table
 	tclMk->tclEvalOn();     //Turn on the hit finder evaluation
     }
   }
-  if (chain->GetOption(kTPT)) {
+  if (chain->GetOption("TPT")) {
     St_tpt_Maker *tptMk= (St_tpt_Maker *) chain->GetMaker("tpc_tracks");
-    if (tptMk && chain->GetOption(kMINIDAQ))  tptMk->Set_final(kTRUE);// Turn on the final ntuple.
-    if (tptMk && chain->GetOption(kEval)) {
+    if (tptMk && chain->GetOption("MINIDAQ"))  tptMk->Set_final(kTRUE);// Turn on the final ntuple.
+    if (tptMk && chain->GetOption("Eval")) {
 	tptMk->tteEvalOn();   //Turn on the tpc evaluation
 	tptMk->tptResOn();    // Turn on the residual table
     }
   }
-  if (chain->GetOption(kV0) && chain->GetOption(kEval)) {
+  if (chain->GetOption("V0") && chain->GetOption("Eval")) {
     StV0Maker    *v0Mk = (StV0Maker *) chain->GetMaker("v0");
     if (v0Mk) 	v0Mk->ev0EvalOn();   //Turn on the ev0 evaluatio
   }
@@ -67,14 +87,14 @@ void bfc(const Int_t First,
 	  gSystem->HostName(),
 	  gSystem->WorkingDirectory());
   printf ("QAInfo: with %s\n", chain->GetCVS());
-  
+   
   // Init the chain and all its makers
   Int_t iInit = chain->Init();
   // skip if any
   St_geant_Maker *geant = (St_geant_Maker *) chain->GetMaker("geant");
   StIOMaker *inpMk      = (StIOMaker *)      chain->GetMaker("inputStream");
   St_XDFFile *xdf_out = chain->GetXdfOut();
-  evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
+  if (chain->GetOption("Event")) evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
   if (geant && First > 1) geant->Skip(First-1);
   if (inpMk && First > 1) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}
   TBenchmark evnt;
@@ -117,7 +137,6 @@ void bfc (const Char_t *Chain="",Char_t *infile=0, Char_t *outfile=0)
   if (!Chain || !strlen(Chain)) {
     Usage();
   }
-  bfc(1,1,Chain,infile,outfile);
 }
 //____________________________________________________________
 void Usage() {
@@ -126,6 +145,11 @@ void Usage() {
 	  "              \tIt is required exact matching in Chain definition\n"
 	  "              \tAll Chain options set in supplyed order\n"); 
 #endif
+  if (gClassTable->GetID("StBFChain") < 0) Load();
+  // Create the main chain object
+  if (!chain) delete chain;
+  chain = new StBFChain;
+  chain->SetFlags("");
   printf ("============= \t U S A G E =============\n");
   printf ("bfc(Int_t First, Int_t Last, Char_t *Chain, Char_t *infile, Char_t *outfile)\n");
   printf ("bfc(Int_t Last, Char_t *Chain, Char_t *infile, Char_t *outfile)\n");
