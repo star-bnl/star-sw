@@ -23,7 +23,6 @@ void StMiniEmbed(Int_t nevents=2,
 {
 
   cout << "Using  : " << MainFile << endl;
-  cout << "outdir : " << outDir << endl;
 
   // Dynamically link needed shared libs
   //gSystem->Load("StarRoot");
@@ -92,12 +91,45 @@ void StMiniEmbed(Int_t nevents=2,
 
   StMiniMcMaker *krap = new StMiniMcMaker;
   krap->setDebug();
-  krap->setOutDir(outDir);
-  TString filename = MainFile;
+  TString outDirName = outDir;
+  TString filename   = MainFile;
+  TString embedrun   = MainFile;
+
+  //
+  // the string manipulations below are for use in PDSF, from
+  // the /beta/starprod/embedding/ input directory
+  // to the /auto/pdsfdv41/starprod/QA/McMiniDst/  output directory
+  //
+  if (filename.Contains("Rev"))
+      outDirName.Append("RevFullField/");
+  else
+      outDirName.Append("FullField/");
+
+  if (filename.Contains("Piminus"))
+      outDirName.Append("PiMinus");
+  if (filename.Contains("Piplus"))
+      outDirName.Append("PiPlus");
+  if (filename.Contains("KMinus"))
+      outDirName.Append("KMinus");
+  if (filename.Contains("KPlus"))
+      outDirName.Append("KPlus");
+  if (filename.Contains("Pbar"))
+      outDirName.Append("Pbar");
+  if (filename.Contains("Proton"))
+      outDirName.Append("Proton");
+  krap->setOutDir(outDirName.Data());
+  int embedRunIndex = embedrun.Index("_",0);
+  embedrun.Remove(0,embedRunIndex+1);
+  embedRunIndex = embedrun.Index("_",0);
+  embedrun.Remove(embedRunIndex);
   int fileBeginIndex = filename.Index("st_physics",0);
-  filename.Remove(0,fileBeginIndex);  
+  filename.Remove(0,fileBeginIndex);
+  filename.Prepend(embedrun);
+  filename.Prepend("emb");
   krap->setFileName(filename);
-	
+  cout << "outdir : " << outDirName << endl;
+  cout << "Output File: " << filename << endl;
+
   // Define the cuts for the Associations
   
   StMcParameterDB* parameterDB = StMcParameterDB::instance();  
@@ -133,7 +165,7 @@ void StMiniEmbed(Int_t nevents=2,
    iev++; goto EventLoop;
  } // Event Loop
  
- chain->Finish();
+//  chain->Finish();
   
 }
 
