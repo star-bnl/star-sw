@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.cxx,v 1.11 1999/07/15 13:57:24 perev Exp $
+// $Id: StSmdstMaker.cxx,v 1.12 1999/09/17 16:25:54 genevb Exp $
 // $Log: StSmdstMaker.cxx,v $
+// Revision 1.12  1999/09/17 16:25:54  genevb
+// handle missing events in Xi section
+//
 // Revision 1.11  1999/07/15 13:57:24  perev
 // cleanup
 //
@@ -444,6 +447,7 @@ void StSmdstMaker::FillXiHistograms() {
   Float_t maxi, maom;
 
   StEvent* ev = (StEvent *) GetInputDS("StEvent");
+  if (!ev) return; // If no event, we're done
   StVertexCollection *vertices = ev->vertexCollection();
   if (!vertices) {
     gMessMgr->Warning("StSmdstMaker - no vertex collection in event.");
