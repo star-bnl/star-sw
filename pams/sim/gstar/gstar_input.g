@@ -1,6 +1,9 @@
-* $Id: gstar_input.g,v 1.26 2000/01/30 21:29:44 nevsky Exp $
+* $Id: gstar_input.g,v 1.27 2000/02/10 14:44:06 nevski Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.27  2000/02/10 14:44:06  nevski
+* event read offset introduced
+*
 * Revision 1.26  2000/01/30 21:29:44  nevsky
 * ntuple input debugged
 *
@@ -14,7 +17,14 @@
    print *,' Automatic recognition uses the first letter of a file extension'
 *  print *,' To activate XDF format readout do " gexec gstar_readxdf " '
    end
-
+*************************************************************************
+  subroutine agusevent(n)
+   Integer          n,InEvent,NnEvent
+   Character        Table*120
+   common /agcuser/ Irec(10),InEvent,NnEvent,Table
+   NnEvent=n
+   print *,' NT READ will start with event ',n
+  end
 *************************************************************************
    subroutine agusopen(ifile)
 *
@@ -26,9 +36,10 @@
 *       Table  - XDF read needs staf table name in AgUsRead             *
 *************************************************************************
    Implicit         None   
-   Integer          SYSTEMF,LENOCC,CSADDR,Iadr,i,J,ier,L,N,idot,Igate,Irec,Lrec
+   Integer          SYSTEMF,LENOCC,CSADDR,Iadr,i,J,ier,L,N,idot,Igate,
+                    Irec,Lrec,InEvent,NnEvent
    Character        ifile*(*),C*1,Table*120,CDIR*8,Zcom*256,file*256
-   common /agcuser/ Irec(10),Table
+   common /agcuser/ Irec(10),InEvent,NnEvent,Table
 *
 +CDE,AGCKINE.
 *
@@ -128,10 +139,10 @@
    implicit      none
 +CDE,GCUNIT,GCFLAG.
 *
-   Integer           Igate,Irec,NpHEP,IdEvHep(5)
+   Integer           Igate,Irec,InEvent,NnEvent,NpHEP,IdEvHep(5)
    Real              CT/3.e11/,Comp(4)/4*0/,Hpar(4)/4*0/
    Character         Table*120,CDIR*10
-   common /agcuser/  Irec(10),Table
+   common /agcuser/  Irec(10),InEvent,NnEvent,Table
 *
    Integer           Ip,Istat,Ipdg,Moth,Idau
    Real              Pxyz,Ener,mass,Vxyz,Vtime
@@ -154,6 +165,7 @@
    if (Irec(Igate)=<0) then
        CALL HBNAME (id+Igate*1000,'        ', 0,'$CLEAR')
        Call HBNAME (id+Igate*1000,'particle',Ip,'$SET'  )
+       InEvent=0
    endif
 * 
    Nin=0
@@ -163,8 +175,10 @@
 
       if Istat>10 
       {
-        if ipdg=999999 
-        {  if nin>0   { Irec(Igate)-=1; Break; }
+        if ipdg=999999
+        {
+           if nin>0   { Irec(Igate)-=1; Break; }
+           InEvent+=1; if (InEvent<NnEvent) Next;  
            NpHEP=ip;  Num = {1,Igate,1,NpHep+1 }
            do i=1,5   { IdEvHep(i) = Pxyz(i);  }
            Call REBANK('/EVNT/GENE/GENT.GENT',num,15,L,ia)
@@ -178,6 +192,7 @@
         Call Ucopy  (Comp,   Vxyz,4)
         Ip=0; Nin=0; mass=IdEvHep(5)
       }
+      if (InEvent<NnEvent) Next;  
       Nin+=1; num(3)=Nin;  
       Call RbSTORE ('/EVNT/GENE/GENT*',num,Cform,15,istat)
     
