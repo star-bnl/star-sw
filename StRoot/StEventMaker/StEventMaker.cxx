@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.12 2000/01/10 18:20:32 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.13 2000/01/11 16:05:34 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,9 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.12  2000/01/10 18:20:32  ullrich
- * Create new StTrackDetectorInfo object for primary tracks if
- * first or last points differ from the referring global track.
+ * Revision 2.13  2000/01/11 16:05:34  ullrich
+ * With Victors help now possible to read the dst_summary_param
+ * table from the runco branch and build StEventSummary objects.
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -93,7 +93,7 @@
  * Revision 2.5  1999/11/11 10:02:58  ullrich
  * Added warning message in case some hits cannot be stored.
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.12 2000/01/10 18:20:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.13 2000/01/11 16:05:34 ullrich Exp $";
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -130,10 +130,10 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.12 2000/01/10 18:20:32 ul
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.12 2000/01/10 18:20:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.13 2000/01/11 16:05:34 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.12 2000/01/10 18:20:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.13 2000/01/11 16:05:34 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -228,17 +228,27 @@ Int_t
         AddData(mCurrentEvent);
     else
         gMessMgr->Warning() << "StEventMaker::Make(): error in makeEvent(), no StEvent object created." << endm;
-    if (!mDstSummaryParam) {
-	StEventManager* theEventManager = new StRootEventManager();
-	theEventManager->setMaker(this);
-	long nrows;
-	if (theEventManager->openEvent("runco") != oocError) 
-	    mDstSummaryParam = theEventManager->returnTable_dst_summary_param(nrows);
-	else
-	    gMessMgr->Warning() << "StEventMaker::loadRunConstants(): cannot open 'runcoBranch'." << endm;
+ 
+    mEventManager->closeEvent();
+
+    //
+    //  Print out some timing, memory usage and StEvent
+    //  info if requested
+    //
+    if (doPrintRunInfo)   printRunInfo();
     if (doPrintEventInfo) printEventInfo();
+    if (doPrintMemoryInfo) {
         StMemoryInfo::instance()->snapshot();
-    return mDstSummaryParam ? kStOK : kStWarn;
+        StMemoryInfo::instance()->print();
+    }
+    if (doPrintCpuInfo) {
+        timer.stop();
+        cout << "CPU time for StEventMaker::Make(): "
+             << timer.elapsedTime() << " sec\n" << endl;
+    }
+
+    return status;
+}
 
 Bool_t
 StEventMaker::isNewRun()
