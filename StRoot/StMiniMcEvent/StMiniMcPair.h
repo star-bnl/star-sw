@@ -27,10 +27,11 @@ public:
 	return static_cast<float>(mNCommonHit)/static_cast<float>(allPts());
     }
 
-    int commonHits() { return mNCommonHit; }
+    int commonHits() { return mNCommonHit%100; }
+    int commonHitsSvt() { return mNCommonHit/100; }
     bool isBestContam() { return mIsBestContam; }
 private:
-    Short_t      mNCommonHit;
+    Short_t      mNCommonHit; /// Common Hits is now encoded, tpc + svt * 100
     Bool_t     mIsBestContam;
 
    
@@ -41,6 +42,9 @@ private:
 
 //
 // $Log: StMiniMcPair.h,v $
+// Revision 1.2  2004/03/15 19:01:32  calderon
+// StMiniMcPair now contains the TPC and SVT common hits information (encoded).
+//
 // Revision 1.1  2002/05/30 01:20:58  calderon
 // Classes for use in a general framework for extracting efficiencies
 // from both embedding and full simulations
