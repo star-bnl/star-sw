@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.19 2000/08/09 21:38:59 snelling Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.20 2000/08/31 18:50:30 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.20  2000/08/31 18:50:30  posk
+// Added plotCen.C to plot from a series of files with different centralities.
+//
 // Revision 1.19  2000/08/09 21:38:59  snelling
 // Added monitor histograms
 //
@@ -110,7 +113,7 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.19 2000/08/09 21:38:59 snelling Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.20 2000/08/31 18:50:30 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -144,8 +147,7 @@ private:
   TH1F*     mHistMaxPts;        //!
   TH1F*     mHistFitOverMax;    //!
   TH1F*     mHistOrigMult;      //!
-  TH1F*     mHistMultEta1;      //!
-  TH1F*     mHistMultEta2;      //!
+  TH1F*     mHistMultEta;       //!
   TH1F*     mHistMult;          //!
   TH1F*     mHistMultOverOrig;  //!
   TH1F*     mHistCorrMult;      //!
@@ -222,10 +224,10 @@ private:
   };
   struct histFulls histFull[Flow::nSels]; //!
 
-  static const Float_t etaMin;                  // histogram limits
-  static const Float_t etaMax;
-  static const Float_t ptMin;
-  static const Float_t ptMax;
+  //static const Float_t etaMin;                  // histogram limits
+  //static const Float_t etaMax;
+  //static const Float_t ptMin;
+  //static const Float_t ptMax;
   static const Float_t qMax;
 
   TString      MakerName;

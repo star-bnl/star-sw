@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.24 2000/08/12 20:20:15 posk Exp $
+// $Id: plot.C,v 1.25 2000/08/31 18:50:32 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -17,6 +17,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.25  2000/08/31 18:50:32  posk
+// Added plotCen.C to plot from a series of files with different centralities.
+//
 // Revision 1.24  2000/08/12 20:20:15  posk
 // More centrality bins.
 //
@@ -103,11 +106,11 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_Mult",
 			     "Flow_OrigMult",
 			     "Flow_MultOverOrig",
+			     "Flow_MultEta",
 			     "Flow_CorrMult",
 			     "Flow_VertexZ",
 			     "Flow_VertexXY2D",
 			     "Flow_EtaSymVerZ2D",
-			     "Flow_EtaSymVerZ",
 			     "Flow_EtaSym",
 			     //"Flow_EtaPtPhi3D",
 			     "Flow_EtaPtPhi2D.PhiEta",
@@ -118,6 +121,10 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   			     "Flow_PidPiPlus",
   			     "Flow_PidPiMinus",
   			     "Flow_PidProton",
+  			     "Flow_PidAntiProton",
+  			     "Flow_PidKplus",
+  			     "Flow_PidKminus",
+  			     "Flow_PidDeuteron",
   			     "Flow_PidMult",
   			     "Flow_Cent",
    			     //"Flow_Bin_Eta",
@@ -144,7 +151,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_vEta_Sel",
 			     "Flow_vPt_Sel"};
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles = 26 + 1;
+  const int nSingles = 30 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
