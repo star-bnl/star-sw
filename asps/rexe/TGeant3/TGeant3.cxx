@@ -15,11 +15,34 @@
 
 /*
 $Log: TGeant3.cxx,v $
-Revision 1.1  2000/01/04 16:04:04  fisyak
-move TGeant3 to root4star executable
+Revision 1.1.1.1  2000/04/23 18:21:13  fisyak
+New version from ALICE
 
-Revision 1.9  1999/12/07 15:44:26  fisyak
-Add geane, new TGeant3 from Alice
+Revision 1.25  2000/04/07 11:12:35  fca
+G4 compatibility changes
+
+Revision 1.24  2000/02/28 21:03:57  fca
+Some additions to improve the compatibility with G4
+
+Revision 1.23  2000/02/23 16:25:25  fca
+AliVMC and AliGeant3 classes introduced
+ReadEuclid moved from AliRun to AliModule
+
+Revision 1.22  2000/01/18 15:40:13  morsch
+Interface to GEANT3 routines GFTMAT, GBRELM and GPRELM added
+Define geant particle type 51: Feedback Photon with Cherenkov photon properties.
+
+Revision 1.21  2000/01/17 19:41:17  fca
+Add SetERAN function
+
+Revision 1.20  2000/01/12 11:29:27  fca
+Close material file
+
+Revision 1.19  1999/12/17 09:03:12  fca
+Introduce a names array
+
+Revision 1.18  1999/11/26 16:55:39  fca
+Reimplement CurrentVolName() to avoid memory leaks
 
 Revision 1.17  1999/11/03 16:58:28  fca
 Correct source of address violation in creating character string
@@ -28,7 +51,7 @@ Revision 1.16  1999/11/03 13:17:08  fca
 Have ProdProcess return const char*
 
 Revision 1.15  1999/10/26 06:04:50  fca
-Introduce TLorentzVector in StarMC::GetSecondary. Thanks to I.Hrivnacova
+Introduce TLorentzVector in AliMC::GetSecondary. Thanks to I.Hrivnacova
 
 Revision 1.14  1999/09/29 09:24:30  fca
 Introduction of the Copyright and cvs Log
@@ -47,128 +70,211 @@ Introduction of the Copyright and cvs Log
 //                                                                           //
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
-#undef __HIGZ__ 
+
 #include "TGeant3.h" 
 #include "TROOT.h" 
-#ifdef __HIGZ__
-#include <THIGZ.h> 
-#endif
-#include <ctype.h> 
+#include "THIGZ.h" 
+#include "ctype.h" 
 #include <TDatabasePDG.h>
-#ifndef __CINT__
-#include "StarCallf77.h" 
-#include "St_Table.h"
-#define    hlimit	 F77_NAME(hlimit,HLIMIT)
-#define    gzebra	 F77_NAME(gzebra,GZEBRA)
-#define    grfile	 F77_NAME(grfile,GRFILE)
-#define    gpcxyz	 F77_NAME(gpcxyz,GPCXYZ)
-#define    ggclos	 F77_NAME(ggclos,GGCLOS)
-#define    glast	 F77_NAME(glast,GLAST)
-#define    ginit         F77_NAME(ginit,GINIT)
-#define    grun	         F77_NAME(grun,GRUN)
-#define    gtrig	 F77_NAME(gtrig,GTRIG)
-#define    gtrigc	 F77_NAME(gtrigc,GTRIGC)
-#define    gtrigi	 F77_NAME(gtrigi,GTRIGI)
-#define    gwork	 F77_NAME(gwork,GWORK)
-#define    gzinit	 F77_NAME(gzinit,GZINIT)
-#define    gfmate	 F77_NAME(gfmate,GFMATE)
-#define    gfpart	 F77_NAME(gfpart,GFPART)
-#define    gftmed	 F77_NAME(gftmed,GFTMED)
-#define    gmate	 F77_NAME(gmate,GMATE)
-#define    gpart	 F77_NAME(gpart,GPART)
-#define    gsdk	         F77_NAME(gsdk,GSDK)
-#define    gsmate	 F77_NAME(gsmate,GSMATE)
-#define    gsmixt	 F77_NAME(gsmixt,GSMIXT)
-#define    gspart	 F77_NAME(gspart,GSPART)
-#define    gstmed	 F77_NAME(gstmed,GSTMED)
-#define    gsckov	 F77_NAME(gsckov,GSCKOV)
-#define    gstpar	 F77_NAME(gstpar,GSTPAR)
-#define    gfkine	 F77_NAME(gfkine,GFKINE)
-#define    gfvert	 F77_NAME(gfvert,GFVERT)
-#define    gskine	 F77_NAME(gskine,GSKINE)
-#define    gsvert	 F77_NAME(gsvert,GSVERT)
-#define    gphysi	 F77_NAME(gphysi,GPHYSI)
-#define    gdebug	 F77_NAME(gdebug,GDEBUG)
-#define    gekbin	 F77_NAME(gekbin,GEKBIN)
-#define    gfinds	 F77_NAME(gfinds,GFINDS)
-#define    gsking	 F77_NAME(gsking,GSKING)
-#define    gskpho	 F77_NAME(gskpho,GSKPHO)
-#define    gsstak	 F77_NAME(gsstak,GSSTAK)
-#define    gsxyz	 F77_NAME(gsxyz,GSXYZ)
-#define    gtrack	 F77_NAME(gtrack,GTRACK)
-#define    gtreve	 F77_NAME(gtreve,GTREVE)
-#define    grndm	 F77_NAME(grndm,GRNDM)
-#define    grndmq	 F77_NAME(grndmq,GRNDMQ)
-#define    gdtom	 F77_NAME(gdtom,GDTOM)
-#define    glmoth	 F77_NAME(glmoth,GLMOTH)
-#define    gmedia	 F77_NAME(gmedia,GMEDIA)
-#define    gmtod	 F77_NAME(gmtod,GMTOD)
-#define    gsdvn	 F77_NAME(gsdvn,GSDVN)
-#define    gsdvn2	 F77_NAME(gsdvn2,GSDVN2)
-#define    gsdvs	 F77_NAME(gsdvs,GSDVS)
-#define    gsdvs2	 F77_NAME(gsdvs2,GSDVS2)
-#define    gsdvt	 F77_NAME(gsdvt,GSDVT)
-#define    gsdvt2	 F77_NAME(gsdvt2,GSDVT2)
-#define    gsord	 F77_NAME(gsord,GSORD)
-#define    gspos	 F77_NAME(gspos,GSPOS)
-#define    gsposp	 F77_NAME(gsposp,GSPOSP)
-#define    gsrotm	 F77_NAME(gsrotm,GSROTM)
-#define    gprotm	 F77_NAME(gprotm,GPROTM)
-#define    gsvolu	 F77_NAME(gsvolu,GSVOLU)
-#define    glvolu	 F77_NAME(glvolu,GLVOLU)
-#define    gufld	 F77_NAME(gufld,GUFLD)
-#define    gprint	 F77_NAME(gprint,GPRINT)
-#define    agmain	 F77_NAME(agmain,AGMAIN)
-#define    agxuser	 F77_NAME(agxuser,AGXUSER)
-#define    agxinit	 F77_NAME(agxinit,AGXINIT)
-#define    kuexel	 F77_NAME(kuexel,KUEXEL)
-#define    dzddiv	 F77_NAME(dzddiv,DZDDIV)
-#define    gfrotm	 F77_NAME(gfrotm,GFROTM)
-#define    gfxzrm	 F77_NAME(gfxzrm,GFXZRM)
-#define    agsens	 F77_NAME(agsens,AGSENS)
-#define    gdinit	 F77_NAME(gdinit,GDINIT)
-#define    gdopt	 F77_NAME(gdopt,GDOPT)
-#define    gdraw	 F77_NAME(gdraw,GDRAW)
-#define    gdrayt	 F77_NAME(gdrayt,GDRAYT)
-#define    gdrawc	 F77_NAME(gdrawc,GDRAWC)
-#define    gdrawx	 F77_NAME(gdrawx,GDRAWX)
-#define    gdhead	 F77_NAME(gdhead,GDHEAD)
-#define    gdwmn1	 F77_NAME(gdwmn1,GDWMN1)
-#define    gdwmn2	 F77_NAME(gdwmn2,GDWMN2)
-#define    gdwmn3	 F77_NAME(gdwmn3,GDWMN3)
-#define    gdxyz	 F77_NAME(gdxyz,GDXYZ)
-#define    gdcxyz	 F77_NAME(gdcxyz,GDCXYZ)
-#define    gdman	 F77_NAME(gdman,GDMAN)
-#define    gdspec	 F77_NAME(gdspec,GDSPEC)
-#define    gdtree	 F77_NAME(gdtree,GDTREE)
-#define    gdelet	 F77_NAME(gdelet,GDELET)
-#define    gdclos	 F77_NAME(gdclos,GDCLOS)
-#define    gdshow	 F77_NAME(gdshow,GDSHOW)
-#define    gdopen	 F77_NAME(gdopen,GDOPEN)
-#define    dzshow	 F77_NAME(dzshow,DZSHOW)
-#define    gsatt	 F77_NAME(gsatt,GSATT)
-#define    gfpara	 F77_NAME(gfpara,GFPARA)
-#define    gckpar	 F77_NAME(gckpar,GCKPAR)
-#define    gckmat	 F77_NAME(gckmat,GCKMAT)
-#define    geditv	 F77_NAME(geditv,GEDITV)
-#define    mzdrop	 F77_NAME(mzdrop,MZDROP)
-#define    ertrak	 F77_NAME(ertrak,ERTRAK)
-#define    ertrgo	 F77_NAME(ertrgo,ERTRGO)
-#define    eufill	 F77_NAME(eufill,EUFILL)
-#define    eufilp	 F77_NAME(eufilp,EUFILP)
-#define    eufilv	 F77_NAME(eufilv,EUFILV)
-#define    setbomb	 F77_NAME(setbomb,SETBOMB)
-#define    setclip	 F77_NAME(setclip,SETCLIP)
-#define    gcomad	 F77_NAME(gcomad,GCOMAD)
-#define    gfnhit	 F77_NAME(gfnhit,GFNHIT)
-#if 0
-#define    csaddr	 F77_NAME(csaddr,CSADDR)
-#define    csjcal	 F77_NAME(csjcal,CSJCAL)
-#endif
-#define    dzddiv	 F77_NAME(dzddiv,DZDDIV)
-
-#endif
+#include "AliCallf77.h" 
  
+#ifndef WIN32 
+# define gzebra  gzebra_ 
+# define grfile  grfile_ 
+# define gpcxyz  gpcxyz_ 
+# define ggclos  ggclos_ 
+# define glast   glast_ 
+# define ginit   ginit_ 
+# define gcinit  gcinit_ 
+# define grun    grun_ 
+# define gtrig   gtrig_ 
+# define gtrigc  gtrigc_ 
+# define gtrigi  gtrigi_ 
+# define gwork   gwork_ 
+# define gzinit  gzinit_ 
+# define gfmate  gfmate_ 
+# define gfpart  gfpart_ 
+# define gftmed  gftmed_ 
+# define gftmat  gftmat_ 
+# define gmate   gmate_ 
+# define gpart   gpart_ 
+# define gsdk    gsdk_ 
+# define gsmate  gsmate_ 
+# define gsmixt  gsmixt_ 
+# define gspart  gspart_ 
+# define gstmed  gstmed_ 
+# define gsckov  gsckov_
+# define gstpar  gstpar_ 
+# define gfkine  gfkine_ 
+# define gfvert  gfvert_ 
+# define gskine  gskine_ 
+# define gsvert  gsvert_ 
+# define gphysi  gphysi_ 
+# define gdebug  gdebug_ 
+# define gekbin  gekbin_ 
+# define gfinds  gfinds_ 
+# define gsking  gsking_ 
+# define gskpho  gskpho_ 
+# define gsstak  gsstak_ 
+# define gsxyz   gsxyz_ 
+# define gtrack  gtrack_ 
+# define gtreve  gtreve_ 
+# define gtreve_root  gtreve_root_ 
+# define grndm   grndm_ 
+# define grndmq  grndmq_ 
+# define gdtom   gdtom_ 
+# define glmoth  glmoth_ 
+# define gmedia  gmedia_ 
+# define gmtod   gmtod_ 
+# define gsdvn   gsdvn_ 
+# define gsdvn2  gsdvn2_ 
+# define gsdvs   gsdvs_ 
+# define gsdvs2  gsdvs2_ 
+# define gsdvt   gsdvt_ 
+# define gsdvt2  gsdvt2_
+# define gsord   gsord_ 
+# define gspos   gspos_ 
+# define gsposp  gsposp_ 
+# define gsrotm  gsrotm_ 
+# define gprotm  gprotm_ 
+# define gsvolu  gsvolu_ 
+# define gprint  gprint_ 
+# define gdinit  gdinit_ 
+# define gdopt   gdopt_ 
+# define gdraw   gdraw_ 
+# define gdrayt  gdrayt_
+# define gdrawc  gdrawc_ 
+# define gdrawx  gdrawx_ 
+# define gdhead  gdhead_ 
+# define gdwmn1  gdwmn1_ 
+# define gdwmn2  gdwmn2_ 
+# define gdwmn3  gdwmn3_ 
+# define gdxyz   gdxyz_ 
+# define gdcxyz  gdcxyz_ 
+# define gdman   gdman_ 
+# define gdspec  gdspec_ 
+# define gdtree  gdtree_ 
+# define gdelet  gdelet_ 
+# define gdclos  gdclos_ 
+# define gdshow  gdshow_ 
+# define gdopen  gdopen_ 
+# define dzshow  dzshow_ 
+# define gsatt   gsatt_ 
+# define gfpara  gfpara_
+# define gckpar  gckpar_
+# define gckmat  gckmat_
+# define geditv  geditv_
+# define mzdrop  mzdrop_
+
+# define ertrak  ertrak_
+# define ertrgo  ertrgo_
+ 
+# define setbomb setbomb_
+# define setclip setclip_
+# define gcomad gcomad_
+
+# define gbrelm gbrelm_
+# define gprelm gprelm_
+#else 
+# define gzebra  GZEBRA 
+# define grfile  GRFILE 
+# define gpcxyz  GPCXYZ 
+# define ggclos  GGCLOS 
+# define glast   GLAST 
+# define ginit   GINIT 
+# define gcinit  GCINIT 
+# define grun    GRUN 
+# define gtrig   GTRIG 
+# define gtrigc  GTRIGC 
+# define gtrigi  GTRIGI 
+# define gwork   GWORK 
+# define gzinit  GZINIT 
+# define gfmate  GFMATE 
+# define gfpart  GFPART 
+# define gftmed  GFTMED 
+# define gftmat  GFTMAT
+# define gmate   GMATE 
+# define gpart   GPART 
+# define gsdk    GSDK 
+# define gsmate  GSMATE 
+# define gsmixt  GSMIXT 
+# define gspart  GSPART 
+# define gstmed  GSTMED 
+# define gsckov  GSCKOV
+# define gstpar  GSTPAR 
+# define gfkine  GFKINE 
+# define gfvert  GFVERT 
+# define gskine  GSKINE 
+# define gsvert  GSVERT 
+# define gphysi  GPHYSI 
+# define gdebug  GDEBUG 
+# define gekbin  GEKBIN 
+# define gfinds  GFINDS 
+# define gsking  GSKING 
+# define gskpho  GSKPHO 
+# define gsstak  GSSTAK 
+# define gsxyz   GSXYZ 
+# define gtrack  GTRACK 
+# define gtreve  GTREVE 
+# define gtreve_root  GTREVE_ROOT
+# define grndm   GRNDM
+# define grndmq  GRNDMQ
+# define gdtom   GDTOM 
+# define glmoth  GLMOTH 
+# define gmedia  GMEDIA 
+# define gmtod   GMTOD 
+# define gsdvn   GSDVN 
+# define gsdvn2  GSDVN2 
+# define gsdvs   GSDVS 
+# define gsdvs2  GSDVS2 
+# define gsdvt   GSDVT 
+# define gsdvt2  GSDVT2
+# define gsord   GSORD 
+# define gspos   GSPOS 
+# define gsposp  GSPOSP 
+# define gsrotm  GSROTM 
+# define gprotm  GPROTM 
+# define gsvolu  GSVOLU 
+# define gprint  GPRINT 
+# define gdinit  GDINIT
+# define gdopt   GDOPT 
+# define gdraw   GDRAW
+# define gdrayt  GDRAYT
+# define gdrawc  GDRAWC
+# define gdrawx  GDRAWX 
+# define gdhead  GDHEAD
+# define gdwmn1  GDWMN1
+# define gdwmn2  GDWMN2
+# define gdwmn3  GDWMN3
+# define gdxyz   GDXYZ
+# define gdcxyz  GDCXYZ
+# define gdman   GDMAN
+# define gdfspc  GDFSPC
+# define gdspec  GDSPEC
+# define gdtree  GDTREE
+# define gdelet  GDELET
+# define gdclos  GDCLOS
+# define gdshow  GDSHOW
+# define gdopen  GDOPEN
+# define dzshow  DZSHOW 
+# define gsatt   GSATT 
+# define gfpara  GFPARA
+# define gckpar  GCKPAR
+# define gckmat  GCKMAT
+# define geditv  GEDITV
+# define mzdrop  MZDROP 
+
+# define ertrak  ERTRAK
+# define ertrgo  ERTRGO
+ 
+# define setbomb SETBOMB
+# define setclip SETCLIP
+# define gcomad  GCOMAD
+ 
+# define gbrelm GBRELM
+# define gprelm GPRELM
+
+#endif 
 
 //____________________________________________________________________________ 
 extern "C" 
@@ -274,6 +380,10 @@ extern "C"
 			   Float_t &, Float_t &, Float_t &, Float_t &,
 			   Float_t &, Float_t &, Float_t *, Int_t * DEFCHARL); 
 
+  void type_of_call gftmat(const Int_t&, const Int_t&, DEFCHARD, const Int_t&,
+			   Float_t*, Float_t*
+			   ,Float_t *, Int_t & DEFCHARL);
+
   void type_of_call gsmate(const Int_t&, DEFCHARD, Float_t &, Float_t &,
 			   Float_t &, Float_t &, Float_t &, Float_t *,
 			   Int_t & DEFCHARL); 
@@ -324,8 +434,6 @@ extern "C"
   void type_of_call gsvolu(DEFCHARD, DEFCHARD, Int_t &, Float_t *, Int_t &,
 			   Int_t & DEFCHARL DEFCHARL); 
 
-  void type_of_call glvolu(Int_t *, Int_t *, Int_t *, Int_t *);
-    
   void type_of_call gsatt(DEFCHARD, DEFCHARD, Int_t & DEFCHARL DEFCHARL); 
 
   void type_of_call gfpara(DEFCHARD , Int_t&, Int_t&, Int_t&, Int_t&, Float_t*,
@@ -379,41 +487,20 @@ extern "C"
 			    Float_t &, Float_t & DEFCHARL); 
   void type_of_call gcomad(DEFCHARD, Int_t*& DEFCHARL); 
 
-  Int_t type_of_call ertrak(Float_t *x1, Float_t *p1,
-			    Float_t *x2, Float_t *p2,
-			    Int_t &ipa, DEFCHARD DEFCHARL);
-  
-  
+  void type_of_call ertrak(const Float_t *const x1, const Float_t *const p1,
+			   const Float_t *x2, const Float_t *p2,
+			   const Int_t &ipa, DEFCHARD DEFCHARL);
+
   void type_of_call ertrgo();
-  void type_of_call eufill (Int_t &, Float_t*, Float_t*);
-  void type_of_call eufilp (Int_t &, Float_t*, Float_t*, Float_t*);
-  void type_of_call eufilv (Int_t &, Float_t*, DEFCHARD, Int_t *, Int_t & DEFCHARL);
-  void type_of_call agmain(Int_t &,Int_t &,Int_t &);
-  void type_of_call gufld(Float_t *, Float_t *);
-  void type_of_call agxuser();
-  void type_of_call agxinit();
-  void type_of_call kuexel   (DEFCHARD DEFCHARL);
-  void type_of_call set_kupatl (DEFCHARD,Int_t* DEFCHARL);
-  void type_of_call gfrotm   (Int_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&);
-  void type_of_call gfxzrm   (Int_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,
-			      Float_t&,Float_t&,Float_t&,Float_t&);
-  Int_t type_of_call agsens   (DEFCHARD DEFCHARL);
-  void type_of_call gfnhit (DEFCHARD,DEFCHARD,int& DEFCHARL DEFCHARL);
-#if 0
-  ULong_t*  type_of_call csaddr(DEFCHARD DEFCHARL);
-  long int type_of_call csjcal(
-                            addrfun *fun, /* addres of external routine */
-                            int  *narg,   /* number   of arguments      */
-                            ...);         /* other narg arguments       */
-#endif
+  
+    float type_of_call gbrelm(const Float_t &z, const Float_t& t, const Float_t& cut);
+    float type_of_call gprelm(const Float_t &z, const Float_t& t, const Float_t& cut);
 }
+
 //
 // Geant3 global pointer
 //
-#ifdef __HIGZ__
 static Int_t defSize = 600;
-#endif
-TGeant3 *TGeant3::fgGeant = 0; 
 
 ClassImp(TGeant3) 
  
@@ -426,18 +513,20 @@ TGeant3::TGeant3()
 } 
  
 //____________________________________________________________________________ 
-TGeant3::TGeant3(const char *title, Int_t nwgeant, Int_t nwpaw, Int_t iwtype) 
-       :StarMC("TGeant3",title) 
+TGeant3::TGeant3(const char *title, Int_t nwgeant) 
+       :AliMC("TGeant3",title) 
 {
   //
   // Standard constructor for TGeant3 with ZEBRA initialisation
   // 
    
-  printf (" calling agmain \n");
-#ifdef __HIGZ__
-  if (!higz) higz = new THIGZ(defSize);
-#endif
-  Agmain(nwgeant,nwpaw,iwtype); 
+  if(nwgeant) {
+    gzebra(nwgeant); 
+    ginit(); 
+    gzinit();
+  } else {
+    gcinit();
+  }
   //
   // Load Address of Geant3 commons    
   LoadAddress(); 
@@ -467,13 +556,11 @@ void TGeant3::DefaultRange()
   //
   // Set range of current drawing pad to 20x20 cm
   //
-#ifdef __HIGZ__
   if (!higz) {
     new THIGZ(defSize); 
     gdinit();
   }
   higz->Range(0,0,20,20);
-#endif
 }
 
 //____________________________________________________________________________ 
@@ -482,12 +569,10 @@ void TGeant3::InitHIGZ()
   //
   // Initialise HIGZ
   //
-#ifdef __HIGZ__
   if (!higz) {
     new THIGZ(defSize); 
     gdinit();
   }
-#endif
 }
  
 //____________________________________________________________________________ 
@@ -502,6 +587,7 @@ void TGeant3::LoadAddress()
   gcomad(PASSCHARD("GCBANK"),(int*&) fGcbank  PASSCHARL("GCBANK"));
   gcomad(PASSCHARD("GCLINK"),(int*&) fGclink  PASSCHARL("GCLINK"));
   gcomad(PASSCHARD("GCCUTS"),(int*&) fGccuts  PASSCHARL("GCCUTS"));
+  gcomad(PASSCHARD("GCMULO"),(int*&) fGcmulo  PASSCHARL("GCMULO"));
   gcomad(PASSCHARD("GCFLAG"),(int*&) fGcflag  PASSCHARL("GCFLAG"));
   gcomad(PASSCHARD("GCKINE"),(int*&) fGckine  PASSCHARL("GCKINE"));
   gcomad(PASSCHARD("GCKING"),(int*&) fGcking  PASSCHARL("GCKING"));
@@ -544,6 +630,13 @@ void TGeant3::GeomIter()
 }
 
 //____________________________________________________________________________ 
+void TGeant3::FinishGeometry()
+{
+  //Close the geometry structure
+  Ggclos();
+}
+  
+//____________________________________________________________________________ 
 Int_t TGeant3::NextVolUp(Text_t *name, Int_t &copy)
 {
   //
@@ -554,14 +647,19 @@ Int_t TGeant3::NextVolUp(Text_t *name, Int_t &copy)
   fNextVol--;
   if(fNextVol>=0) {
     gname=fGcvolu->names[fNextVol];
-    strncpy(name,(char *) &gname, 4);
-    name[4]='\0';
     copy=fGcvolu->number[fNextVol];
     i=fGcvolu->lvolum[fNextVol];
+    name = fVolNames[i-1];
     if(gname == fZiq[fGclink->jvolum+i]) return i;
     else printf("GeomTree: Volume %s not found in bank\n",name);
   }
   return 0;
+}
+
+//_____________________________________________________________________________
+void TGeant3::BuildPhysics()
+{
+  Gphysi();
 }
 
 //_____________________________________________________________________________
@@ -611,17 +709,13 @@ const char* TGeant3::CurrentVolName() const
   // Returns the current volume name
   //
   Int_t i, gname;
-  char *name;
   if( (i=fGcvolu->nlevel-1) < 0 ) {
     Warning("CurrentVolName","Stack depth %d\n",fGcvolu->nlevel);
   } else {
     gname=fGcvolu->names[i];
-    name = new char[5];
-    strncpy(name,(char *) &gname, 4);
-    name[4]='\0';
     i=fGcvolu->lvolum[i];   
-    if(gname == fZiq[fGclink->jvolum+i]) return name;
-    else Warning("CurrentVolName","Volume %4s not found\n",name);
+    if(gname == fZiq[fGclink->jvolum+i]) return fVolNames[i-1];
+    else Warning("CurrentVolName","Volume %4s not found\n",(char*) &gname);
   }
   return 0;
 }
@@ -635,18 +729,14 @@ const char* TGeant3::CurrentVolOffName(Int_t off) const
   // if name=0 no name is returned
   //
   Int_t i, gname;
-  char *name;
   if( (i=fGcvolu->nlevel-off-1) < 0 ) {
     Warning("CurrentVolOffName",
 	    "Offset requested %d but stack depth %d\n",off,fGcvolu->nlevel);
   } else {
     gname=fGcvolu->names[i];
-    name = new char[5];
-    strncpy(name,(char *) &gname, 4);
-    name[4]='\0';
     i=fGcvolu->lvolum[i];    
-    if(gname == fZiq[fGclink->jvolum+i]) return name;
-    else Warning("CurrentVolOffName","Volume %4s not found\n",name);
+    if(gname == fZiq[fGclink->jvolum+i]) return fVolNames[i-1];
+    else Warning("CurrentVolOffName","Volume %4s not found\n",(char*)&gname);
   }
   return 0;
 }
@@ -755,20 +845,20 @@ void TGeant3::DefineParticles()
   // and add 1 000 000
   // and numbers above 5 000 000 for special applications
   //
-#if 0
 
   const Int_t kion=10000000;
 
   const Int_t kspe=50000000;
+
   TDatabasePDG *pdgDB = TDatabasePDG::Instance();
+
   const Double_t autogev=0.9314943228;
   const Double_t hslash = 1.0545726663e-27;
   const Double_t erggev = 1/1.6021773349e-3;
   const Double_t hshgev = hslash*erggev;
   const Double_t yearstosec = 3600*24*365.25;
-#endif
 
-#if 0
+
   pdgDB->AddParticle("Deuteron","Deuteron",2*autogev+8.071e-3,kTRUE,
 		     0,1,"Ion",kion+10020);
   fPDGCode[fNPDGCodes++]=kion+10020;   // 45 = Deuteron
@@ -790,7 +880,11 @@ void TGeant3::DefineParticles()
   pdgDB->AddParticle("Cherenkov","Cherenkov",0,kFALSE,
 		     0,0,"Special",kspe+50);
   fPDGCode[fNPDGCodes++]=kspe+50;   // 50 = Cherenkov
-#endif
+
+  Gspart(51, "FeedbackPhoton", 7, 0., 0.,1.e20 );
+  pdgDB->AddParticle("FeedbackPhoton","FeedbackPhoton",0,kFALSE,
+		     0,0,"Special",kspe+51);
+  fPDGCode[fNPDGCodes++]=kspe+51;   // 51 = FeedbackPhoton
 
 /* --- Define additional decay modes --- */
 /* --- omega(783) --- */
@@ -929,7 +1023,7 @@ void TGeant3::DefineParticles()
 }
 
 //_____________________________________________________________________________
-Int_t TGeant3::VolId(Text_t *name) const
+Int_t TGeant3::VolId(const Text_t *name) const
 {
   //
   // Return the unique numeric identifier for volume name
@@ -957,21 +1051,77 @@ const char* TGeant3::VolName(Int_t id) const
   //
   // Return the volume name given the volume identifier
   //
-  static char name[5];
+  const char name[5]="NULL";
   if(id<1 || id > fGcnum->nvolum || fGclink->jvolum<=0) 
-    strcpy(name,"NULL");
+    return name;
   else
-    strncpy(name,(char *)&fZiq[fGclink->jvolum+id],4);
-  name[4]='\0';
-  return name;
+    return fVolNames[id-1];
+}
+
+//_____________________________________________________________________________
+void    TGeant3::SetCut(const char* cutName, Float_t cutValue)
+{
+  if(!strcmp(cutName,"CUTGAM")) 
+    fGccuts->cutgam=cutValue; 
+  else if(!strcmp(cutName,"CUTGAM")) 
+    fGccuts->cutele=cutValue; 
+  else if(!strcmp(cutName,"CUTELE")) 
+    fGccuts->cutneu=cutValue; 
+  else if(!strcmp(cutName,"CUTHAD")) 
+    fGccuts->cuthad=cutValue; 
+  else if(!strcmp(cutName,"CUTMUO")) 
+    fGccuts->cutmuo=cutValue; 
+  else if(!strcmp(cutName,"BCUTE")) 
+    fGccuts->bcute=cutValue; 
+  else if(!strcmp(cutName,"BCUTM")) 
+    fGccuts->bcutm=cutValue; 
+  else if(!strcmp(cutName,"DCUTE")) 
+    fGccuts->dcute=cutValue; 
+  else if(!strcmp(cutName,"DCUTM")) 
+    fGccuts->dcutm=cutValue; 
+  else if(!strcmp(cutName,"PPCUTM")) 
+    fGccuts->ppcutm=cutValue; 
+  else if(!strcmp(cutName,"TOFMAX")) 
+    fGccuts->tofmax=cutValue; 
+  else Warning("SetCut","Cut %s not implemented\n",cutName);
+}
+
+//_____________________________________________________________________________
+void    TGeant3::SetProcess(const char* flagName, Int_t flagValue)
+{
+  if(!strcmp(flagName,"PAIR")) 
+    fGcphys->ipair=flagValue;
+  else if(!strcmp(flagName,"COMP")) 
+    fGcphys->icomp=flagValue;
+  else if(!strcmp(flagName,"PHOT")) 
+    fGcphys->iphot=flagValue;
+  else if(!strcmp(flagName,"PFIS")) 
+    fGcphys->ipfis=flagValue;
+  else if(!strcmp(flagName,"DRAY")) 
+    fGcphys->idray=flagValue;
+  else if(!strcmp(flagName,"ANNI")) 
+    fGcphys->ianni=flagValue;
+  else if(!strcmp(flagName,"BREM")) 
+    fGcphys->ibrem=flagValue;
+  else if(!strcmp(flagName,"HADR")) 
+    fGcphys->ihadr=flagValue;
+  else if(!strcmp(flagName,"MUNU")) 
+    fGcphys->imunu=flagValue;
+  else if(!strcmp(flagName,"DCAY")) 
+    fGcphys->idcay=flagValue;
+  else if(!strcmp(flagName,"LOSS")) 
+    fGcphys->iloss=flagValue;
+  else if(!strcmp(flagName,"MULS")) 
+    fGcphys->imuls=flagValue;
+  else if(!strcmp(flagName,"RAYL")) 
+    fGcphys->irayl=flagValue;
+  else  Warning("SetFlag","Flag %s not implemented\n",flagName);
 }
 
 //_____________________________________________________________________________
 Float_t TGeant3::Xsec(char* reac, Float_t energy, Int_t part, Int_t mate)
 {
-#if 0
   Int_t gpart = IdFromPDG(part);
-#endif
   if(!strcmp(reac,"PHOT"))
   {
     if(part!=22) {
@@ -1233,40 +1383,6 @@ Float_t TGeant3::MaxStep() const
   // Return the maximum step length in the current medium
   //
   return fGctmed->stemax;
-}
-
-//_____________________________________________________________________________
-void TGeant3::SetColors()
-{
-  //
-  // Set the colors for all the volumes
-  // this is done sequentially for all volumes
-  // based on the number of their medium
-  //
-  Int_t kv, icol;
-  Int_t jvolum=fGclink->jvolum;
-  //Int_t jtmed=fGclink->jtmed;
-  //Int_t jmate=fGclink->jmate;
-  Int_t nvolum=fGcnum->nvolum;
-  char name[5];
-  //
-  //    Now for all the volumes
-  for(kv=1;kv<=nvolum;kv++) {
-    //     Get the tracking medium
-    Int_t itm=Int_t (fZq[fZlq[jvolum-kv]+4]);
-    //     Get the material
-    //Int_t ima=Int_t (fZq[fZlq[jtmed-itm]+6]);
-    //     Get z
-    //Float_t z=fZq[fZlq[jmate-ima]+7];
-    //     Find color number
-    //icol = Int_t(z)%6+2;
-    //icol = 17+Int_t(z*150./92.);
-    //icol = kv%6+2;
-    icol = itm%6+2;
-    strncpy(name,(char*)&fZiq[jvolum+kv],4);
-    name[4]='\0';
-    Gsatt(name,"COLO",icol);
-  }
 }
 
 //_____________________________________________________________________________
@@ -1543,6 +1659,13 @@ void  TGeant3::Ggclos()
   //   through the routine GHCLOS. 
   //
   ggclos(); 
+  // Create internal list of volumes
+  fVolNames = new char[fGcnum->nvolum][5];
+  Int_t i;
+  for(i=0; i<fGcnum->nvolum; ++i) {
+    strncpy(fVolNames[i], (char *) &fZiq[fGclink->jvolum+i+1], 4);
+    fVolNames[i][4]='\0';
+  }
 } 
  
 //_____________________________________________________________________________
@@ -1663,7 +1786,30 @@ void  TGeant3::Gftmed(Int_t numed, char *name, Int_t &nmat, Int_t &isvol,
   //
   gftmed(numed, PASSCHARD(name), nmat, isvol, ifield, fieldm, tmaxfd, stemax,  
          deemax, epsil, stmin, ubuf, nbuf PASSCHARL(name)); 
+}
+
+ 
+ void  TGeant3::Gftmat(Int_t imate, Int_t ipart, char *chmeca, Int_t kdim,
+		      Float_t* tkin, Float_t* value, Float_t* pcut,
+		      Int_t &ixst)
+{ 
+  //
+  // Return parameters for tracking medium NUMED
+  //
+  gftmat(imate, ipart, PASSCHARD(chmeca), kdim,
+	 tkin, value, pcut, ixst PASSCHARL(chmeca));
+
 } 
+
+Float_t TGeant3::Gbrelm(Float_t z, Float_t t, Float_t bcut)
+{
+    return gbrelm(z,t,bcut);
+}
+
+Float_t TGeant3::Gprelm(Float_t z, Float_t t, Float_t bcut)
+{
+    return gprelm(z,t,bcut);
+}
  
 //_____________________________________________________________________________
 void  TGeant3::Gmate() 
@@ -2045,9 +2191,7 @@ void  TGeant3::Gtreve_root()
   //
   //   Controls tracking of all particles belonging to the current event
   //
-#if 0
   gtreve_root(); 
-#endif
 } 
 
 //_____________________________________________________________________________
@@ -2100,7 +2244,7 @@ void  TGeant3::Gdcxyz()
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
 //_____________________________________________________________________________
-void  TGeant3::Gdtom(Float_t *xd, Float_t *xm, Int_t &iflag) 
+void  TGeant3::Gdtom(Float_t *xd, Float_t *xm, Int_t iflag) 
 { 
   //
   //  Computes coordinates XM (Master Reference System
@@ -2146,7 +2290,7 @@ void  TGeant3::Gmedia(Float_t *x, Int_t &numed)
 } 
  
 //_____________________________________________________________________________
-void  TGeant3::Gmtod(Float_t *xm, Float_t *xd, Int_t &iflag) 
+void  TGeant3::Gmtod(Float_t *xm, Float_t *xd, Int_t iflag) 
 { 
   //
   //       Computes coordinates XD (in DRS) 
@@ -2397,29 +2541,7 @@ Int_t TGeant3::Gsvolu(const char *name, const char *shape, Int_t nmed,
 	 PASSCHARL(vname) PASSCHARL(vshape)); 
   return ivolu; 
 } 
-//___________________________________________ 
-Int_t TGeant3::Glvolu(const Int_t Nlev, Int_t *Lnam, Int_t *Lnum)
-{ 
-   Int_t Ierr = 0; 
-   glvolu((Int_t*)&Nlev, Lnam, Lnum, &Ierr);
-   return Ierr; 
-} 
-//___________________________________________ 
-Float_t* TGeant3::Gufld(Float_t *x, Float_t *bf)
-{ 
-   gufld(x,bf);
-   return bf; 
-} 
-//___________________________________________ 
-void TGeant3::Gfnhit(const Char_t *cset, const Char_t *cdet, Int_t &nhits){
-  gfnhit(PASSCHARD(cset), PASSCHARD(cdet), nhits PASSCHARL(cset) PASSCHARL(cdet));
-}
-//___________________________________________ 
-Bool_t  TGeant3::Agsens(const Char_t *name)
-{ 
-  // defines whether the node "name" is "sensible"
-   return (Bool_t) agsens(PASSCHARD(name) PASSCHARL(name));
-} 
+ 
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 //
 //           T H E    D R A W I N G   P A C K A G E
@@ -2622,10 +2744,8 @@ void TGeant3::Gdopen(Int_t iview)
   //  with solid colours can now be stored in a view bank or in 'PICTURE FILES'
   //
   InitHIGZ();
-#ifdef __HIGZ__
   higz->Clear();
   gdopen(iview);
-#endif
 }
  
 //_____________________________________________________________________________
@@ -2729,9 +2849,7 @@ void TGeant3::Gdraw(const char *name,Float_t theta, Float_t phi, Float_t psi,
   //  string for the NAME of the volume can be found using the command DTREE).
   //
   InitHIGZ();
-#ifdef __HIGZ__
   higz->Clear();
-#endif
   char vname[5];
   Vname(name,vname);
   if (fGcvdma->raytra != 1) {
@@ -2762,9 +2880,7 @@ void TGeant3::Gdrawc(const char *name,Int_t axis, Float_t cut,Float_t u0,
   //  the CVOL/BOX function.
   //  
   InitHIGZ();
-#ifdef __HIGZ__
   higz->Clear();
-#endif
   char vname[5];
   Vname(name,vname);
   gdrawc(PASSCHARD(vname), axis,cut,u0,v0,ul,vl PASSCHARL(vname)); 
@@ -2793,9 +2909,7 @@ void TGeant3::Gdrawx(const char *name,Float_t cutthe, Float_t cutphi,
   //  The resulting picture is seen from the viewing angles theta,phi.
   //
   InitHIGZ();
-#ifdef __HIGZ__
   higz->Clear();
-#endif
   char vname[5];
   Vname(name,vname);
   gdrawx(PASSCHARD(vname), cutthe,cutphi,cutval,theta,phi,u0,v0,ul,vl
@@ -2866,9 +2980,7 @@ void TGeant3::Gdspec(const char *name)
   //  volume.
   //  
   InitHIGZ();
-#ifdef __HIGZ__
   higz->Clear();
-#endif
   char vname[5];
   Vname(name,vname);
   gdspec(PASSCHARD(vname) PASSCHARL(vname)); 
@@ -2881,7 +2993,6 @@ void TGeant3::DrawOneSpec(const char *name)
   //  Function called when one double-clicks on a volume name
   //  in a TPavelabel drawn by Gdtree.
   //
-#ifdef __HIGZ__
   THIGZ *higzSave = higz;
   higzSave->SetName("higzSave");
   THIGZ *higzSpec = (THIGZ*)gROOT->FindObject("higzSpec");
@@ -2898,7 +3009,6 @@ void TGeant3::DrawOneSpec(const char *name)
   higzSave->cd();
   higzSave->SetName("higz");
   higz = higzSave;
-#endif
 } 
 
 //_____________________________________________________________________________
@@ -2918,13 +3028,11 @@ void TGeant3::Gdtree(const char *name,Int_t levmax, Int_t isel)
   //    - drawing tree of parent
   //  
   InitHIGZ();
-#ifdef __HIGZ__
   higz->Clear();
   char vname[5];
   Vname(name,vname);
   gdtree(PASSCHARD(vname), levmax, isel PASSCHARL(vname)); 
   higz->fPname = "";
-#endif
 } 
 
 //_____________________________________________________________________________
@@ -2938,7 +3046,6 @@ void TGeant3::GdtreeParent(const char *name,Int_t levmax, Int_t isel)
   //  This function draws the logical tree of the parent of name.
   //  
   InitHIGZ();
-#ifdef __HIGZ__
   higz->Clear();
   // Scan list of volumes in JVOLUM
   char vname[5];
@@ -2960,7 +3067,6 @@ void TGeant3::GdtreeParent(const char *name,Int_t levmax, Int_t isel)
       }
     }
   }
-#endif
 } 
  
 //_____________________________________________________________________________
@@ -3179,6 +3285,20 @@ void TGeant3::SetDRAY(Int_t par)
 }
  
 //_____________________________________________________________________________
+void TGeant3::SetERAN(Float_t ekmin, Float_t ekmax, Int_t nekbin)
+{
+  //
+  //  To control cross section tabulations
+  //   ekmin = minimum kinetic energy in GeV
+  //   ekmax = maximum kinetic energy in GeV
+  //   nekbin = number of logatithmic bins (<200)
+  //  
+  fGcmulo->ekmin = ekmin;
+  fGcmulo->ekmax = ekmax;
+  fGcmulo->nekbin = nekbin;
+}
+ 
+//_____________________________________________________________________________
 void TGeant3::SetHADR(Int_t par)
 {
   //
@@ -3387,50 +3507,13 @@ void TGeant3::Ertrgo()
 }
 
 //______________________________________________________________________________
-Int_t TGeant3::Ertrak(Float_t *x1, Float_t *p1, 
-		      Float_t *x2, Float_t *p2,
-		      Int_t &ipa,  Option_t *chopt)
+void TGeant3::Ertrak(const Float_t *const x1, const Float_t *const p1, 
+			const Float_t *x2, const Float_t *p2,
+			Int_t ipa,  Option_t *chopt)
 {
-  return ertrak(x1,p1,x2,p2,ipa,PASSCHARD(chopt) PASSCHARL(chopt));
+  ertrak(x1,p1,x2,p2,ipa,PASSCHARD(chopt) PASSCHARL(chopt));
 }
-//______________________________________________________________________________
-void TGeant3::Eufill(Int_t &n, Float_t* ein, Float_t* xlf){
-  eufill (n ,ein, xlf);
-}
-//______________________________________________________________________________
-void TGeant3::Eufilp(Int_t &n, Float_t* ein, Float_t* pli, Float_t * plf){
-  eufilp (n ,ein, pli, plf);
-}
-//______________________________________________________________________________
-void TGeant3::Eufilv(Int_t &n, Float_t* ein, const Char_t *cnamv, Int_t *numv, Int_t &Iovl){
-  eufilv (n ,ein, PASSCHARD(cnamv), numv, Iovl PASSCHARL(cnamv));
-}
-//______________________________________________________________________________
-void TGeant3::Agmain(Int_t &nwgeant,Int_t &nwpaw,Int_t &iwtype) {agmain(nwgeant,nwpaw,iwtype);}
-//______________________________________________________________________________
-void TGeant3::Agxuser() {agxuser();}
-//______________________________________________________________________________
-void TGeant3::Agxinit() {agxinit();}
-//_____________________________________________________________________________
-void TGeant3::Kuexel(const Char_t *line) {kuexel(PASSCHARD(line) PASSCHARL(line));}
-//_____________________________________________________________________________
-void TGeant3::Gfrotm(Int_t & Nmat, 
-		     Float_t &Theta1, Float_t & Phi1,
-		     Float_t &Theta2, Float_t & Phi2,
-		     Float_t &Theta3, Float_t & Phi3){
-  gfrotm(Nmat, Theta1, Phi1, Theta2, Phi2, Theta3, Phi3);
-}
-#if 0
-//_____________________________________________________________________________
-ULong_t* TGeant3::Csaddr(const Char_t *name){
-  return casddr(PASSCHARD(name), PASSCHARL(name));
-}
-//_____________________________________________________________________________
-Int_t TGeant3::Csjcal(void *fun, Int_t &Narg, ...) {
-  if (fun) return csjcal(fun,Narg);
-  else     return 0;
-}
-#endif
+        
 //_____________________________________________________________________________
 void TGeant3::WriteEuclid(const char* filnam, const char* topvol,
 			  Int_t number, Int_t nlevel)
@@ -3882,6 +3965,7 @@ void TGeant3::WriteEuclid(const char* filnam, const char* topvol,
     }
   }
   fprintf(lun,"END\n");
+  fclose(lun);
   printf(" *** GWEUCL *** file: %s is now written out\n",filext);
   printf(" *** GWEUCL *** file: %s is now written out\n",filetme);
   // Clean up
@@ -3891,4 +3975,26 @@ void TGeant3::WriteEuclid(const char* filnam, const char* topvol,
   iws=0;
   return;
 }
+
 //_____________________________________________________________________________
+void TGeant3::Streamer(TBuffer &R__b)
+{
+  //
+  // Stream an object of class TGeant3.
+  //
+  if (R__b.IsReading()) {
+    Version_t R__v = R__b.ReadVersion(); if (R__v) { }
+    AliMC::Streamer(R__b);
+    R__b >> fNextVol;
+    R__b >> fNPDGCodes;
+    R__b.ReadStaticArray(fPDGCode);
+  } else {
+    R__b.WriteVersion(TGeant3::IsA());
+    AliMC::Streamer(R__b);
+    R__b << fNextVol;
+    R__b << fNPDGCodes;
+    R__b.WriteArray(fPDGCode, fNPDGCodes);
+  }
+}
+
+
