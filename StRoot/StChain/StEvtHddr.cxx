@@ -23,7 +23,18 @@ StEvtHddr &StEvtHddr::operator=(const StEvtHddr &hddr)
   return *this;
 }
 //_____________________________________________________________________________
-  void StEvtHddr::SetGMTime(ULong_t ut)
+void StEvtHddr::FillTag(EvtHddr_st *tag)
+{
+  memcpy(tag,&mRunNumber,(char*)&mEventNumber-(char*)&mRunNumber); 
+  tag->mEventTime = mEventTime.GetTime();
+  tag->mEventDate = mEventTime.GetDate();
+  tag->mProdTime = mProdTime.GetTime();
+  tag->mProdDate = mProdTime.GetDate();
+  //  tag->mProdTime  = mProdTime;
+  //  tag->mEventType = mEventType;
+}
+//_____________________________________________________________________________
+  void StEvtHddr::SetGMTime(UInt_t ut)
 {  
    struct tm *tp;
    tp            = (tm*)gmtime((time_t*)&ut);
@@ -39,10 +50,10 @@ StEvtHddr &StEvtHddr::operator=(const StEvtHddr &hddr)
   void StEvtHddr::Print()
 {
   printf("\n *********** Event Info **********************\n");  
-  printf("\tRun: \t%5d  Event %5d  TimeStamp %8d.%6d  Bunch %lu\n"
+  printf("\tRun: \t%5d  Event %5d  TimeStamp %8d.%6d  Bunch %u\n"
          ,mRunNumber,mEventNumber,mEventTime.GetDate(),mEventTime.GetTime()
          ,mBunchCrossingNumber);  
-  printf("\tInpTrig: %4lx OutTrig: %4lx  \n"
+  printf("\tInpTrig: %4x OutTrig: %4x  \n"
          ,mInputTriggerMask,mTriggerMask);
   printf("\n *********************************************\n\n");  
 }  
