@@ -12,7 +12,8 @@
 #include "St_Table.h"
 #endif
   gBenchmark->Start("evg");
-  char *dir_name = "/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular";
+//  char *dir_name = "/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular";
+  char *dir_name = "/star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/tss";
   printf ("%s \n",dir_name);
   void *dir = 0;
   if (dir = gSystem->OpenDirectory(dir_name)){ 

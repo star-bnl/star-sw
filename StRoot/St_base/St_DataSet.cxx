@@ -336,17 +336,21 @@ St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent) : TNamed(), fList
    SetTitle("St_DataSet");
 }
 //______________________________________________________________________________
-St_DataSet::St_DataSet(TString &dirname,const Char_t *addname) : TNamed(), fList(0), fMother(0)
+St_DataSet::St_DataSet(TString &dirname,const Char_t *rootname,Bool_t expand) : TNamed(), fList(0), fMother(0)
 {
-  // Convert the "opearting system" file system tree into memory resided St_DataSet
+  // Convert the "opearting system" file system tree into the memory resided St_DataSet
+
+  // expand = kTRUE  -  Expands "dirname" (by default)
+  //
   St_DataSet *set = 0;
   Long_t id, size, flags, modtime;
-  const Char_t *name = dirname.Data();
+  TString dirbuf = dirname;
+  if (expand) gSystem->ExpandPathName(dirbuf);
+  const Char_t *name = dirbuf.Data();
   if (gSystem->GetPathInfo(name, &id, &size, &flags, &modtime)==0) {
     TString nextobj = name;
     if (!addname) SetName(name);
-    else          SetName(addname);
-    SetTitle("file");
+    else          SetName(rootname);
 
     // Check if "dirname" is a directory.
     void *dir = 0;
@@ -355,15 +359,17 @@ St_DataSet::St_DataSet(TString &dirname,const Char_t *addname) : TNamed(), fList
     if (dir) {   // this is a directory
       SetTitle("directory");
       while (name = gSystem->GetDirEntry(dir)) {
-        // scip some "special" names
+         // skip some "special" names
          if (strcmp(name,"..")!=0 && strcmp(name,".")!=0) {
-           Char_t *file = gSystem->ConcatFileName(dirname,name);
+           Char_t *file = gSystem->ConcatFileName(dirbuf,name);
            TString nextdir = file;
            delete [] file;
-           Add(new St_DataSet(nextdir,name));
+           Add(new St_DataSet(nextdir,name,kFALSE));
          }
       }
     }
+    else 
+       SetTitle("file");
   }
 }
 //______________________________________________________________________________

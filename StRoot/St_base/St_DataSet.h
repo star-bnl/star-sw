@@ -37,7 +37,7 @@ class St_DataSet : public TNamed
  public:
  
     St_DataSet(const Char_t *name="", St_DataSet *parent=0);
-    St_DataSet(TString &dirname, const Char_t *filename="");
+    St_DataSet(TString &dirname, const Char_t *filename="",Bool_t expand=kTRUE);
     virtual ~St_DataSet();
             void        Add(St_DataSet *dataset);
     virtual void        Browse(TBrowser *b);
