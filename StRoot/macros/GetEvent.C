@@ -20,17 +20,8 @@ void Load()
 {
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-    gSystem->Load("xdf2root");
     gSystem->Load("St_Tables");
-    gSystem->Load("St_xdfin_Maker");
     gSystem->Load("St_io_Maker");
-    gSystem->Load("St_TLA_Maker");
-    gSystem->Load("libmsg");
-    gSystem->Load("libtls");
-    gSystem->Load("St_tpc");
-    gSystem->Load("St_svt");
-    gSystem->Load("St_global");
-    gSystem->Load("St_dst_Maker");
 };
 
 void GetEvent(Int_t numberOfEvent=1,
@@ -80,7 +71,8 @@ void GetEvent(Int_t numberOfEvent=1,
     if (!chain->Make(i)) 
     {
       cout << "------------- Event #" << i << endl;
-      chain->DataSet(testedMakerName)->ls("*");
+      set = chain->DataSet(testedMakerName);
+      if (set) set->ls("*");
     }
     else {
      set = chain->DataSet(testedMakerName);
