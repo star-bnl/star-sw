@@ -12,6 +12,7 @@
 /*-------------------------------------------- INCLUDES             --*/
 #include <stdlib.h>
 #include <string.h>
+#include "emlLib.h"
 #include "tdm_types.h"
 #include "asuAlloc.h"
 
@@ -48,7 +49,7 @@ int tdm_cvtDst2st(DS_DATASET_T *pT
    ||  !dsTableRowSize((size_t*)(&(header.rbytes)),pT)
    ||  !dsTableDataAddress(&pData,pT)
    ){
-      dsPerror("cannot convert DSL table to TAS table");
+      EML_PUSHERROR(dsError("cannot convert DSL table to TAS table"));
       return FALSE;
    }
    tbl_h = (TABLE_HEAD_ST*)MALLOC(sizeof(header));
