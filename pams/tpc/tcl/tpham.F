@@ -141,6 +141,11 @@ C	fit_isolated_cluster
 C       (now existing) if isolated or deconvolute_cluster (will exist)
 C     - the field tphit.lambda is now filled, using a vertex ansatz
 C       (lambda=atan(z/radius_of_row)
+c
+c     June-Dec 1995 - lots of stuff
+c
+c     Dec 1995
+c      - now transform tphit.q into units of energy loss
 C
 C   Error conditions : 
 C   ================
@@ -240,6 +245,7 @@ C-----------------------------------------------------------------------
 	real rad,dx_prime
 
         real white_noise,filtered_noise
+        real de_scale
 
         double precision invec(3),outvec(3)
 
@@ -355,8 +361,12 @@ c	   yes, I think so - mal
 c
            if(irow.gt.pad_plane(1).nrow_in)then
               pad_width = pad_plane(1).pad_sep_out
+              de_scale = tsspar(1).ave_ion_pot*tsspar(1).scale
+     +             /tsspar(1).gain_out
            else
               pad_width = pad_plane(1).pad_sep_in
+              de_scale = tsspar(1).ave_ion_pot*tsspar(1).scale
+     +             /tsspar(1).gain_in
            endif
 
 
@@ -479,6 +489,10 @@ c  this should be understood and fixed, but for now....
               tphit(tphith.nok).dz = tphit(tphith.nok).dz 
      +             * tclpar(1).dz_fact
               
+
+c also put q (magnitude of hit) into units of energy loss
+              tphit(tphith.nok).q = tphit(tphith.nok).q * de_scale
+
 c     here, at the very end, I make up for the sins of Bob Hackenburg, who
 c     spurns convention, and makes the fast and slow simulator routes have
 c     different conventions for sector numbering... best if this becomes
