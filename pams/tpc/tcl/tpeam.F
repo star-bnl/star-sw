@@ -190,7 +190,7 @@ c  regardless of mcid so as to make a distribution of distance to all
 c  neighboring hits in the sector/padrow  (comparing histograms of the
 c  ntuples 800+ and 850+ will tell us what is the "merging" distance)
          integer max_nhits_in_row
-         parameter (max_nhits_in_row=300)
+         parameter (max_nhits_in_row=600)
          integer mc_ptr_list(mxhits*24,0:max_nhits_in_row)
          integer rec_ptr_list(mxhits*24,0:max_nhits_in_row)
 c (as usual index2=0 tells *number* of hits in the list for that sector/padrow)
