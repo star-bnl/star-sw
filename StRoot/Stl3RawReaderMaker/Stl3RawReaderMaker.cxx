@@ -9,9 +9,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
-//  $Id: Stl3RawReaderMaker.cxx,v 1.9 2001/09/27 03:49:52 struck Exp $
+//  $Id: Stl3RawReaderMaker.cxx,v 1.10 2001/11/14 23:30:56 struck Exp $
 //
 //  $Log: Stl3RawReaderMaker.cxx,v $
+//  Revision 1.10  2001/11/14 23:30:56  struck
+//  major update: set 'unbiased'-flag, correct bugs in StGlobalTrack-filling
+//
 //  Revision 1.9  2001/09/27 03:49:52  struck
 //  actual no. of gl3s handled flexible, max no. of gl3s and algorithms now global define-statements
 //
@@ -33,6 +36,8 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StDAQMaker/StDAQReader.h"
+#include "tables/St_l3RunSummary_Table.h"
+#include "tables/St_l3AlgorithmInfo_Table.h"
 #include "StEventTypes.h"
 #include "StEnumerations.h"
 #include "TTree.h"
@@ -75,13 +80,16 @@ Int_t Stl3RawReaderMaker::Init(){
   mCalculateVertex = 0; // =1 or =2 for vertex finding routines
   mL3On = kFALSE;
 
-  SetDebug(1);
+  //SetDebug(1);
+
+  // reset database pointer
+  mDbSet = 0;
 
   // allocate memory
   //mGlobalCounter = new GlobalCounter[mMaxNumberOfGl3Nodes];
   //mAlgorithmCounter = new AlgorithmCounter[mMaxNumberOfGl3Nodes][mMaxNumberOfAlgorithms];
 
-  mNumberOfGl3Nodes = 3;
+  mNumberOfGl3Nodes = 0;
   mNumberOfAlgorithms = 0;
   mEventCounter = 0;
 
@@ -103,7 +111,6 @@ Int_t Stl3RawReaderMaker::Init(){
 	mL3Event = new Stl3MiniEvent() ;
 	mGlobalTrackTree->Branch("L3Event","Stl3MiniEvent",&mL3Event,128000,1);
   }
-
   // return
   return StMaker::Init();
 }
@@ -119,6 +126,7 @@ Int_t Stl3RawReaderMaker::Make()
     // here we start
     cout << "Now we start l3RawReader Maker. \n" ;
     
+
     // get the l3 daqreader
     StDAQReader *daqReader = (StDAQReader*)(DAQReaderSet->GetObject()) ;
     if (daqReader) { 
@@ -293,6 +301,9 @@ Int_t Stl3RawReaderMaker::fillMiniEventWithi960Clusters()
 
 
 //_____________________________________________________________________________
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+
 Int_t Stl3RawReaderMaker::fillStEvent() 
 {
 
@@ -330,7 +341,7 @@ Int_t Stl3RawReaderMaker::fillStEvent()
 
   // check data
   // L3_summary.on==0 indicates that the event crashed in
-  // L3 online and raw data contains for us no valid information
+  // L3 online and raw data contains no valid information for us
   if (ml3reader->getL3_Summary()->on == 0) {
         cout << "Warning: L3 crashed online on this event, no usefull information."
 	     << endl;
@@ -338,6 +349,38 @@ Int_t Stl3RawReaderMaker::fillStEvent()
 	return 0;
   }
 
+  // get database info
+  mDbSet = GetDataBase("RunLog/l3");
+  // if we didn't get the db use maximum values as default
+  if (mDbSet) {
+        // get number of gl3 nodes
+        TTable* l3runSummaryTable = (TTable* )mDbSet->Find("l3RunSummary");
+	// database can be there, but now tables :-(
+	if (l3runSummaryTable) {
+	      l3RunSummary_st* data = (l3RunSummary_st* )l3runSummaryTable->GetArray();
+	      mNumberOfGl3Nodes = data->nGl3Nodes;
+	      if (m_DebugLevel) {
+		    cout << "database: runNumber = " << data->runNumber << endl;
+		    cout << "database: nGl3Nodes = " << data->nGl3Nodes << endl;
+	      }
+	      // check limit
+	      if (mNumberOfGl3Nodes>MaxNumberOfGl3Nodes) {
+		    cout << " ERROR: number of gl3 nodes too high: db -> " << mNumberOfGl3Nodes
+			 << "  max -> " << MaxNumberOfGl3Nodes << endl;
+		    return 1;
+	      }
+	}
+	else {
+	      mNumberOfGl3Nodes = MaxNumberOfGl3Nodes;
+	      cout << "  no table entry for this run in 'l3RunSummary' found!" << endl;
+	      cout << "  using default values." << endl;
+	}
+  }
+  else {
+        mNumberOfGl3Nodes = MaxNumberOfGl3Nodes;
+	cout << "  no database 'Runlog/l3' found!" << endl;
+	cout << "  using default values." << endl;
+  }
 
   // gl3 node which built this event
   int gl3Id = ml3reader->getGl3Id();
@@ -398,11 +441,11 @@ Int_t Stl3RawReaderMaker::fillStEvent()
   for (int i=0; i<mNumberOfGl3Nodes; i++) {
         // if one gl3 node wasn't seen so far,
         // the counters are still undefined
-        if (mGlobalCounter[i].nProcessed==0 && mEventCounter<MaxNumberOfGl3Nodes) {
+        if (mGlobalCounter[i].nProcessed==0 && mEventCounter<(2*mNumberOfGl3Nodes)) {
 	      totalCounter.nProcessed     = -1;
 	      totalCounter.nReconstructed = -1;
 	      for (int j=0; j<mNumberOfAlgorithms; j++) {
-		    totalAlgCounter[j].algId      = mAlgorithmCounter[i][j].algId;
+		    totalAlgCounter[j].algId      = mAlgorithmCounter[gl3Id-1][j].algId;
 		    totalAlgCounter[j].nProcessed = -1;
 		    totalAlgCounter[j].nAccept    = -1;
 		    totalAlgCounter[j].nBuild     = -1;
@@ -410,7 +453,7 @@ Int_t Stl3RawReaderMaker::fillStEvent()
 	      break;
 	}
 	// summ-up the counters of all gl3 nodes
-	// we have seen so far after #(MaxNumberOfGl3Nodes) events
+	// we have seen so far after #(mNumberOfGl3Nodes*2) events
 	totalCounter.nProcessed     += mGlobalCounter[i].nProcessed;
 	totalCounter.nReconstructed += mGlobalCounter[i].nReconstructed;
 	for (int k=0; k<mNumberOfAlgorithms; k++) {
@@ -428,10 +471,47 @@ Int_t Stl3RawReaderMaker::fillStEvent()
   // fill counters and number of tracks
   myEventSummary->setCounters(totalCounter.nProcessed, totalCounter.nReconstructed);
   myEventSummary->setNumberOfTracks(ml3reader->getL3_Summary()->nTracks);
+  myEventSummary->setL0TriggerWord(ml3reader->getL3_P()->trg_word);
 
   //--------------------------
   // fill StL3AlgorithmInfo
   //--------------------------
+  // get database info if available
+  l3AlgorithmInfo_st* dbAlgInfo = 0;
+  if (mDbSet) {
+        TTable* l3algorithmInfoTable = (TTable* )mDbSet->Find("l3AlgorithmInfo");
+	if (l3algorithmInfoTable) {
+	      dbAlgInfo = (l3AlgorithmInfo_st* )l3algorithmInfoTable->GetArray();
+	      if (m_DebugLevel) {
+		    for (int i=0; i<l3algorithmInfoTable->GetNRows(); i++) {
+		          cout << "  run \tidxAlg\talgId\tpreScale\tpostScale" << endl;
+			  cout << dbAlgInfo[i].runNumber 
+			       << "\t" << dbAlgInfo[i].idxAlg
+			       << "\t" << dbAlgInfo[i].algId
+			       << "\t" << dbAlgInfo[i].preScale
+			       << "\t" << dbAlgInfo[i].postScale << endl;
+			  cout << "  GI: " << dbAlgInfo[i].GI1 << " " << dbAlgInfo[i].GI2 << " " << dbAlgInfo[i].GI3
+			       << " " << dbAlgInfo[i].GI4 << " " << dbAlgInfo[i].GI5 << endl;
+			  cout << "  GF: " << dbAlgInfo[i].GF1 << " " << dbAlgInfo[i].GF2 << " " << dbAlgInfo[i].GF3
+			       << " " << dbAlgInfo[i].GF4 << " " << dbAlgInfo[i].GF5 << endl;
+			  cout << "------------" << endl;
+		    }
+	      }
+	      // check entries, just to be _really_ safe (paranoia;-)
+	      if (l3algorithmInfoTable->GetNRows()!=mNumberOfAlgorithms) {
+		    cout << "Warning: database entries don't match raw data!" << endl;
+		    cout << " db nAlgorithms: " << l3algorithmInfoTable->GetNRows()
+			 << ", raw data: " << mNumberOfAlgorithms
+			 << endl;
+		    cout << " Skip database info for this event." << endl;
+		    dbAlgInfo = 0;
+	      }
+	}
+	else {
+	      cout << "No entry for this run found in table 'l3algorithmInfo'." << endl;
+	}
+  }
+  // now fill algorithm info in StEvent
   for (int i=0; i<mNumberOfAlgorithms; i++) {
         StL3AlgorithmInfo* myL3AlgorithmInfo = new StL3AlgorithmInfo(&algData[i]);
 	if (!myL3AlgorithmInfo) {
@@ -441,17 +521,56 @@ Int_t Stl3RawReaderMaker::fillStEvent()
 	myL3AlgorithmInfo->setCounters(totalAlgCounter[i].nProcessed,
 				       totalAlgCounter[i].nAccept,
 				       totalAlgCounter[i].nBuild);
+
+	//
+	// check Pass-Thru Algorithm for hadronic triggers
+	// that is either TWReject && triggerWord=0x1...
+	// or TRUE && triggerWord=0x1...
+	// __status as of Nov. 2001__
+	//
+	int passThruId = 0;
+	if ( (algData[i].algId==10 || algData[i].algId==1)
+	     && ml3reader->getL3_P()->trg_word>0x0fff
+	     && ml3reader->getL3_P()->trg_word<0x2000
+	     && algData[i].build==1 ) {
+
+	      passThruId = algData[i].algId;
+	      if (m_DebugLevel) {
+		    cout << "pass-thru algorithm Id: " << passThruId << endl;
+	      }
+
+	      // set unbiased flag in event summary
+	      myEventSummary->setUnbiasedTrigger();
+	}
+
+	// get algorithm info from database
+	// and check algId (paranoia again?)
+	if (dbAlgInfo && dbAlgInfo[i].algId==totalAlgCounter[i].algId) {
+	      myL3AlgorithmInfo->setPreScale(dbAlgInfo[i].preScale);
+	      myL3AlgorithmInfo->setPostScale(dbAlgInfo[i].postScale);
+	      int intPara[IntParameterSize] = {dbAlgInfo[i].GI1, dbAlgInfo[i].GI2,
+					       dbAlgInfo[i].GI3, dbAlgInfo[i].GI4,
+					       dbAlgInfo[i].GI5};
+	      float floatPara[FloatParameterSize] = {dbAlgInfo[i].GF1, dbAlgInfo[i].GF2,
+						     dbAlgInfo[i].GF3, dbAlgInfo[i].GF4,
+						     dbAlgInfo[i].GF5};
+	      myL3AlgorithmInfo->setParameters(intPara, floatPara);
+
+	      if (dbAlgInfo[i].algId==passThruId)
+		    myEventSummary->setUnbiasedTriggerPreScale(dbAlgInfo[i].preScale);
+
+	} // if dbAlgInfo
 	myEventSummary->addAlgorithm(myL3AlgorithmInfo);
-  }
+
+  } // for mNumberOfAlgorithms
 
   // delete counter array
   delete [] totalAlgCounter;
 
+
   // call filling routines
   // global tracks and vertex
   if (ml3reader->getGlobalTrackReader()) {
- 
-       if (fillStEventWithL3GlobalTracks()!=0) return 1;
 
 	// vertex position
 	StPrimaryVertex* myL3Vertex = new StPrimaryVertex;
@@ -459,7 +578,9 @@ Int_t Stl3RawReaderMaker::fillStEvent()
 	StThreeVectorF* pos = new StThreeVectorF(vert.x, vert.y, vert.z);
 	myL3Vertex->setPosition(*pos);
 	myStL3Trigger->addPrimaryVertex(myL3Vertex);
-	
+ 
+       if (fillStEventWithL3GlobalTracks()!=0) return 1;
+
   }
 
   // i960 hits
@@ -530,16 +651,16 @@ Int_t Stl3RawReaderMaker::fillStEventWithL3GlobalTracks()
 	myTrackDetectorInfoVector.push_back(detectorInfo);
 		
 	// StTrackGeometry
-	StThreeVectorF* origin = new StThreeVectorF(globalL3Tracks[trackindex].r0 * TMath::Cos(globalL3Tracks[trackindex].phi0),
+	StThreeVectorD* origin = new StThreeVectorD(globalL3Tracks[trackindex].r0 * TMath::Cos(globalL3Tracks[trackindex].phi0),
 						    globalL3Tracks[trackindex].r0 * TMath::Sin(globalL3Tracks[trackindex].phi0),
 						    globalL3Tracks[trackindex].z0);
-	StThreeVectorF* momentum = new StThreeVectorF(globalL3Tracks[trackindex].pt * TMath::Cos(globalL3Tracks[trackindex].psi),
+	StThreeVectorD* momentum = new StThreeVectorD(globalL3Tracks[trackindex].pt * TMath::Cos(globalL3Tracks[trackindex].psi),
 						      globalL3Tracks[trackindex].pt * TMath::Sin(globalL3Tracks[trackindex].psi),
 						      globalL3Tracks[trackindex].pt * globalL3Tracks[trackindex].tanl );
 	StHelixModel* helixModel = new StHelixModel( globalL3Tracks[trackindex].q,
 						     globalL3Tracks[trackindex].psi,
 						     0.0,
-						     globalL3Tracks[trackindex].tanl, 
+						     atan(globalL3Tracks[trackindex].tanl), 
 						     *origin, 
 						     *momentum, -1 );		
       // StGlobalTrack
@@ -548,10 +669,15 @@ Int_t Stl3RawReaderMaker::fillStEventWithL3GlobalTracks()
       globalTrack->setLength(globalL3Tracks[trackindex].length) ;
       globalTrack->setDetectorInfo(detectorInfo) ;
       globalTrack->setGeometry(helixModel) ;
-      short h = globalTrack->geometry()->charge()*signOfField > 0 ? -1 : 1;   //  h = -sign(q*B)
+
+      // helicity h = -sign(q*B)
+      short h = globalTrack->geometry()->charge()*signOfField > 0 ? -1 : 1;
       globalTrack->geometry()->setHelicity(h);
-      double curv = fabs(0.29979 * bval[2] / globalL3Tracks[trackindex].pt);
+
+      // curvature
+      double curv = fabs(0.0003 * bval[2] / globalL3Tracks[trackindex].pt);
       globalTrack->geometry()->setCurvature(curv);
+
       // add dE/dx information
       if (globalL3Tracks[trackindex].dedx > 0) {
 	    StDedxPidTraits* myStDedxPidTraits =  new StDedxPidTraits(kTpcId, kTruncatedMeanId,
@@ -564,6 +690,19 @@ Int_t Stl3RawReaderMaker::fillStEventWithL3GlobalTracks()
       StTrackNode* trackNode = new StTrackNode();
       trackNode->addTrack(globalTrack);
       myTrackNodeVector.push_back(trackNode);
+
+
+      //==================================
+      // check dca
+      //double kapa = fabs(0.0003 * bval[2] / globalL3Tracks[trackindex].pt);
+      //double lambda = atan(globalL3Tracks[trackindex].tanl);
+      //double phase = globalL3Tracks[trackindex].psi - h * TMath::Pi()/2;
+      //StHelixD* track = new StHelixD(kapa, lambda, phase, *origin, h);
+      //StThreeVectorD vertex(0,0,myStL3Trigger->primaryVertex()->position().z());
+      //if (globalL3Tracks[trackindex].nHits>20 && globalL3Tracks[trackindex].q<0)
+      //cout << " dca = " << track->distance(vertex) << ", bval = " << bval[2] << endl;
+      //==================================
+
 
     }
   // ok
