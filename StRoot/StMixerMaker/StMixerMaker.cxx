@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerMaker.cxx,v 1.2 2000/02/22 20:25:23 pfachini Exp $
+ * $Id: StMixerMaker.cxx,v 1.3 2000/03/15 17:23:14 pfachini Exp $
  *
  * Author: Patricia Fachini
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMixerMaker.cxx,v $
+ * Revision 1.3  2000/03/15 17:23:14  pfachini
+ * Using now the Trs classes instead of having a 'local' copy
+ *
  * Revision 1.2  2000/02/22 20:25:23  pfachini
  * *** empty log message ***
  *
@@ -72,23 +75,23 @@
 
 // processes
 #include "StMixerFastDigitalSignalGenerator.hh"
-#include "StMixerDigitalSignalGenerator.hh"
+#include "StTrsMaker/include/StTrsDigitalSignalGenerator.hh"
 #include "StMixerEmbedding.hh"
 
 // containers
-#include "StMixerAnalogSignal.hh"
-#include "StMixerSector.hh"
-#include "StMixerDigitalSector.hh"
+#include "StTrsMaker/include/StTrsAnalogSignal.hh"
+#include "StTrsMaker/include/StTrsSector.hh"
+#include "StTrsMaker/include/StTrsDigitalSector.hh"
 #include "StTrsMaker/include/StTpcElectronics.hh"
 
 // outPut Data--decoder
+#include "StTrsMaker/include/StTrsRawDataEvent.hh"
 #include "StTrsMaker/include/StTrsDetectorReader.hh"
 #include "StTrsMaker/include/StTrsZeroSuppressedReader.hh"
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StSequence.hh"
 //#include "StDaqLib/TPC/trans_table.hh"
-#include "StMixerDataEvent.hh"
-#include "StMixerOstream.hh"
+#include "StTrsMaker/include/StTrsOstream.hh"
 
 #include "StDAQMaker/StDAQReader.h"
 
@@ -166,9 +169,9 @@ Int_t StMixerMaker::Init() {
   mElectronicsDb = StTpcROOTElectronics::instance(Electronics);
 #endif
 
-  mSector = new StMixerSector(mGeometryDb);
-  mSector1 = new StMixerSector(mGeometryDb);
-  mSector2 = new StMixerSector(mGeometryDb);
+  mSector = new StTrsSector(mGeometryDb);
+  mSector1 = new StTrsSector(mGeometryDb);
+  mSector2 = new StTrsSector(mGeometryDb);
   mDigitalSignalGenerator =
 	    StMixerFastDigitalSignalGenerator::instance(mElectronicsDb, mSector);
 
@@ -179,11 +182,11 @@ Int_t StMixerMaker::Init() {
   mAllTheDataMixer=0;
   
   // Construct constant data sets.  This is what is passed downstream
-  mAllTheDataMixer = new StMixerDataEvent(mGeometryDb->numberOfSectors());
+  mAllTheDataMixer = new StTrsRawDataEvent(mGeometryDb->numberOfSectors());
   AddConst(new St_ObjectSet("MixerEvent"  , mAllTheDataMixer));
 
   // Stream Instantiation
-  mOutputStreamMixer = new StMixerOstream(mOutputFileName,mNumberOfEvents,mGeometryDb);
+  mOutputStreamMixer = new StTrsOstream(mOutputFileName,mNumberOfEvents,mGeometryDb);
   //cout << "StMixerMaker::Init()" << endl;
   return StMaker::Init();
 }
@@ -205,7 +208,8 @@ Int_t StMixerMaker::Make() {
   if(!strcmp(GetConfig1(),"daq")) {
     // DAQ
     St_DataSet *dataset1;
-    dataset1=GetDataSet("mixer/.make/DaqFirst/.const/StDAQReader");
+    dataset1=GetDataSet("Input1");
+    //dataset1=GetDataSet("mixer/.make/DaqFirst/.const/StDAQReader");
     assert(dataset1);
     daqr1=(StDAQReader*)(dataset1->GetObject());
     assert(daqr1);
@@ -214,8 +218,10 @@ Int_t StMixerMaker::Make() {
   } else {
     // TRS
     // Get the TRS Event Data Set 
-    St_ObjectSet* trsEventDataSet1 = (St_ObjectSet*) GetDataSet("mixer/.make/TrsFirst/.const/Event"); 
+    //St_ObjectSet* trsEventDataSet1 = (St_ObjectSet*) GetDataSet("mixer/.make/TrsFirst/.const/Event"); 
+    St_ObjectSet* trsEventDataSet1 = (St_ObjectSet*) GetDataSet("Input1"); 
     // Get the pointer to the raw data. 
+
     StTpcRawDataEvent* trsEvent1 = (StTpcRawDataEvent*) trsEventDataSet1->GetObject(); 
     // Instantiate the DetectorReader. Version will be default if not given 
     string version = "TrsDatav1.0"; 
@@ -225,7 +231,8 @@ Int_t StMixerMaker::Make() {
   if(!strcmp(GetConfig2(),"daq")) {
     // DAQ
     St_DataSet *dataset2;
-    dataset2=GetDataSet("mixer/.make/DaqSecond/.const/StDAQReader");
+    //dataset2=GetDataSet("mixer/.make/DaqSecond/.const/StDAQReader");
+    dataset2=GetDataSet("Input2");
     assert(dataset2);
     daqr2=(StDAQReader*)(dataset2->GetObject());
     assert(daqr2);
@@ -234,7 +241,8 @@ Int_t StMixerMaker::Make() {
   } else {
     // TRS
     // Get the TRS Event Data Set 
-    St_ObjectSet* trsEventDataSet2 = (St_ObjectSet*) GetDataSet("mixer/.make/TrsSecond/.const/Event"); 
+    //St_ObjectSet* trsEventDataSet2 = (St_ObjectSet*) GetDataSet("mixer/.make/TrsSecond/.const/Event"); 
+    St_ObjectSet* trsEventDataSet2 = (St_ObjectSet*) GetDataSet("Input2"); 
     // Get the pointer to the raw data. 
     StTpcRawDataEvent* trsEvent2 = (StTpcRawDataEvent*) trsEventDataSet2->GetObject(); 
     // Instantiate the DetectorReader. Version will be default if not given 
@@ -282,7 +290,7 @@ Int_t StMixerMaker::Make() {
 		for(int ibinraw=startTimeBinRaw;ibinraw<(startTimeBinRaw+seqLenRaw);ibinraw++) {
 		  float conversionraw=log8to10_table[*(pointerToAdcRaw++)];
 		  //if (isector==21) out_file1 << "file1" << ' ' << irow+1 << ' ' << padraw << ' ' << ibinraw << ' ' << conversionraw  << '\n';
-		  StMixerAnalogSignal padSignal(ibinraw,conversionraw);
+		  StTrsAnalogSignal padSignal(ibinraw,conversionraw);
 		  mSector->addEntry(irow+1,padraw,padSignal);
 		}
 	      }// seq loop    
@@ -309,11 +317,11 @@ Int_t StMixerMaker::Make() {
 		  float conversionraw=log8to10_table[*(pointerToAdcRaw++)];
 		  //if (isector==21) out_file1 << "file1" << ' ' << irow+1 << ' ' << padraw << ' ' << ibinraw << ' ' << conversionraw  << '\n';
 		  if(numberOfPadsTrs) {
-		    StMixerAnalogSignal padSignal(ibinraw,conversionraw);
+		    StTrsAnalogSignal padSignal(ibinraw,conversionraw);
 		    mSector1->addEntry(irow+1,padraw,padSignal);
 		    //out_file1mixer << "file1mixer" << ' ' << irow+1 << ' ' << padraw << ' ' << ibinraw << ' ' << conversionraw  << '\n';
 		  } else {
-		    StMixerAnalogSignal padSignal(ibinraw,conversionraw);
+		    StTrsAnalogSignal padSignal(ibinraw,conversionraw);
 		    mSector->addEntry(irow+1,padraw,padSignal);
 		  }
 		}
@@ -339,12 +347,12 @@ Int_t StMixerMaker::Make() {
 		  listOfSequencesTrs[iseqtrs].FirstAdc++; 
 		  //out_file2 << "file2" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
 		  if(numberOfPadsRaw) {
-		    StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
+		    StTrsAnalogSignal padSignal(ibintrs,conversiontrs);
 		    mSector2->addEntry(irow+1,padtrs,padSignal);
 		    //out_file2mixer << "file2mixer" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
 		  } else {
 		    //if (isector==21 && (irow+1)==3 && padtrs==54) cout << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs <<endl;  
-		    StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
+		    StTrsAnalogSignal padSignal(ibintrs,conversiontrs);
 		    mSector->addEntry(irow+1,padtrs,padSignal);
 		  }
 		}
@@ -386,7 +394,7 @@ Int_t StMixerMaker::Make() {
 		    float conversiontrs=static_cast<float>(*(listOfSequencesTrs[iseqtrs].FirstAdc)); 
 		    listOfSequencesTrs[iseqtrs].FirstAdc++; 
 		    //out_file1mixer << "file1mixer" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
-		    StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
+		    StTrsAnalogSignal padSignal(ibintrs,conversiontrs);
 		    mSector->addEntry(irow+1,padtrs,padSignal);
 		  }
 		}// seq loop
@@ -413,7 +421,7 @@ Int_t StMixerMaker::Make() {
 		    float conversiontrs=static_cast<float>(*(listOfSequencesTrs[iseqtrs].FirstAdc)); 
 		    listOfSequencesTrs[iseqtrs].FirstAdc++; 
 		    //out_file2mixer << "file2mixer" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
-		    StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
+		    StTrsAnalogSignal padSignal(ibintrs,conversiontrs);
 		    mSector->addEntry(irow+1,padtrs,padSignal);
 		  }
 		}// seq loop
@@ -445,11 +453,11 @@ Int_t StMixerMaker::Make() {
 		  listOfSequencesTrs[iseqtrs].FirstAdc++; 
 		  if(numberOfPadsTrs2) {
 		    //if (isector==21 && (irow+1)==3 && padtrs==54) cout << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs <<endl;  
-		    StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
+		    StTrsAnalogSignal padSignal(ibintrs,conversiontrs);
 		    mSector1->addEntry(irow+1,padtrs,padSignal);
 		    //if (isector==21) out_file1mixer << "file1mixer" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
 		  } else {
-		    StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
+		    StTrsAnalogSignal padSignal(ibintrs,conversiontrs);
 		    mSector->addEntry(irow+1,padtrs,padSignal);
 		  }
 		}
@@ -473,11 +481,11 @@ Int_t StMixerMaker::Make() {
 		  float conversiontrs=static_cast<float>(*(listOfSequencesTrs[iseqtrs].FirstAdc)); 
 		  listOfSequencesTrs[iseqtrs].FirstAdc++; 
 		  if(numberOfPadsTrs1) {
-		    StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
+		    StTrsAnalogSignal padSignal(ibintrs,conversiontrs);
 		    mSector2->addEntry(irow+1,padtrs,padSignal);
 		    //if (isector==21) out_file1mixer << "file1mixer" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
 		  } else {
-		    StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
+		    StTrsAnalogSignal padSignal(ibintrs,conversiontrs);
 		    mSector->addEntry(irow+1,padtrs,padSignal);
 		  }
 		}
@@ -516,10 +524,10 @@ Int_t StMixerMaker::Make() {
 		float conversionraw=log8to10_table[*(pointerToAdcRaw++)];
 		if (numberOfPadsRaw2) {
 		  //if (isector==21) out_file1 << "file1" << ' ' << irow+1 << ' ' << padraw << ' ' << ibinraw << ' ' << conversionraw  << '\n';
-		  StMixerAnalogSignal padSignal(ibinraw,conversionraw);
+		  StTrsAnalogSignal padSignal(ibinraw,conversionraw);
 		  mSector1->addEntry(irow+1,padraw,padSignal);
 		} else {
-		  StMixerAnalogSignal padSignal(ibinraw,conversionraw);
+		  StTrsAnalogSignal padSignal(ibinraw,conversionraw);
 		  mSector->addEntry(irow+1,padraw,padSignal);
 		}
 	      }
@@ -545,10 +553,10 @@ Int_t StMixerMaker::Make() {
 		float conversionraw=log8to10_table[*(pointerToAdcRaw++)];
 		//cout << isector << ' ' << irow+1 << ' ' << padraw << ' ' << ibinraw << ' ' << conversionraw  << '\n';
 		if (numberOfPadsRaw1) {
-		  StMixerAnalogSignal padSignal(ibinraw,conversionraw);
+		  StTrsAnalogSignal padSignal(ibinraw,conversionraw);
 		  mSector2->addEntry(irow+1,padraw,padSignal);
 		} else {
-		  StMixerAnalogSignal padSignal(ibinraw,conversionraw);
+		  StTrsAnalogSignal padSignal(ibinraw,conversionraw);
 		  mSector->addEntry(irow+1,padraw,padSignal);
 		}
 	      }
@@ -563,7 +571,7 @@ Int_t StMixerMaker::Make() {
     // Digitize the Signals
     //
     // First make a sector where the data can go...
-    StMixerDigitalSector* aDigitalSector = new StMixerDigitalSector(mGeometryDb);
+    StTrsDigitalSector* aDigitalSector = new StTrsDigitalSector(mGeometryDb);
     
     // Point to the object you want to fill
     //
@@ -585,7 +593,7 @@ Int_t StMixerMaker::Make() {
     mSector2->clear();
     
   }// sector loop
-  mOutputStreamMixer->writeMixerEvent((mAllTheDataMixer));
+  mOutputStreamMixer->writeTrsEvent((mAllTheDataMixer));
   return kStOK;
 } // Make() 
 

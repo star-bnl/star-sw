@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerMaker.h,v 1.2 2000/02/22 20:25:34 pfachini Exp $
+ * $Id: StMixerMaker.h,v 1.3 2000/03/15 17:26:09 pfachini Exp $
  *
  * Author: Patricia Fachini
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMixerMaker.h,v $
+ * Revision 1.3  2000/03/15 17:26:09  pfachini
+ * Using now the Trs classes instead of having a 'local' copy
+ *
  * Revision 1.2  2000/02/22 20:25:34  pfachini
  * *** empty log message ***
  *
@@ -40,17 +43,17 @@ class StTpcElectronics;
 
 // Processes 
 class StMixerFastDigitalSignalGenerator;
-class StMixerDigitalSignalGenerator;
+class StTrsDigitalSignalGenerator;
 class StMixerEmbedding;
 
 // Containers
-class StMixerAnalogSignal;
-class StMixerSector;
-class StMixerDigitalSector;
+class StTrsAnalogSignal;
+class StTrsSector;
+class StTrsDigitalSector;
 
 // Output Data
-class StMixerDataEvent;
-class StMixerOstream;
+class StTrsRawDataEvent;
+class StTrsOstream;
 class StTpcRawDataEvent;
 class StSequence;
 
@@ -68,22 +71,22 @@ class StMixerMaker : public StMaker {
     StTpcElectronics            *mElectronicsDb; //!
     
     // Processes
-    StMixerDigitalSignalGenerator   *mDigitalSignalGenerator; //!
+    StTrsDigitalSignalGenerator   *mDigitalSignalGenerator; //!
     StMixerEmbedding                *mEmbedding; //!
 
     // Container
-    StMixerSector               *mSector;//!
-    StMixerSector               *mSector1;//!
-    StMixerSector               *mSector2;//!
-    StMixerDigitalSector        *mDigitalSector;//!
+    StTrsSector               *mSector;//!
+    StTrsSector               *mSector1;//!
+    StTrsSector               *mSector2;//!
+    StTrsDigitalSector        *mDigitalSector;//!
 
     // I/O streams
     char*                        mOutputFileName;//!
-    StMixerOstream*              mOutputStreamMixer;//!
+    StTrsOstream*              mOutputStreamMixer;//!
     int                          mNumberOfEvents;//!
 
     // Output
-    StMixerDataEvent             *mAllTheDataMixer;//!
+    StTrsRawDataEvent             *mAllTheDataMixer;//!
    
     int                          mFirstSector;
     int                          mLastSector;
@@ -106,7 +109,7 @@ class StMixerMaker : public StMaker {
 
     virtual const char *GetCVS() const
       {
-	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.2 2000/02/22 20:25:34 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.3 2000/03/15 17:26:09 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StMixerMaker, 1)   //StAF chain virtual base class for Makers
 };
