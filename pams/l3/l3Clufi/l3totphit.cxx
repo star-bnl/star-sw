@@ -99,8 +99,8 @@ long type_of_call l3totphit_(
 					    double xyz[3];
 					    struct dataword 
 					    {
-						ushort info1;
-						ushort info2;
+						unsigned short info1;
+						unsigned short info2;
 					    } *dword;
 
 					    if (rbindex<=6) 
