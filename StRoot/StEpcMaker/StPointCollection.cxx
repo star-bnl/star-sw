@@ -3,8 +3,8 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
-// Revision 1.5  2001/03/13 16:23:41  subhasis
-// StEmcGeom.h moved from St_emc_Maker
+// Revision 1.6  2001/04/24 23:06:29  subhasis
+// clusters attached to Points, QA hists are made for all category separately
 //
 // Revision 1.3  2000/08/29 20:33:04  subhasis
 //  Modified to accept input from StEvent and writing output to StEvent for Emc
@@ -90,7 +90,10 @@ const TString detname[] = {"Bemc", "Bsmde", "Bsmdp"};
   FloatVector HitTrackEta;
   FloatVector HitTrackPhi;
   FloatVector HitTrackMom;
+
+//To attach to points
   StTrackVec  HitTrackPointer;
+  StMatchVecClus ClusterPointer[4];
 
 //_____________________________________________________________________________
 StPointCollection::StPointCollection():St_DataSet("Default")
@@ -385,12 +388,16 @@ Int_t
   Float_t PointSigPhi=0.;
   Float_t PointEnergyinDet[4]={0.,0.,0.,0.};
   Float_t PointSizeinDet[4]={0.,0.,0.,0.};
+
+  for(UInt_t i=0;i<4;i++){ClusterPointer[i].clear();}
+
  
      switch (Category){
      case 0:
        if((k[i1]-1)>=0){
 	 StEmcCluster *cl1;
 	 cl1 = (StEmcCluster*)mvec[i1];
+	 ClusterPointer[0].push_back(cl1);
 	 PointEta=cl1->eta();
 	 PointSigEta=cl1->sigmaEta();
 	 PointPhi=cl1->phi();
@@ -405,8 +412,10 @@ Int_t
        if((k[i1]-1)>=0){
 	 StEmcCluster *cl1;
 	 cl1 = (StEmcCluster*)evec[i1];
+	 ClusterPointer[2].push_back(cl1);
 	 StEmcCluster *cl2;
 	 cl2 = (StEmcCluster*)mvec[k[i1]-1];
+	 ClusterPointer[0].push_back(cl2);
 	 PointEta=cl1->eta();
 	 PointSigEta=cl1->sigmaEta();
 	 PointPhi=cl2->phi();
@@ -423,8 +432,10 @@ Int_t
        if((k[i1]-1)>=0){
 	 StEmcCluster *cl1;
 	 cl1 = (StEmcCluster*)mvec[i1];
+	 ClusterPointer[0].push_back(cl1);
 	 StEmcCluster *cl2;
 	 cl2 = (StEmcCluster*)pvec[k[i1]-1];
+	 ClusterPointer[3].push_back(cl2);
 	 PointEta=cl1->eta();
 	 PointSigEta=cl1->sigmaEta();
 	 PointPhi=cl2->phi();
@@ -441,8 +452,10 @@ Int_t
        if((k[i1]-1)>=0){
 	 StEmcCluster *cl1;
 	 cl1 = (StEmcCluster*)evec[i1];
+	 ClusterPointer[2].push_back(cl1);
 	 StEmcCluster *cl2;
 	 cl2 = (StEmcCluster*)pvec[k[i1]-1];
+	 ClusterPointer[3].push_back(cl1);
 	 PointEta=cl1->eta();
 	 PointSigEta=cl1->sigmaEta();
 	 PointPhi=cl2->phi();
@@ -454,6 +467,13 @@ Int_t
 	 PointEnergyinDet[3]=cl2->energy();
 	 PointSizeinDet[2]=cl1->sigmaEta();
 	 PointSizeinDet[3]=cl2->sigmaPhi();
+  
+            for (UInt_t ims=0;ims<mvec.size();ims++){
+             StEmcCluster *cl0;
+             cl0=(StEmcCluster*)mvec[ims];
+	     ClusterPointer[0].push_back(cl0);
+             }
+
 	 }
        break;
      }
@@ -562,14 +582,31 @@ Int_t
 	  point->addTrack(NULL);
 	}
 
+
+//
+
 	for(Int_t i=0;i<4;i++){
 	  StDetectorId id=static_cast<StDetectorId>(i+kBarrelEmcTowerId);
 	  point->setEnergyInDetector(id,EnergyInDetector[i]);
 	  point->setSizeAtDetector(id,SizeAtDetector[i]);
-	}
+
+	  
+// Set Cluster Pointer for each detector
+        if(ClusterPointer[i].size()>0){
+         for (UInt_t ims=0;ims<ClusterPointer[i].size();ims++){
+	     StEmcCluster *cl;
+	     cl = (StEmcCluster*)ClusterPointer[i][ims];
+             point->addCluster(id,cl);
+          }
+         }
+        else {point->addCluster(id,NULL);}
+
+
+     }
+
 	  mPointsReal.Add(point);
 	  mNPointsReal++;
-     }
+ }
  }
  return kStOK;
 }
