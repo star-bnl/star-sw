@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.38 1999/12/01 22:56:30 perev Exp $
+// $Id: StMaker.h,v 1.39 1999/12/01 23:51:25 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.39  1999/12/01 23:51:25  perev
+// Alias AddRunco - AddRunCont
+//
 // Revision 1.38  1999/12/01 22:56:30  perev
 // .runco directory & AddRunco method introduced
 //
@@ -171,6 +174,7 @@ public:
    virtual void        	AddGarb (St_DataSet *data=0){AddData(data,".garb");};
    virtual void        	AddRunco (St_DataSet *data=0){AddData(data,".runco");};
    virtual void        	AddRunco (double par,const char* name,const char* comment);
+           void        	AddRunCont (St_DataSet *data=0){AddRunco(data);};	//alias
    virtual TList       *GetHistList() const {return (TList*)GetDirObj(".hist");};
    virtual TH1         *GetHist(const Char_t *histName) const {TList *l=GetHistList(); return l?(TH1*)l->FindObject(histName):(TH1*)0;};
    virtual StMaker     *cd(){StMaker *ret = fgStChain; fgStChain=this; return ret;};
@@ -248,7 +252,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.38 1999/12/01 22:56:30 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.39 1999/12/01 23:51:25 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };
