@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.7  1998/08/19 22:26:04  fisyak
+#  Split base
+#
 #  Revision 1.6  1998/08/19 21:41:41  fisyak
 #  Split base -> base + xdf2root
 #
@@ -100,7 +103,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/08/19 21:41:41 $ 
+#           Last modification $Date: 1998/08/19 22:26:04 $ 
 #  default setings
 # Current Working Directory
 #
@@ -209,9 +212,9 @@ TARGETS += StChain
 endif
 endif
 #          I have subdrs
-.PHONY               :  all St_base xdf2root St_Tables StChain test clean clean_lib clean_share clean_obj
+.PHONY               :  all $(BASE) $(XDF2ROOT) $(TARGET) St_Tables StChain test clean clean_lib clean_share clean_obj
 #      I_have_subdirs
-all:  $(addsuffix _all, $(SUBDIRS))   $(TARGETS)
+all:  $(BASE) $(XDF2ROOT) $(addsuffix _all, $(SUBDIRS)) $(TARGETS)
 %_all:; $(MAKE) -f $(MakePam) -C $(STEM) $(MAKFLAGS) 
 test:  $(BASE) $(addsuffix _test, $(SUBDIRS))
 %_test: 
