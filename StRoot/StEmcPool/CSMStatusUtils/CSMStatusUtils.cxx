@@ -438,13 +438,16 @@ CSMStatusUtils::makeStatusPlots(TString plotDir) {
   std::vector<Float_t>* pedestalchi;
 	TH1F* hHotTower;
   Int_t hottowerPlotNameIter = -1;
+  ofstream outputlog("MOSTRECENTLOG.txt");
 
   for (map<Int_t,string>::const_iterator iter = mHistFileMap.begin();
         iter != mHistFileMap.end(); ++iter) {
 //        iter != mHistFileMap.end(); iter = mHistFileMap.end()) {
     TFile* file = new TFile(iter->second.c_str(),"READ");
+outputlog << "doing file " << iter->second.c_str() << endl;
 cout << "doing file " << iter->second.c_str() << endl;
     if (file && file->IsOpen()) {
+outputlog << " it opened" << endl;
 cout << " it opened" << endl;
       runnumber = iter->first;
       runnumberstring = "";
@@ -457,6 +460,7 @@ cout << " it opened" << endl;
       assert(myTree);
 
       if(firstGoodRun) { //initialize currentHist and priorHist
+outputlog << "it's the first good run" << endl;
 cout << "it's the first good run" << endl;
         currentHist = dynamic_cast<TH2F*>(runHist->Clone("ch1"));
         currentHist->SetDirectory(0);
@@ -500,6 +504,7 @@ cout << "it's the first good run" << endl;
 
       if(averageNumberHitsPerChan > 100) {
 //set prior RI to current RI; clear current RI
+outputlog << " good statistics!" << endl;
 cout << " good statistics!" << endl;
         priorHist->Reset();
         tmpHist = priorHist;
@@ -512,6 +517,7 @@ cout << " good statistics!" << endl;
         priorRunNumber = currentRunNumber;
         currentRunNumber = 99999999;
       } else if(mFillEndMap[runnumber]) {
+outputlog << "end of fill and poor statistics!" << endl;
 cout << "end of fill and poor statistics!" << endl;
         currentHist->Add(priorHist);
         if(priorRunNumber < currentRunNumber) currentRunNumber = priorRunNumber;
@@ -539,6 +545,7 @@ cout << "end of fill and poor statistics!" << endl;
   	    goodTowers = analyseStatusHistogram(currentHist,plotDir,averageNumberHitsPerChan,
                   *statusVector,*pedestalmean,*pedestalwidth,*pedestalchi,hHotTower);
       } else {
+outputlog << " poor statistics!" << endl;
 cout << " poor statistics!" << endl;
         delete statusVector;
         delete pedestalmean;
@@ -551,6 +558,7 @@ cout << " poor statistics!" << endl;
       }
       
       if(mFillEndMap[runnumber]) {
+outputlog << " fill has ended!" << endl;
 cout << " fill has ended!" << endl;
         priorHist->Reset();
         currentHist->Reset();
@@ -563,6 +571,8 @@ cout << " fill has ended!" << endl;
       }
 
       (*mRunStatusMapPtr)[savedCurrentRunNumber] = statusVector;
+//write out pedestals for this run
+      writePedestals(savedCurrentRunNumber,plotDir,*statusVector,*pedestalmean,*pedestalwidth,*pedestalchi);
         
 // save tower status bits to a text file
       tmpstr = plotDir + "/status/";
@@ -579,10 +589,11 @@ cout << " fill has ended!" << endl;
 //if the RI has less than 10% of the towers functioning
 //ignore the html file
 	    if (goodTowers < 0.05 * mDetectorSize) {
+outputlog<<"special case - everything sucks!" << endl;
 cout<<"special case - everything sucks!" << endl;
  	      htmlSummary << "<tr> <td>" << runnumber << "</td>" 
-	                  << "<td> BAD </td> <td> BAD </td> <td> BAD </td>"
-		          << "<td> BAD </td> <td> BAD </td> <td> BAD </td> </tr><br>"
+	                  << "<td> BAD </td> <td> - </td> <td> - </td>"
+		          << "<td> - </td> <td> - </td> <td> - </td> </tr><br>"
 		          << endl;
         file->Close();
         delete file;
@@ -652,6 +663,7 @@ cout<<"special case - everything sucks!" << endl;
     delete file;
   }
   htmlSummary.close();
+  outputlog.close();
   writeHtmlFooterSummary(htmlSummary);
   TH2F* statusHist = makeStatusVersusTimePlot();
   if (statusHist) {
@@ -943,8 +955,7 @@ CSMStatusUtils::getNumberOfChangedTowers(Int_t runnumber) {
 }
 
 void
-CSMStatusUtils::writePedestals(TH2F* hist, TTree* ttree,
-                                TString directory,
+CSMStatusUtils::writePedestals(Int_t runNumber, TString directory,
                                 std::vector<Short_t>& statusVector,
                                 std::vector<Float_t>& pedestalmean,
                                 std::vector<Float_t>& pedestalwidth,
@@ -959,8 +970,8 @@ CSMStatusUtils::writePedestals(TH2F* hist, TTree* ttree,
   if ((dir = gSystem->OpenDirectory(pedtxtfilename.Data())) == NULL)
     gSystem->MakeDirectory(pedtxtfilename.Data());
 
-  TString runnumber = hist->GetName();
-  runnumber = runnumber(runnumber.Length()-7,7);
+  TString runnumber = "";
+  runnumber += runNumber;
   pedtxtfilename = directory + "/pedestals/" + mDetectorFlavor
       + "pedestals_for_run_" + runnumber + ".ped";
   ofstream pedestalfile(pedtxtfilename.Data());
@@ -972,7 +983,7 @@ CSMStatusUtils::writePedestals(TH2F* hist, TTree* ttree,
 
   St_emcPed *bemc_ped=new St_emcPed("bemcPed",1);
   emcPed_st t_ped;
-  TString datetimestring = getDateTimeString(atoi(runnumber.Data()));
+  TString datetimestring = getDateTimeString(runNumber);
   TString pedrootfilename = directory + "/pedestals/" + mDetectorFlavor
       + "Ped" + datetimestring + "root";
   TFile fout_status(pedrootfilename.Data(),"RECREATE");
