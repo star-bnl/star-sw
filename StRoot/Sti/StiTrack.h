@@ -66,6 +66,8 @@ public:
 	int getSeedHitCount() const {return mSeedHitCount;}
 	
 	StiHit * getVertex() const;  // return pointer to vertex associated with this track if any. 
+
+	virtual vector<StHit*> stHits() const=0;
 	
   // accessor methods
   
@@ -106,8 +108,6 @@ public:
 	void setFlag(long v) {mFlag = v;}
 	long getFlag() const {return mFlag;}
   
-<<<<<<< StiTrack.h
-	
  protected:
 	static StiTrackFitter * trackFitter;
 	
