@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: stats.pl,v 1.2 1999/09/21 12:18:14 wenaus Exp $
+# $Id: stats.pl,v 1.3 1999/10/30 15:11:47 wenaus Exp $
 #
 # $Log: stats.pl,v $
+# Revision 1.3  1999/10/30 15:11:47  wenaus
+# get CVS commits from webdata area
+#
 # Revision 1.2  1999/09/21 12:18:14  wenaus
 # Data area moved to RCF NFS
 #
@@ -81,7 +84,7 @@ print "</tr></table>\n";
 print "<h3>Source code statistics</h3>\<blockquote><pre>";
 print `cat /star/starlib/doc/www/html/comp-nfs/swguide-stats.txt`."</pre></blockquote>\n";
 
-print "<h3><a href=\"http://www.star.bnl.gov/cvs/userCommits.html\">Commits by user</a></h3>\n";
+print "<h3><a href=\"http://www.star.bnl.gov/webdata/cvs/userCommits.html\">Commits by user</a></h3>\n";
 
 
 #----
