@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.51 2003/10/08 13:49:53 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.52 2003/11/27 03:13:13 perev Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.52  2003/11/27 03:13:13  perev
+// protection sqrt(-1) added
+//
 // Revision 1.51  2003/10/08 13:49:53  jcs
 // initialize pointers and arrays
 //
@@ -1627,17 +1630,17 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	    
 	    /* recalculate peak position */
 	    NewPeakHeight=iADCValue;
-	    Peak[iPeakIndex].PadSigma = sqrt (1 / 
-					      ((2 * fastlog[iADCValue]) -
-					       (fastlog[iADCPlus] + 
-						fastlog[iADCMinus])));
+            double qwe;
+            qwe = (2 * fastlog[iADCValue]) -(fastlog[iADCPlus] + fastlog[iADCMinus]);
+            if (qwe<=0.) continue; 	//skip case for non physical value (VP)
+	    Peak[iPeakIndex].PadSigma = sqrt (1 / qwe);
 	    NewPadPosition = (float) Peak[iPeakIndex].pad + 
 	      sqr(Peak[iPeakIndex].PadSigma) * 
 	      (fastlog[iADCPlus] - fastlog[iADCMinus]);
-	    Peak[iPeakIndex].TimeSigma = sqrt (1 / 
-					       ((2 * fastlog[iADCValue]) -
-						(fastlog[iADCTimePlus] + 
-						 fastlog[iADCTimeMinus])));
+            qwe = (2 * fastlog[iADCValue]) -(fastlog[iADCTimePlus] + fastlog[iADCTimeMinus]);
+            if (qwe<=0.) continue;	//skip case for non physical value (VP)
+	    Peak[iPeakIndex].TimeSigma = sqrt (1 / qwe);
+
 	    NewTimePosition = (float) Peak[iPeakIndex].Timebin + 
 	      mDb->timeOffset(iSec*mDb->numberOfPads()
 			      +Peak[iPeakIndex].pad,iRow) +
