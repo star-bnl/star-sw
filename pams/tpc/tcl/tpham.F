@@ -172,30 +172,22 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
         integer nclpix_max
         parameter (nclpix_max = 10000)
+c
         integer ipad(nclpix_max),itdc(nclpix_max),iadc(nclpix_max)
         integer itrk(nclpix_max)
 	integer npix_seq(300)
-
+        integer ipad_lo, ipad_hi, itdc_lo, itdc_hi
         integer isec,irow,nhits,ihit
-
         integer jtpcl, nclspix
+        integer nseq, jseq
 
-        integer mxrow
-        parameter (mxrow = 45)
-
-        integer ntim, nseq, jseq
-
-        real pad_width, time_bucket, time_bin, tval
-        real rstat
+        real pad_width, time_bucket, time_bin
 	real rad,dx_prime
-
         real white_noise,filtered_noise
         real de_scale
-
         real invec(3),outvec(3)
 
-        logical first, lstat
-
+        logical first
 
 c------------ for deconvolution -----------
         integer max_hits_in_cluster
@@ -221,11 +213,10 @@ c------------ for deconvolution -----------
 C-----------------------------------------------------------------------
         data first/.true./
 C-----------------------------------------------------------------------
-	integer ichek	! mal -** temp
         integer istatus
 
 	save first,time_bucket,time_bin
-
+C-----------------------------------------------------------------------
 c
 c       set status
 c
@@ -247,10 +238,8 @@ c sca and digitization noise
 c noise that comes through shaper
         filtered_noise = tsspar(1).white_rms/tsspar(1).scale
 
+c Loop over the sequences in this cluster:
         do jtpcl = 1, tpcluster_h.nok
-
-c	   if (mod(jtpcl,ichek).eq.1) write(13,*)'cluster #',jtpcl	! mal 
-
            nseq = tpcluster(jtpcl).nseq
            jseq = tpcluster(jtpcl).jseq
            isec = tpcluster(jtpcl).tpc_row/100
@@ -263,16 +252,15 @@ c	   if (mod(jtpcl,ichek).eq.1) write(13,*)'cluster #',jtpcl	! mal
      +,                             tpmcpix_h, tpmcpix
      +,                             nclspix, ipad, itdc, iadc, itrk
      +,				    nclpix_max
-     +,				    npix_seq)
+     +,				    npix_seq
+     +,				    ipad_lo, ipad_hi, itdc_lo, itdc_hi)
  
-
-
 	      call tph_fit_cluster(tclpar,nseq, nclspix, npix_seq,
      +             ipad, itdc, iadc, itrk,
      +             white_noise, filtered_noise, nhits,
      +             max_hits_in_cluster,
      +             qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
-     +             irow)
+     +             irow, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
 
            else
 c
@@ -283,8 +271,8 @@ c
 
 
 c
-c          perhaps consistency with simulation demands use of pad_sep_in/out ???
-c	   yes, I think so - mal
+c perhaps consistency with simulation demands use of pad_sep_in/out ???
+c yes, I think so - mal
 c
            if(irow.gt.pad_plane(1).nrow_in)then
               pad_width = pad_plane(1).pad_sep_out
@@ -306,6 +294,7 @@ c  to cluster in TPCLUSTER table....
            if (nhits.gt.1) fflagg=1
            DO ihit=1,nhits
               if (tphit_h.nok.ge.tphit_h.maxlen) then
+c ??? Direct write is forbidden
                  write(6,*)'TPHIT table full - quitting at cluster',
      +                jtpcl
                  return
@@ -473,7 +462,8 @@ C-----------------------------------------------------------------------
      +,                            tpmcpix_h, tpmcpix
      +,                            nclspix, ipad, itdc, iadc, itrk
      +,				   nclpix_max
-     +,				   npix_seq)
+     +,				   npix_seq
+     +,				   ipad_lo, ipad_hi, itdc_lo, itdc_hi)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -499,6 +489,10 @@ C     itdc:
 C     iadc:
 C     itrk:
 C     npix_seq:	(added 23 Nov 94) number of pixels in segment on each pad
+C     ipad_lo: pad number lower limit for cluster (undefined if null cluster)
+C     ipad_hi: pad number upper limit for cluster (undefined if null cluster)
+C     itdc_lo: TDC lower limit (1-512) for cluster (undefined if null cluster)
+C     itdc_hi: TDC upper limit (1-512) for cluster (undefined if null cluster)
 C
 C  Returns:
 C       Contained in the output arguments...
@@ -523,6 +517,13 @@ c	NOT 1..512.  The rest of the hitfinder assumes minimum tdc
 c	is 1.  This is the only routine where tdc information is unpacked,
 c	so I just add one to it here...
 c
+c   03-NOV-1997 --- R.Bossingham
+c       * Find/return lower and upper tdc, pad-number limits;
+c         change subroutine arguments accordingly.
+c       * Update max. pads in a row and max. time buckets.
+c       * Explicitly save variables that must be non-volatile
+c       * Remove some obsolete (commented) code.
+c
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
@@ -540,45 +541,49 @@ C-----------------------------------------------------------------------
 
 
 C-----------------------------------------------------------------------
-        integer lvmax,iucomp
-
-        integer iadc(*),itdc(*),ipad(*)
+        integer iadc(*)
+        integer ipad(*)
+        integer ipad_lo, ipad_hi
+        integer irow
+        integer itdc(*)
+        integer itdc_lo, itdc_hi
         integer itrk(*)
-        integer jseq,nseq,nclspix,irow
+        integer jseq
+        integer nclspix
 	integer npix_seq(*)
+        integer nseq
 C-----------------------------------------------------------------------
-        integer ldatum
-c 24mar95 -now data is packed in a new way in tppixel
-c        integer*2 idatum(2),tdc_lo,tdc_hi
-c        equivalence(idatum(1),ldatum)
-c        integer*2 seqmask,botmask
-	integer tdc_factor/'400'X/
-	integer numseq_factor/'100000'X/
-
-c        integer maxtrk, ntrk, ktrk, imax
-        integer ktrk
-c        parameter (maxtrk=2000)
-c        integer ltrk(maxtrk)		! array of all MC tracks contrib to cluster
-c        real nocc(maxtrk)		! array of occurrances of those tracks
-
-        integer kseq,kpix,kseqpix
-        integer jpix,iclspix,indx
-        integer mtrk,jndx
-	integer nclpix_max
-
+c RRB: correct 184->182, change 1024->512
+        integer npads_max, nbuck_max
+        parameter (npads_max=182,nbuck_max=512)
+c
+	integer tdc_factor
+	parameter (tdc_factor='400'X)
+c
+	integer numseq_factor
+	parameter (numseq_factor='100000'X)
+C
+        integer iclspix
         integer id
+        integer indx
 	integer iseq_num
+        integer jpix
+        integer kseq, kseqpix
+        integer ktrk
+        integer ldatum
+	integer nclpix_max
+c
+c 24mar95 -now data is packed in a new way in tppixel
 C-----------------------------------------------------------------------
         data id/0/
-c        data seqmask/'3F00'X/,botmask/'FF'X/
 C-----------------------------------------------------------------------
 
         iclspix = 0
-c        ntrk = 0
-c        call vzero(ltrk,maxtrk)
-c        call vzero(nocc,maxtrk)
-
 	iseq_num = 0
+        ipad_lo = npads_max
+        ipad_hi = 1
+        itdc_lo = nbuck_max
+        itdc_hi = 1
         do kseq = jseq, jseq+nseq-1
            jpix = tpseq(kseq).jpix
            iclspix = iclspix + 1
@@ -597,18 +602,23 @@ c
            itrk(iclspix) = ktrk
 c new way to unpack data
            kseqpix = ldatum/numseq_factor
-           itdc(iclspix) = (ldatum - numseq_factor*kseqpix)/
-     +		tdc_factor
+           itdc(iclspix) = (ldatum - numseq_factor*kseqpix)/tdc_factor
+c ??? Maybe mask this (for speed)
            iadc(iclspix) = ldatum - numseq_factor*kseqpix 
      +		- tdc_factor*itdc(iclspix)
-
+c
            itdc(iclspix) = itdc(iclspix)+1 ! added 9apr96 malisa
-
+           itdc_lo = MIN(itdc_lo,itdc(iclspix))
+           itdc_hi = MAX(itdc_hi,itdc(iclspix)+kseqpix-1)
+C
            ipad(iclspix) = tpseq(kseq).secpad
-
+           ipad_lo = MIN(ipad_lo,ipad(iclspix))
+           ipad_hi = MAX(ipad_hi,ipad(iclspix))
+C
 	   iseq_num = iseq_num+1
 	   npix_seq(iseq_num) = kseqpix
-
+C
+C Step through one sequence on one pad:
            do indx = 2, kseqpix
               iclspix = iclspix + 1
 	      if (iclspix.gt.nclpix_max) then
@@ -617,10 +627,10 @@ c new way to unpack data
 	        return
 	      endif
               ldatum = tppixel(jpix+indx-1).datum
-c              iadc(iclspix) = real(idatum(1))
+c ??? Maybe mask this (for speed)
               itdc(iclspix) = itdc(iclspix-1)+1
               iadc(iclspix) = ldatum - numseq_factor*kseqpix 
-     +		- tdc_factor*(itdc(iclspix)-1)
+     +		- tdc_factor*itdc(iclspix-1)
               ipad(iclspix) = ipad(iclspix-1)
 c
 c             for MC data!
@@ -641,7 +651,8 @@ C-----------------------------------------------------------------------
      +     ipad, itdc, iadc, itrk,
      +     white_noise,  filtered_noise, nhits,
      +     max_hits_in_cluster,
-     +     qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,irow)
+     +     qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
+     +     irow, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -656,12 +667,29 @@ C     ipad:	for each pixel, what is pad #
 C     itdc:	for each pixel, what is bucket #
 C     iadc:	for each pixel, what is adc value
 C     itrk:     for each pixel, what MC track contributed most
-C     rms_noise: rms noise on adc values
+C     white_noise:
+C     filtered_noise:
 C     max_hits_in_cluster: max # hits allowed in an overlapping pattern
+C
+C     irow
+C     ipad_lo: Lower limit for pad number in cluster
+C     ipad_hi: Upper limit for pad number in cluster
+C     itdc_lo: Lower limit for time bucket in cluster
+C     itdc_hi: Upper limit for time bucket in cluster
 C
 C   Output arguments : 
 C
 C     nhits - estimated number of hits in this cluster
+C     qq         - "integrated charge" (sum of adc counts)
+C     x,dx,prf  - position, uncertainty, and width along row (units=pads)
+C     z,dz,zrf  - position, uncertainty, and width along time (units=buckets)
+C     phi       - "orientation" of cluster
+C     track     - MC track contributing the most pixels
+C     mu1
+C     mu2
+C     mu3
+C     mu4
+C     mu5
 C
 C  Returns:
 C       Contained in the output arguments...
@@ -694,15 +722,10 @@ C-----------------------------------------------------------------------
       integer ipad(*),itdc(*),iadc(*),itrk(*)
       integer npix_seq(*),nhits
       integer irow
+      integer ipad_lo, ipad_hi, itdc_lo, itdc_hi
+      integer max_hits_in_cluster
 
       real white_noise,filtered_noise
-
-      integer nhits_nnet        ! neural net estimator function
-                                ! of #hits in cluster
-
-
-      integer max_hits_in_cluster
-c        parameter(max_hits_in_cluster=30)
       real qq(*)
       real x(*)
       real dx(*)
@@ -717,7 +740,10 @@ c        parameter(max_hits_in_cluster=30)
       real mu3(*)
       real mu4(*)
       real mu5(*)
-
+c-----------------------------------------------------------------------
+c*** skip the definition for the neural net too..... RRB: 03-NOV-1997
+c    integer nhits_nnet        ! neural net estimator function
+                                ! of #hits in cluster
 
       logical look_for_many,triage_cuts
 c----------------------------------------------------------------
@@ -738,7 +764,9 @@ c*** skip the neural net for now..... mal 21jun95
      +           ipad, itdc, iadc, itrk,
      +           white_noise, filtered_noise,
      +           nhits,
-     +           qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5)
+     +           qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
+     +           ipad_lo, ipad_hi, itdc_lo, itdc_hi)
+c ??? Direct write is forbidden
             if (nhits.gt.max_hits_in_cluster) 
      +           write(6,*)'TPHAM - ERROR! array overrun! - fix this!'
          endif
@@ -746,7 +774,8 @@ c*** skip the neural net for now..... mal 21jun95
             call tph_fit_isolated_cluster(tclpar, nclspix,
      +           ipad, itdc, iadc, itrk,
      +           white_noise, filtered_noise,
-     +           qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5)
+     +           qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
+     +           ipad_lo, ipad_hi, itdc_lo, itdc_hi)
             nhits=1
          endif
 c
@@ -762,7 +791,8 @@ c  calls to tph_fit_isolated_cluster!! - fixed mal
          call tph_fit_isolated_cluster(tclpar, nclspix,
      +        ipad, itdc, iadc, itrk,
      +        white_noise, filtered_noise,
-     +        qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5)
+     +        qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
+     +        ipad_lo, ipad_hi, itdc_lo, itdc_hi)
          nhits=1
       endif
       
@@ -794,7 +824,7 @@ c
       RECORD      /TCL_TCLPAR_ST/               tclpar(*)
 
       integer ipad(*),itdc(*),iadc(*),nclspix
-      real ppa,tta,pa,ta,a,pta ! these are produce sums (ta = tdc(i)*adc(i))
+      real ppa,tta,pa,ta,a ! these are produce sums (ta = tdc(i)*adc(i))
       real rms_pad,rms_tdc
       integer ipix
 
@@ -834,7 +864,6 @@ c      integer rms2_pad,rms2_tdc,rms2_mix,tdc_mean
 c      integer ppa,tta,pa,ta,a,pta ! these are produce sums (ta = tdc(i)*adc(i)
       real ppa,tta,pa,ta,a,pta ! these are produce sums (ta = tdc(i)*adc(i))
       integer ipix
-      character*1 junk
 
       ppa=0.0
       tta=0.0
@@ -855,6 +884,7 @@ c      integer ppa,tta,pa,ta,a,pta ! these are produce sums (ta = tdc(i)*adc(i)
       rms2_mix = sqrt(pta/a - pa*ta/(a**2))
       tdc_mean = ta/a
 
+c ??? Direct write is forbidden
       write(55,*)rms2_pad,rms2_tdc,rms2_mix,tdc_mean,irow,nhits
 
       return
@@ -867,7 +897,8 @@ C-----------------------------------------------------------------------
      +     ipad, itdc, iadc, itrk,
      +     white_noise, filtered_noise,
      +     nhits,
-     +     qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5)
+     +     qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
+     +     ipad_lo, ipad_hi, itdc_lo, itdc_hi)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -882,7 +913,8 @@ C     ipad:	for each pixel, what is pad #
 C     itdc:	for each pixel, what is bucket #
 C     iadc:	for each pixel, what is adc value
 C     itrk:     for each pixel, what MC track contributed most
-C     rms_noise: rms noise on adc values
+C     white_noise: noise on adc values
+C     filtered_noise: noise on adc values
 C
 C   Output arguments : 
 C
@@ -892,11 +924,26 @@ C     x,dx,prf  - position, uncertainty, and width along row (units=pads)
 C     z,dz,zrf  - position, uncertainty, and width along time (units=buckets)
 C     phi       - "orientation" of cluster
 C     track     - MC track contributing the most pixels
+C     mu1
+C     mu2
+C     mu3
+C     mu4
+C     mu5
 C
 C  Returns:
 C       Contained in the output arguments...
 C     
 C   Functional Description : 
+c
+c   modificattions:
+c   ==============
+c   03-NOV-1997 --- R.Bossingham
+c       * Use lower and upper tdc, pad-number limits to speed code;
+c         change arguments accordingly
+c       * Update max. pads in a row and max. time buckets.
+c       * Add comments
+c       * Allow reset of edges of "allowed" array
+c       * Explicitly save the "allowed" array
 C-----------------------------------------------------------------------
 c passed inputs
 #include "PAM.inc"
@@ -909,6 +956,7 @@ c passed inputs
       integer nseq,nclspix
       integer ipad(*),itdc(*),iadc(*),itrk(*)
       integer npix_seq(*),nhits
+      integer ipad_lo, ipad_hi, itdc_lo, itdc_hi
       real white_noise,filtered_noise
 c passed outputs
       real qq(*)
@@ -927,24 +975,25 @@ c passed outputs
       real mu5(*)
 
 c local variables
-      integer maxpad,maxbuck
-      parameter (maxpad=184,maxbuck=1024) ! upped from 512 4jan95
+      integer maxpad,maxbuck,n_allow
+c RRB: correct 184->182, change 1024->512
+      parameter (maxpad=182,maxbuck=512)
+c     parameter (maxpad=184,maxbuck=1024) ! upped from 512 4jan95
+      parameter (n_allow=maxpad*maxbuck)
+c
       integer height(1:maxpad,1:maxbuck)
       integer track_pix(1:maxpad,1:maxbuck)
-      logical allowed(0:maxpad+1,0:maxbuck+1) ! go 1 beyond to avoid overwrite
-                                              ! memory when laying waste
-c      data allowed/95604*.true./
-      data allowed/190836*.true./ ! had to increase when up from 512 to 1024
+      logical allowed(maxpad,maxbuck)
+c
+      integer i,j
       integer jpad,jtdc,jpix
       integer kpad,ktdc
       integer index_list(10000),indx
-      integer previous_height,nmax,imax
+      integer nmax,imax
       integer nmax_max          ! maximum number of local maxima
       parameter(nmax_max=100)
       integer max_pos(2,nmax_max) ! position (pad,tdc) of local maxima
       integer max_height(nmax_max)
-      integer j_maxpad,j_minpad,j_maxtdc,j_mintdc
-      integer itemp,maxize,minize
       integer iclosest_pad,iclosest_tdc,i_minimum_height
 
 c the following arrays are for passing to fit_isolated_clusters for
@@ -954,19 +1003,35 @@ c  each found mountain top
       real mu1temp(1),mu2temp(1),mu3temp(1),mu4temp(1),mu5temp(1)
       integer nclspix_temp
       integer ipad_temp(30),itdc_temp(30),iadc_temp(30),itrk_temp(30)
+      integer ipad_lo_temp
+      integer ipad_hi_temp
+      integer itdc_lo_temp
+      integer itdc_hi_temp
 
       integer dpad,dtdc,valley
       real slope,peak_to_valley
 
       integer iwriteout
+c
+      data allowed/n_allow*.true./
+c
+C-----------------------------------------------------------------------
+      save allowed
 C-----------------------------------------------------------------------
 
-c fill the reference 2-d arrays...
-      call vzero(track_pix,maxpad*maxbuck)
-      call vzero(height,maxpad*maxbuck)
+c Clear a rectangular area containing the cluster with the arrays
+c height(1:maxpad,1:maxbuck) and track_pix(1:maxpad,1:maxbuck):
+      do j=itdc_lo,itdc_hi
+         do i=ipad_lo,ipad_hi
+            height(i,j) = 0
+            track_pix(i,j) = 0
+         enddo
+      enddo
+
+c Load the cluster:
       do jpix=1,nclspix
-         height(ipad(jpix),itdc(jpix))=iadc(jpix)
-         track_pix(ipad(jpix),itdc(jpix))=itrk(jpix)
+         height(ipad(jpix),itdc(jpix)) = iadc(jpix)
+         track_pix(ipad(jpix),itdc(jpix)) = itrk(jpix)
       enddo
 
 c list pixels in descending order of adc occupancy...
@@ -1013,15 +1078,17 @@ c if peak:valley test fails, we do not store and just jump to line 19
                      if (iabs(dpad).gt.iabs(dtdc)) then ! loop over pad
                                                         ! tdc depends
                                                         ! on pad
+c RRB: Must have at least 3 pads for next loop...
                         do kpad=min(jpad,max_pos(1,imax))+1,
-     +                       max(jpad,max_pos(1,imax))-1
+     +                          max(jpad,max_pos(1,imax))-1
                            ktdc=jtdc+nint(slope*float(kpad-jpad))
                            valley = min(valley,height(kpad,ktdc))
                         enddo
                      else                   ! loop over tdc
                                             ! pad depends on tdc
+c RRB: Must have at least 3 buckets for next loop...
                         do ktdc=min(jtdc,max_pos(2,imax))+1,
-     +                       max(jtdc,max_pos(2,imax))-1
+     +                          max(jtdc,max_pos(2,imax))-1
                            kpad=jpad+nint(float(ktdc-jtdc)/slope)
                            valley = min(valley,height(kpad,ktdc))
                         enddo
@@ -1029,10 +1096,12 @@ c if peak:valley test fails, we do not store and just jump to line 19
                   else          ! peaks on same pad.. walk in time only
                      valley = height(jpad,jtdc)
                      do ktdc=min(jtdc,max_pos(2,imax))+1,
-     +                    max(jtdc,max_pos(2,imax))-1
+     +                       max(jtdc,max_pos(2,imax))-1
                         valley=min(valley,height(jpad,ktdc))
                      enddo
                   endif
+
+c RRB: ??? Need a more sophisticated algorithm, allowing for ADC & noise?
 c--------------------------------------------
 c we should NOT be using peak/valley!!!
 c instead use peak-valley (i.e. peak MINUS valley)
@@ -1053,9 +1122,12 @@ c ok, passed peak:valley test... store this peak
             nmax=nmax+1
             if (nmax.gt.nmax_max) then
                nmax = nmax_max
+c ??? Direct write is forbidden
                write(6,*)'Hey!... too many peaks... I am bailing...'
                do iwriteout=1,nclspix
+c ??? Direct write is forbidden
                   write(56,*)' '
+c ??? Direct write is forbidden
                   write(56,*)iwriteout,
      +                 ipad(iwriteout),itdc(iwriteout),iadc(iwriteout)
                enddo
@@ -1066,24 +1138,25 @@ c ok, passed peak:valley test... store this peak
             max_height(nmax)=iadc(indx)
  19         continue
 c lay waste to adjacent area (may be large)...
-            do kpad=max(jpad-(iclosest_pad-1),1),
-     +           min(jpad+(iclosest_pad-1),maxpad)
-               do ktdc=max(jtdc-(iclosest_tdc-1),1)
-     +              ,min(jtdc+(iclosest_tdc-1),maxbuck)
+c RRB: Reverse memory access order; mark false only within cluster region:
+            do ktdc=max(jtdc-(iclosest_tdc-1),itdc_lo),
+     +              min(jtdc+(iclosest_tdc-1),itdc_hi)
+               do kpad=max(jpad-(iclosest_pad-1),ipad_lo),
+     +                 min(jpad+(iclosest_pad-1),ipad_hi)
                   allowed(kpad,ktdc) = .false.
                enddo
             enddo
          else
 c lay waste to some adjacent area even if not a peak......
-            allowed(jpad+1,jtdc-1)=.false.
-            allowed(jpad+1,jtdc)  =.false.
-            allowed(jpad+1,jtdc+1)=.false.
-            allowed(jpad  ,jtdc-1)=.false.
-            allowed(jpad  ,jtdc  )=.false.
-            allowed(jpad  ,jtdc+1)=.false.
-            allowed(jpad-1,jtdc-1)=.false.
-            allowed(jpad-1,jtdc)  =.false.
-            allowed(jpad-1,jtdc+1)=.false.
+c RRB: i.e., "allowed" was false for pixel
+c RRB: mark false only within cluster region:
+            do ktdc=max(jtdc-1,itdc_lo),
+     +              min(jtdc+1,itdc_hi)
+               do kpad=max(jpad-1,ipad_lo),
+     +                 min(jpad+1,ipad_hi)
+                  allowed(kpad,ktdc) = .false.
+               enddo
+            enddo
          endif
       enddo
 
@@ -1095,22 +1168,33 @@ c calculate "positions"...
          call tph_fit_isolated_cluster(tclpar, nclspix,
      +        ipad,itdc,iadc,itrk,
      +        white_noise, filtered_noise,
-     +        qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5)
+     +        qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
+     +        ipad_lo, ipad_hi, itdc_lo, itdc_hi)
       else                      ! just use pixels around local maximum
          do imax=1,nmax
             jpad=max_pos(1,imax)
             jtdc=max_pos(2,imax)
             nclspix_temp = 0
-            do kpad=max(jpad-(iclosest_pad-1),1),
-     +           min(jpad+(iclosest_pad-1),maxpad)
-               do ktdc=max(jtdc-(iclosest_tdc-1),1),
-     +              min(jtdc+(iclosest_tdc-1),maxbuck)
+            ipad_lo_temp = ipad_hi
+            ipad_hi_temp = ipad_lo
+            itdc_lo_temp = itdc_hi
+            itdc_hi_temp = itdc_lo
+            do kpad=max(jpad-(iclosest_pad-1),ipad_lo),
+     +              min(jpad+(iclosest_pad-1),ipad_hi)
+               do ktdc=max(jtdc-(iclosest_tdc-1),itdc_lo),
+     +                 min(jtdc+(iclosest_tdc-1),itdc_hi)
                   if (height(kpad,ktdc).ne.0) then
+c ??? What keeps these arrays from overflowing?
+c ??? Probably need check on iclosest_adc value...
                      nclspix_temp=nclspix_temp+1
                      ipad_temp(nclspix_temp)=kpad
                      itdc_temp(nclspix_temp)=ktdc
                      iadc_temp(nclspix_temp)=height(kpad,ktdc)
                      itrk_temp(nclspix_temp)=track_pix(kpad,ktdc)
+                     ipad_lo_temp = MIN(ipad_lo_temp,kpad)
+                     ipad_hi_temp = MAX(ipad_hi_temp,kpad)
+                     itdc_lo_temp = MIN(itdc_lo_temp,ktdc)
+                     itdc_hi_temp = MAX(itdc_hi_temp,ktdc)
                   endif
                enddo
             enddo
@@ -1118,8 +1202,11 @@ c calculate "positions"...
      +           ipad_temp,itdc_temp,iadc_temp,itrk_temp,
      +           white_noise, filtered_noise,
      +           qtemp,xtemp,dxtemp,prftemp,ztemp,dztemp,zrftemp,
-     +           phitemp,tracktemp,mu1temp,mu2temp,mu3temp,mu4temp,
-     +           mu5temp)
+     +           phitemp,tracktemp,
+     +           mu1temp,mu2temp,mu3temp,mu4temp,mu5temp,
+     +           ipad_lo_temp, ipad_hi_temp, itdc_lo_temp, itdc_hi_temp)
+
+c ??? Could we just put these in the calling arguments, instead?
             qq(imax)     = qtemp(1)
             x(imax)     = xtemp(1)
             dx(imax)    = dxtemp(1)
@@ -1138,17 +1225,9 @@ c calculate "positions"...
       endif
 
 c finally, put back array allowed the way you found it.
-      itemp=maxize(ipad(1),nclspix)
-      j_maxpad=min(ipad(itemp)+iclosest_pad,maxpad)
-      itemp=minize(ipad(1),nclspix)
-      j_minpad=max(ipad(itemp)-iclosest_pad,1)
-
-      itemp=maxize(itdc(1),nclspix)
-      j_maxtdc=min(itdc(itemp)+iclosest_tdc,maxbuck)
-      itemp=minize(itdc(1),nclspix)
-      j_mintdc=max(itdc(itemp)-iclosest_tdc,1)
-      do jpad=j_minpad,j_maxpad
-         do jtdc=j_mintdc,j_maxtdc
+c RRB: Now simplified; also, memory access order reversed
+      do jtdc=itdc_lo,itdc_hi
+         do jpad=ipad_lo,ipad_hi
             allowed(jpad,jtdc) = .true.
          enddo
       enddo
@@ -1162,20 +1241,27 @@ C-----------------------------------------------------------------------
      +				ipad, itdc, iadc, itrk,
      +				white_noise, filtered_noise,
      +                          qq,x,dx,prf,z,dz,zrf,phi,track,
-     +                          mu1,mu2,mu3,mu4,mu5)
+     +                          mu1,mu2,mu3,mu4,mu5,
+     +                          ipad_lo, ipad_hi, itdc_lo, itdc_hi)
+
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
 
 C   Input arguments  (One to a line with definition after ! ) 
 C
-C     tclpar:   switch table for tcl
-C     nclspix:	number of pixels in cluster
-C     ipad:	for each pixel, what is pad #
-C     itdc:	for each pixel, what is bucket #
-C     iadc:	for each pixel, what is adc value
-C     itrk:     for each pixel, what MC track contributed most
-C     rms_noise: rms noise on adc values
+C     tclpar:         switch table for tcl
+C     nclspix:        number of pixels in cluster
+C     ipad:	      for each pixel, what is pad #
+C     itdc:	      for each pixel, what is bucket #
+C     iadc:	      for each pixel, what is adc value
+C     itrk:           for each pixel, what MC track contributed most
+C     white_noise:    noise on adc values
+C     filtered_noise: noise on adc values
+C     ipad_lo:        pad number lower limit for cluster
+C     ipad_hi:        pad number upper limit for cluster
+C     itdc_lo:        TDC lower limit (1-512) for cluster
+C     itdc_hi:        TDC upper limit (1-512) for cluster
 C
 C   Output arguments : 
 C
@@ -1184,6 +1270,11 @@ C     x,dx,prf  - position, uncertainty, and width along row (units=pads)
 C     z,dz,zrf  - position, uncertainty, and width along time (units=buckets)
 C     phi       - "orientation" of cluster
 C     track     - MC track contributing the most pixels
+C     mu1
+C     mu2
+C     mu3
+C     mu4
+C     mu5
 C
 C  Returns:
 C       Contained in the output arguments...
@@ -1201,6 +1292,13 @@ C   Copyright 1994    Lawrence Berkeley Laboratory
 c   
 c   modificattions:
 c   ==============
+c   03-NOV-1997 --- R.Bossingham
+c       * Use lower and upper tdc, pad-number limits to speed code;
+c         change arguments accordingly
+c       * Update max. pads in row -> 182, max. time buckets -> 512.
+c       * Replace most calls to vzero with in-line code (for speed)
+c       * Replace calls to vfloat with in-line code (for speed)
+c       * Add comments
 C
 C   Error conditions : 
 C   ================
@@ -1217,7 +1315,7 @@ c passed inputs
 
 	integer nclspix
 	integer ipad(*),itdc(*),iadc(*),itrk(*)
-	integer nhits
+        integer ipad_lo, ipad_hi, itdc_lo, itdc_hi
 
 c passed outputs
         real qq(*)
@@ -1236,36 +1334,54 @@ c passed outputs
         real mu5(*)
         integer tph_3point_gauss
 
-	real centroid,sigma,uncertainty,sum,dt0
+	real centroid,sigma,uncertainty
         real white_noise,filtered_noise
 C-----------------------------------------------------------------------
 
-        integer ipix,adc_sum
         integer npads_max,nbuck_max
-        parameter(npads_max=184,nbuck_max=1024)
-        integer pad_proj(npads_max),time_proj(nbuck_max)
+        parameter(npads_max=182,nbuck_max=512)
+c
+        integer nmc_tracks_max
+        parameter(nmc_tracks_max=2000)
+c
+        integer adc_sum
+        integer iadc_ipix
+        integer id
+        integer imax
+        integer imc_track(nmc_tracks_max)
+        integer indx
+        integer ipad_ipix
+        integer ipad_range
+        integer ipix
+        integer ir
+        integer itdc_ipix
+        integer iucomp
+        integer ktrk
+        integer lvsimx
+        integer mtrk
+        integer nmc_tracks
+        integer nocc_track(nmc_tracks_max)
         integer numpix_pad_proj(npads_max)
         integer numpix_time_proj(nbuck_max)
+        integer pad_proj(npads_max)
+        integer pad_n
         integer tdc_x_adc(npads_max)
-        integer nmc_tracks_max,nmc_tracks
-        parameter(nmc_tracks_max=2000)
-        integer imc_track(nmc_tracks_max),nocc_track(nmc_tracks_max)
-
-        real identity_vector(nbuck_max) ! useful for x-axis of projections
+        integer time_proj(nbuck_max)
+c
+        real d_rvec_cor(nbuck_max)             ! SCA noise
+        real d_rvec_uncor(nbuck_max)           ! SAS noise
+        real diff(4)
+        real identity_vector(nbuck_max)        ! useful for x-axis of proj.
+        real rmu(4)
         real rvec(nbuck_max),d_rvec(nbuck_max) ! temp arrays
-        real d_rvec_cor(nbuck_max),d_rvec_uncor(nbuck_max) ! SAS, SCA noise
+        real slope,b,badness                   ! for linear fit
+c
         logical first/.true./
-        integer mtrk,iucomp,ktrk
-
-        real slope,b,badness    ! for linear fit
-
-        integer imax,lvsimx
-        integer id,indx
-
         logical lookat_mc
-
-        real  rmu(4)
-        integer  ipad_l, ipad_h, pad_n, ir
+C-----------------------------------------------------------------------
+        save first
+        save identity_vector
+        save lookat_mc
 C-----------------------------------------------------------------------
 
 c set up the identity vector
@@ -1277,7 +1393,6 @@ c set up the identity vector
            lookat_mc = (tclpar(1).mc.eq.1)
         endif
 
-
 c loop over all pixels, in the process:
 c 1) sum all adc counts == q
 c 2) project onto padrow (will fit projection to find x,dx,prf)
@@ -1285,32 +1400,32 @@ c 3) project onto time axis (will fit projection to find z,dz,zrf)
 c 4) get time average for each pad (fit each and obtain orientation)
 c 5) sum up adc contribs from all MC tracks (will check to see who gave most)
 
-	call vzero(numpix_pad_proj,npads_max)
-	call vzero(numpix_time_proj,nbuck_max)
-        call vzero(pad_proj,npads_max)
-        call vzero(time_proj,nbuck_max)
-        call vzero(tdc_x_adc,npads_max)
+        ipad_range = ipad_hi - ipad_lo + 1
+c
+        do indx=ipad_lo,ipad_hi
+           pad_proj(indx) = 0
+           tdc_x_adc(indx) = 0
+           numpix_pad_proj(indx) = 0
+        end do
+c
+        do indx=itdc_lo,itdc_hi
+           time_proj(indx) = 0
+           numpix_time_proj(indx) = 0
+        end do
+c
         adc_sum = 0
-        ipad_l = 999
-        ipad_h = -999
         do ipix=1,nclspix
-           adc_sum = adc_sum+iadc(ipix)
-           pad_proj(ipad(ipix)) = pad_proj(ipad(ipix))+iadc(ipix)
-           numpix_pad_proj(ipad(ipix))=numpix_pad_proj(ipad(ipix))+1
-           numpix_time_proj(itdc(ipix))=numpix_time_proj(itdc(ipix))+1
-           time_proj(itdc(ipix)) = time_proj(itdc(ipix))+iadc(ipix)
-           tdc_x_adc(ipad(ipix)) = tdc_x_adc(ipad(ipix))+
-     +          itdc(ipix)*iadc(ipix)
-C----------------------------------------------------------------------
-C     Keep track of the max & min pad numbers in this cluster.
-C     By DSW on July 6,1997 as part of the pad resolution study.
-           if (ipad_l .ge. ipad(ipix) ) then
-              ipad_l = ipad(ipix)
-           endif
-           if (ipad_h .lt. ipad(ipix) ) then
-              ipad_h = ipad(ipix)
-           endif
-C----------------------------------------------------------------------
+           iadc_ipix = iadc(ipix)
+           adc_sum = adc_sum + iadc_ipix
+           ipad_ipix = ipad(ipix)
+           itdc_ipix = itdc(ipix)
+
+           pad_proj(ipad_ipix)  = pad_proj(ipad_ipix)  + iadc_ipix
+           tdc_x_adc(ipad_ipix) = tdc_x_adc(ipad_ipix)
+     +                          + itdc_ipix*iadc_ipix
+           numpix_pad_proj(ipad_ipix)  = numpix_pad_proj(ipad_ipix)  +1
+           time_proj(itdc_ipix) = time_proj(itdc_ipix) + iadc_ipix
+           numpix_time_proj(itdc_ipix) = numpix_time_proj(itdc_ipix) +1
         enddo
 	if (adc_sum.eq.0) stop 'Hey -- ADCSUM=0!!!!'
 
@@ -1319,20 +1434,25 @@ c screw up for very wide clusters??????????
 C------------------------------------------------------------------
 C     Added by DSW on July 6, 1997 to study the pad resolution shootup
 C     at large pad crossing angles.
-	 do ir=1,4
+	do ir=1,4
            rmu(ir) = 0.
         enddo
-        do pad_n=ipad_l, ipad_h
+        do pad_n=ipad_lo, ipad_hi
            rmu(1)  =  rmu(1) +  pad_proj(pad_n)*pad_n
         enddo
-        rmu(1) =  float(rmu(1))/float(adc_sum)
+        rmu(1) =  rmu(1)/float(adc_sum)
 
-C     Calculate  sigma, skewness & kurtosis
-        do ir = 2,4
-           do pad_n=ipad_l, ipad_h
-              rmu(ir) =  rmu(ir) + float(pad_proj(pad_n))*
-     +             (float(pad_n) - rmu(1))**ir
+C     Calculate  sigma, skewness & kurtosis;
+C RRB: Speed calc. by reordering loop and carrying previous results forward:
+        do pad_n=ipad_lo, ipad_hi
+           diff(1) = float(pad_n) - rmu(1)
+           do ir = 2,4
+              diff(ir) = diff(1)*diff(ir-1)
+              rmu(ir) =  rmu(ir) + float(pad_proj(pad_n))*diff(ir)
            enddo
+        enddo
+C
+        do ir = 2,4
            rmu(ir) = rmu(ir)/float(adc_sum)
         enddo
 
@@ -1340,7 +1460,7 @@ C     Calculate  sigma, skewness & kurtosis
         mu2(1) = sqrt(rmu(2))
         mu3(1) = rmu(3)/rmu(2)**1.5
         mu4(1) = rmu(4)/rmu(2)**2 - 3.
-        mu5(1) = float(ipad_h - ipad_l + 1 )
+        mu5(1) = float(ipad_hi - ipad_lo + 1 )
 C------------------------------------------------------------------
 c mal 30aug97 - just put the damn things to zero-- they seem to be randomly
 c assigned if not!!
@@ -1350,15 +1470,12 @@ c	mu3(1) = 0.0
 c	mu4(1) = 0.0
 c	mu5(1) = 0.0
 
-
-
-
 c     q:
         qq(1) = adc_sum
 
 c x,dx,prf: - try 3-point gauss... if does not work, do weighted mean
-        call vfloat(pad_proj,rvec,npads_max)
-        do indx=1,npads_max
+        do indx=ipad_lo,ipad_hi
+           rvec(indx) = FLOAT(pad_proj(indx))
            if (pad_proj(indx).ne.0) then
               d_rvec(indx) = 
      +          sqrt((float(numpix_pad_proj(indx))*filtered_noise)**2+
@@ -1368,20 +1485,23 @@ c x,dx,prf: - try 3-point gauss... if does not work, do weighted mean
            endif
            d_rvec_cor(indx) = 0.0
         enddo
-cmal 30aug97        if (tph_3point_gauss(identity_vector,rvec,d_rvec,
-cmal     +       npads_max,centroid,sigma,uncertainty).ne.1) 
-cmal     +       call tph_weighted_mean(identity_vector,rvec,
-            call tph_weighted_mean(identity_vector,rvec,
-     +       d_rvec_cor,d_rvec,
-     +       npads_max,centroid,sigma,uncertainty)
+cmal 30aug97        if (tph_3point_gauss(identity_vector, rvec, d_rvec,
+cmal/rrb     +       ipad_lo, ipad_hi, npads_max,
+cmal/rrb     +       centroid, sigma, uncertainty).ne.1) 
+cmal     +       call tph_weighted_mean(identity_vector, rvec,
+	       call tph_weighted_mean(identity_vector, rvec,
+     +          d_rvec_cor, d_rvec,
+     +          ipad_lo, ipad_hi, npads_max,
+     +          centroid, sigma, uncertainty)
         x(1) = centroid
         dx(1) = uncertainty
         prf(1) = sigma
 
 c z,dz,zrf: - do weighted mean
 c  for uncertainties, see notebook2 p113
-        call vfloat(time_proj,rvec,nbuck_max)
-        do indx=1,nbuck_max
+c
+        do indx=itdc_lo,itdc_hi
+           rvec(indx) = FLOAT(time_proj(indx))
            if (time_proj(indx).ne.0) then
               d_rvec_cor(indx) = 
      +             sqrt(float(numpix_time_proj(indx)))*filtered_noise
@@ -1393,26 +1513,35 @@ c  for uncertainties, see notebook2 p113
            endif
         enddo
 c        if (tclpar(1).tfit.eq.1) then ! fancy fit - not recommended...
-c           call tph_fit_pulse(identity_vector,rvec,d_rvec,
-c     +       nbuck_max,centroid,sigma,uncertainty)
+c           call tph_fit_pulse(identity_vector, rvec,
+c     +                        d_rvec,
+c     +                        itdc_lo, itdc_hi, nbuck_max,
+c     +                        centroid, sigma, uncertainty)
 c       else                          ! simple weighted mean
-        call tph_weighted_mean(identity_vector,rvec,
-     +       d_rvec_cor,d_rvec_uncor,
-     +       nbuck_max,centroid,sigma,uncertainty)
+        call tph_weighted_mean(identity_vector, rvec,
+     +       d_rvec_cor, d_rvec_uncor,
+     +       itdc_lo, itdc_hi, nbuck_max,
+     +       centroid, sigma, uncertainty)
+c ??? Curious line?
         centroid = centroid     ! phase correction done at top level....
-c     endif
+c       endif
         z(1) = centroid
         dz(1) = uncertainty
         zrf(1) = sigma
 
 c orientation phi:
-	call vfloat(tdc_x_adc,rvec,npads_max)
-	call vfloat(pad_proj,d_rvec,npads_max)
-        do indx=1,npads_max
-           if (pad_proj(indx).ne.0) rvec(indx) = rvec(indx)/d_rvec(indx)
+c ??? If pad_proj *is* 0, rvec is peculiar...but I left existing *logic*
+        do indx=ipad_lo,ipad_hi
+           d_rvec(indx) = FLOAT(pad_proj(indx))
+           if (pad_proj(indx).ne.0) then
+              rvec(indx) = FLOAT(tdc_x_adc(indx))/d_rvec(indx)
+           else
+              rvec(indx) = FLOAT(tdc_x_adc(indx))
+           end if
         enddo
-	call lfitw(identity_vector,rvec,d_rvec,npads_max,0,
-     +       slope,b,badness)
+	call lfitw(identity_vector(ipad_lo), rvec(ipad_lo),
+     +             d_rvec(ipad_lo), ipad_range, 0,
+     +             slope, b, badness)
         phi(1) = slope
 
 
@@ -1451,7 +1580,8 @@ c  switch if interested in real data (or real data performance)
 
 
 C-----------------------------------------------------------------------
-	Subroutine tph_fit_pulse(tseq, aseq, daseq, npts_max,
+	Subroutine tph_fit_pulse(tseq, aseq, daseq,
+     +                           itdc_lo, itdc_hi, npts_max,
      +				 t0, tau, dt0)
 C-----------------------------------------------------------------------
 
@@ -1462,6 +1592,8 @@ C
 C     tseq:	tdc values for the pulse to be fit
 C     aseq:	adc values for the pulse to be fit
 C     daseq:	adc values for the pulse to be fit
+C     itdc_lo:	first index to use for tseq, aseq, and daseq arrays
+C     itdc_hi:	last  index to use for tseq, aseq, and daseq arrays
 C     npts_max:	size of tseq, aseq, and daseq arrays
 C
 C   Output arguments : 
@@ -1494,11 +1626,13 @@ C
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
+        integer itdc_lo, itdc_hi
 	integer npts_max
 	real tseq(npts_max),aseq(npts_max),daseq(npts_max)
 	real t0,tau,dt0
 C-----------------------------------------------------------------------
 	integer lvmax
+	integer npts
 	integer N
 	parameter(N=2)          ! for STAR
 	real B
@@ -1509,19 +1643,27 @@ C-----------------------------------------------------------------------
         logical retry
 C-----------------------------------------------------------------------
 
-	imax = lvmax(aseq,npts_max)
-
-        if ((imax.eq.1).or.(aseq(imax-1).lt.1.0e-14)) then ! max at early edge
-           istart=imax
-        elseif ((imax.eq.npts_max).or.(aseq(imax+1).lt.1.0e-14)) then !lt edge
-           istart=imax-2
+        npts = itdc_hi - itdc_lo + 1
+	imax = lvmax(aseq(itdc_lo),npts) + itdc_lo - 1
+c
+c RRB: Prevent possible out-of-bounds array accesses
+c      by checking array indices before use:
+        if (imax.eq.1) then ! max at early edge
+           istart = 1
+        else if (aseq(imax-1).lt.1.0e-14) then
+           istart = imax
+        elseif (imax.eq.npts_max) then !lt edge
+           istart = npts_max - 2
+        elseif (aseq(imax+1).lt.1.0e-14) then !lt edge
+           istart = imax - 2
         else                    ! "normal"
-           istart=imax-1
+           istart = imax - 1
         endif
 
         retry=.false.
 
- 1      t1 = tseq(istart)
+ 1      continue
+        t1 = tseq(istart)
 	t2 = tseq(istart+1)
 	t3 = tseq(istart+2)
         delta = t2 - t1         ! (delta also = t3-t2)
@@ -1560,16 +1702,18 @@ c       B = (rat)**(1.0/float(N))	! for arbitrary N
         call message('TPH_FIT_PULSE failure; going to mean',
      +       1,id)
 c this should be fixed before using for real-----v
-        call tph_weighted_mean(tseq,aseq,daseq,daseq,npts_max,
-     +       t0,tau,dt0)
+        call tph_weighted_mean(tseq, aseq,
+     +       daseq, daseq,
+     +       itdc_lo, itdc_hi, npts_max,
+     +       t0, tau, dt0)
 c     should correct for phase here!!!!!!!! *** mal 27jul95
         return
 	end
 
 
 C-----------------------------------------------------------------------
-	integer function tph_3point_gauss(x, y, dy, npts,
-     +				centroid, sigma, uncertainty)
+	integer function tph_3point_gauss(x, y, dy, ipad_lo, ipad_hi,
+     +				ipad_max, centroid, sigma, uncertainty)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -1579,7 +1723,9 @@ C
 C     y		- y(x) distribution to fit to gaussian
 C     dy	- uncertainties on y(x)
 C     x		- x coordinate for each point
-C     npts	- number of samples in distribution
+C     ipad_lo	- first pad number in cluster
+C     ipad_hi	- last pad number in cluster
+C     ipad_max	- last pad number in row
 C
 C   Output arguments : 
 C
@@ -1605,6 +1751,13 @@ C   Modified: 20-DEC-1996 by R.Bossingham, Lawrence Berkeley Natl. Laboratory
 C             If the Gaussian width is more than 83% of the pad width,
 C             return a function value of -2; do not calculate position.
 C
+C             03-NOV-1997 by R.Bossingham
+C             Add calling arguments so as to clearly distinguish
+C               a) range of pads involved in cluster
+C               b) length of pad row
+C             and change logic to use this information properly.
+C             
+C
 C   Error conditions : 
 C   ================
 C
@@ -1617,42 +1770,44 @@ C       to be more accurate, the function returns a value of -2
 C
 C-----------------------------------------------------------------------
 	real y(*),x(*),dy(*)
-	integer npts
+        integer ipad_lo
+        integer ipad_hi
+        integer ipad_max
 	real centroid,sigma,uncertainty,x0
 C-----------------------------------------------------------------------
 	integer lvmax
-	integer ipt,imax,istart,id
+	integer imax,istart,id
+	integer npts
 	real y1,y2,y3,delta,r213
 
-        tph_3point_gauss = 1
-        
+        npts = ipad_hi - ipad_lo + 1
         if (npts.lt.3) then
            tph_3point_gauss = -1
            return
+        else
+           tph_3point_gauss = 1
         endif
-
-	imax = lvmax(y,npts)
-        
-	if ((imax.ge.2).and.(imax.lt.npts)) then ! normal - max not at edge
-           istart=imax-1
-        elseif (imax.eq.1) then ! maximum occupancy at first point
+c
+c Find pad with largest signal:
+	imax = lvmax(y(ipad_lo),npts) + ipad_lo - 1
+        if (imax.eq.1) then             ! maximum at first point
            if (y(2).le.y(3)) then
               id = 0
               tph_3point_gauss = -1
-              call message('TPH_3POINT_GAUSS bad shape',
-     +             1,id)
+              call message('TPH_3POINT_GAUSS bad shape', 1,id)
               return
            endif
-           istart=1
-	else                    ! maximum occupancy at last point
-           if (y(npts-1).le.y(npts-2)) then
+           istart = 1
+	else if (imax.eq.ipad_max) then ! maximum at last point
+           if (y(imax-1).le.y(imax-2)) then
               id = 0
               tph_3point_gauss = -1
-              call message('TPH_3POINT_GAUSS bad shape',
-     +             1,id)
+              call message('TPH_3POINT_GAUSS bad shape', 1,id)
               return
            endif
-           istart=npts-2
+           istart = imax - 2
+        else                            ! normal - max not at edge
+           istart = imax - 1
 	endif
 
 	y1 = y(istart)
@@ -1660,15 +1815,15 @@ C-----------------------------------------------------------------------
 	y3 = y(istart+2)
 
         if (y1*y3.lt.1.0e-10) then ! zero occupancy - no can do
-           tph_3point_gauss=-1
+           tph_3point_gauss = -1
            return
         endif
 
+C RRB: Slightly recode to avoid direct comparison of floating pt. numbers
 	delta = x(istart+1) - x(istart)
-	if (delta.ne.1.0) then
+	if (ABS(delta-1.).gt.1.E-7) then
 	  id = 0
-	  call message('TPH_3POINT_GAUSS unexpected delta .ne. 1',
-     +			1,id)
+	  call message('TPH_3POINT_GAUSS unexpected delta .ne. 1', 1,id)
           tph_3point_gauss = -1
 	  return
 	endif
@@ -1677,10 +1832,8 @@ C-----------------------------------------------------------------------
         if (r213.le.0.0) then
            id = 0
            tph_3point_gauss = -1
-           call message('TPH_3POINT_GAUSS bad shape - r213',
-     +          1,id)
+           call message('TPH_3POINT_GAUSS bad shape - r213', 1,id)
            return
-	endif
 
 ********************** let's try to take it out....**********************
 C
@@ -1691,7 +1844,7 @@ C	elseif (r213.le.1.452) then
 C           id = 0
 C           tph_3point_gauss = -2
 C           return
-c        endif
+        endif
 
 	x0 = (delta/2.0) * log(y3/y1)/r213
 	centroid = x(istart+1) + x0
@@ -1710,7 +1863,7 @@ c        endif
 
 C-----------------------------------------------------------------------
 	Subroutine tph_weighted_mean(x, y, dy_cor,dy_uncor,
-     +     npts,
+     +     ilo, ihi, imax,
      +     mom1, mom2, uncertainty)
 C-----------------------------------------------------------------------
 
@@ -1722,7 +1875,9 @@ C     x		- x coordinate of each point
 C     y		- y(x) distribution
 C     dy_cor	- uncertainty in y(x) that is CORRELATED
 C     dy_uncor	- uncertainty in y(x) that is UNCORRELATED
-C     npts	- number of samples in distribution
+C     ilo	- index of first sample in distribution
+C     ihi	- index of last sample in distribution
+C     imax	- max. possible index for sample
 C
 C   Output arguments : 
 C
@@ -1751,20 +1906,23 @@ C   ================
 C
 C-----------------------------------------------------------------------
 	real x(*),y(*),dy_cor(*),dy_uncor(*)
-	integer npts
+        integer ilo, ihi, imax
 	real mom1,mom2,uncertainty_cor,uncertainty_uncor,uncertainty
 C-----------------------------------------------------------------------
 	real ysum
 	integer ipt
+	integer npts      ! Not currently used
 C-----------------------------------------------------------------------
+
+        npts = ihi - ilo + 1
 
 	mom1 = 0.0
 	mom2 = 0.0
 	ysum = 0.0
-	do ipt=1,npts
+	do ipt=ilo,ihi
 	  ysum = ysum + y(ipt)
 	  mom1 = mom1 + x(ipt)*y(ipt)
-          mom2 = mom2 + x(ipt)*x(ipt)*y(ipt)
+          mom2 = mom2 + x(ipt)*(x(ipt)*y(ipt))
 	enddo
 	mom1 = mom1 / ysum
         mom2 = sqrt(mom2/ysum - mom1**2)
@@ -1773,7 +1931,7 @@ c the uncertainty from the correlated noise and uncorrelated noise
 c  is estimated below...
 	uncertainty_cor = 0.0
 	uncertainty_uncor = 0.0
-	do ipt=1,npts
+	do ipt=ilo,ihi
 	  uncertainty_cor = uncertainty_cor+
      +          abs(x(ipt)-mom1)*dy_cor(ipt)
 	  uncertainty_uncor = uncertainty_uncor+

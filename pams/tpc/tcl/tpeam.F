@@ -89,6 +89,9 @@ c	- now fill pixel visualization ntuples even when we deal with
 c	  real data (requires reading tclpar to know if it is a MC event or
 c	  not) So need fill ntuples 300,500,600
 c
+c   03nov97 R.Bossingham
+c	- eliminate declarations of unused variables.
+c
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
@@ -98,7 +101,6 @@ c
 c        functions
 c
 c        integer lochar        ! Obsolete
-      integer lenocc,icloc
 c
 C-----------------------------------------------------------------------
 c
@@ -108,20 +110,19 @@ ccccc         common/quest/iquest
 ccccc         integer iquest(100)
 
          
-         integer nquota,nvar,icycle,nvar2,nvar3,nvar4,nvar5,nvar6
+         integer nvar,icycle,nvar2,nvar3,nvar4,nvar5,nvar6
          parameter (nvar=9,nvar2=27,nvar3=5,nvar4=5,nvar5=5,nvar6=4)
          character*4 chtags(nvar),chtags2(nvar2)
          character*4 chtags3(nvar3),chtags4(nvar4),chtags5(nvar5)
          character*4 chtags6(nvar6)
 C-----------------------------------------------------------------------
-         logical lstat,first
+         logical first
 
          real vec(27)
          real vec2(4)
 
          integer istat
-         integer indx
-         integer isect,irow,iwire,nseq,numbv
+         integer isect,irow,numbv
          integer kdummy,idummy,jdummy
 
          integer max_incidents
@@ -136,9 +137,8 @@ C-----------------------------------------------------------------------
          integer nmctrk,nhitrk,itrk,nmchit,oldmchit
          integer nhitrk2,nmchit2
          character*80 outfile
-         integer iper,ihisto
+         integer ihisto
         
-         integer wire_hits,kwir
 c         real tphit_q(mxhits),mchit_q(mxhits) ****
 
          integer numpix_factor/'100000'X/
@@ -156,11 +156,6 @@ c         real tphit_q(mxhits),mchit_q(mxhits) ****
          real time_bucket
          integer mxrow
          parameter(mxrow=45)
-         integer imal
-
-         real desum
-
-         logical testcond
 
          integer mcptr(mxhits*24,1:max_incidents)
          integer dtptr(mxhits*24,0:max_incidents) ! indx1=row or volume
