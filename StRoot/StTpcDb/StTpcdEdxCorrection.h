@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.6 2004/08/08 21:06:39 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.7 2004/09/09 20:03:46 perev Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -31,7 +31,7 @@ class dEdx_t : public TObject {
      U->R (TpcAdcCorrection) -> P (tpcPressure) ->
      S (TpcSecRowB) ->  O (TpcDriftDistOxygen) ->  
      Z (TpcZCorrection) -> X(TpcdXCorrection) */
-  Char_t   first;
+  Char_t   first[1];
   Int_t    sector;
   Int_t    row;
   Int_t    pad;
@@ -111,8 +111,8 @@ class dEdx_t : public TObject {
   Double_t zP;      // the most probable value from Bichsel
   Double_t sigmaP;  // sigma from Bichsel
   Double_t dCharge; //
-  Char_t   last;
-  void Reset() {memset(&sector, 0, &last - &first);}
+  Char_t   last[1];
+  void Reset() {memset(first, 0, last - first);}
   ClassDef(dEdx_t,1)
 }; 
 struct dEdxCorrection_t {
