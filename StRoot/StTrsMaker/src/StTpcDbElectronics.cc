@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcDbElectronics.cc,v 1.4 2000/02/10 01:21:49 calderon Exp $
+ * $Id: StTpcDbElectronics.cc,v 1.5 2000/03/15 17:39:48 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcDbElectronics.cc,v $
+ * Revision 1.5  2000/03/15 17:39:48  calderon
+ * Remove beeps
+ *
  * Revision 1.4  2000/02/10 01:21:49  calderon
  * Switch to use StTpcDb.
  * Coordinates checked for consistency.
@@ -95,7 +98,7 @@ StTpcDbElectronics::instance(StTpcDb* gTpcDbPtr)
 	mInstance = new StTpcDbElectronics(gTpcDbPtr);
     }
     else {
-	cerr << "StTpcDbElectronics::getInstance()\a\a\a"  << endl;
+	cerr << "StTpcDbElectronics::instance()"  << endl;
 	cerr << "\tWARNING:" << endl;
 	cerr << "\tSingleton class is already instantiated" << endl;
 	cerr << "\tArgument  ignored!!" << endl;

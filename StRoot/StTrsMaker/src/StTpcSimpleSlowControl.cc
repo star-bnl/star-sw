@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcSimpleSlowControl.cc,v 1.2 1999/04/07 00:45:42 lasiuk Exp $
+ * $Id: StTpcSimpleSlowControl.cc,v 1.3 2000/03/15 17:39:49 calderon Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcSimpleSlowControl.cc,v $
+ * Revision 1.3  2000/03/15 17:39:49  calderon
+ * Remove beeps
+ *
  * Revision 1.2  1999/04/07 00:45:42  lasiuk
  * addition of gas gain
  *
@@ -81,7 +84,7 @@ StTpcSimpleSlowControl::StTpcSimpleSlowControl(const char* fname)
 StTpcSlowControl* StTpcSimpleSlowControl::instance()
 {
     if (mInstance == 0) {
-	cerr << "StTpcSimpleSlowControl::getInstance(): " << endl;	
+	cerr << "StTpcSimpleSlowControl::instance() " << endl;	
 	cerr << "\tWARNING" << endl;
 	cerr << "\tNo arguments for instantiation of" << endl;
 	cerr << "\tsingleton class. All values default to zero." << endl;
@@ -97,7 +100,7 @@ StTpcSlowControl* StTpcSimpleSlowControl::instance(const char* file)
     if (mInstance == 0)
 	mInstance = new StTpcSimpleSlowControl(file);
     else {
-	cerr << "StTpcSimpleSlowControl::getInstance(): " << endl;	
+	cerr << "StTpcSimpleSlowControl::instance()" << endl;	
 	cerr << "\tWARNING" << endl;
 	cerr << "\tSingleton class is already instantiated." << endl;
 	cerr << "\tArgument (const char*) is ignored." << endl;

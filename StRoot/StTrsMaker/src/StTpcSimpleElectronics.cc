@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleElectronics.cc,v 1.6 2000/01/10 23:14:30 lasiuk Exp $
+ * $Id: StTpcSimpleElectronics.cc,v 1.7 2000/03/15 17:39:49 calderon Exp $
  *
  * Author: brian Nov 3, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleElectronics.cc,v $
+ * Revision 1.7  2000/03/15 17:39:49  calderon
+ * Remove beeps
+ *
  * Revision 1.6  2000/01/10 23:14:30  lasiuk
  * Include MACROS for compatiblity with SUN CC5
  *
@@ -103,7 +106,7 @@ StTpcSimpleElectronics::instance(const char* file)
 	mInstance = new StTpcSimpleElectronics(file);
     }
     else {
-	cerr << "StTpcSimpleElectronics::getInstance()\a\a\a"  << endl;
+	cerr << "StTpcSimpleElectronics::instance()"  << endl;
 	cerr << "\tWARNING:" << endl;
 	cerr << "\tSingleton class is already instantiated" << endl;
 	cerr << "\tArgument \"" << file << "\" ignored!!" << endl;

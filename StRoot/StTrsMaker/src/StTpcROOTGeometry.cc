@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcROOTGeometry.cc,v 1.4 2000/01/10 23:14:29 lasiuk Exp $
+ * $Id: StTpcROOTGeometry.cc,v 1.5 2000/03/15 17:39:48 calderon Exp $
  *
  * Author: brian May March 22, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcROOTGeometry.cc,v $
+ * Revision 1.5  2000/03/15 17:39:48  calderon
+ * Remove beeps
+ *
  * Revision 1.4  2000/01/10 23:14:29  lasiuk
  * Include MACROS for compatiblity with SUN CC5
  *
@@ -220,7 +223,7 @@ StTpcROOTGeometry::instance(geometryDataSet* dS)
 	mInstance = new StTpcROOTGeometry(dS);
     }
     else {
-	cerr << "StTpcROOTGeometry::getInstance()\a\a\a"  << endl;
+	cerr << "StTpcROOTGeometry::instance()"  << endl;
 	cerr << "\tWARNING:" << endl;
 	cerr << "\tSingleton class is already instantiated" << endl;
 	cerr << "\tDataSet Argument ignored!!" << endl;
