@@ -80,8 +80,8 @@ void TestIOMaker(Int_t nevents=3,
     const char* calibDB = "MySQL:StarDb";
     const char* paramsDB = "$STAR/StarDb";
     St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB,paramsDB);
-    calibMk->SetDateTime("year_2b");
-    //calibMk->SetDateTime("year_1h");
+    //calibMk->SetDateTime("year_2b");
+    calibMk->SetDateTime("year_1h");
     calibMk->SetDebug();
 
     //Read Tpc Database access
