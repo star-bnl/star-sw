@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.32 1999/05/21 02:02:19 liq Exp $
+// $Id: St_tpt_Maker.cxx,v 1.33 1999/05/21 14:41:18 sakrejda Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.33  1999/05/21 14:41:18  sakrejda
+// tte is called now only if the evaluation flag is on
+//
 // Revision 1.32  1999/05/21 02:02:19  liq
 // set protections on table pointers
 //
@@ -131,8 +134,6 @@ ClassImp(St_tpt_Maker)
   m_tteEvalOn=kFALSE;
   m_tptResOn=kFALSE;
   m_mkfinal=kFALSE;
-  cout<<"I'm initial, m_tteEvalOn="<<m_tteEvalOn<<endl;
-  cout<<"kFALSE="<<kFALSE<<endl;
 }
 //_____________________________________________________________________________
 St_tpt_Maker::~St_tpt_Maker(){}
@@ -260,6 +261,7 @@ Int_t St_tpt_Maker::Make(){
 
 
 //		TTE
+  if(m_tteEvalOn){
   St_DataSet *geant = GetInputDS("geant");
   if (geant) {
     St_DataSetIter geantI(geant);
@@ -283,10 +285,11 @@ Int_t St_tpt_Maker::Make(){
       else {if (Debug()) cout << " finish run_tte " << endl;}
     }
   }
-
+// Calculate  efficiency and the momentum resolution
+  VertexEffResolutionMakeHistograms();
+  }
   MakeHistograms(); // tracking histograms
-// if m_tteEvalOn=kTrue, then  calculate  the efficiency and momentum resolution
-  if(m_tteEvalOn){VertexEffResolutionMakeHistograms();}
+
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -605,7 +608,7 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.32 1999/05/21 02:02:19 liq Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.33 1999/05/21 14:41:18 sakrejda Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
