@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpManager.cxx,v 1.4 2000/05/01 16:59:49 aihong Exp $
+ * $Id: StPidAmpManager.cxx,v 1.5 2000/07/22 22:11:33 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpManager.cxx,v $
+ * Revision 1.5  2000/07/22 22:11:33  aihong
+ * move some include files to StEventUtilities & change include path
+ *
  * Revision 1.4  2000/05/01 16:59:49  aihong
  * clean up
  *
@@ -33,7 +36,7 @@
 #include "StPidAmpMaker/Infrastructure/StPidAmpChannelCollectionVector.hh"
 #include "StPidAmpMaker/StPidAmpTrkVector.h"
 #include "StPidAmpMaker/Infrastructure/StPidAmpChannelCollection.hh"
-#include "StPidAmpMaker/Include/StPidAmpConst.hh"
+#include "StEventUtilities/StPidAmpConst.hh"
 //--------------------------------
 StPidAmpManager::StPidAmpManager(){
     mChannelCollections=new StPidAmpChannelCollectionVector();

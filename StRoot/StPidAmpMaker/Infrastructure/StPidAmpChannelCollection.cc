@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannelCollection.cc,v 1.8 2000/07/12 15:38:34 aihong Exp $
+ * $Id: StPidAmpChannelCollection.cc,v 1.9 2000/07/22 22:11:32 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannelCollection.cc,v $
+ * Revision 1.9  2000/07/22 22:11:32  aihong
+ * move some include files to StEventUtilities & change include path
+ *
  * Revision 1.8  2000/07/12 15:38:34  aihong
  * update for real data
  *
@@ -54,7 +57,7 @@
 #include "StPidAmpMaker/Infrastructure/StPidAmpCut.hh"
 #include "StPidAmpMaker/Infrastructure/StPidAmpNet.hh"
 #include "StPidAmpMaker/Infrastructure/StPidAmpBGNet.hh"
-#include "StPidAmpMaker/Include/StPidAmpConst.hh"
+#include "StEventUtilities/StPidAmpConst.hh"
 //----------------------------
 StPidAmpChannelCollection::StPidAmpChannelCollection(){
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNet.cc,v 1.9 2000/07/12 15:38:35 aihong Exp $
+ * $Id: StPidAmpNet.cc,v 1.10 2000/07/22 22:11:32 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNet.cc,v $
+ * Revision 1.10  2000/07/22 22:11:32  aihong
+ * move some include files to StEventUtilities & change include path
+ *
  * Revision 1.9  2000/07/12 15:38:35  aihong
  * update for real data
  *
@@ -49,7 +52,7 @@
 
 #include "StPidAmpMaker/Infrastructure/StPidAmpNet.hh"
 //#include "StPidAmpMaker/Include/BetheBloch.hh"
-#include "StPidAmpMaker/Include/BetheBlochFunction.hh"
+#include "StEventUtilities/BetheBlochFunction.hh"
 
 #include "StPidAmpMaker/Infrastructure/StPidAmpChannelCollection.hh"
 
