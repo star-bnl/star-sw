@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.56 2000/02/08 15:12:48 love Exp $
+// $Id: St_tcl_Maker.cxx,v 1.57 2000/02/23 23:04:29 hardtke Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.57  2000/02/23 23:04:29  hardtke
+// get tpg tables from tpcDB
+//
 // Revision 1.56  2000/02/08 15:12:48  love
 // Make tcl_Maker abort empty events
 //
@@ -192,7 +195,8 @@
 #include "tables/St_tcl_tpcluster_Table.h"
 #include "tables/St_tcl_tp_seq_Table.h"
 #include "tables/St_tcc_morphology_Table.h"
-#include "tpc/St_tpg_main_Module.h"
+#include "tpc/St_tpg_pad_plane_Table.h"
+#include "tpc/St_tpg_detector_Table.h"
 #include "tpc/St_tcl_Module.h"
 #include "tpc/St_tph_Module.h"
 #include "tpc/St_xyz_newtab_Module.h"
@@ -240,23 +244,14 @@ Int_t St_tcl_Maker::Init() {
 
   // 		geometry parameters
 
-  St_DataSet *tpgpar = local("tpgpar");
-  assert(tpgpar);
 
   m_tpg_pad_plane = NULL;
-  m_tpg_pad_plane = (St_tpg_pad_plane *) tpgpar->Find("tpg_pad_plane");
+  m_tpg_pad_plane = (St_tpg_pad_plane *) GetDataSet("tpcDB/.const/tpg_pad_plane");
 
   m_tpg_detector  = NULL;
-  m_tpg_detector  = (St_tpg_detector  *) tpgpar->Find("tpg_detector");
+  m_tpg_detector  = (St_tpg_detector  *) GetDataSet("tpcDB/.const/tpg_detector");
   assert ((m_tpg_pad_plane && m_tpg_detector)) ;
 
-  m_tpg_pad = NULL;
-  m_tpg_pad = (St_tpg_pad*) tpgpar->Find("tpg_pad");
-  if (!m_tpg_pad) {
-    m_tpg_pad =new St_tpg_pad("tpg_pad",1); AddConst(m_tpg_pad);} 
-  
-  Int_t res = tpg_main(m_tpg_pad_plane,m_tpg_detector,m_tpg_pad); 
-  if(res!=kSTAFCV_OK) Warning("Init","tpg_main = %d",res);
 
   // 		TCL parameters
   St_DataSet *tclpars = local("tclpars");
@@ -552,7 +547,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.56 2000/02/08 15:12:48 love Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.57 2000/02/23 23:04:29 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.45 2000/02/23 03:41:39 sakrejda Exp $
+// $Id: St_tpt_Maker.cxx,v 1.46 2000/02/23 23:04:43 hardtke Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.46  2000/02/23 23:04:43  hardtke
+// get tpg tables from tpcDB
+//
 // Revision 1.45  2000/02/23 03:41:39  sakrejda
 // Histograms names in EVAL changed to TptTte* by Kathy.
 // Also comments added.
@@ -195,8 +198,8 @@ gMessMgr->SetLimit("TPTRSP-E1",10);
   St_DataSetIter       gime(tpcpars);
   
 // 		TPG parameters
-  m_tpg_pad_plane = (St_tpg_pad_plane *) gime("tpgpar/tpg_pad_plane");
-  if (!(m_tpg_pad_plane)) Error("Init","tpc/tpgpar is not initialized. \n");
+  m_tpg_pad_plane = (St_tpg_pad_plane *)  GetDataSet("tpcDB/.const/tpg_pad_plane");
+  if (!(m_tpg_pad_plane)) Error("Init","no tpg_pad_plane is not initialized. \n");
   assert(m_tpg_pad_plane);
   
 // 		TCL parameters
