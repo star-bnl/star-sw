@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.cxx,v 1.1 2003/10/15 18:20:46 porter Exp $
+ * $Id: StEStructPairCuts.cxx,v 1.2 2004/06/25 03:11:49 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -26,15 +26,6 @@ void StEStructPairCuts::init(){
   initCuts();
   initNames();
   if(isLoaded())loadCuts();
-  
-  mytpairbin[0]=0;
-  mytpairbin[1]=7;
-  mytpairbin[2]=13;
-  mytpairbin[3]=18;
-  mytpairbin[4]=22;
-  mytpairbin[5]=25;
-  mytpairbin[6]=27;
-
 
 }
 
@@ -222,7 +213,9 @@ void StEStructPairCuts::printCuts(ostream& ofs){
 //------------------------------------------------------------
 int StEStructPairCuts::cutPair(){
 
-  if(cutDeltaPhi() || cutDeltaEta() || cutDeltaMt()) return 1;
+  //  if(cutDeltaPhi() || cutDeltaEta() || cutDeltaMt()) return 1;
+
+  if(goodDeltaPhi() && goodDeltaEta() && goodDeltaMt()) return 0;
 
   if(mdeltaEta<0.03){
 
@@ -237,7 +230,9 @@ int StEStructPairCuts::cutPair(){
  
   }
 
-  if(cutExitSep() || cutQuality()) return 1;
+  if(cutQuality()) return 1;
+
+  //  if(cutExitSep() || cutQuality()) return 1;
   return 0;
 }
 
@@ -398,20 +393,12 @@ StEStructPairCuts::MidTpcZSeparation() const {
 }
 
 
-int StEStructPairCuts::getYtBin(){
-
-  int imin,imax,istore;
-  if( (imin=mTrack1->getYtBin()) > (imax=mTrack2->getYtBin()) ){
-    istore=imin;
-    imin=imax;
-    imax=istore;
-  }
-  return mytpairbin[imin]+imax-imin;
-}
-
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.cxx,v $
+ * Revision 1.2  2004/06/25 03:11:49  porter
+ * New cut-binning implementation and modified pair-cuts for chunhui to review
+ *
  * Revision 1.1  2003/10/15 18:20:46  porter
  * initial check in of Estruct Analysis maker codes.
  *

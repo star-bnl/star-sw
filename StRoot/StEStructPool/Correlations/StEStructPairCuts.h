@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.3 2004/06/16 20:00:43 chunhuih Exp $
+ * $Id: StEStructPairCuts.h,v 1.4 2004/06/25 03:11:50 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -15,7 +15,6 @@
 
 #include "StEStructPool/AnalysisMaker/StEStructCuts.h"
 
-class StEStructPairCuts;
 #include "StEStructPool/EventMaker/StEStructTrack.h"
 #include "Stiostream.h"
 
@@ -65,13 +64,14 @@ protected:
 
   int mretVal; //! just a dummy holder used a lot
 
+  int  mcutMode;  // cut space definitions
+
   void init();
   void initCuts();
   void initNames();
 
   StEStructTrack* mTrack1;
   StEStructTrack* mTrack2;
-  int mytpairbin[7];
 
 public:
 
@@ -105,9 +105,6 @@ const  StEStructTrack*      Track2() const;
        float                 SigmaEta()   const;
        float                 SigmaPhi()   const;
        float                 SigmaPt()    const;
-       int                   getYtBin();
-       int                   getYtBin1();
-       int                   getYtBin2();
 
 
 //-----For HBT Study
@@ -135,6 +132,12 @@ const  StEStructTrack*      Track2() const;
 	 // non-duplicate codes simply because even checking a 
 	 // bool for each cut is expensive when done N1*N2*Ncut times
 
+        /* because of the expense 1st check wether we need to do further */
+
+	 int  goodDeltaPhi();
+	 int  goodDeltaEta();
+         int  goodDeltaMt();
+
 	 int  cutDeltaPhi();
 	 int  cutDeltaEta();
          int  cutDeltaMt();
@@ -156,6 +159,11 @@ const  StEStructTrack*      Track2() const;
          int  cutMidTpcSepLSH();
          int  cutExitSepH();
          int  cutQualityH();
+
+	 // for new GodPair study
+
+	 int correlationDepth();
+
 
 
   ClassDef(StEStructPairCuts,1)
@@ -232,6 +240,25 @@ inline float StEStructPairCuts::qInv() const {
   return -1.0*(mTrack1->FourMomentum()-mTrack2->FourMomentum()).m();
 }
 
+inline int StEStructPairCuts::goodDeltaPhi(){
+  if ( mdeltaPhiCut &&
+       ( (mdeltaPhi=fabs(DeltaPhi())) < mdphi[1])) return 0;
+  return 1;
+}
+
+inline int StEStructPairCuts::goodDeltaEta(){
+  if(mdeltaEtaCut &&
+     ( (mdeltaEta=fabs(DeltaEta())) <mdeta[1])) return 0;
+  return 1;
+}
+
+inline int StEStructPairCuts::goodDeltaMt(){
+  if(mdeltaMtCut &&
+     ( (mdeltaMt=fabs(DeltaMt())) <mdmt[1] )) return 0;
+  return 1;
+}
+
+
 inline int StEStructPairCuts::cutDeltaPhi(){
   if ( mdeltaPhiCut &&
        ( (mdeltaPhi=DeltaPhi()) <mdphi[0] || mdeltaPhi>mdphi[1])  
@@ -255,11 +282,11 @@ inline int StEStructPairCuts::cutDeltaMt(){
 }
 
 inline int StEStructPairCuts::cutqInvORNominalEntranceSep(){
+  /* small qInv and entrance cut */
+
   if( mqInvCut && mEntSepCut &&
-      (  (mqInvarient=qInv()) <mqInv[0] 
-	 || mqInvarient>mqInv[1] ||
-	 ((mEntranceSeparation=NominalTpcEntranceSeparation())<mEntSep[0])|| mEntranceSeparation>mEntSep[1]
-	 )
+      (  (mqInvarient=qInv()) <mqInv[0]  &&
+	 ((mEntranceSeparation=NominalTpcEntranceSeparation())<mEntSep[0]))
       ) return ++(mqInvCounter[mType]);
   return 0;
 }
@@ -288,6 +315,7 @@ inline int StEStructPairCuts::cutMidTpcSepUS(){
     double x1=mMidTpcSeparationUS=MidTpcSeparation();
     double x2=NominalTpcEntranceSeparation();
     double x3=NominalTpcExitSeparation();
+    if(((x1+x2+x3)/3.)>mMidTpcSepUS[1])return 0; // ok, average is large
     if( x1<x2 && x1<x3 && x1<mMidTpcSepUS[0]) return ++(msplitUSCounter[mType]);
   }
   return 0;
@@ -298,18 +326,18 @@ inline int StEStructPairCuts::cutMidTpcSepLS(){
     double x1=mMidTpcSeparationLS=MidTpcSeparation();
     double x2=NominalTpcEntranceSeparation();
     double x3=NominalTpcExitSeparation();
-    if( x1<x2 && x1<x3 && x1<mMidTpcSepLS[0]) return ++(msplitLSCounter[mType]);
-  }
+    if(((x1+x2+x3)/3.)>mMidTpcSepLS[1])return 0; //ok, average is large
+    if( x1<x2 && x1<x3 && x1<mMidTpcSepLS[0]) return ++(msplitLSCounter[mType]);  }
   return 0;
 }
 
 
 inline int StEStructPairCuts::cutExitSep(){
-  if( mExitSepCut && 
-      ( (mExitSeparation=NominalTpcExitSeparation()) <mExitSep[0]
-	|| mExitSeparation>mExitSep[1] )
-      ) return ++(mExitSepCounter[mType]);
-  return 0;
+   if( mExitSepCut && 
+       ( (mExitSeparation=NominalTpcExitSeparation()) <mExitSep[0])
+       // || mExitSeparation>mExitSep[1] )
+       ) return ++(mExitSepCounter[mType]);
+   return 0;
 }
 
 inline int StEStructPairCuts::cutQuality(){
@@ -389,12 +417,60 @@ inline int StEStructPairCuts::cutQualityH(){
 }
 
 
+inline int StEStructPairCuts::correlationDepth(){
+
+  unsigned int am1=mTrack1->TopologyMapData(0)&65535;
+  unsigned int am2=mTrack2->TopologyMapData(0)&65535;
+  if(am1==0 || am2==0) return 0;
+  if(am1==am2) return 1;
+
+  unsigned int msk=(65535<<16);
+
+  unsigned int bm1=mTrack1->TopologyMapData(0)&msk;
+  unsigned int bm2=mTrack2->TopologyMapData(0)&msk;
+  bm1=(16>>bm1);
+  bm2=(16>>bm2);
+
+  if(am1==bm2 || bm1==am2) return 2;
+  if(bm1==bm2){
+    if(bm1==0) return 0;
+    return 3;
+  }
+
+  unsigned int cm1=mTrack1->TopologyMapData(1)&65535;
+  unsigned int cm2=mTrack2->TopologyMapData(1)&65535;
+  if(cm1==cm2 && cm1==0) return 0;
+ 
+  if(am1==cm2 || am2==cm1) return 4;
+  if( ((bm1==cm2) && bm1!=0) || ((bm2==cm1)&&(bm2!=0)) ) return 4;
+  if( cm1==cm2) return 5;
+
+  unsigned int dm1=mTrack1->TopologyMapData(1)&msk;
+  unsigned int dm2=mTrack2->TopologyMapData(1)&msk;
+  dm1=(16>>dm1);
+  dm2=(16>>dm2);
+  if(dm1==dm2 && dm1==0) return 0;
+
+  if(am1==dm2 || am2==dm1) return 6;
+  if( ((bm1==dm2) && bm1!=0) || ((bm2==dm1)&&(bm2!=0)) ) return 6;
+  if( ((cm1==dm2) && cm1!=0) || ((cm2==dm1)&&(cm2!=0)) ) return 6;
+  if( dm1==dm2 && dm1!=0) return 7;
+
+  return 0;
+}
+
+
+
 #endif
 
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.4  2004/06/25 03:11:50  porter
+ * New cut-binning implementation and modified pair-cuts for chunhui to review
+ *
  * Revision 1.3  2004/06/16 20:00:43  chunhuih
+ *
  * changed one more post-increment operator to pre-increment operator.
  *
  * Revision 1.2  2004/03/19 19:07:43  chunhuih
