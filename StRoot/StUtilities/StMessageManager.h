@@ -1,7 +1,7 @@
-// $Id: StMessageManager.h,v 1.6 1999/06/29 17:37:32 genevb Exp $
+// $Id: StMessageManager.h,v 1.7 1999/06/29 23:32:42 genevb Exp $
 // $Log: StMessageManager.h,v $
-// Revision 1.6  1999/06/29 17:37:32  genevb
-// Lots of fixes...
+// Revision 1.7  1999/06/29 23:32:42  genevb
+// Handle multi-line calls to fortran routines better
 //
 // Revision 1.5  1999/06/28 15:42:13  genevb
 // Added Debug message class
@@ -49,16 +49,23 @@
 #define StDebug_ F77_NAME(stdebug,STDEBUG)
 #define StMessAddType_ F77_NAME(stmessaddtype,StMESSADDTYPE)
 extern "C" {
-R__EXTERN  void type_of_call Message_(char* mess="", int lines=1, int id=-1);
-R__EXTERN  void type_of_call Msg_Enable_(char* mess="");
-R__EXTERN   int type_of_call Msg_Enabled_(char* mess="", int id=-1);
-R__EXTERN  void type_of_call Msg_Disable_(char* mess="");
-R__EXTERN  void type_of_call StMessage_(char* mess="", char* type="I", char* opt="O");
-R__EXTERN  void type_of_call StInfo_(char* mess="", char* opt="O");
-R__EXTERN  void type_of_call StWarning_(char* mess="", char* opt="O");
-R__EXTERN  void type_of_call StError_(char* mess="", char* opt="O");
-R__EXTERN  void type_of_call StDebug_(char* mess="", char* opt="O");
-R__EXTERN  void type_of_call StMessAddType_(const char* type, const char* text);
+R__EXTERN  void type_of_call Message_(char* mess="", int *lines=0, int *id=0,
+                                                                 int meslen=0);
+R__EXTERN  void type_of_call Msg_Enable_(char* mess="", int len=0);
+R__EXTERN   int type_of_call Msg_Enabled_(char* mess="", int *id=0, int len=0);
+R__EXTERN  void type_of_call Msg_Disable_(char* mess="", int len=0);
+R__EXTERN  void type_of_call StMessage_(char* mess="", char* type="I", char* opt="O",
+                                    int len1=0, int len2=1, int len3=1);
+R__EXTERN  void type_of_call StInfo_(char* mess="", char* opt="O",
+                                    int len1=0, int len2=1);
+R__EXTERN  void type_of_call StWarning_(char* mess="", char* opt="O",
+                                    int len1=0, int len2=1);
+R__EXTERN  void type_of_call StError_(char* mess="", char* opt="O",
+                                    int len1=0, int len2=1);
+R__EXTERN  void type_of_call StDebug_(char* mess="", char* opt="O",
+                                    int len1=0, int len2=1);
+R__EXTERN  void type_of_call StMessAddType_(const char* type, const char* text,
+                                    int len1=0, int len2=0);
 }
 #endif
 
