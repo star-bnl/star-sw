@@ -124,12 +124,6 @@ void dsLogError(DS_ERROR_CODE_T code, char *msg, char *file, size_t line)
 {
 	DS_ERROR_INFO_T *pInfo;
 
-/** print error message VP**/
-        int log = 1;
-        if (code == DS_E_ENTRY_NOT_FOUND) log = 0;
-	if (log) printf("dsLogError: %s file=%s:%d\n",msg,file,line);
-
-
 	pInfo = dsErrorInfo();
 	pInfo->code = code;
 	pInfo->msg = (msg == NULL) ? "<nullMsg>" : msg;

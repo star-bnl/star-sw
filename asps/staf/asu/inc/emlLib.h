@@ -77,7 +77,7 @@ CEXTERN(char eml_beep_on);
 CEXTERN(char eml_pretty_on);
 CEXTERN(char eml_demand_ack_on);
 
-CEXTERN(char eml_stack[EML_STACKSIZE]);
+CEXTERN(char eml_stack[EML_STACKSIZE+100]);
 CEXTERN(char eml_buffer[EML_BUFFERSIZE]);
 CEXTERN(char eml_context[EML_CONTEXTSIZE]);
 
@@ -92,15 +92,17 @@ extern CC_P int eml_stop();
 extern CC_P void emlPrettifyErrorMessage(char *errorString,int maxlen);
 extern CC_P int emlMessage(char *fmt, ...);
 extern CC_P char * emlContext(char *fmt, ...);
+extern CC_P void ku_sibr();
+extern CC_P void dsPerror(const char *msg);
 
 /*-------------------------------------------- COMPATABILITY MACROS --*/
-#ifdef KUIP
+#ifndef NOKUIP
 #	define SETCV(CODE) set_staf_status(CODE)
 #else
 #	define SETCV(CODE)
 #endif
 
-#ifdef DSL
+#ifndef NODSL
 #	define DSPERROR(CODE) dsPerror(#CODE)
 #else
 #	define DSPERROR(CODE)
@@ -108,44 +110,50 @@ extern CC_P char * emlContext(char *fmt, ...);
 
 /*-------------------------------------------- INTERFACE MACROS     --*/
 
-#define EML_INITSTACK() {memset(eml_stack,0,EML_STACKSIZE);}
+#define EML_INITSTACK() {memset(eml_stack,0,EML_STACKSIZE);eml_stack[EML_STACKSIZE]=-1;}
 #define EML_INITCONTEXT() {memset(eml_context,0,EML_CONTEXTSIZE);}
 #define EML_INITBUFFER() {memset(eml_buffer,0,EML_BUFFERSIZE);}
 #define EML_INIT() {EML_INITSTACK(); EML_INITBUFFER(); \
 	EML_INITCONTEXT();}
 
-#define EML_CLEARSTACK() {eml_stack[0] = '\0';}
+#define EML_CLEARSTACK() {eml_stack[0] = '\0';eml_stack[EML_STACKSIZE]=-1;}
 #define EML_CLEARCONTEXT() {eml_context[0] = '\0';}
 #define EML_CLEARBUFFER() {eml_buffer[0] = '\0';}
 #define EML_CLEAR() {EML_CLEARSTACK(); EML_CLEARBUFFER(); \
 	EML_CLEARCONTEXT();}
-
+#define EML_OVERFULL() {\
+        if (eml_stack[EML_STACKSIZE]!=-1) {\
+          printf("***EML_STACK Overfull***\n%s\n",eml_stack);\
+          EML_CLEAR();}}
 #define EML_PRINTCONTEXT(STREAM) \
 	{ if(eml_context[0])fprintf(STREAM,"%s\n",eml_context); \
-	EML_CLEARCONTEXT(); fflush(STREAM); }
+          EML_OVERFULL(); EML_CLEARCONTEXT(); fflush(STREAM); }
 
 #define EML_PUSHCONTEXT() \
 	{if(eml_context[0])strcat(eml_stack,eml_context); \
-	EML_CLEARCONTEXT();}
+	EML_OVERFULL(); EML_CLEARCONTEXT();}
 #define EML_PUSHERROR(CODE) \
 	{sprintf(eml_buffer,"%s-%s.%d\n",#CODE,__FILE__,__LINE__); \
 	strcat(eml_stack,eml_buffer); \
-	SETCV(STAFCV_BAD); \
-        { int One=1; set_quest_(&One);}\
+	EML_OVERFULL(); SETCV(STAFCV_BAD); \
 	}
 #define EML_PUSHSUCCESS(CODE) \
 	{ SETCV(STAFCV_OK); }
 #define EML_POPSTACK() { \
-        char eml_error_ack[100]; \
+        char eml_error_ack[4]; \
 	fflush(0); \
         emlPrettifyErrorMessage(eml_stack,EML_STACKSIZE); \
 	fprintf(stderr,"-------------------------------"); \
 	fprintf(stderr,"------------------------------------------------\n"); \
 	fprintf(stderr,"%s\n",eml_stack); \
-	if(eml_demand_ack_on) { fprintf(stderr,"Press return to continue: "); \
-				fgets(eml_error_ack,100,stdin); } \
 	DSPERROR((dsl):); \
-	fflush(stderr); EML_CLEARSTACK();}
+	fflush(stderr); EML_CLEARSTACK();\
+	if(eml_demand_ack_on) {\
+	  fprintf(stderr,"Press return to continue or q to quit: "); \
+	  fgets(eml_error_ack,4,stdin); \
+	  if (eml_error_ack[0]=='q') ku_sibr();}\
+	  else {;}\
+	}
 
 /*- EML_SUCCESS - clear error stack and return TRUE                  -*/
 #define EML_SUCCESS(CODE) {EML_PUSHSUCCESS(CODE); EML_CLEAR(); \

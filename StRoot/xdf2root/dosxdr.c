@@ -516,7 +516,8 @@ static void xdrstdio_destroy(XDR *xdrs)
 static bool_t xdrstdio_getbytes(XDR *xdrs, char *cp, unsigned len)
 {
 	if ((len != 0) &&
-		(fread(cp, len, 1, (FILE *)xdrs->x_private) != 1)) {
+/**VP		(fread(cp, len, 1, (FILE *)xdrs->x_private) != 1)) {**/
+		(fread(cp, len, 1, (FILE *)xdrs->x_private) == len)) {
 		return FALSE;
 	}
 	return TRUE;
