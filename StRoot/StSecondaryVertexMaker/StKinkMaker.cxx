@@ -157,7 +157,7 @@ Int_t StKinkMaker::Make(){//called for each event
          StThreeVectorD p22 = trk->geometry()->helix().momentum(mBfield);
          if(p22.x() != 0) mBfield *= p11.x()/(p22.x()+1e-5);
          else mBfield *= p11.y()/(p22.y()+1.e-5);
-         if (fabs(mBfield) < 1.e-5) return kStWarn;
+         if (fabs(mBfield) < 1.e-20) return kStWarn;
 	}
 	mGlobalTrks++;
       //### cut: fiducial volume
