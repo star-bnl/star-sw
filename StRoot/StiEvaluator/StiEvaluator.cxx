@@ -138,19 +138,20 @@ void StiEvaluator::fillHitEntry(const StiKalmanTrackNode* node)
     mStiHitEntry.reset();
     
     //Fill node-wise quantities:
-    mStiHitEntry.trackAlpha = node->fAlpha;
-    mStiHitEntry.trackLocalX = node->fX;
-    mStiHitEntry.trackLocalY = node->fP0;
-    mStiHitEntry.trackLocalZ = node->fP1;
-    mStiHitEntry.trackLocalEta = node->fP2;
-    mStiHitEntry.trackLocalCurvature = node->fP3;
-    mStiHitEntry.trackLocalTanLambda = node->fP4;
-    mStiHitEntry.trackLocalChi2 = node->fChi2;    
+    mStiHitEntry.nodeAlpha = node->fAlpha;
+    mStiHitEntry.nodeLocalX = node->fX;
+    mStiHitEntry.nodeLocalY = node->fP0;
+    mStiHitEntry.nodeLocalZ = node->fP1;
+    mStiHitEntry.nodeLocalEta = node->fP2;
+    mStiHitEntry.nodeLocalCurvature = node->fP3;
+    mStiHitEntry.nodeLocalTanLambda = node->fP4;
+    mStiHitEntry.nodeLocalChi2 = node->fChi2;    
     
     //Fill hit-wise quantities, if there's a hit for this node:
     const StiHit* hit = node->getHit();
     if (hit) {
 	fillHitEntry(hit);
+	mStiHitEntry.nodeHasHit = 1;
     }
 
     //Add to the track entry
@@ -165,6 +166,15 @@ void StiEvaluator::fillHitEntry(const StiHit* hit)
     mStiHitEntry.hitLocalX = hit->x();
     mStiHitEntry.hitLocalY = hit->y();
     mStiHitEntry.hitLocalZ = hit->z();
+
+    mStiHitEntry.hitLocalSxx = hit->sxx();
+    mStiHitEntry.hitLocalSyy = hit->syy();
+    mStiHitEntry.hitLocalSzz = hit->szz();
+    
+    mStiHitEntry.hitLocalSxy = hit->sxy();
+    mStiHitEntry.hitLocalSxz = hit->sxz();
+    mStiHitEntry.hitLocalSyz = hit->syz();
+    
     
     const StThreeVectorF& pos = hit->globalPosition();
     mStiHitEntry.hitGlobalX = pos.x();
@@ -225,8 +235,9 @@ void StiHitEntry::reset()
 {
     hitPosition = hitRefAngle = hitLocalX = hitLocalY = hitLocalZ = 0.;
     hitGlobalX = hitGlobalY = hitGlobalZ;
-    trackAlpha = trackLocalX = trackLocalY = trackLocalZ = trackLocalEta = trackLocalCurvature
-	= trackLocalTanLambda = trackXCenter = trackYCenter = trackLocalChi2 = 0.;
+    nodeAlpha = nodeLocalX = nodeLocalY = nodeLocalZ = nodeLocalEta = nodeLocalCurvature
+	= nodeLocalTanLambda = nodeXCenter = nodeYCenter = nodeLocalChi2 = 0.;
+   nodeHasHit = 0;
 }
 
 ClassImp(TrackEntry)

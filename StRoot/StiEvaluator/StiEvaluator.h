@@ -35,6 +35,9 @@ public:
     void reset();
     
     //Might as well make these all public, for now
+
+    //We save each node, but not all nodes have hits, so check this flag
+    unsigned int nodeHasHit; // 0=no, 1=yes
     
     //These quantities come from the hit itself, *not* track location
     double hitPosition; //StiHit::position()
@@ -42,23 +45,30 @@ public:
     double hitLocalX;
     double hitLocalY;
     double hitLocalZ;
+
+    double hitLocalSxx;
+    double hitLocalSyy;
+    double hitLocalSzz;
+    double hitLocalSxy;
+    double hitLocalSxz;
+    double hitLocalSyz;
     
     //Get these from StiHit->globalPosition().x, .y(), .z()
     double hitGlobalX;
     double hitGlobalY;
     double hitGlobalZ;
-    
+
     //These quantities come from the track-node location
-    double trackAlpha; //rotation of local frame w.r.t. global 
-    double trackLocalX;
-    double trackLocalY;
-    double trackLocalZ;
-    double trackLocalEta;
-    double trackLocalCurvature;
-    double trackLocalTanLambda;
-    double trackLocalChi2;
-    double trackXCenter; //global (x,y) of center of circle
-    double trackYCenter;
+    double nodeAlpha; //rotation of local frame w.r.t. global 
+    double nodeLocalX;
+    double nodeLocalY;
+    double nodeLocalZ;
+    double nodeLocalEta;
+    double nodeLocalCurvature;
+    double nodeLocalTanLambda;
+    double nodeLocalChi2;
+    double nodeXCenter; //global (x,y) of center of circle
+    double nodeYCenter;
     
 private:
     ClassDef(StiHitEntry, 1)
