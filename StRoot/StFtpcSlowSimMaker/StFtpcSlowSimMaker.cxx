@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.22 2003/09/29 21:37:28 oldi Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.23 2003/10/07 14:04:07 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.23  2003/10/07 14:04:07  jcs
+// remove previous magnetic field fix
+//
 // Revision 1.22  2003/09/29 21:37:28  oldi
 // Small change to make it compatible with the new StFtpcTrackingParams class.
 //
@@ -103,7 +106,6 @@
 #include "St_db_Maker/St_db_Maker.h"
 
 #include "StMessMgr.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "TH1.h"
 #include "TH2.h"
@@ -232,8 +234,7 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
   // instance tracking parameters for rotations
   StFtpcTrackingParams::Instance(kTRUE, 
 				 (St_ftpcCoordTrans *)dblocal_calibrations("ftpcCoordTrans"),
-				 GetDataBase("RunLog"),
-				 (StBFChain*) GetChain());
+				 GetDataBase("RunLog"));
   // get ftpc parameters
   St_DataSet *ftpcParsDb = GetInputDB("ftpc");
   assert(ftpcParsDb);
