@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 1.4 1999/04/28 22:27:31 fisyak Exp $
+ * $Id: StEvent.cxx,v 1.5 1999/04/30 13:16:27 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 1.4  1999/04/28 22:27:31  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:27  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.5  1999/04/30 13:16:27  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:31  fisyak
  * New version with pointer instead referencies
@@ -58,18 +61,21 @@
  * Revision 2.11  2000/05/15 18:35:38  ullrich
 #include <iostream.h>
  * All data member related to collections and containers are now
+#include "StGlobalTrack.h"
 #include "StThreeVectorF.hh"
 #include "TString.h"
 #include "TBrowser.h"
 using namespace std;
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.4 1999/04/28 22:27:31 fisyak Exp $";
-
-StEvent::StEvent()
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.4 1999/04/28 22:27:31 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.5 1999/04/30 13:16:27 fisyak Exp $";
+ extern "C" {int isprint(int);}
+StEvent::StEvent():St_DataSet("Event")
+static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.5 1999/04/30 13:16:27 fisyak Exp $";
  * Changes due to the addition of the EMC to StEvent
 StEvent::StEvent():St_DataSet("StEvent")
  * add rich pixel info/containers
-StEvent::StEvent(StRun* run, dst_event_header_st& hdr, dst_event_summary_st& sum) {
+    init();
+St_DataSet("Event")
+static const char rcsid[] = "$Id: StEvent.cxx,v 1.5 1999/04/30 13:16:27 fisyak Exp $";
 StEvent::StEvent(StRun* run, dst_event_header_st& hdr, dst_event_summary_st& sum):
 St_DataSet("StEvent")
 #include "StEmcCollection.h"
@@ -137,11 +143,11 @@ StEvent::operator=(const StEvent&) { return *this;} // private
     for (Int_t i=0; i<3; i++) {
     // Create the collections
     mSummary = new StDstEventSummary();
-    mTracks = new StGlobalTrackCollection();
-    mVertices = new StVertexCollection();
-    mTpcHits = new StTpcHitCollection();
-    mSvtHits = new StSvtHitCollection();
-    mFtpcHits = new StFtpcHitCollection();
+    mTracks = new StGlobalTrackCollection("Tracks");
+    mVertices = new StVertexCollection("Vertices");
+    mTpcHits = new StTpcHitCollection("TpcHits");
+    mSvtHits = new StSvtHitCollection("SvtHits");
+    mFtpcHits = new StFtpcHitCollection("FtpcHits");
     mTriggerDetectors = new StTriggerDetectorCollection();
     mL0Trigger = new StL0Trigger();
 
@@ -150,11 +156,34 @@ StEvent::operator=(const StEvent&) { return *this;} // private
       mL0Trigger = new StL0Trigger();
     //
     // Attention it would be more (CPU) efficient if we
-    mEmcTowerHits = new StEmcTowerHitCollection();        
-    mEmcPreShowerHits = new StEmcPreShowerHitCollection();
-    mSmdPhiHits = new StSmdPhiHitCollection();
-    mSmdEtaHits = new StSmdEtaHitCollection();
+    mEmcTowerHits = new StEmcTowerHitCollection("EmcTowerHits");        
+    mEmcPreShowerHits = new StEmcPreShowerHitCollection("EmcPreShowerHits");
+    mSmdPhiHits = new StSmdPhiHitCollection("SmdPhiHits");
+    mSmdEtaHits = new StSmdEtaHitCollection("SmdEtaHits");
+      mSmdPhiHits = new StSmdPhiHitCollection("SmdPhiHits");
+      mSmdEtaHits = new StSmdEtaHitCollection("SmdEtaHits");
+    }
+StEvent::initToZero() { /* noop */ }
+//______________________________________________________________________________
+void StEvent::Browse(TBrowser *b)
+     if (mRun)              b->Add(mRun);                
+  // Browse this dataset (called by TBrowser).
+   if (b) {
+     //     if (mRun)              b->Add(mRun);                
+     if (mPrimaryVertex)    b->Add(mPrimaryVertex);
+     if (mSummary)          b->Add(mSummary);
+     if (mTracks)           b->Add(mTracks);
+     if (mVertices)         b->Add(mVertices);
+     if (mTpcHits)          b->Add(mTpcHits);
+     if (mSvtHits)          b->Add(mSvtHits);
+     if (mFtpcHits)         b->Add(mFtpcHits);
+     if (mTriggerDetectors) b->Add(mTriggerDetectors);
+     if (mL0Trigger)        b->Add(mL0Trigger);
+     if (mEmcTowerHits)     b->Add(mEmcTowerHits);
+     if (mEmcPreShowerHits) b->Add(mEmcPreShowerHits);
+     if (mSmdPhiHits)       b->Add(mSmdPhiHits);
 {
+  cout << endl;
   cout << *this << endl;
 }
 //______________________________________________________________________________

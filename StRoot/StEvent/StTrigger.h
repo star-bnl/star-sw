@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrigger.h,v 1.4 1999/04/28 22:27:38 fisyak Exp $
+ * $Id: StTrigger.h,v 1.5 1999/04/30 13:16:30 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrigger.h,v $
- * Revision 1.4  1999/04/28 22:27:38  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:30  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.5  1999/04/30 13:16:30  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:38  fisyak
  * New version with pointer instead referencies
@@ -23,8 +26,8 @@
  * version with constructors for table-based loading
  *
  **************************************************************************/
-#include "TObject.h"
-class StTrigger : public TObject {
+#ifndef StTrigger_hh
+#define StTrigger_hh
 
 #include "StObject.h"
 class StTrigger : public StObject {

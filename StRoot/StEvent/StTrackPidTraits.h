@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.h,v 1.4 1999/04/28 22:27:38 fisyak Exp $
+ * $Id: StTrackPidTraits.h,v 1.5 1999/04/30 13:16:30 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.h,v $
- * Revision 1.4  1999/04/28 22:27:38  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:30  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.5  1999/04/30 13:16:30  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:38  fisyak
  * New version with pointer instead referencies
@@ -26,10 +29,10 @@
  * Adapted new enums for dedx and track reco methods.
  *
  *
-#include "TObject.h"
-class StTrackPidTraits : public TObject {
+class StGlobalTrack;
+class StDedxPid;
  * Completely Revised for New Version
-    StTrackPidTraits(const StGlobalTrack*);
+    StTrackPidTraits(StGlobalTrack*);
     ~StTrackPidTraits();
   StTrackPidTraits() : mTpcDedxPid() {/* noop */};
     const StDedxPid* tpcDedxPid() const;

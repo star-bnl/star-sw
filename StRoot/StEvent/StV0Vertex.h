@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.h,v 1.5 1999/04/28 22:27:39 fisyak Exp $
+ * $Id: StV0Vertex.h,v 1.6 1999/04/30 13:16:30 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.h,v $
- * Revision 1.5  1999/04/28 22:27:39  fisyak
- * New version with pointer instead referencies
+ * Revision 1.6  1999/04/30 13:16:30  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.6  1999/04/30 13:16:30  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.5  1999/04/28 22:27:39  fisyak
  * New version with pointer instead referencies
@@ -44,7 +47,7 @@
  * Revision 1.2  1999/01/15 22:54:16  wenaus
  * version with constructors for table-based loading
  *
-#include "TObject.h"
+ * Revision 2.0  1999/10/12 18:43:26  ullrich
  * Completely Revised for New Version
  *
 #include "StObject.h"

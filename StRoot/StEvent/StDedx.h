@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedx.h,v 1.4 1999/04/28 22:27:29 fisyak Exp $
+ * $Id: StDedx.h,v 1.5 1999/04/30 13:16:26 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StDedx.h,v $
- * Revision 1.4  1999/04/28 22:27:29  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:26  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.5  1999/04/30 13:16:26  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:29  fisyak
  * New version with pointer instead referencies
@@ -27,10 +30,10 @@
  * version with constructors for table-based loading
  *
  **************************************************************************/
-#include "TObject.h"
+#ifndef StDedx_hh
 #include "tables/dst_dedx.h"
 
-class StDedx : public TObject {
+#include "StObject.h"
 #include "dst_dedx.h"
 
 class StDedx : public StObject {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdSummary.h,v 1.4 1999/04/28 22:27:40 fisyak Exp $
+ * $Id: StVpdSummary.h,v 1.5 1999/04/30 13:16:31 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StVpdSummary.h,v $
- * Revision 1.4  1999/04/28 22:27:40  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:31  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.5  1999/04/30 13:16:31  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:40  fisyak
  * New version with pointer instead referencies
@@ -22,10 +25,10 @@
  * Revision 1.2  1999/01/15 22:54:26  wenaus
  * version with constructors for table-based loading
  *
-#include "TObject.h"
+ **************************************************************************/
 #ifndef StVpdSummary_hh
 #define StVpdSummary_hh
-class StVpdSummary : public TObject {
+#include "StObject.h"
 #include "StEnumerations.h"
 
 class StVpdSummary : public StObject {

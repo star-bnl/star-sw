@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.h,v 1.4 1999/04/28 22:27:33 fisyak Exp $
+ * $Id: StHit.h,v 1.5 1999/04/30 13:16:28 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
- * Revision 1.4  1999/04/28 22:27:33  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:28  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.5  1999/04/30 13:16:28  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:33  fisyak
  * New version with pointer instead referencies
@@ -32,11 +35,11 @@
  * version with constructors for table-based loading
  *
  * Revision 2.2  2000/06/01 21:38:56  ullrich
-#include "TObject.h"
+ * Added member mFlag and access member flag() and setFlag().
  *
  * Revision 2.1  1999/10/28 22:25:50  ullrich
 #include "StObject.h"
-class StHit : public TObject {
+#include <iostream.h>
 #include "StThreeVectorF.hh"
     StHit();
     StHit(const StThreeVectorF&,

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunSummary.h,v 1.4 1999/04/28 22:27:35 fisyak Exp $
+ * $Id: StRunSummary.h,v 1.5 1999/04/30 13:16:29 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StRunSummary.h,v $
- * Revision 1.4  1999/04/28 22:27:35  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:29  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.5  1999/04/30 13:16:29  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:35  fisyak
  * New version with pointer instead referencies
@@ -32,7 +35,7 @@
  * version with constructors for table-based loading
  *
  **************************************************************************/
-#include "TObject.h"
+#ifndef StRunSummary_hh
 #define StRunSummary_hh
 
 #include "St_DataSet.h"
@@ -43,7 +46,7 @@
 #include "StTHDefs.h"
 #include "dst_run_summary.h"
 #if !defined(ST_NO_NAMESPACES)
-class StRunSummary : public TObject {
+using namespace std;
 #endif
 
 class StRunSummary : public St_DataSet {
