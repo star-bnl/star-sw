@@ -1,5 +1,9 @@
-// $Id: StFtpcTracker.cc,v 1.32 2004/02/27 21:24:09 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.33 2004/05/07 14:58:22 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.33  2004/05/07 14:58:22  oldi
+// Deletion of track array added again, since it doesn't go into a DataSet anymore.
+// Minor clean-ups.
+//
 // Revision 1.32  2004/02/27 21:24:09  oldi
 // Unnecessary check for number of tracks removed.
 //
@@ -237,7 +241,12 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TObjArray *hit, TObjArray *tr
 /// Destructor.
 StFtpcTracker::~StFtpcTracker()
 {
-  // mTrack and all tracks will be deleted by StMaker::Clear() since it is sitting in a TDataSet
+  // delete everything
+
+  if (mTrack) {	 
+    mTrack->Delete();	 
+    delete mTrack;	 
+  }
 
   if (mHitsCreated) {
     mHit->Delete();
@@ -1033,7 +1042,7 @@ Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
 
     if(mBench) {
       mBench->Stop("fit");
-      gMessMgr->Message("", "I", "OS") << "Fit and dE/dx calc.finished   (" << mBench->GetCpuTime("fit") << " s)." << endm;
+      gMessMgr->Message("", "I", "OS") << "Fit and dE/dx calc. finished  (" << mBench->GetCpuTime("fit") << " s)." << endm;
       mTime += mBench->GetCpuTime("fit");
     }
 
