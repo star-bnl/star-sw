@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcElectronics.hh,v 1.1 1998/11/10 17:12:06 fisyak Exp $
+ * $Id: StTpcElectronics.hh,v 1.2 1999/01/18 10:21:55 lasiuk Exp $
  *
  * Author: brian Nov 3, 1998
  *
@@ -11,8 +11,8 @@
  **********************************************************************
  *
  * $Log: StTpcElectronics.hh,v $
- * Revision 1.1  1998/11/10 17:12:06  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/18 10:21:55  lasiuk
+ * add tau
  *
  * Revision 1.3  1999/02/24 19:32:11  lasiuk
  * tzero offset parameter added
@@ -41,6 +41,7 @@ public:
     //StTpcElectronics(const StTpcElectronics&);
     //StTpcElectronics& operator=(const StTpcElectronics&);
 
+    // Analog Electronics
     virtual double    nominalGain()                    const = 0;
     virtual double    channelGain(int,int,int)         const = 0;
     virtual double    shapingTime()                    const = 0;
