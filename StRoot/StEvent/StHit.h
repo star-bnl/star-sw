@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.15 2004/08/18 19:00:19 ullrich Exp $
+ * $Id: StHit.h,v 2.16 2004/08/19 21:58:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.16  2004/08/19 21:58:53  ullrich
+ * Fixed omitted implementation of nextHit().
+ *
  * Revision 2.15  2004/08/18 19:00:19  ullrich
  * Added access function hardwarePosition().
  *
@@ -141,5 +144,6 @@ inline unsigned short  StHit::idTruth() const {return mIdTruth;}
 inline unsigned short  StHit::quality() const {return mQuality;}
 inline unsigned short  StHit::id()      const {return mId;}
 inline unsigned int    StHit::hardwarePosition() const {return mHardwarePosition;}
+inline StHit*          StHit:: nextHit() const {return mNextHit;}
 
 #endif
