@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackingParams.hh,v 1.6 2002/10/31 13:42:31 oldi Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.7 2002/11/06 13:47:40 oldi Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.7  2002/11/06 13:47:40  oldi
+// All current database values hardcoded (for stand alone usage).
+// Code clean ups.
+//
 // Revision 1.6  2002/10/31 13:42:31  oldi
 // Everything read from database now.
 //
@@ -54,20 +58,20 @@ private:
   static StFtpcTrackingParams* mInstance;
   
   // FTPC geometry
-  Float_t  mInnerRadius;
-  Float_t  mOuterRadius;
-    Int_t  mNumberOfPadRows;
-    Int_t  mNumberOfPadRowsPerSide;
-  Float_t *mPadRowPosZ;
+  Double_t  mInnerRadius;
+  Double_t  mOuterRadius;
+     Int_t  mNumberOfPadRows;
+     Int_t  mNumberOfPadRowsPerSide;
+  Double_t *mPadRowPosZ;
 
   // Vertex position
-  Float_t mMaxVertexPosZWarning;
-  Float_t mMaxVertexPosZError;
+  Double_t mMaxVertexPosZWarning;
+  Double_t mMaxVertexPosZError;
 
   // Vertex reconstruction
-    Int_t mHistoBins;
-  Float_t mHistoMin;
-  Float_t mHistoMax;
+     Int_t mHistoBins;
+  Double_t mHistoMin;
+  Double_t mHistoMax;
 
   // Tracker
   Int_t mRowSegments;
@@ -75,28 +79,28 @@ private:
   Int_t mEtaSegments;
   
   // Tracking
-   Bool_t mLaser[4];
-   Bool_t mVertexConstraint[4];
-    Int_t mMaxTrackletLength[4];
-    Int_t mMinTrackLength[4];
-    Int_t mRowScopeTracklet[4];
-    Int_t mRowScopeTrack[4];
-    Int_t mPhiScope[4];
-    Int_t mEtaScope[4];
-  Float_t mMaxDca[4];
+    Bool_t mLaser[4];
+    Bool_t mVertexConstraint[4];
+     Int_t mMaxTrackletLength[4];
+     Int_t mMinTrackLength[4];
+     Int_t mRowScopeTracklet[4];
+     Int_t mRowScopeTrack[4];
+     Int_t mPhiScope[4];
+     Int_t mEtaScope[4];
+  Double_t mMaxDca[4];
 
   // Tracklets
-  Float_t mMaxAngleTracklet[4];
+  Double_t mMaxAngleTracklet[4];
 
   // Tracks
-  Float_t mMaxAngleTrack[4];
-  Float_t mMaxCircleDist[4];
-  Float_t mMaxLengthDist[4];
+  Double_t mMaxAngleTrack[4];
+  Double_t mMaxCircleDist[4];
+  Double_t mMaxLengthDist[4];
   
   // Split tracks
-  Float_t mMaxDist;
-  Float_t mMinPointRatio;
-  Float_t mMaxPointRatio;
+  Double_t mMaxDist;
+  Double_t mMinPointRatio;
+  Double_t mMaxPointRatio;
 
   // dE/dx
   Int_t mDebugLevel;
@@ -123,7 +127,7 @@ private:
    Double_t mObservedVertexOffsetY[2];
   
   StMagUtilities *mMagField;       // pointer to magnetic field table
-         Float_t  mMagFieldFactor;
+        Double_t  mMagFieldFactor;
 
 protected:
   
@@ -131,6 +135,7 @@ protected:
 		       St_fde_fdepar *dEdxPars = 0,
 		       St_ftpcDimensions *dimensions = 0,
 		       St_ftpcPadrowZ *padrow_z = 0);
+  StFtpcTrackingParams(Double_t magFieldFactor);
   
   Int_t InitTrackingParams(ftpcTrackingPars_st *trackParsTable);
   Int_t InitdEdx(FDE_FDEPAR_ST *dEdxParsTable);
@@ -151,6 +156,7 @@ public:
   static StFtpcTrackingParams* Instance(Bool_t debug, 
 					St_ftpcCoordTrans *ftpcCoordTrans, 
 					TDataSet *RunLog);
+  static StFtpcTrackingParams* Instance(Bool_t debug, Double_t magFieldFactor);
   static StFtpcTrackingParams* Instance();
   
   virtual ~StFtpcTrackingParams();
@@ -158,20 +164,20 @@ public:
   void PrintParams();
   
   // FTPC geometry
-  Float_t InnerRadius();
-  Float_t OuterRadius();
-    Int_t NumberOfPadRows();
-    Int_t NumberOfPadRowsPerSide();
-  Float_t PadRowPosZ(Int_t row);
+  Double_t InnerRadius();
+  Double_t OuterRadius();
+     Int_t NumberOfPadRows();
+     Int_t NumberOfPadRowsPerSide();
+  Double_t PadRowPosZ(Int_t row);
 
   // Vertex position
-  Float_t MaxVertexPosZWarning();
-  Float_t MaxVertexPosZError();
+  Double_t MaxVertexPosZWarning();
+  Double_t MaxVertexPosZError();
 
   // Vertex reconstruction
-    Int_t HistoBins();
-  Float_t HistoMin();
-  Float_t HistoMax();
+     Int_t HistoBins();
+  Double_t HistoMin();
+  Double_t HistoMax();
 
   // Tracker
   Int_t RowSegments();
@@ -179,28 +185,28 @@ public:
   Int_t EtaSegments();
   
   // Tracking
-   Bool_t Laser(Int_t tracking_method);
-   Bool_t VertexConstraint(Int_t tracking_method);
-    Int_t MaxTrackletLength(Int_t tracking_method);
-    Int_t MinTrackLength(Int_t tracking_method);
-    Int_t RowScopeTracklet(Int_t tracking_method);
-    Int_t RowScopeTrack(Int_t tracking_method);
-    Int_t PhiScope(Int_t tracking_method);
-    Int_t EtaScope(Int_t tracking_method);
-  Float_t MaxDca(Int_t tracking_method);
+    Bool_t Laser(Int_t tracking_method);
+    Bool_t VertexConstraint(Int_t tracking_method);
+     Int_t MaxTrackletLength(Int_t tracking_method);
+     Int_t MinTrackLength(Int_t tracking_method);
+     Int_t RowScopeTracklet(Int_t tracking_method);
+     Int_t RowScopeTrack(Int_t tracking_method);
+     Int_t PhiScope(Int_t tracking_method);
+     Int_t EtaScope(Int_t tracking_method);
+  Double_t MaxDca(Int_t tracking_method);
 
   // Tracklets
-  Float_t MaxAngleTracklet(Int_t tracking_method);
+  Double_t MaxAngleTracklet(Int_t tracking_method);
 
   // Tracks
-  Float_t MaxAngleTrack(Int_t tracking_method);
-  Float_t MaxCircleDist(Int_t tracking_method);
-  Float_t MaxLengthDist(Int_t tracking_method);
+  Double_t MaxAngleTrack(Int_t tracking_method);
+  Double_t MaxCircleDist(Int_t tracking_method);
+  Double_t MaxLengthDist(Int_t tracking_method);
   
   // Split tracks
-  Float_t MaxDist();
-  Float_t MinPointRatio();
-  Float_t MaxPointRatio();
+  Double_t MaxDist();
+  Double_t MinPointRatio();
+  Double_t MaxPointRatio();
 
   // dE/dx
   Int_t DebugLevel();
@@ -227,7 +233,7 @@ public:
 
   // magnetic field table
   StMagUtilities *MagField();
-         Float_t  MagFieldFactor();
+        Double_t  MagFieldFactor();
 
   ClassDef(StFtpcTrackingParams,0)  // Parameters for FTPC tracking
 };    
