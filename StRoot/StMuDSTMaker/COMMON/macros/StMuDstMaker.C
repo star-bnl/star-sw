@@ -47,7 +47,7 @@ void StHbtExampleQQ(const Int_t nevents, const Char_t **fileList, const Char_t* 
   gSystem->Load("StAssociationMaker");
   gSystem->Load("StMcAnalysisMaker");
   gSystem->Load("StStrangeMuDstMaker");
-  gSystem->Load("StMuDstMaker");
+  gSystem->Load("StMuDSTMaker");
 
 //  gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001"); 
 //  gSystem->Load("/afs/rhic/star/packages/DEV/.i386_redhat61/lib/libJprof"); 
