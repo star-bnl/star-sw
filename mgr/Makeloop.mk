@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.87  1999/07/16 23:22:10  fisyak
+#  Clean up list of skipped directories
+#
 #  Revision 1.86  1999/07/16 18:08:21  fisyak
 #  Remove Makers
 #
@@ -337,7 +340,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/07/16 18:08:21 $ 
+#           Last modification $Date: 1999/07/16 23:22:10 $ 
 #  default setings
 # Current Working Directory
 #
@@ -387,21 +390,17 @@ ifndef SUBDIRS
   SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS)) 
   SUBDIRS := $(filter-out StDisplay, $(SUBDIRS))
 #  SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
-  SUBDIRS := $(filter-out St_emc_Maker StEclMaker, $(SUBDIRS))
 #                         St_evg_Maker St_ebye_Maker St_fpt_Maker, $(SUBDIRS))
-  SUBDIRS := $(filter-out vpd par crs egz fri g2x mev StHbtMaker StAssociationMaker StPadDisplayMaker, $(SUBDIRS))
-  SUBDIRS := $(filter-out StDisplayMaker, $(SUBDIRS))
+  SUBDIRS := $(filter-out vpd par crs egz fri g2x mev StHbtMaker StAssociationMaker, $(SUBDIRS))
 ifndef OBJY_HOME
   SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker objy, $(SUBDIRS)) 
 endif
 ifneq (wenuas,$(USER))
   SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker objy, $(SUBDIRS)) 
 endif
-    SUBDIRS := $(filter-out StMcAnalysisMaker StMcEvent StMcEvent,  $(SUBDIRS))
+    SUBDIRS := $(filter-out StMcAnalysisMaker,  $(SUBDIRS))
  ifneq (,$(findstring $(STAR_SYS),sun4x_56 hp_ux102))
-    SUBDIRS := $(filter-out StDaqLib StPadDisplayMaker StDisplayMaker, $(SUBDIRS))
-    SUBDIRS := $(filter-out StPeCMaker St_hbt_Maker StHbtMaker ftpc St_fpt_Maker, $(SUBDIRS))
-    SUBDIRS := $(filter-out StDbLib StDbMaker,  $(SUBDIRS))
+    SUBDIRS := $(filter-out StPeCMaker St_hbt_Maker StHbtMaker, $(SUBDIRS))
  endif
 ifdef SKIP_LIB
     SUBDIRS := $(filter-out $(SKIP_LIB),  $(SUBDIRS))
@@ -417,22 +416,22 @@ endif
 .PHONY               :  all $(BASE)  $(St_Tables) test clean clean_lib clean_share clean_obj
 all:    $(BASE) $(addsuffix _loop, $(SUBDIRS))  $(addsuffix _$(branch),$(PKG)) $(St_Tables)
 $(BASE): 
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/$(BASE) depend
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/$(BASE) depend NODEPEND=1999
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/$(BASE)
 St_TablesDoc: 
 	root.exe -b -q MakeHtmlTables.cxx
 %_loop:
 	$(MAKE)  -f $(Makeloop) -C $(STEM)
 %_pams:
-	$(MAKE)  -f $(MakePam) depend
+	$(MAKE)  -f $(MakePam) depend NODEPEND=1999
 	$(MAKE)  -f $(MakePam)
-	$(MAKE)  -f $(MakeDll) -C  $(GEN_DIR) depend
+	$(MAKE)  -f $(MakeDll) -C  $(GEN_DIR) depend NODEPEND=1999
 	$(MAKE)  -f $(MakeDll) -C  $(GEN_DIR)
 %_StRoot:
-	$(MAKE)  -f $(MakeDll) depend
+	$(MAKE)  -f $(MakeDll) depend NODEPEND=1999
 	$(MAKE)  -f $(MakeDll)
 St_Tables: $(BASE)
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables depend
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables depend NODEPEND=1999
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables \
          SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St_Tables.$(So) NODEBUG=1999
 test:   $(addsuffix _test, $(SUBDIRS))
