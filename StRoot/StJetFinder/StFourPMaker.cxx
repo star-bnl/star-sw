@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFourPMaker.cxx,v 1.1 2003/04/04 21:34:59 thenry Exp $
+ * $Id: StFourPMaker.cxx,v 1.2 2003/04/24 14:15:16 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -34,14 +34,13 @@
 ClassImp(StFourPMaker)
   
 StFourPMaker::StFourPMaker(const char* name, StMuDstMaker* uDstMaker) 
-  : StMaker(name), muDst(uDstMaker){
-    tracks = NULL;
-    nTracks = 0;
+  : StMaker(name), muDst(uDstMaker), me(0.000511), mpr(0.9383), 
+    mpi(0.1396), mk(0.4937){
     muEmcCol = new StMuEmcCollection();
-    me = .000511;
-    mp = .9383;
-    mpi = .1396;
-    mk = .4937;
+    //me = .000511;	
+    //mpr = .9383;
+    //mpi = .1396;
+    //mk = .4937;
 }
 
 StMuEmcCollection* StFourPMaker::getStMuEmcCollection(void)

@@ -192,6 +192,7 @@ inline double StFourVec::eta() const
 //4-th component
 inline double StFourVec::eT() const
 {
+    if(p() == 0.0) return 0.0;
     return sqrt(e()*e()*pt()*pt()/(p()*p()));
 }
 

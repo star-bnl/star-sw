@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcFourPMaker.cxx,v 1.1 2003/04/04 21:36:06 thenry Exp $
+ * $Id: StTpcFourPMaker.cxx,v 1.2 2003/04/24 14:15:16 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -36,8 +36,6 @@ ClassImp(StTpcFourPMaker)
   
 StTpcFourPMaker::StTpcFourPMaker(const char* name, StMuDstMaker* uDstMaker) 
   : StFourPMaker(name, uDstMaker){
-    tracks = new StMuTrackFourVec[MAXTRACKS];
-    nTracks = 0;
 }
 
 Int_t StTpcFourPMaker::Make() {
@@ -47,18 +45,22 @@ Int_t StTpcFourPMaker::Make() {
   StMuDst* uDst = muDst->muDst();
 
   // Add TPC tracks
-  nTracks = uDst->numberOfPrimaryTracks();
+  int nTracks = uDst->numberOfPrimaryTracks();
   for(int i = 0; i < nTracks; i++)
   {
     StMuTrack *t = uDst->primaryTracks(i);
+    if(t->flag()<=0) continue;
     StThreeVectorF mom = t->momentum();
-    float mass = t->pidProbElectron()*me + t->pidProbProton()*mp +
+    float mass = t->pidProbElectron()*me + t->pidProbProton()*mpr +
       t->pidProbPion()*mpi + t->pidProbKaon()*mk;
     StLorentzVectorF P(sqrt(mass*mass + mom.mag2()), mom);
-    tracks[i].Init(t, P, i);
+    StMuTrackFourVec& track = tPile[i];
+    track.Init(t, P, i);
+    tracks.push_back(&track);
   }
 
   return kStOk;
 }
+
 
 
