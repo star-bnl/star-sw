@@ -1,5 +1,8 @@
 #!/usr/bin/env perl
 
+#use warnings qw(all);
+#use diagnostics;
+
 Import qw ( env INCLUDE LIB BIN EXPORT BUILD OBJ);
 
 ( my $build = $OBJ ) =~ s/\#//g;
@@ -245,7 +248,7 @@ $env2 = $env->clone(
 		    'FFLAGS'   => $FFLAGS,
 		    'FEXTEND'  => $FEXTEND
 		    );
-bless $env2, cons;
+bless $env2, "cons";
 
 
 print "LIBPATH = |", $env2->{LIBPATH}, "|\n LIBS = |", $env2->{LIBS}, 
@@ -499,7 +502,7 @@ if ( $#idlL > -1 ) {
                 push @Deps, $idli;
 
                 if ( $STAR_SYS !~ /^intel_wnt$/ ) {
-                    Command $env3 [ $idlCintC, $idlCintH ], @Deps,
+                    Command $env3 [ $idlCintC , $idlCintH ], @Deps,
 qq (rootcint.pl %>:d -f %>:f -c  "$ROOTCINT_CPPPATH -D__ROOT__" %1:f %2:f);
                 }
                 push @Deps, $idlCintC;
