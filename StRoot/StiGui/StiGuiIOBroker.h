@@ -51,6 +51,9 @@ public:
     void setMarkedHitStyle(unsigned int);
     unsigned int markedHitStyle() const;
 
+    void setUpdateEachTrack(bool);
+    bool updateEachTrack() const;
+
     friend class nobody;
     
 private:
@@ -69,6 +72,8 @@ private:
     unsigned int mMarkedHitColor;
     unsigned int mMarkedHitStyle;
 
+    bool mUpdateEachTrack;
+    
     ClassDef(StiGuiIOBroker, 1)
 };
 
@@ -142,5 +147,16 @@ inline unsigned int StiGuiIOBroker::markedHitStyle() const
 {
     return mMarkedHitStyle;
 }
+inline void StiGuiIOBroker::setUpdateEachTrack(bool val)
+{
+    mUpdateEachTrack = val;
+    notify();
+}
+
+inline bool StiGuiIOBroker::updateEachTrack() const
+{
+    return mUpdateEachTrack;
+}
+
 
 #endif

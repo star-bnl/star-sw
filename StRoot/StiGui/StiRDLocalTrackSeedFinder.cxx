@@ -24,6 +24,7 @@
 #include "Sti/StiDetectorContainer.h"
 
 //StiGui
+#include "StiGuiIOBroker.h"
 #include "StiDisplayManager.h"
 #include "StiRootDrawableHits.h"
 
@@ -89,9 +90,11 @@ StiKalmanTrack* StiRDLocalTrackSeedFinder::makeTrack(StiHit* hit)
     mMessenger <<"done."<<endl;
 #endif
     
-    mdrawablehits->fillHitsForDrawing();    
-    StiDisplayManager::instance()->draw();
-    StiDisplayManager::instance()->update();
+    mdrawablehits->fillHitsForDrawing();
+    if (StiGuiIOBroker::instance()->updateEachTrack()) {
+	StiDisplayManager::instance()->draw();
+	StiDisplayManager::instance()->update();
+    }
 
 #ifdef DEBUG
     mMessenger <<"\t leaving StiRDLocalTrackSeedFinder::makeTrack()"<<endl;
@@ -105,6 +108,5 @@ void StiRDLocalTrackSeedFinder::getNewState()
 #ifdef DEBUG
     mMessenger <<"StiRDLocalTrackSeedFinder::getNewState()"<<endl;
 #endif
-    //const StiIOBroker* broker = StiIOBroker::instance();
     StiLocalTrackSeedFinder::getNewState();
 }
