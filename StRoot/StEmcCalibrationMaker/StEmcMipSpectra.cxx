@@ -130,7 +130,7 @@ Bool_t StEmcMipSpectra::CalibrateEtaBin(Int_t etabin,Int_t mode)
     for(Int_t i=firstadc;i<nadcMax;i++)
       if(SpectraTemp[i]>SpectraTemp[adcmip]) adcmip=i;
     
-    Int_t lastadc=(Int_t)(2.*(Float_t)adcmip);
+    Int_t lastadc=(Int_t)(2.5*(Float_t)adcmip);
 
     if(CalibrateByMip(etabin,SpectraTemp,firstadc,lastadc)) return kTRUE;
   }
@@ -153,7 +153,7 @@ Bool_t StEmcMipSpectra::CalibrateBin(Int_t bin,Int_t mode)
     for(Int_t i=firstadc;i<nadcMax;i++)
       if(SpectraTemp[i]>SpectraTemp[adcmip]) adcmip=i;
     
-    Int_t lastadc=(Int_t)(2.*(Float_t)adcmip);
+    Int_t lastadc=(Int_t)(2.5*(Float_t)adcmip);
 
     if(CalibrateByMip(bin,SpectraTemp,firstadc,lastadc)) return kTRUE;
   }

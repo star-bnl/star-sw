@@ -14,6 +14,8 @@
 #include "StEmcMipSpectra.h"
 #include "StEmcEqualSpectra.h"
 
+#include "TArrayI.h"
+
 #include "tables/St_emcCalSettings_Table.h"
 #include "tables/St_emcCalSummary_Table.h"
 #include "tables/St_emcCalibration_Table.h"
@@ -21,7 +23,7 @@
 #include "tables/St_emcMipCalib_Table.h"
 #include "TRandom.h"
 
-#define StEmcCalibrationMaker_DEBUG
+#define StEmcCalibrationMaker_DEBUG 
 
 #define maxdet 8
 
@@ -47,6 +49,9 @@ class StEmcCalibrationMaker : public StMaker
            Float_t avg;
            Float_t sigma;
            
+           TArrayI emcHits;
+           TArrayI trackTower,tmp1,tmp2;
+           
            Int_t   firstEventTime;
            Int_t   lastEventTime;
            Int_t   firstEventRun;
@@ -54,14 +59,31 @@ class StEmcCalibrationMaker : public StMaker
            Int_t   firstEventDate;
            Int_t   lastEventDate;
 
+           Int_t   PedStatus;
            Int_t   EqStatus;
            Int_t   MipStatus;
            Int_t   CalibStatus;
+           Int_t   m_pedCounter;
            Int_t   m_equalCounter;
            Int_t   m_mipCounter;
            Float_t m_equalStep;
            Float_t m_calibStep;
            Int_t   nTracks;
+
+           Bool_t  ReadHitsOffline();
+           Bool_t  CalcZVertex();
+           Bool_t  FillEqual();
+           Bool_t  FillMipCalib();
+           Bool_t  CheckTracks();
+           Bool_t  IsThisTrackGood(Int_t,Float_t*,Float_t*);
+           Bool_t  ProjectTrack(StTrack*,double,Float_t*,Float_t*);
+           Bool_t  GetPedestal();
+           Bool_t  SubtractPedestal();
+           void    ClearCalibTable();
+           void    SetCalibStatus();
+           void    ClearEqualTable();
+           void    ClearMipTable();
+           Bool_t  FillEmcVector();
       
    public:
    
@@ -71,24 +93,10 @@ class StEmcCalibrationMaker : public StMaker
    virtual Int_t   Make();
    virtual Int_t   Finish();
    virtual Int_t   Clear();
-           Bool_t  ReadHitsOnline();
-           Bool_t  ReadHitsFromDaqFile();
-           Bool_t  ReadHitsOffline();
-           Bool_t  CalcZVertex();
-           Bool_t  FillEqual();
-           Bool_t  FillMipCalib();
            Bool_t  Equalize();
            Bool_t  MipCalib();
            Bool_t  MakeCalibration();
            Bool_t  SaveTables();
-           Bool_t  IsThisTrackGood(Int_t,Float_t*,Float_t*);
-           Bool_t  ProjectTrack(StTrack*,double,Float_t*,Float_t*);
-           Bool_t  GetPedestal();
-           Bool_t  SubtractPedestal();
-           void    ClearCalibTable();
-           void    SetCalibStatus();
-           void    ClearEqualTable();
-           void    ClearMipTable();
            void    CalcEtaBin(Int_t,Float_t,Int_t*,Int_t*,Int_t*,Int_t*);
 
            St_emcCalSummary*      SummaryTable;
