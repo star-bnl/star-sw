@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.82 1999/05/08 23:19:13 fisyak Exp $
+# $Id: MakeDll.mk,v 1.83 1999/06/08 11:30:13 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.83  1999/06/08 11:30:13  fisyak
+# take out NT stuff for the moment
+#
 # Revision 1.82  1999/05/08 23:19:13  fisyak
 # Add cleanup of ~ stuff
 #
@@ -159,9 +162,6 @@ ifdef PKGNAME
 PKG := $(PKGNAME)
 endif
 ifndef SO_LIB
-  ifdef NT
-    SO_LIB := $(BIN_DIR)/lib$(PKG).$(SOEXT)
-  else
     SO_LIB := $(LIB_DIR)/$(PKG).$(SOEXT)
     ifeq ($(SRC_DIR),$(GEN_DIR))
       SO_LIB := $(LIB_DIR)/St_$(PKG).$(SOEXT)
@@ -171,12 +171,6 @@ ifndef SO_LIB
         LIBRARY += $(wildcard $(LIB_DIR)/libsvt.a $(STAR_LIB)/libsvt.a)
       endif
     endif
-  endif 
-#  ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
-#    ifneq (,$(findstring $(PKG),StTrsMaker))
-#       LIBRARY += /afs/rhic/star/packages/ObjectSpace/2.0m/lib/libospace.a
-#    endif
-#  endif
 endif
 
 
@@ -195,22 +189,10 @@ endif
 INCINT    := $(INC_DIRS) $(CERN_ROOT)/include $(ROOTSYS)/src
 INC_DIRS   = $(INCINT) $(STAF_UTILS_INCS) 
 
-ifdef NT
-INC_DIRS := $(INC_DIRS) $(SUNRPC)
-endif
 INC_DIRS += $(CERN_ROOT)/include
 INCLUDES := $(addprefix -I,$(INC_DIRS))
 INCINT   := $(addprefix -I,$(INCINT))
 
-ifdef NT
- INCLUDES := $(addsuffix I-,$(INCLUDES))
- INCINT   := $(addsuffix I-,$(INCINT))
- INCLUDE :=  $(INCLUDE)$(subst  -I,;,$(INCLUDES) $(INCINT))
- INCLUDE := $(subst  I- ;,;,$(INCLUDE))
- INCLUDE := $(subst  I-,,$(INCLUDE))
- INCLUDES :=
- INCINT   :=
-endif
 CPPFLAGS += -D__ROOT__ 
 
 DINCINT  :=  -DROOT_CINT $(filter-out -DST_NO_TEMPLATE_DEF_ARGS, $(CPPFLAGS)) $(ROOTCINTD) $(INCINT)
@@ -222,7 +204,7 @@ endif
 #	Skip up to the end
 #
 FILES_ALL := $(wildcard $(addprefix $(SRC_DIR)/, *.c *.cxx *.cc))
-FILES_ALL += $(wildcard $(addprefix $(SRC_DIR)/src/, *.c *.cxx *.cc))
+FILES_ALL += $(wildcard $(addprefix $(SRC_DIR)/*/, *.c *.cxx *.cc))
 ifneq ($(GEN_DIR),$(SRC_DIR))
 FILES_ALL += $(wildcard $(addprefix $(SRC_DIR)/, *.f *.F *.g))
 FILES_ALL := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_ALL)))
@@ -237,28 +219,20 @@ FILES_SRC := $(filter-out %_init.cc %_i.cc, $(FILES_SRC))
 FILES_SRC := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_SRC)))
 
 ifeq ($(PKG),xdf2root)
-ifndef NT
   FILES_SRC  += $(wildcard $(STAR)/asps/staf/dsl/src/*.c)
   FILES_SRC := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_SRC)))
   INPUT_DIRS := $(STAR)/asps/staf/dsl/src
-else
-  LIBS := $(LIBS) $(AFS_RHIC)/star/packages/dsl/intel_wnt/lib/dsl.lib 
-endif #/* NT */
 endif
 
 DOIT := $(strip $(FILES_SRC))
 ifneq (,$(DOIT))
 
 OUTPUT_DIRS := $(LIB_DIR) $(OBJ_DIR) $(DEP_DIR) $(BIN_DIR) $(TMP_DIR) $(GEN_DIR) 
-INPUT_DIRS  += $(SRC_DIR) $(SRC_DIR)/src $(ROOT_DIR)
+INPUT_DIRS  += $(sort $(SRC_DIR) $(dir $(wildcard $(SRC_DIR)/*/*.c*))) $(ROOT_DIR)
 
 # 	Make dirs before make real work. Othervice VPATH does not see
 #    	non existing directories
-ifndef NT
 MAKEDIRS := $(shell mkdir -p $(OUTPUT_DIRS))
-else #/* NT */
-MAKEDIRS := $(shell $(MKDIR) $(subst /,\,$(OUTPUT_DIRS))) 
-endif# /* NT */
 
 VPATH =  $(INPUT_DIRS) $(OUTPUT_DIRS)
 
@@ -398,7 +372,6 @@ all:
 else
 
 MY_SO  := $(SO_LIB)
-ifndef NT
   QWE    :=$(strip $(sort $(wildcard $(MY_SO).*)))
   SL_NEW :=$(MY_SO).1000
 ifneq (,$(QWE))
@@ -407,9 +380,6 @@ ifneq (,$(QWE))
   QWE  :=$(subst $(MY_SO).,,$(QWE))
   QWE  :=$(shell expr $(QWE) + 1)
   SL_NEW :=$(MY_SO).$(QWE)
-endif
-else #/* NT */
-  SL_NEW := $(MY_SO)
 endif
 MY_AR  := $(addsuffix .a, $(basename $(MY_SO)))
 #
@@ -429,48 +399,29 @@ $(FILES_CINT_SYM) : $(SRC_DIR)/St_Module.h
 	@echo "#pragma link C++ enum EModuleTypes;"     >> $(LINKDEF)
 	@echo "#endif"					>> $(LINKDEF)
 	$(CAT) $(LINKDEF); 
-ifndef NT
 	cd $(GEN_DIR); \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) St_Module.h $(notdir $(LINKDEF))
-else
-	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
-	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT)  $(notdir $(1ST_DEPS)) \
-        St_DataSet.h $(notdir $(LINKDEF))
-endif
 $(GEN_DIR)/St_TableCint.cxx : $(SRC_DIR)/St_Table.h
 	$(COMMON_LINKDEF)
 	@echo "#pragma link C++ class St_Table-;"       >> $(LINKDEF)
 	@echo "#pragma link C++ class table_head_st-!;" >> $(LINKDEF)
 	@echo "#endif"                                  >> $(LINKDEF)
 	@$(CAT) $(LINKDEF);
-ifndef NT
 	cd $(GEN_DIR); \
         $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) St_Table.h $(LINKDEF)
-else
-	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
-	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(1ST_DEPS)) $(LINKDEF)
-endif
-
 $(FILES_COG): $(GEN_DIR)/%.h:$(SRC_DIR)/%.h $(STAR)/StRoot/St_base/StArray.h
 	$(RM) $(ALL_TAGS)
 	precint.pl $(1ST_DEPS) > $(ALL_TAGS);
 $(FILES_CINT_ORD) : $(FILES_ORD_H)   
 	$(COMMON_LINKDEF)
 	@for p in $(NAMES_ORD); do \
-                                             echo "#pragma link C++ class $${p};" >> $(LINKDEF) ; \
-                                             done
+        echo "#pragma link C++ class $${p};" >> $(LINKDEF) ; \
+                                done
 	@echo "#endif"                                  >> $(LINKDEF);
 	@$(CAT) $(LINKDEF)
-
-ifndef NT
 	cd $(GEN_DIR); \
         $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(FILES_ORD_H)) \
         $(notdir $(LINKDEF))
-else
-	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(1ST_DEPS)) \
-	 $(notdir $(LINKDEF))
-endif
 
 $(FILES_CINT_DEF) : $(FILES_DEF_H)  $(LinkDef)
 	cd $(GEN_DIR); \
@@ -484,13 +435,8 @@ $(FILES_CINT_TAB) : $(GEN_DIR)/St_%_TableCint.cxx : $(SRC_DIR)/St_%_Table.h
 	echo "#pragma link C++ class $(STEM)_st-!;"	>> $(LINKDEF);
 	echo "#endif"					>> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
-ifndef NT
 	cd $(GEN_DIR); \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
-else
-	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
-	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
-endif
 
 $(FILES_CINT_MOD) : $(FILES_MOD_H) $(FILES_MOD_HS)
 	$(COMMON_LINKDEF)
@@ -500,87 +446,31 @@ $(FILES_CINT_MOD) : $(FILES_MOD_H) $(FILES_MOD_HS)
          done
 	@echo "#endif"                                  >> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
-ifndef NT
 	cd $(GEN_DIR); \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(sort $(notdir $(FILES_MOD_H) $(FILES_MOD_HS))) $(notdir $(LINKDEF))
-else
-	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & )) \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(FILES_MOD_H)) $(notdir $(LINKDEF))
-endif
+        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) \
+            $(sort $(notdir $(FILES_MOD_H) $(FILES_MOD_HS))) $(notdir $(LINKDEF))
 
 
 Libraries : $(MY_SO) $(MY_SO_CINT) 
 
 
-ifndef NT
-
 $(MY_SO) : $(FILES_O) $(wildcard $(OBJ_DIR)/Templates.DB/*.$(O)) $(STAR_FILES_O) $(LIBRARY)
 	cd $(OBJ_DIR);  \
         $(SO) $(SOFLAGS) $(SoOUT) $(SL_NEW) $(ALL_DEPS) $(SL_EXTRA_LIB) ; \
         $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)
-else # NT
-ifdef MY_SO
-MY_SOLIB := $(subst /bin/,/lib/,$(MY_SO))
-endif 
-MY_DLLNAME  := $(notdir $(basename $(MY_SO)))
-MY_EXPLIB   := $(addsuffix .exp, $(basename $(MY_SOLIB)))
-MY_IMPLIB   := $(addsuffix .lib, $(basename $(MY_SOLIB)))
-MY_DEF      := $(addsuffix .def, $(basename $(MY_SOLIB)))
-MY_PDB      := $(addsuffix .pdb, $(basename $(MY_SOLIB)))
-
-LIBS        += $(ROOTSYS)/lib/*.lib
-LIBS        += $(filter-out $(MY_IMPLIB),$(wildcard $(LIB_DIR)/*.lib))
-LIBS        += $(LIB_PKG)
-
-LIBRARY     :=  mathlib.lib packlib.lib $(CLIBS) $(FLIBS)
-
-$(MY_DEF): $(FILES_O)
-	@echo MY_DLLNAME = $(MY_DLLNAME)
-	@echo MY_SO = $(MY_SO)
-	BINDEXPLIB.exe $(MY_DLLNAME)  $(OBJ_DIR)/St*.$(O) > $(subst /,\\,$(subst \,/,$(MY_DEF) ))
-
-$(MY_EXPLIB): $(MY_DEF)
-	$(AR) $(ARFLAGS) $(subst /,\\,$(subst \,/,$(LOUT)$(MY_IMPLIB) $(OBJ_DIR)/St*.$(O) -def:$(MY_DEF)))
-
-$(MY_SO) : $(MY_EXPLIB)
-	@echo LIB_DIR   : = $(LIB_DIR)
-	@echo MY_SO     : = $(MY_SO)
-	@echo MY_EXPLIB : = $(MY_EXPLIB)
-	@echo LIBS      : = $(LIBS)
-	@echo LIBRARY   : = $(LIBRARY)
-	@echo MY_PDB    : = $(MY_PDB)
-	@echo MY_SOLIB    : = $(MY_SOLIB)
-	$(SO) $(SOFLAGS) $(subst /,\\,$(subst \,/,$(SoOUT)$(MY_SO) $(sort $(OBJ_DIR)/*.$(O)  $(STAR_OBJ_DIR)/*.$(O) $(SYS_DIR)/obj/St_base/St_staf_dummies.$(O)) $(LIBS) $(LIBRARY) -PDB:$(MY_PDB))) 
-#	$(SO) $(SOFLAGS) $(subst /,\\,$(subst \,/,$(SoOUT)$(MY_SO) $(FILES_O)  $(STAR_FILES_O) $(LIBS) $(LIBRARY) -PDB:$(MY_PDB)))
-#	$(SO) $(SOFLAGS) $(subst /,\\,$(subst \,/,$(SoOUT)$(SL_NEW) $(FILES_O) $(LIBS) $(LIBRARY) -PDB:$(MY_PDB)))
-#        $(RM) $(MY_SO)
-endif
 	@echo "           Shared library " $(MY_SO) " has been created"   
 $(OBJ_DIR)/%.$(O) : %.c
-ifdef NT
 	$(CC)  -c $(subst \,/,$(CPPFLAGS) $(CFLAGS) $(INCLUDES) -Fd$(OBJ_DIR)\$(PKG) $(CINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS))
-else
-	$(CC)  -c $(CPPFLAGS) $(CFLAGS) $(INCLUDES) $(CINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
-endif
 
 $(OBJ_DIR)/%.$(O) : %.cc
-ifdef NT
-	$(CXX) -c $(subst \,/,$(CPPFLAGS) $(CXXFLAGS)  $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS) -Fd$(OBJ_DIR)\$(PKG))
-else
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
-endif
 $(OBJ_DIR)/%.$(O) : %.cxx 
-ifdef NT
-	$(CXX) -c $(subst \,/,$(CPPFLAGS) $(CXXFLAGS)  $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)  -Fd$(OBJ_DIR)\$(PKG))
-else
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
-endif
 $(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(GEN_DIR)/geant3.def
 	$(CP)$(1ST_DEPS) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(1ST_DEPS) -o  $(GEN_DIR)/$(STEM).F
 	$(FOR72) $(subst /,\\,$(subst \,/,$(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  $(FOUT)$(ALL_TAGS)))
 $(FILES_OBJ) $(FILES_ORJ) $(FILES_OTJ): $(OBJ_DIR)/%.$(O): %.cxx
 	$(CXX) $(CXXFLAGS) $(CXXOPT) $(subst \,/, $(CPPFLAGS)  -c $(CXXINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN)
-ifndef NT
 $(GEN_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
 	test -h $(GEN_DIR)/geant3.def || $(RM)  $(GEN_DIR)/geant3.def
 	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def 
@@ -592,31 +482,18 @@ $(OBJ_DIR)/%.$(O): %.F
 ifdef $(LIB_PKG)
 	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).$(O); $(RM) $(OBJ_DIR)/$(STEM).$(O)
 endif
-endif #/* NT */
 $(OBJ_DIR)/%.$(O): %.cdf
 	$(KUIPC) $(KUIPC_FLAGS) $(1ST_DEPS) $(GEN_DIR)/$(STEM).c
 include $(STAR_MAKE_HOME)/MakeDep.mk
 endif
 DeleteDirs :
-ifndef NT
 #	rm -rf  $(TMP_DIR)
-else #/* NT */
-	if exist $(subst /,\\,$(subst \,/,$(TMP_DIR)/.)) $(RMDIR) $(subst /,\\,$(subst \,/,$(TMP_DIR)))
-endif #/* NT */
-
 clean :
-ifndef NT
 	-$(RMDIR)  $(OUTPUT_DIRS)
-else #/* NT */
-	-for %i in ($(subst /,\\,$(subst \,/,$(OUTPUT_DIRS)))) if exist %i\\. $(RMDIR)  %i
-endif #/* NT */
-
 #_________________dependencies_____________________________
-ifndef NT
 ifndef NODEPEND
 ifneq (, $(strip $(FILES_D))) 
 include $(FILES_D)
-endif                               #
 endif
 endif
 
@@ -698,18 +575,7 @@ test:
 	@echo FILES_COL   := $(FILES_COL)
 	@echo FILES_GCO   := $(FILES_GCO)
 	@echo FILES_COG   := $(FILES_COG)
-ifdef NT
-	@echo NT          := $(NT)
-	@echo MY_DLLNAME  := $(MY_DLLNAME)
-	@echo MY_EXPLIB   := $(MY_EXPLIB)
-	@echo MY_IMPLIB   := $(MY_IMPLIB)
-	@echo MY_DEF      := $(MY_DEF)
-	@echo MY_PDB      := $(MY_PDB)
-	@echo LIB_PKG     := $(LIB_PKG)
-	@echo ROOT_DIR    := $(ROOT_DIR)
-	@echo INCLUDE     := $(INCLUDE)
 
-endif #/* NT */
 	@echo DOIT        := $(DOIT)
 	@echo PKGNAME     := $(PKGNAME)	
 	@echo PKG         := $(PKG)

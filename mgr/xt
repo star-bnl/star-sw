@@ -39,7 +39,7 @@ if (($comp =~ /^rsgi/) || ($comp =~ /^ribm/) || ($comp =~ /^rnfs/) ||
 } elsif (($comp =~ /^ru/) || ($comp =~ /^rsun/) || ($comp =~ /^rcf/) || 
          ($comp =~ /^rmds00/) || ($comp =~ /^rmds03/)) {
         $com = $ssh . " "  . $comp . ".rhic.bnl.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
-} elsif (($comp =~ /^rcas/) || ($comp =~ /^rcrs/) || ($comp =~ /^rlnx/) ) {
+} elsif (($comp =~ /^rcas/) || ($comp =~ /^rcrs/) || ($comp =~ /^rlnx/) || ($comp =~ /^play1/) ) {
 	$com = $ssh . " "  . $comp . ".rcf.bnl.local xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
 } elsif (($comp =~ /^sol/) || ($comp =~ /^flynn/) || ($comp =~ /^elvis/) || 
          ($comp =~ /^robinson/) || ($comp =~ /^pickford/))
