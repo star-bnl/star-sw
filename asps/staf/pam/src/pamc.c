@@ -9,6 +9,9 @@ BUGS:         -- STILL IN DEVELOPMENT --
 HISTORY:      00jan96-v000a-hpl- Creation.
 ------------------------------------------------------------------*/
 
+#define MAX(A,B) (A>B ? A : B)
+#define MIN(A,B) (A<B ? A : B)
+
 /*------------------------------------------------------------------
 ROUTINE:      long PAM
 DESCRIPTION:  Physics Analysis Module template.
