@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.25 1999/01/28 19:13:08 fine Exp $
+// $Id: St_Table.h,v 1.26 1999/02/24 17:10:58 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.26  1999/02/24 17:10:58  fine
+// St_Table  New and Purge method have been introdiced, some clean up for St_module as well
+//
 // Revision 1.25  1999/01/28 19:13:08  fine
 // St_TableSorter has been made up
 //
@@ -102,6 +105,8 @@ protected:
    void       SetTableType(const Char_t *type);
 
    Long_t    *s_MaxIndex;   // The used capacity of this array
+
+   void      ReAlloc(Int_t newsize);
  
 public:
 
@@ -130,12 +135,16 @@ public:
    virtual     Bool_t     IsFolder();
    virtual     void       ls(Option_t *option="");
    virtual     void       ls(Int_t deep);
+   static      St_Table  *New(const Char_t *name, const Char_t *type, void *array, UInt_t size);
    virtual     Char_t    *Print(Char_t *buf,Int_t n) const ;
-   virtual     void       Print(Option_t *buf="") { Print((Char_t *)0,Int_t(0)); }
+   virtual     void       Print(Option_t *opt="");
    virtual  const Char_t *Print(Int_t row, Int_t rownumber=10,
                                 const Char_t *colfirst="", const Char_t *collast="") const; // *MENU*
    virtual  const Char_t *PrintHeader() const; // *MENU*
+   virtual Int_t         Purge(Option_t *opt="");   
+
                void      *ReAllocate(Int_t newsize);
+               void      *ReAllocate();
    virtual     table_head_st *GetHeader() const;
    void        MakeHeader(const Char_t *prefix,const Char_t *tablename,const Char_t *suffix, FILE *fl=0); // Create header file for STAF table class
    static Int_t MakeWrapClass(Text_t *name);
@@ -158,6 +167,8 @@ public:
  
 inline  table_head_st *St_Table::GetHeader()const { return s_TableHeader; }
 inline  Bool_t St_Table::IsFolder(){ return fList && fList->Last() ? kTRUE : kFALSE;}
+inline  void   St_Table::Print(Option_t *) { Print((Char_t *)0,Int_t(0)); }
+
 inline  void   St_Table::SetUsedRows(Int_t n) {if (s_TableHeader) *s_MaxIndex = n;}
 inline  void   St_Table::SetTitle(const Char_t *title){SetType(title);}
 inline  void   St_Table::SetHeader(table_head_st *table){s_TableHeader = table;} 
