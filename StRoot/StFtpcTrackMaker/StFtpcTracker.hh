@@ -29,6 +29,7 @@ protected:
                TObjArray   *mTrack;         // ObjArray of tracks
                   Bool_t    mHitsCreated;   // indicator if this class created the mHit ObjArray
                   Bool_t    mVertexCreated; // indicator if this class created the mVertex
+                  Bool_t    mTrackCreated; // indicator if this class created the mTrack
                 Double_t    mMaxDca;        // cut value for momentum fit
 
 public:
@@ -86,8 +87,11 @@ public:
 
 #endif
 
-// $Id: StFtpcTracker.hh,v 1.20 2004/02/12 19:37:11 oldi Exp $
+// $Id: StFtpcTracker.hh,v 1.21 2004/09/03 20:36:23 perev Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.21  2004/09/03 20:36:23  perev
+// Big LeakOff + mem optimisation
+//
 // Revision 1.20  2004/02/12 19:37:11  oldi
 // *** empty log message ***
 //
