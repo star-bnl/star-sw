@@ -5,7 +5,7 @@
 class StChain;
 StChain *chain=0;
 
-void RunStiMaker(Int_t nevents=4,
+void RunStiMaker(Int_t nevents=0,
 		 bool simulated = true,
 		 //const char* MainFile="/star/data13/reco/dev/2001/08/*2235009*.event.root")
 		 //const char* MainFile="/afs/rhic/star/users/mmiller/code/ITF/geant/pion_10_neg.event.root")
