@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.23 2003/10/25 00:12:48 fisyak Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.24 2004/03/30 02:45:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.24  2004/03/30 02:45:07  fisyak
+ * return DBL_MAX instead of 0 if No mTraits
+ *
  * Revision 2.23  2003/10/25 00:12:48  fisyak
  * Replace BetheBloch::Sirrf by m_Bichsel->GetI70 for nSigma calculations
  *
@@ -105,7 +108,7 @@
 #include "StBichsel/Bichsel.h"
 static Bichsel *m_Bichsel = 0;
 static BetheBloch *theBetheBloch = 0;
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.23 2003/10/25 00:12:48 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.24 2004/03/30 02:45:07 fisyak Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -166,7 +169,7 @@ StTpcDedxPidAlgorithm::traits() const { return mTraits; }
 double
 StTpcDedxPidAlgorithm::numberOfSigma(const StParticleDefinition* particle) const
 {
-    if (!mTraits) return 0;
+    if (!mTraits) return DBL_MAX;
 
     if (mTraits->numberOfPoints()==0) return DBL_MAX;
     // sigmaPidFunction already checks this, but when number of dE/dx points is = 0,
