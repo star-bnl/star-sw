@@ -6,12 +6,15 @@ TPad *pad=0;
 //==========================
 //==========================
 
-void plPi0Solo( int page=1,TString fName="aa8c" ) {
+void plPi0Solo( int page=1,char *dd="C/") {
   int pr=0;
 
+  TString fName="all" ;
   // fName="ctbSum70-801sec1-12thr0.8";
   
   TString outDir="outPi0/";
+  outDir="/auto/pdsfdv34/starspin/balewski/calib2004/outPi0";
+  outDir+=dd;
  
   gROOT->Reset();
 
@@ -28,14 +31,14 @@ void plPi0Solo( int page=1,TString fName="aa8c" ) {
   assert(fd->IsOpen());
   //  fd->ls();
   
-  float xLo=.07, xHi=.22;
+  float xLo=.02, xHi=.22;
   //    float xLo=.4, xHi=.7;
 
   
   TString ctit="pi0-"; ctit+=page;
- c=new TCanvas(ctit,ctit,600,350);
-
-   c->Range(0,0,1,1);
+  c=new TCanvas(ctit,ctit,600,350);
+  
+  c->Range(0,0,1,1);
   TPad *pad0 = new TPad("pad0", "apd0",0.0,0.95,1.,1.);
   pad0->Draw();
   pad0->cd();
@@ -134,15 +137,40 @@ void plPi0Solo( int page=1,TString fName="aa8c" ) {
   //..........................................
   //..........................................
   case 6: {
+    TGraphErrors*  gr1=new TGraphErrors;
+    gr1->SetMarkerStyle(21);
+    gr1->SetName(ctit+"eM"); // 
+    gr1->SetTitle("Pi0 mass vs. Eta; eta bin; inv mass (MeV);");
+
+    TGraphErrors*  gr2=new TGraphErrors;
+    gr2->SetMarkerStyle(20);
+    gr2->SetName(ctit+"eS"); // 
+    gr2->SetTitle("Pi0 mass width vs. Eta; eta bin; sigma (MeV);");
+
+    TGraphErrors*  gr3=new TGraphErrors;
+    gr3->SetMarkerStyle(19);
+    gr3->SetName(ctit+"eN"); // 
+    gr3->SetTitle("Pi0 Yield vs. Eta; eta bin; yield, err=nBckg/10;");
+
     pad->Divide(4,3);
     int i;
     for(i=0;i<12;i++) {
       char t1[100];
       sprintf(t1,"invm%02d",i+1);
       pad->cd(1+i);
-      plotMix(t1, xLo,xHi, fd);
+      plotMix(t1, xLo,xHi, fd,gr1,gr2,gr3);
     }
     printYield(xLo,xHi);
+
+    c2=new TCanvas(ctit+"e",ctit+"e",400,700);
+    c2->Divide(1,3);
+    c2->cd(1);    gr1->Draw("AP");
+    gr1->SetMinimum(100);gr1->SetMaximum(180);
+    TLine *ln=new TLine(0,135,13,135);
+    ln->SetLineColor(kBlue); ln->Draw();
+    c2->cd(2);    gr2->Draw("AP");
+    gr2->SetMinimum(20);gr2->SetMaximum(60);
+    c2->cd(3);    gr3->Draw("AP");
   }  break;
   //..........................................
   //..........................................
@@ -199,7 +227,8 @@ void plPi0Solo( int page=1,TString fName="aa8c" ) {
 //---------------------------------------------
 //---------------------------------------------
 //---------------------------------------------
-void  plotMix(TString hname="m1",float xLo, float xHi,TFile *fd) {
+void  plotMix(TString hname="m1",float xLo, float xHi,TFile *fd,
+	      TGraphErrors*  grM=0, TGraphErrors*  grS=0, TGraphErrors*  grN=0) {
   hx= (TH1*)fd->Get("invm"); assert(hx);
   int bin1=hx->FindBin(0.6);
   int bin2=hx->FindBin(1.0);
@@ -250,9 +279,38 @@ void  plotMix(TString hname="m1",float xLo, float xHi,TFile *fd) {
 
   f=hD->GetFunction("gaus");
   f->SetLineColor(kRed);
-  f->SetLineWidth(2.);
- 
-  printf("#2  mass/MeV=%.0f + / - %.0f , <br>sig/MeV %.0f + / - %.0f\n",f->GetParameter(1)*1000.,f->GetParError(1)*1000,f->GetParameter(2)*1000.,f->GetParError(2)*1000);
+  f->SetLineWidth(1.);
+
+  double *par=f->GetParameters();
+  double *epar=f->GetParErrors();
+  float   pi0m=par[1]*1000; // in MeV
+  float   epi0m=epar[1]*1000; // in MeV
+  float   pi0s=par[2]*1000; // in MeV
+  float   epi0s=epar[2]*1000; // in MeV
+
+  printf("#2  mass/MeV=%.0f + / - %.0f , <br>sig/MeV %.0f + / - %.0f\n",pi0m,epi0m,pi0s,epi0s);
+
+
+  if(grM==0) return;
+  int etaB=atoi(hname.Data()+4);
+
+  int n=grM->GetN();
+  grM->SetPoint(n,etaB,pi0m);
+  grM->SetPointError(n,0.5,epi0m);
+
+  n=grS->GetN();
+  grS->SetPoint(n,etaB,pi0s);
+  grS->SetPointError(n,0.5,epi0s);
+
+  ax=invm->GetXaxis();
+  int bLo=ax->FindBin(xLo);
+  int bHi=ax->FindBin(xHi);
+  float nPi0=hD->Integral(bLo,bHi);
+  float nBckg=hr->Integral(bLo,bHi) - nPi0;
+  printf("etaB=%d nPi0=%.1f nBckg=%.1f\n",etaB,nPi0,nBckg);
+  n=grN->GetN();
+  grN->SetPoint(n,etaB,nPi0);
+  grN->SetPointError(n,0.5,nBckg/10.  );
   return;
   // TH1F* hR=(TH1F*)hr->Clone();
 }
