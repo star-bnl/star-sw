@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.11 1999/08/12 15:23:38 ward Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.12 1999/08/13 21:30:34 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.12  1999/08/13 21:30:34  ward
+// Gain corrections.  And bug fix for TRS mode.
+//
 // Revision 1.11  1999/08/12 15:23:38  ward
 // 8 to 10 bit conversion has been implemented
 //
@@ -60,6 +63,7 @@ class StTpcUnpacker;
 class StSequence;
 class TH1F;
 #define NOISE_ELIM
+#define GAIN_CORRECTION
 #define MAXROWPADPERSECTOR 400
 #define BINRANGE 3
 #ifdef NOISE_ELIM
@@ -73,6 +77,10 @@ class St_tpcdaq_Maker : public StMaker {
    Char_t            *gConfig; //!
    StTpcRawDataEvent *mEvent; //!
    void MakeHistograms();
+   void St_tpcdaq_Maker::SetGainCorrectionStuff(int);
+#ifdef GAIN_CORRECTION
+   float fGain[45][182];
+#endif
 #ifdef TRS_SIMPLE
    StTrsSimpleMaker *mUnpacker; //!
 #else
@@ -132,7 +140,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.11 1999/08/12 15:23:38 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.12 1999/08/13 21:30:34 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };

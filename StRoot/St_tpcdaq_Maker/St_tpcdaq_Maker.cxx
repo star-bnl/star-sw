@@ -1,7 +1,7 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
-// Revision 1.34  1999/08/13 16:28:19  fisyak
-// add full path to trans_table.hh
+// Revision 1.35  1999/08/13 21:30:33  ward
+// Gain corrections.  And bug fix for TRS mode.
 //
 // Revision 1.33  1999/08/12 15:23:37  ward
 // 8 to 10 bit conversion has been implemented
@@ -345,6 +345,40 @@ int St_tpcdaq_Maker::getSequences(int row,int pad,int *nseq,StSequence **lst) {
   }
   return rv; // < 0 means serious error.
 }
+#ifdef GAIN_CORRECTION
+#define GAIN_LINE_SIZE 1700
+void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) {
+  FILE *ff; char *cc,line[GAIN_LINE_SIZE+8]; float min=1e15,max=-1e15;
+  int minRow,minPad,maxRow,maxPad,sec,ii,jj,row,num;
+  assert(sector>=1&&sector<=24);
+  for(ii=44;ii>=0;ii--) { for(jj=181;jj>=0;jj--) fGain[ii][jj]=1.0; }
+  ff=fopen("tpcgains.txt","r"); if(!ff) return;
+  while(fgets(line,GAIN_LINE_SIZE,ff)) {
+    assert(strlen(line)<GAIN_LINE_SIZE-5);
+    if(!strncmp(line,"Sector ",7)) { sec=atoi(line+7); continue; } if(sec!=sector) continue;
+    if(!strncmp(line,"Row ",4)) {
+      strtok(line," \n"); 
+      cc=strtok(NULL," \n"); assert(cc); row=atoi(cc)-1;
+      cc=strtok(NULL," \n"); assert(cc); num=atoi(cc);
+      cc=strtok(NULL," \n"); assert(!cc);
+      continue;
+    }
+    assert(row>=0&&row<45);
+    assert(num<=182);
+    cc=strtok(line," \n");
+    for(ii=0;ii<num;ii++) { 
+      assert(cc); fGain[row][ii]=atof(cc); 
+      if(max<fGain[row][ii]) { max=fGain[row][ii]; maxRow=row; maxPad=ii; }
+      if(min>fGain[row][ii]) { min=fGain[row][ii]; minRow=row; minPad=ii; }
+      cc=strtok(NULL," \n"); 
+    }
+    cc=strtok(NULL," \n"); assert(!cc); /* If this assert fails, there is junk in tpcgains.txt. */
+  }
+  fclose(ff);
+  PP"Read gain corr. sector %2d, min=%4.2f (row=%02d pad=%02d), max=%4.2f (row=%02d pad=%02d)\n",
+    sector,min,minRow,minPad,max,maxRow,maxPad);
+}
+#endif
 #ifdef NOISE_ELIM
 void St_tpcdaq_Maker::SetNoiseEliminationStuff(tpcdaq_noiseElim *noiseElim) {
   int zz,sector,row; FILE *ff; char line[200],*cc,*dd,*ee;
@@ -439,6 +473,9 @@ int St_tpcdaq_Maker::Output() {
   // See "DAQ to Offline", section "Better example - access by padrow,pad",
   // modifications thereto in Brian's email, SN325, and Iwona's SN325 expl.
   for(isect=1;isect<=NSECT;isect++) {
+#ifdef GAIN_CORRECTION
+    SetGainCorrectionStuff(isect);
+#endif
     dataOuter[isect-1]=0; dataInner[isect-1]=0;
     sector=raw_data_tpc(NameOfSector(isect));
     if(!sector) {
@@ -513,6 +550,15 @@ int St_tpcdaq_Maker::Output() {
           numberOfUnskippedSeq++;
           for(ibin=0;ibin<seqLen;ibin++) {
             pixCnt++; conversion=log8to10_table[*(pointerToAdc++)]; 
+#ifdef GAIN_CORRECTION
+            assert(pad>0&&pad<=182); /* bbb delete this after running a few complete events */
+            if(fGain[ipadrow][pad-1]>22.0) { /* bbb delete this? */
+              printf("Fatal error in %s, line %d.\n",__FILE__,__LINE__);
+              printf("ipadrow=%d, pad-1=%d, fgain=%g\n",ipadrow,pad-1,fGain[ipadrow][pad-1]);
+              exit(2);
+            }
+            conversion=0.5+fGain[ipadrow][pad-1]*conversion;
+#endif
 #ifdef HISTOGRAMS
             m_pix_AdcValue->Fill((Float_t)(conversion));
 #endif
@@ -569,13 +615,12 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am Shakespeare. St_tpcdaq_Maker::Make().\n"); 
+  printf("I am Bill Clinton. St_tpcdaq_Maker::Make().\n"); 
   errorCode=GetEventAndDecoder();
-    victor=victorPrelim->getTPCReader();
-  assert(victor);
+  if(gDAQ) { victor=victorPrelim->getTPCReader(); assert(victor); }
   printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
-    printf("Error: St_tpcdaq_Maker no event from DAQ/TRS (%d).\n",errorCode);
+    printf("Error: St_tpcdaq_Maker no event from TRS (%d).\n",errorCode);
     return kStErr;
   }
   if (!m_DataSet->GetList()) Output(); else mErr=__LINE__;
