@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.26 2004/03/24 18:44:58 ward Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.27 2004/03/25 21:07:32 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -35,6 +35,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.27  2004/03/25 21:07:32  ward
+ * Suppress more debug messages.
+ *
  * Revision 1.26  2004/03/24 18:44:58  ward
  * Suppress debug messages.
  *
@@ -306,8 +309,7 @@ int TPCV2P0_ZS_SR::initialize()
       }       // if TPCSEQD doesn't exist 
       // use this loop when SEQD exists:
       else { //TPCSEQD bank exists
-	if (detector->ercpy->verbose) 
-	  printf("TPCSEQD found sector %d  RB%d MZ%d\n",sector+1,rcb+1,mz+1);
+	// if (detector->ercpy->verbose) printf("TPCSEQD found sector %d  RB%d MZ%d\n",sector+1,rcb+1,mz+1);
 
 	int padrow=-1, pad=-1, lastbin=-2, oldstart=0;
 	int len = seqd_p[rcb][mz]->header.BankLength - (sizeof(Bank_Header)/4);
@@ -405,8 +407,8 @@ int TPCV2P0_ZS_SR::initialize()
 
 	if (padrow <1 || pad <1) { // Jerome and Herb, Oct 1 2003.
 	  nseq = 0;
-	  if (iOld==-1) (void) printf("Did not loop over bank TPCSEQD");
-	  else          (void) printf("Sequence=%d for SEQD bank\n",numseq);
+	  // if (iOld==-1) (void) printf("Did not loop over bank TPCSEQD");
+	  // else          (void) printf("Sequence=%d for SEQD bank\n",numseq);
 	} else {
 	  nseq = Pad_array[padrow-1][pad-1].nseq;
 	}
