@@ -21,7 +21,7 @@ StTrackChair::StTrackChair(TTable *table) : TChair(table) {
   mTanl = table->GetOffset("tanl");          //        tan(dip) =pz/pt at start               
   mCurvature = table->GetOffset("curvature");//        Track curvature (1/cm)                 
   mLength = table->GetOffset("length");      //        from first to last point (cm)          
-  if (strcmp(table->GetType(),"tpt_track")) {
+  if (strcmp(table->GetType(),"tpt_track_st")) {
     mInvpt  = table->GetOffset("invpt") ;    //        1/pt at start (GeV/c)^(-1)             
     mCharge = table->GetOffset("icharge");   //        Particle charge in units of |e| 
   } else {
