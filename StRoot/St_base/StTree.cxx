@@ -122,7 +122,7 @@ ULong_t StIO::GetNextKey(TFile *file, const Char_t *name, ULong_t ukey)
   if (strncmp(prevkey,kname,lname)) lnk = 0;
   if (!lnk) goto RETURN; 
   while( !isdigit(kname[lname])){lname++;} 
-  ukey = strtoul(kname+lname,0,0);
+  ukey = strtoul(kname+lname,0,10);
 
 RETURN:;
   return ukey;  
