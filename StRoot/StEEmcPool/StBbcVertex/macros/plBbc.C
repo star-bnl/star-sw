@@ -214,8 +214,8 @@ twFit( TH2* h2) {
 
   TF1 *f1 = new TF1(tt+"fit",timeWalkFunc,-100,120,4);
   // f1->SetParameters(-25,50,0.01 1.5);// East
-  // f1->SetParameters(-50,40,0.01 0.1);// East #8
-  f1->SetParameters(-80,30,1,0.1);// West
+   f1->SetParameters(-50,40,0.01 0.1);// East #8
+  //f1->SetParameters(-80,30,1,0.1);// West
   f1->SetLineColor(kRed);
   f1->SetLineWidth(2.);
   
@@ -246,7 +246,7 @@ twFit( TH2* h2) {
   double *parE=f1->GetParErrors();
   int i;
 
-  float fac=2.; // 1tdc ch = 2 cm
+  float fac=2.16; // 1tdc ch = 2 cm
   float pm= 1; // use - for E
   printf("#1 bbc%s %g %g %g %g \n",h2->GetName()+1,pm*par[0]/fac,pm*par[1]/fac,par[2],par[3]);    
 }
