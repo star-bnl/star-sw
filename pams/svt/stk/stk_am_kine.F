@@ -203,7 +203,7 @@ c     track with bad parameters - store it with "infinity"
 
             msg = 'stk_am_kine_invpt-e : '//
      &           'found track with |invpt| out of bound'
-            call StErro(msg)
+            call StError(msg)
             ikine = ikine + 1
             if (ikine.lt.kine_h.maxlen) then
                kine(ikine).id     = ikine
