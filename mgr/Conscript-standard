@@ -72,6 +72,7 @@ print "SO_PKG = $SO_PKG\n" if $param::debug;
 my $LIBS    = $env->{LIBS};
 my $LIBPATH = $env->{LIBPATH};
 my $CPPPATH = $env->{CPPPATH};
+my $CXXFLAGS= $env->{CXXFLAGS};
 my $FC      = $env->{FC};
 my $FFLAGS  = $env->{FFLAGS};
 my $FEXTEND = $env->{FEXTEND};
@@ -86,7 +87,29 @@ if (-d "/usr/include/mysql"){
     $MYSQLINC = $env->{ENV}->{OPTSTAR} . "/include";
     $MYSQLLIB = $env->{ENV}->{OPTSTAR} . "/lib";
 }
+my $QTDIR = $ENV{QTDIR};
 
+
+
+
+
+#+
+# Extraneous flag treatment for specific makers
+# Search path depth for Makers.
+#-
+
+if ( $pkg =~ /^StEventDisplay/){
+    # This make requires both ROOT Qt and QT libraries
+    if ( defined($QTDIR) && -r $ENV{ROOTSYS} . "/include/TQt.h"){
+	#print "-=-=-=-=-=-=-=- QT is defined -=-=-=-=-=-=-=-=-=-=\n";
+	$QTDIRBIN = $QTDIR . "/bin";
+
+	$CPPPATH .= $main::PATH_SEPARATOR . $QTDIR . "/include";
+	$LIBPATH .= $main::PATH_SEPARATOR . $QTDIR . "/lib";
+	#$LIBS ... should come loaded from ROOT
+	$CXXFLAGS.= " -DR__QT";
+    }
+}
 if ( $pkg =~ /^St.*Db/ ) {
   $CPPPATH .= $main::PATH_SEPARATOR . $MYSQLINC;
 }
@@ -179,7 +202,9 @@ if ($pkg =~ /^St_base$/) {
     $CPPPATH .= $main::PATH_SEPARATOR . "/usr/local/include";
   }
 }
-my $CXXFLAGS = $env->{CXXFLAGS};
+
+#print "_+_+_+_+_+ $CPPPATH $CXXFLAGS $LIBS $CPPPATH $LIBPATH _+_+_+_+_+\n";
+
 my $FCCOM = $env->{FCCOM};
 if ( $STAR_SYS =~ /^sun4x_5.$/ ) { $CXXFLAGS .= " -ptr" . $obj_dir; }
 if ( $STAR_SYS =~ /kcc$/ ) { $LIBPATH = ""; $LIBS = ""; }
@@ -196,8 +221,10 @@ $env2 = $env->clone(
   'FEXTEND'  => $FEXTEND
 );
 bless $env2, cons;
-print "LIBPATH = |", $env2->{LIBPATH}, "|\n LIBS = |", $env2->{LIBS}, "|\n"
-  if $param::debug;
+
+
+print "LIBPATH = |", $env2->{LIBPATH}, "|\n LIBS = |", $env2->{LIBS}, 
+    "|\n CPPPATH = |", $env2->{CPPPATH}, "|\n" if $param::debug;
 print "LINKMODULECOM |", $env2->{LINKMODULECOM}, "|\n" if $param::debug;
 my $cscanner = find scan::cpp( $env2->{_cwd}, $env2->{CPPPATH} );
 my @cpps = split /$main::PATH_SEPARATOR/, $env2->{CPPPATH};
@@ -281,11 +308,9 @@ else {
                 if ( ( $line =~ /ClassDef/ || $line =~ /StCollectionDef/) ) {
                     push @Defs, $h;
                     $classDefFlag = 0;
-                } elsif ( $line =~ /Q_OBJECT/ ) {
+                } elsif ( $line =~ /Q_OBJECT/ && defined($QTDIRBIN) ) {
                     push @QtDefs, $h;
                     $qtFlag = 0;
-                    # $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{QT}->{INCDIR};
-                    # $CPPFLAGS .= " " . $env->{Packages}->{QT}->{FLAGS};
                 }
                 next if ( $classDefFlag + $qtFlag == 0 );
             }
@@ -512,12 +537,13 @@ sub script::MakeMoc {
   my @src      = ();
   my @Defs     = ();
   my $PLATFORM = $env->{PLATFORM};
+
   
   foreach my $header (@includes) { 
     my $dd = $d;
     my $G__name = "moc_" . $header; 
     $G__name =~ s/\.h$/\.cxx/; # print "G__name = $G__name\n";
-    my $moc = $ENV{QTDIR} . "/bin/moc";
+    my $moc = $QTDIRBIN . "/moc";
 #    my $moc = "moc";
 #    print "moc = $moc\n";
     Command $env ($G__name), ($header),
