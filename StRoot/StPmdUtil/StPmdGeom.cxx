@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.6 2004/03/23 08:49:27 subhasis Exp $
+ * $Id: StPmdGeom.cxx,v 1.7 2004/04/01 15:41:00 subhasis Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.7  2004/04/01 15:41:00  subhasis
+ * 3rd (or 4th?) access board detail added by Dipak
+ *
  * Revision 1.6  2004/03/23 08:49:27  subhasis
  * biardDetail put by had
  *
@@ -1215,258 +1218,265 @@ void StPmdGeom::chain46(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row)
 }
 void StPmdGeom::ADC2Edep(Int_t ADC, Float_t& Edep)
 {
- const Float_t Coeff[4] = {-0.7802, 0.09678, -3.054e-05, 0.0};
+  const Float_t Coeff[4] = {-0.7802, 0.09678, -3.054e-05, 0.0};
  //const Float_t ErrCoeff[4] = {0.4971, 0.00381, 4.466e-06, 0.0};
-
+  
  Edep = Coeff[0] + Coeff[1]*ADC + Coeff[2]*pow(Float_t(ADC),2) + Coeff[3]*pow(Float_t(ADC),3);
 }
 
 void StPmdGeom::readBoardDetail()
 {
-
- for(Int_t i=0;i<48;i++){
+  
+  for(Int_t i=0;i<48;i++){
    for(Int_t ib=0;ib<27;ib++){
-   status[i][ib]=1;
+     status[i][ib]=1;
    }
   }
 }
 
 void StPmdGeom::readBoardDetail(Int_t runno1)
 {
- char *runfile = new char[20];
- sprintf(runfile,"%d",runno1);
-
- //Initialise satus array as 1 (good board)
- for(Int_t i=0;i<48;i++){
-   for(Int_t ib=0;ib<27;ib++){
-   status[i][ib]=1;
-   }
+  char *runfile = new char[20];
+  sprintf(runfile,"%d",runno1);
+  
+  //Initialise satus array as 1 (good board)
+  for(Int_t i=0;i<48;i++){
+    for(Int_t ib=0;ib<27;ib++){
+      status[i][ib]=1;
+    }
   }
   // Fetch from the run # the day
-   char iRun[8];
-   for (Int_t ik=0; ik<2; ik++)
-     {
-       iRun[ik] = runfile[2+ik];
-     }
-
-     Int_t rn = atoi(iRun);
-cout<<"runno, rn1 "<<runno1<<" "<<rn<<endl;
-
-// Once the day is know choose the mapping file
-//     if( rn >=1 && rn <21)
-     if( rn >=1)
-       {
-       //chain 0
-       for(Int_t i=3;i<6;i++)status[0][i]=0;
-       for(Int_t i=12;i<18;i++)status[0][i]=0;
-       //chain 1
-       status[1][19]=0;
-       //chain 3
-       status[3][22]=0; status[3][25]=0; status[3][26]=0;
-       //chain 5
-       status[5][1]=0;for(Int_t i=24;i<27;i++)status[5][i]=0;
-       //chain 6
-       status[6][24]=0;for(Int_t i=6;i<9;i++)status[6][i]=0;
-       //chain 7
-       for(Int_t i=0;i<27;i++)status[7][i]=0;
-       //chain 8
-       status[8][22]=0;
-       //chain 9
-       for(Int_t i=0;i<27;i++)status[9][i]=0;
-       //chain10 
-       for(Int_t i=0;i<27;i++)status[10][i]=0;
-       //chain11 
-       for(Int_t i=0;i<9;i++)status[11][i]=0;
-       //chain12 
-       for(Int_t i=0;i<9;i++)status[12][i]=0;
-       //chain13 
-       for(Int_t i=0;i<27;i++)status[13][i]=0;
-       //chain14 
-       for(Int_t i=0;i<27;i++)status[14][i]=0;
-       //chain15 
-       for(Int_t i=0;i<27;i++)status[15][i]=0;
-       //chain16 
-       for(Int_t i=0;i<9;i++)status[16][i]=0;
-       //chain17 
-       for(Int_t i=6;i<12;i++)status[17][i]=0;
-       for(Int_t i=24;i<27;i++)status[17][i]=0;
-       //chain19 
-       for(Int_t i=3;i<6;i++)status[19][i]=0;
-       for(Int_t i=21;i<24;i++)status[19][i]=0;
-       status[19][12]=0;
-       //chain20 
-       status[20][18]=0;
-       //chain21 
-       status[21][0]=0;
-       //chain22 
-       status[22][0]=0;
-       //chain23 
-       status[23][6]=0;status[23][24]=0;
-       //chain25 
-       status[25][16]=0;
-       //chain31 
-       status[31][8]=0;
-       //chain38 
-       status[38][24]=0;status[38][25]=0;
-       //chain39 
-       status[39][24]=0;
-       //chain40 
-       status[40][7]=0;
-       //chain44 
-       status[44][14]=0;
-       //chain46 
-       status[46][16]=0;
-
-       }
-
-//     if( rn >=21 && rn <27)
-     if( rn >=21)
-       {
-       //chain30 
-       status[30][21]=0;
-       //chain38 
-       status[38][5]=0;
-       //chain43 
-       status[43][20]=0;
-       //chain44 
-       for(Int_t i=18;i<27;i++)status[44][i]=0;
-       //chain45 
-       for(Int_t i=3;i<6;i++)status[45][i]=0;
-       for(Int_t i=9;i<27;i++)status[45][i]=0;
-       }
-
-//     if( rn >=27 && rn <35)
-     if( rn >=27)
-       {
-       //chain 24
-       status[24][1]=0;
-       status[24][25]=0;
-       //chain35 
-       status[35][14]=0;
-       //chain44 
-       for(Int_t i=18;i<27;i++)status[44][i]=1;
-       //chain45 
-       status[45][6]=0;
-       for(Int_t i=9;i<27;i++)status[45][i]=1;
-       //chain46 
-       status[46][16]=0;
-
-       }
-
-//     if( rn >=35 && rn <43)
-     if( rn >=35)
-       {
-       //chain 0
-       for(Int_t i=0;i<21;i++)status[0][i]=0;
-       status[0][18]=1;
-       //chain 1
-       status[1][19]=1;status[1][9]=0;
-       //chain 2
-       status[2][3]=0;status[2][6]=0;
-       status[2][7]=0;status[2][8]=0;
-       status[2][10]=0;status[2][13]=0;
-       //chain 3
-       status[3][25]=1; status[3][26]=1;
-       status[3][13]=0; status[3][15]=0;
-       status[3][18]=0; status[3][19]=0;
-       status[3][20]=0; status[3][22]=0;
-       status[3][24]=0;
-       //chain 4
-       status[4][2]=0; status[4][17]=0;
-       //chain 5
-       status[5][1]=0; 
-       for(Int_t i=21;i<27;i++)status[5][i]=0;
-       status[5][23]=1; 
-       //chain 6
-       for(Int_t i=6;i<9;i++)status[6][i]=0;
-       for(Int_t i=2;i<4;i++)status[6][i]=0;
-       status[6][15]=0; status[6][17]=0;
-       status[6][18]=0; status[6][19]=0;
-       status[6][20]=0; status[6][24]=0;
-       //chain 8
-       status[8][9]=0; status[8][11]=0;
-       //chain11 
-       status[11][14]=0; status[11][26]=0;
-       //chain17 
-       for(Int_t i=5;i<13;i++)status[17][i]=0;
-       status[17][14]=0; status[17][18]=0;
-       status[17][21]=0; status[17][22]=0;
-       for(Int_t i=24;i<27;i++)status[17][i]=0;
-       //chain18 
-       status[18][1]=0; status[18][6]=0;
-       status[18][18]=0; status[18][24]=0;
-       status[18][25]=0; status[18][26]=0;
-       //chain 20
-       status[20][2]=0; status[20][8]=0;
-       status[20][9]=0; status[20][18]=0;
-       status[20][20]=0; status[20][24]=0;
-       status[20][25]=0;
-       //chain 24
-       status[24][1]=0; status[24][25]=0;
-       //chain 28
-       status[28][23]=0; status[28][24]=0;
-       //chain 36
-       status[36][25]=0;
-       //chain44 
-       for(Int_t i=18;i<27;i++)status[44][i]=1;
-       status[44][3]=0; status[44][4]=0;
-       status[44][14]=0;
-       //chain45 
-       for(Int_t i=3;i<6;i++)status[45][i]=1;
-       }
-//    if( rn >=43 && rn <49)
-    if( rn >=43)
-       {
-       //chain33 
-       status[33][2]=0;
-       }
-
-     if( rn >=49 )
-       {
-       //chain 38
-       status[38][5]=0; status[38][19]=0;
-       status[38][22]=0; status[38][24]=0;
-       status[38][25]=0;
-       //chain 8
-       status[8][22]=0;
-       }
-     if( rn >=78 )
-       {
-	//chain 25    
-	status[24][12]=0;
-	//chain 30    
-	status[30][18]=0;
-	//chain 32    
-	status[32][21]=0;
-	//chain 35    
-	status[35][12]=0;
-	//chain 36    
-	status[36][24]=0;
-	//chain 38    
-	status[38][7]=0;
-	//chain 42    
-	status[42][7]=0;
-	//chain 45    
-	status[45][8]=0;
-	//chain 44    
-	status[44][6]=0;status[44][11]=0;
-	//chain 46    
-	status[46][8]=0;status[46][16]=0;
-	//chain 47    
-	status[47][11]=0;status[47][19]=0;
-	status[47][20]=0;
-
-
-
-       }
+  char iRun[8];
+  for (Int_t ik=0; ik<2; ik++)
+    {
+      iRun[ik] = runfile[2+ik];
+    }
+  
+  Int_t rn = atoi(iRun);
+  cout<<"runno, rn1 "<<runno1<<" "<<rn<<endl;
+  
+  // Once the day is know choose the mapping file
+  //     if( rn >=1 && rn <21)
+  
+  //Following are the configuration of FEE from 1st Jan'04 to 21st Jan'04
+  if( rn >=1)    
+    {
+      //chain 0
+      for(Int_t i=3;i<6;i++)status[0][i]=0;
+      for(Int_t i=12;i<18;i++)status[0][i]=0;
+      //chain 1
+      status[1][19]=0;
+      //chain 3
+      status[3][22]=0; status[3][25]=0; status[3][26]=0;
+      //chain 5
+      status[5][1]=0;for(Int_t i=24;i<27;i++)status[5][i]=0;
+      //chain 6
+      status[6][24]=0;for(Int_t i=6;i<9;i++)status[6][i]=0;
+      //chain 7
+      for(Int_t i=0;i<27;i++)status[7][i]=0;
+      //chain 8
+      status[8][22]=0;
+      //chain 9
+      for(Int_t i=0;i<27;i++)status[9][i]=0;
+      //chain10 
+      for(Int_t i=0;i<27;i++)status[10][i]=0;
+      //chain11 
+      for(Int_t i=0;i<9;i++)status[11][i]=0;
+      //chain12 
+      for(Int_t i=0;i<9;i++)status[12][i]=0;
+      //chain13 
+      for(Int_t i=0;i<27;i++)status[13][i]=0;
+      //chain14 
+      for(Int_t i=0;i<27;i++)status[14][i]=0;
+      //chain15 
+      for(Int_t i=0;i<27;i++)status[15][i]=0;
+      //chain16 
+      for(Int_t i=0;i<9;i++)status[16][i]=0;
+      //chain17 
+      for(Int_t i=6;i<12;i++)status[17][i]=0;
+      for(Int_t i=24;i<27;i++)status[17][i]=0;
+      //chain19 
+      for(Int_t i=3;i<6;i++)status[19][i]=0;
+      for(Int_t i=21;i<24;i++)status[19][i]=0;
+      status[19][12]=0;
+      //chain20 
+      status[20][18]=0;
+      //chain21 
+      status[21][0]=0;
+      //chain22 
+      status[22][0]=0;
+      //chain23 
+      status[23][6]=0;status[23][24]=0;
+      //chain25 
+      status[25][16]=0;
+      //chain31 
+      status[31][8]=0;
+      //chain38 
+      status[38][24]=0;status[38][25]=0;
+      //chain39 
+      status[39][24]=0;
+      //chain40 
+      status[40][7]=0;
+      //chain44 
+      status[44][14]=0;
+      //chain46 
+      status[46][16]=0;
+      
+    }
+  
+  if( rn >=21)  //Following are the FEE config after 21st Jan'04 access
+    {
+      //chain30 
+      status[30][21]=0;
+      //chain38 
+      status[38][5]=0;
+      //chain43 
+      status[43][20]=0;
+      //chain44 
+      for(Int_t i=18;i<27;i++)status[44][i]=0;
+      //chain45 
+      for(Int_t i=3;i<6;i++)status[45][i]=0;
+      for(Int_t i=9;i<27;i++)status[45][i]=0;
+    }
+  
+  if( rn >=27) //Following are the FEE config after 27th Jan'04 access
+    {
+      //chain 24
+      status[24][1]=0;
+      status[24][25]=0;
+      //chain35 
+      status[35][14]=0;
+      //chain44 
+      for(Int_t i=18;i<27;i++)status[44][i]=1;
+      //chain45 
+      status[45][6]=0;
+      for(Int_t i=9;i<27;i++)status[45][i]=1;
+      //chain46 
+      status[46][16]=0;
+      
+    }
+  
+  if( rn >=35) //Following are the FEE config after 4th Feb'04 access
+    {
+      //chain 0
+      for(Int_t i=0;i<21;i++)status[0][i]=0;
+      status[0][18]=1;
+      //chain 1
+      status[1][19]=1;status[1][9]=0;
+      //chain 2
+      status[2][3]=0;status[2][6]=0;
+      status[2][7]=0;status[2][8]=0;
+      status[2][10]=0;status[2][13]=0;
+      //chain 3
+      status[3][25]=1; status[3][26]=1;
+      status[3][13]=0; status[3][15]=0;
+      status[3][18]=0; status[3][19]=0;
+      status[3][20]=0; status[3][22]=0;
+      status[3][24]=0;
+      //chain 4
+      status[4][2]=0; status[4][17]=0;
+      //chain 5
+      status[5][1]=0; 
+      for(Int_t i=21;i<27;i++)status[5][i]=0;
+      status[5][23]=1; 
+      //chain 6
+      //       for(Int_t i=6;i<9;i++)status[6][i]=0; //already assigned
+      for(Int_t i=2;i<4;i++)status[6][i]=0;
+      status[6][15]=0;
+      for(Int_t i=17;i<21;i++)status[6][i]=0;
+      //       status[6][17]=0; status[6][18]=0;
+      // status[6][19]=0; status[6][20]=0;
+      status[6][24]=0;
+      //chain 8
+      status[8][9]=0; status[8][11]=0;
+      //chain11 
+      status[11][14]=0; status[11][26]=0;
+      //chain17 
+      for(Int_t i=5;i<13;i++)status[17][i]=0;
+      status[17][14]=0; status[17][18]=0;
+      status[17][21]=0; status[17][22]=0;
+      for(Int_t i=24;i<27;i++)status[17][i]=0;
+      //chain18 
+      status[18][1]=0; status[18][6]=0;
+      status[18][18]=0;
+      for(Int_t i=24;i<27;i++)status[18][i]=0;
+      // status[18][24]=0;
+      //       status[18][25]=0; status[18][26]=0;
+      //chain 20
+      status[20][2]=0; status[20][8]=0;
+      status[20][9]=0; status[20][18]=0;
+      status[20][20]=0; status[20][24]=0;
+      status[20][25]=0;
+      //chain 24
+      //       status[24][1]=0; status[24][25]=0; //already assigned
+      //chain 28
+      status[28][23]=0; status[28][24]=0;
+      //chain 36
+      status[36][25]=0;
+      //chain44 
+      //       for(Int_t i=18;i<27;i++)status[44][i]=1; //already assigned
+      status[44][3]=0; status[44][4]=0;
+      status[44][14]=0;
+      //chain45 
+      for(Int_t i=3;i<6;i++)status[45][i]=1;
+    }
+  
+  //    if( rn >=43 && rn <49)
+  if( rn >=43) //One board replaced on 12th Feb'04
+    {
+      //chain33 
+      status[33][2]=0;
+    }
+  
+  if( rn >=49 )//Following are the FEE config after 18th Feb'04 access
+    {
+      //chain 38
+      //       status[38][5]=0;
+      status[38][19]=0;
+      status[38][22]=0;
+      //       status[38][24]=0; //already assigned
+      //       status[38][25]=0;
+      //chain 8
+      //       status[8][22]=0; //already assigned
+    }
+  
+  if(rn>=63) //Following are the FEE config after 3rd Mar'04 access
+    {
+      //chain 24
+      status[24][20]=0;
+      //chain38
+      status[38][14]=0;
+      //chain46
+      status[46][8] = 0;
+    }
+  
+  if( rn >=78 )//Following are the FEE config after 18th Mar'04 access
+    {
+      //chain 25    
+      status[24][12]=0;
+      //chain 30    
+      status[30][18]=0;
+      //chain 32    
+      status[32][21]=0;
+      //chain 35    
+      status[35][12]=0;
+      //chain 36    
+      status[36][24]=0;
+      //chain 38    
+      status[38][7]=0;
+      //chain 42    
+      status[42][7]=0;
+      //chain 45    
+      status[45][8]=0;
+      //chain 44    
+      status[44][6]=0;status[44][11]=0;
+      //chain 46    
+      status[46][8]=0;status[46][16]=0;
+      //chain 47    
+      status[47][11]=0;status[47][19]=0;
+      status[47][20]=0;
+      
+    }
 }
-
-
-
-
-
-
-
-
 
 
