@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.74  1999/05/01 18:50:42  fisyak
+#  put ctf as last pams to build
+#
 #  Revision 1.73  1999/04/30 13:22:06  fisyak
 #  put StRootEvent into loop
 #
@@ -298,7 +301,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/04/30 13:22:06 $ 
+#           Last modification $Date: 1999/05/01 18:50:42 $ 
 #  default setings
 # Current Working Directory
 #
@@ -323,6 +326,8 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out inc idl doc CVS wrk src exa kumac html test macros, $(DIRS))
   SUBDIRS := $(strip    $(sort $(SUBDIRS)))
   SUBDIRS := $(filter StChain, $(SUBDIRS)) $(filter-out StChain, $(SUBDIRS)) 
+  SUBDIRS := $(filter-out ctf, $(SUBDIRS)) $(filter ctf, $(SUBDIRS)) 
+  SUBDIRS := $(filter St_base, $(SUBDIRS)) $(filter-out St_base, $(SUBDIRS)) 
   ifneq (,$(findstring sim, $(SUBDIRS)))
     SUBDIRS := $(filter-out sim, $(SUBDIRS))
     DIRS    := $(subst /.,,$(strip $(wildcard sim/*/.)))
