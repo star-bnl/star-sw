@@ -1,7 +1,0 @@
-cd lev  make config
-cd cdf  make       copy .c file to ../src
-cd srcm make levStaf.cc
-cd lib  make
-cd bin  make
-    and or
-cd lev make install
