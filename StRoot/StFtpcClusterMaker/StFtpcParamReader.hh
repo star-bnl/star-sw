@@ -1,9 +1,8 @@
-// $Id: StFtpcParamReader.hh,v 1.4 2000/11/03 13:23:13 hummler Exp $
+// $Id: StFtpcParamReader.hh,v 1.5 2000/11/03 14:20:42 hummler Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
-// Revision 1.4  2000/11/03 13:23:13  hummler
-// add set functions to change the drift map values
-// (to be used in the new drift map maker)
+// Revision 1.5  2000/11/03 14:20:42  hummler
+// add new members needed for the drift map generator
 //
 // Revision 1.3  2000/10/31 09:52:19  hummler
 // add parameters for slow simulator
@@ -97,6 +96,14 @@ protected:
   Float_t m3PadWeightedError;
   Float_t m3PadGaussError;
   Float_t mZDirectionError;
+  Float_t mMinimumDriftField;
+  Float_t mStepSizeDriftField;
+  Float_t mDvdpCalcOffset;
+  Float_t mBaseTemperature;
+  Float_t mPercentAr;
+  Float_t mPercentCO2;
+  Float_t mPercentNe;
+  Float_t mPercentHe;
   Float_t *mPadrowZPosition;
   //FastSimulator parameters
   Int_t mOrderOfFastEstimates;
@@ -217,6 +224,14 @@ public:
   Float_t threePadWeightedError() {return m3PadWeightedError;}
   Float_t threePadGaussError() {return m3PadGaussError;}
   Float_t zDirectionError() {return mZDirectionError;}
+  Float_t minimumDriftField() {return mMinimumDriftField;}
+  Float_t stepSizeDriftField() {return mStepSizeDriftField;}
+  Float_t dvdpCalcOffset() {return mDvdpCalcOffset;}
+  Float_t baseTemperature() {return mBaseTemperature;}
+  Float_t percentAr() {return mPercentAr;}
+  Float_t percentCO2() {return mPercentCO2;}
+  Float_t percentNe() {return mPercentNe;}
+  Float_t percentHe() {return mPercentHe;}
   Int_t numberOfFssGasValues() {return mNumberOfFssGasValues;}
   Int_t randomNumberGenerator() {return mRandomNumberGenerator;}
   Int_t zeroSuppressThreshold() {return mZeroSuppressThreshold;}
@@ -238,3 +253,11 @@ public:
 };
 
 #endif
+
+
+
+
+
+
+
+
