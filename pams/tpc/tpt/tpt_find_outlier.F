@@ -1,5 +1,8 @@
-* $Id: tpt_find_outlier.F,v 1.2 1998/01/27 00:35:44 fisyak Exp $
+* $Id: tpt_find_outlier.F,v 1.3 1998/04/06 19:23:45 sakrejda Exp $
 * $Log: tpt_find_outlier.F,v $
+* Revision 1.3  1998/04/06 19:23:45  sakrejda
+* write replaced by message calls
+*
 * Revision 1.2  1998/01/27 00:35:44  fisyak
 * Split sources
 *
@@ -39,6 +42,8 @@ C_________________________________________________________________
 #include "PAM.inc"
 #include "tpt_pars.inc"
 #include "tpt_pointers.inc"
+#include "math_constants.inc"
+
 C__________________________________________________________________
       RECORD /track_pointers/   trk(*)
       RECORD /table_head_st/    tpar_h
@@ -49,10 +54,13 @@ C_________________________________________________________________
       REAL    xcir(*),ycir(*),zcir(*),wcir(*),wlin(*)
       REAL    zn1,resbig,restot,phi0,dz,ri,rr
       REAL    stot,dsxy,dsz,acent,bcent,xn1,yn1
+      integer idI1, idI2, idI3       ! Message ID
+      character*132 m132  ! And some message-generating space.
+      character*132 m132by100(100)
+      data idI1, idI2, idI3 /0, 0, 0/
+      save idI1, idI2, idI3
 C_________________________________________________________________
-      if(tpar(ipass).debug(6).eq.1) then
-          write(6,*) 'track id',ipt
-      endif
+c
       ibig = 0
       resbig  = 0.0 
       stot = 0.0
@@ -63,18 +71,20 @@ C_________________________________________________________________
       zn1 = trk(ipt).p(6)
       yn1 = ycir(1)
       xn1 = xcir(1)
+      dz  = 0.0
       do i=1,ncir
          ri = abs(sqrt((xcir(i)-acent)**2+(ycir(i)-bcent)**2)- rr)
          if(abs(trk(ipt).p(7)).lt.0.0000001) then
-             write(6,*) 'Midrapidity track'
+             write(m132,*)'TPT-OUT1 Midrapidity track'
+             call Message( m132, 1, idI1 )
              tpt_find_outlier = STAFCV_BAD
              return
          endif
          dsz = (zcir(i) - zn1)/trk(ipt).p(7)
-         if(dsz.ge.2.0*3.141592653589*rr) then
+         if(dsz.ge.C_2PI*rr) then
 *            it's a very special case
-             if(tpar(ipass).debug(6).eq.1)   
-     >       write(6,*) ' special case in the outliers removal',dsz
+             write (m132,*)'TPT-OUT2 special case in the outliers removal',dsz
+             call Message( m132, 1, idI2 )
              tpt_find_outlier = STAFCV_BAD
          else
              dsxy = 0.5*sqrt((ycir(i)-yn1)**2+(xcir(i)-xn1)**2)/rr
@@ -97,8 +107,11 @@ C_________________________________________________________________
       end do
       ibad = ibig
       if(ibad.eq.0) then
-          write(6,*)ibad, ipt, ncir, ri, dz
-          write(6,*)(wlin(i),wcir(i),i=1,ncir)
+          write(m132by100(1),*)'TPT-OUT3 ',ibad, ipt, ncir, ri, dz
+          do i=1,ncir
+          write(m132by100(i+1),*)wlin(i),wcir(i)
+          end do
+          call Message( m132by100, ncir+1, idI3 )
           tpt_find_outlier = STAFCV_BAD
       else
           tpt_find_outlier = STAFCV_OK
