@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimCluster.cc,v 1.5 2002/04/19 22:24:12 perev Exp $
+// $Id: StFtpcSlowSimCluster.cc,v 1.6 2002/06/07 09:55:39 fsimon Exp $
 // $Log: StFtpcSlowSimCluster.cc,v $
+// Revision 1.6  2002/06/07 09:55:39  fsimon
+// Additional debug info to trace electron drift
+//
 // Revision 1.5  2002/04/19 22:24:12  perev
 // fixes for ROOT/3.02.07
 //
@@ -48,6 +51,8 @@ StFtpcSlowSimCluster::StFtpcSlowSimCluster(StFtpcParamReader *paramReader,
   currentPhi          = ph;
   drift_time   = time;
 
+  original_padrow = call_padrow;  //needed for debug info
+
   padrow=call_padrow;
   if(padrow>=10)
     padrow -= 10;
@@ -62,6 +67,9 @@ StFtpcSlowSimCluster::~StFtpcSlowSimCluster() {}
 
 void StFtpcSlowSimCluster::DriftDiffuse(StFtpcSlowSimField *field)
 {
+
+
+  //cout << "DriftDiffuse: Padrow: "<<original_padrow<<" Drift r = "<<currentRadius<<" ; phi = "<<currentPhi;
   int i=0;
   while(currentRadius < outerRadius )
     { 
@@ -102,6 +110,8 @@ void StFtpcSlowSimCluster::DriftDiffuse(StFtpcSlowSimField *field)
       // next step
       currentRadius += deltaRadius; 
     }
+  //cout <<" ====> r = "<<currentRadius<<" ; phi = "<<currentPhi<<endl; 
+
 }
 
 void StFtpcSlowSimCluster::Print() const
