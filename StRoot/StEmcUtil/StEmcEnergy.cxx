@@ -32,7 +32,9 @@ ClassImp(StEmcEnergy)
 //------------------------------------------------------------------------------
 StEmcEnergy::StEmcEnergy():TObject()
 {
-  setBfield(0.5);
+  mInternalFilter=kTRUE;
+	mEmcFilter = new StEmcFilter();
+	setBfield(0.5);
   setQ0Factor(0.163);
   mBemcGeom = StEmcGeom::getEmcGeom("bemc");    
   setEval(evalOff);
@@ -408,3 +410,18 @@ Float_t StEmcEnergy::dEToTotaldE(StMcCalorimeterHit* hit, const char* detname)
   }
   return hitEnergy;
 }
+//------------------------------------------------------------------------------
+void StEmcEnergy::setEmcFilter(StEmcFilter* filter)
+{ 
+	if(mInternalFilter && mEmcFilter) delete mEmcFilter;
+	mEmcFilter = filter; 
+	mInternalFilter=kFALSE;
+}
+//------------------------------------------------------------------------------
+void StEmcEnergy::setBfield(Float_t Bfield)  
+{ 
+	mBfield = Bfield; 
+	if(mEmcFilter) mEmcFilter->setBField(Bfield);
+}
+
+

@@ -37,29 +37,30 @@ class StEmcFilter;
 class StEmcEnergy : public TObject
 {
   public:                 
-              StEmcEnergy();    
-    virtual   ~StEmcEnergy();
+              	StEmcEnergy();    
+    	virtual   	~StEmcEnergy();
 
-    Float_t   getBemcEnergy();                  ///< Return full EMC energy
-    Float_t   getChHadEnergy();                 ///< Return full charged hadronic energy on EMC
-    Float_t   getQ0HadEnergy();                 ///< Return full neutral hadronic energy on EMC
-    Float_t   getEmEnergy();                    ///< Return full electromagnetic energy on EMC
-    Float_t   getBemcEt();                      ///< Return full EMC transverse energy
-    Float_t   getChHadDepEt();                  ///< Return full charged hadronic transverse energy on EMC
-    Float_t   getQ0HadDepEt();                  ///< Return full neutral hadronic transverse energy on EMC
-    Float_t   getEmEt();                        ///< Return full eletromagnetic transverse energy on EMC
+    	Float_t   getBemcEnergy();                  ///< Return full EMC energy
+    	Float_t   getChHadEnergy();                 ///< Return full charged hadronic energy on EMC
+    	Float_t   getQ0HadEnergy();                 ///< Return full neutral hadronic energy on EMC
+    	Float_t   getEmEnergy();                    ///< Return full electromagnetic energy on EMC
+    	Float_t   getBemcEt();                      ///< Return full EMC transverse energy
+    	Float_t   getChHadDepEt();                  ///< Return full charged hadronic transverse energy on EMC
+    	Float_t   getQ0HadDepEt();                  ///< Return full neutral hadronic transverse energy on EMC
+    	Float_t   getEmEt();                        ///< Return full eletromagnetic transverse energy on EMC
+ StEmcFilter*   getFilter();                      ///< Return EmcFilter being used
             
-    Float_t   getChHadEnergyInBtow(UInt_t);     ///< Return Charged hadronic energy in one tower               
-    Float_t   getEnergyInBtow(UInt_t);          ///< Return EMC energy in one tower         
+    	Float_t   getChHadEnergyInBtow(UInt_t);     ///< Return Charged hadronic energy in one tower               
+    	Float_t   getEnergyInBtow(UInt_t);          ///< Return EMC energy in one tower         
                
-       void   setEval(evalMetd);                ///< Set evaluation method if using geant
-       void   setEvent(StEvent*);               ///< Set StEvent pointer
-       void   setMcEvent(StMcEvent*);           ///< Set McEvent pointer
-       void   setEmcFilter(StEmcFilter*);       ///< Set event filter
-       void   setTPCEff(Bool_t);                ///< Apply or don't TPC efficiency correction
-       void   setBfield(Float_t);               ///< Set magnetic field
-       void   setQ0Factor(Float_t);             ///< Set neutral correction factor
-       void   processEvent();                   ///< Process StEvent/StMcEvent information
+         void   setEval(evalMetd);                ///< Set evaluation method if using geant
+         void   setEvent(StEvent*);               ///< Set StEvent pointer
+         void   setMcEvent(StMcEvent*);           ///< Set McEvent pointer
+         void   setEmcFilter(StEmcFilter*);       ///< Set event filter
+         void   setTPCEff(Bool_t);                ///< Apply or don't TPC efficiency correction
+         void   setBfield(Float_t);               ///< Set magnetic field
+         void   setQ0Factor(Float_t);             ///< Set neutral correction factor
+         void   processEvent();                   ///< Process StEvent/StMcEvent information
   
   protected:
             
@@ -71,6 +72,7 @@ class StEmcEnergy : public TObject
       StEvent*   mEvent;
     StMcEvent*   mMcEvent;
   StEmcFilter*   mEmcFilter;
+	      Bool_t   mInternalFilter;
             
        Float_t   mEnergyInBtow[4800];
        Float_t   mChHadEnergyInBtow[4800];
@@ -122,16 +124,11 @@ inline Float_t StEmcEnergy::getEmEt(){ return mEmEt; }
 inline void    StEmcEnergy::setEval( evalMetd metd) { mEvalMetd = metd; }
 inline void    StEmcEnergy::setEvent(StEvent* event){ mEvent = event; }
 inline void    StEmcEnergy::setMcEvent(StMcEvent* mcEvent){ mMcEvent = mcEvent; }
-inline void    StEmcEnergy::setEmcFilter(StEmcFilter* filter){ mEmcFilter = filter; }
 inline void    StEmcEnergy::setTPCEff(Bool_t option)  { mTPCEff = option; }
-inline void    StEmcEnergy::setBfield(Float_t Bfield)  { mBfield = Bfield; }
 inline void    StEmcEnergy::setQ0Factor(Float_t factor)  { mQ0Factor = factor; }
-
-inline Float_t StEmcEnergy::getEnergyInBtow(UInt_t towerNdx) 
-{ return mEnergyInBtow[towerNdx]; }
-
-inline Float_t StEmcEnergy::getChHadEnergyInBtow(UInt_t towerNdx) 
-{ return mChHadEnergyInBtow[towerNdx]; }
+inline Float_t StEmcEnergy::getEnergyInBtow(UInt_t towerNdx) { return mEnergyInBtow[towerNdx]; }
+inline Float_t StEmcEnergy::getChHadEnergyInBtow(UInt_t towerNdx) { return mChHadEnergyInBtow[towerNdx]; }
+inline StEmcFilter* StEmcEnergy::getFilter() { return mEmcFilter; }
 
 //------------------------------------------------------------------------------
 #endif

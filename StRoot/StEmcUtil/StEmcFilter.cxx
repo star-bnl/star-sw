@@ -456,6 +456,7 @@ Bool_t StEmcFilter::accept(StMcTrack *track)
 Bool_t StEmcFilter::accept(Int_t rid)
 {
   if(rid<1 && rid>4800) return kFALSE;
+	if(getEmcStatus(1,rid)!=kGOOD) return kFALSE;
   if(mNTracksTower[rid-1]>mMaxTracksPerTower) return kFALSE;
   if(mETower[rid-1]<mEMin || mETower[rid-1]>mEMax) return kFALSE;
   if(mPtTower[rid-1]<mPtMin || mPtTower[rid-1]>mPtMax) return kFALSE;
@@ -519,7 +520,7 @@ Float_t StEmcFilter::getPtTower(Int_t m, Int_t e, Int_t s)
 */
 Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id)
 {
-	TArrayF nSigma;
+	Float_t nSigma[4];
 	return getTrackId(track,mass,id,nSigma);
 }
 //------------------------------------------------------------------------------
@@ -531,21 +532,16 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id)
 
 To the present, only pions, protons, kaons and electrons are tested. 
 */
-Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id,TArrayF nSigmaFinal)
+Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id,Float_t *nSigmaFinal)
 {
  // dE/dx
   id=8;
   mass=mPion->mass();  
-  
   if(!track) return kFALSE;
   
   double momentum  = fabs(track->geometry()->momentum().mag());
-  if(momentum>mdEdXPMax) return kFALSE;
-
   StPtrVecTrackPidTraits traits = track->pidTraits(kTpcId);
   unsigned int size = traits.size();
-
-  // default result (track id = pion)
   if(size==0) return kFALSE;  
 
   Float_t m[4];
@@ -553,6 +549,7 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id,TArrayF nS
   m[1] = mProton->mass();
   m[2] = mKaon->mass();
   m[3] = mElectron->mass();
+	Int_t kk[4]={0,0,0,1};
   
   if (size>0)
   {
@@ -566,23 +563,20 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id,TArrayF nS
 
     double dEdX = (double)pid->mean();
     if(dEdX==0) return kFALSE;
-    
     double npt = (double)pid->numberOfPoints();
-       
     double dedx_expected;
     double dedx_resolution = (double)pid->errorOnMean();
     if(dedx_resolution<=0) dedx_resolution=npt > 0 ? 0.45/sqrt(npt) : 1000.;
     double z;
     Float_t nSigma[4];
-            
     Int_t charge=track->geometry()->charge();
-    
-    nSigmaFinal.Set(4);
-		nSigmaFinal.Reset();
+    Float_t length = (Float_t)pid->length();
+		if(length<=0) length = 60.;
 		for(Int_t i=0;i<4;i++)
     {
-      dedx_expected=mBB(momentum/m[i])*mdEdXScale;
-      z = log(dEdX/dedx_expected);
+      //dedx_expected=mBB(momentum/m[i])*mdEdXScale;      
+			dedx_expected = 1.0e-6*mBB.Sirrf(momentum/m[i],length,kk[i])*mdEdXScale;
+			z = log(dEdX/dedx_expected);
 			nSigmaFinal[i]=(Float_t) z/dedx_resolution;
       nSigma[i]=fabs(nSigmaFinal[i]) ;
     }
@@ -599,20 +593,24 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id,TArrayF nS
       }
       nSigma[type[i]]=9999; 
     }
+    
+		if(momentum>mdEdXPMax) return kFALSE;
+		if(npt<mPointsdEdX) return kFALSE;
+		if(dEdX<mdEdXCut) return kFALSE;
       
     if(SigmaOrder[0]<=mdEdXNSigma)
     {  
-      if(type[0]==0 && charge>0 && dEdX>mdEdXCut) {mass=mPion->mass();   id = 8; return kTRUE;}
-      if(type[0]==0 && charge<0 && dEdX>mdEdXCut) {mass=mPion->mass();   id = 9; return kTRUE;}
+      if(type[0]==0 && charge>0) {mass=mPion->mass();   id = 8; return kTRUE;}
+      if(type[0]==0 && charge<0) {mass=mPion->mass();   id = 9; return kTRUE;}
   
-      if(type[0]==1 && charge>0 && dEdX>mdEdXCut) {mass=mProton->mass(); id = 14; return kTRUE;}
-      if(type[0]==1 && charge<0 && dEdX>mdEdXCut) {mass=mProton->mass(); id = 15; return kTRUE;}
+      if(type[0]==1 && charge>0) {mass=mProton->mass(); id = 14; return kTRUE;}
+      if(type[0]==1 && charge<0) {mass=mProton->mass(); id = 15; return kTRUE;}
   
-      if(type[0]==2 && charge>0 && dEdX>mdEdXCut) {mass=mKaon->mass();   id = 11; return kTRUE;}
-      if(type[0]==2 && charge<0 && dEdX>mdEdXCut) {mass=mKaon->mass();   id = 12; return kTRUE;}
+      if(type[0]==2 && charge>0) {mass=mKaon->mass();   id = 11; return kTRUE;}
+      if(type[0]==2 && charge<0) {mass=mKaon->mass();   id = 12; return kTRUE;}
 
-      if(type[0]==3 && charge>0 && dEdX>mdEdXCut) {mass=mElectron->mass();id = 2; return kTRUE;}
-      if(type[0]==3 && charge<0 && dEdX>mdEdXCut) {mass=mElectron->mass();id = 3; return kTRUE;}
+      if(type[0]==3 && charge>0) {mass=mElectron->mass();id = 2; return kTRUE;}
+      if(type[0]==3 && charge<0) {mass=mElectron->mass();id = 3; return kTRUE;}
     }
    //cout <<"final id = "<<id<<endl;
    return kFALSE; 
