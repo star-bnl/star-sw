@@ -732,7 +732,6 @@ void StBFChain::SetDbOptions(){
   else {if (GetOption("Y1h"))  SetDataBases("year_1h");
   else {if (GetOption("Y2a"))  SetDataBases("year_2a");
   else {if (GetOption("gstar"))SetDataBases("year_2a");
-  else                         SetDataBases("year_2a");
   }}}}}}}}}}}}
   gMessMgr->QAInfo() << "db Maker set time = " << dbMk->GetDateTime().GetDate() 
 		   << dbMk->GetDateTime().GetTime() << endm;
@@ -797,5 +796,5 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.116 2000/07/18 22:54:09 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.117 2000/07/19 13:36:00 fisyak Exp $
 //_____________________________________________________________________
