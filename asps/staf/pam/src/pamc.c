@@ -21,13 +21,18 @@ RETURN VALUE: STAF Condition Value
 long pamc_(
   TABLE_HEAD_ST             *t1_h,        SCALARS_ST               *t1 ,
   TABLE_HEAD_ST             *t2_h,        VECTORS_ST               *t2 ) {
-int i;
+int i,j;
+
+printf("########################################\n");
+printf("###  pamc - fill tables \n");
+printf("########################################\n");
+
 printf(" name = (%20s) nok = (%d) maxlen = (%d)\n"      /*IGNORE*/
         ,t1_h->name,t1_h->nok,t1_h->maxlen);            /*IGNORE*/
 printf(" name = (%20s) nok = (%d) maxlen = (%d)\n"      /*IGNORE*/
         ,t2_h->name,t2_h->nok,t2_h->maxlen);            /*IGNORE*/
 
-  for(i=0;i<t1_h->nok;i++){
+  for(i=0;i<(t1_h->nok);i++){
      t1[i].aShort = i;
      t1[i].aUshort = i;
      t1[i].aLong = i;
@@ -36,6 +41,18 @@ printf(" name = (%20s) nok = (%d) maxlen = (%d)\n"      /*IGNORE*/
      t1[i].aOctet = i;
      t1[i].aFloat = i;
      t1[i].aDouble = i;
+  }
+  for(i=0;i<(t2_h->nok);i++){
+     for(j=0;j<3;j++){
+	t2[i].bShorts[j] = i+j;
+	t2[i].bUshorts[j] = i+j;
+	t2[i].bLongs[j] = i+j;
+	t2[i].bUlongs[j] = i+j;
+	t2[i].bChars[j] = '-';
+	t2[i].bOctets[j] = i+j;
+	t2[i].bFloats[j] = i+j;
+	t2[i].bDoubles[j] = i+j;
+     }
   }
 
   return STAFCV_OK;
