@@ -1,5 +1,8 @@
-# $Id: MakeRexe.mk,v 1.25 1999/08/25 13:09:38 fisyak Exp $
+# $Id: MakeRexe.mk,v 1.26 1999/10/26 18:44:04 perev Exp $
 # $Log: MakeRexe.mk,v $
+# Revision 1.26  1999/10/26 18:44:04  perev
+# Search of Def file changed (Nevski)
+#
 # Revision 1.25  1999/08/25 13:09:38  fisyak
 # Devorce StAF
 #
@@ -161,8 +164,6 @@ root4star: $(FILES_O) $(STCLASS_OBJS) $(STEVENT_OBJS)
 #
 $(OBJ_DIR)/%.o : %.g
 	cd $(OBJ_DIR);\
-	test -h geant3.def || $(RM)  geant3.def; \
-	test -h geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  geant3.def; \
 	$(GEANT3)    $(1ST_DEPS) -o $(STEM).F; \
 	$(FOR) -c $(INCL) $(STEM).F -o  $(OBJ_DIR)/$(STEM).o;
 #        $(RM)  $(STEM).F;
