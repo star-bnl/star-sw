@@ -1,0 +1,27 @@
+
+10/26/98 K. Turner
+
+- to run gstar & g2t with standard physics and geometry settings
+  (same as BFC uses) use
+     $STAR/kumacs/sim/run_gstar_g2t.kumac
+
+     or 
+ 
+     use BFC -> $STAR/kumacs/chain/call_bfc_gstar_g2t.kumac
+
+
+- to run gstar & g2t the older way where you can see each
+  different physics and geometry setting and how to turn them
+  off and on, use
+
+    $STAR/kumacs/sim/run_gstar_g2t_full.kumac
+
+
+  This uses
+    $STAR/kumacs/sim/set_phys_hadronic_off.kumac
+                     set_phys_hadronic_on.kumac
+                     load_star_geom.kumac
+
+  which one could copy to their area and change if desired.
+
+
