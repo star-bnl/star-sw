@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.11 1998/10/31 00:26:22 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.12 1998/12/04 15:31:50 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.12  1998/12/04 15:31:50  fisyak
+// Add g2t_vertex for tcl
+//
 // Revision 1.11  1998/10/31 00:26:22  fisyak
 // Makers take care about branches
 //
@@ -179,11 +182,12 @@ Int_t St_tcl_Maker::Make(){
        St_DataSetIter geant(gStChain->DataSet("geant"));
        St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
        St_g2t_track   *g2t_track   = (St_g2t_track   *) geant("g2t_track");
+       St_g2t_vertex  *g2t_vertex   = (St_g2t_vertex   *) geant("g2t_vertex");
        if (g2t_tpc_hit && g2t_track){
          St_tcl_tpc_index  *index = new St_tcl_tpc_index("index",5*max_hit); m_DataSet->Add(index);
 	 cout << "start tfs_run" << endl;
 
-         Int_t Res_tfs_g2t =   tfs_g2t(g2t_tpc_hit, g2t_track,
+         Int_t Res_tfs_g2t =   tfs_g2t(g2t_tpc_hit, g2t_track, g2t_vertex,
                                 m_tfs_fspar,m_tfs_bmpar,m_tfs_fsctrl,
                                 index, m_type, tphit);
 
@@ -204,7 +208,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.11 1998/10/31 00:26:22 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.12 1998/12/04 15:31:50 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
