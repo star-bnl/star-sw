@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.104 2004/10/17 03:37:19 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.105 2004/11/08 20:12:11 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -757,11 +757,7 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
   for (int i=1;(word=EHKindN[i]);i++) {
     if (strstr(pos[1],word)) kase |= EHKindS[i];
   }
-//TEmporary XI ==> Global
-  if (kase&kXI ) { kase &=(~kXI ); kase |= kTGB;}
-  if (kase&kKNK) { kase &=(~kKNK); kase |= kTPT;}
-//End of TEmporary
-
+  
   TString sel("^StSPtrVec");
 
   Style_t defSty=0; Size_t defSiz = 0; Color_t defCol= 0;
@@ -1193,6 +1189,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.105  2004/11/08 20:12:11  fine
+// Remove the Victor workaround for Global tracks
+//
 // Revision 1.104  2004/10/17 03:37:19  perev
 // A lot of improvements
 //
