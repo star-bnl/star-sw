@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.23 2000/05/20 00:57:02 posk Exp $
+// $Id: StFlowTagMaker.cxx,v 1.24 2000/05/26 21:26:51 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,11 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
-// Revision 1.23  2000/05/20 00:57:02  posk
-// Minor update.
+// Revision 1.24  2000/05/26 21:26:51  posk
+// Number of subevents fixed at 2.
 //
-// Revision 1.22  2000/05/12 22:39:28  snelling
-// Fixed warning
 //
 // Revision 1.21  2000/03/28 23:23:25  posk
 // Allow multiple instances of the AnalysisMaker.
@@ -141,7 +139,7 @@ Int_t StFlowTagMaker::Make() {
 //-------------------------------------------------------------
 
 void StFlowTagMaker::PrintInfo() {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.23 2000/05/20 00:57:02 posk Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.24 2000/05/26 21:26:51 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -186,12 +184,12 @@ Int_t StFlowTagMaker::Init() {
   const Float_t qMin      =  0.;
   const Float_t qMax      =  2.;
 
-  for (int i = 0; i < Flow::nSels + Flow::nSubs; i++) {
+  for (int i = 0; i < nSels * nSubs; i++) {
     TString* histTitle;
     char countSubEvents[5];
     sprintf(countSubEvents,"%d",i);
 
-    for (int j = 0; j < Flow::nHars; j++) {
+    for (int j = 0; j < nHars; j++) {
       char countHarmonics[5];
       sprintf(countHarmonics,"%d",j);
 
@@ -253,7 +251,7 @@ void StFlowTagMaker::FillFlowTag() {
 
   TVector2 Q;
 
-  for (int j = 0; j < Flow::nHars ; j++) {
+  for (int j = 0; j < nHars ; j++) {
     pFlowSelect->SetHarmonic(j);
 
     // fill sub1 tags
@@ -301,7 +299,7 @@ void StFlowTagMaker::FillFlowTag() {
 Int_t StFlowTagMaker::FillHistograms() {
   // Fill histograms from Tag table
 
-  for (int j = 0; j < Flow::nHars; j++) {
+  for (int j = 0; j < nHars; j++) {
     float order = (float)(j+1);
 
     histSubEvents[0].histHarmonics[j].mHistMeanPt->

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.hh
-// $Id: StFlowTagMaker.h,v 1.12 2000/05/20 00:57:03 posk Exp $
+// $Id: StFlowTagMaker.h,v 1.13 2000/05/26 21:26:53 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -16,11 +16,9 @@
 //
 // History:
 // $Log: StFlowTagMaker.h,v $
-// Revision 1.12  2000/05/20 00:57:03  posk
-// Minor update.
+// Revision 1.13  2000/05/26 21:26:53  posk
+// Number of subevents fixed at 2.
 //
-// Revision 1.11  2000/05/12 22:39:28  snelling
-// Fixed warning
 //
 // Revision 1.10  2000/03/28 23:23:26  posk
 // Allow multiple instances of the AnalysisMaker.
@@ -89,20 +87,24 @@ public:
   void         PrintInfo();
   Int_t        Finish();
   FlowTag_st*  TagPointer() const;         // returns pointer to the tag table
-  virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFlowTagMaker.h,v 1.12 2000/05/20 00:57:03 posk Exp $ built "__DATE__" "__TIME__ ;
+  virtual const char *GetCVS() const {static const char cvs[]=
+  "Tag $Name:  $ $Id: StFlowTagMaker.h,v 1.13 2000/05/26 21:26:53 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
 
-  void         FillFlowTag();
-  Int_t        FillHistograms();
-  void         PrintTag(ostream& = cout);  // output Tag info to screen
+  void             FillFlowTag();
+  Int_t            FillHistograms();
+  void             PrintTag(ostream& = cout); // output Tag info to screen
 
   St_FlowTag*      pSt_FlowTag; //! the StFlowTag table header
   FlowTag_st*      pFlowTag;    //! the StFlowTag table structure to fill
   StFlowEvent*     pFlowEvent;  //! the event to fill from
   StFlowSelection* pFlowSelect; //! the selection object
+
+  enum { nHars = 6,
+	 nSels = 2,
+	 nSubs = 2 };
 
   struct histHarmonic {
     TH1F *mHistPsi;
@@ -114,10 +116,10 @@ private:
   struct histSubEvent;
   friend struct histSubEvent;
   struct histSubEvent {
-    struct histHarmonic histHarmonics[Flow::nHars];
+    struct histHarmonic histHarmonics[nHars];
   };
 
-  struct histSubEvent histSubEvents[Flow::nSels+Flow::nSubs]; //!
+  struct histSubEvent histSubEvents[nSels*nSubs]; //!
 
   ClassDef(StFlowTagMaker, 1)                     // macro for rootcint
 };
