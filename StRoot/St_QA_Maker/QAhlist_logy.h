@@ -1,5 +1,8 @@
-// $Id: QAhlist_logy.h,v 2.9 2002/04/23 01:59:55 genevb Exp $
+// $Id: QAhlist_logy.h,v 2.10 2002/07/29 18:54:43 genevb Exp $
 // $Log: QAhlist_logy.h,v $
+// Revision 2.10  2002/07/29 18:54:43  genevb
+// Some FTPC updates
+//
 // Revision 2.9  2002/04/23 01:59:55  genevb
 // Addition of BBC/FPD histos
 //
@@ -228,6 +231,9 @@
  "QaPtrkChisq0F",
  "QaPtrkChisq0FE",
  "QaPtrkChisq0FW",
+ "QaPtrkChisq1F",
+ "QaPtrkChisq1FE",
+ "QaPtrkChisq1FW",
  "QaPtrkChisq1T",
  "QaPtrkChisq1TS",
  "QaPtrkChisq1TTS",
