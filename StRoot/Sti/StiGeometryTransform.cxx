@@ -9,7 +9,9 @@
 
 //StDb
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
+#include "StDbUtilities/StSvtCoordinateTransform.hh"
 #include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
+#include "StDbUtilities/StSvtLocalCoordinate.hh"
 #include "StDbUtilities/StGlobalCoordinate.hh"
 #include "StTpcDb/StTpcDb.h"
 
@@ -58,14 +60,19 @@ StiGeometryTransform::StiGeometryTransform()
     tpcTransform = new StTpcCoordinateTransform(gStTpcDb);
 
     //cout <<"Generating Padrow Radius Map"<<endl;
-    for (unsigned int padrow=1; padrow<=45; ++padrow) {
-	
-	//Replace this call!!!!
-	double center = gStTpcDb->PadPlaneGeometry()->radialDistanceAtRow(padrow);
-	//!!!!!!
-	
-	mpadrowradiusmap.insert( padrow_radius_map_ValType( padrow, center ) );	
+
+    // store svt + ssd as padrows 1-7
+    for (unsigned int padrow=1; padrow<=7; ++padrow){
+      double center = centerForSvgLadder(padrow, 1).perp();
+      mpadrowradiusmap.insert( padrow_radius_map_ValType( padrow, center ) );
     }
+
+    for (unsigned int padrow=1; padrow<=45; ++padrow) {
+	double center = centerForTpcPadrow(1, padrow).perp();
+        mpadrowradiusmap.insert( padrow_radius_map_ValType( padrow + 100, 
+                                                            center ) );	
+    }
+
     cout <<"\nPadrow\tRadius"<<endl;
     for (padrow_radius_map::const_iterator it=mpadrowradiusmap.begin(); it!=mpadrowradiusmap.end(); ++it) {
 	cout <<(*it).first<<"\t"<<(*it).second<<endl;
@@ -100,6 +107,8 @@ void StiGeometryTransform::kill()
 // numbered sector is at "12 o'clock", or pi/2, and the sector numbering
 // _decreases_ with increasing phi.  [I guess this must have seemed like
 // a good idea at the time....]
+//
+// returns in [0,2pi)
 double StiGeometryTransform::phiForWestSector(int iSector, int nSectors){
     
   int offset = nSectors/4;
@@ -107,11 +116,12 @@ double StiGeometryTransform::phiForWestSector(int iSector, int nSectors){
   double deltaPhi = 2.*M_PI/nSectors;
   
   // make phi ~ sector (not -sector) and correct offset
-  iSector = offset - iSector;
-  if(iSector<minSector){ iSector += nSectors; }
-  
-  return iSector*deltaPhi;
-  
+  double dPhi = (offset - iSector)*deltaPhi;
+  while(dPhi >= 2.*M_PI){ dPhi -= 2.*M_PI; }
+  while(dPhi <  0.){      dPhi += 2.*M_PI; }
+
+  return dPhi;
+    
 } // phiForWestSector
 
 // as above, but numbering _increases_ with increasing phi.
@@ -122,11 +132,12 @@ double StiGeometryTransform::phiForEastSector(int iSector, int nSectors){
     double deltaPhi = 2.*M_PI/nSectors;
 
     // correct offset
-    iSector = iSector - (2*nSectors - offset);
-    if(iSector<minSector){ iSector += nSectors; }
-    
-    return iSector*deltaPhi;
-    
+    double dPhi = (iSector - offset)*deltaPhi;
+    while(dPhi >= 2.*M_PI){ dPhi -= 2.*M_PI; }
+    while(dPhi <  0.){      dPhi += 2.*M_PI; }
+
+    return dPhi;
+
 } // phiForEastSector
 
 int StiGeometryTransform::westSectorForPhi(double phi, int nSectors){
@@ -222,9 +233,7 @@ double StiGeometryTransform::phiForSector(int iSector, int nSectors)
     else {
 	phi = phiForWestSector(iSector, nSectors);
     }
-    if (phi<0.) {
-	phi+=2.*M_PI;
-    }
+
     return phi;
 }
 
@@ -259,8 +268,8 @@ void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
     stihit->setStHit(const_cast<StTpcHit*>(tpchit));
 
     //Change if we change numbering scheme
-    double refangle = gRefAnleForSector( tpchit->sector() );
-    double pos = mpadrowradiusmap[ tpchit->padrow() ];
+    double refangle = phiForSector( tpchit->sector(), 12 );
+    double pos = mpadrowradiusmap[ tpchit->padrow() + 100];
     stihit->setRefangle( refangle );
     stihit->setPosition( pos );
 
@@ -296,12 +305,58 @@ void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
     */
     return;
 }
-
-double gRefAnleForSector(unsigned int sector)
+void StiGeometryTransform::operator() (const StiHit* stihit, StTpcHit* tpchit)
 {
-    unsigned int numSectors = 24;
-    double tolerance = .00001;
-    double beta = (sector > 12) ?(numSectors-sector)*2.*M_PI/(static_cast<double>(numSectors)/2.) :
-	sector*2.*M_PI/(static_cast<double>(numSectors)/2.);
-    return ( fabs(2.*M_PI - beta) < tolerance ) ? fabs(2.*M_PI-beta) : beta;
 }
+
+void StiGeometryTransform::operator() (const StSvtHit* svthit, StiHit* stihit){
+  
+  //We'll temporarily keep
+  stihit->setStHit(const_cast<StSvtHit*>(svthit));
+
+  // first the position & ref angle
+  int iLadder = svthit->ladder();
+  int nLadders = svgConfig.n_ladder[svthit->layer() - 1]*2; // 0-indexed
+  double dRefAngle = phiForSector( iLadder, nLadders );
+  double dPosition = mpadrowradiusmap[svthit->layer()]; // this is 1-indexed
+  stihit->setRefangle( dRefAngle );
+  stihit->setPosition( dPosition );
+
+  // z is fine, we just need to do a 2d rotation so that x' is radially outward
+  // from the wafer center.  Note that since the svt ladders have a zero
+  // orientation angle, this _is_ the normal to the wafers.
+
+  stihit->setZ( svthit->position().z() );
+  stihit->setX( svthit->position().x() * cos(dRefAngle) +
+                svthit->position().y() * sin(dRefAngle) );
+  stihit->setY(-svthit->position().x() * sin(dRefAngle) +
+                svthit->position().y() * cos(dRefAngle) );
+}
+void StiGeometryTransform::operator() (const StiHit* stihit, StSvtHit* svthit){
+}
+
+void StiGeometryTransform::operator() (const StSsdHit* ssdhit, StiHit* stihit){
+  
+  //We'll temporarily keep
+  stihit->setStHit(const_cast<StSsdHit*>(ssdhit));
+
+  // first the position & ref angle
+  int nLadders = svgConfig.n_ladder[6];  // ssd is svg layer 7 (0-indexed)
+  double dRefAngle = phiForSector( ssdhit->ladder(), nLadders );
+  double dPosition = mpadrowradiusmap[7]; // this is 1-indexed
+  stihit->setRefangle( dRefAngle );
+  stihit->setPosition( dPosition );
+
+  // z is fine, we just need to do a 2d rotation so that x' is radially outward
+  // from the wafer center.  Note that since the ssd ladders have a nonzero
+  // orientation angle, this is _not_ the normal to the wafers.
+
+  stihit->setZ( ssdhit->position().z() );
+  stihit->setX( ssdhit->position().x() * cos(dRefAngle) +
+                ssdhit->position().y() * sin(dRefAngle) );
+  stihit->setY(-ssdhit->position().x() * sin(dRefAngle) +
+                ssdhit->position().y() * cos(dRefAngle) );
+}
+void StiGeometryTransform::operator() (const StiHit* stihit, StSsdHit* ssdhit){
+}
+
