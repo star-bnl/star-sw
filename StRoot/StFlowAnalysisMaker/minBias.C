@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.5 2001/11/09 21:15:00 posk Exp $
+// $Id: minBias.C,v 1.6 2002/05/21 18:42:18 posk Exp $
 //
 // Author:       Art Poskanzer and Alexander Wetzler, Mar 2001
 // Description:  Macro to add histograms together.
@@ -170,6 +170,7 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 	} else {                                   // with yield weighting
 	  cout<<"  With yield weighting"<<endl;
 	  float v;
+	  float verr;
 	  float vSum;
 	  float content;
 	  float error;
@@ -180,6 +181,7 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 	  float pt;
 	  for (int bin = 0; bin < nBins; bin++) {
 	    v         = 0.;
+	    verr      = 0.;
 	    vSum      = 0.;
 	    content   = 0.;
 	    error     = 0.;
@@ -205,10 +207,21 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 		yield = yieldPartHist[n]->Integral();
 	      }
 	      v = hist[n]->GetBinContent(bin);
+	      if (yield==1) { // special case for calculating the error
+		if (yieldSum > 1.) {
+		  verr = (yieldSum / (yieldSum + 1.)) *
+		    sqrt(error*error + (v - content)*(v - content) /
+			 (yieldSum*(yiledSum + 1.)));
+		} else {
+		  verr = 0.;
+		}
+	      } else {
+		verr = hist[n]->GetBinError(bin);
+	      }
 	      if (v != 0) {
 		yieldSum  += yield;
 		vSum      += yield * v;
-		error2sum += pow(yield *  hist[n]->GetBinError(bin), 2.);
+		error2sum += pow(yield * verr, 2.);
 	      }
 	    }
 	    if (yieldSum) {
@@ -234,6 +247,9 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: minBias.C,v $
+// Revision 1.6  2002/05/21 18:42:18  posk
+// Kirill's correction to minBias.C for bins with one count.
+//
 // Revision 1.5  2001/11/09 21:15:00  posk
 // Switched from CERNLIB to TMath. Using global dca instead of dca.
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.62 2002/02/13 22:31:27 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.63 2002/05/21 18:42:15 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -111,12 +111,12 @@ Int_t StFlowAnalysisMaker::Init() {
   xLabel = "Pseudorapidity";
   if (strlen(pFlowSelect->PidPart()) != 0) { xLabel = "Rapidity"; }
 
-  const float triggerMin      =    0.;
-  const float triggerMax      =   10.;
+  const float triggerMin      =   0.5;
+  const float triggerMax      =  10.5;
   const float chargeMin       =  -2.5;
   const float chargeMax       =   2.5; 
   const float dcaMin          =    0.;
-  const float dcaMax          =   1.2; 
+  const float dcaMax          =   3.6; 
   const float glDcaMax        =   3.6; 
   const float chi2Min         =    0.;
   const float chi2Max         =    5.; 
@@ -131,7 +131,7 @@ Int_t StFlowAnalysisMaker::Init() {
   const float fitOverMaxMin   =    0.;
   const float fitOverMaxMax   =   1.2; 
   const float origMultMin     =    0.;
-  const float origMultMax     = 2000.; 
+  const float origMultMax     = 2500.; 
   const float MultEtaMin      =    0.;
   const float MultEtaMax      = 1000.; 
   const float totalMultMin    =    0.;
@@ -144,8 +144,8 @@ Int_t StFlowAnalysisMaker::Init() {
   const float vertexZMax      =  150.; 
   const float vertexXYMin     =   -1.;
   const float vertexXYMax     =    1.; 
-  const float etaSymZMin      =  -0.5; 
-  const float etaSymZMax      =   0.5; 
+  const float etaSymZMin      =  -1.1; 
+  const float etaSymZMax      =   1.1; 
   const float etaSymMin       =   -5.; 
   const float etaSymMax       =    5.; 
   const float phiMin          =    0.;
@@ -164,7 +164,7 @@ Int_t StFlowAnalysisMaker::Init() {
   const float dEdxMax       = 0.00004;
   const float qMax             =  3.5;
 
-  enum { nTriggerBins      = 11,
+  enum { nTriggerBins      = 10,
 	 nChargeBins       = 50,
 	 nDcaBins          = 60,
 	 nChi2Bins         = 50,
@@ -173,7 +173,7 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nMaxPtsBinsTpc    = 61,
 	 nMaxPtsBinsFtpc   = 14,
 	 nFitOverMaxBins   = 40,
-	 nOrigMultBins     = 40,
+	 nOrigMultBins     = 50,
 	 nMultEtaBins      = 50,
 	 nTotalMultBins    = 40,
 	 nMultOverOrigBins = 50,
@@ -1057,7 +1057,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.62 2002/02/13 22:31:27 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.63 2002/05/21 18:42:15 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1520,7 +1520,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
   Float_t vertexZ = vertex.z();
   mHistEtaSymVerZ2D->Fill(vertexZ , etaSym);
 
-  float etaSymZSlope = 0.003;
+  float etaSymZSlope = 0.0029;
   etaSym += (etaSymZSlope * vertexZ);                // corrected for acceptance
   etaSym *= sqrt((double)(etaSymPosN + etaSymNegN)); // corrected for statistics
   mHistEtaSym->Fill(etaSym);
@@ -1789,6 +1789,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.63  2002/05/21 18:42:15  posk
+// Kirill's correction to minBias.C for bins with one count.
+//
 // Revision 1.62  2002/02/13 22:31:27  posk
 // Pt Weight now also weights Phi Weight. Added Eta Weught, default=FALSE.
 //
