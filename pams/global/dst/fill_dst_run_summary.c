@@ -103,7 +103,7 @@ long  type_of_call fill_dst_run_summary_ (
   /* Initialize dst_run_summary table at the begining of the event loop */
   if (first_event) {
     dst_run_summary_h->nok = 1;  
-    dst_runsummary->prod_run          = 0;
+    dst_runsummary->bfc_run_id        = 0;
     dst_runsummary->n_events_tot      = 0;
     dst_runsummary->n_events_good     = 0;
     for (i=0; i<2; i++) {
@@ -111,20 +111,32 @@ long  type_of_call fill_dst_run_summary_ (
       dst_runsummary->time[i]         = 0;
     } 
     dst_runsummary->cpu_total         = 0;
+    dst_runsummary->east_pol_L        = 0;
+    dst_runsummary->east_pol_T        = 0;
+    dst_runsummary->west_pol_L        = 0;
+    dst_runsummary->west_pol_T        = 0;
+    dst_runsummary->luminosity        = 0;
     
-    for (i=0; i<2; i++) {                         
-      dst_runsummary->eta_bins[i]     = 0;        
-      dst_runsummary->pt_bins[i]      = 0;        
-      dst_runsummary->mt_bins[i]      = 0;        
-    }                                            
-    dst_runsummary->n_phi_bins        = 0;
+    /* Obsolete in newest DSTs   */
+    /*    for (i=0; i<2; i++) {                         
+          dst_runsummary->eta_bins[i]     = 0;        
+          dst_runsummary->pt_bins[i]      = 0;        
+          dst_runsummary->mt_bins[i]      = 0;        
+          }                                            
+          dst_runsummary->n_phi_bins        = 0; 
+    */
+
     for (i=0; i<2; i++) {
-      dst_runsummary->mean_eta[i]     = 0;
-      dst_runsummary->mean_pt[i]      = 0;
-      dst_runsummary->multiplicity[i] = 0;
+      dst_runsummary->eta[i]     = 0;
+      dst_runsummary->pt[i]      = 0;
       dst_runsummary->num_vert[i]     = 0;
-      dst_runsummary->energy_emc[i]   = 0;
     }
+
+    for (i=0; i<30; i++) {
+      dst_runsummary->mean_mult[i] = 0;
+      dst_runsummary->rms_mult[i]   = 0;
+    }
+
     first_event=0;
   }
 
@@ -193,16 +205,18 @@ long  type_of_call fill_dst_run_summary_ (
   /* Fill mean & stand. deviations  */
   mean   = pt_sum/nchgtrk_sum;
   stddev = pt2_sum/nchgtrk_sum - pow(mean,2);
-  dst_runsummary->mean_pt[0]       = mean;
-  dst_runsummary->mean_pt[1]       = sqrt(stddev);
+  dst_runsummary->pt[0]       = mean;
+  dst_runsummary->pt[1]       = sqrt(stddev);
   mean   = eta_sum/nchgtrk_sum;  
   stddev = eta2_sum/nchgtrk_sum - pow(mean,2);
-  dst_runsummary->mean_eta[0]      = mean;
-  dst_runsummary->mean_eta[1]      = sqrt(stddev);
+  dst_runsummary->eta[0]      = mean;
+  dst_runsummary->eta[1]      = sqrt(stddev);
   mean   = nchgtrk_sum/n_events_good;  
   stddev = nchgtrk2_sum/n_events_good - pow(mean,2);
-  dst_runsummary->multiplicity[0]  = mean; 
-  dst_runsummary->multiplicity[1]  = sqrt(stddev);
+  /* I used detector id for global =23 (temporarily), this
+     has to be passed from bfc. SMargetis  */
+  dst_runsummary->mean_mult[23]  = mean; 
+  dst_runsummary->rms_mult[23]  = sqrt(stddev);
   mean   = nvertx_sum/n_events_good;  
   stddev = nvertx2_sum/n_events_good - pow(mean,2);
   dst_runsummary->num_vert[0]      = mean; 
@@ -212,12 +226,14 @@ long  type_of_call fill_dst_run_summary_ (
      Load kinematic ranges from dst_summaryparam into dst_runsummary.
      DSW  Nov. 18 , 1998
    */
-  for (i=0; i<6; i++) {                         
-    dst_runsummary->eta_bins[i]     = dst_summaryparam->eta_bins[i];        
-    dst_runsummary->pt_bins[i]      = dst_summaryparam->pt_bins[i];        
-    dst_runsummary->mt_bins[i]      = dst_summaryparam->mt_bins[i];        
-  }                                            
-  dst_runsummary->n_phi_bins        = dst_summaryparam->n_phi_bins;
+  /* Obsolete in newest DSTs   */
+  /*  for (i=0; i<6; i++) {                         
+      dst_runsummary->eta_bins[i]     = dst_summaryparam->eta_bins[i];        
+      dst_runsummary->pt_bins[i]      = dst_summaryparam->pt_bins[i];        
+      dst_runsummary->mt_bins[i]      = dst_summaryparam->mt_bins[i];        
+      }                                            
+      dst_runsummary->n_phi_bins        = dst_summaryparam->n_phi_bins;
+  */
 
  NextEvent:
   return STAFCV_OK;
