@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.16 2000/09/25 14:21:27 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.17 2000/09/25 14:47:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,8 +12,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 2.16  2000/09/25 14:21:27  ullrich
- * Removed enums for content vector. Replaced by lookup function.
+ * Revision 2.17  2000/09/25 14:47:25  ullrich
+ * Fixed problem in _lookup() and _lookupOrCreate().
  *
  * Revision 2.16  2000/09/25 14:21:27  ullrich
  * Removed enums for content vector. Replaced by lookup function.
@@ -95,13 +95,13 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.16 2000/09/25 14:21:27 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.16 2000/09/25 14:21:27 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.17 2000/09/25 14:47:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.17 2000/09/25 14:47:25 ullrich Exp $";
 
 ClassImp(StEvent)
 
 template<class T> void
-_lookup(T* val, StSPtrVecObject &vec)
+_lookup(T*& val, StSPtrVecObject &vec)
 {
     val = 0;
     for (unsigned int i=0; i<vec.size(); i++)
@@ -112,7 +112,7 @@ _lookup(T* val, StSPtrVecObject &vec)
 }
 
 template<class T> void
-_lookupOrCreate(T* val, StSPtrVecObject &vec)
+_lookupOrCreate(T*& val, StSPtrVecObject &vec)
 {
     T* t = 0;
     _lookup(t, vec);
