@@ -1,76 +1,77 @@
-// Cons tries to include even if there is a  '#ifdef #endif' around
-// For that reson I had to change all '#include' statements into
-// '//(notTheY2KBuf)#include' 
-#undef McEventExists
-#ifdef McEventExists
-
-#undef TheWorldIsNice 
 #define HBT_BFIELD 0.5*tesla
 #define DIFF_CUT_OFF 1.
 
-//(notTheY2KBug)#include "StHbtMaker/Reader/StHbtMcEventReader.h"
-//(notTheY2KBug)#include "StChain.h"
-//(notTheY2KBug)#include "TOrdCollection.h"
+#include "StHbtMaker/Reader/StHbtMcEventReader.h"
+#include "StChain.h"
+#include "TOrdCollection.h"
 
-//(notTheY2KBug)#include "StEvent.h"
-//(notTheY2KBug)#include "StGlobalTrack.h"
-//(notTheY2KBug)#include "StTpcDedxPid.h"
-//(notTheY2KBug)#include "StDedxPid.h"
+// StEvent stuff
+#include "StEventTypes.h"
+#include "StEventMaker/StEventMaker.h"
+// StMcEvent stuff
+#include "StMcEventTypes.hh"
+#include "StMcEventMaker/StMcEventMaker.h"
 
-//(notTheY2KBug)#include "SystemOfUnits.h"   // has "tesla" in it
-//(notTheY2KBug)#include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
-//(notTheY2KBug)#include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
-//(notTheY2KBug)#include "StV0MiniDstMaker/StV0MiniDstMaker.h"  
-//(notTheY2KBug)#include "StV0MiniDstMaker/StV0MiniDst.hh"
-//(notTheY2KBug)#include "StEventMaker/StEventMaker.h"
-//(notTheY2KBug)#include "StMcEventMaker/StMcEventMaker.h"
-////(notTheY2KBug)#include "StAssociationMaker/StAssociationMaker.h"
+// c++ stuff
+#include <typeinfo>
+#include <cmath>
 
-//(notTheY2KBug)#include <iostream.h>
-//(notTheY2KBug)#include <stdlib.h>
-//(notTheY2KBug)#include <string>
-//(notTheY2KBug)#include <vector>
-////(notTheY2KBug)#include "TStyle.h"
-////(notTheY2KBug)#include "TCanvas.h"
+// hbt stuff
+#include "SystemOfUnits.h"   // has "tesla" in it
+#include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
+#include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
+// strangeness v0 stuff
+#include "StV0MiniDstMaker/StV0MiniDstMaker.h"  
+#include "StV0MiniDstMaker/StV0MiniDst.hh"
 
+//#include "StAssociationMaker/StAssociationMaker.h"
 
-//(notTheY2KBug)#include "PhysicalConstants.h"
-//(notTheY2KBug)#include "SystemOfUnits.h"
-//(notTheY2KBug)#include "StThreeVector.hh"
-
-//(notTheY2KBug)#include "StChain.h"
-//(notTheY2KBug)#include "St_DataSet.h"
-//(notTheY2KBug)#include "St_DataSetIter.h"
-
-//(notTheY2KBug)#include "g2t_event.h"
-//(notTheY2KBug)#include "g2t_ftp_hit.h"
-//(notTheY2KBug)#include "g2t_svt_hit.h"
-//(notTheY2KBug)#include "g2t_tpc_hit.h"
-//(notTheY2KBug)#include "g2t_track.h"
-//(notTheY2KBug)#include "g2t_vertex.h"
-
-//(notTheY2KBug)#include "tables/St_g2t_event_Table.h"
-//(notTheY2KBug)#include "tables/St_g2t_ftp_hit_Table.h"
-//(notTheY2KBug)#include "tables/St_g2t_svt_hit_Table.h"
-//(notTheY2KBug)#include "tables/St_g2t_tpc_hit_Table.h"
-//(notTheY2KBug)#include "tables/St_g2t_track_Table.h"
-//(notTheY2KBug)#include "tables/St_g2t_vertex_Table.h"
-
-// //(notTheY2KBug)#include "StMcEvent/StMemoryInfo.hh"
-
-//(notTheY2KBug)#include "StMcEvent.hh"
-//(notTheY2KBug)#include "StMcTrack.hh"
-//(notTheY2KBug)#include "StMcTpcHit.hh"
-//(notTheY2KBug)#include "StMcFtpcHit.hh"
-//(notTheY2KBug)#include "StMcSvtHit.hh"
-//(notTheY2KBug)#include "StMcVertex.hh"
-
-////(notTheY2KBug)#include "StAssociationMaker/StTrackPairInfo.hh"
-//(notTheY2KBug)#include "StParticleDefinition.hh"
-//(notTheY2KBug)#include "StPhysicalHelix.hh"
+#include <iostream.h>
+#include <stdlib.h>
+#include <string>
+#include <vector>
+//#include "TStyle.h"
+//#include "TCanvas.h"
 
 
+#include "PhysicalConstants.h"
+#include "SystemOfUnits.h"
+#include "StThreeVector.hh"
+#include "phys_constants.h"
 
+#include "StChain.h"
+#include "St_DataSet.h"
+#include "St_DataSetIter.h"
+
+#include "g2t_event.h"
+#include "g2t_ftp_hit.h"
+#include "g2t_svt_hit.h"
+#include "g2t_tpc_hit.h"
+#include "g2t_track.h"
+#include "g2t_vertex.h"
+
+#include "tables/St_g2t_event_Table.h"
+#include "tables/St_g2t_ftp_hit_Table.h"
+#include "tables/St_g2t_svt_hit_Table.h"
+#include "tables/St_g2t_tpc_hit_Table.h"
+#include "tables/St_g2t_track_Table.h"
+#include "tables/St_g2t_vertex_Table.h"
+
+// #include "StMcEvent/StMemoryInfo.hh"
+
+#include "StMcEvent.hh"
+#include "StMcTrack.hh"
+#include "StMcTpcHit.hh"
+#include "StMcFtpcHit.hh"
+#include "StMcSvtHit.hh"
+#include "StMcVertex.hh"
+
+//#include "StAssociationMaker/StTrackPairInfo.hh"
+#include "StParticleDefinition.hh"
+#include "StPhysicalHelix.hh"
+
+
+//ClassImp(StHbtMcEventReader)
 
 #ifndef ST_NO_NAMESPACES
 using namespace std;
@@ -100,11 +101,6 @@ double dedxMean(double mass, double momentum){
     dedxMean = 1000.;
   return dedxMean;
 }
-
-
-
-//ClassImp(StHbtMcEventReader)
-
 
 //__________________
 StHbtMcEventReader::StHbtMcEventReader(){
@@ -157,11 +153,10 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
   // **************************************
   // get pointer to mcEventMaker, Event *
   // **************************************
-  StMcEvent* Event = 0;  //!
+  StMcEvent* mcEvent = 0;  //!
   StMcEventMaker* tempMaker = (StMcEventMaker*) mTheMcEventMaker;
-  //mEvent = ((StMcEventMaker*) (StMcEventMaker*) gStChain->Maker("MCEvent"))->currentMcEvent();
-  Event = tempMaker->currentMcEvent();
-  if (!Event){
+  mcEvent = tempMaker->currentMcEvent();
+  if (!mcEvent){
     cout << "StHbtMcEventReader - No StMcEvent!!! " << endl;
     return 0;
   }
@@ -169,23 +164,16 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
   // ******************
   // Event properties
   // ******************
-  unsigned long RunNumber = Event->runNumber();
+  unsigned long RunNumber = mcEvent->runNumber();
   //cout << " MC : run: #" << RunNumber;
-  unsigned long EventNumber = Event->eventNumber();
+  unsigned long EventNumber = mcEvent->eventNumber();
   //cout << " * event: #" << EventNumber;
-  int Mult = Event->trackCollection()->size();
+  int Mult = mcEvent->tracks().size();
   //cout << " *  mult = " << Mult;
+  //cout << "StHbtMcEventReader::ReturnHbtEvent - We have " << Mult << " tracks " << endl;
 
-  //#ifdef TheWorldIsNice
-  StHbtThreeVector VertexPosition = Event->primaryVertex()->position();  // using templates, everything is fine
-  //#else
-  //  StHbtThreeVector VertexPosition;
-  //VertexPosition.setX( Event->primaryVertex()->position().x() );         // the none template version can not cast 
-  //VertexPosition.setY( Event->primaryVertex()->position().y() );         // StThreeVectorD = StThreeVectorF
-  //VertexPosition.setZ( Event->primaryVertex()->position().z() );         // isn't it sad ? yes, it is !
-  //#endif
+  StHbtThreeVector VertexPosition = mcEvent->primaryVertex()->position();  // using templates, everything is fine
   //cout << " *  primary Vertex = " << VertexPosition << endl;
-  // cout << "StHbtMcEventReader::ReturnHbtEvent - We have " << Mult << " tracks " << endl;
     
   StHbtEvent* hbtEvent = new StHbtEvent;
 
@@ -211,22 +199,12 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
   }
 
   
-  //  StDedxPid* tpcDedxPid;
-  //  float nsigpi;
-  //  float nsigk;
-  //  float nsigprot;
-  //  double pathlength;
   StHbtThreeVector p;
-  //  float DCA;
-  //float Dedx;
-  //float pt;
-  //int charge;
   
-  for (StMcTrackIterator iter=Event->trackCollection()->begin();
-       iter!=Event->trackCollection()->end();iter++){
+  for (StMcTrackIterator iter=mcEvent->tracks().begin(); iter!=mcEvent->tracks().end(); iter++){
     StMcTrack*  track = *iter;
 
-    int nTpcHits = track->tpcHits()->size();
+    int nTpcHits = track->tpcHits().size();
 
     if (nTpcHits==0) {
       //cout << "No hits in TPC-- skipping track " << endl;
@@ -251,31 +229,32 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
 #endif
     //cout << " P     " << hbtTrack->P() << endl;
 
-    hbtTrack->SetNHits( nTpcHits );          // hits in Tpc
+    hbtTrack->SetNHits( nTpcHits );               // hits in Tpc
     hbtTrack->SetNHitsPossible(nTpcHits );        // hits in Tpc
     //cout << " NHits " << hbtTrack->NHits() << endl;
 
     // **************************************************************************************
     // set NSigma's, derivation in dedx distribustion from being a poin, kaon, proton  [sigma]
     // **************************************************************************************
-    
-    int geantId = track->geantId();
+    int geantPid = track->particleDefinition()->pdgEncoding();
 
-    switch (geantId) {
-    case 8:  // intentional fall-through
-    case 9:  // gid=8,9 is pion
+    //cout << geantPid << " " << track->particleDefinition()->mass() << " " << track->particleDefinition()->charge() << endl;
+
+    switch (geantPid) {
+    case 211:  // intentional fall-through
+    case -211:  // gid=211,-211 is pion
       hbtTrack->SetNSigmaPion(0.);
       hbtTrack->SetNSigmaKaon(-999.);
       hbtTrack->SetNSigmaProton(-999.);
       break;
-    case 11:  // intentional fall-through
-    case 12:  // gid=11,12 is kaon
+    case 321:  // intentional fall-through
+    case -321:  // gid=321,-321 is kaon
       hbtTrack->SetNSigmaPion(999.0);
       hbtTrack->SetNSigmaKaon(0.);
       hbtTrack->SetNSigmaProton(-999.);
       break;
-    case 14:  // intentional fall-through
-    case 15:  // gid=14,15 is proton
+    case 2212:  // intentional fall-through
+    case -2212:  // gid=2212,-2212 is proton
       hbtTrack->SetNSigmaPion(999.);
       hbtTrack->SetNSigmaKaon(999.);
       hbtTrack->SetNSigmaProton(0.);
@@ -288,9 +267,8 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
     }
 
     //cout << "Nsig pion,kaon,proton : " << hbtTrack->NSigmaPion() << " ";
-    //cout << hbtTrack->NSigmaKaon() << " " << hbtTrack->NSigmaProton() << " Geant ID " << geantId << endl;
+    //cout << hbtTrack->NSigmaKaon() << " " << hbtTrack->NSigmaProton() << " PDG code " << geantPId << endl;
    
-
     hbtTrack->SetdEdx( dedxMean( track->particleDefinition()->mass(),  track->momentum().mag() ) ); // not in mike's
     //cout << " dedx " << hbtTrack->Dedx() << endl;
 
@@ -303,18 +281,23 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
 #ifdef TheWorldIsNice
     StPhysicalHelix helix = StPhysicalHelix( hbtTrack->P(), track->startVertex()->position(), HBT_BFIELD, hbtTrack->Charge() ); 
 #else
-    StHbtThreeVector tmpSV;
+    StHbtThreeVector tmpSV;    
     tmpSV.setX( track->startVertex()->position().x() );
     tmpSV.setY( track->startVertex()->position().y() );
     tmpSV.setZ( track->startVertex()->position().z() );
     StPhysicalHelixD helix = StPhysicalHelixD( hbtTrack->P(), tmpSV, HBT_BFIELD, hbtTrack->Charge() ); 
 #endif
-    StHbtThreeVector dist= helix.distance(VertexPosition);
 
     hbtTrack->SetHelix(helix);
 
-    hbtTrack->SetDCAxy( dist.perp() );     // in xy-plane
-    hbtTrack->SetDCAz( dist.z() );         // in z direction
+
+    double pathlength = helix.pathLength(VertexPosition);
+    //cout << "pathlength\t" << pathlength << endl;
+    StHbtThreeVector  DCAxyz = helix.at(pathlength)-VertexPosition;
+    //cout << "DCA\t\t" << DCAxyz << " " << DCAxyz.perp() << endl;
+
+    hbtTrack->SetDCAxy( DCAxyz.perp() );     // in xy-plane
+    hbtTrack->SetDCAz( DCAxyz.z() );         // in z direction
 
     hbtTrack->SetChiSquaredXY( 0.); 
     hbtTrack->SetChiSquaredZ( 0.); 
@@ -333,66 +316,120 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
   }
   cout << hbtEvent->TrackCollection()->size() << " tracks pushed to collection" << endl;
 
- //Pick up pointer v0 minidst maker
-  StV0MiniDstMaker* v0Maker = (StV0MiniDstMaker *) mTheV0Maker;
-  if( ! v0Maker ) {
-    cout << "Not doing v0 stuff" << endl;
-    return hbtEvent; 
-  }
-  //Get collection
-  
-  mCollection = v0Maker->GetCollection();
-  int n_v0 =0;
-  if( mCollection ){
-    n_v0 = mCollection->GetSize();
-    //Loop over all v0s in collection for this event
-    
-    for( int i=mV0; i<n_v0; i++){
-      StV0MiniDst* v0FromMiniDst = (StV0MiniDst *) mCollection->At(i);
-      v0FromMiniDst->UpdateV0();
-      StHbtV0* hbtV0 = new StHbtV0;
-      hbtV0->SetdecayLengthV0(v0FromMiniDst->decayLengthV0());
-      hbtV0->SetdecayVertexV0(v0FromMiniDst->decayVertexV0());
-      hbtV0->SetdcaV0Daughters(v0FromMiniDst->dcaV0Daughters());
-      hbtV0->SetdcaV0ToPrimVertex(v0FromMiniDst->dcaV0ToPrimVertex());
-      hbtV0->SetdcaPosToPrimVertex(v0FromMiniDst->dcaPosToPrimVertex());
-      hbtV0->SetdcaNegToPrimVertex(v0FromMiniDst->dcaNegToPrimVertex());
-      hbtV0->SetmomPos(v0FromMiniDst->momPos());
-      hbtV0->SetmomNeg(v0FromMiniDst->momNeg());
-      hbtV0->SettpcHitsPos(v0FromMiniDst->tpcHitsPos());
-      hbtV0->SettpcHitsNeg(v0FromMiniDst->tpcHitsNeg());
-      hbtV0->SetmomV0(v0FromMiniDst->momV0());
-      hbtV0->SetalphaV0(v0FromMiniDst->alphaV0());
-      hbtV0->SetptArmV0(v0FromMiniDst->ptArmV0());
-      hbtV0->SeteLambda(v0FromMiniDst->eLambda());
-      hbtV0->SeteK0Short(v0FromMiniDst->eK0Short());
-      hbtV0->SetePosProton(v0FromMiniDst->ePosProton());
-      hbtV0->SetePosPion(v0FromMiniDst->ePosPion());
-      hbtV0->SeteNegPion(v0FromMiniDst->eNegPion());
-      hbtV0->SeteNegProton(v0FromMiniDst->eNegProton());
-      hbtV0->SetmassLambda(v0FromMiniDst->massLambda());
-      hbtV0->SetmassAntiLambda(v0FromMiniDst->massAntiLambda());
-      hbtV0->SetmassK0Short(v0FromMiniDst->massK0Short());
-      hbtV0->SetrapLambda(v0FromMiniDst->rapLambda());
-      hbtV0->SetrapK0Short(v0FromMiniDst->rapK0Short());
-      hbtV0->SetcTauLambda(v0FromMiniDst->cTauLambda());
-      hbtV0->SetcTauK0Short(v0FromMiniDst->cTauK0Short());
-      hbtV0->SetptV0(v0FromMiniDst->ptV0());
-      hbtV0->SetptotV0(v0FromMiniDst->ptotV0());
-      hbtV0->SetptPos(v0FromMiniDst->ptPos());
-      hbtV0->SetptotPos(v0FromMiniDst->ptotPos());
-      hbtV0->SetptNeg(v0FromMiniDst->ptNeg());
-      hbtV0->SetptotNeg(v0FromMiniDst->ptotNeg());
-      
-      hbtEvent->V0Collection()->push_back(hbtV0);
+  // ******************
+  // fill v0 collection
+  // ******************
+  for (StMcVertexIterator vIter=mcEvent->vertices().begin(); vIter!=mcEvent->vertices().end(); vIter++){
+    StMcVertex*  vertex = *vIter;
+    int nDaughters = vertex->numberOfDaughters();
+    long geantProcess = vertex->geantProcess();
+    //cout << " daughters : " << nDaughters  << endl;
+    if ( nDaughters!=2) {
+      continue; // not a v0
     }
-    //Store total number of v0s in v0minidst so can start from there next time
-    cout << "**** n_v0 = " << n_v0 << "**mV0"   << n_v0-mV0 << endl;        //  "       "
-    mV0 =n_v0;
+
+    StMcTrack* parent = vertex->parent();
+    StMcTrack* daughter1 = *(vertex->daughters().begin());
+    StMcTrack* daughter2 = *(vertex->daughters().end()-1);
+    //cout << parent << " " << daughter1 << " " << daughter2 << " " << endl;
+
+    /*
+      if (!(parent && daughter1 && daughter2)) {
+      cout << " two daughters, but no parent " << endl;
+      }
+    */
+
+    double daughter1Charge = daughter1->particleDefinition()->charge();
+    double daughter2Charge = daughter2->particleDefinition()->charge();
+    double parentCharge = daughter1Charge+daughter2Charge;
+ 
+    if (!( parentCharge+daughter1Charge+daughter2Charge==0 && daughter1Charge*daughter2Charge<0 )) {
+      continue;  // not a v0
+    }
+    
+    /*
+      cout << " got a v0 "  << endl;
+      cout << " charge ";
+      cout << daughter1->particleDefinition()->charge() << " ";
+      cout << daughter2->particleDefinition()->charge() << " ";
+      cout << endl;
+      cout << " geantProcessId " << geantProcess << endl;
+    */
+
+    // fill the V0MiniDst structure
+    StHbtV0* hbtv0 = new StHbtV0();
+    hbtv0->SetdecayLengthV0( abs(vertex->position()-VertexPosition) );
+    hbtv0->SetdecayVertexV0( vertex->position() );
+    
+    StMcTrack* pos;
+    StMcTrack* neg;
+    
+    if ( daughter1Charge>0 ) {
+      pos = daughter1;
+      neg = daughter2;
+    }
+    else {
+      pos = daughter2;
+      neg = daughter1;
+    }
+
+    StPhysicalHelixD posHelix = StPhysicalHelixD( pos->momentum(), vertex->position(), HBT_BFIELD, pos->particleDefinition()->charge() ); 
+    StPhysicalHelixD negHelix = StPhysicalHelixD( neg->momentum(), vertex->position(), HBT_BFIELD, neg->particleDefinition()->charge() ); 
+    StPhysicalHelixD v0Helix = StPhysicalHelixD( pos->momentum()+neg->momentum(), vertex->position(), HBT_BFIELD, 0 );
+ 
+    double posPathLength = posHelix.pathLength( vertex->position() );
+    double negPathLength = negHelix.pathLength( vertex->position() );
+
+    hbtv0->SetdcaV0Daughters( abs(posHelix.at(posPathLength)-negHelix.at(negPathLength))  );
+    //cout << " dcaV0Daughters " << hbtv0->dcaV0Daughters() << endl;
+
+    hbtv0->SetdcaV0ToPrimVertex( v0Helix.distance( VertexPosition ) );    // VertexPosition = prim vert pos
+    //cout << " dcaV0ToPrimVertex " << hbtv0->dcaV0ToPrimVertex() << endl;
+
+    hbtv0->SetdcaPosToPrimVertex( posHelix.distance( VertexPosition ) );    // VertexPosition = prim vert pos
+    hbtv0->SetdcaNegToPrimVertex( negHelix.distance( VertexPosition ) );    // VertexPosition = prim vert pos
+    
+    hbtv0->SetmomPos( pos->momentum() );
+    hbtv0->SetmomNeg( neg->momentum() );
+
+    hbtv0->SettpcHitsPos( pos->tpcHits().size() );
+    hbtv0->SettpcHitsNeg( neg->tpcHits().size() );
+
+    StThreeVectorF v0P = pos->momentum()+neg->momentum();
+
+    float eLambda=sqrt( pow(v0P.mag(),2.) + pow(M_LAMBDA,2.) );
+    float rapLambda = 0.5*log( (eLambda+v0P.z()) / (eLambda-v0P.z()) );
+    float tauLambda = M_LAMBDA*(hbtv0->decayLengthV0()) / sqrt( pow(v0P.mag(),2.) );
+    hbtv0->SetrapLambda( rapLambda );
+    hbtv0->SetcTauLambda( tauLambda );
+
+    float eK0Short=sqrt( pow(v0P.mag(),2.) + pow(M_KAON_0_SHORT,2.) );
+    float rapK0Short = 0.5*log( (eK0Short+v0P.z()) / (eK0Short-v0P.z()) );
+    float tauK0Short = M_KAON_0_SHORT*(hbtv0->decayLengthV0()) / sqrt( pow(v0P.mag(),2.) );
+    hbtv0->SetrapK0Short( rapK0Short );
+    hbtv0->SetcTauK0Short( tauK0Short );
+
+    /*
+    hbtv0->SetidPos( pos->geantId() );
+    hbtv0->SetidNeg( neg->geantId() );
+    cout << pos->geantId() << " " << pos->geantId() << endl;
+    */
+    hbtv0->UpdateV0();
+
+    // apply v0 cut
+    if (mV0Cut){
+      if (!(mV0Cut->Pass(hbtv0))){                  // track failed - delete it and skip the push_back
+	delete hbtv0;
+	continue;
+      }
+    }
+
+    hbtEvent->V0Collection()->push_back(hbtv0);
   }
+  //Store total number of v0s in v0minidst so can start from there next time
+  cout << hbtEvent->V0Collection()->size() << " v0s pushed to collection" << endl;
 
   return hbtEvent;
 }
 
 
-#endif
