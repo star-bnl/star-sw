@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.13 2001/04/27 21:41:07 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.14 2002/02/06 23:00:54 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.14  2002/02/06 23:00:54  ullrich
+ * Added float.h.
+ *
  * Revision 2.13  2001/04/27 21:41:07  ullrich
  * Fixed bug.
  *
@@ -62,6 +65,7 @@
  **************************************************************************/
 #include <typeinfo>
 #include <math.h>
+#include <float.h>
 #include "StTpcDedxPidAlgorithm.h"
 #include "StTrack.h"
 #include "StParticleTypes.hh"
@@ -70,7 +74,7 @@
 #include "StTrackGeometry.h"
 #include "BetheBloch.h"
 
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.13 2001/04/27 21:41:07 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.14 2002/02/06 23:00:54 ullrich Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
