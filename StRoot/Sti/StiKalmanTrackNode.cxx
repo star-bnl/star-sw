@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.57 2005/01/17 01:31:25 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.58 2005/01/20 16:51:32 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.58  2005/01/20 16:51:32  perev
+ * Remove redundant print
+ *
  * Revision 2.57  2005/01/17 01:31:25  perev
  * New parameter model
  *
@@ -1568,7 +1571,7 @@ void StiKalmanTrackNode::setChi2(double chi2)
 {
       _chi2 = chi2;
       if(chi2 < 0.) Break(1);
-static const double MyChi2 = 1.18179;
+static const double MyChi2 = -9999.;
       if (chi2 <  0.9999*MyChi2) return;
       if (chi2 >  1.0001*MyChi2) return;
   printf("BOT OHO: %g %p\n",chi2,(void*)getHit());
