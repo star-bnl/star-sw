@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.331 2003/04/18 15:53:35 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.332 2003/04/25 14:49:34 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -289,6 +289,7 @@ Bfc_st BFC1[] = {
   {"dbutil"      ,""     ,"","SCL"            ,"","StSvtDbMaker,StDbUtilities","Load StDbUtilities",kFALSE},
   {"calib"       ,"calib","","xdf2root"          ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"detDb"       ,""     ,"",""   ,"StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker",kFALSE},
+  {"eemcDb"      ,"eeDb" ,"","db",                                "StEEmcDbMaker","StEEmcDbMaker","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Valid Db    ","Versions   ","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -430,6 +431,8 @@ Bfc_st BFC1[] = {
 
   {"EEfs"        ,"eefs","",                   "geant,db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker",
                                                                               "EEMC fast simulator",kFALSE},
+  {"eemcD"       ,"eeRaw","","eemcDb,EEmcUtil",                         "StEEmcDataMaker","StEEmcDataMaker",
+                                                                                  "EEMC data maker",kFALSE},
 
 
   {"rich"        ,"RichChain","","rch,RichPiD,RichSpectra",        "StMaker","StChain","RICH chain",kFALSE},
@@ -769,6 +772,7 @@ Bfc_st BFC2[] = {
   {"dbutil"      ,""     ,"","SCL"            ,"","StSvtDbMaker,StDbUtilities","Load StDbUtilities",kFALSE},
   {"calib"       ,"calib","","xdf2root"          ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"detDb"       ,""     ,"",""   ,"StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker",kFALSE},
+  {"eemcDb"      ,"eeDb" ,"","db",                              "StEEmcDbMaker","StEEmcDbMaker","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Valid Db    ","Versions   ","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -912,6 +916,8 @@ Bfc_st BFC2[] = {
 
   {"EEfs"        ,"eefs","",                   "geant,db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker",
                                                                               "EEMC fast simulator",kFALSE},
+  {"eemcD"       ,"eeRaw","","eemcDb,EEmcUtil",                         "StEEmcDataMaker","StEEmcDataMaker",
+                                                                                  "EEMC data maker",kFALSE},
 
 
   {"rich"        ,"RichChain","","rch,RichPiD,RichSpectra",        "StMaker","StChain","RICH chain",kFALSE},
