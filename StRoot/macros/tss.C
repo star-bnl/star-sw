@@ -1,8 +1,12 @@
 {
    gSystem->Load("lib/St_base.so");
    gSystem->Load("lib/St_Tables.so");
+   gSystem->Load("lib/libmsg.so");
+   gSystem->Load("lib/libtls.so");
    gSystem->Load("lib/tpc.sl");
    gSystem->Load("lib/St_tpc.so");
+   gSystem->Load("lib/svt.sl");
+   gSystem->Load("lib/St_svt.so");
    gSystem->Load("lib/StChain.so");
 
 #ifndef __CINT__
@@ -26,6 +30,7 @@
   St_xdfin_Maker xdfin("Xdfin","event/geant");
   chain.SetInputXDFile(&xdffile_in);
 //  St_evg_Maker evg("evg","event");
+  St_srs_Maker srs_Maker("srs_Maker","event/data");
   St_tss_Maker tss_Maker("tss_Maker","event/raw_data");
 // Set parameters
   tss_Maker.adcxyzon();
