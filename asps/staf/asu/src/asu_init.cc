@@ -4,6 +4,7 @@
 //:DESCRIPTION:	Functions  to initialize ASU 
 //:AUTHOR:	cet - Craig E. Tull, cetull@lbl.gov
 //:BUGS:	-- STILL IN DEVELOPMENT --
+//:HISTORY:	21jun96-v001a-cet- remove asu_kuip_init_
 //:HISTORY:	20nov95-v000a-cet- creation
 //:<--------------------------------------------------------------------
 
@@ -13,6 +14,7 @@
 #include "asuLib.h"	/* Analysis Service Utilities */
 #include "emlLib.h"	/* Error Messaging & Logging */
 
+extern "C" void staf_kuip_init_();
 
 //:>--------------------------------------------------------------------
 //:ROUTINE:	int asu_init()
@@ -25,7 +27,8 @@ int asu_init()
    EML_MESSAGE(ASU: Initializing.);
 
 /*- Setup basic KUIP commands. -*/
-   asu_kuip_init_();
+/* asu_kuip_init_();------------- use STAF_CERN_INIT in main instead */
+   staf_kuip_init_();
 
 /*- Define the ASU KUIP commands. -*/
    asu_def_();

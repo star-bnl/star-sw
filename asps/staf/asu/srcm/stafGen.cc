@@ -1,6 +1,6 @@
 /*:Copyright 1996, Lawrence Berkeley National Laboratory
 *:>---------------------------------------------------------------------
-*:FILE:         moastGen.c
+*:FILE:         stafGen.c
 *:DESCRIPTION:  Program to generate STAF mainline.
 *:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
 *:BUGS:         -- STILL IN DEVELOPMENT --
@@ -25,6 +25,11 @@ char *ASP[64];
 int npam=0;
 char *pam[64];
 char *PAM[64];
+
+int ami=FALSE;			/* AMI is not defined */
+
+unsigned char paw=FALSE;	/* PAW */
+
 /*-------------------------------------------- PROTOTYPES           --*/
 char* locase(char* s);
 char* hicase(char* s);
@@ -35,7 +40,7 @@ char* ami_load_proto();
 char* asp_starts();
 char* asp_stops();
 char* ami_load_func();
-int ami=FALSE;			/* AMI is not defined */
+char* cern_init_call();
 
 /*
 *:>---------------------------------------------------------------------
@@ -63,6 +68,9 @@ int main(int argc, char **argv)
 	 case 'a': case 'A':
 	 case 'p': case 'P':
 	    ap = argv[i][1];
+	    break;
+	 case 'w': case 'W':
+	    paw = TRUE;
 	    break;
 	 default:
 	    usage(argv[0]);
@@ -118,14 +126,16 @@ int main(int argc, char **argv)
 " \n"
 "/*------------------ PROTOTYPES --*/ \n"
 "%s"						/* ami_load_proto() */
-"void unknown(); \n"
-"void usage(char* prog); \n"
+"extern CC_P void unknown(); \n"
+"extern CC_P int stafArgs(int argc, char **argv); \n"
+"extern CC_P void %s; \n"			/* cern_init_call() */
 "extern CC_P void staf_banner(FILE* stream); \n"
 " \n"
 "/*================== MAIN ========*/ \n"
 "int main(int argc, char** argv) \n"
 "{ \n"
-"   if( argc != 1 )usage(argv[0]); \n"
+"   stafArgs(argc,argv); \n"
+"   %s; \n"					/* cern_init_call() */
 " \n"
 "/*------------------ START -------*/ \n"
 "%s"						/* asp_starts() */
@@ -145,13 +155,6 @@ int main(int argc, char **argv)
 "/*================== UNKNOWN =====*/ \n"
 "void unknown(){} \n"
 " \n"
-"/*================== USAGE =======*/ \n"
-"void usage(char* prog) \n"
-"{ \n"
-"   printf(\"Usage: %%s \\n\",prog); \n"
-"   exit(0); \n"
-"} \n"
-" \n"
 "/*================== AMI_LOAD ====*/ \n"
 "%s"						/* ami_load_func() */
 " \n"
@@ -160,6 +163,8 @@ int main(int argc, char **argv)
 	,asp_includes()
 	,pam_includes()
 	,ami_load_proto()
+	,cern_init_call()
+	,cern_init_call()
 	,asp_starts()
 	,asp_stops()
 	,ami_load_func()
@@ -318,6 +323,17 @@ char* hicase(char *s)
    }
    ss[strlen(s)]=NULL;
    return ss;
+}
+
+/*--------------------------------------------------------------------*/
+char* cern_init_call()
+{
+   if(paw){
+      return "staf_paw_init_()";
+   }
+   else {
+      return "staf_kuip_init_()";
+   }
 }
 
 /*====================================================================*/
