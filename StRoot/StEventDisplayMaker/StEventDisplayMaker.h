@@ -30,10 +30,11 @@ class StVecPtrTpcHit;
 class StGlobalTrack;
 class StVertex;
 class StVirtualEventFilter;
+class StTrackChair;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.15 1999/11/02 01:49:26 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.16 2000/03/09 22:00:34 fine Exp $";
  private: 
     TList         *m_HitCollector;     //!
     TList         *m_TrackCollector;   //!
@@ -67,7 +68,7 @@ class StEventDisplayMaker : public StMaker {
    virtual Int_t  Make();
    virtual Int_t  MakeGlobalTracks();
    virtual Int_t  MakeTracks( StGlobalTrack *globTrack,StVirtualEventFilter *filter);
-   virtual Int_t  MakeTableTracks(const St_Table *points,StVirtualEventFilter *filter);
+   virtual Int_t  MakeTableTracks(const StTrackChair *points,StVirtualEventFilter *filter);
    virtual Int_t  MakeHits(const StObjArray *eventCollection,StVirtualEventFilter *filter);
    virtual Int_t  MakeVertex(const StVertex *vertex,StVirtualEventFilter *filter);
    virtual Int_t  MakeVertices(const StObjArray *verticesCollection,StVirtualEventFilter *filter);
@@ -107,50 +108,50 @@ class StEventDisplayMaker : public StMaker {
 
      // -- Vertex filters --
 
-     Int_t SetPrimaryVertexFlag(Int_t flag=1); // *MENU*
+     Int_t SetPrimaryVertexFlag(Int_t flag=1);
      StVirtualEventFilter *SetPrimaryVertex(StVirtualEventFilter *filter);
 
      // -- Hits collections filters --
 
-     Int_t SetTpcHitFlag(Int_t flag=1); // *MENU*
+     Int_t SetTpcHitFlag(Int_t flag=1);
      StVirtualEventFilter *SetTpcHit(StVirtualEventFilter *filter);
 
-     Int_t SetSvtHitFlag(Int_t flag=1); // *MENU*
+     Int_t SetSvtHitFlag(Int_t flag=1);
      StVirtualEventFilter *SetSvtHit(StVirtualEventFilter *filter);
 
-     Int_t SetFtpcHitFlag(Int_t flag=1); // *MENU*
+     Int_t SetFtpcHitFlag(Int_t flag=1);
      StVirtualEventFilter *SetFtpcHit(StVirtualEventFilter *filter);
 
-     Int_t SetEmcTowerHitFlag(Int_t flag=1); // *MENU*
+     Int_t SetEmcTowerHitFlag(Int_t flag=1);
      StVirtualEventFilter *SetEmcTowerHit(StVirtualEventFilter *filter);
 
-     Int_t SetEmcPreShowerHitFlag(Int_t flag=1); // *MENU*
+     Int_t SetEmcPreShowerHitFlag(Int_t flag=1);
      StVirtualEventFilter *SetEmcPreShowerHit(StVirtualEventFilter *filter);
 
-     Int_t SetSmdPhiHitFlag(Int_t flag=1); // *MENU*
+     Int_t SetSmdPhiHitFlag(Int_t flag=1);
      StVirtualEventFilter *SetSmdPhiHit(StVirtualEventFilter *filter);
 
-     Int_t SetSmdEtaHitFlag(Int_t flag=1); // *MENU*
+     Int_t SetSmdEtaHitFlag(Int_t flag=1);
      StVirtualEventFilter *SetSmdEtaHit(StVirtualEventFilter *filter);
 
-     Int_t SetVerticesFlag(Int_t flag=1); // *MENU*
+     Int_t SetVerticesFlag(Int_t flag=1); 
      StVirtualEventFilter *SetVertices(StVirtualEventFilter *filter);
 
      // -- StGlobalTrack filters --
 
-     Int_t SetGlobalTracksFlag(Int_t flag=1); // *MENU*
+     Int_t SetGlobalTracksFlag(Int_t flag=1); 
      StVirtualEventFilter *SetGlobalTracks(StVirtualEventFilter *filter);
 
-     Int_t SetTrackFlag(Int_t flag=1);    // *MENU*
+     Int_t SetTrackFlag(Int_t flag=1);
      StVirtualEventFilter *SetTrack(StVirtualEventFilter *filter);
 
-     Int_t SetTrackTpcHitsFlag(Int_t flag=1); // *MENU*
+     Int_t SetTrackTpcHitsFlag(Int_t flag=1);
      StVirtualEventFilter *SetTrackTpcHits(StVirtualEventFilter *filter);
 
-     Int_t SetTrackSvtHitsFlag(Int_t flag=1); // *MENU*
+     Int_t SetTrackSvtHitsFlag(Int_t flag=1);
      StVirtualEventFilter *SetTrackSvtHits(StVirtualEventFilter *filter);
 
-     Int_t SetTrackFtpcHitsFlag(Int_t flag=1); // *MENU*
+     Int_t SetTrackFtpcHitsFlag(Int_t flag=1);
      StVirtualEventFilter *SetTrackFtpcHits(StVirtualEventFilter *filter);
 
     //  -- Table filter ---
@@ -163,7 +164,7 @@ class StEventDisplayMaker : public StMaker {
   // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.15 1999/11/02 01:49:26 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.16 2000/03/09 22:00:34 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
