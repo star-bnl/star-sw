@@ -1,64 +1,4 @@
-// $Id: rootlogon.C,v 1.24 2000/04/23 21:03:05 fisyak Exp $
-// $Log: rootlogon.C,v $
-// Revision 1.24  2000/04/23 21:03:05  fisyak
-// Add node information
-//
-// Revision 1.23  2000/04/14 16:25:31  fisyak
-// Take out libSTAR & Star2Root once again
-//
-// Revision 1.22  2000/04/14 00:44:44  fisyak
-// put back libSTAR & Star2Root
-//
-// Revision 1.20  2000/03/27 02:59:46  fine
-// Star2Root has been added to logon
-//
-// Revision 1.19  2000/03/27 02:57:12  fine
-// ROOT 2.24 needs libSTAR to be loaded
-//
-// Revision 1.18  1999/12/07 20:23:28  fisyak
-// Uncomment Default white background for all plots
-//
-// Revision 1.17  1999/11/15 23:46:42  fisyak
-// Separate time stamps and chains
-//
-// Revision 1.16  1999/11/11 00:25:53  fisyak
-// replace cout by printf
-//
-// Revision 1.15  1999/11/02 18:12:15  fine
-// STAR_Demos.C has been removed from rootlogon.C
-//
-// Revision 1.14  1999/09/20 23:03:04  fisyak
-// Set default O0
-//
-// Revision 1.13  1999/08/11 13:30:31  fisyak
-// Add root4star usage statistics
-//
-// Revision 1.12  1999/08/06 15:00:41  fisyak
-// Keep formwer bfc.C as BFC.C
-//
-// Revision 1.11  1999/07/22 15:31:41  fine
-// US letter paper size has been set as default one
-//
-// Revision 1.10  1999/07/17 23:28:09  fisyak
-// Add QAInfo tag
-//
-// Revision 1.9  1999/07/09 20:55:00  didenko
-// set O0 (VP)
-//
-// Revision 1.8  1999/07/09 01:22:03  fisyak
-// CleanUp, set sequantial processing of Chain flags, flags are not truncated to 3 characters any more
-//
-// Revision 1.7  1999/06/27 22:45:33  fisyak
-// Merge StRootEvent and StEvent
-//
-// Revision 1.6  1999/06/15 16:19:11  fine
-// New logon script
-//
-// Revision 1.5  1999/06/11 23:01:56  perev
-// cleanup
-//
-// Revision 1.4  1999/05/21 15:34:00  kathy
-// made sure Log & Id are in each file and also put in standard comment line with name of owner
+// $Id: rootlogon.C,v 1.25 2000/06/23 16:54:34 fisyak Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -134,7 +74,58 @@ TBuffer::SetGlobalWriteParam(2003);
 	gSystem->HostName());
   gSystem->Exec("echo $USER from $HOST in STAR_LEVEL=$STAR_LEVEL / STAR_VERSION=$STAR_VERSION  `date` >>  $GROUP_DIR/statistics/root4star${STAR_VERSION}");
   gSystem->SetIncludePath("-I./include -I./StRoot -I$STAR/include -I$STAR/StRoot -I$STAF/inc -I$CERN_ROOT/include -I$ROOTSYS/src");
-  //  gSystem->Load("libSTAR");
-  //  gSystem->Load("Star2Root");
+  {
+    // Load rfio map
+    
+    TNamed *tn=0;
+    TList *rfiomap = new TList();
+    rfiomap->SetName(".rfiomap");
+    gROOT->GetListOfSpecials()->Add(rfiomap);
+    
+    char *map[] = {
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/data01",
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/data02",
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/data07",
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/data08",
+      
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/GC",
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/daq",
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/daq/1999   ",  
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/daq/l3",
+      
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/daq/2000/06",
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/disk0",
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/disk1",
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/dst",
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/pwg",
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/qa",
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/scratch",
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/simu",
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/star",
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/test",
+      
+      ":rfio:rmine03.rcf.bnl.gov:", "/star/data03",
+      ":rfio:rmine03.rcf.bnl.gov:", "/star/data04",
+      ":rfio:rmine03.rcf.bnl.gov:", "/star/data05",
+      ":rfio:rmine03.rcf.bnl.gov:", "/star/data06",
+      ":rfio:rmine03.rcf.bnl.gov:", "/star/data09",
+      ":rfio:rmine03.rcf.bnl.gov:", "/star/data10",
+      
+      ":rfio:rmine03.rcf.bnl.gov:", "/star/rcf/daq/2000/01",
+      ":rfio:rmine03.rcf.bnl.gov:", "/star/rcf/daq/2000/02",
+      ":rfio:rmine03.rcf.bnl.gov:", "/star/rcf/daq/2000/03",
+      
+      ":rfio:rmine03.rcf.bnl.gov:", "/star/rcf/reco",
+
+      ":rfio:rmine02.rcf.bnl.gov:", "/star/rcf/daq/2000",
+      0
+    };
+      
+    for (int i=0;map[i];i+=2) {
+      tn = new TNamed();
+      tn->SetName (map[i+1]);
+      tn->SetTitle(map[i+0]);
+      rfiomap->Add(tn);
+    }
+  }
 }
- 
