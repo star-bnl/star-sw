@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofMCInfo.h,v 2.2 2002/02/22 22:56:51 jeromel Exp $
+ * $Id: StTofMCInfo.h,v 2.3 2003/05/21 18:23:18 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, April 2001 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofMCInfo.h,v $
+ * Revision 2.3  2003/05/21 18:23:18  ullrich
+ * Major Revision of ToF classes (F. Geurts)
+ *
  * Revision 2.2  2002/02/22 22:56:51  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -25,7 +28,7 @@
 #ifndef StTofMCInfo_hh
 #define StTofMCInfo_hh
 
-#include "StTofSlat.h"
+#include "StObject.h"
 
 class StTofMCInfo : public StObject {
 public:
@@ -52,7 +55,7 @@ public:
     Float_t mMTime;
     Float_t mMTimeL;
     
-    ClassDef(StTofMCInfo,1)
+    ClassDef(StTofMCInfo,2)
 };
 
 inline int StTofMCInfo::operator==(const StTofMCInfo& MCInfo) const

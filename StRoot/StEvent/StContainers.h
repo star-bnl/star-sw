@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.15 2002/12/20 22:34:42 ullrich Exp $
+ * $Id: StContainers.h,v 2.16 2003/05/21 18:22:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.16  2003/05/21 18:22:46  ullrich
+ * Major Revision of ToF classes (F. Geurts)
+ *
  * Revision 2.15  2002/12/20 22:34:42  ullrich
  * Added containers for PMD hits and clusters.
  *
@@ -84,6 +87,7 @@ class StEmcCluster;
 class StEmcPoint;
 class StTofHit;
 class StTofSlat;
+class StTofCell;
 class StTofData;
 class StTrack;
 class StTrackNode;
@@ -116,6 +120,7 @@ StCollectionDef(EmcCluster)
 StCollectionDef(EmcPoint)
 StCollectionDef(TofHit)
 StCollectionDef(TofSlat)
+StCollectionDef(TofCell)
 StCollectionDef(TofData)
 StCollectionDef(Track)
 StCollectionDef(TrackNode)

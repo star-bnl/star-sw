@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofHit.h,v 2.5 2002/02/22 22:56:51 jeromel Exp $
+ * $Id: StTofHit.h,v 2.6 2003/05/21 18:22:46 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -13,8 +13,10 @@
  *
  ***************************************************************************
  *
- *
  * $Log: StTofHit.h,v $
+ * Revision 2.6  2003/05/21 18:22:46  ullrich
+ * Major Revision of ToF classes (F. Geurts)
+ *
  * Revision 2.5  2002/02/22 22:56:51  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -38,51 +40,76 @@
 #include <iostream.h>
 #include "StHit.h"
 
+class StParticleDefinition;
+class StTrack;
+
 class StTofHit : public StHit {
 public:
     StTofHit();
-    
-    //StTofHit(const StTofHit&);
-    //StTofHit& operator=(const StTofHit&);
     ~StTofHit();
 
-    unsigned short slatIndex()      const;
-    unsigned short numberOfMips()   const;
-    float          flightTime()     const;
+    int   trayIndex() const;
+    int   moduleIndex() const;
+    int   cellIndex() const;
+    int   daqIndex() const;
+    float timeOfFlight() const;
+    float pathLength() const;
+    float beta() const;
 
-    void setSlatIndex(unsigned short);
-    void setNumberOfMips(unsigned short);
-    void setFlightTime(float);
-    
-protected:
-    StObject* clone() const;
+    StTrack*       associatedTrack();
+    const StTrack* associatedTrack() const;
 
-    UShort_t  mSlatIndex;
-    UShort_t  mNumberOfMips;
-    Float_t   mFlightTime;
+    float tofExpectedAsElectron() const;
+    float tofExpectedAsPion() const;
+    float tofExpectedAsKaon() const;
+    float tofExpectedAsProton() const;
 
-    ClassDef(StTofHit,1)
+    float sigmaElectron() const;
+    float sigmaPion() const;
+    float sigmaKaon() const;
+    float sigmaProton() const;
+
+    StParticleDefinition*       particleHypothesis();
+    const StParticleDefinition* particleHypothesis() const;
+
+    void setTrayIndex(int);
+    void setModuleIndex(int);
+    void setCellIndex(int);
+    void setDaqIndex(int);
+    void setTimeOfFlight(float);
+    void setPathLength(float);
+    void setBeta(float);
+    void setAssociatedTrack(StTrack*);
+    void settofExpectedAsElectron(float);
+    void settofExpectedAsPion(float);
+    void settofExpectedAsKaon(float);
+    void settofExpectedAsProton(float);
+    void setsigmaElectron(float);
+    void setsigmaPion(float);
+    void setsigmaKaon(float);
+    void setsigmaProton(float);
+    void setparticleHypothesis(StParticleDefinition*);
+
+ protected:
+    Int_t   mTrayIndex;
+    Int_t   mModuleIndex;
+    Int_t   mCellIndex;
+    Int_t   mDaqIndex;
+    Float_t mTimeOfFlight;
+    Float_t mPathLength;
+    Float_t mBeta;
+    StTrack *mAssociatedTrack;   //$LINK
+    Float_t mTOFExpectedAsElectron;
+    Float_t mTOFExpectedAsPion;
+    Float_t mTOFExpectedAsKaon;
+    Float_t mTOFExpectedAsProton;
+    Float_t mSigmaElectron;
+    Float_t mSigmaPion;
+    Float_t mSigmaKaon;
+    Float_t mSigmaProton;
+    StParticleDefinition *mParticleHypothesis;
+
+    ClassDef(StTofHit,2)
 };
-
-inline unsigned short
-StTofHit::slatIndex() const { return mSlatIndex; }
-
-inline unsigned short
-StTofHit::numberOfMips() const {return mNumberOfMips;}
-
-inline float
-StTofHit::flightTime() const {return mFlightTime;}
-
-inline void
-StTofHit::setSlatIndex(unsigned short slatId) {mSlatIndex = slatId;}
-
-inline void
-StTofHit::setNumberOfMips(unsigned short nm) {mNumberOfMips = nm;}
-
-inline void
-StTofHit::setFlightTime(float tof) {mFlightTime = tof;}
-
-//non-members
-ostream& operator<<(ostream&, const StTofHit&);
 
 #endif

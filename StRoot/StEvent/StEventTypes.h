@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.24 2003/04/16 17:48:53 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.25 2003/05/21 18:22:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.25  2003/05/21 18:22:46  ullrich
+ * Major Revision of ToF classes (F. Geurts)
+ *
  * Revision 2.24  2003/04/16 17:48:53  ullrich
  * Added StTriggerData.
  *
@@ -164,9 +167,11 @@
 #include "StTofCollection.h"
 #include "StTofHit.h"
 #include "StTofMCHit.h"
+#include "StTofMCCell.h"
 #include "StTofMCSlat.h"
 #include "StTofPidTraits.h"
 #include "StTofSlat.h"
+#include "StTofCell.h"
 #include "StTofData.h"
 #include "StTofSoftwareMonitor.h"
 #include "StTpcHit.h"

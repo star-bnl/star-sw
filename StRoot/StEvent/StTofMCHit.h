@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofMCHit.h,v 2.2 2002/02/22 22:56:51 jeromel Exp $
+ * $Id: StTofMCHit.h,v 2.3 2003/05/21 18:22:46 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, April 2001 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofMCHit.h,v $
+ * Revision 2.3  2003/05/21 18:22:46  ullrich
+ * Major Revision of ToF classes (F. Geurts)
+ *
  * Revision 2.2  2002/02/22 22:56:51  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -31,22 +34,20 @@
 class StTofMCHit : public StTofHit {
 public:
     StTofMCHit();
-    //StTofMCHit(const StTofMCHit&);
-    //StTofMCHit& operator=(const StTofMCHit&);
     ~StTofMCHit();
 
-    int       trkId()            const;
-    int       gId()              const;
+    int   trkId() const;
+    int   gId()   const;
 
-    void      setTrkId(Int_t);
-    void      setGId(Int_t);
+    void  setTrkId(Int_t);
+    void  setGId(Int_t);
 
 protected:
     StObject* clone() const;
     Int_t     mTrkId;
     Int_t     mGId;
 
-    ClassDef(StTofMCHit,1)
+    ClassDef(StTofMCHit,2)
 };
 
 inline void

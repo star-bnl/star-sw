@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofCollection.h,v 2.4 2002/02/22 22:56:51 jeromel Exp $
+ * $Id: StTofCollection.h,v 2.5 2003/05/21 18:22:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StTofCollection.h,v $
+ * Revision 2.5  2003/05/21 18:22:46  ullrich
+ * Major Revision of ToF classes (F. Geurts)
+ *
  * Revision 2.4  2002/02/22 22:56:51  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -39,6 +42,7 @@
 #include "StContainers.h"
 #include "StEnumerations.h"
 #include "StTofHit.h"
+#include "StTofCell.h"
 #include "StTofSlat.h"
 #include "StTofData.h"
 
@@ -47,8 +51,14 @@ public:
     StTofCollection();
     ~StTofCollection();
 
-    const StSPtrVecTofSlat&    tofSlats() const;
-    StSPtrVecTofSlat&          tofSlats();
+    //const StSPtrVecTofUnit&    tofUnits() const;
+    //StSPtrVecTofUnit&          tofUnits();
+
+    const StSPtrVecTofCell&    tofCell() const;
+    StSPtrVecTofCell&          tofCell();
+
+    const StSPtrVecTofSlat&    tofSlat() const;
+    StSPtrVecTofSlat&          tofSlat();
     
     const StSPtrVecTofHit&     tofHits() const;
     StSPtrVecTofHit&           tofHits();
@@ -57,18 +67,21 @@ public:
     StSPtrVecTofData&          tofData();
 
     void addSlat(const StTofSlat*);
+    void addCell(const StTofCell*);
     void addHit(const StTofHit*);
     void addData(const StTofData*); 
 
+    bool cellsPresent()    const;
     bool slatsPresent()    const;
     bool hitsPresent()     const;
     bool dataPresent()     const;
     
 private:
-    StSPtrVecTofSlat           mTofSlats;
+    StSPtrVecTofSlat           mTofSlat;
+    StSPtrVecTofCell           mTofCell;
     StSPtrVecTofHit            mTofHits;
     StSPtrVecTofData           mTofData;
   
-    ClassDef(StTofCollection, 2)
+    ClassDef(StTofCollection, 3)
 };
 #endif

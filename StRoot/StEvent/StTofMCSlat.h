@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofMCSlat.h,v 2.4 2002/02/22 22:56:52 jeromel Exp $
+ * $Id: StTofMCSlat.h,v 2.5 2003/05/21 18:23:18 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, April 2001 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofMCSlat.h,v $
+ * Revision 2.5  2003/05/21 18:23:18  ullrich
+ * Major Revision of ToF classes (F. Geurts)
+ *
  * Revision 2.4  2002/02/22 22:56:52  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -38,8 +41,6 @@ class StTofMCSlat : public StTofSlat {
 public:
     StTofMCSlat();
     StTofMCSlat(const StTofMCInfo&);
-    // StTofMCSlat(const StTofMCSlat&);            use default
-    // StTofMCSlat& operator=(const StTofMCSlat&); use default
     ~StTofMCSlat();
     
     int operator==(const StTofMCSlat&) const;
