@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.52 2000/05/17 16:50:47 kathy Exp $
+// $Id: doEvents.C,v 1.53 2000/05/17 16:53:50 kathy Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -67,7 +67,7 @@ void doEvents(Int_t nevents=2,
               const Char_t *path="-",
               const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
               const Char_t *qaflag = "off", 
-              const Char_t *wrStEOut = "true");
+              const Char_t *wrStEOut = "false");
 
 // ------------------ Here is the actual method -----------------------------------------
 void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, const Char_t *wrStEOut)
@@ -204,8 +204,11 @@ void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
-// Revision 1.52  2000/05/17 16:50:47  kathy
-// put Victor's code to write out .event.root file from doEvents.C in here with a flag to turn off and on - now we can get rid of doEventsOut.C ... don't have to keep up 2 sets of macros
+// Revision 1.53  2000/05/17 16:53:50  kathy
+// change flag to write out .event.root file to false by default
+//
+// Revision 1.53  2000/05/17 16:53:50  kathy
+// change flag to write out .event.root file to false by default
 //
 // Revision 1.52  2000/05/17 16:50:47  kathy
 // put Victor's code to write out .event.root file from doEvents.C in here with a flag to turn off and on - now we can get rid of doEventsOut.C ... don't have to keep up 2 sets of macros
