@@ -1,6 +1,10 @@
 //
-// $Id: StEpcMaker.cxx,v 1.14 2001/11/01 00:15:23 suaide Exp $
+// $Id: StEpcMaker.cxx,v 1.15 2001/11/02 15:32:16 jeromel Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.15  2001/11/02 15:32:16  jeromel
+// Added return kStOK; which makes Insure happy (function is Int_t and does not return
+// a value).
+//
 // Revision 1.14  2001/11/01 00:15:23  suaide
 // Clean up and small modification to stop crashing at Finish()
 //
@@ -403,6 +407,7 @@ Int_t StEpcMaker::fillStEvent()
 //-------------------------------------------------------
 Int_t StEpcMaker::Finish() 
 {
+  return kStOK;
 }
 //-------------------------------------------------------
 bool StEpcMaker::accept(StTrack* track)
