@@ -372,7 +372,7 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
         MakePairs("real", mPicoEvent->FirstParticleCollection(),
                           mPicoEvent->SecondParticleCollection() );
       }
-      cout << "StHbtAnalysis::ProcessEvent() - reals done   ";
+      cout << "StHbtAnalysis::ProcessEvent() - reals done ";
 
       //---- Make pairs for mixed events, looping over events in mixingBuffer ----//
 
@@ -394,7 +394,7 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
                             mPicoEvent->SecondParticleCollection() );
         }
       }
-      cout << "StHbtAnalysis::ProcessEvent() - mixed done   ";
+      cout << " - mixed done   " << endl;
 
       //--------- If mixing buffer is full, delete oldest event ---------//
 
