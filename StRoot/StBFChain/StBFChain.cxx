@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.443 2004/09/03 14:21:57 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.444 2004/09/16 02:14:15 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -333,8 +333,6 @@ Bfc_st BFC1[] = { // standard chains
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"in"          ,""  ,"","xin"                                           ,"","","... Alias to xin",kFALSE},
-  {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
-  {"xdf2root"    ,""  ,"",""                                   ,"","xdf2root","Read XDF input file",kFALSE},
   {"geant"       ,"geant","","geomT,gen_T,sim_T"
                           ,"St_geant_Maker","libGeom,geometry,St_g2t,StMagF,St_geant_Maker","GEANT",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -604,7 +602,6 @@ Bfc_st BFC1[] = { // standard chains
   {"ppLPeval1"   ,"ppLPeval1"  ,"",""  ,"StppLPevalMaker","StppSpin","Evaluation of LP algo for pp",kFALSE},
   {"ppDAQfilter1","ppDAQfilter1"  ,"",""  ,"StDAQfilterMaker","StppSpin","DAQ filter (used for pp)",kFALSE},
   {"HitFilt"     ,"", "","",               "StHitFilterMaker","StHitFilterMaker","Hit filter Maker",kFALSE},
-  {"xout"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE},
   {"Tree"        ,"OutTree","","","StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE},
   {"NoDefault"   ,""  ,"",""                                  ,"","","No Default consistency check",kFALSE}
 };
@@ -947,8 +944,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"in"          ,""  ,"","xin"                                           ,"","","... Alias to xin",kFALSE},
-  {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
-  {"xdf2root"    ,""  ,"",""                                   ,"","xdf2root","Read XDF input file",kFALSE},
+  {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
   {"geant"       ,"geant","","geomT,gen_T,sim_T"
                           ,"St_geant_Maker","libGeom,geometry,St_g2t,StMagF,St_geant_Maker","GEANT",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1225,7 +1221,6 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"ppLPeval1"   ,"ppLPeval1"  ,"",""  ,"StppLPevalMaker","StppSpin","Evaluation of LP algo for pp",kFALSE},
   {"ppDAQfilter1","ppDAQfilter1"  ,"",""  ,"StDAQfilterMaker","StppSpin","DAQ filter (used for pp)",kFALSE},
   {"HitFilt"     ,"", "","",               "StHitFilterMaker","StHitFilterMaker","Hit filter Maker",kFALSE},
-  {"xout"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE},
   {"Tree"        ,"OutTree","","","StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE},
   {"NoDefault"   ,""  ,"",""                                  ,"","","No Default consistency check",kFALSE}
 };
@@ -1248,7 +1243,7 @@ ClassImp(StBFChain)
 //_____________________________________________________________________________
 /// Default Constructor
 StBFChain::StBFChain(const char *name, const Bool_t UseOwnHeader):
-  StChain(name,UseOwnHeader),fXdfOut(0),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0),fXdfFile(0) {
+  StChain(name,UseOwnHeader),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0) {
 
   gMessMgr->Info("StBFChain::StBFChain Default Constructor called.");
   fBFC = new Bfc_st[NoChainOptions1];
@@ -1271,7 +1266,7 @@ StBFChain::StBFChain(const char *name, const Bool_t UseOwnHeader):
  * chain and the ITTF chain options.
  */
 StBFChain::StBFChain(Int_t mode, const char *name):
-  StChain(name,kFALSE),fXdfOut(0),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0),fXdfFile(0) {
+  StChain(name,kFALSE),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0) {
 
   if(mode == 2){
     gMessMgr->Info("StBFChain::StBFChain Special Constructor called using chain-setup 2");
@@ -1416,7 +1411,6 @@ Int_t StBFChain::Instantiate()
 	  if (inpMk) {
 	    strcpy (fBFC[i].Name,(Char_t *) inpMk->GetName());
 	    SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
-	    SetInput("geant",".make/inputStream/.make/inputStream_XDF/.data/event/geant/Event");
 	    if (GetOption("ReadAll")) inpMk->SetBranch("*",0,"r");	//activate all branches
 	  }
 	  else status = kStErr;
@@ -1816,10 +1810,6 @@ Int_t StBFChain::Instantiate()
     }
   }
 
-  if (fXdfFile) {
-    fXdfOut = 0;//VP new St_XDFFile(fXdfFile->Data(),"wb");
-    if (!fXdfOut) status = kStErr;
-  }
   SetDbOptions();
   //  PrintQAInfo();
   PrintInfo();
@@ -1834,7 +1824,30 @@ Int_t StBFChain::Instantiate()
   if (GetOption("NoRepeat")) gMessMgr->IgnoreRepeats();
   return status;
 }
+//_____________________________________________________________________
+/// Skip events by selecting according maker 
+Int_t StBFChain::Skip(int nskip)
+{
+  St_geant_Maker *geant = 0;
+  StIOMaker      *inpMk = 0;
+  if (nskip<=0) return 0;
+  if (GetOption("fzin")) 
+   geant = (St_geant_Maker *)GetMaker("geant");
+   if (geant && !geant->InheritsFrom("St_geant_Maker")) geant = 0;
+   if (geant && !geant->IsActive()) 			geant = 0;
+   if (geant) {
+      printf ("St_Geant_Make::Skip(%d) Events\n",nskip);
+      geant->Skip(nskip);return 0;}
 
+   inpMk = (StIOMaker *) GetMaker("inputStream");
+   if (inpMk && !inpMk->InheritsFrom("StIOMaker")) 	inpMk = 0;
+   if (inpMk) {
+     printf ("StIOMaker::Skip(%d)  Events\n",nskip);
+     inpMk->Skip(nskip); return 0;}
+     
+   Error("Skip","No maker to Skip"); 
+   return kStErr;  
+}  
 
 //_____________________________________________________________________
 /// Really the destructor (close files, delete pointers etc ...)
@@ -1842,7 +1855,6 @@ Int_t StBFChain::Finish()
 {
   if (fBFC) {
     delete [] fBFC; fBFC = 0;
-//VP    SafeDelete (fXdfOut);
     if (fTFile) {fTFile->Write(); fTFile->Flush(); fTFile->Close(); SafeDelete (fTFile);}
     return StMaker::Finish();
   }
@@ -2241,7 +2253,6 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
 	  fFileOut->ReplaceAll(".daq","");
 	  fFileOut->ReplaceAll(".fzd","");
 	  fFileOut->ReplaceAll(".fz","");
-	  fFileOut->ReplaceAll(".xdf","");
 	  fFileOut->Strip();
 	  fFileOut->Append(".root");
 	}
@@ -2260,11 +2271,6 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
       }
       fTFile = new TFile(TagsName.Data(),"RECREATE");
     }
-  }
-  if (GetOption("xout") && fFileOut) {
-    fXdfFile = new TString(fFileOut->Data());
-    fXdfFile->Append(".dst.xdf");
-    gMessMgr->QAInfo() << "Open output xdf file  = " << fXdfFile->Data() <<  "++++++++++++++++++++++" << endm;
   }
   //    gSystem->Exit(1);
 }
