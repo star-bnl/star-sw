@@ -4,152 +4,169 @@
 #include "TDatime.h"
 #include "TBrowser.h"
 
-StObjArray StRegistry::fgColl[2];
-StRegistry RegInit;
+//TObjArray *StRegistry::fgReg  = 0;
+//Int_t      StRegistry::fgFree = 0;
 //______________________________________________________________________________
 
+#if 0
 ClassImp(StRegistry)
 //______________________________________________________________________________
-StRegistry::StRegistry()
+void StRegistry::Clear()
 {
-  assert(!fgColl[0].size());
-  assert(!fgColl[1].size());
-  fgColl[0].push_back(0);
-  fgColl[1].push_back(0);
+  if (fgReg) fgReg->Clear();
+  fgFree = 0;
+}
+//______________________________________________________________________________
+UInt_t StRegistry::Ident(Int_t colidx,Int_t objidx)
+{
+  UInt_t u;
+  int kase = 0;
+  if (colidx > 0x7fff  || objidx > 0xffff) kase =1;
+  if (kase && colidx > objidx ) kase +=2;
+  switch (kase) {
 
-}
-//______________________________________________________________________________
-void StRegistry::CheckIn(const StObjArray *Arr)
-{
-  StObjArray *arr = (StObjArray*)Arr;
-  int kind = arr->IsArr()-1;
-  assert(kind>=0);
-  StObjArray &book = fgColl[kind];
-  int ifree = (int)book[0];
-  if (ifree) {
-    ifree /=2; book[0] = book[ifree];
-    book[ifree] = arr;
-  } else {
-    book.push_back(arr);
-    ifree = book.size()-1;
-  }
-  UInt_t u = 0xffff & (ifree);
-  arr->SetUniqueID(u);
-}
-
-//______________________________________________________________________________
-void StRegistry::CheckIn(const TObject *Obj, const StObjArray *Arr)
-{
-  if (!Obj) return;
-  StObjArray *arr = (StObjArray*)Arr;
-  StObject   *obj = (StObject*)Obj;
-  UInt_t uarr,uobj;
-  uobj = obj->GetUniqueID();
-  uarr = arr->GetUniqueID();
-  int kArr = arr->IsArr();
-  int kObj = obj->IsArr();
-    
-  if (kObj==0 && kArr==1) {	//regular case
-    assert(!uobj);
-    uobj = 0xffff & uarr;
-  } else     {	//weak case
-  
-    if ( uobj&0xffff0000 ) {	//was already registered
-      if ( (uobj&0xffff0000)==0xffff0000)	return;
-      uobj |= 0xffff0000; 			return;
-    }
-    uobj |= uarr << 17 ;
-    if (kArr==2) uobj |= 010000;
-  } 
-  
-  obj->SetUniqueID(uobj);
-}
-//______________________________________________________________________________
-Int_t StRegistry::Where(const TObject *Obj, StObjArray *arr, Int_t &idx)
-{
-  StObject *obj = (StObject*)Obj;
-  
-  StObjArray &book = fgColl[0];
-  int nbook = book.size();
-  idx = -1; arr = 0;
-  UInt_t uobj = 0xffff & obj->GetUniqueID();
-  if (!uobj) return -1;
-  int kind = obj->IsArr();
-  switch (kind) {
-  
-    case 0:
-    for (int ibook=(int)uobj;ibook < nbook; ibook += 0x10000)
-    {
-      arr = (StObjArray*)fgColl[0][ibook];
-      if (! arr)			continue;
-      if (((ULong_t)arr)&1)		continue; 
-      if (arr->TestBit(kInvalidObject))	continue;
-      for (StObjArrayIter it = arr->begin(); it !=arr->end(); it++)
-      {
-        if (obj != (StObject*)(*it))	continue;
-        idx = it - arr->begin();
-        return 0;
-      }
-    } 
+    case 0:	// col=15bit obj=16bit
+    u = (colidx<<17)|(objidx<<1)|0;
     break;
-    
-    case 1:
-    case 2:
-    arr = fgColl+kind-2;
-    for (int ibook=(int)uobj;ibook < nbook; ibook += 0x10000)
-    {
-      if (obj != (*arr)[ibook]) 	continue;      
-      idx = ibook;
-      return kind;
-    } 
- }       
-    arr = 0; return -1;
-}    
 
-//______________________________________________________________________________
-void StRegistry::Remove(const TObject *Obj)  
-{
-  StObject *obj = (StObject*)Obj;
-  StObjArray *arr,*a;
-  TObject *o;
-  Int_t idx,knd,k;
+    case 1: 	// col=12bit obj=18bit
+    assert(colidx <   0xfff);
+    assert(objidx < 0x3ffff);
+    u = (colidx<<20)|(objidx<<2)|kase;        
+    break;
 
-  knd = Where(obj,arr,idx);
-  if (idx >0 ) { 	//found it
-    (*arr)[idx] = 0;
-    if (knd) { 
-      (*arr)[idx] = (*arr)[0];
-      (*arr)[0  ] = (TObject*)((idx<<1)|1);
-  }  }
-  UInt_t u = obj->GetUniqueID()>>16;
-  if (!u) return;
-  int ka = 0,na=2,start=1,step =1;
-  if (u!=0xffff) {
-    if (u&1) ka = 1; na = ka+1; start = u>>1; step = 0x1000;}
-    
-  for (k=ka; k < na; k++) {
-    arr = fgColl+k;
-    for (StObjArrayIter it = arr->begin()+start; it < arr->end(); it+=step) {
-      o = *it;
-      if (! o || 1&((ULong_t)o))	continue;
-      if (o->TestBit(kInvalidObject))	continue;
-      a = (StObjArray*)o;      
-      for (StObjArrayIter jt = a->begin(); jt != a->end(); jt++) {
-        if (obj != *jt) continue;
-        *jt = 0;
-  } } }
+    case 3: 	// col=18bit obj=12bit
+    assert(colidx < 0x3ffff);
+    assert(objidx <   0xfff);
+    u = (colidx<<14)|(objidx<<2)|kase;        
+    break;
+
+    default: assert(0);
+  }
+//  Int_t colqq,objqq;
+//  StRegistry::Ident(u,colqq,objqq);
+//  assert(colqq==colidx && objqq == objidx);
+  return u;
 
 }
 //______________________________________________________________________________
-void StRegistry::ls(int nmax) 
+void StRegistry::Ident(UInt_t ident,Int_t &colidx,Int_t &objidx)
 {
-   printf("\n StRegistry ls \n\n");    
-   fgColl[0].ls();
-   fgColl[1].ls();
+  int kase = ident&3;
+  switch (kase) {
+
+    case 0:; case 2:
+      objidx = (ident>>1)&0xffff; 
+      colidx = ident>>17;
+      { UInt_t u = StRegistry::Ident(colidx,objidx);
+        assert(u==ident); }
+      
+      return;
+
+    case 1:;
+      objidx = (ident>>2)&0x3ffff;
+      colidx = ident>>20;
+      return;
+    case 3:;  
+      objidx = (ident>>2)&0xfff;
+      colidx = ident>>14;
+      return;
+    default: assert(0);  
+  }
+}  
+//______________________________________________________________________________
+Int_t StRegistry::GetNColl(){return (fgReg) ? fgReg->GetLast()+1:0;}				// Number of collections
+//______________________________________________________________________________
+void StRegistry::Streamer(TBuffer &){assert(0);}
+
+//______________________________________________________________________________
+Int_t StRegistry::SetColl(StStrArray *coll) 		
+// Register new container
+{
+  Int_t n;
+  assert(coll);
+  if (!fgReg) fgReg = new TObjArray(100);
+  
+  if (!fgFree) {	//No free places
+    fgReg->AddLast(coll);
+    n = fgReg->GetLast()+1;
+  } else {
+    n = fgFree;
+    fgFree = -(int)fgReg->At(n-1);
+    fgReg->AddAt(coll,n-1);
+  }
+  coll->SetUniqueID(StRegistry::Ident(1999,n));
+  
+  return n;
 }
 //______________________________________________________________________________
-void StRegistry::Streamer(TBuffer &b){assert(0);}  
+void StRegistry::RemColl(StStrArray *coll)  
+{
+  UInt_t id;
+  Int_t colIdx,objIdx;
+  assert(fgReg); 		//Reg collection does not exist
+  id = coll->GetUniqueID();
+  assert(id);			//Collection removed twice
+  StRegistry::Ident(id, colIdx, objIdx);
+  assert(objIdx); 
+  assert(colIdx==1999);		//No collection for collection (???)
+  assert( fgReg->At(objIdx-1)==coll);
+  fgReg->RemoveAt(objIdx-1);
+  if (objIdx-1 < fgReg->GetLast()) {
+    fgReg->AddAt((TObject*)(-fgFree),objIdx-1);
+    fgFree = objIdx;
+  }
 
+  coll->SetUniqueID(0);
+  
+}
+//______________________________________________________________________________
+Int_t StRegistry::GetColl(const char *collname)  
+// get index of container
+{
+  assert(collname);
+  if (!fgReg) return 0;
+
+  int i=0,n=fgReg->GetLast();  
+  for (i=0;i<=n;i++) 
+  {
+    StStrArray *koll = (StStrArray*)fgReg->At(i);
+    if (!koll) continue;
+    if(strcmp(collname,koll->GetIDName())) continue;
+    return (i+1);
+  }
+  return 0;
+}
+//______________________________________________________________________________
+StStrArray *StRegistry::GetColl (Int_t idx )
+// get collection  by index
+{ assert(fgReg); return (StStrArray*)fgReg->At(idx-1);} 
+
+//______________________________________________________________________________
+const char *StRegistry::GetCollName (Int_t idx ) 
+// get name of collection by index
+{
+ StStrArray *coll = (StStrArray*)GetColl(idx); assert(coll); 
+ return coll->GetIDName();
+}
+ 
+//______________________________________________________________________________
+void StRegistry::List() 
+{
+
+  printf("\n\tList of StRegistry\n");
+  if (!fgReg) return;
+  int n = fgReg->GetLast();
+  for (int i=1;i<=n;i++) {
+    StObjArray *coll = GetColl(i);
+    if (!coll) continue;
+    int size = coll->GetSize();
+    printf("Collection.%02d = %s Size = %d Address=%p\n"
+    ,i,coll->GetName(),size,coll);   
+  }
+  printf("\n");
+}
+#endif /*0*/
 //______________________________________________________________________________
 
 ClassImp(StObjArray)
@@ -170,7 +187,7 @@ void StObjArray::Streamer(TBuffer &b)
       for (Int_t i = 0; i < nobjects; i++) {
          b >> obj;  push_back(obj);}
    } else {
-      b.WriteVersion(IsA());//
+      b.WriteVersion(IsA());
       nobjects = size();
       b << nobjects;
 
@@ -220,40 +237,9 @@ void StObjArray::random_shuffle(int start,int end)
 
 }
 //______________________________________________________________________________
-void StObjArray::ls(int nmax) const
-{
-   printf("\n Container %s::%s(%d)\n",ClassName(),GetName(),size());    
-   int num = size();
-   if (num > nmax) num = nmax;
-   for (int i=0; i<num; i++)
-   {
-     const TObject *to = at(i);
-     if (!to) 	continue;
-     printf("%8d - ",i);
-     if ((UInt_t)to <1000000 || ((UInt_t)to)&1 ) 
-       printf("%10d\n",(int)to);
-     else {
-       printf("%p  %s::%s 0x%8x\n",to,to->ClassName(),to->GetName(),to->GetUniqueID());
-     }
-   }
-   printf("\n");
-}       
-
-
-
-
-//______________________________________________________________________________
 ClassImp(StRefArray)
-StRefArray::StRefArray(Int_t sz):StObjArray(sz)                
-{  
-  SetBit(kStRRR);
-  StRegistry::CheckIn(this);
-}
-StRefArray::StRefArray(const StRefArray &from):StObjArray(from)
-{
-  SetBit(kStRRR);
-  StRegistry::CheckIn(this);
-};
+StRefArray::StRefArray(Int_t sz):StObjArray(sz){};
+StRefArray::StRefArray(const StRefArray &from):StObjArray(from){};
 
 //______________________________________________________________________________
 void StRefArray::Streamer(TBuffer &R__b)
@@ -326,13 +312,9 @@ StStrArray::StStrArray(const Char_t *name,Int_t sz):StObjArray(sz)
 { 
 //NONMONO  StRegistry::SetColl(this);
   if (name) SetName(name); 
-  StRegistry::CheckIn(this);
 }
 //______________________________________________________________________________
-StStrArray::StStrArray(Int_t sz):StObjArray(sz)
-{
-  StRegistry::CheckIn(this);
-}
+StStrArray::StStrArray(Int_t sz):StObjArray(sz){}
 //______________________________________________________________________________
  void StStrArray::operator=(const StStrArray &a)
 {
@@ -425,10 +407,10 @@ void StStrArray::Streamer(TBuffer &R__b)
    }
 
 }
-// $Id: StArray.cxx,v 1.30 2000/07/30 01:40:11 perev Exp $
+// $Id: StArray.cxx,v 1.31 2000/07/30 01:45:26 perev Exp $
 // $Log: StArray.cxx,v $
-// Revision 1.30  2000/07/30 01:40:11  perev
-// StMem class added
+// Revision 1.31  2000/07/30 01:45:26  perev
+// StArray vers restored
 //
 // Revision 1.29  2000/07/03 02:07:58  perev
 // StEvent: vector<TObject*>
