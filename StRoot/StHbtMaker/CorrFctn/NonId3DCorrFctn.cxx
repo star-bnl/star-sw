@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: NonId3DCorrFctn.cxx,v 1.5 2004/02/02 20:19:15 kisiel Exp $
+ * $Id: NonId3DCorrFctn.cxx,v 1.6 2004/02/17 19:03:15 jeromel Exp $
  *
  * Author: Adam Kisiel, Warsaw University of Technology
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: NonId3DCorrFctn.cxx,v $
+ * Revision 1.6  2004/02/17 19:03:15  jeromel
+ * Assignement of float to int is unpredictable
+ *
  * Revision 1.5  2004/02/02 20:19:15  kisiel
  * Properly initialize variables in NonId3DCorrFctn
  *
@@ -261,7 +264,7 @@ void NonId3DCorrFctn::makeHistos(char* title, const int& nbins, const float& Qin
 //				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
 
   mKCompCut = -1000.0;
-  mqSideSel = 0.0;   
+  mqSideSel = 0;   
 }
 
 //____________________________
@@ -278,7 +281,7 @@ NonId3DCorrFctn::NonId3DCorrFctn(char* title, const int& nbins, const float& Qin
 {
   makeHistos(title, nbins, QinvLo, QinvHi);
   mKCompCut = KCompCut;
-  mqSideSel = 0.0;   
+  mqSideSel = 0;   
 }
 
 
