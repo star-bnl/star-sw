@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.9 2000/09/15 22:51:34 posk Exp $
+// $Id: StFlowSelection.h,v 1.10 2000/09/16 22:20:34 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.10  2000/09/16 22:20:34  snelling
+// Added selection on P and global DCA and fixed rapidity calulation
+//
 // Revision 1.9  2000/09/15 22:51:34  posk
 // Added pt weighting for event plane calcualtion.
 //
@@ -76,12 +79,14 @@ class StFlowSelection : public StObject {
   void    SetPid(const Char_t*);
   void    SetPidPart(const Char_t*);
   void    SetPtPart(const Float_t, const Float_t);
+  void    SetPPart(const Float_t, const Float_t);
   void    SetEtaPart(const Float_t, const Float_t);
   void    SetYPart(const Float_t, const Float_t);
   void    SetFitPtsPart(const Int_t, const Int_t);
   void    SetFitOverMaxPtsPart(const Float_t, const Float_t);
   void    SetChiSqPart(const Float_t, const Float_t);
   void    SetDcaPart(const Float_t, const Float_t);
+  void    SetDcaGlobalPart(const Float_t, const Float_t);
   void    SetHarmonic(const Int_t&);
   void    SetSelection(const Int_t&);
   void    SetSubevent(const Int_t&);
@@ -94,12 +99,14 @@ class StFlowSelection : public StObject {
                                              // pbar, proton, d, dbar, e+, e-
   Char_t  mPidPart[10];                      // PID for particles wrt plane
   Float_t mPtPart[2];                        // for parts. wrt plane
+  Float_t mPPart[2];                         // for parts. wrt plane
   Float_t mEtaPart[2];                       // for parts. wrt plane
   Float_t mYPart[2];                         // for parts. wrt plane 
   Int_t   mFitPtsPart[2];                    // for parts. wrt plane
   Float_t mFitOverMaxPtsPart[2];             // for parts. wrt plane
   Float_t mChiSqPart[2];                     // for parts. wrt plane
   Float_t mDcaPart[2];                       // for parts. wrt plane
+  Float_t mDcaGlobalPart[2];                 // for parts. wrt plane
 
   Int_t   mHarmonic;
   Int_t   mSelection;
@@ -140,6 +147,9 @@ inline void StFlowSelection::SetPidPart(const Char_t* pid)  {
 inline void StFlowSelection::SetPtPart(Float_t lo, Float_t hi) {
   mPtPart[0] = lo; mPtPart[1] = hi; }
 
+inline void StFlowSelection::SetPPart(Float_t lo, Float_t hi) {
+  mPPart[0] = lo; mPPart[1] = hi; }
+
 inline void StFlowSelection::SetEtaPart(Float_t lo, Float_t hi) {
   mEtaPart[0] = lo; mEtaPart[1] = hi; }
 
@@ -157,6 +167,9 @@ inline void StFlowSelection::SetChiSqPart(Float_t lo, Float_t hi) {
 
 inline void StFlowSelection::SetDcaPart(Float_t lo, Float_t hi) {
   mDcaPart[0] = lo; mDcaPart[1] = hi; }
+
+inline void StFlowSelection::SetDcaGlobalPart(Float_t lo, Float_t hi) {
+  mDcaGlobalPart[0] = lo; mDcaGlobalPart[1] = hi; }
 
 inline void StFlowSelection::SetHarmonic(const Int_t& harN) {
   if (harN < 0 || harN >= Flow::nHars) {
