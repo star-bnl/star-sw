@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.h,v 1.8 2000/09/11 17:08:29 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.h,v 1.9 2000/10/24 22:36:47 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.h,v $
+ * Revision 1.9  2000/10/24 22:36:47  aihong
+ * pass if no parameter file read
+ *
  * Revision 1.8  2000/09/11 17:08:29  aihong
  * add geantID access
  *
@@ -170,6 +173,7 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
 
     static  bool     mTurnOnNoise;
     static  bool     mDynamicallyCalculatePID;
+    static  bool     mHasParameterFile;
     static  double   mDedxBinWidth;
     static  double   mRigBinWidth; //do not let NBins exceed 999.
     static  double   mPtBinWidth; //not implemented yet.
