@@ -1,5 +1,9 @@
-* $Id: tpt_project.F,v 1.5 1998/09/01 13:32:38 sakrejda Exp $
+* $Id: tpt_project.F,v 1.6 1999/03/30 15:55:03 love Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.6  1999/03/30 15:55:03  love
+* Spelling.  make_segment_uv removed doubling of tolerance on row skip.
+*  row_sect_point remove check on sector z position
+*
 * Revision 1.5  1998/09/01 13:32:38  sakrejda
 * restored sector numbering 1-24 in tphit.row
 *
@@ -20,7 +24,7 @@ C
 C TPT_PROJECT - adds more points to the itrk track
 C
 C DESCRIPTION:
-C Two neighbouring sectors as wee as the one in which the segment is
+C Two neighbouring sectors as well as the one in which the segment is
 C are searched for hits that are within tolerances.
 C
 C INPUT ARGUMENTS:
