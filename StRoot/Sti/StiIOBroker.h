@@ -148,6 +148,20 @@ public:
 
     virtual void setLTMDeltaR(double) = 0;
     virtual double ltmDeltaR() const = 0;
+
+    //Track Filter parameters (filter)
+
+    virtual void setFilterPtMin(double) = 0;
+    virtual double filterPtMin() const = 0;
+
+    virtual void setFilterPtMax(double) = 0;
+    virtual double filterPtMax() const = 0;
+
+    virtual void setFilterEtaMin(double) = 0;
+    virtual double filterEtaMin() const = 0;
+    
+    virtual void setFilterEtaMax(double) = 0;
+    virtual double filterEtaMax() const = 0;
     
 protected:
     
@@ -197,7 +211,11 @@ inline ostream& operator<<(ostream& os, const StiIOBroker& b)
        <<"ktfMinContiguousHitCount():\t"<<b.ktfMinContiguousHitCount()<<endl
        <<"ktfMaxNullCount():\t"<<b.ktfMaxNullCount()<<endl
        <<"ktfMaxContiguousNullCount():\t"<<b.ktfMaxContiguousNullCount()<<endl
-       <<"ltmDeltaR():\t"<<b.ltmDeltaR()<<endl;
+       <<"ltmDeltaR():\t"<<b.ltmDeltaR()<<endl
+       <<"filterPtMin():\t"<<b.filterPtMin()<<endl
+       <<"filterPtMax():\t"<<b.filterPtMax()<<endl
+       <<"filterEtaMin():\t"<<b.filterEtaMin()<<endl
+       <<"filterEtaMax():\t"<<b.filterEtaMax()<<endl;
     
 
     return os;
