@@ -427,11 +427,11 @@ void ConvertRawToDetector(int sector, int padrow, float pad, float timeslice,
                 pad, padrow, NumberOfPadsInRow[padrow-1] ) ;
       pad = 0 ;
    }
-   if ( pad >= NumberOfPadsInRow[padrow-1] ) {
-      printf ( "\n pad %f in row %d , out of bounds (0, %d) ", 
-            pad, padrow, NumberOfPadsInRow[padrow-1] ) ;
-      pad = NumberOfPadsInRow[padrow-1] - 1 ;
-   }
+//   if ( pad >= NumberOfPadsInRow[padrow-1] ) {
+//      printf ( "\n pad %f in row %d , out of bounds (0, %d) ", 
+//            pad, padrow, NumberOfPadsInRow[padrow-1] ) ;
+//      pad = NumberOfPadsInRow[padrow-1] - 1 ;
+//   }
    cart_y = PadrowOffset[padrow-1];
 //   cart_x = (pad - (NumberOfPadsInRow[padrow-1] >> 1)+0.5) * PadSpacing[padrow-1];
    cart_x = (pad - (NumberOfPadsInRow[padrow-1] >> 1)) * PadSpacing[padrow-1];
