@@ -1,11 +1,15 @@
-* $Id: tgc_local_to_global.F,v 1.2 1998/01/27 01:56:41 fisyak Exp $
+* $Id: tgc_local_to_global.F,v 1.3 1998/02/28 02:06:22 sakrejda Exp $
 * $Log: tgc_local_to_global.F,v $
+* Revision 1.3  1998/02/28 02:06:22  sakrejda
+* math_constants.inc used in the geometry package
+*
 * Revision 1.2  1998/01/27 01:56:41  fisyak
 * Split sources
 *
       integer function tgc_local_to_global(isect,xlocal,xglobal)
       implicit none
 #include "PAM.inc"
+#include "math_constants.inc"
 
       integer isect
       real xlocal(3), xglobal(3)
@@ -18,15 +22,14 @@ C     Returns:
 C     xglobal- coordinates of a point in the global coordinate system
 C
       integer iret, tgc_drift_volume_length
-      real b_rot, pi_six, drift_vol_length, dummy1
+      real b_rot, drift_vol_length, dummy1
 *
-      pi_six=2.0*atan(1.0)/3.0
       iret=tgc_drift_volume_length(drift_vol_length, dummy1, dummy1)
       if(isect.le.12) then    
-        b_rot=real(isect)*pi_six
+        b_rot=real(isect)*(C_PI_2/3.)
         xglobal(3)=drift_vol_length-xlocal(3)
       else
-        b_rot=real(24-isect)*pi_six
+        b_rot=real(24-isect)*(C_PI_2/3.)
         xglobal(3)=-drift_vol_length+xlocal(3)
       endif
       xglobal(1)=xlocal(1)*cos(b_rot)+xlocal(2)*sin(b_rot)

@@ -2,6 +2,7 @@
       integer function tgc_global_to_sector(isect,xglobal)
       implicit none
 #include "PAM.inc"
+#include "math_constants.inc"
       integer isect
       real xglobal(3)
 C
@@ -12,23 +13,13 @@ C     returns:
 C     isect - sector number
 C
       integer iret
-      integer first
       real angle
-      real twopi, pi_twelve, pi_six
       save
 
-      data first/1/
-C
-      if(first.eq.1) then
-       twopi=8.0*atan(1.0)
-       pi_twelve=atan(1.0)/3.0
-       pi_six=pi_twelve*2.0
-       first=0
-      endif
 C
       angle = atan2(xglobal(2),xglobal(1))
-      if(angle.lt.0)angle=angle+twopi
-      isect=int((angle+pi_twelve)/pi_six)
+      if(angle.lt.0)angle=angle+C_2PI
+      isect=int((angle+C_PI_4/3.)/(C_PI_2/3.))
       if(isect.eq.12)isect=0
       if(xglobal(3).gt.0) then
          isect=15-isect
