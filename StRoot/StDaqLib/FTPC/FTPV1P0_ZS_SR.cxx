@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_ZS_SR.cxx,v 1.3 2000/08/18 15:38:58 ward Exp $
+ * $Id: FTPV1P0_ZS_SR.cxx,v 1.4 2001/06/19 20:51:22 jeromel Exp $
  * Author: M.J. LeVine, H.Huemmler
  ***************************************************************************
  * Description: FTPC V1.0 Zero Suppressed Reader
@@ -11,6 +11,9 @@
  * 
  ***************************************************************************
  * $Log: FTPV1P0_ZS_SR.cxx,v $
+ * Revision 1.4  2001/06/19 20:51:22  jeromel
+ * Commited for Janet S.
+ *
  * Revision 1.3  2000/08/18 15:38:58  ward
  * New FTPC stuff from JKlay and Hummler.
  *
@@ -74,17 +77,14 @@ int FTPV1P0_ZS_SR::initialize()
   // store pointers to the ADCD, ADCX, SEQD banks
   adcd_p = detector->getBankFTPADCD(sector);
   if ((void *)adcd_p != NULL) {
-    printf("found ADCD, sector %d\n", sector);
     fflush(stdout);
   }
   adcx_p = detector->getBankFTPADCX(sector);
   if ((void *)adcx_p != NULL) {
-    printf("found ADCX, sector %d\n", sector);
     fflush(stdout);
   }
   seqd_p = detector->getBankFTPSEQD(sector);
   if ((void *)seqd_p != NULL) {
-    printf("found SEQD, sector %d\n", sector);
     fflush(stdout);
   }
   else
@@ -101,6 +101,7 @@ int FTPV1P0_ZS_SR::initialize()
   for (i=0; i<numseq; i++) {
     if (seqd_p->sequence[i]<0) { //padrow, pad
       padrow = (seqd_p->sequence[i]>>8)& 0x7f;
+      padrow = ((int)(padrow-1)/6)%2+1;
       pad = (seqd_p->sequence[i])& 0xff;
       if (pad==255) break; //pad 255 exists only in extraneous last word
       Row_array[padrow-1].npads++; //increment #pads in padrow
@@ -133,7 +134,6 @@ int FTPV1P0_ZS_SR::initialize()
       }
     }
   }
-  
   //allocate memory for Sequence arrays
   // This stupid compiler thinks row's scope extends here, so I removed int
   // The original line should go in when we upgrade to a better compiler 
@@ -163,6 +163,7 @@ int FTPV1P0_ZS_SR::initialize()
   for (i=0; i<numseq; i++) {
     if (seqd_p->sequence[i]<0) { //padrow, pad
       padrow = (seqd_p->sequence[i]>>8)& 0x7f;
+      padrow = ((int)(padrow-1)/6)%2+1;
       pad = (seqd_p->sequence[i])& 0xff;
       if (pad==255) break; //pad 255 exists only in extraneous last word
       pad_seq = 0;
