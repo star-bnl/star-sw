@@ -1,6 +1,12 @@
-// $Id: StTrsMaker.cxx,v 1.21 1999/03/15 02:52:26 perev Exp $
+// $Id: StTrsMaker.cxx,v 1.22 1999/03/16 02:03:46 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.22  1999/03/16 02:03:46  lasiuk
+// Add Finish(); correct breakNumber calculation; Use C++ casts;
+// Change defaults (again) including P10;
+// New mechanism for selecting which sectors to process;
+// Add flag for processing pseudo-pad rows
+//
 // Revision 1.21  1999/03/15 02:52:26  perev
 // new Maker schema
 //
@@ -52,9 +58,9 @@
 //                                                                      //
 // StTrsMaker class for Makers                                          //
 //                                                                      //
-#define hISTOGRAM 1
+#define hISTOGRAM  1
 #define uNPACK_ALL 1
-#define vERBOSITY 1
+#define vERBOSITY  0
 //////////////////////////////////////////////////////////////////////////
 
 #include "StTrsMaker.h"
@@ -118,7 +124,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.21 1999/03/15 02:52:26 perev Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.22 1999/03/16 02:03:46 lasiuk Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -183,11 +189,11 @@ Int_t StTrsMaker::Init()
 
    mElectronicsDb =
        StTpcSimpleElectronics::instance(electronicsFile.c_str());
-   mElectronicsDb->print();
+   //mElectronicsDb->print();
 
-   string gas =("Ar");
+   string gas =("P10");
    mGasDb = new StTrsDeDx(gas);
-   double miniSegmentLength = 4.*millimeter;
+   mMiniSegmentLength = 4.*millimeter;
    //mGasDb->print();
 
    //
@@ -198,7 +204,7 @@ Int_t StTrsMaker::Init()
    mWireHistogram =
        StTrsWireHistogram::instance(mGeometryDb, mSlowControlDb);
    mWireHistogram->setDoGasGain(true);             // True by default
-   mWireHistogram->setDoGasGainFluctuations(false);
+   mWireHistogram->setDoGasGainFluctuations(true);
    mWireHistogram->setGasGainInnerSector(2000);
    mWireHistogram->setGasGainOuterSector(1000);
    mWireHistogram->setDoTimeDelay(false);
@@ -214,10 +220,10 @@ Int_t StTrsMaker::Init()
    mChargeTransporter =
        StTrsFastChargeTransporter::instance(mGeometryDb, mSlowControlDb, mGasDb, mMagneticFieldDb);
    // set status:
-   mChargeTransporter->setChargeAttachment(false);
+   mChargeTransporter->setChargeAttachment(true);
    mChargeTransporter->setGatingGridTransparency(false);
-   mChargeTransporter->setTransverseDiffusion(false);
-   mChargeTransporter->setLongitudinalDiffusion(false);
+   mChargeTransporter->setTransverseDiffusion(true);
+   mChargeTransporter->setLongitudinalDiffusion(true);
    mChargeTransporter->setExB(false);
 
 
@@ -240,8 +246,8 @@ Int_t StTrsMaker::Init()
      static_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
 	 setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
    mAnalogSignalGenerator->setDeltaRow(0);
-   mAnalogSignalGenerator->setDeltaPad(1);
-   mAnalogSignalGenerator->setSignalThreshold(1.*(.001*volt));
+   mAnalogSignalGenerator->setDeltaPad(2);
+   mAnalogSignalGenerator->setSignalThreshold(1.*millivolt);
    mAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
    mAnalogSignalGenerator->addNoise(false);
    mAnalogSignalGenerator->generateNoiseUnderSignalOnly(false);
@@ -259,8 +265,17 @@ Int_t StTrsMaker::Init()
    mAllTheData =
        new StTrsRawDataEvent();
 
+   //
+   // Maker Initialization
+   //
+   mFirstSectorToProcess = 1;
+   mLastSectorToProcess  = 24;
+
+   // This should really be a boolean
+   mProcessPseudoPadRows = 0;  // 0 is no!
+
    
-    return StMaker::Init();
+   return StMaker::Init();
 }
 
 
@@ -279,6 +294,9 @@ void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
     
 Int_t StTrsMaker::Make(){
     //  PrintInfo();
+
+    //Do not use this unless you really know what you are
+    // doing...
 #ifdef HISTOGRAM
     cout << "Histogram" << endl;
 
@@ -318,17 +336,12 @@ Int_t StTrsMaker::Make(){
 	      << "xr" << "yr" << "zr" << book;
 #endif
 
-    //
-    // Set Range for Processing
-    const int firstSectorToProcess = 1;
-    const int lastSectorToProcess = 24;
-    
-    int currentSectorProcessed = firstSectorToProcess;
+    int currentSectorProcessed = mFirstSectorToProcess;
 
     cout << "Processing sectors "
-	 << firstSectorToProcess
+	 << mFirstSectorToProcess
 	 << "--"
-	 << lastSectorToProcess << endl;
+	 << mLastSectorToProcess << endl;
     //
     //
     
@@ -337,32 +350,35 @@ Int_t StTrsMaker::Make(){
     //ofstream raw("/star/u2b/lasiuk/event.txt",ios::out);
     if (!m_DataSet->GetList())  {//if DataSet is empty fill it
     //
-    // Read the Ionization
+    // Read the GEANT info
+    // these structures/classes are defined in:
+    // $STAR/pams/sim/idl/g2t_tpc_hit.idl 
+    // $STAR/StRoot/base/St_DataSet.h & St_Table.h 
     //
     St_DataSetIter geant(GetDataSet("geant"));
-    // $STAR/pams/sim/idl/g2t_tpc_hit.idl 
     
-    St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
-    // $STAR/StRoot/base/St_DataSet.h & St_Table.h 
+    //St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
+    St_g2t_tpc_hit *g2t_tpc_hit =
+	static_cast<St_g2t_tpc_hit *>(geant("g2t_tpc_hit"));
     int no_tpc_hits         =  g2t_tpc_hit->GetNRows();
     g2t_tpc_hit_st *tpc_hit =  g2t_tpc_hit->GetTable();
 
-    St_g2t_track *g2t_track = (St_g2t_track *) geant("g2t_track");
+    //St_g2t_track *g2t_track = (St_g2t_track *) geant("g2t_track");
+    St_g2t_track *g2t_track =
+	static_cast<St_g2t_track *>(geant("g2t_track"));
     g2t_track_st *tpc_track = g2t_track->GetTable();
 
     //int geantPID = tpc_track->ge_pid;
     //PR(geantPID);
 
-    int bisdet, bsectorOfHit, bpadrow;
-
-    // Where is the first hit in the TPC
-    whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
-    //int currentSectorProcessed = bsectorOfHit;
-
+    // inRange should be a boolean
+    bool inRange;
+    int  bisdet, bsectorOfHit, bpadrow;
+    int  numberOfProcessedPointsInCurrentSector = 0;
     // Limit the  processing to a fixed number of segments
     //no_tpc_hits = 20;
     for (int i=1; i<=no_tpc_hits; i++){
-	//cout << "--> tpc_hit:  " << i << endl;
+// 	cout << "--> tpc_hit:  " << i << endl;
 //  	raw << tpc_hit->volume_id   << ' '
 //  	    << tpc_hit->de          << ' '
 //  	    << tpc_hit->ds          << ' '
@@ -374,30 +390,34 @@ Int_t StTrsMaker::Make(){
 //  	    << tpc_hit->p[2]        << ' '  << endl;
 
 	whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
-	
-	// Process until the next sector is reached.
-
 // 	PR(bsectorOfHit);
+	if(bsectorOfHit >= mFirstSectorToProcess &&
+	   bsectorOfHit <= mLastSectorToProcess)
+	    inRange = true;
+	else
+	    inRange = false;
 
 	// Save time initially  - by not processing pseudo padrows
-	if(bisdet) {
-// 	    cout << "Segment in a pseudo-padRow. Skipping..." << endl;
+	if(bisdet && !mProcessPseudoPadRows) {
+ 	    //cout << "Segment in a pseudo-padRow. Skipping..." << endl;
 	    tpc_hit++;
 	    if(i != no_tpc_hits) continue;
 	}
 	//sleep(2);
 
-	if ( (bsectorOfHit < firstSectorToProcess) ||
-	     (bsectorOfHit >  (lastSectorToProcess+1) )) {
-	    tpc_hit++;  // increase the pointer...
+	//
+	// If not in range AND there are no points processed, skip to next point
+	if(!inRange && !numberOfProcessedPointsInCurrentSector) {
+	    cout << "out of range and no points" << endl;
+	    tpc_hit++;
 	    continue;
 	}
-	    
 	
-	if( (currentSectorProcessed == bsectorOfHit        ) &&
-	    (i                      != no_tpc_hits         )) {
+	if((inRange)  &&
+	   (bsectorOfHit == currentSectorProcessed) &&
+	   (i            != no_tpc_hits           )) {
 
-	    // I can't believe this.  After such careful design of the coordinate
+	    // I can't believe this.  After careful design of the coordinate
 	    // transformation, I am reduced to this because I am fixed to GEANT
 	    // coordinates.  This is the problem you get if you
 	    // don't use a common data base
@@ -495,8 +515,9 @@ Int_t StTrsMaker::Make(){
 	    // Break the segment for diffusion reproduction.
 	    // Fast Simulation can use breakNumber = 1
 	    //
-	    int breakNumber = 1;
-	    //int breakNumber = aSegment.ds()/miniSegmentLength;
+	    int breakNumber = max(aSegment.ds()/mMiniSegmentLength,1.);
+// 	    PR(aSegment.ds()/millimeter);
+// 	    PR(breakNumber);
 	    aSegment.split(mGasDb, mMagneticFieldDb, breakNumber, &comp);
 	    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
@@ -512,7 +533,7 @@ Int_t StTrsMaker::Make(){
 	        // TRANSPORT HERE
 	        //
 		mChargeTransporter->transportToWire(*iter);
-//  		PR(*iter);
+  		//PR(*iter);
 		
 		//
 		// CHARGE COLLECTION AND AMPLIFICATION
@@ -537,6 +558,7 @@ Int_t StTrsMaker::Make(){
 // 	    PR(no_tpc_hits);
 	    
 	    tpc_hit++;  // increase the pointer to the next hit
+	    numberOfProcessedPointsInCurrentSector++;
 	    continue;   // don't digitize, you still have data in the same sector to process
 	} // if (currentSector == bsectorOfHit)
 	// Otherwise, do the digitization...
@@ -581,11 +603,10 @@ Int_t StTrsMaker::Make(){
 	mSector->clear();
 	
 	//
-	// Go to the next sector
+	// Go to the next sector --> should be identical to a simple increment
 	currentSectorProcessed = bsectorOfHit;
-
-	//
-	// you can skip out here if you only want to process a single sector...
+        numberOfProcessedPointsInCurrentSector = 0;
+// you can skip out here if you only want to process a single sector...
 // 	if(currentSectorProcessed>3)
 // 	    break;  // Finish here
 	//
@@ -686,31 +707,31 @@ Int_t StTrsMaker::Make(){
 
 // *****************************************************************
 // Make sure the memory is deallocated!
-// Either Finish() or clean()
-// Make sure the return type is proper!
 //
-// void StTrsMaker::Finish()
-// {
-//     //Clean up all the pointers that were initialized in StTrsMaker::Init()
-//     delete mGeometryDb;
-//     delete mSlowControlDb;
-//     delete mMagneticFieldDb;
-//     delete mElectronicsDb;
-//     delete mGasDb;
+Int_t StTrsMaker::Finish()
+{
+    //Clean up all the pointers that were initialized in StTrsMaker::Init()
+    delete mGeometryDb;
+    delete mSlowControlDb;
+    delete mMagneticFieldDb;
+    delete mElectronicsDb;
+    delete mGasDb;
     
-//     delete mWireHistogram;
-//     delete mSector;
-//     delete mUnPacker;
-//     delete mAllTheData;
+    delete mWireHistogram;
+    delete mSector;
+    delete mUnPacker;
+    delete mAllTheData;
     
-//     delete mChargeTransporter;
-//     delete mAnalogSignalGenerator;
-//     delete mDigitalSignalGenerator;
-// }
+    delete mChargeTransporter;
+    delete mAnalogSignalGenerator;
+    delete mDigitalSignalGenerator;
+
+    return kStOK;
+}
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.21 1999/03/15 02:52:26 perev Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.22 1999/03/16 02:03:46 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
