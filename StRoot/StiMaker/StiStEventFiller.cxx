@@ -1,11 +1,21 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.26 2003/12/11 03:44:29 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.27 2004/01/27 23:40:46 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.27  2004/01/27 23:40:46  calderon
+ * The filling of the impactParameter() for global tracks is done now
+ * only after finding the vertex.  The StPhysicalHelix::distance(StThreeVectorD)
+ * method is used for both globals and primaries, the only difference is
+ * where the helix is obtained:
+ * - globals - helix from StTrack::geometry(), which was filled from the innermost
+ *   hit node, which should be a hit at the time.
+ * - primaries, helix from innermost hit node, which should be the vertex at the
+ *   time it is called.
+ *
  * Revision 2.26  2003/12/11 03:44:29  calderon
  * set the length right again, it had dissappeared from the code...
  *
@@ -462,8 +472,9 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- itKtrack == mTrkNodeMap.end()");
       StTrackNode* currentTrackNode = (*itKtrack).second;
       //double globalDca = currentTrackNode->track(global)->impactParameter();
-      StiKalmanTrackNode * nnn1=0; 	if(nnn1){}
-      StiKalmanTrackNode * nnnn=0;	if(nnnn){}
+      StGlobalTrack* currentGlobalTrack = static_cast<StGlobalTrack*>(currentTrackNode->track(global));
+      float globalDca = impactParameter(currentGlobalTrack);
+      currentGlobalTrack->setImpactParameter(globalDca);
       if (kTrack->isPrimary())
 	{
 	  fillTrackCount1++;
@@ -721,10 +732,13 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
   // above is no longer used, instead use kITKalmanfitId as fitter and tpcOther as finding method
 
   gTrack->setEncodedMethod(mStiEncoded);
-  double impactParam = impactParameter(track);
-
-  gTrack->setImpactParameter(impactParam );
+ 
+  if (gTrack->type()==primary) {
+      float impactParam = impactParameter(track);
+      gTrack->setImpactParameter(impactParam );
+  }
   gTrack->setLength(track->getTrackLength());// someone removed this, grrrr!!!!
+
   int maxPoints = track->getMaxPointCount();
   gTrack->setNumberOfPossiblePoints(static_cast<unsigned short>(maxPoints));
   fillGeometry(gTrack, track, false); // inner geometry
@@ -808,5 +822,20 @@ float StiStEventFiller::impactParameter(StiKalmanTrack* track)
       track->setDca(dca);
       //cout << "StiStEventFiller::impactParameter() -I- GLOBAL  Track -   Dca:"<<dca<<endl;
     }
+  return dca;
+}
+float StiStEventFiller::impactParameter(StTrack* track) 
+{
+  if (!mEvent->primaryVertex()) 
+    {
+      return DBL_MAX;
+    }
+  StPhysicalHelixD helix = track->geometry()->helix();
+
+  const StThreeVectorF& vxF = mEvent->primaryVertex()->position();
+
+  StThreeVectorD vxDD(vxF.x(),vxF.y(),vxF.z());
+  //cout <<"PHelix: "<<helix<<endl;
+  float dca = static_cast<float>(helix.distance(vxDD));
   return dca;
 }

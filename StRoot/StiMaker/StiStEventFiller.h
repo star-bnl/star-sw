@@ -1,12 +1,22 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.5 2003/07/01 20:25:28 calderon Exp $
+ * $Id: StiStEventFiller.h,v 2.6 2004/01/27 23:40:47 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.6  2004/01/27 23:40:47  calderon
+ * The filling of the impactParameter() for global tracks is done now
+ * only after finding the vertex.  The StPhysicalHelix::distance(StThreeVectorD)
+ * method is used for both globals and primaries, the only difference is
+ * where the helix is obtained:
+ * - globals - helix from StTrack::geometry(), which was filled from the innermost
+ *   hit node, which should be a hit at the time.
+ * - primaries, helix from innermost hit node, which should be the vertex at the
+ *   time it is called.
+ *
  * Revision 2.5  2003/07/01 20:25:28  calderon
  * fillGeometry() - use node->getX(), as it should have been since the beginning
  * impactParameter() - always use the innermos hit node, not just for globals
@@ -110,6 +120,7 @@ public:
     void fillTrack(StTrack* track, StiKalmanTrack* kTrack);
     unsigned short encodedStEventFitPoints(StiKalmanTrack* kTrack); 
     float impactParameter(StiKalmanTrack* kTrack);
+    float impactParameter(StTrack* track);
 private:
     StEvent* mEvent;
     StiTrackContainer* mTrackStore;
