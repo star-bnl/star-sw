@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BetheBlochCalibrator.C,v 1.4 2003/04/30 20:37:10 perev Exp $
+ * $Id: BetheBlochCalibrator.C,v 1.5 2003/08/18 19:10:08 aihong Exp $
  *
  * Author:Aihong Tang           Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,11 +11,8 @@
  ***************************************************************************
  *
  * $Log: BetheBlochCalibrator.C,v $
- * Revision 1.4  2003/04/30 20:37:10  perev
- * Warnings cleanup. Modified lines marked VP
- *
- * Revision 1.3  2002/12/30 20:03:19  aihong
- * change include path
+ * Revision 1.5  2003/08/18 19:10:08  aihong
+ * update default pars
  *
  * Revision 1.2  2000/08/10 20:52:56  aihong
  * change directory of Ntuples
@@ -60,7 +57,7 @@
 
 
 #include <strstream.h>
-#include "/afs/rhic/star/packages/DEV/StRoot/StEventUtilities/BetheBlochFunction.hh"
+#include "/afs/rhic/star/packages/SL02i/StRoot/StEventUtilities/BetheBlochFunction.hh"
 
 
 void BetheBlochCalibrator(){
@@ -76,25 +73,28 @@ void BetheBlochCalibrator(){
     gSystem->Load("StEvent");
     gSystem->Load("StEventUtilities");
 
-    const int NParameters=7;
-    bool  monitorFitting=false;
+
+    bool  monitorFitting=true;
 
     //***********************************************************************
     //**********change the name to the corresponding name in your NTuple.****
-    char* dedxMean="m_mean70";
-    char* NTpcHitsOnTrack="m_tpcpoints";
-    char* momentum="m_pmag";
+    char* dedxMean="mDedx";
+    char* NTpcHitsOnTrack="mNdedxPts";
+    char* momentum="(mPt/sqrt(1-(tanh(mEta)*tanh(mEta))))";
     //***********end of block
     //***********************************************************************
 
 
 
- double pars[NParameters]={1.072,0.3199,2.30966e-07,1,1,4.74599e-07,5.0e-4};//for mean70
+    // double pars[NParameters]={1.09344, 0.0199,-2.34802e-07, 1.,1.,3.98625e-07,5.0e-4};//for mean70
     //we need to adjudge pars[2] and pars[5].
     //pars[2] describe uniform dE/dx shift.
     //pars[5] describe dE/dx squeeze or enlarge.
 
    //double pars[NParameters]={1.072,0.3199,1.26349e-07,1,1,2.39688e-07,5.0e-4};//for mean55
+    const int NParameters=7;
+    const double pars[NParameters]={1.09344, 0.0199, -4.46121e-08, 1., 1., 4.12976e-07, 0.0005};
+
     double theCalib=pars[5];
 
 
@@ -105,8 +105,8 @@ void BetheBlochCalibrator(){
            =(minimumIonizingPionEnd+minimumIonizingPionStart)/2.;
 
 
-    double protonTestStart = 0.375;
-    double protonTestEnd   = 0.425;
+    double protonTestStart = 0.525;
+    double protonTestEnd   = 0.575;
     double protonTestPosition
            =(protonTestStart+protonTestEnd)/2.;
 
@@ -139,10 +139,10 @@ double minimumIonizingdEdx(double calib, double pionPosition){
     return pionPlusBandCenter->Eval(pionPosition,0,0);
 }
     
-double look4MinDeltaDiff(double calibTablet, double calibEnd, int calibSteps, double pionPosition, double protonPosition, double DeltaRef){
+double look4MinDeltaDiff(double calibStart, double calibEnd, int calibSteps, double pionPosition, double protonPosition, double DeltaRef){
 
-     double calibSeg=(calibEnd-calibTablet)/double(calibSteps);
-     double thisCalib=calibTablet;
+     double calibSeg=(calibEnd-calibStart)/double(calibSteps);
+     double thisCalib=calibStart;
      double minDeltaDiffCalib=5000;//calib associated with minDeltaDiff.
      double minDeltaDiff=5000;
 
@@ -173,44 +173,183 @@ double look4MinDeltaDiff(double calibTablet, double calibEnd, int calibSteps, do
 
 //*************************************************************************
 //************** change the file name and branch name  as yours ***********
-  TChain chain("DeDxTree");
+  TChain chain("FlowTree");
 
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1176003.root");
- 
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1176004.root");
- 
-  
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1176013.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1176014.root");
-  
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1176015.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1177001.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1177002.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1177006.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1177009.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1177010.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1177013.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1179007.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1179010.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1183003.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1183006.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1183008.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1183009.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1183011.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1183013.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1183019.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1183020.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1184000.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1184001.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1184002.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1184004.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1184026.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1185001.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1185002.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1185003.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1185004.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1185005.root");
-  
+
+
+
+
+
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0010010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0010020.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0010030.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0010040.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0010050.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0010060.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0010070.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0010080.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0010090.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0010100.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0010110.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0010120.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0010130.flowpicoevent.root");  
+
+
+
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0010140.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0010150.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0020010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0020020.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0020030.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0020040.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0020050.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0020060.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0020070.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0020080.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0020090.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0020100.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0020110.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0020120.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0020130.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0020140.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0020150.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0020160.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0030010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0030020.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0030030.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0030040.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0030050.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0030070.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0030080.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0030090.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0030100.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0030110.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0030120.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0030130.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0030140.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0030150.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0040010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0040020.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0040030.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0040040.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0040050.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0040060.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0040070.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0040080.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0040090.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0040100.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0040110.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0040120.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0040130.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0040140.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034002_raw_0040150.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034004_raw_0020010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034004_raw_0030010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034004_raw_0040010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0010010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0010020.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0010030.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0010040.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0010050.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0010060.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0010070.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0010080.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0020010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0020020.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0020030.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0020040.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0020050.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0020060.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0020070.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0020080.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0030010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0030020.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0030030.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0030040.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0030050.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0030060.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0030070.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0030080.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0040010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0040020.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0040030.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0040040.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0040050.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0040060.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0040070.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034005_raw_0040080.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0010010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0010020.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0010030.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0010040.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0010050.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0010060.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0010070.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0010080.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0010090.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0010100.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0010110.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0010120.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0010130.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0010140.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0010150.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0020010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0020020.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0020030.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0020040.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0020050.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0020060.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0020070.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0020080.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0020090.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0020100.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0020110.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0020120.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0020130.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0020140.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0020150.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0030010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0030020.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0030030.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0030040.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0030050.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0030060.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0030070.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0030080.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0030090.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0030100.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0030110.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0030120.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0030130.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0030140.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0040010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0040020.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0040030.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0040040.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0040050.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0040060.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0040070.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0040080.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0040090.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0040100.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0040110.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0040120.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0040130.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034028_raw_0040140.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034033_raw_0010010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034033_raw_0020010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034033_raw_0020020.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034033_raw_0020030.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034033_raw_0020040.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034033_raw_0030010.flowpicoevent.root");  
+chain->Add("/afs/rhic/star/users/aihong/ebye/Pico_P03iadAuTest/st_physics_4034033_raw_0040010.flowpicoevent.root"); 
+
+
+
+
+
+
+
   //**********end of block************************************
   //**********************************************************
 
@@ -219,7 +358,7 @@ double look4MinDeltaDiff(double calibTablet, double calibEnd, int calibSteps, do
   
 
 
- TH1D* pionHisto= new TH1D("pionHisto","dE/dx histo. for minimum ionizing pions",100,0.05e-5,0.18e-5);
+ TH1D* pionHisto= new TH1D("pionHisto","dE/dx histo. for minimum ionizing pions",100,0.022e-4,0.03e-4);
 
  double protonHistoCenter=protonBandCenter->Eval(protonTestPosition,0,0);
  double protonHistoHalfRange=0.24e-5;
