@@ -626,6 +626,11 @@ my @output = `more $jb_sum`;
             @word_sum = split (":", $sum_line); 
               $pr_chain = $word_sum[2];
               $pr_chain =~ s/ /_/g;
+             if ( $pr_chain =~ /^\s*_/ ) {
+                  my $mIndex = index $pr_chain, "_";
+                  $pr_chain = substr( $pr_chain, $mIndex+1);
+              } 
+
            }
 # get max memory size during execution
            if ($sum_line =~ /Package   tree:/ ) {
