@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFlowAnalysisMaker.cxx,v 1.2 1999/08/13 21:12:00 posk Exp $
+ * $Id: StFlowAnalysisMaker.cxx,v 1.3 1999/08/24 18:02:37 posk Exp $
  *
  * Author: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
  * Description:  Maker to analyze Flow using the FlowTags
@@ -8,6 +8,10 @@
  ***************************************************************************
  *
  * $Log: StFlowAnalysisMaker.cxx,v $
+ * Revision 1.3  1999/08/24 18:02:37  posk
+ * Calculates event plane resolution.
+ * Added macros for plotting histograms.
+ *
  * Revision 1.2  1999/08/13 21:12:00  posk
  * corrections and polishing
  *
@@ -55,7 +59,7 @@ Int_t StFlowAnalysisMaker::Make() {
 }
 
 void StFlowAnalysisMaker::PrintInfo() {
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.2 1999/08/13 21:12:00 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.3 1999/08/24 18:02:37 posk Exp $"
        << endl;
   if (Debug()) StMaker::PrintInfo();
 }
@@ -85,8 +89,8 @@ Int_t StFlowAnalysisMaker::Init() {
   const int nMultBins   = 100;
   const int n_qBins     = 100;
 
+  TString *mHistTitle;
   for (int i = 0; i < nSubEvents; i++) {
-    TString *mHistTitle;
     char mCountSubEvents[2];
     sprintf(mCountSubEvents,"%d",i);
 
@@ -107,26 +111,11 @@ Int_t StFlowAnalysisMaker::Init() {
 	("Event Plane Angle (rad)");
       histSubEvents[i].histSubEventHarmonics[j].mHistPsiSub->SetYTitle("Counts");
       delete mHistTitle;
-
-      // multiplicity
-      mHistTitle = new TString("Flow_Mult_Sub");
-      mHistTitle->Append(*mCountSubEvents + 1);
-      mHistTitle->Append("_Har");
-      mHistTitle->Append(*mCountHarmonics + 1);
-      histSubEvents[i].histSubEventHarmonics[j].mHistFlowMultSub =
-	new TH1D(mHistTitle->Data(), mHistTitle->Data(), nMultBins, MultMin, 
-		 MultMax);
-      histSubEvents[i].histSubEventHarmonics[j].mHistFlowMultSub->SetXTitle
-	("Multiplicity");
-      histSubEvents[i].histSubEventHarmonics[j].mHistFlowMultSub->
-	SetYTitle("Counts");
-      delete mHistTitle;
     }
   }
 
   // for sub-event pairs
   for (int k = 0; k < nSubEvents/2; k++) {
-    TString *mHistTitle;
     char mCountSubEvents[2];
     sprintf(mCountSubEvents,"%d",k);
 
@@ -141,11 +130,11 @@ Int_t StFlowAnalysisMaker::Init() {
     delete mHistTitle;
     
     // resolution
-    mHistTitle = new TString("Flow_prof_Res_Pair");
+    mHistTitle = new TString("Flow_Res_Pair");
     mHistTitle->Append(*mCountSubEvents + 1);
     histFullEvents[k].mHistRes =
-      new TProfile(mHistTitle->Data(), mHistTitle->Data(), nHarmonics, 0.5, 
-		   (float)(nHarmonics) + 0.5, -10., 10., "");
+      new TH1F(mHistTitle->Data(), mHistTitle->Data(), nHarmonics, 0.5, 
+		   (float)(nHarmonics) + 0.5);
     histFullEvents[k].mHistRes->SetXTitle("Harmonic");
     histFullEvents[k].mHistRes->SetYTitle("Resolution");
     delete mHistTitle;
@@ -154,6 +143,20 @@ Int_t StFlowAnalysisMaker::Init() {
     for (int j = 0; j < nHarmonics; j++) {
       char mCountHarmonics[2];
       sprintf(mCountHarmonics,"%d",j);
+
+      // multiplicity
+      mHistTitle = new TString("Flow_Mult_Pair");
+      mHistTitle->Append(*mCountSubEvents + 1);
+      mHistTitle->Append("_Har");
+      mHistTitle->Append(*mCountHarmonics + 1);
+      histFullEvents[k].histFullEventHarmonics[j].mHistMult =
+	new TH1D(mHistTitle->Data(), mHistTitle->Data(), nMultBins, MultMin, 
+		 MultMax);
+      histFullEvents[k].histFullEventHarmonics[j].mHistMult->SetXTitle
+	("Multiplicity");
+      histFullEvents[k].histFullEventHarmonics[j].mHistMult->
+	SetYTitle("Counts");
+      delete mHistTitle;
       
       // event plane
       mHistTitle = new TString("Flow_Psi_Pair");
@@ -185,12 +188,12 @@ Int_t StFlowAnalysisMaker::Init() {
       mHistTitle->Append(*mCountSubEvents + 1);
       mHistTitle->Append("_Har");
       mHistTitle->Append(*mCountHarmonics + 1);
-      histFullEvents[k].histFullEventHarmonics[j].mHistFlowMeanPt =
+      histFullEvents[k].histFullEventHarmonics[j].mHistMeanPt =
 	new TH1F(mHistTitle->Data(), mHistTitle->Data(), nMeanPtBins, MeanPtMin,
 		 MeanPtMax);
-      histFullEvents[k].histFullEventHarmonics[j].mHistFlowMeanPt->
+      histFullEvents[k].histFullEventHarmonics[j].mHistMeanPt->
 	SetXTitle("Mean Pt (GeV)");
-      histFullEvents[k].histFullEventHarmonics[j].mHistFlowMeanPt->
+      histFullEvents[k].histFullEventHarmonics[j].mHistMeanPt->
 	SetYTitle("Counts");
       delete mHistTitle;
     }
@@ -262,23 +265,23 @@ Int_t StFlowAnalysisMaker::getTags() {
 }
 
 void StFlowAnalysisMaker::makeTagHistograms() {
-  // sub-event Psi_Sub, N_Sub
+  // sub-event Psi_Sub
   for (int i = 0; i < nSubEvents; i++) {
     for (int j = 0; j < nHarmonics; j++) {
       histSubEvents[i].histSubEventHarmonics[j].mHistPsiSub->Fill(PsiSub[i][j]);
-      histSubEvents[i].histSubEventHarmonics[j].mHistFlowMultSub->
-	Fill(NSub[i][j]);
     }
   }
 
-  // full event Psi, q, cos, <Pt>
+  // full event Psi, N, q, cos, <Pt>
   for (int k = 0; k < nSubEvents/2; k++) {
     for (int j = 0; j < nHarmonics; j++) {
       histFullEvents[k].histFullEventHarmonics[j].mHistPsi->Fill(Psi[k][j]);
+      histFullEvents[k].histFullEventHarmonics[j].mHistMult->
+	Fill(N[k][j]);
       histFullEvents[k].histFullEventHarmonics[j].mHist_q->Fill(q[k][j]);
       histFullEvents[k].mHistCos->Fill((float)(j+1),CosDiffSubs[k][j]);    
       if (N[k][j] > 0) {
-	histFullEvents[k].histFullEventHarmonics[j].mHistFlowMeanPt->
+	histFullEvents[k].histFullEventHarmonics[j].mHistMeanPt->
 	  Fill(sumPt[k][j] / (float)N[k][j]);
       }
     }
@@ -327,11 +330,23 @@ void StFlowAnalysisMaker::makeFlowHistograms() {
 }
 
 Int_t StFlowAnalysisMaker::Finish() {
-  // Calculate resolution = sqrt(2)*sqrt(mHistCos) 
+  // Calculate resolution = sqrt(2)*sqrt(mHistCos)
+  float cosPair[nSubEvents/2][nHarmonics];
+  float cosPairErr[nSubEvents/2][nHarmonics];
   for (int k = 0; k < nSubEvents/2; k++) {
     for (int j = 0; j < nHarmonics; j++) {
-      // res[k][j] = ;
-      // histFullEvents[k].mHistRes->Fill((float)(j+1),res[k][j]);
+      cosPair[k][j] = histFullEvents[k].mHistCos->GetBinContent(j+1);
+      cosPairErr[k][j] = histFullEvents[k].mHistCos->GetBinError(j+1);
+      if (cosPair[k][j] > 0.) {
+	res[k][j] = sqrt(2*cosPair[k][j]);
+	resErr[k][j] = cosPairErr[k][j] / res[k][j];
+      }
+      else {
+	res[k][j] = 0.;
+	resErr[k][j] = 0.;
+      }
+      histFullEvents[k].mHistRes->SetBinContent(j+1, res[k][j]);
+      histFullEvents[k].mHistRes->SetBinError(j+1, resErr[k][j]);
     }
   }
   return kStOK;

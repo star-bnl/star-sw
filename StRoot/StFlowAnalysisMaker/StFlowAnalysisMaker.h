@@ -18,7 +18,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "StFlowTagMaker/StFlowTagMaker.h"
-#include <iostream>
+#include <iostream.h>
 #include <stdlib.h>
 #include "StMaker.h"
 #include "tables/FlowTag.h"
@@ -41,13 +41,11 @@ public:
   virtual ~StFlowAnalysisMaker();
   virtual Int_t Init();
   virtual Int_t Make();
+  Int_t   getTags();
   virtual void PrintInfo();
   virtual Int_t Finish();
 
 protected:
-
-  //get Tags and calculated quantities
-  Int_t   getTags();
 
   // Histograms
   void makeTagHistograms();
@@ -59,12 +57,12 @@ protected:
   // structures for histograms
   struct histSubEventHarmonic {
     TH1F *mHistPsiSub;
-    TH1D *mHistFlowMultSub;
   };
 
   struct histFullEventHarmonic {
     TH1F *mHistPsi;
-    TH1F *mHistFlowMeanPt;
+    TH1D *mHistMult;
+    TH1F *mHistMeanPt;
     TH1F *mHist_q;
   };
 
@@ -79,7 +77,7 @@ protected:
   friend struct histFullEvent;
   struct histFullEvent {
     TProfile *mHistCos;
-    TProfile *mHistRes;
+    TH1F *mHistRes;
     struct histFullEventHarmonic histFullEventHarmonics[nHarmonics];
   };
   struct histFullEvent histFullEvents[nSubEvents/2]; //!
@@ -102,6 +100,7 @@ private:
   float Psi[nSubEvents/2][nHarmonics];
   float CosDiffSubs[nSubEvents/2][nHarmonics];
   float res[nSubEvents/2][nHarmonics];
+  float resErr[nSubEvents/2][nHarmonics];
 
   ClassDef(StFlowAnalysisMaker, 1)  // macro for rootcint
 };
