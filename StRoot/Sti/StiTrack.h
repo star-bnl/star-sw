@@ -1,10 +1,8 @@
 #ifndef StiTrack_H
 #define StiTrack_H 1
 
-#include <iostream.h>
-#include <stdlib.h>
+#include <cmath>
 #include "TObject.h"
-#include "TMath.h"
 
 class StMeasuredPoint;
 class StVertex;
@@ -12,11 +10,6 @@ class StVertex;
 class StiTrack : public TObject
 {
  public:
-
-  static const int Global    = 0; // fitted without vertex info
-  static const int Primary   = 1; // fitted with primary vertex
-  static const int Secondary = 2; // fitted with constraint on secondary vertex
-  
 
   // constructor/destructor/copy/etc
 
@@ -91,7 +84,7 @@ class StiTrack : public TObject
   int    q;
   float  pt, tanL, tanPhi, svtDedx, tpcDedx, dca, m, chi2;
   int    nPts, nFitPts;
-    StVertex * vertex; //!
+  StVertex * vertex; //!
   int    status;
 
   ClassDef(StiTrack, 1)
@@ -142,19 +135,19 @@ inline  float  StiTrack::getRapidity()       const
   // Returns the rapidity
   float pz = pt*tanL;
   float e  = sqrt(m*m+pz*pz+pt*pt);
-  return TMath::Log((e+pz)/(e-pz));
+  return log((e+pz)/(e-pz));
 }
 
 inline  float  StiTrack::getPseudoRapidity()    const
 {
   // Returns pseudorapidity of the particle
-  return -TMath::Log(TMath::Tan(TMath::Pi()/4.-TMath::ATan(tanL)));
+  return -log(tan(M_PI/4.-tan(tanL)));
 }
 
 inline  float  StiTrack::getPhi()            const
 {
   // return azimuthal angle of track in radian
-  return TMath::ATan(tanPhi);
+  return (tanPhi);
 }
 
 inline  float  StiTrack::getTanPhi()         const   
@@ -172,7 +165,7 @@ inline  float  StiTrack::getTanL()           const
 inline  float  StiTrack::getLambda()         const   
 {
   // return lambda
-  return TMath::ATan(tanL);
+  return atan(tanL);
 }
 
 inline  float  StiTrack::getMass()           const   
@@ -302,7 +295,4 @@ inline void  StiTrack::setVertex(StVertex *v)
   vertex = v;
 }
 
-
 #endif
-
-
