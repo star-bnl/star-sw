@@ -20,22 +20,17 @@ StMuDstMaker  *muDstMaker= 0;
 void
 ttmexample
 (
- char*  inpDir    = "",         // MuDST directory
- char*  inpFile   = "ttm.lis", // MuDST file(s);                      
- Int_t  nFiles    = 50,         // # of MuDST file(s)
- Int_t  nEvents   = 100,        // # of events
- Int_t timeStamp  = 20040331    // format: yyyymmdd
+ char*  inpDir    = "",             // MuDST directory
+ char*  inpFile   = "ttm.lis",      // MuDST file(s);                      
+ char*  outFile   = "ttm.ndst.root",// output nano dst root file
+ Int_t  nFiles    = 150,            // # of MuDST file(s)
+ Int_t  nEvents   = -1              // # of events
  )
   // NOTES: 
-  // 1. StEEmcDbMaker has some limitations so beware of the following
-  // ( complaints to appropriate autors) 
-  // * StEEmcDbMaker works _only_ for single run , so make sure that
-  //   your *.lis containf files for one run only, otherwise it will crash like Windoza
-  // * remember to adjust dbase timestamp above to match your runs as iStEEmcDbMaker 
-  //   is unable (as of Apr 2004) to read timestamp off a muDST file, what a .....
-  // 2. EEmcTTMMaker main "product" is a list of EEmcTTMatch'es which in turn are 
-  //   EEmcTower plus a list of StMuTrack's that fullfill certain criteria. 
-  //  See below how to access information
+  // 1. EEmcTTMMaker main "product" is a list of EEmcTTMatch'es which in turn are 
+  //    EEmcTower plus a list of StMuTrack's that fullfill certain criteria. 
+  // 2. Optionally the Maker created a nanoDst file [ or a 'Not-a-Dst' file :) ]
+  // 
 { 
   // load root/root4star libraries
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
@@ -61,11 +56,11 @@ ttmexample
 
   // now comment in/out/change the below if you want it your way
   eemcDbMaker->setSectors(1,12);           // request sectors you need (default:1-12)
-  eemcDbMaker->setTimeStampDay(timeStamp); // format: yyyymmdd
   eemcDbMaker->setPreferedFlavor("onlped","eemcPMTped"); // request alternative db flavor 
 
   // finally after so many lines we arrive at the good stuff
   ttm = new  EEmcTTMMaker ("TTM",muDstMaker,eemcDbMaker);
+  ttm->SetFileName(outFile); // output nanoDst file
   // have cuts your way (optional)
   ttm->SetMaxCTBSum(1000); 
   ttm->SetMinTrackLength(20.0);
