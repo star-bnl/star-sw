@@ -5,8 +5,12 @@
 //
 // Extend to account for production purposes.
 // Arguments are
-//      mode             bitmaks CMuDST always on regardless of bit 1
-//                       bit 2    EMC MuDST ON/OFF
+//      mode             bitmaks 
+//                       bit 1 0x1   CMuDST always on regardless of 1st bit
+//                       bit 2 0x2   EMC 'MuDST' ON/OFF (different from EMC branch in CMuDst)
+//                       bit 3 0x4   RICH mode ON/OFF    
+//                       bit 4 0x8   V0Finder processing during MuDst production
+//
 //      nevents
 //      path             Path where the InputFile resides ; "-" for local
 //      InputFile        Should be an event.root file
@@ -53,7 +57,7 @@ void StMuDstMaker(const Int_t   mode=0,
 void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
 	       const Char_t **fileList, const Char_t* dirName)
 {
-  cout << "Loading libraries ..." << endl;
+  cout << "ProcessQQ::Load : Loading libraries ..." << endl;
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("StDaqLib");
@@ -72,10 +76,14 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");
   gSystem->Load("StAssociationMaker");
+  //New V0 finder
+  if (mode & 0x8){
+    gSystem->Load("StSecondaryVertexMaker");
+  }
 
   //if( mode & 0x2){
   // EMC specific
-  cout << " EMC mode enabled" << endl;
+  cout << "ProcessQQ::Load : MuDst-EMC mode is ON " << endl;
   gSystem->Load("StEmcUtil");
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
@@ -84,7 +92,7 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
 
   if( mode & 0x4){
     // RICH
-    cout << " RICH mode enabled" << endl;
+    cout << "ProcessQQ::Load : RICH mode enabled" << endl;
     gSystem->Load("StRrsMaker");
     gSystem->Load("StRchMaker");
     gSystem->Load("StRichPIDMaker");
@@ -101,7 +109,7 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
     gSystem->Load("StPreEclMaker");    // analysis maker
     gSystem->Load("StEpcMaker");       // analysis maker
   }
-  cout << "Loading done " << endl;
+  cout << "ProcessQQ::Load : done " << endl;
 
 
   chain = new StChain("StChain");
@@ -127,10 +135,15 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
   ioMaker->SetDebug();
   ioMaker->SetBranch("*",0,"0");           //deactivate all branches
   ioMaker->SetBranch("eventBranch",0,"r"); //activate evt.root Branch
-  ioMaker->SetBranch("emcBranch",0,"r");   //activate evt.root Branch
+  //  ioMaker->SetBranch("emcBranch",0,"r");   //activate evt.root Branch
   ioMaker->SetBranch("runcoBranch",0,"r"); //activate runcoBranch
 
+  St_db_Maker dbMaker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
 
+  if (mode & 0x8){
+    cout << " V0Finder mode enabled" << endl;
+    StV0FinderMaker* secondaryFinder = new StV0FinderMaker;
+  }
 
   // ***********************************************
   // MuDstMaker(s) instantiation / chain activation
@@ -141,6 +154,20 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
   v0dst->DoXi();      //Set v0MiniDstMaker to find only v0s
   v0dst->DoKink();    //Set v0MiniDstMaker to find only v0s
   v0dst->SetNoKeep();
+
+  // New V0 finder part - specifically for ITTF testing, we will allow
+  // it to consider BOTH pairs of ITTF tracks AND pairs of old tracks
+  // but not mixed pairs (experts can tell difference in MuDst).
+  // Could use kTrackerUseBOTH and kTrackerUseTPT if would <hash>include
+  // StSecondaryMaker/StV0FinderMaker.h but no includes in this macro so 
+  // I followed that convention. (LSB)
+  if (mode & 0x8){
+    if ( fsti == 1){
+      secondaryFinder->SetTrackerUsage(2);
+    } else {
+      secondaryFinder->SetTrackerUsage(0);
+    }
+  }
 
   // RICH part
   if( mode & 0x4 ){
@@ -157,7 +184,7 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
 
   // EMC part
   if( mode & 0x2){
-    St_db_Maker *dbMk = new St_db_Maker("StarDb","MySQL:StarDb");
+    //St_db_Maker *dbMk = new St_db_Maker("StarDb","MySQL:StarDb");
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
     StPreEclMaker *pre = new StPreEclMaker();
     StEpcMaker *epc = new StEpcMaker();
