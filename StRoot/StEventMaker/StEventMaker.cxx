@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.4 1999/11/10 22:40:27 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.5 1999/11/11 10:02:58 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.4  1999/11/10 22:40:27  ullrich
- * Delete hit if it cannot be added to collection.
+ * Revision 2.5  1999/11/11 10:02:58  ullrich
+ * Added warning message in case some hits cannot be stored.
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -88,7 +88,7 @@
     doPrintRunInfo    = kTRUE;  // TMP 
     doPrintEventInfo  = kTRUE;  // TMP
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.4 1999/11/10 22:40:27 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.5 1999/11/11 10:02:58 ullrich Exp $";
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -125,10 +125,10 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.4 1999/11/10 22:40:27 ull
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.4 1999/11/10 22:40:27 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.5 1999/11/11 10:02:58 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.4 1999/11/10 22:40:27 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.5 1999/11/11 10:02:58 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -423,11 +423,12 @@ StEventMaker::makeEvent()
 	    if (id < vecGlobalTracks.size()) xi->addDaughter(vecGlobalTracks[id]);
 	    xiVertices.push_back(xi);
 	}
-
+	else
 	    nfailed++;
     }
         int  nfailed;
 	gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
+			    << " Xi vertices, invalid foreign key to vertex table." << endm;
     if (nfailed)
     if (doLoadTpcHits || doLoadFtpcHits || doLoadSvtHits) {
                             << " V0 vertices, no valid id_vertex." << endm;
@@ -441,16 +442,22 @@ StEventMaker::makeEvent()
 	    StKinkVertex *kink = new StKinkVertex(dstVertices[id], dstKinkVertices[i]);
 	    id = dstKinkVertices[i].idd;
 	    if (id < vecGlobalTracks.size()) kink->addDaughter(vecGlobalTracks[id]);
-		else
-		    delete tpcHit; 
+	    id = dstKinkVertices[i].idp;
+	    if (id < vecGlobalTracks.size()) kink->setParent(vecGlobalTracks[id]);
+	    kinkVertices.push_back(kink);
+	}
 	else
 	    nfailed++;
+    }
+    if (nfailed) 
+			    << " kink vertices, no valid id_vertex." << endm;
 
     }
     if (nfailed)
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
                             << " Xi vertices, invalid foreign key to vertex table." << endm;
 
+    //
     //  Setup kinks
 		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
 			vecGlobalTracks[id]->detectorInfo()->addHit(tpcHit);
@@ -464,16 +471,22 @@ StEventMaker::makeEvent()
             if (id < vecGlobalTracks.size()) kink->setParent(vecGlobalTracks[id]);
 	
         }
-		else
-		    delete svtHit; 		    
+        else
+            nfailed++;
+    }
+	    info    = 0;
 	    nfailed = 0;
                             << " kink vertices, no valid id_vertex." << endm;
+
+    //
+    //  Since the user might have decided to skip certain kind of hits
     //  we have to scan them all and get the first index and the total
     //  number of those which have to be loaded.
 		    id = dstPoints[i].id_track;
 		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
 			info = vecGlobalTracks[id]->detectorInfo();
 			info->addHit(tpcHit);
+		    }
 		    if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
 		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
 			vecGlobalTracks[id]->detectorInfo()->addHit(svtHit);
@@ -488,8 +501,10 @@ StEventMaker::makeEvent()
             info    = 0;
             nfailed = 0;
             StSvtHit *svtHit;
-		else
+            begin = index[kSvtId].first;
+            end   = index[kSvtId].first+index[kSvtId].second;
 	    info    = 0;
+	    nfailed = 0;
                 svtHit = new StSvtHit(dstPoints[i]);
                 if (svtHitColl->addHit(svtHit)) {
                     id = dstPoints[i].id_track;
@@ -503,10 +518,15 @@ StEventMaker::makeEvent()
 		    }
 		    if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
 			if (vecPrimaryTracks[id]->detectorInfo() != info)
-		else
+		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
+			vecGlobalTracks[id]->detectorInfo()->addHit(ftpcHit);
 		    else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
+			vecPrimaryTracks[id]->detectorInfo()->addHit(ftpcHit);
 
 	    if (nfailed) 
+		gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
+				    << " SSD hits, wrong hardware address." << endm;
+        if (doLoadSsdHits) {
 	
             nfailed = 0;
             StSsdHit *ssdHit;
