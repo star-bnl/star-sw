@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.22 2003/07/15 09:35:49 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.23 2003/08/21 14:27:23 jcs Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.23  2003/08/21 14:27:23  jcs
+// remove temporary fix to prevent segmentation violation which occurred when  more than one run per job
+//
 // Revision 1.22  2003/07/15 09:35:49  jcs
 // do not re-flavor FTPC drift maps if already flavored to avoid creating
 // memory leak.
@@ -115,8 +118,7 @@ class St_ftpcClusterGeom;
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-   Double_t CurrentgFactor;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.22 2003/07/15 09:35:49 jcs Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.23 2003/08/21 14:27:23 jcs Exp $";
    St_db_Maker *mDbMaker;                         //!
    St_ftpcClusterPars   *m_clusterpars;           //!
    St_ftpcFastSimGas    *m_fastsimgas;            //!
@@ -169,7 +171,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.22 2003/07/15 09:35:49 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.23 2003/08/21 14:27:23 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker, 1)   //StAF chain virtual base class for Makers
 };

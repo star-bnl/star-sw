@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.55 2003/07/18 18:31:47 perev Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.56 2003/08/21 14:27:24 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.56  2003/08/21 14:27:24  jcs
+// remove temporary fix to prevent segmentation violation which occurred when  more than one run per job
+//
 // Revision 1.55  2003/07/18 18:31:47  perev
 // test for nonexistance of XXXReader added
 //
@@ -256,18 +259,11 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
   gufld(x,b);
   Double_t gFactor = b[2]/4.980;
 
-  if (gFactor == CurrentgFactor) {
-    gMessMgr->Info()<<"StFtpcClusterMaker::InitRun("<<runnumber<<") - FTPC drift maps are already 'flavored' for gFactor = "<<gFactor<<endm;
-  }    
-  else {
-
   mDbMaker     = (St_db_Maker*)GetMaker("db");
   Int_t dbDate = mDbMaker->GetDateTime().GetDate();
   cout<<"StFtpcClusterMaker: dbDate = "<<dbDate<<endl;
   
   gMessMgr->Info() << "StFtpcClusterMaker::InitRun("<<runnumber<<") - 'flavor' FTPC drift maps for gFactor = "<<gFactor<<endm;
-  if (CurrentgFactor != 999) gMessMgr->Info() << "StFtpcClusterMaker::InitRun("<<runnumber<<") WARNING !!! possible memory leak"<<endm;
-  CurrentgFactor = gFactor;
   
   // Load the correct FTPC drift maps depending on magnetic field
 
@@ -307,13 +303,11 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
      SetFlavor("ffn10kv","ftpcdDeflectiondP");
      gMessMgr->Info() << "StFtpcClusterMaker::InitRun: flavor set to ffn10kv"<<endm;
   }     
- } 
   return 0;
 }
 //_____________________________________________________________________________
 Int_t StFtpcClusterMaker::Init(){
 
-  CurrentgFactor = 999;
 
   St_DataSet *ftpc = GetDataBase("ftpc");
   assert(ftpc);
