@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFTPCReader.cxx,v 1.2 2000/06/12 15:04:02 perev Exp $
+ * $Id: StFTPCReader.cxx,v 1.3 2001/06/19 21:12:07 jeromel Exp $
  *
  * Author: Holm Huemmler
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFTPCReader.cxx,v $
+ * Revision 1.3  2001/06/19 21:12:07  jeromel
+ * Code update (Janet S.)
+ *
  * Revision 1.2  2000/06/12 15:04:02  perev
  * SVT + cleanup
  *
@@ -18,10 +21,6 @@
  *
  *
  **************************************************************************/
-#include "StDAQReader.h"
-#include "StFTPCReader.h"
-#include "Stypes.h"
-#include "StDaqLib/GENERIC/EventReader.hh"
 
 //	non standard open,close,read
 #include <string.h>
@@ -33,8 +32,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "Stypes.h"
-//
 
+#include "StDaqLib/GENERIC/EventReader.hh"
+#include "StDAQReader.h"
+#include "StFTPCReader.h"
+
+//
 
 typedef EventInfo DAQEventInfo;
 //_____________________________________________________________________________
@@ -81,13 +84,27 @@ StFTPCReader::~StFTPCReader()
     }
   else
     {
-      delete fFTPCImpReader;
+      close();
     }
 }
 //_____________________________________________________________________________
-void StFTPCReader::setSector(int sector)
+int StFTPCReader::close()
 {
-  if (sector == fSector) return;
+      delete fZeroSuppressedReader; fZeroSuppressedReader   = 0;
+      delete fADCRawReader ;        fADCRawReader           = 0;
+      delete fPedestalReader ;      fPedestalReader         = 0;
+      delete fPedestalRMSReader;    fPedestalRMSReader      = 0;
+      delete fGainReader;           fGainReader             = 0;
+      delete fCPPReader;            fCPPReader              = 0;
+      delete fBadChannelReader;     fBadChannelReader       = 0;
+      delete fFTPCImpReader;        fFTPCImpReader          = 0;
+      fSector=-1999;
+      return 0;
+}
+//_____________________________________________________________________________
+int StFTPCReader::setSector(int sector)
+{
+  if (sector == fSector) return 0;
 
   if(simu)
     {
@@ -97,7 +114,7 @@ void StFTPCReader::setSector(int sector)
       
       if (sector == -1) {
 	fSector = -1999;
-	return;
+	return 0;
       }
       
       fSector = sector;
@@ -107,44 +124,40 @@ void StFTPCReader::setSector(int sector)
     }
   else
     {
-      delete fZeroSuppressedReader;
-      delete fADCRawReader ;
-      delete fPedestalReader ;
-      delete fPedestalRMSReader;
-      delete fGainReader;
-      delete fCPPReader;
-      delete fBadChannelReader;
+      delete fZeroSuppressedReader;  fZeroSuppressedReader     = 0;
+      delete fADCRawReader ;         fADCRawReader             = 0;
+      delete fPedestalReader ;       fPedestalReader           = 0;
+      delete fPedestalRMSReader;     fPedestalRMSReader        = 0;
+      delete fGainReader;            fGainReader               = 0;
+      delete fCPPReader;             fCPPReader                = 0;
+      delete fBadChannelReader;      fBadChannelReader         = 0;
       
       if (sector == -1) {
-	delete fFTPCImpReader;
-	fFTPCImpReader = ::getDetectorReader(fDAQReader->getEventReader(),fDAQReader->getFTPCVersion());
+  	delete fFTPCImpReader;
+  	fFTPCImpReader = ::getDetectorReader(fDAQReader->getEventReader(),"FTPC");
 	fSector = -1999;
+        if(!fFTPCImpReader) return 1;
+        return 0;
       }
 
-      fZeroSuppressedReader = 0;
-      fADCRawReader 	= 0;
-      fPedestalReader 	= 0;
-      fPedestalRMSReader 	= 0;
-      fGainReader 		= 0;
-      fCPPReader 		= 0;
-      fBadChannelReader 	= 0;
-      if (sector == -1) return;
-      
       fSector = sector;
       
+
       fZeroSuppressedReader = fFTPCImpReader->getZeroSuppressedReader(fSector);
-      fADCRawReader 	= fFTPCImpReader->getADCRawReader(fSector);
-      fPedestalReader 	= fFTPCImpReader->getPedestalReader(fSector);
-      fPedestalRMSReader 	= fFTPCImpReader->getPedestalRMSReader(fSector);
-      fGainReader 		= fFTPCImpReader->getGainReader(fSector);
-      fCPPReader 		= fFTPCImpReader->getCPPReader(fSector);
-      fBadChannelReader 	= fFTPCImpReader->getBadChannelReader(fSector);
+      fADCRawReader 	    = fFTPCImpReader->getADCRawReader(fSector);
+      fPedestalReader 	    = fFTPCImpReader->getPedestalReader(fSector);
+      fPedestalRMSReader    = fFTPCImpReader->getPedestalRMSReader(fSector);
+      fGainReader           = fFTPCImpReader->getGainReader(fSector);
+      fCPPReader 	    = fFTPCImpReader->getCPPReader(fSector);
+      fBadChannelReader     = fFTPCImpReader->getBadChannelReader(fSector);
     }
+      return 0;
 }
 //_____________________________________________________________________________
 int StFTPCReader::getPadList(int Sector, int PadRow, unsigned char *&padList)
 {
   setSector(Sector); 
+
   if(simu)
     {
       if (!mSecReader) 

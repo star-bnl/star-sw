@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFTPCReader.h,v 1.3 2000/11/24 17:56:18 fisyak Exp $
+ * $Id: StFTPCReader.h,v 1.4 2001/06/19 21:12:12 jeromel Exp $
  *
  * Author: Holm Huemmler
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFTPCReader.h,v $
+ * Revision 1.4  2001/06/19 21:12:12  jeromel
+ * Code update (Janet S.)
+ *
  * Revision 1.3  2000/11/24 17:56:18  fisyak
  * Replace St_fss_Maker by StFtpcSlowSimMaker
  *
@@ -38,6 +41,7 @@ class  StFTPCReader
   StFTPCReader(unsigned short *fcl_ftpcsqndx, int nSeq,
 	       char *fcl_ftpcadc, int nAdc);
   virtual ~StFTPCReader();
+  virtual  int close();
 
   int getMaxPad(int PadRow) const {return 160;};	//Number of pads in padrow
 
@@ -105,7 +109,7 @@ class  StFTPCReader
 
   virtual void Update();
 protected:
-  virtual void setSector(int sector);
+  virtual int setSector(int sector);
 
   StDAQReader 		*fDAQReader;
   DetectorReader 	*fFTPCImpReader;
