@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.69 1998/12/02 20:42:47 perev Exp $
+# $Id: MakePam.mk,v 1.70 1998/12/09 13:53:54 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.70  1998/12/09 13:53:54  fisyak
+# Remove dependencies from module idl
+#
 # Revision 1.69  1998/12/02 20:42:47  perev
 # cleanup
 #
@@ -241,7 +244,7 @@ endif
 FILES_O  := $(strip $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_F) $(NAMES_C) $(NAMES_CC))))
 ifndef NODEPEND                
 FILES_D  := $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_O)))))
-FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
+#FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
 endif                          
 FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O),   $(notdir $(basename $(FILES_ICC)))))
 NAMES_O   = $(notdir $(FILES_O))
