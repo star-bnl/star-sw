@@ -1,9 +1,12 @@
 #ifndef EEmcEventHeader_h
 #define EEmcEventHeader_h
 /*********************************************************************
- * $Id: EEmcEventHeader.h,v 1.3 2003/06/02 18:55:00 zolnie Exp $
+ * $Id: EEmcEventHeader.h,v 1.4 2003/06/16 16:03:54 zolnie Exp $
  *********************************************************************
  * $Log: EEmcEventHeader.h,v $
+ * Revision 1.4  2003/06/16 16:03:54  zolnie
+ * updated root version number
+ *
  * Revision 1.3  2003/06/02 18:55:00  zolnie
  * added run number to the header
  *
@@ -53,7 +56,7 @@ class EEmcEventHeader : public TObject {
   unsigned     getStatus        () const { return mStatus;         }
   const char * getComment ()       const { return mComment;        }
   
-  ClassDef(EEmcEventHeader,3) 
+  ClassDef(EEmcEventHeader,4) 
 
 };
 #endif
