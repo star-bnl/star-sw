@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.h,v 1.1 1999/01/02 19:09:23 fisyak Exp $
+// $Id: St_dst_Maker.h,v 1.2 1999/01/20 23:58:03 fisyak Exp $
 // $Log: St_dst_Maker.h,v $
+// Revision 1.2  1999/01/20 23:58:03  fisyak
+// Tree 2 GetTree
+//
 // Revision 1.1  1999/01/02 19:09:23  fisyak
 // Add Clones
 //
@@ -44,8 +47,8 @@ class St_dst_Maker : public StMaker {
    static const Int_t maxNoVertex;
    static const Int_t maxNoTrack;
    static const Int_t maxNoPoint;
-   TClonesArray *m_Vertex;
-   TClonesArray *m_Track;
+   TClonesArray *m_Vertex;  //!
+   TClonesArray *m_Track;   //!
    //   TClonesArray *m_Point;
  protected:
  public: 

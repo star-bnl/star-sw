@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.17 1999/01/02 19:08:17 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.18 1999/01/20 23:58:03 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.18  1999/01/20 23:58:03  fisyak
+// Tree 2 GetTree
+//
 // Revision 1.17  1999/01/02 19:08:17  fisyak
 // Add ctf
 //
@@ -412,6 +415,7 @@ Int_t St_glb_Maker::Make(){
     dst.Add(dst_v0_vertex);
     Int_t Res_ev0d = ev0_dst(ev0out,dst_v0_vertex);
     if (Res_ev0d != kSTAFCV_OK) {cout << " Problem on return from EV0_DST " << endl;}
+#if 0
     //  ev0_eval2
     if (stk_track && tptrack && evaltrk) {
       St_ev0_eval *ev0_eval = new St_ev0_eval("ev0_eval",100000);
@@ -439,6 +443,7 @@ Int_t St_glb_Maker::Make(){
 				 m_smdst_v0cut, 
 				 smdst_v0,tindex,vindex);
     if (Res_smdst != kSTAFCV_OK) {cout << " Problem on return from smdst2_am" << endl;}
+#endif
     // dst 
     // dst_dedx_filler
     if (tptrack && stk_track) {
@@ -580,7 +585,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.17 1999/01/02 19:08:17 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.18 1999/01/20 23:58:03 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
