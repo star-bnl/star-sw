@@ -74,9 +74,10 @@ void StObjArray::Streamer(TBuffer &b)
       clear();
       b >> nobjects;
       if (!nobjects) return;
+      resize(nobjects);
       TObject *obj;
       for (Int_t i = 0; i < nobjects; i++) {
-         b >> obj;  push_back(obj);}
+         b >> obj;  fV[i] =(obj);}
    } else {
       b.WriteVersion(Class());
       nobjects = getEntries();
