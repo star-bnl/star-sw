@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.10 2003/03/18 22:37:39 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.11 2003/04/17 18:01:24 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.11  2003/04/17 18:01:24  calderon
+ * print the subprocess id when dumping event info in operator<<
+ *
  * Revision 2.10  2003/03/18 22:37:39  calderon
  * Added member mSubProcessId which is used for Pythia events.
  * Only is set from constructor from g2t_event table.
@@ -72,8 +75,8 @@
 
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.10 2003/03/18 22:37:39 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.10 2003/03/18 22:37:39 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.11 2003/04/17 18:01:24 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.11 2003/04/17 18:01:24 calderon Exp $";
 
 void StMcEvent::initToZero()
 {
@@ -206,6 +209,7 @@ ostream&  operator<<(ostream& os, const StMcEvent& e)
     os << "Participant Neutrons East: " << e.nEast() << endl;
     os << "Participant Neutrons West: " << e.nWest() << endl;
     os << "Number of Primary Tracks : " << e.numberOfPrimaryTracks() << endl;
+    os << "Subprocess Id    : " << e.subProcessId() << endl;
     os << "Impact Parameter : " << e.impactParameter()   << endl;
     os << "Phi Reaction Pl. : " << e.phiReactionPlane()  << endl;
     os << "Trig. Time Offset: " << e.triggerTimeOffset() << endl;
