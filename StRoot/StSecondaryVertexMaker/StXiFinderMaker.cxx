@@ -70,26 +70,52 @@ StXiFinderMaker::~StXiFinderMaker() {
 
 //_____________________________________________________________________________
 Int_t StXiFinderMaker::Init()
-{TDataSet* dbDataSet = GetDataBase("global/vertices");
+{bool a,b,c;
+ TDataSet* dbDataSet = GetDataBase("global/vertices");
 
  if (!dbDataSet)
-    {gMessMgr->Error("StXiFinderMaker::Init(): could not find appropriate database");
+    {gMessMgr->Error("StXiFinderMaker::Init() : could not find appropriate database.");
      return kStErr;
      }
  exipar = (St_exi_exipar*) (dbDataSet->FindObject("exipar"));
  if (!exipar)
-    {gMessMgr->Error("StXiFinderMaker::Init(): could not find exipar in database");
+    {gMessMgr->Error("StXiFinderMaker::Init() : could not find exipar in database.");
      return kStErr;
      }
  ///AddRunCont(exipar);
  
+ if ((useTracker!=kTrackerUseTPT) && (useTracker!=kTrackerUseITTF) && (useTracker!=kTrackerUseBOTH))
+    {gMessMgr->Error("StXiFinderMaker::Init() : wrong TrackerUsage parameter set.");
+     return kStErr;
+     }
+ if ((useSVT!=kNoSVT) && (useSVT!=kUseSVT))
+    {gMessMgr->Error("StXiFinderMaker::Init() : wrong SVTUsage parameter set.");
+     return kStErr;
+     }
+ if ((useLikesign!=kLikesignUseStandard) && (useLikesign!=kLikesignUseLikesign))
+    {gMessMgr->Error("StXiFinderMaker::Init() : wrong LikesignUsage parameter set.");
+     return kStErr;
+     }
+ if ((useRotating!=kRotatingUseStandard) && (useRotating!=kRotatingUseRotating) && (useRotating!=kRotatingUseSymmetry) && (useRotating!=kRotatingUseRotatingAndSymmetry))
+    {gMessMgr->Error("StXiFinderMaker::Init() : wrong RotatingUsage parameter set.");
+     return kStErr;
+     }
+ 
+ if (useTracker == kTrackerUseTPT) gMessMgr->Info()<<"StXiFinderMaker : use TPT tracks."<<endm;
+ if (useTracker == kTrackerUseITTF) gMessMgr->Info()<<"StXiFinderMaker : use ITTF tracks."<<endm;
+ if (useTracker == kTrackerUseBOTH) gMessMgr->Info()<<"StXiFinderMaker : use TPT *and* ITTF tracks."<<endm;
+ if (useSVT == kUseSVT) gMessMgr->Info()<<"StXiFinderMaker : use SVT points if possible."<<endm;///Betty
+ if (useLikesign == kLikesignUseLikesign) gMessMgr->Info()<<"StXiFinderMaker : does like-sign finding."<<endm;
+ if (useRotating == kRotatingUseRotating) gMessMgr->Info()<<"StXiFinderMaker : does rotating finding."<<endm;
+ if (useRotating == kRotatingUseSymmetry) gMessMgr->Info()<<"StXiFinderMaker : does symmetry finding."<<endm;
+ if (useRotating == kRotatingUseRotatingAndSymmetry) gMessMgr->Info()<<"StXiFinderMaker : does rotating + symmetry finding."<<endm;
+ 
  if (useLanguage != kLanguageUseSpecial)
-    {int a,b,c;
-     a=1&(useLanguage>>2);
-     b=1&(useLanguage>>1);
-     c=1&useLanguage;
-     useV0Language=2*(~(a^c))+(a|c);
-     useXiLanguage=4*(b&(~(a^c)))+2*(a&b&(~c))+(a|c);
+    {a=(bool)(1&(useLanguage>>2));
+     b=(bool)(1&(useLanguage>>1));
+     c=(bool)(1&useLanguage);
+     useV0Language=2*(!(a^c))+(a|c);
+     useXiLanguage=4*(b&(!(a^c)))+2*(a&b&(!c))+(a|c);
      }
  switch (useLanguage)
     {case kLanguageUseOldRun : gMessMgr->Info()<<"StXiFinderMaker : Fortran run."<<endm;
@@ -102,22 +128,30 @@ Int_t StXiFinderMaker::Init()
                                      break;
      case kLanguageUseTestBothFinders : gMessMgr->Info()<<"StXiFinderMaker : Test V0Finder and XiFinder."<<endm;
                                         break;
-     default : ;
+     case kLanguageUseSpecial : break;
+     default : gMessMgr->Error("StXiFinderMaker::Init() : wrong LanguageUsage parameter set.");
+               return kStErr;
+     }
+ if ((useXiLanguage!=kXiLanguageUseFortran) && (useXiLanguage!=kXiLanguageUseCppOnFortranV0) && (useXiLanguage!=kXiLanguageUseCppOnCppV0) && (useXiLanguage!=kXiLanguageUseFortranAndCppOnFortranV0) && (useXiLanguage!=kXiLanguageUseFortranAndCppOnCppV0) && (useXiLanguage!=kXiLanguageUseBothCpp) && (useXiLanguage!=kXiLanguageUseAll))
+    {gMessMgr->Error("StXiFinderMaker::Init() : wrong XiLanguageUsage parameter set.");
+     return kStErr;
      }
  switch (useV0Language)
-    {case 1 : if ((useXiLanguage!=1) && (useXiLanguage!=2) && (useXiLanguage!=3))
-                 {gMessMgr->Info()<<"StXiFinderMaker : BE CAREFUL : impossible combination asked."<<endm;
-                  gMessMgr->Info()<<"StXiFinderMaker :    Set it to testXiFinder."<<endm;
-                  useXiLanguage=kXiLanguageUseFortranAndCppOnFortranV0;
-                  }
-              break;
-     case 2 : if (useXiLanguage!=4)
-                 {gMessMgr->Info()<<"StXiFinderMaker : BE CAREFUL : impossible combination asked."<<endm;
-                  gMessMgr->Info()<<"StXiFinderMaker :    Set it to normalRun."<<endm;
-                  useXiLanguage=kXiLanguageUseCppOnCppV0;
-                  }
-              break;
-     default : ;
+    {case kV0LanguageUseFortran : if ((useXiLanguage!=kXiLanguageUseFortran) && (useXiLanguage!=kXiLanguageUseCppOnFortranV0) && (useXiLanguage!=kXiLanguageUseFortranAndCppOnFortranV0))
+                                     {gMessMgr->Info()<<"StXiFinderMaker : BE CAREFUL : impossible combination asked."<<endm;
+                                      gMessMgr->Info()<<"StXiFinderMaker :    Set it to testXiFinder."<<endm;
+                                      useXiLanguage=kXiLanguageUseFortranAndCppOnFortranV0;
+                                      }
+                                  break;
+     case kV0LanguageUseCpp : if (useXiLanguage!=kXiLanguageUseCppOnCppV0)
+                                 {gMessMgr->Info()<<"StXiFinderMaker : BE CAREFUL : impossible combination asked."<<endm;
+                                  gMessMgr->Info()<<"StXiFinderMaker :    Set it to normalRun."<<endm;
+                                  useXiLanguage=kXiLanguageUseCppOnCppV0;
+                                  }
+                              break;
+     case kV0LanguageUseBoth : break;
+     default : gMessMgr->Error("StXiFinderMaker::Init() : wrong V0LanguageUsage parameter set.");
+               return kStErr;
      }
  if (1&useV0Language) gMessMgr->Info()<<"StXiFinderMaker :    Will store Fortran V0s."<<endm;
  if (2&useV0Language) gMessMgr->Info()<<"StXiFinderMaker :    Will store C++ V0s."<<endm;
@@ -149,7 +183,8 @@ Int_t StXiFinderMaker::Make() {
   if (iRes != kStOk) return iRes;
 
   StSPtrVecXiVertex& xiVertices = event->xiVertices();
-  /*if (dontZapV0s && !dontZapXis)
+  gMessMgr->Info()<<"StXiFinderMaker : coming in I have "<<xiVertices.size()<<" Xis."<<endm;
+  /**if (dontZapV0s && !dontZapXis)
      {// Erase existing Xis
       // Already done if erasing V0s
       StSPtrVecXiVertex xiVertices2;
@@ -160,8 +195,10 @@ Int_t StXiFinderMaker::Make() {
       << "      Automatically switching to keep V0s." << endm;
       DontZapV0s();
       }*/
+
   if (!(1&useXiLanguage) && !((4&useXiLanguage) && (!(1&useV0Language))))
      {// Erase existing Xis
+      gMessMgr->Info() << "StXiFinderMaker : pre-existing Xis deleted." << endm;
       StSPtrVecXiVertex xiVertices2;
       xiVertices = xiVertices2;
       }
@@ -169,6 +206,7 @@ Int_t StXiFinderMaker::Make() {
 
   // Call the V0-finding, which will in turn call
   // the UseV0() member function for each V0 found
+  
   if (2&useXiLanguage)
      {StSPtrVecV0Vertex& v0Vertices = event->v0Vertices();
      unsigned int nV0s = v0Vertices.size();
@@ -183,8 +221,7 @@ Int_t StXiFinderMaker::Make() {
      if (iRes != kStOk) return iRes;
      }
 
-  gMessMgr->Info() << "StXiFinderMaker: Found " << xiVertices.size() <<
-                      " Xi candidates" << endm;
+  gMessMgr->Info()<<"StXiFinderMaker : now I have "<<xiVertices.size()<<" Xis."<<endm;
 
   return kStOk;
 }
@@ -202,14 +239,21 @@ Int_t StXiFinderMaker::Make() {
 
 //_____________________________________________________________________________
 Bool_t StXiFinderMaker::UseV0() {
-
+  
   Bool_t usedV0 = kFALSE;
-
+  
   if ((!(2&useXiLanguage)) && (!(4&useXiLanguage))) return usedV0;
   if (useXiLanguage<6)
-     {if ((2&useXiLanguage) && (v0Vertex->chiSquared()<0)) return usedV0;
+    {
+      if ((2&useXiLanguage) && (v0Vertex->chiSquared()<0)) return usedV0;
       if ((4&useXiLanguage) && (v0Vertex->chiSquared()>=0)) return usedV0;
-      }
+    }
+  
+  long myChi = -1*(long)v0Vertex->chiSquared();
+  
+  if( !useSVT && (myChi&(( long)1<<3))) return usedV0;
+  if( useSVT && !(myChi&(( long)1<<3))) return usedV0;
+
 
   /// Variables:
   StPhysicalHelixD /**trkHelix,*/tmpHelix;
@@ -219,7 +263,7 @@ Bool_t StXiFinderMaker::UseV0() {
   double mlam,mala;
   unsigned int k;
   ///pairD paths,path2;
-
+  
   StThreeVectorF xV0, pV0;
   
   // Subroutine casc_geom
@@ -268,7 +312,7 @@ Bool_t StXiFinderMaker::UseV0() {
   bfield.setX(gufldB[0]*tesla);
   bfield.setY(gufldB[1]*tesla);
   bfield.setZ(gufldB[2]*tesla);
-
+  
   charge=0;
 
   int negKey, posKey;
@@ -276,6 +320,7 @@ Bool_t StXiFinderMaker::UseV0() {
   posKey=v0Vertex->daughter(positive)->key();
   
   // Xi cut parameters using detector id from V0
+
   parsXi = exipar->GetTable(det_id_v0-1);
 
   xV0=v0Vertex->position();
@@ -680,7 +725,17 @@ Bool_t StXiFinderMaker::UseV0() {
                               xiVertex->setDcaDaughters(dca);
                               xiVertex->setDcaParentToPrimaryVertex(bxi);
                               xiVertex->setV0Vertex(v0Vertex);
-                              xiVertex->setChiSquared(-1.);
+                              
+                              ///Begin Betty
+                              long int v0ChiSq = -1*(long int)v0Vertex->chiSquared();
+                              if(detId[k]==2 || detId[k]==3)
+                                 {//if an SVT track was used on bachelor set the last bit to 1
+                                  v0ChiSq |=((long int)1 << 0);
+                                  }
+                              v0ChiSq *=-1;
+                              xiVertex->setChiSquared((float)v0ChiSq);
+                              ///End Betty
+                              
                               xiVertices.push_back(xiVertex);
                               usedV0 = kTRUE;
                               } //End if (bxi and iflag check)
@@ -708,8 +763,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.7 2003/05/14 19:15:36 faivre Exp $
+// $Id: StXiFinderMaker.cxx,v 1.8 2003/06/24 16:20:11 faivre Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.8  2003/06/24 16:20:11  faivre
+// Uses SVT tracks. Fixed bool calculations. Exits when bad param. Reshaping.
+//
 // Revision 1.7  2003/05/14 19:15:36  faivre
 // Fancy choices Fortran/C++ V0's and Xi's. Xi rotating and like-sign.
 //
