@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.3 2003/09/02 17:58:49 perev Exp $
+ * $Id: StPmdGeom.cxx,v 1.4 2003/11/27 12:31:56 subhasis Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.4  2003/11/27 12:31:56  subhasis
+ * ADC2EDEP added by Supriya
+ *
  * Revision 1.3  2003/09/02 17:58:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -24,6 +27,7 @@
 #include "StPmdGeom.h"
 #include <strings.h>
 #include <stdlib.h>
+#include <math.h>
 #include <TROOT.h>
 #include<TMatrix.h>
 #include<TArrayF.h>
@@ -1042,9 +1046,13 @@ void StPmdGeom::chain45(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row)
   }
 }
 
+void StPmdGeom::ADC2Edep(Int_t ADC, Float_t& Edep)
+{
+ const Float_t Coeff[4] = {-0.7802, 0.09678, -3.054e-05, 0.0};
+ //const Float_t ErrCoeff[4] = {0.4971, 0.00381, 4.466e-06, 0.0};
 
-
-
+ Edep = Coeff[0] + Coeff[1]*ADC + Coeff[2]*pow(Float_t(ADC),2) + Coeff[3]*pow(Float_t(ADC),3);
+}
 
 
 
