@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.42 2002/02/07 21:00:48 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.43 2002/02/25 00:25:44 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -70,7 +70,7 @@
     $CPPPATH       = "";
     $EXTRA_CPPPATH = "";
     $CXX           = "g++";
-    $CXX           = "/usr/bin/g++" if ($HOST =~ "rplay6");
+    #$CXX           = "/usr/bin/g++" if ($HOST =~ "rplay6");
     $CXXFLAGS      = "-fpic -w";
     $EXTRA_CXXFLAGS = "";
     $CXXOPT         = "";
@@ -78,7 +78,7 @@
     $PLATFORM       = "linux";
     $ARCH          = "linuxegcs";
     $CC            = "gcc";
-    $CC            = "/usr/bin/gcc" if ($HOST =~ "rplay6");
+    #$CC            = "/usr/bin/gcc" if ($HOST =~ "rplay6");
     $CFLAGS        = "-fpic -w";
     $EXTRA_CFLAGS  = "";
     $CINTCFLAGS    = "";
