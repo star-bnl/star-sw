@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.26 2004/04/08 16:28:06 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.27 2004/04/09 18:38:10 balewski Exp $
  
 
 #include <time.h>
@@ -44,13 +44,11 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
   myTimeStampDay=0;
   myTimeStampUnix=0;
 
-  //............ NEW ..............
-
  //................ allocate memory for lookup tables
   byIndex=new  EEmcDbItem[EEindexMax];
-
+  
   byCrate=new  EEmcDbItem ** [mxAdcCrate];
-
+  
   int i;
   for(i=0;i<mxAdcCrate;i++){
     byCrate[i]=NULL;
@@ -59,6 +57,10 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
     memset(byCrate[i],0,sizeof(EEmcDbItem *)*mxAdcChan);// clear all pointers
   }
 
+  mDbFiber=0; nFiber=0;
+
+  setDBname("Calibrations/eemc");
+  
 
   //...... old
   mDbItem1=new  StEEmcDbIndexItem1[EEindexMax];
@@ -72,11 +74,7 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
     memset(mLookup[i],0,sizeof(StEEmcDbIndexItem1 *)*mxAdcChan);// clear all pointers
   }
 
-  // new
-  mDbFiber=0; nFiber=0;
 
-  setDBname("Calibrations/eemc");
-  
 }
 
 
@@ -97,7 +95,7 @@ StEEmcDbMaker::~StEEmcDbMaker(){
 
   delete mDbFiber;
 
-  //old, drop it
+  //.............old, drop it
   delete [] mDbItem1;
 
   int i;
@@ -197,7 +195,7 @@ void StEEmcDbMaker::setSectors(int sec1,int sec2){
   mDbsectorID=  new int [mNSector];
 
 
-  clear();
+  clearItemArray();
 
   printf("\n\n%s::Use sectors from %d to %d\n",GetName(),mfirstSecID,mlastSecID);
 
@@ -217,8 +215,8 @@ const EEmcDbCrate* StEEmcDbMaker::getFiber(int icr) {
 
 //--------------------------------------------------
 //--------------------------------------------------
-void StEEmcDbMaker::clear(){
-  printf("%s::clear()\n",GetName());
+void StEEmcDbMaker::clearItemArray(){
+  printf("%s::clearItemArray()\n",GetName());
   nFound=0;
 
   int i;
@@ -237,12 +235,14 @@ void StEEmcDbMaker::clear(){
   nFiber=0;
   mDbFiberConfBlob=0;
 
-  //xxx start here
+
   nFound=0;
   mDbADCconf[0]=0;
   for(i=0; i<mNSector; i++) {// clear pointers old DB tables
      mDbADCconf [i]=0;
      mDbPMTcal  [i]=0;
+     mDbPMTname [i]=0;
+     mDbPIXcal  [i]=0;
      mDbPMTped  [i]=0;
      mDbPMTstat [i]=0;
     mDbsectorID[i]=-1;
@@ -274,9 +274,8 @@ Int_t  StEEmcDbMaker::InitRun  (int runumber){
 
   printf("%s::use(flav='%s', mask='%s')\n",GetName(),dbFlavor.flavor,dbFlavor.nameMask);
 
-  //... new  
-  clear();
-  mReloadDb();
+  clearItemArray();
+  mRequestDataBase();
 
  //............  reload all lookup tables ...............
   int is;
@@ -287,7 +286,7 @@ Int_t  StEEmcDbMaker::InitRun  (int runumber){
 
   mOptimizeFibers();
 
-  exportAscii(); //tmp
+  // exportAscii(); //tmp
 
   printf("%s::InitRun()  Found %d EEMC related tables for the present time stamp\n",GetName(),nFound);
 
@@ -298,7 +297,7 @@ Int_t  StEEmcDbMaker::InitRun  (int runumber){
 //__________________________________________________
 //__________________________________________________
 
-void  StEEmcDbMaker::mReloadDb  (){
+void  StEEmcDbMaker::mRequestDataBase(){
 
 
   printf("%s::reloadDb using TimeStamp from 'StarDb'=%p or 'db'=%p \n",GetName(),(void*)GetMaker("StarDb"),(void*)GetMaker("db"));
@@ -360,11 +359,13 @@ void  StEEmcDbMaker::mReloadDb  (){
       mDbsectorID[is]=secID;
       getTable<St_eemcDbADCconf,eemcDbADCconf_st>(eedb,secID,"eemcADCconf",mask,mDbADCconf+is);
    
-      getTable<St_eemcDbPMTcal,eemcDbPMTcal_st>(eedb,secID,"eemcPMTcal",mask,mDbPMTcal+is);
-   
+      getTable<St_eemcDbPMTcal,eemcDbPMTcal_st>(eedb,secID,"eemcPMTcal",mask,mDbPMTcal+is);   
+
+      getTable<St_eemcDbPMTname,eemcDbPMTname_st>(eedb,secID,"eemcPMTname",mask,mDbPMTname+is);   
+
+      getTable<St_eemcDbPIXcal,eemcDbPIXcal_st>(eedb,secID,"eemcPIXcal",mask,mDbPIXcal+is);   
       
       getTable<St_eemcDbPMTped,eemcDbPMTped_st>(eedb,secID,"eemcPMTped",mask,mDbPMTped+is);
-      
       
       getTable<St_eemcDbPMTstat,eemcDbPMTstat_st>(eedb,secID,"eemcPMTstat",mask,mDbPMTstat+is);
       
@@ -456,12 +457,17 @@ void StEEmcDbMaker::mOptimizeOthers(int is){
   eemcDbPMTcal_st  *calT=mDbPMTcal[is];  
   if(calT) printf("  calTw-comment=%s\n",calT->comment);
 
+  eemcDbPMTname_st *tubeTw=mDbPMTname[is];
+  if(tubeTw) printf("  tube-comment=%s\n",tubeTw->comment);
+
+  eemcDbPIXcal_st  *calM= mDbPIXcal[is];
+  if(calM) printf("  calMAPMT-comment=%s\n",calM->comment);
+
   eemcDbPMTped_st  *ped=mDbPMTped[is];
   if(ped) printf("  ped-comment=%s\n",ped->comment);
 
   eemcDbPMTstat_st *stat=mDbPMTstat[is];
   if(stat) printf("  stat-comment=%s\n",stat->comment);
-
   
   int key; 
   for(key=ix1;key<ix2; key++) { // loop  in this sector
@@ -495,7 +501,7 @@ void StEEmcDbMaker::mOptimizeOthers(int is){
       }
     } // end of Tower gains
 
-#if 0
+
     if(calM && name[2]!='T') { // calibration for MAPMT
       int j;
       int mx=sizeof(calM->name)/EEMCDbMaxName;
@@ -519,7 +525,7 @@ void StEEmcDbMaker::mOptimizeOthers(int is){
 	break;
       }
     } // end of tube
-#endif    
+
     
     if(stat) { // status
       int j;
@@ -538,17 +544,6 @@ void StEEmcDbMaker::mOptimizeOthers(int is){
     
   }// end of pixels in this sector
 
-#if 0
-  
-  eemcDbPIXcal  *calM= ( eemcDbPIXcal*)  getDbTable(secID,"eemcPIXcal");
-  if(calM) printf("  calMAPMT-comment=%s\n",calM->comment);
-
-
-  eemcDbPMTname_st *tubeTw=( eemcDbPMTname*) getDbTable(secID,"eemcPMTname");
-  if(tubeTw) printf("  tube-comment=%s\n",tubeTw->comment);
-
-
-#endif
 
 }
 
@@ -728,9 +723,38 @@ template <class St_T, class T_st> void StEEmcDbMaker
   return ; // copy the whole s-struct to allow flavor change;
 }
 
+
+//__________________________________________________
+//__________________________________________________
+//__________________________________________________
+
+const EEmcDbItem*  
+StEEmcDbMaker::getTail(int sec, char sub, int eta, char type){
+  char name[20];
+  sprintf(name,"%2.2d%c%c%2.2d",sec,type,sub,eta);
+  int key=EEname2Index(name);
+  return byIndex+key;  
+}
+
+//__________________________________________________
+//__________________________________________________
+//__________________________________________________
+
+const EEmcDbItem* 
+StEEmcDbMaker::getStrip(int sec, int strip, char type){
+  char name[20];
+  sprintf(name,"%2.2d%c%3.3d",sec,type,strip);
+  int key=EEname2Index(name);
+  return byIndex+key;
+}
+
+
+
 //================================================
-//  O L D  C O D  T O  B e   FIXED
+//  O L D  C O D  T O  B e   Erase it
 //================================================
+
+
 
 
 //__________________________________________________
@@ -816,184 +840,13 @@ StEEmcDbMaker::get(int crate, int channel){
   return mLookup[crate][channel];  
 }
  
-//__________________________________________________
-//__________________________________________________
-//__________________________________________________
-
-void  StEEmcDbMaker::mOptimizeDb(){
-  
-  int i, j;
-  printf("\noptimizeDb :::::: %s\n\n",GetName());
-  if(nFound<=0) {
-    printf("\n\nWARN : no relevant records were in db, makes no sense to use %s maker for any work, JB\n\n",GetName());
-    return;
-  }
-
-
-  // primary information: crate,chan <--> element name
-  for(i=0; i<mNSector; i++) {
-    eemcDbADCconf_st *t= mDbADCconf[i];
-    if(t==0) continue;
-    
-    for(j=0;j<EEMCDbMaxAdc; j++) { // loop within sector
-      char *name=t->name+j*EEMCDbMaxName;
-      //      printf("jjj i=%d j=%d %d %d '%s' kill!\n",i,j,t->slot[j],t->channel[j],name);// continue;
-      if(*name==EEMCDbStringDelim) continue;
-
-      //      printf("aaa %d %d\n",t->slot[j],t->channel[j]);
-      // validate entries
-      //tmp      assert(t->slot[j]>=0 && t->slot[j]<EEMC_MaxAdcSlot);
-      //tmp assert(t->channel[j]>=0 && t->channel[j]<EEMC_MaxAdcChan);
-
-      int key=EEname2Index(name);
-      // store valid entry
-      mDbItem1[key].crate=t->crate[j];
-      mDbItem1[key].chan=t->channel[j];
-      mDbItem1[key].setName(name);
-
-      assert(t->crate[j]>=0 && t->crate[j]<mxAdcCrate);
-      assert(t->channel[j]>=0 && t->channel[j]<mxAdcChan);
-      assert(mLookup[t->crate[j]]);// wrong crate ID from DB
-      if(mLookup[t->crate[j]][t->channel[j]]) {
-	printf("Fatal Error of eemc DB records: the same crate=%d / channel=%d entered twice for :\n",t->crate[j],t->channel[j]);
-	mLookup[t->crate[j]][t->channel[j]]->print(); // first time
-	mDbItem1[key].print(); // second time
-	assert(1==2);
-      }
-      mLookup[t->crate[j]][t->channel[j]]=&mDbItem1[key];
-      
-      //      if(j>300) break;
-      // printf("Mapped %s -->index=%d -->crate/chan=%d/%d \n",mDbItem1[index].name,index,t->crate[j],t->channel[j]);
-    }
-
-  } 
-
-
-  //---------------------------------------------------
-  printf("\nAcquire secondary info for active elements ...\n");
-
-  int key;
-  for(key=0; key<EEindexMax; key++){//main loop over all pixels
-    if(mDbItem1[key].chan<0) continue;
-    StEEmcDbIndexItem1 *item=mDbItem1+key;
-
-    char *name=item->name;
-    int secID=atoi(name);
-    // printf("update %s in sec=%d \n",name,secID);
-
-
-    for(i=0; i<EEindexMax; i++) {
-      if(secID==mDbsectorID[i]) break;
-    }
-    assert(i<EEindexMax ); // sector not loaded from DB ???, sth is wrong
-
-    eemcDbPMTcal_st *cal= mDbPMTcal[i];
-    if(cal==0) continue; // DB data for this sector not loaded from DB
-    
-    for(j=0;j<EEMCDbMaxPmt; j++) { // loop within sector
-      char name1[EEMCDbMaxName];
-      strncpy(name1,cal->name+j*EEMCDbMaxName, EEMCDbMaxName-1);
-      if(name1[0]==EEMCDbStringDelim) break;
-      name1[EEMCDbMaxName-1]=0;
-      char *p=strstr(name1,item->name);
-      if(p==0) continue;
-      mDbItem1[key].gain=cal->gain[j];
-      mDbItem1[key].hv=cal->hv[j];
-      //if(strchr(name1,'T')==0)
-      //    printf(" Axx=%s, index=%d j=%d  gain=%f hv=%f c1=%d c2\%d\n",name1,j,index,cal->gain[j],cal->hv[j], name1[0], name1[1]) ;
-      break;
-    }
-    
-    eemcDbPMTped_st *ped= mDbPMTped[i];
-    if(ped==0) continue; // DB data for this sector not loaded from DB
-    
-    for(j=0;j<EEMCDbMaxAdc; j++) { // loop within sector
-      char name1[EEMCDbMaxName];
-      strncpy(name1,ped->name+j*EEMCDbMaxName, EEMCDbMaxName-1);
-      if(name1[0]==EEMCDbStringDelim) break;
-      name1[EEMCDbMaxName-1]=0;
-      char *p=strstr(name1,item->name);
-      if(p==0) continue;
-      mDbItem1[key].ped=ped->ped[j];
-      mDbItem1[key].thr=ped->ped[j]+KsigOverPed*ped->sig[j];
-      break;
-    }
-    
-    eemcDbPMTstat_st *stat= mDbPMTstat[i];
-    if(stat==0) continue; // DB data for this sector not loaded from DB
-    
-    for(j=0;j<EEMCDbMaxAdc; j++) { // loop within sector
-     char name1[EEMCDbMaxName];
-      strncpy(name1,stat->name+j*EEMCDbMaxName, EEMCDbMaxName-1);
-      if(name1[0]==EEMCDbStringDelim) break;
-      name1[EEMCDbMaxName-1]=0;
-      char *p=strstr(name1,item->name);
-      if(p==0) continue;
-      mDbItem1[key].stat=stat->stat[j];
-      mDbItem1[key].fail=stat->fail[j];
-      break;
-    }
-    
-  }// end of loop over index
-
-}
-
-//__________________________________________________
-//__________________________________________________
-//__________________________________________________
-
-void  StEEmcDbMaker::mPrintItems  (){
-
-  printf("\n\nprintChan :::::: %s\n\nChan   crate -->  name\n ",GetName());
-
-  // int i=0,j=0;
-#if 0
-  for(i=0; i<EEMC_MaxAdcSlot; i++) 
-    for(j=0; j<EEMC_MaxAdcChan; j++) {
-     char* name= DbChan2name[i][j];
-     if(name[0]==0) continue;
-     printf("%d  %d  %s\n",i,j,name);
-    }
-
-
-  printf("\nInverse relation  \n nameHashIndex --> slot + chan\n");
-  for(i=0; i<EEMC_MaxNameHash; i++){ 
-    if(DbName2chan[i].chan<0) continue;
-    printf("%d   %d  %d \n",i, DbName2chan[i].slot, DbName2chan[i].chan);
-  }
-
-#endif
-  return;
-
-#if 0
-  //  int i,j;
-  printf("test:  chan,slot <-->  name <-->index\n ");
-  for(i=0; i<EEMC_MaxAdcSlot; i++) 
-    for(j=0; j<EEMC_MaxAdcChan; j++) {
-     char* name= DbChan2name[i][j];
-     if(name[0]==0) continue;
-     printf("test %d  %d  %s\n",i,j,name);
-     int chan,slot;
-     name2chan(name,slot,chan);
-     char name1[1000];
-     chan2name(slot,chan,name1);
-     assert(strstr(name,name1)); // consistency check
-
-     //tmp     int k=name2HashIndex(name);
-     //tmp assert(strstr(DbName2chan[k].name,name1));
-     
-    }
-
-#endif
-  printf("test OK\n");
-
-  
-}
-
 
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.27  2004/04/09 18:38:10  balewski
+// more access methods, not important for 63GeV production
+//
 // Revision 1.26  2004/04/08 16:28:06  balewski
 // *** empty log message ***
 //

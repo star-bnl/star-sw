@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.19 2004/04/08 16:28:06 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.20 2004/04/09 18:38:11 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -66,21 +66,21 @@ class StEEmcDbMaker : public StMaker {
 	minMapmtCrateID=64, maxMapmtCrateID=119,
         maxTwCrateCh=128, maxMapmtCrateCh=192};
   
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.19 2004/04/08 16:28:06 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.20 2004/04/09 18:38:11 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
   int myTimeStampDay;
   unsigned int myTimeStampUnix;
-  void  clear();
-  void mReloadDb(); ///< reads data from STAR-DB
+  void  clearItemArray();
+  void mRequestDataBase(); ///< reads tables from STAR-DB
   void mOptimizeMapping(int isec);
   void mOptimizeOthers(int isec);
   void mOptimizeFibers(); ///< decodes crates -->fiber map
 
   //........... old
-  void mOptimizeDb(); ///< creates local fast look-up tables
-  void mPrintItems();///< utility
+  StEEmcDbIndexItem1   *mDbItem1; //!  assess via logical name (sec/sub/eta)
+  StEEmcDbIndexItem1   ***mLookup; //! access via crate/chan
   // ........... end
   
   // pointers to Db tables for each sector
@@ -94,31 +94,21 @@ class StEEmcDbMaker : public StMaker {
   kretDbBlobS_st  *mDbFiberConfBlob; //!
   
   // local fast look-up tables
-  //old,.........................  to be revised,jb
-  StEEmcDbIndexItem1   *mDbItem1; //!  assess via logical name (sec/sub/eta)
-  StEEmcDbIndexItem1   ***mLookup; //! access via crate/chan
-
-  // new, jb
-  // local fast look-up tables
   EEmcDbItem   *byIndex; //!  assess via plain index
   EEmcDbItem   ***byCrate; //! access via crate/chan
   EEmcDbCrate *mDbFiber; // maps tw & mapmt crates to DAQ fibers
   int nFiber; // # of existing crates(Tw+Mapmt)
-
-
- 
+  
   float KsigOverPed; // defines threshold
   int nFound;
   TString dbName; //name of the DB used 
   DbFlavor dbFlavor; // used if flavor is requested
   
   template <class St_T, class T_st> void getTable(TDataSet *eedb, int secID, TString tabName, TString mask, T_st **outTab);
-  
 
  protected:
  public:  
-
-
+  
   void setSectors(int ,int); ///< limit the range of sectors for speed
   void setThreshold(float x);// defines threshold for ADCs
 
@@ -128,14 +118,27 @@ class StEEmcDbMaker : public StMaker {
   void exportAscii(char *fname="eemcDbDump.dat") const; 
   void print() {exportAscii();}
 
- const  EEmcDbItem*  getByCrate(int crateID, int channel); // full DB info, crateID counts from 1, channel from 0  
+  const  EEmcDbItem*  getByCrate(int crateID, int channel); // full DB info, crateID counts from 1, channel from 0  
 
+  const EEmcDbItem* getTail(int sec, char sub, int eta, char type);  
+  const EEmcDbItem* getStrip(int sec, int strip, char type);  
 
-  //.......................  OLD ............... DB access, drop it
+#if 0 // tmp out, remove the old methods firts
+  const EEmcDbItem* getT(int sec, char sub, int eta){getTail(sec,sub,eta,'T');}
+  const EEmcDbItem* getP(int sec, char sub, int eta){getTail(sec,sub,eta,'P');}
+  const EEmcDbItem* getQ(int sec, char sub, int eta){getTail(sec,sub,eta,'Q');}
+  const EEmcDbItem* getR(int sec, char sub, int eta){getTail(sec,sub,eta,'R');}
+  const EEmcDbItem* getU(int sec, int strip){getStrip(sec,strip,'U');}
+  const EEmcDbItem* getV(int sec, int strip){getStrip(sec,strip,'V');}
+#endif  
+
   //
   // Methods to acces DB info for T=tower, P=preshower-1, Q=preshower-2,
   // R=postshower, U=SMD-U strip, V=SMD-V strip
   //
+
+
+  //.......................  OLD ............... DB access, drop it
   const  StEEmcDbIndexItem1* getT(int sec, char sub, int eta); ///< returns full DB info for one Tower channel
   const  StEEmcDbIndexItem1* getP(int sec, char sub, int eta); ///< returns full DB info for one preshower-1 channel
   const  StEEmcDbIndexItem1* getQ(int sec, char sub, int eta); ///< returns full DB info for one preshower-2 channel
@@ -165,7 +168,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.19 2004/04/08 16:28:06 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.20 2004/04/09 18:38:11 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -176,6 +179,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.20  2004/04/09 18:38:11  balewski
+// more access methods, not important for 63GeV production
+//
 // Revision 1.19  2004/04/08 16:28:06  balewski
 // *** empty log message ***
 //
