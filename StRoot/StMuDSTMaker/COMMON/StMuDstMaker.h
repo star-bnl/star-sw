@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.13 2002/08/20 19:55:49 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.14 2002/09/11 21:02:41 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -14,7 +14,8 @@
 
 #include "StMuArrays.h"
 
-
+#include "StMuFilter.h"
+#include "StMuL3Filter.h"
 
 
 class StMuEvent;
@@ -77,8 +78,10 @@ class StMuDstMaker : public StMaker {
 
   /// Set the track filter used for all tracks (except the L3 tracks) when creating muDsts from StEvent and writing to disk.
   void setTrackFilter(StMuCut* c);
+  StMuFilter* trackFilter();
   /// Set the track filter used for L3 tracks when creating muDsts from StEvent and writing to disk.
   void setL3TrackFilter(StMuCut* c);
+  StMuL3Filter* l3TrackFilter();
   /// Set the file from where the PID probability tables should be read. 
   /** Set the file from where the PID probability tables should be read. These tables might change from production version to production version.
       It is the reposibility of who ever creates muDsts to make sure the right tables are used. So far, Aihong was providing these files. Thanks,Aihong. 
@@ -100,7 +103,7 @@ class StMuDstMaker : public StMaker {
   void setCompression(int comp=9);
   /// Returns version tag.
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.13 2002/08/20 19:55:49 laue Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.14 2002/09/11 21:02:41 laue Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -225,6 +228,8 @@ inline TChain* StMuDstMaker::chain() { return mChain; }
 inline TTree* StMuDstMaker::tree() { return mTTree; }
 inline void StMuDstMaker::setTrackFilter(StMuCut* c) { mTrackFilter=c;}
 inline void StMuDstMaker::setL3TrackFilter(StMuCut* c) { mL3TrackFilter=c;}
+inline StMuFilter* StMuDstMaker::trackFilter() { return (StMuFilter*)mTrackFilter;}
+inline StMuL3Filter* StMuDstMaker::l3TrackFilter() { return (StMuL3Filter*)mL3TrackFilter;}
 inline void StMuDstMaker::setStStrangeMuDstMaker(StStrangeMuDstMaker* s) {mStStrangeMuDstMaker=s;}
 inline StStrangeMuDstMaker* StMuDstMaker::stStrangeMuDstMaker() {return mStStrangeMuDstMaker;}
 inline void StMuDstMaker::setTrackType(unsigned int t) {mTrackType=t;}
@@ -248,6 +253,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.14  2002/09/11 21:02:41  laue
+ * added cut on track encoded method for ITTF
+ *
  * Revision 1.13  2002/08/20 19:55:49  laue
  * Doxygen comments added
  *

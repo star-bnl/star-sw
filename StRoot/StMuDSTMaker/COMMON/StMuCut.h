@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuCut.h,v 1.2 2002/05/04 23:56:29 laue Exp $
+ * $Id: StMuCut.h,v 1.3 2002/09/11 21:02:41 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -15,6 +15,8 @@
 #ifndef StMuCut_h
 #define StMuCut_h
 
+#include "TObject.h"
+
 class StEvent;
 class StTrack;
 class StV0Vertex;
@@ -24,7 +26,7 @@ class StV0MuDst;
 class StXiMuDst;
 class StKinkMuDst;
 
-class StMuCut{
+class StMuCut : public TObject {
  public:
   StMuCut() {};
   virtual ~StMuCut() {};
@@ -59,6 +61,7 @@ class StMuCut{
   unsigned int mNStXiMuDst[2];  
   unsigned int mNStKinkMuDst[2];
 
+  ClassDef(StMuCut,1)
 };
 
 inline bool StMuCut::leave(bool b, unsigned int counter[2]) { (b) ? counter[0]++ : counter[1]++; return b; } 
@@ -78,6 +81,9 @@ inline bool StMuCut::pass( const StKinkMuDst* k) {    return leave( accept(k), m
 /***************************************************************************
  *
  * $Log: StMuCut.h,v $
+ * Revision 1.3  2002/09/11 21:02:41  laue
+ * added cut on track encoded method for ITTF
+ *
  * Revision 1.2  2002/05/04 23:56:29  laue
  * some documentation added
  *

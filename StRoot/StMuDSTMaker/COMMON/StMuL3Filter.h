@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuL3Filter.h,v 1.3 2002/05/04 23:56:30 laue Exp $
+ * $Id: StMuL3Filter.h,v 1.4 2002/09/11 21:02:42 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -8,12 +8,11 @@
 #ifndef StMuL3Filter_h
 #define StMuL3Filter_h
 
-#include "TObject.h"
 #include "StMuCut.h"
 
 class BetheBloch;
   
-class StMuL3Filter : public StMuCut, public TObject{
+class StMuL3Filter : public StMuCut {
  public: 
   StMuL3Filter();
   ~StMuL3Filter();
@@ -37,6 +36,9 @@ class StMuL3Filter : public StMuCut, public TObject{
 /***************************************************************************
  *
  * $Log: StMuL3Filter.h,v $
+ * Revision 1.4  2002/09/11 21:02:42  laue
+ * added cut on track encoded method for ITTF
+ *
  * Revision 1.3  2002/05/04 23:56:30  laue
  * some documentation added
  *

@@ -10,23 +10,25 @@
 
 #include <math.h>
 
-template<class T> inline T max(T a, T b) { return (a>b) ? a : b;}
-template<class T> inline T min(T a, T b) { return (a<b) ? a : b;}
-template<class T> inline T fabsMax(T a, T b)  { return (fabs(a)>fabs(b)) ? a : b;}
-template<class T> inline T fabsMin(T a, T b)  { return (fabs(a)<fabs(b)) ? a : b;}
+//* minimum and maximum functions */
+template<class T> inline T max(T a, T b) { return (a>b) ? a : b;} ///< max of two values
+template<class T> inline T min(T a, T b) { return (a<b) ? a : b;} ///< min of two values
+template<class T> inline T fabsMax(T a, T b)  { return (fabs(a)>fabs(b)) ? a : b;} ///< max of the absolut two values
+template<class T> inline T fabsMin(T a, T b)  { return (fabs(a)<fabs(b)) ? a : b;} ///< min of the absolut two values
 
-template<class T> 
-inline unsigned short pack2UnsignedShort(T t, int scale) {
+//* pack and unpack functions */
+template<class T, class U> 
+inline unsigned short pack2UnsignedShort(T t, U scale) {
   return (unsigned short) (t*scale +0.5);
 }
 
-template<class T> 
-inline short pack2Short(T t, int scale) {
+template<class T, class U> 
+inline short pack2Short(T t, U scale) {
   return (unsigned short) (t*scale +0.5);
 }
 
-template<class T> 
-inline unsigned int pack2UnsignedInt(T t, int scale) {
+template<class T, class U> 
+inline unsigned int pack2UnsignedInt(T t, U scale) {
   return (unsigned int) (t*scale +0.5);
 }
 
@@ -47,6 +49,9 @@ inline double unPack(T v, U scale) {
 /***********************************************************************
  *
  * $Log: StMuUtilities.h,v $
+ * Revision 1.3  2002/09/11 21:02:42  laue
+ * added cut on track encoded method for ITTF
+ *
  * Revision 1.2  2002/04/15 22:29:28  laue
  * updates
  *
