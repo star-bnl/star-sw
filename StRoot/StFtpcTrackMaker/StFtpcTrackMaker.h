@@ -1,5 +1,14 @@
-// $Id: StFtpcTrackMaker.h,v 1.5 2002/03/01 14:21:21 jcs Exp $
+// $Id: StFtpcTrackMaker.h,v 1.6 2002/04/05 16:51:07 oldi Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.6  2002/04/05 16:51:07  oldi
+// Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
+// Each Track inherits from StHelix, now.
+// Therefore it is possible to calculate, now:
+//  - residuals
+//  - vertex estimations obtained by back extrapolations of FTPC tracks
+// Chi2 was fixed.
+// Many additional minor (and major) changes.
+//
 // Revision 1.5  2002/03/01 14:21:21  jcs
 // add additional histograms to monitor cluster finding
 //
@@ -28,6 +37,7 @@
 #define STAR_StFtpcTrackMaker
 
 #include "StMaker.h"
+#include "StFtpcTracker.hh"
 
 class TH1F;
 class TH2F;
@@ -52,7 +62,19 @@ class StFtpcTrackMaker : public StMaker {
        TH1F          *m_maxadc_East;
        TH1F          *m_charge_West;
        TH1F          *m_charge_East;
-       
+       TH1F          *m_xres;       //! x residuals
+       TH1F          *m_yres;       //! y residuals
+       TH1F          *m_rres;       //! r residuals
+       TH1F          *m_phires;     //! phi residuals
+       TH2F          *m_rres_vs_r_east;   //! r residuals vs. r east
+       TH2F          *m_phires_vs_r_east; //! phi residuals vs. r east
+       TH2F          *m_rres_vs_r_west;   //! r residuals vs. r west
+       TH2F          *m_phires_vs_r_west; //! phi residuals vs. r west
+       TH2F          *m_vertex_east_xy;   //! vertex xy estimation east
+       TH1F          *m_vertex_east_z;    //! vertex z estimation east
+       TH2F          *m_vertex_west_xy;   //! vertex xy estimation west
+       TH1F          *m_vertex_west_z;    //! vertex z estimation west
+
    St_fde_fdepar   *m_fdepar;   //!
 
  public: 
@@ -61,10 +83,10 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  Init();                                           // Initialisation 
    virtual Int_t  Make();                                           // actual program
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.5 2002/03/01 14:21:21 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.6 2002/04/05 16:51:07 oldi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
            void   MakeHistograms();                                 // makes histograms
-	   void   MakeHistograms(TObjArray *foundtracks);           // makes histograms
+	   void   MakeHistograms(StFtpcTracker *tracker);           // makes histograms
 
 
    ClassDef(StFtpcTrackMaker, 1)   //StAF chain virtual base class for Makers

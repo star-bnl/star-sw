@@ -1,5 +1,14 @@
-// $Id: StFtpcTracker.cc,v 1.18 2002/02/21 22:57:57 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.19 2002/04/05 16:51:09 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.19  2002/04/05 16:51:09  oldi
+// Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
+// Each Track inherits from StHelix, now.
+// Therefore it is possible to calculate, now:
+//  - residuals
+//  - vertex estimations obtained by back extrapolations of FTPC tracks
+// Chi2 was fixed.
+// Many additional minor (and major) changes.
+//
 // Revision 1.18  2002/02/21 22:57:57  oldi
 // Fixes to avoid warnings during optimized compilation.
 //
@@ -109,12 +118,15 @@ StFtpcTracker::StFtpcTracker()
   // Default constructor.
   // Sets the pointers to 0 an cut for momnetum fit loosely.
 
-  mBench  = NULL;
+  mBench  = 0;
   mTime = 0.;
 
-  mVertex = NULL;
-  mHit    = NULL;
-  mTrack  = NULL;
+  mVertex = 0;
+  mVertexEast = 0;
+  mVertexWest = 0;
+
+  mHit    = 0;
+  mTrack  = 0;
 
   mHitsCreated = (Bool_t)false;
   mVertexCreated = (Bool_t)false;
@@ -123,7 +135,7 @@ StFtpcTracker::StFtpcTracker()
 }
 
 
-StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3], Bool_t bench, Double_t max_Dca)
+StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[6], Bool_t bench, Double_t max_Dca)
 {
   // Usual used constructor.
   // Sets up the pointers and the cut value for the momentum fit.
@@ -141,7 +153,7 @@ StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3],
   Int_t n_clusters = fcl_fppoint->GetNRows();          // number of clusters
   fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
 
-  if(vertexPos == NULL) {
+  if(vertexPos == 0) {
     mVertex = new StFtpcVertex(point_st, n_clusters);
   }
   
@@ -150,6 +162,9 @@ StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3],
   }
 
   mVertexCreated = (Bool_t)true;
+
+  mVertexEast = new StFtpcVertex();
+  mVertexWest = new StFtpcVertex();
 }
 
 
@@ -190,6 +205,9 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TObjArray *hit, TObjArray *tr
   mVertexCreated = (Bool_t) false;
   mTrack = track;
   mMaxDca = max_Dca;
+
+  mVertexEast = new StFtpcVertex();
+  mVertexWest = new StFtpcVertex();
 }
 
 
@@ -229,6 +247,9 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, 
   }}
 
   mMaxDca = max_Dca;
+
+  mVertexEast = new StFtpcVertex();
+  mVertexWest = new StFtpcVertex();
 }
 
 
@@ -254,6 +275,42 @@ StFtpcTracker::~StFtpcTracker()
     delete mBench;
   }
  
+  delete mVertexEast;
+  delete mVertexWest;
+
+  return;
+}
+
+
+void StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, UChar_t iterations)
+{
+  // Vertex estiamtion with fit tracks for FTPC east and west.
+  EstimateVertex(vertex, -1, iterations);
+  EstimateVertex(vertex, +1, iterations);
+
+  return;
+}
+
+
+void StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t west, UChar_t iterations)
+{
+  // Vertex estiamtion with fit tracks.
+  StFtpcVertex v = *vertex;
+
+  for (Int_t i = 0; i < iterations; i++) {
+    StFtpcVertex v_new = StFtpcVertex(mTrack, &v, west);
+    v = v_new;
+  }
+
+  if (west == 1) {
+    *mVertexWest = v;
+  }
+
+  else {
+    // west == -1
+    *mVertexEast = v;
+  }
+
   return;
 }
 
@@ -766,7 +823,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
       all_hit = 0;       
       track = (StFtpcTrack*)mTrack->At(itrk);
       track->Fit(mVertex, mMaxDca, id_start_vertex);
-
+ 
       // we accumulate all the charges inside the sensitive volume
       for (icluster = 0; icluster < track->GetNumberOfPoints(); icluster++) {
 	hit = (StFtpcPoint*)((TObjArray*)track->GetHits())->At(icluster);
@@ -849,9 +906,11 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
       track->SetdEdx(dedx_mean);
       track->SetNumdEdxHits(acc_hit);
 	
+      //cout << track->GetdEdx() << " " << track->GetNumdEdxHits() << endl << endl;
+
       if (fdepar->id_method != 1) { 
 	// calculations done, write track
-	// if id_method == 1 the calculaations go on and the track is writtem later
+	// if id_method == 1 the calculations go on and the track is writtem later
 	track->WriteTrack(&(trackTable[itrk]), id_start_vertex);
       }
     
@@ -1002,6 +1061,8 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 	dedx_mean /= (Double_t)acc_hit;
 	track->SetdEdx(dedx_mean);
 	track->SetNumdEdxHits(acc_hit);
+
+	//cout << track->GetdEdx() << " " << track->GetNumdEdxHits() << endl;
 
 	// write track
 	track->WriteTrack(&(trackTable[itrk]), id_start_vertex);

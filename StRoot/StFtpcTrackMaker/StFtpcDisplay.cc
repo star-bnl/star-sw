@@ -1,5 +1,14 @@
-// $Id: StFtpcDisplay.cc,v 1.11 2001/09/27 14:00:35 oldi Exp $
+// $Id: StFtpcDisplay.cc,v 1.12 2002/04/05 16:50:17 oldi Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.12  2002/04/05 16:50:17  oldi
+// Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
+// Each Track inherits from StHelix, now.
+// Therefore it is possible to calculate, now:
+//  - residuals
+//  - vertex estimations obtained by back extrapolations of FTPC tracks
+// Chi2 was fixed.
+// Many additional minor (and major) changes.
+//
 // Revision 1.11  2001/09/27 14:00:35  oldi
 // Small change to avoid ambiguous call of TPolyMarker() constructor.
 //
@@ -94,22 +103,22 @@ StFtpcDisplay::StFtpcDisplay()
   mNumEtaSegment = 200;
   mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
   
-  mTrack = NULL;
-  mHit   = NULL;
-  mGeantTrack = NULL;
-  mGeantHit   = NULL;
+  mTrack = 0;
+  mHit   = 0;
+  mGeantTrack = 0;
+  mGeantHit   = 0;
   
-  mX_Y_Z      = NULL;
-  mX_Y_Zplus  = NULL;
-  mX_Y_Zminus = NULL;
+  mX_Y_Z      = 0;
+  mX_Y_Zplus  = 0;
+  mX_Y_Zminus = 0;
 
-  mNode0 = NULL;
-  mNode1 = NULL;
-  mNode2 = NULL;
+  mNode0 = 0;
+  mNode1 = 0;
+  mNode2 = 0;
 
-  current_line = NULL;
-  found_line   = NULL;
-  geant_line   = NULL;
+  current_line = 0;
+  found_line   = 0;
+  geant_line   = 0;
 
   found_hit        = new TPolyMarker3D();
   found_hit_plus   = new TPolyMarker3D();
@@ -124,21 +133,21 @@ StFtpcDisplay::StFtpcDisplay()
   wrong_hit_plus   = new TPolyMarker3D();
   wrong_hit_minus  = new TPolyMarker3D();
 
-  found_value        = NULL;
-  found_value_minus  = NULL;
-  found_value_plus   = NULL;
-  unused_value       = NULL;
-  unused_value_minus = NULL;
-  unused_value_plus  = NULL;
-  geant_value        = NULL;
-  geant_value_minus  = NULL;
-  geant_value_plus   = NULL;
-  unused_value       = NULL;
-  unused_value_minus = NULL;
-  unused_value_plus  = NULL;
-  wrong_value        = NULL;
-  wrong_value_minus  = NULL;
-  wrong_value_plus   = NULL;
+  found_value        = 0;
+  found_value_minus  = 0;
+  found_value_plus   = 0;
+  unused_value       = 0;
+  unused_value_minus = 0;
+  unused_value_plus  = 0;
+  geant_value        = 0;
+  geant_value_minus  = 0;
+  geant_value_plus   = 0;
+  unused_value       = 0;
+  unused_value_minus = 0;
+  unused_value_plus  = 0;
+  wrong_value        = 0;
+  wrong_value_minus  = 0;
+  wrong_value_plus   = 0;
 }
 
 
@@ -152,20 +161,20 @@ StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks)
 
   mTrack = tracks;
   mHit   = hits;
-  mGeantHit   = NULL;
-  mGeantTrack = NULL;
+  mGeantHit   = 0;
+  mGeantTrack = 0;
 
-  mX_Y_Z      = NULL;
-  mX_Y_Zplus  = NULL;
-  mX_Y_Zminus = NULL;
+  mX_Y_Z      = 0;
+  mX_Y_Zplus  = 0;
+  mX_Y_Zminus = 0;
 
-  mNode0 = NULL;
-  mNode1 = NULL;
-  mNode2 = NULL;
+  mNode0 = 0;
+  mNode1 = 0;
+  mNode2 = 0;
 
-  current_line = NULL;
-  found_line   = NULL;
-  geant_line   = NULL;
+  current_line = 0;
+  found_line   = 0;
+  geant_line   = 0;
 
   found_hit        = new TPolyMarker3D();
   found_hit_plus   = new TPolyMarker3D();
@@ -180,21 +189,21 @@ StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks)
   wrong_hit_plus   = new TPolyMarker3D();
   wrong_hit_minus  = new TPolyMarker3D();
 
-  found_value        = NULL;
-  found_value_minus  = NULL;
-  found_value_plus   = NULL;
-  unused_value       = NULL;
-  unused_value_minus = NULL;
-  unused_value_plus  = NULL;
-  geant_value        = NULL;
-  geant_value_minus  = NULL;
-  geant_value_plus   = NULL;
-  unused_value       = NULL;
-  unused_value_minus = NULL;
-  unused_value_plus  = NULL;
-  wrong_value        = NULL;
-  wrong_value_minus  = NULL;
-  wrong_value_plus   = NULL;
+  found_value        = 0;
+  found_value_minus  = 0;
+  found_value_plus   = 0;
+  unused_value       = 0;
+  unused_value_minus = 0;
+  unused_value_plus  = 0;
+  geant_value        = 0;
+  geant_value_minus  = 0;
+  geant_value_plus   = 0;
+  unused_value       = 0;
+  unused_value_minus = 0;
+  unused_value_plus  = 0;
+  wrong_value        = 0;
+  wrong_value_minus  = 0;
+  wrong_value_plus   = 0;
 }
 
 
@@ -212,17 +221,17 @@ StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks, TObjArray *gean
   mGeantTrack = geanttracks;
   mGeantHit   = geanthits;
 
-  mX_Y_Z      = NULL;
-  mX_Y_Zplus  = NULL;
-  mX_Y_Zminus = NULL;
+  mX_Y_Z      = 0;
+  mX_Y_Zplus  = 0;
+  mX_Y_Zminus = 0;
 
-  mNode0 = NULL;
-  mNode1 = NULL;
-  mNode2 = NULL;
+  mNode0 = 0;
+  mNode1 = 0;
+  mNode2 = 0;
 
-  current_line = NULL;
-  found_line   = NULL;
-  geant_line   = NULL;
+  current_line = 0;
+  found_line   = 0;
+  geant_line   = 0;
 
   found_hit        = new TPolyMarker3D();
   found_hit_plus   = new TPolyMarker3D();
@@ -237,21 +246,21 @@ StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks, TObjArray *gean
   wrong_hit_plus   = new TPolyMarker3D();
   wrong_hit_minus  = new TPolyMarker3D();
 
-  found_value        = NULL;
-  found_value_minus  = NULL;
-  found_value_plus   = NULL;
-  unused_value       = NULL;
-  unused_value_minus = NULL;
-  unused_value_plus  = NULL;
-  geant_value        = NULL;
-  geant_value_minus  = NULL;
-  geant_value_plus   = NULL;
-  unused_value       = NULL;
-  unused_value_minus = NULL;
-  unused_value_plus  = NULL;
-  wrong_value        = NULL;
-  wrong_value_minus  = NULL;
-  wrong_value_plus   = NULL;
+  found_value        = 0;
+  found_value_minus  = 0;
+  found_value_plus   = 0;
+  unused_value       = 0;
+  unused_value_minus = 0;
+  unused_value_plus  = 0;
+  geant_value        = 0;
+  geant_value_minus  = 0;
+  geant_value_plus   = 0;
+  unused_value       = 0;
+  unused_value_minus = 0;
+  unused_value_plus  = 0;
+  wrong_value        = 0;
+  wrong_value_minus  = 0;
+  wrong_value_plus   = 0;
 } 
 
 
@@ -470,11 +479,11 @@ void StFtpcDisplay::TrackInfo()
   Int_t trackcluster;
   Int_t entries = mTrack->GetEntriesFast();
 
-  TPolyMarker *phi_track = NULL;
-  TPolyMarker *eta_track = NULL;
+  TPolyMarker *phi_track = 0;
+  TPolyMarker *eta_track = 0;
 
-  TPolyMarker *circle_track = NULL;
-  TPolyMarker *z_track = NULL;
+  TPolyMarker *circle_track = 0;
+  TPolyMarker *z_track = 0;
 
   StFtpcTrack *track;
  
@@ -1420,9 +1429,9 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
       
       else {
 	cout << endl;
-	MIntArray *sp = NULL;
-	MIntArray *uncl = NULL;
-	MIntArray *hits = NULL;
+	MIntArray *sp = 0;
+	MIntArray *uncl = 0;
+	MIntArray *hits = 0;
 	
 	if (split) sp = splitArr;
 	if (unclean) uncl = uncleanArr;
@@ -1961,52 +1970,52 @@ void StFtpcDisplay::DeleteFound()
 
   if (found_line) {
     delete[] found_line;
-    found_line = NULL;
+    found_line = 0;
   }
 
   if (found_value) {
     delete[] found_value;
-    found_value = NULL;
+    found_value = 0;
   }
 
   if (found_value_plus) {
     delete[] found_value_plus;
-    found_value_plus = NULL;
+    found_value_plus = 0;
   }
 
   if (found_value_minus) {
     delete[] found_value_minus;
-    found_value_minus = NULL;
+    found_value_minus = 0;
   }
 
   if (unused_value) {
     delete[] unused_value;
-    unused_value = NULL;
+    unused_value = 0;
   }
 
   if (unused_value_plus) {
     delete[] unused_value_plus;
-    unused_value_plus = NULL;
+    unused_value_plus = 0;
   }
 
   if (unused_value_minus) {
     delete[] unused_value_minus;
-    unused_value_minus = NULL;
+    unused_value_minus = 0;
   }
 
   if (wrong_value) {
     delete[] wrong_value;
-    wrong_value = NULL;
+    wrong_value = 0;
   }
 
   if (wrong_value_plus) {
     delete[] wrong_value_plus;
-    wrong_value_plus = NULL;
+    wrong_value_plus = 0;
   }
 
   if (wrong_value_minus) {
     delete[] wrong_value_minus;
-    wrong_value_minus = NULL;
+    wrong_value_minus = 0;
   }
 
   return;
@@ -2019,22 +2028,22 @@ void StFtpcDisplay::DeleteGeant()
 
   if (geant_line) {
     delete[] geant_line;
-    geant_line = NULL;
+    geant_line = 0;
   }
 
   if (geant_value) {
     delete[] geant_value;
-    geant_value = NULL;
+    geant_value = 0;
   }
 
   if (geant_value_plus) {
     delete[] geant_value_plus;
-    geant_value_plus = NULL;
+    geant_value_plus = 0;
   }
 
   if (geant_value_minus) {
     delete[] geant_value_minus;
-    geant_value_minus = NULL;
+    geant_value_minus = 0;
   }
 
   return;

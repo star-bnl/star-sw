@@ -1,5 +1,14 @@
-// $Id: StFtpcTrack.hh,v 1.9 2002/01/29 11:08:16 oldi Exp $
+// $Id: StFtpcTrack.hh,v 1.10 2002/04/05 16:50:44 oldi Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.10  2002/04/05 16:50:44  oldi
+// Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
+// Each Track inherits from StHelix, now.
+// Therefore it is possible to calculate, now:
+//  - residuals
+//  - vertex estimations obtained by back extrapolations of FTPC tracks
+// Chi2 was fixed.
+// Many additional minor (and major) changes.
+//
 // Revision 1.9  2002/01/29 11:08:16  oldi
 // Write() renamed to WriteCluster() resp. WriteTrack() to avoid compiler warnings.
 // As a result the functions TObject::Write() are available again (directly).
@@ -58,26 +67,29 @@
 #ifndef STAR_StFtpcTrack
 #define STAR_StFtpcTrack
 
-#include "TObject.h"
 #include "TObjArray.h"
 #include "TVector3.h"
 
+#include "StPhysicalHelix.hh"
+#include "StThreeVector.hh"
+
 #include "MIntArray.h"
 #include "StFtpcPoint.hh"
+#include "StFtpcVertex.hh"
 
 #include "fpt_fptrack.h"
 
 class StFtpcPoint;
 class StFtpcVertex;
 
-class StFtpcTrack : public TObject {
+class StFtpcTrack : public StPhysicalHelix, public TObject {
   
 private:
   
   // data from tracker
   TObjArray *mPoints;         // Array of pointers to clusters of track
   MIntArray *mPointNumbers;   // Array of numbers of clusters
-      Int_t  mRowsWithPoints; // Binary pattern to know in which row a point is found
+  Int_t  mRowsWithPoints;     // Binary pattern to know in which row a point is found
 
      Int_t   mTrackNumber;    // number of track
   Double_t   mChi2Circle;     // Chi squared of circle fit
@@ -110,92 +122,116 @@ private:
 
 public:
   
-              StFtpcTrack();                                                       // constructor
-              StFtpcTrack(Int_t tracknumber);                                      // constructor which fills tracknumber (all other members are set to default values)
-              StFtpcTrack(fpt_fptrack_st *track_st, TObjArray *hits = 0, 
-			  Int_t tracknumber = 0);                                  // constructor if STAF track is given
-    virtual  ~StFtpcTrack();                                                       // destructor
+             StFtpcTrack();                                                       // constructor
+             StFtpcTrack(Int_t tracknumber);                                      // constructor which fills tracknumber (all other members are set to default values)
+             StFtpcTrack(fpt_fptrack_st *track_st, TObjArray *hits = 0, 
+	                Int_t tracknumber = 0);                                  // constructor if STAF track is given
+   virtual  ~StFtpcTrack();                                                       // destructor
 
-       void   SetDefaults();                                                       // performs the default setup for the track
-       void   AddPoint(StFtpcPoint *point);                                        // adds a point to the track
-       void   AddForwardPoint(StFtpcPoint* point);                                 // adds a point after all shifting all existing points by one slot
-       void   Fit();                                                               // momentum fit
-       void   Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_vertex);  // momentum fit with vertex
-       void   CalculateNMax();                                                     // calculates the max. possible number of points
-   Double_t   CalcDca(StFtpcVertex *vertex);                                       // calculation of distance of closest approach (dca) to main vertex
-   Double_t   CalcAlpha0();                                                        // calculation of the angle of xt with respect to the x axis
-       void   CalcAndSetAlpha0() { this->SetAlpha0(this->CalcAlpha0()); }          // calculates and sets the angle of xt with respect to the x axis
-      Int_t   WriteTrack(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex);  // writes track to table
+      void   SetDefaults();                                                       // performs the default setup for the track
+      void   AddPoint(StFtpcPoint *point);                                        // adds a point to the track
+      void   AddForwardPoint(StFtpcPoint* point);                                 // adds a point after all shifting all existing points by one slot
+      void   Fit();                                                               // momentum fit
+      void   Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_vertex);  // momentum fit with vertex
+      void   CalculateNMax();                                                     // calculates the max. possible number of points
+  Double_t   CalcDca(StFtpcVertex *vertex);                                       // calculation of distance of closest approach (dca) to main vertex
+  Double_t   CalcAlpha0();                                                        // calculation of the angle of xt with respect to the x axis
+      void   CalcAndSetAlpha0() { this->SetAlpha0(this->CalcAlpha0()); }          // calculates and sets the angle of xt with respect to the x axis
+      void   CalcResiduals();                                                     // calulates the residuals for each point on track
+     Int_t   WriteTrack(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex);  // writes track to table
 
+  // momentum fit
+  void MomentumFit(StFtpcVertex *vertex = 0);
+
+  StThreeVector<Double_t> helixMomentum() const;
+  StThreeVector<Double_t> momentum() const;
+  StThreeVector<Double_t> localMomentum(Double_t s);
+               Double_t chi2Rad() const;
+               Double_t chi2Lin() const;
+  
   // getter
-       TObjArray  *GetHits()             const { return mPoints;                          }
-       MIntArray  *GetHitNumbers()       const { return mPointNumbers;                    }
-           Int_t   GetRowsWithPoints()   const { return mRowsWithPoints;                  }
-           Int_t   GetTrackNumber()      const { return mTrackNumber;                     }
-        Double_t   GetChi2Circle()       const { return mChi2Circle;                      }
-        Double_t   GetChi2Length()       const { return mChi2Length;                      }
-        Double_t   GetRadius()           const { return mRadius;                          }
-        Double_t   GetCenterX()          const { return mCenterX;                         }
-        Double_t   GetCenterY()          const { return mCenterY;                         }
-        Double_t   GetAlpha0()           const { return mAlpha0;                          }
-        Double_t   GetPid()              const { return mPid;                             }
-         Short_t   GetNMax()             const { return mNMax;                            }
-        Double_t   GetRFirst()           const { return mRFirst;                          }
-        Double_t   GetRLast()            const { return mRLast;                           }
-        Double_t   GetAlphaFirst()       const { return mAlphaFirst;                      }
-        Double_t   GetAlphaLast()        const { return mAlphaLast;                       }
-           Int_t   GetNumberOfPoints()   const { return mPoints->GetEntriesFast();        }
-          Bool_t   ComesFromMainVertex() const { return mFromMainVertex;                  }
-        TVector3   GetMomentum()         const { return mP;                               }
-        Double_t   GetPx()               const { return mP.X();                           }
-        Double_t   GetPy()               const { return mP.Y();                           }
-        Double_t   GetPz()               const { return mP.Z();                           }
-        Double_t   GetP() const;
-        Double_t   GetPt() const;
-        Double_t   GetPseudoRapidity() const;
-        Double_t   GetEta() const; 
-        Double_t   GetRapidity() const;
-           Int_t   GetHemisphere() const;
+  TObjArray  *GetHits()             const { return mPoints;                          }
+  MIntArray  *GetHitNumbers()       const { return mPointNumbers;                    }
+  Int_t       GetRowsWithPoints()   const { return mRowsWithPoints;                  }
+  Int_t       GetTrackNumber()      const { return mTrackNumber;                     }
+  Double_t    GetChi2Circle()       const { return mChi2Circle;                      }
+  Double_t    GetChi2Length()       const { return mChi2Length;                      }
+  Double_t    GetRadius()           const { return mRadius;                          }
+  Double_t    GetCenterX()          const { return mCenterX;                         }
+  Double_t    GetCenterY()          const { return mCenterY;                         }
+  Double_t    GetAlpha0()           const { return mAlpha0;                          }
+  Double_t    GetPid()              const { return mPid;                             }
+  Short_t     GetNMax()             const { return mNMax;                            }
+  Double_t    GetRFirst()           const { return mRFirst;                          }
+  Double_t    GetRLast()            const { return mRLast;                           }
+  Double_t    GetAlphaFirst()       const { return mAlphaFirst;                      }
+  Double_t    GetAlphaLast()        const { return mAlphaLast;                       }
+  Int_t       GetNumberOfPoints()   const { return mPoints->GetEntriesFast();        }
+  Bool_t      ComesFromMainVertex() const { return mFromMainVertex;                  }
+  TVector3    GetMomentum()         const { return mP;                               }
+  Double_t    GetPx()               const { return mP.X();                           }
+  Double_t    GetPy()               const { return mP.Y();                           }
+  Double_t    GetPz()               const { return mP.Z();                           }
+  Double_t    GetP() const;
+  Double_t    GetPt() const;
+  Double_t    GetPseudoRapidity()   const;
+  Double_t    GetEta() const; 
+  Double_t    GetRapidity() const;
+  Int_t       GetHemisphere() const;
 
-        TVector3   GetVertex()           const { return mV;                               }
-           Int_t   GetCharge()           const { return mQ;                               }
-  Double_t const  *GetChiSq()            const { return mChiSq;                           }
-        Double_t   GetTheta()            const { return mTheta;                           }
-        Double_t   GetDca()              const { return mDca;                             }
+  TVector3    GetVertex()           const { return mV;                               }
+  Int_t       GetCharge()           const { return mQ;                               }
+  Double_t const  *GetChiSq()       const { return mChiSq;                           }
+  Double_t    GetTheta()            const { return mTheta;                           }
+  Double_t    GetDca()              const { return mDca;                             }
 
-        Double_t   GetdEdx() const             { return mdEdx;                            }
-           Int_t   GetNumdEdxHits() const      { return mNumdEdxHits;                     }
+  Double_t    GetdEdx() const             { return mdEdx;                            }
+  Int_t       GetNumdEdxHits() const      { return mNumdEdxHits;                     }
   
   // setter   
-            void   SetTrackNumber(Int_t number);
-            void   SetRowsWithPoints(Int_t f)    { mRowsWithPoints = f; }
+  void   SetTrackNumber(Int_t number);
+  void   SetRowsWithPoints(Int_t f)    { mRowsWithPoints = f; }
 	    
-            void   SetPx(Double_t f)             {          mP.SetX(f); }
-            void   SetPy(Double_t f)             {          mP.SetY(f); }
-            void   SetPz(Double_t f)             {          mP.SetZ(f); }
+  void   SetPx(Double_t f)             {          mP.SetX(f); }
+  void   SetPy(Double_t f)             {          mP.SetY(f); }
+  void   SetPz(Double_t f)             {          mP.SetZ(f); }
 
-            void   SetdEdx(Double_t f)           {           mdEdx = f; }
-            void   SetNumdEdxHits(Int_t f)       {    mNumdEdxHits = f; }
+  void   SetdEdx(Double_t f)           {           mdEdx = f; }
+  void   SetNumdEdxHits(Int_t f)       {    mNumdEdxHits = f; }
 
-            void   SetChi2Circle(Double_t f)     {     mChi2Circle = f; }
-            void   SetChi2Length(Double_t f)     {     mChi2Length = f; }
-            void   SetRadius(Double_t f)         {         mRadius = f; }
-            void   SetCenterX(Double_t f)        {        mCenterX = f; }
-            void   SetCenterY(Double_t f)        {        mCenterY = f; }
-            void   SetAlpha0(Double_t f)         {         mAlpha0 = f; }
-            void   SetCharge(Int_t f)            {              mQ = f; }
-            void   SetPid(Int_t f)               {            mPid = f; }
-            void   SetRLast(Double_t f)          {          mRLast = f; }
-            void   SetRFirst(Double_t f)         {         mRFirst = f; }
-            void   SetAlphaLast(Double_t f)      {      mAlphaLast = f; }
-            void   SetAlphaFirst(Double_t f)     {     mAlphaFirst = f; }
+  void   SetChi2Circle(Double_t f)     {     mChi2Circle = f; }
+  void   SetChi2Length(Double_t f)     {     mChi2Length = f; }
+  void   SetRadius(Double_t f)         {         mRadius = f; }
+  void   SetCenterX(Double_t f)        {        mCenterX = f; }
+  void   SetCenterY(Double_t f)        {        mCenterY = f; }
+  void   SetAlpha0(Double_t f)         {         mAlpha0 = f; }
+  void   SetCharge(Int_t f)            {              mQ = f; }
+  void   SetPid(Int_t f)               {            mPid = f; }
+  void   SetRLast(Double_t f)          {          mRLast = f; }
+  void   SetRFirst(Double_t f)         {         mRFirst = f; }
+  void   SetAlphaLast(Double_t f)      {      mAlphaLast = f; }
+  void   SetAlphaFirst(Double_t f)     {     mAlphaFirst = f; }
 
-            void   SetDca(Double_t f)            {            mDca = f; }
-            void   SetNMax(Short_t f)            {           mNMax = f; }
-            void   ComesFromMainVertex(Bool_t f) { mFromMainVertex = f; }
+  void   SetDca(Double_t f)            {            mDca = f; }
+  void   SetNMax(Short_t f)            {           mNMax = f; }
+  void   ComesFromMainVertex(Bool_t f) { mFromMainVertex = f; }
 
-            void   SetProperties(Bool_t fUsage, Int_t mTrackNumber);  
-            void   SetPointDependencies();
+  void   SetProperties(Bool_t fUsage, Int_t mTrackNumber);  
+  void   SetPointDependencies();
+
+protected:
+
+  Int_t  CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t yw[], Int_t num);
+  void   LineFit(Double_t *x, Double_t *y, Double_t *z, Double_t *xw, Double_t *yw, Int_t num);
+  
+  StThreeVector<Double_t> mHelixMomentum;
+  StThreeVector<Double_t> mFullMomentum;
+  StThreeVector<Double_t> mVertex;
+  Double_t              mXCenter, mYCenter, mFitRadius, mChi2Rad;
+  Double_t              mArcOffset, mArcSlope, mChi2Lin;
+  Double_t              mZField;
+  Int_t                 mIterSteps;
+  Int_t                 mVertexPointOffset;
 
   ClassDef(StFtpcTrack, 1)    // Ftpc track class  
 };
@@ -241,4 +277,38 @@ inline Double_t StFtpcTrack::GetRapidity() const
 
   return 0.5 * TMath::Log((m_pi + GetPz()) / (m_pi - GetPz()));
 }
+
+
+// momentum fit functions
+
+inline StThreeVector<Double_t> StFtpcTrack::helixMomentum() const
+{
+  return mHelixMomentum;
+}
+
+
+inline StThreeVector<Double_t> StFtpcTrack::momentum() const
+{
+  return mFullMomentum;
+}
+
+
+inline Double_t StFtpcTrack::chi2Rad() const
+{
+  return mChi2Rad;
+}
+
+
+inline Double_t StFtpcTrack::chi2Lin() const
+{
+  return mChi2Lin;
+}
+
+
+inline StThreeVector<Double_t> StFtpcTrack::localMomentum(Double_t s)
+{
+  return momentumAt(s, mZField);
+}
+
+
 #endif

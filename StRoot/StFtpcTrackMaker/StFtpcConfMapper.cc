@@ -1,5 +1,14 @@
-// $Id: StFtpcConfMapper.cc,v 1.16 2002/02/21 22:57:56 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.17 2002/04/05 16:50:04 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.17  2002/04/05 16:50:04  oldi
+// Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
+// Each Track inherits from StHelix, now.
+// Therefore it is possible to calculate, now:
+//  - residuals
+//  - vertex estimations obtained by back extrapolations of FTPC tracks
+// Chi2 was fixed.
+// Many additional minor (and major) changes.
+//
 // Revision 1.16  2002/02/21 22:57:56  oldi
 // Fixes to avoid warnings during optimized compilation.
 //
@@ -133,14 +142,14 @@ StFtpcConfMapper::StFtpcConfMapper()
 
   mLaser = (Bool_t)false;
 
-  mHit     = NULL;
-  mVolume  = NULL;
+  mHit     = 0;
+  mVolume  = 0;
 
   mVertexConstraint = (Bool_t)true;
 }
 
 
-StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3], Bool_t bench, 
+StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[6], Bool_t bench, 
 				   Int_t phi_segments, Int_t eta_segments) 
   : StFtpcTracker(fcl_fppoint, vertexPos, bench)
 {
@@ -202,7 +211,7 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, Double_t vertexP
 }
 
 
-StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, MIntArray *good_hits, Double_t vertexPos[3], Bool_t bench, 
+StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, MIntArray *good_hits, Double_t vertexPos[6], Bool_t bench, 
 				   Int_t phi_segments, Int_t eta_segments) 
   : StFtpcTracker(fcl_fppoint, vertexPos, bench)
 {
@@ -1139,7 +1148,7 @@ void StFtpcConfMapper::HandleSplitTracks(Double_t max_dist, Double_t ratio_min, 
 	  }
 	  
 	  MergeSplitTracks(t1, t2);
-	  t1 = t2 = NULL;
+	  t1 = t2 = 0;
 	}      
       }
     }
@@ -1276,11 +1285,11 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
   // This function takes as input a point in the Ftpc which acts as starting point for a new track.
   // It forms tracklets then extends them to tracks.
 
-  Double_t *coeff = NULL;
+  Double_t *coeff = 0;
   //Double_t chi2[2];
 
-  StFtpcConfMapPoint *closest_hit = NULL;
-  StFtpcTrack *track = NULL;
+  StFtpcConfMapPoint *closest_hit = 0;
+  StFtpcTrack *track = 0;
 
   Int_t point;
   Int_t tracks = GetNumberOfTracks();
@@ -1406,7 +1415,7 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
       
       // cleanup
       delete[] coeff; 
-      coeff = NULL;
+      coeff = 0;
     } 
   } 	
 
@@ -1414,7 +1423,7 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
 }
 
 
-StFtpcConfMapPoint *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coeff = NULL, Bool_t backward = (Bool_t)true)
+StFtpcConfMapPoint *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coeff = 0, Bool_t backward = (Bool_t)true)
 { 
   // Returns the nearest cluster to a given start_hit. 
   
@@ -1422,10 +1431,10 @@ StFtpcConfMapPoint *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapPoint *start_
   Double_t closest_circle_dist = 1.e7;
   Double_t closest_length_dist = 1.e7;
 
-  StFtpcConfMapPoint *hit = NULL;
-  StFtpcConfMapPoint *closest_hit = NULL;
-  StFtpcConfMapPoint *closest_circle_hit = NULL;
-  StFtpcConfMapPoint *closest_length_hit = NULL;
+  StFtpcConfMapPoint *hit = 0;
+  StFtpcConfMapPoint *closest_hit = 0;
+  StFtpcConfMapPoint *closest_circle_hit = 0;
+  StFtpcConfMapPoint *closest_length_hit = 0;
   
   TObjArray *sub_segment;
   Int_t sub_entries;
@@ -1692,7 +1701,7 @@ Bool_t StFtpcConfMapper::TrackExtension(StFtpcTrack *track)
 
   Int_t point;
   Int_t number_of_points = track->GetNumberOfPoints();
-  Double_t *coeff = NULL;
+  Double_t *coeff = 0;
 
   StFtpcConfMapPoint *closest_hit;
   StFtpcConfMapPoint *hit;
@@ -1758,7 +1767,7 @@ Bool_t StFtpcConfMapper::TrackExtension(StFtpcTrack *track)
   // cleanup
   if (coeff) {
     delete[] coeff; 
-    coeff = NULL;
+    coeff = 0;
   }
 
   if (track->GetNumberOfPoints() - number_of_points) {

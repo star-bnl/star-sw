@@ -1,5 +1,14 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.13 2002/03/05 16:53:10 jcs Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.14 2002/04/05 16:50:51 oldi Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.14  2002/04/05 16:50:51  oldi
+// Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
+// Each Track inherits from StHelix, now.
+// Therefore it is possible to calculate, now:
+//  - residuals
+//  - vertex estimations obtained by back extrapolations of FTPC tracks
+// Chi2 was fixed.
+// Many additional minor (and major) changes.
+//
 // Revision 1.13  2002/03/05 16:53:10  jcs
 // force data type definitions to avoid compiler warnings (this is a correct
 // but inelegant fix which must be changed)
@@ -111,54 +120,54 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator()
   // Default constructor.
   // Sets the pointers.
 
-  mFilename = NULL;
-  mWritePermission = NULL;
-  mFile = NULL;
+  mFilename = 0;
+  mWritePermission = 0;
+  mFile = 0;
 
-  mNumGeantHits = NULL;
-  mNumFoundHits = NULL;
-  mNumGeantTracks = NULL;
-  mNumFoundTracks = NULL;
+  mNumGeantHits = 0;
+  mNumFoundHits = 0;
+  mNumGeantTracks = 0;
+  mNumFoundTracks = 0;
 
-  mClusterArr = NULL;
-  mUncleanTracksArr = NULL;
-  mSplitTracksArr = NULL;
-  mSplitGoodTracksArr = NULL;
-  mGoodFastSimHitsArr = NULL;
+  mClusterArr = 0;
+  mUncleanTracksArr = 0;
+  mSplitTracksArr = 0;
+  mSplitGoodTracksArr = 0;
+  mGoodFastSimHitsArr = 0;
   
-  mNumFoundVertexTracks = NULL;
-  mNumFoundNonVertexTracks = NULL;
+  mNumFoundVertexTracks = 0;
+  mNumFoundNonVertexTracks = 0;
 
-  mNumLookLikeGoodTracks = NULL;
-  mNumElectronTracks = NULL;
-  mNumNonVertexTracks = NULL;
-  mNumGoodGTracks = NULL;
-  mNumGoodFTracks = NULL;
-  mGoodRatio = NULL;
-  mContamination = NULL;
-  mContaWoSplit = NULL;
-  mNumSplitTracks = NULL;
-  mNumSplitGoodTracks = NULL;
-  mNumSplitLoliGoodTracks = NULL;
-  mNumUncleanTracks = NULL;
-  mNumUncleanGoodTracks = NULL;
-  mNumLongTracks = NULL;
-  mNumLongTrackClusters = NULL;
-  mNumShortTracks = NULL;
-  mNumTooShortTracks = NULL;
-  mNumShortTrackClusters = NULL;
+  mNumLookLikeGoodTracks = 0;
+  mNumElectronTracks = 0;
+  mNumNonVertexTracks = 0;
+  mNumGoodGTracks = 0;
+  mNumGoodFTracks = 0;
+  mGoodRatio = 0;
+  mContamination = 0;
+  mContaWoSplit = 0;
+  mNumSplitTracks = 0;
+  mNumSplitGoodTracks = 0;
+  mNumSplitLoliGoodTracks = 0;
+  mNumUncleanTracks = 0;
+  mNumUncleanGoodTracks = 0;
+  mNumLongTracks = 0;
+  mNumLongTrackClusters = 0;
+  mNumShortTracks = 0;
+  mNumTooShortTracks = 0;
+  mNumShortTrackClusters = 0;
 
-  mVertex = NULL;
+  mVertex = 0;
 
-  mGeantHits = NULL;
-  mFoundHits = NULL;
-  mFastSimHits = NULL;
-  mGeantTracks = NULL;
-  mFoundTracks = NULL;
+  mGeantHits = 0;
+  mFoundHits = 0;
+  mFastSimHits = 0;
+  mGeantTracks = 0;
+  mFoundTracks = 0;
 
   mObjArraysCreated = (Bool_t)false;
 
-  mFtpcTrackNum = NULL;
+  mFtpcTrackNum = 0;
 
   mSplitTracks = 0;
   mSplitGoodTracks = 0;
@@ -174,118 +183,118 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator()
   mGoodGeantPoints = 0;
   mGoodFoundPoints = 0;
 
-  mNumGoodGeantPoints = NULL;
-  mNumGoodFoundPoints = NULL;
-  mGoodPointRatio = NULL;
+  mNumGoodGeantPoints = 0;
+  mNumGoodFoundPoints = 0;
+  mGoodPointRatio = 0;
 
-  mFHitsOnTrack = NULL;
-  mGHitsOnTrack = NULL;
-  mNumParents = NULL;
+  mFHitsOnTrack = 0;
+  mGHitsOnTrack = 0;
+  mNumParents = 0;
 
-  mNumWrongHitsAll = NULL;
-  mNumWrongHits = NULL;
+  mNumWrongHitsAll = 0;
+  mNumWrongHits = 0;
 
-  mPtot = NULL;
-  mPt = NULL;
-  mPx = NULL;
-  mPy = NULL;
-  mPz = NULL;
+  mPtot = 0;
+  mPt = 0;
+  mPx = 0;
+  mPy = 0;
+  mPz = 0;
 
-  mPtotDiff = NULL;
-  mPtDiff = NULL;
-  mPxDiff = NULL;
-  mPyDiff = NULL;
-  mPzDiff = NULL;
+  mPtotDiff = 0;
+  mPtDiff = 0;
+  mPxDiff = 0;
+  mPyDiff = 0;
+  mPzDiff = 0;
 
-  mPtotAcc = NULL;
-  mPtAcc = NULL;
-  mPxAcc = NULL;
-  mPyAcc = NULL;
-  mPzAcc = NULL;
+  mPtotAcc = 0;
+  mPtAcc = 0;
+  mPxAcc = 0;
+  mPyAcc = 0;
+  mPzAcc = 0;
 
-  mPRelErr = NULL;
-  mPRelErrqok = NULL;
-  mPRelDiff = NULL;
+  mPRelErr = 0;
+  mPRelErrqok = 0;
+  mPRelDiff = 0;
   
-  mEtaNghits = NULL;
-  mEtaNfhits = NULL;
+  mEtaNghits = 0;
+  mEtaNfhits = 0;
 
-  mPtEtaF = NULL;
-  mPtEtaFMes = NULL;
-  mPtEtaGood = NULL;
-  mPtEtaBad = NULL;
-  mPtEtaUnclean = NULL;
-  mPtEtaMesUnclean = NULL;
-  mPtEtaUncleanGood = NULL;
-  mPtEtaMesUncleanGood = NULL;
+  mPtEtaF = 0;
+  mPtEtaFMes = 0;
+  mPtEtaGood = 0;
+  mPtEtaBad = 0;
+  mPtEtaUnclean = 0;
+  mPtEtaMesUnclean = 0;
+  mPtEtaUncleanGood = 0;
+  mPtEtaMesUncleanGood = 0;
 
-  mPtEtaSplit = NULL;
-  mPtEtaSplitGood = NULL;
-  mPtEtaSplitLoliGood = NULL;
+  mPtEtaSplit = 0;
+  mPtEtaSplitGood = 0;
+  mPtEtaSplitLoliGood = 0;
 
-  mPtEtaGoodG = NULL;
-  mPtEtaGoodF = NULL;
-  mPtEtaGoodRatio = NULL;
-  mPtEtaBadG = NULL;
-  mPtEtaBadF = NULL;
-  mPtEtaBadRatio = NULL;
+  mPtEtaGoodG = 0;
+  mPtEtaGoodF = 0;
+  mPtEtaGoodRatio = 0;
+  mPtEtaBadG = 0;
+  mPtEtaBadF = 0;
+  mPtEtaBadRatio = 0;
 
-  mPtEtaFVtx = NULL;
-  mPtEtaLookLikeGood = NULL;
-  mPtEtaContamination = NULL;
-  mPtEtaContaWoSplits = NULL;
+  mPtEtaFVtx = 0;
+  mPtEtaLookLikeGood = 0;
+  mPtEtaContamination = 0;
+  mPtEtaContaWoSplits = 0;
 
-  mPtEta10PointTracks = NULL;
-  mPtEtaWrongCharge = NULL;
-  mPtEtaWrongPosCharge = NULL;
+  mPtEta10PointTracks = 0;
+  mPtEtaWrongCharge = 0;
+  mPtEtaWrongPosCharge = 0;
 
-  mGLengthDistTrackAng = NULL;
-  mGCircleDistTrackAng = NULL;
-  mFLengthDistTrackAng = NULL;
-  mFCircleDistTrackAng = NULL;
+  mGLengthDistTrackAng = 0;
+  mGCircleDistTrackAng = 0;
+  mFLengthDistTrackAng = 0;
+  mFCircleDistTrackAng = 0;
 
-  mGTracklAngAll = NULL;
-  mGTrackAngAll = NULL;
-  mGCircleDistAll = NULL;
-  mGLengthDistAll = NULL; 
+  mGTracklAngAll = 0;
+  mGTrackAngAll = 0;
+  mGCircleDistAll = 0;
+  mGLengthDistAll = 0; 
 
-  mDcaFMainVertex = NULL;
-  mDcaFNonVertex = NULL;
-  mDcaGMainVertex = NULL;
-  mDcaGNonVertex = NULL;
+  mDcaFMainVertex = 0;
+  mDcaFNonVertex = 0;
+  mDcaGMainVertex = 0;
+  mDcaGNonVertex = 0;
 
-  mGTrackAng = NULL;
-  mGCircleDist = NULL;
-  mGLengthDist = NULL; 
+  mGTrackAng = 0;
+  mGCircleDist = 0;
+  mGLengthDist = 0; 
 
-  mGCircleLength = NULL;
+  mGCircleLength = 0;
 
-  mFTracklAngAll = NULL;
-  mFTrackAngAll = NULL;
-  mFCircleDistAll = NULL;
-  mFLengthDistAll = NULL; 
+  mFTracklAngAll = 0;
+  mFTrackAngAll = 0;
+  mFCircleDistAll = 0;
+  mFLengthDistAll = 0; 
 
-  mFTrackAng = NULL;
-  mFCircleDist = NULL;
-  mFLengthDist = NULL; 
+  mFTrackAng = 0;
+  mFCircleDist = 0;
+  mFLengthDist = 0; 
 
-  mFCircleLength = NULL;
+  mFCircleLength = 0;
 
-  mPRatioDist = NULL;
-  mPRatioDistSplit = NULL;
+  mPRatioDist = 0;
+  mPRatioDistSplit = 0;
 
-  mParentTrack = NULL;
-  mParentTracks = NULL;
-  mNumParentTracks = NULL;
+  mParentTrack = 0;
+  mParentTracks = 0;
+  mNumParentTracks = 0;
 
-  mUnclean = NULL;
+  mUnclean = 0;
   
-  mSetupTime = NULL;
-  mTrackingTime = NULL;
-  mExtensionTime = NULL;
-  mSplitTime = NULL;
-  mFitTime = NULL;
-  mTotalTime = NULL;
+  mSetupTime = 0;
+  mTrackingTime = 0;
+  mExtensionTime = 0;
+  mSplitTime = 0;
+  mFitTime = 0;
+  mTotalTime = 0;
 }
 
 

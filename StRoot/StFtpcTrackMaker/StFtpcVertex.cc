@@ -1,5 +1,14 @@
-// $Id: StFtpcVertex.cc,v 1.7 2001/07/12 13:05:02 oldi Exp $
+// $Id: StFtpcVertex.cc,v 1.8 2002/04/05 16:51:16 oldi Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.8  2002/04/05 16:51:16  oldi
+// Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
+// Each Track inherits from StHelix, now.
+// Therefore it is possible to calculate, now:
+//  - residuals
+//  - vertex estimations obtained by back extrapolations of FTPC tracks
+// Chi2 was fixed.
+// Many additional minor (and major) changes.
+//
 // Revision 1.7  2001/07/12 13:05:02  oldi
 // QA histogram of FTPC vertex estimation is generated.
 // FTPC vertex estimation is stored as pre vertex (id = 301) in any case, now.
@@ -39,14 +48,17 @@
 //----------Last Modified: 24.07.2000
 //----------Copyright:     &copy MDO Production 1999
 
+#include "StMessMgr.h"
 #include "StFtpcVertex.hh"
 #include "StFtpcPoint.hh"
 
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "tables/St_g2t_vertex_Table.h"
+#include "tables/St_dst_vertex_Table.h"
+#include "tables/St_fcl_fppoint_Table.h"
 
-#include "StMessMgr.h"
+#include "TF1.h"
 
 ////////////////////////////////////////////////////////////////////////////
 //                                                                        //
@@ -56,7 +68,6 @@
 // getters and setter. It is just a wrapper of the Staf tables.           //
 //                                                                        //
 ////////////////////////////////////////////////////////////////////////////
-#include "tables/St_fcl_fppoint_Table.h"
 
 ClassImp(StFtpcVertex)
 
@@ -138,7 +149,8 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
 
   Int_t maxBin=HISTOBINS/2, maxHeight=0;
   
-  Float_t vertex=0;
+  Float_t vertex = 0.;
+  Float_t sigma = 0.;
 
   for(Int_t hindex=1; hindex<HISTOBINS-1; hindex++) {
     
@@ -165,9 +177,9 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
   else {
       
     // do gaussfit 
-    Float_t sigma = sqrt (1 / ((2 * log(myhist[maxBin])) -
-			       (log(myhist[maxBin+1]) + 
-				log(myhist[maxBin-1]))));
+    sigma = sqrt (1 / ((2 * log(myhist[maxBin])) -
+		       (log(myhist[maxBin+1]) + 
+			log(myhist[maxBin-1]))));
     vertex =  ((maxBin+0.5)/hratio+HISTOMIN) + 
       sigma*sigma/(hratio*hratio) * (log(myhist[maxBin+1]) - 
 				     log(myhist[maxBin-1]));
@@ -180,12 +192,16 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
   
   SetX((Double_t) 0);
   SetY((Double_t) 0);
+  SetXerr(0.);
+  SetYerr(0.);
   if(vertex*0 != 0)
     {
       cerr << "vertex not found, setting to 0!" << endl;
       vertex = 0;
+      sigma = 0.;
     }
   SetZ((Double_t) vertex);
+  SetZerr((Double_t) sigma);
 }
 
 
@@ -255,7 +271,8 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
 
   Int_t maxBin=HISTOBINS/2, maxHeight=0;
   
-  Float_t vertex=0;
+  Float_t vertex = 0.;
+  Float_t sigma = 0.;
 
   for(Int_t hindex=1; hindex<HISTOBINS-1; hindex++) {
     
@@ -282,9 +299,9 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
   else {
       
     // do gaussfit 
-    Float_t sigma = sqrt (1 / ((2 * log(myhist[maxBin])) -
-			       (log(myhist[maxBin+1]) + 
-				log(myhist[maxBin-1]))));
+    sigma = sqrt (1 / ((2 * log(myhist[maxBin])) -
+		       (log(myhist[maxBin+1]) + 
+			log(myhist[maxBin-1]))));
     vertex =  ((maxBin+0.5)/hratio+HISTOMIN) + 
       sigma*sigma/(hratio*hratio) * (log(myhist[maxBin+1]) - 
 				     log(myhist[maxBin-1]));
@@ -297,12 +314,16 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
   
   SetX(0.);
   SetY(0.);
+  SetXerr(0.);
+  SetYerr(0.);
   if(vertex*0 != 0)
     {
       cerr << "vertex not found, setting to 0!" << endl;
-      vertex = 0;
+      vertex = 0.;
+      sigma = 0.;
     }
   SetZ((Double_t) vertex);
+  SetZerr((Double_t) sigma);
 }
 
 
@@ -329,27 +350,133 @@ StFtpcVertex::StFtpcVertex(St_DataSet *const geant)
       SetZ(dummy);
       gMessMgr->Message("Using primary vertex coordinates (Default): ", "I", "OST");
     }
+
+    SetXerr(0.);
+    SetYerr(0.);
+    SetZerr(0.);  
   }
 }
 
 
-StFtpcVertex::StFtpcVertex(Double_t pos[3])
+StFtpcVertex::StFtpcVertex(dst_vertex_st *vertex)
+{
+  // constructor from Doubles
+  
+  SetX(vertex->x);
+  SetY(vertex->y);
+  SetZ(vertex->z);
+  SetXerr(TMath::Sqrt(vertex->covar[0]));
+  SetYerr(TMath::Sqrt(vertex->covar[2]));
+  SetZerr(TMath::Sqrt(vertex->covar[5]));  
+}  
+
+
+StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t west)
+{
+  // constructor from track array
+
+  TH1F x_hist("x_hist", "x position of estimated vertex", 200, -10., 10.);
+  TH1F y_hist("y_hist", "y position of estimated vertex", 200, -10., 10.);
+  TH1F z_hist("z_hist", "z position of estimated vertex", 200, -75., 75.);
+
+  x_hist.Clear();
+  y_hist.Clear();
+  z_hist.Clear();
+
+  TF1 gauss_x("gauss_x", "gaus", -10., 10.);
+  TF1 gauss_y("gauss_y", "gaus", -10., 10.);
+  TF1 gauss_z("gauss_z", "gaus", -75., 75.);
+  
+  StFtpcVertex v;
+
+  if (vertex == 0) {
+    // set nominal vertex to 0, 0, 0 if no nominal vertex is given
+    v = StFtpcVertex(0., 0., 0., 0., 0., 0.);
+  }
+
+  else {
+    v = *vertex;
+  }
+
+  for (Int_t i = 0; i < tracks->GetEntriesFast(); i++) {
+    
+    StFtpcTrack *track = (StFtpcTrack*)tracks->At(i);
+
+    if (track->GetHemisphere() == west) {
+      z_hist.Fill(track->z(track->pathLength(v.GetX(), v.GetY())));
+    }
+  }
+
+  // fit only 20 cm in both directions of maximum
+  z_hist.Fit(&gauss_z, "QN", "", z_hist.GetXaxis()->GetBinCenter(z_hist.GetMaximumBin())-20,
+	     z_hist.GetXaxis()->GetBinCenter(z_hist.GetMaximumBin())+20);
+
+  SetZ(gauss_z.GetParameter(1));
+  SetZerr(gauss_z.GetParameter(2));
+
+  for (Int_t i = 0; i < tracks->GetEntriesFast(); i++) {
+    
+    StFtpcTrack *track = (StFtpcTrack*)tracks->At(i);
+    
+    if (track->GetHemisphere() == west) {
+      StThreeVector<Double_t> rv(0, 0, GetZ());
+      StThreeVector<Double_t> nv(0,0,1);
+      Double_t pl = track->pathLength(rv, nv);
+      x_hist.Fill(track->x(pl));
+      y_hist.Fill(track->y(pl));
+    }
+  }
+
+  // fit only 3 cm in both directions of maximum
+  x_hist.Fit(&gauss_x, "QN", "", x_hist.GetXaxis()->GetBinCenter(x_hist.GetMaximumBin())-3,
+	     x_hist.GetXaxis()->GetBinCenter(x_hist.GetMaximumBin())+3);
+  SetX(gauss_x.GetParameter(1));
+  SetXerr(gauss_x.GetParameter(2));
+
+  // fit only 3 cm in both directions of maximum
+  y_hist.Fit(&gauss_y, "QN", "", y_hist.GetXaxis()->GetBinCenter(y_hist.GetMaximumBin())-3,
+	     y_hist.GetXaxis()->GetBinCenter(y_hist.GetMaximumBin())+3);
+  SetY(gauss_y.GetParameter(1));
+  SetYerr(gauss_y.GetParameter(2));
+}
+
+
+StFtpcVertex::StFtpcVertex(Double_t pos[6])
 {
   // constructor from Doubles
   
   SetX((Double_t) pos[0]);
   SetY((Double_t) pos[1]);
   SetZ((Double_t) pos[2]);
+  SetXerr((Double_t) pos[3]);
+  SetYerr((Double_t) pos[4]);
+  SetZerr((Double_t) pos[5]);  
 }  
 
 
-StFtpcVertex::StFtpcVertex(Double_t x, Double_t y, Double_t z)
+StFtpcVertex::StFtpcVertex(Double_t pos[3], Double_t err[3])
 {
-  // constructor from Doubles
+  // constructor from Doubles with errors
+  
+  SetX((Double_t) pos[0]);
+  SetY((Double_t) pos[1]);
+  SetZ((Double_t) pos[2]);
+  SetXerr((Double_t) err[0]);
+  SetYerr((Double_t) err[1]);
+  SetZerr((Double_t) err[2]);
+}  
+
+
+StFtpcVertex::StFtpcVertex(Double_t x, Double_t y, Double_t z, Double_t x_err, Double_t y_err, Double_t z_err)
+{
+  // constructor from Doubles with errors
   
   SetX(x);
   SetY(y);
   SetZ(z);
+  SetXerr(x_err);
+  SetYerr(y_err);
+  SetZerr(z_err);
 }  
 
 
@@ -357,4 +484,34 @@ StFtpcVertex::~StFtpcVertex()
 {
   // Destructor.
   // Does nothing except destruct.
+}
+
+
+StFtpcVertex::StFtpcVertex(const StFtpcVertex &vertex)
+{
+  // Copy constructor.
+
+  SetX(vertex.GetX());
+  SetY(vertex.GetY());
+  SetZ(vertex.GetZ());
+  SetXerr(vertex.GetXerr());
+  SetYerr(vertex.GetYerr());
+  SetZerr(vertex.GetZerr());
+}
+
+
+StFtpcVertex& StFtpcVertex::operator=(const StFtpcVertex &vertex)
+{
+  // Assigment operator.
+
+  if (this != &vertex) {  // beware of selfd assignment: vertex = vertex
+    SetX(vertex.GetX());
+    SetY(vertex.GetY());
+    SetZ(vertex.GetZ());
+    SetXerr(vertex.GetXerr());
+    SetYerr(vertex.GetYerr());
+    SetZerr(vertex.GetZerr());
+  }
+
+  return *this;
 }

@@ -1,5 +1,14 @@
-// $Id: StFtpcConfMapper.hh,v 1.11 2002/03/15 10:04:41 oldi Exp $
+// $Id: StFtpcConfMapper.hh,v 1.12 2002/04/05 16:50:11 oldi Exp $
 // $Log: StFtpcConfMapper.hh,v $
+// Revision 1.12  2002/04/05 16:50:11  oldi
+// Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
+// Each Track inherits from StHelix, now.
+// Therefore it is possible to calculate, now:
+//  - residuals
+//  - vertex estimations obtained by back extrapolations of FTPC tracks
+// Chi2 was fixed.
+// Many additional minor (and major) changes.
+//
 // Revision 1.11  2002/03/15 10:04:41  oldi
 // Adjust eta segments not only to z-position of vertex but to x,y as well.
 // Avoid tracking if vertex position is outside of the inner radius of the Ftpc.
@@ -176,18 +185,18 @@ private:
 public:
             StFtpcConfMapper();  // default constructor
             StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, 
-			     Double_t vertexPos[3] = NULL,
+			     Double_t vertexPos[6] = 0,
 			     Bool_t bench = (Bool_t)false,
 			     Int_t phi_segments = 100, 
 			     Int_t eta_segments = 200);  // constructor
             StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint,
 			     MIntArray *good_hits,
-			     Double_t vertexPos[3] = NULL,
+			     Double_t vertexPos[6] = 0,
 			     Bool_t bench = (Bool_t)false,
 			     Int_t phi_segments = 100, 
 			     Int_t eta_segments = 200);  // constructor to fill evaluated hits
             StFtpcConfMapper(TObjArray *hits, 
-			     StFtpcVertex *vertex = NULL, 
+			     StFtpcVertex *vertex = 0, 
 			     Bool_t bench = (Bool_t)false, 
 			     Int_t phi_segments = 100, 
 			     Int_t eta_segments = 200);  // constructor which takes an CLonesArray of hits
