@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAlignmentMaker.hh,v 1.2 2001/05/09 16:33:02 gaudiche Exp $
+ * $Id: StSvtAlignmentMaker.hh,v 1.3 2004/07/29 14:59:36 caines Exp $
  *
  * Author: Helen Caines
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAlignmentMaker.hh,v $
+ * Revision 1.3  2004/07/29 14:59:36  caines
+ * Fix Alignmentmaker with new param settings
+ *
  * Revision 1.2  2001/05/09 16:33:02  gaudiche
  * bug on Solaris fixed - cleanup
  *
@@ -26,6 +29,8 @@
 class StSvtConfig;
 class StSsdAlign;
 class StSvtCoordinateTransform;
+class StSvtHybridCollection;
+class StSvtT0;
 class srs_srspar_st;
 class svg_shape_st;
 class svg_geom_st;
@@ -57,7 +62,9 @@ private:
   svg_shape_st                 *mSvtShapeT;          //!
   svg_geom_st                  *mSvtGeomT;           //!     
   TString                      mConfigString;  
-
+  StSvtHybridCollection *m_driftVeloc; //!
+  StSvtHybridCollection *m_driftCurve; //!
+  StSvtT0 *m_t0; //!
   int NumberEvents;
   int NumberOfEventsSoFar;
   int DataType;
