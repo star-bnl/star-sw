@@ -57,9 +57,10 @@ class StiDefaultMutableTreeNode : public StiTreeNode
 {
  public:
 
-  virtual ~StiDefaultMutableTreeNode(){};
+  virtual ~StiDefaultMutableTreeNode(){reset();};
   StiDefaultMutableTreeNode();
   //StiDefaultMutableTreeNode(bool allowsChildren);
+  const StiDefaultMutableTreeNode& operator=(const StiDefaultMutableTreeNode& node);  
 
   void reset();
   //void set(int depth);
