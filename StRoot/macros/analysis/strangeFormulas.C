@@ -5,13 +5,17 @@
 //          micro DST tree, a pointer to a TFile containing such
 //          a tree (tree name assumed to be either "StrangeMuDst"
 //          or "MuDst" (in the case of a common micro DST)), or
-//          the name of such a file. In the latter two cases, a
-//          pointer to the strangeness TTree is returned.
+//          the name of such a file or files (one can use wildcards
+//          to examine the data in multiple files). In the latter
+//          two cases, a pointer to the strangeness TTree is returned.
 //          See documentation for more information.
 // examples:
 //        .x strangeFormulas.C("myfile.root");
 //          Opens a file named "myfile.root", loads the formulas needed,
 //          and returns a pointer to the TTree.
+//        .x strangeFormulas.C("/path/to/otherfiles*.root");
+//          Opens all the files matching the pattern using a TChain.
+//          The returned pointer is the TChain cast to a TTree pointer.
 //        .x strangeFormulas.C;
 //          Opens a file named "evMuDst.root", loads the formulas needed,
 //          and returns a pointer to the TTree (this is the default file).
@@ -36,7 +40,7 @@
 
 
 // Public interface:
-    TTree* strangeFormulas(const char* fname=0);
+    TTree* strangeFormulas(const char* fname=0, const char* tname=0);
     TTree* strangeFormulas(TFile* fptr);
      Int_t strangeFormulas(TTree* tree);
       void findFormulas(const char* c0, const char* c1=0, const char* c2=0);
@@ -47,8 +51,21 @@
 // Internal members and functions:
 void formulate(const char* name, const char* formula);
 TTree* strangeTree=0;
-TSeqCollection* ListofFuncs=gROOT->GetListOfFunctions();
+TSeqCollection* ListofFuncs=0;
 Int_t max_codes=0;
+static const char* defaultFile = "evMuDst.root";
+static const char* defaultTree = "StrangeMuDst";
+static const char* altTree = "MuDst";
+
+//-----------------------------------------------------
+
+void prep() {
+  if (!(gROOT->GetClass("TTreePlayer"))) {
+    gSystem->Load("libProof");
+    gSystem->Load("libTreePlayer");
+  }
+  if (!ListofFuncs) ListofFuncs=gROOT->GetListOfFunctions();
+}
 
 //-----------------------------------------------------
 
@@ -102,27 +119,34 @@ void formulate(const char* name, const char* formula) {
 
 //-----------------------------------------------------
 
-TTree* strangeFormulas(const char* fname) {
-  TFile *fptr;
-  if (!fname) {
-    fptr = new TFile("evMuDst.root");    // Default filename for root of TTree
-  } else {
-    fptr = new TFile(fname);
+TTree* strangeFormulas(const char* fname, char* tname) {
+  prep();
+  if (!tname) {
+    tname = defaultTree;
   }
-  strangeTree = strangeFormulas(fptr);
+  printf("Looking for tree with name %s\n",tname);
+  TChain* strangeChain = new TChain(tname);
+  if (!fname) {
+    fname = defaultFile;
+  }
+  strangeChain->Add(fname);
+  if (strangeChain->LoadTree(0)) {
+    delete strangeChain;
+    if (!(strcmp(tname,defaultTree))) return strangeFormulas(fname,altTree);
+    return 0;
+  }
+  strangeTree = (TTree*) strangeChain;
+  strangeFormulas(strangeTree);
   return strangeTree;
 }
 
 //-----------------------------------------------------
 
 TTree* strangeFormulas(TFile* fptr) {
+  prep();
   if (!fptr) return 0;
-  if (!(gROOT->GetClass("TTreeFormula"))) {
-    gSystem->Load("libProof");
-    gSystem->Load("libTreePlayer");
-  }
-  strangeTree = (TTree*) fptr->Get("StrangeMuDst");
-  if (!strangeTree) strangeTree = (TTree*) fptr->Get("MuDst");
+  strangeTree = (TTree*) fptr->Get(defaultTree);
+  if (!strangeTree) strangeTree = (TTree*) fptr->Get(altTree);
   strangeFormulas(strangeTree);
   return strangeTree;
 }
@@ -130,11 +154,8 @@ TTree* strangeFormulas(TFile* fptr) {
 //-----------------------------------------------------
 
 Int_t strangeFormulas(TTree* tree) {
+  prep();
   if (!tree) return 0;
-  if (!(gROOT->GetClass("TTreeFormula"))) {
-    gSystem->Load("libProof");
-    gSystem->Load("libTreePlayer");
-  }
   if (gROOT->GetVersionInt() < 22405) {
     max_codes = 50;
   } else {
@@ -170,7 +191,6 @@ Int_t strangeFormulas(TTree* tree) {
   formulate("Event.globalTracks()", "Event.mGlobalTracks");
   formulate("Event.primaryTracks()", "Event.mPrimaryTracks");
   formulate("Event.primaryNegTracks()", "Event.mPrimaryNegTracks");
-  formulate("Event.primaryCorrectedTracks()", "Event.mPrimaryCorrectedTracks");
   formulate("Event.primaryVertexX()", "Event.mPrimaryVertexX");
   formulate("Event.primaryVertexY()", "Event.mPrimaryVertexY");
   formulate("Event.primaryVertexZ()", "Event.mPrimaryVertexZ");
@@ -188,7 +208,6 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("McEvent.globalTracks()", "McEvent.mGlobalTracks");
     formulate("McEvent.primaryTracks()", "McEvent.mPrimaryTracks");
     formulate("McEvent.primaryNegTracks()", "McEvent.mPrimaryNegTracks");
-    formulate("McEvent.primaryCorrectedTracks()", "McEvent.mPrimaryCorrectedTracks");
     formulate("McEvent.primaryVertexX()", "McEvent.mPrimaryVertexX");
     formulate("McEvent.primaryVertexY()", "McEvent.mPrimaryVertexY");
     formulate("McEvent.primaryVertexZ()", "McEvent.mPrimaryVertexZ");
@@ -833,8 +852,11 @@ Int_t strangeFormulas(TTree* tree) {
 
 }
 //______________________________________________________________________
-// $Id: strangeFormulas.C,v 3.6 2002/05/17 14:07:55 genevb Exp $
+// $Id: strangeFormulas.C,v 3.7 2003/01/22 05:15:16 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 3.7  2003/01/22 05:15:16  genevb
+// Use TChain for multiple files
+//
 // Revision 3.6  2002/05/17 14:07:55  genevb
 // Added some new event functions
 //
