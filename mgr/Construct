@@ -66,7 +66,7 @@ if (/^i386_/) {
   $EXEFLAGS = $CXXFLAGS . " -Wl,-Bdynamic";
   $SOFLAGS  = "-shared";  
   $CLIBS    = "-L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
-  $FLIBS    = "-L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
+  $FLIBS    = "-L/usr/pgi/linux86/lib -lpgftnrtl -lpgc -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
   if (/^i386_linux2/) {$FLIBS   .= " -lI77 -lF77";}
 #  $FLIBS   .= "-lcrypt";
   $FFLAGS   = "-DPGI";  
