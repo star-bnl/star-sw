@@ -9,6 +9,7 @@
 /*                                                                                     */
 /*  06Dec99 zm  Created so offline can use and after modification for mod 8 DMA reads  */
 /*  08Dec99 zm  Changed Event Descriptor Structure to previous length                  */
+/*  03Feb00 zm  Changed "ushort ZDCDSM[8]" to "BYTE ZDC[16]" in L0_DSM_Data structure  */
 /***************************************************************************************/
 
 
@@ -38,7 +39,7 @@ typedef unsigned int  WORD;
 #define RAW_DET_DATA_LEN     408   /* Size of Raw Detector Data from CTB, MWC with headers */
 #define TRG_SUM_LEN          432   /* Number of bytes in the trigger summary for DAQ with headers */
 
-#define L1_DATA_LEN  (EVT_HEAD_LEN+EV_DESC_LEN+TRG_SUM_LEN)   /* Size of data passed from L1ANA to LiDC */ 
+#define L1_DATA_LEN  (EVT_HEAD_LEN+EV_DESC_LEN+TRG_SUM_LEN)   /* Size of data passed from L1ANA to L1DC */ 
 
 #define TRG_EVT_LEN  (L1_DATA_LEN+(MAX_RAW_DATA_BLOCKS*RAW_DET_DATA_LEN))  /* Max size of a trigger event */
 #define TDI_EVT_LEN  (EV_DESC_LEN+TRG_SUM_LEN+(MAX_RAW_DATA_BLOCKS*RAW_DET_DATA_LEN)) /* size of event sent to TDI */
@@ -137,7 +138,7 @@ typedef struct {
   ushort             CPA[32];        /* Contents of 4 CTB+MWC DSM Input Buffers (IB's) - coarse pixel array*/
   ushort             quadDSM[8];     /* Contents of 1 CTB+MWC DSM IB - outputs of previous 4 */
   ushort             lastDSM[8];     /* Contents of last DSM IB - results of all DSM trees */
-  ushort             ZDCDSM[8];      /* Contents of ZDC DSM IB - raw data from ZDC */
+  BYTE               ZDC[16];        /* Contents of ZDC DSM IB - raw data from ZDC */
   ushort             BCdata[16];     /* Contents of 2 Bunch Crossing DSMs IB's */
 } L0_DSM_Data;          /* 144 bytes total */
 
