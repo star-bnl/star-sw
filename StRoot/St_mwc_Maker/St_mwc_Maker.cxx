@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.23 2000/12/20 04:42:19 vlmrz Exp $
+// $Id: St_mwc_Maker.cxx,v 1.24 2001/01/31 20:54:23 vlmrz Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.24  2001/01/31 20:54:23  vlmrz
+// Choice of slow or fast simu, new parameters, signal generated for 11 conseq. RHIC crossings
+//
 // Revision 1.23  2000/12/20 04:42:19  vlmrz
 // *** empty log message ***
 //
@@ -102,9 +105,10 @@
 #include "St_mwc_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
-#include "StTpcDb/StTpcDb.h"
+//#include "StTpcDb/StTpcDb.h" - no call to DB until dust settles
 #include "mwc/St_mwg_Module.h"
 #include "mwc/St_mws_Module.h"
+#include "mwc/St_mwf_Module.h"
 #include "mwc/St_mwu_Module.h"
 #include "TH1.h"
 #include "TH2.h"
@@ -135,28 +139,27 @@ Int_t St_mwc_Maker::Init(){
    m_mpar = (St_mwc_mpar *) params("mpar");
 
 
-
-
    mwc_mpar_st *partable = m_mpar->GetTable();
    partable->de_thresh_in      = 0;
    partable->de_thresh_out     = 0;
-   partable->el_noise_width    = 0;
+   partable->el_noise_width    = 0;//width of electronic noise in units of mean anode signal (dE in fast simulation, mV in slow)
    partable->min_ion    = 0;
    m_mpar->AddAt(partable,0);
 
    
    mwc_geo_st *geotable = m_geom->GetTable();
-   if (gStTpcDb) {
+   /*   if (gStTpcDb) { eliminate call to the database until DB gets in shape
      StTpcWirePlaneI *radius = gStTpcDb->WirePlaneGeometry();
      Float_t rad1 = radius->firstInnerSectorAnodeWire();
      Float_t rad2 = radius->lastInnerSectorAnodeWire();
      Float_t rad3 = radius->firstOuterSectorAnodeWire();
      Float_t rad4 = radius->lastOuterSectorAnodeWire();
-     geotable->r1max = rad2+.2;
-     geotable->r1min = rad1-.2;
-     geotable->r2min = rad3-.2;
-     geotable->r2max = rad4+.2;
-   }
+     }*/
+     geotable->r1max = 117.0;
+     geotable->r1min = 53.0;
+     geotable->r2min = 125.395;
+     geotable->r2max = 189.395;
+   
    m_geom->AddAt(geotable,0);
    
    m_pars = new St_mwc_pars("pars",1);
@@ -195,7 +198,6 @@ Int_t St_mwc_Maker::Make(){
 
    St_mwc_mevent *mevent = new St_mwc_mevent("mevent",96);
    St_mwc_sector *sector = new St_mwc_sector("sector",96);
-   St_mwc_raw    *raww    = new St_mwc_raw("raww",1056);
    St_mwc_raw    *raw    = new St_mwc_raw("raw",1056);
 //   the cor table is not implemented
 //     St_mwc_cor    *cor    = new St_mwc_cor("cor",384);
@@ -212,35 +214,47 @@ Int_t St_mwc_Maker::Make(){
    St_DataSetIter geant(GetDataSet("geant"));
    St_g2t_mwc_hit *g2t_mwc_hit = (St_g2t_mwc_hit *) geant("g2t_mwc_hit");
 
-   if (!g2t_mwc_hit) {return kStOK;}
+   if (!g2t_mwc_hit) {
+    for (int hh = 1; hh<12;hh++) {
+     for (int ii = 1; ii<97;ii++){
+      mwc_raw_st *rw = new mwc_raw_st();
+      (rw)->sector = ii;
+      (rw)->count = 0;
+      raw->AddAt(rw,(hh-1)*96+ii-1);
+     }
+    }
+   return kStOK;
+   }
    if (!m_geom)      {printf("m_geom does not exist\n")     ;return kStWarn;}
    if (!m_mpar)      {printf("m_mpar does not exist\n")     ;return kStWarn;}
    if (!mevent)      {printf("mevent does not exist\n")     ;return kStWarn;}
    if (!sector)      {printf("sector does not exist\n")     ;return kStWarn;}
    if (!raw)         {printf("raw does not exist\n")        ;return kStWarn;}
 
- 
+   // mwf calls fast simulator, mws calls slow simulator, make your pick - just unclomment the call to the wanted code, and comment the unwanted one
+   // i.e. here the fast simulator is commented out, and slow simu is used
+   /*
+   Int_t mwc_result = mwf(
+                          g2t_mwc_hit,
+                          m_geom,
+                          m_mpar,
+                          mevent,
+                          sector,
+                          raw);
+   */                        
    Int_t mwc_result = mws(
                           g2t_mwc_hit,
                           m_geom,
                           m_mpar,
                           mevent,
                           sector,
-                          raww,
+                          raw,
                           m_pars);
+  
    if (mwc_result != kSTAFCV_OK)
    {
       printf("**** Problems with mwc ****\n");
       return kStWarn;
-   }
-
- 
-   mwc_raw_st    *vladimir = raww->GetTable();
-   for (int hh = 0; hh<1056;hh++) {
-   mwc_raw_st *rw = new mwc_raw_st();
-   (rw)->sector = (vladimir+hh)->sector;
-   (rw)->count = (vladimir+hh)->count;
-   raw->AddAt(rw,hh);
    }
 
    mwc_sector_st *sec = sector->GetTable();
@@ -249,16 +263,16 @@ Int_t St_mwc_Maker::Make(){
      Int_t nhts = 0;
      for (int ii=jj*96;ii<=95+jj*96;ii++){
  
-       if ( (rw+ii)->count ){
-         nhts = nhts + (rw+ii)->count;
-	 /*basic debugging - turn this on if needed:
-        	 printf("raw sector: %2d count %3d phi %2d eta %d nhit %2d tot_hit "
+         if ( (rw+ii)->count ) nhts = nhts + (rw+ii)->count;
+	 /*   Uncomment the following for basic debugging
+
+                printf("raw sector: %2d count %3d phi %2d eta %d nhit %2d tot_hit "
 		"%3d de %f\n",(rw+ii)->sector,(rw+ii)->count,
 		(sec+ii-jj*96)->iphi,(sec+ii-jj*96)->ieta,(sec+ii-jj*96)->nhit,
-		(sec+ii-jj*96)->tot_hit,(sec+ii-jj*96)->de);*/
-       }	 
+		(sec+ii-jj*96)->tot_hit,(sec+ii-jj*96)->de);
+	 */	 
      }
-   for (int zz = 0;zz<nhts;zz++) m_Hits->Fill(jj);
+   m_Hits->Fill(jj,nhts);
    }
    g2t_mwc_hit_st *hitTable = g2t_mwc_hit->GetTable();
    float px,py,pz,x,y;
