@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.5 2000/06/05 22:06:26 vanyashi Exp $
+// $Id: StTagsMaker.cxx,v 1.6 2000/06/08 22:21:08 vanyashi Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.6  2000/06/08 22:21:08  vanyashi
+// event header tags fixed
+//
 // Revision 1.5  2000/06/05 22:06:26  vanyashi
 // added const needed for tableDescriptor
 //
@@ -54,10 +57,11 @@ Int_t StTagsMaker::Make(){
     St_DataSet *set = 0;
     TClass *cl = 0;
     void *address = 0;
-    TString branchName;
+    EvtHddr_st fEvtHddr;
 
     while ((set = next())) {
       St_DataSet *ds = GetDataSet(set->GetTitle());
+
       if (ds) {
 	if (ds->InheritsFrom(tabClass)) {
 	  St_Table *tabl = (St_Table *) ds;
@@ -65,19 +69,16 @@ Int_t StTagsMaker::Make(){
 	  address = tab[0];
 	  cl = gROOT->GetClass(ds->GetTitle());
 	}
-	else {
-	  if (strstr(ds->GetName(),"EvtHddr")){
-	    EvtHddr_st fEvtHddr;
-	    StEvtHddr *lEvtHddr = (StEvtHddr *) ds;
-	    lEvtHddr->FillTag(&fEvtHddr);
-	    address = &fEvtHddr;
-	    cl = gROOT->GetClass("EvtHddr_st");
-	  }
+	else if (strstr(ds->GetName(),"EvtHddr")){
+	  StEvtHddr *lEvtHddr = (StEvtHddr *) ds;
+	  lEvtHddr->FillTag(&fEvtHddr);
+	  address = &fEvtHddr;
+	  cl = gROOT->GetClass("EvtHddr_st");
 	}
 	if (cl) {
 	  St_tableDescriptor td(cl);
 	  for (UInt_t i=0;i<td.NumberOfColumns();i++){
-	    branchName=ds->GetName();
+	    TString branchName=ds->GetName();
 	    branchName += ".";
 	    branchName += td.ColumnName(i);
 	    fTree->SetBranchAddress(branchName.Data(),(char*)address+td.Offset(i));
@@ -99,16 +100,15 @@ EDataSetPass StTagsMaker::GetTags (St_DataSet* ds)
   void *address = 0;
 
   const char *Name=ds->GetName();
+  newds = new St_DataSet(Name);
 
   if (!tabClass) tabClass  = gROOT->GetClass("St_Table"); 
   if (ds->InheritsFrom(tabClass) && strstr(Name,"Tag")) {
-    newds = new St_DataSet(Name);
     name = TString(ds->GetTitle());
     St_Table &tab = *((St_Table *)ds); 
     address = tab[0];
   }
   else if (strstr(Name,"EvtHddr")){   
-    newds = new St_DataSet(Name,fTagsList);
     name = TString("EvtHddr_st");
     cl = new TClass(name.Data(),1,"StEvtHddr.h","StEvtHddr.h");
     if (cl) address = cl->New();
@@ -141,7 +141,6 @@ EDataSetPass StTagsMaker::GetTags (St_DataSet* ds)
       branchName = Name;
       branchName += ".";
       branchName += colName;
-
       fTree->Branch(branchName.Data(),(char*)address+td.Offset(i),
 		    leaflist.Data(),bufsize);
     }
