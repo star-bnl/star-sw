@@ -17,74 +17,77 @@ my $EXTENSION;
 my $LIST;
 my $RAW_SET;
 my $DISK1        = "/disk00001";
-my $diskA        = "/diskA";
+my $disk0        = "/disk00000";
 my $HOSTNAME     = hostname();
 my $RCF          = "rcf.rhic.bnl.gov";
 #if ($HOSTNAME == $RCF) {$DISK1 = "/net/rmds03/disk1";}
 my $TOPHPSS_SINK =  "/home/starsink/raw";
 my $TOPHPSS_RECO =  "/home/starreco/reco";
 my $TOPDISK1_RECO=  $DISK1 . "/star";
-my $TOPDISKA_RECO=  $diskA . "/star/starreco";
-my $TOP_TEST     =  "/star/scr2f/starreco/MDC2/tests";
-my $REQUEST      =  "/star/u2e/starreco/MDC2/requests";
-my $JOB_LOG      =  $DISK1 . "/star/MDC2";
+my $TOPDISK0_RECO=  $disk0 . "/star/starreco";
+my $TOP_TEST     =  "/star/scr2f/starreco/MDC3/tests";
+my $REQUEST      =  "/star/u2e/starreco/MDC3/requests";
+my $JOB_LOG      =  $DISK1 . "/star/MDC3";
 my $Objy         =  $DISK1 . "/star/stardb/dst";
 #my @SETS = @ARGV;
 my @SETS=     (
 "auau200/venus412/default/b0_3/year_1b/hadronic_on",      # 
-"auau200/venus412/default/b0_9/year_1b/hadronic_on",      # 
-"auau200/venus412/default/b3_6/year_1b/hadronic_on",      # 
-"auau200/venus412/default/b6_9/year_1b/hadronic_on",      # 
-"auau200/venus412/default/b9_12/year_1b/hadronic_on",     # 
-"auau200/venus412/halffield/b0_3/year_1b/hadronic_on",    #
-"auau200/venus412/default/b0_3/year_2a/hadronic_on",      # 
+#"auau200/venus412/default/b0_9/year_1b/hadronic_on",      # 
+#"auau200/venus412/default/b3_6/year_1b/hadronic_on",      # 
+#"auau200/venus412/default/b6_9/year_1b/hadronic_on",      # 
+#"auau200/venus412/default/b9_12/year_1b/hadronic_on",     # 
+#"auau200/venus412/halffield/b0_3/year_1b/hadronic_on",    #
+#"auau200/venus412/default/b0_3/year_2a/hadronic_on",      # 
  
-#"auau200/hijing135/default/b0_3/year_1b/hadronic_on",    #      not mdc2 dataset
-#"auau200/hijing135/default/b0_9/year_2a/hadronic_on",    #          - " -
+#"auau200/hijing135/default/b0_3/year_1b/hadronic_on",      #      not mdc3 dataset
+#"auau200/hijing135/default/b0_9/year_2a/hadronic_on",     #          - " -
 
 "auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on",    # 
 "auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on",     # 
-"auau200/hijing135/jetq_on/b0_9/year_1b/hadronic_on",     # 
-"auau200/hijing135/jetq_on/b3_6/year_1b/hadronic_on",     # 
-"auau200/hijing135/jetq_on/b6_9/year_1b/hadronic_on",     # 
-"auau200/hijing135/jetq_on/b9_12/year_1b/hadronic_on",    # 
+#"auau200/hijing135/jetq_on/b0_9/year_1b/hadronic_on",     # 
+#"auau200/hijing135/jetq_on/b3_6/year_1b/hadronic_on",     # 
+#"auau200/hijing135/jetq_on/b6_9/year_1b/hadronic_on",     # 
+#"auau200/hijing135/jetq_on/b9_12/year_1b/hadronic_on",    # 
 
-"auau200/hijing/b0_3/jet05/year_1b/hadronic_on",          # 
-"auau200/hijing/b0_3/jet10/year_1b/hadronic_on",          # 
-"auau200/hijing/b0_3/jet15/year_1b/hadronic_on",          # 
-"auau200/hijing/b0_3/jet20/year_1b/hadronic_on",          # 
+#"auau200/hijing/b0_3/jet05/year_1b/hadronic_on",          # 
+#"auau200/hijing/b0_3/jet10/year_1b/hadronic_on",          # 
+#"auau200/hijing/b0_3/jet15/year_1b/hadronic_on",          # 
+#"auau200/hijing/b0_3/jet20/year_1b/hadronic_on",
+#"auau200/hijing135/Bjets/b0_3/year_2a/hadronic_on",       #
+#"auau200/hijing135/Cjets/b0_3/year_2a/hadronic_on",       #
 "auau200/hijing/default/jet05/year_2a/hadronic_on",       # 
 "auau200/hijing/default/jet10/year_2a/hadronic_on",       # 
 "auau200/hijing/default/jet15/year_2a/hadronic_on",       # 
 "auau200/hijing/default/jet20/year_2a/hadronic_on",       # 
 
-"auau200/hbt_vni/1d/r5/year_1b/hadronic_on",              # 
-"auau200/hbt_vni/1d/r7/year_1b/hadronic_on",              # 
-"auau200/hbt_vni/sol/r533/year_1b/hadronic_on",           # 
-"auau200/hbt_vni/sol/r563/year_1b/hadronic_on",           # 
-"auau200/hbt_vni/sol/r674/year_1b/hadronic_on",           # 
+#"auau200/hbt_vni/1d/r5/year_1b/hadronic_on",              # 
+#"auau200/hbt_vni/1d/r7/year_1b/hadronic_on",              # 
+#"auau200/hbt_vni/sol/r533/year_1b/hadronic_on",           # 
+#"auau200/hbt_vni/sol/r563/year_1b/hadronic_on",           # 
+#"auau200/hbt_vni/sol/r674/year_1b/hadronic_on",           # 
 
-"auau200/hijet/default/central/year_1b/hadronic_on",      # 
-"auau200/vni/after/central/year_1b/hadronic_on",          # 
-"auau200/vni/after/minb/year_1b/hadronic_on",             # 
-"auau200/vni/before/central/year_1b/hadronic_on",         # 
-"auau200/vni/before/minb/year_1b/hadronic_on",            # 
+#"auau200/hijet/default/central/year_1b/hadronic_on",      # 
+#"auau200/vni/after/central/year_1b/hadronic_on",          # 
+#"auau200/vni/after/minb/year_1b/hadronic_on",             # 
+#"auau200/vni/before/central/year_1b/hadronic_on",         # 
+#"auau200/vni/before/minb/year_1b/hadronic_on",            # 
 
-"pau200/hijing/default/minbias/year_2a/hadronic_on",      #          
+#"pau200/hijing/default/minbias/year_2a/hadronic_on",      #          
 
-"pp200/pythia/default/minbias/year_1b/hadronic_on",       # 
+#"pp200/pythia/default/minbias/year_1b/hadronic_on",       # 
 "pp200/pythia/default/minbias/year_2a/hadronic_on",       # 
-"pp200/pythia/default/jet15/year_1b/hadronic_on",         # 
-"pp200/pythia/default/jet15/year_2a/hadronic_on",         # 
-"pp200/pythia/compton/ptcut8/year_2a/hadronic_on",        #            6.139 GB
+#"pp200/pythia/default/jet15/year_1b/hadronic_on",         # 
+#"pp200/pythia/default/jet15/year_2a/hadronic_on",         # 
+#"pp200/pythia/compton/ptcut8/year_2a/hadronic_on",        #            6.139 GB
 
 "auau200/two_photon/starlight/phi/year_1b/hadronic_on",   #       0.059 GB
 "auau200/two_photon/starlight/rho/year_1b/hadronic_on",   #       0.094 GB
 "auau200/two_photon/starlight/twogam/year_1b/hadronic_on",#      0.177 GB
-"auau200/two_photon/dtunuc/none/year_1b/hadronic_on",     #         not ready yet
+"auau200/two_photon/dtunuc/none/year_1a/hadronic_on",     #         not ready yet
 "augas100/venus412/hydrogen/b0_10/year_1b/hadronic_on",   #       1.945 GB
 "augas100/venus412/nitrogen/b0_10/year_1b/hadronic_on",   #       3.196 GB
-"cosmics/muon/default/none/year_1b/hadronic_on");         #              0.313 
+"cosmics/muon/default/none/year_1b/hadronic_on"           #              0.313 
+ );
 my %geant_size = ();
 my %geant_date = (); my %geant_test = ();         # test of input (Y/N)
 my %geant_noev = ();
@@ -225,7 +228,7 @@ sub get_list_dir($$$){
   my $EXTENSION = @_[1];
   my $LIST      = @_[2];
 #  printf ("DIR=%s EXTENSION=%s\n", $DIR, $EXTENSION, $LIST);
-  $answer = `ftp -i -v rmds01 2121 <<EOF
+  $answer = `ftp -i -v rmds02 2121 <<EOF
 cd $DIR
 mdir $EXTENSION $LIST
 EOF
@@ -233,8 +236,8 @@ EOF
 }
 #____________________________________________________________________
 sub get_job_status{
-#   my $CRS_JOBS = "";
-  my $CRS_JOBS = `ssh rcf.rhic.bnl.gov crs_node_status.pl -c`; #print $CRS_JOBS;
+   my $CRS_JOBS = "";
+#  my $CRS_JOBS = `ssh rcf.rhic.bnl.gov crs_node_status.pl -c`; #print $CRS_JOBS;
   @lines = split /^/m, $CRS_JOBS;
   foreach $line (@lines){
 #   open(CRS_STATUS,"crs_status.log") ||  die "Can't open RAW_SET tus.log: $!\n";
@@ -291,7 +294,7 @@ sub read_set($$){
 #    printf ("filename = %s date =  %s %s %s size = %s\n", $filename,$mon, $day, $time, $size );
     $file = $filename;
     $file =~ s/.fzd//g;
-    $file =~ s/_dst.root//g;
+    $file =~ s/.dst.root//g;
     #      printf  ("file = %s size = %s\n", $file, $size);
     $files{$file}       = $file;
     $size = $size/1000000;
@@ -348,7 +351,7 @@ sub begin_html($){
   print HTML "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML//EN\">\n";
   print HTML "<html>\n";
   print HTML "  <head>\n";
-  print HTML "          <title>MDC2 summary</title>\n";
+  print HTML "          <title>MDC3 summary</title>\n";
   print HTML "  </head>\n";
   print HTML "  <body BGCOLOR=\"#ccffff\"> \n";
   print HTML " JFS = A (archived) J (in jobfile) N (in new_jobs) L (logfile) <br> \n";
@@ -458,12 +461,14 @@ sub crs_script($$$$){
   if (! $done) {
       my $hpss_raw_dir  = $TOPHPSS_SINK . "/" . $set . "/gstardata";
       my $hpss_raw_file = $file . ".fzd";
-      my $hpss_dst_dir  = $TOPHPSS_RECO . "/" . $set . "/" . $process;
-      my $hpss_dst_file0 = $file . ".root";
-      my $hpss_dst_file1 = $file . "_dst.root";
-      my $hpss_dst_file2 = $file . "_dst.xdf";
-      my $executable    = $REQUEST . "/" . $process . "/" . $process;
-#      my $executable    = "bfc_" . $process . ".C";
+      my $hpss_dst_dir  = $TOPHPSS_RECO . "/" . $set . "/" . $process . "r";
+      my $hpss_dst_file0 = $file . ".event.root";
+      my $hpss_dst_file1 = $file . ".dst.root";
+      my $hpss_dst_file2 = $file . ".hist.root";
+      my $hpss_dst_file3 = $file . "_dst.xdf";
+      my $executable     = "/afs/rhic/star/packages/SL99e/mgr/bfc";
+      my $executableargs    = $process . ",xout,-all";
+#      my $executableargs    = "bfc_" . $process . ".C";
       my $log_dir       = $JOB_LOG . "/" . $process;
       my $log_name      = $gen_set . "_" . $file;
       my $err_log       = $log_name . ".err";
@@ -475,7 +480,7 @@ sub crs_script($$$$){
       print TOM_SCRIPT "      inputdir[0]=$hpss_raw_dir\n";
       print TOM_SCRIPT "      inputfile[0]=$hpss_raw_file\n";
       print TOM_SCRIPT "#output\n";
-      print TOM_SCRIPT "      outputnumstreams=3\n";
+      print TOM_SCRIPT "      outputnumstreams=4\n";
       print TOM_SCRIPT "#output stream \n";
       print TOM_SCRIPT "      outputstreamtype[0]=HPSS\n";
       print TOM_SCRIPT "      outputdir[0]=$hpss_dst_dir\n";
@@ -486,6 +491,9 @@ sub crs_script($$$$){
       print TOM_SCRIPT "      outputstreamtype[2]=HPSS\n";
       print TOM_SCRIPT "      outputdir[2]=$hpss_dst_dir\n";
       print TOM_SCRIPT "      outputfile[2]=$hpss_dst_file2\n";
+      print TOM_SCRIPT "      outputstreamtype[3]=HPSS\n";
+      print TOM_SCRIPT "      outputdir[3]=$hpss_dst_dir\n";
+      print TOM_SCRIPT "      outputfile[3]=$hpss_dst_file3\n";
       print TOM_SCRIPT "#standard out -- Should be five outputs\n";
       print TOM_SCRIPT "      stdoutdir=$log_dir\n";
       print TOM_SCRIPT "      stdout=$log_name\n";
@@ -495,6 +503,7 @@ sub crs_script($$$$){
       print TOM_SCRIPT "      notify=starreco\@rcf.rhic.bnl.gov\n";
       print TOM_SCRIPT "#program to run\n";
       print TOM_SCRIPT "      executable=$executable\n";
+      print TOM_SCRIPT "      executableargs=$executableargs\n";
       close(TOM_SCRIPT);
       $JFS .= "N";
     }
@@ -531,7 +540,7 @@ format OUT =
 $file,$geant_size{$file},$geant_date{$file},$JFS,$hpss_size,$hpss_date,$disk_size,$disk_date,$running{$file},$noevents,$timeperevent{$file},$kBsec{$file},$comment{$file}
 .
 #______________________________________________________________
-while (1) 
+#while (1) 
   {# infinite loop
     $TOTAL_GEANT_SIZE = 0;
     $NO_OF_EVENTS = 0;
@@ -552,12 +561,12 @@ while (1)
 #   my $month =  ("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")[(localtime)[3]];
   my $DATE  = $hour . ":" . $min . ":" . $sec . "_" . $day . $mon . "_" . $year;
   #   printf ("Date = %s\n",$DATE);
-  my $html     = "MDC2.summary.html";
+  my $html     = "MDC3.summary.html";
   my $new_html = $html . "." . $DATE;
   get_job_status();
   begin_html($new_html);
-#  foreach my $full_set ("auau200/venus412/default/b0_3/year_1b/hadronic_on"){
-  foreach my $full_set (@SETS){
+#  foreach my $full_set ("auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on"){
+   foreach my $full_set (@SETS){
     $set = $full_set;
     $set =~ s/auau200\///g;
     init_hash();
@@ -576,8 +585,8 @@ while (1)
     # tfs
     my $tfs_set = "tfs_" . $gen_set . ".list";
     printf ("gen_set = %s tfs_set = %s \n", $gen_set, $tfs_set);
-    $DIR = $TOPHPSS_RECO . "/" . $full_set . "/" . "tfs";
-    $EXTENSION = "*_dst.root";
+    $DIR = $TOPHPSS_RECO . "/" . $full_set . "/" . "tfsr";
+    $EXTENSION = "*.dst.root";
     $LIST = $tfs_set;
 #    if (! -e $tfs_set) 
     {get_list_dir($DIR,$EXTENSION,$LIST);}
@@ -585,8 +594,8 @@ while (1)
     # tss
     my $tss_set = "tss_" . $gen_set . ".list";
     printf ("gen_set = %s tss_set = %s \n", $gen_set, $tss_set);
-    $DIR = $TOPHPSS_RECO . "/" . $full_set . "/" . "tss";
-    $EXTENSION = "*_dst.root";
+    $DIR = $TOPHPSS_RECO . "/" . $full_set . "/" . "tssr";
+    $EXTENSION = "*.dst.root";
     $LIST = $tss_set;
 #    if (! -e $tss_set) 
     {get_list_dir($DIR,$EXTENSION,$LIST);}
@@ -594,8 +603,8 @@ while (1)
      # trs
     my $trs_set = "trs_" . $gen_set . ".list";
     printf ("gen_set = %s trs_set = %s \n", $gen_set, $trs_set);
-    $DIR = $TOPHPSS_RECO . "/" . $full_set . "/" . "trs";
-    $EXTENSION = "*_dst.root";
+    $DIR = $TOPHPSS_RECO . "/" . $full_set . "/" . "trsr";
+    $EXTENSION = "*.dst.root";
     $LIST = $trs_set;
 #    if (! -e $trs_set) 
     {get_list_dir($DIR,$EXTENSION,$LIST);}
@@ -621,7 +630,7 @@ while (1)
       # tfs/tss/trs on hpss
       
       # tfs on disk1
-      my $full_name =  $TOPDISK1_RECO . "/" . $full_set . "/tfs/" . $file . "_dst.root";
+      my $full_name =  $TOPDISK1_RECO . "/" . $full_set . "/tfsr/" . $file . ".dst.root";
       #    printf ("full name %s\n",$full_name);
       if (-f $full_name){
 	$line = `ls -l  $full_name`;# printf ("line = %s\n", $line);
@@ -632,21 +641,21 @@ while (1)
 	$tfs_date{$file} = $mon . "_" . $day;
 	$total_tfs_size += $tfs_size{$file};
       }
-#      else { # diskA
-#	my $full_name =  $TOPDISKA_RECO . "/" . $full_set . "/tfs/" . $file . "_dst.root";
-#	#    printf ("full name %s\n",$full_name);
-#	if (-f $full_name){
-#	  $line = `ls -l  $full_name`;# printf ("line = %s\n", $line);
-#	  ($dummy, $dummy, $dummy, $dummy, $size, $mon, $day, $time, $filename ) = split (" ",$line);
-#	  #      printf ("file = %s size = %d date %s %s \n", $full_name, $size, $mon, $day);
-#	  $size = $size/1000000;
-#	  $tfs_size{$file} = int $size;
-#	  $tfs_date{$file} = $mon . "_" . $day;
-#	  $total_tfs_size += $tfs_size{$file};
-#	}
-#      }
+      else { # disk0
+	my $full_name =  $TOPDISK0_RECO . "/" . $full_set . "/tfsr/" . $file . ".dst.root";
+	#    printf ("full name %s\n",$full_name);
+	if (-f $full_name){
+	  $line = `ls -l  $full_name`;# printf ("line = %s\n", $line);
+	  ($dummy, $dummy, $dummy, $dummy, $size, $mon, $day, $time, $filename ) = split (" ",$line);
+	  #      printf ("file = %s size = %d date %s %s \n", $full_name, $size, $mon, $day);
+	  $size = $size/1000000;
+	  $tfs_size{$file} = int $size;
+	  $tfs_date{$file} = $mon . "_" . $day;
+	  $total_tfs_size += $tfs_size{$file};
+	}
+      }
       # tss on disk1
-      my $full_name =  $TOPDISK1_RECO . "/" . $full_set . "/tss/" . $file . "_dst.root";
+      my $full_name =  $TOPDISK1_RECO . "/" . $full_set . "/tssr/" . $file . ".dst.root";
       #    printf ("full name %s\n",$full_name);
       if (-f $full_name){
 	$line = `ls -l  $full_name`;# printf ("line = %s\n", $line);
@@ -657,21 +666,21 @@ while (1)
 	$tss_date{$file} = $mon . "_" . $day;
 	$total_tss_size += $tss_size{$file};
       }
-#      else { #diskA
-#	my $full_name =  $TOPDISKA_RECO . "/" . $full_set . "/tss/" . $file . "_dst.root";
-#	#    printf ("full name %s\n",$full_name);
-#	if (-f $full_name){
-#	  $line = `ls -l  $full_name`;# printf ("line = %s\n", $line);
-#	  ($dummy, $dummy, $dummy, $dummy, $size, $mon, $day, $time, $filename ) = split (" ",$line);
-#	  #      printf ("file = %s size = %d date %s %s \n", $full_name, $size, $mon, $day);
-#	  $size = $size/1000000;
-#	  $tss_size{$file} = int $size;
-#	  $tss_date{$file} = $mon . "_" . $day;
-#	  $total_tss_size += $tss_size{$file};
-#	}
-#      }
+      else { #disk0
+	my $full_name =  $TOPDISK0_RECO . "/" . $full_set . "/tssr/" . $file . ".dst.root";
+	#    printf ("full name %s\n",$full_name);
+	if (-f $full_name){
+	  $line = `ls -l  $full_name`;# printf ("line = %s\n", $line);
+	  ($dummy, $dummy, $dummy, $dummy, $size, $mon, $day, $time, $filename ) = split (" ",$line);
+	  #      printf ("file = %s size = %d date %s %s \n", $full_name, $size, $mon, $day);
+	  $size = $size/1000000;
+	  $tss_size{$file} = int $size;
+	  $tss_date{$file} = $mon . "_" . $day;
+	  $total_tss_size += $tss_size{$file};
+	}
+      }
       # trs on disk1
-      my $full_name =  $TOPDISK1_RECO . "/" . $full_set . "/trs/" . $file . "_dst.root";
+      my $full_name =  $TOPDISK1_RECO . "/" . $full_set . "/trsr/" . $file . ".dst.root";
       #    printf ("full name %s\n",$full_name);
       if (-f $full_name){
 	$line = `ls -l  $full_name`;# printf ("line = %s\n", $line);
@@ -682,19 +691,19 @@ while (1)
 	$trs_date{$file} = $mon . "_" . $day;
 	$total_trs_size += $trs_size{$file};
       }
-#      else { #diskA
-#	my $full_name =  $TOPDISKA_RECO . "/" . $full_set . "/trs/" . $file . "_dst.root";
-#	#    printf ("full name %s\n",$full_name);
-#	if (-f $full_name){
-#	  $line = `ls -l  $full_name`;# printf ("line = %s\n", $line);
-#	  ($dummy, $dummy, $dummy, $dummy, $size, $mon, $day, $time, $filename ) = split (" ",$line);
-#	  #      printf ("file = %s size = %d date %s %s \n", $full_name, $size, $mon, $day);
-#	  $size = $size/1000000;
-#	  $trs_size{$file} = int $size;
-#	  $trs_date{$file} = $mon . "_" . $day;
-#	  $total_trs_size += $trs_size{$file};
-#	}
-#      }
+      else { #disk0
+	my $full_name =  $TOPDISK0_RECO . "/" . $full_set . "/trsr/" . $file . ".dst.root";
+	#    printf ("full name %s\n",$full_name);
+	if (-f $full_name){
+	  $line = `ls -l  $full_name`;# printf ("line = %s\n", $line);
+	  ($dummy, $dummy, $dummy, $dummy, $size, $mon, $day, $time, $filename ) = split (" ",$line);
+	  #      printf ("file = %s size = %d date %s %s \n", $full_name, $size, $mon, $day);
+	  $size = $size/1000000;
+	  $trs_size{$file} = int $size;
+	  $trs_date{$file} = $mon . "_" . $day;
+	  $total_trs_size += $trs_size{$file};
+	}
+      }
       $no_of_files++;
       $total_geant_size += $geant_size{$file};
       $no_of_events     += $geant_noev{$file};
