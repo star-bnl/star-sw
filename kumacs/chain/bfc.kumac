@@ -37,6 +37,7 @@
 * editted 6/26/98 Kathy Turner - put in dictionary of input values &
 *                                example chains
 * editted 7/2/98 Kathy Turner - tpc code now required geometry libraries!
+* editted 7/9/98 Kathy Turner - track evaluation now available for tpc slowsim
 * 
 * ******************************************************************************
 * DICTIONARY OF INPUTS TO BFC.KUMAC
@@ -54,6 +55,10 @@
 * input_data_prefix - directory of where to find input file
 * input_data_file   - input file name
 * output_file       - output file name
+* 
+* !! Domain notes !!
+* In order to get tpc code, you must load BOTH geometry and tpc 
+*  e.g. domain='geometry tpc'
 * 
 * 
 *  THESE are modules that go into a chain!
@@ -78,19 +83,19 @@
 
 * 
 * EXAMPLE CHAINS:
-*   1. read from geant file, svt fast sim, tpc fast sim,
+* 1. read from geant file, svt fast sim, tpc fast sim,
 *                            sgr tracker, tpt tracker, tte track evaluator,
 *                            global tracking, global refitting, v0 finder
 *                            & write event out
 *      chain=' g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
 *
-*   2. read from geant file, svt fast sim, tpc slow sim, tpc clustering
-*                            sgr tracker, tpt tracker,
+* 2. read from geant file, svt fast sim, tpc slow sim, tpc clustering
+*                            sgr tracker, tpt tracker, tte track evaluator
 *                            global tracking, global refitting, v0 finder
 *                            & write event out
-*      chain=' g2t svg tpg srs tss tcl sgr tpt svm egr ev0 evout'_
+*      chain=' g2t svg tpg srs tss tcl sgr tpt tte_e svm egr ev0 evout'_
 *
-*   3. read from geant file, svt fast sim, sgr tracker & write event out
+* 3. read from geant file, svt fast sim, sgr tracker & write event out
 *      chain=' g2t svg srs sgr evout'_
 * 
 * 4. read from geant file, tpc fast sim, tpt tracker, tte track eval, 
@@ -98,8 +103,8 @@
 *      chain=' g2t tpg tfs tpt tte_e evout'
 * 
 * 5. read from geant file, tpc slow sim, tpc clustering, tpt tracker,
-*                             & write event out
-*      chain=' g2t tpg tss tcl tpt  evout'
+*                             tte track evaluator, write event out
+*      chain=' g2t tpg tss tcl tpt tte_e evout'
 *  
 *
 *****************************************************************
@@ -116,7 +121,7 @@ MACRO bfc _
    adcxyzon=0 _
    tpc_sector_first=1 _
    tpc_sector_last=1 _
-   domain='geometry tpc svt global' _
+   domain='geometry tpc svt global ' _
    chain=' g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
    first=1 _
    no_events=1 _
@@ -147,12 +152,16 @@ MACRO bfc _
 * PRINT OUT INPUT VALUES
 ***********************************************************
    
- message ' *** Input file                    --> ' [input_file]
- message ' *** Num Events to process         --> ' [no_events]
- message ' *** domains to load               --> ' [domain]
- message ' *** modules to process            --> ' [chain]   
- message ' *** Output file name              --> ' [output_file]
- 
+ message ' *** TOP level directory --> ' [TOP]
+ message ' *** Input file   --> ' [input_data_prefix][input_file]
+ message ' *** Num Events to process   --> ' [no_events]
+ message ' *** domains to load         --> ' [domain]
+ message ' *** modules to process      --> ' [chain]   
+ message ' *** Output file name        --> ' [output_file]
+ message ' *** adcxyzon                --> ' [adcxyzon]
+ message ' *** tpc_sector_first        --> ' [tpc_sector_first]
+ message ' *** tpc_sector_last         --> ' [tpc_sector_last]
+
 ***********************************************************
 * BEGINNING STUFF 
 * **********************************************************
@@ -189,6 +198,11 @@ RETURN
  
 ******************************************************************
 ****************************************************************** 
+
+
+
+
+
 
 
 
