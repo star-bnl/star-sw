@@ -8,9 +8,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
-//  $Id: Stl3RawReaderMaker.cxx,v 1.14 2002/05/16 02:39:13 struck Exp $
+//  $Id: Stl3RawReaderMaker.cxx,v 1.15 2004/01/23 23:14:06 kollegge Exp $
 //
 //  $Log: Stl3RawReaderMaker.cxx,v $
+//  Revision 1.15  2004/01/23 23:14:06  kollegge
+//  Crashs of the l3 online analysis code so far stopped the chain. Changed this to a warning message.
+//
 //  Revision 1.14  2002/05/16 02:39:13  struck
 //  switch reco/embedding mode (m_Mode=0/1).
 //  Embedding mode skips L3 biased events (return kStErr).
@@ -178,11 +181,13 @@ Int_t Stl3RawReaderMaker::Make()
 	  } // if (ml3reader)
 
 	  else {
-	        // if L3 is on for this run
-	        // crash chain
+	        // if L3 is on for this run but no data found
+	        // warning: should happen only if we crashed during the run.
+	        // new since FY04 run: DAQ doesn't send us all events
+	        // so this is normal/expected behaviour
 	        if (mL3On) {
-		      gMessMgr->Error("Stl3RawReaderMaker: L3 is ON, but no l3 data found in this event.");
-		      return kStErr;
+		      gMessMgr->Warning("Stl3RawReaderMaker: L3 is ON, but no l3 data found in this event. Either DAQ has not send us this event or we crashed during online analysis.");
+		      return kStWarn;
 		}
 		// if L3 is off so far
 		// it may be switched off for this run
