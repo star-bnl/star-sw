@@ -310,9 +310,8 @@ public:
     virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2);
 };
 
-
 #ifndef __CINT__
-typedef pair<const unsigned int, TGCheckButton*> MessengerPair;
+typedef pair<unsigned int, TGCheckButton*> MessengerPair;
 #else
 class MessengerPair;
 #endif
