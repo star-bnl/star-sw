@@ -39,7 +39,7 @@
  
  make db
  cd run
- call par2mem
+ fortran/call par2mem
  cd /dui
  
  return
