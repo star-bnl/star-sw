@@ -1,7 +1,10 @@
 /*
- * $Id: cs_shl_load.c,v 1.3 1998/06/10 00:52:24 perev Exp $
+ * $Id: cs_shl_load.c,v 1.4 1999/01/28 17:21:36 nevski Exp $
  *
  * $Log: cs_shl_load.c,v $
+ * Revision 1.4  1999/01/28 17:21:36  nevski
+ * long names allowed
+ *
  * Revision 1.3  1998/06/10 00:52:24  perev
  * Change || to | in dlopen
  *
@@ -14,11 +17,12 @@
  */
 #include "comis/pilot.h"
 #if defined(CERNLIB_HPUX)
-/*CMZ :          18/05/97  14.03.45  by  Pavel Nevski*/
-/*-- Author :*/
+/*CMZ :          26/01/99  14.39.57  by  Pavel Nevski*/
+/*-- Author : Vladimir Berejnoi*/
 #include <string.h>
 #include <stdlib.h>
 #include <dl.h>
+#define  MAXLENFL  256;
  
 void perror();
 int  cs_shl_load_(path, n)
@@ -26,13 +30,14 @@ int  cs_shl_load_(path, n)
    int n;
 {
    shl_t  handle;
-   char   lib_name[80];
+   char   lib_name[MAXLENFL];
 /* int    flags=BIND_DEFERRED; */
    int    flags=BIND_IMMEDIATE | BIND_VERBOSE;
 /* int    flags=BIND_IMMEDIATE | BIND_NONFATAL; */
    long   address=0L;
    extern int errno;
  
+   if (n>=MAXLENFL) printf(" CS_perror: path too long %256s \n",path);
    strncpy(lib_name, path, n);  lib_name[n] = '\0';
    handle = shl_load(lib_name, flags, address);
    return (errno);
@@ -45,8 +50,9 @@ long cs_get_func_(sym,n)
    shl_t handle;
    short type;
    long  addr;
-   char  func_name[80];
+   char  func_name[MAXLENFL];
  
+   if (n>=MAXLENFL) printf(" CS_GET_FUNCT: symbol too long %256s \n",sym);
    strncpy(func_name, sym, n);  func_name[n] = '\0';
  
    handle = NULL;
@@ -60,9 +66,10 @@ void cs_shl_unload_(path, n)
 {
    shl_t  handle;
    struct shl_descriptor *desc;
-   char   lib_name[80];
+   char   lib_name[MAXLENFL];
    int    index;
  
+   if (n>=MAXLENFL) printf(" CS_SHL_UNLOAD: path too long %256s \n",path);
    strncpy(lib_name, path, n);  lib_name[n] = '\0';
  
    /* find handle of shared library using its name */
@@ -85,14 +92,15 @@ void cs_shl_symbols_(path, ns, symbol, n)
 {
    shl_t  handle;
    struct shl_descriptor *desc;
-   char   lib_name[80];
+   char   lib_name[MAXLENFL];
    int    index, flags;
    short  type;
    static nsym;
    static struct shl_symbol *symbols;
  
    if (*ns == -1)
-   {  strncpy(lib_name, path, n);   lib_name[n] = '\0';
+   {  if (n>=MAXLENFL) printf(" CS_GET_FUNCT: path too long %256s \n",path);
+      strncpy(lib_name, path, n);   lib_name[n] = '\0';
  
       /* find handle of shared library using its name */
       index  = 0;
@@ -132,6 +140,8 @@ void cs_shl_get_(ns, symbol, n)
  
  
 #else
+/*CMZ :          28/01/99  12.05.23  by  Pavel Nevski*/
+/*-- Author : Vladimir Berejnoi*/
 #if defined(CERNLIB_ALPHA_OSF)
 #define  ALPHA_OSF
 #endif
@@ -141,7 +151,9 @@ void cs_shl_get_(ns, symbol, n)
 #include <dlfcn.h>
 #endif
 #include <string.h>
-#define MAXLENFL        60
+ 
+#define MAXLENFL        256
+/* new strategy - if no GLOBAL defined, use LAZY */
 #ifdef  RTLD_GLOBAL
 #define RTLD_NOW_CONST (RTLD_NOW | RTLD_GLOBAL)
 #else
@@ -202,6 +214,7 @@ int  cs_shl_load_(path, n)
    void   *file_handle;
    char   lib_name[MAXLENFL];
  
+   if (n>=MAXLENFL) printf(" CS_SHL_LOAD: path too long %256s \n",path);
    strncpy(lib_name, path, n);  lib_name[n] = '\0';
  
     if (strcmp(lib_name, "./0.sl") == 0)
@@ -229,6 +242,7 @@ void cs_shl_unload_(path, n)
    struct files *f,  *before;
    char   lib_name[MAXLENFL];
  
+   if (n>=MAXLENFL) printf(" CS_SHL_UNLOAD: path too long %256s \n",path);
    strncpy(lib_name, path, n);  lib_name[n] = '\0';
  
    /*       find file    */
@@ -260,11 +274,12 @@ void * cs_get_func_(sym,n)
    struct procedures *p;
    struct files      *f;
    void   *fill_procaddr;
-   char   procname[80];
+   char   procname[MAXLENFL];
 #ifdef ALPHA_OSF
          int jumpad_();
          unsigned long ptr = (unsigned long)jumpad_;
 #endif
+   if (n>=MAXLENFL) printf(" CS_GET_FUNC: symbol too long %256s \n",sym);
    strncpy(procname, sym, n);  procname[n] = '\0';
  
 /* --   Search for all files -- */
@@ -316,7 +331,8 @@ void cs_shl_symbols_(path, ns, symbol, n, nsy)
    static struct procedures *p;
  
    if (*ns == -1)
-   {  strncpy(lib_name, path, n);  lib_name[n] = '\0';
+   {  if (n>=MAXLENFL) printf(" CS_SHL_SYMBOLS: path too long %256s \n",path);
+      strncpy(lib_name, path, n);  lib_name[n] = '\0';
  
       /* find shared library using its name */
       f = first_file;  *ns = -2;
