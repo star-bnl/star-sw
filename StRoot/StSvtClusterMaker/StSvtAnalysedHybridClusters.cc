@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.cc,v 1.8 2002/05/08 23:07:54 caines Exp $
+ * $Id: StSvtAnalysedHybridClusters.cc,v 1.9 2003/04/05 22:36:10 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.cc,v $
+ * Revision 1.9  2003/04/05 22:36:10  caines
+ * Fix filling on local coords so its time and anode not cm
+ *
  * Revision 1.8  2002/05/08 23:07:54  caines
  * T0 jitter stuff
  *
@@ -42,6 +45,7 @@
 
 #include "StSvtAnalysis.hh"
 #include "StSvtAnalysedHybridClusters.hh"
+#include "StDbUtilities/StSvtWaferCoordinate.hh"
 #include "tables/St_scs_spt_Table.h"
 
 
@@ -149,8 +153,8 @@ int StSvtAnalysedHybridClusters::setSvtHit(StSvtAnalysis* mSvtAnalysis,
 return 0;
 }
 
-
-int StSvtAnalysedHybridClusters::setSvtHit(scs_spt_st* mSrsHit)
+int StSvtAnalysedHybridClusters::setSvtHit(scs_spt_st* mSrsHit, 
+					   StSvtWaferCoordinate *WaferCoord)
 {
 
   StThreeVectorF mGlobalPos;
@@ -166,9 +170,9 @@ int StSvtAnalysedHybridClusters::setSvtHit(scs_spt_st* mSrsHit)
   mSvtHit[mNumOfHits].setHardwarePosition(mHardWarePosition<<4);
   mSvtHit[mNumOfHits].setCharge(mSrsHit->de[0]*300000); // put GEANT dE roughly into ADC counts
   
-  mPos[mNumOfHits].setX(mSrsHit->xl[0]);
-  mPos[mNumOfHits].setY(mSrsHit->xl[1]);
-  mPos[mNumOfHits].setZ(mSrsHit->xl[2]);
+  mPos[mNumOfHits].setX(WaferCoord->timebucket());
+  mPos[mNumOfHits].setY(WaferCoord->anode());
+  mPos[mNumOfHits].setZ(0.0);
   
   mGlobalPos.setX(mSrsHit->res[0]);
   mGlobalPos.setY(mSrsHit->res[1]);

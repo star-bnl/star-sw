@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.hh,v 1.7 2002/01/05 21:46:00 caines Exp $
+ * $Id: StSvtAnalysedHybridClusters.hh,v 1.8 2003/04/05 22:36:22 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.hh,v $
+ * Revision 1.8  2003/04/05 22:36:22  caines
+ * Fix filling on local coords so its time and anode not cm
+ *
  * Revision 1.7  2002/01/05 21:46:00  caines
  * Include t0 correction in hit
  *
@@ -43,6 +46,7 @@
 
 class StSvtAnalysis;
 class scs_spt_st;
+class StSvtWaferCoordinate;
 
 typedef struct StSvtHitData
 {
@@ -72,7 +76,7 @@ class StSvtAnalysedHybridClusters : public StSvtHybridObject
   
   void setMembers(int numOfClu, int index);
   int setSvtHit(StSvtAnalysis* mSvtAnalysis, float T0Jitter);
-  int setSvtHit(scs_spt_st* mSrsHit);
+  int setSvtHit(scs_spt_st* mSrsHit, StSvtWaferCoordinate* WaferCoord);
 
   StSvtHitData* svtHitData();
   StSvtHit* svtHit();

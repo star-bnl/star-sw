@@ -1,10 +1,13 @@
-//$Id: St_srs_Maker.cxx,v 1.30 2002/12/05 23:37:42 caines Exp $
+//$Id: St_srs_Maker.cxx,v 1.31 2003/04/05 22:36:26 caines Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.31  2003/04/05 22:36:26  caines
+//Fix filling on local coords so its time and anode not cm
+//
 //Revision 1.30  2002/12/05 23:37:42  caines
 //Remove hits if they are on a  bad anode
 //
@@ -322,7 +325,7 @@ Int_t St_srs_Maker::Make()
 	  mSvtAnalClusters->setMembers(NumOfHits,index);
 	}
 	if(mSvtAnalClusters) {
-	  mSvtAnalClusters->setSvtHit(spc);
+	  mSvtAnalClusters->setSvtHit(spc, &WaferCoord);
 	  mSvtAnalColl->at(index) = mSvtAnalClusters;
 	}			
       }

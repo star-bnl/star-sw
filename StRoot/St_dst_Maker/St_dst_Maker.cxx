@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.73 2002/05/16 01:59:19 caines Exp $
+// $Id: St_dst_Maker.cxx,v 1.74 2003/04/05 22:36:25 caines Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.74  2003/04/05 22:36:25  caines
+// Fix filling on local coords so its time and anode not cm
+//
 // Revision 1.73  2002/05/16 01:59:19  caines
 // Send in differnt group tables for the TPC and est refit so flagging of hits correct
 //
@@ -226,7 +229,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.73 2002/05/16 01:59:19 caines Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.74 2003/04/05 22:36:25 caines Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -466,8 +469,8 @@ Int_t  St_dst_Maker::Filler(){
     StSvtAnalysedHybridClusters *mSvtBigHit;
     StSvtHybridCollection *mSvtCluColl=0;
     St_DataSet *dataSetSvt =0;
-    dataSetSvt = GetDataSet("StSvtData");
-    if( dataSetSvt)
+    //dataSetSvt = GetDataSet("StSvtData");
+    //if( dataSetSvt)
     dataSetSvt = GetDataSet("StSvtAnalResults");
 
     // If dataSetSvt not there then fast sim ran and need to use scs_spt else
