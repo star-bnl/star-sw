@@ -1,5 +1,8 @@
-// $Id: Root2XDF.C,v 1.9 2000/08/02 01:46:14 fine Exp $
+// $Id: Root2XDF.C,v 1.10 2000/08/02 21:44:31 fine Exp $
 // $Log: Root2XDF.C,v $
+// Revision 1.10  2000/08/02 21:44:31  fine
+// *** empty log message ***
+//
 // Revision 1.9  2000/08/02 01:46:14  fine
 // Bug fix: wrong event counter
 //
@@ -76,10 +79,13 @@ void Root2XDF(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
   IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch  
-  if (firstEvent > 1) IOMk->Skip(firstEvent-1);
-// --- now execute chain member functions
+ 
+ // --- now execute chain member functions
+ 
   chain->Init();
-
+ 
+  if (firstEvent > 1) IOMk->Skip(firstEvent-1);
+ 
   TDataSet *ds=0;
 
   // Create output file 
@@ -90,7 +96,7 @@ void Root2XDF(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
   if (xdf && !xdf->OpenXDF(xdfOut.Data(),"w")) {
     // Loop over events
     if (!numberOfEvents) numberOfEvents = 9999;
-    int counter = numberOfEvents+firstEvent-1;
+    int counter = numberOfEvents;
     for (iev = 0; iev < counter; iev++) {         // goto loop code
        chain->Clear();
        iret = chain->Make();
@@ -134,7 +140,7 @@ void Root2XDF(Int_t numbertOfEvents)
 
 //__________________________________________________________________________
 void Root2XDF(const char *MainFile, Int_t numbertOfEvents)
-{   Root2XDF(firstEvent,numbertOfEvents,MainFile);  }
+{   Root2XDF(1,numbertOfEvents,MainFile);  }
 
 //__________________________________________________________________________
 void Root2XDF(Int_t firstEvent, const char *MainFile)
