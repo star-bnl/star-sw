@@ -1,5 +1,8 @@
-* $Id: tde.F,v 1.6 1999/12/28 20:10:08 ogilvie Exp $
+* $Id: tde.F,v 1.7 2000/02/22 20:05:13 hardtke Exp $
 * $Log: tde.F,v $
+* Revision 1.7  2000/02/22 20:05:13  hardtke
+* use tpc_row_par instead of tpg_row_par
+*
 * Revision 1.6  1999/12/28 20:10:08  ogilvie
 * adde scaled dedx, changed to error on mean
 *
@@ -115,7 +118,7 @@ C-----------------------------------------------------------------------
 
       INTEGER tls_Index_Sort_i,tls_Quick_Sort_r      
       INTEGER iret
-      INTEGER i,l,itrack,j,irow,isect,tgc_row_par,cros,k,last
+      INTEGER i,l,itrack,j,irow,isect,tpc_row_par,cros,k,last
       INTEGER imsg1, imsg2, imsg3,iret1,iret2,flag,nde,ndemax
       INTEGER nlocmax,nloctrc,nde_orig,nde_trunc
       REAL    x1,y1,xc,yc,radius,psic,cosl
@@ -340,7 +343,7 @@ C        options based on Jeff Mitchell's
 c              get the parametrisation for the center of a row
 c              (ax + by = 1)
                rowtmp=irow
-               iret  = tgc_row_par(isect,rowtmp,a,b,pad_h,pad) 
+               iret  = tpc_row_par(isect,rowtmp,a,b) 
 c              calculate the parametrisation for the inner and the outer
 c              boundary of a row
                half_pad = pad(1).pad_len_in*0.5
