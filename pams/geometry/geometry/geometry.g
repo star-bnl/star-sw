@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.89 2004/04/28 23:30:37 potekhin Exp $
+* $Id: geometry.g,v 1.90 2004/05/10 21:49:38 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.90  2004/05/10 21:49:38  potekhin
+* For consistency, the SSD config in the y2004a tag should
+* be equal 2 (even if the SSD data won't be used)
+*
 * Revision 1.89  2004/04/28 23:30:37  potekhin
 * Deleted an unnecessary line setting the
 * PHMD version. It will be done throught the
@@ -871,7 +875,7 @@ If LL>1
 
                   "Silicon Strip Detector Version "
                      sisd=on;
-                     SisdConfig = 1;
+                     SisdConfig = 2;
                 }
 
 *
