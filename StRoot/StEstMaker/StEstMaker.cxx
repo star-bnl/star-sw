@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.4 2001/01/31 16:52:19 lmartin Exp $
+ * $Id: StEstMaker.cxx,v 1.5 2001/02/07 19:16:29 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.5  2001/02/07 19:16:29  caines
+ * Fix sun non compilation for non-fixed size array
+ *
  * Revision 1.4  2001/01/31 16:52:19  lmartin
  * mParams[]->debug replaced by mDebug.
  * phi and z params for StEstIndexGeom remove from StEstParams.
@@ -45,7 +48,6 @@
 #include "tables/St_stk_track_Table.h" 
 #include "tables/St_sgr_groups_Table.h" 
 #include "tables/St_svm_evt_match_Table.h" 
-#include "StBFChain.h"
 
 ClassImp(StEstMaker)
 
@@ -113,9 +115,7 @@ Int_t StEstMaker::Init(){
   mIdealTracking=0;
 
  // ideal tracking: mIdealTracking = 1
-  if( ((StBFChain *) GetChain())->GetOption("Eval") == kTRUE ){
     mIdealTracking = 1;
-  }
   mDebugLevel = 0;
 
   mParams = new StEstParams*[mNPass];
@@ -391,9 +391,9 @@ Int_t StEstMaker::Make() {
   // Creating the output tables
   St_stk_track     *svttrk     = new St_stk_track("EstSvtTrk",maxNofTracks);
   AddData(svttrk);
-  St_sgr_groups     *svtgrps     = new St_sgr_groups("EstGroups",maxNofTracks*4);
+  St_sgr_groups     *svtgrps   = new St_sgr_groups("EstGroups",maxNofTracks*4);
   AddData(svtgrps);
-  St_svm_evt_match     *EstMatch     = new St_svm_evt_match("EstMatch",maxNofTracks);
+  St_svm_evt_match  *EstMatch  = new St_svm_evt_match("EstMatch",maxNofTracks);
   AddData(EstMatch);
 
   // Getting the input tables

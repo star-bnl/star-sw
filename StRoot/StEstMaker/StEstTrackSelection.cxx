@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrackSelection.cxx,v 1.4 2001/01/31 16:56:03 lmartin Exp $
+ * $Id: StEstTrackSelection.cxx,v 1.5 2001/02/07 19:16:30 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrackSelection.cxx,v $
+ * Revision 1.5  2001/02/07 19:16:30  caines
+ * Fix sun non compilation for non-fixed size array
+ *
  * Revision 1.4  2001/01/31 16:56:03  lmartin
  * mParams[]->debug replaced by mDebug.
  *
@@ -171,7 +174,7 @@ void StEstTracker::RemoveHitSharing() {
     brmin=0;
     minbr=1.e+99;
     StEstTrack **track = new StEstTrack*[mSvtHit[i]->GetNBranch()];
-    long br_index[mSvtHit[i]->GetNBranch()];
+    long* br_index = new long[mSvtHit[i]->GetNBranch()];
 
     for (j=0;j<mSvtHit[i]->GetNBranch();j++){
       track[j]=mSvtHit[i]->mBranch[j]->mTrack;
@@ -191,6 +194,7 @@ void StEstTracker::RemoveHitSharing() {
     }
     for (j=0;j<brmax;j++) track[j]=0;
     delete [] track;
+    delete [] br_index;
   }
   cout<<HowMany<<" branches cleared"<<endl;
   if(mDebugLevel>2)
@@ -227,7 +231,7 @@ void StEstTracker::ChooseSegment(int overPass,int layer) {
   for (i=0; i<mNTrack; i++) {
     if(mTrack[i]->GetDoIt()!=1) continue;
     nbr=mTrack[i]->GetNBranches();
-    int isok[nbr];    
+    int* isok = new int[nbr];    
     for (j=0;j<nbr;j++) 
       isok[j] = 1;
 
