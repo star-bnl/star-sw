@@ -1,3 +1,9 @@
+// $Id: StKinkTrkIdCheck.cc,v 1.2 1999/12/16 21:52:27 wdeng Exp $
+// $Log: StKinkTrkIdCheck.cc,v $
+// Revision 1.2  1999/12/16 21:52:27  wdeng
+// Added CVS Id strings
+//
+
 #include "StKinkTrkIdCheck.hh"
 
 StKinkTrkIdCheck::StKinkTrkIdCheck()

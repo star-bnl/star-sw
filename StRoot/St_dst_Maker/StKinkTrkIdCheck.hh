@@ -1,3 +1,9 @@
+// $Id: StKinkTrkIdCheck.hh,v 1.3 1999/12/16 21:52:27 wdeng Exp $
+// $Log: StKinkTrkIdCheck.hh,v $
+// Revision 1.3  1999/12/16 21:52:27  wdeng
+// Added CVS Id strings
+//
+
 #ifndef StKinkTrkIdCheck_hh
 #define StKinkTrkIdCheck_hh
 
