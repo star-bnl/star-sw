@@ -9,7 +9,8 @@ option nbox;     option nsta
 * drawing attributes
 dopt   hide on;  dopt   edge on
 satt * fill 6;   satt * lwid 1
-
+satt cave seen 0
+ 
 * create cut in drawing
 box  .; box  *  -3000. 0. -40. 3000. -2000. 1200.
 
