@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.26 1999/05/07 17:18:29 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.27 1999/05/07 20:20:53 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.27  1999/05/07 20:20:53  kathy
+// now set logy on when hist name is in loglist
+//
 // Revision 1.26  1999/05/07 17:18:29  kathy
 // new method AddToLogYList implemented and tested on solaris
 //
@@ -402,8 +405,12 @@ Int_t St_QA_Maker::DrawHists()
 	  padCount=0;
 	}
 	QACanvas->cd(++padCount);
-	
-	obj->Draw();   
+          gPad->SetLogy(0);
+	if (m_ListOfLog->FindObject(obj->GetName())){
+	  gPad->SetLogy(1);
+          cout << "St_QA_Maker::DrawHists -- Will draw in log scale: " << obj->GetName() <<endl;
+        }
+        obj->Draw();   
 	if (gPad) gPad->Update();
       }
     }
@@ -1153,7 +1160,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.26 1999/05/07 17:18:29 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.27 1999/05/07 20:20:53 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
