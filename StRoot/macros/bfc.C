@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.74 1999/06/30 14:15:39 didenko Exp $
+// $Id: bfc.C,v 1.75 1999/07/01 15:09:28 didenko Exp $
 // $Log: bfc.C,v $
+// Revision 1.75  1999/07/01 15:09:28  didenko
+// switch off ftpc
+//
 // Revision 1.74  1999/06/30 14:15:39  didenko
 // switch on ctf and off Uttility
 //
@@ -232,6 +235,7 @@ void SetDefaultChain(){// default for standard chain
 	ChainFlags[k] = kTRUE;
       }
     }
+    ChainFlags[kFPC] = kFALSE;
     DefaultSet = kTRUE;
   } 
 }
