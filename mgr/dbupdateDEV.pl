@@ -217,7 +217,7 @@ struct JFileAttr => {
  my $jEvSkip;
  my $logName; 
  my $crCode = "n\/a"; 
-
+ 
   $now = time;
 ##### connect to DB TestJobs
 
@@ -362,7 +362,7 @@ my $pfullName;
 
            if( $ltime > 3600 && $ltime < 345600 ){         
 #   print "Log time: ", $ltime, "\n";
-      
+           
         foreach my $eachOldJob (@old_jobs) {
           $pvjbId = ($$eachOldJob)->oldjbId;
           $pvpath = ($$eachOldJob)->oldpath;
@@ -380,7 +380,7 @@ my $pfullName;
 #  print  "files to be updated:", $pvjbId, " % ",$mpath, " % ",$pvTime, " % ", $newAvail, "\n"; 
 
      &updateJSTable();
-	
+
         &logInfo("$fullname", "$platf");
 
       $jobTime = $timeS;  
@@ -827,6 +827,8 @@ sub  updateJSTable {
 
    my @logfile = <LOGFILE>;
 
+my $Anflag = 0;
+
    foreach my $line (@logfile) {
        chop $line ;
         $num_line++; 
@@ -870,8 +872,10 @@ sub  updateJSTable {
     }
 # get number of tracks and vertices
 
-      if ($line =~ /QAInfo: StAnalysisMaker/ ) {
-           next if ($line =~ /...................../);
+    if ($line =~ /StMessageManager message summary/) {
+      $Anflag = 1;
+    }
+      if ($line =~ /QAInfo: StAnalysisMaker/ && $Anflag == 0 ) {
             my  $string = $logfile[$num_line];
               @word_tr = split /:/,$string;
               $no_tracks = $word_tr[2];
@@ -940,7 +944,7 @@ sub  updateJSTable {
 ##### get CPU and Real Time per event
       
  if ($EvCom != 0) {
-    @cpu_output = `tail -250 $fl_log`;
+    @cpu_output = `tail -400 $fl_log`;
      
   foreach $end_line (@cpu_output){
           chop $end_line;
