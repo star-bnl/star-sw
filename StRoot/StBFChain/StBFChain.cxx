@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.259 2002/01/23 03:25:17 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.260 2002/01/24 21:40:13 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -182,6 +182,7 @@ Bfc_st BFC[] = {
   {"pp"      ,""  ,"","SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","","Use pp specific parameters",kFALSE},
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
+  {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -581,13 +582,19 @@ Int_t StBFChain::Instantiate()
 	}
 	// special maker options
 	if (mk) {
-	  if (GetOption("pp") ) {// pp specific stuff
+	  if (GetOption("pp") ) {                           // pp specific stuff
 	    if (maker == "StTrsMaker") mk->SetMode(1);      // Pile-up correction
-	    if (maker == "StPrimaryMaker") mk->SetMode(15); // Switch vertex finder to ppLMV
+	    if (maker == "StPrimaryMaker"){
+	      mk->SetMode(15);                              // Switch vertex finder to ppLMV
+	      if( GetOption("beamLine")){
+		StPrimaryMaker *pMk = (StPrimaryMaker*) mk;
+		pMk->SetBeam4ppLMV();                       // Add beam-line constrain
+	      }
+	    }
 	  }
-	  if ((maker == "StPrimaryMaker"  ||
-	       maker == "StPreVertexMaker") &&
+	  if ((maker == "StPrimaryMaker"  || maker == "StPreVertexMaker") &&
 	      GetOption("VtxOffSet")) mk->SetMode(2);
+
 	  if (maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
 	  if (maker == "St_dst_Maker" && GetOption("HitsBranch")) mk->SetMode(2);
 	  if (maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
@@ -654,6 +661,10 @@ Int_t StBFChain::Instantiate()
 	    // rotation/translation, this won't be necessarily true.
 	    // Will investigate further.
             if (GetOption("Simu")) mk->SetMode(1);
+	    // This is commented for now but may be used. Those extensions
+	    // were implemented by David H. on Jan 2 2002. DEfault is ofl+laserDV
+	    //mk->UseOnlyLaserDriftVelocity();    // uses laserDV database
+	    //mk->UseOnlyCathodeDriftVelocity();  // uses offl database
 	  }
 	  if (GetOption("dst") && GetOption("NoHits") && maker == "StEventMaker") {
 	    StEventMaker *EvMk = (StEventMaker *) mk;
