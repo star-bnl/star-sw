@@ -89,20 +89,7 @@ CC:  Load Primary vertex position coordinates:
            
            IF(trak(i).q .lt. 0) GOTO 10
            
-*    
-           
-C--   calculate impact parameter at main vertex--- wkw
-           
-*          call ev0_project_track(trak(i).xc,trak(i).rc,mainv,xn1)
-           
-*           pv0 = trak(i).dca
-*          trak(i).dca=sqrt((xn1(1)-mainv(1))**2.+(xn1(2)-mainv(2))**2.)
-*           if( abs(pv0-trak(i).dca) .gt. 0.5) then
-*              write(6,*) '***',pv0, trak(i).dca
-*           endif
-           
 
-C--   skip all tracks with impact parameter .lt. dcapnmin
            if( trak(i).det_id .eq. kTpcId )then
                  det_id_i = 1
            elseif( trak(i).det_id .eq. kSvtId .or.
@@ -112,7 +99,6 @@ C--   skip all tracks with impact parameter .lt. dcapnmin
            else
                  det_id_i = 3
            endif
-           IF( (trak(i).dca.le.ev0par(det_id_i).dcapnmin)) GO TO 10 
 C******************
 C-- skip all SVT only tracks
 c           if(det_id_i.eq.2)go to 10
@@ -120,10 +106,7 @@ C******************
            call ev0_track_mom(trak(i).r0,trak(i).rc,0,pst1,bfield(3))
            trak(i).p=sqrt(pst1(1)*pst1(1)+pst1(2)*pst1(2)
      +          +pst1(3)*pst1(3))
-*     
-*-----reject all tracks that are compatible with vertex within dr-----
-*     
-           
+
            DO 20 j=1,trak_h.nok
 
 *     second track is a negative
@@ -143,31 +126,14 @@ C-- skip all SVT only tracks
 c           if(det_id.eq.2)go to 20
 C******************
 
+C--   I only have to calculate total mom for trak(j) first time I see it---
               if( first ) then
-
-C--   I only have to calculate impact parameter ---
-C--    and total mom for trak(j) first time I see it---
-              
-
-*                call ev0_project_track(trak(j).xc,trak(j).rc,mainv,xn2)
-*                trak(j).dca=sqrt((xn2(1)-mainv(1))**2.+(xn2(2)-mainv(2))**2.)
-
-C--   skip all tracks with impact parameter .lt. dcapnmin
-                IF((trak(j).dca.gt.ev0par(det_id).dcapnmin)) then 
-
                  call ev0_track_mom(trak(j).r0,trak(j).rc,0,
      +                pst2,bfield(3))
                  trak(j).p=sqrt(pst2(1)*pst2(1)+pst2(2)*pst2(2)
      +                +pst2(3)*pst2(3))
-
-                endif
               endif
                  
-                 
-C--   skip all tracks with impact parameter .lt. dcapnmin
-                IF((trak(j).dca.le.ev0par(det_id).dcapnmin)) GO TO 20 
-
-
               if( det_id_i .eq. 1 .or. det_id .eq. 1)then
                  det_id = 1
               elseif( det_id_i .eq. 2 .or. det_id .eq. 2)then
@@ -338,7 +304,14 @@ C---- calculate the momentum components of the primary-----------
                     pp(1)  =pst1(1)+pst2(1)
                     pp(2)  =pst1(2)+pst2(2)
                     pp(3)  =pst1(3)+pst2(3)
-                    pv0sq = pp(1)**2+pp(2)**2+pp(3)**2
+                    temp = pp(1)**2+pp(2)**2
+                    pv0sq = temp + pp(3)**2
+
+C--   skip all V0s with tracks with impact parameter .lt. dcapnmin
+C--   unless ptV0 > 3.5 GeV/c
+                    if ((temp .lt. 12.25) .and.
+     +                  ((trak(i).dca.le.ev0par(det_id_i).dcapnmin) .or. 
+     +                   (trak(j).dca.le.ev0par(det_id).dcapnmin))) GO TO 20 
 C---- find square of impact param of reconstructed particle------
                     call ev0_v0_impact_param(mainv,xpp,pp,pv0sq,rmin
      +                   ,iflag)
@@ -414,80 +387,9 @@ C                       ev0out(ok).alpha = (ppar-npar)/(ppar+npar)
                           vertex_h.nok = vertex_h.nok -1
                           goto 20
                        endif
-C                       ev0out(ok).sagitta_pos = trak(i).sagitta
-C                       ev0out(ok).sagitta_neg = trak(j).sagitta
-                       
-                       
-c     Opening angles: wkw
-C                       dot=pst1(1)*pst2(1)+pst1(2)*pst2(2)
-C     +                      +pst1(3)*pst2(3)
-C                       open=(dot/(trak(i).p*trak(j).p))
-C                       if( open .gt. 1.0) then
-C                          open = 1.0
-C                       elseif( open .lt. -1.) then
-C                          open = -1.0
-C                       endif
-C                       ev0out(ok).theta = acosd(open)
-*     
-*---  if blind run test all mass hypothesis
-*     
-                       
-C                       DO ll=1,3
-C                          massl(1)=mass1(ll)
-C                          massl(2)=mass2(ll)
-C                          index=ll
-                          
-C                          call ev0_inv_mass(trak(i).p,trak(j).p,massl,
-C     +                         pv0sq,pp(3),inv_mass,env0,ep,rap)
-                          
-C                          if( index .eq. 1) then
-C                             ev0out(ok).inv_mass_k0=inv_mass
-C                             ev0out(ok).rapidity_k0 = rap
-C-- calculate proper lifetime assuming that particle originated at main vertex
-C                             ev0out(ok).tau_k0=inv_mass*rv/pv0
-C                          elseif( index .eq. 2) then
-C                             ev0out(ok).inv_mass_la=inv_mass
-C                             ev0out(ok).rapidity_la = rap
-C-- calculate proper lifetime assuming that particle originated at main vertex
-C                             ev0out(ok).tau_la=inv_mass*rv/pv0
-C                          elseif( index .eq. 3) then
-C                             ev0out(ok).inv_mass_lb=inv_mass
-C                             ev0out(ok).rapidity_lb = rap
-C-- calculate proper lifetime assuming that particle originated at main vertex
-C                             ev0out(ok).tau_lb=inv_mass*rv/pv0
-C                          endif
-                                 
-C                    ev0out(ok).tmin(index)=inv_mass*ev0par(det_id).dlen/pv0 
-c--   calculate cos(theta_c.m.)
-C                          bv0  =pv0/env0
-C                          gv0  =env0/inv_mass
-C                          ppar_cm=gv0*(ppar-bv0*ep)
-C                          ev0out(ok).cos_th_cm(index)=
-C     +                         cos(atan2(pper,ppar_cm))
-c     
-c                          WRITE(6,*) rd,rv,rmin,inv_mass
-C                          
-C                       ENDDO
                        GOTO 30  !next j
-*                    else
-*                       if( j.eq. i+1 ) then
-c                        write(6,*) 'rmin =',rmin,i,j,trak(i).id,
-c     >                         trak(j).id,trak(i).r0,trak(j).r0
-*                       endif
                     ENDIF       !rmin and iflag check
-*                 else
-*                    if( j.eq. i+1 ) then
-c                      write(6,*) 'rv =',rv,i,j,trak(i).p,trak(j).p
-*                    endif
                  ENDIF          !rv check      
-*              else
-*                 if( j.eq. i+1 ) then
-c                    write(6,*) 'rd =',rd,i,j,trak(i).id,trak(j).id
-c     >                   ,trak(i).z0,trak(j).z0,xn1(1),xn1(2),
-c     >                   xn2(1),xn2(2),trk1(3),trk2(3)
-*                    trak(i).q = 100.
-*                    trak(j).q = 100.0
-*                 endif  
 
               endif ! rd check
               
