@@ -1,7 +1,10 @@
-// $Id: StChain.cxx,v 1.30 1999/02/27 21:18:36 fine Exp $
+// $Id: StChain.cxx,v 1.31 1999/02/28 19:18:44 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.31  1999/02/28 19:18:44  fisyak
+// Add tag information
+//
 // Revision 1.30  1999/02/27 21:18:36  fine
-// Minor fix for Maker timers
+//  Minor fix for Maker timers
 //
 // Revision 1.29  1999/02/27 20:13:45  fine
 // Total job time and relative time have been introduced
@@ -285,7 +288,7 @@ StChain::StChain()
 
 //_____________________________________________________________________________
 StChain::StChain(const char *name, const char *title):
-m_VersionCVS("$Id: StChain.cxx,v 1.30 1999/02/27 21:18:36 fine Exp $"),
+m_VersionCVS("$Id: StChain.cxx,v 1.31 1999/02/28 19:18:44 fisyak Exp $"),
 m_VersionTag("$Name:  $"),
 m_DateTime(),
 mProcessTime()
@@ -504,11 +507,9 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.30 1999/02/27 21:18:36 fine Exp $    \n");
-   //   printf("* %s    *\n",m_VersionCVS);
+   printf("* $Id: StChain.cxx,v 1.31 1999/02/28 19:18:44 fisyak Exp $    \n");
+   printf("* The chain was tagged with $Name:  $                \n");
    printf("**************************************************************\n");
-   printf("\n\n");
-
 //     Print info for all defined Makers
    TIter next(m_Makers);
    StMaker *maker;
