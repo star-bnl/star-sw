@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.h,v 2.4 2004/02/11 01:39:52 ullrich Exp $
+ * $Id: StTriggerData2003.h,v 2.5 2004/06/29 22:37:35 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.h,v $
+ * Revision 2.5  2004/06/29 22:37:35  ullrich
+ * Added missing access function for ZDC. Currently same as 2004.
+ *
  * Revision 2.4  2004/02/11 01:39:52  ullrich
  * Use enumeration StBeamDirector for east/west. Add member for ZDC vertex.
  *
@@ -82,6 +85,14 @@ public:
     // FPD
     unsigned short fpd(StBeamDirection eastwest, int module, int pmt, int prepost=0) const; 
     unsigned short fpdSum(StBeamDirection eastwest, int module) const;
+
+    //ZDC
+    unsigned short zdcAtChannel(int channel, int prepost=0) const;
+    unsigned short zdcAtAddress(int address, int prepost=0) const;
+    unsigned short zdcUnAttenuated(StBeamDirection eastwest, int prepost=0) const;
+    unsigned short zdcAttenuated(StBeamDirection eastwest, int prepost=0) const;
+    unsigned short zdcADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    unsigned short zdcTDC(StBeamDirection eastwest, int prepost=0) const;
     
     // experts only
     char* getTriggerStructure();

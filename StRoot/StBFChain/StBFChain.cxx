@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.421 2004/06/25 17:24:32 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.423 2004/07/01 00:11:30 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -198,6 +198,8 @@ Bfc_st BFC1[] = {
   {"VtxSeedCal","","",
    "ppOpt,ry2001,in,tpc_daq,tpc,global,-Tree,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2",
                                                                      "","","Pass0 Vertex evaluator",kFALSE},
+  {"SpcChgCal","","","B2004,fcf,Corr3,OSpaceZ2,OShortR,SCEbyE,-Tree,-tags,-EvOut",
+                                                                "","","Pass0 SpaceCharge evaluator",kFALSE},
 
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -501,6 +503,8 @@ Bfc_st BFC1[] = {
                                                               "Special: use estGlobal from StEvent",kFALSE},
   {"Xisvt"       ,"xisvt","","db,MuDST","StXiFinderMaker","StSecondaryVertexMaker",
                                                               "Special: use estGlobal from StEvent",kFALSE},
+  {"SCEbyE"      ,"scebye","","","StSpaceChargeEbyEMaker","StEvent,StPass0CalibMaker",
+                                                         "Determine EbyE SpaceCharge using StEvent",kFALSE},
 
 
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,PreEcl,EmcUtil"      ,"StMaker","StChain","",kFALSE},
@@ -742,10 +746,11 @@ Bfc_st BFC2[] = {
    "l0,dst,event,dEdxY2,genvtx,Kink2,xi2,svtdEdx,SvtIT,CMuDst,analysis,compend,EventQA"   ,"","","",kFALSE},
   {"B2003I"      ,"","","ry2003,in,tpc_daq,tpcI,fcf,Physics,Idst,beamLine,tags,Tree,evout"
                                                                   ,"","","Base chain for 2003 ITTF",kFALSE},
-  {"dau2003i"    ,""  ,"","B2003I,Corr2,ppOpt,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
-                                        ,"Production chain for winter 2003 data dau2003a with ITTF",kFALSE},
-  {"pp2003i"     ,""  ,"","B2003I,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
-                                        ,"Production chain for winter 2003 data dau2003a with ITTF",kFALSE},
+  {"dau2003i"    ,""  ,"",  "B2003I,CtbMatchVtx,Corr2,ppOpt,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd",
+                                   "","","Production chain for winter 2003 data dau2003a with ITTF",kFALSE},
+  {"pp2003i"     ,""  ,"",
+                    "B2003I,CtbMatchVtx,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd",
+                                   "","","Production chain for winter 2003 data dau2003a with ITTF",kFALSE},
 
   // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
   {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
@@ -764,6 +769,8 @@ Bfc_st BFC2[] = {
   {"VtxSeedCal","","",
    "ppOpt,ry2001,in,tpc_daq,tpc,global,-Tree,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2",
                                                                      "","","Pass0 Vertex evaluator",kFALSE},
+ {"SpcChgCal","","","B2004,fcf,Corr3,OSpaceZ2,OShortR,SCEbyE,-Tree,-tags,-EvOut",
+                                                                "","","Pass0 SpaceCharge evaluator",kFALSE},
 
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1077,6 +1084,9 @@ Bfc_st BFC2[] = {
                                                               "Special: use estGlobal from StEvent",kFALSE},
   {"Xisvt"       ,"xisvt","","db,MuDST","StXiFinderMaker","StSecondaryVertexMaker",
                                                               "Special: use estGlobal from StEvent",kFALSE},
+  {"SCEbyE"       ,"scebye","","","StSpaceChargeEbyEMaker","StEvent,StPass0CalibMaker",
+                                                         "Determine EbyE SpaceCharge using StEvent",kFALSE},
+
 
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,PreEcl,EmcUtil",      "StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
@@ -1648,7 +1658,11 @@ Int_t StBFChain::Instantiate()
 	  // // - SetMode(2)   ITTF
 	  // // Default = Both
 	  //}
-
+	  if (maker == "StSpaceChargeEbyEMaker") {
+	    if ( GetOption("SpcChgCal") ){
+	      mk->SetMode(2);
+	    }
+	  }
 	  if (maker == "StEventQAMaker") {
 	    if ( GetOption("alltrigger") ){
 	      StEventQAMaker *QAmk = (StEventQAMaker *) mk;

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.26 2004/04/01 22:19:48 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.27 2004/07/01 17:49:07 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.27  2004/07/01 17:49:07  jhthomas
+ * Add Event by Event SpaceCharge form GVB.  Start adding incomplete/unfinished work on Endcaps from JT.
+ *
  * Revision 1.26  2004/04/01 22:19:48  jhthomas
  * Add 3D SpaceCharge capabilities
  *
@@ -131,7 +134,7 @@ class StMagUtilities {
   StTpcDb*  thedb ;  
   TDataSet* thedb2 ;
   StDetectorDbSpaceCharge* fSpaceCharge ;
-  StDetectorDbSpaceCharge* fSpaceChargeR2 ;  // Not used as of 01/01/2004 ... waiting for DB upgrade.
+  StDetectorDbSpaceCharge* fSpaceChargeR2 ;  
   StDetectorDbTpcVoltages* fTpcVolts ;
 
   virtual void    SetDb( StTpcDb* dbin , TDataSet* dbin2 ) ;
@@ -228,6 +231,23 @@ class StMagUtilities {
 					const Prime PrimaryOrGlobal, Float_t x_new[3], Float_t p_new[3],
 		      const unsigned int RowMask1 = 0xFFFFFF00 , const unsigned int RowMask2 = 0x1FFFFF,
 			     		                             const Float_t VertexError = 0.0200 ) ;
+
+  virtual void    ApplySpaceChargeDistortion ( const Double_t sc, const Int_t Charge, const Float_t x[3], const Float_t p[3], 
+			const Prime PrimaryOrGlobal, Int_t &new_Charge, Float_t x_new[3], Float_t p_new[3],
+		      const unsigned int RowMask1 = 0xFFFFFF00 , const unsigned int RowMask2 = 0x1FFFFF,
+			     		                             const Float_t VertexError = 0.0200 ) ;
+
+  virtual Int_t   PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Float_t VertexZ, Float_t PseudoRapidity, 
+		   Float_t DCA,  const unsigned int RowMask1, const unsigned int RowMask2, Float_t &pSpace ) ;
+
+  virtual void    ManualSpaceCharge(Double_t SpcChg)
+          { SpaceCharge   = SpcChg; fSpaceCharge   = 0;}
+  virtual void    ManualSpaceChargeR2(Double_t SpcChg)
+          { SpaceChargeR2 = SpcChg; fSpaceChargeR2 = 0;}
+  virtual void    AutoSpaceCharge()   {GetSpaceCharge()  ;} // use DB
+  virtual void    AutoSpaceChargeR2() {GetSpaceChargeR2();} // use DB
+  virtual Double_t CurrentSpaceCharge()   {return SpaceCharge  ;}
+  virtual Double_t CurrentSpaceChargeR2() {return SpaceChargeR2;}
 
   ClassDef(StMagUtilities,1)    // Base class for all STAR MagField
 
