@@ -33,7 +33,8 @@ typedef struct {
   TrgSumData2000     TrgSum;   /* summary data */
   RawTrgDet2000      RAW[PREPOST];      /* For simplicity, I assume that you don't want pre and post history. */
 } MarilynMonroe2000;
-MarilynMonroe2000 *gs2000;
+MarilynMonroe2000 *gs2000; // CAUTION: this is used in duplicated.code, even 
+                           // though grep doesn't find it (see macro SWITCH).
 ////////////////////////////////////////////////////////////////////////////////
 // This section of code causes the functions in the file duplicated.code to appear twice
 // in this code file.  The second time is for trigger data in the year 2000 format.
@@ -46,11 +47,12 @@ MarilynMonroe2000 *gs2000;
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////  functions  /////////////////////
 
-char TRG_Reader::IsYear2000Data(char *data) {
+int TRG_Reader::YearOfData(char *data) {
   data+=sizeof(unsigned short)+sizeof(char); // Skip the first two data.
-  if(*data==0x12) return 7; // TRUE
-  if(*data==0x13) return 0; // FALSE
-  assert(0);  // Should not be here.  Eto nehoroshoe mesto etogo fajla.
+  if(*data==0x12) return 2000; // These years (2000, 2001, 2003, ...) correspond
+  if(*data==0x13) return 2001; // roughly to the file names for the various
+  if(*data==0x20) return 2003; // trgStructures.h versions (eg, trgStructures2003.h).
+  assert(0);  // Should not be here.  My ne dolzhny byt6 zdec6.
   return 0;
 }
 TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
@@ -62,17 +64,24 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
   pBankTRGD=(Bank_TRGD*) ((unsigned int)pBankTRGP + 4*pBankTRGP->theData.offset);
   assert(pBankTRGD);
   if(!pBankTRGD->test_CRC()) printf("CRC error: %s %d\n",__FILE__,__LINE__); 
-  char *ptr=(char*)pBankTRGD; ptr+=40; /* skip header */ 
-  if(IsYear2000Data(ptr)) {
-    gs2000=(MarilynMonroe2000*)ptr;
-    SanityCheck2000();
-    if(pBankTRGD->HerbSwap2000()<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
-  } else {
-    gs=(MarilynMonroe*)ptr;
-    SanityCheck();
-    if(pBankTRGD->HerbSwap()<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
+  char *ptr=(char*)pBankTRGD; ptr+=40; /* Skip the 10-word TRGD bank header. */ 
+  switch(YearOfData(ptr)) {
+    case 2000:
+      gs2000=(MarilynMonroe2000*)ptr;
+      SanityCheck2000();
+      if(pBankTRGD->HerbSwap2000()<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
+      break;
+    case 2001:
+      gs=(MarilynMonroe*)ptr;
+      SanityCheck();
+      if(pBankTRGD->HerbSwap()<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
+      break;
+    case 2003:
+      SanityCheck2003(ptr);
+      if(pBankTRGD->HerbSwap2003(ptr)<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
+      break;
+    default: assert(0);
   }
-  if(pBankTRGD->HerbSwap()<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
   printf("Trigger reader instantiated, distance to data = %d bytes.\n",pBankTRGP->theData.offset);
 }
 void TRG_Reader::dumpWordsToScreenInHexAndExit(int nwords) {

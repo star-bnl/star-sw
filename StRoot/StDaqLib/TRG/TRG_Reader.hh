@@ -69,6 +69,7 @@ public:
   int swapHerb4bytes(unsigned long *data,int number);
   int HerbSwap(); //!
   int HerbSwap2000(); //!
+  int HerbSwap2003(char*); //!
   // void PrintAllTheData(FILE *ff);
   // void PrintDataCompact(FILE *ff);
   char *PrintHelp(char*,int);
@@ -79,7 +80,7 @@ public:
   TRG_Reader(EventReader *er, Bank_TRGP *pTRGP);
   ~TRG_Reader(){}; 
   Bank_TRGD *pBankTRGD; // Making this public saves 2 large layers of accessor functions.
-  char IsYear2000Data(char *); //!
+  int YearOfData(char *); //!
 protected:
   EventReader *ercpy;    // copy of EventReader pointer
   Bank_TRGP *pBankTRGP;  // Bank Pointers
@@ -87,5 +88,6 @@ private:
   void dumpWordsToScreenInHexAndExit(int); //!
   void SanityCheck(); //!
   void SanityCheck2000(); //!
+  void SanityCheck2003(char*); //!
 };
 TRG_Reader *getTRGReader(EventReader *er);
