@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.18 2000/04/20 21:31:52 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.19 2000/05/11 16:21:26 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.19  2000/05/11 16:21:26  calderon
+ * Write only one V0 matched pair to supress the screen output.
+ *
  * Revision 1.18  2000/04/20 21:31:52  calderon
  * More checks for the cases where a track has no partner, Thanks Janet.
  *
@@ -115,8 +118,8 @@ const Int_t   StMcAnalysisMaker::mNumDeltaX = 50;
 const Int_t   StMcAnalysisMaker::mNumDeltaZ = 50;
 const Float_t StMcAnalysisMaker::mMinDeltaX = -0.52;
 const Float_t StMcAnalysisMaker::mMaxDeltaX =  0.52;
-const Float_t StMcAnalysisMaker::mMinDeltaZ = -0.24;
-const Float_t StMcAnalysisMaker::mMaxDeltaZ =  0.24;
+const Float_t StMcAnalysisMaker::mMinDeltaZ = -0.52;
+const Float_t StMcAnalysisMaker::mMaxDeltaZ =  0.52;
 
 ClassImp(StMcAnalysisMaker)
 
@@ -161,8 +164,8 @@ void StMcAnalysisMaker::Clear(const char*)
 //_________________________________________________
 Int_t StMcAnalysisMaker::Finish()
 {
-    cout << "in StMcAnalysisMaker::Finish....." << endl;
-    //mNtupleFile->Close();
+    mNtupleFile->Write();
+    mNtupleFile->Close();
     return StMaker::Finish();
 }
 
@@ -174,30 +177,31 @@ Int_t StMcAnalysisMaker::Init()
     
     SetZones();  // This is my method to set the zones for the canvas.
 
-    // Book Histograms Here so they can be found and deleted by Victor's chain (I hope).
-    mHitResolution = new TH2F("Hit Resolution using Map","Delta Z Vs Delta X for Hits",
-			     mNumDeltaX,mMinDeltaX,mMaxDeltaX,mNumDeltaZ,mMinDeltaZ,mMaxDeltaZ);
-    mHitResolution->SetXTitle("Delta X (cm)");
-    mHitResolution->SetYTitle("Delta Z (cm)");
-
-    mMomResolution = new TH1F("Mom. Resolution","(|p| - |pmc|)/|pmc|",100,-1.,1.);
-    mMomResolution->SetXTitle("Resolution (%)");
-
-    coordRec = new TH2F("coords. Rec","X vs Y pos. of Hits", 100, -200, 200, 100, -200, 200);
-    coordRec->SetXTitle("X (cm)");
-    coordRec->SetYTitle("Y (cm)");
-    
-    coordMcPartner = new TH2F("coords. MC","X vs Y pos. of Hits", 100, -200, 200, 100, -200, 200);
-    coordMcPartner->SetXTitle("X (cm)");
-    coordMcPartner->SetYTitle("Y (cm)");
-
     // Define the file for the Ntuple, otherwise it won't be available later.
     
     mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");
 
+    // Book Histograms Here so they can be found and deleted by Victor's chain (I hope).
+    mHitResolution = new TH2F("hitRes","Delta Z Vs Delta X for Hits",
+			     mNumDeltaX,mMinDeltaX,mMaxDeltaX,mNumDeltaZ,mMinDeltaZ,mMaxDeltaZ);
+    mHitResolution->SetXTitle("Delta X (cm)");
+    mHitResolution->SetYTitle("Delta Z (cm)");
+
+    mMomResolution = new TH1F("momRes","(|p| - |pmc|)/|pmc|",100,-1.,1.);
+    mMomResolution->SetXTitle("Resolution (%)");
+
+    coordRec = new TH2F("coordRc","X vs Y pos. of Hits", 100, -200, 200, 100, -200, 200);
+    coordRec->SetXTitle("X (cm)");
+    coordRec->SetYTitle("Y (cm)");
+    
+    coordMcPartner = new TH2F("coordMc","X vs Y pos. of Hits", 100, -200, 200, 100, -200, 200);
+    coordMcPartner->SetXTitle("X (cm)");
+    coordMcPartner->SetYTitle("Y (cm)");
+
+
     char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commTpcHits:hitDiffX:hitDiffY:hitDiffZ";
     mTrackNtuple = new TNtuple("TrackNtuple","Track Pair Info",vars);
-    
+    mTrackNtuple->SetAutoSave(100000000);
     //cout << "Defined Momentum Res. Histogram & Ntuple" << endl;
 
 
@@ -302,7 +306,8 @@ Int_t StMcAnalysisMaker::Make()
      
     cout << "Making Hit Resolution Histogram..." << endl;
     // Loop over Rec Hits
-    for (unsigned int iSector=0; iSector<recHits->numberOfSectors(); iSector++) {
+    
+    for (unsigned int iSector=0; iSector< recHits->numberOfSectors(); iSector++) {
 	for (unsigned int iPadrow=0; iPadrow<recHits->sector(iSector)->numberOfPadrows();
 	     iPadrow++) {
 	    for (StTpcHitIterator iter = recHits->sector(iSector)->padrow(iPadrow)->hits().begin();
@@ -313,12 +318,12 @@ Int_t StMcAnalysisMaker::Make()
 		    recBounds = theHitMap->equal_range(keyHit);
 	
 		for (rcTpcHitMapIter it2=recBounds.first; it2!=recBounds.second; ++it2){
-	    
-		    DeltaX = (*it2).first->position().x() - (*it2).second->position().x();
-		    DeltaZ = (*it2).first->position().z() - (*it2).second->position().z();
-	    
-		    mHitResolution->Fill(DeltaX,DeltaZ); 
-				
+		    
+		    DeltaX = (*it2).second->position().x() - (*it2).first->position().x();
+		    DeltaZ = (*it2).second->position().z() - (*it2).first->position().z();
+
+		    mHitResolution->Fill(DeltaX,DeltaZ);
+		    
 		}//Mc Hits assoc. w/ rec.
 	    } // Rec hits loop
 	} // padrow
@@ -429,7 +434,7 @@ Int_t StMcAnalysisMaker::Make()
     cout << "Finished Track Loop, Made Ntuple" << endl;
     //delete vars;
     delete [] values;
-    mNtupleFile->Write(); // Write the Ntuple to the File.
+    //mNtupleFile->Write(); // Write the Ntuple to the File in Finish(), not here
 
     // Example: Make 2 Histograms
     // - x and y positions of the hits from the reconstructed track.
@@ -469,21 +474,27 @@ Int_t StMcAnalysisMaker::Make()
     StMcVertexIterator mcVertexIt;
 
     //Loop over all MC vertices
+    bool foundV0Pair = false;
     for (mcVertexIt = mcVertices.begin(); mcVertexIt != mcVertices.end();
 	 mcVertexIt++){
 	// Get the upper and lower bounds.
 	pair<mcV0MapIter,mcV0MapIter> mcV0Bounds = theMcV0Map->equal_range(*mcVertexIt);
 
 	// Print out MC vertex position if there is an associated V0.
-	if (mcV0Bounds.first != mcV0Bounds.second) 
+	
+	if (mcV0Bounds.first != mcV0Bounds.second) {
+	    cout << "Printing Position of a V0 pair:\n";
 	    cout << "Position of MC V0 vertex: " << (*mcVertexIt)->position() << endl;
-
+	    foundV0Pair = true;
+	}
 	//Now loop over the bounds      
 	for(mcV0MapIter mcV0MapIt = mcV0Bounds.first;
 	    mcV0MapIt != mcV0Bounds.second; ++mcV0MapIt){
 	    rcV0Partner = (*mcV0MapIt).second;
 	    cout << "Position of rc V0 vertex: " << rcV0Partner->position() << endl;
+	   
 	}
+	if (foundV0Pair) break; // Only print the information of 1 reconstructed vertex, to avoid a lot of output.
     }
 
     
