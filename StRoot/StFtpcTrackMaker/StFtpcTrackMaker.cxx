@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.61 2004/06/04 11:04:15 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.62 2004/06/18 09:07:03 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.62  2004/06/18 09:07:03  jcs
+// add code to write out a root file for calibration
+//
 // Revision 1.61  2004/06/04 11:04:15  jcs
 // replaced StarDb/ftpc/fdepars/fdepar with StarDb/ftpc/ftpcdEdxPars
 //
@@ -259,6 +262,9 @@
 #include "StFormulary.hh"
 #include "StFtpcTrackingParams.hh"
 #include "StFtpcTrackToStEvent.hh"
+#ifdef DEBUGFILE
+#include "StFtpcClusterMaker/StFtpcClusterDebug.hh"
+#endif
 
 #include "TObjArray.h"
 #include "TObjectSet.h"
@@ -503,7 +509,17 @@ Int_t StFtpcTrackMaker::Make()
   }
   
   else {
+#ifdef TWOCYCLETRACKING
     tracker->TwoCycleTracking();
+    if (Debug()) {
+       gMessMgr->Info() << "StFtpcTrackMaker: Using TwoCycleTracking"<<endm;
+     }       
+#elif LASERTRACKING
+    tracker->LaserTracking();
+    if (Debug()) {
+       gMessMgr->Info() << "StFtpcTrackMaker: Using LaserTracking"<<endm;
+     }       
+#endif    
   }
   
   // for the line above you have these possibilities
@@ -561,6 +577,20 @@ Int_t StFtpcTrackMaker::Make()
   else {
     tracker->TrackingInfo();
   }
+
+#ifdef DEBUGFILE
+  Double_t vertexPos[6] = {0.,0.,0.,0.,0.,0.};
+  
+  cout<<"LASER : No FTPC to global transformation !!!"<<endl;
+  
+  StFtpcClusterDebug *cldebug=new StFtpcClusterDebug((int) GetRunNumber(),(int) GetEventNumber());
+  //cout<<"Debug fill tracktree"<<endl;
+  cldebug->filltracktree(tracker->GetTracks(),vertexPos);
+  //if (cldebug->drawvertexhisto!=0)
+  //   cldebug->drawvertex(m_vertex_east,m_vertex_west,m_vtx_pos);
+  
+  delete cldebug;
+#endif  
   
   /*
   // Track Display
@@ -789,7 +819,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.61 2004/06/04 11:04:15 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.62 2004/06/18 09:07:03 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
