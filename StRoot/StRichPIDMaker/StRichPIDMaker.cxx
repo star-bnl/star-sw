@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.33 2001/01/30 16:38:43 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.34 2001/01/30 22:13:10 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.34  2001/01/30 22:13:10  horsley
+ * trajectory correction now default, added trajectory correction comments for log file
+ *
  * Revision 2.33  2001/01/30 16:38:43  horsley
  * updated PID maker for next production run, included new class for TTree
  *
@@ -257,7 +260,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.33 2001/01/30 16:38:43 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.34 2001/01/30 22:13:10 horsley Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -320,6 +323,13 @@ Int_t StRichPIDMaker::Init() {
   mListOfParticles[1]   = kaon;
   mListOfParticles[2]   = proton;
   
+  //
+  //
+  //
+  cout << "StRichPIDMaker::init()   trajectory correction turned on." << endl;
+  mTrackRefit = true;
+
+
   //
   // get data bases
   //
