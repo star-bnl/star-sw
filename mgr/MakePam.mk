@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.77 1999/01/25 23:49:14 fisyak Exp $
+# $Id: MakePam.mk,v 1.78 1999/01/30 04:08:23 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.78  1999/01/30 04:08:23  fisyak
+# Add StRootEvent
+#
 # Revision 1.77  1999/01/25 23:49:14  fisyak
 # Add MAKEFLAG
 #
@@ -256,7 +259,7 @@ FILES_MOD := $(addprefix $(GEN_DIR)/St_,$(subst .idl,_Module.cxx, $(notdir $(FIL
 FILES_MHH := $(addprefix $(GEN_DIR)/St_,$(subst .idl,_Module.h  , $(notdir $(FILES_IDM))))
 FILES_ALL_MOD := $(FILES_SYM) $(FILES_ICC) $(FILES_IH) $(FILES_INC) $(FILES_MOD) $(FILES_MHH)
 #list :=  $(STIC) -T -q $(STICFLAGS) 
-#FILES_IDT := $(notdir $(wildcard $(OUT_DIR)/pams/$(DOMAIN)/idl/*.idl $(STAR)/pams/$(DOMAIN)/idl/*.idl))
+FILES_IDT := $(notdir $(wildcard $(OUT_DIR)/pams/$(DOMAIN)/idl/*.idl $(STAR)/pams/$(DOMAIN)/idl/*.idl))
 FILES_IDT += $(foreach IDM, $(FILES_IDM), $(shell $(STIC) -T -q $(STICFLAGS) $(IDM))) 
 FILES_IDT := $(sort $(FILES_IDT))
 #FILES_IDT := $(shell  for IDM in $(FILES_IDM) ;  do [$(list) $(IDM)] ; done ) 

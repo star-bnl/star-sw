@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.46  1999/01/30 04:08:23  fisyak
+#  Add StRootEvent
+#
 #  Revision 1.45  1999/01/28 16:49:59  fisyak
 #  remove copying of h-files for rootcint
 #
@@ -214,7 +217,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/01/28 16:49:59 $ 
+#           Last modification $Date: 1999/01/30 04:08:23 $ 
 #  default setings
 # Current Working Directory
 #
@@ -393,6 +396,9 @@ endif
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/StDisplay))
 StRoot += StDisplay
 endif
+ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/StMagF))
+StRoot += StDisplay
+endif
 
 endif
 #          I have subdrs
@@ -409,13 +415,15 @@ StSclRoot:
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StSclRoot SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StSclRoot.$(So) 
 StDisplay:
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StDisplay SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StDisplay.$(So) 
+StMakers: St_Makers
 St_Makers: $(Makers)
 StChain:   
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain  SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StChain.$(So)
 St_Tables:
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables   SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St_Tables.$(So) NODEBUG=YES
 StMagF: 
-	$(MAKE) -f $(MakeFun) fun=StMagF -C $(ROOT_DIR)/StRoot/StMagF   SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StMagF.$(So)
+#	$(MAKE) -f $(MakeFun) fun=StMagF -C $(ROOT_DIR)/StRoot/StMagF   SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StMagF.$(So)
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StMagF  SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StMagF.$(So)
 StRootEvent: 
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StRootEvent  SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StRootEvent.$(So)
 ifneq ($(EMPTY),$(findstring $(STAR_LEVEL),dev))

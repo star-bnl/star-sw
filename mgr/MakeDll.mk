@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.53 1999/01/28 17:54:50 fisyak Exp $
+# $Id: MakeDll.mk,v 1.54 1999/01/30 04:08:22 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.54  1999/01/30 04:08:22  fisyak
+# Add StRootEvent
+#
 # Revision 1.53  1999/01/28 17:54:50  fisyak
 # Fix more typo
 #
@@ -169,7 +172,8 @@ endif #/* NT */
 #	Includes
 
 # 	Define internal and external includes dirs
-INC_NAMES := $(addprefix StRoot/,base StChain xdf2root) StRoot .share .share/tables pams inc StarClassLibrary/include
+INC_NAMES := $(addprefix StRoot/,base StChain xdf2root StSclRoot) StRoot .share .share/tables pams inc 
+#                            StarClassLibrary/include
 INC_DIRS  := $(wildcard $(SRC_DIR) $(SRC_DIR)/include)
 INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) 
 ifneq ($(ROOT_DIR),$(STAR))
@@ -250,39 +254,25 @@ FILES_TAB  := $(wildcard $(SRC_DIR)/St_*_Table.cxx)
 FILES_MOD  := $(wildcard $(SRC_DIR)/St_*_Module.cxx)
 FILES_DAT  := $(wildcard $(SRC_DIR)/St_DataSet.cxx)
 FILES_XDF  := $(wildcard $(SRC_DIR)/St_XDFFile.cxx)
-FILES_G3   := $(wildcard $(SRC_DIR)/TGeant3.cxx)
-FILES_CHAIN:= $(wildcard $(SRC_DIR)/StChain.cxx)
-FILES_ALL  := $(filter-out %Cint.cxx,$(wildcard $(SRC_DIR)/*.cxx))
-FILES_ST   := $(FILES_SYM) $(FILES_SYT) $(FILES_TAB) $(FILES_MOD) $(FILES_G3) $(FILES_CHAIN)
-#                                                                 $(FILES_DAT)
+FILES_ALL  := $(filter-out %Cint.cxx,$(wildcard $(SRC_DIR)/*.cxx $(SRC_DIR)/*.cc))
+FILES_H    := $(wildcard $(addprefix $(SRC_DIR)/, $(addsuffix  .h, $(basename $(notdir $(FILES_ALL)))) \
+                                                  $(addsuffix .hh, $(basename $(notdir $(FILES_ALL))))))
+FILES_ST   := $(FILES_SYM) $(FILES_SYT) $(FILES_TAB) $(FILES_MOD) 
 FILES_ALL  := $(sort $(filter-out $(FILES_ST),$(FILES_ALL)))
 FILES_ORD  := $(FILES_ALL)
-ifdef FILES_G3
-  NAMES_G3      := $(basename $(notdir $(FILES_G3)))
-  FILES_G3_H    := $(addprefix $(SRC_DIR)/,$(addsuffix .h,$(NAMES_G3)))
-  FILES_CINT_G3 := $(addprefix $(GEN_DIR)/,$(addsuffix Cint.cxx,$(NAMES_G3)))
-endif
-ifdef FILES_CHAIN
-  NAMES_CHAIN      := $(basename $(notdir $(FILES_CHAIN)))
-  FILES_CHAIN_H    := $(addprefix $(SRC_DIR)/,$(addsuffix .h,$(NAMES_CHAIN)))
-  FILES_CINT_CHAIN := $(addprefix $(GEN_DIR)/,$(addsuffix Cint.cxx,$(NAMES_CHAIN)))
-endif
 
 ifdef FILES_SYM
   NAMES_SYM      := $(subst St_,,$(basename $(notdir $(FILES_SYM))))
-  FILES_SYM_H    := $(addprefix $(SRC_DIR)/St_,$(addsuffix .h,$(NAMES_SYM)))
   FILES_CINT_SYM := $(addprefix $(GEN_DIR)/St_,$(addsuffix Cint.cxx,$(NAMES_SYM)))
 endif
 
 ifdef FILES_SYT
-  NAMES_SYT      := $(subst St_,,$(basename $(notdir $(FILES_SYT))))
-  FILES_SYT_H    := $(addprefix $(SRC_DIR)/St_,$(addsuffix .h,$(NAMES_SYT)))
-  FILES_CINT_SYT := $(addprefix $(GEN_DIR)/St_,$(addsuffix Cint.cxx,$(NAMES_SYT)))
+  NAMES_SYT      := $(basename $(notdir $(FILES_SYT)))
+  FILES_CINT_SYT := $(addprefix $(GEN_DIR)/,$(addsuffix Cint.cxx,$(NAMES_SYT)))
 endif
 
 ifdef FILES_TAB
   NAMES_TAB      := $(strip $(subst _Table,,$(subst St_,,$(basename $(notdir $(FILES_TAB))))))
-  FILES_TAB_H    := $(addprefix $(SRC_DIR)/St_,$(addsuffix _Table.h,$(NAMES_TAB)))
   FILES_CINT_TAB := $(addprefix $(GEN_DIR)/St_,$(addsuffix _TableCint.cxx,$(NAMES_TAB)))
 endif
 
@@ -290,81 +280,51 @@ ifdef FILES_MOD
   NAMES_MOD      := $(subst _Module,,$(subst St_,,$(basename $(notdir $(FILES_MOD)))))
   FILES_MOD_H    := $(addprefix $(SRC_DIR)/St_,$(addsuffix _Module.h,$(NAMES_MOD)))
   FILES_CINT_MOD := $(addprefix $(GEN_DIR)/St_,$(addsuffix _ModuleCint.cxx,$(NAMES_MOD)))
+  FILES_CINT_MOD :=$(GEN_DIR)/$(PKGNAME)_Cint.cxx
 endif
 
 ifdef FILES_ORD
-  NAMES_ORD      := $(basename $(notdir $(FILES_ORD)))
-  FILES_ORD_H    := $(subst .cxx,.h, $(FILES_ORD))
-  FILES_CINT_ORD := $(addprefix $(GEN_DIR)/,$(addsuffix Cint.cxx, $(NAMES_ORD)))
+  NAMES_ORD    := $(basename $(notdir $(shell grep -l ClassDef $(SRC_DIR)/*.h*)))
+  LinkDef        :=$(wildcard $(SRC_DIR)/$(PKGNAME)LinkDef.h $(SRC_DIR)/$(PKGNAME)LinkDef.hh)
+  ifneq (,$(LinkDef))
+    NAMES_DEF    := $(shell  grep C++ $(LinkDef) | grep class | awk '{print $$5}')
+    NAMES_DEF    := $(subst ;, ,$(NAMES_DEF))    
+    NAMES_DEF    := $(subst -, ,$(NAMES_DEF))   
+    NAMES_ORD    := $(strip $(filter-out $(NAMES_DEF), $(NAMES_ORD)))
+    ifneq (,$(NAMES_DEF))
+      FILES_CINT_DEF :=$(GEN_DIR)/$(PKGNAME)_DCint.cxx 
+      FILES_DEF_H    := $(wildcard $(addprefix $(SRC_DIR)/,$(addsuffix .h,$(NAMES_DEF)) \
+                                                           $(addsuffix .hh,$(NAMES_DEF))))
+    endif
+  endif
+  ifneq (,$(NAMES_ORD))
+    FILES_CINT_ORD :=$(GEN_DIR)/$(PKGNAME)_Cint.cxx 
+    FILES_ORD_H    := $(wildcard $(addprefix $(SRC_DIR)/,$(addsuffix .h,$(NAMES_ORD)) \
+                                                         $(addsuffix .hh,$(NAMES_ORD))))
+  endif
 endif
 
 LINKDEF := $(GEN_DIR)/LinkDef.h
 
 #	Define the common part of rootcint s
-ifndef NT
 define  COMMON_LINKDEF
 	@test -f $(LINKDEF) &&  $(RM) $(LINKDEF);\
 	echo "#ifdef __CINT__"                  	>  $(LINKDEF);\
 	echo "#pragma link off all globals;"    	>> $(LINKDEF);\
 	echo "#pragma link off all classes;"    	>> $(LINKDEF);\
-	echo "#pragma link off all functions;"  	>> $(LINKDEF);\
-	echo "#pragma link C++ class $(STEM)-;"	        >> $(LINKDEF);
+	echo "#pragma link off all functions;"  	>> $(LINKDEF);
 endef
 
-else
-define  COMMON_LINKDEF
-	@echo #ifdef __CINT__                   	>  $(LINKDEF)&\
-	@echo #pragma link off all globals; 	    	>> $(LINKDEF)&\
-	@echo #pragma link off all classes;	    	>> $(LINKDEF)&\
-	@echo #pragma link off all functions;	  	>> $(LINKDEF)&\
-	@echo #pragma link C++ class St_$(STEM)-;	>> $(LINKDEF)
-endef
-endif
-
-ifndef NT
-ifeq ($(PKGNAME),StRootEvent)
-define  ORD_LINKDEF
-	@test -f $(LINKDEF) &&  $(RM) $(LINKDEF);\
-	echo "#ifdef __CINT__"                  	>  $(LINKDEF);\
-	echo "#pragma link off all globals;"    	>> $(LINKDEF);\
-	echo "#pragma link off all classes;"    	>> $(LINKDEF);\
-	echo "#pragma link off all functions;"  	>> $(LINKDEF);\
-	echo "#pragma link C++ class $(STEM);"  	>> $(LINKDEF);\
-	echo "#endif"					>> $(LINKDEF);
-endef
-else
-define  ORD_LINKDEF
-	@test -f $(LINKDEF) &&  $(RM) $(LINKDEF);\
-	echo "#ifdef __CINT__"                  	>  $(LINKDEF);\
-	echo "#pragma link off all globals;"    	>> $(LINKDEF);\
-	echo "#pragma link off all classes;"    	>> $(LINKDEF);\
-	echo "#pragma link off all functions;"  	>> $(LINKDEF);\
-	echo "#pragma link C++ class $(STEM);"  	>> $(LINKDEF);\
-	echo "#endif"					>> $(LINKDEF);
-endef
-endif
-
-else
-define  ORD_LINKDEF
-	@echo #ifdef __CINT__                  	>  $(LINKDEF)&\
-	@echo #pragma link off all globals;    	>> $(LINKDEF)&\
-	@echo #pragma link off all classes;    	>> $(LINKDEF)&\
-	@echo #pragma link off all functions;  	>> $(LINKDEF)&\
-	@echo #pragma link C++ class $(STEM);  	>> $(LINKDEF)&\
-	@echo #endif"				>> $(LINKDEF)
-
-endef
-endif
-
-FILES_CINT := $(FILES_CINT_SYM) $(FILES_CINT_G3) $(FILES_CINT_CHAIN)  $(FILES_CINT_SYT) $(FILES_CINT_TAB) $(FILES_CINT_MOD)  $(FILES_CINT_ORD)
+FILES_CINT := $(FILES_CINT_SYM)  $(FILES_CINT_SYT) $(FILES_CINT_TAB) 
+FILES_DCINT:= $(addsuffix .d, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_CINT)))))
 FILES_CINTH:= $(subst .cxx,.h,$(FILES_CINT))
+FILES_CINT += $(FILES_CINT_ORD) $(FILES_CINT_DEF) $(FILES_CINT_MOD)  
 FILES_O := $(addprefix $(OBJ_DIR)/,$(addsuffix .$(O), $(notdir $(basename $(FILES_SRC) $(FILES_ORD) $(FILES_CINT)))))
 FILES_O := $(sort $(FILES_O))
 STAR_FILES_O := $(wildcard $(STAR_OBJ_DIR)/*.$(O))
 FILTER  := $(addprefix %/,$(notdir $(FILES_O)))
 STAR_FILES_O := $(filer-out $(FILTER),$(STAR_FILES_O))
 FILES_D := $(addsuffix .d, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_O)))))
-FILES_DCINT := $(addsuffix .d, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_CINT)))))
 
 ifeq (,$(FILES_O))
 all: 
@@ -393,96 +353,61 @@ MY_AR  := $(addsuffix .a, $(basename $(MY_SO)))
 all:   RootCint Libraries  DeleteDirs
 
 
-RootCint : $(FILES_CINT_SYT) $(FILES_CINT_SYM) $(FILES_CINT_G3) $(FILES_CINT_CHAIN) $(FILES_CINT_TAB) $(FILES_CINT_MOD)
+#  $(INCLUDES)
+RootCint :  $(FILES_CINT)
 
-$(FILES_CINT_SYT) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h 
-	@test -f $(LINKDEF) &&  $(RM) $(LINKDEF);\
-        echo "#ifdef __CINT__"                  	>  $(LINKDEF);\
-        echo "#pragma link off all globals;"    	>> $(LINKDEF);\
-        echo "#pragma link off all classes;"    	>> $(LINKDEF);\
-        echo "#pragma link off all functions;"  	>> $(LINKDEF);\
-        echo "#pragma link C++ class $(STEM)-;"         >> $(LINKDEF);\
-        echo "#pragma link C++ class table_head_st-!;"	>> $(LINKDEF);\
-        echo "#endif"					>> $(LINKDEF);\
-        $(CAT) $(LINKDEF);
+$(GEN_DIR)/St_ModuleCint.cxx : $(SRC_DIR)/St_Module.h 
+	$(COMMON_LINKDEF)
+	@echo "#pragma link C++ class St_Module-;"	>> $(LINKDEF)
+	@echo "#pragma link C++ enum EModuleTypes;"     >> $(LINKDEF)
+	@echo "#endif"					>> $(LINKDEF)
+	$(CAT) $(LINKDEF); 
 ifndef NT
 	cd $(GEN_DIR); \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) $(LINKDEF)
+	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) St_Module.h $(notdir $(LINKDEF))
+else
+	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
+	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT)  $(notdir $(1ST_DEPS)) \
+        St_DataSet.h $(notdir $(LINKDEF))
+endif
+$(GEN_DIR)/St_TableCint.cxx : $(SRC_DIR)/St_Table.h
+	$(COMMON_LINKDEF)
+	@echo "#pragma link C++ class St_Table-;"       >> $(LINKDEF)
+	@echo "#pragma link C++ class table_head_st-!;" >> $(LINKDEF)
+	@echo "#endif"                                  >> $(LINKDEF)
+	@$(CAT) $(LINKDEF);
+ifndef NT
+	cd $(GEN_DIR); \
+        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) St_Table.h $(LINKDEF)
 else
 	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) $(LINKDEF)
 endif
-
-$(FILES_CINT_G3) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h 
+$(FILES_CINT_ORD) : $(FILES_ORD_H)   
 	$(COMMON_LINKDEF)
-	echo "#pragma  link C++ global geant;"	 >> $(LINKDEF);
-	echo "#pragma  link C++ global cquest;" >> $(LINKDEF);
-	echo "#pragma  link C++ global clink;"	 >> $(LINKDEF);
-	echo "#pragma  link C++ global ccuts;"	 >> $(LINKDEF);
-	echo "#pragma  link C++ global cflag;"	 >> $(LINKDEF);
-	echo "#pragma  link C++ global ckine;"	 >> $(LINKDEF);
-	echo "#pragma  link C++ global cking;"	 >> $(LINKDEF);
-	echo "#pragma  link C++ global cmate;"	 >> $(LINKDEF);
-	echo "#pragma  link C++ global ctmed;"	 >> $(LINKDEF);
-	echo "#pragma  link C++ global ctrak;"	 >> $(LINKDEF);
-	echo "#pragma  link C++ global ctpol;"	 >> $(LINKDEF);
-	echo "#pragma  link C++ global cvolu;"	 >> $(LINKDEF);
-	echo "#pragma  link C++ global cnum;"	 >> $(LINKDEF);
-	echo "#pragma  link C++ global csets;"	 >> $(LINKDEF);
-	echo "#pragma  link C++ class  TGeant3;"	 >> $(LINKDEF);
-	echo "#endif"					 >> $(LINKDEF);
-	$(CAT) $(LINKDEF);
-	cd $(GEN_DIR); \
-	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT)  $(notdir $(1ST_DEPS)) \
-        $(notdir $(LINKDEF))
-
-$(FILES_CINT_CHAIN) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h 
-	@test -f $(LINKDEF) &&  $(RM) $(LINKDEF);\
-	echo "#ifdef __CINT__"                  	>  $(LINKDEF);\
-	echo "#pragma link off all globals;"    	>> $(LINKDEF);\
-	echo "#pragma link off all classes;"    	>> $(LINKDEF);\
-	echo "#pragma link off all functions;"  	>> $(LINKDEF);\
-	echo "#pragma link C++ class $(STEM)-;"  	>> $(LINKDEF);\
-	echo "#endif"					>> $(LINKDEF);
-	@$(CAT) $(LINKDEF);
-ifndef NT
-	cd $(GEN_DIR); \
-	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT)  $(notdir $(1ST_DEPS)) \
-        St_DataSet.h $(notdir $(LINKDEF))
-else
-	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
-	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT)  $(notdir $(1ST_DEPS)) \
-        St_DataSet.h $(notdir $(LINKDEF))
-endif
-$(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h 
-	$(COMMON_LINKDEF)
-	@echo "#pragma link C++ enum EModuleTypes;"      >> $(LINKDEF);
-	@echo "#endif"					 >> $(LINKDEF);
-	@$(CAT) $(LINKDEF);
-ifndef NT
-	cd $(GEN_DIR); \
-	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT)  $(notdir $(1ST_DEPS)) \
-        St_DataSet.h $(notdir $(LINKDEF))
-else
-	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
-	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT)  $(notdir $(1ST_DEPS)) \
-        St_DataSet.h $(notdir $(LINKDEF))
-endif
-$(FILES_CINT_ORD) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h    
-	$(ORD_LINKDEF)
+	@for p in $(notdir $(basename $(FILES_ORD_H))); do echo $${p}; \
+                                             echo "#pragma link C++ class $${p};" >> $(LINKDEF) ; \
+                                             done
+	@echo "#endif"                                  >> $(LINKDEF);
 	@$(CAT) $(LINKDEF)
 ifndef NT
 	cd $(GEN_DIR); \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) \
+        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(FILES_ORD_H)) \
         $(notdir $(LINKDEF))
 else
 	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
         $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) \
 	 $(notdir $(LINKDEF))
 endif
-#$(FILES_CINT_TAB) : 
-$(GEN_DIR)/St_%_TableCint.cxx : $(SRC_DIR)/St_%_Table.h 
+$(FILES_CINT_DEF) : $(FILES_DEF_H)   
+	cd $(GEN_DIR); \
+	$(CAT) $(LinkDef); \
+        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(FILES_DEF_H)) \
+        $(notdir $(LinkDef))
+
+$(FILES_CINT_TAB) : $(GEN_DIR)/St_%_TableCint.cxx : $(SRC_DIR)/St_%_Table.h 
 	$(COMMON_LINKDEF)
+	echo "#pragma link C++ class St_$(STEM)-;"	>> $(LINKDEF);
 	echo "#pragma link C++ class $(STEM)_st-!;"	>> $(LINKDEF);
 	echo "#endif"					>> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
@@ -494,11 +419,13 @@ else
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
 endif
 
-#$(FILES_CINT_MOD) : 
-$(GEN_DIR)/St_%_ModuleCint.cxx : $(GEN_DIR)/St_%_Module.h 
+$(FILES_CINT_MOD) : $(FILES_MOD_H)
 	$(COMMON_LINKDEF)
-	echo "#pragma link C++ global $(STEM);"	>> $(LINKDEF);
-	echo "#endif"					>> $(LINKDEF);
+	@for p in $(subst St_,,$(notdir $(basename $(FILES_MOD_H)))); do echo $${p}; \
+                                             echo "#pragma link C++ class St_$${p}-;" >> $(LINKDEF) ; \
+                                             echo "#pragma link C++ global   $${p};" >> $(LINKDEF) ; \
+                                             done
+	@echo "#endif"                                  >> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
 ifndef NT
 	cd $(GEN_DIR); \
@@ -507,7 +434,7 @@ else
 	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & )) \
         $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
 endif
-#  $(INCLUDES)
+
 
 Libraries : $(MY_SO) 
 
@@ -515,9 +442,15 @@ Libraries : $(MY_SO)
 ifndef NT
 
 $(MY_SO) : $(FILES_O) $(wildcard $(OBJ_DIR)/Templates.DB/*.o)
+ifneq ($(STAR_SYS),hp_ux102)   
 	cd $(OBJ_DIR); \
-        $(SO) $(SOFLAGS) $(SoOUT)$(SL_NEW) $(ALL_DEPS) $(LIBRARY); \
+        $(SO) $(SOFLAGS) $(SoOUT)$(SL_NEW) $(notdir $(ALL_DEPS)) $(LIBRARY); \
         $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)
+else  # hp_ux102
+	cd $(OBJ_DIR); \
+        $(SO) $(SOFLAGS) $(SoOUT)$(SL_NEW) *.o $(LIBRARY); \
+        $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)
+endif # hp_ux102
 else # NT
 ifdef MY_SO
 MY_SOLIB := $(subst /bin/,/lib/,$(MY_SO))
@@ -653,8 +586,6 @@ endif #/* NT */
 #_________________dependencies_____________________________
 ifndef NT
 ifndef NODEPEND
-$(FILES_CINTH) : $(GEN_DIR)/%Cint.h : $(SRC_DIR)/%.h
-$(FILES_CINT)  : $(GEN_DIR)/%Cint.cxx : $(GEN_DIR)/%Cint.h
 ifneq (, $(strip $(FILES_D))) 
 include $(FILES_D)
 endif                               #
@@ -694,34 +625,30 @@ test:
 	@echo OSFID       := $(OSFID)
 
 	@echo FILES_ORD := $(FILES_ORD)
+	@echo FILES_DEF := $(FILES_DEF)
 	@echo FILES_SYM := $(FILES_SYM)
-	@echo FILES_G3  := $(FILES_G3)
-	@echo FILES_CHAIN:= $(FILES_CHAIN)
 	@echo FILES_SYT := $(FILES_SYT)
 	@echo FILES_TAB := $(FILES_TAB)
 	@echo FILES_MOD := $(FILES_MOD) 
 	@echo FILES_CINT:= $(FILES_CINT)
 
 	@echo NAMES_ORD := $(NAMES_ORD) 
+	@echo NAMES_DEF := $(NAMES_DEF) 
 	@echo NAMES_SYT := $(NAMES_SYT) 
 	@echo NAMES_SYM := $(NAMES_SYM) 
-	@echo NAMES_G3 := $(NAMES_G3) 
 	@echo NAMES_TAB := $(NAMES_TAB)
 	@echo NAMES_MOD := $(NAMES_MOD)
 
 
 	@echo FILES_CINT_ORD := $(FILES_CINT_ORD) 
+	@echo FILES_CINT_DEF := $(FILES_CINT_DEF) 
 	@echo FILES_CINT_SYT := $(FILES_CINT_SYT) 
 	@echo FILES_CINT_SYM := $(FILES_CINT_SYM) 
-	@echo FILES_CINT_G3 := $(FILES_CINT_G3) 
 	@echo FILES_CINT_TAB := $(FILES_CINT_TAB) 
 	@echo FILES_CINT_MOD := $(FILES_CINT_MOD)
 
 	@echo FILES_ORD_H := $(FILES_ORD_H) 
-	@echo FILES_SYT_H := $(FILES_SYT_H) 
-	@echo FILES_SYM_H := $(FILES_SYM_H) 
-	@echo FILES_G3_H  := $(FILES_G3_H) 
-	@echo FILES_TAB_H := $(FILES_TAB_H) 
+	@echo FILES_DEF_H := $(FILES_DEF_H) 
 	@echo FILES_MOD_H := $(FILES_MOD_H)
 	@echo FILES_DCINT := $(FILES_DCINT)
 ifdef NT
