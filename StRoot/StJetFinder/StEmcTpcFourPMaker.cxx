@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.6 2003/05/15 17:54:19 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.7 2003/05/29 21:16:04 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -85,7 +85,10 @@ Int_t StEmcTpcFourPMaker::Make() {
   else
     {
       if(muEmc != NULL)
-	delete muEmc;
+	{
+	  delete muEmc;
+	  muEmc = NULL;
+	}
       StMuEmcUtil converter;
       StEmcCollection *emc = adc2E->getEmcCollection();
       muEmc = converter.getMuEmc(emc);
@@ -157,7 +160,7 @@ Int_t StEmcTpcFourPMaker::Make() {
     StMuTrackFourVec& newTrack = tPile[index];
     StProjectedTrack &pTrack = track_val.second;
     newTrack.Init(pTrack.getTrack(), pTrack.P(), index++);
-    tracks.push_back(&newTrack);  
+    tracks.push_back(&newTrack);
   }  
 
   // Now subtract the energy deposited by the tracks:
@@ -188,9 +191,6 @@ Int_t StEmcTpcFourPMaker::Make() {
   //timeLengths[timeindex] += static_cast<double>(stop-start)
   ///static_cast<double>(CLOCKS_PER_SEC);
   //cout << "Time to add points for jet finding: " << timeLengths[timeindex++] << endl;
-
-  if(adc2E == NULL)
-    delete muEmc;
 
   return kStOk;
 }

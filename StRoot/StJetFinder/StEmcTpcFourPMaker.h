@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.4 2003/05/15 17:54:19 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.5 2003/05/29 21:16:05 thenry Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.5  2003/05/29 21:16:05  thenry
+ * Added initProbabilities to StProjectedTrack class
+ *
  * Revision 1.4  2003/05/15 17:54:19  thenry
  * Constructor modified to accept the StEmcADCToEMaker* (default is NULL), so
  * that if StEmcADCToEMaker* is not NULL, the StEmcCollection from the
@@ -145,7 +148,7 @@ class StProjectedTrack
     static const double mpi = .1396;
     static const double mk = .4937;
 
-    StProjectedTrack() : mTrack(0) {};
+    StProjectedTrack() : mTrack(0) { };
     StProjectedTrack(StMuTrack* t) : mTrack(t) 
     {
       fourP = StLorentzVectorD(sqrt(masssqr() + mom().mag2()), mom());
@@ -154,6 +157,7 @@ class StProjectedTrack
       if(isnan(s.first) || isnan(s.second)) throw BadPathLengthException();
       double path = ((s.first < 0) || (s.second < 0)) ? max(s.first, s.second) : min(s.first, s.second);
       projection = helix.at(path);
+      initProbabilities(t);
     };
     StProjectedTrack(StMuTrack* t, StThreeVectorD vertex) : mTrack(t) 
     {
@@ -163,6 +167,7 @@ class StProjectedTrack
       if(isnan(s.first) || isnan(s.second)) throw BadPathLengthException();
       double path = ((s.first < 0) || (s.second < 0)) ? max(s.first, s.second) : min(s.first, s.second);
       projection = helix.at(path) - vertex;
+      initProbabilities(t);
     };
     StProjectedTrack(const StProjectedTrack &t) { 
       mTrack = t.getTrack();
@@ -175,6 +180,17 @@ class StProjectedTrack
     };
     virtual ~StProjectedTrack() {};
 
+    void initProbabilities(StMuTrack *t)
+      {
+	if(!t) { 
+	  probPion = 1.0; 
+	  probKaon = probProton = probElectron = 0; 
+	  return; }
+	probPion = t->pidProbPion();
+	probKaon = t->pidProbKaon();
+	probProton = t->pidProbProton();
+	probElectron = t->pidProbElectron();
+      };
     bool init(StMuTrack *t, StThreeVectorD vertex)
       {
 	mTrack = t;
