@@ -1,7 +1,7 @@
 //StiResidualCalculator.cxx
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.cxx,v 2.14 2005/01/17 03:59:13 pruneau Exp $
+ * $Id: StiResidualCalculator.cxx,v 2.15 2005/03/24 18:06:42 perev Exp $
  *
  * \class  StiResidualCalculator provides a utility for determining the
  *         track residuals.
@@ -9,6 +9,9 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.cxx,v $
+ * Revision 2.15  2005/03/24 18:06:42  perev
+ * Do not allow to modify node anymore
+ *
  * Revision 2.14  2005/01/17 03:59:13  pruneau
  * change track container to vector
  *
@@ -391,15 +394,13 @@ void StiResidualCalculator::NodeResidue(StiKalmanTrackNode iNode,
   double nodeY = iNode.getY();
   double dy,dz;
 
-  iNode.getDetector()->getHitErrorCalculator()->calculateError(&iNode);
   double nodeZE = iNode.getEzz();
   double nodeYE = iNode.getEyy();
+  iNode.getDetector()->getHitErrorCalculator()->calculateError(&iNode,nodeYE,nodeZE);
   //cout <<" D: "<<nodeZE<<endl;
 
-  if(nodeYE>0) nodeYE=::sqrt(nodeYE);
-  else nodeYE=1.;
-  if(nodeZE>0) nodeYE=::sqrt(nodeZE);
-  else nodeZE=1.;
+  nodeYE =(nodeYE>0)? ::sqrt(nodeYE):1.;
+  nodeZE =(nodeZE>0)? ::sqrt(nodeZE):1.;
 
   vector<StiHit*>::iterator iH = hitVec.begin();
   StiHit* hit;
