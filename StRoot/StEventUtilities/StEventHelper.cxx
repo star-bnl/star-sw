@@ -25,6 +25,10 @@
 #include "StVertex.h"
 #include "StTrackGeometry.h"
 #include "StTrackDetectorInfo.h"
+// For L3 filter
+#include "StarClassLibrary/BetheBloch.h"
+#include "StEvent/StDedxPidTraits.h"
+
 #include "StEventHelper.h"
 
 void Break(){printf("InBreak\n");}
@@ -469,7 +473,7 @@ void StTrackPoints::Init()
    if (!view) 						goto END;
    
    {Int_t i;
-   Float_t dpoint,alfa;
+   Float_t /*dpoint,*/alfa;
    Float_t xndc[3];
    Int_t x1,y1,x0,y0;
    Int_t pointSize = fN*3;
@@ -696,6 +700,126 @@ SKIP: return 0;
 }
 
 
+//______________________________________________________________________________
+ClassImp(StMuDstFilterHelper)
+StMuDstFilterHelper::StMuDstFilterHelper(const char *name):StFilterABC(name)
+{
+  mBB = new BetheBloch();
+  SetDefs();
+  
+}
+//______________________________________________________________________________
+StMuDstFilterHelper::~StMuDstFilterHelper()
+{ delete mBB;}
+//______________________________________________________________________________
+const char  **StMuDstFilterHelper::GetNams() const
+{
+  static const char *nams[] = {
+  " pCutHigh            ",  
+  " nHitsCutHighP       ",
+  " pCutLow             ",
+  " nHitsCutLowP        ",    
+  " chargeForLowP       ",
+  " dEdxMassCutHigh     ",
+  " dEdxFractionCutHigh ",
+  " dEdxMassCutLow      ",
+  " dEdxFractionCutLow  ",
+   0};
+  return nams;
+}
+//______________________________________________________________________________
+const float  *StMuDstFilterHelper::GetDefs() const
+{
+  static const float defs[] = {
+  /* pCutHigh            */ 2.0,    // high momentum cut for RICH/Upsilon candidates 
+  /* nHitsCutHighP       */ 10,    // nHits cut for all tracks
+  /* pCutLow             */ 0.2,    // low momentum cut
+  /* nHitsCutLowP        */ 15,    
+  /* chargeForLowP       */ -1,     // charge for tracks with pCutLow < p < pCutHigh, set to 0 for all tracks
+  /* dEdxMassCutHigh     */ 0.939,  // cut below BetheBloch(p/dEdxMassCutHigh), e.g. proton-band
+  /* dEdxFractionCutHigh */ 0.6,    // cut fraction of dEdx-band, i.e. dEdxFractionCut * BetheBloch(p/dEdxMassCut)
+  /* dEdxMassCutLow      */ 0.494,  // cut above BetheBloch(p/dEdxMassCutLow), e.g. kaon-band
+  /* dEdxFractionCutLow  */ 1.1,
+     0};
+  return defs;   
+}
+//______________________________________________________________________________
+Int_t StMuDstFilterHelper::Accept(const StTrack* track) {
+  
+  float pCutHigh        = fpCutHigh;    // high momentum cut for RICH/Upsilon candidates 
+  int   nHitsCutHighP   = int(fnHitsCutHighP);     // nHits cut for all tracks
 
+  // following cuts apply only for tracks with pCutLow < p <pHigh
+  float pCutLow             = fpCutLow;            // low momentum cut
+  int   nHitsCutLowP        = int(fnHitsCutLowP);    
+  int   chargeForLowP       = int(fchargeForLowP); // charge for tracks with pCutLow < p < fpCutHigh, set to 0 for all tracks
+  float dEdxMassCutHigh     = fdEdxMassCutHigh;    // cut below BetheBloch(p/dEdxMassCutHigh), e.g. proton-band
+  float dEdxFractionCutHigh = fdEdxFractionCutHigh;// cut fraction of dEdx-band, i.e. dEdxFractionCut * BetheBloch(p/dEdxMassCut)
+  float dEdxMassCutLow      = fdEdxMassCutLow;     // cut above BetheBloch(p/dEdxMassCutLow), e.g. kaon-band
+  float dEdxFractionCutLow  = fdEdxFractionCutLow;
 
+  int iret = 0;
 
+  // next: take all tracks above fpCutHigh
+  if (track->geometry()->momentum().magnitude() > pCutHigh
+      && track->detectorInfo()->numberOfPoints() >= nHitsCutHighP)
+        iret = 1;
+
+  // otherwise: take only neg. tracks in a certain dEdx-range
+  else {
+        if (track->detectorInfo()->numberOfPoints() >= nHitsCutLowP
+	    && track->geometry()->momentum().magnitude() > pCutLow) {
+
+	      int chargeOK = 0;
+	      int dedxOK = 0;
+
+	      // check charge
+	      if (chargeForLowP==0) 
+		    chargeOK = 1;
+	      else if (track->geometry()->charge() == chargeForLowP) 
+		    chargeOK = 1;
+
+	      // check dEdx
+	      //	      if (mBB==0) mBB = new BetheBloch();
+	      float p = track->geometry()->momentum().magnitude();
+	      float dedxHigh = dEdxFractionCutHigh * mBB->Sirrf(p/dEdxMassCutHigh);
+	      float dedxLow = dEdxFractionCutLow * mBB->Sirrf(p/dEdxMassCutLow);
+
+	      float dedx = 0;
+	      // get track dEdx
+	      const StSPtrVecTrackPidTraits& traits = track->pidTraits();
+	      StDedxPidTraits* dedxPidTr;
+	      for (unsigned int itrait = 0; itrait < traits.size(); itrait++){
+		    dedxPidTr = 0;
+		    if (traits[itrait]->detector() == kTpcId) {
+		          StTrackPidTraits* thisTrait = traits[itrait];
+			  dedxPidTr = dynamic_cast<StDedxPidTraits*>(thisTrait);
+			  if (dedxPidTr && dedxPidTr->method() == kTruncatedMeanId) {
+			        // adjust L3 dE/dx by a factor of 2 to match offline
+			        dedx = 2 * dedxPidTr->mean();
+			  }
+		    }
+	      }
+	      if (dedx > dedxHigh && dedx > dedxLow) 
+		    dedxOK = 1;
+
+	      // final answer
+	      iret = chargeOK * dedxOK;
+	} // if (pCutLow && nHitsCutLowP)
+
+  }
+
+  return iret;
+}
+
+//______________________________________________________________________________
+Int_t StMuDstFilterHelper::Accept(StPoints3DABC *pnt) 
+{
+   TObject *to;
+   StTrack *trk;
+   to = pnt->GetObject();
+   if (!to) 						return 1;
+   if (!to->InheritsFrom(StTrack::Class()))		return 1;
+   trk = (StTrack*)to;
+   return Accept(trk);
+}
