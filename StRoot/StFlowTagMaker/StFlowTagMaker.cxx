@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.11 2000/01/14 01:36:02 snelling Exp $
+// $Id: StFlowTagMaker.cxx,v 1.12 2000/01/14 02:09:43 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.12  2000/01/14 02:09:43  snelling
+// Fixed small typo (- ->)
+//
 // Revision 1.11  2000/01/14 01:36:02  snelling
 // changed include path ../FlowMaker/ to FlowMaker/
 //
@@ -108,7 +111,7 @@ Int_t StFlowTagMaker::Make()
 
 void StFlowTagMaker::PrintInfo() 
 {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.11 2000/01/14 01:36:02 snelling Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.12 2000/01/14 02:09:43 snelling Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -276,7 +279,7 @@ Int_t StFlowTagMaker::fillHistograms()
     float order = (float)(j+1);
 
     histSubEvents[0].histHarmonics[j].mHistMeanPt->
-      Fill(pFlowTag-mpta[j]);
+      Fill(pFlowTag->mpta[j]);
     histSubEvents[0].histHarmonics[j].mHistMult->Fill(pFlowTag->na[j]);
     histSubEvents[0].histHarmonics[j].mHist_q->
       Fill(sqrt(pFlowTag->qxa[j]*pFlowTag->qxa[j] +
