@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.16 2000/04/13 21:46:21 kathy Exp $
+// $Id: StAssociator.C,v 1.17 2000/04/13 22:01:41 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.17  2000/04/13 22:01:41  calderon
+// proper table and branch activating as per Kathy
+//
 // Revision 1.16  2000/04/13 21:46:21  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -114,7 +117,6 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
 
     // Note, the title "events" is used in the Association Maker, so don't change it.
     StEventMaker*       eventReader   = new StEventMaker("events","title");
-    
     StMcEventMaker*     mcEventReader = new StMcEventMaker; // Make an instance...
     StAssociationMaker* associator    = new StAssociationMaker;
     StMcAnalysisMaker*  examples      = new StMcAnalysisMaker;
