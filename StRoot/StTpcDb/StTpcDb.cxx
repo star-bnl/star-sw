@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.33 2002/04/02 00:16:30 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.34 2004/01/14 22:54:30 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.34  2004/01/14 22:54:30  fisyak
+ * Add hooks for Pedestal and tpcGain
+ *
  * Revision 1.33  2002/04/02 00:16:30  hardtke
  * New class that gets hit errors from database
  *
@@ -121,11 +124,11 @@ StTpcDb::StTpcDb(St_DataSet* input) {
    St_DataSetIter dataBase(input);
    int i;
    for (i = 0;i<2;i++,dataBase.Cd("/") )
-     if ( !(tpc[i] = dataBase.Cd(bases[i]) ? dataBase("tpc") : 0 ) ){
+     if ( !(tpctrg[i] = dataBase.Cd(bases[i]) ? dataBase("tpc") : 0 ) ){
        gMessMgr->Warning() << "StTpcDb::Error Getting TPC database: " << bases[i]       << endm;
      }
    for (i = 2;i<lBases;i++,dataBase.Cd("/") )   //only need conditions for trg
-     if ( !(trg[i] = dataBase.Cd(bases[i]) ? dataBase("trg") : 0 ) ){
+     if ( !(tpctrg[i] = dataBase.Cd(bases[i]) ? dataBase("trg") : 0 ) ){
        gMessMgr->Warning() << "StTpcDb::Error Getting trigger database: " << bases[i]       << endm;
      }
  }
@@ -153,7 +156,6 @@ void StTpcDb::Clear(){
   dvelcounter = 0;
   return;
 }
-
 //_____________________________________________________________________________
 void StTpcDb::GetDataBase(StMaker* maker) {
  if (maker){
@@ -165,8 +167,8 @@ void StTpcDb::GetDataBase(StMaker* maker) {
      TString dbPath = bases[i];
      dbPath += "tpc";
      dbFullPath += dbPath;
-     if ( ( tpc[i] = maker->GetDataBase(dbPath)) || 
-          ( tpc[i] = maker->GetDataBase(dbFullPath)) ) continue;
+     if ( ( tpctrg[i] = maker->GetDataBase(dbPath)) || 
+          ( tpctrg[i] = maker->GetDataBase(dbFullPath)) ) continue;
      gMessMgr->Warning() << "StTpcDb::Error Getting TPC database: " << bases[i] << "   " << endm;
    }
    for (i = 2;i<lBases;i++) {
@@ -174,8 +176,8 @@ void StTpcDb::GetDataBase(StMaker* maker) {
      TString dbPath = bases[i];
      dbPath += "trg";
      dbFullPath += dbPath;
-     if ( ( trg[i] = maker->GetDataBase(dbPath)) || 
-          ( trg[i] = maker->GetDataBase(dbFullPath)) ) continue;
+     if ( ( tpctrg[i] = maker->GetDataBase(dbPath)) || 
+          ( tpctrg[i] = maker->GetDataBase(dbFullPath)) ) continue;
      gMessMgr->Warning() << "StTpcDb::Error Getting trg database: " << bases[i] << "   " << endm;
    }
  }
@@ -195,7 +197,8 @@ StTpcDb::~StTpcDb() {
 for (int i = 0;i<24;i++) {
   //    delete gain[i]; delete t0[i];
 }
-
+ delete  mPedestal; mPedestal = 0;
+ delete  mGain; mGain = 0;
 gStTpcDb = 0;
 }
 //_____________________________________________________________________________
@@ -203,8 +206,8 @@ gStTpcDb = 0;
 StTpcPadPlaneI* StTpcDb::PadPlaneGeometry(){
   if (!PadPlane){            // get pad plane from data base
    const int dbIndex = kGeometry;
-   if (tpc[dbIndex]){
-    St_DataSet *tpd = tpc[dbIndex]->Find("tpcPadPlanes");
+   if (tpctrg[dbIndex]){
+    St_DataSet *tpd = tpctrg[dbIndex]->Find("tpcPadPlanes");
     if (!tpd) {
       gMessMgr->Message("StTpcDb::Error Finding Tpc Pad Planes","E");
       return 0;
@@ -219,8 +222,8 @@ StTpcPadPlaneI* StTpcDb::PadPlaneGeometry(){
 StTpcWirePlaneI* StTpcDb::WirePlaneGeometry(){
   if (!WirePlane){            // get wire plane from data base
    const int dbIndex = kGeometry;
-   if (tpc[dbIndex]){
-    St_DataSet* tpd = tpc[dbIndex]->Find("tpcWirePlanes");
+   if (tpctrg[dbIndex]){
+    St_DataSet* tpd = tpctrg[dbIndex]->Find("tpcWirePlanes");
     if (!(tpd && tpd->HasData()) ){
      gMessMgr->Message("StTpcDb::Error Finding Tpc Wire Planes","E");
      return 0;
@@ -237,16 +240,16 @@ StTpcDimensionsI* StTpcDb::Dimensions(){
    int dbIndex = kGeometry;
    St_DataSet *tpd;
    St_DataSet *geo;
-   if (tpc[dbIndex]){
-    tpd = tpc[dbIndex]->Find("tpcDimensions");
+   if (tpctrg[dbIndex]){
+    tpd = tpctrg[dbIndex]->Find("tpcDimensions");
     if (!(tpd && tpd->HasData()) ){
      gMessMgr->Message("StTpcDb::Error Finding Tpc Dimensions","E");
      return 0;
     }
    }
    dbIndex = kCalibration;
-   if (tpc[dbIndex]){
-    geo = tpc[dbIndex]->Find("tpcEffectiveGeom");
+   if (tpctrg[dbIndex]){
+    geo = tpctrg[dbIndex]->Find("tpcEffectiveGeom");
     if (!(geo && geo->HasData()) ){
      gMessMgr->Message("StTpcDb::Error Finding Tpc Effective Geometry","E");
      return 0;
@@ -264,8 +267,8 @@ StTpcDimensionsI* StTpcDb::Dimensions(){
 StTpcSlowControlSimI* StTpcDb::SlowControlSim(){
   if (!slowControlSim){            // get wire plane from data base
    const int dbIndex = kCalibration;
-   if (tpc[dbIndex]){
-    St_DataSet* tpd = tpc[dbIndex]->Find("tpcSlowControlSim");
+   if (tpctrg[dbIndex]){
+    St_DataSet* tpd = tpctrg[dbIndex]->Find("tpcSlowControlSim");
     if (!(tpd && tpd->HasData()) ){
      gMessMgr->Message("StTpcDb::Error Finding Slow Control Simulations Parameters","E");
      return 0;
@@ -286,8 +289,8 @@ StTpcSlowControlSimI* StTpcDb::SlowControlSim(){
 StTpcElectronicsI* StTpcDb::Electronics(){
   if (!electronics){            // get electronics from data base
    const int dbIndex = kCalibration;
-   if (tpc[dbIndex]){
-    St_DataSet* tpd = tpc[dbIndex]->Find("tpcElectronics");
+   if (tpctrg[dbIndex]){
+    St_DataSet* tpd = tpctrg[dbIndex]->Find("tpcElectronics");
     if (!(tpd && tpd->HasData()) ){
      gMessMgr->Message("StTpcDb::Error Finding Tpc Electronics","E");
      return 0;
@@ -302,8 +305,8 @@ StTpcElectronicsI* StTpcDb::Electronics(){
 StTpcGlobalPositionI* StTpcDb::GlobalPosition(){
   if (!GlobPos){            // get global position from data base
    const int dbIndex = kGeometry;
-   if (tpc[dbIndex]){
-    St_DataSet* tpd = tpc[dbIndex]->Find("tpcGlobalPosition");
+   if (tpctrg[dbIndex]){
+    St_DataSet* tpd = tpctrg[dbIndex]->Find("tpcGlobalPosition");
     if (!(tpd && tpd->HasData()) ){
      gMessMgr->Message("StTpcDb::Error Finding Tpc Global Positions","E");
      return 0;
@@ -318,8 +321,8 @@ StTpcGlobalPositionI* StTpcDb::GlobalPosition(){
 StTpcFieldCageI* StTpcDb::FieldCage(){
   if (!FC){            // get field cage from data base
    const int dbIndex = kGeometry;
-   if (tpc[dbIndex]){
-    St_DataSet* tpd = tpc[dbIndex]->Find("tpcFieldCage");
+   if (tpctrg[dbIndex]){
+    St_DataSet* tpd = tpctrg[dbIndex]->Find("tpcFieldCage");
     if (!(tpd && tpd->HasData()) ){
      gMessMgr->Message("StTpcDb::Error Finding Tpc Field Cage Info","E");
      return 0;
@@ -334,8 +337,8 @@ StTpcFieldCageI* StTpcDb::FieldCage(){
 StTpcHitErrorsI* StTpcDb::HitErrors(){
   if (!hitErrors){            // get hit errors from data base
    const int dbIndex = kCalibration;
-   if (tpc[dbIndex]){
-    St_DataSet* tpd = tpc[dbIndex]->Find("tpcHitErrors");
+   if (tpctrg[dbIndex]){
+    St_DataSet* tpd = tpctrg[dbIndex]->Find("tpcHitErrors");
     if (!(tpd && tpd->HasData()) ){
      gMessMgr->Message("StTpcDb::Error Finding Tpc Hit Error Info","E");
      return 0;
@@ -358,9 +361,9 @@ StTpcGainI* StTpcDb::Gain(int sector){
    sprintf(dbname,"Sector_%.2d/tpcISGains",sector);
    sprintf(dbname2,"Sector_%.2d/tpcOSGains",sector);
    //   printf("Getting %s , %s\n",dbname,dbname2);
-   if (tpc[dbIndex]){
-    St_DataSet* tpd = tpc[dbIndex]->Find(dbname);
-    St_DataSet* tpd2 = tpc[dbIndex]->Find(dbname2);
+   if (tpctrg[dbIndex]){
+    St_DataSet* tpd = tpctrg[dbIndex]->Find(dbname);
+    St_DataSet* tpd2 = tpctrg[dbIndex]->Find(dbname2);
     if (!(tpd && tpd->HasData() && tpd2 && tpd2->HasData()) ){
      gMessMgr->Message("StTpcDb::Error Finding Tpc Gain Factors","E");
      return 0;
@@ -385,9 +388,9 @@ StTpcT0I* StTpcDb::T0(int sector){
    sprintf(dbname,"Sector_%.2d/tpcISTimeOffsets",sector);
    sprintf(dbname2,"Sector_%.2d/tpcOSTimeOffsets",sector);
    //   printf("Getting %s , %s \n",dbname,dbname2);
-   if (tpc[dbIndex]){
-    St_DataSet* tpd = (St_DataSet*)tpc[dbIndex]->Find(dbname);
-    St_DataSet* tpd2 = (St_DataSet*)tpc[dbIndex]->Find(dbname2);
+   if (tpctrg[dbIndex]){
+    St_DataSet* tpd = (St_DataSet*)tpctrg[dbIndex]->Find(dbname);
+    St_DataSet* tpd2 = (St_DataSet*)tpctrg[dbIndex]->Find(dbname2);
     if (!(tpd && tpd->HasData() && tpd2 && tpd2->HasData()) ){
      gMessMgr->Message("StTpcDb::Error Finding Tpc Time Offsets","E");
      return 0;
@@ -411,8 +414,8 @@ StTpcSectorPositionI* StTpcDb::SectorPosition(int sector){
    const int dbIndex = kGeometry;
    char dbname[40];
    sprintf(dbname,"Sector_%.2d/tpcSectorPosition",sector);
-   if (tpc[dbIndex]){
-    St_DataSet* tpd = (St_DataSet*)tpc[dbIndex]->Find(dbname);
+   if (tpctrg[dbIndex]){
+    St_DataSet* tpd = (St_DataSet*)tpctrg[dbIndex]->Find(dbname);
     if (!(tpd && tpd->HasData()) ){
      gMessMgr->Message("StTpcDb::Error Finding Tpc Sector Position","E");
      return 0;
@@ -427,15 +430,15 @@ StTpcSectorPositionI* StTpcDb::SectorPosition(int sector){
 
 //_____________________________________________________________________________
 St_Table *StTpcDb::getTpcTable(int i){
-  return (St_Table *)tpc[i];
+  return (St_Table *)tpctrg[i];
 }
 
 //-----------------------------------------------------------------------------
 float StTpcDb::DriftVelocity(){
   if(!dvel){              // get drift velocity table
    const int dbIndex = kCalibration;
-   if (tpc[dbIndex]){
-    St_DataSet* tpd = tpc[dbIndex]->Find("tpcDriftVelocity");
+   if (tpctrg[dbIndex]){
+    St_DataSet* tpd = tpctrg[dbIndex]->Find("tpcDriftVelocity");
     if (!(tpd && tpd->HasData()) ){
      gMessMgr->Message("StTpcDb::Error Finding Tpc DriftVelocity","E");
      return 0;
@@ -454,8 +457,8 @@ float StTpcDb::triggerTimeOffset(){
   dvelcounter++;
   if(!toff){              // get triggerTimeOffset
    const int dbIndex = kConditions;
-   if (trg[dbIndex]){
-    St_DataSet* tpd = trg[dbIndex]->Find("trgTimeOffset");
+   if (tpctrg[dbIndex]){
+    St_DataSet* tpd = tpctrg[dbIndex]->Find("trgTimeOffset");
     if (!(tpd && tpd->HasData()) ){
      gMessMgr->Message("StTpcDb::Error Finding Trigger Time Offset","E");
      return 0;
@@ -467,6 +470,35 @@ float StTpcDb::triggerTimeOffset(){
   float theoffset = 1e-6*(*toff)[0].offset;
   if(trigtype&&trigtype->HasData()){if((*trigtype)[0].TriggerActionWd==36865) theoffset = 1e-6*(*toff)[0].laserOffset;}
   return theoffset;
+}
+//________________________________________________________________________________
+TTable *StTpcDb::FindTable(const Char_t *name, Int_t dbIndex) {
+  TTable *table = 0;
+  if (tpctrg[dbIndex]){
+    table = (TTable *) tpctrg[dbIndex]->Find(name);
+    if (! (table && table->HasData()) ) {
+      gMessMgr->Error() << "StTpcDb::Error Finding " << name << endm;
+    }
+  }
+  return table;
+}
+//________________________________________________________________________________
+St_tpcPedestalC *StTpcDb::Pedestal() {
+  if (!mPedestal){
+    St_tpcPedestal *table = (St_tpcPedestal *) FindTable("tpcPedestal",kCalibration);
+    if (! table) return 0;
+    mPedestal = new St_tpcPedestalC(table);
+  }
+  return mPedestal;
+}
+//________________________________________________________________________________
+St_tpcGainC     *StTpcDb::tpcGain() {
+  if (! mGain){
+    St_tpcGain *table = (St_tpcGain *) FindTable("tpcGain",kCalibration);
+    if (! table) return 0;
+    mGain = new St_tpcGainC(table);
+  }
+  return mGain;
 }
 
 
