@@ -10,6 +10,7 @@
 **:   
 **:<------------------------------------------------------------------*/
 #include "FtfSl3.h"
+#include <iostream.h>
 
 UINT32 swap32(unsigned int in);
 
@@ -261,21 +262,29 @@ int FtfSl3::readSector ( struct TPCSECLP *seclp ) {
     // check byte order of SECLP bank
     // byte swapping is needed
     short swapByte = 0 ;
-    if (checkByteOrder(swap32((unsigned int)seclp->bh.byte_order))) {
-       swapByte = 1     ;
-    }
-    else {
+    if (seclp->bh.byte_order == 0x04030201) 
+	{
+	    swapByte = 1     ;
+	}
+    else if( seclp->bh.byte_order == 0x01020304 )
+	{
         swapByte = 0 ;
 	//fprintf(stderr, "Error - FtfSl3::readSector: Wrong byte order in SECLP bank!\n");
 	//   return -1;
-    }
-
+	}
+    else 
+	{
+	    printf("unknow bit order \n");
+	}
+    
     nHitsOfMz = 0;
 
 
     sector = (unsigned int)seclp->bh.bank_id ;
     if ( swapByte ) sector = swap32(sector) ;
-   
+    
+    cout << sector << "sector " <<endl;
+    cout << swapByte << "swap " << endl;
 
     // run over receiver boards
     for (iRb=0; iRb<SB_RB_NUM; iRb++) {
