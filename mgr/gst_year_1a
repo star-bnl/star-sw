@@ -1,6 +1,9 @@
 #! /usr/local/bin/tcsh -f
-#  $Id: gst_year_1a,v 1.1 1998/09/08 23:10:12 fisyak Exp $
+#  $Id: gst_year_1a,v 1.2 1998/09/09 04:37:34 fisyak Exp $
 #  $Log: gst_year_1a,v $
+#  Revision 1.2  1998/09/09 04:37:34  fisyak
+#  simplify logic
+#
 #  Revision 1.1  1998/09/08 23:10:12  fisyak
 #  gstar+g2t  for 1a
 #
@@ -69,14 +72,14 @@ endif
   set log_dir  = `dirname ${log}`
   if ( -d ${log_dir} == 0) mkdir -p ${log_dir}
   set log_done = $HOME/MDC1/log/gst_year_1a/hadronic_off_${first}_${no_events}_`hostname`_job_${JOB_ID}_gst_year_1a
-  touch ${DQS_STDOUT}
+touch ${DQS_STDOUT}
 STAR_LEVELS >> ${DQS_STDOUT}
 if ( -e ${log}) rm ${log}
 cd ${SCRATCH}/gst_year_1a
 if ( -d gst_year_1a_${first}_${no_events} == 0) mkdir -p gst_year_1a_${first}_${no_events}
 cd gst_year_1a_${first}_${no_events}
 if ( -e  batch_${first}.kumac ) rm  batch_${first}.kumac 
-cat > batch_${first}.kumac <<EOF
+time  staf -w 0 -g 20 >& ${log} <<EOF
 trace on full
 debug on 
    exec $STAR/kumacs/chain/gst_year_1a _ 
@@ -86,11 +89,11 @@ debug on
    prefix_out=$prefix_out _
    log=$log_file 
 exit 
+
 EOF
-cat  batch_${first}.kumac >> $DQS_STDOUT
-time  staf -w 0 -g 20 < batch_${first}.kumac >& ${log}
+
 # Clean files/links not needed anymore...
-cat $log_file >> $DQS_STDOUT
+cat $log_file >> ${DQS_STDOUT}
 mv ${log} ${log_done}
 echo
 echo   Job finished at `date`
