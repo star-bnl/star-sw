@@ -31,17 +31,14 @@ void GeomDraw(const char *fzFile="complete")
           printf(" 3. Select class method to execute and click it with left mouse button\n");           
           printf("---------------\n"); 
           printf("     List of the usefull TVolume methods and its parameters:\n"); 
-          printf("     1. TVolume::Draw(const char *levels=\"3\") - Define the bumber of the level of the geometry hierachy to be drawn\n"); 
-          printf("        Examples:\n");
-          printf("        1.1. Draw(\"5\")     - draw 5 levels deep \n");
-          printf("        1.2. Draw(\"4:3\")   - draw from the 4th level 3 level deep\n");
-          printf("        1.3. Draw(\"4,6,8\") - draw 3 levels, namelt 3d,6th and 8th \n");
-          printf("        1.4. Draw(\"4-8\")   - draw from the 3d level till 8th including levels, namely 3d,6th and 8th \n\n");
-          printf("     2.  SetVisibility    0 - everything visible,\n");
-          printf("                          2 - this unvisible, but sons are visible\n");
-          printf("                          1 - this visible but sons\n");
-          printf("                          3 - neither this nor its sons are visible\n\n");       
-          printf(" $Id: GeomDraw.C,v 1.1 2004/07/23 18:42:34 fine Exp $\n");
+          printf("     1. TVolume::Draw(const char *levels=\"3\") - \n");
+          printf("                       - define the number of the levels of the geometry hierarchy to be drawn\n"); 
+          printf("     2. TVolume::SetVisibility - \n");
+          printf("                         0 - everything visible,\n");
+          printf("                         2 - this invisible, but sons are visible\n");
+          printf("                         1 - this visible but sons\n");
+          printf("                         3 - neither this nor its sons are visible\n\n");       
+          printf(" $Id: GeomDraw.C,v 1.2 2004/07/23 19:38:16 fine Exp $\n");
           return;              
      }
    }
