@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0I.hh,v 3.4 2001/11/28 05:14:59 genevb Exp $
+ * $Id: StV0I.hh,v 3.5 2002/02/10 15:29:09 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 24-Apr-2001
  *
@@ -13,6 +13,9 @@
  ***********************************************************************
  *
  * $Log: StV0I.hh,v $
+ * Revision 3.5  2002/02/10 15:29:09  genevb
+ * Additional functions for momenta of decay daughters in CM frame
+ *
  * Revision 3.4  2001/11/28 05:14:59  genevb
  * Additional decay angle functions
  *
@@ -67,15 +70,19 @@ public:
   virtual Float_t decayVertexV0Y() const=0;
   virtual Float_t decayVertexV0Z() const=0;
 
+  virtual TVector3 momPos();                     // Momentum of pos. daughter
   virtual Float_t momPosX() const=0;             // Momentum components of pos. daughter
   virtual Float_t momPosY() const=0;
   virtual Float_t momPosZ() const=0;
+  virtual TVector3 momNeg();                     // Momentum of neg. daughter
   virtual Float_t momNegX() const=0;             // Momentum components of neg. daughter
   virtual Float_t momNegY() const=0;
   virtual Float_t momNegZ() const=0;
+  virtual TVector3 momV0();                 // Momentum of V0
   virtual Float_t momV0X() const=0;         // Momentum components of V0
   virtual Float_t momV0Y() const=0;
   virtual Float_t momV0Z() const=0;
+
   virtual Float_t alphaV0();              // Armenteros-Podolanski variable
   virtual Float_t ptArmV0();              // Armenteros-Podolanski variable
 
@@ -119,11 +126,23 @@ public:
   virtual Float_t polCosThetaAntiLambda();      // antilambda - neg. daughter
   virtual Float_t decayCosThetaPosLambda();     // lambda     - pos. daughter
   virtual Float_t decayCosThetaNegLambda();     // lambda     - neg. daughter
-  virtual Float_t decayCosThetaNegAntiLambda(); // antilambda - neg. daughter
   virtual Float_t decayCosThetaPosAntiLambda(); // antilambda - pos. daughter
+  virtual Float_t decayCosThetaNegAntiLambda(); // antilambda - neg. daughter
   // This helper function can be used for decayCosTheta of any hypothesis:
   // m1 = parent mass, m2 = daughter mass, charge = positive/negative daughter
   virtual Float_t dCTV0(Float_t m1, Float_t m2, StChargeSign charge);
+
+  // Momenta of daughters in V0 rest frame for different particle hypotheses
+  virtual TVector3 momPosK0Short();             // k-short    - pos. daughter
+  virtual TVector3 momNegK0Short();             // k-short    - neg. daughter
+  virtual TVector3 momPosLambda();              // lambda     - neg. daughter
+  virtual TVector3 momNegLambda();              // lambda     - neg. daughter
+  virtual TVector3 momPosAntiLambda();          // antilambda - pos. daughter
+  virtual TVector3 momNegAntiLambda();          // antilambda - neg. daughter
+  // This helper function can be used for momentum of daughter in
+  // V0 rest frame of any hypothesis:
+  // m1 = parent mass, m2 = daughter mass, charge = positive/negative daughter
+  virtual TVector3 momV0Frame(Float_t m1, Float_t m2, StChargeSign charge);
 
 // ************************************************************************
 // The next few functions are presently used only by MC
@@ -217,6 +236,18 @@ inline Float_t StV0I::decayLengthV0() const {
                    pow(decayVertexV0Y() - mEvent->primaryVertexY(),2) +
                    pow(decayVertexV0Z() - mEvent->primaryVertexZ(),2));
      return 0.;
+}
+
+inline TVector3 StV0I::momPos() {
+     return TVector3(momPosX(), momPosY(), momPosZ());
+}
+
+inline TVector3 StV0I::momNeg() {
+     return TVector3(momNegX(), momNegY(), momNegZ());
+}
+
+inline TVector3 StV0I::momV0() {
+     return TVector3(momV0X(), momV0Y(), momV0Z());
 }
 
 inline Float_t StV0I::Ptot2Pos() {
@@ -430,6 +461,38 @@ inline Float_t StV0I::dCTV0(Float_t m1, Float_t m2, StChargeSign charge) {
                                 momPosX(),momPosY(),momPosZ(),m2) :
     StDecayAngle::decayCosTheta(momV0X() ,momV0Y() ,momV0Z() ,m1,
                                 momNegX(),momNegY(),momNegZ(),m2) );
+}
+
+inline TVector3 StV0I::momPosK0Short() {
+  return momV0Frame(M_KAON_0_SHORT,M_PION_PLUS,positive);
+}
+
+inline TVector3 StV0I::momNegK0Short() {
+  return momV0Frame(M_KAON_0_SHORT,M_PION_MINUS,negative);
+}
+
+inline TVector3 StV0I::momPosLambda() {
+  return momV0Frame(M_LAMBDA,M_PROTON,positive);
+}
+
+inline TVector3 StV0I::momNegLambda() {
+  return momV0Frame(M_LAMBDA,M_PION_MINUS,negative);
+}
+
+inline TVector3 StV0I::momPosAntiLambda() {
+  return momV0Frame(M_ANTILAMBDA,M_PION_PLUS,positive);
+}
+
+inline TVector3 StV0I::momNegAntiLambda() {
+  return momV0Frame(M_ANTILAMBDA,M_ANTIPROTON,negative);
+}
+
+inline TVector3 StV0I::momV0Frame(Float_t m1, Float_t m2, StChargeSign charge) {
+  return ( (charge == positive) ?
+    StDecayAngle::getShiftedDaughter(momV0X() ,momV0Y() ,momV0Z() ,m1,
+                                     momPosX(),momPosY(),momPosZ(),m2) :
+    StDecayAngle::getShiftedDaughter(momV0X() ,momV0Y() ,momV0Z() ,m1,
+                                     momNegX(),momNegY(),momNegZ(),m2) );
 }
 
 inline void StV0I::Clear() {
