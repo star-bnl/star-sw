@@ -1,13 +1,13 @@
 /**********************************************************
- * $Id: StRichMCTrack.cxx,v 2.1 2000/09/29 01:35:36 horsley Exp $
+ * $Id: StRichMCTrack.cxx,v 2.2 2000/11/01 17:39:27 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMCTrack.cxx,v $
- *  Revision 2.1  2000/09/29 01:35:36  horsley
- *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
- *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
+ *  Revision 2.2  2000/11/01 17:39:27  lasiuk
+ *  clean up:
+ *  CVSn: ----------------------------------------------------------------------
  *
  *  Revision 2.1  2000/09/29 01:35:36  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
@@ -328,32 +328,43 @@ void StRichMCTrack::useTPCInfo() {
 
 
 
-StMcTrack* StRichMCTrack::getGeantTrack(StRichMCHit* hit, StMcEvent* mcevt, St_g2t_track * geantTracks) {
+StMcTrack* StRichMCTrack::getGeantTrack(StRichMCHit* hit,
+					StMcEvent* mcevt,
+					St_g2t_track * geantTracks) {
     
-  StMcTrack* mcTrack=0;
-  if (!hit || !mcevt || !geantTracks) return mcTrack;
-  g2t_track_st *trackList = geantTracks->GetTable();
+    StMcTrack* mcTrack=0;
+    if (!hit || !mcevt || !geantTracks) return mcTrack;
 
-  unsigned int hitIndex = 0;
-  if (hit->getMCInfo().process()==ePhoton)       hitIndex = hit->getMCInfo().id();
-  else if (hit->getMCInfo().process()==eCharged) hitIndex = hit->getMCInfo().trackp();
-  else { return 0;}
+    g2t_track_st *trackList = geantTracks->GetTable();
+
+    unsigned int hitIndex = 0;
+    if (hit->getMCInfo().process()==ePhoton)       hitIndex = hit->getMCInfo().id();
+    else if (hit->getMCInfo().process()==eCharged) hitIndex = hit->getMCInfo().trackp();
+    else return 0;
   
-  float  start=0;
-  float  end = mcevt->tracks().size()-1;
-  int    index = hitIndex;
-  int    counter=0;
-  bool   searching=true;
-  while (searching) {
-    if (index >= mcevt->tracks().size()-1) return 0;
-    if (trackList[hitIndex].id == mcevt->tracks()[index]->key()) {return mcevt->tracks()[index];}
-    if (trackList[hitIndex].id > mcevt->tracks()[index]->key()) {start=index;}
-    else {end=index;}
-    index=(end-start)/2 + start;
-    counter++;
-    if (counter>mcevt->tracks().size()-1) searching=false; 
-  }
-  return mcTrack; 
+    unsigned int  start   = 0;
+    unsigned int  end     = mcevt->tracks().size()-1;
+    unsigned int  index   = hitIndex;
+    unsigned int  counter = 0;
+
+    bool searching=true;
+
+    while (searching) {
+	if (index >= mcevt->tracks().size()-1) return 0;
+
+	if (trackList[hitIndex].id == mcevt->tracks()[index]->key()) {
+	    return mcevt->tracks()[index];
+	}
+
+	if (trackList[hitIndex].id > mcevt->tracks()[index]->key()) {
+	    start=index;
+	}
+	else {
+	    end=index;
+	}
+	index = (end-start)/2 + start;
+	counter++;
+	if (counter>mcevt->tracks().size()-1) searching=false; 
+    }
+    return mcTrack; 
 }
-
-
