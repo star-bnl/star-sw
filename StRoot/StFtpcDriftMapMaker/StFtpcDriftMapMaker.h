@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.h,v 1.2 2001/03/07 15:12:39 jcs Exp $
+// $Id: StFtpcDriftMapMaker.h,v 1.3 2001/03/09 13:54:26 jcs Exp $
 // $Log: StFtpcDriftMapMaker.h,v $
+// Revision 1.3  2001/03/09 13:54:26  jcs
+// write out cstructs with new values so that they can be added to database
+//
 // Revision 1.2  2001/03/07 15:12:39  jcs
 // use MySQL database instead of params
 //
@@ -34,7 +37,9 @@ class TH2F;
 
 class StFtpcDriftMapMaker : public StMaker {
  private:
-  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.2 2001/03/07 15:12:39 jcs Exp $";
+   char*   fTableName;      // c-structure name that is same as table in database
+   char*   fOutputFileName; // file name for output
+  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.3 2001/03/09 13:54:26 jcs Exp $";
   // Int_t         m_mode;        // mode 1 = primaries;
   St_fss_gas      *m_fss_gas;  //!
   St_fss_param    *m_fss_param;//!
@@ -55,7 +60,7 @@ class StFtpcDriftMapMaker : public StMaker {
   virtual Int_t  Make();
   // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.2 2001/03/07 15:12:39 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.3 2001/03/09 13:54:26 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StFtpcDriftMapMaker, 1)  
 };
