@@ -82,7 +82,7 @@
    enddo
 
 *  To generate more header information:
-   call HEPEHeader
+   call GHeader
 *
    End
  
@@ -250,14 +250,79 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
 *
    END
 
+*****************************************************************************
+ module  HEPEVNT  is the HEPEVNT event header
+ author  P.Nevski
+ created 01/01/98
+*****************************************************************************
++CDE,AGECOM,GCBANK,SCLINK,RBBANK.
+
+ Old Structure PASS {int SYS1, int SYS2, int SYS3, int PJID,int GJID,int EVID}
+
+ Old Structure GENE {int SYS1, int SYS2, int SYS3, int GRUN,int GEVT,
+                     Char GNAM, VRTX, VRTY, VRTZ, VRTT, int WTFL, WEIG }
+
+ Old Structure GENT {int STAT, int PDGC, int MOT1,int MOT2, int DAU1,int DAU2,
+                     PX, PY, PZ, ENER, MASS, VERTX, VERTY, VERTZ, TIME }
+
+     If (LkEvnt==0) Call MZBOOK(IxDIV,LKAR P2,LkEvnt, 1,'EVNT',2,2,7,2,0)
+
+     IrbDIV=IxDIV;         LKARP2=LkEvnt
+     Fill /EVNT/PASS(1)  ! Pass Record Bank
+        SYS1 = 1         !  Format flag
+        SYS2 = 1         !  Member system word = 100000*NG+NM NGEN 
+        SYS3 = 300003    !  Modularity system word = 100000*NW+NT
+        PJID = 1         !  Pass Job ID (GJID for latest PASS bank)
+        GJID = 1         !  Generator Job ID.
+        EVID = 1         !  ZEBRA IDN of event read in or generated
+     endfill
+
+     IrbDIV=IxDIV;         LKARP2=LkEvnt
+     Fill /EVNT/GENE(1)  ! GENZ Event Bank  
+       SYS1 =     1      !  Format flag = 1
+       SYS2 =     0      !  Member system word = 100000*NG+NM 
+       SYS3 =     0      !  Modularity system word = 100000*NW+NT
+       GRUN =     0      !  Generator run number
+       GEVT =     1      !  Generator event number
+       GNAM = 'VENUS'    !  Generator name
+       VRTX =   0.0      !  Interaction vertex position in metres
+       VRTY =   0.0      !  idem
+       VRTZ =   0.0      !  idem
+       VRTT =   0.0      !  Interaction vertex time in seconds
+       WTFL =     1      !  Interaction weight flag
+       WEIG =  1.00      !  Interaction weight  
+     endfill
+ 
+     IrbDIV=IxDIV;             LKARP2=LkEvnt
+     Fill /EVNT/GENE/GENT(1) ! HEPEVT parton level data 
+       STAT  =   0       !  Status flag
+       PDGC  =   0       !  PDG particle code
+       MOT1  =   0       !  First mother
+       MOT2  =   0       !  Second mother. If -ve, mothers give a range
+       DAU1  =   0       !  First daughter. If<0, reference to GEANT
+       DAU2  =   0       !  Last daughter.  If<0, reference to GEANT
+       PX    = 0.0       !  x-Momentum of particle in GeV/c
+       PY    = 0.0       !  idem in y
+       PZ    = 0.0       !  idem in z
+       ENER  = 0.0       !  particle Total Energy 
+       MASS  = 0.0       !  Mass in GeV/c. Not necessarily the on-shell m
+       VERTX = 0.0       !  particle origin in x
+       VERTY = 0.0       !  idem in y
+       VERTZ = 0.0       !  idem in z
+       TIME  = 0.0       !  Start time of particle relative to the interact
+     endfill
+
+ end
+
+
 *************************************************************************
-   module  HepeHeader defines event header
+   module  GHeader defines GSTAR event header
    author  Pavel Nevski
    created sometime ago
 *************************************************************************
 +CDE,GCBANK,GCTIME,SCLINK.
 *
-      STRUCTURE EGRN {               " Event generator run structure  "_
+  old STRUCTURE EGRN {               " Event generator run structure  "_
         INT   generator              " event generator identification ",
         CHAR  eg_name(8)             " event generator name           ",
         REAL  eg_versn               " version of event generator     ",
@@ -274,7 +339,7 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
         INT   polariza(10)           " to be defined                  "_
       }
 *
-      STRUCTURE EGEV {               " Event generator event structure"_
+  Old STRUCTURE EGEV {               " Event generator event structure"_
         INT   n_event                " eg event number                ",
         REAL  b_impact               " actual impact parameter        ",
         REAL  phi_impa               " reaction plane                 ",
@@ -294,7 +359,7 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
         INT   p_fsvert               " pointer to ll of final state vert"_
       }
 *
-   structure uevn {                      _
+  Old structure uevn {                      _
         char author(20), char machine(20), 
         int date, int time, version,
         int ge_run,
@@ -369,73 +434,9 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
    call GsHEAD (len_egrn-2, Bank_egrn(3), iadr)
    call GsHEAD (len_egev-2, Bank_egev(3), iadr)
    call GsHEAD (len_uevn-2, Bank_uevn(3), iadr)
-   print *,' HepeHeader: geant header set with length =',iadr
+   print *,' Header: geant header set with length =',iadr
 *
    end
-
-*****************************************************************************
- module  HEPEVNT  is the HEPEVNT event header
- author  P.Nevski
- created at night
-*****************************************************************************
-+CDE,AGECOM,GCBANK,SCLINK,RBBANK.
-
- Old Structure PASS {int SYS1, int SYS2, int SYS3, int PJID,int GJID,int EVID}
-
- Old Structure GENE {int SYS1, int SYS2, int SYS3, int GRUN,int GEVT,
-                     Char GNAM, VRTX, VRTY, VRTZ, VRTT, int WTFL, WEIG }
-
- Old Structure GENT {int STAT, int PDGC, int MOT1,int MOT2, int DAU1,int DAU2,
-                     PX, PY, PZ, ENER, MASS, VERTX, VERTY, VERTZ, TIME }
-
-     If (LkEvnt==0) Call MZBOOK(IxDIV,LKAR P2,LkEvnt, 1,'EVNT',2,2,7,2,0)
-
-     IrbDIV=IxDIV;         LKARP2=LkEvnt
-     Fill /EVNT/PASS(1)  ! Pass Record Bank
-        SYS1 = 1         !  Format flag
-        SYS2 = 1         !  Member system word = 100000*NG+NM NGEN 
-        SYS3 = 300003    !  Modularity system word = 100000*NW+NT
-        PJID = 1         !  Pass Job ID (GJID for latest PASS bank)
-        GJID = 1         !  Generator Job ID.
-        EVID = 1         !  ZEBRA IDN of event read in or generated
-     endfill
-
-     IrbDIV=IxDIV;         LKARP2=LkEvnt
-     Fill /EVNT/GENE(1)  ! GENZ Event Bank  
-       SYS1 =     1      !  Format flag = 1
-       SYS2 =     0      !  Member system word = 100000*NG+NM 
-       SYS3 =     0      !  Modularity system word = 100000*NW+NT
-       GRUN =     0      !  Generator run number
-       GEVT =     1      !  Generator event number
-       GNAM = 'VENUS'    !  Generator name
-       VRTX =   0.0      !  Interaction vertex position in metres
-       VRTY =   0.0      !  idem
-       VRTZ =   0.0      !  idem
-       VRTT =   0.0      !  Interaction vertex time in seconds
-       WTFL =     1      !  Interaction weight flag
-       WEIG =  1.00      !  Interaction weight  
-     endfill
- 
-     IrbDIV=IxDIV;             LKARP2=LkEvnt
-     Fill /EVNT/GENE/GENT(1) ! HEPEVT parton level data 
-       STAT  =   0       !  Status flag
-       PDGC  =   0       !  PDG particle code
-       MOT1  =   0       !  First mother
-       MOT2  =   0       !  Second mother. If -ve, mothers give a range
-       DAU1  =   0       !  First daughter. If<0, reference to GEANT
-       DAU2  =   0       !  Last daughter.  If<0, reference to GEANT
-       PX    = 0.0       !  x-Momentum of particle in GeV/c
-       PY    = 0.0       !  idem in y
-       PZ    = 0.0       !  idem in z
-       ENER  = 0.0       !  particle Total Energy 
-       MASS  = 0.0       !  Mass in GeV/c. Not necessarily the on-shell m
-       VERTX = 0.0       !  particle origin in x
-       VERTY = 0.0       !  idem in y
-       VERTZ = 0.0       !  idem in z
-       TIME  = 0.0       !  Start time of particle relative to the interact
-     endfill
-
- end
 
 
 
