@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.9 1999/02/14 20:44:32 lasiuk Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.10 1999/02/16 23:40:32 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,9 +11,8 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
- * Revision 1.9  1999/02/14 20:44:32  lasiuk
- * gas gain settable via member function
- * escape if min()<0
+ * Revision 1.10  1999/02/16 23:40:32  lasiuk
+ * check clear/add entry
  *
  *
  * Revision 1.10  1999/02/16 23:40:32  lasiuk
@@ -218,7 +217,8 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 void StTrsWireHistogram::clear()
 {
     for(int ii=mMin; ii<= mMax; ii++) {
-    mMax = -1;	
+        if(ii<0) continue; // Iwona and Herb, April 20 1999.
+	mSectorWires[ii].clear();
     }
     mMin = -1;
     mMax = -1;
