@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtThreeParticleAnalysis.cxx,v 1.6 2001/06/03 20:56:40 willson Exp $
+ * $Id: StHbtThreeParticleAnalysis.cxx,v 1.7 2002/08/22 13:14:25 willson Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtThreeParticleAnalysis.cxx,v $
+ * Revision 1.7  2002/08/22 13:14:25  willson
+ * Removed some warnings
+ *
  * Revision 1.6  2001/06/03 20:56:40  willson
  * Sectoring, Cos(phi) calculation added
  *
@@ -457,8 +460,8 @@ void StHbtThreeParticleAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
     }  //  normal correlation function calculation
     
     if (mCalcCosPhi) {
-      double bin1,bin2,bin3,bin4,C2Q12,C2Q23,C2Q31,C3,arg1,arg2,arg3,arg4,cosphi,cosphiError,termt;
-      
+      double C2Q12,C2Q23,C2Q31,C3,arg1,arg2,arg3,arg4,cosphi,cosphiError,termt;
+      int bin1,bin2,bin3,bin4;
       // event cut and event cut monitor
       bool tmpPassEvent = mEventCut->Pass(hbtEvent);
       mEventCut->FillCutMonitor(hbtEvent, tmpPassEvent);
@@ -1196,8 +1199,8 @@ int StHbtThreeParticleAnalysis::CreateRealTriplets(StHbtSectoredPicoEvent *picoE
 //_________________________
 int StHbtThreeParticleAnalysis::CalculateCosPhi(StHbtSectoredPicoEvent *picoEvent, int Index1) {
 
-  double bin1,bin2,bin3,bin4,C2Q12,C2Q23,C2Q31,C3,arg1,arg2,arg3,arg4,cosphi,cosphiError,termt;
-  int NumTriplets=0;
+  double C2Q12,C2Q23,C2Q31,C3,arg1,arg2,arg3,arg4,cosphi,cosphiError,termt;
+  int bin1,bin2,bin3,bin4,NumTriplets=0;
 
   StHbtParticleCollection *partColl1 = picoEvent->FirstSectoredCollection()[Index1];
 
@@ -1282,8 +1285,8 @@ int StHbtThreeParticleAnalysis::CalculateCosPhi(StHbtSectoredPicoEvent *picoEven
 //_________________________
 int StHbtThreeParticleAnalysis::CalculateCosPhi(StHbtSectoredPicoEvent *picoEvent, int Index1, int Index2) {
 
-  double bin1,bin2,bin3,bin4,C2Q12,C2Q23,C2Q31,C3,arg1,arg2,arg3,arg4,cosphi,cosphiError,termt;
-  int NumTriplets=0;
+  double C2Q12,C2Q23,C2Q31,C3,arg1,arg2,arg3,arg4,cosphi,cosphiError,termt;
+  int bin1,bin2,bin3,bin4,NumTriplets=0;
 
   if (Index1==-1 || Index2==-1) return 0;
 
@@ -1435,8 +1438,8 @@ int StHbtThreeParticleAnalysis::CalculateCosPhi(StHbtSectoredPicoEvent *picoEven
 //_________________________
 int StHbtThreeParticleAnalysis::CalculateCosPhi(StHbtSectoredPicoEvent *picoEvent, int Index1, int Index2, int Index3) {
 
-  double bin1,bin2,bin3,bin4,C2Q12,C2Q23,C2Q31,C3,arg1,arg2,arg3,arg4,cosphi,cosphiError,termt;
-  int NumTriplets=0;
+  double C2Q12,C2Q23,C2Q31,C3,arg1,arg2,arg3,arg4,cosphi,cosphiError,termt;
+  int bin1,bin2,bin3,bin4,NumTriplets=0;
 
   if (Index1==-1 || Index2==-1 || Index3==-1) return 0;
 
