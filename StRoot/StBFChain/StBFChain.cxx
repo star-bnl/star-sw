@@ -177,7 +177,8 @@ BfcItem BFC[] = {
   {"FlowAnalysis","","TagsChain","Event,Flow"       ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
   {"StrangeTags" ,"","TagsChain","Event"              ,"StStrangeTagsMaker","StStrangeTagsMaker","",kFALSE},
   {"EbyeScaTags" ,"","TagsChain","Event"              ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
-  {"tags"        ,"","TagsChain","TagsChain,globT,Event,FlowTag,StrangeTags,EbyeScaTags,TpcTag"    
+  {"PCollTag"    ,"","TagsChain","Event"                    ,"StPCollTagMaker","StPCollTagMaker","",kFALSE},
+  {"tags"        ,"","TagsChain","TagsChain,globT,Event,FlowTag,StrangeTags,EbyeScaTags,TpcTag,PCollTag"    
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
   {"QA"          ,"QA","","globT,SCL,global"                        ,"St_QA_Maker","St_QA_Maker","",kFALSE},
   {"EventQA"     ,"EventQA","","Event"                           ,"StEventQAMaker","St_QA_Maker","",kFALSE},
@@ -230,10 +231,10 @@ Int_t StBFChain::Load()
       if (strlen(fBFC[i].Libs) > 0) { 
 	TString *Libs[80];
 	Int_t NParsed = ParseString(fBFC[i].Libs,Libs);
-	TString lib(gSystem->GetLibraries(0,"D")); 
-	TString *LoadedLibs[80];
-	Int_t NLoaded = ParseString(lib,LoadedLibs);
 	for (j=0;j<=NParsed;j++) {
+	  TString lib(gSystem->GetLibraries(0,"D")); 
+	  TString *LoadedLibs[80];
+	  Int_t NLoaded = ParseString(lib,LoadedLibs);
 	  TString libe(*Libs[j]);
 	  libe.Append(".so");
 	  for (l = 0; l < 2; l++) { // so / sl
@@ -632,7 +633,7 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
   if (fInFile) gMessMgr->QAInfo() << "Input file name = " << fInFile->Data() << endm;
   if (outfile)               fFileOut = new TString(outfile);
   else {
-    if (GetOption("gstar"))  fFileOut = new TString("gtrack");
+    if (GetOption("gstar"))  fFileOut = new TString("gtrack.root");
     else {
       if (fInFile) {
 	fFileOut = new TString(gSystem->BaseName(fInFile->Data()));
@@ -757,8 +758,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.100 2000/06/13 17:22:14 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.101 2000/06/14 21:17:58 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.101  2000/06/14 21:17:58  fisyak
+// PCollTag into tags chain
+//
 // Revision 1.100  2000/06/13 17:22:14  fisyak
 // Add Kalman to p00h
 //
