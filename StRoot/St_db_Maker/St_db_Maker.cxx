@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.52 2001/11/07 18:02:28 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.53 2002/01/17 23:45:32 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.53  2002/01/17 23:45:32  perev
+// TimeStamp for nonexisting table fixed
+//
 // Revision 1.52  2001/11/07 18:02:28  perev
 // reurn into InitRun added
 //
@@ -461,7 +464,8 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
   TDataSet *newGuy=0;
 SWITCH:  switch (kase) {
   
-    case 0:   break;  
+    case 0:   val->fTimeMin = valsSQL[0];  val->fTimeMax = valsSQL[1];  
+              kase=4; goto SWITCH;
     
     case 1:   val->fTimeMin = valsSQL[0];  val->fTimeMax = valsSQL[1]; 
               ds->GetParent()->AddFirst(val->fDat);
