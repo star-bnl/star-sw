@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.50 2003/09/05 18:01:37 posk Exp $
+// $Id: doFlowEvents.C,v 1.51 2003/11/14 20:01:22 oldi Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -47,6 +47,7 @@
 //              Art Poskanzer
 //              Raimond Snellings
 //              Kirill Filimonov
+//              Markus Oldenburg
 //  
 ///////////////////////////////////////////////////////////////////////////////
 #include <iostream.h> // needed on Solaris
@@ -230,7 +231,15 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   Bool_t includeFtpcTracks = kTRUE;
 //   Float_t ptRange_for_vEta[2] = {0., 2.};
 //   Float_t etaRange_for_vPt[2] = {2., 5.};
-
+  
+  // To calculate v1{EP1,EP2} use the following switch.
+  // Since v1{EP1} doesn't work very well at RHIC energies, v1{EP1,EP2} is set to be 
+  // the default.
+  // To make full use of it, the cuts for Har1 should allow for FTPC tracks only, 
+  // while the cuts for Har2 should use TPC tracks only. This method works for 
+  // eta subevents (SetEtaSubs(kTRUE)) and random subevents (SetEtaSubs(kFALSE)).
+  Bool_t v1Ep1Ep2 = kTRUE;
+  //  Bool_t v1Ep1Ep2 = kFALSE;
 
   if (makerName[0]=='\0') { // blank if there is no selection object
     if (anaMaker) {
@@ -238,6 +247,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
       flowAnalysisMaker->SetHistoRanges(includeFtpcTracks);
       flowAnalysisMaker->SetPtRange_for_vEta(ptRange_for_vEta[0], ptRange_for_vEta[1]);
       flowAnalysisMaker->SetEtaRange_for_vPt(etaRange_for_vPt[0], etaRange_for_vPt[1]);
+      flowAnalysisMaker->SetV1Ep1Ep2(v1Ep1Ep2);
     }
     if (cumMaker) {
       StFlowCumulantMaker*  flowCumulantMaker = new StFlowCumulantMaker();
@@ -255,6 +265,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
       flowAnalysisMaker->SetHistoRanges(includeFtpcTracks);
       flowAnalysisMaker->SetPtRange_for_vEta(ptRange_for_vEta[0], ptRange_for_vEta[1]);
       flowAnalysisMaker->SetEtaRange_for_vPt(etaRange_for_vPt[0], etaRange_for_vPt[1]);
+      flowAnalysisMaker->SetV1Ep1Ep2(v1Ep1Ep2);
     }
     if (cumMaker) {
       sprintf(makerName, "FlowCumulant");
@@ -364,7 +375,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   // Make Eta subevents
 //     StFlowEvent::SetEtaSubs();
 
-  // Disenable weights in the event plane calculation
+  // Disable weights in the event plane calculation
 //   StFlowEvent::SetPtWgt(kFALSE);
 //   StFlowEvent::SetPtWgtSaturation(2.);
 //   StFlowEvent::SetEtaWgt(kFALSE);
@@ -550,6 +561,10 @@ void doFlowEvents(const Int_t nevents, Bool_t phiWgtOnly) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.51  2003/11/14 20:01:22  oldi
+// Implementation of v1{EP1,EP2}. This method is set to be the default for v1 now!
+// Minor code clean-ups.
+//
 // Revision 1.50  2003/09/05 18:01:37  posk
 // Updated list of shared libraries.
 //

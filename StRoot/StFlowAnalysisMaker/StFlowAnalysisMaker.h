@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.42 2003/09/10 19:47:14 perev Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.43 2003/11/14 20:00:43 oldi Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -56,8 +56,9 @@ public:
   void     SetHistoRanges(Bool_t ftpc_included = kFALSE);
   void     SetPtRange_for_vEta(Float_t lo, Float_t hi);
   void     SetEtaRange_for_vPt(Float_t lo, Float_t hi);
+  void     SetV1Ep1Ep2(Bool_t v1Ep1Ep2 = kTRUE);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.42 2003/09/10 19:47:14 perev Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.43 2003/11/14 20:00:43 oldi Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -222,6 +223,8 @@ private:
   Float_t mPtRange_for_vEta[2];
   Float_t mEtaRange_for_vPt[2];
 
+  Bool_t mV1Ep1Ep2;
+
   ClassDef(StFlowAnalysisMaker,0)              // macro for rootcint
 };
 
@@ -236,6 +239,10 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.43  2003/11/14 20:00:43  oldi
+// Implementation of v1{EP1,EP2}. This method is set to be the default for v1 now!
+// Minor code clean-ups.
+//
 // Revision 1.42  2003/09/10 19:47:14  perev
 // ansi corrs
 //
