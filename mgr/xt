@@ -52,8 +52,9 @@ if (($comp =~ /^rsgi/) || ($comp =~ /^ribm/) || ($comp =~ /^rnfs/) ||
   $com = $ssh . " "  . $comp . ".physics.purdue.edu xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
 } elsif ($comp =~ /^rhic/ ) {
   $com = $ssh . " "  . $comp . ".physics.wayne.edu xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
-} elsif (($comp =~ /^sol/) || ($comp =~ /^flynn/) || ($comp =~ /^elvis/) || 
-         ($comp =~ /^robinson/) || ($comp =~ /^pickford/)){
+} elsif ($comp =~ /^sol/ || $comp =~ /^flynn/ || $comp =~ /^elvis/ || 
+         $comp =~ /^robinson/ || $comp =~ /^pickford/ || $comp =~ /^connery/ ||
+	 $comp =~ /^coburn/){
   $com = $ssh . " "  . $comp . ".star.bnl.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
 } elsif ($comp eq "-v") {
   print ("\nXterminal utility program, version 1.0, by Alex Lenderman, RCF\n");
