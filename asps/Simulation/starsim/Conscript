@@ -1,5 +1,15 @@
 #!/opt/star/bin/perl
 #use Env;
+############################################################
+# $Id: Conscript,v 1.10 2004/11/23 01:38:46 potekhin Exp $
+#
+# $Log: Conscript,v $
+# Revision 1.10  2004/11/23 01:38:46  potekhin
+# Added i386 to the "if" statement to insure compilation
+# on the older RH 7.x systems. Added the CVS ID line for
+# better documentation.
+#
+############################################################
 Import qw ( env INCLUDE LIB BIN BUILD OBJ);
 (my $build = $OBJ) =~ s/\#//g;
 $build =~ s/\\/\//g;# print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
@@ -40,7 +50,7 @@ if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^i386/ or $STAR_SYS =~ /^sl/) {
   $FPPFLAGS .= " -DCERNLIB_LINUX";
   $CPPFLAGS .= " -DCERNLIB_LINUX";
 }
-if ($STAR_SYS =~ /^rh8/ or $STAR_SYS =~ /^rh9/ or $STAR_SYS =~ /^sl/) {
+if ($STAR_SYS =~ /^rh8/ or $STAR_SYS =~ /^rh9/ or $STAR_SYS =~ /^sl/ or $STAR_SYS =~ /^i386/) {
   $FPPFLAGS .= " -DCERNLIB_MYSQL -DCERNLIB_QMGLIBC";
   $CPPFLAGS .= " -DCERNLIB_MYSQL";
   $CPPFLAGS .= " -Df2cFortran -DCERNLIB_QMGLIBC";
