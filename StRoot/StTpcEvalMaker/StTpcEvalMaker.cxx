@@ -1,6 +1,9 @@
 //-----------------------------------------------------------------------
-// * $Id: StTpcEvalMaker.cxx,v 1.3 2000/05/25 20:38:09 snelling Exp $
+// * $Id: StTpcEvalMaker.cxx,v 1.4 2000/08/07 03:25:15 snelling Exp $
 // * $Log: StTpcEvalMaker.cxx,v $
+// * Revision 1.4  2000/08/07 03:25:15  snelling
+// * Added selection on tracks
+// *
 // * Revision 1.3  2000/05/25 20:38:09  snelling
 // * Added TPC evaluation histograms
 // *
@@ -37,6 +40,9 @@ using std::distance;
 #include "St_DataSetIter.h"
 #include "TFile.h"
 #include "TH2.h"
+#include "TProfile.h"
+#include "TProfile2D.h"
+
 #include "StTpcDb/StTpcDbMaker.h"
 #include "StMessMgr.h"
 
@@ -60,7 +66,7 @@ using std::distance;
 #include "StTpcEvalEvent.h"
 #include "StTpcEvalHistograms.h"
 
-static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.3 2000/05/25 20:38:09 snelling Exp $";
+static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.4 2000/08/07 03:25:15 snelling Exp $";
 ClassImp(StTpcEvalMaker)
 
 //-------------------------------------------------
@@ -240,6 +246,10 @@ void StTpcEvalMaker::HitIteration() {
 	   hitIter !=
 	     mcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();
 	   hitIter++) {
+	// skip certain monte carlo Hits
+	//	if ((*hitIter)->parentTrack()->momentum().mag() < .1) continue;
+	//	if ((*hitIter)->parentTrack()->startVertex() != 
+	//	    mStMcEvent->primaryVertex()) continue;
 	// calculate the number of Generated Hits per padrow
 	nGeneratedHits[irow]++;
 	// access StAssociationMaker mc tpc hit map information
@@ -325,14 +335,14 @@ void StTpcEvalMaker::HitIteration() {
 
   // Fill efficiency and purity histograms
 
-  float HitEfficiency[45];
-  float HitPurity[45];
+  float HitEfficiency;
+  float HitPurity;
 
   for (unsigned int i = 0; i < 45; i++) {
-    HitEfficiency[i] = (float)nAssociatedHits[i] / (float)nGeneratedHits[i];
-    HitPurity[i] = (float)nAssociatedHits[i] / (float)nReconstructedHits[i];
-    histograms.mHitEfficiency->Fill((float) i+1, HitEfficiency[i]);
-    histograms.mHitPurity->Fill((float) i+1, HitPurity[i]);
+    HitEfficiency = (float)nAssociatedHits[i] / (float)nGeneratedHits[i];
+    HitPurity = (float)nAssociatedHits[i] / (float)nReconstructedHits[i];
+    histograms.mHitEfficiency->Fill((float)i+1, HitEfficiency);
+    histograms.mHitPurity->Fill((float) i+1, HitPurity);
   }
 }
 

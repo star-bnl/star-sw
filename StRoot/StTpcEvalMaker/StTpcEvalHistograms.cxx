@@ -1,5 +1,8 @@
-// $Id: StTpcEvalHistograms.cxx,v 1.2 2000/05/25 20:38:09 snelling Exp $
+// $Id: StTpcEvalHistograms.cxx,v 1.3 2000/08/07 03:25:14 snelling Exp $
 // $Log: StTpcEvalHistograms.cxx,v $
+// Revision 1.3  2000/08/07 03:25:14  snelling
+// Added selection on tracks
+//
 // Revision 1.2  2000/05/25 20:38:09  snelling
 // Added TPC evaluation histograms
 //
@@ -16,6 +19,8 @@
 #include "TH2.h"
 #include "TNtuple.h"
 #include "TClonesArray.h"
+#include "TProfile.h"
+#include "TProfile2D.h"
 
 #include "StTpcEvalEvent.h"
 #include "StTpcEvalHistograms.h"
@@ -174,15 +179,15 @@ void StTpcEvalHistograms::Book() {
   mcPadSepEfficiencyInner->SetXTitle("delta x (cm)");
   mcPadSepEfficiencyInner->SetYTitle("delta z (cm)");
 
-  mHitEfficiency = new TH2F("HitEfficiency","Hit Efficiency versus padrow", 
-				      45, 1., 46., 50, 0., 1.);
+  mHitEfficiency = new TProfile("HitEfficiency","Hit Efficiency versus padrow", 
+				      45, 1., 46., 0., 10., "");
   mHitEfficiency->SetXTitle("Padrow Nr");
   mHitEfficiency->SetYTitle("Efficiency");
   mHitEfficiency->SetMarkerColor(2);
   mHitEfficiency->SetMarkerStyle(29);
 
-  mHitPurity = new TH2F("HitPurity","Hit Purity versus padrow", 
-				      45, 1., 46., 50, 0., 1.);
+  mHitPurity = new TProfile("HitPurity","Hit Purity versus padrow", 
+				      45, 1., 46., 0., 10., "");
   mHitPurity->SetXTitle("Padrow Nr");
   mHitPurity->SetYTitle("Purity");
   mHitPurity->SetMarkerColor(2);

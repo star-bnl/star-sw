@@ -1,5 +1,8 @@
-// $Id: StTpcEval.C,v 1.3 2000/06/22 18:11:13 snelling Exp $
+// $Id: StTpcEval.C,v 1.4 2000/08/07 03:25:13 snelling Exp $
 // $Log: StTpcEval.C,v $
+// Revision 1.4  2000/08/07 03:25:13  snelling
+// Added selection on tracks
+//
 // Revision 1.3  2000/06/22 18:11:13  snelling
 // Fixed DataBase and EMC dependencies
 //
@@ -87,15 +90,15 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
 
     // Define the swithes for the TpcEvalMaker
     mTpcEval->DoHitIteration(kTRUE);
-    mTpcEval->DoHitSeparation(kFALSE);
-    //    mTpcEval->DoHitSeparation(kTRUE);
+    //   mTpcEval->DoHitSeparation(kFALSE);
+        mTpcEval->DoHitSeparation(kTRUE);
 
     // Define the cuts for the Associations
     StMcParameterDB* parameterDB = StMcParameterDB::instance();  
     // TPC
     parameterDB->setXCutTpc(.5); // 5 mm
     parameterDB->setYCutTpc(.5); // 5 mm
-    parameterDB->setZCutTpc(1.5); // 5 mm
+    parameterDB->setZCutTpc(1.); // 5 mm
     parameterDB->setReqCommonHitsTpc(3); // Require 3 hits in common for tracks to be associated
     // FTPC
     parameterDB->setRCutFtpc(.3); // 3 mm

@@ -1,5 +1,8 @@
-// $Id: StTpcEvalHistograms.h,v 1.2 2000/05/25 20:38:09 snelling Exp $
+// $Id: StTpcEvalHistograms.h,v 1.3 2000/08/07 03:25:14 snelling Exp $
 // $Log: StTpcEvalHistograms.h,v $
+// Revision 1.3  2000/08/07 03:25:14  snelling
+// Added selection on tracks
+//
 // Revision 1.2  2000/05/25 20:38:09  snelling
 // Added TPC evaluation histograms
 //
@@ -14,6 +17,8 @@
 class TH1F;
 class TH2F;
 class TNtuple;
+class TProfile;
+class TProfile2D;
 class TClonesArray;
 class MatchedTrackPair; //!
 
@@ -52,8 +57,8 @@ class StTpcEvalHistograms : public StObject {
   TH1F*     rcUnmatchedHitPositionSector; //! for rec. hits that are not matched to any M.C. hit
   TH1F*     rcUnmatchedHitPositionZ; //! for rec. hits that are not matched to any M.C. hit
 
-  TH2F*     mHitEfficiency;     //! 
-  TH2F*     mHitPurity;         //! 
+  TProfile* mHitEfficiency;     //! 
+  TProfile* mHitPurity;         //! 
 
   TH2F*     rcPadSepEfficiencyOuter;  //! 
   TH2F*     mcPadSepEfficiencyOuter;  //! 
