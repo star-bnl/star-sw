@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.6 2004/04/09 16:11:18 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.7 2004/05/03 23:08:50 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,8 +12,8 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
- * Revision 1.6  2004/04/09 16:11:18  dongx
- * comment out a potential bug causing crash
+ * Revision 1.7  2004/05/03 23:08:50  dongx
+ * change according to the update of StTofrGeometry, save CPU time by 100 times
  *
  * Revision 1.5  2004/04/01 20:08:54  dongx
  * fix a bug about the hit position stored in TofCell
@@ -40,6 +40,7 @@
 #include "StEventUtilities/StuRefMult.hh"
 #include "PhysicalConstants.h"
 #include "StPhysicalHelixD.hh"
+#include "StHelix.hh"
 #include "StTofUtil/tofPathLength.hh"
 #include "StTofUtil/StTofrDaqMap.h"
 #include "StTofUtil/StTofrGeometry.h"
@@ -143,7 +144,8 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
     mTofrGeom->Init(starHall);
   }
   // other makers can get this geometry
-  AddConst(new TObjectSet("tofrGeometry",mTofrGeom)); 
+//   if(TDataSet *geom = GetDataSet("tofrGeometry")) delete geom;
+//   AddConst(new TObjectSet("tofrGeometry",mTofrGeom)); 
 
   if(Debug()) {
     gMessMgr->Info(" Test the TofrGeometry","OS");
@@ -163,7 +165,7 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
     TVolumeView *sectorVolume = 0;
     for(Int_t i=0;i<list->GetSize();i++) {
       sectorVolume = dynamic_cast<TVolumeView*> (list->At(i));
-      if ( i>60 ) ibtoh = 1;
+      if ( i>=60 ) ibtoh = 1;
       gMessMgr->Info("","OS") << " test sector size = " <<sectorVolume->GetListSize() << endm;
       StTofrGeomTray *tray = new StTofrGeomTray(ibtoh, sectorVolume, topNode);
       tray->Print();
@@ -371,6 +373,7 @@ Int_t StTofrMatchMaker::Make(){
   //  idVector validCellIdVec;
   tofCellHitVector daqCellsHitVec;
   //  daqCellsHitVec.clear();
+  idVector validModuleVec;
 
   for (Int_t i=0;i<mNTOFR;i++){
     Float_t rawAdc = mTofrAdc[i];
@@ -388,24 +391,41 @@ Int_t StTofrMatchMaker::Make(){
       aDaqCellHit.tray = IDtray;
       aDaqCellHit.module = IDmodule;
       aDaqCellHit.cell = IDcell;
-      daqCellsHitVec.push_back(aDaqCellHit);  
+      daqCellsHitVec.push_back(aDaqCellHit);
+      // additional valid number configuration
+      int id = IDtray*100+IDmodule;
+      bool ifind = kFALSE;
+      for(size_t iv=0;iv<validModuleVec.size();iv++) {
+	if(id==validModuleVec[iv]) {
+	  ifind = kTRUE;
+	  break;
+	}
+      }
+      if(!ifind) validModuleVec.push_back(id);
+
       if (mHisto) {
 	mDaqOccupancyValid->Fill(i);
 	Int_t adcchan = mDaqMap->DaqChan2ADCChan(i);
 	Int_t tdcchan = mDaqMap->DaqChan2TDCChan(i);
 	mADCTDCCorelation->Fill(tdcchan, adcchan);
       }
-      if(Debug())
+      if(Debug()) {
 	gMessMgr->Info("","OS") <<"A: daqId=" << i << "  rawAdc= " << rawAdc << " rawTdc="<< rawTdc <<endm;
+      }
     }
   }
   // end of Sect.A
-  if(Debug())
+  if(Debug()) {
     gMessMgr->Info("","OS") << "    total # of cells = " << daqCellsHitVec.size() << endm;
+    for(size_t iv = 0;iv<validModuleVec.size();iv++) {
+      gMessMgr->Info("","OS") << " module # " << validModuleVec[iv] << " Valid! " << endm;
+    }
+  }
   if(mHisto) {
     mCellsMultInEvent->Fill(daqCellsHitVec.size());
     if(daqCellsHitVec.size()) mEventCounterHisto->Fill(6);
   }
+  if(!daqCellsHitVec.size()) return kStOK;
 
   //.........................................................................
   // B. loop over global tracks and determine all cell-track matches
@@ -426,6 +446,9 @@ Int_t StTofrMatchMaker::Make(){
       nAllTracks++;
       StPhysicalHelixD theHelix = trackGeometry(theTrack)->helix();
 
+      IntVec projTrayVec;
+      if(!mTofrGeom->projTrayVector(theHelix, projTrayVec)) continue;
+
       IntVec idVec;
       DoubleVec pathVec;
       PointVec  crossVec;
@@ -435,7 +458,8 @@ Int_t StTofrMatchMaker::Make(){
 //       crossVec.clear();
 
       Int_t ncells = 0;
-      if(mTofrGeom->HelixCrossCellIds(theHelix,idVec,pathVec,crossVec) ) {
+      //      if(mTofrGeom->HelixCrossCellIds(theHelix,idVec,pathVec,crossVec) ) {
+      if(mTofrGeom->HelixCrossCellIds(theHelix, validModuleVec, projTrayVec, idVec, pathVec, crossVec)) {
 	Int_t cells = idVec.size();
 	for (Int_t i=0; i<cells; i++) {
             Int_t icell,imodule,itray;
@@ -447,8 +471,13 @@ Int_t StTofrMatchMaker::Make(){
             global[1]=crossVec[i].y();
             global[2]=crossVec[i].z();
             mTofrGeom->DecodeCellId(idVec[i], icell, imodule, itray);
+	    //	    cout << " decode " << idVec[i] << "  to tray#" << itray << " module#" << imodule << " cell#" << icell << endl;
 	    StTofrGeomSensor* sensor = 
                   mTofrGeom->GetGeomSensor(imodule,itray);
+	    if(!sensor) {
+	      gMessMgr->Warning("","OS") << " No sensitive module in the projection??? -- Something weird!!! " << endm;
+	      continue;
+	    }
             sensor->Master2Local(&global[0],&local[0]);
             icell = sensor->FindCellIndex(local);
 	    //	    StThreeVectorD glo=sensor->GetCenterPosition();
@@ -915,7 +944,7 @@ Int_t StTofrMatchMaker::Make(){
   }
   if (doPrintCpuInfo) {
     timer.stop();
-    gMessMgr->Info("","OS") << "CPU time for StEventMaker::Make(): "
+    gMessMgr->Info("","OS") << "CPU time for StTofrMatchMaker::Make(): "
 	 << timer.elapsedTime() << " sec\n" << endm;
   }
 
@@ -1029,39 +1058,41 @@ void StTofrMatchMaker::writeHistogramsToFile(){
 
   theHistoFile->cd();
 
-  mEventCounterHisto->Write();
-  mADCTDCCorelation->Write();
-  mCellsMultInEvent->Write();
-  mHitsMultInEvent->Write();
-  mHitsMultPerTrack->Write();
-  mDaqOccupancy->Write();
-  mDaqOccupancyValid->Write();
-  mDaqOccupancyProj->Write();
-  mHitsPosition->Write();
+  if(mHisto) {
+    mEventCounterHisto->Write();
+    mADCTDCCorelation->Write();
+    mCellsMultInEvent->Write();
+    mHitsMultInEvent->Write();
+    mHitsMultPerTrack->Write();
+    mDaqOccupancy->Write();
+    mDaqOccupancyValid->Write();
+    mDaqOccupancyProj->Write();
+    mHitsPosition->Write();
+    
+    mCellsPerEventMatch1->Write();
+    mHitsPerEventMatch1->Write();
+    mCellsPerTrackMatch1->Write();
+    mTracksPerCellMatch1->Write();
+    mDaqOccupancyMatch1->Write();
+    mDeltaHitMatch1->Write();
+    
+    mCellsPerEventMatch2->Write();
+    mHitsPerEventMatch2->Write();
+    mCellsPerTrackMatch2->Write();
+    mTracksPerCellMatch2->Write();
+    mDaqOccupancyMatch2->Write();
+    mDeltaHitMatch2->Write();
 
-  mCellsPerEventMatch1->Write();
-  mHitsPerEventMatch1->Write();
-  mCellsPerTrackMatch1->Write();
-  mTracksPerCellMatch1->Write();
-  mDaqOccupancyMatch1->Write();
-  mDeltaHitMatch1->Write();
-
-  mCellsPerEventMatch2->Write();
-  mHitsPerEventMatch2->Write();
-  mCellsPerTrackMatch2->Write();
-  mTracksPerCellMatch2->Write();
-  mDaqOccupancyMatch2->Write();
-  mDeltaHitMatch2->Write();
-
-  mCellsPerEventMatch3->Write();
-  mHitsPerEventMatch3->Write();
-  mCellsPerTrackMatch3->Write();
-  mTracksPerCellMatch3->Write();
-  mDaqOccupancyMatch3->Write();
-  mDeltaHitMatch3->Write();
-
-  theHistoFile->Write();  
-  theHistoFile->Close();    
+    mCellsPerEventMatch3->Write();
+    mHitsPerEventMatch3->Write();
+    mCellsPerTrackMatch3->Write();
+    mTracksPerCellMatch3->Write();
+    mDaqOccupancyMatch3->Write();
+    mDeltaHitMatch3->Write();
+    
+    theHistoFile->Write();  
+    theHistoFile->Close();    
+  }
 
   return;
 }
