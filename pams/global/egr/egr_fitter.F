@@ -206,7 +206,7 @@ C**
          enddo                  ! Loop over ithit
       endif                     ! usetpc.gt.0
          
-         
+    
       do i=1,svt_track_h.nok
          if( svt_track(i).id .le. mxtrack) then
             svt(svt_track(i).id) = i
@@ -236,7 +236,7 @@ C**
 c     mark spts as used if not using primary vertex
                do ient = 1, gtrk(itpct).nhit
                   ithit = gtrk(itpct).ipnt(ient)
-                  if( gtrk(itpct).det(ient) .eq. 1 ) then
+                  if( gtrk(itpct).det(ient) .eq. 1 .and. ithit .ne. 0) then
                      
                      if( gtrk(itpct).pos(ient) .lt. 0) then
                         tpc_group(ithit).ident = -1
@@ -244,7 +244,7 @@ c     mark spts as used if not using primary vertex
                      if( ipriv .eq. 0) then
                         tphit(ithit).id_globtrk = globtrk_h.nok
                      endif
-                  elseif( gtrk(itpct).det(ient) .eq. 2)  then  
+                  elseif( gtrk(itpct).det(ient) .eq. 2 .and. ithit .ne. 0)  then  
                      if( gtrk(itpct).pos(ient) .lt. 0) then
                         
                         do ishit = 1, svt_group_h.nok
@@ -254,7 +254,7 @@ c     mark spts as used if not using primary vertex
                            endif
                         enddo
                      endif
-                     if( ipriv .eq.0) then
+                     if( ipriv .eq.0 ) then
                         svt_spt(gtrk(itpct).ipnt(ient)).id_globtrk =  
      +                       globtrk_h.nok
                      endif
@@ -299,7 +299,7 @@ c     mark spts as used if not using primary vertex
 c     mark spts as used if not using primary vertex
                do ient = 1, gtrk(itpct).nhit
                   ithit = gtrk(itpct).ipnt(ient)
-                  if( gtrk(itpct).det(ient) .eq. 1) then
+                  if( gtrk(itpct).det(ient) .eq. 1 .and. ithit .ne. 0) then
                      
                      if( gtrk(itpct).pos(ient) .lt. 0) then
                         tpc_group(ithit).ident = -1
@@ -307,7 +307,7 @@ c     mark spts as used if not using primary vertex
                      if( ipriv .eq. 0) then
                         tphit(ithit).id_globtrk = globtrk_h.nok
                      endif
-                  elseif( gtrk(itpct).det(ient) .eq. 2)  then 
+                  elseif( gtrk(itpct).det(ient) .eq. 2 .and. ithit .ne. 0)  then 
                      if( gtrk(itpct).pos(ient) .lt. 0) then
                         
                         do ishit = 1, svt_group_h.nok
@@ -447,8 +447,15 @@ C     Now find first point on track.
                   if (tptrack(itrk).id.gt.0.and.
      +                 tptrack(itrk).id.le.mxtrack) then
                      ifirst = gtrk(tptrack(itrk).id).ntpc
+                     lasthit= ifirst
                      ifirst = 
-     +              gtrk(tptrack(itrk).id).ipnt(ifirst)
+     +                    gtrk(tptrack(itrk).id).ipnt(ifirst)
+                     do while(ifirst .eq.0 .and. lasthit .gt.0)
+                        lasthit = lasthit-1
+                        ifirst = 
+     +                       gtrk(tptrack(itrk).id).ipnt(lasthit)
+                    enddo
+                    if( ifirst .eq. 0) ifirst = 1
                   else
                      write (errmsg,'(A60)')
      +                    'EGR_REFITTER-W: lasthit track id error'
@@ -457,16 +464,22 @@ C     Now find first point on track.
                   globtrk(iglob).x_first(1) = tphit(ifirst).x
                   globtrk(iglob).x_first(2) = tphit(ifirst).y
                   globtrk(iglob).x_first(3) = tphit(ifirst).z
-C                  if( abs(globtrk(iglob).x_first(1)-globtrk(iglob).x0) 
-C     +                 .gt. 0.5) then
-C                     write(6,*) "Errr"
-C                  endif
+
 
 C     Now find last point on track and calculate track length.
                   if (tptrack(itrk).id.gt.0.and.
      +                 tptrack(itrk).id.le.mxtrack) then
                      lasthit = gtrk(tptrack(itrk).id).ipnt(1)
-                  else
+                     ifirst = 1
+                     do while( lasthit .eq.0 .and.
+     +                    ifirst .le.  gtrk(tptrack(itrk).id).ntpc)
+                        ifirst = ifirst+1
+                        lasthit = gtrk(tptrack(itrk).id).ipnt(ifirst)
+                     enddo
+                     if( lasthit .gt. gtrk(tptrack(itrk).id).ntpc) then
+                        lasthit = gtrk(tptrack(itrk).id).ntpc
+                     endif
+                 else
                      write (errmsg,'(A60)')
      +                    'EGR_REFITTER-W: lasthit track id error'
                      call message(errmsg,1,imsg4)
@@ -489,7 +502,9 @@ C---<<<<<<<
                      globtrk(iglob).length=99999.9
                   endif
 
-CSM                  globtrk(iglob).id_start_vertex= 0
+                  globtrk(iglob).length = tptrack(itrk).length
+CSM               
+                  globtrk(iglob).id_start_vertex= 0
                   globtrk(iglob).curvature = tptrack(itrk).curvature
                   globtrk(iglob).method = 2**8+2**kHelix2StepId
                   globtrk(iglob).map(1) = 0
@@ -503,8 +518,10 @@ CSM                  globtrk(iglob).id_start_vertex= 0
                   do ient = 1, gtrk(itrk).ntpc
                      if( ient .le .mxpnt_tpc) then
                         ithit = gtrk(itrk).ipnt(ient)
-                        if (ithit.ne.-999) tphit(ithit).id_globtrk 
+                        if (ithit.ne.-999 .and. ithit .ne. 0) then
+                           tphit(ithit).id_globtrk 
      +                       = globtrk_h.nok
+                        endif
                      endif
                   enddo
                   tptrack(itrk).id_globtrk = globtrk_h.nok
@@ -659,7 +676,9 @@ CSM                    globtrk(iglob).id_start_vertex = 0
                        do ishit = 1, gtrk(igtrk).nhit
                           if( gtrk(igtrk).det(ishit) .eq. 2) then
                              ient = gtrk(igtrk).ipnt(ishit)
-                             svt_spt(ient).id_globtrk = globtrk_h.nok
+                             if( ient .ne. 0) then
+                                svt_spt(ient).id_globtrk = globtrk_h.nok
+                             endif
                           endif
                        enddo
                     endif
@@ -686,35 +705,37 @@ CSM                    globtrk(iglob).id_start_vertex = 0
                     do ishit = 1, gtrk(igtrk).nhit
                        if( gtrk(igtrk).det(ishit) .eq. 2) then
                           ient = gtrk(igtrk).ipnt(ishit)
-                          if( ipriv .eq. 0) then
-                             svt_spt(ient).id_globtrk = globtrk_h.nok
+                          if( ient .ne. 0) then
+                             if( ipriv .eq. 0 ) then
+                                svt_spt(ient).id_globtrk = globtrk_h.nok
+                             endif
+                             if( gtrk(igtrk).pos(ishit) .gt. 0) then
+                                globtrk(globtrk_h.nok).n_fit_point = 
+     +                               globtrk(globtrk_h.nok).n_fit_point-1+1000
+                             else 
+                                do ient=1, svt_group_h.nok
+                                   
+                                   if( svt_group(ient).id2 .eq. 
+     +                                  svt_spt(gtrk(igtrk).ipnt(ishit)).id) then
+                                      svt_group(ient).ident=-1
+                                   endif
+                                enddo
+                             endif
+                             if( svt_spt(ient).id_wafer .gt. 6000) then
+                                globtrk(globtrk_h.nok).n_point = 
+     +                               globtrk(globtrk_h.nok).n_point-1000+10000
+                                if( gtrk(igtrk).pos(ishit) .gt. 0) then
+                                   globtrk(globtrk_h.nok).n_fit_point = 
+     +                                  globtrk(globtrk_h.nok).n_fit_point-1000+10000
+                                endif
+                             endif
                           endif
-                        if( gtrk(igtrk).pos(ishit) .gt. 0) then
-                           globtrk(globtrk_h.nok).n_fit_point = 
-     +                          globtrk(globtrk_h.nok).n_fit_point-1+1000
-                        else
-                           do ient=1, svt_group_h.nok
-                              
-                              if( svt_group(ient).id2 .eq. 
-     +                             svt_spt(gtrk(igtrk).ipnt(ishit)).id) then
-                                 svt_group(ient).ident=-1
-                              endif
-                           enddo
-                        endif
-                          if( svt_spt(ient).id_wafer .gt. 6000) then
-                       globtrk(globtrk_h.nok).n_point = 
-     +                       globtrk(globtrk_h.nok).n_point-1000+10000
-                        if( gtrk(igtrk).pos(ishit) .gt. 0) then
-                       globtrk(globtrk_h.nok).n_fit_point = 
-     +                       globtrk(globtrk_h.nok).n_fit_point-1000+10000
-                       endif
-                       endif
                        endif
                     enddo
                     
                  endif          ! End of if usesvt=1
-  
-
+                 
+                 
 
                if( ipriv .eq.0) then
                  svt_track(itrk).id_globtrk = globtrk_h.nok
