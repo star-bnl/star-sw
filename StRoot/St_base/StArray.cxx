@@ -302,7 +302,7 @@ void StObjArray::random_shuffle(int start,int end)
   int lst = GetLast();
   if (start > lst)	return;
   if (end   > lst) 	end = lst;
-  if (start <= end)	return;
+  if (start >= end)	return;
 
   for (int i=start; i<end; i++) {
     int j = i + (int)(ran->Rndm()*(end-i+1)); 
@@ -573,8 +573,11 @@ void StStrArray::Streamer(TBuffer &R__b)
    }
 
 }
-// $Id: StArray.cxx,v 1.26 2000/05/20 01:12:20 perev Exp $
+// $Id: StArray.cxx,v 1.27 2000/06/01 16:32:21 perev Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.27  2000/06/01 16:32:21  perev
+// bug in random_shuffle fixed
+//
 // Revision 1.26  2000/05/20 01:12:20  perev
 // Big cleanup of StArray
 //
