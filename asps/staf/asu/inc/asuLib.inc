@@ -5,11 +5,10 @@
 */
 #ifndef ASULIB_INC
 #define ASULIB_INC
-
 #define ASU Analysis Service Utilities
+#endif /*ASULIB_INC*/
 
 /*------------------------------------------------ TEMPORARY        --*/
 #include "asu_codes.h"
 
-#endif /*ASULIB_INC*/
 
