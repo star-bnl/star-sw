@@ -102,7 +102,7 @@ int StiGeometryTransform::eastSectorForPhi(double phi, int nSectors){
 StThreeVector<double> StiGeometryTransform::centerForTpcPadrow(int sector, int padrow)
 {
     double radius = gStTpcDb->PadPlaneGeometry()->radialDistanceAtRow(padrow);
-    Double_t phi = phiForSector(sector, 12);
+    double phi = phiForSector(sector, 12);
     
     return StThreeVector<double>(radius*cos(phi), radius*sin(phi), 0.);
 }

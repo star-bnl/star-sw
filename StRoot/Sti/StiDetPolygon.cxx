@@ -50,6 +50,70 @@ void StiDetPolygon::clearAndDestroy()
     return;
 }
 
+void StiDetPolygon::reset()
+{
+    mcurrent = msidemap.begin();
+}
+
+//Set to iterator to side closest to this angle
+void StiDetPolygon::setToAngle(double angle)
+{
+    det_polygon_map::iterator where = msidemap.find( side(angle) );
+    if (where == msidemap.end() ) {
+	cout <<"StiDetPolygon::setToAngle(double) !!! ERROR: side for angle: "<<angle<<" not found"<<endl;
+	return;
+    }
+    else {
+	mcurrent = where;
+    }
+}
+
+StiDetector* StiDetPolygon::detector(unsigned int side) const
+{
+    det_polygon_map::const_iterator where = msidemap.find(side);
+    return (where!=msidemap.end()) ? (*where).second : 0;
+}
+
+//iterate through side container
+void StiDetPolygon::operator++()
+{
+    //this first if is a redundant check (in principle, you never go out of bounds, but we'll stick it in to be sure
+    if (mcurrent==msidemap.end()) {
+	mcurrent=msidemap.begin(); //Wrap around 2pi
+    }
+    else {
+	++mcurrent;
+	if (mcurrent == msidemap.end() ) {
+	    mcurrent = msidemap.begin(); //Wrap around 2pi
+	}
+    }
+    return;
+}
+
+void StiDetPolygon::operator--()
+{
+    if (mcurrent==msidemap.begin()) {
+	mcurrent = --msidemap.end(); //Wrap around 2pi
+    }
+    
+    else {
+	--mcurrent;
+    }
+    return;
+}
+
+StiDetector* StiDetPolygon::operator*() const
+{
+    return (mcurrent != msidemap.end()) ? (*mcurrent).second : 0;
+}
+
+
+
+StiDetector* StiDetPolygon::detector(double angle) const
+{
+    return ( detector( side(angle) ) );
+}
+
 void StiDetPolygon::push_back(StiDetector* layer)
 {
     double phi = layer->getCenterRefAngle();
