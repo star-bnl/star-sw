@@ -1,5 +1,8 @@
-# $Id: MakeDirs.mk,v 1.8 1999/08/24 13:27:27 fisyak Exp $
+# $Id: MakeDirs.mk,v 1.9 1999/08/24 16:00:10 fisyak Exp $
 # $Log: MakeDirs.mk,v $
+# Revision 1.9  1999/08/24 16:00:10  fisyak
+# Bug in STAR_OBJ_DIR
+#
 # Revision 1.8  1999/08/24 13:27:27  fisyak
 # Fix St_Tables name
 #
@@ -32,7 +35,7 @@ SYS_DIR := $(ROOT_DIR)/.$(STAR_HOST_SYS)
   DEP_DIR := $(SYS_DIR)/dep/$(branch)/$(DOMAIN)
   OBJ_DIR := $(SYS_DIR)/obj/$(branch)/$(DOMAIN)
   ifndef STAR_OBJ_DIR 
-    STAR_OBJ_DIR := $(STAR)/.$(STAR_HOST_SYS)/obj/$(branch)/$(PKG)
+    STAR_OBJ_DIR := $(subst $(ROOT_DIR),$(STAR),$(OBJ_DIR))
   endif
 #else
 #  LIB_DIR := $(SYS_DIR)/LIB
