@@ -1,5 +1,5 @@
 #ifndef StiFactory_H
-#define StiFactory_H 1
+#define StiFactory_H
 
 class StiFactory
 {
