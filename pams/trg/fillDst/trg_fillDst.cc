@@ -10,7 +10,7 @@
 extern "C" long type_of_call trg_fillDst_(
   TABLE_HEAD_ST     *ctu_cor_h,    CTU_COR_ST              *ctu_cor,   
   TABLE_HEAD_ST     *mwc_raw_h,    MWC_RAW_ST              *mwc_raw,   
-  TABLE_HEAD_ST     *dst_h,        DST_TRIGGERDETECTORS_ST *dst )  
+  TABLE_HEAD_ST     *dst_h,        DST_TRGDET_ST           *dst )  
 {
 /*:>--------------------------------------------------------------------
 **: ROUTINE:    trg_fillDst_
@@ -43,7 +43,7 @@ extern "C" long type_of_call trg_fillDst_(
       }
    }
 //
-//   dst_h->nok = 1 ;
+    dst_h->nok = 1 ;
 //
    return STAFCV_OK ;
    

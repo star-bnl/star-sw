@@ -1,17 +1,16 @@
-/* rl1_ks.idl */
+/* trg_fillDst.idl */
 #include "PAM.idl"
 #include "ctu_cor.idl"
 #include "mwc_raw.idl"
 /*#include "vps_raw.idl" */
-#include "dst_TriggerDetectors.idl"
+#include "dst_TrgDet.idl"
 
 interface trg_fillDst : amiModule {
         STAFCV_T call
-                ( in    ctu_cor              ctu_cor
-                , in    mwc_raw              mwc_raw
-/*                , in    vps_raw              vps_raw */
-                , out   dst_TriggerDetectors detectors
+                ( inout ctu_cor              ctu_cor
+                , inout mwc_raw              mwc_raw
+                , inout dst_TrgDet           dst
         );
 };
-/*  Last mod. for rl1_ks: $Date: 1999/02/06 01:52:56 $ */
 
+/*  Last mod. for trg_fillDst: $Date: 1999/07/11 19:34:56 $ */
