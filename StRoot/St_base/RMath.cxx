@@ -4,8 +4,11 @@
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f112/top.html 
 //
-// $Id: RMath.cxx,v 1.4 1999/09/26 02:48:50 fine Exp $
+// $Id: RMath.cxx,v 1.5 1999/09/26 23:37:50 fine Exp $
 // $Log: RMath.cxx,v $
+// Revision 1.5  1999/09/26 23:37:50  fine
+// Bug fixes for F112
+//
 // Revision 1.4  1999/09/26 02:48:50  fine
 // F112 CERNLIB package (TR matrix) has been added. No micky test yet
 //
@@ -22,6 +25,136 @@ ClassImp(RMath)
 //___________________________________________________________________________
 void RMath::mxmad_0_(int n_, float *a, float *b, float *c, int i, int j, int k)
 {
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* begin_html 
+<table border>
+<tr><td align=left>Author(s): TC  <td align=left>Library: KERNLIB 
+<tr><td align=left>Submitter: C. Letertre  <td align=left>Submitted: 01.08.1969  
+<tr><td align=left>Language: Fortran  <td align=left>Revised: 07.03.1989  
+</table>
+<BR>
+<!-- KEY VALUE="tc manipulation matrix row-wise " -->
+<P>
+<DIV ALIGN=CENTER><P ALIGN=CENTER> <IMG WIDTH=555 HEIGHT=96 ALIGN=BOTTOM ALT="tex2html_wrap271" SRC="img1.gif"  > </P></DIV>
+The routines of <TT>MXPACK</TT> compute the product of two matrices or the
+product of their transposed matrices and may add or subtract to the
+resultant matrix a third one, add or subtract one matrix from another,
+or transfer a matrix, its negative, or a multiple of it, transpose a
+given matrix, build up a unit matrix, multiply a matrix by a diagonal
+(from left or from right) and may add the result to another matrix,
+add to square matrix the multiple of a diagonal matrix, compute the
+products  <IMG WIDTH=79 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline191" SRC="img2.gif"  >  ( <IMG WIDTH=16 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline193" SRC="img3.gif"  >  denotes the transpose of
+ <IMG WIDTH=12 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline195" SRC="img4.gif"  > ) and  <IMG WIDTH=79 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline197" SRC="img5.gif"  > . It is assumed that matrices are
+stored <B>row-wise without gaps</B>, contrary to the Fortran convention.
+<P>
+<p><b>Structure:</b><p>
+<TT>SUBROUTINE</TT> subprograms  <BR> 
+User Entry Names:
+<TABLE COLS=8>
+<COL ALIGN=LEFT><COL ALIGN=LEFT><COL ALIGN=LEFT><COL ALIGN=LEFT><COL ALIGN=LEFT><COL ALIGN=LEFT><COL ALIGN=LEFT><COL ALIGN=LEFT>
+<TR><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>
+<A NAME=MXMAD><TT>MXMAD</TT></A>,  </TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> <A NAME=MXMAD1><TT>MXMAD1</TT></A>, </TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> <A NAME=MXMAD2><TT>MXMAD2</TT></A>, </TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> <A NAME=MXMAD3><TT>MXMAD3</TT></A>, </TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>
+<A NAME=MXMPY><TT>MXMPY</TT></A>,  </TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> <A NAME=MXMPY1><TT>MXMPY1</TT></A>, </TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> <A NAME=MXMPY2><TT>MXMPY2</TT></A>, </TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> <A NAME=MXMPY3><TT>MXMPY3</TT></A>, </TD></TR>
+<TR><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> 
+<A NAME=MXMUB><TT>MXMUB</TT></A>,  </TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> <A NAME=MXMUB1><TT>MXMUB1</TT></A>, </TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> <A NAME=MXMUB2><TT>MXMUB2</TT></A>, </TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> <A NAME=MXMUB3><TT>MXMUB3</TT></A>, </TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>
+<A NAME=MXTRP><TT>MXTRP</TT></A>,  </TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> <A NAME=MXUTY><TT>MXUTY</TT></A>,  </TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> <A NAME=MXMLRT><TT>MXMLRT</TT></A>, </TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> <A NAME=MXMLTR><TT>MXMLTR</TT></A>
+</TD></TR>
+</TABLE>
+<P>
+<p><b>Usage:</b><p>
+<B>Matrix Multiplication</B> <BR>
+<TABLE COLS=4>
+<COL ALIGN=CENTER><COL ALIGN=LEFT><COL ALIGN=CENTER><COL ALIGN=LEFT>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>
+<TT>CALL MXMPY(A,B,C,NI,NJ,NK)</TT> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>  <IMG WIDTH=132 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline199" SRC="img6.gif"  >  </TD></TR>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> 
+<TT>CALL MXMPY1(A,Q,C,NI,NJ,NK)</TT> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>  <IMG WIDTH=67 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline201" SRC="img7.gif"  >  \
+( <IMG WIDTH=12 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline203" SRC="img8.gif"  >  is  <IMG WIDTH=52 HEIGHT=18 ALIGN=MIDDLE ALT="tex2html_wrap_inline205" SRC="img9.gif"  > ) </TD></TR>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> 
+<TT>CALL MXMPY2(P,B,C,NI,NJ,NK)</TT> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>  <IMG WIDTH=66 HEIGHT=13 ALIGN=BOTTOM ALT="tex2html_wrap_inline207" SRC="img10.gif"  >  \
+( <IMG WIDTH=10 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline209" SRC="img11.gif"  >  is  <IMG WIDTH=52 HEIGHT=18 ALIGN=MIDDLE ALT="tex2html_wrap_inline211" SRC="img12.gif"  > ) </TD></TR>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> 
+<TT>CALL MXMPY3(P,Q,C,NI,NJ,NK)</TT> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>  <IMG WIDTH=71 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline213" SRC="img13.gif"  >  </TD></TR>
+</TABLE>
+ <BR>
+If  <IMG WIDTH=46 HEIGHT=10 ALIGN=BOTTOM ALT="tex2html_wrap_inline215" SRC="img14.gif"  > ,  <IMG WIDTH=11 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline217" SRC="img15.gif"  >  will be filled with zeros. <BR>
+<B>Matrix Multiplication and Addition</B> <BR>
+<TABLE COLS=4>
+<COL ALIGN=CENTER><COL ALIGN=LEFT><COL ALIGN=CENTER><COL ALIGN=LEFT>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>
+<TT>CALL MXMAD(A,B,C,NI,NJ,NK)</TT> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>
+ <IMG WIDTH=188 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline219" SRC="img16.gif"  >  </TD></TR>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> 
+<TT>CALL MXMAD1(A,Q,C,NI,NJ,NK)</TT> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>  <IMG WIDTH=100 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline221" SRC="img17.gif"  >  </TD></TR>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> 
+<TT>CALL MXMAD2(P,B,C,NI,NJ,NK)</TT> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>  <IMG WIDTH=98 HEIGHT=26 ALIGN=MIDDLE ALT="tex2html_wrap_inline223" SRC="img18.gif"  >  </TD></TR>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> 
+<TT>CALL MXMAD3(P,Q,C,NI,NJ,NK)</TT> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>  <IMG WIDTH=104 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline225" SRC="img19.gif"  >  </TD></TR>
+</TABLE>
+ <BR>
+If  <IMG WIDTH=46 HEIGHT=10 ALIGN=BOTTOM ALT="tex2html_wrap_inline227" SRC="img20.gif"  > ,  <IMG WIDTH=11 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline229" SRC="img21.gif"  >  will not be changed. <BR>
+<P>
+<B>Matrix Multiplication and Subtraction</B> <BR>
+<TABLE COLS=4>
+<COL ALIGN=CENTER><COL ALIGN=LEFT><COL ALIGN=CENTER><COL ALIGN=LEFT>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>
+<TT>CALL MXMUB(A,B,C,NI,NJ,NK)</TT> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>
+ <IMG WIDTH=188 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline231" SRC="img22.gif"  >  </TD></TR>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> 
+<TT>CALL MXMUB1(A,Q,C,NI,NJ,NK)</TT> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>  <IMG WIDTH=100 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline233" SRC="img23.gif"  >  </TD></TR>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> 
+<TT>CALL MXMUB2(P,B,C,NI,NJ,NK)</TT> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>  <IMG WIDTH=98 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline235" SRC="img24.gif"  >  </TD></TR>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> 
+<TT>CALL MXMUB3(P,Q,C,NI,NJ,NK)</TT> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>  <IMG WIDTH=104 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline237" SRC="img25.gif"  >  </TD></TR>
+</TABLE>
+ <BR>
+If  <IMG WIDTH=46 HEIGHT=10 ALIGN=BOTTOM ALT="tex2html_wrap_inline239" SRC="img26.gif"  > ,  <IMG WIDTH=11 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline241" SRC="img27.gif"  >  will be replaced by  <IMG WIDTH=23 HEIGHT=20 ALIGN=MIDDLE ALT="tex2html_wrap_inline243" SRC="img28.gif"  > .
+<BR>
+<B>Matrix Transposition</B> <BR>
+<TABLE COLS=4>
+<COL ALIGN=CENTER><COL ALIGN=LEFT><COL ALIGN=CENTER><COL ALIGN=LEFT>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>
+<TT>CALL MXTRP(A,B,NI,NJ)</TT> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>  <IMG WIDTH=94 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline245" SRC="img29.gif"  >  </TD></TR>
+</TABLE>
+ <BR>
+<B>Unity Matrix</B> <BR>
+<TABLE COLS=4>
+<COL ALIGN=CENTER><COL ALIGN=LEFT><COL ALIGN=CENTER><COL ALIGN=LEFT>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>
+<TT>CALL MXUTY(A,NI)</TT> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>  <IMG WIDTH=193 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline247" SRC="img30.gif"  >  </TD></TR>
+</TABLE>
+ <BR>
+<B>Matrix Multiplication</B> <BR>
+<TABLE COLS=4>
+<COL ALIGN=CENTER><COL ALIGN=LEFT><COL ALIGN=CENTER><COL ALIGN=LEFT>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>
+<TT>CALL MXMLRT(A,B,X,M,N)</TT> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>
+ <IMG WIDTH=294 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline249" SRC="img31.gif"  >  </TD></TR>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP> 
+<TT>CALL MXMLTR(A,B,X,N,M)</TT> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP></TD><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP>
+ <IMG WIDTH=294 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline251" SRC="img32.gif"  >  </TD></TR>
+</TABLE>
+<P>
+<p><b>Notes:</b><p>
+In the formulae above,  <IMG WIDTH=34 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline253" SRC="img33.gif"  >  <I>etc</I> denotes the ensemble of
+elements of the matrix  <IMG WIDTH=12 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline255" SRC="img34.gif"  >  <I>etc</I>
+with the row index <I>i</I> and the column index <I>j</I>.
+The Fortran variables <TT>NI</TT>, <TT>NJ</TT> and <TT>NK</TT> specify the
+dimensions associated with the indices <I>i</I>,<I>j</I> and <I>k</I>. If
+<TT>DIMENSION A(NJ,NI)</TT> reserves space for the
+matrix  <IMG WIDTH=12 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline265" SRC="img35.gif"  > , then the element  <IMG WIDTH=22 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline267" SRC="img36.gif"  >  is contained in
+<TT>A(J,I)</TT>.
+<BR>  <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline269" SRC="img37.gif"  > 
+<BR><HR>
+<P><ADDRESS>
+Michel Goossens
+Wed Jun  5 04:52:43 METDST 1996
+</ADDRESS>
+</BODY>
+</HTML>
+end_html 
+*/
+////////////////////////////////////////////////////////////////////////////////////////////////////////
     /* Local variables */
     int l, m, n, ia, ic, ib, ja, jb, iia, iib, ioa, iob;
 
@@ -738,17 +871,16 @@ L42:
 } /* trchul_ */
 
 //____________________________________________________________
-// trinv.F -- translated by f2c (version 19970219).
 /* Subroutine */float *RMath::trinv(float *t, float *s, int n)
 {
-     int lhor, ipiv, lver, i__, j;
-     double r__;
+// trinv.F -- translated by f2c (version 19970219).
+// CERN PROGLIB# F112    TRINV           .VERSION KERNFOR  4.15  861204 */
+// ORIG. 18/12/74 WH */
+
+     int lhor, ipiv, lver, j;
+     double sum = 0;
+     double r__ = 0;
      int mx, ndstep, ind;
-     double sum;
-
-
-/* CERN PROGLIB# F112    TRINV           .VERSION KERNFOR  4.15  861204 */
-/* ORIG. 18/12/74 WH */
 
 
     /* Parameter adjustments */
@@ -758,20 +890,20 @@ L42:
     mx = (n * n + n) / 2;
     ipiv = mx;
 
-    i__ = n;
+    int i = n;
     do {
-      r__ = (float)0.;
-      if (t[ipiv] > (float)0.) 	r__ = (float)1. / t[ipiv];
+      r__ = 0.;
+      if (t[ipiv] > 0.) r__ = 1. / t[ipiv];
       s[ipiv] = r__;
       ndstep = n;
-      ind = mx - n + i__;
+      ind = mx - n + i;
 
-      while (ind == ipiv) {
+      while (ind != ipiv) {
         sum = 0.;
-        if (r__ != (float)0.) {
+        if (r__ != 0.) {
           lhor = ipiv;
           lver = ind;
-          j = i__;
+          j = i;
 
           do {
             lhor += j;
@@ -785,9 +917,9 @@ L42:
         ind -= ndstep;
       }
 
-      ipiv -= i__;
-      --i__;
-    } while (i__ > 0);
+      ipiv -= i;
+      --i;
+    } while (i > 0);
 
     return 0;
 } /* trinv_ */
@@ -1081,7 +1213,7 @@ L42:
 	      lver = lpiv;
 	      lhor = ind;
 	      sum = 0.;
-	      for (k = i__; k <= n; ++k,lhor += k,lver += k) 
+	      for (k = i__; k <= n; lhor += k,lver += k,++k) 
 		      sum += g[lver] * g[lhor];	      
 	      gi[ind] = sum;
     	}
