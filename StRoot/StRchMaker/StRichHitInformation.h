@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichHitInformation.h,v 2.1 2000/09/13 21:01:58 lasiuk Exp $
+ * $Id: StRichHitInformation.h,v 2.2 2000/09/29 19:05:25 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StRichHitInformation.h,v $
- * Revision 2.1  2000/09/13 21:01:58  lasiuk
- * Initial Revision
+ * Revision 2.2  2000/09/29 19:05:25  lasiuk
+ * number of pads added as well as ostream operator
  *
  * Revision 2.1  2000/09/13 21:01:58  lasiuk
  * Initial Revision
@@ -46,6 +46,7 @@ public:
     void setCharge(float);
     void setMaxAdc(float);
     void setClusterNumber(int);
+    void setNumberOfPads(unsigned short);
     
     const StThreeVector<double>& position() const;
     StThreeVector<double>& position();
@@ -56,14 +57,16 @@ public:
     float charge() const;
     float maxAdc() const;
     int clusterNumber() const;
+    unsigned short numberOfPads() const;
     
 private:
     StThreeVector<double> mPosition;
-    StThreeVector<double> mPositionError;
+    StThreeVector<double> mPositionError; // sigma in pads
     StThreeVector<double> mPosition2;
     float                 mCharge;
     float                 mMaxAdc;
     int                   mClusterNumber;
+    unsigned short        mNumberOfPads;
 };
 inline void StRichHitInformation::setPosition(StThreeVector<double>& x) { mPosition = x; }
 inline void StRichHitInformation::setPositionError(StThreeVector<double>& dx) { mPositionError = dx; }
@@ -71,6 +74,7 @@ inline void StRichHitInformation::setPosition2(StThreeVector<double>& x2) { mPos
 inline void StRichHitInformation::setCharge(float q) { mCharge = q; }
 inline void StRichHitInformation::setMaxAdc(float q) { mMaxAdc = q; }
 inline void StRichHitInformation::setClusterNumber(int n) { mClusterNumber = n; }
+inline void StRichHitInformation::setNumberOfPads(unsigned short n) {mNumberOfPads = n;}
 
 inline const StThreeVector<double>& StRichHitInformation::position() const { return mPosition; }
 inline StThreeVector<double>& StRichHitInformation::position() { return mPosition; }
@@ -81,4 +85,7 @@ inline StThreeVector<double>& StRichHitInformation::position2() { return mPositi
 inline float StRichHitInformation::charge() const { return mCharge; }
 inline float StRichHitInformation::maxAdc() const { return mMaxAdc; }
 inline int   StRichHitInformation::clusterNumber() const { return mClusterNumber; }
+inline unsigned short StRichHitInformation::numberOfPads() const { return mNumberOfPads;}
+
+ostream& operator<<(ostream&, StRichHitInformation&);
 #endif
