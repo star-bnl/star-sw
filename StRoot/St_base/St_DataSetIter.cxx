@@ -326,6 +326,11 @@ St_DataSet *St_DataSetIter::Next(const Char_t *path, St_DataSet *rootset,
       if (!dataset)
            dataset = fWorkingDataSet;  //*-* "relative path"
  
+  if (!dataset) {
+    Warning("Next()","Empty iterator. Nothing to do!");
+    return 0;
+  }
+ 
    ULong_t ldirname = 0;
  
    if (seppos)
