@@ -1,5 +1,5 @@
 /************************************************************GHit.h**\
- * $Id: StRichGHit.h,v 1.1 2000/01/18 21:32:01 lasiuk Exp $
+ * $Id: StRichGHit.h,v 1.2 2000/01/27 17:05:37 lasiuk Exp $
  *
  * Description:
  *   StRichGHit is a data type containing information passed by Geant.
@@ -16,8 +16,8 @@
  *   RawData Project.
  * *****************************************************************
  * $Log: StRichGHit.h,v $
- * Revision 1.1  2000/01/18 21:32:01  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/27 17:05:37  lasiuk
+ * add global information
  *
  * keep the track pointer info
  *
@@ -43,28 +43,33 @@
 #include <string>
 
 #include "StThreeVector.hh"
-    struct StRichGHit {
+
 #ifndef ST_NO_NAMESPACES
-	StRichGHit(double x_, double y_, double z_,double dE_, short pID_, string vID_)
-	    : x(x_), y(y_), z(z_), id(pID_), mVolumeID(vID_), dE(dE_) { }
+using std::string;
+struct StRichGHit {
 	
-	StRichGHit(double x_, double y_, double z_, int q_, short pID_) 
-	    : x(x_), y(y_), z(z_), quad(q_), id(pID_) { }
+    StRichGHit(double x_, double y_, double z_,double dE_, short pID_, string vID_)
+	: x(x_), y(y_), z(z_), id(pID_), mVolumeID(vID_), dE(dE_) { }
+	
+    StRichGHit(double x_, double y_, double z_, int q_, short pID_) 
+	: x(x_), y(y_), z(z_), quad(q_), id(pID_) { }
+
     StRichGHit(double x_, double y_, double z_,double dE_, short pID_, string vID_,double xx_, double yy_, double zz_)
-	StRichGHit() { }
+	: x(x_), y(y_), z(z_), id(pID_), mVolumeID(vID_), dE(dE_),xx(xx_),yy(yy_),zz(zz_) { }
+    StRichGHit() { }
 	
-	void fill(double,double,double,int,
-		  double,double,double,double,
-		  double,short,string);
-	
-	double                   x,y,z;
-	int                      quad;
-	double                   cosX, cosY, cosZ;
-	double                   step;
-	short                    id;
-	string                   mVolumeID;  //!
-	double                   dE;
-    };
+    void fill(double,double,double,int,
+	      double,double,double,double,
+	      double,short,string);
+    double  cosY()     const;
+	      short pID, string vID);
+    
+    double                   xx,yy,zz;
+    double                   x,y,z;
+    int                      quad;
+    double                   cosX, cosY, cosZ;
+    double                   step;
+    short                    id;
     string                   mVolumeID;  //!
     double                   dE;
 };

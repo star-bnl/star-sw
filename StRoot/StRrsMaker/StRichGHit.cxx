@@ -1,13 +1,13 @@
 /******************************************************
- * $Id: StRichGHit.cxx,v 1.1 2000/01/18 21:32:00 lasiuk Exp $
+ * $Id: StRichGHit.cxx,v 1.2 2000/01/27 17:05:35 lasiuk Exp $
  *
  * Description:
  *  Implementation of the GHit object.
  *
  ******************************************************
  * $Log: StRichGHit.cxx,v $
- * Revision 1.1  2000/01/18 21:32:00  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/27 17:05:35  lasiuk
+ * add global information
  *
  * CC5 compatibility needs .c_str() for string printing
  *
@@ -26,28 +26,35 @@ using std::string;
 
 //namespace StRichRawData {
  ******************************************************/
-    void StRichGHit::fill(double x_, double y_, double z_, int quad_,
-			  double cosX_, double cosY_, double cosZ_, double step_, 
-			  double dE_ ,short pID_ , string vID_)
-    {
-	x = x_;
-	y = y_;
-	z = z_;
-	quad = quad_;
-	cosX = cosX_;
-	cosY = cosY_;
-	cosZ = cosZ_;
-	step = step_;
-	dE = dE_;
-	id = pID_;
-	mVolumeID = vID_;
-    }
+
+#include "StRichGHit.h"
+void StRichGHit::addGlobal(double xx, double yy, double zz)
+void StRichGHit::fill(double x_, double y_, double z_, int quad_,
+		      double cosX_, double cosY_, double cosZ_, double step_, 
+		      double dE_ ,short pID_ , string vID_)
+{
+    x = x_;
+    y = y_;
+    z = z_;
+    quad = quad_;
+    cosX = cosX_;
+    cosY = cosY_;
+    cosZ = cosZ_;
+    step = step_;
+    dE = dE_;
     id = pID_;
-    ostream& operator<<(ostream& os, const StRichGHit& hit)
-    {
-	return (os << "(" << hit.x << ", " << hit.y << ", " << hit.z << ") : "
-		<< hit.dE << " (" << hit.cosX << ", " << hit.cosY << ", " << hit.cosZ << ")");
-    }
+    mVolumeID = vID_;
+}
+
+void StRichGHit::addGlobal(double xx_, double yy_, double zz_)
+{
+    xx = xx_;
+    yy = yy_;
+    zz = zz_;
+    os << "P:       "  << mP << endl;
+    os << "track_p  "  << mTrackp << endl;
+    os << "cos      "  << mCosX << ' ' << mCosY << ' ' << mCosZ << endl;
+    os << "dE/ds    "  << mdE << ' ' << mdS << endl;
     return (os << "(" << hit.x << ", " << hit.y << ", " << hit.z << ") : "
 	    << hit.dE << " (" << hit.cosX << ", " << hit.cosY << ", " << hit.cosZ << ")");
 {
