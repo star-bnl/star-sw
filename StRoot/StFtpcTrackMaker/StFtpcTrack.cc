@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.27 2003/09/02 17:58:16 perev Exp $
+// $Id: StFtpcTrack.cc,v 1.28 2003/09/16 14:08:04 jeromel Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.28  2003/09/16 14:08:04  jeromel
+// Removed inline to resolve undefined symbol in lib
+//
 // Revision 1.27  2003/09/02 17:58:16  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -351,14 +354,14 @@ void StFtpcTrack::AddForwardPoint(StFtpcPoint* point)
 }
 
 
-inline Int_t StFtpcTrack::GetHemisphere() const
+Int_t StFtpcTrack::GetHemisphere() const
 {
   // Returns +1 if z of track is positiv, -1 otherwise.
   return (Int_t)TMath::Sign(1., ((StFtpcPoint *)(GetHits()->First()))->GetZ());  
 }
 
 
-inline Int_t StFtpcTrack::GetSector() const
+Int_t StFtpcTrack::GetSector() const
 {
   // Returns sector of track. Assumes that the track doesn't cross more than one sector.
   return ((StFtpcPoint *)GetHits()->First())->GetSector();  
