@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.64 2001/05/04 20:17:31 perev Exp $
+// $Id: doEvents.C,v 1.65 2001/05/19 00:32:53 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -176,6 +176,8 @@ void doEvents(Int_t startEvent, Int_t nEvents, const Char_t **fileList, const Ch
     Int_t iInit = chain->Init();
     if (iInit) chain->Fatal(iInit,"on init");
     chain->PrintInfo();
+    if (startEvent > 1) IOMk->Skip(startEvent-1);
+
 
 
 //----- added 6/20/00 by Kathy
@@ -303,6 +305,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.65  2001/05/19 00:32:53  perev
+// Skip added
+//
 // Revision 1.64  2001/05/04 20:17:31  perev
 // remove St_dst_bfc_status::iterator
 //
