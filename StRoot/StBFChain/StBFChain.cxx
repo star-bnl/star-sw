@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.36 1999/11/29 21:38:26 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.37 1999/11/29 22:32:05 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.37  1999/11/29 22:32:05  fisyak
+// Add St_l3 for St_l3Clufi_Maker
+//
 // Revision 1.36  1999/11/29 21:38:26  fisyak
 // Add Dave Hardtke corrections, clean up print outs
 //
@@ -246,7 +249,7 @@ BfcItem BFC[] = {
   {"mwc"         ,"mwc","l0","tables"                      ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
   {"trg"         ,"trg","l0","tables"                      ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
   {"l3"          ,"l3","","l3cl,l3t"                                 ,"StChainMaker","StBFChain","",kFALSE},
-  {"l3cl"        ,"","l3","tables"                        ,"St_l3Clufi_Maker","St_l3Clufi_Maker","",kFALSE},
+  {"l3cl"        ,"","l3","tables"                  ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3","tables"                          ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
   {"rich"        ,"rch","","tables"                                   ,"StRchMaker","StRchMaker","",kFALSE},
   {"global"      ,"global","","tables,Match,primary,v0,xi,kink,dst"    ,"StChainMaker","StChain","",kFALSE},
