@@ -6,15 +6,18 @@
 #
 # Specify ASPs and PAMs upon which this package depends.
 ASPS := tbr ami dio dui tdm spx soc
-PAMS := pam
+#PAMS := pam
 #
 # Specify special user libraries against which to link.
 #USER_LIBS := -ldsu -ldsl -lasu
 #
 # Choose flags controlling make.
 DEBUG := TRUE
-#SHARE := TRUE
-#MOTIF := TRUE
+IRIX := IRIX
+ifneq ($(IRIX),$(shell uname))
+SHARE := FALSE
+endif
+MOTIF := TRUE
 #
 # Specify which CERN libraries against which to link.
 #CERNLIBS := pawlib graflib grafX11 packlib mathlib kernlib

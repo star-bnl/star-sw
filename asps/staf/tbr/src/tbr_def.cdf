@@ -42,9 +42,8 @@ Commands for the Table BRowser ASP.
 **>ACTION KAM_TBR_LIST
 
 ************************************************************************
-************************************************************************
 ** TBR/MOTIF
->MENU MOTIF
+>MENU \MOTIF
 >GUIDANCE
 Motif Table BRowser commands.
 .
