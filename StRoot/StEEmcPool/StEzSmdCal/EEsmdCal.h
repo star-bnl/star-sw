@@ -3,7 +3,7 @@
 #ifndef EEsmdCal_h
 #define EEsmdCal_h
 /*********************************************************************
- * $Id: EEsmdCal.h,v 1.2 2004/06/15 20:03:26 balewski Exp $
+ * $Id: EEsmdCal.h,v 1.3 2004/06/22 23:31:11 balewski Exp $
  *********************************************************************
  * Descripion:
  *  Calibration of SMD/pre/post using MIPs from UxV
@@ -12,6 +12,7 @@
 class EEmcGeomSimple;
 class TVector3;
 class TH1F ;
+class TMath ;
 class EEmcDbItem;
 class EEsmdPlain;
 class  EEmcSmdGeom;
@@ -32,21 +33,21 @@ class  EEmcSmdGeom;
 
 class EEsmdCal {
  protected:
-  enum {kTile=4}; // 0=tower, 1=pres1, 2=pres2, 3=post
+  enum {kTile=4,kT=0,kP=1, kQ=2,kR=3}; // 0=tower, 1=pres1, 2=pres2, 3=post
 
- private:
-  EEmcGeomSimple *geoTw;
-  EEmcSmdGeom *geoSmd;
-
+ private: 
   int sectID; /// calibrate only one sector
   int iSect; /// the same info, counted from 0
   
   float thrMipSmdE; // threshold on MIP signal in SMD strip
+  float twMipEdev; // maximal energy deviation for MIP in towers 
   int emptyStripCount; // minimal # of SMD strops below threshold
-  int iTagLayer; // used to tag all spectra : 0-3 means T,P,Q,R
-
+  float towerMipElow [MaxEtaBins]; // lower energy range for MIP
+  float towerMipEhigh[MaxEtaBins]; // high  energy range for MIP
+  int dbMapped;// flag indicating local DB is mapped
+  const EEmcDbItem *dbT[kTile][MaxEtaBins][MaxPhiBins]; // local fast access to DB
   // cuts: 0=inclusive, 1=tagged with PostShower,  2=Tagged & UxVinTower
-  enum {kCut=3}; 
+  enum {kCut=5}; 
 
   TH1F *hA[32]; // some global (test) histograms
   // all histograms are created for only one sector
@@ -55,9 +56,11 @@ class EEsmdCal {
   TH1F *hSs[MaxSmdPlains][MaxSmdStrips]; // individual SMD strips ,inclusive
   TH1F *hSp[kCut][MaxSmdPlains][MaxSmdStrips]; // pair of SMD strips
 
-  void initTileHist(char cut, char * title); 
-  void initSmdHist(char cut, char * title); 
+  void initTileHist(char cut, char * title, int col=1); 
+  void initSmdHist(char cut, char * title, int col=1); 
   void initAuxHisto();
+  void mapTileDb();
+  void addTwMipEbarsToHisto (int col);
   
   void fillSmdHisto_a();
   void fillOneTailHisto(char cut, int iEta, int iPhi);
@@ -75,8 +78,9 @@ class EEsmdCal {
   /// local event storage for all instrumented sectors
   /// remeber to clear all variables bewlow for every event
   float tileAdc[kTile][MaxEtaBins][MaxPhiBins]; // adc-ped for : T,P,Q,R
-  int tileTag[kTile][MaxEtaBins][MaxPhiBins]; // tagg  for : T,P,Q,R
-  float smdE[MaxSectors][MaxSmdPlains][MaxSmdStrips]; // energy in arb.uni.
+  float tileEne[kTile][MaxEtaBins][MaxPhiBins]; // adc-ped/gain (if exist)
+  bool  tileThr[kTile][MaxEtaBins][MaxPhiBins]; //  == adc-ped>thr 
+  float smdEne[MaxSectors][MaxSmdPlains][MaxSmdStrips]; // adc-ped/gain (if exist)
 
   void clear();
   void findSectorMip();
@@ -86,13 +90,17 @@ class EEsmdCal {
   
  public:
   
+  EEmcGeomSimple *geoTw;
+  EEmcSmdGeom *geoSmd;
+
   EEsmdCal();
   virtual ~EEsmdCal();
   void finish();
 
   void init(); 
-  void setMipCuts(float x, int y, int z) 
-    { thrMipSmdE=x; emptyStripCount=y; iTagLayer=z;}
+  void initRun(int runID);// must be called after DB timestamp is known
+  void setMipCuts(float x, int y, float z) 
+    { thrMipSmdE=x; emptyStripCount=y; twMipEdev=z;}
 
   void saveHisto(TString fname="fixMe3");
  
@@ -104,6 +112,9 @@ class EEsmdCal {
 
 /*****************************************************************
  * $Log: EEsmdCal.h,v $
+ * Revision 1.3  2004/06/22 23:31:11  balewski
+ * few more gadgets added
+ *
  * Revision 1.2  2004/06/15 20:03:26  balewski
  * to match web-descriptio
  *
