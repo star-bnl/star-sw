@@ -21,7 +21,8 @@ public:
    virtual       ~StTreeMaker();
    virtual Int_t  Init();
    virtual Int_t  Make();
-   virtual Int_t  MakeRead();
+   virtual Int_t  MakeRead(UInt_t *RunEvent);
+   virtual Int_t  MakeRead(){return MakeRead(0);};
    virtual Int_t  MakeWrite();
    virtual Int_t  Finish();
    virtual Int_t  Save();
@@ -38,7 +39,7 @@ public:
      {if(!fTree)return 0;return (StBranch*)fTree->Find(brName);};   
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.10 1999/11/09 02:15:37 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.11 2000/04/03 23:55:26 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTreeMaker, 1)   //StAR chain virtual base class for Makers
 };

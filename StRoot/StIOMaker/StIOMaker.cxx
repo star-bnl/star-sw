@@ -33,13 +33,13 @@ StIOMaker::StIOMaker(const char *name,  const char *iomode,
 }
 //_____________________________________________________________________________
 StIOMaker::StIOMaker(const char *name,   const char *iomode, 
-                     StFile     *fileSet,const char *treeName )
+                     StFileI  *fileSet,const char *treeName )
 :StIOInterFace(name,iomode)
 {
   Build( fileSet,treeName);
 }
 //_____________________________________________________________________________
-void StIOMaker::Build(StFile *fileSet,const char *treeName) 
+void StIOMaker::Build(StFileI *fileSet,const char *treeName) 
 {
   SetTreeName(treeName); fCase=0;
   SetMaxEvent();
@@ -83,13 +83,14 @@ Int_t StIOMaker::Open()
 {
   
   fNumEvent = 0;
-  if (!fFileSet) return kStEOF;
+  if (!fFileSet) 			return kStEOF;
 
-  
-  fNextFile = fFileSet->NextFileName();
+  if (fFileSet->GetNextBundle())	return kStEOF;
+
+  fNextFile = fFileSet->GetFileName();
   if (!fNextFile) return kStEOF;
   TString fmt = fFileSet->GetFormat();
-  TString bra = fFileSet->GetBraName();
+  TString bra = fFileSet->GetCompName();
 
   const char *cc = strstr(IOFMTS,(const char*)fmt);
   if (!cc) return kStErr;
@@ -125,9 +126,13 @@ AGAIN:
 }
 //_____________________________________________________________________________
 Int_t StIOMaker::MakeRead(){
+  UInt_t uRunEvent[8];
 
   if (!fCurrMk) return kStEOF;
-  return fCurrMk->Make();
+  int res = fFileSet->GetNextEvent(uRunEvent);
+  if (res)	return kStEOF;
+
+  return fCurrMk->MakeRead(uRunEvent);
 }    
 //_____________________________________________________________________________
 Int_t StIOMaker::MakeWrite()
