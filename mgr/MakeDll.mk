@@ -1,6 +1,8 @@
-
-# $Id: MakeDll.mk,v 1.76 1999/04/24 13:15:22 fisyak Exp $
+# $Id: MakeDll.mk,v 1.77 1999/04/26 22:40:15 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.77  1999/04/26 22:40:15  fisyak
+# remove -lpgc for new pfg77, Victor has updated libpgf77S.so
+#
 # Revision 1.76  1999/04/24 13:15:22  fisyak
 # Add --sillent mode for set SILENT environmnet variable
 #
@@ -288,13 +290,26 @@ ifdef FILES_MOD
   FILES_CINT_MOD :=$(GEN_DIR)/$(PKG)_Cint.cxx
   FILES_H        := $(filter-out $(FILES_MOD_H), $(FILES_H))
 endif
-ifdef FILES_ORD
-  ifneq (,$(strip $(FILES_H)))
 #    NAMES_ORD      := $(basename $(notdir $(FILES_H)))
 define AWK
 grep ClassDef $(FILES_H) | awk -F\( '{print $$2}' | awk -F\, '{print $$1}'
 endef
-   NAMES_ORD  := $(shell $(AWK))
+define AWK2
+grep StCollectionDef $(FILES_H) | awk -F\( '{print $$2}' | awk -F\) '{print $$1}' | awk -F\, '{print $$1}'
+endef
+
+ifdef FILES_ORD
+  ifneq (,$(strip $(FILES_H)))
+    NAMES_ORD  := $(shell $(AWK))
+    NAMES_DD    = $(shell $(AWK2))
+    ifneq (,$(NAMES_DD))
+      NAMES_ORDD := $(addprefix St, $(addsuffix Collection, $(NAMES_DD))\
+                                     $(addsuffix Iterator,   $(NAMES_DD))\
+                                     $(addprefix  VecPtr,    $(NAMES_DD)))
+      NAMES_ORD := $(filter-out $(NAMES_ORDD), $(NAMES_ORD))
+      FILES_COL := $(shell grep -l StCollectionDef  $(FILES_H))
+      FILES_GCO := $(notdir $(FILES_COL))
+    endif
   endif
   LinkDef        :=$(wildcard $(SRC_DIR)/$(PKG)LinkDef.h $(SRC_DIR)/$(PKG)LinkDef.hh)
   ifneq (,$(LinkDef))
@@ -305,6 +320,7 @@ endef
     NAMES_DEF    := $(subst !, ,$(NAMES_DEF))
     ifneq (,$(NAMES_DEF))
       NAMES_ORD  := $(strip $(filter-out $(NAMES_DEF), $(NAMES_ORD)))
+      NAMES_ORDD := $(strip $(filter-out $(NAMES_DEF), $(NAMES_ORDD)))
     endif
     ifneq (,$(NAMES_DEF))
       FILES_CINT_DEF :=$(GEN_DIR)/$(PKG)_DCint.cxx 
@@ -320,6 +336,9 @@ endef
     FILES_CINT_ORD :=$(GEN_DIR)/$(PKG)_Cint.cxx 
     FILES_ORD_H    := $(wildcard $(addprefix $(SRC_DIR)/,$(addsuffix .h,$(NAMES_ORD)) \
                                                          $(addsuffix .hh,$(NAMES_ORD))))
+    ifneq (,$(NAMES_ORDD))
+      NAMES_ORD      += $(addsuffix -, $(NAMES_ORDD))
+    endif
   endif
 endif
 
@@ -405,20 +424,32 @@ else
 endif
 $(FILES_CINT_ORD) : $(FILES_ORD_H)   
 	$(COMMON_LINKDEF)
-	@for p in $(notdir $(basename $(NAMES_ORD))); do \
+	@for p in $(NAMES_ORD); do \
                                              echo "#pragma link C++ class $${p};" >> $(LINKDEF) ; \
                                              done
 	@echo "#endif"                                  >> $(LINKDEF);
 	@$(CAT) $(LINKDEF)
 ifndef NT
+ifneq (,$(FILES_GCO))
+	@for p in $(FILES_GCO); do $(RM) $(GEN_DIR)/$$p; \
+                                precint.pl $(SRC_DIR)/$$p > $(GEN_DIR)/$$p; \
+                                done
+
+endif
 	cd $(GEN_DIR); \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(FILES_ORD_H)) \
+        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -I./ $(DINCINT) $(notdir $(FILES_ORD_H)) \
         $(notdir $(LINKDEF))
+ifneq (,$(FILES_GCO))
+	@for p in $(FILES_GCO); do $(RM) $(GEN_DIR)/$$p; \
+                                done
+
+endif
 else
 	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
         $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(1ST_DEPS)) \
 	 $(notdir $(LINKDEF))
 endif
+
 $(FILES_CINT_DEF) : $(FILES_DEF_H)  $(LinkDef)
 	cd $(GEN_DIR); \
 	$(CAT) $(LinkDef); \
@@ -622,6 +653,8 @@ test:
 	@echo FILES_H   := $(FILES_H)
 
 	@echo NAMES_ORD := $(NAMES_ORD) 
+	@echo NAMES_ORDD:= $(NAMES_ORDD) 
+	@echo NAMES_DD  := $(NAMES_DD) 
 	@echo NAMES_DEF := $(NAMES_DEF) 
 	@echo NAMES_SYT := $(NAMES_SYT) 
 	@echo NAMES_SYM := $(NAMES_SYM) 
@@ -640,6 +673,7 @@ test:
 	@echo FILES_DEF_H := $(FILES_DEF_H) 
 	@echo FILES_MOD_H := $(FILES_MOD_H)
 	@echo FILES_DCINT := $(FILES_DCINT)
+	@echo FILES_COL   := $(FILES_COL)
 ifdef NT
 	@echo NT          := $(NT)
 	@echo MY_DLLNAME  := $(MY_DLLNAME)
