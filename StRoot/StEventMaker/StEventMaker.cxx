@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.17 1999/07/28 02:03:30 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.18 1999/08/14 03:12:19 genevb Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.18  1999/08/14 03:12:19  genevb
+// Remove ambiguity for vertexMatchIndex
+//
 // Revision 1.17  1999/07/28 02:03:30  fisyak
 // Add protection against Gene
 //
@@ -129,8 +132,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.17 1999/07/28 02:03:30 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.18 1999/08/14 03:12:19 genevb Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.18  1999/08/14 03:12:19  genevb
+// Remove ambiguity for vertexMatchIndex
+//
 // Revision 1.17  1999/07/28 02:03:30  fisyak
 // Add protection against Gene
 //
@@ -274,7 +280,7 @@
 #include <new.h>
 static const char thisClass[] = "StEventMaker: ";
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.17 1999/07/28 02:03:30 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.18 1999/08/14 03:12:19 genevb Exp $";
 #include "StEventManager.hh"
  * Revision 2.23  2000/05/22 21:53:41  ullrich
 #include <vector>
@@ -666,7 +672,7 @@ Int_t StEventMaker::Make(){
           // For now, if start vertex id is zero, assume the primary vertex
           if ( idStartVertex >= 0 && idStartVertex <= vtxPtr.size() ) {
             if ( idStartVertex ) {
-              idStartVertex = vertexMatchIndex[--idStartVertex];
+              idStartVertex = vertexMatchIndex[(idStartVertex-1)];
               startVertex = vtxPtr[idStartVertex];
             } else {
               startVertex = currentEvent->primaryVertex();
