@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: StTpcLocalCoordinate.hh,v 1.3 2003/09/02 17:57:51 perev Exp $
+ * $Id: StTpcLocalCoordinate.hh,v 1.4 2004/06/05 23:31:09 fisyak Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTpcLocalCoordinate.hh,v $
+ * Revision 1.4  2004/06/05 23:31:09  fisyak
+ * Add (sector,row) for Tpc Coordinate/Direction transformations; Change sign of t0zoffset correction (to be synch. with fcf)
+ *
  * Revision 1.3  2003/09/02 17:57:51  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -50,39 +53,17 @@
  **********************************************************************/
 #ifndef ST_TPC_LOCAL_COORDINATE_HH
 #define ST_TPC_LOCAL_COORDINATE_HH
-
-#include <Stiostream.h>
-
-
-#include "StThreeVector.hh"
-
-class StTpcLocalCoordinate
-{
+#include "StTpcCoordinate.h"
+class StTpcLocalCoordinate : public StTpcCoordinate {
 public:
-    StTpcLocalCoordinate();
-    StTpcLocalCoordinate(const double, const double, const double);
-    StTpcLocalCoordinate(const StThreeVector<double>&);
-
-    virtual ~StTpcLocalCoordinate();
-    //StTpcLocalCoordinate(const StTpcLocalCoordinate&);
-    //StTpcLocalCoordinate& operator=(const StTpcLocalCoordinate&);
-    
-    int operator==(const StTpcLocalCoordinate&) const;
-    int operator!=(const StTpcLocalCoordinate&) const;
-    // access functions provided by StThreeVector
-    const StThreeVector<double>& position()  const;
-    void setPosition(const StThreeVector<double>&);
-    StThreeVector<double>& position();
-
-protected:
-    StThreeVector<double> mPosition;
-
+  StTpcLocalCoordinate() :  StTpcCoordinate(0,0,0,0,0) {}
+  StTpcLocalCoordinate(double x, double y, double z);
+  StTpcLocalCoordinate(double x, double y, double z, int sector, int row) :
+    StTpcCoordinate(x,y,z,sector,row) {}
+  StTpcLocalCoordinate(const StThreeVector<double>& xyz);
+  StTpcLocalCoordinate(const StThreeVector<double>& xyz, int sector, int row) :
+    StTpcCoordinate(xyz,sector,row) {}
+  virtual ~StTpcLocalCoordinate() {}
 };
-
-inline const StThreeVector<double>& StTpcLocalCoordinate::position() const { return(mPosition); }
-inline StThreeVector<double>& StTpcLocalCoordinate::position() { return(mPosition); }
-inline void StTpcLocalCoordinate::setPosition(const StThreeVector<double>& val) { mPosition = val; }
-
-// Non-member
 ostream& operator<<(ostream&, const StTpcLocalCoordinate&);
 #endif

@@ -1,21 +1,22 @@
-//  $Id: StTpcLocalSectorAlignedDirection.hh,v 1.1 2004/03/05 17:22:55 fisyak Exp $
-#ifndef ST_TPC_LOCAL_ALIGNEDDIRECTION_HH
-#define ST_TPC_LOCAL_ALIGNEDDIRECTION_HH
+/*********************************************************************
+ *
+ * $Id: StTpcLocalSectorAlignedDirection.hh,v 1.2 2004/06/05 23:31:09 fisyak Exp $
+ **********************************************************************/
+#ifndef ST_TPC_LOCAL_SECTOR_ALIGNED_DIRECTION_HH
+#define ST_TPC_LOCAL_SECTOR_ALIGNED_DIRECTION_HH
 #include "StTpcLocalSectorDirection.hh"
-
 class StTpcLocalSectorAlignedDirection : public StTpcLocalSectorDirection {
 public:
-  StTpcLocalSectorAlignedDirection(int sector=12, int row=1) : 
-    StTpcLocalSectorDirection(sector), mFromRow(row)  {}
-  StTpcLocalSectorAlignedDirection(const double x, const double y, const double z, int sector, int row=1) : 
-    StTpcLocalSectorDirection(x,y,z,sector), mFromRow(row)  {}
-  StTpcLocalSectorAlignedDirection(const StThreeVector<double>& xyz, int sector, int row=1) : 
-    StTpcLocalSectorDirection(xyz,sector), mFromRow(row) {}
+  StTpcLocalSectorAlignedDirection() :  StTpcLocalSectorDirection(0,0,0,0,0) {}
+  StTpcLocalSectorAlignedDirection(double x, double y, double z) :
+    StTpcLocalSectorDirection(x,y,z,0,0) {}
+  StTpcLocalSectorAlignedDirection(const StThreeVector<double>& xyz) :
+    StTpcLocalSectorDirection(xyz,0,0) {}
+  StTpcLocalSectorAlignedDirection(double x, double y, double z, int sector, int row = 0) :
+    StTpcLocalSectorDirection(x,y,z,sector,row) {}
+  StTpcLocalSectorAlignedDirection(const StThreeVector<double>& xyz, int sector, int row = 0) :
+    StTpcLocalSectorDirection(xyz,sector,row) {}
   virtual ~StTpcLocalSectorAlignedDirection() {}
-  int   fromRow()   const {return mFromRow;}
-private:
-  int   mFromRow;
 };
-// Non-member
 ostream& operator<<(ostream&, const StTpcLocalSectorAlignedDirection&);
 #endif
