@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.10 2000/07/17 20:03:17 lisa Exp $
+ * $Id: StHbtParticle.cc,v 1.11 2000/07/19 17:18:48 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.11  2000/07/19 17:18:48  laue
+ * Calculation of Entrance and Exit point added in StHbtParticle constructor
+ *
  * Revision 1.10  2000/07/17 20:03:17  lisa
  * Implemented tools for addressing and assessing trackmerging
  *
@@ -77,6 +80,7 @@ StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass
   mMap[1] = hbtTrack->TopologyMap(1);
   mNhits = hbtTrack->NHits();
   mHelix = hbtTrack->Helix();
+  CalculateNominalTpcExitAndEntrancePoints();
 }
 //_____________________
 StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mTrack(0), mV0(0) {
