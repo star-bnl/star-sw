@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.138 2000/06/23 16:54:03 fisyak Exp $
+// $Id: bfc.C,v 1.139 2000/06/26 22:15:06 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -135,6 +135,7 @@ void bfc(const Int_t First,
   printf ("QAInfo: with %s\n", chain->GetCVS());
   
   // Init the chain and all its makers
+  Int_t iTotal = 0, iBad = 0;
   if (Last >= 0) {
     Int_t iInit = chain->Init();
     if (iInit >=  kStEOF) goto END;
@@ -153,7 +154,6 @@ void bfc(const Int_t First,
   treeMk = chain->GetMaker("tree");
   TBenchmark evnt;
   Int_t iMake = 0, i = First;
-  Int_t iTotal = 0, iBad = 0;
  EventLoop: if (i <= Last && iMake != kStEOF && iMake != kStFatal) {
    evnt.Reset();
    evnt.Start("QAInfo:");
