@@ -1,5 +1,8 @@
-* $Id: tcl_get_row_seq.F,v 1.1 1998/01/27 00:49:11 fisyak Exp $
+* $Id: tcl_get_row_seq.F,v 1.2 1998/08/27 16:59:53 love Exp $
 * $Log: tcl_get_row_seq.F,v $
+* Revision 1.2  1998/08/27 16:59:53  love
+* Check tpmcpix table before accessing
+*
 * Revision 1.1  1998/01/27 00:49:11  fisyak
 * Split sources
 *
@@ -197,7 +200,9 @@ c BUG BUG BUG! - found 18dec94 malisa     jndx = tppad(jtppad).jpix + nseqpix
               tdc = (ldatum - nseq_factor*nseqpix)/tdc_factor
               adc = (ldatum - nseq_factor*nseqpix) - tdc_factor*tdc
 
-              MCid = tpmcpix( jndx ).mcid !This shadows tppixel (we hope).
+		MCid=0
+C Need a flag to know if this is Monte Carlo data
+              if(tpmcpix_h.nok.ge.jndx)MCid = tpmcpix( jndx ).mcid 
 c
 c Keep only sequences with nseqpix.gt.1  !
 c ??? RRB: Not clear that this is desireable...
