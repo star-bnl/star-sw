@@ -18,21 +18,23 @@
 *
 * -------------------- set GSTAR absolute default ------------------------
 *
-   {CUTGAM,CUTELE,CUTNEU,CUTHAD,CUTMUO,BCUTE,BCUTM,DCUTE,DCUTM,PPCUTM} =.001;
-   {IDCAY,IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,ILOSS,IDRAY,IMULS} = 1;
-   {IRAYL,ISTRA} = 0;
-   TOFMAX = 1.e-4
-*
 *  main configuration - everthing on, except for tof
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld} = on;
    {mwc,four,pse}=on;  tof=off;
-   NtrSubEv=1000
    field=5
    Nsi=7
 *
 * -------------------- select USERS configuration ------------------------
 *
-   
+  If LL>1   
+  { * set geant flags and cuts only if any detp geometry was issued:
+ 
+   {CUTGAM,CUTELE,CUTNEU,CUTHAD,CUTMUO,BCUTE,BCUTM,DCUTE,DCUTM,PPCUTM} =.001;
+   {IDCAY,IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,ILOSS,IDRAY,IMULS} = 1;
+   {IRAYL,ISTRA} = 0;
+   TOFMAX   = 1.e-4 
+   NtrSubEv = 1000
+*
    FOR i=2 to LL by 2
    {
       call UHTOC(Par(i),4,CommandL,12);  
@@ -86,47 +88,48 @@
              if IDEB==0 & IDEBUG==0 { print *,'Nothing done !'; return; }
              i-=1; 
            }  
-   }
+ } }
 *
 * -------------------- setup selected configuration ------------------------
 *
 * - to save secondaries AFTER all decays:      DETP TRAC DCAY 210 210 0.1 0.01
    dcay={210,210,0.1,0.01}
    call AgDETP new ('trac')
-   call AgDETP add ('dcay',dcay,4)
-
-* - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6 
-   call AgDETP new ('svtt')
-   if (Nsi<7 & svtt) call AgDETP add ('svtg.nlayer=',Nsi,1)
- 
-* - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
-   call AgDETP new ('btof')
-   if (tof) call AgDETP add ('btog.choice=',2,1)
-      
-* - reset magnetic field value (default is 5): DETP MFLD MFLG.Bfield=5
-   call AgDETP new ('MFLD')
-   if (field!=5) call AgDETP add ('MFLG(1).Bfield=',field,1)
-
-* - MWC or pseudo padrows needed ? DETP TPCE TPCG(1).MWCread=0 TPRS(1).super=1
-*  CRAY does not accept construction: IF (mwc==off) ... I do it differntly:
-   call AgDETP new ('tpce')
-   unless (mwc) call AgDETP add ('tpcg(1).MWCread=',0,1)
-   unless (pse) call AgDETP add ('tprs(1).super='  ,1,1) 
+   call AgDETP add ('TracDcay',dcay,4)
 *
    if (cave) Call cavegeo
    if (pipe) Call pipegeo
+
    Call AGSFLAG('SIMU',2)
+* - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6 
+   call AgDETP new ('svtt')
+   if (svtt & Nsi < 7) call AgDETP add ('svtg.nlayer=',Nsi,1)
    if (svtt) Call svttgeo
+ 
+* - MWC or pseudo padrows needed ? DETP TPCE TPCG(1).MWCread=0 TPRS(1).super=1
+*  CRAY does not accept construction: IF (mwc==off) ... I do it differntly:
+   call AgDETP new ('tpce')
+   If (tpce &.not.mwc) call AgDETP add ('tpcg(1).MWCread=',0,1)
+   If (tpce &.not.pse) call AgDETP add ('tprs(1).super='  ,1,1) 
    if (tpce) Call tpcegeo
    if (ftpc) Call ftpcgeo
+
+* - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
+   call AgDETP new ('btof')
+   if (tof)  call AgDETP add ('btog.choice=',2,1)
    if (btof) Call btofgeo
+     
    Call AGSFLAG('SIMU',1)
    if (vpdd) Call vpddgeo
    if (calb) Call calbgeo
    if (ecal) Call ecalgeo
    if (magp) Call magpgeo
 *
+* - reset magnetic field value (default is 5): DETP MFLD MFLG.Bfield=5
+   call AgDETP new ('MFLD')
+   if (mfld & field!=5) call AgDETP add ('MFLG(1).Bfield=',field,1)
    if (mfld) Call mfldgeo
+*
    if JVOLUM>0 
    { Call ggclos
      If IDEBUG>0 { CALL ICLRWK(0,1); Call GDRAWC('CAVE',1,.2,10.,10.,.03,.03)}
