@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.9 2000/05/18 17:07:31 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.10 2000/05/23 14:35:02 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.10  2000/05/23 14:35:02  pavlinov
+ * Clean up for SUN
+ *
  * Revision 1.9  2000/05/18 17:07:31  pavlinov
  * Fixed error for methods getXYZ(...)
  *
@@ -40,9 +43,12 @@
 #include <strings.h>
 #include "StEmcGeom.h"
 #include "TROOT.h"
+#include "StBFChain.h"
 #include "emc_def.h"
 
 ClassImp(StEmcGeom)
+
+extern TROOT* gROOT;
 
 const Float_t perr=0.01;
 Float_t rmin, rsmdEta, rsmdPhi;
@@ -120,14 +126,14 @@ StEmcGeom::StEmcGeom(const Int_t det, const Char_t *mode)
     // Will be work if BFC has name "bfc" !!! Be carefull
     TList *tl = (TList*)gROOT->GetListOfBrowsables();
     if(tl) {mChain=(StBFChain*)tl->FindObject("bfc"); 
-      if(mChain){mGeom = mChain->GetDataSet("geom");
+      if(mChain){mGeantGeom = mChain->GetDataSet("geom");
       }
     }
-    if(mGeom == 0) {mCalg = 0;mCalr = 0;}
+    if(mGeantGeom == 0) {mCalg = 0;mCalr = 0;}
     else{
-      mCalg    = (St_calb_calg   *) mGeom->Find("calb_calg");
+      mCalg    = (St_calb_calg   *) mGeantGeom->Find("calb_calg");
       mCalg_st = mCalg->GetTable();
-      mCalr = (St_calb_calr   *) mGeom->Find("calb_calr");
+      mCalr = (St_calb_calr   *) mGeantGeom->Find("calb_calr");
       mCalr_st = mCalr->GetTable();
       if(!mCalg_st && !mCalr_st) mMode.Append(" : No table");
     }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.10 2000/05/18 17:07:30 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.11 2000/05/23 14:35:01 pavlinov Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.11  2000/05/23 14:35:01  pavlinov
+ * Clean up for SUN
+ *
  * Revision 1.10  2000/05/18 17:07:30  pavlinov
  * Fixed error for methods getXYZ(...)
  *
@@ -53,15 +56,16 @@
 #include <math.h>
 #include <TArrayF.h>
 #include <TString.h>
-#include <StBFChain.h>
 #include "tables/St_calb_calg_Table.h"
 #include "tables/St_calb_calr_Table.h"
 
-class StEmcGeom {
+class StBFChain;
+class TDataSet;
 
+class StEmcGeom {
 private:
   StBFChain*    mChain;    //!
-  St_DataSet*   mGeom;     //!
+  TDataSet*     mGeantGeom;//!
   St_calb_calg* mCalg;     //!
   calb_calg_st* mCalg_st;  //!
   St_calb_calr* mCalr;     //!  
