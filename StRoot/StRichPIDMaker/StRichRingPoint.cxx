@@ -1,15 +1,12 @@
 /**********************************************************
- * $Id: StRichRingPoint.cxx,v 2.4 2000/10/19 01:13:23 horsley Exp $
+ * $Id: StRichRingPoint.cxx,v 2.5 2000/11/01 17:41:26 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingPoint.cxx,v $
- *  Revision 2.4  2000/10/19 01:13:23  horsley
- *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
- *  added normal distance sigma cut on hits, quartz and radiator pathlengths
- *  for individual photons, modified minimization routine to correct boundary
- *  problems
+ *  Revision 2.5  2000/11/01 17:41:26  lasiuk
+ *  use math.h for FLT_MAX definition
  *
  *  Revision 2.4  2000/10/19 01:13:23  horsley
  *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
@@ -35,10 +32,12 @@
  *  initial revision
  **********************************************************/
 
+//#include <values.h> // Needed for MAXFLOAT
+#include <math.h>
+
 #include "StRichRingPoint.h"
 #include "SystemOfUnits.h"
 #include "StRichMaterialsDb.h"
-#include <values.h> // Needed for MAXFLOAT
 
 #ifndef ST_NO_NAMESPACES
 using namespace units;
@@ -126,9 +125,9 @@ StRichRingPoint::StRichRingPoint(StRichTrack* track,
   
   // use this StThreeVectorD as a return 
   // if ring is refracted away to infinity
-  mRefractedAway.setX(MAXFLOAT);
-  mRefractedAway.setY(MAXFLOAT);
-  mRefractedAway.setZ(MAXFLOAT);  
+  mRefractedAway.setX(FLT_MAX);
+  mRefractedAway.setY(FLT_MAX);
+  mRefractedAway.setZ(FLT_MAX);  
 }
 
 StParticleDefinition* StRichRingPoint::getParticleType() {
@@ -280,7 +279,7 @@ bool StRichRingPoint::getPoint(double psi, StThreeVectorF& point) {
 
     cout << "mPsiPrime = " << mPsiPrime << endl;
     cout << "cosPsiPrime    sinPsiPrime  = " << cosPsiPrime << "   " <<    sinPsiPrime << endl;
-    cout << "mRingType = " << mRingType << endl;
+    cout << "mRingType = " << static_cast<int>(mRingType) << endl;
     
     cout << " mDepthQuar*mTanQAngle*cosPsiPrime  = " <<  mDepthQuar << "   " 
 	 << mTanQAngle << "   " << cosPsiPrime << endl;
