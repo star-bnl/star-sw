@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.2 1999/05/05 22:38:00 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.3 1999/05/10 13:09:46 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.3  1999/05/10 13:09:46  fisyak
+// Fix for HP
+//
 // Revision 1.2  1999/05/05 22:38:00  fisyak
 // Add gulfd for magnetic field
 //
@@ -90,8 +93,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.2 1999/05/05 22:38:00 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.3 1999/05/10 13:09:46 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.3  1999/05/10 13:09:46  fisyak
+// Fix for HP
+//
 // Revision 1.2  1999/05/05 22:38:00  fisyak
 // Add gulfd for magnetic field
 //
@@ -173,7 +179,7 @@
 #include "StV0Vertex.h"
 #include "StXiVertex.h"
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.2 1999/05/05 22:38:00 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.3 1999/05/10 13:09:46 fisyak Exp $";
 #include "StEventManager.h"
 StEventManager MakerEventManager;
  * Revision 2.23  2000/05/22 21:53:41  ullrich
@@ -448,9 +454,9 @@ Int_t StEventMaker::Make(){
       cout << "StEventReaderMaker: " << nTrack << " dst_track" << endl;
       if (doLoad) {
 	StGlobalTrack* trk = NULL;
-	for (i=0; i<nTrack; i++) {
+	for (i=0; i<nTrack; i++, dstTrack++) {
 	  // Extract fit params: curv, dip, phase, origin
-	  dst_track_st& tktbl = dstTrack[i];
+	  dst_track_st& tktbl = *dstTrack;
 	  // $$$ get field from somewhere!
 	  Float_t x[3] = {0,0,0};
 	  Float_t b[3];
@@ -465,19 +471,19 @@ Int_t StEventMaker::Make(){
 	  double phase = tktbl.psi*degree-h*pi/2;
 	  double pt    = (1./tktbl.invpt)*GeV;
 	  double curvature = fabs(c_light*nanosecond/meter*tktbl.icharge*B/tesla)/(pt/GeV); // in meter^-1	
-	  StThreeVectorF origin(tktbl.x0, tktbl.y0, tktbl.z0);  // in centimeter
+	  StThreeVectorD origin(tktbl.x0, tktbl.y0, tktbl.z0);  // in centimeter
 	  
 	  //   Create the track, pass the helix parameter (note h)
-	  trk = new StGlobalTrack(&(dstTrack[i]),
+	  trk = new StGlobalTrack(dstTrack,
 				  curvature/meter,
 				  dip*radian,
 				  phase*radian,
-				  origin*centimeter,
+				  origin, //*centimeter),
 				  h);
 	  currentEvent->trackCollection()->push_back(trk);
 	  // add the track to vertex
-	  unsigned long idStartVertex = dstTrack[i].id_start_vertex;
-	  unsigned long idStopVertex = dstTrack[i].id_stop_vertex;
+	  unsigned long idStartVertex = dstTrack->id_start_vertex;
+	  unsigned long idStopVertex = dstTrack->id_stop_vertex;
 	  // For now, if start or stop vertex id is zero, assume it is the primary
 	  //  vertex, even though the primary vertex should not be a stop vertex
 	  StVertex* startVertex = 0;
@@ -686,7 +692,7 @@ void StEventMaker::setEventManager(StEventManager* mgr)
 //_____________________________________________________________________________
 void StEventMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StEventMaker.cxx,v 1.2 1999/05/05 22:38:00 fisyak Exp $\n");
+  printf("* $Id: StEventMaker.cxx,v 1.3 1999/05/10 13:09:46 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
