@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.55 1999/05/14 15:48:01 didenko Exp $
+// $Id: bfc.C,v 1.56 1999/05/20 01:33:18 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.56  1999/05/20 01:33:18  fisyak
+// Iwona's changes of access to TPC parameters
+//
 // Revision 1.55  1999/05/14 15:48:01  didenko
 // correct error in input_file
 //
@@ -410,21 +413,28 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar",Char_t *infile=0, C
   if (!chain) delete chain;
   chain = new StChain("bfc");
   chain->SetDebug();
+
 //  Create the makers to be called by the current chain
+  const char *mainDB = "$STAR/StDb/params";
+  dbMk = new St_db_Maker("db",mainDB);
+  dbMk->SetDebug();
+  const char *calibDB = "$STAR_ROOT/calib";
+  St_db_Maker *calibMk = new St_db_Maker("calib",calibDB);
+  calibMk->SetDebug();  
   if (ChainFlags[kCTEST]){// ChainFlags[kTPC] test Data Base
-    cout<<"creating DB for ChainFlags[kTPC] test"<<endl;
-    const char *tpcDB = "/afs/rhic/star/tpc/ctest/StDb/params";
-    dbMktpc = new St_db_Maker("tpcdb",tpcDB);
-    dbMktpc->SetDebug();  
+    //Switch off baseline files
+    dbMk->SetOff("params/tpc/trspars/Trs");
+    dbMk->SetOff("params/tpc/tsspars/tsspar");
+    dbMk->SetOff("params/tpc/tptpars/tpt_pars");
+    dbMk->SetOff("params/tpc/tpgpar/tpg_detector"); 
   }
-  else {// Standard DataBase
-    const char *mainDB = "$STAR/StDb/params";
-    dbMk = new St_db_Maker("db",mainDB);
-    dbMk->SetDebug();
-    const char *calibDB = "$STAR_ROOT/calib";
-    St_db_Maker *calibMk = new St_db_Maker("calib",calibDB);
-    calibMk->SetDebug();  
-  }
+  else{
+    //Switch off TestData files
+    dbMk->SetOff("params/tpc/trspars/TrsTestData");
+    dbMk->SetOff("params/tpc/tsspars/tssparTestData");
+    dbMk->SetOff("params/tpc/tptpars/tpt_parsTestData");
+    dbMk->SetOff("params/tpc/tpgpar/tpg_detectorTestData");
+  } 
   if (ChainFlags[kXINDF]) {
     xdfMk = new St_xdfin_Maker("xdfin",InFile->Data());
     chain->SetInput("geant",".make/xdfin/.data/event/geant/Event");
