@@ -1,6 +1,9 @@
 
-# $Id: MakeDll.mk,v 1.73 1999/04/13 20:35:40 fisyak Exp $
+# $Id: MakeDll.mk,v 1.74 1999/04/19 21:29:37 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.74  1999/04/19 21:29:37  fisyak
+# Add SL_EXTRA_LIB
+#
 # Revision 1.73  1999/04/13 20:35:40  fisyak
 # Add Stypes to dictionary
 #
@@ -460,7 +463,7 @@ ifndef NT
 
 $(MY_SO) : $(FILES_O) $(wildcard $(OBJ_DIR)/Templates.DB/*.$(O)) $(STAR_FILES_O) $(LIBRARY)
 	cd $(OBJ_DIR);  \
-        $(SO) $(SOFLAGS) $(SoOUT)$(SL_NEW) $(ALL_DEPS); \
+        $(SO) $(SOFLAGS) $(SoOUT) $(SL_NEW) $(ALL_DEPS) $(SL_EXTRA_LIB) ; \
         $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)
 else # NT
 ifdef MY_SO
