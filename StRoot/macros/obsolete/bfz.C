@@ -89,9 +89,9 @@ void bfz(const Int_t Nevents=1,const Char_t *inputFile ="/disk1/star/test/muons.
   
 //  		Create the makers to be called by the current chain
  
- const char *mainDB = "$STAR/StDB";
+ const char *mainDB = "$STAR/StDb";
  St_db_Maker *dbMk = new St_db_Maker("db",mainDB);
- chain->SetInput("params","db:StDB/params");
+ chain->SetInput("params","db:StDb/params");
  dbMk->SetDebug();  
 
 
