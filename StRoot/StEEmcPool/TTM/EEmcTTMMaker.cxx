@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.16 2004/04/14 16:20:25 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.17 2004/04/15 18:08:18 zolnie Exp $
 // doxygen info here
 /** 
     \mainpage TTM - an endcap Tower to Track Match maker
@@ -310,35 +310,35 @@ EEmcTTMMaker::Make(){
 
   // sanity checks
   if(muDst==NULL) { 
-    Warning("Make","%s aborted, muDST maker data missing",GetName());
+    Warning("Make","%s error, muDST maker data missing",GetName());
     return kStErr;
   }
   
   if(mEEmcDb->valid()<=0) {
-    Warning("Make","%s aborted, missing EEMC Db records",GetName());
+    Warning("Make","%s: missing EEMC Db records",GetName());
     return kStErr;
   }
   // real work begins here
   TClonesArray      *tracks = muDst->primaryTracks();   // fetch primary tracks
   if (!tracks) { 
-    Info("Make","no tracks for this event");
-    return kStWarn;
+    Warning("Make","%s: no tracks for this event",GetName());
+    return kStErr;
   }
   //
   StMuEvent* muEvent = muDst->event();                     // fetch microEvent data
   if (!muEvent) {
-    Info("Make","no MuEvent data for this event");
-    return kStWarn;
+    Warning("Make","%s: no MuEvent data for this event",GetName());
+    return kStErr;
   }
   //
   StMuEmcCollection *emc    = muDst->emcCollection();   // fetch endcap data
   if (!emc) {
-    Info("Make","no EMC data for this event");
-    return kStWarn;
+    Info("Make","%s: no EMC data for this event",GetName());
+    return kStErr;
   }
   if(emc->getNEndcapTowerADC()<=0) {
-    Info("Make","no EEMC tower data for this event");
-    return kStWarn;
+    Info("Make","%s: no EEMC tower data for this event",GetName());
+    return kStErr;
   }
   
   //StEventInfo             &evinfo = muEvent->eventInfo();           // event info
@@ -674,6 +674,9 @@ ostream&  operator<<(ostream &out, const StMuTrack    &t  )  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.17  2004/04/15 18:08:18  zolnie
+// *** empty log message ***
+//
 // Revision 1.16  2004/04/14 16:20:25  zolnie
 // added static method Run for faster analysis under root4star
 //
