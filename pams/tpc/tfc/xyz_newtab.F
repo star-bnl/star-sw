@@ -1,5 +1,8 @@
-* $Id: xyz_newtab.F,v 1.4 1999/03/27 01:14:54 snelling Exp $
+* $Id: xyz_newtab.F,v 1.5 2000/02/23 23:19:48 hardtke Exp $
 * $Log: xyz_newtab.F,v $
+* Revision 1.5  2000/02/23 23:19:48  hardtke
+* replace tpg functions with tpc functions
+*
 * Revision 1.4  1999/03/27 01:14:54  snelling
 * fix placement for inner sector
 *
@@ -103,7 +106,6 @@ CC:>--------------------------------------------------------------------
 	real		time_bin	! size (usec) of time bucket
 	real		Xlocal(3)	! local cartesian coordinates
 	real		Xglobal(3)	! global cartesian coordinates
-        real            dummy           ! dummy argument for the tgc calls
         real            dvel            ! drift velocity
 
 	logical		first_call/.true./
@@ -125,11 +127,11 @@ c       local bookkeeping variables
 
 
 c -----	TPG function calls
-	integer		tgc_row_to_y
-	integer		tgc_pad_to_x
-	integer		tgc_local_to_global
-        integer         tgc_time_to_z
-        integer tgc_drift_velocity    !function that returns as a first
+	integer		tpc_row_to_y
+	integer		tpc_pad_to_x
+	integer		tpc_local_to_global
+        integer         tpc_time_to_z
+        integer tpc_drift_velocity    !function that returns as a first
 c                                     !argument the drift velocity
 c                                     !two next arguments dummy          
 
@@ -230,20 +232,20 @@ c mal 31aug97
               adcxyz(adcxyz_h.nok).chip = 
      +          chip_pad(adcxyz(adcxyz_h.nok).row,adcxyz(adcxyz_h.nok).pad)
             
-	      istatus = tgc_pad_to_x (float(adcxyz(adcxyz_h.nok).pad), 
-     +	        float(adcxyz(adcxyz_h.nok).row), Xlocal(1),dummy,dummy) 
+	      istatus = tpc_pad_to_x (float(adcxyz(adcxyz_h.nok).pad), 
+     +	        float(adcxyz(adcxyz_h.nok).row), Xlocal(1)) 
 
-	      istatus = tgc_row_to_y (float(adcxyz(adcxyz_h.nok).row), 
-     + 	      Xlocal(2), dummy, dummy)
+	      istatus = tpc_row_to_y (float(adcxyz(adcxyz_h.nok).row), 
+     + 	      Xlocal(2))
 
 *	      Xlocal(3) = adcxyz(adcxyz_h.nok).bucket * time_bucket
-              istatus = tgc_time_to_z(adcxyz(adcxyz_h.nok).bucket,1,1,1,
+              istatus = tpc_time_to_z(adcxyz(adcxyz_h.nok).bucket,1,1,1,
      +                                Xlocal(3))
 
-              istatus = tgc_drift_velocity(dvel,dummy,dummy)
-              Xlocal(3) = Xlocal(3) - 3.0*tsspar(1).tau*dvel* 1.0e-6
+              istatus = tpc_drift_velocity(dvel)
+cdh 23feb00              Xlocal(3) = Xlocal(3) - 3.0*tsspar(1).tau*dvel* 1.0e-6
 
-	      istatus = tgc_local_to_global (adcxyz(adcxyz_h.nok).sector,
+	      istatus = tpc_local_to_global (adcxyz(adcxyz_h.nok).sector,
      +        Xlocal, Xglobal)
 
 	      adcxyz(adcxyz_h.nok).x = Xglobal(1)
@@ -333,20 +335,20 @@ c mal 31aug97
               adcxyz(adcxyz_h.nok).chip = 
      +          chip_pad(adcxyz(adcxyz_h.nok).row,adcxyz(adcxyz_h.nok).pad)
             
-	      istatus = tgc_pad_to_x (float(adcxyz(adcxyz_h.nok).pad), 
-     +	        float(adcxyz(adcxyz_h.nok).row), Xlocal(1), dummy, dummy)
+	      istatus = tpc_pad_to_x (float(adcxyz(adcxyz_h.nok).pad), 
+     +	        float(adcxyz(adcxyz_h.nok).row), Xlocal(1))
 
-	      istatus = tgc_row_to_y (float(adcxyz(adcxyz_h.nok).row), 
-     + 	      Xlocal(2), dummy, dummy)
+	      istatus = tpc_row_to_y (float(adcxyz(adcxyz_h.nok).row), 
+     + 	      Xlocal(2))
 
 *	      Xlocal(3) = adcxyz(adcxyz_h.nok).bucket * time_bucket
-              istatus = tgc_time_to_z(adcxyz(adcxyz_h.nok).bucket,1,1,1,
+              istatus = tpc_time_to_z(adcxyz(adcxyz_h.nok).bucket,1,1,1,
      +                                Xlocal(3))
 
-              istatus = tgc_drift_velocity(dvel,dummy,dummy)
-              Xlocal(3) = Xlocal(3) - 3.0*tsspar(1).tau*dvel* 1.0e-6
+              istatus = tpc_drift_velocity(dvel)
+c dh 23Feb00              Xlocal(3) = Xlocal(3) - 3.0*tsspar(1).tau*dvel* 1.0e-6
 
-	      istatus = tgc_local_to_global (adcxyz(adcxyz_h.nok).sector,
+	      istatus = tpc_local_to_global (adcxyz(adcxyz_h.nok).sector,
      +        Xlocal, Xglobal)
 
 	      adcxyz(adcxyz_h.nok).x = Xglobal(1)
