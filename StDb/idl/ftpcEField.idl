@@ -8,6 +8,8 @@
 
 struct ftpcEField { 
 
-   float  e[761];   /*   electric field for each bin  */
+   long   numberOfEFieldBins;   /* number of electric field bins */
+
+   float  e[761];               /*   electric field for each bin  */
 
  };  
