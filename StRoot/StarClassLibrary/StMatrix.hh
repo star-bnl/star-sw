@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.10 2000/02/02 18:31:05 lasiuk Exp $
+ * $Id: StMatrix.hh,v 1.11 2001/10/31 00:33:34 ullrich Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
+ * Revision 1.11  2001/10/31 00:33:34  ullrich
+ * Remove macro ifdef for GCC which is not needed anymore.
+ *
  * Revision 1.10  2000/02/02 18:31:05  lasiuk
  * restore files
  *
@@ -343,11 +346,7 @@ public:
     // Must be of same type to swap
     static void   swap(unsigned int&, unsigned int&);
     static void   swap(DataType *&, DataType *&);
-#ifdef GNU_GCC
-    friend void   swap<DataType>(StMatrix<DataType>&, StMatrix<DataType>&);
-#else
     friend void   swap(StMatrix<DataType>&, StMatrix<DataType>&);
-#endif
     
 private:
     // Friend classes.
