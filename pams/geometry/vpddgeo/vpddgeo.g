@@ -1,5 +1,8 @@
-* $Id: vpddgeo.g,v 1.3 2000/08/08 00:11:25 nevski Exp $
+* $Id: vpddgeo.g,v 1.4 2000/08/21 23:57:25 geurts Exp $
 * $Log: vpddgeo.g,v $
+* Revision 1.4  2000/08/21 23:57:25  geurts
+* updated dimensions of the I-beam
+*
 * Revision 1.3  2000/08/08 00:11:25  nevski
 * more realistic VPD project
 *
@@ -78,8 +81,8 @@ Created 21 June 2000
         PMTlen    =    8.0    ! PMT tube length 
         IBchoice  =    1      ! active/de-activate (0) ibeam
         IBPosYc   =  -16.51   ! IBeam central Ylocation		(6.5inch)
-        IBPosZc   =  350.     ! IBeam central Zposition
-        IBLeng    =  300.     ! IBeam length
+        IBPosZc   =  530.477  ! IBeam central Zposition
+        IBLeng    =  294.894  ! IBeam length                    (116.1inch)
         IBthickH  =    0.7366 ! IBeam horiz. plate thickness	(0.29inch)
         IBthickV  =    0.4318 ! IBeam vert. plate thickness	(0.17inch)
         IBheight  =   10.16   ! IBeam height			(4inch)
@@ -93,8 +96,8 @@ Created 21 June 2000
      Position VPDD in Cave   z=-vpdg_zpos   ThetaZ=180
 
      if (vpdg_IBchoice != 0) then
-       Position IBEM in Cave z=+vpdg_zpos y=vpdg_IBposYc
-       Position IBEM in Cave z=-vpdg_zpos y=vpdg_IBposYc ThetaZ=180
+       Position IBEM in Cave z=+vpdg_IBPosZc y=vpdg_IBposYc
+       Position IBEM in Cave z=-vpdg_IBPosZc y=vpdg_IBposYc ThetaZ=180
      endif
 *
 *=======================================================================
@@ -143,7 +146,7 @@ Block VPDD  is the whole VPPD assembly
 *
      if (vpdg_IBchoice != 0) then
        print *,'vpddgeo: I-Beam support is activated'
-       Create and Position IBEM y=vpdg_IBposYc
+       Create and Position IBEM z=-vpdg_zpos+vpdg_IBPosZc   y=vpdg_IBposYc
      endif
 *
 Endblock
