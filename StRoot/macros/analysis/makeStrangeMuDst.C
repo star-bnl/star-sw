@@ -1,5 +1,8 @@
-// $Id: makeStrangeMuDst.C,v 2.4 2001/09/21 02:21:57 jeromel Exp $
+// $Id: makeStrangeMuDst.C,v 2.5 2003/02/10 16:50:08 genevb Exp $
 // $Log: makeStrangeMuDst.C,v $
+// Revision 2.5  2003/02/10 16:50:08  genevb
+// simple updates
+//
 // Revision 2.4  2001/09/21 02:21:57  jeromel
 // StTpcDb needed by StEventMaker.
 //
@@ -53,7 +56,8 @@ void load() {
   gSystem->Load("StEvent");
   gSystem->Load("StMagF");
   gSystem->Load("StTpcDb");
-  gSystem->Load("StEventMaker");
+  // The following is needed if reading from dst Branch instead of Event Branch
+//  gSystem->Load("StEventMaker");
   gSystem->Load("StStrangeMuDstMaker");
 // The following are needed for using Monte Carlo info
 //  gSystem->Load("StEmcUtil");
@@ -80,7 +84,8 @@ void run() {
 
   // Create Makers
   StIOMaker IOMaker("IO","r",files,"bfcTree");
-  StEventMaker eventMaker("events","title");
+  // The following is needed if reading from dst Branch instead of Event Branch
+//  StEventMaker eventMaker("events","title");
 // The following are needed for using Monte Carlo info
 //  StMcEventMaker*     mcEventReader = new StMcEventMaker; 
 //  StAssociationMaker* associator    = new StAssociationMaker;
@@ -88,10 +93,12 @@ void run() {
 //  StRandyTopMapMaker topoMapFixer();
   StStrangeMuDstMaker strangeDst("strangeMuDst");
 
-  // Indicate input branches
+  // Indicate input branches (i.e. eventBranch = *.event.root file)
   IOMaker.SetBranch("*",0,"0");           //deactivate all branches
-  IOMaker.SetBranch("dstBranch",0,"r");   //activate Event Branch
   IOMaker.SetBranch("runcoBranch",0,"r"); //activate runco Branch
+  // One of the following two branches must be selected to read from
+//  IOMaker.SetBranch("dstBranch",0,"r");   //activate sst Branch
+  IOMaker.SetBranch("eventBranch",0,"r");   //activate Event Branch
 // The following is needed for using Monte Carlo info
 //  IOMaker.SetBranch("geantBranch",0,"r"); //activate geant Branch
 
