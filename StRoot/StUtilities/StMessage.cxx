@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.14 1999/09/10 21:05:55 genevb Exp $
+// $Id: StMessage.cxx,v 1.15 1999/09/11 23:12:23 fisyak Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.15  1999/09/11 23:12:23  fisyak
+// Add cast for HP
+//
 // Revision 1.14  1999/09/10 21:05:55  genevb
 // Some workarounds for RedHat6.0
 //
@@ -73,7 +76,7 @@ ClassImp(StMessage)
 StMessage::StMessage(char *mess, char *ty, char* opt) :
 type(new char[2]),
 messTime() {
-  char* type1 = type;
+  char* type1 = (char *) type;
   *type1 = *ty;
   *(++type1) = 0;
   static char space = ' ';
@@ -146,7 +149,7 @@ int StMessage::Print(int nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.14 1999/09/10 21:05:55 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.15 1999/09/11 23:12:23 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
