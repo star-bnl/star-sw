@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.33 1999/06/17 18:25:32 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.34 1999/06/30 20:35:35 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.34  1999/06/30 20:35:35  kathy
+// now have 2D histograms being plotted with box plots instead of scatter plots
+//
 // Revision 1.33  1999/06/17 18:25:32  kathy
 // fix so writes out blank canvas
 //
@@ -409,6 +412,7 @@ Int_t St_QA_Maker::DrawHists()
 //     in TIter that returns a TObject* 
 
   TObject *obj = 0;
+  Int_t chkdim=0;
   while (obj = nextHist()) {
 //    cout << " **** Now in St_QA_Maker::DrawHists - in loop: " << endl;
 //    cout << "               name = " << obj->GetName() << endl;
@@ -432,7 +436,11 @@ Int_t St_QA_Maker::DrawHists()
 	  gPad->SetLogy(1);
           cout << "St_QA_Maker::DrawHists -- Will draw in log scale: " << obj->GetName() <<endl;
         }
-        obj->Draw();   
+        chkdim = ((TH1 *)obj)->GetDimension();
+	  cout << " name " << obj->GetName() << " dimension " << chkdim << endl;
+        if (chkdim == 2) obj->Draw("box");
+        else 
+            obj->Draw();   
 	if (gPad) gPad->Update();
       }
     }
@@ -1366,7 +1374,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.33 1999/06/17 18:25:32 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.34 1999/06/30 20:35:35 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
