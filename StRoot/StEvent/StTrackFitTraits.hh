@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.hh,v 1.3 1999/01/30 23:03:17 wenaus Exp $
+ * $Id: StTrackFitTraits.hh,v 1.2 1999/01/15 22:54:07 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,9 +13,6 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.hh,v $
- * Revision 1.3  1999/01/30 23:03:17  wenaus
- * table load intfc change; include ref change
- *
  * Revision 1.2  1999/01/15 22:54:07  wenaus
  * version with constructors for table-based loading
  *
@@ -23,7 +20,7 @@
 #ifndef StTrackFitTraits_hh
 #define StTrackFitTraits_hh
 #include "StMatrix.hh"
-#include "tables/dst_track.h"
+#include "StTables/dst_track.h"
 
 class StTrackFitTraits {
 public:
