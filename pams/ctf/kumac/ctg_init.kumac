@@ -156,10 +156,11 @@ RETURN
  macro/global/import *
    
    cd [params]
-   /dio/newfilestream  input_file ctg_pars_ctb.xdf r
+   /dio/newfilestream input_file $STAR/params/ctf/ctg_pars_ctb.xdf r
    getevent input_file 
    cd /dui
    
  return
  
 * *************************************************************
+
