@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPicoEventCollectionVectorHideAway.hh,v 1.2 2001/11/11 18:34:13 laue Exp $
+ * $Id: StHbtPicoEventCollectionVectorHideAway.hh,v 1.3 2002/02/04 18:58:33 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPicoEventCollectionVectorHideAway.hh,v $
+ * Revision 1.3  2002/02/04 18:58:33  laue
+ * *** empty log message ***
+ *
  * Revision 1.2  2001/11/11 18:34:13  laue
  * StHbtPicoEventCollectionVectorHideAway: updated for 3d grid
  * StHbtVertexMultAnalysis: new
@@ -26,6 +29,7 @@
 #include "StHbtMaker/Infrastructure/StHbtPicoEventCollectionVector.hh"
 #include <vector>
 #include <list>
+#include <float.h>
 #include <limits.h>
 
 #if !defined(ST_NO_NAMESPACES)
@@ -35,9 +39,9 @@ using std::list;
 
 class StHbtPicoEventCollectionVectorHideAway {
 public:
-  StHbtPicoEventCollectionVectorHideAway(int bx=1, double lx=DBL_MIN, double ux=DBL_MAX,
-					 int by=1, double ly=DBL_MIN, double uy=DBL_MAX,
-					 int bz=1, double lz=DBL_MIN, double uz=DBL_MAX);
+  StHbtPicoEventCollectionVectorHideAway(int bx=1, double lx=-FLT_MAX, double ux=FLT_MAX,
+					 int by=1, double ly=-FLT_MAX, double uy=FLT_MAX,
+					 int bz=1, double lz=-FLT_MAX, double uz=FLT_MAX);
   StHbtPicoEventCollection* PicoEventCollection(int, int, int);
   StHbtPicoEventCollection* PicoEventCollection(double x, double y=0, double z=0);
 private:
