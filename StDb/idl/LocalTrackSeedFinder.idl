@@ -20,7 +20,7 @@ struct LocalTrackSeedFinder {
   long   maxSkipped;        /* max number of layers one can skip                                    */
   long   extrapMaxLength;   /* define the Max number of points to extrapolate                       */
   long   extrapMinLength;   /* define the Min number of points to extrapolate                       */
-  short  useOrigin;         /* Use the origin to calculate helix                                    */
+  long   useOrigin;         /* Use the origin to calculate helix                                    */
 
 
 };
