@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.2 2003/05/09 22:20:00 lbarnby Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.3 2003/05/12 21:10:06 lbarnby Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.3  2003/05/12 21:10:06  lbarnby
+ * Made destructor virtual
+ *
  * Revision 1.2  2003/05/09 22:20:00  lbarnby
  * Now also calculates and reports error on vertex. Corrected filter to use ITTF tracks. Some temporary protections against inf/Nan. Skip delete of TMinuit class since causing seg. fault.
  *
@@ -51,11 +54,12 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
     use_ITTF = false;
 }
 
-StMinuitVertexFinder::~StMinuitVertexFinder()
-{
-  cout << "***Skipping delete Minuit ***" << endl;
-  //delete mMinuit;
-}
+
+ StMinuitVertexFinder::~StMinuitVertexFinder()
+ {
+   gMessMgr->Info() << "Skipping delete Minuit in StMinuitVertexFinder::~StMinuitVertexFinder()" << endm;
+   //delete mMinuit;
+ }
 
 bool
 StMinuitVertexFinder::fit(StEvent* event)

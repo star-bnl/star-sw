@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.h,v 1.2 2003/05/09 22:19:51 lbarnby Exp $
+ * $Id: StMinuitVertexFinder.h,v 1.3 2003/05/12 21:10:06 lbarnby Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  * Modified for pp by David Hardtke, Summer 2002
@@ -87,6 +87,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.3  2003/05/12 21:10:06  lbarnby
+ * Made destructor virtual
+ *
  * Revision 1.2  2003/05/09 22:19:51  lbarnby
  * Now also calculates and reports error on vertex. Corrected filter to use ITTF tracks. Some temporary protections against inf/Nan. Skip delete of TMinuit class since causing seg. fault.
  *
@@ -106,7 +109,7 @@ class TMinuit;
 class StMinuitVertexFinder: public StGenericVertexFinder {
 public:
     StMinuitVertexFinder();
-    ~StMinuitVertexFinder();
+    virtual ~StMinuitVertexFinder();
 
     bool            fit(StEvent*);       // fit the vertex
     StThreeVectorD  result() const;      // result of fit
