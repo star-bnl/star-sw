@@ -80,6 +80,7 @@ Int_t StBemcStatusMaker::Make() {
   }
   StEmcDetector* bemc = emcColl->detector(kBarrelEmcTowerId);
   if (!bemc) {
+    cout << "No barrel!" << endl;
     return kStOk;
   }
   
@@ -88,6 +89,7 @@ Int_t StBemcStatusMaker::Make() {
   for(int crate = 1; crate<=MAXCRATES; crate++) {
     StEmcCrateStatus crateStatus = bemc->crateStatus(crate);
     if (crateStatus==crateHeaderCorrupt) {
+      cout << "corruption!" << endl;
       return kStOk;  //corrupt event
     }
   }

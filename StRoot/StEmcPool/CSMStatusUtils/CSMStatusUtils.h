@@ -49,7 +49,7 @@ class CSMStatusUtils : public TObject {
   TString getDateTimeString(int runnumber,TTree* ttree=0);
   void findFillEnds();
   void setDateTimeInfo(int runnumber,TTree* ttree);
-  void writePedestals(TH2F* hist, TTree* ttree, TString directory,
+  void writePedestals(Int_t runNumber, TString directory,
                         std::vector<Short_t>& statusVector,
                         std::vector<Float_t>& pedestalmean,
                         std::vector<Float_t>& pedestalwidth,
