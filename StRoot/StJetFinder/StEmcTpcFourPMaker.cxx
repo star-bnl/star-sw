@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.9 2003/06/26 22:37:32 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.10 2003/07/24 22:11:17 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -35,9 +35,53 @@
 #include "StEmcPoint.h"
 #include "StMuDSTMaker/COMMON/StMuEmcUtil.h"
 #include "StEmcTpcFourPMaker.h"
+#include "SystemOfUnits.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEmcUtil/others/emcDetectorName.h"
+#include "StEmcADCtoEMaker/StBemcData.h"
 
 ClassImp(StEmcTpcFourPMaker)
   
+double PionAveDepRatio;
+double KaonAveDepRatio;
+double ProtonAveDepRatio;
+double ElectronAveDepRatio;
+double ChargedAveDep;
+
+  // This is the Energy deposit function.  It calculates the amount of 
+  // energy deposited by a charged particle 
+double StProjectedTrack::depE(void) 
+{ 
+  double coef_0 = ChargedAveDep*(1.0-probElectron);
+  double coef_1 = probElectron*ElectronAveDepRatio +
+			  probPion*PionAveDepRatio + 
+			  probProton*ProtonAveDepRatio +
+			  probKaon*KaonAveDepRatio;
+  cout << "coef_0: " << coef_0 << endl;
+  cout << "coef_1: " << coef_1 << endl;
+  return coef_0 + coef_1*E();
+}
+
+void StEmcTpcFourPMaker::SetDepRatios(double PIDR, double KDR, 
+				 double PRDR, double EDR, double CAD)
+{
+  mPIDR = PIDR;
+  mKDR = KDR;
+  mPRDR = PRDR;
+  mEDR = EDR;
+  mCAD = CAD;
+  SetDepRatios();
+}
+
+void StEmcTpcFourPMaker::SetDepRatios(void)
+{
+  PionAveDepRatio = mPIDR;
+  KaonAveDepRatio = mKDR;
+  ProtonAveDepRatio = mPRDR;
+  ElectronAveDepRatio = mEDR;
+  ChargedAveDep = mCAD;
+}
+
 StEmcTpcFourPMaker::StEmcTpcFourPMaker(const char* name, 
   StMuDstMaker* uDstMaker, 
   long pBins, long thBins, double pRad, double thRad, double rsqr,
@@ -45,9 +89,15 @@ StEmcTpcFourPMaker::StEmcTpcFourPMaker(const char* name,
   : StFourPMaker(name, uDstMaker), radiussqr(rsqr), binmap(pBins, thBins, pRad, thRad), adc2E(adcToEMaker) {
   seconds = 0;
   muEmc = NULL;
+  emc = NULL;
+  SetDepRatios(0.2,0.2,0.2,1.0,0.0);
+  maxHits = 4800;
+  fakePoints.resize(maxHits);
+  useType = Hits;
 }
 
 Int_t StEmcTpcFourPMaker::Make() {
+  SetDepRatios();
   cout <<" Start StEmcTpcFourPMaker :: "<< GetName() <<" mode="<<m_Mode<<endl;   
   binmap.clearall();
 
@@ -80,40 +130,105 @@ Int_t StEmcTpcFourPMaker::Make() {
   }
 
   // Retreive the points
-  if(adc2E == NULL)
-    muEmc = uDst->emcCollection();
+  StEmcCollection *emc = NULL;
+  if((useType != Hits) || (adc2E == NULL))
+    { 
+      if(adc2E == NULL)
+	{
+	  muEmc = uDst->emcCollection();
+	}
+      else
+	{
+	  if(muEmc != NULL)
+	    {
+	      delete muEmc;
+	      muEmc = NULL;
+	    }
+	  StMuEmcUtil converter;
+	  StEmcCollection *emc = adc2E->getEmcCollection();
+	  muEmc = converter.getMuEmc(emc);
+	}
+    }
   else
     {
-      if(muEmc != NULL)
-	{
-	  delete muEmc;
-	  muEmc = NULL;
-	}
-      StMuEmcUtil converter;
-      StEmcCollection *emc = adc2E->getEmcCollection();
-      muEmc = converter.getMuEmc(emc);
+      emc = adc2E->getEmcCollection();
     }
-  int numPoints = muEmc->getNPoints();
+  int numPoints = 0;
+  int numClusters = 0;
+  double twoPi = M_PI*2.0;
 
   // Add the points
-  cout << "NumPoints: " << numPoints << endl;
-  // This just prints for debugging purposes:
-  double twoPi = M_PI*2.0;
-  for(int i = 0; i < numPoints; i++)
-  {
-    StMuEmcPoint* point = muEmc->getPoint(i);
-    cout << "Point[" << i << "] eta: " << point->getEta() - etaShift;
-    double phi = point->getPhi(); 
-    while(phi < 0) phi += twoPi;
-    while(phi > twoPi) phi -= twoPi;
-    cout << "  phi: " << phi;
-    cout << "  energy: " << point->getEnergy() << endl;
-  }
-  for(int i = 0; i < numPoints; i++)
-  {
-    StMuEmcPoint* point = muEmc->getPoint(i);
-    binmap.insertPoint(point, i);
-  }
+  if((useType != Hits) || (adc2E == NULL))
+    {
+      numPoints = muEmc->getNPoints();
+      numClusters = muEmc->getNClusters(1);
+      cout << "NumPoints: " << numPoints << endl;
+      cout << "NumClusters: " << numClusters << endl;
+      // This just prints for debugging purposes:
+      if(useType != Clusters) for(int i = 0; i < numPoints; i++)
+	{
+	  StMuEmcPoint* point = muEmc->getPoint(i);
+	  cout << "Point[" << i << "] eta: " << point->getEta() - etaShift;
+	  double phi = point->getPhi(); 
+	  while(phi < 0) phi += twoPi;
+	  while(phi > twoPi) phi -= twoPi;
+	  cout << "  phi: " << phi;
+	  cout << "  energy: " << point->getEnergy() << endl;
+	}
+      if(useType == Clusters) for(int i = 0; i < numClusters; i++)
+	{
+	  StMuEmcCluster* cluster = muEmc->getCluster(1,i);
+	  cout << "Cluster[" << i << "] eta: " << cluster->getEta() - etaShift;
+	  double phi = cluster->getPhi(); 
+	  while(phi < 0) phi += twoPi;
+	  while(phi > twoPi) phi -= twoPi;
+	  cout << "  phi: " << phi;
+	  cout << "  energy: " << cluster->getEnergy() << endl;
+	}
+      if(useType != Clusters) for(int i = 0; i < numPoints; i++)
+	{
+	  StMuEmcPoint* point = muEmc->getPoint(i);
+	  binmap.insertPoint(point, i);
+	}
+      if(useType == Clusters) for(int i = 0; i < numClusters; i++)
+	{
+	  StMuEmcCluster* cluster = muEmc->getCluster(1,i);
+
+	  // now add a fake point to the binmap
+	  StMuEmcPoint& point = fakePoints[i];
+	  point.setEta(cluster->getEta());
+	  point.setPhi(cluster->getPhi());
+	  point.setEnergy(cluster->getEnergy());
+	  binmap.insertPoint(&point, i);
+	}
+    }
+  else // useType == Hits
+    {
+      int pointIndex = 0;
+      int& hitId = pointIndex;
+      StEmcGeom* geom = StEmcGeom::getEmcGeom(detname[0].Data());
+      StBemcData* data = adc2E->getBemcData();
+      int numHits = data->NTowerHits;
+      cout << "Number Hits: " << numHits;
+
+      for(hitId = 1; hitId <= maxHits; hitId++)
+	{
+	  float eta, phi, energy;
+	  if(data->TowerStatus[hitId-1] != 1) continue;
+	  energy = data->TowerEnergy[hitId-1];
+	  if(energy < 0.01) continue;
+	  geom->getEtaPhi(hitId, eta, phi);
+	  while(phi < 0) phi += twoPi;
+	  while(phi > twoPi) phi -= twoPi;
+
+	  // now add a fake point to the binmap
+	  StMuEmcPoint& point = fakePoints[pointIndex];
+	  point.setEta(eta);
+	  point.setPhi(phi);
+	  point.setEnergy(energy);
+	  binmap.insertPoint(&point, pointIndex);
+	}
+    }
 
   // Connect the points with the tracks when they are within radiussqr 
   binmap.correlate(radiussqr);
@@ -163,14 +278,43 @@ Int_t StEmcTpcFourPMaker::Make() {
     tracks.push_back(&newTrack);
   }  
 
+
   // Now subtract the energy deposited by the tracks:
-  for(pointToTracks::iterator pointit = binmap.p2t.begin(); 
-      pointit != binmap.p2t.end(); ++pointit)
-  {
-    StCorrectedEmcPoint &point = binmap.moddPoints[(*pointit).first];
-    StProjectedTrack &track = binmap.moddTracks[(*pointit).second];
-    point.SubE(track.depE());
-  }  
+  StMuTrack* lasttrack = (*(binmap.t2p.begin())).first;
+  double deposit = (binmap.moddTracks[lasttrack]).depE();
+  DistanceToPointMap pointsDist;
+  for(trackToPoints::iterator trackit = binmap.t2p.begin(); 
+      trackit != binmap.t2p.end(); ++trackit)
+    {
+      if((*trackit).first != lasttrack)
+	{
+	  for(DistanceToPointMap::iterator d2p = pointsDist.begin();
+	      d2p != pointsDist.end(); ++d2p)
+	    {
+	      StCorrectedEmcPoint& point = binmap.moddPoints[(*d2p).second];
+	      if(point.E() > deposit)
+		{
+		  point.SubE(deposit);
+		  deposit = 0;
+		  break;
+		}
+	      else
+		{
+		  deposit -= point.E();
+		  point.SetE(0);
+		}
+	    }
+	  pointsDist.clear();
+	  lasttrack = (*trackit).first;
+	  deposit = (binmap.moddTracks[lasttrack]).depE();
+	}
+
+      StProjectedTrack& track = binmap.moddTracks[(*trackit).first];
+      StCorrectedEmcPoint& point = binmap.moddPoints[(*trackit).second];
+      pointsDist.insert(DistanceToPointMap::value_type
+			(binmap.trackPointRadiusSqr(track, point), 
+			 (*trackit).second));
+    }
 
   // Add neutral pion and eta tracks using the remaining energy in the 
   // reducedPointEnergies array - not coded
@@ -184,9 +328,12 @@ Int_t StEmcTpcFourPMaker::Make() {
     pointMap::value_type &point_val = *point;
     StMuTrackFourVec& newTrack = tPile[index++];
     StCorrectedEmcPoint &cPoint = point_val.second;
-    cout << "Point/Track E: " << cPoint.P().e() << endl;
-    cout << "Point/Track Phi: " << cPoint.P().phi() << endl;
-    cout << "Point/Track Eta: " << cPoint.P().pseudoRapidity() << endl;
+    //cout << "FourP E: " << cPoint.P().e() << endl;
+    //cout << "FourP Phi: " << cPoint.P().phi() << endl;
+    //cout << "FourP Eta: " << cPoint.P().pseudoRapidity() << endl;
+    //cout << "Point/Track E: " << cPoint.E() << endl;
+    //cout << "Point/Track Phi: " << cPoint.Phi() << endl;
+    //cout << "Point/Track Eta: " << cPoint.Eta() << endl;
     if(cPoint.P().e() > .01)
       {
 	newTrack.Init(NULL, cPoint.P(), cPoint.getIndex()+nTracks);
