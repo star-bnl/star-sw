@@ -82,6 +82,7 @@ CC:  Local Variable Type Declarations:
       integer*4 track_index(ntpc_max), tpc_trk_row
       integer*4 iftpc, ihit, nhits(2)
       integer*4 max_ftpc_hits
+      integer*4 nqwe
       parameter (max_ftpc_hits = 10)
 
       real*4  zbin(11), zstep, zmin
@@ -596,36 +597,51 @@ CC:        Accumulate residual, drift direction for FTPC West and East
  
 CC:      Compute fraction of space points used in FTPC West and East
 
-         dms_ftpc(1).hit_frac_ftpc(1) = 
-     1       float(nhits(1))/float(dms_ftpc(1).n_pts_ftpc(1))
-         dms_ftpc(1).hit_frac_ftpc(2) = 
-     1        float(nhits(2))/float(dms_ftpc(1).n_pts_ftpc(2))
+         nqwe = dms_ftpc(1).n_pts_ftpc(1)
+         dms_ftpc(1).hit_frac_ftpc(1) = 0
+         if (nqwe.ne.0) 
+     1   dms_ftpc(1).hit_frac_ftpc(1) = float(nhits(1))/float(nqwe)
+         nqwe = dms_ftpc(1).n_pts_ftpc(2)
+         dms_ftpc(1).hit_frac_ftpc(2) = 0
+         if (nqwe.ne.0)
+     1   dms_ftpc(1).hit_frac_ftpc(2) = float(nhits(2))/float(nqwe)
 
 CC:      Compute average number of space points per reconstructed track
 CC:      used in FTPC West and East
 
-         dms_ftpc(1).avg_trkL_ftpc(1) = 
-     1        float(nhits(1))/float(dms_ftpc(1).n_trk_ftpc(1))
-         dms_ftpc(1).avg_trkL_ftpc(2) =
-     1        float(nhits(2))/float(dms_ftpc(1).n_trk_ftpc(2))
+         dms_ftpc(1).avg_trkL_ftpc(1) = 0
+         nqwe = dms_ftpc(1).n_trk_ftpc(1)
+         if (nqwe.ne.0)
+     1   dms_ftpc(1).avg_trkL_ftpc(1) = float(nhits(1))/float(nqwe)
+
+         dms_ftpc(1).avg_trkL_ftpc(2) = 0
+         nqwe = dms_ftpc(1).n_trk_ftpc(2)
+         if (nqwe.ne.0)
+     1   dms_ftpc(1).avg_trkL_ftpc(2) = float(nhits(2))/float(nqwe)
 
 CC:      Compute average residual, pad direction for FTPC West and East
 
-         dms_ftpc(1).res_pad_ftpc(1) =
-     1    dms_ftpc(1).res_pad_ftpc(1)/
-     2        dms_ftpc(1).n_trk_ftpc(1)
-         dms_ftpc(1).res_pad_ftpc(2) =
-     1    dms_ftpc(1).res_pad_ftpc(2)/
-     2        dms_ftpc(1).n_trk_ftpc(2)
+         dms_ftpc(1).res_pad_ftpc(1) = 0
+         nqwe = dms_ftpc(1).n_trk_ftpc(1)
+         if (nqwe.ne.0) 
+     1   dms_ftpc(1).res_pad_ftpc(1) = dms_ftpc(1).res_pad_ftpc(1)/nqwe
+
+         dms_ftpc(1).res_pad_ftpc(2) = 0
+         nqwe = dms_ftpc(1).n_trk_ftpc(2)
+         if (nqwe.ne.0)
+     1   dms_ftpc(1).res_pad_ftpc(2) = dms_ftpc(1).res_pad_ftpc(2)/nqwe
 
 CC:      Compute average residual, drift direction for FTPC West and East
 
-         dms_ftpc(1).res_drf_ftpc(1) =
-     1    dms_ftpc(1).res_drf_ftpc(1)
-     2        /dms_ftpc(1).n_trk_ftpc(1)
-         dms_ftpc(1).res_drf_ftpc(2) =
-     1    dms_ftpc(1).res_drf_ftpc(2)
-     2       /dms_ftpc(1).n_trk_ftpc(2)
+         dms_ftpc(1).res_drf_ftpc(1) = 0
+         nqwe = dms_ftpc(1).n_trk_ftpc(1)
+         if (nqwe.ne.0) 
+     1   dms_ftpc(1).res_drf_ftpc(1) = dms_ftpc(1).res_drf_ftpc(1)/nqwe
+
+         dms_ftpc(1).res_drf_ftpc(2) = 0
+         nqwe = dms_ftpc(1).n_trk_ftpc(2)
+         if (nqwe.ne.0)
+     1   dms_ftpc(1).res_drf_ftpc(2) = dms_ftpc(1).res_drf_ftpc(2)/nqwe
 
       end if
  
