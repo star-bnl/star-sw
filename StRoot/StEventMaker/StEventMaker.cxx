@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.38 2001/09/28 22:22:05 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.39 2001/11/07 21:20:46 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.39  2001/11/07 21:20:46  ullrich
+ * Added L1 trigger.
+ *
  * Revision 2.38  2001/09/28 22:22:05  ullrich
  * Load helix geometry at last point of each track.
  *
@@ -169,7 +172,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.38 2001/09/28 22:22:05 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.39 2001/11/07 21:20:46 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -402,12 +405,15 @@ StEventMaker::makeEvent()
     //
     dst_TrgDet_st* dstTriggerDetectors = mEventManager->returnTable_dst_TrgDet(nrows);
     dst_L0_Trigger_st* dstL0Trigger    = mEventManager->returnTable_dst_L0_Trigger(nrows);
+    dst_L1_Trigger_st* dstL1Trigger    = mEventManager->returnTable_dst_L1_Trigger(nrows);
     if (dstTriggerDetectors)
         mCurrentEvent->setTriggerDetectorCollection(new StTriggerDetectorCollection(*dstTriggerDetectors));
     if (dstL0Trigger && dstTriggerDetectors)
         mCurrentEvent->setL0Trigger(new StL0Trigger(*dstL0Trigger, *dstTriggerDetectors));
     else if (dstL0Trigger)
         mCurrentEvent->setL0Trigger(new StL0Trigger(*dstL0Trigger));
+    if (dstL0Trigger && dstL1Trigger)
+	mCurrentEvent->setL1Trigger(new StL1Trigger(*dstL0Trigger, *dstL1Trigger));
 
     //
     //  Some variables we need in the following
@@ -625,10 +631,11 @@ StEventMaker::makeEvent()
     dst_vertex_st *dstVertices = mEventManager->returnTable_dst_vertex(nVertices);
 
     for (i=0; i<nVertices; i++) {
-        if (dstVertices[i].iflag < 100 && dstVertices[i].iflag%10 == 1 &&
-            dstVertices[i].vtx_id == kEventVtxId) {
+        if ( (dstVertices[i].iflag < 100 && dstVertices[i].iflag%10 == 1 &&
+              dstVertices[i].vtx_id == kEventVtxId ) ||                        // mod for Helen
+	     dstVertices[i].iflag == 201) {                                    // mod for Helen
             StPrimaryVertex *pvtx = new StPrimaryVertex(dstVertices[i]);
-            for (k=0; k<vecPrimaryTracks.size(); k++) {
+            for (k=0; k<vecPrimaryTracks.size() && dstVertices[i].iflag != 201; k++) {   // mod for Helen
                 if (vecPrimaryTracks[k] &&
                     vecPrimaryVertexId[k] == (unsigned int) dstVertices[i].id) {
                     pvtx->addDaughter(vecPrimaryTracks[k]);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.hh,v 2.3 2001/09/12 23:48:34 ullrich Exp $
+ * $Id: StRootEventManager.hh,v 2.4 2001/11/07 21:20:46 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.hh,v $
+ * Revision 2.4  2001/11/07 21:20:46  ullrich
+ * Added L1 trigger.
+ *
  * Revision 2.3  2001/09/12 23:48:34  ullrich
  * Removed code to load run_header and run_summary tables.
  *
@@ -46,6 +49,7 @@ public:
     virtual event_header_st*       returnTable_event_header(long&)      const;             
     virtual dst_event_summary_st*  returnTable_dst_event_summary(long&) const;             
     virtual dst_L0_Trigger_st*     returnTable_dst_L0_Trigger(long&)    const;             
+    virtual dst_L1_Trigger_st*     returnTable_dst_L1_Trigger(long&)    const;             
     virtual dst_TrgDet_st*         returnTable_dst_TrgDet(long&)        const;             
     virtual dst_dedx_st*           returnTable_dst_dedx(long&)          const;                    
     virtual dst_mon_soft_ctb_st*   returnTable_dst_mon_soft_ctb(long&)  const;            

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.cc,v 2.8 2001/09/12 23:48:33 ullrich Exp $
+ * $Id: StRootEventManager.cc,v 2.9 2001/11/07 21:20:46 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.cc,v $
+ * Revision 2.9  2001/11/07 21:20:46  ullrich
+ * Added L1 trigger.
+ *
  * Revision 2.8  2001/09/12 23:48:33  ullrich
  * Removed code to load run_header and run_summary tables.
  *
@@ -104,6 +107,7 @@ RETURN_TABLE(dst_event_summary,event_summary)
 RETURN_TABLE(dst_summary_param,summary_param)
 RETURN_TABLE(dst_TrgDet,TrgDet)
 RETURN_TABLE(dst_L0_Trigger,L0_Trigger)         
+RETURN_TABLE(dst_L1_Trigger,L1_Trigger)         
 RETURN_TABLE(dst_dedx,dedx)            
 RETURN_TABLE(dst_mon_soft_ctb,mon_soft_ctb)    
 RETURN_TABLE(dst_mon_soft_emc,mon_soft_emc)    
