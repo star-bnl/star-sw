@@ -16,6 +16,7 @@
 #include "StMemoryInfo.hh"
 
 //Sti
+#include "Sti/Messenger.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiPlacement.h"
 #include "Sti/StiDetectorContainer.h"
@@ -91,20 +92,20 @@ Bool_t TileFrame::HandleButton(Event_t *event)
 
 
 ClassImp(MainFrame)
-
-MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
-    : TGMainFrame(p, w, h),
-
-      fCanvasWindow(0), fContainer(0),
-      fMenuBar(0), fMenuFile(0), fMenuHelp(0), fDetectorMenu(0),
-      fDetectorViewMenu(0), mSvtViewMenu(0), mTpcViewMenu(0),
-      mIfcViewMenu(0), mAllViewMenu(0), mNavigateMenu(0),
-      mTrackingMenu(0), mNextStepMenu(0),
-      fMenuBarLayout(0), fMenuBarItemLayout(0), fMenuBarHelpLayout(0),
-      mchain(0), mIoMaker(0),
-      fTrackingFrame(0), fDoTrackStepButton(0),
-      fFinishTrackButton(0), fFinishEventButton(0),
-      fNextEventButton(0)
+    
+    MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
+	: TGMainFrame(p, w, h),
+	  
+	  fCanvasWindow(0), fContainer(0),
+	  fMenuBar(0), fMenuFile(0), fMenuHelp(0), fDetectorMenu(0),
+	  fDetectorViewMenu(0), mSvtViewMenu(0), mTpcViewMenu(0),
+	  mIfcViewMenu(0), mAllViewMenu(0), mNavigateMenu(0),
+	  mTrackingMenu(0), mNextStepMenu(0),
+	  fMenuBarLayout(0), fMenuBarItemLayout(0), fMenuBarHelpLayout(0),
+	  mchain(0), mIoMaker(0),
+	  fTrackingFrame(0), fDoTrackStepButton(0),
+	  fFinishTrackButton(0), fFinishEventButton(0),
+	  fNextEventButton(0)
 {
     cout <<"MainFrame::MainFrame()"<<endl;
     // Create test main frame. A TGMainFrame is a top level window.
@@ -124,22 +125,26 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
     fMenuFile->AddSeparator();
     fMenuFile->AddEntry("&Print", -1);
     fMenuFile->AddEntry("P&rint setup...", -1);
+    
     fMenuFile->AddSeparator();
+    fMenuFile->AddEntry("Messenger Options", M_Messenger);
+    fMenuFile->AddSeparator();
+
     fMenuFile->AddEntry("E&xit", M_FILE_EXIT);
     
     fMenuFile->DisableEntry(M_FILE_SAVEAS);
-
+    
     mSvtViewMenu = new TGPopupMenu(fClient->GetRoot());
     mSvtViewMenu->AddEntry("Svt Visible", M_DetView_SvtVisible);
     mSvtViewMenu->AddEntry("Svt Invisible", M_DetView_SvtInvisible);
-
+    
     mTpcViewMenu = new TGPopupMenu(fClient->GetRoot());
     mTpcViewMenu->AddEntry("Tpc Visible", M_DetView_TpcVisible);
     mTpcViewMenu->AddEntry("Tpc Invisible", M_DetView_TpcInvisible);
     mIfcViewMenu = new TGPopupMenu(fClient->GetRoot());
     mIfcViewMenu->AddEntry("Ifc Visible", M_DetView_IfcVisible);
     mIfcViewMenu->AddEntry("Ifc Invisible", M_DetView_IfcInvisible);
-
+    
     mAllViewMenu = new TGPopupMenu(fClient->GetRoot());
     mAllViewMenu->AddEntry("All Visible", M_DetView_AllVisible);
     mAllViewMenu->AddEntry("All Invisible", M_DetView_AllInvisible);
@@ -151,25 +156,27 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
     fDetectorViewMenu->AddPopup("&Tpc",mTpcViewMenu);
     fDetectorViewMenu->AddPopup("&Svt",mSvtViewMenu);
     fDetectorViewMenu->AddPopup("&Ifc",mIfcViewMenu);
-
+    
     mNavigateMenu = new TGPopupMenu(fClient->GetRoot());
+    mNavigateMenu->AddEntry("Navigator",M_Det_Navigate);
+    mNavigateMenu->AddSeparator();
     mNavigateMenu->AddEntry("Move &In",M_DetNavigate_MoveIn);
     mNavigateMenu->AddEntry("Move &Out",M_DetNavigate_MoveOut);
     mNavigateMenu->AddEntry("Move &Plus Phi",M_DetNavigate_MovePlusPhi);
     mNavigateMenu->AddEntry("Move &Minus Phi",M_DetNavigate_MoveMinusPhi);
     mNavigateMenu->AddEntry("Set Layer",M_DetNavigate_SetLayer);
     mNavigateMenu->AddEntry("Set Layer and Angle",M_DetNavigate_SetLayerAndAngle);
-
+    
     fDetectorMenu = new TGPopupMenu(fClient->GetRoot());
     fDetectorMenu->AddLabel("Access to the Detector Model");
     fDetectorMenu->AddSeparator();
     fDetectorMenu->AddPopup("&Navigate", mNavigateMenu);
     fDetectorMenu->AddPopup("&Visibility", fDetectorViewMenu);
-
+    
     mNextStepMenu = new TGPopupMenu(fClient->GetRoot());
     mNextStepMenu->AddEntry("Next Detector",M_TrackingSwitch_NextDetector);
     mNextStepMenu->AddEntry("Scan Layer",M_TrackingSwitch_ScanLayer);
-
+    
     mTrackingMenu = new TGPopupMenu(fClient->GetRoot());
     mTrackingMenu->AddLabel("Access to tracking functions");
     mTrackingMenu->AddEntry("Toggle Fit/Find",M_Tracking_ToggleFitFind);
@@ -250,6 +257,11 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
     fFinishEventButton->SetToolTipText("Finish The Current Event");
 
 
+    fResetEventButton = new TGTextButton(fTrackingFrame,
+					 "Reset Event", M_Tracking_ResetEvent);
+    fResetEventButton->Associate(this);
+    fResetEventButton->SetToolTipText("Reset The Current Event");
+    
     fNextEventButton = new TGTextButton(fTrackingFrame,
 					"&Next Event", M_Tracking_EventStep);
     fNextEventButton->Associate(this);
@@ -262,6 +274,9 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
     fTrackingFrame->AddFrame(fFinishEventButton,
 			     new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 0, 2, 2));
 
+    fTrackingFrame->AddFrame(fResetEventButton,
+			     new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 0, 2, 2));
+    
     fTrackingFrame->AddFrame(fNextEventButton,
 			     new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 0, 2, 2));
 
@@ -354,6 +369,9 @@ MainFrame::~MainFrame()
     delete fFinishEventButton;
     fFinishEventButton=0;
 
+    delete fResetEventButton;
+    fResetEventButton=0;
+    
     delete fNextEventButton;
     fNextEventButton=0;
 
@@ -393,6 +411,10 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 	    else if (parm1 == M_Tracking_FinishEvent) {
 		finishEvent();
 	    }
+	    else if (parm1 == M_Tracking_ResetEvent) {
+		StiMaker::instance()->Clear();
+		StiMaker::instance()->Make();
+	    }
 	    else if (parm1 == M_Tracking_EventStep) {
 		stepToNextEvent();
 	    }
@@ -423,6 +445,10 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 
 		//Mike's stuff here:
 
+	    case M_Messenger:
+		new TestMsgBox(fClient->GetRoot(), this, 400, 200);
+		break;
+		
 	    case M_Draw_TestObject:
 		testDraw();
 		break;
@@ -458,11 +484,7 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 	    case M_DetView_IfcInvisible:
 		setIfcInvisible();
 		break;
-		    
-		//case M_Det_Navigate:
-		//navigate();
-		//break;
-
+		
 	    case M_DetView_SkeletonView:
 		setSkeletonView();
 		break;
@@ -471,6 +493,10 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 		setZoomSkeletonView();
 		break;
 
+	    case M_Det_Navigate:
+		new Navigator(fClient->GetRoot(), this, 400, 200);
+		break;
+		
 	    case M_DetNavigate_MoveIn:
 		moveIn();
 		break;
@@ -876,8 +902,534 @@ void MainFrame::printVertices()
     cout <<StiHitContainer::instance()->vertices()<<endl;
 }
 
+// Non members
+
+Navigator::Navigator(const TGWindow *p, const TGWindow *main,
+		     UInt_t w, UInt_t h, UInt_t options) :
+    TGTransientFrame(p, main, w, h, options)
+{
+    int ax, ay;
+    
+    ChangeOptions((GetOptions() & ~kVerticalFrame) | kHorizontalFrame);
+    
+    f1 = new TGCompositeFrame(this, 60, 20, kVerticalFrame | kFixedWidth);
+    
+    mMoveIn = new TGTextButton(f1, "Move In", 1);
+    mMoveOut = new TGTextButton(f1, "Move Out", 2);
+    mMovePlusPhi = new TGTextButton(f1, "Move Plus Phi", 3);
+    mMoveMinusPhi = new TGTextButton(f1, "Move Minus Phi", 4);
+    mClose = new TGTextButton(f1, "Close", 5);
+
+    f1->Resize(mMoveMinusPhi->GetDefaultWidth()+40, GetDefaultHeight());
+
+    mMoveIn->Associate(this);
+    mMoveOut->Associate(this);
+    mMovePlusPhi->Associate(this);
+    mMoveMinusPhi->Associate(this);
+    mClose->Associate(this);
+
+    fL1 = new TGLayoutHints(kLHintsTop | kLHintsExpandX,
+			    2, 2, 3, 0);
+    fL21 = new TGLayoutHints(kLHintsTop | kLHintsRight,
+			     2, 5, 10, 0);
+
+    f1->AddFrame(mMoveIn, fL1);
+    f1->AddFrame(mMoveOut, fL1);
+    f1->AddFrame(mMovePlusPhi, fL1);
+    f1->AddFrame(mMoveMinusPhi, fL1);
+    f1->AddFrame(mClose, fL1);
+    
+    AddFrame(f1, fL21);
+    
+    MapSubwindows();
+    Resize(GetDefaultSize());
+    
+    // position relative to the parent's window
+    Window_t wdum;
+    gVirtualX->TranslateCoordinates(main->GetId(), GetParent()->GetId(),
+				    (((TGFrame *) main)->GetWidth() - fWidth) >> 1,
+				    (((TGFrame *) main)->GetHeight() - fHeight) >> 1,
+				    ax, ay, wdum);
+    Move(ax, ay);
+    
+    SetWindowName("ITTF Detector Navigator");
+    
+    MapWindow();
+    //fClient->WaitFor(this);
+}
+
+Navigator::~Navigator()
+{
+    delete mMoveIn;
+    mMoveIn=0;
+
+    delete mMoveOut;
+    mMoveOut=0;
+
+    delete mMovePlusPhi;
+    mMovePlusPhi=0;
+
+    delete mMoveMinusPhi;
+    mMoveMinusPhi=0;
+
+    delete mClose;
+    mClose=0;
+
+    delete f1;
+    f1=0;
+
+    delete fL1;
+    fL1=0;
+
+    delete fL21;
+    fL21=0;
+}
+
+void Navigator::CloseWindow()
+{
+    delete this;
+}
+
+Bool_t Navigator::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
+{
+    // Process messages sent to this dialog.
+    
+    switch(GET_MSG(msg)) {
+    case kC_COMMAND:
+	
+	switch(GET_SUBMSG(msg)) {
+	case kCM_BUTTON:
+	    switch(parm1) {
+		
+	    case 1:
+		MainFrame::moveIn();
+		break;
+		
+	    case 2:
+		MainFrame::moveOut();
+		break;
+		
+	    case 3:
+		MainFrame::movePlusPhi();
+		break;
+		
+	    case 4:
+		MainFrame::moveMinusPhi();
+		break;
+		
+	    case 5:
+		CloseWindow();
+		break;
+	    }
+	    break;
+	    
+	case kCM_RADIOBUTTON:
+	    
+	case kCM_CHECKBUTTON:
+	    break;
+	    
+	default:
+	    break;
+	}
+	break;
+	
+    default:
+	break;
+    }
+    
+    return kTRUE;
+}
+
+// -----------------
+
+TestMsgBox::TestMsgBox(const TGWindow *p, const TGWindow *main,
+                       UInt_t w, UInt_t h, UInt_t options) :
+    TGTransientFrame(p, main, w, h, options),
+    fRedTextGC(TGButton::GetDefaultGC())
+{
+
+    ULong_t red;
+    fClient->GetColorByName("red", red);
+    fRedTextGC.SetForeground(red);
+    
+    int ax, ay;
+    
+    ChangeOptions((GetOptions() & ~kVerticalFrame) | kHorizontalFrame);
+    
+    f1 = new TGCompositeFrame(this, 60, 20, kVerticalFrame | kFixedWidth);
+    f2 = new TGCompositeFrame(this, 60, 20, kVerticalFrame);
+    f3 = new TGCompositeFrame(f2, 60, 20, kHorizontalFrame);
+    
+    fTestButton = new TGTextButton(f1, "&Apply", 1, fRedTextGC());
+    
+    // Change background of fTestButton to green
+    ULong_t green;
+    fClient->GetColorByName("green", green);
+    fTestButton->ChangeBackground(green);
+    
+    fCloseButton = new TGTextButton(f1, "&Close", 2);
+
+    f1->Resize(fTestButton->GetDefaultWidth()+40, GetDefaultHeight());
+    
+    fTestButton->Associate(this);
+    fCloseButton->Associate(this);
+    
+    fL1 = new TGLayoutHints(kLHintsTop | kLHintsExpandX,
+			    2, 2, 3, 0);
+    fL2 = new TGLayoutHints(kLHintsTop | kLHintsRight | kLHintsExpandX,
+			    2, 5, 0, 2);
+    fL21 = new TGLayoutHints(kLHintsTop | kLHintsRight,
+			     2, 5, 10, 0);
+    
+    f1->AddFrame(fTestButton, fL1);
+    f1->AddFrame(fCloseButton, fL1);    
+    
+    AddFrame(f1, fL21);
+    
+    //--------- create check and radio buttons groups
+    
+    fG1 = new TGGroupFrame(f3, new TGString("Message Streams"));
+
+    
+    fL3 = new TGLayoutHints(kLHintsTop | kLHintsLeft |
+			    kLHintsExpandX | kLHintsExpandY,
+			    2, 2, 2, 2);
+    fL4 = new TGLayoutHints(kLHintsTop | kLHintsLeft,
+			    0, 0, 5, 0);
+
+    fC.push_back( MessengerPair( kHitMessage,
+				 new TGCheckButton(fG1, new TGHotString("kHitMessage"), -1) ));
+    fC.push_back( MessengerPair( kTrackMessage,
+				 new TGCheckButton(fG1, new TGHotString("kTrackMessage"), -1) ));
+    fC.push_back( MessengerPair( kNodeMessage,
+				 new TGCheckButton(fG1, new TGHotString("kNodeMessage"), -1) ));
+    fC.push_back( MessengerPair( kDetectorMessage,
+				 new TGCheckButton(fG1, new TGHotString("kDetectorMessage"), -1) ));
+    fC.push_back( MessengerPair( kGeometryMessage,
+				 new TGCheckButton(fG1, new TGHotString("kGeometryMessage"), -1) ));
+    fC.push_back( MessengerPair( kSeedFinderMessage,
+				 new TGCheckButton(fG1, new TGHotString("kSeedFinderMessage"), -1) ));
+
+    for (unsigned int i=0; i<fC.size(); ++i) {
+	//cout <<"Adding Frame: "<<i<<endl;
+	fG1->AddFrame(fC[i].second, fL4);
+    }
+    
+    Messenger* msgr = Messenger::instance();
+    //Set current state here!
+    for (unsigned int i=0; i<fC.size(); ++i) {
+	unsigned int theBit = msgr->getRoutingBits(fC[i].first);
+	cout <<"Bit for message: "<<fC[i].first<<" = "<<theBit<<endl;
+	if (theBit) {
+	    fC[i].second->SetState(kButtonDown);
+	}
+    }
+    
+    f3->AddFrame(fG1, fL3);
+    
+    f2->AddFrame(f3, fL1);
+    
+    AddFrame(f2, fL2);
+    
+    MapSubwindows();
+    Resize(GetDefaultSize());
+    
+    // position relative to the parent's window
+    Window_t wdum;
+    gVirtualX->TranslateCoordinates(main->GetId(), GetParent()->GetId(),
+				    (((TGFrame *) main)->GetWidth() - fWidth) >> 1,
+				    (((TGFrame *) main)->GetHeight() - fHeight) >> 1,
+				    ax, ay, wdum);
+    Move(ax, ay);
+    
+    SetWindowName("Activate ITTF Message Streams");
+    
+    MapWindow();
+    //fClient->WaitFor(this);
+}
+
+// Order is important when deleting frames. Delete children first,
+// parents last.
+
+TestMsgBox::~TestMsgBox()
+{
+    // Delete widgets created by dialog.
+    
+    delete fTestButton; delete fCloseButton;
+    for (unsigned int i=0; i<fC.size(); ++i) {
+	delete fC[i].second;
+    }
+
+    delete f3; delete f2; delete f1;
+    delete fL1; delete fL2; delete fL3; delete fL4;
+    delete fL21;
+}
+
+void TestMsgBox::CloseWindow()
+{
+    // Close dialog in response to window manager close.
+    
+    delete this;
+}
+
+Bool_t TestMsgBox::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
+{
+    // Process messages sent to this dialog.
+    
+    switch(GET_MSG(msg)) {
+    case kC_COMMAND:
+	
+	switch(GET_SUBMSG(msg)) {
+	case kCM_BUTTON:
+	    switch(parm1) {
+	    case 1:
+		updateMessenger();		
+		break;
+		
+	    case 2:
+		CloseWindow();
+		break;
+		
+	    }
+	    break;
+	    
+	case kCM_RADIOBUTTON:
+	    
+	case kCM_CHECKBUTTON:
+	    break;
+	    
+	default:
+	    break;
+	}
+	break;
+	
+    default:
+	break;
+    }
+    
+    return kTRUE;
+}
+
+void TestMsgBox::updateMessenger()
+{
+    Messenger* msgr = Messenger::instance();
+    
+    cout <<endl;
+
+    for (unsigned int j=0; j<fC.size(); ++j) {
+	if (fC[j].second->GetState() == kButtonDown) {
+	    cout <<"Button "<<j<<" is checked with enum: "<<fC[j].first<<endl;
+	    msgr->setRoutingBits( fC[j].first );
+	}
+	else {
+	    msgr->clearRoutingBits( fC[j].first );
+	}
+    }
+}
+
+// TGNumberEntry widget test dialog
+const char *const EntryTestDlg::numlabel[13] = {
+    "Integer",
+    "One digit real",
+    "Two digit real",
+    "Three digit real",
+    "Four digit real",
+    "Real",
+    "Degree.min.sec",
+    "Min:sec",
+    "Hour:min",
+    "Hour:min:sec",
+    "Day/month/year",
+    "Month/day/year",
+    "Hex"
+};
+
+const Double_t EntryTestDlg::numinit[13] = {
+    12345, 1.0, 1.00, 1.000, 1.0000, 1.2E-12,
+    90 * 3600, 120 * 60, 12 * 60, 12 * 3600 + 15 * 60,
+    19991121, 19991121, (Double_t) 0xDEADFACE
+};
+
+EntryTestDlg::EntryTestDlg(const TGWindow * p, const TGWindow * main)
+    : TGTransientFrame(p, main, 10, 10, kHorizontalFrame)
+{
+    // build widgets
+    fF1 = new TGVerticalFrame(this, 200, 300);
+    fL1 = new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 2, 2, 2);
+    AddFrame(fF1, fL1);
+    fL2 = new TGLayoutHints(kLHintsCenterY | kLHintsRight, 2, 2, 2, 2);
+
+    for (int i = 0; i < 13; i++) {
+	fF[i] = new TGHorizontalFrame(fF1, 200, 30);
+	fF1->AddFrame(fF[i], fL2);
+	fNumericEntries[i] = new TGNumberEntry(fF[i], numinit[i], 12, i + 20,
+					       (TGNumberFormat::EStyle) i);
+	fNumericEntries[i]->Associate(this);
+	fF[i]->AddFrame(fNumericEntries[i], fL2);
+	fLabel[i] = new TGLabel(fF[i], numlabel[i]);
+	fF[i]->AddFrame(fLabel[i], fL2);
+    }
+    fF2 = new TGVerticalFrame(this, 200, 500);
+    fL3 = new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 2, 2, 2);
+    AddFrame(fF2, fL3);
+    fLowerLimit = new TGCheckButton(fF2, "lower limit:", 4);
+    fLowerLimit->Associate(this);
+    fF2->AddFrame(fLowerLimit, fL3);
+    fLimits[0] = new TGNumberEntry(fF2, 0, 12, 10);
+    fLimits[0]->SetLogStep(kFALSE);
+    fLimits[0]->Associate(this);
+    fF2->AddFrame(fLimits[0], fL3);
+    fUpperLimit = new TGCheckButton(fF2, "upper limit:", 5);
+    fUpperLimit->Associate(this);
+    fF2->AddFrame(fUpperLimit, fL3);
+    fLimits[1] = new TGNumberEntry(fF2, 0, 12, 11);
+    fLimits[1]->SetLogStep(kFALSE);
+    fLimits[1]->Associate(this);
+    fF2->AddFrame(fLimits[1], fL3);
+    fPositive = new TGCheckButton(fF2, "Positive", 6);
+    fPositive->Associate(this);
+    fF2->AddFrame(fPositive, fL3);
+    fNonNegative = new TGCheckButton(fF2, "Non negative", 7);
+    fNonNegative->Associate(this);
+    fF2->AddFrame(fNonNegative, fL3);
+    fSetButton = new TGTextButton(fF2, " Set ", 2);
+    fSetButton->Associate(this);
+    fF2->AddFrame(fSetButton, fL3);
+    fExitButton = new TGTextButton(fF2, " Close ", 1);
+    fExitButton->Associate(this);
+    fF2->AddFrame(fExitButton, fL3);
+    
+    // set dialog box title
+    SetWindowName("Number Entry Test");
+    SetIconName("Number Entry Test");
+    SetClassHints("NumberEntryDlg", "NumberEntryDlg");
+    // resize & move to center
+    MapSubwindows();
+    UInt_t width = GetDefaultWidth();
+    UInt_t height = GetDefaultHeight();
+    Resize(width, height);
+    Int_t ax;
+    Int_t ay;
+    if (main) {
+	Window_t wdum;
+	gVirtualX->TranslateCoordinates(main->GetId(), GetParent()->GetId(),
+					(((TGFrame *) main)->GetWidth() -
+					 fWidth) >> 1,
+					(((TGFrame *) main)->GetHeight() -
+					 fHeight) >> 1, ax, ay, wdum);
+    } else {
+	UInt_t root_w, root_h;
+	gVirtualX->GetWindowSize(fClient->GetRoot()->GetId(), ax, ay,
+				 root_w, root_h);
+	ax = (root_w - fWidth) >> 1;
+	ay = (root_h - fHeight) >> 1;
+    }
+    Move(ax, ay);
+    SetWMPosition(ax, ay);
+    // make the message box non-resizable
+    SetWMSize(width, height);
+    SetWMSizeHints(width, height, width, height, 0, 0);
+    SetMWMHints(kMWMDecorAll | kMWMDecorResizeH | kMWMDecorMaximize |
+		kMWMDecorMinimize | kMWMDecorMenu,
+		kMWMFuncAll | kMWMFuncResize | kMWMFuncMaximize |
+		kMWMFuncMinimize, kMWMInputModeless);
+    
+    MapWindow();
+    fClient->WaitFor(this);
+}
+
+EntryTestDlg::~EntryTestDlg()
+{
+    for (int i = 0; i < 13; i++) {
+	delete fNumericEntries[i];
+	delete fLabel[i];
+	delete fF[i];
+    }
+    delete fLowerLimit;
+    delete fUpperLimit;
+    delete fLimits[0];
+    delete fLimits[1];
+    delete fPositive;
+    delete fNonNegative;
+    delete fSetButton;
+    delete fExitButton;
+    delete fF1;
+    delete fF2;
+    delete fL1;
+    delete fL2;
+    delete fL3;
+}
+
+void EntryTestDlg::CloseWindow()
+{
+    delete this;
+}
+
+void EntryTestDlg::SetLimits()
+{
+    Double_t min = fLimits[0]->GetNumber();
+    Bool_t low = (fLowerLimit->GetState() == kButtonDown);
+    Double_t max = fLimits[1]->GetNumber();
+    Bool_t high = (fUpperLimit->GetState() == kButtonDown);
+    TGNumberFormat::ELimit lim;
+    if (low && high) {
+	lim = TGNumberFormat::kNELLimitMinMax;
+    } else if (low) {
+	lim = TGNumberFormat::kNELLimitMin;
+    } else if (high) {
+	lim = TGNumberFormat::kNELLimitMax;
+    } else {
+	lim = TGNumberFormat::kNELNoLimits;
+    }
+    Bool_t pos = (fPositive->GetState() == kButtonDown);
+    Bool_t nneg = (fNonNegative->GetState() == kButtonDown);
+    TGNumberFormat::EAttribute attr;
+    if (pos) {
+	attr = TGNumberFormat::kNEAPositive;
+    } else if (nneg) {
+	attr = TGNumberFormat::kNEANonNegative;
+    } else {
+	attr = TGNumberFormat::kNEAAnyNumber;
+    }
+    for (int i = 0; i < 13; i++) {
+	fNumericEntries[i]->SetFormat(fNumericEntries[i]->GetNumStyle(), attr);
+	fNumericEntries[i]->SetLimits(lim, min, max);
+    }
+}
+
+Bool_t EntryTestDlg::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
+{
+    switch (GET_MSG(msg)) {
+    case kC_COMMAND:
+	{
+	    switch (GET_SUBMSG(msg)) {
+	    case kCM_BUTTON:
+		{
+		    switch (parm1) {
+			// exit button
+		    case 1:
+			{
+			    CloseWindow();
+			    break;
+			}
+			// set button
+		    case 2:
+			{
+			    SetLimits();
+			    break;
+			}
+		    }
+		    break;
+		}
+	    }
+	    break;
+	}
+    }
+    return kTRUE;
+}
+
 //Extras
 
 /*
-
+  
 */

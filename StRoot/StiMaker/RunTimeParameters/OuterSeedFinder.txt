@@ -1,4 +1,4 @@
-//OuterSeedFinder.txt
+k//OuterSeedFinder.txt
 //Run-time configuration for the outer seed finder
 
 //Hit Filter type
@@ -9,13 +9,13 @@ deltaD:			10.
 deltaZ:			10.
 
 //Track Seed Finder type
-seedFinderType:		StiTrackSeedFinder
+seedFinderType:		StiLocalTrackSeedFinder
 
-//Number of padrows
-nPadrows:		2
+nPadrows:		3
+thePadrows:		5 25 45
 
-//The Padrows
-thePadrows:		43 44
+//nPadrows:		1
+//thePadrows:		45
 
 //Number of sectors
 nSectors:		12

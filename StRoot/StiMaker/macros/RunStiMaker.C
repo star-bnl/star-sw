@@ -15,14 +15,18 @@ void RunStiMaker(Int_t nevents=1,
 const char* outfile = "Evaluation.root",
 
 //This file points to 30 events of 10 neg muons w/ pt=.9
-								 //const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
-	const char* MainFile="/star/data17/ITTF/EvalData/MCNtuple/muon_100_neg.event.root")
+//const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
+const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
+//const char* MainFile="/star/data17/ITTF/EvalData/MCNtuple/muon_100_neg.event.root")
 
 //This file points to 110 events from mevsim (homebrew had. cocktail)
 //const char* MainFile="/star/data17/ITTF/data/mevsim/10_9_01/*.event.root")
 
 //This file points to a nightly low density hadronic cocktail reconstruction.
 //const char* MainFile="/star/rcf/test/dev/trs_redhat61/Tue/year_2001/hc_lowdensity/*.event.root")
+
+//This file points to 5 muons /event
+//const char* MainFile="/star/data17/ITTF/EvalData/MCNtuple/muon_100_neg.event.root")
     
 {    
     // Dynamically link needed shared libs
