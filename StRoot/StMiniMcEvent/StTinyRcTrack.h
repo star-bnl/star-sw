@@ -31,7 +31,10 @@ class StTinyRcTrack {
   void setDcaPr(Float_t val) { mDcaPr=val; }
   void setDcaXYPr(Float_t val) { mDcaXYPr=val; }
   void setDcaZPr(Float_t val) { mDcaZPr=val; }
-  
+  void setCurvPr(Float_t val) {mCurvPr=val; }
+  void setTanLPr(Float_t val) {mTanLPr=val; }
+  void setErrPr(Float_t val[5]) { for (short j=0; j<5; ++j) mErrP[j] = val[j]; }
+    
   void setChi2Pr(Float_t val) { mChi2Pr=val; }
   void setFlag(Short_t val) { mFlag=val; }
   void setDedx(Float_t val) { mDedx=val; }
@@ -43,6 +46,9 @@ class StTinyRcTrack {
   void setDcaGl(Float_t val) { mDcaGl=val; }
   void setDcaXYGl(Float_t val) { mDcaXYGl=val; }
   void setDcaZGl(Float_t val) { mDcaZGl=val; }
+  void setCurvGl(Float_t val) { mCurvGl=val; }
+  void setTanLGl(Float_t val) { mTanLGl=val; }
+  void setErrGl(Float_t val[5]) { for (short j=0; j<5; ++j) mErrG[j] = val[j]; }
 
   void setPidPion(Float_t val) { mPidPion=val; }
   void setPidProton(Float_t val) { mPidProton=val; }
@@ -77,6 +83,9 @@ class StTinyRcTrack {
   float dcaPr() const { return mDcaPr; }
   float dcaXYPr() const { return mDcaXYPr; }
   float dcaZPr() const { return mDcaZPr; }
+  float curvPr() const { return mCurvPr; }
+  float tanLPr() const { return mTanLPr; }
+  float errPr(size_t i) const { return (i<5) ? mErrP[i] : 0; }
   	
   float chi2Pr() const { return mChi2Pr; }
   short flag() const { return mFlag; }
@@ -92,7 +101,10 @@ class StTinyRcTrack {
   float dcaGl() const { return mDcaGl; }
   float dcaXYGl() const { return mDcaXYGl; }
   float dcaZGl() const { return mDcaZGl; }
-	
+  float curvGl() const { return mCurvGl; }
+  float tanLGl() const { return mTanLGl; }
+  float errGl(size_t i) const { return (i<5) ? mErrG[i] : 0; }
+    
   float pidPion() const { return mPidPion; }
   float pidProton() const { return mPidProton; }
   float pidKaon() const { return mPidKaon; }
@@ -125,7 +137,17 @@ private:
   Float_t    mDcaPr;
   Float_t    mDcaXYPr;
   Float_t    mDcaZPr;
-  
+  Float_t    mCurvPr;
+  Float_t    mTanLPr;
+
+    // the indices of the error matrix correspond to
+    // 0 - error on y (track position along pad row direction)
+    // 1 - error on z (track position along drift direction)
+    // 2 - error on C*x0 where C is the track curvature and x0 is the helix center position along x
+    // 3 - error on C, the curvature
+    // 4 - error on tan(dipAngle)
+  Float_t    mErrP[5];
+    
   Float_t    mChi2Pr;
   Short_t    mFlag;
   Float_t    mDedx;
@@ -138,6 +160,9 @@ private:
   Float_t    mDcaGl;
   Float_t    mDcaXYGl;
   Float_t    mDcaZGl;
+  Float_t    mCurvGl;
+  Float_t    mTanLGl;
+  Float_t    mErrG[5];
   
 
   // pid stuff from FlowMaker
@@ -172,12 +197,19 @@ private:
   Short_t      mNAssocMc;
   Short_t      mNPossible;
 
-  ClassDef(StTinyRcTrack,3)
+  ClassDef(StTinyRcTrack,4)
 };
 
 #endif
 //
 // $Log: StTinyRcTrack.h,v $
+// Revision 1.4  2003/05/14 00:07:40  calderon
+// Added members so that curvature and tan(lambda) pull plots can be made.
+// Curvature and tan(lambda) are now stored.  The 5 diagonal elements of the
+// error matrix are also stored.  The last two, for ittf tracks, are the error
+// on curvature and error on tan(lambda).  This is done from both the global
+// and the primary track.
+//
 // Revision 1.3  2003/05/08 02:09:20  calderon
 // Added data members for svt and ftpc fit points for StTinyRcTrack.
 // Added data members for svt and ftpc hits for StTinyMcTrack.
@@ -187,6 +219,13 @@ private:
 //
 // Revision 1.2  2002/06/06 18:58:30  calderon
 // Added $Log: StTinyRcTrack.h,v $
+// Added Revision 1.4  2003/05/14 00:07:40  calderon
+// Added Added members so that curvature and tan(lambda) pull plots can be made.
+// Added Curvature and tan(lambda) are now stored.  The 5 diagonal elements of the
+// Added error matrix are also stored.  The last two, for ittf tracks, are the error
+// Added on curvature and error on tan(lambda).  This is done from both the global
+// Added and the primary track.
+// Added
 // Added Revision 1.3  2003/05/08 02:09:20  calderon
 // Added Added data members for svt and ftpc fit points for StTinyRcTrack.
 // Added Added data members for svt and ftpc hits for StTinyMcTrack.
