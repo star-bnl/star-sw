@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.41 1999/02/27 23:10:32 caines Exp $
+// $Id: St_glb_Maker.cxx,v 1.42 1999/02/28 15:48:48 caines Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.42  1999/02/28 15:48:48  caines
+// CHanged no of xi_vertex booked
+//
 // Revision 1.41  1999/02/27 23:10:32  caines
 // Fixed impact calc
 //
@@ -613,7 +616,7 @@ Int_t St_glb_Maker::Make(){
     // exi
     cout << "Calling exi..."<< endl;
     if (! dst_xi_vertex) {
-      dst_xi_vertex = new St_dst_xi_vertex("dst_xi_vertex",2*dst_v0_vertex->GetNRows());
+      dst_xi_vertex = new St_dst_xi_vertex("dst_xi_vertex",30*dst_v0_vertex->GetNRows());
       dst.Add(dst_xi_vertex);
      }
     Int_t Res_exi = exiam(m_exipar,globtrk,vertex,dst_v0_vertex,dst_xi_vertex,m_exiaux);
@@ -728,7 +731,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.41 1999/02/27 23:10:32 caines Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.42 1999/02/28 15:48:48 caines Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
