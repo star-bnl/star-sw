@@ -1,4 +1,4 @@
-<job nProcesses="10" simulateSubmission ="false">
+<job nProcesses="200" simulateSubmission ="false">
    <command>       
    <![CDATA[
     time
@@ -12,16 +12,26 @@
     set strFailMsg = 'Starsim error: file not created. Abort.'
 
 ################################################
-    set nev=10
+    set nev=100
 ################################################
 
 
-    set evgenOutput=evgen.1.nt
     set localHijing=1 # produce own Hijing data locally, be default
     set fz = gstar.$PROCESSID.fz
 
+#general case:
+    @ evgenID = $PROCESSID + 1
+    set evgenOutput=evgen.$evgenID.nt
+
+#if produced locally
+    if ( $localHijing == 1 ) then
+       set evgenOutput=evgen.1.nt
+    endif
+
+
+
     set baseDir=/star/simu/simu/gstardata
-    set finalDir=${baseDir}/gridtest
+    set finalDir=${baseDir}/gridtest_auau62_b0_3
     set jobTitle="STAR Hijing and GEANT Simulation"   
 
 
@@ -51,6 +61,9 @@
     set finalHijing = ${finalPath}/evgen.$fileID.nt
     set finalGstar  = ${finalPath}/gstar.$fileID.fz
 
+#    set localStorage=/aztera/rhstar/potekhin/auau200/hijing_382/b0_20
+    set localStorage=/auto/pdsfdv64.2/starprod/potekhin/auau62/hijing_382/b0_3
+
     # load Globus on PDSF only, won't work at BNL:
     if ( ${BNL} == 0 ) then
         module load globus
@@ -77,12 +90,12 @@
     echo "${STAR_LIB} ${STAR_PATH}"
     set STAR_LIB=/afs/rhic.bnl.gov/star/packages/DEV/.rh80_gcc32/lib
 
-    cd $SCRATCH # Go to the working area
-
 # Build Hijing (optionally)
     if ( $localHijing == 1 ) then
       lndir $STAR/pams/gen/hijing_382 .
       make -f hijing.mk
+
+      cd $SCRATCH # Go to the working area
 
 # Create Hijing input file
      cat >hijev.inp <<HIJ
@@ -90,10 +103,10 @@
 '  =====         Hijing Control file                ===== '   
 '  ====================================================== ' 
 ' Events                          '  ${nev}
-' Frame/Energy                    '  'CMS'  200. 
+' Frame/Energy                    '  'CMS'  62.4 
 ' Projectile  type/A/Z            '  'A'  197 79             
 ' Target      type/Z/Z            '  'A'  197 79         
-' Impact parameter min/max (fm)   '  0.   3.               
+' Impact parameter min/max (fm)   '  0.   3.            
 ' Jet quenching (1=yes/0=no)      '  0                        
 ' Hard scattering/pt jet          '  0   2.0                   
 ' Max # jets per nucleon (D=10)   '  10                        
@@ -103,20 +116,28 @@
 ' istat=1 old istat>1 new         '  2                                    
 HIJ
 
-
-     time | tee -a ${localLogFile}
-     echo "Launching the Hijing\n" | tee -a ${localLogFile}
-     time | tee -a ${localLogFile}
-     ${webDirBin}/hijjet.x #   start hijjet from the bin directory
-     if (! -f ${evgenOutput}) then
-        echo hijFailMsg | tee -a ${localLogFile}
+     if (! -f hijev.inp ) then
+        echo hijev failure | tee -a ${localLogFile}
         echo "</PRE></BODY><HTML>"  >>${localLogFile}
         exit -1
      endif
 
+     time | tee -a ${localLogFile}
+     echo "Launching the Hijing" | tee -a ${localLogFile}
+     time | tee -a ${localLogFile}
+     ${webDirBin}/hijjet.x #   start hijjet from the bin directory
+     if (! -f ${evgenOutput}) then
+        echo $hijFailMsg | tee -a ${localLogFile}
+        echo "</PRE></BODY><HTML>"  >>${localLogFile}
+        exit -1
+     endif
+
+   else
+     cp ${localStorage}/${evgenOutput} $SCRATCH/${evgenOutput}
+     echo Copied the Hijing file ${evgenOutput} to scratch| tee -a ${localLogFile}
    endif
 
-   echo "Created the Hijing file\n" | tee -a ${localLogFile}
+   echo "Created the Hijing file" | tee -a ${localLogFile}
    ls -l ${evgenOutput} | tee -a ${localLogFile} #    register the result file for debugging
     
 #  Create the Starsim kumac
@@ -124,7 +145,7 @@ HIJ
      cat >${macroName}.kumac <<HIJINGKUMAC
 macro ${macroName}
 *******************************************
- detp geom y2004
+ detp geom y2004a
  gexec $STAR_LIB/geometry.so
  gexec $STAR_LIB/gstar.so
  gclose all
@@ -137,30 +158,33 @@ macro ${macroName}
 HIJINGKUMAC
  
       time | tee -a ${localLogFile}
-      echo "Launching Starsim\n" | tee -a ${localLogFile}
+      echo "Launching Starsim" | tee -a ${localLogFile}
       starsim -w 0 -b ${macroName}.kumac       
       time | tee -a ${localLogFile}
 
       if (! -f ${fz}) then
-        echo strFailMsg | tee -a ${localLogFile}
+        echo $strFailMsg | tee -a ${localLogFile}
         echo "</PRE></BODY><HTML>"  >>${localLogFile}
         exit -2
       endif
       
-     echo "Created the Starsim file\n" | tee -a ${localLogFile}
+     echo "Created the Starsim file" | tee -a ${localLogFile}
      ls -l ${fz} | tee -a ${localLogFile} #    register the result file for debugging
 
 # Copy output files
     if ( $BNL == 0 ) then
        time | tee -a ${localLogFile}
+
        echo "Starting ${evgenOutput} ==> ${finalHijing}"                 | tee -a ${localLogFile}
        globus-url-copy -p 20 -vb  file:$SCRATCH/${evgenOutput} ${finalHijing}
+       cp $SCRATCH/${evgenOutput} ${localStorage}/evgen.$fileID.nt
        echo "Finished ${evgenOutput} ==> ${finalHijing}, status=$status" | tee -a ${localLogFile}
 
        time | tee -a ${localLogFile}
+
        echo "Starting ${fz} ==> $finalGstar}" | tee -a ${localLogFile}
        globus-url-copy -p 20 -vb file:$SCRATCH/$fz ${finalGstar}
-
+       cp $SCRATCH/$fz ${localStorage}/gstar.$fileID.fz
        time | tee -a ${localLogFile}
        echo "Finished ${fz} ==> ${finalGstar}, status=$status" | tee -a ${localLogFile}
      else
