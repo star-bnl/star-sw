@@ -1,5 +1,8 @@
-* $Id: tfs_g2t.F,v 1.7 1998/12/03 23:03:56 sakrejda Exp $
+* $Id: tfs_g2t.F,v 1.8 1998/12/13 21:36:12 sakrejda Exp $
 * $Log: tfs_g2t.F,v $
+* Revision 1.8  1998/12/13 21:36:12  sakrejda
+* parameters and constants cleaned up, bmpar removed
+*
 * Revision 1.7  1998/12/03 23:03:56  sakrejda
 * Akio's changes to create pileup events added
 *
@@ -22,7 +25,6 @@
      >                           g2t_track_h,     g2t_track,
      >                           g2t_vertex_h,    g2t_vertex,
      >                           par_h,            par,
-     >                           bmpar_h,          bmpar,
      >                           ctrl_h,           ctrl,
      >                           tpc_index_h,      tpc_index,
      >                           tpc_index_type_h, tpc_index_type,
@@ -57,8 +59,6 @@ C       g2t_track_h      = header for g2t g2t_track table
 C       g2t_track       = rows of g2t_track table
 C       par_h            = header for TFS fspar table
 C       par             = rows of TFS fspar table
-C       bmpar_h          = header for TFS bmpar table
-C       bmpar           = rows of TFS bmpar table
 C       ctrl_h           = header for TFS ctrl table
 C       ctrl            = rows of TFS ctrl table
 C       tpc_index_h      = header of TPC INDEX table  
@@ -102,21 +102,12 @@ C-----------------------------------------------------------------------
 
 #include "tfs_g2t.inc"
 
-C-----------------------------------------------------------------------
-      REAL DZXING, EVPXNG
-      INTEGER NXINGS, NXTRIG
-      COMMON /EVMERG/ DZXING, NXINGS, NXTRIG, EVPXNG
-C     DZXING - z separation between beam bunches
-C     NXINGS - number of beam crossings per TPC live time
-C     NXTRIG - the number of the triggered crossing
-C     EVPXNG - average number of events per beam crossing
-
 C Local variables
 
       LOGICAL   NEW_EVENT, EVENT_FLAG, LAST_EVENT
       logical   new_xing, goloop, errflg
-      INTEGER   NEVENT_OUT, IX, NOK
-      integer   ind, ierr, iev, nevpx(5), nevent,i
+      INTEGER   NEVENT_OUT, NOK
+      integer   ind, ierr, iev, nevent,i
       REAL      TIME_NOW, TIME_RD, TIME_POINT, TIME_DISPL
       REAL      TIME_MERGE, TIME_ALL, TIME_SORT
       character*132 m132       ! for messages
@@ -161,8 +152,7 @@ CCCC      end do
 
 C     initialize
       if( ctrl(1).init .eq. 0 ) then
-         CALL TFS_INI( par_h, par, ctrl_h, ctrl, bmpar_h, bmpar,
-     >        errflg )
+         CALL TFS_INI( par_h, par, ctrl_h, ctrl, errflg )
          if (errflg)then
             tfs_g2t = STAFCV_BAD
             goto 999
@@ -185,7 +175,6 @@ C
 
 C     book-keeping
       if( new_event ) then
-         ix  = 0                ! bunch crossing counter
          iev = 0                ! sub-event counter
          nok = 0                ! nok rows in tphit table
          new_event = .false.
@@ -197,42 +186,7 @@ C     (re)set running count of OK rows in tphit table
 C     update current beam crossing
       if( new_xing ) then
          iev = 0
-
-C     if this is a pp event, calculate events per bunch crossing
-         if( ctrl(1).ppflag .ne. 0 ) then
-            nevent = 0
-            goloop = .true.
-            do while ( goloop )
-               ix  = ix + 1
-               call poissn(evpxng,nevent,ierr)
-               if( ierr .ne. 0 ) then
-                  write(6,'(a,i6)') ' TFS_g2t - POISSN ierr: ',ierr
-                  nevent = 1
-               endif
-C     make sure that triggered crossing has an event
-               if( ix.eq.nxtrig .and. nevent.eq.0 ) then
-                  do while ( nevent.eq.0 )
-                     call poissn(evpxng,nevent,ierr)
-                     if( ierr .ne. 0 ) then
-                        write(6,'(a,i6)') 
-     &                       ' TFS_g2t - POISSN ierr: ',ierr
-                        nevent = 1
-                     endif
-                  enddo
-               endif
-C     keep statistics on the number of events per crossing
-               ind = nevent + 1
-               if( ind .gt. 5 ) ind = 5
-               nevpx(ind) = nevpx(ind) + 1
-               if(ix.eq.nxtrig-1.and.nevent.eq.0) nevent=1
-               if( nevent.gt.0 .or. ix.eq.nxings ) goloop = .false.
-            enddo
-         else
-C     single event
-            ix  = ix + 1
-            nevent = 1
-         endif
-         
+         nevent = 1
          new_xing = .false.
       endif
       
@@ -242,7 +196,6 @@ C     read-in the Monte-Carlo hit data
          CALL TFS_G2T_HIT_RD( g2t_hit_h, g2t_hit, 
      >        g2t_track_h, g2t_track, 
      >        ctrl_h, ctrl,par_h, par, tphit_h, tphit,
-     >        ix, nxtrig,
      >        tpc_index_h, tpc_index, tpc_index_type_h,
      >        tpc_index_type,ierr)
          If (ierr.gt.0) then
@@ -258,15 +211,6 @@ C          write(6,*) 'TFS-G2T-I1 tphit table too small'
       endif
       
 C     
-C     if the next is a trigger crossing ask for a switch in input files....
-C     
-CCC   if( ix .eq. nxtrig-1 .and. iev .eq. nevent ) then
-CCC   mctrl(1).ifile=2 
-CCC   else
-CCC   if this is an end of any other event, get the next one from the 
-CCC   regular input stream.,....
-CCC   mctrl(1).ifile=1
-CCC   endif
 C     check current sub-event (may be more than one per beam crossing)
       if( iev .eq. nevent ) new_xing = .true.
       
@@ -275,8 +219,7 @@ C     abort TAS event loop if not yet done
 C     bipass any processing of this event
          tfs_g2t = STAFCV_OK
          new_event = .true.
-         
-      elseif( ix .eq. nxings .and. iev .eq. nevent ) then
+      elseif( iev .eq. nevent ) then
 C     sort according to sector-row and set up pointer index
          CALL TFS_HIT_SORT( tphit_h, tphit )
          CALL TIMED(TIME_NOW)
@@ -297,13 +240,6 @@ C     displace overlapping events  ---1998.10.29-akio
          TIME_ALL = TIME_ALL + TIME_NOW
          TIME_DISPL = TIME_DISPL + TIME_NOW
 
-C     displace
-         IF( CTRL(1).PPFLAG .NE. 0 )
-     >        CALL TFS_DISPL_EVENT( par_h, par, tphit_h, tphit )
-         CALL TIMED(TIME_NOW)
-         TIME_ALL = TIME_ALL + TIME_NOW
-         TIME_DISPL = TIME_DISPL + TIME_NOW
-         
 C     Merge hits that are close in space
          CALL TFS_TPCHIT_MERGE( ctrl_h, ctrl, par_h, par,
      >        g2t_hit_h, g2t_hit, tphit_h, tphit,tpc_index_h,
@@ -326,16 +262,6 @@ C     Increment counter and check if done
             WRITE(6,*) ' TIME_POINT: ',TIME_POINT,' CPU seconds'
             WRITE(6,*) ' TIME_DISPL: ',TIME_DISPL,' CPU seconds'
             WRITE(6,*) ' TIME_MERGE: ',TIME_MERGE,' CPU seconds'
-            
-            if( ctrl(1).ppflag .ne. 0 ) then
-               WRITE(6,*) ' AVERAGE EVENTS PER BUNCH CROSSING: ',EVPXNG
-               WRITE(6,*) ' 0 EVENT CROSSINGS: ',NEVPX(1)
-               WRITE(6,*) ' 1 EVENT CROSSINGS: ',NEVPX(2)
-               WRITE(6,*) ' 2 EVENT CROSSINGS: ',NEVPX(3)
-               WRITE(6,*) ' 3 EVENT CROSSINGS: ',NEVPX(4)
-               WRITE(6,*) ' > EVENT CROSSINGS: ',NEVPX(5)
-            endif
-            
          endif
          
 C     write out this event - set flag for new event
