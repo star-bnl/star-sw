@@ -190,6 +190,18 @@ Int_t StVertexSeedMaker::Make(){
         case (2001) :     // dAuMinBias
         case (2003) :     // dAuMinBias
         case (2300) :     // dAuTOF
+
+// 2004 data
+        case (45201) :    // pp bht-1-slow
+        case (45202) :    // pp bht-2-slow
+        case (45203) :    // pp eht-1-slow
+        case (45204) :    // pp eht-2-slow
+        case (45010) :    // pp minbias
+        case (1)     :    // pp bht-1-slow
+        case (2)     :    // pp bht-2-slow
+        case (3)     :    // pp eht-1-slow
+        case (4)     :    // pp eht-2-slow
+        case (10)    :    // pp minbias
                       { notTrig = kFALSE; }
         default     : {}
       }
@@ -299,7 +311,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.19 2003/09/02 17:58:45 perev Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.20 2004/07/23 16:56:01 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -584,8 +596,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.19 2003/09/02 17:58:45 perev Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.20 2004/07/23 16:56:01 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.20  2004/07/23 16:56:01  genevb
+// 2004 pp triggers
+//
 // Revision 1.19  2003/09/02 17:58:45  perev
 // gcc 3.2 updates + WarnOff
 //
