@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixF.cc,v 1.5 2001/12/05 23:34:44 ullrich Exp $
+ * $Id: StMatrixF.cc,v 1.6 2004/01/14 22:37:27 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StMatrixF.cc,v $
+ * Revision 1.6  2004/01/14 22:37:27  fisyak
+ * unsigned int => size_t to make alpha happy
+ *
  * Revision 1.5  2001/12/05 23:34:44  ullrich
  * Added Victor modifications to cope with error recovery.
  *
@@ -434,12 +437,12 @@ void StMatrixF::invert(size_t &ierr) {
 	cerr << "StMatrixF::invert(): not a NxN matrix" << endl;
     }
     static unsigned int max_array = 20;
-    static unsigned int *ir = new unsigned int [max_array+1];
+    static size_t *ir = new size_t [max_array+1];
     
     if (mCol > max_array) {
 	delete [] ir;
 	max_array = mRow;
-	ir = new unsigned int [max_array+1];
+	ir = new size_t [max_array+1];
     }
     float t1, t2, t3;
     float det, temp, s;
@@ -532,14 +535,14 @@ void StMatrixF::invert(size_t &ierr) {
 
 float StMatrixF::determinant() const {
     static unsigned int max_array = 20;
-    static unsigned int *ir = new unsigned int [max_array+1];
+    static size_t *ir = new size_t [max_array+1];
     if(mCol != mRow) {
 		cerr << "StMatrixF::determinant(): not a NxN matrix" << endl;
     }
     if (mCol > max_array) {
 	delete [] ir;
 	max_array = mRow;
-	ir = new unsigned int [max_array+1];
+	ir = new size_t [max_array+1];
     }
     float det;
     StMatrixF mt(*this);
