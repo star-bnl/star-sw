@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BetheBlochCalibrator.C,v 1.1 2000/08/09 15:55:23 aihong Exp $
+ * $Id: BetheBlochCalibrator.C,v 1.2 2000/08/10 20:52:56 aihong Exp $
  *
  * Author:Aihong Tang           Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: BetheBlochCalibrator.C,v $
+ * Revision 1.2  2000/08/10 20:52:56  aihong
+ * change directory of Ntuples
+ *
  * Revision 1.1  2000/08/09 15:55:23  aihong
  * initial version
  *
@@ -166,41 +169,41 @@ double look4MinDeltaDiff(double calibStart, double calibEnd, int calibSteps, dou
 //************** change the file name and branch name  as yours ***********
   TChain chain("DeDxTree");
 
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1176003.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1176003.root");
  
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1176004.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1176004.root");
  
   
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1176013.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1176014.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1176013.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1176014.root");
   
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1176015.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1177001.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1177002.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1177006.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1177009.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1177010.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1177013.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1179007.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1179010.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1183003.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1183006.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1183008.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1183009.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1183011.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1183013.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1183019.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1183020.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1184000.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1184001.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1184002.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1184004.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1184026.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1185001.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1185002.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1185003.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1185004.root");
-  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/st_physics_1185005.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1176015.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1177001.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1177002.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1177006.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1177009.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1177010.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1177013.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1179007.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1179010.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1183003.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1183006.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1183008.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1183009.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1183011.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1183013.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1183019.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1183020.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1184000.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1184001.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1184002.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1184004.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1184026.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1185001.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1185002.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1185003.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1185004.root");
+  chain.Add("/star/rcf/pwg/spectra/mmiller/DeDxNtuples/07_26_00/st_physics_1185005.root");
   
   //**********end of block************************************
   //**********************************************************
