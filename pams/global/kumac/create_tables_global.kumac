@@ -118,8 +118,19 @@ macro svm
 
 *------------------------------------------------------------------*
 
+ macro particle_dst_filler
+ macro/global/import *
 
+cd [params]/global
 
+tdm/newtable particle_dst_param  particle_dst_param 1
+tdm/table/rowcount  particle_dst_param 1
+
+ cd /dui
+
+ return
+
+*------------------------------------------------------------------*
 
 
 
