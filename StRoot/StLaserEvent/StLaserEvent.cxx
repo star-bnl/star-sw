@@ -1,16 +1,17 @@
-//* adapted to Laser straight track events 4/16/99 by Bill Love
-//*CMZ :  2.21/06 17/02/99  19.02.12  by  Rene Brun
-//*CMZ :  2.20/00 06/11/98  15.21.16  by  Rene Brun
-//*CMZ :  2.00/13 28/10/98  12.53.06  by  Fons Rademakers
-//*CMZ :  1.03/09 11/12/97  11.00.17  by  Rene Brun
-//*-- Author :    Rene Brun   19/08/96
+//&Id$
+// ROOT Tree for Laser Events tracking by tpt. -- Bill Love
+//$Log: StLaserEvent.cxx,v $
+//Revision 1.1  1999/09/27 21:44:27  love
+//LSEvent -> StLaserEvent
+//
+//* adapted from Laser straight track code 27/9/99 by Bill Love
 
 ////////////////////////////////////////////////////////////////////////
 //
-//                       LSEvent and Track classes
+//                       St_LaserEvent and Track classes
 //                       =======================
 //
-//  The LSEvent class is a simple event structure.
+//  The St_LaserEvent class is a simple event structure.
 //     public:
 //        Int_t          fNtrack;
 //        Int_t          fNhit;
@@ -30,7 +31,7 @@
 //        Int_t          fDate;
 //
 //
-//   The LSEvent data members fTracks, fHits, fPixels are pointers to 
+//   The St_LaserEvent data members fTracks, fHits, fPixels are pointers to 
 //   TClonesArrays, each an array of a variable number of tracks, hits,
 //   pixels per event.
 //   Each element of each array is an object of class Track or Hit or Pixel
@@ -39,23 +40,23 @@
 #include "TRandom.h"
 #include "TDirectory.h"
 
-#include "LSEvent.h"
+#include "StLaserEvent.h"
 
 
 ClassImp(EventHeader)
-ClassImp(LSEvent)
+ClassImp(StLaserEvent)
 ClassImp(Track)
 ClassImp(Hit)
 ClassImp(Pixel)
 
-TClonesArray *LSEvent::fgTracks = 0;
-TClonesArray *LSEvent::fgHits = 0;
-TClonesArray *LSEvent::fgPixels = 0;
+TClonesArray *StLaserEvent::fgTracks = 0;
+TClonesArray *StLaserEvent::fgHits = 0;
+TClonesArray *StLaserEvent::fgPixels = 0;
 
 //______________________________________________________________________________
-LSEvent::LSEvent()
+StLaserEvent::StLaserEvent()
 {
-   // Create an LSEvent object.
+   // Create an StLaserEvent object.
    // When the constructor is invoked for the first time, the class static
    // variable fgTracks is 0 and the TClonesArray fgTracks is created.
 
@@ -71,14 +72,17 @@ LSEvent::LSEvent()
 }
 
 //______________________________________________________________________________
-LSEvent::~LSEvent()
+StLaserEvent::~StLaserEvent()
 {
    Clear();
 }
 
 //______________________________________________________________________________
-void LSEvent::AddTrack(Int_t tid, Int_t nfit, Float_t ax, Float_t az,
-     Float_t x0, Float_t y0, Float_t z0, Float_t Chixy, Float_t Chizy)
+void StLaserEvent::AddTrack(Int_t flag,Int_t hitid,Int_t tid,Int_t id_globtrk,
+         Int_t ndedx, Int_t nfit, Int_t nrec, Int_t npos,
+         Int_t q, Float_t Chixy, Float_t Chiyz, Float_t dedx,
+         Float_t invp, Float_t curvature, Float_t psi, Float_t tanl,
+         Float_t phi0, Float_t r0, Float_t z0)
 {
    // Add a new track to the list of tracks for this event.
    // To avoid calling the very time consuming operator new for each track,
@@ -87,11 +91,13 @@ void LSEvent::AddTrack(Int_t tid, Int_t nfit, Float_t ax, Float_t az,
    // otherwise the previous Track[i] will be overwritten.
 
    TClonesArray &tracks = *fTracks;
-   new(tracks[fNtrack++]) Track(tid,nfit,ax,az,x0,y0,z0,Chixy,Chizy);
+   new(tracks[fNtrack++]) Track(flag, hitid, tid, id_globtrk,
+         ndedx, nfit, nrec, npos, q, Chixy, Chiyz, dedx,
+         invp, curvature, psi, tanl, phi0, r0, z0);
 }
 
 //______________________________________________________________________________
-void LSEvent::AddHit(Float_t q,Float_t x,Float_t y,Float_t z, 
+void StLaserEvent::AddHit(Float_t q,Float_t x,Float_t y,Float_t z, 
                         Int_t row, Int_t track, Int_t flag)
 {
    // Add a new hit to the list of hits for this event.
@@ -105,7 +111,7 @@ void LSEvent::AddHit(Float_t q,Float_t x,Float_t y,Float_t z,
 }
 
 //______________________________________________________________________________
-void LSEvent::AddPixel(Int_t row, Int_t pad,Int_t time,Int_t adc,
+void StLaserEvent::AddPixel(Int_t row, Int_t pad,Int_t time,Int_t adc,
                     Float_t x, Float_t y, Float_t z)
 {
    // Add a new Pixel to the list of Pixels for this event.
@@ -119,7 +125,7 @@ void LSEvent::AddPixel(Int_t row, Int_t pad,Int_t time,Int_t adc,
 }
 
 //______________________________________________________________________________
-void LSEvent::Clear(Option_t *option)
+void StLaserEvent::Clear(Option_t *option)
 {
    fTracks->Clear(option);
    fHits->Clear(option);
@@ -127,7 +133,7 @@ void LSEvent::Clear(Option_t *option)
 }
 
 //______________________________________________________________________________
-void LSEvent::Reset()
+void StLaserEvent::Reset()
 {
 // Static function to reset all static objects for this event
 //   fgTracks->Delete(option);
@@ -137,7 +143,7 @@ void LSEvent::Reset()
 }
 
 //______________________________________________________________________________
-void LSEvent::SetHeader(Int_t i, Int_t run, Int_t date)
+void StLaserEvent::SetHeader(Int_t i, Int_t run, Int_t date)
 {
    fNtrack = 0;
    fNhit = 0;
@@ -146,26 +152,34 @@ void LSEvent::SetHeader(Int_t i, Int_t run, Int_t date)
 }
 
 //______________________________________________________________________________
-Track::Track(Int_t tid, Int_t nfit, Float_t ax, Float_t az,
-     Float_t x0, Float_t y0, Float_t z0,
-     Float_t Chixy, Float_t Chizy) : TObject()
+Track::Track(Int_t flag,Int_t hitid,Int_t tid,Int_t id_globtrk,
+         Int_t ndedx, Int_t nfit, Int_t nrec, Int_t npos,
+         Int_t q, Float_t Chixy, Float_t Chiyz, Float_t dedx,
+         Float_t invp, Float_t curvature, Float_t psi, Float_t tanl,
+	     Float_t phi0, Float_t r0, Float_t z0) : TObject()
 {
    // Create a track object.
 
-   fPy = TMath::Sqrt(1.0/(1.0+ax*ax+az*az));
-   fPx = ax*fPy;
-   fPz = az*fPy;
+   fStatus = flag;
+   fhitid = hitid;
+   ftid = tid;
+   fid_globtrk = id_globtrk;
+   fndedx = ndedx;
+   fnfit = nfit;
+   fnrec = nrec;
+   fnpos = npos;
+   fq = q;
 
-   fBx = x0;
-   fBy = y0;
-   fBz = z0;
-   fDedx = 0.0;
-   fChisqxy = Chixy;
-   fChisqzy = Chizy;
-
-   fTrackId = tid;
-   fNpoint = nfit;
-   fValid  = 1;
+   fChixy = Chixy;
+   fChiyz = Chiyz;
+   fdedx = dedx;
+   finvp = invp;
+   fcurvature = curvature;
+   fpsi = psi;
+   ftanl = tanl;
+   fphi0 = phi0;
+   fr0 = r0;
+   fz0 = z0;
 }
 
 //______________________________________________________________________________

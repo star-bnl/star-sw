@@ -1,11 +1,19 @@
+//$Id: StLaserEvent.h,v 1.1 1999/09/27 21:44:27 love Exp $
+// Header file for TPC Laser event - Bill Love
+//$Log: StLaserEvent.h,v $
+//Revision 1.1  1999/09/27 21:44:27  love
+//LSEvent -> StLaserEvent
+//
+
 #ifndef Laser_Event
 #define Laser_Event
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// LSEvent                                                                //
+// StLaserEvent                                                         //
 //                                                                      //
-// Description of the event and track parameters                        //
+// Description of the event TTree                                       //
+// Track parameters are the tpt_track version                           //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
@@ -38,7 +46,7 @@ public:
 };
 
 
-class LSEvent : public TObject {
+class StLaserEvent : public TObject {
 
 private:
    Int_t          fNtrack;
@@ -57,8 +65,8 @@ private:
    static TClonesArray *fgPixels;
 
 public:
-   LSEvent();
-   virtual ~LSEvent();
+   StLaserEvent();
+   virtual ~StLaserEvent();
    void          Clear(Option_t *option ="");
    static void   Reset();
    void          SetNseg(Int_t n) { fNseg = n; }
@@ -68,9 +76,12 @@ public:
    void          SetNvertex(Int_t n) { fNvertex = n; }
    void          SetFlag(UInt_t f) { fFlag = f; }
    void          SetHeader(Int_t i, Int_t run, Int_t date);
-   void          AddTrack(Int_t tid,Int_t nfit, Float_t ax, Float_t az,
-                     Float_t x0, Float_t y0, Float_t z0,
-                     Float_t Chixy, Float_t Chizy);
+   void          AddTrack(Int_t flag,Int_t hitid,Int_t tid,Int_t id_globtrk,
+         Int_t ndedx, Int_t nfit, Int_t nrec, Int_t npos,
+         Int_t q, Float_t Chixy, Float_t Chiyz, Float_t dedx,
+         Float_t invp, Float_t curvature, Float_t psi, Float_t tanl,
+         Float_t phi0, Float_t r0, Float_t z0);
+
    void          AddHit(Float_t q,Float_t x,Float_t y,Float_t z, 
                         Int_t row, Int_t track, Int_t flag);
    void          AddPixel(Int_t row,Int_t pad,Int_t time,Int_t adc,
@@ -87,7 +98,7 @@ public:
    TClonesArray *GetHits() const { return fHits; }
    TClonesArray *GetPixels() const { return fPixels; }
 
-   ClassDef(LSEvent,1)  //LSEvent structure
+   ClassDef(StLaserEvent,1)  //StLaserEvent structure
 };
 
 
@@ -130,45 +141,51 @@ public:
 class Track : public TObject {
 
 private:
-   Float_t      fPx;           //X component of the momentum
-   Float_t      fPy;           //Y component of the momentum
-   Float_t      fPz;           //Z component of the momentum
+  //  struct tpt_track {          /* Tptrack_row_st */ 
+       Int_t       fStatus;       // status flag */
+       Int_t       fhitid;      // ID of the hit where parameters are given */
+       Int_t       ftid;         // track id 
+       Int_t       fid_globtrk; // Pointer to the globtrk table row. 
+       Int_t       fndedx;      // Number of points used in dE/dx calc 
+       Int_t       fnfit;       // Number of points included in the fit 
+       Int_t       fnrec;       // Number of points assigned to that track
+       Int_t       fnpos;       // Number of geometrically possible points
+       Int_t       fq;          // charge */
+       Float_t     fChixy;     // chi squared of the momentum fit */
+       Float_t     fChiyz;     // chi squared of the momentum fit */
+    // Float_t     cov[15];    // covariance matrix(psi,invp,tanl,phi,z) */
+    //  Float_t     dedx[2];    // dE/dx information */
+       Float_t     fdedx;
+       Float_t     finvp;       // 1/pt (transverse momentum) at (r,phi,z) */
+       Float_t     fcurvature;  // 1/radius */
+       Float_t     fpsi;        // azimuthal angle of the momentum at (r,.. */
+       Float_t     ftanl;       // tg of the dip angle at (r,phi,z) */
+       Float_t     fphi0;       // azimuthal angle of the first point */
+       Float_t     fr0;         // r (in cyl. coord.) for the first point */
+       Float_t     fz0;         // z coordinate of the first point */
 
-   Float_t      fBx;           //X position at the vertex
-   Float_t      fBy;           //Y position at the vertex
-   Float_t      fBz;           //Z position at the vertex
-   Float_t      fDedx;   //Mean q deposition of all hits of this track
-   Float_t      fChisqxy;      //Chi square of the xy fit
-   Float_t      fChisqzy;      //Chi square of the zy fit
-   Int_t        fNpoint;       //Number of points for this track
-   Int_t        fTrackId;      //Track number
-   Short_t      fValid;        //Validity criterion
-
+  
 public:
    Track() { }
-   Track(Int_t tid, Int_t nfit, Float_t ax, Float_t az,
-         Float_t x0, Float_t y0, Float_t z0,
-         Float_t Chixy, Float_t Chizy);
-   virtual ~Track() { }
-   Float_t       GetPx() const { return fPx; }
-   Float_t       GetPy() const { return fPy; }
-   Float_t       GetPz() const { return fPz; }
-   Float_t       GetPt() const { return TMath::Sqrt(fPx*fPx + fPy*fPy); }
-   Float_t       GetBx() const { return fBx; }
-   Float_t       GetBy() const { return fBy; }
-   Float_t       GetBz() const { return fBz; }
-   Float_t       GetX(Float_t y) const {return fBx + (fPx/fPy)*(y-fBy);}
-   Float_t       GetZ(Float_t y) const {return fBz + (fPz/fPy)*(y-fBy);}
-   Float_t       GetDedx() const { return fDedx; }
-   void          SetDedx(Float_t Dedx=0.0)  { fDedx = Dedx; }
-   Float_t       GetChisqxy() const { return fChisqxy; }
-   Float_t       GetChisqzy() const { return fChisqzy; }
-   Int_t         GetTrackId() const { return fTrackId; }
-   Int_t         GetNpoint() const { return fNpoint; }
-   Short_t       GetValid()  const { return fValid; }
-   virtual void  SetValid(Int_t valid=1) { fValid = valid; }
+   Track(Int_t flag,Int_t hitid,Int_t tid,Int_t id_globtrk,
+         Int_t ndedx, Int_t nfit, Int_t nrec, Int_t npos,
+         Int_t q, Float_t Chixy, Float_t Chiyz, Float_t dedx,
+         Float_t invp, Float_t curvature, Float_t psi, Float_t tanl,
+         Float_t phi0, Float_t r0, Float_t z0);
 
-   ClassDef(Track,1)  //A straight laser track 
+   virtual ~Track() { }
+   // Float_t       GetPx() const { return fPx; }
+  
+   Float_t       GetDedx() const { return fdedx; }
+   Float_t       GetChixy() const { return fChixy; }
+   Float_t       GetChiyz() const { return fChiyz; }
+   Int_t         GetTrackId() const { return ftid; }
+   Int_t         GetNrec() const { return fnrec; }
+   Int_t         GetNfit() const { return fnfit; }
+   Int_t         GetNposs() const { return fnpos; }
+
+
+   ClassDef(Track,1)  //A tpt_track rep of a laser track. 
 };
 
 
