@@ -12,19 +12,20 @@ EMC_DIR = ../EMC
 FTPC_DIR = ../FTPC
 RICH_DIR = ../RICH
 TRG_DIR  = ../TRG
+L3_DIR = ../L3
 
-OBJECTS = client.o EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o TPCV1P0.Banks.o TPCV2P0.Banks.o  swaps.o RICH_Reader.o TRG_Reader.o FTPV1P0.o FTPV1P0.Banks.o FTPV1P0_ADCR_SR.o FTPV1P0_CPP_SR.o FTPV1P0_ZS_SR.o SVTV1P0.o SVTV1P0.Banks.o SVTV1P0_ADCR_SR.o SVTV1P0_CPP_SR.o SVTV1P0_ZS_SR.o 
+OBJECTS = client.o EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o TPCV1P0.Banks.o TPCV2P0.Banks.o  swaps.o RICH_Reader.o TRG_Reader.o FTPV1P0.o FTPV1P0.Banks.o FTPV1P0_ADCR_SR.o FTPV1P0_CPP_SR.o FTPV1P0_ZS_SR.o SVTV1P0.o SVTV1P0.Banks.o SVTV1P0_ADCR_SR.o SVTV1P0_CPP_SR.o SVTV1P0_ZS_SR.o L3_Reader.o
 
 client: $(OBJECTS)	
 	g++ $(CFLAGS) $(OBJECTS) -o client
 
-client.o:	client.cxx $(EMC_DIR)/EMC_Reader.hh $(RICH_DIR)/RICH_Reader.hh $(TRG_DIR)/TRG_Reader.hh
+client.o:	client.cxx $(EMC_DIR)/EMC_Reader.hh $(RICH_DIR)/RICH_Reader.hh $(TRG_DIR)/TRG_Reader.hh $(L3_DIR)/L3_Reader.hh
 	g++ $(CFLAGS) -c client.cxx
 
 EventReader.o:	$(IFACE_DIR)/EventReader.hh $(IFACE_DIR)/EventReader.cxx
 	g++ $(CFLAGS) -c $(IFACE_DIR)/EventReader.cxx
 
-DetectorReader.o:	$(IFACE_DIR)/EventReader.hh $(IFACE_DIR)/DetectorReader.cxx $(TPC_DIR)/TPCV1P0_Reader.hh $(TPC_DIR)/TPCV2P0_Reader.hh $(SVT_DIR)/SVT_Reader.hh $(EMC_DIR)/EMC_Reader.hh $(FTPC_DIR)/FTPV1P0_Reader.hh $(RICH_DIR)/RICH_Reader.hh  $(SSD_DIR)/SSD_Reader.hh $(TRG_DIR)/TRG_Reader.hh
+DetectorReader.o:	$(IFACE_DIR)/EventReader.hh $(IFACE_DIR)/DetectorReader.cxx $(TPC_DIR)/TPCV1P0_Reader.hh $(TPC_DIR)/TPCV2P0_Reader.hh $(SVT_DIR)/SVT_Reader.hh $(EMC_DIR)/EMC_Reader.hh $(FTPC_DIR)/FTPV1P0_Reader.hh $(RICH_DIR)/RICH_Reader.hh  $(SSD_DIR)/SSD_Reader.hh $(TRG_DIR)/TRG_Reader.hh $(L3_DIR)/L3_Reader.hh
 	g++ $(CFLAGS) -c $(IFACE_DIR)/DetectorReader.cxx
 
 TPCV1P0.o:	$(IFACE_DIR)/EventReader.hh $(TPC_DIR)/TPCV1P0.hh $(TPC_DIR)/TPCV1P0.cxx 
@@ -108,6 +109,9 @@ RICH_Reader.o:	$(RICH_DIR)/RICH_Reader.hh $(RICH_DIR)/RICH_Reader.cxx
 
 TRG_Reader.o:	$(IFACE_DIR)/EventReader.hh $(TRG_DIR)/TRG_Reader.hh $(TRG_DIR)/TRG_Reader.cxx $(TRG_DIR)/trgStructures.h
 	g++ $(CFLAGS) -c $(TRG_DIR)/TRG_Reader.cxx
+
+L3_Reader.o:	$(IFACE_DIR)/EventReader.hh $(L3_DIR)/L3_Reader.hh $(L3_DIR)/L3_Reader.cxx 
+	g++ $(CFLAGS) -c $(L3_DIR)/L3_Reader.cxx
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

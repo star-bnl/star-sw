@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.6 2000/06/06 21:46:59 jml Exp $
+ * $Id: DetectorReader.cxx,v 1.7 2000/06/13 17:29:30 jml Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,6 +12,9 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.7  2000/06/13 17:29:30  jml
+ * Adding L3 Detector reader and template L3 Reader
+ *
  * Revision 1.6  2000/06/06 21:46:59  jml
  * Added code for SVTV1P0
  *
@@ -49,6 +52,7 @@
 #include "EMC/EMC_Reader.hh"
 #include "RICH/RICH_Reader.hh"
 #include "FTPC/FTPV1P0_Reader.hh"
+#include "L3/L3_Reader.hh"
 
 
 DetectorReader *getDetectorReader(EventReader *er, string det)
@@ -143,7 +147,6 @@ EMC_Reader *getEMCReader(EventReader *er)
   return FALSE;
 }
 
-
 TRG_Reader *getTRGReader(EventReader *er)
 {
   Bank_TRGP *pTRGP;
@@ -155,6 +158,22 @@ TRG_Reader *getTRGReader(EventReader *er)
 					__FILE__,__LINE__) ;
     pTRGP->header.CRC = 0;
     return new TRG_Reader(er,pTRGP);
+  }
+  return FALSE;
+}
+
+L3_Reader *getL3Reader(EventReader *er)
+{
+  Bank_L3P *pL3P;
+  pL3P = (Bank_L3P *)er->findBank("L3P");
+  if(pL3P)
+  {
+    if(!pL3P->test_CRC()) printf("CRC error in L3P: %s %d\n",
+				 __FILE__,__LINE__);
+    if(pL3P->swap() < 0)  printf("swap error in L3P: %s %d\n",
+				 __FILE__,__LINE__);
+    pL3P->header.CRC = 0;
+    return new L3_Reader(er,pL3P);
   }
   return FALSE;
 }
