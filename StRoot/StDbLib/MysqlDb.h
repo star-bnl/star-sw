@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.16 2002/03/22 19:05:38 porter Exp $
+ * $Id: MysqlDb.h,v 1.17 2003/04/11 22:47:35 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.17  2003/04/11 22:47:35  porter
+ * Added a fast multi-row write model specifically needed by the daqEventTag
+ * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
+ * the table is marked as Non-Indexed (daqTags & scalers). For non-indexed tables
+ * which include binary stored data (we don't have any yet), the fast writer  has
+ * to invoke a slower buffer so that the rates are a bit slower (~500Hz at 50 rows/insert).
+ *
  * Revision 1.16  2002/03/22 19:05:38  porter
  * #-of-retries on server connect increased to 7 with timeout period doubled per
  * retry starting at 1 sec.  DOES NOT work (is ignored) on STAR's Redhat 6.2
@@ -176,6 +183,14 @@ private:
   unsigned int mtimeout; // wait time between connection tries
 
 
+  // these are specific for fast multi-row writes of non-indexed tables
+  int   jfields;
+  char* cnames[200];
+  bool  isBlob[200];
+  bool  isBinary[200];
+  bool  isSpecialType[200];
+
+
 public:
 
   // for logging times
@@ -196,6 +211,12 @@ public:
 
   virtual char* printQuery();
   //    virtual char* LastQuery();
+
+  // these 3 meths are specific for fast multi-row writes of non-index tables
+  virtual bool InputStart(const char *aName,StDbBuffer *aBuff, const char* colList, int nRows, bool& hasBinary);
+  virtual bool InputRow(StDbBuffer* aBuff, int row);
+  virtual bool InputEnd();
+
 
   virtual bool Input(const char *aName,StDbBuffer *aBuff);
   //virtual bool InitBuff(StDbBuffer *aBuff);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.21 2003/02/12 22:12:45 porter Exp $
+ * $Id: StDbTable.h,v 1.22 2003/04/11 22:47:36 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,13 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.22  2003/04/11 22:47:36  porter
+ * Added a fast multi-row write model specifically needed by the daqEventTag
+ * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
+ * the table is marked as Non-Indexed (daqTags & scalers). For non-indexed tables
+ * which include binary stored data (we don't have any yet), the fast writer  has
+ * to invoke a slower buffer so that the rates are a bit slower (~500Hz at 50 rows/insert).
+ *
  * Revision 1.21  2003/02/12 22:12:45  porter
  * moved warning message about null columns (checked in 2 days ago) from the
  * depths of the mysql coding into the StDbTable code. This suppresses confusing
@@ -298,6 +305,7 @@ public:
   virtual void dbStreamer(typeAcceptor* accept, bool isReading);
   virtual void StreamAccessor(StDbBufferI* buff, bool isReading);
   virtual void dbStreamer(StDbBufferI* buff, bool isReading);
+  virtual void dbStreamerWrite(StDbBufferI* buff);
   virtual void dbTableStreamer(StDbBufferI* buff, const char* name, bool isReading);
 #ifdef __ROOT__
  ClassDef(StDbTable,0)

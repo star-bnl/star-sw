@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.33 2003/02/12 22:12:45 porter Exp $
+ * $Id: StDbTable.cc,v 1.34 2003/04/11 22:47:36 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,13 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.34  2003/04/11 22:47:36  porter
+ * Added a fast multi-row write model specifically needed by the daqEventTag
+ * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
+ * the table is marked as Non-Indexed (daqTags & scalers). For non-indexed tables
+ * which include binary stored data (we don't have any yet), the fast writer  has
+ * to invoke a slower buffer so that the rates are a bit slower (~500Hz at 50 rows/insert).
+ *
  * Revision 1.33  2003/02/12 22:12:45  porter
  * moved warning message about null columns (checked in 2 days ago) from the
  * depths of the mysql coding into the StDbTable code. This suppresses confusing
@@ -148,6 +155,13 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.34  2003/04/11 22:47:36  porter
+ * Added a fast multi-row write model specifically needed by the daqEventTag
+ * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
+ * the table is marked as Non-Indexed (daqTags & scalers). For non-indexed tables
+ * which include binary stored data (we don't have any yet), the fast writer  has
+ * to invoke a slower buffer so that the rates are a bit slower (~500Hz at 50 rows/insert).
+ *
  * Revision 1.33  2003/02/12 22:12:45  porter
  * moved warning message about null columns (checked in 2 days ago) from the
  * depths of the mysql coding into the StDbTable code. This suppresses confusing
@@ -793,6 +807,32 @@ char* ptr;
    cerr << "dbStreamer:: more rows delivered than allocated " << endl;
  }
  if(!ClientMode)buff->SetStorageMode();  // reset to StorageMode
+}
+
+
+///////////////////////////////////////////////////////////////////////
+void
+StDbTable::dbStreamerWrite(StDbBufferI* buff){
+
+int max = mdescriptor->getNumElements();
+char* name;
+StTypeE type;
+unsigned int length;
+char* ptr;
+
+//  bool ClientMode;
+//  if(!(ClientMode=buff->IsClientMode()))buff->SetClientMode();
+
+// if(createMemory() && mrowNumber < mrows){
+
+ if(mrowNumber<mrows){
+   for(int i=0; i<max; i++){
+     getElementSpecs(i,ptr,name,length,type);
+     WriteElement(ptr,name,length,type,(StDbBuffer*)buff);
+     delete [] name;       
+   }
+  mrowNumber++;
+ }
 }
 
 ///////////////////////////////////////////////////////////////////////
