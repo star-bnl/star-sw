@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.19 2000/04/03 16:22:07 laue Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.20 2000/04/26 14:55:45 rcwells Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.20  2000/04/26 14:55:45  rcwells
+ * Fixed filling of NHitsPossible in StStandardHbtEventsReader
+ *
  * Revision 1.19  2000/04/03 16:22:07  laue
  * some include files changed
  *
@@ -336,6 +339,8 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     hbtTrack->SetTrackId(rTrack->key());
 
     hbtTrack->SetNHits(nhits);
+    int nHitsPoss = rTrack->numberOfPossiblePoints(kTpcId);
+    hbtTrack->SetNHitsPossible(nHitsPoss);
 
     float nsige = PidAlgorithm->numberOfSigma(Electron);
     //cout << "nsigpe\t\t" << nsigpe << endl;
