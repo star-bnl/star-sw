@@ -163,6 +163,7 @@ Bool_t StEmcSpectra::GetOccupancy(Int_t minimum,Float_t* m,
       avg+=s;
       sigma+=s*s;
       temp++;
+      //cout <<"id = "<<id<<"  sum = "<<s<<"  n = "<<temp<<endl;
     }
   }
   if(temp==0) return kFALSE;
@@ -183,10 +184,14 @@ Bool_t StEmcSpectra::GetOccupancyEtaBin(Int_t minimum,Float_t* m,
   {
     Float_t s;
     s=GetSumEtaBin(bin);
-    if (s>minimum) number++;
-    avg+=s;
-    sigma+=s*s;
-    temp++;
+    if(s>0)
+    {
+     if (s>=minimum) number++;
+     avg+=s;
+     sigma+=s*s;
+     temp++;
+    }
+    cout <<"etabin = "<<bin<<"  sum = "<<s<<"  n = "<<temp<<endl;
   }
   if(temp==0) return kFALSE;
   avg=avg/temp;
@@ -327,8 +332,8 @@ void StEmcSpectra::CalcEtaBin(Int_t i,Float_t ebin,
   e = (Int_t)(fabs(etai)/0.05 + 1.5 );
   e1= (Int_t)(fabs(etaf)/0.05 + 0.5 );
   
-  if(etai>=0) {*mi=1;  *mf=60;}
-  else     {*mi=61; *mf=120;}
+  if(etaf>=0) {*mi=1;  *mf=60;}
+  else        {*mi=61; *mf=120;}
   
   *ei=e;  *ef=e1;
 
@@ -355,7 +360,7 @@ TArrayF StEmcSpectra::GetEtaBinSpectra(Int_t etabin)
       for(Int_t s=si;s<=sf;s++)
       {
         Int_t id=GetID(m,e,s);
-        if(rows[id-1].EqStatus==1)
+        if(rows[id-1].EqStatus==1 && GetStatus(id)==1)
         {
           Float_t a=rows[id-1].EqSlope;
           Float_t b=rows[id-1].EqShift;
@@ -383,7 +388,7 @@ Float_t StEmcSpectra::GetSumEtaBin(Int_t etabin)
       for(Int_t s=si;s<=sf;s++)
       {
         Int_t id=GetID(m,e,s);
-        sum+=GetSum(id);
+        if(GetStatus(id)==1) sum+=GetSum(id);
       }
   return sum;
 }

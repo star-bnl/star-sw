@@ -21,7 +21,7 @@
 #include "tables/St_emcMipCalib_Table.h"
 #include "TRandom.h"
 
-//#define StEmcCalibrationMaker_DEBUG
+#define StEmcCalibrationMaker_DEBUG
 
 #define maxdet 8
 

@@ -96,7 +96,9 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
     x1[nadcMax-1]=GetAdcValue(position1,nadcMax-1);
     x2[nadcMax-1]=GetAdcValue(position2,nadcMax-1);
     Float_t max=pwd1;
+    
     if(pwd2>max) max=pwd2;
+    
     for(Int_t i=nadcMax-2;i>=(Int_t)(max*2.);i--)
     {
       x1[i]=x1[i+1]+GetAdcValue(position1,i);
@@ -104,71 +106,81 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
       x2[i]=x2[i+1]+GetAdcValue(position2,i);
       if(x2[i]==0) ini2=i;
     }
+    
     Float_t limit;
+    
     if(x1[0]<x2[0]) limit=0.9*x1[0];
     else limit=0.9*x2[0];
-    Float_t dl=limit/(Float_t)npoints;
-    Float_t cc1[npoints],ec1[npoints],cc2[npoints],ec2[npoints];
-    Float_t ss=0,sx=0,sx2=0,sy=0,sxy=0;
-    for(Int_t i=0;i<npoints;i++)
-    {
-      Float_t x=((Float_t)i+1)*dl;
-      Float_t xmin=x-sqrt(x);
-      Float_t xmax=x+sqrt(x);
-      Float_t a1=5000,a2=5000;
-      Int_t ji=ini1;
-      if (i>0) ji=(Int_t)(cc1[i-1]+ec1[i-1]);
-      for(Int_t j=ji;j>=0;j--)
-      {
-        if(x1[j]>xmin && a1==5000) a1=(Float_t)j;
-        if(x1[j]>xmax && a2==5000) a2=(Float_t)j-1.;
-      }
-      Float_t b1=5000,b2=5000;
-      ji=ini2;
-      if (i>0) ji=(Int_t)(cc2[i-1]+ec2[i-1]);
-      for(Int_t j=ji;j>=0;j--)
-      {
-        if(x2[j]>xmin && b1==5000) b1=(Float_t)j;
-        if(x2[j]>xmax && b2==5000) b2=(Float_t)j-1.;
-      }
-      cc1[i]=(a1+a2)/2.;
-      cc2[i]=(b1+b2)/2.;
-      ec1[i]=sqrt(((a2-a1)/2.)*((a2-a1)/2.)+pwd1*pwd1);
-      ec2[i]=sqrt(((b2-b1)/2.)*((b2-b1)/2.)+pwd2*pwd2);
-      ss+=1/(ec1[i]*ec1[i]);
-      sx+=cc2[i]/(ec1[i]*ec1[i]);
-      sx2+=(cc2[i]*cc2[i])/(ec1[i]*ec1[i]);
-      sy+=cc1[i]/(ec1[i]*ec1[i]);
-      sxy+=(cc1[i]*cc2[i])/(ec1[i]*ec1[i]);
-    }
-    Float_t delta=ss*sx2-sx*sx;
-    a=(ss*sxy-sx*sy)/delta; // preliminar fit ...
-    b=0;erra=0;errb=0;cov=0;chi=0;
-    ss=0;sx=0;sx2=0;sy=0;sxy=0;
     
-    for(Int_t i=0;i<npoints;i++)  // final fit
-    {
-      Float_t sigma=sqrt(ec1[i]*ec1[i]+a*a*ec2[i]*ec2[i]);
-      ss+=1/(sigma*sigma);
-      sx+=cc2[i]/(sigma*sigma);
-      sx2+=(cc2[i]*cc2[i])/(sigma*sigma);
-      sy+=cc1[i]/(sigma*sigma);
-      sxy+=(cc1[i]*cc2[i])/(sigma*sigma);
-    }
-    delta=ss*sx2-sx*sx;
-    a=(ss*sxy-sx*sy)/delta;
-    b=(sx2*sy-sx*sxy)/delta;
-    erra=sqrt(ss/delta);
-    errb=sqrt(sx2/delta);
-    cov=-sx/delta;
+    if(limit>=10)
+    {    
+      Float_t dl=log10(limit)/(Float_t)npoints;
     
-    for(Int_t i=0;i<npoints;i++)  // chi calc
-    {
-      Float_t sigma=sqrt(ec1[i]*ec1[i]+a*a*ec2[i]*ec2[i]);
-      chi+=(cc1[i]-(a*cc2[i]+b))*(cc1[i]-(a*cc2[i]+b))/(sigma*sigma);
+      Float_t cc1[npoints],ec1[npoints],cc2[npoints],ec2[npoints];
+      Float_t ss=0,sx=0,sx2=0,sy=0,sxy=0;
+      for(Int_t i=0;i<npoints;i++)
+      {
+        Float_t x=pow(10,((Float_t)i+1)*dl);
+        Float_t xmin=x-sqrt(x);
+        Float_t xmax=x+sqrt(x);
+        Float_t a1=5000,a2=5000;
+        Int_t ji=ini1;
+        if (i>0) ji=(Int_t)(cc1[i-1]+ec1[i-1]);
+        for(Int_t j=ji;j>=0;j--)
+        {
+          if(x1[j]>xmin && a1==5000) a1=(Float_t)j;
+          if(x1[j]>xmax && a2==5000) a2=(Float_t)j-1.;
+        }
+        Float_t b1=5000,b2=5000;
+        ji=ini2;
+        if (i>0) ji=(Int_t)(cc2[i-1]+ec2[i-1]);
+        for(Int_t j=ji;j>=0;j--)
+        {
+          if(x2[j]>xmin && b1==5000) b1=(Float_t)j;
+          if(x2[j]>xmax && b2==5000) b2=(Float_t)j-1.;
+          }
+        cc1[i]=(a1+a2)/2.;
+        cc2[i]=(b1+b2)/2.;
+        cout <<"i = "<<i<<"  x = "<<x<<"  cc1[i] = "<<cc1[i]<<"  cc2[i]= "<<cc2[i]<<endl;
+        ec1[i]=sqrt(((a2-a1)/2.)*((a2-a1)/2.)+pwd1*pwd1);  
+        ec2[i]=sqrt(((b2-b1)/2.)*((b2-b1)/2.)+pwd2*pwd2);
+        ss+=1/(ec1[i]*ec1[i]);
+        sx+=cc2[i]/(ec1[i]*ec1[i]);
+        sx2+=(cc2[i]*cc2[i])/(ec1[i]*ec1[i]);
+        sy+=cc1[i]/(ec1[i]*ec1[i]);
+        sxy+=(cc1[i]*cc2[i])/(ec1[i]*ec1[i]);
+      }
+      cout <<"--------------------\n";
+      Float_t delta=ss*sx2-sx*sx;
+      a=(ss*sxy-sx*sy)/delta; // preliminar fit ...
+      b=0;erra=0;errb=0;cov=0;chi=0;
+      ss=0;sx=0;sx2=0;sy=0;sxy=0;
+    
+      for(Int_t i=0;i<npoints;i++)  // final fit
+      {
+        Float_t sigma=sqrt(ec1[i]*ec1[i]+a*a*ec2[i]*ec2[i]);
+        ss+=1/(sigma*sigma);
+        sx+=cc2[i]/(sigma*sigma);
+        sx2+=(cc2[i]*cc2[i])/(sigma*sigma);
+        sy+=cc1[i]/(sigma*sigma);
+        sxy+=(cc1[i]*cc2[i])/(sigma*sigma);  
+      }
+      delta=ss*sx2-sx*sx;
+      a=(ss*sxy-sx*sy)/delta;
+      b=(sx2*sy-sx*sxy)/delta;
+      erra=sqrt(ss/delta);
+      errb=sqrt(sx2/delta);
+      cov=-sx/delta;
+    
+      for(Int_t i=0;i<npoints;i++)  // chi calc
+      {
+        Float_t sigma=sqrt(ec1[i]*ec1[i]+a*a*ec2[i]*ec2[i]);
+        chi+=(cc1[i]-(a*cc2[i]+b))*(cc1[i]-(a*cc2[i]+b))/(sigma*sigma);
+      }
+      EqDone=kTRUE;
     }
-    EqDone=kTRUE;
   }
+  
   if (EqDone)
   {
     rows[position2-1].EqStatus=1;
