@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.8 2001/05/01 15:17:36 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.9 2001/05/02 16:10:47 lansdell Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.9  2001/05/02 16:10:47  lansdell
+// changed some histogram limits
+//
 // Revision 2.8  2001/05/01 15:17:36  genevb
 // Execute EMC code only if EMC libs loaded
 //
@@ -672,7 +675,7 @@ void StQABookHist::BookHistGlob(){
   m_glb_r0TS     = QAH::H1F("QaGtrkR0TS",     "globtrk: radius at start (cm), tpc+svt", 100,0.,25.);
     m_glb_r0TS->SetMinimum(100);
   m_glb_phi0TS   = QAH::H1F("QaGtrkPhi0TS",   "globtrk: azimuth (phi) at start (deg,force 0-360),tpc+svt", 64, 0.,360.);
-  m_glb_z0TS     = QAH::H1F("QaGtrkZ0TS",     "globtrk: z-coord at start (cm), tpc+svt", 50, -300.,300.);
+  m_glb_z0TS     = QAH::H1F("QaGtrkZ0TS",     "globtrk: z-coord at start (cm), tpc+svt", 50, -50.,50.);
     m_glb_z0TS->SetMinimum(500);
   m_glb_curvTS   = QAH::H1F("QaGtrkCurvTS",   "globtrk: log10 curvature (1/cm), tpc+svt", 80,-3.5,0.5);
   m_glb_f0TS     = QAH::MH1F("QaGtrkf0TS",    "globtrk: first point: hit-helix, tpc+svt",50,-5.,5.,3);
@@ -958,7 +961,7 @@ void StQABookHist::BookHistPrim(){
   m_prim_chargeTS = QAH::H1F("QaPtrkChrgTS",   "primtrk: charge, tpc+svt ", 20,-2.,2.);
   m_prim_r0TS     = QAH::H1F("QaPtrkR0TS",     "primtrk: radius at start (cm), tpc+svt", 50,0.,0.1);
   m_prim_phi0TS   = QAH::H1F("QaPtrkPhi0TS",   "primtrk: azimuth (phi) at start (deg,force 0-360),tpc+svt", 64, 0.,360.);
-  m_prim_z0TS     = QAH::H1F("QaPtrkZ0TS",     "primtrk: z-coord at start (cm), tpc+svt", 50, -300.,300.);
+  m_prim_z0TS     = QAH::H1F("QaPtrkZ0TS",     "primtrk: z-coord at start (cm), tpc+svt", 50, -50.,50.);
   m_prim_curvTS   = QAH::H1F("QaPtrkCurvTS",   "primtrk: log10 curvature (1/cm), tpc+svt", 80,-3.5,0.5);
   m_prim_f0TS     = QAH::MH1F("QaPtrkf0TS",    "primtrk: first point: hit-helix, tpc+svt",50,-5.,5.,3);
   m_prim_f0TS->Rebin(0,"X");
@@ -1052,12 +1055,12 @@ void StQABookHist::BookHistPrim(){
   m_prim_ratiomFW = QAH::H1F("QaPtrkRnmFW",     "primtrk: ratio Nfit/max pnt, ftpc west", 55, 0., 1.1);
   m_prim_chargeFE = QAH::H1F("QaPtrkChrgFE",    "primtrk: charge, ftpc east ", 20,-2.,2.);
   m_prim_chargeFW = QAH::H1F("QaPtrkChrgFW",    "primtrk: charge, ftpc west ", 20,-2.,2.);
-  m_prim_xfFE     = QAH::H1F("QaPtrkXfFE",      "primtrk: x of first hit on trk, ftpc east", 50,-200.,200.);
-  m_prim_xfFW     = QAH::H1F("QaPtrkXfFW",      "primtrk: x of first hit on trk, ftpc west", 50,-200.,200.);
-  m_prim_yfFE     = QAH::H1F("QaPtrkYfFE",      "primtrk: y of first hit on trk, ftpc east", 50,-200.,200.);
-  m_prim_yfFW     = QAH::H1F("QaPtrkYfFW",      "primtrk: y of first hit on trk, ftpc west", 50,-200.,200.);
-  m_prim_zfFE     = QAH::H1F("QaPtrkZfFE",      "primtrk: z of first hit on trk, ftpc east", 50,-300.,300.);
-  m_prim_zfFW     = QAH::H1F("QaPtrkZfFW",      "primtrk: z of first hit on trk, ftpc west", 50,-300.,300.);
+  m_prim_xfFE     = QAH::H1F("QaPtrkXfFE",      "primtrk: x of first hit on trk, ftpc east", 50,-50.,50.);
+  m_prim_xfFW     = QAH::H1F("QaPtrkXfFW",      "primtrk: x of first hit on trk, ftpc west", 50,-50.,50.);
+  m_prim_yfFE     = QAH::H1F("QaPtrkYfFE",      "primtrk: y of first hit on trk, ftpc east", 50,-50.,50.);
+  m_prim_yfFW     = QAH::H1F("QaPtrkYfFW",      "primtrk: y of first hit on trk, ftpc west", 50,-50.,50.);
+  m_prim_zfFE     = QAH::H1F("QaPtrkZfFE",      "primtrk: z of first hit on trk, ftpc east", 50,150.,200.);
+  m_prim_zfFW     = QAH::H1F("QaPtrkZfFW",      "primtrk: z of first hit on trk, ftpc west", 50,-200.,-150.);
   m_prim_radfFE   = QAH::H1F("QaPtrkRFE",       "primtrk: radial position of first hit, ftpc east", 40,0.,40.);
   m_prim_radfFW   = QAH::H1F("QaPtrkRFW",       "primtrk: radial position of first hit, ftpc west", 40,0.,40.);
   m_plengthFE     = QAH::H1F("QaPtrkLengthFE",  "primtrk: track length, ftpc east", 60,0.,300.);
