@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.cxx,v 2.6 2004/06/29 22:37:35 ullrich Exp $
+ * $Id: StTriggerData2003.cxx,v 2.7 2004/06/30 00:12:09 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.cxx,v $
+ * Revision 2.7  2004/06/30 00:12:09  ullrich
+ * Added ZDC info to dump().
+ *
  * Revision 2.6  2004/06/29 22:37:35  ullrich
  * Added missing access function for ZDC. Currently same as 2004.
  *
@@ -502,6 +505,12 @@ void StTriggerData2003::dump() const
     printf(" FPD West South PS: ");for(int i=1; i<= 7;i++){ printf("%d ",fpd(west,5,i,0));  }; printf("\n");
     printf(" FPD Sums East    : ");for(int j=0; j<4 ;j++) printf("%d ",fpdSum(east,j));        printf("\n");
     printf(" FPD Sums West    : ");for(int j=0; j<4 ;j++) printf("%d ",fpdSum(west,j));        printf("\n");
+    printf(" ZDC ADC  East    : ");for(int j=1; j<4 ;j++) printf("%d ",zdcADC(east,j));        printf("\n");
+    printf(" ZDC ADC  West    : ");for(int j=1; j<4 ;j++) printf("%d ",zdcADC(west,j));        printf("\n");
+    printf(" ZDC Sum(A) East  : ");printf("%d ",zdcAttenuated(east));        printf("\n");
+    printf(" ZDC Sum(A) West  : ");printf("%d ",zdcAttenuated(west));        printf("\n");
+    printf(" ZDC Sum(UA) East : ");printf("%d ",zdcUnAttenuated(east));      printf("\n");
+    printf(" ZDC Sum(UA) West : ");printf("%d ",zdcUnAttenuated(west));      printf("\n");
     printf("\n");
     printf("***** StTriggerData Dump *****\n");
 }
