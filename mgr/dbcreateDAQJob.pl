@@ -21,18 +21,13 @@ require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
 my $debugOn=0;
 
 my @SetD = (
-#             "daq/2000/01",
-#             "daq/2000/02",
-#             "daq/2000/03",
-#             "daq/2000/04",
-#             "daq/2000/05",
              "daq/2000/06",
              "daq/2000/07", 
 
 );
 
-my $prodPeriod = "P00hd_1"; 
-my @chName = ("p00h3", "p00h1");              
+my $prodPeriod = "P00he"; 
+my @chName = ("p00h4", "p00h1");              
 my $chainDir = "daq";
 
 ###Set directories to be created for jobfiles
@@ -301,7 +296,7 @@ my $jbset;
 #    $Jsetn =~ s/_/\//g;
 
     @pts = split ("_",$Jset);
-    $Jsetr = $pts[2] . "/" .$pts[3]; 
+    $Jsetr = $pts[1] . "/" .$pts[2]; 
     $Jsetd = $prodPeriod . "/" . $Jsetr;     
     $inFile =  $gfile . ".daq";
     $logDir = $JOB_LOG[0];   
