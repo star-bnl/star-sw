@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.56 2004/11/19 18:05:19 posk Exp $
+// $Id: doFlowEvents.C,v 1.55 2004/06/23 20:06:02 perev Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -99,6 +99,9 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   gSystem->Load("StMuDSTMaker"); 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
+  gSystem->Load("libgen_Tables");
+  gSystem->Load("libsim_Tables");
+  gSystem->Load("libglobal_Tables");
   gSystem->Load("StMagF");
 
   gSystem->Load("StFlowMaker");
@@ -107,7 +110,20 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   // Make a chain with a file list
   chain  = new StChain("StChain");
   //chain->SetDebug();
-  setFiles = new StFile(fileList);	// Normal case
+  if (fileList) {	//Normal case
+    setFiles = new StFile(fileList);
+  } else        {	//Grand Challenge
+    gSystem->Load("StChallenger");
+    setFiles = StChallenger::Challenge();
+    //setFiles->SetDebug();
+    const char *Argv[]= {
+      "-s","dst runco",                               // list of components needed
+      "-q","n_trk_tpc[0]>1000 && n_trk_tpc[1]>1000",  // example of user query
+      "-c","/afs/rhic/star/incoming/GCA/daq/stacs.rc" // GC servers for daq
+    };
+    Int_t Argc=sizeof(Argv)/4;
+    setFiles->Init(Argc,Argv);
+  }
   
   //
   // Make Selection objects and instantiate FlowMaker
@@ -201,8 +217,6 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
     //bool spMaker = kTRUE;
   }
 
-  //StFlowEvent::SetUseZDCSMD(kTRUE); // use ZDCSMD for the event plane
-
   Bool_t includeTpcTracks  = kTRUE;
   //Float_t ptRange_for_vEta[2] = {0.15, 2.};
   //Float_t etaRange_for_vPt[2] = {-1.2, 1.2}; // show only TPC particles in v(pt)
@@ -220,8 +234,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   // To make full use of it, the cuts for Har1 should allow for FTPC tracks only, 
   // while the cuts for Har2 should use TPC tracks only. This method works for 
   // FTPC eta subevents (SetEtaSubs(kTRUE)) and random subevents (SetEtaSubs(kFALSE)).
-  //Bool_t v1Ep1Ep2 = kTRUE;
-    Bool_t v1Ep1Ep2 = kFALSE;
+  Bool_t v1Ep1Ep2 = kTRUE;
+  //  Bool_t v1Ep1Ep2 = kFALSE;
 
   if (makerName[0]=='\0') { // blank if there is no selection object
     if (anaMaker) {
@@ -386,26 +400,26 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   //
   // Event loop
   //
-  int istat = 0, iEvt = 1;
- EventLoop: if (iEvt <= nevents && istat != 2) {
+  int istat = 0, i = 1;
+ EventLoop: if (i <= nevents && istat != 2) {
    
-   cout << endl << "============================ Event " << iEvt
+   cout << endl << "============================ Event " << i
 	<< " start ============================" << endl;
    
    chain->Clear();
-   istat = chain->Make(iEvt);
+   istat = chain->Make(i);
    if (istat == 2) 
      {cout << "Last  event processed. Status = " << istat << endl;}
    if (istat == 3) 
      {cout << "Error event processed. Status = " << istat << endl;}
    
    //   gObjectTable->Print();
-   iEvt++;
+   i++;
    goto EventLoop;
  }
   
-  iEvt--;
-  cout << endl << "============================ Event " << iEvt
+  i--;
+  cout << endl << "============================ Event " << i
        << " finish ============================" << endl;
 
   //
@@ -483,28 +497,65 @@ void doFlowEvents(Int_t nevents, Bool_t phiWgtOnly) {
 // PDSF pico files
   // 200 GeV
   // FTPC
-  Char_t* filePath="/auto/pdsfdv36/starebye/oldi/ProductionMinBias/PicoDst/AllSectors/FullField";
-  if (nevents < 250) {
-    Char_t* fileExt="st_physics_2320013_raw_0008.flowpicoevent.root";
-   } else {
-     Char_t* fileExt="*.flowpicoevent.root";
-   }
-
-  // MinBiasVertex P02ge
-//   Char_t* filePath="/auto/stardata/starspec/flow_pDST_production_removed_l3_trigged_events/reco/MinBiasVertex/ReversedFullField/P02ge/2001/2236006";
+//   Char_t* filePath="/auto/pdsfdv36/starebye/oldi/ProductionMinBias/PicoDst/AllSectors/FullField";
 //   if (nevents < 250) {
-//     Char_t* fileExt="0001/st_physics_2236006_raw_0001.flowpicoevent.root";
+//     Char_t* fileExt="st_physics_2253050_raw_0001.flowpicoevent.root";
 //    } else {
-//      Char_t* fileExt="*/*.flowpicoevent.root";
+//      Char_t* fileExt="*.flowpicoevent.root";
 //    }
 
+  // ProductionMinBias P02gd
+//   Char_t* filePath="/auto/stardata/pDST/flow_pDST_production_removed_l3_trigged_events/reco/ProductionMinBias/ReversedFullField/P02gd/2001/2258044";
+//   if (nevents < 250) {
+//     Char_t* fileExt="st_physics_2258044_raw_0205.flowpicoevent.root";
+//    } else {
+//      Char_t* fileExt="*.flowpicoevent.root";
+//    }
+
+  // MinBiasVertex P02ge
+  Char_t* filePath="/auto/stardata/starspec/flow_pDST_production_removed_l3_trigged_events/reco/MinBiasVertex/ReversedFullField/P02ge/2001/2236006";
+  if (nevents < 250) {
+    Char_t* fileExt="0001/st_physics_2236006_raw_0001.flowpicoevent.root";
+   } else {
+     Char_t* fileExt="*/*.flowpicoevent.root";
+   }
+
   // 130 GeV
+//   Char_t* filePath="/auto/pdsfdv10/starprod/DST/kirll_flow_pDST_minbias/";
+//   if (nevents < 250) {
+//     Char_t* fileExt="st_physics_1239006_raw_0017.event.root.flowpicoevent.root";
+//   } else {
+//     Char_t* fileExt="*.flowpicoevent.root";
+//   }
 
   // 22 GeV
+//   Char_t* filePath="/auto/stardata/starspec3/flow_pDST_production/reco/minBias22GeVZDC/ReversedHalfField/P02ge/2001/2329085";
+//   if (nevents < 250) {
+//     Char_t* fileExt="st_physics_2329085_raw_0001.flowpicoevent.root";
+//   } else {
+//     Char_t* fileExt="*.flowpicoevent.root";
+//   }
 
   // muDST files
+  // 200 GeV 60k events
+//   Char_t* filePath="/aztera/starprod/reco/ProductionMinBias/ReversedFullField/P02gd/2001/253";
+//   if (nevents < 250) {
+//     Char_t* fileExt="st_physics_2253050_raw_0001.MuDst.root";
+//   } else {
+//     Char_t* fileExt="*.MuDst.root";
+//   }
+
+  // muDST files
+//   Char_t* filePath="/auto/pdsfdv10/starprod/reco/ProductionMinBias/ReversedFullField/P03id/2001/308/";
+//   if (nevents < 250) {
+//     Char_t* fileExt="st_physics_2308016_raw_0001.MuDst.root";
+//   } else {
+//     Char_t* fileExt="*.MuDst.root";
+//   }
 
   // event.root files
+//   Char_t* filePath="/beta/starprod/kirill/";
+//   Char_t* fileExt="st_physics_2269002_raw_0177.event.root"; 
 
   doFlowEvents(nevents, filePath, fileExt, phiWgtOnly);
 }
@@ -512,9 +563,6 @@ void doFlowEvents(Int_t nevents, Bool_t phiWgtOnly) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
-// Revision 1.56  2004/11/19 18:05:19  posk
-// A bit more like doEvents.C
-//
 // Revision 1.55  2004/06/23 20:06:02  perev
 // const Int_t replaced by Int_t
 //

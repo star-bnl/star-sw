@@ -121,6 +121,7 @@ public:
     }
 #ifdef STI_NODE_DEBUG
   void setChi2(double chi2);
+  void Break(int kase);
 #endif  
 #ifndef STI_NODE_DEBUG
   void setChi2(double chi2){_chi2 = chi2;}
@@ -134,13 +135,13 @@ public:
   void setAsCopyOf(const StiKalmanTrackNode * node);
   
   /// Propagates a track encapsulated by the given node "p" to the given detector "tDet".
-  int  propagate(StiKalmanTrackNode *p, const StiDetector * tDet);	//throw (Exception);
+  int  propagate(StiKalmanTrackNode *p, const StiDetector * tDet, int dir);	//throw (Exception);
   
   /// Propagates a track encapsulated by the given node "p" to the given vertex
-  bool propagate(const StiKalmanTrackNode *p, StiHit * vertex);
+  bool propagate(const StiKalmanTrackNode *p, StiHit * vertex, int dir);
 
-  bool propagateToBeam(const StiKalmanTrackNode *p);
-  int  propagateToRadius(StiKalmanTrackNode *pNode, double radius);
+  bool propagateToBeam(const StiKalmanTrackNode *p, int dir);
+  int  propagateToRadius(StiKalmanTrackNode *pNode, double radius,int dir);
 
   /// Evaluates, stores and returns the dedx associated with this node.
   /// Possible returned values are:
@@ -151,8 +152,11 @@ public:
   double  evaluateDedx();
   
   int  locate(StiPlacement*place,StiShape*sh);
-  int  propagate(double x,int option);
+  int  propagate(double x,int option,int dir);
   void propagateError();
+  int  testError(double *emx);
+  void numeDeriv(double val,int kind,int shape=0,int dir=0);
+  int  testDeriv(double *der);
   void propagateMCS(StiKalmanTrackNode * previousNode, const StiDetector * tDet);
   
   /// Extrapolate the track parameters to radial position "x"  and return a point global coordinates along
@@ -199,9 +203,6 @@ public:
   double _alpha;
   double _cosAlpha;
   double _sinAlpha;
-  /// sine and cosine of cross angle
-  double _sinCA;
-  double _cosCA;
   /// local X-coordinate of this track (reference plane)
   double _refX;
   double _refAngle;
@@ -216,6 +217,9 @@ public:
   double _p3;  
   /// tangent of the track momentum dip angle
   double _p4;
+  /// sine and cosine of cross angle
+  double _sinCA;
+  double _cosCA;
   /// covariance matrix of the track parameters
   double _c00;                       
   double _c10, _c11;                 
@@ -232,7 +236,6 @@ public:
 
  protected:   
   static int counter;
-  static const StiElossCalculator * _elossCalculator;
   const StiDetector * _detector;
   static Messenger &  _messenger;
 
@@ -245,13 +248,19 @@ public:
   static StiMaterial * prevGas;
   static StiMaterial * mat;
   static StiMaterial * prevMat;
-  static double x0,y0, dx;
+  static double x0,y0, dx, dl;
   static double x1,y1,z1,cosCA1,sinCA1;
   static double x2,y2,z2,cosCA2,sinCA2;
   static double sumSin, sinCA1plusCA2, sumCos;
   static double radThickness, density;
   static double gasDensity,matDensity,gasRL,matRL;
   static bool   useCalculatedHitError;
+  void static saveStatics(double *sav);
+  void static backStatics(double *sav);
+    
+//  debug variables
+  static int    fDerivTestOn;   
+  static double fDerivTest[5][5];   
 };
 
 inline void StiKalmanTrackNode::reset()
@@ -363,7 +372,7 @@ inline double StiKalmanTrackNode::getPt() const
   if (curvature<1e-12) 
     return 0.003e12*fabs(pars->field);
   else
-    return 1.0025*0.003*fabs(pars->field/curvature);
+    return 0.003*fabs(pars->field/curvature);
 }
 
 /*! Calculate/return the track momentum
@@ -527,9 +536,13 @@ inline  void StiKalmanTrackNode::initialize(StiHit*h,double alpha, double eta, d
   _p2      = eta;
   _p3      = curvature;
   _p4      = tanl;
-  _sinCA   = _p3*_x-_p2;
-  if (fabs(_sinCA)>1.) 
+//VP  _sinCA   = _p3*_x-_p2;   
+//VP   if (fabs(_sinCA)>1.) 
+  double tmp=_p3*_x-_p2;
+  _sinCA = 999.;
+  if (fabs(tmp)>1.)   
       throw runtime_error("SKTN::initialize() - ERROR - fabs(_sinCA)>1.");
+  _sinCA   = tmp;
   _cosCA   = ::sqrt(1.-_sinCA*_sinCA);
   //cout << "StiKalmanTrackNode::initialize(...) -I- Done"<<endl;
 };

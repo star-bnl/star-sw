@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.108 2004/11/18 22:27:02 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.107 2004/11/16 04:33:05 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -866,11 +866,8 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
       case 1:  defSty = VertSty; defSiz = VertSiz  ; defCol = VertCol;        break;
       case 2:  defSty = TrakSty; defSiz = TrakSiz  ; defCol = TrakCol; L="L"; break;
       case 3:  defSty = NHitSty; defSiz = NHitSiz  ; defCol = NHitCol;        break;
-      case 4:  defSty = VertSty; defSiz = UHitSiz  ; defCol = VertCol;        break;
-      case 5:  defSty = VertSty; defSiz = UHitSiz  ; defCol = VertCol;        break;
-
-//      case 4:  defSty = VertSty; defSiz = UHitSiz*4; defCol = VertCol;        break;
-//      case 5:  defSty = VertSty; defSiz = UHitSiz*4; defCol = VertCol;        break;
+      case 4:  defSty = VertSty; defSiz = UHitSiz*4; defCol = VertCol;        break;
+      case 5:  defSty = VertSty; defSiz = UHitSiz*4; defCol = VertCol;        break;
       case 9:  defSty = UHitSty; defSiz = UHitSiz  ; defCol = UHitCol;	      break;
     }
 
@@ -893,16 +890,14 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
 void  StEventDisplayMaker::DrawIt(StPoints3DABC *pnt,const char *opt
                                  ,Color_t col,Style_t sty,Size_t siz)
 {
+    TVolume        *thisTrack;
+    TPolyLineShape *tracksShape;
+    StPoints3DABC  *bigPnt;
+
     m_TrackCollector->Add(pnt);		//collect garbage
-#if 0
-    TPolyLineShape *tracksShape=0;
-    StPoints3DABC  *bigPnt=0;
-    TVolume        *thisTrack=0;
-    if (0 && opt[0] == 'P' && col < kCOLORS) 
-    {
-      //thisTrack = fColCash[col];
-      if (!thisTrack)
-         {
+    if (0 && opt[0] == 'P' && col < kCOLORS) {
+      thisTrack = fColCash[col];
+      if (!thisTrack){
          bigPnt = new StPoints3DABC(pnt->GetName(),pnt->GetTitle(),0);
          tracksShape = new TPolyLineShape(bigPnt,opt);  
          tracksShape->SetVisibility(1);
@@ -911,9 +906,9 @@ void  StEventDisplayMaker::DrawIt(StPoints3DABC *pnt,const char *opt
          tracksShape->SetSizeAttribute(siz);
          thisTrack = new TVolume(pnt->GetName(),pnt->GetTitle(),tracksShape);
          fColCash[col]=thisTrack;
-         thisTrack->Mark();   
-         thisTrack->SetVisibility();
+         thisTrack->Mark();   thisTrack->SetVisibility();
          m_EventsNode->Add(thisTrack); 
+
        } else {
          tracksShape = (TPolyLineShape*)thisTrack->GetShape();
          bigPnt = (StPoints3DABC*)tracksShape->GetPoints();
@@ -924,11 +919,11 @@ void  StEventDisplayMaker::DrawIt(StPoints3DABC *pnt,const char *opt
       tracksShape = new TPolyLineShape(pnt,opt);
       tracksShape->SetVisibility(1);
       tracksShape->SetColorAttribute(col);
- //     tracksShape->SetLineStyle(sty);
-     tracksShape->SetStyleAttribute(sty);
-     tracksShape->SetSizeAttribute((Size_t)siz);
-// #if qq
-           // Create the dummy TPolyLine3D
+      tracksShape->SetLineStyle(sty);
+      tracksShape->SetSizeAttribute(siz);
+       
+#if 1
+      // Create the dummy TPolyLine3D
       m_PadBrowserCanvas->cd();
       Int_t n = pnt->Size();
       if ( opt[0] == 'L' ) {
@@ -944,25 +939,15 @@ void  StEventDisplayMaker::DrawIt(StPoints3DABC *pnt,const char *opt
          dots->Draw();
          m_TrackCollector->Add(dots);      
      }
-// #endif            
+#endif            
 
-// #if 0      
     // 		Create a node to hold it
       TVolume *thisTrack = new TVolume(pnt->GetName(),pnt->GetTitle(),tracksShape);
       thisTrack->Mark();   thisTrack->SetVisibility();
+#if 0      
       m_EventsNode->Add(thisTrack); 
-   }
-#else     
-     TPolyLineShape *tracksShape=new TPolyLineShape(pnt,opt);;
-      tracksShape->SetVisibility(1);
-      tracksShape->SetColorAttribute(col);
-      tracksShape->SetStyleAttribute(sty);
-      tracksShape->SetSizeAttribute((Size_t)siz);
-      tracksShape->SetName (pnt->GetName());
-      tracksShape->SetTitle(pnt->GetTitle());
-      tracksShape->Draw();
-      m_TrackCollector->Add(tracksShape);
 #endif      
+   }
 }
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeTableTracks(const StTrackChair *points,StVirtualEventFilter *filter)
@@ -1215,9 +1200,6 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
-// Revision 1.108  2004/11/18 22:27:02  fine
-// clean up. Provide the object infor via class NAme and Title
-//
 // Revision 1.107  2004/11/16 04:33:05  perev
 // Bug fix. Check for same value of StEvent pointer removed
 //

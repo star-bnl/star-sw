@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TMemStat.cxx,v 1.13 2004/09/16 02:07:18 perev Exp $
+ * $Id: TMemStat.cxx,v 1.14 2004/12/13 16:38:38 jeromel Exp $
  *
  ***************************************************************************
  *
@@ -142,8 +142,8 @@ Double_t TMemStat::ProgSize()
   Double_t    res=0;
   if (!ps) {
     int pid = ::getpid();
-    ps = (char*)malloc(20);
-    sprintf(ps,"ps -l -p %d",pid);
+    ps = (char*)malloc(25);
+    sprintf(ps,"/bin/ps -l -p %d",pid);
   }
   FILE *pipe = ::popen(ps,"r");
   if (!pipe) return 0.;

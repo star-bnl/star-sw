@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTRGReader.cxx,v 1.6 2004/11/03 17:55:28 akio Exp $
+ * $Id: StTRGReader.cxx,v 1.5 2004/08/07 02:39:00 perev Exp $
  *
  * Author: Herbert Ward, Dec 28 1999, 13:10 EST.
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StTRGReader.cxx,v $
- * Revision 1.6  2004/11/03 17:55:28  akio
- * update for fy05 run
- *
  * Revision 1.5  2004/08/07 02:39:00  perev
  * Traditional Clear added
  *
@@ -76,6 +73,7 @@ const char *StTRGReader::getData() const
 {
   if(!fTRGImpReader) return 0;
   return (const char*)(fTRGImpReader->pBankTRGD)+40;
+
 }
 //_____________________________________________________________________________
 int   StTRGReader::getYear() const
@@ -98,11 +96,5 @@ const TrgDataType2004 *StTRGReader::getDataType2004() const
 {
   if (getYear()!=2004) return 0;
   return (const TrgDataType2004*)getData();
-}
-//_____________________________________________________________________________
-const TrgDataType2005 *StTRGReader::getDataType2005() const
-{
-  if (getYear()!=2005) return 0;
-  return (const TrgDataType2005*)getData();
 }
  	

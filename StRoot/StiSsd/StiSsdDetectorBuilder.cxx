@@ -24,6 +24,7 @@ using namespace std;
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiSsd/StiSsdIsActiveFunctor.h" 
 #include "StiSsd/StiSsdDetectorBuilder.h" 
+#include "Sti/StiElossCalculator.h"
 #include "StSsdUtil/StSsdConfig.hh"
 #include "StSsdUtil/StSsdGeometry.hh"
 #include "StSsdUtil/StSsdWaferGeometry.hh"
@@ -88,9 +89,14 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
       all SSD materials (average).
     */
     //gMessMgr->Info() << "StiSsdDetectorBuilder::buildMaterials() - I - Started "<<endm;
-    _gasMat     = add(new StiMaterial("SsdAir", 0.49919,  1., 0.001205, 30420.*0.001205, 5.));
-    _siMat      = add(new StiMaterial("SsdSi",14., 28.0855, 2.33, 21.82, 5.));
-    _hybridMat  = add(new StiMaterial("SsdHyb",14., 28.0855, 2.33, 21.82, 5.));
+    _gasMat     = add(new StiMaterial("SsdAir",7.3, 14.61, 0.001205, 30420.*0.001205, 7.3*12.e-9));
+    _siMat      = add(new StiMaterial("SsdSi",14., 28.0855, 2.33, 21.82, 14.*12.*1e-9));
+    _hybridMat  = add(new StiMaterial("SsdHyb",14., 28.0855, 2.33, 21.82, 14.*12.*1e-9));
+
+    double ionization = _siMat->getIonization();
+    //const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
+    StiElossCalculator * siElossCalculator = new StiElossCalculator(_siMat->getZOverA(), ionization*ionization);
+
     //gMessMgr->Info() << "StiSsdDetectorBuilder::buildMaterials() - I - Done "<<endm;  
     cout << "StiSsdDetectorBuilder::buildMaterials() - I - Done "<<endl;  
     /*! buildShape : SSD has been defined as a PlanarShape 
@@ -153,6 +159,9 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
 		pLadder->setShape(_waferShape[layer]);
 		pLadder->setPlacement(pPlacement); 
 		pLadder->setHitErrorCalculator(&_hitCalculator);
+		pLadder->setKey(1,0);
+		pLadder->setKey(2,ladder-1);
+		pLadder->setElossCalculator(siElossCalculator);
 		add(layer,ladder-1,pLadder); 
 		/*StiDetector *pHybrid = _detectorFactory->getInstance();
 		pHybrid->setName(name);
@@ -164,6 +173,7 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
 		pHybrid->setMaterial(_hybridMat);
 		pHybrid->setShape(_hybridShape[layer]);
 		pHybrid->setPlacement(pPlacement); 
+		pHybrid->setElossCalculator(siElossCalculator);
 		add(pHybrid);*/
 	    }
 	}

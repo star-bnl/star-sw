@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.14 2004/09/13 15:41:31 balewski Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.16 2004/12/16 17:01:36 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -49,8 +49,8 @@ void StppLMVVertexFinder::Init() {
     gMessMgr->Info() << "The  ppLMV4 cuts have been activated" << endm; 
     mMaxTrkDcaRxy    = 3.9;
     mMinTrkPt        = 0.2;
-    mMinNumberOfFitPointsOnTrack = 10;
-    mMaxZrange       = 250;            // for tracks
+    mMinNumberOfFitPointsOnTrack = 15; // a typo (=10) was here before , JB
+    mMaxZrange       = 180;            // for tracksa;  typo (=250) was here before , JB
     mDVtxMax         = 4.0;            // max sigma multipl between tracks and current vertex, used for tracks rejection
     mMinMatchTr      = 1;              // minimal # of tracks matched to CTB 
     mBLequivNtr      = 100;            // equivalent # of tracks for BeamLine
@@ -129,7 +129,7 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
 
   // get CTB info, does not  work for embeding 
   if(event->runId()<100000){
-    St_DataSet *gds=mDumMaker->GetDataSet("geant");
+    St_DataSet *gds=StMaker::GetChain()->GetDataSet("geant");
     collectCTBhitsMC(gds);  // use M-C
   }  else {
     StTriggerData *trgD=event->triggerData ();
@@ -535,7 +535,7 @@ bool  StppLMVVertexFinder::ppLMV5() {
       
 
   // get geant vertex
-  St_DataSet *gds=mDumMaker->GetDataSet("geant");
+  St_DataSet *gds=StMaker::GetChain()->GetDataSet("geant");
   if(gds) {
     St_g2t_vertex  *g2t_ver=( St_g2t_vertex *)gds->Find("g2t_vertex");
     if(g2t_ver) {
@@ -574,7 +574,7 @@ int  StppLMVVertexFinder::NCtbSlats() {
 //==========================================================
 //==========================================================
 void  StppLMVVertexFinder::changeCuts(){
-  StGenericVertexMaker *mk=(StGenericVertexMaker *)mDumMaker->GetMaker("GenericVertex");
+  StGenericVertexMaker *mk=(StGenericVertexMaker *)StMaker::GetChain()->GetMaker("GenericVertex");
   int mode2=mk->GetMode2();
 
   gMessMgr->Info()<< "ccc m_mode2=" << mode2 << endm;
@@ -598,6 +598,12 @@ void  StppLMVVertexFinder::changeCuts(){
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.16  2004/12/16 17:01:36  balewski
+ * 2 cuts in ppLMV4 were slightly off what was in the TPT version
+ *
+ * Revision 1.15  2004/12/13 20:39:58  fisyak
+ * Add initaition of StGenericVertexFinder variables, replace mDumMaker by StMaker::GetChain() method
+ *
  * Revision 1.14  2004/09/13 15:41:31  balewski
  * fix bug in ppLMV4/5 switch
  *

@@ -30,11 +30,6 @@ class StSvtdEdxMaker : public StMaker
   void FillHistograms(double dEdx, double p);
   Int_t GetSvtGeometry();
 
-  virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSvtdEdxMaker.h,v 1.6 2004/11/11 20:21:32 jeromel Exp $ built "__DATE__" "__TIME__ ; 
-    return cvs;
-  }
-
  private:
 
   StSvtGeometry* mGeom; //!

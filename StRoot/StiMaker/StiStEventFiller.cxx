@@ -1,11 +1,22 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.45 2004/11/08 15:34:16 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 2.48 2004/12/02 22:14:53 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.48  2004/12/02 22:14:53  calderon
+ * Only fill the fitTraits.chi2[1] data member for primaries.
+ * It holds node->getChi2() from the innerMostHitNode, which will be the
+ * vertex for primaries.
+ *
+ * Revision 2.47  2004/12/02 04:18:06  pruneau
+ * chi2[1] now set to incremental chi2 at inner most hit or vertex
+ *
+ * Revision 2.46  2004/12/01 15:35:46  pruneau
+ * removed throw and replaced with continue
+ *
  * Revision 2.45  2004/11/08 15:34:16  pruneau
  * fix of the chi2 calculation
  *
@@ -557,14 +568,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 
   int fillTrackCount1=0;
   int fillTrackCount2=0;
-  int svtHit;
-  int svtNode;
-  int matrix[10][10];
-  for (int i=0;i<10;++i)
-    {
-      for (int j=0;j<10;++j)
-	matrix[i][j]=0;
-    }
+  bool testing= false;
 
   for (TrackToTrackMap::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt,++mTrackN) 
     {
@@ -573,102 +577,95 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- static_cast<StiKalmanTrack*>((*trackIt).second)==0");
       if (!accept(kTrack)) continue;
       map<StiKalmanTrack*, StTrackNode*>::iterator itKtrack = mTrkNodeMap.find(kTrack);
-      if (itKtrack == mTrkNodeMap.end()) 
-	throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- itKtrack == mTrkNodeMap.end()");
+      if (itKtrack == mTrkNodeMap.end())  continue;
+      //throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- itKtrack == mTrkNodeMap.end()");
       StTrackNode* currentTrackNode = (*itKtrack).second;
       //double globalDca = currentTrackNode->track(global)->impactParameter();
+      //Even though this is filling of primary tracks, there are certain
+      // quantities that need to be filled for global tracks that are only known
+      // after the vertex is found, such as dca.  Here we can fill them.
+      // 
       StGlobalTrack* currentGlobalTrack = static_cast<StGlobalTrack*>(currentTrackNode->track(global));
       float globalDca = impactParameter(currentGlobalTrack);
       currentGlobalTrack->setImpactParameter(globalDca);
-      svtNode = 0;
-      svtHit = 0;
+      kTrack->setGlobalDca(globalDca);
+      
       if (kTrack->isPrimary())
 	{
 	  fillTrackCount1++;
-	  if (currentTrackNode->entries()>10)
-	    throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- currentTrackNode->entries()>10");
-	  if (currentTrackNode->entries(global)<1) 
-	    throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- currentTrackNode->entries(global)<1");
+	  if (currentTrackNode->entries()>10)   continue;//throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- currentTrackNode->entries()>10");
+	  if (currentTrackNode->entries(global)<1) continue;//throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- currentTrackNode->entries(global)<1");
 	  // detector info
 	  StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
 	  fillDetectorInfo(detInfo,kTrack,false); //3d argument used to increase/not increase the refCount. MCBS oct 04.
 	  StPrimaryTrack* pTrack = new StPrimaryTrack;
 	  try
-	    {  // test begin ==============
-	      StiKalmanTrackNode* leaf = kTrack->getLastNode();
-	      StiKTNForwardIterator it(leaf);
-	      StiKTNForwardIterator end = it.end();
-	      bool weird = false;
-	      int bad = 0;
-	      bool piped = false;
-	      bool ifced = false;
-	      bool out = false;
-	      while (it!=end) 
+	    {  
+	      if (testing)
 		{
-		  const StiKalmanTrackNode& node = *it;
-		  if (node._x>2. && node._x<4.5)
+		  // test begin ==============
+		  StiKalmanTrackNode* leaf = kTrack->getLastNode();
+		  StiKTNForwardIterator it(leaf);
+		  StiKTNForwardIterator end = it.end();
+		  bool weird = false;
+		  int bad = 0;
+		  bool piped = false;
+		  bool ifced = false;
+		  //bool out = false; //unused, comment out to remove compiler warning
+		  while (it!=end) 
 		    {
-		      //cout << "Beam Pipe:"<<node<<endl;
-		      piped = true;
-		    }
-		  if (node._x>40. && node._x<50.)
-		    {
-		      //cout << "Beam Pipe:"<<node<<endl;
-		      ifced = true;
-		    }
-		  else if (node._x>5. && node._x< 20.)
-		    {
-		      //svt land...
-		      if (node.getDetector()->isActive())
+		      const StiKalmanTrackNode& node = *it;
+		      if (node._refX>2. && node._refX<4.5)
 			{
-			  svtNode++;
-			  if (node.getHit())
-			    svtHit++;
+			  piped = true;
+			}
+		      if (node._refX>40. && node._x<50.)
+			{
+			  ifced = true;
+			}
+		      double x_g = node.x_g();
+		      double y_g = node.y_g();
+		      double z_g = node.z_g();
+		      double rt_g = sqrt(x_g*x_g+y_g*y_g);
+		      StiHit * theHit = node.getHit();
+		      if (theHit)
+			{
+			  double dx = fabs(theHit->x() - node._x);
+			  double dy = fabs(theHit->y() - node._p0);
+			  double dz = fabs(theHit->z() - node._p1);
+			  if (dx>3 || dy>5 || dz>5)
+			    bad++;
+			}//theHit
+		      if (rt_g>200. || fabs(z_g)>200.)	weird = true;
+		      ++it;
+		    }//it!=end
+		  if (!piped) noPipe++;
+		  if (ifced)  ifcOK++;
+		  if (weird || !piped || bad>4 || !ifced)
+		    {
+		      cout << "  ==";
+		      if (weird) cout << "WEIRD/";
+		      if (!piped)cout << "NO-PIPE/";
+		      if (bad>4) cout << "BAD>4 ("<<bad<<")/";
+		      if (!ifced) cout << "no-ifc/";
+		      cout << "=="<<endl;
+		      
+		      StiKTNForwardIterator it2(leaf);
+		      StiKTNForwardIterator end2 = it2.end();
+		      while (it2!=end2) 
+			{
+			  const StiKalmanTrackNode& node2 = *it2;
+			  double x_g = node2.x_g();
+			  double y_g = node2.y_g();
+			  //double z_g = node2.z_g(); //unused, remove to remove compiler warning
+			  double rt_g2 = sqrt(x_g*x_g+y_g*y_g);
+			  cout << "rt:" << rt_g2 << " --" << node2 << endl;
+			  ++it2;
 			}
 		    }
-		  double x_g = node.x_g();
-		  double y_g = node.y_g();
-		  double z_g = node.z_g();
-		  double rt_g = sqrt(x_g*x_g+y_g*y_g);
-		  StiHit * theHit = node.getHit();
-		  if (theHit)
-		    {
-		      double dx = fabs(theHit->x() - node._x);
-		      double dy = fabs(theHit->y() - node._p0);
-		      double dz = fabs(theHit->z() - node._p1);
-		      if (dx>3 || dy>5 || dz>5)
-			bad++;
-		    }
-		  if (rt_g>200. || fabs(z_g)>200.)
-		    weird = true;
-		  ++it;
-		}
-	      if (!piped) noPipe++;
-	      if (ifced)  ifcOK++;
-	      if (weird || !piped || bad>4 || !ifced)
-		{
-		  cout << "  ===========";
-		  if (weird) cout << "WEIRD/";
-		  if (!piped)cout << "NO-PIPE/";
-		  if (bad>4) cout << "BAD>4 ("<<bad<<")/";
-		  if (!ifced) cout << "no-ifc/";
-		  cout << "==========================="<<endl;
-
-		  StiKTNForwardIterator it2(leaf);
-		  StiKTNForwardIterator end2 = it2.end();
-		  while (it2!=end2) 
-		    {
-		      const StiKalmanTrackNode& node2 = *it2;
-		      double x_g = node2.x_g();
-		      double y_g = node2.y_g();
-		      double z_g = node2.z_g();
-		      double rt_g2 = sqrt(x_g*x_g+y_g*y_g);
-		      cout << ">>>>>>>>>rt=" << rt_g2 << ">>>>>>>>>>" << node2 << endl;
-		      ++it2;
-		    }
-		}
-				// test end ===============
-
+		}//testing
+	      // test end ===============
+		  
 	      fillTrack(pTrack,kTrack);
 	      // set up relationships between objects
 	      detInfoVec.push_back(detInfo);
@@ -694,20 +691,10 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	      delete pTrack;
 	    }
 	}//end if primary
-      matrix[svtNode][svtHit]++;
     } // kalman track loop
   if (skippedCount>0) cout << "StiStEventFiller::fillEventPrimaries() -I- A total of "<<skippedCount<<" StiKalmanTracks were skipped"<<endl;
   mTrkNodeMap.clear();  // need to reset for the next event
-  cout <<"StiStEventFiller::fillEventPrimaries() -I- Number of tracks filled as primaries(1):"<< fillTrackCount1<<endl;
-  cout <<"StiStEventFiller::fillEventPrimaries() -I- Number of tracks filled as primaries:(2)"<< fillTrackCount2<<endl;  
-  cout <<"StiStEventFiller::fillEventPrimaries() -I- Number of tracks filled as primaries but without a beam pipe node:"<<noPipe<<endl;
-  cout <<"StiStEventFiller::fillEventPrimaries() -I- Number of tracks filled as primaries with ifc OK:"<<ifcOK<<endl;
-  for (int iNode=0;iNode<6;++iNode)
-    {
-      cout << "iNode";
-      for (int iHit=0;iHit<6;++iHit)
-	cout << "   " << matrix[iNode][iHit] << endl;
-    }
+  cout <<"StiStEventFiller::fillEventPrimaries() -I- Primaries (1):"<< fillTrackCount1<< " (2):"<< fillTrackCount2<< " no pipe node:"<<noPipe<<" with IFC:"<< ifcOK<<endl;
   return mEvent;
 }
 
@@ -816,8 +803,10 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   float chi2[2];
   //get chi2/dof
   chi2[0] = track->getChi2();  
-  chi2[1] = -9999; // change: here goes an actual probability, need to calculate?
-    
+  chi2[1] = -999; // change: here goes an actual probability, need to calculate?
+  // December 04: The second element of the array will now hold the incremental chi2 of adding
+  // the vertex for primary tracks
+  if (gTrack->type()==primary) chi2[1]=node->getChi2();
 
   // @#$%^&
   // need to transform the covariant matrix from double's (Sti) to floats (StEvent)!
@@ -982,6 +971,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
   if (gTrack->type()==primary) {
       float impactParam = impactParameter(track);
       gTrack->setImpactParameter(impactParam );
+      track->setDca(impactParam);
   }
 
   // Follow the StDetectorId.h enumerations...
@@ -1055,15 +1045,6 @@ float StiStEventFiller::impactParameter(StiKalmanTrack* track)
 
   //cout <<"PHelix: "<<*physicalHelix<<endl;
   float dca = static_cast<float>(physicalHelix->distance(vxDD));
-  if (track->isPrimary())
-    {
-      //cout << "StiStEventFiller::impactParameter() -I- Primary Track -   Dca:"<<dca<<endl;
-    }
-  else
-    {
-      track->setDca(dca);
-      //cout << "StiStEventFiller::impactParameter() -I- GLOBAL  Track -   Dca:"<<dca<<endl;
-    }
   return dca;
 }
 float StiStEventFiller::impactParameter(StTrack* track) 

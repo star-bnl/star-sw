@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.cc,v 1.21 2004/11/22 22:30:17 perev Exp $
+ * $Id: StHelixD.cc,v 1.20 2004/10/17 03:20:41 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,9 +15,6 @@
  ***************************************************************************
  *
  * $Log: StHelixD.cc,v $
- * Revision 1.21  2004/11/22 22:30:17  perev
- * remove debug modif wit StMkDeb
- *
  * Revision 1.20  2004/10/17 03:20:41  perev
  * Error check improved
  *
@@ -90,6 +87,7 @@
 #include "StHelixD.hh"
 #include "PhysicalConstants.h" 
 #include "SystemOfUnits.h"
+#include "StMkDeb.h"
 
 #ifdef __ROOT__
 ClassImp(StHelixD)
@@ -98,11 +96,13 @@ ClassImp(StHelixD)
 StHelixD::StHelixD()
 {
     setParameters(0, 0, 0, StThreeVectorD(), -1);
+    StMkDeb::SetUser(this);
 }
 
 StHelixD::StHelixD(double c, double d, double phase,
 		   const StThreeVectorD& o, int h)
 {
+    StMkDeb::SetUser(this);
     setParameters(c, d, phase, o, h);
 }
 

@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.452 2004/11/24 02:42:47 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.453 2004/12/16 00:27:52 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -198,11 +198,12 @@ Bfc_st BFC1[] = { // standard chains
 
 
   // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
-  {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
-                                                                       ,"Base chain for 2004 (tpc)",kFALSE},
+  {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,svt_daq,SvtD,Physics,Cdst,Kalman,tags,Tree,evout","",""
+                                                                   ,"Base chain for 2004 (tpc+svt)",kFALSE},
   {"P2004"       ,""     ,"","B2004,l3onl,fcf,ToF,emcDY2,fpd,Corr4,ftpc,trgd,ZDCvtx,OSpaceZ2","",""
                 ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
-  {"pp2004"     ,""   ,"","B2004,l3onl,fcf,ToF,emcDY2,fpd,Corr4,ppOpt,-PreVtx,ftpc,trgd,ZDCvtx,OSpaceZ2",
+  {"pp2004"     ,""   ,"",
+   "B2004,fcf,ppOpt,VFppLMV5,-PreVtx,l3onl,ToF,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4,OSpaceZ2",
                     "","","Production chain for 2004 pp data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
 
 
@@ -296,9 +297,15 @@ Bfc_st BFC1[] = { // standard chains
   {"ppOpt"       ,""  ,"","","","",                      "pp option without enabling special cases",kFALSE},
 
   {"SvtMatchVtx" ,""  ,"","",""                ,"","Use SVT matched tracks to find  Primary Vertex",kFALSE},
+
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
+  // This option doe snothing in TPT mode
+  //{"CtbMatchVtx" ,""  ,"","",""                         ,"","... CTB Matching ON in Vertex Finding",kFALSE},
+  {"VFppLMV"       ,""  ,"","",""                        ,"","...VertexMaker will use ppLMV method",kFALSE},
+  {"VFppLMV5"      ,""  ,"","",""                ,"","...VertexMaker will use ppLMV method (tuned)",kFALSE},
+
   {"onlcl"  ,""  ,"","",""                                       ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,""  ,"","",""                                              ,"","Read/use TPC raw hits",kFALSE},
 
@@ -821,8 +828,8 @@ Bfc_st BFC2[] = { // ITTF Chains
                    "B2004,fcf,VFMinuit,l3onl,ToF,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr4,OSpaceZ2",
               "","","Production chain for 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
   {"pp2004"      ,"" ,"",
-  "B2004,fcf,ppOpt,VFppLMV5,CtbMatchVtx,l3onl,ToF,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr4,OSpaceZ2",
-             "","","Production chain for 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+   "B2004,fcf,ppOpt,VFppLMV5,CtbMatchVtx,l3onl,ToF,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr4,OSpaceZ2",
+              "","","Production chain for 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
 
 
@@ -1607,8 +1614,9 @@ Int_t StBFChain::Instantiate()
 	    }
 	    if (maker == "StVertexMaker"){
 	      cout << "QAInfo: ppOpt (pp mode) is turned ON" << endl;
-	      if( GetOption("SvtMatchVtx")) mk->SetMode(4); // Switch vertex finder to ppLMV using EST
-	      else                          mk->SetMode(1); // Switch vertex finder to ppLMV
+	      if( GetOption("SvtMatchVtx"))    mk->SetMode(4); // Switch vertex finder to ppLMV using EST
+	      else if ( GetOption("VFppLMV5")) mk->SetMode(8); // LMV4 with LMV5 cuts 
+	      else                             mk->SetMode(1); // Switch vertex finder to ppLMV
 	      StVertexMaker *pMk = (StVertexMaker*) mk;
 	      if( GetOption("beamLine")){
 		  pMk->SetBeam4ppLMV();                      // Add beam-line constrain

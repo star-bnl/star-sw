@@ -18,28 +18,6 @@
 #include "Rtypes.h"
 #endif
 
-#ifndef __CINT__
-#ifdef LOGGERMESSAGE
-#error An attempt to redefine the LOGGERMESSAGE macro
-#else
-#  define LOGGERMESSAGE(MESSAGELEVEL)                                    \
-   if (StMessMgr::CurrentMessager()->_NAME3_(is,MESSAGELEVEL,Enabled)()) \
-   StMessMgr::CurrentMessager()->MESSAGELEVEL("","O",__FUNCTION__, __LINE__) 
-
-#  define LOG_INFO  LOGGERMESSAGE(Info)
-#  define LOG_WARN  LOGGERMESSAGE(Warning)
-#  define LOG_ERROR LOGGERMESSAGE(Error)
-#  define LOG_FATAL LOGGERMESSAGE(Fatal)
-#  define LOG_DEBUG LOGGERMESSAGE(Debug)
-#  define LOG_QA    LOGGERMESSAGE(QAInfo)
-
-#define STAR_INFO(name) \
-   GetLogger(_QUITE_(name))->MESSAGELEVEL(__FUNCTION__, __LINE__) 
-
-#define MSG_INFO(name) \
-   GetLogger(_QUITE_(name))->MESSAGELEVEL(__FUNCTION__, __LINE__) 
-#endif
-#endif 
 
 #ifndef __CINT__
 #include "StarCallf77.h"
@@ -106,7 +84,7 @@ class StMessMgr : public ostrstream {
    friend ostream& operator--(StMessMgr&);
    friend ostream& operator~(StMessMgr&);
    friend class StBFChain;
-   
+
  private:
 
  protected:
@@ -149,49 +127,7 @@ class StMessMgr : public ostrstream {
    virtual       void MemoryOff() =0;
    virtual        int AddType(const char* type, const char* text) =0;
    virtual        int ListTypes() =0;
-//Optimization
-       /*
-        *  <p>If you are worried about speed, then you should write
-        *  <pre>
-        *        if(logger->isDebugEnabled()) {
-        *          logger->debug("debug message");
-        *        }
-        *  </pre>
-        *
-        *  <p>This way you will not incur the cost of parameter
-        *  construction if debugging is disabled for <code>logger</code>. On
-        *  the other hand, if the <code>logger
-              </code> is debug enabled, you
-        *  will incur the cost of evaluating whether the logger is debug
-        *  enabled twice. Once in <code>isDebugEnabled</code> and once in
-        *  the <code>debug</code>.  This is an insignificant overhead
-        *  since evaluating a logger takes about 1%% of the time it
-        *  takes to actually log.
-        *
-        *  @return bool - <code>true</code> if this logger is debug
-        *  enabled, <code>false</code> otherwise.
-        *   */
-  virtual bool isDebugEnabled()  const;
-  virtual bool isWarnEnabled()   const;
-  virtual bool isErrorEnabled()  const;
-  virtual bool isInfoEnabled()   const;
-  virtual bool isFatalEnabled()  const;
-  virtual bool isEnabledFor()    const;
-  virtual bool isQAInfoEnabled()   const;
 
-  
-   
-//  Manager factory
-public:
-   static StMessMgr*  CurrentMessager();
-   static StMessMgr*  Instance();
-   static StMessMgr*  Instance(const char *);
-   static StMessMgr*  SetCurrentMessager(StMessMgr *mgr=0);
-protected:
-   virtual StMessMgr*  Instantiate();
-   virtual StMessMgr*  Instantiate(const char *);
-         
-public:
 // Info Messages:
    virtual StMessMgr& Info(const char* mess="", const char* opt="O",const char *sourceFileName=0, int lineNumber=-1)=0;
    virtual        int PrintInfos() =0;
@@ -250,41 +186,12 @@ public:
 #endif
 };
 
-//______________________________________________________________________________
-//
-//  StTurnLogger - an aux class to simply "save/restore the "current" logger
-//______________________________________________________________________________
-class StTurnLogger 
-{
-   private:
-     StMessMgr* fMessager; // hold the messager to restore it at dtor
-   public:
-      StTurnLogger(StMessMgr* msg=0);
-      StTurnLogger(const StTurnLogger& push);
-     ~StTurnLogger();
-};
-   
 // Global pointers:
 R__EXTERN StMessMgr* gMessMgr;
 R__EXTERN StMessage* gMessage;
 R__EXTERN StMessage* endm;
 // R__EXTERN StMessMgr& gMess;
 
-//______________________________________________________________________________
-inline StTurnLogger::StTurnLogger(StMessMgr* msg): fMessager(0) 
-{
-  if (msg) fMessager = StMessMgr::SetCurrentMessager(msg);
-}
-
-//______________________________________________________________________________
-inline StTurnLogger::StTurnLogger(const StTurnLogger& push) : fMessager(push.fMessager) 
-{ ((StTurnLogger*)&push)->fMessager=0; }
-
-//______________________________________________________________________________
-inline StTurnLogger::~StTurnLogger()
-{if (fMessager) StMessMgr::SetCurrentMessager(fMessager);} 
-
-     
 //______________________________________________________________________________
 inline ostream& operator<<(ostream& os, StMessage* stm) {
    return gMessMgr->OperatorShift(os,stm);
@@ -312,4 +219,4 @@ inline ostream& operator-(StMessMgr&) {
 
 #endif
 
-// $Id: StMessMgr.h,v 1.6 2004/11/04 22:25:56 fine Exp $
+// $Id: StMessMgr.h,v 1.2 2004/04/16 15:20:07 fine Exp $

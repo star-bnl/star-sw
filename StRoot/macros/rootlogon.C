@@ -1,4 +1,4 @@
-// $Id: rootlogon.C,v 1.45 2004/11/14 17:01:38 fisyak Exp $
+// $Id: rootlogon.C,v 1.44 2004/08/09 00:55:24 fisyak Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -30,12 +30,10 @@ namespace rootlogon {
   ((TRint*)gROOT->GetApplication())->SetPrompt( gPrompt.Data()); // Redefine prompt
     
   // 	Load StarRoot lib.
-  gSystem->Load("StarClassLibrary");
-  //  if (gPrompt.Index("root4star")>=0 && !strstr(gSystem->GetLibraries(),"libTable")) {
-  if (!strstr(gSystem->GetLibraries(),"libTable")) {
+  gSystem->Load("StarRoot");
+  if (gPrompt.Index("root4star")>=0 && !strstr(gSystem->GetLibraries(),"libTable")) {
     gSystem->Load("libGeom"); gSystem->Load("libTable");
   }
-  gSystem->Load("StarRoot");
   if (strstr(gSystem->GetLibraries(),"libTable")) {
     gInterpreter->ProcessLine("typedef TCL              StCL;");              
     gInterpreter->ProcessLine("typedef TDataSet         St_DataSet ;");       

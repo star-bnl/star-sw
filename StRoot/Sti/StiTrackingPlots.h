@@ -1,8 +1,14 @@
 /*
- * $Id: StiTrackingPlots.h,v 2.12 2004/11/22 19:21:49 pruneau Exp $
+ * $Id: StiTrackingPlots.h,v 2.14 2004/12/11 22:21:02 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.h,v $
+ * Revision 2.14  2004/12/11 22:21:02  pruneau
+ * new histos
+ *
+ * Revision 2.13  2004/12/01 14:02:09  pruneau
+ * svt
+ *
  * Revision 2.12  2004/11/22 19:21:49  pruneau
  * revamped the plotting package
  *
@@ -63,39 +69,46 @@ class StiTrackingPlots : public HistogramGroup
   vector<StiDefaultTrackFilter *> mFilter;
   string mOutFile;
 
-  TH1D * _track[5];
-  TH2D * _track2D[5][5];
+#define NPLOTS 9
 
-  TH1D * _eta[5];
-  TH1D * _phi[5];
-  TH1D * _pt[5];
-  TH1D * _dca[5];
-  TH1D * _gdca[5];
-  TH2D * _nptsVsPt[5];
-  TH2D * _nptsVsEta[5];
-  TH2D * _nptsVsPhi[5];
-  TH2D * _nFitVsPt[5];
-  TH2D * _nFitVsEta[5];
-  TH2D * _nFitVsPhi[5];
-  TH2D * _nFitVsN[5];
-  TH2D * _nFitVsNSvt[5];
-  TH1D * _chi2[5];
-  TH2D * _chi2VsNpts[5];
-  TH2D * _chi2VsDca[5];
-  TH2D * _xLastHitVsXLastNode[5];
-  TH2D * radLengthZ[5];
-  TH2D * radLengthPhi[5];
-  TH2D * radLengthEta[5];
-  TH1D * _chi2Inc[5][51];
-  TH2D * _chi2IncVsDca[5][51];
-  TH1D * _yPull[5][51];
-  TH1D * _zPull[5][51];
-  TH1D * _dx[5][51];
-  TH1D * _dy[5][51];
-  TH1D * _dz[5][51];
-  TH2D * _dyVsTanCA[5][51][12];
-  TH2D * _dzVsTanL[5][51][12];
+  TH1D * _track[NPLOTS];
+  TH2D * _track2D[NPLOTS][NPLOTS];
 
+  TH1D * _eta[NPLOTS];
+  TH1D * _phi[NPLOTS];
+  TH1D * _pt[NPLOTS];
+  TH1D * _dca[NPLOTS];
+  TH1D * _gdca[NPLOTS];
+  TH2D * _nptsVsPt[NPLOTS];
+  TH2D * _nptsVsEta[NPLOTS];
+  TH2D * _nptsVsPhi[NPLOTS];
+  TH2D * _nFitVsPt[NPLOTS];
+  TH2D * _nFitVsEta[NPLOTS];
+  TH2D * _nFitVsPhi[NPLOTS];
+  TH2D * _nFitVsN[NPLOTS];
+  TH2D * _nFitVsNSvt[NPLOTS];
+  TH1D * _chi2[NPLOTS];
+  TH2D * _chi2VsNpts[NPLOTS];
+  TH2D * _chi2VsDca[NPLOTS];
+  TH2D * _xLastHitVsXLastNode[NPLOTS];
+  TH2D * radLengthZ[NPLOTS];
+  TH2D * radLengthPhi[NPLOTS];
+  TH2D * radLengthEta[NPLOTS];
+  TH1D * _chi2Inc[NPLOTS][51];
+  TH2D * _chi2IncVsDca[NPLOTS][51];
+  TH1D * _yPull[NPLOTS][51];
+  TH1D * _zPull[NPLOTS][51];
+  TH1D * _dx[NPLOTS][51];
+  TH1D * _dy[NPLOTS][51];
+  TH1D * _dz[NPLOTS][51];
+  TH2D * _dyVsTanCA[NPLOTS][51][12];
+  TH2D * _dyVsY[NPLOTS][51][12];
+  TH2D * _dyVsZ[NPLOTS][51][12];
+  TH2D * _dzVsTanL[NPLOTS][51][12];
+  TH2D * _dzVsY[NPLOTS][51][12];
+  TH2D * _dzVsZ[NPLOTS][51][12];
+  TH2D * _svtNhitVsNode[NPLOTS];
+  TH2D * _svtNfitVsNode[NPLOTS];
 
   //track kinematics & helix parameters
   //make all plots 3D - value,Phi,Eta - then cut 

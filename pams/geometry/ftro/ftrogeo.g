@@ -1,9 +1,5 @@
-* $Id: ftrogeo.g,v 1.4 2004/10/28 22:19:50 potekhin Exp $
+* $Id: ftrogeo.g,v 1.3 2004/07/27 17:53:13 potekhin Exp $
 * $Log: ftrogeo.g,v $
-* Revision 1.4  2004/10/28 22:19:50  potekhin
-* There are two cages, one on each respective
-* FTPC module, so we have to position it twice
-*
 * Revision 1.3  2004/07/27 17:53:13  potekhin
 * A large number of refinements and additions, notably the divisions
 * in the central mother volume to improve efficiency, outer shell,
@@ -114,8 +110,7 @@ Module FTROGEO is the geometry of the readout structure of the FTPC
 
 *
       Create   FTMO
-      Position FTMO in CAVE z= Zpos;
-      Position FTMO in CAVE z=-Zpos AlphaZ=180.;
+      Position FTMO in CAVE z=Zpos;
 * -----------------------------------------------------------------------------
 Block FTMO is the mother of the single FTPC RO barrel
       Material  Air

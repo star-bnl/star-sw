@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.8 2004/10/27 21:45:32 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.7 2004/09/09 20:03:46 perev Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -13,6 +13,7 @@
 #include "tables/St_dst_dedx_Table.h"
 //class St_trigDetSums;
 //class trigDetSums_st;
+#if 1
 struct dE_t {
  public:
   Double_t dE;
@@ -20,6 +21,7 @@ struct dE_t {
   Double_t dEdxL;
   Double_t dEdxN;
 };
+#endif
 //________________________________________
 class dEdx_t : public TObject {
  public:
@@ -27,7 +29,7 @@ class dEdx_t : public TObject {
   virtual ~dEdx_t() {}
   /* U->R->S->P->O->Z->X
      U->R (TpcAdcCorrection) -> P (tpcPressure) ->
-     S (TpcSecRowB/TpcSecRowC) ->  O (TpcDriftDistOxygen) ->  
+     S (TpcSecRowB) ->  O (TpcDriftDistOxygen) ->  
      Z (TpcZCorrection) -> X(TpcdXCorrection) */
   Char_t   first[1];
   Int_t    sector;
@@ -42,19 +44,60 @@ class dEdx_t : public TObject {
   Double_t QRatio;             // Ratio to previous cluster Charge 
   Double_t QRatioA;            // Ratio to Sum of all previous cluster Charge 
   Double_t QSumA;              // Sum of all previous cluster Charge 
-  Double_t dx;                 // dx with accounting distortions
-  Double_t dxH;                // Old dx, base on StHelix and global track parameters
+  Double_t dx;
+#if 0
+  Double_t dx0;    // stright line approximation
+#endif
   Double_t dE;
   Double_t dEdx;   // after all corrections
   Double_t dEdxL;  // log of dEdx
   Double_t dEdxN;  // normolized to BB
-  dE_t     C[20]; //!
+#if 1
+  dE_t     C[15]; //!
+#else
+  Double_t dEU;    // before correction (only Scale2keV scale)
+  Double_t dEUdx; 
+  Double_t dEUdxL; // log of dEdx
+  Double_t dEUdxN;  // normolized to BB
+  Double_t dER;    // after row correction
+  Double_t dERdx;    // after row correction
+  Double_t dERdxL;    // after row correction
+  Double_t dERdxN; 
+  Double_t dEP;    // after Pressure correction
+  Double_t dEPdx; 
+  Double_t dEPdxN; 
+  Double_t dEPdxL; 
+  Double_t dET;    // after TimeScale
+  Double_t dETdx; 
+  Double_t dEdxLT; 
+  Double_t dETdxN;  // normolized to BB
+  Double_t dEO;    // after Blair correction
+  Double_t dEOdx; 
+  Double_t dEdxLO; 
+  Double_t dEOdxN;  // normolized to BB
+  Double_t dES;    // after TimeScale + SecRow corrections
+  Double_t dESdx; 
+  Double_t dEdxLS; 
+  Double_t dESdxN;  // normolized to BB
+  Double_t dEZ;    // after TimeScale + SecRow + Sec Z corrections
+  Double_t dEZdx; 
+  Double_t dEZdxL; 
+  Double_t dEZdxN;  // normolized to BB
+  Double_t dED;    // after + Accamulated charge correction
+  Double_t dEDdx; 
+  Double_t dEDdxL; 
+  Double_t dEDdxN;  // normolized to BB
+  Double_t dEX;    //  dX corrections
+  Double_t dEXdx; 
+  Double_t dEXdxL; 
+  Double_t dEXdxN;  // normolized to BB
+  Double_t dEM;     // after TimeScale + SecRow + Sec Z + Multipicity 
+  Double_t dEMdx; 
+  Double_t dEMdxL; 
+  Double_t dEMdxN;  // normolized to BB
+#endif  
   Double_t dETot; 
   Double_t xyz[3];  // local
-  Double_t xyzD[3]; // local direction
-  Double_t edge;    // distance to sector edge
-  Double_t PhiR;    // relative phi
-  Double_t resXYZ[3]; // track SectorLocal residual wrt local track 
   Double_t Prob; 
   Double_t SigmaFee;
   Double_t xscale;
@@ -87,9 +130,7 @@ class StTpcdEdxCorrection : public TObject {
   enum EOptions {
     kUncorrected         , //U
     kAdcCorrection       , //R
-    kTpcSecRow,
-    kTpcSecRowB=kTpcSecRow,//S
-    kTpcSecRowC          , //S
+    kTpcSecRow           , //S
     ktpcPressure         , //P
     ktpcTime             , //T
     kDrift               , //O
@@ -100,8 +141,6 @@ class StTpcdEdxCorrection : public TObject {
     ktpcWaterOut         ,
     kTpcdCharge          , //D
     kSpaceCharge         , // space charge near the wire
-    kEdge                , // correction near edge of chamber
-    kPhiDirection        , // correction wrt local interception angle 
     kTpcLast             ,
     kdXCorrection        , //X
     kTpcPadTBins         ,
@@ -116,8 +155,7 @@ class StTpcdEdxCorrection : public TObject {
   void SettpcGas               (St_tpcGas          *m = 0);
   //  void SettrigDetSums          (St_trigDetSums     *m = 0);
   //  void SettpcGainMonitor       (St_tpcGainMonitor  *m = 0);
-  void SetTpcSecRowB           (St_TpcSecRowCor    *m = 0);
-  void SetTpcSecRowC           (St_TpcSecRowCor    *m = 0);
+  void SetTpcSecRow            (St_TpcSecRowCor    *m = 0);
   void SetCorrection           (Int_t k = 0, St_tpcCorrection   *m = 0);
   void Setdrift                (St_tpcCorrection   *m = 0) {SetCorrection (kDrift               , m);}
   void SetMultiplicity         (St_tpcCorrection   *m = 0) {SetCorrection (kMultiplicity        , m);}
@@ -139,11 +177,10 @@ class StTpcdEdxCorrection : public TObject {
   //  St_trigDetSums    *trigDetSums()         {return m_trigDetSums;}
   //  St_tpcGainMonitor *tpcGainMonitor()      {return m_tpcGainMonitor;}
 
-  St_TpcSecRowCor  *TpcSecRowB()           {return m_TpcSecRowB;}
-  St_TpcSecRowCor  *TpcSecRowC()           {return m_TpcSecRowC;}
+  St_TpcSecRowCor   *TpcSecRow()           {return m_TpcSecRow;}
 
   St_tpcCorrectionC *Correction(Int_t k = 0) {
-    return (k > kTpcSecRowC && k < kTpcAllCorrections && m_Corrections[k].Chair) ? m_Corrections[k].Chair : 0;
+    return (k > kTpcSecRow && k < kTpcAllCorrections && m_Corrections[k].Chair) ? m_Corrections[k].Chair : 0;
   }
   St_tpcCorrectionC *drift()               {return Correction(kDrift);}
   St_tpcCorrectionC *Multiplicity()        {return Correction(kMultiplicity);}
@@ -166,8 +203,7 @@ class StTpcdEdxCorrection : public TObject {
   //  trigDetSums_st      *m_trig;                 //!
   //  St_tpcGainMonitor   *m_tpcGainMonitor;       //!
 
-  St_TpcSecRowCor     *m_TpcSecRowB;            //!
-  St_TpcSecRowCor     *m_TpcSecRowC;            //!
+  St_TpcSecRowCor     *m_TpcSecRow;            //!
 
   dEdxCorrection_t     m_Corrections[kTpcAllCorrections];//!
   Double_t             mAdc2GeV[2];            //! Outer/Inner conversion factors from ADC -> GeV

@@ -7,6 +7,11 @@
  *        3 = lmv evr
  *        4 = pplmv using EST if around
  *        5 = lmv/evr with VtxOffset
+ *        8 = pplmv using pplmv5 cuts
+ *
+ * 0, 2, 3, 5 can be treated together (lmv)
+ * 1, 4, 8    are ppLMV related
+ * 
  */
 
 
@@ -65,6 +70,8 @@ StVertexMaker::~StVertexMaker(){
   UnFixVertex();
 }
 //_____________________________________________________________________________
+
+/// m_Mode is used for selecting the vertex finding method. 
 Int_t StVertexMaker::Init(){
 
   switch(m_Mode) { // lmv/evr or ppLMV
@@ -90,9 +97,22 @@ Int_t StVertexMaker::Init(){
     AddRunCont(m_evr_evrpar);
     break; }
   case 1:  // initialize ppLMV
-  case 4: { // initialize ppLMV using EST
-    int   ppLMVparIdef[10]={2, 10, 0, 0, 0, 0, 0, 0, 0, 9999};
+  case 4: 
+  case 8:  // ppLMV5
+    { // initialize ppLMV using EST
+    int   ppLMVparIdef[10]={2, 10, 0, 1, 0, 0, 0, 0, 0, 9999};
     float ppLMVparFdef[10]={1., 3.9, 0.20, .02, 1.,180., 0, 0, 0, 8888};
+    if(m_Mode==8) {
+      gMessMgr->Info() << GetName() <<" Init() activate  ppLMV5 cuts "<<endm;
+      ppLMVparFdef[1]=2.0;  // MaxTrkDcaRxy
+      ppLMVparFdef[4]=0.;   // CtbPhiErr/deg
+      ppLMVparFdef[5]=150.; // MaxTrkDcaZ
+      ppLMVparIdef[1]=15;   // MinTrkPonits
+      ppLMVparIdef[2]=20;   // beamEequivNtr
+      ppLMVparIdef[3]=2;    // MinMatchTr
+    } else {
+     gMessMgr->Info() << GetName() <<" Init() activate  ppLMV4 cuts, m_Mode= "<<m_Mode<<endm;
+    }
     ppLMVuse(ppLMVparIdef,ppLMVparFdef);
 
     // few histos for monitoring of ppLMV
@@ -251,6 +271,7 @@ Int_t StVertexMaker::Make(){
 
 
   case 1:  // ppLMV
+  case 8:  // ppLMV5
   case 4:{ //pplmv using EST
     gMessMgr->Info() << GetName() <<
       "-maker will use ppLMV with zCutppLMV=" << zCutppLMV << "/cm" << endm;
@@ -260,7 +281,7 @@ Int_t StVertexMaker::Make(){
       return kStErr;
     }
 
-    cout << "CTB Mode = " << this->GetCTBMode() << endl;
+    gMessMgr->Info() << GetName() << "CTB Mode = " << this->GetCTBMode() << endm;
     CtbResponse ctbResponse(this, ppLMVparI, ppLMVparF,this->GetCTBMode());
 
 
@@ -271,7 +292,11 @@ Int_t StVertexMaker::Make(){
       TDataSet* dbDataSet = GetDataBase("Calibrations/rhic");
       vertexSeed_st* vSeed =
 	((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
-      SetBeam4ppLMV((int) (vSeed->weight), vSeed->x0, vSeed->y0,
+      int beamEequivNtr=ppLMVparI[2];
+      if(beamEequivNtr<=0) beamEequivNtr=(int) (vSeed->weight);
+      // I can't beleive I wrote this dirty patch to switch cut4-->cut5, JB.  
+      // Well, it works though so we will live, JL
+      SetBeam4ppLMV(beamEequivNtr, vSeed->x0, vSeed->y0,
 		    vSeed->dxdz, vSeed->dydz);
     }
 
@@ -423,8 +448,12 @@ void StVertexMaker::UnFixVertex(){
 
 
 //_____________________________________________________________________________
-// $Id: StVertexMaker.cxx,v 1.9 2003/09/02 17:59:26 perev Exp $
+// $Id: StVertexMaker.cxx,v 1.10 2004/12/16 00:29:56 jeromel Exp $
 // $Log: StVertexMaker.cxx,v $
+// Revision 1.10  2004/12/16 00:29:56  jeromel
+// Modifications (shall we say hack ?) to implement the ppLMV-5 cuts to
+// ppLMV4.
+//
 // Revision 1.9  2003/09/02 17:59:26  perev
 // gcc 3.2 updates + WarnOff
 //

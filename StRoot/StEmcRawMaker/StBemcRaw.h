@@ -1,5 +1,8 @@
-// $Id: StBemcRaw.h,v 1.5 2004/11/22 12:46:22 suaide Exp $
+// $Id: StBemcRaw.h,v 1.6 2004/12/14 11:32:11 suaide Exp $
 // $Log: StBemcRaw.h,v $
+// Revision 1.6  2004/12/14 11:32:11  suaide
+// added histograms for status tables creation
+//
 // Revision 1.5  2004/11/22 12:46:22  suaide
 // added new flags for hit reconstruction. Status are not checked
 // dureing production anymore in order to avoid bad status loaded in
@@ -55,6 +58,7 @@ class StBemcRaw : public TObject
    TH2F*                    mBarrelAdcSumHist;
    TH2F*                    mBarrelNCratesHist;
    TH2F*                    mBarrelCrateStatusHist;
+   TH2F*                    mBarrelQAHisto[MAXDETBARREL];
 
    StEmcDecoder*            mDecoder;
    StBemcTables*            mTables;
@@ -74,6 +78,7 @@ class StBemcRaw : public TObject
    Int_t                    mNCRATESOK[MAXDETBARREL];
    Float_t                  mTOTALE[MAXDETBARREL];
    Int_t                    mCrateStatus[MAXDETBARREL][MAXCRATES];
+   Bool_t                   mIsCorrupted[MAXDETBARREL];
           
  public: 
                  
@@ -81,6 +86,7 @@ class StBemcRaw : public TObject
   virtual                   ~StBemcRaw(); ///< StBemcRaw destructor
 
   void                      initHisto();
+  void                      initQAHisto();
   void                      fillHisto();
   
   Bool_t                    make(TDataSet*,StEvent*); ///< Make the BEMC detector from DAQ
@@ -92,6 +98,7 @@ class StBemcRaw : public TObject
   void                      emptyEmcCollection(StEmcCollection*); ///< empty current emcCollection
   Int_t                     makeHit(StEmcCollection*, Int_t, Int_t, Int_t, Int_t, Int_t, Float_t&); ///< make StEmcRawHit
   void                      createDecoder(Int_t,Int_t); ///< Create new StEmcDecoder
+  Bool_t                    isCorrupted(Int_t det) { return mIsCorrupted[det-1];} // return kTRUE if the event is corrupted for that detector
 
   void                      clearStats(Int_t); ///< Clear statistics for detector 'det'
   void                      updateStats(Int_t,Int_t,Int_t, Float_t); ///< Update statistics for detector 'det'

@@ -1,11 +1,20 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.45 2004/11/12 22:48:28 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.45 2004/11/12 22:48:28 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.48 2004/12/11 04:31:36 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.48 2004/12/11 04:31:36 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.48  2004/12/11 04:31:36  perev
+ * set of bus fixed
+ *
+ * Revision 2.47  2004/12/01 18:04:32  perev
+ * test for -ve and too big track length added
+ *
+ * Revision 2.46  2004/12/01 03:57:08  pruneau
+ * d<4
+ *
  * Revision 2.45  2004/11/12 22:48:28  fisyak
  * Back to use chi2 instead DCA for Vertex fit
  *
@@ -471,7 +480,7 @@ StThreeVector<double> StiKalmanTrack::getGlobalPointAt(double x) const
   if (n==0) throw logic_error("StiKalmanTrack::getGlobalPointAt(double x) - ERROR - n==0");
   n->reset();
   n->setState(nearNode);
-  int status = n->propagate(x,0);
+  int status = n->propagate(x,0,trackingDirection);
   if (status<0) throw runtime_error(" StiKalmanTrack::getGlobalPointAt() - WARNING - Position not reachable by this track");
   return n->getGlobalPoint();
 }
@@ -493,7 +502,7 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
   px=py=pz=0;
   StiKalmanTrackNode * inner = getInnerMostNode();
   if (inner==0)throw logic_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
-  inner->propagate(0.,0);
+  inner->propagate(0.,0,trackingDirection);
   double p[3];
   double e[6];
   inner->getMomentum(p,e);
@@ -690,18 +699,46 @@ int    StiKalmanTrack::getGapCount()    const
 int StiKalmanTrack::getFitPointCount()    const  
 {
     int fitPointCount  = 0;
-    double maxChi2 = fitpars->getMaxChi2();
-    if (firstNode) {
+    if (firstNode) 
+      {
+	double chi2Max = fitpars->getMaxChi2();
 	StiKTNBidirectionalIterator it;
-	for (it=begin();it!=end();it++) {
+	for (it=begin();it!=end();it++) 
+	  {
 	    StiKalmanTrackNode& ktn = (*it);
-	    if (ktn.getChi2() < maxChi2) {
-		fitPointCount++;
-	    }
-	}
-    }    
+	    if (ktn.getChi2()<chi2Max) ++fitPointCount;
+	  }
+      }    
   return fitPointCount;
 }
+
+///Get number of fit points in given detector
+int StiKalmanTrack::getFitPointCount(int detectorId)    const  
+{
+    int fitPointCount  = 0;
+    if (firstNode) 
+      {
+	double chi2Max = fitpars->getMaxChi2();
+	StiKTNBidirectionalIterator it;
+	for (it=begin();it!=end();it++) 
+	  {
+	    StiKalmanTrackNode& node = (*it); 
+	    StiHit* hit = node.getHit();
+	    if (hit && 
+		hit->detector() && 
+		node.getDedx()>0. &&  
+		detectorId==hit->detector()->getGroupId() &&
+		node.getChi2()<chi2Max) 
+	      {
+		fitPointCount++;
+	      }
+	  }
+      }    
+  return fitPointCount;
+}
+
+
+
 
 /*! Calculate and return the track length.
   <h3>Notes</h3> 
@@ -725,7 +762,17 @@ double StiKalmanTrack::getTrackLength() const
 		            inNode->getPhase(),
 		            in,
 		            inNode->getHelicity());
-  return hlx.pathLength(ot);
+  double per = hlx.period();
+  double len = hlx.pathLength(ot);
+//  StHelix can return negative length if -ve path is shorter then +ve one
+//  period ia added in this case;
+  while(len<0  ) {len+=per;}
+//  StHelix can return length > period id dip is almost zero and by chance
+//  this length is more suitable for Z distance. It is wrong solution even
+//  it has better distance to end point. Subtruct period in this case
+  while(len>per) {len-=per;}
+
+  return len;
 }
 
 
@@ -931,8 +978,6 @@ vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(int detectorId) const
       const StiKalmanTrackNode& node = *it;
       StiHit* hit = node.getHit();
       if (hit && 
-	  hit->detector())
-      if (hit && 
 	  hit->detector() && 
 	  node.getDedx()>0. &&  
 	  detectorId==hit->detector()->getGroupId() ) 
@@ -1027,7 +1072,7 @@ bool StiKalmanTrack::extendToVertex(StiHit*vertex, const StiDetector * alternate
   StiKalmanTrackNode * tNode = trackNodeFactory->getInstance();
   if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() -E- tNode==null");
   tNode->reset();
-  int status = tNode->propagate(lastNode,alternate);
+  int status = tNode->propagate(lastNode,alternate,trackingDirection);
   cout << "propagate status:"<<status<<endl;
   return false;
 }
@@ -1049,6 +1094,11 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 		
   StiHit localVertex = *vertex;
   sNode = lastNode;
+
+  double xxxx = lastNode->_x;
+  bool   check = false;
+  //if (xxxx>4.1) check = true;
+
   localVertex.rotate(sNode->getRefAngle());
   tNode = trackNodeFactory->getInstance();
   if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() -E- tNode==null");
@@ -1058,7 +1108,7 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   //     << " " <<  localVertex.y() << " " << localVertex.z() << endl;
   //cout << "SKT::extendToVertex() -I- sNode->_x:"<<sNode->_x<<endl;
   //cout << "SKT::extendToVertex() -I-0 tNode->_x:"<< tNode->_x<<endl;
-  if (tNode->propagate(sNode, &localVertex))
+  if (tNode->propagate(sNode, &localVertex,trackingDirection))
     { 
       //cout << " on vertex plane:";
       chi2 = tNode->evaluateChi2(&localVertex); 
@@ -1075,10 +1125,10 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 		<< " d: "<< d<<endl;*/
       _vDca = d;
       _vChi2= chi2;
-      if (chi2<pars->maxChi2Vertex)
-	//      if (d<3.)
+      //if (chi2<pars->maxChi2Vertex)
+      if (d<4.)
 	{
-	  _dca = ::sqrt(dy*dy+dz*dz);
+	  //_dca = ::sqrt(dy*dy+dz*dz);
 	  myHit = StiToolkit::instance()->getHitFactory()->getInstance();
 	  *myHit = localVertex;
 	  tNode->setHit(myHit);
@@ -1216,7 +1266,7 @@ StiKalmanTrackNode * StiKalmanTrack::extrapolateToBeam()
   //return null if there is no node to extrapolate from.
   if (!innerMostNode) return 0;
   StiKalmanTrackNode * n = trackNodeFactory->getInstance();
-  if (n->propagateToBeam(innerMostNode)) return n;
+  if (n->propagateToBeam(innerMostNode,trackingDirection)) return n;
   return 0;
 }
 
@@ -1226,6 +1276,6 @@ StiKalmanTrackNode * StiKalmanTrack::extrapolateToRadius(double radius)
   //return null if there is no node to extrapolate from.
   if (!outerMostNode) return 0;
   StiKalmanTrackNode * n = trackNodeFactory->getInstance();
-  if (n->propagateToRadius(outerMostNode,radius)>=0) return n;
+  if (n->propagateToRadius(outerMostNode,radius,trackingDirection)>=0) return n;
   return 0;
 }

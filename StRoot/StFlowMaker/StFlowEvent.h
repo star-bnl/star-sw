@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.48 2004/11/16 21:22:22 aihong Exp $
+// $Id: StFlowEvent.h,v 1.47 2004/05/05 21:13:45 aihong Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -59,7 +59,10 @@ public:
   Float_t        ZDCSMD_PsiWst();
   Float_t 	 ZDCSMD_GetPosition(int eastwest,int verthori,int strip);
   Double_t       G_New(StFlowSelection* pFlowSelect, Double_t Zx, Double_t Zy);
+  Double_t       G_Old(StFlowSelection* pFlowSelect, Double_t Zx, Double_t Zy);
   Double_t       SumWeightSquare(StFlowSelection* pFlowSelect);
+  Double_t       WgtMult_q4(StFlowSelection* pFlowSelect);
+  Double_t       WgtMult_q6(StFlowSelection* pFlowSelect);
   TVector2       NormQ(StFlowSelection* pFlowSelect);
   Float_t        CTB() const;
   Float_t        ZDCe() const;
@@ -418,9 +421,6 @@ inline void StFlowEvent::SetEtaWgt(Bool_t EtaWgt) { mEtaWgt = EtaWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
-// Revision 1.48  2004/11/16 21:22:22  aihong
-// removed old cumulant method
-//
 // Revision 1.47  2004/05/05 21:13:45  aihong
 // Gang's code for ZDC-SMD added
 //
