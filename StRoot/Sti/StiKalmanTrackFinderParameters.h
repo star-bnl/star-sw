@@ -22,17 +22,17 @@ public:
   void setMinContiguousHitCount(int count);
   void setMaxNullCount(int count);
   void setMaxContiguousNullCount(int count);
-  //void setMaxChi2ForSelection(double chi);
-  //void setMinSearchWindow(double val);
-  //void setMaxSearchWindow(double val);
-  //void setSearchWindowScale(double val);
-  //bool getUseTrackFilter() const; 
-  //double getMinSearchWindow() const;
-  //double getMaxSearchWindow() const;
-  //double getSearchWindowScale() const;
+  void setMaxChi2ForSelection(double chi);
+  void setMinSearchWindow(double val);
+  void setMaxSearchWindow(double val);
+  void setSearchWindowScale(double val);
+  bool getUseTrackFilter() const; 
+  double getMinSearchWindow() const;
+  double getMaxSearchWindow() const;
+  double getSearchWindowScale() const;
   double getMassHypothesis() const;
-  //double getOuterScaling() const;
-  //double getInnerScaling() const;
+  double getOuterScaling() const;
+  double getInnerScaling() const;
 
   void   initialize();
   friend StiKalmanTrackFinder;
@@ -48,17 +48,16 @@ public:
   int    maxNullCount;
   int    maxContiguousNullCount; 
   int    minContiguousHitCountForNullReset;
-  //double minSearchWindow;
-  //double maxSearchWindow;
-  //double searchWindowScale;
-  //double maxChi2ForSelection;
+  double minSearchWindow;
+  double maxSearchWindow;
+  double searchWindowScale;
+  double maxChi2ForSelection;
   double maxChi2Vertex;
   double massHypothesis;
-  //double outerScaling;
-  //double innerScaling;
+  double outerScaling;
+  double innerScaling;
 };
 
-/*
 inline  double StiKalmanTrackFinderParameters::getOuterScaling() const
 {
   return outerScaling;
@@ -68,7 +67,6 @@ inline double StiKalmanTrackFinderParameters::getInnerScaling() const
 {
   return innerScaling;
 }
-*/
   
 inline   void StiKalmanTrackFinderParameters::setUseTrackFilter(bool option)
 {
@@ -110,7 +108,6 @@ inline   void   StiKalmanTrackFinderParameters::setMaxContiguousNullCount(int co
   maxContiguousNullCount = count;
 }
 
-/*
 inline   void   StiKalmanTrackFinderParameters::setMaxChi2ForSelection(double chi)
 {
   maxChi2ForSelection = chi;
@@ -150,7 +147,6 @@ inline   double   StiKalmanTrackFinderParameters::getSearchWindowScale() const
 {
   return searchWindowScale;
 }
-*/
 
 inline  double   StiKalmanTrackFinderParameters::getMassHypothesis() const
 {
