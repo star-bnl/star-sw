@@ -22,28 +22,28 @@ my $debugOn=0;
 
 my $DISK1 = "/star/rcf/disk00001/star";
 
-my $prodSr = "P00hi";
+my $prodSr = "P00hk";
 my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
 
 my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetD = (
-             "P00hi/2000/06",
-             "P00hi/2000/07",
-             "P00hi/2000/08", 
-             "P00hi/2000/09", 
+#             "P00hi/2000/06",
+#             "P00hi/2000/07",
+             "P00hk/2000/08", 
+             "P00hk/2000/09", 
 );
 
 my @SetS = (
-             "daq/2000/06",
-             "daq/2000/07",
+#             "daq/2000/06",
+#             "daq/2000/07",
              "daq/2000/08",
              "daq/2000/09", 
 );
 
 my @DirD = (
-            "2000/06",
-            "2000/07",
+#            "2000/06",
+#            "2000/07",
             "2000/08",
             "2000/09",
 );
@@ -61,7 +61,7 @@ struct JFileAttr => {
           NoEvSk => '$',
           jobSt  => '$',  
           FstEvt => '$',
-          LstEvt => '$',
+          LstEvt => '$',          
 		    };
  
  struct FileAttr => {
@@ -269,7 +269,7 @@ my $flname;
 
 ##### select from JobStatus table files which should be updated
 
- $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobfileName like 'P00hi%' AND jobStatus = 'n/a' ";
+ $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobfileName like '$prodSr%' AND jobStatus = 'n/a' ";
 
 
    $cursor =$dbh->prepare($sql)
@@ -397,6 +397,7 @@ my $flname;
       ($$fObjAdr)->NoEvSk($mEvtSk); 
       ($$fObjAdr)->FstEvt($first_evts);
       ($$fObjAdr)->LstEvt($last_evts);               
+      ($$fObjAdr)->jobSt($mjobSt);
 
      $jobFSum_set[$jobFSum_no] = $fObjAdr;
      $jobFSum_no++; 
@@ -429,7 +430,8 @@ my $flname;
  my $msite = "n\/a";
  my $mhpss = "Y";
  my $mstatus = 0;
-
+ my $mdtstat = "OK";
+ my $mcomnt = " ";
 
 #####=======================================================
 ##### hpss reco daq file check
@@ -463,7 +465,9 @@ my $flname;
  $msite = "n\/a";
  $mhpss = "Y";
  $mstatus = 0;
-    
+ $mdtstat = "OK";
+ $mcomnt = " ";   
+
 ##### end of reinitialization
 
 my $dfile;
@@ -517,10 +521,20 @@ my $daqType = 0;
        $mNevts = ($$jobnm)->NoEvt;
        $mNevtLo =($$jobnm)->FstEvt;
        $mNevtHi =($$jobnm)->LstEvt;
+       $mjobSt  =($$jobnm)->jobSt;
        $dfile = $msumFile;
        $dfile =~ s/.sum//g;
-        
+ 
+     chop $mjobSt;        
     if ( $mfName =~ /$dfile/) {
+     if ( $mjobSt ne "Done") {
+
+       $mdtStat = "notOK";
+       $mcomnt = $mjobSt;
+} else{
+  $mdtStat = "OK";
+  $mcomnt = " ";
+}
 
  print "File Name :", $mpath, " % ", $mfName, " % ", "Num Events :", $mNevts, "\n";     
     print "updating FileCatalogT table\n";
@@ -546,9 +560,9 @@ my $daqType = 0;
 
 my $myRun;
 
- for ($ll = 0; $ll<scalar(@DirD); $ll++) {
+# for ($ll = 0; $ll<scalar(@DirD); $ll++) {
 
- $sql="SELECT DISTINCT runID FROM $FileCatalogT WHERE path like '%$DirD[$ll]' AND dataset = 'n/a' ";
+ $sql="SELECT DISTINCT runID FROM $FileCatalogT WHERE path like '%$prodSr%' AND dataset = 'n/a' ";
 
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
@@ -567,7 +581,7 @@ my $myRun;
         $runSet[$nrunSet] = $myRun;
         $nrunSet++;
  }
- }
+# }
 
  &StDbProdDisconnect(); 
 
@@ -728,7 +742,8 @@ sub fillDbTable {
    $sql.="site='$msite',"; 
    $sql.="hpss='$mhpss',";
    $sql.="status= 0,";
-   $sql.="comment=''";
+   $sql.="dataStatus='$mdtStat',";
+   $sql.="comment='$mcomnt' ";
    print "$sql\n" if $debugOn;
    $rv = $dbh->do($sql) || die $dbh->errstr;
 
