@@ -1,4 +1,5 @@
 * created 6/5/98 Kathy Turner
+*  updated 6/9/98 Kathy Turner
 * ******************************************
  
  macro init_geom geomtype
@@ -37,7 +38,10 @@
  
  macro load_lib
    
-
+* HAVE TO HAVE THESE 4 STEPS IN ORDER!
+   
+   cd /dui/geant
+   
    make geometry
 
    make sim/g2t
@@ -83,39 +87,12 @@
 * read in another event from input_file
      trig 1
      
+   cd /dui/geant
 * write out in staf table format
    for/call g2t
      
  return
-* ****************************************
  
- macro mv_tables_Run_muons
-   
-   dui/mv Run/cave_cave geant/Run
-   dui/mv Run/tpce_tpcg geant/Run
-   dui/mv Run/tpce_tprs geant/Run
-   dui/mv Run/tpce_tecw geant/Run
-   dui/mv Run/g2tm_gttc geant/Run
-   dui/mv Run/g2tm_dete geant/Run
-* dui/mv Run/mick_miky geant/Run
-   
-   rmdir Run
-   
-      
- return
- 
-* ***************************************
- 
- macro mv_tables_Event_muons
-   
-   dui/mv Event/g2t_event    geant/Event
-   dui/mv Event/g2t_vertex   geant/Event
-   dui/mv Event/g2t_track    geant/Event
-   dui/mv Event/g2t_tpc_hit  geant/Event
-   
-* rmdir Event
-   
- return
  
 * ****************************************
 
