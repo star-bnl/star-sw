@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.28 2004/03/05 15:38:08 fisyak Exp $
+ * $Id: StDAQReader.h,v 1.29 2004/08/07 02:39:00 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.29  2004/08/07 02:39:00  perev
+ * Traditional Clear added
+ *
  * Revision 1.28  2004/03/05 15:38:08  fisyak
  * Add default for getTPCReader (to keep interface unchanged)
  *
@@ -144,7 +147,7 @@ class StDAQReader
 public:
   StDAQReader(const char *file=0);
   virtual ~StDAQReader();
-
+          void clear();
   virtual void setVerbose(int ver=1){fVerbose=ver;};
   virtual int open(const char *file);
   virtual int close();

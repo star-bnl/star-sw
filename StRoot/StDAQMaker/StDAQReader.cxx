@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.43 2004/03/04 21:51:27 ward Exp $
+ * $Id: StDAQReader.cxx,v 1.44 2004/08/07 02:39:00 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.44  2004/08/07 02:39:00  perev
+ * Traditional Clear added
+ *
  * Revision 1.43  2004/03/04 21:51:27  ward
  * Replaced MERGE_SEQUENCES with a StDAQMaker chain parameter, as suggested by Landgraf and Lauret.
  *
@@ -209,6 +212,11 @@ int StDAQReader::open(const char *file)
   }
   fOffset =0;   
   return 0;  
+}
+//_____________________________________________________________________________
+void StDAQReader::clear()
+{
+  delete fEventReader;	fEventReader 	= 0;  
 }
 //_____________________________________________________________________________
 int StDAQReader::close()

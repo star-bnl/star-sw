@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTRGReader.cxx,v 1.4 2003/12/23 23:17:10 akio Exp $
+ * $Id: StTRGReader.cxx,v 1.5 2004/08/07 02:39:00 perev Exp $
  *
  * Author: Herbert Ward, Dec 28 1999, 13:10 EST.
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTRGReader.cxx,v $
+ * Revision 1.5  2004/08/07 02:39:00  perev
+ * Traditional Clear added
+ *
  * Revision 1.4  2003/12/23 23:17:10  akio
  * Update for Fy04 run
  *
@@ -49,7 +52,7 @@ StTRGReader::StTRGReader(StDAQReader *daqr) {
 void StTRGReader::Update() {
   delete fTRGImpReader;
   fTRGImpReader = ::getTRGReader(fDAQReader->getEventReader());
-  assert(fTRGImpReader);
+//VP  assert(fTRGImpReader);
 }
 //_____________________________________________________________________________
 StTRGReader::~StTRGReader() {

@@ -100,5 +100,12 @@ Int_t StDAQMaker::Make(){
   }
   return 0;
 }
+//_____________________________________________________________________________
+void  StDAQMaker::Clear(const char*)
+{
+  if (fDAQReader) fDAQReader->clear();
+  StMaker::Clear();
+}
+
 
 
