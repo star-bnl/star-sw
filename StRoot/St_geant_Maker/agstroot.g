@@ -83,7 +83,8 @@ C     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   Lc=Lenocc(Cpath); n=Index(Cpath,'@');  Csys=' ';
   if (Cpath(1:6)=='/DETM/' & Lc>=10) Csys=Cpath(7:Lc)
   if (0<n&n<Lc)  { Csys=Cpath(n+1:Lc); Lc=n-1 }
-  Mj=2; if (Lenocc(Csys)>0) { Mj=0; "Call Agkeeps(Csys,Cdest,Idoc);" }
+*  Mj=2; if (Lenocc(Csys)>0) { Mj=0; "Call Agkeeps(Csys,Cdest,Idoc);" }
+  Mj=2; if (Lenocc(Csys)>0) { Mj=0; "Call Agkeeps(Csys,Cdest);" }
 *
 * Rebank path does not accept / or /_* at the end, truncate:
   m=Index(Cpath(1:Lc),'*'); Lp=Lc;
@@ -100,10 +101,12 @@ C     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 J=1; Loop                                  " over existing banks only "
 {  If L>0
    {  Call UHTOC(IQ(L-4),4,CBank,4);
-      if     J==MJ      { Csys=Cbank; "Call Agkeeps(Csys,Cdest,Idoc);" }
+*      if     J==MJ      { Csys=Cbank; "Call Agkeeps(Csys,Cdest,Idoc);" }
+      if     J==MJ      { Csys=Cbank; "Call Agkeeps(Csys,Cdest);" }
       elseif J> MJ & Csys!='DOCU'
       { Table=Csys(1:4)//'_'//Cbank;  Call CUTOL(Table);
-        Call AGKEEPs(%L(Csys)//'/'//Cbank,%L(Cdest),Idoc)
+*        Call AGKEEPs(%L(Csys)//'/'//Cbank,%L(Cdest),Idoc)
+        Call AGKEEPs(%L(Csys)//'/'//Cbank,%L(Cdest))
  
 *       Spec=Char(0); if (Table='hepe_gent') Spec='particle'//Char(0)
  
