@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.80 1999/07/09 14:29:34 fisyak Exp $
+// $Id: bfc.C,v 1.81 1999/07/09 18:40:58 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -45,7 +45,7 @@ enum EChainOptions {
   kSD97    ,kSD98    ,kY1a     ,kY1b     ,kY1c     ,kES99     ,kER99    ,kY1d     ,
   kY1e     ,kY2a     ,kEval    ,kOFF     ,
   kXINDF   ,kXOUTDF  ,kGSTAR   ,kMINIDAQ ,kTDAQ    ,kFZIN     ,kGEANT   ,kCTEST   ,
-  kField_On,kNo_Field,kTPC     ,kTSS     ,kTRS     ,kTFS      ,kFPC     ,
+  kField_On,kNo_Field,kHalfField,kTPC     ,kTSS     ,kTRS     ,kTFS      ,kFPC     ,
   kFSS     ,kEMC     ,kCTF     ,kL3      ,kRICH    ,kSVT      ,kGLOBAL  ,
   kDST     ,kSQA     ,kEVENT   ,kANALYS  ,kTREE    ,kAllEvent ,kLAST    ,kDefault
 };
@@ -54,7 +54,7 @@ Char_t  *ChainOptions[] = {
  "sd97"    ,"sd98"   ,"Y1a"    ,"Y1b"    ,"Y1c"    ,"es99"    ,"er99"   ,"Y1d"    ,
  "Y1e"     ,"Y2a"    ,"Eval"   ,"OFF"    ,
  "XIN"     ,"XOUT"   ,"GSTAR"  ,"MINIDAQ","TDAQ"   ,"FZIN"    ,"GEANT"  ,"CTEST"  ,
- "FieldOn" ,"NoField","TPC"    ,"TSS"    ,"TRS"    ,"TFS"     ,"FPC"    ,
+ "FieldOn" ,"NoField","HalfField","TPC"    ,"TSS"    ,"TRS"    ,"TFS"     ,"FPC"    ,
  "FSS"     ,"EMC"    ,"CTF"    ,"L3"     ,"RICH"   ,"SVT"     ,"GLOBAL" ,
  "DST"     ,"SQA"    ,"EVENT"  ,"ANALYS" ,"TREE"   ,"AllEvent","LAST"   ,"Default"
 };
@@ -63,7 +63,7 @@ UChar_t  ChainFlags[] = {
   kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,kFALSE   ,
   kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,
   kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,kFALSE   ,
-  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,
+  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,kFALSE   ,
   kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,
   kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,kFALSE  
 };
@@ -91,6 +91,7 @@ Char_t *ChainComments[] = {
   "test DB with MINIDAQ constans",
   "Use nominal STAR field",
   "No Field option",
+  "Half Field option",
   "TPC in chain",
   "TPC with TSS",
   "TPC with TRS",
@@ -143,7 +144,43 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
   printf ("============= You are in %s ===============\n",STAR_VERSION.Data());
   Int_t k, kgo;
   if (!Chain || !strlen(Chain)) {
-    printf ("============= \tPossible Chain Options are: \n");
+    printf ("============= \t U S A G E =============\n");
+    printf ("
+\tbfc(Int_t First, Int_t Nevents, Char_t *Chain, Char_t *infile, Char_t *outfile)
+\tbfc(Int_t Nevents, Char_t *Chain, Char_t *infile, Char_t *outfile)
+\tbfc(Char_t *Chain, Char_t *infile, Char_t *outfile)
+where
+\t First   \t- First event to process \t(Default = 1)
+\t Nevents \t- Total No. of events    \t(Default = 1)
+\t Chain   \t- Chain specification    \t(without First &  Nevents: Default is \"\" which gives this message)
+\t         \t                         \t with    First || Nevents: Default is \"gstar tfs\")
+\t infile  \t- Name of Input file     \t(Default = 0, i.e. use preset file names depending on Chain)
+\t outfile \t- Name of Output file    \t(Default = 0, i.e. define Output file name from Input one)
+\n");
+    printf ("
+Examples:
+\t root4star  bfc.C                   \t// Create this message
+\t root4star 'bfc.C(1)'               \t// Run one event with default Chain=\"gstar tfs\"
+\t root4star 'bfc.C(1,1)'             \t// the same
+\t root4star 'bfc.C(2,40,\"y1a fzin\")\t// run for configuration year_1a, 
+\t                                    \t// reading /disk1/star/test/psc0049_08_40evts.fzd
+\t                                    \t// skipping the 1-st event for the rest 39 events
+\t root4star 'bfc.C(2,40,\"y1a fzin -l3\")\t// the as above but remove L3 from chain
+\t root4star 'bfc.C(1,\"off xin tpc No_Field sd96 eval\",\"Mini_Daq.xdf\")'\t// the same as Chain=\"minidaq\"
+\t root4star 'bfc.C(2,40,\"y1a fzin\",\"/disk1/star/test/psc0049_08_40evts.fzd\")\t// the same
+\t root4star 'bfc.C(5,10,\"y1a xin xout\",\"/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf\")'
+\t                                    \t// skipping the 4 events for the rest 6 events
+\n");
+    printf ("
+\t root4star 'bfc.C(1,\"off tdaq tpc FieldOn\",\"/disk1/star/daq/990624.306.daq\")' 
+\t \t//Cosmics (56) events with full magnetic field 
+\t root4star 'bfc.C(1,\"off tdaq tpc HalfField\",\"/disk1/star/daq/990630.602.daq\")' 
+\t \t//Laser (10) events with half magnetic field 
+\t root4star 'bfc.C(1,\"off tdaq tpc NoField\",\"/disk1/star/daq/990701.614.daq\")' 
+\t \t//Laser (12) events with no magnetic field 
+\n");
+                        
+    printf ("============= \tPossible Chain Options are: \n"); 
     for (k=kFIRST;k<kLAST;k++) printf ("============ %2d \t[-]%s   \t:%s \n",
 				       k,ChainOptions[k],ChainComments[k]);
     printf ("============= \tImportant two changes:
@@ -276,8 +313,9 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
     SetOption(kFZIN);
     SetOption(kGEANT);
   }
-  if (!ChainFlags[kGEANT] && !ChainFlags[kNo_Field]) { 
-    SetOption(kField_On);
+  if (!ChainFlags[kGEANT] && !ChainFlags[kNo_Field] && 
+      !ChainFlags[kHalfField] && !ChainFlags[kField_On]) { 
+    SetOption(kField_On); 
   }
   if (ChainFlags[kAllEvent]) {
     SetOption(kEval); 
@@ -303,7 +341,7 @@ void Load(const Char_t *Chain="gstar tfs"){
   gSystem->Load("libtls");
   gSystem->Load("St_db_Maker");
   if (ChainFlags[kXINDF]) gSystem->Load("St_xdfin_Maker");
-  if (ChainFlags[kNo_Field] || ChainFlags[kField_On]) gSystem->Load("StMagF");
+  if (ChainFlags[kNo_Field] || ChainFlags[kField_On] || ChainFlags[kHalfField] ) gSystem->Load("StMagF");
   else        gSystem->Load("geometry");
   gSystem->Load("StarClassLibrary");
   if (ChainFlags[kTPC]) {
@@ -512,9 +550,8 @@ void bfc (const Int_t First,
     }
   }
   if (ChainFlags[kNo_Field]) field   = new StMagFC("field","STAR no field",0.00002);
-  if (ChainFlags[kNo_Field]) field   = new StMagFC("field","STAR no field",0.00002);
   if (ChainFlags[kField_On]) field   = new StMagFC("field","STAR Normal field",1.);
-  if (ChainFlags[kField_On]) field   = new StMagFC("field","STAR Normal field",1.);
+  if (ChainFlags[kHalfField])field   = new StMagFC("field","STAR Normal field",0.5);
   //  S I M U L A T I O N  or D A Q
   if (ChainFlags[kMINIDAQ]) {
     StMinidaqMaker *tpc_raw = new StMinidaqMaker("tpc_raw");
@@ -737,7 +774,7 @@ void bfc (const Int_t Nevents,
   bfc(1,Nevents,Chain,infile,outfile);
 }
 //_____________________________________________________________________
-void bfc (const Char_t *Chain="gstar tfs",Char_t *infile=0, Char_t *outfile=0)
+void bfc (const Char_t *Chain="",Char_t *infile=0, Char_t *outfile=0)
 {
   bfc(1,1,Chain,infile,outfile);
 }
