@@ -14,7 +14,7 @@ TOPDIR := $(shell pwd)
 
 #include $(STAF_ROOT_HOME)/MakeEnv.mk
 include $(STAR)/mgr/MakeEnv.mk
-include $(STAF_ROOT_HOME)/MakeArch.mk
+include $(STAR)/mgr/MakeArch.mk
 #include $(STAR)/mgr/MakeSYS.mk
 #                                   -I$(CERN_ROOT)/src/geant321 
 
