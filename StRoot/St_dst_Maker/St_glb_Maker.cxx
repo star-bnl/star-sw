@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.48 1999/03/04 03:08:14 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.49 1999/03/06 03:01:12 genevb Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.49  1999/03/06 03:01:12  genevb
+// Change dst_vertex table size as needed
+//
 // Revision 1.48  1999/03/04 03:08:14  fisyak
 // take out PhysicalConstants
 //
@@ -569,7 +572,7 @@ Int_t St_glb_Maker::Make(){
      
 
     }
-    if (! vertex) {vertex = new St_dst_vertex("vertex",20000); dst.Add(vertex);}
+    if (! vertex) {vertex = new St_dst_vertex("vertex",1); dst.Add(vertex);}
 
     // egr
     Int_t Res_egr =  egr_fitter (tphit,vertex,tptrack,evaltrk,
@@ -652,6 +655,7 @@ Int_t St_glb_Maker::Make(){
       v0_limit = (v0_limit*v0_limit)/6000;
       if (v0_limit < 1000) v0_limit=1000;
       if (! dst_v0_vertex) {dst_v0_vertex = new St_dst_v0_vertex("dst_v0_vertex",v0_limit); dst.Add(dst_v0_vertex);}
+      vertex->ReAllocate(3*v0_limit);
       St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",globtrk->GetNRows());
       temp->Add(ev0track2);
       if (vertex->GetNRows() != 1) vertex->SetNRows(1); 
@@ -787,7 +791,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.48 1999/03/04 03:08:14 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.49 1999/03/06 03:01:12 genevb Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
