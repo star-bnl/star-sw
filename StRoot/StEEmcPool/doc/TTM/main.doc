@@ -5,7 +5,7 @@
 	        \image latex logo.eps "TTM" width=3cm
 \author Piotr A. Zolnierczuk
 \date    created 2003/12/08
-\version 2.0
+\version 2.1
 
 
 \section intro Introduction
@@ -83,12 +83,13 @@ One can also ask EEmcTTMMaker to produce a nanodst ROOT file (ndst.root) with a 
 	- info    - a copy of StEventInfo from muDST
 	- summary - a copy of StEventSummary from muDST
 	- trigger - a copy of StMuTriggerIdCollection from muDST
+
 See also macro readnanodst.C for in Section \ref exampleread for an example how to read nanodst.
 
 Here are some examples of matched tracks (from Run2003)
         \image html  snapshot.jpg "Screen Shot"
-        \image html  eemc.gif     "Two track event"
-        \image latex eemc.eps     "Two track event" width=10cm
+        \image html  eemc.jpg "Multi-track event"
+        \image latex eemc.eps "Multi-track event" width=10cm
 
 
 
@@ -101,7 +102,7 @@ Here are some examples of matched tracks (from Run2003)
 
 \subsection exampleread   Reading Nano DST file
 
-\include readnanodst.C	
+\include readndst.C	
      
 
 \section mainremarks Remarks
