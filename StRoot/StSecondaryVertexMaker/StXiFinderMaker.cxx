@@ -11,9 +11,6 @@
 #include "TVector2.h"
 #include "tables/St_exi_exipar_Table.h"
 #include "PhysicalConstants.h"
-
-
-
 #include "math_constants.h"
 #include "phys_constants.h"
 
@@ -34,7 +31,7 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 enum ITTFusage{
   kUseTPT = 0 ,
   kUseITTF = 1,
-		kUseBOTH = 2
+  kUseBOTH = 2
 };
 
 
@@ -82,21 +79,21 @@ StXiFinderMaker::~StXiFinderMaker() {
 
 //_____________________________________________________________________________
 Int_t StXiFinderMaker::Init()
-{
-  TDataSet* dbDataSet = GetDataBase("global/vertices");
-  if (!dbDataSet) {
-    gMessMgr->Error("StXiFinderMaker::Init(): could not find appropriate database");
-    return kStErr;
-  }
-  exipar = (St_exi_exipar*) (dbDataSet->FindObject("exipar"));
-  if (!exipar) {
-    gMessMgr->Error("StXiFinderMaker::Init(): could not find exipar in database");
-    return kStErr;
-  }
-  ///AddRunCont(exipar);
+{TDataSet* dbDataSet = GetDataBase("global/vertices");
 
-  return StMaker::Init();
-}
+ if (!dbDataSet)
+    {gMessMgr->Error("StXiFinderMaker::Init(): could not find appropriate database");
+     return kStErr;
+     }
+ exipar = (St_exi_exipar*) (dbDataSet->FindObject("exipar"));
+ if (!exipar)
+    {gMessMgr->Error("StXiFinderMaker::Init(): could not find exipar in database");
+     return kStErr;
+     }
+ ///AddRunCont(exipar);
+
+ return StMaker::Init();
+ }
 
 
 
@@ -161,14 +158,11 @@ Bool_t StXiFinderMaker::UseV0() {
   StThreeVectorD xk,/**pk,*/xpp,pp,impact,tmp3V;
   TVector2 /**rk,xck,*/tmp2V;
   StLorentzVectorD posVec,negVec;
-  double dca_k,rmin;
   double mlam,mala;
   unsigned int k;
   ///pairD paths,path2;
-  ///Julien
-  double tmpcalc;
+
   StThreeVectorF xV0, pV0;
-  double monTab[3],storeV0Coords[3];
   
   // Subroutine casc_geom
   double xd, yd, atmp, btmp, ctmp, dtmp, abtmp, xOut[2], yOut[2], dist;
@@ -194,22 +188,15 @@ Bool_t StXiFinderMaker::UseV0() {
   int h_tmp;
   StThreeVectorD origin_tmp;
   
-  ///End Julien
-  
 
-  StSPtrVecXiVertex& xiVertices   = *vecXi;
+  StSPtrVecXiVertex& xiVertices = *vecXi;
   
   
-  ///Julien
-  int iflag=0,iflag1=0,printV0Coords;
-  int i;
-  int charge;
-  int tries;
+  int iflag=0,iflag1=0;
+  int i, charge, tries;
   float gufldX[3], gufldB[3];
-  double rv,massV0;
+  double rv;
   StThreeVectorF xPvx, bfield;
-  StV0Vertex *v0Vtx;
-//VPunused  StHelixModel *bachGeom2;
   xPvx=mainv;
   gufldX[0]=xPvx.x();
   gufldX[1]=xPvx.y();
@@ -219,28 +206,20 @@ Bool_t StXiFinderMaker::UseV0() {
   bfield.setX(gufldB[0]*tesla);
   bfield.setY(gufldB[1]*tesla);
   bfield.setZ(gufldB[2]*tesla);
-  ///End Julien
 
   Bool_t usedV0 = kFALSE;
   charge=0;
 
-  StTrack *negDg, *posDg;
-  StTrackGeometry *negDgGeom, *posDgGeom;
-  negDg=v0Vertex->daughter(negative);
-  posDg=v0Vertex->daughter(positive);
-  if (negDg == NULL) {printf("CAUTION : pointer negDg is null.\n");return usedV0;}
-  if (posDg == NULL) {printf("CAUTION : pointer posDg is null.\n");return usedV0;}
-  negDgGeom=negDg->geometry();
-  posDgGeom=posDg->geometry();
-  if (negDgGeom == NULL) {printf("CAUTION : pointer negDgGeom is null.\n");return usedV0;}
-  if (posDgGeom == NULL) {printf("CAUTION : pointer posDgGeom is null.\n");return usedV0;}
+  int negKey, posKey;
+  negKey=v0Vertex->daughter(negative)->key();
+  posKey=v0Vertex->daughter(positive)->key();
   
   // Xi cut parameters using detector id from V0
   parsXi  = exipar->GetTable(det_id_v0-1);
 
-  xV0=v0Vertex->position();///Julien
-  pV0=v0Vertex->momentum();///Julien
-  impact = xV0-mainv;
+  xV0=v0Vertex->position();
+  pV0=v0Vertex->momentum();
+  impact = xV0-xPvx;
   if (impact.mag2() < (parsXi->rv_v0*parsXi->rv_v0)) return usedV0;
 
 
@@ -281,28 +260,21 @@ Bool_t StXiFinderMaker::UseV0() {
      {return usedV0;
       }
 
-  ///Julien
-  v0Vtx=v0Vertex;///To be replaced
-  storeV0Coords[0]=v0Vtx->position().x();
-  storeV0Coords[1]=v0Vtx->position().y();
-  storeV0Coords[2]=v0Vtx->position().z();
-  printV0Coords=1;
-  if (charge < 0) massV0=mlam;
-  if (charge > 0) massV0=mala;
-  ///End Julien
-  
 
   // Loop over tracks (bachelors) to find Xis
 
   for (k=0; k<trks; k++)
-     {if (UsingITTFTracks() == kUseBOTH)
-						   {if ((v0Vtx->dcaDaughters() <= 0) && (trk[k]->fittingMethod() != ITTFflag)) continue;
-									 if ((v0Vtx->dcaDaughters() >= 0) && (trk[k]->fittingMethod() == ITTFflag)) continue;
-									 }
-					 StTrackGeometry* bachGeom=trk[k]->geometry();/////Added Julien.
+     {StTrackGeometry* bachGeom=trk[k]->geometry();
       if (bachGeom == NULL) {printf("CAUTION : pointer bachGeom is null.\n");return usedV0;}
       if (charge*bachGeom->charge() > 0)
-         {//Need to check here that this track is not used in the V0.
+         {//Check that ITTF and TPT tracks/V0's are not combined together.
+          if (UsingITTFTracks() == kUseBOTH)
+             {if ((v0Vertex->dcaDaughters() <= 0) && (trk[k]->fittingMethod() != ITTFflag)) continue;
+              if ((v0Vertex->dcaDaughters() >= 0) && (trk[k]->fittingMethod() == ITTFflag)) continue;
+              }
+          //Check that the bachelor is not one of the V0's daughters.
+          if (trk[k]->key() == negKey) continue;
+          if (trk[k]->key() == posKey) continue;
           /**pk=bachGeom->momentum();
           if (pk == NULL) {printf("CAUTION : pointer pk is null.\n");return usedV0;}*/
           ///trkHelix=heli[k];
@@ -315,21 +287,11 @@ Bool_t StXiFinderMaker::UseV0() {
           
           //Cut on number of hits
           ///if (hits[k] >= parsXi->n_point)
-          if (true) ///`struct exi_exipar_st' has no member named `n_point'
-             {
-
-
-
-
-
-
-
-
+          ///`struct exi_exipar_st' has no member named `n_point'
 
 
 
           // Beginning of the big(est) block inserted from StXiVertexFinder.cxx
-          // Every line in this block should be shifted by 4 spaces to the right.
 
           StHelixModel *bachGeom2 = new StHelixModel(bachGeom->charge(),bachGeom->psi(),bachGeom->curvature(),bachGeom->dipAngle(),bachGeom->origin(),bachGeom->momentum(),bachGeom->helicity());
 
@@ -338,7 +300,6 @@ Bool_t StXiFinderMaker::UseV0() {
               continue;
               }
           
-
           //Calculation of the 2 intersection points between bachelor circle and V0 straight line
           
           // Subroutine casc_geom
@@ -360,20 +321,20 @@ Bool_t StXiFinderMaker::UseV0() {
               if (ctmp < 0)
                  {dist=fabs(xd*pV0.y()-yd*pV0.x())/sqrt(pV0.x()*pV0.x()+pV0.y()*pV0.y());
                   if (dist >= (1/bachGeom->curvature()+parsXi->dca_max)) iflag1=5;
-                     else
-                    {iflag1=3;
-                     ctmp=sqrt(rsq/(atmp*atmp+1.));
-                     dtmp=-atmp*ctmp;
-                     btmp=dtmp*xd+ctmp*yd;
-                     if (btmp > 0.)
-                        {xOut[0]=dtmp+xc;
-                         yOut[0]=ctmp+yc;
-                         }
-                         else
-                        {xOut[0]=-dtmp+xc;
-                         yOut[0]=-ctmp+yc;
-                         }
-                     }
+                      else
+                     {iflag1=3;
+                      ctmp=sqrt(rsq/(atmp*atmp+1.));
+                      dtmp=-atmp*ctmp;
+                      btmp=dtmp*xd+ctmp*yd;
+                      if (btmp > 0.)
+                         {xOut[0]=dtmp+xc;
+                          yOut[0]=ctmp+yc;
+                          }
+                          else
+                         {xOut[0]=-dtmp+xc;
+                          yOut[0]=-ctmp+yc;
+                          }
+                      }
                   }
                   else
                  {if (ctmp == 0) iflag1=3;
@@ -393,12 +354,12 @@ Bool_t StXiFinderMaker::UseV0() {
               if (ctmp <= 0)
                  {dist=fabs(xd*pV0.y()-yd*pV0.x())/sqrt(pV0.x()*pV0.x()+pV0.y()*pV0.y());
                   if (dist >= (1/bachGeom->curvature()+parsXi->dca_max)) iflag1=5;
-                     else
-                    {iflag1=3;
-                     yOut[0]=yc;
-                     if (xV0.x() > xc) xOut[0]=xc+1/bachGeom->curvature();
-                        else xOut[0]=xc-1/bachGeom->curvature();
-                     }
+                      else
+                     {iflag1=3;
+                      yOut[0]=yc;
+                      if (xV0.x() > xc) xOut[0]=xc+1/bachGeom->curvature();
+                         else xOut[0]=xc-1/bachGeom->curvature();
+                      }
                   }
                   else
                  {if (ctmp == 0) iflag1=3;
@@ -408,13 +369,6 @@ Bool_t StXiFinderMaker::UseV0() {
                   }
               }
           // End of casc_geom
-          tmpcalc=TMath::ATan(bachGeom->origin().y()/bachGeom->origin().x());
-          if (bachGeom->origin().x() < 0) tmpcalc+=C_PI;
-          if (tmpcalc < 0) tmpcalc+=2*C_PI;
-          if (tmpcalc > 2*C_PI) tmpcalc-=2*C_PI;
-          monTab[0]=sqrt(bachGeom->origin().x()*bachGeom->origin().x()+bachGeom->origin().y()*bachGeom->origin().y());
-          monTab[1]=tmpcalc;
-          monTab[2]=bachGeom->origin().z();
           if (iflag1 == 5) continue; //No intersection points
 
          
@@ -619,13 +573,12 @@ Bool_t StXiFinderMaker::UseV0() {
                                   }
                               //calculate daughter impact parameters
                               bBach=trk[k]->impactParameter();
-                              bV0=fabs(v0Vtx->dcaParentToPrimaryVertex());
+                              bV0=fabs(v0Vertex->dcaParentToPrimaryVertex());
                               xiVertex = new StXiVertex();
                               xiVertex->setPosition(xpp);
                               xiVertex->addDaughter(trk[k]);
                               xiVertex->setDcaBachelorToPrimaryVertex(trk[k]->impactParameter());
-                              ///xiVertex->setMomentumOfBachelor(bachGeom->momentum());
-																														xiVertex->setMomentumOfBachelor(xOrig);
+                              xiVertex->setMomentumOfBachelor(xOrig);
                               xiVertex->setDcaDaughters(dca);
                               xiVertex->setDcaParentToPrimaryVertex(bxi);
                               xiVertex->setV0Vertex(v0Vertex);
@@ -643,16 +596,6 @@ Bool_t StXiFinderMaker::UseV0() {
 
 
 
-
-
-
-
-
-
-
-
-              
-              } // track n_point cut
           } // charge sign
       } // k-Loop
 
@@ -664,8 +607,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.4 2003/05/02 21:21:08 lbarnby Exp $
+// $Id: StXiFinderMaker.cxx,v 1.5 2003/05/05 21:24:15 faivre Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.5  2003/05/05 21:24:15  faivre
+// Lots of cleanup. Don't re-use V0 daughters' track for the bachelor.
+//
 // Revision 1.4  2003/05/02 21:21:08  lbarnby
 // Now identify ITTF tracks by fittingMethod() equal to  kITKalmanFitId
 //
