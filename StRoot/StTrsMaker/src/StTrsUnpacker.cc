@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.cc,v 1.8 1999/03/01 15:20:15 lasiuk Exp $
+ * $Id: StTrsUnpacker.cc,v 1.9 1999/03/24 22:21:52 lasiuk Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.cc,v $
+ * Revision 1.9  1999/03/24 22:21:52  lasiuk
+ * confirm dataset delete
+ *
  * Revision 1.8  1999/03/01 15:20:15  lasiuk
  * correct discrepancy at last time bin truncation (//length--)
  *
@@ -43,7 +46,12 @@
 
 StTrsUnpacker::StTrsUnpacker() { /* nopt */}
 
-StTrsUnpacker::~StTrsUnpacker() { /* nopt */}
+StTrsUnpacker::~StTrsUnpacker()
+{
+    //cout << "StTrsUnpacker::~StTrsUnpacker()" << endl;
+    //delete [] mSequence;
+    //delete [] mPadList;
+}
     
 int StTrsUnpacker::getSector(int which, StTpcRawDataEvent* eventData)
 {
