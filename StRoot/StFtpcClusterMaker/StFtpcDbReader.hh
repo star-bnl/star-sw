@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.7 2001/10/19 09:40:11 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.8 2001/10/29 12:54:43 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.8  2001/10/29 12:54:43  jcs
+// add new constructor for StFtpcDriftMapMaker
+//
 // Revision 1.7  2001/10/19 09:40:11  jcs
 // tZero now in data base in ftpcElectronics
 //
@@ -119,9 +122,8 @@ public:
                  St_ftpcTimeOffset    *timeoffset,
                  St_ftpcDriftField    *driftfield,
                  St_ftpcElectronics   *electronics);
-  // constructor used by StFtpcSlowSimMaker and StFtpcDriftMapMaker:
+  // constructor used by StFtpcSlowSimMaker
   StFtpcDbReader(St_ftpcDimensions    *dimensions,
-                 St_ftpcPadrowZ       *zrow,
                  St_ftpcEField        *efield,
                  St_ftpcVDrift        *vdrift,
                  St_ftpcDeflection    *deflection,
@@ -130,6 +132,16 @@ public:
                  St_ftpcGas           *gas,
                  St_ftpcDriftField    *driftfield,
                  St_ftpcElectronics   *electronics);
+  // constructor used by StFtpcDriftMapMaker:
+  StFtpcDbReader(St_ftpcDimensions    *dimensions,
+                 St_ftpcPadrowZ       *zrow,
+                 St_ftpcEField        *efield,
+                 St_ftpcVDrift        *vdrift,
+                 St_ftpcDeflection    *deflection,
+                 St_ftpcdVDriftdP     *dvdriftdp,
+                 St_ftpcdDeflectiondP *ddeflectiondp,
+                 St_ftpcGas           *gas,
+                 St_ftpcDriftField    *driftfield);
   ~StFtpcDbReader();
   Float_t padrowZPosition(Int_t i); 
   Float_t magboltzEField(Int_t i);
