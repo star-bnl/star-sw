@@ -1,10 +1,13 @@
 /*
  *
- * $Id: standardPlots.C,v 1.1 2002/06/12 20:23:35 andrewar Exp $
+ * $Id: standardPlots.C,v 1.2 2002/06/26 14:27:54 andrewar Exp $
  *  A. Rose, WSU
  *  
  *
  * $Log: standardPlots.C,v $
+ * Revision 1.2  2002/06/26 14:27:54  andrewar
+ * Added cut function and track efficiency hists.
+ *
  * Revision 1.1  2002/06/12 20:23:35  andrewar
  * Initial commit. Methods file for standard evaluation plot package.
  * Few plots are defined; plots will be added as cuts and characteristics
@@ -14,7 +17,9 @@
  *
  *
  *
- */#define standardPlots_cxx
+ */
+
+#define standardPlots_cxx
 #include "standardPlots.h"
 #include "TH2.h"
 #include "TH3.h"
@@ -22,6 +27,7 @@
 #include "TStyle.h"
 #include "TCanvas.h"
 
+#define MAX_TRACKS 7000
 void standardPlots::Loop()
 {
 //   In a ROOT session, you can do:
@@ -43,10 +49,6 @@ void standardPlots::Loop()
 //by  b_branchname->GetEntry(i); //read only this branch
    if (fChain == 0) return;
 
-   TProfile* trackEff=new TProfile("trackEff","Sti Tracks vs. Mc Tracks",100,0,5000);
-   TProfile* trackEffMult=new TProfile("trackEffMult","Track Finding Efficiency vs. McMult",100,0,5000);
-   TProfile* trackEffPt=new TProfile("trackEffPt","Track Finding Efficiency vs. McPt",100,0,5);
-   TProfile* trackEffEta=new TProfile("trackEffEta","Track Finding Efficiency vs. McEta",100,-1,1);
 
    Int_t nentries = Int_t(fChain->GetEntries());
 
@@ -54,14 +56,89 @@ void standardPlots::Loop()
    for (Int_t jentry=0; jentry<nentries;jentry++) {
       Int_t ientry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
       nb = fChain->GetEntry(jentry);   nbytes += nb;
-      // if (Cut(ientry) < 0) continue;
+
+   }
+}
+
+void standardPlots::makeTrackEffPlots()
+{
+
+   if (fChain == 0) return;
+
+   TProfile* primaryTrackEff=new TProfile("primaryTrackEff","Sti PrimaryTracks vs. Mc PrimaryTracks",100,0,MAX_TRACKS);
+   TProfile* primaryTrackMult=new TProfile("primaryTrackEffMult","PrimaryTrack Finding Efficiency vs. McMult",100,0,MAX_TRACKS);
+   TProfile* globalTrackEff=new TProfile("globalTrackEff","Sti GlobalTracks vs. Mc GlobalTracks",100,0,MAX_TRACKS);
+   TProfile* globalTrackEffMult=new TProfile("globalTrackEffMult","GlobalTrack Finding Efficiency vs. McMult",100,0,MAX_TRACKS);
+
+
+   TH1D* primaryTrackEffPt=new TH1D("primaryTrackEffPt","PrimaryTrack Pt",100,0,5);
+   TH1D* primaryTrackEffEta=new TH1D("primaryTrackEffEta","PrimaryTrack Eta",100,-1,1);
+   TH1D* mcTrackEffPt=new TH1D("mcTrackEffPt","McTrack Pt",100,0,5);
+   TH1D* mcTrackEffEta=new TH1D("mcTrackEffEta","McTrack Eta",100,-1,1);
+   TProfile* globalTrackEffPt=new TProfile("globalTrackEffPt","GlobalTrack Finding Efficiency vs. McPt",100,0,5);
+   TProfile* globalTrackEffEta=new TProfile("globalTrackEffEta","GlobalTrack Finding Efficiency vs. McEta",100,-1,1);
+
+   Int_t nentries = Int_t(fChain->GetEntries());
+
+   Int_t nbytes = 0, nb = 0;
+   for (Int_t jentry=0; jentry<nentries;jentry++) {
+      Int_t ientry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
+      nb = fChain->GetEntry(jentry);   nbytes += nb;
+      if (!Cut(ientry)) continue;
       //cout <<"mMatchedPairs: "<<mMatchedPairs_<<endl
       //   <<"mMcTracks: "<<mMcTracks_<<endl
       //;
-      trackEffMult->Fill((float)mMcTracks_,((float)mMatchedPairs_/(float)mMcTracks_));
-      trackEff->Fill((float)mMcTracks_,((float)mMatchedPairs_));
- 
+      float mPrimaryTrackEff = (float)mMatchedPairs_/(float)mMcTracks_;
+      primaryTrackEff->Fill((float)mMcTracks_,((float)mMatchedPairs_));
+      primaryTrackEffMult->Fill((float)mMcTracks_,mPrimaryTrackEff);
+
+      //make Pt and Eta spectra of matched tracks
+      for(int iTrack=0;iTrack<mMatchedPairs_;iTrack++)
+	{
+	  if(!trackCut(ientry,iTrack)) continue;  //next track if trackCut 
+	                                          //doesn't pass
+	  primaryTrackEffEta->Fill(mMatchedPairs_mEtaPr[iTrack]);
+	  primaryTrackEffPt->Fill(mMatchedPairs_mEtaPr[iTrack]);
+	}
+
+      //make Pt and Eta spectra of MC tracks
+      for(int iTrack=0;iTrack<mMcTracks_;iTrack++)
+	{
+	  if(!mcTrackCut(ientry,iTrack)) continue;  //next track if mcTrackCut 
+	                                          //doesn't pass
+	  mcTrackEffEta->Fill(mMcTracks_mEtaMc[iTrack]);
+	  mcTrackEffPt->Fill(mMcTracks_mPtMc[iTrack]);
+	}
+
+      //float mGlobalTrackEff = 0.;
+      //for(int iTrack=0; iTrack<mMatchedPairs_;iTrack++)
+      //{
+	  //if(//global)
+	  //   globalTrackEff->Fill((float)mMcTracks_,((float)mMatchedPairs_));
+	  //   globalTrackEffMult->Fill((float)mMcTracks_,mGlobalTrackEff);
+      //}
+
+      //fill global hists?
+      globalTrackEff->Fill((float)mMcTracks_,((float)mMatchedPairs_));
+      globalTrackEffMult->Fill((float)mMcTracks_,mPrimaryTrackEff);
    }
+   
+   cout <<"\tDisplaying Mc Track and Sti Track Eta Distribution:"<<endl;
+   mcTrackEffEta->Draw();
+   primaryTrackEffEta->SetMarkerColor(4);
+   primaryTrackEffEta->SetLineColor(4);
+   primaryTrackEffEta->Draw("same");
+   cout <<"\tDisplaying Mc Track and Sti Track Pt Distribution:"<<endl;
+   mcTrackEffPt->Draw();
+   primaryTrackEffPt->SetMarkerColor(4);
+   primaryTrackEffPt->SetLineColor(4);
+   primaryTrackEffPt->Draw("same");
+
+
+   cout <<"\tDisplaying Track Efficiency vs. Multiplicity:"<<endl;
+   primaryTrackEffMult->Draw();
+
+
 }
 
 
@@ -186,6 +263,36 @@ void standardPlots::makeMomentumPlots()
     resolutionPAtEtaZero->SetXTitle("pt (GeV/c)");
     resolutionPAtEtaZero->Draw();
 
+
+
+    //make momentum resolution plot
+
+    TProfile *myMomResPlot=new TProfile("myMomResPlot","dp/p vs p.",20,0,4);
+    TProfile *mySigmaMomResPlot=new TProfile("mySigmaMomResPlot","RMS(dp/p) vs p.",20,0,4);
+    float totalM=0; float totalMmc=0;
+   Int_t nbytes = 0, nb = 0;
+   for (Int_t jentry=0; jentry<nentries;jentry++) {
+      Int_t ientry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
+      nb = fChain->GetEntry(jentry);   nbytes += nb;
+      for(int iTrack=0; iTrack<mMatchedPairs_; iTrack++)
+	{
+	  if(!trackCut(ientry,iTrack)) continue;
+	     totalM=mMatchedPairs_mPtPr[iTrack]*mMatchedPairs_mPtPr[iTrack]
+	       +mMatchedPairs_mPzPr[iTrack]*mMatchedPairs_mPzPr[iTrack];
+	     totalM=sqrt(totalM);
+	  
+	     totalMmc=mMatchedPairs_mPtMc[iTrack]*mMatchedPairs_mPtMc[iTrack]
+	       +mMatchedPairs_mPzMc[iTrack]*mMatchedPairs_mPzMc[iTrack];
+	     totalMmc=sqrt(totalMmc);
+	     myMomResPlot->Fill(totalMmc, (totalMmc-totalM)/totalMmc);
+      	}
+	  
+   }
+   for(int iBin=0; iBin<20;iBin++)
+     {
+       float mom = 4.*((float)(iBin+1))/20.-.1;
+       mySigmaMomResPlot->Fill(mom,myMomResPlot->GetBinError(iBin));
+     }
     return;
 }
   
@@ -236,9 +343,9 @@ void standardPlots::makeHitEffPlots()
 {
   cout <<"standardPlots::hitPlots | Plotting Hit Efficiencies"<<endl;
   
-  TProfile *hitEffMult=new TProfile("hitEffMult","Hit Shared / N Hits Possible", 50, 0, 5000);
+  TProfile *hitEffMult=new TProfile("hitEffMult","Hit Shared / N Hits Possible", 50, 0, MAX_TRACKS);
   TProfile *hitEffPt=new TProfile("hitEffPt","Hit Shared / N Hits Possible", 50, 0, 5);
-  TProfile *hitEffEta=new TProfile("hitEffEta","Hits Shared with MC Track / N Hits Possible", 50, -1,1);
+  TProfile *hitEffEta=new TProfile("hitEffEta","Hits Shared with MC Track / N Hits Possible", 50, -1.5,1.5);
 
    if (fChain == 0) return;
 
