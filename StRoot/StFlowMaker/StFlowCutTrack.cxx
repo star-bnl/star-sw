@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.27 2001/11/09 21:10:27 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.28 2001/11/13 22:43:50 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -34,8 +34,8 @@ Float_t StFlowCutTrack::mFitOverMaxCuts[2] = {0.52, 1.1}; // greater than one!
 Float_t StFlowCutTrack::mChiSqTpcCuts[2]   = {0., 0.};
 Float_t StFlowCutTrack::mChiSqFtpcCuts[2]  = {0., 0.};
 Float_t StFlowCutTrack::mDcaFtpcCuts[2]    = {0., 1.};
-Float_t StFlowCutTrack::mPtTpcCuts[2]      = {0.1, 2.};
-Float_t StFlowCutTrack::mPtFtpcCuts[2]     = {0.1, 2.};
+Float_t StFlowCutTrack::mPtTpcCuts[2]      = {0.1, 8.};
+Float_t StFlowCutTrack::mPtFtpcCuts[2]     = {0.1, 8.};
 Float_t StFlowCutTrack::mEtaTpcCuts[2]     = {-1.3, 1.3};
 Float_t StFlowCutTrack::mEtaFtpcCuts[4]    = {-4.0, -2.7, 2.7, 4.0};
 
@@ -421,6 +421,9 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.28  2001/11/13 22:43:50  posk
+// Documentation updated.
+//
 // Revision 1.27  2001/11/09 21:10:27  posk
 // Switched from CERNLIB to TMath. Little q is now normalized.
 //
