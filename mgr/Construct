@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.112 2001/03/14 21:42:49 jeromel Exp $
+# $Id: Construct,v 1.113 2001/04/05 22:12:04 didenko Exp $
 use Env;
 use lib $STAR . "/mgr";    # Modify perl include path
 use ConsDefs;
@@ -23,13 +23,38 @@ if ( defined( $ARG{LinksCheck} ) ) {
     &File::Find::find( \&wanted_dead, $include ) if -d $include;
     &File::Find::find( \&wanted_dead, $build ) if -d $build;
 }
+my $def = {@param::defaults};
+{
+  foreach my $key( sort keys %$def) {
+    if ( defined( $ARG{$key} ) ) {
+      print "Reset $key = $def->{$key} to $ARG{$key}\n" unless ($param::quiet);
+      my @defs = ($key => $ARG{$key});
+      push ( @param::defaults, @defs );
+      #       $def->{$key} = $ARG{$key};
+    }
+  }
+}
 
+$BUILD = "#" . $build; print "BUILD is $BUILD CXX = $def->{CXX} DEBUG = $def->{DEBUG}\n";
+if ($def->{CXX}  =~ m/-Zoi/ ){
+    # Drtup for INSURE tree directory.
+    $LIB = $BUILD . "/ILIB";
+    $BIN = $BUILD . "/IBIN";
+    $OBJ = $BUILD . "/IOBJ";
+} elsif ($def->{DEBUG}  eq "-g" ) {
+    $LIB = $BUILD . "/lib";
+    $BIN = $BUILD . "/bin";
+    $OBJ = $BUILD . "/obj";
+} else {
+    $LIB = $BUILD . "/LIB";
+    $BIN = $BUILD . "/BIN";
+    $OBJ = $BUILD . "/OBJ";
+}
 $INCLUDE = "#" . $include;
 $EXPORT  = "#.share";
-$FFLAGS .= " -DCERNLIB_TYPE";
-$OSFID .= " " . $STAR_SYS;
-
-my $ROOTLIBS =
+$LIBPATH = $LIB;
+print "Set LIB = $LIB BIN = $BIN OBJ = $OBJ INCLUDE = $INCLUDE LIBPATH = $LIBPATH\n";
+my $ROOTLIBS = 
 " -lNew  -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lHist -lGraf -lGraf3d -lTree -lGpad -lPhysics";
 print "ROOTLIBS = $ROOTLIBS\n";
 
@@ -69,22 +94,6 @@ if ( $#Repo > -1 ) {
 }
 else { $param::keep = 1; }
 
-$BUILD = "#" . $build;
-if ( $CXX =~ m/-Zoi/ ){
-    # Drtup for INSURE tree directory.
-    $LIB = $BUILD . "/ILIB";
-    $BIN = $BUILD . "/IBIN";
-    $OBJ = $BUILD . "/IOBJ";
-} elsif ( $DEBUG eq "-g" ) {
-    $LIB = $BUILD . "/lib";
-    $BIN = $BUILD . "/bin";
-    $OBJ = $BUILD . "/obj";
-} else {
-    $LIB = $BUILD . "/LIB";
-    $BIN = $BUILD . "/BIN";
-    $OBJ = $BUILD . "/OBJ";
-}
-$LIBPATH = $LIB;
 
 if ( $STAR_HOST_SYS !~ /^intel_wnt/ ) {
     $CERNLIBS .= " "
@@ -141,7 +150,7 @@ if ( !$param::quiet ) {
     print "STAR_SYS = \t$env->{ENV}->{STAR_SYS}\n";
     print "ROOTSYS  = \t$env->{ENV}->{ROOTSYS}\n";
     print "DEBUG    = \t$env->{DEBUG}\n";
-    print "CPPFLAGS = \t$env->{CPPFLAGS}\nCPPPATH  = \t$env->{CPPPATH}\n";
+    print "CPPFLAGS = \t$env->{CPPFLAGS} \tEXTRA_CPPFLAGS = \t$env->{EXTRA_CPPFLAGS}\nCPPPATH  = \t$env->{CPPPATH}\n";
     print
 "CC       = \t$env->{CC}    \tCFLAGS   = \t$env->{CFLAGS} \tEXTRA_CFLAGS  = \t$env->{EXTRA_CFLAGS}     \tCLIBS    =\t$env->{CLIBS}\n";
     print

@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.33 2001/03/20 02:12:07 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.34 2001/04/05 22:12:03 didenko Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -32,6 +32,7 @@
     $Cinp     = "";
     $CXXinp   = "";
     $CPPFLAGS = "";                                                  #-I-";
+    $EXTRA_CPPFLAGS = "";                                                  #-I-";
     $AFSFLAGS = "";
     $AFSDIR   = "/usr/afsws";
     $AFSLIBS  = "-L" . $AFSDIR . "/lib -L" . $AFSDIR . "/lib/afs";
@@ -95,7 +96,7 @@
     # $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
     $date   = `date +\%d\%b-%T`;
     $CXXCOM =
-"%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %CXXinp%< %Cout%>";
+"%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS -c %CXXinp%< %Cout%>";
 
     # $MAKELIB = "test -f %> && mv %> %>.$date;";
     $MAKELIB .= "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
@@ -104,10 +105,10 @@
     $LINKCOM =
       "%LD %DEBUG %LDFLAGS %EXTA_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
     $FCCOM =
-      "%FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>";
+      "%FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>";
     $GEANT3COM = "test -f %>:b.F && rm %>:b.F;";
     $GEANT3COM .=
-"%GEANT3 %< -o %>:b.F && %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %>:b.F -o %>";
+"%GEANT3 %< -o %>:b.F && %FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %>:b.F -o %>";
     $INCLUDE_PATH = $INCLUDE;
     $Salt = undef;
     if ( !$OPTSTAR ) { $OPTSTAR = "/opt/star"; }
@@ -158,11 +159,11 @@
             $FFLAGS = "-w %DEBUG -fno-second-underscore -fno-automatic";
             $FCCOM  = "test -f %>.g && rm %>.g ; test -f %>.f && rm %>.f;";
             $FCCOM .=
-            "%FC -E -P %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %< %Fout%>.g &&";
+            "%FC -E -P %CPPFLAGS %EXTRA_CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %< %Fout%>.g &&";
             $FCCOM .= "%GEANT3 -V 1 -V f -i %>.g %Fout%>:b.f;";
             $FCCOM .= "if [ -f %>:b.f ]; then %FC %FFLAGS -c %>:b.f %Fout%> ;";
             $FCCOM .=
-"else %FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>; fi";
+"else %FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>; fi";
             my $GEANT3COM = $FCCOM;
             $FEXTEND = "-ffixed-line-length-132";
         }
@@ -268,7 +269,7 @@
         $CC     = "/opt/WS5.0/bin/cc";
         $CXX    = "/opt/WS5.0/bin/CC";
         $CXXCOM =
-"%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS -I%<:d -ptr%ObjDir %_IFLAGS -c %CXXinp%< %Cout%>";
+"%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS -I%<:d -ptr%ObjDir %_IFLAGS -c %CXXinp%< %Cout%>";
         $FC             = "/opt/WS5.0/bin/f77";
         $CXXFLAGS       = "-KPIC";                # -library=iostream,no%%Cstd";
         $EXTRA_CXXFLAGS = " -D__CC5__";
@@ -314,106 +315,6 @@
         print "set DEBUG = $DEBUG\n" unless ($param::quiet);
     }
 
-    if ( defined( $ARG{DEBUG} ) ) {
-        $DEBUG = $ARG{DEBUG};
-        print "set DEBUG = $DEBUG\n" unless ($param::quiet);
-    }
-    if ( defined( $ARG{CPPFLAGS} ) ) {
-        $CPPFLAGS = $ARG{CPPFLAGS};
-        print "set CPPFLAGS = $CPPFLAGS\n" unless ($param::quiet);
-    }
-
-    if ( defined( $ARG{EXTRA_CPPFLAGS} ) ) {
-        $EXTRA_CPPFLAGS = $ARG{EXTRA_CPPFLAGS};
-        print "set EXTRA_CPPFLAGS = $EXTRA_CPPFLAGS\n" unless ($param::quiet);
-    }
-    if ( defined( $ARG{CPPPATH} ) ) {
-        $CPPPATH = $ARG{CPPPATH};
-        print "set CPPPATH = $CPPPATH\n" unless ($param::quiet);
-    }
-
-    if ( defined( $ARG{EXTRA_CPPPATH} ) ) {
-        $EXTRA_CPPPATH = $ARG{EXTRA_CPPPATH};
-        print "set EXTRA_CPPPATH = $EXTRA_CPPPATH\n" unless ($param::quiet);
-    }
-    if ( defined( $ARG{CPP} ) ) {
-        $CPP = $ARG{CPP};
-        print "set CPP = $CPP\n" unless ($param::quiet);
-    }
-
-    if ( defined( $ARG{CC} ) ) {
-        $CC = $ARG{CC};
-        print "set CC = $CC\n" unless ($param::quiet);
-    }
-    if ( defined( $ARG{CFLAGS} ) ) {
-        $CFLAGS = $ARG{CFLAGS};
-        print "set CFLAGS = $CFLAGS\n" unless ($param::quiet);
-    }
-
-    if ( defined( $ARG{EXTRA_CFLAGS} ) ) {
-        $EXTRA_CFLAGS = $ARG{EXTRA_CFLAGS};
-        print "set EXTRA_CFLAGS = $EXTRA_CFLAGS\n" unless ($param::quiet);
-    }
-    if ( defined( $ARG{CLIBS} ) ) {
-        $CLIBS = $ARG{CLIBS};
-        print "set CLIBS = $CLIBS\n" unless ($param::quiet);
-    }
-
-    if ( defined( $ARG{CXX} ) ) {
-        $CXX = $ARG{CXX};
-        print "set CXX = $CXX\n" unless ($param::quiet);
-    }
-    if ( defined( $ARG{CXXFLAGS} ) ) {
-        $CXXFLAGS = $ARG{CXXFLAGS};
-        print "set CXXFLAGS = $CXXFLAGS\n" unless ($param::quiet);
-    }
-
-    if ( defined( $ARG{FC} ) ) {
-        $FC = $ARG{FC};
-        print "set FC = $FC\n" unless ($param::quiet);
-    }
-    if ( defined( $ARG{FFLAGS} ) ) {
-        $FFLAGS = $ARG{FFLAGS};
-        print "set FFLAGS = $FFLAGS\n" unless ($param::quiet);
-    }
-
-    if ( defined( $ARG{FLIBS} ) ) {
-        $FLIBS = $ARG{FLIBS};
-        print "set FLIBS = $FLIBS\n" unless ($param::quiet);
-    }
-    if ( defined( $ARG{LD} ) ) {
-        $LD = $ARG{LD};
-        print "set LD = $LD\n" unless ($param::quiet);
-    }
-
-    if ( defined( $ARG{LDFLAGS} ) ) {
-        $LDFLAGS = $ARG{LDFLAGS};
-        print "set LDFLAGS = $LDFLAGS\n" unless ($param::quiet);
-    }
-
-# if (defined($ARG{EXEFLAGS})) {$EXEFLAGS = $ARG{EXEFLAGS}  ; print "set EXEFLAGS = $EXEFLAGS\n" unless ($param::quiet);}
-    if ( defined( $ARG{Libraries} ) ) {
-        $Libraries = $ARG{Libraries};
-        print "set Libraries = $Libraries\n" unless ($param::quiet);
-    }
-
-    if ( defined( $ARG{LIBS} ) ) {
-        $LIBS = $ARG{LIBS};
-        print "set LIBS = $LIBS\n" unless ($param::quiet);
-    }
-    if ( defined( $ARG{LIBPATH} ) ) {
-        $LIBPATH = $ARG{LIBPATH};
-        print "set LIBPATH = $LIBPATH\n" unless ($param::quiet);
-    }
-
-    if ( defined( $ARG{SO} ) ) {
-        $SO = $ARG{SO};
-        print "set SO = $SO\n" unless ($param::quiet);
-    }
-    if ( defined( $ARG{SOFLAGS} ) ) {
-        $SOFLAGS = $ARG{SOFLAGS};
-        print "set SOFLAGS = $SOFLAGS\n" unless ($param::quiet);
-    }
     $ROOTSRC = $ROOT . "/" . $ROOT_LEVEL . "/include";
     my @params = (
       'PLATFORM'    => $PLATFORM,
@@ -433,6 +334,7 @@
       'CPPPATH'       => $CPPPATH,
       'EXTRA_CPPPATH' => $EXTRA_CPPPATH,
       'CPPFLAGS'      => $CPPFLAGS,
+      'EXTRA_CPPFLAGS'=> $EXTRA_CPPFLAGS,
       'R_CPPFLAGS'    => $R_CPPFLAGS,
       'DEBUG'         => $DEBUG,
       'FC'            => $FC,
@@ -455,7 +357,7 @@
       'KUIP'          => $KUIP,
       'KUIPCOM'       => '%KUIP %< %<.f && %FC %FFLAGS -c %<.f -o %>',
       'CCCOM'         =>
-      '%CC %CFLAGS %EXTRA_CFLAGS %DEBUG %CPPFLAGS %_IFLAGS  -c %Cinp%< %Cout%>',
+      '%CC %CFLAGS %EXTRA_CFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS  -c %Cinp%< %Cout%>',
       'CXX'            => $CXX,
       'CXXFLAGS'       => $CXXFLAGS,
       'CINTCXXFLAGS'   => $CINTCXXFLAGS,
@@ -531,6 +433,5 @@
       }
     );
     push ( @param::defaults, @params );
-
 }
 1;
