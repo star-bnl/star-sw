@@ -1,7 +1,7 @@
 // Hey Emacs this is -*-c++-*-
 #ifndef STAR_EEmcTTDisplay
 #define STAR_EEmcTTDisplay
-// $Id: EEmcTTDisplay.h,v 1.8 2004/04/14 16:40:34 zolnie Exp $
+// $Id: EEmcTTDisplay.h,v 1.9 2004/05/04 18:28:55 zolnie Exp $
 
 /*!
  *                                                                     
@@ -54,8 +54,10 @@ public:
   /// \param sub     subsector index [0,mNumSSec)
   /// \param eta     eta index       [0,mNumEta)
   /// \return      kTRUE on success and kFALSE on failure
-  Bool_t       AddTower(int sec, int sub, int eta) {   
-    return AddTower(volumeName(sec,sub,eta)); }  
+  Bool_t       AddTower(int sec, int sub, int eta) 
+  {   
+    return AddTower(volumeName(sec,sub,eta)); 
+  }  
 
   //! adds tower to the list 
   /// \param tower a reference to EEmcTower 
@@ -70,9 +72,10 @@ public:
   /// \param py    y-component of the track momentum
   /// \param pz    z-component of the track momentum
   /// \param qB    sign sensitive product of the particle charge and magnetic field 
+  /// \param zMax  to BE DOCUMENTED
   /// \return      kTRUE on success and kFALSE on failure
   Bool_t       AddTrack(Double_t x, Double_t y, Double_t z, 
-			   Double_t px, Double_t py, Double_t pz, Double_t qB);
+			   Double_t px, Double_t py, Double_t pz, Double_t qB, Double_t zMin=0.0, Double_t zMax=0.0);
   //! adds track to the list
   /// \param track a refence to StMuTrack
   /// \return      kTRUE on success and kFALSE on failure
@@ -104,6 +107,17 @@ public:
   //! returns STAR magnetic fiels in Tesla
   double GetMagneticField()         { return mBField; }
 
+  //! sets a flag that controls how TPC trackcs are displayed, 
+  /// if f is true  - tracks are plotted from vertex to endcap 
+  /// if f is false - tracks are plotted from first to last point in the track 
+  /// \param f flag true/false
+  void   SetShowExtrapolatedTracks(bool f) { mShowExtrapolatedTracks = f; }
+  //! gets a flag that controls how TPC trackcs are displayed, 
+  /// if f is true  - tracks are plotted from vertex to endcap 
+  /// if f is false - tracks are plotted from first to last point in the track 
+  /// \param f flag true/false
+  bool   GetShowExtrapolatedTracks() { return mShowExtrapolatedTracks; }
+
 
 protected:
   //! initializes EEMC geometry: sector,subsectors and towers
@@ -125,8 +139,8 @@ protected:
   TList *mTowerHits; /**<- list of towers        */
   TList *mTrackHits; /**<- list of tracks        */
   double mBField   ; /**<- magnetic field (in T) */ 
+  bool   mShowExtrapolatedTracks; /**<- flag to control how tracks are plotted */
   
-
 public:
   ClassDef(EEmcTTDisplay, 1)   // 
 };
@@ -136,6 +150,9 @@ public:
 
 
 // $Log: EEmcTTDisplay.h,v $
+// Revision 1.9  2004/05/04 18:28:55  zolnie
+// version after split
+//
 // Revision 1.8  2004/04/14 16:40:34  zolnie
 // *** empty log message ***
 //

@@ -1,6 +1,6 @@
 // \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2004/01/19
-// $Id: EEmcTTDisplay.cxx,v 1.7 2004/04/13 14:53:38 zolnie Exp $
+// $Id: EEmcTTDisplay.cxx,v 1.8 2004/05/04 18:28:55 zolnie Exp $
 // doxygen info here
 
 #include <ostream>
@@ -16,10 +16,20 @@
 #include "StarClassLibrary/StPhysicalHelixD.hh"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
+
+#include "EEmcTTMatch.h"
 #include "EEmcTTMMaker.h"
 #include "EEmcTTDisplay.h"
 
+
 static const double cLight = 3e10*centimeter/second;
+
+// FIXME
+static const int    Sec12Color=kRed;
+static const int    Sec03Color=kGreen;
+static const int    Sec06Color=kBlue;
+static const int    Sec09Color=kYellow;
+
 
 EEmcTTDisplay::EEmcTTDisplay(const char *name) : EEmcGeomSimple()
 { 
@@ -28,7 +38,7 @@ EEmcTTDisplay::EEmcTTDisplay(const char *name) : EEmcGeomSimple()
   mTrackHits=new TList;
   mTowerHits=new TList;
   mBField   =0.5;  // in Tesla
-
+  mShowExtrapolatedTracks = false;
   initGeometry(name);
 
 };
@@ -75,11 +85,11 @@ EEmcTTDisplay::initGeometry(const char *topName)
     TGeoVolume *sector = new TGeoVolume(volumeName(s),geosector,medVac);
     sector->SetVisibility(kTRUE);
     // color coded sectors
-    switch(s) {
-    case 11: sector->SetLineColor(kRed    );break;
-    case  2: sector->SetLineColor(kGreen  );break;
-    case  5: sector->SetLineColor(kBlue   );break;
-    case  8: sector->SetLineColor(kYellow );break;
+    switch(s+1) {
+    case 12: sector->SetLineColor(Sec12Color);break;
+    case  3: sector->SetLineColor(Sec03Color);break;
+    case  6: sector->SetLineColor(Sec06Color);break;
+    case  9: sector->SetLineColor(Sec09Color);break;
     default: break;
     }
     //sector->SetVisibility(kFALSE);
@@ -129,8 +139,6 @@ EEmcTTDisplay::Draw(const Option_t* option)
     vol->SetVisibility(kTRUE);
   }
   while( (helix=(THelix   *)nextTrack())!=NULL ) {
-    helix->SetLineColor(kBlue);
-    helix->SetLineWidth(2);
     helix->Draw();
   }
 }
@@ -182,17 +190,35 @@ EEmcTTDisplay::AddTower(const char *vname)
 Bool_t       
 EEmcTTDisplay::AddTower(const EEmcTower& tower)
 {
-  return AddTower(volumeName(tower.sec,tower.sub,tower.eta));
+  return AddTower(volumeName(tower.Sec(),tower.SubSec(),tower.Eta()));
 }
 
 
 Bool_t       
-EEmcTTDisplay::AddTrack(Double_t x, Double_t y, Double_t z, Double_t px, Double_t py, Double_t pz, Double_t qB)
+EEmcTTDisplay::AddTrack(Double_t x, Double_t y, Double_t z, Double_t px, Double_t py, Double_t pz, Double_t qB, 
+			Double_t zMin, Double_t zMax)
 {
 
-  THelix *helix = new THelix(x,y,z,px,py,pz,cLight*qB);
-  helix->SetRange(z,mZ2);
+  THelix *helix    = new THelix(x,y,z,px,py,pz,cLight*qB);
+
+  if(zMin<=0.0) zMin=z;
+  if(zMax<=0.0) zMax=mZ2;
+
+  helix->SetRange(zMin,zMax);
+  helix->SetLineColor(102); // the beauty of root :)
+  helix->SetLineWidth(2);
+
+  if(mShowExtrapolatedTracks) {
+    THelix *helixExt = new THelix(x,y,z,px,py,pz,cLight*qB);
+    helixExt->SetRange(z   ,mZ2);
+    helixExt->SetLineColor(20);
+    helixExt->SetLineWidth(1);
+    mTrackHits->Add(helixExt);
+  }
+
   mTrackHits->Add(helix);
+
+
   return kTRUE;
 }
 
@@ -203,15 +229,19 @@ EEmcTTDisplay::AddTrack(const StMuTrack& track)
   StThreeVectorD o   = h.origin(); 
   StThreeVectorD p   = h.momentum(mBField*tesla);
   double         q   = h.charge(mBField*tesla);
-  return AddTrack(o.x(),o.y(),o.z(),p.x(),p.y(),p.z(),q*mBField*tesla);
+  double         zMin= track.firstPoint().z();
+  double         zMax= track.lastPoint().z();
+  return AddTrack(o.x(),o.y(),o.z(),p.x(),p.y(),p.z(),q*mBField*tesla,zMin,zMax);
 }
 
 
 void         
 EEmcTTDisplay::Out(ostream &out, const StMuTrack& track, const EEmcTower &tower)
 {
-  ::Out(out,tower);
-  ::Out(out,track);
+  out << tower ;
+  out << track ;
+  //tower->Out(out);
+  //track->Out(out);
 }
 
 void         
@@ -219,7 +249,7 @@ EEmcTTDisplay::Out(TString &out, const StMuTrack& track, const EEmcTower &tower)
 {
   const  int  bufLen=1024;
   static char buff[bufLen];
-  sprintf(buff,"ADC(%s)=%.0f pT=%.2f GeV/c",volumeName(tower),tower.edep,track.pt());
+  sprintf(buff,"ADC(%s)=%.0f pT=%.2f GeV/c",volumeName(tower),tower.dE(),track.pt());
   out = buff;
 }
 
@@ -253,11 +283,14 @@ EEmcTTDisplay::volumeName (int sec, int sub, int eta)
 char *
 EEmcTTDisplay::volumeName(const EEmcTower& tower)
 {  
-  return volumeName(tower.sec,tower.sub,tower.eta); 
+  return volumeName(tower.Sec(),tower.SubSec(),tower.Eta()); 
 }; 
 
 
 // $Log: EEmcTTDisplay.cxx,v $
+// Revision 1.8  2004/05/04 18:28:55  zolnie
+// version after split
+//
 // Revision 1.7  2004/04/13 14:53:38  zolnie
 // *** empty log message ***
 //

@@ -1,9 +1,9 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.17 2004/04/15 18:08:18 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.18 2004/05/04 18:28:55 zolnie Exp $
 // doxygen info here
 /** 
-    \mainpage TTM - an endcap Tower to Track Match maker
+    \mainpage TTM - an endcap Tower to Track Match maker (FIXME not updated!!!)
 
     \section intro Introduction
     This a MuDST based class to get tower calibration from matching TPC tracks
@@ -116,7 +116,8 @@
 #include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 
-#define DEBUG_PRINTS 0
+#include "EEmcTTMatch.h"
+
 #define DEBUG        0
 
 #if !defined(ST_NO_NAMESPACES)
@@ -128,14 +129,18 @@ using std::ostringstream;
 
 ClassImp(EEmcTTMMaker);
 
-ClassImp(EEmcTower);
 
 
+const Int_t    EEmcTTMMaker::kDefMaxCTBsum      = 1000; 
 const Int_t    EEmcTTMMaker::kDefMinTrackHits   =  5; 
 const Double_t EEmcTTMMaker::kDefMinTrackLength = 20.0;
-const Double_t EEmcTTMMaker::kDefMinTrackPt     =  0.5;
+const Double_t EEmcTTMMaker::kDefMinTrackPt     =  0.1;
 
+const Double_t EEmcTTMMaker::kDefMinTrackEta    =  0.0;
+const Double_t EEmcTTMMaker::kDefMaxTrackEta    =  2.2;
 
+const Double_t EEmcTTMMaker::kDefDeltaPhiCut    =  0.7;
+const Double_t EEmcTTMMaker::kDefDeltaEtaCut    =  0.7;
 
 //_____________________________________________________________________________
 //! the TTM constructor
@@ -165,12 +170,6 @@ EEmcTTMMaker::EEmcTTMMaker(
   mFileName.ToLower();
   mFileName += ".root";
   mFile=NULL;
-  mTree=NULL;
-
-  mMatch  =NULL;
-
-
-  // InitCuts()
 
   ResetZPositionsArray();
   AddZPosition("pres",kEEmcZPRE1+0.1);
@@ -178,18 +177,21 @@ EEmcTTMMaker::EEmcTTMMaker(
   AddZPosition("smd" ,kEEmcZSMD);
 
   // cuts
+  mMaxCTBsum      = kDefMaxCTBsum;
   mMinTrackHits   = kDefMinTrackHits;
   mMinTrackLength = kDefMinTrackLength;
   mMinTrackPt     = kDefMinTrackPt;
+  mMinTrackEta    = kDefMinTrackEta;
+  mMaxTrackEta    = kDefMaxTrackEta;
   
   //
-  mPhiFac = 1.0;
-  mEtaFac = 1.0;
+  mPhiFac         = kDefDeltaPhiCut;
+  mEtaFac         = kDefDeltaEtaCut;
 
   // 
   mTrackList = new TList;
   mTowerList = new TList;
-  mMatchMap  = new TMap;
+  mMatchList = new TList;
 
   //
   ResetStats();
@@ -199,12 +201,10 @@ EEmcTTMMaker::EEmcTTMMaker(
 //_____________________________________________________________________________
 /// destructor - cleanup
 EEmcTTMMaker::~EEmcTTMMaker(){
-  if( mTree  !=NULL ) delete mTree;
   if( mFile  !=NULL ) delete mFile;
-  if( mMatch !=NULL ) delete mMatch;
   if( mGeom  !=NULL ) delete mGeom;
 
-  if( mMatchMap !=NULL ) delete mMatchMap;
+  if( mMatchList!=NULL ) delete mMatchList;
   if( mTrackList!=NULL ) delete mTrackList;
   if( mTowerList!=NULL ) delete mTowerList;
 }
@@ -217,56 +217,10 @@ EEmcTTMMaker::Init(){
 
   ResetStats();
 
-  mMatch= new NTupleTTM_t;  if(!mMatch) return kStErr;
-
   mFile = new TFile(mFileName, "RECREATE");   if(!mFile) return kStErr;
-  mTree = new TTree("track","MuDST tracks");  if(!mTree) return kStErr;
+  mTree = new TTree("ttm","MuDST tracks");    if(!mTree) return kStErr;
 
-  (void)mTree->Branch("ntracks" ,&(mMatch->numtracks),"numtracks/I");
-
-  (void)mTree->Branch("sec"     , mMatch->sector,"sec[numtracks]/I");
-  (void)mTree->Branch("ssec"    , mMatch->subsec,"ssec[numtracks]/I");
-  (void)mTree->Branch("eta"     , mMatch->etabin,"eta[numtracks]/I");
-  (void)mTree->Branch("adc"     , mMatch->adc   ,"adc[numtracks]/F");
-  (void)mTree->Branch("edep"    , mMatch->edep  ,"edep[numtracks]/F");
-  (void)mTree->Branch("track"   , mMatch->ntrack,"track[numtracks]/I");
-
-  (void)mTree->Branch("pt"      , mMatch->pt    ,"pt[numtracks]/F");
-  (void)mTree->Branch("ptot"    , mMatch->ptot  ,"ptot[numtracks]/F");
-  (void)mTree->Branch("nhits"   , mMatch->nhits ,"nhits[numtracks]/I");
-  (void)mTree->Branch("length"  , mMatch->length,"length[numtracks]/F");
-  (void)mTree->Branch("dedx"    , mMatch->dedx  ,"dedx[numtracks]/F");
-
-
-  (void)mTree->Branch("numz"   ,&(mMatch->numz) , "numz/I");
-  (void)mTree->Branch("zpos"   ,  mMatch->zpos  , "zpos[numz]/F");
-
-  map<double,TString>::const_iterator zpos; 
-  unsigned k=0; 
-  for(zpos=mZ.begin(),k=0; zpos!=mZ.end() ; ++zpos, k++) {
-    if(k>=kNTupleTTM_MaxZ) { 
-      Warning("Init","too many z positions: %s %g will be used but not written",zpos->second.Data(),zpos->first);
-      continue;
-    }
-    const TString deta = "deta";
-    const TString dphi = "dphi";
-    const TString ntra = "[numtracks]/F";
-    TString bEtaName = deta + zpos->second;
-    TString bEtaDef  = deta + zpos->second + ntra;
-    TString bPhiName = dphi + zpos->second;
-    TString bPhiDef  = dphi + zpos->second + ntra;
-
-    //Info("Init","Adding branches %s/%s (test match at z=%g)",bEtaName.Data(),bPhiName.Data(),zpos->second);
-    (void)mTree->Branch(bEtaName, mMatch->deta[k], bEtaDef);
-    (void)mTree->Branch(bPhiName, mMatch->dphi[k], bPhiDef);
- 
-  }
-
-  (void)mTree->Branch("ntrig"  ,&(mMatch->numtrig),"numtrig/I");
-  (void)mTree->Branch("trigid" , mMatch->trigid   ,"trigid[numtrig]/I");
-  (void)mTree->Branch("daqbits",&(mMatch->daqbits),"daqbits/i");
-  (void)mTree->Branch("ctbsum" ,&(mMatch->ctbsum ),"ctbsum/I");
- 
+  //(void)mTree
 
   mFile->mkdir("histos");
   mFile->cd("histos");
@@ -277,8 +231,8 @@ EEmcTTMMaker::Init(){
   hTrackPt    = new TH1F("hTrackPt"   ,"p_T   [GeV]"        ,500,  0.0,  5.0);
   hTrackPtot  = new TH1F("hTrackPtot" ,"p_tot [GeV]"        ,500,  0.0,  5.0);
 
-  hTrackDCA[0]  = new TH1F("hTrackDCAX" , "x_vtxdca [cm]"     ,200,- 50.0, 50.0);
-  hTrackDCA[1]  = new TH1F("hTrackDCAY" , "y_vtxdca [cm]"     ,200, -50.0, 50.0);
+  hTrackDCA[0] = new TH1F("hTrackDCAX" , "x_vtxdca [cm]"     ,200,- 50.0, 50.0);
+  hTrackDCA[1] = new TH1F("hTrackDCAY" , "y_vtxdca [cm]"     ,200, -50.0, 50.0);
   hTrackDCA[2]  = new TH1F("hTrackDCAZ" , "z_vtxdca [cm]"     ,200,  -5.0,  5.0);
 
   mFile->cd("");
@@ -292,20 +246,15 @@ EEmcTTMMaker::Init(){
 /// Make()
 Int_t 
 EEmcTTMMaker::Make(){
+
   mNEvents++;
   //
-  mMatchMap->Clear();
-  mTrackList->Clear() ;
-  mTowerList->Delete();
+  mMatchList->Clear();
+  // 
+  mTrackList->Clear() ; // we do  not own this 
+  mTowerList->Delete(); // we own that :) the beauty of C++
+
   //
-  mMatch->Clear()  ; 
-
-  int &ntrack       = mMatch->numtracks = 0; // an alias
-  mMatch->numz = 3;
-
-  map<double,TString>::const_iterator zpos=mZ.begin();
-  for(unsigned int k=0; zpos!=mZ.end() && k< kNTupleTTM_MaxZ ; ++zpos,k++)  mMatch->zpos[k]=zpos->first;
-
   StMuDst    *muDst  = mMuDstMaker->muDst();   // get pointer to _the_ _data_
 
   // sanity checks
@@ -318,16 +267,19 @@ EEmcTTMMaker::Make(){
     Warning("Make","%s: missing EEMC Db records",GetName());
     return kStErr;
   }
+
   // real work begins here
-  TClonesArray      *tracks = muDst->primaryTracks();   // fetch primary tracks
-  if (!tracks) { 
-    Warning("Make","%s: no tracks for this event",GetName());
-    return kStErr;
-  }
-  //
   StMuEvent* muEvent = muDst->event();                     // fetch microEvent data
   if (!muEvent) {
     Warning("Make","%s: no MuEvent data for this event",GetName());
+    return kStErr;
+  }
+  // ignore event too many tracks
+  if( muEvent->ctbMultiplicity() > mMaxCTBsum ) return kStOK;
+  //
+  TClonesArray      *tracks = muDst->primaryTracks();   // fetch primary tracks
+  if (!tracks) { 
+    Warning("Make","%s: no tracks for this event",GetName());
     return kStErr;
   }
   //
@@ -336,6 +288,7 @@ EEmcTTMMaker::Make(){
     Info("Make","%s: no EMC data for this event",GetName());
     return kStErr;
   }
+  //
   if(emc->getNEndcapTowerADC()<=0) {
     Info("Make","%s: no EEMC tower data for this event",GetName());
     return kStErr;
@@ -343,8 +296,8 @@ EEmcTTMMaker::Make(){
   
   //StEventInfo             &evinfo = muEvent->eventInfo();           // event info
   StEventSummary          &evsumm = muEvent->eventSummary();        // event summary
-  StL0Trigger             &l0trig = muEvent->l0Trigger();           // L0 trigger info 
-  StMuTriggerIdCollection &evtrig = muEvent->triggerIdCollection(); // trigger Id's
+  //StL0Trigger             &l0trig = muEvent->l0Trigger();           // L0 trigger info 
+  //StMuTriggerIdCollection &evtrig = muEvent->triggerIdCollection(); // trigger Id's
 
   StThreeVectorF vertex = evsumm.primaryVertexPosition();
 
@@ -352,8 +305,6 @@ EEmcTTMMaker::Make(){
   // select "good" tracks
   TIter      nextTrack(tracks);
   StMuTrack *track  = NULL;
-
-
  
   while ( (track = (StMuTrack *)nextTrack()) ) {
     StThreeVectorF p  =track->p();
@@ -377,17 +328,12 @@ EEmcTTMMaker::Make(){
   if( mTrackList->IsEmpty() ) { 
 #if     DEBUG 
     Info("Make","no good tracks for this event");
-    //cerr << "TOTAL TRACKS FOR EVENT#" << evinfo.id() << endl;
-    //cerr << " primary : " << muDst->primaryTracks()->GetEntries() << endl;
-    //cerr << " global  : " << muDst->globalTracks()->GetEntries()  << endl;
-    //cerr << " other   : " << muDst->otherTracks()->GetEntries()   << endl;
-    //cerr << " l3      : " << muDst->l3Tracks()->GetEntries()      << endl;
 #endif
     return kStOK  ;  // what the ...
   }
 
   // do the matching
-  ntrack=0;
+  int ntrack=0;
   int goodTowerHits = 0;
   for (Int_t i=0; i< emc->getNEndcapTowerADC(); i++) { // loop over EEMC hits
     // get endcap hit(s) and use dbase to subtract pedestal and apply gain
@@ -402,106 +348,47 @@ EEmcTTMMaker::Make(){
     // some idiot changed indexing scheme in the middle of the run 
     if(dbi==NULL) continue;
     // now because of that idiot I have to do this scheiss
-    sec--;
-    sub--;
-    eta--;
+    sec--;  sub--;  eta--;
 
     adcped = float(adc) - dbi->ped; 
     edep   = (dbi->gain>0.0) ? adcped/dbi->gain : 0.0;
     if(adcped<0.0) continue;
     goodTowerHits++;
-    //cerr <<  sec+1 << "|" << char(sub+'A') << "|" << eta+1 << "\t=>\t" << adcped << endl;
-    EEmcTower *eemcHit = new EEmcTower(sec,sub,eta,adcped);
+    //
+    EEmcTower   *eemcHit   = new EEmcTower(sec,sub,eta,adcped);
+    EEmcTTMatch *eemcMatch = new EEmcTTMatch();
     mTowerList->Add(eemcHit);
+    eemcMatch->Add(eemcHit);
 
-    int nPrevTracks  = ntrack; // [FIXME]
-    int nMatchThisHit= 0;      // [FIXME]
     TIter nextTrack(mTrackList);
-    while( (track=(StMuTrack *)nextTrack()) != NULL && ntrack<kNTupleTTM_MaxTracks ){
+    while( (track=(StMuTrack *)nextTrack()) != NULL ) {
       TVector3 tc    = mGeom->getTowerCenter(sec,sub,eta);  // tower center
       double   phiHW = mGeom->getPhiHalfWidth();
       double   etaHW = mGeom->getEtaHalfWidth(eta);
       double   dphi=0.0, deta=0.0;
-      //double   z=0.0;
       TVector3 r(0.0,0.0,0.0);
-      
-      bool matched=false;
 
-      zpos=mZ.begin();
+      // TODO maybe add tracks that touch the tower for better cleanup
+      // of multiple tracks per tower
+      bool   matched=false;
+      map<double,TString>::const_iterator zpos=mZ.begin();
       for(unsigned int k=0; zpos!=mZ.end() ; ++zpos,k++) { 
 	double z = zpos->first;
 	matched=false;
-	if(!ExtrapolateToZ(track,z,r) ) break;   // track 'hit' at z
+	if( ! EEmcTTMatch::ExtrapolateToZ(track,z,r)   ) break; // track 'hit' at z
 	dphi = tc.Phi()            - r.Phi()           ;
 	deta = tc.PseudoRapidity() - r.PseudoRapidity();
-	if( ! MatchTrack(dphi,deta,phiHW,etaHW) ) break   ; 
-	if(k<kNTupleTTM_MaxZ) {
-	  mMatch->deta[k][ntrack] = dphi;
-	  mMatch->dphi[k][ntrack] = deta;
-	}
+	if( ! MatchTrack(dphi,deta,phiHW,etaHW) ) break; 
 	matched=true;
       }
-      if(!matched) continue;
-
-
-#if     DEBUG_PRINTS
-      cerr << "<ExtrapolateToZ>\n";      
-      cerr <<  sec+1 << "|" << char(sub+'A') << "|" << eta+1 << endl;
-      cerr <<  track->helix() << endl;
-      fprintf(stderr,"z=%7.3f phi=%7.3f eta=%5.3f r=(%7.3f,%7.3f,%7.3f)\n",
-	     0.0,tc.Phi()/M_PI*180.0,tc.PseudoRapidity(),tc.x(),tc.y(),tc.z()); 
-
-      zpos=mZ.begin();
-      for(unsigned int k=0; zpos!=mZ.end() ; ++zpos,k++) { 
-	double z = zpos->first;
-	matched=false;
-	if(!ExtrapolateToZ(track,z,r) ) break;   // track 'hit' at z
-	dphi = tc.Phi()            - r.Phi()           ;
-	deta = tc.PseudoRapidity() - r.PseudoRapidity();
-	if( ! MatchTrack(dphi,deta,phiHW,etaHW) ) break   ; 
-	fprintf(stderr,"z=%7.3f phi=%7.3f eta=%5.3f r=(%7.3f,%7.3f,%7.3f)  (%5.3f/%5.3f %5.3f/%5.3f)\n",
-	       z,r.Phi()/M_PI*180.0,r.PseudoRapidity(),r.x(),r.y(),r.z(),dphi,phiHW,deta,etaHW); 
-      }
-      cerr << "</ExtrapolateToZ>\n";
-#endif /* DEBUG_PRINTS */
-
-      mMatch->sector[ntrack]=sec;
-      mMatch->subsec[ntrack]=sub;
-      mMatch->etabin[ntrack]=eta;
-      mMatch->adc   [ntrack]=adcped;
-      mMatch->edep  [ntrack]=edep;
-      mMatch->ntrack[ntrack]=0;
-  
-      mMatch->nhits[ntrack]  = track->nHitsFit();
-      mMatch->pt[ntrack]     = track->pt();
-      mMatch->ptot[ntrack]   = track->pt()*TMath::CosH(track->eta());    // for now
-      mMatch->length[ntrack] = track->length();
-      mMatch->dedx[ntrack]   = track->dEdx();
-
-      // fill trigger info
-      mMatch->daqbits = l0trig.triggerWord();
-      const StTriggerId &trg =  evtrig.nominal();
-      mMatch->numtrig = trg.triggerIds().size();
-      for(int k=0; k<mMatch->numtrig; k++) mMatch->trigid[k]=trg.triggerIds()[k];
-      mMatch->ctbsum  = (Int_t)muEvent->ctbMultiplicity();
-
-      mMatchMap->Add(eemcHit,track);
+      if(!matched)                continue;
+      eemcMatch->Add(track);
       ntrack++;       
-      nMatchThisHit++;
     }
-    // [FIXME] a kluge to tag multiple tracks hitting the same tower
-    for(int k=nPrevTracks;k<ntrack;k++) mMatch->ntrack[k]=nMatchThisHit;
+    if( eemcMatch->Matches() > 0 ) mMatchList->Add(eemcMatch); 
   }
-
-#if     DEBUG 
-  if(goodTowerHits<=0) {
-    Info("Make","no good EEMC tower data for this event");
-    return kStWarn;
-  }
-#endif
 
   mNMatched += ntrack;
-  if(0<ntrack && ntrack<kNTupleTTM_MaxTracks)  mTree->Fill();
   return kStOK;
 }
 
@@ -519,7 +406,6 @@ EEmcTTMMaker::Clear(Option_t *option ) {
 /// finish the job, write TTree 
 Int_t 
 EEmcTTMMaker::Finish () {
-  if(mFile)      mFile->Write();
   return kStOK;
 }
 
@@ -535,6 +421,8 @@ EEmcTTMMaker::AcceptTrack(const StMuTrack *track) {
   if(  track->nHitsFit() <  mMinTrackHits   ) return kFALSE;
   if(  track->length()   <  mMinTrackLength ) return kFALSE;
   if(  track->pt()       <  mMinTrackPt     ) return kFALSE;
+  if(  track->eta()      <  mMinTrackEta    ) return kFALSE;
+  if(  track->eta()      >  mMaxTrackEta    ) return kFALSE;
   return kTRUE;
 }
 
@@ -559,27 +447,6 @@ EEmcTTMMaker::MatchTrack(
 }
 				   
 
-//_____________________________________________________________________________
-//! given track and position z return TVector3 with a 
-/// \param track a const pointer to current track
-/// \param z     a z (along the beam) position where 
-/// \param r     a TVector (returned)
-/// \return boolean indicating if track crosses a plane
-Bool_t
-EEmcTTMMaker::ExtrapolateToZ(const StMuTrack *track, const double   z, TVector3 &r)
-{
-  const double kMinDipAngle   = 1.0e-13;
-  //const float kMinCurvature =  1e+00;
-
-  StPhysicalHelixD   helix  = track->helix();
-  double             dipAng = helix.dipAngle();
-  double             z0     = helix.origin().z();
-  if(dipAng<kMinDipAngle) return kFALSE; 
-  double s  = ( z - z0 ) / sin(dipAng)  ;
-  StThreeVectorD hit = helix.at(s);
-  r.SetXYZ(hit.x(),hit.y(),hit.z());
-  return   kTRUE;
-}
 
 
 
@@ -627,35 +494,6 @@ EEmcTTMMaker::Summary(ostream &out ) const
   return out;
 }
 
-// ================================================================================================
-ostream& 
-EEmcTower::Out(ostream &out ) const
-{
-  out << "<EEmcTower";
-  out << " SECTOR=\""    << int(sec+1)    << "\"" ;
-  out << " SUBSECTOR=\"" << char(sub+'A') << "\"" ;
-  out << " ETA=\""       << int(eta+1)    << "\"" ;
-  out << " EDEP=\""      << edep          << "\"" ;
-  out << "/>\n";
-  return out;
-}
-
-// ================================================================================================
-ostream& 
-Out(ostream &out , const StMuTrack &t)
-{
-  out << "<StMuTrack";
-  out << " ORIGIN=\""   << t.helix().origin() << "\"";
-  out << " MOMENTUM=\"" << t.momentum()   << "\"";
-  out << "/>\n";
-  return out;
-}
-
-ostream& 
-Out(ostream &out , const EEmcTower &t)
-{
-  return t.Out(out);
-}
 
 
 
@@ -664,16 +502,13 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm)  {
   return ttm.Summary(out); 
 };
 
-ostream&  operator<<(ostream &out, const EEmcTower    &t  )  {
-  return t.Out(out);
-}
 
-ostream&  operator<<(ostream &out, const StMuTrack    &t  )  {
-  return Out(out,t);
-}
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.18  2004/05/04 18:28:55  zolnie
+// version after split
+//
 // Revision 1.17  2004/04/15 18:08:18  zolnie
 // *** empty log message ***
 //
