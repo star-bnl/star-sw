@@ -1,0 +1,149 @@
+* *************************************************************************
+* run_ebye.kumac
+* 
+* written by D. Weerasundara -- dhammika@npl.washington.edu
+* modified by L.D. Carr -- lcarr@u.washington.edu
+* 8/4/98 K. Turner - editted to make it standard
+* 
+************************************************************************
+************************************************************************
+
+ macro run__
+          TOP=$STAR _
+          domain='geometry tpc svt global ebye' _
+          input_data_dir=/star/u2/dhammika/data/ _
+          input_data_file=DST_prodrun2_evt1-99.xdf _
+          num_events=1 _
+          funit=21 _
+          nfile=ebye.ntup _
+          nid=111 _
+          table=ebye/sca/sca_out
+
+* 
+*  this is an example!! you must change to fill your needs
+*  
+* --> to run
+*    - change the inputs above as desired
+*    - run staf
+*    -   exec run_ebye
+* 
+	  
+  message ' *** TOP directory to search for kumacs --> ' [TOP]
+  message ' *** domains to load  -->                   ' [domain]
+  message ' *** Data Sample directory -->              ' [input_data_dir]
+  message ' *** Input data file -->                    ' [input_data_file]
+  message ' *** Num Events to process -->              ' [num_events]
+  message ' *** ntup file unit -->                     ' [funit]
+  message ' *** output Ntuple filename  -->            ' [nfile]
+  message ' *** Ntuple ID # -->                        ' [nid]
+  message ' *** Table to write to ntup -->             ' [table]
+
+***********************************************************
+* General Setup
+***********************************************************
+  
+ macro/global/create TOP              [TOP]
+
+   exec $STAR/kumacs/util/setup_defaults#run
+   
+   exec setup#setup
+   
+* SETUP LOCAL VARIABLES 
+ alias/create STAFCV_OK  1
+ alias/create STAFCV_BAD 0
+
+   macro/global/import *
+     
+   exec load_libraries#run [domain]
+
+* **************************************************************
+* --------- Setup and run EbyE analysis chain  -------------*
+   
+* open input data file
+   exec read_table_from_file#init ebye [input_data_dir][input_data_file]   
+   if STAF_STATUS(1).eq.0 goto ENDOFDATA
+   
+* init to move table to correct place
+   exec ebye_getDst#init
+   if STAF_STATUS(1).eq.0 goto ENDOFDATA
+  
+* open output ntuple
+  exec write_table_to_ntuple#init_disk [funit] [nfile]  
+    
+* --------------------- initialization ----------------------------*
+  
+  exec create_tables_ebye#sca
+  
+  exec create_tables_global#sca
+  
+  exec init_sca#init
+  
+* this should be done in init_sca!
+* set switches to make prior
+  cd [params]/ebye
+  tdm/table/cell/putvalue 'sca_switch[0].useDeltaD'      0
+  tdm/table/cell/putvalue 'sca_switch[0].useDimension'   0
+  tdm/table/cell/putvalue 'sca_switch[0].useEntropy'     0
+  tdm/table/cell/putvalue 'sca_switch[0].makePrior'      1
+  tdm/table/cell/putvalue 'sca_switch[0].doAnalysis'     0
+  cd /dui 
+  
+
+*------------------- process events ------------------------------*
+
+* read event and then process thru analysis
+  do i=1,[num_events]
+    message ' run_ebye: processing event ' [i]
+* clear all event tables
+    tabclear [event]
+* read input file
+    exec read_table_from_file#read ebye
+    if STAF_STATUS(1).eq.0 goto ENDOFDATA  
+* move table to correct place
+    exec ebye_getDst#move_table 
+* do analysis
+    exec run_sca#filter 
+      if ( staf_status(1) .ne. STAFCV_OK) then
+          message <<< WARNING >>>  Problem with sca_filter in event [i]
+	endif
+    exec run_sca#runsca
+      if ( staf_status(1) .ne. STAFCV_OK) then
+          message <<< WARNING >>>  Problem with sca_runsca in event [i]
+        endif
+  * write table to ntuple
+    exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
+  enddo
+
+  
+* -------------------- end stuff -----------------------------*
+  
+  ENDOFDATA:
+  if [i].lt.[num_events] then
+    message ' End of input file'
+  endif  
+
+* close ntuple
+  message ' close ntuple'
+  exec write_table_to_ntuple#close_disk [funit]
+
+* close input file
+  message ' close input file'
+  exec read_table_from_file#close ebye
+  
+  
+return
+ 
+************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
