@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.5 2001/07/11 21:18:01 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.6 2001/08/16 18:27:54 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.6  2001/08/16 18:27:54  jcs
+// add inline get function for driftCathodeVoltage
+//
 // Revision 1.5  2001/07/11 21:18:01  jcs
 // changes for new FTPC database structures
 //
@@ -176,6 +179,7 @@ public:
   Float_t pressureOffset() {return mPressureOffset;}
 
   Float_t tZero() {return mTZero;}
+  Float_t driftCathodeVoltage() {return mDriftCathodeVoltage;}
   Float_t minimumDriftField() {return mMinimumDriftField;}
   Float_t stepSizeDriftField() {return mStepSizeDriftField;}
   Float_t radiusTimesField() {return mRadiusTimesField;}
