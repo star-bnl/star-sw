@@ -1,5 +1,5 @@
 /**********************************************************
- * $Id: StRrsMaker.h,v 1.3 2000/01/26 23:39:19 lasiuk Exp $
+ * $Id: StRrsMaker.h,v 1.4 2000/01/27 17:10:04 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
@@ -15,9 +15,8 @@
  *  memory.
  ***********************************************************
  *  $Log: StRrsMaker.h,v $
- *  Revision 1.3  2000/01/26 23:39:19  lasiuk
- *  Forward declaration of classes to bypass CINT evaluation
- *  comment the list data member in StRichID
+ *  Revision 1.4  2000/01/27 17:10:04  lasiuk
+ *  modify to work stand-alone from ROOT
  *
  *  Revision 1.5  2000/02/08 16:36:51  lasiuk
  *  Bring into line with HP
@@ -49,7 +48,7 @@
  *  8/20/1999 Moved includes to DB and Viewer to .cxx
  *                                         Valery Fine
  *
-
+ *  8/25/1999 drawing functions included
  *                                    Caroline Peter
  *  8/30/1999 removed bool for SUN compatibility
  *                                    Alexandre Nevski
@@ -143,9 +142,10 @@ private:
     
     //   Flags settable at macro level!
     int       mAddPedestal;
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.3 2000/01/26 23:39:19 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.4 2000/01/27 17:10:04 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
     
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.3 2000/01/26 23:39:19 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+    virtual const char *GetCVS() const
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.4 2000/01/27 17:10:04 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StRrsMaker, 1)            // StAF chain
 };

@@ -1,18 +1,19 @@
 /*******************************************************
- * $Id: StRichMonitor.cxx,v 1.1 2000/01/25 22:02:21 lasiuk Exp $
+ * $Id: StRichMonitor.cxx,v 1.2 2000/01/27 17:09:56 lasiuk Exp $
  *
  * Description:
  *  Implementation of the Viewer displaying module
  *
  ********************************************************
  * $Log: StRichMonitor.cxx,v $
- * Revision 1.1  2000/01/25 22:02:21  lasiuk
- * Second Revision
+ * Revision 1.2  2000/01/27 17:09:56  lasiuk
+ * modify to work stand-alone from ROOT
  *
  * Revision 1.1  2000/01/25 22:02:21  lasiuk
  * Second Revision
  *
  ********************************************************/
+#ifdef __ROOT__
 #ifdef RICH_WITH_MONITOR
 #include "StRichMonitor.h"
 
@@ -79,3 +80,5 @@ StRichMonitor* StRichMonitor::getInstance()
 #endif
 
 #endif
+
+#endif // __ROOT__

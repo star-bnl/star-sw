@@ -1,5 +1,5 @@
 /*********************************************************
- * $Id: StRichMonitor.h,v 1.1 2000/01/25 22:02:21 lasiuk Exp $
+ * $Id: StRichMonitor.h,v 1.2 2000/01/27 17:09:57 lasiuk Exp $
  *
  * Description:
  *  Struct holds different histograms filled by different
@@ -9,13 +9,14 @@
  *
  ************************************************************
  * $Log: StRichMonitor.h,v $
- * Revision 1.1  2000/01/25 22:02:21  lasiuk
- * Second Revision
+ * Revision 1.2  2000/01/27 17:09:57  lasiuk
+ * modify to work stand-alone from ROOT
  *
  * Revision 1.1  2000/01/25 22:02:21  lasiuk
  * Second Revision
  *
  ***********************************************************/
+#ifdef __ROOT__
 #include "StRichRrsMacros.h"
 
 #ifdef RICH_WITH_MONITOR
@@ -57,3 +58,5 @@ private:
 #endif // ST_RICH_VIEWER_H
 
 #endif // RICH_WITH_VIEWER
+
+#endif // __ROOT__
