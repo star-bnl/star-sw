@@ -1,10 +1,17 @@
 /**********************************************************
- * $Id: StRichTrack.h,v 2.10 2001/01/30 16:38:44 horsley Exp $
+ * $Id: StRichTrack.h,v 2.11 2001/02/07 16:00:14 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.h,v $
+ *  Revision 2.11  2001/02/07 16:00:14  lasiuk
+ *  inline functions made.  Data members are set directly.
+ *  residual cut is a data member
+ *  momentum loss in fastEnough() (uses local momentum)
+ *  store momentum loss for individual particles
+ *  xCorrection() made into a member function
+ *
  *  Revision 2.10  2001/01/30 16:38:44  horsley
  *  updated PID maker for next production run, included new class for TTree
  *
@@ -115,6 +122,11 @@ public:
     void           assignMIP(const StSPtrVecRichHit*);  
 
     //
+    // Corrections
+    //
+    double xCorrection() const;
+    
+    //
     // Pid Trait manipulation
     //
     StRichPidTraits* getPidTrait();  
@@ -124,6 +136,7 @@ public:
     void  addHit(StRichHit*, double, double, double, double, double, StParticleDefinition* );
     vector<StRichRingHit*> getRingHits(StParticleDefinition* );
 
+    double          residualCut() const;
     StThreeVectorF& getProjectedCTBPoint();
     StThreeVectorF& getLastHit();
     StThreeVectorF& getUnCorrectedImpactPoint();
@@ -135,7 +148,7 @@ public:
     StThreeVectorF& getMomentum();
     StThreeVectorF& getMomentumAtPadPlane();
 
-    bool    setEnergyLoss();
+    void    setMomentumLoss();
     void    setCorrectedMomentum(StThreeVectorF);
     
     double  getTheta();
@@ -146,8 +159,7 @@ public:
     double  getUnCorrectedPhi( );
     double  getLastHitDCA();
     double  getExpectedNPhots(StParticleDefinition* particle);
-    double  getEnergyLoss() const;
-
+    double  getMomentumLoss(StParticleDefinition* part) const;
     
     bool    isGood(StParticleDefinition* );
     bool    correctTrajectory();
@@ -155,13 +167,15 @@ public:
   
     void    useUnCorrected();
     
-    int     fastEnough(StParticleDefinition* particle);
+    bool     fastEnough(StParticleDefinition* particle);
     int     getMaxGap();
     int     getMaxChain();
     int     getFirstRow();
     int     getLastRow();  
     
 protected:
+
+    void  setResidualCut(double);
   
     void  setUnCorrectedTheta(double );
     void  setUnCorrectedPhi(double );
@@ -197,7 +211,8 @@ protected:
 #ifdef RICH_WITH_L3_TRACKS
     globalTrack *mL3Track;
 #endif
-    
+
+    double mResidualCut;
     double mUnCorrectedTheta;
     double mUnCorrectedPhi;
     double mLastHitDCA;
@@ -213,9 +228,9 @@ protected:
     // take into account the energy loss of the particles
     // mEnergyLoss is the mean (currently used)
     double mEnergyLoss;
-    double mPiondEdx;
-    double mKaondEdx;
-    double mProtondEdx;
+    double mPiondPdx;
+    double mKaondPdx;
+    double mProtondPdx;
 
     double mPionMass;
     double mKaonMass;
@@ -250,5 +265,58 @@ protected:
 
 
 };
+
+inline void StRichTrack::setResidualCut(double c) {mResidualCut = c;}
+inline double StRichTrack::residualCut() const {return mResidualCut;}
+
+inline bool StRichTrack::getRefit() {return mRefit;}
+inline StThreeVectorF& StRichTrack::getCorrectedMomentum() { return mCorrectedMomentum;}
+inline void StRichTrack::setCorrectedMomentum(StThreeVectorF input) { mCorrectedMomentum = input;}
+
+inline StThreeVectorF& StRichTrack::getUnCorrectedMomentum() { return mUnCorrectedMomentum;}
+inline StThreeVectorF& StRichTrack::getUnCorrectedProjectedMIP() { return mUnCorrectedProjectedMIP;}
+inline StThreeVectorF& StRichTrack::getUnCorrectedImpactPoint() { return mUnCorrectedImpactPoint;}
+inline StThreeVectorF& StRichTrack::getLastHit() { return mLastHit;}
+inline StThreeVectorF& StRichTrack::getProjectedCTBPoint() { return mProjectedCTB;} 
+inline StThreeVectorF& StRichTrack::getProjectedMIP() { return mProjectedMIP;}
+inline StThreeVectorF& StRichTrack::getImpactPoint() { return mImpactPoint;}
+inline StThreeVectorF& StRichTrack::getMomentum() { return mMomentum;}
+inline StThreeVectorF& StRichTrack::getMomentumAtPadPlane() { return mMomentumAtPadPlane;}
+
+inline StRichPidTraits* StRichTrack::getPidTrait() { return mPidTrait; }
+inline void StRichTrack::addPidTrait(StRichPidTraits* trait) { mPidTrait = trait;}
+
+inline void StRichTrack::setPathLength(double p) { mPath = p;}
+inline void StRichTrack::setLastHitDCA(double lastdca)  {mLastHitDCA = lastdca;}
+inline void StRichTrack::setMaxGap(int n)   { mMaxGap=n;}
+inline void StRichTrack::setMaxChain(int n) { mMaxChain=n;}
+inline void StRichTrack::setFirstRow(int n) { mFirstRow=n;}
+inline void StRichTrack::setLastRow(int n)  { mLastRow=n;}
+inline void StRichTrack::setProjectedCTB(StThreeVectorF& ctb) {mProjectedCTB = ctb;} 
+inline void StRichTrack::setProjectedMIP(StThreeVectorF& mip) {mProjectedMIP = mip;}
+inline void StRichTrack::setTheta(double the) {mTheta = the;}
+inline void StRichTrack::setPhi(double phi) { mPhi = phi;}
+inline void StRichTrack::setImpactPoint(StThreeVectorF& impact) { mImpactPoint = impact;}
+inline void StRichTrack::setUnCorrectedTheta(double the) {mUnCorrectedTheta=the;}
+inline void StRichTrack::setUnCorrectedPhi(double phi) {mUnCorrectedPhi=phi;}
+inline
+void StRichTrack::setUnCorrectedImpactPoint(StThreeVectorF& point) {mUnCorrectedImpactPoint=point;}
+inline
+void StRichTrack::setUnCorrectedProjectedMIP(StThreeVectorF& point) {mUnCorrectedProjectedMIP=point;}
+inline void StRichTrack::setUnCorrectedMomentum(StThreeVectorF& point) {mUnCorrectedMomentum=point;}
+inline void StRichTrack::setLastHit(StThreeVectorF hit) { mLastHit = hit;}
+
+inline StRichHit* StRichTrack::getAssociatedMIP() { return mAssociatedMIP;}
+inline StTrack* StRichTrack::getStTrack() { return mStTrack;}
+inline double StRichTrack::getUnCorrectedTheta() { return mUnCorrectedTheta;}
+inline double StRichTrack::getUnCorrectedPhi()   { return mUnCorrectedPhi;}
+inline double StRichTrack::getLastHitDCA()       { return mLastHitDCA;}
+inline double StRichTrack::getPathLength()       { return mPath;}
+inline double StRichTrack::getTheta()            { return mTheta;}
+inline double StRichTrack::getPhi()              { return mPhi;}
+inline int StRichTrack::getMaxGap()   { return mMaxGap;}
+inline int StRichTrack::getMaxChain() { return mMaxChain;}
+inline int StRichTrack::getFirstRow() { return mFirstRow;}
+inline int StRichTrack::getLastRow()  { return mLastRow;}
 
 #endif
