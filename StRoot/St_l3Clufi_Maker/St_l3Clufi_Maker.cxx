@@ -1,8 +1,11 @@
 
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.2 1999/11/29 21:50:49 fisyak Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.3 1999/11/29 23:08:12 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.3  1999/11/29 23:08:12  flierl
+// minor changes in variable names
+//
 // Revision 1.2  1999/11/29 21:50:49  fisyak
 // Fix compilation on Sun
 //
@@ -221,9 +224,9 @@ Int_t St_l3Clufi_Maker::Make(){
 			
 			    // just checking
 			    Int_t pixelcount = 0;
-			    for(pixindex=0;pixindex<Max_number_of_rows*Max_number_of_pads*Max_number_of_buckets;pixindex++)
+			    for(Int_t Pixindex=0;Pixindex<Max_number_of_rows*Max_number_of_pads*Max_number_of_buckets;Pixindex++)
 				{
-				    if (pixelst[pixindex].data!=0) { pixelcount++;} 
+				    if (pixelst[Pixindex].data!=0) { pixelcount++;} 
 				}
 			    cout << pixelcount << " pixel found in sector " << sectorindex << endl;
 
@@ -272,8 +275,18 @@ Int_t St_l3Clufi_Maker::Make(){
 	    St_DataSet* sec_bank_set = GetInputDS("l3Clufi");
 	    // create iterator
 	    St_DataSetIter sec_bank_iter(sec_bank_set);
-	    Char_t secname[20];
-	    sprintf(secname,"hits_in_sec_%2i",sec_index);
+	    Char_t secname[15] = "hits_in_sec_00";
+	    if ( sec_index < 10 )
+		{
+		    Char_t sec_char = 48+sec_index;
+		    secname[13] = sec_char;
+		}
+	    else if ( sec_index == 10 || sec_index == 11 || sec_index == 12 )
+		{
+		    secname[12] = '1';
+		    Char_t sec_char = 48+(sec_index-10);
+		    secname[13] = (Char_t) sec_char;
+		}
 	    // get hit array (=bank)
 	    St_hitarray* bank_entries = (St_hitarray*)sec_bank_iter(secname);
 	    hitarray_st* bank_entries_st = (hitarray_st*) bank_entries->GetTable();
