@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.17 1999/03/30 22:30:13 fine Exp $
+// $Id: St_Node.cxx,v 1.18 1999/04/02 23:56:17 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.18  1999/04/02 23:56:17  fine
+// Clean up
+//
 // Revision 1.17  1999/03/30 22:30:13  fine
-// Visibility test has been added for Paint method
+//  Visibility test has been added for Paint method
 //
 // Revision 1.16  1999/03/29 19:25:23  fine
 // Visibility flag have been activated. Some working correction
@@ -658,17 +661,14 @@ void St_Node::PaintNodePosition(Option_t *option,St_NodePosition *pos)
   if (posList && posList->GetSize()) {  
     gGeometry->PushLevel();
     St_NodePosition *thisPosition;
-    TObject *obj;
     TIter  next(posList);
-    while ((obj = next())) {
-       if (view3D)
-           view3D->PushMatrix();
- 
-       thisPosition = (St_NodePosition*)obj;
+    while ((thisPosition = (St_NodePosition *)next())) {
+       if (view3D)  view3D->PushMatrix();
+
        St_Node *node = thisPosition->GetNode();
        if (node) node->PaintNodePosition(option,thisPosition);
-       if (view3D)
-           view3D->PopMatrix();
+
+       if (view3D) view3D->PopMatrix();
     }
     gGeometry->PopLevel();
   }
