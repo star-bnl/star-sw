@@ -3,7 +3,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.hh,v 1.2 1999/11/24 18:14:07 posk Exp $
+// $Id: StFlowAnalysisMaker.hh,v 1.3 1999/12/04 00:15:40 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 // Description:  Maker to analyze Flow using the FlowTags
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.hh,v $
+// Revision 1.3  1999/12/04 00:15:40  posk
+// Works with StFlowEvent which works with the new StEvent
+//
 // Revision 1.2  1999/11/24 18:14:07  posk
 // Now reads event quantities with StFlowEvent methods
 //
@@ -28,8 +31,10 @@
 
 #include <iostream.h>
 #include <stdlib.h>
-#include "../StFlowMaker/StFlowMaker.hh"
-//#include "../StFlowTagMaker/StFlowTagMaker.hh"
+#include "StMaker.h"
+#include "../StFlowMaker/StFlowEvent.hh"
+//#include "../StFlowMaker/StFlowMaker.hh"
+#include "../StFlowTagMaker/StFlowTagMaker.hh"
 #include "TVector2.h"
 class TH1F;
 class TH1D;
@@ -54,34 +59,40 @@ public:
 
 private:
 
-  StFlowEvent*    pFlowEvent;
-  //StFlowTagMaker* pFlowTag;
+  StFlowEvent*  pFlowEvent; //!
+  FlowTag_st*   pFlowTag;   //!
 
-  // C++ way to define constants in the header
   enum {nHars = 4, nSels = 2, nSubs = 2};
   enum {nPhiBins = 60};
 
-  //Double_t mPhiWgt[nSels][nHars][nPhiBins]; // To make event plane isotropic
-
-  TVector2 mQ[nSels][nHars];              // flow vector
-  Float_t  mPsiSub[nSels+nSubs][nHars];   // event plane angle subevents
-  Float_t  mPsi[nSels][nHars];            // event plane angle
-  Float_t  mMult[nSels][nHars];           // multiplicity
-  Float_t  mMeanPt[nSels][nHars];         // mean Pt
-  Float_t  m_q[nSels][nHars];             // Q/sqroot(Mul)
-  TVector2 mQSub[nSels+nSubs][nHars];     // flow vector sub-events
-  Float_t  mMultSub[nSels+nSubs][nHars];  // multiplicity sub-events
-  Float_t  mSumPtSub[nSels+nSubs][nHars]; // Pt sum sub-events
-  //Float_t  mSumPt[nSels][nHars];       // sum Pt
-  //Float_t  mQMod[nSels][nHars];           // flow vector magnitude
+  TVector2 mQ[nSels][nHars];               // flow vector
+  Float_t  mPsiSub[nSels+nSubs][nHars];    // event plane angle subevents
+  Float_t  mPsi[nSels][nHars];             // event plane angle
+  Float_t  mMult[nSels][nHars];            // multiplicity
+  Float_t  mMeanPt[nSels][nHars];          // mean Pt
+  Float_t  m_q[nSels][nHars];              // Q/sqrt(Mul)
+  TVector2 mQSub[nSels+nSubs][nHars];      // flow vector sub-events
+  Float_t  mMeanPtSub[nSels+nSubs][nHars]; // mean Pt
+  Float_t  mMultSub[nSels+nSubs][nHars];   // multiplicity
  
-  // structures for histograms
-  // for each harminic and each sub-event
+  // for histograms
+  TH3F*     mHistEtaPtPhi3D; //!
+  TH2D*     mHistYieldAll2D; //!
+  TProfile* mHistBinEta;     //!
+  TProfile* mHistBinPt;      //!
+  
+  // for each harmonic, each selection, and each sub-event
   struct histSubHars {
     TH1F*     mHistPsiSubs;
   };
+  struct histSubs;	
+  friend struct histSubs;
+  struct histSubs {
+    struct histSubHars histSubHar[nHars];
+  };
+  struct histSubs histSub[nSels+nSubs]; //!
 
-  // for each harminic and each selection
+  // for each harmonic and each selection
   struct histFullHars {
     TH1D*     mHistPhi;
     TH1D*     mHistPhiWgt;
@@ -97,16 +108,7 @@ private:
     TH2D*     mHistSum_v2D;
     TH2F*     mHist_vObs2D;
     TH2F*     mHist_v2D;
-    TProfile* mHistBinEta;
-    TProfile* mHistBinPt;
   };
-
-  struct histSubs;	
-  friend struct histSubs;
-  struct histSubs {
-    struct histSubHars histSubHar[nHars];
-  };
-  struct histSubs histSub[nSels+nSubs]; //!
 
   // for each selection
   struct histFulls;	
@@ -114,20 +116,40 @@ private:
   struct histFulls {
     TProfile* mHistCos;
     TH1F*     mHistRes;
-    TH3F*     mHistEtaPtPhi3D;
     struct histFullHars histFullHar[nHars];
   };
   struct histFulls histFull[nSels]; //!
 
-  //private:
+  static const Float_t phiMin;
+  static const Float_t phiMax;
+  static const Float_t etaMin;
+  static const Float_t etaMax;
+  static const Float_t ptMin;
+  static const Float_t ptMax;
+  static const Float_t psiMin;
+  static const Float_t psiMax; 
+  static const Float_t meanPtMin;
+  static const Float_t meanPtMax;
+  static const Float_t multMin;
+  static const Float_t multMax;
+  static const Float_t qMin;
+  static const Float_t qMax;
+  static const Int_t nPhi3DBins;
+//  static const Int_t nPhiBins;
+  static const Int_t nEtaBins;
+  static const Int_t nPtBins;
+  static const Int_t nPsiBins;
+  static const Int_t nMeanPtBins;
+  static const Int_t nMultBins;
+  static const Int_t n_qBins;
 
   Int_t fillFromTags();
   Int_t fillFromFlowEvent();
   void  fillEventHistograms();
   void  fillParticleHistograms();
 
-  Float_t  mRes[nSels][nHars];    // event plane resolution
-  Float_t  mResErr[nSels][nHars]; // event plane resolution error
+  Float_t  mRes[nSels][nHars];      // event plane resolution
+  Float_t  mResErr[nSels][nHars];   // event plane resolution error
 
   ClassDef(StFlowAnalysisMaker, 1)  // macro for rootcint
 };
