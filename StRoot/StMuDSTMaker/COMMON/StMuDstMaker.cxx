@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.41 2003/10/27 23:54:33 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.42 2003/10/28 00:03:46 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -556,16 +556,16 @@ void StMuDstMaker::closeWrite(){
 void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
   DEBUGMESSAGE2("");
   
-//VP try {
+ try {
     fillEvent(ev);
     fillL3AlgorithmInfo(ev);
     fillDetectorStates(ev);
     fillEmc(ev);
-//VP  }
-//VP  catch(StMuException e) {
-//VP    e.print();
-//VP    throw e;
-//VP  }
+  }
+  catch(StMuException e) {
+    e.print();
+    throw e;
+  }
   
   try {
     fillTracks(ev,mTrackFilter);
@@ -694,7 +694,6 @@ void StMuDstMaker::fillDetectorStates(StEvent* ev) {
     StDetectorState* state = ev->detectorState((StDetectorId) i);
     if (state) {
       addType( mArrays[muState], *state );
-      assert (mArrays[muState]->Last()->GetName());
     }
   }
   timer.stop();
@@ -921,6 +920,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.42  2003/10/28 00:03:46  perev
+ * remove some debug lines
+ *
  * Revision 1.41  2003/10/27 23:54:33  perev
  * weird template bug fized and templates simplified
  *
