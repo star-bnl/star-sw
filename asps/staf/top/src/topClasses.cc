@@ -243,7 +243,7 @@ STAFCV_T topCut:: DoCutTable(tdmTable *tbl,char *func,
   for(row=0;row<*orig+1;row++) { /* The +1 is deliberate, to invoke the
                                  ** else clause during ending of the loop. */
     if(row<(*orig)&&dsuRowPassedCuts((char*)mask,row)) {
-      if(row%1557==0) printf("Phase II: %d %% complete.\n",(row*100)/(*orig));
+      if(row%1557==0) printf("Phase II: %ld %% complete.\n",(row*100)/(*orig));
       rowCnt++; if(startRow<0) startRow=row;
     } else {
       if(startRow>=0) {
@@ -255,8 +255,8 @@ STAFCV_T topCut:: DoCutTable(tdmTable *tbl,char *func,
       }
     }
   }
-  printf("%d rows passed the cuts.\n",rowCnt);
-  *percentPass=(100.0*rowCnt)/(*orig)+0.5;
+  printf("%ld rows passed the cuts.\n",rowCnt);
+  *percentPass=(long)((100.0*rowCnt)/(*orig)+0.5);
   tbl->rowCount(rowCnt);
   FREE(mask); /*fix memory leak -akio*/
   return 7;
@@ -301,11 +301,11 @@ STAFCV_T topCut:: DoFilterTable(tdmTable *src,
     if(row<(*orig)&&dsuRowPassedCuts((char*)mask,row)) {
       if(numMsg<5) {
         if(row%1557==0) {
-          printf("Phase II: %d %% complete.\n",(row*100)/(*orig)); numMsg++;
+          printf("Phase II: %ld %% complete.\n",(row*100)/(*orig)); numMsg++;
         }
       } else {
         if(row%55570==0) {
-          printf("Phase II: %d %% complete.\n",(row*100)/(*orig)); numMsg++;
+          printf("Phase II: %ld %% complete.\n",(row*100)/(*orig)); numMsg++;
         }
       }
       if(startRow<0) startRow=row;
@@ -319,8 +319,8 @@ STAFCV_T topCut:: DoFilterTable(tdmTable *src,
       }
     }
   }
-  printf("%d rows passed the cuts.\n",numberPass);
-  *percentPass=(100.0*numberPass)/(*orig)+0.5;
+  printf("%ld rows passed the cuts.\n",numberPass);
+  *percentPass=(long)((100.0*numberPass)/(*orig)+0.5);
   FREE(mask); /*fix memory leak -akio*/
   return 7;
 }
@@ -335,7 +335,7 @@ STAFCV_T topCut:: filter(tdmTable * tab1, tdmTable * tab2) {
    if( !DoFilterTable(tab1,tab2,myCutFunction,&orig,&percent) ){
       EML_ERROR(FILTER_FAILURE);
    }
-   printf("The original table had %d rows.  %d percent of these passed.\n",
+   printf("The original table had %ld rows.  %ld percent of these passed.\n",
    orig,percent);
    EML_SUCCESS(STAFCV_OK);
 }
@@ -350,7 +350,7 @@ STAFCV_T topCut:: cut(tdmTable * table1) {
    if( !DoCutTable(table1,myCutFunction,&orig,&percent) ){
       EML_ERROR(CUT_FAILURE);
    }
-   printf("The original table had %d rows.  %d percent of these passed.\n",
+   printf("The original table had %ld rows.  %ld percent of these passed.\n",
    orig,percent);
    EML_SUCCESS(STAFCV_OK);
 }
@@ -393,9 +393,13 @@ char* topSort:: whichColumn() {
   strcpy(c,myWhichColumn);
   return c;
 }
-void topSort::SwapRows(
-    void *data, size_t rowsize,void *temp,
-    DS_DATASET_T* dsPtr,int rowNumberA,int rowNumberB) {
+void 
+topSort::SwapRows(void *data, size_t rowsize,void *temp,
+		  DS_DATASET_T* dsPtr,int rowNumberA,int rowNumberB) 
+{
+  // Just to hush pedantic compilers
+  static void *pd = &dsPtr;
+
   void *row1,*row2;
   row1=(void*)((char*)data+(rowsize*rowNumberA));
   row2=(void*)((char*)data+(rowsize*rowNumberB));
