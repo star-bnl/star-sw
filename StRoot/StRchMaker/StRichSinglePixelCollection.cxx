@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSinglePixelCollection.cxx,v 1.2 2000/05/09 21:55:38 lasiuk Exp $
+ * $Id: StRichSinglePixelCollection.cxx,v 1.3 2000/05/23 16:56:01 lasiuk Exp $
  *
  * Description:
  *  Container for cluster finder which allows access in
@@ -11,8 +11,10 @@
  ****************************************************************
  *
  * $Log: StRichSinglePixelCollection.cxx,v $
- * Revision 1.2  2000/05/09 21:55:38  lasiuk
- * deep copy for copy c'tor and assignment (jd)
+ * Revision 1.3  2000/05/23 16:56:01  lasiuk
+ * Incorporate new MC info
+ * add clone() where necessary
+ * accomodate name changes
  *
  * Revision 1.2  2000/05/09 21:55:38  lasiuk
  * deep copy for copy c'tor and assignment (jd)
@@ -23,6 +25,7 @@
 
 #include <memory>
 //#include <string.h>  // only for memcpy and memset functions
+
 #include "StGlobals.hh"
 
 #include "StRichSinglePixelCollection.h"
@@ -46,6 +49,7 @@ StRichSinglePixelCollection::~StRichSinglePixelCollection()
 
 StRichSinglePixelCollection::StRichSinglePixelCollection(const StRichSinglePixelCollection& old)
 {
+    //cout << "StRichSinglePixelCollection::StRichSinglePixelCollection()" << endl;
     // Correction from jcd.  Make a deep copy if
     // the pixel collection is to be passed by value.
     //mPixelVector = old.mPixelVector;
@@ -71,7 +75,8 @@ StRichSinglePixelCollection::StRichSinglePixelCollection(const StRichSinglePixel
     
     for (size_t ii=0; ii<old.mPixelVector.size(); ii++) {
 	// Error handling?
-        this->push_back(new StRichSinglePixel(*(old.mPixelVector[ii])));
+	this->push_back( (old.mPixelVector[ii])->clone() );
+        //this->push_back(new StRichSinglePixel(*(old.mPixelVector[ii])));
     }
     
 //      memcpy( (void *)mPixelArray,
@@ -83,6 +88,7 @@ StRichSinglePixelCollection::StRichSinglePixelCollection(const StRichSinglePixel
 StRichSinglePixelCollection&
 StRichSinglePixelCollection::operator=(const StRichSinglePixelCollection& old)
 {
+    //cout << "StRichSinglePixelCollection::operator=()" << endl;
     // change from jcd.  Make a deep copy.
     if(this != &old) {
 	//
@@ -112,7 +118,8 @@ StRichSinglePixelCollection::operator=(const StRichSinglePixelCollection& old)
 
 	for (size_t ii=0; ii<old.mPixelVector.size(); ii++) {
 	    // Error handling?
-	    this->push_back(new StRichSinglePixel(*(old.mPixelVector[ii])));
+	    this->push_back( (old.mPixelVector[ii])->clone() );
+	    //this->push_back(new StRichSinglePixel(*(old.mPixelVector[ii])));
 	}
     }
 // 	memcpy( (void *)mPixelArray,

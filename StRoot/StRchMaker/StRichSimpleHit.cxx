@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSimpleHit.cxx,v 1.2 2000/05/18 11:42:39 lasiuk Exp $
+ * $Id: StRichSimpleHit.cxx,v 1.3 2000/05/23 16:55:55 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -10,8 +10,10 @@
  ***************************************************************************
  *
  * $Log: StRichSimpleHit.cxx,v $
- * Revision 1.2  2000/05/18 11:42:39  lasiuk
- * mods for pre StEvent writing
+ * Revision 1.3  2000/05/23 16:55:55  lasiuk
+ * Incorporate new MC info
+ * add clone() where necessary
+ * accomodate name changes
  *
  * Revision 2.0  2000/08/09 16:22:12  gans
  * Cosmetic Changes. Naming convention for TDrawable objects
@@ -31,12 +33,12 @@
 
     : mLocal(xl), mSigma(dx)
 
-// #ifdef __ROOT__
-// StRichSimpleHit::StRichSimpleHit(const StRichHit*)
-// {
-//     cout << "StRichSimpleHit::StRichSimpleHit(const StRichHit*)" << endl;
-// }
-// #endif
+StRichSimpleHit::StRichSimpleHit() {/* nopt */}
+
+StRichSimpleHit::StRichSimpleHit(const StThreeVector<double>& xl, const StThreeVector<double>& dx)
+    : mLocal(xl), mSigma(dx), mFlags(0)
+StRichSimpleHit::StRichSimpleHit(const StRichHit*)
+      mSigma(hit->positionError().x(), hit->positionError().y(), hit->positionError().z()),
       mCharge(hit->charge()),
       mMaxAmplitude(hit->maxAmplitude()),
       mClusterNumber(hit->clusterNumber()),

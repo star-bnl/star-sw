@@ -1,12 +1,14 @@
 /***************************************************************
- * $Id: StRichDrawableTHit.cxx,v 1.2 2000/05/18 11:42:32 lasiuk Exp $
+ * $Id: StRichDrawableTHit.cxx,v 1.3 2000/05/23 16:55:48 lasiuk Exp $
  *
  * Description:
  *
  ***************************************************************
  * $Log: StRichDrawableTHit.cxx,v $
- * Revision 1.2  2000/05/18 11:42:32  lasiuk
- * mods for pre StEvent writing
+ * Revision 1.3  2000/05/23 16:55:48  lasiuk
+ * Incorporate new MC info
+ * add clone() where necessary
+ * accomodate name changes
  *
  * Revision 1.2  2000/05/18 11:42:32  lasiuk
  * mods for pre StEvent writing
@@ -17,6 +19,7 @@
  ***************************************************************/
 #ifdef __ROOT__
 #include "StRichDrawableTHit.h"
+#include "StRichSimpleHit.h"
 
 ClassImp(StRichDrawableTHit)
 
