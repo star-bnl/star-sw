@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcDetector.cxx,v 2.5 2000/10/26 00:02:21 ullrich Exp $
+ * $Id: StEmcDetector.cxx,v 2.6 2000/12/08 03:39:50 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.cxx,v $
+ * Revision 2.6  2000/12/08 03:39:50  ullrich
+ * Fixed warning because of signed/unsigned comparison.
+ *
  * Revision 2.5  2000/10/26 00:02:21  ullrich
  * Fixed various problems causing I/O failures.
  *
@@ -31,7 +34,7 @@
 #include "StEmcModule.h"
 #include "StEmcClusterCollection.h"
 
-static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.5 2000/10/26 00:02:21 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.6 2000/12/08 03:39:50 ullrich Exp $";
 
 ClassImp(StEmcDetector)
 
@@ -115,7 +118,7 @@ StEmcDetector::setModule(StEmcModule* val,Int_t IdMod)
 {
     if (val)
     { 
-      if (IdMod >= 0 && IdMod < mNumberOfModules) 
+      if (IdMod >= 0 && IdMod < static_cast<int>(mNumberOfModules)) 
       {
         if (mModules[IdMod]) delete mModules[IdMod];
         mModules[IdMod] = val;
