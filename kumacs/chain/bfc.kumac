@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.38 1998/08/25 00:20:16 kathy Exp $
+* $Id: bfc.kumac,v 1.39 1998/08/25 00:32:11 fisyak Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.39  1998/08/25 00:32:11  fisyak
+* Add log summary
+*
 * Revision 1.38  1998/08/25 00:20:16  kathy
 * put in Lanny's changes: now have dpnt, desum working
 *
@@ -399,6 +402,7 @@ MACRO bfc _
    tabclear [event]          | zero all tables
    exec bfc_util#bfc_process [chain]
    if (STAF_STATUS(1).ne. 1) goto ABEND
+   nevents = [nevents] + 1
  enddo
 
 *****************************************
