@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.12 2000/09/05 16:11:31 snelling Exp $
+// $Id: StFlowEvent.cxx,v 1.13 2000/09/12 01:30:23 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.13  2000/09/12 01:30:23  snelling
+// Changed PID selection
+//
 // Revision 1.12  2000/09/05 16:11:31  snelling
 // Added global DCA, electron and positron
 //
@@ -376,54 +379,112 @@ void StFlowEvent::MakeSubEvents() {
 
 void StFlowEvent::SetPids() {
   
+
   StFlowTrackIterator itr;
+
   for (itr = TrackCollection()->begin(); 
        itr != TrackCollection()->end(); itr++) {
+
     StFlowTrack* pFlowTrack = *itr;
     Char_t pid[10] = "none";
     Short_t charge  = pFlowTrack->Charge();
+
+    Bool_t bPiPlus = kFALSE;
+    Bool_t bPiMinus = kFALSE;
+    Bool_t bProton = kFALSE;
+    Bool_t bAntiProton = kFALSE;
+    Bool_t bKplus = kFALSE;
+    Bool_t bKminus = kFALSE;
+    Bool_t bDeuteron = kFALSE;
+    Bool_t bAntiDeuteron = kFALSE;
+    Bool_t bElectron = kFALSE;
+    Bool_t bPositron = kFALSE;
     
     if (charge == 1) {
       Float_t piPlus  = pFlowTrack->PidPiPlus();
       Float_t proton  = pFlowTrack->PidProton();
       Float_t kPlus   = pFlowTrack->PidKaonPlus();
-      Float_t kDeuteron   = pFlowTrack->PidDeuteron();
-      Float_t kPositron   = pFlowTrack->PidPositron();
-      if (piPlus > mPiPlusCuts[0] && piPlus < mPiPlusCuts[1]) {
-	strcpy(pid, "pi+");
-      } else if ( proton > mProtonCuts[0] && proton < mProtonCuts[1]) {
-	strcpy(pid, "proton");
-      } else if ( kPlus > mKPlusCuts[0] && kPlus < mKPlusCuts[1]) {
-	strcpy(pid, "k+");
-      } else if ( kDeuteron > mDeuteronCuts[0] && 
-		  kDeuteron < mDeuteronCuts[1]) {
-	strcpy(pid, "d");
-      } else if ( kPositron > mPositronCuts[0] && 
-		  kPositron < mPositronCuts[1]) {
-	strcpy(pid, "e+");
+      Float_t deuteron   = pFlowTrack->PidDeuteron();
+      Float_t positron   = pFlowTrack->PidPositron();
+      if (piPlus > mPiPlusCuts[0] && 
+	  piPlus < mPiPlusCuts[1]) {
+	bPiPlus = kTRUE;
+      } 
+      if ( proton > mProtonCuts[0] && 
+	   proton < mProtonCuts[1]) {
+	bProton = kTRUE;
+      } 
+      if ( kPlus > mKPlusCuts[0] && 
+	   kPlus < mKPlusCuts[1]) {
+	bKplus = kTRUE;
+      } 
+      if ( deuteron > mDeuteronCuts[0] && 
+	   deuteron < mDeuteronCuts[1]) {
+	bDeuteron = kTRUE;
+      } 
+      if ( positron > mPositronCuts[0] && 
+	   positron < mPositronCuts[1]) {
+	bPositron = kTRUE;
       }
     } else if (charge == -1) {
       Float_t piMinus = pFlowTrack->PidPiMinus();
       Float_t antiProton  = pFlowTrack->PidAntiProton();
       Float_t kMinus   = pFlowTrack->PidKaonMinus();
-      Float_t kAntiDeuteron   = pFlowTrack->PidAntiDeuteron();
-      Float_t kElectron   = pFlowTrack->PidElectron();
-      if (piMinus > mPiMinusCuts[0] && piMinus < mPiMinusCuts[1]) {
-	strcpy(pid, "pi-");
-      } else if ( antiProton > mAntiProtonCuts[0] && 
-		  antiProton < mAntiProtonCuts[1]) {
-	strcpy(pid, "pbar");
-      } else if ( kMinus > mKMinusCuts[0] && kMinus < mKMinusCuts[1]) {
-	strcpy(pid, "k-");
-      } else if ( kAntiDeuteron > mAntiDeuteronCuts[0] && 
-		  kAntiDeuteron < mAntiDeuteronCuts[1]) {
-	strcpy(pid, "dbar");
-      } else if ( kElectron > mElectronCuts[0] && 
-		  kElectron < mElectronCuts[1]) {
-	strcpy(pid, "e-");
+      Float_t antiDeuteron   = pFlowTrack->PidAntiDeuteron();
+      Float_t electron   = pFlowTrack->PidElectron();
+      if (piMinus > mPiMinusCuts[0] && 
+	  piMinus < mPiMinusCuts[1]) {
+	bPiMinus = kTRUE;
+      } 
+      if ( antiProton > mAntiProtonCuts[0] && 
+	   antiProton < mAntiProtonCuts[1]) {
+	bAntiProton = kTRUE;
+      } 
+      if ( kMinus > mKMinusCuts[0] && 
+	   kMinus < mKMinusCuts[1]) {
+	bKminus = kTRUE;
+      } 
+      if ( antiDeuteron > mAntiDeuteronCuts[0] && 
+	   antiDeuteron < mAntiDeuteronCuts[1]) {
+	bAntiDeuteron = kTRUE;
+      } 
+      if ( electron > mElectronCuts[0] && 
+	   electron < mElectronCuts[1]) {
+	bElectron = kTRUE;
       }
     }
-    
+
+    if (bPiPlus && !bPiMinus && !bProton && !bAntiProton && 
+	!bKplus && !bKminus && !bDeuteron && !bAntiDeuteron && 
+	!bElectron && !bPositron) { strcpy(pid, "pi+"); } 
+    if (!bPiPlus && bPiMinus && !bProton && !bAntiProton && 
+	!bKplus && !bKminus && !bDeuteron && !bAntiDeuteron && 
+	!bElectron && !bPositron) { strcpy(pid, "pi-"); } 
+    if (!bPiPlus && !bPiMinus && bProton && !bAntiProton && 
+	!bKplus && !bKminus && !bDeuteron && !bAntiDeuteron && 
+	!bElectron && !bPositron) { strcpy(pid, "proton"); } 
+    if (!bPiPlus && !bPiMinus && !bProton && bAntiProton && 
+	!bKplus && !bKminus && !bDeuteron && !bAntiDeuteron && 
+	!bElectron && !bPositron) { strcpy(pid, "pbar"); } 
+    if (!bPiPlus && !bPiMinus && !bProton && !bAntiProton && 
+	bKplus && !bKminus && !bDeuteron && !bAntiDeuteron && 
+	!bElectron && !bPositron) { strcpy(pid, "k+"); } 
+    if (!bPiPlus && !bPiMinus && !bProton && !bAntiProton && 
+	!bKplus && bKminus && !bDeuteron && !bAntiDeuteron && 
+	!bElectron && !bPositron) { strcpy(pid, "k-"); } 
+    if (!bPiPlus && !bPiMinus && !bProton && !bAntiProton && 
+	!bKplus && !bKminus && bDeuteron && !bAntiDeuteron && 
+	!bElectron && !bPositron) { strcpy(pid, "d"); } 
+    if (!bPiPlus && !bPiMinus && !bProton && !bAntiProton && 
+	!bKplus && !bKminus && !bDeuteron && bAntiDeuteron && 
+	!bElectron && !bPositron) { strcpy(pid, "dbar"); } 
+    if (!bPiPlus && !bPiMinus && !bProton && !bAntiProton && 
+	!bKplus && !bKminus && !bDeuteron && !bAntiDeuteron && 
+	bElectron && !bPositron) { strcpy(pid, "e-"); } 
+    if (!bPiPlus && !bPiMinus && !bProton && !bAntiProton && 
+	!bKplus && !bKminus && !bDeuteron && !bAntiDeuteron && 
+	!bElectron && bPositron) { strcpy(pid, "e+"); } 
+
     pFlowTrack->SetPid(pid);
 
   }
