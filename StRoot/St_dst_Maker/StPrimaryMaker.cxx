@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.40 2000/04/11 23:54:00 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.41 2000/04/12 20:33:52 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.41  2000/04/12 20:33:52  caines
+// Fill bit map for primaries flag in one place
+//
 // Revision 1.40  2000/04/11 23:54:00  caines
 // Shouldnt try to access row -1 any more
 //
@@ -468,7 +471,7 @@ Int_t StPrimaryMaker::Make(){
       bool isset;
       
       for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
-	if( tgroup->ident > 0){
+	if( tgroup->ident >= 0){
 	  spt_id = tgroup->id2-1;
 	  row = spc[spt_id].row/100;
 	  row = spc[spt_id].row - row*100;
@@ -483,22 +486,6 @@ Int_t StPrimaryMaker::Make(){
 	  if (isset) track[spc[spt_id].id_globtrk-1].map[1] |= 1UL<<30; 
 	}
       }
-      
-      
-
-      //scs_spt_st *s_spc = scs_spt->GetTable();
-      //      sgr_groups_st *sgroup = svt_groups->GetTable();
-      
-      // for( i=0; i<svt_groups->GetNRows(); i++, sgroup++){
-	
-      //	if( sgroup->id1 > 0){
-      //	  spt_id = sgroup->id2-1;
-      //	  row = s_spc[spt_id].id_wafer/1000;
-      //	  if( row >7) row=7;
-      //	  track[s_spc[spt_id].id_globtrk-1].map[0] += pow(2,(row));
-      //	}
-	
-      // }
       
     }
   }
@@ -531,7 +518,7 @@ Int_t StPrimaryMaker::Make(){
           //          if(primtrkPtr->id_start_vertex != 0)
           //  keep_vrtx_id=primtrkPtr->id_start_vertex;
           primtrkPtr->n_max_point = globtrkPtr->n_max_point;
-	  primtrkPtr->map[0] += (1UL<<1);
+	  primtrkPtr->map[0] |= (1UL<<0);
 
 	  Float_t dip   = atan(primtrkPtr->tanl);
 	  Int_t    h    = (primtrkPtr->icharge > 0 ? -1 : 1);
