@@ -219,18 +219,19 @@ C     omit points that were marked as outliers
      +                    tphit(ient).dy**2)
                      
 C     calculate correction to the error, coming from the crossing angle
-                     iret = egr_cross_fact(tphit(ient).row,xcir(ncir),
-     +                    ycir(ncir),xold,yold,cf,theta)
+C                     iret = egr_cross_fact(tphit(ient).row,xcir(ncir),
+C     +                    ycir(ncir),xold,yold,cf,theta)
                      
-                     if(ient1 .eq. 0) then
-                        ient1 = 1
-                     else if(ient1 .eq. 1) then
-                        ient1 = 2
-                        wcir(ncir-1) = wcir(ncir-1)/cf
-                     endif
-                     xold = xcir(ncir)
-                     yold = ycir(ncir)
-                     wcir(ncir) = wcir(ncir)/cf
+C                     if(ient1 .eq. 0) then
+C                        ient1 = 1
+C                     else if(ient1 .eq. 1) then
+C                        ient1 = 2
+C                        wcir(ncir-1) = wcir(ncir-1)/cf
+C                     endif
+C                     xold = xcir(ncir)
+C                     yold = ycir(ncir)
+C                    wcir(ncir) = wcir(ncir)/cf
+
                      wlin(ncir) = 1.0/tphit(ient).dz**2
                      
                      pnt(ncir)  = i ! pointer that identifies outliers
