@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.16 1999/02/23 01:10:42 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.17 1999/02/23 19:15:05 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.17  1999/02/23 19:15:05  lasiuk
+// Change in the rotation angle for GEANT global coordinates
+//
 // Revision 1.16  1999/02/23 01:10:42  lasiuk
 // 1st production version
 //
@@ -97,7 +100,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.16 1999/02/23 01:10:42 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.17 1999/02/23 19:15:05 lasiuk Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -366,7 +369,9 @@ Int_t StTrsMaker::Make(){
 	    // It is also in StTrsChargeSegment::rotate()
 	    // should change to this SOON, but there is a time penalty because
 	    // a 2x2 matrix must be constructed
-	    double beta = bsectorOfHit*M_PI/6.;  // (30 degrees)
+	    double beta = (bsectorOfHit>12) ?
+		-bsectorOfHit*M_PI/6 :
+		bsectorOfHit*M_PI/6 ;   //(30 degrees)
 	    double cb   = cos(beta);
 	    double sb   = sin(beta);
 	    double xp = hitPosition.x()*cb - hitPosition.y()*sb;
@@ -604,7 +609,7 @@ Int_t StTrsMaker::Make(){
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.16 1999/02/23 01:10:42 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.17 1999/02/23 19:15:05 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
