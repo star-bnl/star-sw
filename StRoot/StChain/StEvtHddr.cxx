@@ -43,7 +43,7 @@ void StEvtHddr::FillTag(EvtHddr_st *tag)
   void StEvtHddr::SetGMTime(UInt_t ut)
 {
    TUnixTime unixTime(ut);
-   Int_t dat,tim;
+   Int_t dat=0,tim=0;
    unixTime.GetGTime(dat,tim);
    mEventTime.Set(dat,tim);
 }
