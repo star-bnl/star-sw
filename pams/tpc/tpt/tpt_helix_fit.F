@@ -1,5 +1,8 @@
-* $Id: tpt_helix_fit.F,v 1.7 2000/01/21 07:55:46 sakrejda Exp $
+* $Id: tpt_helix_fit.F,v 1.8 2000/03/10 05:27:42 sakrejda Exp $
 * $Log: tpt_helix_fit.F,v $
+* Revision 1.8  2000/03/10 05:27:42  sakrejda
+* Track length calculation fixed. Was not going past 90 deg before.
+*
 * Revision 1.7  2000/01/21 07:55:46  sakrejda
 * Calculation of track length along the helix improved. Makes chisq and residuals symmetric.
 *
@@ -49,6 +52,7 @@ C___________________________________________________________________
 #include "tpt_pars.inc"
 #include "tpt_mxdim.inc"
 #include "tpt_track_pointers.inc"
+#include "math_constants.inc"
 C____________________________________________________________________
       RECORD /tpt_track_pointers_st/ trk(*)
       RECORD /table_head_st/    tpar_h
@@ -57,7 +61,7 @@ C____________________________________________________________________
       INTEGER ier,ncir,ipt,utcfit,ks,lswlf,circov
       REAL    sgn, rad, phi0, x0, y0, z0, tanl, chit, chil
       REAL    acent, bcent, charge,dpsi,scir(mxpnt),rr,zint
-      REAL    dtanl,dzint,h(3,3)
+      REAL    dtanl,dzint,h(3,3),dangle
       REAL    xcir(*),ycir(*),wcir(*),zcir(*),wlin(*)
       REAL    refx,refy,refmod,curx,cury,curmod
       LOGICAL good
@@ -108,8 +112,13 @@ C        evaluate errors
              curx=xcir(ks)-acent
              cury=ycir(ks)-bcent
              curmod=sqrt(curx**2+cury**2)
-             dpsi = abs(refx*cury-refy*curx)/(refmod*curmod)
-             scir(ks) = rr*asin(dpsi)
+             dpsi = abs(-refx*cury+refy*curx)/(refmod*curmod)
+             dangle = asin(dpsi)
+             scir(ks) = rr*dangle
+             if(ks.gt.1.and.scir(ks).lt.scir(ks-1))then
+                 scir(ks)= rr*(C_PI-dangle)
+             endif 
+C
          end do
          chil = 999999.0
          if(ncir.ge.3)then
