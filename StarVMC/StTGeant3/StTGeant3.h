@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: StTGeant3.h,v 1.1.1.1 2004/07/17 20:02:55 perev Exp $ */
+/* $Id: StTGeant3.h,v 1.2 2004/07/22 18:09:20 perev Exp $ */
 
 //////////////////////////////////////////////// 
 //  C++ interface to Geant3 basic routines    // 
@@ -539,13 +539,15 @@ typedef struct {
  *                                                                      *
  ************************************************************************/
 
+class TGeoNode;
 class StTGeant3 : public TVirtualMC { 
 
 public: 
   StTGeant3(); 
-  StTGeant3(const char *title, Bool_t isrootgeom=1,Int_t nwgeant=0); 
+  StTGeant3(const char *title, Int_t isrg=1,Int_t nwgeant=0); 
   virtual ~StTGeant3();
-
+  static Int_t Mode()  {return fgMode;}
+  
   virtual void LoadAddress(); 
   static  void InitBridge();
 ///////////////////////////////////////////////////////////////////////
@@ -903,7 +905,14 @@ static void Bgrndm (Float_t *r, const Int_t &n);
                   Float_t tof, TMCProcess mech, Int_t &ntr,
                   Float_t weight, Int_t is);
 
+static Int_t fgMode; // 1=WithRoot, 2=WithG3, 1+2=WithBoth
+static TGeoNode  *fgCurrentNode;
+static Gctrak_t  *fgGctrack;
+static Gcvolu_t  *fgGcvolu;
+static StTGeant3 *fgGeant3;
+
 protected:
+  enum Modes {kWithRoot=1,kWithG3=2,kWithBoth=3};
   Int_t fNextVol;    // Iterator for GeomIter
   char  fPath[512];  // Current path of G3
 //--------------Declarations for ZEBRA--------------------- 
