@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.238 2001/10/06 06:12:43 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.239 2001/10/08 01:56:10 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -100,15 +100,19 @@ Bfc_st BFC[] = {
 
 
   // Physics,Cdst,... Physics was removed since trg reads the wrong format
-  {"P2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
-                                               ,"Production chain for summer 2001 data (tpc, rich)",kFALSE},
+  {"P2001"       ,""  ,"",
+   "ry2001,in,tpc_daq,tpc,rich,l3onl,tofDat,Physics,Cdst,Kalman,tags,Tree,evout,AlignSectors,ExB,OBmap,OClock,OPr13",
+   "",""                                       ,"Production chain for summer 2001 data (tpc, rich)",kFALSE},
 
   // all above P2001x are TEMPORARY chains. We will shift the numbering up
   // as soon as the code will be toroughly tested. NoHits will be turned on
   // later as a final touch. emcY2 removed on Sept 27th 2001.
-  {"P2001a"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,svt_daq,SvtD,ftpc,l3onl,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""              ,"Production chain for summer 2001 data (tpc, rich, ftpc, svt, l3)",kFALSE},
+  {"P2001a"      ,""  ,"",
+   "ry2001,in,tpc_daq,tpc,rich,svt_daq,SvtD,ftpc,l3onl,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
+                                ,"Production chain for summer 2001 data (tpc, rich, ftpc, svt, l3)",kFALSE},
 
-  {"P2001b"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,ftpc,l3onl,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""                                 ,"Production chain for summer 2001 data (P2001a - Svt)",kFALSE},
+  {"P2001b"  ,"" ,"","ry2001,in,tpc_daq,tpc,rich,ftpc,l3onl,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
+                                            ,"Production chain for summer 2001 data (P2001a - Svt)",kFALSE},
 
 
 
@@ -243,6 +247,7 @@ Bfc_st BFC[] = {
   {"Mixer"       ,"tpc_raw","","","StMixerMaker"  ,"StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
   {"tpc_daq"     ,"tpc_raw","tpcChain","tpc_T"              ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"tfs"         ,"","tpcChain","Simu"                             ,"","","use tfs (no StTrsMaker)",kFALSE},
+  {"ZDCVtx"      ,"","tpcChain","db"                      ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
   {"Velo"        ,"","tpcChain","tpc_T,tls"                         ,"StVeloMaker","StVeloMaker","",kFALSE},
   {"TpcHitFilter","tpc_hit_filter","tpcChain",""    ,"StTpcHitFilterMaker","StTpcHitFilterMaker","",kFALSE},
