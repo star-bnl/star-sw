@@ -3,6 +3,7 @@
 class TObject;
 class TObjArray;
 class StMaker; 
+
 class StMkDeb 
 {
 public:
@@ -14,6 +15,7 @@ public:
   static void Cancel(StMaker *mk);
   static int  SetCurrent(const TObject *mk,int kind=0);
   static int  SetCurrent(const StMaker *mk,int kind=0);
+  static void SetStage(int stage);
   static int  GetCurrent();
   static int  SetCurrent(int curr); 
   static int  SetUser(TObject *us); 
@@ -24,6 +26,7 @@ private:
   static void Ready();
 
   static int        fgCurr;
+  static int        fgStage;
   static TObjArray *fgArr;
 };  
 
