@@ -31,6 +31,7 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
   StiKTNBidirectionalIterator source;
   bool direction = (trackingDirection==fitDirection);
   double chi2;
+  int status;
   if (direction)
     { 
       //cout << "set =="<<endl;
@@ -43,11 +44,11 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	  targetHit = targetNode->getHit();
 	  // evolve state from that of source using dets source to target
 	  if (targetDet)
-	    targetNode->propagate(&(*source),targetDet);	// hit
+	    status = targetNode->propagate(&(*source),targetDet);	// hit
 	  else
-	    targetNode->propagate(&(*source),targetHit);  // vertex
+	    status = targetNode->propagate(&(*source),targetHit);  // vertex
 	  // if targetNode has hit, get chi2 and update track parameters accordingly
-	  if (targetHit)
+	  if (targetHit && status==0)
 	    {
 	      chi2 = targetNode->evaluateChi2(targetHit);
 	      targetNode->setChi2(chi2);
@@ -67,11 +68,11 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	  targetHit = targetNode->getHit();
 	  // evolve state from that of source using dets source to target
 	  if (targetDet)
-	    targetNode->propagate(&(*source),targetDet);	// hit
+	    status = targetNode->propagate(&(*source),targetDet);	// hit
 	  else
-	    targetNode->propagate(&(*source),targetHit);  // vertex
+	    status = targetNode->propagate(&(*source),targetHit);  // vertex
 	  // if targetNode has hit, get chi2 and update track parameters accordingly
-	  if (targetHit)
+	  if (targetHit && status==0)
 	    {
 	      chi2 = targetNode->evaluateChi2(targetHit);
 	      targetNode->setChi2(chi2);

@@ -767,11 +767,19 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   StiKalmanTrackNode * sNode=0;
   StiKalmanTrackNode * tNode=0;
   bool trackExtended = false;
-	StiHit localVertex = *vertex;
+  StiHit localVertex = *vertex;
   sNode = lastNode;
-	localVertex.rotate(sNode->getRefAngle());
+  localVertex.rotate(sNode->getRefAngle());
+  cout << "vx:"<<localVertex.x()
+       << "vy:"<<localVertex.y()
+       << "vz:"<<localVertex.z()<<endl;
+
   tNode = trackNodeFactory->getInstance();
   if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() - ERROR - tNode==null");
+
+  cout << "StiKalmanTrack::extendToVertex() -I- original pt:"<< getPt()<<endl;
+
+
   tNode->reset();
 	//  if (tNode->propagate(sNode, vertex))
   bool propagateResult=tNode->propagate(sNode,vertex);
@@ -779,21 +787,26 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   if (propagateResult)
   {
      chi2 = tNode->evaluateChi2(&localVertex); 
-     //cout<<"Chi2 at Vertex:"<<chi2<<endl;
-     if (chi2<20.)// pars->maxChi2ForSelection)
+     if (chi2<2000.)// pars->maxChi2ForSelection)
 	{
-	   // storing a pointer to the vertex 
-	   // should I use localVertex?
-	   StiHit * myHit = StiToolkit::instance()->
-	                    getHitFactory()->getInstance();
-	   *myHit = localVertex;
-	    tNode->setHit(myHit);
-	    tNode->setChi2(chi2);
-	    tNode->setDetector(0);
-	    add(tNode);
-	    trackExtended = true;
-	 }
-	 return trackExtended;
+	  // storing a pointer to the vertex 
+	  // should I use localVertex?
+	  StiHit * myHit = StiToolkit::instance()->
+	    getHitFactory()->getInstance();
+	  *myHit = localVertex;
+	  tNode->setHit(myHit);
+	  tNode->setChi2(chi2);
+	  tNode->setDetector(0);
+	  add(tNode);
+	  cout << "StiKalmanTrack::extendToVertex() -I- updated  pt:"<< getPt()<<endl;
+	  cout << "inout fit"<<endl;
+	  fit(kInsideOut);
+	  cout << "out-in fit"<<endl;
+	  fit(kOutsideIn);
+	  trackExtended = true;
+	  cout << "StiKalmanTrack::extendToVertex() -I- refitted  pt:"<< getPt()<<endl;
+	}
+     return trackExtended;
   }//end if (propogate returns true)
   return false;
 }
@@ -811,24 +824,28 @@ bool StiKalmanTrack::find(int direction)
       trackExtended = true;
     }		
   // decide if an outward pass is needed.
-  /*const StiKalmanTrackNode * outerMostNode = getOuterMostHitNode();
-		if (outerMostNode->_x<190. )
+  const StiKalmanTrackNode * outerMostNode = getOuterMostHitNode();
+  if (false) //outerMostNode->getX()<190. )
     {
       // swap the track inside-out in preparation for the outward search/extension
       TRACKMESSENGER<<"StiKalmanTrack::find(int) -I- Swap track"<<endl;
       swap();      
       try
-				{
-					if (trackFinder->find(this,kInsideOut))
-						{
-							if (debugCount<20) TRACKMESSENGER << "fit(OutIn)";
-							fit(kOutsideIn);             
-							trackExtended = true;
-						}
-				}
-			swap();
-			setTrackingDirection(kOutsideIn);
-			}*/
+	{
+	  if (trackFinder->find(this,kInsideOut) )
+	    {
+	      if (debugCount<20) TRACKMESSENGER << "fit(OutIn)";
+	      fit(kOutsideIn);             
+	      trackExtended = true;
+	    }
+	}
+      catch (...)
+	{
+	  cout << "StiKalmanTrack::find(int direction) -W- Exception while in out fit"<<endl;
+	}
+      swap();
+      setTrackingDirection(kOutsideIn);
+    }
   reserveHits();
   setFlag(1);
   return trackExtended;

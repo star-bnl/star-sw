@@ -371,8 +371,8 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 	{
 	  gasDensity = gas->getDensity();
 	  matDensity = mat->getDensity();
-	  gasRL      = gas->getRadLength();
-	  matRL      = mat->getRadLength();
+	  gasRL      = gas->getX0();
+	  matRL      = mat->getX0();
 	}
       double detHT, gapT,s;
       switch (sh->getShapeCode())
@@ -390,27 +390,26 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 	    detHT = 0.;
 	    gapT  = 0.;
 	    s=1.;
+	    break;
 	  }
 	case kConical:
-		{
-			cout << " StiKalmanTrackNode::propagate(  ) -F- kConical option not yet supported"<<endl;
-		}
+	  {
+	    cout << " StiKalmanTrackNode::propagate(  ) -F- kConical option not yet supported"<<endl;
+	  }
 	}
       density = (gasDensity*gapT + 2*matDensity*detHT)/s;
       radThickness  = s*(gapT/gasRL+2*detHT/matRL)/dx;
-      if (density<0) 
-	throw runtime_error("SKTN::propagate() - density<0");
-      //mass
-      //radThickness*density;
+      if (density<=0) 
+	throw runtime_error("SKTN::propagate() - density<=0");
       double sign;
       if (dx>0)
 	sign = -1.;
       else
-	sign = 1.;
+	sign =  1.;
 	  
-      //double zOverA = 0.5;
-      //double ionization = 5;
-      //propagateMCS(pathLength,radThickness,zOverA,ionization,pars->massHypothesis,sign);
+      double zOverA = 0.5;
+      double ionization = 5;
+      propagateMCS(pathLength,radThickness,zOverA,ionization,pars->massHypothesis,sign);
     }
   return position;
 }
@@ -430,12 +429,11 @@ bool StiKalmanTrackNode::propagate(const StiKalmanTrackNode *parentNode, StiHit 
   setState(parentNode);
   double locVx = _cosAlpha*vertex->x() + _sinAlpha*vertex->y();
   if (propagate(locVx,0) < 0)
-		return false; // track does not reach vertex "plane"
-  //propagateError();
+    return false; // track does not reach vertex "plane"
+  propagateError();
   _hit = vertex;
-	_detector = 0;
-	cout<<"SKTN -i- propagateDone";
-	return true;
+  _detector = 0;
+  return true;
 }
 
 
@@ -586,12 +584,14 @@ void StiKalmanTrackNode::propagateMCS(double pathLength,
   _c22 += (2*ey*ez*ez*_p2+1-ey*ey+ez*ez+_p2*_p2*ez*ez)*theta2;
   _c42 += ez*zz1*xy*theta2;
   _c44 += zz1*zz1*theta2;
-  //if(!eloss) return;
   double dE=0;
   //double dE=elossSign*eloss->calculate(1.,massHypo, beta2);
-  double cc=_p3;
-  _p3 = _p3 *(1.- sqrt(e2)*dE/p2);
-  _p2 = _p2 + _x*(_p3-cc);
+  if (fabs(dE)>0)
+    {
+      double cc=_p3;
+      _p3 = _p3 *(1.- sqrt(e2)*dE/p2);
+      _p2 = _p2 + _x*(_p3-cc);
+    }
 }
 
 
@@ -631,32 +631,36 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   MESSENGER <<"evaluateChi2()-INFO-Started"<<endl;
   //If required, recalculate the errors of the detector hits.
   //Do not attempt this calculation for the main vertex.
-	if (!hit)
-		throw runtime_error("SKTN::evaluateChi2(const StiHit &) - hit==0");
-	const StiDetector * detector = hit->detector();
+  if (!hit)
+    throw runtime_error("SKTN::evaluateChi2(const StiHit &) - hit==0");
+  const StiDetector * detector = hit->detector();
   if (useCalculatedHitError && detector)
     {
       MESSENGER <<"evaluateChi2()-INFO- Hit OK"<<endl;
       const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
       if (!calc)
-				throw runtime_error("SKTN::evaluateChi2(const StiHit &) - calc==0");
+	throw runtime_error("SKTN::evaluateChi2(const StiHit &) - calc==0");
       calc->calculateError(this);
       r00=_c00+eyy;
       r01=_c10; r11=_c11+ezz;
     }
   else
-    { 
+    {
+      //cout << "hit->syy():"<<hit->syy()<<" hit->szz():"<<hit->szz()<<endl;
       r00=hit->syy()+_c00;
       r01=hit->syz()+_c10;  
       r11=hit->szz()+_c11;
     }
-  double det=r00*r11 - r01*r01;
+  double det=fabs(r00*r11 - r01*r01);
   if (fabs(det)==0.) throw runtime_error("SKTN::evaluateChi2() Singular matrix !\n");
   double tmp=r00; r00=r11; r11=tmp; r01=-r01;  
   double dy=hit->y()-_p0;
   double dz=hit->z()-_p1;
-  MESSENGER <<"evaluateChi2()-INFO-Done"<<endl;
-  return (dy*r00*dy + 2*r01*dy*dz + dz*r11*dz)/det;
+  double cc= (dy*r00*dy + 2*r01*dy*dz + dz*r11*dz)/det;
+  if (!hit->detector())
+    cout << " dy:"<<dy << " dz:"<<dz<< " sqrt(dy^2+dz^2):" << sqrt(dy*dy+dz*dz) << " CHI2:"<< cc <<endl;
+  MESSENGER <<"evaluateChi2() -I- Done"<<cc<<endl;
+  return cc;
 }
 
 /*! Update the track parameters using this node.
@@ -714,10 +718,10 @@ void StiKalmanTrackNode::updateNode()
   _p4 += k40*dy + k41*dz;
   _sinCA  =  _p3*_x-_p2;
   if (_sinCA>1.) 
-		{
-			cout << " SKTN    _sinCA>1";
-			throw runtime_error("SKTN::updateNode() - WARNING - _sinCA>1");
-		}
+    {
+      cout << " SKTN    _sinCA>1";
+      throw runtime_error("SKTN::updateNode() - WARNING - _sinCA>1");
+    }
   _cosCA = sqrt(1.-_sinCA*_sinCA); 
   // update error matrix
   double c01=_c10, c02=_c20, c03=_c30, c04=_c40;

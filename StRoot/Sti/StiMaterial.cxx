@@ -27,8 +27,8 @@ StiMaterial::~StiMaterial(){
  \param name name given to the material
  \param effective mass number of the material
  \param effective atomic mass of the material
- \param density of the material in g/cm^2
- \param radiation length in g/cm^2
+ \param density of the material in g/cm^3
+ \param radiation length in g/cm^2 -> _x0 as calculated is in cm.
  \param ionization potential in eV.
 */
 void StiMaterial::set(const string& name,
@@ -57,7 +57,7 @@ void StiMaterial::set(const string& name,
 ostream& operator<<(ostream& os, const StiMaterial& m)
 {
   os << "Name:"<< m.getName()
-     << " Density:"<< m.getDensity()
+     << " Density:"<< m.getDensity()<< " g/cm^3"
      << " RadLength:"<<m.getRadLength()
      << " EffZ: "<<m.getZ()
      << " EffA: "<<m.getA()

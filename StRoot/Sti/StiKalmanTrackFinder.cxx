@@ -264,22 +264,36 @@ void StiKalmanTrackFinder::fitTracks()
 */
 void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 {
+  int rawCount = 0;
+  int goodCount= 0;
+  int plus=0;
+  int minus=0;
   for (TrackMap::const_iterator it=_trackContainer->begin(); 
        it!=_trackContainer->end(); 
        ++it) 
     {
       try
-				{
-					(*it).second->extendToVertex(vertex);
-				}
+	{
+	  rawCount++;
+	  if ((*it).second->extendToVertex(vertex))
+	    goodCount++;
+	  if ((*it).second->getCharge()>0)
+	    plus++;
+	  else
+	    minus++;
+	}
       catch (runtime_error & rte) 
-				{
-					_messenger << "SKTF::extendTracksToVertex()"
-										 << "- WARNING - Run Time Error while extending a track to main vertex."<<endl
-										 << "Error Message:" << endl
-										 << rte.what() << endl;
-				}
+	{
+	  _messenger << "SKTF::extendTracksToVertex()"
+		     << "- WARNING - Run Time Error while extending a track to main vertex."<<endl
+		     << "Error Message:" << endl
+		     << rte.what() << endl;
+	}
     }
+  cout << "SKTF::extendTracksToVertex(StiHit* vertex) -I- rawCount:"<<rawCount<<endl
+       << "                                          extendedCount:"<<goodCount<<endl
+       << "                                                   plus:"<<plus<<endl
+       << "                                                  minus:"<<minus<<endl;
 }
 
 
