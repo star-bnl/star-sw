@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.10 2001/11/28 19:14:47 jeromel Exp $
+// $Id: StLaserEventMaker.cxx,v 1.11 2001/12/12 19:39:23 pfachini Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.11  2001/12/12 19:39:23  pfachini
+// Changes to automate the drift velocity calculation
+//
 // Revision 1.10  2001/11/28 19:14:47  jeromel
 // Fixed default values for Laser calibration.
 //
@@ -58,6 +61,7 @@
 #include "tables/St_tpt_track_Table.h"
 #include "TTree.h"
 #include "StLaserEvent/StLaserEvent.h"
+#include "tables/St_tpcDriftVelocity_Table.h"
 #include "tables/St_type_index_Table.h"
 #include "tables/St_dst_vertex_Table.h"
 #include "StTpcDb/StTpcDb.h"
@@ -71,6 +75,8 @@ ClassImp(StLaserEventMaker)
     m_type(0),
     m_tpt_pars(0)
 {
+  //  mHistOut   = kFALSE;
+  mHistOut=kTRUE;
   m_mklaser=kTRUE;
   m_lasers =kTRUE;
   m_rowmin = 1;
@@ -120,11 +126,29 @@ Int_t StLaserEventMaker::Init(){
   Int_t bufsize= 64000;
   m_laser->Branch("event", "StLaserEvent",&event, bufsize, 1);
 
+//  Create histograms
+  cout << "Making Histograms" << endl;
+  fzlWestHigh = new TH1F("fzlEastHigh","fzlEastHigh",100,165,190);
+  fzlWestLow = new TH1F("fzlEastLow","fzlEastLow",100,15,40);
+  fzlEastHigh = new TH1F("fzlWestHigh","fzlWestHigh",100,-190,-165);
+  fzlEastLow = new TH1F("fzlWestLow","fzlWestLow",100,-40,-15);
+  numberTracks = new TH1F("numberTracks","numberTracks",100,0,2000);
+  AddHist(fzlEastHigh);
+  AddHist(fzlEastLow);
+  AddHist(fzlWestHigh);
+  AddHist(fzlWestLow);
+  AddHist(numberTracks);
+  date = 0;
+  time = 0;
+
   return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t StLaserEventMaker::Make(){
   
+  if (date==0) {date = GetDate();cout << "date = " << date << endl;}
+  if (time==0) {time = GetTime();cout << "time = " << time << endl;}
+
   TDataSet *tpc_data =  GetInputDS("tpc_hits"); 
   if (!tpc_data) return 0;
   
@@ -184,7 +208,7 @@ Int_t StLaserEventMaker::Make(){
   return kStOK;
 }
 //_____________________________________________________________________________
-  void StLaserEventMaker::MakeHistograms() {
+void StLaserEventMaker::MakeHistograms() {
     // reset static clones arrays
    // go get event number from the event data
    Int_t evno = 0;
@@ -194,6 +218,7 @@ Int_t StLaserEventMaker::Make(){
       evno = GetEventNumber();
       m_runno = GetRunNumber();
       Float_t m_drivel = gStTpcDb->DriftVelocity();
+      driftVelocityReco = m_drivel;
       Float_t m_tzero = gStTpcDb->Electronics()->tZero();
       Float_t m_clock = gStTpcDb->Electronics()->samplingFrequency();
       Float_t m_trigger = gStTpcDb->triggerTimeOffset();
@@ -282,13 +307,20 @@ Int_t StLaserEventMaker::Make(){
          ngtk++;
 	 Float_t phi = t->psi;
 	 Float_t tlam = t->tanl;
-        event->AddTrack(t->flag,t->hitid,t->id,t->id_globtrk,
-         t->ndedx, t->nfit, t->nrec, t->npos, t->q,
-         t->chisq[0], t->chisq[1], t->dedx[0], t->invp, t->curvature,
-         phi, tlam, t->phi0, t->r0, t->z0, sector[itrk],xl[itrk],
-         yl[itrk],zl[itrk], phil[itrk] );
+	 event->AddTrack(t->flag,t->hitid,t->id,t->id_globtrk,
+			 t->ndedx, t->nfit, t->nrec, t->npos, t->q,
+			 t->chisq[0], t->chisq[1], t->dedx[0], t->invp, t->curvature,
+			 phi, tlam, t->phi0, t->r0, t->z0, sector[itrk],xl[itrk],
+			 yl[itrk],zl[itrk], phil[itrk] );
+	 Float_t fzl = zl[itrk];
+	 Float_t nfits = t->nfit;
+	 if (fzl > 165 && fzl < 190 && nfits > 15) fzlWestHigh->Fill(fzl);
+	 if (fzl > 15 && fzl < 40 && nfits > 15) fzlWestLow->Fill(fzl);
+	 if (fzl > -190 && fzl < -165 && nfits > 15) fzlEastHigh->Fill(fzl);
+	 if (fzl > -40 && fzl < -15 && nfits > 15) fzlEastLow->Fill(fzl);
 	 }
      } //end of itrk for loop 
+     numberTracks->Fill(ngtk);
      cout <<  ntks << " total tracks " << ngtk << " good tracks" << endl;
       delete [] sector;
       delete [] xl;
@@ -624,7 +656,68 @@ void StLaserEventMaker::UndoExB(Float_t *x, Float_t *y, Float_t *z){
 
   *x = xp; *y = yp; *z = zp;  
 }
-
-
 //_____________________________________________________________________________
+Int_t StLaserEventMaker::Finish() {
+  if (numberTracks->GetMean()>=500){
+    WriteTableToFile();
+  }
+  else{
+    gMessMgr->Error() << "StLaserEventMaker::no laser events. Number Tracks = " << numberTracks->GetRMS() << " which is lower than the minimum of 500 tracks requested for good laser events. No table will be written" << endm;
+  }
 
+  if (mHistOut){
+    WriteHistFile();
+  }  
+    return StMaker::Finish();
+}
+//_____________________________________________________________________________
+void StLaserEventMaker::PrintInfo() {
+  printf("**************************************************************\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.11 2001/12/12 19:39:23 pfachini Exp $\n");
+  printf("**************************************************************\n");
+
+  if (Debug()) StMaker::PrintInfo();
+}
+//_____________________________________________________________________________
+void StLaserEventMaker::WriteTableToFile(){
+  char filename[80]; 
+  sprintf(filename,"./StarDb/Calibrations/tpc/tpcDriftVelocity.%08d.%06d.C",date,time);
+  TString dirname = gSystem->DirName(filename);
+  if (gSystem->OpenDirectory(dirname.Data())==0) { 
+    if (gSystem->mkdir(dirname.Data())) {
+      cout << "Directory " << dirname << " creation failed" << endl;
+      cout << "Putting tpcDriftVelocityLaser.C in current directory" << endl;
+      for (int i=0;i<80;i++){filename[i]=0;}
+      sprintf(filename,"tpcDriftVelocityLaser.%08d.%06d.C",date,time);
+    }
+  }
+  ofstream *out = new ofstream(filename);
+  driftTable()->SavePrimitive(*out,"");
+  return;
+}
+
+ St_tpcDriftVelocity* StLaserEventMaker::driftTable(){
+   double velocityEast = 147.199*driftVelocityReco/fabs(fzlAverageEastHigh()-fzlAverageEastLow());
+   double velocityWest = 147.164*driftVelocityReco/fabs(fzlAverageWestHigh()-fzlAverageWestLow());
+  St_tpcDriftVelocity* table = new St_tpcDriftVelocity("tpcDriftVelocity",1);
+  tpcDriftVelocity_st* row = table->GetTable();
+  row->cathodeDriftVelocityEast = 0.0;
+  row->cathodeDriftVelocityWest = 0.0;
+  row->laserDriftVelocityEast = velocityEast;
+  row->laserDriftVelocityWest = velocityWest;
+  table->SetNRows(1);
+  return table;
+ }
+//_____________________________________________________________________________
+void StLaserEventMaker::WriteHistFile(){
+  char filename[80]; 
+  sprintf(filename,"laserhist.%08d.%06d.root",date,time);
+  TFile out(filename,"RECREATE");
+  GetHistList()->Write();
+  out.Close();
+}
+
+double StLaserEventMaker::fzlAverageEastHigh(){double mean = fzlEastHigh->GetMean();return mean;};
+double StLaserEventMaker::fzlAverageEastLow(){double mean = fzlEastLow->GetMean();return mean;};
+double StLaserEventMaker::fzlAverageWestHigh(){double mean = fzlWestHigh->GetMean();return mean;};
+double StLaserEventMaker::fzlAverageWestLow(){double mean = fzlWestLow->GetMean();return mean;};

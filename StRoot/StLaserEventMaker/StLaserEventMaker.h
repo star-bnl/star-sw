@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.h,v 1.7 2001/11/28 17:54:21 love Exp $
+// $Id: StLaserEventMaker.h,v 1.8 2001/12/12 19:39:24 pfachini Exp $
 // $Log: StLaserEventMaker.h,v $
+// Revision 1.8  2001/12/12 19:39:24  pfachini
+// Changes to automate the drift velocity calculation
+//
 // Revision 1.7  2001/11/28 17:54:21  love
 // Default ExB flags to FALSE
 //
@@ -46,6 +49,7 @@
 class St_tpg_pad_plane;
 class St_tcl_tpc_index_type;
 class St_tpt_pars;
+class St_tpcDriftVelocity;
 
 class TTree;
 class StLaserEvent;
@@ -54,12 +58,18 @@ enum { maxNofTracks = 8000};
 
 class StLaserEventMaker : public StMaker {
 private:
+  TH1* fzlWestHigh;
+  TH1* fzlWestLow;
+  TH1* fzlEastHigh;
+  TH1* fzlEastLow;
+  TH1* numberTracks;
+  Bool_t   mHistOut;
   Int_t m_runno;          //Run number to put on events (derive from filename)
   Int_t m_date;           //date to put in event header
   Float_t m_tzero;        // record tzero etc. in the event header
   Float_t m_drivel;
   Float_t m_clock;
-  Float_t m_trigger;//additional time added to tZero for trigger delay
+  Float_t m_trigger;      //additional time added to tZero for trigger delay
   Int_t m_rowmin ; Int_t m_rowmax ;  //Range for the pixel branch.
   Bool_t m_mklaser;   	          //control flag for laser tree production
   Bool_t m_undoExB;        // control flag for applying ExB hit corrections
@@ -70,12 +80,16 @@ private:
   St_tcl_tpc_index_type *m_type;   	  //! Table of many-to-many index 
 	                                  //! correlations for tpc evaluations
   St_tpt_pars           *m_tpt_pars;  	  //! Parameters for the track finding
-  StMagUtilities            *m_mag;                 //!JT's ExB code
+  StMagUtilities        *m_mag;           //!JT's ExB code
+  int    date;
+  int    time;
 
   void         MakeHistograms();// Histograms for tracking
+
 protected:
  TTree                *m_laser; //! Laser track-hit event Tree
  StLaserEvent              *event;  //! Laser Event object 
+
 public: 
   StLaserEventMaker(const char *name="tpc_stracks");
   virtual       ~StLaserEventMaker();
@@ -98,8 +112,21 @@ public:
   virtual void   Set_UndoDistort(Bool_t m=kFALSE){m_undoDistort = m;}
   virtual void   UndoExB(Float_t *x,Float_t *y,Float_t *z);
 
+  virtual void PrintInfo();
+  virtual Int_t Finish();
+  St_tpcDriftVelocity* driftTable();
+  void WriteTableToFile();    //Write drift velocity table
+  void WriteHistFile();       // Write out .root file with results
+  void HistFileByDefault();   // Write out file on Finish
+
+  double fzlAverageEastHigh();
+  double fzlAverageEastLow();
+  double fzlAverageWestHigh();
+  double fzlAverageWestLow();
+  double driftVelocityReco;
+
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.7 2001/11/28 17:54:21 love Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.8 2001/12/12 19:39:24 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker, 1)   //StAF chain virtual base class for Makers
 };
