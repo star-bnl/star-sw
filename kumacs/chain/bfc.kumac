@@ -38,13 +38,14 @@
 *                                example chains
 * editted 7/2/98 Kathy Turner - tpc code now required geometry libraries!
 * editted 7/9/98 Kathy Turner - track evaluation now available for tpc slowsim
+* editted 7/11/98 K. Turner - no longer need input value adcxyzon - use tfc
+*                             in chain instead
 * 
 * ******************************************************************************
 * DICTIONARY OF INPUTS TO BFC.KUMAC
 * 
 * TOP        - top level directory to search for kumacs 
 *            - change if you copy stuff to your area! 
-* adcxyzon = 0,1 to turn off,on generation of adcxyz table from tss
 * tpc_sector_first - first sector # of tpc to simulation using tss
 * tpc_sector_last -  last sector # of tpc to simulation using tss
 * domain     - list of domains to load [domain='tpc svt global]
@@ -69,7 +70,8 @@
 * tpg        - TPC geometry initialization
 * srs        - SVT  resolution simulator (fast)
 * sss        - SVT slow simulator - not implemented yet
-* tss        - TPC slow simulator 
+* tss        - TPC slow simulator
+* tfc        - unpacks tpc raw data into adcxyz table for diagnostics
 * tcl        - TPC clustering - slow sim only !
 * tte_c      - TPC cluster evaluation - slow sim only
 * tfs        - TPC fast simulator
@@ -119,11 +121,10 @@
  
 MACRO bfc _
    TOP=$STAR _
-   adcxyzon=0 _
    tpc_sector_first=1 _
    tpc_sector_last=1 _
-   domain='geometry tpc svt global' _
-   chain='g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout' _
+   domain=' geometry tpc svt global ' _
+   chain=' g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout' _
    first=1 _
    no_events=1 _
    input_data_prefix=$AFS_RHIC/star/data/samples/ _
@@ -147,7 +148,6 @@ MACRO bfc _
  message ' *** domains to load         --> ' [domain]
  message ' *** modules to process      --> ' [chain]   
  message ' *** Output file name        --> ' [output_file]
- message ' *** adcxyzon                --> ' [adcxyzon]
  message ' *** tpc_sector_first        --> ' [tpc_sector_first]
  message ' *** tpc_sector_last         --> ' [tpc_sector_last]
  
@@ -157,12 +157,10 @@ MACRO bfc _
  
  macro/global/create input_file  [input_file]   'Input file name'
  macro/global/create output_file [output_file]  'Output file name'
- macro/global/create adcxyzon    [adcxyzon]     'flag to turn on adcxyz table'
  macro/global/create tpc_sector_first [tpc_sector_first] 'first sector in TPC'
  macro/global/create tpc_sector_last  [tpc_sector_last]   'last sector in TPC'
  macro/global/create ievent           1          'Event counter'
  macro/global/create TOP              [TOP]
-
 
 
 ***********************************************************
@@ -200,6 +198,8 @@ RETURN
  
 ******************************************************************
 ****************************************************************** 
+
+
 
 
 
