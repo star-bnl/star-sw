@@ -43,7 +43,7 @@ struct JFileAttr => {
 my $debugOn = 0;
 
 # my @dirSet = ("auau100", "auau128", "auau200", "augas100", "pau200", "pp200", "sisi200");
-my @dirSet = ("auau128","auau200");
+my @dirSet = ("auau128","auau130","auau200");
 my @dirSet = 
 my $topHpssSink  =  "/home/starsink/raw";
 my $topHpssReco  =  "/home/starreco/reco";
@@ -87,7 +87,7 @@ my $jobIn_no = 0;
 
  $hpssGeantDirs[0] = $topHpssSink . "/" . "auau200";
  $hpssGeantDirs[1] = $topHpssSink . "/" . "auau128";
- $hpssGeantDirs[2] = $topHpssSink . "/" . "pp200";
+ $hpssGeantDirs[2] = $topHpssSink . "/" . "auau130";
  $checkedSimuDirs[0] = 0; 
  $checkedSimuDirs[1] = 0;
  $checkedSimuDirs[2] = 0;
@@ -161,8 +161,10 @@ my @parts;
 my $gtime;
 my $dbgtime;
 my $ztime = "000000";
+my @prtFS;
+my $mNts;
 
-## 
+##### 
 
    foreach $eachGeantFile (@hpssGeantFiles) {
 
@@ -231,11 +233,22 @@ my $ztime = "000000";
    $mowner = ($$eachGeantFile)->fowner;
    $msize = ($$eachGeantFile)->size;
    $basename = basename("$mfName",".fzd");
+  if($mfName =~ /rcf150_p/) {
+   $mrunId = 150;
+   @prtFS = split("_",$basename);
+   $mfileSeq = $prtFS[2];
+   $mNts = $prtFS[3]; 
+   $mNts =~ s/evts//g; 
+   $mNevts = $mNts;
+   print "No Events : ", $mNevts, "\n";
+ }else{
+   
    $basename =~ m/(^[a-z0-9]+)_([0-9]+)_([0-9]+)/;
    $mfileSeq = $2 +0;
    $mNevts = $3;
    $mrun = $1;
    $mrunId = substr($1,3) + 0;  
+ }
    $mNevtLo = 1;
    $mNevtHi = $mNevts;
    $mformat = "fzd";

@@ -358,6 +358,7 @@ my $mformat = "n\/a";
 my $msite = "n\/a";
 my $mhpss = "Y";
 my $mstatus = 0;
+my @prtFS; 
 
 ###=======================================================
 ## hpss reco file check
