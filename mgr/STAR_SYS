@@ -1,7 +1,10 @@
 #  $Log: STAR_SYS,v $
+#  Revision 1.2  1998/01/30 12:42:15  fisyak
+#  Save changes before moving to SL97b
+#
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1997/12/31 14:35:23 $ 
+#             Last modification $Date: 1998/01/30 12:42:15 $ 
 #!/bin/csh
 #
 # Determine STAR_SYS variable.
@@ -20,6 +23,15 @@ case "AIX2":
 	breaksw
 case "HP-UXB1020":
 	setenv STAR_SYS hp700_ux90
+if (-e /bin/CC) then 
+  setenv STAR_SYS_HOST "${STAR_SYS}"
+else
+if (-e /opt/aCC/bin/aCC) then
+  setenv STAR_SYS_HOST "${STAR_SYS}_aCC"
+else
+  setenv STAR_SYS_HOST "${STAR_SYS}_gcc"
+endif
+endif
 	breaksw
 case "IRIX4*":
 case "IRIX52":
@@ -64,9 +76,6 @@ default:
 	setenv STAR_SYS unknown
 	breaksw
 endsw
-echo "mach_os = " $mach_os
 endif
-echo "STAR_SYS = " $STAR_SYS
-
-
-
+#echo "mach_os = " $mach_os
+if ($?STAR_SYS_HOST == 0) setenv STAR_SYS_HOST $STAR_SYS
