@@ -1,6 +1,6 @@
-// $Id: St_tpt_Maker.cxx,v 1.71 2002/02/22 17:56:20 hardtke Exp $
+// $Id: St_tpt_Maker.cxx,v 1.72 2002/02/22 19:20:28 hardtke Exp $
 // $Log: St_tpt_Maker.cxx,v $
-// Revision 1.71  2002/02/22 17:56:20  hardtke
+// Revision 1.72  2002/02/22 19:20:28  hardtke
 // change order of instantiation for Jim
 //
 // Revision 1.70  2002/02/05 22:22:15  hardtke
