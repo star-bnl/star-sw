@@ -1203,6 +1203,7 @@ STAFCV_T tdmFactory:: getTypeSpecification (long tid, char *& spec) {
       spec = (char*)MALLOC(9); strcpy(spec,"**NONE**");
       EML_ERROR(INVALID_TYPE_ID);
    }
+   l=strlen(c); // Herb Ward, November 12 1998
    spec = (char*)MALLOC(l+1);
    strcpy(spec,c);
    EML_SUCCESS(STAFCV_OK);
