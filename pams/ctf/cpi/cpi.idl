@@ -7,7 +7,7 @@
 #include "cte_extra.idl"
 #include "epi_hypo_pid.idl"
 
-interface cpi_am: amiModule {
+interface cpi: amiModule {
         STAFCV_T call
                 ( inout cpi_para     para     
                 , inout egr_globtrk  track

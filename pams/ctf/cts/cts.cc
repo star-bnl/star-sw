@@ -1,5 +1,5 @@
 /*:>--------------------------------------------------------------------
-**: FILE:       cts_am.cc        
+**: FILE:       cts.cc        
 **: HISTORY:
 **:             03feb97-      ppy- STAF version
 **:
@@ -7,7 +7,7 @@
 #include <math.h>
 #include <iostream.h>
 #include <malloc.h>
-#include "cts_am.h"
+#include "cts.h"
 #include "ctfgeo.h"
 //
 //  Function definitions
@@ -69,7 +69,7 @@ float const Pi    = acos(-1.) ;
 float const Todeg = 180. / Pi ;
 #define min(a,b)    ( ( (a) < (b) ) ? (a) : (b) )
 //
-extern "C" long cts_am_(
+extern "C" long cts_(
   TABLE_HEAD_ST           *mhit_h,    G2T_CTF_HIT_ST             *mhit ,
   TABLE_HEAD_ST          *track_h,      G2T_TRACK_ST            *track ,
   TABLE_HEAD_ST            *geo_h,        CTG_GEO_ST              *geo ,
@@ -82,7 +82,7 @@ extern "C" long cts_am_(
   TABLE_HEAD_ST            *raw_h,        CTU_RAW_ST              *raw )
 {
 /*:>--------------------------------------------------------------------
-**: ROUTINE:    cts_am_
+**: ROUTINE:    cts_
 **: DESCRIPTION: Simulates CTB/TOF response
 **:  
 **: AUTHOR:     ppy - P.P. Yepes, yepes@physics.rice.edu
@@ -172,7 +172,7 @@ extern "C" long cts_am_(
      return STAFCV_BAD ;
    }
 //
-//   Initialize cts_am
+//   Initialize cts
 //
    raw_h->nok    = 0 ;
    mslat_h->nok  = 0 ;
@@ -312,7 +312,7 @@ long cts_detector_response (
                            / slat_eta[i_eta].cosang ;
       if ( Length < -1 * mpara->position_tolerance || 
            Length - mpara->position_tolerance > max_distance  ) { 
-           sprintf ( OutMessage, " cts_am: Hit %d has wrong distance: %f  ",
+           sprintf ( OutMessage, " cts: Hit %d has wrong distance: %f  ",
                                    i_hit, Length ) ;
            MessageOut ( OutMessage ) ;
            continue ;

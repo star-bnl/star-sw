@@ -1,5 +1,5 @@
 /*:>--------------------------------------------------------------------
-**: FILE:       cpe_am.cc
+**: FILE:       cpe.cc
 **: HISTORY:
 **:             26sep97-v000a-ppy- 
 **: 
@@ -8,12 +8,12 @@
 inline int abs(int x) {return x > 0 ? x : -x;}
 #endif
 #include <math.h>
-#include "cpe_am.h"
+#include "cpe.h"
 #include "ctfgeo.h"
 /*------------------------------------------------------------------
      Declaration variables
 ------------------------------------------------------------------ */
-#define M_PI		3.14159265358979323846
+#define M_PI            3.14159265358979323846
 #define MX_PHI          420
 #define MX_ETA           42
 #define TRACK_LEN     10000
@@ -77,7 +77,7 @@ CPE_MKINE_ST        *kine       ;
 
 
 
-extern "C" long cpe_am_(
+extern "C" long cpe_(
   TABLE_HEAD_ST            *ge_h,        CTG_GEO_ST         *ge ,
   TABLE_HEAD_ST       *slt_phi_h,   CTG_SLAT_PHI_ST         *slt_phi,
   TABLE_HEAD_ST       *slt_eta_h,   CTG_SLAT_ETA_ST         *slt_eta,
@@ -91,7 +91,7 @@ extern "C" long cpe_am_(
   TABLE_HEAD_ST           *evl_h,       CPE_EVAL_ST             *evl ,
   TABLE_HEAD_ST           *kne_h,      CPE_MKINE_ST             *kne )
 /*:>--------------------------------------------------------------------
-**: ROUTINE:    cpe_am_
+**: ROUTINE:    cpe_
 **: DESCRIPTION: Evaluates performance of CTF Particle Id module, cpi
 **: 
 **: AUTHOR:     ppy - P.P. Yepes, yepes@physics.rice.edu      

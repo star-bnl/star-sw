@@ -1,12 +1,12 @@
 //:>------------------------------------------------------------------
-//: FILE:       ctg_am.cc
+//: FILE:       ctg.cc
 //: HISTORY:
 //:
 //:             10oct96-      ppy- STAF version        
 //:
 //:<------------------------------------------------------------------
 #include <math.h>
-#include "ctg_am.h"
+#include "ctg.h"
 #include "ctfgeo.h"
 
 extern "C" void    MessageOut( const char *msg );
@@ -16,7 +16,7 @@ float const Twopi = 2. * Pi ;
 float const Todeg = 360. / Twopi ;
 
 
-extern "C" long ctg_am_(
+extern "C" long ctg_(
   TABLE_HEAD_ST     *geo_h,      CTG_GEO_ST       *geo,
   TABLE_HEAD_ST     *slat_phi_h, CTG_SLAT_PHI_ST  *slat_phi,
   TABLE_HEAD_ST     *slat_eta_h, CTG_SLAT_ETA_ST  *slat_eta,    

@@ -11,7 +11,7 @@
 #include "cte_para.idl"
 #include "cte_extra.idl"
 
-interface cte_am: amiModule {
+interface cte: amiModule {
         STAFCV_T call
                 ( inout ctg_geo      geo 
                 , inout ctg_slat     slat   

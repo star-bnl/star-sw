@@ -1,12 +1,12 @@
 /*:>--------------------------------------------------------------------
-**: FILE:       cte_am.cc
+**: FILE:       cte.cc
 **: HISTORY:
 **:             09sep97-v0001-cte- First STAF version     
 **:<------------------------------------------------------------------*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "cte_am.h"
+#include "cte.h"
 #include "ctfgeo.h"
 
 /*------------------------------------------------------------------
@@ -80,7 +80,7 @@ TABLE_HEAD_ST           *extra_h ;
 CTE_EXTRA_ST            *extra   ;
 
 
-extern "C" long cte_am_(
+extern "C" long cte_(
   TABLE_HEAD_ST            *ge_h,        CTG_GEO_ST             *ge,
   TABLE_HEAD_ST           *slt_h,       CTG_SLAT_ST             *slt ,
   TABLE_HEAD_ST       *slt_eta_h,   CTG_SLAT_ETA_ST         *slt_eta ,
@@ -91,7 +91,7 @@ extern "C" long cte_am_(
   TABLE_HEAD_ST          *xtra_h,      CTE_EXTRA_ST            *xtra ) 
 {
 /*:>--------------------------------------------------------------------
-**: ROUTINE:    cte_am_
+**: ROUTINE:    cte_
 **: DESCRIPTION: Extrapolates global tracks to CTF          
 **:              Tries to match each tracks with a slat with signal
 **:              If time info available calculated corrected time

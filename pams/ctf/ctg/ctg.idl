@@ -1,10 +1,10 @@
-/* Filename = ctg_am.idl */
+/* Filename = ctg.idl */
 #include "PAM.idl"
 #include "ctg_geo.idl"
 #include "ctg_slat_phi.idl"
 #include "ctg_slat_eta.idl"
 #include "ctg_slat.idl"
-interface ctg_am:amiModule {
+interface ctg:amiModule {
   STAFCV_T call (
              inout      ctg_geo      geo ,
              inout      ctg_slat_phi slat_phi ,
