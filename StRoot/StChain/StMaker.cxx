@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.51 1999/07/11 20:40:35 perev Exp $
+// $Id: StMaker.cxx,v 1.52 1999/07/11 21:04:06 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.52  1999/07/11 21:04:06  fisyak
+// Clash resolion
+//
 // Revision 1.51  1999/07/11 20:40:35  perev
 // Move Clear from StChain to StMaker
 //
@@ -142,7 +145,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.51 1999/07/11 20:40:35 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.52 1999/07/11 21:04:06 fisyak Exp $";
 return cvs;};
 static void doPs(const char *who,const char *where);
 
@@ -709,7 +712,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   const Char_t *source[] = {"StRoot/St_base"         , "St_DataSet"  ,    "St_base"
                            ,"StRoot/StChain"         , "StMaker"     ,    "StChain"
                            ,"StRoot/xdf2root"        , "St_XDFFile"  ,    "xdf2root"
-                           ,"StRoot/StUtilities"     , "StMessage"   ,    "StUtilities"
+//                           ,"StRoot/StUtilities"     , "StMessage"   ,    "StUtilities"
                            ,"StRoot/StarClassLibrary", ""            ,    ""
                            ,"StRoot/StEvent"         , "StEvent"     ,    "StEvent"
                            ,"StRoot/St_TLA_Maker"    , "St_TLA_Maker",    "St_TLA_Maker"
