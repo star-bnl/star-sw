@@ -1,19 +1,18 @@
-// $Id: tpcdraw.C,v 1.4 1999/05/21 15:34:02 kathy Exp $
+// $Id: tpcdraw.C,v 1.5 1999/06/10 22:45:15 snelling Exp $
 // $Log: tpcdraw.C,v $
+// Revision 1.5  1999/06/10 22:45:15  snelling
+// disabled nr of track limit
+//
 // Revision 1.4  1999/05/21 15:34:02  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
 //=======================================================================
-// owner: Bill Love
-// what it does: 
+// owner: Raimond Snellings
+// what it does: Macro for plotting hits and pixels in combination with bfc.C 
 //=======================================================================
 
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// Macro for plotting hits and pixels in combination with bfc.C         //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
-int draw_sector(TPad &padname, Float_t theta, Float_t phi){
+//int draw_sector(TPad &padname, Float_t theta, Float_t phi) {
+int InitDraw() {
   /* 
    * -----------------------------------------------------------------
    *	draw TPC sectors, two sections, inner and outer.
@@ -29,7 +28,7 @@ int draw_sector(TPad &padname, Float_t theta, Float_t phi){
   insect->DefineSection(1,210,r1,r2);
   insect->SetLineColor(2);
   
-  m_node1 = new  TNode("m_node1","inner sector",insect);
+  TNode *m_node1 = new TNode("m_node1","inner sector",insect);
   m_node1->BuildListOfNodes();
   m_node1->cd();
   
@@ -37,23 +36,24 @@ int draw_sector(TPad &padname, Float_t theta, Float_t phi){
   outsect->DefineSection(0,-210,r3,r4);
   outsect->DefineSection(1,210,r3,r4);
   outsect->SetLineColor(2);
-  TNode *node2 = new  TNode("node2","outer sector",outsect);
 
-  padname.SetTheta(theta);
-  padname.SetPhi(phi);
-  padname.Modified();
-  padname.Update();
+  TNode *m_node2 = new TNode("node2","outer sector",outsect);
 
   return kStOK;
 }
 //______________________________________________________________________
-int draw_event(TPad &padname) {
+//int draw_event(TPad &padname) {
+int DrawEvent(TPad &padname, Float_t theta, Float_t phi) {
   /*-----------------------------------------------------------------------
    * Plot hits and tracks in the TPC */
   
   char tkstring[10];
 
   // Plot the part of the TPC with tracks 
+  padname.SetTheta(theta);
+  padname.SetPhi(phi);
+  padname.Modified();
+  padname.Update();
   m_node1->Draw();
 
   TView *view = padname.GetView();
@@ -186,17 +186,17 @@ int draw_event(TPad &padname) {
   //  ttext->SetTextSize(0.5);
   //  cout << "nr good tracks " << ngoodtrks << endl;
   //  ttext->Draw();
-  //  event->Modified();
-  //  padname.cd();
-  //  padname.Modified();
-  //  padname.Update();
+  event->Modified();
+  padname.cd();
+  padname.Modified();
+  padname.Update();
 
   return kStOK;
 }
 
 //-----------------------------------------------------------------------
 
-int draw_pixels(Text_t* varexp, Text_t* selection, Text_t* options) {
+int DrawPixels(Text_t* varexp, Text_t* selection, Text_t* options) {
   /* 
    * -----------------------------------------------------------------
    *	draw TPC pixels
@@ -224,7 +224,7 @@ int draw_pixels(Text_t* varexp, Text_t* selection, Text_t* options) {
 
 //-----------------------------------------------------------------------
 
-int draw_hits(Text_t* varexp, Text_t* selection, Text_t* options){
+int DrawHits(Text_t* varexp, Text_t* selection, Text_t* options){
   /* 
    * -----------------------------------------------------------------
    *	draw TPC hits
@@ -251,7 +251,7 @@ int draw_hits(Text_t* varexp, Text_t* selection, Text_t* options){
 
 //-----------------------------------------------------------------------
 
-int draw_geant_hits(Text_t* varexp, Text_t* selection, Text_t* options) {
+int DrawGeantHits(Text_t* varexp, Text_t* selection, Text_t* options) {
   /* 
    * -----------------------------------------------------------------
    *	draw TPC geant hits
@@ -288,16 +288,6 @@ void tpcdraw() {
     chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
     chain->SetInput("ChainFlags[kTPC]_DATA",".make/xdfin/.data/ChainFlags[kTPC]_DATA");
   }
-
-  // defined for MINIDAQ
-  //  chain->SetInput("TPC_DATA",".make/xdfin/.data/TPC_DATA");
-  //  chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
-
-  //#ifndef FZIN
-  //#ifndef GTRACK
-  //  chain->SetInput("g2t_tpc_hit",".make/xdfin/.data/event/geant/Event/g2t_tpc_hit");
-  //#endif
-  //#endif
 
   gStyle->SetCanvasColor(10);              // white
   gStyle->SetPadColor(10);                 // white
@@ -341,31 +331,31 @@ void tpcdraw() {
 
   pad1->cd();
   if (ChainFlags[kTSS] || ChainFlags[kTRS] || ChainFlags[kMINIDAQ]) {
-    draw_pixels("y:x","adc>2","");
+    DrawPixels("y:x","(adc>2)*adc","box");
   }
-  if (draw_pixels == 0) { draw_hits("y:x","","same"); }
-  else { draw_hits("y:x","",""); }
+  if (DrawPixels == 0) { DrawHits("y:x","","same,scat"); }
+  else { DrawHits("y:x","","scat"); }
   if (!ChainFlags[kMINIDAQ]) {
-    draw_geant_hits("x1:x0","","same");
+    DrawGeantHits("x1:x0","","same,scat");
   }  
 
   pad2->cd();
   if (ChainFlags[kTSS] || ChainFlags[kTRS] || ChainFlags[kMINIDAQ]) {
-    draw_pixels("z:x","adc>2","");
+    DrawPixels("z:x","(adc>2)*adc","box");
   }
-  if (draw_pixels == 0) { draw_hits("z:x","","same"); }
-  else { draw_hits("z:x","",""); }
+  if (DrawPixels == 0) { DrawHits("z:x","","same,scat"); }
+  else { DrawHits("z:x","","scat"); }
   if (!ChainFlags[kMINIDAQ]) {
-    draw_geant_hits("x2:x0","","same");
+    DrawGeantHits("x2:x0","","same,scat");
   }
+  
+  InitDraw();
   
   pad3->cd();
-  draw_sector(*pad3,90.0,0.0);
-  draw_event(*pad3);
+  DrawEvent(*pad3,90.0,0.0);
   
   pad4->cd();
-  draw_sector(*pad4,0.0,0.0);
-  draw_event(*pad4);
+  DrawEvent(*pad4,0.0,0.0);
 }
 
 
