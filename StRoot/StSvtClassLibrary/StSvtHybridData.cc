@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridData.cc,v 1.8 2003/09/17 12:57:51 munhoz Exp $
+ * $Id: StSvtHybridData.cc,v 1.9 2004/04/29 03:45:37 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridData.cc,v $
+ * Revision 1.9  2004/04/29 03:45:37  perev
+ * fill array by -1. walgrind complained non itializeds variable
+ *
  * Revision 1.8  2003/09/17 12:57:51  munhoz
  * initializing pointer seq[]
  *
@@ -41,6 +44,7 @@
 //                                                                        //
 ////////////////////////////////////////////////////////////////////////////
 
+#include <string.h>
 #include "StSvtHybridData.hh"
 #include "StSequence.hh"
 
@@ -187,6 +191,7 @@ int StSvtHybridData::setListSequences(int listID, int Anode, int& nSequence, StS
   if (nAnodes == 0){
     nAnodes = 240;
     anodeList = new int[nAnodes];
+    memset(anodeList,-1,nAnodes*sizeof(int)); //fills by crazy (-1) VP
   }
 
   anodeList[listID] = Anode;
