@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 2.5 2000/11/30 23:27:03 lasiuk Exp $
+ * $Id: StRchMaker.cxx,v 2.6 2001/02/07 16:06:38 lasiuk Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -126,7 +126,7 @@ Int_t StRchMaker::Init() {
     mRchNTupleFile = new TFile("RchData.root","RECREATE","Rch Ntuples");
     mPadPlane      = new TNtuple("rawNtuple", "raw data", "row:pad:adc:evt");
     mClusters      = new TNtuple("clusters", "cluster data","q:qmax:rms2:pads:max:evt");
-    mHits          = new TNtuple("hits", "hit data", "q:qmax:evt:dc:cnumber:pads:x:dx:y:dy");
+    mHits          = new TNtuple("hits", "hit data", "q:qmax:evt:dc:cnumber:pads:x:dx:y:dy:pad");
     mcc            = new TH1F("ccharge","Cluster Charge",50,0,3000);
     mmc            = new TH1F("cmaxadc","Cluster max ADC",50,0,1024);
     mrms           = new TH1F("crms2","Cluster RMS2",50,0,1000);
@@ -179,7 +179,8 @@ int StRchMaker::adcDecoder(unsigned long code,
 {
     *pad = ( code        & 0xff);
     *row = ((code >> 8)  & 0xff);
-    *adc = ((code >> 16) & 0x3ff);
+    //--> Used to be *adc = ((code >> 16) & 0x3ff);
+    *adc = ( (code>>26) & 0x1 ) ? 1024 : ( (code>>16) & 0x3ff);
 
     return 0;
 }
@@ -220,10 +221,10 @@ Int_t StRchMaker::Make() {
     //
     // Pause for Event Display Inspection
     //
-//         cout << "Next Event? <ret>: " << endl;
-//         do {
-//           if(getchar()) break;
-//         } while (true);
+//          cout << "Next Event? <ret>: " << endl;
+//          do {
+//            if(getchar()) break;
+//          } while (true);
 
     //
     // Try get StEvent Structure
@@ -282,7 +283,7 @@ Int_t StRchMaker::Make() {
 		cout << "StRchMaker::Maker()\n";
 		cout << "\tDataSet: rrsEvent not there\n";
 		cout << "\tSkip this event\n" << endl;
-		clearPadMonitor();
+		this->clearPadMonitor();
 		return kStWarn;
 	    }
 
@@ -292,7 +293,7 @@ Int_t StRchMaker::Make() {
 		cout << "StRchMaker::Maker()\n";
 		cout << "\tRichSimData: not there\n";
 		cout << "\tSkip this event\n" << endl;
-		clearPadMonitor();
+		this->clearPadMonitor();
 		return kStWarn;
 	    }
 	    mTheRichReader = new StRrsReader(theRichSimData, -9);
@@ -304,7 +305,7 @@ Int_t StRchMaker::Make() {
 		cout << "StRchMaker::Maker()\n";
 		cout << "\t DataSet: StDAQReader not there\n";
 		cout << "\tSkip this event\n" << endl;
-		clearPadMonitor();
+		this->clearPadMonitor();
 		
 		return kStWarn;
 	    }
@@ -314,14 +315,14 @@ Int_t StRchMaker::Make() {
 		cout << "StRchMaker::Maker()\n";
 		cout << "\tStDAQReader*: not there\n";
 		cout << "\tSkip this event\n" << endl;
-		clearPadMonitor();
+		this->clearPadMonitor();
 		return kStWarn;
 	    }
 	    if (!(mTheDataReader->RICHPresent())) {
 		cout << "StRchMaker::Maker()\n";
 		cout << "\tRICH not in datastream\n";
 		cout << "\tSkip this event\n" << endl;
-		clearPadMonitor();
+		this->clearPadMonitor();
 		return kStWarn;
 	    }
 	    mTheRichReader = mTheDataReader->getRICHReader();
@@ -334,15 +335,30 @@ Int_t StRchMaker::Make() {
 	    cout << "StRchMaker::Make()\n";
 	    cout << "\tCould not get a Reader\n";
 	    cout << "\tSkip Event" << endl;
-	    clearPadMonitor();
+	    this->clearPadMonitor();
 	    return kStWarn;
 	}
 
+	//
+	// In possession of a RichReader
+	//  --> use the interface to extract the pixels
+	//     and load the PixelStore for the CF
+	// The decoding is done such that it is a
+	// saturated pad if the 11th bit is set
+	//
+
+	bool saturatedPad = false;
+
 	for(int iPad=0; iPad<mPads; iPad++) {  //x--> 160
 	    for(int iRow=0; iRow<mRows; iRow++) { // y -> 96
-	    
+
+		saturatedPad = false;
+		
 		unsigned long theADCValue =
 		    mTheRichReader->GetADCFromCoord(iPad,iRow);
+
+		if(theADCValue>=1023)
+		    saturatedPad = true;
 		
 		if (mPedestalSubtract && (iPad == 0) &&  (iRow%6==5)) {
 		    unsigned long theCut = static_cast<unsigned long>(mPedestal[iPad][iRow] + mSigma[iPad][iRow]);
@@ -357,9 +373,9 @@ Int_t StRchMaker::Make() {
 		
 		
 		//pack adc/row/pad into a single long.  Use:
-		// the first 8 bits for the Pad (0-159)
-		// the next  8 bits for the Row (0-96)
-		// the next 11 bits for the ADC (0-1023)
+		// the first 8 bits for the Pad (0-159)  --> 0-255
+		// the next  8 bits for the Row (0-96)   --> 0-255
+		// the next 11 bits for the ADC (0-1023) --> 0-2047
 		if(theADCValue) {
 		    unsigned long codedValue = 0;
 		    codedValue = (theADCValue << 16) | (iRow << 8) | iPad;
@@ -411,12 +427,15 @@ Int_t StRchMaker::Make() {
     else {
 	const StSPtrVecRichPixel& thePixels = mTheRichCollection->getRichPixels();
 	StSPtrVecRichPixelConstIterator iter;
+	bool saturatedPad = false;
 	for (iter  = thePixels.begin();
 	     iter != thePixels.end();
 	     ++iter) {
+	    saturatedPad = false;
 	    UShort_t iPad = (*iter)->pad();
 	    UShort_t iRow = (*iter)->row();
 	    UShort_t theADCValue = (*iter)->adc();
+	    if(theADCValue>=1023) saturatedPad = true;
 	    if (mPedestalSubtract && (iPad==0) && (iRow%6==5)) {
 		unsigned long theCut =
 		    static_cast<unsigned long>(mPedestal[iPad][iRow] + mPedestalSubtract* mSigma[iPad][iRow]);
@@ -455,6 +474,11 @@ Int_t StRchMaker::Make() {
 		}
 		else {
 		    mPixelStore.push_back(new StRichSinglePixel(iPad,iRow,theADCValue));
+		}
+
+		if(saturatedPad) {
+		    mPixelStore.back()->setBit(eSaturatedPixel);
+		    //cout << "p/r/q " << iPad << "/" << iRow << "/" << theADCValue << endl;
 		}
 	    }
 	}
@@ -606,6 +630,7 @@ Int_t StRchMaker::Make() {
 	mHit[7] = mTheHits[kk]->sigma().x();
 	mHit[8] = mTheHits[kk]->internal().y();
 	mHit[9] = mTheHits[kk]->sigma().y();
+	mHit[10] = mTheHits[kk]->numberOfPads();
 	mHits->Fill(mHit);
 	
     }
@@ -759,7 +784,7 @@ void StRchMaker::fillStEvent()
 								StThreeVectorF(mTheHits[ii]->localError().x(),
 									       mTheHits[ii]->localError().y(),
 									       mTheHits[ii]->localError().z()),
-								1,
+								kRichId,
 								mTheHits[ii]->charge(),
 								mTheHits[ii]->maxAmplitude(),
 								static_cast<unsigned char>(0));
@@ -843,7 +868,7 @@ void StRchMaker::fillStEvent()
 void StRchMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRchMaker.cxx,v 2.5 2000/11/30 23:27:03 lasiuk Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 2.6 2001/02/07 16:06:38 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -888,6 +913,11 @@ void StRchMaker::clearPadMonitor(){
 /****************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 2.6  2001/02/07 16:06:38  lasiuk
+ * adc decoder modified for 11bit check
+ * this-> for internal calls
+ * hit ntuple extended to include pads in hit
+ *
  * Revision 2.5  2000/11/30 23:27:03  lasiuk
  * change the hardware position of the hit to kRichId
  *

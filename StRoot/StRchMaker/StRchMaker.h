@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.h,v 2.1 2000/09/29 18:59:33 lasiuk Exp $
+ * $Id: StRchMaker.h,v 2.2 2001/02/07 16:06:39 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,11 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRchMaker.h,v $
+ * Revision 2.2  2001/02/07 16:06:39  lasiuk
+ * adc decoder modified for 11bit check
+ * this-> for internal calls
+ * hit ntuple extended to include pads in hit
+ *
  * Revision 2.1  2000/09/29 18:59:33  lasiuk
  * addition of software monitor
  * write flags in persistent hit (reservedLong)
@@ -155,7 +160,7 @@ private:
     TNtuple* mHits;//!
     float mRawData[4];    //!
     float mCluster[6];//!
-    float mHit[10];//!
+    float mHit[11];//!
     
     TH1F* mcc;//!
     TH1F* mmc;//!
@@ -170,7 +175,7 @@ private:
 #endif
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRchMaker.h,v 2.1 2000/09/29 18:59:33 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRchMaker.h,v 2.2 2001/02/07 16:06:39 lasiuk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 public:
