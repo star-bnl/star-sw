@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsChargeTransporter.cc,v 1.2 1999/01/18 10:16:28 lasiuk Exp $
+ * $Id: StTrsChargeTransporter.cc,v 1.3 1999/03/12 18:32:19 lasiuk Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -11,8 +11,8 @@
  **********************************************************************
  *
  * $Log: StTrsChargeTransporter.cc,v $
- * Revision 1.2  1999/01/18 10:16:28  lasiuk
- * units consistency
+ * Revision 1.3  1999/03/12 18:32:19  lasiuk
+ * diffusion calculation
  *
  * Revision 1.2  1999/01/18 10:16:28  lasiuk
  * units consistency
@@ -53,11 +53,18 @@ StTrsChargeTransporter::StTrsChargeTransporter(StTpcGeometry* geodb, StTpcSlowCo
     mGasDb      = gasdb;
     mMagDb      = magdb;
 
+    mDriftVelocity = scdb->driftVelocity();
     mAttachment = gasdb->attachmentCoefficient();
-    mSigmaTransverse = gasdb->transverseDiffusionCoefficient();
+    // should actually use a Global Coordinate
+    mOmegaTau   =
+	mDriftVelocity*mMagDb->at(StThreeVector<double>(0,0,0))/(scdb->driftVoltage());
+    PR(mOmegaTau);
+    PR(gasdb->transverseDiffusionCoefficient());
+    mSigmaTransverse =
+	(gasdb->transverseDiffusionCoefficient())/(1+sqr(mOmegaTau));
+    PR(mSigmaTransverse);
     mSigmaLongitudinal = gasdb->longitudinalDiffusionCoefficient();
     mO2Concentration = 50.; // 50 ppm //mO2Concentration = scdb->oxygenInPPM();
-    mDriftVelocity = scdb->driftVelocity();
     mGateVoltage   = -130*volt;      // scdb->gatingGridVoltage();
     mTransparency = 1.;
     
