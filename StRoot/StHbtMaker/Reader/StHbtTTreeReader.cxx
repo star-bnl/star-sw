@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTTreeReader.cxx,v 1.6 2003/05/07 20:05:25 magestro Exp $
+ * $Id: StHbtTTreeReader.cxx,v 1.7 2003/05/16 21:30:18 magestro Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -37,8 +37,6 @@
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
 #include "StStrangeMuDstMaker/StXiMuDst.hh"
 #include "StStrangeMuDstMaker/StKinkMuDst.hh"
-
-#include "tables/St_FlowTag_Table.h"
 
 #include "StHbtMaker/Infrastructure/StHbtTTreeEvent.h"
 #include "StarClassLibrary/StMemoryInfo.hh"
@@ -381,6 +379,9 @@ int StHbtTTreeReader::fillChain(TChain* chain, const char* dir, const char* filt
 /***************************************************************************
  *
  * $Log: StHbtTTreeReader.cxx,v $
+ * Revision 1.7  2003/05/16 21:30:18  magestro
+ * Removed obsolete include file
+ *
  * Revision 1.6  2003/05/07 20:05:25  magestro
  * Removed StFlowTagMaker.h include
  *
