@@ -2,10 +2,13 @@
 //  This class is to provide "micky" test for RMath.h methods
 //  derived from CERNLIB 
 //  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
-// $Id: StMicky.h,v 1.4 1999/09/27 00:13:46 fine Exp $
+// $Id: StMicky.h,v 1.5 1999/09/29 04:05:55 fine Exp $
 // $Log: StMicky.h,v $
+// Revision 1.5  1999/09/29 04:05:55  fine
+// StMicky::Txmx prototype fixed for HP
+//
 // Revision 1.4  1999/09/27 00:13:46  fine
-// test F112 has been fixed for Sun
+//  test F112 has been fixed for Sun
 //
 // Revision 1.3  1999/09/26 23:37:22  fine
 // test F112 package has been introduced
@@ -52,10 +55,10 @@ typedef struct {
      void Timed(float *)  const; 
 //--  tests:
 //--  test F110
-     void StMicky::Tmxm();
+     void Tmxm();
 //--  test F112
-      int ttrinv();
-      int ttrla();
-      int ttrcho();
+     int ttrinv();
+     int ttrla();
+     int ttrcho();
  };
 
