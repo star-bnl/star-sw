@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.34 2004/07/07 22:31:06 oldi Exp $
+// $Id: StFlowCutEvent.cxx,v 1.35 2004/08/24 20:24:32 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
@@ -118,10 +118,10 @@ Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
   }
 
   // Trigger
-  Float_t trigger;
+  Float_t trigger = 0.;
 
   if (pEvent->runInfo()->centerOfMassEnergy() > 60. && pEvent->runInfo()->centerOfMassEnergy() < 65. ) { // 62 GeV
-    Float_t ctbMult;
+    Float_t ctbMult = 0.;
     StTriggerDetectorCollection *triggers = pEvent->triggerDetectorCollection();
     if (triggers) {
       StCtbTriggerDetector &CTB = triggers->ctb();
@@ -323,8 +323,8 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
 
   // Centrality
   // Centrality=0 is not retrievable
-  Int_t* cent;
-  Int_t centrality;
+  Int_t* cent = 0;
+  Int_t centrality = 0;
 
   if (pMuEvent->runInfo().centerOfMassEnergy() >= 199.) {
     if (fabs(pMuEvent->magneticField()) >= 4.) { // year=2, Au+Au, Full Field
@@ -589,6 +589,10 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.35  2004/08/24 20:24:32  oldi
+// Minor modifications to avoid compiler warnings.
+// Small bug fix (didn't affect anyone yet).
+//
 // Revision 1.34  2004/07/07 22:31:06  oldi
 // Fix of a severe bug which threw away about 1/3 of all events by cutting on
 // vertex_x < 0 && vertex_y < 0 && vertex_z < 0 instead of fabs(...) < 0.

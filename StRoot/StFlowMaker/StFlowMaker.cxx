@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.91 2004/08/18 00:19:19 oldi Exp $
+// $Id: StFlowMaker.cxx,v 1.92 2004/08/24 20:24:34 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -221,7 +221,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.91 2004/08/18 00:19:19 oldi Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.92 2004/08/24 20:24:34 oldi Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -687,7 +687,7 @@ void StFlowMaker::FillFlowEvent() {
 	StPtrVecTrackPidTraits traits = pTrack->pidTraits(kTpcId);
         unsigned int size = traits.size();
         if (size) {
-	  StDedxPidTraits* pid;
+	  StDedxPidTraits* pid = 0;
 	  for (unsigned int i = 0; i < traits.size(); i++) {
 	    pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
 	    if (pid && pid->method() == kTruncatedMeanId) break;
@@ -1788,7 +1788,7 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
 	
 	x = pMuTrack->firstPoint().x();
 	y = pMuTrack->firstPoint().y();
-	if (TMath::Sqrt(x*x+y*y) >= innerPadrowRadius) { // track starts in TPC
+	if (TMath::Sqrt(x*x+y*y) >= innerFieldCageRadius) { // track starts in TPC
 	  pFlowTrack->SetZFirstPoint(pMuTrack->firstPoint().z()); 
 	} else { // track starts before TPC: calculate first TPC point
 	  pairD pathL = pMuTrack->helix().pathLength(innerPadrowRadius);
@@ -2113,6 +2113,10 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.92  2004/08/24 20:24:34  oldi
+// Minor modifications to avoid compiler warnings.
+// Small bug fix (didn't affect anyone yet).
+//
 // Revision 1.91  2004/08/18 00:19:19  oldi
 // Several changes were necessary to comply with latest changes of MuDsts and StEvent:
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.cxx,v 1.13 2004/05/31 20:09:39 oldi Exp $
+// $Id: StFlowPicoEvent.cxx,v 1.14 2004/08/24 20:24:36 oldi Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -63,7 +63,7 @@ void StFlowPicoEvent::AddTrack(StFlowPicoTrack* inputTrack) {
 
 UInt_t StFlowPicoEvent::CalcCentrality() {
 
-  Int_t* cent;
+  Int_t* cent = 0;
   Int_t  tracks = mMultEta; // converts UInt_t to Int_t
 
   if (mCenterOfMassEnergy == 0.) { // year=1
@@ -97,6 +97,10 @@ UInt_t StFlowPicoEvent::CalcCentrality() {
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.cxx,v $
+// Revision 1.14  2004/08/24 20:24:36  oldi
+// Minor modifications to avoid compiler warnings.
+// Small bug fix (didn't affect anyone yet).
+//
 // Revision 1.13  2004/05/31 20:09:39  oldi
 // PicoDst format changed (Version 7) to hold ZDC SMD information.
 // Trigger cut modified to comply with TriggerCollections.
