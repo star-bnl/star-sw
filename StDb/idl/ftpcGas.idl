@@ -18,8 +18,8 @@ struct ftpcGas {
    float  baseTemperature;          /* degree Centigrade */
    float  basePressure;             /* Torr  */
    float  pressureOffset;           /* Torr  */
-   float  temperatureDifference;    /* gas temperature difference FTPC West-East in degree Centigrade */
-   float  defaultTemperatureWest;   /* default gasout temperature for FTPC West */
-   float  defaultTemperatureEast;   /* default gasout temperature for FTPC East */
+   float  temperatureDifference;    /* gas temperature difference between SVT high voltage off/on in degree Centigrade */
+   float  defaultTemperatureWest;   /* default gas temperature for FTPC West for SVT high voltage off */
+   float  defaultTemperatureEast;   /* default gas temperature for FTPC East for SVT high voltage off */
 
  };  
