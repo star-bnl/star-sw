@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.59 2000/07/30 02:36:35 long Exp $
+// $Id: StTrsMaker.cxx,v 1.60 2000/08/04 03:33:45 long Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.60  2000/08/04 03:33:45  long
+// mMiniSegmentLength(3.*millimeter)--->mMiniSegmentLength(4.*millimeter)
+//
 // Revision 1.59  2000/07/30 02:36:35  long
 // add dx(d[0]),dy(d[1]),dz calculation instead of just ds
 //
@@ -337,7 +340,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.59 2000/07/30 02:36:35 long Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.60 2000/08/04 03:33:45 long Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -350,7 +353,7 @@ ClassImp(StTrsMaker)
 StTrsMaker::StTrsMaker(const char *name):
 StMaker(name),
     //  mMiniSegmentLength(400.*millimeter),  // used to be 4mm
-mMiniSegmentLength(3.*millimeter),  // test trial,Hui Long
+mMiniSegmentLength(4.*millimeter),  // test trial,Hui Long
 mFirstSectorToProcess(1),
 mLastSectorToProcess(24), 
 mWriteToFile(0),
@@ -907,9 +910,10 @@ Int_t StTrsMaker::Make(){
        	     d[0] =tpc_hit->ds*absP[0]/ptot;
              d[1] =tpc_hit->ds*absP[1]/ptot; 
              d[2] =tpc_hit->ds*absP[2]/ptot;// approximation 
-            int breakNumber = (int)max(d[0]/mMiniSegmentLength,d[2]/mMiniSegmentLength);
-              if(breakNumber<1)   breakNumber = 1;
-	    //   breakNumber = min(breakNumber,16);  // set limit
+	     //   int breakNumber = (int)max(d[0]/mMiniSegmentLength,d[2]/mMiniSegmentLength);
+            int breakNumber = (int)max(aSegment.ds()/mMiniSegmentLength,1.);
+	      if(breakNumber<1)   breakNumber = 1;
+	     breakNumber = min(breakNumber,16);  // set limit
             int numberOfLevels =
 	    static_cast<int>(log(static_cast<double>(breakNumber))/M_LN2 + .999);
 	    d[0]/=pow(2.,numberOfLevels);
