@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.20 2001/05/21 23:25:34 hardtke Exp $
+ * $Id: StTpcDb.h,v 1.21 2001/08/14 18:18:03 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.21  2001/08/14 18:18:03  hardtke
+ * Add sector position structures
+ *
  * Revision 1.20  2001/05/21 23:25:34  hardtke
  * Add tpcGlobalPosition to StTpcDb.  This includes the global position offset and the rotation w.r.t. the magnet
  *
@@ -87,6 +90,7 @@
 #include "StRTpcT0.h"
 #include "StRTpcSlowControlSim.h"
 #include "StRTpcGlobalPosition.h"
+#include "StRTpcSectorPosition.h"
 #include "St_DataSet.h"
 class StMaker;
 class St_tpcDriftVelocity;
@@ -104,7 +108,8 @@ class StTpcDb {
  StTpcSlowControlSimI* slowControlSim;//! 
  StTpcElectronicsI*    electronics;   //!
  StTpcGainI*           gain[24];      //!
- StTpcT0I*             t0[24];        //! 
+ StTpcT0I*             t0[24];        //!
+ StTpcSectorPositionI* sect[24];    //! 
  StTpcGlobalPositionI* GlobPos; //!
  St_DataSet*           tpc[3];        //!
  St_DataSet*           trg[3];        //!
@@ -129,6 +134,7 @@ class StTpcDb {
    StTpcGlobalPositionI* GlobalPosition();
    StTpcGainI* Gain(int sector);
    StTpcT0I* T0(int sector);
+   StTpcSectorPositionI* SectorPosition(int sector);
    St_Table *getTpcTable(int i);
    //small pieces of data:
    float DriftVelocity();
