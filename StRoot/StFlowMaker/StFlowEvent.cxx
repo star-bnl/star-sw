@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.10 2000/08/12 20:22:19 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.11 2000/08/31 18:58:21 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,11 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.11  2000/08/31 18:58:21  posk
+// For picoDST, added version number, runID, and multEta for centrality.
+// Added centrality cut when reading picoDST.
+// Added pt and eta selections for particles corr. wrt event plane.
+//
 // Revision 1.10  2000/08/12 20:22:19  posk
 // Recalculate centrality in read from pico.
 //
@@ -105,12 +110,24 @@ Float_t  StFlowEvent::mEtaCuts[2][Flow::nHars][Flow::nSels] = {{{0.,0.5},
 								{0.,0.},
 								{0.,0.5},
 								{0.,0.}},
-							       {{1.5,2.},
-								{1.5,1.},
-								{1.5,2.},
-								{1.5,1.},
-								{1.5,2.},
-								{1.5,1.}}};
+							       {{1.0,2.},
+								{1.0,1.},
+								{1.0,2.},
+								{1.0,1.},
+								{1.0,2.},
+								{1.0,1.}}};
+// Float_t  StFlowEvent::mEtaCuts[2][Flow::nHars][Flow::nSels] = {{{0.05,0.5},
+// 								{0.05,0.},
+// 								{0.05,0.5},
+// 								{0.05,0.},
+// 								{0.05,0.5},
+// 								{0.05,0.}},
+// 							       {{1.0,2.},
+// 								{1.0,1.},
+// 								{1.0,2.},
+// 								{1.0,1.},
+// 								{1.0,2.},
+// 								{1.0,1.}}};
 Float_t  StFlowEvent::mPtCuts[2][Flow::nHars][Flow::nSels] =  {{{0.1,0.1},
 								{0.1,0.1},
 								{0.1,0.1},
@@ -124,12 +141,12 @@ Float_t  StFlowEvent::mPtCuts[2][Flow::nHars][Flow::nSels] =  {{{0.1,0.1},
 								{2.,2.},
 								{2.,2.}}};
 
-Float_t StFlowEvent::mPiPlusCuts[2]  = {-2., 1.};
-Float_t StFlowEvent::mPiMinusCuts[2] = {-2., 2.};
-Float_t StFlowEvent::mProtonCuts[2]  = {-1., 2.};
-Float_t StFlowEvent::mKMinusCuts[2]  = {-1., 1.};
-Float_t StFlowEvent::mKPlusCuts[2]  = {-1., 1.};
-Float_t StFlowEvent::mAntiProtonCuts[2]  = {-1., 1.};
+Float_t StFlowEvent::mPiPlusCuts[2]     = {-3., 3.};
+Float_t StFlowEvent::mPiMinusCuts[2]    = {-3., 3.};
+Float_t StFlowEvent::mProtonCuts[2]     = {-3., 3.};
+Float_t StFlowEvent::mKMinusCuts[2]     = {-3., 3.};
+Float_t StFlowEvent::mKPlusCuts[2]      = {-3., 3.};
+Float_t StFlowEvent::mAntiProtonCuts[2] = {-3., 3.};
 
 //-----------------------------------------------------------
 
@@ -144,10 +161,6 @@ StFlowEvent::StFlowEvent()  {
 
 StFlowEvent::~StFlowEvent() {
 
-//   StFlowTrackIterator iter;
-//   for (iter= pTrackCollection->begin(); iter!= pTrackCollection->end(); iter++){
-//     delete *iter;
-//   }
   delete pTrackCollection;
 
 }
@@ -258,8 +271,10 @@ void StFlowEvent::SetSelections() {
 
 	// Eta
 	if (mEtaCuts[1][harN][selN] > mEtaCuts[0][harN][selN] && 
-	    (fabs(eta) < mEtaCuts[0][harN][selN] || 
-	     fabs(eta) >= mEtaCuts[1][harN][selN])) continue;
+ 	    (fabs(eta) < mEtaCuts[0][harN][selN] || 
+ 	     fabs(eta) >= mEtaCuts[1][harN][selN])) continue;
+// 	    (eta < mEtaCuts[0][harN][selN]         || both subs at +eta
+// 	     eta >= mEtaCuts[1][harN][selN])) continue;
 	
 	// Pt
 	if (mPtCuts[1][harN][selN] > mPtCuts[0][harN][selN] && 
@@ -315,6 +330,35 @@ void StFlowEvent::MakeSubEvents() {
   }
   
 }
+
+//-------------------------------------------------------------
+
+// void StFlowEvent::MakeSubEvents() {
+//   // subevents with positive and negative eta
+
+//   StFlowTrackIterator itr;
+//   int eventMult[Flow::nHars][Flow::nSels] = {{0}};
+//   int harN, selN, subN = 0;
+  
+//   // loop to set the SubEvent member variable
+//   for (selN = 0; selN < Flow::nSels; selN++) {
+//     for (harN = 0; harN < Flow::nHars; harN++) {
+//       for (itr = TrackCollection()->begin(); itr != TrackCollection()->end();
+// 	   itr++) {
+// 	StFlowTrack* pFlowTrack = *itr;
+// 	if (pFlowTrack->Select(harN, selN)) {
+// 	  float eta = pFlowTrack->Eta();
+// 	  if (eta > 0.) {
+// 	    pFlowTrack->SetSubevent(harN, selN, 0);
+// 	  } else {
+// 	    pFlowTrack->SetSubevent(harN, selN, 1);
+// 	  }
+// 	}
+//       }
+//     }
+//   }
+  
+// }
 
 //-----------------------------------------------------------------------
 

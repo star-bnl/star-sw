@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.38 2000/08/26 21:37:02 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.39 2000/08/31 18:58:23 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,11 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.39  2000/08/31 18:58:23  posk
+// For picoDST, added version number, runID, and multEta for centrality.
+// Added centrality cut when reading picoDST.
+// Added pt and eta selections for particles corr. wrt event plane.
+//
 // Revision 1.38  2000/08/26 21:37:02  snelling
 // Removed flownanoevent, Added multiple input for pico, fixed IO bug
 //
@@ -155,7 +160,7 @@ StFlowMaker::StFlowMaker(const Char_t* name):
   mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE),
   mFlowEventWrite(kFALSE), mFlowEventRead(kFALSE), pEvent(NULL) {
   pFlowSelect = new StFlowSelection();
-  SetPicoEventFileName("flowpicoevent.root");
+  SetPicoEventDir("./");
 }
 
 StFlowMaker::StFlowMaker(const Char_t* name,
@@ -164,7 +169,7 @@ StFlowMaker::StFlowMaker(const Char_t* name,
   mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), 
   mFlowEventWrite(kFALSE), mFlowEventRead(kFALSE), pEvent(NULL) {
   pFlowSelect = new StFlowSelection(flowSelect); //copy constructor
-  SetPicoEventFileName("flowpicoevent.root");
+  SetPicoEventDir("./");
 }
 
 //-----------------------------------------------------------------------
@@ -175,8 +180,8 @@ StFlowMaker::~StFlowMaker() {
 //-----------------------------------------------------------------------
 
 Int_t StFlowMaker::Make() {
-
   if (Debug()) gMessMgr->Info() << "FlowMaker: Make() " << endm;
+
   // Delete previous StFlowEvent
   if (pFlowEvent) delete pFlowEvent;
   pFlowEvent = NULL;
@@ -199,12 +204,9 @@ Int_t StFlowMaker::Make() {
       if (mPicoEventWrite) {
 	if (pPicoEvent) delete pPicoEvent;
 	if (pPicoDST) delete pPicoDST;
-	//      cout << "FlowMaker: FlowTree deleted " << endl;
-	//      if (pFlowTree) delete pFlowTree;
 	pPicoEvent = NULL;
-      pPicoDST = NULL;
-      //      pFlowTree = NULL;
-      InitPicoEventWrite();
+	pPicoDST = NULL;
+	InitPicoEventWrite();
       }
       mEventFileNameOld = mEventFileName;
     }
@@ -244,7 +246,7 @@ Int_t StFlowMaker::Make() {
   }
   
   UInt_t flowEventMult;
-  if (!pFlowEvent) { flowEventMult = 0;}
+  if (!pFlowEvent) { flowEventMult = 0; }
   else { flowEventMult = pFlowEvent->FlowEventMult(); }
 
   if (Debug()) StMaker::PrintInfo();
@@ -255,7 +257,6 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 Int_t StFlowMaker::Init() {
-
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
   // Open PhiWgt file
@@ -265,9 +266,7 @@ Int_t StFlowMaker::Init() {
 
   if (!mPicoEventRead && !mFlowEventRead) {
     // get input file name
-    TString* makerName = new TString("IO");
-    pIOMaker = (StIOMaker*)GetMaker(makerName->Data());
-    delete makerName;
+    pIOMaker = (StIOMaker*)GetMaker("IO");
     if (pIOMaker) {
       mEventFileName = strrchr(pIOMaker->GetFile(),'/')+1;
       mEventFileNameOld = mEventFileName; 
@@ -283,7 +282,7 @@ Int_t StFlowMaker::Init() {
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.38 2000/08/26 21:37:02 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.39 2000/08/31 18:58:23 posk Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -301,6 +300,7 @@ Int_t StFlowMaker::InitRun() {
 
 Int_t StFlowMaker::Finish() {
   if (Debug()) gMessMgr->Info() << "FlowMaker: Finish()" << endm;
+
   // Print the cut lists
   cout << "#######################################################" << endl;
   cout << "##### FlowMaker: Cut Lists" << endl;
@@ -314,8 +314,6 @@ Int_t StFlowMaker::Finish() {
     pPicoDST->Write();
     pPicoDST->Close();
   }
-
-  //  if (mPicoEventRead) { pPicoChain->Close(); }
 
   if (mFlowEventWrite && pFlowDST->IsOpen()) {
     pFlowDST->Write();
@@ -331,9 +329,9 @@ Int_t StFlowMaker::Finish() {
 //-----------------------------------------------------------------------
 
 Int_t StFlowMaker::ReadPhiWgtFile() {
-  if (Debug()) gMessMgr->Info() << "FlowMaker: ReadPhiWgtFile()" << endm;
-
   // Read the PhiWgt root file
+
+  if (Debug()) gMessMgr->Info() << "FlowMaker: ReadPhiWgtFile()" << endm;
 
   TDirectory* dirSave = gDirectory;
   TString* fileName = new TString("flowPhiWgt.hist.root");
@@ -378,13 +376,16 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::FillFlowEvent() {
-  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFlowEvent()" << endm;
   // Make StFlowEvent from StEvent
+
+  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFlowEvent()" << endm;
+
   // Fill PhiWgt array
   pFlowEvent->SetPhiWeight(mPhiWgt);
 
   // Get event id 
   pFlowEvent->SetEventID((Int_t)(pEvent->id()));
+  pFlowEvent->SetRunID((Int_t)(pEvent->runId()));
 
   // Get primary vertex position
   const StThreeVectorF& vertex = pEvent->primaryVertex(0)->position();
@@ -416,13 +417,11 @@ void StFlowMaker::FillFlowEvent() {
   // Get initial multiplicity before TrackCuts 
   UInt_t origMult = pEvent->primaryVertex(0)->numberOfDaughters(); 
   pFlowEvent->SetOrigMult(origMult);
-  //pFlowEvent->SetCentrality(origMult);
   PR(origMult);
   
   // loop over tracks in StEvent
-  int goodTracks = 0;
-  int goodTracksEta1 = 0;
-  int goodTracksEta2 = 0;
+  int goodTracks    = 0;
+  int goodTracksEta = 0;
   const StSPtrVecPrimaryTrack& tracks = pEvent->primaryVertex(0)->daughters();
   StSPtrVecPrimaryTrackConstIterator itr;
   StTpcDedxPidAlgorithm tpcDedxAlgo;
@@ -433,11 +432,8 @@ void StFlowMaker::FillFlowEvent() {
     if (pTrack && pTrack->flag() > 0) {
       StThreeVectorD p = pTrack->geometry()->momentum();
       // calculate the number of tracks with positive flag 
-      if (fabs(p.pseudoRapidity()) < 1.) {
-	goodTracksEta2++;
-	if (fabs(p.pseudoRapidity()) < 0.75) {
-	  goodTracksEta1++;
-	}
+      if (fabs(p.pseudoRapidity()) < 0.75) {
+	goodTracksEta++;
       }
       if (StFlowCutTrack::CheckTrack(pTrack)) {
 	// Instantiate new StFlowTrack
@@ -484,16 +480,15 @@ void StFlowMaker::FillFlowEvent() {
     }
   }
 
-  // Check for > 10 tracks and check Eta Symmetry
-  if (goodTracks < 10 || !StFlowCutEvent::CheckEtaSymmetry(pEvent)) {  
+  // Check Eta Symmetry
+  if (!StFlowCutEvent::CheckEtaSymmetry(pEvent)) {  
     delete pFlowEvent;             //  delete this event
     pFlowEvent = NULL;
     return;
   }
 
-  pFlowEvent->SetMultEta1(goodTracksEta1);
-  pFlowEvent->SetCentrality(goodTracksEta1);
-  pFlowEvent->SetMultEta2(goodTracksEta2);
+  pFlowEvent->SetMultEta(goodTracksEta);
+  pFlowEvent->SetCentrality(goodTracksEta);
   
   // For use with STL vector
 //   random_shuffle(pFlowEvent->TrackCollection()->begin(),
@@ -520,10 +515,11 @@ void StFlowMaker::FillPicoEvent() {
     return;
   }
   
+  pPicoEvent->SetVersion(1);         // version 1
   pPicoEvent->SetEventID(pFlowEvent->EventID());
+  pPicoEvent->SetRunID(pFlowEvent->RunID());
   pPicoEvent->SetOrigMult(pFlowEvent->OrigMult());
-  pPicoEvent->SetMultEta1(pFlowEvent->MultEta1());
-  pPicoEvent->SetMultEta2(pFlowEvent->MultEta2());
+  pPicoEvent->SetMultEta(pFlowEvent->MultEta());
   pPicoEvent->SetCentrality(pFlowEvent->Centrality());
   pPicoEvent->SetVertexPos(pFlowEvent->VertexPos().x(),
 			       pFlowEvent->VertexPos().y(),
@@ -567,8 +563,9 @@ void StFlowMaker::FillPicoEvent() {
 //-----------------------------------------------------------------------
 
 Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
-  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoDST()" << endm;
   // Make StFlowEvent from StFlowPicoEvent
+
+  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoDST()" << endm;
 
   if (!pPicoEvent || !pPicoChain->GetEntry(mPicoEventCounter++)) {
     cout << "##### FlowMaker: no more events" << endl; 
@@ -584,21 +581,23 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
 					  pPicoEvent->VertexY(),
 					  pPicoEvent->VertexZ()) );
-  pFlowEvent->SetMultEta1(pPicoEvent->MultEta1());
-  pFlowEvent->SetMultEta2(pPicoEvent->MultEta2());
-  //pFlowEvent->SetCentrality(pPicoEvent->MultEta1());
+  if (pPicoEvent->Version()) {
+    pFlowEvent->SetMultEta(pPicoEvent->MultEta());
+    pFlowEvent->SetCentrality(pPicoEvent->MultEta());
+    pFlowEvent->SetRunID(pPicoEvent->RunID());
+  }
   pFlowEvent->SetCTB(pPicoEvent->CTB());
   pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
   pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
 
-  int goodTracks = 0;
-  UInt_t goodTracksEta1 = 0;
+  int    goodTracks    = 0;
+  UInt_t goodTracksEta = 0;
   // Fill FlowTracks
   for (Int_t nt=0; nt<pPicoEvent->GetNtrack(); nt++) {
     StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
       ->UncheckedAt(nt);
     if (fabs(pPicoTrack->Eta()) < 0.75) {
-      goodTracksEta1++;
+      goodTracksEta++;
     }
     if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
       // Instantiate new StFlowTrack
@@ -626,12 +625,14 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   }
     
   // Recreate centrality
-  pFlowEvent->SetCentrality(goodTracksEta1);
+  if (!pPicoEvent->Version()) {
+    pFlowEvent->SetMultEta(goodTracksEta);
+    pFlowEvent->SetCentrality(goodTracksEta);
+  }
 
-  // Check event cuts and Eta Symmetry and tracks > 10
+  // Check event cuts and Eta Symmetry
   if (!StFlowCutEvent::CheckEvent(pPicoEvent) ||
-      !StFlowCutEvent::CheckEtaSymmetry(pPicoEvent) ||
-      goodTracks < 10) {  
+      !StFlowCutEvent::CheckEtaSymmetry(pPicoEvent)) {  
     Int_t eventID = pPicoEvent->EventID();
     gMessMgr->Info() << "##### FlowMaker: picoevent " << eventID << " cut" << endm;
     delete pFlowEvent;             // delete this event
@@ -698,9 +699,9 @@ Int_t StFlowMaker::InitPicoEventWrite() {
   // creat a Picoevent and an output file
   pPicoEvent = new StFlowPicoEvent();   
 
-  TString* filestring = new TString(mEventFileName);
-  filestring->Append(".");
-  filestring->Append(mPicoEventFileName);
+  TString* filestring = new TString(mPicoEventDir);
+  filestring->Append(mEventFileName);
+  filestring->Append(".flowpicoevent.root");
   pPicoDST = new TFile(filestring->Data(),"RECREATE","Flow Pico DST file");
   if (!pPicoDST) {
     cout << "##### FlowMaker: Warning: no PicoEvents file = " 
@@ -733,12 +734,8 @@ Int_t StFlowMaker::InitPicoEventWrite() {
 Int_t StFlowMaker::InitPicoEventRead() {
   if (Debug()) gMessMgr->Info() << "FlowMaker: InitPicoEventRead()" << endm;
 
-  //  pFlowTree = NULL;
   pPicoEvent = new StFlowPicoEvent(); 
   pPicoChain = new TChain("FlowTree");
-  
-  //  pPicoDST = new TFile(file);
-  
   
   for (Int_t ilist = 0;  ilist < pPicoFileList->GetNBundles(); ilist++) {
     pPicoFileList->GetNextBundle();
@@ -746,24 +743,6 @@ Int_t StFlowMaker::InitPicoEventRead() {
 				  << pPicoFileList->GetFileName(0) << endm;
     pPicoChain->Add(pPicoFileList->GetFileName(0));
   }
-
-  cout << " Out of file list loop" << endl;  
-  //  if (!pPicoDST->IsOpen()) {
-  //    cout << "##### FlowMaker: Error: no PicoEvents file = " << file << endl;
-  //    return kStFatal;
-  //  }
-  
-  //  gMessMgr->Info() << "##### FlowMaker: PicoEvents file = " << file << endm;
-  
-  // Get the tree, the branch, and the entries
-  //  pFlowTree = (TTree*)pPicoDST->Get("FlowTree");
-  //  if (!pFlowTree) {
-  //    cout << "##### FlowMaker: Error: No FlowTree" << endl;
-  //    return kStFatal;
-  //  }
-  
-  //  TBranch* branch = pFlowTree->GetBranch("pPicoEvent");
-  //  branch->SetAddress(&pPicoEvent);
 
   pPicoChain->SetBranchAddress("pPicoEvent", &pPicoEvent);
 

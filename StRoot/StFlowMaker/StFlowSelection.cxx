@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.5 2000/08/12 20:22:21 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.6 2000/08/31 18:58:26 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,11 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.6  2000/08/31 18:58:26  posk
+// For picoDST, added version number, runID, and multEta for centrality.
+// Added centrality cut when reading picoDST.
+// Added pt and eta selections for particles corr. wrt event plane.
+//
 // Revision 1.5  2000/08/12 20:22:21  posk
 // Recalculate centrality in read from pico.
 //
@@ -43,6 +48,10 @@ StFlowSelection::StFlowSelection() : mCentrality(0), mSubevent(-1) {
   mNumber[0] = '\0';
   mPid[0] = '\0';
   mPidPart[0] = '\0';
+  mPtPart[0] = 0.;
+  mPtPart[1] = 0.;
+  mEtaPart[0] = 0.;
+  mEtaPart[1] = 0.;
 }
 
 //-----------------------------------------------------------------------
@@ -94,7 +103,37 @@ Bool_t StFlowSelection::SelectPart(StFlowTrack* pFlowTrack) {
     if (strstr(pid, mPidPart)==0) return kFALSE;
   }
   
+  // Pt
+  float pt = pFlowTrack->Pt();
+  if (mPtPart[1] > mPtPart[0] && 
+      (pt < mPtPart[0] || pt >= mPtPart[1])) return kFALSE;
+  
+  // Eta
+  float eta = pFlowTrack->Eta();
+  if (mEtaPart[1] > mEtaPart[0] && 
+      (eta < mEtaPart[0] || eta >= mEtaPart[1])) return kFALSE;
+
   return kTRUE;
+}
+
+//-----------------------------------------------------------------------
+
+void StFlowSelection::PrintList() const {
+  
+  cout << "#################################################################"
+       << endl;
+  cout << "# Selection List:" << endl;
+  cout << "# Number = " << mNumber << endl;
+  cout << "# Centrality = " << mCentrality << endl;
+  cout << "# Particles used for the event plane: " << mPid << endl;
+  cout << "# Particles correlated with the event plane: " << mPidPart << endl;
+  cout << "# Pt for particles correlated with the event plane: " << 
+    mPtPart[0] << " to " << mPtPart[1] << " GeV/c" <<endl;
+  cout << "# Eta for particles correlated with the event plane: " << 
+    mEtaPart[0] << " to " << mEtaPart[1] <<endl;
+  cout << "#################################################################"
+       << endl;
+
 }
 
 //-----------------------------------------------------------------------

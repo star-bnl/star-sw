@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.15 2000/08/10 23:00:20 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.16 2000/08/31 18:58:19 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,11 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.16  2000/08/31 18:58:19  posk
+// For picoDST, added version number, runID, and multEta for centrality.
+// Added centrality cut when reading picoDST.
+// Added pt and eta selections for particles corr. wrt event plane.
+//
 // Revision 1.15  2000/08/10 23:00:20  posk
 // New centralities. pt and eta cuts.
 //
@@ -77,7 +82,7 @@ Float_t StFlowCutTrack::mFitOverMaxCuts[2] = {0.52, 1.};
 Float_t StFlowCutTrack::mChiSqCuts[2]      = {0., 0.};
 Float_t StFlowCutTrack::mDcaCuts[2]        = {0., 1.};
 Float_t StFlowCutTrack::mPtCuts[2]         = {0.1, 2.};
-Float_t StFlowCutTrack::mEtaCuts[2]        = {-1.5, 1.5};
+Float_t StFlowCutTrack::mEtaCuts[2]        = {-1.3, 1.3};
 
 UInt_t  StFlowCutTrack::mTrackN            = 0;     
 UInt_t  StFlowCutTrack::mGoodTrackN        = 0;

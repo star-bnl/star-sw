@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.5 2000/08/09 21:38:23 snelling Exp $
+// $Id: StFlowSelection.h,v 1.6 2000/08/31 18:58:27 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,11 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.6  2000/08/31 18:58:27  posk
+// For picoDST, added version number, runID, and multEta for centrality.
+// Added centrality cut when reading picoDST.
+// Added pt and eta selections for particles corr. wrt event plane.
+//
 // Revision 1.5  2000/08/09 21:38:23  snelling
 // PID added
 //
@@ -55,24 +60,30 @@ class StFlowSelection : public StObject {
   Bool_t  Select(StFlowEvent*);
   Bool_t  Select(StFlowTrack*);
   Bool_t  SelectPart(StFlowTrack*);
+  Float_t PtMaxPart() const;
+  void    PrintList() const;
   void    SetNumber(const UInt_t&);
   void    SetCentrality(const UInt_t&);
   void    SetPid(const Char_t*);
   void    SetPidPart(const Char_t*);
+  void    SetPtPart(const Float_t, const Float_t);
+  void    SetEtaPart(const Float_t, const Float_t);
   void    SetHarmonic(const Int_t&);
   void    SetSelection(const Int_t&);
   void    SetSubevent(const Int_t&);
   
  private:
 
-  Char_t mNumber[3];                        // selection number
-  UInt_t mCentrality;                       // centrality bin
-  Char_t mPid[10];                          // "pi-", "pi+", "pi", "k+", "k-", 
-                                            //"pbar", "proton" or "deuteron"
-  Char_t mPidPart[10];                      // PID for particles wrt plane
-  Int_t  mHarmonic;
-  Int_t  mSelection;
-  Int_t  mSubevent;
+  Char_t  mNumber[3];                        // selection number
+  UInt_t  mCentrality;                       // centrality bin
+  Char_t  mPid[10];                          // "pi-", "pi+", "pi", "k+", "k-", 
+                                             //"pbar", "proton" or "deuteron"
+  Char_t  mPidPart[10];                      // PID for particles wrt plane
+  Float_t mPtPart[2];                        // pt cuts for parts. wrt plane
+  Float_t mEtaPart[2];                       // eta cuts for parts. wrt plane
+  Int_t   mHarmonic;
+  Int_t   mSelection;
+  Int_t   mSubevent;
 
   ClassDef(StFlowSelection,1)               // macro for rootcint
 }; 
@@ -84,6 +95,8 @@ inline UInt_t  StFlowSelection::Centrality() const { return mCentrality; }
 inline Char_t* StFlowSelection::Pid() { return mPid; }
 
 inline Char_t* StFlowSelection::PidPart() { return mPidPart; }
+
+inline Float_t StFlowSelection::PtMaxPart() const { return mPtPart[1]; }
 
 inline Int_t StFlowSelection::Sel() const { return mSelection; }
 
@@ -104,6 +117,12 @@ inline void StFlowSelection::SetPid(const Char_t* pid)  {
 inline void StFlowSelection::SetPidPart(const Char_t* pid)  { 
   strncpy(mPidPart, pid, 9); mPidPart[9] = '\0'; }
 
+inline void StFlowSelection::SetPtPart(Float_t lo, Float_t hi) {
+  mPtPart[0] = lo; mPtPart[1] = hi; }
+
+inline void StFlowSelection::SetEtaPart(Float_t lo, Float_t hi) {
+  mEtaPart[0] = lo; mEtaPart[1] = hi; }
+
 inline void StFlowSelection::SetHarmonic(const Int_t& harN) {
   if (harN < 0 || harN >= Flow::nHars) {
     cout << "### Harmonic " << harN << " not valid" << endl;
@@ -121,6 +140,5 @@ inline void StFlowSelection::SetSubevent(const Int_t& subN) {
     cout << "### Subevent " << subN << " not valid" << endl;
     mSubevent = -1;
   } else { mSubevent = subN; } }
-
 
 #endif

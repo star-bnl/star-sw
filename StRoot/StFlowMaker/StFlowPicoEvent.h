@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.h,v 1.4 2000/08/09 21:38:23 snelling Exp $
+// $Id: StFlowPicoEvent.h,v 1.5 2000/08/31 18:58:25 posk Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -9,6 +9,11 @@
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.h,v $
+// Revision 1.5  2000/08/31 18:58:25  posk
+// For picoDST, added version number, runID, and multEta for centrality.
+// Added centrality cut when reading picoDST.
+// Added pt and eta selections for particles corr. wrt event plane.
+//
 // Revision 1.4  2000/08/09 21:38:23  snelling
 // PID added
 //
@@ -33,6 +38,8 @@
 #include "TObject.h"
 #include "TClonesArray.h"
 
+//-----------------------------------------------------------
+
 class StFlowPicoEvent : public TObject {
   
  public:
@@ -43,25 +50,27 @@ class StFlowPicoEvent : public TObject {
   TClonesArray* Tracks()     const { return fTracks; }
   Int_t         GetNtrack()  const { return mNtrack; }
 
+  Int_t         Version()    const { return mVersion; }
   UInt_t        OrigMult()   const { return mOrigMult; }
-  UInt_t        MultEta1()   const { return mMultEta1; }
-  UInt_t        MultEta2()   const { return mMultEta2; }
- 
+  UInt_t        MultEta()    const { return mMultEta; }
+
   UInt_t        Centrality() const { return mCentrality; }
   Float_t       VertexX()    const { return mVertexX; }
   Float_t       VertexY()    const { return mVertexY; }
   Float_t       VertexZ()    const { return mVertexZ; }
   Int_t         EventID()    const { return mEventID; }
+  Int_t         RunID()      const { return mRunID; }
   Float_t       CTB()        const { return mCTB; }
   Float_t       ZDCe()       const { return mZDCe; }
   Float_t       ZDCw()       const { return mZDCw; }
 
   
+  void SetVersion(const Int_t ver)      { mVersion = ver; }
   void SetEventID(const Int_t id)       { mEventID = id; }
+  void SetRunID(const Int_t id)         { mRunID = id; }
   void SetNtrack(const Int_t ntrk)      { mNtrack = ntrk; }
   void SetOrigMult(const UInt_t mult)   { mOrigMult = mult; }
-  void SetMultEta1(const UInt_t goodtracks1) { mMultEta1 = goodtracks1; }
-  void SetMultEta2(const UInt_t goodtracks2) { mMultEta2 = goodtracks2; }
+  void SetMultEta(const UInt_t goodtracks) { mMultEta = goodtracks; }
   void SetCentrality(const UInt_t cent) { mCentrality = cent; }
   void SetVertexPos(const Float_t x, const Float_t y, const Float_t z) { 
     mVertexX=x; mVertexY=y; mVertexZ=z; }
@@ -71,13 +80,13 @@ class StFlowPicoEvent : public TObject {
 
  private:
 
+  Int_t          mVersion;              // pico version
   Int_t          mNtrack;               // track number
   Int_t          mEventID;              // event ID
+  Int_t          mRunID;                // run ID
   UInt_t         mOrigMult;             // number of tracks
-  UInt_t         mMultEta1;             // number of tracks with 
-                                        // positive flag in 1 unit of eta
-  UInt_t         mMultEta2;             // number of tracks with positive flag 
-                                        // in 2 units of eta
+  UInt_t         mMultEta;              // number of tracks with 
+                                        // positive flag in 1.5 units of eta
   UInt_t         mCentrality;           // centrality bin
   Float_t        mVertexX;              // primary vertex position
   Float_t        mVertexY;              // primary vertex position
@@ -92,6 +101,8 @@ class StFlowPicoEvent : public TObject {
   ClassDef(StFlowPicoEvent,1)
 };
 
+
+//-----------------------------------------------------------
 
 class StFlowPicoTrack : public TObject {
 
