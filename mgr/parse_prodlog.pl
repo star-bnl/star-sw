@@ -7,36 +7,34 @@ use strict;
 use Sys::Hostname;
 my $hostname     = hostname();
 my $dir_log      = "/disk00001/star/prod4/log/tfs";
-my $dir_sum      = "/disk00001/star/prod4/sum/tfs";   
+my $dir_sum      = "../../sum/tfs";   
 my @set ;
-my @list; 
-my @list_sum;     
+my @list;      
 my $job_log;
 my $dummy;
 my $file_sum;
 #my $dir_lg       = "../log";
 my $name_log;
 my $f_flag = 0;
+my $pwd;
+my $filesm;
 #=========================================================
-#chdir $dir_log;
-@list = `ls *log`;
-chdir $dir_sum;
-@list_sum = `ls *.sum`;
 chdir $dir_log;
+@list = `ls *log`;
 
 foreach my $file (@list) {
         my $ltime = `mod_time $file`;
            if( $ltime > 3600){
                 chop $file;
+               $f_flag = 0; 
               $file_sum = $file;
               $file_sum =~ s/.log//g;
               $file_sum = $file_sum . ".sum";
-      foreach my $filesm (@list_sum)  {
-               chop $filesm;              
-	if ($filesm = $file_sum) {
+        chdir $dir_sum;
+         if(-f $file_sum ) {
               $f_flag = 1;
-     }
-}           
+	    }
+         chdir $dir_log;
               if($f_flag != 1) {  
              parse_log($file);
              timestamp($file);
@@ -279,12 +277,12 @@ sub parse_log($) {
    
    if ( defined($segmentation_violation) ){
 
-   print( "***Segmentation violation found:  ", "***\n");
+   print( "Segmentation violation found:  *** ", "\n");
 
  }
   if ( defined($break_buss) ){
 
-   print( "***Break *** buss error:  ", "\n");
+   print( "Break *** buss error: *** ", "\n");
 
  } 
 
@@ -299,7 +297,7 @@ sub parse_log($) {
  }
 
    print '=' x 80, "\n";
-   print(">>> Average number of tracks, vertices and hits foung <<<\n");
+   print(">>> Average number of tracks, vertices and hits found <<<\n");
    print '=' x 80, "\n";
  
    $avr_tracks    = $tot_tracks/$num_event;
