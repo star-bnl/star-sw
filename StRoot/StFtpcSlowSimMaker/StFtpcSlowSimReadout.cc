@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.11 2002/09/13 13:44:02 fsimon Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.12 2002/10/16 12:31:53 fsimon Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.12  2002/10/16 12:31:53  fsimon
+// gain factors and time offset included, Hardware <-> DAQ mapping taken into
+// account for Db access
+//
 // Revision 1.11  2002/09/13 13:44:02  fsimon
 // Added Random noise to each Timebin -> Better description of real data
 //
@@ -54,6 +58,7 @@
 #include <iostream.h>
 #include "PhysicalConstants.h"
 
+#include "StMessMgr.h"
 #include "StFtpcSlowSimField.hh"
 #include "StFtpcSlowSimCluster.hh"
 #include "StFtpcSlowSimReadout.hh"
@@ -178,11 +183,15 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
   float phi        = cl->GetPhi();
   int isec, jsec, nsecs;
   int     ipad       = WhichPad(phi,isec);
-  
+
+  //gMessMgr->Info()<< " FTPC SlowSimulator using time offset tables" << endm;
+
   if (DEBUG) {  
     cout << "Digitize using parameters: mDb->radiansPerBoundary() = "<<mDb->radiansPerBoundary()<<" mDb->radiansPerPad() = "<<mDb->radiansPerPad()<<endl;
     cout << " phiMin = "<< phiMin << " phiMax = " << phiMax <<endl;
   }
+
+  
 
   // big if() loop
   if ( itim > 2 && itim < (mDb->numberOfTimebins()-3)) 
@@ -261,7 +270,16 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 	    
 	    
 	    // and calculate the time distribution 
+	    // include time offset database: subtract time offset!
+	    // move time center of cluster
+	    //cout <<" Shifting time by ";
+	    //cout << mDb->timeOffset(GetHardSec(isec, irow)*mDb->numberOfPads()+GetHardPad(isec,ipad,irow)+1, irow) << " from "<< time << " with parameters " 
+	    // << GetHardSec(isec, irow)*mDb->numberOfPads()+GetHardPad(isec,ipad,irow)+1<< " , "<< irow;
 	    
+	    time = time - mDb->timeOffset(GetHardSec(isec, irow)*mDb->numberOfPads()+GetHardPad(isec,ipad,irow)+1, irow)/(0.001/mDb->microsecondsPerTimebin());
+	    
+	    //cout << " to " << time << " for Sec "<< isec<<" ("<<GetHardSec(isec, irow)<<") pad "<< (ipad) <<" ("<<GetHardPad(isec,ipad,irow)<<") row " << irow <<endl;
+
 	    float width_tim = n_sigmas_to_calc*sigma_tim;
 	    int tim_min = WhichSlice(time - width_tim);
 	    int tim_max = WhichSlice(time + width_tim);
@@ -308,14 +326,15 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 }
 
 
-void StFtpcSlowSimReadout::OutputADC() const 
+void StFtpcSlowSimReadout::OutputADC() 
 {
   int num_pixels[11]={0}, num_pixels_occupied[11]={0};
   
   // Gaussian distribution for Noise, Sigma 1.5 ADC channels
   TF1* noise = new TF1("noise","gaus",-5,5);
   noise->SetParameters(1,0,1.5);
-  cout << "Using random noise with a sigma of 1.5\n";
+  gMessMgr->Info()<< " FTPC SlowSimulator using random noise with a sigma of 1.5" << endm;
+  gMessMgr->Info()<< " FTPC SlowSimulator using gain tables and amplitude offset" << endm;
 
 
   for (int row=0; row<mDb->numberOfPadrows(); row++) { 
@@ -324,22 +343,35 @@ void StFtpcSlowSimReadout::OutputADC() const
 	for (int bin=0; bin<mDb->numberOfTimebins(); bin++) {
 	  int i=bin+mDb->numberOfTimebins()*pad+mDb->numberOfTimebins()*mDb->numberOfPads()*sec+mDb->numberOfTimebins()*mDb->numberOfPads()*mDb->numberOfSectors()*row;
 	  
-	  mADCArray[i] =(mADCArray[i] / mParam->adcConversion());
-	  mADCArray[i] =(mADCArray[i] / 1.4); // Scale ADC Values to match real data
-	  if(DEBUG)
-	    num_pixels[(int) (bin/30)]++;
+	  if (mADCArray[i] != 0){
+	    mADCArray[i] =(mADCArray[i] / mParam->adcConversion());
+	    mADCArray[i] =(mADCArray[i] / 1.4); // Scale ADC Values to match real data
 	  
-	  // Add random noise to each timebin
-	  mADCArray[i] += noise->GetRandom();
-	 
-	  if(mADCArray[i] >= mParam->zeroSuppressThreshold()) {
+	    // include gainfactors 
+	    // remember that the Db access counts from 1 to 960 and not from 0 to 959 for the sector&pad index!
+	    mADCArray[i] = mADCArray[i] - mDb->amplitudeOffset(GetHardSec(sec, row)*mDb->numberOfPads()+GetHardPad(sec,pad,row)+1, row);
+	    //cout << "Using AmpSlope :" << mDb->amplitudeSlope(GetHardSec(sec, row)*mDb->numberOfPads()+GetHardPad(sec,pad,row)+1, row) <<endl;
+	    if (mDb->amplitudeSlope(GetHardSec(sec, row)*mDb->numberOfPads()+GetHardPad(sec,pad,row)+1, row)!= 0)
+	      mADCArray[i] = mADCArray[i] / (mDb->amplitudeSlope(GetHardSec(sec, row)*mDb->numberOfPads()+GetHardPad(sec,pad,row)+1, row));
+	    else
+	      mADCArray[i] = 0;
 	    
-	    // count up occupancy
+	    
 	    if(DEBUG)
-	      num_pixels_occupied[(int) (bin/30)]++;
+	      num_pixels[(int) (bin/30)]++;
+	  
+	    // Add random noise to each timebin
+	    mADCArray[i] += noise->GetRandom();
 	    
-	    if (mADCArray[i] >= mMaxAdc)  
-	      mADCArray[i] = mMaxAdc;          // reset overflow
+	    if(mADCArray[i] >= mParam->zeroSuppressThreshold()) {
+	    
+	      // count up occupancy
+	      if(DEBUG)
+		num_pixels_occupied[(int) (bin/30)]++;
+	    
+	      if (mADCArray[i] >= mMaxAdc)  
+		mADCArray[i] = mMaxAdc;          // reset overflow
+	    }
 	  }
 	}
       }
@@ -397,6 +429,34 @@ float StFtpcSlowSimReadout::TimeOfSlice(const int sslice)
     return (sslice+0.5)*1000*mDb->microsecondsPerTimebin();         // time in nsec
 }
 
+int StFtpcSlowSimReadout::GetHardPad(const int daqsec, const int daqpad, const int irow)
+{
+  int pad = daqpad;
+  if (pad <0) pad =0;
+  if (pad > (mDb->numberOfPads() -1)) pad = mDb->numberOfPads() -1;
+  if (irow>=10)
+    if ((pad>63)&&(pad<96)) // no turning for center FEE card in each sector
+      return pad;
+    else
+      return (mDb->numberOfPads()-pad-1);
+  else
+    return (mDb->numberOfPads()-pad-1);
+
+}
+
+
+int StFtpcSlowSimReadout::GetHardSec(const int daqsec, const int irow)
+{
+  int sec = daqsec;
+  if (sec < 0) sec = 0;
+  if (sec > (mDb->numberOfSectors() -1 )) sec = mDb->numberOfSectors() -1;
+
+  if (irow>=10)
+    return sec;      
+  else
+    return (mDb->numberOfSectors()-sec-1);
+}
+	  
 void StFtpcSlowSimReadout::Print() const 
 {
     

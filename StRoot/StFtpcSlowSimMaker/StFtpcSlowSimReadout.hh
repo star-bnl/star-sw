@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimReadout.hh,v 1.3 2001/04/20 12:50:26 jcs Exp $
+// $Id: StFtpcSlowSimReadout.hh,v 1.4 2002/10/16 12:31:56 fsimon Exp $
 // $Log: StFtpcSlowSimReadout.hh,v $
+// Revision 1.4  2002/10/16 12:31:56  fsimon
+// gain factors and time offset included, Hardware <-> DAQ mapping taken into
+// account for Db access
+//
 // Revision 1.3  2001/04/20 12:50:26  jcs
 // cleanup comments
 //
@@ -50,7 +54,7 @@ public:
   void Digitize(const StFtpcSlowSimCluster *cl, const int irow);
                                 // add noise and fill the pixel array
                                 //     mADCArray[pad,time]
-  void OutputADC() const;
+  void OutputADC();
   void Print() const ;   // print readout parameters
   
   float GetPadLength() const        {return pad_length; }
@@ -67,7 +71,11 @@ public:
                   const float x_0, const float sig);
   float ranmar();
   void rmarin(int ij, int kl);
- 
+  
+  int GetHardPad(const int daqsec, const int daqpad, const int irow);
+  int GetHardSec(const int daqsec, const int irow);
+
+
 private:
   struct raset1 {
     float u[97];
