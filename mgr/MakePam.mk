@@ -185,7 +185,7 @@ ifneq ($(STAR_PATH),$(OUT_DIR))
     LIBRARIES += $(wildcard  $(STAR_LIB)/lib$(PKG).a)
   endif                           
 endif                           
-####LIBRARIES += -L$(STAR)/asps/../.$(STAR_HOST_SYS)/lib -ltls -lmsg
+LIBRARIES += -L$(STAR)/asps/../.$(STAR_HOST_SYS)/lib -ltls -lmsg
 endif                          
 ifeq (,$(strip $(LIB_PKG) $(SL_PKG)))
 all:
@@ -206,7 +206,7 @@ endif
 ifneq ($(strip $(FILES_SL) $(FILES_OG) $(FILES_init)),)   
 $(SL_PKG): $(FILES_SL) $(FILES_OG) $(FILES_init) $(LIB_PKG)
 	$(SO) $(SOFLAGS) $(FILES_SL) $(FILES_OG)  $(FILES_init)  -o $(SL_PKG) \
-        $(LIBRARIES)  
+        $(LIBRARIES) $(CERN_LIBS)  $(FLIBS) $(CLIBS)
 	@echo "           Shared library " $(SL_PKG) " has been created"   
 #--------- module --------- 
 ifneq ($(NAMES_IDM),)           
