@@ -131,8 +131,8 @@
 * 
 * 7. to read from an xdf file that already has raw data simulated on it
 *    and then doing tpc clustering and tracking and write out results:
-*    domain=' geometry tpc '
-*    chain=' evin tpg tcl tpt'
+*    domain=' tpc '
+*    chain=' evin tcl tpt'
 *****************************************************************
 *****************************************************************
 *****************************************************************
@@ -148,11 +148,11 @@ MACRO bfc _
    tpc_sector_last=1 _
    geomtype=all _
    phystype=on _
-   domain=' geometry tpc svt global' _
-   chain='g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout ' _
+   domain=' geometry tpc svt global ' _
+   chain=' g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout' _
    first=1 _
    no_events=1 _
-   input_data_prefix=$AFS_RHIC/star/data/samples _
+   input_data_prefix=$AFS_RHIC/star/data/samples/ _
    input_data_file=auau_central_hijing.xdf _
    output_file=bfc_output.xdf 
   

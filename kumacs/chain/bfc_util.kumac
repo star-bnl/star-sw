@@ -198,7 +198,7 @@ macro bfc_init _
                 goto eof
               endif
 *             exec write_table_to_file#write evout [geant_Run]
-     *        exec write_table_to_file#write evout [run]         
+              exec write_table_to_file#write evout [run]         
             endif
       (*)   message " !!! bfc_util: No initialization for package " [mod]
     ENDCASE
