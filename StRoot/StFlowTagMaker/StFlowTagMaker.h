@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.hh
-// $Id: StFlowTagMaker.h,v 1.7 2000/03/02 23:00:09 posk Exp $
+// $Id: StFlowTagMaker.h,v 1.8 2000/03/15 23:30:56 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -16,6 +16,9 @@
 //
 // History:
 // $Log: StFlowTagMaker.h,v $
+// Revision 1.8  2000/03/15 23:30:56  posk
+// Added StFlowSelection.
+//
 // Revision 1.7  2000/03/02 23:00:09  posk
 // Changed header file extensions from .hh to .h .
 //
@@ -66,6 +69,7 @@
 #include "tables/St_FlowTag_Table.h"
 #include "StFlowMaker/StFlowConstants.h"
 class StFlowEvent;
+class StFlowSelection;
 class TH1F;
 class TH1D;
 class TProfile;
@@ -76,6 +80,7 @@ class StFlowTagMaker : public StMaker
 public:
 
                StFlowTagMaker(const Char_t* name = "FlowTag");
+               StFlowTagMaker(const Char_t* name, const StFlowSelection&);
   virtual      ~StFlowTagMaker();
 
   Int_t        Init();
@@ -90,9 +95,10 @@ private:
   Int_t        FillHistograms();
   void         PrintTag(ostream& = cout);  // output Tag info to screen
 
-  St_FlowTag*  pSt_FlowTag; //! the StFlowTag table header
-  FlowTag_st*  pFlowTag;    //! the StFlowTag table structure to fill
-  StFlowEvent* pFlowEvent;  //! the event to fill from
+  St_FlowTag*      pSt_FlowTag; //! the StFlowTag table header
+  FlowTag_st*      pFlowTag;    //! the StFlowTag table structure to fill
+  StFlowEvent*     pFlowEvent;  //! the event to fill from
+  StFlowSelection* pFlowSelect; //! the selection object
 
   struct histHarmonic {
     TH1F *mHistPsi;

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.8 2000/03/02 23:02:42 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.9 2000/03/15 23:28:49 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.9  2000/03/15 23:28:49  posk
+// Added StFlowSelection.
+//
 // Revision 1.8  2000/03/02 23:02:42  posk
 // Changed extensions from .hh and .cc to .h and .cxx .
 //
@@ -118,7 +121,7 @@ void StFlowCutTrack::PrintCutList() {
   cout << "#######################################################" << endl;
   cout << "# Track Cut List:" << endl;
   cout << "#   FitPts cuts= " << mFitPtsCuts[0] << ", " << mFitPtsCuts[1] 
-    //       << " :\t " << setprecision(4) << (float)mFitPtsCutN/(float)mTrackN/perCent 
+    //      << " :\t " << setprecision(4) << (float)mFitPtsCutN/(float)mTrackN/perCent 
        << " :\t " << (float)mFitPtsCutN/(float)mTrackN/perCent 
        << "% cut" << endl;
   cout << "#   FitOverMax cuts= " << mFitOverMaxCuts[0] << ", " 

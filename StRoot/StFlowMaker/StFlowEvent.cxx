@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.1 2000/03/02 23:02:48 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.2 2000/03/15 23:28:50 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.2  2000/03/15 23:28:50  posk
+// Added StFlowSelection.
+//
 // Revision 1.1  2000/03/02 23:02:48  posk
 // Changed extensions from .hh and .cc to .h and .cxx .
 //
@@ -71,14 +74,15 @@
 #include <stdlib.h>
 #include <math.h>
 #include <algorithm>
-#if defined(ST_NO_TEMPLATE_DEF_ARGS)
-#include <ospace/stl/src/randgen.cpp>
-#endif
+//#if defined(ST_NO_TEMPLATE_DEF_ARGS)
+//#include <ospace/stl/src/randgen.cpp>
+//#endif
 #if !defined(ST_NO_NAMESPACES)
 using std::random_shuffle;
 #endif
 #include "StFlowEvent.h"
 #include "StFlowTrackCollection.h"
+#include "StFlowSelection.h"
 #include "StFlowConstants.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -120,6 +124,7 @@ Float_t StFlowEvent::mProtonCuts[2]  = {-1., 2.};
 
 StFlowEvent::StFlowEvent() {
   // Make a new track collection
+
   pTrackCollection = new StFlowTrackCollection;
 
 }
@@ -127,6 +132,7 @@ StFlowEvent::StFlowEvent() {
 //-----------------------------------------------------------
 
 StFlowEvent::~StFlowEvent() {
+
   StFlowTrackIterator iter;
   for (iter= pTrackCollection->begin(); iter!= pTrackCollection->end(); iter++){
     delete *iter;
@@ -137,29 +143,7 @@ StFlowEvent::~StFlowEvent() {
 
 //-------------------------------------------------------------
 
-Int_t StFlowEvent::checkInput(Int_t harN, Int_t selN, Int_t subN) const {
-  // checks arguments for valid range
-  
-  if (harN < 0 || harN >= Flow::nHars) {
-    cout << "### Harmonic " << harN << " not valid" << endl;
-    return kFALSE;
-  }
-  if (selN < 0 || selN >= Flow::nSels) {
-    cout << "### Selection " << selN << " not valid" << endl;
-    return kFALSE;
-  }
-  if (subN < -1 || subN > Flow::nSubs) {
-    cout << "### Subevent " << subN << " not valid" << endl;
-    return kFALSE;
-  }
-
-  return kTRUE;
-}
-
-//-------------------------------------------------------------
-
 Double_t StFlowEvent::PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const {
-  if (!checkInput(harN, selN, 0)) return 0.;
 
   if (mPhi < 0.) mPhi += twopi;
   int n = (int)((mPhi/twopi)*Flow::nPhiBins);
@@ -169,30 +153,28 @@ Double_t StFlowEvent::PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const {
 
 //-------------------------------------------------------------
 
-UInt_t StFlowEvent::Mult(Int_t harN, Int_t selN, Int_t subN) {
+UInt_t StFlowEvent::Mult(StFlowSelection* pFlowSelect) {
   UInt_t mult = 0;
-  if (!checkInput(harN, selN, subN)) return mult;
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
-    if (pFlowTrack->Select(harN, selN, subN))  mult++;
+    if (pFlowSelect->Select(pFlowTrack))  mult++;
   }
-  
+
   return mult;
 }
 
 //-------------------------------------------------------------
 
-Float_t StFlowEvent::MeanPt(Int_t harN, Int_t selN, Int_t subN) {
+Float_t StFlowEvent::MeanPt(StFlowSelection* pFlowSelect) {
   Float_t sumPt = 0.;
   UInt_t  mult  = 0;
-  if (!checkInput(harN, selN, subN)) return 0.;
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
-    if (pFlowTrack->Select(harN, selN, subN)) {
+    if (pFlowSelect->Select(pFlowTrack)) {
       sumPt += pFlowTrack->Pt();
       mult++;
     }
@@ -203,18 +185,18 @@ Float_t StFlowEvent::MeanPt(Int_t harN, Int_t selN, Int_t subN) {
 
 //-------------------------------------------------------------
 
-TVector2 StFlowEvent::Q(Int_t harN, Int_t selN, Int_t subN) { 
+TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) { 
   TVector2 mQ;
-  mQ.Set(0., 0.);
-  if (!checkInput(harN, selN, subN)) return mQ;
-  double mQx=0., mQy=0.;
+  Int_t  selN  = pFlowSelect->Sel();
+  Int_t  harN  = pFlowSelect->Har();
   double order = (double)(harN + 1);
+  double mQx=0., mQy=0.;
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
-    if (pFlowTrack->Select(harN, selN, subN)) {
-      double mPhi = pFlowTrack->Phi();
+    if (pFlowSelect->Select(pFlowTrack)) {
+      Float_t mPhi = pFlowTrack->Phi();
       double phiWgt = PhiWeight(mPhi, selN, harN);
       if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
       mQx += phiWgt * cos(mPhi * order);
@@ -228,13 +210,12 @@ TVector2 StFlowEvent::Q(Int_t harN, Int_t selN, Int_t subN) {
 
 //-------------------------------------------------------------
 
-Float_t StFlowEvent::Psi(Int_t harN, Int_t selN, Int_t subN) {
-  Float_t psi = 0.;
-  if (!checkInput(harN, selN, subN)) return psi;
+Float_t StFlowEvent::Psi(StFlowSelection* pFlowSelect) {
+  Int_t  harN = pFlowSelect->Har();
   float order = (float)(harN + 1);
 
-  TVector2 mQ = Q(harN, selN, subN);
-  psi= mQ.Phi() / order;
+  TVector2 mQ = Q(pFlowSelect);
+  Float_t psi= mQ.Phi() / order;
   if (psi < 0.) {psi += twopi / order;}
   
   return psi;
@@ -242,12 +223,9 @@ Float_t StFlowEvent::Psi(Int_t harN, Int_t selN, Int_t subN) {
 
 //-------------------------------------------------------------
 
-Float_t StFlowEvent::q(Int_t harN, Int_t selN, Int_t subN) { 
-  Float_t q = 0.;
-  if (!checkInput(harN, selN, subN)) return q;
-
-  TVector2 mQ  = Q(harN, selN, subN);
-  UInt_t mult = Mult(harN, selN, subN);
+Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) { 
+  TVector2 mQ  = Q(pFlowSelect);
+  UInt_t mult  = Mult(pFlowSelect);
   
   return (mult) ? mQ.Mod() / sqrt((double)mult) : 0.;
 }
@@ -256,11 +234,10 @@ Float_t StFlowEvent::q(Int_t harN, Int_t selN, Int_t subN) {
 
 void StFlowEvent::SetSelections() {
 
-  
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
-    Double_t eta = pFlowTrack->Eta();
+    Double_t eta = (double)(pFlowTrack->Eta());
     Float_t  Pt  = pFlowTrack->Pt();
     for (int selN = 0; selN < Flow::nSels; selN++) {
       for (int harN = 0; harN < Flow::nHars; harN++) {
