@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.13 2000/01/04 20:55:05 levine Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.14 2000/02/08 21:34:06 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -26,9 +26,13 @@
  *           No longer return FALSE
  * 27-Jul-99 MJL init RowSpacePts = 0 to make destructor robust
  * 29-Aug-99 MJL #include <iostream.h> for HP platform
+ * 07-Feb-00 MJL add diagnostics when bad cluster data encountered
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.14  2000/02/08 21:34:06  levine
+ * added diagnostics for bad cluster pointers
+ *
  * Revision 1.13  2000/01/04 20:55:05  levine
  * Implemented memory-mapped file access in EventReader.cxx. Old method
  * (via seeks) is still possible by setting mmapp=0 in
@@ -166,6 +170,17 @@ int TPCV2P0_ZS_SR::initialize()
 	      newseq = (start > lastbin+1) ; // sequence broken in pieces by MZ
 	      stop = clusters[i].stop_time_bin;
 	      len = stop - start + 1;
+	      if (start<0 || start>511 || stop<0 || stop>511) {
+		struct EventInfo ei;
+		ei = detector->ercpy->getEventInfo();
+		printf("%s:%d: bad TPC cluster data detected\n",
+		       __FILE__,__LINE__); 
+		printf("evt# %d , sector %d, RB %d, MZ %d row %d, pad %d\n", 
+			 ei.EventSeqNo,sector+1,rcb+1,mz+1,row,pad);
+		printf("cluster %d: start=0x%x   stop=0x%x\n",
+		       i,clusters[i].start_time_bin,clusters[i].stop_time_bin);
+		break; //stop processing this pad
+	      }
 	      lastbin = stop;
 	      if (newseq) Pad_array[row-1][pad-1].nseq++;
 	      //update the cluster counter for this pad
@@ -192,6 +207,17 @@ int TPCV2P0_ZS_SR::initialize()
 		// sequence broken in pieces by MZ
 		stop = clusters[i].stop_time_bin;
 		len = stop - start + 1;
+		if (start<0 || start>511 || stop<0 || stop>511) {
+		  struct EventInfo ei;
+		  ei = detector->ercpy->getEventInfo();
+		  printf("%s:%d: bad TPC cluster data detected\n",
+			 __FILE__,__LINE__); 
+		  printf("evt# %d , sector %d, RB %d, MZ %d row %d, pad %d\n", 
+			 ei.EventSeqNo,sector+1,rcb+1,mz+1,row,pad);
+		  printf("cluster %d: start=0x%x   stop=0x%x\n",
+			 i,clusters[i].start_time_bin,clusters[i].stop_time_bin);
+		  break; //stop processing this pad
+		}
 		lastbin = stop;
 		if (newseq) {
 		  int offset = ent.offset * padkr->getADCBytes() + start;
