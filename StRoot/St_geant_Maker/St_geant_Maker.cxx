@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.22 1999/02/22 20:51:25 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.23 1999/02/22 23:55:57 fine Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.23  1999/02/22 23:55:57  fine
+// St_geant_Maker::rootmaptable is prepaed to use St_TableNew(), not activated yet
+//
 // Revision 1.22  1999/02/22 20:51:25  fisyak
 // Mismatch between ctb/tof
 //
@@ -372,7 +375,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.22 1999/02/22 20:51:25 fisyak Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.23 1999/02/22 23:55:57 fine Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
@@ -643,14 +646,14 @@ void St_geant_Maker::Work()
   TRotMatrix* rotd=0;
   Float_t* volu=0, *position=0, *mother=0;
   Char_t ss[12];
-  int     icopy   = 0;
-  Int_t   irot;
+  Int_t   icopy   = 0;
+  Int_t   irot    = 0;
   Int_t   mrot    = 0;
   Int_t   nrot    = 0;
   Int_t   jrotm   = clink->jrotm;
   if (jrotm) {nrot = z_iq[jrotm-2];}
   float te1[700], fi1[700], te2[700], fi2[700], te3[700], fi3[700];
-  Float_t xx[3],  theta1,phi1, theta2,phi2, theta3,phi3, type;
+  Float_t theta1,phi1, theta2,phi2, theta3,phi3, type;
 
   typedef enum {BOX=1,TRD1,TRD2,TRAP,TUBE,TUBS,CONE,CONS,SPHE,PARA,PGON,PCON,ELTU,HYPE,GTRA=28,CTUB} shapes;
 
@@ -732,8 +735,8 @@ void St_geant_Maker::Work()
       t->SetLineColor(att[4]);
     };
     Int_t    ivol = *(position+1);
-    Int_t    irot = *(position+3);
     Float_t* xyz  =   position+4;
+    irot = *(position+3);
     strncpy(nick,(const Char_t*)(cvolu+ivol),4);
 
     gfxzrm_ (&nlev, &xx[0],&xx[1],&xx[2], &theta1,&phi1, 
@@ -779,11 +782,13 @@ TRotMatrix *St_geant_Maker::GetMatrix(float thet1, float phii1,
    return pattern;
 }
 //------------------------------------------------------------------------
-void type_of_call rootmaptable_(Char_t *Cdest,Char_t *Table, Char_t* Spec, Int_t *k, Char_t *iq){
+void type_of_call rootmaptable_(Char_t *,Char_t *Table, Char_t*, Int_t *k, Char_t *iq){
+// void type_of_call rootmaptable_(Char_t *Cdest,Char_t *Table, Char_t* Spec, Int_t *k, Char_t *iq){
   TString TableName(Table); 
   TString t = TableName.Strip();
   t.ToLower();
   St_DataSet *geom = gStChain->DataSet("geom");
+#ifndef StTableNewMethod
   Char_t cmd[80];
   Int_t Nchar = sprintf(cmd,"St_%s",t.Data());
   if (gClassTable->GetID(cmd) < 0){
@@ -794,4 +799,12 @@ void type_of_call rootmaptable_(Char_t *Cdest,Char_t *Table, Char_t* Spec, Int_t
     St_Table *table = (St_Table *) gInterpreter->Calc(cmd);
     if (table) {geom->Add(table); table->Adopt(*k,iq); table->SetBit(kIsNotOwn);}
   }
+#else
+  // Use St_Table::New(...)  when it is available as follows:
+   St_Table *table =  St_Table::New(t.Data(),t.Data(),iq,*k);
+   if (table) {geom->Add(table); table->SetBit(kIsNotOwn);}
+   else
+     cout << "Dictionary for table :" << t.Data() << " has not yet been defined. Skip it" << endl;
+#endif
+
 }
