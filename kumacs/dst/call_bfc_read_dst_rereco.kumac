@@ -12,11 +12,11 @@
    chain=' dstin ev02 ev0d sdst2 desum drsum ntup ntup2' _
    skip=0 _
    no_events=1 _
-   input_data_file=/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/tfs_dst/psc180_02_48evts_h_dst.xdf _
-   output_file=psc180_02_48evts_j_dst _
+   input_data_file=/disk1/star/kathy/year2a_psc079_01_46evts_dst.xdf _
+   output_file=year2a_psc079_01_46evts_dst _
    log=bfc_read_dst_rereco.log _
    nunit=21 _
-   nfile=psc180_02_48evts_j_dst_smdst.ntup _
+   nfile=year2a_psc079_01_46evts_dst.ntup _
    nid=112 _
    ntable=event/data/global/dst/event_summary _
    nid2=111 _
