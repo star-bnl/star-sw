@@ -1,12 +1,12 @@
 *
-* $Id: aggstep.age,v 1.2 2004/03/31 22:54:16 fisyak Exp $
+* $Id: aggstep.age,v 1.3 2004/08/12 19:13:16 fisyak Exp $
 * $Name:  $
 * $Log: aggstep.age,v $
-* Revision 1.2  2004/03/31 22:54:16  fisyak
-* Keep hits for Laserino
+* Revision 1.3  2004/08/12 19:13:16  fisyak
+* Keep neutral laserinos
 *
-* Revision 1.1.1.1  2004/01/12 23:49:37  potekhin
-*
+* Revision 1.1  2004/01/12 23:49:37  potekhin
+* Initial revision
 *
 * Revision 1.2  2001/03/01 19:55:37  nevski
 * config file becomes atlsim specific
@@ -33,7 +33,7 @@
 #include "geant321/gctmed.inc"
 #include "geant321/gcsets.inc"
 #include "geant321/gckine.inc"
-#include "geant321/gcking.inc" 
+#include "geant321/gcking.inc"
 #include "geant321/gctrak.inc"
 #include "atlsim/agcstep.inc"
 #include "slug/sclink.inc"
@@ -74,12 +74,11 @@
  { Iad=0; If (LdetE(id)>12) Iad=LWSTEP(Id); If (Iad!=0) Call JUMPT0(Iad); }
 * - - - - - - - - - - - - - - - sensitive - - - - - - - - - - - - -
  AdEstep+=DeStep;  Astep+=Step;
-* print *,'DeStep :', DeStep, ' 	Step : ', Step
- If (Charge=0 & ipart != 170 & dEstep=0)  Go To :done:
+ If (Charge=0 & dEstep=0)  Go To :done:
  If (isvol<=0)             Go To :done:
  Iret=0;
 * - - - - - - - - - - - - - first point in hit - - - - - - - - - - -
- If  InwVOL==1 | Charge==0 & ipart != 170
+ If  InwVOL==1 | Charge==0
  { " If sensitive detector, find it's description banks a la GFINDS "
    Do Nlev=Nlevel,1,-1
    { Jat=JATTF(LQ(JVOLUM-LVOLUM(Nlev))); If (Q(Jat+8)>0) goto :sens:; };
@@ -102,7 +101,7 @@
      If (Jbit(Iopt,2)>0) Call GMTOD(vect,vloc0,1)
      If (Jbit(Iopt,3)>0) Call GMTOD(vect(4),vloc0(4),2)
    }
-   if (charge==0 & ipart != 170) AdEstep=dEstep;
+   if (charge==0) AdEstep=dEstep;
  }
 * - - - - - - - - - - - - - -
  If (STEP>0|dEstep>0) & Jdu>0 & Isimu>0
