@@ -68,6 +68,12 @@ Int_t StTreeMaker::Open(const char*)
     }
 
 //   
+//    	Several default branches
+    SetBranch("histBranch" ,0,"r","const");
+    SetBranch("runcoBranch",0,"r","const");
+
+//
+
     UpdateTree(0);
     fTree->SetUKey(0);
     
@@ -93,8 +99,12 @@ Int_t StTreeMaker::Open(const char*)
       fTree = new StTree(GetTreeName()); 
       if (!fFile.IsNull()) fTree->SetBaseName(fFile);
 
-//    		?????? Compatibility ???????
-      if ( fTreeName=="bfcTree") SetBranch("dstBranch");
+//    		Several default branches
+      if ( fTreeName=="bfcTree") { 
+        SetBranch("dstBranch"  ,0,"w");
+        SetBranch("histBranch" ,0,"w","const");
+        SetBranch("runcoBranch",0,"w","const");
+      }
 
 //   	Set filename for runcoBranch
     StBranch *h = (StBranch*)fTree->Find("histBranch");
