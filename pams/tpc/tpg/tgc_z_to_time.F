@@ -1,5 +1,8 @@
-* $Id: tgc_z_to_time.F,v 1.5 1999/07/26 21:17:25 sakrejda Exp $
+* $Id: tgc_z_to_time.F,v 1.6 1999/07/27 15:27:02 sakrejda Exp $
 * $Log: tgc_z_to_time.F,v $
+* Revision 1.6  1999/07/27 15:27:02  sakrejda
+* time to z and z to time changed to match Tom's notation, easier to follow, phase forced to 0, it has to be added to the tpg_detector table
+*
 * Revision 1.5  1999/07/26 21:17:25  sakrejda
 * z<->time changedto follow Tom's formula
 *
@@ -47,7 +50,7 @@ C     time - time bucket number
          vdrift=dvel
          clock_local=clock
          z_offset=z_inner_offset
-         t0_offset=-trigger_offset
+         t0_offset=trigger_offset
       endif
 *     iret = tgc_t0(t0, pad, padrow, sector, dummy1, dummy1)
 
@@ -56,7 +59,7 @@ C     time - time bucket number
       zoff=0
       if(padrow.lt.14)zoff=z_offset
 c      time=((z+zoff)/vdrift + t0_offset)*clock_local+1.0
-       time=int(z*clock_local/vdrift)+int(t0_offset*clock_local-1.0)+1 ! HL,IS 7/25/99
+       time=int(z*clock_local/vdrift - t0_offset*clock_local)+1 ! HL,IS 7/25/99
 
       tgc_z_to_time = STAFCV_OK      
 
