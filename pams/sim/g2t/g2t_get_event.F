@@ -1,6 +1,15 @@
-* $Id: g2t_get_event.F,v 1.5 2000/01/22 23:42:11 nevski Exp $
+* $Id: g2t_get_event.F,v 1.6 2003/03/14 17:26:19 potekhin Exp $
 *
 * $Log: g2t_get_event.F,v $
+* Revision 1.6  2003/03/14 17:26:19  potekhin
+* Added a call to the "mheadrd", the facility which
+* will allow us to read optional Zebra banks into root
+* tables, at will
+*
+*
+* Changes made:  2003/03/10 potekhin
+* introduced the Pythia subprocess Id
+*
 * Revision 1.5  2000/01/22 23:42:11  nevski
 * clean up unused variables
 *
@@ -24,7 +33,7 @@
       Real                   VERT(4),PP(4),TIME,AMASS,WEIGH
       Character              GeName*8
       Parameter              (NBytPW=4)
-      INTEGER                NUMPRIM,NUMFINS
+      INTEGER                NUMPRIM,NUMFINS,SUB_ID
       common /g2tevtcnt/     NUMPRIM,NUMFINS 
 *
 *     make g2t_event:
@@ -62,6 +71,10 @@
       g2t_event(1).n_track_prim       = NUMFINS
       g2t_event(1).prim_vertex_p      = 1
       g2t_event(1).time_offset        = 0
+
+* Adding the suboprocess ID reader
+      call MHEADRD(SUB_ID)
+      g2t_event(1).subprocess_id = SUB_ID
 
       END
 
