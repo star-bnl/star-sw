@@ -1,5 +1,8 @@
-// $Id: StChargeStepMaker.cxx,v 1.3 2000/07/14 14:42:43 hardtke Exp $
+// $Id: StChargeStepMaker.cxx,v 1.4 2000/07/28 18:31:54 hardtke Exp $
 // $Log: StChargeStepMaker.cxx,v $
+// Revision 1.4  2000/07/28 18:31:54  hardtke
+// print out tpcDriftVelocity table
+//
 // Revision 1.3  2000/07/14 14:42:43  hardtke
 // Add return values so it compiles on Solaris
 //
@@ -25,6 +28,7 @@
 #include "St_XDFFile.h"
 #include "StMessMgr.h"
 #include "tables/St_type_shortdata_Table.h"
+#include "tables/St_tpcDriftVelocity_Table.h"
 #include "tpc/St_xyz_newtab_Module.h"
 #include "TH1.h"
 #include "StTpcDb/StTpcDb.h"
@@ -53,7 +57,17 @@ Int_t StChargeStepMaker::Init() {
 
   //		Histograms     
   InitHistograms(); // book histograms
-  
+
+  for (int isec = 0;isec<4;isec++){ 
+    for (int ievt = 0; ievt<100;ievt++){
+     pastresults[ievt][isec]=0.0;
+    }
+    nresults[isec]=0;
+    lastresult[isec]=-1;
+  }  // reset arrays for running average 
+
+  date = 0;
+  time = 0;
   return StMaker::Init();
 }
 
@@ -64,6 +78,8 @@ Int_t StChargeStepMaker::Make() {
 
   if (Debug()) printf("Start of StChargeStepMaker");
 
+  if (date==0) {date = GetDate();cout << "date = " << date << endl;}
+  if (time==0) {time = GetTime();cout << "time = " << time << endl;}
 
   // prepare tree  
   typedef struct 
@@ -233,6 +249,7 @@ Int_t StChargeStepMaker::Make() {
                       int section = 0;
                       if (row>13) section++;
                       if (sec>12) section = section+2;
+		      //                      step[section]->Fill(mypixel.time,mypixel.adc);
                       step[section]->Fill(mypixel.time);
  
 
@@ -274,7 +291,10 @@ Int_t StChargeStepMaker::Make() {
     float answer = GetWeightedMean(derivative[i]);
     if (answer<0.0) continue;
     result[i]->Fill(answer);
+    AddToAverage(i,answer);
+    float current_average = GetAverage(i);
     cout << "StChargeStepMaker: weighted mean "  << eRegions_names[i] << " = " << answer << endl;
+    cout << "StChargeStepMaker: average "  << eRegions_names[i] << " = " << current_average << endl;
     }
   } 
 
@@ -287,7 +307,7 @@ Int_t StChargeStepMaker::Make() {
 
 void StChargeStepMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StChargeStepMaker.cxx,v 1.3 2000/07/14 14:42:43 hardtke Exp $\n");
+  printf("* $Id: StChargeStepMaker.cxx,v 1.4 2000/07/28 18:31:54 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -307,6 +327,7 @@ void StChargeStepMaker::Clear(const char *opt) {
 //-----------------------------------------------------------------------
 
 Int_t StChargeStepMaker::Finish() {
+  WriteTableToFile();
   return StMaker::Finish();
 }
 
@@ -352,17 +373,17 @@ void StChargeStepMaker::MakeHistograms() {
 float StChargeStepMaker::GetWeightedMean(TH1S* hist){
 int peak = hist->GetMaximumBin();
  int location = hist->GetBinCenter(peak);
- if (location<theGuess-20||location>theGuess+20) {
+ if (location<theGuess-10||location>theGuess+10) {
    cout << "StChargeStepMaker:: False peak found at tb = " << location << endl;
+   cout << "StChargeStepMaker:: Database may be way off" << endl;
    return -1.0;
  }
 float mom1=0.0;
 float ysum=0.0;
 float value;
  float maxval = hist->GetBinContent(peak);
- for (int i = peak-10;i<peak+10;i++){
+ for (int i = peak-5;i<peak+5;i++){
   value = (float)hist->GetBinContent(i);
-  if (value<maxval/10.0) continue;  //avoid the undershoot
   ysum += value;
   mom1 += value*(float)(hist->GetBinCenter(i));
  }
@@ -370,6 +391,63 @@ float value;
  return mom1;
 }
 //_____________________________________________________________________________
+void StChargeStepMaker::AddToAverage(int section, float value){
+  if (lastresult[section]!=99){
+    lastresult[section] = lastresult[section]+1;
+    int index = lastresult[section];
+   pastresults[index][section] = value;
+  }
+  else {
+   lastresult[section]=0;
+   int index = lastresult[section];
+   pastresults[index][section]=value;
+  }
+  if (nresults[section]<100) nresults[section] = nresults[section]+1;
+}
+//_____________________________________________________________________________
+float StChargeStepMaker::GetAverage(int section){
+ float sum=0.0;
+ for (int i =0;i<nresults[section];i++){
+  sum+=pastresults[i][section];
+ }
+  float value = sum/nresults[section];
+  return value;
+}
+
+St_tpcDriftVelocity* StChargeStepMaker::driftTable(){
+  float reference_velocity = 5.3875;
+  float reference_t0       = 1.969;
+  float reference_clock    = 9.3387;
+  float reference_step_west = 348.812;
+  float reference_step_east = 348.816;
+  float Lwest = reference_velocity*((reference_step_west/reference_clock)+reference_t0);
+  float Least = reference_velocity*((reference_step_east/reference_clock)+reference_t0);
+  cout << "Least, trig offset = " << Least << endl; 
+  float velocityEast = Least/((GetAverage(3)/theDb->Electronics()->samplingFrequency()) + theDb->triggerTimeOffset()*1e6);
+  float velocityWest = Lwest/((GetAverage(1)/theDb->Electronics()->samplingFrequency()) + theDb->triggerTimeOffset()*1e6);
+  St_tpcDriftVelocity* table = new St_tpcDriftVelocity("tpcDriftVelocity",1);
+  tpcDriftVelocity_st* row = table->GetTable();
+  row->cathodeDriftVelocityEast = velocityEast;
+  row->cathodeDriftVelocityWest = velocityWest;
+  row->laserDriftVelocityEast = 0.0;
+  row->laserDriftVelocityWest = 0.0;
+  table->SetNRows(1);
+  return table;
+}
+
+void StChargeStepMaker::WriteTableToFile(){
+  char filename[80]; 
+  sprintf(filename,"tpcDriftVelocity.%08d.%06d.C",date,time);
+  ofstream *out = new ofstream(filename);
+  driftTable()->SavePrimitive(*out,"");
+  return;
+}
+
+
+
+
+
+
 
 
 
