@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.33 2001/11/09 21:44:34 posk Exp $
+// $Id: doFlowEvents.C,v 1.34 2001/12/11 22:14:33 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -203,19 +203,28 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //////////////
   // Flow Makers
   //   Use of the TagMaker is optional.
-  //   The AnalysisMaker may be used with a selection object.
-  //   When the CumulantMaker is run, also run the AnalysisMaker.
+  //   The AnalysisMaker and CumulantMaker may be used with a selection object.
+  //bool tagMaker = kFALSE;
+  bool tagMaker = kTRUE;
+  bool anaMaker = kTRUE;
+  //bool anaMaker = kFALSE;
+  //bool cumMaker = kTRUE;
+  bool cumMaker = kFALSE;
 
-  //StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
+  if (tagMaker) StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
 
   if (makerName[0]=='\0') {
-    StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
-    //StFlowCumulantMaker* flowCumulantMaker = new StFlowCumulantMaker();
+    if (anaMaker) StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
+    if (cumMaker) StFlowCumulantMaker* flowCumulantMaker = new StFlowCumulantMaker();
   } else {
-    sprintf(makerName, "FlowAnalysis");
-    StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker(makerName, flowSelect);
-    //sprintf(makerName, "FlowCumulant");
-    //StFlowCumulantMaker* flowCumulantMaker = new StFlowCumulantMaker(makerName, flowSelect);
+    if (anaMaker) {
+      sprintf(makerName, "FlowAnalysis");
+      StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker(makerName, flowSelect);
+    }
+    if (cumMaker) {
+      sprintf(makerName, "FlowCumulant");
+      StFlowCumulantMaker* flowCumulantMaker = new StFlowCumulantMaker(makerName, flowSelect);
+    }
   }
 
   // Make docs
@@ -331,38 +340,6 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
      {cout << "Last  event processed. Status = " << istat << endl;}
    if (istat == 3) 
      {cout << "Error event processed. Status = " << istat << endl;}
-
-//    if (!istat) {
-//      ddstBranch=chain->GetDataSet("dstBranch");
-//      TDataSetIter dstbranchIter(ddstBranch);
-//      if (ddstBranch) {
-//        cout << endl << " QAInfo: in dstBranch " << endl;
-//        while (ddb=dstbranchIter.Next()) {
-//          cout << " QAInfo:   found object: " << ddb->GetName() << endl;      
-//          TString dsName =  ddb->GetName();
-// 	 if (ddb->InheritsFrom("TTable")) { 
-// 	   tabl = (TTable *)ddb;
-// 	   cout << " QAInfo:     it's a table with #rows = " 
-// 		<< tabl->GetNRows() << endl;
-// 	   if (dsName == "BfcStatus") {	
-// 	     // Now print out contents of BfcStatus for QA purposes
-// 	     TDataSetIter bfcstatiter(ddb);
-// 	     St_dst_bfc_status *bfcstat = 
-// 	       (St_dst_bfc_status *) bfcstatiter.Find("BfcStatus");
-// 	     dst_bfc_status_st *bth = bfcstat->GetTable();
-// 	     //  loop over all rows in table BfcStatus:
-// 	     Int_t ij = 0;
-// 	     for (ij=0; ij< bfcstat->GetNRows(); ij++)
-//                {
-// 	         cout << " QAInfo:       BfcStatus table -- row " << ij <<
-// 		   ", Maker: "     <<  bth[ij]->maker_name <<
-//                    " has istat = "  <<  bth[ij]->status << endl;	
-// 	       }   // for bfcstat
-// 	   }  // if dsName
-// 	 } // if ddb
-//        }  // while obj Next
-//      } // if dstBranch
-//    } //  if !istat
    
    i++;
    goto EventLoop;
@@ -384,6 +361,37 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
     if (!b) {
       b = new TBrowser;
     }
+  }
+
+  if (anaMaker && cumMaker) {
+    // Combine the flow.hist.root and flow.cumulant.root files
+    // Is there an easier way?
+    TFile* anaFile = new TFile("flow.hist.root", "UPDATE");
+    if (!anaFile->IsOpen()) cout << "### Can't find file flow.hist.root" << endl;
+    TFile* cumFile = new TFile("flow.cumulant.root", "READ");
+    if (!cumFile->IsOpen()) cout << "### Can't find file flow.cumulant.root" << endl; 
+    
+    TKey*    key;
+    TObject* obj;
+    TIter nextkey(cumFile->GetListOfKeys());  
+    while (key = (TKey*)nextkey()) {
+      cumFile->cd();
+      obj = key->ReadObj();
+      if (obj->InheritsFrom("TH1")) { // TH1 or TProfile
+	char* objName = key->GetName();
+	//cout << "hist name= " << objName << endl;
+	anaFile->cd();
+	obj->Write(objName);
+      }
+      delete obj;
+      obj = NULL;
+    }
+    cumFile->Close();
+    //anaFile->ls();
+    anaFile->Close();
+
+  } else if (cumMaker) {
+    gSystem->Rename("flow.cumulant.root", "flow.hist.root");      
   }
 
 END:
@@ -423,6 +431,7 @@ void doFlowEvents(const Int_t nevents)
   //Char_t* fileExt="*.event.root";
   
   // LBNL
+  // 200 GeV
 //   Char_t* filePath="/auto/pdsfdv15/rhstar/kaneta/flow_pDST/reco/ProductionMinBias/DEV/2001/2266012/";
 //   if (nevents < 250) {
 //     Char_t* fileExt="st_physics_2266012_raw_0001.event.root.flowpicoevent.root";
@@ -430,17 +439,17 @@ void doFlowEvents(const Int_t nevents)
 //      Char_t* fileExt="*.flowpicoevent.root";
 //    }
 
-//   Char_t* filePath="/auto/pdsfdv15/starprod/reco/minbias/P01he/2000/08";
-//   if (nevents < 250) {
-//     Char_t* fileExt="st_physics_1229032_raw_0001.event.root";
-//    } else {
-//      Char_t* fileExt="*.event.root";
-//    }
+//   Char_t* filePath="/auto/stardata/starspec/kaneta/flow_pDST_production/reco/MinBiasVerTex/ReverseFullField/P01gk/2001/";
+//   Char_t* filePath="/auto/stardata/starspec/kaneta/flow_pDST_production/reco/MinBiasVerTex/ReverseHalfField/P01gk/2001/";
 
-//   Char_t* filePath="/auto/pdsfdv08/starspec/pDST/P00hm/minbias/";
+  // 20 GeV
+// Char_t* filePath="/auto/stardata/starspec/kaneta/flow_pDST_production/reco/dev/2001/";
+
+  // 130 GeV
+//   Char_t* filePath="/auto/pdsfdv14/starprod/DST/kirll_flow_pDST_minbias/";
 //   if (nevents < 250) {
-//     Char_t* fileExt="st_physics_1244014_raw_0001.event.root.flowpicoevent.root";
-//    } else {
+//     Char_t* fileExt="st_physics_1239006_raw_0006.event.root.flowpicoevent.root";
+//   } else {
 //      Char_t* fileExt="*.flowpicoevent.root";
 //    }
 
@@ -450,6 +459,9 @@ void doFlowEvents(const Int_t nevents)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.34  2001/12/11 22:14:33  posk
+// Combined histogram output files from the CumulantMaker and the AnalysisMaker.
+//
 // Revision 1.33  2001/11/09 21:44:34  posk
 // Added StFlowCumulantMaker.
 //
