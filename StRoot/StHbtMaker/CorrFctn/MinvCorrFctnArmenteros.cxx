@@ -1,6 +1,6 @@
 /***************************************************************************
  * 
- * $Id: MinvCorrFctnArmenteros.cxx,v 1.2 2000/03/16 01:56:36 laue Exp $
+ * $Id: MinvCorrFctnArmenteros.cxx,v 1.3 2000/06/15 18:52:42 willson Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctnArmenteros.cxx,v $
+ * Revision 1.3  2000/06/15 18:52:42  willson
+ * HbtAnalysis() method must be cast to specific analysis
+ * rotateEventCut installed
+ *
  * Revision 1.2  2000/03/16 01:56:36  laue
  * Copy constructor added to some correlation functions
  *
@@ -75,7 +79,12 @@ MinvCorrFctnArmenteros::~MinvCorrFctnArmenteros(){
 }
 //_________________________
 void MinvCorrFctnArmenteros::Finish(){
-  int NEvents = ((mikesEventCut*)HbtAnalysis()->EventCut())->NEventsPassed();
+  int NEvents = 1;
+  if (   dynamic_cast<StHbtAnalysis*>( HbtAnalysis() )   ) {
+    if (   dynamic_cast<mikesEventCut*>( ((StHbtAnalysis*)HbtAnalysis())->EventCut() )   )
+      NEvents = ((mikesEventCut*)((StHbtAnalysis*)HbtAnalysis())->EventCut())->NEventsPassed();
+  }
+
   mNumerator->Scale(1./NEvents);
   mDenominator->Scale(1./NEvents);
   mDifference->Scale(1./NEvents);

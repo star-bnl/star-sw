@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctnY_vs_Pt.cxx,v 1.1 2000/02/28 14:39:30 laue Exp $
+ * $Id: MinvCorrFctnY_vs_Pt.cxx,v 1.2 2000/06/15 18:52:42 willson Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctnY_vs_Pt.cxx,v $
+ * Revision 1.2  2000/06/15 18:52:42  willson
+ * HbtAnalysis() method must be cast to specific analysis
+ * rotateEventCut installed
+ *
  * Revision 1.1  2000/02/28 14:39:30  laue
  * Correlation function to fill phasespace rapidity vs pt
  *
@@ -74,7 +78,12 @@ void MinvCorrFctnY_vs_Pt::Finish(){
   //mRatio->Draw();
   
   // normalized by number of events
-  int NEvents = ((mikesEventCut*)HbtAnalysis()->EventCut())->NEventsPassed();
+  int NEvents = 1;
+  if (   dynamic_cast<StHbtAnalysis*>( HbtAnalysis() )   ) {
+    if (   dynamic_cast<mikesEventCut*>( ((StHbtAnalysis*)HbtAnalysis())->EventCut() )   )
+      NEvents = ((mikesEventCut*)((StHbtAnalysis*)HbtAnalysis())->EventCut())->NEventsPassed();
+  }
+ 
   mNumerator->Scale(1./NEvents);
   mDenominator->Scale(1./NEvents);
   mDifference->Scale(1./NEvents);
