@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.8 1999/12/16 18:05:23 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.9 1999/12/21 01:11:00 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //////////////////////////////////////////////////////////////////////
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.9  1999/12/21 01:11:00  posk
+// Added more quantities to StFlowEvent.
+//
 // Revision 1.8  1999/12/16 18:05:23  posk
 // Fixed Linux compatability again.
 //
@@ -78,12 +81,6 @@ Int_t StFlowMaker::Make() {
   pEvent = (StEvent*)GetInputDS("StEvent");
   if (!pEvent) return kStOK; // If no event, we're done
 
-  // Set BField
-  //StEventSummary* pSummary = pEvent->summary();
-  //PR(pSummary);
-  //mBField = pEvent->summary()->magneticField();
-  mBField = 0.5*tesla;
-    
   // Check the event cuts and fill StFlowEvent
   pFlowEvent = 0;
   if (StFlowCutEvent::CheckEvent(pEvent)) fillFlowEvent();
@@ -94,7 +91,7 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.8 1999/12/16 18:05:23 posk Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.9 1999/12/21 01:11:00 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 
 }
@@ -103,10 +100,13 @@ void StFlowMaker::PrintInfo() {
 
 Int_t StFlowMaker::Init() {
 
-//   // Get a pointer to StRun
+  // Get a pointer to StRun to get BField
 //   StRun* pRun = (StRun*)GetInputDS("StRun");
+//   PR(pRun);
 //   if (!pRun) double BField = pRun->magneticField();
 //   PR(BField);
+  mBField = 0.5*tesla;
+    
 
   // Open PhiWgt file
   readPhiWgtFile();
@@ -194,10 +194,14 @@ void StFlowMaker::fillFlowEvent() {
   pFlowEvent->SetEventNumber(eventID);
   PR(eventID);
 
-  // GetiInitial multiplicity before TrackCuts 
-  UInt_t origTracks = pEvent->primaryVertex(0)->numberOfDaughters(); 
-  pFlowEvent->SetOrigTrackN(origTracks);
-  PR(origTracks);
+  // Get initial multiplicity before TrackCuts 
+  UInt_t origMult = pEvent->primaryVertex(0)->numberOfDaughters(); 
+  pFlowEvent->SetOrigMult(origMult);
+  PR(origMult);
+
+  // Get primary vertex position
+  const StThreeVectorF& vertex = pEvent->primaryVertex(0)->position();
+  pFlowEvent->SetVertexPos(vertex);
 
   // loop over tracks in StEvent
   int goodTracks = 0;
@@ -218,6 +222,8 @@ void StFlowMaker::fillFlowEvent() {
 //       PR(b);
       pFlowTrack->SetImpactPar(pTrack->impactParameter());
       pFlowTrack->SetChi2(pTrack->fitTraits().chi2());
+      pFlowTrack->SetFitPts(pTrack->fitTraits().numberOfFitPoints());
+      pFlowTrack->SetMaxPts(pTrack->numberOfPossiblePoints());
       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
       goodTracks++;
     }

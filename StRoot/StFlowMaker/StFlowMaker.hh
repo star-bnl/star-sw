@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.hh,v 1.6 1999/12/16 18:05:24 posk Exp $
+//  $Id: StFlowMaker.hh,v 1.7 1999/12/21 01:11:01 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -15,6 +15,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.hh,v $
+//  Revision 1.7  1999/12/21 01:11:01  posk
+//  Added more quantities to StFlowEvent.
+//
 //  Revision 1.6  1999/12/16 18:05:24  posk
 //  Fixed Linux compatability again.
 //
@@ -72,6 +75,7 @@ private:
 
   StEvent*        pEvent;                    //! pointer to DST data
   StFlowEvent*    pFlowEvent;                //! pointer to micro-DST data
+
   static Double_t mBField;
   //TString      MakerName;
 

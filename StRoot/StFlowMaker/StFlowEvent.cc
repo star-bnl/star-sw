@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cc,v 1.7 1999/12/16 18:05:22 posk Exp $
+// $Id: StFlowEvent.cc,v 1.8 1999/12/21 01:10:58 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cc,v $
+// Revision 1.8  1999/12/21 01:10:58  posk
+// Added more quantities to StFlowEvent.
+//
 // Revision 1.7  1999/12/16 18:05:22  posk
 // Fixed Linux compatability again.
 //
@@ -43,6 +46,7 @@
 #include <algorithm>
 #include "StFlowEvent.hh"
 #include "StFlowTrackCollection.hh"
+#include "StFlowConstants.hh"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "TVector2.h"
@@ -225,7 +229,7 @@ Float_t StFlowEvent::q(Int_t harN, Int_t selN, Int_t subN) {
   TVector2 mQ  = Q(harN, selN, subN);
   UInt_t mMult = Mult(harN, selN, subN);
   
-  return (mMult) ? mQ.Mod() / sqrt(mMult) : 0.;
+  return (mMult) ? mQ.Mod() / sqrt((float)mMult) : 0.;
 }
 
 //-----------------------------------------------------------------------
@@ -246,16 +250,14 @@ void StFlowEvent::SetSelections() {
 	// Eta
 	if (mEtaCuts[1][harN][selN] > mEtaCuts[0][harN][selN] && 
 	    (fabs(mEta) < mEtaCuts[0][harN][selN] || 
-	     fabs(mEta) >= mEtaCuts[1][harN][selN])) goto Skip;
+	     fabs(mEta) >= mEtaCuts[1][harN][selN])) continue;
 	
 	// Pt
 	if (mPtCuts[1][harN][selN] > mPtCuts[0][harN][selN] && 
 	    (mPt < mPtCuts[0][harN][selN] ||
-	     mPt >= mPtCuts[1][harN][selN])) goto Skip;
+	     mPt >= mPtCuts[1][harN][selN])) continue;
 
       	pFlowTrack->SetSelect(harN, selN);
-
-      Skip:  ;  // must have a statement after a label
 
       }
     }
