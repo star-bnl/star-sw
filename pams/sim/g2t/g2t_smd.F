@@ -1,7 +1,7 @@
-      FUNCTION  G2T_ESM (g2t_track_h,   g2t_track , 
+      FUNCTION  G2T_SMD (g2t_track_h,   g2t_track , 
      >                   g2t_emc_hit_h, g2t_emc_hit ) 
       IMPLICIT  NONE
-#include "g2t_esm.inc"
+#include "g2t_smd.inc"
 *    - - - - - - - - - 
       Integer         Lnmax
       Parameter       (Lnmax=50)
@@ -13,19 +13,19 @@
      >                Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
       Equivalence     (QQ(1),IQQ(1),id)
 *    - - - - - - - - -
-      INTEGER   G2T_ESM,G2R_GET_HIT,ISLFLAG,Iprin/0/,Idigi,i
+      INTEGER   G2T_SMD,G2R_GET_HIT,Iprin/0/,Idigi,i
       logical   Local/.true./
 *
-      G2T_ESM=STAFCV_OK
+      G2T_SMD=STAFCV_OK
       if (g2t_emc_hit_h.maxlen.le.0) return
 *
-      call G2R_GET_SYS ('ECAL','EXSE',Iprin,Idigi)
+      call G2R_GET_SYS ('CALB','CSDA',Iprin,Idigi)
       if (Iprin.lt.0) return
       Local  = Idigi.ge.2
 *
       i=0
       g2t_emc_hit_h.nok = 0
-      Do While (G2R_GET_HIT('esm') .eq. 0)
+      Do While (G2R_GET_HIT('smd') .eq. 0)
          i=i+1
          g2t_emc_hit_h.nok            = i
          g2t_emc_hit(i).id            = i
@@ -35,9 +35,9 @@
 *
 *                  add to track linked list 
 *
-*        g2t_emc_hit(i).next_tr_hit_p = g2t_track(trac).hit_esm_p
-         g2t_track(trac).hit_esm_p    = i
-         g2t_track(trac).n_esm_hit    = g2t_track(trac).n_esm_hit + 1
+*        g2t_emc_hit(i).next_tr_hit_p = g2t_track(trac).hit_smd_p
+         g2t_track(trac).hit_smd_p    = i
+         g2t_track(trac).n_smd_hit    = g2t_track(trac).n_smd_hit + 1
 
       enddo    
 

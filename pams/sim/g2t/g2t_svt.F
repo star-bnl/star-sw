@@ -13,7 +13,7 @@
      >                Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
       Equivalence     (QQ(1),IQQ(1),id)
 *    - - - - - - - - -
-      INTEGER   G2T_SVT,G2R_GET_HIT,ISLFLAG,Iprin/0/,Idigi,i,isys
+      INTEGER   G2T_SVT,G2R_GET_HIT,Iprin/0/,Idigi,i,isys
       logical   Local/.true./
 *
       G2T_SVT=STAFCV_OK

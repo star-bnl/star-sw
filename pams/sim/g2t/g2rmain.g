@@ -1,5 +1,8 @@
-* $Id: g2rmain.g,v 1.4 2000/01/12 00:08:51 nevski Exp $
+* $Id: g2rmain.g,v 1.1 2000/01/24 14:48:43 nevski Exp $
 * $Log: g2rmain.g,v $
+* Revision 1.1  2000/01/24 14:48:43  nevski
+* combined g2t+g2r version
+*
 * Revision 1.4  2000/01/12 00:08:51  nevski
 * clean-up: control skip headers, g2t/r tpc corrections speed-up
 *
@@ -246,38 +249,3 @@ created   22 april 98
       G2R_MAIN = i
       END
 
-****************************************************************************
-
-      FUNCTION   G2T_NEW_TABLE (name,spec,L)
-      implicit   none
-#include "g2t_hits.inc"
-#include "g2t_svt_hit.inc"
-#include "g2t_tpc_hit.inc"
-#include "g2t_mwc_hit.inc"
-#include "g2t_ctf_hit.inc"
-#include "g2t_emc_hit.inc"
-#include "g2t_smd_hit.inc"
-#include "g2t_eem_hit.inc"
-#include "g2t_esm_hit.inc"
-#include "g2t_ftp_hit.inc"
-#include "g2t_vpd_hit.inc"
-      character  name*(*),spec*(*),o*1
-      integer    G2T_NEW_TABLE,TDM_NEW_TABLE,i,L 
-
-      i = 0
-      o = char(0)  
-      if (spec=='svt') { i=TDM_NEW_TABLE (name, g2t_svt_hit_spec//o, L) } 
-  elseif (spec=='tpc') { i=TDM_NEW_TABLE (name, g2t_tpc_hit_spec//o, L) } 
-  elseif (spec=='mwc') { i=TDM_NEW_TABLE (name, g2t_mwc_hit_spec//o, L) } 
-  elseif (spec=='ctf') { i=TDM_NEW_TABLE (name, g2t_ctf_hit_spec//o, L) } 
-  elseif (spec=='emc') { i=TDM_NEW_TABLE (name, g2t_emc_hit_spec//o, L) } 
-  elseif (spec=='smd') { i=TDM_NEW_TABLE (name, g2t_smd_hit_spec//o, L) } 
-  elseif (spec=='eem') { i=TDM_NEW_TABLE (name, g2t_eem_hit_spec//o, L) } 
-  elseif (spec=='esm') { i=TDM_NEW_TABLE (name, g2t_esm_hit_spec//o, L) } 
-  elseif (spec=='ftp') { i=TDM_NEW_TABLE (name, g2t_ftp_hit_spec//o, L) } 
-  elseif (spec=='vpd') { i=TDM_NEW_TABLE (name, g2t_vpd_hit_spec//o, L) }
-  else                 { i=TDM_NEW_TABLE (name, g2t_hits_spec//o,    L) }
-  G2T_NEW_TABLE=i
-  end
-
-****************************************************************************

@@ -27,9 +27,11 @@
      >                Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
       Equivalence     (QQ(1),IQQ(1),id)
 *     - - - - - - - - - - - - - -
-      character*4     Cset,Cdet
-      Integer                   nvl,     numbv
-      common /gensit/ Cset,Cdet,nvl(Nmh),numbv(Nmh)
+      character*4     Cset,Cdet,Chit
+      Real            FHmin,FHmax,FHbin,Hits
+      Integer         NVL,NumBV
+      common /gensit/ Cset,Cdet, NVL(Nmh),NumBV(Nmh),hits(Nmh),
+     >                FHmin(Nmh),FHmax(Nmh),FHbin(Nmh),chit(Nmh)
 *     - - - - - - - - - - - - - -
 *KEND.
       Integer         G2R_GET_HIT,AgHITGET,G2T_VOLUME_ID,i
