@@ -2,7 +2,7 @@
 *
 *	Table: zdcsmdBeamCenter
 *
-*	description: *	//:	Table which contains BeamCenter information for zdcsmd ADCs
+*	description: 	Table which contains BeamCenter information for zdcsmd ADCs
 */
 
 struct zdcsmdBeamCntr {
