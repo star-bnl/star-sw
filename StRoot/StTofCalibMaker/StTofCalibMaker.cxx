@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.7 2004/08/11 18:58:40 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.8 2004/08/11 19:35:40 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.8  2004/08/11 19:35:40  dongx
+ * loose the ADC cut of tofp
+ *
  * Revision 1.7  2004/08/11 18:58:40  dongx
  * missing nSigmaXX in tofHit implemented
  *
@@ -578,7 +581,8 @@ Int_t StTofCalibMaker::Make()
     Double_t L = tofPathLength(&vtx, &aSlat->position(), theTrackGeometry->helix().curvature());
     aHit->setPathLength((Float_t)L);
     
-    if(adc<mTofpADCMin[daqId]||adc>=mTofpADCMax[daqId]) {
+    //    if(adc<mTofpADCMin[daqId]||adc>=mTofpADCMax[daqId]) {
+    if(adc<mTofpADCMin[daqId]) {
       delete aHit;
       continue;
     }
