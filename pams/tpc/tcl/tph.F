@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.12 1999/03/24 01:20:13 sakrejda Exp $
+* $Id: tph.F,v 1.13 1999/03/29 23:10:56 snelling Exp $
 * $Log: tph.F,v $
+* Revision 1.13  1999/03/29 23:10:56  snelling
+* auxiliary hit table eliminated
+*
 * Revision 1.12  1999/03/24 01:20:13  sakrejda
 * hits that start on the first or end on the last pad removed
 *
@@ -57,8 +60,7 @@
      +,                       pixel_data_out_h,  pixel_data_out
      +,                       tpseq_h,         tpseq 
      +,                       tpcluster_h,     tpcluster 
-     +,                       tphit_h,         tphit 
-     +,                       tphit_aux_h,     tphit_aux)
+     +,                       tphit_h,         tphit) 
 
       IMPLICIT NONE
 
@@ -300,8 +302,8 @@ C-----------------------------------------------------------------------
         parameter(Nrows_in=13)
         save last_cluster_index
         data last_cluster_index / 1 /
-        logical do_aux
-        data do_aux /.false./
+        logical debug 
+        data debug /.false./
        
 C-----------------------------------------------------------------------
         data first/.true./
@@ -380,16 +382,20 @@ c ??? Check index?
                  itdc_lo=1
               endif
 
-C Rai: patch from Bill Love we might have to think of a better way
+C Rai: patch from Bill Love, we might have to think of a better way
 C             skip clusters on the end pads.
               if(ipad_lo.eq.1)then
-                write(6,1)irow
-                go to 999
- 1              format(' TPH - dropping pad 1 cluster in row',i5)
+                 if(debug) then
+                    write(6,1)irow
+                 endif
+                 go to 999
+ 1               format(' TPH - dropping pad 1 cluster in row',i5)
               elseif(ipad_hi.eq.npads)then
-                write(6,2)npads,irow
- 2              format(' TPH - drop end pad cluster, pad',i5,' row',i5)
-                go to 999
+                 if(debug) then
+                    write(6,2)npads,irow
+                 endif
+ 2               format(' TPH - drop end pad cluster, pad',i5,' row',i5)
+                 go to 999
               endif
 
 
@@ -560,40 +566,7 @@ c             tphit(tphit_h.nok).dz+0.07
               
               
 c     also put q (magnitude of hit) into units of energy loss
-              tphit(tphit_h.nok).q = tphit(tphit_h.nok).q * de_scale
-              
-              
-C     Added an auxiliary diagnostic hit table to evaluate "various quality
-C     studies" of hit finder.   DSW 08/29/97.
-              if(do_aux) then
-              tphit_aux_h.nok = tphit_h.nok
-	      tphit_aux(tphit_h.nok).id     = tphit_h.nok		
-              tphit_aux(tphit_h.nok).flag   = tphit(tphit_h.nok).flag
-              tphit_aux(tphit_h.nok).cluster= tphit(tphit_h.nok).cluster
-              tphit_aux(tphit_h.nok).nseq   = tphit(tphit_h.nok).nseq
-              tphit_aux(tphit_h.nok).row    = tphit(tphit_h.nok).row
-              tphit_aux(tphit_h.nok).npads  = int(mu5(ihit))       
-              tphit_aux(tphit_h.nok).x      = tphit(tphit_h.nok).x 
-              tphit_aux(tphit_h.nok).y      = tphit(tphit_h.nok).y
-              tphit_aux(tphit_h.nok).z      = tphit(tphit_h.nok).z 
-              tphit_aux(tphit_h.nok).dx     = tphit(tphit_h.nok).dx 
-              tphit_aux(tphit_h.nok).dy     = tphit(tphit_h.nok).dy 
-              tphit_aux(tphit_h.nok).dz     = tphit(tphit_h.nok).dz 
-              tphit_aux(tphit_h.nok).prf    = tphit(tphit_h.nok).prf 
-              tphit_aux(tphit_h.nok).zrf    = tphit(tphit_h.nok).zrf 
-              tphit_aux(tphit_h.nok).q      = tphit(tphit_h.nok).q 
-              tphit_aux(tphit_h.nok).xave   = mu1(ihit)            
-              tphit_aux(tphit_h.nok).sigma  = mu2(ihit)      
-              tphit_aux(tphit_h.nok).skew   = mu3(ihit)      
-              tphit_aux(tphit_h.nok).kurto  = mu4(ihit)       
-c explicitly put them to zero here-- mal 30aug97
-c              tphit_aux(tphit_h.nok).xave   = 0.0            
-c              tphit_aux(tphit_h.nok).sigma  = 0.0
-c              tphit_aux(tphit_h.nok).skew   = 0.0
-c              tphit_aux(tphit_h.nok).kurto  = 0.0
-              endif
-
-         
+              tphit(tphit_h.nok).q = tphit(tphit_h.nok).q * de_scale         
 
            ENDDO
 
@@ -610,3 +583,4 @@ c
  555    continue
         return
         end
+
