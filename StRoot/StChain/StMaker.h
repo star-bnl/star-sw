@@ -33,6 +33,7 @@ class TChain;
 class TTree;
 class TTable;
 class TMemStat;
+class StEvtHddr;
 
 class StMaker : public TDataSet{
 public:
@@ -118,6 +119,8 @@ public:
    virtual Int_t        GetEventNumber() const ;
    virtual Int_t        GetRunNumber() const ;
    virtual TDatime      GetDateTime() const;
+   virtual void         SetDateTime(int idat,int itim);// 
+   virtual StEvtHddr   *GetEvtHddr() const; //
    virtual Int_t     	GetDate()  const ;
    virtual Int_t     	GetTime()  const ;
    virtual const Char_t *GetEventType() const ;
@@ -188,7 +191,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.63 2003/11/13 02:54:34 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.64 2004/04/15 00:21:17 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -218,8 +221,11 @@ private:
 #endif
 
 
-// $Id: StMaker.h,v 1.63 2003/11/13 02:54:34 perev Exp $
+// $Id: StMaker.h,v 1.64 2004/04/15 00:21:17 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.64  2004/04/15 00:21:17  perev
+// SetDateTime(int,int) added
+//
 // Revision 1.63  2003/11/13 02:54:34  perev
 // Safe destructor of TDataSet like object added
 //
