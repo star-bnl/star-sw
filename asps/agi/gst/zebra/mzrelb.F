@@ -1,13 +1,15 @@
 *
-* $Id: mzrelb.F,v 1.3 1998/04/16 16:58:08 fisyak Exp $
+* $Id: mzrelb.F,v 1.4 1998/06/05 20:55:39 perev Exp $
 *
 * $Log: mzrelb.F,v $
+* Revision 1.4  1998/06/05 20:55:39  perev
+* AGI commit
+*
 * Revision 1.3  1998/04/16 16:58:08  fisyak
 * 2nd pass with gstar
 *
 *
-#include "sys/CERNLIB_machine.h"
-#include "pilot.h"
+#include "zebra/pilot.h"
 *CMZ :          25/03/98  17.50.48  by  Pavel Nevski
 *-- Author :
       SUBROUTINE MZRELB

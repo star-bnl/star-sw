@@ -1,13 +1,15 @@
 *
-* $Id: mzlink.F,v 1.3 1998/04/16 16:58:06 fisyak Exp $
+* $Id: mzlink.F,v 1.4 1998/06/05 20:55:35 perev Exp $
 *
 * $Log: mzlink.F,v $
+* Revision 1.4  1998/06/05 20:55:35  perev
+* AGI commit
+*
 * Revision 1.3  1998/04/16 16:58:06  fisyak
 * 2nd pass with gstar
 *
 *
-#include "sys/CERNLIB_machine.h"
-#include "pilot.h"
+#include "zebra/pilot.h"
 *CMZ :          20/11/97  23.58.03  by  Pavel Nevski
 *-- Author :
       SUBROUTINE MZLINK (IXSTOR,CHNAME,LAREA,LREF,LREFL)

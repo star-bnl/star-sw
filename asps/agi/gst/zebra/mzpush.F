@@ -1,13 +1,15 @@
 *
-* $Id: mzpush.F,v 1.3 1998/04/16 16:58:07 fisyak Exp $
+* $Id: mzpush.F,v 1.4 1998/06/05 20:55:37 perev Exp $
 *
 * $Log: mzpush.F,v $
+* Revision 1.4  1998/06/05 20:55:37  perev
+* AGI commit
+*
 * Revision 1.3  1998/04/16 16:58:07  fisyak
 * 2nd pass with gstar
 *
 *
-#include "sys/CERNLIB_machine.h"
-#include "pilot.h"
+#include "zebra/pilot.h"
 *CMZ :  1.30/00 18/03/97  19.04.33  by  Pavel Nevski
 *-- Author :
       SUBROUTINE MZPUSH (IXDIV,LORGP,INCNLP,INCNDP,CHOPT)

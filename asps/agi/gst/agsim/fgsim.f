@@ -1,4 +1,4 @@
-*CMZ :          19/07/97  14.41.41  by  Pavel Nevski
+*CMZ :          27/05/98  23.06.11  by  Pavel Nevski
 *CMZ :  1.30/00 29/04/97  23.40.13  by  Pavel Nevski
 *-- Author :    Pavel Nevski   29/03/97
 c***********************************************************************
@@ -162,7 +162,7 @@ c***  Get command and number of parameters passed
 *        - - - -
             call kugets (string1, length1)
             inquire (file=string1(1:length1), exist=exist)
-            if ( .not. exist  ) then
+            if ( Input.gt.0 .and. .not.exist ) then
                write(6,*)' file ',string1(1:length1),' does not exist'
                goto 500
             endif
@@ -192,7 +192,10 @@ c***  Get command and number of parameters passed
                 C='t'
             else
                 Iadr=CSADDR('agusopen')
-                if (Iadr.eq.0) goto 490
+                if (Iadr.eq.0) then
+                   print *,' AgSUSER: no agusopen found for this input'
+                   goto 500
+                endif
 *               Comis pass whole words only (both start and length !)
                 L1    = 4*((Length1+3)/4)
                 call CSJCAL(Iadr,2,string1(1:L1))
@@ -379,26 +382,3 @@ c----------------------------------------------------------------------
       WRITE(*,'('' Interrupt trace routine not available '')')
       END
  
-*CMZ :          17/11/97  18.33.05  by  Pavel Nevski
-*-- Author :    Pavel Nevski   17/11/97
-      subroutine PMINIT
-      print *,'  PMINIT: motif interface not linked '
-      end
-      subroutine KUINIM(p)
-      character*(*) p
-      print *,'  KUINIM: motif interface not linked '
-      end
-      subroutine GBROS
-      call       ZBRDEF
-      end
-      subroutine KUWHAM(p)
-      character*(*) p
-      call       KUWHAG
-      end
- 
- 
-*CMZ :          06/12/97  11.46.00  by  Pavel Nevski
-*-- Author :    Pavel Nevski   06/12/97
-       program afmain
-       call agmain
-       end

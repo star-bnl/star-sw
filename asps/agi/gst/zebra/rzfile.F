@@ -1,13 +1,15 @@
 *
-* $Id: rzfile.F,v 1.3 1998/04/16 16:58:09 fisyak Exp $
+* $Id: rzfile.F,v 1.4 1998/06/05 20:55:41 perev Exp $
 *
 * $Log: rzfile.F,v $
+* Revision 1.4  1998/06/05 20:55:41  perev
+* AGI commit
+*
 * Revision 1.3  1998/04/16 16:58:09  fisyak
 * 2nd pass with gstar
 *
 *
-#include "sys/CERNLIB_machine.h"
-#include "pilot.h"
+#include "zebra/pilot.h"
 *CMZ :          18/03/98  17.12.00  by  Pavel Nevski
 *-- Author :
       SUBROUTINE RZFILE(LUNIN,CHDIR,CHOPT)

@@ -1,7 +1,10 @@
 /*
- * $Id: memget.c,v 1.1 1998/04/16 17:03:33 fisyak Exp $
+ * $Id: memget.c,v 1.2 1998/06/05 20:55:09 perev Exp $
  *
  * $Log: memget.c,v $
+ * Revision 1.2  1998/06/05 20:55:09  perev
+ * AGI commit
+ *
  * Revision 1.1  1998/04/16 17:03:33  fisyak
  * 2nd pass with gstar
  *
@@ -20,12 +23,9 @@
  *  subroutine fsub(n,array,...)
  */
 /*  char *malloc(); */
-memget_(n)
-int *n;
+unsigned long memget_(unsigned int *n)
 {
   /* malloc() requires unsigned arg. FORTRAN passes signed integers */
-  unsigned i;
-  i = (unsigned)  *n;
   /* malloc() returns a pointer;     memget() returns an integer.   */
-  return ( (int) malloc(i) );
+  return ( (unsigned long) malloc(*n) );
 }

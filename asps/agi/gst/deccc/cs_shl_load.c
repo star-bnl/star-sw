@@ -1,7 +1,10 @@
 /*
- * $Id: cs_shl_load.c,v 1.1 1998/04/16 17:01:57 fisyak Exp $
+ * $Id: cs_shl_load.c,v 1.2 1998/06/05 20:55:14 perev Exp $
  *
  * $Log: cs_shl_load.c,v $
+ * Revision 1.2  1998/06/05 20:55:14  perev
+ * AGI commit
+ *
  * Revision 1.1  1998/04/16 17:01:57  fisyak
  * 2nd pass with gstar
  *
@@ -125,12 +128,15 @@ void cs_shl_get_(ns, symbol, n)
  
  
  
-#elseif !defined(CERNLIB_HPUX)
+#else
 #if defined(CERNLIB_ALPHA_OSF)
 #define  ALPHA_OSF
 #endif
- 
+#if (defined(CERNLIB_AIX))&&(defined(CERNLIB_SHL))
 #include "dlfcn.h"
+#else
+#include <dlfcn.h>
+#endif
 #include <string.h>
  
 #define MAXLENFL        60

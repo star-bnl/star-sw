@@ -1,13 +1,15 @@
 *
-* $Id: rzmake.F,v 1.3 1998/04/16 16:58:11 fisyak Exp $
+* $Id: rzmake.F,v 1.4 1998/06/05 20:55:43 perev Exp $
 *
 * $Log: rzmake.F,v $
+* Revision 1.4  1998/06/05 20:55:43  perev
+* AGI commit
+*
 * Revision 1.3  1998/04/16 16:58:11  fisyak
 * 2nd pass with gstar
 *
 *
-#include "sys/CERNLIB_machine.h"
-#include "pilot.h"
+#include "zebra/pilot.h"
 *CMZ :          25/03/98  19.29.54  by  Pavel Nevski
 *-- Author :
       SUBROUTINE RZMAKE(LUNIN,CHDIR,NWKEY,CHFORM,CHTAG,NRECP,CHOPT)

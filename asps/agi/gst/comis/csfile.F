@@ -1,7 +1,10 @@
 *
-* $Id: csfile.F,v 1.2 1998/04/16 17:02:18 fisyak Exp $
+* $Id: csfile.F,v 1.3 1998/06/05 20:55:12 perev Exp $
 *
 * $Log: csfile.F,v $
+* Revision 1.3  1998/06/05 20:55:12  perev
+* AGI commit
+*
 * Revision 1.2  1998/04/16 17:02:18  fisyak
 * 2nd pass with gstar
 *
@@ -114,7 +117,7 @@
       ENDIF
 #endif
       IERR=0
-      CALL CSFILX(LIBNAME)
+      CALL CSFILX(FILENAME)
       END
  
  

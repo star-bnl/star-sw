@@ -1,7 +1,10 @@
-*
-* $Id: dlfcn.h,v 1.1 1998/04/16 17:01:59 fisyak Exp $
+/*
+* $Id: dlfcn.h,v 1.2 1998/06/05 20:55:15 perev Exp $
 *
 * $Log: dlfcn.h,v $
+* Revision 1.2  1998/06/05 20:55:15  perev
+* AGI commit
+*
 * Revision 1.1  1998/04/16 17:01:59  fisyak
 * 2nd pass with gstar
 *
@@ -9,7 +12,7 @@
 * ---------------------------------------------
 *
 * dlfcn.inc
-*
+*/
 #if (defined(CERNLIB_AIX))&&(defined(CERNLIB_SHL))
 /*CMZ :          20/11/97  22.10.22  by  Pavel Nevski*/
 /*-- Author :    HELIOS Software GmbH*/

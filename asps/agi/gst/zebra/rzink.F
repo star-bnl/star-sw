@@ -1,13 +1,15 @@
 *
-* $Id: rzink.F,v 1.3 1998/04/16 16:58:10 fisyak Exp $
+* $Id: rzink.F,v 1.4 1998/06/05 20:55:42 perev Exp $
 *
 * $Log: rzink.F,v $
+* Revision 1.4  1998/06/05 20:55:42  perev
+* AGI commit
+*
 * Revision 1.3  1998/04/16 16:58:10  fisyak
 * 2nd pass with gstar
 *
 *
-#include "sys/CERNLIB_machine.h"
-#include "pilot.h"
+#include "zebra/pilot.h"
 *CMZ :  1.30/00 15/04/97  17.42.11  by  Pavel Nevski
 *-- Author :
       SUBROUTINE RZINK(KEYU,ICYCLE,CHOPT)
