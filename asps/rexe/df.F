@@ -5,6 +5,7 @@
       double precision degree
       dsind = sin (C_RAD_PER_DEG*degree)
       end
+
       double precision function dcosd(degree)
       double precision degree
       dcosd = cos (C_RAD_PER_DEG*degree)
