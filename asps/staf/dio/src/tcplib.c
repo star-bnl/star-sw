@@ -5,6 +5,7 @@
 /*
 modification history
 --------------------
+01b,17sep97,cet  -incorporate Carl Lionberger code from cosmic test
 01a,30may92,whg  written.
 */
 
@@ -12,27 +13,30 @@ modification history
 DESCRIPTION
 TBS...
 */
-				/*aix
-#ifdef aix
+#include <sys/types.h>
+#ifdef						aix
 typedef unsigned long u_long;
 typedef unsigned int u_int;
-#endif 
-				aix*/
+#endif						/* aix */
 #include <sys/types.h>
 #include <arpa/inet.h>
-#ifndef VXWORKS
+#ifndef						VXWORKS
 #include <sys/time.h>
-#endif
+#endif						/* VXWORKS */
 #include <sys/socket.h>
 #include <netinet/in.h>
-#ifndef VXWORKS
+#ifndef						VXWORKS
 #include <netdb.h>
-#endif
+#endif						/* VXWORKS */
+#include <sys/ioctl.h>
+#ifdef						sparc
+#include <sys/filio.h>
+#endif						/* sparc */
 #include "tcplib.h"
 
-#ifdef craig
+/* #ifdef craig
 int connect(int socket, struct sockaddr *name, int namelen);
-#endif
+#endif */
 
 #define INET_ADDR_ERROR -1
 /**********************************************************************
@@ -97,46 +101,64 @@ int *pSocket;
 /**********************************************************************
 *
 */
-#ifdef IRIX
+#ifdef							__sgi
 int tcpRead(void *fd, void *buf, u_int len)
-#else /*IRIX*/
-#ifdef sun4os5pc
+#else							/*__sgi*/
+#ifdef							sun4os5pc
 int tcpRead(void *fd, char *buf, int len)
-#else /*sun4os5pc*/
+#else							/*sun4os5pc*/
 int tcpRead(int *fd, char *buf, int len)
-#endif /*sun4os5pc*/
-#endif /*IRIX*/
+#endif							/*sun4os5pc*/
+#endif							/*__sgi*/
 {
-	int *ffdd=fd;	/*- HACK for IRIX -*/
+        int locallen, timeout = 0;
 
-	len = read(*ffdd, buf, len);
+        ioctl(*fd, FIONREAD, (caddr_t)&locallen);
 
-	if (len < 1) {
-		return -1;
-	}
-	return len;
+        while (locallen < 1 && timeout < 30)
+        {
+           if (timeout <20)
+              usleep(100000);
+           else
+              sleep(1);
+           timeout++;
+           ioctl(*fd, FIONREAD, (caddr_t)&locallen);
+        }
+        if (timeout >= 30) return -1;
+
+/*
+        printf("timeout,len,locallen: %d %d %d\n ", timeout, len, locallen);
+*/
+
+        if (locallen > len) locallen = len;
+
+        len = read(*fd, buf, locallen);
+
+        if (len < 1) {
+                return -1;
+        }
+        return len;
 }
 /**********************************************************************
 *
 *
 */
-#ifdef IRIX
+#ifdef							__sgi
 int tcpWrite(void *fd, void *buf, u_int len)
-#else /*IRIX*/
+#else							/*__sgi*/
 #ifdef sun4os5pc
 int tcpWrite(void *fd, char *buf, int len)
-#else /*sun4os5pc*/
+#else							/*sun4os5pc*/
 int tcpWrite(int *fd, char *buf, int len)
-#endif /*sun4os5pc*/
-#endif /*IRIX*/
+#endif							/*sun4os5pc*/
+#endif							/*__sgi*/
 {
-	int i, cnt;
-	int *ffdd=fd;	/*- HACK for IRIX -*/
+        int i, cnt;
 
-	for (cnt = len; cnt > 0; cnt -= i, buf += i) {
-		if ((i = write(*ffdd, buf, cnt)) == -1) {
-			return (-1);
-		}
-	}
-	return len;
+        for (cnt = len; cnt > 0; cnt -= i, buf += i) {
+                if ((i = write(*fd, buf, cnt)) == -1) {
+                        return (-1);
+                }
+        }
+        return len;
 }

@@ -4,6 +4,7 @@
 *:DESCRIPTION:  Utility functions for DIO.
 *:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
 *:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      14nov97-v030a-cet- Remove NOISY warnings
 *:HISTORY:      30dec96-v020a-cet- NEW_DSL -> OLD_DSL option
 *:HISTORY:      13dec95-v000a-cet- creation
 *:<---------------------------------------------------------------------
@@ -175,7 +176,7 @@ int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
 	 ||  !dsFindEntry(&pAdded,pDS,name)
 #endif  /*OLD_DSL*/
 	 ){
-	    EML_WARNING("can't map dataset");
+/*TOO NOISY	    EML_WARNING("can't map dataset"); */
 	    return FALSE;
 	 }
       }
@@ -188,7 +189,7 @@ int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
 	 if( !dsDatasetEntry(&pEntry,pAdd,(size_t)i)
 	 ||  !dio_mapHierarchy(pAdded,pEntry)
 	 ){
-	    EML_WARNING("can't map entry");
+/*TOO NOISY	    EML_WARNING("can't map entry"); */
 	 }
       }
 /* Add Table */
@@ -209,7 +210,7 @@ int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
 	    ||  !dsSetTableRowCount(pAdded,maxcount)
 	    ){
 	       if( 0 == maxcount )return TRUE; /* SPECIAL CASE */
-	       EML_WARNING("can't map table");
+/*TOO NOISY	       EML_WARNING("can't map table"); */
 	       return FALSE;
 	    }
 	    pAdd->p.data = pData; /* Evil DSL HACK */
@@ -220,7 +221,7 @@ int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
 	    ||  !result
 	    ||  !dsTableMaxRowCount(&allspace,pAdded)
 	    ){
-	       EML_WARNING("can't map table");
+/*TOO NOISY	       EML_WARNING("can't map table"); */
 	       return FALSE;
 	    }
 /* Grow the destination table. */
@@ -234,7 +235,7 @@ int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
 	    if( !dsTableDataAddress(&pData,pAdded)
 	    ||  !dsSetTableRowCount(pAdded,maxcount)
 	    ){
-	       EML_WARNING("can't map table");
+/*TOO NOISY	       EML_WARNING("can't map table"); */
 	       return FALSE;
 	    }
 	    pAdd->p.data = pData; /* Evil DSL HACK */
@@ -270,7 +271,7 @@ int dio_clearDataset(DS_DATASET_T *pDS)
 /* Handle datasets recursively. */
    if(isDataset){
       if( !dsDatasetEntryCount(&count,pDS) ){
-	 EML_WARNING("error clearing dataset");
+/* TOO NOISY	 EML_WARNING("error clearing dataset"); */
 	 return (int)FALSE;
       }
       for( i=0;i<count;i++ ){
@@ -278,7 +279,7 @@ int dio_clearDataset(DS_DATASET_T *pDS)
 	 if( !dsDatasetEntry(&pEntry,pDS,(size_t)i)
 	 ||  !dio_clearDataset(pEntry)
 	 ){
-	    EML_WARNING("error clearing entry");
+/* TOO NOISY	    EML_WARNING("error clearing entry"); */
 	    return (int)FALSE;
 	 }
       }
@@ -286,7 +287,7 @@ int dio_clearDataset(DS_DATASET_T *pDS)
 /* Zero out table data. */
    else if(isTable){
       if( !dsSetTableRowCount(pDS,0) ){
-	 EML_WARNING("error clearing table");
+/* TOO NOISY	 EML_WARNING("error clearing table"); */
 	 return (int)FALSE;
       }
    }
