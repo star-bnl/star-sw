@@ -1,5 +1,8 @@
-* $Id: tde.F,v 1.3 1999/10/01 16:35:54 margetis Exp $
+* $Id: tde.F,v 1.4 1999/10/15 00:54:06 nevski Exp $
 * $Log: tde.F,v $
+* Revision 1.4  1999/10/15 00:54:06  nevski
+* pgf->g77 cleanup
+*
 * Revision 1.3  1999/10/01 16:35:54  margetis
 * updated tid, put method instead of iflag
 *
@@ -92,7 +95,7 @@ C-----------------------------------------------------------------------
                 REAL length
                 REAL charge
                 REAL adedx
-                REAL sortadedx
+                REAL sorta_dedx
       END STRUCTURE
 
 C-----------------------------------------------------------------------
@@ -152,7 +155,7 @@ C Abort if there are no TPC hits to work with
 
       if (hit_h.nok.eq.0) then
         call message('TDE_DEDX-W: No TPC hitss.'// 
-     >               ' TDE aborted.',1,imsg2)
+     >                 ' TDE aborted.',1,imsg2)
          tde=STAFCV_BAD
          return
       endif
@@ -399,9 +402,9 @@ c
                     dedx(nde).charge=hit(loc_hit(l)).q
                     dedx(nde).adedx=dedx(nde).charge/ds
                     if (tdpar(1).averaging_method.eq.3) then
-                       dedx(nde).sortadedx = dedx(nde).adedx/sqrt(ds)
+                       dedx(nde).sorta_dedx = dedx(nde).adedx/sqrt(ds)
                     else
-                      dedx(nde).sortadedx = dedx(nde).adedx
+                      dedx(nde).sorta_dedx = dedx(nde).adedx
                     endif  
                   endif
 c               else if((xc-hit(loc_hit(l)).x)**2+
@@ -433,8 +436,8 @@ c
 		last=0
             endif     
          end do
-         iret=tls_Quick_Sort_r(nde,dedx(1).sortadedx,
-     >        dedx(2).sortadedx,dedx)
+         iret=tls_Quick_Sort_r(nde,dedx(1).sorta_dedx,
+     >        dedx(2).sorta_dedx,dedx)
 c
 c truncating options
 c

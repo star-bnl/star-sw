@@ -49,15 +49,6 @@ C<----------------------------------------------------------------------
 #define SVT_ONLY 2
 #define TPC_PLUS_SVT 3
 
-      STRUCTURE/local_track/
-        INTEGER id
-        REAL*4 r
-        REAL*4 rf
-        REAL*4 z
-        REAL*4 f
-        REAL*4 tanl
-        REAL*4 qR
-      END STRUCTURE
  
       INTEGER   id, id1, id2
       INTEGER   ierr, iflag, iflag1
@@ -185,8 +176,8 @@ c*** pgj: check detector id
 
         if( idet_daughter(1).eq.TPC_ONLY .and.
      >      idet_daughter(2).eq.TPC_ONLY ) then
-          idet_v0 = TPC_ONLY
-        elseif( idet_daughter(1).eq.SVT_ONLY .or.    !* Notice .or. not .and.
+          idet_v0 = TPC_ONLY        ! * Notice .or. not .and.
+        elseif( idet_daughter(1).eq.SVT_ONLY .or.    
      >          idet_daughter(2).eq.SVT_ONLY ) then
           idet_v0 = SVT_ONLY
         else

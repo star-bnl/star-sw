@@ -1,5 +1,8 @@
-* $Id: tstgain.F,v 1.2 1998/01/27 01:14:52 fisyak Exp $
+* $Id: tstgain.F,v 1.3 1999/10/15 00:54:00 nevski Exp $
 * $Log: tstgain.F,v $
+* Revision 1.3  1999/10/15 00:54:00  nevski
+* pgf->g77 cleanup
+*
 * Revision 1.2  1998/01/27 01:14:52  fisyak
 * Split sources
 *
@@ -51,25 +54,25 @@ CC:>--------------------------------------------------------------------
 
 c -----	Make sure incoming tables look OK
 	if ((tstpar_h.maxlen.le.0) .or. 
-	2	(tstpar_h.nok.gt.tstpar_h.maxlen)) then
+     >		(tstpar_h.nok.gt.tstpar_h.maxlen)) then
 	  write (6,*) 'TSTGAIN: !!! Poorly defined table: TSTPAR !!!'
 	  goto 999
 	endif
 
 	if ((pedestal_h.maxlen.le.0) .or. 
-	2	(pedestal_h.nok.gt.pedestal_h.maxlen)) then
+     >		(pedestal_h.nok.gt.pedestal_h.maxlen)) then
 	  write (6,*) 'TSTGAIN: !!! Poorly defined table: PEDESTAL !!!'
 	  goto 999
 	endif
 
 	if ((pulser_h.maxlen.le.0) .or. 
-	2	(pulser_h.nok.gt.pulser_h.maxlen)) then
+     >		(pulser_h.nok.gt.pulser_h.maxlen)) then
 	  write (6,*) 'TSTGAIN: !!! Poorly defined table: PULSER !!!'
 	  goto 999
 	endif
 
 	if ((tpc_gain_h.maxlen.le.0) .or. 
-	2	(tpc_gain_h.nok.gt.tpc_gain_h.maxlen)) then
+     >		(tpc_gain_h.nok.gt.tpc_gain_h.maxlen)) then
 	  write (6,*) 'TSTGAIN: !!! Poorly defined table: TPC_GAIN !!!'
 	  goto 999
 	endif
@@ -94,10 +97,10 @@ c	write (6,*) 'TSTGAIN: Subtracting pedestal values...'
 
 	do i = 1, pedestal_h.nok
 	  adc(pedestal(i).channel,pedestal(i).bucket) = 
-	2	adc(pedestal(i).channel,pedestal(i).bucket) -
-	3	(pedestal(i).ave + pedestal(i).rms*tstpar(1).times_rms)
+     >		adc(pedestal(i).channel,pedestal(i).bucket) -
+     >		(pedestal(i).ave + pedestal(i).rms*tstpar(1).times_rms)
 	  if (adc(pedestal(i).channel,pedestal(i).bucket).lt. 0.0)
-	2	adc(pedestal(i).channel,pedestal(i).bucket) = 0.0
+     >		adc(pedestal(i).channel,pedestal(i).bucket) = 0.0
 	enddo
 
 c -----	Integrate the remaining signals

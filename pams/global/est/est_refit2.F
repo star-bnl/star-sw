@@ -180,7 +180,7 @@ C.................LOAD THE FITTING ARRAYS WITH THE SVT SPACE POINTS
                do j=est_match(i).n_svt_hits,1,-1
                   ient=j
                   ptgt=est_match(i).n_svt_hits-j+1
-                  if (good_hit(ptgt) .ne. .false. ) then
+                  if (good_hit(ptgt)) then
                      ncir = ncir + 1
                      xcir(ncir) = est_match(i).r_4th(ient)
      &                    *cos(est_match(i).phi_4th(ient))

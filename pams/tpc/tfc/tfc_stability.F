@@ -1,5 +1,8 @@
-* $Id: tfc_stability.F,v 1.2 1998/01/27 01:14:51 fisyak Exp $
+* $Id: tfc_stability.F,v 1.3 1999/10/15 00:53:57 nevski Exp $
 * $Log: tfc_stability.F,v $
+* Revision 1.3  1999/10/15 00:53:57  nevski
+* pgf->g77 cleanup
+*
 * Revision 1.2  1998/01/27 01:14:51  fisyak
 * Split sources
 *
@@ -11,10 +14,10 @@ CC:  Id: idl.y,v 1.8 1996/10/15 18:33:35 ward Exp
 CC:<--------------------------------------------------------------------
 
 	INTEGER*4 FUNCTION TFC_STABILITY(
-	1	pedestal_h,		pedestal ,
-	2	gain_h,			gain ,
-	3	pedstab_pars_h,		pedstab_pars ,
-	4	pedstab_h,		pedstab )
+     >		pedestal_h,		pedestal ,
+     >		gain_h,			gain ,
+     >		pedstab_pars_h,		pedstab_pars ,
+     >          pedstab_h,		pedstab )
 
 	IMPLICIT NONE
 #include "tfc_stability.inc"
@@ -68,25 +71,25 @@ CC:>--------------------------------------------------------------------
 
 c -----	Make sure incoming tables look OK
 	if ((pedestal_h.maxlen.le.0) .or. 
-	2	(pedestal_h.nok.gt.pedestal_h.maxlen)) then
+     >		(pedestal_h.nok.gt.pedestal_h.maxlen)) then
 	  write (6,*) 'STAB: !!! Poorly defined table: PEDESTAL !!!'
 	  goto 999
 	endif
 
 	if ((gain_h.maxlen.le.0) .or. 
-	2	(gain_h.nok.gt.gain_h.maxlen)) then
+     >		(gain_h.nok.gt.gain_h.maxlen)) then
 	  write (6,*) 'STAB: !!! Poorly defined table: GAIN !!!'
 	  goto 999
 	endif
 
 	if ((pedstab_h.maxlen.le.0) .or. 
-	2	(pedstab_h.nok.gt.pedstab_h.maxlen)) then
+     >		(pedstab_h.nok.gt.pedstab_h.maxlen)) then
 	  write (6,*) 'STAB: !!! Poorly defined table: PEDSTAB !!!'
 	  goto 999
 	endif
 
 	if ((pedstab_pars_h.maxlen.le.0) .or. 
-	2	(pedstab_pars_h.nok.gt.pedstab_pars_h.maxlen)) then
+     >		(pedstab_pars_h.nok.gt.pedstab_pars_h.maxlen)) then
 	  write (6,*) 'STAB: !!! Poorly defined table: PEDSTAB_PARS !!!'
 	  goto 999
 	endif
@@ -139,20 +142,20 @@ c -----	Sum up all of the contributions (by bucket)
 	  ichip = chip(pedestal(i).channel)
 
 	  if (pedestal(i).bucket.ge.pedstab_pars(1).first_bucket .and.
-	2     pedestal(i).bucket.le.pedstab_pars(1).last_bucket .and.
-	3     ichip.ge.1 .and. ichip.le.30 .and.
-	4     pedestal(i).channel.ne.1) then
+     >        pedestal(i).bucket.le.pedstab_pars(1).last_bucket .and.
+     >        ichip.ge.1 .and. ichip.le.30 .and.
+     >        pedestal(i).channel.ne.1) then
 
 	    buc_ent(ichip) = buc_ent(ichip) + 1
 
 c -----	Average Pedestal
 	    pedstab(inok).ped(ichip) = 
-	2	(pedstab(inok).ped(ichip)*(buc_ent(ichip)-1) +
-	3	pedestal(i).ave) / buc_ent(ichip)
+     >		(pedstab(inok).ped(ichip)*(buc_ent(ichip)-1) +
+     >		pedestal(i).ave) / buc_ent(ichip)
 
 c -----	Average Pedestal RMS
 	    pedstab(inok).rms(ichip) = ( pedstab(inok).rms(ichip) * 
-	2	(buc_ent(ichip)-1) + pedestal(i).rms) / buc_ent(ichip)
+     >		(buc_ent(ichip)-1) + pedestal(i).rms) / buc_ent(ichip)
 
 	  endif
 	enddo
@@ -162,25 +165,25 @@ c -----	Sum up all of the contrubutions (by pad)
 	  ichip = chip(gain(i).channel)
 
 	  if (gain(i).channel.ne.1 .and.
-	2     ichip.ge.1 .and. ichip.le.30 ) then
+     >      ichip.ge.1 .and. ichip.le.30 ) then
 	    pad_ent(ichip) = pad_ent(ichip) + 1
 
 c -----	Save previous variance
 	    if (pad_ent(ichip).gt.1) then
 	      s2 = pedstab(inok).gain_rms(ichip)**2 + 
-	2	 pedstab(inok).gain(ichip)**2
+     >		 pedstab(inok).gain(ichip)**2
 	    else
 	      s2 = 0
 	    endif
 
 c -----	Average Gain
 	    pedstab(inok).gain(ichip) = 
-	2	(pedstab(inok).gain(ichip)*(pad_ent(ichip)-1) +
-	3       gain(i).gain) / pad_ent(ichip)
+     >		(pedstab(inok).gain(ichip)*(pad_ent(ichip)-1) +
+     >           gain(i).gain) / pad_ent(ichip)
 
 c -----	RMS in Average Gain
 	    s2 = (s2*(pad_ent(ichip) - 1) + gain(i).gain**2) /
-	2	pad_ent(ichip) - pedstab(inok).gain(ichip)**2
+     >		pad_ent(ichip) - pedstab(inok).gain(ichip)**2
 	    if (s2.gt.0.0) then
 	      pedstab(inok).gain_rms(ichip) = sqrt(s2)
 	    else
