@@ -7,9 +7,16 @@
 ************************************************************************
 ************************************************************************
 ************************************************************************
+macro initialize
+   macro/global/import *
+   message ' initializing svt_fast_sim '
+   exec init_srs
+return
 
+********************************************************************
  
- macro process_event nev
+macro process_event nev
+  macro/global/import *
    
       message ' SVT fast sim: Processing Event # ' [nev]
 

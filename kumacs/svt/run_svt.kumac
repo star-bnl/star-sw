@@ -60,7 +60,6 @@ $STAR/pams/trg/kumac
  def [DEFAULT]
  message 'Define default kumac search path as' def
 
- make util
  make svt
 
  *****************************************
@@ -75,6 +74,7 @@ $STAR/pams/trg/kumac
  *****************************************
   
  exec setup_dir
+macro/global/import *
 
 
 Message 'Doing' [no_events] 'events'
@@ -87,7 +87,7 @@ Message 'Doing' [no_events] 'events'
  *****************************************
  * one time package initialization phase for geometry
  *****************************************
- cd /dui/data/svt
+ cd [data]/svt
 
  exec  init_svg
  if [svt_simul] = sss then
@@ -95,10 +95,9 @@ Message 'Doing' [no_events] 'events'
   exec init_sss
   exec init_ssf
  endif
-
-
-  G2Tfile
- ls
+ exec init_srs
+ exec init_sgr
+ exec init_stk
 
  *****************************************
  * event loop
@@ -116,7 +115,7 @@ Message 'Doing' [no_events] 'events'
 
 
  *  SVT detector response simulation 
-   cd /dui/data/svt
+   cd [data]/svt
 $cptime 
     if [svt_simul]= sss then
       exec run_sss [ievent]
@@ -146,7 +145,7 @@ $cptime
     endif
 
 
- ls /dui/data/svt/tracks
+ ls [data]/svt/tracks
 
 NEXT_EVENT:
  

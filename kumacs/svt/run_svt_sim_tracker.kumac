@@ -24,6 +24,7 @@
 *           June 3, 1998 - editted by Kathy Turner
  *************************************************
 
+macro/global/import *
 
 ***********************************************************
 * PRINT OUT INPUT VALUES
@@ -147,7 +148,7 @@ Message 'Doing' [no_events] 'events'
     endif
     
     
-  ls /dui/data/svt/tracks
+  ls [data]/svt/tracks
 
   NEXT_EVENT:
  

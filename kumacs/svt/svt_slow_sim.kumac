@@ -9,6 +9,7 @@
 ************************************************************************
  
  macro initialize
+macro/global/import *
    
     message ' SVT slow simulator initialization'
       exec init_sss
@@ -19,6 +20,7 @@
 * ******************************************************************
  
  macro process_event nev
+macro/global/import *
    
       message ' SVT slow sim: Processing Event # ' [nev]
 
