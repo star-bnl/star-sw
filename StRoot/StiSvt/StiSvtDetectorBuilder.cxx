@@ -68,12 +68,7 @@
 StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active, char* baseName)
   : StiDetectorBuilder("Svt",active)
 {
-  cout <<"Creating Hit Error Calculator:"<<endl;
-  _calc = new StiDefaultHitErrorCalculator();
-  cout <<"Setting Hit Error Calculator parameters:"<<endl;
-  _calc->set(.1,0.,0.,.1,0.,0.); 
-
-
+ 
   StiTrackingParameters * trackingPars = getTrackingParameters();
 
   string fName= _name + baseName;
@@ -93,6 +88,27 @@ StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active, char* baseName)
       cout <<"Tracking Parameters set from default. "<<endl;
     }
   cout <<*trackingPars<<endl;
+
+   cout <<"Creating Hit Error Calculator:"<<endl;
+  _calc = new StiDefaultHitErrorCalculator();
+  if(inF)
+    {
+      double intrY, driftY, dipY, intrZ,driftZ,dipZ;
+      inF>>intrY;
+      inF>>driftY;
+      inF>>dipY;
+      inF>>intrZ;
+      inF>>driftZ;
+      inF>>dipZ;
+      _calc->set(intrY,driftY,dipY,intrZ,driftZ,dipZ);
+
+    }
+  else
+    {
+      cout <<"Setting Hit Error Calculator parameters from defaults:"<<endl;
+      _calc->set(.1,0.,0.,.1,0.,0.); 
+    }
+
 
 }
 
