@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.19 2000/05/11 16:20:33 calderon Exp $
+// $Id: StAssociator.C,v 1.20 2000/05/11 22:14:27 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.20  2000/05/11 22:14:27  calderon
+// Go back to getting the histograms from the TList.
+//
 // Revision 1.19  2000/05/11 16:20:33  calderon
 // histograms have to be obtained directly from maker again.
 // Examples of using the loading of hits in StMcEventMaker (commented out by
@@ -196,14 +199,14 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
     examples->mTrackNtuple->Draw("(p-prec)/p:commTpcHits","prec!=0");
 
     TList* dList = chain->GetMaker("StMcAnalysisMaker")->Histograms();
-//     TH2F* hitRes = dList->At(0);
-//     TH1F* momRes = dList->At(1);
-//     TH2F* coordRc = dList->At(2);
-//     TH2F* coordMc = dList->At(3);
-    TH2F* hitRes  = examples->mHitResolution;
-    TH1F* momRes  = examples->mMomResolution;
-    TH2F* coordRc = examples->coordRec;
-    TH2F* coordMc = examples->coordMcPartner;
+    TH2F* hitRes = dList->At(0);
+    TH1F* momRes = dList->At(1);
+    TH2F* coordRc = dList->At(2);
+    TH2F* coordMc = dList->At(3);
+//     TH2F* hitRes  = examples->mHitResolution;
+//     TH1F* momRes  = examples->mMomResolution;
+//     TH2F* coordRc = examples->coordRec;
+//     TH2F* coordMc = examples->coordMcPartner;
     
     myCanvas->cd(2);
     gPad->SetLogy(0);
