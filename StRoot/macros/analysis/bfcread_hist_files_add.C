@@ -1,5 +1,10 @@
-// $Id: bfcread_hist_files_add.C,v 2.14 2002/09/06 02:50:22 genevb Exp $
+// $Id: bfcread_hist_files_add.C,v 2.15 2004/09/01 14:41:23 jeromel Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.15  2004/09/01 14:41:23  jeromel
+// Thanks to Janet S., some correction to broken macro
+//  fin logic change
+//  gPad / example commented out
+//
 // Revision 2.14  2002/09/06 02:50:22  genevb
 // Update compatibility with library changes
 //
@@ -85,6 +90,7 @@ void bfcread_hist_files_add(
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("libglobal_Tables");
   gSystem->Load("libtpc_Tables");
+  gSystem->Load("libStDb_Tables.so");
   gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
   gSystem->Load("St_QA_Maker");
@@ -96,9 +102,10 @@ void bfcread_hist_files_add(
   if (fin) {
     int j=0;
     cout << "Input file " << fileName << " found." << endl;
-    while (!fin.eof()) {
+    for (Int_t i=0;i<nevents;i++){
       char *line = new char[256];
       fin >> line;
+      if (fin.eof()) break;
       fList[j] = line;
       cout << " Added file : " << fList[j] << endl;
       j++;
@@ -206,13 +213,13 @@ void bfcread_hist_files_add(
      }  //else (ifl not #1)
 
 // to see an example of histograms being added together:   
-     TH1** kathyArray = HU[bnum]->getNewHist();
-     for (Int_t imk=0;imk<hCCount;imk++) {
-       if (strcmp(kathyArray[imk]->GetName(),"TabQaEvsumTrkTot")==0) {       
-	 kathyArray[imk]->Draw();
-	 gPad->Update();
-       } // if strcmp -- to draw
-     } // for -- end of example
+//   TH1** kathyArray = HU[bnum]->getNewHist();
+//   for (Int_t imk=0;imk<hCCount;imk++) {
+//     if (strcmp(kathyArray[imk]->GetName(),"TabQaEvsumTrkTot")==0) {       
+//       kathyArray[imk]->Draw();
+//       gPad->Update();
+//     } // if strcmp -- to draw
+//     } // for -- end of example
    } // end while loop
 
    ifl++;
