@@ -1,13 +1,19 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.111 2001/03/12 23:19:43 fisyak Exp $
+# $Id: Construct,v 1.112 2001/03/14 21:42:49 jeromel Exp $
 use Env;
 use lib $STAR . "/mgr";    # Modify perl include path
 use ConsDefs;
+
+
 $param::defaultConscript =
   $STAR . "/mgr/Conscript-standard";    # Default construction file.
+
+
+print "Path used is $STAR\n" unless ($param::quiet);
 print "Use default Conscript from $param::defaultConscript \n"
   unless ($param::quiet);
 print "Install includes\n" unless ($param::quiet);
+
 my $include = "include";
 my $build   = "." . $STAR_HOST_SYS;
 print "build for $build\n" unless ($param::quiet);
@@ -17,13 +23,16 @@ if ( defined( $ARG{LinksCheck} ) ) {
     &File::Find::find( \&wanted_dead, $include ) if -d $include;
     &File::Find::find( \&wanted_dead, $build ) if -d $build;
 }
+
 $INCLUDE = "#" . $include;
 $EXPORT  = "#.share";
 $FFLAGS .= " -DCERNLIB_TYPE";
 $OSFID .= " " . $STAR_SYS;
+
 my $ROOTLIBS =
 " -lNew  -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lHist -lGraf -lGraf3d -lTree -lGpad -lPhysics";
 print "ROOTLIBS = $ROOTLIBS\n";
+
 my $ROOTGLIBS = "";
 my $RINTLIBS  = "-lRint ";
 
@@ -31,6 +40,7 @@ if ( !defined( $ARG{NoNew} ) ) { $ROOTLIBS = " -lNew"; }
 $ROOTLIBS .=
 " -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui -lGpad -lPhysics -lMatrix";
 print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
+
 if ( defined( $ARG{ROOTLIBS} ) ) {
     $ROOTLIBS = $ARG{ROOTLIBS};
     print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
@@ -40,10 +50,12 @@ $CPPPATH .= $main::PATH_SEPARATOR . $CERN_ROOT . "/include" . $EXTRA_CPPPATH;
 $FCPPPATH = "";
 ( my $DirPath = cwd() ) =~ s/\/$//g;
 print "DirPath    = $DirPath\n" unless ($param::quiet);
+
 $repository = `echo $STAR`;
 chop($repository);
 print "repository = $repository\n" unless ($param::quiet);
 Repository($repository);    # unless $param::noRepository;
+
 my @Repo = Repository_List;
 if ( defined( $ARG{Salt} ) ) { $Salt = $ARG{Salt}; }
 
@@ -58,12 +70,16 @@ if ( $#Repo > -1 ) {
 else { $param::keep = 1; }
 
 $BUILD = "#" . $build;
-if ( $DEBUG eq "-g" ) {
+if ( $CXX =~ m/-Zoi/ ){
+    # Drtup for INSURE tree directory.
+    $LIB = $BUILD . "/ILIB";
+    $BIN = $BUILD . "/IBIN";
+    $OBJ = $BUILD . "/IOBJ";
+} elsif ( $DEBUG eq "-g" ) {
     $LIB = $BUILD . "/lib";
     $BIN = $BUILD . "/bin";
     $OBJ = $BUILD . "/obj";
-}
-else {
+} else {
     $LIB = $BUILD . "/LIB";
     $BIN = $BUILD . "/BIN";
     $OBJ = $BUILD . "/OBJ";
@@ -277,6 +293,7 @@ print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ\n" unless ($param::quiet);
 print "Targets = @Targets\n" if $param::debug;
 Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ);
 Default qw (   .  );
+#print "Debug ".join(" ",@Targets)."\n";
 Build @Targets;
 
 #________________________________________________________________________________
