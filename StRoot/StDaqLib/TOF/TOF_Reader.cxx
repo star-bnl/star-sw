@@ -1,10 +1,16 @@
 /***************************************************************************
-* $Id: TOF_Reader.cxx,v 2.0 2003/01/29 05:27:24 geurts Exp $
+* $Id: TOF_Reader.cxx,v 2.1 2004/01/28 02:47:45 dongx Exp $
 * Author: Frank Geurts
 ***************************************************************************
 * Description:  TOF Event Reader
 ***************************************************************************
 * $Log: TOF_Reader.cxx,v $
+* Revision 2.1  2004/01/28 02:47:45  dongx
+* change for year4 run (pVPD+TOFp+TOFr')
+*  - Addtional TOFr' ADCs and TDCs put in
+*  - Add TOTs of TOFr' in, combined in TDCs
+*
+*
 * Revision 2.0  2003/01/29 05:27:24  geurts
 * New TOF reader capable of reading TOF year3 data (pVPD, TOFp and TOFr).
 * - Added dedicated retrieval methods for different parts of the data.
@@ -22,6 +28,7 @@
 
 bool TOF_Reader::year2Data(){return (mTofRawDataVersion==1);}
 bool TOF_Reader::year3Data(){return (mTofRawDataVersion==2);}
+bool TOF_Reader::year4Data(){return (mTofRawDataVersion==3);}
 
 void TOF_Reader::ProcessEvent(const Bank_TOFP * TofPTR) {
   unsigned short numberOfDataWords, slot, channel;
@@ -36,7 +43,7 @@ void TOF_Reader::ProcessEvent(const Bank_TOFP * TofPTR) {
   mTheTofArray.ByteSwapped = 0x04030201;
 
   int tofRawDataVersion = TofPTR->header.FormatNumber;
-  if ((tofRawDataVersion <1) || (tofRawDataVersion >2)){
+  if ((tofRawDataVersion <1) || (tofRawDataVersion >3)){
     cout << "TOF_Reader: ERROR unknown raw data version " << tofRawDataVersion << endl;
     return;
   }
@@ -174,10 +181,14 @@ TOF_Reader::TOF_Reader(EventReader *er, Bank_TOFP *pTOFP)
 
   mTofRawDataVersion = pBankTOFP->header.FormatNumber;
 
-  // Year2: pVPD+TOFp; Year3:pVPD+TOFp+TOFr
+  // Year2: pVPD+TOFp; Year3:pVPD+TOFp+TOFr(72); Year4: pVPD+TOFp+TOFr'(120)
   if (year2Data()){
     mMaxAdcChannels=48;
     mMaxTdcChannels=48;
+  }
+  else if (year3Data()) {
+    mMaxAdcChannels=48+12+72;
+    mMaxTdcChannels=48+72;
   }
   else {
     mMaxAdcChannels=TOF_MAX_ADC_CHANNELS;
@@ -233,9 +244,17 @@ unsigned short TOF_Reader::GetTofrAdc(int padId){
     cout << "TOF_Reader: TOFr ADC data not available for year2 data" << endl;
     return 0;
   }
-  if ((padId<0) || (padId>71)){
-    cout << "TOF_Reader::GetTofrAdc padId out of range " << padId << endl;
-    return 0;
+  if (year3Data()) {
+    if((padId<0) || (padId>71)) {
+      cout << "TOF_Reader::GetTofrAdc padId out of range " << padId << endl;
+      return 0;
+    }
+  }
+  if (year4Data()) {
+    if ((padId<0) || (padId>119)){
+      cout << "TOF_Reader::GetTofrAdc padId out of range " << padId << endl;
+      return 0;
+    }
   }
   return mTheTofArray.AdcData[60+padId];
 }
@@ -246,14 +265,45 @@ unsigned short TOF_Reader::GetTofrTdc(int padId){
     cout << "TOF_Reader: TOFr TDC data not available for year2 data" << endl;
     return 0;
   }
-  if ((padId<0) || (padId>71)){
-    cout << "TOF_Reader::GetTofrTdc padId out of range " << padId << endl;
-    return 0;
+  if (year3Data()) {
+    if((padId<0) || (padId>71)) {
+      cout << "TOF_Reader::GetTofrTdc padId out of range " << padId << endl;
+      return 0;
+    }
+    return mTheTofArray.TdcData[48+padId];
   }
-  return mTheTofArray.TdcData[48+padId];
+  if (year4Data()) {
+    if ((padId<0) || (padId>119)){
+      cout << "TOF_Reader::GetTofrTdc padId out of range " << padId << endl;
+      return 0;
+    }
+    int offset = 0;
+    if(padId<24) {
+      offset = 0;
+    } else if(padId<48) {
+      offset = 2;
+    } else if(padId<72) {
+      offset = 4;
+    } else {
+      offset = 8;
+    }
+    return mTheTofArray.TdcData[48+offset+padId];
+  }
 }
 
+unsigned short TOF_Reader::GetTofrTOT(int totId){
+  if(year2Data()||year3Data()) {
+    cout << "TOF_Reader:: TOFr TOT data not available for year3 and year3 data" << endl;
+    return 0;
+  }
+  if((totId<0) || (totId>9)) {
+    cout << "TOF_Reader::GetTofrTOT totId out of range " << totId << endl;
+  }
+  unsigned short tdcId[10] = {72, 73, 98, 99, 124, 125, 176, 177, 178, 179};
 
+  return mTheTofArray.TdcData[tdcId[totId]];
+}
+   
 unsigned short TOF_Reader::GetPvpdAdc(int pvpdId){
   if ((pvpdId<0) || (pvpdId>5)){
     cout << "TOF_Reader::GetPvpdAdc pvpdId out of range " << pvpdId << endl;

@@ -1,10 +1,16 @@
 /***************************************************************************
-* $Id: TOF_Reader.hh,v 2.0 2003/01/29 05:27:25 geurts Exp $
+* $Id: TOF_Reader.hh,v 2.1 2004/01/28 02:47:45 dongx Exp $
 * Author: Frank Geurts
 ***************************************************************************
 * Description:  TOF Event Reader
 ***************************************************************************
 * $Log: TOF_Reader.hh,v $
+* Revision 2.1  2004/01/28 02:47:45  dongx
+* change for year4 run (pVPD+TOFp+TOFr')
+*  - Addtional TOFr' ADCs and TDCs put in
+*  - Add TOTs of TOFr' in, combined in TDCs
+*
+*
 * Revision 2.0  2003/01/29 05:27:25  geurts
 * New TOF reader capable of reading TOF year3 data (pVPD, TOFp and TOFr).
 * - Added dedicated retrieval methods for different parts of the data.
@@ -31,8 +37,14 @@
 //#define TOFP_NUM_ADC_CHANNELS 48
 //#define TOFP_NUM_TDC_CHANNELS 48
 // - Year3 Maxima
-#define TOF_MAX_ADC_CHANNELS (48+12+72)
-#define TOF_MAX_TDC_CHANNELS (48+72)
+// #define TOF_MAX_ADC_CHANNELS (48+12+72)
+// #define TOF_MAX_TDC_CHANNELS (48+72)
+// #define TOF_MAX_A2D_CHANNELS 32
+// #define TOF_MAX_SCA_CHANNELS 12
+// - Year4 Maxima
+#define TOF_MAX_ADC_CHANNELS (48+12+120)
+#define TOF_MAX_TDC_CHANNELS (48+120+16)
+#define TOF_MAX_TOT_CHANNELS 10
 #define TOF_MAX_A2D_CHANNELS 32
 #define TOF_MAX_SCA_CHANNELS 12
 
@@ -188,9 +200,11 @@ public:
   unsigned short GetPvpdAdc(int id);
   unsigned short GetPvpdTdc(int id);
   unsigned short GetClockAdc();
+  unsigned short GetTofrTOT(int totId);
   bool year2Data();
   bool year3Data();
-           short GetTc(int chanId);
+  bool year4Data();
+  short GetTc(int chanId);
   unsigned short GetSc(int chanId);
   unsigned int   GetEventNumber();  
   void printRawData();
