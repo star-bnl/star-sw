@@ -3,6 +3,8 @@
 
 
 long type_of_call sca_filter_(
+  TABLE_HEAD_ST   *dst_run_header_h,    DST_RUN_HEADER_ST    *dstRunHeader,
+  TABLE_HEAD_ST   *dst_event_header_h,  DST_EVENT_HEADER_ST  *dstEventHeader,
   TABLE_HEAD_ST   *dst_track_h,         DST_TRACK_ST         *dstTrack,
   TABLE_HEAD_ST   *sca_filter_const_h,  SCA_FILTER_CONST_ST  *filter_const,
   TABLE_HEAD_ST   *sca_switch_h,        SCA_SWITCH_ST        *sca_switch,
@@ -102,21 +104,24 @@ long type_of_call sca_filter_(
     sca_in[iGoodTrack].x     = Transversity;
     sca_in[iGoodTrack].y     = rapidity;
     sca_in[iGoodTrack].z     = dstTrack[idstTrack].psi;
-    //sca_in[iGoodTrack].z = dstTrack[idstTrack].psi;
-    // zero these out temporarily
-    sca_in[iGoodTrack].evn =0; //eventSum->n_event[0];
-    sca_in[iGoodTrack].run =0;
-    sca_in[iGoodTrack].iflag =0;
+    if ( sca_in[iGoodTrack].z < 0 )
+      sca_in[iGoodTrack].z += 360.;
+    sca_in[iGoodTrack].evn   = dstEventHeader->n_event[0];
+    sca_in[iGoodTrack].run   = dstRunHeader->run_id;
+    sca_in[iGoodTrack].iflag = 0;
     iGoodTrack++;
   } 
   
   // Set the number of entries in sca_in_h 
   sca_in_h->nok = iGoodTrack;
 
-  // Check if enough tracks passed the quality cuts
+// Check if enough tracks passed the quality cuts
   if ( iGoodTrack >= filter_const->nGoodTraks )
     return STAFCV_OK;
-  else
+  else {
+    cout << " sca_filter:: Nglobtrk = " << dst_track_h[0].nok << " iGoodTrack = "<< 
+      iGoodTrack  << endl;
     return STAFCV_BAD;
+  }
 }  // end sca_filter
 

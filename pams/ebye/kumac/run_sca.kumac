@@ -1,7 +1,8 @@
 * run_sca.kumac
 *
-* written by D. Weerasundara -- dhammika@npl.washington.edu
-* modified by L.D. Carr      -- lcarr@u.washington.edu
+*  07/25/98  written  by D. Weerasundara -- dhammika@gibbs.npl.washington.edu
+* modified by 
+* ??/??/1998  L.D. Carr      -- lcarr@u.washington.edu
 * 08/04/1998  K.Turner       -- edited to make it standard
 * 08/10/1998  K. Turner      -- changed name of table dstrack to globtrk
 * 08/10/1998  L.D. Carr      -- added close MACRO to support reference
@@ -9,13 +10,16 @@
 * 09/01/1998  DSW            -- fixed DSL directory aliases.
 * 09/11/1998  DSW            -- added call to sca_makeprior & sca_makeref
 *                               in run_sca#close macro.
-* 09/15/98 - LDC added analysis_switch options for xdf file output
+* 09/15/1998  LDC            -- added analysis_switch options for xdf file 
+*                               output
 *
 *********************************************************
  MACRO filter
    macro/global/import *
      
      ami/module/call sca_filter _
+        [run_dst]/run_header _
+        [dst]/event_header _
         [dst]/globtrk  _
         [params]/ebye/sca/sca_filter_const _
 	[params]/ebye/sca/sca_switch _
@@ -56,6 +60,7 @@ MACRO close calib_dir=$STAR_CALIB _
     exec write_table_to_file#init  SCAPRIOR2  sca_prior_dir.xdf
     exec write_table_to_file#write SCAPRIOR2  [calib]/ebye/sca_prior_dir
     exec write_table_to_file#close SCAPRIOR2 
+    goto THIS_EOF
   endif
 
   if [ensemble_switch]=1 then
@@ -67,12 +72,14 @@ MACRO close calib_dir=$STAR_CALIB _
     exec write_table_to_file#init  SCAENSEMBLE2  sca_ensemble_dir.xdf
     exec write_table_to_file#write SCAENSEMBLE2  [calib]/ebye/sca_ensemble_dir
     exec write_table_to_file#close SCAENSEMBLE2 
+    goto THIS_EOF
   endif
 
   if [analysis_switch]=1 then
     exec write_table_to_file#close SCAANALYSIS  
   endif
 
+THIS_EOF:
 RETURN
 *********************************************************
 
