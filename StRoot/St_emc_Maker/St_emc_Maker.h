@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.h,v 1.4 1999/02/12 19:19:17 akio Exp $
+// $Id: St_emc_Maker.h,v 1.5 1999/07/01 16:17:57 pavlinov Exp $
 // $Log: St_emc_Maker.h,v $
+// Revision 1.5  1999/07/01 16:17:57  pavlinov
+// class StEmcGeom was created and maker was remade for new maker scheme
+//
 // Revision 1.4  1999/02/12 19:19:17  akio
 // *** empty log message ***
 //
@@ -15,6 +18,7 @@
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_emc_Maker class for <FONT COLOR="RED">EMc Calibration</FONT> dataset     //
+//
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
@@ -27,13 +31,14 @@
 #include "St_emc_calib_header_Table.h"
 #include "St_emc_hits_Table.h"
 #include "StEmcHitCollection.h"
-#include "/afs/rhic/star/packages/SL98j/pams/emc/inc/emc_def.h"
+#include "emc/inc/emc_def.h"
 
 class St_emc_Maker : public StMaker {
 private:
   Bool_t drawinit; 
-  Int_t  m_mode;          // mode=0/1 No/Create copy in emc_hits Table;
-  void MakeHistograms();  // Filling QA Histograms
+  Int_t  m_mode;               // mode=0/1 No/Create copy in emc_hits Table;
+  St_DataSet     *mEmcCalib;   //!  For StEmcCollection::ADCtoEnergy
+  void MakeHistograms();       // Filling QA Histograms
 protected:
   TH2F *m_nhit;           //! 
   TH2F *m_etot;           //!
@@ -44,8 +49,9 @@ public:
   virtual ~St_emc_Maker();
   virtual Int_t Init();
   virtual Int_t Make();
-  virtual void Set_mode (Int_t m = 0){m_mode = m;} // *MENU*  
+  virtual void Set_mode (Int_t m = 0){m_mode = m;}; // *MENU*  
   virtual void PrintInfo();
+  St_DataSet     *getEmcCalib()   {return mEmcCalib;};
   ClassDef(St_emc_Maker, 1)   //Macro
 };
 
