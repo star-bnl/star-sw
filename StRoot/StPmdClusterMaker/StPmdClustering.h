@@ -4,7 +4,7 @@
  */
 /******************************************************
  *
- * $Id: StPmdClustering.h,v 1.5 2004/06/24 13:43:02 subhasis Exp $
+ * $Id: StPmdClustering.h,v 1.6 2004/07/19 13:23:27 subhasis Exp $
  *
  * Author: Dr. S.C. Phatak
  *         Dipak Mishra
@@ -13,6 +13,9 @@
  * Description: Base class for PMD clusters
  *
  * $Log: StPmdClustering.h,v $
+ * Revision 1.6  2004/07/19 13:23:27  subhasis
+ * checks applied on clust_cell dimension
+ *
  * Revision 1.5  2004/06/24 13:43:02  subhasis
  * several changes in clustering code
  *
@@ -70,7 +73,7 @@ class StPmdClustering:public StPmdAbsClustering
   //! printing clusters
   void printclust(Int_t,Int_t, StPmdCluster*); 
   //! for Calculating cluster properties, those clusters having more then two cells
-  void CentroidCal(Int_t,Int_t,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&);
+  Int_t CentroidCal(Int_t,Int_t,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&);
   
 
   //! for getting hits of each cluster
