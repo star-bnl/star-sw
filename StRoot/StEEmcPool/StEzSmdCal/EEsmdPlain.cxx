@@ -7,39 +7,40 @@
 //-------------------------------------------------
 EEsmdPlain::EEsmdPlain(){
   thresE=-1; 
-  xOffset=-2;
+  nDot=-2;
   uv='N';
   pattXX[0]=0;
   pattX[0]=0;
+  hitOver=dotArray+oneOff; // map real strips in the middle of dot Arrary
   clear();
 }
 //-------------------------------------------------
 //-------------------------------------------------
-void EEsmdPlain::set(float th, int Xoff, char uv0) {
+void EEsmdPlain::set(float th, int nd, char uv0) {
   thresE=th; 
-  xOffset=Xoff;
+  nDot=nd;
   uv=uv0;
-  int len=2*xOffset+2;
+  int len=2*nDot+2;
   assert(len>=2); // makes no sense to search for 0xx0, JB
   assert(len+2<MaxSmdStrips);
 
   memset(pattXX,'.',len);
   pattXX[len]=0; // string  terminatinon 
-  pattXX[xOffset]='x';
-  pattXX[xOffset+1]='x';
+  pattXX[nDot]='x';
+  pattXX[nDot+1]='x';
 
   memset(pattX,'.',len);
   pattX[len]=0; // string  terminatinon 
-  pattX[xOffset]='x';
+  pattX[nDot]='x';
 
-  printf("Set %c-plain , X-off=%d, thrE=%.2f, pattXX='%s'\n",uv,xOffset,thresE,pattXX);
+  printf("Set %c-plain , nDot=%d, thrE=%.2f, pattXX='%s'\n",uv,nDot,thresE,pattXX);
 }
 
 //-------------------------------------------------
 //-------------------------------------------------
 void EEsmdPlain::clear(){
-  memset(hitOver,'.',sizeof(hitOver)); // clear it
-  hitOver[288]=0; // terminate string
+  memset(dotArray,'.',sizeof(dotArray)); // clear it
+  dotArray[2*oneOff+MaxSmdStrips]=0;// terminate the string to make strstr work properly
   nMatch=0;
   memset(iStrip,-1,sizeof(iStrip));
   memset(type,0,sizeof(type));
@@ -53,7 +54,7 @@ void EEsmdPlain::print(int k){
   for(i=0;i<nMatch;i++) printf("i=%d, iStrip=%d type=%d\n",i,iStrip[i],type[i]);
 
   if(k<=0) return;
-  printf("%c-plain , X-off=%d, pattXX='%s'\n",uv,xOffset,pattXX);
+  printf("%c-plain , X-off=%d, nDot='%s'\n",uv,nDot,pattXX);
 
   printf("iStrip:");
   for(i=0;i<MaxSmdStrips;i++) {
@@ -70,26 +71,33 @@ void EEsmdPlain::print(int k){
 void EEsmdPlain::findMipPattern(){
   char *p=0;
   nMatch=0;
+  // print(1);
 
   // ............. search for XX
-  p=hitOver;
+  p=dotArray;
+
   while((p=strstr(p,pattXX))) {
-    iStrip[nMatch]=p-hitOver+xOffset;
+    int j=p-hitOver+nDot;
+    assert(j>=0 && j<MaxSmdStrips); // logical error
+    iStrip[nMatch]=j;
     type[nMatch]=2;
     nMatch++;
-    p+=xOffset;// move pointer a bit
+    p+=nDot;// move pointer a bit
   }
 
   // ............. search for X
-  p=hitOver;
+  p=dotArray;
   while((p=strstr(p,pattX))) {
-    iStrip[nMatch]=p-hitOver+xOffset;
+    int j=p-hitOver+nDot;
+    //  printf("aa %d %d \n", p-dotArray, j);
+    assert(j>=0 && j<MaxSmdStrips); // logical error
+    iStrip[nMatch]=j;
     type[nMatch]=1;
     nMatch++;
-    p+=xOffset;// move pointer a bit
+    p+=nDot;// move pointer a bit
   }
 
-  //  print(1);
+
 }
 
 //-------------------------------------------------

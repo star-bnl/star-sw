@@ -1,4 +1,4 @@
-// $Id: EEsmdCalHisto.cxx,v 1.6 2004/07/08 01:20:20 balewski Exp $
+// $Id: EEsmdCalHisto.cxx,v 1.7 2004/07/10 18:40:54 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -307,7 +307,7 @@ void EEsmdCal::initAuxHisto(){
   
   sprintf(tt1,"xy%02dct",sectID);
   sprintf(tt2," accepted MIP position in tagged tower , SMD plane %02d; X(cm); Y(cm) ",sectID);
-  h2=new TH2F(tt1,tt2,200,-40,160,200,-250,-50);
+  h2=new TH2F(tt1,tt2,500,-250,250,250,-250,-0);
   hA[22]=(TH1F*)h2;
   
   //..................
