@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.6 2002/06/11 19:09:35 calderon Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.7 2002/06/27 17:30:58 jeromel Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,6 +7,9 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.7  2002/06/27 17:30:58  jeromel
+ * Bug fix. NULL+1 caused a crash ...
+ *
  * Revision 1.6  2002/06/11 19:09:35  calderon
  * Bug fix: the filename that was set in the macro was being overwritten
  * in InitRun, so the emb80x string which was added to the filename was lost.
@@ -16,12 +19,15 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.7  2002/06/27 17:30:58  jeromel
+ * Bug fix. NULL+1 caused a crash ...
+ *
  * Revision 1.6  2002/06/11 19:09:35  calderon
  * Bug fix: the filename that was set in the macro was being overwritten
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.6 2002/06/11 19:09:35 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.7 2002/06/27 17:30:58 jeromel Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -147,7 +153,6 @@ StMiniMcMaker::InitRun(int runID) {
   cout << "\tpt cut : " << mMinPt << " , " << mMaxPt << endl;
 
   mIOMaker = (StIOMaker*)GetMaker("IO");
-  //if(mIOMaker) mInFileName = strrchr(mIOMaker->GetFile(),'/')+1;
 
   //
   // instantiate the event object here (embedding or simulation?)
@@ -203,7 +208,14 @@ StMiniMcMaker::Make()
   // if it's a new file, then close the old one and open a new one
   //
   TString curFileName;
-  if(mIOMaker) curFileName = strrchr(mIOMaker->GetFile(),'/')+1;
+  if(mIOMaker){
+    if( ! strrchr(mIOMaker->GetFile(),'/')){
+      curFileName = mIOMaker->GetFile();
+    } else {
+      curFileName = strrchr(mIOMaker->GetFile(),'/')+1;
+    }
+  }
+
   if(!mInFileName.Contains(curFileName)){
     if(mDebug) {
       cout << "\tNew file found : " << curFileName << endl
