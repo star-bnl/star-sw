@@ -26,18 +26,16 @@ ttmexample
  Int_t  nEvents   = 100,        // # of events
  Int_t timeStamp  = 20040331    // format: yyyymmdd
  )
-// NOTES: 
-// 1. StEEmcDbMaker has some limitations so beware of the following
-// ( complaints to appropriate autors) 
-// * StEEmcDbMaker works _only_ for single run , so make sure that
-//   your *.lis containf files for one run only, otherwise it will
-//   crash like Windows
-// * remember to adjust dbase timestamp above to match your runs
-//   as iStEEmcDbMaker is unable (as of Apr 2004) to read timestamp 
-//   off a muDST file
-// 2. StEEmcTTMMaker main "product" is a list of EEmcTTMatch'es
-//   which in turn are EEmcTower plus a list of StMuTrack's that
-//   fullfill certain criteria. See below how to access information
+  // NOTES: 
+  // 1. StEEmcDbMaker has some limitations so beware of the following
+  // ( complaints to appropriate autors) 
+  // * StEEmcDbMaker works _only_ for single run , so make sure that
+  //   your *.lis containf files for one run only, otherwise it will crash like Windoza
+  // * remember to adjust dbase timestamp above to match your runs as iStEEmcDbMaker 
+  //   is unable (as of Apr 2004) to read timestamp off a muDST file, what a .....
+  // 2. EEmcTTMMaker main "product" is a list of EEmcTTMatch'es which in turn are 
+  //   EEmcTower plus a list of StMuTrack's that fullfill certain criteria. 
+  //  See below how to access information
 { 
   // load root/root4star libraries
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
