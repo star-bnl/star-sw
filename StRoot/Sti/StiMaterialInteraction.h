@@ -9,10 +9,11 @@
 #define STI_MATERIAL_INTERACTION_H
 
 // uncertainty along detector edges (in cm)
-#define EDGE_HALF_WIDTH 5.
+#define EDGE_HALF_WIDTH 1.
 
 class StiKalmanTrackNode;
 class StThreeVectorD;
+class Messenger;
 
 // indicate where an intersection occurs
 typedef enum {
@@ -65,6 +66,7 @@ protected:
                                 const StThreeVectorD *pPoint,
                                 const StThreeVectorD *pDirection);
 
+    static Messenger *s_pMessenger;
 };
 
 #endif // defined STI_MATERIAL_INTERACTION_H

@@ -8,12 +8,17 @@
 #include "StiHit.h"
 #include "StiMaterialInteraction.h"
 #include "StiGeometryTransform.h" 
+#include "Messenger.h"
 
 #include "StHelix.hh"
 #include "StThreeVector.hh"
 
 #include <float.h>
 #include <string>
+
+// can't initialize this to the actual messenger until after
+// Messenger::init() is called in StiMaker, certainly not at dll load time.
+static Messenger *StiMaterialInteraction::s_pMessenger = NULL;
 
 void StiMaterialInteraction::nameForIntersection(
     StiIntersection &intersection, string &name){
@@ -36,7 +41,11 @@ void StiMaterialInteraction::nameForIntersection(
 StiIntersection StiMaterialInteraction::findIntersection(
     const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
     double &dXlocal, double &dThickness, double &dDensity, double &dDistance){
-  
+
+  // make sure we have our output device initialized
+  if(s_pMessenger==NULL){s_pMessenger = Messenger::instance(kGeometryMessage);}
+  Messenger::clearRoutingBits(kGeometryMessage);
+
   switch(pDetector->getShape()->getShapeCode()){
   case kPlanar:  
     return findPlanarIntersection(pNode, pDetector, 
@@ -148,36 +157,41 @@ double x1=fX, x2=x1+(xk-x1), dx=x2-x1, y1=fP0, z1=fP1;
   double dInnerZ = pShape->getHalfDepth() - EDGE_HALF_WIDTH;
   double dOuterZ = dInnerZ + 2.*EDGE_HALF_WIDTH;
 
-	/*  cout << "y,z:" << dYoffset << "\t" << dZoffset << endl
-			 << "dInnerY:" << dInnerY
-			 << " dOuterY:" << dOuterY
-			 << " dInnerZ:" << dInnerZ
-			 << " dOuterZ:" << dOuterZ << endl;
-	*/
+  *s_pMessenger << "innerY:" << dInnerY
+                << " outerY:" << dOuterY
+                << " innerZ:" << dInnerZ
+                << " outerZ:" << dOuterZ 
+                << " yOffset:" << dYoffset 
+                << " zOffset:" << dZoffset << endl;
+
+  *s_pMessenger << pDetector->getName() 
+                << " has intersection (" << dXlocal << ", " << dYoffset
+                << ", " << dZoffset << ") = ";
+
+  StiIntersection iIntersection = kFailed;
+
   // direct hit
-  if(fabs(dYoffset)<dInnerY && fabs(dZoffset)<dInnerZ){ return kHit; }
-
-  // outside detector to positive or negative y
-  if(dYoffset>dOuterY && fabs(dYoffset)>fabs(dZoffset)){
-    return kMissPhiPlus; 
+  if(fabs(dYoffset)<dInnerY && fabs(dZoffset)<dInnerZ){ 
+    iIntersection = kHit; 
+  }else if(fabs(dYoffset)>dOuterY && 
+           (fabs(dYoffset) - dOuterY)>(fabs(dZoffset) - dOuterZ)){
+    // outside detector to positive or negative y (phi)
+    iIntersection = dYoffset>0 ? kMissPhiPlus : kMissPhiMinus;
+  }else if(fabs(dZoffset)>dOuterZ && 
+           (fabs(dZoffset) - dOuterZ)>(fabs(dYoffset) - dOuterY)){
+    // outside detector to positive or negative z (west or east)
+    iIntersection = dZoffset>0 ? kMissZplus : kMissZminus;
+  }else if((fabs(dYoffset) - dInnerY)>(fabs(dZoffset) - dInnerZ)){
+    // positive or negative phi edge
+    iIntersection = dYoffset>0 ? kEdgePhiPlus : kEdgePhiMinus;
+  }else{
+    // positive or negative z edge
+    iIntersection = dZoffset>0 ? kEdgeZplus : kEdgeZminus;
   }
-  if(dYoffset<-dOuterY && fabs(dYoffset)>fabs(dZoffset)){
-    return kMissPhiMinus;
-  }
 
-  // outside detector to positive or negative z (west or east)
-  if(dZoffset>dOuterZ){  return kMissZplus; }
-  if(dZoffset<-dOuterZ){ return kMissZminus; }
-
-  // on positive or negative y edge
-  if(dYoffset>0 && dYoffset>fabs(dZoffset)){  return kEdgePhiPlus; }
-  if(dYoffset<0 && dYoffset<-fabs(dZoffset)){ return kEdgePhiMinus; }
-
-  // on positive or negative z edge
-  if(dZoffset>0){ return kEdgeZplus; }
-  if(dZoffset<0){ return kEdgeZminus; }
-
-  return kFailed;
+  string name; nameForIntersection(iIntersection, name);
+  *s_pMessenger << name << endl;
+  return iIntersection;
 
 } // findPlanarIntersection
 
@@ -278,30 +292,28 @@ StiIntersection StiMaterialInteraction::findCylindricalIntersection(
   double dInnerZ = pShape->getHalfDepth() - EDGE_HALF_WIDTH;
   double dOuterZ = dInnerZ + 2.*EDGE_HALF_WIDTH;
   
+  StiIntersection iIntersection = kFailed;
+
   // direct hit
-  if(fabs(dPhiOffset)<dInnerPhi && fabs(dZoffset)<dInnerZ){ return kHit; }
-
-  // outside detector to positive or negative y
-  if(dPhiOffset>dOuterPhi && fabs(dPhiOffset)>fabs(dZoffset)){  
-    return kMissPhiPlus; 
+  if(fabs(dPhiOffset)<dInnerPhi && fabs(dZoffset)<dInnerZ){ 
+    iIntersection = kHit; 
+  }else if(fabs(dPhiOffset)>dOuterPhi && 
+           (fabs(dPhiOffset) - dOuterPhi)>(fabs(dZoffset) - dOuterZ)){
+    // outside detector to positive or negative y (phi)
+    iIntersection = dPhiOffset>0 ? kMissPhiPlus : kMissPhiMinus;
+  }else if(fabs(dZoffset)>dOuterZ && 
+           (fabs(dZoffset) - dOuterZ)>(fabs(dPhiOffset) - dOuterPhi)){
+    // outside detector to positive or negative z (west or east)
+    iIntersection = dZoffset>0 ? kMissZplus : kMissZminus;
+  }else if((fabs(dPhiOffset) - dInnerPhi)>(fabs(dZoffset) - dInnerZ)){
+    // positive or negative phi edge
+    iIntersection = dPhiOffset>0 ? kEdgePhiPlus : kEdgePhiMinus;
+  }else{
+    // positive or negative z edge
+    iIntersection = dZoffset>0 ? kEdgeZplus : kEdgeZminus;
   }
-  if(dPhiOffset<-dOuterPhi && fabs(dPhiOffset)>fabs(dZoffset)){ 
-    return kMissPhiMinus; 
-  }
 
-  // outside detector to positive or negative z (west or east)
-  if(dZoffset>dOuterZ){  return kMissZplus; }
-  if(dZoffset<-dOuterZ){ return kMissZminus; }
-
-  // on positive or negative y edge
-  if(dPhiOffset>0 && dPhiOffset>fabs(dZoffset)){  return kEdgePhiPlus; }
-  if(dPhiOffset<0 && dPhiOffset<-fabs(dZoffset)){ return kEdgePhiMinus; }
-
-  // on positive or negative z edge
-  if(dZoffset>0){ return kEdgeZplus; }
-  if(dZoffset<0){ return kEdgeZminus; }
-
-  return kFailed;
+  return iIntersection;
 } // findCylindricalIntersection
 
 StiIntersection StiMaterialInteraction::findConicalIntersection(
