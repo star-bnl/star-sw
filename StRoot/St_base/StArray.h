@@ -81,7 +81,7 @@ const_VecTObjIter end()   const {return fV.end();}
         VecTObjIter erase(VecTObjIter fst,VecTObjIter lst) {return fV.erase(fst,lst);}
         TObject *&       operator[](Int_t i)       {return fV[i];}
         TObject * const &operator[](Int_t i) const {return fV[i];}
-void    push_back(TObject * const to){fV.push_back(to);}
+void    push_back(const TObject * const to){fV.push_back((TObject*)to);}
 protected:
 #ifndef __CINT__
 VecTObj fV;
@@ -107,7 +107,7 @@ public:
  virtual void        SetName(const char *name);
  virtual const char *GetName() const;
 
- void push_back(TObject *to){fV.push_back(to);}
+ void push_back(const TObject *to){fV.push_back((TObject*)to);}
  VecTObjIter erase(VecTObjIter fst,VecTObjIter lst=0);
  void clear();
 private:
@@ -163,7 +163,7 @@ const_St ## QWERTY ## Iterator end()   const {return (const_St ## QWERTY ## Iter
       {return (St ## QWERTY ## Iterator)fV.erase((VecTObjIter)fst,(VecTObjIter)lst);}\
       St ## QWERTY *       &operator[](Int_t i)       {return at(i);}\
       St ## QWERTY * const &operator[](Int_t i) const {return at(i);}\
-void  push_back(St ## QWERTY * const to){fV.push_back((TObject*const)to);}\
+void  push_back(const St ## QWERTY * const to){fV.push_back((TObject*const)to);}\
 \
 ClassDef(StPtrVec ## QWERTY ##,1) \
 };\
