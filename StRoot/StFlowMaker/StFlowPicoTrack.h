@@ -1,30 +1,10 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoTrack.h,v 1.4 2000/12/10 02:01:13 oldi Exp $
+// $Id: StFlowPicoTrack.h,v 1.5 2000/12/12 20:22:06 posk Exp $
 //
 // Author: Raimond Snellings, March 2000
 //
 // Description:  A persistent Flow Pico DST
-// 
-//////////////////////////////////////////////////////////////////////////
-//
-// $Log: StFlowPicoTrack.h,v $
-// Revision 1.4  2000/12/10 02:01:13  oldi
-// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
-// The evaluation of either a track originates from the FTPC or not is
-// unambiguous now. The evaluation itself is easily extendible for other
-// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
-// they contain TPC tracks only (backward compatibility).
-//
-// Revision 1.3  2000/10/12 22:46:39  snelling
-// Added support for the new pDST's and the probability pid method
-//
-// Revision 1.2  2000/09/15 22:51:33  posk
-// Added pt weighting for event plane calcualtion.
-//
-// Revision 1.1  2000/09/05 16:11:38  snelling
-// Added global DCA, electron and positron
-//
 // 
 //////////////////////////////////////////////////////////////////////////
 
@@ -119,3 +99,27 @@ private:
 
 #endif
 
+//////////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowPicoTrack.h,v $
+// Revision 1.5  2000/12/12 20:22:06  posk
+// Put log comments at end of files.
+// Deleted persistent StFlowEvent (old micro DST).
+//
+// Revision 1.4  2000/12/10 02:01:13  oldi
+// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
+// The evaluation of either a track originates from the FTPC or not is
+// unambiguous now. The evaluation itself is easily extendible for other
+// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
+// they contain TPC tracks only (backward compatibility).
+//
+// Revision 1.3  2000/10/12 22:46:39  snelling
+// Added support for the new pDST's and the probability pid method
+//
+// Revision 1.2  2000/09/15 22:51:33  posk
+// Added pt weighting for event plane calcualtion.
+//
+// Revision 1.1  2000/09/05 16:11:38  snelling
+// Added global DCA, electron and positron
+//
+//////////////////////////////////////////////////////////////////////////

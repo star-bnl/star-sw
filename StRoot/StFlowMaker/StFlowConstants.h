@@ -1,27 +1,14 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.4 2000/12/08 17:03:38 oldi Exp $
+// $Id: StFlowConstants.h,v 1.5 2000/12/12 20:22:04 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
+//          FTPC added by Markus Oldenburg, MPI, Dec 2000
+//
 //////////////////////////////////////////////////////////////////////
 //
 // Description: constants for the flow makers
-//////////////////////////////////////////////////////////////////////
-//
-// $Log: StFlowConstants.h,v $
-// Revision 1.4  2000/12/08 17:03:38  oldi
-// Phi weights for both FTPCs included.
-//
-// Revision 1.3  2000/05/11 20:00:30  posk
-// Preparation for micro and nano DSTs.
-//
-// Revision 1.1  2000/03/02 23:02:36  posk
-// Changed extensions from .hh and .cc to .h and .cxx .
-//
-// Revision 1.1  1999/12/15 22:01:20  posk
-// Added StFlowConstants.hh
-//
-//
+//.
 //////////////////////////////////////////////////////////////////////
 
 #ifndef StFlowConstants_h
@@ -46,3 +33,20 @@ class Flow{
 
 #endif
 
+//////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowConstants.h,v $
+// Revision 1.5  2000/12/12 20:22:04  posk
+// Put log comments at end of files.
+// Deleted persistent StFlowEvent (old micro DST).
+//
+// Revision 1.4  2000/12/08 17:03:38  oldi
+// Phi weights for both FTPCs included.
+//
+// Revision 1.1  2000/03/02 23:02:36  posk
+// Changed extensions from .hh and .cc to .h and .cxx .
+//
+// Revision 1.1  1999/12/15 22:01:20  posk
+// Added StFlowConstants.hh
+//
+//////////////////////////////////////////////////////////////////////

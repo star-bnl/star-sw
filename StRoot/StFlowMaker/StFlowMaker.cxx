@@ -1,35 +1,13 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.49 2000/12/10 02:01:13 oldi Exp $
+// $Id: StFlowMaker.cxx,v 1.50 2000/12/12 20:22:05 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
+//          FTPC added by Markus Oldenburg, MPI, Dec 2000
 //
 //////////////////////////////////////////////////////////////////////
 //
 // Description: Maker to fill StFlowEvent from StEvent
-//
-//////////////////////////////////////////////////////////////////////
-//
-// $Log: StFlowMaker.cxx,v $
-// Revision 1.49  2000/12/10 02:01:13  oldi
-// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
-// The evaluation of either a track originates from the FTPC or not is
-// unambiguous now. The evaluation itself is easily extendible for other
-// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
-// they contain TPC tracks only (backward compatibility).
-//
-// Revision 1.48  2000/12/08 17:03:38  oldi
-// Phi weights for both FTPCs included.
-//
-// Revision 1.47  2000/12/06 15:38:46  oldi
-// Including FTPC.
-//
-// Revision 1.46  2000/11/30 16:40:21  snelling
-// Protection against loading probability pid caused it not to work anymore
-// therefore protection removed again
-//
-// Revision 1.45  2000/11/07 02:36:41  snelling
-// Do not init prob pid when not used
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -74,8 +52,7 @@ ClassImp(StFlowMaker)
 
 StFlowMaker::StFlowMaker(const Char_t* name): 
   StMaker(name), 
-  mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE),
-  mFlowEventWrite(kFALSE), mFlowEventRead(kFALSE), pEvent(NULL) {
+  mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), pEvent(NULL) {
   pFlowSelect = new StFlowSelection();
   SetPicoEventDir("./");
 }
@@ -83,8 +60,7 @@ StFlowMaker::StFlowMaker(const Char_t* name):
 StFlowMaker::StFlowMaker(const Char_t* name,
 			 const StFlowSelection& flowSelect) :
   StMaker(name), 
-  mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), 
-  mFlowEventWrite(kFALSE), mFlowEventRead(kFALSE), pEvent(NULL) {
+  mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), pEvent(NULL) {
   pFlowSelect = new StFlowSelection(flowSelect); //copy constructor
   SetPicoEventDir("./");
 }
@@ -104,7 +80,7 @@ Int_t StFlowMaker::Make() {
   pFlowEvent = NULL;
 
   // Get the input file name from the ioMaker
-  if (!mPicoEventRead && !mFlowEventRead && pIOMaker) {
+  if (!mPicoEventRead && pIOMaker) {
     mEventFileName = strrchr(pIOMaker->GetFile(),'/')+1;
     if (Debug()) { 
       gMessMgr->Info() << "FlowMaker: filename: " << mEventFileName << endm;
@@ -130,7 +106,7 @@ Int_t StFlowMaker::Make() {
   }
 
   // Get a pointer to StEvent
-  if (!mFlowEventRead && !mPicoEventRead) {
+  if (!mPicoEventRead) {
     pEvent = (StEvent*)GetDataSet("StEvent");
     if (!pEvent) {
       if (Debug()) { 
@@ -147,18 +123,12 @@ Int_t StFlowMaker::Make() {
       FillFlowEvent();
       if (!pFlowEvent) return kStOK;  // could have been deleted
       if (mPicoEventWrite) FillPicoEvent();
-      if (mFlowEventWrite) pFlowMicroTree->Fill();  // fill the tree
     } else {
       Long_t eventID = pEvent->id();
       gMessMgr->Info() << "##### FlowMaker: event " << eventID 
 		       << " cut" << endm;
     }
 
-  } else if (mFlowEventRead) {
-    // Get a pointer to StFlowEvent
-    if (!pFlowEvent) return kStOK; // If no event, we're done
-    if (mPicoEventWrite) FillPicoEvent();
-    
   } else if (mPicoEventRead) {
     // Instantiate a new StFlowEvent
     pFlowEvent = new StFlowEvent;
@@ -186,7 +156,7 @@ Int_t StFlowMaker::Init() {
 
   Int_t kRETURN = kStOK;
 
-  if (!mPicoEventRead && !mFlowEventRead) {
+  if (!mPicoEventRead) {
     // get input file name
     pIOMaker = (StIOMaker*)GetMaker("IO");
     if (pIOMaker) {
@@ -205,11 +175,9 @@ Int_t StFlowMaker::Init() {
 
   if (mPicoEventWrite) kRETURN += InitPicoEventWrite();
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
-  if (mFlowEventWrite) kRETURN += InitFlowEventWrite();
-  if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.49 2000/12/10 02:01:13 oldi Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.50 2000/12/12 20:22:05 posk Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -231,23 +199,13 @@ Int_t StFlowMaker::Finish() {
   // Print the cut lists
   cout << "#######################################################" << endl;
   cout << "##### FlowMaker: Cut Lists" << endl;
-  if (!mFlowEventRead) {
-    StFlowCutEvent::PrintCutList();
-    StFlowCutTrack::PrintCutList();
-  }
+  StFlowCutEvent::PrintCutList();
+  StFlowCutTrack::PrintCutList();
   pFlowEvent->PrintSelectionList();
 
   if (mPicoEventWrite && pPicoDST->IsOpen()) {
     pPicoDST->Write();
     pPicoDST->Close();
-  }
-
-  if (mFlowEventWrite && pFlowDST->IsOpen()) {
-    pFlowDST->Write();
-    pFlowDST->Close();
-  }
-
-  if (mFlowEventRead && pFlowDST->IsOpen()) { // pFlowDST->Close(); 
   }
 
   return StMaker::Finish();
@@ -976,50 +934,31 @@ Int_t StFlowMaker::InitPicoEventRead() {
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowMaker::InitFlowEventWrite() {
-  if (Debug()) gMessMgr->Info() << "FlowMaker: InitFlowEventWrite()" << endm;
-  
-  Int_t split  = 1;       // by default, split Event in sub branches
-  Int_t comp   = 1;       // by default file is compressed
-  Int_t bufsize = 256000;
-  if (split)  bufsize /= 4;
-  
-  // Create a new ROOT binary machine independent file.
-  // Note that this file may contain any kind of ROOT objects, histograms,
-  // pictures, graphics objects, detector geometries, tracks, events, etc..
-  // This file is now becoming the current directory.
-  
-  pFlowDST = new TFile("flowevent.root", "RECREATE", "Flow micro DST file");
-  if (!pFlowDST) {
-    cout << "##### FlowMaker: Warning: no FlowEvents file" << endl;
-    return kStFatal;
-  }
-  
-  pFlowDST->SetCompressionLevel(comp);
-  
-  // Create a ROOT Tree and one superbranch
-  pFlowMicroTree = new TTree("FlowMicroTree", "Flow Micro Tree");
-  if (!pFlowMicroTree) {
-    cout << "##### FlowMaker: Warning: No FlowMicroTree" << endl;
-    return kStFatal;
-  }
-
-  pFlowMicroTree->SetAutoSave(1000000);  // autosave when 1 Mbyte written
-  pFlowMicroTree->Branch("pFlowEvent", "StFlowEvent", &pFlowEvent, 
-			 bufsize, split);
-  
-  return kStOK;
-}
-
-//-----------------------------------------------------------------------
-
-Int_t StFlowMaker::InitFlowEventRead() {
-  if (Debug()) gMessMgr->Info() << "FlowMaker: InitFlowEventRead()" << endm;
-  
-  pFlowDST = new TFile("flowevent.root", "READ");
-  if (pFlowDST) return kStFatal;
-
-  return kStOK;
-}
-
-//-----------------------------------------------------------------------
+//////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowMaker.cxx,v $
+// Revision 1.50  2000/12/12 20:22:05  posk
+// Put log comments at end of files.
+// Deleted persistent StFlowEvent (old micro DST).
+//
+// Revision 1.49  2000/12/10 02:01:13  oldi
+// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
+// The evaluation of either a track originates from the FTPC or not is
+// unambiguous now. The evaluation itself is easily extendible for other
+// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
+// they contain TPC tracks only (backward compatibility).
+//
+// Revision 1.48  2000/12/08 17:03:38  oldi
+// Phi weights for both FTPCs included.
+//
+// Revision 1.47  2000/12/06 15:38:46  oldi
+// Including FTPC.
+//
+// Revision 1.46  2000/11/30 16:40:21  snelling
+// Protection against loading probability pid caused it not to work anymore
+// therefore protection removed again
+//
+// Revision 1.45  2000/11/07 02:36:41  snelling
+// Do not init prob pid when not used
+//
+//////////////////////////////////////////////////////////////////////

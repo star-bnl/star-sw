@@ -1,49 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.11 2000/09/22 22:03:01 posk Exp $
+// $Id: StFlowSelection.h,v 1.12 2000/12/12 20:22:06 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
 // Description:  Class for making selections
-//
-////////////////////////////////////////////////////////////////////////////
-//
-// $Log: StFlowSelection.h,v $
-// Revision 1.11  2000/09/22 22:03:01  posk
-// Clean up.
-//
-// Revision 1.10  2000/09/16 22:20:34  snelling
-// Added selection on P and global DCA and fixed rapidity calulation
-//
-// Revision 1.9  2000/09/15 22:51:34  posk
-// Added pt weighting for event plane calcualtion.
-//
-// Revision 1.8  2000/09/15 01:20:03  snelling
-// Added methods for P and Y and added selection on Y
-//
-// Revision 1.7  2000/09/13 00:32:27  snelling
-// Added selections for particles correlated with reaction plane
-//
-// Revision 1.6  2000/08/31 18:58:27  posk
-// For picoDST, added version number, runID, and multEta for centrality.
-// Added centrality cut when reading picoDST.
-// Added pt and eta selections for particles corr. wrt event plane.
-//
-// Revision 1.5  2000/08/09 21:38:23  snelling
-// PID added
-//
-// Revision 1.4  2000/05/26 21:29:33  posk
-// Protected Track data members from overflow.
-//
-// Revision 1.3  2000/05/12 22:42:05  snelling
-// Additions for persistency and minor fix
-//
-// Revision 1.2  2000/03/28 23:21:04  posk
-// Allow multiple instances of the AnalysisMaker.
-//
-// Revision 1.1  2000/03/15 23:28:54  posk
-// Added StFlowSelection.
-//
 //
 ////////////////////////////////////////////////////////////////////////////
 
@@ -193,3 +154,45 @@ inline void StFlowSelection::SetSubevent(const Int_t& subN) {
   } else { mSubevent = subN; } }
 
 #endif
+
+////////////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowSelection.h,v $
+// Revision 1.12  2000/12/12 20:22:06  posk
+// Put log comments at end of files.
+// Deleted persistent StFlowEvent (old micro DST).
+//
+//
+// Revision 1.10  2000/09/16 22:20:34  snelling
+// Added selection on P and global DCA and fixed rapidity calulation
+//
+// Revision 1.9  2000/09/15 22:51:34  posk
+// Added pt weighting for event plane calcualtion.
+//
+// Revision 1.8  2000/09/15 01:20:03  snelling
+// Added methods for P and Y and added selection on Y
+//
+// Revision 1.7  2000/09/13 00:32:27  snelling
+// Added selections for particles correlated with reaction plane
+//
+// Revision 1.6  2000/08/31 18:58:27  posk
+// For picoDST, added version number, runID, and multEta for centrality.
+// Added centrality cut when reading picoDST.
+// Added pt and eta selections for particles corr. wrt event plane.
+//
+// Revision 1.5  2000/08/09 21:38:23  snelling
+// PID added
+//
+// Revision 1.4  2000/05/26 21:29:33  posk
+// Protected Track data members from overflow.
+//
+// Revision 1.3  2000/05/12 22:42:05  snelling
+// Additions for persistency and minor fix
+//
+// Revision 1.2  2000/03/28 23:21:04  posk
+// Allow multiple instances of the AnalysisMaker.
+//
+// Revision 1.1  2000/03/15 23:28:54  posk
+// Added StFlowSelection.
+//
+////////////////////////////////////////////////////////////////////////////

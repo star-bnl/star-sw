@@ -1,72 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.20 2000/11/30 16:40:20 snelling Exp $
+// $Id: StFlowCutEvent.cxx,v 1.21 2000/12/12 20:22:05 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
 // Description:  Class for applying event cuts
-//
-////////////////////////////////////////////////////////////////////////////
-//
-// $Log: StFlowCutEvent.cxx,v $
-// Revision 1.20  2000/11/30 16:40:20  snelling
-// Protection agains loading probability pid caused it not to work anymore
-// therefore protection removed again
-//
-// Revision 1.19  2000/09/05 16:11:30  snelling
-// Added global DCA, electron and positron
-//
-// Revision 1.18  2000/08/31 18:58:17  posk
-// For picoDST, added version number, runID, and multEta for centrality.
-// Added centrality cut when reading picoDST.
-// Added pt and eta selections for particles corr. wrt event plane.
-//
-// Revision 1.17  2000/08/10 23:00:19  posk
-// New centralities. pt and eta cuts.
-//
-// Revision 1.16  2000/07/20 17:25:49  posk
-// Fixed bug in readPico checkEvent.
-//
-// Revision 1.15  2000/07/14 23:49:03  snelling
-// Changed to ConstIterator for new StEvent and removed comparison int uint
-//
-// Revision 1.14  2000/07/12 17:54:33  posk
-// Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
-// Apply cuts when reading picoevent file.
-//
-// Revision 1.13  2000/06/30 14:48:29  posk
-// Using MessageMgr, changed Eta Symmetry cut.
-//
-// Revision 1.12  2000/06/01 18:26:32  posk
-// Increased precision of Track integer data members.
-//
-// Revision 1.11  2000/05/26 21:29:26  posk
-// Protected Track data members from overflow.
-//
-// Revision 1.10  2000/05/11 20:00:31  posk
-// Preparation for micro and nano DSTs.
-//
-// Revision 1.9  2000/03/02 23:02:38  posk
-// Changed extensions from .hh and .cc to .h and .cxx .
-//
-// Revision 1.5  1999/12/15 22:01:22  posk
-// Added StFlowConstants.hh
-//
-// Revision 1.4  1999/12/04 00:10:30  posk
-// Works with the new StEvent
-//
-// Revision 1.3  1999/11/30 18:52:47  snelling
-// First modification for the new StEvent
-//
-// Revision 1.2  1999/11/24 18:17:09  posk
-// Put the methods which act on the data in with the data in StFlowEvent.
-//
-// Revision 1.1  1999/11/11 23:08:47  posk
-// Rearrangement of files.
-//
-// Revision 1.1  1999/11/05 00:06:41  posk
-// First versions of Flow cut classes.
-//
 //
 ////////////////////////////////////////////////////////////////////////////
 
@@ -309,3 +247,61 @@ void StFlowCutEvent::PrintCutList() {
   cout << "#######################################################" << endl;
 
 }
+
+////////////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowCutEvent.cxx,v $
+// Revision 1.21  2000/12/12 20:22:05  posk
+// Put log comments at end of files.
+// Deleted persistent StFlowEvent (old micro DST).
+//
+// Revision 1.20  2000/11/30 16:40:20  snelling
+// Protection agains loading probability pid caused it not to work anymore
+// therefore protection removed again
+//
+// Revision 1.19  2000/09/05 16:11:30  snelling
+// Added global DCA, electron and positron
+//
+// Revision 1.18  2000/08/31 18:58:17  posk
+// For picoDST, added version number, runID, and multEta for centrality.
+// Added centrality cut when reading picoDST.
+// Added pt and eta selections for particles corr. wrt event plane.
+//
+// Revision 1.17  2000/08/10 23:00:19  posk
+// New centralities. pt and eta cuts.
+//
+// Revision 1.15  2000/07/14 23:49:03  snelling
+// Changed to ConstIterator for new StEvent and removed comparison int uint
+//
+// Revision 1.14  2000/07/12 17:54:33  posk
+// Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
+// Apply cuts when reading picoevent file.
+//
+// Revision 1.13  2000/06/30 14:48:29  posk
+// Using MessageMgr, changed Eta Symmetry cut.
+//
+// Revision 1.12  2000/06/01 18:26:32  posk
+// Increased precision of Track integer data members.
+//
+// Revision 1.11  2000/05/26 21:29:26  posk
+// Protected Track data members from overflow.
+//
+// Revision 1.9  2000/03/02 23:02:38  posk
+// Changed extensions from .hh and .cc to .h and .cxx .
+//
+// Revision 1.5  1999/12/15 22:01:22  posk
+// Added StFlowConstants.hh
+//
+// Revision 1.4  1999/12/04 00:10:30  posk
+// Works with the new StEvent
+//
+// Revision 1.3  1999/11/30 18:52:47  snelling
+// First modification for the new StEvent
+//
+// Revision 1.2  1999/11/24 18:17:09  posk
+// Put the methods which act on the data in with the data in StFlowEvent.
+//
+// Revision 1.1  1999/11/05 00:06:41  posk
+// First versions of Flow cut classes.
+//
+////////////////////////////////////////////////////////////////////////////

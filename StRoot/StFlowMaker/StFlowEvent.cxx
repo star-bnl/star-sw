@@ -1,120 +1,13 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.19 2000/12/10 02:01:13 oldi Exp $
+// $Id: StFlowEvent.cxx,v 1.20 2000/12/12 20:22:05 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
+//          FTPC added by Markus Oldenburg, MPI, Dec 2000
+//
 //////////////////////////////////////////////////////////////////////
 //
 // Description: A subset of StEvent 
-//
-//////////////////////////////////////////////////////////////////////
-//
-// $Log: StFlowEvent.cxx,v $
-// Revision 1.19  2000/12/10 02:01:13  oldi
-// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
-// The evaluation of either a track originates from the FTPC or not is
-// unambiguous now. The evaluation itself is easily extendible for other
-// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
-// they contain TPC tracks only (backward compatibility).
-//
-// Revision 1.18  2000/12/08 17:03:38  oldi
-// Phi weights for both FTPCs included.
-//
-// Revision 1.17  2000/10/12 22:46:35  snelling
-// Added support for the new pDST's and the probability pid method
-//
-// Revision 1.16  2000/09/26 20:51:37  posk
-// Updated documentation.
-//
-// Revision 1.15  2000/09/22 22:02:55  posk
-// Clean up.
-//
-// Revision 1.14  2000/09/15 22:51:28  posk
-// Added pt weighting for event plane calcualtion.
-//
-// Revision 1.13  2000/09/12 01:30:23  snelling
-// Changed PID selection
-//
-// Revision 1.12  2000/09/05 16:11:31  snelling
-// Added global DCA, electron and positron
-//
-// Revision 1.11  2000/08/31 18:58:21  posk
-// For picoDST, added version number, runID, and multEta for centrality.
-// Added centrality cut when reading picoDST.
-// Added pt and eta selections for particles corr. wrt event plane.
-//
-// Revision 1.10  2000/08/12 20:22:19  posk
-// Recalculate centrality in read from pico.
-//
-// Revision 1.9  2000/08/10 23:00:21  posk
-// New centralities. pt and eta cuts.
-//
-// Revision 1.8  2000/08/09 21:38:23  snelling
-// PID added
-//
-// Revision 1.7  2000/06/01 18:26:35  posk
-// Increased precision of Track integer data members.
-//
-// Revision 1.6  2000/05/20 00:55:13  posk
-// Condensed flownanoevent.root somewhat.
-//
-// Revision 1.5  2000/05/16 20:59:29  posk
-// Voloshin's flownanoevent.root added.
-//
-// Revision 1.4  2000/05/12 22:42:04  snelling
-// Additions for persistency and minor fix
-//
-// Revision 1.2  2000/03/15 23:28:50  posk
-// Added StFlowSelection.
-//
-// Revision 1.1  2000/03/02 23:02:48  posk
-// Changed extensions from .hh and .cc to .h and .cxx .
-//
-// Revision 1.16  2000/02/29 22:00:53  posk
-// Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
-//
-// Revision 1.15  2000/02/29 01:26:11  snelling
-// removed static const int& nxxx = Flow::nxxx;
-//
-// Revision 1.14  2000/02/18 22:49:54  posk
-// Added PID and centrality.
-//
-// Revision 1.13  2000/02/11 20:53:09  posk
-// Commented out random_shuffle and cout formatting so as to work under CC5.
-//
-// Revision 1.12  2000/01/31 22:16:58  posk
-// CC5 compliant.
-//
-// Revision 1.9  1999/12/21 17:31:50  posk
-// Fixed random_shuffle in making the sub events.
-//
-// Revision 1.8  1999/12/21 01:10:58  posk
-// Added more quantities to StFlowEvent.
-//
-// Revision 1.7  1999/12/16 18:05:22  posk
-// Fixed Linux compatability again.
-//
-// Revision 1.6  1999/12/15 22:01:25  posk
-// Added StFlowConstants.hh
-//
-// Revision 1.5  1999/12/07 23:30:52  snelling
-// Fixed Linux warnings
-//
-// Revision 1.4  1999/12/04 00:10:32  posk
-// Works with the new StEvent
-//
-// Revision 1.3  1999/11/30 18:52:51  snelling
-// First modification for the new StEvent
-//
-// Revision 1.2  1999/11/24 18:17:13  posk
-// Put the methods which act on the data in with the data in StFlowEvent.
-//
-// Revision 1.1  1999/11/11 23:08:54  posk
-// Rearrangement of files.
-//
-// Revision 1.1  1999/11/04 19:02:04  snelling
-// First check in of StFlowMaker. It contains the common code from
-// StFlowTagMaker and StFlowAnalysisMaker.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -722,3 +615,93 @@ void StFlowEvent::PrintSelectionList() {
   
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowEvent.cxx,v $
+// Revision 1.20  2000/12/12 20:22:05  posk
+// Put log comments at end of files.
+// Deleted persistent StFlowEvent (old micro DST).
+//
+// Revision 1.19  2000/12/10 02:01:13  oldi
+// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
+// The evaluation of either a track originates from the FTPC or not is
+// unambiguous now. The evaluation itself is easily extendible for other
+// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
+// they contain TPC tracks only (backward compatibility).
+//
+// Revision 1.18  2000/12/08 17:03:38  oldi
+// Phi weights for both FTPCs included.
+//
+// Revision 1.17  2000/10/12 22:46:35  snelling
+// Added support for the new pDST's and the probability pid method
+//
+// Revision 1.16  2000/09/26 20:51:37  posk
+// Updated documentation.
+//
+// Revision 1.14  2000/09/15 22:51:28  posk
+// Added pt weighting for event plane calcualtion.
+//
+// Revision 1.13  2000/09/12 01:30:23  snelling
+// Changed PID selection
+//
+// Revision 1.12  2000/09/05 16:11:31  snelling
+// Added global DCA, electron and positron
+//
+// Revision 1.11  2000/08/31 18:58:21  posk
+// For picoDST, added version number, runID, and multEta for centrality.
+// Added centrality cut when reading picoDST.
+// Added pt and eta selections for particles corr. wrt event plane.
+//
+// Revision 1.10  2000/08/12 20:22:19  posk
+// Recalculate centrality in read from pico.
+//
+// Revision 1.9  2000/08/10 23:00:21  posk
+// New centralities. pt and eta cuts.
+//
+// Revision 1.8  2000/08/09 21:38:23  snelling
+// PID added
+//
+// Revision 1.7  2000/06/01 18:26:35  posk
+// Increased precision of Track integer data members.
+//
+// Revision 1.5  2000/05/16 20:59:29  posk
+// Voloshin's flownanoevent.root added.
+//
+// Revision 1.4  2000/05/12 22:42:04  snelling
+// Additions for persistency and minor fix
+//
+// Revision 1.2  2000/03/15 23:28:50  posk
+// Added StFlowSelection.
+//
+// Revision 1.1  2000/03/02 23:02:48  posk
+// Changed extensions from .hh and .cc to .h and .cxx .
+//
+// Revision 1.16  2000/02/29 22:00:53  posk
+// Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
+//
+// Revision 1.15  2000/02/29 01:26:11  snelling
+// removed static const int& nxxx = Flow::nxxx;
+//
+// Revision 1.14  2000/02/18 22:49:54  posk
+// Added PID and centrality.
+//
+// Revision 1.9  1999/12/21 17:31:50  posk
+// Fixed random_shuffle in making the sub events.
+//
+// Revision 1.6  1999/12/15 22:01:25  posk
+// Added StFlowConstants.hh
+//
+// Revision 1.4  1999/12/04 00:10:32  posk
+// Works with the new StEvent
+//
+// Revision 1.3  1999/11/30 18:52:51  snelling
+// First modification for the new StEvent
+//
+// Revision 1.2  1999/11/24 18:17:13  posk
+// Put the methods which act on the data in with the data in StFlowEvent.
+//
+// Revision 1.1  1999/11/04 19:02:04  snelling
+// First check in of StFlowMaker. It contains the common code from
+// StFlowTagMaker and StFlowAnalysisMaker.
+//
+//////////////////////////////////////////////////////////////////////

@@ -1,37 +1,10 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.h,v 1.6 2000/09/05 16:11:35 snelling Exp $
+// $Id: StFlowPicoEvent.h,v 1.7 2000/12/12 20:22:06 posk Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
 // Description:  A persistent Flow Pico DST
-// 
-//////////////////////////////////////////////////////////////////////////
-//
-// $Log: StFlowPicoEvent.h,v $
-// Revision 1.6  2000/09/05 16:11:35  snelling
-// Added global DCA, electron and positron
-//
-// Revision 1.5  2000/08/31 18:58:25  posk
-// For picoDST, added version number, runID, and multEta for centrality.
-// Added centrality cut when reading picoDST.
-// Added pt and eta selections for particles corr. wrt event plane.
-//
-// Revision 1.4  2000/08/09 21:38:23  snelling
-// PID added
-//
-// Revision 1.3  2000/06/01 18:26:39  posk
-// Increased precision of Track integer data members.
-//
-// Revision 1.2  2000/05/26 21:29:32  posk
-// Protected Track data members from overflow.
-//
-// Revision 1.1  2000/05/23 20:09:50  voloshin
-// added StFlowPicoEvent, persistent FlowEvent as plain root TTree
-//
-// Revision 1.5  2000/05/16 20:59:34  posk
-// Voloshin's flowPicoevent.root added.
-//
 // 
 //////////////////////////////////////////////////////////////////////////
 
@@ -108,6 +81,37 @@ class StFlowPicoEvent : public TObject {
 
 #endif
 
+//////////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowPicoEvent.h,v $
+// Revision 1.7  2000/12/12 20:22:06  posk
+// Put log comments at end of files.
+// Deleted persistent StFlowEvent (old micro DST).
+//
+// Revision 1.6  2000/09/05 16:11:35  snelling
+// Added global DCA, electron and positron
+//
+// Revision 1.5  2000/08/31 18:58:25  posk
+// For picoDST, added version number, runID, and multEta for centrality.
+// Added centrality cut when reading picoDST.
+// Added pt and eta selections for particles corr. wrt event plane.
+//
+// Revision 1.4  2000/08/09 21:38:23  snelling
+// PID added
+//
+// Revision 1.3  2000/06/01 18:26:39  posk
+// Increased precision of Track integer data members.
+//
+// Revision 1.2  2000/05/26 21:29:32  posk
+// Protected Track data members from overflow.
+//
+// Revision 1.1  2000/05/23 20:09:50  voloshin
+// added StFlowPicoEvent, persistent FlowEvent as plain root TTree
+//
+// Revision 1.5  2000/05/16 20:59:34  posk
+// Voloshin's flowPicoevent.root added.
+//
+//////////////////////////////////////////////////////////////////////////
 
 
 
