@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.48 2005/02/09 21:02:21 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.49 2005/02/13 19:02:49 fisyak Exp $
 #define dChargeCorrection
 #define SpaceChargeQdZ
 #define CompareWithToF
@@ -1592,6 +1592,7 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
     FitPull->Fill(TrackLength,(fitZ - TMath::Log(PredB[kPidPion]))/fitdZ);
     if (pidFU) {
       PointsBU->Fill(NdEdx,(fitZU-TMath::Log(PredB[kPidPion]))/fitdZ);
+      TPointsBU->Fill(TrackLength,fitZU-TMath::Log(Pred70B[kPidPion]));
       if (pMomentum > pMomin && pMomentum < pMomax) MPointsBU->Fill(TrackLength,fitZU-TMath::Log(PredB[kPidPion]));
     }
   }
