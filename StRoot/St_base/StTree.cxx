@@ -74,15 +74,25 @@ TObject *StIO::Read(TFile *file, const Char_t *name, ULong_t  ukey)
 {
   assert(file);
 
-  StIOEvent event;
-  event.fObj = 0;
-  
+//VP  StIOEvent event;
+//VP  event.fObj = 0;
+  StIOEvent *event = 0;  
   TFile *bakfile = gFile; TDirectory *bakdir = gDirectory; file->cd();
-  event.Read((const char*)MakeKey(name,ukey));
+
+   if (!gFile) { printf("<StIO::Read> No file open \n"); return 0; }
+   TKey *key = (TKey*)gDirectory->GetListOfKeys()->FindObject((const char*)MakeKey(name,ukey));
+   if (!key)   { printf("<StIO::Read> Key not found\n"); return 0; }
+   event = (StIOEvent*)key->ReadObj();
+
+//VP  event.Read((const char*)MakeKey(name,ukey));
   gFile=bakfile; gDirectory=bakdir;
-  if (!event.fObj)  return 0; 
-  assert(event.GetUniqueID()==ukey);
-  return event.fObj;
+//VP  if (!event.fObj)  return 0; 
+//VP  assert(event.GetUniqueID()==ukey);
+//VP  return event.fObj;
+   if (!event) 		return 0;
+   if (!event->fObj)  	return 0;
+   assert(event->GetUniqueID()==ukey);
+   return event->fObj;
 }
 //_______________________________________________________________________________
 ULong_t StIO::GetNextKey(TFile *file, const Char_t *name, ULong_t ukey)
