@@ -13,6 +13,8 @@ using namespace std;
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcDb/StTpcDbMaker.h"
 #include "StSvtDbMaker/StSvtDbMaker.h"
+#include "StSsdDbMaker/StSsdDbMaker.h"
+#include "StSsdDbMaker/St_SsdDb_Reader.hh"
 #include "StMcEventMaker/StMcEventMaker.h"
 #include "StAssociationMaker/StAssociationMaker.h"
 #include "St_geant_Maker/St_geant_Maker.h"
@@ -127,6 +129,10 @@ void MiniChain::setupDatabase()
 
   if (_pars->useTpc) new StTpcDbMaker("tpcDb");
   if (_pars->useSvt) new StSvtDbMaker("svtDb");
+  if (_pars->useSsd) {
+      new StSsdDbMaker("ssdDb");
+  }
+  
   new StDetectorDbMaker("detDb");
   cout <<"MiniChain::setupDatabase() -I- Done" <<endl;
 }
