@@ -39,6 +39,9 @@
 //3200  =EEMCDbMaxQAbatch * EEMCDbMaxName
 
 
+// 0.5 MB per record should be enough for now
+#define    EEMCDbMaxXMLData  524288
+
 /*
 Use idividual bits of 'stat' to exclude individual
 channels from a particular analysis, but let other 
