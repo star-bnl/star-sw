@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.32 1999/05/06 00:23:45 fine Exp $
+// $Id: StMaker.cxx,v 1.33 1999/05/06 00:47:43 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.33  1999/05/06 00:47:43  fine
+// maker's histogram is removed from the ROOT system gDirectory
+//
 // Revision 1.32  1999/05/06 00:23:45  fine
 // StMaker::MakeDoc some extra comments have been introduced
 //
@@ -83,7 +86,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.32 1999/05/06 00:23:45 fine Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.33 1999/05/06 00:47:43 fine Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -358,11 +361,19 @@ Int_t StMaker::Init()
       if ( maker->Init()) return kStErr;
       gBenchmark->Stop((const char *) maker->GetName());
      // Add the Maker histograms in the Maker histograms list
-      if (objlast) objfirst = gDirectory->GetList()->After(objlast);
-      else         objfirst = gDirectory->GetList()->First();
-      while (objfirst) {
-         maker->AddHist((TH1*)objfirst);
-         objfirst = gDirectory->GetList()->After(objfirst);
+     // and remove it from the ROOT system directory
+      TList *rootListofHistogram = gDirectory->GetList();
+      if (rootListofHistogram) {
+         if (objlast) objfirst = rootListofHistogram->After(objlast);
+         else         objfirst = rootListofHistogram->First();
+         while (objfirst) {
+            if (objfirst->InheritsFrom("TH1")) {
+               // Move the histogram from the ROOT list into the "maker's" list
+                maker->AddHist((TH1*)objfirst);
+                ((TH1*)objfirst)->SetDirectory(0);
+            }
+            objfirst = rootListofHistogram->After(objfirst);
+         }
       }
    }
   return kStOK; 
@@ -376,6 +387,7 @@ void StMaker::StartMaker()
   if (GetDebug()) printf("\n*** Call %s::Make() ***\n\n", ClassName());
   gBenchmark->Start(GetName());
 }
+//_____________________________________________________________________________
 void StMaker::EndMaker(int ierr)
 {
   if (ierr){};
@@ -424,6 +436,7 @@ Int_t StMaker::Make()
    }
    return kStOK;
 }
+//_____________________________________________________________________________
 void StMaker::Fatal(int Ierr, const char *com)
 {
    printf("%s::Fatal: Error %d %s\n",GetName(),Ierr,com);
@@ -498,11 +511,13 @@ const Char_t *StMaker::GetEventType() const
 void StMaker::PrintTimer(Option_t *option) 
 {
    if(option){};
-   Printf("%-10s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds",GetName(),m_Timer.RealTime(),m_Timer.CpuTime());
+   Printf("%-10s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds",GetName()
+                                         ,m_Timer.RealTime(),m_Timer.CpuTime());
 }
 
 //_____________________________________________________________________________
-void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseClasses){
+void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseClasses)
+{
  //
  // MakeDoc - creates the HTML doc for this class and for the base classes:
  //           (if baseClasses == kTRUE)
@@ -617,7 +632,6 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   printf(" Making html for <%s>\n",c);
   html.MakeClass((Char_t *)c);
 //   Loop on all makers
-
    TList *tl = GetMakeList();
    if (tl) {
      TIter nextMaker(tl);
