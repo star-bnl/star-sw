@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.h,v 1.6 2002/12/19 18:09:53 yepes Exp $
+// $Id: StPeCEvent.h,v 1.7 2003/02/05 17:14:05 yepes Exp $
 // $Log: StPeCEvent.h,v $
+// Revision 1.7  2003/02/05 17:14:05  yepes
+// Adding bField and pPairs.psi to tree
+//
 // Revision 1.6  2002/12/19 18:09:53  yepes
 // MuDST input added
 //
@@ -72,7 +75,7 @@ public:
   StEvent*                        eventP ;
   void                            addPair(StPeCPair* pair) const;
   Int_t                           fill ( StEvent* event ) ;
-  Int_t fill(StMuDst* mudst);
+  Int_t                           fill(StMuDst* mudst);
   Int_t                           infoLevel ;
   void                            setInfoLevel ( Int_t in ) { infoLevel = in ; } ;
   StLorentzVectorF                getEvent4Momentum(StPeCSpecies pid) const;
@@ -89,6 +92,7 @@ private:
   Int_t                           nTot;
   Int_t                           nPrim;
   Int_t                           qTot;
+  Float_t                         bField ;
   Float_t                         pt;
   Float_t                         xVertex;
   Float_t                         yVertex;
