@@ -355,7 +355,8 @@ TTreeHelperCast &TTreeHelper::operator() (const TString varname)
 TTreeHelperCast &TTreeHelper::operator() (const char *varname)
 {
    fCast.Set(0,0,varname);
-   TBranch *br = GetBranch(varname);
+//   TBranch *br = GetBranch(varname);
+   TBranch *br = fTree->GetBranch(varname);
    if (!br) {
      Warning("operator()","Branch %s NOT FOUND",varname);
      return fCast;
@@ -378,6 +379,7 @@ TTreeHelperCast &TTreeHelper::operator() (const char *varname)
      pddr = mem->GetMem();
      fTree->SetBranchAddress(br->GetName(),*pddr);
      br->ResetBit  (kDoNotProcess);
+     br->SetBit(1);
      fBraList.Add(br);
    } else {
      pddr = mem->GetMem();
@@ -400,22 +402,29 @@ Int_t TTreeHelper::Next(Int_t entry)
     Warning("Next","It was %d errors in Init. Loop ignored",fNErr);
     fEntry=0; return 0;}
 
-  int ientry = (entry >= 0) ? entry:fEntry++;
+  int ientry,jentry;
+  ientry = jentry = (entry >= 0) ? entry:fEntry++;
   if (fChain) {
-    ientry = fChain->LoadTree(ientry);
+    ientry = fChain->LoadTree(jentry);
     if (ientry<0) return 0;
     if (fTreeNumb != fChain->GetTreeNumber()) {
       fTreeNumb = fChain->GetTreeNumber();
       Notify();
   } }
 
-  int n = fBraList.GetEntriesFast();
   Int_t ans = 0;
-  for (int i=0;i<n;i++) {
-    TBranch *b = (TBranch*)fBraList.UncheckedAt(i);
-    ans +=b->GetEntry(ientry); 
-  }
-//  IsCorrupted();
+  if (ientry==0) {
+//		1st time standard read
+    ans = fTree->GetEntry(jentry);
+  }  else	 {
+//   		more fast read all other times
+    int n = fBraList.GetEntriesFast();
+    for (int i=0;i<n;i++) {
+      TBranch *b = (TBranch*)fBraList.UncheckedAt(i);
+      ans +=b->GetEntry(ientry); 
+  } }
+
+  Assert(!IsCorrupted());
   if (ans) return ans;
   fEntry=0;
   return 0;
@@ -432,17 +441,20 @@ Bool_t TTreeHelper::Notify()
   int n = fMemList.GetEntriesFast();
   for (int i=0;i<n;i++) {
     TTreeHelperMem *t = (TTreeHelperMem*)fMemList.UncheckedAt(i);
-    TBranch *b = GetBranch(t->GetName());
+//VP    TBranch *b = GetBranch(t->GetName());
+    TBranch *b = fTree->GetBranch(t->GetName());
     Assert(b);
     b->ResetBit  (kDoNotProcess);
+    Assert(!b->TestBit(1));
+    b->SetBit(1);
     GetInfo(b,tyName,units,add,brType);
     if (units > t->fUnits) {
-      t->Alloc(units);
-      void **pddr = t->GetMem();
+      void **pddr = t->Alloc(units);
       fTree->SetBranchAddress(b->GetName(),*pddr);
     }
     fBraList.Add(b);
   }
+  fTreeNumb = fChain->GetTreeNumber();
   return 0;
 }
 //______________________________________________________________________________
@@ -454,7 +466,7 @@ const char *TTreeHelper::IsCorrupted() const
     TTreeHelperMem *t = (TTreeHelperMem*)fMemList.UncheckedAt(i);
     char *perev = t->fMem+t->fSize;
     if (strcmp(perev,"Perev") ==0 ) continue;
-    Error("IsCorrupted","Branch=%s Mem %p ***\n",t->GetName(),perev);
+    Error("IsCorrupted","Branch=%s Units=%d Mem=%p ***\n",t->GetName(),fUnits,perev);
     return t->GetName();
   }
   return 0;
