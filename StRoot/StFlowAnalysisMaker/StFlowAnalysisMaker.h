@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.9 2000/03/02 22:55:34 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.10 2000/03/15 23:32:04 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.10  2000/03/15 23:32:04  posk
+// *** empty log message ***
+//
 // Revision 1.9  2000/03/02 22:55:34  posk
 // Changed header file extensions from .hh to .h .
 //
@@ -65,6 +68,7 @@
 #include "StFlowTagMaker/StFlowTagMaker.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "TVector2.h"
+class StFlowSelection;
 class TH1F;
 class TH1D;
 class TH2F;
@@ -77,6 +81,8 @@ class StFlowAnalysisMaker : public StMaker {
 public:
 
            StFlowAnalysisMaker(const Char_t* name="FlowAnalysis");
+           StFlowAnalysisMaker(const Char_t* name,
+			       const StFlowSelection& pFlowSelect);
   virtual  ~StFlowAnalysisMaker();
 
   Int_t    Init();
@@ -105,8 +111,9 @@ private:
   Float_t  mRes[Flow::nSels][Flow::nHars];      // event plane resolution
   Float_t  mResErr[Flow::nSels][Flow::nHars];   // event plane resolution error
  
-  StFlowEvent*  pFlowEvent; //! pointer to StFlowEvent
-  FlowTag_st*   pFlowTag;   //! pointer to StEvent
+  StFlowEvent*     pFlowEvent;  //! pointer to StFlowEvent
+  FlowTag_st*      pFlowTag;    //! pointer to StEvent
+  StFlowSelection* pFlowSelect; //! selection object
 
   // for single histograms
   TH1F*     mHistCharge;        //!
@@ -118,6 +125,7 @@ private:
   TH1F*     mHistOrigMult;      //!
   TH1F*     mHistMult;          //!
   TH1F*     mHistMultOverOrig;  //!
+  TH1F*     mHistCorrMult;      //!
   TH1F*     mHistVertexZ;       //!
   TH2F*     mHistVertexXY2D;    //!
   TH1F*     mHistEtaSym;        //!

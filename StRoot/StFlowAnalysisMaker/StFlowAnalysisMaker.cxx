@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.23 2000/03/02 22:55:32 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.24 2000/03/15 23:32:03 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.24  2000/03/15 23:32:03  posk
+// *** empty log message ***
+//
 // Revision 1.23  2000/03/02 22:55:32  posk
 // Changed header file extensions from .hh to .h .
 //
@@ -94,6 +97,7 @@
 #include "StFlowMaker/StFlowEvent.h"
 #include "StFlowTagMaker/StFlowTagMaker.h"
 #include "StFlowMaker/StFlowConstants.h"
+#include "StFlowMaker/StFlowSelection.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "TVector2.h"
@@ -126,6 +130,14 @@ enum { nEtaBins = 20,
 
 StFlowAnalysisMaker::StFlowAnalysisMaker(const Char_t* name): StMaker(name),
   MakerName(name) {
+  pFlowSelect = new StFlowSelection();
+}
+
+StFlowAnalysisMaker::StFlowAnalysisMaker(const Char_t* name,
+					 const StFlowSelection& flowSelect) :
+  StMaker(name),
+  MakerName(name) {
+  pFlowSelect = new StFlowSelection(flowSelect); //copy constructor
 }
 
 //-----------------------------------------------------------------------
@@ -149,24 +161,28 @@ Int_t StFlowAnalysisMaker::Make() {
   pFlowMaker = (StFlowMaker*)GetMaker("Flow");
   if (pFlowMaker) pFlowEvent = pFlowMaker->FlowEventPointer();
 
-  // Event quantities
-  if (pFlowTag) {
-    FillFromTags();                        // get event quantities
-    FillEventHistograms();                 // fill from Flow Tags
-  } else if (pFlowEvent) {
-    cout << "$$$$$ null FlowTag pointer" << endl;
-    FillFromFlowEvent();                   // get event quantities
-    FillEventHistograms();                 // fill from FlowEvent
-  } else {
-    cout << "$$$$$ null FlowEvent and FlowTag pointers" << endl;
-    return kStOK;
+  if (pFlowSelect->Select(pFlowEvent)) {     // event selected
+
+    // Event quantities
+    if (pFlowTag) {
+      FillFromTags();                        // get event quantities
+      FillEventHistograms();                 // fill from Flow Tags
+    } else if (pFlowEvent) {
+      cout << "$$$$$ null FlowTag pointer" << endl;
+      FillFromFlowEvent();                   // get event quantities
+      FillEventHistograms();                 // fill from FlowEvent
+    } else {
+      cout << "$$$$$ null FlowEvent and FlowTag pointers" << endl;
+      return kStOK;
+    }
+    
+    // Particle quantities
+    if (pFlowEvent) FillParticleHistograms(); // fill particle histograms
+    
+    PrintInfo();
+    
   }
-
-  // Particle quantities
-  if (pFlowEvent) FillParticleHistograms(); // fill particle histograms
-   
-  PrintInfo();
-
+  
   // Clean up
   if (pFlowEvent) {
     delete pFlowEvent;    // it deletes pTrackCollection;
@@ -179,7 +195,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.23 2000/03/02 22:55:32 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.24 2000/03/15 23:32:03 posk Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
@@ -206,6 +222,8 @@ Int_t StFlowAnalysisMaker::Init() {
   const float origMultMax     = 4000.; 
   const float totalMultMin    =    0.;
   const float totalMultMax    = 2000.; 
+  const float corrMultMin     =    0.;
+  const float corrMultMax     = 2000.; 
   const float multOverOrigMin =    0.;
   const float multOverOrigMax =    1.; 
   const float vertexZMin      = -100.;
@@ -237,6 +255,7 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nOrigMultBins     = 50,
 	 nTotalMultBins    = 50,
 	 nMultOverOrigBins = 50,
+	 nCorrMultBins     = 50,
 	 nVertexZBins      = 50,
 	 nVertexXYBins     = 50,
 	 nEtaSymBins       = 50,
@@ -300,6 +319,12 @@ Int_t StFlowAnalysisMaker::Init() {
       nMultOverOrigBins, multOverOrigMin, multOverOrigMax);
   mHistMultOverOrig->SetXTitle("Mult / Orig. Mult");
   mHistMultOverOrig->SetYTitle("Counts");
+    
+  // Mult correlated with the event planes
+  mHistCorrMult = new TH1F("Flow_CorrMult", "Flow_CorrMult",
+      nCorrMultBins, corrMultMin, corrMultMax);
+  mHistCorrMult->SetXTitle("Mult of Correlated Particles");
+  mHistCorrMult->SetYTitle("Counts");
     
   // VertexZ
   mHistVertexZ = new TH1F("Flow_VertexZ", "Flow_VertexZ",
@@ -668,21 +693,25 @@ void StFlowAnalysisMaker::FillFromTags() {
 
 void StFlowAnalysisMaker::FillFromFlowEvent() {
   // Get event quantities from StFlowEvent
-
-   for (int k = 0; k < Flow::nSels; k++) {
+  
+  for (int k = 0; k < Flow::nSels; k++) {
+    pFlowSelect->SetSelection(k);
     for (int j = 0; j < Flow::nHars; j++) {
+      pFlowSelect->SetHarmonic(j);
       for (int n = 0; n < Flow::nSubs; n++) {
+	pFlowSelect->SetSubevent(n);
 	int i = 2*k + n;
 	// sub-event quantities
-	mPsiSub[i][j] = pFlowEvent->Psi(j, k, n);
+	mPsiSub[i][j] = pFlowEvent->Psi(pFlowSelect);
       }
 
+      pFlowSelect->SetSubevent(-1);
       // full event quantities
-      mQ[k][j]      = pFlowEvent->Q(j, k);
-      mPsi[k][j]    = pFlowEvent->Psi(j, k);
-      m_q[k][j]     = pFlowEvent->q(j, k);
-      mMult[k][j]   = pFlowEvent->Mult(j, k);
-      mMeanPt[k][j] = pFlowEvent->MeanPt(j, k);
+      mQ[k][j]      = pFlowEvent->Q(pFlowSelect);
+      mPsi[k][j]    = pFlowEvent->Psi(pFlowSelect);
+      m_q[k][j]     = pFlowEvent->q(pFlowSelect);
+      mMult[k][j]   = pFlowEvent->Mult(pFlowSelect);
+      mMeanPt[k][j] = pFlowEvent->MeanPt(pFlowSelect);
     }
   }
 
@@ -758,6 +787,7 @@ void StFlowAnalysisMaker::FillEventHistograms() {
 void StFlowAnalysisMaker::FillParticleHistograms() {
   // Fill histograms from the particles
 
+  float corrMultN  = 0.;
   float etaSymPosN = 0.;
   float etaSymNegN = 0.;
   float piPlusN    = 0.;
@@ -823,11 +853,13 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     if (strcmp(pid, "proton") == 0) protonN++;
 
     for (int k = 0; k < Flow::nSels; k++) {
+      pFlowSelect->SetSelection(k);
       for (int j = 0; j < Flow::nHars; j++) {
+	pFlowSelect->SetHarmonic(j);
 	double order  = (double)(j+1);
 	float psi_i = mQ[k][j].Phi() / order;
 	//if (psi_i < 0.) psi_i += twopi / order;
-	if (pFlowTrack->Select(j, k)) {
+	if (pFlowSelect->Select(pFlowTrack)) {
 	  // Remove autocorrelations
 	  TVector2 Q_i;
 	  double phiWgt = pFlowEvent->PhiWeight(phi, k, j);
@@ -842,24 +874,27 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  histFull[k].histFullHar[j].mHistYield2D->Fill(eta, pt);
 	}
 
-       	// Caculate v for all particles
-	float v = cos(order * (phi - psi_i))/perCent;
-	float vFlip = v;
-	if (eta < 0 && (j+1) % 2 == 1) vFlip *= -1;
-	histFull[k].histFullHar[j].mHistSum_v2D-> Fill(eta, pt, v);
-	histFull[k].histFullHar[j].mHist_vObsEta->Fill(eta, v);
-	histFull[k].histFullHar[j].mHist_vObsPt-> Fill(pt, vFlip);
-
-	// Correlation of Phi of all particles with Psi
-	float phi_i = phi;
-	if (eta < 0 && (j+1) % 2 == 1) {
-	  phi_i += pi; // backward particle and odd harmonic
-	  if (phi_i > twopi) phi_i -= twopi;
+       	// Caculate v for all particles selected for correlation analysis
+	if (pFlowSelect->SelectPart(pFlowTrack)) {
+	  corrMultN++;
+	  float v = cos(order * (phi - psi_i))/perCent;
+	  float vFlip = v;
+	  if (eta < 0 && (j+1) % 2 == 1) vFlip *= -1;
+	  histFull[k].histFullHar[j].mHistSum_v2D-> Fill(eta, pt, v);
+	  histFull[k].histFullHar[j].mHist_vObsEta->Fill(eta, v);
+	  histFull[k].histFullHar[j].mHist_vObsPt-> Fill(pt, vFlip);
+	  
+	  // Correlation of Phi of all particles with Psi
+	  float phi_i = phi;
+	  if (eta < 0 && (j+1) % 2 == 1) {
+	    phi_i += pi; // backward particle and odd harmonic
+	    if (phi_i > twopi) phi_i -= twopi;
+	  }
+	  float dPhi = phi_i - psi_i;
+	  if (dPhi < 0.) dPhi += twopi;
+	  histFull[k].histFullHar[j].mHistPhiCorr->
+	    Fill(fmod((double)dPhi, twopi / order));
 	}
-	float dPhi = phi_i - psi_i;
-	if (dPhi < 0.) dPhi += twopi;
-	histFull[k].histFullHar[j].mHistPhiCorr->
-	  Fill(fmod((double)dPhi, twopi / order));
       }
     }  
   }
@@ -874,6 +909,10 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
   mHistPidMult->Fill(2., piPlusN);
   mHistPidMult->Fill(3., piMinusN);
   mHistPidMult->Fill(4., protonN);
+
+  // Multiplicity of particles correlated with the event planes
+  corrMultN = corrMultN / (float)(Flow::nHars * Flow::nSels);
+  mHistCorrMult->Fill(corrMultN);
 
 }
 
@@ -1060,6 +1099,17 @@ Int_t StFlowAnalysisMaker::Finish() {
   phiWgtHistNames->Write();
   phiWgtNewFile.Close();
   delete phiWgtHistNames;
+
+  // Note the selection object used
+  cout << "########################################################" << endl;
+  cout << "##### The selection number was " << pFlowSelect->Number() << endl;
+  cout << "##### Centrality was " << pFlowSelect->Centrality() << endl;
+  cout << "##### Particles used for the event plane were " << 
+    pFlowSelect->Pid() << endl;
+  cout << "##### Particles correlated with the event plane were " << 
+    pFlowSelect->PidPart() << endl;
+  cout << "########################################################" << endl;
+  delete pFlowSelect;
 
   return StMaker::Finish();
 }
