@@ -48,4 +48,61 @@ t0result                --  Event-by-event t0
 t0 measured - t0 guess  --  measured t0 - guess taken from database        
 
 
+____________________________________________________________________________
+____________________________________________________________________________
+____________________________________________________________________________
+
+Package: StVertexSeedMaker
+
+Responsible: Gene Van Buren (Brookhaven National Lab - gene@bnl.gov)
+
+Purpose: This calibrates the beamline constraint for vertex finding in
+low multiplicity events.
+
+Usage:
+
+Calibration is a two step process. The first step allows calibration on
+a per DAQ file sequence basis. The second step aggregates information from
+fills to provide calibration on a per fill basis.
+
+_____
+1) A step that can be run during FastOffline or
+afterwards. This needs to be run for every 10th
+or 100th daqFile (certainly not all of them - just
+enough to get sufficient statistics for each fill):
+
+    root4star -b -q 'bfc.C(10000,"VtxSeedCal",daqFile)'
+
+This produces a histogram file specific to a given
+daqFile (one specific file sequence) named something
+like:
+  vertexseedhist.20030126.213934.ROOT
+
+The date/timestamp is for that daqFile's first event.
+If statistics are sufficient, it may also produce a
+database table file named something like:
+  vertexSeed.20030126.213934.C
+
+These files will be placed in ./StarDb/Calibrations/rhic
+if they can, otherwise they will be placed in the working
+directory of the root4star job.
+
+_____
+2) A second step aggregates data by fill. For this, we
+should move all the above vertexseedhist.*.ROOT files
+into one directory, and their suffix should be renamed
+to lowercase ".root". I'm not sure why we made step 1
+write out upper case, but that's what we did.
+
+Now, it is simple to run the aggregation:
+
+    root4star -b -q 'AggregateVtxSeed.C("/path/to/hists/")'
+
+This will then give similar hist and table output files as
+in step 1, but with date/timestamps that correspond to the
+start of the fill. One single root4star job will take care
+of all the fills. These table files (vertexSeed.*.C) should
+then be placed in the database so that they may be used for
+the beamline constraint in subsequent vertex finding.
+
 

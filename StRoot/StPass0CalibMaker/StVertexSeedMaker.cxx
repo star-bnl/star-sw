@@ -15,12 +15,16 @@
 #include "St_DataSetIter.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "St_db_Maker/St_db_Maker.h"
+#include "StDbLib/StDbManager.hh"
+#include "StDbLib/StDbConfigNode.hh"
+#include "StDbLib/StDataBaseI.hh"
 #include "St_tcl_Maker/St_tcl_Maker.h"
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_L0_Trigger_Table.h"
 #include "StMessMgr.h"
 #include "StVertexId.h"
 #include "tables/St_vertexSeed_Table.h"
+#include "tables/St_beamInfo_Table.h"
 #include "TSystem.h"
 #include "TFile.h"
 #include "TVirtualFitter.h"
@@ -242,8 +246,8 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
       }
     }
   } else {
-    gMessMgr->Error() << "StVertexSeedMaker:Insufficient statistics for " <<
-     "mean vertex determination.  Only " << nverts << " entries." << endm;
+    gMessMgr->Error() << "StVertexSeedMaker: Insufficient stats for " <<
+     "mean vertex determination.\n  Only " << nverts << " entries." << endm;
   }
 
   if (writeIt) WriteTableToFile();
@@ -254,7 +258,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.11 2003/01/22 23:32:23 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.12 2003/02/11 22:24:20 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -303,6 +307,15 @@ void StVertexSeedMaker::WriteHistFile(){
   sprintf(filename,"%s/vertexseedhist.%08d.%06d.ROOT",defDir,date,time);
   gMessMgr->Info() << "StVertexSeedMaker: Writing new histograms to:\n  "
     << filename << endm;
+  TString dirname = gSystem->DirName(filename);
+  if (gSystem->OpenDirectory(dirname.Data())==0) { 
+    if (gSystem->mkdir(dirname.Data())) {
+      gMessMgr->Warning() << "Directory creation failed for:\n  " << dirname
+      << "\n  Putting histogram file in current directory" << endm;
+      for (int i=0;i<80;i++){filename[i]=0;}
+      sprintf(filename,"vertexseedhist.%08d.%06d.ROOT",date,time);
+    }
+  }
   TFile out(filename,"RECREATE");
   GetHistList()->Write();
   resNtuple->Write();
@@ -366,53 +379,42 @@ void StVertexSeedMaker::FillDateTime() {
 }
 //_____________________________________________________________________________
 void StVertexSeedMaker::GetFillDateTime() {
-  int datef = 0;
-  int timef = 0;
-  int fillf = -1;
-  char filename[128];
-  sprintf(filename,"./StRoot/StPass0CalibMaker/fillNumberTimes.txt");
-  ifstream in(filename);
-  if (!in) { 
-    sprintf(filename,
-      gSystem->ExpandPathName("${STAR}/StRoot/StPass0CalibMaker/fillNumberTimes.txt"));
-    in.open(filename);
-  }
-  if (in) {
-    gMessMgr->Info() << "StVertexSeedMaker: Using fill date/time file:\n  "
-      << filename << endm;
-    const int maxc = 128;
-    char inbuf[maxc];
-    inbuf[0] = ' ';
-    // loop until line with 3rd char a space
-    while ((in.getline(inbuf,maxc)) && (inbuf[2] != ' ')) {}
-    if ((inbuf[0] == ' ') || (inbuf[2] != ' ')) {
-      gMessMgr->Error("StVertexMaker: Format of date/time file incorrect. Uh-oh....");
-      printf("%s\n",inbuf);
-    }
-    // Format from here should look like:
-    // |  FFFF |  DDDDDDDDTTTTTT |
-    // where the only length constraint is that the date D should have only 8 characters
-    int datep = 0;
-    int timep = 0;
-    int fillp = -1;
-    while ((date > datef) || ((date == datef) && (time > timef))) {
-      fillp = fillf; datep = datef; timep = timef;
-      char* start = &(inbuf[2]);
-      fillf = atoi(start);
-      start = strchr(start,'|');
-      while ((*start == ' ') || (*start == '|')) { start++; } // get past spaces and bars
-      timef = atoi(&(start[8]));  // date portion is 8 characters. Read time first,
-      start[8] = 0;               // then get date by ending string where time starts.
-      datef = atoi(start);
-      in.getline(inbuf,maxc);
-    }
-    in.close();
-    fill = fillp; date = datep; time = timep;
+
+  StDbManager* mgr=StDbManager::Instance();
+  StDbConfigNode* node=mgr->initConfig("RunLog_onl");
+  StDbTable* tab=node->addDbTable("beamInfo");
+  StDataBaseI* db=mgr->findDb("RunLog_onl");
+  unsigned int ts;
+  char queryStr[128];
+
+  // Find beamInfo entry for this date time
+  sprintf(queryStr,"%8d %6d",date,time);
+  TString tdStr = queryStr;
+  tdStr.Insert(4,'-').Insert(7,'-').Insert(13,':').Insert(16,':');
+  const char* tdstr = tdStr.Data();
+  sprintf(queryStr," where beginTime<='%s' order by beginTime desc limit 1",tdstr);
+  ts = db->QueryDb(tab,queryStr);
+
+  if (ts) {
+    // Find earliest entry for this fill
+    float thisFill = *(float*) (tab->getDataValue("blueFillNumber",0));
+    sprintf(queryStr," where blueFillNumber=%f order by beginTime limit 1",
+      thisFill);
+    ts = db->QueryDb(tab,queryStr);
+
+    // Extract date and time at start of fill
+    char* start = tab->getBeginDateTime();
+    fill = (int) thisFill;
+    time = atoi(&(start[8]));
+    start[8] = 0;
+    date = atoi(start);
+
     gMessMgr->Info() << "StVertexSeedMaker: Using fill no.  = " << fill << endm;
     gMessMgr->Info() << "StVertexSeedMaker: Using fill date = " << date << endm;
     gMessMgr->Info() << "StVertexSeedMaker: Using fill time = " << time << endm;
   } else {
-    gMessMgr->Warning() << "StVertexSeedMaker: No fill date/time file found\n" <<
+    gMessMgr->Warning() <<
+      "StVertexSeedMaker: Could not find beamInfo in database\n" <<
       "  Using event date/time." << endm;
     UseEventDateTime();
   }
@@ -535,8 +537,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.11 2003/01/22 23:32:23 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.12 2003/02/11 22:24:20 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.12  2003/02/11 22:24:20  genevb
+// Update to use beamInfo table from database
+//
 // Revision 1.11  2003/01/22 23:32:23  genevb
 // Type cast fix
 //
