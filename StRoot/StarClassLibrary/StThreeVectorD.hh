@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.hh,v 1.3 2000/09/25 20:23:06 ullrich Exp $
+ * $Id: StThreeVectorD.hh,v 1.4 2002/06/21 17:47:36 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.hh,v $
+ * Revision 1.4  2002/06/21 17:47:36  genevb
+ * Added pseudoProduct
+ *
  * Revision 1.3  2000/09/25 20:23:06  ullrich
  * Removed inheritance from TObject.
  *
@@ -97,10 +100,13 @@ public:
     double         angle(const StThreeVectorF&) const;
     StThreeVectorD cross(const StThreeVectorF&) const;
     double         dot  (const StThreeVectorF&) const;
+    StThreeVectorD pseudoProduct(const StThreeVectorF&) const;
     
     double         angle(const StThreeVectorD&) const;
     double         dot  (const StThreeVectorD&) const;
     StThreeVectorD cross(const StThreeVectorD&) const;
+    StThreeVectorD pseudoProduct(const StThreeVectorD&) const;
+    StThreeVectorD pseudoProduct(double,double,double) const;
       
     int operator == (const StThreeVectorF& v) const;
     int operator != (const StThreeVectorF& v) const;
@@ -425,6 +431,18 @@ StThreeVectorD::cross(const StThreeVectorD& v) const
 inline double StThreeVectorD::angle(const StThreeVectorD& v) const
 {
     return acos(this->dot(v)/this->mag()/v.mag());
+}
+
+inline StThreeVectorD
+StThreeVectorD::pseudoProduct(const StThreeVectorD& v) const
+{
+    return this->pseudoProduct(v.x(),v.y(),v.z());
+}
+
+inline StThreeVectorD
+StThreeVectorD::pseudoProduct(double x,double y,double z) const
+{
+    return StThreeVectorD(mX1*x,mX2*y,mX3*z);
 }
 
 //

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.cc,v 1.7 2001/04/09 21:19:36 perev Exp $
+ * $Id: StThreeVectorF.cc,v 1.8 2002/06/21 17:47:37 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.cc,v $
+ * Revision 1.8  2002/06/21 17:47:37  genevb
+ * Added pseudoProduct
+ *
  * Revision 1.7  2001/04/09 21:19:36  perev
  * Streamer for ROOT3
  *
@@ -106,6 +109,12 @@ StThreeVectorF StThreeVectorF::cross(const StThreeVectorD& v) const
 float StThreeVectorF::angle(const StThreeVectorD& v) const
 {
     return acos(this->dot(v)/this->mag()/v.mag());
+}
+
+inline StThreeVectorF
+StThreeVectorF::pseudoProduct(const StThreeVectorD& v) const
+{
+    return this->pseudoProduct(v.x(),v.y(),v.z());
 }
 
 ostream&  operator<<(ostream& os, const StThreeVectorF& v)
