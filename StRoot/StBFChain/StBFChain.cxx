@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.20 1999/11/04 22:21:25 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.21 1999/11/05 16:20:20 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.21  1999/11/05 16:20:20  fisyak
+// change tls -> libtls
+//
 // Revision 1.20  1999/11/04 22:21:25  fisyak
 // Reorganize chain as Table
 //
@@ -151,16 +154,16 @@ BfcItem BFC[] = {
   {"HalfField"   ,""  ,"","-FieldOn,-FieldOff,-ReverseField","StMagFC","StMagF","Half Field option",kFALSE},
   {"ReverseField",""  ,"","-FieldOn,-FieldOff,-HalfField","StMagFC","StMagF","Reverse Field option",kFALSE},
   {"TPC"         ,"tpc","","db,-tss,-trs,tcl,tpt"                 ,"StMaker","St_Tables,StChain","",kFALSE},
-  {"TSS"         ,"tpc_raw","tpc","-trs"             ,"St_tss_Maker"  ,"tls,St_tpc,St_tss_Maker","",kFALSE},  
+  {"TSS"         ,"tpc_raw","tpc","-trs"             ,"St_tss_Maker"  ,"libtls,St_tpc,St_tss_Maker","",kFALSE},  
   {"TRS"         ,"tpc_raw","tpc","-tss,tpc_daq"     ,"StTrsMaker","StarClassLibrary,StTrsMaker","",kFALSE},
   {"MINIDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
   {"tpc_daq"     ,"tpc_raw","tpc",""               ,"St_tpcdaq_Maker","StDaqLib,St_tpcdaq_Maker","",kFALSE},
   {"TFS"         ,""  ,"","tpc,-trs,-tss","",""     ,"use TFS       (no St_[tss_ and no Trs]Maker)",kFALSE},
-  {"TCL"         ,"tpc_hits","tpc",""                  ,"St_tcl_Maker","tls,St_tpc,St_tcl_Maker","",kFALSE},
-  {"TPT"         ,"tpc_tracks","tpc",""      ,"St_tpt_Maker","St_Tables,tls,St_tpc,St_tpt_Maker","",kFALSE},
+  {"TCL"         ,"tpc_hits","tpc",""                  ,"St_tcl_Maker","libtls,St_tpc,St_tcl_Maker","",kFALSE},
+  {"TPT"         ,"tpc_tracks","tpc",""      ,"St_tpt_Maker","St_Tables,libtls,St_tpc,St_tpt_Maker","",kFALSE},
   {"SVT"         ,"svt","","srs,stk"                              ,"St_Tables,StMaker","StChain","",kFALSE},
-  {"SRS"         ,"svt_hits","svt",""                  ,"St_srs_Maker","tls,St_svt,St_srs_Maker","",kFALSE},
-  {"STK"         ,"svt_tracks","svt",""                ,"St_stk_Maker","tls,St_svt,St_stk_Maker","",kFALSE},
+  {"SRS"         ,"svt_hits","svt",""                  ,"St_srs_Maker","libtls,St_svt,St_srs_Maker","",kFALSE},
+  {"STK"         ,"svt_tracks","svt",""                ,"St_stk_Maker","libtls,St_svt,St_stk_Maker","",kFALSE},
   {"FTPC"        ,"ftpc"  ,"","-fss,fcl,fpt"                      ,"St_Tables,StMaker","StChain","",kFALSE},
   {"FSS"         ,"ftpc_raw","ftpc",""   ,"St_fss_Maker","StarClassLibrary,St_ftpc,St_fss_Maker","",kFALSE},
   {"FCL"         ,"ftpc_hits","ftpc","","StFtpcClusterMaker","StarClassLibrary,St_ftpc,StFtpcClusterMaker"
@@ -176,13 +179,13 @@ BfcItem BFC[] = {
   {"L3T"         ,"l3Tracks","",""                ,"St_l3t_Maker","St_Tables,St_l3,St_l3t_Maker","",kFALSE},
   {"RICH"        ,"rch","",""                               ,"StRchMaker","St_Tables,StRchMaker","",kFALSE},
   {"GLOBAL"      ,"global","","match,primary,v0,xi,kink,dst"      ,"StMaker","St_Tables,StChain","",kFALSE},
-  {"MATCH"       ,"match","global",""        ,"StMatchMaker","tls,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"MATCH"       ,"match","global",""        ,"StMatchMaker","tls,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"PRIMARY"     ,"primary","global",""    ,"StPrimaryMaker","tls,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"V0"          ,"v0","global",""              ,"StV0Maker","tls,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"XI"          ,"xi","global",""              ,"StXIMaker","tls,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"KINK"        ,"kink","global",""          ,"StKinkMaker","tls,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"DST"         ,"dst","global",""          ,"St_dst_Maker","tls,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"MATCH"       ,"match","global",""        ,"StMatchMaker","libtls,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"MATCH"       ,"match","global",""        ,"StMatchMaker","libtls,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"PRIMARY"     ,"primary","global",""    ,"StPrimaryMaker","libtls,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"V0"          ,"v0","global",""              ,"StV0Maker","libtls,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"XI"          ,"xi","global",""              ,"StXIMaker","libtls,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"KINK"        ,"kink","global",""          ,"StKinkMaker","libtls,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"DST"         ,"dst","global",""          ,"St_dst_Maker","libtls,St_svt,St_global,St_dst_Maker","",kFALSE},
   {"EVENT"       ,"StEventMaker","",""          ,"StEventMaker","St_Tables,StEvent,StEventMaker","",kFALSE},
   {"ANALYSIS"    ,"analysis","",""                  ,"StAnalysisMaker","StEvent,StAnalysisMaker","",kFALSE},
   {"QA"          ,"QA","",""                              ,"St_QA_Maker","St_Tables,St_QA_Maker","",kFALSE},
