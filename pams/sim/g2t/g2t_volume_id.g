@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.31 2000/12/01 22:48:00 nevski Exp $
+* $Id: g2t_volume_id.g,v 1.32 2001/02/13 02:29:47 nevski Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.32  2001/02/13 02:29:47  nevski
+* USE BTOG bug fix
+*
 * Revision 1.31  2000/12/01 22:48:00  nevski
 * phmd stuff added
 *
@@ -47,7 +50,7 @@
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
       Structure  TPCG  {version}
       Structure  VPDG  {version}
-      Structure  BTOG  {version, choice, posit1 }
+      Structure  BTOG  {version, int choice, posit1 }
       Structure  CALG  {version, int Nmodule(2), int NetaT, int MaxModule, 
                                  int Nsub, int NetaSMDp, int NPhistr,
      + 	                         int Netfirst, int Netsecon}
