@@ -63,6 +63,13 @@ public:
     void movePlusPhi();
     //ibid
     void moveMinusPhi();
+
+    //Set iterators to the detector nearest to this guy (Useful if you get lost)
+    void setToDetector(StiDetector* layer);
+    //Set iterators to the first detector in the yaer closest to this position
+    void setToDetector(double position);
+    //Set iterators to the position nearest this guy
+    void setToDetector(double position, double angle);
     
     //Utilities
     void print() const;
