@@ -33,6 +33,7 @@ StTrackChair::StTrackChair(St_Table *table) : TChair(table) {
 //_____________________________________________________________________________
 StHelixD *StTrackChair::MakeHelix(Int_t i) const
 {
+ //see: StEvent/StHelixModel 
   const float pi2 = 3.1415926/2.;
   const float rad = pi2/90.;
   const void *point =  At(i);
@@ -46,7 +47,7 @@ StHelixD *StTrackChair::MakeHelix(Int_t i) const
   Float_t tanl = *(Float_t *)GetOffset(point,mTanl);
   Float_t psi  = *(Float_t *)GetOffset(point,mPsi);
 
-  StHelixD *helix = new  StHelixD(curv, tanl, psi*rad-h*pi2, vector, h);
+  StHelixD *helix = new  StHelixD(curv, atan(tanl), psi*rad-h*pi2, vector, h);
   return helix;
 }
 
