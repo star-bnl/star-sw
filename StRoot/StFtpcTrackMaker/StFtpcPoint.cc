@@ -1,11 +1,14 @@
-// $Id: StFtpcPoint.cc,v 1.1 2000/05/11 15:14:47 oldi Exp $
+// $Id: StFtpcPoint.cc,v 1.2 2000/06/07 11:37:34 oldi Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.2  2000/06/07 11:37:34  oldi
+// Cleanup.
+//
 // Revision 1.1  2000/05/11 15:14:47  oldi
 // Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 11.05.2000
+//----------Last Modified: 22.05.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcPoint.hh"
@@ -52,6 +55,8 @@ StFtpcPoint::StFtpcPoint()
   SetSigmaPhi(0);
   SetSigmaR(0);
   SetFlags(0);
+
+  return;
 }
 
 
@@ -87,6 +92,8 @@ StFtpcPoint::StFtpcPoint(fcl_fppoint_st *point_st)
   SetSigmaPhi((Double_t) point_st->s_phi);
   SetSigmaR((Double_t) point_st->s_r);
   SetFlags((Long_t) point_st->flags);
+
+  return;
 }
 
 
