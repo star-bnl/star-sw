@@ -1,63 +1,56 @@
-// $Id: St_LSEvent_Maker.cxx,v 1.4 1999/09/24 01:23:33 fisyak Exp $
-// $Log: St_LSEvent_Maker.cxx,v $
-// Revision 1.4  1999/09/24 01:23:33  fisyak
-// Reduced Include Path
+// $Id: StLaserEventMaker.cxx,v 1.1 1999/09/28 15:34:34 love Exp $
+// $Log: StLaserEventMaker.cxx,v $
+// Revision 1.1  1999/09/28 15:34:34  love
+// change LSEvent to LaserEvent
 //
-// Revision 1.3  1999/07/15 13:57:35  perev
-// cleanup
+
 //
-// Revision 1.2  1999/05/10 13:41:30  love
-//   Two passes to try to get event number from IT tables, Clean up code
-//  to erase previous event data.
+// Revision 1.1.1.1  1999/09/28 14:29:31  love
+// First release of StLaserEventMaker
 //
-// Revision 1.1.1.1  1999/04/27 14:29:31  love
-// First release of Laser Event
-//
-//copied from St_tpt_Maker
+// copied from St_LSEvent_Maker
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_LSEvent_Maker class                                               //
+// StLaserEventMaker class                                               //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
-#include "St_LSEvent_Maker.h"
+#include "StLaserEventMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_XDFFile.h"
 #include "tpc/St_tcl_Module.h"
 #include "tpc/St_tph_Module.h"
-#include "tpc/St_tpt_sts_Module.h"
+#include "tpc/St_tpt_Module.h"
 #include "tables/St_tfc_adcxyz_Table.h"
-#include "tables/St_tpt_strack_Table.h"
-#include "tables/St_tpt_res_Table.h"
+#include "tables/St_tpt_track_Table.h"
 #include "TTree.h"
-#include "LSEvent/LSEvent.h"
+#include "StLaserEvent/StLaserEvent.h"
 #include "tables/St_type_index_Table.h"
 
-ClassImp(St_LSEvent_Maker)
+ClassImp(StLaserEventMaker)
 
 //_____________________________________________________________________________
-  St_LSEvent_Maker::St_LSEvent_Maker(const char *name):
+  StLaserEventMaker::StLaserEventMaker(const char *name):
     StMaker(name),
     m_tpg_pad_plane(0),
     m_type(0),
-    m_tpt_pars(0),
-    m_tpt_spars(0)
+    m_tpt_pars(0)
 {
-  m_mkstks=kTRUE;
+  m_mklaser=kTRUE;
   m_rowmin=14;
-  m_rowmax=40;
+  m_rowmax=45;
 }
 //_____________________________________________________________________________
-St_LSEvent_Maker::~St_LSEvent_Maker(){}
+StLaserEventMaker::~StLaserEventMaker(){}
 //_____________________________________________________________________________
-void St_LSEvent_Maker::Clear(Option_t *option){
+void StLaserEventMaker::Clear(Option_t *option){
   event->Clear(option);
   StMaker::Clear(option);
 }
 //_____________________________________________________________________________
-Int_t St_LSEvent_Maker::Init(){
+Int_t StLaserEventMaker::Init(){
   // Create tables
   
   St_DataSet *tpcpars = GetInputDB("params/tpc");
@@ -77,21 +70,20 @@ Int_t St_LSEvent_Maker::Init(){
   
 // 		TPT parameters
   m_tpt_pars  = (St_tpt_pars* ) gime("tptpars/tpt_pars" );
-  m_tpt_spars = (St_tpt_spars*) gime("tptpars/tpt_spars");
-  if (!(m_tpt_pars && m_tpt_spars)) 
+  if (!(m_tpt_pars)) 
     Error("Init", "tpt parameters have not been initialized" );
-  assert(m_tpt_pars && m_tpt_spars);
+  assert(m_tpt_pars);
 
 //  Create a root tree. (let controlling Macro make the file?)
-  event = new LSEvent();
-  m_stks = new TTree("stks","Tpc straight track tree");
+  event = new StLaserEvent();
+  m_laser = new TTree("laser","Tpc laser track tree");
   Int_t bufsize= 64000;
-  TBranch *br = m_stks->Branch("event", "LSEvent",&event, bufsize, 1);
+  TBranch *br = m_laser->Branch("event", "StLaserEvent",&event, bufsize, 1);
 
   return StMaker::Init();
 }
 //_____________________________________________________________________________
-Int_t St_LSEvent_Maker::Make(){
+Int_t StLaserEventMaker::Make(){
   
   St_DataSet *tpc_data =  GetInputDS("tpc_hits"); 
   if (!tpc_data) return 0;
@@ -102,33 +94,30 @@ Int_t St_LSEvent_Maker::Make(){
   //  St_tcl_tpc_index *index = (St_tcl_tpc_index *) gime("index");
   //  if (!index) {index = new St_tcl_tpc_index("index",10*maxNofTracks);  m_DataSet->Add(index);}
       
-  St_tpt_strack  *tptrack = new St_tpt_strack("tptrack",maxNofTracks);
+  St_tpt_track  *tptrack = new St_tpt_track("tptrack",maxNofTracks);
   m_DataSet->Add(tptrack);
-  St_tpt_res *res1 = new St_tpt_res("res1",50*maxNofTracks);
-  St_tpt_res *res2 = new St_tpt_res("res2",50*maxNofTracks);
-  m_DataSet->Add(res1);
-  m_DataSet->Add(res2);
 
-//			TPT_STS straight line tracker
-    if (Debug()) cout << " start tpt_sts run " << endl;
-    Int_t Res_tpt = tpt_sts(m_tpt_spars,tphit,res1,res2,tptrack);
+
+//			call TPT tracker 
+    if (Debug()) cout << " start tpt run " << endl;
+    Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack);
 //                      ==============================
     
     if (Res_tpt != kSTAFCV_OK) {
-     cout << "Problem with tpt_sts.." << endl;
+     cout << "Problem with tpt.." << endl;
       return kStErr;}
     
-    if (Debug()) cout << " finish tpt_sts run " << endl;
+    if (Debug()) cout << " finish tpt run " << endl;
 
   MakeHistograms(); // tracking histograms
   return kStOK;
 }
 //_____________________________________________________________________________
-  void St_LSEvent_Maker::MakeHistograms() {
+  void StLaserEventMaker::MakeHistograms() {
     // reset static clones arrays
    // go get event number from the event data
    Int_t evno = 0;
-   if (m_mkstks) {
+   if (m_mklaser) {
      St_DataSet *raw = GetDataSet("TPC_DATA"); 
      if (raw) { 
         St_DataSetIter nex(raw);
@@ -143,7 +132,7 @@ Int_t St_LSEvent_Maker::Make(){
      event->SetHeader(evno, m_runno, m_date);
      cout << "Event "<< evno << " Run " << m_runno << endl;
 
-     //  Make the "stks"  TTree  Should be controllable.
+     //  Make the "laser"  TTree  Should be controllable.
      St_tfc_adcxyz  *n_adc = 0;
      St_tcl_tphit  *n_hit = 0;
      St_tcl_tpcluster *n_clus  = 0;
@@ -162,16 +151,14 @@ Int_t St_LSEvent_Maker::Make(){
      }
      // Create an iterator for the track dataset
      St_DataSetIter tpc_tracks(m_DataSet);
-     St_tpt_strack * n_track = (St_tpt_strack *) tpc_tracks["tptrack"];
-     tpt_strack_st *t = n_track->GetTable();
+     St_tpt_track * n_track = (St_tpt_track *) tpc_tracks["tptrack"];
+     tpt_track_st *t = n_track->GetTable();
      Int_t ntks=n_track->GetNRows();
      for(int itk=0;itk<ntks;itk++,t++){
-          Float_t y0 = -196.6;
-	  Float_t x0 = (1.0-t->ay*y0)/t->ax;
-          Float_t z0 = t->bzy+y0*t->azy;
-          Float_t ax = -t->ay/t->ax;
-          event->AddTrack(t->trk,t->npnt,ax, t->az, x0, y0, z0, 
-			       t->chisqxy,t->chisqz);
+          event->AddTrack(t->flag,t->hitid,t->id,t->id_globtrk,
+         t->ndedx, t->nfit, t->nrec, t->npos, t->q,
+         t->chisq[0], t->chisq[1], t->dedx[0], t->invp, t->curvature,
+         t->psi, t->tanl, t->phi0, t->r0, t->z0);
      } //end of itk for loop - fix the maximum counter
      cout <<  ntks << " tracks, ";
      // Find the adc table.
@@ -193,7 +180,7 @@ Int_t St_LSEvent_Maker::Make(){
 	 }
 	 cout << npixwrit <<" pixels written to event " << evno << endl;
      }
-     m_stks->Fill(); //Fill the Tree
+     m_laser->Fill(); //Fill the Tree
    }  //end of if(m_mksts)
 }  // end of MakeHistograms member.
 //_____________________________________________________________________________
