@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.3 2001/05/16 20:57:03 lansdell Exp $ 
+// $Id: StQAMakerBase.h,v 2.4 2001/08/29 20:45:15 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.4  2001/08/29 20:45:15  genevb
+// Trigger word histos
+//
 // Revision 2.3  2001/05/16 20:57:03  lansdell
 // new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
 //
@@ -36,7 +39,7 @@ class StQAMakerBase : public StMaker {
   virtual Int_t  Make();
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.3 2001/05/16 20:57:03 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.4 2001/08/29 20:45:15 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -53,6 +56,9 @@ class StQAMakerBase : public StMaker {
   TH1F     *mNullPrimVtx;         //!
   // histogram for number of events in mult classes
   TH1F     *mMultClass;           //!
+  // histograms for event trigger words/bits
+  TH1F     *mTrigWord;            //!
+  TH1F     *mTrigBits;            //!
   // for method MakeEvSum - from software monitor
   TH2F     *m_glb_trk_chg;        //! all charge east/west (TPC) 
   TH2F     *m_glb_trk_chgF;       //! all charge east/west (FTPC) 

@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.10 2001/08/27 21:15:15 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.11 2001/08/29 20:45:15 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.11  2001/08/29 20:45:15  genevb
+// Trigger word histos
+//
 // Revision 2.10  2001/08/27 21:15:15  genevb
 // fixed a typo
 //
@@ -38,6 +41,8 @@
 // must be recompiled
 
   "StEQaMultClass",
+  "StEQaTrigWord",
+  "StEQaTrigBits",
   "StEQaPointTpc",
   "StEQaPointSvt",
   "StEQaPointFtpc",

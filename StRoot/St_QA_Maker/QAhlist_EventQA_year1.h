@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_year1.h,v 2.4 2001/05/16 20:57:02 lansdell Exp $
+// $Id: QAhlist_EventQA_year1.h,v 2.5 2001/08/29 20:45:15 genevb Exp $
 // $Log: QAhlist_EventQA_year1.h,v $
+// Revision 2.5  2001/08/29 20:45:15  genevb
+// Trigger word histos
+//
 // Revision 2.4  2001/05/16 20:57:02  lansdell
 // new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
 //
@@ -21,6 +24,8 @@
 
      "StEQaNullPrimVtx",
      "StEQaMultClass",
+     "StEQaTrigWord",
+     "StEQaTrigBits",
      "QaInnerSectorDeDx",
      "QaOuterSectorDeDx",
      "QaDedxAllSectors",
