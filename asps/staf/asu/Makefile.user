@@ -11,3 +11,9 @@ install_slm:
 #
 stafGen: $(SRCMDIR)/stafGen.cc
 	$(CXX) -o $@ $^
+#
+PROGS += pamiGen
+#
+pamiGen: $(BASE_DIR)/tools/initGen.csh
+	cp $< $@
+#
