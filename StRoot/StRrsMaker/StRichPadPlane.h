@@ -1,9 +1,13 @@
 /*****************************************************************
- * $Id: StRichPadPlane.h,v 1.7 2000/04/05 16:03:04 lasiuk Exp $   
+ * $Id: StRichPadPlane.h,v 1.8 2000/04/26 18:58:03 lasiuk Exp $   
  *   StRichPadPlane is a special container specialized to store 
  *   RICH Raw Data. 
  *
  * $Log: StRichPadPlane.h,v $
+ * Revision 1.8  2000/04/26 18:58:03  lasiuk
+ * change list to vector for mc info storage.
+ * allow change of allocation methodology
+ *
  * Revision 1.7  2000/04/05 16:03:04  lasiuk
  * remove size_type type definition.  Clash on SUN
  *
@@ -27,7 +31,6 @@
  *     - 8/23/1999 created the type, tested          Alexandre Nevski.
  *
  ********************************************************************/
-
 #ifndef ST_RICH_PADPLANE_H
 #define ST_RICH_PADPLANE_H
 
@@ -36,12 +39,14 @@
 #endif
 
 #include <iostream.h>
-#include <list>
+//#include <list>
 #include <vector>
+//#include <deque>
 
 #ifndef ST_NO_NAMESPACES
+//using std::list;
 using std::vector;
-using std::list;
+//using std::deque;
 #endif
 
 #ifndef ST_NO_NAMESPACES
@@ -77,14 +82,15 @@ ostream& operator<<(ostream& os, const StRichID& id);
 
 
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
-typedef list<StRichID>        anIDList;
+typedef vector<StRichID>        anIDList;
 #else
-typedef list<StRichID, allocator<StRichID> >           anIDList;
+typedef vector<StRichID, allocator<StRichID> >           anIDList;
 #endif
 
-struct StRichPad {
-    StRichPad()
-	: signal(0), IDs() {/* nopt */}
+class StRichPad {
+public:
+    StRichPad()	: signal(0) {/* nopt */}
+    ~StRichPad() {}
     double signal;
     
     // the quadrants of the pad plane
@@ -114,8 +120,6 @@ typedef impl_type::const_iterator const_row_iter;
 typedef row_type::iterator pad_iter;
 typedef row_type::const_iterator const_pad_iter;
 	
-	
-
 
 class StRichPadPlane
 #ifdef __ROOT__
