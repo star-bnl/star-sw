@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitCollection.cxx,v 2.2 1999/10/28 22:27:13 ullrich Exp $
+ * $Id: StTpcHitCollection.cxx,v 2.3 1999/12/13 20:16:29 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHitCollection.cxx,v $
- * Revision 2.2  1999/10/28 22:27:13  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/12/13 20:16:29  ullrich
+ * Changed numbering scheme for hw_position unpack methods (STAR conventions).
  *
  * Revision 2.2  1999/10/28 22:27:13  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -24,7 +24,7 @@
 #include "StTpcPadrowHitCollection.h"
 #include "StTpcHit.h"
 
-static const char rcsid[] = "$Id: StTpcHitCollection.cxx,v 2.2 1999/10/28 22:27:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcHitCollection.cxx,v 2.3 1999/12/13 20:16:29 ullrich Exp $";
 
 ClassImp(StTpcHitCollection)
 
@@ -37,8 +37,8 @@ StTpcHitCollection::addHit(StTpcHit* hit)
 {
     unsigned int s, r;
     if (hit &&
-        (s = hit->sector()) < mNumberOfSectors &&
-        (r = hit->padrow()) < mSectors[s].numberOfPadrows()) {
+        (s = hit->sector()-1) < mNumberOfSectors &&
+        (r = hit->padrow()-1) < mSectors[s].numberOfPadrows()) {
         mSectors[s].padrow(r)->hits().push_back(hit);
         return kTRUE;
     }

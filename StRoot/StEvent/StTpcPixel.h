@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcPixel.h,v 2.1 1999/10/13 19:44:04 ullrich Exp $
+ * $Id: StTpcPixel.h,v 2.2 1999/12/13 20:16:34 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcPixel.h,v $
- * Revision 2.1  1999/10/13 19:44:04  ullrich
- * Initial Revision
+ * Revision 2.2  1999/12/13 20:16:34  ullrich
+ * Changed numbering scheme for hw_position unpack methods (STAR conventions).
  *
  * Revision 2.1  1999/10/13 19:44:04  ullrich
  * Initial Revision
@@ -39,7 +39,7 @@ public:
 
     UShort_t detector() const;
     UShort_t sector() const;
-    UShort_t row() const;
+    UShort_t padrow() const;
     ULong_t  pad() const;
     ULong_t  timebin() const;
     ULong_t  adc() const;

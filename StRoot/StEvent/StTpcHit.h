@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.4 1999/12/01 15:56:31 ullrich Exp $
+ * $Id: StTpcHit.h,v 2.5 1999/12/13 20:16:27 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
- * Revision 2.4  1999/12/01 15:56:31  ullrich
- * Renamed xxxInCluster() methods to xxxInHit()
+ * Revision 2.5  1999/12/13 20:16:27  ullrich
+ * Changed numbering scheme for hw_position unpack methods (STAR conventions).
  *
  * Revision 2.4  1999/12/01 15:56:31  ullrich
  * Renamed xxxInCluster() methods to xxxInHit()
@@ -50,8 +50,8 @@ public:
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
 
-    ULong_t   sector() const;          // 0-23
-    ULong_t   padrow() const;          // 0-44
+    ULong_t   sector() const;          // 1-24
+    ULong_t   padrow() const;          // 1-45
     ULong_t   padsInHit() const;
     ULong_t   pixelsInHit() const;
 
@@ -64,13 +64,13 @@ protected:
 inline ULong_t
 StTpcHit::sector() const
 {
-    return bits(4, 5)-1;   // bits 4-8, sector=[0,23]
+    return bits(4, 5);   // bits 4-8, sector=[1,24]
 }
 
 inline ULong_t
 StTpcHit::padrow() const
 {
-    return bits(9, 6)-1;   // bits 9-14, padrow=[0-44]
+    return bits(9, 6);   // bits 9-14, padrow=[1-45]
 }
 
 #endif

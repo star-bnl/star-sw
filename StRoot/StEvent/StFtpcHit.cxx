@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.cxx,v 2.4 1999/12/06 18:28:21 ullrich Exp $
+ * $Id: StFtpcHit.cxx,v 2.5 1999/12/13 20:16:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.cxx,v $
- * Revision 2.4  1999/12/06 18:28:21  ullrich
- * Changed method names xxxInCluster to xxxInHit
+ * Revision 2.5  1999/12/13 20:16:12  ullrich
+ * Changed numbering scheme for hw_position unpack methods (STAR conventions).
  *
  * Revision 2.5  1999/12/13 20:16:12  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
@@ -36,7 +36,7 @@
 #include "tables/St_dst_point_Table.h"
 #include "StTrack.h"
 
-static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.4 1999/12/06 18:28:21 ullrich Exp $";
+static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.5 1999/12/13 20:16:12 ullrich Exp $";
 
 StMemoryPool StFtpcHit::mPool(sizeof(StFtpcHit));
 
@@ -99,13 +99,13 @@ StFtpcHit::~StFtpcHit() {/* noop */}
 StObject*
 StFtpcHit::clone() { return new StFtpcHit(*this); }
 
-    return bits(11, 10)-1;   // bits 11-20
+ULong_t
 StFtpcHit::sector() const
 {
     return bits(11, 10);   // bits 11-20
 }
 
-    return bits(4, 7)-1;    // bits 4-10
+ULong_t
 StFtpcHit::plane() const
 {
     return bits(4, 7);    // bits 4-10

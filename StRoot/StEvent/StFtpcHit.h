@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.h,v 2.3 1999/12/06 18:28:24 ullrich Exp $
+ * $Id: StFtpcHit.h,v 2.4 1999/12/13 20:16:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.h,v $
- * Revision 2.3  1999/12/06 18:28:24  ullrich
- * Changed method names xxxInCluster to xxxInHit
+ * Revision 2.4  1999/12/13 20:16:15  ullrich
+ * Changed numbering scheme for hw_position unpack methods (STAR conventions).
  *
  * Revision 2.3  1999/12/06 18:28:24  ullrich
  * Changed method names xxxInCluster to xxxInHit
@@ -47,8 +47,8 @@ public:
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
   
-    ULong_t sector() const;        // 0-5
-    ULong_t plane() const;         // 0-19
+    ULong_t sector() const;        // 1-6
+    ULong_t plane() const;         // 1-20
     ULong_t padsInHit() const;
     ULong_t timebinsInHit() const;
 

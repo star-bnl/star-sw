@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitCollection.cxx,v 2.2 1999/10/28 22:26:47 ullrich Exp $
+ * $Id: StSvtHitCollection.cxx,v 2.3 1999/12/13 20:16:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtHitCollection.cxx,v $
- * Revision 2.2  1999/10/28 22:26:47  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/12/13 20:16:24  ullrich
+ * Changed numbering scheme for hw_position unpack methods (STAR conventions).
  *
  * Revision 2.3  1999/12/13 20:16:24  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
@@ -26,7 +26,7 @@
 #include "StSvtHitCollection.h"
 #include "StSvtHit.h"
 
-static const char rcsid[] = "$Id: StSvtHitCollection.cxx,v 2.2 1999/10/28 22:26:47 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtHitCollection.cxx,v 2.3 1999/12/13 20:16:24 ullrich Exp $";
 
 ClassImp(StSvtHitCollection)
 
@@ -51,9 +51,9 @@ StSvtHitCollection::numberOfLayers() const { return mNumberOfLayers; }
 
 Bool_t
 StSvtHitCollection::addHit(StSvtHit* hit)
-        (l = hit->layer()) < mNumberOfLayers &&
-        (d = hit->ladder()) < mLayers[l].numberOfLadders() &&
-        (w = hit->wafer()) < mLayers[l].ladder(d)->numberOfWafers()) {
+{
+    unsigned int l, d, w;
+    if (hit &&
         (l = hit->layer()-1) < mNumberOfLayers &&
         (d = hit->ladder()-1) < mLayers[l].numberOfLadders() &&
         (w = hit->wafer()-1) < mLayers[l].ladder(d)->numberOfWafers()) {

@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.10 1999/12/06 23:01:54 ullrich Exp $
+% $Id: StEvent.tex,v 2.11 1999/12/13 20:16:46 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -143,8 +143,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.10 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/06 23:01:54 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.11 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/13 20:16:46 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -168,8 +168,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.10 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/06 23:01:54 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.11 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/13 20:16:46 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -177,17 +177,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.10 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/06 23:01:54 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.11 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/13 20:16:46 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.10 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/06 23:01:54 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.11 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/13 20:16:46 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.10 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/06 23:01:54 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.11 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/13 20:16:46 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -202,8 +202,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.10 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/06 23:01:54 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.11 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/13 20:16:46 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -312,17 +312,38 @@ header files as \texttt{StDetectorId.h}, \texttt{StVertexId.h} and
 \texttt{StTrackMethod.h} are also included therein.
 enum StTrackType            {global, primary, secondary};
     \begin{center}
-All numbering follows \emph{strictly} the C/C++ convention. This
-includes not only indices as usual but also for example sector
-numbers, row numbers and wafer numbers. If you follow this rule things
-become less confusing for there is only one way of counting. This
-allows to follow the usual C/C++ syntax in all forms:
+        \includegraphics[width=0.45\textheight]{cartoon2.eps}
+        \caption{Strong typing avoids mixing abstractions.}
+    \end{center}
+\end{figure}
+To remind you of the names and save you the time to look them up up
+every you need one they are all listed below:
+
 \begin{verbatim}
-const int nSectors = 24;
-for (int i=0; i<nSectors; i++)
-    // ...
-\end{verbatim}
-If you find a deviation from this rule it is a bug.
+enum StBeamDirection        {east, west};
+
+enum StBeamPolarizationAxis {transverse, longitudinal};
+
+enum StChargeSign           {negative, positive};
+
+enum StTrackType            {global, primary, tpt, secondary};
+
+enum StTrackModel           {helixModel, kalmanModel};
+
+enum StDetectorId           {kUnknownId,
+                             kTpcId,
+at 1.  Examples are TPC sectors and padrows, SVT layers, ladders and
+                             kRichId,
+                             kFtpcWestId,
+                             kFtpcEastId,
+                             kTofPatchId,
+                             kCtbId,
+                             kSsdId,
+                             kBarrelEmcTowerId,
+                             kBarrelEmcPreShowerId,
+                             kBarrelSmdEtaStripId,
+                             kBarrelSmdPhiStripId,
+                             kEndcapEmcTowerId,
                              kEndcapEmcPreShowerId,
                              kEndcapSmdEtaStripId,
                              kEndcapSmdPhiStripId,
@@ -1847,18 +1868,14 @@ classes are:
 The UML diagram for the vertices classes is shown in
 Fig.~\ref{fig:vertex}.
 
-\index{TPC hits}
-\index{TPC sectors and rows}
-\index{StTpcHit}
-\index{sectors}
-\index{rows}
-Each hit returns its position in global
-coordinates. In addition hit classes also provide information on
-their \emph{local} coordinates through methods which
-decode a detector specific data word. For the TPC hits there
-are methods to return the sector number (0-23) and row number (0-44).
-Please read section \ref{sec:conventionsNumbering} if you are puzzled
-about the numbering scheme.  There are two additional member functions
+The primary vertex \texttt{StPrimaryVertex} class plays an important
+role since it holds all primary tracks. This is depicted in
+Fig.~\ref{fig:nodes}. If the
+class gets deleted all primary tracks get deleted. \\
+The primary vertex, or vertices, are directly stored in the
+\texttt{StEvent} class. Usually, in Au-Au collisions there's only one
+``primary'' vertex but there are cases (pile-up events) where there
+can be more than one.  That's why \texttt{StEvent} has the
 \texttt{numberOfPrimaryVertices()} method and the access member
 function has an optional argument \texttt{primaryVertex(unsigned int
     i=0)}.  Hence \texttt{event->primaryVertex()} implies
@@ -1920,12 +1937,15 @@ Here an example on how to obtain a list of all global and primary
 tracks which use a given hit:
 \begin{verbatim}
 void f(StHit& hit, StEvent& event)
-The FTPC hit class \texttt{StFtpcHit} is very similar to the TPC version.
-However, because of the different detector geometry the hits are stored
-according to planes (0--19) and then sectors (0--5). This is depicted in
-Fig.~\ref{fig:ftpc}. Other than the TPC hit the FTPC hit has a method to return
-the size of the hit in time direction (\texttt{timebinsInHit()}) but no method
-to return the number of pixels per hit. See \ref{sec:StFtpcHit} for details. 
+{
+   StPtrVecTrack gvec, pvec;
+   gvec = hit.relatedTracks(event->trackNodes(), global);
+   pvec = hit.relatedTracks(event->trackNodes(), primary);
+
+   if (gvec.size() + pvec.size() != hit.trackReferenceCount())
+      cerr << "This cannot happen unless something is very wrong." << endl;
+
+   cout << "The hit is used to fit "
         << gvec.size() << " global tracks and "
         << pvec.size() << "primary tracks."
 
@@ -1968,9 +1988,9 @@ const int irow = 24;
 The hits are stored in a tree-like structure organized
 has up to 7 wafers. Consequently the \texttt{StSvtHit} class provides method to
 The collection you obtain (by pointer) via
-returns 0--2, \texttt{layer()} returns 0--5, \texttt{ladder()} returns 0--7,
-and \texttt{wafer()} returns 0--6. If you are puzzled why we start to count at
-0 you better have a look at section \ref{sec:conventionsNumbering}.
+\texttt{StEvent::tpcHitCollection()} holds a list of sectors
+(\texttt{StTpcSectorHitCollection}) which itself holds a list of padrows
+(\texttt{StTpcPadrowHitCollection}). Each padrow finally contains the list of
 hits in this padrow. This is illustrated in the class diagrams in
 Fig.~\ref{fig:tpc}. You get the idea when you look at the following
 example:
@@ -2545,12 +2565,10 @@ definition in the header file.
 
 \subsection{StEventSummary}
 \index{StEventSummary|textbf}
-    Returns sector number running from 0--5.
+\label{sec:StEventSummary}
 \begin{Entry}
 \item[Summary]
-    Returns plane number running from 0--19.
-    
-    
+\item[Synopsis]
     \verb+#include "StEventSummary.h"+\\
     \verb+class StEventSummary;+\\
 \item[Description]
@@ -3304,18 +3322,16 @@ definition in the header file.
     \verb+#include "StSsdHit.h"+\\
 \end{Entry}
 \clearpage
-    Layer in which hit is located. Layer number runs from 0--5.
-    
-    
+
 \subsection{StSsdHitCollection}
 \index{StSsdHitCollection|textbf}
-    Ladder number runs from 0--7.
+\label{sec:StSsdHitCollection}
 \begin{Entry}
 \item[Summary]
-    Wafer number runs from 0--6.
+\item[Synopsis]
     \verb+#include "StSsdHitCollection.h"+\\
-    \verb+ULong_t barrel() const; // barrel=[0-2]+\\
-    Barrel number runs from 0--2.
+    \verb+class StSsdHitCollection;+\\
+\item[Description]
 \item[Related Classes]
 \item[Public\\ Constructors]
     \verb+StSsdHitCollection();+\\
@@ -3492,8 +3508,8 @@ definition in the header file.
     \verb+StTpcDedxPidAlgorithm();+\\
     
     Fraction of hits used in each SVT/SSD barrel/layer. 
-    \verb+ULong_t sector() const; // 0-23+\\
-    \verb+ULong_t padrow() const; // 0-44+\\
+    
+    or average number of points assigned.
     Average residual, pad direction, SVT \\
 
     \verb+Float_t res_drf_svt;+\\
@@ -3519,8 +3535,6 @@ definition in the header file.
     \verb+StSPtrVecSvtHit& hits();+\\
     \verb+const StSPtrVecSvtHit& hits() const;+\\
 \end{Entry}
-    
-    
 \clearpage
 
 
@@ -3565,8 +3579,13 @@ definition in the header file.
 \end{Entry}
 \clearpage
 
+
 \subsection{StTpcHit}
-    \verb+UShort_t row() const;+\\
+\index{StTpcHit|textbf}
+\label{sec:StTpcHit}
+\begin{Entry}
+\item[Summary]
+\item[Synopsis]
 \item[Summary]
     \verb+class StTpcHit;+\\
 \item[Description]
@@ -3874,17 +3893,11 @@ numberOfPoints(kTpcId) == numberOfPoints(kFtpcWestId)
     one or two values.
     If a real 3D fit is performed (e.g.~Kalman) the first value (\texttt{i = 0}) is the
     $\chi^2$ per degree of freedom and the second value (\texttt{i = 1}) is the
-    
-
     upper tail probability of $\chi^2$ distribution for this value.
-    Row numbering starts at 0.
-    
+    If two 2-dimensional fits are performed (circle in xy plane and straight line in path-z)
     the $\chi^2$ per degree of freedom for each fit is stored.
-
     \index{$\chi^2$} \index{degree of freedom}
-    Layer numbering starts at 0.
-    
-    
+
 \end{Entry}
 \clearpage
 

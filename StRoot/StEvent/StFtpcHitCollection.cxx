@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHitCollection.cxx,v 2.2 1999/10/28 22:25:22 ullrich Exp $
+ * $Id: StFtpcHitCollection.cxx,v 2.3 1999/12/13 20:16:17 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StFtpcHitCollection.cxx,v $
- * Revision 2.2  1999/10/28 22:25:22  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/12/13 20:16:17  ullrich
+ * Changed numbering scheme for hw_position unpack methods (STAR conventions).
  *
  * Revision 2.2  1999/10/28 22:25:22  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -24,7 +24,7 @@
 #include "StFtpcSectorHitCollection.h"
 #include "StFtpcHit.h"
 
-static const char rcsid[] = "$Id: StFtpcHitCollection.cxx,v 2.2 1999/10/28 22:25:22 ullrich Exp $";
+static const char rcsid[] = "$Id: StFtpcHitCollection.cxx,v 2.3 1999/12/13 20:16:17 ullrich Exp $";
 
 ClassImp(StFtpcHitCollection)
 
@@ -37,8 +37,8 @@ StFtpcHitCollection::addHit(StFtpcHit* hit)
 {
     unsigned int p, s;
     if (hit &&
-        (p = hit->plane()) < mNumberOfPlanes &&
-        (s = hit->sector()) < mPlanes[p].numberOfSectors()) {
+        (p = hit->plane()-1) < mNumberOfPlanes &&
+        (s = hit->sector()-1) < mPlanes[p].numberOfSectors()) {
         mPlanes[p].sector(s)->hits().push_back(hit);
         return kTRUE;
     }
