@@ -129,7 +129,7 @@ BfcItem BFC[] = {
   {"Ftpc"        ,"ftpc"  ,"","ftpcT,fcl,fpt"                          ,"StChainMaker","StChain","",kFALSE},
   {"fss"         ,"ftpc_raw","ftpc","SCL"                 ,"St_fss_Maker","St_ftpc,St_fss_Maker","",kFALSE},
   {"Fcl"         ,"ftpc_hits","ftpc","SCL"
-                                   ,"StFtpcClusterMaker","StDAQMaker,St_ftpc,StFtpcClusterMaker","",kFALSE},
+                          ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,St_ftpc,StFtpcClusterMaker","",kFALSE},
   {"fpt"         ,"ftpc_tracks","ftpc","SCL"              ,"St_fpt_Maker","St_ftpc,St_fpt_Maker","",kFALSE},
   {"emc"         ,"emc","","geant,emc_T,tpc_T,db,calib,ems,emh"        ,"StChainMaker","StChain","",kFALSE},
   {"ems"         ,"emc_raw","emc","geant,emc_T"            ,"St_ems_Maker","St_emc,St_ems_Maker","",kFALSE},
@@ -185,9 +185,7 @@ class St_geant_Maker; St_geant_Maker *geantMk = 0;
 class St_db_Maker;    
 St_db_Maker *dbMk    = 0; 
 St_db_Maker *calibMk = 0; 
-St_db_Maker *GeometryMk = 0; 
-St_db_Maker *CalibrationsMk = 0;
-St_db_Maker *ConditionsMk = 0; 
+St_db_Maker *StarDbMk = 0; 
 St_db_Maker *RunLogMk = 0;
 StMaker *tpcDBMk = 0;
 class StTreeMaker;    
@@ -214,7 +212,7 @@ Int_t StBFChain::Load()
       if (strlen(fBFC[i].Libs) > 0) { 
 	TString *Libs[80];
 	Int_t NParsed = ParseString(fBFC[i].Libs,Libs);
-	TString lib(gSystem->GetLibraries()); 
+	TString lib(gSystem->GetLibraries(0,"D")); 
 	TString *LoadedLibs[80];
 	Int_t NLoaded = ParseString(lib,LoadedLibs);
 	for (j=0;j<=NParsed;j++) {
@@ -291,9 +289,7 @@ Int_t StBFChain::Instantiate()
 	    if (userDB) gMessMgr->QAInfo() << " User DataBase == " << PWD.Data() << "/" << userDB << endm;  
 	    if (!dbMk) dbMk = new St_db_Maker("db",mainDB,userDB);
 	    if (GetOption("tpcDB")){// 
-	      if (!GeometryMk)     GeometryMk     = new St_db_Maker("Geometry","MySQL:Geometry_tpc");
-	      if (!CalibrationsMk) CalibrationsMk = new St_db_Maker("Calibrations","MySQL:Calibrations_tpc");
-	    //if (!ConditionsMk)   ConditionsMk   = new St_db_Maker("Conditions","MySQL:Conditions");
+	      if (!StarDbMk)     StarDbMk     = new St_db_Maker("StarDb","MySQL:StarDb");
 	    }
 	    if (!RunLogMk) RunLogMk = new St_db_Maker("RunConditions","MySQL:RunLog");
 	    if (dbMk) {
@@ -642,17 +638,15 @@ void StBFChain::SetDbOptions(){
   gMessMgr->QAInfo() << "db Maker set time = " << dbMk->GetDateTime().GetDate() 
 		   << dbMk->GetDateTime().GetTime() << endm;
   gMessMgr->QAInfo() << "Geometry Maker set time = ";
-  if (GeometryMk)  gMessMgr->QAInfo()                
-                   << GeometryMk->GetDateTime().GetDate() 
-		   << GeometryMk->GetDateTime().GetTime();
+  if (StarDbMk)  gMessMgr->QAInfo()                
+                   << StarDbMk->GetDateTime().GetDate() 
+		   << StarDbMk->GetDateTime().GetTime();
   gMessMgr->QAInfo()  << endm;
 }
 //_____________________________________________________________________
 void StBFChain::SetDataBases(const Char_t* TimeStamp){
   if (dbMk)           dbMk->SetDateTime(TimeStamp);
-  if (GeometryMk)     GeometryMk->SetDateTime(TimeStamp);
-  if (CalibrationsMk) CalibrationsMk->SetDateTime(TimeStamp);
-  if (ConditionsMk)   ConditionsMk->SetDateTime(TimeStamp);
+  if (StarDbMk)     StarDbMk->SetDateTime(TimeStamp);
 }
 //_____________________________________________________________________
 void StBFChain::SetTreeOptions()
@@ -673,6 +667,8 @@ void StBFChain::SetTreeOptions()
     if (GetOption("Trs"))    treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
     if (GetOption("tcl"))    treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
     if (GetOption("tpt"))    treeMk->IntoBranch("tpc_tracksBranch","tpc_tracks/.data");
+    if (GetOption("srs"))    treeMk->IntoBranch("svt_hitsBranch","svt_hits/.data");
+    if (GetOption("stk"))    treeMk->IntoBranch("svt_tracksBranch","svt_tracks/.data");
     if (GetOption("trg"))    treeMk->IntoBranch("trgBranch","ctf mwc trg");
     if (GetOption("l3t"))    treeMk->IntoBranch("l3tBranch","l3Tracks");
     if (GetOption("global")) treeMk->IntoBranch("globalBranch","global/.data");
@@ -681,8 +677,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.83 2000/03/23 03:45:51 fine Exp $
+// $Id: StBFChain.cxx,v 1.84 2000/04/13 23:07:05 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.84  2000/04/13 23:07:05  fisyak
+// Only one access to Db; add svt maker to output
+//
 // Revision 1.83  2000/03/23 03:45:51  fine
 // Clean up
 //
