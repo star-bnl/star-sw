@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.116 1999/11/05 16:19:18 fisyak Exp $
+// $Id: bfc.C,v 1.117 1999/11/07 02:26:42 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -19,7 +19,11 @@ void Load(){
   gSystem->Load("St_base");
   gSystem->Load("StUtilities");
   gSystem->Load("StChain");
-  gSystem->Load("StBFChain");}
+  gSystem->Load("StBFChain");
+  if (!chain) delete chain;
+  chain = new StBFChain;   // Create the main chain object
+  if (!chain) gSystem->Exit(1);
+}
 //_____________________________________________________________________
 void bfc(const Int_t First,
 	 const Int_t Last,
@@ -32,14 +36,12 @@ void bfc(const Int_t First,
   // Chain = "minidaq" read miniDAQ xdf file and process 
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load();
-  // Create the main chain object
-  if (!chain) delete chain;
-  chain = new StBFChain;
+
   chain->SetFlags(Chain);
   printf ("QAInfo:Process [First=%6i/Last=%6i/Total=%6i] Events\n",First,Last,Last-First+1);
   chain->Set_IO_Files(infile,outfile);
-
   chain->Load();
+  chain->Instantiate();
 #if 0
   // Insert your maker before "tpc_hits"
   Char_t *myMaker = "St_TLA_Maker";
@@ -166,25 +168,25 @@ void Usage() {
   printf (" root4star 'bfc.C(1)'               \t// Run one event with default Chain=\"gstar tfs\"\n");
   printf (" root4star 'bfc.C(1,1)'             \t// the same\n");
   printf (" root4star 'bfc.C(2,40,\"y1b fzin\")'\t// run for configuration year_1b, \n");
-  printf ("                                    \t// reading /disk1/star/test/psc0050_01_40evts.fzd\n");
+  printf ("                                    \t// reading /star/rcf/disk1/star/test/psc0050_01_40evts.fzd\n");
   printf ("                                    \t// skipping the 1-st event and processing the remaining 39 events\n");
-  printf (" root4star 'bfc.C(40,\"y1b fzin\",\"/disk1/star/test/psc0050_01_40evts.fzd\")'\n");
+  printf (" root4star 'bfc.C(40,\"y1b fzin\",\"/star/rcf/disk1/star/test/psc0050_01_40evts.fzd\")'\n");
   printf (" root4star 'bfc.C(40,\"y1b fzin\")'\t// the same as  above\n");
   printf (" root4star 'bfc.C(2,40,\"y1b fzin -l3t\")'//the as above but remove L3T from chain\n");
-  printf (" root4star 'bfc.C(40,\"y2a fzin\",\"/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fz\")'\n");
+  printf (" root4star 'bfc.C(40,\"y2a fzin\",\"/star/rcf/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fz\")'\n");
   printf (" root4star 'bfc.C(40,\"y2a fzin\")'\t// the same as  above\n");
   printf (" root4star 'bfc.C(5,10,\"y1b in xout\",\"/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf\")'\n");
   printf ("                                    \t// skipping the 4 events and processing the remaining 6 events\n");
   printf (" root4star 'bfc.C(1,\"off in tpc FieldOff sd97 eval\",\"Mini_Daq.xdf\")'\t// the same as Chain=\"minidaq\"\n");
   printf (" root4star 'bfc.C(1,\"gstar y1a tfs allevent\")' \t// run gstar and write all event into file branches\n");
   printf (" root4star 'bfc.C(1,\"off in y1a l3t\",\"gtrack.tpc_hits.root\")'\t// run l3t only with prepaired file\n");
-  printf (" root4star 'bfc.C(1,\"tdaq display\",\"/disk1/star/daq/990727.3002.01.daq\")' \n");
+  printf (" root4star 'bfc.C(1,\"tdaq display\",\"/star/rcf/disk1/star/daq/990727.3002.01.daq\")' \n");
   printf (" \t//Cosmics (56) events with full magnetic field, TPC only \n");
-  printf (" root4star 'bfc.C(1,\"tdaq FieldOn\",\"/disk1/star/daq/990624.306.daq\")' \n");
+  printf (" root4star 'bfc.C(1,\"tdaq FieldOn\",\"/star/rcf/disk1/star/daq/990624.306.daq\")' \n");
   printf (" \t//Cosmics (56) events with full magnetic field \n");
-  printf (" root4star 'bfc.C(1,\"tdaq HalfField\",\"/disk1/star/daq/990630.602.daq\")' \n");
+  printf (" root4star 'bfc.C(1,\"tdaq HalfField\",\"/star/rcf/disk1/star/daq/990630.602.daq\")' \n");
   printf (" \t//Laser (10) events with half magnetic field \n");
-  printf (" root4star 'bfc.C(1,\"tdaq FieldOff\",\"/disk1/star/daq/990701.614.daq\")' \n");
+  printf (" root4star 'bfc.C(1,\"tdaq FieldOff\",\"/star/rcf/disk1/star/daq/990701.614.daq\")' \n");
   printf (" \t//Laser (12) events with no magnetic field \n");
   gSystem->Exit(1);
 }
