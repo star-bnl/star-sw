@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.40 2001/11/10 23:54:21 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.41 2001/12/21 21:13:03 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.41  2001/12/21 21:13:03  ullrich
+ * Fixed bug: loading multiple primary vertices.
+ *
  * Revision 2.40  2001/11/10 23:54:21  ullrich
  * Added calibration vertices.
  *
@@ -162,6 +165,7 @@
 #include "StGlobals.hh"
 #include "StEvtHddr.h"
 #include "StTpcDb/StTpcDb.h"
+#include "StDetectorDbMaker/StDetectorDbRichScalers.h"
 
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
@@ -175,7 +179,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.40 2001/11/10 23:54:21 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.41 2001/12/21 21:13:03 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -640,11 +644,10 @@ StEventMaker::makeEvent()
     dst_vertex_st *dstVertices = mEventManager->returnTable_dst_vertex(nVertices);
 
     for (i=0; i<nVertices; i++) {
-        if ( (dstVertices[i].iflag < 100 && dstVertices[i].iflag%10 == 1 &&
-              dstVertices[i].vtx_id == kEventVtxId ) ||                        // mod for Helen
-	     dstVertices[i].iflag == 201) {                                    // mod for Helen
+        if (dstVertices[i].iflag < 100 && dstVertices[i].iflag%10 == 1 &&
+	    dstVertices[i].vtx_id == kEventVtxId ) {
             StPrimaryVertex *pvtx = new StPrimaryVertex(dstVertices[i]);
-            for (k=0; k<vecPrimaryTracks.size() && dstVertices[i].iflag != 201; k++) {   // mod for Helen
+            for (k=0; k<vecPrimaryTracks.size(); k++) {
                 if (vecPrimaryTracks[k] &&
                     vecPrimaryVertexId[k] == (unsigned int) dstVertices[i].id) {
                     pvtx->addDaughter(vecPrimaryTracks[k]);
@@ -925,9 +928,13 @@ StEventMaker::makeEvent()
     }
 
     //
-    //  Handle StRunInfo
+    //  Fill StRunInfo
     //
     if (!mCurrentRunInfo) mCurrentRunInfo = new StRunInfo;
+
+    //
+    //  This part of run info is only filled once a run/file
+    //
     if (mCurrentEvent->runId() != mCurrentRunInfo->runId()) {
 	mCurrentRunInfo->setRunId(mCurrentEvent->runId());
 	mCurrentRunInfo->setProductionTime(time(0));                 
@@ -946,9 +953,20 @@ StEventMaker::makeEvent()
 	    mCurrentRunInfo->setTpcDriftVelocity(west, gStTpcDb->DriftVelocity());
 	}
     }
+    
+    //
+    //  This part of run info is filled every event
+    //
+    StDetectorDbRichScalers richScalers(this);
+    mCurrentRunInfo->setZdcWestRate(richScalers.getZDCWest());
+    mCurrentRunInfo->setZdcEastRate(richScalers.getZDCEast());
+    mCurrentRunInfo->setZdcCoincidenceRate(richScalers.getZDCX());
+    mCurrentRunInfo->setBackgroundRate(richScalers.getMult());
+    mCurrentRunInfo->setL0RateToRich(richScalers.getL0());
+    
     if (mCurrentRunInfo)
 	mCurrentEvent->setRunInfo(new StRunInfo(*mCurrentRunInfo));
-   
+
     return kStOK;
 }
 
