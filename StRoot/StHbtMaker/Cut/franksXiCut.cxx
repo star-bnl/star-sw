@@ -77,8 +77,8 @@ bool franksXiCut::Pass(const StHbtXi* Xi){
   inMassRange=0;
   // Find out what particle is desired
 
-  if ( (Xi->massXi() > mXiMassRange[0]) || (Xi->massXi() < mXiMassRange[1]) ) inMassRange=1;
-  if ( (Xi->massOmega() > mOmegaMassRange[0]) || (Xi->massOmega() < mOmegaMassRange[1]) ) inMassRange=1;
+  if ( (Xi->massXi() > mXiMassRange[0]) && (Xi->massXi() < mXiMassRange[1]) ) inMassRange=1;
+  if ( (Xi->massOmega() > mOmegaMassRange[0]) && (Xi->massOmega() < mOmegaMassRange[1]) ) inMassRange=1;
   
 
   bool goodPID = ( inMassRange &&
