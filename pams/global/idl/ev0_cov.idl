@@ -1,0 +1,10 @@
+/* ev0_cov 
+  covariance table for v0s */
+
+struct ev0_cov{
+
+	long  id;  /* Primary key for table. 1-1 corespondance with ev0_aux */
+	float cov[9]; /* covariance matrix for sec. vertex fit */
+};
+
+/*  Last mod. for ev0_cov:   $Date: 1998/05/08 15:36:26 $ */
