@@ -4,7 +4,7 @@
 //
 extern "C" void    MessageOut( const char *msg );
 //
-extern "C" long ctu_(
+long type_of_call ctu_(
   TABLE_HEAD_ST           *geo_h,         CTG_GEO_ST            *geo,
   TABLE_HEAD_ST           *slat_h,       CTG_SLAT_ST            *slat,
   TABLE_HEAD_ST           *raw_h,         CTU_RAW_ST            *raw,
