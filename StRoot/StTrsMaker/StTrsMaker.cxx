@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.58 2000/07/21 22:31:11 calderon Exp $
+// $Id: StTrsMaker.cxx,v 1.59 2000/07/30 02:36:35 long Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.59  2000/07/30 02:36:35  long
+// add dx(d[0]),dy(d[1]),dz calculation instead of just ds
+//
 // Revision 1.58  2000/07/21 22:31:11  calderon
 // Added checks at the beginning of Make() to avoid
 // seg faults when dereferencing an invalid pointer.  This
@@ -334,7 +337,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.58 2000/07/21 22:31:11 calderon Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.59 2000/07/30 02:36:35 long Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -347,7 +350,7 @@ ClassImp(StTrsMaker)
 StTrsMaker::StTrsMaker(const char *name):
 StMaker(name),
     //  mMiniSegmentLength(400.*millimeter),  // used to be 4mm
-mMiniSegmentLength(4.*millimeter),  // test trial,Hui Long
+mMiniSegmentLength(3.*millimeter),  // test trial,Hui Long
 mFirstSectorToProcess(1),
 mLastSectorToProcess(24), 
 mWriteToFile(0),
@@ -530,15 +533,15 @@ Int_t StTrsMaker::Init()
 
    // A Wire Plane
    mWireHistogram =
-       StTrsWireHistogram::instance(mGeometryDb, mSlowControlDb ,mGasDb);
+       StTrsWireHistogram::instance(mGeometryDb, mSlowControlDb ,mGasDb,mMagneticFieldDb);
    mWireHistogram->setDoGasGain(true);
    mWireHistogram->setDoGasGainFluctuations(true); // used to be true
-   mWireHistogram->setDoGasGainFluctuations(false);
+   //  mWireHistogram->setDoGasGainFluctuations(false);
    mWireHistogram->setDoSingleElectronMultiplication(false);
    mWireHistogram->setGasGainInnerSector(mSlowControlDb->innerSectorGasGain());
    mWireHistogram->setGasGainOuterSector(mSlowControlDb->outerSectorGasGain());
    mWireHistogram->setDoTimeDelay(false);
-   mWireHistogram->setRangeOfWiresForChargeDistribution(0);
+   //   mWireHistogram->setRangeOfWiresForChargeDistribution(0);
 
    //
    // An Analog Sector(for calculation)
@@ -566,8 +569,8 @@ Int_t StTrsMaker::Init()
    mAnalogSignalGenerator->setDeltaPad(2);
    mAnalogSignalGenerator->setSignalThreshold(.1*millivolt);
    mAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
-   mAnalogSignalGenerator->addNoise(false);
-   mAnalogSignalGenerator->generateNoiseUnderSignalOnly(false);
+   mAnalogSignalGenerator->addNoise(true);
+   mAnalogSignalGenerator->generateNoiseUnderSignalOnly(true);
    }
    else {
 
@@ -594,8 +597,8 @@ Int_t StTrsMaker::Init()
    mAnalogSignalGenerator->setDeltaPad(2);
    mAnalogSignalGenerator->setSignalThreshold(.0*millivolt);
    mAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
-   mAnalogSignalGenerator->addNoise(false);
-   mAnalogSignalGenerator->generateNoiseUnderSignalOnly(false);
+   mAnalogSignalGenerator->addNoise(true);
+   mAnalogSignalGenerator->generateNoiseUnderSignalOnly(true);
    mAnalogSignalGenerator->setNoiseRMS(900);  // set in  #e
    }
 
@@ -653,7 +656,7 @@ void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
 Int_t StTrsMaker::Make(){
     
     //  PrintInfo();
-
+        double d[3],absP[3];
     
     //Do not use this unless you really know what you are
     // doing...This is a histogram diagnostic to compare
@@ -802,9 +805,9 @@ Int_t StTrsMaker::Make(){
 	    //PR(tpc_hit->x[2]*centimeter);
 	    //PR(zPosition);
 	    
-	    StThreeVector<double> hitPosition(tpc_hit->x[0]*centimeter,
-	    				      tpc_hit->x[1]*centimeter,
-	    				      tpc_hit->x[2]*centimeter); 
+		  //	    StThreeVector<double> hitPosition(tpc_hit->x[0]*centimeter,
+		  //	    				      tpc_hit->x[1]*centimeter,
+		  //	    				      tpc_hit->x[2]*centimeter); 
 // 	    PR(hitPosition);
 
 // 	    // Drift Length is calculated with respect to the FG!
@@ -823,9 +826,10 @@ Int_t StTrsMaker::Make(){
 		bsectorOfHit*M_PI/6. ;   //(30 degrees)
 	    double cb   = cos(beta);
 	    double sb   = sin(beta);
-	    double xp = hitPosition.x()*cb - hitPosition.y()*sb;
-	    double yp = hitPosition.x()*sb + hitPosition.y()*cb;
-
+	    //    double xp = hitPosition.x()*cb - hitPosition.y()*sb;
+	    //   double yp = hitPosition.x()*sb + hitPosition.y()*cb;
+                 double xp = tpc_hit->x[0]*cb -tpc_hit->x[1]*sb;
+	         double yp = tpc_hit->x[0]*sb +tpc_hit->x[1]*cb;
 	    StThreeVector<double>
 		sector12Coordinate(xp,yp,(tpc_hit->x[2]));
 
@@ -835,7 +839,9 @@ Int_t StTrsMaker::Make(){
 	    // the segment into more than 1 mini segement
 	    double pxPrime = tpc_hit->p[0]*cb - tpc_hit->p[1]*sb;
 	    double pyPrime = tpc_hit->p[0]*sb + tpc_hit->p[1]*cb;
-	    
+	    absP[0]=fabs(pxPrime);
+            absP[1]=fabs(pyPrime); 
+            absP[2]=fabs(tpc_hit->p[2]); 
 	    StThreeVector<double> hitMomentum(pxPrime*GeV,
 					      pyPrime*GeV,
 					      tpc_hit->p[2]*GeV);
@@ -895,16 +901,34 @@ Int_t StTrsMaker::Make(){
 #endif
 	    //
 	    // Break the segment for diffusion reproduction.
-	    // Fast Simulation can use breakNumber = 1
+	    // Fast Simulation can use breakNumber = 1 
+         double ptot=sqrt(absP[0]*absP[0]+absP[1]*absP[1]+absP[2]*absP[2]);
+                             
+       	     d[0] =tpc_hit->ds*absP[0]/ptot;
+             d[1] =tpc_hit->ds*absP[1]/ptot; 
+             d[2] =tpc_hit->ds*absP[2]/ptot;// approximation 
+            int breakNumber = (int)max(d[0]/mMiniSegmentLength,d[2]/mMiniSegmentLength);
+              if(breakNumber<1)   breakNumber = 1;
+	    //   breakNumber = min(breakNumber,16);  // set limit
+            int numberOfLevels =
+	    static_cast<int>(log(static_cast<double>(breakNumber))/M_LN2 + .999);
+	    d[0]/=pow(2.,numberOfLevels);
+            d[1]/=pow(2.,numberOfLevels); 
+            d[2]/=pow(2.,numberOfLevels);// approximation
+            numberOfLevels++;  // take care of the zero!  in aSegment.tssSplit
+// 	    PR(aSegment.ds()/millimeter);
+// 	    PR(breakNumber); 
+          
 	    //
-	    int breakNumber = (int)max(aSegment.ds()/mMiniSegmentLength,1.);
-	    breakNumber = min(breakNumber,16);  // set limit
+	 //    int breakNumber = (int)max(aSegment.ds()/mMiniSegmentLength,1.);
+	 //   breakNumber = min(breakNumber,16);  // set limit
 // 	    PR(aSegment.ds()/millimeter);
 // 	    PR(breakNumber);
 
 // 	    aSegment.split(mGasDb, mMagneticFieldDb, breakNumber, &comp);
            
- 	    aSegment.tssSplit(mGasDb, mMagneticFieldDb, breakNumber, &comp);
+	    //   aSegment.tssSplit(mGasDb, mMagneticFieldDb, breakNumber, &comp);
+ 	    aSegment.tssSplit(mGasDb, mMagneticFieldDb, numberOfLevels , &comp);
 	    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 // 	    copy(comp.begin(), comp.end(), ostream_iterator<StTrsMiniChargeSegment>(cout,"\n"));
@@ -948,8 +972,8 @@ Int_t StTrsMaker::Make(){
 		//#endif
 	       //	mWireHistogram->addEntry(anEntry); 
              
-               StTrsWireBinEntry anEntry((*iter).position(), (*iter).charge(),SigmaL,SigmaT);//HL,for field on ,08/02/00
-	        mWireHistogram->addEntry(anEntry);	
+               StTrsWireBinEntry anEntry((*iter).position(), (*iter).charge(),SigmaL,SigmaT,d);//HL,for field on ,08/02/00
+	        mWireHistogram->addEntry(anEntry,bsectorOfHit);	
 	    } // Loop over the list of iterators
 
 	    //  tpc_hit++;  // increase the pointer to the next hit
