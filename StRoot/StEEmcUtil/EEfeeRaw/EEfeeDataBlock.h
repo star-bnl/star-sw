@@ -2,7 +2,7 @@
 #ifndef EEfeeDataBlock_h
 #define EEfeeDataBlock_h
 /*********************************************************************
- * $Id: EEfeeDataBlock.h,v 1.10 2004/04/02 06:38:52 balewski Exp $
+ * $Id: EEfeeDataBlock.h,v 1.11 2004/04/20 21:43:53 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw FEE Data Block
@@ -54,7 +54,7 @@ public:
   int       isValid(); 
   int     isHeadValid(int token, int crId, int len, int trigComm, int errFlag);
 
-  ClassDef(EEfeeDataBlock,1) // Endcap Emc event
+  ClassDef(EEfeeDataBlock,2) // Endcap Emc event
 };
 #endif
 
@@ -87,6 +87,9 @@ http://www.iucf.indiana.edu/U/gvisser/STAR_EEMC/STAR_EEMC_DAQ_Data_Formats.pdf
 
 /*
  * $Log: EEfeeDataBlock.h,v $
+ * Revision 1.11  2004/04/20 21:43:53  balewski
+ * small change in data block header get now tagged
+ *
  * Revision 1.10  2004/04/02 06:38:52  balewski
  * *** empty log message ***
  *
