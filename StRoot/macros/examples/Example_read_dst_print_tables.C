@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_print_tables.C,v 1.1 1999/10/11 17:17:57 kathy Exp $
+// $Id: Example_read_dst_print_tables.C,v 1.2 1999/11/03 16:57:00 kathy Exp $
 // $Log: Example_read_dst_print_tables.C,v $
+// Revision 1.2  1999/11/03 16:57:00  kathy
+// fix macros to use StIOMaker instead of StTreeMaker
+//
 // Revision 1.1  1999/10/11 17:17:57  kathy
 // changed names of some macros to make them more standard; changed default input file to MakeHists since previous no longer existed; combined some macros so that the one example will show all functionality
 //
@@ -26,7 +29,7 @@ void Example_read_dst_print_tables(Int_t nevents=1, const char
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
-    gSystem->Load("StTreeMaker");
+    gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
 
     cout << "  .. Example_read_dst_print_tables.C, have loaded libraries " << endl;
@@ -35,12 +38,15 @@ void Example_read_dst_print_tables(Int_t nevents=1, const char
     chain = new StChain("bfc");
     chain->SetDebug();
    
-//  Input Tree
-  StTreeMaker *treeMk = new StTreeMaker("treeRead",MainFile);
-  treeMk->SetIOMode("r");
-  treeMk->SetDebug();
-  treeMk->SetBranch("*",0,"0");  		//deactivate all branches
-  treeMk->SetBranch("dstBranch",0,"r");	//activate EventBranch
+//  
+// setup chain with IOMaker - can read in .dst.root, .dst.xdf files
+  StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
+  IOMk->SetDebug();
+  IOMk->SetIOMode("r");
+  IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+//  IOMk->SetBranch("tpc_tracks",0,"r"); //activate tpc_tracks Branch
+//  IOMk->SetBranch("geantBranch",0,"r"); //activate geant Branch
+  IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch
 
   
 // --- now execute chain member functions
