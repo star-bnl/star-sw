@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.10 1999/03/03 23:34:29 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.11 1999/03/05 21:19:37 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.11  1999/03/05 21:19:37  kathy
+// added new histograms
+//
 // Revision 1.10  1999/03/03 23:34:29  kathy
 // fixes to histograms
 //
@@ -62,7 +65,12 @@
 #include "St_dst_v0_vertex_Table.h"
 #include "St_dst_dedx_Table.h"
 #include "St_dst_event_summary_Table.h"
+#include "St_dst_xi_vertex_Table.h"
 #include "St_dst_vertex_Table.h"
+#include "St_dst_tof_evt_Table.h"
+#include "St_dst_tof_trk_Table.h"
+#include "St_ems_hits_Table.h"
+
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -152,7 +160,11 @@ Int_t St_QA_Maker::Init(){
  BookHistV0();
  BookHistPID();
  BookHistVertex();
-
+ BookHistTofEvt();
+ BookHistTofTrk();
+ BookHistEmsHitsBemc();
+ BookHistEmsHitsBsmd();
+ BookHistXi();
    return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -177,6 +189,11 @@ Int_t St_QA_Maker::Make(){
   MakeHistPID();
 // histograms from table dst_vertex
   MakeHistVertex();
+  MakeHistTofEvt();
+  MakeHistTofTrk();
+  MakeHistEmsHitsBemc();
+  MakeHistEmsHitsBsmd();
+  MakeHistXi();
 
   return kStOK;
 }
@@ -286,6 +303,11 @@ void St_QA_Maker::BookHistGen(){
     m_H_pT_eta_gen->SetYTitle("pT (GeV)");
  m_H_pT_gen  = new TH1F("QaParticlePt","charged: pt (generated)",nxpT,xminpT,xmaxpT);
  m_H_eta_gen = new TH1F("QaParticleEta","charged:eta (generated)",nyeta,kmineta,kmaxeta);
+ m_H_vtxx    = new TH1F("QaParticleVtxX","prod vertex x (generated)",50,-100.,100.);
+ m_H_vtxy    = new TH1F("QaParticleVtxY","prod vertex y (generated)",50,-100.,100.);
+ m_H_vtxz    = new TH1F("QaParticleVtxZ","prod vertex z (generated)",50,-500.,500.);
+ m_H_npart   = new TH1F("QaParticleNumPart","total num particles (generated)",100,0.,30000.);
+ m_H_ncpart  = new TH1F("QaParticleNumChgPart","num chg (e,mu,pi,K,p) part (generated)",100,0.,20000.);
 }
 
 //_____________________________________________________________________________
@@ -323,6 +345,54 @@ void St_QA_Maker::BookHistVertex(){
     m_v_pchi2 = new TH1F("QaVertexChisq"," vertex: chisq/dof ",50,0.,5.);
 
 }
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistXi(){
+
+}
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistTofEvt(){
+    m_te_ntpttrk    = new TH1F("QaTofEvtNTptTrk","tof evt: num tpc trks",50,0.,10000.);
+    m_te_nttetrk    = new TH1F("QaTofEvtNTteTrk","tof evt: num assoc tte trks",50,0.,10000.);
+    m_te_ng2ttrk    = new TH1F("QaTofEvtNG2tTrk","tof evt: num assoc g2t trks",50,0.,40000.);
+    m_te_nctfhit    = new TH1F("QaTofEvtNCtfHit","tof evt: num g2t_tof_hit",50,0.,200.);
+    m_te_nexttrk    = new TH1F("QaTofEvtNExtTrk","tof evt: num decent trks extr.",50,0.,5000.);
+    m_te_ntoftrk    = new TH1F("QaTofEvtNTofTrk","tof evt: num tof trks",50,0.,5000.);
+    m_te_ntrks      = new TH1F("QaTofEvtNTrk",   "tof evt: num good trks",50,0.,10000.);
+    m_te_ntrks_hit  = new TH1F("QaTofEvtNTrkHit","tof evt: num good trks w/ctf hit",20,0.,100.);
+    m_te_ntrks_kee  = new TH1F("QaTofEvtNTrkKee","tof evt: num good trks extr.",50,0.,5000.);
+    m_te_ntrks_tra  = new TH1F("QaTofEvtNTrkTra","tof evt: num good trks extr. to tofp",20,0.,100.);
+    m_te_ntrks_mat  = new TH1F("QaTofEvtNTrkMat","tof evt: num good trks extr. to strk tofp",20,0.,100.);
+
+}
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistTofTrk(){
+
+    m_tt_strk   = new TH1F("QaTofTrkSTrk","tof trk: s of trk",50,200.,400.);
+    m_tt_phitrk = new TH1F("QaTofTrkPhiTrk","tof trk: phi of trk",50,0.,6.28);
+    m_tt_stof   = new TH1F("QaTofTrkSTof","tof trk: s of tof",50,200.,400.);
+    m_tt_phitof = new TH1F("QaTofTrkPhiTof","tof trk: phi of tof",50,0.,6.28);
+    m_tt_tof    = new TH1F("QaTofTrkTof","tof trk: tof value",128,0.,2048.);
+    m_tt_adc    = new TH1F("QaTofTrkAdc","tof trk: adc value",128,0.,1024.);
+}
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistEmsHitsBemc(){
+    m_ehbe_hits1 = new TH1F("QaEmsBemcHits1","ems bemc: # hits det 1",50,0.,1000.);
+    m_ehbe_tnrg1 = new TH1F("QaEmsBemcTotE1","ems bemc: tot energy det 1",50,0.,5.);
+    m_ehbe_hits2 = new TH1F("QaEmsBemcHits2","ems bemc: # hits det 2",50,0.,1000.);
+    m_ehbe_tnrg2 = new TH1F("QaEmsBemcTotE2","ems bemc: tot energy det 2",50,0.,5.);
+    m_ehbe_nrg1  = new TH1F("QaEmsBemcEperHit1","ems bemc: energy per hit, det 1",50,0.,1.);
+    m_ehbe_nrg2  = new TH1F("QaEmsBemcEperHit2","ems bemc: energy per hit, det 2",50,0.,1.);
+}
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistEmsHitsBsmd(){
+    m_ehbs_hits3 = new TH1F("QaEmsBsmdHits3","ems bsmd: # hits det 3",50,0.,1000.);
+    m_ehbs_tnrg3 = new TH1F("QaEmsBsmdTotE3","ems bsmd: tot energy det 3",50,0.,5.);
+    m_ehbs_hits4 = new TH1F("QaEmsBsmdHits4","ems bsmd: # hits det 4",50,0.,1000.);
+    m_ehbs_tnrg4 = new TH1F("QaEmsBsmdTotE4","ems bsmd: tot energy det 4",50,0.,5.);
+    m_ehbs_nrg3  = new TH1F("QaEmsBsmdEperHit3","ems bsmd: energy per hit, det 3",50,0.,1.);
+    m_ehbs_nrg4  = new TH1F("QaEmsBsmdEperHit4","ems bsmd: energy per hit, det 4",50,0.,1.);
+}
+
 //_____________________________________________________________________________
 void St_QA_Maker::MakeHistEvSum(){
  //  PrintInfo();
@@ -370,7 +440,6 @@ void St_QA_Maker::MakeHistGlob(){
 
   St_dst_track *globtrk = (St_dst_track *) dstI["globtrk"];
   if (globtrk) {
-    table_head_st *trk_h = globtrk->GetHeader();
     dst_track_st  *trk   = globtrk->GetTable();
     for (Int_t i = 0; i < globtrk->GetNRows(); i++){
       dst_track_st *t = trk + i;
@@ -436,7 +505,6 @@ void St_QA_Maker::MakeHistPrim(){
   St_dst_track      *primtrk     = (St_dst_track *) dstI["primtrk"];
 
   if (primtrk) {
-    table_head_st *trk_h = primtrk->GetHeader();
     dst_track_st  *trk   = primtrk->GetTable();
     for (Int_t i = 0; i < primtrk->GetNRows(); i++){
       dst_track_st *t = trk + i;
@@ -480,19 +548,24 @@ void St_QA_Maker::MakeHistGen(){
   St_particle   *part     = (St_particle  *) dstI["particle"];
       if (part){
         particle_st *p = part->GetTable();
+        Int_t nchgpart=0;
+        Int_t totpart=0;
         for (Int_t l=0; l < part->GetNRows(); l++, p++){
           //
           //  select only particles which can be detected
           //  in the STAR detector. Here we restrict us to
 	  //  the most common species.
 	  //
-          if (abs(p->idhep) == 11   ||     // electrons
-              abs(p->idhep) == 13   ||     // muon
-              abs(p->idhep) == 211  ||     // pion
-              abs(p->idhep) == 321  ||     // kaon
-              abs(p->idhep) == 2212) {     // proton
-	    
-	    if (p->isthep == 1) {
+	  if(l!=0){                        // first row of table is header, so skip it!
+	    if (p->isthep == 1) {            // select good status only
+            totpart++;
+            if (abs(p->idhep) == 11   ||       // electrons
+                abs(p->idhep) == 13   ||       // muon
+                abs(p->idhep) == 211  ||       // pion
+                abs(p->idhep) == 321  ||       // kaon
+                abs(p->idhep) == 2212) {       // proton
+
+              nchgpart++;	    
 	      Double_t px = p->phep[0];
 	      Double_t py = p->phep[1];
 	      Double_t pz = p->phep[2];
@@ -503,9 +576,15 @@ void St_QA_Maker::MakeHistGen(){
 	      m_H_pT_eta_gen->Fill(eta, (Float_t) pT);
 	      m_H_pT_gen->Fill((Float_t) pT);
 	      m_H_eta_gen->Fill(eta);
+              m_H_vtxx->Fill(p->vhep[0]);
+              m_H_vtxy->Fill(p->vhep[1]);
+              m_H_vtxz->Fill(p->vhep[2]);
+	      }
 	    }
 	  }
-	}
+        }
+              m_H_npart->Fill(totpart);
+              m_H_ncpart->Fill(nchgpart);
       }
 }
 
@@ -574,10 +653,10 @@ void St_QA_Maker::MakeHistPID(){
 	       if (invpt) pT = 1./TMath::Abs(invpt);
                Float_t pz = pT*t->tanl;
                Float_t  p = sqrt(pT*pT+pz*pz);
-               Float_t z0 = abs(t->x_first[2]);
+	       //     Float_t z0 = abs(t->x_first[2]);
                Float_t x0 = t->x_first[0];
                Float_t y0 = t->x_first[1];
-               Float_t r0 = sqrt(x0*x0+y0*y0);
+               //     Float_t r0 = sqrt(x0*x0+y0*y0);
 
 	       if (d->det_id==1 && d->ndedx >15 ) { 
 		    m_p_dedx_rec->Fill(p,(float)(dedx_m*1e6)); // change from GeV/cm to keV/cm
@@ -596,7 +675,6 @@ void St_QA_Maker::MakeHistVertex(){
   St_dst_vertex      *vertex     = (St_dst_vertex *) dstI["vertex"];
 
   if (vertex) {
-    table_head_st *trk_h = vertex->GetHeader();
     dst_vertex_st  *trk   = vertex->GetTable();
     for (Int_t i = 0; i < vertex->GetNRows(); i++){
       dst_vertex_st *t = trk + i;
@@ -611,13 +689,124 @@ void St_QA_Maker::MakeHistVertex(){
     }
   }
 }
+//_____________________________________________________________________________
+void St_QA_Maker::MakeHistXi(){
+   cout << " *** in St_QA_Maker - filling dst_xi_vertex histograms " << endl;
+}
+//_____________________________________________________________________________
+void St_QA_Maker::MakeHistTofEvt(){
+   cout << " *** in St_QA_Maker - filling dst_tof_evt histograms " << endl;
+  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSetIter dstI(dst);         
+
+  St_dst_tof_evt *tofevt = (St_dst_tof_evt *) dstI["dst_tof_evt"];
+  if (tofevt) {
+    dst_tof_evt_st  *t   = tofevt->GetTable();
+    for (Int_t i = 0; i < tofevt->GetNRows(); i++, t++){
+      m_te_ntpttrk->Fill(t->n_tpttrk);
+      m_te_nttetrk->Fill(t->n_ttetrk);
+      m_te_ng2ttrk->Fill(t->n_g2ttrk);
+      m_te_nctfhit->Fill(t->n_ctfhit);
+      m_te_nexttrk->Fill(t->n_exttrk);
+      m_te_ntoftrk->Fill(t->n_toftrk);
+      m_te_ntrks->Fill(t->ntrks);
+      m_te_ntrks_hit->Fill(t->ntrks_hit);
+      m_te_ntrks_kee->Fill(t->ntrks_kee);
+      m_te_ntrks_tra->Fill(t->ntrks_tra);
+      m_te_ntrks_mat->Fill(t->ntrks_mat);
+    }
+  }
+}
+//_____________________________________________________________________________
+void St_QA_Maker::MakeHistTofTrk(){
+   cout << " *** in St_QA_Maker - filling dst_tof_trk histograms " << endl;
+  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSetIter dstI(dst);         
+
+  St_dst_tof_trk *toftrk = (St_dst_tof_trk *) dstI["dst_tof_trk"];
+  if (toftrk) {
+    dst_tof_trk_st  *t   = toftrk->GetTable();
+    for (Int_t i = 0; i < toftrk->GetNRows(); i++, t++){
+      m_tt_strk->Fill(t->s_trk);
+      m_tt_phitrk->Fill(t->phi_trk);
+      m_tt_stof->Fill(t->s_tof);
+      m_tt_phitof->Fill(t->phi_tof);
+      m_tt_tof->Fill(t->tof);
+      m_tt_adc->Fill(t->adc);
+    }
+  }
+}
+
+//_____________________________________________________________________________
+void St_QA_Maker::MakeHistEmsHitsBemc(){
+   cout << " *** in St_QA_Maker - filling dst_ems_bemc histograms " << endl;
+  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSetIter dstI(dst);         
+
+  St_ems_hits *ems = (St_ems_hits *) dstI["ems_hits_bemc"];
+  Int_t hits1 = 0;
+  Int_t hits2 = 0;
+  Float_t tote1=0.0;
+  Float_t tote2=0.0;
+  if (ems) {
+    ems_hits_st  *t   = ems->GetTable();
+    for (Int_t i = 0; i < ems->GetNRows(); i++, t++){
+      if(t->det == 1){   
+        m_ehbe_nrg1->Fill(t->energy);
+        hits1++;
+        tote1+=t->energy;
+      }
+      if(t->det == 2){   
+        m_ehbe_nrg2->Fill(t->energy);
+        hits2++;
+        tote1+=t->energy;
+      }
+    }
+    m_ehbe_hits1->Fill(hits1);
+    m_ehbe_hits2->Fill(hits2);
+    m_ehbe_tnrg1->Fill(tote1);
+    m_ehbe_tnrg2->Fill(tote2);
+  }
+
+}
+//_____________________________________________________________________________
+void St_QA_Maker::MakeHistEmsHitsBsmd(){
+   cout << " *** in St_QA_Maker - filling dst_ems_bsmd histograms " << endl;
+  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSetIter dstI(dst);         
+
+  St_ems_hits *ems = (St_ems_hits *) dstI["ems_hits_bsmd"];
+  Int_t hits3 = 0;
+  Int_t hits4 = 0;
+  Float_t tote3=0.0;
+  Float_t tote4=0.0;
+  if (ems) {
+    ems_hits_st  *t   = ems->GetTable();
+    for (Int_t i = 0; i < ems->GetNRows(); i++, t++){
+      if(t->det == 3){   
+        m_ehbs_nrg3->Fill(t->energy);
+        hits3++;
+        tote3+=t->energy;
+      }
+      if(t->det == 4){   
+        m_ehbs_nrg4->Fill(t->energy);
+        hits4++;
+        tote4+=t->energy;
+      }
+    }
+    m_ehbs_hits3->Fill(hits3);
+    m_ehbs_hits4->Fill(hits4);
+    m_ehbs_tnrg3->Fill(tote3);
+    m_ehbs_tnrg4->Fill(tote4);
+  }
+}
 
 //_____________________________________________________________________________
 
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.10 1999/03/03 23:34:29 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.11 1999/03/05 21:19:37 kathy Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
