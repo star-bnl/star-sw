@@ -34,7 +34,7 @@ if( defined($ARGV[0]) ){
     $prodl = $ARGV[0];
 } else {
     # default value
-    $prodl ="P01he";                               # production level
+    $prodl ="P01hf";                               # production level
 }
 
 # root for a structure for an implied directory structure made of a
