@@ -1,5 +1,4 @@
-// $Id: bfcz.C,v 1.3 1999/02/19 18:21:06 kathy Exp $
-
+// $Id: bfcz.C,v 1.4 1999/02/19 22:24:54 fisyak Exp $
 //#define gtrack
 #define trs
 #define emc
@@ -71,6 +70,7 @@ bfcz(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/muons.fz")
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load();
   TString FileOut = gSystem->BaseName(fzfile);
+  
   FileOut.ReplaceAll(".fz",".root");
   TFile       *root_out  =  new TFile(FileOut.Data(),"RECREATE");
 
@@ -161,7 +161,6 @@ bfcz(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/muons.fz")
   Int_t i=0;
   for (Int_t i =1; i <= Nevents; i++){
     if (chain->Make(i)) break;
-
 #if 0
     St_DataSet *dst = chain->DataSet("dst");
     if (dst) {
