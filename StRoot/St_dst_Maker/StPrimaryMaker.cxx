@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.7 1999/07/17 00:31:24 genevb Exp $
+// $Id: StPrimaryMaker.cxx,v 1.8 1999/09/12 23:03:03 fisyak Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.8  1999/09/12 23:03:03  fisyak
+// Move parameters into makers
+//
 // Revision 1.7  1999/07/17 00:31:24  genevb
 // Use StMessMgr
 //
@@ -24,6 +27,7 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "TMath.h"
 #include "StPrimaryMaker.h"
 
@@ -56,25 +60,29 @@ StPrimaryMaker::~StPrimaryMaker(){
 //_____________________________________________________________________________
 Int_t StPrimaryMaker::Init(){
   // Create tables
-  St_DataSet *globalParams = GetInputDB("params/global");
-  assert (globalParams);
-  St_DataSetIter params(globalParams);
-  
   //egr 
-  m_egr_egrpar = (St_egr_egrpar *) params("egrpars/egr_egrpar");  
-  if( !m_egr_egrpar ) {
-    St_DataSet *match = GetDataSet("match"); 
-    St_DataSetIter matchI(match);         
-    m_egr_egrpar = (St_egr_egrpar *) matchI("m_egr_egrpar");  
-  }
-  
+  m_egr_egrpar = (St_egr_egrpar *) GetDataSet("match/.runcontrol/egr_egrpar");  
+  assert (m_egr_egrpar);
   //evr
-  m_evr_evrpar  = (St_evr_evrpar *) params("evrpars/evr_evrpar");
-  AddConst(m_evr_evrpar);
+  //  m_evr_evrpar  = (St_evr_evrpar *) params("evrpars/evr_evrpar");
+  m_evr_evrpar = new St_evr_evrpar("evr_evrpar",1);
+  {
+    evr_evrpar_st row;
+    //
+    memset(&row,0,m_evr_evrpar->GetRowSize());
+    row.vcut	 =          1; // distance below where track is marked as default primary ;
+    row.cut2	 =          2; // select tracks for 2nd vertex fit ;
+    row.cut3	 =        0.5; // select tracks for 3rd vertex fit ;
+    row.cutxy	 =          1; // select tracks for vertex fitting ;
+    row.cutz	 =         10; // select tracks for vertex fitting ;
+    row.ptmin	 =          0; // minimum pt of individual tracks ;
+    m_evr_evrpar->AddAt(&row,0);
+  }
+  AddRunCont(m_evr_evrpar);
   
   // prop
   m_tp_param = new St_egr_propagate("tp_param",1); 
-  AddConst(m_tp_param);
+  AddRunCont(m_tp_param);
   m_tp_param->SetNRows(1);
   egr_propagate_st *tp_param = m_tp_param->GetTable();
   tp_param->iflag =   m_flag;
@@ -88,25 +96,24 @@ Int_t StPrimaryMaker::Init(){
     tp_param->z =  0.; 
   }
   // egr2
-  m_egr2_egrpar = (St_egr_egrpar *) params("egrpars/egr2_egrpar");
-  if (!m_egr2_egrpar) {
-    m_egr2_egrpar = new St_egr_egrpar("egr2_egrpar",1);
-    AddConst(m_egr2_egrpar);
-    m_egr2_egrpar->SetNRows(1);
+  m_egr2_egrpar = new St_egr_egrpar("egr2_egrpar",1);
+  {  
+    egr_egrpar_st row;
+    memset(&row,0,m_evr_evrpar->GetRowSize());
+    row.scenario =  5;
+    row.mxtry =    10;
+    row.minfit =    5;
+    row.prob[0] =   2;
+    row.prob[1] =   2;
+    row.debug[0] =  1;
+    row.svtchicut = 0;
+    row.usetpc    = 1;
+    row.usesvt    = 0;
+    row.usevert   = 1;
+    row.useglobal = 0;
+    m_egr2_egrpar->AddAt(&row,0);
   }
-  egr_egrpar_st *egr2_egrpar = m_egr2_egrpar->GetTable();
-  egr2_egrpar->scenario =  5;
-  egr2_egrpar->mxtry =    10;
-  egr2_egrpar->minfit =    5;
-  egr2_egrpar->prob[0] =   2;
-  egr2_egrpar->prob[1] =   2;
-  memset (egr2_egrpar->debug,0,9*sizeof(Int_t));
-  egr2_egrpar->debug[0] =  1;
-  egr2_egrpar->svtchicut = 0;
-  egr2_egrpar->usetpc    = 1;
-  egr2_egrpar->usesvt    = 0;
-  egr2_egrpar->usevert   = 1;
-  egr2_egrpar->useglobal = 0;
+  AddRunCont(m_egr2_egrpar);
   
   return StMaker::Init();
 }

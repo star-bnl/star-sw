@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.18 1999/08/31 21:56:37 fisyak Exp $
+// $Id: StKinkMaker.cxx,v 1.19 1999/09/12 23:03:03 fisyak Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.19  1999/09/12 23:03:03  fisyak
+// Move parameters into makers
+//
 // Revision 1.18  1999/08/31 21:56:37  fisyak
 // Remove SetNRows
 //
@@ -102,35 +105,28 @@ StKinkMaker::~StKinkMaker(){
 }
 //_____________________________________________________________________________
 Int_t StKinkMaker::Init(){
-  St_DataSet *globalParams = GetInputDB("params/global");
-  assert (globalParams);
-  St_DataSetIter params(globalParams);
-  
-  m_tkfpar = (St_tkf_tkfpar *)  params("tkfpars/tkf_tkfpar");
-  if (!m_tkfpar) {
-    m_tkfpar = new St_tkf_tkfpar("tkfpar",1);
-    AddConst(m_tkfpar);
+  m_tkfpar =  new St_tkf_tkfpar("tkf_tkfpar",1);
+  {
+    tkf_tkfpar_st parRow;  
+    memset(&parRow,0,m_tkfpar->GetRowSize());
+    parRow.dcaParentDaughterMax      =  0.5;
+    parRow.parentPtMin               =  0.2;   
+    parRow.vertexRMax2D              =  179.;  
+    parRow.vertexRMin2D              =  133.;  
+    parRow.thetaMin                  =  1.; 
+    parRow.numOfPadRows              =  40;  	
+    parRow.parentDipAngleMax         =  0.79;	
+    parRow.impactCut                 =  2.;
+    parRow.parentLastDaughterStart2D =  14.;
+    parRow.parentLastDaughterStartZ  =  20.;
+    parRow.projectPointZDiff         =  2.;
+    parRow.distanceKinkParent2D      =  14.;
+    parRow.distanceKinkDaughter2D    =  14.;
+    parRow.distanceKinkParentZ       =  20.;
+    parRow.distanceKinkDaughterZ     =  20.;
+    m_tkfpar->AddAt(&parRow, 0);
   }
-  tkf_tkfpar_st parRow;  
-  
-  parRow.dcaParentDaughterMax      =  0.5;
-  parRow.parentPtMin               =  0.2;   
-  parRow.vertexRMax2D              =  179.;  
-  parRow.vertexRMin2D              =  133.;  
-  parRow.thetaMin                  =  1.; 
-  parRow.numOfPadRows              =  40;  	
-  parRow.parentDipAngleMax         =  0.79;	
-  parRow.impactCut                 =  2.;
-  parRow.parentLastDaughterStart2D =  14.;
-  parRow.parentLastDaughterStartZ  =  20.;
-  parRow.projectPointZDiff         =  2.;
-  parRow.distanceKinkParent2D      =  14.;
-  parRow.distanceKinkDaughter2D    =  14.;
-  parRow.distanceKinkParentZ       =  20.;
-  parRow.distanceKinkDaughterZ     =  20.;
-  
-  m_tkfpar->AddAt(&parRow, 0);
-  
+  AddRunCont(m_tkfpar);
   return StMaker::Init();
 }
 //_____________________________________________________________________________
