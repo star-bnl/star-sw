@@ -28,7 +28,7 @@
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 #endif
-
+int BetheBloch::noWarn = 0;
 
 BetheBloch::BetheBloch(){
     // it's more elegant to read the values from a file, but to put it
@@ -36,10 +36,16 @@ BetheBloch::BetheBloch(){
     // here
     // could also fill them directly in the map, or transform the numbers directly
     // to beta gamma.
+  if (! noWarn) {
   cout << "BetheBloch::BetheBloch =================================================================" << endl;
   cout << "Warning: please don't use BetheBloch::BetheBloch for any analysis after P00hm production" << endl;
-  cout << "but use static function 1.e-6*BetheBloch::Sirrf(Poverm) instead                         " << endl;
+  cout << "but use insead :                                                                        " << endl;
+  cout << "for production before P03h static function 1.e-6*BetheBloch::Sirrf(Poverm)              " << endl;
+  cout << "for production after  P03h (including P03h)                                             " << endl; 
+  cout << "gSystem->Load(\"StBichsel\"); m = new Bichsel(); m->GetI70(TMath::Log10(poverm),1.)     " << endl;
   cout << "BetheBloch::BetheBloch =================================================================" << endl;
+  noWarn = 1;
+  }
     vector<double> kinVec;
     vector<double> ionizVec;   // Protons                      
     kinVec.push_back(0.216355);ionizVec.push_back(2.38171e-05);
