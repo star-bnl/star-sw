@@ -194,18 +194,28 @@ void MiniChain::setupOutput(const char * filePrefix,
 			    const char * fileTemplate)
 {
   cout <<"MiniChain::setupOutput - INFO - Started"<<endl;
-  TString fileName = "MiniChain";
+  TString outFilePrefix = "MiniChain_";
+  TString stEventFileSuffix = "event.root";
+  TString MuDstSuffix = "MuDst.root";
+  TString miniMcSuffix = "stiminimc.root";
+
+  //Now clip prefix and 'event.root' from filename
   TString templateFile = fileTemplate;
   int fileBeginIndex = templateFile.Index(filePrefix,0);
   templateFile.Remove(0,fileBeginIndex);
-  fileName.Append(templateFile);
+  int fileEndIndex = templateFile.Index(stEventFileSuffix,0);
+  templateFile.Remove(fileEndIndex, templateFile.Length());
 
   if (_pars->doStEventOutput) 
     {
-      cout << "    Events written out .event.root file" << endl;
+      TString stEventFileName = outFilePrefix;
+      stEventFileName.Append(templateFile);
+      stEventFileName.Append(stEventFileSuffix);
+      
+      cout << "    Events written out to " <<stEventFileName << endl;
       StTreeMaker * outMaker = new StTreeMaker("EvOut","","bfcTree");
       outMaker->SetIOMode("w");
-      outMaker->SetBranch("eventBranch","test.event.root","w");
+      outMaker->SetBranch("eventBranch",stEventFileName,"w");
       outMaker->IntoBranch("eventBranch","StEvent");
     }
   else
@@ -213,8 +223,11 @@ void MiniChain::setupOutput(const char * filePrefix,
 
   if (_pars->doMiniMcEvent)
     {
+      TString miniMcFileName = outFilePrefix;
+      miniMcFileName.Append(templateFile);
+      miniMcFileName.Append(miniMcSuffix);
       cout << "    MiniMcEvent will be called."<<endl
-	   << "    MiniMcEvent output to file : " << fileName << endl;
+	   << "    MiniMcEvent output to file : " << miniMcFileName << endl;
 
       StAssociationMaker  * assocMakerIt = new StAssociationMaker();
       assocMakerIt->useInTracker();
@@ -223,7 +236,7 @@ void MiniChain::setupOutput(const char * filePrefix,
       StMiniMcMaker * minimcMaker = new StMiniMcMaker;
       minimcMaker->setDebug();
       minimcMaker->setOutDir("./");
-      minimcMaker->setFileName(fileName);
+      minimcMaker->setFileName(miniMcFileName);
     }
   else
     {
