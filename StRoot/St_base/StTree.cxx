@@ -325,7 +325,7 @@ Int_t StBranch::WriteEvent(const StUKey &ukey)
   int iret;
   if (fIOMode<=0)       return 0;
   if (!(fIOMode & 2))   return 0;
-  fUKey.Update(ukey);
+  fUKey.Update(ukey,GetName());
   if (!fList)           return kStWarn; //empty
   if (!fList->First())  return kStWarn; //empty
   if(Open()) return 1;
@@ -372,7 +372,7 @@ Int_t StBranch::ReadEvent(const StUKey &ukey)
 {
   if (fIOMode<=0)       return 0;
   if (!(fIOMode&1))     return 0;
-  fUKey.Update(ukey);
+  fUKey.Update(ukey,GetName());
   return GetEvent(0);
 }
 //_______________________________________________________________________________
@@ -389,7 +389,10 @@ Int_t StBranch::NextEvent (StUKey &ukey)
   if (fIOMode<=0)       return 0;
   if (!(fIOMode&1))     return 0;
   Clear();
-  fUKey.Update(ukey); int iret = GetEvent(1); ukey.Update(fUKey); return iret;
+  fUKey.Update(ukey,GetName());
+  int iret = GetEvent(1); 
+  ukey.Update(fUKey); 
+  return iret;
 }
 //_______________________________________________________________________________
 void StBranch::SetParAll(TDataSet *par,TList *savList)
@@ -525,7 +528,7 @@ Int_t StTree::UpdateFile(const Char_t *file)
 //_______________________________________________________________________________
 Int_t StTree::WriteEvent(const StUKey &ukey)
 {
-  fUKey.Update(ukey); Open();
+  fUKey.Update(ukey,GetName()); Open();
   TDataSetIter next(this);StBranch *br;
   while ((br=(StBranch*)next())) br->WriteEvent(fUKey);
   fNEvents++;
@@ -536,7 +539,7 @@ Int_t StTree::WriteEvent(const StUKey &ukey)
 Int_t StTree::ReadEvent(const StUKey &ukey)
 {
   Int_t iret=0,num=0;
-  fUKey.Update(ukey); Open();
+  fUKey.Update(ukey,GetName()); Open();
   TDataSetIter next(this);StBranch *br;
   while ((br=(StBranch*)next())) {      //Read all branches
     iret=br->ReadEvent(fUKey);
@@ -549,7 +552,7 @@ Int_t StTree::ReadEvent(const StUKey &ukey)
 //_______________________________________________________________________________
 Int_t StTree::NextEvent(StUKey  &ukey)
 {
-  fUKey.Update(ukey);int iret=NextEvent(); ukey.Update(fUKey); return iret;
+  fUKey.Update(ukey,GetName());int iret=NextEvent(); ukey.Update(fUKey); return iret;
 }
 
 //_______________________________________________________________________________
@@ -561,7 +564,7 @@ Int_t StTree::NextEvent()
   while ((br=(StBranch*)next())) {
     if (! br->fIOMode<0) continue;
     if (! br->fIOMode&1) continue;
-    if (fst) {  //Read only 1st branch
+      if (fst && !br->IsOption("const")) {  //Read only 1st branch
       iret = br->NextEvent(fUKey);
       if(iret) return iret;
       fst=0;
