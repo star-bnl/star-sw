@@ -70,7 +70,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.5 2004/07/23 00:59:36 jeromel Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.6 2004/07/23 02:24:39 jeromel Exp $
  *
  */
 
@@ -92,11 +92,11 @@ public:
     virtual         ~StMinuitVertexFinder();
     bool            fit(StEvent*);       
     int             NCtbMatches();
+    void            printInfo(ostream& = cout) const;
+    void            UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
 
     // Added, not part of base-class
     void            setPrintLevel(int = 0);
-    void            printInfo(ostream& = cout) const;
-    void            UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
 
 private:
     bool accept(StTrack*) const;   // track filter
@@ -133,6 +133,9 @@ private:
 /***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.6  2004/07/23 02:24:39  jeromel
+ * Oops ... Worng swithc (had twice Minuit). Now corrected.
+ *
  * Revision 1.5  2004/07/23 00:59:36  jeromel
  * Removed methods (moved in base class) + doxygenized
  *

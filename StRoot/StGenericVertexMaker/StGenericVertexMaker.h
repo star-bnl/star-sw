@@ -5,7 +5,7 @@
  * Maker for minuit based vertex finder
  * Lee Barnby - modification, becomes StGenericVertexMaker
  *
- * $Id: StGenericVertexMaker.h,v 1.3 2004/07/23 00:56:58 jeromel Exp $
+ * $Id: StGenericVertexMaker.h,v 1.4 2004/07/23 02:24:39 jeromel Exp $
  *
  */
 
@@ -39,7 +39,7 @@ class StGenericVertexMaker : public StMaker
 
   StEvent *mEvent;
   StPrimaryVertex* primV;
-  StMinuitVertexFinder *theFinder;
+  StGenericVertexFinder *theFinder;
 
   Bool_t DoFit(); ///Find and fit the primary vertex
   void const FillStEvent();
@@ -69,7 +69,7 @@ class StGenericVertexMaker : public StMaker
   inline void SetDoNotUseITTF(){use_ITTF=kFALSE;};
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StGenericVertexMaker.h,v 1.3 2004/07/23 00:56:58 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StGenericVertexMaker.h,v 1.4 2004/07/23 02:24:39 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StGenericVertexMaker, 0)   //StAF chain virtual base class for Makers
 };
