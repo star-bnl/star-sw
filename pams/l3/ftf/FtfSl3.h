@@ -1,10 +1,11 @@
 /*:>-------------------------------------------------------------------
-**: FILE:     ftfSl3.h 
+**: FILE:     FtfSl3.h 
 **: HISTORY:  may 29, 1999  Frame for sl3 tracking
 **:           aug 23, 1999  add setup with number of hits and tracks
 **:           sep 28, 1999  cs: new input functions (pointer to
 **:                         bank instead of FILE) using
 **:                         daqFormats.h
+**:           oct 25, 1999  ppy: use sl3CoordianteTransform header
 **:   
 **:  
 **:<------------------------------------------------------------------*/
@@ -15,6 +16,7 @@
 #include "sl3MPTrack.h"
 #include "sl3USTrack.h"
 #include "daqFormats.h"
+#include "sl3CoordinateTransform.h"
 
 #define checkByteOrder(byte_order)    ( (byte_order) == (DAQ_RAW_FORMAT_ORDER) ? (1) : (-1) )
 
