@@ -12,10 +12,11 @@
 #define  MT_MAX      1.5
 #define  ETA_MIN    -2.0
 #define  ETA_MAX     2.0
-#define  PHI_MIN  -180.0
-#define  PHI_MAX   180.0 
+#define  PHI_MIN   -180.0
+#define  PHI_MAX    180.0 
 #define  NBINS      50
 #define  NRANGE      5
+#define  NPHIBINS   40
 #define  NPHIRANGE   8
 #define  NETARANGE   3
 
@@ -85,7 +86,8 @@ long  type_of_call fill_dst_event_summary_ (
   int     minbin, maxbin, binrange;
   int     ivtx, vtx_id;
   double  pi, piov2;
-  double  mt_histo[NBINS], pt_histo[NBINS], eta_histo[NBINS], phi_histo[NBINS];
+  double  mt_histo[NBINS], pt_histo[NBINS], eta_histo[NBINS];
+  double  phi_histo[NPHIBINS];
   double  eta1_mt_histo[NBINS],eta2_mt_histo[NBINS],eta3_mt_histo[NBINS];
   float   mt_min, mt_max;
   float   pt_binsize, mt_binsize, eta_binsize, phi_binsize; 
@@ -151,7 +153,7 @@ long  type_of_call fill_dst_event_summary_ (
   memset (&pt_histo,      0, sizeof(double)*NBINS);
   memset (&mt_histo,      0, sizeof(double)*NBINS);
   memset (&eta_histo,     0, sizeof(double)*NBINS);
-  memset (&phi_histo,     0, sizeof(double)*NBINS);
+  memset (&phi_histo,     0, sizeof(double)*NPHIBINS);
   memset (&eta1_mt_histo, 0, sizeof(double)*NBINS);
   memset (&eta2_mt_histo, 0, sizeof(double)*NBINS);
   memset (&eta3_mt_histo, 0, sizeof(double)*NBINS);
@@ -160,7 +162,7 @@ long  type_of_call fill_dst_event_summary_ (
   pt_binsize  = (PT_MAX  - PT_MIN )/NBINS;
   mt_binsize  = (MT_MAX  - MT_MIN )/NBINS;
   eta_binsize = (ETA_MAX - ETA_MIN)/NBINS;
-  phi_binsize = (PHI_MAX - PHI_MIN)/NBINS;
+  phi_binsize = (PHI_MAX - PHI_MIN)/NPHIBINS;
 
   /*  Calculate  the mt bin weight  */
   deta1       = (ETA_MAX - ETA_MIN);
@@ -203,7 +205,7 @@ long  type_of_call fill_dst_event_summary_ (
       pt_histo[iptbin]++;    /* pt histogram    */
     if (0 <= ietabin && ietabin<NBINS)
       eta_histo[ietabin]++;  /* eta histogram   */
-    if (iphibin<NBINS)  
+    if (0 <= iphibin && iphibin<NPHIBINS)  
       phi_histo[iphibin]++;  /* phi histogram   */
     /*  weight the mt bin by  1/(mt*dy*dmt)     */
     if (imtbin<NBINS) {
@@ -226,7 +228,7 @@ long  type_of_call fill_dst_event_summary_ (
 
   binrange = NBINS/NRANGE;  /* NBINS have to be a multiple of NRANGE */
 
-  /* Fill pt, my, eta & phi  bin multiplicities  */
+  /* Fill pt, my, eta  bin multiplicities  */
   for (irange=0; irange<NRANGE; irange++) { /* begin  looping over ranges  */
     minbin = binrange*irange;
     maxbin = minbin + binrange;
@@ -235,9 +237,19 @@ long  type_of_call fill_dst_event_summary_ (
 	 pt_histo[ibin];         /* Fill pt  bin  multiplicities  */
       dst_eventsummary->mult_eta[irange]+=
 	 eta_histo[ibin];        /* Fill eta bin  multiplicities  */
+    }/* end of looping over bins */
+
+  binrange = NPHIBINS/NPHIRANGE; /* NBINS have to be a multiple of NRANGE */
+
+  /* Fill  phi  bin multiplicities  */
+  for (irange=0; irange<NPHIRANGE; irange++) { /* begin looping over ranges  */
+    minbin = binrange*irange;
+    maxbin = minbin + binrange;
+    for (ibin=minbin; ibin < maxbin; ibin++) {/* begin  looping over bins  */
       dst_eventsummary->mult_phi[irange]+=
 	 phi_histo[ibin];        /* Fill phi bin  multiplicities  */
     }/* end of looping over bins */
+
 
     /* Fill inverse slope for mt bins   */
     dst_eventsummary->T_mt_bins[irange] = 
@@ -355,3 +367,7 @@ float  mt_inverse_slope(double *mthisto,int ibegin, int istop)
   }
   return invslope;
 } /* end of mt_inverse_slope */
+
+
+
+
