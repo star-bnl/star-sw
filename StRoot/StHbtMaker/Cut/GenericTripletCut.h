@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: GenericTripletCut.h,v 1.3 2000/08/08 23:39:31 laue Exp $
+ * $Id: GenericTripletCut.h,v 1.4 2001/06/03 21:04:56 willson Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: GenericTripletCut.h,v $
+ * Revision 1.4  2001/06/03 21:04:56  willson
+ * Cuts on entrance separation
+ *
  * Revision 1.3  2000/08/08 23:39:31  laue
  * Updated for standalone version
  *
@@ -27,7 +30,7 @@
 
 class GenericTripletCut : public StHbtTripletCut{
 public:
-  GenericTripletCut();
+  GenericTripletCut(float EntSepCut = 0.0);
   //~GenericTripletCut();
 
   virtual bool Pass(const StHbtTriplet*);
@@ -38,6 +41,7 @@ public:
 private:
   long mNTripletsPassed;
   long mNTripletsFailed;
+  float mEntSepCut;
 
 #ifdef __ROOT__
   ClassDef(GenericTripletCut, 1)
