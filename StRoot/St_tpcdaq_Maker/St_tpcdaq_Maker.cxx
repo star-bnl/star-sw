@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.30  1999/07/29 00:49:52  fisyak
+// Add default ctor
+//
 // Revision 1.29  1999/07/27 17:30:39  ward
 // Converted to StIOMaker.  Also noise suppression.
 //
@@ -119,18 +122,18 @@ ClassImp(St_tpcdaq_Maker)
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDAQMaker/StDAQReader.h"
 char gDAQ; /* This is TRUE if using DAQ, FALSE if using Trs. */
-char gConfig[40]; /* either "daq" or "trs" or "embedding" */
 StDAQReader *victorPrelim;
 StTPCReader *victor;
 int gSector;
 // obsolete since we are moving to StIOMaker ZeroSuppressedReader *gZsr;  
 // obsolete since we are moving to StIOMaker DetectorReader *gDetectorReader;
 
-St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name) 
+St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name,daqOrTrs) 
 {
-  printf("St_tpcdaq_Maker constructor, getting data from %s.\n",daqOrTrs);
   printf("This is St_tpcdaq_Maker, name = \"%s\".\n",name);
-  if(daqOrTrs) strcpy(gConfig,daqOrTrs); else strcpy(gConfig,"undefined");
+  if(daqOrTrs) {
+    printf("St_tpcdaq_Maker constructor, getting data from %s.\n",daqOrTrs);
+  }
 }
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
 }
@@ -149,13 +152,13 @@ Int_t St_tpcdaq_Maker::Init() {
                             "pad vs num seq" , 40 , 1.0 , 40.0 );
   m_pix_AdcValue      = new TH1F("tpcdaq_adcVal" , 
                             "pix vs ADC value" , 255 , 1.0 , 255.0 );
-  if(!strcmp(gConfig,"daq")) { // Update this for embedding.
+  if(!strcmp(GetTitle(),"daq")) { // Update this for embedding.
     gDAQ=7; 
     herb=GetDataSet("StDAQReader");
     assert(herb);
     victorPrelim=(StDAQReader*)(herb->GetObject());
     assert(victorPrelim);
-  } else if(!strcmp(gConfig,"trs")) {
+  } else if(!strcmp(GetTitle(),"trs")) {
     gDAQ=0;
   } else {
      PP"-----------------------------------------------------------------\n");
