@@ -52,7 +52,7 @@ public:
   Bool_t   setControlDefault(UInt_t det);
 
   virtual void    init();
-  virtual void    setParameters(const Float_t calibCoeff,const UInt_t type, const Float_t pedMean, const Float_t pedRMS);
+  virtual void    setParameters(const Float_t calibCoeff,const UInt_t type, const Float_t pedMean, const Float_t pedRMS, const Float_t gainUnc);
   virtual Int_t   getAdc(const Double_t de, const Double_t eta);
   virtual Float_t getEnergy();
   virtual void    print();
@@ -63,8 +63,11 @@ public:
 #endif
 
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcPmtSimulator.h,v 1.3 2003/09/23 15:19:46 suaide Exp $
+//  $Id: StEmcPmtSimulator.h,v 1.4 2004/08/06 13:24:47 suaide Exp $
 //  $Log: StEmcPmtSimulator.h,v $
+//  Revision 1.4  2004/08/06 13:24:47  suaide
+//  New features added and fixed some bugs in the database
+//
 //  Revision 1.3  2003/09/23 15:19:46  suaide
 //  fixed bugs and modifications for embedding
 //
