@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.25 2001/11/13 21:17:56 lansdell Exp $
+// $Id: StQABookHist.cxx,v 2.26 2001/11/20 21:53:45 lansdell Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.26  2001/11/20 21:53:45  lansdell
+// added x-y dist of hits, tpc east&west histos
+//
 // Revision 2.25  2001/11/13 21:17:56  lansdell
 // changed limits on dedx error on mean, tpc
 //
@@ -581,6 +584,8 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pnt_tot_med=0; //! number of hits, med range
   m_pnt_tot_sm=0;  //! number of hits, small range
   m_pnt_id=0;      //! detector id of the hit
+  m_pnt_xyTE=0;    //! xy dist. of hits, tpcE
+  m_pnt_xyTW=0;    //! xy dist. of hits, tpcW
   m_pnt_phiT=0;    //! phi dist. of hits, tpc
   m_pnt_padrowT=0; //! padrow dist. of hits, tpc
   m_pnt_zS=0;      //! z dist. of hits, svt
@@ -1607,7 +1612,8 @@ void StQABookHist::BookHistPoint(){
   // east and west on separate plots
   m_pnt_ftpcE   = QAH::H1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,25000.);
   m_pnt_ftpcW   = QAH::H1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,25000.);
-
+  m_pnt_xyTE    = QAH::H2F("QaPointXYTpcE","point: x-y distribution of hits, tpcE",40,-200,200,40,-200,200);
+  m_pnt_xyTW    = QAH::H2F("QaPointXYTpcW","point: x-y distribution of hits, tpcW",40,-200,200,40,-200,200);
   m_z_hits      = QAH::H1F("QaPointZhits","point: z distribution of hits, tpc",100,-210,210);
   m_pnt_phiT    = QAH::MH1F("QaPointPhiT","point: #phi distribution of hits, tpc",36,0,360,2);
   m_pnt_phiT->Rebin(0,"East");

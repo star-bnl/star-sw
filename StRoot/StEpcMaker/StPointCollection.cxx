@@ -1,8 +1,13 @@
-
 //
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.14  2001/12/03 22:24:28  pavlinov
+// tuned for case of no tracks
+//
+// Revision 1.13  2001/12/01 02:44:50  pavlinov
+// Cleanp for events with zero number of tracks
+//
 // Revision 1.12  2001/11/06 23:35:27  suaide
 // fixed bug in the way we get magnetic field
 //
@@ -51,7 +56,8 @@
 #include <iostream.h>
 #include <math.h>
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include <TDataSetIter.h>
+#include <TBrowser.h>
 #include "StEpcMaker.h"
 #include "StThreeVector.hh"
 #include "StHelix.hh"
@@ -68,6 +74,7 @@
 #include "StDetectorDefinitions.h"
 #include "Stypes.h"
 #include "math_constants.h"
+#include "StAutoBrowse.h"
 
 //For StEvent
 #include "StEvent/StEvent.h"
@@ -112,21 +119,30 @@ StTrackVec  HitTrackPointer;
 StMatchVecClus ClusterPointer[4];
 
 //_____________________________________________________________________________
-StPointCollection::StPointCollection():St_DataSet("Default")
+StPointCollection::StPointCollection():TDataSet("Default")
 {
   SetTitle("EmcPoints");
-  BField = 0.5;
+  mBField = 0.5;
 }
 //_____________________________________________________________________________
-StPointCollection::StPointCollection(const Char_t *Name):St_DataSet(Name)
+StPointCollection::StPointCollection(const Char_t *Name):TDataSet(Name)
 {
   SetTitle("EmcPoints");
-  BField = 0.5;
+  mBField = 0.5;
 }
 //_____________________________________________________________________________
 StPointCollection::~StPointCollection()
 {
 }
+
+void 
+StPointCollection::Browse(TBrowser* b)
+{
+  // if(mPoints.GetSize())     b->Add((TObject*)NPoints()); // for testing 30-nov-2001
+  //if(mPointsReal.GetSize()) b->Add((TObject*)NPointsReal());
+  TDataSet::Browse(b);
+}
+
 //*************** FIND EMC POINTS **********************************
 Int_t StPointCollection::findEmcPoints(StEmcClusterCollection* Bemccluster,
                                        StEmcClusterCollection *Bprscluster,
@@ -141,16 +157,26 @@ Int_t StPointCollection::findEmcPoints(StEmcClusterCollection* Bemccluster,
   // Getting BemcGeom to obtain radius etc
   BemcGeomIn  = StEmcGeom::getEmcGeom("bemc");
 
+  Int_t *Trcheck;
   if(TrackToFit.size()>0)
   {
     cout<<" Taking Tracks from StEvent for track matching**"<<endl;
     TrackSort(TrackToFit);
-  }
 
   //track check array for checking if the track is matched
-  Int_t *Trcheck = new Int_t[HitTrackEta.size()];
-  
-  for(UInt_t i1=0;i1<HitTrackEta.size();i1++) Trcheck[i1]=0;
+    Trcheck = new Int_t[HitTrackEta.size()];
+    for(UInt_t i1=0;i1<HitTrackEta.size(); i1++) Trcheck[i1]=0;
+  } else { // 3-dec-2001 
+    //
+    // if no tracks !!!
+    //
+    HitTrackEta.clear();
+    HitTrackPhi.clear();
+    HitTrackMom.clear();
+    HitTrackPointer.clear();
+    Trcheck = 0;
+  }
+
 
 // MATCHING****************
 
@@ -174,9 +200,9 @@ Int_t StPointCollection::findEmcPoints(StEmcClusterCollection* Bemccluster,
           return kStWarn;
         }
       }
-	  }
+    }
   }
-  delete [] Trcheck;
+  if (Trcheck) delete [] Trcheck;
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -527,7 +553,7 @@ Int_t StPointCollection::MatchClusterAndTrack(const StMatchVecClus mvec,
         {
           if(MatchFlag!=1)
           {
-            if(Trcheck[it]!=1)
+            if(Trcheck && Trcheck[it]!=1) // 3-dec-2001
             {
               Float_t EtaTrack=E_tvec[it];
               Float_t PhiTrack=P_tvec[it];
@@ -651,7 +677,7 @@ Int_t StPointCollection::MatchClusterAndTrack(const StMatchVecClus mvec,
 Int_t StPointCollection::TrackSort( const StTrackVec & TrackToFit) const
 {
   cout <<" Inside TrackSort*** size "<<TrackToFit.size()<<endl;
-  cout <<" Magnetic Field used = "<<BField<<endl;
+  cout <<" Magnetic Field used = "<<mBField<<endl;
   double spath;
   //  double x0,y0,z0;
   //  double ptinv,psi,tanl;
@@ -675,7 +701,7 @@ Int_t StPointCollection::TrackSort( const StTrackVec & TrackToFit) const
   //  double Rmincut      = 4.0;
   //  long   MinTrkPoints = 10;
 
-  double bfield = BField; //This is now Tesla.
+  double bfield = mBField; //This is now Tesla.
 
   #ifdef ST_NO_TEMPLATE_DEF_ARGS
     vector<StPhysicalHelixD,allocator<StPhysicalHelixD> > helices;

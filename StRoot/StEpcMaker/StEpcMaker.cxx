@@ -1,6 +1,12 @@
 //
-// $Id: StEpcMaker.cxx,v 1.16 2001/11/06 23:35:27 suaide Exp $
+// $Id: StEpcMaker.cxx,v 1.18 2001/12/03 22:24:28 pavlinov Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.18  2001/12/03 22:24:28  pavlinov
+// tuned for case of no tracks
+//
+// Revision 1.17  2001/12/01 02:44:49  pavlinov
+// Cleanp for events with zero number of tracks
+//
 // Revision 1.16  2001/11/06 23:35:27  suaide
 // fixed bug in the way we get magnetic field
 //
@@ -56,7 +62,9 @@
 #include <iostream.h>
 #include <math.h>
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include <TDataSetIter.h>
+#include <TBrowser.h>
+#include <TMath.h>
 #include "StThreeVector.hh"
 #include "StHelix.hh"
 #include "SystemOfUnits.h"
@@ -66,7 +74,6 @@
 #include "StThreeVectorD.hh"
 #include "StHelixD.hh"
 #include "StPhysicalHelixD.hh"
-#include "TMath.h"
 #include "StDetectorDefinitions.h"
 #include "Stypes.h"
 #include "math_constants.h"
@@ -74,7 +81,7 @@
 
 // For StEvent
 #include "StEventTypes.h"
-#include "St_ObjectSet.h"
+#include "TObjectSet.h"
 #include "StEvent.h" 
 #include "StContainers.h"
 #include "StEmcCollection.h"
@@ -105,6 +112,7 @@ const TString detname[] = {"Bemc", "Bsmde", "Bsmdp"};
 //_____________________________________________________________________________
 StEpcMaker::StEpcMaker(const char *name):StMaker(name)
 {
+  mPoint = 0;
   //  drawinit=kFALSE;
 }
 //_____________________________________________________________________________
@@ -236,20 +244,29 @@ Int_t StEpcMaker::Make()
       }
     }
     
-    BField=0.5;   // default magnetic field in Tesla
+    mBField=0.5;   // default magnetic field in Tesla  
     
     StEventSummary*  summary=mEvent->summary();
-    if(summary) BField = summary->magneticField()/10.; // BField in Tesla
-    else 
-    {
-      // Get BField from gufld(,)
-      cout <<"Trying to Get the BField ..."<<endl;
+    if(summary) {
+      mBField = summary->magneticField()/10.; // mBField in Tesla
+      cout <<"StEpcMaker::Make() -> mBField(summary->magneticField()) = "
+           <<mBField<<"(tesla)"<<endl;
+    }
+    if(fabs(mBField) < 0.01) {
+    // Sometimes StEventSummary get wrong value of field - 3 Dec 2001
+      // Get mBField from gufld(,)
+      cout <<"Trying to Get the mBField ..."<<endl;
       float x[3] = {0,0,0};
       float b[3];
       gufld(x,b);
-      BField = 0.1*b[2]; // This is BField in Tesla.        
+      mBField = 0.1*b[2]; // This is mBField in Tesla.        
+      cout <<"StEpcMaker::Make() -> mBField(gufld) = "
+           <<mBField<<"(tesla)"<<endl;
     }
-    cout <<"BField (tesla) = "<<BField<<endl;
+    if(fabs(mBField) < 0.01) {
+      cout<<"StEpcMaker::Make() finished => wrong mBField !!!"<<endl; 
+      return kStWarn;
+    }
   
     //////////////////////////////////////
 
@@ -285,17 +302,17 @@ Int_t StEpcMaker::Make()
 
     StTrackVec& TrackToFit=TrackVecForEmc;
     //******Creating StPointCollection and calling findPoints
-    StPointCollection *point = new StPointCollection("point");
+    mPoint = new StPointCollection("point");
     
-    point->SetBField(BField);  // set correct magnetic field
+    mPoint->SetBField(mBField);  // set correct magnetic field
     
-    m_DataSet->Add(point);
+    m_DataSet->Add(mPoint);     // for convinience only
 
-    if(point->findEmcPoints(Bemccluster,Bprscluster,Bsmdecluster,Bsmdpcluster,TrackToFit)!=kStOK)
+    if(mPoint->findEmcPoints(Bemccluster,Bprscluster,Bsmdecluster,Bsmdpcluster,TrackToFit)!=kStOK)
     {
       return kStWarn;
     } 
-    else cout<<" findEmcPoint called"<<endl;
+    else cout<<" findEmcPoint called is ok "<<endl;
 
     MakeHistograms(); // Fill QA histgrams
     //------------------------------------------
@@ -334,7 +351,7 @@ void StEpcMaker::MakeHistograms()
   Int_t Point_Mult[4];
   for(UInt_t i=0;i<4;i++) Point_Mult[i]=0;
 
-  St_DataSetIter itr(m_DataSet);
+  TDataSetIter itr(m_DataSet);
   StPointCollection *cluster = 0;
   StPointCollection dummy;
   TString tit = dummy.GetTitle(); 
@@ -386,48 +403,31 @@ void StEpcMaker::MakeHistograms()
   }
   for(UInt_t i=0;i<4;i++) m_emc_points[i]->Fill(Float_t(Point_Mult[i]));
 }
-//-------------------------------------------------------------------------
-Int_t StEpcMaker::fillStEvent()
-{
-  if(!m_DataSet)return kStOK;
-  StEmcCollection *emc;
-  if(!mTheEmcCollection)
-  {
-    cout<<"Epc:: Emc Collection does not exist, Create one***"<<endl;
-    //Create StEmcCollection
-    emc = new StEmcCollection();
-    AddData(new St_ObjectSet("EmcCollection", emc));
-    cout<<" Epc:: EmcCollection created***"<<endl;
-  }
-  else
-  {
-    cout<<" Epc:: EmcCollection exist***"<<endl;
-    emc=mTheEmcCollection;
-  }
-   cout<<" Epc:: Main fillevent***"<<endl;
 
-  St_DataSetIter itr(m_DataSet);
-  StPointCollection *cluster = 0;
-  StPointCollection dummy;
-  TString tit = dummy.GetTitle();
-  cluster= (StPointCollection*)itr();
-  if(cluster != 0)
-  {
-    if(cluster->GetTitle() == tit)
-    {
-      Int_t nR = cluster->NPointsReal();
-      if(nR>0)
-      {
-		    TIter next(cluster->PointsReal());
-		    StEmcPoint *cl;
-		    for(Int_t i=0; i<nR; i++)
-        {
-		      cl = (StEmcPoint*)next();
-		      emc->addBarrelPoint(cl);
-		    } //for i=0
-	    }// for nR
-	  }//tit check
-	} //cluster!= 0 check
+Int_t 
+StEpcMaker::fillStEvent()
+{
+  // mTheEmcCollection  -> must be defined -> see Make() 
+  cout<<"Epc::fillStEvent() ***"<<endl;
+
+  if(mPoint) {
+    Int_t nR = mPoint->NPointsReal();
+
+    if(nR>0) {
+      cout<<"Number of Emc points "<< nR <<endl;
+      TIter next(mPoint->PointsReal());
+      StEmcPoint *cl;
+
+      for(Int_t i=0; i<nR; i++){
+	cl = (StEmcPoint*)next();
+	mTheEmcCollection->addBarrelPoint(cl);
+      } //for i=0
+
+    }// for nR
+
+  } else { //mPoint check
+    cout<<"mPoint iz zero !!! "<<endl;
+  }
   return kStOK;
 }
 //-------------------------------------------------------
@@ -446,4 +446,13 @@ bool StEpcMaker::accept(StTrack* track)
     //  class only (StTrack).
     //
     return track && track->flag() >= 0;
+}
+
+void 
+StEpcMaker::Browse(TBrowser* b)
+{
+  // Will be see StEmcCollection in browser as separate entity (if unzero)
+  // the same as in StEvent
+  if(mTheEmcCollection) b->Add((TObject*)mTheEmcCollection);
+  TDataSet::Browse(b);
 }

@@ -1,7 +1,10 @@
 //
-// $Id: StEpcMaker.h,v 1.5 2001/11/06 23:35:27 suaide Exp $
+// $Id: StEpcMaker.h,v 1.6 2001/12/01 02:44:50 pavlinov Exp $
 //
 // $Log: StEpcMaker.h,v $
+// Revision 1.6  2001/12/01 02:44:50  pavlinov
+// Cleanp for events with zero number of tracks
+//
 // Revision 1.5  2001/11/06 23:35:27  suaide
 // fixed bug in the way we get magnetic field
 //
@@ -50,6 +53,7 @@ typedef vector<Float_t> FloatVector;
 
 class StEvent;
 class StEmcCollection;
+class StPointCollection;
 // Taking Tracks from StEvent
 class StTrack;
 typedef StVector(StTrack*) StTrackVec;
@@ -62,6 +66,7 @@ class StEpcMaker : public StMaker
   private:
     StEvent*             mEvent;              //!
     StEmcCollection*     mTheEmcCollection;   //!
+    StPointCollection*   mPoint;              //! 29-nov-2001 by PAI
     bool                 accept(StTrack*);    // This is used to select tracks
     void                 MakeHistograms();    // Filling QA Histograms
 
@@ -77,7 +82,7 @@ class StEpcMaker : public StMaker
     TH1F *m_emc_points[4];     //! //Emc Point multiplicity
     TH1F *m_point_flag;        //! //Point Flag spectra
 
-    double BField;
+    double mBField;
   
   public: 
     StEpcMaker(const char *name="epc");
@@ -86,9 +91,10 @@ class StEpcMaker : public StMaker
     virtual Int_t Make();
     virtual Int_t Finish();
     virtual Int_t fillStEvent();
-
+    virtual void  Browse(TBrowser* b); // StEvent staf will be visible in browser
   
-    virtual const char *GetCVS() {static const char cvs[]="Tag $Name:  $ $Id: StEpcMaker.h,v 1.5 2001/11/06 23:35:27 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}  
+    virtual const char *GetCVS() const {static const char cvs[]=
+    "Tag $Name:  $ $Id: StEpcMaker.h,v 1.6 2001/12/01 02:44:50 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}  
 
   ClassDef(StEpcMaker, 1)// EMC-Track match maker
 };

@@ -1,5 +1,14 @@
-// $Id: StEmcADCtoEMaker.h,v 1.9 2001/10/31 15:01:07 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.12 2001/12/06 17:50:08 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.12  2001/12/06 17:50:08  suaide
+// changes to save ADC without pedestal subtraction
+//
+// Revision 1.11  2001/12/05 22:31:12  suaide
+// Modifications to include SMD
+//
+// Revision 1.10  2001/12/04 22:05:50  suaide
+// new QA histogram for tower
+//
 // Revision 1.9  2001/10/31 15:01:07  suaide
 // modified to discard bad EMC events
 //
@@ -34,6 +43,7 @@
 #include "StEmcUtil/emcInternalDef.h"
 
 class StEmcCollection;
+class StEmcDecoder;
 
 class StEmcADCtoEMaker : public StMaker 
 
@@ -42,17 +52,31 @@ class StEmcADCtoEMaker : public StMaker
            TH2F              *m_nhit;           //! 
            TH2F              *m_etot;           //!
            TH2F              *m_hits[MAXDET];   //!
-           TH2F              *m_adc[MAXDET];   //!
+           TH2F              *m_adc[MAXDET];    //!
            TH2F              *m_energy[MAXDET]; //!
-           TH1F              *m_adc1d[MAXDET]; //!
+           TH1F              *m_adc1d[MAXDET];  //!
+           
+           TH2F              *m_tower;          //!
+           TH1F              *m_towerMean;      //!
+           TH1F              *m_towerRMS;       //!
+           TH1F              *m_towerSum;       //!
+           
+           TH2F              *m_smdTimeBin;     //!
+           
            TDataSet          *m_CalibDb;
            TDataSet          *m_StatusDb;
            StEmcCollection   *m_emc;            //!
+           StEmcDecoder      *decoder;          //!
            
-           Int_t             status[18000];
-           Int_t             nChannels;
+           Int_t             status[MAXDET][18000];
+           Int_t             nChannels[MAXDET];
+           Float_t           ADCTemp[18000];
            
-           StEmcCollection   *GetEmcCollectionFromDaq(TDataSet* daq);           
+           Int_t             smdTimeBin[2][8];
+           Int_t             smdTimeBinTemp[18000];
+           Bool_t            kCalibTemp[MAXDET];
+           
+           StEmcCollection   *GetEmcCollectionFromDaq(TDataSet* daq);
            void              GetStatus(Int_t);
            
   protected:    
@@ -68,7 +92,7 @@ class StEmcADCtoEMaker : public StMaker
    virtual Int_t             Make();
    virtual Int_t             Finish();
            Bool_t            GetEmcEvent();
-           Bool_t            SubtractPedestal(Int_t);
+           Bool_t            CreateVector(Int_t);
            Bool_t            Calibrate(Int_t,Int_t*,Float_t*);
            Bool_t            FillHistograms(Int_t,Int_t,Float_t);
            Bool_t            FillStEvent();

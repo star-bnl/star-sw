@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL3EventSummary.h,v 2.2 2001/08/20 21:29:53 ullrich Exp $
+ * $Id: StL3EventSummary.h,v 2.4 2001/11/28 18:52:57 struck Exp $
  *
  * Author: Christof Struck, July 2001
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StL3EventSummary.h,v $
+ * Revision 2.4  2001/11/28 18:52:57  struck
+ * updated classdef version
+ *
+ * Revision 2.3  2001/11/14 23:29:35  struck
+ * minor changes in 'unbiasedTrigger' function, trigger word added for debugging purposes
+ *
  * Revision 2.2  2001/08/20 21:29:53  ullrich
  * Added method setCounters().
  *
@@ -40,8 +46,12 @@ public:
     unsigned int                     numberOfTracks() const;
     unsigned int                     numberOfAlgorithms() const;
 
+    int                              unbiasedTriggerPreScale() const;
+
     bool                             unbiasedTrigger() const;
     bool                             zVertexTrigger() const;
+
+    unsigned int                     l0TriggerWord() const;
 
     StPtrVecL3AlgorithmInfo&         algorithmsAcceptingEvent();
     const StPtrVecL3AlgorithmInfo&   algorithmsAcceptingEvent() const;
@@ -52,6 +62,10 @@ public:
     void                             addAlgorithm(StL3AlgorithmInfo*);
     void                             setNumberOfTracks(int);
     void                             setCounters(int, int);
+    void                             setUnbiasedTrigger();
+    void                             setUnbiasedTriggerPreScale(int);
+    void                             setZVertexTrigger();
+    void                             setL0TriggerWord(unsigned int);
 
 private:
     Int_t    mNumberOfProcessedEvents;
@@ -60,10 +74,12 @@ private:
     UInt_t   mNumberOfAlgorithms;
     Bool_t   mZVertexTrigger;
     Bool_t   mUnbiasedTrigger;
+    UInt_t   mL0TriggerWord;
+    Int_t    mUnbiasedPreScale;
     StPtrVecL3AlgorithmInfo   mL3AcceptAlgorithms;
     StSPtrVecL3AlgorithmInfo  mL3Algorithms;
 
-    ClassDef(StL3EventSummary,1)
+    ClassDef(StL3EventSummary,2)
 };
 
 
@@ -85,6 +101,9 @@ StL3EventSummary::unbiasedTrigger() const { return mUnbiasedTrigger; }
 inline bool
 StL3EventSummary::zVertexTrigger() const { return mZVertexTrigger; }
 
+inline unsigned int
+StL3EventSummary::l0TriggerWord() const { return mL0TriggerWord; }
+
 inline StPtrVecL3AlgorithmInfo&
 StL3EventSummary::algorithmsAcceptingEvent() { return mL3AcceptAlgorithms; }
 
@@ -97,10 +116,25 @@ StL3EventSummary::algorithms() { return mL3Algorithms; }
 inline const StSPtrVecL3AlgorithmInfo&
 StL3EventSummary::algorithms() const { return mL3Algorithms; }
 
+inline int
+StL3EventSummary::unbiasedTriggerPreScale() const { return mUnbiasedPreScale; }
+
 inline void
 StL3EventSummary::setCounters(int nProcessed, int nReconstructed) {
       mNumberOfProcessedEvents = nProcessed;
       mNumberReconstructedEvents = nReconstructed;
 }
+
+inline void
+StL3EventSummary::setUnbiasedTrigger() { mUnbiasedTrigger = true; }
+
+inline void
+StL3EventSummary::setZVertexTrigger() { mZVertexTrigger = true; }
+
+inline void
+StL3EventSummary::setUnbiasedTriggerPreScale(int preScale) { mUnbiasedPreScale = preScale; }
+
+inline void
+StL3EventSummary::setL0TriggerWord(unsigned int triggerWord) { mL0TriggerWord = triggerWord; }
 
 #endif

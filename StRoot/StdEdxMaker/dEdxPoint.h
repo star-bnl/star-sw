@@ -39,15 +39,30 @@ typedef struct {
   Int_t    pad;
   Int_t    Fee;
   Double_t dE;
-  Double_t dEU; // before correction
   Double_t dx;
   Double_t dEdx; 
+  Double_t dEdxL;  // log of dEdx
+  Double_t dEdxN;  // normolized to BB
+  Double_t dEU;    // before correction (only Scale2keV scale)
   Double_t dEdxU; 
-  Double_t dEdxP; // after pulser correction only
-  Double_t dEdxL; // log of dEdx
   Double_t dEdxLU; // log of dEdx
-  Double_t dEdxN; // normolized to BB
-  Double_t dEdxNP; // normolized to BB
+  Double_t dEdxNU;  // normolized to BB
+  Double_t dET;    // after TimeScale
+  Double_t dEdxT; 
+  Double_t dEdxLT; 
+  Double_t dEdxNT;  // normolized to BB
+  Double_t dES;    // after TimeScale + SecRow corrections
+  Double_t dEdxS; 
+  Double_t dEdxLS; 
+  Double_t dEdxNS;  // normolized to BB
+  Double_t dEZ;    // after TimeScale + SecRow + Sec Z corrections
+  Double_t dEdxZ; 
+  Double_t dEdxLZ; 
+  Double_t dEdxNZ;  // normolized to BB
+  Double_t dEV;    // after TimeScale + SecRow + Sec Z + Volume Charge corrections
+  Double_t dEdxV; 
+  Double_t dEdxLV; 
+  Double_t dEdxNV;  // normolized to BB
   Double_t dETot; 
   Double_t xyz[3];
   Double_t Prob; 

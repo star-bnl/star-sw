@@ -6,6 +6,7 @@
 #include "StDaqLib/GENERIC/RecHeaderFormats.hh"
 #include "StDaqLib/GENERIC/swaps.hh"
 #include "EMC_Reader.hh"
+#include "StEmcDecoder.h"
 
 //class EMC_BarrelReader:public EMC_Reader {
 class EMC_BarrelReader
@@ -20,18 +21,14 @@ class EMC_BarrelReader
       Bank_TOWERADCR*  getBarrelADC(Bank_EMCRBP*);
       int              FillBarrelTower(Bank_TOWERADCR*);
       void             PrintTowerArray();
-      int              GetCrate(int daq_tower,int& crate_seq);
-      int              Getjose_tower(int start,int& crate_seq);   
-      int              get_index_jose(int daq_tower,int& index_jose);
-      int              getTowerBin(const int,int &,int &,int &);
-      int              checkTowerId(const int);
       Bank_BTOWERADCR& getBTOWERADCR();
-                       ~EMC_BarrelReader(){}; 
+                       ~EMC_BarrelReader(); 
 
     protected:
       Bank_EMCP*       pBankEMCP;
       EventReader*     ercpy;
-
+      StEmcDecoder*    decoder;
+      
       Bank_BTOWERADCR  mTheTowerAdcR;
       Bank_BTOWERADCD  mTheTowerAdcD;
       Bank_BTOWERPEDR  mTheTowerPedR;
