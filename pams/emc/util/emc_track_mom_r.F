@@ -1,6 +1,6 @@
-      SUBROUTINE ev0_track_mom_r(trk,iflag,p)
+      SUBROUTINE emc_track_mom_r(trk,iflag,p)
 c:>------------------------------------------------------------------
-C:ROUTINE:      ev0_track_mom_r
+C:ROUTINE:      emc_track_mom_r
 C:DESCRIPTION:  returns track momentum components from track parameters
 C:ARGUMENTS:    see code
 C:ARGUMENTS:    see code
