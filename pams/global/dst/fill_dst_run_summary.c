@@ -13,8 +13,8 @@
 #define  MT_MAX      1.5
 #define  ETA_MIN    -2.0
 #define  ETA_MAX     2.0
-#define  PHI_MIN  -180.0
-#define  PHI_MAX   180.0 
+#define  PHI_MIN     0.0
+#define  PHI_MAX   360.0 
 #define  NBINS      30
 #define  NRANGE      6
 #define  NPHIRANGE   8
@@ -24,8 +24,6 @@
 #undef DEBUG
 #endif
 #define DEBUG 0
-
-float  mt_inverse_slope(double *mt_histo,int iBegin, int iStop);
 
 long  type_of_call fill_dst_run_summary_ (
   TABLE_HEAD_ST  *dst_run_header_h,    DST_RUN_HEADER_ST     *dst_runheader,
@@ -71,6 +69,12 @@ long  type_of_call fill_dst_run_summary_ (
    *:                                       A place holder for the actual
    *:                                       routine.
    *:      Aug 27, 1998       Dhammika W.   Updated to fill run_summary table.
+   *:      Nov 05, 1998       Dhammika W.   Removed filling pt, mt & eta
+   *:                                       multiplicity bins. It was a 
+   *:                                       misunderstanding. The values of
+   *:                                       eta_bin, pt_bin & mt_bins are
+   *:                                       filled in an initialization  kumac.
+   *:
    *:
    *:>--------------------------------------------------------------------
    */
@@ -82,13 +86,13 @@ long  type_of_call fill_dst_run_summary_ (
   int     minbin, maxbin, binrange;
   int     ivtx, vtx_id;
   double  pi, piov2;
-  double  mt_histo[NBINS], pt_histo[NBINS], eta_histo[NBINS];
-  float   pt_binsize, mt_binsize, eta_binsize, phi_binsize; 
+  /* double  mt_histo[NBINS], pt_histo[NBINS], eta_histo[NBINS];  */
+  /* float   pt_binsize, mt_binsize, eta_binsize, phi_binsize;    */
   float   dmt, deta1, deta2, mtweight1, mtweight2;
   float   pt, mt, eta ,phi, theta;
   float   n_events_good, mean, stddev;
-  static  int    first_event=1;
-  static  int    nevents=0;
+  static  int     first_event=1;
+  static  int     nevents=0;
   static  double  pt_sum=0, pt2_sum=0, eta_sum=0, eta2_sum=0;
   static  double  nchgtrk_sum=0, nchgtrk2_sum=0, nvertx_sum=0, nvertx2_sum=0;
  
@@ -106,12 +110,17 @@ long  type_of_call fill_dst_run_summary_ (
       dst_runsummary->time[i]         = 0;
     }
     dst_runsummary->cpu_total         = 0;
-    for (i=0; i<6; i++) {
-      dst_runsummary->eta_bins[i]     = 0;
-      dst_runsummary->pt_bins[i]      = 0;
-      dst_runsummary->mt_bins[i]      = 0;
-    }
-    dst_runsummary->n_phi_bins        = 0;
+    
+    /* Commented out initializing eta_bins, pt_bins & mt_bins. They represents
+     * the ranges in eta, pt & mt and n_phi_bins are filled in an initialiation
+     * kumac.  DSW  Nov 05, 1998.
+     */
+    /* for (i=0; i<6; i++) {                         */
+    /*   dst_runsummary->eta_bins[i]     = 0;        */
+    /*   dst_runsummary->pt_bins[i]      = 0;        */
+    /*   dst_runsummary->mt_bins[i]      = 0;        */
+    /*  }                                            */
+    /* dst_runsummary->n_phi_bins        = 0;        */
     for (i=0; i<2; i++) {
       dst_runsummary->mean_eta[i]     = 0;
       dst_runsummary->mean_pt[i]      = 0;
@@ -134,16 +143,6 @@ long  type_of_call fill_dst_run_summary_ (
     return STAFCV_BAD;
   }
 
-  /* Reset pt, mt, eta & phi  histograms  */
-  memset (&pt_histo,      0, sizeof(double)*NBINS);
-  memset (&mt_histo,      0, sizeof(double)*NBINS);
-  memset (&eta_histo,     0, sizeof(double)*NBINS);
-
-  /* Claculate  histogram bin size */
-  pt_binsize  = (PT_MAX  - PT_MIN )/NBINS;
-  mt_binsize  = (MT_MAX  - MT_MIN )/NBINS;
-  eta_binsize = (ETA_MAX - ETA_MIN)/NBINS;
-
   /* Get double precision pi */
   pi = acos(-1.);
   piov2 = pi/2;
@@ -154,18 +153,6 @@ long  type_of_call fill_dst_run_summary_ (
 	     pt_sum,pt2_sum,eta_sum,eta2_sum);
     fprintf (stderr, "ntrk_sum=%f, ntrk2_sum=%f,  vt_sum=%f, vt2_sum=%f \n",
 	     nchgtrk_sum, nchgtrk2_sum, nvertx_sum,  nvertx2_sum);    
-    fprintf (stderr, "\n");
-    fprintf (stderr, "pt_bins"); 
-    for (irange=0; irange<NRANGE; irange++)
-      fprintf (stderr, "%f",dst_runsummary->pt_bins[irange]);
-    fprintf (stderr, "\n");
-    fprintf (stderr, "mt_bins"); 
-    for (irange=0; irange<NRANGE; irange++)
-      fprintf (stderr, "%f",dst_runsummary->mt_bins[irange]);
-    fprintf (stderr, "\n");
-    fprintf (stderr, "eta_bins"); 
-    for (irange=0; irange<NRANGE; irange++)
-      fprintf (stderr, "%f",dst_runsummary->eta_bins[irange]);
   }
 
   /* Fill pt, mt, eta & phi histograms  */
@@ -179,18 +166,7 @@ long  type_of_call fill_dst_run_summary_ (
     pt    = 1./dst_track[itrk].invpt;
     mt    = sqrt(pt*pt + PI_MASS*PI_MASS)-PI_MASS;
     phi   = dst_track[itrk].psi;
-    /*  Determine appropriate bin number */ 
-    iptbin  =  ((pt - PT_MIN)/pt_binsize);
-    imtbin  =  ((mt - MT_MIN)/mt_binsize);
-    ietabin =  ((eta - ETA_MIN)/eta_binsize);
-    iphibin =  ((phi - PHI_MIN)/phi_binsize);
-    /*  Fill histograms.  Protect against going out of range. */
-    if (iptbin<NBINS)
-      pt_histo[iptbin]++;    /* pt histogram    */
-    if (0 <= ietabin && ietabin<NBINS)
-      eta_histo[ietabin]++;  /* eta histogram   */
-    if (imtbin<NBINS) 
-      mt_histo[imtbin]++;    /* mt histogram    */
+    if (phi<0) phi += 360.;
     /* Sum pt, pt^2, eta, eta^2  for all good global charged tracks*/ 
     pt_sum    += pt;
     pt2_sum   += pt*pt;
@@ -204,22 +180,6 @@ long  type_of_call fill_dst_run_summary_ (
   nchgtrk2_sum += pow(glb_trk_good,2);
   nvertx_sum   += dst_vertex_h->nok;
   nvertx2_sum  += pow(dst_vertex_h->nok,2);
-
-  binrange = NBINS/NRANGE;  /* NBINS have to be a multiple of NRANGE */
-
-  /* Fill pt, my, eta & phi  bin multiplicities  */
-  for (irange=0; irange<NRANGE; irange++) { /* begin  looping over ranges  */
-    minbin = binrange*irange;
-    maxbin = minbin + binrange;
-    for (ibin=minbin; ibin < maxbin; ibin++) {/* begin  looping over bins  */
-      /* Fill pt  bin  multiplicities  */
-      dst_runsummary->pt_bins[irange]  +=  pt_histo[ibin];                  
-      /* Fill mt bin  multiplicities   */
-      dst_runsummary->mt_bins[irange]  +=  mt_histo[ibin];      
-      /* Fill eta bin  multiplicities  */
-      dst_runsummary->eta_bins[irange] +=  eta_histo[ibin];     
-    }  /* end of looping over bins */
-  }  /* end of looping over ranges */
   
   /*  
       I assume here that dst_runsummary->n_events_good will only be filled at
