@@ -3,9 +3,12 @@
 // Macro for plotting hits and pixels in combination with bfc.C
 //            plotting both sides of tpc seperately
 //
-// $Id: TwoSideDraw.C,v 1.3 1999/09/23 21:52:18 snelling Exp $
+// $Id: TwoSideDraw.C,v 1.4 1999/11/10 00:15:36 snelling Exp $
 //
 // $Log: TwoSideDraw.C,v $
+// Revision 1.4  1999/11/10 00:15:36  snelling
+// removed drawing of pseudo-padrow hits for geant points
+//
 // Revision 1.3  1999/09/23 21:52:18  snelling
 // added gSystem->Load("StAnalysisUtilities") because that's not in bfc anymore
 //
@@ -87,7 +90,7 @@ int DrawGeantHits(Text_t* varexp, Text_t* selection, Text_t* options) {
   g2t_tpc_hit.Fill(*phg2t);
   // define plot options
   g2t_tpc_hit.SetMarkerStyle(24);
-  g2t_tpc_hit.SetMarkerColor(5);
+  g2t_tpc_hit.SetMarkerColor(3);
   g2t_tpc_hit.Draw(varexp,selection,options);
   return kStOK;
 }
@@ -167,7 +170,7 @@ void TwoSideDraw() {
     DrawHits("y:x","z>0","scat"); 
   }
   if (!chain->GetOption(kMINIDAQ) && !chain->GetOption(kTDAQ)) {
-      DrawGeantHits("x1:x0","x2>0","same,scat");
+      DrawGeantHits("x1:x0","x2>0 && volume_id<2446","same,scat");
   }  
 
   pad2->cd();
@@ -182,7 +185,7 @@ void TwoSideDraw() {
     DrawHits("z:x","z>0","scat"); 
   }
   if (!chain->GetOption(kMINIDAQ) && !chain->GetOption(kTDAQ)) {
-    DrawGeantHits("x2:x0","x2>0","same,scat");
+    DrawGeantHits("x2:x0","x2>0 && volume_id<2446","same,scat");
   }
 
   pad3->cd();
@@ -197,7 +200,7 @@ void TwoSideDraw() {
     DrawHits("y:x","z<0","scat"); 
   }
   if (!chain->GetOption(kMINIDAQ) && !chain->GetOption(kTDAQ)) {
-    DrawGeantHits("x1:x0","x2<0","same,scat");
+    DrawGeantHits("x1:x0","x2<0 && volume_id<2446","same,scat");
   }  
 
   pad4->cd();
@@ -210,6 +213,6 @@ void TwoSideDraw() {
   }
   else { DrawHits("z:x","z<0","scat"); }
   if (!chain->GetOption(kMINIDAQ) && !chain->GetOption(kTDAQ)) {
-    DrawGeantHits("x2:x0","x2<0","same,scat");
+    DrawGeantHits("x2:x0","x2<0 && volume_id<2446","same,scat");
   }
 }
