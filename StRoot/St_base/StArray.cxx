@@ -76,7 +76,7 @@ void StObjArray::Streamer(TBuffer &b)
 //______________________________________________________________________________
 void StObjArray::Browse(TBrowser *b)
 {
-  enum { maxBrowsable =  500 000};
+  enum { maxBrowsable =  5000};
 
    // Browse this collection (called by TBrowser).
    // If b=0, there is no Browse call TObject::Browse(0) instead.
