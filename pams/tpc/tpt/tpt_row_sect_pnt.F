@@ -1,5 +1,8 @@
-* $Id: tpt_row_sect_pnt.F,v 1.5 1998/05/26 04:15:13 sakrejda Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.6 1998/07/12 05:29:07 sakrejda Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.6  1998/07/12 05:29:07  sakrejda
+* space in local array increased
+*
 * Revision 1.5  1998/05/26 04:15:13  sakrejda
 * message type set to E to limit printing
 *
@@ -49,12 +52,12 @@ C_____________________________________________________________________
       RECORD /tcl_tphit_st/     hit(*)
       RECORD /table_head_st/    tpar_h
       RECORD /tpt_pars_st/    tpar(*)
-      RECORD /sort_hit/         tpsort(2000)
+      RECORD /sort_hit/         tpsort(4000)
 C______________________________________________________________________
       INTEGER tpstart(mxrow,mxsector),tpcount(mxrow,mxsector),loc_hit(*)
       INTEGER irow,isect,i,inew,j,k,ipos,ic,itim,ntmp,ipnt,ipass
       INTEGER next_hit(tpt_mxhit),slice_loc(mxsector,mxrow,mxslic)
-      INTEGER slice_pnt(2,mxsector*mxrow*mxslic),loc_hit_tmp(2000)
+      INTEGER slice_pnt(2,mxsector*mxrow*mxslic),loc_hit_tmp(4000)
       INTEGER iret, tls_Index_Sort_r,nhalf,itim1,ipos1,kc
       INTEGER tgc_drift_volume_length,id1
 
@@ -123,7 +126,7 @@ C       loop through row-sorted list
          do j=1,mxrow
            ipnt= tpstart(j,i)
            ic = tpcount(j,i)
-           if(ic.gt.0.and.ic.le.2000) then
+           if(ic.gt.0.and.ic.le.4000) then
             k=0
             kc=0
             do while (k.lt.ic)
@@ -193,8 +196,8 @@ C       loop through row-sorted list
                if(slice_pnt(2,ipos1).eq.1)slice_pnt(1,ipos1)=
      >         loc_hit(ipnt+k-1)
             end do
-           else if(ic.gt.2000) then
-               write(m132,*) 'TPTRSP-E1 not enough storage to sort data in z'
+           else if(ic.gt.4000) then
+               write(m132,*) 'TPTRSP-E1 not enough storage to sort data in z',ic
                call Message( m132, 1, id1 )
            endif
          end do
