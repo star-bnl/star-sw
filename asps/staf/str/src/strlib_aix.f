@@ -455,6 +455,9 @@
 *	Provides a machine-dependent (native) OPEN routine, intended
 *	to be called only from STROPEN (qv).
 
+*	Note that the "ACTION" keyword is disabled, since it's only
+*	available with the newer compiler.  1jul94  RWH
+
 	INTEGER RECL_JARG
 
 	LOGICAL Open_success
@@ -472,7 +475,7 @@
 	    OPEN(UNIT=LUN,FILE=FILENAME,STATUS=STATUS_CARG
      1	        ,ACCESS=ACCESS_CARG,FORM=FORM_CARG
      1	        ,RECL=RECL_JARG
-     1	        ,ACTION=READ
+*     1	        ,ACTION=READ
      1	        ,ERR=1)
 	  ELSE
 	    OPEN(UNIT=LUN,FILE=FILENAME,STATUS=STATUS_CARG
@@ -486,7 +489,7 @@
 	  IF ( READONLY_FLAG ) THEN
 	    OPEN(UNIT=LUN,FILE=FILENAME,STATUS=STATUS_CARG
      1	        ,ACCESS=ACCESS_CARG,FORM=FORM_CARG
-     1	        ,ACTION=READ
+*     1	        ,ACTION=READ
      1	        ,ERR=1)
 	  ELSE
 	    OPEN(UNIT=LUN,FILE=FILENAME,STATUS=STATUS_CARG
