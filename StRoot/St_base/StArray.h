@@ -10,17 +10,20 @@
  
 #include <assert.h>
 #include "TString.h"
+#include "TObject.h"
 #include "StObject.h"
-#ifndef __CINT__
-  #include <vector>
-  #include <algorithm>
-  #ifndef ST_NO_NAMESPACES
+//#ifndef __CINT__
+class TObject;
+#include <vector>
+#include <algorithm>
+#ifndef ST_NO_NAMESPACES
     using std::vector;
     using std::random_shuffle;
-  #endif /*ST_NO_NAMESPACES*/
+#endif /*ST_NO_NAMESPACES*/
   typedef vector<TObject*> VecTObj;
+#ifndef __CINT__
   typedef vector<TObject*>::iterator       VecTObjIter;
-  typedef vector<TObject*const>::iterator const_VecTObjIter;
+  typedef vector<TObject* const>::iterator const_VecTObjIter;
   typedef VecTObjIter StObjArrayIter;
   typedef VecTObjIter StStrArrayIter;
   typedef VecTObjIter StRefArrayIter;
@@ -29,7 +32,7 @@
   typedef const_VecTObjIter const_StRefArrayIter;
 #endif /*!__CINT__*/
 
-#ifdef __CINT__
+#ifdef __CINT__NEVER
 	class VecTObj;
 	class VecTObjIter;
 	class  const_VecTObjIter;
@@ -107,21 +110,24 @@ virtual Bool_t IsFolder() const;
         TObject * const &back()  const { return fV.back();}
         TObject *       &back()        { return fV.back();}
 
+#ifndef __CINT__
 const_VecTObjIter begin() const {return fV.begin();}
         VecTObjIter begin()       {return fV.begin();}
 const_VecTObjIter end()   const {return fV.end();}
         VecTObjIter end()         {return fV.end();}
         VecTObjIter erase(VecTObjIter it                 ) {return fV.erase(it);}
         VecTObjIter erase(VecTObjIter fst,VecTObjIter lst) {return fV.erase(fst,lst);}
+#endif /*!__CINT__*/
+
         TObject *&       operator[](Int_t i)       {return fV[i];}
         TObject * const &operator[](Int_t i) const {return fV[i];}
 void    push_back(const TObject * const to){fV.push_back((TObject*)to);}
         Int_t getEntries() const;
 protected:
-#ifndef __CINT__
+//#ifndef __CINT__
 VecTObj fV;
-#endif //_CINT__
-ClassDef(StObjArray,2)
+//#endif //_CINT__
+ClassDef(StObjArray,3)
 };
 
 
@@ -137,7 +143,9 @@ public:
  virtual void operator =(const StStrArray &a); 
 
  void push_back(const TObject *to){fV.push_back((TObject*)to);}
+#ifndef __CINT__
  VecTObjIter erase(VecTObjIter fst,VecTObjIter lst=0);
+#endif /*!__CINT__*/
  void clear();
  virtual void makeZombie(int flg);			
 private:
@@ -162,7 +170,7 @@ ClassDef(StRefArray,3)
 #define StCollectionDef(QWERTY) \
 class St ## QWERTY;\
 typedef St ## QWERTY**            St ## QWERTY ## Iterator;\
-typedef St ## QWERTY*const* const_St ## QWERTY ## Iterator;\
+typedef St ## QWERTY * const * const_St ## QWERTY ## Iterator;\
 \
 class StPtrVec ## QWERTY : public StRefArray \
 { \
@@ -233,10 +241,10 @@ typedef const_St ## QWERTY ## Iterator  StSPtrVec ## QWERTY ## ConstIterator;\
 //______________________________________________________________
 #define StCollectionImp(QWERTY) \
 \
-ClassImp(StPtrVec ## QWERTY ) \
+ClassImpUnique(StPtrVec ## QWERTY ,1 ) \
 void 		StPtrVec  ## QWERTY::Streamer(TBuffer& b){StRefArray::Streamer(b);} \
 \
-ClassImp(StSPtrVec ## QWERTY ) \
+ClassImpUnique(StSPtrVec ## QWERTY , 2 ) \
 \
 void 		StSPtrVec ## QWERTY::Streamer(TBuffer& b){StStrArray::Streamer(b);} \
 

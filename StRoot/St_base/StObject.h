@@ -1,5 +1,8 @@
-// $Id: StObject.h,v 1.12 2001/05/30 17:46:42 perev Exp $
+// $Id: StObject.h,v 1.13 2002/11/26 02:23:38 perev Exp $
 // $Log: StObject.h,v $
+// Revision 1.13  2002/11/26 02:23:38  perev
+// new ROOT adoptation
+//
 // Revision 1.12  2001/05/30 17:46:42  perev
 // StEvent branching
 //
@@ -56,14 +59,15 @@ protected:
    UInt_t fID[4];
 public:
     	StUUId();
-       ~StUUId(){};
+virtual ~StUUId(){};
 void 	Generate();
 StUUId  &operator=(const StUUId &from);
 StUUId  &operator=(const char  *from);
 Int_t  IsNull() const {return (fID[3]==0);}
 
-void  Streamer(TBuffer &b);
+//void  Streamer(TBuffer &b);
 int Compare(const StUUId &u2) const;
+ClassDef(StUUId,1)
 };   
 
 

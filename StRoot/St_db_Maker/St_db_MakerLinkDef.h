@@ -4,5 +4,5 @@
 #pragma link off all functions;
 #pragma link C++ class St_db_Maker;
 #pragma link C++ class St_dbConfig-;
-#pragma link C++ class dbConfig_st-!;
+#pragma link C++ class dbConfig_st-;
 #endif

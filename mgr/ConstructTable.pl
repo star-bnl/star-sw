@@ -121,7 +121,7 @@ sub TableLinkDef {
 #pragma link off all classes;         
 #pragma link off all functions;       
 #pragma link C++ class St_' . $stem . '-;     
-#pragma link C++ class ' . $stem . '_st-!;    
+#pragma link C++ class ' . $stem . '_st+;    
 #endif 
 ';
     print OUT $h;                               
