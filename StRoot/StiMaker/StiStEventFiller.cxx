@@ -1,11 +1,19 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.33 2004/07/07 19:33:48 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.34 2004/07/30 18:49:18 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.34  2004/07/30 18:49:18  calderon
+ * For running in production, Yuri's dEdx Maker will fill the Pid Traits,
+ * so the filling of Pid Traits in the filler is no longer needed:
+ * it actually causes confusion because the V0 finders will loop over
+ * the PID traits vector and find the first one, so they won't find
+ * the trait created by the dEdx Maker.  It is best to just comment
+ * out the filling of the Pid Traits here.
+ *
  * Revision 2.33  2004/07/07 19:33:48  calderon
  * Added method fillFlags.  Flags tpc, tpc+svt (globals and primaries) and flags -x02 tracks with less than 5 total fit points
  *
@@ -823,7 +831,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
   fillGeometry(gTrack, track, false); // inner geometry
   fillGeometry(gTrack, track, true);  // outer geometry
   fillFitTraits(gTrack, track);
-  fillPidTraits(gTrack, track);
+  //fillPidTraits(gTrack, track);
   fillFlags(gTrack);
   return;
 }
