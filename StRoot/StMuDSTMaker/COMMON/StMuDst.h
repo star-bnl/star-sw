@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.19 2004/07/27 02:35:23 mvl Exp $
+ * $Id: StMuDst.h,v 1.20 2004/08/25 04:05:56 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -25,6 +25,7 @@ class StKinkMuDst;
 class StV0Mc;
 class StXiMc;
 class StKinkMc;
+class StStrangeAssoc;
 class TCut;
 
 class StMuEmcCollection;
@@ -167,12 +168,15 @@ public:
   /// returns pointer to the i-th v0
   static StV0MuDst* v0s(int i) { return (StV0MuDst*)strangeArrays[smuV0]->UncheckedAt(i); }
   static StV0Mc* v0sMc(int i) { return (StV0Mc*)strangeArrays[smuV0Mc]->UncheckedAt(i); }
+  static StStrangeAssoc* v0Assoc(int i) { return (StStrangeAssoc*)strangeArrays[smuV0Assoc]->UncheckedAt(i); }
   /// returns pointer to the i-th xi
   static StXiMuDst* xis(int i) { return (StXiMuDst*)(void*)strangeArrays[smuXi]->UncheckedAt(i); }
   static StXiMc* xisMc(int i) { return (StXiMc*)strangeArrays[smuXiMc]->UncheckedAt(i); }
+  static StStrangeAssoc* xiAssoc(int i) { return (StStrangeAssoc*)strangeArrays[smuXiAssoc]->UncheckedAt(i); }
   /// returns pointer to the i-th kink
   static StKinkMuDst* kinks(int i) { return (StKinkMuDst*)(void*)strangeArrays[smuKink]->UncheckedAt(i); }
   static StKinkMc* kinksMc(int i) { return (StKinkMc*)strangeArrays[smuKinkMc]->UncheckedAt(i); }
+  static StStrangeAssoc* kinkAssoc(int i) { return (StStrangeAssoc*)strangeArrays[smuKinkAssoc]->UncheckedAt(i); }
   /// returns pointer to the i-th stranneCut (of type TCut)
   static TCut* strangeCuts(int i) { return (TCut*)strangeArrays[smuCut]->UncheckedAt(i); }
 
@@ -239,6 +243,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.20  2004/08/25 04:05:56  mvl
+ * Added getters for StStrangeAssocs
+ *
  * Revision 1.19  2004/07/27 02:35:23  mvl
  * Added access methods for Strangeness Monte-Carlo arrays
  *
