@@ -17,8 +17,8 @@ void Load()
 void DrawDstHist(
      const Char_t *firstHistName="*",const Char_t *lastHistName="*",
 //     const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/./psc0055_07_40evts.root",
-//     const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0067_02_40evts.root",
-     const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss",
+     const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0064_07_40evts.root",
+//     const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss",
      const Char_t *psFile="QA_hist.ps")
 { 
     cout << endl   
@@ -84,7 +84,7 @@ void DrawDstHist(
     }
     cout << "Total: " << nFile << " files will be analysed" << endl ;
 
-    in->SetMaxEvent(2);
+//    in->SetMaxEvent(2);
     St_QA_Maker *QA   = new St_QA_Maker("QA","event/geant/Event");
     QA->SetHistsNames(firstHistName,lastHistName);
     QA->SetDraw();
