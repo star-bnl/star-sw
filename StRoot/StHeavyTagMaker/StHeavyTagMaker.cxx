@@ -1,4 +1,4 @@
-/* $Id: StHeavyTagMaker.cxx,v 1.2 2004/07/29 23:06:11 calderon Exp $
+/* $Id: StHeavyTagMaker.cxx,v 1.3 2004/08/26 03:24:10 jeromel Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, July 2004
  ***************************************************************************
@@ -22,6 +22,9 @@
  ***************************************************************************
  *
  * $Log: StHeavyTagMaker.cxx,v $
+ * Revision 1.3  2004/08/26 03:24:10  jeromel
+ * Fixed wrong indexing
+ *
  * Revision 1.2  2004/07/29 23:06:11  calderon
  * Changed adc cut to match towers to 360 ADC counts,
  * and documented the origin.
@@ -55,7 +58,7 @@ StHeavyTagMaker::StHeavyTagMaker(const char *name,const char* title)
     // 3d threshold, set to 7 GeV so each threshold is in steps of ~3 GeV
     mMassThres[0] = 1.2;
     mMassThres[1] = 4.25;
-    mMassThres[3] = 7.0;
+    mMassThres[2] = 7.0;
 }
 
 StHeavyTagMaker::~StHeavyTagMaker(){
