@@ -29,29 +29,19 @@ bool MapKeyLessThan::operator() (const HitMapKey& key1, const HitMapKey& key2) c
 {
     //cout <<"HitMapKey::operator<()"<<endl;
     bool val = false;
-    if ( fabs(key1.refangle-key2.refangle) < reftolerance) { //Call these equal, check position
-
-	if ( fabs(key1.position-key2.position) < postolerance) {//Call these equal
-	    val = false;
-	}
+    if ( fabs(key1.refangle-key2.refangle) < reftolerance) {
+	//Call these equal, check position
 	
+	if ( fabs(key1.position-key2.position) < postolerance) {
+	    //Call these equal
+	    val = false;
+	}	
 	else if (key1.position < key2.position) {val = true;}
 	else {val = false;}
     }
     
     else if (key1.refangle < key2.refangle) {val = true;}
     else {val = false;}
-
-    //Old
-    /*
-      if (key1.refangle > key2.refangle) {val =  false;}
-      else if (key1.refangle < key2.refangle) {val = true;}
-      else if (key1.refangle == key2.refangle) {
-      if (key1.position > key2.position) {val = false;}
-      else if (key1.position < key2.position) {val = true;}
-      else if (key1.position == key2.position) {val = false;}
-      }
-    */
 
     return val;
 }
