@@ -18,8 +18,6 @@ TOPDIR := $(shell pwd)
 #include $(STAF_ROOT_HOME)/MakeEnv.mk
 include $(STAR)/mgr/MakeEnv.mk
 include $(STAR)/mgr/MakeArch.mk
-#include $(STAR)/mgr/MakeSYS.mk
-#                                   -I$(CERN_ROOT)/src/geant321 
 
 #
 #	INP_DIR & OUT_DIR could be declared in invoking
@@ -199,14 +197,13 @@ $(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(wildcard $(SRC_DIR)/St_*.h)
 $(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
 	$(COMMON_LINKDEF)
 	@echo "#pragma link C++ class St_DataSet;"       >> $(LINKDEF);
-#	@echo "#pragma link C++ class St_XDFFile;"       >> $(LINKDEF);
 	@echo "#pragma link C++ enum EModuleTypes;"      >> $(LINKDEF);
 	@echo "#pragma link C++ class St_DataSetIter;"   >> $(LINKDEF);
 	@echo "#endif"					 >> $(LINKDEF);
 	@cat $(LINKDEF);
 	cd $(GEN_DIR); cp $(1ST_DEPS) .; \
 	rootcint -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCLUDES) -I$(INP_DIR) $(notdir $(1ST_DEPS)) \
-        St_DataSet.h St_XDFFile.h $(notdir $(LINKDEF));
+        St_DataSet.h $(notdir $(LINKDEF));
 
 $(FILES_CINT_ORD) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h
 	$(ORD_LINKDEF)
