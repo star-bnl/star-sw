@@ -1,8 +1,7 @@
 #include "StSpectraAnalysis.h"
-
-
-StSpectraAnalysis::~StSpectraAnalysis() {
-}
+#include "StParticleDefinition.hh"
+#include "StParticleTable.hh"
+#include "StEventTypes.h"
 
 void StSpectraAnalysis::setParticle(string particle) {
 
@@ -22,13 +21,46 @@ StParticleDefinition* StSpectraAnalysis::getParticle() {
 void StSpectraAnalysis::setTitle(string title) {
   mTitle = title;
 }
+string StSpectraAnalysis::getTitle() {
+  return mTitle;
+}
 
-void StSpectraAnalysis::setEfficiency(StEfficiency effic) {
+void StSpectraAnalysis::setEfficiency(StEfficiency& effic) {
   mEffic = effic;
 }
 StEfficiency* StSpectraAnalysis::getEfficiency() {
   return &(mEffic);
 }
+
+void StSpectraAnalysis::setAbscissa(StSpectraAbscissa abscissa,
+				    float lbin, float ubin, int nbin) {
+  mAbscissa     = abscissa;
+  mlbinAbscissa = lbin;
+  mubinAbscissa = ubin;
+  mnbinAbscissa = nbin;
+}
+
+void StSpectraAnalysis::setOrdinate(StSpectraOrdinate ordinate,
+				    float lbin, float ubin, int nbin) {
+  mOrdinate     = ordinate;
+  mlbinOrdinate = lbin;
+  mubinOrdinate = ubin;
+  mnbinOrdinate = nbin;
+}
+
+StSpectraAnalysis::StSpectraAnalysis(){
+  // no-op
+}
+StSpectraAnalysis::~StSpectraAnalysis(){
+}
+
+
+
+
+
+
+
+
 
 
 

@@ -1,7 +1,10 @@
 
-// $Id: StSpectraMaker.h,v 1.6 2000/02/03 20:47:41 fisyak Exp $
+// $Id: StSpectraMaker.h,v 1.7 2000/03/08 02:30:20 ogilvie Exp $
 //
 // $Log: StSpectraMaker.h,v $
+// Revision 1.7  2000/03/08 02:30:20  ogilvie
+// individual output .root files per analysis, prep. for user choice of axes, (y,eta) (pperp,mperp)
+//
 // Revision 1.6  2000/02/03 20:47:41  fisyak
 // CC5 fixes
 //
@@ -36,7 +39,7 @@
 //  Software developed for the STAR Detector at Brookhaven National Laboratory
 //
 // Author List: 
-//  Torre Wenaus, BNL
+//  Craig Ogilvie
 //
 // History:
 //
@@ -47,6 +50,7 @@
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
 #endif
+
 class StSpectraAnalysis;
 
 class StSpectraMaker : public StMaker {
@@ -54,10 +58,12 @@ class StSpectraMaker : public StMaker {
 private:
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
-vector<StSpectraAnalysis*, allocator<StSpectraAnalysis*> > mSpectraAnalysisContainer;//!
+ vector<StSpectraAnalysis*,
+    allocator<StSpectraAnalysis*>> mSpectraAnalysisContainer;//!
 #else
-vector<StSpectraAnalysis*> mSpectraAnalysisContainer;//!
+ vector<StSpectraAnalysis*> mSpectraAnalysisContainer;//!
 #endif
+
 TFile* mOutput;
 
 protected:
@@ -73,7 +79,7 @@ public:
   virtual Int_t  Finish();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraMaker.h,v 1.6 2000/02/03 20:47:41 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;};
+  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraMaker.h,v 1.7 2000/03/08 02:30:20 ogilvie Exp $ built "__DATE__" "__TIME__ ; return cvs;};
 
   ClassDef(StSpectraMaker,1)
 
@@ -81,5 +87,7 @@ public:
 
 
 #endif
+
+
 
 

@@ -4,12 +4,9 @@
 #include "StSpectraCutDCA.h"
 #include "StGetConfigValue.hh"
 #include "TFile.h"
+#include "StParticleTable.hh"
 
-StEfficiency::StEfficiency(){
-  //
-  // for better design should call working constructor with default arguments
-  //
-}
+StEfficiency::StEfficiency() {}
 
 StEfficiency::StEfficiency(char* efficFile) {
 
@@ -40,7 +37,13 @@ StEfficiency::StEfficiency(char* efficFile) {
   //
   cout << histRootFileName << endl;
   TFile histRootFile(histRootFileName);
-  mEfficHistogram = (*(TH2D*)histRootFile.Get("efficYPt"));
+  //
+  // check which histograms are there
+  //
+   mEfficHistogram = *((TH2D*)histRootFile.Get("efficYPt"));
+   mAbscissa = kPperp;
+   mOrdinate = kRapidity;
+   //
   histRootFile.Close();
 }
 
@@ -78,16 +81,20 @@ double StEfficiency::efficiency(StTrack* track) {
 return effic;
 }
 
-TH2D StEfficiency::getEfficHistogram() { 
-  return mEfficHistogram;
+StSpectraOrdinate StEfficiency::getOrdinate(){
+      return mOrdinate;
+}
+
+StSpectraAbscissa StEfficiency::getAbscissa(){
+  return mAbscissa;
 }
 
 double StEfficiency::getLowEdge(char axis) {
   double lowEdge =0.; 
   if (axis == 'x' || axis == 'X') {
-      lowEdge = mEfficHistogram.GetXaxis()->GetXmin();
+      lowEdge = (mEfficHistogram.GetXaxis())->GetXmin();
   } else if (axis == 'y' || axis == 'Y') {
-      lowEdge = mEfficHistogram.GetYaxis()->GetXmin();
+      lowEdge = (mEfficHistogram.GetYaxis())->GetXmin();
   }
   return lowEdge;
 }
