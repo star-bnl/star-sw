@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.cc,v 3.1 2000/08/09 18:56:18 wdeng Exp $
+ * $Id: StKinkMuDst.cc,v 3.2 2000/08/10 01:16:24 genevb Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.cc,v $
+ * Revision 3.2  2000/08/10 01:16:24  genevb
+ * Added number of dedx points
+ *
  * Revision 3.1  2000/08/09 18:56:18  wdeng
  * Get parent track lengths from primary tracks.
  *
@@ -71,6 +74,7 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex)
     StDedxPidTraits* pid = (StDedxPidTraits*) pidParent[i];
     if (pid->method() == kTruncatedMeanId) {
       mDedxParent = pid->mean();
+      mNumDedxParent = pid->numberOfPoints();
       break;
     }
   }
@@ -84,6 +88,7 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex)
     StDedxPidTraits* pid = (StDedxPidTraits*) pidDaughter[i];
     if (pid->method() == kTruncatedMeanId) {
       mDedxDaughter = pid->mean();
+      mNumDedxDaughter = pid->numberOfPoints();
       break;
     }
   }

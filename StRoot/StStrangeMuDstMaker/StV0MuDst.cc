@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.cc,v 3.0 2000/07/14 12:56:50 genevb Exp $
+ * $Id: StV0MuDst.cc,v 3.1 2000/08/10 01:16:24 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.cc,v $
+ * Revision 3.1  2000/08/10 01:16:24  genevb
+ * Added number of dedx points
+ *
  * Revision 3.0  2000/07/14 12:56:50  genevb
  * Revision 3 has event multiplicities and dedx information for vertex tracks
  *
@@ -71,6 +74,7 @@ void StV0MuDst::Fill(StV0Vertex* v0Vertex,
     StDedxPidTraits* pid = (StDedxPidTraits*) pidPos[i];
     if (pid->method() == kTruncatedMeanId) {
       mDedxPos = pid->mean();
+      mNumDedxPos = pid->numberOfPoints();
       break;
     }
   }
@@ -86,6 +90,7 @@ void StV0MuDst::Fill(StV0Vertex* v0Vertex,
     StDedxPidTraits* pid = (StDedxPidTraits*) pidNeg[i];
     if (pid->method() == kTruncatedMeanId) {
       mDedxNeg = pid->mean();
+      mNumDedxNeg = pid->numberOfPoints();
       break;
     }
   }

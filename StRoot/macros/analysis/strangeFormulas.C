@@ -1,5 +1,8 @@
-// $Id: strangeFormulas.C,v 3.0 2000/07/17 22:08:11 genevb Exp $
+// $Id: strangeFormulas.C,v 3.1 2000/08/10 01:21:10 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 3.1  2000/08/10 01:21:10  genevb
+// Added number of dedx points
+//
 // Revision 3.0  2000/07/17 22:08:11  genevb
 // Updated for rev. 3, fixed bug in number of tpc hits
 //
@@ -338,9 +341,11 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("V0.chi2Pos()", "V0.mChi2Pos");
     formulate("V0.clPos()", "V0.mClPos");
     formulate("V0.dedxPos()", "V0.mDedxPos");
+    formulate("V0.numDedxPos()", "V0.mNumDedxPos");
     formulate("V0.chi2Neg()", "V0.mChi2Neg");
     formulate("V0.clNeg()", "V0.mClNeg");
     formulate("V0.dedxNeg()", "V0.mDedxNeg");
+    formulate("V0.numDedxNeg()", "V0.mNumDedxNeg");
 
 
     // V0Mc
@@ -469,10 +474,12 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("Xi.clV0()", "Xi.mClV0");
     formulate("Xi.chi2Pos()", "Xi.mChi2Pos");
     formulate("Xi.dedxPos()", "Xi.mDedxPos");
+    formulate("Xi.numDedxPos()", "Xi.mNumDedxPos");
     formulate("Xi.clPos()", "Xi.mClPos");
     formulate("Xi.chi2Neg()", "Xi.mChi2Neg");
     formulate("Xi.clNeg()", "Xi.mClNeg");
     formulate("Xi.dedxNeg()", "Xi.mDedxNeg");
+    formulate("Xi.numDedxNeg()", "Xi.mNumDedxNeg");
 
 
     // Now, finally get to the unique Xi formulas:
@@ -670,6 +677,7 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("Xi.chi2Bachelor()", "Xi.mChi2Bachelor");
     formulate("Xi.clBachelor()", "Xi.mClBachelor");
     formulate("Xi.dedxBachelor()", "Xi.mDedxBachelor");
+    formulate("Xi.numDedxBachelor()", "Xi.mNumDedxBachelor");
 
 
     // XiMc

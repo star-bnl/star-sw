@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMuDst.hh,v 3.1 2000/07/14 14:09:11 genevb Exp $
+ * $Id: StXiMuDst.hh,v 3.2 2000/08/10 01:16:25 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 30-Mar-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiMuDst.hh,v $
+ * Revision 3.2  2000/08/10 01:16:25  genevb
+ * Added number of dedx points
+ *
  * Revision 3.1  2000/07/14 14:09:11  genevb
  * Fixed small typo
  *
@@ -49,8 +52,8 @@ public:
   void    Fill(StXiVertex*,StV0Vertex*,StStrangeEvMuDst*);
 
   Int_t   charge() const;              // Particle charge
-  virtual Float_t decayLengthV0() const;  // 3-d decay distance
-  virtual Float_t decayLengthXi() const;  // 3-d decay distance
+  Float_t decayLengthV0() const;       // 3-d decay distance
+  Float_t decayLengthXi() const;       // 3-d decay distance
   Float_t decayVertexXiX() const;      // Coordinate of decay vertex
   Float_t decayVertexXiY() const;
   Float_t decayVertexXiZ() const;
@@ -89,6 +92,7 @@ public:
   Long_t  detectorIdXi();              // Detector ID for Xi vertex
   virtual Long_t detectorIdPars();     // Detector ID for pars used in Xi finder
   Float_t dedxBachelor() const;        // dE/dX of bachelor
+  UShort_t numDedxBachelor() const;    // Number of dE/dX points for bachelor
 
 protected:
   Int_t   mCharge;                     // Written out
@@ -120,6 +124,7 @@ protected:
   Float_t MomV0AlongXi();
 
   Float_t mDedxBachelor;
+  UShort_t mNumDedxBachelor;
 
   ClassDef(StXiMuDst,3)
 };
@@ -153,4 +158,5 @@ inline Float_t StXiMuDst::clXi()   const { return mClXi; }
 inline Float_t StXiMuDst::chi2Bachelor() const { return mChi2Bachelor; }
 inline Float_t StXiMuDst::clBachelor()   const { return mClBachelor; }
 inline Float_t StXiMuDst::dedxBachelor() const { return mDedxBachelor; }
+inline UShort_t StXiMuDst::numDedxBachelor() const { return mNumDedxBachelor; }
 #endif
