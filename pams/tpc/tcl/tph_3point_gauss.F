@@ -1,5 +1,8 @@
-* $Id: tph_3point_gauss.F,v 1.4 1999/10/07 03:21:37 snelling Exp $
+* $Id: tph_3point_gauss.F,v 1.5 2000/01/20 23:15:33 snelling Exp $
 * $Log: tph_3point_gauss.F,v $
+* Revision 1.5  2000/01/20 23:15:33  snelling
+* Made 3point gaussian default
+*
 * Revision 1.4  1999/10/07 03:21:37  snelling
 * changes related to StMessage
 *
@@ -115,7 +118,7 @@ c Find pad with largest signal:
            if (y(2).le.y(3)) then
               tph_3point_gauss = -1
 	      write(m132,*) 'TPH_3POINT_GAUSS bad shape'
-              call StError(m132)
+              call StWarning(m132)
               return
            endif
            istart = 1
@@ -123,7 +126,7 @@ c Find pad with largest signal:
            if (y(npads-1).le.y(npads-2)) then
               tph_3point_gauss = -1
 	      write(m132,*) 'TPH_3POINT_GAUSS bad shape'
-              call StError(m132)
+              call StWarning(m132)
               return
            endif
            istart = npads - 2
@@ -144,7 +147,7 @@ C RRB: Slightly recode to avoid direct comparison of floating pt. numbers
 	delta = x(istart+1) - x(istart)
 	if (ABS(delta-1.).gt.1.E-7) then
 	   write(m132,*) 'TPH_3POINT_GAUSS unexpected delta .ne. 1'
-	   call StError(m132)
+	   call StWarning(m132)
 	   tph_3point_gauss = -1
 	   return
 	endif
@@ -153,7 +156,7 @@ C RRB: Slightly recode to avoid direct comparison of floating pt. numbers
         if (r213.le.0.0) then
            tph_3point_gauss = -1
 	   write(m132,*) 'TPH_3POINT_GAUSS bad shape - r213'
-	   call StError(m132)
+	   call StWarning(m132)
            return
 
 ********************** let's try to take it out....**********************
