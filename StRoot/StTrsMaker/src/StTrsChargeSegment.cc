@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.32 2001/11/21 01:53:42 long Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.33 2002/04/25 21:37:03 long Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -13,6 +13,9 @@
  *
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.33  2002/04/25 21:37:03  long
+ * *** empty log message ***
+ *
  * Revision 1.32  2001/11/21 01:53:42  long
  * adding log message for 3/2001 long;
  *
@@ -243,6 +246,18 @@ void StTrsChargeSegment::whichGEANTParticle(double& particleMass, int& charge)
     case 15:    // anti-proton
 	particleMass = .93827231*GeV;
 	charge = -1;
+	break;
+    case 49:    // he3
+	particleMass = 2.8*GeV;
+	charge = -1;
+	break;
+    case 45:    // deuteron
+	particleMass = 1.876*GeV;
+	charge = 2;
+	break;
+    case 47:    // he4
+	particleMass = 3.727*GeV;
+	charge = 2;
 	break;
     default: // Probably uncharged, but DO NOT BREAK IT!
 	//cout << "Mass is Undefined (" << mPid << ")" << endl;
