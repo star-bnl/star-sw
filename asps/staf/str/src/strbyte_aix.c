@@ -35,11 +35,18 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifndef TRUE
 #define TRUE -1
+#endif
+#ifndef FALSE
 #define FALSE 0
+#endif
 
 
-	void	strend_( char *, int *, size_t );
+/*	Prototypes     */
+
+	void	strend_( char* string, int* lnb, size_t string_length );
+
 
 /*	Define file-wide-global pointers fpr and fpw and function-pointer fopen,  type FILE, defined in stdio.h:     */
 

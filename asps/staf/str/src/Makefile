@@ -3,6 +3,7 @@ ARFLAGS      = vqs
 FFLAGS       = -c -O -w -extend_source
 FFLAGS4      = -c -O -w -extend_source -irix4
 FFLAGS_DBG   = -c -g -w -extend_source
+CC           = cc
 CCFLAGS      = -c -O -ansi -fullwarn -prototypes
 CCFLAGS4     = -c -O -ansi -fullwarn -prototypes -irix4
 CCFLAGS_DBG  = -c -g -ansi -fullwarn -prototypes
@@ -33,7 +34,6 @@ strbyte$(ARCH_TAG).o strtermc$(ARCH_TAG).o strlibc$(ARCH_TAG).o
 	ar $(ARFLAGS) libstr.a strlib.o strlib$(ARCH_TAG).o strmth.o strplot.o \
 	strterm$(ARCH_TAG).o str_file.o str_parse.o str_time.o \
 	strbyte$(ARCH_TAG).o strtermc$(ARCH_TAG).o strlibc$(ARCH_TAG).o
-	ar ts libstr.a
 
 libstr4.a : strlib.o4 strlib$(ARCH_TAG).o4 strmth.o4 strplot.o4 strterm$(ARCH_TAG).o4 str_file.o4 \
 str_parse.o4 str_time.o4 \
@@ -42,7 +42,6 @@ strbyte$(ARCH_TAG).o4 strtermc$(ARCH_TAG).o4 strlibc$(ARCH_TAG).o4
 	ar $(ARFLAGS) libstr4.a strlib.o4 strlib$(ARCH_TAG).o4 strmth.o4 strplot.o4 \
 	strterm$(ARCH_TAG).o4 str_file.o4 str_parse.o4 str_time.o4 \
 	strbyte$(ARCH_TAG).o4 strtermc$(ARCH_TAG).o4 strlibc$(ARCH_TAG).o4
-	ar ts libstr4.a
 
 libstr_dbg.a : strlib_dbg.o strlib$(ARCH_TAG)_dbg.o strmth_dbg.o strplot_dbg.o strterm$(ARCH_TAG)_dbg.o str_file_dbg.o \
 str_parse_dbg.o str_time_dbg.o \
@@ -51,7 +50,6 @@ strbyte$(ARCH_TAG)_dbg.o strtermc$(ARCH_TAG)_dbg.o strlibc$(ARCH_TAG)_dbg.o
 	ar $(ARFLAGS) libstr_dbg.a strlib_dbg.o strlib$(ARCH_TAG)_dbg.o strmth_dbg.o strplot_dbg.o \
 	strterm$(ARCH_TAG)_dbg.o str_file_dbg.o str_parse_dbg.o str_time_dbg.o \
 	strbyte$(ARCH_TAG)_dbg.o strtermc$(ARCH_TAG)_dbg.o strlibc$(ARCH_TAG)_dbg.o
-	ar ts libstr_dbg.a
 
 
 strlib.o4 : strlib.f
@@ -135,33 +133,35 @@ str_time_dbg.o : str_time.f
 
 
 strbyte$(ARCH_TAG).o4 : strbyte$(ARCH_TAG).c
-	cc $(CCFLAGS4) strbyte$(ARCH_TAG).c -o strbyte$(ARCH_TAG).o4
+	echo $ARCH_TAG
+	$(CC) $(CCFLAGS4) strbyte$(ARCH_TAG).c -o strbyte$(ARCH_TAG).o4
 
 strbyte$(ARCH_TAG).o : strbyte$(ARCH_TAG).c
-	cc $(CCFLAGS) strbyte$(ARCH_TAG).c
+	$(CC) $(CCFLAGS) strbyte$(ARCH_TAG).c
 
 strbyte$(ARCH_TAG)_dbg.o : strbyte$(ARCH_TAG).c
-	cc $(CCFLAGS_DBG) strbyte$(ARCH_TAG).c -o strbyte$(ARCH_TAG)_dbg.o
+	echo $ARCH_TAG
+	$(CC) $(CCFLAGS_DBG) strbyte$(ARCH_TAG).c -o strbyte$(ARCH_TAG)_dbg.o
 
 
 strtermc$(ARCH_TAG).o4 : strtermc$(ARCH_TAG).c
-	cc $(CCFLAGS4) strtermc$(ARCH_TAG).c -o strtermc$(ARCH_TAG).o4
+	$(CC) $(CCFLAGS4) strtermc$(ARCH_TAG).c -o strtermc$(ARCH_TAG).o4
 
 strtermc$(ARCH_TAG).o : strtermc$(ARCH_TAG).c
-	cc $(CCFLAGS) strtermc$(ARCH_TAG).c
+	$(CC) $(CCFLAGS) strtermc$(ARCH_TAG).c
 
 strtermc$(ARCH_TAG)_dbg.o : strtermc$(ARCH_TAG).c
-	cc $(CCFLAGS_DBG) strtermc$(ARCH_TAG).c -o strtermc$(ARCH_TAG)_dbg.o
+	$(CC) $(CCFLAGS_DBG) strtermc$(ARCH_TAG).c -o strtermc$(ARCH_TAG)_dbg.o
 
 
 strlibc$(ARCH_TAG).o4 : strlibc$(ARCH_TAG).c
-	cc $(CCFLAGS4) strlibc$(ARCH_TAG).c -o strlibc$(ARCH_TAG).o4
+	$(CC) $(CCFLAGS4) strlibc$(ARCH_TAG).c -o strlibc$(ARCH_TAG).o4
 
 strlibc$(ARCH_TAG).o : strlibc$(ARCH_TAG).c
-	cc $(CCFLAGS) strlibc$(ARCH_TAG).c
+	$(CC) $(CCFLAGS) strlibc$(ARCH_TAG).c
 
 strlibc$(ARCH_TAG)_dbg.o : strlibc$(ARCH_TAG).c
-	cc $(CCFLAGS_DBG) strlibc$(ARCH_TAG).c -o strlibc$(ARCH_TAG)_dbg.o
+	$(CC) $(CCFLAGS_DBG) strlibc$(ARCH_TAG).c -o strlibc$(ARCH_TAG)_dbg.o
 
 
 
