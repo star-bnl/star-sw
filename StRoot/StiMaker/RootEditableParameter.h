@@ -2,7 +2,7 @@
 #define RootEditableParameter_H
 #include <TGNumberEntry.h>
 #include <TGLabel.h>
-#include "Sti/EditableParameter.h"
+#include "Sti/Base/EditableParameter.h"
 
 class RootEditableParameter : public EditableParameter
 {

@@ -1,5 +1,5 @@
 #include "StiOptionFrame.h"
-#include "Sti/Parameter.h"
+//////#include "Sti/Base/Parameter.h"
 #include <TGListBox.h>
 #include <TGClient.h>
 #include <TGFrame.h>
@@ -119,7 +119,7 @@ void StiOptionFrame::initialize()
 	  TGCheckButton* tempButton = new TGCheckButton(frame.back(),
 							new TGHotString(par->getDescription().c_str()), -1);
 	  par->setCheckButton(tempButton);
-	  if (par->getValue()==true)
+	  if (par->getBoolValue()==true)
 	    tempButton->SetState(kButtonDown);
 	  frame.back()->AddFrame(tempButton, layout2);
 	}
@@ -127,16 +127,17 @@ void StiOptionFrame::initialize()
 	{
 	  TGNumberEntry * numberEntry = new TGNumberEntry( frame.back() );
 	  par->setNumberEntry(numberEntry);
-	  numberEntry->SetNumber( par->getValue() );
 	  if (par->getType()==Parameter::Integer)
 	    {
 	      // Integer
+	      numberEntry->SetNumber( par->getIntValue() );
 	      numberEntry->SetFormat(TGNumberFormat::kNESInteger, 
 				     TGNumberFormat::kNEAAnyNumber);
 	    }
 	  else
 	    {
 	      // Double 
+	      numberEntry->SetNumber( par->getDoubleValue() );
 	      if (par->getIncrement()==2)
 		// two significant figures
 		numberEntry->SetFormat(TGNumberFormat::kNESRealTwo, 
