@@ -1,5 +1,8 @@
-// $Id: StPeCLumiMaker.cxx,v 1.3 2002/04/18 19:02:09 meissner Exp $
+// $Id: StPeCLumiMaker.cxx,v 1.4 2002/06/03 23:07:44 meissner Exp $
 // $Log: StPeCLumiMaker.cxx,v $
+// Revision 1.4  2002/06/03 23:07:44  meissner
+// return flag of Make() for filtering
+//
 // Revision 1.3  2002/04/18 19:02:09  meissner
 // Change Init to  InitRun
 //
@@ -56,7 +59,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCLumiMaker.cxx,v 1.3 2002/04/18 19:02:09 meissner Exp $";
+static const char rcsid[] = "$Id: StPeCLumiMaker.cxx,v 1.4 2002/06/03 23:07:44 meissner Exp $";
 
 ClassImp(StPeCLumiMaker)
 
@@ -93,9 +96,12 @@ Int_t StPeCLumiMaker::InitRun(Int_t runnr) {
   cout << uDstFileName << endl;
   TString  tDst("dst");
   TString  tEvt("event");
+  TString  tEvtSel("evtsel");
   TString  tuDst("lumiDst");
+  TString  tuDstSel("lumiDstSel");
   uDstFileName.ReplaceAll(tDst,tuDst);
   uDstFileName.ReplaceAll(tEvt,tuDst);
+  uDstFileName.ReplaceAll(tEvtSel,tuDstSel);
   cout << "StPeCLumiMaker: uDst output file: " << uDstFileName << endl;
   // Get runnumber from filename somewhow
   // filenumber= 
@@ -145,7 +151,7 @@ Int_t StPeCLumiMaker::Make() {
     cout<<"Not a peripheral event (NTracks>15)"<<endl;
     flag = kStErr;
   }
-  if( NTracks <= 0 ){
+  if( NTracks <= 1 ){
     cout<<"StPeCLumiMaker: Event has no tracks!"<<endl;
     flag = kStErr;
   }
@@ -154,7 +160,8 @@ Int_t StPeCLumiMaker::Make() {
   LumiEntry->fill(  event );
   // fill the tree 
   uDstTree->Fill();
-  return kStOk ;
+  //return kStOk ;
+  return flag ;
 }
 
 Int_t StPeCLumiMaker::Finish() {

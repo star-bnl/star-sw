@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.21 2002/04/18 19:02:11 meissner Exp $
+// $Id: StPeCMaker.cxx,v 1.22 2002/06/03 23:07:46 meissner Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.22  2002/06/03 23:07:46  meissner
+// return flag of Make() for filtering
+//
 // Revision 1.21  2002/04/18 19:02:11  meissner
 // Change Init to  InitRun
 //
@@ -104,7 +107,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.21 2002/04/18 19:02:11 meissner Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.22 2002/06/03 23:07:46 meissner Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -141,9 +144,12 @@ Int_t StPeCMaker::InitRun(Int_t runnr) {
 
   TString  tDst("dst");
   TString  tEvt("event");
+  TString  tEvtSel("evtsel");
   TString  tuDst("uDst");
+  TString  tuDstSel("uDstSel");
   uDstFileName.ReplaceAll(tDst,tuDst);
   uDstFileName.ReplaceAll(tEvt,tuDst);
+  uDstFileName.ReplaceAll(tEvtSel,tuDstSel);
   cout << "StPeCMaker: uDst output file: " << uDstFileName << endl;
 
   m_outfile   = new TFile( uDstFileName,"recreate");
@@ -247,18 +253,14 @@ Int_t StPeCMaker::Make() {
     cout<<"StPeCMaker: Do Not fill  Event to Tree !"<<endl;
   } 
 
-
-
-
-  
-
    
   pevent->clear();
   geant->clear ( ) ;
   trigger->clear();
 
-  if ( filter ) return flag ;
+  //if ( filter ) return flag ;
   return kStOk ;
+  //return flag;
 }
 
 
