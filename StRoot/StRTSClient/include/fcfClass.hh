@@ -9,7 +9,7 @@
 
 
 // steering - watch it!
-#define FCF_ANNOTATE_CLUSTERS
+//#define FCF_ANNOTATE_CLUSTERS
 
 
 
