@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// $Id: StMiniEmbed.C,v 1.6 2003/07/09 01:07:23 calderon Exp $
+// $Id: StMiniEmbed.C,v 1.7 2004/03/30 03:16:14 calderon Exp $
 // owner: Manuel Calderon de la Barca Sanchez
 //
 // what it does: reads .geant.root file from emedding data, produces minimc.root file 
@@ -10,6 +10,17 @@
 //       so if one needs to run elsewhere, and the output directory doesn't have the same
 //       lower level directory structure, no output files will be done.
 // $Log: StMiniEmbed.C,v $
+// Revision 1.7  2004/03/30 03:16:14  calderon
+// Modifications for running in bfc.
+//  - Changed to use StiIOInterface (IOMaker in normal mode, TreeMaker in bfc)
+//  - Cleaned up Init(), InitRun() to handle the changing file names.
+//  - Initialize lots of variables and pointers in constructor.
+//  - Delete some pointers in Finish (deleting the TTree causes a seg fault, though.)
+//  - Note that currently the StHits in the ITTF chain don't have a usedInFit() flag,
+//    so there will be many messages complaining about this.
+//  - Removed the mDebug data member, every Maker already has one, so change
+//    to use that throughout the package.
+//
 // Revision 1.6  2003/07/09 01:07:23  calderon
 // Addition of FTPC reference multiplicity
 // Addition of other multiplicity values for StMiniMcEvent
@@ -125,7 +136,7 @@ void StMiniEmbed(Int_t nevents=2,
   //associator->doPrintMemoryInfo = kTRUE;
 
   StMiniMcMaker *krap = new StMiniMcMaker;
-  krap->setDebug();
+  krap->SetDebug();
   TString outDirName = outDir;
   TString filename   = MainFile;
   TString embedrun   = MainFile;

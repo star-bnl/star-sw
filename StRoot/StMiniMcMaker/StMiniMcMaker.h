@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.h,v 1.9 2004/03/15 18:59:47 calderon Exp $
+ * $Id: StMiniMcMaker.h,v 1.10 2004/03/30 03:16:15 calderon Exp $
  * \file  StMiniMcMaker.h
  * \brief Filling of StMiniMcEvent classes from StMcEvent, StEvent, StAssociationMaker
  * 
@@ -12,6 +12,17 @@
  * manuel calderon de la barca's code.
  *
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.10  2004/03/30 03:16:15  calderon
+ * Modifications for running in bfc.
+ *  - Changed to use StiIOInterface (IOMaker in normal mode, TreeMaker in bfc)
+ *  - Cleaned up Init(), InitRun() to handle the changing file names.
+ *  - Initialize lots of variables and pointers in constructor.
+ *  - Delete some pointers in Finish (deleting the TTree causes a seg fault, though.)
+ *  - Note that currently the StHits in the ITTF chain don't have a usedInFit() flag,
+ *    so there will be many messages complaining about this.
+ *  - Removed the mDebug data member, every Maker already has one, so change
+ *    to use that throughout the package.
+ *
  * Revision 1.9  2004/03/15 18:59:47  calderon
  * - Added support for encoded common hits.  Now the common hits of the TPC and
  * the SVT are stored, with the corresponding methods to decode and return these
@@ -57,6 +68,17 @@
  * Revision 1.4  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.10  2004/03/30 03:16:15  calderon
+ * Modifications for running in bfc.
+ *  - Changed to use StiIOInterface (IOMaker in normal mode, TreeMaker in bfc)
+ *  - Cleaned up Init(), InitRun() to handle the changing file names.
+ *  - Initialize lots of variables and pointers in constructor.
+ *  - Delete some pointers in Finish (deleting the TTree causes a seg fault, though.)
+ *  - Note that currently the StHits in the ITTF chain don't have a usedInFit() flag,
+ *    so there will be many messages complaining about this.
+ *  - Removed the mDebug data member, every Maker already has one, so change
+ *    to use that throughout the package.
+ *
  * Revision 1.9  2004/03/15 18:59:47  calderon
  * - Added support for encoded common hits.  Now the common hits of the TPC and
  * the SVT are stored, with the corresponding methods to decode and return these
@@ -98,7 +120,7 @@
  * but in order not to break Jenn's scripts if she was already using this macro,
  * this parameter was added at the end and defaults to "rcf", which is appropriate
  * for hijing files reconstructed in rcf.
- * and $Id: StMiniMcMaker.h,v 1.9 2004/03/15 18:59:47 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.h,v 1.10 2004/03/30 03:16:15 calderon Exp $ plus header comments for the macros
  *
  */
 
@@ -130,7 +152,7 @@ class StMcEvent;
 class StMcTrack;
 class StTrack;
 class StPrimaryTrack;
-class StIOMaker;
+class StIOInterFace;
 class StThreeVectorF;
 class StTpcDedxPidAlgorithm;
 class StuProbabilityPidAlgorithm;
@@ -171,12 +193,11 @@ class StMiniMcMaker : public StMaker{
   Int_t Make();
   Int_t Finish();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMiniMcMaker.h,v 1.9 2004/03/15 18:59:47 calderon Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMiniMcMaker.h,v 1.10 2004/03/30 03:16:15 calderon Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   //---- SETS -------
 
   void  setGhost(Bool_t doit=kTRUE)      { mGhost = doit; }
-  void  setDebug(Bool_t debug=kTRUE)     { mDebug = debug; }
   void  setOutDir(const char* dir= "./") { mOutDir = dir; }  
   void  setPtCut(Float_t minPt=0, Float_t maxPt=9999) 
     { mMinPt=minPt; mMaxPt=maxPt; }
@@ -250,7 +271,7 @@ class StMiniMcMaker : public StMaker{
   size_t           getIndex(size_t mult);
   // members
   StMiniMcEvent*   mMiniMcEvent; //! 
-  StIOMaker*       mIOMaker;      //!
+  StIOInterFace*   mIOMaker;      //!
   TTree*           mMiniMcTree;   //!
   TFile*           mMiniMcDST;    //!
   TString          mInFileName;   //!
@@ -271,7 +292,6 @@ class StMiniMcMaker : public StMaker{
   StuProbabilityPidAlgorithm* mPidAlgo; //!
 
   Bool_t           mGhost;        //!
-  Bool_t           mDebug;        //!
   
   Float_t          mMinPt;        //!
   Float_t          mMaxPt;        //!

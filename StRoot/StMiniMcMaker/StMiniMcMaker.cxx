@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.14 2004/03/15 18:59:47 calderon Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.15 2004/03/30 03:16:15 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,6 +7,17 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.15  2004/03/30 03:16:15  calderon
+ * Modifications for running in bfc.
+ *  - Changed to use StiIOInterface (IOMaker in normal mode, TreeMaker in bfc)
+ *  - Cleaned up Init(), InitRun() to handle the changing file names.
+ *  - Initialize lots of variables and pointers in constructor.
+ *  - Delete some pointers in Finish (deleting the TTree causes a seg fault, though.)
+ *  - Note that currently the StHits in the ITTF chain don't have a usedInFit() flag,
+ *    so there will be many messages complaining about this.
+ *  - Removed the mDebug data member, every Maker already has one, so change
+ *    to use that throughout the package.
+ *
  * Revision 1.14  2004/03/15 18:59:47  calderon
  * - Added support for encoded common hits.  Now the common hits of the TPC and
  * the SVT are stored, with the corresponding methods to decode and return these
@@ -74,6 +85,17 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.15  2004/03/30 03:16:15  calderon
+ * Modifications for running in bfc.
+ *  - Changed to use StiIOInterface (IOMaker in normal mode, TreeMaker in bfc)
+ *  - Cleaned up Init(), InitRun() to handle the changing file names.
+ *  - Initialize lots of variables and pointers in constructor.
+ *  - Delete some pointers in Finish (deleting the TTree causes a seg fault, though.)
+ *  - Note that currently the StHits in the ITTF chain don't have a usedInFit() flag,
+ *    so there will be many messages complaining about this.
+ *  - Removed the mDebug data member, every Maker already has one, so change
+ *    to use that throughout the package.
+ *
  * Revision 1.14  2004/03/15 18:59:47  calderon
  * - Added support for encoded common hits.  Now the common hits of the TPC and
  * the SVT are stored, with the corresponding methods to decode and return these
@@ -137,7 +159,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.14 2004/03/15 18:59:47 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.15 2004/03/30 03:16:15 calderon Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -201,12 +223,30 @@ ClassImp(StMiniMcMaker)
 
 StMiniMcMaker::StMiniMcMaker(const Char_t *name, const Char_t *title)
   : 
-  StMaker(name,title), 
-  mOutDir("./"), 
-  mGhost(kFALSE), 
-  mDebug(kFALSE),
+  StMaker(name,title),
+  mMiniMcEvent(0),
+  mIOMaker(0),
+  mMiniMcTree(0),
+  mMiniMcDST(0),
+  mInFileName(),
+  mInFilePrefix(),
+  mOutFileName(),
+  mOutDir("./"),
+  mParameterFileName(),
+  mRcEvent(0),
+  mMcEvent(0),
+  mRun(0),
+  mRcHitMap(0),
+  mRcTrackMap(0),
+  mMcTrackMap(0),
+  mRcVertexPos(0),
+  mMcVertexPos(0),
+  mTpcDedxAlgo(0),
+  mPidAlgo(0),
+  mGhost(kTRUE), 
   mMinPt(0),mMaxPt(99999),
-  mNSplit(0),mNRc(0),mNGhost(0),mNContam(0)
+  mNSplit(0),mNRc(0),mNGhost(0),mNContam(0),
+  mNMatched(0),mNMatGlob(0)
     
 {
     
@@ -243,15 +283,24 @@ StMiniMcMaker::Finish()
 
   closeFile();
 
-  cout << "\trc=" << mNRc << endl
-       << "\tmatched=" << mNMatched << endl
-       << "\tsplit=" << mNSplit << endl
-       << "\tcontam=" << mNContam << endl
-       << "\tghost=" << mNGhost << endl
-       << "\tmat global=" << mNMatGlob << endl;
+  cout << "\treconstr.  = " << mNRc << endl
+       << "\tmatched    = " << mNMatched << endl
+       << "\tsplit      = " << mNSplit << endl
+       << "\tcontam.    = " << mNContam << endl
+       << "\tghost      = " << mNGhost << endl
+       << "\tmat global = " << mNMatGlob << endl;
 
-
-
+  if (Debug()) cout << "deleting mMiniMcEvent" << endl;
+  delete mMiniMcEvent;
+  mMiniMcEvent = 0;
+  // for some reason, the tree doesn't like to get deleted here...
+//   if (Debug()) cout << "deleting mMiniMcTree" << endl;
+//   delete mMiniMcTree;
+//   mMiniMcTree = 0;
+  if (Debug()) cout << "deleting mMiniMcDST" << endl;
+  delete mMiniMcDST;
+  mMiniMcDST = 0;
+  
   return StMaker::Finish();
 }
 /*
@@ -264,56 +313,12 @@ StMiniMcMaker::InitRun(int runID) {
 
   cout << "\tpt cut : " << mMinPt << " , " << mMaxPt << endl;
 
-  mIOMaker = (StIOMaker*)GetMaker("IO");
-
-  //
-  // instantiate the event object here (embedding or simulation?)
-  //
-  if(mDebug) cout << "\tCreating StMiniMcEvent..." << endl;
-  mMiniMcEvent =  new StMiniMcEvent();
-  if(mGhost) {
-    cout << "\tGhost loop on" << endl;
-    // double check that we really want the ghost flag
-    if(mInFileName.Contains("st_physics")){ // probably not
-      mGhost = kFALSE;
-      cout << "\tApparently we're looking at real data. " <<endl
-	   << "\tTurning off the ghost flag" << endl;
-    }
+  mIOMaker = (StIOInterFace*)GetMaker("IO");
+  if (!mIOMaker) {
+      cout << "No StIOMaker found, trying StTreeMaker" << endl;
+      mIOMaker = (StIOInterFace*) GetMaker("outputStream");
   }
-
-  //
-  // init the tpc dedx algo once
-  //
-  mTpcDedxAlgo = new StTpcDedxPidAlgorithm;
-    
-  //
-  // create file, trees, etc.
-  //
-  Int_t stat = openFile();
-
-  return stat + StMaker::InitRun(runID);
-
-}   
-    
-Int_t
-StMiniMcMaker::Init()
-{
-  //Moved everything important to InitRun(int)
-  cout << "###StMiniMcMaker::Init()" << endl;
-
-  cout << "\tpt cut : " << mMinPt << " , " << mMaxPt << endl;
-  return StMaker::Init();
-}   
-
-/*
-  Make called every event
- */
-
-Int_t
-StMiniMcMaker::Make()
-{
-  if(mDebug) cout << "###StMiniMcMaker::Make()" << endl;
-  
+  assert(mIOMaker);
   Int_t stat=0;
   //
   // if it's a new file, then close the old one and open a new one
@@ -327,19 +332,104 @@ StMiniMcMaker::Make()
 	  curFileName = strrchr(mIOMaker->GetFile(),'/')+1;
       }
   }
-
+  if (Debug()) {
+      cout << "Current File Name (StIO) " << curFileName << endl;
+      cout << "Cached  File Name (MiniMcMk) " << mInFileName << endl;
+  }
   if(!mInFileName.Contains(curFileName)){
-      if(mDebug) {
+      if(Debug()) {
 	  cout << "\tNew file found : " << curFileName << endl
 	       << "\tReplacing " << mInFileName << endl;
       }
       closeFile();
-      int fileBeginIndex = mInFileName.Index(mInFilePrefix,0);
-      mInFileName.Remove(fileBeginIndex);
-      mInFileName.Append(curFileName);
-      stat = openFile();
-      if(!stat) return stat;
+      int fileBeginIndex = mInFileName.Last('/');
+      mInFileName.Remove(0,fileBeginIndex+1);
+      if (Debug()) cout << "New InFileName = " << mInFileName << endl;
   }
+  
+  //
+  // instantiate the event object here (embedding or simulation?)
+  //
+  if (!mMiniMcEvent) {
+      if(Debug()) cout << "\tStMiniMcMaker::InitRun Creating StMiniMcEvent..." << endl;
+      mMiniMcEvent =  new StMiniMcEvent();
+  }
+  else {
+      if (Debug()) cout << "\tStMiniMcMaker::InitRun StMiniMcEvent Already created" << endl;
+  }
+  if(mGhost) {
+    cout << "\tGhost loop on" << endl;
+    // double check that we really want the ghost flag
+    if(mInFileName.Contains("st_physics")){ // probably not
+      mGhost = kFALSE;
+      cout << "\tApparently we're looking at real data. " <<endl
+	   << "\tTurning off the ghost flag" << endl;
+    }
+  }
+
+  //
+  // init the tpc dedx algo once
+  //
+  if (!mTpcDedxAlgo)
+      mTpcDedxAlgo = new StTpcDedxPidAlgorithm;
+    
+  //
+  // create file, trees, etc.
+  //
+  stat = openFile();
+
+  return stat + StMaker::InitRun(runID);
+
+}   
+    
+Int_t
+StMiniMcMaker::Init()
+{
+  //Moved everything important to InitRun(int)
+  cout << "###StMiniMcMaker::Init()" << endl;
+
+  cout << "\tpt cut : " << mMinPt << " , " << mMaxPt << endl;
+
+  mIOMaker = (StIOInterFace*)GetMaker("IO");
+  if (!mIOMaker) {
+      cout << "No StIOMaker found, trying StTreeMaker from bfc." << endl;
+      mIOMaker = (StIOInterFace*) GetMaker("outputStream");
+  }
+  assert(mIOMaker);
+  TString curFileName;
+  if(mIOMaker){
+      if( ! strrchr(mIOMaker->GetFile(),'/')){
+	  curFileName = mIOMaker->GetFile();
+      }
+      else {
+	  curFileName = strrchr(mIOMaker->GetFile(),'/')+1;
+      }
+      if(!mInFileName.Contains(curFileName)){
+	  cout << "StMiniMcMaker::Init \tNew file found : " << curFileName << endl;
+	  mInFileName = curFileName;
+	  int fileBeginIndex = mInFileName.Last('/');
+	  mInFileName.Remove(0,fileBeginIndex+1);
+	  cout << "Caching the File Name (path removed) = " << mInFileName << endl;
+      }
+
+  }
+  else {
+      cout << "Couldn't find IO Maker!!" << endl;
+      return kStFatal;
+  }
+  
+  return StMaker::Init();
+}   
+
+/*
+  Make called every event
+ */
+
+Int_t
+StMiniMcMaker::Make()
+{
+  if(Debug()) cout << "###StMiniMcMaker::Make()" << endl;
+  
   
   //
   // initialize StEvent, StMcEvent, and StAssociationMaker
@@ -422,7 +512,7 @@ StMiniMcMaker::initVertex()
   mRcVertexPos = &mRcEvent->primaryVertex(0)->position();
   mMcVertexPos = &mMcEvent->primaryVertex()->position();
 
-  if(mDebug){
+  if(Debug()){
     cout
       << "----------vertex info---------------------\n"
       << "Position of primary vertex from StEvent: \n"
@@ -447,7 +537,7 @@ StMiniMcMaker::initVertex()
 void 
 StMiniMcMaker::trackLoop()
 {
-  if(mDebug) cout << "##StMiniMcMaker::trackLoop()" << endl;
+  if(Debug()) cout << "##StMiniMcMaker::trackLoop()" << endl;
 
   Int_t nMatched(0), nAcceptedRaw(0),nAccepted(0), 
       nMerged(0), nSplit(0), nContam(0), nGhost(0), nMatGlob(0), nContamNew(0),
@@ -660,7 +750,7 @@ StMiniMcMaker::trackLoop()
 	  // ok, save all primary mc tracks.
 	  // best 'best' matched is saved as a matched pair.
 
-	  if(mDebug==2 && mcMergedPair.size()>1) {
+	  if(Debug()==2 && mcMergedPair.size()>1) {
 	    cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
 	    cout << "MERGED" << endl;
 	  }
@@ -672,7 +762,7 @@ StMiniMcMaker::trackLoop()
 	    StMcTrack* mergedMcTrack = (mcMergedPair[i])->partnerMcTrack();
 	    UInt_t mergedCommonHits = (mcMergedPair[i])->commonTpcHits();
 	   	    
-	    if(mDebug==2 && mcMergedPair.size()>1) {
+	    if(Debug()==2 && mcMergedPair.size()>1) {
 	      TString hello = (foundBest) ? "yes" : "no";
 	      cout << "-----------" << " foundBest? " << hello.Data() << endl;
 	      checkMerged(mergedMcTrack, mergedCommonHits,prTrack);
@@ -706,7 +796,7 @@ StMiniMcMaker::trackLoop()
 				  nAssocPrVec[i]);
 		 mMiniMcEvent->addTrackPair(miniMcPair,MERGED);
 	      }
-	      if(mDebug==2 && acceptDebug(mergedMcTrack)) 
+	      if(Debug()==2 && acceptDebug(mergedMcTrack)) 
 		cout << "YES! satisfies cuts" << endl;
 	      
 	      nMerged++; 
@@ -719,7 +809,7 @@ StMiniMcMaker::trackLoop()
 	    mcFoundMap[mergedMcTrack->key()]=1;
 	
 	  } // 'merged' pair loop
-	  if(mDebug==2 && mcMergedPair.size()>1) 
+	  if(Debug()==2 && mcMergedPair.size()>1) 
 	    cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
 	} // found a matched rc track
       } // not merged	
@@ -854,7 +944,7 @@ StMiniMcMaker::trackLoop()
 	  //
 	  // reality check.  
 	  //	  
-	  if(mDebug==2) checkSplit(mcTrack,glTrack,commonHits);
+	  if(Debug()==2) checkSplit(mcTrack,glTrack,commonHits);
 	}
 	else{ // no, it's best matched to a non primary, contamination
 	  
@@ -863,7 +953,7 @@ StMiniMcMaker::trackLoop()
 			    nAssocMc,nAssocGl,nAssocPr);
 	  mMiniMcEvent->addTrackPair(contamPair,CONTAM);
 	  
-	  if(mDebug==2) checkContam(mcTrack,glTrack,commonHits);
+	  if(Debug()==2) checkContam(mcTrack,glTrack,commonHits);
 	  nContam++;
 	}
       } // cand.size()?
@@ -881,7 +971,7 @@ StMiniMcMaker::trackLoop()
 		      prTrack,glTrack,nAssocMc);
       mMiniMcEvent->addTrackPair(miniMcPair,GHOST); 
       nGhost++;
-      if(mDebug) {
+      if(Debug()) {
 	cout << "#############" << endl;
 	cout << "GHOST!" << endl;
 	cout << "pr pt: " << prTrack->geometry()->momentum().perp() << endl
@@ -941,21 +1031,29 @@ StMiniMcMaker::openFile()
   cout << "###StMiniMcMaker::openFile()" << endl;
   
   //
-  // for the output root file, replace geant.root with minimc.root
+  // for the output root file,
+  // - replace geant.root with minimc.root
   // in case there is an event.root, or any other blabla.root, we will
   // replace the blabla.root with minimc.root.  This takes some funky TString
   // manipulation, and will only work if the filename is of the form  somefilestring.blablabla.root
   // it will change it to somefilestring.minimc.root
+  // - for the case of running in bfc, the Infilename will have only the extension .root
+  //   so we can keep this working in both cases by checking that the first and the last "." are
+  //   not the same before attempting to remove what's in between them.
   cout << "Infilename = " << mInFileName << endl;
   TString outFileName(mInFileName);
   //outFileName.ReplaceAll("geant.root","minimc.root");
   short indx1 = outFileName.First('.');
   short indx2 = outFileName.Last('.');
-  outFileName.Remove(indx1+1,(indx2-indx1)-1);
-  outFileName.Insert(indx1+1,"minimc");
+  if (indx1!=indx2) outFileName.Remove(indx1+1,(indx2-indx1));
+  outFileName.Insert(indx1+1,"minimc.");
   outFileName.Prepend(mOutDir);
 
-  mMiniMcDST = 0;
+  if (mMiniMcDST) {
+      delete mMiniMcDST;
+      mMiniMcDST = 0;
+  }
+  cout << "Opening File " << outFileName << endl;
   mMiniMcDST = new TFile(outFileName.Data(),"RECREATE");
 
   if(!mMiniMcDST || !mMiniMcDST->IsOpen()){ 
@@ -968,8 +1066,8 @@ StMiniMcMaker::openFile()
   //
   // top level tree
   //
-  if(mDebug) cout << "##Creating the top level tree..." << endl;
-
+  if(Debug()) cout << "##Creating the top level tree..." << endl;
+  if (mMiniMcTree) delete mMiniMcTree;
   mMiniMcTree = new TTree("StMiniMcTree","StMiniMcTree");
   if(!mMiniMcTree){
     gMessMgr->Error() << "Cannot create StMiniMcTree" << endm;
