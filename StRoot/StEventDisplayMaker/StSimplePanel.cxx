@@ -2,7 +2,7 @@
 ** Form implementation generated from reading ui file 'Panel.ui'
 **
 ** Created: Wed Jan 8 14:32:54 2003
-**      by: The User Interface Compiler ($Id: StSimplePanel.cxx,v 1.2 2003/01/17 02:19:40 fine Exp $)
+**      by: The User Interface Compiler ($Id: StSimplePanel.cxx,v 1.3 2003/01/28 23:10:47 fine Exp $)
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/
@@ -41,7 +41,7 @@ StSimplePanel::~StSimplePanel()
     // no need to delete child widgets, Qt does it all for us
 }
 //______________________________________________________________________________
-void StSimplePanel::Add(QWidget *q, int row, int col, unsigned int aligment)
+void StSimplePanel::Add(QWidget *q, int pRow, int pCol, unsigned int aligment)
 {
    // Qt::AlignAuto    - Aligns according to the language. Left for most, right for Arabic and Hebrew. 
    // Qt::AlignLeft    - Aligns with the left edge. 
@@ -49,7 +49,7 @@ void StSimplePanel::Add(QWidget *q, int row, int col, unsigned int aligment)
    // Qt::AlignHCenter - Centers horizontally in the available space. 
    // Qt::AlignJustify - Justifies the text in the available space
 
-   if (row == -1) row = fLayout->numRows();
-   fLayout->addWidget(q,row,col,aligment);
+   if (pRow == -1) pRow = fLayout->numRows();
+   fLayout->addWidget(q,pRow,pCol,aligment);
 }
 #endif
