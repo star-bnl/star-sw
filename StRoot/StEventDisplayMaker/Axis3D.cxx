@@ -19,7 +19,7 @@
 // * purpose.  It is provided "as is" without express or implied warranty.
 // ************************************************************************
 //
-// $Id: Axis3D.cxx,v 1.7 1999/12/09 20:43:00 fine Exp $ 
+// $Id: Axis3D.cxx,v 1.8 1999/12/10 02:30:25 fine Exp $ 
 //
 
 #include <iostream.h>
@@ -195,25 +195,41 @@ void TAxis3D::ExecuteEvent(Int_t event, Int_t px, Int_t py)
 
    case kButton1Up:
       gPad->GetCanvas()->FeedbackMode(kFALSE);
-      if (px == px0) return;
-      if (py == py0) return;
+
       x1 = gPad->AbsPixeltoX(px);
       y1 = gPad->AbsPixeltoY(py);
 
-      if (x1 < x0) {temp = x0; x0 = x1; x1 = temp;}
-      if (y1 < y0) {temp = y0; y0 = y1; y1 = temp;}
-      gPad->Range(x0,y0,x1,y1);
-#if 0
-      if (fZooms < kMAXZOOMS-1) {
-         fZooms++;
-         fZoomX0[fZooms] = x0;
-         fZoomY0[fZooms] = y0;
-         fZoomX1[fZooms] = x1;
-         fZoomY1[fZooms] = y1;
+      // If there was a small motion move center there
+      if (TMath::Abs(px-px0)+TMath::Abs(py - py0) < 4 ) {
+         Float_t cx = x1;
+         Float_t cy = y1;
+
+         gPad->GetRange(x0,y0,x1,y1);
+         Float_t xSize = (x1 - x0)/2;
+         Float_t ySize = (y1 - y0)/2;
+         x0 = cx - xSize;
+         y0 = cy - ySize;
+         x1 = cx + xSize;
+         y1 = cy + ySize;
+         gPad->Range(x0,y0,x1,y1);
       }
+      else {
+        if (x1 < x0) {temp = x0; x0 = x1; x1 = temp;}
+        if (y1 < y0) {temp = y0; y0 = y1; y1 = temp;}
+        gPad->Range(x0,y0,x1,y1);
+#if 0
+        if (fZooms < kMAXZOOMS-1) {
+           fZooms++;
+           fZoomX0[fZooms] = x0;
+           fZoomY0[fZooms] = y0;
+           fZoomX1[fZooms] = x1;
+           fZoomY1[fZooms] = y1;
+        }
 #endif
+      }
       SwitchZoom();
-//      gPad->Modified(kTRUE);
+      gPad->Modified(kTRUE);
+      gPad->Update();
       break;
       default: break;
    }
@@ -588,17 +604,20 @@ TAxis3D *TAxis3D::ToggleZoom(TVirtualPad *pad)
     // Find axis in the current thisPad 
     TList *l = thisPad->GetListOfPrimitives();
     TObject *o = l->FindObject(TAxis3D::rulerName);
-    if (o && o->InheritsFrom(Class()->GetName())) {      
-      if (o != l->Last()) { // make sure the TAxis is the last object of the Pad.
+    if (o && o->InheritsFrom(Class()->GetName())) { // Find axis     
+      if (o != l->Last()) { // make sure the TAxis3D is the last object of the Pad.
         l->Remove(o);
         l->AddLast(o);
       }
       ax = (TAxis3D *)o;
-      ax->SwitchZoom();
-      thisPad->Modified();
-      thisPad->Update();
-    }          
-  }
+    }
+    else { // There is no 
+      ax = new TAxis3D;
+      ax->SetBit(kCanDelete);
+      ax->Draw();      
+    }
+    ax->SwitchZoom();
+  }          
   return ax;
 }
 //_______________________________________________________________________________________
@@ -607,6 +626,9 @@ TAxis3D *TAxis3D::ToggleZoom(TVirtualPad *pad)
 //_______________________________________________________________________________________
 
 // $Log: Axis3D.cxx,v $
+// Revision 1.8  1999/12/10 02:30:25  fine
+// Centered
+//
 // Revision 1.7  1999/12/09 20:43:00  fine
 // Zoom
 //
