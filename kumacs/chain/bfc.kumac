@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.23 1998/07/28 22:18:55 kathy Exp $
+* $Id: bfc.kumac,v 1.24 1998/07/29 20:53:36 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.24  1998/07/29 20:53:36  kathy
+* corrected for unecessary inputs to macros
+*
 * Revision 1.23  1998/07/28 22:18:55  kathy
 * oops!
 *
@@ -93,11 +96,11 @@
 * 
 * 
 * -- CHAINS --
-* evgin      - read in event generator file or text file for gstar
+* evgin      - read in event generator file for running gstar
 * g2tin      - read G2T xdf file
 * evin       - read in simulated-data file 
 * fzin       - read in fz file
-* gtxin      - read in txt file to run gstar off of
+* gtxin      - read in txt file for running gstar
 * rgst       - run gstar from evgin file
 * rg2t       - run g2t from rungst(gstar) stuff
 * svg        - SVT geometry initialization
@@ -190,8 +193,7 @@ MACRO bfc _
    no_events=1 _
    input_data_prefix=$AFS_RHIC/star/data/samples/ _
    input_data_file=auau_central_hijing.xdf _
-   output_file=bfc_output.xdf 
-  
+   output_file=bfc_output.xdf   
   
 ***********************************************************
 * CALCULATE STUFF FROM MACRO INPUTS 
@@ -230,7 +232,7 @@ MACRO bfc _
 * BEGINNING STUFF 
 * **********************************************************
    
- exec $STAR/kumacs/util/setup_defaults domain=[domain]
+ exec $STAR/kumacs/util/setup_defaults 
    
  exec setup#setup
       

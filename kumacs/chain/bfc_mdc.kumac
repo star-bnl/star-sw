@@ -1,5 +1,8 @@
-* $Id: bfc_mdc.kumac,v 1.11 1998/07/28 22:18:56 kathy Exp $
+* $Id: bfc_mdc.kumac,v 1.12 1998/07/29 20:53:37 kathy Exp $
 * $Log: bfc_mdc.kumac,v $
+* Revision 1.12  1998/07/29 20:53:37  kathy
+* corrected for unecessary inputs to macros
+*
 * Revision 1.11  1998/07/28 22:18:56  kathy
 * oops!
 *
@@ -87,11 +90,11 @@
 * 
 * 
 * -- CHAINS --
-* evgin      - read in event generator file or text file for gstar
+* evgin      - read in event generator file for running gstar
 * g2tin      - read G2T xdf file
 * evin       - read in simulated-data file 
 * fzin       - read in fz file
-* gtxin      - read in txt file to run gstar off of
+* gtxin      - read in txt file for running gstar
 * rgst       - run gstar from evgin file
 * rg2t       - run g2t from rungst(gstar) stuff
 * svg        - SVT geometry initialization
