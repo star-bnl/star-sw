@@ -1,0 +1,44 @@
+<html>
+<title>StPrimaryMaker documentation</title>
+
+<h1>StPrimaryMaker documentation</h1>
+
+<h2>est</h2>
+<h2>evr</h2>
+<h2>lmv</h2>
+<h2>egr</h2>
+
+<h2>Fixed Vertices</h2>
+<pre>
+The StPrimaryMaker now has the ability to use a "fixed"
+primary vertex. This is useful if a primary vertex fitter (lmv or evr)
+is failing, or if you want to test some other portion of code
+without any contributions from primary vertex fitting (for
+example, testing secondary vertex codes with Monte Carlo
+studies of particles produced at (0,0,0)).
+
+The fixed vertex is (OF COURSE!) by default turned off.
+And when it is turned on, an annoying warning message
+is produced in StPrimaryMaker at each event.
+
+To use in the BFC, copy bfc.C to your working area and edit.
+After the chain has been instantiated (chain->Instantiate();)
+and before the event loop, you can use:
+
+  primMk = (StPrimaryMaker*) chain->GetMaker("primary");
+  primMk->FixVertex(0.1,-0.3,10.5);
+
+For a "fixed" vertex, that portion of evr which determines
+which tracks have a distance-of-closest-approach passing
+the cut from the evr parameter table (evrpar.vcut) is still
+run to determine which global tracks are primary tracks.
+
+The "fixed" vertex can also be switched off with
+
+  primMk->UnFixVertex();
+
+in case one wants to switch on/off the fixing of the vertex
+for different events.
+</pre>
+
+</html>
