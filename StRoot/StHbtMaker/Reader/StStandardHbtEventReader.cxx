@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.5 1999/07/24 16:24:25 lisa Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.6 1999/07/27 20:21:10 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.6  1999/07/27 20:21:10  lisa
+ * Franks fixes of StTrack and subsequent changes to particleCut and EventReader
+ *
  * Revision 1.5  1999/07/24 16:24:25  lisa
  * adapt StHbtMaker to dev version of library - solaris still gives problems with strings
  *
@@ -122,7 +125,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
       continue;
     }
 
-    //    cout << "Now getting the pidTraits" << endl;
+    //cout << "Now getting the pidTraits" << endl;
     //StTrackPidTraits pidTraitsTemp = rTrack->pidTraits();
     //cout << " Got it"<<endl;
 
@@ -149,22 +152,34 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     float nsigprot = tpcDedxPid->numberOfSigma(0.938);
     //cout << "nsigprot\t\t\t\t" << nsigprot << endl;
     hbtTrack->SetNSigmaProton(nsigprot);
-
-    //    cout << "Nsig pion,kaon,proton : " << nsigpi << " " << nsigk << " " << nsigprot << endl;
-
+    //cout << "Nsig pion,kaon,proton : " << nsigpi << " " << nsigk << " " << nsigprot << endl;
+    
+    float dEdx = rTrack->tpcDedx()->mean();
+    //cout << "dEdx\t" << dEdx << endl; 
+    hbtTrack->SetdEdx(dEdx);
+    
     double pathlength = rTrack->helix().pathLength(vp);
     //cout << "pathlength\t" << pathlength << endl;
     StHbtThreeVector p = rTrack->helix().momentumAt(pathlength,HBT_B_FIELD);
     //cout << "p: " << p << endl;
     hbtTrack->SetP(p);
 
-    float DCA = abs(rTrack->helix().at(pathlength)-vp);
-    //cout << "DCA\t\t" << DCA << endl;
-    //    hbtTrack->SetDCA(DCA);
+    StHbtThreeVector  DCAxyz = rTrack->helix().at(pathlength)-vp;
+    //cout << "DCA\t\t" << DCAxyz << " " << DCAxyz.perp() << endl;
+    hbtTrack->SetDCAxy( DCAxyz.perp() );
+    hbtTrack->SetDCAz(  DCAxyz.z()  );
 
-    float pt = sqrt(p[0]*p[0]+p[1]*p[1]);
+    hbtTrack->SetChiSquaredXY( rTrack->fitTraits().chiSquaredInXY() );
+    hbtTrack->SetChiSquaredZ( rTrack->fitTraits().chiSquaredInPlaneZ() ); 
+
+    StPhysicalHelixD&  helix = rTrack->helix();
+    hbtTrack->SetHelix( helix );
+
+     float pt = sqrt(p[0]*p[0]+p[1]*p[1]);
     //cout << "pt\t\t\t" << pt << endl;
-    //    hbtTrack->SetPt(pt);
+    //hbtTrack->SetPt(pt);
+
+    hbtTrack->SetPt(pt);
 
     int charge = ((rTrack->helix().charge(HBT_B_FIELD)>0) ? 1 : -1);
     //cout << "charge\t\t\t\t" << charge << endl;

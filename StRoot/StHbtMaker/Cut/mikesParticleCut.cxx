@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mikesParticleCut.cxx,v 1.3 1999/07/19 14:24:04 hardtke Exp $
+ * $Id: mikesParticleCut.cxx,v 1.4 1999/07/27 20:21:08 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: mikesParticleCut.cxx,v $
+ * Revision 1.4  1999/07/27 20:21:08  lisa
+ * Franks fixes of StTrack and subsequent changes to particleCut and EventReader
+ *
  * Revision 1.3  1999/07/19 14:24:04  hardtke
  * modifications to implement uDST
  *
@@ -36,7 +39,17 @@ mikesParticleCut::mikesParticleCut(){
 //}
 //------------------------------
 bool mikesParticleCut::Pass(const StHbtTrack* track){
+  static int trackCount=0;
 
+
+  /*
+    cout << endl;
+    cout << "#track " << trackCount++;
+    cout << " * pion " << (track->NSigmaPion() > mNSigmaPion[0]) && (track->NSigmaPion() < mNSigmaPion[1]);
+    cout << " * kaon " << (track->NSigmaKaon() > mNSigmaKaon[0]) && (track->NSigmaKaon() < mNSigmaKaon[1]);
+    cout << " * proton " << (track->NSigmaProton() > mNSigmaProton[0]) && (track->NSigmaProton() < mNSigmaProton[1]);
+    cout << " * charge " << (track->Charge() == mCharge);
+  */
   bool goodPID = ((track->NSigmaPion()   > mNSigmaPion[0]) &&
                   (track->NSigmaPion()   < mNSigmaPion[1]) &&
                   (track->NSigmaKaon()   > mNSigmaKaon[0]) &&
@@ -45,6 +58,7 @@ bool mikesParticleCut::Pass(const StHbtTrack* track){
                   (track->NSigmaProton() < mNSigmaProton[1]) &&
                   (track->Charge() == mCharge));
 
+
   if (goodPID){
     float TEnergy = sqrt(track->P().mag2()+mMass*mMass);
     float TRapidity = 0.5*log((TEnergy+track->P().z())/
@@ -52,6 +66,20 @@ bool mikesParticleCut::Pass(const StHbtTrack* track){
 
     float Pt = sqrt((track->P().x())*(track->P().x())+
                     (track->P().y())*(track->P().y()));
+
+
+    
+    /*
+      cout << " * DCAxy " << (track->DCAxy()  > mDCA[0]) && (track->DCAxy()  < mDCA[1]);
+      cout << " * mDCA[0] " << mDCA[0];
+      cout << " * mDCA[1] " << mDCA[1];
+      cout << " * track->DCAxy " << track->DCAxy();
+      cout << " * NHits " <<  (track->NHits() > mNHits[0]) && (track->NHits() < mNHits[1]); 
+      cout << " * Pt " << (Pt > mPt[0]) && (Pt < mPt[1]);
+      cout << " * y " << (TRapidity > mRapidity[0]) && (TRapidity < mRapidity[1]);
+      cout << endl;
+    */
+
     bool goodTrack=
       ((track->DCAxy()  > mDCA[0]) &&
        (track->DCAxy()  < mDCA[1]) &&
