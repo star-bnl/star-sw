@@ -38,6 +38,12 @@ void StBemcData::zeroAll()
     SmdeEnergy[i] = 0;
     SmdpEnergy[i] = 0;
   }
+  TowerPresent = kFALSE;
+  SMDPresent = kFALSE;
+  PSDPresent = kFALSE;
+  ValidTowerEvent = kFALSE;
+  ValidSMDEvent = kFALSE;
+  ValidPSDEvent = kFALSE;
 }
 StBemcData::~StBemcData()
 {
@@ -80,7 +86,7 @@ Bool_t StBemcData::checkTDC(Int_t i)
 	if(TDCCount[i]!=164) ok = kFALSE;
 	float sum =0, nt=0;
 	float avg = 0;
-	int id;
+	int id=0;
 	if(TDCTrigger[i]==4)  //physics trigger only
 	  for(int j=0;j<160;j++)
 		{
