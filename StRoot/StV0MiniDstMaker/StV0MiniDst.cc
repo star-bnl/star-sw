@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MiniDst.cc,v 1.4 1999/08/03 02:31:44 genevb Exp $
+ * $Id: StV0MiniDst.cc,v 1.5 1999/08/13 12:38:16 jones Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 04-Jun-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StV0MiniDst.cc,v $
+ * Revision 1.5  1999/08/13 12:38:16  jones
+ * Major revision to merge StV0MiniDstMaker and StXiMiniDstMaker
+ *
  * Revision 1.4  1999/08/03 02:31:44  genevb
  * Better implementation of StHFillObject
  *
@@ -27,8 +30,8 @@
  ***********************************************************************/
 #include "global/inc/phys_constants.h"
 #include "StV0MiniDst.hh"
-#include "StEvent/StGlobalTrack.h"
-#include "StEvent/StV0Vertex.h"
+#include "StGlobalTrack.h"
+#include "StV0Vertex.h"
 #include "SystemOfUnits.h"
 ClassImp(StV0MiniDst)
 
@@ -37,146 +40,149 @@ StV0MiniDst::StV0MiniDst() {
 
 StV0MiniDst::StV0MiniDst(StV0Vertex* v0Vertex,
 			 StVertex*   primaryVertex) {
-  mPrimVertex[0] = primaryVertex->position().x();
-  mPrimVertex[1] = primaryVertex->position().y();
-  mPrimVertex[2] = primaryVertex->position().z();
-  mPosition[0] = v0Vertex->position().x();
-  mPosition[1] = v0Vertex->position().y();
-  mPosition[2] = v0Vertex->position().z();
-  mDecayDistance = 
-    sqrt(pow(mPosition[0] - mPrimVertex[0],2) +
-	 pow(mPosition[1] - mPrimVertex[1],2) +
-	 pow(mPosition[2] - mPrimVertex[2],2));
 
-  mDcaDaughters = v0Vertex->dcaDaughters();
-  mDcaParentToPrimVertex = v0Vertex->dcaParentToPrimaryVertex();
+  double B=0.5*tesla; // Hardwired - fix later
+
+  mPrimaryVertex[0] = primaryVertex->position().x();
+  mPrimaryVertex[1] = primaryVertex->position().y();
+  mPrimaryVertex[2] = primaryVertex->position().z();
+  mDecayVertexV0[0] = v0Vertex->position().x();
+  mDecayVertexV0[1] = v0Vertex->position().y();
+  mDecayVertexV0[2] = v0Vertex->position().z();
+  mDcaV0Daughters = v0Vertex->dcaDaughters();
+  mDcaV0ToPrimVertex = v0Vertex->dcaParentToPrimaryVertex();
   mDcaPosToPrimVertex = v0Vertex->dcaDaughterToPrimaryVertex(positiveTrack);
   mDcaNegToPrimVertex = v0Vertex->dcaDaughterToPrimaryVertex(negativeTrack);
-  mMomNegDaughter[0] = v0Vertex->momentumOfDaughter(negativeTrack).x();
-  mMomNegDaughter[1] = v0Vertex->momentumOfDaughter(negativeTrack).y();
-  mMomNegDaughter[2] = v0Vertex->momentumOfDaughter(negativeTrack).z();
-  mMomPosDaughter[0] = v0Vertex->momentumOfDaughter(positiveTrack).x();
-  mMomPosDaughter[1] = v0Vertex->momentumOfDaughter(positiveTrack).y();
-  mMomPosDaughter[2] = v0Vertex->momentumOfDaughter(positiveTrack).z();
+  mMomNeg[0] = v0Vertex->momentumOfDaughter(negativeTrack).x();
+  mMomNeg[1] = v0Vertex->momentumOfDaughter(negativeTrack).y();
+  mMomNeg[2] = v0Vertex->momentumOfDaughter(negativeTrack).z();
+  mMomPos[0] = v0Vertex->momentumOfDaughter(positiveTrack).x();
+  mMomPos[1] = v0Vertex->momentumOfDaughter(positiveTrack).y();
+  mMomPos[2] = v0Vertex->momentumOfDaughter(positiveTrack).z();
 
-  this->Update();
+  mTpcHitsPos =
+    ((StGlobalTrack *) v0Vertex->daughter(positiveTrack,B))->numberOfTpcHits();
+  mTpcHitsNeg =
+    ((StGlobalTrack *) v0Vertex->daughter(negativeTrack,B))->numberOfTpcHits();
+  
+  this->UpdateV0();
 }
 
 StV0MiniDst::~StV0MiniDst() {
 }
 
-void StV0MiniDst::Update() { 
+void StV0MiniDst::UpdateV0() { 
   // Calculate derived data members
 
-       mDecayDistance = sqrt(pow(mPosition[0]-mPrimVertex[0],2) +
-			     pow(mPosition[1]-mPrimVertex[1],2) +
-			     pow(mPosition[2]-mPrimVertex[2],2));
+       mDecayLengthV0 = sqrt(pow(mDecayVertexV0[0]-mPrimaryVertex[0],2) +
+			     pow(mDecayVertexV0[1]-mPrimaryVertex[1],2) +
+			     pow(mDecayVertexV0[2]-mPrimaryVertex[2],2));
   
-    mPtot2PosDaughter = mMomPosDaughter[0]*mMomPosDaughter[0] +
-                        mMomPosDaughter[1]*mMomPosDaughter[1] +
-                        mMomPosDaughter[2]*mMomPosDaughter[2];
+            mPtot2Pos = mMomPos[0]*mMomPos[0] +
+                        mMomPos[1]*mMomPos[1] +
+                        mMomPos[2]*mMomPos[2];
 
-    mPtot2NegDaughter = mMomNegDaughter[0]*mMomNegDaughter[0] +
-                        mMomNegDaughter[1]*mMomNegDaughter[1] +
-                        mMomNegDaughter[2]*mMomNegDaughter[2];
+            mPtot2Neg = mMomNeg[0]*mMomNeg[0] +
+                        mMomNeg[1]*mMomNeg[1] +
+                        mMomNeg[2]*mMomNeg[2];
 
-                  mPx = mMomPosDaughter[0] + mMomNegDaughter[0];
-                  mPy = mMomPosDaughter[1] + mMomNegDaughter[1];
-                  mPz = mMomPosDaughter[2] + mMomNegDaughter[2];
-                 mPt2 = mPx*mPx + mPy*mPy;
-               mPtot2 = mPt2 + mPz*mPz;
+                mMomV0[0] = mMomPos[0] + mMomNeg[0];
+                mMomV0[1] = mMomPos[1] + mMomNeg[1];
+                mMomV0[2] = mMomPos[2] + mMomNeg[2];
+               mPt2V0 = mMomV0[0]*mMomV0[0] + mMomV0[1]*mMomV0[1];
+             mPtot2V0 = mPt2V0 + mMomV0[2]*mMomV0[2];
 
-       mMomPosAlongV0 = ( mMomPosDaughter[0]*mPx + 
-			  mMomPosDaughter[1]*mPy +
-			  mMomPosDaughter[2]*mPz ) / sqrt(mPtot2); 
-       mMomNegAlongV0 = ( mMomNegDaughter[0]*mPx + 
-			  mMomNegDaughter[1]*mPy + 
-			  mMomNegDaughter[2]*mPz ) / sqrt(mPtot2);
+       mMomPosAlongV0 = ( mMomPos[0]*mMomV0[0] + 
+			  mMomPos[1]*mMomV0[1] +
+			  mMomPos[2]*mMomV0[2] ) / sqrt(mPtot2V0); 
+       mMomNegAlongV0 = ( mMomNeg[0]*mMomV0[0] + 
+			  mMomNeg[1]*mMomV0[1] + 
+			  mMomNeg[2]*mMomV0[2] ) / sqrt(mPtot2V0);
 }
 
-float StV0MiniDst::alpha() {
+float StV0MiniDst::alphaV0() {
   return (mMomPosAlongV0-mMomNegAlongV0)/
          (mMomPosAlongV0+mMomNegAlongV0);
 }
 
-float StV0MiniDst::ptArm() {
-  return sqrt(mPtot2PosDaughter - mMomPosAlongV0*mMomPosAlongV0);
+float StV0MiniDst::ptArmV0() {
+  return sqrt(mPtot2Pos - mMomPosAlongV0*mMomPosAlongV0);
 }
 
 float StV0MiniDst::eLambda() {
-  return sqrt(mPtot2+M_LAMBDA*M_LAMBDA);
+  return sqrt(mPtot2V0+M_LAMBDA*M_LAMBDA);
 }
 
 float StV0MiniDst::eK0Short() {
-  return sqrt(mPtot2+M_KAON_0_SHORT*M_KAON_0_SHORT);
+  return sqrt(mPtot2V0+M_KAON_0_SHORT*M_KAON_0_SHORT);
 }
 
-float StV0MiniDst::ePosDaughterProton() {
-  return sqrt(mPtot2PosDaughter+M_PROTON*M_PROTON);
+float StV0MiniDst::ePosProton() {
+  return sqrt(mPtot2Pos+M_PROTON*M_PROTON);
 }
 
-float StV0MiniDst::eNegDaughterProton() {
-  return sqrt(mPtot2NegDaughter+M_ANTIPROTON*M_ANTIPROTON);
+float StV0MiniDst::eNegProton() {
+  return sqrt(mPtot2Neg+M_ANTIPROTON*M_ANTIPROTON);
 }
 
-float StV0MiniDst::ePosDaughterPion() {
-  return sqrt(mPtot2PosDaughter+M_PION_PLUS*M_PION_PLUS);
+float StV0MiniDst::ePosPion() {
+  return sqrt(mPtot2Pos+M_PION_PLUS*M_PION_PLUS);
 }
 
-float StV0MiniDst::eNegDaughterPion() {
-  return sqrt(mPtot2NegDaughter+M_PION_MINUS*M_PION_MINUS);
+float StV0MiniDst::eNegPion() {
+  return sqrt(mPtot2Neg+M_PION_MINUS*M_PION_MINUS);
 }
 
 float StV0MiniDst::massLambda() {
-  return sqrt(pow(ePosDaughterProton()+eNegDaughterPion(),2)-mPtot2);
+  return sqrt(pow(ePosProton()+eNegPion(),2)-mPtot2V0);
 }
 
 float StV0MiniDst::massAntiLambda() {
-  return sqrt(pow(eNegDaughterProton()+ePosDaughterPion(),2)-mPtot2);
+  return sqrt(pow(eNegProton()+ePosPion(),2)-mPtot2V0);
 }
 
 float StV0MiniDst::massK0Short() {
-  return sqrt(pow(ePosDaughterPion()+eNegDaughterPion(),2)-mPtot2);
+  return sqrt(pow(ePosPion()+eNegPion(),2)-mPtot2V0);
 }
 
 float StV0MiniDst::rapLambda() {
   float ela = eLambda();
-  return 0.5*log((ela+mPz)/(ela-mPz));
+  return 0.5*log((ela+mMomV0[2])/(ela-mMomV0[2]));
 }
 
 float StV0MiniDst::rapK0Short() {
   float ek0 = eK0Short();
-  return 0.5*log((ek0+mPz)/(ek0-mPz));
+  return 0.5*log((ek0+mMomV0[2])/(ek0-mMomV0[2]));
 }
 
 float StV0MiniDst::cTauLambda() {
-  return massLambda()*mDecayDistance/sqrt(mPtot2);
+  return massLambda()*mDecayLengthV0/sqrt(mPtot2V0);
 }
 
 float StV0MiniDst::cTauK0Short() {
-  return massK0Short()*mDecayDistance/sqrt(mPtot2);
+  return massK0Short()*mDecayLengthV0/sqrt(mPtot2V0);
 }
 
-float StV0MiniDst::ptPosDaughter() {
-  return sqrt(mPtot2PosDaughter-mMomPosDaughter[2]*mMomPosDaughter[2]);
+float StV0MiniDst::ptPos() {
+  return sqrt(mPtot2Pos-mMomPos[2]*mMomPos[2]);
 }
 
-float StV0MiniDst::ptotPosDaughter() {
-  return sqrt(mPtot2PosDaughter);
+float StV0MiniDst::ptotPos() {
+  return sqrt(mPtot2Pos);
 }
 
-float StV0MiniDst::ptNegDaughter() {
-  return sqrt(mPtot2NegDaughter-mMomNegDaughter[2]*mMomNegDaughter[2]);
+float StV0MiniDst::ptNeg() {
+  return sqrt(mPtot2Neg-mMomNeg[2]*mMomNeg[2]);
 }
 
-float StV0MiniDst::ptotNegDaughter() {
-  return sqrt(mPtot2NegDaughter);
+float StV0MiniDst::ptotNeg() {
+  return sqrt(mPtot2Neg);
 }
 
-float StV0MiniDst::pt() {
-  return sqrt(mPt2);
+float StV0MiniDst::ptV0() {
+  return sqrt(mPt2V0);
 }
 
-float StV0MiniDst::ptot() {
-  return sqrt(mPtot2);
+float StV0MiniDst::ptotV0() {
+  return sqrt(mPtot2V0);
 }

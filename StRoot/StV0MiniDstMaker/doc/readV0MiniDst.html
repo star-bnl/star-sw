@@ -36,31 +36,22 @@ TOrdCollection *collection = 0;
 TStopwatch clock;
 
 void load() {
-  gSystem->Load("St_base.so");
-  gSystem->Load("St_Tables.so");
-  gSystem->Load("StChain.so");
-  gSystem->Load("StEvent.so");
-  gSystem->Load("StV0MiniDstMaker.so");
+  gSystem->Load("St_base");
+  gSystem->Load("St_Tables");
+  gSystem->Load("StChain");
+  gSystem->Load("StUtilities");
+  gSystem->Load("StarClassLibrary");
+  gSystem->Load("StEvent");
+  gSystem->Load("StV0MiniDstMaker");
   
   // Create and start new stopwatch
   clock = new TStopwatch;
   clock.Start(kTRUE);
 
   // Open V0 mini-DST
-  TFile input("V0MiniDst.root");
-  collection = (TOrdCollection *) input.Get("V0MiniDst;1");
-  if( collection ) {
-    n_v0 = collection->LastIndex()+1;
-    printf("collection last index %d\n",n_v0);
-  }
-  else
-    printf("pointer to collection is zero\n");
-
-  // Loop over collection and precalculate some useful quantities
-  for( int i=0; i<n_v0; i++ ) {
-    StV0MiniDst *v0m = (StV0MiniDst *) collection->At(i);
-    v0m->Update();  // Important - fills class
-  }
+  StV0MiniDstMaker* v0dst = new StV0MiniDstMaker("v0dst","V0MicroDst.root");
+  v0dst->SetV0VertexType();
+  collection = v0dst->Read(&n_v0);
 
   // Stop the clock
   clock.Stop();
@@ -92,9 +83,9 @@ void run() {
   // Loop over collection and fill histograms
   for( int i=0; i<n_v0; i++ ) {
     StV0MiniDst *v0m = (StV0MiniDst *) collection->At(i);
-    hX->Fill(v0m->position()[0]);
-    hY->Fill(v0m->position()[1]);
-    hZ->Fill(v0m->position()[2]);
+    hX->Fill(v0m->positionV0()[0]);
+    hY->Fill(v0m->positionV0()[1]);
+    hZ->Fill(v0m->positionV0()[2]);
     hMassLambda->Fill(v0m->massLambda());
   } 
 
