@@ -13,8 +13,9 @@
 #define ntuplePair_hh
 
 #include "StHbtMaker/Base/StHbtCorrFctn.hh"
-
 #ifdef __ROOT__
+
+#include "StHbtMaker/Infrastructure/StHbtTFile.hh"
 
 class ntuplePair : public StHbtCorrFctn 
 {
