@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.10 2004/07/29 22:56:59 fisyak Exp $
+// $Id: StTagsMaker.cxx,v 1.11 2004/07/30 14:15:10 fisyak Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.11  2004/07/30 14:15:10  fisyak
+// Back to idl tag definition
+//
 // Revision 1.10  2004/07/29 22:56:59  fisyak
 // Add Global tags
 //
@@ -41,7 +44,8 @@
 #include "TClass.h"
 #include "TDataMember.h"
 #include "TDataType.h"
-#include "St_GlobalTag.h"
+#include "tables/St_GlobalTag_Table.h"
+//#include "St_GlobalTag.h"
 #include "StEvent.h"
 #include "StTriggerData.h"
 #include "StEventUtilities/StuRefMult.hh"
@@ -50,8 +54,8 @@ static TClass *tabClass = 0;
 static TTree  *fTree = 0; //!
 static St_DataSet *fTagsList =  new St_DataSet("TagList");
 
-TableClassImpl(St_GlobalTag,GlobalTag_st);
-ClassImp(StTagsMaker);
+//TableImpl(GlobalTag);
+ClassImp(StTagsMaker); 
 //_____________________________________________________________________________
 StTagsMaker::StTagsMaker(const char *name):StMaker(name){
 }
@@ -111,7 +115,7 @@ Int_t StTagsMaker::Make(){
       }
     }
   }
-  tagtab->AddAt(&row);
+  tagtab->AddAt(&row); if (Debug()) tagtab->Print(0,1);
   if (!fTree) InitTags();
   if (fTree && fTagsList && tabClass) {
     St_DataSetIter next(fTagsList);

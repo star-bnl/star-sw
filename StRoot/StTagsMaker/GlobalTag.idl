@@ -1,0 +1,23 @@
+//
+// $Id: GlobalTag.idl,v 1.1 2004/07/30 14:15:10 fisyak Exp $
+//
+// Global tag
+//
+// $Log: GlobalTag.idl,v $
+// Revision 1.1  2004/07/30 14:15:10  fisyak
+// Back to idl tag definition
+//
+//
+struct GlobalTag {                                           // Global:
+  unsigned long   TriggerId[32];                       // Trigger Id's satisfied by an event
+  unsigned long   uncorrectedNumberOfPrimaries;        // TPC StuRefMult
+  unsigned long   uncorrectedNumberOfFtpcEastPrimaries;// FTPC StuFtpcRefMult
+  unsigned long   uncorrectedNumberOfFtpcWestPrimaries;// FTPC StuFtpcRefMult
+  double          xPrimVertex;                         // Primary vertex (x)
+  double          yPrimVertex;                         //                (y)
+  double          zPrimVertex;                         //                (z)
+  short           vertexFlag;                          // with some flag !=0 if not found
+  unsigned short  zdcHardSum;                          // trigData->zdcAtChannel(10)
+  float           CTBsum;                              // CTB sum mMips[mMaxTrays][mMaxSlats][0]
+ };
+
