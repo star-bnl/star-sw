@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.6  1998/08/19 21:41:41  fisyak
+#  Split base -> base + xdf2root
+#
 #  Revision 1.5  1998/08/18 18:53:16  fisyak
 #  Add root I/O
 #
@@ -97,7 +100,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/08/18 18:53:16 $ 
+#           Last modification $Date: 1998/08/19 21:41:41 $ 
 #  default setings
 # Current Working Directory
 #
@@ -195,6 +198,9 @@ ifneq (,$(findstring $(LEVEL),0 1))
 ifneq (,$(wildcard $(ROOT_DIR)/StRoot/base))
 BASE := St_base 
 endif
+ifneq (,$(wildcard $(ROOT_DIR)/StRoot/xdf2root))
+XDF2ROOT := xdf2root
+endif
 ifneq (,$(wildcard $(ROOT_DIR)/.share/tables))
 TARGETS += St_Tables
 endif
@@ -203,7 +209,7 @@ TARGETS += StChain
 endif
 endif
 #          I have subdrs
-.PHONY               :  all St_base St_Tables StChain test clean clean_lib clean_share clean_obj
+.PHONY               :  all St_base xdf2root St_Tables StChain test clean clean_lib clean_share clean_obj
 #      I_have_subdirs
 all:  $(addsuffix _all, $(SUBDIRS))   $(TARGETS)
 %_all:; $(MAKE) -f $(MakePam) -C $(STEM) $(MAKFLAGS) 
@@ -241,8 +247,11 @@ endif
 endif
 ifndef NOROOT
 St_base:   $(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so
+xdf2root:  $(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.so
 St_Tables: $(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so
 StChain:   $(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.so
+$(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.so:   $(wildcard $(ROOT_DIR)/StRoot/xdf2root/*.*) 
+	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root    SO_LIB=$(ALL_TAGS)
 $(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so:   $(wildcard $(ROOT_DIR)/StRoot/base/*.*) 
 	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base    SO_LIB=$(ALL_TAGS)
 $(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so: $(wildcard $(ROOT_DIR)/.share/tables/St*.*)

@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.44 1998/08/19 00:03:59 fisyak Exp $
+# $Id: MakePam.mk,v 1.45 1998/08/19 21:41:41 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.45  1998/08/19 21:41:41  fisyak
+# Split base -> base + xdf2root
+#
 # Revision 1.44  1998/08/19 00:03:59  fisyak
 # Add NOROOT option
 #
@@ -308,28 +311,24 @@ $(GEN_TAB)/.rootrc:
 
 $(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc
 	@echo "{" >   $(GEN_TAB)/gentable.C;
-	@echo "   gSystem->Load(\"libasu.so\");" >> $(GEN_TAB)/gentable.C;
-	@echo "   gSystem->Load(\"libdsl.so\");" >> $(GEN_TAB)/gentable.C;
 	@echo "   gSystem->Load(\"St_base.so\");" >> $(GEN_TAB)/gentable.C;
 	@echo "#pragma Ccomment on"  >> $(GEN_TAB)/gentable.C;
 	@echo "G__loadfile(\"$(GEN_TAB)/$(STEM).h\");" >> $(GEN_TAB)/gentable.C;
 	@echo "St_Table tabs(\"$(STEM)\",1);" >> $(GEN_TAB)/gentable.C;
 	@echo "tabs.StafStreamer();" >> $(GEN_TAB)/gentable.C;
 	@echo "}" >> $(GEN_TAB)/gentable.C;
-	cd $(GEN_TAB); Root.exe -b -q /dev/null > /dev/null; $(RM) gentable.C
+	cd $(GEN_TAB); root.exe -b -q /dev/null > /dev/null; $(RM) gentable.C
 #$(FILES_THH) : $(GEN_TAB)/St_%_Table.h   : %.idl
 #	cp  $(1ST_DEPS) $(GEN_TAB)/ ; cd $(GEN_TAB); $(STIC) -r -H -q $(STICFLAGS) $(STEM).idl; $(RM) $(STEM).idl
 $(FILES_THH) : $(GEN_TAB)/St_%_Table.h : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc
 	@echo "{" >   $(GEN_TAB)/gentable.C;
-	@echo "   gSystem->Load(\"libasu.so\");" >> $(GEN_TAB)/gentable.C;
-	@echo "   gSystem->Load(\"libdsl.so\");" >> $(GEN_TAB)/gentable.C;
 	@echo "   gSystem->Load(\"St_base.so\");" >> $(GEN_TAB)/gentable.C;
 	@echo "#pragma Ccomment on"  >> $(GEN_TAB)/gentable.C;
 	@echo "G__loadfile(\"$(GEN_TAB)/$(STEM).h\");" >> $(GEN_TAB)/gentable.C;
 	@echo "St_Table tabs(\"$(STEM)\",1);" >> $(GEN_TAB)/gentable.C;
 	@echo "tabs.StafStreamer();" >> $(GEN_TAB)/gentable.C;
 	@echo "}" >> $(GEN_TAB)/gentable.C;
-	cd $(GEN_TAB); Root.exe -b -q /dev/null > /dev/null ; $(RM) gentable.C
+	cd $(GEN_TAB); root.exe -b -q /dev/null > /dev/null ; $(RM) gentable.C
 endif #NOROOT
 endif #ALL_TAB
 #--- compilation -
