@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.hh,v 1.10 2002/02/10 21:12:32 jcs Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.11 2002/02/26 13:17:56 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.11  2002/02/26 13:17:56  jcs
+// get cluster unfolding parameters from ftpcClusterPars
+//
 // Revision 1.10  2002/02/10 21:12:32  jcs
 // add deltaAirPressure to calcpadtrans call
 //
@@ -51,14 +54,7 @@
 #define FALSE 0
 #define sqr(x) ((x)*(x))
 #define MAXNUMSEQUENCES 160
-#define MAXSEQPEAKS 160
-#define MAXPEAKS 160
 #define MAXNUMCUC 128
-#define MAXLOOPS 100
-#define MAXFASTLOOPS 30
-#define UNFOLDLIMIT 0.01
-#define UNFOLDFAILEDLIMIT 0.50
-
 
 typedef struct tagClusterUC
 {
@@ -66,7 +62,7 @@ typedef struct tagClusterUC
   int                  EndPad;
   int                  NumSequences;
   int                  CutOff;
-  TPCSequence            Sequence[MAXNUMSEQUENCES];
+  TPCSequence          Sequence[MAXNUMSEQUENCES];
   int                  SequencePad[MAXNUMSEQUENCES];
   struct tagClusterUC* NextClusterUC;
   int                  MemoryPtr;
@@ -113,6 +109,13 @@ class StFtpcClusterFinder
   StFTPCReader *mReader; 
   StFtpcParamReader *mParam;
   StFtpcDbReader *mDb;
+
+  int MAXSEQPEAKS;
+  int MAXPEAKS;
+  int MAXLOOPS;
+  int MAXFASTLOOPS;
+  float UNFOLDLIMIT;
+  float UNFOLDFAILEDLIMIT;
 
  public:
   StFtpcClusterFinder(StFTPCReader *reader, 
