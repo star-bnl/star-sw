@@ -326,12 +326,12 @@ C.....
 C: Delete 'flist' file, if it's already exist
       ln1=lenocc(flist)
       string='rm -f '//flist(1:ln1)
-      CALL CSCLI(string(1:ln1+6))
+      CALL SYSTEMF(string(1:ln1+6))
       string='rm -f 1'//flist(1:ln1)
-      CALL CSCLI(string(1:ln1+7))
+      CALL SYSTEMF(string(1:ln1+7))
       if(iopt.eq.0) then
         string='rm -f 2'//flist(1:ln1)
-        CALL CSCLI(string(1:ln1+7))
+        CALL SYSTEMF(string(1:ln1+7))
 C: Get full path to STAR directory
         ln2=lenocc(calenv)
         string=calenv(1:ln2)//char(0)
@@ -345,12 +345,12 @@ C: Get current working directory
       ln4=lenocc(troot)
 C: Produce path list of current directory
       string='find '//troot(1:ln4)//' -type d >1'//flist(1:ln1)
-      CALL CSCLI(string)
+      CALL SYSTEMF(string)
       if(iopt.eq.0) then
 C: Goto STAR directory, produce path list, return to PWD
       string='cd '//caldir(1:ln2)//'/..; find '//troot(1:ln4)//
      >' -type d >'//pwd(1:ln3)//'/2'//flist(1:ln1)//'; cd '//pwd(1:ln3)
-      CALL CSCLI(string)
+      CALL SYSTEMF(string)
       endif
 C: Sort both lists to merge its
       if(iopt.eq.0) then
@@ -359,12 +359,12 @@ C: Sort both lists to merge its
       else
       string='sort 1'//flist(1:ln1)//' -u >'//flist(1:ln1)
       endif
-      CALL CSCLI(string)
+      CALL SYSTEMF(string)
 C: Delete two temporary files
       string='rm -f 1'//flist(1:ln1)
-      CALL CSCLI(string(1:ln1+7))
+      CALL SYSTEMF(string(1:ln1+7))
       string='rm -f 2'//flist(1:ln1)
-      CALL CSCLI(string(1:ln1+7))
+      CALL SYSTEMF(string(1:ln1+7))
 
       END
 
