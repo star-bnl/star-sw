@@ -1,19 +1,19 @@
 CC:>--------------------------------------------------------------------
-CC: FILE:       vps_am.F.template
+CC: FILE:       vps.F.template
 CC: HISTORY:
 CC:             00jan96-v000a-hpl- Created by stic Version
 CC:  Id: idl.y,v 1.8 1996/10/15 18:33:35 ward Exp  
 CC:<--------------------------------------------------------------------
 
-      INTEGER*4 FUNCTION VPS_AM(
+      INTEGER*4 FUNCTION VPS(
      1            gvhit_h,               gvhit ,
      2            vpar_h,                vpar ,
      3            vsim_h,                vsim ,
      4            vraw_h,                vraw ) 
       IMPLICIT NONE
-#include "vps_am.inc"
+#include "vps.inc"
 CC:>--------------------------------------------------------------------
-CC: ROUTINE:    VPS_AM
+CC: ROUTINE:    VPS
 CC: DESCRIPTION: Simulates VPD detector response.
 CC:        
 CC:        
@@ -235,7 +235,7 @@ C
 *    
 *    
 *
-      VPS_AM=STAFCV_OK
+      VPS=STAFCV_OK
 999   RETURN
       END
 
