@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: kaonPid.cc,v 1.1 2000/10/13 19:26:19 ullrich Exp $
+ * $Id: kaonPid.cc,v 1.2 2000/10/16 19:35:47 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: kaonPid.cc,v $
- * Revision 1.1  2000/10/13 19:26:19  ullrich
- * Initial Revision.
+ * Revision 1.2  2000/10/16 19:35:47  ullrich
+ * Updated to run on Sun/CC5.
  *
  * Revision 1.1  2000/10/13 19:26:19  ullrich
  * Initial Revision.
@@ -52,7 +52,7 @@ kaonPid::operator() (const StTrack& track, const StSPtrVecTrackPidTraits& vec)
     //
     BetheBloch   bb;
     StParticleDefinition* particle =
-	track.geometry()->charge() > 0 ? StKaonPlus::instance() : StKaonMinus::instance();
+	track.geometry()->charge() > 0 ? (StParticleDefinition*)StKaonPlus::instance() : (StParticleDefinition*)StKaonMinus::instance();
 
     double p = abs(track.geometry()->momentum());
     double dedx = mTraits->mean();
