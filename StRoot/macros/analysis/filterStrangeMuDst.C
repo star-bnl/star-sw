@@ -1,5 +1,8 @@
-// $Id: filterStrangeMuDst.C,v 2.0 2000/06/09 22:12:56 genevb Exp $
+// $Id: filterStrangeMuDst.C,v 2.1 2003/02/10 16:50:08 genevb Exp $
 // $Log: filterStrangeMuDst.C,v $
+// Revision 2.1  2003/02/10 16:50:08  genevb
+// simple updates
+//
 // Revision 2.0  2000/06/09 22:12:56  genevb
 // Updated for version 2 of Strangeness mico DST package
 //
@@ -50,7 +53,7 @@ void run() {
   // erasing the event.
   
   StStrangeMuDstMaker strangeNewDst("strangeNewMuDst");
-  strangeNewDst.SetWrite("newEvMuDst.root","newV0MuDst.root"); //
+  strangeNewDst.SetWrite("newEvMuDst.root"); //
   strangeNewDst.DoV0();    // Selects V0 vertices for new micro-DST
   strangeNewDst.DoMc();    // Keep MC info if it is available
 
@@ -74,7 +77,7 @@ void run() {
 
   // Loop over events
   for( Int_t i=0; i<Nevents; i++ ) {
-    if( chain.Make(i) ) break;
+    if( chain.Make() ) break;
 
 //    Float_t totalV0Pt = 0.;
     for( Int_t j=0; j<strangeOldDst.GetNV0(); j++ ) {
