@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 using std::string;
-using std::ifstream;
+//yf using std::ifstream;
 using std::vector;
 #include "TObject.h"
 class GainVoltCoeffCalculator;
