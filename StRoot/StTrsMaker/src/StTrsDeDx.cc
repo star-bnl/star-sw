@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.7 1999/03/17 17:11:30 lasiuk Exp $
+ * $Id: StTrsDeDx.cc,v 1.8 1999/04/07 00:51:46 lasiuk Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,8 +13,11 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
- * Revision 1.7  1999/03/17 17:11:30  lasiuk
- * comment out debug output
+ * Revision 1.8  1999/04/07 00:51:46  lasiuk
+ * refine diffusion coefficients for P10
+ *
+ * Revision 1.8  1999/04/07 00:51:46  lasiuk
+ * refine diffusion coefficients for P10
  *
  * Revision 1.7  1999/03/17 17:11:30  lasiuk
  * comment out debug output
@@ -152,8 +155,8 @@ void StTrsDeDx::doInitialization()
 	mPairs    = 28.1/centimeter;
 	mIonize   = 15.5*eV;
 	mW        = 26.2*eV;
-	mSigmaTransverse   = 600*micrometer/sqrt(centimeter);
-	mSigmaLongitudinal = 300*micrometer/sqrt(centimeter);
+	mExponent = 2.0;
+
 	// ArCH4 (90:10) at 160 V/cm    From Alber et al. NIM (NA49)  
 	mSigmaTransverse   = 633*micrometer/sqrt(centimeter);
 	mSigmaLongitudinal = 370*micrometer/sqrt(centimeter);
