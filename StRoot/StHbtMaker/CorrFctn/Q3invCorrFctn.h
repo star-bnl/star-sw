@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: Q3invCorrFctn.h,v 1.2 2000/04/12 01:53:28 willson Exp $
+ * $Id: Q3invCorrFctn.h,v 1.3 2000/05/11 21:17:30 willson Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: Q3invCorrFctn.h,v $
+ * Revision 1.3  2000/05/11 21:17:30  willson
+ * Modified CorrFctn class
+ *
  * Revision 1.2  2000/04/12 01:53:28  willson
  * Initial Installation - Comments Added
  *
@@ -21,10 +24,10 @@
 #ifndef Q3invCorrFctn_hh
 #define Q3invCorrFctn_hh
 
-#include "StHbtMaker/Base/StHbtThreeParticleCorrFctn.hh"
+#include "StHbtMaker/Base/StHbtCorrFctn.hh"
 //#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 
-class Q3invCorrFctn : public StHbtThreeParticleCorrFctn {
+class Q3invCorrFctn : public StHbtCorrFctn {
 public:
   Q3invCorrFctn(char* title, const int& nbins, const float& QinvLo, const float& QinvHi);
   virtual ~Q3invCorrFctn();
