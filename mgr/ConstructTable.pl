@@ -33,7 +33,7 @@ sub tableH ($) {
 /*!
  * \class  St_'.$stem.'
  * \brief  C++ wrapper for <'.$stem.'> StAF table
- * \author Automatic Generation
+ * \author Automatic Generation from '.$ENV{STAR_VERSION}.'
  * \date   '.localtime().'
  */
 class St_' . $stem . ' : public TTable
