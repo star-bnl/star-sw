@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StVirtualEventFilter.h,v 1.3 1999/11/10 02:24:37 fine Exp $
+// $Id: StVirtualEventFilter.h,v 1.4 1999/11/24 18:51:22 fine Exp $
 //
 #ifndef STAR_StVirtualEventFilter
 #define STAR_StVirtualEventFilter
@@ -35,11 +35,11 @@ class StVirtualEventFilter : public TObject {
     Int_t TurnOn() { return Turn();}
     Int_t TurnOff(){ return Turn(0);}
     Int_t Toggle() { return GetFlag()? TurnOff():TurnOn();}
-    virtual Int_t Filter(StGlobalTrack *globTrack,Width_t &size,Style_t &style);
-    virtual Int_t Filter(const StObjArray *hitCollection,Width_t &size,Style_t &style);
-    virtual Int_t Filter(const St_TableSorter *tableObject,Int_t index,Width_t &size,Style_t &style);
-    virtual Int_t Filter(const StVertex *vertexObject,Width_t &size,Style_t &style);
-    virtual Int_t Filter(const St_Table *tableObject,Int_t rowNumber,Width_t &size,Style_t &style);
+    virtual Int_t Channel(StGlobalTrack *globTrack,Width_t &size,Style_t &style);
+    virtual Int_t Channel(const StObjArray *hitCollection,Width_t &size,Style_t &style);
+    virtual Int_t Channel(const St_TableSorter *tableObject,Int_t index,Width_t &size,Style_t &style);
+    virtual Int_t Channel(const StVertex *vertexObject,Width_t &size,Style_t &style);
+    virtual Int_t Channel(const St_Table *tableObject,Int_t rowNumber,Width_t &size,Style_t &style);
     virtual Int_t Reset(Int_t reset=0){return reset;}
     ClassDef(StVirtualEventFilter,0)
 };
@@ -47,6 +47,9 @@ class StVirtualEventFilter : public TObject {
 inline Int_t StVirtualEventFilter::Turn(Int_t flag){ Int_t s = GetFlag(); m_ActiveFlag = flag; return s;}
 
 // $Log: StVirtualEventFilter.h,v $
+// Revision 1.4  1999/11/24 18:51:22  fine
+// all StVirtual::Filter have been renamed to Channel
+//
 // Revision 1.3  1999/11/10 02:24:37  fine
 // StVirtualFilter::Reset method has been introduced
 //
