@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.65 2002/01/07 21:42:49 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.66 2002/01/07 23:32:01 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -140,6 +140,7 @@ Int_t StFlowMaker::Make() {
       Long_t eventID = pEvent->id();
       gMessMgr->Info() << "##### FlowMaker: event " << eventID 
 		       << " cut" << endm;
+      return kStOK; // to prevent seg. fault when no event survives
     }
 
   } else if (mPicoEventRead) {
@@ -198,7 +199,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.65 2002/01/07 21:42:49 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.66 2002/01/07 23:32:01 posk Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -1313,6 +1314,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.66  2002/01/07 23:32:01  posk
+// Added return to prevent seg. fault when event skipped.
+//
 // Revision 1.65  2002/01/07 21:42:49  posk
 // Protection for seg. fault when no particles.
 //
