@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 2.14 2003/09/23 03:31:15 jeromel Exp $
+ * $Id: StRchMaker.cxx,v 2.15 2003/09/24 02:20:08 hippolyt Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -76,21 +76,68 @@ ClassImp(StRchMaker) // macro
     StRchMaker::StRchMaker(const char *name, int daq, int matrix, int cf)
 	: StMaker(name), mDaq(daq), mUseMatrix(matrix), mCfOnly(cf)
 {
-    //
-    // Switches in the .h file
-    //
-#ifdef RCH_HISTOGRAM
-    mRchNTupleFile = 0;
-    mPadPlane = 0;
-#endif
-    mTheDataReader           = 0;
-    mTheRichReader           = 0;
-    mTheRichData             = 0;
-    mGeometryDb              = 0;
-    
-    mRemovePicketFencePixels = 1;
-    mPedestalSubtract        = 0;
+  mTheDataReader = 0;
+  mTheRichReader = 0;
+  mTheRichData   = 0;
+  mGeometryDb    = 0;
 
+  mDaq           = 0;
+  mPads          = 0;
+  mRows          = 0;
+  mNumberOfPads  = 0;
+  mEventNumber   = 0;
+  mUseMatrix     = 0;
+
+  // flags
+  mRichCollectionPresent    = 0;
+  mPixelCollectionPresent   = 0;
+  mClusterCollectionPresent = 0;
+  mHitCollectionPresent     = 0;
+  mCfOnly                   = 0;
+  //pedestal
+  mPedestalSubtract         = 0;
+  Int_t i                   = 0;        
+  Int_t j                   = 0;        
+  for(i=0;i<160;i++){
+    for(j=0;j<96;j++){
+      mPedestal[i][j] = 0;
+      mSigma[i][j]    = 0;
+    }
+  }
+  mPedestalFile             = 0;
+  mRemovePicketFencePixels  = 1;
+    
+#ifndef __CINT__    
+  //  mPixelStore               = 0;
+  //  pointerToPixelStoreType   = 0;
+  //  mPicketFencePixelStore    = 0;
+  mClusterFinder            = 0;
+  mSimpleHitCollection      = 0;
+  //  mTheHits                  = 0;
+#endif    
+
+  mEvent                    = 0;
+  mTheRichCollection        = 0;
+
+#ifdef RCH_HISTOGRAM
+    mRchNTupleFile          = 0;
+    mPadPlane               = 0;
+    mClusters               = 0;
+    mHits                   = 0;
+    for(i=0;i< 4;i++) mRawData[i] = 0;
+    for(i=0;i< 6;i++) mCluster[i] = 0;
+    for(i=0;i<11;i++) mHit[i]     = 0;
+    
+    mcc       = 0;
+    mmc       = 0;
+    mrms      = 0;
+    mpad      = 0;
+    mqpad     = 0;
+    mcratio   = 0;
+    mhc       = 0;
+    mhmc      = 0;
+    mhc2m     = 0;
+#endif
     drawinit=kFALSE;
 }
 
@@ -967,7 +1014,7 @@ void StRchMaker::fillStEvent()
 void StRchMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRchMaker.cxx,v 2.14 2003/09/23 03:31:15 jeromel Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 2.15 2003/09/24 02:20:08 hippolyt Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -1012,6 +1059,9 @@ void StRchMaker::clearPadMonitor(){
 /****************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 2.15  2003/09/24 02:20:08  hippolyt
+ * init pointers and arrays
+ *
  * Revision 2.14  2003/09/23 03:31:15  jeromel
  * Get read of a READ_UNINIT_MEM(read) [zeroed in constructor]
  *
