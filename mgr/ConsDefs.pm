@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.68 2004/03/04 23:57:52 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.69 2004/03/16 21:16:34 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -532,6 +532,7 @@
       'SO'             => $SO,
       'SOFLAGS'        => $SOFLAGS,
       'SoOUT'          => $SoOUT,
+      'STIC'           => $STIC,
       'LINKMODULECOM'  => $MAKELIB,
       'AR'             => $AR,
       'ARFLAGS'        => $ARFLAGS,
