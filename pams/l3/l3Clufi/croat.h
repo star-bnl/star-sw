@@ -35,7 +35,7 @@
 /* maximum number of absolute rows that ANY mezzanine can have */
 #define MAX_LOGICAL_ROWS	6
 
-#define MAX_T                 350
+#define MAX_T                 512
 #define MAX_P                 184
 #define MAX_C                  64
 #define MAX_C2          (MAX_C/2)

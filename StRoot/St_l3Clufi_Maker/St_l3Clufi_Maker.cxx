@@ -1,7 +1,12 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.10 2000/02/10 20:43:47 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.11 2000/02/24 01:55:24 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.11  2000/02/24 01:55:24  flierl
+// i960 timing built in.
+// output just with debug option.
+// pixelarray has now space for 512 timebuckets.
+//
 // Revision 1.10  2000/02/10 20:43:47  flierl
 // new files to provide classes which fill banks into tphits. this was done
 // before by l3totphit in pams
@@ -70,12 +75,9 @@
 #include "TH1.h"
 #include "St_l3banks_2_tphits.h"
 #include "TStopwatch.h"
+#include <string.h>
 
-//TStopwatch old;
-//extern TStopwatch watchit;
-
-//Double_t* rawToGlobal (int sector, int row, double pad, double tb,
-//		       double *x, double *y, double *z);
+extern TStopwatch i960[18];
 
 ClassImp(St_l3Clufi_Maker)
 //_____________________________________________________________________________
@@ -114,6 +116,15 @@ Int_t St_l3Clufi_Maker::Init(){
     y_dis = new TH1F("L3ClufiTphity","y coordinate of hits",400,-200,200);
     z_dis = new TH1F("L3ClufiTphitz","z coordinate of hits",400,-400,400);
     charge_dis =  new TH1F("L3ClufiTphitcharge","charge of hits",40,-10,10);
+    i960_time = new TH1D("times","times",18,1,19);
+    for (Int_t id=0; id<18 ;id++) i960[id].Reset();
+    
+    // set max values for pixel array
+    // these values must be equal to those in the module (in croat.h)
+    Max_number_of_rows = 45;
+    Max_number_of_pads = 184;
+    Max_number_of_buckets = 512;
+
     return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -131,12 +142,7 @@ Int_t St_l3Clufi_Maker::Make(){
 
     // here we start
     cout << "Now we start l3Clufi Maker." << endl;
-  
-    // set max values for pixel array
-    // these values must be equal to those in the module (in croat.h)
-    Max_number_of_rows = 45;
-    Max_number_of_pads = 184;
-    Max_number_of_buckets = 350;
+     
 
     /////////
     // Get raw data 
@@ -192,7 +198,7 @@ Int_t St_l3Clufi_Maker::Make(){
 			    Int_t supersectorindex;
 			    if ( sectorindex%2 == 1 )
 				{
-				    // now we have got the first sector of the two sectors
+				    // in this case we have got the first sector of the two sectors
 				    // allocate out array for the TWO secotors that means
 				    // for the supersector ! 
 				    // supersectorindex goes from 1 to 12
@@ -210,7 +216,7 @@ Int_t St_l3Clufi_Maker::Make(){
 					    output_name[13] = sec_char;
 					}
 				    // allocate the table where the out bank will go for this supersector
-				    St_hit_bank[supersectorindex-1] = new St_hitarray(output_name,50000);
+				    St_hit_bank[supersectorindex-1] = new St_hitarray(output_name,80000);
 				    St_hit_bank_this = St_hit_bank[supersectorindex-1];
 				    hit_bank_this_st = (hitarray_st*) St_hit_bank_this->GetTable();
 				    // fill TPCSECLP bankheader with 1,3,5 ... or 23
@@ -223,21 +229,24 @@ Int_t St_l3Clufi_Maker::Make(){
 				}
 			    else if ( sectorindex%2 == 0 )
 				{
-				// now we got the second sector of one supersector
-				// it gets the same out array but the start point will be different !
+				    // in this case we got the second sector of one supersector
+				    // it gets the same out array but the start point will be different !
 				    supersectorindex = sectorindex/2;
 				    St_hit_bank_this = St_hit_bank[supersectorindex-1]; 
 				}
+			    
 			    //cout << "  Supersecotr : " << supersectorindex << endl;
 			
 			    //////
 			    // fill pixel array for this sector
 			    //////	  
-			    // set pixel array 0 clumsey and slow but working !
+			    // set pixel array 0 clumsey and slow but working 
 			    for(Int_t pixindex=0;pixindex<Max_number_of_rows*Max_number_of_pads*Max_number_of_buckets;pixindex++)
-				{
-				    pixelst[pixindex].data=0;
-				}
+			    	{
+			    	    pixelst[pixindex].data=0;
+			    	}
+			    //bzero(pixelst,Max_number_of_rows*Max_number_of_pads*Max_number_of_buckets*2);			   
+
 			    // fill pixel array inner rows
 			    if ( Fill_pixel_of_inner_rows() != 1 ) 
 				{
@@ -254,13 +263,16 @@ Int_t St_l3Clufi_Maker::Make(){
 				}
 			
 			    // just checking
-			    Int_t pixelcount = 0;
-			    for(Int_t Pixindex=0;Pixindex<Max_number_of_rows*Max_number_of_pads*Max_number_of_buckets;Pixindex++)
+			    if (Debug())
 				{
-				    if (pixelst[Pixindex].data!=0) { pixelcount++;} 
+				    Int_t pixelcount = 0;
+				    for(Int_t Pixindex=0;Pixindex<Max_number_of_rows*Max_number_of_pads*Max_number_of_buckets;Pixindex++)
+					{
+					    if (pixelst[Pixindex].data!=0) { pixelcount++;} 
+					}
+				    cout << pixelcount << " Pixel found in sector " << sectorindex << endl;
 				}
-			    cout << pixelcount << " pixel found in sector " << sectorindex << endl;
-
+			    
 			    /////
 			    // now lets do the clusterfinding for this sector
 			    ////
@@ -276,7 +288,7 @@ Int_t St_l3Clufi_Maker::Make(){
 			    // write out tables in online format just for the supersector
 			    if ( sectorindex%2 == 0 )
 			        {
-				    for(Int_t tt=0;tt<50000;tt++)
+				    for(Int_t tt=0;tt<80000;tt++)
 					{
 					    St_hit_bank_this->AddAt(&hit_bank_this_st[tt],tt);
 					}
@@ -339,13 +351,14 @@ Int_t St_l3Clufi_Maker::Make(){
 	}
 
     // fill histogramms
-    for(Int_t tt=0;tt<50000;tt++)
+    cout << "Number of clusters found by l3 :  " << stl3hit->GetNRows() << endl;
+    for(Int_t tt=0; tt<stl3hit->GetNRows() && tt<500000; tt++)
 	{
-	    if  (l3hitst[tt].z == 0 && l3hitst[tt+1].y == 0  && l3hitst[tt+2].x == 0)
-		{
-		    cout << "Total number of clusters " << tt <<" ."<< endl;
-		    break;
-		}
+	    // if  (l3hitst[tt].z == 0 && l3hitst[tt+1].y == 0  && l3hitst[tt+2].x == 0)
+            // 		{
+            // 		    cout << "Total number of clusters " << tt <<" ."<< endl;
+            // 		    break;
+            // 		}
 	    // old style
 	    //stl3hit->AddAt(&l3hitst[tt],tt);
 	    
@@ -355,8 +368,22 @@ Int_t St_l3Clufi_Maker::Make(){
 	    z_dis->Fill(l3hitst[tt].z);
 	    charge_dis->Fill(l3hitst[tt].q);
 	}
-    
-    // done with the whole job    
+
+    // fill i960 timer
+    for (Int_t index1=1;index1<19;index1++ )
+      {
+	i960_time->Fill(index1,(Double_t)i960[index1].CpuTime());
+	//i960_time->Fill(index1,(Float_t)index1);
+	if (Debug())
+	    {
+		cout << "Time per i960 :  " << index1 << "\t" ;
+		cout << (Double_t)(i960[index1].RealTime()) << "\t";
+		cout << (Double_t)(i960[index1].CpuTime()) << endl;
+	    }
+      }
+  
+    // done with the whole job  
+    cout << "Done with l3 clusterfinding." << endl;
     return kStOK;    
 }
 
@@ -438,7 +465,7 @@ Int_t St_l3Clufi_Maker::Fill_pixel_of_inner_rows(){
 					+ (pad_id-1) * Max_number_of_buckets 
 					+ (bucket_id-1);
 
-				    if ( adc_value < 1024 && adc_value > 0 && pixelarrayindex < 2913750 && pixelarrayindex >0 )
+				    if ( adc_value < 1024 && adc_value > 0 && pixelarrayindex < Max_number_of_rows*Max_number_of_pads*Max_number_of_buckets && pixelarrayindex >0 )
 					{
 					    // Fill pixelarray
 					    pixelst[pixelarrayindex].data = adc_value; 
@@ -545,7 +572,7 @@ Int_t St_l3Clufi_Maker::Fill_pixel_of_outer_rows(){
 					+ (pad_id-1) * Max_number_of_buckets 
 					+ (bucket_id-1);
 
-				    if ( adc_value < 1024 && adc_value > 0 && pixelarrayindex < 2913750 && pixelarrayindex >0 )
+				    if ( adc_value < 1024 && adc_value > 0 && pixelarrayindex < Max_number_of_rows*Max_number_of_pads*Max_number_of_buckets && pixelarrayindex >0 )
 					{
 					    // Fill pixelarray
 					    pixelst[pixelarrayindex].data = adc_value; 

@@ -79,8 +79,8 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
     UInt_t *padrows ;
     Int_t cl_found ;
     UInt_t rows ;
-
-
+    
+    
     /* Do init number of pads in each padrow belonging to this mz */
     Int_t rowAbs[MAX_LOGICAL_ROWS] ;   /* the "real" padrow number [1..45] */ 
     Int_t rowStart[MAX_LOGICAL_ROWS] ; /* first pad in the padrow */
