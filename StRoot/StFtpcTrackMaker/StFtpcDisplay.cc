@@ -1,5 +1,8 @@
-// $Id: StFtpcDisplay.cc,v 1.10 2001/07/13 18:00:50 oldi Exp $
+// $Id: StFtpcDisplay.cc,v 1.11 2001/09/27 14:00:35 oldi Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.11  2001/09/27 14:00:35  oldi
+// Small change to avoid ambiguous call of TPolyMarker() constructor.
+//
 // Revision 1.10  2001/07/13 18:00:50  oldi
 // New function WriteData() added. It writes TPolyMarkers and TPolyLine3Ds to
 // a file which can be used to display results (pictures) offline.
@@ -501,22 +504,22 @@ void StFtpcDisplay::TrackInfo()
       trackcluster = hits->GetEntriesFast();
       
       if (phi_track) delete phi_track;
-      phi_track = new TPolyMarker(trackcluster, 0, 0, "");
+      phi_track = new TPolyMarker(trackcluster, (Float_t*)0, (Float_t*)0, "");
       phi_track->SetMarkerStyle(4);
       phi_track->SetMarkerSize(0.4);
 
       if (eta_track) delete eta_track;
-      eta_track = new TPolyMarker(trackcluster, 0, 0, "");
+      eta_track = new TPolyMarker(trackcluster, (Float_t*)0, (Float_t*)0, "");
       eta_track->SetMarkerStyle(4);
       eta_track->SetMarkerSize(0.4);
 
       if (circle_track) delete circle_track;
-      circle_track = new TPolyMarker(trackcluster, 0, 0, "");
+      circle_track = new TPolyMarker(trackcluster, (Float_t*)0, (Float_t*)0, "");
       circle_track->SetMarkerStyle(4);
       circle_track->SetMarkerSize(0.4);
 
       if (z_track) delete z_track;
-      z_track = new TPolyMarker(trackcluster, 0, 0, "");
+      z_track = new TPolyMarker(trackcluster, (Float_t*)0, (Float_t*)0, "");
       z_track->SetMarkerStyle(4);
       z_track->SetMarkerSize(0.4);
 
