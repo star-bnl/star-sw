@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   22/06/99  (E-mail: fine@bnl.gov)
-// $Id: PadBrowser.C,v 1.6 1999/09/08 19:35:19 fine Exp $
+// $Id: PadBrowser.C,v 1.7 1999/09/08 23:28:57 fine Exp $
 // $Log: PadBrowser.C,v $
+// Revision 1.7  1999/09/08 23:28:57  fine
+// Histogram browser fixed
+//
 // Revision 1.6  1999/09/08 19:35:19  fine
 // PAdMonitor access to DAQ via IO Maker
 //
@@ -26,6 +29,7 @@
 class StPadDisplayMaker;
 class StChain;
 StChain *chain = 0;
+StPadDisplayMaker *padMonitor;
 
 //_______________________________________________________________________________________
 void Load(){
@@ -68,21 +72,21 @@ class StPadBrowserPanel {
   }
   //_______________________________________________________________________________________
   static void MakeHists(Int_t direction=1,Int_t hId=0){
+  // Display 2D histograms for given sector
     static TCanvas *histCanvas = 0;
     static Int_t histCounter = 0;
     if (!histCanvas) histCanvas = new TCanvas("Pads");
     histCanvas->cd();
     histCounter += direction;
-    if (histCounter > 12) histCounter = 1;
-    if (histCounter < 1)  histCounter = 12;
-    chain->GetHists(hId+histCounter)->Draw("cont");
+    if (histCounter > 24) histCounter = 1;
+    if (histCounter < 1)  histCounter = 24;
+    padMonitor->GetHists(hId+histCounter)->Draw("cont");
   }
   //_______________________________________________________________________________________
   static void Finish(){
     chain->Clear();
     chain->Finish();
   }
-
 };
 
 //_______________________________________________________________________________________
