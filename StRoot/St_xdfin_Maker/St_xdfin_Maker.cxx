@@ -32,6 +32,7 @@ void St_xdfin_Maker::Finish(){
 void St_xdfin_Maker::Init(){
 // Get run parameters from input file
   St_DataSet *set = gStChain->XDFFile()->NextEventGet(); 
+  SafeDelete(set);// quick and dirty
   if (set) {
     if (strcmp(set->GetName(),"run")==0){ 
       St_DataSet *RunSet = gStChain->GetRun();

@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.h,v 1.1 1998/08/18 14:06:07 fisyak Exp $
+// $Id: St_glb_Maker.h,v 1.2 1998/09/08 22:43:11 fisyak Exp $
 // $Log: St_glb_Maker.h,v $
+// Revision 1.2  1998/09/08 22:43:11  fisyak
+// Modify St_dst_Maker to account new calling sequence
+//
 // Revision 1.1  1998/08/18 14:06:07  fisyak
 // Add to bfc dst
 //
@@ -29,11 +32,12 @@ class St_ev0_ev0par;
 class St_mft_control;
 class St_ev0_ev0par;
 class St_mft_control; 
-
+class St_dst_run_header;
+class St_particle_dst_param;
 class St_dst_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.1 1998/08/18 14:06:07 fisyak Exp $";
+// static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.2 1998/09/08 22:43:11 fisyak Exp $";
    // egr
    Int_t         m_scenario;   //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
                                //    EGR will refit the TPC tracks, reproducing the parameters in tptrack.
@@ -83,6 +87,8 @@ class St_dst_Maker : public StMaker {
    St_ev0_ev0par  *m_ev0par;      //!
    St_mft_control *m_magf;        //!
    St_egr_egrpar  *m_egr_egrpar;  //!
+   St_dst_run_header *m_run_header;//!
+   St_particle_dst_param *m_particle_dst_param; //!
  protected:
  public: 
                   St_dst_Maker();

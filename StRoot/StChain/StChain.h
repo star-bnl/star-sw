@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.9 1998/09/08 13:42:00 love Exp $
+// $Id: StChain.h,v 1.10 1998/09/08 22:43:09 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.10  1998/09/08 22:43:09  fisyak
+// Modify St_dst_Maker to account new calling sequence
+//
 // Revision 1.9  1998/09/08 13:42:00  love
 // new St_tpctest_Maker module
 //
@@ -44,10 +47,10 @@
 class TBrowser;
 class TChain;
 class St_XDFFile; 
-//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.9 1998/09/08 13:42:00 love Exp $";//StChain header CVS version
+//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.10 1998/09/08 22:43:09 fisyak Exp $";//StChain header CVS version
 
 class StChain : public StMaker {
-
+public:
 typedef  enum {kNormal, kDebug} EDebugLevel;
 private:
    Int_t               m_Version;           //StChain version number
