@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.12 2001/01/22 22:56:40 laue Exp $
+ * $Id: StHbtPair.hh,v 1.13 2001/03/28 22:35:23 flierl Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
+ * Revision 1.13  2001/03/28 22:35:23  flierl
+ * changes and bugfixes in qYKP*
+ * add pairrapidity
+ *
  * Revision 1.12  2001/01/22 22:56:40  laue
  * Yano-Koonin-Podgoretskii Parametrisation added
  *
@@ -91,6 +95,8 @@ public:
   double qInv() const;
   double kT()   const;
   double mInv() const;
+  // pair rapidity
+  double rap() const;
 
   // Bertsch-Pratt momentum components in Pair Frame - written by Bekele/Humanic
   double qSidePf() const;
@@ -111,8 +117,13 @@ public:
   double qLongBf(double beta=0.0) const;
 
   // Yano-Koonin-Podgoretskii Parametrisation 
-  void qYKPCMS(double& qP, double& qT, double& q0);
-  void qYKPLCMS(double& qP, double& qT, double& q0);
+  // source rest frame (usually lab frame)
+  void qYKPCMS(double& qP, double& qT, double& q0) const ;
+  // longitudinal comoving frame
+  void qYKPLCMS(double& qP, double& qT, double& q0) const ;
+  // pair rest frame
+  void qYKPPF(double& qP, double& qT, double& q0) const ;
+
 
   double quality() const;
 
