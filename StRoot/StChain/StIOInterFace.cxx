@@ -7,6 +7,7 @@ StIOInterFace::StIOInterFace(const char *name,const char *iomode)
 :StMaker(name)
 {
   if (iomode) SetIOMode(iomode);
+  fNIO = 0;
 }  
 //_____________________________________________________________________________
 void StIOInterFace::SetBranch(const Char_t *brName,const Char_t *file,const Char_t *mode,Option_t *opt)
@@ -34,4 +35,10 @@ Int_t StIOInterFace::Skip(int nskip)
     if (ret) return ret;
   }
   return kStOK;
+}
+//_____________________________________________________________________________
+Int_t StIOInterFace::Finish()
+{
+  printf("<%s::Finish> %s: %d I/O's\n",ClassName(),GetName(),fNIO);
+  return StMaker::Finish();
 }
