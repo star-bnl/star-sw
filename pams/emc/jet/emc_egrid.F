@@ -276,9 +276,9 @@ C*- phi,eta for EMC energy grid? Need to improve! -akio
             xp(1) = 0.0
             xp(2) = 0.0
             
-            call ev0_circle_param_r(trak,xc1,r1)
-            call ev0_project_track(xc1,r1,xp,xn1)
-            call ev0_update_track_param(xc1,r1,xn1,trak,trk1) 
+            call emc_circle_param_r(trak,xc1,r1)
+            call emc_project_track(xc1,r1,xp,xn1)
+            call emc_update_track_param(xc1,r1,xn1,trak,trk1) 
             
 C*-Calculate (phi,eta) bin for Track at vertex            
             eta=-1.0*ALOG(TAN(ATAN2(pt,pz)/2.0))
