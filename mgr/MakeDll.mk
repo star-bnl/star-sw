@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.111 1999/09/09 23:31:57 fisyak Exp $
+# $Id: MakeDll.mk,v 1.112 1999/09/12 01:47:26 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.112  1999/09/12 01:47:26  fisyak
+# merge cons and makel tables h-files into include/tables
+#
 # Revision 1.111  1999/09/09 23:31:57  fisyak
 # Remove clash between MakeDll and cons in RootCint output
 #
@@ -279,7 +282,7 @@ endif
 # 	Define internal and external includes dirs
 INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities StAnalysisUtilities \
 	xdf2root StarClassLibrary StEvent  StDbLib) \
-        StRoot .share .share/tables .share/$(PKG) pams inc StDb/include
+        StRoot .share include/tables .share/$(PKG) pams inc StDb/include
 #                            StarClassLibrary/include
 INC_DIRS  := $(wildcard $(GEN_DIR) $(SRC_DIRS) $(SRC_DIR)/include)
 INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) 
@@ -335,9 +338,9 @@ MAKEDIRS := $(shell mkdir -p $(OUTPUT_DIRS))
 
 VPATH =  $(INPUT_DIRS) $(OUTPUT_DIRS)
 
-FILES_TAB  := $(wildcard $(SRC_DIR)/St_*_Table.cxx)
 FILES_MOD  := $(wildcard $(SRC_DIR)/St_*_Module.cxx)
 ifneq (tables,$(PKGNAME))
+FILES_TAB  := $(wildcard $(GEN_TAB_INC)/St_*_Table.cxx)
 #FILES_HH   := $(wildcard $(SRC_DIR)/*.h $(SRC_DIR)/*.hh $(SRC_DIR)/*.h $(SRC_DIR)/*.hh)
 FILES_HH   := $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.h) $(wildcard $(dir)/*.hh))
 FILES_HH := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_HH)))
@@ -696,6 +699,7 @@ test_mk:
 	@echo "DIR_GEN   = |"$(DIR_GEN)"|"
 	@echo "GEN_TMP   = |"$(GEN_TMP)"|"
 	@echo "GEN_TAB   = |"$(GEN_TAB)"|"
+	@echo "GEN_TAB_INC= |"$(GEN_TAB_INC)"|"
 	@echo "LIB_DIR   = |"$(LIB_DIR)"|"
 	@echo "OBJ_DIR   = |"$(OBJ_DIR)"|"
 	@echo "DEP_DIR   = |"$(DEP_DIR)"|"

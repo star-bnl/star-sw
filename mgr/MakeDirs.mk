@@ -1,5 +1,8 @@
-# $Id: MakeDirs.mk,v 1.10 1999/09/03 17:49:50 fisyak Exp $
+# $Id: MakeDirs.mk,v 1.11 1999/09/12 01:47:25 fisyak Exp $
 # $Log: MakeDirs.mk,v $
+# Revision 1.11  1999/09/12 01:47:25  fisyak
+# merge cons and makel tables h-files into include/tables
+#
 # Revision 1.10  1999/09/03 17:49:50  fisyak
 # Make makel and cons compartible in OBJ
 #
@@ -42,6 +45,8 @@ endif
 DIR_GEN := $(ROOT_DIR)/.share
 GEN_TMP := $(DIR_GEN)/tmp
 GEN_TAB := $(DIR_GEN)/tables
+GEN_INC := $(ROOT_DIR)/include
+GEN_TAB_INC := $(GEN_INC)/tables
 GEN_DIR := $(DIR_GEN)/$(DOMAIN)
 DOM_DIRS:= $(filter-out CVS, $(notdir $(wildcard $(ROOT_DIR)/pams/*)))
 #.
@@ -53,3 +58,5 @@ check_gen   := $(shell test -d $(DIR_GEN)  || mkdir -p $(DIR_GEN))
 check_neg   := $(shell test -d $(GEN_DIR)  || mkdir -p $(GEN_DIR))
 check_tab   := $(shell test -d $(GEN_TAB)  || mkdir -p $(GEN_TAB))
 check_tmp   := $(shell test -d $(GEN_TMP)  || mkdir -p $(GEN_TMP))
+check_inc   := $(shell test -d $(GEN_INC)  || mkdir -p $(GEN_INC))
+check_tab_inc   := $(shell test -d $(GEN_TAB_INC)  || mkdir -p $(GEN_TAB_INC))
