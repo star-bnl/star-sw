@@ -79,7 +79,11 @@ class StEstTracker {
   table_head_st*   m_egrpar_h;//!
   // real data members
   StEstWafer*      mPreprojTable[MAXFINDWAF];//!
-  StEstIndexGeom*  mIndexGeom;//!
+  StEstIndexGeom*  mIndexGeom;//! Objet mapping the wafer position in phi and z
+  double mPhiBin; //! size in phi (degree) of a cell for StEstIndexGeom
+  int    mNPhiBins; //! number of bins in phi for StEstIndexGeom
+  double mZBin; //! size in z (cm) of a cell for StEstIndexGeom
+  int    mNZBins; //! number of bins in phi for StEstIndexGeom
   StEstWafer**     mIndexWaf;//!
   StEstHit**       mSvtHit;//!
   StEstHit*        mVertex;//!
