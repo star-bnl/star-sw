@@ -1,6 +1,5 @@
 #ifndef StEvtHddr_h
 #define StEvtHddr_h
-
 #include <TDatime.h>
 #include "TDataSet.h"
 struct EvtHddr_st;
