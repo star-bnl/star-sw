@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.78 2001/09/17 21:31:53 jeromel Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.79 2001/09/26 23:26:56 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -65,10 +65,14 @@
 #include "TStyle.h"
 #include "TTUBS.h"
 #include "TPaveLabel.h"
+#include "TGeometry.h"
+#include "TBRIK.h"
+#include "TMath.h"
+#include "TObjString.h"
+#include "TSystem.h"
 #include "TRootHelpDialog.h"
 
 #include "StEventDisplayMaker.h"
-#include "StChain.h"
 #include "TDataSetIter.h"
 #include "TVolume.h"
 #include "TVolumeView.h"
@@ -83,23 +87,13 @@
 #include "StVirtualEventFilter.h"
 #include "TTable.h"
 #include "TTableSorter.h"
-#include "StArray.h"
 #include "tables/St_tpt_track_Table.h"
 #include "tables/St_dst_event_summary_Table.h"
 
-// #include "StThreeVector.hh"
-// #include "StHelixD.hh"
 #include "StTrackChair.h"
-#include "StEvent.h"
-#include <TCanvas.h>
-#include <TGeometry.h>
-#include <TWebFile.h>
-#include <TBRIK.h>
-#include <TH2.h>
-#include <TMath.h>
-#include <TObjString.h>
-#include <TSystem.h>
 
+#include "StArray.h"
+#include "StEvent.h"
 #include "StDefaultFilter.h"
 #include "StEventHelper.h"
 
@@ -113,14 +107,12 @@ StEventDisplayInfo *StEventDisplayMaker::fgInfo      = 0;
 
 ClassImp(StEventDisplayInfo)
 
-
 //_____________________________________________________________________________
 //
 //                         StEventDisplayMaker
 //_____________________________________________________________________________
 
 ClassImp(StEventDisplayMaker)
-
 //_____________________________________________________________________________
 StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
 {
@@ -143,6 +135,8 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   m_ListDataSetNames = 0;
   m_VolumeList       = 0;
   mFilterList        = 0;
+  memset(fColCash,0,kCOLORS*sizeof(void*));
+  
   m_FilterArray   = new TObjArray(kEndOfEventList);
   Int_t i; 
   for (i =0;i<kEndOfEventList;i++) {
@@ -678,20 +672,20 @@ Int_t StEventDisplayMaker::MakeTable(const char **positions)
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
 {
-const Style_t UHitSty = 4; const Size_t UHitSiz = 0.35; const Color_t UHitCol= 0;
-const Style_t NHitSty = 1; const Size_t NHitSiz = 1.00; const Color_t NHitCol=18;
-const Style_t TrakSty = 1; const Size_t TrakSiz = 1.00; const Color_t TrakCol= 0;
-const Style_t VertSty = 5; const Size_t VertSiz = 0.90; const Color_t VertCol= 0;
+   static const Style_t UHitSty = 4; static const Size_t UHitSiz = 0.35; static const Color_t UHitCol= 0;
+   static const Style_t NHitSty = 1; static const Size_t NHitSiz = 1.00; static const Color_t NHitCol=18;
+   static const Style_t TrakSty = 1; static const Size_t TrakSiz = 1.00; static const Color_t TrakCol= 0;
+   static const Style_t VertSty = 5; static const Size_t VertSiz = 0.90; static const Color_t VertCol= 0;
 
-enum {kTRK=1,kHIT=2,kUSE=4,kUNU=8};
+   enum QWERTY {kTRK=1,kHIT=2,kUSE=4,kUNU=8};
 
 
   if (!pos[1] || !pos[1][0]) return 1;
+  memset(fColCash,0,kCOLORS*sizeof(void*));
 
   if (!mEventHelper) mEventHelper = new StEventHelper;
   mEventHelper->Reset(event);
   mEventHelper->ls();
-
 
   int keyLen = strchr(pos[1],' ') - pos[1];
   int kase=0;
@@ -700,12 +694,13 @@ enum {kTRK=1,kHIT=2,kUSE=4,kUNU=8};
   if (strstr(pos[1],"Used"  )) kase |= kUSE;
   if (strstr(pos[1],"Unused")) kase |= kUNU;
   int all = (strncmp(pos[1],"All",3)==0);
+
   TString sel("^StSPtrVec");
 
   Style_t defSty=0; Size_t defSiz = 0; Color_t defCol= 0;
   TObjArray *shaps =0;
 
- SWIT:  
+
   switch (kase) {
 
     case kHIT|kUNU:;
@@ -714,76 +709,120 @@ enum {kTRK=1,kHIT=2,kUSE=4,kUNU=8};
       else     {sel.Append(pos[1],keyLen);} 
       sel += ".*Hit$";
       shaps = mEventHelper->SelHits  (sel.Data(),(kase>>2)&3);
-      kase  = kase&kUSE | kase&kUNU;
-      goto SWIT;
-
-    case kUSE:;
-      defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;
-
-    case kUNU:;
-      defSty = NHitSty; defSiz = NHitSiz; defCol = NHitCol; break;
+      break;
 
     case kTRK:;
-      defSty = TrakSty; defSiz = TrakSiz; defCol = TrakCol;       
-
     case kTRK|kHIT:;
       if (all) { 
         shaps = mEventHelper->SelTracks(kase&3);
       } else {
-        sel.Append(pos[1],keyLen);
-        sel +="Vertex$";
+        sel.Append(pos[1],keyLen); sel +="Vertex$";
         shaps = mEventHelper->SelVertex(sel.Data(),kase&3);
       } 
-      if (!(kase&kHIT)) break;
-      kase = kUSE; goto SWIT;
+      break;
 
      default: Assert(0);
   }
-      
-  
-  if (!shaps) return 0;
 
-  m_TrackCollector->Add(shaps);	//collect for garbage
+  switch ( kase ) 
+  {
+    case (kHIT|kUNU):;
+      defSty = NHitSty; defSiz = NHitSiz; defCol = NHitCol; break;
+
+    case (kHIT|kUSE):;
+    case (kTRK|kHIT):;
+      defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;
+
+    case kTRK:;
+      defSty = TrakSty; defSiz = TrakSiz; defCol = TrakCol; break;      
+
+    default: Assert(0);
+  }
+
+
+  if (!shaps) return 0;
+  Int_t trackCounter = 0;
+
+  m_TrackCollector->Add(shaps);		//collect for garbage
   int ntrk = shaps->GetLast()+1;
   if (!ntrk ) return 0;
 
-  Int_t trackCounter = 0;
   Color_t rndCol = kRed;
 
   TListIter nextFilter(mFilterList);
-  for (int i = 0; i < ntrk; i++ ){
-    rndCol = (((rndCol-kRed)+1)%7)+kRed;
-    StPoints3DABC *pnt = (StPoints3DABC*)shaps->At(i);
-    //		Filtration
-    StFilterABC *filt=0;
+  int ncut = 0;
+  Color_t col = 0;
+  StFilterABC *filt=0;
+  Style_t sty; Size_t siz;
+  StPoints3DABC *pnt;
+  int P; const char *L;
+
+  for (int i = 0; i < ntrk; i++ )
+  {
+    rndCol = (((rndCol-kRed)+1)%6)+kRed;
+    pnt = (StPoints3DABC*)shaps->At(i);
+//		Filtration
     nextFilter.Reset();
     while ((filt=(StFilterABC*)nextFilter())) {if (!filt->Accept(pnt)) break;}
-    if (filt) continue;
-    //
-    int P = pnt->Size()==1;
-    const char *L = (P) ? "P":"L";
+    if (filt) {ncut++; continue;}
+//
+    P = pnt->Size()==1;
+    L = (P) ? "P":"L";
 
-    Style_t sty = defSty; Size_t siz = defSiz;
+    sty = defSty; siz = defSiz;
     if (P && !(kase&kHIT)) { sty = VertSty ; siz = VertSiz; }
 
-    TPolyLineShape *tracksShape = new TPolyLineShape(pnt,L);
-    m_TrackCollector->Add(pnt);		//collect garbage
-    Color_t col = pnt->GetUniqueID();
+    col = pnt->GetUniqueID();
     if (!col) col = defCol;
     if (!col) col = rndCol;
+    DrawIt(pnt,L,col,sty,siz);
+    trackCounter++;
+  }
+  printf(" %d objects was filtered out\n",ncut);
+  return trackCounter;
+}
+//_____________________________________________________________________________
+void  StEventDisplayMaker::DrawIt(StPoints3DABC *pnt,const char *opt
+                                 ,Color_t col,Style_t sty,Size_t siz)
+{
+    TVolume        *thisTrack;
+    TPolyLineShape *tracksShape;
+    StPoints3DABC  *bigPnt;
 
-    tracksShape->SetVisibility(1);
-    tracksShape->SetColorAttribute(col);
-    tracksShape->SetLineStyle(sty);
-    tracksShape->SetSizeAttribute(siz);
+    m_TrackCollector->Add(pnt);		//collect garbage
+    if (opt[0] == 'P' && col < kCOLORS) {
+      thisTrack = fColCash[col];
+      if (!thisTrack) {
+         bigPnt = new StPoints3DABC(pnt->GetName(),pnt->GetTitle(),0);
+         tracksShape = new TPolyLineShape(bigPnt,opt);  
+         tracksShape->SetVisibility(1);
+         tracksShape->SetColorAttribute(col);
+         tracksShape->SetLineStyle(sty);
+         tracksShape->SetSizeAttribute(siz);
+         thisTrack = new TVolume(pnt->GetName(),pnt->GetTitle(),tracksShape);
+         fColCash[col]=thisTrack;
+         thisTrack->Mark();   thisTrack->SetVisibility();
+         m_EventsNode->Add(thisTrack); 
+
+       } else {
+         tracksShape = (TPolyLineShape*)thisTrack->GetShape();
+         bigPnt = (StPoints3DABC*)tracksShape->GetPoints();
+       }
+       bigPnt->Add(pnt);
+    
+    } else {
+
+      tracksShape = new TPolyLineShape(pnt,opt);
+      tracksShape->SetVisibility(1);
+      tracksShape->SetColorAttribute(col);
+      tracksShape->SetLineStyle(sty);
+      tracksShape->SetSizeAttribute(siz);
 
     // 		Create a node to hold it
-    TVolume *thisTrack = new TVolume(pnt->GetName(),pnt->GetTitle(),tracksShape);
-    thisTrack->Mark();   thisTrack->SetVisibility();
-    trackCounter++;
-    m_EventsNode->Add(thisTrack); 
-  }
-  return trackCounter;
+      TVolume *thisTrack = new TVolume(pnt->GetName(),pnt->GetTitle(),tracksShape);
+      thisTrack->Mark();   thisTrack->SetVisibility();
+      m_EventsNode->Add(thisTrack); 
+   }
 }
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeTableTracks(const StTrackChair *points,StVirtualEventFilter *filter)
@@ -1033,6 +1072,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.79  2001/09/26 23:26:56  perev
+// Sorting by color added
+//
 // Revision 1.78  2001/09/17 21:31:53  jeromel
 // Compiler Kaboum on syntax (label vs switch()). Slightly modified and now works.
 //

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.26 2001/09/01 19:51:24 perev Exp $
+// $Id: StEventDisplayMaker.h,v 1.27 2001/09/26 23:26:56 perev Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.27  2001/09/26 23:26:56  perev
+// Sorting by color added
+//
 // Revision 1.26  2001/09/01 19:51:24  perev
 // StEvent added
 //
@@ -57,13 +60,16 @@ class TVirtualPad;
 class TPaveLabel;
 class StEventHelper;
 class StFilterABC;
-
+class StPoints3DABC;
 class StEventDisplayInfo;
+
 class StEventDisplayMaker : public StMaker {
  private:
-// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.26 2001/09/01 19:51:24 perev Exp $";
+// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.27 2001/09/26 23:26:56 perev Exp $";
 
  private: 
+ enum {kCOLORS=20};
+
 static Int_t fgEventLoop;
 static StEventDisplayInfo *fgInfo;
 
@@ -90,6 +96,9 @@ static StEventDisplayInfo *fgInfo;
 
     TList*        mFilterList;		//! list of filters for StEvent
 
+    TVolume *fColCash[kCOLORS];
+    
+
     Int_t         MakeTable(const char   **positions);
     Int_t         MakeTableHits(const TTable *points,StVirtualEventFilter *filter,const char   *keyColumn,const char   *keyPositions[]);
     static Int_t  ParseName(char   *inName, char   *position[]);
@@ -106,6 +115,8 @@ static StEventDisplayInfo *fgInfo;
    virtual Int_t  Make();
    virtual Int_t  MakeTableTracks(const StTrackChair *points,StVirtualEventFilter *filter);
    virtual Int_t  MakeEvent(const TObject *event,const char** positions);
+           void   DrawIt(StPoints3DABC *pnt,const char *opt,Color_t col,Style_t sty,Size_t siz);
+
    virtual void   Clear(Option_t *option="");
    virtual void   ClearCanvas(); // *MENU*
    virtual void   ClearEvents();
@@ -156,7 +167,7 @@ static StEventDisplayInfo *fgInfo;
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.26 2001/09/01 19:51:24 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.27 2001/09/26 23:26:56 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
