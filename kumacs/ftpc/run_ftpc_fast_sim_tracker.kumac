@@ -8,6 +8,7 @@
 *                        chain: simulation,tracking, track evaluation
 * editted July 29,1998 - K. Turner
 *                        changed some names of utility kumacs
+*                        write out [run] and [event]
 ************************************************************************
 ************************************************************************
 
@@ -21,7 +22,7 @@
           nfile=ftpc_tracks.ntup _
           nid=111 _
           table=ftpc/tracks/fpt_fptrack _
-          output_file=ftpc_output.xdf
+          output_file=ftpc_fast_sim_output.xdf
 * 
 *  this is an example!! you must change to fill your needs
 *  
@@ -83,6 +84,7 @@
 * open output ntuple
   exec write_table_to_ntuple#init_disk [funit] [nfile]  
   
+* open output file
   exec write_table_to_file#init evout [output_file]
   
 * **************************************************************

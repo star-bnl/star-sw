@@ -8,6 +8,7 @@
 *                        chain: simulation,tracking, track evaluation
 * editted July 29,1998 - K. Turner
 *                         changed some names of utility kumacs
+*                         write out [run] and [event]
 ************************************************************************
 ************************************************************************
 
@@ -20,7 +21,8 @@
           funit=21 _
           nfile=ftpc_tracks.ntup _
           nid=111 _
-          table=ftpc/tracks/fpt_fptrack
+          table=ftpc/tracks/fpt_fptrack _
+          output_file=ftpc_slow_sim_output.xdf
 * 
 *  this is an example!! you must change to fill your needs
 *  
@@ -49,6 +51,7 @@
   message ' *** output Ntuple filename  -->            ' [nfile]
   message ' *** Ntuple ID # -->                        ' [nid]
   message ' *** Table to write to ntup -->             ' [table]
+  message ' *** Output file name        --> ' [output_file]
   
   
 ***********************************************************
@@ -81,6 +84,9 @@
   
 * open output ntuple
   exec write_table_to_ntuple#init_disk [funit] [nfile]  
+
+* open output file
+  exec write_table_to_file#init evout [output_file]
    
 * **************************************************************
 * --------- Setup and run ftpc slow simulator & tracker pams -------------*
@@ -101,6 +107,8 @@
     exec fpt_init#init
     exec fte_init#init
 
+* write run directory to output table file
+   exec write_table_to_file#write evout [run]
 
   
 * ------------------- process events ------------------------------*
@@ -135,6 +143,8 @@
 	 endif 
 * write table to ntuple
     exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
+* write event directory to output table file
+   exec write_table_to_file#write evout [event]
   enddo
 
   
@@ -152,6 +162,9 @@
 * close input file
   message ' close input file'
   exec input_g2t_file#close
+
+* close output table file
+  exec write_table_to_file#close evout
 
 return
  
