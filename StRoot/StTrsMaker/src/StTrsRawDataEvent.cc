@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsRawDataEvent.cc,v 1.3 1999/03/24 22:19:58 lasiuk Exp $
+ * $Id: StTrsRawDataEvent.cc,v 1.4 1999/04/29 00:16:17 lasiuk Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StTrsRawDataEvent.cc,v $
+ * Revision 1.4  1999/04/29 00:16:17  lasiuk
+ * add the member function clear() to take care of
+ * allocated memory within the event loop.
+ *
  * Revision 1.3  1999/03/24 22:19:58  lasiuk
  * actively clean up pointers in destructors
  *
@@ -47,6 +51,15 @@ StTrsRawDataEvent::~StTrsRawDataEvent()
 	delete mSectors[ii];
     mSectors.clear();
     //PR(mSectors.size());
+}
+
+void StTrsRawDataEvent::clear()
+{
+    cout << "StTrsRawDataEvent::clear()" << endl;
+    for(int ii=0; ii<mSectors.size(); ii++) {
+	delete mSectors[ii];
+	mSectors[ii] = 0;     // remember to make sure pointer in NULL
+    }
 }
 
 unsigned long StTrsRawDataEvent::size()
