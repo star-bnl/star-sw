@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.8 1999/02/12 01:26:38 lasiuk Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.9 1999/02/14 20:44:32 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,8 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
- * Revision 1.8  1999/02/12 01:26:38  lasiuk
- * Limit debug output
+ * Revision 1.9  1999/02/14 20:44:32  lasiuk
+ * gas gain settable via member function
+ * escape if min()<0
  *
  *
  * Revision 1.10  1999/02/16 23:40:32  lasiuk
@@ -82,7 +83,6 @@ StTrsWireHistogram::StTrsWireHistogram(StTpcGeometry* geoDb, StTpcSlowControl* s
     mSCDb   = scDb;
     mNumberOfInnerSectorAnodeWires =
 	mGeomDb->numberOfInnerSectorAnodeWires();
-    PR(mSectorWires.size());
     mNumberOfOuterSectorAnodeWires =
 	mGeomDb->numberOfOuterSectorAnodeWires();
 
@@ -157,14 +157,15 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
     //PR(offSet);
     //PR(wireLimit);
 //     PR(wireIndex);
+//     PR(wireCoordinate(wireIndex));
 
     //
     // Check Wire Index before doing any further calculations:
-// 	    PR(avalancheFactor);
+    //
     if (wireIndex >= 0 &&
 	if(mDoGasGain) {
 	    double avalancheFactor = avalanche(wireIndex);
-// 	PR(bin.numberOfElectrons());
+//  	    PR(avalancheFactor);
 	    bin.scaleNumberOfElectrons(avalancheFactor);
 	    //bin.scaleNumberOfElectrons(avalanche(wireIndex));
 	else {  // Do Gaussian scaling
@@ -192,7 +193,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 		double oldDriftLength = bin.position().z();
 		bin.position().setZ((oldDriftLength+increase));
 	    }
-//         cout << "add at wire # " << wireIndex <<endl;
+	}
 
 	//
 	// Change coordinate of the wire!
@@ -273,11 +274,13 @@ void StTrsWireHistogram::setDoGasGainFluctuations(bool doIt)
     // Make sure if you turn "on" fluctuations, that gas gain is on!
     if(doIt && !mDoGasGain)
 	mDoGasGain = true;
+
     mDoGasGainFluctuations = doIt;
 }
 
 // These two could be inline, but are only called once so probably doesn't matter
 void StTrsWireHistogram::setGasGainInnerSector(double v)
+{
     mInnerSectorGasGain = v;
     cout << "Gas gain IS: " << mInnerSectorGasGain << endl;
 }
@@ -313,10 +316,6 @@ double StTrsWireHistogram::noFluctuations(int wireIndex) const
 {
     return (wireIndex<mNumberOfInnerSectorAnodeWires) ?
 	mInnerSectorGasGain : mOuterSectorGasGain;
-
-    // Take gain 10^4
-    mInnerSectorGasGain = 10000.;
-    mOuterSectorGasGain = 10000.;
 }
     // For now use values from SN247
     //mInnerSectorGasGain = 1315.;
