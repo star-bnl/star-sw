@@ -1,4 +1,23 @@
-*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12345678
+* $Id: tpeam.F,v 1.40 1998/01/27 00:49:14 fisyak Exp $
+* $Log: tpeam.F,v $
+* Revision 1.40  1998/01/27 00:49:14  fisyak
+* Split sources
+*
+      INTEGER FUNCTION TPEAM( 
+     +                        tphit_h, tphit 
+     +,                       g2t_track_h,g2t_track
+     +,                       g2t_tpc_hit_h,g2t_tpc_hit
+     +,                       tsspar_h, tsspar 
+     +,			      tpcluster_h, tpcluster
+     +,			      tpseq_h, tpseq
+     +,			      tppixel_h, tppixel 
+     +,			      tpmcpix_h, tpmcpix 
+     +,			      pad_plane_h, pad_plane
+     +,			      detector_h, detector,
+     +	                      tclpar_h, tclpar,
+     +                        tpc_index_h, tpc_index,
+     +                        tpc_index_type_h, tpc_index_type)
+
 c        1         2         3         4         5         6         7
 C----------------------------------------------------------------------
 C
@@ -16,21 +35,6 @@ C                     **                 **
 C
 C----------------------------------------------------------------------
 C
-      INTEGER FUNCTION TPEAM( 
-     +                        tphit_h, tphit 
-     +,                       g2t_track_h,g2t_track
-     +,                       g2t_tpc_hit_h,g2t_tpc_hit
-     +,                       tsspar_h, tsspar 
-     +,			      tpcluster_h, tpcluster
-     +,			      tpseq_h, tpseq
-     +,			      tppixel_h, tppixel 
-     +,			      tpmcpix_h, tpmcpix 
-     +,			      pad_plane_h, pad_plane
-     +,			      detector_h, detector,
-     +	                      tclpar_h, tclpar,
-     +                        tpc_index_h, tpc_index,
-     +                        tpc_index_type_h, tpc_index_type)
-
       IMPLICIT NONE
 
 C   Input arguments  (One to a line with definition after ! ) 
@@ -1104,24 +1108,3 @@ c now fill another ntuple (600+ihisto) with "LOCAL" hit coordinates
          close(23)
          return
          end
-
-C----------------------------------------------------------------------
-
-        SUBROUTINE TPE_CLOSE
-
-        Implicit None
-
-C----------------------------------------------------------------------
-
-        call hcdir('//NTUP',' ')
-        call hrend('NTUP')
-        close(23)
-
-        return
-        end
-
-
-C----------------------------------------------------------------------
-
-
-
