@@ -34,7 +34,8 @@ void EditableParameters::add(const string & name,
 			     double min, 
 			     double max,
 			     double increment,
-			     int    type)
+			     int    type,
+			     int    key)
 {
   cout << "EditableParameters::add(name,...)" << endl;
   Parameter * parameter = StiToolkit::instance()->getParameterFactory()->getObject();
@@ -50,7 +51,7 @@ void EditableParameters::add(const string & name,
   if (editableParameter)
     {
       cout << "EditableParameters::add(name,...) - INFO - editableParameter OK" << endl;
-      editableParameter->set(name,description,value,defaultValue,min,max,increment,type);
+      editableParameter->set(name,description,value,defaultValue,min,max,increment,type,key);
       this->Parameters::add(editableParameter);
     }
   else

@@ -43,10 +43,11 @@ const Parameters & Parameters::operator=(const Parameters & parameter)
 void Parameters::add(const string & name, 
 		     const string & description,
 		     double value,
-		     int type)
+		     int type,
+		     int key)
 {
   Parameter * par = StiToolkit::instance()->getParameterFactory()->getObject();
-  par->set(name,description,value,type);
+  par->set(name,description,value,type,key);
   add(par);
 }
 

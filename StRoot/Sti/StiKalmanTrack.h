@@ -307,10 +307,8 @@ class StiKalmanTrack : public StiTrack
   void setFlag(long v);
   long getFlag() const;
 
-
 protected:
     
-
   static StiKalmanTrackFinderParameters * pars;
   static StiObjectFactoryInterface<StiKalmanTrackNode> * trackNodeFactory;
   

@@ -8,15 +8,19 @@ const int Parameter::Double  = 2;
 Parameter::Parameter()
  : Named(""),
    Described(""),
+   _key(0),
    _type(Double),
    _value(0.)
 { }
 
 Parameter::Parameter(const string & name, 
 		     const string & description,
-		     int type, double value)
+		     double value,
+		     int type, 
+		     int key)
  : Named(name),
    Described(description),
+   _key(key),
    _type(type),
    _value(value)
 { }
@@ -25,6 +29,7 @@ Parameter::Parameter(const Parameter & parameter)
 {
   _name = parameter._name;
   _description = parameter._description;
+  _key  = parameter._key;
   _type = parameter._type;
   _value = parameter._value;
 }

@@ -108,7 +108,10 @@ StiKalmanTrackFinder::StiKalmanTrackFinder(StiToolkit * userToolkit)
     {
       cout << "StiKalmanTrackFinder() - INFO - Instantiating gui filters" << endl;
       guiTrackFilter   = trackFilterFactory->getObject();
+      Observer * obs = dynamic_cast<Observer *>(this);
+      dynamic_cast<Subject*>(guiTrackFilter)->attach(obs);
       guiMcTrackFilter = trackFilterFactory->getObject();
+      dynamic_cast<Subject*>(guiMcTrackFilter)->attach(obs);
     }
   else
     cout << "StiKalmanTrackFinder() - INFO - No GUI filters selected" << endl;
@@ -808,45 +811,52 @@ void StiKalmanTrackFinder::findNextTrackSegment(){}
 
 void StiKalmanTrackFinder::update()
 {
-  cout << "StiKalmanTrackFinder::update() - INFO - Starting."<<endl;
+  //cout << "StiKalmanTrackFinder::update() - INFO - Starting."<<endl;
   TrackMap::const_iterator iter;
   StiDrawableTrack * t;
 
+  StiToolkit::instance()->getDisplayManager()->reset();
+  StiToolkit::instance()->getDisplayManager()->draw();
+  StiToolkit::instance()->getDisplayManager()->update();
   // Monte Carlo Tracks
   if (mcTrackContainer)
     {
+      //cout << "StiKalmanTrackFinder::update() - INFO - Looping on MC tracks."<<endl;
       for (iter=mcTrackContainer->begin();iter!=mcTrackContainer->end(); ++iter) 
 	{
-	  cout << "StiKalmanTrackFinder::update() - INFO - Looping."<<endl;
-	  t = dynamic_cast<StiDrawableTrack *>((*iter).second);
-	  if (t)
-	    {
-	      cout << "StiKalmanTrackFinder::update() MC track start" << endl;
-	      t->update();
-	      cout << "StiKalmanTrackFinder::update() MC track done" << endl;
-	    }
-	  else
-	    cout << "StiKalmanTrackFinder::update() - WARNING - MC dynamic_cast failed." << endl;
+	   if (guiMcTrackFilter)
+	     {
+	       //cout << "StiKalmanTrackFinder::update() - INFO - Filter OK/";
+	       if (guiMcTrackFilter->filter((*iter).second))
+		 {
+		   //cout <<"Passed"<<endl;
+		   t = dynamic_cast<StiDrawableTrack *>((*iter).second);
+		   if (t)
+		     t->update();
+		   else
+		     cout << "StiKalmanTrackFinder::update() - WARNING - MC dynamic_cast failed." << endl;
+		 }
+	     }	
+	   else
+	     cout << "StiKalmanTrackFinder::update() - INFO - Filter NOK"<<endl;
 	}
     }
 
   // Reconstructed tracks
   for (iter=trackContainer->begin();iter!=trackContainer->end();++iter) 
     {
-      //cout << "StiKalmanTrackFinder::update() - INFO - Looping."<<endl;
-      //track = static_cast<StiKalmanTrack*>((*it).second);
-      ////if (guiTrackFilter && guiTrackFilter->filter(track);
-      // StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>((*iter).second);
-      if (t)
+      if (guiTrackFilter && guiTrackFilter->filter((*iter).second))
 	{
-	  cout << "StiKalmanTrackFinder::update() Kalman track start" << endl;
-	  t->update();
-	  cout << "StiKalmanTrackFinder::update() Kalman track done" << endl;
+	  t = dynamic_cast<StiDrawableTrack *>((*iter).second);
+	  if (t)
+	      t->update();
+	  else
+	    cout << "StiKalmanTrackFinder::update() - WARNING - Kalman dynamic_cast failed." << endl;
 	}
-      else
-	cout << "StiKalmanTrackFinder::update() - WARNING - Kalman dynamic_cast failed." << endl;
     }
-  cout << "StiKalmanTrackFinder::update() - INFO - Done."<<endl;
+  StiToolkit::instance()->getDisplayManager()->draw();
+  StiToolkit::instance()->getDisplayManager()->update();
+  //cout << "StiKalmanTrackFinder::update() - INFO - Done."<<endl;
 }
 
 void StiKalmanTrackFinder::setEvent(StEvent * event, StMcEvent * mcEvent)
@@ -855,7 +865,7 @@ void StiKalmanTrackFinder::setEvent(StEvent * event, StMcEvent * mcEvent)
   toolkit->getHitFiller()->setEvent(event);
   toolkit->getHitFiller()->fillHits(toolkit->getHitContainer(), toolkit->getHitFactory());
   toolkit->getHitContainer()->sortHits();
-  toolkit->getHitContainer()->update();
+  //xxxxx//  toolkit->getHitContainer()->update();
   trackSeedFinder->reset();
 
   if (mcEvent)
@@ -878,4 +888,11 @@ void StiKalmanTrackFinder::setEvent(StEvent * event, StMcEvent * mcEvent)
 	}
     }
   cout << "StiKalmanTrackFinder::setEvent(StEvent*) - INFO - Done"  << endl;
+}
+
+void StiKalmanTrackFinder::changed(Subject* changedSubject)
+{
+  cout << "StiKalmanTrackFinder::changed(Subject* changedSubject)" << endl;
+  getNewState();
+  update();
 }

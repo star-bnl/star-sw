@@ -14,8 +14,9 @@ ConstrainedParameter::ConstrainedParameter(const string & name,
 					   double defaultValue, 
 					   double min, 
 					   double max, 
-					   int    type)
-  : Parameter(name,description,type,value),
+					   int    type,
+					   int    key)
+  : Parameter(name,description,value,type,key),
     _minimum(min),
     _maximum(max),
     _default(defaultValue)
@@ -23,6 +24,7 @@ ConstrainedParameter::ConstrainedParameter(const string & name,
 
 ConstrainedParameter::ConstrainedParameter(const ConstrainedParameter & parameter)
 { 
+  _key     = parameter._key;
   _type    = parameter._type;
   _value   = parameter._value; 
   _minimum = parameter._minimum;

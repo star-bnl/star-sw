@@ -29,6 +29,9 @@ protected:
 inline void StiRootDrawableTrack::update()
 {
   //cout <<"StiRootDrawableTrack::update() - INFO - Starting."<<endl;
+  // clear the hits and lines of this track
+  this->StiRootDrawableTrack::reset();
+  // fill the hits
   fillHitsForDrawing();
   //cout <<"StiRootDrawableTrack::update() - INFO - Done."<<endl;
 }

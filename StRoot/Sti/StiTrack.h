@@ -59,6 +59,29 @@ enum StiDirection {kOutsideIn=0, kInsideOut};
 class StiTrack 
 {
 public:
+
+  enum StiTrackProperty {kCharge=0,
+			 kMass,
+			 kChi2,
+			 kDca2,
+			 kDca3,
+			 kFlag,
+			 kPrimaryDca,
+			 kPointCount,
+			 kFitPointCount,
+			 kGapCount,
+			 kTrackLength,
+			 kMaxPointCount,
+			 kisPrimary,
+			 kTpcDedx,
+			 kSvtDedx,
+			 kCurvature,
+			 kP,
+			 kPt,
+			 kRapidity,
+			 kPseudoRapidity,
+			 kPhi,
+			 kTanL  };
   static void setTrackFinder(StiTrackFinder * finder);
   static void setTrackFitter(StiTrackFitter * fitter);
   static StiTrackFinder * getTrackFinder();
@@ -101,7 +124,10 @@ public:
   virtual double  getChi2() const=0;
   virtual void    setFlag(long v)=0;
   virtual long    getFlag() const=0;
-  
+
+  // Convenience Accessor using a switch
+  virtual double  getValue(int key);
+
  protected:
   static StiTrackFinder * trackFinder;
   static StiTrackFitter * trackFitter;

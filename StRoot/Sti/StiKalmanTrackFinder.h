@@ -40,6 +40,8 @@ public:
     //action methods_______________________________________________
 
     virtual void update();
+    virtual void changed(Subject* changedSubject);
+
     virtual void findTracks();
     virtual void fitTracks(); 
     virtual void extendTracksToVertex(StiHit* vertex);
