@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.cxx,v 3.12 2003/02/10 16:02:24 genevb Exp $
+// $Id: StStrangeControllerBase.cxx,v 3.13 2003/04/11 08:06:03 jones Exp $
 // $Log: StStrangeControllerBase.cxx,v $
+// Revision 3.13  2003/04/11 08:06:03  jones
+// Fix to read in Mc branch(es) of common MuDst
+//
 // Revision 3.12  2003/02/10 16:02:24  genevb
 // Now read files using TChains; no splitting of MuDst file
 //
@@ -135,9 +138,12 @@ void StStrangeControllerBase::InitReadDst() {
   tree->SetBranchStatus(statName.Data(),1);
   tree->SetBranchAddress(GetName(),&dataArray);
   if (doMc) {
+    if (!tree->GetBranch(mcName.Data()))
+      // Common MuDst stores the MC under a different name
+      (mcName = "Mc") += GetName();
     if (!tree->GetBranch(mcName.Data())) {
       gMessMgr->Warning() << IsA()->GetName() <<
-                        ": No MC data available, continuing without." << endm;
+        ": No MC data available, continuing without." << endm;
       doMc = kFALSE;
     } else {
       (statName = mcName) += ".*";
@@ -166,9 +172,12 @@ void StStrangeControllerBase::InitCreateSubDst() {
   StStrangeControllerBase* dstController = GetDstController();
   tempArray = dstController->GetDataArray();
   if (doMc) {
-    if (!dstMaker->GetTree()->GetBranch(mcName.Data())) {
+    if (!dstMaker->GetTree()->GetBranch(mcName.Data()))
+      // Common MuDst stores the MC under a different name
+      (mcName = "Mc") += GetName();
+    if (!tree->GetBranch(mcName.Data())) {
       gMessMgr->Warning() << IsA()->GetName() <<
-                        ": No MC data available, continuing without." << endm;
+        ": No MC data available, continuing without." << endm;
       doMc = kFALSE;
     } else {
       mcArray = dstController->GetMcArray();
