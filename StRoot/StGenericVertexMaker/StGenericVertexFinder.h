@@ -22,7 +22,7 @@
  * is enforced.
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.9 2004/09/13 15:41:30 balewski Exp $
+ * $Id: StGenericVertexFinder.h,v 1.10 2004/12/13 20:39:58 fisyak Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -32,7 +32,6 @@
 
 
 class StEvent;
-class StMaker;
 
 class StGenericVertexFinder {
  public:
@@ -71,7 +70,6 @@ class StGenericVertexFinder {
  protected: //................................
 
   StGenericVertexFinder();
-  StMaker *mDumMaker;
 
   bool                   mUseITTF;          // Use only tracks with ITTF encoded method
   UInt_t                 mFlagBase;         // ITTF track flag
@@ -99,6 +97,9 @@ class StGenericVertexFinder {
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.10  2004/12/13 20:39:58  fisyak
+// Add initaition of StGenericVertexFinder variables, replace mDumMaker by StMaker::GetChain() method
+//
 // Revision 1.9  2004/09/13 15:41:30  balewski
 // fix bug in ppLMV4/5 switch
 //

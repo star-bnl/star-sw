@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.14 2004/09/13 15:41:31 balewski Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.15 2004/12/13 20:39:58 fisyak Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -129,7 +129,7 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
 
   // get CTB info, does not  work for embeding 
   if(event->runId()<100000){
-    St_DataSet *gds=mDumMaker->GetDataSet("geant");
+    St_DataSet *gds=StMaker::GetChain()->GetDataSet("geant");
     collectCTBhitsMC(gds);  // use M-C
   }  else {
     StTriggerData *trgD=event->triggerData ();
@@ -535,7 +535,7 @@ bool  StppLMVVertexFinder::ppLMV5() {
       
 
   // get geant vertex
-  St_DataSet *gds=mDumMaker->GetDataSet("geant");
+  St_DataSet *gds=StMaker::GetChain()->GetDataSet("geant");
   if(gds) {
     St_g2t_vertex  *g2t_ver=( St_g2t_vertex *)gds->Find("g2t_vertex");
     if(g2t_ver) {
@@ -574,7 +574,7 @@ int  StppLMVVertexFinder::NCtbSlats() {
 //==========================================================
 //==========================================================
 void  StppLMVVertexFinder::changeCuts(){
-  StGenericVertexMaker *mk=(StGenericVertexMaker *)mDumMaker->GetMaker("GenericVertex");
+  StGenericVertexMaker *mk=(StGenericVertexMaker *)StMaker::GetChain()->GetMaker("GenericVertex");
   int mode2=mk->GetMode2();
 
   gMessMgr->Info()<< "ccc m_mode2=" << mode2 << endm;
@@ -598,6 +598,9 @@ void  StppLMVVertexFinder::changeCuts(){
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.15  2004/12/13 20:39:58  fisyak
+ * Add initaition of StGenericVertexFinder variables, replace mDumMaker by StMaker::GetChain() method
+ *
  * Revision 1.14  2004/09/13 15:41:31  balewski
  * fix bug in ppLMV4/5 switch
  *
