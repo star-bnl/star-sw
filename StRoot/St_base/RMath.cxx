@@ -187,3 +187,39 @@ void RMath::mxmlrt_0_(int n__, double *a, double *b, double *c, int ni,int nj)
 } /* mxmlrt_ */
 
 
+//___________________________________________________________________________
+void RMath::mxtrp(float *a, float *b, int i, int j)
+{
+// CERN PROGLIB# F110    MXTRP           .VERSION KERNFOR  1.0   650809 
+// ORIG. 01/01/64 RKB 
+
+  /* Parameter adjustments */
+  --b;  --a;
+  if (i == 0 || j == 0) return;
+
+  int ib = 1;
+  for (int k = 1; k <= j; ++k) 
+  {
+    int ia = k;
+    for (int l = 1; l <= i; ++l,ia += j,++ib) b[ib] = a[ia];
+  }
+} /* mxtrp */
+
+//___________________________________________________________________________
+void RMath::mxtrp(double *a, double *b, int i, int j)
+{
+// CERN PROGLIB# F110    MXTRP           .VERSION KERNFOR  1.0   650809 
+// ORIG. 01/01/64 RKB 
+
+  /* Parameter adjustments */
+  --b;  --a;
+  /* Function Body */
+  if (i == 0 || j == 0) return;
+
+  int ib = 1;
+  for (int k = 1; k <= j; ++k) 
+  {
+    int ia = k;
+    for (int l = 1; l <= i; ++l,ia += j,++ib) b[ib] = a[ia];
+  }
+} /* mxtrp */
