@@ -40,17 +40,19 @@
 #include "StiEvaluableTrackSeedFinder.h"
 #include "StiCompositeSeedFinder.h"
 #include "StiTrackFilter.h"
+#include "StiTrack.h"
 #include "StiKalmanTrackFinder.h"
+#include "StiKalmanTrackFitter.h"
 #include "StiMaterialInteraction.h"
 
 ostream& operator<<(ostream&, const StiTrack&);
 
 StiKalmanTrackFinder::StiKalmanTrackFinder()
 {
-    cout <<"StiKalmanTrackFinder::StiKalmanTrackFinder()"<<endl;    
+    cout <<"StiKalmanTrackFinder::StiKalmanTrackFinder()"<<endl; 
+    StiTrack::setTrackFitter(new StiKalmanTrackFitter());
     reset();
 }
-
 
 StiKalmanTrackFinder::~StiKalmanTrackFinder()
 {
@@ -87,14 +89,17 @@ void StiKalmanTrackFinder::doTrackFit()
 	StiKalmanTrack* track = 0;
 	if (trackSeedFinder->hasMore())	{ //Redundant check, but it protectes against naive calls
 	    track = trackSeedFinder->next();
-	    if (!track) {
+	    if (!track) 
+	      {
 		cout <<"StiKalmanTrackFinder::doTrackFit()\t Track==0. Abort"
 		     <<endl;
 		return;
-	    }
-	    else {
+	      }
+	    else 
+	      {
 		cout <<"StiKalmanTrackFinder::doTrackFit()\t Got Valid track"<<endl;
-
+		track->fit();
+		/*
 		StiKalmanTrackNode * f = track->getFirstNode();
 		StiKalmanTrackNode * ccc = dynamic_cast<StiKalmanTrackNode *>(f->getFirstChild());
 		if (ccc==0) {
@@ -103,12 +108,12 @@ void StiKalmanTrackFinder::doTrackFit()
 		}
 		fitInward(ccc);
 		//if (trackFilter->accept(track))
+		**/
 		trackContainer->push_back(track);
 		track->update();  //This updates the track on the display
 		cout <<*track<<endl;
 	    }
 	}
-	
 	else {
 	    cout <<"\ttrackSeedFinder->hasMore()==false"<<endl;
 	}
@@ -324,87 +329,6 @@ StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) throw (Exception)
 	}
     }
   return sNode;
-}
-
-void StiKalmanTrackFinder::fitInward(StiKalmanTrackNode * node) throw (Exception)
-{
-  /**
-     Perform a track fit from the outside-in.
-     The track is assumed to consist of a simple node a sequence. 
-     i.e. It is assumed to be pruned. Additionally, since the 
-     fit is done from the outside-in the MCS and E-loss are 
-     turned off since one would be getting wrong values in 
-     this case.
-     
-     The fit starts from the given node which may (or may not)
-     be the first node of the track, the outer most point of the
-     track.
-  */
-  StiKalmanTrackNode * pNode; // parent node
-  StiKalmanTrackNode * cNode; // child node
-  StiDetector * pDet;  // parent detector
-  StiDetector * cDet;  // child detector
-  //double chi2;
-  
-  pNode = node;
-  pDet  = pNode->getDetector();
-  cout << "StiKalmanTrackFinder::fitInward()" << endl
-       << "FIRST NODE::" << endl
-       << *pNode << endl;
-  int pos;
-  while (pNode->getChildCount()>0)      {
-      cNode = dynamic_cast<StiKalmanTrackNode *>(pNode->getFirstChild());
-      cout << "Child: " <<  *cNode;
-      cDet  = cNode->getHit()->detector();
-      
-      pos = cNode->propagate(pNode,cDet);	  // evolve state from pDet to cDet
-      if (pos<0)	      {
-	  cout << "POSITION < 0 =======================" << endl;
-	  break;
-      }
-      cNode->evaluateChi2();
-      cNode->updateNode();
-      cout << "UPDATED: " <<  *cNode;
-      pNode = cNode;
-      pDet  = cDet;
-  }
-}
-
-void StiKalmanTrackFinder::fitOutward(StiKalmanTrackNode * node) throw (Exception)
-{
-  /**
-     Perform a track fit from the outside-in.
-     The track is assumed to consist of a simple node a sequence. 
-     i.e. It is assumed to be pruned. 
-     
-     The fit starts from the given node which may (or may not)
-     be the last node of the track, the inner most point of the
-     track.
-     
-     If MCS and ELOSS calculations are required, they must be
-     set externally to this call.
-     
-     Likewise, the mass hypothesis must also be made externally.
-  */
-  StiKalmanTrackNode * pNode; // parent node
-  StiKalmanTrackNode * cNode; // child node
-  StiDetector * pDet;  // parent detector
-  StiDetector * cDet;  // child detector
-  //double chi2;
-  
-  cNode = node;
-  cDet  = cNode->getHit()->detector();
-  pNode = dynamic_cast<StiKalmanTrackNode *>(cNode->getParent());
-  while (pNode)
-    {
-      pDet  = pNode->getHit()->detector();
-      pNode->propagate(cNode,pDet);	// evolve state from cDet to pDet
-      pNode->evaluateChi2();
-      pNode->updateNode();
-      cNode = pNode;
-      cDet  = pDet;
-      pNode = dynamic_cast<StiKalmanTrackNode *>(cNode->getParent());
-    }
 }
 
 //_____________________________________________________________________________

@@ -31,8 +31,6 @@ class StiKalmanTrackFinder : public StiTrackFinder
 
     //Local
     virtual void findTrack(StiTrack * t) throw ( Exception);
-    virtual void fitInward(StiKalmanTrackNode * node) throw (Exception) ;
-    virtual void fitOutward(StiKalmanTrackNode * node) throw (Exception) ;
     virtual StiKalmanTrackNode * followTrackAt(StiKalmanTrackNode * node) throw (Exception);
     void removeNodeFromTrack(StiKalmanTrackNode * node, StiKalmanTrack* track);
     void pruneNodes(StiKalmanTrackNode * node);

@@ -45,7 +45,20 @@ class StiKalmanTrack : public StiTrack
   virtual double  getDca(StiHit *h=0)    const;   // distance of closest approach to given point/hit
   virtual double  getDca2(StiTrack *t)   const;   // distance of closest approach to given track - 2D calc
   virtual double  getDca3(StiTrack *t)   const;   // distance of closest approach to given track - 3D calc
+  virtual double  getMass()              const;   // mass when pid known
+  virtual int     getCharge()            const;   // charge of the particle
+  virtual double  getChi2()              const;   // chi2 of fit
+  virtual int     getFitPointCount()   const;  // number of points used in fit
+  // number of total number of points 
+  // currently assigned to the track
+  virtual int     getPointCount()      const;  
+  virtual int     getStatus()          const;  // status of track
   
+  virtual void  setCharge(int v);
+  virtual void  setChi2(double v);        
+  virtual void  setFitPointCount(int v);   
+  virtual void  setPointCount(int v);      
+  virtual void  setStatus(int v);        
 
   // Methods of this class
   StiKalmanTrackNode * getFirstNode()  const { return firstNode; };

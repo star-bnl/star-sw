@@ -502,3 +502,78 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin()
   return p3;
 }
 
+double  StiKalmanTrack::getMass() const   
+{
+  /**
+     returns the mass when pid known
+  */
+  return m;
+}
+
+int StiKalmanTrack::getCharge() const
+{
+  /**
+      charge of the particle
+  */
+  return q;
+}
+
+double  StiKalmanTrack::getChi2() const
+{
+  return chi2;
+}
+  
+
+int    StiKalmanTrack::getFitPointCount()    const  
+{
+  // return number of points used in fit
+  return nFitPts;
+}
+
+int    StiKalmanTrack::getPointCount()       const  
+{
+  // return number of points associated with track
+  return nPts;
+}
+
+
+int    StiKalmanTrack::getStatus()         const  
+{
+  // return track status 
+  // see class documentation for definition of possible status
+  return status;
+}
+
+
+
+void  StiKalmanTrack::setCharge(int v)         
+{
+  // set value of charge
+  q = v;
+}
+
+void  StiKalmanTrack::setChi2(double v)        
+{
+  // set value of chi2 of track
+  chi2 = v;
+}
+
+void  StiKalmanTrack::setFitPointCount(int v)   
+{
+  // set number of points used in fit
+  nFitPts = v;
+}
+
+void  StiKalmanTrack::setPointCount(int v)      
+{
+  // set value of number of points associated with track
+  nPts = v;
+}
+
+void  StiKalmanTrack::setStatus(int v)        
+{
+  // set value of track status
+  status = v;
+}
+
+
