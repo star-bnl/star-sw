@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.63 2000/08/18 02:22:52 snelling Exp $
+// $Id: St_tcl_Maker.cxx,v 1.64 2000/08/22 00:17:54 hardtke Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.64  2000/08/22 00:17:54  hardtke
+// Add ability to turn off either half of TPC:  new functions EastOff(), WestOff(), AllOn()
+//
 // Revision 1.63  2000/08/18 02:22:52  snelling
 // changed default behaiviour of eval switch
 //
@@ -65,7 +68,9 @@ St_tcl_Maker::St_tcl_Maker(const char *name):
   m_tclEvalOn(kFALSE),
   m_tclPixTransOn(kFALSE),
   m_tclMorphOn(kFALSE),
-  bWriteTNtupleOn(kFALSE) {
+  bWriteTNtupleOn(kFALSE),
+  m_EastOff(kFALSE),
+  m_WestOff(kFALSE) {
 }
 
 //_____________________________________________________________________________
@@ -137,7 +142,7 @@ Int_t St_tcl_Maker::Init() {
 
   //		Histograms     
   InitHistograms(); // book histograms
-  
+
   return StMaker::Init();
 }
 
@@ -250,6 +255,8 @@ Int_t St_tcl_Maker::Make() {
 	tcl_sector_index_st *tcl_sector_index = m_tcl_sector_index->GetTable();
 	m_tcl_sector_index->SetNRows(1);
 	tcl_sector_index->CurrentSector = indx;
+        if (m_EastOff&&indx>12) continue;
+        if (m_WestOff&&indx<=12) continue;
 	St_DataSetIter sect(sector);
 	St_raw_row         *raw_row_in     = (St_raw_row *) sect("raw_row_in");
 	St_raw_row         *raw_row_out    = (St_raw_row *) sect("raw_row_out");
@@ -400,7 +407,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.63 2000/08/18 02:22:52 snelling Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.64 2000/08/22 00:17:54 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -747,3 +754,14 @@ Int_t St_tcl_Maker::CalculateQuadrupoleMoms(
 
   return kStOK; 
 }
+
+void St_tcl_Maker::EastOff(){m_EastOff = kTRUE;  
+  gMessMgr->Info() << "St_tcl_Maker:Turning off East End of TPC " << endm;
+}
+void St_tcl_Maker::WestOff(){m_WestOff = kTRUE;
+  gMessMgr->Info() << "St_tcl_Maker:Turning off West End of TPC " << endm;
+}
+void St_tcl_Maker::AllOn(){m_WestOff = kFALSE;m_EastOff= kFALSE;
+  gMessMgr->Info() << "St_tcl_Maker:Both East and West Ends of TPC Enabled " << endm;
+}
+
