@@ -1,0 +1,15 @@
+/*    tpcRDOMasks.idl
+*
+*  Table: tpcRDOMasks
+*
+*       description:
+*/ 
+
+
+struct tpcRDOMasks { 
+
+   unsigned long  runNumber;   /*       run number  */
+   unsigned long  sector;   /*   sector  */
+   unsigned long  mask;   /*   enable mask  */
+
+ };  
