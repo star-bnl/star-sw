@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.36 2003/09/02 17:57:51 perev Exp $
+ * $Id: StMagUtilities.cxx,v 1.37 2003/09/30 04:05:12 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.37  2003/09/30 04:05:12  jhthomas
+ * Explicity initialize "static ilow = 0" parameters that are used in Search(blah,blah,ilow)
+ *
  * Revision 1.36  2003/09/02 17:57:51  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -656,10 +659,10 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] )
   static  Float_t xarray[2*NPOINTS-1], yarray[2*NPOINTS-1], zarray[NPOINTS] ;
   static  Float_t dXplus[2*NPOINTS-1][2*NPOINTS-1][NPOINTS], dYplus[2*NPOINTS-1][2*NPOINTS-1][NPOINTS] ;
   static  Float_t dXminus[2*NPOINTS-1][2*NPOINTS-1][NPOINTS], dYminus[2*NPOINTS-1][2*NPOINTS-1][NPOINTS] ;
+  static  Int_t   ilow=0, jlow=0, klow=0 ;
 
   const   Int_t ORDER = 2 ;                         // Linear interpolation = 1, Quadratic = 2         
   Int_t   i, j, k ;
-  Int_t   ilow, jlow, klow ;
   Float_t xx[3] ;
   Float_t save_dX[ORDER+1], saved_dX[ORDER+1] ;
   Float_t save_dY[ORDER+1], saved_dY[ORDER+1] ;
@@ -787,7 +790,7 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] )
   static Double_t C[TERMS] ;                     // Coefficients for series
   static Int_t    DoOnce = 0 ;                   // Calculate only once
   static Float_t  SumArray[NZDRIFT][NYARRAY] ;
-  static Int_t    ilow, jlow, ORDER ;
+  static Int_t    ilow=0, jlow=0, ORDER ;
 
   Float_t  y, Zdrift, save_sum[3] ;
   Double_t r, phi, phi0, sum = 0.0 ;
@@ -1201,7 +1204,7 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 	    }
 	}
       //Interpolate results onto standard grid for Electric Fields
-      Int_t ilow, jlow ;
+      Int_t ilow=0, jlow=0 ;
       Float_t save_Er[2] ;	      
       for ( Int_t i = 0 ; i < neZ ; ++i ) 
 	{
@@ -1532,7 +1535,7 @@ void StMagUtilities::Interpolate2DBfield( const Float_t r, const Float_t z, Floa
   fscale = 0.001*gFactor*gRescale ;               // Scale STAR maps to work in kGauss, cm
 
   const   Int_t ORDER = 1  ;                      // Linear interpolation = 1, Quadratic = 2        
-  static  Int_t jlow, klow ;                            
+  static  Int_t jlow=0, klow=0 ;                            
   Float_t save_Br[ORDER+1] ;
   Float_t save_Bz[ORDER+1] ;
 
@@ -1564,7 +1567,7 @@ void StMagUtilities::Interpolate3DBfield( const Float_t r, const Float_t z, cons
   fscale = 0.001*gFactor*gRescale ;               // Scale STAR maps to work in kGauss, cm
 
   const   Int_t ORDER = 1 ;                       // Linear interpolation = 1, Quadratic = 2   
-  static  Int_t ilow, jlow, klow ;
+  static  Int_t ilow=0, jlow=0, klow=0 ;
   Float_t save_Br[ORDER+1],   saved_Br[ORDER+1] ;
   Float_t save_Bz[ORDER+1],   saved_Bz[ORDER+1] ;
   Float_t save_Bphi[ORDER+1], saved_Bphi[ORDER+1] ;
@@ -1609,7 +1612,7 @@ void StMagUtilities::Interpolate2DEdistortion( const Float_t r, const Float_t z,
 {
 
   const   Int_t ORDER = 1 ;                      // Linear interpolation = 1, Quadratic = 2         
-  static  Int_t jlow, klow ;
+  static  Int_t jlow=0, klow=0 ;
   Float_t save_Er[ORDER+1] ;
 
   Search( neZ,   eZList,   z,   jlow   ) ;
@@ -1636,7 +1639,7 @@ void StMagUtilities::Interpolate3DEdistortion( const Float_t r, const Float_t ph
 {
 
   const   Int_t ORDER = 1 ;                      // Linear interpolation = 1, Quadratic = 2         
-  static  Int_t ilow, jlow, klow ;
+  static  Int_t ilow=0, jlow=0, klow=0 ;
   Float_t save_Er[ORDER+1],   saved_Er[ORDER+1] ;
   Float_t save_Ephi[ORDER+1], saved_Ephi[ORDER+1] ;
 
@@ -1818,7 +1821,7 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
   R0 = TMath::Abs( 1000.0 * Pt / ( 0.299792 * B[2] ) ) ;     // P in GeV, R in cm, B in kGauss
   X0 = x[0] + ChargeB * p[1] * R0 / Pt ;
   Y0 = x[1] - ChargeB * p[0] * R0 / Pt ; 
-  Rotation = TMath::Sign( 1.0, (x[0]-X0)*p[1] - (x[1]-Y0)*p[0] ) ; 
+  Rotation = TMath::Sign( (double)1.0, (x[0]-X0)*p[1] - (x[1]-Y0)*p[0] ) ; 
 
   for ( Int_t i = 0 ; i < ROWS ; i++ )
     {
