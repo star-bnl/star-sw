@@ -66,11 +66,9 @@ char gIncDir[INCDIR][INCDIRS];
 char gOrigInputFile[81];
 int gNincDir,gNOutFile=0,gNoMoreComments=0;
 int  gOptionH,gOptiont,gOptioni,gOptionM,gOptionstatic,gOptiondynamic;
-int  gOptionf;
-
+int  gOptionr,gOptionf;
 /* An option to process files _quietly_ */
 int  gOptionq;
-
 char gOlc[COL][OLC],gOutFile[NOUTFILE][OUTFILE+2];
 char gInFile[INFILE][INFILES+1];
 int gNInFile=0;
@@ -89,7 +87,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.3 1998/05/11 18:16:14 dave Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.4 1998/05/19 01:26:19 fisyak Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -144,17 +142,18 @@ argType	: IDENT { ArgType(yylval.str); } | CORBA { ArgType(yylval.str); } ;
 void ToUpper(char *out,const char *in);
 char *StrippedInFileName(int uppercase) {
   char *cc,tmp[100];
-  strcpy(gPass,gInFileNameNoPath);
-  cc=strstr(gPass,".idl"); if(cc) cc[0]=0;
-  if(uppercase) { ToUpper(tmp,gPass); strcpy(gPass,tmp); }
-  return gPass;
+  static char rv[123];
+  strcpy(rv,gInFileNameNoPath);
+  cc=strstr(rv,".idl"); if(cc) cc[0]=0;
+  if(uppercase) { ToUpper(tmp,rv); strcpy(rv,tmp); }
+  return rv;
 }
 void DoComment(int codeLineNum,char *xx) {
   char *cc;
   if(xx[0]=='/'&&xx[1]=='/') cc=xx+2; else cc=xx;
   if(gNoMoreComments) return;
-  if(strlen(cc)+strlen(gComments)>COMMENTS-19) {
-    strcat(gComments,"\nCOMMENTS TRUNCATED"); gNoMoreComments=7; return;
+  if(strlen(cc)+strlen(gComments)>COMMENTS-13) {
+    strcat(gComments,"\nCOMMENTS TRUNCATED"); gNoMoreComments=7;
   }
   strcat(gComments,cc);
 }
@@ -271,9 +270,47 @@ void IdlToCOrCpp(char *out,char *in) {
 char *Up(const char *x) {
   ToUpper(gPass,x); return gPass;
 }
+void FirstFile(FILE *ff) {
+  FF"#ifndef STAF_St_%s_Table\n",gTable);
+  FF"#define STAF_St_%s_Table\n",gTable);
+  FF"\n");
+  FF"#include \"St_Table.h\"\n");
+  FF"#include \"%s.h\"\n",gTable); 
+  FF"\n");
+  FF"class St_%s : public St_Table\n",gTable);
+  FF"{\n");
+  FF"public:\n");
+  FF" St_%s() : St_Table(\"%s\",sizeof(%s_st)) {SetType(\"%s\");}\n",gTable,gTable,gTable,gTable);
+  FF" St_%s(Text_t *name,const Char_t *type=\"%s\") : St_Table(name,sizeof(%s_st)) {SetType(type);}\n",gTable,gTable,gTable);
+  FF" St_%s(Int_t n): St_Table(\"%s\",n,sizeof(%s_st)) {SetType(\"%s\");}\n",gTable,gTable,gTable,gTable);
+  FF" St_%s(Text_t *name,Int_t n): St_Table(name,n,sizeof(%s_st)) {SetType(\"%s\");}\n",gTable,gTable,gTable);
+  FF" %s_st *GetTable(){ return (%s_st *)s_Table;}\n",gTable,gTable);
+  FF"\n");
+  FF" ClassDef(St_%s,0) // class to wrap the \"%s\" STAF table\n",
+      gTable,gTable);
+  FF"};\n");
+  FF"\n");
+  FF"#endif\n");
+}
+void SecondFile(FILE *ff) {
+  FF"#include \"St_%s_Table.h\"\n",gTable);
+  FF"ClassImp(St_%s)\n",gTable);
+  FF"void St_%s::Streamer(TBuffer &b){St_Table::Streamer(b);}\n",gTable);
+}
+void WriteTwoRootTableFiles(void) {
+  FILE *ff; char fn[123];
+
+  sprintf(fn,"St_%s_Table.h",gTable);
+  ff=fopen(fn,"w"); if(!ff) ERR; FirstFile(ff); fclose(ff);
+
+  sprintf(fn,"St_%s_Table.cxx",gTable);
+  ff=fopen(fn,"w"); if(!ff) ERR; SecondFile(ff); fclose(ff);
+
+}
 void DotHFileTbl(void) {
   char colType[111]; int ii;
   if(gOptionM) Err(__LINE__);
+  if(gOptionr) WriteTwoRootTableFiles();
   FH"#ifndef %s_H\n",Up(gTable));
   FH"#define %s_H\n",Up(gTable));
   /* 960529a FH"#include \"table_header.h\"\n"); */
@@ -654,7 +691,7 @@ void PamCC(void) {
     Up(gDataType[gNProto-1][ii]));
   }
   FF"\n");
-  FF"  broker->newInvoker(\"%s\",%s_RANK\n",gPam,gPamUp);
+  FF" broker->deleteInvoker(\"%s\");  broker->newInvoker(\"%s\",%s_RANK\n",gPam,gPam,gPamUp);
 
 
   FF"               ,(FNC_PTR_T)%s_call ,specs             );\n",gPam);
@@ -672,9 +709,343 @@ void PamCC(void) {
   /* FF"  printf(\"\\n\");\n"); 960606 */
   FF"  return TRUE;\n");
   FF"}\n");
-  fclose(ff); 
-  if (!gOptionq) 
-     F"  out: %s\n",fn);
+  fclose(ff); if (!gOptionq) F"  out: %s\n",fn);
+}
+char *Xidl(char *x) {
+  char *cc;
+  static char rv[123];
+  strncpy(rv,x,120); rv[120]=0;
+  cc=strstr(rv,".idl"); if(cc) cc[0]=0;
+  return rv;
+}
+char *Capitalized(char *x) {
+  static char rv[123];
+  strncpy(rv,x,122); rv[121]=0;
+  if(rv[0]<='z'&&rv[0]>='a') rv[0]+='A'-'a';
+  return rv;
+}
+char *Nq(char *x) {
+  static char rv[123];
+  char *cc;
+  if(x[0]=='"') strncpy(rv,x+1,121);
+  else strncpy(rv,x,121);
+  rv[122]=0;
+  cc=strstr(rv,"\""); if(cc) cc[0]=0;
+  return rv;
+}
+void FirstRootPamFile(FILE *ff) {
+  char *cc,Sifn[123],*sifn; int i, ii, jj;
+  sifn=StrippedInFileName(0); strcpy(Sifn,sifn);
+  if(Sifn[0]>='a'&&Sifn[0]<='z') Sifn[0]+='A'-'a';
+  FF"#ifndef STAF_St_%s_Module\n",sifn);
+  FF"#define STAF_St_%s_Module\n",sifn);
+  FF"\n");
+  FF"#include \"St_Module.h\"\n");
+  FF"\n");
+  FF"#ifdef __CINT__\n");
+  FF" class table_head_st;\n");
+    for(i=1;i<gNIncFile;i++) FF" class %s_st;\n",Xidl(Nq(gIncFile[i])));
+    for(i=1;i<gNIncFile;i++) FF" class St_%s;\n",Xidl(Nq(gIncFile[i]))); 
+  FF"#else\n");
+  for(i=1;i<gNIncFile;i++) 
+      FF"#include \"St_%s_Table.h\"\n",Xidl(Nq(gIncFile[i])));
+  FF"#endif\n");
+  FF"\n");
+  FF"\n");
+  FF"class St_%s : public St_Module\n",sifn);
+  FF"{\n");
+  FF"public:\n");
+  FF"  St_%s() : St_Module(){}\n",sifn);
+  FF"\n");
+  FF"// Passing the \"simple\" structures\n");
+  FF"\n");
+  ii=0;
+  if (gNArgName[ii] > 0 ) {
+  FF" typedef enum { \n");
+/*  for(i=1;i<gNIncFile;i++) {
+    cc=Capitalized(Xidl(Nq(gIncFile[i]))); FF"    k%s_h, k%s_d",cc,cc);
+    if(i<gNIncFile-1) FF","); FF"\n");
+    } */
+
+ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+        cc=Capitalized(gDataType[ii][jj]); FF"    k%s%d_h, k%s%d_d",cc,jj,cc,jj);
+        if(jj<gNArgName[ii]-1) FF","); FF"\n");
+      }
+  FF" } E%s;\n",sifn);
+  FF"\n");
+    FF"// Passing the C++ objects\n");
+    FF"\n");
+    FF"  St_%s(\n",sifn);
+/*    for(i=1;i<gNIncFile;i++) {
+       FF"     St_%s *o%d",Xidl(Nq(gIncFile[i])),i);
+       if(i<gNIncFile-1) FF","); FF"\n");
+       } */
+      ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+       FF"     St_%s *o%d",gDataType[ii][jj],jj);
+       if(jj<gNArgName[ii]-1) FF","); FF"\n");
+      }
+    FF"  );\n");
+  if (gNArgName[ii] > 0 ) {
+    FF"  St_%s(\n",sifn);
+/*yf    for(i=1;i<gNIncFile;i++) {
+       FF"     table_head_st *h%d, %s_st *d%d",i,Xidl(Nq(gIncFile[i])),i);
+       if(i<gNIncFile-1) FF","); FF"\n");
+       } */
+      ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+      FF"     table_head_st *h%d, %s_st *d%d",jj,gDataType[ii][jj],jj);
+      if(jj<gNArgName[ii]-1) FF","); FF"\n");
+      }
+    FF"  );\n");
+    FF"  Int_t ExecuteModule(\n");
+/*yf    for(i=1;i<gNIncFile;i++) {
+       FF"     table_head_st *h%d, %s_st *d%d",i,Xidl(Nq(gIncFile[i])),i);
+       if(i<gNIncFile-1) FF","); FF"\n");
+       } */
+      ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+       FF"     table_head_st *h%d, %s_st *d%d",jj,gDataType[ii][jj],jj);
+       if(jj<gNArgName[ii]-1) FF","); FF"\n");
+      }
+
+    FF"  );\n");
+  }
+  FF"  Int_t operator() (\n");
+/*yf  for(i=1;i<gNIncFile;i++) {
+     FF"     table_head_st *h%d, %s_st *d%d",i,Xidl(Nq(gIncFile[i])),i);
+     if(i<gNIncFile-1) FF","); FF"\n");
+     } */
+      ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+       FF"     table_head_st *h%d, %s_st *d%d",jj,gDataType[ii][jj],jj);
+       if(jj<gNArgName[ii]-1) FF","); FF"\n");
+      }
+  FF"  );\n");
+  FF"\n"); 
+    FF"  Int_t ExecuteModule(\n");
+/*    for(i=1;i<gNIncFile;i++) {
+       FF"     St_%s *o%d",Xidl(Nq(gIncFile[i])),i);
+       if(i<gNIncFile-1) FF","); FF"\n");
+       }*/
+      ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+       FF"     St_%s *o%d",gDataType[ii][jj],jj);
+       if(jj<gNArgName[ii]-1) FF","); FF"\n");
+      }
+    FF"  );\n");
+  }
+    FF"  Int_t operator()(\n");
+/*    for(i=1;i<gNIncFile;i++) {
+       FF"     St_%s *o%d",Xidl(Nq(gIncFile[i])),i);
+       if(i<gNIncFile-1) FF","); FF"\n");
+       }*/
+      ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+       FF"     St_%s *o%d",gDataType[ii][jj],jj);
+       if(jj<gNArgName[ii]-1) FF","); FF"\n");
+      }
+    FF"  );\n");
+  FF"\n");
+  FF"// Calling the wrapped STAF module\n");
+  FF"\n");
+  FF" Int_t ExecuteModule();\n");
+  FF"\n");
+  FF"  const Char_t *GetName(){return \"%s\";}\n",sifn);
+  FF" ClassDef(St_%s,0)\n",sifn);
+  FF"};\n");
+  FF"\n");
+  FF"\n");
+  FF"EXTERN St_%s &%s; \n",sifn,sifn);
+  FF"\n");
+  FF"#endif\n");
+
+}
+void SecondRootPamFile(FILE *ff) {
+  char *sifn,cap[123],uppercase[123]; int i;
+  int ii=0; int jj=0;
+  sifn=StrippedInFileName(0);
+  FF"#include \"%s.h\"\n",StrippedInFileName(0));
+  FF"#include \"St_%s_Module.h\"\n",StrippedInFileName(0));
+  for(i=1;i<gNIncFile;i++) {
+    FF"#include \"St_%s_Table.h\"\n",Xidl(Nq(gIncFile[i])));
+/*    if(i<gNIncFile-1) FF","); FF"\n"); */
+  }
+  FF"\n");
+
+  /* FF"St_%s g%s = new St_%s;\n",sifn,sifn,sifn); */
+  FF"St_%s g%s;\n",sifn,sifn);
+
+  FF"St_%s &%s = g%s;\n",sifn,sifn,sifn);
+  FF"\n");
+  FF"ClassImp(St_%s)\n",sifn);
+  FF"\n");
+  FF"//*-* Passing the \"simple\" structures\n");
+  FF"\n");
+  if (gNArgName[ii] > 0 ) { 
+    FF"//_______________________________________________________________\n");
+    FF"St_%s::St_%s(\n",sifn,sifn);
+/*yf    for(i=1;i<gNIncFile;i++) {
+      FF"   table_head_st *h%d, %s_st *d%d",i,Xidl(Nq(gIncFile[i])),i);
+      if(i<gNIncFile-1) FF","); FF"\n");
+      } */
+ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+        FF"   table_head_st *h%d, %s_st *d%d",jj,Nq(gDataType[ii][jj]),jj);
+        if(jj<gNArgName[ii]-1) FF","); FF"\n");
+      }
+
+    FF") : St_Module(\n");
+/*yf    for(i=1;i<gNIncFile;i++) {
+       FF"   h%d, d%d",i,i);
+       if(i<gNIncFile-1) FF","); FF"\n");
+       } */
+ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+         FF"   h%d, d%d",jj,jj);
+        if(jj<gNArgName[ii]-1) FF","); FF"\n");
+}
+    FF"  ){}\n");
+    FF"\n");
+    FF"//_______________________________________________________________\n");
+    FF"Int_t St_%s::ExecuteModule(\n",sifn);
+/*yf    for(i=1;i<gNIncFile;i++) {
+       FF"   table_head_st *h%d, %s_st *d%d",i,Xidl(Nq(gIncFile[i])),i);
+       if(i<gNIncFile-1) FF","); FF"\n");
+       } */
+ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+        FF"   table_head_st *h%d, %s_st *d%d",jj,Nq(gDataType[ii][jj]),jj);
+        if(jj<gNArgName[ii]-1) FF","); FF"\n");
+      }
+
+    FF"  )\n");
+    FF"{return St_Module::ExecuteModule(\n");
+/*yf    for(i=1;i<gNIncFile;i++) {
+       FF"   h%d, d%d",i,i);
+       if(i<gNIncFile-1) FF","); FF"\n");
+       } */
+ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+         FF"   h%d, d%d",jj,jj);
+        if(jj<gNArgName[ii]-1) FF","); FF"\n");
+}
+    FF"  ); }\n");
+    FF" \n");
+    FF"//_______________________________________________________________\n");
+    FF"Int_t  St_%s::operator()(\n",sifn);
+/*yf    for(i=1;i<gNIncFile;i++) {
+       FF"   table_head_st *h%d, %s_st *d%d",i,Xidl(Nq(gIncFile[i])),i);
+       if(i<gNIncFile-1) FF","); FF"\n");
+       } */
+ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+        FF"   table_head_st *h%d, %s_st *d%d",jj,Nq(gDataType[ii][jj]),jj);
+        if(jj<gNArgName[ii]-1) FF","); FF"\n");
+      }
+
+    FF")\n");
+    FF"{return ExecuteModule(");
+/*yf    for(i=1;i<gNIncFile;i++) { FF"h%d,d%d",i,i); if(i<gNIncFile-1) FF","); } */
+ii=0;for(jj=0;jj<gNArgName[ii];jj++) {FF"h%d,d%d",jj,jj); if(jj<gNArgName[ii]-1) FF","); }
+    FF");}\n");
+    FF"\n");
+    FF"//*-* Passing the C++ objects\n");
+    FF"\n");
+    FF"//_______________________________________________________________\n");
+    FF"St_%s::St_%s(\n",sifn,sifn);
+/*yf    for(i=1;i<gNIncFile;i++) {
+       FF"  St_%s *o%d",Xidl(Nq(gIncFile[i])),i);
+       if(i<gNIncFile-1) FF","); FF"\n");
+       } */
+      ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+        FF"  St_%s *o%d",Nq(gDataType[ii][jj]),jj);
+        if(jj<gNArgName[ii]-1) FF","); FF"\n");
+       }
+    FF") \n");
+    FF" : St_Module(\n");
+/*yf    for(i=1;i<gNIncFile;i++) {
+       FF"   o%d->GetHeader(),o%d->GetTable()\n",i,i);
+       if(i<gNIncFile-1) FF","); FF"\n");
+       } */
+      ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+       FF"   o%d->GetHeader(),o%d->GetTable()\n",jj,jj);
+       if(jj<gNArgName[ii]-1) FF","); FF"\n");
+      }
+    FF"   ){}\n");
+    FF"//_______________________________________________________________\n");
+    FF"Int_t St_%s::ExecuteModule(\n",sifn);
+/*yf    for(i=1;i<gNIncFile;i++) {
+       FF"  St_%s *o%d",Xidl(Nq(gIncFile[i])),i);
+       if(i<gNIncFile-1) FF","); FF"\n");
+       } */
+    ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+       FF"  St_%s *o%d",Nq(gDataType[ii][jj]),jj);
+       if(jj<gNArgName[ii]-1) FF","); FF"\n");
+       }
+    FF"  ) { \n");
+    FF"return St_Module::ExecuteModule(\n");
+/*yf  for(i=1;i<gNIncFile;i++) {
+      FF"   o%d->GetHeader(),o%d->GetTable()",i,i);
+       if(i<gNIncFile-1) FF","); FF"\n");
+       } */
+    ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+       FF"   o%d->GetHeader(),o%d->GetTable()",jj,jj);
+       if(jj<gNArgName[ii]-1) FF","); FF"\n");
+       }
+    FF" );\n}\n"); /* bbb wrking here */
+  }  
+  FF"//_______________________________________________________________\n");
+  FF"Int_t St_%s::operator()(\n",sifn);
+/*yf  for(i=1;i<gNIncFile;i++) {
+     FF"  St_%s *o%d",Xidl(Nq(gIncFile[i])),i);
+     if(i<gNIncFile-1) FF","); FF"\n");
+     } */
+   ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+      FF"  St_%s *o%d",Nq(gDataType[ii][jj]),jj);
+      if(jj<gNArgName[ii]-1) FF","); FF"\n");
+}
+  FF"  )\n");
+  FF"{return ExecuteModule(");
+/*yf  for(i=1;i<gNIncFile;i++) {
+     FF"o%d",i);
+     if(i<gNIncFile-1) FF",");
+     } */
+ii=0;for(jj=0;jj<gNArgName[ii];jj++) {FF"o%d",jj); if(jj<gNArgName[ii]-1) FF",");}
+  FF");}\n");
+  FF"//_______________________________________________________________\n");
+  FF"Int_t St_%s::ExecuteModule()\n",sifn);
+  FF"{\n");
+  FF" //*-* Calling the wrapped STAF '%s' module\n",sifn);
+  FF"\n");
+if (gNArgName[0]){
+  FF" const Char_t *names[]={");
+  ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+  FF"\"%s\"",Nq(gDataType[ii][jj]));
+  if(jj<gNIncFile-1) FF",\n");
+};
+  FF"};\n");
+  FF"  CheckParameters(names);\n");
+};
+  FF"return ::%s_(\n",sifn);
+/*  for(i=1;i<gNIncFile;i++) {
+     ToUpper(uppercase,Xidl(Nq(gIncFile[i])));
+     strcpy(cap,Capitalized(Xidl(Nq(gIncFile[i]))));
+     FF" (TABLE_HEAD_ST *)GetParams(k%s_h), (%s_ST *)GetParams(k%s_d)",
+         cap,uppercase,cap);
+     if(i<gNIncFile-1) FF","); FF"\n");
+     } */
+    ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
+       ToUpper(uppercase,Nq(gDataType[ii][jj]));
+       strcpy(cap,Capitalized(Nq(gDataType[ii][jj])));
+       FF" (TABLE_HEAD_ST *)GetParams(k%s%d_h), (%s_ST *)GetParams(k%s%d_d)",
+         cap,jj,uppercase,cap,jj);
+       if(jj<gNArgName[ii]-1) FF","); FF"\n");
+       }
+
+  FF" );\n");
+  FF"};\n");
+  FF"\n");
+  FF"//_______________________________________________________________\n");
+  FF"void St_%s::Streamer(class TBuffer &){}\n",sifn);
+}
+void WriteTheTwoRootPamFiles(void) {
+  FILE *ff; char fn[123];
+
+  sprintf(fn,"St_%s_Module.h",StrippedInFileName(0));
+  ff=fopen(fn,"w"); if(!ff) ERR; FirstRootPamFile(ff); fclose(ff); if (!gOptionq) F"  out: %s\n",fn);
+
+  sprintf(fn,"St_%s_Module.cxx",StrippedInFileName(0));
+  ff=fopen(fn,"w"); if(!ff) ERR; SecondRootPamFile(ff); fclose(ff);
 }
 void PamTemplateC(void) {
   int type,lookfor;
@@ -854,7 +1225,8 @@ void Pam(void) {
   if(              !gOptionH ) PamTemplateC();
   if( !gOptiont && !gOptionH ) PamCC();
   if(              !gOptionH ) PamTemplateFortran();
- }
+  if(gOptionr) WriteTheTwoRootPamFiles();
+}
 IncludeFileName(char *io) {
   if(gNIncFile>=INC) { F"Too many include files, max=%d.\n",INC); exit(2); }
   strncpy(gIncFile[gNIncFile++],io,ISIZE);
@@ -959,7 +1331,7 @@ void Help(void) {
  Usage();
 }
 void Usage(void) {
-  F"Usage: %s [-h?Mivftq] [-Iincdir] [-static|-dynamic] [xxx.idl]\n",
+  F"Usage: %s [-h?rMivftq] [-Iincdir] [-static|-dynamic] [xxx.idl]\n",
   gExeName);
   F"All options are optional.\n");
   F"\n");
@@ -980,6 +1352,7 @@ void Usage(void) {
   F"-q Operate quietly.\n");
   F"-static  Static tables.\n");
   F"-t Produce only the template files.\n");
+  F"-r Produce only the ROOT files.\n");
   F"-v Write version info to stdout, no other output is produced.\n");
   exit(2);
 }
@@ -1077,7 +1450,7 @@ void DumpOptionsAndExit(void) {
 void ReadOptions(int nnn,char *aaa[]) {
   int jj,filenameCount=0,ii; char die=0;
   gOptionstatic=0; gOptiondynamic=0; gOptionM=0; gOptioni=0; gOptionH=0;
-  gOptiont=0; gOptionf=0; 
+  gOptiont=0; gOptionf=0; gOptionr=0;
   gOptionq = 0;
   gNincDir=0; strcpy(gIncDir[gNincDir++],".");
   for(ii=1;ii<nnn;ii++) {
@@ -1094,6 +1467,7 @@ void ReadOptions(int nnn,char *aaa[]) {
           else if(aaa[ii][jj]=='M') gOptionM=7;
           else if(aaa[ii][jj]=='f') gOptionf=7;
           else if(aaa[ii][jj]=='i') gOptioni=7;
+          else if(aaa[ii][jj]=='r') gOptionr=7;
           else if(aaa[ii][jj]=='q') gOptionq=7;
           else if(aaa[ii][jj]=='h') Usage();
           else if(aaa[ii][jj]=='?') Usage();
