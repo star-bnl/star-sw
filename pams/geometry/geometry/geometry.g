@@ -3,13 +3,12 @@
    Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,
               mfld,mwc,pse,tof,four,on/.true./,off/.false./
    real       Par(1000),field,dcay(5)
-   Integer    LL,I,IDEB,Nsi
-   character  Commands*8,CommandL*12
+   Integer    LL,IDEB,Nsi,i
+   character  Commands*4000
 * - - - - - - - - - - - - - - - - -
-+CDE,GCBANK,GCPHYS,GCCUTS,GCFLAG,AGCKINE.
++CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE.
 * - - - - - - - - - - - - - - - - -
-   replace[<P>] with [; print *,' Commands = ',Commands;]
-*
+replace[;ON#{#;] with [;IF (Index(Commands,'#1')>0) { <W>;(' #1: #2');]
 *
    call ASLGETBA ('GEOM','DETP',1000,LL,Par)
    Call AGSFLAG  ('GEOM',1)
@@ -21,81 +20,65 @@
 *  main configuration - everthing on, except for tof
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld} = on;
    {mwc,four,pse}=on;  tof=off;
-   field=5
-   Nsi=7
+   field=5;  Nsi=7;    
+   Commands=' '
 *
 * -------------------- select USERS configuration ------------------------
 *
-  If LL>1   
-  { * set geant flags and cuts only if any detp geometry was issued:
- 
-   {CUTGAM,CUTELE,CUTNEU,CUTHAD,CUTMUO,BCUTE,BCUTM,DCUTE,DCUTM,PPCUTM} =.001;
-   {IDCAY,IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,ILOSS,IDRAY,IMULS} = 1;
-   {IRAYL,ISTRA} = 0;
-   TOFMAX   = 1.e-4 
-   NtrSubEv = 1000
-*
-   FOR i=2 to LL by 2
-   {
-      call UHTOC(Par(i),4,CommandL,12);  
-      CALL CLTOU(CommandL);  Commands=CommandL;  
+If LL>1   
+{ CALL UHTOC(PAR(2),4,Commands,LL*4); 
+  Call CLTOU(Commands); i=Index(Commands,'FIELD=');
 
-          if Commands=='HADR_ON'   
-           {  print *,' default Geant Physics On'; }
-      elseif Commands=='HADR_OFF'
-           {  print *,' Geant Physics on, except for hadronic interactions';
-              IHADR=0;
-           }
-      elseif Commands=='DECAY_ON'
-           {  print *,' Some Physics: decays, mult.scat and energy loss';
-              {IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY}=0; 
-              Iloss=2;  i+=1;
-           }
-      elseif Commands=='TPC_ONLY'  
-           {  print *,' Minimal geometry - only TPC '
-              {pipe,svtt,ftpc,btof,vpdd,magp,calb,ecal} = off;
-           }
-      elseif CommandL=='FIELD_ONLY'
-           {  print *,' No geometry - only magnetic field '
-              {cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal}=off; i+=1;
-           }
-      elseif Commands=='COMPLETE'  { print *,' Complete STAR geometry' }
-      elseif Commands=='YEAR_1A'   {<p> {vpdd,calb,ecal}=off;  Nsi=0;  }
-      elseif Commands=='YEAR_2A'   {<p> {vpdd,ecal}=off;       tof=on; }
-      elseif CommandL=='FIELD_OFF' {<p> field=0;               i+=1;   }
-      elseif Commands=='FIELD_ON'  {<p> field=5;                       }
-      elseif Commands=='FIELD'     {<p> field=Par(i+2);        i+=1;   }
-      elseif Commands=='MWC_OFF'   {<p> mwc=off;                       }
-      elseif Commands=='PSE_OFF'   {<p> pse=off;                       }
-      elseif Commands=='4TH_OFF'   {<p> Nsi=min(Nsi,6);                }
-      elseif CommandL=='SPLIT_OFF' {<p> NtrSubEv=0;            i+=1;   }
-      elseif Commands=='SPLIT_ON'  {<p> NtrSubEv=10000;                }
-      elseif Commands=='DEBUG_ON'  {<p> Idebug=max(Idebug,1); Itest=1; }
-      elseif CommandL=='DEBUG_OFF' {<p> {Idebug,Itest}=0;      i+=1;   }
-      else { <p>
-             If (Commands(1:4)!='HELP') _
-             print *,'UNKNOWN GSTAR KEYWORD, YOU BETTER STOP'; 
-             print *,'you may select : '
-             print *,'---------------:-----------------------------'
-             print *,'Configurations : complete, year_1a, year_2a, '
-             print *,'               : tpc_only, field_only        '
-             print *,'Geant Physics  : Hadr_on, Hadr_off, Decay_Only'
-             print *,'Geometry Detail: mwc_off, pse_off, 4th_off   '
-             print *,'Auxillary keys : Debug_on/off, Split_on/off  '
-             print *,'---------------------------------------------'
-             print *,'Default: complete STAR with standard physics '
-             print *,'---------------------------------------------'
-             if IDEB==0 & IDEBUG==0 { print *,'Nothing done !'; return; }
-             i-=1; 
-           }  
- } }
+  * set geant flags and cuts only if any detp geometry was issued:
+   
+  {CUTGAM,CUTELE,CUTNEU,CUTHAD,CUTMUO,BCUTE,BCUTM,DCUTE,DCUTM,PPCUTM} =.001;
+  {IDCAY,IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,ILOSS,IDRAY,IMULS} = 1;
+  {IRAYL,ISTRA} = 0;
+  TOFMAX        = 1.e-4 
+  NtrSubEv      = 1000
+*
+  on HELP       { you may select following the keywords: ;
+                  <W>;('---------------:----------------------------- ');
+                  <W>;('Configurations : complete, year_1a, year_2a,  ');
+                  <W>;('               : tpc_only, field_only         ');
+                  <W>;('Geant Physics  : Hadr_on, Hadr_off, Decay_Only');
+                  <W>;('Geometry Detail: mwc_off, pse_off, 4th_off    ');
+                  <W>;('Magnetic Field : Field_on/off, field=value    ');
+                  <W>;('Auxillary keys : Debug_on/off, Split_on/off   ');
+                  <W>;('--------------------------------------------- ');
+                  <W>;('Default: complete STAR with standard physics  ');
+                  <W>;('--------------------------------------------- ');
+                }  
+  on COMPLETE   { Complete STAR geometry;                                     }
+  on YEAR_1A    { STAR initial geometry;      {vpdd,calb,ecal}=off; Nsi=0;    }
+  on YEAR_2A    { STAR second year upgrade;   {vpdd,ecal}=off;      tof=on;   }
+  on HADR_ON    { default Geant Physics On;                                   }
+  on HADR_OFF   { Geant Physics on, except for hadronic interactions; IHADR=0;}
+  on DECAY_ONLY { Some Physics: decays, mult.scat and energy loss;
+                  {IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY}=0; Iloss=2}
+  on TPC_ONLY   { Minimal geometry - only TPC;
+                  {pipe,svtt,ftpc,btof,vpdd,magp,calb,ecal}=off;              }
+  on FIELD_ONLY { No geometry - only magnetic field;
+                  {cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal}=off;    }
+  on FIELD_OFF  { no magnetic field;                field=0;                  }
+  on FIELD_ON   { Standard (5 KGs) field on;        field=5;                  }
+  if i>0        { field=Par(i/4+4);  <W> field;
+                  (' Modified field value =',F6.2,' KGS');                    }
+  on MWC_OFF    { Trigger Multy-wire readout off;   mwc=off;                  }
+  on PSE_OFF    { No TPC pseudo-padrow generated;   pse=off;                  }
+  on 4TH_OFF    { SVT fourth layer off;             Nsi=min(Nsi,6);           }
+  on SPLIT_OFF  { events will not be splitted into subevents; NtrSubEv=0;     }
+  on SPLIT_ON   { events will be splitted into subevents;     NtrSubEv=10000; }
+  on DEBUG_ON   { verbose mode, some graphics; Idebug=max(Idebug,1); Itest=1; }
+  on DEBUG_OFF  { standard debug mode;         {Idebug,Itest}=0;              }
+ }
 *
 * -------------------- setup selected configuration ------------------------
 *
 * - to save secondaries AFTER all decays:      DETP TRAC DCAY 210 210 0.1 0.01
    dcay={210,210,0.1,0.01}
    call AgDETP new ('trac')
-   call AgDETP add ('TracDcay',dcay,4)
+   call AgDETP add ('TracDCAY',dcay,4)
 *
    if (cave) Call cavegeo
    if (pipe) Call pipegeo
