@@ -1,5 +1,9 @@
-// $Id: StFtpcTracker.hh,v 1.3 2000/05/15 14:28:14 oldi Exp $
+// $Id: StFtpcTracker.hh,v 1.4 2000/07/03 12:48:14 jcs Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.4  2000/07/03 12:48:14  jcs
+// use (pre)Vertex id to access vertex coordinates for unconstrained fit and
+// for constrained fit
+//
 // Revision 1.3  2000/05/15 14:28:14  oldi
 // problem of preVertex solved: if no main vertex is found (z = NaN) StFtpcTrackMaker stops with kStWarn,
 // refitting procedure completed and included in StFtpcTrackMaker (commented),
@@ -47,12 +51,12 @@ public:
             StFtpcTracker();  // default constructor
             StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3] = NULL, Double_t max_Dca = 100.);             // real constructor
             StFtpcTracker(StFtpcVertex *vertex, TClonesArray *hit, TClonesArray *track, Double_t dca);                    // constructor if everything is already there
-            StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, St_fpt_fptrack *fpt_fptrack, Double_t dca);  // sonstructor do do refitting
+            StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, St_fpt_fptrack *fpt_fptrack, Double_t dca);  // constructor do do refitting
 
   virtual  ~StFtpcTracker();  // destructor
 
-    Int_t   FitAndWrite(St_fpt_fptrack *trackTable);    // does momentum fit and writes tracks to STAF table
-    Int_t   Write();                                    // writes tracks and clusters in ROOT file
+    Int_t   FitAndWrite(St_fpt_fptrack *trackTable, Int_t id_start_vertex);   // does momentum fit and writes tracks to STAF table
+    Int_t   Write();                                                          // writes tracks and clusters in ROOT file
 
   // getter
   StFtpcVertex  *GetVertex()            { return mVertex;                  }  // returns the vertex

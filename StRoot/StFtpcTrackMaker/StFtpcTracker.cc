@@ -1,5 +1,9 @@
-// $Id: StFtpcTracker.cc,v 1.5 2000/06/13 14:28:23 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.6 2000/07/03 12:48:14 jcs Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.6  2000/07/03 12:48:14  jcs
+// use (pre)Vertex id to access vertex coordinates for unconstrained fit and
+// for constrained fit
+//
 // Revision 1.5  2000/06/13 14:28:23  oldi
 // Changed cout to gMessMgr->Message().
 // Printed output changed (slightly).
@@ -155,7 +159,7 @@ StFtpcTracker::~StFtpcTracker()
 }
 
 
-Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper)
+Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Int_t id_start_vertex)
 {
   // Writes tracks to STAF table.
   
@@ -172,8 +176,8 @@ Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper)
     
     for (Int_t i=0; i<num_tracks; i++) {
       track = (StFtpcTrack *)mTrack->At(i);
-      track->Fit(mVertex, mMaxDca);  
-      track->Write(&(trackTable[i]));    
+      track->Fit(mVertex, mMaxDca, id_start_vertex);  
+      track->Write(&(trackTable[i]), id_start_vertex);    
     }
    
     trackTableWrapper->SetNRows(num_tracks);
