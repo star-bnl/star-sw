@@ -1,8 +1,8 @@
-// $Id: StFtpcClusterFinder.hh,v 1.11 2002/02/26 13:17:56 jcs Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.12 2002/03/01 14:22:20 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
-// Revision 1.11  2002/02/26 13:17:56  jcs
-// get cluster unfolding parameters from ftpcClusterPars
+// Revision 1.12  2002/03/01 14:22:20  jcs
+// add additional histograms to monitor cluster finding
 //
 // Revision 1.10  2002/02/10 21:12:32  jcs
 // add deltaAirPressure to calcpadtrans call
@@ -49,6 +49,7 @@
 #include "StDAQMaker/StFTPCReader.h"
 #include "StFtpcParamReader.hh"
 #include "StFtpcDbReader.hh"
+#include "TH2.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -109,6 +110,7 @@ class StFtpcClusterFinder
   StFTPCReader *mReader; 
   StFtpcParamReader *mParam;
   StFtpcDbReader *mDb;
+  TH2F *mhpad, *mhtime;
 
   int MAXSEQPEAKS;
   int MAXPEAKS;
@@ -116,12 +118,18 @@ class StFtpcClusterFinder
   int MAXFASTLOOPS;
   float UNFOLDLIMIT;
   float UNFOLDFAILEDLIMIT;
+  int MAXPADLENGTH;
+  int MAXTIMELENGTH;
+  int MINTIMEBIN;
 
  public:
   StFtpcClusterFinder(StFTPCReader *reader, 
 		      StFtpcParamReader *paramReader, 
                       StFtpcDbReader    *dbReader,
-		      TObjArray *pointarray);
+		      TObjArray *pointarray,
+		      TH2F *hpad,
+		      TH2F *htime);
+
   ~StFtpcClusterFinder();
   int search();
   int findHits(TClusterUC *Cluster, int, int, double*, double*, float *);//!

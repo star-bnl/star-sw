@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.h,v 1.4 2001/07/12 13:05:01 oldi Exp $
+// $Id: StFtpcTrackMaker.h,v 1.5 2002/03/01 14:21:21 jcs Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.5  2002/03/01 14:21:21  jcs
+// add additional histograms to monitor cluster finding
+//
 // Revision 1.4  2001/07/12 13:05:01  oldi
 // QA histogram of FTPC vertex estimation is generated.
 // FTPC vertex estimation is stored as pre vertex (id = 301) in any case, now.
@@ -43,7 +46,13 @@ class StFtpcTrackMaker : public StMaker {
        TH1F          *m_found;      //! # points found per track
        TH1F          *m_track;      //! # tracks found   
        TH2F          *m_nrec_track; //! # points found per track vs. # tracks found
-
+       TH2F          *m_padvstime_West; //! padlength vs. timelength
+       TH2F          *m_padvstime_East; //! padlength vs. timelength
+       TH1F          *m_maxadc_West;
+       TH1F          *m_maxadc_East;
+       TH1F          *m_charge_West;
+       TH1F          *m_charge_East;
+       
    St_fde_fdepar   *m_fdepar;   //!
 
  public: 
@@ -52,9 +61,10 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  Init();                                           // Initialisation 
    virtual Int_t  Make();                                           // actual program
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.4 2001/07/12 13:05:01 oldi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.5 2002/03/01 14:21:21 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
            void   MakeHistograms();                                 // makes histograms
+	   void   MakeHistograms(TObjArray *foundtracks);           // makes histograms
 
 
    ClassDef(StFtpcTrackMaker, 1)   //StAF chain virtual base class for Makers

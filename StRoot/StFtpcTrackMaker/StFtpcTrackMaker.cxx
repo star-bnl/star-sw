@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.25 2002/02/20 16:11:15 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.26 2002/03/01 14:21:21 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.26  2002/03/01 14:21:21  jcs
+// add additional histograms to monitor cluster finding
+//
 // Revision 1.25  2002/02/20 16:11:15  jcs
 // change loop over vertex table to test if first row is primary vertex
 //
@@ -179,6 +182,13 @@ Int_t StFtpcTrackMaker::Init()
   m_found        = new TH1F("fpt_nrec"      ,"FTPC: number of points found per track"          , 10, 1. ,  11. );
   m_track        = new TH1F("fpt_track"     ,"FTPC: number of tracks found"                    ,100, 1. ,5000. );    
   m_nrec_track   = new TH2F("fpt_hits_mom"  ,"FTPC: points found per track vs. momentum"       , 10, 1. ,  11. , 100, 1., 20.);
+
+  m_padvstime_West = new TH2F("fpt_padvstimeW","FTPCW padlength vs. timelength",12,0.5,12.5,10,0.5,10.5);
+  m_padvstime_East = new TH2F("fpt_padvstimeE","FTPCE padlength vs. timelength",12,0.5,12.5,10,0.5,10.5);
+  m_maxadc_West = new TH1F("fpt_maxadcW","FTPCW MaxAdc",50,0.5,50.5);
+  m_maxadc_East = new TH1F("fpt_maxadcE","FTPCE MaxAdc",50,0.5,50.5);
+  m_charge_West = new TH1F("fpt_chargeW","FTPCW charge",50,0.5,500.5);
+  m_charge_East = new TH1F("fpt_chargeE","FTPCE charge",50,0.5,500.5);
  
   return StMaker::Init();
 }
@@ -269,6 +279,13 @@ Int_t StFtpcTrackMaker::Make()
   if (iflag == 0) {
     //  No vertex found, no FTPC tracking is possible
     gMessMgr->Warning() << "StFtpcTrackMaker::Make() - no vertex found - no tracking" << endm;
+
+    // ----------------------------------------------------
+    // debug
+    //primary_vertex_x=primary_vertex_y=primary_vertex_z=0;
+    //gMessMgr->Message("", "I", "OST") << "DEBUG : Using Tpc Vertex (" << primary_vertex_x << ", " << primary_vertex_y << ", " << primary_vertex_z <<  ") for Ftpc tracking." << endm;
+    // ----------------------------------------------------
+
     return kStWarn;
   }
 
@@ -357,9 +374,11 @@ Int_t StFtpcTrackMaker::Make()
   delete eval;
   */
 
+  MakeHistograms(tracker->GetTracks());
+
   delete tracker;
 
-  MakeHistograms();
+  //MakeHistograms();
   gMessMgr->Message("", "I", "OST") << "Tracking (FTPC) completed." << endm;
 
   return kStOK;;
@@ -377,21 +396,58 @@ void StFtpcTrackMaker::MakeHistograms()
   St_fpt_fptrack *trk = NULL;
   trk = (St_fpt_fptrack *) ftpc_tracks.Find("fpt_fptrack");
 
-  if (trk) {
-   // Fill histograms for FTPC fpt,fte,fde
-
-    fpt_fptrack_st *r = trk->GetTable();
-    for (Int_t i=0; i<trk->GetNRows();i++,r++) {
-      m_found->Fill((float)(r->nrec));
-      m_q->Fill((float)(r->q));
-      m_theta->Fill(r->theta);
-      m_ndedx->Fill((float)(r->ndedx));
-      float mom=sqrt(r->p[0] * r->p[0] + r->p[1] * r->p[1] + r->p[2] * r->p[2]);
-      m_nrec_track->Fill((float)(r->nrec),mom);
+  if (trk) 
+    {
+      // Fill histograms for FTPC fpt,fte,fde
+      
+      fpt_fptrack_st *r = trk->GetTable();
+      for (Int_t i=0; i<trk->GetNRows();i++,r++) 
+	{
+	  m_found->Fill((float)(r->nrec));
+	  m_q->Fill((float)(r->q));
+	  m_theta->Fill(r->theta);
+	  m_ndedx->Fill((float)(r->ndedx));
+	  float mom=sqrt(r->p[0] * r->p[0] + r->p[1] * r->p[1] + r->p[2] * r->p[2]);
+	  m_nrec_track->Fill((float)(r->nrec),mom);
+	}        
     }
-  }
 }
 
+//_____________________________________________________________________________
+void   StFtpcTrackMaker::MakeHistograms(TObjArray *foundtracks)
+{
+  // Fill histograms.
+
+  for (Int_t t_counter = 0; t_counter < foundtracks->GetEntriesFast(); t_counter++) 
+    {
+      StFtpcTrack *tracks = (StFtpcTrack*) foundtracks->At(t_counter);
+      TObjArray   *fhits  = (TObjArray*) tracks->GetHits();
+      
+      m_nrec_track->Fill(tracks->GetNumberOfPoints(),tracks->GetP());
+      m_found->Fill(tracks->GetNumberOfPoints());
+      m_q->Fill(tracks->GetCharge());
+      m_theta->Fill(tracks->GetTheta());
+      m_ndedx->Fill(tracks->GetdEdx());
+
+      for (Int_t h_counter = 0; h_counter < fhits->GetEntriesFast(); h_counter++) 
+	{
+	  StFtpcPoint *mhit = (StFtpcPoint *) fhits->At(h_counter);
+
+	  if (mhit->GetPadRow()<=10)
+	    {
+	      m_maxadc_West->Fill(mhit->GetMaxADC());
+	      m_charge_West->Fill(mhit->GetCharge());
+	      m_padvstime_West->Fill(mhit->GetNumberBins(),mhit->GetNumberPads());
+	    }
+	  else if (mhit->GetPadRow()>=11)
+	    {
+	      m_maxadc_East->Fill(mhit->GetMaxADC());
+	      m_charge_East->Fill(mhit->GetCharge());
+	      m_padvstime_East->Fill(mhit->GetNumberBins(),mhit->GetNumberPads());
+	    }
+	}
+    }
+}
 
 //_____________________________________________________________________________
 void StFtpcTrackMaker::PrintInfo()
@@ -399,7 +455,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.25 2002/02/20 16:11:15 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.26 2002/03/01 14:21:21 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {

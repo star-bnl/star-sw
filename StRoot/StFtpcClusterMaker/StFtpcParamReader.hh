@@ -1,8 +1,8 @@
-// $Id: StFtpcParamReader.hh,v 1.19 2002/02/26 13:16:40 jcs Exp $
+// $Id: StFtpcParamReader.hh,v 1.20 2002/03/01 14:22:21 jcs Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
-// Revision 1.19  2002/02/26 13:16:40  jcs
-// get cluster unfolding paramteres from ftpcClusterPars
+// Revision 1.20  2002/03/01 14:22:21  jcs
+// add additional histograms to monitor cluster finding
 //
 // Revision 1.18  2002/01/21 22:14:56  jcs
 // added values for temperature/pressure calculations to ftpcClusterPars
@@ -160,7 +160,10 @@ protected:
   Int_t mMaxLoops;         
   Int_t mMaxFastLoops;    
   Float_t mUnfoldLimit;      
-  Float_t mUnfoldFailedLimit; 
+  Float_t mUnfoldFailedLimit;
+  Int_t mMaxTimeLength;
+  Int_t mMaxPadLength;
+  Int_t mMinTimeBin;
   
 public:
   // constructor used by StFtpcClusterMaker:
@@ -254,6 +257,9 @@ public:
   Int_t maxFastLoops() {return mMaxFastLoops;}
   Float_t unfoldLimit() {return mUnfoldLimit;}
   Float_t unfoldFailedLimit() {return mUnfoldFailedLimit;}  
+  Int_t maxTimeLength() {return mMaxTimeLength;}
+  Int_t maxPadLength() {return mMaxPadLength;}
+  Int_t minTimeBin() {return mMinTimeBin;}
 
 };
 
