@@ -1,10 +1,25 @@
-/*!
- * \class StRTpcPadPlane 
- * \author David Hardtke
+/***************************************************************************
  *
- * TPC Pad Plane Geometry Interface
- */
-
+ * $Id: StRTpcPadPlane.h,v 1.11 2000/11/14 22:00:06 genevb Exp $
+ *
+ * Author:  David Hardtke
+ ***************************************************************************
+ *
+ * Description: TPC Pad Plane Geometry Interface 
+ *
+ ***************************************************************************
+ *
+ * $Log: StRTpcPadPlane.h,v $
+ * Revision 1.11  2000/11/14 22:00:06  genevb
+ * Switched several functions from float to double
+ *
+ * Revision 1.10  2000/01/12 15:14:40  hardtke
+ * Update StTpcWirePlanes to use new variable names in tpcWirePlanes.idl/ Add Z position functions to StTpcPadPlane
+ *
+ * Revision 1.9  1999/12/16 22:00:53  hardtke
+ * add CVS tags
+ *
+ **************************************************************************/
 #ifndef __STRTPCPADPLANE__
 #define __STRTPCPADPLANE__
 //#include <TObject.h>
@@ -165,31 +180,11 @@ return (*mPadPlane)[0].outerSectorPadPlaneZ;
 
 #endif
 
-/***************************************************************************
- *
- * $Id: StRTpcPadPlane.h,v 1.13 2002/02/22 01:03:22 jeromel Exp $
- *
- * Author:  David Hardtke
- ***************************************************************************
- *
- * Description: TPC Pad Plane Geometry Interface 
- *
- ***************************************************************************
- *
- * $Log: StRTpcPadPlane.h,v $
- * Revision 1.13  2002/02/22 01:03:22  jeromel
- * Undo recent changes (don't understand it yet). Will be recoverable ...
- *
- * Revision 1.12  2002/02/21 18:35:58  hardtke
- * Speed up by hardwiring number of inner rows and making array for numberOfRowsAt function
- *
- * Revision 1.11  2000/11/14 22:00:06  genevb
- * Switched several functions from float to double
- *
- * Revision 1.10  2000/01/12 15:14:40  hardtke
- * Update StTpcWirePlanes to use new variable names in tpcWirePlanes.idl/ Add Z position functions to StTpcPadPlane
- *
- * Revision 1.9  1999/12/16 22:00:53  hardtke
- * add CVS tags
- *
- **************************************************************************/
+
+
+
+
+
+
+
+

@@ -61,7 +61,8 @@ Int_t St_trg_Maker::SWITCH(SanityCheck)() {
 #define BYTESPERDSM 16  //The number of output bytes the 20 signals are packed into
 typedef unsigned char byte;
 
-int tower_map[10] = {4,3,2,1,0,9,8,7,6,5};
+int tower_map[10] = {0,1,2,3,4,5,6,7,8,9};  // Corrected per Jenn Klay in her email of Fri, 22 Feb 2002.
+//int tower_map[10] = {4,3,2,1,0,9,8,7,6,5};  // Commented per Jenn Klay in her email of Fri, 22 Feb 2002.
 int swapByteOrder[16] = {7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8};
 
 //dsm_to_patch follows the numbering scheme in the offline software, since

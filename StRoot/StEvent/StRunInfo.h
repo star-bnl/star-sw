@@ -1,6 +1,10 @@
+/*!
+ * \class StRunInfo 
+ * \author Thomas Ullrich, Sep 2001
+ */
 /***************************************************************************
  *
- * $Id: StRunInfo.h,v 2.3 2002/01/31 23:42:36 ullrich Exp $
+ * $Id: StRunInfo.h,v 2.5 2002/02/25 19:32:47 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2001
  ***************************************************************************
@@ -10,6 +14,13 @@
  ***************************************************************************
  *
  * $Log: StRunInfo.h,v $
+ * Revision 2.5  2002/02/25 19:32:47  ullrich
+ * Added more RHIC related info.
+ *
+ * Revision 2.4  2002/02/22 22:56:50  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.3  2002/01/31 23:42:36  ullrich
  * Added member to hold BBC coincidence rate.
  *
@@ -23,10 +34,10 @@
 #ifndef StRunInfo_hh
 #define StRunInfo_hh
 
-#include <ctime>
 #include "StObject.h"
 #include "TString.h"
 #include "StEnumerations.h"
+#include <ctime>
 
 class StRunInfo : public StObject {
 public:
@@ -40,7 +51,10 @@ public:
     TString  productionVersion() const;
     double   centerOfMassEnergy() const;
     int      beamMassNumber(StBeamDirection) const;
-    int      beamCharge(StBeamDirection) const;
+    float    beamEnergy(StBeamDirection) const;
+    float    initialBeamIntensity(StBeamDirection) const;
+    float    beamLifeTime(StBeamDirection) const;
+    float    beamFillNumber(StBeamDirection) const;
     double   magneticField() const;
     double   tpcDriftVelocity(StBeamDirection) const;
 
@@ -56,7 +70,10 @@ public:
     void     setProductionVersion(const char*);   
     void     setCenterOfMassEnergy(double);             
     void     setBeamMassNumber(StBeamDirection, int);  
-    void     setBeamCharge(StBeamDirection, int);      
+    void     setBeamEnergy(StBeamDirection, float);
+    void     setInitialBeamIntensity(StBeamDirection, float);
+    void     setBeamLifeTime(StBeamDirection, float);
+    void     setBeamFillNumber(StBeamDirection, float);
     void     setMagneticField(double);                  
     void     setTpcDriftVelocity(StBeamDirection, double);
 
@@ -75,7 +92,6 @@ protected:
     
     Float_t     mCenterOfMassEnergy;
     Int_t       mBeamMassNumber[2];
-    Int_t       mBeamCharge[2];
     
     Double_t    mMagneticFieldZ;
     Float_t     mTpcDriftVelocity[2];
@@ -87,6 +103,10 @@ protected:
     Double_t    mL0RateToRich;
     Double_t    mBbcCoincidenceRate;
 
-    ClassDef(StRunInfo,3)
+    Float_t     mBeamEnergy[2];
+    Float_t     mInitialBeamIntensity[2];
+    Float_t     mBeamLifeTime[2];
+    Float_t     mBeamFillNumber[2];
+    ClassDef(StRunInfo,4)
 };
 #endif

@@ -1,5 +1,9 @@
-// $Id: StEmcADCtoEMaker.h,v 1.16 2001/12/28 22:38:37 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.17 2002/02/24 21:19:21 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.17  2002/02/24 21:19:21  suaide
+// clean up and modifications on the settings that allow to save only hits
+// above a given threshold that can be defined for each sub detector.
+//
 // Revision 1.16  2001/12/28 22:38:37  suaide
 // fixed documentation
 //
@@ -61,17 +65,16 @@ The defaults values are:<br>
 #include "StMaker.h"
 #endif
 
-#include <TH1.h>
-#include <TH2.h>
-
 #include "tables/St_emcCalibration_Table.h"
 #include "tables/St_emcPedestal_Table.h"
 #include "tables/St_smdPedestal_Table.h"
 #include "tables/St_emcRunning_Table.h"
 #include "tables/St_smdRunning_Table.h"
-
 #include "tables/St_controlADCtoE_Table.h"
+
 #include "StEmcUtil/emcInternalDef.h"
+#include "TH1.h"
+#include "TH2.h"
 
 class StEmcCollection;
 class StEmcDecoder;
@@ -80,60 +83,58 @@ class StEmcGeom;
 class StEmcADCtoEMaker : public StMaker 
 {
   private: 
-           TH2F              *m_nhit;           //! 
-           TH2F              *m_etot;           //!
-           TH2F              *m_hits[MAXDET];   //!
-           TH2F              *m_adc[MAXDET];    //!
-           TH2F              *m_energy[MAXDET]; //!
-           TH1F              *m_adc1d[MAXDET];  //!
+           TH2F              *mNhit;           //! 
+           TH2F              *mEtot;           //!
+           TH2F              *mHits[MAXDET];   //!
+           TH2F              *mAdc[MAXDET];    //!
+           TH2F              *mEnergyHist[MAXDET]; //!
+           TH1F              *mAdc1d[MAXDET];  //!
            
-           TH2F              *m_tower;          //!
-           TH1F              *m_towerMean;      //!
-           TH1F              *m_towerRMS;       //!
-           TH1F              *m_towerSum;       //!
+           TH2F              *mTower;          //!
            
-           TH2F              *m_smdTimeBin;     //!
+           TH2F              *mSmdTimeBinHist;     //!
            
-           TDataSet          *m_CalibDb;
-           TDataSet          *m_StatusDb;
-           StEmcCollection   *m_emc;            //!
-           StEmcDecoder      *decoder;          //!
+           controlADCtoE_st  *mControlADCtoE; //!
            
-           Int_t             status[MAXDET][18000];
-           Int_t             nChannels[MAXDET];
-           Float_t           ADCTemp[18000];
+           TDataSet          *mCalibDb;
+           TDataSet          *mStatusDb;
+           StEmcCollection   *mEmc;            //!
+           StEmcDecoder      *mDecoder;          //!
            
-           Int_t             smdTimeBin[2][8];
-           Int_t             smdTimeBinTemp[18000];
-           Bool_t            kCalibTemp[MAXDET];
+           Int_t             mStatus[MAXDET][18000];
+           Int_t             mNChannels[MAXDET];
            
-           StEmcGeom         *geo[MAXDET];
+           Float_t           mADC[MAXDET][18000];
+           Float_t           mADCPedSub[MAXDET][18000];
+           Float_t           mEnergy[MAXDET][18000];
+           
+           Int_t             mSmdTimeBin[8];
+           
+           StEmcGeom         *mGeo[MAXDET]; //!
 
-           StEmcCollection   *GetEmcCollectionFromDaq(TDataSet* daq);///< This method gets EMC collection from DAQ dataset.
-           void              GetStatus(Int_t); ///< This method gets the status tables for a given detector
-           
+           Bool_t            getEmcFromDaq(TDataSet* daq);///< This method gets EMC collection from DAQ dataset.
+           Bool_t            getEmcFromStEvent(StEmcCollection*); ///< This method creates a temporary ADC vector for each detector.
+           void              getStatus(Int_t); ///< This method gets the status tables 
+           void              zeroAll(); ///< Zero all temporary vectors
+           Bool_t            getEmc(); ///< This method gets EMC hits from different sources.
+           Bool_t            calibrate(Int_t,Int_t*,Float_t*); ///< This method applies the calibration constants to get the hit energy.
+           Bool_t            subtractPedestal(Int_t); ///< This method creates a temporary ADC vector for each detector.
+           Bool_t            fillHistograms(Int_t,Int_t,Float_t); ///< This method fills QA histograms
+           Bool_t            fillStEvent(); ///< This method makes a clean up of StEvent
+           Bool_t            saveHit(Int_t,Int_t);///< Decide if a hit should be saved or not
   protected:    
     
   public: 
-           Bool_t            kCalib[MAXDET]; ///< Set to kTRUE if you want to calibrate some detector
-           Bool_t            isDaqFile; ///< Set to kTRUE if you are reading a .daq file
-           Bool_t            subtractPedestal; ///< Set to kTRUE to subtract pedestal
-           Bool_t            saveOnlyCalibHits; ///< Set to kTRUE to save only calibrated hits
                  
                              StEmcADCtoEMaker(const char *name="Eread"); ///< StEmcADCtoEMaker constructor
    virtual                   ~StEmcADCtoEMaker(); ///< StEmcADCtoEMaker destructor
    virtual Int_t             Init(); ///< Init function. This method initializes the histograms
    virtual Int_t             Make(); ///< Process each event
    virtual Int_t             Finish(); ///< This method creates mean ADC and RMS histograms.
-           Bool_t            GetEmcEvent(); ///< This method gets EMC hits from different sources.
-           Bool_t            CreateVector(Int_t); ///< This method creates a temporary ADC vector for each detector.
-           Bool_t            Calibrate(Int_t,Int_t*,Float_t*); ///< This method applies the calibration constants to get the hit energy.
-           Bool_t            FillHistograms(Int_t,Int_t,Float_t); ///< This method fills QA histograms
-           Bool_t            FillStEvent(); ///< This method makes a clean up of StEvent
    
-   static  controlADCtoE_st  *getControlTable()  {return NULL;} ///< Return Control table (NULL)
-           StEmcCollection   *getEmcCollection() {return m_emc;} ///< Return emcCollection
-           void              clearStEventStaf()  { m_emc = 0;} ///< Clear emcCollection (does not delete from memory)
+           controlADCtoE_st* getControlTable()  {return mControlADCtoE;} ///< Return Control table (NULL)
+           StEmcCollection*  getEmcCollection() {return mEmc;} ///< Return emcCollection
+           void              clearStEventStaf() {mEmc = 0;} ///< Clear emcCollection (does not delete from memory)
 
    ClassDef(StEmcADCtoEMaker, 1)  
 };

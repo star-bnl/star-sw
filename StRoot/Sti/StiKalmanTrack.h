@@ -208,8 +208,8 @@ public:
   double getTpcDedx() const;
   double getSvtDedx() const;
 
-	StiKTNBidirectionalIterator begin() const;
-	StiKTNBidirectionalIterator end() const;
+	StiKTNForwardIterator begin() const;
+	StiKTNForwardIterator end() const;
 
    /// Accessor method returns the outer most node associated with the track.
    StiKalmanTrackNode * getOuterMostNode()  const;

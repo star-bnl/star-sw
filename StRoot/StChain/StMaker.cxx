@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.122 2002/02/22 21:16:21 perev Exp $
+// $Id: StMaker.cxx,v 1.121 2002/02/02 23:31:14 jeromel Exp $
 //
 /*!
  *                                                                      
@@ -195,27 +195,6 @@ void StMaker::AddAlias(const char* log, const char* act,const char* dir)
   TDataSet *ali = new TDataSet(log); 
   ali->SetTitle(act);
   AddData(ali,dir);
-}
-//______________________________________________________________________________
-void StMaker::SetNotify(const char* about, StMaker *mk)
-{
-  TDataSet *ali = new TObjectSet(about,mk,0); 
-  AddData(ali,".notify");
-}
-//______________________________________________________________________________
-void StMaker::NotifyEm(const char* about, const void *ptr)
-{
-  TDataSet *set = Find(".notify");
-  if (!set) return;
-  TDataSetIter iter(set);
-  TObjectSet *os=0;
-  while((os=(TObjectSet*)iter())) {
-    if (strcmp(about,os->GetName()))	continue;
-    StMaker *mk=(StMaker*)os->GetObject();
-    if (!mk)				continue;
-    mk->NotifyMe(about,ptr);
-  }
-
 }
 //______________________________________________________________________________
 void StMaker::SetAlias(const char* log, const char* act,const char* dir)
@@ -1134,9 +1113,6 @@ const char *StMaker::GetBroadcast(const char *subj,const char *author) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
-// Revision 1.122  2002/02/22 21:16:21  perev
-// new method NotifyMe
-//
 // Revision 1.121  2002/02/02 23:31:14  jeromel
 // doxygenized. Added some text for the Make() method.
 //

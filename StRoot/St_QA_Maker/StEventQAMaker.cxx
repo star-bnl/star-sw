@@ -146,13 +146,15 @@ Int_t StEventQAMaker::Make() {
       multiplicity = event->trackNodes().size();
       int makeStat = StQAMakerBase::Make();
       mNullPrimVtx->Fill(1);
-      if (histsSet > 0)
+      if ((histsSet == 1 && multiplicity >= 50)
+	  || histsSet == 2)
 	hists->mNullPrimVtxMult->Fill(1);
       return makeStat;
     } else {
       gMessMgr->Warning("StEventQAMaker::Make(): no primary vertex found!");
       mNullPrimVtx->Fill(-1);
-      if (histsSet > 0)
+      if ((histsSet == 1 && multiplicity >= 50)
+	  || histsSet == 2)
 	hists->mNullPrimVtxMult->Fill(-1);
       return kStOk;
     }
@@ -1834,8 +1836,11 @@ void StEventQAMaker::MakeHistEval() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.34 2002/02/12 18:41:59 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.35 2002/02/23 00:31:26 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.35  2002/02/23 00:31:26  lansdell
+// bug fix: primary vertex check histograms for a multiplicity class did not reflect the correct number of good events
+//
 // Revision 2.34  2002/02/12 18:41:59  genevb
 // Additional FTPC histograms
 //

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.36 2002/02/20 04:01:46 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.39 2002/02/25 19:21:51 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,15 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.39  2002/02/25 19:21:51  porter
+ * removed <<ends from  prodTime protection on run queries
+ *
+ * Revision 1.38  2002/02/25 17:52:10  porter
+ * prodTime check for run level queries
+ *
+ * Revision 1.37  2002/02/22 22:17:43  porter
+ * run test added on runs>=year1
+ *
  * Revision 1.36  2002/02/20 04:01:46  porter
  * changed test on runNumber from !=0 to >0 for initiating query by runNumber
  *
@@ -441,7 +450,7 @@ void * StDbBroker::Use(int tabID, int parID)
   bool fetchStatus;
   if(node->getDbType()==dbRunLog && 
      node->getDbDomain() != dbStar && 
-     m_runNumber>0 ){
+     m_runNumber>1000000 ){
      fetchStatus=UseRunLog(node);   
   } else {
     fetchStatus=mgr->fetchDbTable(node);
@@ -486,8 +495,17 @@ void StDbBroker::makeDateTime(const char* dateTime,UInt_t& iDate,UInt_t& iTime){
 //_____________________________________________________________________________
 bool StDbBroker::UseRunLog(StDbTable* table){
 
+  unsigned int prodTime=table->getProdTime();    
     ostrstream rq;
-    rq<<" where runNumber="<<m_runNumber<<ends;
+    rq<<" where runNumber="<<m_runNumber;
+
+    if(prodTime==0){
+      rq<<" AND deactive=0 "<<ends;
+    } else {
+      rq<<" AND (deactive=0 OR deactive>="<<prodTime<<")";
+      rq<<" AND unix_timestamp(entryTime)<="<<prodTime<<ends;
+    } 
+
     bool fetchStatus=mgr->fetchDbTable(table,rq.str());
     rq.freeze(0);
 

@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.277 2002/02/22 20:51:40 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.279 2002/02/25 21:19:32 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -105,23 +105,24 @@ Bfc_st BFC[] = {
 
 
   // Year 2 chains. 
-  // B2001 is a base-chain for 2001 (with tpc+rhic). SVT not in 2001 but can be added
-  // as an extra option. 2001a is currently used by FastOffline and is the "experimental" chain
-  // we used most often for the inclusion of new sub-systems.
+  // B2001 is a base-chain for 2001 (with tpc+rhic). 
   {"B2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                   ,"Base chain for 2001 (tpc+rhic)",kFALSE},
   {"P2001"       ,""  ,"",
-   "B2001,l3onl,tofDat,AlignSectors,ExB,OBmap,OClock,OPr13",
+   "B2001,l3onl,tofDat,AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC,OSpaceZ",
    "",""                                       ,"Production chain for summer 2001 data (+ l3, tof)",kFALSE},
 
   {"P2001a"      ,""  ,"",
-   "B2001,svt_daq,SvtD,ftpc,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13","",""
-                               ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof, emc)",kFALSE},
+   "B2001,svt_daq,SvtD,ftpc,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC,OSpaceZ",
+   "",""                       ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
-  // pp Chains -- Experimental ; will follow P2001* chains model
+  // pp Chains 
   {"pp2001"      ,""  ,"",
-   "pp,B2001,-PreVtx,-SpinTag,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13",
-   "",""                                                                                 ,"pp 2001",kFALSE},
+   "pp,B2001,-PreVtx,-SpinTag,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC",
+   "",""                                                                ,"pp 2001 (+ l3, tof, emc)",kFALSE},
+  {"pp2001a"      ,""  ,"",
+   "pp,B2001,-PreVtx,-SpinTag,SvtD,ftpc,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC",
+   "",""                                                     ,"pp 2001 (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
 
   // Other chains/Calibration
@@ -331,7 +332,7 @@ Bfc_st BFC[] = {
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
 
   {"point"      ,"point","globalChain","SCL,tables,tls","StPointlMaker","St_global,St_dst_Maker","",kFALSE},
-  {"Vertex"     ,"vertex","globalChain","SCL,tls"
+  {"Vertex"     ,"Vertex","globalChain","SCL,tls"
                            ,"StVertexMaker","St_svt,St_global,St_dst_Maker","Primary Vertex finder",kFALSE},
   {"Primary"    ,"primary","globalChain","SCL,globT,tls"
                                                ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},

@@ -176,8 +176,7 @@ inline StiKalmanTrackNode& StiKTNBidirectionalIterator::operator*()
 /*! In the case where the prefix operator increments beyond the root of the tree,
   the pointer to mNode is set to 0.   This demarcates the end of the traversal.
  */
-//inline StiKTNBidirectionalIterator& StiKTNBidirectionalIterator::operator++ ()
-inline StiKTNBidirectionalIterator& StiKTNBidirectionalIterator::operator-- ()
+inline StiKTNBidirectionalIterator& StiKTNBidirectionalIterator::operator++ ()
 {
     if (mNode->isRoot() ) {
 	mNode=0;
@@ -204,8 +203,7 @@ inline StiKTNBidirectionalIterator StiKTNBidirectionalIterator::operator++(int)
 /*! In the case where the prefix operator increments beyond the last leaf of the tree,
   the pointer to mNode is set to -.  This demarcates the end of traversal.
 */
-//inline StiKTNBidirectionalIterator& StiKTNBidirectionalIterator::operator-- ()
-inline StiKTNBidirectionalIterator& StiKTNBidirectionalIterator::operator++ ()
+inline StiKTNBidirectionalIterator& StiKTNBidirectionalIterator::operator-- ()
 {
     if (mNode->isLeaf() ) {
 	mNode=0;

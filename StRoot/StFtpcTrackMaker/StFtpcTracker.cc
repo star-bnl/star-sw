@@ -1,8 +1,5 @@
-// $Id: StFtpcTracker.cc,v 1.18 2002/02/21 22:57:57 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.17 2002/02/14 22:05:12 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
-// Revision 1.18  2002/02/21 22:57:57  oldi
-// Fixes to avoid warnings during optimized compilation.
-//
 // Revision 1.17  2002/02/14 22:05:12  oldi
 // Typo removed.
 //
@@ -746,7 +743,6 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
     pad_length  = fdepar[0].pad_length/100.;  // from cm to um/keV
     ftrunc      = fdepar[0].frac_trun;        // fraction for trunc. mean 
     aip         = fdepar[0].a_i_p * 1.0e-9;   // in GeV 
-    a_large_number = fdepar[0].a_large_number; // 1e+10
   
     // initialize the dedx table counter
     itrk_ok   = 0; 

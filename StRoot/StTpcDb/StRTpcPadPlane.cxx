@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcPadPlane.cxx,v 1.12 2002/02/22 01:03:21 jeromel Exp $
+ * $Id: StRTpcPadPlane.cxx,v 1.10 2000/11/14 22:00:06 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,12 +10,6 @@
  ***************************************************************************
  *
  * $Log: StRTpcPadPlane.cxx,v $
- * Revision 1.12  2002/02/22 01:03:21  jeromel
- * Undo recent changes (don't understand it yet). Will be recoverable ...
- *
- * Revision 1.11  2002/02/21 18:35:58  hardtke
- * Speed up by hardwiring number of inner rows and making array for numberOfRowsAt function
- *
  * Revision 1.10  2000/11/14 22:00:06  genevb
  * Switched several functions from float to double
  *

@@ -1,8 +1,5 @@
-// $Id: StFtpcTrack.cc,v 1.14 2002/02/21 22:57:57 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.13 2002/01/29 11:08:10 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
-// Revision 1.14  2002/02/21 22:57:57  oldi
-// Fixes to avoid warnings during optimized compilation.
-//
 // Revision 1.13  2002/01/29 11:08:10  oldi
 // Write() renamed to WriteCluster() resp. WriteTrack() to avoid compiler warnings.
 // As a result the functions TObject::Write() are available again (directly).
@@ -271,9 +268,11 @@ Double_t StFtpcTrack::CalcAlpha0()
 {
   // Calculates the starting angle (with respect to the x-axis) of xt.
   
+  Double_t asin_arg;
+  Double_t alpha0;
+
   StFtpcConfMapPoint *trackpoint = (StFtpcConfMapPoint *)mPoints->First();
-  Double_t asin_arg = StFormulary::CheckASinArg((trackpoint->GetYt() - GetCenterY())/GetRadius());
-  Double_t alpha0 = 0.;
+  asin_arg = StFormulary::CheckASinArg((trackpoint->GetYt() - GetCenterY())/GetRadius());
 
   if (trackpoint->GetXt() >= GetCenterX() && trackpoint->GetYt() > GetCenterY()) {
     alpha0 = TMath::ASin(asin_arg);

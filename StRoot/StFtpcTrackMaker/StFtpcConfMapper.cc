@@ -1,8 +1,5 @@
-// $Id: StFtpcConfMapper.cc,v 1.16 2002/02/21 22:57:56 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.15 2001/09/19 21:01:28 jcs Exp $
 // $Log: StFtpcConfMapper.cc,v $
-// Revision 1.16  2002/02/21 22:57:56  oldi
-// Fixes to avoid warnings during optimized compilation.
-//
 // Revision 1.15  2001/09/19 21:01:28  jcs
 // change track finding and fitting settings
 //
@@ -950,7 +947,7 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
   }
 
   // Circle Fit
-  StFtpcConfMapPoint *trackpoint = 0;
+  StFtpcConfMapPoint *trackpoint;
 
   {for (Int_t i = start_counter; i < n; i++) {
     trackpoint = (StFtpcConfMapPoint *)trackpoints->At(i);
@@ -976,9 +973,9 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
   //cout << track->GetRadius() << " " << track->GetAlpha0() << endl;
 
   // Tracklength Fit
-  Double_t s = 0.;
-  Double_t angle = 0.;
-  Double_t angle_diff = 0.;
+  Double_t s;
+  Double_t angle;
+  Double_t angle_diff;
 
   // Set variables again
   // first track point is main vertex or first track point (both at (0, 0, 0) [shifted coordinates])

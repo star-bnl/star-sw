@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.121 2002/02/22 20:42:42 perev Exp $
+# $Id: Construct,v 1.120 2002/01/03 20:46:37 jeromel Exp $
 use Env;
 use lib $STAR . "/mgr";    # Modify perl include path
 use ConsDefs;
@@ -63,11 +63,9 @@ if ( defined( $ARG{ROOTLIBS} ) ) {
     print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
 }
 else {
-  if ( !defined( $ARG{NoNew} ) ) { $ROOTLIBS = " -lNew "; }
-#VP  $ROOTLIBS .=
-#VP    " -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui -lGpad -lPhysics -lMatrix";
-    $ROOTLIBS .=
-  " -lCore -lCint -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics";
+  if ( !defined( $ARG{NoNew} ) ) { $ROOTLIBS = " -lNew"; }
+  $ROOTLIBS .=
+    " -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui -lGpad -lPhysics -lMatrix";
   print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
   
 }
@@ -172,7 +170,7 @@ if ( !$param::quiet ) {
     print "SO       = \t$env->{SO}     \tSOFLAGS  = \t$env->{SOFLAGS}\n";
     if ($param::debug) {
         foreach my $key( sort keys %$env ) {
-            print "\$env->{", $key, "}= \t|$env->{$key}|\n";
+            print "\$env->{", $key, "}= \t$env->{$key}\n";
         }
     }
 }
