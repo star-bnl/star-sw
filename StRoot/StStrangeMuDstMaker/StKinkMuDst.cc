@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.cc,v 3.10 2004/02/03 03:49:27 genevb Exp $
+ * $Id: StKinkMuDst.cc,v 3.11 2004/02/12 20:51:41 genevb Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.cc,v $
+ * Revision 3.11  2004/02/12 20:51:41  genevb
+ * Better error messages
+ *
  * Revision 3.10  2004/02/03 03:49:27  genevb
  * Added keys (IDs) for Kink parent and daughter
  *
@@ -59,6 +62,7 @@
 #include "StTrackNode.h"
 #include "StTrackFitTraits.h"
 #include "StDedxPidTraits.h"
+#include "StMessMgr.h"
 
 #include <stdlib.h>
 #include "phys_constants.h"
@@ -79,10 +83,13 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex) : StKinkBase()
   mHitDistanceParentDaughter = kinkVertex->hitDistanceParentDaughter();
   mHitDistanceParentVertex = kinkVertex->hitDistanceParentVertex();
   mDecayAngle = kinkVertex->decayAngle();
+  StTrack* parent = kinkVertex->parent();
+  if (!parent) gMessMgr->Error("StKinkMuDst: parent missing!");
+  StTrack* daughter = kinkVertex->daughter();
+  if (!daughter) gMessMgr->Error("StKinkMuDst: daughter missing!");
 
-  StTrack* parentPrimaryTrack = 
-    kinkVertex->parent()->node()->track(primary);
-  if (parentPrimaryTrack) {
+  StTrack* parentPrimaryTrack = parent->node()->track(primary);
+  if (parentPrimaryTrack && (parentPrimaryTrack->geometry())) {
     mParentPrimMomentumX = parentPrimaryTrack->geometry()->momentum().x();
     mParentPrimMomentumY = parentPrimaryTrack->geometry()->momentum().y();
     mParentPrimMomentumZ = parentPrimaryTrack->geometry()->momentum().z();
@@ -100,16 +107,26 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex) : StKinkBase()
   mParentMomentumY = parentMom.y();
   mParentMomentumZ = parentMom.z();
   mParentMomentum  = parentMom.mag();
-  mParentCharge = kinkVertex->parent()->geometry()->charge();
-  mKeyParent = kinkVertex->parent()->key();
+  if (parent->geometry()) {
+    mParentCharge = parent->geometry()->charge();
+  } else {
+    mParentCharge = 0;
+    gMessMgr->Warning("StKinkMuDst: parent geometry missing!");
+  }
+  mKeyParent = parent->key();
 
   const StThreeVectorF daughterMom = kinkVertex->daughterMomentum();
   mDaughterMomentumX = daughterMom.x();
   mDaughterMomentumY = daughterMom.y();
   mDaughterMomentumZ = daughterMom.z();
   mDaughterMomentum  = daughterMom.mag();
-  mDaughterCharge = kinkVertex->daughter()->geometry()->charge();
-  mKeyDaughter = kinkVertex->daughter()->key();
+  if (daughter->geometry()) {
+    mDaughterCharge = daughter->geometry()->charge();
+  } else {
+    mDaughterCharge = 0;
+    gMessMgr->Warning("StKinkMuDst: daughter geometry missing!");
+  }
+  mKeyDaughter = daughter->key();
 
   const StThreeVectorF pos = kinkVertex->position();
   mPositionX = pos.x();
@@ -118,13 +135,12 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex) : StKinkBase()
   mChi2Kink = kinkVertex->chiSquared();
   mClKink = kinkVertex->probChiSquared();
   
-  StTrack* trk = kinkVertex->parent();
-  mChi2Parent = trk->fitTraits().chi2(0);
-  mClParent = trk->fitTraits().chi2(1);
+  mChi2Parent = parent->fitTraits().chi2(0);
+  mClParent = parent->fitTraits().chi2(1);
   mDedxParent = 0.;
   mNumDedxParent = 0;
   // For now, get the truncated mean dE/dX from the TPC
-  StPtrVecTrackPidTraits pidParent = trk->pidTraits(kTpcId);
+  StPtrVecTrackPidTraits pidParent = parent->pidTraits(kTpcId);
   UInt_t i;
   for (i=0; i<pidParent.size(); i++) {
     StDedxPidTraits* pid = (StDedxPidTraits*) pidParent[i];
@@ -136,13 +152,12 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex) : StKinkBase()
     }
   }
 
-  trk = kinkVertex->daughter();
-  mChi2Daughter = trk->fitTraits().chi2(0);
-  mClDaughter = trk->fitTraits().chi2(1);
+  mChi2Daughter = daughter->fitTraits().chi2(0);
+  mClDaughter = daughter->fitTraits().chi2(1);
   mDedxDaughter = 0.;
   mNumDedxDaughter = 0;
   // For now, get the truncated mean dE/dX from the TPC
-  StPtrVecTrackPidTraits pidDaughter = trk->pidTraits(kTpcId);
+  StPtrVecTrackPidTraits pidDaughter = daughter->pidTraits(kTpcId);
   for (i=0; i<pidDaughter.size(); i++) {
     StDedxPidTraits* pid = (StDedxPidTraits*) pidDaughter[i];
     if (pid->method() == kTruncatedMeanId) {
