@@ -343,9 +343,14 @@ float sft_find_vertex ()
    else
       q = -q;
 
-      d = (double)bx + p / q; 
-
-
+   if( q !=0) {
+     
+     d = (double)bx + p / q; 
+   }
+   else{
+     d = -999;
+   }
+     
    return (float)d;
 }
 
@@ -382,6 +387,7 @@ bracket2 ( float (*func)(double),
 
    fX = fStart;
 
+   iMaxPos =0;
    fVal = (*func)(fX);
    pPoints[iNumPoints].x = fX;
    pPoints[iNumPoints].y = fVal;
@@ -422,11 +428,10 @@ bracket2 ( float (*func)(double),
     *  the three bracketing points.
     */
 
-   if (iNumPoints > 3)
-   {
-     iLeftPos  = (iMaxPos-2 > 0 ? iMaxPos - 2 : 0);
-     iRightPos = iMaxPos + 2;
-   }
+   
+   
+   iLeftPos  = (iMaxPos-2 > 0 ? iMaxPos - 2 : 0);
+   iRightPos = iMaxPos + 2;
    if( iMaxPos == 0){
      iLeftPos=1;
    }
