@@ -269,6 +269,8 @@ c   "sequence" orientation of algorithm is much more
 c   straight-forward and actually worked (in practice!) for 
 c   multi-track events
 c
+c   30 November - Mike Lisa mal
+c   fixed a bug, flagged below, that did not fill tpseq.next field correctly
 c
 #include "tas_structures.inc"
 #include "tas_user_codes.inc"
@@ -530,7 +532,8 @@ c
                  tpseq(tpseqh.nok).jpix = Jpix(indx)
                  tpseq(tpseqh.nok).secpad = Jpad(indx)
                  tpseq(tpseqh.nok).tpc_row = 100*sector + row
-                 if(indx.gt.loptr)then
+c BUG! BUG! BUG!                 if(indx.gt.loptr)then
+		 if (indx.gt.1) then		! fixed 30nov94 malisa
                     tpseq(tpseqh.nok-1).next = tpseqh.nok
                  endif
               enddo
