@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.31 2001/05/25 23:24:01 lisa Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.32 2001/06/04 19:09:54 rcwells Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.32  2001/06/04 19:09:54  rcwells
+ * Adding B-field, run number, and improved reaction plane functionality
+ *
  * Revision 1.31  2001/05/25 23:24:01  lisa
  * Added in StHbtKink stuff
  *
@@ -163,7 +166,10 @@
 
 #include "StFlowTagMaker/StFlowTagMaker.h"
 #include "tables/St_FlowTag_Table.h"
-
+#include "StFlowMaker/StFlowMaker.h"
+#include "StFlowMaker/StFlowEvent.h"
+#include "StFlowAnalysisMaker/StFlowAnalysisMaker.h"
+#include "StFlowMaker/StFlowSelection.h"
 
 #ifdef __ROOT__
 ClassImp(StStandardHbtEventReader)
@@ -180,6 +186,8 @@ StStandardHbtEventReader::StStandardHbtEventReader() : mTrackType(primary) {
   mTheV0Maker=0;
   mTheTagReader = 0;
   mReaderStatus = 0;  // "good"
+  mFlowMaker = 0;
+  mFlowAnalysisMaker = 0;
 }
 //__________________
 StStandardHbtEventReader::~StStandardHbtEventReader(){
@@ -187,7 +195,6 @@ StStandardHbtEventReader::~StStandardHbtEventReader(){
   if (mTrackCut) delete mTrackCut;
   if (mV0Cut) delete mV0Cut;
   if (mKinkCut) delete mKinkCut;
-
 }
 //__________________
 StHbtString StStandardHbtEventReader::Report(){
@@ -283,6 +290,9 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   hbtEvent->SetPrimVertPos(vp);
   cout << " StStandardHbtEventReader::ReturnHbtEvent() - primary vertex : " << vp << endl;
 
+  // Run number
+  hbtEvent->SetRunNumber( rEvent->runId() );
+
   if ( rEvent->summary() ) {
     double magneticField = rEvent->summary()->magneticField();
     hbtEvent->SetMagneticField(magneticField);
@@ -346,18 +356,22 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   hbtEvent->SetZdcAdcWest(zdc.adc(10)); // Zdc West sum attenuated
   hbtEvent->SetZdcAdcEast(zdc.adc(13)); // Zdc East sum attenuated
 
+  /*
+  // Randy commented this out since the RP is obtained from the FlowMaker now
+  // Didn't remove in case someone found it useful
   if (mTheTagReader) {
     hbtEvent->SetEventNumber(mTheTagReader->tag("mEventNumber"));    
     // reaction plane from tags 
     StHbtThreeVector a( mTheTagReader->tag("qxa",1), mTheTagReader->tag("qya",1),0);
     StHbtThreeVector b( mTheTagReader->tag("qxb",1), mTheTagReader->tag("qyb",1),0);
     float reactionPlane = (a+b).phi();
-    float reactionPlaneError = a.angle(b);
+    float reactionPlaneSubEventDifference = a.angle(b);
     cout << " reactionPlane : " << reactionPlane/3.1415927*180.;
-    cout << " reactionPlaneError : " << reactionPlaneError/3.1415927*180. << endl;
+    cout << " reactionPlaneSubEventDifference : " << reactionPlaneSubEventDifference/3.1415927*180. << endl;
     hbtEvent->SetReactionPlane(reactionPlane);
-    hbtEvent->SetReactionPlaneError(reactionPlaneError);
+    hbtEvent->SetReactionPlaneSubEventDifference(reactionPlaneSubEventDifference);
   }
+  */
 
   {for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
 #ifdef STHBTDEBUG
@@ -619,6 +633,24 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
       hbtEvent->KinkCollection()->push_back(hbtKink);
     }
   cout << "Number of StHbtKinks in HbtEvent: " << hbtEvent->KinkCollection()->size() << endl;
+
+  // Can't get Reaction Plane until whole HbtEvent is filled
+  if ( mFlowMaker && hbtEvent ) {
+    mFlowMaker->FillFlowEvent(hbtEvent);
+    // First get RP for whole event
+    mFlowMaker->FlowSelection()->SetSubevent(-1);
+    double reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+    cout << "Reaction Plane " << reactionPlane << endl;
+    hbtEvent->SetReactionPlane(reactionPlane);
+    // Sub event RPs
+    mFlowMaker->FlowSelection()->SetSubevent(0);
+    double RP1 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+    mFlowMaker->FlowSelection()->SetSubevent(1);
+    double RP2 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+    hbtEvent->SetReactionPlaneSubEventDifference(RP1-RP2);
+    // if Flow Analysis is switched on ... make correction histogram
+    if (mFlowAnalysisMaker) mFlowAnalysisMaker->Make();
+  }
 
   // There might be event cuts that modify the collections of Tracks or V0 in the event.
   // These cuts have to be done after the event is built. That's why we have the event cut

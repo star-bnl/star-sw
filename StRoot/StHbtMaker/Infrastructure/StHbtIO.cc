@@ -133,12 +133,13 @@ ostream& operator<<(ostream& out, StHbtV0& v0){
 //------------------------- StHbtEvent -----------------------------------
 ostream& operator<<(ostream& out, StHbtEvent& ev){
   out
-    << ev.mEventNumber         << " " << ev.mCtbMultiplicity  << " "
-    << ev.mZdcAdc[0]           << " " << ev.mZdcAdc[1]         << " "
-    << ev.mTpcNhits            << " " << ev.mNumberOfTracks   << " "
-    << ev.mNumberOfGoodTracks  << " " << ev.mReactionPlane[0] << " "
-    << ev.mReactionPlane[1]    << " " << ev.mPrimVertPos.x()   << " " 
-    << ev.mPrimVertPos.y()      << " " << ev.mPrimVertPos.z()   << endl;
+    << ev.mEventNumber         << " " << ev.mRunNumber << " "
+    << ev.mCtbMultiplicity     << " " << ev.mZdcAdc[0]           << " " 
+    << ev.mZdcAdc[1]           << " " << ev.mTpcNhits            << " " 
+    << ev.mNumberOfTracks      << " " << ev.mNumberOfGoodTracks  << " " 
+    << ev.mReactionPlane[0]    << " " << ev.mReactionPlane[1]    << " " 
+    << ev.mPrimVertPos.x()     << " " << ev.mPrimVertPos.y()      << " " 
+    << ev.mPrimVertPos.z()     << " " << ev.mMagneticField << endl;
   out << ev.mTrackCollection->size() << endl;;
   StHbtTrack trk;
   for (StHbtTrackIterator iter=ev.mTrackCollection->begin();
@@ -167,12 +168,14 @@ istream& operator>>(istream& in,  StHbtEvent& ev){
     cout << "Hit end of file " << endl;
     return in;
   }
-  in >> ev.mCtbMultiplicity 
-    >> ev.mZdcAdc[0]           >> ev.mZdcAdc[1]         
-    >> ev.mTpcNhits            >> ev.mNumberOfTracks  
-    >> ev.mNumberOfGoodTracks  >> ev.mReactionPlane[0]
-    >> ev.mReactionPlane[1]    >> x
-    >> y                       >> z;
+  in >> ev.mRunNumber
+     >> ev.mCtbMultiplicity 
+     >> ev.mZdcAdc[0]           >> ev.mZdcAdc[1]         
+     >> ev.mTpcNhits            >> ev.mNumberOfTracks  
+     >> ev.mNumberOfGoodTracks  >> ev.mReactionPlane[0]
+     >> ev.mReactionPlane[1]    >> x
+     >> y                       >> z
+     >> ev.mMagneticField;
   ev.mPrimVertPos.setX(x);
   ev.mPrimVertPos.setY(y);
   ev.mPrimVertPos.setZ(z);

@@ -173,7 +173,7 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
   hbtEvent->SetNumberOfTracks(Mult);
   hbtEvent->SetNumberOfGoodTracks(Mult);  // same for now
   hbtEvent->SetReactionPlane(0.);
-  hbtEvent->SetReactionPlaneError(0.);
+  hbtEvent->SetReactionPlaneSubEventDifference(0.);
   hbtEvent->SetPrimVertPos(VertexPosition); 
 
   // By now, all event-wise information has been extracted and stored in hbtEvent

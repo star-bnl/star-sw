@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.17 2001/02/08 22:38:26 laue Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.18 2001/06/04 19:09:54 rcwells Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
+ * Revision 1.18  2001/06/04 19:09:54  rcwells
+ * Adding B-field, run number, and improved reaction plane functionality
+ *
  * Revision 1.17  2001/02/08 22:38:26  laue
  * Reader can now switch between different track types: primary is default
  *
@@ -127,6 +130,10 @@ class StKaonPlus;
 class StProton;
 class StTpcDedxPidAlgorithm;
 class StParticleDefinition;
+class StFlowMaker;
+class StFlowEvent;
+class StFlowAnalysisMaker;
+class StFlowSelection;
 
 class StStandardHbtEventReader : public StMaker, public StHbtEventReader{
 
@@ -138,6 +145,9 @@ private:
   StHbtTagReader* mTheTagReader;  //! this tag reader opens a tags.root file 
 
   StTrackType mTrackType;
+
+  StFlowMaker* mFlowMaker;             //!
+  StFlowAnalysisMaker* mFlowAnalysisMaker; //!
 
  protected:
 
@@ -157,6 +167,10 @@ public:
 
   StTrackType TrackType(); 
   void SetTrackType(StTrackType);
+
+  void SetFlowMaker(StFlowMaker* flowMaker);
+  void SetFlowAnalysisMaker(StFlowAnalysisMaker* flowAnal);
+
 #ifdef __ROOT__
   ClassDef(StStandardHbtEventReader, 1)
 #endif
@@ -170,6 +184,10 @@ inline void StStandardHbtEventReader::SetTheTagReader(StHbtTagReader* maker){mTh
 inline StHbtTagReader* StStandardHbtEventReader::TheTagReader(){return mTheTagReader;}
 inline StTrackType StStandardHbtEventReader::TrackType() { return mTrackType;}
 inline void StStandardHbtEventReader::SetTrackType(StTrackType t) { mTrackType=t;}
+inline void StStandardHbtEventReader::SetFlowMaker(StFlowMaker* flowMaker){mFlowMaker = flowMaker;}
+inline void StStandardHbtEventReader::SetFlowAnalysisMaker(StFlowAnalysisMaker* flowAnal) {
+  mFlowAnalysisMaker = flowAnal;
+}
 
 #endif
 
