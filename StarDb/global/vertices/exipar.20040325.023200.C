@@ -21,8 +21,8 @@ TDataSet *CreateTable() {
   row.use_pid	 =          0; // logical flag to control usage of global pid ;
   row.dca_max	 =        1.2; // cut on dca between the two tracks ;
   row.bxi_max	 =        1.2; // cut on impact param. of xi from prim. vertex ;
-  row.rv_xi	 =          2; // cut on min. dist. of decay from prim. vertex ;
-  row.rv_v0	 =          4; // cut on min. dist. of decay from prim. vertex ;
+  row.rv_xi	 =        1.7; // cut on min. dist. of decay from prim. vertex ;
+  row.rv_v0	 =        3.5; // cut on min. dist. of decay from prim. vertex ;
   row.dmass	 =       0.01; // v0 mass cut +/- [dmass] ;
   row.bpn_v0	 =        0.0; // cut on v0 pion daught. impact param. ;
   row.pchisq	 =          0; // cut on chi^2 probability of vertex fit;
@@ -45,8 +45,8 @@ TDataSet *CreateTable() {
   row.use_pid	 =          0; // logical flag to control usage of global pid ;
   row.dca_max	 =        1.2; // cut on dca between the two tracks ;
   row.bxi_max	 =        1.2; // cut on impact param. of xi from prim. vertex ;
-  row.rv_xi	 =          2; // cut on min. dist. of decay from prim. vertex ;
-  row.rv_v0	 =          4; // cut on min. dist. of decay from prim. vertex ;
+  row.rv_xi	 =        0.6; // cut on min. dist. of decay from prim. vertex ;
+  row.rv_v0	 =        1.5; // cut on min. dist. of decay from prim. vertex ;
   row.dmass	 =       0.01; // v0 mass cut +/- [dmass] ;
   row.bpn_v0	 =        0.0; // cut on v0 pion daught. impact param. ;
   row.pchisq	 =          0; // cut on chi^2 probability of vertex fit;
