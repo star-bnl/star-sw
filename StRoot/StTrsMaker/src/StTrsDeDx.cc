@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.10 1999/07/19 21:42:23 lasiuk Exp $
+ * $Id: StTrsDeDx.cc,v 1.11 1999/07/20 02:19:58 lasiuk Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
+ * Revision 1.11  1999/07/20 02:19:58  lasiuk
+ * remove CVS merge conflicts
+ *
  * Revision 1.10  1999/07/19 21:42:23  lasiuk
  * - add tss bethe-bloche parameterization for P10.  No saturation
  *   effects are included.
@@ -373,11 +376,3 @@ void StTrsDeDx::print(ostream& os) const
     os << "mPadLength " << (mPadLength/centimeter) << " cm"  << endl;
     os << "======================================\n"         << endl;
 }
-
-
-
-
-
-
-
-
