@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.18  1998/08/10 23:23:03  fisyak
+#  add CERNLIB_SOLARISPC
+#
 #  Revision 1.17  1998/08/02 19:07:16  perev
 #  New Pavel makefile and bug in MakeArch
 #
@@ -32,7 +35,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/08/02 19:07:16 $ 
+#             Last modification $Date: 1998/08/10 23:23:03 $ 
 #. default setings
 
 RM := rm -f
@@ -329,7 +332,7 @@ endif
 
 ifneq (,$(findstring $(STAF_ARCH),sunx86_55))
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
-  OSFID :=  sun SUN SOLARIS SOLARISPC CERNLIB_UNIX CERNLIB_SUN CERNLIB_FQNEEDCV 
+  OSFID :=  sun SUN SOLARIS SOLARISPC CERNLIB_UNIX CERNLIB_SOLARISPC
   STRID :=  sun
   CC       :=  /opt/SUNWspro/bin/cc
   CXX      := /opt/SUNWspro/bin/CC
