@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.9 2000/01/04 19:50:20 jgreid Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.10 2000/01/25 15:31:15 fisyak Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.10  2000/01/25 15:31:15  fisyak
+ * Add namespace for CC5
+ *
  * Revision 1.9  2000/01/04 19:50:20  jgreid
  * modified to access tracks through the track node scheme
  *
@@ -44,7 +47,11 @@
 #include "StRun.h"
 #include "StEventTypes.h"
 #include "StGlobalTrack.h"
+
 #include "SystemOfUnits.h"
+#ifndef ST_NO_NAMESPACES
+using namespace units;
+#endif
 
 // define values for temperature calculation
 #define PI_MASS 0.139569

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventSummary.cxx,v 2.5 2000/01/14 19:06:47 ullrich Exp $
+ * $Id: StEventSummary.cxx,v 2.6 2000/01/25 15:31:47 fisyak Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEventSummary.cxx,v $
- * Revision 2.5  2000/01/14 19:06:47  ullrich
- * Made code more robust if read-in table is not well defined.
+ * Revision 2.6  2000/01/25 15:31:47  fisyak
+ * Add namespace for CC5
+ *
+ * Revision 2.6  2000/01/25 15:31:47  fisyak
+ * Add namespace for CC5
  *
  * Revision 2.5  2000/01/14 19:06:47  ullrich
  * Made code more robust if read-in table is not well defined.
@@ -34,12 +37,13 @@
 #include "StEventSummary.h"
 #include "SystemOfUnits.h"
 #include "tables/St_dst_event_summary_Table.h"
+#include "tables/St_dst_summary_param_Table.h"
 #ifndef ST_NO_NAMESPACES
 using units::tesla;
-static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.5 2000/01/14 19:06:47 ullrich Exp $";
+using units::degree;
 #endif
 
-static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.5 2000/01/14 19:06:47 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.6 2000/01/25 15:31:47 fisyak Exp $";
 
 ClassImp(StEventSummary)
 
