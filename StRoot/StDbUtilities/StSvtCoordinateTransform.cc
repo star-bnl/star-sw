@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.14 2002/01/30 14:29:13 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.15 2002/02/16 21:45:34 jeromel Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -16,15 +16,16 @@
  *
  ***********************************************************************/
 #include "StTpcDb/StTpcDb.h" //Final transformation to mag. coords
+#include "StSvtDbMaker/StSvtDbMaker.h"
 #include "StSvtCoordinateTransform.hh"
 #include "StCoordinates.hh"        // coordinate definitions
 #include "StGlobals.hh"
-#include "St_DataSetIter.h"
-#include "St_ObjectSet.h"
 #include "StMessMgr.h"
 #include "StSvtClassLibrary/StSvtConfig.hh"
 #include "StSvtClassLibrary/StSvtGeometry.hh"
 #include "StSvtClassLibrary/StSvtWaferGeometry.hh"
+#include "StSvtClassLibrary/StSvtHybridCollection.hh"
+#include "StSvtClassLibrary/StSvtHybridDriftVelocity.hh"
 //#include "tables/St_svg_geom_Table.h"
 //#include "tables/St_svg_shape_Table.h"
 //#include "tables/St_srs_srspar_Table.h"
@@ -38,23 +39,20 @@ using namespace units;
 //C and fortran routines
 
 //_______________________________________________________________________
-int type_of_call SvtGtoL_(float *x,float *xp,
-			   svg_geom_st* geom, int* index){
+int type_of_call SvtGtoL_(float *x,float *xp, int* index){
 
+
+ 
   StThreeVector<double> a(x[0],x[1],x[2]);
   StSvtCoordinateTransform transform;
-  
-  transform.setParamPointers(NULL, geom, NULL, NULL);
+  St_DataSet* dataSet;
+  dataSet = gStSvtDbMaker->GetDataSet("StSvtGeometry");
+  StSvtGeometry *GeomDataBase = (StSvtGeometry*)dataSet->GetObject();
+  if(GeomDataBase)   transform.setParamPointers(GeomDataBase, NULL);
+
   StSvtLocalCoordinate b;
 
-  if( transform.TpcTransform){
-
-    StTpcLocalCoordinate TpcLocal;
-    transform.TpcTransform->operator()(a,TpcLocal);
-    transform.GlobaltoLocal(TpcLocal.position(), b, 0, *index);
-  }
-  else
-    transform.GlobaltoLocal(a, b, 0, *index);
+  transform.GlobaltoLocal(a, b,*index, -1);
 
   xp[0] = b.position().x();
   xp[1] = b.position().y();
@@ -64,43 +62,34 @@ int type_of_call SvtGtoL_(float *x,float *xp,
   
 }
 //____________________________________________________________________________
-int type_of_call SvtLtoG_(float *xp, float *x,
-			   svg_geom_st* geom, int* index){
+int type_of_call SvtLtoG_(float *xp, float *x, int* index){
   StSvtLocalCoordinate a;
 
-  a.setPosition(StThreeVector<double>(xp[0],xp[1],xp[2]));
 
+  a.setPosition(StThreeVector<double>(xp[0],xp[1],xp[2]));
   StSvtCoordinateTransform transform;
-  transform.setParamPointers(NULL, geom, NULL, NULL);
+  St_DataSet* dataSet;
+  dataSet = gStSvtDbMaker->GetDataSet("StSvtGeometry");
+  StSvtGeometry *GeomDataBase = (StSvtGeometry*)dataSet->GetObject();
+  if(GeomDataBase)   transform.setParamPointers(GeomDataBase, NULL);
 
   StThreeVector<double> b(0,0,0);
   StGlobalCoordinate c;
 
-  transform.LocaltoGlobal(a, b, *index);
+  transform.LocaltoGlobal(a, b, -1);
 
-  if( transform.TpcTransform){
 
-    StTpcLocalCoordinate TpcLocal;
-    TpcLocal.setPosition(b);
-    transform.TpcTransform->operator()(TpcLocal,c);
-    
-    x[0] = c.position().x();
-    x[1] = c.position().y();
-    x[2] = c.position().z();
-  }
-  else{
-    x[0] = b.x();
-    x[1] = b.y();
-    x[2] = b.z();
-  }
-
+  x[0] = b.x();
+  x[1] = b.y();
+  x[2] = b.z();
+  
   return 0;
-
 }
 //_____________________________________________________________________________
 StSvtCoordinateTransform::StSvtCoordinateTransform() {
 
  TpcTransform = NULL;
+
 }
 
 //_____________________________________________________________________________
@@ -108,6 +97,7 @@ StSvtCoordinateTransform::StSvtCoordinateTransform() {
 StSvtCoordinateTransform::StSvtCoordinateTransform(StTpcDb* gStTpcDb) {
 
   TpcTransform = new StTpcCoordinateTransform(gStTpcDb);
+
 }
 //_____________________________________________________________________________
 
@@ -119,21 +109,25 @@ StSvtCoordinateTransform::~StSvtCoordinateTransform() {
 void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
 						 svg_geom_st* geom, 
 						 svg_shape_st* shape,
-						 StSvtConfig* config){
+						 StSvtConfig* config,
+						 StSvtHybridCollection* driftVeloc){
   mgeom = new StSvtGeometry(param, geom, shape);
   mconfig = config;
+  mDriftVelocity = driftVeloc;
   //  mparam = param;
   //  mgeom = geom;
   //  mshape = shape;
 
   
-};
+}
 
 void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
-						 StSvtConfig* config){
+						 StSvtConfig* config,
+						 StSvtHybridCollection* driftVeloc){
   mgeom = geom;
   mconfig = config;
-};
+  mDriftVelocity = driftVeloc;
+}
 
 //_____________________________________________________________________________
 //      Raw Data          -->  Global Coordinate
@@ -194,7 +188,7 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
 
   double t = a.timebucket() - t0;
 
-  b.setPosition(StThreeVector<double>(CalcDriftLength(t),
+  b.setPosition(StThreeVector<double>(CalcDriftLength(a,t),
 				      CalcTransLength(a.anode()),0.0));
   
   //  int idShape = 0;
@@ -264,7 +258,7 @@ void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StSvtWa
   
 
 
-  double t = UnCalcDriftLength(pos.x()) + t0;
+  double t = UnCalcDriftLength(a,pos.x()) + t0;
   b.setTimeBucket(t);
   b.setAnode(UnCalcTransLength(pos.y()));
 
@@ -537,16 +531,17 @@ int StSvtCoordinateTransform::LocaltoGlobal(const StSvtLocalCoordinate& a, StThr
 
   if( index < 0){
     index = mgeom->getWaferIndex(mgeom->getBarrelID(a.layer(),a.ladder()),(int)a.ladder(),(int)a.wafer());
-    if (index >= 0)
-      waferGeom = (StSvtWaferGeometry*)mgeom->at(index);
+  }
+  if (index >= 0 && index < 216)
+    waferGeom = (StSvtWaferGeometry*)mgeom->at(index);
 
-    if (!waferGeom) {
-      x.setX(-999);
-      x.setY(-999);
-      x.setZ(-999);
-      return 0;
-    }
-  }    
+  if (!waferGeom) {
+    x.setX(-999);
+    x.setY(-999);
+    x.setZ(-999);
+    return 0;
+  }
+      
 
   xl[0] = a.position().x();
   xl[1] = a.position().y();
@@ -623,18 +618,19 @@ int StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StS
 
   if( index < 0){
     index = mgeom->getWaferIndex(HardWarePos);
-    if (index >= 0)
+  }
+  if (index >= 0 && index < 216)
       waferGeom = (StSvtWaferGeometry*)mgeom->at(index);
 
     //cout << "HardWarePos = " << HardWarePos << ", index = " << index << ", waferGeom = " << waferGeom << endl;
 
-    if (!waferGeom) {
-      b.position().setX(-999);
-      b.position().setY(-999);
-      b.position().setZ(-999);
-      return 0;
-    }
-  }    
+  if (!waferGeom) {
+    b.position().setX(-999);
+    b.position().setY(-999);
+    b.position().setZ(-999);
+    return 0;
+  }
+      
   
   //  xl[0] = x.x() - mgeom[index].x[0];
   //  xl[1] = x.y() - mgeom[index].x[1];
@@ -658,7 +654,7 @@ int StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StS
 
 //_____________________________________________________________________________
 
-double StSvtCoordinateTransform::CalcDriftLength(double x){
+double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, double x){
 
   //Gives drift distance of spt in cm in local coords from timebuckets
 
@@ -699,8 +695,28 @@ double StSvtCoordinateTransform::CalcDriftLength(double x){
 //   if (distance>d) distance=d+v2*(t-d/v1);
   
   // hard wired for the time being (07/29/2001) MM
-  float vd = 675000;
+  //float vd = 675000;
   float fsca = 25000000;
+
+  int barrel;
+  if ((a.layer()==1) || (a.layer()==2)) barrel = 1;
+  if ((a.layer()==3) || (a.layer()==4)) barrel = 2;
+  if ((a.layer()==5) || (a.layer()==6)) barrel = 3;
+  int ladder = a.ladder();
+  int wafer = a.wafer();
+  int hybrid = a.hybrid();
+
+  float vd = -1;
+  int index;
+  if (mDriftVelocity) {
+    index = mDriftVelocity->getHybridIndex(barrel,ladder,wafer,hybrid);
+    if (index > 0)
+      vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1);
+  }
+  if (vd < 0)
+    vd = 675000;
+
+  cout << "index = " << index << ", vd = " << vd << endl;
 
   //distance = mparam->vd*x/mparam->fsca;
   distance = vd*x/fsca;
@@ -709,7 +725,7 @@ double StSvtCoordinateTransform::CalcDriftLength(double x){
 }
 //_____________________________________________________________________________
 
-double StSvtCoordinateTransform::UnCalcDriftLength(double x){
+double StSvtCoordinateTransform::UnCalcDriftLength(const StSvtLocalCoordinate& a, double x){
 
   //Gives drift distance of spt in timebuckets from cm in local coords
 
@@ -747,8 +763,23 @@ double StSvtCoordinateTransform::UnCalcDriftLength(double x){
 //   if (x>d) t = (x-d)/v2 + d/v1;
 
   // hard wired for the time being (07/29/2001) MM
-  float vd = 675000;
+  //float vd = 675000;
   float fsca = 25000000;
+
+  int barrel;
+  if ((a.layer()==1) || (a.layer()==2)) barrel = 1;
+  if ((a.layer()==3) || (a.layer()==4)) barrel = 2;
+  if ((a.layer()==5) || (a.layer()==6)) barrel = 3;
+
+  float vd = -1;
+  int index;
+  if (mDriftVelocity) {
+    index = mDriftVelocity->getHybridIndex(barrel,a.ladder(),a.wafer(),a.hybrid());
+    if (index > 0)
+      vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1);
+  }
+  if (vd < 0)
+    vd = 675000;
 
   double t;
   //t = x/mparam->vd;
