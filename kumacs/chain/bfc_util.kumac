@@ -95,11 +95,13 @@ macro bfc_init _
    vec/create v[mod]
    vec/create t[mod]
    CASE [mod] in
-    (oldin)  user/input dummy [input_file]
+    (oldin) user/input dummy [input_file]
     (evgin) newfile hij_in [input_file] r; 
             user/input u [evgen]/particle.staf
     (gtxin) user/input dummy [input_file]
-     (fzin) gfile pz [input_file]
+     (fzin) gfile pz [input_file]; cd [geantR];
+            detp g2tm dete(cdet=SFSD).onoff=0
+            for/call g2t
      (g2tin) exec input_g2t_file#init [input_file]
             if (STAF_STATUS(1).ne. STAFCV_OK) then
               message 'problem opening input file '
@@ -112,7 +114,7 @@ macro bfc_init _
           dio/newfilestream inev [input_file] r
           cd [run]
           dio/stream/getevent inev
-     (rgst)
+     (rgst) 
      (rg2t) 
      (svg) exec init_svg#read
            exec init_svg#svg_am
@@ -395,17 +397,39 @@ macro bfc_finish _
   macro/global/import *
   test = [chain]
   nw = $words([test])
+  vec/cre totime r 0
   do i = 1, [nw]
     mod = $word([test],[i],1)
     CASE [mod] in 
      (g2tin)  exec input_g2t_file#close
-      (rgst)  ge/rz/cd //PAWC;
-	        hi/list;  | show histograms
-     (evout,esout) exec write_table_to_file#close outfile;
+     (rgst)  ge/rz/cd //PAWC; hi/list;  | show histograms
+     (evout,esout) 
+            if [output_xdf_file]="" then
+                 message "Empty output file"
+            else
+              exec write_table_to_file#close outfile;
+            endif
       (*) message " !!! bfc_util#bfc_finish No final stage for package " [mod]
     ENDCASE
+    sigma totime = totime + t[mod]
+    if [nevents]>0 then
+      sigma cpupev = t[mod]/[nevents]
+      string = '---<bfc>---'//[mod]//': CPU/event = '//$format(cpupev,f12.5)
+     fmessage $quote([string])    [log_file]
+      message $quote([string]) 
+    endif
    if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
   enddo
+  string = '---<bfc>--- total CPU to process  '//$format([nevents],i6)//'events = '//$format(totime,f12.5)
+ fmessage $quote([string])    [log_file]
+  message $quote([string]) 
+  if [nevents]>0 then
+      sigma cpupev = totime/[nevents]
+      string = '---<bfc>--- total CPU/event = '//$format(cpupev,f12.5)
+     fmessage $quote([string])    [log_file]
+      message $quote([string]) 
+  endif
+
 ABEND:
 return
  
