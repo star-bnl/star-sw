@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.10 2001/12/04 22:05:50 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.11 2001/12/05 22:31:12 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.11  2001/12/05 22:31:12  suaide
+// Modifications to include SMD
+//
 // Revision 1.10  2001/12/04 22:05:50  suaide
 // new QA histogram for tower
 //
@@ -37,6 +40,7 @@
 #include "StEmcUtil/emcInternalDef.h"
 
 class StEmcCollection;
+class StEmcDecoder;
 
 class StEmcADCtoEMaker : public StMaker 
 
@@ -54,14 +58,19 @@ class StEmcADCtoEMaker : public StMaker
            TH1F              *m_towerRMS;       //!
            TH1F              *m_towerSum;       //!
            
+           TH2F              *m_smdTimeBin;     //!
+           
            TDataSet          *m_CalibDb;
            TDataSet          *m_StatusDb;
            StEmcCollection   *m_emc;            //!
+           StEmcDecoder      *decoder;          //!
            
-           Int_t             status[18000];
-           Int_t             nChannels;
+           Int_t             status[MAXDET][18000];
+           Int_t             nChannels[MAXDET];
            
-           StEmcCollection   *GetEmcCollectionFromDaq(TDataSet* daq);           
+           Int_t             smdTimeBin[2][8];
+           
+           StEmcCollection   *GetEmcCollectionFromDaq(TDataSet* daq);
            void              GetStatus(Int_t);
            
   protected:    
