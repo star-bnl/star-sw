@@ -186,6 +186,7 @@ Int_t StVertexSeedMaker::Make(){
       switch (dbTriggerId->getOfflineTrgId(iTrg)) {
         case (2001) :
         case (2003) :
+        case (2300) :
                       { notTrig = kFALSE; }
         default     : {}
       }
@@ -295,7 +296,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.14 2003/02/25 03:49:16 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.15 2003/03/21 15:12:24 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -436,6 +437,9 @@ void StVertexSeedMaker::GetFillDateTime() {
 
   if (ts) {
     // Find earliest entry for this fill
+    int thisRun = *(int*) (tab->getDataValue("runNumber",0));
+    gMessMgr->Info() << "StVertexSeedMaker: " << tdstr << " is from run "
+      << thisRun << endm;
     float thisFill = *(float*) (tab->getDataValue("blueFillNumber",0));
     sprintf(queryStr,
       " where blueFillNumber=%f and deactive=0 order by beginTime asc limit 1",
@@ -577,8 +581,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.14 2003/02/25 03:49:16 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.15 2003/03/21 15:12:24 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.15  2003/03/21 15:12:24  genevb
+// Allow use of TOF triggers
+//
 // Revision 1.14  2003/02/25 03:49:16  genevb
 // Choose only dAu minbias triggers
 //
