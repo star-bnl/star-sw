@@ -7,7 +7,7 @@
 
  exec $STAR/kumacs/chain/bfc _
    TOP=$STAR _
-   calib_dir=$STAR_CALIB/ebye_
+   calib_dir=$STAR_CALIB/ebye _
    tpc_sector_first=1 _
    tpc_sector_last=24 _
    ebye_prior_switch=0 _
