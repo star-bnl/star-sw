@@ -1,234 +1,4 @@
-//  
-// $Log: St_tpcdaq_Maker.cxx,v $
-// Revision 1.84  2004/03/09 18:47:53  ward
-// To silence Insure++.
-//
-// Revision 1.83  2004/01/27 23:38:14  jeromel
-// Small change (more info in message)
-//
-// Revision 1.82  2004/01/05 16:51:29  ward
-// Fix bug in ipadrow limits.
-//
-// Revision 1.81  2004/01/02 18:11:29  ward
-// Change encoding of rb_mz.
-//
-// Revision 1.80  2004/01/02 17:53:18  ward
-// Add receiver board and mezzanine to daq100cl output table.
-//
-// Revision 1.79  2004/01/02 17:05:46  ward
-// Bug fixes from Jeff Landgraf after testing.
-//
-// Revision 1.78  2003/12/24 13:44:55  fisyak
-// Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
-//
-// Revision 1.77  2003/10/28 20:35:54  ward
-// Chain control of NOISE_ELIM GAIN_CORRECTION ASIC_THRESHOLDS.
-//
-// Revision 1.76  2003/07/18 18:31:50  perev
-// test for nonexistance of XXXReader added
-//
-// Revision 1.75  2003/07/10 19:41:00  ward
-// Fix bug for running under TRS.
-//
-// Revision 1.74  2003/07/01 21:32:46  ward
-// Do not skip event if TPC data is legitimately missing because of mixed triggers.
-//
-// Revision 1.73  2003/05/13 03:31:35  jeromel
-// Minor message modif (by by Perry Mason)
-//
-// Revision 1.72  2003/04/22 20:12:44  ward
-// So the chain can run when there is no TPC data.
-//
-// Revision 1.71  2002/10/18 20:08:18  didenko
-// fixed flag
-//
-// Revision 1.70  2002/10/15 19:24:31  ward
-// Stuff for pre-.daq file testing, and better handling of daq_flag.
-//
-// Revision 1.69  2002/10/13 20:43:38  ward
-// Support for decoding DAQ100 data and writing it into a table.
-//
-// Revision 1.68  2002/10/11 18:10:53  jeromel
-// Changes to accomodate for DAQ100 Cluster reading or raw hit reading
-//
-// Revision 1.67  2002/02/20 20:45:02  ward
-// Implementation of RDO mask.  Mostly from Fabrice.
-//
-// Revision 1.66  2002/02/13 21:16:30  ward
-// Move calibration access from Init() to InitRun().
-//
-// Revision 1.65  2001/05/17 20:16:02  ward
-// Minor modification to allow running without gain corrections.
-//
-// Revision 1.64  2001/02/15 22:25:29  fisyak
-// Add l3 option
-//
-// Revision 1.63  2001/02/13 18:36:24  fisyak
-// Clean GAIN_LINE_SIZE
-//
-// Revision 1.62  2001/02/13 18:28:39  fisyak
-// Step back with switching calibration
-//
-// Revision 1.60  2000/11/30 02:06:10  fisyak
-// Remove scale factor 1.135, move it to calibration file
-//
-// Revision 1.59  2000/11/28 23:52:20  fisyak
-// Add 1.135 factor to gain to make peack value = 1
-//
-// Revision 1.58  2000/11/25 23:15:03  fisyak
-// Add cut for 0.125 < Gain < 8
-//
-// Revision 1.57  2000/11/07 16:30:29  ward
-// New check for .daq corruption, with kStErr from St_tpcdaq_Maker.
-//
-// Revision 1.56  2000/06/26 18:25:20  ward
-// mulitple veto zones for ExcludeTheseTimeBins
-//
-// Revision 1.55  2000/06/24 19:26:31  ward
-// changed the name of the function to ExcludeTheseTimeBins
-//
-// Revision 1.54  2000/06/24 19:18:41  ward
-// changed meaning of SetMinMaxTimeBucket args
-//
-// Revision 1.53  2000/06/24 19:13:27  ward
-// added SetMinMaxTimeBucket(int lo,int hi) for Dave H.
-//
-// Revision 1.52  2000/06/20 01:43:35  fisyak
-// Change calibrations => Calibrations to match with MySQL Db
-//
-// Revision 1.51  2000/06/14 17:40:39  ward
-// added db stuff for gains
-//
-// Revision 1.50  2000/06/13 17:42:55  ward
-// asic and noise attached to db, but not yet gains
-//
-// Revision 1.49  2000/06/09 18:02:38  ward
-// Removed the gets() for mErr.
-//
-// Revision 1.48  2000/03/07 21:52:14  ward
-// Converted from assert() to kStFatal.
-//
-// Revision 1.47  2000/02/23 21:31:32  ward
-// Replaced the mErr mechanism with assert()s.
-//
-// Revision 1.46  2000/01/14 15:29:42  ward
-// Implementation of ASICS thresholds for Iwona and Dave H.
-//
-// Revision 1.43  1999/12/07 21:31:54  ward
-// Eliminate 2 compile warnings, as requested by Lidia.
-//
-// Revision 1.42  1999/11/23 22:26:44  ward
-// forward declaration for daq ZeroSuppressedReader
-//
-// Revision 1.41  1999/11/23 20:32:48  ward
-// forward declaration for StTrsDetectorReader & StTrsZeroSuppressedReader
-//
-// Revision 1.40  1999/11/19 19:59:53  ward
-// Converted for new TRS ZeroSuppressed Reader.
-//
-// Revision 1.39  1999/09/27 19:22:58  ward
-// Ignore CVS comments in the noise file.
-//
-// Revision 1.38  1999/09/27 16:24:58  ward
-// Handle CVS comments in gains file.
-//
-// Revision 1.37  1999/09/24 01:23:45  fisyak
-// Reduced Include Path
-//
-// Revision 1.36  1999/09/23 16:22:00  ward
-// Removed obsolete include file.
-//
-// Revision 1.35  1999/08/13 21:30:33  ward
-// Gain corrections.  And bug fix for TRS mode.
-//
-// Revision 1.33  1999/08/12 15:23:37  ward
-// 8 to 10 bit conversion has been implemented
-//
-// Revision 1.32  1999/08/07 16:44:37  ward
-// Default ctor from Yuri.
-//
-// Revision 1.31  1999/07/29 23:07:05  ward
-// Fixed bug in noise suppression.  Put gConfig back.
-//
-// Revision 1.30  1999/07/29 00:49:52  fisyak
-// Add default ctor
-//
-// Revision 1.29  1999/07/27 17:30:39  ward
-// Converted to StIOMaker.  Also noise suppression.
-//
-// Revision 1.28  1999/07/15 13:58:25  perev
-// cleanup
-//
-// Revision 1.27  1999/06/22 19:21:43  ward
-// Fix crash found by Lidia.
-//
-// Revision 1.26  1999/06/21 22:27:08  ward
-// Prototype connection to StDaqLib.
-//
-// Revision 1.25  1999/05/01 03:39:52  ward
-// raw_row col PadModBreak set per row instead of per half-sector
-//
-// Revision 1.24  1999/04/28 19:46:12  ward
-// QA histograms.
-//
-// Revision 1.23  1999/04/09 23:30:04  ward
-// Version tag, Alan Funt.
-//
-// Revision 1.22  1999/04/09 23:29:08  ward
-// Does not waste huge amounts of table space.
-//
-// Revision 1.21  1999/04/08 17:21:46  ward
-// Re-init nPixelPreviousPadRow at row 13, again.
-//
-// Revision 1.20  1999/04/08 16:40:51  ward
-// Reduced table memory, will reduce more later.
-//
-// Revision 1.19  1999/04/07 21:42:33  ward
-// Version tag, Desi and Lucy.
-//
-// Revision 1.18  1999/04/07 21:41:46  ward
-// Incorporates nPixelThisPad fix from Bill Love.
-//
-// Revision 1.16  1999/04/07 19:48:40  ward
-// Fixed adc mis-cast and also mis-count of pixel offset.
-//
-// Revision 1.13  1999/04/05 16:57:19  ward
-// Updated version tag (Spock).
-//
-// Revision 1.12  1999/04/05 16:51:11  ward
-// Now expects time bins 0-511 from Trs, and not 1-512.
-//
-// Revision 1.11  1999/04/02 22:45:21  ward
-// Temp patch to prevent startTimeBin<1 or >512.
-//
-// Revision 1.9  1999/03/31 00:38:29  fisyak
-// Replace search for Event and Decoder
-//
-// Revision 1.8  1999/03/25 22:39:10  ward
-// getPadList does not set padlist when npad==0
-//
-// Revision 1.7  1999/03/15 03:24:14  perev
-// New maker schema
-//
-// Revision 1.6  1999/03/10 19:18:17  ward
-// Correctly fill raw_sec_m table.
-//
-// Revision 1.5  1999/03/03 20:52:16  ward
-// Fix bug.  Pad number assignment was off by 1
-//
-// Revision 1.4  1999/02/21 22:30:53  ward
-// small corrections
-//
-// Revision 1.3  1999/02/20 17:49:57  ward
-// Fixed bug in setting of SeqModBreak.
-//
-// Revision 1.2  1999/02/19 16:32:21  fisyak
-// rename h-file and access name to Trs
-//
-// Revision 1.1  1999/02/18 16:56:34  ward
-// There may be bugs. = Moshno oshibki.
-//
-// BBB Yuri.  Is the above correctly initialized?
+
 //////////////////////////////////////////////////////////////////////////
 // St_tpcdaq_Maker class
 // Herbert Ward, started Feb 1 1999.
@@ -239,6 +9,7 @@
 #include <sys/stat.h>   // For binary file input (the DAQ data file).
 #include <fcntl.h>      // For binary file input (the DAQ data file).
 ///////////////////////////////////////////////////////////////////////////
+
 //VP#include "StDaqLib/GENERIC/EventReader.hh"
 #include "StTrsMaker/include/StTrsDetectorReader.hh"
 #include "StTrsMaker/include/StTrsZeroSuppressedReader.hh"
@@ -277,22 +48,22 @@ int gSector;
 // #define DEVELOPMENT
 //________________________________________________________________________________
 int St_tpcdaq_Maker::GetCorrection(void) {
-  return m_CorrectionMask;
+  return mCorrectionMask;
 }
 void St_tpcdaq_Maker::SetCorrection(int mask) {
   // bit 0  =   do GAIN_CORRECTION
   // bit 1  =   do NOISE_ELIM
   // bit 2  =   do ASIC_THRESHOLDS
-  // Thus, the old mode (all three corrections) is m_Correction = 7 = bit 1 + bit 2 + bit 3.
+  // Thus, the old mode (all three corrections) is mCorrection = 7 = bit 1 + bit 2 + bit 3.
   // To switch OFF all corrections use mask = 0.
-  m_CorrectionMask=mask;
+  mCorrectionMask=mask;
 }
 St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name),gConfig(daqOrTrs)
 {
   printf("This is St_tpcdaq_Maker, name = \"%s\".\n",name);
   alreadySet=0; // FALSE
   daq_flag = 1; // default value for DAQ Reading is to use pad_raw table filling
-  m_CorrectionMask=7;
+  mCorrectionMask=7;
 }
 //________________________________________________________________________________
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
@@ -319,8 +90,8 @@ Int_t St_tpcdaq_Maker::Init() {
 //________________________________________________________________________________
 Int_t St_tpcdaq_Maker::InitRun(Int_t RunNumber) {
   St_DataSet *herb; int junk;
-  if(m_CorrectionMask&0x02) { SetNoiseEliminationStuff(); /*WriteStructToScreenAndExit();*/ }
-  if(m_CorrectionMask&0x04) {
+  if(mCorrectionMask&0x02) { SetNoiseEliminationStuff(); /*WriteStructToScreenAndExit();*/ }
+  if(mCorrectionMask&0x04) {
     TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc");
     assert(tpc_calib);
     St_asic_thresholds *asic = (St_asic_thresholds *) tpc_calib->Find("asic_thresholds");
@@ -492,6 +263,8 @@ int St_tpcdaq_Maker::getSector(Int_t isect) {
 int St_tpcdaq_Maker::getPadList(int whichPadRow,unsigned char **padlist) {
   int rv; unsigned char *padlistPrelim;
   if(m_Mode != 1) { // Use DAQ.
+    // enforce recorded merge sequence flag
+    victor->SetSequenceMerging(mMergeSequences);              
     rv=victor->getPadList(gSector,whichPadRow,padlistPrelim);
     *padlist=padlistPrelim;
     return rv;
@@ -550,7 +323,7 @@ int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequenc
     assert(sizeof(Sequence)==sizeof(StSequence));
     rv=mZsr->getSequences(row,pad,nseq,lst,listOfIds);
   }
-  if(m_CorrectionMask&0x04) AsicThresholds(gain,nseq,lst);
+  if(mCorrectionMask&0x04) AsicThresholds(gain,nseq,lst);
   return rv; // < 0 means serious error.
 }
 
@@ -732,7 +505,7 @@ int St_tpcdaq_Maker::Output() {
   // See "DAQ to Offline", section "Better example - access by padrow,pad",
   // modifications thereto in Brian's email, SN325, and Iwona's SN325 expl.
   for(isect=1;isect<=NSECT;isect++) {
-    if(m_CorrectionMask&0x01) SetGainCorrectionStuff(isect);
+    if(mCorrectionMask&0x01) SetGainCorrectionStuff(isect);
     dataOuter[isect-1]=0; dataInner[isect-1]=0;
 
     sector=raw_data_tpc(NameOfSector(isect));
@@ -767,7 +540,7 @@ int St_tpcdaq_Maker::Output() {
       // printf("BBB isect=%d ,ipadrow=%d ,npad=%d \n",isect,ipadrow,npad);
       if(npad>0) pad=padlist[0];
       for( ipad=0 ; ipad<npad ; pad=padlist[++ipad] ) {
-        if(m_CorrectionMask&0x02) {
+        if(mCorrectionMask&0x02) {
           skip=0;
           for(lgg=0;lgg<noiseElim[isect-1].npad;lgg++) {
             if(noiseElim[isect-1].row[lgg]==ipadrow+1&&noiseElim[isect-1].pad[lgg]==pad) { skip=7; break; }
@@ -775,7 +548,7 @@ int St_tpcdaq_Maker::Output() {
           if(skip) continue;
         }
         nPixelThisPad=0;
-        if(m_CorrectionMask&0x01) {
+        if(mCorrectionMask&0x01) {
           seqStatus=getSequences(fGain[ipadrow][pad-1],ipadrow+1,pad,&nseq,&listOfSequences, &listOfIds);
         } else {
           seqStatus=getSequences(                  1.0,ipadrow+1,pad,&nseq,&listOfSequences, &listOfIds);
@@ -796,7 +569,7 @@ int St_tpcdaq_Maker::Output() {
           if(startTimeBin>511) startTimeBin=511;
           if(prevStartTimeBin>startTimeBin) { mErr=3; return 2; }
           prevStartTimeBin=startTimeBin; seqLen=listOfSequences[iseq].length;
-          if(m_CorrectionMask&0x02) {
+          if(mCorrectionMask&0x02) {
             skip=0;
             for(lgg=0;lgg<noiseElim[isect-1].nbin;lgg++) {
               hj=startTimeBin;
@@ -817,18 +590,18 @@ int St_tpcdaq_Maker::Output() {
           m_seq_padRowNumber->Fill((Float_t)(ipadrow+1));
 #endif
           Double_t gaincorrection = 1; // L3
-          if(m_CorrectionMask&0x01) {
+          if(mCorrectionMask&0x01) {
             assert(pad>0&&pad<=182);
             if (fGain[ipadrow][pad-1] < 0.125 || fGain[ipadrow][pad-1] > 8.0)  continue;
 //          if (m_Mode == 2) gaincorrection = 1; // Trs
 	    if (m_Mode == 0) gaincorrection = fGain[ipadrow][pad-1];
-//yf (not ready yet to use uncorrected Trs)     if(m_CorrectionMask&0x01) gaincorrection = fGain[ipadrow][pad-1];
+//yf (not ready yet to use uncorrected Trs)     if(mCorrectionMask&0x01) gaincorrection = fGain[ipadrow][pad-1];
           }
           numberOfUnskippedSeq++;
           for(ibin=0;ibin<seqLen;ibin++) {
             pixCnt++; conversion=log8to10_table[*(pointerToAdc++)];
 	    unsigned short id =  0; if (listOfIds && listOfIds[iseq]) {id = *listOfIds[iseq]; listOfIds[iseq]++;}
-            if(m_CorrectionMask&0x01) {
+            if(mCorrectionMask&0x01) {
               if(fGain[ipadrow][pad-1]>22.0) {
                 printf("Fatal error in %s, line %d.\n",__FILE__,__LINE__);
                 printf("ipadrow=%d, pad-1=%d, fgain=%g\n",ipadrow,pad-1,fGain[ipadrow][pad-1]);
@@ -1091,3 +864,260 @@ Int_t St_tpcdaq_Maker::Make() {
   }
   return kStOK;
 }
+
+
+/*!
+ *  Records the Sequence merging mode (and keep it once as this is a real
+ *  callable maker unlike StDAQmaker() instantiated from StIOMaker() and
+ *  not in the chain). Later use it for in DAQ mode (St_tpcdaq_Maker::getPadList)
+ *  to enforce the same setting in StTPCReader via the similar SetSequenceMerging()
+ *  method.
+ */
+char  St_tpcdaq_Maker::SetSequenceMerging(char mergeSequences)
+{
+  mMergeSequences=mergeSequences;
+  (void) printf("St_tpcdaq_Maker::SetSequenceMerging: mMergeSequences is %s",(mMergeSequences?"ON":"OFF"));
+  return mMergeSequences;
+}
+
+
+
+
+
+
+//  
+// $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.85  2004/03/10 05:51:54  jeromel
+// SetSequenceMerging() implementation (check comments) and note the
+// victor->SetSequenceMerging() usage victor==StTPCReader though method
+// is propagated there.
+//
+// Revision 1.84  2004/03/09 18:47:53  ward
+// To silence Insure++.
+//
+// Revision 1.83  2004/01/27 23:38:14  jeromel
+// Small change (more info in message)
+//
+// Revision 1.82  2004/01/05 16:51:29  ward
+// Fix bug in ipadrow limits.
+//
+// Revision 1.81  2004/01/02 18:11:29  ward
+// Change encoding of rb_mz.
+//
+// Revision 1.80  2004/01/02 17:53:18  ward
+// Add receiver board and mezzanine to daq100cl output table.
+//
+// Revision 1.79  2004/01/02 17:05:46  ward
+// Bug fixes from Jeff Landgraf after testing.
+//
+// Revision 1.78  2003/12/24 13:44:55  fisyak
+// Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+//
+// Revision 1.77  2003/10/28 20:35:54  ward
+// Chain control of NOISE_ELIM GAIN_CORRECTION ASIC_THRESHOLDS.
+//
+// Revision 1.76  2003/07/18 18:31:50  perev
+// test for nonexistance of XXXReader added
+//
+// Revision 1.75  2003/07/10 19:41:00  ward
+// Fix bug for running under TRS.
+//
+// Revision 1.74  2003/07/01 21:32:46  ward
+// Do not skip event if TPC data is legitimately missing because of mixed triggers.
+//
+// Revision 1.73  2003/05/13 03:31:35  jeromel
+// Minor message modif (by by Perry Mason)
+//
+// Revision 1.72  2003/04/22 20:12:44  ward
+// So the chain can run when there is no TPC data.
+//
+// Revision 1.71  2002/10/18 20:08:18  didenko
+// fixed flag
+//
+// Revision 1.70  2002/10/15 19:24:31  ward
+// Stuff for pre-.daq file testing, and better handling of daq_flag.
+//
+// Revision 1.69  2002/10/13 20:43:38  ward
+// Support for decoding DAQ100 data and writing it into a table.
+//
+// Revision 1.68  2002/10/11 18:10:53  jeromel
+// Changes to accomodate for DAQ100 Cluster reading or raw hit reading
+//
+// Revision 1.67  2002/02/20 20:45:02  ward
+// Implementation of RDO mask.  Mostly from Fabrice.
+//
+// Revision 1.66  2002/02/13 21:16:30  ward
+// Move calibration access from Init() to InitRun().
+//
+// Revision 1.65  2001/05/17 20:16:02  ward
+// Minor modification to allow running without gain corrections.
+//
+// Revision 1.64  2001/02/15 22:25:29  fisyak
+// Add l3 option
+//
+// Revision 1.63  2001/02/13 18:36:24  fisyak
+// Clean GAIN_LINE_SIZE
+//
+// Revision 1.62  2001/02/13 18:28:39  fisyak
+// Step back with switching calibration
+//
+// Revision 1.60  2000/11/30 02:06:10  fisyak
+// Remove scale factor 1.135, move it to calibration file
+//
+// Revision 1.59  2000/11/28 23:52:20  fisyak
+// Add 1.135 factor to gain to make peack value = 1
+//
+// Revision 1.58  2000/11/25 23:15:03  fisyak
+// Add cut for 0.125 < Gain < 8
+//
+// Revision 1.57  2000/11/07 16:30:29  ward
+// New check for .daq corruption, with kStErr from St_tpcdaq_Maker.
+//
+// Revision 1.56  2000/06/26 18:25:20  ward
+// mulitple veto zones for ExcludeTheseTimeBins
+//
+// Revision 1.55  2000/06/24 19:26:31  ward
+// changed the name of the function to ExcludeTheseTimeBins
+//
+// Revision 1.54  2000/06/24 19:18:41  ward
+// changed meaning of SetMinMaxTimeBucket args
+//
+// Revision 1.53  2000/06/24 19:13:27  ward
+// added SetMinMaxTimeBucket(int lo,int hi) for Dave H.
+//
+// Revision 1.52  2000/06/20 01:43:35  fisyak
+// Change calibrations => Calibrations to match with MySQL Db
+//
+// Revision 1.51  2000/06/14 17:40:39  ward
+// added db stuff for gains
+//
+// Revision 1.50  2000/06/13 17:42:55  ward
+// asic and noise attached to db, but not yet gains
+//
+// Revision 1.49  2000/06/09 18:02:38  ward
+// Removed the gets() for mErr.
+//
+// Revision 1.48  2000/03/07 21:52:14  ward
+// Converted from assert() to kStFatal.
+//
+// Revision 1.47  2000/02/23 21:31:32  ward
+// Replaced the mErr mechanism with assert()s.
+//
+// Revision 1.46  2000/01/14 15:29:42  ward
+// Implementation of ASICS thresholds for Iwona and Dave H.
+//
+// Revision 1.43  1999/12/07 21:31:54  ward
+// Eliminate 2 compile warnings, as requested by Lidia.
+//
+// Revision 1.42  1999/11/23 22:26:44  ward
+// forward declaration for daq ZeroSuppressedReader
+//
+// Revision 1.41  1999/11/23 20:32:48  ward
+// forward declaration for StTrsDetectorReader & StTrsZeroSuppressedReader
+//
+// Revision 1.40  1999/11/19 19:59:53  ward
+// Converted for new TRS ZeroSuppressed Reader.
+//
+// Revision 1.39  1999/09/27 19:22:58  ward
+// Ignore CVS comments in the noise file.
+//
+// Revision 1.38  1999/09/27 16:24:58  ward
+// Handle CVS comments in gains file.
+//
+// Revision 1.37  1999/09/24 01:23:45  fisyak
+// Reduced Include Path
+//
+// Revision 1.36  1999/09/23 16:22:00  ward
+// Removed obsolete include file.
+//
+// Revision 1.35  1999/08/13 21:30:33  ward
+// Gain corrections.  And bug fix for TRS mode.
+//
+// Revision 1.33  1999/08/12 15:23:37  ward
+// 8 to 10 bit conversion has been implemented
+//
+// Revision 1.32  1999/08/07 16:44:37  ward
+// Default ctor from Yuri.
+//
+// Revision 1.31  1999/07/29 23:07:05  ward
+// Fixed bug in noise suppression.  Put gConfig back.
+//
+// Revision 1.30  1999/07/29 00:49:52  fisyak
+// Add default ctor
+//
+// Revision 1.29  1999/07/27 17:30:39  ward
+// Converted to StIOMaker.  Also noise suppression.
+//
+// Revision 1.28  1999/07/15 13:58:25  perev
+// cleanup
+//
+// Revision 1.27  1999/06/22 19:21:43  ward
+// Fix crash found by Lidia.
+//
+// Revision 1.26  1999/06/21 22:27:08  ward
+// Prototype connection to StDaqLib.
+//
+// Revision 1.25  1999/05/01 03:39:52  ward
+// raw_row col PadModBreak set per row instead of per half-sector
+//
+// Revision 1.24  1999/04/28 19:46:12  ward
+// QA histograms.
+//
+// Revision 1.23  1999/04/09 23:30:04  ward
+// Version tag, Alan Funt.
+//
+// Revision 1.22  1999/04/09 23:29:08  ward
+// Does not waste huge amounts of table space.
+//
+// Revision 1.21  1999/04/08 17:21:46  ward
+// Re-init nPixelPreviousPadRow at row 13, again.
+//
+// Revision 1.20  1999/04/08 16:40:51  ward
+// Reduced table memory, will reduce more later.
+//
+// Revision 1.19  1999/04/07 21:42:33  ward
+// Version tag, Desi and Lucy.
+//
+// Revision 1.18  1999/04/07 21:41:46  ward
+// Incorporates nPixelThisPad fix from Bill Love.
+//
+// Revision 1.16  1999/04/07 19:48:40  ward
+// Fixed adc mis-cast and also mis-count of pixel offset.
+//
+// Revision 1.13  1999/04/05 16:57:19  ward
+// Updated version tag (Spock).
+//
+// Revision 1.12  1999/04/05 16:51:11  ward
+// Now expects time bins 0-511 from Trs, and not 1-512.
+//
+// Revision 1.11  1999/04/02 22:45:21  ward
+// Temp patch to prevent startTimeBin<1 or >512.
+//
+// Revision 1.9  1999/03/31 00:38:29  fisyak
+// Replace search for Event and Decoder
+//
+// Revision 1.8  1999/03/25 22:39:10  ward
+// getPadList does not set padlist when npad==0
+//
+// Revision 1.7  1999/03/15 03:24:14  perev
+// New maker schema
+//
+// Revision 1.6  1999/03/10 19:18:17  ward
+// Correctly fill raw_sec_m table.
+//
+// Revision 1.5  1999/03/03 20:52:16  ward
+// Fix bug.  Pad number assignment was off by 1
+//
+// Revision 1.4  1999/02/21 22:30:53  ward
+// small corrections
+//
+// Revision 1.3  1999/02/20 17:49:57  ward
+// Fixed bug in setting of SeqModBreak.
+//
+// Revision 1.2  1999/02/19 16:32:21  fisyak
+// rename h-file and access name to Trs
+//
+// Revision 1.1  1999/02/18 16:56:34  ward
+// There may be bugs. = Moshno oshibki.
+//
+// BBB Yuri.  Is the above correctly initialized?
