@@ -27,7 +27,7 @@ src       := $(strip $(filter-out $(DIRS),$(SRC)))
 src       := $(filter-out %.gz %.tar %.Z,$(src))
 dirs      := $(filter-out alpha_% tar hp700_ux90 rs_aix% sgi_% sun4c_%,$(DIRS))
 ifneq (,$(strip $(dirs)))
-dirs      :=$(filter-out alpha_% rs_aix% sgi% 94a 95a 95b 96a 97a metahtml%,$(dirs))
+dirs      :=$(filter-out alpha_% rs_aix% sgi% 94a 95a 95b 96a 97a 99- NEW obsolete metahtml%,$(dirs))
 ifeq ($(RHIC_DIR),$(RHIC_ASIS))
 skip_list :=adm packages
 skip_list += a10_sr104 a68_sr104 alpha_% amiga_aux20 bin cern convex% cray% etc hp700_ux101 hp700_ux807 hp700_ux90 
