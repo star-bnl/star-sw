@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.61 2003/10/28 20:40:40 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.62 2004/01/05 18:08:00 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -50,7 +50,7 @@
     $AFSLIBS  = "-L" . $AFSDIR . "/lib -L" . $AFSDIR . "/lib/afs";
     $AFSLIBS .= " -lkauth -lprot -lubik -lauth -lrxkad -lsys -ldes -lrx -llwp";
     $AFSLIBS .= " -lcmd -lcom_err -laudit " . $AFSDIR . "/lib/afs/util.a";
-    if ( !$ROOT )       { $ROOT       = "/afs/rhic/star/ROOT"; }
+    if ( !$ROOT )       { $ROOT       = $AFS_RHIC."/star/ROOT"; }
     if ( !$ROOT_LEVEL ) { $ROOT_LEVEL = "2.25.01"; }
     if ( !$ROOTSYS )    { $ROOTSYS    = $ROOT . "/" . $ROOT_LEVEL; }
     $SRPDIR   = $ROOTSYS . "/lib";

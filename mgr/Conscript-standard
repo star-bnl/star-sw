@@ -14,6 +14,7 @@ my $DirPath = DirPath '.';                              # print "DirPath = $DirP
 my $ObjDir   = "#" . $obj_dir;                          # print "ObjDir = $ObjDir\n";
 my $STAR_SYS     = $env->{ENV}->{STAR_SYS};
 my $STAR_VERSION = $env->{ENV}->{STAR_VERSION};         # print "#####  $STAR_VER\n";
+my $AFS_RHIC     = $env->{ENV}->{AFS_RHIC};  
 
 @Repo   = Repository_List unless $param::noRepository;  # print "Repositories = |@Repo|\n";nv
 
