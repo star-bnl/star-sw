@@ -33,7 +33,7 @@ void Load()
 //   *fileName="/disk1/star/test/hijing135/jetq_on/b0_3/year_1b/tfs_dst/set0016_01_51evts.dst.root",
 
 void DrawDstHist(
-     Int_t nevproc=40,
+     Int_t nevproc=4,
      const Char_t *firstHistName="*",
      const Char_t *lastHistName="*",
      const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0064_07_40evts.root",
@@ -120,7 +120,7 @@ void DrawDstHist(
       input->SetDebug();
 
 // now setup the rest of the Makers in the chain 
-    St_QA_Maker *QA   = new St_QA_Maker("QA","event/geant/Event");
+    St_QA_Maker *QA   = new St_QA_Maker;
     QA->SetHistsNames(firstHistName,lastHistName);
     QA->SetDraw();
     QA->SetPostScriptFile(psFile);
@@ -133,7 +133,7 @@ void DrawDstHist(
   int i=0;
   int iloop=0;
   iloop = input->GetMaxEvent();
-// add 1 to iloop 
+// add 1 to iloop  or it doesn't work (due to "feature" in St_io_Maker??)
   iloop+=1;
   cout << " DrawDstHist - will now loop over # events = " << input->GetMaxEvent() << endl;
   cout << "   -- but really have to add 1 to loop to make it work! iloop =  " << iloop << endl;
