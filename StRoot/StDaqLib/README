@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: README,v 1.2 1999/07/03 03:39:16 levine Exp $
+ * $Id: README,v 2.0 1999/07/10 21:05:22 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: README
@@ -14,6 +14,22 @@
  *
  ***************************************************************************
  * $Log: README,v $
+ * Revision 2.0  1999/07/10 21:05:22  levine
+ * Classes reorganized so that TPC, SVT, SSD, FTPC classes are derived from a
+ * single set of interfaces; remianing detectors each have their own interface
+ * (defined by the detector group).
+ *
+ * The following applies to EMC, RICH, TRG:
+ * The xxx_Reader constructor is passed a pointer to its top-level pointer
+ * bank (xxxP). All code which existed inside the detector-specific classes
+ * which served to locate this top-level pointer bank has now been extracted and
+ * moved to the EventReader::findBank() method.
+ *
+ * Existing user code for the TPC, SVT, FTPC, SSD should not be changed by this
+ * re-organization. Other detectors now have a new API. The API for each of
+ * these "other" detectors is now completely free of constraints, with the
+ * exception of the arguments passed to the constructor xxx_Reader::xxx_Reader()
+ *
  * Revision 1.2  1999/07/03 03:39:16  levine
  * reorganization of files described
  *
