@@ -1,4 +1,13 @@
+***************************************************************************
    subroutine geometry
+*                                                                         *  
+   author  Pavel Nevski
+   Created August 1998
+*                                                                         *
+* Update history:                                                         *
+*  08/19/98, PN: tof is not part of year_2a                               *
+*                                                                         *
+***************************************************************************
    Implicit   none
    Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,
               mfld,mwc,pse,tof,four,ems,on/.true./,off/.false./
@@ -64,7 +73,7 @@ If LL>1
   on YEAR_1A    { STAR initial geometry;      {vpdd,calb,ecal}=off;    Nsi=0; }
   on YEAR_1B    { TPCs+calo patch, no svt;    {vpdd,ecal}=off; ems=on; Nsi=0; }
   on YEAR_1C    { TPCs+barrel calo, no svt;   {vpdd,ecal}=off;         Nsi=0; }
-  on YEAR_2A    { STAR second year upgrade;   {vpdd,ecal}=off;        tof=on; }
+  on YEAR_2A    { STAR second year upgrade;   {vpdd,ecal}=off;       "tof=on;"}
   on HADR_ON    { default Geant Physics On;                                   }
   on HADR_OFF   { Geant Physics on, except for hadronic interactions; IHADR=0;}
   on DECAY_ONLY { Some Physics: decays, mult.scat and energy loss;
