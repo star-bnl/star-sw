@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.22 1999/10/14 13:42:14 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.23 1999/11/02 01:49:26 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.23  1999/11/02 01:49:26  fine
+// A special case for tpt_track table has been introduced
+//
 // Revision 1.22  1999/10/14 13:42:14  fine
 // Some big to draw tables have been fixed
 //
@@ -87,8 +90,13 @@
 #include "StVirtualEventFilter.h"
 #include "St_Table.h"
 #include "St_TableSorter.h"
+#include "StArray.h"
+#include "tables/St_tpt_track_Table.h"
 
-#include "StEvent.h"
+#include "StThreeVector.hh"
+#include "StHelixD.hh"
+
+// #include "StEvent.h"
 #include <TCanvas.h>
 #include <TGeometry.h>
 #include <TWebFile.h>
@@ -354,6 +362,7 @@ Int_t StEventDisplayMaker::MakeGlobalTracks()
   const Int_t maxTrackCounter = 9999999;
   Int_t trackCounter  = 0;
   Int_t hitCounter    = 0;
+#ifdef STEVENT
   Width_t size;
   Style_t style;
   StTrackCollection *tracks = m_Event->trackCollection();
@@ -389,6 +398,7 @@ Int_t StEventDisplayMaker::MakeGlobalTracks()
      }
      printf(" %d tracks %d hits have been found\n",trackCounter, hitCounter);
    }   
+#endif
    return trackCounter+hitCounter;
 }
 
@@ -420,12 +430,12 @@ Int_t StEventDisplayMaker::Make()
            printf(" tphit found !!!\n");  
           ((St_Table *)dshits)->Print(0,10);   
         }
-        //- St_DataSet *dstracks = GetDataSet("tptrack");
-        //- if (dstracks) {
-        //-    AddName("tptrack(id,x,y,z)");
-        //-    printf(" tptrack found !!!\n"); 
-        //-    ((St_Table *)dstracks)->Print(0,1);
-        //- }
+         St_DataSet *dstracks = GetDataSet("tptrack");
+         if (dstracks) {
+            AddName(dstracks->GetName());
+            printf(" tptrack found !!!\n"); 
+           ((St_Table *)dstracks)->Print(0,1);
+         }
       }
     }
     TIter nextNames(m_ListDataSetNames);
@@ -529,6 +539,7 @@ Int_t StEventDisplayMaker::MakeEvent()
   //----------------------------//
 
   StVirtualEventFilter *filter = 0;
+#ifdef STEVENT
   filter = (StVirtualEventFilter *)m_FilterArray->At(kTpcHit);
   if (!filter || filter->IsOn() ) {
   StTpcHitCollection *hits   = m_Event->tpcHitCollection();
@@ -600,7 +611,7 @@ Int_t StEventDisplayMaker::MakeEvent()
     if (Debug()) printf(" Primary Vertex: %d vertex\n", hitCounter);
     total += hitCounter;
   }
-
+#endif
   return total;
 }
 //_____________________________________________________________________________
@@ -625,6 +636,7 @@ Int_t StEventDisplayMaker::MakeHits(const StObjArray *eventCollection,StVirtualE
     // ---------------------------- hits filter ----------------------------- //
     if (filter) hitColor =  filter->Filter(eventCollection,hitSize,hitStyle); //
     // ---------------------------------------------------------------------- //
+#ifdef STEVENT
     if (hitColor > 0) {
        StHits3DPoints   *hitsPoints  = new StHits3DPoints((StObjArray *)eventCollection);
        m_HitCollector->Add(hitsPoints);    // Collect to remove  
@@ -641,6 +653,7 @@ Int_t StEventDisplayMaker::MakeHits(const StObjArray *eventCollection,StVirtualE
        }
        return hitsPoints->Size(); // hitColor;
     }
+#endif
   }
   return 0;
 }
@@ -654,6 +667,7 @@ Int_t StEventDisplayMaker::MakeVertex(const StVertex *vertex,StVirtualEventFilte
     Style_t vertexStyle = 3;
     Width_t vertexSize  = 1;
 
+#ifdef STEVENT
     // ---------------------------- hits filter ----------------------------- //
     if (filter) vertexColor =  filter->Filter(vertex,vertexSize,vertexStyle); //
     // ---------------------------------------------------------------------- //
@@ -677,6 +691,7 @@ Int_t StEventDisplayMaker::MakeVertex(const StVertex *vertex,StVirtualEventFilte
        vertexCounter = 1;
        return vertexCounter;
     }
+#endif
   }
   return 0;
 }
@@ -689,7 +704,7 @@ Int_t StEventDisplayMaker::MakeVertices(const StObjArray *eventCollection,StVirt
     Color_t hitColor = kYellow;
     Style_t hitStyle = 1;
     Width_t hitSize  = 2;
-
+#ifdef STEVENT
     // ---------------------------- hits filter ----------------------------- //
     if (filter) hitColor =  filter->Filter(eventCollection,hitSize,hitStyle); //
     // ---------------------------------------------------------------------- //
@@ -709,6 +724,7 @@ Int_t StEventDisplayMaker::MakeVertices(const StObjArray *eventCollection,StVirt
        }
        return hitsPoints->Size(); // hitColor;
     }
+#endif
   }
   return 0;
 }
@@ -720,7 +736,7 @@ Int_t StEventDisplayMaker::MakeTracks( StGlobalTrack *globTrack,StVirtualEventFi
     Color_t trackColor = kRed;
     Style_t trackStyle = 1;
     Width_t trackSize  = 2;
-
+#ifdef STEVENT
     // --------------------- tracks filter ---------------------------------- //
     if (filter) trackColor =  filter->Filter(globTrack,trackSize,trackStyle); //
     // ---------------------------------------------------------------------- //
@@ -740,6 +756,7 @@ Int_t StEventDisplayMaker::MakeTracks( StGlobalTrack *globTrack,StVirtualEventFi
        }
        return trackCounter;
     }
+#endif
   }
   return 0;
 }
@@ -750,13 +767,64 @@ Int_t StEventDisplayMaker::MakeTable(const Char_t **positions)
   StVirtualEventFilter *filter = 0;
   Int_t tableCounter = 0;
 
-  filter = (StVirtualEventFilter *)m_FilterArray->At(kTable);
-  if (!filter || filter->IsOn() ) {
-     tableCounter = MakeTableHits(m_Table,filter,positions[1],&positions[2]);
-     if (Debug()) printf(" St_Table: %d \n", tableCounter);
+  if (strcmp(m_Table->GetType(),"tpt_track")) {
+    filter = (StVirtualEventFilter *)m_FilterArray->At(kTable);
+    if (!filter || filter->IsOn() ) {
+       tableCounter = MakeTableHits(m_Table,filter,positions[1],&positions[2]);
+       if (Debug()) printf(" St_Table: %d \n", tableCounter);
+    }
+  }
+  else {
+    filter = (StVirtualEventFilter *)m_FilterArray->At(kTptTrack);
+    if (!filter || filter->IsOn() ) {
+       tableCounter = MakeTableTracks(m_Table,filter);
+       if (Debug()) printf(" St_Table:tpc_Track %d \n", tableCounter);
+    }
   }
   return tableCounter;
 }
+
+//_____________________________________________________________________________
+Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEventFilter *filter)
+{
+  Int_t i = 0;
+  Int_t trackCounter = 0;
+  if (points && points->GetNRows() ) {
+    St_tpt_track *tptTrack = (St_tpt_track *)points;
+    tpt_track_st *track = tptTrack->GetTable();
+    Color_t trackColor = kRed;
+    Style_t trackStyle = 1;
+    Width_t trackSize  = 2;
+    for (i = 0; i < points->GetNRows();i++ ){
+      filter = (StVirtualEventFilter *)m_FilterArray->At(kTptTrack);
+      if (!filter || filter->IsOn() ) {
+        // --------------------- tracks filter ------------------------------------ //
+        if (filter) trackColor =  filter->Filter(tptTrack,i,trackSize,trackStyle);  //
+        // ------------------------------------------------------------------------ //
+        if (trackColor > 0) {
+           tpt_track_st &t = *track++;
+           StThreeVectorD vector(t.r0*cos(t.phi0),t.r0*sin(t.phi0),t.z0);
+           StHelixD *helix  = new  StHelixD(t.curvature, atan(t.tanl), t.psi,vector); 
+           StHelix3DPoints *tracksPoints  = new StHelix3DPoints(helix);
+           m_TrackCollector->Add(tracksPoints);    // Collect to remove  
+           St_PolyLineShape *tracksShape   = new St_PolyLineShape(tracksPoints,"L");
+             tracksShape->SetVisibility(1);         tracksShape->SetColorAttribute(trackColor);
+             tracksShape->SetLineStyle(trackStyle); tracksShape->SetSizeAttribute(trackSize);
+           // Create a node to hold it
+           St_Node *thisTrack = new St_Node("tracks",points->GetName(),tracksShape);
+             thisTrack->Mark();   thisTrack->SetVisibility();
+             trackCounter++;
+           St_NodePosition *pp = m_EventsNode->Add(thisTrack); 
+           if (!pp && trackCounter) {
+              printf(" no track position %d\n",trackCounter);
+           }
+        }
+      }
+    }
+  }
+  return trackCounter;
+}
+
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFilter *filter
                                         ,const Char_t *keyColumn,const Char_t *keyPositions[]
@@ -869,7 +937,7 @@ void StEventDisplayMaker::PrintFilterStatus()
   }
 }
 
-#define DISPLAY_FILTER_DEFINITION(filterName)                                  \
+#define DISPLAY_FILTER_DEFINITION(filterName)                                 \
 Int_t  StEventDisplayMaker::_NAME3_(Set,filterName,Flag)(Int_t flag)         \
 { return SetFlag(flag,_NAME2_(k,filterName)); }                              \
 StVirtualEventFilter *StEventDisplayMaker::_NAME2_(Set,filterName)(StVirtualEventFilter *filter) \
@@ -899,6 +967,10 @@ DISPLAY_FILTER_DEFINITION(TrackFtpcHits)
 // -- Generic St_Table  filters --
 
 DISPLAY_FILTER_DEFINITION(Table)
+
+// -- Tpt track  filter --
+
+DISPLAY_FILTER_DEFINITION(TptTrack)
 
 // --  end of filter list --
 
