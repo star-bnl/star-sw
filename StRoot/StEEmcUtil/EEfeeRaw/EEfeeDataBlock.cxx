@@ -16,9 +16,8 @@ const int EEfeeDataBlock::DefaultMaxData=192;
 
 EEfeeDataBlock ::  EEfeeDataBlock() {
   MaxHead =  DefaultMaxHead;
-  MaxData =  0 ; // DefaultMaxData;
+  MaxData =  0 ; 
   head = new UShort_t[MaxHead];
-  //data = new UShort_t[MaxData];
   data = NULL;
 }
 
@@ -26,8 +25,10 @@ EEfeeDataBlock ::  EEfeeDataBlock() {
 EEfeeDataBlock::EEfeeDataBlock(const EEfeeDataBlock *b) {
   MaxData = b->getDataLen();
   MaxHead = b->getHeadLen();
-  head = new UShort_t[MaxHead];
-  data = new UShort_t[MaxData];
+  head=0;
+  if(MaxHead>0) head = new UShort_t[MaxHead];
+  data=0;
+  if(MaxData>0) data = new UShort_t[MaxData];
   set(b);
 }
 
@@ -78,7 +79,7 @@ EEfeeDataBlock ::  set(const EEfeeDataBlock *b) {
 //--------------------------------------------------
 //--------------------------------------------------
 //--------------------------------------------------
-void EEfeeDataBlock ::setHead(UShort_t *h) {
+void EEfeeDataBlock ::setHead(const UShort_t *h) {
   if(h) 
     memcpy(head,h,sizeof(head[0])*MaxHead);
   else // empty header==>clear
@@ -102,8 +103,8 @@ int EEfeeDataBlock ::getNData(int thres) const {
 //--------------------------------------------------
 //--------------------------------------------------
 
-void EEfeeDataBlock ::setDataArray(UShort_t *dIn, int size) {
-  UShort_t x=0,*d=&x;
+void EEfeeDataBlock ::setDataArray(const UShort_t *dIn, int size) {
+ const UShort_t x=0,*d=&x;
   if(dIn) {
     d=dIn;
   } else {
@@ -160,6 +161,9 @@ int  EEfeeDataBlock :: isValid(){
 
 /*
  * $Log: EEfeeDataBlock.cxx,v $
+ * Revision 1.11  2004/03/25 16:54:58  balewski
+ * cleanup of arguments
+ *
  * Revision 1.10  2004/03/20 20:25:55  balewski
  * *** empty log message ***
  *

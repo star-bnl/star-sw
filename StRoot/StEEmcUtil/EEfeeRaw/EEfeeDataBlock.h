@@ -2,7 +2,7 @@
 #ifndef EEfeeDataBlock_h
 #define EEfeeDataBlock_h
 /*********************************************************************
- * $Id: EEfeeDataBlock.h,v 1.8 2004/03/20 20:25:55 balewski Exp $
+ * $Id: EEfeeDataBlock.h,v 1.9 2004/03/25 16:54:59 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw FEE Data Block
@@ -31,9 +31,9 @@ public:
   void print(int flag=1);
   void clear();
   void set         (const EEfeeDataBlock *b);
-  void setHead     (UShort_t* h );
+  void setHead     (const UShort_t* h );
   void setData     (int chan, UShort_t d);
-  void setDataArray(UShort_t *d, const int size=DefaultMaxData);
+  void setDataArray(const UShort_t *d,  int size);
 
 
   UShort_t* getData() const { return data; };
@@ -57,6 +57,9 @@ public:
 
 /*
  * $Log: EEfeeDataBlock.h,v $
+ * Revision 1.9  2004/03/25 16:54:59  balewski
+ * cleanup of arguments
+ *
  * Revision 1.8  2004/03/20 20:25:55  balewski
  * *** empty log message ***
  *
