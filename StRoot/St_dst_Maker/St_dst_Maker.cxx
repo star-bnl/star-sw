@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.43 2000/01/31 20:12:14 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.44 2000/02/05 19:06:33 lbarnby Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.44  2000/02/05 19:06:33  lbarnby
+// Added L2_Trigger and L2_Trigger to DST
+//
 // Revision 1.43  2000/01/31 20:12:14  fisyak
 // Add rch:dst_rch_pixel for Lee
 //
@@ -132,7 +135,7 @@
 #include "tables/St_dst_mon_soft_l3_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.43 2000/01/31 20:12:14 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.44 2000/02/05 19:06:33 lbarnby Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -156,7 +159,7 @@ Int_t St_dst_Maker::Init(){
     "kink:",   "kinkVertex",
     "geant:",  "particle", "g2t_rch_hit",
     "rch:",    "dst_rch_pixel",
-    "trg:",    "TrgDet", "L0_Trigger",
+    "trg:",    "TrgDet", "L0_Trigger","L1_Trigger","L2_Trigger",
     "l3Tracks:","l3Track",
     "l3Clufi:","l3Hit",
     0};
