@@ -262,9 +262,10 @@ my $no_ev;
 # /disk1/dst 
     ($dummy, $dummy, $no_ev) = split /_/, $file; 
     $no_ev =~ s/evts//g; # printf ("file = %s noev = %d\n", $file, $no_ev); 
+    if ($no_ev) {$no_ev_tot += $no_ev;}
     if ($no_ev && $kBsec{$file}) {
-       $no_ev_tot += $no_ev;
        $kBsec{$file} = $kBsec{$file} * $noevents{$file} / $no_ev;
+       if (! $reco_size{$file} && $dst_size{$file}) {$kBsec{$file} = "";}
     }  
     $dir = $TOPDISK1_RECO . "/" . $set . "/tfs_dst/"; 
     $full_name = $dir . $file . "_h_dst.xdf";# printf ("full name = %s\n",$full_name); 
