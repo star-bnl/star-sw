@@ -104,7 +104,7 @@ Int_t StEventQAMaker::Make() {
     if (firstEvent) {
       if (histsSet == StQA_Undef) {
         if (realData) {
-          histsSet = StQA_AuAu;
+          histsSet = StQA_AuAuOld;
         } else {
           // process Monte Carlo events
           histsSet = StQA_MC;
@@ -142,7 +142,7 @@ Int_t StEventQAMaker::Make() {
         } else if ((tword >= 0x2000) && (tword < 0x3000)) {
           mTrigWord->Fill(4.); // "pp Physics"
 	  doEvent = kTRUE;
-          if ((firstEvent) && (histsSet==StQA_AuAu)) histsSet = StQA_pp;
+          if ((firstEvent) && (histsSet==StQA_AuAuOld)) histsSet = StQA_pp;
         } else if (tword == 0xF200) {
           mTrigWord->Fill(7.); // "Laser"
         } else {
@@ -158,36 +158,61 @@ Int_t StEventQAMaker::Make() {
 
     } else {  // run_year >= 4
 
+
       StTriggerIdCollection* trigIdColl = event->triggerIdCollection();
       const StTriggerId* trigId = ((trigIdColl) ? trigIdColl->nominal() : 0);
       if (trigId) {
-       histsSet = StQA_dAu;
+       histsSet = StQA_Undef;
+       if (run_num < 4363000) histsSet = StQA_dAu;
+       else if (run_num < 5120000) histsSet = StQA_AuAu;
+       else if (run_num < 5999999) histsSet = StQA_pp;
        if (realData) doEvent = kFALSE;
        nEvClasses=0;
        tword = trigId->mask();
+
+ // dAu
+
        if (isTriggerAmong(trigId,4,2001,2002,2003,2004)) {
          mTrigWord->Fill(1.); // "MinBias"
          doEvent = kTRUE;
 	 evClasses[nEvClasses] = 1;
 	 nEvClasses++;
+         histsSet = StQA_dAu;
        }
        if (isTriggerAmong(trigId,2,2201,2202)) {
          mTrigWord->Fill(3.); // "High pt"
          doEvent = kTRUE;
 	 evClasses[nEvClasses] = 2;
 	 nEvClasses++;
+         histsSet = StQA_dAu;
        }
        if ((nEvClasses==0) && (isTriggerInRange(trigId,2000,2999))) {
          mTrigWord->Fill(8.); // "Other"
 	 evClasses[nEvClasses] = 3;
 	 nEvClasses++;
+         histsSet = StQA_dAu;
        }
+
+ // pp
+
        if ((nEvClasses==0) && (isTriggerInRange(trigId,1000,1999))) {
          mTrigWord->Fill(4.); // "pp Physics"
+         doEvent = kTRUE;
 	 evClasses[nEvClasses] = 1;
 	 nEvClasses++;
          histsSet = StQA_pp;
        }
+
+ // AuAu
+
+       if (isTriggerInRange(trigId,15000,15999)) {
+         mTrigWord->Fill(1.); // "AuAu Physics"
+         doEvent = kTRUE;
+	 evClasses[nEvClasses] = 1;
+	 nEvClasses++;
+         histsSet = StQA_AuAu;
+       }
+
       } else {  // No trigger info!
        gMessMgr->Warning("StEventQAMaker::Make(): No trigger info");
       }
@@ -207,7 +232,7 @@ Int_t StEventQAMaker::Make() {
     if (firstEvent) BookHist();
     multiplicity = event->trackNodes().size();
     switch (histsSet) {
-      case (StQA_AuAu) : {
+      case (StQA_AuAuOld) : {
         if (multiplicity < 50) eventClass = 0;
         else if (multiplicity < 500) eventClass = 1;
         else if (multiplicity < 2500) eventClass = 2;
@@ -432,7 +457,11 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_rzf0->Fill(dif.z(),1.);
 	hists->m_glb_rzl0->Fill(azimdifl,0.);
         hists->m_glb_rzl0->Fill(difl.z(),1.);
-        hists->m_glb_impactT->Fill(logImpact);
+        hists->m_glb_impactT->Fill(logImpact,2.);
+        if ((firstPoint.z() < 0) && (lastPoint.z() < 0))  // east-only
+          hists->m_glb_impactT->Fill(logImpact,0.);
+        if ((firstPoint.z() > 0) && (lastPoint.z() > 0))  // west-only
+          hists->m_glb_impactT->Fill(logImpact,1.);
         hists->m_glb_impactrT->Fill(globtrk->impactParameter());
         hists->m_glb_impactTTS->Fill(logImpact,1.);
         hists->m_glb_impactrTTS->Fill(globtrk->impactParameter(),1.);
@@ -554,6 +583,8 @@ void StEventQAMaker::MakeHistGlob() {
 
 	cnttrkgTS++;
 	cnttrkgTTS++;
+
+        hists->m_glb_sptsTS->Fill(map.numberOfHits(kSvtId));
 
         hists->m_glb_f0TS->Fill(dif.x(),0.);
         hists->m_glb_f0TS->Fill(dif.y(),1.);
@@ -1646,7 +1677,7 @@ void StEventQAMaker::MakeHistPoint() {
   ULong_t totalHits = 0;
   ULong_t ftpcHitsE = 0;
   ULong_t ftpcHitsW = 0;
-  StThreeVectorF tpcHitsPos;
+  StThreeVectorF hitPos;
   Int_t rotator;
 
   if (tpcHits) {
@@ -1656,11 +1687,11 @@ void StEventQAMaker::MakeHistPoint() {
       for (UInt_t j=0; j<tpcHitsSector->numberOfPadrows(); j++) {
         StSPtrVecTpcHit& tpcHitsVec = tpcHitsSector->padrow(j)->hits();
 	for (UInt_t k=0; k<tpcHitsVec.size(); k++) {
-          tpcHitsPos = tpcHitsVec[k]->position();
-	  Float_t x   = tpcHitsPos.x();
-	  Float_t y   = tpcHitsPos.y();
-	  Float_t z   = tpcHitsPos.z();
-	  Float_t phi = tpcHitsPos.phi();
+          hitPos = tpcHitsVec[k]->position();
+	  Float_t x   = hitPos.x();
+	  Float_t y   = hitPos.y();
+	  Float_t z   = hitPos.z();
+	  Float_t phi = hitPos.phi();
 	  hists->m_z_hits->Fill(z);
           // TPC East is sectors 13-24, and z<0
           // TPC West is sectors  1-12, and z>0
@@ -1682,9 +1713,9 @@ void StEventQAMaker::MakeHistPoint() {
 	    hists->m_pnt_padrowT->Fill(j+1,1.); // physical padrow numbering starts at 1
 	    hists->m_pnt_xyTW->Fill(x,y);
 	  }
-          tpcHitsPos.rotateZ(((float) rotator)*TMath::Pi()/6.0);
-	  x   = tpcHitsPos.x();
-	  //y   = tpcHitsPos.y();
+          hitPos.rotateZ(((float) rotator)*TMath::Pi()/6.0);
+	  x   = hitPos.x();
+	  //y   = hitPos.y();
           //mTpcSectorPlot[i]->Fill(x,y);
           mTpcSectorPlot[i]->Fill(x,(float) (j+1));
 	}
@@ -1704,14 +1735,18 @@ void StEventQAMaker::MakeHistPoint() {
 	  for (UInt_t l=0; l<svtwaferhits.size(); l++) {
 	    StSvtHit* svthit = svtwaferhits[l];
 	    if (svthit->flag() < 4) {
-	      Float_t z = svthit->position().z();
-	      Float_t phi = svthit->position().phi();
+              hitPos = svthit->position();
+	      Float_t x = hitPos.x();
+	      Float_t y = hitPos.y();
+	      Float_t z = hitPos.z();
+	      Float_t phi = hitPos.phi();
 	      hists->m_pnt_zS->Fill(z);
 	      if (phi<0)
 	        hists->m_pnt_phiS->Fill(360+phi/degree);
 	      else
 	        hists->m_pnt_phiS->Fill(phi/degree);
 	      hists->m_pnt_barrelS->Fill(i+1); // physical barrel numbering starts at 1
+	      hists->m_pnt_xyS->Fill(x,y);
               totalSvtHits++;
             }
 	  }
@@ -2015,8 +2050,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.53 2003/12/04 03:56:26 perev Exp $
+// $Id: StEventQAMaker.cxx,v 2.54 2004/01/10 01:10:17 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.54  2004/01/10 01:10:17  genevb
+// Preparations for Year 5, added some svt plots
+//
 // Revision 2.53  2003/12/04 03:56:26  perev
 // 1/0 fix
 //

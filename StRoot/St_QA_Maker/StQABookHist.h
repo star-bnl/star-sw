@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.15 2003/02/20 20:09:54 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.16 2004/01/10 01:10:18 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.16  2004/01/10 01:10:18  genevb
+// Preparations for Year 5, added some svt plots
+//
 // Revision 2.15  2003/02/20 20:09:54  genevb
 // Several changes for new trigger scheme, dAu data
 //
@@ -78,7 +81,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.15 2003/02/20 20:09:54 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.16 2004/01/10 01:10:18 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -176,6 +179,7 @@ class StQABookHist : public TObject {
   TH1F     *m_fit_pointT;    //! number of track points used for fitting - tpc
   TH1F     *m_fit_pointTS;   //! number of track points used for fitting - tpc+svt
   TH2F     *m_fit_pointTTS;  //! number of track points used for fitting - tpc,tpc+svt
+  TH1F     *m_glb_sptsTS;  //! number of track pnts on svt - tpc+svt
   TH1F     *m_glb_ratioT;    //! ratio of n fit pnts over tot n pnts - tpc
   TH1F     *m_glb_ratioTS;   //! ratio of n fit pnts over tot n pnts - tpc+svt
   TH2F     *m_glb_ratioTTS;  //! ratio of n fit pnts over tot n pnts - tpc,tpc+svt
@@ -284,7 +288,7 @@ class StQABookHist : public TObject {
   TH1F     *m_chisq1FW;      //! chi square [1], ftpc west
   TH1F     *m_chisq1T;       //! chi square [1], tpc
   TH2F     *m_chisq1TTS;     //! chi square [1], tpc,svt
-  TH1F     *m_glb_impactT;   //! impact parameter from primary vertex, tpc
+  TH2F     *m_glb_impactT;   //! impact parameter from primary vertex, tpc
   TH1F     *m_glb_impactrT;  //! impact parameter from primary vertex, tpc
 
   TH2F     *m_glb_f0;          //! overlayed hist of first point - helix point
@@ -580,6 +584,7 @@ class StQABookHist : public TObject {
 // for method MakeHistPoint
   TH1F     *m_z_hits;      //! z dist. of hits, tpc
   TH1F     *m_pnt_zS;      //! z dist. of hits, svt
+  TH2F     *m_pnt_xyS;     //! xy dist. of hits, svt
   TH2F     *m_pnt_xyTE;    //! xy dist. of hits, tpcE
   TH2F     *m_pnt_xyTW;    //! xy dist. of hits, tpcW
   TH2F     *m_pnt_phiT;    //! phi dist. of hits, tpc

@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.24 2003/04/19 00:17:50 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.25 2004/01/10 01:10:18 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.25  2004/01/10 01:10:18  genevb
+// Preparations for Year 5, added some svt plots
+//
 // Revision 2.24  2003/04/19 00:17:50  genevb
 // Updated for dAu/pp running
 //
@@ -147,7 +150,7 @@ Int_t StQAMakerBase::Make() {
   // which should be set during Make() of the derived QA Maker class
   // event class also decided in derived Make()
   switch (histsSet) {
-    case (StQA_AuAu) :
+    case (StQA_AuAuOld) :
       mMultClass->Fill((float) eventClass);
     default : {
       if (!eventClass) { hists=0; return kStOk; }
@@ -228,15 +231,22 @@ void StQAMakerBase::BookHist() {
 
   switch (histsSet) {
 
-    // Real data with three multiplicity classes (low, medium, high)
-    case (StQA_AuAu) : {
+  // Real data with three multiplicity classes (low, medium, high)
+
+    case (StQA_AuAuOld) : {
       (prefix[0] = QAMakerType) += "LM";
       (prefix[1] = QAMakerType) += "MM";
       (prefix[2] = QAMakerType) += "HM";
       eventClass = 3;
       break; }
 
-    // Real data with event classes for different triggers
+  // Real data with event classes for different triggers
+
+    case (StQA_AuAu) : {
+      prefix[0] = QAMakerType;  // Minbias
+      eventClass = 1;
+      break; }
+
     case (StQA_dAu) : {
       prefix[0] = QAMakerType;  // Minbias
       (prefix[1] = QAMakerType) += "HP";
@@ -244,12 +254,12 @@ void StQAMakerBase::BookHist() {
       eventClass = 3;
       break; }
 
- // the following data sets use the defaults
+  // the following data sets use the defaults
  
-    // Generic data (e.g. Monte Carlo) with just one event class
+   // Generic data (e.g. Monte Carlo) with just one event class
     case (StQA_MC) :
 
-    // pp data with just one event class
+   // pp data with just one event class
     case (StQA_pp) :
 
     default  : {
@@ -284,7 +294,7 @@ void StQAMakerBase::BookHistGeneral(){
   mNullPrimVtx->SetXTitle("has primary vertex? (yes = 1, no = -1)");
   mNullPrimVtx->SetYTitle("# of events");
 
-  if (histsSet == StQA_AuAu) {
+  if (histsSet == StQA_AuAuOld) {
     mMultClass = QAH::H1F("QaMultClass","event multiplicity class",5,-0.5,4.5);
     mMultClass->SetXTitle("mult class (0=?/MC, 1=LM, 2=MM, 3=HM)");
     mMultClass->SetYTitle("# of events");
