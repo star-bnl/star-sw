@@ -18,6 +18,6 @@
    skip=0 _
    no_events=1 _
    input_data_file=/disk1/star/kathy/year1a_rcf011_01_90evts.fza _
-   output_file=year1a_rcf011_01_90evts _
+   output_file=year1a_rcf011_01_90evts_reco _
    log=bfc_readfz_to_dst_year1.log
 

@@ -69,6 +69,7 @@
 * evin       - read in simulated-data file (post gstar + more) 
 * fzin       - read in fz file (post gstar but haven't run g2t)
 * gtxin      - read in txt file for running gstar
+* dstin      - read in dst file (only dst directories on file)
 * calin      - find event time and read in correct calibration with cal2mem
 * rgst       - run gstar from evgin file
 * rg2t       - run g2t from rungst(gstar) stuff
@@ -142,10 +143,9 @@
 *   - run gstar
 *   - run g2t
 * 
-* 3. call_bfc_readfz_ftpc.kumac
+* 3. call_bfc_readfz_g2t.kumac
 *   - read in fz file
 *   - run g2t
-*   - run ftpc simulation
 *   - write out xdf file containing full directories
 *
 *

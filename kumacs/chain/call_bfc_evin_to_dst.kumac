@@ -12,9 +12,9 @@
    tpc_sector_last=24 _
    gstar_settings=' field_only' _
    domain=' geometry tpc ctf svt global' _
-   chain='  g2tin svg tpg srs tfs tpt tid tte_e sgr drhd dehd svm egr evr ev0 ddedx dpnt desum dmsft drsum evout' _
+   chain='  evin svg tpg srs tfs tpt tid tte_e sgr drhd dehd svm egr evr ev0 ddedx dpnt desum dmsft drsum evout' _
    skip=0 _
    no_events=1 _
-   input_data_file=$AFS_RHIC/star/data/samples/auau_central_hijing.xdf _
-   output_file=auau_central_hijing_out _
-   log=bfc_g2tin_to_dst.log
+   input_data_file=/disk1/star/kathy/year2a_psc079_01_46evts.xdf _
+   output_file=year2a_psc079_01_46evts_reco _
+   log=bfc_evin_to_dst.log
