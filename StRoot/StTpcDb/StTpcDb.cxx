@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.29 2001/05/21 23:25:34 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.30 2001/06/20 22:25:26 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.30  2001/06/20 22:25:26  hardtke
+ * Get TRS gain parameters from tsspar table
+ *
  * Revision 1.29  2001/05/21 23:25:34  hardtke
  * Add tpcGlobalPosition to StTpcDb.  This includes the global position offset and the rotation w.r.t. the magnet
  *
@@ -255,7 +258,13 @@ StTpcSlowControlSimI* StTpcDb::SlowControlSim(){
      gMessMgr->Message("StTpcDb::Error Finding Slow Control Simulations Parameters","E");
      return 0;
     }
-   slowControlSim = new StRTpcSlowControlSim((St_tpcSlowControlSim*)tpd);
+    St_DataSet *olddb = mk->GetDataBase("tpc");
+    St_tss_tsspar* tss = (St_tss_tsspar*)olddb->Find("tsspars/tsspar");
+    if (!(tss&&tss->HasData())){
+      gMessMgr->Message("StTpcDb::Error Finding tsspars Parameters","E");  
+      return 0;
+     }
+   slowControlSim = new StRTpcSlowControlSim((St_tpcSlowControlSim*)tpd,tss);
    }
   }
  return slowControlSim;
