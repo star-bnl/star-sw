@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.31 1998/12/17 14:36:51 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.32 1998/12/17 16:57:56 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.32  1998/12/17 16:57:56  fine
+// St_Table: some extra protections have been established (safe "strncat" have replaced the  unsafe  "strncpy")
+//
 // Revision 1.31  1998/12/17 14:36:51  fisyak
 // fix Print for empty tablea, fix copy ctor
 //
@@ -944,9 +947,27 @@ void St_Table::SetHeadFields(Text_t *name)
 //______________________________________________________________________________
 void St_Table::SetName(const Char_t *name)
 {
-   strcpy(s_TableHeader->name,name);
+   SetTableName(name);
    St_DataSet::SetName(s_TableHeader->name);
 }
+//______________________________________________________________________________
+void   St_Table::SetTableName(const Char_t *name){
+// Fill staf table header with the table name information
+ if (s_TableHeader)
+ {
+    s_TableHeader->name[0] = '\0';
+    strncat(s_TableHeader->name,name,20); 
+ }
+}
+//______________________________________________________________________________
+void   St_Table::SetTableType(const Char_t *type){
+// Fill staf table header with the table type information
+   if (s_TableHeader) {
+     s_TableHeader->type[0] = '\0';
+     strncat(s_TableHeader->type,type,20); 
+   }
+}
+
 //______________________________________________________________________________
 void St_Table::SetTablePointer(void *table)
 { 
@@ -957,7 +978,7 @@ void St_Table::SetTablePointer(void *table)
 //______________________________________________________________________________
 void St_Table::SetType(const Text_t *const type)
 {
-   strcpy(s_TableHeader->type,type);
+   SetTableType(type);
    St_DataSet::SetTitle(s_TableHeader->type);
 }
 
