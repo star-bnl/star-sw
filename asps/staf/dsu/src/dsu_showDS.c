@@ -41,7 +41,7 @@ dsuPrintDataset(DS_DATASET_T *pDataset)
       }
    }else{
       printf(" ---------------------------------------- \n");
-      dsTypeSpecifier(&typeSpec,&iclen,pDataset->tid);
+      dsTypeSpecifier(&typeSpec,pDataset->tid);
       printf("%s ",typeSpec);
       printf("%s",pDataset->name);
       printf("[%d%%%d];\n",pDataset->elcount,pDataset->maxcount);

@@ -8,9 +8,7 @@
 #include <string.h>
 #endif /*sun*/
 #include <stdlib.h>
-#include "dstype.h"
 #include "dsxdr.h"
-/* #include "ds.h" */
 #define EXTERN extern
 #include "brow.h"
 #include "dscuts.h"

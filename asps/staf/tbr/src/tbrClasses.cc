@@ -17,9 +17,6 @@
 //:----------------------------------------------- PROTOTYPES         --
 extern CC_P void tbrNewDSView(DS_DATASET_T **ppDS, long np);
 extern CC_P void tbrNewTbView(DS_DATASET_T **ppDS);
-extern CC_P int dsPrintDatasetSpecifier(FILE *stream
-		, DS_DATASET_T *pDataset);
-extern CC_P void dsPrintTableData(FILE *stream, DS_DATASET_T *table);
 
 //:####################################################################
 //:=============================================== CLASS              ==

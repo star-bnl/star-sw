@@ -28,6 +28,8 @@ extern "C" void ami_module_register_ ()    {}
 #include "amiLib.h"
 #include "tntLib.h"
 #include "topLib.h"
+
+#define DS_ADVANCED 141198 /* VP 14Nov98*/
 #include "dstype.h"
 extern int gcflag_;
  
@@ -62,10 +64,8 @@ typedef struct XdfLun_t
 } XdfLun_t;
  
 /*---------------------------------------------------------------------------*/
-/*                         p r o t o t y p e s                               */
- 
-/* extern "C"  int  dsTypeSpecifier (char**, unsigned*, int); */
- 
+/*                         p r o t o t y p e s                               */ 
+extern "C" int tdm_clear_allR (DS_DATASET_T  *pDataset);
 extern "C" FNC_PTR_T type_of_call cs_get_func_(char* name,int n);
 extern "C" void  staf_banner     (FILE* stream);
 extern CC_P int  ami_load        (amiBroker *broker);
@@ -133,32 +133,40 @@ extern "C" int type_of_call tdm_map_table_
   long k=*l;
   //             this should work,  but it does not
   //  ier=dsNewDataset(&ds,cpath);  tdm->createTable(name, ds);
- 
+
   if (!tdm) { printf(" tdm_map_table ERROR: no tdm is found !\n"); return 0; }
   if (!(tDs=tdm->findDataset(cpath))) dui->mkdir(cpath);
- 
-  if ( (tDs=tdm->findDataset(cpath))
-       &&  (tDs->cvtDslPointer((DSL_PTR_T &)pDs)) && pDs)
-     { for (int i=0;  i < pDs->elcount;  i++)
-       { // printf (" dataset %d %d %d %s tested \n",i,pDs->p.link[i],
-         //          (pDs->p.link[i])->flags, (pDs->p.link[i])->name);
-         if ((dDs=pDs->p.link[i]) && dDs->flags && !strcmp(dDs->name,cname))
-         {  if (k<0)
-            { size_t rsize;  dsTableRowSize(&rsize,dDs);
-              if (rsize)     k=(-k)/(rsize/sizeof(k));
-              int d=k*rsize+(*l)*sizeof(k);
-              if (!d) printf (" table %s rsize=%d k=%d %d\n",cname,rsize,*l,d);
-            }
-            dDs->maxcount = k;
-            dDs->elcount  = k;
-            dDs->p.data   = data;
-            return          k;
-            // return (DSL_PTR_T &) dDs;
-       } }
-       return dsAddTable(pDs,cname,cspec,k,&data);
+
+  tDs=NULL;
+  pDs=dDs=NULL;
+  if( !(tDs=tdm->findDataset(cpath))
+  ||  !((tDs->cvtDslPointer((DSL_PTR_T &)pDs)) && pDs)
+  ){
+//   dsPerror("CANNOT_LOCATE_CCSIM_DATASET");
+     return 0; // ERROR
+  }
+  if( !dsFindEntry(&dDs,pDs,cname) ){
+//- TABLE DOES NOT EXIST - CREATE IT
+     if( !dsAddTable(pDs,cname,cspec,(size_t)k,&data)
+     ||  !dsFindEntry(&dDs,pDs,cname)
+     ){
+//	dsPerror("CANNOT_CREATE_CCSIM_TABLE");
+	return 0; // ERROR
      }
-  printf (" TDM_MAP_TABLE: directory %s not found \n",cpath);
-  return 0;
+  }
+  else{
+     char* ccspec=0;
+//- TABLE DOES EXIST - RECREATE IT
+     if( !dsTableTypeSpecifier(&ccspec,dDs)
+     ||  !dsUnlink(pDs,dDs)
+     ||  !dsFreeDataset(dDs)
+     ||  !dsAddTable(pDs,cname,ccspec,(size_t)k,&data) 
+     ){
+//	dsPerror("CANNOT_MAP_CCSIM_TABLE");
+	return 0; // ERROR
+     }
+  }
+  return 1; // OKAY
 }
  
 extern "C" int type_of_call tdm_new_table_
@@ -186,7 +194,7 @@ extern "C" int type_of_call tdm_find_spec_(char* c, int lc)
 {
   char *pSpec;  int i;  unsigned lspec=0;
   for (i=1;;i++)
-  { if (!dsTypeSpecifier((const char**)&pSpec, &lspec, i)) return 0;
+  { if (!dsTypeSpecifier((const char**)&pSpec, i)) return 0;
     if (strstr(pSpec,c)) return i;
   }
 }
@@ -243,27 +251,30 @@ extern "C" int type_of_call tdm_clear_all_  (char* path, int lp)
    ds=0;
    if (tDs=tdm->findDataset(path))  tDs->cvtDslPointer ((DSL_PTR_T &) ds);
    if (!ds) { printf (" tdm_zero_all: bad path = %s \n",path); return 0; }
- 
-   l=0; dd[0]=ds; mm[0]=-1;
-   for (;ds;)
-   {
-     if (ds->tid)
-     { ds->elcount=0; if(gcflag_>1) printf(" clearing table %20s \n",ds->name);
-       break;
-     }
-     du=0;
-     for (j=mm[l]+1; j< ds->elcount; j++)
-     {
-       if (!(dt=ds->p.link[j])) continue;
-       if (!(dt->tid)) { mm[l]=j; du=dt; break; }
-       dt->elcount=0; if(gcflag_>1) printf(" clearing table %20s \n",dt->name);
-     }
-     /* new dataset found  - and selected */
-     if (du)  { /* going  up  the tree */  l+=1; ds=du; mm[l]=-1; dd[l]=ds; }
-     else     { /* going down the tree */  l-=1; if (l<0) break;  ds=dd[l]; }
+   return tdm_clear_allR(ds);
+}
+
+/*---------------------------------------------------------------------------*/
+extern "C" int tdm_clear_allR (DS_DATASET_T  *pDataset)
+{
+   DS_DATASET_T  *pChild;
+   size_t count;
+   int result;
+   dsIsDataset(&result, pDataset);			// NEEDS ERROR CHECKING
+   if( result ){
+      dsDatasetEntryCount(&count,pDataset);		// NEEDS ERROR CHECKING
+      for(int i=0;i<count;i++){
+	 dsDatasetEntry(&pChild,pDataset,(size_t)i);	// NEEDS ERROR CHECKING
+	 tdm_clear_allR(pChild);			// NEEDS ERROR CHECKING
+      }
    }
+   else {
+      dsSetTableRowCount(pDataset,0);
+   }
+ 
    return 1;
 }
+
 /***************************************************************************-*/
  
 extern "C" int type_of_call ami_call_
