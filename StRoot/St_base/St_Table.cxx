@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.79 1999/09/04 00:28:02 fine Exp $ 
+// $Id: St_Table.cxx,v 1.80 1999/09/07 19:30:29 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.80  1999/09/07 19:30:29  fine
+// table descriptor access has been changed. All tables are affected and must be re-compiled
+//
 // Revision 1.79  1999/09/04 00:28:02  fine
 // St_Table::NaN from VP and gloabl dataset have been introduced
 //
@@ -2586,7 +2589,20 @@ Int_t St_Table::SetfN(Long_t len)
 //______________________________________________________________________________
 Int_t St_Table::StreamerHeader(StBufferAbc &){ return 0;}
 //______________________________________________________________________________
-St_tableDescriptor  *St_Table::GetRowDescriptors() const { return 0;}
+St_tableDescriptor  *St_Table::GetRowDescriptors() const 
+{
+  St_tableDescriptor *dsc = GetDescriptorPointer();
+  if (!dsc) {
+    dsc = GetTableDescriptors();
+    SetDescriptorPointer(dsc);
+  }
+  return dsc;
+}
+//______________________________________________________________________________
+St_tableDescriptor *St_Table::GetDescriptorPointer() const { assert(0); return 0;}
+//______________________________________________________________________________
+void St_Table::SetDescriptorPointer(St_tableDescriptor *) const { assert(0); }
+
 //______________________________________________________________________________
 Int_t St_Table::Streamer(StBufferAbc &R__b)
 {
