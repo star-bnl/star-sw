@@ -1,4 +1,8 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.75  2004/09/27 12:54:28  jcs
+// pad vs. time histograms moved to St_QA_Maker
+// set radial step histogram line color; red = FTPC East, blue=FTPC West
+//
 // Revision 1.74  2004/09/08 16:03:26  jcs
 // correct binning error in fcl_flags histogram
 //
@@ -391,14 +395,14 @@ Int_t StFtpcClusterMaker::Init(){
   m_chargestep_West = new TH1F("fcl_chargestepW","FTPC West chargestep",260, -0.5, 259.5);
   m_chargestep_East = new TH1F("fcl_chargestepE","FTPC East chargestep",260, -0.5, 259.5);
   m_cluster_radial_West = new TH1F("fcl_radialW","FTPCW cluster radial position",700,0.,35.);
+  m_cluster_radial_West->SetLineColor(kBlue);
   m_cluster_radial_East = new TH1F("fcl_radialE","FTPCE cluster radial position",700,0.,35.);
+  m_cluster_radial_East->SetLineColor(kRed);
 
   m_csteps     = NULL;
   m_hitsvspad  = NULL;
   m_hitsvstime = NULL;
 
-  m_padvstime_West = new TH2F("fcl_padvstimeW","FTPCW padlength vs. timelength",12,0.5,12.5,10,0.5,10.5);
-  m_padvstime_East = new TH2F("fcl_padvstimeE","FTPCE padlength vs. timelength",12,0.5,12.5,10,0.5,10.5);
   if (IAttr(".histos")) {
      m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,8,0.,8.);
      m_row        = new TH1F("fcl_row"	,"FTPC rows"			,20,1.,21.);
@@ -754,10 +758,10 @@ void StFtpcClusterMaker::MakeHistograms()
   for (Int_t i=0; i<mHitArray->GetEntriesFast();i++) {
     StFtpcPoint *hit = (StFtpcPoint*)mHitArray->At(i);
   
+    //  created here because x,y still in FTPC internal coordinate system
     Float_t rpos = ::sqrt(hit->GetX()*hit->GetX() + hit->GetY()*hit->GetY());
     if (hit->GetPadRow() <=10 ) {
        m_cluster_radial_West->Fill(rpos);
-       m_padvstime_West->Fill(hit->GetNumberBins(),hit->GetNumberPads());
        if (IAttr(".histos")) {
           m_maxadc_West->Fill(hit->GetMaxADC());
           m_charge_West->Fill(hit->GetCharge());	 
@@ -765,7 +769,6 @@ void StFtpcClusterMaker::MakeHistograms()
     } //end if hit->GetPadRow() <=10
     else if (hit->GetPadRow() >=11 ) {
        m_cluster_radial_East->Fill(rpos);
-       m_padvstime_East->Fill(hit->GetNumberBins(),hit->GetNumberPads());
        if (IAttr(".histos")) {
           m_maxadc_East->Fill(hit->GetMaxADC());
           m_charge_East->Fill(hit->GetCharge());
@@ -798,4 +801,5 @@ void StFtpcClusterMaker::MakeHistograms()
     }  //end if IAttr
    
   } //end for mHitArray->GetEntriesFast()
+
 }
