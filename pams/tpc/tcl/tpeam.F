@@ -281,6 +281,10 @@ c                if(irow .le. pad_plane(1).nrow_in)then
                  else
                     mchit_q(nmchit)=mchit_q(nmchit)*tsspar(1).scale_out
                  endif
+c
+c                correct for integral
+c
+                 mchit_q(nmchit) = 8.*mchit_q(nmchit)
                  
                  if(dtptr(irow).ne.0)then
                     vec(5) = tphit(dtptr(irow)).x

@@ -219,7 +219,7 @@ c
 c             final adjustment to z coordinate--we must add the shaper response 
 c             in time bins!!!
 c  
-              tphit(tphith.nok).z = tphit(tphith.nok).z + shaper_bin
+              tphit(tphith.nok).z = tphit(tphith.nok).z - 0.7*shaper_bin
 c
 c             now use Gaussian prf assumption in order to refine 
 c             pad dimension prf/coordinate; could use alternative
