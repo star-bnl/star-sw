@@ -1,6 +1,12 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   23/04/99  
-// $Id: HitsDraw.C,v 1.3 1999/04/27 21:32:03 fine Exp $
+// begin_html
+// Full text of this macro can be downloaded from the repository: <a href = "http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/macros/HitsDraw.C">HitsDraw.C</a> 
+// end_html
+// $Id: HitsDraw.C,v 1.4 1999/04/27 21:42:07 fine Exp $
 // $Log: HitsDraw.C,v $
+// Revision 1.4  1999/04/27 21:42:07  fine
+// Web ref. have been added
+//
 // Revision 1.3  1999/04/27 21:32:03  fine
 // some new comments and clean up
 //
