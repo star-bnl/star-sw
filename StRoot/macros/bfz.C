@@ -1,4 +1,4 @@
-// $Id: bfcz.C,v 1.2 1999/02/19 16:31:01 fisyak Exp $
+// $Id: bfz.C,v 1.1 1999/02/19 16:31:01 fisyak Exp $
 //#define gtrack
 #define trs
 #define emc
@@ -64,7 +64,7 @@ void Load(){
     gSystem->Load("St_io_Maker");
 }
 
-bfcz(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/muons.fz")
+bfz(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/muons.fz")
 {                              
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load();
