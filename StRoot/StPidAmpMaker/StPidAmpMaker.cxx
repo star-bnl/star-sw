@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpMaker.cxx,v 1.7 2000/07/12 15:38:33 aihong Exp $
+ * $Id: StPidAmpMaker.cxx,v 1.8 2000/07/22 22:11:33 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpMaker.cxx,v $
+ * Revision 1.8  2000/07/22 22:11:33  aihong
+ * move some include files to StEventUtilities & change include path
+ *
  * Revision 1.7  2000/07/12 15:38:33  aihong
  * update for real data
  *
@@ -46,7 +49,7 @@
 #include "tables/St_dst_dedx_Table.h"
 #include "tables/St_dst_vertex_Table.h"
 
-#include "StPidAmpMaker/Include/StPidAmpConst.hh"
+#include "StEventUtilities/StPidAmpConst.hh"
 
 
 void fillStPidAmpTrks4StandardStEvent(StEvent& event, StPidAmpTrkVector* trks, Int_t dedxMethod);
@@ -65,6 +68,7 @@ StPidAmpMaker::StPidAmpMaker(const Char_t *name) : StMaker(name)
     mNHits4BG=0;
     theManager->passTrksAddress(ampTrks);
     mReadFromTable=kFALSE;
+    mManualSetTrks=kFALSE;//will switch to true if SetTotalTracks() is called
     mDedxMethod=1; //truncated mean
 
 }
@@ -90,6 +94,8 @@ StPidAmpMaker::Clear(Option_t *opt)
 Int_t
 StPidAmpMaker::Finish()
 {
+
+  if (ampTrks->size()>=mTotalTrks4Run) {
   // readDataFromDisk(ampTrks);
 
     //release unused space back to memory.
@@ -103,14 +109,20 @@ StPidAmpMaker::Finish()
 
 
     theManager->process();
- 
-
+  } else {
+  gMessMgr->Info()<<"Statistics is not enough for run. Require "<<mTotalTrks4Run<<" tracks to run this option "<<endm;
+  gMessMgr->Info()<<"But got only "<<ampTrks->size()<<" tracks. Aborted. "<<endm;
+  }
+  
     return kStOK;
 }
 
 Int_t
 StPidAmpMaker::Make()
 {
+
+  if (ampTrks->size()>=mTotalTrks4Run)    return kStEOF;
+  
 
   if (mReadFromTable) {
 
@@ -147,6 +159,13 @@ StPidAmpMaker::Make()
 }
 
 void
+StPidAmpMaker::SetTotalTracks(Int_t totalTracks){
+     mTotalTrks4Run=totalTracks;
+     mManualSetTrks=kTRUE;
+}
+
+
+void
 StPidAmpMaker::SetNHitsFilter2LastCollection(Int_t nhits){
        theManager->setNHits4BGNet(nhits);
 }
@@ -176,6 +195,7 @@ void
 StPidAmpMaker::AddDefaultChannelCollection(TString fitOpt, TString drawOpt){
     theManager->bookADefaultChannelCollection(fitOpt,drawOpt);
     gMessMgr->Info()<<"a default ChannelCollection is registered in Manager"<<endm;
+    if (!mManualSetTrks) mTotalTrks4Run=1000000;
 }
 
 
@@ -187,6 +207,8 @@ StPidAmpMaker::AddNHitsChannelCollection(Int_t x1, Int_t x2,TString fitOpt, TStr
     theManager->bookADefaultChannelCollection(fitOpt,drawOpt);
     gMessMgr->Info()<<"ignored two inputs "<<x1<<" "<<x2<<endm;
     gMessMgr->Info()<<"two inputs is for default option, the default ChannelCollection is registered in the Manager"<<endm;
+   if (!mManualSetTrks) mTotalTrks4Run=1000000;
+
 }
 
 
@@ -194,12 +216,14 @@ void
 StPidAmpMaker::AddNHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt, TString drawOpt){
     theManager->bookANHitsChannelCollection(x1,x2,x3,fitOpt,drawOpt);
     gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<") ChannelCollection is registered in the Manager "<<endm;
+    if (!mManualSetTrks) mTotalTrks4Run=4000000;
 }
 
 void 
 StPidAmpMaker::AddNHitsChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x4,TString fitOpt, TString drawOpt){
     theManager->bookANHitsChannelCollection(x1,x2,x3,x4,fitOpt,drawOpt);
     gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<") ChannelCollection is registered in the Manager "<<endm;
+    if (!mManualSetTrks) mTotalTrks4Run=4000000;
 }
 
 
@@ -208,6 +232,7 @@ void
 StPidAmpMaker::AddNHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt, TString drawOpt){
     theManager->bookANHitsChannelCollection(x1,x2,x3,x4,x5,fitOpt,drawOpt);
     gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<x5<<" "<<") ChannelCollection is registered in the Manager"<<endm;
+    if (!mManualSetTrks) mTotalTrks4Run=4000000;
 }
 
 
@@ -216,6 +241,7 @@ StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,TString fitOpt,Do
     theManager->bookADefaultChannelCollection(fitOpt,drawOpt);
     gMessMgr->Info()<<"ignored two inputs "<<x1<<" "<<x2<<endm;
     gMessMgr->Info()<<"two inputs is for default option, the default ChannelCollection is registered in the Manager"<<endm;
+    if (!mManualSetTrks) mTotalTrks4Run=6000000;
 }
 
 
@@ -223,6 +249,7 @@ void
 StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt,Double_t d1, Double_t d2,  Double_t d3, TString drawOpt){
     theManager->bookANHitsDcaChannelCollection(x1,x2,x3,fitOpt,drawOpt,d1,d2,d3);
     gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<") dca("<<d1<<" "<<d2<<" "<<d3<<")  ChannelCollection is registered in the Manager "<<endm;
+    if (!mManualSetTrks) mTotalTrks4Run=6000000;
 }
 
 void 
@@ -230,6 +257,7 @@ StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x
 
     theManager->bookANHitsDcaChannelCollection(x1,x2,x3,x4,fitOpt,drawOpt,d1,d2,d3);
     gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<") dca("<<d1<<" "<<d2<<" "<<d3<<") ChannelCollection is registered in the Manager "<<endm;
+    if (!mManualSetTrks) mTotalTrks4Run=6000000;
 }
 
 
@@ -238,6 +266,8 @@ void
 StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt, Double_t d1,  Double_t d2, Double_t  d3, TString drawOpt){
     theManager->bookANHitsDcaChannelCollection(x1,x2,x3,x4,x5,fitOpt,drawOpt,d1,d2,d3);
     gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<x5<<" "<<") dca("<<d1<<" "<<d2<<" "<<d3<<") ChannelCollection is registered in the Manager "<<endm;
+    if (!mManualSetTrks) mTotalTrks4Run=6000000;
+
 }
 
 

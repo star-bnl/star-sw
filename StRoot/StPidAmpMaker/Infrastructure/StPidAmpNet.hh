@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNet.hh,v 1.2 2000/05/01 16:59:25 aihong Exp $
+ * $Id: StPidAmpNet.hh,v 1.3 2000/07/22 22:11:32 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNet.hh,v $
+ * Revision 1.3  2000/07/22 22:11:32  aihong
+ * move some include files to StEventUtilities & change include path
+ *
  * Revision 1.2  2000/05/01 16:59:25  aihong
  * clean up
  *
@@ -46,8 +49,8 @@ using std::string;
 #include "StPidAmpMaker/Infrastructure/StPidAmpSliceVector.hh"
 #include "StPidAmpMaker/Infrastructure/StPidAmpPathVector.hh"
 #include "StPidAmpMaker/StPidAmpTrkVector.h"
-#include "StPidAmpMaker/Include/StPidAmpConst.hh"
-#include "StPidAmpMaker/StPidAmpNetOut.h"
+#include "StEventUtilities/StPidAmpConst.hh"
+#include "StEventUtilities/StPidAmpNetOut.h"
 
 
 class StPidAmpChannelCollection;

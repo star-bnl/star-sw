@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpDefaultNet.cc,v 1.4 2000/07/12 15:38:35 aihong Exp $
+ * $Id: StPidAmpDefaultNet.cc,v 1.5 2000/07/22 22:11:32 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpDefaultNet.cc,v $
+ * Revision 1.5  2000/07/22 22:11:32  aihong
+ * move some include files to StEventUtilities & change include path
+ *
  * Revision 1.4  2000/07/12 15:38:35  aihong
  * update for real data
  *
@@ -31,8 +34,8 @@
 
 #include "StPidAmpMaker/Infrastructure/StPidAmpDefaultNet.hh"
 
-#include "StPidAmpMaker/Include/MaxllBoltz.hh"
-#include "StPidAmpMaker/Include/Linear.hh"
+#include "StEventUtilities/MaxllBoltz.hh"
+#include "StEventUtilities/Linear.hh"
 
 
 

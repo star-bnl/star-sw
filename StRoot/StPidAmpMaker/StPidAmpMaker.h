@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpMaker.h,v 1.5 2000/07/12 15:38:33 aihong Exp $
+ * $Id: StPidAmpMaker.h,v 1.6 2000/07/22 22:11:33 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpMaker.h,v $
+ * Revision 1.6  2000/07/22 22:11:33  aihong
+ * move some include files to StEventUtilities & change include path
+ *
  * Revision 1.5  2000/07/12 15:38:33  aihong
  * update for real data
  *
@@ -55,6 +58,8 @@ public:
     virtual Int_t  Make();
     virtual Int_t  Finish();
 
+    void SetTotalTracks(Int_t totalTracks);
+
     void SetNHitsFilter2LastCollection(Int_t nhits);
     void SetDedxMethod(TString method);
 
@@ -78,15 +83,18 @@ public:
     void AddPtNHitsChannelCollection(Int_t n, Int_t* nhitsAry,Int_t p, Double_t* ptAry,TString fitOpt="BAR", TString drawOpt=" ");
   
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.5 2000/07/12 15:38:33 aihong Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.6 2000/07/22 22:11:33 aihong Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
 private:
 
     void   bookCollection();
 
     Bool_t  mReadFromTable;
+    Bool_t  mManualSetTrks;//if true, Add..Collection wont change mTotalTrks.
     Int_t   mNHits4BG;
     Int_t   mDedxMethod;
+    Int_t   mTotalTrks4Run;
+
     TString drawOpt;
     Char_t  collectionName[256];
 
