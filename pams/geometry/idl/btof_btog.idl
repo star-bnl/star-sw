@@ -9,7 +9,7 @@
     float rmin;         /*  - MINIMUM CTB/TOF SYSTEM RADIUS (AS BUILT */
     float rmax;         /*  - MAXIMUM CTB/TOF SYSTEM RADIUS           */
     float dz;           /*  - CTB/TOF TUBE HALF LENGTH                */
-    float choice;       /*  - 1(CTB),4(TOFp),5(TOFp+TOFr),6(full TOFR)*/
-    float posit1;       /*  - position of TOFp tray                   */
+    float choice;       /*  - 1(CTB),4(TOFp, run-2),5(TOFp+TOFr, run-3),6(full TOFR),7(TOFp+TOFr, run-4) */
+    float posit1[2];    /*  - position of TOFp tray, [0] gives posn in runs-2 & -3, [1] is run-4 posn */
     float posit2;       /*  - position of TOFr tray                   */
 };
