@@ -98,6 +98,9 @@
      elseif [geomtype].eq.tpc_nofield then
        message ' gstar: load star geometry - tpc only, no mag.field '
        exec load_star_geom#tpc_nofield
+     elseif [geomtype].eq.tpc_field then
+       message ' gstar: load star geometry - tpc only, with mag.field '
+       exec load_star_geom#tpc_field
      else 
          message ' gstar: geometry type not available!! '
      endif
