@@ -49,7 +49,7 @@ class StTpcDb {
  protected:
  
  public:
-   StTpcDb(StMaker* mk);
+   StTpcDb(StDbDataSet* input);
    ~StTpcDb();
    StTpcPadPlaneI* PadPlaneGeometry();
    StTpcWirePlaneI* WirePlaneGeometry();
