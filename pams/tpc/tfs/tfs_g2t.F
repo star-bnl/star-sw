@@ -1,5 +1,8 @@
-* $Id: tfs_g2t.F,v 1.2 1998/01/27 01:47:21 fisyak Exp $
+* $Id: tfs_g2t.F,v 1.3 1998/04/02 20:53:39 sakrejda Exp $
 * $Log: tfs_g2t.F,v $
+* Revision 1.3  1998/04/02 20:53:39  sakrejda
+* message calls initialised
+*
 * Revision 1.2  1998/01/27 01:47:21  fisyak
 * Split sources
 *
@@ -114,7 +117,8 @@ C     Protect against no Geant hits in the chamber.  DSW  12/18/96
          tfs_g2t = STAFCV_BAD
          goto 999
       endif
-
+      call Msg_Enable( 'TFS-MERGE-I1' )
+      call Msg_Enable( 'TFS-MERGE-I2' )
 C     Initialize tpc_index_h.nok to zero. This is valid  for the fast
 C     simulator chain only. It is assumed that TFS is the first PAM
 C     to be called in the fast simulator chain discounting geant and g2t.
