@@ -106,7 +106,7 @@ FILES_SYM  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_Module.cxx )))
 FILES_SYT  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_Table.cxx )))
 FILES_TAB  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_*_Table.cxx )))
 FILES_MOD  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_*_Module.cxx )))
-FILES_DAT  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_DataSet.cxx )))
+#FILES_DAT  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_DataSet.cxx )))
 FILES_XDF  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_XDFFile.cxx )))
 FILES_ALL  := $(strip $(wildcard $(SRC_DIR)/St*.cxx ))
 FILES_ST   := $(strip $(FILES_SYM) $(FILES_SYT) $(FILES_TAB) $(FILES_MOD) $(FILES_DAT))
@@ -199,7 +199,6 @@ $(FILES_CINT_SYT) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
 
 $(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h 
 	$(COMMON_LINKDEF)
-	@echo "#pragma link C++ class St_DataSet;"       >> $(LINKDEF);
 	@echo "#pragma link C++ enum EModuleTypes;"      >> $(LINKDEF);
 	@echo "#endif"					 >> $(LINKDEF);
 	@cat $(LINKDEF);
