@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.83  1999/07/13 14:41:42  fisyak
+#  Add SKIP_LIB env. varibale to skip unwanted directory
+#
 #  Revision 1.82  1999/07/10 19:06:33  fisyak
 #  Fix St_base
 #
@@ -325,7 +328,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/07/10 19:06:33 $ 
+#           Last modification $Date: 1999/07/13 14:41:42 $ 
 #  default setings
 # Current Working Directory
 #
@@ -388,7 +391,11 @@ endif
  ifneq (,$(findstring $(STAR_SYS),sun4x_56 hp_ux102))
     SUBDIRS := $(filter-out StDaqLib StNoiseMaker StPadDisplayMaker StDisplayMaker, $(SUBDIRS))
     SUBDIRS := $(filter-out StPeCMaker St_hbt_Maker StHbtMaker ftpc St_fpt_Maker, $(SUBDIRS))
+    SUBDIRS := $(filter-out StDbLib StDbMaker,  $(SUBDIRS))
  endif
+ifdef SKIP_LIB
+    SUBDIRS := $(filter-out $(SKIP_LIB),  $(SUBDIRS))
+endif
   ifdef PKG
     SUBDIRS:=
   endif
