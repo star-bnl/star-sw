@@ -1,4 +1,4 @@
-// $Id: EzEEsmdCal.cxx,v 1.1 2004/06/12 04:09:23 balewski Exp $
+// $Id: EzEEsmdCal.cxx,v 1.2 2004/06/15 20:03:26 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -125,7 +125,7 @@ void EzEEsmdCal:: unpackEzTail(){
       assert(iT>=0 && iT<kTile);
     
       tileAdc[iT][ieta][iphi]=adc; // store T,P,Q,R depending on 'iT'
-      tileThr[iT][ieta][iphi]=rawAdc>x->thr;
+      tileTag[iT][ieta][iphi]=rawAdc>x->thr;
       //printf("%s adc=%f out=%d thr=%f\n",x->name,adc,tileThr[iT][ieta][iphi],x->thr);
     }
   }

@@ -1,7 +1,7 @@
 #ifndef EEsmdPlain_h
 #define EEsmdPlain_h
 /*********************************************************************
- * $Id: EEsmdPlain.h,v 1.1 2004/06/12 04:09:22 balewski Exp $
+ * $Id: EEsmdPlain.h,v 1.2 2004/06/15 20:03:26 balewski Exp $
  *********************************************************************
  * Descripion:
  *  response of single SMD plain to MIPs, 
@@ -27,7 +27,7 @@ class EEsmdPlain {
   EEsmdPlain();
   void set(float th, int Xoff, char uv0);
   void clear(); // only event part
-  void print(int);
+  void print(int x=1);
   void scanAdc(float *val, float thr);
   void findMipPattern();
  };
@@ -37,6 +37,9 @@ class EEsmdPlain {
 #endif
 /*****************************************************************
  * $Log: EEsmdPlain.h,v $
+ * Revision 1.2  2004/06/15 20:03:26  balewski
+ * to match web-descriptio
+ *
  * Revision 1.1  2004/06/12 04:09:22  balewski
  * start
  *
