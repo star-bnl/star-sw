@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.47 2000/03/07 05:14:54 sakrejda Exp $
+// $Id: St_tpt_Maker.cxx,v 1.48 2000/05/30 19:19:53 sakrejda Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.48  2000/05/30 19:19:53  sakrejda
+// A debyg cout statement removed
+//
 // Revision 1.47  2000/03/07 05:14:54  sakrejda
 // Jan's modifications to run on L3 clusters (I think)
 //
@@ -256,8 +259,7 @@ gMessMgr->SetLimit("TPTRSP-E1",10);
  // xave and sigma are not filled anymore because they came from aux table (RAI)
 
 // if m_tteEvalOn=kTrue, then initialize the histograms of the efficiency and momentum resolution
-  cout<<"my make init m_tteEvalOn="<<m_tteEvalOn<<endl;
-  //  cout<<"kFALSE="<<kFALSE<<endl;
+//  cout<<"kFALSE="<<kFALSE<<endl;
 
   if(m_tteEvalOn){VertexEffResolutionInit();}
   return StMaker::Init();
