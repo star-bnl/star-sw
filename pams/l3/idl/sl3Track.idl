@@ -2,19 +2,20 @@
  * Table containing tracks found by l3 tracking     
 */
    struct sl3Track{
-      float    id      ;       /* id */
-      float    xReference ;    /* x reference for conformal mapping */
-      float    yReference ;    /* y reference for conformal mapping */
-      float    s11_xy  ;       /* Fit parameters */
-      float    s12_xy  ;       /* conformal line in xy plane */
-      float    s22_xy  ;
-      float    g1_xy   ;
-      float    g2_xy   ;
-      float    s11_sz  ;      /* Fit parameters in sz plane */
-      float    s12_sz  ;
-      float    s22_sz  ;
-      float    g1_sz   ;
-      float    g2_sz   ;
+<<<<<<< sl3Track.idl
+      float    id      ;       // id
+      float    xReference ;    // x reference for conformal mapping
+      float    yReference ;    // y reference for conformal mapping
+      float    s11Xy  ;       // Fit parameters
+      float    s12Xy  ;       // conformal line in xy plane
+      float    s22Xy  ;
+      float    g1Xy   ;
+      float    g2Xy   ;
+      float    s11Sz  ;      // Fit parameters in sz plane
+      float    s12Sz  ;
+      float    s22Sz  ;
+      float    g1Sz   ;
+      float    g2Sz   ;
       float    trackLength ;
    };
-/*  Last mod. for sl3Track: $Date: 1998/12/08 15:44:02 $ */
+/*  Last mod. for sl3Track: $Date: 1998/12/10 15:29:39 $ */
