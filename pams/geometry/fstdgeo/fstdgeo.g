@@ -1,5 +1,9 @@
-* $Id: fstdgeo.g,v 1.3 2005/01/06 02:01:09 potekhin Exp $
+* $Id: fstdgeo.g,v 1.4 2005/01/25 22:43:36 potekhin Exp $
 * $Log: fstdgeo.g,v $
+* Revision 1.4  2005/01/25 22:43:36  potekhin
+* Added the water manifold (duct). Corrected a small
+* error in the size of AlN plate. Added HITS (to be further devloped)
+*
 * Revision 1.3  2005/01/06 02:01:09  potekhin
 * Substantial reorganization, better AlN description
 *
@@ -28,15 +32,17 @@ Module FSTDGEO is the geometry of the forward silicon tracker pixel detector
 
       integer nl, ly
 
-      Content   FSMO, FDMO, FDMS, FDMW, FDSW, FDTP, FDSA, FDSP, FDSC
+      Content   FSMO, FDMO, FDMS, FDMW, FDSW, FDTP, FDSC, FDWD, FDWW
 
       Structure FSTG {Layer,    Nsec,      Spacing,
                       RminS,    RmaxS,     Rmin,      Rmax,       Zmin,      Zmax,
-                      WedgeThk, SensorThk, PassiveThk, ActiveThk, Z(4)}
+                      WedgeThk, SensAThk,  SensorThk, Z(4)}
 
-      Structure FSAN {Version,  Thk, Length}
+      Structure FSAN {Version,  Thk,       Length}
 
-      Structure FSCG {Nummer,   W,   H,    Thk}
+      Structure FSCG {Nummer,   W,         H,         Thk}
+
+      Structure FDWG {Version,  Rmin,Rmax, Thk,       Len,        WallThk}
 *
 * -----------------------------------------------------------------------------
 *
@@ -55,13 +61,12 @@ Module FSTDGEO is the geometry of the forward silicon tracker pixel detector
       Zmax       = 38.0        ! Z-finish of the barrel comprising the three pancakes
 
 
-      WedgeThk   =  0.3700     ! Includes two layers of Si, AlN plates and chips
-      SensorThk  =  0.0300     ! Total   silicon thickness, includes passive and active
-      PassiveThk =  0.0100     ! Passive silicon Thickness
-      ActiveThk  =  0.0200     ! Active  silicon Thickness
-
+      WedgeThk   =  0.700      ! Includes sensor assembly and water pipes
+      SensAThk   =  0.370      ! Sensor assembly thk: includes two layers of Si, AlN plates and chips
+      SensorThk  =  0.030      ! Total   silicon thickness, includes passive and active
 
       Z          =  {0.0, 3.0, 6.0, 9.0} ! nominal Zs of the faces
+
    EndFill
 
    Fill FSAN                   ! Aluminum Nitride Thermal Plate
@@ -84,6 +89,14 @@ Module FSTDGEO is the geometry of the forward silicon tracker pixel detector
       Thk        =   0.07      ! Thickness
    EndFill
 
+   Fill FDWG                   ! Water duct geometry
+      Version    =   1         ! Version
+      Rmin       =   21.0      ! Inner radius of the duct
+      Rmax       =   22.0      ! Outer radius of the duct
+      Thk        =    0.5      ! Thisckness in Z
+      Len        =    6.3      ! Length
+      WallThk    =    0.1      ! Wall thickness
+   EndFill
 *
 ******************************************************
 
@@ -104,7 +117,6 @@ Module FSTDGEO is the geometry of the forward silicon tracker pixel detector
       WedgeDx1    = FSTG_Rmin*TanHalfAngle;     WedgeDx2     = (FSTG_RmaxS+FSAN_Length)*TanHalfAngle
       WedgeOffset = FSTG_Rmin + 0.5*WedgeLength
 
-      PlateDx1    = FSTG_RmaxS*TanHalfAngle;    PlateDx2     = (FSTG_RmaxS+FSAN_Length)*TanHalfAngle
 
 
 * Top sector has to be at 12 o'clock: May need Angular Offset --
@@ -116,9 +128,9 @@ Module FSTDGEO is the geometry of the forward silicon tracker pixel detector
 
       Create   FSMO
       Position FSMO in CAVE z=+center
-      Position FSMO in CAVE z=-center
+      Position FSMO in CAVE z=-center ThetaZ=180
 * -----------------------------------------------------------------------------
-Block FSMO is the mother of the FSTD detector volumes
+Block FSMO is the mother of one endcap of FSTD
       Material  Air
       Attribute FSMO  Seen=1  colo=6
 
@@ -148,20 +160,27 @@ Block FDMS is a division within an individual disk
       Shape  Division   Iaxis=2   Ndiv=21 c0=start
 
       Create   FDMW
-      Position FDMW x=WedgeOffset ORT=YZX
+      Position FDMW x=WedgeOffset y=0.0 z=-0.5*(FSTG_WedgeThk-FSTG_SensAThk) ORT=YZX
+
 endblock
 * -----------------------------------------------------------------------------
 Block FDMW is the mother wedge, housing plate, sensor  and chips
       Attribute FDMW  Seen=0  colo=4
 
-      Shape TRD1 dx1=WedgeDx1 dx2=WedgeDx2 dy=FSTG_WedgeThk/2.0 dz=WedgeLength/2.0
+      Shape TRD1 dx1=WedgeDx1 dx2=WedgeDx2 dy=FSTG_SensAThk/2.0 dz=WedgeLength/2.0
 
+* -------------------------------------
+* The Silicon Wafer
       Create   FDSW
       Position FDSW x=0.0 y=-FSTG_Spacing/2.0+FSTG_SensorThk/2.0 z=SensorOffset
       Position FDSW x=0.0 y=+FSTG_Spacing/2.0-FSTG_SensorThk/2.0 z=SensorOffset AlphaZ=180
 
-* ALN thermal plates and substrate
+* -------------------------------------
+* ALN thermal plate
       USE FSAN Version=1 ! the center plate
+
+      PlateDx1    = FSTG_RmaxS*TanHalfAngle;    PlateDx2     = (FSTG_RmaxS+FSAN_Length)*TanHalfAngle
+
       Create   FDTP
       PlateOffset = 0.5*(SensorLength) !   WedgeLength = SensorLength+FSAN_Length
       Position FDTP z=PlateOffset
@@ -170,40 +189,42 @@ Block FDMW is the mother wedge, housing plate, sensor  and chips
       Position FDSC x=0.0 y=+0.5*FSCG_Thk+1.5*FSAN_Thk z=(0.5*WedgeLength - FSAN_Length+FSCG_H/2.0)
       Position FDSC x=0.0 y=-0.5*FSCG_Thk-1.5*FSAN_Thk z=(0.5*WedgeLength - FSAN_Length+FSCG_H/2.0)
 
+* -------------------------------------
+* ALN substrate
       USE FSAN Version=2 ! the substrate plate
+
+      PlateDx1    = FSTG_RmaxS*TanHalfAngle;    PlateDx2     = (FSTG_RmaxS+FSAN_Length)*TanHalfAngle
+
       Create   FDTP
       Offhack=0.5
       PlateOffset    = PlateOffset-Offhack ! Encapsulated hack
       Position FDTP y=+FSAN_Thk z=PlateOffset
       Position FDTP y=-FSAN_Thk z=PlateOffset
 
+* -------------------------------------
+* Water manifold (duct)
+      Create FDWD
+      Position FDWD x=0 y=0.5*(FSTG_WedgeThk-FSTG_SensAThk+FSAN_Thk)  z=0.5*(FDWG_Rmin-FSTG_RminS)
 
 endblock
 * -----------------------------------------------------------------------------
-Block FDSW is the Silicon wafer mother (passive+active)
+Block FDSW is the Silicon Wafer (all active)
+      Material  Silicon  
+      Material  Sensitive  Isvol=1
+
       Attribute FDSW  Seen=1  colo=5
 
       Shape TRD1 dx1=SensorDx1 dx2=SensorDx2 dy=FSTG_SensorThk/2.0 dz=SensorLength/2.0
 
-      Create and Position FDSA y=-(FSTG_SensorThk-FSTG_ActiveThk)/2.0
-      Create and Position FDSP y=+(FSTG_SensorThk-FSTG_PassiveThk)/2.0
-
-endblock
-* -----------------------------------------------------------------------------
-Block FDSP is the Passive part of the Silicon wafer
-      Material  Silicon  
-      Attribute FDSP  Seen=1  colo=3
-
-      Shape TRD1 dx1=SensorDx1 dx2=SensorDx2 dy=FSTG_PassiveThk/2.0 dz=SensorLength/2.0
+      HITS    FDSW   Z:.001:S  Y:.001:   X:.001:     Ptot:16:(0,100),
+                     cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
+                     ToF:16:(0,1.e-6)    Step:.01:   Eloss:16:(0,0.001) 
 
 
-endblock
-* -----------------------------------------------------------------------------
-Block FDSA is the Active part of the Silicon wafer
-      Material  Silicon  
-      Attribute FDSA  Seen=1  colo=3
-
-      Shape TRD1 dx1=SensorDx1 dx2=SensorDx2 dy=FSTG_ActiveThk/2.0 dz=SensorLength/2.0
+* I'll leave this for reference, but we no longer have
+* passive and active layers in this sensor. It's all active
+*      Create and Position FDSA y=-(FSTG_SensorThk-FSTG_ActiveThk)/2.0
+*      Create and Position FDSP y=+(FSTG_SensorThk-FSTG_PassiveThk)/2.0
 
 endblock
 * -----------------------------------------------------------------------------
@@ -223,6 +244,27 @@ Block FDSC is the readout Chip
       Attribute FDSC  Seen=1  colo=1
 
       Shape BOX dx=FSCG_W/2.0 dy=FSCG_Thk/2.0 dz=FSCG_H/2.0
+
+endblock
+* -----------------------------------------------------------------------------
+Block FDWD is the water duct made of carbon composite
+      Material  Carbon
+      Attribute FDWD  Seen=1  colo=1
+
+      Shape BOX dx=FDWG_Len/2.0 dy=FDWG_Thk/2.0 dz=(FDWG_Rmax-FDWG_Rmin)/2.0
+      Create and Position FDWW
+
+endblock
+* -----------------------------------------------------------------------------
+Block FDWW is the water inside the carbon duct
+*     Pellegrino:
+      Component H2     A=1   Z=1   W=2
+      Component O      A=16  Z=8   W=1
+      Mixture   Water  Dens=1.0
+
+      Attribute FDWD  Seen=1  colo=3
+
+      Shape BOX dx=FDWG_Len/2.0 dy=(FDWG_Thk-2.0*FDWG_WallThk)/2.0 dz=(FDWG_Rmax-FDWG_Rmin-2.0*FDWG_WallThk)/2.0
 
 endblock
 * -----------------------------------------------------------------------------
