@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.47 2000/12/08 17:04:09 oldi Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.48 2000/12/10 02:02:01 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,13 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.48  2000/12/10 02:02:01  oldi
+// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
+// The evaluation of either a track originates from the FTPC or not is
+// unambiguous now. The evaluation itself is easily extendible for other
+// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
+// they contain TPC tracks only (backward compatibility).
+//
 // Revision 1.47  2000/12/08 17:04:09  oldi
 // Phi weights for both FTPCs included.
 //
@@ -303,7 +310,9 @@ Int_t StFlowAnalysisMaker::Init() {
   const float centMin         =  -0.5;
   const float centMax         =   9.5;
 
-  enum { nEtaBins          = 90,
+  enum { // commit with this value
+         nEtaBins          = 30,
+	 //nEtaBins          = 90,
 	 nPtBins           = 40,
 	 nChargeBins       = 50,
 	 nDcaBins          = 60,
@@ -1069,7 +1078,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.47 2000/12/08 17:04:09 oldi Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.48 2000/12/10 02:02:01 oldi Exp $");
 
   return StMaker::Init();
 }
@@ -1255,7 +1264,6 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     float chi2      = pFlowTrack->Chi2();
     int   fitPts    = pFlowTrack->FitPts();
     int   maxPts    = pFlowTrack->MaxPts();
-    int   detId     = DetId(eta);
     Char_t pid[10];
     strcpy(pid, pFlowTrack->Pid());
     float totalp    = pFlowTrack->P();
@@ -1265,7 +1273,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 
     // distinguish between Tpc and Ftpc
 
-    if (detId == kFtpcWestId || detId == kFtpcEastId) {
+    if (pFlowTrack->TopologyMap().numberOfHits(kFtpcEastId) || pFlowTrack->TopologyMap().numberOfHits(kFtpcWestId)) {
 	mHistDcaFtpc->Fill(dca);
 	mHistDcaGlobalFtpc->Fill(dcaGlobal);
 	mHistChi2Ftpc->Fill(chi2);
@@ -1274,7 +1282,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	if (maxPts) mHistFitOverMaxFtpc->Fill((float)fitPts/(float)maxPts);
     }
 
-    else { // (detId == kTpcId) or otherwise!!!
+    else { // Tpc track or otherwise!!!
 
 	// For PID multiplicites
 	if (strcmp(pid, "pi+")    == 0)  piPlusN++;
@@ -1409,7 +1417,26 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	if (pFlowSelect->Select(pFlowTrack)) {
 	  // Remove autocorrelations
 	  TVector2 Q_i;
-	  Int_t detId = pFlowTrack->DetId();
+	  StDetectorId detId;
+
+	  if (pFlowTrack->TopologyMap().numberOfHits(kTpcId) || 
+		   (pFlowTrack->TopologyMap().data(0) == 0 && pFlowTrack->TopologyMap().data(1) == 0)) {
+	    // Tpc track ot TopologyMap not available
+	    detId = kTpcId;
+	  }
+
+	  else if (pFlowTrack->TopologyMap().numberOfHits(kFtpcEastId)) {
+	    detId = kFtpcEastId;
+	  }
+
+	  else if (pFlowTrack->TopologyMap().numberOfHits(kFtpcWestId)) {
+	    detId = kFtpcWestId;
+	  }
+	  
+	  else {
+	    detId = kUnknownId;
+	  }
+
 	  double phiWgt = pFlowEvent->PhiWeight(phi, k, j, detId);
 
 	  if (detId == kFtpcEastId) {
@@ -1554,22 +1581,6 @@ static Double_t chi(double res) {
   }
 
   return chi;
-}
-
-//-----------------------------------------------------------------------
-
-Int_t StFlowAnalysisMaker::DetId(Float_t eta) const {
-    // Returns the detector Id depending on the pseudorapidity eta.
-
-    if (TMath::Abs(eta) < 2.) {
-	return kTpcId;
-    }
-
-    else if (TMath::Abs(eta) < 4.5) {
-	return eta > 0. ? kFtpcWestId : kFtpcEastId;
-    } 
-
-    return -1;
 }
 
 //-----------------------------------------------------------------------

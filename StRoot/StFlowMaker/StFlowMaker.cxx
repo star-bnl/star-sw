@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.48 2000/12/08 17:03:38 oldi Exp $
+// $Id: StFlowMaker.cxx,v 1.49 2000/12/10 02:01:13 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,13 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.49  2000/12/10 02:01:13  oldi
+// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
+// The evaluation of either a track originates from the FTPC or not is
+// unambiguous now. The evaluation itself is easily extendible for other
+// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
+// they contain TPC tracks only (backward compatibility).
+//
 // Revision 1.48  2000/12/08 17:03:38  oldi
 // Phi weights for both FTPCs included.
 //
@@ -202,7 +209,7 @@ Int_t StFlowMaker::Init() {
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.48 2000/12/08 17:03:38 oldi Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.49 2000/12/10 02:01:13 oldi Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -400,7 +407,6 @@ void StFlowMaker::FillFlowEvent() {
 	pFlowTrack->SetPhiGlobal(g.phi());
 	pFlowTrack->SetEta(p.pseudoRapidity());
 	pFlowTrack->SetEtaGlobal(g.pseudoRapidity());
-	pFlowTrack->SetDetId((Float_t)p.pseudoRapidity());
 	pFlowTrack->SetPt(p.perp());
 	pFlowTrack->SetPtGlobal(g.perp());
 	pFlowTrack->SetCharge(pTrack->geometry()->charge());
@@ -432,6 +438,8 @@ void StFlowMaker::FillFlowEvent() {
 	pFlowTrack->SetPidElectron(nSigma);
 	nSigma = (float)tpcDedxAlgo.numberOfSigma(StPositron::instance());
 	pFlowTrack->SetPidPositron(nSigma);
+
+	pFlowTrack->SetTopologyMap(pTrack->topologyMap());
 	
 	// dE/dx
         
@@ -542,6 +550,7 @@ void StFlowMaker::FillPicoEvent() {
       pFlowPicoTrack->SetPidDeuteron(pFlowTrack->PidAntiDeuteron());
       pFlowPicoTrack->SetPidElectron(pFlowTrack->PidElectron());
     }
+    pFlowPicoTrack->SetTopologyMap(pFlowTrack->TopologyMap());
     pPicoEvent->AddTrack(pFlowPicoTrack);
   }
 
@@ -580,7 +589,7 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   if (pPicoEvent->Version() == 3) {
     FillFromPicoVersion3DST(pPicoEvent);
   }
-  
+
   // Check event cuts and Eta Symmetry
   if (!StFlowCutEvent::CheckEvent(pPicoEvent) ||
       !StFlowCutEvent::CheckEtaSymmetry(pPicoEvent)) {  
@@ -640,7 +649,6 @@ Bool_t StFlowMaker::FillFromPicoVersion0DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetPt(pPicoTrack->Pt());
       pFlowTrack->SetPhi(pPicoTrack->Phi());
       pFlowTrack->SetEta(pPicoTrack->Eta());
-      pFlowTrack->SetDetId(pPicoTrack->Eta());
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
       pFlowTrack->SetDca(pPicoTrack->Dca()/10000.);
@@ -694,7 +702,6 @@ Bool_t StFlowMaker::FillFromPicoVersion1DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetPt(pPicoTrack->Pt());
       pFlowTrack->SetPhi(pPicoTrack->Phi());
       pFlowTrack->SetEta(pPicoTrack->Eta());
-      pFlowTrack->SetDetId(pPicoTrack->Eta());
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
       pFlowTrack->SetDca(pPicoTrack->Dca());
@@ -762,7 +769,6 @@ Bool_t StFlowMaker::FillFromPicoVersion2DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetPhiGlobal(pPicoTrack->PhiGlobal());
       pFlowTrack->SetEta(pPicoTrack->Eta());
       pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
-      pFlowTrack->SetDetId(pPicoTrack->Eta());
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
       pFlowTrack->SetDca(pPicoTrack->Dca());
@@ -830,7 +836,6 @@ Bool_t StFlowMaker::FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetPhiGlobal(pPicoTrack->PhiGlobal());
       pFlowTrack->SetEta(pPicoTrack->Eta());
       pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
-      pFlowTrack->SetDetId(pPicoTrack->Eta());
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
       pFlowTrack->SetDca(pPicoTrack->Dca());
@@ -854,6 +859,11 @@ Bool_t StFlowMaker::FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent) {
 	pFlowTrack->SetPidKaonPlus(pPicoTrack->PidKaon());
 	pFlowTrack->SetPidDeuteron(pPicoTrack->PidDeuteron());
 	pFlowTrack->SetPidPositron(pPicoTrack->PidElectron());
+      }
+
+      if (pPicoTrack->TopologyMap().data(0) || pPicoTrack->TopologyMap().data(1)) {
+	// topology map found
+	pFlowTrack->SetTopologyMap(pPicoTrack->TopologyMap());
       }
 
       pFlowEvent->TrackCollection()->push_back(pFlowTrack);

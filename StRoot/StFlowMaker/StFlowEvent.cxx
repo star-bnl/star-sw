@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.18 2000/12/08 17:03:38 oldi Exp $
+// $Id: StFlowEvent.cxx,v 1.19 2000/12/10 02:01:13 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,13 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.19  2000/12/10 02:01:13  oldi
+// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
+// The evaluation of either a track originates from the FTPC or not is
+// unambiguous now. The evaluation itself is easily extendible for other
+// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
+// they contain TPC tracks only (backward compatibility).
+//
 // Revision 1.18  2000/12/08 17:03:38  oldi
 // Phi weights for both FTPCs included.
 //
@@ -126,18 +133,18 @@
 
 ClassImp(StFlowEvent)
 
-Float_t  StFlowEvent::mEtaCuts[2][Flow::nHars][Flow::nSels] = {{{0.,0.5},
-								{0.,0.},
-								{0.,0.5},
-								{0.,0.},
-								{0.,0.5},
-								{0.,0.}},
-							       {{1.0,2.},
-								{1.0,1.},
-								{1.0,2.},
-								{1.0,1.},
-								{1.0,2.},
-								{1.0,1.}}};
+Float_t  StFlowEvent::mEtaTpcCuts[2][Flow::nHars][Flow::nSels] = {{{0.,0.5},
+                                                                   {0.,0.},
+								   {0.,0.5},
+								   {0.,0.},
+								   {0.,0.5},
+								   {0.,0.}},
+							          {{1.0,2.},
+								   {1.0,1.},
+							   	   {1.0,2.},
+								   {1.0,1.},
+								   {1.0,2.},
+								   {1.0,1.}}};
 Float_t  StFlowEvent::mEtaFtpcCuts[2][Flow::nHars][Flow::nSels] = {{{2.7,2.7},
 								    {2.7,2.7},
 								    {2.7,2.7},
@@ -151,7 +158,7 @@ Float_t  StFlowEvent::mEtaFtpcCuts[2][Flow::nHars][Flow::nSels] = {{{2.7,2.7},
 								    {4.0,4.0},
 								    {4.0,4.0}}};
 //For gap of |eta| < 0.05
-// Float_t  StFlowEvent::mEtaCuts[2][Flow::nHars][Flow::nSels] = {{{0.05,0.5},
+// Float_t  StFlowEvent::mEtaTpcCuts[2][Flow::nHars][Flow::nSels] = {{{0.05,0.5},
 // 								{0.05,0.},
 // 								{0.05,0.5},
 // 								{0.05,0.},
@@ -164,18 +171,18 @@ Float_t  StFlowEvent::mEtaFtpcCuts[2][Flow::nHars][Flow::nSels] = {{{2.7,2.7},
 // 								{1.0,2.},
 // 								{1.0,1.}}};
 
-Float_t  StFlowEvent::mPtCuts[2][Flow::nHars][Flow::nSels] =  {{{0.1,0.1},
-								{0.1,0.1},
-								{0.1,0.1},
-								{0.1,0.1},
-								{0.1,0.1},
-								{0.1,0.1}},
-							       {{2.,2.},
-								{2.,2.},
-								{2.,2.},
-								{2.,2.},
-								{2.,2.},
-								{2.,2.}}};
+Float_t  StFlowEvent::mPtTpcCuts[2][Flow::nHars][Flow::nSels] =  {{{0.1,0.1},
+								   {0.1,0.1},
+								   {0.1,0.1},
+								   {0.1,0.1},
+								   {0.1,0.1},
+								   {0.1,0.1}},
+							          {{2.,2.},
+								   {2.,2.},
+								   {2.,2.},
+								   {2.,2.},
+								   {2.,2.},
+								   {2.,2.}}};
 Float_t  StFlowEvent::mPtFtpcCuts[2][Flow::nHars][Flow::nSels] =  {{{0.1,0.1},
 								    {0.1,0.1},
 								    {0.1,0.1},
@@ -342,42 +349,46 @@ void StFlowEvent::SetSelections() {
     StFlowTrack* pFlowTrack = *itr;
     Double_t eta = (double)(pFlowTrack->Eta());
     Float_t  Pt  = pFlowTrack->Pt();
-    Int_t detId  =  pFlowTrack->DetId();
+
     for (int selN = 0; selN < Flow::nSels; selN++) {
-	for (int harN = 0; harN < Flow::nHars; harN++) {
+      for (int harN = 0; harN < Flow::nHars; harN++) {
 	    
-	    if (detId == kFtpcEastId || detId == kFtpcWestId) {
-		// Eta
-		if (mEtaFtpcCuts[1][harN][selN] > mEtaFtpcCuts[0][harN][selN] && 
-		    (fabs(eta) < mEtaFtpcCuts[0][harN][selN] || 
-		     fabs(eta) >= mEtaFtpcCuts[1][harN][selN])) continue;
-		// 	    (eta < mEtaCuts[0][harN][selN]         || both subs at +eta
-		// 	     eta >= mEtaCuts[1][harN][selN])) continue;
-		
-		// Pt
-		if (mPtFtpcCuts[1][harN][selN] > mPtFtpcCuts[0][harN][selN] && 
-		    (Pt < mPtFtpcCuts[0][harN][selN] ||
-		     Pt >= mPtFtpcCuts[1][harN][selN])) continue;	
-	    }
+	  if (pFlowTrack->TopologyMap().numberOfHits(kTpcId) ||  
+	      (pFlowTrack->TopologyMap().data(0) == 0 && pFlowTrack->TopologyMap().data(1) == 0)) {
+	    // hits in Tpc or TopologyMap not available
 	    
-	    else { // (detId == kTpcId) or otherwise !!!
-		
-		// Eta
-		if (mEtaCuts[1][harN][selN] > mEtaCuts[0][harN][selN] && 
-		    (fabs(eta) < mEtaCuts[0][harN][selN] || 
-		     fabs(eta) >= mEtaCuts[1][harN][selN])) continue;
-		// 	    (eta < mEtaCuts[0][harN][selN]         || both subs at +eta
-		// 	     eta >= mEtaCuts[1][harN][selN])) continue;
-		
-		// Pt
-		if (mPtCuts[1][harN][selN] > mPtCuts[0][harN][selN] && 
-		    (Pt < mPtCuts[0][harN][selN] ||
-		     Pt >= mPtCuts[1][harN][selN])) continue;
-	    }
+	    // Eta
+	    if (mEtaTpcCuts[1][harN][selN] > mEtaTpcCuts[0][harN][selN] && 
+		(fabs(eta) < mEtaTpcCuts[0][harN][selN] || 
+		 fabs(eta) >= mEtaTpcCuts[1][harN][selN])) continue;
+	    // 	    (eta < mEtaTpcCuts[0][harN][selN]         || both subs at +eta
+	    // 	     eta >= mEtaTpcCuts[1][harN][selN])) continue;
 	    
-	    pFlowTrack->SetSelect(harN, selN);
-	
-	}
+	    // Pt
+	    if (mPtTpcCuts[1][harN][selN] > mPtTpcCuts[0][harN][selN] && 
+		(Pt < mPtTpcCuts[0][harN][selN] ||
+		 Pt >= mPtTpcCuts[1][harN][selN])) continue;
+	  }
+	  
+	  else if (pFlowTrack->TopologyMap().numberOfHits(kFtpcEastId) || pFlowTrack->TopologyMap().numberOfHits(kFtpcWestId)) {
+	    // hits in Ftpc
+	    
+	    // Eta
+	    if (mEtaFtpcCuts[1][harN][selN] > mEtaFtpcCuts[0][harN][selN] && 
+		(fabs(eta) < mEtaFtpcCuts[0][harN][selN] || 
+		 fabs(eta) >= mEtaFtpcCuts[1][harN][selN])) continue;
+	    // 	    (eta < mEtaTpcCuts[0][harN][selN]         || both subs at +eta
+	    // 	     eta >= mEtaTpcCuts[1][harN][selN])) continue;
+	    
+	    // Pt
+	    if (mPtFtpcCuts[1][harN][selN] > mPtFtpcCuts[0][harN][selN] && 
+		(Pt < mPtFtpcCuts[0][harN][selN] ||
+		 Pt >= mPtFtpcCuts[1][harN][selN])) continue;	
+	  }
+	  
+	  pFlowTrack->SetSelect(harN, selN);
+	  
+      }
     }
   }
   
@@ -697,10 +708,14 @@ void StFlowEvent::PrintSelectionList() {
     for (int j = 0; j < Flow::nHars; j++) {
       cout << "#  selection= " << k+1 << " harmonic= " 
 	   << j+1 << endl;
-      cout << "#    abs(Eta) cuts= " << mEtaCuts[0][j][k] << ", " 
-	   << mEtaCuts[1][j][k] << endl;
-      cout << "#    Pt cuts= " << mPtCuts[0][j][k] << ", "
-	   << mPtCuts[1][j][k] << endl;
+      cout << "#    abs(Eta) Tpc cuts= " << mEtaTpcCuts[0][j][k] << ", " 
+	   << mEtaTpcCuts[1][j][k] << endl;
+      cout << "#    abs(Eta) Ftpc cuts= " << mEtaFtpcCuts[0][j][k] << ", " 
+	   << mEtaTpcCuts[1][j][k] << endl;
+      cout << "#    Pt Tpc cuts= " << mPtTpcCuts[0][j][k] << ", "
+	   << mPtTpcCuts[1][j][k] << endl;
+      cout << "#    Pt Ftpc cuts= " << mPtFtpcCuts[0][j][k] << ", "
+	   << mPtTpcCuts[1][j][k] << endl;
     }
   }
   cout << "#######################################################" << endl;

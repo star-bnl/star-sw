@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoTrack.cxx,v 1.4 2000/10/12 22:46:39 snelling Exp $
+// $Id: StFlowPicoTrack.cxx,v 1.5 2000/12/10 02:01:13 oldi Exp $
 //
 // Author: Raimond Snellings, March 2000
 //
@@ -9,6 +9,13 @@
 ////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoTrack.cxx,v $
+// Revision 1.5  2000/12/10 02:01:13  oldi
+// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
+// The evaluation of either a track originates from the FTPC or not is
+// unambiguous now. The evaluation itself is easily extendible for other
+// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
+// they contain TPC tracks only (backward compatibility).
+//
 // Revision 1.4  2000/10/12 22:46:39  snelling
 // Added support for the new pDST's and the probability pid method
 //
@@ -63,4 +70,6 @@ StFlowPicoTrack::StFlowPicoTrack(StFlowPicoTrack *track) : TObject() {
   if (fabs(pid) > maxInt) pid = maxInt; mPidDeuteron = (Int_t)(pid*1000.); 
   pid = track->PidElectron();
   if (fabs(pid) > maxInt) pid = maxInt; mPidElectron = (Int_t)(pid*1000.); 
+
+  mTopology = track->mTopology;
 }
