@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.52 2003/06/26 18:27:16 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.53 2003/07/30 01:40:42 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -154,7 +154,7 @@
         $OSFID .=
           " CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX NEW_ARRAY_ON GNU_GCC";
 
-        if ($STAR) {
+        if ($STAR && $STAR_HOST_SYS !~ /gcc3/ ) {
             $OSFID .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
         }
         $R_CPPFLAGS .=
