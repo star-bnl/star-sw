@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.10 1999/03/15 13:49:30 lasiuk Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.11 1999/03/16 02:00:40 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,8 +12,13 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
- * Revision 1.10  1999/03/15 13:49:30  lasiuk
- * field is initialized with Tesla in the data base!
+ * Revision 1.11  1999/03/16 02:00:40  lasiuk
+ * use STL in ionization generation;
+ * do not always use betaGamma as a scale factor;
+ * still a problem with the neutrals depositing energy
+ *
+ * do not always use betaGamma as a scale factor;
+ * still a problem with the neutrals depositing energy
  *
  * Revision 1.10  1999/03/15 13:49:30  lasiuk
  * field is initialized with Tesla in the data base!
@@ -42,11 +47,17 @@
  * Revision 1.2  1999/01/15 10:59:11  lasiuk
  * remove g2t pointer
  * add pid member; add systemofunits; mv access fcts to .hh
+ * add ostream operator
+#ifdef __sun
+ **************************************************************************/
+#include <algorithm>
+#if  defined(__sun) && ! defined(__GNUG__)
+#include "ospace/stl/src/randgen.cpp"
+#endif
 
 #include "StPhysicalHelix.hh"
 
 #include "StTrsChargeSegment.hh"
-#include "StPhysicalHelix.hh"
 #include "StTpcCoordinateTransform.hh"
 #include "StTrsDeDx.hh"
 
@@ -107,180 +118,203 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 			       list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> >* listOfMiniSegments)
 #endif
 {
+#ifndef ST_NO_NAMESPACES
+    using namespace units;
+#endif
+
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+	vector<int>   ionization(StTrsDeDx::numberOfElectrons);
+	vector<float> theIonization;
+
+#else
+	vector<int, allocator<int> >     ionization(StTrsDeDx::numberOfElectrons);
+	vector<float, allocator<float> > theIonization;
 #endif
 
 
     //
     // Calculate the number of electrons in complete segment
-    
+    //
+    if (mNumberOfElectrons<0)
+	mNumberOfElectrons = (mDE)/(gasDb->W());
 
 //     PR(mDE/eV);
 //     PR(gasDb->W());
 //     PR(mNumberOfElectrons);
     //
-    if(subSegments > 1) {
-
-	// what is the subsegment length?
+    // Only do costly initialization if you
+    // break into more than one subsegment
     //
-	double deltaS = mDs/static_cast<double>(subSegments);
-//     PR(deltaS);
-//     PR(deltaS/millimeter);
+     double particleMass;
+     int    charge;
+
+     if(subSegments>1) {
+	 //
+	 // PID are GEANT3 Conventions
+	 // Must get from pid structures
+	 switch (mPid) {
+	 case 2:    // e+
+	     particleMass = .00051099906*GeV;
+	     charge = 1;
+	     break;
+	 case 3:    // e-
+	     particleMass = .00051099906*GeV;
+	     charge = -1;	      
+	     break;
+	 case 5:    // muon+
+	     particleMass = .105658389*GeV;
+	     charge = 1;
+	     break;
+	 case 6:    // muon-
+	     particleMass = .105658389*GeV;
+	     charge = -1;
+	     break;
+	 case 8:    // pion+
+	     particleMass = .1395700*GeV;
+	     charge = 1;
+	     break;
+	 case 9:    // pion-
+	     particleMass = .1395700*GeV;
+	     charge = -1;
+	     break;
+	 case 11:    // kaon+
+	     particleMass = .493677*GeV;
+	     charge = 1;
+	     break;
+	 case 12:    // kaon-
+	     particleMass = .493677*GeV;
+	     charge = -1;
+	     break;
+	 case 14:    // proton
+	     particleMass = .93827231*GeV;
+	     charge = 1;
+	     break;
+	 case 15:    // anti-proton
+	     particleMass = .93827231*GeV;
+	     charge = -1;
+	     break;
+	 default: // Probably uncharged, but DO NOT BREAK IT!
+	     //cout << "Mass is Undefined (" << mPid << ")" << endl;
+	     subSegments = 1;
+	     break;
+	 }
+     }
+
+     //
+     // Double Check
+     if(subSegments > 1) {  // if an uncharged particle deposits energy, do not split it
+
 	 // what is the subsegment length?
 	 
-	gasDb->setPadLength(deltaS*centimeter);
-//     cout << "StTrsDeDx::padLength() -->        "  << (gasDb->padLength()/millimeter) << " mm" << endl;
-//     cout << "StTrsChargeSegment::split() de--> " << (this->dE()/eV)                 << " eV" << endl;
-//     cout << "StTrsChargeSegment::split() ds--> " << (this->ds()/millimeter)         << " mm" << endl;
-//     cout << "StTrsDeDx::W() -->                "   << (gasDb->W()/eV)                 << " eV"  << endl;
-//     cout << "StMagneticField:at() -->          " << (magDb->at(mSector12Position))    << " T"  <<endl;
+	 double deltaS = mDs/static_cast<double>(subSegments);
+
+    // set the segment length in the gasDb:
+	 gasDb->setPadLength(deltaS*centimeter);
+// 	 cout << "StTrsDeDx::padLength() -->        "  << (gasDb->padLength()/millimeter) << " mm" << endl;
+// 	 cout << "StTrsChargeSegment::split() de--> " << (this->dE()/eV)                 << " eV" << endl;
 // 	 cout << "StTrsChargeSegment::split() ds--> " << (this->ds()/millimeter)         << " mm" << endl;
 // 	 cout << "StTrsDeDx::W() -->                "   << (gasDb->W()/eV)                 << " eV"  << endl;
-	//
-	// PID are GEANT3 Conventions
-	// Must get from pid structures
-	double particleMass;
-	int    charge;
-	switch (mPid) {
-	case 2:    // e+
-	    particleMass = .00051099906*GeV;
-	    charge = 1;
-	    break;
-	case 3:    // e-
-	    particleMass = .00051099906*GeV;
-	    charge = -1;	      
-	    break;
-	case 5:    // muon+
-	    particleMass = .105658389*GeV;
-	    charge = 1;
-	    break;
-	case 6:    // muon-
-	    particleMass = .105658389*GeV;
-	    charge = -1;
-	    break;
-	case 8:    // pion+
-	    particleMass = .1395700*GeV;
-	    charge = 1;
-	    break;
-	case 9:    // pion-
-	    particleMass = .1395700*GeV;
-	    charge = -1;
-	    break;
-	case 11:    // kaon+
-	    particleMass = .493677*GeV;
-	    charge = 1;
-	    break;
-	case 12:    // kaon-
-	    particleMass = .493677*GeV;
-	    charge = -1;
-	    break;
-	case 14:    // proton
-	    particleMass = .93827231*GeV;
-	    charge = 1;
-	    break;
-	case 15:    // anti-proton
-	    particleMass = .93827231*GeV;
-	    charge = -1;
-	    break;
-	default: // Probably uncharged, but DO NOT BREAK IT!
-	    subSegments = 1;
-	}
+// 	 cout << "StMagneticField:at() -->          " << (magDb->at(mSector12Position)/tesla)    << " T"  <<endl;
+//     PR(mSector12Position);
 
-	//To decompose track use the helix parameterization.
-	//StPhysicalHelix(p,x,B,+/-)
-	// Need some track info from pid:
+     //
+     // theIonization
+     //
+	 theIonization.clear();
 
-	StPhysicalHelix
-	    track(mMomentum,
-		  mSector12Position,
-		  (magDb->at(mSector12Position)).z(), //*tesla NOT now!
-		  charge);
+     // number of segments to split given by command line argument (default 1):
+     //  should be related to mNumberOfElectrons
+	 
+	 double ionizationLeft = mNumberOfElectrons;
+
+	 //PR(subSegments);
+	 for(int ii=0; ii<(subSegments-1); ii++) {
+	     //
+	     // generate electrons
+	     double betaGamma = abs(mMomentum)/particleMass;
+// 	     PR(betaGamma);
+	     if(betaGamma>3)
+		 gasDb->electrons(ionization, betaGamma);
+	     else
+		 gasDb->electrons(ionization);  // betaGamma = 3
+	     
+// 	     PR(ionization[StTrsDeDx::primaries]);
+// 	     PR(ionization[StTrsDeDx::secondaries]);
+// 	     PR(ionization[StTrsDeDx::total]);
+// 	     PR(ionizationLeft);
+	    
+	    // Don't generate too much ionization
+	     if(ionization[StTrsDeDx::total] > ionizationLeft) {
+		 theIonization.push_back(ionizationLeft);
+	     }
+	     else {
+		 theIonization.push_back(ionization[StTrsDeDx::total]);
+	     }
+	
+	     ionizationLeft -= theIonization.back();
+// 	     PR(ionizationLeft);
+	     
+	 } // loop over subsegments
+	 theIonization.push_back(ionizationLeft);
+
+	 //copy(theIonization.begin(),theIonization.end(), ostream_iterator<float>(cout,","));
+	 random_shuffle(theIonization.begin(), theIonization.end());
+	 //cout << endl;
+	 //copy(theIonization.begin(), theIonization.end(), ostream_iterator<float>(cout,","));
+     
+     //To decompose track use the helix parameterization.
+     //StPhysicalHelix(p,x,B,+/-)
+     // Need some track info from pid:
+
+	 StPhysicalHelix
+	     track(mMomentum,
 		   mSector12Position,
-	double betaGamma = abs(mMomentum)/particleMass;
-// 	PR(particleMass/GeV);
+		   (magDb->at(mSector12Position)).z(), //*tesla NOT now!
 		   charge);
-// 	PR(betaGamma);
-
-	// number of segments to split given by command line argument (default 1):
-	//  should be related to mNumberOfElectrons
-
-	float ionizationLeft = mNumberOfElectrons;
 
 //  	PR(particleMass/GeV);
 // 	PR(mMomentum.mag());
 
-	double newPosition = -mDs/2. + deltaS/2.;
+	//
 	// calculate the offset to the start position
 	//
 	 double newPosition = -mDs/2. + deltaS/2.;
 	//PR(newPosition);
 	
 	//
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-	vector<int> ionization(StTrsDeDx::numberOfElectrons);
-#else
-	vector<int, allocator<int> > ionization(StTrsDeDx::numberOfElectrons);
-#endif
 	// loop over all subSegments and distribute charge
-	int numberOfElectronsOnMiniSegment;
+	//
+    
+	//cout << "ionization.size() " << (ionization.size()) << endl;
+// 	PR(subSegments);
+	for(ii=0; ii<subSegments; ii++) {
+	    // Take the electrons from the vector
 
-	for(int ii=0; ii<(subSegments-1); ii++) {
-	    // generate electrons
-	    gasDb->electrons(ionization, betaGamma);
-	    
-	    // 	PR(ionization[StTrsDeDx::primaries]);
-	    // 	PR(ionization[StTrsDeDx::secondaries]);
-	    //  PR(ionization[StTrsDeDx::total]);
-	    
-	    if(!ionization[StTrsDeDx::total]) continue;
-	    
-	    // Don't generate too much ionization
-	    if(ionization[StTrsDeDx::total] > ionizationLeft) {
-		numberOfElectronsOnMiniSegment = ionizationLeft;
-	    }
-	    else {
-		numberOfElectronsOnMiniSegment = ionization[StTrsDeDx::total];
+	    // If there is no Ionization, take the next
+//  	    cout << "theIonization[" << ii << "]:" << (theIonization[ii]) << endl;
 	    if(!theIonization[ii]) {
 		newPosition += deltaS;
-// 	    PR(numberOfElectronsOnMiniSegment);
-// 	    PR(newPosition);
-// 	    PR(track.at(newPosition));
+		continue;
+	    }
 	
  	    //PR(newPosition);
-						numberOfElectronsOnMiniSegment,
+ 	    //PR(track.at(newPosition));
 	
 	    StTrsMiniChargeSegment aMiniSegment(track.at(newPosition),
 						theIonization[ii],
-	    ionizationLeft -= numberOfElectronsOnMiniSegment;
-// 	PR(ionizationLeft);
-
-	    if(ionizationLeft<1) break;
 						deltaS);
 	    listOfMiniSegments->push_back(aMiniSegment);
 
 	    newPosition += deltaS;
+// 	PR(newPosition);
+	} // loop over subsegments
 
-	//
-	// last subsegment -- assign remaining ionizaiton
-	// GEANT energy is conserved by this (exactly!)
-	//
-	if(ionizationLeft>1) {
-	    StTrsMiniChargeSegment aNewMiniSegment(track.at(newPosition),
-						   ionizationLeft,
-						   deltaS);
-	    listOfMiniSegments->push_back(aNewMiniSegment);
-// 	    PR(newPosition);
-// 	    PR(track.at(newPosition));
-// 	    PR(ionizationLeft);
-	}
-    } // if (subsegments > 1)  ---> allows us to skip the helix construction
-    else if(subSegments == 1) {
-	StTrsMiniChargeSegment aSingleMiniSegment(mPosition,
-						  mNumberOfElectrons,
-						  mDs);
-	listOfMiniSegments->push_back(aSingleMiniSegment);
+     } // if (subsegments > 1)  ---> allows us to skip the helix construction
+     else if(subSegments == 1) {
+	 StTrsMiniChargeSegment aSingleMiniSegment(mPosition,
 						   mNumberOfElectrons,
 						   mDs);
-    }
+	 listOfMiniSegments->push_back(aSingleMiniSegment);
 // 	PR(mPosition);
 // 	PR(mNumberOfElectrons);
      }
