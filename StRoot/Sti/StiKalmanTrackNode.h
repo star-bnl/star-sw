@@ -45,7 +45,7 @@ public:
   //~StiKalmanTrackNode();
   const StiKalmanTrackNode& operator=(const StiKalmanTrackNode&node);  
   
-  double mcs2(double d, double radThickness, double beta2, double p2);
+  double mcs2(double relRadThickness, double beta2, double p2);
   /// Resets the node to a "null" un-used state
   void reset();
   /// Initialize this node with the given hit information
@@ -141,12 +141,8 @@ public:
   int  locate(StiPlacement*place,StiShape*sh);
   int  propagate(double x,int option);
   void propagateError();
-  void propagateMCS(double pathLength, 
-		    double radThickness, 
-		    double zOverA,
-		    double ionization,
-		    double massHypo,
-		    double elossSign);
+  void propagateMCS(StiKalmanTrackNode * previousNode,
+		    float elossSign);
   
   /// Extrapolate the track parameters to radial position "x"  and return a point global coordinates along
   /// the track at that point.
@@ -176,7 +172,14 @@ public:
   void setError(pair<double, double> p);
   static void   setParameters(StiKalmanTrackFinderParameters *parameters);
   friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
+
+  double getX0() const;
+  double getGasX0() const;
+
   /// rotation angle of local coordinates wrt global coordinates
+
+
+
   
   double _alpha;
   double _cosAlpha;
@@ -356,9 +359,9 @@ inline double StiKalmanTrackNode::getP() const
   return (getPt()*sqrt(1.+_p4*_p4));
 }
 
-inline double StiKalmanTrackNode::mcs2(double d, double radThickness, double beta2, double p2)
+inline double StiKalmanTrackNode::mcs2(double relRadThickness, double beta2, double p2)
 {
-  return 14.1*14.1/(beta2*p2*1e6)*d/radThickness;
+  return 14.1*14.1/(beta2*p2*1e6)*relRadThickness;
 }
 
 //stl helper functor
@@ -450,6 +453,27 @@ inline double StiKalmanTrackNode::pathlength() const
     return (thickness*sqrt(1.+_p4*_p4)) / _cosCA;
 }
 
+///Return the radiation length (in cm) of the 
+///the detector volume at this node.
+inline double StiKalmanTrackNode::getX0() const
+{
+  const StiDetector * det = getDetector();
+  if (!det)
+    return 0.;
+  return det->getMaterial()->getX0();
+}
+
+///Return the radiation length (in cm) of the gas
+///surrounding the detector volume at this node.
+inline double StiKalmanTrackNode::getGasX0() const
+{
+  const StiDetector * det = getDetector();
+  if (!det)
+    return 0.;
+  return det->getGas()->getX0();
+}
+
+
 inline StThreeVectorD* StiKalmanTrackNode::getLengths(StiKalmanTrackNode* nextNode)
 {
   double x1=pathlength()/2.;
@@ -458,9 +482,9 @@ inline StThreeVectorD* StiKalmanTrackNode::getLengths(StiKalmanTrackNode* nextNo
   if (x2> (x1+x3)) x2=x2-x1-x3;
   else x2=0;
 
-  return new StThreeVectorD(x1/getDetector()->getGas()->getX0(), 
+  return new StThreeVectorD(x1/getX0(),
 			    x2/getDetector()->getMaterial()->getX0(), 
-			    x3/nextNode->getDetector()->getGas()->getX0());
+			    x3/nextNode->getX0());
 }
 
 inline double StiKalmanTrackNode::getDedx() const

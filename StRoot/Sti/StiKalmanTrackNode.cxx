@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.10 2003/03/04 18:41:27 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.11 2003/03/04 21:31:05 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.11  2003/03/04 21:31:05  pruneau
+ * Added getX0() and getGasX0() conveninence methods.
+ *
  * Revision 2.10  2003/03/04 18:41:27  pruneau
  * Fixed StiHit to use global coordinates as well as locals.
  * Fixed Logic Bug in StiKalmanTrackFinder
@@ -373,53 +376,13 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   // Multiple scattering
   if (pars->mcsCalculated)
     {
-      prevGas = gas;
-      prevMat = mat;
-      gas = det->getGas();
-      mat = det->getMaterial();
-      if (prevGas!=gas || prevMat!=mat)
-	{
-	  gasDensity = gas->getDensity();
-	  matDensity = mat->getDensity();
-	  gasRL      = gas->getX0();
-	  matRL      = mat->getX0();
-	}
-      double detHT, gapT,s;
-      switch (sh->getShapeCode())
-	{
-	case kPlanar:
-	  {
-	    detHT = 0.5*planarShape->getThickness();
-	    gapT = dx-2*detHT;
-	    double sphi=_p3*_x-_p2;
-	    s = dx*sqrt(1.+_p4*_p4)/sqrt(1-sphi*sphi);
-	    break;
-	  }
-	case kCylindrical:
-	  {
-	    detHT = 0.;
-	    gapT  = 0.;
-	    s=1.;
-	    break;
-	  }
-	case kConical:
-	  {
-	    cout << " StiKalmanTrackNode::propagate(  ) -F- kConical option not yet supported"<<endl;
-	  }
-	}
-      density = (gasDensity*gapT + 2*matDensity*detHT)/s;
-      radThickness  = s*(gapT/gasRL+2*detHT/matRL)/dx;
-      if (density<=0) 
-	throw runtime_error("SKTN::propagate() - density<=0");
       double sign;
       if (dx>0)
 	sign = -1.;
       else
 	sign =  1.;
       
-      //double zOverA = 0.5;
-      //double ionization = 5;
-      //propagateMCS(pathLength,radThickness,zOverA,ionization,pars->massHypothesis,sign);
+      //    propagateMCS(relRadThickness,zOverA,ionization,pars->massHypothesis,sign);
     }
   return position;
 }
@@ -562,11 +525,6 @@ void StiKalmanTrackNode::propagateError()
   _c41 += b41; 
 }
 
-/*
-void StiKalmanTrackNode::propagateMCS()
-{}
-*/
-
 /*! Calculate the effect of MCS on the track error matrix.
   <p>
   The track is assumed to propagate from (x0,y0,z0) to (x1,y1,z1). The calculation
@@ -575,19 +533,35 @@ void StiKalmanTrackNode::propagateMCS()
   is delegated to the function "mcs2". The calculation of energy loss is done
   by the function eloss.
  */
-void StiKalmanTrackNode::propagateMCS(double pathLength, 
-				      double radThickness, 
-				      double zOverA,
-				      double ionization,
-				      double massHypo,
-				      double elossSign)
+void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode,
+				      float elossSign)
 {  
+  double relRadThickness;
+  // Half path length in previous node
+  double r1=previousNode->pathlength()/2.;
+  // Half path length in this node
+  double r3=pathlength()/2.;
+  // Gap path length
+  double r2= pathLToNode(previousNode);
+  if (r2> (r1+r3)) 
+    {
+      r2=r2-r1-r3;
+      if (dx>0)
+	relRadThickness = r1/previousNode->getX0()+ r2/getGasX0()+ r3/getX0();
+      else 
+	relRadThickness = r1/previousNode->getX0()+ r2/previousNode->getGasX0()+ r3/getX0();
+    }
+  else 
+    {
+      relRadThickness = r1/previousNode->getX0()+r3/getX0();
+    }
   double pt = getPt();
   double p2=(1.+_p4*_p4)*pt*pt;
-  double m2=massHypo*massHypo;
+  double m=pars->massHypothesis;
+  double m2=m*m;
   double e2=p2+m2;
   double beta2=p2/e2;
-  double theta2=mcs2(pathLength,radThickness,beta2,p2);
+  double theta2=mcs2(relRadThickness,beta2,p2);
   double ey  = _p3*_x-_p2;
   double ez  = _p4;
   double xz  = _p3*ez;
@@ -609,22 +583,18 @@ void StiKalmanTrackNode::propagateMCS(double pathLength,
     }
 }
 
-double StiKalmanTrackNode::pathLToNode(const StiKalmanTrackNode * const oNode)
-{
 /*!Calulates length between center of this node and provided node, which
   is assumed to be on the same helix. Have to use global coords, since 
   nodes may not be in the same detector volume.
 
   \returns (double) length
 */
-  //delta(dx,dy,dz) = here - there
-
+//delta(dx,dy,dz) = here - there
+double StiKalmanTrackNode::pathLToNode(const StiKalmanTrackNode * const oNode)
+{
   const StThreeVector<double> delta = 
-                 getGlobalPoint() - oNode->getGlobalPoint();
-
+    getGlobalPoint() - oNode->getGlobalPoint();
   double R = getCurvature();
-
-
   // s = 2c * asin( t/(2c)); t=sqrt(dx^2+dy^2+dz^2)
   return length(delta, R);
 }
@@ -632,11 +602,8 @@ double StiKalmanTrackNode::pathLToNode(const StiKalmanTrackNode * const oNode)
 inline double StiKalmanTrackNode::length(const StThreeVector<double>& delta, double curv)
 {
   double tR = fabs(2./curv);
-
   return  tR*asin(delta.magnitude()/tR);
 }
-
-
 
 StThreeVector<double> StiKalmanTrackNode::getPointAt(double xk) const
 {
