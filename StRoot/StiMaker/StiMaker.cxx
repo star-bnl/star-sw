@@ -73,13 +73,13 @@ StiMaker::StiMaker(const Char_t *name) : StMaker(name),
 					 mhitstore(0), mdetector(0), mtrackstore(0),
 					 //Factories
 					 mhitfactory(0), mtrackfactory(0), mktracknodefactory(0),
-					 mdetectorfactory(0), mdatanodefactory(0), mkalmantrackfactory(0),
+					 mdetectorfactory(0), mdatanodefactory(0),
 					 //Display
 					 mdisplay(0),
 					 //Utilities
 					 mhitfiller(0),
 					 //SeedFinders
-					 mEvaluableSeedFinder(0), mKalmanSeedFinder(0), mcompseedfinder(0),
+					 mSeedFinder(0),
 					 //Tracker
 					 mtracker(0),
 					 //Members
@@ -120,9 +120,9 @@ StiMaker::~StiMaker()
     delete mtrackfactory;
     mtrackfactory = 0;
 
-    delete mEvaluableSeedFinder;
-    mEvaluableSeedFinder = 0;
-    
+    delete mSeedFinder;
+    mSeedFinder = 0;
+        
     StiDetectorContainer::kill();
     mdetector = 0;
     
@@ -137,15 +137,6 @@ StiMaker::~StiMaker()
 
     delete mktracknodefactory;
     mktracknodefactory = 0;
-
-    delete mkalmantrackfactory;
-    mkalmantrackfactory=0;
-
-    delete mKalmanSeedFinder;
-    mKalmanSeedFinder=0;
-
-    delete mcompseedfinder;
-    mcompseedfinder=0;
 
     delete mtracker;
     mtracker = 0;
@@ -172,9 +163,6 @@ void StiMaker::Clear(const char*)
     mtrackfactory->reset();
     mktracknodefactory->reset();
 
-    //Reset KalmanTrackFactory
-    mkalmantrackfactory->reset();
-    
     //Reset DisplayManager
     mdisplay->reset();
 
@@ -222,16 +210,6 @@ Int_t StiMaker::Init()
     mktracknodefactory->setMaxIncrementCount(100);
     StiKalmanTrack::setKalmanTrackNodeFactory( mktracknodefactory );
     
-    //The Kalman Track Factory
-    mkalmantrackfactory = new StiKalmanTrackFactory("KalmanTrackFactory");
-    mkalmantrackfactory->setIncrementalSize(1000);
-    mkalmantrackfactory->setMaxIncrementCount(10);
-
-    //EvaluableTrack SeedFinder
-    mEvaluableSeedFinder = new StiEvaluableTrackSeedFinder(mAssociationMaker);
-    mEvaluableSeedFinder->setFactory(mtrackfactory);
-    mEvaluableSeedFinder->setBuildPath("StRoot/StiMaker/RunTimeParameters/EvaluableSeedFinder.txt");
-    mEvaluableSeedFinder->build();
 
     //The StiDetector factory
     if (mUseGui==true) {
@@ -261,35 +239,34 @@ Int_t StiMaker::Init()
     mhitfiller->addDetector(kSvtId);
     cout <<"Hits used from detectors:\t"<<*mhitfiller<<endl;
 
-/*
-    TrackNodeTest *pTest = new TrackNodeTest();
-    pTest->doTest();
-*/
-
-    //StiCompositeSeedFinder
-    mcompseedfinder = new StiCompositeSeedFinder();
-    mcompseedfinder->setFactory(mkalmantrackfactory);
-    mcompseedfinder->setBuildPath("StRoot/StiMaker/RunTimeParameters/CompositeSeedFinderBuild.txt");
-    mcompseedfinder->build();
-
-    //The Tracker
-    mtracker = new StiKalmanTrackFinder();
-    mtracker->setTrackNodeFactory(mktracknodefactory);
+    //The seed finder (must be built after detector-tree)
     if (mSeedFinderType==kEvaluable) {
-	mtracker->setTrackSeedFinder(mEvaluableSeedFinder);
 	cout <<"StiMaker::init(). Set tracker seed finder to kEvaluable"<<endl;
+	StiEvaluableTrackSeedFinder* temp = new StiEvaluableTrackSeedFinder(mAssociationMaker);
+	temp->setFactory(mtrackfactory);
+	temp->setBuildPath("StRoot/StiMaker/RunTimeParameters/EvaluableSeedFinder.txt");
+	temp->build();
+	mSeedFinder=temp;
     }
     else if (mSeedFinderType==kComposite) {
-	mtracker->setTrackSeedFinder(mcompseedfinder);
 	cout <<"StiMaker::init(). Set tracker seed finder to kComposite"<<endl;
+	StiCompositeSeedFinder* temp = new StiCompositeSeedFinder();
+	temp->setFactory(mtrackfactory);
+	temp->setBuildPath("StRoot/StiMaker/RunTimeParameters/CompositeSeedFinderBuild.txt");
+	temp->build();
+	mSeedFinder=temp;	
     }
-    else if (mSeedFinderType==kUndefined) {
+    else if (mSeedFinderType==kUndefined) { //not initialized
 	cout <<"StiMaker::init(). ERROR:\t SeedFinderType==kUndefined"<<endl;
     }
-    else {
+    else { //catch all
 	cout <<"StiMaker::init(). ERROR:\t unkown SeedFinderType"<<endl;
     }
     
+    //The Tracker
+    mtracker = new StiKalmanTrackFinder();
+    mtracker->setTrackNodeFactory(mktracknodefactory);
+    mtracker->setTrackSeedFinder(mSeedFinder);
     mtracker->isValid(true);
 
     mdisplay->setSkeletonView();
@@ -337,11 +314,12 @@ Int_t StiMaker::Make()
 	cout <<"\tdone"<<endl;
 	    
 	//Init seed finder for start
-	mcompseedfinder->reset();
+	mSeedFinder->reset();
 
-	//Initialize the SeedFinder, loop on tracks
-	if (mSimulation) {
-	    mEvaluableSeedFinder->setEvent(mc);
+	//Pass mc event if simulated
+	StiEvaluableTrackSeedFinder* temp = dynamic_cast<StiEvaluableTrackSeedFinder*>(mSeedFinder);
+	if (mSimulation && temp!=0) {
+	    temp->setEvent(mc);
 	}
 
 	//Now we can loop, if we're not using the gui
