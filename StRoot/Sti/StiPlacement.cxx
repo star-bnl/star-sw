@@ -39,11 +39,13 @@ void StiPlacement::setCenterRep(float refAngle_, float radius_,
   trig[1] = sin(normalRefAngle);
   trig[2] = cos(centerRefAngle);
   trig[3] = sin(centerRefAngle);
+#if 0
   double dif = fabs(trig[0]-trig[2])+fabs(trig[1]-trig[3]);
   if (dif >1e-3) {
     printf("**** centerRefAngle=%g normalAngle=%g diff=%g ****\n"
           ,centerRefAngle,normalRefAngle,dif);
   }
+#endif
 }// setCenterRep()
 
 void StiPlacement::setNormalRep(float refAngle_, float radius_, 
@@ -68,12 +70,13 @@ void StiPlacement::setNormalRep(float refAngle_, float radius_,
   trig[1] = sin(normalRefAngle);
   trig[2] = cos(centerRefAngle);
   trig[3] = sin(centerRefAngle);
+#if 0
   double dif = fabs(trig[0]-trig[2])+fabs(trig[1]-trig[3]);
   if (dif >1e-3) {
     printf("**** centerRefAngle=%g normalAngle=%g diff=%g ****\n"
           ,centerRefAngle,normalRefAngle,dif);
   }
-  
+#endif  
   
   
 //  cout << "normal(" << normalRefAngle << ", " << normalRadius
