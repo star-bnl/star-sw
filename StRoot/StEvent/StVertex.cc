@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cc,v 1.3 1999/04/19 15:54:10 genevb Exp $
+ * $Id: StVertex.cc,v 1.4 1999/04/19 18:07:35 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.cc,v $
+ * Revision 1.4  1999/04/19 18:07:35  genevb
+ * Fixed vertex constructor
+ *
  * Revision 1.3  1999/04/19 15:54:10  genevb
  * Added momentum() to vertex classes
  *
@@ -23,7 +26,7 @@
 #include "StEvent/StVertex.hh"
 #include "StEvent/StGlobalTrack.hh"
 
-static const char rcsid[] = "$Id: StVertex.cc,v 1.3 1999/04/19 15:54:10 genevb Exp $";
+static const char rcsid[] = "$Id: StVertex.cc,v 1.4 1999/04/19 18:07:35 genevb Exp $";
 
 StVertex::StVertex()
 {
@@ -35,6 +38,8 @@ StVertex::StVertex()
 
 StVertex::StVertex(dst_vertex_st* vtx)
 {
+  mType = undefined;                           
+  mParent = 0;                
   mPosition.setX(vtx->x);
   mPosition.setY(vtx->y);
   mPosition.setZ(vtx->z);
