@@ -4,6 +4,7 @@ GV              = /usr/local/bin/X11/gv
 XDVI            = /usr/local/bin/X11/xdvi -copy -bg white -fg black 
 STY             = 
 DVIPS           = dvips -Z -D 600 -tletter
+DVIPDF          = dvipdf
 LATEX           = latex
 MKINDEX         = makeindex -s sclindex.sty
 # PSNUP		= /usr/local/bin/psnup -2 -pletter -d -b10
@@ -23,11 +24,16 @@ print:			$(TEXSRC).ps
 
 psnup:			$(TEXSRC).psnup
 
+pdf:                    $(TEXSRC).pdf
+
 index:			$(TEXSRC).idx
 			$(MKINDEX) $(TEXSRC).idx
 
 $(TEXSRC).psnup:	$(TEXSRC).ps
 			$(PSNUP) $(TEXSRC).ps > $(TEXSRC).psnup
+
+$(TEXSRC).pdf:		$(TEXSRC).dvi $(MAKEFILE) $(PSSRC)
+			$(DVIPDF) $(TEXSRC).dvi $(TEXSRC).pdf
 
 $(TEXSRC).ps:		$(TEXSRC).dvi $(MAKEFILE) $(PSSRC)
 			$(DVIPS) $(TEXSRC).dvi -o $(TEXSRC).ps
