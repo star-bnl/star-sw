@@ -81,7 +81,12 @@ ALL_EXE_LIBS +=     -L/afs/cern.ch/atlas/offline/@sys/pro/lib -lgcalor
 endif
 
 ifdef STAF
- ALL_EXE_LIBS +=    -L$(STAF_SYS_LIB) -lmsg -ltdm -lspx -lsoc -lasu -ltop -ltnt -lami -ldio -ldui -ldsl -ldsu -ltls 
+  ASPs := msg tdm spx  asu top tnt ami dio dui dsl dsu tls soc
+  ifdef STAF_ARCHIVE_LIBS
+    ALL_EXE_LIBS += $(addsuffix .a,$(addprefix $(STAF_SYS_LIB)/lib,$(ASPs)))
+  else
+    ALL_EXE_LIBS +=    -L$(STAF_SYS_LIB) $(addprefix -l,$(ASPs))
+  endif
 endif
 
 ALL_EXE_LIBS +=	`cernlib geant321 pawlib
