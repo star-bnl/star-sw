@@ -8,8 +8,9 @@ Replace[LIST #;] with [ #1 _
  "Geant  "   GfKine,GfVert,GfPart,GfPath,GfHead,GDtoM,GMtoD,GlVolu,
              GpKine,GLast,GsHEAD,GsCKOV,GpIons,Grndm,Granor,Gfnhit,GpRung,
  "vector "   vdist,vscale,vadd,vmod,sortzv,vfill,Ublank,Ufill,Uzero,IuLast,
+ "tr-prop"   trprfn,trprop,trscsp,trspsc,trscsd,trsdsc,
  "minuit "   mnseti,mninit,mnstat,mnexcm,mnpout,mnparm,
- "matrix "   Rsinv,Dsinv,Rinv,Dinv, 
+ "matrix "   Rsinv,Dsinv,Rinv,Dinv,Ssmt5t,Xmm55,Dmmlt,
  "ffread "   ffinit,ffset,ffkey,ffget,ffgo,
  "random "   poissn,norran,rndm,rnorml,dircos,
  "random "   binomi,rngama,gauss,proxim,
@@ -19,32 +20,23 @@ Replace[LIST #;] with [ #1 _
  "hbook  "   hplfun,hpagsz,hnoent,hnform,
  "somesg "   rm48,rm48in,rsfact,rsfinv,rsfeqn,dsfact,rfft,cfft,
  " math   "  sortrq,dgmlt1,dgmlt2
- " sind,cosd " 
  ]
 +CDE,GCFLAG.
-  Integer  SystemF,Ix/0/
+  Integer  SystemF,Ix/0/;  Real x/0.0/;  Double Precision d/0.D0/
   list external;
 * make sure that real calls will never be done even if this routine is called
   Ix = Ix+1;  if (Ix<=0) Return;
   Ix = Ix+1;  if (Ix>=0) Return;
-   fdum1 = atand(0.0);
-   fdum1 = atan2d(0.0,0.0);
-   fdum2 = sind(0.0);
-   fdum3 = cosd(0.0);
-   fdum4 = tand(0.0);
-
-   fdum1 = datand(0.0D0);
-   fdum1 = datan2d(0.0D0,0.0D0);
-   fdum2 = dsind(0.0D0);
-   fdum3 = dcosd(0.0D0);
-   fdum4 = dtand(0.0D0);
-  
-
-  ix=SystemF(' ')
+  ix = SystemF(' ')
+  x  = sind(x)+asind(x)+cosd(x)+acosd(x)+tand(x)+atand(x)+atan2d(x,x)
+  d  = dsind(d)+dasind(d)+dcosd(d)+dacosd(d)+dtand(d)+datand(d)+datan2d(d,d)
 * now fake calls to library - no need for arguments
   list ref;
 *
   END
+ 
+ 
+ 
  
  
  
