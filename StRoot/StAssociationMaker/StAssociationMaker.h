@@ -1,7 +1,15 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.7 1999/09/09 23:51:22 calderon Exp $
+ * $Id: StAssociationMaker.h,v 1.8 1999/10/01 14:08:55 calderon Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.8  1999/10/01 14:08:55  calderon
+ * Added Local Hit resolution Histogram. It is made by default
+ * without any requirement of association, to serve
+ * as a diagnostic.
+ * Before building track multimap, check the size of the
+ * tpc hit map.  If it is too small, print out a warning
+ * and exit.
+ *
  * Revision 1.7  1999/09/09 23:51:22  calderon
  * Made the following changes:
  * StAssociationMaker
@@ -40,6 +48,7 @@ class StMcTrack;
 class StTrackPairInfo;
 
 // Need to define a struct that relates a track with it's # of associated hits.
+class TH2F;
     
 struct trackPing {
     StMcTrack* mcTrack;
@@ -112,7 +121,7 @@ class StAssociationMaker : public StMaker {
     virtual Int_t Make();
     virtual Int_t Finish();
 
-    //TH1F*     mNumberOfPings;    //! Number of Hits Associated.
+    TH2F*     mLocalHitResolution;    //! Diff btw local x and z coords of hits.
     
 
     // Have to tell Root not to parse the Multimap stuff, or else it pukes.
@@ -135,7 +144,7 @@ private:
     Bool_t drawinit;
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.7 1999/09/09 23:51:22 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.8 1999/10/01 14:08:55 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker, 1)
 

@@ -1,9 +1,17 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.9 1999/09/28 14:35:00 fisyak Exp $
+ * $Id: StAssociationMaker.cxx,v 1.10 1999/10/01 14:08:54 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
- * Revision 1.9  1999/09/28 14:35:00  fisyak
- * Remove cons dependence on non existing headers
+ * Revision 1.10  1999/10/01 14:08:54  calderon
+ * Added Local Hit resolution Histogram. It is made by default
+ * without any requirement of association, to serve
+ * as a diagnostic.
+ * Before building track multimap, check the size of the
+ * tpc hit map.  If it is too small, print out a warning
+ * and exit.
+ *
+ * tpc hit map.  If it is too small, print out a warning
+ * and exit.
  *
  * Revision 1.9  1999/09/28 14:35:00  fisyak
  * Remove cons dependence on non existing headers
@@ -50,6 +58,7 @@ using std::vector;
 #include "StThreeVectorF.hh"
 
 
+#include "StChain.h"
 #include "St_DataSet.h"
 #include "StDevRow.hh"
 #include "StDevice.hh"
@@ -151,7 +160,7 @@ StAssociationMaker::StAssociationMaker(const char *name, const char *title):StMa
     mTpcHitMap = 0;
     mTrackMap = 0;
     
-    //mNumberOfPings  = 0;   
+    mLocalHitResolution = 0;   
     mTpcLocalHitResolution = 0;   
     mSvtHitResolution      = 0;   
     mFtpcHitResolution     = 0;
@@ -163,7 +172,7 @@ StAssociationMaker::StAssociationMaker(const char *name, const char *title):StMa
 StAssociationMaker::~StAssociationMaker()
     SafeDelete(mTpcHitMap);
     SafeDelete(mTrackMap);
-    //SafeDelete(mNumberOfPings);
+    //SafeDelete(mLocalHitResolution);
 	SafeDelete(mMcXiMap);
 	cout << "Deleted M.C. Xi Map" << endl;
     }
@@ -192,6 +201,10 @@ Int_t StAssociationMaker::Finish()
 }
 
 //_________________________________________________
+    mLocalHitResolution = new TH2F("LocalHitResolution","Delta Z Vs Delta X for Nearby Hits",
+			     50,-0.52,0.52,50,-0.24,0.24);
+    mLocalHitResolution->SetXTitle("Local (Xmc - Xrec) (cm)");
+    mLocalHitResolution->SetYTitle("Zmc - Zrec (cm)");
 				  50, -8, 0.8);
     mFtpcHitResolution->SetXTitle("Rmc - Rrec (cm)");
     mFtpcHitResolution->SetYTitle("PHImc - PHIrec (deg)");
@@ -262,10 +275,8 @@ Int_t StAssociationMaker::Finish()
     
     // Get the pointer to the parameter DB,
     // the definitions of the cuts
-    cout << " X Cut : " << parDB->xCut()/millimeter << " mm" << endl;
-    cout << " Z Cut : " << parDB->zCut()/millimeter << " mm" << endl;
-    cout << " Required Hits for Associating Tracks: " << parDB->reqCommonHits() << endl;
-
+    // should be done at the macro level.
+    mMcTpcHitMap = new mcTpcHitMapType;
     // Loop over hits and make Associations
     
     cout << "Making Hit Associations..." << endl;
@@ -285,19 +296,26 @@ Int_t StAssociationMaker::Finish()
 	    for (unsigned int iHit=0; iHit<rTpcLocal->device(iSector)->row(iPadrow)->nHits(); iHit++){
 		
 		recHit = (StTpcLocalHit_recon*) rTpcLocal->device(iSector)->row(iPadrow)->hit(iHit);
-		
+		float distance=200;
+		StTpcLocalHit_mc* closestHit = 0;
 		for (unsigned int jHit=0; jHit<mTpcLocal->device(iSector)->row(iPadrow)->nHits(); jHit++){
 		    
 		    mcHit = (StTpcLocalHit_mc*) mTpcLocal->device(iSector)->row(iPadrow)->hit(jHit);
-		    
+		    float xDiff = mcHit->localX()-recHit->localX();
+		    float zDiff = mcHit->globalZ()-recHit->globalZ();
+		    if (xDiff*xDiff+zDiff*zDiff<distance) {
+			distance = xDiff*xDiff+zDiff*zDiff;
+			closestHit = mcHit;
+		    if (xDiff*xDiff+zDiff*zDiff<tpcHitDistance) {
+			tpcHitDistance = xDiff*xDiff+zDiff*zDiff;
 		    if ( (StLocalHit) *recHit == (StLocalHit) *mcHit) {
 			// Make Associations  Use map,
-						
-			mTpcHitMap->insert(tpcHitMapValType (recHit->globalHitPtr(), mcHit->globalHitPtr()) );
 			
+			mTpcHitMap->insert(tpcHitMapValType (recHit->globalHitPtr(), mcHit->globalHitPtr()) );
 			// Make Associations  Use maps,
 			mRcTpcHitMap->insert(rcTpcHitMapValType (rcTpcHit, mcTpcHit) );
 			mMcTpcHitMap->insert(mcTpcHitMapValType (mcTpcHit, rcTpcHit) );
+		mLocalHitResolution->Fill(closestHit->localX()-recHit->localX(), closestHit->globalZ()-recHit->globalZ());
 						 rcTpcHit->position().x(),
 						 closestTpcHit->position().z()-
 						 rcTpcHit->position().z() );
@@ -306,7 +324,16 @@ Int_t StAssociationMaker::Finish()
     mMcFtpcHitMap = new mcFtpcHitMapType;
 			rDiffMin=rDiff;
 	cout << "Suggest increase distance cuts." << endl;
+    if (mTpcHitMap->size() < parDB->reqCommonHits()) {
+    }
     
+    if (mRcTpcHitMap->size() < parDB->reqCommonHitsTpc()) {
+	cout << " -----------  WARNING --------------- " << endl;
+	cout << "Entries in Hit Map  : " << mTpcHitMap->size() << endl;
+	cout << "Required Common Hits: " << parDB->reqCommonHits() << endl;
+	cout << " ------------------------------------ " << endl;
+	exit(1);
+    if (smallTpcHitMap && smallSvtHitMap && smallFtpcHitMap) {
     }
     const StMcTpcHit* mcValueTpcHit;
     StTrackCollection* recTracks = rEvent->trackCollection();
@@ -333,8 +360,6 @@ Int_t StAssociationMaker::Finish()
 	// Loop over tracks in StEvent
 	recTrack = *recTrackIter; // For a by-pointer collection we need to dereference once
 	if (!(recTrack->numberOfTpcHits())) continue; // If there are no Tpc Hits, skip track.
-	// print out the map
-        // cout << "The map is now" << endl << *mTrackMap << endl;
 	rcTrack = dynamic_cast<StGlobalTrack*>(trkNode->track(global));
 	if (!rcTrack || !(rcTrack->detectorInfo()->hits().size()))
 	    } // mc ftpc hits in multimap
@@ -396,8 +421,10 @@ Int_t StAssociationMaker::Finish()
 	      candidates[iCandidate].nPingsSvt  >= parDB->reqCommonHitsSvt() ||
 	      candidates[iCandidate].nPingsFtpc >= parDB->reqCommonHitsFtpc()){
 	    trkPair = new StTrackPairInfo(candidates[iCandidate].mcTrack, candidates[iCandidate].nPings);
-	    //mTrackMap->insert(make_pair(recTrack, trkPair));
 	    mTrackMap->insert(trackMapValType (recTrack, trkPair));
+					  candidates[iCandidate].nPingsFtpc);
+	    mRcTrackMap->insert(rcTrackMapValType (rcTrack, trkPair));
+	    //cout << "The map is now" << endl << *mTrackMap << endl;
 	    
 	    // print out the map
 	    //cout << "The map is now" << endl << *mRcTrackMap << endl;
