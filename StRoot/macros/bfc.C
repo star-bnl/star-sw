@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.107 1999/09/03 01:02:28 fisyak Exp $
+// $Id: bfc.C,v 1.108 1999/09/08 22:41:59 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -38,53 +38,7 @@ void bfc(const Int_t First,
   chain = new StBFChain;
   chain->SetFlags(Chain);
   if (!Chain || !strlen(Chain)) {
-#if 0
-    printf ("============= \tImportant two changes:\n"
-            "              \tIt is required exact matching in Chain definition\n"
-            "              \tAll Chain options set in supplyed order\n"); 
-#endif
-    printf ("============= \t U S A G E =============\n");
-    printf (
-"bfc(Int_t First, Int_t Nevents, Char_t *Chain, Char_t *infile, Char_t *outfile)\n"
-"bfc(Int_t Nevents, Char_t *Chain, Char_t *infile, Char_t *outfile)\n"
-"bfc(Char_t *Chain, Char_t *infile, Char_t *outfile)\n"
-"where\n"
-" First   \t- First event to process \t(Default = 1)\n"
-" Nevents \t- Total No. of events    \t(Default = 1)\n"
-" Chain   \t- Chain specification    \t(without First &  Nevents: Default is \"\" which gives this message)\n"
-"         \t                         \t with    First || Nevents: Default is \"gstar tfs\")\n"
-" infile  \t- Name of Input file     \t(Default = 0, i.e. use preset file names depending on Chain)\n" 
-" outfile \t- Name of Output file    \t(Default = 0, i.e. define Output file name from Input one)\n");
-    printf (
-"Examples:\n" 
-" root4star  bfc.C                   \t// Create this message\n"
-" root4star 'bfc.C(1)'               \t// Run one event with default Chain=\"gstar tfs\"\n"
-" root4star 'bfc.C(1,1)'             \t// the same\n"
-" root4star 'bfc.C(2,40,\"y1b fzin\")'\t// run for configuration year_1b, \n"
-"                                    \t// reading /disk1/star/test/psc0050_01_40evts.fzd\n"
-"                                    \t// skipping the 1-st event for the rest 39 events\n");
-    printf (
-" root4star 'bfc.C(40,\"y1b fzin\",\"/disk1/star/test/psc0050_01_40evts.fzd\")'\n"
-" root4star 'bfc.C(40,\"y1b fzin\")'\t// the same as  above\n"
-" root4star 'bfc.C(2,40,\"y1b fzin -l3t\")'//the as above but remove L3T from chain\n"
-" root4star 'bfc.C(40,\"y2a fzin\",\"/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fz\")'\n"
-" root4star 'bfc.C(40,\"y2a fzin\")'\t// the same as  above\n"
-" root4star 'bfc.C(5,10,\"y1b in xout\",\"/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf\")'\n"
-"                                    \t// skipping the 4 events for the rest 6 events\n");
-    printf (
-" root4star 'bfc.C(1,\"off in tpc FieldOff sd97 eval\",\"Mini_Daq.xdf\")'\t// the same as Chain=\"minidaq\"\n"
-" root4star 'bfc.C(1,\"gstar y1a tfs allevent\")' \t// run gstar and write all event into file branches\n"
-" root4star 'bfc.C(1,\"off in y1a l3t\",\"gtrack.tpc_hits.root\")'\t// run l3t only with prepaired file\n");
-    printf (
-" root4star 'bfc.C(1,\"tdaq display\",\"/disk1/star/daq/990727.3002.01.daq\")' \n"
-" \t//Cosmics (56) events with full magnetic field, TPC only \n"
-" root4star 'bfc.C(1,\"tdaq FieldOn\",\"/disk1/star/daq/990624.306.daq\")' \n"
-" \t//Cosmics (56) events with full magnetic field \n"
-" root4star 'bfc.C(1,\"tdaq HalfField\",\"/disk1/star/daq/990630.602.daq\")' \n"
-" \t//Laser (10) events with half magnetic field \n"
-" root4star 'bfc.C(1,\"tdaq FieldOff\",\"/disk1/star/daq/990701.614.daq\")' \n"
-" \t//Laser (12) events with no magnetic field \n");
-    gSystem->Exit(1);
+    Usage();
   }
   printf ("QAInfo:No. of Events to process = %i\n",NoEvents);
   chain->Set_IO_Files(infile,outfile);
@@ -172,4 +126,49 @@ void bfc (const Int_t Nevents,
 void bfc (const Char_t *Chain="",Char_t *infile=0, Char_t *outfile=0)
 {
   bfc(1,1,Chain,infile,outfile);
+}
+//____________________________________________________________
+void Usage() {
+#if 0
+  printf ("============= \tImportant two changes:\n"
+	  "              \tIt is required exact matching in Chain definition\n"
+	  "              \tAll Chain options set in supplyed order\n"); 
+#endif
+  printf ("============= \t U S A G E =============\n");
+  printf ("bfc(Int_t First, Int_t Nevents, Char_t *Chain, Char_t *infile, Char_t *outfile)\n");
+  printf ("bfc(Int_t Nevents, Char_t *Chain, Char_t *infile, Char_t *outfile)\n");
+  printf ("bfc(Char_t *Chain, Char_t *infile, Char_t *outfile)\n");
+  printf ("where\n");
+  printf (" First   \t- First event to process \t(Default = 1)\n");
+  printf (" Nevents \t- Total No. of events (including skipped ones)\t(Default = 1)\n");
+  printf (" Chain   \t- Chain specification    \t(without First &  Nevents: Default is \"\" which gives this message)\n");
+  printf ("         \t                         \t with    First || Nevents: Default is \"gstar tfs\")\n");
+  printf (" infile  \t- Name of Input file     \t(Default = 0, i.e. use preset file names depending on Chain)\n"); 
+  printf (" outfile \t- Name of Output file    \t(Default = 0, i.e. define Output file name from Input one)\n");
+  printf ("Examples:\n"); 
+  printf (" root4star  bfc.C                   \t// Create this message\n");
+  printf (" root4star 'bfc.C(1)'               \t// Run one event with default Chain=\"gstar tfs\"\n");
+  printf (" root4star 'bfc.C(1,1)'             \t// the same\n");
+  printf (" root4star 'bfc.C(2,40,\"y1b fzin\")'\t// run for configuration year_1b, \n");
+  printf ("                                    \t// reading /disk1/star/test/psc0050_01_40evts.fzd\n");
+  printf ("                                    \t// skipping the 1-st event for the rest 39 events\n");
+  printf (" root4star 'bfc.C(40,\"y1b fzin\",\"/disk1/star/test/psc0050_01_40evts.fzd\")'\n");
+  printf (" root4star 'bfc.C(40,\"y1b fzin\")'\t// the same as  above\n");
+  printf (" root4star 'bfc.C(2,40,\"y1b fzin -l3t\")'//the as above but remove L3T from chain\n");
+  printf (" root4star 'bfc.C(40,\"y2a fzin\",\"/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fz\")'\n");
+  printf (" root4star 'bfc.C(40,\"y2a fzin\")'\t// the same as  above\n");
+  printf (" root4star 'bfc.C(5,10,\"y1b in xout\",\"/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf\")'\n");
+  printf ("                                    \t// skipping the 4 events for the rest 6 events\n");
+  printf (" root4star 'bfc.C(1,\"off in tpc FieldOff sd97 eval\",\"Mini_Daq.xdf\")'\t// the same as Chain=\"minidaq\"\n");
+  printf (" root4star 'bfc.C(1,\"gstar y1a tfs allevent\")' \t// run gstar and write all event into file branches\n");
+  printf (" root4star 'bfc.C(1,\"off in y1a l3t\",\"gtrack.tpc_hits.root\")'\t// run l3t only with prepaired file\n");
+  printf (" root4star 'bfc.C(1,\"tdaq display\",\"/disk1/star/daq/990727.3002.01.daq\")' \n");
+  printf (" \t//Cosmics (56) events with full magnetic field, TPC only \n");
+  printf (" root4star 'bfc.C(1,\"tdaq FieldOn\",\"/disk1/star/daq/990624.306.daq\")' \n");
+  printf (" \t//Cosmics (56) events with full magnetic field \n");
+  printf (" root4star 'bfc.C(1,\"tdaq HalfField\",\"/disk1/star/daq/990630.602.daq\")' \n");
+  printf (" \t//Laser (10) events with half magnetic field \n");
+  printf (" root4star 'bfc.C(1,\"tdaq FieldOff\",\"/disk1/star/daq/990701.614.daq\")' \n");
+  printf (" \t//Laser (12) events with no magnetic field \n");
+  gSystem->Exit(1);
 }
