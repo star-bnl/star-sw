@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.112 1999/09/03 17:49:51 fisyak Exp $
+# $Id: MakePam.mk,v 1.113 1999/09/03 20:44:58 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.113  1999/09/03 20:44:58  fisyak
+# Fix typo
+#
 # Revision 1.112  1999/09/03 17:49:51  fisyak
 # Make makel and cons compartible in OBJ
 #
@@ -494,7 +497,7 @@ $(GEN_TAB)/St_%_Table.h:
 #--- compilation -
 $(OBJ_DIR)/%.$(O):%.g
 	test -d $(dir $(OBJ_DIR)/$(STEM)) || mkdir -p $(dir $(OBJ_DIR)/$(STEM)) && echo "mkdir -p $(dir $(OBJ_DIR)/$(STEM))"
-	$(CP) $(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
+	$(CP) $(1ST_DEPS) $(dir $(OBJ_DIR)/$(STEM)); cd $(dir $(OBJ_DIR)/$(STEM)); $(GEANT3) $(notdir $(1ST_DEPS)) -o  $(OBJ_DIR)/$(STEM).F
 	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  -o  $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.o: %.cxx
 	test -d $(dir $(OBJ_DIR)/$(STEM)) || mkdir -p $(dir $(OBJ_DIR)/$(STEM)) && echo "mkdir -p $(dir $(OBJ_DIR)/$(STEM))"
