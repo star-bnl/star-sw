@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.hh,v 1.1 1998/11/10 17:12:12 fisyak Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.hh,v 1.2 1998/11/16 14:49:43 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.hh,v $
- * Revision 1.1  1998/11/10 17:12:12  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1998/11/16 14:49:43  lasiuk
+ * add deltaResponse()
  *
  * Revision 1.4  1999/01/18 21:01:42  lasiuk
  * use fractionSampled(); enumerated types for function selection
@@ -56,6 +56,7 @@ public:
     // sampling
     void   setElectronicSampler(StSignal);
     void   sampleAnalogSignal();
+    double signalSampler(double, StTrsAnalogSignal&);
 
 private:
     // charge generation
