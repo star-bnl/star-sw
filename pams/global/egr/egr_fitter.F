@@ -80,14 +80,16 @@ C ---------------------------------------------------------------------
       INTEGER igtrk,itpct,isvtt,ipriv,iglob,ishit,ithit
       INTEGER tpcmc(1),lasthit,ifirst
       INTEGER*4 egr_refit_track,egr_load_globtrk
+      INTEGER*4 egr_refit_track_kal, egr_load_globtrk_kal
       INTEGER svt(1),tpc(1),mxtrack
       INTEGER malloc
       INTEGER imsg,imsgw
       INTEGER imsg1,imsg2,imsg3,imsg4,imsg5,imsg6,imsg7,imsg8
       INTEGER nqwe,locf,ifull
       CHARACTER*132 errmsg,msg
-      REAL covar(3,3),rfirst,rlast,r
-      real x(3),bfield(3)
+      REAL rfirst,rlast,r
+      double precision param(5),covar(5,5)
+      real x(3),bfield(3),cov(3,3)
       DATA imsg,imsgw,imsg1,imsg2,imsg3 /5*0/
       DATA imsg4,imsg5,imsg6,imsg7,imsg8 /5*0/
 
@@ -325,8 +327,8 @@ C  Abort if the TPC is needed but there are no TPC tracks
             jj=0
             do while (j.le.tpeval_h.nok.and.jj.eq.0)
                if (tpeval(j).rtrk.eq.tptrack(itpct).id) then
-                 tpcmc(itpct) = tpeval(j).mtrk
-                 jj=1
+                  tpcmc(itpct) = tpeval(j).mtrk
+                  jj=1
                endif
                j = j+1
             enddo
@@ -343,7 +345,7 @@ c     Find svt track with matching mc_id for perfect track matching
             enddo
             if( isvtt .ne. 0) then
 c     Fill tracks
-
+               
                if( egrpar(1).usesvt .eq. 0 .and. 
      +              egrpar(1).usetpc .eq. 0) then
 		  ifull = 1
@@ -387,9 +389,9 @@ c     Fill tracks
                   globtrk(igtrk).covar_diag(5)
      +                 =svt_track(svt(isvtt)).cov(15)                 
                   globtrk(igtrk).chisq(1)=svt_track(svt(isvtt)).chisq(1)
-     +                 / real((2.*globtrk(igtrk).n_fit_point)-3)
+     +                 / real(globtrk(igtrk).n_fit_point-3)
                   globtrk(igtrk).chisq(2)=svt_track(svt(isvtt)).chisq(2)
-     +                 /real(2*globtrk(igtrk).n_fit_point-2)
+     +                 /real(globtrk(igtrk).n_fit_point-2)
 C     Now find first point on track
                   rfirst = 99999.
 
@@ -474,16 +476,16 @@ C---<<<<<<<
                   endif
                   
                else
-            iret = egr_refit_track(tptrack(itpct).id,tptrack(itpct).id,
+             iret = egr_refit_track(tptrack(itpct).id,tptrack(itpct).id,
      +                 svt(isvtt),ipriv,gtrk,tphit_h,tphit,privert_h,
      +                 privert,svt_spt_h,svt_spt,svt_track_h,svt_track,
      +                 svt_group_h,svt_group,egrpar_h,egrpar,
-     +                 evt_match_h,evt_match,covar)
+     +                 evt_match_h,evt_match,cov)
                   
-                iret = egr_load_globtrk(globtrk_h,globtrk,globtrk_aux_h
+              iret = egr_load_globtrk(globtrk_h,globtrk,globtrk_aux_h
      +                 ,globtrk_aux,tptrack(itpct).id,gtrk,
-     +               tphit_h,tphit,svt_spt_h,svt_spt,covar,itpct,isvtt,
-     +                 ipriv,bfield(3))
+     +                 tphit_h,tphit,svt_spt_h,svt_spt,cov,itpct
+     +                 ,isvtt,ipriv,bfield(3))
                endif
                tptrack(itpct).id_globtrk = globtrk_h.nok
                svt_track(svt(isvtt)).id_globtrk = globtrk_h.nok  
@@ -507,15 +509,47 @@ c     mark spts as used
             isvtt = evt_match(imatch).idsvt
             if( egrpar(1).useglobal .eq. 2) then
                
-               igtrk = itpct             
+               igtrk = itpct  
+
                iret = egr_refit_track(igtrk,itpct,svt(isvtt),ipriv,gtrk,
+     +              tphit_h,tphit,privert_h,privert,svt_spt_h,svt_spt,
+     +              svt_track_h,svt_track,svt_group_h,svt_group,
+     +              egrpar_h,egrpar,evt_match_h,evt_match,cov)
+               
+               iret = egr_load_globtrk(globtrk_h,globtrk,globtrk_aux_h
+     +              ,globtrk_aux,igtrk,gtrk,tphit_h,tphit,svt_spt_h,
+     +              svt_spt,cov,itpct,isvtt,ipriv,bfield(3))
+               
+c     mark spts as used
+               do ient = 1, gtrk(itpct).nfit
+                  if( gtrk(itpct).det(ient) .eq. 1) then
+                     ithit = gtrk(itpct).ipnt(ient)
+                     tphit(ithit).id_globtrk = globtrk_h.nok
+                  elseif( gtrk(itpct).det(ient) .eq. 2)  then   
+                     svt_spt(gtrk(itpct).ipnt(ient)).id_globtrk =  
+     +                    globtrk_h.nok
+                  endif
+               enddo
+            elseif( egrpar(1).useglobal.eq.4) then
+               igtrk = itpct
+               
+               param(1) = svt_track(svt(isvtt)).phi0*C_RAD_PER_DEG
+               param(2) = svt_track(svt(isvtt)).z0
+               param(3) = svt_track(svt(isvtt)).psi*C_RAD_PER_DEG 
+               param(4) = svt_track(svt(isvtt)).tanl
+               param(5) = svt_track(svt(isvtt)).invpt
+               
+               
+               iret = egr_refit_track_kal(param, igtrk,itpct,svt(isvtt),
+     +              ipriv,gtrk,
      +              tphit_h,tphit,privert_h,privert,svt_spt_h,svt_spt,
      +              svt_track_h,svt_track,svt_group_h,svt_group,
      +              egrpar_h,egrpar,evt_match_h,evt_match,covar)
                
-               iret = egr_load_globtrk(globtrk_h,globtrk,globtrk_aux_h
-     +              ,globtrk_aux,igtrk,gtrk,tphit_h,tphit,svt_spt_h,
-     +              svt_spt,covar,itpct,isvtt,ipriv,bfield(3))
+               iret = egr_load_globtrk_kal(globtrk_h,globtrk
+     +              ,globtrk_aux_h,globtrk_aux,igtrk,gtrk,tphit_h,
+     +              tphit,svt_spt_h,svt_spt,covar,itpct,isvtt,
+     +              ipriv,bfield(3))
                
 c     mark spts as used
                do ient = 1, gtrk(itpct).nfit
@@ -528,7 +562,8 @@ c     mark spts as used
                   endif
                enddo
                
-            else                ! egrpar(1).useglobal=3
+               
+            elseif(egrpar(1).useglobal.eq.3) then
                
 	       ifull = 1
 	       if (globtrk_h.nok .ge. globtrk_h.maxlen) go to 1313
@@ -562,9 +597,9 @@ c     mark spts as used
               globtrk(igtrk).covar_diag(4)=svt_track(svt(isvtt)).cov(10)
               globtrk(igtrk).covar_diag(5)=svt_track(svt(isvtt)).cov(15)
                globtrk(igtrk).chisq(1)=svt_track(svt(isvtt)).chisq(1)/
-     +             real(2*globtrk(igtrk).n_fit_point -3)
+     +             real(globtrk(igtrk).n_fit_point -3)
                globtrk(igtrk).chisq(2)=svt_track(svt(isvtt)).chisq(2)/
-     +             real(2*globtrk(igtrk).n_fit_point -2)
+     +             real(globtrk(igtrk).n_fit_point -2)
 C     Now find first point on track
                rfirst = 99999.
                do ishit = 1,svt_group_h.nok
@@ -685,15 +720,33 @@ C     Loop through unmatched TPC tracks here.  Straight copy of tptrack.
 C     +           tptrack(itrk).nrec .gt. 10 )    then
 
                
-               if( egrpar(1).usetpc .gt. 1) then
+               if( egrpar(1).usetpc .eq. 2) then
                   
                   iret = egr_refit_track(tptrack(itrk).id,
      +                 tptrack(itrk).id,isvtt,ipriv,gtrk,tphit_h,
      +                 tphit,privert_h,privert,svt_spt_h,svt_spt,
      +                 svt_track_h,svt_track,svt_group_h,svt_group,
-     +                 egrpar_h,egrpar,evt_match_h,evt_match,covar)
+     +                 egrpar_h,egrpar,evt_match_h,evt_match,cov)
                   iret = egr_load_globtrk(globtrk_h,globtrk,globtrk_aux_h
      +                 ,globtrk_aux,tptrack(itrk).id,gtrk
+     +                 ,tphit_h,tphit,svt_spt_h,svt_spt,cov,itrk
+     +                 ,isvtt,ipriv,bfield(3))
+
+               elseif( egrpar(1).usetpc .eq. 4) then
+
+                    param(1) = tptrack(itrk).phi0*C_RAD_PER_DEG
+                    param(2) = tptrack(itrk).z0
+                    param(3) = tptrack(itrk).psi*C_RAD_PER_DEG 
+                    param(4) = tptrack(itrk).tanl
+                    param(5) = tptrack(itrk).invp*tptrack(itrk).q
+
+                  iret = egr_refit_track_kal(param,tptrack(itrk).id,
+     +                 tptrack(itrk).id,isvtt,ipriv,gtrk,tphit_h,
+     +                 tphit,privert_h,privert,svt_spt_h,svt_spt,
+     +                 svt_track_h,svt_track,svt_group_h,svt_group,
+     +                 egrpar_h,egrpar,evt_match_h,evt_match,covar)
+                  iret = egr_load_globtrk_kal(globtrk_h,globtrk,
+     +                 globtrk_aux_h,globtrk_aux,tptrack(itrk).id,gtrk
      +                 ,tphit_h,tphit,svt_spt_h,svt_spt,covar,itrk,isvtt,
      +                 ipriv,bfield(3))
                else
@@ -736,9 +789,9 @@ C     +           tptrack(itrk).nrec .gt. 10 )    then
                   globtrk(iglob).covar_diag(4) = tptrack(itrk).cov(10)
                   globtrk(iglob).covar_diag(5) = tptrack(itrk).cov(15)
                   globtrk(iglob).chisq(1) = tptrack(itrk).chisq(1)/
-     +            real(2*globtrk(iglob).n_fit_point-3)
+     +            real(globtrk(iglob).n_fit_point-3)
                   globtrk(iglob).chisq(2) = tptrack(itrk).chisq(2)/
-     +                 real(2*globtrk(iglob).n_fit_point-2)
+     +                 real(globtrk(iglob).n_fit_point-2)
 C     Now find first point on track.
                   if (tptrack(itrk).id.gt.0.and.
      +                 tptrack(itrk).id.le.mxtrack) then
@@ -753,6 +806,10 @@ C     Now find first point on track.
                   globtrk(iglob).x_first(1) = tphit(ifirst).x
                   globtrk(iglob).x_first(2) = tphit(ifirst).y
                   globtrk(iglob).x_first(3) = tphit(ifirst).z
+                  if( abs(globtrk(iglob).x_first(1)-globtrk(iglob).x0) 
+     +                 .gt. 0.5) then
+                     write(6,*) "Errr"
+                  endif
 
 C     Now find last point on track and calculate track length.
                   if (tptrack(itrk).id.gt.0.and.
@@ -870,9 +927,9 @@ C     Now loop over unmatched SVT tracks.  Straight svt_track copy.
                     globtrk(iglob).covar_diag(5) = 
      +                       svt_track(itrk).cov(15)
                     globtrk(iglob).chisq(1) = svt_track(itrk).chisq(1)/
-     +                   real(2*globtrk(iglob).n_fit_point-3)
+     +                   real(globtrk(iglob).n_fit_point-3)
                     globtrk(iglob).chisq(2) = svt_track(itrk).chisq(2)/
-     +                   real(2*globtrk(iglob).n_fit_point-2)
+     +                   real(globtrk(iglob).n_fit_point-2)
                     globtrk(iglob).x_first(1) = svt_spt(ifirst).x(1)
                     globtrk(iglob).x_first(2) = svt_spt(ifirst).x(2)
                     globtrk(iglob).x_first(3) = svt_spt(ifirst).x(3)
@@ -925,15 +982,39 @@ C---<<<<<<<
      +                   svt_track(itrk).cov(13)
                     globtrk_aux(globtrk_aux_h.nok).covar_off_diag(10) = 
      +                   svt_track(itrk).cov(14)
-                 else
+                 elseif( egrpar(1).usesvt .eq.2)then
                     igtrk = igtrk + 1
                     iret = egr_refit_track(igtrk,itpct,itrk,ipriv,
      +                   gtrk,tphit_h,tphit,privert_h,privert,
      +                   svt_spt_h,svt_spt,svt_track_h,svt_track,
      +                   svt_group_h,svt_group,egrpar_h,egrpar,
-     +                   evt_match_h,evt_match,covar)
+     +                   evt_match_h,evt_match,cov)
                     
                     iret = egr_load_globtrk(globtrk_h,globtrk,
+     +                   globtrk_aux_h,globtrk_aux,igtrk,gtrk,tphit_h,
+     +                   tphit,svt_spt_h,svt_spt,cov,itpct,isvtt
+     +                   ,ipriv,bfield(3))
+                    
+                    do ishit = 1, gtrk(igtrk).nfit
+                       ient = gtrk(igtrk).ipnt(ishit)
+                       svt_spt(ient).id_globtrk = globtrk_h.nok
+                    enddo
+                 elseIF( egrpar(1).usesvt .eq. 4) then
+                    igtrk = igtrk + 1
+
+                    param(1) = svt_track(itrk).phi0*C_RAD_PER_DEG
+                    param(2) = svt_track(itrk).z0
+                    param(3) = svt_track(itrk).psi*C_RAD_PER_DEG
+                    param(4) = svt_track(itrk).tanl
+                    param(5) = svt_track(itrk).invpt
+
+                    iret = egr_refit_track_kal(param,igtrk,itpct,itrk,ipriv,
+     +                   gtrk,tphit_h,tphit,privert_h,privert,
+     +                   svt_spt_h,svt_spt,svt_track_h,svt_track,
+     +                   svt_group_h,svt_group,egrpar_h,egrpar,
+     +                   evt_match_h,evt_match,covar)
+                    
+                    iret = egr_load_globtrk_kal(globtrk_h,globtrk,
      +                   globtrk_aux_h,globtrk_aux,igtrk,gtrk,tphit_h,
      +                   tphit,svt_spt_h,svt_spt,covar,itpct,isvtt,ipriv,
      +                   bfield(3))
