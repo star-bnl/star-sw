@@ -4,7 +4,7 @@
 * 7/31/98 P. Yepes  - editted to make it standard
 * 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk 
 * 10/14/98 K. Turner - put in read_default_params
-* 11/16/98 K. Turner - update to dev version of kumacs
+* 11/16/98 K. Turner - update to current version of mwc kumacs
 * ***********************************************************************
 ************************************************************************
 
@@ -111,7 +111,10 @@
  
 * close ntuple
   message ' close ntuple'
-  exec write_table_to_ntuple#close_disk [funit] [nid]
+  exec write_table_to_ntuple#close_disk_ntup
+  exec write_table_to_ntuple#close_file_ntup [funit]
+  exec write_table_to_ntuple#delete_soc_ntup [nid]
+   
 
 * close input file
   message ' close input file'
