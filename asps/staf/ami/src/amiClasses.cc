@@ -1,4 +1,4 @@
-// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.28 1999/11/17 03:05:11 fisyak Exp $";
+// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.29 1999/12/10 03:08:51 nevski Exp $";
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
 //:FILE:        amiClasses.C
@@ -105,9 +105,20 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
 	 delete[] d;
 	 // PN, 11/11/99: give explicite types
 	  char *a = (tbl._buffer[i])->typeSpecifier();
-          printf (" => argument table specification \n %s \n",a);
-          printf (" => required table specification \n %s \n",myTblSpecs[i]);
-          FREE (a);
+          char *b = myTblSpecs[i];
+          char *a1,*b1,a0,b0,sa[50],sb[50]; 
+          int  n;         
+          printf (" => BAD input -vs- required table specifications : \n");
+          for (a1=a, b1=b;  *a1!=0 || *b1!=0;) 
+          { 
+            for (a0=' ',n=0;  *a1!=0&&a0!=','&&a0!=';'&&a0!='{';  a1++) 
+                {a0=*a1; if (a0!='\n'&&n<30) sa[n++]=a0;}      sa[n]=0; 
+            for (b0=' ',n=0;  *b1!=0&&b0!=','&&b0!=';'&&b0!='{';  b1++) 
+                {b0=*b1; if (b0!='\n'&&n<30) sb[n++]=b0;}      sb[n]=0;
+            printf("  %-30s  :  %-s \n",sa,sb);
+          }
+
+         FREE (a);
 	 EML_ERROR(WRONG_TABLE_TYPE);
       }
 //- Convert table objs to 2-struct (TAS-like) tables.
@@ -251,17 +262,21 @@ STAFCV_T amiBroker:: callInvoker (const char * name
 	 table_size = 1;
       }
 //- Find or create table.
+//  PN, 12/9/99 - print table name in case of error
       if( NULL == (tables._buffer[i] = tdm->findTable(table_name)) ){
 	 if( AMI_INPUT_MODE == invoker->tableMode(i) ){
+            printf(" bad table name = %s \n", table_name);
 	    EML_ERROR(OBJECT_NOT_FOUND);
 	 }
 	 else {
 	    if( NULL == (tables._buffer[i] = tdm->newTable(table_name,
 			invoker->tableSpec(i), table_size)) ){
 	       if( table_name ){FREE(table_name); table_name = NULL;}
+               printf(" bad table name = %s \n", table_name);
 	       EML_ERROR(CANT_CREATE_OBJECT);
 	    }
 	    else {
+               printf(" bad table name = %s \n", table_name);
 	       EML_WARNING(Table created with 1 row.);
 	    }
 	 }
