@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.66 2002/01/07 23:32:01 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.67 2002/01/11 19:08:43 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -199,7 +199,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.66 2002/01/07 23:32:01 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.67 2002/01/11 19:08:43 posk Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -472,7 +472,7 @@ void StFlowMaker::FillFlowEvent() {
 
 	dcaSigned = CalcDcaSigned(vertex,gTrack);
 	pFlowTrack->SetDcaSigned(dcaSigned);
-
+	pFlowTrack->SetDca(pTrack->impactParameter());
 	pFlowTrack->SetDcaGlobal(gTrack->impactParameter());
 	pFlowTrack->SetChi2((Float_t)(pTrack->fitTraits().chi2()));
 	pFlowTrack->SetFitPts(pTrack->fitTraits().numberOfFitPoints());
@@ -744,6 +744,7 @@ void StFlowMaker::FillPicoEvent() {
     pFlowPicoTrack->SetPhiGlobal(pFlowTrack->PhiGlobal());
     pFlowPicoTrack->SetCharge(pFlowTrack->Charge());
     pFlowPicoTrack->SetDcaSigned(pFlowTrack->DcaSigned());
+    pFlowPicoTrack->SetDca(pFlowTrack->Dca());
     pFlowPicoTrack->SetDcaGlobal(pFlowTrack->DcaGlobal());
     pFlowPicoTrack->SetChi2(pFlowTrack->Chi2());
     pFlowPicoTrack->SetFitPts(pFlowTrack->FitPts());
@@ -943,6 +944,7 @@ Bool_t StFlowMaker::FillFromPicoVersion1DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetEta(pPicoTrack->Eta());
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
+      pFlowTrack->SetDca(pPicoTrack->Dca());
       pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
       pFlowTrack->SetChi2(pPicoTrack->Chi2());
       pFlowTrack->SetFitPts(pPicoTrack->FitPts());
@@ -1007,6 +1009,7 @@ Bool_t StFlowMaker::FillFromPicoVersion2DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
+      pFlowTrack->SetDca(pPicoTrack->Dca());
       pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
       pFlowTrack->SetChi2(pPicoTrack->Chi2());
       pFlowTrack->SetFitPts(pPicoTrack->FitPts());
@@ -1071,6 +1074,7 @@ Bool_t StFlowMaker::FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
+      pFlowTrack->SetDca(pPicoTrack->Dca());
       pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
       pFlowTrack->SetChi2(pPicoTrack->Chi2());
       pFlowTrack->SetFitPts(pPicoTrack->FitPts());
@@ -1147,6 +1151,7 @@ Bool_t StFlowMaker::FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
       pFlowTrack->SetDcaSigned(pPicoTrack->DcaSigned());
+      pFlowTrack->SetDca(pPicoTrack->Dca());
       pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
       pFlowTrack->SetChi2(pPicoTrack->Chi2());
       pFlowTrack->SetFitPts(pPicoTrack->FitPts());
@@ -1314,6 +1319,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.67  2002/01/11 19:08:43  posk
+// Restored SetDca for backwards compatability.
+//
 // Revision 1.66  2002/01/07 23:32:01  posk
 // Added return to prevent seg. fault when event skipped.
 //
