@@ -300,7 +300,7 @@ inline double StiKalmanTrackNode::getP() const
   if (c<1e-12) 
     return 0.003e12*pars->field;
   else
-    return 0.003*pars->field*(1.+fP4*fP4)/c;
+    return 0.003*pars->field*sqrt(1.+fP4*fP4)/c;
 }
 
 

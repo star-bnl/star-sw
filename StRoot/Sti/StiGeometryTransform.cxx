@@ -286,7 +286,7 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pNode,
   double h, phase;
   h = (pNode->getCharge()*StiKalmanTrackNode::getFieldConstant() <= 0) ? 1 : -1;
   phase = (p.y()==0&&p.x()==0) ? phase =(1-2.*h)*M_PI/4. : atan2(p.y(),p.x())-h*M_PI/2.;
-  *pHelix = StHelix(pNode->getCurvature(),
+  *pHelix = StHelix(fabs(pNode->getCurvature()),  // for StHelix, the curvature should be unsigned
 		    pNode->getDipAngle(),
 		    phase,
 		    origin,

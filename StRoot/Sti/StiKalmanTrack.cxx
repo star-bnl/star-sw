@@ -869,7 +869,7 @@ vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(StDetectorId detectorId) co
     //make sure node has a hit
     StiHit* hit = node.getHit();
     if((&node)->getHit()!=hit) cout <<"Danger, Will Robinson! Danger!"<<endl;
-    if (hit && hit->detector() != NULL) {
+    if (hit && hit->detector() != NULL && hit->getEloss()>0.) {
       if(detectorId==kTpcId && strstr(hit->detector()->getName().c_str(), "Tpc")!=NULL)
 	{//Tpc Hit requested and found
 	nodeVec.push_back(const_cast<StiKalmanTrackNode*>(&node));
@@ -1046,9 +1046,9 @@ bool StiKalmanTrack::find(int direction)
   if (debugCount<5) 
     {
       getInnerMostHitNode()->getGlobalMomentum(pp);
-      cout << "\nIn-x:" << getInnerMostHitNode()->fX<< " p:"<<pp[0]<<" "<<pp[1]<<" "<<pp[2]<<"\n"<<endl;
+      // cout << "\nIn-x:" << getInnerMostHitNode()->fX<< " p:"<<pp[0]<<" "<<pp[1]<<" "<<pp[2]<<"\n"<<endl;
       getOuterMostHitNode()->getGlobalMomentum(pp);
-      cout << "\nOut-x:" << getOuterMostHitNode()->fX<<" p:"<<pp[0]<<" "<<pp[1]<<" "<<pp[2]<<"\n"<<endl;
+      // cout << "\nOut-x:" << getOuterMostHitNode()->fX<<" p:"<<pp[0]<<" "<<pp[1]<<" "<<pp[2]<<"\n"<<endl;
     }
   reserveHits();  
   setFlag(1);
