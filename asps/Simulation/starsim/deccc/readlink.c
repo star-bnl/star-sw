@@ -1,7 +1,11 @@
 /*********************************************************
-* $Id: readlink.c,v 1.1.1.1 2004/01/12 23:49:39 potekhin Exp $
+* $Id: readlink.c,v 1.2 2004/06/26 00:16:28 potekhin Exp $
 * $Log: readlink.c,v $
+* Revision 1.2  2004/06/26 00:16:28  potekhin
+* Added size_t to the variable La in strncat
+*
 * Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
+*
 *
 * Revision 1.2  2001/03/05 11:55:22  nevski
 * headers clean-up
@@ -18,7 +22,7 @@ int readlink_(char* a, char *b, int La, int Lb)
 {
    char path[256];
    path[0]=0;
-   strncat (path,a,La);
+   strncat (path,a,(size_t) La);
    return readlink(path,b,Lb);
 }
 
