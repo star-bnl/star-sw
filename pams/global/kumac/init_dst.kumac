@@ -1,10 +1,25 @@
-macro init_rsum
+
+* *************************************************************************
+* init_dstl.kumac
+* Initialize dst run, event and particle_dst_filler
+*
+* 08/25/98 K. Turner       - created
+* 08/27/98 D. Weerasundara - renamed init_rsum to init_rhead
+*                            renamed init_esum to init_ehead
+*                            set row count=1 for run_header & event_header
+*                            tables.
+*
+************************************************************************
+
+macro init_rhead
 
 macro/global/import *
 
-message ' Initializing the Run header & summary Tables'
+message ' Initializing the Run header  Tables'
 
 cd [run_dst]
+
+tdm/table/rowcount run_header 1
 
 tdm/table/cell/putvalue 'run_header[0].run_id'       0
 tdm/table/cell/putvalue 'run_header[0].event_type'   'Collision'
@@ -25,10 +40,12 @@ cd /dui
 return
 ***************************************************************
 *
-macro init_esum
+macro init_ehead
  macro/global/import *
 
 cd [dst]
+
+tdm/table/rowcount event_header   1
 
 tdm/table/cell/putvalue 'event_header[0].n_event'      0  0
 tdm/table/cell/putvalue 'event_header[0].n_run'        0
@@ -62,6 +79,7 @@ tdm/table/cell/putvalue 'particle_dst_param[0].phi_max'       360.0
  return
 
 * ***************************************************************
+
 
 
 
