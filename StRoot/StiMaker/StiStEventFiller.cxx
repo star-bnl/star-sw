@@ -1,11 +1,18 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.20 2002/09/12 22:27:15 andrewar Exp $
+ * $Id: StiStEventFiller.cxx,v 1.21 2002/09/20 02:19:32 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 1.21  2002/09/20 02:19:32  calderon
+ * Quick hack for getting code for review:
+ * The filler now checks the global Dca for the tracks and only fills
+ * primaries when dca<3 cm.
+ * Also removed some comments so that the production log files are not swamped
+ * with debug info.
+ *
  * Revision 1.20  2002/09/12 22:27:15  andrewar
  * Fixed signed curvature -> StHelixModel conversion bug.
  *
@@ -342,9 +349,12 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t) 
 	    continue;
 	}
 	//cout <<"Tester: Primary Track Map Node Entries: "<<(*itKtrack).second->entries()<<endl;
-	if (kTrack->isPrimary()) {
-	  //cout <<"Track is a primary."<<endl;
-	    StTrackNode* currentTrackNode = (*itKtrack).second;
+	// obtain track node and global track, test for the global dca, and only enter those
+	// that satisfy the 3cm cut... wish this could be done in StiKalmanTrack::isPrimary().... 
+	StTrackNode* currentTrackNode = (*itKtrack).second;
+	double globalDca = currentTrackNode->track(global)->impactParameter();
+	if (globalDca<3.) {
+// 	    cout <<"Track is a primary. globalDca = " << globalDca <<endl;
 	    //cout <<"Got Current Node."<<endl;
 	    //  cout<<"Total entries in track node: "<<currentTrackNode->entries()<<endl;
 	    if (currentTrackNode->entries()>10)
@@ -452,7 +462,7 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool
     phase = (p.y()==0&&p.x()==0) ? phase =(1-2.*h)*M_PI/4. : atan2(p.y(),p.x())-h*M_PI/2.;
     phase += h*halfpi;
     double curv=fabs(node->getCurvature());
-    cout <<"Curvature: "<<curv<<endl;;
+//     cout <<"Curvature: "<<curv<<endl;;
     StTrackGeometry* geometry =new StHelixModel(short(node->getCharge()),
 						phase,
 						curv,
@@ -601,14 +611,16 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track){
     // finding 100000000000     
     // fitting             0010 
     //            32768    +    2 = 32770;
+    //
+    // above is no longer used, instead use kITKalmanfitId as fitter and tpcOther as finding method
     
     unsigned short int mStiEncoded = kITKalmanFitId + (1<< tpcOther);
     unsigned short int bit = 1<< tpcOther;
     gTrack->setEncodedMethod(mStiEncoded);
-    cout <<"Encoded Method ID: "<<mStiEncoded
-	 <<"kId: "<< kITKalmanFitId
-	 <<"bit: "<<bit
-	 <<endl;
+//     cout <<"Encoded Method ID: "<<mStiEncoded
+// 	 <<"kId: "<< kITKalmanFitId
+// 	 <<"bit: "<<bit
+// 	 <<endl;
     
     gTrack->setImpactParameter(impactParameter(track));//gTrack->setImpactParamter(track->getDca(vertex)); // change: need to calculate impact parameter or use 
     gTrack->setLength(track->getTrackLength());
