@@ -7,7 +7,8 @@ C:RETURN VALUE:
 c:>------------------------------------------------------------------
       subroutine jet_finder_ISA
       write(*,*)
-     1 'EMC_ERJ -- WARNING !! isajet jet finder not coded yet'
+     > 'EMC_ERJ -- WARNING !! isajet jet finder not coded yet',
+     > 'EMC_ERJ -- WARNING !! and probably will never be coded'
       return
       end
 

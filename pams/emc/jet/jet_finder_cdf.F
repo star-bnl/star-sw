@@ -8,6 +8,7 @@ c:>------------------------------------------------------------------
       subroutine jet_finder_CDF
       implicit NONE
       write(*,*)
-     1 'EMC_ERJ -- WARNING !! cdf jet finder not coded yet'
+     > 'EMC_ERJ -- WARNING !! cdf jet finder not coded yet',
+     > 'EMC_ERJ -- WARNING !! probably will never be coded'
       return
       end
