@@ -4,7 +4,8 @@ macro cts_init
 *
 cd /dui/constants
 *
-newfilestream ctb_geo ctb_geo.dsl r
+macro/global/import PARAMS_CTF 
+newfilestream ctb_geo [PARAMS_CTF]ctg_pars_ctb.xdf r
 getevent ctb_geo
 dio/stream/close ctb_geo
 *
