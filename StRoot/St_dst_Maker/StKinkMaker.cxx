@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.24 1999/11/10 20:29:38 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.25 1999/12/03 20:29:14 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.25  1999/12/03 20:29:14  wdeng
+// Comment out the cut for dip angle of parent
+//
 // Revision 1.24  1999/11/10 20:29:38  wdeng
 // Fixed problems with unit usage. Comment out the cut of point number for the moment.
 //
@@ -228,7 +231,7 @@ Int_t StKinkMaker::Make(){
 	StThreeVectorD origin(x0, y0, z0);  
 
 	tempTrack = new StKinkLocalTrack(dstTrackPtr,
-					 curvature*centimeter,					 
+					 curvature/centimeter,					 
 					 dip*radian, 
 					 phase*radian,
 					 origin*centimeter,
@@ -257,7 +260,7 @@ Int_t StKinkMaker::Make(){
     {
       myTrack1 = (StKinkLocalTrack*)trackArray->At(i);
 
-      if(fabs( myTrack1->helix().dipAngle()) > tkfpar->parentDipAngleMax ) continue;  
+      //if(fabs( myTrack1->helix().dipAngle()) > tkfpar->parentDipAngleMax ) continue;  
       if( myTrack1->pt() < tkfpar->parentPtMin ) continue;     
 
       parentImpact = myTrack1->helix().distance(eventVertex);
