@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.27 2004/02/12 16:54:24 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.28 2004/12/13 15:52:37 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.28  2004/12/13 15:52:37  genevb
+// Numerous updates: PMD, primtrk, FPD, QAShift lists
+//
 // Revision 2.27  2004/02/12 16:54:24  genevb
 // Separate MinBias histos
 //
@@ -104,6 +107,7 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
   histsList.Expand(32);
   histsSet = StQA_Undef;
   eventClass = 3;
+  ITTF = kFALSE;
 
 //  - Set all the histogram booking constants
 
@@ -190,8 +194,6 @@ Int_t StQAMakerBase::Make() {
   MakeHistDE();
   // histograms from table point
   MakeHistPoint();
-  // histograms from table g2t_rch_hit
-  MakeHistRich();
   // histograms from table dst_vertex,dst_v0_vertex,dst_xi_vertex,dst_kinkVertex
   MakeHistVertex();
   // histograms from EMC in StEvent
@@ -199,9 +201,11 @@ Int_t StQAMakerBase::Make() {
   // histograms from geant and reco tables 
   if (histsSet==StQA_MC) MakeHistEval();
   // histograms from BBC in StEvent
-  if (histsSet!=StQA_dAu) MakeHistBBC();
+  if (histsSet==StQA_AuAuOld) MakeHistBBC();
   // histograms from FPD in StEvent
-  if (histsSet!=StQA_dAu) MakeHistFPD();
+  if (histsSet==StQA_AuAuOld) MakeHistFPD();
+  // histograms from PMD in StEvent
+  MakeHistPMD();
 
   eventCount++;
   return kStOk;

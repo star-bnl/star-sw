@@ -1,5 +1,8 @@
-// $Id: QAH.cxx,v 2.2 2001/04/28 22:05:12 genevb Exp $ 
+// $Id: QAH.cxx,v 2.3 2004/12/13 15:52:36 genevb Exp $ 
 // $Log: QAH.cxx,v $
+// Revision 2.3  2004/12/13 15:52:36  genevb
+// Numerous updates: PMD, primtrk, FPD, QAShift lists
+//
 // Revision 2.2  2001/04/28 22:05:12  genevb
 // Added EMC histograms
 //
@@ -73,6 +76,22 @@ TH2F* QAH::MH1F(const Text_t* name, const Text_t* title,
     StMultiH1F(NameIt(name),TitleIt(title),nbinsx,xlow,xup,nbinsy);
   if (maker) maker->AddHist(hist);
   return hist;
+
+}
+//_____________________________________________________________________________
+void QAH::MMH1F(TH2F** histp, Int_t nhist, const Text_t* name, const Text_t* title,
+	   Int_t nbinsx, Axis_t xlow, Axis_t xup, Int_t nbinsy, Int_t first) {
+
+  for (Int_t i=0; i<nhist; i++) {
+    Int_t j = first + (i * nbinsy);
+    Int_t k = j + nbinsy - 1;
+    histp[i] = QAH::MH1F(Form(name,i),Form(title,j,k),nbinsx,xlow,xup,nbinsy);
+    for (Int_t l=0; l<nbinsy; l++) {
+      TString binname = Form("%d",j+l);
+      histp[i]->Rebin(l,binname.Data());
+    }
+    histp[i]->SetStats(kFALSE);
+  }
 
 }
 //_____________________________________________________________________________

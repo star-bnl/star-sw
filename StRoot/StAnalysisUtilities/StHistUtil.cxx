@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.22 2004/10/04 16:40:41 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.23 2004/12/13 15:52:35 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.23  2004/12/13 15:52:35  genevb
+// Numerous updates: PMD, primtrk, FPD, QAShift lists
+//
 // Revision 2.22  2004/10/04 16:40:41  genevb
 // FTPC radial histos
 //
@@ -218,8 +221,9 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   gStyle->SetPaperSize(m_PaperWidth,m_PaperHeight); 
   gStyle->SetOptStat(111111);
   gStyle->SetStatStyle(0);
+  gStyle->SetOptDate(0);
 
-
+  
   //setup canvas
   SafeDelete(m_HistCanvas);
 
@@ -337,9 +341,13 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 //  --> you can see the full list of global variables by starting ROOT and entering .g
 //  --> to find the full list of commands, type ? in ROOT 
 
+          // set x & y grid off by default
+	  gPad->SetGridy(0);
+	  gPad->SetGridx(0);
+	  
           // set logY & logX scale off
 	  gPad->SetLogy(0);
-	  gPad->SetLogx(0);	  
+	  gPad->SetLogx(0);
 
 // Set logY scale on if: there is a loglist, if the hist name is on the list, if it has entries
 //    and if the max entries in all bins is > 0
@@ -403,6 +411,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 	    }
           } else {
             if (oName.Contains("QaBbc") ||
+		(oName.Contains("QaPmd") && !oName.Contains("Total")) ||
                 (oName.Contains("QaFpd") && !oName.Contains("Sums"))) {
               hobj->SetBarOffset();
             }

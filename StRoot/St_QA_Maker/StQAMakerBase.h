@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.13 2004/02/12 05:03:17 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.14 2004/12/13 15:52:37 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.14  2004/12/13 15:52:37  genevb
+// Numerous updates: PMD, primtrk, FPD, QAShift lists
+//
 // Revision 2.13  2004/02/12 05:03:17  genevb
 // Year 4 AuAu changes. New SVT histos.
 //
@@ -77,7 +80,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.13 2004/02/12 05:03:17 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.14 2004/12/13 15:52:37 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -121,6 +124,7 @@ class StQAMakerBase : public StMaker {
   Int_t eventCount;
   Bool_t firstEventClass;
   Bool_t fillHists;
+  Bool_t ITTF;
 
   virtual void NewQABookHist();
   virtual TH2F* MH1F(const Text_t* name, const Text_t* title,
@@ -139,11 +143,11 @@ class StQAMakerBase : public StMaker {
   virtual void MakeHistPID() = 0;
   virtual void MakeHistVertex() = 0;
   virtual void MakeHistPoint() = 0;
-  virtual void MakeHistRich() = 0;
   virtual void MakeHistEMC() {}
   virtual void MakeHistEval() = 0;
   virtual void MakeHistBBC() {}
   virtual void MakeHistFPD() {}
+  virtual void MakeHistPMD() {}
 
   ClassDef(StQAMakerBase,0)   //needed for all code that will be used in CINT
 };

@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.46 2004/10/04 16:40:42 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.47 2004/12/13 15:52:36 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.47  2004/12/13 15:52:36  genevb
+// Numerous updates: PMD, primtrk, FPD, QAShift lists
+//
 // Revision 2.46  2004/10/04 16:40:42  genevb
 // FTPC radial histos
 //
@@ -229,7 +232,6 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_globtrk_tot=0;
   m_globtrk_good=0;
   m_globtrk_good_sm=0;
-  m_globtrk_good_tot=0;
   m_globtrk_goodTTS=0;
   m_globtrk_goodF=0;
   m_globtrk_iflag=0;
@@ -534,12 +536,6 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pchisq1FW=0;
   m_pchisq1T=0;
   m_pchisq1TTS=0;
-  m_prim_impactT=0; 
-  m_prim_impactrT=0; 
-  m_prim_impactTTS=0; 
-  m_prim_impactrTTS=0; 
-  m_prim_impactF=0; 
-  m_prim_impactrF=0; 
 
   m_ppointTS=0;        
   m_pmax_pointTS=0;    
@@ -570,8 +566,6 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_plengthTS=0;       
   m_pchisq0TS=0;       
   m_pchisq1TS=0;       
-  m_prim_impactTS=0;   
-  m_prim_impactrTS=0;   
 
   m_ppT_eta_recT = 0;
   m_ppT_eta_recFE = 0;
@@ -651,7 +645,13 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_ev0_k0ma_hist=0; //! K0 mass  
   m_xi_tot=0;        //! number of vertices
   m_xi_ma_hist=0;    //! Xi Mass
-  m_kink_tot=0;      //! number of kinks  
+  m_kink_tot=0;      //! number of kinks
+  
+  m_vtx_FtpcEastTpc_xy=0; //! FtpcEast prim vtx - TPC prim vtx, x vs y
+  m_vtx_FtpcEastTpc_z=0;  //! FtpcEast prim vtx z - TPC prim vtx z
+  m_vtx_FtpcWestTpc_xy=0; //! FtpcWest prim vtx - TPC prim vtx, x vs y
+  m_vtx_FtpcWestTpc_z=0;  //! FtpcWest prim vtx z - TPC prim vtx z
+  
 
 // for method MakeHistPoint
   m_z_hits=0;
@@ -705,6 +705,20 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
     m_fpd_north[i] = 0;
   }
   for (i=0; i<8; i++) m_fpd_sums[i] = 0;
+
+// for PMD
+  for (i=0; i<3; i++) {
+    m_pmd_sm_adc[i] = 0;
+    m_pmd_sm_hit[i] = 0;
+  }
+  for (i=0; i<6; i++) {
+    m_pmd_chain_adc[i] = 0;
+    m_pmd_chain_hit[i] = 0;
+  }
+  m_pmd_total_hit = 0;
+  m_pmd_total_adc = 0;
+  m_cpv_total_hit = 0;
+  m_cpv_total_adc = 0;
 }
 //_____________________________________________________________________________
 void StQABookHist::BookHist(Int_t histsSet){
@@ -719,7 +733,7 @@ void StQABookHist::BookHist(Int_t histsSet){
   BookHistPoint();
   BookHistRich();
   BookHistEMC();
-  if (histsSet != StQA_dAu) {
+  if (histsSet == StQA_AuAuOld) {
     BookHistBBC();
     BookHistFPD();
   }
@@ -728,6 +742,7 @@ void StQABookHist::BookHist(Int_t histsSet){
   BookHistDE();
   BookHistPID();
   BookHistVertex();
+  BookHistPMD();
   if (histsSet==StQA_MC) BookHistEval();
   
 }
@@ -743,10 +758,6 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_iflag    = QAH::H1F("QaGtrkFlag","globtrk: iflag - all ",200,-999.,1001.);
   m_globtrk_good     = QAH::H1F("QaGtrkGood","globtrk: tot good tracks - all",40,0.,10000.);
   m_globtrk_good_sm  = QAH::H1F("QaGtrkGoodsm","globtrk: tot good tracks - all",40,0.,500.);
-  m_globtrk_good_tot = QAH::MH1F("QaGtrkGoodTot","globtrk: ratio good tracks (tpc,tpc+svt) to all tracks (tpc,tpc+svt)",50,0,1,2);
-  m_globtrk_good_tot->Rebin(0,"TPC+SVT/total");
-  m_globtrk_good_tot->Rebin(1,"TPC/total");
-  m_globtrk_good_tot->SetStats(kFALSE);
   m_globtrk_goodTTS  = QAH::H1F("QaGtrkGoodTTS","globtrk: tot good tracks - tpc,tpc+svt",150,0.,9000.);
   m_globtrk_goodF    = QAH::H2F("QaGtrkGoodF","globtrk: tot good tracks - ftpc",150,0.,1500.,150,0.,1500.);
   m_globtrk_goodF->SetXTitle("FTPC East");
@@ -1314,14 +1325,6 @@ void StQABookHist::BookHistPrim(){
   m_pchisq1TTS->Rebin(0,"TPC+SVT");
   m_pchisq1TTS->Rebin(1,"TPC");
   m_pchisq1TTS->SetStats(kFALSE);
-  m_prim_impactTTS = QAH::MH1F("QaPtrkImpactTTS", "primtrk: log10 impact param from prim vtx, tpc,svt",120,-3.,3.,2);
-  m_prim_impactTTS->Rebin(0,"TPC+SVT");
-  m_prim_impactTTS->Rebin(1,"TPC");
-  m_prim_impactTTS->SetStats(kFALSE);
-  m_prim_impactrTTS = QAH::MH1F("QaPtrkImpactrTTS", "primtrk: impact param from prim vtx, tpc,svt",100,0.,0.001,2);
-  m_prim_impactrTTS->Rebin(0,"TPC+SVT");
-  m_prim_impactrTTS->Rebin(1,"TPC");
-  m_prim_impactrTTS->SetStats(kFALSE);
   m_pfpoint_lengthTTS = QAH::H2F("QaPtrkFitPntLTTS","primtrk: N fit pnts vs length, tpc,tpc+svt",25,70.,350.,25,0.,50.);
   m_pfpoint_lengthTTS->SetXTitle("trk length");
   m_pfpoint_lengthTTS->SetYTitle("Npoints on trk");
@@ -1365,8 +1368,6 @@ void StQABookHist::BookHistPrim(){
   m_pmomT        = QAH::H1F("QaPtrkPT",      "primtrk: momentum, tpc",50,0.,5.);
   m_pchisq0T     = QAH::H1F("QaPtrkChisq0T", "primtrk: chisq0, tpc", 50, 0.,5.);
   m_pchisq1T     = QAH::H1F("QaPtrkChisq1T", "primtrk: chisq1, tpc", 50, 0.,1.2);
-  m_prim_impactT = QAH::H1F("QaPtrkImpactT", "primtrk: log10 impact param from prim vtx, tpc",120,-3.0,3.0);
-  m_prim_impactrT = QAH::H1F("QaPtrkImpactrT", "primtrk: impact param from prim vtx, tpc",100,0.,0.001);
 
 // 2D - tpc
   m_ppT_eta_recT = QAH::H2F("QaPtrkPtVsEtaT","primtrk: log pT vs eta, tpc", 20,-2.,2.,40,1.,4.);
@@ -1467,8 +1468,6 @@ void StQABookHist::BookHistPrim(){
   m_pmomTS        = QAH::H1F("QaPtrkPTS",      "primtrk: momentum, tpc+svt",50,0.,5.);
   m_pchisq0TS     = QAH::H1F("QaPtrkChisq0TS", "primtrk: chisq0, tpc+svt", 50, 0.,5.);
   m_pchisq1TS     = QAH::H1F("QaPtrkChisq1TS", "primtrk: chisq1, tpc+svt", 50, 0.,1.2);
-  m_prim_impactTS = QAH::H1F("QaPtrkImpactTS", "primtrk: log10 impact param from prim vtx, tpc+svt",120,-3.0,3.0);
-  m_prim_impactrTS = QAH::H1F("QaPtrkImpactrTS", "primtrk: impact param from prim vtx, tpc+svt",100,0.,0.01);
 
 // 2D - tpc + silicon (svt + ssd)
   m_ppT_eta_recTS = QAH::H2F("QaPtrkPtVsEtaTS","primtrk: log pT vs eta, tpc+svt", 20,-2.,2.,40,1.,4.);
@@ -1588,14 +1587,6 @@ void StQABookHist::BookHistPrim(){
   m_pchisq1F->Rebin(0,"East");
   m_pchisq1F->Rebin(1,"West");
   m_pchisq1F->SetStats(kFALSE);
-  m_prim_impactF = QAH::MH1F("QaPtrkImpactF", "primtrk: log10 impact param from prim vtx, ftpc",120,-3.0,3.,2);
-  m_prim_impactF->Rebin(0,"East");
-  m_prim_impactF->Rebin(1,"West");
-  m_prim_impactF->SetStats(kFALSE);
-  m_prim_impactrF = QAH::MH1F("QaPtrkImpactrF", "primtrk: impact param from prim vtx, ftpc",100,0.,30.,2);
-  m_prim_impactrF->Rebin(0,"East");
-  m_prim_impactrF->Rebin(1,"West");
-  m_prim_impactrF->SetStats(kFALSE);
   // separate east and west histograms
   m_ppointFE      = QAH::H1F("QaPtrkNPntFE",    "primtrk: N points on trk,ftpc east", 15, 0.,15.);
   m_ppointFW      = QAH::H1F("QaPtrkNPntFW",    "primtrk: N points on trk,ftpc west", 15, 0.,15.);
@@ -1738,6 +1729,19 @@ void StQABookHist::BookHistVertex(){
 
   m_kink_tot   = QAH::H1F("QaKinkTot",  "kinkVertex: # kinks ",25,0.,25.);
 
+  m_vtx_FtpcEastTpc_xy = QAH::H2F("QaVtxFtpcETpcXY",
+				  " vertex,prim: x(ftpcE)-x(tpc) vs y(ftpcE)-y(tpc)",
+				  80, -2., 2., 80, -2., 2.);
+  m_vtx_FtpcEastTpc_z  = QAH::H1F("QaVtxFtpcETpcZ",
+				  " vertex,prim: z(ftpcE)-z(tpc)",
+				  100, -10., 10.);
+  m_vtx_FtpcWestTpc_xy = QAH::H2F("QaVtxFtpcWTpcXY",
+				  " vertex,prim: x(ftpcW)-x(tpc) vs y(ftpcW)-y(tpc)",
+				  80, -2., 2., 80, -2., 2.);
+  m_vtx_FtpcWestTpc_z  = QAH::H1F("QaVtxFtpcWTpcZ",
+				  " vertex,prim: z(ftpcW)-z(tpc)",
+				  100, -10., 10.);
+  
 }
 //_____________________________________________________________________________
 void StQABookHist::BookHistPoint(){
@@ -1975,31 +1979,11 @@ void StQABookHist::BookHistBBC(){
 //_____________________________________________________________________________
 void StQABookHist::BookHistFPD(){
 
-  Char_t ID[4];
-  Int_t i,j;
-
-// Book ADC histograms
-  m_fpd_top[0] = QAH::MH1F("QaFpdTop0","FPD Top ADC 1-8" ,100,0.5,1500.5,8);
-  m_fpd_top[1] = QAH::MH1F("QaFpdTop1","FPD Top ADC 9-16",100,0.5,1500.5,8);
-  m_fpd_bottom[0] = QAH::MH1F("QaFpdBottom0","FPD Bottom ADC 1-8" ,100,0.5,1500.5,8);
-  m_fpd_bottom[1] = QAH::MH1F("QaFpdBottom1","FPD Bottom ADC 9-16",100,0.5,1500.5,8);
-  m_fpd_south[0] = QAH::MH1F("QaFpdSouth0","FPD South ADC 1-8" ,100,0.5,1500.5,8);
-  m_fpd_south[1] = QAH::MH1F("QaFpdSouth1","FPD South ADC 9-16",100,0.5,1500.5,8);
-  m_fpd_north[0] = QAH::MH1F("QaFpdNorth0","FPD North ADC 1-6" ,100,0.5,1500.5,6);
-  m_fpd_north[1] = QAH::MH1F("QaFpdNorth1","FPD North ADC 7-12",100,0.5,1500.5,6);
-  for (i=0; i<8; i++) {
-    for (j=0; j<2; j++) {
-      sprintf(ID,"%d",i+1+(8*j));
-      m_fpd_top[j]->Rebin(i,ID);
-      m_fpd_bottom[j]->Rebin(i,ID);
-      m_fpd_south[j]->Rebin(i,ID);
-      if (i<6) {
-        sprintf(ID,"%d",i+1+(6*j));
-        m_fpd_north[j]->Rebin(i,ID);
-      } 
-    } 
-  } 
-
+  QAH::MMH1F(m_fpd_top,2,"QaFpdTop%d","FPD Top ADC %d-%d",100,0.5,1500.5,8,1);
+  QAH::MMH1F(m_fpd_bottom,2,"QaFpdBottom%d","FPD Bottom ADC %d-%d",100,0.5,1500.5,8,1);
+  QAH::MMH1F(m_fpd_south,2,"QaFpdSouth%d","FPD South ADC %d-%d",100,0.5,1500.5,8,1);
+  QAH::MMH1F(m_fpd_north,2,"QaFpdNorth%d","FPD North ADC %d-%d",100,0.5,1500.5,6,1);
+  
 // Book ADC histograms: FPD SUM signals
   m_fpd_sums[0] = QAH::H1F("QaFpdSums0","FPD SUM Top",100,0.5,2050.5);
   m_fpd_sums[1] = QAH::H1F("QaFpdSums1","FPD SUM Bottom",100,0.5,2050.5);
@@ -2010,6 +1994,32 @@ void StQABookHist::BookHistFPD(){
   m_fpd_sums[6] = QAH::H1F("QaFpdSums6","FPD SUM Pres1",100,0.5,1500.5);
   m_fpd_sums[7] = QAH::H1F("QaFpdSums7","FPD SUM Pres2",100,0.5,1500.5);
 
+}
+//_____________________________________________________________________________
+void StQABookHist::BookHistPMD(){
+
+  QAH::MMH1F(m_pmd_sm_hit,3,"QaPmdSmHit%d",
+	     "PMD SM-wise Hit Multiplicity %02d-%02d",1000,0.,5000.,8);
+  QAH::MMH1F(m_pmd_sm_adc,3,"QaPmdSmAdcHit%d",
+	     "PMD SM-wise ADC/Hit Multiplicity %02d-%02d",100,0.,1000.,8);
+  QAH::MMH1F(m_pmd_chain_hit,6,"QaPmdChHitChain%d",
+	     "PMD Channel-wise Hit, Chain %02d-%02d",1728,-0.5,1727.5,8);
+  QAH::MMH1F(m_pmd_chain_adc,6,"QaPmdChAdcChain%d",
+	     "PMD Channel-wise ADC, Chain %02d-%02d",1728,-0.5,1727.5,8);
+
+  m_pmd_total_hit = QAH::H2F("QaPmdTotalHit","PMD Total Hits",100,0.,1e5,100,0.,4.);
+  m_pmd_total_hit->SetXTitle("event id");
+  m_pmd_total_hit->SetYTitle("log10");
+  m_pmd_total_adc = QAH::H2F("QaPmdTotalAdc","PMD Total ADC",100,0.,1e5,100,0.,6.);
+  m_pmd_total_adc->SetXTitle("event id");
+  m_pmd_total_adc->SetYTitle("log10");
+  m_cpv_total_hit = QAH::H2F("QaCpvTotalHit","CPV Total Hits",100,0.,1e5,100,0.,4.);
+  m_cpv_total_hit->SetXTitle("event id");
+  m_cpv_total_hit->SetYTitle("log10");
+  m_cpv_total_adc = QAH::H2F("QaCpvTotalAdc","CPV Total ADC",100,0.,1e5,100,0.,6.);
+  m_cpv_total_adc->SetXTitle("event id");
+  m_cpv_total_adc->SetYTitle("log10");
+  
 }
 //_____________________________________________________________________________
 

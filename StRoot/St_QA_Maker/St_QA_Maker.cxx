@@ -746,7 +746,6 @@ void St_QA_Maker::MakeHistPrim(){
 	Float_t chisq1 = t->chisq[1]; 
         Float_t nfitntot = (Float_t(trkfpnt))/(Float_t(trkpnt )+1.e-10);
         Float_t nfitnmax = (Float_t(trkfpnt))/(Float_t(trkmpnt)+1.e-10);
-        Float_t logImpact = TMath::Log10(t->impact); 
         Float_t logCurvature = TMath::Log10(t->curvature); 
 
 
@@ -809,8 +808,6 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_prim_zf0->Fill(zdif);
         hists->m_prim_rzf0->Fill(azimdif,0.);
         hists->m_prim_rzf0->Fill(zdif,1.);
-        hists->m_prim_impactT->Fill(logImpact);
-        hists->m_prim_impactrT->Fill(t->impact);
 	
 // these are tpc & ftpc
         hists->m_ppointT->Fill(trkpnt);
@@ -880,8 +877,6 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_prim_zf0TS->Fill(zdif);
         hists->m_prim_rzf0TS->Fill(azimdif,0.);
         hists->m_prim_rzf0TS->Fill(zdif,1.);
-        hists->m_prim_impactTS->Fill(logImpact);
-        hists->m_prim_impactrTS->Fill(t->impact);
 	
         hists->m_ppointTS->Fill(trkpnt);
         hists->m_pmax_pointTS->Fill(trkmpnt);
@@ -1355,8 +1350,11 @@ void St_QA_Maker::MakeHistEval(){
 }
 
 //_____________________________________________________________________________
-// $Id: St_QA_Maker.cxx,v 2.20 2004/02/12 05:03:18 genevb Exp $
+// $Id: St_QA_Maker.cxx,v 2.21 2004/12/13 15:52:37 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.21  2004/12/13 15:52:37  genevb
+// Numerous updates: PMD, primtrk, FPD, QAShift lists
+//
 // Revision 2.20  2004/02/12 05:03:18  genevb
 // Year 4 AuAu changes. New SVT histos.
 //
