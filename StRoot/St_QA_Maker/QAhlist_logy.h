@@ -1,5 +1,8 @@
-// $Id: QAhlist_logy.h,v 2.7 2002/02/12 18:41:59 genevb Exp $
+// $Id: QAhlist_logy.h,v 2.8 2002/04/03 21:13:11 lansdell Exp $
 // $Log: QAhlist_logy.h,v $
+// Revision 2.8  2002/04/03 21:13:11  lansdell
+// primary track first, last point residuals now use outerGeometry() for helix parameters
+//
 // Revision 2.7  2002/02/12 18:41:59  genevb
 // Additional FTPC histograms
 //
@@ -46,6 +49,8 @@
  "QaGtrkZf0TS",
  "QaGtrkRZf0",
  "QaGtrkRZf0TS",
+ "QaGtrkRZl0",
+ "QaGtrkRZl0TS",
  "QaGtrkImpactT",  
  "QaGtrkImpactTS",
  "QaGtrkImpactTTS",
@@ -170,6 +175,8 @@
  "QaPtrkR0TS",
  "QaPtrkZ0T",
  "QaPtrkZ0TS",
+ "QaPtrkRZl0",
+ "QaPtrkRZl0TS",
  "QaPtrkCurvT",
  "QaPtrkCurvTS",
  "QaPtrkXfT",
