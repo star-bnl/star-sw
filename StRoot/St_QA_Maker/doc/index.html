@@ -241,17 +241,35 @@
      &nbsp - you don't need to call this explicitly, since ListHists & DrawHists call it for you
   <li> virtual Int_t   
     <font  size ="+1" color="red">ListHists<font  size ="+1" color="black">(Char_t *dirName="QA");<br>
-     &nbsp - finds histograms (FindHist) for given input Maker "dirName" and then lists the titles 
+     &nbsp - finds histograms (using FindHist method) for given input Maker "dirName" and then lists the titles 
 
   <li> virtual Int_t  
     <font  size ="+1" color="red">DrawHists<font  size ="+1" color="black">(Char_t *dirName="QA"); <br>
-     &nbsp -  finds histograms (FindHist) for given input Maker "dirName" and then prints & draws them <br>
-     &nbsp -  uses settings and lists from the methods listed below<br>
-     &nbsp -  sets all statistics on using SetOptStat(111111) <br>
-     &nbsp - if it's a 2D histogram, prints it as a "box" plot <br>
+
+     &nbsp -  creates output postscript file (if you have set a filename) <br>
+     &nbsp -  sets the global title to be written at top of output pages<br>
+     &nbsp -  sets papersize <br>
+     &nbsp -  set all statistics options on <br>
+     &nbsp -  creates histogram canvas<br>
+     &nbsp -  writes title at top of canvas & date,time at bottom<br>
+     &nbsp -  create a pad on the canvas and divide it into subpads if requested<br>
+     &nbsp -  find the pointer <br>
+     &nbsp -  finds histograms (using FindHist method) for given input Maker directory "dirName" <br>
+     &nbsp -  loop over histograms (they are in order booked) and 
+   <ol>
+        <li> if there's no print list, then print all histograms in directory
+        <li> if there is a print list, then only print if hist name is on list
+        <li> set logY scale OFF
+        <li> if there is a list of LogY=ON and this histogram name is on it, then
+             set logY scale ON
+        <li> if it's a 2D histogram, set it to print as a "box" plot
+        <li> draw all histograms to screen 
+        <li> send all histograms to postscript file 
+   </ol>
+     &nbsp - close postscript file
   <li> virtual void    
     <font  size ="+1" color="red">SetDefaultLogYList<font  size ="+1" color="black">(Char_t *dirName="QA");<br>
-     &nbsp -  sets a default list of histograms, for given input
+     &nbsp -  creates a default list of histograms (using AddToLogYList), for given input
               Maker "dirName", that should be
               drawn in logY scale <br>
      &nbsp - call this method *before* DrawHists
@@ -277,7 +295,7 @@
      &nbsp - prints out list of histograms that will be drawn in logY scale  <br>
   <li> virtual void    
     <font  size ="+1" color="red">SetDefaultPrintList<font  size ="+1" color="black">(Char_t *dirName="QA");<br>
-     &nbsp -  sets a default list of histogram names, for given input
+     &nbsp -  creates a default list of histogram names (using AddToPrintList), for given input
               PrintList, that should be
               drawn,printed  <br>
      &nbsp - this list will be a subset of the histogram names for the given Maker
@@ -323,6 +341,10 @@
     <font  size ="+1" color="red">SetPostScriptFile<font  size ="+1" color="black">(const Char_t *psFileName="");<br>
        &nbsp - set output postscript file name to print histograms to <br>
        &nbsp - this filename is  used by DrawHists method
+  <li> virtual void    
+    <font  size ="+1" color="red">SetGlobalTitle<font  size ="+1" color="black">(const Char_t *globalTitle="");<br>
+       &nbsp - set character string which gets written as a title on top of each output page <br>
+       &nbsp - this string is  used by DrawHists method
          </ul>
      </ul>
 
@@ -371,19 +393,22 @@
 
     <li>  <font  size ="+1" color="red">bfcread_hist_to_ps.C <font  size ="+1" color="black">  <br>
           &nbsp   - reads .hist.root file produced from bfc.C  or other chain<br>
-          &nbsp   -  lists,draws,prints to output ps file histograms for given Maker
-                    subdirectory for given top level directory<br>
+          &nbsp   -  lists,draws,prints to output ps file histograms for given: Maker
+                    subdirectory name, top level directory name, print list<br>
           &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
-                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,DrawHists methods
+                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,DrawHists,
+                     SetDefaultPrintList,ExaminePrintList, DrawHists  methods
                   from StHistUtil
 
     <li>  <font  size ="+1" color="red">bfcread_dst_QAhist.C <font  size ="+1" color="black"> <br>
           &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
           &nbsp   - creates chain and then runs the St_QA_Maker for nevents to book & fill QA 
                     dst-table histograms <br>
-          &nbsp   -  lists,draws,prints histograms from "QA" subdirectory   <br>                  
+          &nbsp   -  lists,draws,prints histograms from "QA" subdirectory from
+                   given print list   <br>                  
           &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
-                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,DrawHists methods
+                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,
+                  SetDefaultPrintList,ExaminePrintList,DrawHists methods
                   from StHistUtil
 
     <li>  <font  size ="+1" color="red">bfcread_dst_EventQAhist.C <font  size ="+1" color="black"> <br>
@@ -391,9 +416,10 @@
           &nbsp   - creates chain and then runs the StEventMaker (to fill StEvent data structure)
                     and StEventQAMaker for nevents to book & fill QA 
                     StEvent histograms<br>
-          &nbsp   -  lists,draws,prints histograms from "EventQA" subdirectory  <br>                  
+          &nbsp   -  lists,draws,prints histograms from "EventQA" subdirectory from given print list <br>                 
           &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
-                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,DrawHists methods
+                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,
+                   SetDefaultPrintList,ExaminePrintList,DrawHists methods
                   from StHistUtil
 
     <li>  <font  size ="+1" color="red">bfcread_dst_QA_outhistfile.C <font  size ="+1" color="black"> <br>
