@@ -1,6 +1,9 @@
-// $Id: StRareMaker.h,v 1.4 2001/10/15 20:20:27 struck Exp $
+// $Id: StRareMaker.h,v 1.5 2001/10/16 01:26:14 struck Exp $
 //
 // $Log: StRareMaker.h,v $
+// Revision 1.5  2001/10/16 01:26:14  struck
+// added filename parameter for tree file to constructors
+//
 // Revision 1.4  2001/10/15 20:20:27  struck
 // first version with L3 included
 //
@@ -61,15 +64,17 @@ protected:
 
 public:
 
-  StRareMaker(const Char_t *name="RareParticles");
-  StRareMaker(const Char_t *name,StRareEventCut* cut, StRareTrackCut* track);
-  StRareMaker(const Char_t *name,StRareEventCut* cut,
+  StRareMaker(const Char_t *name="RareParticles", Char_t* fileName="RareEvent.root");
+  StRareMaker(const Char_t *name, Char_t* fileName, StRareEventCut* cut, StRareTrackCut* track);
+  StRareMaker(const Char_t *name,
+	      Char_t* fileName,
+	      StRareEventCut* cut,
 	      StRareTrackCut* trackCut,
 	      StL3RareTrackCut* l3trackCut);
   virtual ~StRareMaker(){};
   virtual void Clear(Option_t *option="");
   virtual Int_t Init();
-   virtual Int_t  Make();
+  virtual Int_t  Make();
   virtual void   PrintInfo();
   virtual Int_t  Finish();
   virtual void   Report();
