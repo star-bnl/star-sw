@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.42 2001/12/21 22:39:32 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.43 2002/01/11 16:44:12 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.43  2002/01/11 16:44:12  ullrich
+ * Fill bunch crossing numbers in StEventInfo.
+ *
  * Revision 2.42  2001/12/21 22:39:32  ullrich
  * Disabled filling parts of StRunInfo.
  *
@@ -182,7 +185,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.42 2001/12/21 22:39:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.43 2002/01/11 16:44:12 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -438,6 +441,15 @@ StEventMaker::makeEvent()
     unsigned int               id, k, nfailed;
     int                        i, h;
     int signOfField = mCurrentEvent->summary()->magneticField() < 0 ? -1 : 1;
+
+    //
+    //  Complete information in StEventInfo
+    //
+    StEventInfo *theInfo = mCurrentEvent->info();
+    if (theInfo && dstTriggerDetectors) {
+	theInfo->setBunchCrossingNumber(dstTriggerDetectors->bunchXing_lo,0);
+	theInfo->setBunchCrossingNumber(dstTriggerDetectors->bunchXing_hi,1);
+    }
     
     //
     //  Create global tracks.
