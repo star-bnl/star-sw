@@ -1,10 +1,7 @@
-// $Id: StRareMaker.cxx,v 1.2 2001/04/25 18:19:19 perev Exp $
+// $Id: StRareMaker.cxx,v 1.3 2001/09/06 20:51:23 hardtke Exp $
 // $Log: StRareMaker.cxx,v $
-// Revision 1.2  2001/04/25 18:19:19  perev
-// HPcorrs
-//
-// Revision 1.1  2001/01/31 18:05:52  hardtke
-// Add Rare Particle mini-DST maker to repository
+// Revision 1.3  2001/09/06 20:51:23  hardtke
+// Update
 //
 //
 //
@@ -37,7 +34,7 @@
 ClassImp(StRareEventCut)
 ClassImp(StRareTrackCut)
 
-static const char rcsid[] = "$Id: StRareMaker.cxx,v 1.2 2001/04/25 18:19:19 perev Exp $";
+static const char rcsid[] = "$Id: StRareMaker.cxx,v 1.3 2001/09/06 20:51:23 hardtke Exp $";
 
 double dEdx_formula(double momentum, double mass);
 
@@ -76,10 +73,10 @@ Int_t StRareMaker::Make() {
     StEvent& ev = *mEvent;
     if (EventCut->Accept(mEvent)){
      revt->FillRareEvent(mEvent);
-     StPrimaryTrackIterator itr=0;
+     StPrimaryTrackIterator itr;
      StPrimaryTrack *trk;
      if (ev.primaryVertex()){
-      StSPtrVecPrimaryTrack& tracks = ev.primaryVertex()->daughters();
+      const StSPtrVecPrimaryTrack& tracks = ev.primaryVertex()->daughters();
       for (itr=tracks.begin();itr != tracks.end(); itr++){
         trk = *itr;
 	if (TrackCut->Accept(trk)) revt->AddTrack(trk);
@@ -106,7 +103,7 @@ void StRareMaker::Report(){
 
 void StRareMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StRareMaker.cxx,v 1.2 2001/04/25 18:19:19 perev Exp $\n");
+  printf("* $Id: StRareMaker.cxx,v 1.3 2001/09/06 20:51:23 hardtke Exp $\n");
   printf("**************************************************************\n");
 }
 

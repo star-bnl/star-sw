@@ -1,8 +1,8 @@
-// $Id: StRareMaker.h,v 1.1 2001/01/31 18:05:52 hardtke Exp $
+// $Id: StRareMaker.h,v 1.2 2001/09/06 20:51:23 hardtke Exp $
 //
 // $Log: StRareMaker.h,v $
-// Revision 1.1  2001/01/31 18:05:52  hardtke
-// Add Rare Particle mini-DST maker to repository
+// Revision 1.2  2001/09/06 20:51:23  hardtke
+// Update
 //
 
 
