@@ -2,13 +2,13 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: geant3LinkDef.h,v 1.1.1.1 2004/07/17 20:02:55 perev Exp $ */
+/* $Id: geant3LinkDef.h,v 1.2 2005/03/09 18:35:35 perev Exp $ */
 
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
  
-#pragma link C++ class StTGeant3-;
+#pragma link C++ class StTGeant3+;
 #pragma link C++ class StTGeant3f77+;
 
 #pragma link C++ class Quest_t+;

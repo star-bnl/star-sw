@@ -16,7 +16,8 @@ const int &GetID() const;
 static void Init(void *q) { fgQ = (int*)q;}
 static int  &IQ(int l);
 static float &Q(int l);
-static int  &LQ(int l);
+static Z_t*  LQ(int l);
+static Z_t*  ZObj(int l);
 
 static int* fgQ;
 //      data
@@ -31,11 +32,11 @@ friend class NOBODY;
 };
 
 
-inline int &IQ(int l){ return Z_t::fgQ[l-1];}
-inline Z_t*   LQ(int l)
-{ int i=Z_t::fgQ[l-1-8]; return (!i)? 0:(Z_t*)(Z_t::fgQ+i-1);}
-inline float  &Q(int l){ return ((float*)Z_t::fgQ)[l-1]; }
-inline Z_t* Z_t::Link(int idx) const
+inline int&   Z_t::IQ(int l) { return fgQ[l-1];}
+inline Z_t*   Z_t::ZObj(int l) {return (l)? (Z_t*)(fgQ+l-1):0; }
+inline Z_t*   Z_t::LQ(int l) { int i=Z_t::fgQ[l-1-8]; return ZObj(i);}
+inline float& Z_t::Q(int l)  { return ((float*)Z_t::fgQ)[l-1]; }
+inline Z_t*   Z_t::Link(int idx) const
 { 
   int l = iDat[idx-8]; if (!l) return 0;
   return (Z_t*)(fgQ+l-1);
