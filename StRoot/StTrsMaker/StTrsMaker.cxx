@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.1 1999/01/22 21:31:57 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.2 1999/01/22 22:05:08 fisyak Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.2  1999/01/22 22:05:08  fisyak
+// Rename
+//
 // Revision 1.1  1999/01/22 21:31:57  lasiuk
 // name change
 //
@@ -74,7 +77,7 @@
 // #endif
 
 
-ClassImp(St_trs_Maker)
+ClassImp(StTrsMaker)
 
 StTrsMaker::StTrsMaker(const char *name, const char *title):StMaker(name,title)
 {
@@ -303,7 +306,7 @@ Int_t StTrsMaker::Make(){
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.1 1999/01/22 21:31:57 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.2 1999/01/22 22:05:08 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
