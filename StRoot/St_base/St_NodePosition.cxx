@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.9 1999/02/05 16:32:30 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.10 1999/03/27 22:44:59 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.10  1999/03/27 22:44:59  fine
+// Working 3D St_node with X3d and OpenGL
+//
 // Revision 1.9  1999/02/05 16:32:30  fine
 // St_NodePostion::Draw() method has been implemented
 //
@@ -360,104 +363,4 @@ void St_NodePosition::UpdatePosition(Option_t *)
         view3D->UpdatePosition(fX,fY,fZ,fMatrix);
   }
 }
-#if 0  
-//_______________________________________________________________________
-void St_NodePosition::Streamer(TBuffer &b)
-{
-//*-*-*-*-*-*-*-*-*Stream a class object*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-//*-*              =========================================
-   if (b.IsReading()) {
-      Version_t v = b.ReadVersion();
-      TNamed::Streamer(b);
-      TAttLine::Streamer(b);
-      TAttFill::Streamer(b);
-      b >> fX;
-      b >> fY;
-      b >> fZ;
-      b >> fMatrix;
-      b >> fShape;
-      b >> fParent;
-      b >> fNodes;
-      fOption.Streamer(b);
-      if (v > 1) b >> fVisibility;
-      else  fVisibility = fShape->GetVisibility();
-   } else {
-      b.WriteVersion(St_NodePosition::IsA());
-      TNamed::Streamer(b);
-      TAttLine::Streamer(b);
-      TAttFill::Streamer(b);
-      b << fX;
-      b << fY;
-      b << fZ;
-      b << fMatrix;
-      b << fShape;
-      b << fParent;
-      b << fNodes;
-      fOption.Streamer(b);
-      b << fVisibility;
-   }
-}
- 
-//______________________________________________________________________________
-void St_NodePosition::UpdateMatrix()
-{
-//    Update global rotation matrix/translation vector for this node
-//   this function must be called before invoking Local2Master
- 
-   St_NodePosition *nodes[kMAXLEVELS], *node;
-   Int_t i;
-   for (i=0;i<kVectorSize;i++) gTranslation[0][i] = 0;
-   for (i=0;i<kMatrixSize;i++) gRotMatrix[0][i] = 0;
-   gRotMatrix[0][0] = 1;   gRotMatrix[0][4] = 1;   gRotMatrix[0][8] = 1;
- 
-   node     = this;
-   gGeomLevel  = 0;
-   //build array of parent nodes
-   while (node) {
-      nodes[gGeomLevel] = node;
-      node = node->GetParent();
-      gGeomLevel++;
-   }
-   gGeomLevel--;
-   //Update matrices in the hierarchy
-   for (i=1;i<=gGeomLevel;i++) {
-      node = nodes[gGeomLevel-i];
-      UpdateTempMatrix(&(gTranslation[i-1][0]),&gRotMatrix[i-1][0]
-                      ,node->GetX(),node->GetY(),node->GetZ(),node->GetMatrix()->GetMatrix()
-                      ,&gTranslation[i][0],&gRotMatrix[i][0]);
-   }
-}
- 
-//______________________________________________________________________________
-void St_NodePosition::UpdateTempMatrix(Double_t *dx,Double_t *rmat
-                         , Double_t x, Double_t y, Double_t z, Double_t *matrix
-                         , Double_t *dxnew, Double_t *rmatnew)
-{
-//*-*-*-*-*-*-*Compute new translation vector and global matrix*-*-*-*-*-*-*-*
-//*-*          ================================================
-//*-*
-//*-*  dx      old translation vector
-//*-*  rmat    old global matrix
-//*-*  x,y,z   offset of new local system with respect to mother
-//*-*  dxnew   new translation vector
-//*-*  rmatnew new global rotation matrix
-//*-*
-//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
- 
- 
-   dxnew[0] = dx[0] + x*rmat[0] + y*rmat[3] + z*rmat[6];
-   dxnew[1] = dx[1] + x*rmat[1] + y*rmat[4] + z*rmat[7];
-   dxnew[2] = dx[2] + x*rmat[2] + y*rmat[5] + z*rmat[8];
- 
- 
-   rmatnew[0] = rmat[0]*matrix[0] + rmat[3]*matrix[1] + rmat[6]*matrix[2];
-   rmatnew[1] = rmat[1]*matrix[0] + rmat[4]*matrix[1] + rmat[7]*matrix[2];
-   rmatnew[2] = rmat[2]*matrix[0] + rmat[5]*matrix[1] + rmat[8]*matrix[2];
-   rmatnew[3] = rmat[0]*matrix[3] + rmat[3]*matrix[4] + rmat[6]*matrix[5];
-   rmatnew[4] = rmat[1]*matrix[3] + rmat[4]*matrix[4] + rmat[7]*matrix[5];
-   rmatnew[5] = rmat[2]*matrix[3] + rmat[5]*matrix[4] + rmat[8]*matrix[5];
-   rmatnew[6] = rmat[0]*matrix[6] + rmat[3]*matrix[7] + rmat[6]*matrix[8];
-   rmatnew[7] = rmat[1]*matrix[6] + rmat[4]*matrix[7] + rmat[7]*matrix[8];
-   rmatnew[8] = rmat[2]*matrix[6] + rmat[5]*matrix[7] + rmat[8]*matrix[8];
-}
-#endif
+

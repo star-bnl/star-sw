@@ -177,7 +177,7 @@ void St_NodeView::Draw(Option_t *option)
    if (!view) {
       view = new TView(1);
       view->SetAutoRange(kTRUE);
-      Paint();
+      Paint("range");
       view->SetAutoRange(kFALSE);
    }
 }
@@ -203,13 +203,19 @@ void St_NodeView::Paint(Option_t *option)
 //*-*
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
   static St_NodePosition nullPosition;
+
+// restrict the levels for "range" option
+  Int_t level = gGeometry->GeomLevel();
+//  if (option && option[0]=='r' && level > 3 && strcmp(option,"range") == 0) return;
+  if (option && option[0]=='r' && level > 3 ) return;
+
   TPadView3D *view3D=gPad->GetView3D();
 
   St_Node *thisNode  = GetNode();
   St_NodePosition *position = &nullPosition;
   if (thisNode)    position = GetPosition();
 
-  // UpdatePosition does change the current matrix and it MUST be callled FIRST !!!
+  // UpdatePosition does change the current matrix and it MUST be called FIRST !!!
 
   position->UpdatePosition(option);      
 

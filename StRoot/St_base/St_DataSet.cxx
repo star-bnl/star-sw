@@ -68,7 +68,10 @@ St_DataSet::St_DataSet(const St_DataSet &pattern,EDataSetPass iopt)
        Add((St_DataSet *)(set->Clone()));
   }
 }
+//______________________________________________________________________________
+St_DataSet::St_DataSet(TNode &src){
 
+}
 //______________________________________________________________________________
 St_DataSet::~St_DataSet()
 {

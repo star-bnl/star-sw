@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98   
-// $Id: St_NodePosition.h,v 1.6 1999/03/21 22:38:53 fine Exp $
+// $Id: St_NodePosition.h,v 1.7 1999/03/27 22:44:59 fine Exp $
 // $Log: St_NodePosition.h,v $
+// Revision 1.7  1999/03/27 22:44:59  fine
+// Working 3D St_node with X3d and OpenGL
+//
 // Revision 1.6  1999/03/21 22:38:53  fine
 // StDataSetIter make up + new NextDataSet method introced
 //
@@ -30,13 +33,13 @@
 #define ROOT_St_NodePosition
 
 #include <TClass.h>
-#include "St_DefineSet.h"
+// #include "St_DefineSet.h"
 #include "St_Node.h"
   
 class TBrowser;
 class TRotMatrix;
   
-class St_NodePosition  : public TObject, public St_DefineSet {
+class St_NodePosition  : public TObject /*, public St_DefineSet */ {
  protected:
    Double_t        fX;           //X offset with respect to parent object
    Double_t        fY;           //Y offset with respect to parent object

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.14 1999/03/21 22:38:53 fine Exp $
+// $Id: St_Node.cxx,v 1.15 1999/03/27 22:44:59 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.15  1999/03/27 22:44:59  fine
+// Working 3D St_node with X3d and OpenGL
+//
 // Revision 1.14  1999/03/21 22:38:53  fine
 // StDataSetIter make up + new NextDataSet method introced
 //
@@ -348,7 +351,7 @@ void St_Node::Browse(TBrowser *b)
          TString posName = nodePosition->GetNode()->GetName();
          char num[20];
          posName += ";";
-         sprintf(num,"%d",posNumber);
+         sprintf(num,"Pos:%d",posNumber);
          posName += num;
          b->Add(nodePosition,posName.Data());       
          posNumber++;
@@ -476,7 +479,7 @@ void St_Node::Draw(Option_t *option)
    if (!view) {
       view = new TView(1);
       view->SetAutoRange(kTRUE);
-      Paint();
+      Paint("range");
       view->SetAutoRange(kFALSE);
    }
 }
@@ -606,9 +609,9 @@ void St_Node::ls(Option_t *option)
 #endif
  
 //______________________________________________________________________________
-void St_Node::Paint(Option_t *)
+void St_Node::Paint(Option_t *opt)
 {
-  PaintNodePosition();
+  PaintNodePosition(opt);
   return; 
 }
 
@@ -625,6 +628,12 @@ void St_Node::PaintNodePosition(Option_t *option,St_NodePosition *pos)
 //*-*
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
   static St_NodePosition nullPosition;
+
+// restrict the levels for "range" option
+  Int_t level = gGeometry->GeomLevel();
+//  if (option && option[0]=='r' && level > 3 && strcmp(option,"range") == 0) return;
+  if (option && option[0]=='r' && level > 4 ) return;
+
   TPadView3D *view3D=gPad->GetView3D();
 
   St_NodePosition *position = pos;
@@ -764,7 +773,7 @@ void St_Node::Sizeof3D() const
    if (fVisibility && fShape->GetVisibility()) {
       fShape->Sizeof3D();
    }
-   if ( TestBit(kSonsInvisible) ) return;
+//   if ( TestBit(kSonsInvisible) ) return;
  
    if (!Nodes()) return;
    St_Node *node;
