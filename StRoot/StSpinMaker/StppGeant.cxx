@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppGeant.cxx,v 1.2 2003/09/02 17:59:01 perev Exp $
+// $Id: StppGeant.cxx,v 1.3 2003/09/11 18:14:18 thenry Exp $
 // $Log: StppGeant.cxx,v $
+// Revision 1.3  2003/09/11 18:14:18  thenry
+// *** empty log message ***
+//
 // Revision 1.2  2003/09/02 17:59:01  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -12,7 +15,7 @@
 // Revision 1.0  2001/06/14 Akio Ogawa
 //
 //////////////////////////////////////////////////////////////////////
-#include <Stiostream.h>
+#include <iostream>
 #include <math.h>
 #include "StppGeant.h"
 #include "StppParticle.h"

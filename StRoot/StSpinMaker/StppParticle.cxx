@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppParticle.cxx,v 1.2 2003/09/02 17:59:01 perev Exp $ 
+// $Id: StppParticle.cxx,v 1.3 2003/09/11 18:14:18 thenry Exp $ 
 // $Log: StppParticle.cxx,v $
+// Revision 1.3  2003/09/11 18:14:18  thenry
+// *** empty log message ***
+//
 // Revision 1.2  2003/09/02 17:59:01  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -19,7 +22,7 @@
 // geant track class for Spin pp uDst
 //
 //////////////////////////////////////////////////////////////////////
-#include <Stiostream.h>
+#include <iostream>
 #include <math.h>
 #include "StppParticle.h"
 #include "tables/St_g2t_track_Table.h"

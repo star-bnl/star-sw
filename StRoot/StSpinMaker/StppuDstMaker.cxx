@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StppuDstMaker.cxx,v 1.9 2003/09/11 05:49:22 perev Exp $
+ * $Id: StppuDstMaker.cxx,v 1.10 2003/09/11 18:14:18 thenry Exp $
  * 
  * Author: Akio Ogawa June 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StppuDstMaker.cxx,v $
+ * Revision 1.10  2003/09/11 18:14:18  thenry
+ * *** empty log message ***
+ *
  * Revision 1.9  2003/09/11 05:49:22  perev
  * ansi corrs
  *
@@ -51,8 +54,8 @@
  * First version
  *
  **************************************************************************/
-#include <string.h>
-#include <Stiostream.h>
+#include <string>
+#include <iostream>
 
 #include "TFile.h"
 #include "TTree.h"
