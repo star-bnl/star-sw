@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2004.h,v 2.1 2003/12/23 21:56:52 ullrich Exp $
+ * $Id: StTriggerData2004.h,v 2.2 2004/01/28 00:29:49 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2004
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2004.h,v $
+ * Revision 2.2  2004/01/28 00:29:49  ullrich
+ * Methods to retrieve ZDC data added.
+ *
  * Revision 2.1  2003/12/23 21:56:52  ullrich
  * Initial Revision.
  *
@@ -75,6 +78,14 @@ virtual ~StTriggerData2004();
     unsigned short fpd(int eastwest, int module, int pmt, int prepost=0) const; 
     unsigned short fpdSum(int eastwest, int module) const;
    
+    //ZDC
+    unsigned short zdcAtChannel(int channel, int prepost=0) const;
+    unsigned short zdcAtAddress(int address, int prepost=0) const;
+    unsigned short zdcUnAttenuated(int eastwest, int prepost=0) const;
+    unsigned short zdcAttenuated(int eastwest, int prepost=0) const;
+    unsigned short zdcADC(int eastwest, int pmt, int prepost=0) const;
+    unsigned short zdcTDC(int eastwest, int prepost=0) const;
+
     //ZDCSMD
     unsigned short zdcSMD(int eastwest, int verthori, int strip, int prepost=0) const;
 

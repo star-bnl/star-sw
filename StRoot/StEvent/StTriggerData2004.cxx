@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2004.cxx,v 2.2 2004/01/13 21:00:21 fisyak Exp $
+ * $Id: StTriggerData2004.cxx,v 2.3 2004/01/28 00:29:49 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2004
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2004.cxx,v $
+ * Revision 2.3  2004/01/28 00:29:49  ullrich
+ * Methods to retrieve ZDC data added.
+ *
  * Revision 2.2  2004/01/13 21:00:21  fisyak
  * remove default parameter set from implimentation, make icc happy
  *
@@ -406,6 +409,52 @@ unsigned short StTriggerData2004::fpdSum(int eastwest, int module) const
     static const short map[2][4]={{3,2,1,0},{7,6,5,4}};
     static const short nbit[2][4]={{16384,16384,8192,8192},{16384,16384,8192,8192}};
     return mData->TrgSum.DSMdata.FPD[map[eastwest][module]] % nbit[eastwest][module];
+}
+
+unsigned short StTriggerData2004::zdcAtChannel(int channel, int prepost) const
+{
+  static const int dsmmap[16]={7,6,5,4,3,2,1,15,14,13,12,11,10,9,8};
+  if(channel>=0 && channel<16){ return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[dsmmap[channel]]; }
+  return 0;
+}
+
+unsigned short StTriggerData2004::zdcAtAddress(int address, int prepost) const
+{
+  if(address>=0 && address<16){ return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[address]; }
+  return 0;
+}
+
+unsigned short StTriggerData2004::zdcUnAttenuated(int eastwest, int prepost) const
+{
+  if(eastwest==0) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[3];}
+  if(eastwest==1) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[0];}
+  return 0;
+}
+
+unsigned short StTriggerData2004::zdcAttenuated(int eastwest, int prepost) const
+{
+  if(eastwest==0) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[13];}
+  if(eastwest==1) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[10];}
+  return 0;
+}
+
+unsigned short StTriggerData2004::zdcADC(int eastwest, int pmt, int prepost) const
+{
+  if(eastwest==0 && pmt==1) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[7];}
+  if(eastwest==0 && pmt==2) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[6];}
+  if(eastwest==0 && pmt==3) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[5];}
+  if(eastwest==1 && pmt==1) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[3];}
+  if(eastwest==1 && pmt==2) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[2];}
+  if(eastwest==1 && pmt==3) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[1];}
+  return 0;
+
+}
+
+unsigned short StTriggerData2004::zdcTDC(int eastwest, int prepost) const
+{
+  if(eastwest==0) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[8];}
+  if(eastwest==1) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[9];}
+  return 0;
 }
 
 unsigned short StTriggerData2004::zdcSMD(int eastwest, int verthori, int strip, int prepost) const
