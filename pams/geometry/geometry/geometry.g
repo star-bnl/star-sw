@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.104 2005/03/25 02:13:59 potekhin Exp $
+* $Id: geometry.g,v 1.105 2005/03/25 17:28:24 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.105  2005/03/25 17:28:24  potekhin
+* Added the corrected SSD ladder positions (as per Lilian's
+* communication) to the tag y2005b
+*
 * Revision 1.104  2005/03/25 02:13:59  potekhin
 * A very significant set of code changes, related to
 * versioning: The CorrNum variable turned out to be
@@ -1352,9 +1356,7 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
-* important -- notice:
-* new svt version
-* FTPC gas correction
+* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
 
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 4; "SVTT version"
@@ -1367,7 +1369,7 @@ If LL>1
 
                   "Silicon Strip Detector Version "
                      sisd=on;
-                     SisdConfig = 23; "second version, full barrel"
+                     SisdConfig = 24; "second version, full barrel with corrected radii"
 
 
                   "FTPC Readout barrel "
