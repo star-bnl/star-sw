@@ -4,7 +4,7 @@
  */
 /*********************************************************
  *
- * $Id: StPmdGeom.h,v 1.7 2004/03/23 08:49:15 subhasis Exp $
+ * $Id: StPmdGeom.h,v 1.8 2004/04/01 15:40:25 subhasis Exp $
  *
  * Author: Dipak Mishra
  *
@@ -16,6 +16,9 @@
  *************************************************************
  *
  * $Log: StPmdGeom.h,v $
+ * Revision 1.8  2004/04/01 15:40:25  subhasis
+ * zdist changed after survey result
+ *
  * Revision 1.7  2004/03/23 08:49:15  subhasis
  * biardDetail put by had
  *
@@ -111,7 +114,8 @@ inline void StPmdGeom::commonconstants()
   mcelldia_x = 1.0564;
   mcelldia_y = 0.91484;   
   // changed to 535mzreal = 550.0;
-  mzreal = 542.0;
+//  mzreal = 542.0;
+  mzreal = 539.0;  // changed on 1/4/04 after survey results
 }
 #endif
 
