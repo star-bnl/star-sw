@@ -73,8 +73,8 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
    
   Bool_t EqDone=kFALSE;
     
-  Float_t pwd1=calib[position1-1].AdcPedestalRms;
-  Float_t pwd2=calib[position2-1].AdcPedestalRms;
+  Float_t pwd1=5;
+  Float_t pwd2=5;
 
   Float_t a=0,b=0,erra=0,errb=0,cov=0,chi=0;
   const int npoints=10;

@@ -47,7 +47,7 @@ StEmcCalibrationMaker::StEmcCalibrationMaker(const char *name):StMaker(name)
 
   emcCalSummary_st* Summary_st=SummaryTable->GetTable();
   
-  Summary_st[0].DetNumber=1;
+  Summary_st[0].DetNumber=1;  // 1 = bemc, 2 = bprs, 3 = bsmde, 4 = bsmdp
   Summary_st[0].FirstRun=0;
   Summary_st[0].LastRun=0;
   Summary_st[0].NEvents=0;
@@ -59,24 +59,28 @@ StEmcCalibrationMaker::StEmcCalibrationMaker(const char *name):StMaker(name)
   SettingsTable->SetNRows(1);
   emcCalSettings_st* Settings_st=SettingsTable->GetTable();
   
-  Settings_st[0].DataType=0;
-  Settings_st[0].UseL3Tracks=0;
-  Settings_st[0].ZVertexCut=40;
+  Settings_st[0].DataType=0;              // 0 - simulation 
+                                          // 1 - Real data from StEvent (no pedestal sub)
+                                          // 2 - real data from Daq file (pedestal subtraction)
+                                          // 3 - real data from even pool (pedestal subtraction)
+                                          
+  Settings_st[0].UseL3Tracks=0;           // 0 - tpt tracks, 1 = l3 tracks
+  Settings_st[0].ZVertexCut=40;           // z vertex cut in cm
   
-  Settings_st[0].NEtaBins=10;
-  Settings_st[0].EtaBinWidth=0.2;
+  Settings_st[0].NEtaBins=10;             // number of eta bins
+  Settings_st[0].EtaBinWidth=4;           // etabin width in detetor division
   
-  Settings_st[0].DoEqualization=1;
-  Settings_st[0].EqualizationMethod=1;
-  Settings_st[0].EqEventsPerBin=750; //670
+  Settings_st[0].DoEqualization=1;        // 0 - do not equalize, 1 - equalize
+  Settings_st[0].EqualizationMethod=1;    // 0 - mean and rms, 1 - fit
+  Settings_st[0].EqEventsPerBin=750;      //670
   Settings_st[0].EqMinNumberOfTracks=50;
   Settings_st[0].EqMinOccupancy=0.99;
   
   Settings_st[0].UseMipCalib=1;
   Settings_st[0].UseMipEtaBin=1;
-  Settings_st[0].EOverMipCte=0.290;  // e/MIP for geant
+  Settings_st[0].EOverMipCte=0.290;       // e/MIP for geant
   Settings_st[0].MipPeakFitFuntion=0;
-  Settings_st[0].MipEventsPerBin=500; //600
+  Settings_st[0].MipEventsPerBin=950;     //600
   Settings_st[0].MipMaxNumberOfTracks=1000;
   Settings_st[0].MipMinOccupancy=0.99;
   Settings_st[0].MipMinimumMomentum=1.5;
@@ -85,8 +89,6 @@ StEmcCalibrationMaker::StEmcCalibrationMaker(const char *name):StMaker(name)
   
   Settings_st[0].UseElectronCalib=0;
 // finished settings table
-
-  SetMode(1);
 
 }
 //_____________________________________________________________________________
@@ -104,7 +106,7 @@ Int_t StEmcCalibrationMaker::Init()
   emcCalSummary_st* Summary_st=SummaryTable->GetTable();
   emcCalSettings_st* Settings_st=SettingsTable->GetTable();
   
-  if(Settings_st[0].DataType==1) Settings_st[0].EOverMipCte=0.252; // e/MIP for real data
+  if(Settings_st[0].DataType!=0) Settings_st[0].EOverMipCte=0.252; // e/MIP for real data
   
   detnum=Summary_st[0].DetNumber-1;  // this is only the vector index
   
@@ -150,6 +152,7 @@ Int_t StEmcCalibrationMaker::Init()
     EqualSpec=new StEmcEqualSpectra(detname[detnum].Data());
     EqualSpec->EqualTable=EqualTable;  
     EqualSpec->CalibTable=CalibTable;
+    EqualSpec->SettingsTable=SettingsTable;
     EqualSpec->nEtaBins=Settings_st[0].NEtaBins;
     EqualSpec->etaBinWidth=Settings_st[0].EtaBinWidth;
     EqualSpec->Init();
@@ -195,6 +198,7 @@ Int_t StEmcCalibrationMaker::Init()
       MipSpec->etaBinWidth=0;          
     }
     MipSpec->MipTable=MipTable;
+    MipSpec->SettingsTable=SettingsTable;
     MipSpec->CalibTable=CalibTable;
     MipSpec->Init();
     MipStatus=0;
@@ -214,18 +218,13 @@ Int_t StEmcCalibrationMaker::Init()
   
   if(Settings_st[0].UsePi0Calib==1) // do Pi0 calibration
   {
-    ElectronStatus=0;
-    m_electronCounter=0;
   }
   
   if(Settings_st[0].UseElectronCalib==1) // do Electron calibration
   {
-    ElectronStatus=0;
-    m_electronCounter=0;
   }
   
   CalibStatus=0;
-  CalcPedestal();
   
   // setting Calibration Mode
   Summary_st[0].CalibMode=0;  
@@ -268,10 +267,12 @@ Int_t StEmcCalibrationMaker::Make()
    
   zVertex=0;
   Bool_t kReadOk=kFALSE; 
-  switch (runMode)
+  switch (Settings_st[0].DataType)
   {
-    case(0): kReadOk=ReadHitsOnline();   break;
-    case(1): kReadOk=ReadHitsOffline();  break;
+    case(0): kReadOk=ReadHitsOffline();   break;
+    case(1): kReadOk=ReadHitsOffline();   break;
+    case(2): kReadOk=ReadHitsFromDaqFile(); break;
+    case(3): kReadOk=ReadHitsOnline(); break;
   }
 
   if(!kReadOk)
@@ -290,6 +291,16 @@ Int_t StEmcCalibrationMaker::Make()
     #endif
     gMessMgr->Warning("StEmcCalibrationMaker::Make() - zVertex calc fails");
     return kStWarn;
+  }
+  
+  if (Settings_st[0].DataType > 1) 
+  {
+    if(GetPedestal()) SubtractPedestal();
+    else 
+    {
+      gMessMgr->Warning("StEmcCalibrationMaker::Make() - Could not get pedestals");
+      return kStWarn;
+    }
   }
 
   evnumber++;
@@ -316,20 +327,6 @@ Int_t StEmcCalibrationMaker::Make()
     gMessMgr->Info("StEmcCalibrationMaker::Make() - doing MIP calibration");
     MipCalib();
    }
-
-  if(Settings_st[0].UseElectronCalib==1) FillElectron();
-  if(Settings_st[0].UseElectronCalib==1 && ElectronStatus==1) 
-  {
-    gMessMgr->Info("StEmcCalibrationMaker::Make() - doing Electron calibration");
-    ElectronCalib();
-  }
-
-  if(Settings_st[0].UsePi0Calib==1) FillPi0();
-  if(Settings_st[0].UsePi0Calib==1 && Pi0Status==1) 
-  {
-    gMessMgr->Info("StEmcCalibrationMaker::Make() - doing Pi0 calibration");
-    Pi0Calib();
-  }
     
   Int_t done=0;
   if(Settings_st[0].DoEqualization==1 && EqStatus==2)   done+=1;
@@ -385,6 +382,11 @@ Int_t StEmcCalibrationMaker::Clear()
 }
 //_____________________________________________________________________________
 Bool_t StEmcCalibrationMaker::ReadHitsOnline()
+{
+  return kTRUE;
+}
+//_____________________________________________________________________________
+Bool_t StEmcCalibrationMaker::ReadHitsFromDaqFile()
 {
   return kTRUE;
 }
@@ -627,18 +629,13 @@ Bool_t StEmcCalibrationMaker::ProjectTrack(StTrack* track,double radius, Float_t
   
 }
 //_____________________________________________________________________________
-Bool_t StEmcCalibrationMaker::CalcPedestal()
+Bool_t StEmcCalibrationMaker::GetPedestal()
 {
-  Int_t nb=nbins;
-  emcCalSettings_st* Settings_st=SettingsTable->GetTable();
-  emcCalibration_st* Calib_st=CalibTable->GetTable();  
-  
-  if(Settings_st[0].DataType==0)  // simulation data
-    for(Int_t i=1;i<=nb;i++)
-    {
-      Calib_st[i-1].AdcPedestal=0;
-      Calib_st[i-1].AdcPedestalRms=0;
-    }
+  return kTRUE;
+}
+//_____________________________________________________________________________
+Bool_t StEmcCalibrationMaker::SubtractPedestal()
+{
   return kTRUE;
 }
 //_____________________________________________________________________________
@@ -662,10 +659,14 @@ Bool_t StEmcCalibrationMaker::FillEqual()
       Int_t did=EqualSpec->GetID(rawHit[k]->module(),rawHit[k]->eta(),abs(rawHit[k]->sub()));
       if(EqualSpec->GetStatus(did)==1) 
       {
-        EqualSpec->FillSpectra(did,rawHit[k]->adc()-Calib_st[did-1].AdcPedestal);
+        EqualSpec->FillSpectra(did,rawHit[k]->adc());
         //FILL QA HISTOGRAM*********************
         m_EqualOccupancy->Fill(did);
         //**************************************
+       #ifdef StEmcCalibrationMaker_DEBUG
+       //emclog <<"EQUALIZATION: Fill Id = "<<did<<"  ADC = "<<rawHit[k]->adc()<<"\n";
+       //cout   <<"EQUALIZATION: Fill Id = "<<did<<"  ADC = "<<rawHit[k]->adc()<<"\n";
+       #endif
       }
     }
   }
@@ -739,7 +740,7 @@ Bool_t StEmcCalibrationMaker::Equalize()
             }
           }
       #ifdef StEmcCalibrationMaker_DEBUG
-      emclog <<"***** Reference spectrum choice for etabin = "<<div<<"   ref = "<<ref<<"\n";
+      emclog <<"***** Reference spectrum choice for etabin = "<<i<<"   ref = "<<ref<<"\n";
       #endif
       for(Int_t m=mi;m<mf+1;m++)
         for(Int_t e=ei;e<ef+1;e++)
@@ -803,13 +804,17 @@ Bool_t StEmcCalibrationMaker::FillMipCalib()
             Int_t did=MipSpec->GetID(mtr,etr,str);
             if(MipSpec->GetStatus(did)==1) 
             {
-              MipSpec->FillSpectra(did,rawHit[k]->adc()-Calib_st[did-1].AdcPedestal);
+              MipSpec->FillSpectra(did,rawHit[k]->adc());
               //FILL QA HISTOGRAM*********************
               m_MipOccupancy->Fill(did);
               //**************************************
               ok=kTRUE;
               #ifdef StEmcCalibrationMaker_DEBUG
               emclog <<"CALIBRATION: MIP track = "<<tr<<"  momentum = "
+                     <<momentum.mag()<<"  eta = "<<eta
+                     <<"  phi = "<<phi<<"  id = "<<did
+                     <<"  adc = "<<rawHit[k]->adc()<<"\n";
+              cout   <<"CALIBRATION: MIP track = "<<tr<<"  momentum = "
                      <<momentum.mag()<<"  eta = "<<eta
                      <<"  phi = "<<phi<<"  id = "<<did
                      <<"  adc = "<<rawHit[k]->adc()<<"\n";
@@ -885,33 +890,17 @@ Bool_t StEmcCalibrationMaker::MipCalib()
   return kTRUE;
 }
 //_____________________________________________________________________________
-Bool_t StEmcCalibrationMaker::FillElectron()
-{
-  return kTRUE;
-}    
-//_____________________________________________________________________________
-Bool_t StEmcCalibrationMaker::ElectronCalib()
-{ 
-  return kTRUE;
-}     
-//_____________________________________________________________________________
-Bool_t StEmcCalibrationMaker::FillPi0()
-{ 
-  return kTRUE;
-}     
-//_____________________________________________________________________________
-Bool_t StEmcCalibrationMaker::Pi0Calib()
-{ 
-  return kTRUE;
-}     
-//_____________________________________________________________________________
 Bool_t StEmcCalibrationMaker::MakeCalibration()
 {
   emcCalSettings_st* Settings_st=SettingsTable->GetTable();
   emcCalibration_st* Calib_st=CalibTable->GetTable();
-  emcEqualization_st* Equal_st=EqualTable->GetTable();
-  emcMipCalib_st* Mip_st=MipTable->GetTable();
   
+  emcMipCalib_st* Mip_st;
+  if(MipTable) Mip_st=MipTable->GetTable();
+  
+  emcEqualization_st* Equal_st;
+  if(EqualTable) Equal_st=EqualTable->GetTable(); 
+
   Int_t nb=nbins,np;
   Float_t x[10],ex[10],y[10],ey[10];
   Float_t p[5],ep[5],cov[5][5],chisqr;
@@ -1061,9 +1050,13 @@ Bool_t StEmcCalibrationMaker::MakeCalibration()
 Bool_t StEmcCalibrationMaker::SaveTables()
 {
   emcCalSettings_st* Settings_st=SettingsTable->GetTable();
-  emcCalibration_st* Calib_st=CalibTable->GetTable();  
-  emcMipCalib_st* Mip_st=MipTable->GetTable();
-  emcEqualization_st* Equal_st=EqualTable->GetTable(); 
+  emcCalibration_st* Calib_st=CalibTable->GetTable(); 
+   
+  emcMipCalib_st* Mip_st;
+  if(MipTable) Mip_st=MipTable->GetTable();
+  
+  emcEqualization_st* Equal_st;
+  if(EqualTable) Equal_st=EqualTable->GetTable(); 
 
   char file1[80],file2[80],file3[80],file4[80],file5[80],histfile[80]; 
 
@@ -1148,15 +1141,15 @@ Bool_t StEmcCalibrationMaker::SaveTables()
     if(Calib_st[i-1].CalibStatus==1)
     {
       h0.Fill(x,Calib_st[i-1].AdcToE[0]);
-      h0.SetBinError(h0.GetBin(x),Calib_st[i-1].AdcToEErr[0]);
+      h0.SetBinError(h0.FindBin(x),Calib_st[i-1].AdcToEErr[0]);
       h1.Fill(x,Calib_st[i-1].AdcToE[1]);
-      h1.SetBinError(h1.GetBin(x),Calib_st[i-1].AdcToEErr[1]);
+      h1.SetBinError(h1.FindBin(x),Calib_st[i-1].AdcToEErr[1]);
       h2.Fill(x,Calib_st[i-1].AdcToE[2]);
-      h2.SetBinError(h2.GetBin(x),Calib_st[i-1].AdcToEErr[2]);
+      h2.SetBinError(h2.FindBin(x),Calib_st[i-1].AdcToEErr[2]);
       h3.Fill(x,Calib_st[i-1].AdcToE[3]);
-      h3.SetBinError(h3.GetBin(x),Calib_st[i-1].AdcToEErr[3]);
+      h3.SetBinError(h3.FindBin(x),Calib_st[i-1].AdcToEErr[3]);
       h4.Fill(x,Calib_st[i-1].AdcToE[4]);
-      h4.SetBinError(h4.GetBin(x),Calib_st[i-1].AdcToEErr[4]);
+      h4.SetBinError(h4.FindBin(x),Calib_st[i-1].AdcToEErr[4]);
     }
     
     if(EqualSpec)
@@ -1165,9 +1158,9 @@ Bool_t StEmcCalibrationMaker::SaveTables()
       if(Equal_st[i-1].EqStatus==1)
       {
         equa0.Fill(x,Equal_st[i-1].EqSlope);
-        equa0.SetBinError(equa0.GetBin(x),Equal_st[i-1].EqSlopeError);
+        equa0.SetBinError(equa0.FindBin(x),Equal_st[i-1].EqSlopeError);
         equa1.Fill(x,Equal_st[i-1].EqShift);
-        equa1.SetBinError(equa1.GetBin(x),Equal_st[i-1].EqShiftError);
+        equa1.SetBinError(equa1.FindBin(x),Equal_st[i-1].EqShiftError);
       }
     }
     
@@ -1189,13 +1182,13 @@ Bool_t StEmcCalibrationMaker::SaveTables()
       {
         Float_t x=(Float_t)i;
         mip0.Fill(x,Mip_st[i-1].MipPeakPosition);
-        mip0.SetBinError(mip0.GetBin(x),Mip_st[i-1].MipPeakPositionError);
+        mip0.SetBinError(mip0.FindBin(x),Mip_st[i-1].MipPeakPositionError);
       }
       TArrayF spectemp=MipSpec->GetEtaBinSpectra(i);
       for(Int_t j=0;j<MipSpec->GetNAdcMax();j++) mipspecetabin.Fill((Float_t)j,spectemp[j]);
       mipspecetabin.Write();
     }
-  mip0.Write(); mipocc.Write();
+    mip0.Write(); mipocc.Write();
   }
         
   h0.Write(); h1.Write(); h2.Write(); h3.Write(); h4.Write();
@@ -1220,8 +1213,6 @@ void StEmcCalibrationMaker::ClearCalibTable()
       for(Int_t k=0;k<5;k++) Calib_st[i-1].AdcToECov[j][k]=0;
     }
     Calib_st[i-1].AdcToEChiSqr=0;
-    Calib_st[i-1].AdcPedestal=0;
-    Calib_st[i-1].AdcPedestalRms=0;
   }
 }
 //_____________________________________________________________________________
@@ -1231,9 +1222,11 @@ void StEmcCalibrationMaker::SetCalibStatus()
 
   for(Int_t i=1;i<=nbins;i++)
   { 
+    Int_t m,e,s;
+    Geo->getBin(i,m,e,s);
     Calib_st[i-1].Status=0;
-    if (i>=1801 && i<=2400) Calib_st[i-1].Status=1; // initial 2001 configuration
-    if (i>=1 && i<=360)     Calib_st[i-1].Status=1; // initial 2001 configuration    
+    if (m>=1 && m<=9)    Calib_st[i-1].Status=1; // initial 2001 configuration
+    if (m>=46 && m<=60)  Calib_st[i-1].Status=1; // initial 2001 configuration    
   } 
   //for(Int_t i=1;i<=nbins;i++) Calib_st[i-1].Status=1; // FULL EMC
 }
@@ -1315,23 +1308,30 @@ void StEmcCalibrationMaker::ClearMipTable()
 //_____________________________________________________________________________
 void StEmcCalibrationMaker::CalcEtaBin(Int_t i,Float_t ebin,
                                       Int_t* mi,Int_t* mf,Int_t* ei,Int_t* ef)
-{
+{ 
+  emcCalSettings_st* Settings_st=SettingsTable->GetTable();  
+  Int_t nb=Settings_st[0].NEtaBins;
+  Int_t neta=Geo->NEta();
+  Int_t eei=1;
+  Int_t eef=eei+(Int_t)ebin-1;
+  Int_t mmi=1;
+  Int_t mmf=60;
   
-  Int_t e,e1;
-  Float_t etai=-1+(Float_t)(i-1)*ebin;
-  Float_t etaf=-1+(Float_t)(i)*ebin;
-  if (fabs(etai)<0.0001) etai=0;
-  if (fabs(etaf)<0.0001) etaf=0;
-  if(fabs(etai)>fabs(etaf)) {Float_t t=etai;etai=etaf;etaf=t;}
-
-  e = (Int_t)(fabs(etai)/0.05 + 1.5 );
-  e1= (Int_t)(fabs(etaf)/0.05 + 0.5 );
+  for(Int_t j=1;j<=nb;j++)
+  {
+    if (i==j) goto etabinok;
+    eei=eef+1;
+    if(eei>neta) {eei=1;mmi=61; mmf=120;}
+    eef=eei+(Int_t)ebin-1;
+    if(eef>neta) eef=neta;
+  }
+  etabinok:
+  *ei=eei; *ef=eef;
+  *mi=mmi; *mf=mmf;
+  Float_t etai,etaf;
+  Geo->getEta(mmi,eei,etai);
+  Geo->getEta(mmi,eef,etaf);
   
-  if(etaf>=0) {*mi=1;  *mf=60;}
-  else        {*mi=61; *mf=120;}
-  
-  *ei=e;  *ef=e1;
-
   gMessMgr->Info()<<"StEmcCalibrationMaker: EtaBin "<<i<<"  etai="<<etai<<"  etaf="<<etaf<<"  mi="<<*mi<<"  mf="<<*mf<<"  ei="<<*ei<<"  ef="<<*ef<<endm;
   #ifdef StEmcCalibrationMaker_DEBUG
   emclog <<"EtaBin "<<i<<"  etai = "<<etai<<"  etaf = "<<etaf<<"  mi = "<<*mi<<"  mf = "<<*mf<<"  ei = "<<*ei<<"  ef = "<<*ef<<"\n";

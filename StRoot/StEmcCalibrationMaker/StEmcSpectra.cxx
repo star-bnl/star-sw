@@ -7,7 +7,6 @@
 #include "StEmcSpectra.h"
 #include <iostream.h>
 #include <math.h>
-#include <stdlib.h>
 #include "emc_def.h"
 #include "TCanvas.h"
 #include "TH1.h"
@@ -323,20 +322,28 @@ TArrayF StEmcSpectra::ReBin(Int_t position,Float_t a,Float_t b)
 void StEmcSpectra::CalcEtaBin(Int_t i,Float_t ebin,
                               Int_t* mi,Int_t* mf,Int_t* ei,Int_t* ef)
 {
-  Int_t e,e1;
-  Float_t etai=-1+(Float_t)(i-1)*ebin;
-  Float_t etaf=-1+(Float_t)(i)*ebin;
-  if (fabs(etai)<0.0001) etai=0;
-  if (fabs(etaf)<0.0001) etaf=0;
-  if(fabs(etai)>fabs(etaf)) {Float_t t=etai;etai=etaf;etaf=t;}
-
-  e = (Int_t)(fabs(etai)/0.05 + 1.5 );
-  e1= (Int_t)(fabs(etaf)/0.05 + 0.5 );
+  emcCalSettings_st* Settings_st=SettingsTable->GetTable();  
+  Int_t nb=Settings_st[0].NEtaBins;
+  Int_t neta=geo->NEta();
+  Int_t eei=1;
+  Int_t eef=eei+(Int_t)ebin-1;
+  Int_t mmi=1;
+  Int_t mmf=60;
   
-  if(etaf>=0) {*mi=1;  *mf=60;}
-  else        {*mi=61; *mf=120;}
-  
-  *ei=e;  *ef=e1;
+  for(Int_t j=1;j<=nb;j++)
+  {
+    if (i==j) goto etabinok;
+    eei=eef+1;
+    if(eei>neta) {eei=1;mmi=61; mmf=120;}
+    eef=eei+(Int_t)ebin-1;
+    if(eef>neta) eef=neta;
+  }
+  etabinok:
+  *ei=eei; *ef=eef;
+  *mi=mmi; *mf=mmf;
+  Float_t etai,etaf;
+  geo->getEta(mmi,eei,etai);
+  geo->getEta(mmi,eef,etaf);
 
 }
 
