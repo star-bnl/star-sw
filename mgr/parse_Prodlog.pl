@@ -400,10 +400,23 @@ sub parse_log($) {
   
       $exmessg = "Stale NFS file handle";
  }       
-       if ( $mline =~ /Assertion/ & $mline =~ /failed/)  {
+       elsif ( $mline =~ /Assertion/ & $mline =~ /failed/)  {
         $Err_messg = "Assertion failed";
      } 
+      elsif ($mline =~ /Error calling module/) {
+       chop $mline;  
+      $exmessg = $mline;
    }
+      elsif ($mline =~ /Fatal in <operator delete>/) {
+  
+       $Err_messg = "Fatal in <operator delete>";   
+  }
+       elsif ($mline =~ /Fatal in <operator new>/) {
+  
+       $Err_messg = "Fatal in <operator new>";   
+  }
+
+  }
   
   #--------------------------------------------------------------------------
    $EvDone = $no_event;
