@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.cc,v 1.16 2003/09/02 17:58:17 perev Exp $
+// $Id: StFtpcVertex.cc,v 1.17 2003/10/23 04:17:31 perev Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.17  2003/10/23 04:17:31  perev
+// Protection aginst bad TH1::Fit added
+//
 // Revision 1.16  2003/09/02 17:58:17  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -80,6 +83,7 @@
 //----------Last Modified: 24.07.2000
 //----------Copyright:     &copy MDO Production 1999
 
+#include "TH1Helper.h"
 #include "StFtpcVertex.hh"
 #include "StFtpcTrackingParams.hh"
 #include "StFtpcPoint.hh"
@@ -434,6 +438,7 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
     v = *vertex;
   }
 
+  TH1Helper  h1h;
   for (Int_t i = 0; i < tracks->GetEntriesFast(); i++) {
 
     StFtpcTrack *track = (StFtpcTrack*)tracks->At(i);
@@ -442,12 +447,21 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
       z_hist.Fill(track->z(track->pathLength(v.GetX(), v.GetY())));
     }
   }
+   
 
   // fit only 20 cm in both directions of maximum
-  z_hist.Fit(&gauss_z, "QN", "", z_hist.GetXaxis()->GetBinCenter(z_hist.GetMaximumBin())-20,
-	     z_hist.GetXaxis()->GetBinCenter(z_hist.GetMaximumBin())+20);
-  SetZ(gauss_z.GetParameter(1));
-  SetZerr(gauss_z.GetParameter(2));
+  double low,upp;
+  low = z_hist.GetXaxis()->GetBinCenter(z_hist.GetMaximumBin())-20;
+  upp = z_hist.GetXaxis()->GetBinCenter(z_hist.GetMaximumBin())+20;
+  h1h.Set(&z_hist,low,upp);
+  if (h1h.GetNonZeros()<=2) { //Bad case, foit will failed
+    SetZ(h1h.GetMean());
+    SetZerr(h1h.GetRMS());
+  } else {  
+    z_hist.Fit(&gauss_z, "QN", "", low, upp);
+    SetZ(gauss_z.GetParameter(1));
+    SetZerr(gauss_z.GetParameter(2));
+  }
 
   for (Int_t i = 0; i < tracks->GetEntriesFast(); i++) {
 
@@ -463,17 +477,29 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
   }
 
   // fit only 3 cm in both directions of maximum
-  x_hist.Fit(&gauss_x, "QN", "", x_hist.GetXaxis()->GetBinCenter(x_hist.GetMaximumBin())-3,
-	     x_hist.GetXaxis()->GetBinCenter(x_hist.GetMaximumBin())+3);
-  SetX(gauss_x.GetParameter(1));
-  SetXerr(gauss_x.GetParameter(2));
-
+  low = x_hist.GetXaxis()->GetBinCenter(x_hist.GetMaximumBin())-3;
+  upp = x_hist.GetXaxis()->GetBinCenter(x_hist.GetMaximumBin())+3;
+  h1h.Set(&x_hist,low,upp);
+  if (h1h.GetNonZeros()<=2) { //Bad case, fit will failed
+    SetX(h1h.GetMean());
+    SetXerr(h1h.GetRMS());
+  } else {  
+    x_hist.Fit(&gauss_x, "QN", "", low,upp);
+    SetX(gauss_x.GetParameter(1));
+    SetXerr(gauss_x.GetParameter(2));
+  }
   // fit only 3 cm in both directions of maximum
-  y_hist.Fit(&gauss_y, "QN", "", y_hist.GetXaxis()->GetBinCenter(y_hist.GetMaximumBin())-3,
-	     y_hist.GetXaxis()->GetBinCenter(y_hist.GetMaximumBin())+3);
-  SetY(gauss_y.GetParameter(1));
-  SetYerr(gauss_y.GetParameter(2));
-
+  low = y_hist.GetXaxis()->GetBinCenter(y_hist.GetMaximumBin())-3;
+  upp = y_hist.GetXaxis()->GetBinCenter(y_hist.GetMaximumBin())+3;
+  h1h.Set(&x_hist,low,upp);
+  if (h1h.GetNonZeros()<=2) { //Bad case, fit will failed
+    SetY(h1h.GetMean());
+    SetYerr(h1h.GetRMS());
+  } else {  
+    y_hist.Fit(&gauss_y, "QN", "", low, upp);
+    SetY(gauss_y.GetParameter(1));
+    SetYerr(gauss_y.GetParameter(2));
+  }
   SetIFlag(0);
   SetId(0);
 }
