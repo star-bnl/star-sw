@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.72 2002/06/17 16:12:43 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.73 2002/08/26 14:21:21 jeromel Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.73  2002/08/26 14:21:21  jeromel
+// changing 'PHMD' to 'PHMH'
+//
 // Revision 1.72  2002/06/17 16:12:43  perev
 // fix wrong geant time
 //
@@ -618,7 +621,7 @@ Int_t St_geant_Maker::Make()
 //           ==============================
     }
 
-    geant3->Gfnhit("PHMD","PDGS", nhits);
+    geant3->Gfnhit("PHMH","PDGS", nhits);
     if (nhits>0) {
       St_g2t_pmd_hit *g2t_pmd_hit = new St_g2t_pmd_hit("g2t_pmd_hit",nhits);
       m_DataSet->Add(g2t_pmd_hit);
