@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.5 2000/08/29 22:46:26 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.6 2000/09/14 22:17:57 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.6  2000/09/14 22:17:57  caines
+ * Put back in flagging hot anodes and timebuckets
+ *
  * Revision 1.5  2000/08/29 22:46:26  caines
  * Fixed some memory leaks
  *
@@ -281,7 +284,7 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
           mSvtAnalysis->CluFirstTimeBin();
           mSvtAnalysis->CluLastTimeBin();
           mSvtAnalysis->MomentAnalysis();
-          //mSvtAnalysis->SetBadAnTb(mNumOfClusters);   //note I dont look at decon here
+          mSvtAnalysis->SetBadAnTb(mNumOfClusters);   //note I dont look at decon here
           //mSvtAnalysis->Report(index);
 
 
