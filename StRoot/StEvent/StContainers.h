@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.4 2000/03/23 22:24:06 akio Exp $
+ * $Id: StContainers.h,v 2.5 2000/05/22 21:42:44 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
- * Revision 2.4  2000/03/23 22:24:06  akio
- * Initial version of Emc Point, and Inclusion of track pointers
+ * Revision 2.5  2000/05/22 21:42:44  ullrich
+ * Add RICH related classes.
  *
  * Revision 2.6  2000/06/19 01:32:15  perev
  *  Thomas StEvent branches added
@@ -37,6 +37,10 @@
 
 class StObject;
 class StHit;
+class StPrimaryTrack;
+class StPrimaryVertex;
+class StSvtHit;
+class StSsdHit;
 class StTpcHit;
 class StRichHit;
 class StRichPixel;
@@ -55,6 +59,10 @@ class StKinkVertex;
 
 StCollectionDef(Object)
 StCollectionDef(Hit)
+StCollectionDef(PrimaryTrack)
+StCollectionDef(PrimaryVertex)
+StCollectionDef(SvtHit)
+StCollectionDef(SsdHit)
 StCollectionDef(TpcHit)
 StCollectionDef(RichHit)
 StCollectionDef(RichPixel)
