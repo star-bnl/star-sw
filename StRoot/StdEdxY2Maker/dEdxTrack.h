@@ -3,43 +3,6 @@
 
 #include "dEdxPoint.h"
 #include "TClonesArray.h"
-class Point : public TObject {
- private: 
- public:
-  Point() {};
-  Point(dEdx_t point); 
-  virtual ~Point() {};
-  Int_t    sector;
-  Int_t    row;
-  Int_t    pad;
-  Int_t    Fee;
-  Double_t dx;
-  Double_t dE;
-  Double_t dEdx; 
-  Double_t dEdxL;  // log of dEdx
-  Double_t dEdxN; // normolized to BB
-  Double_t dETot; 
-  Double_t dEU;
-  Double_t dEUdx; 
-  Double_t dEUdxL;  // log of dEdx
-  Double_t dEUdxN; // normolized to BB
-  Double_t xyz[3];
-  Double_t Prob; 
-  Double_t SigmaFee;
-  Double_t xscale;
-  Double_t dEIpad;  // total charge integrated so far in the pad
-  Double_t dEI3pad; // total charge integrated so far in the pad +/-
-  Double_t dEIrow;  // total charge integrated so far in the row
-  Double_t dETrow;  // total charge not integrated (time bucket only) in the row
-  Double_t dET3row; // total charge not integrated (+0 + 2 time buckets only) in the row
-  Double_t dET5row; // total charge not integrated (+0 + 4 time buckets only) in the row
-  Double_t zdev; 
-  Double_t dY;      // Projection on the wire
-  Double_t RMS;     // rms from volume charge
-
-  ClassDef(Point,1)
-};
-
 class dEdxTrack : public TObject {
  private:
   Int_t          fNPoint;

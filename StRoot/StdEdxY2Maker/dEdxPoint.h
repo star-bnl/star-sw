@@ -1,10 +1,12 @@
-#ifndef ST_dEdxPoint_Table
-#define ST_dEdxPoint_Table
+#ifndef St_dEdx_t_h
+#define St_dEdx_t_h
 
-#include "TTable.h"
-#include "Ttypes.h"
+#include "TObject.h"
 //________________________________________
-typedef struct {
+class dEdx_t : public TObject {
+ public:
+  dEdx_t() {}
+  virtual ~dEdx_t() {}
   /* U(uncorrected) -> R(ADC nonlinearity) ->  Z(Drift distance) -> P(ressure) -> T(ime ?) -> 
      S(ecRow) ->  M(ultiplicity charge) */
   Int_t    sector;
@@ -59,5 +61,6 @@ typedef struct {
   Double_t RMS;     // rms from volume charge
   Double_t zP;      // the most probable value from Bichsel
   Double_t sigmaP;  // sigma from Bichsel
-} dEdx_t;
+  ClassDef(dEdx_t,0); 
+}; 
 #endif 
