@@ -54,8 +54,18 @@ if (! -d $tmpdir && !mkdir ($tmpdir, 0755)) {
     die "$0 :: ERROR : Can't create directory $tmpdir\n";
 }
 
-# exec command
-my $com = "cd $tmpdir && $STIC @pars $idl";
+# exec command, in detach mode, environment variables may not
+# be passed. We use a modified version of stic to pass an
+# arbitrary string for the version.
+my $STVER;
+my $com;
+
+if ( defined($STVER = $ENV{STAR_VERSION}) ){
+    $com  = "cd $tmpdir && $STIC -version $STVER @pars $idl";
+} else {
+    $com  = "cd $tmpdir && $STIC @pars $idl";
+}
+
 my $exec = `$com`; if ($?) { exit 2; }
 
 # copy file and delete temp directory

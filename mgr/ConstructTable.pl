@@ -26,6 +26,8 @@ if ($file =~ /Table\.h/) {
 }
 
 #_____________________________________________________________________________
+# do not change the comment format for the library version 
+# It matches the one in stic and RootCint
 sub tableH ($) {
     my $stem = $_[0];
     my $vers = 2;
@@ -33,8 +35,10 @@ sub tableH ($) {
 /*!
  * \class  St_'.$stem.'
  * \brief  C++ wrapper for <'.$stem.'> StAF table
- * \author Automatic Generation from '.$ENV{STAR_VERSION}.'
+ * \author Automatic Generation
  * \date   '.localtime().'
+ *
+ * This was generated for version \''.$ENV{STAR_VERSION}.'\'
  */
 class St_' . $stem . ' : public TTable
 {
