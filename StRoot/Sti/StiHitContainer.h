@@ -43,14 +43,15 @@ public:
     inline double deltaZ() const {return mdeltaz;}
 
     //STL wrappers
-    void push_back(StiHit*);
-    unsigned int size() const;
-    void clear();
-    void clearAndDestroy();
-    void sortHits();
+    virtual void push_back(StiHit*);
+    virtual unsigned int size() const;
+    virtual void clear();
+    virtual void clearAndDestroy();
+    virtual void sortHits();
 
     //Gets
     const hitvector& hits(double refangle, double position);
+    const hitmap& hits() const {return mmap;}
     
     //Debugging Utilities
     void print() const;
