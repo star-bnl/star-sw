@@ -332,7 +332,7 @@ int asuStack(void *p)
   if (MaxStack >= pp && pp > NowStack) 	return  1;
   if (NowStack >= pp && pp > MinStack) 	return -1;
   if (! init) return 0;
-  if (pp < MinHeap)  			return -2;
+/*if (pp < MinHeap)  			return -2;*/
   return 0;    
 }
 
