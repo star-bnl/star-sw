@@ -1,7 +1,7 @@
-// $Id: trs.C,v 1.8 1999/03/15 19:52:11 fisyak Exp $
+// $Id: trs.C,v 1.9 1999/04/01 23:39:48 fisyak Exp $
 // $Log: trs.C,v $
-// Revision 1.8  1999/03/15 19:52:11  fisyak
-// New Makers scheme
+// Revision 1.9  1999/04/01 23:39:48  fisyak
+// Cleanup old macros
 //
 // Revision 1.7  1999/03/07 22:34:04  fisyak
 // replace StSclRoot by StarClassLibrary
@@ -47,7 +47,6 @@ void trs(const Int_t Nevents=1)
   calibMk->SetDebug();  
 
   geant = new St_geant_Maker("geant");
-  geant->SetNwGEANT(10 000 000);
   geant->SetNwGEANT(10 000 000);
   geant->SetDebug();
   //  geant->SetNwPAW(1000000);

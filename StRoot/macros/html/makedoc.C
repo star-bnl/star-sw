@@ -4,13 +4,13 @@
  // 
   gROOT.Reset();
   Char_t *libs[] = { "St_base","xdf2root","St_Tables"
-                    ,"libmsg", "libtls",  "tpc.sl","St_tpc"
+                    ,"libmsg", "libtls", 
                     ,"svt.sl", "St_svt",  "StChain"};
   
  TString AFS; // STAR root directory
 
  Char_t *suffix=0;
-  Int_t nlist = 10;
+  Int_t nlist = 8;
   Bool_t NT=kFALSE;
   if (strcmp(gSystem.GetName(),"WinNT") == 0 )
   {
@@ -36,8 +36,6 @@
   
      gSystem->Load("libmsg.so");
      gSystem->Load("libtls.so");
-     gSystem->Load("tpc.sl");
-     gSystem->Load("St_tpc");
      gSystem->Load("svt.sl");
      gSystem->Load("St_svt");
 //     gSystem->Load("global.sl");
@@ -47,11 +45,10 @@
      gSystem->Load("StChain");
 
      gSystem->Load("St_srs_Maker");
-     gSystem->Load("St_tpt_Maker");
+   
      gSystem->Load("St_xdfin_Maker");
      gSystem->Load("St_evg_Maker");
-     gSystem->Load("St_tcl_Maker");
-     gSystem->Load("St_tss_Maker");
+
 //     gSystem->Load("St_ebye_Maker");
 //     gSystem->Load("St_laser_Maker");
 //     gSystem->Load("St_run_Maker");
@@ -80,9 +77,9 @@
   TString lookup ;
   if (NT) {
     lookup = STAR;
-    lookup += "/.share/tables;../base;";
+    lookup += "/.share/tables;../St_base;";
     lookup += STAR;
-    lookup += ".share/base";
+    lookup += ".share/St_base";
   }
   else {
     lookup = STAR;
@@ -111,9 +108,9 @@
                        ,"StParticleView","St_ObjectSet","St_Node","St_NodePosition"
                        ,"StMaker",     "StChain",       "St_NodeView"
                        ,"table_head_st","St_NodeViewIter"
-                       ,"St_srs_Maker","St_tpt_Maker","St_xdfin_Maker"
+                       ,"St_srs_Maker","St_xdfin_Maker"
                       };
-  Int_t nclass = 17;
+  Int_t nclass = 16;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
@@ -151,6 +148,7 @@
 
   // Make HTML docs for the "plain" text files those are not in the dictionaries
   cout << " Makeing HTML's for macros" << endl;
+  html.Convert("./StarFromWeb.C","Access to ROOT/GEANT geometry database");
   html.Convert("./GetEvent.C","An example of the reading MDC2 dst events");
   html.Convert("./QA_Hist_Draw.C","An example of the plotting postscript file of the MDC2 histograms");
   html.Convert("./StarGeom.C","An example of the ROOT/STAR/GEANT interface");
