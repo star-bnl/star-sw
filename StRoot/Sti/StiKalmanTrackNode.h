@@ -83,42 +83,36 @@ public:
   /// Calculates and returns the transverse momentum of the track at this node.
   double getPt() const;
   
-  double getRefPosition() const 
-    {
-      return _refX;
-    }
+  double getRefPosition() const {return _refX;}
   
-  double getRefAngle() const 
-    {
-      return _refAngle;
-    }
+  double getRefAngle() const {return _refAngle;}
   
   double x_g() const;
   double y_g() const;
   double z_g() const;
     
-  double getX() const
-    {
-      return _x;
-    }
-  double getY() const
-    {
-      return _p0;
-    }
+  double getX() const 			{ return _x ;}
+  double getY() const 			{ return _p0;}  
+  double getZ() const 			{ return _p1;}
   
-  double getZ() const
-    {
-      return _p1;
-    }
-  
-  double getEta() const
-    {
-      return _p2;
-    }
-  double getChi2() const
-    {
-      return _chi2;
-    }
+  double getEta  () const 		{return _p2;   }
+  double getChi2 () const 		{return _chi2; }
+  double getSin  () const 		{return _sinCA;}
+  double getCos  () const 		{return _cosCA;}
+  double getAlpha() const 		{return _alpha;}
+  double getEyy()   const 		{return eyy;}
+  double getEzz()   const 		{return ezz;}
+  double getCyy()   const 		{return _c00;}
+  double getCzz()   const 		{return _c11;}
+  int    getHitCount () const		{return hitCount;}
+  int    getNullCount() const       	{return nullCount;}
+  int    getContigHitCount () const 	{return contiguousHitCount ;}
+  int    getContigNullCount() const 	{return contiguousNullCount;}
+  int   &getHitCount () 		{return hitCount;}
+  int   &getNullCount()        		{return nullCount;}
+  int   &getContigHitCount ()  		{return contiguousHitCount ;}
+  int   &getContigNullCount()  		{return contiguousNullCount;}
+
 #ifdef STI_NODE_DEBUG
   void setChi2(double chi2);
   void Break(int kase);
@@ -186,7 +180,7 @@ public:
   double nice(double angle) const;
   /// Return center of helix circle in global coordinates
   StThreeVector<double> getHelixCenter() const;
-  void setError(pair<double, double> p);
+  void setError(double yErr,double zErr);
   static void   setParameters(StiKalmanTrackFinderParameters *parameters);
   friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
 
@@ -198,8 +192,9 @@ public:
   /// rotation angle of local coordinates wrt global coordinates
 
 
+ protected:   
 
-  
+  char _beg[1];  
   double _alpha;
   double _cosAlpha;
   double _sinAlpha;
@@ -211,7 +206,7 @@ public:
   double _p0; 
   /// local Z-coordinate of this track (reference plane)
   double _p1;
-  /// (signed curvature)*(local X-coordinate of helix axis)
+  /// (signed curvature)*(local Xc of helix axis - X current point on track)
   double _p2;
   /// signed curvature [sign = sign(-qB)]
   double _p3;  
@@ -220,6 +215,7 @@ public:
   /// sine and cosine of cross angle
   double _sinCA;
   double _cosCA;
+  
   /// covariance matrix of the track parameters
   double _c00;                       
   double _c10, _c11;                 
@@ -228,15 +224,16 @@ public:
   double _c40, _c41, _c42, _c43, _c44;
   double _chi2;
   float  eyy,ezz;
-  short int hitCount;
-  short int nullCount;
-  short int contiguousHitCount;
-  short int contiguousNullCount;
+  int hitCount;
+  int nullCount;
+  int contiguousHitCount;
+  int contiguousNullCount;
+  const StiDetector * _detector;
+  char   _end[1];
+
   static StiKalmanTrackFinderParameters * pars;
 
- protected:   
   static int counter;
-  const StiDetector * _detector;
   static Messenger &  _messenger;
 
   static bool  recurse;
@@ -338,10 +335,9 @@ inline double StiKalmanTrackNode::crossAngle() const
   return asin(_sinCA);
 }
 
-inline void StiKalmanTrackNode::setError(pair<double, double> p)
+inline void StiKalmanTrackNode::setError(double ey,double ez)
 {
-  eyy = p.first*p.first;
-  ezz = p.second*p.second;
+  eyy = ey; ezz = ez;
 }
 
 /*! Calculate/return the track transverse momentum
@@ -389,7 +385,7 @@ struct StreamX
 {
   void operator()(const StiKalmanTrackNode& node) 
   {
-    cout <<node._x<<endl;
+    cout <<node.getX()<<endl;
   }
 };
 
@@ -505,7 +501,7 @@ inline void StiKalmanTrackNode::setCurvature(double curvature)
   _p3=curvature;
 }
 
-inline  void StiKalmanTrackNode::initialize(StiHit*h,double alpha, double eta, double curvature, double tanl)
+inline  void StiKalmanTrackNode::initialize(StiHit*h,double alpha, double XcRho, double curvature, double tanl)
 {
   //cout << "StiKalmanTrackNode::initialize(...) -I- Started"<<endl;
   reset();
@@ -519,16 +515,13 @@ inline  void StiKalmanTrackNode::initialize(StiHit*h,double alpha, double eta, d
   _sinAlpha = sin(alpha);
   _p0      = h->y();
   _p1      = h->z();
-  _p2      = eta;
+  _p2      = XcRho-_x*curvature;
   _p3      = curvature;
   _p4      = tanl;
-//VP  _sinCA   = _p3*_x-_p2;   
-//VP   if (fabs(_sinCA)>1.) 
-  double tmp=_p3*_x-_p2;
   _sinCA = 999.;
-  if (fabs(tmp)>1.)   
+  if (fabs(_p2)>1.)   
       throw runtime_error("SKTN::initialize() - ERROR - fabs(_sinCA)>1.");
-  _sinCA   = tmp;
+  _sinCA   = -_p2;
   _cosCA   = ::sqrt(1.-_sinCA*_sinCA);
   //cout << "StiKalmanTrackNode::initialize(...) -I- Done"<<endl;
 };

@@ -46,11 +46,11 @@ void RadLengthPlots::fill(StiTrackContainer *mTrackStore)
       if (kTrack)
 	{
 	  StiKalmanTrackNode * innerMostNode = static_cast<StiKalmanTrackNode *>(kTrack->getInnerMostNode());
-	  double x1 = innerMostNode->_x; if(x1){}
-	  double z  = innerMostNode->_p1;
-	  double x2 = kTrack->getInnerMostHitNode()->_x;
+	  double x1 = innerMostNode->getX(); if(x1){}
+	  double z  = innerMostNode->getZ();
+	  double x2 = kTrack->getInnerMostHitNode()->getX();
 	  StiKalmanTrackNode * secNode =  static_cast<StiKalmanTrackNode *>(innerMostNode->getParent());
-	  double x3 = secNode->_x;if(x3){}
+	  double x3 = secNode->getX();if(x3){}
 	  if(nPts>40 && x2<2. && fabs(z)<50. && thePt>0.4)
 	    {
 	      double radLength = kTrack->getTrackRadLength();

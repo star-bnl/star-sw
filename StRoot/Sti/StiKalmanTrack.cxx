@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.49 2004/12/23 15:06:28 pruneau Exp $
- * $Id: StiKalmanTrack.cxx,v 2.49 2004/12/23 15:06:28 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.50 2005/01/17 01:31:25 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.50 2005/01/17 01:31:25 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.50  2005/01/17 01:31:25  perev
+ * New parameter model
+ *
  * Revision 2.49  2004/12/23 15:06:28  pruneau
  * use _alpha instead of getRefAngle while extending to vertex
  *
@@ -419,7 +422,7 @@ StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
   for (it=nodes->begin(); it!=nodes->end(); it++)
     {
       StiKalmanTrackNode * node = static_cast<StiKalmanTrackNode *>(*it);
-      xx = node->_x;
+      xx = node->getX();
       diff = xx-x; if (diff<0) diff = -diff;
       //TRACKMESSENGER << "===> x/diff:" << xx << "\t" << diff << endl;
       if (diff<minDist) 
@@ -495,7 +498,7 @@ StThreeVector<double> StiKalmanTrack::getMomentumNear(double x)
   double e[6];
   node->getMomentum(p,e);
   StThreeVector<double> p3(p[0],p[1],p[2]);
-  p3.rotateZ(node->_alpha);
+  p3.rotateZ(node->getAlpha());
   return p3;
 }
 
@@ -510,7 +513,7 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
   double e[6];
   inner->getMomentum(p,e);
   StThreeVector<double> p3(p[0],p[1],p[2]);
-  p3.rotateZ(inner->_alpha);
+  p3.rotateZ(inner->getAlpha());
   return p3;
 }
 
@@ -545,7 +548,7 @@ double  StiKalmanTrack::getChi2() const
 	{
 	  if ((*it).getHit())
 	    {
-	      nodeChi2 = (*it)._chi2;
+	      nodeChi2 = (*it).getChi2();
 	      if (nodeChi2<maxChi2) 
 		{
 		  trackChi2 += nodeChi2;
@@ -611,7 +614,7 @@ int StiKalmanTrack::getMaxPointCount() const
 	       const StiDetector * detector = h->detector();
 	       if (detector)
 		  {
-		     if (detector->isActive((*it)._p0,(*it)._p1))
+		     if (detector->isActive((*it).getY(),(*it).getZ()))
 			      	nPts++;
 		  }
 	       //else
@@ -637,7 +640,7 @@ int StiKalmanTrack::getMaxPointCount(int detectorId) const
 	       const StiDetector * detector = h->detector();
 	       if (detector)
 		  {
-		     if (detector->isActive((*it)._p0,(*it)._p1) &&
+		     if (detector->isActive((*it).getY(),(*it).getZ()) &&
 			 detector->getGroupId() == detectorId)
 			      	nPts++;
 		  }
@@ -757,11 +760,11 @@ double StiKalmanTrack::getTrackLength() const
   StiKalmanTrackNode * inNode = getInnerMostHitNode(2);
   StThreeVectorD in(inNode->getX(),inNode->getY(),inNode->getZ());
   //  in.rotateZ(inNode->getRefAngle());
-  in.rotateZ(inNode->_alpha);
+  in.rotateZ(inNode->getAlpha());
   StiKalmanTrackNode * otNode = getOuterMostHitNode(2);
   StThreeVectorD ot(otNode->getX(),otNode->getY(),otNode->getZ());
   //ot.rotateZ(otNode->getRefAngle());
-  ot.rotateZ(otNode->_alpha);
+  ot.rotateZ(otNode->getAlpha());
   StPhysicalHelixD hlx(fabs(inNode->getCurvature()),
 		            inNode->getDipAngle(),
 		            inNode->getPhase(),
@@ -922,7 +925,7 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode(int qua)   const
 bool  StiKalmanTrack::isPrimary() const
 {
   StiKalmanTrackNode * node = getInnerMostHitNode();
-  return (fabs(node->_x)<2.) ? true : false;
+  return (fabs(node->getX())<2.) ? true : false;
 }
 
 /*! Swap the track node sequence inside-out
@@ -1100,29 +1103,29 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   StiHit localVertex = *vertex;
   sNode = lastNode;
 
-  double xxxx = lastNode->_x;
-  bool   check = false;
+  //double xxxx = lastNode->getX();
+  //bool   check = false;
   //if (xxxx>4.1) check = true;
 
   //localVertex.rotate(sNode->getRefAngle());
-  localVertex.rotate(sNode->_alpha);
+  localVertex.rotate(sNode->getAlpha());
   tNode = trackNodeFactory->getInstance();
   if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() -E- tNode==null");
   tNode->reset();
   StiHit *myHit;
   //cout << "SKT::extendToVertex() -I- x,y,z:"<< localVertex.x() 
   //     << " " <<  localVertex.y() << " " << localVertex.z() << endl;
-  //cout << "SKT::extendToVertex() -I- sNode->_x:"<<sNode->_x<<endl;
-  //cout << "SKT::extendToVertex() -I-0 tNode->_x:"<< tNode->_x<<endl;
+  //cout << "SKT::extendToVertex() -I- sNode->getX():"<<sNode->getX()<<endl;
+  //cout << "SKT::extendToVertex() -I-0 tNode->getX():"<< tNode->getX()<<endl;
   if (tNode->propagate(sNode, &localVertex,trackingDirection))
     { 
       //cout << " on vertex plane:";
       chi2 = tNode->evaluateChi2(&localVertex); 
       
       double dx,dy,dz,d;
-      dx=tNode->_x- localVertex.x();
-      dy=tNode->_p0- localVertex.y();
-      dz=tNode->_p1- localVertex.z();
+      dx=tNode->getX()- localVertex.x();
+      dy=tNode->getY()- localVertex.y();
+      dz=tNode->getZ()- localVertex.z();
       d= ::sqrt(dx*dx+dy*dy+dz*dz);
       //cout << "chi2 @ vtx " << chi2 << endl;
       /*	cout << " dx:"<< dx
@@ -1245,7 +1248,7 @@ double  StiKalmanTrack::getDca(const StiHit * vertex)    const
   StiKalmanTrackNode*	node;
 
   lastNode = getInnerMostHitNode(); 
-  if (lastNode->_x<2.)
+  if (lastNode->getX()<2.)
     node = static_cast<StiKalmanTrackNode*>(lastNode->getParent());
   else
     node = lastNode;
@@ -1253,7 +1256,7 @@ double  StiKalmanTrack::getDca(const StiHit * vertex)    const
   StThreeVectorD vxDD(vertex->x_g(), vertex->y_g(),vertex->z_g());
   StPhysicalHelixD physicalHelix(0.,0.,0.,originD,-1);
   //originD.rotateZ(node->getRefAngle());
-  originD.rotateZ(node->_alpha);
+  originD.rotateZ(node->getAlpha());
   physicalHelix.setParameters(fabs(node->getCurvature()),
 			       node->getDipAngle(),
 			       node->getPhase(),
@@ -1282,7 +1285,7 @@ StiKalmanTrackNode * StiKalmanTrack::extrapolateToRadius(double radius)
   StiKalmanTrackNode * outerMostNode = getOuterMostNode();
   //return null if there is no node to extrapolate from.
   if (!outerMostNode) return 0;
-  StiKalmanTrackNode * n = trackNodeFactory->getInstance();
+  StiKalmanTrackNode *n = trackNodeFactory->getInstance();
   if (n->propagateToRadius(outerMostNode,radius,trackingDirection)>=0) return n;
   return 0;
 }
