@@ -30,13 +30,6 @@ using namespace std;
 //StiEvaluator
 #include "StiTrackAssociator.h"
 
-StiTrackAssociator* StiTrackAssociator::sInstance = 0;
-
-StiTrackAssociator* StiTrackAssociator::instance(StAssociationMaker* a)
-{
-    return (sInstance) ? sInstance : new StiTrackAssociator(a);
-}
-
 StiTrackAssociator::StiTrackAssociator(StAssociationMaker* a)
     : mAssociationMaker(a)
 {
@@ -45,7 +38,6 @@ StiTrackAssociator::StiTrackAssociator(StAssociationMaker* a)
 	cout <<"StiTrackAssociator::StiTrackAssociatorr(). ERROR:\t"
 	     <<"mAssociationMaker null.  Undefined behavior"<<endl;
     }
-    sInstance = this;    
 }
 
 StiTrackAssociator::~StiTrackAssociator()
@@ -86,10 +78,10 @@ StiTrackAssociator::AssocPair StiTrackAssociator::associate(StiKalmanTrack* stiT
 
     //Now we have the best ping, find the best TrackPairInfo for this MC track:
     StTrackPairInfo* info = findBestTrackPair(ping);
-    if (!info) {
-	cout <<"Error, info==0.  Abort"<<endl;
-	return AssocPair(0, nullPing);
-    }
+    //if (!info) {
+    //cout <<"Error, info==0.  Abort"<<endl;
+    //return AssocPair(0, nullPing);
+    //}
     
     return AssocPair(info, *ping);
 }
