@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTTreeReader.cxx,v 1.2 2001/09/05 20:42:18 laue Exp $
+ * $Id: StHbtTTreeReader.cxx,v 1.3 2001/09/19 16:14:58 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -294,9 +294,19 @@ int StHbtTTreeReader::initRead(string dir, string file, string filter, string ex
   mEventIndex =0;
   mTChain = new TChain("Tree","hbtTree");
   int nFiles =0;
-  if (file!="") { // if a single file was specified  
-    mTChain->Add((dir+file).c_str());
-    nFiles++;
+  if (file!="") { // if a filename was given
+    if( strstr(file.c_str(),".lis") ) { // if a file list is specified
+      try {
+	nFiles = fillChain(mTChain, (dir+file).c_str(), mMaxFiles);
+      }
+      catch(StException e) {
+	throw e;
+      }
+    }
+    else { // a single file was specified
+      mTChain->Add((dir+file).c_str());
+      nFiles++;
+    }
   }
   else {
     try {
@@ -315,6 +325,27 @@ int StHbtTTreeReader::uninitRead(){
   mHbtTTreeEvent = 0;
   mTChain = 0;
   return 0;
+}
+
+int StHbtTTreeReader::fillChain(TChain* chain, const char* fileList, const int maxFiles) {
+  ifstream* inputStream = new ifstream;
+  inputStream->open(fileList);
+  if (!(inputStream)) throw StException("StHbtTTreeReader::fillChain(string dir) - can not open directory");
+  char* temp;
+  int count=0;
+  if (mDebug>1) cout << " StHbtTTreeReader::fillChain(...)- inputStream->good() : " << inputStream->good() << endl;
+  for (;inputStream->good();) {
+    temp = new char[200];
+    inputStream->getline(temp,200);
+    if (mDebug) cout << temp << endl;
+    chain->Add(temp);
+    delete temp;
+    ++count;
+    if (count>maxFiles) break;
+  }   
+  delete inputStream;
+  if (mDebug) cout << "StHbtTTreeReader::(string dir)(string dir) - Added " << count << " files to the chain" << endl;
+  return count;
 }
 
 int StHbtTTreeReader::fillChain(TChain* chain, const char* dir, const char* filter, const char* extention, const int maxFiles) {
@@ -344,8 +375,8 @@ int StHbtTTreeReader::fillChain(TChain* chain, const char* dir, const char* filt
 /***************************************************************************
  *
  * $Log: StHbtTTreeReader.cxx,v $
- * Revision 1.2  2001/09/05 20:42:18  laue
- * Updates of the hbtMuDstTree microDSTs
+ * Revision 1.3  2001/09/19 16:14:58  laue
+ * filelist option added
  *
  * Revision 1.1  2001/06/21 19:18:42  laue
  * Modified Files: (to match the changed base classes)
