@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.18 2000/02/26 19:06:12 laue Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.19 2000/04/03 16:22:07 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.19  2000/04/03 16:22:07  laue
+ * some include files changed
+ *
  * Revision 1.18  2000/02/26 19:06:12  laue
  * Some unnecessary includes removed.
  * StThreeVectorD replace by StHbtThreeVector.
@@ -93,7 +96,7 @@
  *
  **************************************************************************/
 #define HBT_BFIELD 0.5*tesla
-
+ 
 #include "StHbtMaker/Reader/StStandardHbtEventReader.h"
 #include "StChain.h"
 #include "TOrdCollection.h"
@@ -117,6 +120,7 @@
 
 #include "StParticleTypes.hh"
 #include "StTpcDedxPidAlgorithm.h"
+#include "StHit.h"
 
 //#include <typeinfo>
 #include <math.h>
@@ -238,6 +242,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   if (!PidAlgorithm) cout << "Whoa!! No PidAlgorithm!! " << endl;
 
   // the following just point to particle definitions in StEvent
+  StElectron* Electron = StElectron::instance();
   StPionPlus* Pion = StPionPlus::instance();
   StKaonPlus* Kaon = StKaonPlus::instance();
   StProton* Proton = StProton::instance();
@@ -261,6 +266,8 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
       //cout << "No global track -- skipping track" << endl;
       continue;
     }
+
+
     // check number points in tpc
     int nhits = rTrack->detectorInfo()->numberOfPoints(kTpcId);
     //cout << "nhits\t" << nhits << endl;
@@ -274,6 +281,11 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     //cout << " number of pidTraits for tpc: " << rTrack->pidTraits(kTpcId).size() << endl;
     StTrackPidTraits* trackPidTraits=0; 
     size_t iPidTraitsCounter=0;
+
+    //for ( int ihit = 0; ihit < rTrack->detectorInfo()->hits(kTpcId).size(); ihit++) {
+    //  cout << rTrack->detectorInfo()->hits(kTpcId)[ihit]->position() << endl;
+    //}
+
     do {
       trackPidTraits = rTrack->pidTraits(kTpcId)[iPidTraitsCounter];
       iPidTraitsCounter++;
@@ -320,11 +332,16 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     //cout << "StHbtTrack instantiated " << endl;
 
 
+    
+    hbtTrack->SetTrackId(rTrack->key());
 
     hbtTrack->SetNHits(nhits);
 
-    float nsigpi = PidAlgorithm->numberOfSigma(Pion);
+    float nsige = PidAlgorithm->numberOfSigma(Electron);
+    //cout << "nsigpe\t\t" << nsigpe << endl;
+    hbtTrack->SetNSigmaElectron(nsige);
 
+    float nsigpi = PidAlgorithm->numberOfSigma(Pion);
     //cout << "nsigpi\t\t" << nsigpi << endl;
     hbtTrack->SetNSigmaPion(nsigpi);
 
@@ -338,7 +355,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 
 
 
-    //cout << "Nsig pion,kaon,proton : " << nsigpi << " " << nsigk << " " << nsigprot << endl;
+    //cout << "Nsig electron,pion,kaon,proton : " << nsige << " " << nsigpi << " " << nsigk << " " << nsigprot << endl;
     
     float dEdx = dedxPidTraits->mean();
     //cout << "dEdx\t" << dEdx << endl; 
@@ -373,6 +390,9 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     //cout << "charge\t\t\t\t" << charge << endl;
     hbtTrack->SetCharge(charge);
     
+    hbtTrack->SetTopologyMap( 0, rTrack->topologyMap().data(0) );
+    hbtTrack->SetTopologyMap( 1, rTrack->topologyMap().data(1) );
+
     //cout << "pushing..." <<endl;
 
     
@@ -465,6 +485,17 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 	//Store total number of v0s in v0minidst so can start from there next time
         cout << "**** n_v0 = " << n_v0 << "**mV0"   << n_v0-mV0 << endl;        //  "       "
 	mV0 =n_v0;
+      }
+
+      // There might be event cuts that modify the collections of Tracks or V0 in the event.
+      // These cuts have to be done after the event is built. That's why we have the event cut
+      // at this point for the second time.
+      // An example of this kind of cuts will be an cut that removes spit tracks from the event.
+      if (mEventCut){
+	if (!(mEventCut->Pass(hbtEvent))){    // event failed! - return null pointer (but leave Reader status flag as "good")
+	  delete hbtEvent;
+	  return 0;
+	}
       }
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtXDFReader.cxx,v 1.3 2000/03/16 02:07:55 laue Exp $
+ * $Id: StHbtXDFReader.cxx,v 1.4 2000/04/03 16:22:07 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -263,26 +263,40 @@ StHbtEvent* StHbtXDFReader::ReturnHbtEvent(){
 #ifdef STHBTDEBUG
     cout << "StHbtTrack instantiated " << endl;
 #endif    
+
+    hbtTrack->SetTrackId(icount);
+
     switch (particleId) {
+    case 11:  // intentional fall-through
+    case -11:  // gid=211,-211 is pion
+      hbtTrack->SetNSigmaElectron(0.);
+      hbtTrack->SetNSigmaPion(-999.);
+      hbtTrack->SetNSigmaKaon(-999.);
+      hbtTrack->SetNSigmaProton(-999.);
+      break;
     case 211:  // intentional fall-through
     case -211:  // gid=211,-211 is pion
+      hbtTrack->SetNSigmaElectron(999.);
       hbtTrack->SetNSigmaPion(0.);
       hbtTrack->SetNSigmaKaon(-999.);
       hbtTrack->SetNSigmaProton(-999.);
       break;
     case 321:  // intentional fall-through
     case -321:  // gid=321,-321 is kaon
+      hbtTrack->SetNSigmaElectron(999.);
       hbtTrack->SetNSigmaPion(999.0);
       hbtTrack->SetNSigmaKaon(0.);
       hbtTrack->SetNSigmaProton(-999.);
       break;
     case 2212:  // intentional fall-through
     case -2212:  // gid=2212,-2212 is proton
+      hbtTrack->SetNSigmaElectron(999.);
       hbtTrack->SetNSigmaPion(999.);
       hbtTrack->SetNSigmaKaon(999.);
       hbtTrack->SetNSigmaProton(0.);
       break;
     default:
+      hbtTrack->SetNSigmaElectron(999.);
       hbtTrack->SetNSigmaPion(999.);
       hbtTrack->SetNSigmaKaon(999.);
       hbtTrack->SetNSigmaProton(999.);

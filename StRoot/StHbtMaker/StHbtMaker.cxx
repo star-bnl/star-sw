@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtMaker.cxx,v 1.8 2000/01/25 17:33:38 laue Exp $
+ * $Id: StHbtMaker.cxx,v 1.9 2000/04/03 16:21:12 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtMaker.cxx,v $
+ * Revision 1.9  2000/04/03 16:21:12  laue
+ * some include files changed
+ *
  * Revision 1.8  2000/01/25 17:33:38  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -49,13 +52,11 @@
 
 #include <iostream.h>
 #include <stdlib.h>
-//#include <string>
 
 #ifdef __ROOT__
 #include "StChain.h"
 #endif
 
-#include <vector>
 #include "StHbtMaker.h"
 
 #ifdef __ROOT__
@@ -72,6 +73,7 @@ StHbtMaker::StHbtMaker(const char*name, const char * title)
 {
   // StHbtMaker - constructor
   mHbtManager = new StHbtManager;
+  cout << string::npos << endl;
 }
 //_____________________________________________________________________________
 StHbtMaker::~StHbtMaker()

@@ -6,8 +6,7 @@
  ***************************************************************************/
 
 #include "StHbtMaker/Cut/GenericTripletCut.h"
-#include <string>
-#include <cstdio>
+//#include <cstdio>
 
 ClassImp(GenericTripletCut)
 
@@ -27,7 +26,7 @@ bool GenericTripletCut::Pass(const StHbtTriplet* Triplet){
 }
 //__________________
 StHbtString GenericTripletCut::Report(){
-  string Stemp = "Generic Triplet Cut - total dummy-- always returns true\n";
+  StHbtString Stemp = "Generic Triplet Cut - total dummy-- always returns true\n";
   char Ctemp[100];
   sprintf(Ctemp,"Number of Triplets which passed:\t%ld  Number which failed:\t%ld\n",mNTripletsPassed,mNTripletsFailed);
   Stemp += Ctemp;

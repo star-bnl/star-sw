@@ -49,12 +49,18 @@ class StHbtBinaryReader : public StHbtEventReader{
 private:
   StHbtIOBinary* binaryIO;
 
+  unsigned short mStHbtEventVersion;
+  unsigned short mStHbtTrackVersion;
+  unsigned short mStHbtV0Version;
+
   ifstream* mInputStream;              //!
   ofstream* mOutputStream;             //! 
   int mReaderStatus;                   //!
   const char* mFileName;               //!
+  const char* mDirName;                //!
+  const char* mAppendix;               //!
   fileCollection* mFileList;           //!
-
+  int mRetrieve;
   StHbtString mTheMessage;
   StHbtString mCurrentFile;
 
@@ -81,9 +87,11 @@ public:
   void Finish();
 
   // methods special to this Reader
-  void SetFileName(char*);
-  void AddFileList(char*);
-
+  void SetFileName(const char*);
+  void SetDirName(const char*);
+  void SetAppendix(const char*);
+  void AddFileList(const char*);
+  void SetRetrieveFileName(const int=1);
 #ifdef __ROOT__
   ClassDef(StHbtBinaryReader, 0)
 #endif

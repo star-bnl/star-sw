@@ -14,7 +14,6 @@
  * 
  **************************************************************************/
 #define HBT_BFIELD 0.5*tesla
-#include <string>
 #include "StHbtMaker/Reader/StHbtGstarTxtReader.h"
 // hbt stuff
 #include "SystemOfUnits.h"   // has "tesla" in it
@@ -180,11 +179,22 @@ StHbtEvent* StHbtGstarTxtReader::ReturnHbtEvent(){
     StHbtTrack* hbtTrack = new StHbtTrack;
 
     //    cout << "Pid is " << pid;
+    hbtTrack->SetTrackId(itrack);
 
     switch (pid){
+    case 2:  // intentional fall-through
+      charge = 1;
+    case 3:  // pion
+      hbtTrack->SetNSigmaElectron(0.);
+      hbtTrack->SetNSigmaPion(999.);
+      hbtTrack->SetNSigmaKaon(-999.);
+      hbtTrack->SetNSigmaProton(-999.);
+      mass = 5.1099905E-04;
+      break;
     case 8:  // intentional fall-through
       charge = 1;
     case 9:  // pion
+      hbtTrack->SetNSigmaElectron(999.);
       hbtTrack->SetNSigmaPion(0.);
       hbtTrack->SetNSigmaKaon(-999.);
       hbtTrack->SetNSigmaProton(-999.);
@@ -193,6 +203,7 @@ StHbtEvent* StHbtGstarTxtReader::ReturnHbtEvent(){
     case 11:  // intensional fall-thru
       charge = 1;
     case 12:
+      hbtTrack->SetNSigmaElectron(999.);
       hbtTrack->SetNSigmaPion(999.0);
       hbtTrack->SetNSigmaKaon(0.);
       hbtTrack->SetNSigmaProton(-999.);
@@ -200,6 +211,7 @@ StHbtEvent* StHbtGstarTxtReader::ReturnHbtEvent(){
       break;
     case 14:  // proton
       charge = 1;
+      hbtTrack->SetNSigmaElectron(999.);
       hbtTrack->SetNSigmaPion(999.);
       hbtTrack->SetNSigmaKaon(999.);
       hbtTrack->SetNSigmaProton(0.);

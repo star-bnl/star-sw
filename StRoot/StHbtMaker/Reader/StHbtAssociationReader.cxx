@@ -20,7 +20,7 @@
 #include "StTpcDedxPidAlgorithm.h"
 
 //#include <typeinfo>
-#include <cmath>
+#include <math.h>
 
 #include "SystemOfUnits.h"   // has "tesla" in it
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
@@ -30,10 +30,9 @@
 #include "StV0MiniDstMaker/StV0MiniDst.hh"
 #include "StAssociationMaker/StAssociationMaker.h"
 
-#include <iostream.h>
-#include <stdlib.h>
-#include <string>
-#include <vector>
+//#include <iostream.h>
+//#include <stdlib.h>
+//#include <vector>
 #include "StMcEventMaker/StMcEventMaker.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -329,28 +328,41 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     
     //cout << "StHbtTrack instantiated " << endl;
     
+    hbtTrack->SetTrackId(rTrack->key());
+
     hbtTrack->SetNHits(nhits);
     
     switch (geantId) {
+    case 2:  // intentional fall-through
+    case 3:  // gid=2,3 is electron
+      hbtTrack->SetNSigmaElectron(0.);
+      hbtTrack->SetNSigmaPion(-999);
+      hbtTrack->SetNSigmaKaon(-999.);
+      hbtTrack->SetNSigmaProton(-999.);
+      break;
     case 8:  // intentional fall-through
     case 9:  // gid=8,9 is pion
+      hbtTrack->SetNSigmaElectron(999.);
       hbtTrack->SetNSigmaPion(0.);
       hbtTrack->SetNSigmaKaon(-999.);
       hbtTrack->SetNSigmaProton(-999.);
       break;
     case 11:  // intentional fall-through
     case 12:  // gid=11,12 is kaon
+      hbtTrack->SetNSigmaElectron(999.);
       hbtTrack->SetNSigmaPion(999.0);
       hbtTrack->SetNSigmaKaon(0.);
       hbtTrack->SetNSigmaProton(-999.);
       break;
     case 14:  // intentional fall-through
     case 15:  // gid=14,15 is proton
+      hbtTrack->SetNSigmaElectron(999.);
       hbtTrack->SetNSigmaPion(999.);
       hbtTrack->SetNSigmaKaon(999.);
       hbtTrack->SetNSigmaProton(0.);
       break;
     default:
+      hbtTrack->SetNSigmaElectron(999.);
       hbtTrack->SetNSigmaPion(999.);
       hbtTrack->SetNSigmaKaon(999.);
       hbtTrack->SetNSigmaProton(999.);
@@ -389,6 +401,9 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     //cout << "charge\t\t\t\t" << charge << endl;
     hbtTrack->SetCharge(charge);
     
+    hbtTrack->SetTopologyMap( 0, rTrack->topologyMap().data(0) );
+    hbtTrack->SetTopologyMap( 1, rTrack->topologyMap().data(1) );
+
     //cout << "pushing..." <<endl;
     // By now, all track-wise information has been extracted and stored in hbtTrack
     // see if it passes any front-loaded event cut

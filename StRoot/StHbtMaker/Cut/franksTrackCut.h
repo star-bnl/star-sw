@@ -38,9 +38,11 @@ class franksTrackCut : public StHbtTrackCut
   virtual StHbtString Report();
 
 
+  void SetNSigmaElectron(const float& lo, const float& hi);
   void SetNSigmaPion(const float& lo, const float& hi);
   void SetNSigmaKaon(const float& lo, const float& hi);
   void SetNSigmaProton(const float& lo, const float& hi);
+
 
   void SetNHits(const int& lo, const int& hi);
   void SetP(const float& lo, const float& hi);
@@ -54,6 +56,7 @@ class franksTrackCut : public StHbtTrackCut
 private:   // here are the quantities I want to cut on...
 
   int               mCharge;
+  float             mNSigmaElectron[2];
   float             mNSigmaPion[2];
   float             mNSigmaKaon[2];
   float             mNSigmaProton[2];
@@ -72,6 +75,7 @@ private:   // here are the quantities I want to cut on...
 };
 
 
+inline void franksTrackCut::SetNSigmaElectron(const float& lo, const float& hi){mNSigmaElectron[0]=lo; mNSigmaElectron[1]=hi;}
 inline void franksTrackCut::SetNSigmaPion(const float& lo, const float& hi){mNSigmaPion[0]=lo; mNSigmaPion[1]=hi;}
 inline void franksTrackCut::SetNSigmaKaon(const float& lo, const float& hi){mNSigmaKaon[0]=lo; mNSigmaKaon[1]=hi;}
 inline void franksTrackCut::SetNSigmaProton(const float& lo, const float& hi){mNSigmaProton[0]=lo; mNSigmaProton[1]=hi;}

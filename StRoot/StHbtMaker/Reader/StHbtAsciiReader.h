@@ -24,6 +24,10 @@
 class StHbtAsciiReader : public StHbtEventReader{
 
 private:
+  unsigned short mStHbtEventVersion;
+  unsigned short mStHbtTrackVersion;
+  unsigned short mStHbtV0Version;
+
   ifstream* mInputStream;              //!
   ofstream* mOutputStream;             //!
   const char* mFileName;               //!
