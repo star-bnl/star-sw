@@ -1,5 +1,8 @@
-* $Id: tpt_find_root.F,v 1.8 1998/09/01 13:32:35 sakrejda Exp $
+* $Id: tpt_find_root.F,v 1.9 1999/05/05 21:52:11 sakrejda Exp $
 * $Log: tpt_find_root.F,v $
+* Revision 1.9  1999/05/05 21:52:11  sakrejda
+* local arrays converted to dynamic ones (with malloc)
+*
 * Revision 1.8  1998/09/01 13:32:35  sakrejda
 * restored sector numbering 1-24 in tphit.row
 *
@@ -45,7 +48,6 @@ C
 #include "tpt_pars.inc"
 #include "tpt_root.inc"
 #include "tpt_mxdim.inc"
-#include "tpt_mxhit.inc"
 
 C_____________________________________________________________________
 
@@ -56,7 +58,7 @@ C_____________________________________________________________________
 C_____________________________________________________________________
 C     Local variables
       RECORD /track_root/     root(mxroot)
-      INTEGER next_hit(tpt_mxhit)
+      INTEGER next_hit(*)
       INTEGER slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic)
       INTEGER k                            !pointer to the hit we start with
