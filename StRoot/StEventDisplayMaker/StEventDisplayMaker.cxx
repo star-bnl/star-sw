@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.83 2002/12/13 00:47:40 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.84 2002/12/19 01:21:45 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -70,7 +70,6 @@
 #include "TMath.h"
 #include "TObjString.h"
 #include "TSystem.h"
-#include "TRootHelpDialog.h"
 
 #include "StEventDisplayMaker.h"
 #include "TDataSetIter.h"
@@ -99,8 +98,10 @@
 #include "StDefaultFilter.h"
 #include "StEventHelper.h"
 
+#ifdef R__QT
 // Qt header files
 #include <qtextview.h>
+#endif
 
 // StVirtualEventFilter hitsOffFilter(0);
 // StVirtualEventFilter hitsOnFilter(1);
@@ -112,24 +113,44 @@ StEventDisplayInfo *StEventDisplayMaker::fgInfo      = 0;
 
 
 
-class StEventDisplayInfo : public QTextView 
+class StEventDisplayInfo
+#ifdef R__QT
+ : public QTextView 
+#endif
 {
 public:
-  StEventDisplayInfo(StEventDisplayInfo **kaddr, const char* title, UInt_t w=100, UInt_t h=50)
-  :QTextView(title)
-  {  
-    resize(w,h);
-    fKAddr=kaddr;*fKAddr=this;
-
-  }
+  StEventDisplayInfo(StEventDisplayInfo **kaddr, const char* title, UInt_t w=100, UInt_t h=50);
   virtual ~StEventDisplayInfo(){*fKAddr=0;}
 private:
  StEventDisplayInfo **fKAddr;	//!
 public:
- void SetText(const char *info){ setText(info);}
- void Popup(){ show();}
+ void SetText(const char *info);
+ void Popup();
 };
 
+//_____________________________________________________________________________
+StEventDisplayInfo::StEventDisplayInfo(StEventDisplayInfo **kaddr, const char* title, UInt_t w, UInt_t h)
+#ifdef R__QT
+  :QTextView(title)
+  {  
+    resize(w,h);
+#else
+  {
+#endif
+    fKAddr=kaddr;*fKAddr=this;
+  }
+//_____________________________________________________________________________
+inline void StEventDisplayInfo::SetText(const char *info){ 
+#ifdef R__QT
+  setText(info);
+#endif
+}
+//_____________________________________________________________________________
+inline void StEventDisplayInfo::Popup(){ 
+#ifdef R__QT
+  show();
+#endif
+}
 
 //_____________________________________________________________________________
 //
@@ -181,11 +202,15 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   const Int_t lvolumeNames = sizeof(volumeNames)/sizeof(char *);
   for (i=0;i<lvolumeNames;i++) AddVolume(volumeNames[i]);
 
-  gROOT->LoadMacro("EventControlPanel.C");
-  gSystem->DispatchOneEvent(1);
-//  gROOT->LoadMacro("PadControlPanel.C"  );
+#ifdef R__QT
   new StPadControlPanel();
   gSystem->DispatchOneEvent(1);
+#else
+  gROOT->LoadMacro("EventControlPanel.C");
+  gSystem->DispatchOneEvent(1);
+  gROOT->LoadMacro("PadControlPanel.C"  );
+  fprintf(stderr," PLease install Qt package to run Event Display. \n \t Thank you!\n");
+#endif
 
 
 }
@@ -1096,6 +1121,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.84  2002/12/19 01:21:45  fine
+// CPP condition to use Qt staff has been introduced
+//
 // Revision 1.83  2002/12/13 00:47:40  fine
 // first version with Qt interface
 //
