@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.31 2001/05/22 20:11:15 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.32 2001/08/02 17:41:50 snelling Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -45,7 +45,7 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.31 2001/05/22 20:11:15 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.32 2001/08/02 17:41:50 snelling Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -71,6 +71,7 @@ private:
   StFlowSelection* pFlowSelect; //! selection object
 
   // for single histograms
+  TH1F*     mHistTrigger;              //!
   TH1F*     mHistCharge;               //!
   TH1F*     mHistDcaTpc;               //!
   TH1F*     mHistDcaFtpc;              //!
@@ -204,6 +205,9 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.32  2001/08/02 17:41:50  snelling
+// Added trigger histogram
+//
 // Revision 1.31  2001/05/22 20:11:15  posk
 // Changed dEdx graphs.
 //
