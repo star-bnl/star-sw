@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.4 2002/11/05 13:44:29 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.5 2002/11/05 19:53:25 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -89,69 +89,68 @@ const static Double_t pMomin = 0.4; // range for dE/dx calibration
 const static Double_t pMomax = 0.5;
 const static Double_t GeV2keV = TMath::Log(1.e-6);
 const static Double_t TrackLengthCut = 20.;
-TMinuit *gMinuit = new TMinuit(2);
 // Histograms
-TProfile2D *Z = 0, *ZC = 0, *ETA = 0, *SecRow = 0, *SecRowC = 0, *ZRow = 0;// *sXY = 0, *SXY = 0;
+static TProfile2D *Z = 0, *ZC = 0, *ETA = 0, *SecRow = 0, *SecRowC = 0, *ZRow = 0;// *sXY = 0, *SXY = 0;
 #ifdef SpaceChargeStudy
-TProfile2D *SpaceCharge = 0, *SpaceChargeU = 0, *SpaceChargeT = 0;
-TH2D *Space2Charge = 0, *Space2ChargeU = 0, *Space2ChargeT = 0;
+static TProfile2D *SpaceCharge = 0, *SpaceChargeU = 0, *SpaceChargeT = 0;
+static TH2D *Space2Charge = 0, *Space2ChargeU = 0, *Space2ChargeT = 0;
 #endif
-TH2D *TPoints = 0, *TPoints60 = 0, *TPoints70 = 0;
-TH2D *TPointsB = 0, *TPoints60B = 0, *TPoints70B = 0;
-TH2D *Time = 0, *TimeP = 0, *Pressure = 0, *PressureC = 0, *TimeC = 0;
-TH2D *Points =  0, *Points70 =  0, *Points60 =  0;
-TH2D *PointsB = 0, *Points70B = 0, *Points60B = 0; 
+static TH2D *TPoints = 0, *TPoints60 = 0, *TPoints70 = 0;
+static TH2D *TPointsB = 0, *TPoints60B = 0, *TPoints70B = 0;
+static TH2D *Time = 0, *TimeP = 0, *Pressure = 0, *PressureC = 0, *TimeC = 0;
+static TH2D *Points =  0, *Points70 =  0, *Points60 =  0;
+static TH2D *PointsB = 0, *Points70B = 0, *Points60B = 0; 
 #ifdef CORRELATION
-TH2D *corrI = 0, *corrO = 0, *corrI2 = 0, *corrO2 = 0, *corrI5 = 0, *corrO5 = 0;
-TH2D *corrIw = 0, *corrOw = 0, *corrI2w = 0, *corrO2w = 0, *corrI5w = 0, *corrO5w = 0;
-TH1D *corrI1w = 0, *corrO1w = 0;
+static TH2D *corrI = 0, *corrO = 0, *corrI2 = 0, *corrO2 = 0, *corrI5 = 0, *corrO5 = 0;
+static TH2D *corrIw = 0, *corrOw = 0, *corrI2w = 0, *corrO2w = 0, *corrI5w = 0, *corrO5w = 0;
+static TH1D *corrI1w = 0, *corrO1w = 0;
 #endif
-TH2D *hist70[NHYPS][2], *hist60[NHYPS][2], *histz[NHYPS][2];
-TH2D *hist70B[NHYPS][2], *hist60B[NHYPS][2], *histzB[NHYPS][2];
-TH2D *FitPull = 0;
+static TH2D *hist70[NHYPS][2], *hist60[NHYPS][2], *histz[NHYPS][2];
+static TH2D *hist70B[NHYPS][2], *hist60B[NHYPS][2], *histzB[NHYPS][2];
+static TH2D *FitPull = 0;
 #ifdef XYZcheck
-TH3D *XYZ = 0, *XYZbad = 0;
+static TH3D *XYZ = 0, *XYZbad = 0;
 #endif
-TProfile2D  *dYrow = 0;
-TProfile *histB[NHYPS][2], *histBB[NHYPS][2]; 
-TTree *ftree = 0;
-dEdxTrack *ftrack = 0;
-TH2D *ffitZ[NHYPS],  *ffitP[NHYPS], *ffitZU = 0, *ffitZU3 = 0, *ffitZA = 0;
+static TProfile2D  *dYrow = 0;
+static TProfile *histB[NHYPS][2], *histBB[NHYPS][2]; 
+static TTree *ftree = 0;
+static dEdxTrack *ftrack = 0;
+static TH2D *ffitZ[NHYPS],  *ffitP[NHYPS], *ffitZU = 0, *ffitZU3 = 0, *ffitZA = 0;
 #ifdef ZBGX
-TH3D **zbgx = 0;
+static TH3D **zbgx = 0;
 #endif
-TH3D *MulRow = 0;
-TH3D *MulRowC = 0;
-TH2D *GainMonitor = 0;
-TH3D *SecRow3 = 0, *Z3 = 0, *Z3O = 0, *SecRow3C = 0;
+static TH3D *MulRow = 0;
+static TH3D *MulRowC = 0;
+static TH2D *GainMonitor = 0;
+static TH3D *SecRow3 = 0, *Z3 = 0, *Z3O = 0, *SecRow3C = 0;
 #ifdef AdcHistos
-TH2D *AdcI = 0, *AdcO = 0, *AdcIC = 0, *AdcOC = 0, *Adc3I = 0, *Adc3O = 0, *Adc3IC = 0, *Adc3OC = 0;
-TH3D *AdcIZP = 0, *AdcOZP = 0, *AdcIZN = 0, *AdcOZN = 0;
-TH2D **Adc3Ip = 0, **Adc3Op = 0;
+static TH2D *AdcI = 0, *AdcO = 0, *AdcIC = 0, *AdcOC = 0, *Adc3I = 0, *Adc3O = 0, *Adc3IC = 0, *Adc3OC = 0;
+static TH3D *AdcIZP = 0, *AdcOZP = 0, *AdcIZN = 0, *AdcOZN = 0;
+static TH2D **Adc3Ip = 0, **Adc3Op = 0;
 #endif
-const Int_t Nlog2dx = 140;
-const Double_t log2dxLow = 0.0, log2dxHigh = 3.5;
-TH2D *Zdc  = 0; // ZdcEastRate versus ZdcWestRate
-TH1D *ZdcC = 0; // ZdcCoincidenceRate
-TH1D *BBC   = 0; // BbcCoincidenceRate
-TH1D *L0   = 0; // L0RateToRich
-TH1D *Multiplicity; // mult rate 
-TH2D *ZdcCP = 0, *BBCP = 0, *L0P = 0, *MultiplicityPI = 0, *MultiplicityPO = 0;
+const static Int_t Nlog2dx = 140;
+const static Double_t log2dxLow = 0.0, log2dxHigh = 3.5;
+static TH2D *Zdc  = 0; // ZdcEastRate versus ZdcWestRate
+static TH1D *ZdcC = 0; // ZdcCoincidenceRate
+static TH1D *BBC   = 0; // BbcCoincidenceRate
+static TH1D *L0   = 0; // L0RateToRich
+static TH1D *Multiplicity; // mult rate 
+static TH2D *ZdcCP = 0, *BBCP = 0, *L0P = 0, *MultiplicityPI = 0, *MultiplicityPO = 0;
 #ifdef Mip
-TH3D *SecRow3Mip = 0;
+static TH3D *SecRow3Mip = 0;
 #endif
-TProfile *Center = 0, *Height = 0, *Width = 0, *BarPressure = 0, *CenterPressure = 0;
-TProfile *inputTPCGasPressure = 0, *nitrogenPressure = 0, *gasPressureDiff = 0, *inputGasTemperature = 0;
-TProfile *outputGasTemperature = 0, *flowRateArgon1 = 0, *flowRateArgon2 = 0, *flowRateMethane = 0;
-TProfile *percentMethaneIn = 0, *ppmOxygenIn = 0, *flowRateExhaust = 0, *percentMethaneOut = 0;
-TProfile *ppmWaterOut = 0, *ppmOxygenOut = 0, *flowRateRecirculation = 0;
-TH2D *inputTPCGasPressureP = 0, *nitrogenPressureP = 0, *gasPressureDiffP = 0, *inputGasTemperatureP = 0;
-TH2D *outputGasTemperatureP = 0, *flowRateArgon1P = 0, *flowRateArgon2P = 0, *flowRateMethaneP = 0;
-TH2D *percentMethaneInP = 0, *ppmOxygenInP = 0, *flowRateExhaustP = 0, *percentMethaneOutP = 0;
-TH2D *ppmWaterOutP = 0, *ppmOxygenOutP = 0, *flowRateRecirculationP = 0;
-TH1D *hdE = 0, *hdEU = 0, *hdER = 0, *hdEP = 0, *hdET = 0, *hdES = 0, *hdEZ = 0, *hdEM = 0;
-TH3D *Prob = 0;
-TH2D *NdEdxHits = 0;
+static TProfile *Center = 0, *Height = 0, *Width = 0, *BarPressure = 0, *CenterPressure = 0;
+static TProfile *inputTPCGasPressure = 0, *nitrogenPressure = 0, *gasPressureDiff = 0, *inputGasTemperature = 0;
+static TProfile *outputGasTemperature = 0, *flowRateArgon1 = 0, *flowRateArgon2 = 0, *flowRateMethane = 0;
+static TProfile *percentMethaneIn = 0, *ppmOxygenIn = 0, *flowRateExhaust = 0;
+static TProfile *ppmWaterOut = 0, *ppmOxygenOut = 0, *flowRateRecirculation = 0;
+static TH2D *inputTPCGasPressureP = 0, *nitrogenPressureP = 0, *gasPressureDiffP = 0, *inputGasTemperatureP = 0;
+static TH2D *outputGasTemperatureP = 0, *flowRateArgon1P = 0, *flowRateArgon2P = 0, *flowRateMethaneP = 0;
+static TH2D *percentMethaneInP = 0, *ppmOxygenInP = 0, *flowRateExhaustP = 0;
+static TH2D *ppmWaterOutP = 0, *ppmOxygenOutP = 0, *flowRateRecirculationP = 0;
+static TH1D *hdE = 0, *hdEU = 0, *hdER = 0, *hdEP = 0, *hdET = 0, *hdES = 0, *hdEZ = 0, *hdEM = 0;
+static TH3D *Prob = 0;
+static TH2D *NdEdxHits = 0;
 ClassImp(StdEdxY2Maker);
   
 //_____________________________________________________________________________
@@ -171,7 +170,9 @@ StdEdxY2Maker::StdEdxY2Maker(const char *name):
     m_trig(0),
     m_Simulation(kFALSE), 
     m_InitDone (kFALSE), 
-    m_tpcGainMonitor(0) {}
+    m_tpcGainMonitor(0) {
+  if (!gMinuit) gMinuit = new TMinuit(2);
+}
 //_____________________________________________________________________________
 StdEdxY2Maker::~StdEdxY2Maker(){}
 //_____________________________________________________________________________
