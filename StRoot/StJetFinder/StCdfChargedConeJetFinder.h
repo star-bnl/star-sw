@@ -13,12 +13,26 @@
 
 #include "StConeJetFinder.h"
 
+/*!
+  \class StCdfChargedConePars
+  \author M.L. Miller (MIT Software)
+  A simple class to encapsulate the requisite run-time parameters of the cdf-charged cone jet algorithm.
+*/
+
+///Run time pars
+class StCdfChargedConePars : public StConePars
+{
+private:    
+    ClassDef(StCdfChargedConePars,1)
+	};
+
+
 class StCdfChargedConeJetFinder : public StConeJetFinder
 {
 public:
 
     //cstr-dstr
-    StCdfChargedConeJetFinder(StConePars& pars);
+    StCdfChargedConeJetFinder(const StCdfChargedConePars& pars);
     virtual ~StCdfChargedConeJetFinder();
     
     //inherited interface
