@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.13 2000/01/27 05:54:34 porter Exp $
+ * $Id: StDbTable.cc,v 1.14 2000/02/15 20:27:44 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,13 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.14  2000/02/15 20:27:44  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.13  2000/01/27 05:54:34  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -45,6 +52,13 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.14  2000/02/15 20:27:44  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.13  2000/01/27 05:54:34  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -91,7 +105,7 @@
 
 ///////////////////////////////////////////////////////////////
 
-StDbTable::StDbTable(const char* tableName): StDbNode(tableName,"default"), mhasDescriptor(false), mdescriptor(0), mdata(0) { 
+StDbTable::StDbTable(const char* tableName): StDbNode(tableName,"default"), mhasDescriptor(false), mdescriptor(0), mdata(0), mhasData(false), mstoreMode(false) { 
 
  mendTime.munixTime=0;
  mrows=0;
@@ -104,7 +118,7 @@ StDbTable::StDbTable(const char* tableName): StDbNode(tableName,"default"), mhas
 
 ///////////////////////////////////////////////////////////////
 
-StDbTable::StDbTable(const char* tableName, int schemaID): StDbNode(tableName,"default"), mhasDescriptor(false), mdescriptor(0), mdata(0) { 
+StDbTable::StDbTable(const char* tableName, int schemaID): StDbNode(tableName,"default"), mhasDescriptor(false), mdescriptor(0), mdata(0), mhasData(false), mstoreMode(false) { 
 
 mschemaID=schemaID;
 mrows=0;
@@ -121,11 +135,15 @@ melementID = 0;
 
 StDbTable::StDbTable(StDbTable& table): StDbNode(table){
 
+melementID=0;
 StDbNodeInfo mnode;
  table.getNodeInfo(&mnode);
  setNodeInfo(&mnode);
+ mschemaID = table.getSchemaID();
+ mstoreMode = table.IsStoreMode();
  mdescriptor=0;
  mdata = 0;
+ mhasData = false;
  mrowNumber = 0;
  mrows = table.GetNRows();
  mhasDescriptor=table.hasDescriptor();
@@ -140,10 +158,12 @@ StDbNodeInfo mnode;
  mendTime.setUnixTime(table.getEndTime());
 
  char* tmp = table.GetTable();
+ if(mrows==0) mrows = 1;
  if(tmp) {
    unsigned int size = mrows*table.getTableSize();
    mdata = new char[size];
    memcpy(mdata,tmp,size);
+   mhasData = true;
  }
 
 
@@ -211,7 +231,8 @@ if(mdata){
 createMemory(nrows);
 int len = nrows*getTableSize();
 memcpy(mdata,c,len);
-
+mhasData=true;
+mstoreMode=true;
 
 }
 
@@ -238,6 +259,7 @@ ptr+=len1;
 memcpy(ptr,c,len2);
 
 delete [] tmpData;
+mhasData=true;
 
 }
 /////////////////////////////////////////////////////////////////////
@@ -274,9 +296,20 @@ bool retVal = true;
   if(mdata)return retVal;
 
   if(mdescriptor && mdescriptor->getNumElements()>0){
+     if(mrows==0) mrows = 1;
      int len = mrows*mdescriptor->getTotalSizeInBytes();
      mdata=new char[len];
      memset(mdata,0,len);
+     int max = mdescriptor->getNumElements();
+     char* name;
+     StTypeE type;
+     unsigned int length;
+     char * ptr;
+     for(int i=0; i<max;i++){
+       getElementSpecs(i,ptr,name,length,type);
+       if(type==Stchar)ptr='\0';
+       delete [] name;
+     }
   } else {
     if(!mnode.name){mnode.mstrCpy(mnode.name,"Unknown");}
     retVal = false;
@@ -447,6 +480,7 @@ char* ptr;
  }
 
  mrowNumber++;
+ if(isReading)mhasData=true;
 
  } else {
    cerr << "dbStreamer:: more rows delivered than allocated " << endl;
@@ -482,6 +516,7 @@ char* ptr;
     }       
  mrowNumber=mrows;
 
+ if(isReading) mhasData=true;
  } else {
    cerr << "dbTableStreamer:: more rows delivered than allocated " << endl;
    cerr << " #of rows= "<<mrows<< " current row= "<<mrowNumber << endl;
@@ -512,6 +547,8 @@ char* ptr;
       PassInElement(ptr,name,length,type,accept);
       delete [] name;
      }
+     mhasData=true;
+     mstoreMode=true; // For Reading from Xml-into database
    } else {
      for(int i=0; i<max; i++){
       getElementSpecs(i,ptr,name,length,type);
@@ -522,6 +559,7 @@ char* ptr;
    }
 
  mrowNumber++;
+
 
  } else {
    cerr << "Cannot Stream Data" << endl;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.4 2000/01/27 05:54:31 porter Exp $
+ * $Id: MysqlDb.cc,v 1.5 2000/02/15 20:27:43 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.5  2000/02/15 20:27:43  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.4  2000/01/27 05:54:31  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -130,7 +137,7 @@ bool MysqlDb::ExecQuery(){
 
 bool tOk=false;
 
-//cout <<"Attempting Query:: "<<mQuery << endl;
+//cout <<"Attempting Query:: "<<mQuery <<" of len=" << mQueryLen << endl;
   if(mysql_real_query(&mData,mQuery,mQueryLen)){
     cout << "Query Failed : " << mQueryMess << endl;
     cout << "Returned Error : " << mysql_error(&mData) << endl;

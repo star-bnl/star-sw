@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.16 2000/01/27 05:54:35 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.17 2000/02/15 20:27:45 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.17  2000/02/15 20:27:45  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.16  2000/01/27 05:54:35  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -135,6 +142,18 @@ int NodeID;
    Db<<"LEFT JOIN Nodes as subNode ON NodeRelation.NodeID=subNode.ID ";
    Db<<" Where Nodes.ID="<<thisNode<<endsql;
 
+   if(StDbManager::Instance()->IsVerbose()){
+     char qString[1024];
+     ostrstream qs(qString,1024);
+    qs<<"Select subNode.* from Nodes ";
+    qs<<"LEFT JOIN NodeRelation ON Nodes.ID=NodeRelation.ParentID ";
+    qs<<"LEFT JOIN Nodes as subNode ON NodeRelation.NodeID=subNode.ID ";
+    qs<<" Where Nodes.ID="<<thisNode<<ends;
+
+    cout << "NodeRelation Query = " << endl;
+    cout << qString<<endl;
+   }
+
    if(Db.NbRows() == 0){
      cerr << "No Rows Satisfying Query " << Db.NbRows()<< endl;
      Db.Release();
@@ -188,6 +207,20 @@ int NodeID;
   return 1;
 }
 
+///////////////////////////////////////////////////////////////
+
+int
+mysqlAccessor::QueryDb(StDbNode* node){
+
+  StDbNodeInfo currentNode;
+  if(!node->IsConfigured()){
+   if(!prepareNode(node,&currentNode))return 0;
+  }
+
+return 1;
+}
+
+
 ////////////////////////////////////////////////////////////////
 
 int
@@ -235,15 +268,15 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
   int* elementID = currentNode.getElementID((const char*)currentNode.elementID,numRows);
 
   // loop over numRows to get minimum endTime in 1 query
-  char elementString[1024];
-  ostrstream es(elementString,1024);
+  char elementString[4096];
+  ostrstream es(elementString,4096);
 
   int i;
 
   if(elementID){
-   es << " AND (";
-   for(i=0;i<numRows-1;i++)es<<"elementID="<<elementID[i]<<" OR ";
-   es<<"elementID="<<elementID[numRows-1]<<")"<<ends;
+   es << " AND elementID IN(";
+   for(i=0;i<numRows-1;i++)es<<elementID[i]<<",";
+   es<<elementID[numRows-1]<<")"<<ends;
   } else {
     // don't query on elementID
     es<<" "<<ends;
@@ -433,6 +466,7 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
    
    // reset row number to 0 for future dbStreaming
   table->setRowNumber();
+  table->setStoreMode(false);
   if(countRows != table->GetNRows()){
      cerr <<"Query::Table: Mismatch between NRows Requested & Delivered"<<endl;
      cerr <<" NRows Requested = "<<table->GetNRows() << "  ";
@@ -479,6 +513,11 @@ return icount;
 
 int
 mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
+
+    if(!table->hasData() && !table->IsStoreMode()){
+      table->commitData(); // prevents rollback on this table
+      return 0;
+    }
   
   StDbNodeInfo currentNode;
   // first check if node exists
@@ -493,25 +532,30 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
   currentNode.versionKey = table->getVersion();
 
   if(!queryNodeInfo(&currentNode)){ 
-     // then we should store the node in DB
+     // then we should store the node information in DB
      // I assume the table has the right node information
      char* cName = table->getCstrName();
      if(cName)currentNode.structName = currentNode.mstrDup((const char*)cName);
      currentNode.elementID  = ((StDbNode*)table)->getElementID();
      currentNode.IsBaseLine = table->IsBaseLine();
-     if(!storeNodeInfo(&currentNode))return 0;
+     if(!storeNodeInfo(&currentNode)){
+       table->commitData();return 0;}
   }
+
+
+  table->setNodeID(currentNode.nodeID);
 
   // check if it baseline &, if so, if an instance is already stored 
   if(currentNode.IsBaseLine && hasInstance(&currentNode)){
     cerr << "WriteDb::Table Error: trying to add to baseline instance"<<endl;
+    table->commitData();
     return 0;
   }
 
   // some node information can change e.g. isIndexed, structName,...
 
   if(!table->hasDescriptor()){
-     if(!QueryDescriptor(table))return 0;
+    if(!QueryDescriptor(table)){ table->commitData(); return 0;}
   }
 
   char* sTime = getDateTime(storeTime);
@@ -526,21 +570,26 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
     delete [] elements;
     elements = table->getElementID(nrows);
   }
-  int dataID;
+
+  int dataID=0;
+  if(!table->hasData()) dataID=findDefaultID(table);
 
   if(currentNode.IsBinary){
 
-    table->dbTableStreamer(&buff,"bytes",false);
-    if(!Db.Input("bytes",&buff)){
+    if(dataID==0 && table->hasData()) {  //dataID may = 0 if !indexed
+     table->dbTableStreamer(&buff,"bytes",false);
+     if(!Db.Input("bytes",&buff)){
       table->setRowNumber();
+      table->commitData();
       return 0;
     }
 
     dataID = Db.GetLastInsertID();
     Db.Release(); buff.Raz();
 
-    if(currentNode.IsIndexed){
+   }
 
+    if(currentNode.IsIndexed){
     // now write to index
      buff.WriteScalar(table->getSchemaID(),"schemaID");
      buff.WriteScalar(sTime,"beginTime");
@@ -549,11 +598,12 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
      buff.WriteScalar(currentNode.nodeID,"nodeID");
      buff.WriteScalar(nrows,"numRows");
 
-     if(!Db.Input("dataIndex",&buff)){ // write to index or delete the data
+     if(!Db.Input("dataIndex",&buff) && table->hasData()){ // write to index or delete the data
        Db.Release();
        // roll it back
        deleteRows("bytes",&dataID,1);
        table->setRowNumber();
+       table->commitData();
        return 0;
      }
     }
@@ -561,45 +611,48 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
           
   } else {  // not binary
 
-   int eID;
-   int* storedData = new int[nrows];
-   int* storedIndex = new int[nrows];
-   for(int i=0; i<nrows; i++){
+     int eID;
+     int* storedData = new int[nrows];
+     int* storedIndex = new int[nrows];
+     for(int i=0; i<nrows; i++){
   
-     table->dbStreamer(&buff,false);
-     Db.Input(currentNode.structName,&buff); // input to database
- 
-     dataID = Db.GetLastInsertID(); // get auto-generated row-id
-     storedData[i]=dataID;
-     Db.Release(); buff.Raz();
-     
-     if(currentNode.IsIndexed){
-      eID=elements[i];
+    if(dataID==0 && table->hasData()){ //dataID may = 0 if !indexed
+       table->dbStreamer(&buff,false);
+       Db.Input(currentNode.structName,&buff); // input to database
+       dataID = Db.GetLastInsertID(); // get auto-generated row-id
+       Db.Release(); buff.Raz();
+    }
+       storedData[i]=dataID;
+      
+       if(currentNode.IsIndexed){
+          eID=elements[i];
 
-      char* version = table->getVersion();
-      buff.WriteScalar(table->getSchemaID(),"schemaID");
-      buff.WriteScalar(sTime,"beginTime");
-      if(version){
-      buff.WriteScalar(version,"version");
-      delete [] version;
-      }
-      buff.WriteScalar(eID,"elementID");
-      buff.WriteScalar(dataID,"dataID");  
-      buff.WriteScalar(currentNode.nodeID,"nodeID");
+          char* version = table->getVersion();
+          buff.WriteScalar(table->getSchemaID(),"schemaID");
+          buff.WriteScalar(sTime,"beginTime");
+          if(version){
+            buff.WriteScalar(version,"version");
+            delete [] version;
+          }
+         buff.WriteScalar(eID,"elementID");
+         buff.WriteScalar(dataID,"dataID");  
+         buff.WriteScalar(currentNode.nodeID,"nodeID");
 
-      if(!Db.Input("dataIndex",&buff)){ // write row address or delete data
-        Db.Release();
+        if(!Db.Input("dataIndex",&buff) && table->hasData()){ 
+        // write row address or delete data
+          Db.Release();
         // roll back this transaction
-        deleteRows(currentNode.structName,storedData,i+1);
-        deleteRows("dataIndex",storedIndex,i);
-        table->setRowNumber(); // reset row number to 0 for future dbStreaming
-        table->commit(); //zero written rows
-        delete [] storedData; 
-        delete [] storedIndex;
-        return 0;
-      } else {
+          deleteRows(currentNode.structName,storedData,i+1);
+          deleteRows("dataIndex",storedIndex,i);
+          table->setRowNumber(); // reset row number to 0 for next dbStreaming
+          table->commit(); //zero written rows
+          delete [] storedData; 
+          delete [] storedIndex;
+          table->commitData();
+          return 0;
+        } else {
         storedIndex[i] = Db.GetLastInsertID();
-      }
+        }
 
      Db.Release();
      buff.Raz();
@@ -615,9 +668,70 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
   }
 
   table->setRowNumber(); // reset row number to 0 for future dbStreaming
+  table->setStoreMode(false);
   delete [] sTime;
 
 return 1;
+}
+
+//////////////////////////////////////////////////////////////
+
+int
+mysqlAccessor::findDefaultID(StDbTable* table){
+
+
+ if(!table->IsIndexed()) return 0;
+
+ buff.Raz(); Db.Release();
+
+ Db<<"Select ID from Nodes where name='"<<table->getMyName()<<"'";
+ Db<<" and versionKey='NullEntry'"<<endsql;
+
+ int NodeID;
+ if(!Db.Output(&buff)){
+   if(StDbManager::Instance()->IsVerbose()){
+     cout<<"findDefaultID:: failed - No NullEntry version of this table"<<endl;
+     cout<<"Will Insert 'NullEntry' for table = "<<table->getMyName()<<endl;
+   }
+     StDbTable* table2 = table->Clone();
+     table2->setVersion("NullEntry");   
+     table2->setStoreMode(true);
+     buff.Raz(); Db.Release();
+     WriteDb(table2,(unsigned int)0);
+     delete table2;
+
+ } else {
+
+   if(!buff.ReadScalar(NodeID,"ID")){
+     if(StDbManager::Instance()->IsVerbose())
+       cout<<"findDefaultID:: failed - No NullEntry-nodeID found"<<endl;
+     Db.Release();
+     return 0;
+   }
+ }
+
+ char nodeID[10]; ostrstream os(nodeID,10); os<<NodeID << ends;
+ Db<<"Select dataID from dataIndex where nodeID="<<nodeID<<" AND ";
+ Db<<" version='NullEntry'"<<endsql;
+
+ int dataID=0;
+
+ if(!Db.Output(&buff)){
+   if(StDbManager::Instance()->IsVerbose())
+     cout<<"Will Insert 'NullEntry' for table = "<<table->getMyName()<<endl;
+   StDbTable* table2 = table->Clone();
+   table2->setVersion("NullEntry");   
+   buff.Raz(); Db.Release();
+   WriteDb(table2,(unsigned int)0);
+   dataID=findDefaultID(table2);
+   delete table2;
+   return dataID;
+ } else {
+   buff.ReadScalar(dataID,"dataID");
+ }
+ buff.Raz(); Db.Release();
+
+return dataID;
 }
 
 ///////////////////////////////////////////////////////////////
@@ -692,8 +806,8 @@ bool retVal=true;
          return retVal;
        }
     }   
-    buff.SetClientMode();
 
+    buff.SetClientMode();
     bool retCheck = readNodeInfo(node);
     if(retVal && !retCheck)retVal=false;
 
@@ -740,6 +854,7 @@ return true;
 };
 
 ////////////////////////////////////////////////////////////////
+
 bool
 mysqlAccessor::storeNodeInfo(StDbNodeInfo* node){
 
@@ -867,6 +982,8 @@ mysqlAccessor::QueryDescriptor(StDbTable* table){
 return 1;
 }
 
+//////////////////////////////////////////////////////////////
+
 int
 mysqlAccessor::WriteDb(StDbConfigNode* node, int currentID){
 
@@ -949,9 +1066,9 @@ bool
 mysqlAccessor::rollBack(StDbTable* table){
 
 int numrows;
-int* dataIDs;
+int* dataIDs=table->getWrittenRows(&numrows);
 
- if((dataIDs=table->getWrittenRows(&numrows))){
+ if(dataIDs){
      
    char* dataString = new char[4*numrows+1];
    ostrstream os(dataString,4*numrows+1);
@@ -975,7 +1092,7 @@ int* dataIDs;
    Db.Release();
    table->commitData();
 
- }
+ } 
 
 return true;
 }
@@ -1025,15 +1142,8 @@ return retVal;
 
 bool
 mysqlAccessor::IsConnected() {
-  // simple test of the connect state
 
-  Db.Release();
-  Db<<"show tables"<<endsql;
-  if(Db.NbRows() == 0)return false;
-  Db.Release();
-
-return true;
-
+return Db.IsConnected();
 }
 
 

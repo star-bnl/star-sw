@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.10 2000/01/27 05:54:35 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.11 2000/02/15 20:27:45 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,13 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.11  2000/02/15 20:27:45  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.10  2000/01/27 05:54:35  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -156,6 +163,8 @@ mMax = 0;
 offsetToNextEmptyByte = 0;
 offsetToLast4Bytes = 0;
 mcols = d.getTableDescriptor();
+mnumElements=d.getNumElements();
+mtableSize = d.getTotalSizeInBytes();
 
 }
 

@@ -27,7 +27,7 @@ CSTRUCTS= $(STAR)/StDb/include
 
 ALL_CPPFLAGS += -I$(STDB_API) 
 ALL_CPPFLAGS += -I$(CSTRUCTS)
-ALL_LIBS = $(STDB_API)/StDbLib.so $(SHARED_LIBS) -lnsl -lsocket
+ALL_LIBS = $(STDB_API)/StDbLib.so $(SHARED_LIBS) 
 
 EXEC_OBJS   =  ReadConfig.o 
 

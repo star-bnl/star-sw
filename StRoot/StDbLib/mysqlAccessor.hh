@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: mysqlAccessor.hh,v 1.8 2000/01/27 05:54:36 porter Exp $
+ * $Id: mysqlAccessor.hh,v 1.9 2000/02/15 20:27:45 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.hh,v $
+ * Revision 1.9  2000/02/15 20:27:45  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.8  2000/01/27 05:54:36  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -79,6 +86,7 @@ StDbBuffer buff;
                           const char* host, 
                           const int portNumber);
 
+  virtual void close();
   // tableQuery Interface;
 
   virtual int QueryDb(StDbTable* table, unsigned int reqTime);
@@ -86,6 +94,7 @@ StDbBuffer buff;
   virtual int WriteDb(StDbTable* table, unsigned int storeTime);
   virtual int WriteDb(StDbConfigNode* node, int currentID);
   virtual int QueryDb(StDbConfigNode* node);
+  virtual int QueryDb(StDbNode* node);
   virtual bool rollBack(StDbNode* node);
   virtual bool rollBack(StDbTable* table);
   
@@ -101,6 +110,8 @@ StDbBuffer buff;
   virtual char* getDateTime(unsigned int time);
   virtual char* getDbName() const;
 
+  // If write with no data, then assume index points to default
+  virtual int findDefaultID(StDbTable* table);
 
 protected:
 
@@ -122,6 +133,10 @@ protected:
 
 };
 
+
+inline
+void
+mysqlAccessor::close(){ Db.Close();}
 
 #endif
 

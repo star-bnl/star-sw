@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: tableQuery.hh,v 1.7 2000/01/27 05:54:36 porter Exp $
+ * $Id: tableQuery.hh,v 1.8 2000/02/15 20:27:46 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: tableQuery.hh,v $
+ * Revision 1.8  2000/02/15 20:27:46  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.7  2000/01/27 05:54:36  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -55,6 +62,7 @@ public:
   virtual ~tableQuery() {};
 
   virtual int initDbQuery(const char* dbname, const char* serverName, const char* hostName, const int portNumber) = 0;
+  virtual void close() = 0;
 
   virtual int QueryDb(StDbTable* table, unsigned int reqTime) = 0;
   virtual int QueryDb(StDbTable* table, const char* whereClause) = 0;
@@ -62,6 +70,8 @@ public:
 
   virtual int QueryDb(StDbConfigNode* node) = 0;
   virtual int WriteDb(StDbConfigNode* node, int currentID)=0;
+
+  virtual int QueryDb(StDbNode* node) = 0;
 
   virtual bool rollBack(StDbNode* node) = 0;
   virtual bool rollBack(StDbTable* table) = 0;

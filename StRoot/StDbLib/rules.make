@@ -30,6 +30,7 @@ ifeq (SunOS,$(SYSTYPE))
   LDFLAGS  := -g
   EXEFLAGS := -g -Wl,-Bdynamic   
   SOFLAGS  := -g -shared  
+  LIBS     := -lnsl -lsocket
 
 ifndef GNU_GCC
 #-->then we're using CC5
@@ -68,8 +69,8 @@ SO  := $(CXX)
 ###############################################################
 
 LOCAL_INCS = -I. -I/opt/star/include
-SHARED_LIBS = -L/opt/star/lib/ -L/opt/star/lib/mysql -lmysqlclient
-STATIC_LIBS = /opt/star/lib/libmysqlclient.a
+SHARED_LIBS = -L/opt/star/lib/ -L/opt/star/lib/mysql -lmysqlclient $(LIBS)
+STATIC_LIBS = /opt/star/lib/libmysqlclient.a $(LIBS)
 
 
 ########################################

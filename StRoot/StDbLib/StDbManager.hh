@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.hh,v 1.12 2000/01/27 05:54:34 porter Exp $
+ * $Id: StDbManager.hh,v 1.13 2000/02/15 20:27:44 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbManager.hh,v $
+ * Revision 1.13  2000/02/15 20:27:44  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.12  2000/01/27 05:54:34  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -203,6 +210,9 @@ public:
   virtual bool rollBack(StDbTable* table); //! for table data
   virtual bool commitAllTables(StDbConfigNode* node); //! table commits
   virtual bool commitAllNodes(StDbConfigNode* node);  //! node  commits 
+
+  virtual void closeAllConnections(StDbConfigNode* node); 
+  virtual void closeConnection(StDbNode* node);
 
   // make ROOT-CLI via star-ofl "makefiles"
   // ClassDef(StDbManager,0)

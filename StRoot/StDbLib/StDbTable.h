@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.10 2000/01/27 05:54:35 porter Exp $
+ * $Id: StDbTable.h,v 1.11 2000/02/15 20:27:45 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,13 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.11  2000/02/15 20:27:45  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.10  2000/01/27 05:54:35  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -53,6 +60,7 @@
 #include "StTableDescriptorI.h"
 #include "StDbBufferI.h"
 #include <string.h>
+#include <iostream.h>
 
 class StDbBuffer;
 
@@ -79,6 +87,8 @@ StTableDescriptorI* mdescriptor;//!
 char*    mdata;//!
 int      mrows;
 int      mrowNumber;
+bool     mhasData;
+bool     mstoreMode;
 
   virtual void ReadElement(char*& ptr, char* name, int length, StTypeE type, StDbBuffer* buff);
   virtual void WriteElement(char* ptr, char* name, int length, StTypeE type, StDbBuffer* buff);
@@ -100,7 +110,8 @@ public:
 
   virtual ~StDbTable(){         if(melementID) delete [] melementID;
                                 if(mdescriptor)delete mdescriptor; 
-                                if(mdata) delete [] mdata; };
+                                if(mdata) delete [] mdata; 
+                                if(mdataIDs) delete [] mdataIDs; };
 
   virtual void setNodeInfo(StDbNodeInfo* node);
 
@@ -137,15 +148,20 @@ public:
   //
   // access to date via this table or c-struct
 
-  virtual StDbTable* Clone();
+  virtual StDbTable*  Clone();
   virtual char*       GetTable(); 
-  virtual void*       GetTableCpy();
+  virtual void*       GetTableCpy(); //! calloc'd version of data for StRoot
   virtual void        SetTable(char* data, int nrows);
   virtual void        AddRows(char* data, int nrows);
   virtual int         GetNRows() const;
   virtual void        SetNRows(int nrows){ mrows = nrows; }; 
   virtual void        setRowNumber(int row=0);
+  virtual bool        hasData() const;
   
+  // store mode is automatic with 'SetTable' but not for either
+  // indexing to 'NullEntry' or retimestamping just read data
+  virtual void        setStoreMode(bool mode);
+  virtual bool        IsStoreMode() const;
  
   // methods for reading & writing to Db & to file
 
@@ -242,6 +258,15 @@ inline
 void StDbTable::setRowNumber(int row){
 if(row < mrows)mrowNumber = row;
 }
+
+inline
+bool StDbTable::hasData() const { return mhasData; };
+
+inline
+void StDbTable::setStoreMode(bool mode) { mstoreMode = mode; }
+
+inline
+bool StDbTable::IsStoreMode() const { return mstoreMode; }
 
 
 #endif

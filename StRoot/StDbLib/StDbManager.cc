@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.16 2000/01/27 20:27:17 porter Exp $
+ * $Id: StDbManager.cc,v 1.17 2000/02/15 20:27:44 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.17  2000/02/15 20:27:44  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.16  2000/01/27 20:27:17  porter
  * fixed error logic for table, config, or table-list not-found
  *
@@ -464,9 +471,9 @@ StDbManager::findServer(StDbType type, StDbDomain domain){
 
  // connect to database if needed
 
- if(server && !server->hasConnected()){
-   server->init();
- }
+ // if(server && !server->hasConnected()){
+ //   server->init();
+ // }
 
  // report failure
  if(!server) {
@@ -731,6 +738,7 @@ StDbManager::setRequestTime(unsigned int time){
 mcheckTime.munixTime = time;
 StDbServer* server = findServer(dbStDb,dbStar);
 if(server){
+  if(!server->isConnected())server->init();
   if(mcheckTime.mdateTime) delete [] mcheckTime.mdateTime;
   mcheckTime.mdateTime = server->getDateTime(time);
 }
@@ -744,7 +752,10 @@ StDbManager::setRequestTime(const char* time){
 
 mcheckTime.setDateTime(time);
 StDbServer* server = findServer(dbStDb,dbStar);
-if(server)mcheckTime.munixTime = server->getUnixTime(time);
+if(server){
+  if(!server->isConnected())server->init();
+  mcheckTime.munixTime = server->getUnixTime(time);
+}
 
 }
 
@@ -756,6 +767,7 @@ StDbManager::setStoreTime(unsigned int time){
 mstoreTime.munixTime = time;
 StDbServer* server = findServer(dbStDb,dbStar);
 if(server){
+ if(!server->isConnected())server->init();
  if(mstoreTime.mdateTime) delete [] mstoreTime.mdateTime;
  mstoreTime.mdateTime = server->getDateTime(time);
  if(misVerbose) cout <<" StoreDateTime = " << mstoreTime.mdateTime << endl;
@@ -772,8 +784,9 @@ StDbManager::setStoreTime(const char* time){
 mstoreTime.setDateTime(time);
 StDbServer* server = findServer(dbStDb,dbStar);
 if(server){
+  if(!server->isConnected())server->init();
   mstoreTime.munixTime = server->getUnixTime(time);
- if(misVerbose) cout <<" StoreUnixTime = " << mstoreTime.munixTime << endl;
+  if(misVerbose) cout <<" StoreUnixTime = " << mstoreTime.munixTime << endl;
 }
 
 }
@@ -828,14 +841,9 @@ bool retVal = false;
 
     StDbServer* server = findServer(table->getDbType(),table->getDbDomain());
     if(!server)return retVal;
-    if(!server->QueryDb(table,mcheckTime.munixTime)){
-     if(!server->isConnected()){
-       if(!server->reConnect())return retVal;
-       if(!server->QueryDb(table,mcheckTime.munixTime))return retVal;
-     } else {
-       return retVal;
-     }
-    }
+    if(!server->isConnected())server->init();
+    if(!server->QueryDb(table,mcheckTime.munixTime))return retVal;
+    
      
      // table is filled 
   }
@@ -855,16 +863,9 @@ bool retVal = false;
 
     StDbServer* server = findServer(table->getDbType(),table->getDbDomain());
     if(!server)return retVal;
-    if(!server->QueryDb(table,whereClause)){
-     if(!server->isConnected()){
-      if(!server->reConnect())return retVal;
-      if(!server->QueryDb(table,whereClause))return retVal;
-     } else {
-       return retVal;
-     }
-    }
-     
-     // table is filled 
+    if(!server->isConnected())server->init();
+    if(!server->QueryDb(table,whereClause))return retVal;
+
   }
 
 return true;
@@ -927,15 +928,8 @@ bool retVal = false;
 
     StDbServer* server = findServer(table->getDbType(),table->getDbDomain());
     if(!server)return retVal;
-
-    if(!server->WriteDb(table,mstoreTime.munixTime)){
-     if(!server->isConnected()){
-       if(!server->reConnect())return retVal;  // table is filled 
-       if(!server->WriteDb(table,mstoreTime.munixTime))return retVal; 
-     } else {
-       return retVal;
-     }
-   }    
+    if(!server->isConnected())server->init();
+    if(!server->WriteDb(table,mstoreTime.munixTime))return retVal;
 
   }
 
@@ -959,16 +953,21 @@ bool retVal = false;
     retVal = true;
     while(!itr->done()){
       table = itr->next();
-      retVal = (retVal && storeDbTable(table));
-      if(!retVal){
-        rollBackAllTables(node);
-        break;
+      if(retVal){
+        retVal = (retVal && storeDbTable(table));
+      } else {
+        if(table)table->commitData(); // prevent rollback of non-stored tables
       }
     }
   delete itr;
   }
 
-if(!retVal) return retVal;
+if(!retVal) {
+  rollBackAllTables(node);
+  return retVal;
+}
+
+// do children & siblings
 bool children = true;
 bool siblings = true;
 
@@ -977,6 +976,7 @@ bool siblings = true;
     rollBackAllTables(node);
     return false;
   }
+ 
   StDbConfigNode* nextNode = 0;
   if((nextNode=node->getNextNode()))siblings = storeAllTables(nextNode);
   if(!siblings){
@@ -996,7 +996,9 @@ StDbServer* server=findServer(node->getDbType(),node->getDbDomain());
 bool children = true;
 bool siblings = true;
 bool retVal = false;
+if(!server->isConnected())server->init();
 int nodeID=server->WriteDb(node,currentID);
+
 if(nodeID){
   retVal = true;
   node->addWrittenNode(nodeID);
@@ -1063,13 +1065,9 @@ StDbManager::rollBackAllNodes(StDbConfigNode* node){
   delete itr;
   }
 
-  //bool children = true;
-  //bool siblings = true;
-
 if(node->hasChildren()) rollBackAllNodes(node->getFirstChildNode());
 StDbConfigNode* nextNode = 0;
 if((nextNode=node->getNextNode())) rollBackAllNodes(nextNode);
-
 
 return rollBack(node);
 }
@@ -1085,6 +1083,9 @@ StDbManager::rollBack(StDbNode* node){
   }
 
 StDbServer* server=findServer(node->getDbType(),node->getDbDomain());
+if(!server)return false;
+if(!server->isConnected())server->init();
+
 return server->rollBack(node);
 }
 
@@ -1098,6 +1099,8 @@ StDbManager::rollBack(StDbTable* table){
   bool retVal = false;
   if((dataRows=table->getWrittenRows(&numRows))){
      StDbServer* server=findServer(table->getDbType(),table->getDbDomain());
+     if(!server) return false;
+     if(!server->isConnected()) server->init();
      retVal = server->rollBack(table);
   }
      
@@ -1163,8 +1166,29 @@ node->commit();
 return true;
 }
 
+////////////////////////////////////////////////////////////////
+void
+StDbManager::closeAllConnections(StDbConfigNode* node){
 
+if(!node) return;
 
+ closeConnection(node);
+ if(node->hasChildren())closeAllConnections(node->getFirstChildNode());
+ StDbConfigNode* next = node->getNextNode();
+ if(next)closeAllConnections(next);
+  
+} 
+
+////////////////////////////////////////////////////////////////
+void
+StDbManager::closeConnection(StDbNode* node){
+
+if(!node) return;
+
+StDbServer* server=findServer(node->getDbType(),node->getDbDomain());
+if(server && (server->isConnected())) server->closeConnection();
+
+}
 
 ////////////////////////////////////////////////////////////////
 
@@ -1201,11 +1225,4 @@ delete [] tmpName;
  }
 return retVal;
 }
-
-
-
-
-
-
-
 
