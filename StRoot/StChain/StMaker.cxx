@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.22 1999/03/19 20:30:49 perev Exp $
+// $Id: StMaker.cxx,v 1.23 1999/03/20 20:57:35 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.23  1999/03/20 20:57:35  perev
+// add StEvtHddr.h and fix Get/SetNumber in maker
+//
 // Revision 1.22  1999/03/19 20:30:49  perev
 // GetCVSTag introduced
 //
@@ -55,7 +58,7 @@ StMaker *StMaker::fgStChain = 0;
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.22 1999/03/19 20:30:49 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.23 1999/03/20 20:57:35 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -85,6 +88,20 @@ StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker")
 StMaker::~StMaker()
 {
   Finish();
+}
+//______________________________________________________________________________
+void StMaker::SetNumber(Int_t number)
+{
+ StMaker *par = GetParentMaker();
+ if (par) par->SetNumber(number);
+ m_Number = number;
+}
+//______________________________________________________________________________
+Int_t StMaker::GetNumber() const
+{
+ StMaker *par = GetParentMaker();
+ if (par) return par->GetNumber();
+ return m_Number;
 }
 //______________________________________________________________________________
 StMaker *StMaker::GetParentMaker() const
