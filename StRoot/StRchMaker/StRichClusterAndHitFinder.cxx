@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 2.8 2001/04/25 00:31:09 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 2.9 2002/02/23 02:37:07 dunlop Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
+ * Revision 2.9  2002/02/23 02:37:07  dunlop
+ * Tweak the output a bit.  Keep a counter of clusters removed.
+ *
  * Revision 2.8  2001/04/25 00:31:09  lasiuk
  * HP changes "Declaration in loop violates scope (OLD ANSI)"
  *
@@ -628,6 +631,8 @@ bool StRichClusterAndHitFinder::simpleHitsFromClusters()
     
     StRichHitInformation hitInfo;
     vector<StRichSinglePixel*> aVectorOfPixels;
+
+    int numberOfBadClusters = 0;
     
     for(ii=0; ii<mTheClusters.size(); ii++) {
 	
@@ -735,15 +740,20 @@ bool StRichClusterAndHitFinder::simpleHitsFromClusters()
 	    badCluster = true;
 	}
 	if( mNumberOfSaturatedPads > mMaxSaturatedPads) {
-	    PR(mNumberOfSaturatedPads);
+	    cout << "StRichClusterAndHitFinder: Bad cluster: saturated " <<
+		mNumberOfSaturatedPads << " > max " << mMaxSaturatedPads << endl;
 	    badCluster = true;
 	}
 
 	// Dervived Quantities
 	// Aspect Ratio
 	// total numberofpads etc...
-	if(badCluster) continue;
-
+	if(badCluster) {
+	    ++numberOfBadClusters;
+	    
+	    continue;
+	}
+	
 
 	//
 	// 2 local max
@@ -853,6 +863,8 @@ bool StRichClusterAndHitFinder::simpleHitsFromClusters()
 		}
 		else {
 		    cout << "Matrix failed " << kk << '/' << theLocalMaxima.size() << endl;
+		    ++numberOfBadClusters;
+		    
 		}
 		
 		aVectorOfPixels.clear();
@@ -869,6 +881,8 @@ bool StRichClusterAndHitFinder::simpleHitsFromClusters()
 	    cout << "\tBad Cluster\n";
 	    cout << "\tNumber of Local Max: " << numberOfLocalMax << "/" << mTheClusters[ii]->numberOfPads(); 
 	    cout << "\tSkipping...." << endl;
+	    ++numberOfBadClusters;
+	    
 	}
 
 
@@ -876,6 +890,9 @@ bool StRichClusterAndHitFinder::simpleHitsFromClusters()
     } // loop over all clusters!
 
 //     cout << "StRichClusterAndHitFinder::simpleHitsFromCluster() # =" << mTheHits.size() << endl;
+    if (numberOfBadClusters) {
+	cout << "StRichClusterAndHitFinder:: numberOfBadClusters = " <<numberOfBadClusters << endl;
+    }
     
     return true;
 }
