@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.97 2003/10/28 20:21:13 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.98 2004/01/26 22:57:10 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -854,12 +854,11 @@ void  StEventDisplayMaker::DrawIt(StPoints3DABC *pnt,const char *opt
 #if 1
       // Create the dummy TPolyLine3D
       m_PadBrowserCanvas->cd();
-      int i= 0;
       Int_t n = pnt->Size();
       if ( opt[0] == 'L' ) {
          TPolyLine3D  *line = new TPolyLine3D ( n, (Float_t *)pnt->GetXYZ(0),"");
          line->SetLineColor(col);
-         line->SetLineWidth(siz);
+         line->SetLineWidth((short)siz);
          line->Draw();
          m_TrackCollector->Add(line);
      } else {
@@ -1129,6 +1128,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.98  2004/01/26 22:57:10  perev
+// WarnOff
+//
 // Revision 1.97  2003/10/28 20:21:13  fine
 // Adjust the maker size
 //

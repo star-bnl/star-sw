@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.h,v 1.7 2003/11/25 01:54:34 meissner Exp $
+// $Id: StPeCPair.h,v 1.8 2004/01/26 23:01:11 perev Exp $
 // $Log: StPeCPair.h,v $
+// Revision 1.8  2004/01/26 23:01:11  perev
+// WarnOff
+//
 // Revision 1.7  2003/11/25 01:54:34  meissner
 // correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
 //
@@ -57,7 +60,7 @@ public:
 
                                   StPeCPair();
   virtual                         ~StPeCPair();
-  void                            Clear();
+  void                            Clear(const char* opt=0);
 
   void                            calculatePair4Momentum( ) ;
 #ifndef __CINT__

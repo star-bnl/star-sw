@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdSimulatorMaker.cxx,v 1.9 2003/11/27 12:33:41 subhasis Exp $
+ * $Id: StPmdSimulatorMaker.cxx,v 1.10 2004/01/26 23:01:49 perev Exp $
  * Author: Subhasis Chattopadhyay
  ***************************************************************
  *
@@ -8,6 +8,9 @@
  *
  ****************************************************************
  * $Log: StPmdSimulatorMaker.cxx,v $
+ * Revision 1.10  2004/01/26 23:01:49  perev
+ * WarnOff
+ *
  * Revision 1.9  2003/11/27 12:33:41  subhasis
  * calib constant values updated
  *
@@ -496,7 +499,7 @@ void StPmdSimulatorMaker::FinalEdep(StPmdDetector* pdet,Int_t id){
 	  Float_t keVedep=rawedep;
 	  keV_ADC(keVedep,rawadc);
 	  if(mResFlag) ADC_Readout(rawadc,ADC);
-	  else ADC = rawadc;
+	  else ADC = (int)rawadc;
 	  mpmdgeom->ADC2Edep(ADC,Edep);
 	  spmcl->setEdep(Edep);
 	  spmcl->setAdc(ADC);
