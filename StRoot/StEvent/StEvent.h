@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.7 2000/04/18 17:31:28 perev Exp $
+ * $Id: StEvent.h,v 2.6 2000/03/29 16:54:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,11 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 2.7  2000/04/18 17:31:28  perev
- * StEvent::Browse overload of TDataSet:;One
- *
- * Revision 2.11  2000/05/24 15:46:10  ullrich
- * Added setSummary() method.
+ * Revision 2.6  2000/03/29 16:54:15  ullrich
+ * Added L3 trigger.
  *
  * Revision 2.10  2000/05/22 21:47:15  ullrich
  * Added RICH collection and related methods.
@@ -70,7 +67,7 @@ class StTpcHitCollection;
 class StFtpcHitCollection;
 class StSvtHitCollection;
 class StSsdHitCollection;
-class StEmcCollection;
+    
 class StRichCollection;
 class StTriggerDetectorCollection;
     virtual void Browse(TBrowser* b);

@@ -1,11 +1,5 @@
-// $Id: StArray.cxx,v 1.22 2000/04/20 14:24:08 perev Exp $
+// $Id: StArray.cxx,v 1.20 2000/01/28 20:37:03 perev Exp $
 // $Log: StArray.cxx,v $
-// Revision 1.22  2000/04/20 14:24:08  perev
-// StArray fixes
-//
-// Revision 1.21  2000/04/18 02:57:25  perev
-// StEvent browse
-//
 // Revision 1.20  2000/01/28 20:37:03  perev
 // Home made SetLast removed
 //
@@ -76,8 +70,7 @@ void StRegistry::Clear()
 //______________________________________________________________________________
 UInt_t StRegistry::Ident(UInt_t colidx,UInt_t objidx)
 {
- assert(colidx <= 0xffff);
- assert(objidx <= 0xffff);
+ assert(colidx<=0xffff && objidx <= 0xffff);
  return (colidx<<16)|objidx;
 }
 //______________________________________________________________________________
@@ -116,8 +109,7 @@ void StRegistry::RemColl(StStrArray *coll)
   UInt_t colIdx,objIdx;
   assert(fReg); 
   StRegistry::Ident(coll->GetUniqueID(), colIdx, objIdx);
-  assert(objIdx); 
-  assert(!colIdx);
+  assert(objIdx);  assert(!colIdx);
   assert( fReg->At(objIdx-1)==coll);
   fReg->RemoveAt(objIdx-1);
   if (objIdx-1 < (UInt_t)fReg->GetLast()) {
@@ -231,15 +223,14 @@ const TIterator *StObjArray::Begin() const
 //______________________________________________________________________________
 void StObjArray::Browse(TBrowser *b)
 {
-  enum { maxBrowsable =  10 };
-
    // Browse this collection (called by TBrowser).
    // If b=0, there is no Browse call TObject::Browse(0) instead.
    //         This means TObject::Inspect() will be invoked indirectly
  
    if (!b) return;
    StRegistry::Init();
-   TIter next(fArr);
+   const Int_t maxBrowsable =  10;
+   TIter next(this);
    TObject *obj;
     
    Int_t counter = 0;
@@ -247,14 +238,11 @@ void StObjArray::Browse(TBrowser *b)
    while ((obj = next()) && ++counter <  maxBrowsable ) {
        TString browseName = obj->GetName();
        char buffer[100];
-       sprintf(buffer,"_%d(%d)",counter,totalSize);
+       sprintf(buffer,"_%d_of_%d",counter,totalSize);
        browseName += buffer;
        b->Add(obj,browseName.Data());
    }
 }
-//______________________________________________________________________________
-Bool_t StObjArray::IsFolder(){ return GetEntries();}
-   
 //______________________________________________________________________________
 const TIterator *StObjArray::End() const
 { 

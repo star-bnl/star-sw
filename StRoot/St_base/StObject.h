@@ -1,11 +1,5 @@
-// $Id: StObject.h,v 1.6 2000/04/20 14:24:09 perev Exp $
+// $Id: StObject.h,v 1.4 1999/11/15 23:09:10 perev Exp $
 // $Log: StObject.h,v $
-// Revision 1.6  2000/04/20 14:24:09  perev
-// StArray fixes
-//
-// Revision 1.5  2000/04/18 02:57:26  perev
-// StEvent browse
-//
 // Revision 1.4  1999/11/15 23:09:10  perev
 // Streamer for StrArray and auto remove
 //
@@ -33,7 +27,8 @@ class StObject : public TObject {
   public:
   virtual ~StObject();
   virtual void Browse(TBrowser *b);
-  virtual Bool_t IsFolder();
+  static  int Browse(const TObject *This, TBrowser *b);
+  virtual Bool_t IsFolder(){return Browse(this,0);};
   virtual TObject *clone() const {return 0;}
   ClassDef(StObject,1) // Base class for StEvent
 };

@@ -654,7 +654,6 @@ St_DataSet *StFile::GetFileDS(Int_t idx)
 //_____________________________________________________________________________
 const Char_t *StFile::GetFileName(Int_t idx)
 {
-  if (idx == -1) { idx=0; if (GetNextBundle()) return 0;}
   St_DataSet *df = GetFileDS(idx);
   if (!df) return 0;
   return strstr(df->GetTitle(),"file=")+5;  

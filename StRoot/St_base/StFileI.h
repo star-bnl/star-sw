@@ -24,7 +24,7 @@ public:
   virtual Int_t GetNFiles()=0;
   virtual Int_t GetNBundles()=0;
   virtual Int_t GetBundleSize()=0;
-  virtual const Char_t *GetFileName(Int_t idx=-1)=0;
+  virtual const Char_t *GetFileName(Int_t idx=0)=0;
   virtual const Char_t *GetCompName(Int_t idx=0)=0;
   virtual const Char_t *GetFormat(Int_t idx=0)=0;
   virtual Int_t GetNextBundle()=0;

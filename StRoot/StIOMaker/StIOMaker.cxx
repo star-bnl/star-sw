@@ -87,10 +87,10 @@ Int_t StIOMaker::Open()
 
   if (fFileSet->GetNextBundle())	return kStEOF;
 
-  fNextFile = fFileSet->GetFileName(0);
+  fNextFile = fFileSet->GetFileName();
   if (!fNextFile) return kStEOF;
-  TString fmt = fFileSet->GetFormat(0);
-  TString bra = fFileSet->GetCompName(0);
+  TString fmt = fFileSet->GetFormat();
+  TString bra = fFileSet->GetCompName();
 
   const char *cc = strstr(IOFMTS,(const char*)fmt);
   if (!cc) return kStErr;

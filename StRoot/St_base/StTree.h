@@ -137,7 +137,7 @@ public:
   virtual Int_t GetNFiles();
   virtual Int_t GetBundleSize(){return 1;};
  
-  virtual const Char_t *GetFileName(Int_t idx=-1);
+  virtual const Char_t *GetFileName(Int_t idx=0);
   virtual const Char_t *GetCompName(Int_t idx=0);
   virtual const Char_t *GetFormat(Int_t idx=0);
   virtual Int_t GetNextBundle();
