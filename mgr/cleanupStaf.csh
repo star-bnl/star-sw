@@ -12,8 +12,28 @@ if ( -d $LIB) then
     echo rm -f $QWE
          rm -f $QWE
   endif
-  
+   set QWE = $LIB/$ASP.a
+  if ( -e $QWE[1] ) then
+    echo rm -f $QWE
+         rm -f $QWE
+  endif
+ 
   set QWE = $LIB/lib$ASP.s?.????
+  if ( -e $QWE[1] ) then
+    echo rm -f $QWE
+         rm -f $QWE
+  endif
+  set QWE = $LIB/lib$ASP.s?
+  if ( -e $QWE[1] ) then
+    echo rm -f $QWE
+         rm -f $QWE
+  endif
+  set QWE = $LIB/$ASP.s?.????
+  if ( -e $QWE[1] ) then
+    echo rm -f $QWE
+         rm -f $QWE
+  endif
+  set QWE = $LIB/$ASP.s?
   if ( -e $QWE[1] ) then
     echo rm -f $QWE
          rm -f $QWE
