@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.12 1999/09/29 20:29:06 wdeng Exp $
+// $Id: StPrimaryMaker.cxx,v 1.13 1999/09/30 13:34:21 wdeng Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.13  1999/09/30 13:34:21  wdeng
+// Diminish the degree or radian bug
+//
 // Revision 1.12  1999/09/29 20:29:06  wdeng
 // Accommodate dst_track and dst_vertex change
 //
@@ -43,6 +46,8 @@
 #include <assert.h>
 #include "TMath.h"
 #include "StPrimaryMaker.h"
+
+#include "math_constants.h"
 
 #include "StVertexId.h"
 
@@ -242,8 +247,8 @@ Int_t StPrimaryMaker::Make(){
     for( Int_t no_rows=0; no_rows<globtrk2->GetNRows() &&
                           no_rows<globtrk->GetNRows(); no_rows++, glob++,glob2++)
       {
-	Float_t xStart = glob2->r0 * cos(glob2->phi0);
-	Float_t yStart = glob2->r0 * sin(glob2->phi0);
+	Float_t xStart = glob2->r0 * cos(glob2->phi0 * C_RAD_PER_DEG);
+	Float_t yStart = glob2->r0 * sin(glob2->phi0 * C_RAD_PER_DEG);
 	Float_t zStart = glob2->z0;
 	double qwe = pow(xStart-v0[0],2)+pow(yStart-v0[1],2)+pow(zStart-v0[2],2);
 	
