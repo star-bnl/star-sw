@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.38 2002/10/13 20:43:37 ward Exp $
+ * $Id: EventReader.cxx,v 1.39 2002/12/09 18:54:23 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.39  2002/12/09 18:54:23  ward
+ * EMC stuff from Subhassis.
+ *
  * Revision 1.38  2002/10/13 20:43:37  ward
  * Support for decoding DAQ100 data and writing it into a table.
  *
@@ -662,9 +665,9 @@ void EventReader::printEventInfo()
   if (ei.SVTPresent) printf("SVT ");
   if (ei.TOFPresent) printf("TOF ");
   if (ei.EMCPresent) printf("EMC ");
+  if (ei.PMDPresent) printf("PMD ");
   if (ei.FPDPresent) printf("FPD ");
   if (ei.FTPCPresent) printf("FTPC ");
-  if (ei.PMDPresent) printf("PMD ");
   if (ei.RICHPresent) printf("RICH ");
   if (ei.TRGDetectorsPresent) printf("TRG ");
   if (ei.L3Present) printf("L3 ");
@@ -689,9 +692,9 @@ void EventReader::printEventInfo(FILE * fd)
   if (ei.SVTPresent) fprintf(fd,"SVT ");
   if (ei.TOFPresent) fprintf(fd,"TOF ");
   if (ei.EMCPresent) fprintf(fd,"EMC ");
+  if (ei.PMDPresent) fprintf(fd,"PMD ");
   if (ei.FPDPresent) fprintf(fd,"FPD ");
   if (ei.FTPCPresent) fprintf(fd,"FTPC ");
-  if (ei.PMDPresent)  fprintf(fd,"PMD ");
   if (ei.RICHPresent) fprintf(fd,"RICH ");
   if (ei.TRGDetectorsPresent) fprintf(fd,"TRG ");
   if (ei.L3Present) fprintf(fd,"L3 ");
@@ -718,7 +721,6 @@ char * EventReader::findBank(char *bankid)
 {
   // Fix up DATAP
   Bank_DATAP *pBankDATAP = (Bank_DATAP *)this->getDATAP();
-
   if (!pBankDATAP->test_CRC()) {
     printf("CRC error in DATAP: %s %d\n",__FILE__,__LINE__) ;
     return FALSE;
@@ -736,16 +738,34 @@ char * EventReader::findBank(char *bankid)
   // JML - the length is now hard coded again as DATAP now contains
   // non-pointer data after the pointer data
   int len = 10;
+  int ext_len=22; // For Extended Detector ( e.g PMD ) ; Added by Susanta on 6th Nov, 2002
 
   Bank_Header *pBank;
   Pointer *ptr = &pBankDATAP->TPC;
-  int i;
+  
+  Bank_DATAPX *pBankDATAPX; // Added by Susanta for PMD on 6th Nov, 2002
+
+  int i,j=0;
+
   for (i=0; i<len; i++, ptr++) {
     if (ptr->length==0) continue;//invalid entry
     if ((unsigned int)ptr->length== 0xfeedf00d) continue; // EVB fills DATAP with this
     pBank = (Bank_Header *)(((INT32 *)pBankDATAP)+ (ptr->offset)); // the INT32 cast has 
                                    // the effect of multiplying the offset by 4
-    if(!strncmp(bankid,pBank->BankType,4)) break;
+   
+    // staff Added by Susanta for PMD on 6th Nov, 2002.--- BEGIN
+        if(!strncmp("DATAPX",pBank->BankType,6)){
+	  pBankDATAPX = (Bank_DATAPX *)(((INT32 *)pBankDATAP)+ (ptr->offset));
+	  pBankDATAPX->swap();
+  	  Pointer *ptr1 = &pBankDATAPX->EXT_DET[0];
+	  for(j=0; j < ext_len; j++, ptr1++){
+               if (ptr1->length==0) continue;//invalid entry
+               pBank = (Bank_Header *)(((INT32 *)pBankDATAPX)+ ptr1->offset); // To find Extended Detector ID 
+               if(!strncmp(bankid,pBank->BankType,4)) break;
+	  }
+        }
+	// ---ENDS
+        if(!strncmp(bankid,pBank->BankType,4)) break;
   }
   if (i==len)  return FALSE;
   if(strncmp(pBank->BankType,bankid,4)) {
@@ -865,6 +885,7 @@ char EventReader::BankOrItsDescendentsIsBad(int herbFd,long currentOffset) { // 
   assert(numberOfDataWords<=DATA);
   if(!strcmp(bankname,"TPCMZP")) { beg=0; end=numberOfDataWords-1; }
   else if(!strcmp(bankname,"EMCP")) { beg=0; end=0; }
+  else if(!strcmp(bankname,"PMDP")) { beg=0; end=0; }
   else WhereAreThePointers(&beg,&end,bankname); 
   if(end>=numberOfDataWords) {
     PP"end=%d, numberOfDataWords=%d, bankname=%s.\n",end,numberOfDataWords,bankname);

@@ -44,6 +44,7 @@ void EMC_Reader::ProcessEvent(const Bank_EMCP * EmcPTR)
 
 EMC_Reader::EMC_Reader(EventReader *er, Bank_EMCP *pEMCP) 
 {
+	printf(" SP in EMC_Reader\n");
   pBankEMCP = pEMCP; //copy into class data member for use by other methods
   ercpy = er; // squirrel away pointer eventreader for our friends
   
