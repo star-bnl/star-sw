@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.36 2005/02/08 20:57:36 psoren Exp $
+// $Id: StFlowCutEvent.cxx,v 1.37 2005/02/08 22:13:08 psoren Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
@@ -113,7 +113,7 @@ Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
   // Check the for acceptable trigger words
 
   if (pEvent->runId() > 4000000 ) { // trigger collections were used
-
+    flowTriggerBitMap = 0;
     Float_t ctbMult = 0.;
     StTriggerDetectorCollection *triggers = pEvent->triggerDetectorCollection();
     if (triggers) {
@@ -328,6 +328,7 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
   Int_t centrality = 0; // Centrality=0 is not retrievable
 
   if (pMuEvent->runId() > 4000000 ) { // trigger collections were used
+    flowTriggerBitMap = 0;
 
     /////////////////////////////////////////////////
     // Add new minbias triggers to look for here
@@ -361,8 +362,8 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
     // Add new central triggers to look for here
     /////////////////////////////////////////////////    
     if        ( // year 4 full field central triggers
-       pMuEvent->triggerIdCollection().nominal().isTrigger(15105) 
-       ){
+	       pMuEvent->triggerIdCollection().nominal().isTrigger(15105) 
+	       ){
       flowTriggerBitMap += 2;
       cent = Flow::cent200Year4Full; // full field
     } else if ( // year 4 half field central
@@ -679,6 +680,9 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.37  2005/02/08 22:13:08  psoren
+// initialized flowTriggerBitMap=0 for each event
+//
 // Revision 1.36  2005/02/08 20:57:36  psoren
 // trigger and centrality selections were updated for all runs after run 4 to be compatible with trigger collections. Added TriggersFound() and GetFlowTriggerBitMap() functions.
 //
