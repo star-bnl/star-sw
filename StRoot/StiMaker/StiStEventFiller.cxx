@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.4 2003/02/25 14:21:10 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 2.5 2003/02/25 16:56:20 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.5  2003/02/25 16:56:20  pruneau
+ * *** empty log message ***
+ *
  * Revision 2.4  2003/02/25 14:21:10  pruneau
  * *** empty log message ***
  *
@@ -355,52 +358,48 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- static_cast<const StiKalmanTrack*>((*trackIt).second)==0");
       map<const StiKalmanTrack*, StTrackNode*>::iterator itKtrack = mTrkNodeMap.find(kTrack);
       if (itKtrack == mTrkNodeMap.end()) 
-	{
-	  if (++skippedCount<5)
-	    cout << "skipping track which was not entered in an StTrackNode" << endl;
-	  continue;
-	}
+	throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- itKtrack == mTrkNodeMap.end()");
+      //	{ 
+      //  if (++skippedCount<5)
+      //    cout << "skipping track which was not entered in an StTrackNode" << endl;
+      //  continue;
+      //}
     StTrackNode* currentTrackNode = (*itKtrack).second;
     //double globalDca = currentTrackNode->track(global)->impactParameter();
     if (kTrack->isPrimary())
       {
 	if (currentTrackNode->entries()>10)
+	  throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- currentTrackNode->entries()>10");
+	if (currentTrackNode->entries(global)<1) 
+	  throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- currentTrackNode->entries(global)<1");
+	// detector info
+	StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
+	fillDetectorInfo(detInfo,kTrack);
+	StPrimaryTrack* pTrack = new StPrimaryTrack;
+	try
 	  {
-	    cout <<"Track map gone pathalogic. Next track!"<<endl;
-	    continue;
+	    fillTrackCount++;
+	    fillTrack(pTrack,kTrack);
+	    // set up relationships between objects
+	    detInfoVec.push_back(detInfo);
+	    pTrack->setDetectorInfo(detInfo);
+	    currentTrackNode->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
+	    vertex->addDaughter(pTrack);
+	    StuFixTopoMap(pTrack);
 	  }
-      if (currentTrackNode->entries(global)<1) 
-	{
-	  cout << "skipping Node: this node should have a global track but doesn't" << endl;
-	  continue;
-	}
-      // detector info
-      StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
-      fillDetectorInfo(detInfo,kTrack);
-      StPrimaryTrack* pTrack = new StPrimaryTrack;
-      try	{
-	fillTrackCount++;
-	fillTrack(pTrack,kTrack);
-	// set up relationships between objects
-	detInfoVec.push_back(detInfo);
-	pTrack->setDetectorInfo(detInfo);
-	currentTrackNode->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
-	vertex->addDaughter(pTrack);
-	StuFixTopoMap(pTrack);
-      }
-      catch (runtime_error & rte )
-	{
-	  cout << "StiStEventFiller::fillEventPrimaries() - runtime exception, filling track: "
-	       << rte.what() << endl;
-	  delete detInfo;
-	  delete pTrack;
-      }
-      catch (...)
-	{
-	  cout << "StiStEventFiller::fillEventPrimaries() - Unknown exception, filling track."<<endl;
-	  delete detInfo;
-	  delete pTrack;
-	}
+	catch (runtime_error & rte )
+	  {
+	    cout << "StiStEventFiller::fillEventPrimaries() - runtime exception, filling track: "
+		 << rte.what() << endl;
+	    delete detInfo;
+	    delete pTrack;
+	  }
+	catch (...)
+	  {
+	    cout << "StiStEventFiller::fillEventPrimaries() - Unknown exception, filling track."<<endl;
+	    delete detInfo;
+	    delete pTrack;
+	  }
       }//end if primary
     } // kalman track loop
   if (skippedCount>0) cout << "StiStEventFiller::fillEventPrimaries() -I- A total of "<<skippedCount<<" StiTracks were skipped"<<endl;
@@ -431,20 +430,13 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StiT
 void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool outer)
 {
   //cout << "StiStEventFiller::fillGeometry() -I- Started"<<endl;
-  if (gTrack==0 || track==0) 
-    {
-      cout << "StiStEventFiller::fillGeometry(). ERROR:\t"
-	   << "Null StGlobalTrack or null StiTrack.  Exit" <<endl;
-      return;
-    }
-  // fill a new instance of StTrackGeometry (i.e. StHelixModel) selecting
-  // between inner and outermost point based on the third argument of the function call
+  if (!gTrack)
+    throw runtime_error("StiStEventFiller::fillGeometry() -F- gTrack==0");
+  if (!track) 
+    throw runtime_error("StiStEventFiller::fillGeometry() -F- track==0");
   const StiKalmanTrack* kTrack = dynamic_cast<const StiKalmanTrack*>(track);
-  if (!kTrack) {
-    cout << "StiStEventFiller::fillGeometry(). ERROR:\t"
-	 << "StiTrack can't be dynamic_cast'd to StiKalmanTrack.  Exit" <<endl;
-    return;	
-  }
+  if (!kTrack)
+    throw runtime_error("StiStEventFiller::fillGeometry() -F- kTrack==0 cast failed");
   StiKalmanTrackNode* node;
   if (outer)
     node = kTrack->getOuterMostHitNode();
@@ -458,17 +450,17 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool
   phase = (p.y()==0&&p.x()==0) ? phase =(1-2.*h)*M_PI/4. : atan2(p.y(),p.x())-h*M_PI/2.;
   phase += h*halfpi;
   double curv=fabs(node->getCurvature());
-  //     cout <<"Curvature: "<<curv<<endl;;
   StTrackGeometry* geometry =new StHelixModel(short(node->getCharge()),
-					      phase,
-					      curv,
+					      node->getPhase(),
+					      fabs(node->getCurvature()),
 					      node->getDipAngle(),
-					      origin, p, h);
+					      origin, 
+					      p, 
+					      node->getHelicity());
   if (outer)
     gTrack->setOuterGeometry(geometry);
   else
     gTrack->setGeometry(geometry);
-  //cout << "StiStEventFiller::fillGeometry() -I- Started"<<endl;
   return;
 }
 

@@ -40,15 +40,17 @@ void loadLibrairies(bool doProfile)
 }
 
 void Run(int firstEvent=0,
-	 int nEvents=1,
+	 int nEvents=5,
 	 //const char * filePrefix = "st_physics_",
 	 const char * filePrefix = "rcf",
 	 //const char * path= "/star/data13/reco/ppMinBias/FullField/P02gf/2002/019/",
 	 //const char * path ="/star/data22/ITTF/EvalData/Event/ppMinBias/",
   	 //const char * file="st_physics_3019045_raw_0031.event.root",
-	 const char * path= "/star/data22/ITTF/EvalData/MCFiles/auau200",
-  	 const char * file="rcf0183_12_300evts.event.root",
-
+	 //const char * path= "/star/data22/ITTF/EvalData/MCFiles/auau200",
+	 const char * path= "/a1/ittf/auau200/hijing/b0_20/standard/year2001/",
+	 //const char * file="rcf0183_12_300evts.event.root",
+	 const char * file="rcf0183_05_300evts.geant.root",
+  
 //  	 bool useGui=false,
 //  	 bool doSimulation=false,
 //  	 bool doAssociation=false,
@@ -59,15 +61,14 @@ void Run(int firstEvent=0,
 //  	 bool doProfile=false
 
 	 //Example of switch setup for minimctree output
-	 bool useGui=true,
+	 bool useGui=false,
 	 bool doSimulation=true,
 	 bool doAssociation=true,
 	 bool doMiniMcEvent=true,
 	 bool doDst=false,
 	 bool doStEventOutput=true,
 	 bool doStEventInput=true,
-	 bool doProfile=false
-	 )
+	 bool doProfile=false	 )
 {
   const char *fileList[]={0,0};
   if (strncmp(path,"GC",2)==0) 
