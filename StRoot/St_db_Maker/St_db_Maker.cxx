@@ -15,11 +15,14 @@
 #include "TDatime.h"
 #include "TInterpreter.h"
 #include "TSystem.h"
+#include "TRegexp.h"
 #include "St_db_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_FileSet.h"
 #include "St_XDFFile.h"
+
+static Int_t AliasDate(const char *alias);
 
 //_________________________ class St_Validity ____________________________________
 class St_ValiSet : public St_DataSet{
@@ -57,8 +60,10 @@ St_db_Maker::St_db_Maker(const char *name, const char *maindir,const char *userd
 :StMaker(name)
 {
 
+   fIsDBTime = 0;
    m_MainDir = maindir;
    if (userdir) m_UserDir=userdir;
+   m_DataBase = 0;
 }
 //_____________________________________________________________________________
 St_db_Maker::~St_db_Maker(){
@@ -93,39 +98,41 @@ Int_t St_db_Maker::Init()
    Fileset->Sort();
 
    AddData(Fileset);
-
+   m_DataBase = Fileset;
    SetOutput(Fileset); //  
 // SetOutputAll(Fileset); //  
 
    if (Debug()) Fileset->ls("*");
-// Create Histograms    
-   return StMaker::Init();
+   OnOff();
+   return 0;
 }
 
 
 //_____________________________________________________________________________
 TDatime St_db_Maker::Time(const char *filename)
 {
-   int lfilename,lname,idate,itime;
-   
-   TDatime time; time.Set(kMaxTime,0);
-   
-   lfilename = strlen(filename);
-   lname = strcspn(filename,".");
-   if (lname+2>lfilename) return time;
-   
-   if (lname+20 <= lfilename    &&
-       filename[lname+1 ]=='.'  && 
-       filename[lname+9 ]=='.'  && 
-       filename[lname+18]=='.'  ) {// file name format:  <name>.YYYYMMDD.hhmmss.<ext>
-        idate  = atoi(filename+lname+ 2); 
-        itime  = atoi(filename+lname+11);
-    } else {			   // file name format:  <name>.<ext>
-	idate = kMinTime;
-	itime = 0;
-    }
-    time.Set(idate,itime); 
-    return time;
+  int lfilename,lname,idate,itime;
+
+  TDatime time; time.Set(kMaxTime,0);
+
+  lfilename = strlen(filename);
+  lname = strcspn(filename,".");
+  if (lname+2>lfilename) return time;
+  idate = ::AliasDate(filename+lname+1);
+
+  if (idate) { time.Set(idate,0);return time;}
+
+  if (lname+20 <= lfilename    &&
+      filename[lname+1 ]=='.'  && 
+      filename[lname+9 ]=='.'  && 
+      filename[lname+18]=='.'  ) {// file name format:  <name>.YYYYMMDD.hhmmss.<ext>
+       idate  = atoi(filename+lname+ 2); 
+       itime  = atoi(filename+lname+11);
+   } else {			   // file name format:  <name>.<ext>
+       idate = kMinTime;
+       itime = 0;
+   }
+   time.Set(idate,itime); return time;
 
 }
 
@@ -261,8 +268,84 @@ void    St_db_Maker::SetUserDir(const Char_t *db)
 //_____________________________________________________________________________
 void St_db_Maker::PrintInfo(){
   printf("***************************************************************\n");
-  printf("* $Id: St_db_Maker.cxx,v 1.6 1999/05/01 00:51:37 perev Exp $\n");
+  printf("* $Id: St_db_Maker.cxx,v 1.7 1999/05/13 21:24:09 perev Exp $\n");
   printf("***************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
+//_____________________________________________________________________________
+TDatime St_db_Maker::GetDateTime()
+{ 
+  if (!fIsDBTime) return StMaker::GetDateTime();
+  return fDBTime;
+}
+//_____________________________________________________________________________
+void St_db_Maker::SetDateTime(Int_t idat,Int_t itim)
+{ 
+  fIsDBTime=1;
+  fDBTime.Set(idat,itim);
+}
+//_____________________________________________________________________________
+void   St_db_Maker::SetDateTime(const char *alias)
+{ 
+  fIsDBTime=1;
+  int idat = AliasDate(alias);
+  assert(idat);
+  fDBTime.Set(idat,0);
+}
+//_____________________________________________________________________________
+void   St_db_Maker::SetOn(const char *path)
+{ AddAlias("On" ,path,".onoff"); OnOff();}
+//_____________________________________________________________________________
+void   St_db_Maker::SetOff(const char *path)
+{ AddAlias("Off",path,".onoff"); OnOff();}
+//_____________________________________________________________________________
+void St_db_Maker::OnOff()
+{
+  int Off,len;
+  if (!m_DataBase) return;
+  St_DataSet *onoff = Find(".onoff");
+  if (!onoff) return;
+  
+  TString tsBase,tsDir,tsTit;
+  St_DataSet *ono;  
+  St_DataSetIter onoffNext(onoff);
+  while((ono=onoffNext())) {// loop onoffs
+    Off = (strcmp("Off",ono->GetName())==0);
+    tsDir  = gSystem->DirName(ono->GetTitle());
+    tsBase = gSystem->BaseName(ono->GetTitle());
+    TRegexp rex(tsBase,1);
+    St_DataSet *dsDir = GetDataSet(tsDir);
+    if (!dsDir) continue;
+    if (GetMaker(dsDir) != this) continue;
+    St_DataSetIter nextVal(dsDir);
+    St_DataSet *val;
+    while ((val=nextVal())) {//loop over val's  
+      const char *name = val->GetName();
+      if(name[0]!='.') 				continue;
+      tsTit = val->GetTitle();
+      int ival = tsTit.Index(".Val");
+      if (ival<0) 				continue;		
+      if (Off != (ival==0))			continue;
+      if (rex.Index(name+1,&len)!=0)		continue;
+      if ( Off) tsTit.Replace(0,0,".Off");
+      if (!Off) tsTit.Replace(0,4,""    );
+      val->SetTitle(tsTit);
+      printf("<%s::Set%s>   %s/%s\n"
+      ,ClassName(),ono->GetName(),(const char*)tsDir,val->GetName()+1);
+    }//end loop over val's 
+  }// end loop onoffs
+}
+//_____________________________________________________________________________
+static Int_t AliasDate(const char *alias)
 
+{
+static const char *aliases[]={"sd97",   "sd98",   "year_1a","year_1b","year_1c"
+                             ,"year_1d","year_1e","year_2a","nofield",      0};   
+
+static const int   dates[]=  {19970101, 19980101, 19990101, 19990500, 19991001
+                             ,19991101, 19991201, 20000101, 1996010,        0};
+
+  int n = strcspn(alias," ."); if (n<4) return 0;
+  for (int i=0;aliases[i] && strncmp(alias,aliases[i],n);i++) {} 
+  return dates[i];
+}
