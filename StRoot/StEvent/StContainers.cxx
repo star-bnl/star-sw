@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.10 2001/04/16 20:29:45 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.11 2001/08/02 01:27:08 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.11  2001/08/02 01:27:08  ullrich
+ * Added containers for StL3AlgorithmInfo.
+ *
  * Revision 2.10  2001/04/16 20:29:45  ullrich
  * Added Tof containers.
  *
@@ -66,6 +69,7 @@
 #include "StV0Vertex.h"
 #include "StXiVertex.h"
 #include "StKinkVertex.h"
+#include "StL3AlgorithmInfo.h"
 
 StCollectionImp(Object)
 StCollectionImp(Hit)
@@ -94,3 +98,4 @@ StCollectionImp(TrackDetectorInfo)
 StCollectionImp(V0Vertex)
 StCollectionImp(XiVertex)
 StCollectionImp(KinkVertex)
+StCollectionImp(L3AlgorithmInfo)
