@@ -34,8 +34,8 @@ Int_t StDetectorDbMaker::Make(){
 
    
     // Update FTPC Gas
-   //  StDetectorDbFTPCGas* gas = StDetectorDbFTPCGas::instance();
-//     gas->update(this);
+    StDetectorDbFTPCGas* gas = StDetectorDbFTPCGas::instance();
+    gas->update(this);
 
     // Update Rich Scalers/Voltages
     StDetectorDbRichScalers* scalers = StDetectorDbRichScalers::instance();
