@@ -61,7 +61,7 @@ void StTpcHitMover::FlushDB() {
 Int_t StTpcHitMover::Make() {
   if (m_Mode & 0x01) {
     // option handling needs some clean up, but right now we stay compatible
-    Int_t option = (m_Mode & 0x7FFE) >> 1;
+    Int_t option = (m_Mode & 0x7FFFFFFE) >> 1;
     if (! mExB ) {
       TDataSet *RunLog = GetDataBase("RunLog");
       mExB = new StMagUtilities(gStTpcDb, RunLog, option);
