@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.22 2000/07/30 22:26:14 long Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.23 2000/08/04 03:32:18 long Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.23  2000/08/04 03:32:18  long
+ * nQOnWire<12--->nQOnWire<6.5
+ * add "bin.sigmaT()+d[0]/12"
+ *
  * Revision 1.22  2000/07/30 22:26:14  long
  * nQOnWire<12-->nQOnWire<6.5
  *
@@ -231,14 +235,16 @@ StTrsWireHistogram* StTrsWireHistogram::instance(StTpcGeometry* geoDb, StTpcSlow
 
 void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin,int sector)
 {
-    // also needs db information to create coordinate->wire map
+   // also needs db information to create coordinate->wire map
     // Find closes wire to: bin.position().y()
+  double Q=bin.numberOfElectrons();
+   double *d=bin.d();
     double innerSectorBoundary =
 	mGeomDb->outerSectorEdge() - mGeomDb->ioSectorSpacing();
-    double yCoordinateOfHit = bin.position().y();
+    double yCoordinateOfHit = random->Gaus(bin.position().y(),(bin.sigmaT()+d[1]/12)/sqrt(Q)); 
     double sigma=bin.sigmaT();
     double D=mGeomDb->anodeWirePitch()/2.;
-    double *d=bin.d();
+  
     double dy=d[1];
     
     //  if(dy<=0.){cout<<"  wrong in dySubsegment calculation..."<<dy<<" "<<bin.position().y()<<" "<<bin.position().x()<<" "<<bin.position().z()<<endl;
@@ -297,9 +303,9 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin,int sector)
 	     +exp(-y3*y3)- exp(-y4*y4));
 	    Prob=Prob*sigma/dy/4.0*M_SQRT2;
 	    // Prob=0.5*(table_fast(y2)-table_fast(y1));
-        nQOnWire=	(int)(Prob* bin.numberOfElectrons()+0.5);  
+        nQOnWire=	(int)(Prob* Q+0.5);  
         Qtotal+=nQOnWire;
-	  if( Qtotal> bin.numberOfElectrons())nQOnWire--;  
+	  if( Qtotal> Q)nQOnWire--;  
             
                
         double newx,newz;  
@@ -311,10 +317,11 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin,int sector)
           nQ+=nQOnWire;
 	  //  float unknown=0.02;
 	  //	  newx=random->Gaus(bin.position().x(),bin.sigmaT()/sqrt(nQOnWire)+unknown); 
-	  //   cout<<bin.position().x()<<" "<<bin.sigmaT()<<" "<<nQOnWire<<" "<<bin.position().z()<<" "<<bin.sigmaL()<<endl;
-          newx=random->Gaus(bin.position().x(),bin.sigmaT()/sqrt(nQOnWire)); 
+	  //	  cout<<bin.position().x()<<" "<<bin.sigmaT()<<" "<<nQOnWire<<" "<<bin.position().z()<<" "<<bin.sigmaL()<<endl;
+	  // cin>>newx;
+          newx=random->Gaus(bin.position().x(),(bin.sigmaT()+d[0]/12)/sqrt(nQOnWire)); 
           
-	  newz=random->Gaus(bin.position().z(),bin.sigmaL()/sqrt(nQOnWire)); 
+	  newz=random->Gaus(bin.position().z(),(bin.sigmaL()+d[2]/12)/sqrt(nQOnWire)); 
      
            if(newz<0.)continue; 
 	    if(sector>12.5)newx+=dx[gWire+2];
@@ -416,6 +423,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin,int sector)
    
    
    
+ 
  
 }
 
