@@ -1,10 +1,8 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.12 1998/09/14 00:31:30 fine Exp $ 
+// $Id: St_Table.cxx,v 1.13 1998/09/14 01:01:20 fine Exp $ 
 // $Log: St_Table.cxx,v $
-// Revision 1.12  1998/09/14 00:31:30  fine
-// The new method St_DataSet::Update(... ) has been introduced to merge two datasets
-// The version of the method above was done for  the St_Table base class as well
-// The classes St_DataSet and St_DataSetIter have been separated
+// Revision 1.13  1998/09/14 01:01:20  fine
+// some corrections for the brand-new St_Table::Update() method
 //
 // Revision 1.11  1998/09/07 19:23:39  fine
 // St_Table::Print() - malloc/fre have been replaced with new [] / delete []  due a problem under Linux
@@ -206,7 +204,7 @@ void St_Table::Delete()
 {
   if (s_Table)
   {
-    free(s_Table);
+    if (TestBit(kCanDelete)) free(s_Table);
     s_Table = 0;
    *s_MaxIndex = 0;
     fN = 0;
@@ -922,13 +920,14 @@ void St_Table::Update(St_DataSet *set, UInt_t opt)
    if (strcmp(GetTitle(),set->GetTitle()) == 0 ) 
    {
      St_Table *table = (St_Table *)set;
+    *s_TableHeader   =*(table->GetHeader());
      Adopt(table->GetSize(),table->GetArray());
-     SetHeader(table->GetHeader());
-     LinkHeader();
+     // mark that object lost STAF table and can not delete it anymore
+     table->SetBit(kCanDelete); 
    }
    else
       Error("Update",
-            "This table is <%s> but the updating one has a wrong type %s",GetTitle(),set->GetTitle());
+            "This table is <%s> but the updating one has a wrong type <%s>",GetTitle(),set->GetTitle());
   }
   St_DataSet::Update(set,opt);
 }
