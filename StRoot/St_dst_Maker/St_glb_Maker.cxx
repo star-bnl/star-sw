@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.38 1999/02/23 16:50:16 fine Exp $
+// $Id: St_glb_Maker.cxx,v 1.39 1999/02/23 17:10:47 caines Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.39  1999/02/23 17:10:47  caines
+// xi_aux table size reduced
+//
 // Revision 1.38  1999/02/23 16:50:16  fine
 // wrong calling seq for ev0_eval2 module
 //
@@ -192,6 +195,8 @@ Int_t St_glb_Maker::Init(){
   //est
   
   m_est_ctrl   = (St_est_ctrl *) params("global/estpars/est_ctrl");
+  est_ctrl_st *est_ctrl = m_est_ctrl->GetTable();
+  //  est_ctrl->svt_er = 0.01;
 
   //egr 
   m_egr_egrpar = (St_egr_egrpar *) params("global/egrpars/egr_egrpar");
@@ -287,7 +292,7 @@ Int_t St_glb_Maker::Init(){
   ev0par2->ptarm_max  = 0.3;
   ev0par2->dcapnmin   = 0.7;
   //exi
-  if (!m_exiaux) m_exiaux = new St_exi_aux("exi_aux",10000);
+  if (!m_exiaux) m_exiaux = new St_exi_aux("exi_aux",1);
   m_exipar = (St_exi_exipar *)  params("global/exipars/exipar");
   if (!m_exipar) {
     m_exipar = new St_exi_exipar("exipar",3);
@@ -566,7 +571,7 @@ Int_t St_glb_Maker::Make(){
     //  ev0_eval2
     if (stk_track && tptrack && evaltrk) {
       St_ev0_eval *ev0_eval = new St_ev0_eval("ev0_eval",20000);
-      dst.Add(ev0_eval); 
+      dst.Add(ev0_eval);
       St_DataSetIter geant(gStChain->DataSet("geant"));
       St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("Event/g2t_track");
       St_g2t_vertex  *g2t_vertex   = (St_g2t_vertex *) geant("Event/g2t_vertex");
@@ -701,7 +706,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.38 1999/02/23 16:50:16 fine Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.39 1999/02/23 17:10:47 caines Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
