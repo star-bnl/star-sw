@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.433 2004/08/11 15:44:06 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.434 2004/08/11 21:47:30 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -362,7 +362,9 @@ Bfc_st BFC1[] = {
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
-
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation>",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE},
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE},
   {"mwc"         ,"mwc","l0Chain","mwc_T,db,tpcDB"         ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE},
@@ -460,10 +462,7 @@ Bfc_st BFC1[] = {
                                                                          "Regular dEdx calculation",kFALSE},
   {"svtdEdx"     ,"svtdEdx","globalChain","globT,TbUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
 
-
-
-  {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StDetectorDbMaker,StEventMaker",
-                                                                               "<StEvent creation>",kFALSE},
+  {"Event","","",",StEvent,tpcDB,detDb","StEventMaker",",StEventMaker","<StEvent creation/filling>",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
@@ -970,7 +969,9 @@ Bfc_st BFC2[] = {
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
-
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation>",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE},
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE},
   {"mwc"         ,"mwc","l0Chain","mwc_T,db,tpcDB"         ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE},
@@ -1069,8 +1070,7 @@ Bfc_st BFC2[] = {
 
 
   //  Reminder: You are within the ITTF chain definitions
-  {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StDetectorDbMaker,StEventMaker",
-                                                                               "<StEvent creation>",kFALSE},
+  {"Event","","",",StEvent,tpcDB,detDb","StEventMaker",",StEventMaker","<StEvent creation/filling>",kFALSE},
   {"genvtx"      ,"","","",   "StGenericVertexMaker","StGenericVertexMaker","Generic Vertex Finder",kFALSE},
   {"Mc"          ,"McChain","McEvent","sim_T,globT,McAss,McAna"             ,"StMaker","StChain","",kFALSE},
   {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
