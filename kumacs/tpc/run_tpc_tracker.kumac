@@ -5,7 +5,8 @@
 * editted June 2, 1998 - Kathy Turner
 *                   - put in tcl_init#init and took it out of tpc_tracker.kumac
 * editted June 3, 1998 - Kathy Turner
-*  editted 6/25/98 - Kathy Turner
+* editted 6/25/98 - Kathy Turner
+* 7/2/98 - K. Turner - code now requires that you load geometry libraries
 * ***********************************************************************
 ************************************************************************
 
@@ -23,7 +24,6 @@
 *  
 * --> to run
 *    - change the inputs above as desired
-*    - run staf
 *    -   exec run_tpc_tracker
 *         
 *
@@ -67,6 +67,7 @@ $STAR/pams/trg/kumac
  
 * LOAD LIBRARIES
  if $vexist(make_done)=0 then
+   make geometry
    make tpc 
    vec/cre make_done
  endif
