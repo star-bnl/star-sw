@@ -49,7 +49,7 @@ eemcfeerootopen_(long& run, long& runtime, char *chfile, int &nAuto, int len)
   // a hack for now
   if(strstr(chfile,"[BSND ALL]")!=NULL) { // we have an online case
     fprintf(stderr,"rootopen: on-line data <[BSND ALL]>\n");
-    sprintf(basefile,"run%05ld",run);
+    sprintf(basefile,"run%03ld",run);
   } else {
     memcpy(basefile,chfile,len);
     char *isp  = strchr(basefile,' ');  *isp = 0x00; // locate first space
@@ -73,6 +73,7 @@ eemcfeerootopen_(long& run, long& runtime, char *chfile, int &nAuto, int len)
   ehead->setProcessingTime(time(0));
   ehead->setTimeStamp(runtime);
   ehead->setComment(comment);
+  evnum=1; // reset event counter
 
   nAutoSave=nAuto;
 
