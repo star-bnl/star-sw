@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.35 2000/06/26 20:58:41 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.36 2000/06/29 15:58:04 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.36  2000/06/29 15:58:04  perev
+// bug in Init fixed, wrong {}
+//
 // Revision 1.35  2000/06/26 20:58:41  perev
 // multiple DBs
 //
@@ -166,11 +169,12 @@ Int_t St_db_Maker::Init()
        fileset->Sort(); 
        fileset->Pass(PrepareDB,&dir);
        fileset->Purge(); 
-       if (fDataBase) {
-	 assert(strcmp(fDataBase->GetName(),fileset->GetName())==0);
-	 fDataBase->Update(fileset); delete fileset;
+     }
+     if (fDataBase) {
+       assert(strcmp(fDataBase->GetName(),fileset->GetName())==0);
+       fDataBase->Update(fileset); delete fileset;
        } else          {fDataBase = fileset; }
-   } }
+   }
 
 
    AddData(fDataBase);
