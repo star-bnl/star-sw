@@ -3,6 +3,6 @@
 #pragma link off all classes;
 #pragma link off all functions;
 #pragma link C++ class St_db_Maker;
-#pragma link C++ class St_tables_hierarchy-;
-#pragma link C++ class tables_hierarchy_st-!;
+#pragma link C++ class St_dbConfig-;
+#pragma link C++ class dbConfig_st-!;
 #endif

@@ -17,13 +17,14 @@
 #include "St_Table.h"                      
 
 #include "TDatime.h"
+#include "StDbBroker/dbConfig.h"
 
 class St_FileSet;
 class St_DataSet;
 class TList;
 class TBrowser;
 class StDbBroker;
-class St_tables_hierarchy;
+class St_dbConfig;
 class St_ValiSet;
 
 enum DBConst {kMinTime = 19950101, kMaxTime = 20380101};
@@ -34,7 +35,7 @@ private:
 
   St_DataSet *fDataBase;       	//! DB structure
   StDbBroker *fDBBroker;	//!MySql broker 
-  St_tables_hierarchy *fHierarchy; //!
+  St_dbConfig *fHierarchy; //!
   TString     fMainDir;        	//! The main root directory for the calibrarion data
   TString     fUserDir;        	//! The user root directory for the calibrarion data
   TString     fCurrentDir;     	//! The current root directory for the calibrarion data
@@ -42,7 +43,7 @@ private:
   TDatime     fDBTime;		//! Own DB time stamp
   Int_t       fUpdateMode;	//! 
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.7 2000/01/05 23:23:22 perev Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.8 2000/01/28 21:57:52 perev Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name,const char *maindir,const char *userdir=0);
@@ -63,7 +64,7 @@ private:
 
 protected:
    virtual St_DataSet* UpdateDB (St_DataSet* ds);
-   virtual int UpdateTable(St_Table* dat, TDatime val[2]);
+   virtual int UpdateTable(UInt_t parId, St_Table* dat, TDatime val[2]);
    virtual St_DataSet *LoadTable(St_DataSet* left);
    virtual St_DataSet *FindLeft(St_ValiSet *val, TDatime vals[2]);
    virtual St_DataSet *OpenMySQL(const char* dbname);
@@ -75,33 +76,25 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.7 2000/01/05 23:23:22 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.8 2000/01/28 21:57:52 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   //StAF chain virtual base class for Makers
 };
-                                           
 
-struct  tables_hierarchy_st {
-char tabname[20];
-char tabtype[20];
-char parname[20];
-};                                          
-                                           
-class St_tables_hierarchy : public St_Table   
+class St_dbConfig : public St_Table   
 {                                          
 protected:                                 
   static St_tableDescriptor *fgColDescriptors;    
   virtual St_tableDescriptor *GetDescriptorPointer() const { return fgColDescriptors;}       
   virtual void  SetDescriptorPointer(St_tableDescriptor *list) const { fgColDescriptors = list;}  
 public:                                    
-  St_tables_hierarchy() : St_Table("tables_hierarchy",sizeof(tables_hierarchy_st)) {SetType("tables_hierarchy");}           
-  St_tables_hierarchy(Text_t *name) : St_Table(name,sizeof(tables_hierarchy_st)) {SetType("tables_hierarchy");}          
-  St_tables_hierarchy(Int_t n): St_Table("tables_hierarchy",n,sizeof(tables_hierarchy_st)) {SetType("tables_hierarchy");}   
-  St_tables_hierarchy(Text_t *name,Int_t n): St_Table(name,n,sizeof(tables_hierarchy_st)) {SetType("tables_hierarchy");} 
-  tables_hierarchy_st *GetTable(){ return (tables_hierarchy_st *)s_Table;}                                            
+  St_dbConfig() : St_Table("dbConfig",sizeof(dbConfig_st)) {SetType("dbConfig");}           
+  St_dbConfig(Text_t *name) : St_Table(name,sizeof(dbConfig_st)) {SetType("dbConfig");}          
+  St_dbConfig(Int_t n): St_Table("dbConfig",n,sizeof(dbConfig_st)) {SetType("dbConfig");}   
+  St_dbConfig(Text_t *name,Int_t n): St_Table(name,n,sizeof(dbConfig_st)) {SetType("dbConfig");} 
+  dbConfig_st *GetTable(){ return (dbConfig_st *)s_Table;}                                            
                                            
-  ClassDef(St_tables_hierarchy,0) //  
+  ClassDef(St_dbConfig,0) //  
 };                                                            
-                                                              
-
+                                           
 #endif
