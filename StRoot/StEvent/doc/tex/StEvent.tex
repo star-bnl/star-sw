@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.26 2000/03/30 16:55:38 ullrich Exp $
+% $Id: StEvent.tex,v 2.27 2000/04/10 19:59:34 genevb Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -21,8 +21,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.26  2000/03/30 16:55:38  ullrich
-% Modified reference section for StTrack::key().
+% Revision 2.27  2000/04/10 19:59:34  genevb
+% StRoot/StEvent/doc/tex/
+%
+% Revision 2.34  2000/05/24 15:43:38  ullrich
+% More on the StEventMaker (update).
 %
 % Revision 2.33  2000/05/22 22:04:07  ullrich
 % Removed StRichPixelCollection ref section and added description
@@ -147,8 +150,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.26 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/30 16:55:38 $ $}  % replaced by cvs with current revision
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -172,8 +175,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.26 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/30 16:55:38 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.27 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/04/10 19:59:34 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -181,17 +184,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.26 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/30 16:55:38 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.27 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/04/10 19:59:34 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.26 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/30 16:55:38 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.27 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/04/10 19:59:34 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.26 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/30 16:55:38 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.27 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/04/10 19:59:34 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -206,8 +209,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.26 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/30 16:55:38 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.27 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/04/10 19:59:34 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -4569,7 +4572,10 @@ numberOfPoints(kTpcId) == numberOfPoints(kFtpcWestId)
     information. Since the implementations of the various concrete PID
     classes differ strongly this class is incomplete and thus a
     \texttt{dynamic\_cast} is required each time when concrete
-    to request the first or the second (\texttt{i}=0,1).
+    \texttt{StTrack}).
+    
+    \verb+UInt_t numberOfHits(StDetectorId) const;+\\
+    \verb+StTrackPidTraits(const dst_dedx_st&);+\\
 
     may be stored in a TTree (TBranch does not support ULong_t),
     \verb+Short_t detector() const;+\\
