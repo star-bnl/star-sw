@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixD.hh,v 1.2 1999/02/14 23:11:44 fisyak Exp $
+ * $Id: StMatrixD.hh,v 1.3 2000/01/31 20:53:45 lasiuk Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StMatrixD.hh,v $
- * Revision 1.2  1999/02/14 23:11:44  fisyak
- * Fixes for Rootcint
+ * Revision 1.3  2000/01/31 20:53:45  lasiuk
+ * using std::swap
+ *
+ * Revision 1.3  2000/01/31 20:53:45  lasiuk
+ * using std::swap
  *
  * Revision 1.2  1999/02/14 23:11:44  fisyak
  * Fixes for Rootcint
@@ -31,6 +34,10 @@
 
 #include <iostream.h>
 #include "StThreeVectorF.hh"
+#include "StLorentzVectorF.hh"
+#ifndef ST_NO_NAMESPACES
+using std::swap;
+#endif
 
 #include "StThreeVectorD.hh"
 #include "StLorentzVectorD.hh"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.7 1999/12/21 15:14:13 ullrich Exp $
+ * $Id: StMatrix.hh,v 1.8 2000/01/31 20:53:45 lasiuk Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
+ * Revision 1.8  2000/01/31 20:53:45  lasiuk
+ * using std::swap
+ *
  * Revision 1.7  1999/12/21 15:14:13  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
  *
@@ -192,6 +195,7 @@
 #include <vector>
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
+using std::swap;
 #endif
 
 #ifndef ST_NO_EXCEPTIONS
