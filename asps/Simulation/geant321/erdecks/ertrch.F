@@ -26,7 +26,7 @@ C.
 #include "geant321/gcunit.inc"
 #include "geant321/ertrio.inc"
 #include "geant321/erwork.inc"
-
+#include "geant321/gcflag.inc"
 #if defined(CERNLIB_SINGLE)
       PARAMETER (EPSMAC=1.E-11)
 #endif
@@ -153,7 +153,7 @@ C.    ------------------------------------------------------------------
                   IF(VECT(I+3).NE.0.) THEN
                      VECTMP =
      +               VECT(I)+ABS(VECT(I))*SIGN(1.,VECT(I+3))*EPSMAC
-#if DEBUG
+#if defined(DEBUG)
                      WRITE(CHMAIL, 10000)
                      CALL GMAIL(0,0)
                      WRITE(CHMAIL, 10100) GEKIN, NUMED, STEP, SNEXT
