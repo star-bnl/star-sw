@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.32 1999/06/15 14:44:52 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.33 1999/06/17 18:25:32 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.33  1999/06/17 18:25:32  kathy
+// fix so writes out blank canvas
+//
 // Revision 1.32  1999/06/15 14:44:52  kathy
 // fix St_QA_Maker
 //
@@ -377,7 +380,7 @@ Int_t St_QA_Maker::DrawHists()
 
 // TCanvas wants width & height in pixels (712 x 950 corresponds to A4 paper)
   TCanvas *QACanvas = new TCanvas("CanvasName","Canvas Title",30*m_PaperWidth,30*m_PaperHeight);
-  QACanvas->SetFillColor(19);
+//  QACanvas->SetFillColor(19);
   QACanvas->SetBorderSize(2);  
   QACanvas->Divide(m_PadColumns,m_PadRows);
 
@@ -1363,7 +1366,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.32 1999/06/15 14:44:52 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.33 1999/06/17 18:25:32 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
