@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.13 1998/08/26 12:15:08 fisyak Exp $
+// $Id: StChain.cxx,v 1.14 1998/09/16 14:29:33 love Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.14  1998/09/16 14:29:33  love
+// St_DataSetIter.h added
+//
 // Revision 1.13  1998/08/26 12:15:08  fisyak
 // Remove asu & dsl libraries
 //
@@ -207,6 +210,7 @@
 #include <TClonesArray.h>
 #include <TBenchmark.h>
 #include "St_XDFFile.h"
+#include "St_DataSetIter.h"
 #include "St_FileSet.h"
 #include "StChain.h"
 #include "StMaker.h"
@@ -461,7 +465,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.13 1998/08/26 12:15:08 fisyak Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.14 1998/09/16 14:29:33 love Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
