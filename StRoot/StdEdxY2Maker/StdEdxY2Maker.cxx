@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.47 2005/02/05 01:17:06 perev Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.48 2005/02/09 21:02:21 fisyak Exp $
 #define dChargeCorrection
 #define SpaceChargeQdZ
 #define CompareWithToF
@@ -288,7 +288,7 @@ Int_t StdEdxY2Maker::Make(){
   }
   if (pEvent->runInfo()) bField = pEvent->runInfo()->magneticField()*kilogauss;
 
-  if (fabs(bField) < 1.e-5) return kStOK;
+  if (fabs(bField) < 1.e-5*kilogauss) return kStOK;
 
   if ((TESTBIT(m_Mode, kSpaceChargeStudy))) SpaceCharge(1,pEvent);
   // no of tpc hits
