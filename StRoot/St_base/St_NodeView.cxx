@@ -572,7 +572,7 @@ St_NodePosition  *St_NodeView::Local2Master(const Char_t *localName, const Char_
 }
 
 //______________________________________________________________________________
-St_NodePosition  *St_NodeView::Local2Master(const St_NodeView *localNode,const St_NodeView *masterNode)
+St_NodePosition *St_NodeView::Local2Master(const St_NodeView *localNode,const St_NodeView *masterNode)
 {
   St_NodePosition *position = 0;
   if (!masterNode) masterNode = this;
@@ -603,7 +603,7 @@ Float_t *St_NodeView::Local2Master(const Float_t *local, Float_t *master,
    if (masterName && masterName[0]) masterNode = (St_NodeView *)Find(masterName);
    if (masterNode) {
      St_NodeViewIter transform(masterNode,0);
-     if (transform(localName) && (position = transform.GetPosition()) )
+     if (transform(localName) && (position = (St_NodePosition *) transform.GetPosition()) )
          trans = position->Local2Master(local,master,nVector);
    }
    return trans;
@@ -630,7 +630,7 @@ Float_t *St_NodeView::Local2Master(const Float_t *local, Float_t *master,
      St_NodeViewIter transform((St_NodeView *)masterNode,0);
      St_NodeView *nextNode = 0;
      while ((nextNode = (St_NodeView *)transform()) && nextNode != localNode);    
-     if (nextNode && (position = transform.GetPosition()) ) 
+     if (nextNode && (position = (St_NodePosition *) transform.GetPosition()) ) 
          trans = position->Local2Master(local,master,nVector);
    }
    return trans;
