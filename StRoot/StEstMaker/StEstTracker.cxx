@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.cxx,v 1.7 2001/03/19 16:09:03 lmartin Exp $ 
+ * $Id: StEstTracker.cxx,v 1.8 2001/04/25 15:06:50 lmartin Exp $ 
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.cxx,v $
+ * Revision 1.8  2001/04/25 15:06:50  lmartin
+ * Tracking parameters set to specific values for the 2nd superpass.
+ *
  * Revision 1.7  2001/03/19 16:09:03  lmartin
  * GetVertexZ method added.
  *
@@ -101,6 +104,16 @@ Int_t StEstTracker::DoTracking() {
 
   gMessMgr->Info()<<"Hit density (0123) :\t"<<ihita[0]<<"\t\t"<<ihita[1]<<"\t\t"<<ihita[2]<<"\t\t"<<ihita[3]<<endm;
   for(mSuperPass=0; mSuperPass<mNSuperPass; mSuperPass++) {
+    if (mSuperPass>0) {
+      for (mPass=0;mPass<mNPass;mPass++) {
+	mParams[mPass]->geomcutl[2] = 0.5;
+	mParams[mPass]->geomcutl[1] = 0.2;
+	mParams[mPass]->geomcutl[0] = 0.2;
+	mParams[mPass]->geomcutw[2] = 0.5;
+	mParams[mPass]->geomcutw[1] = 0.2;
+	mParams[mPass]->geomcutw[0] = 0.2;
+      }
+    }
     FlagTPCTracksSP(mSuperPass);
     onoffmatrix=0;
     for (j=0;j<4;j++) 
