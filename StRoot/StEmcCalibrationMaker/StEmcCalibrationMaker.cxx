@@ -27,13 +27,6 @@
 #include "StDbLib/StDbTable.h"
 #include "StDbLib/StDbConfigNode.hh"
 
-#include "tables/St_emcStatus_Table.h"
-#include "tables/St_smdStatus_Table.h"
-#include "tables/St_emcCalib_Table.h"
-#include "tables/St_smdCalib_Table.h"
-#include "tables/St_emcPed_Table.h"
-#include "tables/St_smdPed_Table.h"
-
 #ifndef ST_NO_NAMESPACES
 using units::tesla;
 #endif
@@ -72,10 +65,25 @@ StEmcCalibrationMaker::StEmcCalibrationMaker(const char *name):StMaker(name)
   mPedDate = 0;
   mPedTime = 0;
   mPedInterval = 6; //in hours
+  
+  mFakeRun = kFALSE;
 }
 //_____________________________________________________________________________
 StEmcCalibrationMaker::~StEmcCalibrationMaker()
 {
+  if(mPedSpec) delete mPedSpec;
+  if(mEqualSpec) delete mEqualSpec;
+  if(mGainSpec) delete mGainSpec;
+  if(mMipSpec) delete mMipSpec;
+  if(mFilter) delete mFilter;
+  if(mPosition) delete mPosition;
+  if(mHitsAdc) delete mHitsAdc;
+  if(mHitsE) delete mHitsE;
+  if(mIsOnOff) delete mIsOnOff;
+  if(mCalib) delete mCalib;
+  if(mEqual) delete mEqual;
+  if(mBemc) delete mBemc;
+  if(mBsmd) delete mBsmd;
 }
 //_____________________________________________________________________________
 Int_t StEmcCalibrationMaker::Init()
@@ -97,6 +105,7 @@ Int_t StEmcCalibrationMaker::Init()
 		mPedSpec = new StEmcPedSpectra(mDetName.Data());
 		mPedSpec->SetIsOnOff(mIsOnOff);
     mPedSpec->SetMinHits(300);
+    mPedSpec->SetMaxMultiplicity(20);
 		mPedSpec->Init();    
   } 
   if(mDoEqual) 
@@ -261,10 +270,13 @@ Bool_t StEmcCalibrationMaker::GetEvent()
 {
 	Bool_t kReadOk=ReadStEvent();
   if(!kReadOk) return kFALSE;	
-	/*StL0Trigger* trg = mEvent->l0Trigger();
-	Int_t trigger=0;
-	if(trg) trigger = trg->triggerWord();
-	if(trigger!=8192 && trigger!=4096) return kFALSE;*/
+  if(!mFakeRun)
+  {
+	  StL0Trigger* trg = mEvent->l0Trigger();
+	  Int_t trigger=0;
+	  if(trg) trigger = trg->triggerWord();
+	  if(trigger!=8192 && trigger!=4096) return kFALSE;
+  }
 	
   // reading B field from Database//////////
   TDataSet *RunLog=GetInputDB("RunLog");
@@ -281,10 +293,12 @@ Bool_t StEmcCalibrationMaker::GetEvent()
   cout <<"Magnetic Field = "<<mBField<<" Tesla\n";
   mFilter->setBField(mBField);
   //////////////////////////////////////////
-	
-	//if(!CalcZVertex()) return kFALSE;
-  //if(fabs(mZVertex)>mZVertexMax) return kFALSE;
-
+  if(!mFakeRun)
+  {
+	  if(!CalcZVertex()) return kFALSE;
+    if(fabs(mZVertex)>mZVertexMax) return kFALSE;
+  }
+  
   if(!FillEmcVector()) return kFALSE;  
   
   Int_t mode=0;
@@ -312,22 +326,23 @@ Bool_t StEmcCalibrationMaker::ReadStEvent()
   if(!mEvent) return kFALSE;
   mEmc=mEvent->emcCollection();
   if(!mEmc) return kFALSE;    
-  /*if(mDoUseL3) // use L3Tracks
+  if(!mFakeRun)
   {
-    if(mEvent->l3Trigger())
+    if(mDoUseL3) // use L3Tracks
     {
-      StSPtrVecTrackNode& tracks=mEvent->l3Trigger()->trackNodes();
-      mNTracks=tracks.size();
-      if(mNTracks==0) return kFALSE;        
+      if(mEvent->l3Trigger())
+      {
+        StSPtrVecTrackNode& tracks=mEvent->l3Trigger()->trackNodes();
+        mNTracks=tracks.size();
+      }
+      else return kFALSE; 
     }
-    else return kFALSE; 
+    else
+    {
+      StSPtrVecTrackNode& tracks=mEvent->trackNodes();
+      mNTracks=tracks.size();
+    }
   }
-  else
-  {
-    StSPtrVecTrackNode& tracks=mEvent->trackNodes();
-    mNTracks=tracks.size();
-    if (mNTracks==0) return kFALSE;
-  }*/    
   return kTRUE;
 }
 //_____________________________________________________________________________
@@ -488,13 +503,13 @@ void StEmcCalibrationMaker::SetStatus()
 	cout <<"Setting calibration status ...";
   Int_t nc=0;
 
-  St_emcStatus*  Bemc = new St_emcStatus("emcStatus",1);
-  St_smdStatus*  Bsmd = new St_smdStatus("smdStatus",1);
+  mBemc = new St_emcStatus("emcStatus",1);
+  mBsmd = new St_smdStatus("smdStatus",1);
 
-	mFilter->setBemcStatus(Bemc);
-	mFilter->setBprsStatus(Bemc);
-	mFilter->setBsmdeStatus(Bsmd);
-	mFilter->setBsmdpStatus(Bsmd);
+	mFilter->setBemcStatus(mBemc);
+	mFilter->setBprsStatus(mBemc);
+	mFilter->setBsmdeStatus(mBsmd);
+	mFilter->setBsmdpStatus(mBsmd);
 
 	Int_t status[18000];
   for(Int_t i=1;i<=mNBins;i++)
@@ -524,12 +539,12 @@ void StEmcCalibrationMaker::SetStatus()
 		mIsOnOff->SetBinContent(ibin,(Float_t)status[i-1]);
 		if(mDetNum<2)
 		{
-			emcStatus_st *st=Bemc->GetTable();
+			emcStatus_st *st=mBemc->GetTable();
 			st[0].Status[i-1]=status[i-1];
 		}
 		else
 		{
-			smdStatus_st *st=Bsmd->GetTable();
+			smdStatus_st *st=mBsmd->GetTable();
 			st[0].Status[i-1]=status[i-1];
 		}
 		if(status[i-1]==1) nc++;

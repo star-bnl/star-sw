@@ -18,6 +18,8 @@
 #endif
 #define maxdet 8
 
+#include "TH2.h"
+
 class StEmcCollection;
 class StEmcGeom;
 
@@ -26,6 +28,7 @@ class StSmdPedMaker : public StMaker
   private:
          StEmcCollection *mEmc;
          StEmcGeom       *mGeo[2];
+         TH2F            *mCapacitor; //!
          
          Float_t   mSmdPedX[2][3][18000];
          Float_t   mSmdPedX2[2][3][18000];
@@ -38,8 +41,10 @@ class StSmdPedMaker : public StMaker
          Int_t     mPedTime;  
          Int_t     mPedStatus;  
          Int_t     mNEvents;
-         Int_t     mMinEvents;  
+         Int_t     mMinEvents;
+         Int_t     mMaxMultiplicity;  
          Bool_t    mSaveToDB; 
+         Bool_t    mFakeRun;
          
          void      FillPedestal(); 
          void      CalculatePedestals();
@@ -59,7 +64,8 @@ class StSmdPedMaker : public StMaker
    
            void    SetPedInterval(Float_t a) { mPedInterval =a;}
            void    SetMinEvents(Int_t a)     { mMinEvents =a;}
-           void    SetSavePedToDB(Bool_t a)     { mSaveToDB =a;}
+           void    SetSavePedToDB(Bool_t a)  { mSaveToDB =a;}
+           void    SetFakeRun(Bool_t a)      { mFakeRun =a;}
            
 
    ClassDef(StSmdPedMaker, 1)  
