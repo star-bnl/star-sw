@@ -50,7 +50,7 @@ St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition)
      EDataSetPass mode = kContinue;
      St_NodeViewIter next(viewNode,0);
      St_NodeView *nextView = 0;
-     while (nextView = (St_NodeView *)next(mode)){     
+     while ( (nextView = (St_NodeView *)next(mode)) ){     
        mode = kContinue;
        if (nextView->IsMarked()) {
          St_NodePosition *position = next[0];
@@ -308,7 +308,7 @@ St_Node *St_NodeView::GetNode() const {
 Int_t St_NodeView::GetGlobalRange(const St_NodeView *rootNode,Float_t *globalMin,Float_t *globalMax)
 {
   //
-  // Calculate the position of the vertrex of the outlined cude in repect
+  // Calculate the position of the vertrex of the outlined cube in repect
   // of the given St_NodeView object
   //
   if (rootNode) 
@@ -341,9 +341,10 @@ void St_NodeView::GetLocalRange(Float_t *min, Float_t *max)
 {
   //  GetRange
   //
-  //  Calculate the size of 3 box the node occupies
-  //  return two floating point array with the bound of box
-  //  surroundind all shapes of this St_ModeView
+  //  Calculates the size of 3 box the node occupies.
+  //  Return:
+  //    two floating point arrays with the bound of box
+  //     surroundind all shapes of this St_ModeView
   //
 
   TVirtualPad *savePad = gPad;

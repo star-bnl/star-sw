@@ -1,6 +1,6 @@
 #include "St_PolyLineShape.h"
 
-#include "TPoints3DABC.h"
+#include "St_Points3D.h"
 #include "St_PolyLine3D.h"
 #include <TPolyLine3D.h>
 #include <TPolyMarker3D.h>
@@ -14,8 +14,6 @@
 #include <TPadView3D.h>
 #include <TPoint.h>
 #include <TPostScript.h>
-
-#define MyInputPoints TPoints3DABC
 
 //////////////////////////////////////////////////////////////////////////////////////
 //                                                                                  //
@@ -33,18 +31,21 @@
 //                            TShape                   |       to "classT"          //
 //                              |                   "classT"                        //
 //                              v                                                   //
-//       ----------------------------------------------------                       //
-//       |              |      |                     |      |                       //
-//       |              |      |     .    .    .     |      |                       //
-//       |              |      |                     |      |                       //
-//       V              v      v                     v      v                       //
-// St_PolyLineShape   TBRIK  TTUBE                 TPCON  TTRD1                     //
-//       ^                                                                          //
-//       |     begin_html       <a href="http://root.cern.ch/root/html/TShape.html#TShape:description">G  E  A  N  T     S  H  A  P  E  S</a>end_html                          //
-//       |                                                                          //
-//  TPoints3DABC                                                                    //
-//       |                                                                          //
-//       v                                                                          //
+//           -----------------------------------------------------                  //
+//           |               |      |                     |      |                  //
+//           |               |      |     .    .    .     |      |                  //
+//           |               |      |                     |      |                  //
+//           V               v      v                     v      v                  //
+//    St_PolyLineShape     TBRIK  TTUBE                 TPCON  TTRD1                //
+//       |        ^                                                                 //
+//       |        |       begin_html <a href="http://root.cern.ch/root/html/TShape.html#TShape:description">G  E  A  N  T     S  H  A  P  E  S</a>end_html                          //
+//       V        |                                                                 //
+// St_PolyLine3D  |                                                                 //
+//                |                                                                 //
+//           TPoints3DABC                                                           //
+//                |                                                                 //
+//                |                                                                 //
+//                v                                                                 //
 //      --------------------------------------------------------                    //
 //      |                 |                 |                  |                    //
 //      |                 |                 |                  |                    //
@@ -56,7 +57,7 @@
 //      |                 |                 |                  |                    //
 //  StObjArray    StTrack / StHelixD  St_TableSorter      flat floating             //
 //                                          ^              point array              //
-//                                          |                                       //
+//                                          |        (see St_PolyLine3D as well)    //
 //                                          |                                       //
 //                                      St_Table                                    //
 //                                                                                  //
@@ -84,7 +85,7 @@ St_PolyLineShape::St_PolyLineShape()
 }
 
 //______________________________________________________________________________
-St_PolyLineShape::St_PolyLineShape(MyInputPoints  *points,Option_t* option)
+St_PolyLineShape::St_PolyLineShape(TPoints3DABC  *points,Option_t* option)
 {
    m_Shape       = new TTUBE("tube","tube","void",0.5,0.5);
    m_ShapeType   = kNULL;
@@ -112,7 +113,7 @@ St_PolyLineShape::~St_PolyLineShape()
   SafeDelete(m_SizeX3D);
 }
 //______________________________________________________________________________
-void St_PolyLineShape::Axis(TVirtualPad *p, Float_t width)
+void St_PolyLineShape::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
 {
 #if 0
    TVirtualPad *pad = p;
@@ -123,40 +124,54 @@ void St_PolyLineShape::Axis(TVirtualPad *p, Float_t width)
    }
    else 
      pad = gPad;
+
+   // 3 options for the origin positions
+   //  -  at (0,0,0}
+   //  -  left front angle of the view port
+   //  -  the center of the view port  
+   //       Axis / Cube
+   
    
    TView *view = pad->GetView();
    if (view) {
+      Float_t origin[3] = {0,0,0};
       Float_t min[3];
       Float_t max[3];
       view->GetRange(min,max);
-      MyInputPoints *lx = new MyInputPoints(2);
-      lx->SetLineColor(6);
-      lx->SetLineWidth(5);
-      lx->SetPoint(0,0,0,0);
-      lx->SetPoint(1,max[0],0,0);
-
-      MyInputPoints *ly = new MyInputPoints(2);
-      ly->SetLineColor(4);
-      ly->SetLineWidth(5);
-      ly->SetPoint(0,0,0,0);
-      ly->SetPoint(1,0,max[1],0);
-
-      MyInputPoints *lz = new MyInputPoints(2);
-      lz->SetLineColor(2);
-      lz->SetLineWidth(5);
-      lz->SetPoint(0,0,0,0);
-      lz->SetPoint(1,0,0,max[2]);
+      //___________  X axis ____________
+      TPointsArray3D *lx = new TPointsArray3D(2);
+      lx->SetPoint(0,origin[0],origin[1],origin[2]);
+      lx->SetPoint(1,axisFactor*max[0],origin[1],origin[2]);
 
       St_PolyLineShape *lxview = new St_PolyLineShape(lx);
-      St_PolyLineShape *lyview = new St_PolyLineShape(ly);
-      St_PolyLineShape *lzview = new St_PolyLineShape(lz);
-
+      lxview->SetBit(kCanDelete);
+      lxview->SetLineColor(6);
+      lxview->SetLineWidth(5);
       lxview->SetWidthFactor(width);
-      lyview->SetWidthFactor(width);
-      lzview->SetWidthFactor(width);
-
       lxview->Draw();
+
+      //___________  Y axis ____________
+      TPoints3DABC *ly = new TPoints3DABC(2);
+      lx->SetPoint(0,origin[0],origin[1],origin[2]);
+      ly->SetPoint(1,origin[0],axisFactor*max[1],origin[2]);
+
+      St_PolyLineShape *lyview = new St_PolyLineShape(ly);
+      lyview->SetLineColor(4);
+      lyview->SetLineWidth(5);
+      lyview->SetBit(kCanDelete);
+      lyview->SetWidthFactor(width);
       lyview->Draw();
+
+      //___________  Z axis ____________
+      TPoints3DABC *lz = new TPoints3DABC(2);
+      lx->SetPoint(0,origin[0],origin[1],origin[2]);
+      lz->SetPoint(1,origin[0],origin[1],axisFactor*max[2]);
+
+      St_PolyLineShape *lzview = new St_PolyLineShape(lz);
+      lzview->SetLineColor(2);
+      lzview->SetLineWidth(5);
+      lzview->SetBit(kCanDelete);
+      lzview->SetWidthFactor(width);
       lzview->Draw();
    }
    if (savpad) savpad->cd();
@@ -218,9 +233,132 @@ Int_t St_PolyLineShape::SetConnection(EShapeTypes connection)
 }
 
 //______________________________________________________________________________
+static Int_t DistancetoLine(Int_t px, Int_t py, Float_t x1, Float_t y1, Float_t x2, Float_t y2, Int_t lineWidth )
+{
+//*-*-*-*-*Compute distance from point px,py to an axis of the band defined*-*-*-*
+//*-*  by pair points  (x1,y1),(x2,y2) where lineWidth is the width of the band
+//*-*  ========================================================================
+//*-*
+//*-*  Compute the closest distance of approach from point px,py to this line.
+//*-*  The distance is computed in pixels units.
+//*-*
+//*-*
+//*-*  Algorithm:
+//*-*
+//*-*    A(x1,y1)         P                             B(x2,y2)
+//*-*    ------------------------------------------------
+//*-*                     I
+//*-*                     I
+//*-*                     I
+//*-*                     I
+//*-*                    M(x,y)
+//*-*
+//*-*  Let us call  a = distance AM     A=a**2
+//*-*               b = distance BM     B=b**2
+//*-*               c = distance AB     C=c**2
+//*-*               d = distance PM     D=d**2
+//*-*               u = distance AP     U=u**2
+//*-*               v = distance BP     V=v**2     c = u + v
+//*-*
+//*-*  D = A - U
+//*-*  D = B - V  = B -(c-u)**2
+//*-*     ==> u = (A -B +C)/2c
+//*-*
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+   Float_t xl, xt, yl, yt;
+   Float_t x     = px;
+   Float_t y     = py;
+   if (x1 < x2) {xl = x1; xt = x2;}
+   else         {xl = x2; xt = x1;}
+   if (y1 < y2) {yl = y1; yt = y2;}
+   else         {yl = y2; yt = y1;}
+
+   //following algorithm only valid in the box
+   //surrounding the line
+   const Float_t boxWidth = 10;
+   if (x < xl-boxWidth || x> xt+boxWidth ||  
+       y < yl-boxWidth || y> yt+boxWidth)    return 9999;  
+
+   Float_t xx1   = x  - x1;
+   Float_t xx2   = x  - x2;
+   Float_t x1x2  = x1 - x2;
+   Float_t yy1   = y  - y1;
+   Float_t yy2   = y  - y2;
+   Float_t y1y2  = y1 - y2;
+   Float_t A     = xx1*xx1   + yy1*yy1;
+   Float_t B     = xx2*xx2   + yy2*yy2;
+   Float_t C     = x1x2*x1x2 + y1y2*y1y2;
+   if (C <= 0)  return 9999;
+   Float_t c     = TMath::Sqrt(C);
+   Float_t u     = (A - B + C)/(2*c);
+   Float_t D     = TMath::Abs(A - u*u);
+   if (D < 0)   return 9999;
+ 
+   return Int_t(TMath::Sqrt(D) - 0.5*float(lineWidth));
+}
+ 
+//______________________________________________________________________________
 Int_t St_PolyLineShape::DistancetoPrimitive(Int_t px, Int_t py)
 {
- if (m_Points) return m_Points->DistancetoPrimitive(px,py);
+//*-*-*-*-*-*-*-*Compute distance from point px,py to a 3-D polyline*-*-*-*-*-*-*
+//*-*            ===================================================
+//*-*
+//*-*  Compute the closest distance of approach from point px,py to each segment
+//*-*  of the polyline.
+//*-*  Returns when the distance found is below DistanceMaximum.
+//*-*  The distance is computed in pixels units.
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+ 
+ if (m_Points) {
+   return m_Points->DistancetoPrimitive( px, py);
+ 
+   const Int_t inaxis = 7;
+   Int_t dist = 99999;
+ 
+   Int_t puxmin = gPad->XtoAbsPixel(gPad->GetUxmin());
+   Int_t puymin = gPad->YtoAbsPixel(gPad->GetUymin());
+   Int_t puxmax = gPad->XtoAbsPixel(gPad->GetUxmax());
+   Int_t puymax = gPad->YtoAbsPixel(gPad->GetUymax());
+ 
+//*-*- return if point is not in the user area
+   if (px < puxmin - inaxis) return dist;
+   if (py > puymin + inaxis) return dist;
+   if (px > puxmax + inaxis) return dist;
+   if (py < puymax - inaxis) return dist;
+ 
+   TView *view = gPad->GetView();
+   if (!view) return dist;
+ 
+   Int_t i, dsegment;
+   Float_t x1,y1,x2,y2, xndc[3];
+   Float_t xyz[6];
+   Float_t *shift = xyz;
+   Int_t offset =  3;
+   m_Points->GetXYZ(shift,0);  
+   for (i=0;i<m_Points->Size()-1;i++) {
+      view->WCtoNDC(shift, xndc);
+      x1 = xndc[0];
+      y1 = xndc[1];
+      shift += offset;  offset = -offset;
+      m_Points->GetXYZ(shift,i+1);
+      view->WCtoNDC(shift, xndc);
+      x2 = xndc[0];
+      y2 = xndc[1];
+      Float_t xp1    = gPad->XtoAbsPixel(x1);
+      Float_t yp1    = gPad->YtoAbsPixel(y1);
+      Float_t xp2    = gPad->XtoAbsPixel(x2);
+      Float_t yp2    = gPad->YtoAbsPixel(y2);
+
+//      dsegment = TPoints3DABC::DistancetoLine(px,py,x1,y1,x2,y2);
+      dsegment = ::DistancetoLine(px,py,xp1,yp1,xp2,yp2,GetSizeAttribute());
+      if (dsegment < dist) {
+         dist = dsegment;
+//         printf(" %d %f %f %f %f \n",dist,x1,y1,x2,y2);
+      }
+   }
+   return dist;
+}
+ 
  return 999999;
 }
 
@@ -238,12 +376,17 @@ void St_PolyLineShape::ExecuteEvent(Int_t event, Int_t px, Int_t py)
 }
 
 //______________________________________________________________________________
-Color_t St_PolyLineShape::GetColorAttribute(){
-  return GetLineColor();
+Color_t St_PolyLineShape::GetColorAttribute() const {
+  return ((St_PolyLineShape *)this)->GetLineColor();
 }
 //______________________________________________________________________________
-Width_t St_PolyLineShape::GetSizeAttribute(){
-  return GetLineWidth();
+Width_t St_PolyLineShape::GetSizeAttribute() const {
+  return ((St_PolyLineShape *)this)->GetLineWidth();
+}
+//______________________________________________________________________________
+Style_t St_PolyLineShape::GetStyleAttribute() const 
+{
+  return ((St_PolyLineShape *)this)->GetLineStyle();
 }
 
 //______________________________________________________________________________
@@ -339,16 +482,18 @@ void St_PolyLineShape::PaintNode(Float_t *start,Float_t *end,Option_t *option)
 //______________________________________________________________________________
 void St_PolyLineShape::Paint(Option_t *opt)
 {
-  if (!m_Points) return;
+  if (!GetPoints()) return;
 
   Bool_t rangeView = opt && opt[0] && strcmp(opt,"range")==0 ? kTRUE : kFALSE;
   TPadView3D *view3D = 0;
   if (!rangeView  && (view3D = gPad->GetView3D()) ) {
     TString mode;
+
     mode="";
-    view3D->SetLineAttr(GetColorAttribute(), GetSizeAttribute());
     if (m_LineFlag)  mode  = "L";
     if (m_PointFlag) mode += "P";    
+    
+    view3D->SetLineAttr(GetColorAttribute(), GetSizeAttribute());
     view3D->PaintPoints3D(GetPoints(), mode.Data());
   }
   if (!strstr(opt, "x3d")) {
@@ -665,7 +810,20 @@ Width_t St_PolyLineShape::SetSizeAttribute(Width_t size)
   }
   return currentSize;
 }
-
+//______________________________________________________________________________
+Style_t St_PolyLineShape::SetStyleAttribute(Style_t style)
+{
+  // SetStyleAttribute(Style_t style) - set new style for this line
+  // Returns:
+  //          previous value of the line style
+  //
+   Style_t s = 0;
+   s = GetStyleAttribute();
+   SetLineStyle(style);
+   SetMarkerStyle(style);
+   return s;
+}
+ 
 //______________________________________________________________________________
 void St_PolyLineShape::SetShape(TShape *shape)
 { 
@@ -673,6 +831,8 @@ void St_PolyLineShape::SetShape(TShape *shape)
    m_Shape = shape; 
 }
 
+//_______________________________________________________________________
+Int_t St_PolyLineShape::Size() const {return m_Points ? m_Points->Size():0;}
 //______________________________________________________________________________
 void St_PolyLineShape::Sizeof3D() const
 {

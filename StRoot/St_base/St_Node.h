@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_Node.h,v 1.14 1999/05/18 20:26:29 fine Exp $
+// $Id: St_Node.h,v 1.15 1999/06/09 22:09:35 fine Exp $
 // $Log: St_Node.h,v $
+// Revision 1.15  1999/06/09 22:09:35  fine
+// St_PolyLine3D has beed redesigned
+//
 // Revision 1.14  1999/05/18 20:26:29  fine
 // comments clean up
 //
@@ -109,6 +112,7 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
         const   Option_t   *GetOption() const { return fOption.Data();}
                 TShape     *GetShape()  const {return fShape;}
                 TList      *GetListOfShapes()  const {return fListOfShapes;}
+        virtual void        GetLocalRange(Float_t *min, Float_t *max);
         Int_t               GetVisibility() const {return fVisibility;}
         virtual TList      *GetListOfPositions() { return (TList *)(GetObject());}
         virtual ULong_t     Hash() { return TObject::Hash();}

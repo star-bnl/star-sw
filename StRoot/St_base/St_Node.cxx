@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.25 1999/05/29 20:52:32 fine Exp $
+// $Id: St_Node.cxx,v 1.26 1999/06/09 22:09:34 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.26  1999/06/09 22:09:34  fine
+// St_PolyLine3D has beed redesigned
+//
 // Revision 1.25  1999/05/29 20:52:32  fine
 // Several method to estimat range of 3D object were introduced
 //
@@ -99,9 +102,8 @@
 #include "X3DBuffer.h"
 //*KEND.
  
-//*KEEP,TPadView3D,T=C++.
 #include "TPadView3D.h"
-//*KEND.
+#include "TCanvas.h"
 
 #include "TRotMatrix.h"
 #include "St_NodePosition.h"
@@ -154,7 +156,7 @@ St_Node::St_Node()
  
 //______________________________________________________________________________
 St_Node::St_Node(const Text_t *name, const Text_t *title, const Text_t *shapename, Option_t *option)
-       :St_ObjectSet(name),TAttLine(), TAttFill(),fListOfShapes(0),fShape(0)
+       :St_ObjectSet(name),TAttLine(), TAttFill(),fShape(0),fListOfShapes(0)
 {
 //*-*-*-*-*-*-*-*-*-*-*Node normal constructor*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 //*-*                  ======================
@@ -197,7 +199,7 @@ St_Node::St_Node(const Text_t *name, const Text_t *title, const Text_t *shapenam
  
 //______________________________________________________________________________
 St_Node::St_Node(const Text_t *name, const Text_t *title, TShape *shape, Option_t *option)
-                :St_ObjectSet(name),TAttLine(),TAttFill(),fListOfShapes(0),fShape(0)
+                :St_ObjectSet(name),TAttLine(),TAttFill(),fShape(0),fListOfShapes(0)
 {
 //*-*-*-*-*-*-*-*-*-*-*Node normal constructor*-*-*-*-*-*-*-*-*-*-*
 //*-*                  ================================
@@ -233,7 +235,7 @@ St_Node::St_Node(const Text_t *name, const Text_t *title, TShape *shape, Option_
 
 }
 //______________________________________________________________________________
-St_Node::St_Node(TNode &rootNode):fListOfShapes(0),fShape(0)
+St_Node::St_Node(TNode &rootNode):fShape(0),fListOfShapes(0)
 {
   // Convert the ROOT TNode object into STAR St_Node
 
@@ -253,7 +255,7 @@ St_Node::St_Node(TNode &rootNode):fListOfShapes(0),fShape(0)
   if (nodes) {
     TIter next(nodes);
     TNode *node = 0;
-    while (node = (TNode *) next()){
+    while ( (node = (TNode *) next()) ){
       St_Node *nextNode = new St_Node(*node);
       Add(nextNode,node->GetX(),node->GetY(),node->GetZ(),node->GetMatrix());
     }
@@ -298,11 +300,11 @@ TNode *St_Node::CreateTNode(const St_NodePosition *position)
   if (positions) {
     TIter next(positions);
     St_NodePosition *pos = 0;
-    while (pos = (St_NodePosition *) next()){
+    while ( (pos = (St_NodePosition *) next()) ){
       St_Node *node = pos->GetNode();
       if (node) {
           newNode->cd();
-          TNode *nextNode = node->CreateTNode(pos);
+          node->CreateTNode(pos);
       }
     }
   }
@@ -392,7 +394,7 @@ void St_Node::Browse(TBrowser *b)
        St_NodePosition *nodePosition = 0;
        TIter next(GetListOfPositions());
        Int_t posNumber = 0;
-       while (nodePosition = (St_NodePosition *)next()) {
+       while ( (nodePosition = (St_NodePosition *)next()) ) {
          posNumber       = nodePosition->GetId();
          TString posName = "*";
          posName += nodePosition->GetNode()->GetTitle();
@@ -461,7 +463,7 @@ Int_t St_Node::DistancetoNodePrimitive(Int_t px, Int_t py,St_NodePosition *pos)
    if (GetVisibility()) {
      TShape  *shape = 0;
      TIter nextShape(fListOfShapes);
-     while (shape = (TShape *)nextShape()) {
+     while ((shape = (TShape *)nextShape())) {
       //*-*- Distnance to the next referenced shape  if visible
       if (shape->GetVisibility()) {
         Int_t dshape = shape->DistancetoPrimitive(px,py);
@@ -605,8 +607,8 @@ void St_Node::ImportShapeAttributes()
    if (!GetList()) return;
    St_Node *node;
    TIter  next(GetList());
-   while (node = (St_Node *)next()) 
-      node->ImportShapeAttributes();
+   while ( (node = (St_Node *)next()) )
+     node->ImportShapeAttributes();
 }
    
 #if 0
@@ -739,7 +741,7 @@ void St_Node::PaintShape(Option_t *option)
 
   TIter nextShape(fListOfShapes);
   TShape *shape = 0;
-  while(shape = (TShape *)nextShape()) {
+  while( (shape = (TShape *)nextShape()) ) {
     if (!shape->GetVisibility())   continue;
     if (!rangeView) {
       shape->SetLineColor(GetLineColor());
@@ -778,6 +780,32 @@ void St_Node::DeletePosition(St_NodePosition *position)
   }
 }   
  
+//______________________________________________________________________________
+void St_Node::GetLocalRange(Float_t *min, Float_t *max)
+{
+  //  GetRange
+  //
+  //  Calculates the size of 3 box the node occupies,
+  //  Return:
+  //    two floating point arrays with the bound of box
+  //     surroundind all shapes of this St_ModeView
+  //
+
+  TVirtualPad *savePad = gPad;
+  //  Create a dummy TPad;
+  TCanvas dummyPad("--Dumm--","dum",1,1);
+  // Assing 3D TView 
+  TView view(1);
+
+  gGeometry->SetGeomLevel();
+  gGeometry->UpdateTempMatrix();
+  view.SetAutoRange(kTRUE);
+  Paint("range");
+  view.GetRange(&min[0],&max[0]);
+  // restore "current pad"
+   if (savePad) savePad->cd();   
+}
+
 //______________________________________________________________________________
 void St_Node::SetVisibility(Int_t vis)
 {
