@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.19 2000/08/10 18:41:34 hardtke Exp $
+ * $Id: StTpcDb.h,v 1.20 2001/05/21 23:25:34 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.20  2001/05/21 23:25:34  hardtke
+ * Add tpcGlobalPosition to StTpcDb.  This includes the global position offset and the rotation w.r.t. the magnet
+ *
  * Revision 1.19  2000/08/10 18:41:34  hardtke
  * only look for L0_trigger table once per event -- improves timing
  *
@@ -83,6 +86,7 @@
 #include "StRTpcGain.h"
 #include "StRTpcT0.h"
 #include "StRTpcSlowControlSim.h"
+#include "StRTpcGlobalPosition.h"
 #include "St_DataSet.h"
 class StMaker;
 class St_tpcDriftVelocity;
@@ -101,6 +105,7 @@ class StTpcDb {
  StTpcElectronicsI*    electronics;   //!
  StTpcGainI*           gain[24];      //!
  StTpcT0I*             t0[24];        //! 
+ StTpcGlobalPositionI* GlobPos; //!
  St_DataSet*           tpc[3];        //!
  St_DataSet*           trg[3];        //!
  St_tpcDriftVelocity*  dvel;          //!
@@ -121,6 +126,7 @@ class StTpcDb {
    StTpcDimensionsI* Dimensions();
    StTpcSlowControlSimI* SlowControlSim();
    StTpcElectronicsI* Electronics();
+   StTpcGlobalPositionI* GlobalPosition();
    StTpcGainI* Gain(int sector);
    StTpcT0I* T0(int sector);
    St_Table *getTpcTable(int i);

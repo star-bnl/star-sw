@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.28 2000/08/18 17:19:21 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.29 2001/05/21 23:25:34 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.29  2001/05/21 23:25:34  hardtke
+ * Add tpcGlobalPosition to StTpcDb.  This includes the global position offset and the rotation w.r.t. the magnet
+ *
  * Revision 1.28  2000/08/18 17:19:21  hardtke
  * use laser velocity, if available
  *
@@ -91,6 +94,7 @@ ClassImp(StTpcGainI)
 ClassImp(StTpcPadPlaneI)
 ClassImp(StTpcSlowControlSimI)
 ClassImp(StTpcT0I)
+ClassImp(StTpcGlobalPositionI)
 #endif
 //_____________________________________________________________________________
 StTpcDb::StTpcDb(St_DataSet* input) {
@@ -101,7 +105,7 @@ StTpcDb::StTpcDb(St_DataSet* input) {
    int lBases = sizeof(bases)/sizeof(Char_t *);
    St_DataSetIter dataBase(input);
    int i;
-   for (i = 0;i<lBases;i++,dataBase.Cd("/") )
+   for (i = 0;i<2;i++,dataBase.Cd("/") )
      if ( !(tpc[i] = dataBase.Cd(bases[i]) ? dataBase("tpc") : 0 ) ){
        gMessMgr->Warning() << "StTpcDb::Error Getting TPC database: " << bases[i]       << endm;
      }
@@ -141,7 +145,7 @@ void StTpcDb::GetDataBase(StMaker* maker) {
    const Char_t *bases[] = {"Calibrations/","Geometry/","Conditions/"};
    int lBases = sizeof(bases)/sizeof(Char_t *);
    int i;
-   for (i = 0;i<lBases;i++) {
+   for (i = 0;i<2;i++) {
      TString dbFullPath = "StDb/";
      TString dbPath = bases[i];
      dbPath += "tpc";
@@ -271,6 +275,22 @@ StTpcElectronicsI* StTpcDb::Electronics(){
    }
   }
  return electronics;
+}
+
+//_____________________________________________________________________________
+StTpcGlobalPositionI* StTpcDb::GlobalPosition(){
+  if (!GlobPos){            // get global position from data base
+   const int dbIndex = kGeometry;
+   if (tpc[dbIndex]){
+    St_DataSet* tpd = tpc[dbIndex]->Find("tpcGlobalPosition");
+    if (!(tpd && tpd->HasData()) ){
+     gMessMgr->Message("StTpcDb::Error Finding Tpc Global Positions","E");
+     return 0;
+    }
+    GlobPos = new StRTpcGlobalPosition((St_tpcGlobalPosition*)tpd);
+   }
+  }
+ return GlobPos;
 }
 
 //_____________________________________________________________________________
