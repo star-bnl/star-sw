@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.22 2000/02/03 00:05:13 snelling Exp $
+* $Id: tph.F,v 1.23 2000/02/18 20:07:57 snelling Exp $
 * $Log: tph.F,v $
+* Revision 1.23  2000/02/18 20:07:57  snelling
+* Changed tph function into tpc functions y(using database)
+*
 * Revision 1.22  2000/02/03 00:05:13  snelling
 * Changed warning reporting, improved switching between 3point Gaussian fit
 * and weighted mean.
@@ -65,11 +68,18 @@ c-----------------------------------------------------------------------
 c-----------------------------------------------------------------------
 c
 c functions:
-      integer tgc_pad_to_x
-      integer tgc_row_to_y
-      integer tgc_local_to_global
       real    tand, atand
-      integer tgc_drift_velocity !function that returns as a first
+      integer tpc_pad_to_x
+      integer tpc_row_to_y
+      integer tpc_local_to_global
+      integer tpc_drift_velocity !function that returns as a first
+c                                !argument the drift velocity
+c                                !two next arguments dummy             
+c
+c      integer tgc_pad_to_x
+c      integer tgc_row_to_y
+c      integer tgc_local_to_global
+c      integer tgc_drift_velocity !function that returns as a first
 c                                !argument the drift velocity
 c                                !two next arguments dummy             
 c
@@ -329,25 +339,25 @@ c     Put q (magnitude of hit) into units of energy loss
               tphit(tphit_h.nok).dq = 0.
               
 c     Transform x(ihit) to local x coordinates invec(1)              
-              istatus = tgc_pad_to_x(x(ihit),
+              istatus = tpc_pad_to_x(x(ihit),
      &             float(irow), invec(1), pad_plane_h, pad_plane)
               
 c     Transform row to y coordinate invec(2)              
               invec(2) = 0.
-              istatus = tgc_row_to_y(float(irow),
+              istatus = tpc_row_to_y(float(irow),
      &             invec(2), pad_plane_h, pad_plane)
 
 c     Correct z for weighted mean function used to determine it 
 c     (using the drift velocity and tau)
               invec(3) = z(ihit)
-              istatus = tgc_drift_velocity(dvel, dummy1, dummy1)
+              istatus = tpc_drift_velocity(dvel, dummy1, dummy1)
               if (tclpar(1).tfit .eq. 0) then 
                  invec(3) = z(ihit) - 
      &                3.0 * tsspar(1).tau * dvel * 1.0E-6
               endif
 
 c     Transform local to global coordinates !
-              istatus = tgc_local_to_global(isec, invec, outvec)
+              istatus = tpc_local_to_global(isec, invec, outvec)
 
 c     Fill hit coordinates
               tphit(tphit_h.nok).x = outvec(1)
@@ -405,11 +415,11 @@ c     dz already in global coordinates
 
 c     also, need a fudge factor for the uncertainties dx dy dz.
 c     this should be understood and fixed.
-              tphit(tphit_h.nok).dx = 0.2
+              tphit(tphit_h.nok).dx = 0.1
 c             tphit(tphit_h.nok).dx+ tclpar(1).dxy_fact
-              tphit(tphit_h.nok).dy = 0.2
+              tphit(tphit_h.nok).dy = 0.1
 c             tphit(tphit_h.nok).dy+ tclpar(1).dxy_fact
-              tphit(tphit_h.nok).dz = 0.55
+              tphit(tphit_h.nok).dz = 0.2
               
            enddo
 
