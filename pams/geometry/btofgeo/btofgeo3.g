@@ -1,7 +1,10 @@
-* $Id: btofgeo3.g,v 1.4 2004/07/08 01:43:20 potekhin Exp $
+* $Id: btofgeo3.g,v 1.5 2004/07/08 01:52:25 potekhin Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo3.g,v $
+* Revision 1.5  2004/07/08 01:52:25  potekhin
+* Need to properly name the module here (different from previous version)
+*
 * Revision 1.4  2004/07/08 01:43:20  potekhin
 * Frank's latest fixes should go in a new file, hence this
 * version
@@ -25,7 +28,7 @@
 *
 *
 *******************************************************************************
-Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system 
+Module  BTOFGEO3 is the Geometry of Barrel Trigger / Time Of Flight system 
 *******************************************************************************
 
   Author     W.J. Llope 
