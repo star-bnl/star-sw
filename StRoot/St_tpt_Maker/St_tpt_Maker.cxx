@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.75 2004/06/05 23:40:05 fisyak Exp $
+// $Id: St_tpt_Maker.cxx,v 1.76 2004/08/07 03:01:24 perev Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.76  2004/08/07 03:01:24  perev
+// TF1 cleanup
+//
 // Revision 1.75  2004/06/05 23:40:05  fisyak
 // Add (sector,row) for TpcCoordinate transformations
 //
@@ -843,9 +846,9 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
   
   //fit efficiency per event
   Double_t par[1];
-  TF1 *pol_0= new TF1("pol_0","pol0",-1.0,1.0);
+  TF1 pol_0("pol_0","pol0",-1.0,1.0);
   m_eff1->Fit("pol_0","N","",-1.0,1.0); //fit and non_plot
-  pol_0->GetParameters(&par[0]);
+  pol_0.GetParameters(&par[0]);
   
   Float_t efficiency=par[0];
   cout<<"For each event:Fit eff0="<<par[0]<<endl; 
@@ -916,9 +919,9 @@ void St_tpt_Maker::VertexEffResolutionFinish(){
   m_eff_total->Divide(m_rapidity_total2,m_rapidity_total1,1.0,1.0); 
   //fit efficiency for all events
   Double_t par[1];
-  TF1 *pol_0= new TF1("pol_0","pol0",-1.0,1.0);
+  TF1 pol_0("pol_0","pol0",-1.0,1.0);
   m_eff_total->Fit("pol_0","N","",-1.0,1.0); //fit and non_plot
-  pol_0->GetParameters(&par[0]);
+  pol_0.GetParameters(&par[0]);
   
   Float_t efficiency=par[0];
   cout<<"For all events:Fit eff="<<efficiency<<endl; 
