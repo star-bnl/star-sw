@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMuDst.cc,v 1.3 2000/03/31 03:20:24 jones Exp $
+ * $Id: StXiMuDst.cc,v 2.0 2000/06/02 22:11:55 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 30-Mar-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiMuDst.cc,v $
+ * Revision 2.0  2000/06/02 22:11:55  genevb
+ * New version of Strangeness micro DST package
+ *
  * Revision 1.3  2000/03/31 03:20:24  jones
  * Added topology map to V0/Xi; access funcs for each data member
  *
@@ -43,7 +46,6 @@ void StXiMuDst::Fill(StXiVertex* xiVertex,
 }
 
 void StXiMuDst::FillXi(StXiVertex* xiVertex) {
-
   mCharge = (Int_t) (xiVertex->chargeOfBachelor());
   mDecayVertexXiX = xiVertex->position().x();
   mDecayVertexXiY = xiVertex->position().y();
@@ -54,8 +56,14 @@ void StXiMuDst::FillXi(StXiVertex* xiVertex) {
   mMomBachelorX = xiVertex->momentumOfBachelor().x();
   mMomBachelorY = xiVertex->momentumOfBachelor().y();
   mMomBachelorZ = xiVertex->momentumOfBachelor().z();
-  mKeyBachelor  = xiVertex->bachelor()->key();
-  mTopologyMapBachelor = xiVertex->bachelor()->topologyMap();
+  mChi2Xi = xiVertex->chiSquared();
+  mClXi = xiVertex->probChiSquared();
+
+  StTrack* trk = xiVertex->bachelor();
+  mKeyBachelor  = trk->key();
+  mTopologyMapBachelor = trk->topologyMap();
+  mChi2Bachelor = trk->fitTraits().chi2(0);
+  mClBachelor = trk->fitTraits().chi2(1);
 }
 
 void StXiMuDst::Clear() {
@@ -63,6 +71,12 @@ void StXiMuDst::Clear() {
 }
 
 StXiMuDst::~StXiMuDst() {
+}
+
+Float_t StXiMuDst::decayLengthV0() const {
+  return sqrt(pow(mDecayVertexV0X - mDecayVertexXiX,2) +
+              pow(mDecayVertexV0Y - mDecayVertexXiY,2) +
+              pow(mDecayVertexV0Z - mDecayVertexXiZ,2));
 }
 
 Float_t StXiMuDst::decayLengthXi() const {
@@ -186,3 +200,11 @@ Float_t StXiMuDst::ptotXi() {
   return sqrt(Ptot2Xi());
 }
 
+Long_t StXiMuDst::detectorIdXi() {
+  return ((100*detectorIdV0())+
+               detectorIdTrack(mTopologyMapBachelor));
+}
+
+Long_t StXiMuDst::detectorIdPars() {
+  return 1;  // Currently, only one set of parameters actually used
+}

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.cc,v 1.1 2000/03/30 00:18:08 genevb Exp $
+ * $Id: StKinkMuDst.cc,v 2.0 2000/06/02 22:11:54 genevb Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.cc,v $
+ * Revision 2.0  2000/06/02 22:11:54  genevb
+ * New version of Strangeness micro DST package
+ *
  * Revision 1.1  2000/03/30 00:18:08  genevb
  * Introduction of StKinkMuDst
  *
@@ -19,6 +22,7 @@
 #include "StKinkMuDst.hh"
 #include "StKinkVertex.h"
 #include "StTrack.h"
+#include "StTrackFitTraits.h"
 
 #include <stdlib.h>
 #include "phys_constants.h"
@@ -47,6 +51,12 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex)
   mPositionX = kinkVertex->position().x();
   mPositionY = kinkVertex->position().y();
   mPositionZ = kinkVertex->position().z();
+  mChi2Kink = kinkVertex->chiSquared();
+  mClKink = kinkVertex->probChiSquared();
+  mChi2Parent = kinkVertex->parent()->fitTraits().chi2(0);
+  mClParent = kinkVertex->parent()->fitTraits().chi2(1);
+  mChi2Daughter = kinkVertex->daughter()->fitTraits().chi2(0);
+  mClDaughter = kinkVertex->daughter()->fitTraits().chi2(1);
 
   findMinDeltaEnergy(kinkVertex);
   findDecayLength(kinkVertex);
@@ -59,126 +69,6 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex)
 }
 
 StKinkMuDst::~StKinkMuDst() {/* noop */}
-
-UShort_t StKinkMuDst::geantIdParent() const 
-{ 
-  return mParentGeantId; 
-}
-
-UShort_t StKinkMuDst::geantIdDaughter() const 
-{ 
-  return mDaughterGeantId; 
-}
-
-Float_t StKinkMuDst::dcaParentDaughter() const 
-{
-  return mDcaParentDaughter;
-}
-
-Float_t StKinkMuDst::dcaDaughterPrimaryVertex() const
-{
-  return mDcaDaughterPrimaryVertex;
-}
-   
-Float_t StKinkMuDst::dcaParentPrimaryVertex() const 
-{
-  return mDcaParentPrimaryVertex; 
-}
-
-Float_t StKinkMuDst::hitDistanceParentDaughter() const
-{
-  return mHitDistanceParentDaughter; 
-}
-
-Float_t StKinkMuDst::hitDistanceParentVertex() const 
-{
-  return mHitDistanceParentVertex; 
-}
-
-Float_t StKinkMuDst::mindE() const
-{ 
-  return mMinDeltaEnergy; 
-}
-
-Float_t StKinkMuDst::decayAngle() const
-{
-  return mDecayAngle; 
-}
-
-Float_t StKinkMuDst::parentMomentumX() const
-{
-  return mParentMomentumX; 
-}
-
-Float_t StKinkMuDst::parentMomentumY() const
-{
-  return mParentMomentumY; 
-}
-
-Float_t StKinkMuDst::parentMomentumZ() const 
-{
-  return mParentMomentumZ; 
-}
-
-Float_t StKinkMuDst::daughterMomentumX() const
-{ 
-  return mDaughterMomentumX; 
-}
-
-Float_t StKinkMuDst::daughterMomentumY() const 
-{
-  return mDaughterMomentumY; 
-}
-
-Float_t StKinkMuDst::daughterMomentumZ() const
-{
-  return mDaughterMomentumZ; 
-}
-
-Float_t StKinkMuDst::positionX() const
-{
-  return mPositionX; 
-}
-
-Float_t StKinkMuDst::positionY() const
-{
-  return mPositionY; 
-}
-
-Float_t StKinkMuDst::positionZ() const 
-{
-  return mPositionZ;
-}
-
-Float_t StKinkMuDst::decayLength() const
-{
-  return mDecayLength;
-}
-  
-Float_t StKinkMuDst::transverseMomentum() const
-{
-  return mTransverseMomentum;
-}
-
-Float_t StKinkMuDst::transverseMassKaon() const
-{
-  return mTransverseMassKaon;
-}
-
-Float_t StKinkMuDst::transverseMassPion() const
-{
-  return mTransverseMassPion;
-}
-
-Float_t StKinkMuDst::rapidityKaon() const
-{
-  return mRapidityKaon;
-}
-
-Float_t StKinkMuDst::rapidityPion() const
-{
-  return mRapidityPion;
-}
 
 void
 StKinkMuDst::findMinDeltaEnergy(StKinkVertex* kinkVertex) 

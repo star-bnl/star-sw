@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeEvMuDst.cc,v 1.3 2000/03/31 03:20:24 jones Exp $
+ * $Id: StStrangeEvMuDst.cc,v 2.0 2000/06/02 22:11:54 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 19-Aug-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeEvMuDst.cc,v $
+ * Revision 2.0  2000/06/02 22:11:54  genevb
+ * New version of Strangeness micro DST package
+ *
  * Revision 1.3  2000/03/31 03:20:24  jones
  * Added topology map to V0/Xi; access funcs for each data member
  *
