@@ -4,13 +4,15 @@
 
 #ifdef SL3ROOT
 #include "Rtypes.h"
+#include "TObject.h"
 #else
 #define ClassDef(a,b)
 #endif
 
 class FtfBaseTrack ;
 
-class Ftf3DHit {
+class Ftf3DHit 
+{
 public:
    Ftf3DHit (  ) { x =  y =  z = 0. ; } ;
    Ftf3DHit ( float _x, float _y, float _z ){ x = _x ; y = _y ; z = _z ; } ; 
@@ -20,7 +22,11 @@ public:
    float z ;
 };
 
-class FtfBaseHit {         
+class FtfBaseHit
+#ifdef SL3ROOT
+:public TObject
+#endif
+{         
    public:
       void         print ( ) ;
       void         print ( int level ) ;

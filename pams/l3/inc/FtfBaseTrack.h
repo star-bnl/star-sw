@@ -15,13 +15,18 @@
 
 #ifdef SL3ROOT
 #include "Rtypes.h"
+#include "TObject.h"
 #else
 #define ClassDef(a,b)
 #endif
 //
 //    Base Track class
 //
-  class FtfBaseTrack { 
+class FtfBaseTrack 
+#ifdef SL3ROOT
+: public TObject
+#endif
+{ 
       
 public:
     FtfBaseTrack ( ) ;

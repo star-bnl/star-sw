@@ -52,6 +52,21 @@ public:
       }
    };
 //*********************************************************
+   void clear() {
+      if (head!=0) {
+	 register slink* p, *old;
+	 for(p = head; p; ) {
+	    // get next element before deleting this one
+	    old = p;
+	    p = p->succ;
+	    delete old;
+	 }
+	 head=tail=0;
+	 count=0;
+      }
+   }
+
+//*********************************************************
    void* first() { 
       current = head ;
       if ( head ) return head->e;
