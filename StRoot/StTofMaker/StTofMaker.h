@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.h,v 1.5 2002/01/22 06:50:51 geurts Exp $ 
+ * $Id: StTofMaker.h,v 1.6 2002/01/22 16:47:08 geurts Exp $ 
  * 
  * Author: Wei-Ming Zhang / Frank Geurts
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.h,v $
+ * Revision 1.6  2002/01/22 16:47:08  geurts
+ * minor change in ClassDef
+ *
  * Revision 1.5  2002/01/22 06:50:51  geurts
  * modifications for STAR dBase access
  *
@@ -81,9 +84,9 @@ public:
   virtual Int_t Finish();
     
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofMaker.h,v 1.5 2002/01/22 06:50:51 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofMaker.h,v 1.6 2002/01/22 16:47:08 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StTofMaker, 2)
+  ClassDef(StTofMaker, 1)
 
 };
 #endif
