@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.165 2001/02/06 21:28:53 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.166 2001/02/07 14:29:17 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -60,8 +60,8 @@ Bfc_st BFC[] = {
   {"Cy1d"        ,""  ,"","y1d,Cdefault"                                 ,"","","Turn on chain y1d",kFALSE},
   {"cy1e"        ,""  ,"","y1e,Cdefault"                                 ,"","","Turn on chain y1h",kFALSE},
   {"cy1h"        ,""  ,"","y1h,Cdefault"                                 ,"","","Turn on chain y1e",kFALSE},
-  {"Cy2a"        ,""  ,"","y2a,tpc,ftpc,emc,l0,l3,Cdst,tags,Tree,svt"    ,"","","Turn on chain y2a",kFALSE},
-  {"Cy2b"        ,""  ,"","y2b,tpc,rich,ftpc,emc,svt,l0,l3,Cdst,Kalman,tags,Tree,evout"
+  {"Cy2a"        ,""  ,"","y2a,tpc,ftpc,emcY2,l0,l3,Cdst,tags,Tree,svt"  ,"","","Turn on chain y2a",kFALSE},
+  {"Cy2b"        ,""  ,"","y2b,tpc,rich,ftpc,emcY2,svt,l0,l3,Cdst,Kalman,tags,Tree,evout"
                                                                          ,"","","Turn on chain y2b",kFALSE},
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
@@ -198,6 +198,10 @@ Bfc_st BFC[] = {
   {"emc"    ,"emcChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl"      ,"StMaker","StChain","",kFALSE},
   {"ems"    ,"emc_raw","emcChain","geant,emc_T"    ,"St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
   {"emh"    ,"emc_hits","emcChain","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
+  {"emcY2"    ,"emcY2","","geant,emc_T,tpc_T,db,calib,emcSim,PreEcl,epc"      ,"StMaker","StChain",
+                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
+  {"emcSim" ,"emcRaw","emcY2","geant,emc_T","StEmcSimulatorMaker","StMcEvent,StEmcUtil,StEmcSimulatorMaker", 
+                                                                           "New simulator for BEMC",kFALSE},
   {"global"      ,"globalChain","","globT,Match,primary,v0,xi,kink,dst,SCL,dEdx"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
@@ -216,8 +220,9 @@ Bfc_st BFC[] = {
                                                                 ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"dEdx"       ,"dEdx","globalChain","globT,tpcDb","StdEdxMaker","StTableUtilities,StdEdxMaker","",kFALSE},
   {"Event"       ,"","","globT,SCL"                       ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
-  {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl","StMaker","StChain","",kFALSE},
-  {"PreEcl"      ,"preecl","PostChain","emh"                    ,"StPreEclMaker","StPreEclMaker","",kFALSE},
+  {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl"        ,"StMaker","StChain","",kFALSE},
+  {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",
+                                         "StPreEclMaker,StEmcSimulatorMaker,St_emc,St_ems_Maker","",kFALSE},
   {"Epc"         ,"epc","PostChain","PreEcl,Match"                    ,"StEpcMaker","StEpcMaker","",kFALSE},
   {"rich"        ,"RichChain","","rch,RichPiD",                    "StMaker","StChain","RICH chain",kFALSE},
   {"Rrs"         ,"","RichChain","sim_T,Simu"                         ,"StRrsMaker","StRrsMaker","",kFALSE},
