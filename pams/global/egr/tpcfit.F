@@ -379,36 +379,7 @@ CCC         CH2SMO=1.E20
       RETURN
 *--
       END
-      SUBROUTINE TPCEND
-*------------------------------------------------------------------------------
-*--
-*--   Clean up HBOOK
-*--
-*--   Dietrich Liko
-*--
-*------------------------------------------------------------------------------
-*--
-*      PARAMETER (MTPC=70)
-*      CHARACTER*80 TPCNAM
-*      COMMON/TPCRES/TPCNAM,CH2TOT,NDEF,CH2FIL,CH2SMO,NOUT,SP(5,MTPC),
-*     &              FRES(2,MTPC),FPUL(2,MTPC),FCH2(MTPC),
-*     &              SRES(2,MTPC),SPUL(2,MTPC),SCH2(MTPC)
-*--
-*      CHARACTER*80 CHSAVE
-*--
-*      IF (TPCNAM.NE.' ') THEN
-*         CALL HCDIR(CHSAVE,'R')
-*         CALL HCDIR('//'//TPCNAM(8:),' ')
-*         CALL HROUT(1100,IC,' ')
-*         CALL HDELET(1100)
-*         CALL HROUT(1200,IC,' ')
-*         CALL HDELET(1200)
-*         CALL HCDIR(CHSAVE,' ')
-*      ENDIF
-*--
-*      RETURN
-*--
-      END
+
       SUBROUTINE TPCTRK(NEVT,NTRK,
      &                  TRKGEN,TRKREF,NTPC,TPC,TPCCH2,TRKTPC,IRET)
 *------------------------------------------------------------------------------
@@ -424,7 +395,7 @@ CCC         CH2SMO=1.E20
 *--
 *--   Output:
 *--      TRKTPC      ... track at reference surface within the beam tube
-*--                      (R,R*PHI,z,theta,phi,1/p,c11,..,c55,chi2,ndef)
+*--                      (R,R*PHI,z,tanl,phi,1/p,c11,..,c55,chi2,ndef)
 *--      IRET        ... return code
 *--
 *--   Dietrich Liko
@@ -449,63 +420,8 @@ CCC         CH2SMO=1.E20
          RETURN
       ENDIF
 
-*--   some checks ...
-
       R = TRKTPC(1)
-      IF (TRKTPC(2).LT.0)       WRITE(6,*) 'TRKTPC(2)-',TRKTPC(2)
-      IF (TRKTPC(2).GT.2.*PI*R) WRITE(6,*) 'TRKTPC(2)+',TRKTPC(2)
-CCC      IF (TRKTPC(4).LT.0)       WRITE(6,*) 'TRKTPC(4)-',TRKTPC(4)
-CCC      IF (TRKTPC(4).GT.PI)      WRITE(6,*) 'TRKTPC(4)+',TRKTPC(4)
-      IF (TRKTPC(5).LT.0)       WRITE(6,*) 'TRKTPC(5)-',TRKTPC(5)
-      IF (TRKTPC(5).GT.2.*PI)   WRITE(6,*) 'TRKTPC(5)+',TRKTPC(5)
-*--
-*--   Fill Ntuples
-*--
-*      IF (TPCNAM.NE.' ') THEN
-*--
-*         CALL HCDIR(CHSAVE,'R')
-*         CALL HCDIR(TPCNAM,' ')
-*         TRK(1) = REAL( NEVT )
-*         TRK(2) = REAL( NTRK )
-*         TRK(3) = REAL( NTPC )
-*         TRK(4) = REAL( NOUT )
-*         TRK(5) = PROB( TRKTPC(22), INT( TRKTPC(23) ) )
-*         CALL UCOPY(TRKTPC(1),TRK(6),21)
-*         CALL UCOPY(TRKGEN(2),TRK(27),5)
-*         IF ((TRK(27)-TRK(7)).GT. PI*TRK(6))
-*     &      TRK(27)=TRK(27)-2.*PI*TRK(6)
-*         IF ((TRK(27)-TRK(7)).LT.-PI*TRK(6))
-*     &      TRK(27)=TRK(27)+2.*PI*TRK(6)
-*         IF ((TRK(30)-TRK(10)).GT. PI) TRK(30)=TRK(30)-2.*PI
-*         IF ((TRK(30)-TRK(10)).LT.-PI) TRK(30)=TRK(30)+2.*PI
-*         CALL HFN(1100,TRK(1))
-*--
-*         HIT(1) = REAL( NEVT )
-*         HIT(2) = REAL( NTRK )
-*         HIT(3) = REAL( NTPC )
-*         II = 0
-*         DO 1000 I = NTPC,1,-1
-*            IF (TPCCH2(I).GE.0.) THEN
-*               II = II + 1
-*               HIT( 4) = REAL( II )
-*               HIT( 5) = TPC(1,I)
-*               CALL UCOPY(SP(1,I),HIT(6),5)
-*               HIT(11) = FRES(1,I)
-*               HIT(12) = FRES(2,I)
-*               HIT(13) = FPUL(1,I)
-*               HIT(14) = FPUL(2,I)
-*               HIT(15) = PROB( FCH2(I), 2)
-*               HIT(16) = SRES(1,I)
-*               HIT(17) = SRES(2,I)
-*               HIT(18) = SPUL(1,I)
-*               HIT(19) = SPUL(2,I)
-*               HIT(20) = PROB( SCH2(I), 2)
-*               CALL HFN(1200,HIT(1))
-*            ENDIF
-* 1000    CONTINUE
-*--
-*         CALL HCDIR(CHSAVE,' ')
-*      ENDIF
+
       IRET = 0
       RETURN
 *--
@@ -862,6 +778,8 @@ CCC      pathl = abs(dpsi*rad/cosl)
 
 *-- fraction of radiation length for P10
       XLTRUE = SQRT(DXSQ+DYSQ+DZSQ)/11600.
+*-- put in the material for inner field cage
+      if((rl.gt.50.0).and.(r.lt.50.0))XLTRUE = XLTRUE + 0.006
 CCC      XLTRUE = pathl/11600.
 
       IF (XLTRUE.GT.1E-8) THEN
