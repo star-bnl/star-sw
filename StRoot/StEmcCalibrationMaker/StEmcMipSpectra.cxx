@@ -128,7 +128,7 @@ Bool_t StEmcMipSpectra::CalibrateByMip(Int_t bin,TArrayF SpectraTemp,
 */
 
 
-  Int_t parms=6;
+  const Int_t parms=6;
   
   StEmcFit *fit=new StEmcFit();
   fit->SetNParms(parms);
