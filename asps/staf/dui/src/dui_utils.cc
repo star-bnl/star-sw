@@ -190,27 +190,24 @@ int duiFindDS(DS_DATASET_T *& node, DS_DATASET_T* root, char* path)
    char *s;
    DS_DATASET_T *pDSr=root;
    DS_DATASET_T *pDSc=NULL;
-   int i=0;
+   int i=1;   // hjw 14 June 1998:  We need to start from 1, not 0.
    bool_t isDataset;
 
-//printf("path = %s \n",path);			.. ***** DEBUG *****
    while( (s = strntok(path,"/",i++)) != NULL ){
-//printf("elem = %s \t",s);			.. ***** DEBUG *****
-//printf("base = %s \n",pDSr->name);		.. ***** DEBUG *****
-     if( 0 != strcmp(s,pDSr->name)){ 	// ***** HACK *****
-       if( !dsIsDataset(&isDataset,pDSr)
+     // hjw 14 June 1998:  I removed an if() here.  The non-pernicious
+     // functionality of the if() is taken over by the new initialization
+     // for i above (1 instead of 0).  The pernicious functionality caused
+     // the cd recursion bug reported in Craig's email to me of 12 Jun 1998.
+     if( !dsIsDataset(&isDataset,pDSr)
 	   ||  !isDataset
 	   ||  !dsFindEntry(&pDSc, pDSr, s)
 	   ){
 	 if(s) FREE(s);  /*fix memory leak -akio/phenix*/
 	 EML_PUSHERROR(dsError("DSL-NODE_NOT_FOUND"));
-	 //printf("elem = %s ??? \t",s);			.. ***** DEBUG *****
-	 //printf("base = %s ??? \n",pDSr->name);	.. ***** DEBUG *****
 	 return FALSE;
-       }
-       pDSr = pDSc;
      }
-     FREE(s); /*fix memory leak -akio*/
+     pDSr = pDSc;
+     if(s) FREE(s); /*fix memory leak -akio*/
    }
    node = pDSr;
    return TRUE;
