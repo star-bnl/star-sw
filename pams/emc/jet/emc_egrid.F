@@ -77,11 +77,11 @@ C---- Initialize nok counter and variable arrays
       emin=emc_egrid_par(1).chrg_eta_min
       emax=emc_egrid_par(1).chrg_eta_max
       if(emin.lt.-2.0) then
-         write(*,*)"emc_egrid: chrg_eta_min should be >-2.0 Ignored" 
+         write(*,*)'emc_egrid: chrg_eta_min should be >-2.0 Ignored' 
          emin=-2.0
       endif
            if(emin.gt.2.0) then
-         write(*,*)"emc_egrid: chrg_eta_max should be <2.0 Ignored"
+         write(*,*)'emc_egrid: chrg_eta_max should be <2.0 Ignored'
          emax=2.0
       endif
           
@@ -222,6 +222,7 @@ c*-Subtract expected energy deposit from charged track
                endif
                if(id(idet,mod,ebin,sub).eq.0) then ! No EMC hits for track,
                   nout=nout+1                      ! then give negative energy
+*
                   if(nout .gt. emc_energy_h.maxlen)then
                      write(*,*) '***EMC_EGRID:Need more memory in EMC_ENERGY'
                      EMC_EGRID=STAFCV_BAD
@@ -333,7 +334,7 @@ C*-Calculate (phi,eta) bin for Track at vertex
          endif                  ! good tracks
  100     continue
       enddo                     ! End loop over input tracks
-      
+c      
       write(*,*) 'EMC_EGRID done :',nout,' grid wrote out' 
       write(*,*) 'EMC_EGRID done : Total energy = ', etot
       emc_energy_h.nok = nout

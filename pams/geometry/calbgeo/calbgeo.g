@@ -36,17 +36,17 @@ MODULE  CALBGEO is the geometry of the Barrel EM Calorimeter in (aG)STAR     *
 *               - two type of strips in the SMD in eta direction
 *
 *      Version 2.7
-*               - modified by A. OGAWA   98.9.23
+*               - modified by A. OGAWA   98/09/23
 *	        - modification for path (year1, 2 or 3)
 *	        - modification for STAR NOTE 229 numbering scheme
 *
 *      Version 2.7
-*               - modified by K.Shestermanov 99.10.08
+*               - modified by K.Shestermanov 99/10/08
 *               - remove unused constant in structure CALG
 *               - put new cuts for SMD detector
 *
 *      Version 3.0
-*               - modified by A. OGAWA   99.5.13
+*               - modified by A. OGAWA   99/10/13
 *	        - Clean up and addition of variables
 *
 ******************************************************************************
@@ -69,7 +69,8 @@ external etsphit
 
       Real      RKB2sc/0.013/, RKB3sc/9.6E-6/
 *---- local definitions...
-      real      current_depth, current, layer_width, smd_width, tan_theta,
+      real      current_depth, current, layer_width, tan_theta,
+                smd_width, smd_width1, smd_width2, smd_width3,
                 cut_length, cut_radius, future_depth,c_dep,c_lead_dep, 
                 eta_lenght, current_csda, h_eta1, h_eta2, h_phi1, h_phi2,
                 sh_eta1,sh_eta2,sh_phi1,sh_phi2,Rmax,Hleng, Deta,

@@ -53,10 +53,9 @@ C     ===================
       real     x1, y1, z1, b, e, x0(3), delphi, r, h,  dels, s, k
       real     ptot, pt, p(3), costh, sinth, cosl, sinl, ph, th
       real   lambda
-      real     rndm
-      external rndm
-
-      
+      real     rndm,sind,cosd
+      external rndm,sind,cosd
+     
 c     error/message
       
       character msg*132

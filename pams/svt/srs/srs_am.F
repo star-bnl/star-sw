@@ -90,6 +90,7 @@ c      integer j,k,ii,jj,kk
       integer idI1
       data    idI1 /0/
       save    idI1
+      real    acosd,cosd,sind
 
 c------------------------------------------------------------------------------c
 c------------------------------------------------------------------------------c
@@ -429,13 +430,14 @@ c       real mag2,v3(3),mag3,v4(3),mag4,v5(3),mag5
         real gcoord(3),lcoord(3)
 	real covar(3),deltax,deltay,ux,uy
 	real seperation,resolution
-	integer ihit,nanode,id_active
-c       integer chip,iix,iiz
-        integer seed,iwafer
-	real drift_length,trans_length,thickness,gasdev
-	integer id_shape,jhit,old_ok,new_ok
-	integer layer,ladder,wafer,npoints(9,26,9),points(9,26,9,1000),wi,wj
-	real posit(2,15000),uncer(2,15000)
+	integer  ihit,nanode,id_active
+c       integer  chip,iix,iiz
+        integer  seed,iwafer
+	real     drift_length,trans_length,thickness,gasdev
+	integer  id_shape,jhit,old_ok,new_ok
+	integer  layer,ladder,wafer,npoints(9,26,9),points(9,26,9,1000),wi,wj
+	real     posit(2,15000),uncer(2,15000)
+        real     acosd,cosd,sind
         external ran2
 c------------------------------------------------------------------------------c
 c       samples(1,n),samples(2,n) = x and z coordinate of sample               c
@@ -1119,7 +1121,7 @@ c------------------------------------------------------------------------------c
 c------------------------------------------------------------------------------c
 c	VARIABLE DECLARATIONS AND DATA:					       c
 c------------------------------------------------------------------------------c
-c	implicit none
+	implicit none
 
 #include "PAM.inc"
 #include "srs_srspar.inc"
@@ -1128,7 +1130,9 @@ c	implicit none
       RECORD      /SRS_SRSPAR_ST/               srspar(*)
 
 c	integer i,j,k,ii,jj,kk
-	real*8 par(8),svt_charge,xmin,xmax,zmin,zmax
+c PN:::: inconsistent definition, function used as real elsewhere
+c	real*8 par(8),svt_charge,xmin,xmax,zmin,zmax
+	real   par(8),svt_charge,xmin,xmax,zmin,zmax
 	integer iix,iiz
 	real svt_integrate_2d_gauss
 c------------------------------------------------------------------------------c
@@ -1774,10 +1778,12 @@ c	integer i,j,k,ii,jj,kk
 
 
       SUBROUTINE QROMB(FUNC,p,A,B,SS)
-      REAL P(8),eps,a,b,ss,dss,func
-      integer jmax,jmaxp,k,km,j,l
+      REAL     P(8),eps,a,b,ss,dss,func
+      integer  jmax,jmaxp,k,km,j,l
       PARAMETER(EPS=1.E-4,JMAX=20,JMAXP=JMAX+1,K=5,KM=4)
-      REAL S(JMAXP),H(JMAXP)
+      REAL     S(JMAXP),H(JMAXP)
+      EXTERNAL FUNC
+
       H(1)=1.
       DO 11 J=1,JMAX
         CALL TRAPZD(FUNC,p,A,B,S(J),J)

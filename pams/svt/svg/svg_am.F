@@ -225,6 +225,7 @@ C     ===========
       integer  id_shape
       integer  n_shape
       real     r_shape(20)
+      real     cosd,sind
 
 c      namelist /svtconfig/n_layer,n_ladder,n_wafer,
 c     &     layer_drift,layer_shape,layer_radius,layer_phioff,
