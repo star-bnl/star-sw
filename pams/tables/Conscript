@@ -88,15 +88,15 @@ foreach my $stem (sort keys %idl) {
   my $idlhh    = basename($idlHH);
   (my $idlHHH = $idlHH) =~ s/$obj/$share/g;
   push @Deps, $idlHHH;
-  my $cmdCint = "cd $build; rm -f LinkDef.h;"; 
-     $cmdCint.= "echo \"#ifdef __CINT__\" > LinkDef.h;";
-     $cmdCint.= "echo \"#pragma link off all globals;\" >> LinkDef.h;";
-     $cmdCint.= "echo \"#pragma link off all classes;\" >> LinkDef.h;";
-     $cmdCint.= "echo \"#pragma link off all functions;\" >> LinkDef.h;";
-     $cmdCint.= "echo \"#pragma link C++ class St_\"$stem\"-;\" >> LinkDef.h;";
-     $cmdCint.= "echo \"#pragma link C++ class \"$stem\"_st-!;\" >> LinkDef.h;";
-     $cmdCint.= "echo \"#endif\" >> LinkDef.h;";
-     $cmdCint.= " rootcint -f $idlcintC -c $CPPPATH  $idlhh LinkDef.h;"; #print "$cmdCint\n";
+  my $cmdCint = "cd $build && rm -f LinkDef.h &&"; 
+     $cmdCint.= "echo \"#ifdef __CINT__\" > LinkDef.h&&";
+     $cmdCint.= "echo \"#pragma link off all globals;\" >> LinkDef.h&&";
+     $cmdCint.= "echo \"#pragma link off all classes;\" >> LinkDef.h&&";
+     $cmdCint.= "echo \"#pragma link off all functions;\" >> LinkDef.h&&";
+     $cmdCint.= "echo \"#pragma link C++ class St_\"$stem\"-;\" >> LinkDef.h&&";
+     $cmdCint.= "echo \"#pragma link C++ class \"$stem\"_st-!;\" >> LinkDef.h&&";
+     $cmdCint.= "echo \"#endif\" >> LinkDef.h&&";
+     $cmdCint.= " rootcint -f $idlcintC -c $CPPPATH  $idlhh LinkDef.h"; #print "$cmdCint\n";
   Command $my_env [$idlCintC, $idlCintH], @Deps,  qq ($cmdCint);
   push @sources, $idlCintC; 
 }
