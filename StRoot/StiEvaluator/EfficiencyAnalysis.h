@@ -3,6 +3,11 @@
 // MCBS
 //
 // $Log: EfficiencyAnalysis.h,v $
+// Revision 1.4  2003/11/20 22:58:10  calderon
+// Move inline functions to header file.
+// Initialize minimcevent pointer to zero in constructor of StiEvaluator.  Otherwise
+// we can't set the branch address properly and the code breaks.
+//
 // Revision 1.3  2003/09/02 17:59:47  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -179,4 +184,19 @@ private:
 
     ClassDef(EfficiencyAnalysis,1)
 };
+
+inline void EfficiencyAnalysis::setFitPtsLimit(double val) {mFitPtsLimit = val;}
+
+inline void EfficiencyAnalysis::setDcaLimit(double val) {mDcaLimit = val;}
+
+inline void EfficiencyAnalysis::setGeantId(int val) { mGeantId = val;}
+
+inline void EfficiencyAnalysis::setEtaRange(double val1, double val2) { mEtaMinimum = val1; mEtaMaximum = val2; }
+
+inline void EfficiencyAnalysis::setPullType(bool val) { mPullType = val;}
+
+inline void EfficiencyAnalysis::setFileName(char* val) { mFileName = val;}
+
+inline void EfficiencyAnalysis::setSuffix(string val) { mSuffix = val;}
+
 #endif
