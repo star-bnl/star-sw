@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.44  1999/12/31 03:39:11  ward
+// Fixed a bug in setting SeqModBreak with noise elim on.
+//
 // Revision 1.43  1999/12/07 21:31:54  ward
 // Eliminate 2 compile warnings, as requested by Lidia.
 //
@@ -538,7 +541,7 @@ int St_tpcdaq_Maker::Output() {
           }
           if(skip) continue; // Skip this sequence.
 #endif
-          if(startTimeBin<=255) timeWhere=iseq+1; else timeOff=0x100;
+          if(startTimeBin<=255) timeWhere=numberOfUnskippedSeq+1; else timeOff=0x100;
           SeqWrite(raw_seq_gen,seqR,(startTimeBin-timeOff),seqLen);
           nSeqThisPadRow++;
           pointerToAdc=listOfSequences[iseq].firstAdc;
@@ -609,7 +612,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am Rudi Guilianni. St_tpcdaq_Maker::Make().\n"); 
+  printf("I am Eliot Ness (bang bang).\n"); 
   errorCode=GetEventAndDecoder();
   if(gDAQ) { victor=victorPrelim->getTPCReader(); assert(victor); }
   printf("GetEventAndDecoder() = %d\n",errorCode);
