@@ -1,12 +1,15 @@
-
 // for each little section here, do your own "ifndef....endif"
 // the reason for that is because this file may be processed more
 // than once (by cint "preprocessor" and by C++ preprocessor)
 
-
-//#define FRANKS_HISTO
-#include "StHbtMaker/Infrastructure/franks1Histo.hh"  
-#include "StHbtMaker/Infrastructure/franks2Histo.hh"  
+//#include "StHbtMaker/Infrastructure/franks1Histo.hh"  
+//#include "StHbtMaker/Infrastructure/franks2Histo.hh"  
+#ifndef __ROOT__
+#include "franks1Histo.hh"  
+#include "franks2Histo.hh"  
+#include "franks1HistoD.hh"  
+#include "franks2HistoD.hh"  
+#endif
 
 /*------------------------------
  * Enumerations                */
@@ -43,8 +46,12 @@ typedef TH2D StHbt2DHisto;
 typedef TH3D StHbt3DHisto;
 
 #else 
-typedef franks1Histo<double> StHbt1DHisto;
-typedef franks2Histo<double> StHbt2DHisto;
+
+//typedef franks1Histo<> StHbt1DHisto;
+//typedef franks2Histo<> StHbt2DHisto;
+typedef franks1HistoD StHbt1DHisto;
+typedef franks2HistoD StHbt2DHisto;
+
 #endif // __ROOT__
 
 #endif

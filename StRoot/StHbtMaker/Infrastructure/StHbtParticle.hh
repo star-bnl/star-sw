@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.5 1999/12/11 15:58:29 lisa Exp $
+ * $Id: StHbtParticle.hh,v 1.6 2000/02/26 19:04:52 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,14 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
+ * Revision 1.6  2000/02/26 19:04:52  laue
+ * Some unnecessary includes removed.
+ * StThreeVectorD replace by StHbtThreeVector.
+ * StHbtCoulomb modified to compile without Root (ClassDef embraced into
+ *   #ifdef __ROOT__  ..... #endif)
+ * StHbtParticle now returns references (FourMomentum(),Helix(),
+ *   DecayVertexPosiion())
+ *
  * Revision 1.5  1999/12/11 15:58:29  lisa
  * Add vertex decay position datum and accessor to StHbtParticle to allow pairwise cuts on seperation of V0s
  *
@@ -46,11 +54,11 @@ public:
   StHbtParticle(const StHbtV0* const hbtV0, const double& mass);
   ~StHbtParticle();
 
-  StHbtLorentzVector FourMomentum() const;
+  const StHbtLorentzVector& FourMomentum() const;
 
   StPhysicalHelixD& Helix();
 
-  StHbtThreeVector DecayVertexPosition() const;
+  const StHbtThreeVector& DecayVertexPosition() const;
 
 private:
   StHbtLorentzVector mFourMomentum;
@@ -59,7 +67,7 @@ private:
 
 };
 
-inline StHbtLorentzVector StHbtParticle::FourMomentum() const {return mFourMomentum;}
+inline const StHbtLorentzVector& StHbtParticle::FourMomentum() const {return mFourMomentum;}
 inline StPhysicalHelixD& StHbtParticle::Helix() {return mHelix;}
-inline StHbtThreeVector StHbtParticle::DecayVertexPosition() const {return mDecayVertexV0;}
+inline const StHbtThreeVector& StHbtParticle::DecayVertexPosition() const {return mDecayVertexV0;}
 #endif

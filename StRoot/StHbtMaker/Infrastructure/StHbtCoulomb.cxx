@@ -11,7 +11,9 @@
 #include <cassert>
 #include "PhysicalConstants.h"
 
+#ifdef __ROOT__
 ClassImp(StHbtCoulomb)
+#endif
 
 StHbtCoulomb::StHbtCoulomb() {
   mFile = "/afs/rhic/star/hbt/coul/StHbtCorrectionFiles/correctionpp.dat";
@@ -95,7 +97,7 @@ void StHbtCoulomb::CreateLookupTable(const double& radius) {
     cout << "Could not read radii from file" << endl;
     assert(0);
   }
-  for (int ii=0; ii<strlen(tempstring); ii++) {
+  for (unsigned int ii=0; ii<strlen(tempstring); ii++) {
     while (tempstring[ii]==' ') ii++;
     sscanf(&tempstring[ii++],"%f",&radii[++NRadii]);
     while ( tempstring[ii]!=' ' && (ii)<strlen(tempstring) )ii++;
