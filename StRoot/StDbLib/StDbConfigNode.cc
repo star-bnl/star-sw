@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.12 2000/01/14 14:50:52 porter Exp $
+ * $Id: StDbConfigNode.cc,v 1.13 2000/01/19 20:20:04 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.13  2000/01/19 20:20:04  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.12  2000/01/14 14:50:52  porter
  * expanded use of verbose mode & fixed inconsistency in
  * StDbNodeInfo::getElementID
@@ -45,7 +50,7 @@
 #include "StDbConfigNode.hh"
 #include "StDbManager.hh"
 #include "StDbFactories.hh"
-#include "TableIter.hh"
+#include "StDbTableIter.hh"
 #include "StDbTable.h"
 #include "StDbServer.hh"
 
@@ -125,11 +130,13 @@ void
 StDbConfigNode::buildTree(){
 
  StDbServer* server=0;
- TableIter* itr=0;
+ StDbTableIter* itr=0;
  StDbTable* table=0;
 
  server = StDbManager::Instance()->findServer(mnode.dbType, mnode.dbDomain);
  if(server){
+   char* dbName = server->getDbName();
+   setDbName(dbName); delete [] dbName;
    if(!server->QueryDb(this)){
      if(StDbManager::Instance()->IsVerbose())
        cout<<"Node "<<mnode.name<<"::"<<mnode.versionKey<<" has no children or tables "<<endl;
@@ -137,7 +144,7 @@ StDbConfigNode::buildTree(){
  }
 
  if(mhasData){
-  itr = getTableIter();
+  itr = getStDbTableIter();
   while(!itr->done()){
     table = itr->next();
     server->QueryDescriptor(table);
@@ -219,6 +226,7 @@ StDbConfigNode::addTable(const char* tableName, const char* version){
     table->setVersion((char*)version);
     table->setDbType(mnode.dbType);
     table->setDbDomain(mnode.dbDomain);
+    table->setDbName(mnode.dbName);
     mTables.push_back(table);
     if(!mhasData)mhasData=true;
   } else {
@@ -244,6 +252,7 @@ StDbConfigNode::addTable(StDbNodeInfo* node){
   if(table){
      if(node->versionKey) table->setVersion(node->versionKey);
      table->setNodeInfo(node);
+     //table->setDbName(mnode.dbName);
      mTables.push_back(table);
      if(!mhasData) mhasData = true;
   } else {
@@ -368,10 +377,10 @@ StDbConfigNode::resolveNodeInfo(StDbNodeInfo*& node){
 
 ////////////////////////////////////////////////////////////////
 
-TableIter*
-StDbConfigNode::getTableIter(){
+StDbTableIter*
+StDbConfigNode::getStDbTableIter(){
 
-  TableIter* itr = new TableIter();
+  StDbTableIter* itr = new StDbTableIter();
   itr->init(this);
 
 return itr;

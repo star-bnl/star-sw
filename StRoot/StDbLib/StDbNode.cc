@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNode.cc,v 1.2 2000/01/14 14:50:52 porter Exp $
+ * $Id: StDbNode.cc,v 1.3 2000/01/19 20:20:06 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbNode.cc,v $
+ * Revision 1.3  2000/01/19 20:20:06  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.2  2000/01/14 14:50:52  porter
  * expanded use of verbose mode & fixed inconsistency in
  * StDbNodeInfo::getElementID
@@ -36,6 +41,7 @@ mnode.mstrCpy(mnode.versionKey,node->versionKey);
 mnode.setNodeInfo(node);
 misConfigured = true;
 misNode = true;
+mcanRollBack = false;
 
 }
 
@@ -45,7 +51,7 @@ mnode.mstrCpy(mnode.name,name);
 mnode.mstrCpy(mnode.versionKey,versionKey);
 misConfigured = false;
 misNode = false;
-
+mcanRollBack = false;
 
 }
 
@@ -56,6 +62,7 @@ mnode.versionKey = node.getVersion();
 node.getNodeInfo(&mnode);
 misConfigured = node.IsConfigured();
 misNode = node.IsNode();
+mcanRollBack = false;
 
 }
 

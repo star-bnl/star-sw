@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.8 2000/01/10 20:37:55 porter Exp $
+ * $Id: StDbTable.h,v 1.9 2000/01/19 20:20:07 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.9  2000/01/19 20:20:07  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.8  2000/01/10 20:37:55  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -49,16 +54,23 @@ class StDbBuffer;
 class StDbTable : public StDbNode {
 
 protected:
-
+//! validity interval
 StDbTime mbeginTime;
 StDbTime mendTime;
+
 int      mschemaID;
 int*     melementID;
-int      mdataID;  //! the data ID is only for use in transaction roll backs 
 
+//! these are for rolling back stores
+int*     mdataIDs;
+int      mdataRows;
+int      mMaxRows;
+
+//! c-struct descriptor information                      
 bool     mhasDescriptor;//!
 StTableDescriptorI* mdescriptor;//!
 
+//! data & num of rows
 char*    mdata;//!
 int      mrows;
 int      mrowNumber;
@@ -106,8 +118,9 @@ public:
   virtual int          getSchemaID() const ; 
   virtual void         setSchemaID(int id) ; 
 
-  virtual int          getDataID() const;
-  virtual void         setDataID(int id); 
+  virtual void         addWrittenRow(int dataID);
+  virtual int*         getWrittenRows(int* numrows);
+  virtual void         commitData();
 
   // c-struct descriptort & schema 
   // set by 1st call to db
@@ -196,11 +209,20 @@ int StDbTable::getSchemaID() const { return mschemaID; }
 inline 
 void StDbTable::setSchemaID(int id) {mschemaID = id; }
 
-inline 
-int StDbTable::getDataID() const { return mdataID; }
+inline
+int* StDbTable::getWrittenRows(int* nrows){
+*nrows=mdataRows;
+return mdataIDs;
+}
 
-inline 
-void StDbTable::setDataID(int id) {mdataID = id; }
+inline
+void StDbTable::commitData() { 
+mdataRows = 0;
+mMaxRows  = 500;
+if(mdataIDs) delete [] mdataIDs;
+mdataIDs = 0;
+
+}
 
 inline
 bool StDbTable::hasDescriptor() const { return mhasDescriptor; }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TableIter.hh,v 1.6 2000/01/10 20:37:55 porter Exp $
+ * $Id: StDbTableIter.hh,v 1.1 2000/01/19 20:20:07 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -9,7 +9,12 @@
  *
  ***************************************************************************
  *
- * $Log: TableIter.hh,v $
+ * $Log: StDbTableIter.hh,v $
+ * Revision 1.1  2000/01/19 20:20:07  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.6  2000/01/10 20:37:55  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -37,16 +42,16 @@ class ListIter;
 
 #include "StDbTable.h"
 
-class TableIter {
+class StDbTableIter {
 
   ListIter itr;
   StDbConfigNode* mnode;
 
 public:
 
-  TableIter() : mnode(0){};
-  TableIter(StDbConfigNode* node){ init(node);};
-  ~TableIter(){};
+  StDbTableIter() : mnode(0){};
+  StDbTableIter(StDbConfigNode* node){ init(node);};
+  ~StDbTableIter(){};
 
   void init(StDbConfigNode* node);
 
@@ -57,7 +62,7 @@ public:
   // will also want a method nextAndRelease() which does the
   // same as next() but removes the table from the StDbConfigNode
 
-  //ClassDef(TableIter,0)
+  //ClassDef(StDbTableIter,0)
 
 };
 

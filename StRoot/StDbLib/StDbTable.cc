@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.11 2000/01/10 20:37:54 porter Exp $
+ * $Id: StDbTable.cc,v 1.12 2000/01/19 20:20:07 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.12  2000/01/19 20:20:07  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.11  2000/01/10 20:37:54  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -35,6 +40,11 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.12  2000/01/19 20:20:07  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.11  2000/01/10 20:37:54  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -65,6 +75,7 @@
 #include "StDbBuffer.h"
 #include <string.h>
 #include <iostream.h>
+#include <strstream.h>
 #include <malloc.h>
 
 
@@ -76,7 +87,9 @@ StDbTable::StDbTable(const char* tableName): StDbNode(tableName,"default"), mhas
  mrows=0;
  mrowNumber=0;
  melementID = 0;
-
+ mdataIDs = 0;
+ mdataRows = 0;
+ mMaxRows = 500;
 }
 
 ///////////////////////////////////////////////////////////////
@@ -87,6 +100,10 @@ mschemaID=schemaID;
 mrows=0;
 mrowNumber=0;
 melementID = 0;
+ mdataIDs = 0;
+ mdataRows = 0;
+ mMaxRows = 500;
+
 
 }
 
@@ -103,6 +120,9 @@ StDbNodeInfo mnode;
  mrows = table.GetNRows();
  mhasDescriptor=table.hasDescriptor();
  mdescriptor=table.getDescriptorCpy();
+ mdataIDs = 0;
+ mdataRows = 0;
+ mMaxRows = 500;
 
  mbeginTime.setDateTime(table.getBeginDateTime());
  mbeginTime.setUnixTime(table.getBeginTime());
@@ -258,27 +278,50 @@ return retVal;
 void
 StDbTable::setElementID(int* elements, int nrows) { 
 
- mrows = nrows;
- // if(mrows==1){
- //   melementID = new int[1];
- //   *(melementID) = 0;
- // } else {
+   mrows = nrows;
+
+   if(mnode.elementID) delete [] mnode.elementID;
+   mnode.elementID = new char[4*nrows];
+   ostrstream os(mnode.elementID,4*nrows);
    melementID = new int[nrows];
-   for(int i=0;i<nrows;i++)melementID[i] = elements[i];
-   // }
+   memcpy(melementID,elements,nrows*sizeof(int));
 
+   for(int i=0;i<nrows-1;i++){
+     os<<elements[i]<<",";
+   }
+   os<<elements[nrows-1]<<ends;
 }
-
 
 //////////////////////////////////////////////////////////////////////
 
+void
+StDbTable::addWrittenRow(int dataID){
+
+  if(mdataRows==mMaxRows){
+    int newMax = 2*mMaxRows;
+    int* tmp= new int[newMax];
+    memcpy(tmp,mdataIDs,mMaxRows*(sizeof(int)));
+    delete [] mdataIDs;
+    mdataIDs = tmp;
+    mMaxRows = newMax;
+  } else if( mdataRows == 0){
+   mdataIDs = new int[mMaxRows];
+   mcanRollBack = true;
+  }
+
+  mdataIDs[mdataRows] = dataID;
+  mdataRows++;
+
+}
+  
+//////////////////////////////////////////////////////////////////////
 
 void
 StDbTable::StreamAccessor(typeAcceptor* accept, bool isReading){
 
    int len = 1;
 
-   accept->pass("schemaID",mschemaID,len);
+   accept->pass((char*)"schemaID",mschemaID,len);
 
    if(isReading){
 
@@ -296,9 +339,9 @@ StDbTable::StreamAccessor(typeAcceptor* accept, bool isReading){
 
    }
 
-   accept->pass("beginTime",mbeginTime.mdateTime,len);
-   accept->pass("version",mnode.versionKey,len);
-   accept->pass("elementID",melementID, mrows);
+   accept->pass((char*)"beginTime",mbeginTime.mdateTime,len);
+   accept->pass((char*)"version",mnode.versionKey,len);
+   accept->pass((char*)"elementID",melementID, mrows);
  
 }
 

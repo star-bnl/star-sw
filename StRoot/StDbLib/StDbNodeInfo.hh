@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNodeInfo.hh,v 1.1 2000/01/10 20:37:54 porter Exp $
+ * $Id: StDbNodeInfo.hh,v 1.2 2000/01/19 20:20:06 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbNodeInfo.hh,v $
+ * Revision 1.2  2000/01/19 20:20:06  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.1  2000/01/10 20:37:54  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -47,6 +52,7 @@ public:
   char* mstrDup(const char* s2) ;  // strdup isn't ANSI
   void  mstrCpy(char*& s1, const char* s2) ;
   int*  getElementID(const char* elementID, int& numRows) ;
+  char* elementIDString(); 
 
 
 char*      name;

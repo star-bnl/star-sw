@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TableIter.cc,v 1.7 2000/01/10 20:37:55 porter Exp $
+ * $Id: StDbTableIter.cc,v 1.1 2000/01/19 20:20:07 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -9,7 +9,12 @@
  *
  ***************************************************************************
  *
- * $Log: TableIter.cc,v $
+ * $Log: StDbTableIter.cc,v $
+ * Revision 1.1  2000/01/19 20:20:07  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.7  2000/01/10 20:37:55  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -25,21 +30,21 @@
  * each header and src file
  *
  **************************************************************************/
-#include "TableIter.hh"
+#include "StDbTableIter.hh"
 #include "StDbTable.h"
 
 
 ////////////////////////////////////////////////////////
 
 void
-TableIter::init(StDbConfigNode* node){
+StDbTableIter::init(StDbConfigNode* node){
 mnode=node; itr = mnode->mTables.begin();
 }
 
 ////////////////////////////////////////////////////////
 
 StDbTable*
-TableIter::next(){
+StDbTableIter::next(){
 StDbTable* ret = 0;
 if(!done()) { 
  ret = *itr;
@@ -55,14 +60,14 @@ return ret;
 
 
 StDbTable*
-TableIter::operator++(){
+StDbTableIter::operator++(){
 return next();
 }
 
 ////////////////////////////////////////////////////////
 
 bool
-TableIter::done(){
+StDbTableIter::done(){
 bool retVal = true;
 if(itr != mnode->mTables.end())retVal = false;
 return retVal;

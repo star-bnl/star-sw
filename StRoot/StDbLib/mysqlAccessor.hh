@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.hh,v 1.6 2000/01/10 20:37:55 porter Exp $
+ * $Id: mysqlAccessor.hh,v 1.7 2000/01/19 20:20:08 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.hh,v $
+ * Revision 1.7  2000/01/19 20:20:08  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.6  2000/01/10 20:37:55  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -37,6 +42,7 @@
 #ifndef mysqlAccessor_HH
 #define mysqlAccessor_HH
 
+#include "StDbDefs.hh"
 #include "tableQuery.hh" // Interface for StarDb Queries
 
 #include "StDbTable.h"
@@ -75,6 +81,9 @@ StDbBuffer buff;
   virtual int WriteDb(StDbTable* table, unsigned int storeTime);
   virtual int WriteDb(StDbConfigNode* node, int currentID);
   virtual int QueryDb(StDbConfigNode* node);
+  virtual bool rollBack(StDbNode* node);
+  virtual bool rollBack(StDbTable* table);
+  
   virtual int QueryDescriptor(StDbTable* table);
 
   virtual StDbBuffer* getBuffer(){return (StDbBuffer*) &buff;}; 
@@ -88,11 +97,18 @@ StDbBuffer buff;
 
 protected:
 
+  // low-level delete for roll-back & duplicate entries
   virtual void  deleteRows(const char* tableName, int* rowID, int nrows);
+  // check node attributes
   virtual bool  queryNodeInfo(StDbNodeInfo* node);
+  // read node attributes
   virtual bool  readNodeInfo(StDbNodeInfo* node);
+  // store node attributes
   virtual bool  storeNodeInfo(StDbNodeInfo* node);
+  // combine query & read of node attributes
   virtual bool  prepareNode(StDbNode* dbNode, StDbNodeInfo* node);
+  // check if a data-instance exists in database
+  virtual bool  hasInstance(StDbNodeInfo* node);
 
   virtual char* getEndDateTime() {return getDateTime(theEndTime);};
   virtual unsigned int getEndTime(){return theEndTime; };
