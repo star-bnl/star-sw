@@ -2,12 +2,14 @@
 // \author Jan Balewski
 #ifndef EEsoloPi0_h
 #define EEsoloPi0_h
-/******************************************************
- * $Id: EEsoloPi0.h,v 1.6 2004/09/03 04:50:52 balewski Exp $
- ******************************************************
+/*********************************************************************
+ * $Id: EEsoloPi0.h,v 1.4 2004/05/07 21:38:38 balewski Exp $
+ *********************************************************************
  * Descripion:
  *  finds pi0 based on EEMC tower response
- ******************************************************/
+ *********************************************************************/
+
+#include "TObject.h"
 
 class EEmcGeomSimple;
 class TVector3;
@@ -20,26 +22,22 @@ class EEmcDbItem;
 
 #include "StEEmcUtil/EEfeeRaw/EEdims.h"
 
-
-/// the trick to switch between two DB readers
-#ifdef StRootFREE
+#ifdef NO_ROOT4STAR
   class EEmcDb;
-  typedef EEmcDb EEDB;
+  typedef EEmcDb MYDB;
 #else
   class StEEmcDbMaker;
-  typedef StEEmcDbMaker EEDB;
+  typedef StEEmcDbMaker MYDB;
 #endif
 
 
-class EEsoloPi0 {
+class EEsoloPi0 :public TObject{
  protected:
   enum {MxTwEta=12, MxTwPhi=60, MxTw=12*60};
-  enum {mxTile=4,kT=0,kP=1, kQ=2,kR=3, kU=0, kV=1}; // 0=tower, 1=pres1, 2=pres2, 3=post
- 
+
  private:
   EEmcGeomSimple *geom;
  protected:
-  int  nInpEve;
   float seedEnergy; // lower limit in search for seeds
   float shapeLimit; // cut on eHTower/eCluster 
   float mLo, mHi; // define mass of meson
@@ -54,52 +52,48 @@ class EEsoloPi0 {
   struct EEsoloMipA{int key,id; float e;};
   struct Cluster {int k1; float eH,eC,fphi,feta; } clust[MxTw] ,oldClust;
 
-
   float scaleFactor; // converts energy from eeTree --> GeV, old
 
   TH1F *hA[32], *hR[64], *hM[64]; // all, real , mixed eve
   EEsoloMipA soloMip[MxTw]; // stores all towers
 
-  int dbMapped;
+  const  EEmcDbItem  *soloMipDb[MxTw]; // stores DB pointers for all towers
 
   void clear();
   void tagCluster(int k0,int d=1);
   void sumTwClusterEnergy(int ic,int d=1);
   float sumPatchEnergy(int k0,int d,EEsoloMipA *soloMipX, float *maxVal=0);
   int findInvM(Cluster *, Cluster *, TH1F **);
-
-  EEDB *eeDb; /// DB access point
-  TObjArray  *HList; /// output histo access point
-
+  MYDB *db;
  public:
   
   EEsoloPi0();
   virtual ~EEsoloPi0();
   void print();
   void finish();
+#ifdef NO_ROOT4STAR
+  int getTowerAdc(EEfeeRawEvent  *feeEve, EEstarTrig *eTrig=0,EEmcEventHeader *eHead=0, int n1=0, int n2=240);
+#endif
   int findTowerClust();
   void findTowerPi0();
-  void init( );
-  void initRun(int runID);// must be called after DB timestamp is known
-
+  void init( MYDB *, TObjArray * L=0);
   void set(float a, float b,  float d, float m1=0.11, float m2=0.16 )
     {scaleFactor =a; seedEnergy=b;  shapeLimit=d;  mLo=m1; mHi=m2; }
+
  
   ClassDef(EEsoloPi0,1) 
 };
 #endif
 
+/* fix in St-code
+1) clear soloMipDb[MxTw] in InitRun
+
+*/
  
 
 
 /*****************************************************************
  * $Log: EEsoloPi0.h,v $
- * Revision 1.6  2004/09/03 04:50:52  balewski
- * big clenup
- *
- * Revision 1.5  2004/08/26 04:39:40  balewski
- * towards pi0
- *
  * Revision 1.4  2004/05/07 21:38:38  balewski
  * gamma finder with SMD
  *

@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.13 2004/09/03 14:24:15 jeromel Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.14 2004/09/13 15:41:31 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -103,7 +103,7 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
   gMessMgr->Info() << "ppLMV5:: mBfield/Tesla=" << mBfield << " b2=" << b[2] << endm;
  
   setFlagBase(); // what is that ? JB
-  changeCuts();
+  //changeCuts();
 
   gMessMgr->Message("","I") << "ppLMV5::cuts"
 			    <<"\n CtbThres_ch (real)="<<mCtbThres_ch
@@ -577,7 +577,7 @@ void  StppLMVVertexFinder::changeCuts(){
   StGenericVertexMaker *mk=(StGenericVertexMaker *)mDumMaker->GetMaker("GenericVertex");
   int mode2=mk->GetMode2();
 
-  gMessMgr->Info()<< "ccc m_mode2=%d" << mode2 << endm;
+  gMessMgr->Info()<< "ccc m_mode2=" << mode2 << endm;
   switch(mode2) {
   case 'a': mMaxTrkDcaRxy=1.5; break;
   case 'b': mMaxTrkDcaRxy=2.5; break;
@@ -598,6 +598,9 @@ void  StppLMVVertexFinder::changeCuts(){
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.14  2004/09/13 15:41:31  balewski
+ * fix bug in ppLMV4/5 switch
+ *
  * Revision 1.13  2004/09/03 14:24:15  jeromel
  * Fixed inverted comment
  *

@@ -22,7 +22,7 @@
  * is enforced.
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.8 2004/09/03 00:09:08 jeromel Exp $
+ * $Id: StGenericVertexFinder.h,v 1.9 2004/09/13 15:41:30 balewski Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -47,7 +47,7 @@ class StGenericVertexFinder {
 
 
   // General (default)
-  virtual void           SetMode(Int_t mode=0 ) {mMode = 0;}
+  virtual void           SetMode(Int_t mode=0 ) {mMode = mode;}
   virtual void           Init(){ /* noop */;}
 
   virtual StThreeVectorD result() const {return mFitResult;}  // result of fit
@@ -99,6 +99,9 @@ class StGenericVertexFinder {
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.9  2004/09/13 15:41:30  balewski
+// fix bug in ppLMV4/5 switch
+//
 // Revision 1.8  2004/09/03 00:09:08  jeromel
 // Modified code to Implement Init() and SetMode() and allow passing a switch
 // to chose the vertex finder from within the same code implementation. Was
