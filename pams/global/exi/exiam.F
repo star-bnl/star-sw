@@ -118,7 +118,7 @@ c*** pgj: loop to find main vertex and maximum key value
 
       if( vertex_h.nok .gt. 0 ) then
         do i= 1, vertex_h.nok
-          if( vertex(i).vtx_id .eq. 1 ) then
+          if( vertex(i).vtx_id .eq. 1 .and. vertex(i).iflag .eq. 1) then
             vmain(1) = vertex(i).x
             vmain(2) = vertex(i).y
             vmain(3) = vertex(i).z
