@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.15 2003/09/02 17:58:46 perev Exp $
+// $Id: StPeCEvent.cxx,v 1.16 2003/11/25 01:54:26 meissner Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.16  2003/11/25 01:54:26  meissner
+// correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
+//
 // Revision 1.15  2003/09/02 17:58:46  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -106,15 +109,16 @@ void  StPeCEvent::clear ( ) {
    tracks->Clear();
 }
 
+// The counting of FTPC tracks is not yet debugged
 Int_t StPeCEvent::fill ( StEvent *event ) {
-
+  
   eventP = event ;
 
   // Set Run and Event Number
   eventN = event->id() ;
   runN   = event->runId(); 
-  cout << "Event Run ID: " << runN << endl;
-  cout << "Event ID: " << eventN << endl;
+  cout << "StEvent Run ID: " << runN << endl;
+  cout << "StEvent ID: " << eventN << endl;
 
   bField = event->summary()->magneticField();
 
@@ -125,6 +129,9 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
   Int_t   SumQ=0; 
   Float_t SumPx=0.0; 
   Float_t SumPy=0.0;  
+  // separate TPC and FTPC 
+  nPrimaryTPC=0;
+  nPrimaryFTPC=0;
 
   // Get the track nodes
   StSPtrVecTrackNode& exnode = event->trackNodes();
@@ -134,10 +141,10 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
   for( Int_t in=0; in<nnode; in++ ) {
 	UInt_t nprim = exnode[in]->entries(primary);
         UInt_t nglob = exnode[in]->entries(global);
-
+	
 	if( nprim>1 || nglob>1 ){
 	   cout<<"There could be a problem! nprim= "<<nprim<<"  nglob= "<<nglob<<endl;
-
+	   
     }
     if( nprim==1 ){
       StTrack *tp = exnode[in]->track(primary);
@@ -153,6 +160,11 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
       // need to dereference the Array pointer first 
       //new((*tracks)[nTracks++]) StPeCTrack(1,tp) ;
       
+      if(fabs(tp->geometry()->momentum().pseudoRapidity())<2.0) {
+	nPrimaryTPC++;
+      } else {
+	nPrimaryFTPC++;
+      }      
     }
     if( nglob==1 ){
       StTrack *tnp = exnode[in]->track(global);
@@ -164,13 +176,27 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
 //    new((*tracks)[nTracks++]) StPeCTrack(0,tnp) ;
     }
   }
+  // nGlobals not a good UPC criteria any more 
   if ( NGlobal > StPeCnMaxTracks ) return 1 ; 
-
+  cout << "Number of primary  TPC  tracks: " << nPrimaryTPC << " FTPC tracks " << nPrimaryFTPC;    
+  
+  if (( nPrimaryTPC > 0 ||  nPrimaryFTPC>0 ) &&   // at least one track in either FTPC or TPC
+      ( nPrimaryTPC < StPeCnMaxTracks && nPrimaryFTPC< StPeCnMaxTracks ) &&( nPrimaryFTPC+nPrimaryTPC>=2 ) ) {
+    cout << " analyze event !" << endl;
+  } else {
+    cout << " reject  event !" << endl;
+    return 1; 
+  } 
+  
   nPrim             = NPrimaries ;
   nTot              = NGlobal  ;
   qTot = SumQ ;
   pt   = ::sqrt( SumPx*SumPx + SumPy*SumPy );
+  
+  nGlobalTracks=  NPrimaries;
+  nPrimaryTracks= NGlobal;
 
+  
   //cout << "Number of Primary Vertices " << event->numberOfPrimaryVertices() << endl;
   StPrimaryVertex* vtx = event->primaryVertex();
   if(vtx) {
@@ -181,7 +207,7 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
     rVertex = ::sqrt(xVertex*xVertex + yVertex*yVertex);
     
     if ( infoLevel > 1 ) {
-       cout << "StPeCEvent : primary vertex x:" << xVertex << " y: "  <<  yVertex  << " z: " << zVertex << " r: " << rVertex <<endl;
+      cout << "StPeCEvent : primary vertex x:" << xVertex << " y: "  <<  yVertex  << " z: " << zVertex << " r: " << rVertex <<endl;
     }
   }   else {
     xVertex = -9999. ;
@@ -268,93 +294,129 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
   return 0 ;
 }
 
+//===========================================================================================
 Int_t StPeCEvent::fill(StMuDst *mudst) {
    //cout << "Entering StPeCEvent::fill(StMuDst *mudst)" << endl;
-   Int_t nGlobals = 0, SumQ = 0; 
-   Float_t SumPx = 0.0, SumPy = 0.0;  
-   float px, py;
-   TClonesArray* muTracks = 0;
-   StMuEvent* event = 0;
-   StMuTrack *tp = 0;
-
+  // Int_t nGlobals = 0, SumQ = 0; 
+  // Float_t SumPx = 0.0, SumPy = 0.0;  
+  // float px, py;
+  TClonesArray* muTracks = 0;
+  StMuEvent* event = 0;
+  StMuTrack *tp = 0;
+  
    //Save the event reference
    muDst = mudst;
    event = muDst->event();
 
    //Set Run and Event Number
    eventN = event->eventInfo().id();
-
+   
    runN = event->eventInfo().runId(); 
-   cout << "Event Run ID: " << runN << endl;
-   cout << "Event ID: " << eventN << endl;
-
+   cout << "StMuEvent Run ID: " << runN << endl;
+   cout << "StMuEvent ID: " << eventN << endl;
+   
    bField = event->eventSummary().magneticField();
-
-   if ( event->eventSummary().numberOfVertices() ) {
-      StThreeVectorF vtx = event->primaryVertexPosition();
-      xVertex = vtx.x();
-      yVertex = vtx.y();
-      zVertex = vtx.z();
-      rVertex = ::sqrt(xVertex*xVertex + yVertex*yVertex);
+   
+   // number of vertices not a good number anymore ! FLK 07/03
+   // if ( event->eventSummary().numberOfVertices() ) {
+   
+   StThreeVectorF vtx = event->primaryVertexPosition();
+   // vertex is set to 0,0,0 of no prim vertex found  FLK 07/03
+   if(vtx.x() !=0 && vtx.y()!=0 && vtx.z()!=0) {
+     xVertex = vtx.x();
+     yVertex = vtx.y();
+     zVertex = vtx.z();
+     rVertex = ::sqrt(xVertex*xVertex + yVertex*yVertex);
    }
    else {
-      xVertex = -9999.;
-      yVertex = -9999.;
-      zVertex = -9999.;
-      rVertex = -9999.;
+     xVertex = -9999.;
+     yVertex = -9999.;
+     zVertex = -9999.;
+     rVertex = -9999.;
    }
- 
+   
+   // directly from StEvent Summary 
+   nGlobalTracks= event->eventSummary().numberOfGoodTracks();
+   nPrimaryTracks= event->eventSummary().numberOfGoodPrimaryTracks();
+   nPrimaryTPC=0;
+   nPrimaryFTPC=0;
+   
    //Retrieve the primary tracks
    muTracks = muDst->primaryTracks();
-   nPrim    = muTracks->GetLast() + 1;
-
+   // nPrim    = muTracks->GetLast() + 1; // this ignores quality check FLK
+   // backwards compatibility, FLK
+   nPrim    = nPrimaryTracks; 
+   nTot     = nGlobalTracks;
+   
    for(int i = 0; i <= muTracks->GetLast(); i++) {
-      tp = (StMuTrack*)muTracks->UncheckedAt(i);
-
-      px = tp->momentum().x();
-      py = tp->momentum().y();
-
-      SumPx += px;
-      SumPy += py;
-      SumQ += tp->charge();
+     tp = (StMuTrack*)muTracks->UncheckedAt(i);
+     if (! (tp->flag()>0)) continue; // Quality check on the track
+     
+     // in 2003 this doesnt tell much anymore with the FTPC tracks....FLK
+     // cout << "id " << i << " mom.x " <<  tp->momentum().x() << " mom.y "<< tp->momentum().y() << endl;
+     //    px = tp->momentum().x();
+     //    py = tp->momentum().y();
+     //    SumPx += px;
+     //    SumPy += py;
+     //    SumQ += tp->charge();
+     
+     if(fabs(tp->eta())<2.0) {
+       nPrimaryTPC++;
+     } else {
+       nPrimaryFTPC++;
+     }
+     
+     // do not fill track list for now to save space 
+     // nTracks should be the same as nPrim afterwards
+     // new((*tracks)[nTracks++])StPeCTrack(0, tp);
    }
 
-
-   //Retrieve the global tracks
-   muTracks = muDst->globalTracks();
-   for(int i = 0; i <= muTracks->GetLast(); i++) {
-      tp = (StMuTrack*)muTracks->UncheckedAt(i);
-      if ( tp->nHits() < 11 ) continue ;
-// No track structure: trying to make trees smaller
-//    new((*tracks)[i])StPeCTrack(0, tp);
-      nGlobals++;
-   }
-
-   nTot = nGlobals ;
-   qTot = SumQ;
-   pt = ::sqrt(SumPx * SumPx + SumPy * SumPy );
-    
-   if ( nGlobals > StPeCnMaxTracks ) return 1 ; 
-
-
+   // We do not fill track list, so can skip this loop FLK 11/03
+   //    //Retrieve the global tracks
+   //    muTracks = muDst->globalTracks();
+   //    for(int i = 0; i <= muTracks->GetLast(); i++) {
+   //       tp = (StMuTrack*)muTracks->UncheckedAt(i);
+   //       if ( tp->nHits() < 11 ) continue ;
+   // // No track structure: trying to make trees smaller
+   // //    new((*tracks)[i])StPeCTrack(0, tp);
+   //       nGlobals++;
+   //    }
+   // nTot = nGlobals ;  get this from above 
+   // qTot = SumQ;
+   // pt = sqrt(SumPx * SumPx + SumPy * SumPy );
+   
+   // nGlobals not a goof UPC criteria any more 
+   // if ( nGlobals > StPeCnMaxTracks ) return 1 ; 
+   cout << "Number of primary  TPC  tracks: " << nPrimaryTPC << " FTPC tracks " << nPrimaryFTPC;    
+   
+   if (( nPrimaryTPC > 0 ||  nPrimaryFTPC>0 ) &&   // at least one track in either FTPC or TPC
+       ( nPrimaryTPC < StPeCnMaxTracks && nPrimaryFTPC< StPeCnMaxTracks )&& (nPrimaryFTPC+nPrimaryTPC>=2)) {
+     cout << " analyze event !" << endl;
+   } else {
+     cout << " reject  event !" << endl;
+     return 1; 
+   } 
+       
    nPPairs = 0 ;
    StPeCPair* lPair ; 
    StMuTrack *trk1, *trk2 ;
    muTracks = muDst->primaryTracks();
-   for(int i1 = 0; i1 < nPrim; i1++) {
-      trk1 = (StMuTrack*)muTracks->UncheckedAt(i1);
-      for(int i2 = i1+1; i2 < nPrim; i2++) {
-	 trk2 = (StMuTrack*)muTracks->UncheckedAt(i2);
-
-	 // DANGER 
-	 if (! (trk1->flag()>0)) continue;
-	 if (! (trk2->flag()>0)) continue;
-	 // --------
-	 // get pointer to memebr ?
-	 // TClonesArray &ppairs = *pPairs;
-	 lPair = new((*pPairs)[nPPairs++]) StPeCPair(trk1,trk2,1,event) ;
+   for(int i1 = 0; i1  <= muTracks->GetLast(); i1++) {
+     trk1 = (StMuTrack*)muTracks->UncheckedAt(i1);
+     for(int i2 = i1+1; i2  <= muTracks->GetLast(); i2++) {
+       trk2 = (StMuTrack*)muTracks->UncheckedAt(i2);
+       // cout << " id1 " << i1 << " p_x " << trk1->momentum().x() << endl;
+       // cout << " id2 " << i2 << " p_x " << trk2->momentum().x() << endl;
+       
+       // DANGER 
+       if (! (trk1->flag()>0)) continue;
+       if (! (trk2->flag()>0)) continue;
+       // --------
+       // get pointer to memebr ?
+       // TClonesArray &ppairs = *pPairs;
+       lPair = new((*pPairs)[nPPairs++]) StPeCPair(trk1,trk2,1,event) ;
 #ifdef PECPRINT
-	 cout << "StPeCEvent : Primary Pair : " 
+       cout << "StPeCEvent : Primary Pair : " 
 	    << "  sumQ = " << lPair->getSumCharge()
 	    << "  sumPt = " << lPair->getSumPt()
 	    << "  mInv = " << lPair->getMInv(pion)
@@ -363,7 +425,7 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
 #endif	   
       }
    }
-
+   
 #ifdef SPAIRS
    // HERE  flag must  be tested. 
    nSPairs = 0 ;
@@ -371,25 +433,25 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
    muTracks = muDst->globalTracks();
 
    for(int i1 = 0; i1 < nTot; i1++) {
-      muTrk1 = (StMuTrack*)muTracks->UncheckedAt(i1);
-      for(int i2 = i1+1; i2 < nTot; i2++) {
-	 muTrk2 = (StMuTrack*)muTracks->UncheckedAt(i2);
+     muTrk1 = (StMuTrack*)muTracks->UncheckedAt(i1);
+     for(int i2 = i1+1; i2 < nTot; i2++) {
+       muTrk2 = (StMuTrack*)muTracks->UncheckedAt(i2);
 	 // DANGER 
-	 if (! (muTrk1->flag()>0)) continue;
-	 if (! (muTrk2->flag()>0)) continue;
-	 // --------
-	 // get pointer to memebr ?
-	 // TClonesArray &ppairs = *pPairs;
-	 lPair = new((*sPairs)[nSPairs++]) StPeCPair(muTrk1,muTrk2,0,event) ;
+       if (! (muTrk1->flag()>0)) continue;
+       if (! (muTrk2->flag()>0)) continue;
+       // --------
+       // get pointer to memebr ?
+       // TClonesArray &ppairs = *pPairs;
+       lPair = new((*sPairs)[nSPairs++]) StPeCPair(muTrk1,muTrk2,0,event) ;
 #ifdef PECPRINT
-	 cout << "StPeCEvent : Primary Pair : " 
+       cout << "StPeCEvent : Primary Pair : " 
 	    << "  sumQ = " << lPair->getSumCharge()
 	    << "  sumPt = " << lPair->getSumPt()
 	    << "  mInv = " << lPair->getMInv(pion)
 	    << "  opening angle = " << lPair->getOpeningAngle()
 	    << "  cos(theta*) = " << lPair->getCosThetaStar(pion) << endl;
 #endif	   
-      }
+     }
    }
 #endif
    //cout << "Exiting StPeCEvent::fill(StMuDst *mudst)" << endl;

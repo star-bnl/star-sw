@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.24 2002/12/19 18:09:53 yepes Exp $
+// $Id: StPeCMaker.cxx,v 1.25 2003/11/25 01:54:30 meissner Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.25  2003/11/25 01:54:30  meissner
+// correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
+//
 // Revision 1.24  2002/12/19 18:09:53  yepes
 // MuDST input added
 //
@@ -110,7 +113,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.24 2002/12/19 18:09:53 yepes Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.25 2003/11/25 01:54:30 meissner Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -204,7 +207,7 @@ Int_t StPeCMaker::Make()
       tw = trig.triggerWord();
 
       trigger->process(muDst);
-
+      
    }
    else
    {
@@ -223,63 +226,62 @@ Int_t StPeCMaker::Make()
       tw = event->l0Trigger()->triggerWord();
    }
 
-
+   
    //Fill geant simulations
    TDataSet* geantBranch = GetInputDS("geantBranch");
    if (geantBranch)
    {
-      geant->fill(geantBranch);
+     geant->fill(geantBranch);
    }
-
+   
    //  Check number of tracks
-
-
-   if(NTracks > StPeCnMaxTracks) {
-      cout << "Number of tracks: " << NTracks << endl;
-      cout << "Not a peripheral event (NTracks > 15)" << endl;
-//    flag = kStErr;
-   }
-   if(NTracks <= 1) {
-      cout << "Event has no tracks" << endl;
-      flag = kStErr;
-   }
-
-   if (tw == 0x3001 || tw==0x3002 || tw == 0x3011 || tw == 0x1001)
-      cout << "UPC trigger"  << endl;
+   // FTPC tracks make this more complex to separate peripheral and nonperipheral events, 
+   // Use the test on return 'ok' of the 'fill' function to decide if event is ok 
+   // flk 07/17/03
+   
+   //    if(NTracks > StPeCnMaxTracks) {
+   cout << "Number of tracks: " << NTracks << endl;
+   //       cout << "Not a peripheral event (NTracks > 15)" << endl;
+   //       //flag = kStErr;
+   //    }
+   //    if(NTracks <= 1) {
+   //       cout << "Event has no tracks" << endl;
+   //       // Trigger studies, keep empty events 
+   //       //flag = kStErr;
+   //    }
 
    //Fill StPeCEvent
    if ( geantBranch || (flag == kStOk) ) {
-
+     
       int ok = 0 ;
       if (event) ok = pevent->fill(event);
       else       ok = pevent->fill(muDst);
-
+      
       if ( !ok ) {
-	 uDstTree->Fill();
+	uDstTree->Fill();
       }
-
+      
       //Select only 4 prong candidates
       //NOTE: This does not appear to do anything because the return code isn't used
       if (event)
-      {
-	 if (filter == 1)
+	{
+	  if (filter == 1)
 	    flag = Cuts(event, pevent);
-	 else if (filter == 2)
+	  else if (filter == 2)
 	    flag = Cuts4Prong(event, pevent);
-      }
+	}
+   } else {
+     cout << "Do Not fill Event to Tree!" << endl;
    }
-   else
-      cout << "Do Not fill Event to Tree!" << endl;
-
-
+   
    //Cleanup
    pevent->clear();
    geant->clear();
    trigger->clear();
 
    cout << "Exiting StPeCMaker::Make()" << endl;
-
-
+   
+   
    return kStOk;
 }
 

@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrack.h,v 1.4 2002/12/19 18:09:53 yepes Exp $
+// $Id: StPeCTrack.h,v 1.5 2003/11/25 01:54:36 meissner Exp $
 // $Log: StPeCTrack.h,v $
+// Revision 1.5  2003/11/25 01:54:36  meissner
+// correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
+//
 // Revision 1.4  2002/12/19 18:09:53  yepes
 // MuDST input added
 //
@@ -63,6 +66,7 @@ public:
   Float_t                         eta ;
   Float_t                         psi ; 
   Float_t                         phi0 ;
+  Float_t                         length ;
   Float_t                         r0 ;
   Float_t                         z0 ;
   Float_t                         dedx ;
@@ -72,6 +76,12 @@ public:
   Float_t                         dedxZk ;
   Float_t                         dedxZp ;
   Float_t                         nHits ;
+  Float_t                         nSigmaEl;
+  Float_t                         nSigmaPi;
+  Float_t                         nSigmaK;
+  Float_t                         nSigmaP;
+
+
 
   
 

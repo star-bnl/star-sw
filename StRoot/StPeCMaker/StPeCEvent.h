@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.h,v 1.7 2003/02/05 17:14:05 yepes Exp $
+// $Id: StPeCEvent.h,v 1.8 2003/11/25 01:54:28 meissner Exp $
 // $Log: StPeCEvent.h,v $
+// Revision 1.8  2003/11/25 01:54:28  meissner
+// correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
+//
 // Revision 1.7  2003/02/05 17:14:05  yepes
 // Adding bField and pPairs.psi to tree
 //
@@ -89,9 +92,13 @@ public:
 private:
   Int_t                           eventN;
   Int_t                           runN;
-  Int_t                           nTot;
-  Int_t                           nPrim;
-  Int_t                           qTot;
+  Int_t                           nTot;     //FLK keept for backwards compatibility
+  Int_t                           nPrim;    //FLK keept for backwards compatibility
+  Int_t                           qTot;     
+  Int_t                           nGlobalTracks;
+  Int_t                           nPrimaryTracks;
+  Int_t                           nPrimaryTPC;
+  Int_t                           nPrimaryFTPC;
   Float_t                         bField ;
   Float_t                         pt;
   Float_t                         xVertex;

@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.cxx,v 1.13 2003/09/02 17:58:46 perev Exp $
+// $Id: StPeCPair.cxx,v 1.14 2003/11/25 01:54:33 meissner Exp $
 // $Log: StPeCPair.cxx,v $
+// Revision 1.14  2003/11/25 01:54:33  meissner
+// correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
+//
 // Revision 1.13  2003/09/02 17:58:46  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -55,20 +58,68 @@ StPeCPair::StPeCPair() {
 StPeCPair::~StPeCPair() {
 }
 
+void StPeCPair::Clear() {
+  pCharge=0;
+  pPt=0.;
+  pPz =0.;
+  pPsi =0.;
+  pAngle =0.;
+  pXyAngle =0.;
+  pPtArm =0.; 
+  pAlpha =0.; 
+  pPartDca =0.; 
+  pV0Dca =0.;   
+  rV0 =0.;
+  phiV0 =0.;
+  zV0 =0.;  
+  
+  // Not implemented 
+  // tr1.Clear(); 
+  // tr2.Clear(); 
+  // pionH.Clear();
+  // kaonH.Clear();
+  // protonH.Clear();
+  // electronH.Clear();
+  // muonH.Clear();
+  
+  track1=NULL;
+  track2=NULL;
+  muTrack1=NULL;
+  muTrack2=NULL;
+}
+
 #ifndef __CINT__
 StPeCPair::StPeCPair ( StTrack* trk1, StTrack* trk2, 
                        Bool_t primaryFlag, StEvent* event ) {
-   track1 = trk1;
-   track2 = trk2;
-   fill ( primaryFlag, event ) ;
+  this->Clear();
+  if(trk1->geometry()->charge() < 0 && trk2->geometry()->charge()>0 ) { // swap to 1+ 2- if different charges 
+    track1 = trk2;
+    track2 = trk1;
+  } else {  // keep +-, ++, --
+    track1 = trk1;
+    track2 = trk2;
+  }
+  muTrack1=0;   // clean, might crash otherwise 
+  muTrack2=0;
+  fill ( primaryFlag, event ) ;
 }
 
 StPeCPair::StPeCPair ( StMuTrack* trk1, StMuTrack* trk2, 
                        Bool_t primaryFlag, StMuEvent* event ) {
-   muTrack1 = trk1;
-   muTrack2 = trk2;
-   fill ( primaryFlag, event ) ;
+  this->Clear();
+  if (trk1->charge() <0 && trk2->charge() >0  ) { // swap to 1+ 2- if different charges 
+    muTrack1 = trk2;
+    muTrack2 = trk1;
+  } else {    // keep for +- and ++, -- 
+    muTrack1 = trk1;
+    muTrack2 = trk2;
+  }
+  track1=0;  // clean; might crash otherwise 
+  track2=0; 
+  fill ( primaryFlag, event ) ;
 }
+
+
 
 void StPeCPair::setTrack1(StTrack* trk) {
   track1 = trk;
@@ -134,7 +185,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEventSummary* summary,
       p1 = h1.momentumAt(dcaLengths.first, tesla*bField*0.1 ) ;
       p2 = h2.momentumAt(dcaLengths.second, tesla*bField*0.1 ) ;
    }
-
+   
    StThreeVectorD x1 = h1.at(dcaLengths.first);
    StThreeVectorD x2 = h2.at(dcaLengths.second);
    StThreeVectorD x = (x1-x2) ;
@@ -180,7 +231,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEventSummary* summary,
 
    pPtArm = pt1Ptot ;
    pAlpha = (p1AlongPtot-p2AlongPtot)/(p1AlongPtot+p2AlongPtot);
-// printf ( "p1AlongPtot p1AlongPtot alpha %f %f %f \n",
+   // printf ( "p1AlongPtot p1AlongPtot alpha %f %f %f \n",
 //           p1AlongPtot, p2AlongPtot, pAlpha ) ;
 // printf ( " p1 %f %f %f \n", p1.x(), p1.y(), p1.z() ) ;
 // printf ( " p2 %f %f %f \n", p2.x(), p2.y(), p2.z() ) ;
@@ -194,40 +245,40 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEventSummary* summary,
    StLorentzVectorF FourMomentum ; 
    StPeCSpec* species ;
    for ( int i = 0 ; i < nSpecies ; i++ )
-	   {
-      if ( i == pion )    {
+     {
+       if ( i == pion )    {
          mptcle = pion_plus_mass_c2;
 	 species = &pionH ;
-      }
-      else if ( i == kaon ) {
+       }
+       else if ( i == kaon ) {
          mptcle = 493.677*MeV;
 	 species = &kaonH ;
       }
-      else if ( i == proton ) {
+       else if ( i == proton ) {
          mptcle = proton_mass_c2;
 	 species = &protonH ;
-      }
-      else if ( i == electron ) {
+       }
+       else if ( i == electron ) {
          mptcle = electron_mass_c2;
 	 species = &electronH ;
-      }
+       }
       else if ( i == muon ) {
-         mptcle = 105.6584*MeV; 
-	 species = &muonH ;
+	mptcle = 105.6584*MeV; 
+	species = &muonH ;
       }
       else {
-         printf ( "StPecPair:calculatePair4Momentum; wrong pid %d \n", i ) ;
+	printf ( "StPecPair:calculatePair4Momentum; wrong pid %d \n", i ) ;
  	continue ;
       }
-      
-      StLorentzVectorF p4pair(0.0,0.0,0.0,0.0);
-      Float_t          e1 = p1.massHypothesis(mptcle);
-      Float_t          e2 = p2.massHypothesis(mptcle);
-      StLorentzVectorF pf1(e1,p1);
-      StLorentzVectorF pf2(e2,p2);
-      p4pair = pf1 + pf2;
-      FourMomentum = p4pair ;
-      mInv = p4pair.m() ;
+       
+       StLorentzVectorF p4pair(0.0,0.0,0.0,0.0);
+       Float_t          e1 = p1.massHypothesis(mptcle);
+       Float_t          e2 = p2.massHypothesis(mptcle);
+       StLorentzVectorF pf1(e1,p1);
+       StLorentzVectorF pf2(e2,p2);
+       p4pair = pf1 + pf2;
+       FourMomentum = p4pair ;
+       mInv = p4pair.m() ;
 
   // ThetaStar is the angle between of one of the daughter tracks
   // and the Z-axis in the Helicity frame. The Helicity frame is
@@ -259,20 +310,21 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEventSummary* summary,
       species->cosThetaStar = cosThetaStar ;
    }
 //
-//  fill our local Track class
-#ifndef __CINT__
-   Int_t prim = 1 ;
-	if (track1 && track2)
-	{
-	   tr1.set(prim,track1);
-	   tr2.set(prim,track2);
-	}
-	else if (muTrack1 && muTrack2)
-	{
-	   tr1.set(prim,muTrack1);
-	   tr2.set(prim,muTrack2);
-	}
-#endif
+//  fill our local Track class; not save if track pointers not properly reset !!!
+// set does not belong here ! FLK works with pointers which are not arguments of this routine !!
+// #ifndef __CINT__
+//    Int_t prim = 1 ;
+//    if (track1 && track2)
+//      {
+//        tr1.set(prim,track1);
+//        tr2.set(prim,track2);
+//      }
+//    else if (muTrack1 && muTrack2)
+//      {
+//        tr1.set(prim,muTrack1);
+//        tr2.set(prim,muTrack2);
+//      }
+// #endif
 
 
    return 0 ;
@@ -284,75 +336,51 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEventSummary* summary,
 Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event  ) {
 
    pCharge           = muTrack1->charge()+muTrack2->charge();
-
+   
    StThreeVectorF p1 ; 
    StThreeVectorF p2 ;
    StPhysicalHelixD h1 ;
    StPhysicalHelixD h2 ;
    short charge1, charge2 ;
 //
-//  If charges have different sign
-//  1=+ and 2=-
-//
-   if ( muTrack1->charge() > 0 && muTrack2->charge() < 0 ) {
-      p1      = muTrack1->momentum();
-      p2      = muTrack2->momentum();
-      charge1 = muTrack1->charge();
-      charge2 = muTrack2->charge();
-      h1      = muTrack1->helix() ;
-      h2      = muTrack2->helix() ;
-   }
-   else {
-      p1      = muTrack2->momentum();
-      p2      = muTrack1->momentum();
-      charge1 = muTrack2->charge();
-      charge2 = muTrack1->charge();
-      h1      = muTrack2->helix() ;
-      h2      = muTrack1->helix() ;
-   }
-
+   p1      = muTrack1->momentum();
+   p2      = muTrack2->momentum();
+   charge1 = muTrack1->charge();
+   charge2 = muTrack2->charge();
+   h1      = muTrack1->helix() ;
+   h2      = muTrack2->helix() ;
+   
    StThreeVectorF vtx = event->primaryVertexPosition() ;
-
+   
    fill ( primaryFlag, &(event->eventSummary()), 
 	  p1, h1, charge1, p2, h2, charge2, vtx ) ; 
-   
-   return 0 ;
 
+#ifndef __CINT__
+   tr1.set(1,muTrack1); // 1=primary
+   tr2.set(1,muTrack2);
+#endif
+   return 0 ;
+   
 }
 Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
-//
-   pCharge           = track1->geometry()->charge()+track2->geometry()->charge();
-
-   StThreeVectorF p1 ; 
-   StThreeVectorF p2 ;
-   StPhysicalHelixD h1 ;
-   StPhysicalHelixD h2 ;
-   short charge1, charge2 ;
-//
-//  If charges have different sign
-//  1=+ and 2=-
-//
-   if ( track1->geometry()->charge() > 0 && track2->geometry()->charge() < 0 ) {
-      p1      = track1->geometry()->momentum();
-      p2      = track2->geometry()->momentum();
-      charge1 = track1->geometry()->charge();
-      charge2 = track2->geometry()->charge();
-      //   if ( !primaryFlag ) {
-      h1 = track1->geometry()->helix() ;
-      h2 = track2->geometry()->helix() ;
-      // }
-   }
-   else {
-      p1 = track2->geometry()->momentum();
-      p2 = track1->geometry()->momentum();
-      charge1 = track2->geometry()->charge();
-      charge2 = track1->geometry()->charge();
-      // if ( !primaryFlag ) {
-      h1 = track2->geometry()->helix() ;
-      h2 = track1->geometry()->helix() ;
-      // }
-   }
-
+  //
+  pCharge           = track1->geometry()->charge()+track2->geometry()->charge();
+  
+  StThreeVectorF p1 ; 
+  StThreeVectorF p2 ;
+  StPhysicalHelixD h1 ;
+  StPhysicalHelixD h2 ;
+  short charge1, charge2 ;
+  //
+  p1      = track1->geometry()->momentum();
+  p2      = track2->geometry()->momentum();
+  charge1 = track1->geometry()->charge();
+  charge2 = track2->geometry()->charge();
+  //   if ( !primaryFlag ) {
+   h1 = track1->geometry()->helix() ;
+   h2 = track2->geometry()->helix() ;
+   // }
+   
    StEventSummary* summary = 0 ;
    StPrimaryVertex* vtx = 0;
    vtx = event->primaryVertex();
@@ -361,16 +389,21 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
    //
    //  If there is no primary vertex assume (0,0,0)
    //
-   if ( vtx ) vtxP = vtx->position() ;
-   else {
-      vtxP.setX(0.);
-      vtxP.setY(0.);
-      vtxP.setZ(0.);
+   if ( vtx ) {
+     vtxP = vtx->position() ;
+   } else {
+     vtxP.setX(0.);
+     vtxP.setY(0.);
+     vtxP.setZ(0.);
    }
-
+   
    fill ( primaryFlag, summary, p1, h1, charge1, p2, h2, charge2, vtxP ) ;
-
-
+   
+   // fill local track class 
+#ifndef __CINT__
+   tr1.set(1,track1); // 1=primary
+   tr2.set(1,track2);
+#endif
    return 0 ;
 }
 

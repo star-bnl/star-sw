@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.h,v 1.6 2003/02/05 17:14:06 yepes Exp $
+// $Id: StPeCPair.h,v 1.7 2003/11/25 01:54:34 meissner Exp $
 // $Log: StPeCPair.h,v $
+// Revision 1.7  2003/11/25 01:54:34  meissner
+// correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
+//
 // Revision 1.6  2003/02/05 17:14:06  yepes
 // Adding bField and pPairs.psi to tree
 //
@@ -54,6 +57,7 @@ public:
 
                                   StPeCPair();
   virtual                         ~StPeCPair();
+  void                            Clear();
 
   void                            calculatePair4Momentum( ) ;
 #ifndef __CINT__
@@ -112,11 +116,9 @@ private:
   Float_t                         phiV0 ;
   Float_t                         zV0 ;
   
-
   StPeCTrack                      tr1 ;
   StPeCTrack                      tr2 ;
-
-
+  
   StPeCSpec                       pionH;
   StPeCSpec                       kaonH;
   StPeCSpec                       protonH;
