@@ -11,4 +11,6 @@ Purpose: Main STAR I/O Maker to  read/write ROOT based STAR data .
 3) Open/close of numerous input and output files;
 
 4) Provides common user interface for all ROOT based I/O data.
+   User maker access data via StMaker class. It does not
+   know anything about existence of StTreeMaker(s)
 
