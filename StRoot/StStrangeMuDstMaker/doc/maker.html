@@ -290,7 +290,7 @@ in a loop as follows:
     // Loop over Xi vertices
     for( Int_t j=0; j &lt; strangeOldDst.GetNXi(); j++ ) {
       StXiMuDst *xim = strangeDst.GetXi(j);
-      if (xim->ptXi() > 0.5) strangeNewDST.SelectXi(j);
+      if (xim->ptXi() > 0.5) strangeNewDst.SelectXi(j);
     }
     if( i != Nevents) chain.Clear();
   }
@@ -326,13 +326,29 @@ example where the user takes all events which have more than 10 Kinks:
   // Loop over events
   for( Int_t i=0; i &lt; Nevents; i++ ) {
     if( chain.Make(i) ) break;
-    if (strangeOldDst.GetNKink() > 10) strangeNewDST.SelectEvent();
+    if (strangeOldDst.GetNKink() > 10) strangeNewDst.SelectEvent();
     if( i != Nevents) chain.Clear();
   }
   chain.Finish();
 </pre>
 This is really the equivalent of using the vertex selection paradigm
 with input parameter <tt>j = -1</tt> for all active components.
+<p>
+It is important to understand that an event which has not been selected
+will still have its event branch data copied to the filtered micro-DST,
+even if none of the secondary vertex data is copied.
+UnselectEvent() will restore any event in which any selections have
+already been made to this same state of copying the event branch only.
+If you truly want to eliminate an event entirely from the filtered
+micro-DST, then use AbortEvent(). Here is an example:
+<pre>
+    StStrangeEvMuDst* ev = strageOlDst.GetEvent();
+    if (fabs(ev->primaryVertexZ())<100.) {
+      strangeNewDst.SelectEvent();
+    } else {
+      strangeNewDst.AbortEvent();
+    }
+</pre>
 </dl>
 
 Both paradigms are shown in the following macro, with the vertex selection
