@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.38  1999/09/27 16:24:58  ward
+// Handle CVS comments in gains file.
+//
 // Revision 1.37  1999/09/24 01:23:45  fisyak
 // Reduced Include Path
 //
@@ -362,6 +365,7 @@ void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) {
   while(fgets(line,GAIN_LINE_SIZE,ff)) {
     assert(strlen(line)<GAIN_LINE_SIZE-5);
     if(!strncmp(line,"Sector ",7)) { sec=atoi(line+7); continue; } if(sec!=sector) continue;
+    if(line[0]=='*') continue; if(strstr(line,"$")) continue;
     if(!strncmp(line,"Row ",4)) {
       strtok(line," \n"); 
       cc=strtok(NULL," \n"); assert(cc); row=atoi(cc)-1;
@@ -621,7 +625,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am Bill Clinton. St_tpcdaq_Maker::Make().\n"); 
+  printf("I am Rudi Guilianni. St_tpcdaq_Maker::Make().\n"); 
   errorCode=GetEventAndDecoder();
   if(gDAQ) { victor=victorPrelim->getTPCReader(); assert(victor); }
   printf("GetEventAndDecoder() = %d\n",errorCode);
