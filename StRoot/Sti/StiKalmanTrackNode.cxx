@@ -188,12 +188,12 @@ void StiKalmanTrackNode::setAsCopyOf(const StiKalmanTrackNode * node)
   fC43  = node->fC43;
   fC44  = node->fC44;
 
-	pathLength;
-	
-	hitCount   = node->hitCount;
-	nullCount  = node->nullCount;
-	contiguousHitCount  =  node->contiguousHitCount;
-	contiguousNullCount =  node->contiguousNullCount;
+  pathLength;
+  
+  hitCount   = node->hitCount;
+  nullCount  = node->nullCount;
+  contiguousHitCount  =  node->contiguousHitCount;
+  contiguousNullCount =  node->contiguousNullCount;
 }
 
 //_____________________________________________________________________________
