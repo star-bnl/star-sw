@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.52 2003/06/13 10:57:28 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.53 2003/07/04 00:35:53 perev Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.53  2003/07/04 00:35:53  perev
+// Defence against luch of DB info added
+//
 // Revision 1.52  2003/06/13 10:57:28  jcs
 // remove debug statement
 //
@@ -348,6 +351,11 @@ Int_t StFtpcClusterMaker::Make()
   m_clustergeo = (St_ftpcClusterGeom *)dblocal_geometry("ftpcClusterGeom");
   m_cathode      = (St_ftpcInnerCathode *)dblocal_geometry("ftpcInnerCathode");
 
+  if (!(m_dimensions && m_padrow_z && m_asicmap && m_clustergeo && m_cathode)) {
+     gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting content of FTPC database: Geometry"<<endm;
+     return kStWarn;
+  }
+  
   St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
   if ( !ftpc_calibrations_db ){
      gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC database: Calibrations"<<endm;
