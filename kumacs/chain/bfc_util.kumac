@@ -363,7 +363,7 @@ macro bfc_init _
      (ev02) 
 	    exec create_tables_global#ev0
             exec create_tables_global#ev02
-	    exec init_ev0#fill_ev02
+* exec init_ev0#fill_ev02
 	    exec init_ev0#init_ev02
     (ev0_e) exec create_tables_global#ev0_eval2
     (ctf)   exec create_tables_ctf#init
