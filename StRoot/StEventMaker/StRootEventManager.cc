@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.cc,v 2.0 1999/11/04 19:03:00 ullrich Exp $
+ * $Id: StRootEventManager.cc,v 2.1 1999/11/04 17:41:32 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,8 +12,8 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.cc,v $
- * Revision 2.0  1999/11/04 19:03:00  ullrich
- * Revised to build new StEvent version
+ * Revision 2.1  1999/11/04 17:41:32  ullrich
+ * Fixed typo
  *
  * Revision 2.4  2000/05/25 14:44:47  ullrich
  * Removed remaining pieces of the RICH pixel table.
@@ -132,7 +132,7 @@ StRootEventManager::returnTable_dst_globtrk(long& nentries) const
 	nentries = tableWrap->GetNRows();
     }
     else {
-    const char *nm =  "glbtrk";
+	cerr << "StRootEventManager: Table type  " << nt << 
 	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endl;
 	nentries = 0;
     }
