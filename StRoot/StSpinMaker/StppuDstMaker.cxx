@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StppuDstMaker.cxx,v 1.5 2003/02/04 21:57:10 akio Exp $
+ * $Id: StppuDstMaker.cxx,v 1.6 2003/05/14 18:00:25 akio Exp $
  * 
  * Author: Akio Ogawa June 2001
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StppuDstMaker.cxx,v $
+ * Revision 1.6  2003/05/14 18:00:25  akio
+ * New addition for 2003 data ntuple prodction
+ * Also fix a problem with MuTrack creating from StEvent tracks.
+ *
  * Revision 1.5  2003/02/04 21:57:10  akio
  * Improvments on pi0 reconstruction code and ntuple
  *
@@ -62,22 +66,35 @@
 #include "StEmcClusterCollection.h"
 #include "StEmcPoint.h"
 
+#ifdef _2002ntuple_
 extern "C" void initfpdpi0_(const char*);
 extern "C" void finishfpdpi0_();
+#endif
+#ifdef _2003ntuple_
+extern "C" void initntp2003_(const char*);
+extern "C" void finishntp2003_();
+#endif
 
 ClassImp(StppuDstMaker)
   
 StppuDstMaker::StppuDstMaker(const Char_t *name) 
   : StMaker(name), mGoodCounter(0), mBadCounter(0){
+    printf("***StppuDstMaker: Constractor*** name=%s\n",name);
     numJetBranches = 0;
     jetBranches = new (StppJetAnalyzer*)[MAXANALYZERS];
     names = new (char*)[MAXANALYZERS];
     infoLevel = 0;
     mudst=0;
     saveEventWithNoJets = true;
+    ppEvent=0;
 #ifdef _EMC_
     storeEMC = true;
 #endif
+}
+
+StppuDstMaker::~StppuDstMaker(){
+  delete [] jetBranches;
+  delete [] names;
 }
 
 void StppuDstMaker::SetSaveEventWithNoJets(bool saveIt)
@@ -97,8 +114,14 @@ void StppuDstMaker::addAnalyzer(StppJetAnalyzer* a, const char * name)
     numJetBranches++;
 }
 
+
+Int_t StppuDstMaker::Init(){
+    return StMaker::Init();
+}
+
 Int_t StppuDstMaker::Init(const Char_t *filename) 
 {
+    printf("***StppuDstMaker::Init***\n");
     // creating uDst file name
     TString uDstFileName(filename);
     StIOMaker* pIOMaker = (StIOMaker*)GetMaker("IO");
@@ -124,7 +147,9 @@ Int_t StppuDstMaker::Init(const Char_t *filename)
     
     //create udst & its branches
     ppuDst  = new TTree("uDst","ppSpinuDst",99);
+    printf("***StppuDstMaker::Init*** Creating TTree\n");
     ppEvent = new StppEvent(); ppEvent->setInfoLevel(infoLevel);
+    printf("***StppuDstMaker::Init*** Creating StppEvent\n");
     ppuDst->Branch ("Event","StppEvent",&ppEvent,64000,99);
     for(int i = 0; i < numJetBranches; i++)
 	{
@@ -145,10 +170,10 @@ Int_t StppuDstMaker::Init(const Char_t *filename)
 #endif
 #ifdef _EMC_
     if(storeEMC)
-	{
-	    emcEvent = new StEmcMicroEvent();  //will get this data from the EmcMicroEvent
-	    ppuDst->Branch ("EmcMuEvent", "StEmcMicroEvent", &emcEvent, 64000, 99);
-	}
+      {
+	emcEvent = new StEmcMicroEvent();  //will get this data from the EmcMicroEvent
+	ppuDst->Branch ("EmcMuEvent", "StEmcMicroEvent", &emcEvent, 64000, 99);
+      }
 #endif
 #ifdef _EMC_CLUSTERS_
     emcClusters[0]=new StEmcClusterCollection();
@@ -166,14 +191,23 @@ Int_t StppuDstMaker::Init(const Char_t *filename)
     ppuDst->Branch ("EmcPoints","StppEmcPoints",&ppEmcPoints,64000,99);
 #endif  
     
-    uDstFileName.ReplaceAll(".spinDst.root",".spinDst.nt");
-    initfpdpi0_(uDstFileName.Data());
-    
-    return StMaker::Init();
+    uDstFileName.ReplaceAll(".spinDst.root",".spinDst.ntp");
+#ifdef _2002ntuple_
+    initfpdpi0_(uDstFileName.Data());    
+#endif
+#ifdef _2003ntuple_
+    initntp2003_(uDstFileName.Data());
+#endif
+}
+
+void StppuDstMaker::Clear(Option_t *opt){  
+  StMaker::Clear();
 }
 
 Int_t StppuDstMaker::Make() {
   cout <<" Start StppuDstMaker :: "<< GetName() <<" mode="<<m_Mode<<endl;   
+
+  if(ppEvent==0) Init("spindst");
 
   ppEvent->clear();
 #ifdef _GEANT_
@@ -265,7 +299,13 @@ Int_t StppuDstMaker::Finish()
 {
   m_outfile->Write();
   m_outfile->Close();
+
+#ifdef _2002ntuple_
   finishfpdpi0_();
+#endif
+#ifdef _2003ntuple_
+  finishntp2003_();
+#endif
   cout << "=================================================================\n";
   cout << "StppuDstger statistics:\n";
   cout << "events with StppuDstger data: " << mGoodCounter << endl;
