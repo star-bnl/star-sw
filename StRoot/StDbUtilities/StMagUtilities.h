@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.28 2004/10/20 17:53:11 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.29 2004/12/08 01:26:12 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.29  2004/12/08 01:26:12  jhthomas
+ * Add Method kGridLeak
+ *
  * Revision 1.28  2004/10/20 17:53:11  jhthomas
  * Add StGetSpaceChargeMode() function
  *
@@ -113,7 +116,8 @@ enum   DistortSelect
   kSpaceCharge       = 0x400,    // Bit 11
   kSpaceChargeR2     = 0x800,    // Bit 12
   kShortedRing       = 0x1000,   // Bit 13
-  kFast2DBMap        = 0x2000    // Bit 14
+  kFast2DBMap        = 0x2000,   // Bit 14
+  kGridLeak          = 0x4000    // Bit 15
 } ;
 
 // DO NOT change the numbering of these constants. StBFChain depends
@@ -152,6 +156,7 @@ class StMagUtilities {
   virtual void    CommonStart ( Int_t mode ) ;
   virtual void    ReadField ( ) ;
   virtual void    Search ( Int_t N, Float_t Xarray[], Float_t x, Int_t &low ) ;
+  virtual Int_t   IsPowerOfTwo (Int_t i) ;
   virtual Float_t Interpolate ( const Float_t Xarray[], const Float_t Yarray[], 
 				const Int_t ORDER, const Float_t x ) ;
   virtual void    Interpolate2DBfield ( const Float_t r, const Float_t z, 
@@ -198,6 +203,7 @@ class StMagUtilities {
   Float_t  shiftEr[neZ][neR] ;
   Float_t  spaceEr[neZ][neR] ;
   Float_t  spaceR2Er[neZ][neR] ;
+  Float_t  gridleakEr[neZ][neR] ;
   Float_t  shortEr[neZ][neR] ;
   Float_t  tiltEr[neZ][nePhi][neR], tiltEphi[neZ][nePhi][neR] ;
   Float_t  eRadius[neR], ePhiList[nePhi], eZList[neZ]  ;         
@@ -227,6 +233,7 @@ class StMagUtilities {
   virtual void    UndoEndcapDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoSpaceChargeDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoSpaceChargeR2Distortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoGridLeakDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoIFCShiftDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoShortedRingDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoTiltDistortion ( const Float_t x[], Float_t Xprime[] ) ;
