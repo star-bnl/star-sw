@@ -39,8 +39,7 @@ private:
 
 public:
   StMagFC(){}
-  StMagFC(const char *name, const char *title, const EField map, 
-	   const Float_t factor);
+  StMagFC(const char *name, const char *title, const Float_t factor);
   virtual ~StMagFC() {}
   virtual void Field(Float_t *x, Float_t *b);
   virtual void ReadField() {}
