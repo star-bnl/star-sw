@@ -1,14 +1,16 @@
       subroutine control
++CDE,gcbank,gcnum,gcflag,quest.
       print *,' control ready '
       call hbook1(11,'all particle PID',           60, 0.5, 60.5, 0) 
       call hbook1(12,'primary particle PID',       60, 0.5, 60.5, 0) 
       call hbook1(13,'all particles with Nhit>10', 60, 0.5, 60.5, 0) 
       call hbook1(14,'secondary processes       ', 50, 0.5, 50.5, 0) 
+      IQUEST(100)=JVOLUM
       end
 
       subroutine agudigi
       implicit   none
-+CDE,gcbank,gcnum,gcflag.
++CDE,gcbank,gcnum,gcflag,quest.
       integer IEV/0/,Itrac,Ipart,Ivert,Nu,NtpcHit,Iad,
      >        Iw,Ihit,Ltra,Ntbeam,Nttarg,Nhit,N10,
      >        Nvs(15)/15*0/,NBV(15)
@@ -67,6 +69,6 @@
       call xntup ('Ntr10',N10)
       call xntup ('*** end_of_event ***',1)
       print *,' EVENT ',IEV,' DONE '
-
+      iquest(100)=Iev
       end
 
