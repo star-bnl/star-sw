@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.396 2004/03/18 02:17:01 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.397 2004/03/20 01:20:54 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -410,21 +410,11 @@ Bfc_st BFC1[] = {
                     "StDaqLib,StDAQMaker,StFtpcTrackMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
 
 
-  {"pmdRaw"    ,"pmdRaw","","pmdRead,pmdClust,pmdDis"          ,"StMaker","StChain","PMD Raw chain",kFALSE},
-  {"pmd"       ,"pmd","","geant,pmdSim,pmdClust,pmdDis","StMaker","StChain", "PMD Simulation chain",kFALSE},
-  {"pmdRead"   ,"","","PmdUtil","StPmdReadMaker"            ,"StPmdReadMaker", "DAQ reader for PMD",kFALSE},
-  {"pmdSim"    ,"","","geant,PmdUtil","StPmdSimulatorMaker",
-                                                      "StPmdSimulatorMaker","Hit Simulator for PMD",kFALSE},
-  {"pmdClust"  ,"pmdClust","","","StPmdClusterMaker",    "StPmdClusterMaker","ClusterMaker for PMD",kFALSE},
-  {"pmdDis"    ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker",
-                                                  "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
-
-
   {"emcY2"             ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim"   ,"emcRaw","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
                                                                            "New simulator for BEMC",kFALSE},
-  {"emcDY2","",""                    ,"db,StEvent,EmcUtil,PreEcl,Epc","StEmcADCtoEMaker","StEmcADCtoEMaker",
+  {"emcDY2"   ,"",""                 ,"db,StEvent,EmcUtil,PreEcl,Epc","StEmcADCtoEMaker","StEmcADCtoEMaker",
                                                                                     "EMC raw chain",kFALSE},
 
 
@@ -465,6 +455,16 @@ Bfc_st BFC1[] = {
                                                                      "Bichsel method used for dEdx",kFALSE},
 
 
+  {"pmdRaw"    ,"pmdRaw","","pmdRead,pmdClust"                 ,"StMaker","StChain","PMD Raw chain",kFALSE},
+  {"pmd"       ,"pmd","","geant,pmdSim,pmdClust,pmdDis","StMaker","StChain", "PMD Simulation chain",kFALSE},
+  {"pmdRead"   ,"","","PmdUtil","StPmdReadMaker"            ,"StPmdReadMaker", "DAQ reader for PMD",kFALSE},
+  {"pmdSim"    ,"","","geant,PmdUtil","StPmdSimulatorMaker",
+                                                      "StPmdSimulatorMaker","Hit Simulator for PMD",kFALSE},
+  {"pmdClust"  ,"pmdClust","","","StPmdClusterMaker",    "StPmdClusterMaker","ClusterMaker for PMD",kFALSE},
+  {"pmdDis"    ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker",
+                                                  "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
+
+
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
   {"sls"         ,"","","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker",
                                                                             "... SSD slow simulator",kFALSE},
@@ -477,11 +477,11 @@ Bfc_st BFC1[] = {
   {"sce"         ,"","",""                        ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker",
                                                                                 "... SSD Evaluator",kFALSE},
 
-  {"Kink2"       ,"kink2","","db,MuDST","StKinkMaker","StSecondaryVertexMaker",
+  {"Kink2"       ,"kink2","","db,MuDST,-kink","StKinkMaker","StSecondaryVertexMaker",
                                                                           "Find Kinks from StEvent",kFALSE},
   {"V02"         ,"v02","","db,MuDST","StV0FinderMaker","StSecondaryVertexMaker",
                                                                             "Find V0s from StEvent",kFALSE},
-  {"Xi2"         ,"xi2","","db,MuDST","StXiFinderMaker","StSecondaryVertexMaker",
+  {"Xi2"         ,"xi2","","db,MuDST,-V02","StXiFinderMaker","StSecondaryVertexMaker",
                                                                          "Xis AND V0s from StEvent",kFALSE},
   {"V0svt"       ,"v0svt","","db,MuDST","StV0FinderMaker","StSecondaryVertexMaker",
                                                               "Special: use estGlobal from StEvent",kFALSE},
@@ -955,22 +955,12 @@ Bfc_st BFC2[] = {
   {"Fcl"       ,"ftpc_hits","ftpcChain","SCL","StFtpcClusterMaker",
                     "StDaqLib,StDAQMaker,StFtpcTrackMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
 
-  {"pmdRaw"    ,"pmdRaw","","pmdRead,pmdClust,pmdDis"          ,"StMaker","StChain","PMD Raw chain",kFALSE},
-  {"pmd"       ,"pmd","","geant,pmdSim,pmdClust,pmdDis","StMaker","StChain", "PMD Simulation chain",kFALSE},
-  {"pmdRead"   ,"","","PmdUtil","StPmdReadMaker"            ,"StPmdReadMaker", "DAQ reader for PMD",kFALSE},
-  {"pmdSim"    ,"","","geant,PmdUtil","StPmdSimulatorMaker",
-                                                      "StPmdSimulatorMaker","Hit Simulator for PMD",kFALSE},
-  {"pmdClust"  ,"pmdClust","","","StPmdClusterMaker",    "StPmdClusterMaker","ClusterMaker for PMD",kFALSE},
-  {"pmdDis"    ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker",
-                                                  "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
-
-  {"emcY2"    ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc","StMaker","StChain",
+  {"emcY2"             ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim"   ,"emcRaw","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
                                                                            "New simulator for BEMC",kFALSE},
   {"emcDY2"   ,"",""                 ,"db,StEvent,EmcUtil,PreEcl,Epc","StEmcADCtoEMaker","StEmcADCtoEMaker",
                                                                                     "EMC raw chain",kFALSE},
-
   //  Reminder: You are within the ITTF chain definitions
   {"global"      ,"globalChain","","globT,Match,vertex,primary,v0,xi,kink,dst,SCL,dEdxY2"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
@@ -1016,6 +1006,17 @@ Bfc_st BFC2[] = {
                                                                      "Bichsel method used for dEdx",kFALSE},
 
 
+
+  {"pmdRaw"    ,"pmdRaw","","pmdRead,pmdClust"                 ,"StMaker","StChain","PMD Raw chain",kFALSE},
+  {"pmd"       ,"pmd","","geant,pmdSim,pmdClust,pmdDis","StMaker","StChain", "PMD Simulation chain",kFALSE},
+  {"pmdRead"   ,"","","PmdUtil","StPmdReadMaker"            ,"StPmdReadMaker", "DAQ reader for PMD",kFALSE},
+  {"pmdSim"    ,"","","geant,PmdUtil","StPmdSimulatorMaker",
+                                                      "StPmdSimulatorMaker","Hit Simulator for PMD",kFALSE},
+  {"pmdClust"  ,"pmdClust","","","StPmdClusterMaker",    "StPmdClusterMaker","ClusterMaker for PMD",kFALSE},
+  {"pmdDis"    ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker",
+                                                  "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
+
+
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
   {"sls"         ,"","","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker",
                                                                             "... SSD slow simulator",kFALSE},
@@ -1029,11 +1030,11 @@ Bfc_st BFC2[] = {
                                                                                 "... SSD Evaluator",kFALSE},
 
   //  Reminder: You are within the ITTF chain definitions
-  {"Kink2"       ,"kink2","","db,MuDST","StKinkMaker","StSecondaryVertexMaker",
+  {"Kink2"       ,"kink2","","db,MuDST,-kink","StKinkMaker","StSecondaryVertexMaker",
                                                                           "Find Kinks from StEvent",kFALSE},
   {"V02"         ,"v02","","db,MuDST","StV0FinderMaker","StSecondaryVertexMaker",
                                                                             "Find V0s from StEvent",kFALSE},
-  {"Xi2"         ,"xi2","","db,MuDST","StXiFinderMaker","StSecondaryVertexMaker",
+  {"Xi2"         ,"xi2","","db,MuDST,-V02","StXiFinderMaker","StSecondaryVertexMaker",
                                                                          "Xis AND V0s from StEvent",kFALSE},
   {"V0svt"       ,"v0svt","","db,MuDST","StV0FinderMaker","StSecondaryVertexMaker",
                                                               "Special: use estGlobal from StEvent",kFALSE},
