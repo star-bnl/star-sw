@@ -35,7 +35,8 @@ event_refit=egr ev0_finder=ev0
  SVT_HOME = [PAMS]/svt/kumac
  TPC_HOME = [PAMS]/tpc/kumac
  GLOBAL_HOME = [PAMS]/global/kumac
- EMC_HOME = [PAMS]/emc/kumac
+* EMC_HOME = [PAMS]/emc/kumac
+ EMC_HOME = [LOCAL]/pams/emc/kumac
  
  SVG_HOME = [SVT_HOME]
  SSS_HOME = [SVT_HOME]
@@ -45,9 +46,9 @@ event_refit=egr ev0_finder=ev0
  STK_HOME = [SVT_HOME]
  SVM_HOME = [GLOBAL_HOME]
  TPG_HOME = [TPC_HOME]
- TFS_HOME = [KUM_HOME]
- TPT_HOME = [KUM_HOME]
- TTE_HOME = [KUM_HOME]
+ TFS_HOME = [TPC_HOME]
+ TPT_HOME = [TPC_HOME]
+ TTE_HOME = [TPC_HOME]
  EGR_HOME = [GLOBAL_HOME]
  EV0_HOME = [GLOBAL_HOME]
  EMS_HOME = [EMC_HOME]
@@ -79,6 +80,7 @@ v/create vsvm
 v/create vegr
 v/create vev0
 v/create vems
+v/create vele
 v/create vjet
 
  *****************************************
@@ -107,6 +109,7 @@ Message 'Doing' [no_events] 'events'
   exec [SSF_HOME]/init_ssf
  endif
  exec  [EMS_HOME]/init_ems
+* exec  [EMS_HOME]/init_elect
  exec  [JET_HOME]/init_jet
 
  *****************************************
@@ -218,6 +221,10 @@ exec [EV0_HOME]/run_ev0#eval  [ievent] [EV0_HOME]
  exec [EMS_HOME]/run_ems_interface
  sigma vems = vems + $cptime
  
+* Electron Finder
+* exec [JET_HOME]/run_elect
+* sigma vele = vele + $cptime
+
 * Jet Finder
  exec [JET_HOME]/run_jet_egrid
  exec [JET_HOME]/run_jet_erj
@@ -233,6 +240,7 @@ v/print vsvm
 v/print vegr
 v/print vev0
 v/print vems
+v/print vele
 v/print vjet
  ls /dui/data/global
 
