@@ -2,32 +2,34 @@
 //: FILE:       FtfHit.cpp
 //: HISTORY:
 //:             28oct1996 version 1.00
+//:             23aug1999 ppy print format changed
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfHit
 //: DESCRIPTION: Functions associated with this class
 //: AUTHOR:      ppy - Pablo Yepes, yepes@physics.rice.edu
 //:>------------------------------------------------------------------
-#include <math.h>
-#include <string.h>
-#include <stdio.h>
 #include "FtfHit.h"
-#include "FtfTrack.h"
+
+#ifdef SL3ROOT
+ClassImp(FtfHit)
+#endif
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //  
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void FtfHit::print ( int point_level ) 
+void FtfHit::printLinks (  ) { print (11) ; } ; 
+void FtfHit::printLinks ( int point_level ) 
 {
 //--
 //--     print hit info
 //  
 
    if ( point_level > 9 ) 
-      printf ( " \n hit ir iphi ieta   phi   eta      x      y     z" ) ;
+      printf ( "hit ir iphi ieta   phi   eta      x      y     z\n" ) ;
 
-   if ( fmod((double)point_level,10.) > 0 )
-        printf ( " \n %3d %2d %3d  %3d  %6.2f %5.2f  %6.2f %6.2f %6.2f ", 
+   if ( fmod(point_level,10) > 0 )
+        printf ( "%3d %2d %3d  %3d  %6.2f %5.2f  %6.2f %6.2f %6.2f \n", 
                   id, row, phiIndex, etaIndex, phi*toDeg, eta, x, y, z ) ;
    int vhit ;
    if ( nextVolumeHit != 0 ) vhit = nextVolumeHit->id ;
@@ -42,17 +44,17 @@ void FtfHit::print ( int point_level )
    if ( nextMcTrackHit != 0 ) mhit = nextMcTrackHit->id ;
    else mhit = -1 ;
 
-   if ( fmod((double)point_level,10.) > 1 ) 
-      printf ( "\n pointers:vol,row,tr,mtr,mirror (%4d,%4d,%4d,%4d) ",
+   if ( fmod(point_level,10) > 1 ) 
+      printf ( "pointers:vol,row,tr,mtr,mirror (%4d,%4d,%4d,%4d)\n ",
 		    vhit, rhit, thit, mhit ) ; 
    int tid ;
-   if ( track != 0 ) tid = track->id ;
-   else tid = -1 ;
-   if ( fmod((double)point_level,10.) > 2 )
+//   if ( track != 0 ) tid = track->id ;
+//   else tid = -1 ;
+   if ( fmod(point_level,10) > 2 )
       printf ( "\n Tracks  :reco, mc            (%4d,%4d) ",
                                tid, mcTrackId ) ;
 
-/*   if ( fmod((double)point_level,10.)  printf ( "\n  " ) ; */
+/*   if ( fmod(point_level,10)  printf ( "\n  " ) ; */
 }
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //    This function assigns this hit and all its 
@@ -62,7 +64,7 @@ void FtfHit::setStatus ( FtfTrack* this_track, FtfPara *para ) {
 //
 //   Set the flag for this hit
 //
-   track = this_track ;
+   track = (FtfBaseTrack *)this_track ;
 /*
    if ( !para->ghost_flag ) return ;
 //

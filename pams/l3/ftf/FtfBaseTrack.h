@@ -1,7 +1,14 @@
 #ifndef  FTFBASETRACK
 #define  FTFBASETRACK
-#include "FtfHit.h"
+#include "FtfGeneral.h"
+#include "FtfBaseHit.h"
 #include "FtfPara.h"
+
+#ifdef SL3ROOT
+#include "Rtypes.h"
+#else
+#define ClassDef(a,b)
+#endif
 //
 //    Base Track class
 //
@@ -9,16 +16,16 @@
       
 public:
     FtfBaseTrack ( ) ;
-    FtfHit    *firstHit;// First hit belonging to track
-    FtfHit    *lastHit ;// Last  hit belonging to track
-    FtfHit    *currentHit ;
-    int       fitHelix   (  ) ;
-    int       fitCircle  (  ) ;
+    FtfBaseHit *firstHit;// First hit belonging to track
+    FtfBaseHit *lastHit ;// Last  hit belonging to track
+    FtfBaseHit *currentHit ;
+    int        fitHelix   (  ) ;
+    int        fitCircle  (  ) ;
 	   
-    int       fitLine    (  ) ;
-    int       getErrorsCircleFit ( float a, float b, float r ) ;
+    int        fitLine    (  ) ;
+    int        getErrorsCircleFit ( float a, float b, float r ) ;
 	   
-    void      Print       ( int level ) ;
+    void       Print       ( int level ) ;
 	   
     inline virtual   void startLoop( ){ currentHit = firstHit ; } ;
     inline virtual   void nextHit  ( ) = 0 ; 
@@ -43,6 +50,8 @@ public:
     float     dtanl ;
 
     FtfPara  *para  ;    // Parameters pointer     
+    ClassDef(FtfBaseTrack,1)
+
 
    } ;
 #endif

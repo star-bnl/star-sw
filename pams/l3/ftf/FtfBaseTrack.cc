@@ -4,22 +4,21 @@
 //:             28oct1996 version 1.00
 //:             11aug1999 ppy primary flag in FtfPara replace with vertexConstrainedFit
 //:             11aug1999 ppy primary flag in track filled now 
+//:              3sep1999 ppy fitLine, dpsi cannot be greater than 1. Check introduced
+//:              5oct1999 ppy fitLine, bug corrected
+//:              6oct1999 ppy Root switch added
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfBaseTrack
 //: DESCRIPTION: Basic Description of a track P
 //: AUTHOR:      ppy - Pablo Yepes, yepes@physics.rice.edu
 //:>------------------------------------------------------------------
-#include <memory.h>
-#include <stdio.h>
-#include <math.h>
-#include "FtfHit.h"
-#include "FtfGeneral.h"
 #include "FtfBaseTrack.h"
 
+#ifdef SL3ROOT
+ClassImp(FtfBaseTrack)
+#endif
 
-#include <stdio.h>
-#include <math.h>      
 
 void ftfMatrixDiagonal ( double *h, float &h11, float &h22, float &h33 ) ;
 
@@ -333,8 +332,8 @@ int FtfBaseTrack::fitCircle (  )
      flag =  0 ; // primary track flag
      x0   =  lastHit->x  ;
      y0   =  lastHit->y  ;
-     phi0 =  lastHit->phi;
-     r0   =  lastHit->r  ;
+     phi0 =  atan2(lastHit->y,lastHit->x);
+     r0   =  sqrt ( lastHit->x * lastHit->x + lastHit->y * lastHit->y )  ;
   }
   //
   psi  = (float)atan2(bcent-y0,acent-x0) ;
@@ -367,8 +366,8 @@ int FtfBaseTrack::fitLine ( )
 //
 //     find sum , sums ,sumz, sumss 
 // 
-   float dx, dy ;
-   float radius = (float)(pt / ( 2.9979e-3 * para->bField ) ) ;
+   double dx, dy ;
+   double radius = (float)(pt / ( 2.9979e-3 * para->bField ) ) ;
    if ( para->vertexConstrainedFit ) {
       dx   = firstHit->x - para->xVertex ;
       dy   = firstHit->y - para->yVertex ;
@@ -377,10 +376,17 @@ int FtfBaseTrack::fitLine ( )
       dx   = firstHit->x - lastHit->x ;
       dy   = firstHit->y - lastHit->y ;
    }
-   float dpsi = 0.5F * (float)sqrt ( dx*dx + dy*dy ) / radius ;
-   float total_s = 2.0F * radius * (float)asin ( dpsi ) ;
+   double dpsi = 0.5F * sqrt ( dx*dx + dy*dy ) / radius ;
+   double total_s ;
+   if ( fabs(dpsi) < 1. ) {
+      total_s = 2.0F * radius * asin ( dpsi ) ;
+   } 
+   else { 
+      total_s = 2.0F * radius * M_PI ;
+   } 
+
 //
-   FtfHit *previousHit ;
+   FtfBaseHit *previousHit ;
 	
    for ( startLoop() ; done() ; nextHit() ) {
         
@@ -395,7 +401,7 @@ int FtfBaseTrack::fitLine ( )
         
       sum += currentHit->wz ;
       ss  += currentHit->wz * currentHit->s ;
-      ssz += currentHit->wz * currentHit->z ;
+      sz  += currentHit->wz * currentHit->z ;
       sss += currentHit->wz * currentHit->s * currentHit->s ;
       ssz += currentHit->wz * currentHit->s * currentHit->z ;
       previousHit = currentHit ;
@@ -546,7 +552,7 @@ void FtfBaseTrack::Print ( int level )
    else printf ( "\n " ) ;
 
    
-   if ( fmod((double)level,10.) > 0 ) {
+   if ( fmod(level,10) > 0 ) {
       printf ( " \n *** Clusters in this track *** " ) ;
       firstHit->print ( 10 ) ;
       for ( startLoop() ; done() ; nextHit()  ) { 
