@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.23 2003/09/28 01:57:21 jeromel Exp $
+ * $Id: StDAQReader.h,v 1.24 2003/12/24 21:30:45 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.24  2003/12/24 21:30:45  perev
+ * Cleanup of DAQ
+ *
  * Revision 1.23  2003/09/28 01:57:21  jeromel
  * No change (indent)
  *
@@ -150,8 +153,8 @@ public:
   virtual int SMDPresent () const;
   virtual int FTPCPresent() const;
   virtual int RICHPresent() const;
-  virtual int TRGDetectorsPresent() const;
-  virtual int L3Present()   const;
+  virtual int TRGPresent () const;
+  virtual int L3Present  () const;
 
   virtual void setTPCVersion(const char* vers = "TPCV2P0"); 
   virtual void setFTPCVersion(const char* vers = "FTPV1P0"); 

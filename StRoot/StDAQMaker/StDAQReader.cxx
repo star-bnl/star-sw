@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.37 2003/09/28 01:54:58 jeromel Exp $
+ * $Id: StDAQReader.cxx,v 1.38 2003/12/24 21:30:45 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.38  2003/12/24 21:30:45  perev
+ * Cleanup of DAQ
+ *
  * Revision 1.37  2003/09/28 01:54:58  jeromel
  * Missing one zero
  *
@@ -236,7 +239,7 @@ int StDAQReader::readEvent()
 
   if (fTPCReader&&TPCPresent  ())       fTPCReader ->Update();
   if (fFTPCReader&&FTPCPresent())	fFTPCReader->Update();  
-  if (fTRGReader&&TRGDetectorsPresent())fTRGReader ->Update();
+  if (fTRGReader&&TRGPresent  ())       fTRGReader ->Update();
   if (fSVTReader&&SVTPresent  ()) 	fSVTReader ->Update();
   if (fEMCReader&&EMCPresent  ()) 	fEMCReader ->Update();
   if (fEEMCReader&&EMCPresent ()) 	fEEMCReader->Update();
@@ -305,13 +308,13 @@ void StDAQReader::setFTPCVersion(const char* vers)
 //_____________________________________________________________________________
    int StDAQReader::PMDPresent()  const {return  fEventInfo->PMDPresent;}
 //_____________________________________________________________________________
-   int StDAQReader::SMDPresent()  const {return  fEventInfo->SMDPresent;}
+   int StDAQReader::SMDPresent()  const {return  fEventInfo->BSMDPresent|fEventInfo->ESMDPresent;}
 //_____________________________________________________________________________
    int StDAQReader::FTPCPresent() const {return  fEventInfo->FTPCPresent;}
 //_____________________________________________________________________________
    int StDAQReader::RICHPresent() const {return  fEventInfo->RICHPresent;}
 //_____________________________________________________________________________
-   int StDAQReader::TRGDetectorsPresent() const{return  fEventInfo->TRGDetectorsPresent;}
+   int StDAQReader::TRGPresent()  const{return   fEventInfo->TRGPresent;}
 //_____________________________________________________________________________
    int StDAQReader::L3Present()   const {return  fEventInfo->L3Present;}
 //_____________________________________________________________________________
@@ -405,7 +408,7 @@ StFPDReader *StDAQReader::getFPDReader()
 //_____________________________________________________________________________
 StTRGReader *StDAQReader::getTRGReader()
 {
-  if (!TRGDetectorsPresent()) return 0;
+  if (!TRGPresent()) return 0;
   if (!fTRGReader) {
     fTRGReader = new StTRGReader(this);
     fTRGReader->Update();
