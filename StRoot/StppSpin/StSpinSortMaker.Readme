@@ -1,0 +1,59 @@
+Spin sorting of the pp data
+=============================
+
+I have constructed the SpinSort-maker for the spin sorting of polarized
+pp data at STAR. Its function is to produce a "spinID" index for each event,
+qualifying event as {yellow,blue}=++ or {+-}, etc. 
+The decision is based on the event bunch crossing, its time stamp and 
+the STAR Data Base tables from some selected by user spin sorting scheme.
+
+E.g.: 
+scheme A  may correlate:
+ spinID=1 with yellow=+ & blue=any
+ spinID=2 with yellow=- & blue=any
+
+scheme B  may correlate:
+ spinID=1 with yellow=any & blue=+
+ spinID=2 with yellow=any & blue=-
+
+This enables to spin-sort the same data in various ways, even within the same
+root4star replay. 
+
+User defined "spinConfX" DB-table  (X=A,B,...) contains 60 or 120 pairs:
+{bunch_crossing, spin_ID}, one for each bunch crossing.
+ This user defined DB-table has a time line valid for many RHIC fill cycles,
+ so user do not need to reenter the same info to DB for each DAQ file.
+
+In order to exclude events for which polarization or luminosity is unknown,
+or sth else is broken, the time line of the "spinAvrX" DB-table is used.
+This table is produced by an independent program, checking polarization
+and luminosity information stored in the DB during data taking.
+It contains averaged values over a common valid time range,
+one value for each spinID index from the corresponding "spinConfX" DB-table. 
+The content of the "spinAvrX" table is irrelevant for the 
+STAR data spin sorting, but is required to for calculation of the A_N
+or A_LL after sorting is finished.
+
+A pseudo code generating spin dependent Pt distributions may look like this:
+
+...
+Pt=xxx*yyy;
+id=spinSort->spinID;             <<== public member of the StSpinSort class
+if(id>0) histo_Pt[id]->Fill(Pt);
+...
+
+The SpinSort-maker is only consumer of the "spinConfX" and  "spinAvrX" DB-tables.
+If you are interested, the code is at
+/afs/rhic/star/spin/balewski/root_db/test7/StRoot/pp2001
+
+The stand alone C++ programs (much shorter & simpler) 
+are used to calculate & write tables content to the DB.
+
+If you have any comments or suggestions please let me know.
+
+With regards
+Jan
+
+
+
+
