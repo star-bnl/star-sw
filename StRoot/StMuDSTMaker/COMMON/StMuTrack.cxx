@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.16 2004/08/12 01:34:25 mvl Exp $
+ * $Id: StMuTrack.cxx,v 1.17 2004/08/14 00:53:41 mvl Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -148,6 +148,14 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Globa
     mOuterHelix = StMuHelix(track->outerGeometry()->helix(),event->runInfo()->magneticField());
 }
 
+unsigned short StMuTrack::nHitsPoss() const {
+  // Add 1 for primary tracks in old files
+  if (mNHitsPossTpc==255 && type()==primary)
+    return mNHitsPoss+1;
+ 
+  return mNHitsPoss;
+}
+
 unsigned short StMuTrack::nHitsPoss(StDetectorId det) const {
 
   // Backward compatibility for old files
@@ -287,6 +295,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.17  2004/08/14 00:53:41  mvl
+ * Added 1 to possibel points for primary tracks, like in StEvent
+ *
  * Revision 1.16  2004/08/12 01:34:25  mvl
  * Fixed typo when extracting number of fitted, possible points per tpc
  *
