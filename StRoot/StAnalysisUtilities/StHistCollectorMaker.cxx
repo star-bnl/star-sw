@@ -1,11 +1,13 @@
 //*-- Author : Valeri Fine (fine@bnl.gov)
 // 
-// $Id: StHistCollectorMaker.cxx,v 2.1 2000/11/30 19:35:14 fine Exp $
+// $Id: StHistCollectorMaker.cxx,v 2.2 2000/11/30 19:37:26 fine Exp $
 //
 ////////////////////////////////////////////////////////////////////////////
 //                                                                        //
 // StHistCollectorMaker is to collect the histBranch staff from the several //
 //                    files                                               //
+//                                                                        //
+// use $STAR/StRoot/macro/analysis/doHists.C macro to see hot it works    //
 //                                                                        //
 // This maker collects histograms from histBranch                         //
 //             calling GetDataSet("hist")                                 //
@@ -126,6 +128,9 @@ void  StHistCollectorMaker::UpdateHists(TObjectSet *oldSet,TObjectSet *newSet)
 }
 
 // $Log: StHistCollectorMaker.cxx,v $
+// Revision 2.2  2000/11/30 19:37:26  fine
+// Reference to doHists.C macro has been added
+//
 // Revision 2.1  2000/11/30 19:35:14  fine
 // New analysis utility to collect all histogram from all histBranh production branches
 //
