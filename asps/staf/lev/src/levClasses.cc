@@ -36,6 +36,10 @@
 #define LEV_VER_MAX_ROWS 350
 #define PP printf(
 //:----------------------------------------------- PROTOTYPES         --
+#ifdef sun4os5pc
+extern "C" int gethostname(char *name, int namelen);
+#endif /* sun4os5pc */
+
 extern CC_P void LogEnvInfo();
 void levConvertToDigits(char *xx) {
   char *junk,*month,*day,*hour,*minute,*second,*year,copy[55];
@@ -271,7 +275,7 @@ STAFCV_T levFactory:: registerVersion(const char *name,
 } /* nrow val */
 char *levFactory:: version() {
   char *c=NULL;
-  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.4 1997/05/12 20:40:42 tull Exp $";
+  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.5 1997/08/18 22:47:07 tull Exp $";
   c=(char*)malloc(strlen(v)+1);
   strcpy(c,v);
   return c;

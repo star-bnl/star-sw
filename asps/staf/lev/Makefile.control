@@ -13,7 +13,7 @@ PAMS := pam
 #
 # Choose flags controlling make.
 DEBUG := TRUE
-#SHARE := TRUE
+SHARE := FALSE
 #MOTIF := TRUE
 #
 # Specify which CERN libraries against which to link.
