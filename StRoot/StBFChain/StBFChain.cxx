@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.218 2001/08/01 00:54:27 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.219 2001/08/08 20:11:38 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -318,7 +318,7 @@ Bfc_st BFC[] = {
   {"LAna"        ,"","","in,RY1h,geant,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"SpinTag"   ,"SpinTag"  ,"",""  ,"StSpinTagMaker","StppSpin","tag for analysis of polarized pp events",kFALSE},
- {"ppLPfind1"   ,"ppLPfind1"  ,"",""  ,"StppLPfindMaker","StppSpin","Find leading particle for pp",kFALSE},
+  {"ppLPfind1"   ,"ppLPfind1"  ,"",""  ,"StppLPfindMaker","StppSpin","Find leading particle for pp",kFALSE},
   {"SpinSortA"   ,"SpinSortA"  ,"",""               ,"StSpinSortMaker","StppSpin","Spin sort event",kFALSE},
   {"ppLPprojectA","ppLPprojectA","",""
                       ,"StppLPprojectMaker","StppSpin","project LP to the spin dependent phi-histo",kFALSE},
@@ -525,7 +525,8 @@ Int_t StBFChain::Instantiate()
 	  if (maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
 	  if (maker == "St_tpt_Maker" && GetOption("ExB")){
 	    int mask=1;                                  // Al Saulys request
-	    if( GetOption("RY2001") ) mask = mask & 2 ;  // Jim Thomas request
+	    if( GetOption("RY2001") ) mask = mask | 2 ;  // Jim Thomas request
+	    (void) printf("StBFChain: ExB The option passed will be %d\n",mask);
 	    mk->SetMode(mask); 
 	  }
 	  if (maker == "St_tcl_Maker") {
