@@ -1,7 +1,11 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.6 2000/06/06 03:00:18 calderon Exp $
+ * $Id: StMcEventMaker.h,v 1.7 2000/06/22 23:53:31 calderon Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.7  2000/06/22 23:53:31  calderon
+ * Changes from Aleksei for filling of emc hits.
+ * ttemp and ttempParticle are now data members.
+ *
  * Revision 1.6  2000/06/06 03:00:18  calderon
  * Introduction of Calorimeter classes.  Filled according to algorithm from
  * Aleksei, plus some additional checks.
@@ -28,14 +32,19 @@
 
 #ifndef StMcEventMaker_HH
 #define StMcEventMaker_HH
-
+#include <vector>
 #ifndef StMaker_H
 #include "StMaker.h"
+#endif
+#ifndef ST_NO_NAMESPACES
+using std::vector;
 #endif
 
 class StMcEvent;
 class StMcTrack;
 class StMcEmcHitCollection;
+class St_g2t_emc_hit;
+
 class StMcEventMaker : public StMaker {
 public:
 
@@ -50,7 +59,7 @@ public:
     StMcEvent* currentMcEvent() { return mCurrentMcEvent;}; 
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.6 2000/06/06 03:00:18 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.7 2000/06/22 23:53:31 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -62,14 +71,26 @@ public:
     Bool_t  doUseFtpc;             //!
     Bool_t  doUseRich;             //!
     Bool_t  doUseBemc;             //!
+    Bool_t  doUseBsmd;             //!
 protected:
+    void   fillBemc(St_g2t_emc_hit*);
+    void   fillBsmd(St_g2t_emc_hit*);
+
     void   printEventInfo();
     void   printTrackInfo(StMcTrack*);
     void   printEventInfoForEmc(StMcEmcHitCollection*);
 
 private:
+#ifndef ST_NO_TEMPLATE_DEF_ARGS	  
+    vector<StMcTrack*> ttemp; //! Temporary array for Step 4 in Make
+    vector<StMcTrack*> ttempParticle; //!
+#else
+    vector<StMcTrack*, allocator<StMcTrack*> > ttemp; //!
+    vector<StMcTrack*, allocator<StMcTrack*> > ttempParticle; //!
+#endif
     Bool_t drawinit;
     StMcEvent* mCurrentMcEvent; //!  This tells CINT not to parse it.
+    
     ClassDef(StMcEventMaker, 1)
 
 };
