@@ -29,6 +29,7 @@ St_NodePosition *St_NodeViewIter::GetPosition(Int_t level)
   if (m_Positions) pos=(St_NodePosition *)m_Positions->At(l);
   return pos;
 }
+
 //______________________________________________________________________________
 St_NodePosition St_NodeViewIter::operator[](Int_t level)
 {
@@ -39,6 +40,7 @@ St_NodePosition St_NodeViewIter::operator[](Int_t level)
   if (pos) return *pos;
   else     return null;
 }
+
 //______________________________________________________________________________
 void St_NodeViewIter::Notify(St_DataSet *set)
 {
@@ -53,24 +55,27 @@ void St_NodeViewIter::Notify(St_DataSet *set)
 St_NodePosition *St_NodeViewIter::UpdateTempMatrix(St_NodePosition *curPosition)
 {
   // Pick the "old" position by pieces
-  St_NodePosition *oldPosition = (St_NodePosition *)m_Positions->At(fDepth-1);
-  TRotMatrix *oldMatrix = oldPosition->GetMatrix();
-
-  Double_t oldTranslation[3];
-  oldTranslation[0] = oldPosition->GetX();
-  oldTranslation[1] = oldPosition->GetY();
-  oldTranslation[2] = oldPosition->GetZ();
-
-  // Pick the "current" position by pieces
   St_NodePosition *newPosition = 0;
-  TRotMatrix *curMatrix        = curPosition->GetMatrix();
- 
-  // Create a new postion
-  Double_t newTranslation[3];
-  Double_t newMatrix[9];
-
-  St_Node *curNode = curPosition->GetNode();
+  St_Node *curNode = 0;
+  if (curPosition) curNode = curPosition->GetNode();
   if (fDepth-1) {
+    St_NodePosition *oldPosition = 0;
+    TRotMatrix *oldMatrix = 0;
+    oldPosition = (St_NodePosition *)m_Positions->At(fDepth-1);
+    oldMatrix = oldPosition->GetMatrix();
+ 
+    Double_t oldTranslation[3];
+    oldTranslation[0] = oldPosition->GetX();
+    oldTranslation[1] = oldPosition->GetY();
+    oldTranslation[2] = oldPosition->GetZ();
+
+    // Pick the "current" position by pieces
+    TRotMatrix *curMatrix        = curPosition->GetMatrix();
+ 
+    // Create a new postion
+    Double_t newTranslation[3];
+    Double_t newMatrix[9];
+
     if(oldMatrix)
     {
       TGeometry::UpdateTempMatrix(oldTranslation,oldMatrix->GetMatrix()

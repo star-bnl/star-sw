@@ -20,6 +20,7 @@ public:
   virtual void Browse(TBrowser *b);
   virtual St_NodePosition *GetPosition(){ return (St_NodePosition *)GetObject();}
   virtual St_Node         *GetNode();
+  virtual void             Paint(Option_t *option);
   ClassDef(St_NodeView,1)
 };
 #endif
