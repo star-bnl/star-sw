@@ -958,7 +958,7 @@ void MainFrame::showCurrentDetector()
     layer->setVisibility(true);
     layer->setColor(2);
     
-    cout<<*layer<<endl;
+    cout<<"MainFrame::showCurrentDetector() - Layer:"<<*layer<<endl;
     StiRootDisplayManager::instance()->draw();
     StiRootDisplayManager::instance()->update();
     

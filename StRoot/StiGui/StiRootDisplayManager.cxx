@@ -82,7 +82,7 @@ void StiRootDisplayManager::draw()
     for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	StiDrawableHits* val = dynamic_cast<StiDrawableHits*>((*it).second);
 	if (val) {
-	    //cout <<"Drawing Hits"<<endl;
+		//cout <<"Drawing Hits"<<endl;
 	    val->draw();
 	}
     }

@@ -96,7 +96,7 @@ void StiEvaluator::build()
 
 void StiEvaluator::evaluate(const StiTrackContainer* trackStore)
 {
-    cout <<"\nStiEvaluator::evaluateForEvent()"<<endl;
+    cout <<"\nStiEvaluator::evaluate() - INFO - Beginning event evaluation"<<endl;
     cout <<"\tNumber of StiTracks:\t"<<trackStore->size()<<endl;
 
     typedef StiEventAssociator::McToInfoPairMap McMap;
@@ -121,14 +121,14 @@ void StiEvaluator::evaluate(const StiTrackContainer* trackStore)
 	StiTrackPairInfo& testInfo = (*outer_it).second.second;
 	if ( testInfo.partnerMcTrack()==0 ) {// This McTrack was not found!
 	    //Fill McTrack info:
-	    //cout <<"Track not found, fill McTrack and Return"<<endl;
+		//cout <<"Track not found, fill McTrack and Return"<<endl;
 	    mEntry->clear();
 	    mEntry->setMcTrack(mcTrack, 0, false); //Dont incremnt the nFound counter
 	    mTree->Fill();
 	}
 
 	else {
-	    //cout <<"Track found, find best match and fill"<<endl;
+		//cout <<"Track found, find best match and fill"<<endl;
 	    //we have to choose the best ITTF trackf or this Mc Track (best common hits)
 	    //Start kludge here (should be an algorithm call)
 	    pair< McMap::iterator, McMap::iterator > range = myMap.equal_range(mcTrack);
@@ -212,7 +212,7 @@ void StiEvaluator::evaluate(const StiTrackContainer* trackStore)
 	}
 	
     }
-    cout <<"Done Evaluating for event"<<endl;
+    cout <<"StiEvaluator::evaluate() - INFO - Completed"<<endl;
 }
 
 void StiEvaluator::fillHitEntry(const StiKalmanTrackNode* node)

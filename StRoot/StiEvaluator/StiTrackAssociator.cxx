@@ -206,7 +206,8 @@ void StiTrackAssociator::associate(const StSvtHit* hit)
 
 void StiTrackAssociator::associate(const StiHit* hit)
 {
-    const StHit* stHit = hit->stHit();
+	//const StHit* stHit = hit->stHit();
+	const StMeasuredPoint * stHit = hit->stHit();
     if (const StTpcHit* tpcHit = dynamic_cast<const StTpcHit*>(stHit) ) {
 	//retrieve from tpc association
 	associate(tpcHit);

@@ -178,7 +178,7 @@ void StiRootDrawableKalmanTrack::fillHitsForDrawing()
 	}
     }
 
-    cout <<"Hits on track:\t"<<hits<<endl;
+    //cout <<"Hits on track:\t"<<hits<<endl;
     mLineHitPair.first->fillHitsForDrawing();
     mLineHitPair.second->fillHitsForDrawing();
 
