@@ -50,8 +50,13 @@ my $SO_PKGT = "";
 my $LIBS  = $env->{LIBS};
 my $LIBPATH = $env->{LIBPATH};
 my $CPPPATH = $env->{CPPPATH};
-if ($pkg =~ /^StDb/ || $pkg =~ /^StTpcDb/) {
+my $FC    = $env->{FC};
+my $FFLAGS = $env->{FFLAGS};
+my $FEXTEND = $env->{FEXTEND};
+if ($pkg =~ /^St.*Db/) {
   $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{OPTSTAR} . "/include";
+}
+if ($pkg =~ /^StDbLib$/) {
   if ($LIBPATH) { $LIBPATH .=$main::PATH_SEPARATOR;}
   $LIBPATH .= $env->{ENV}->{OPTSTAR} . "/lib/mysql"; print "LIBPATH = $LIBPATH\n" if $param::debug;
   $LIBS .= " -lmysqlclient"; print "LIBS = $LIBS\n" if $param::debug;
@@ -62,6 +67,11 @@ if ($pkg =~ /^pyth$/){
   $LIBPATH .= $CERN_ROOT . "/lib";
   $LIBS    .= " -lpythia ";  
 }
+#if ($pkg eq 'StEeFit' and $STAR_SYS =~ /^i386/) {
+#  $FC = "g77";
+#  $FFLAGS   = "-w %DEBUG -fno-second-underscore -fno-automatic";
+#  $FEXTEND  = "-ffixed-line-length-132"; 
+#}
 (my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g; print "new share $share\n" if $param::debug;
 $share =~ s/\/StRoot//g;
 $share =~ s/\/(sim|gen)//g; 
@@ -105,7 +115,10 @@ $env2 = $env->clone('CPPPATH'      => $CPPPATH,
                     'LIBPATH'      => $LIBPATH,
                     'LIBS'         => $LIBS,
 		    'share'        => $share,
-		    'ObjDir'       => $ObjDir
+		    'ObjDir'       => $ObjDir,
+		    'FC'           => $FC,
+		    'FFLAGS'       => $FFLAGS,
+		    'FEXTEND'      => $FEXTEND
 		   );
 print "LIBPATH = |", $env2->{LIBPATH}, "|\n LIBS = |",$env2->{LIBS},"|\n"  if $param::debug;
 print "LINKMODULECOM |",$env2->{LINKMODULECOM},"|\n"  if $param::debug;

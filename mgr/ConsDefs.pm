@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.27 2000/11/08 14:43:19 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.28 2000/12/19 20:25:17 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -14,8 +14,6 @@
  *topmode        = *File::Find::topmode;
  *topnlink       = *File::Find::topnlink;
  #use strict;
- my $pwd = cwd();
-# if (defined($AFS) || $pwd =~ '^/afs/') {$File::Find::dont_use_nlink;}
  
  @search_files   = ();
  $DEBUG = "-g";
@@ -63,8 +61,8 @@
  $CFLAGS   = "-fpic -w";
  $EXTRA_CFLAGS = "";
  $CINTCFLAGS = "";
- $FC       = "f77";
- $FFLAGS   = "-KPIC -w -DCERNLIB_TYPE";
+ $FC       = "g77";
+ $FFLAGS   = "-w -DCERNLIB_TYPE";#-KPIC 
  $AR       = "ar";
  $ARFLAGS  = "rvu";
  $LD       = $CXX;
