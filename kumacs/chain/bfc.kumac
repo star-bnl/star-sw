@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.30 1998/08/12 15:48:28 kathy Exp $
+* $Id: bfc.kumac,v 1.31 1998/08/12 22:27:09 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.31  1998/08/12 22:27:09  kathy
+* added new chain values to bfc_util:  evr,ddedx,dmsft,dmhrd,desum,drsum,emc,jet,ctf,mwc,trg
+*
 * Revision 1.30  1998/08/12 15:48:28  kathy
 * more comments; combine geomtype+phystype into gstar_settings, use gstar_settings=field_only as default when not running gstar
 *
@@ -91,6 +94,21 @@
 * editted 8/12/98 K. Turner - more comments; combine geomtype+phystype into
 *                             gstar_settings; use gstar_settings=field_only
 *                             if not running gstar
+* editted 8/12/98 K. Turner - added new modules to chain:
+*                               ==> chain name/module
+*                                    evr       evr
+*                                    ddedx     dst_dedx_filler
+*                                    dmsft     dst_monitor_soft_filler
+*                                    dmhrd     not available yet
+*                                    desum     fill_dst_event_summary
+*                                    drsum     fill_dst_run_summary
+*                                    emc       ems_interface2
+*                                    jet       emc_egrid,emc_erj
+*                                    ctf       cts,ctu
+*                                    mwc       mws,mwu
+*                                    trg       l3cl,ftf_tpc - won't work yet
+* 
+* 
 * ******************************************************************************
 * -- DICTIONARY OF INPUTS TO BFC.KUMAC --
 * TOP        - top level directory to search for kumacs 
