@@ -621,7 +621,8 @@ C-----------------------------------------------------------------------
 
 	   if (iclspix.gt.nclpix_max) then
 	     id = 0
-	     call message('TPHAM-!-TMP too many pixels!',1,id)
+*	     call message('TPHAM-!-TMP too many pixels!',1,id)
+             write(6,*) 'TPHAM-!-TMP too many pixels!'
 	     return
 	   endif
 
@@ -653,7 +654,8 @@ C Step through one sequence on one pad:
               iclspix = iclspix + 1
 	      if (iclspix.gt.nclpix_max) then
 	        id = 0
-	        call message('TPHAM-!-TMP too many pixels!',1,id)
+*	        call message('TPHAM-!-TMP too many pixels!',1,id)
+	        write(6,*) 'TPHAM-!-TMP too many pixels!'
 	        return
 	      endif
               ldatum = tppixel(indx).datum
@@ -1178,7 +1180,8 @@ c Check that temporary arrays for hit are large enough to prevent
 c overflows; otherwise, print msg. and protect ourselves as best we can:
 	if ((2*iclosest_pad-1)*(2*iclosest_tdc-1).gt.nclpix_max) then
            id=0
-           call message('TPHAM-I-2MANY pix in temp hit',1,id)
+*           call message('TPHAM-I-2MANY pix in temp hit',1,id)
+           write(6,*) 'TPHAM-I-2MANY pix in temp hit'
            iclosest_pad = INT(SQRT(FLOAT(nclpix_max))+1.)/2
            iclosest_tdc = iclosest_pad
         end if
@@ -1953,7 +1956,8 @@ c          call vzero(nocc_track,nmc_tracks_max)
                     nocc_track(nmc_tracks) = 1
                  else           ! too many contributing tracks... forget it
                     id=0
-                    call message('TPHAM-I-2MANY, ntrk.gt.max',1,id)
+*                    call message('TPHAM-I-2MANY, ntrk.gt.max',1,id)
+                     write(6,*) 'TPHAM-I-2MANY, ntrk.gt.max'
                  endif
               else
                  nocc_track(mtrk) = nocc_track(mtrk)+1
@@ -2115,8 +2119,9 @@ c       B = (rat)**(1.0/float(N))	! for arbitrary N
         return
  99     continue                ! failure...
         id=0
-        call message('TPH_FIT_PULSE failure; going to mean',
-     +       1,id)
+*        call message('TPH_FIT_PULSE failure; going to mean',
+*     +       1,id)
+         write(6,*) 'TPH_FIT_PULSE failure; going to mean'
 c this should be fixed before using for real-----v
         call tph_weighted_mean(tseq, aseq,
      +       daseq, daseq,
@@ -2228,7 +2233,8 @@ c Find pad with largest signal:
            if (y(2).le.y(3)) then
               id = 0
               tph_3point_gauss = -1
-              call message('TPH_3POINT_GAUSS bad shape', 1,id)
+*              call message('TPH_3POINT_GAUSS bad shape', 1,id)
+              write(6,*) 'TPH_3POINT_GAUSS bad shape'
               return
            endif
            istart = 1
@@ -2236,7 +2242,8 @@ c Find pad with largest signal:
            if (y(npads-1).le.y(npads-2)) then
               id = 0
               tph_3point_gauss = -1
-              call message('TPH_3POINT_GAUSS bad shape', 1,id)
+*              call message('TPH_3POINT_GAUSS bad shape', 1,id)
+              write(6,*) 'TPH_3POINT_GAUSS bad shape'
               return
            endif
            istart = npads - 2
@@ -2257,7 +2264,8 @@ C RRB: Slightly recode to avoid direct comparison of floating pt. numbers
 	delta = x(istart+1) - x(istart)
 	if (ABS(delta-1.).gt.1.E-7) then
 	  id = 0
-	  call message('TPH_3POINT_GAUSS unexpected delta .ne. 1', 1,id)
+*	  call message('TPH_3POINT_GAUSS unexpected delta .ne. 1', 1,id)
+	  write(6,*) 'TPH_3POINT_GAUSS unexpected delta .ne. 1'
           tph_3point_gauss = -1
 	  return
 	endif
@@ -2266,7 +2274,8 @@ C RRB: Slightly recode to avoid direct comparison of floating pt. numbers
         if (r213.le.0.0) then
            id = 0
            tph_3point_gauss = -1
-           call message('TPH_3POINT_GAUSS bad shape - r213', 1,id)
+*           call message('TPH_3POINT_GAUSS bad shape - r213', 1,id)
+            write(6,*) 'TPH_3POINT_GAUSS bad shape - r213'
            return
 
 ********************** let's try to take it out....**********************
