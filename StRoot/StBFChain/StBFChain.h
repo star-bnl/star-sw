@@ -1,5 +1,8 @@
-// $Id: StBFChain.h,v 1.10 2000/03/09 16:18:35 fisyak Exp $
+// $Id: StBFChain.h,v 1.11 2000/03/14 01:12:52 fisyak Exp $
 // $Log: StBFChain.h,v $
+// Revision 1.11  2000/03/14 01:12:52  fisyak
+// Split chain files
+//
 // Revision 1.10  2000/03/09 16:18:35  fisyak
 // Make chain table local to the chain
 //
@@ -63,6 +66,7 @@
 //_____________________________________________________________________
 
 class St_XDFFile;
+class StFile;
 struct BfcItem {
   Char_t       *Key;      // nick name
   Char_t       *Name;     // maker name
@@ -76,9 +80,14 @@ struct BfcItem {
 
 class StBFChain : public StChain {
  private:
-  St_XDFFile          *xdf_out; //! xdf output file if any
-  TFile               *m_TFile; //TFile associated with the chain
-  BfcItem             *fBFC;// Private chain
+  St_XDFFile          *fXdfOut;  //! xdf output file if any
+  TFile               *fTFile;   //TFile associated with the chain
+  BfcItem             *fBFC;      // Private chain
+  StFile              *fSetFiles; //
+  TString             *fInFile;   //
+  TString             *fFileOut;  //
+  TString             *fXdfFile;  //
+  
  public:
                        StBFChain(const char *name="bfc");
    virtual            ~StBFChain();
@@ -92,7 +101,7 @@ class StBFChain : public StChain {
    void                Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0); // *MENU
    virtual Int_t       kOpt(const TString *Tag) const; 
    virtual Int_t       kOpt(const Char_t  *Tag) const; 
-   virtual void        SetXdfOut(St_XDFFile *xdf=0) {xdf_out = xdf;}
+   virtual void        SetXdfOut(St_XDFFile *xdf=0) {fXdfOut = xdf;}
    virtual void        SetDbOptions();
    virtual void        SetDataBases(const Char_t *TimeStamp);
    virtual void        SetGeantOptions();
@@ -102,15 +111,15 @@ class StBFChain : public StChain {
    virtual void        SetOption(const TString* Opt) {SetOption(kOpt(Opt));}
    virtual void        SetOptionOff(const Char_t*  Opt) {SetOption(-kOpt(Opt));}
    virtual void        SetOptionOff(const TString* Opt) {SetOption(-kOpt(Opt));}
-   virtual void        SetTFile(TFile *m) {m_TFile = m;}
+   virtual void        SetTFile(TFile *m) {fTFile = m;}
    virtual Int_t       Finish();
-   virtual TFile      *GetTFile() {return m_TFile;}
-   virtual St_XDFFile *GetXdfOut() {return xdf_out;}
+   virtual TFile      *GetTFile() {return fTFile;}
+   virtual St_XDFFile *GetXdfOut() {return fXdfOut;}
    virtual Bool_t      GetOption(const Int_t k);
    virtual Bool_t      GetOption(const TString *Opt) {return GetOption(kOpt(Opt));}
    virtual Bool_t      GetOption(const Char_t *Opt)  {return GetOption(kOpt(Opt));}
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.10 2000/03/09 16:18:35 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.11 2000/03/14 01:12:52 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StBFChain, 0)   //StBFChain control class
 };
 #endif

@@ -39,14 +39,14 @@ BfcItem BFC[] = {
   {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
   {"doEvents"    ,""  ,"","xin,event,analysis,FieldOn"                                    ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis"                                  ,"","","",kFALSE},
-  {"Cdefault"    ,""  ,"","tpc,ftpc,rrs,rich,l0,l3,Cdst,qa,tags,tree"        ,"","","Default chain",kFALSE}, 
+  {"Cdefault"    ,""  ,"","tpc,ftpc,rrs,rich,l0,l3,Cdst,qa,tags,Tree"        ,"","","Default chain",kFALSE}, 
   {"Cy1a"        ,""  ,"","y1a,Cdefault"                                 ,"","","Turn on chain y1a",kFALSE},
   {"Cy1b"        ,""  ,"","y1b,Cdefault"                                 ,"","","Turn on chain y1b",kFALSE},
   {"Cy1c"        ,""  ,"","y1c,Cdefault"                                 ,"","","Turn on chain y1c",kFALSE},
   {"Cy1d"        ,""  ,"","y1d,Cdefault"                                 ,"","","Turn on chain y1d",kFALSE},
   {"cy1e"        ,""  ,"","y1e,Cdefault"                                 ,"","","Turn on chain y1h",kFALSE},
   {"cy1h"        ,""  ,"","y1h,Cdefault"                                 ,"","","Turn on chain y1e",kFALSE},
-  {"Cy2a"        ,""  ,"","y2a,tpc,ftpc,l0,l3,Cdst,qa,tags,tree,svt"     ,"","","Turn on chain y2a",kFALSE},
+  {"Cy2a"        ,""  ,"","y2a,tpc,ftpc,l0,l3,Cdst,qa,tags,Tree,svt"     ,"","","Turn on chain y2a",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
@@ -70,9 +70,10 @@ BfcItem BFC[] = {
   {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},  
   {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
   {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
-  {"EvOut"       ,""  ,"",""                                       ,"","","Write StEvent to StTree",kFALSE},
-  {"GeantOut"    ,""  ,"",""                                    ,"","","Write g2t tables to StTree",kFALSE},
-  {"AllEvent"    ,""  ,"",""                                   ,"","","Write whole event to StTree",kFALSE},
+  {"EvOut"       ,""  ,"","Tree"                                   ,"","","Write StEvent to StTree",kFALSE},
+  {"GeantOut"    ,""  ,"","Tree"                                ,"","","Write g2t tables to StTree",kFALSE},
+  {"TrsOut"      ,""  ,"","Tree"                                ,"","","Write Trs output to StTree",kFALSE},
+  {"AllEvent"    ,""  ,"","Tree"                               ,"","","Write whole event to StTree",kFALSE},
   {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----","------------------------------------------------","","","",kFALSE},
@@ -112,9 +113,9 @@ BfcItem BFC[] = {
   {"calib"       ,""  ,"","xdf2root"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"magF"        ,"","","NoFieldSet,StDbT,db","StMagFMaker","StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
-  {"tpc"         ,"tpc","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StChainMaker","StChain","",kFALSE},
-  {"tpcDB"       ,"tpcDB","tpc","dbutil"                               ,"StTpcDbMaker","StTpcDb","",kFALSE},
-  {"Trs"         ,"","tpc","scl,tpc_daq"                              ,"StTrsMaker","StTrsMaker","",kFALSE},
+  {"tpc"         ,"tpc","","tpc_T,globT,tls,db,tpcDb,tcl,tpt,PreVtx"   ,"StChainMaker","StChain","",kFALSE},
+  {"tpcDb"       ,"tpcDb","tpc","dbutil,db"                            ,"StTpcDbMaker","StTpcDb","",kFALSE},
+  {"Trs"         ,"","tpc","scl,tpcDb,tpc_daq"                        ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"Mixer"      ,"tpc_raw","tpc","","StMixerMaker","StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
   {"tpc_daq"     ,"tpc_raw","tpc","tpc_T"                   ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"tfs"         ,""  ,"tpc","","",""                                    ,"use tfs (no StTrsMaker)",kFALSE},
@@ -178,10 +179,6 @@ BfcItem BFC[] = {
   {"Tree"        ,""  ,"",""                                        ,"StTreeMaker","StTreeMaker","",kFALSE}
 };
 Int_t NoChainOptions = sizeof (BFC)/sizeof (BfcItem);
-StFile  *setFiles= 0;
-TString *InFile = 0;
-TString *FileOut= 0;
-TString *XdfFile = 0;
 class StEvent;
 StEvent *Event;
 class StIOMaker; StIOMaker *inpMk=0;     
@@ -189,12 +186,13 @@ class St_geant_Maker; St_geant_Maker *geantMk = 0;
 class St_db_Maker;    St_db_Maker    *dbMk    = 0; St_db_Maker *calibMk = 0; 
 St_db_Maker *GeometryMk = 0; St_db_Maker *CalibrationsMk = 0;
 St_db_Maker *ConditionsMk = 0;
+StMaker *tpcDbMk = 0;
 class StTreeMaker;    StTreeMaker    *treeMk  = 0;
-
+Bool_t kFZIN = kFALSE;
 ClassImp(StBFChain)
 
 //_____________________________________________________________________________
-StBFChain::StBFChain(const char *name):StChain(name),xdf_out(0){
+StBFChain::StBFChain(const char *name):StChain(name),fXdfOut(0),fSetFiles(0),fInFile(0),fFileOut(0),fXdfFile(0) {
    fBFC = new BfcItem[NoChainOptions];
    memcpy (fBFC, &BFC, sizeof (BFC));
 }
@@ -249,7 +247,7 @@ Int_t StBFChain::Instantiate()
   Int_t i;
   for (i = 1; i< NoChainOptions; i++) {// Instantiate Makers if any
     if (fBFC[i].Flag) {
-      if (strlen(fBFC[i].Maker) > 0 && !(strlen(fBFC[i].Name) > 0 && GetMaker(fBFC[i].Name))) { 
+      if (strlen(fBFC[i].Maker) > 0){// && strlen(fBFC[i].Name) > 0){// && GetMaker(fBFC[i].Name))) { 
 	TString maker(fBFC[i].Maker);
 	TString Key(fBFC[i].Key);
 	Key.ToLower();
@@ -274,7 +272,7 @@ Int_t StBFChain::Instantiate()
 // 	  }
 	  if (Key == "calib") {
 	    const char *calibDB = "$STAR_ROOT/calib";
-	    calibMk = new St_db_Maker("calib",calibDB);
+	    if (!calibMk) calibMk = new St_db_Maker("calib",calibDB);
 	  }
 	  else {
 	    const char *mainDB = "$STAR/StDb/params";
@@ -287,10 +285,10 @@ Int_t StBFChain::Instantiate()
 	    //  if (StDbBroker::DbInit("params")==0) mainDB = "MySQL:params";
 	    gMessMgr->QAInfo() << " Main DataBase == " << mainDB << endm;  
 	    if (userDB) gMessMgr->QAInfo() << " User DataBase == " << PWD.Data() << "/" << userDB << endm;  
-	    dbMk = new St_db_Maker("db",mainDB,userDB);
-	    if (GetOption("tpcDB")){// 
-	      GeometryMk = new St_db_Maker("Geometry","MySQL:Geometry_tpc");
-	      CalibrationsMk = new St_db_Maker("Calibrations","MySQL:Calibrations_tpc");
+	    if (!dbMk) dbMk = new St_db_Maker("db",mainDB,userDB);
+	    if (GetOption("tpcDb")){// 
+	      if (!GeometryMk) GeometryMk = new St_db_Maker("Geometry","MySQL:Geometry_tpc");
+	      if (!CalibrationsMk) CalibrationsMk = new St_db_Maker("Calibrations","MySQL:Calibrations_tpc");
 	      //            ConditionsMk = new St_db_Maker("Conditions","MySQL:Conditions");
 	    }
 	    if (dbMk) {
@@ -300,8 +298,8 @@ Int_t StBFChain::Instantiate()
 	  }
 	  continue;
 	}
-	if (maker == "StIOMaker" && setFiles) {
-	  inpMk = new StIOMaker("inputStream","r",setFiles);
+	if (maker == "StIOMaker" && fSetFiles) {
+	  inpMk = new StIOMaker("inputStream","r",fSetFiles);
 	  if (inpMk) {
 	    fBFC[i].Name = (Char_t *) inpMk->GetName();
 	    SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
@@ -309,8 +307,8 @@ Int_t StBFChain::Instantiate()
 	  }
 	  continue;
 	}
-	if (maker == "StTreeMaker" && FileOut) {
-	  treeMk = new StTreeMaker("tree",FileOut->Data());
+	if (maker == "StTreeMaker" && fFileOut) {
+	  treeMk = new StTreeMaker("tree",fFileOut->Data());
 	  if (treeMk) {
 	    fBFC[i].Name = (Char_t *) treeMk->GetName();
 	    treeMk->SetIOMode("w");
@@ -327,7 +325,7 @@ Int_t StBFChain::Instantiate()
 	  Int_t IwType = 0;
 	  if (GetOption("Higz"))  IwType = 1;
 	  Int_t NwPaw = 0;
-	  geantMk = new St_geant_Maker("geant",NwGeant,NwPaw,IwType);
+	  if (!geantMk) geantMk = new St_geant_Maker("geant",NwGeant,NwPaw,IwType);
 	  if (geantMk) {
 	    fBFC[i].Name = (Char_t *) geantMk->GetName();
 	    if (!GetOption("fzin") && !GetOption("gstar")) {
@@ -340,11 +338,15 @@ Int_t StBFChain::Instantiate()
 	  continue;
 	}
 	StMaker *mk = 0;
-	if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
-	else  {
-	  mk = New(fBFC[i].Maker);
-	  if (mk) fBFC[i].Name = (Char_t *) mk->GetName();
+	if (maker == "StTpcDbMaker") mk = tpcDbMk;
+	if (!mk) {
+	  if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
+	  else  {
+	    mk = New(fBFC[i].Maker);
+	    if (mk) fBFC[i].Name = (Char_t *) mk->GetName();
+	  }
 	}
+	if (maker == "StTpcDbMaker") tpcDbMk = mk;
 	if (mk && maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
 	if (mk && maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
 	if (mk && maker == "St_tpcdaq_Maker") {
@@ -355,7 +357,7 @@ Int_t StBFChain::Instantiate()
       }
     }
   }
-  if (XdfFile) xdf_out = new St_XDFFile(XdfFile->Data(),"wb"); 
+  if (fXdfFile) fXdfOut = new St_XDFFile(fXdfFile->Data(),"wb"); 
   //  PrintQAInfo();
   PrintInfo();
   // START the chain (may the force be with you)
@@ -366,8 +368,8 @@ Int_t StBFChain::Instantiate()
 }
 Int_t StBFChain::Finish()
 {
-  SafeDelete (xdf_out);
-  if (m_TFile) {m_TFile->Write(); m_TFile->Flush(); m_TFile->Close(); SafeDelete (m_TFile);}
+  SafeDelete (fXdfOut);
+  if (fTFile) {fTFile->Write(); fTFile->Flush(); fTFile->Close(); SafeDelete (fTFile);}
   return StMaker::Finish();
 }
 //_____________________________________________________________________
@@ -502,40 +504,40 @@ void StBFChain::SetFlags(const Char_t *Chain)
 //_____________________________________________________________________
 void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
   // define input file
-  if (infile) InFile = new TString(infile);
-  if (!InFile && !GetOption("NoInput")) {
+  if (infile) fInFile = new TString(infile);
+  if (!fInFile && !GetOption("NoInput")) {
     if (GetOption("miniDAQ")) {
-      InFile = new TString("/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"); // laser data
-      printf ("Use default input file %s for %s \n",InFile->Data(),"miniDAQ");
+      fInFile = new TString("/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"); // laser data
+      printf ("Use default input file %s for %s \n",fInFile->Data(),"miniDAQ");
     }
     else {
       if (GetOption("fzin")) {
-	InFile = new TString("/star/rcf/simu/cocktail/hadronic/default/lowdensity/");
-	if (GetOption("y1h")) InFile->Append("year_1h/hadronic_on/Gstardata/rcf0078/hc_lowdensity.400_evts.fz");
+	fInFile = new TString("/star/rcf/simu/cocktail/hadronic/default/lowdensity/");
+	if (GetOption("y1h")) fInFile->Append("year_1h/hadronic_on/Gstardata/rcf0078/hc_lowdensity.400_evts.fz");
 	else 
-	if (GetOption("y2a")) InFile->Append("year_2a/hadronic_on/Gstardata/rcf0079/hc_lowdensity.400_evts.fz");
+	if (GetOption("y2a")) fInFile->Append("year_2a/hadronic_on/Gstardata/rcf0079/hc_lowdensity.400_evts.fz");
 	else {printf ("for fzin Option In file has not been defined. Exit!\n"); gSystem->Exit(1);}
-	printf ("Use default input file %s for %s \n",InFile->Data(),"fzin");
+	printf ("Use default input file %s for %s \n",fInFile->Data(),"fzin");
       }
       else {
 	if (GetOption("doEvents")){
-	  InFile = new TString("/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf");
-	  printf ("Use default input file %s for %s \n",InFile->Data(),"doEvent");
+	  fInFile = new TString("/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf");
+	  printf ("Use default input file %s for %s \n",fInFile->Data(),"doEvent");
 	}
 	else { 
 	  if (!GetOption("gstar")) {
-	    InFile = new TString("/afs/rhic/star/data/samples/hijet-g2t.xdf");	       // g2t xdf file
-	    printf ("Use default input file %s for %s \n",InFile->Data(),"xin");
+	    fInFile = new TString("/afs/rhic/star/data/samples/hijet-g2t.xdf");	       // g2t xdf file
+	    printf ("Use default input file %s for %s \n",fInFile->Data(),"xin");
 	  }
 	}
       }
     }
   }
-  if (InFile) {
+  if (fInFile) {
     if (!GetOption("fzin")) {
-      setFiles= new StFile();
+      fSetFiles= new StFile();
       TString *Files[80];
-      Int_t NParsed = ParseString((const TString )*InFile,Files);
+      Int_t NParsed = ParseString((const TString )*fInFile,Files);
       Int_t i;
       for (i=0;i<=NParsed;i++) {
 	if (!strstr(Files[i]->Data(),"*") &&
@@ -543,38 +545,38 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 	  printf (" *** NO FILE: %s, exit!\n", Files[i]->Data());
 	  gSystem->Exit(1); 
 	}
-	else setFiles->AddFile(Files[i]->Data());
+	else fSetFiles->AddFile(Files[i]->Data());
       }
     }
   }
-  if (InFile) gMessMgr->QAInfo() << "Input file name = " << InFile->Data() << endm;
-  if (outfile)               FileOut = new TString(outfile);
+  if (fInFile) gMessMgr->QAInfo() << "Input file name = " << fInFile->Data() << endm;
+  if (outfile)               fFileOut = new TString(outfile);
   else {
-    if (GetOption("gstar"))  FileOut = new TString("gtrack");
+    if (GetOption("gstar"))  fFileOut = new TString("gtrack");
     else {
-      if (InFile) {
-	FileOut = new TString(gSystem->BaseName(InFile->Data()));
-	FileOut->ReplaceAll("*","");
-	FileOut->ReplaceAll("..",".");
-	FileOut->ReplaceAll(".daq","");
-	FileOut->ReplaceAll(".fzd","");
-	FileOut->ReplaceAll(".fz","");
-	FileOut->ReplaceAll(".xdf","");
-	FileOut->Strip();
-	FileOut->Append(".root");
+      if (fInFile) {
+	fFileOut = new TString(gSystem->BaseName(fInFile->Data()));
+	fFileOut->ReplaceAll("*","");
+	fFileOut->ReplaceAll("..",".");
+	fFileOut->ReplaceAll(".daq","");
+	fFileOut->ReplaceAll(".fzd","");
+	fFileOut->ReplaceAll(".fz","");
+	fFileOut->ReplaceAll(".xdf","");
+	fFileOut->Strip();
+	fFileOut->Append(".root");
       }
     }
   }
-  if (FileOut)  gMessMgr->QAInfo() << "Output root file name " <<  FileOut->Data() << endm;
-  if (GetOption("tags") && FileOut && !m_TFile) {
-    TString *TagsName = new  TString(FileOut->Data());
+  if (fFileOut)  gMessMgr->QAInfo() << "Output root file name " <<  fFileOut->Data() << endm;
+  if (GetOption("tags") && fFileOut && !fTFile) {
+    TString *TagsName = new  TString(fFileOut->Data());
     TagsName->ReplaceAll(".root",".tags.root");
-    m_TFile = new TFile(TagsName->Data(),"RECREATE");
+    fTFile = new TFile(TagsName->Data(),"RECREATE");
   }
-  if (GetOption("xout") && FileOut) {
-    XdfFile = new TString(FileOut->Data());
-    XdfFile->Append(".dst.xdf");
-    gMessMgr->QAInfo() << "Open output xdf file  = " << XdfFile->Data() <<  "++++++++++++++++++++++" << endm;
+  if (GetOption("xout") && fFileOut) {
+    fXdfFile = new TString(fFileOut->Data());
+    fXdfFile->Append(".dst.xdf");
+    gMessMgr->QAInfo() << "Open output xdf file  = " << fXdfFile->Data() <<  "++++++++++++++++++++++" << endm;
   }
   //    gSystem->Exit(1);
 }
@@ -606,8 +608,8 @@ void StBFChain::SetGeantOptions(){
       }
     }
     else {
-      if (InFile && geantMk->SetInputFile(InFile->Data()) > kStOK) {
-	printf ("File %s cannot be opened. Exit! \n",InFile->Data());
+      if (fInFile && geantMk->SetInputFile(fInFile->Data()) > kStOK) {
+	printf ("File %s cannot be opened. Exit! \n",fInFile->Data());
 	gSystem->Exit(1);
       }
     }
@@ -668,10 +670,14 @@ void StBFChain::SetTreeOptions()
     if (GetOption("global")) treeMk->IntoBranch("globalBranch","global/.data");
   }
   else if (GetOption("GeantOut") && geantMk) treeMk->IntoBranch("geantBranch","geant");
+  else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.79 2000/03/12 21:09:39 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.80 2000/03/14 01:12:52 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.80  2000/03/14 01:12:52  fisyak
+// Split chain files
+//
 // Revision 1.79  2000/03/12 21:09:39  fisyak
 // Add NoInput option
 //
@@ -820,7 +826,7 @@ void StBFChain::SetTreeOptions()
 // Add UserDb option for Cint files
 //
 // Revision 1.29  1999/11/11 16:29:06  fisyak
-// Clean up FileOut treatment
+// Clean up fFileOut treatment
 //
 // Revision 1.28  1999/11/11 01:54:37  fisyak
 // Fix Trs name
