@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.9 2000/04/04 16:13:09 lisa Exp $
+ * $Id: StHbtPair.cc,v 1.10 2000/04/04 16:27:03 rcwells Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.10  2000/04/04 16:27:03  rcwells
+ * Removed an errant cout in StHbtPair.cc
+ *
  * Revision 1.9  2000/04/04 16:13:09  lisa
  * StHbtPair:quality() now returns normalized value (and so is double) and add a CorrFctn which looks at quality()
  *
@@ -225,7 +228,6 @@ double StHbtPair::quality() const {
   unsigned long padRow25To45Track1 = mTrack1->TopologyMap(1) & mapMask1;
   unsigned long padRow1To24Track2 = mTrack2->TopologyMap(0) & mapMask0;
   unsigned long padRow25To45Track2 = mTrack2->TopologyMap(1) & mapMask1;
-  cout << " pad row " << mTrack1->TopologyMap(0) << endl;
   // AND logic
   unsigned long bothPads1To24 = padRow1To24Track1 & padRow1To24Track2;
   unsigned long bothPads25To45 = padRow25To45Track1 & padRow25To45Track2;
