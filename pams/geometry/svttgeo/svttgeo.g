@@ -39,6 +39,8 @@ Module  SVTTGEO  is the SVT geometry for STAR
 *             glass thickness changed from 350 to 150 microns to agree with   *
 *              D.L. note                                                      *
 *  Aug 17 PN  C0,Iring is not used anymore, delete their typedef              *
+* 06/08/98 PN truncate variable in structures to 8 letters maximum
+*             otherwise they can not be converted into tables
 *******************************************************************************
 
 +cde,AGECOM,GCONST,GCUNIT.
@@ -57,14 +59,14 @@ Module  SVTTGEO  is the SVT geometry for STAR
 *     
       structure SWCA { Version,   Length,
                        WaferWid,  WaferLen,  WaferThk,  RohaThk, 
-                       WafCarWid, WafCarThk, WaferGap,  Drift,    
+                       WafCarWd,  WafCarTh,  WaferGap,  Drift,    
                        strutlen}
 *
       structure SSUP { Version,   CabThk,    HosRmn,
 		       HosRmx,    Nhoses,    WrpMyThk,  WrpAlThk,    
                        GrphThk,   Cone1Zmn,  RodLen,    RodDist,
-                       RodID,     RodOD,     Cone1idmn, Cone3idmn,  
-                       Cone4idmn, Cone4idmx, Cone3zmx,  Cone4zmx,  
+                       RodID,     RodOD,     Con1IdMn, Con3IdMn,  
+                       Con4IdMn, Con4IdMx, Cone3zmx,  Cone4zmx,  
                        BraThk,    ERJThk,    ERJWid,
                        ERJLen,    ERJzdis,   ERJ1x,     ERJ2x,
                        ERJ2y,     ERJrad,    ERJdia}
@@ -72,8 +74,8 @@ Module  SVTTGEO  is the SVT geometry for STAR
       structure SWAM { Version,   Zmin,      Len,       Rmin, 
                        Rmax,      TbrdThk,   WallThk} 
 *
-      structure SERG { Version,   IrngTRmax, IrngPRmin, OrngRmin, 
-                       OrngRmax,  EndRngThk, EndRngZmn}
+      structure SERG { Version,   IrngTrMx, IrngPrMn, OrngRmin, 
+                       OrngRmax,  EndRngTh, EndRngZm}
 *
       structure SELC { Version,   BeThk,     WatThk,    BeOThk,  
                        DyeThk,    DyeWid,    DyeSpc,    ElcaWid, 
@@ -104,8 +106,8 @@ Module  SVTTGEO  is the SVT geometry for STAR
       WaferLen  = 6          ! wafer length
       WaferThk  = 0.0300     ! wafer thickness
       RoHaThk   = 0.0381     ! Roha cell plus glue thickness 
-      WafCarWid = 1.5        ! wafer carrier rails width
-      WafCarThk = 0.0300     ! wafer carrier thickness 
+      WafCarWd  = 1.5        ! wafer carrier rails width
+      WafCarTh  = 0.0300     ! wafer carrier thickness 
       WaferGap  = 0.0        ! width of the inter-wafer gap      
       Drift     = 1          ! drift direction
       strutlen  = 1.0        ! len (z) of strut between waf car. rails (approx)
@@ -124,10 +126,10 @@ Module  SVTTGEO  is the SVT geometry for STAR
       RodDist   = 17.5       ! Distance of support rod od from beam axis 
       RodID     = 3.5        ! ID of Be support rods
       RodOD     = 3.81       ! OD of Be support rods
-      Cone1idmn = 15.67      ! Minimum id of cone 1 
-      Cone3idmn = 21.67      ! Minimum id of cone 3 (TBD)
-      Cone4idmn = 37.4       ! Minimum id of cone 4 (TBD)
-      Cone4idmx = 37.4       ! Maximum id of cone 4 (TBD)
+      Con1IdMn  = 15.67      ! Minimum id of cone 1 
+      Con3IdMn  = 21.67      ! Minimum id of cone 3 (TBD)
+      Con4IdMn  = 37.4       ! Minimum id of cone 4 (TBD)
+      Con4IdMx  = 37.4       ! Maximum id of cone 4 (TBD)
       Cone3zmx  = 150.0      ! Maximum z of cone 3 (TBD)
       Cone4zmx  = 229.36     ! Maximum z of cone 4 (TBD)
       BraThk    = .2         ! thickness of Al brackets 
@@ -143,12 +145,12 @@ Module  SVTTGEO  is the SVT geometry for STAR
 *
    Fill SERG ! end rings
       Version   = 1          ! geometry version
-      IrngTRmax = 9.703      ! Inner end ring tube maximum radius 
-      IrngPRmin = 7.671      ! Inner end ring polygon minimum radius
+      IrngTrMx  = 9.703      ! Inner end ring tube maximum radius 
+      IrngPrMn  = 7.671      ! Inner end ring polygon minimum radius
       OrngRmin  = 11.900     ! Outer end ring minimum radius
       OrngRmax  = 13.805     ! Outer end ring maximum radius
-      EndRngThk = 0.2        ! End ring thickness
-      EndRngZmn = 23.01      ! minimum z for end rings
+      EndRngTh  = 0.2        ! End ring thickness
+      EndRngZm  = 23.01      ! minimum z for end rings
 *
    Fill SWAM ! water manifold
       Version  = 1           ! geometry version
@@ -218,7 +220,7 @@ Module  SVTTGEO  is the SVT geometry for STAR
 *
 Block SVTT is the mother of all SVT volumes
 *
-      RsizeMax=ssup_Cone4idmx
+      RsizeMax=ssup_Con4IdMx
       RsizeMax=RsizeMax+ssup_GrphThk+ssup_CabThk+2.0*ssup_HosRmx
       RsizeMax=RsizeMax+ssup_WrpMyThk+ssup_WrpAlThk
 *
@@ -235,14 +237,14 @@ Block SVTT is the mother of all SVT volumes
 * End rings to support the ladders:
 *
       Create    SIRP  " inner end ring polygon piece "  
-      Position  SIRP  Z=serg_EndRngZmn+serg_EndRngThk/2  AlphaZ=22.5
-      Position  SIRP  Z=-serg_EndRngZmn-serg_EndRngThk/2 AlphaZ=22.5
+      Position  SIRP  Z=serg_EndRngZm+serg_EndRngTh/2  AlphaZ=22.5
+      Position  SIRP  Z=-serg_EndRngZm-serg_EndRngTh/2 AlphaZ=22.5
       Create    SIRT  " inner end ring tube piece "  
-      Position  SIRT  Z=serg_EndRngZmn+serg_EndRngThk/2  AlphaZ=22.5
-      Position  SIRT  Z=-serg_EndRngZmn-serg_EndRngThk/2 AlphaZ=22.5
+      Position  SIRT  Z=serg_EndRngZm+serg_EndRngTh/2  AlphaZ=22.5
+      Position  SIRT  Z=-serg_EndRngZm-serg_EndRngTh/2 AlphaZ=22.5
       Create    SOER  " outer end ring"  
-      Position  SOER  Z=serg_EndRngZmn+serg_EndRngThk/2 
-      Position  SOER  Z=-serg_EndRngZmn-serg_EndRngThk/2 
+      Position  SOER  Z=serg_EndRngZm+serg_EndRngTh/2 
+      Position  SOER  Z=-serg_EndRngZm-serg_EndRngTh/2 
 *
 * Bracket joining the end rings 
 * (shape is very approximate guess)
@@ -253,7 +255,7 @@ Block SVTT is the mother of all SVT volumes
 *
 * Mother volumes for the screws joining the bracket to the end ring
 *
-      endrng_z=serg_EndRngZmn+serg_EndRngThk
+      endrng_z=serg_EndRngZm+serg_EndRngTh
       brack_z=swca_Length/2.0+ssup_ERJzdis
       screw_z=endrng_z+0.5*(brack_z-endrng_z)
       Create    SOES " Volume to hold outer endring screws"
@@ -307,7 +309,7 @@ Block SLYD is a single SVT layer
 *     any of the thicknesses in ladthk or elethk, you should make SLYD
 *     visible and check clearences. (wkw)
 *     ladthk is the ladder HALF thickness, wafer is at mid-plane
-      ladthk = swca_WaferThk/2.0+swca_RoHaThk+swca_WafCarThk
+      ladthk = swca_WaferThk/2.0+swca_RoHaThk+swca_WafCarTh
 *     elethk is the electronics+electronic carrier full thickness
       elethk=2.0*selc_BeThk+selc_WatThk+selc_BeOThk+selc_AgPdThk
       elethk=elethk+selc_GlassThk+selc_DyeThk
@@ -361,19 +363,19 @@ Block SLDI is a ladder volume
 *         
 *     SBER are the Berillium wafer carrier rails                     
       Create   SBER " wafer carrier rails"
-      Position SBER x=+swca_WaferWid/2.0-swca_WafCarWid/2.0,
-                    z=-ladthk+swca_WafCarThk/2.0 
-      Position SBER x=-swca_WaferWid/2.0+swca_WafCarWid/2.0,
-                    z=-ladthk+swca_WafCarThk/2.0 
+      Position SBER x=+swca_WaferWid/2.0-swca_WafCarWd/2.0,
+                    z=-ladthk+swca_WafCarTh/2.0 
+      Position SBER x=-swca_WaferWid/2.0+swca_WafCarWd/2.0,
+                    z=-ladthk+swca_WafCarTh/2.0 
 *
 *     STAB are the Berrillium tabs and the ends of the wafer carriers
       Create   STAB " wafter carrier end tabs"
       Position STAB x=0,
                     y=swca_Length/2.0-tabLen/2.0,
-                    z=-ladthk+swca_WafCarThk/2.0 
+                    z=-ladthk+swca_WafCarTh/2.0 
       Position STAB x=0,
                     y=-swca_Length/2.0+tabLen/2.0,
-                    z=-ladthk+swca_WafCarThk/2.0 
+                    z=-ladthk+swca_WafCarTh/2.0 
 *
 *     STRU are the Berrillium struts between the wafer carriers rails
 *     note: the positioning of these struts is approximate
@@ -381,18 +383,18 @@ Block SLDI is a ladder volume
       Position STRU x=0,
                     y=(svtl_Nwafer*(swca_WaferLen/2.0+swca_WaferGap)+ _
                        swca_WaferGap+swca_strutlen/2.0),
-                    z=-ladthk+swca_WafCarThk/2.0 
+                    z=-ladthk+swca_WafCarTh/2.0 
       Position STRU x=0,
                     y=-(svtl_Nwafer*(swca_WaferLen/2.0+swca_WaferGap)+ _
                        swca_WaferGap+swca_strutlen/2.0),
-                    z=-ladthk+swca_WafCarThk/2.0 
+                    z=-ladthk+swca_WafCarTh/2.0 
 *
 *     Roha cell spacers support the chips
       Create   SRHC " roha cell wafer supports"
-      Position SRHC x=+swca_WaferWid/2.0-swca_WafCarWid/2.0,
-                    z=-ladthk+2.0*swca_WafCarThk/2.0+swca_RoHaThk/2.0
-      Position SRHC x=-swca_WaferWid/2.0+swca_WafCarWid/2.0,
-                    z=-ladthk+2.0*swca_WafCarThk/2.0+swca_RoHaThk/2.0
+      Position SRHC x=+swca_WaferWid/2.0-swca_WafCarWd/2.0,
+                    z=-ladthk+2.0*swca_WafCarTh/2.0+swca_RoHaThk/2.0
+      Position SRHC x=-swca_WaferWid/2.0+swca_WafCarWd/2.0,
+                    z=-ladthk+2.0*swca_WafCarTh/2.0+swca_RoHaThk/2.0
 
 
 EndBlock
@@ -403,7 +405,7 @@ Block SRHC is the roha cell wafer support
       Component H2     A=1   Z=1  W=2
       Mixture   ROHA   Dens=0.0304
       Attribute SRHC   Seen=1   Colo=3
-      Shape     BOX    dx=swca_WafCarWid/2.0,
+      Shape     BOX    dx=swca_WafCarWd/2.0,
                        dy=svtl_Nwafer*(swca_WaferLen/2.0+swca_WaferGap),
                        dz=swca_RoHaThk/2.0
 EndBlock
@@ -436,25 +438,25 @@ EndBlock
 Block SBER are the Berillium wafer carrier rails
       Material  Berillium 
       Attribute SBER     Seen=1   Colo=2
-      Shape     BOX      dx=swca_WafCarWid/2.0,
+      Shape     BOX      dx=swca_WafCarWd/2.0,
                          dy=swca_Length/2.0,  
-                         dz=swca_WafCarThk/2.0
+                         dz=swca_WafCarTh/2.0
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block STAB are the Berillium wafer carrier end tabs
       Material  Berillium 
       Attribute STAB     Seen=1   Colo=2
-      Shape     BOX      dx=swca_WaferWid/2.0-swca_WafCarWid,
+      Shape     BOX      dx=swca_WaferWid/2.0-swca_WafCarWd,
                          dy=tabLen/2.0,
-                         dz=swca_WafCarThk/2.0
+                         dz=swca_WafCarTh/2.0
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block STRU are the Berillium struts between the wafer carrier rails
       Material  Berillium 
       Attribute STRU     Seen=1   Colo=2
-      Shape     BOX      dx=swca_WaferWid/2.0-swca_WafCarWid,
+      Shape     BOX      dx=swca_WaferWid/2.0-swca_WafCarWd,
                          dy=swca_strutlen/2.0,
-                         dz=swca_WafCarThk/2.0
+                         dz=swca_WafCarTh/2.0
 EndBlock
 *
 *------------------------------------------------------------------------------
@@ -572,10 +574,10 @@ Block SIRT is the SVT inner end ring tube
 *
       Material  Berillium
       Attribute SIRT  Seen=1  Colo=2
-      ir_rmin=serg_IrngPRmin*(cos(pi/8.)+sqrt(tan(pi/8.)**2.-sin(pi/8.)**2.))
+      ir_rmin=serg_IrngPrMn*(cos(pi/8.)+sqrt(tan(pi/8.)**2.-sin(pi/8.)**2.))
       Shape     TUBE  rmin=ir_rmin,
-                      rmax=serg_IrngTRmax,
-                      dz=serg_EndRngThk/2.0
+                      rmax=serg_IrngTrMx,
+                      dz=serg_EndRngTh/2.0
 Endblock
 *
 * ****************************************************************************
@@ -586,11 +588,11 @@ Block SIRP is the SVT inner end ring polycone (overlaps tube)
 *
       Material  Berillium
       Attribute SIRP  Seen=1  Colo=2
-      rou=serg_IrngTRmax/(cos(pi/8.)+sqrt(tan(pi/8.)**2.-sin(pi/8.)**2.))
+      rou=serg_IrngTrMx/(cos(pi/8.)+sqrt(tan(pi/8.)**2.-sin(pi/8.)**2.))
       Shape     PGON  Phi1=0   Dphi=360  Nz=2,
                       NpDiv=8,
-                      zi ={-serg_EndRngThk/2, +serg_EndRngThk/2},
-                      rmn={ serg_IrngPRmin, serg_IrngPRmin},
+                      zi ={-serg_EndRngTh/2, +serg_EndRngTh/2},
+                      rmn={ serg_IrngPrMn, serg_IrngPrMn},
                       rmx={ rou, rou}
 Endblock
 *
@@ -601,7 +603,7 @@ Block SOER is the SVT outer end ring
       Attribute SOER  Seen=1  Colo=2
       Shape     TUBE   rmin=serg_OrngRmin,  
                        rmax=serg_OrngRmax,  
-                       dz=serg_EndRngThk/2.0
+                       dz=serg_EndRngTh/2.0
 Endblock
 *
 *******************************************************************************
@@ -610,7 +612,7 @@ Block SIES is the volume to hold inner endring screws
       Material  Air
       Attribute SIES seen=0 colo=1
       Shape     TUBE  rmin=ir_rmin,
-                      rmax=serg_IrngTRmax,
+                      rmax=serg_IrngTrMx,
                       dz=0.5*(brack_z-endrng_z)
 *
       Create    SISM " Mother volume for inner end ring screws"
@@ -658,7 +660,7 @@ Endblock
 *******************************************************************************
 *
 Block SBRG is the bracket joining the end rings
-      rin=serg_IrngPRmin
+      rin=serg_IrngPrMn
       rou=serg_OrngRmax
       Material  Air
       Attribute SBRG  seen=0  colo=1
@@ -727,20 +729,20 @@ Block SCON is the Silicon tracker supporting cone mother volume
            ssup_Rodlen/2.0+ssup_GrphThk, 
 	   ssup_Cone3zmx, 
 	   ssup_Cone4zmx},
-      Rmx={ssup_Cone1idmn+cone_thk1,
-           ssup_Cone1idmn+cone_thk1, 
-           ssup_Cone3idmn+cone_thk1,
-           ssup_Cone3idmn+cone_thk1,
-           ssup_Cone3idmn+cone_thk2,
-	   ssup_Cone4idmn+cone_thk2,
-	   ssup_Cone4idmx+cone_thk2},
-      Rmn={ssup_Cone1idmn,
-           ssup_Cone1idmn, 
-           ssup_Cone1idmn,
-           ssup_Cone1idmn,
-           ssup_Cone3idmn, 
-	   ssup_Cone4idmn,
-	   ssup_Cone4idmx}
+      Rmx={ssup_Con1IdMn+cone_thk1,
+           ssup_Con1IdMn+cone_thk1, 
+           ssup_Con3IdMn+cone_thk1,
+           ssup_Con3IdMn+cone_thk1,
+           ssup_Con3IdMn+cone_thk2,
+	   ssup_Con4IdMn+cone_thk2,
+	   ssup_Con4IdMx+cone_thk2},
+      Rmn={ssup_Con1IdMn,
+           ssup_Con1IdMn, 
+           ssup_Con1IdMn,
+           ssup_Con1IdMn,
+           ssup_Con3IdMn, 
+	   ssup_Con4IdMn,
+	   ssup_Con4IdMx}
 *
       Create    SGRA  " graphite/epoxy support cone (lowest layer)"
       Position  SGRA
@@ -772,20 +774,20 @@ Block SGRA is the graphite/epoxy support cone
            ssup_Rodlen/2.0+ssup_GrphThk, 
 	   ssup_Cone3zmx, 
 	   ssup_Cone4zmx},
-      Rmx={ssup_Cone1idmn+ssup_GrphThk,
-           ssup_Cone1idmn+ssup_GrphThk, 
-           ssup_Cone3idmn+ssup_GrphThk,
-           ssup_Cone3idmn+ssup_GrphThk,
-           ssup_Cone3idmn+ssup_GrphThk,
-	   ssup_Cone4idmn+ssup_GrphThk,
-	   ssup_Cone4idmx+ssup_GrphThk},
-      Rmn={ssup_Cone1idmn,
-           ssup_Cone1idmn, 
-           ssup_Cone1idmn,
-           ssup_Cone1idmn,
-           ssup_Cone3idmn, 
-	   ssup_Cone4idmn,
-	   ssup_Cone4idmx}
+      Rmx={ssup_Con1IdMn+ssup_GrphThk,
+           ssup_Con1IdMn+ssup_GrphThk, 
+           ssup_Con3IdMn+ssup_GrphThk,
+           ssup_Con3IdMn+ssup_GrphThk,
+           ssup_Con3IdMn+ssup_GrphThk,
+	   ssup_Con4IdMn+ssup_GrphThk,
+	   ssup_Con4IdMx+ssup_GrphThk},
+      Rmn={ssup_Con1IdMn,
+           ssup_Con1IdMn, 
+           ssup_Con1IdMn,
+           ssup_Con1IdMn,
+           ssup_Con3IdMn, 
+	   ssup_Con4IdMn,
+	   ssup_Con4IdMx}
 endblock
 *
 *------------------------------------------------------------------------------
@@ -800,12 +802,12 @@ Block STAP is the plastic part of the twin-ax cable layer (guess polyethylene)
       zi ={ssup_Rodlen/2.0+ssup_GrphThk, 
 	   ssup_Cone3zmx, 
 	   ssup_Cone4zmx},
-      Rmx={ssup_Cone3idmn+roffset+ssup_CabThk/2.0,
-	   ssup_Cone4idmn+roffset+ssup_CabThk/2.0,
-	   ssup_Cone4idmx+roffset+ssup_CabThk/2.0},
-      Rmn={ssup_Cone3idmn+roffset, 
-	   ssup_Cone4idmn+roffset,
-	   ssup_Cone4idmx+roffset}
+      Rmx={ssup_Con3IdMn+roffset+ssup_CabThk/2.0,
+	   ssup_Con4IdMn+roffset+ssup_CabThk/2.0,
+	   ssup_Con4IdMx+roffset+ssup_CabThk/2.0},
+      Rmn={ssup_Con3IdMn+roffset, 
+	   ssup_Con4IdMn+roffset,
+	   ssup_Con4IdMx+roffset}
 endblock
 *
 *------------------------------------------------------------------------------
@@ -818,12 +820,12 @@ Block STAC is the copper part of the twin-ax cable layer
       zi ={ssup_Rodlen/2.0+ssup_GrphThk, 
 	   ssup_Cone3zmx, 
 	   ssup_Cone4zmx},
-      Rmx={ssup_Cone3idmn+roffset+ssup_CabThk/2.0,
-	   ssup_Cone4idmn+roffset+ssup_CabThk/2.0,
-	   ssup_Cone4idmx+roffset+ssup_CabThk/2.0},
-      Rmn={ssup_Cone3idmn+roffset, 
-	   ssup_Cone4idmn+roffset,
-	   ssup_Cone4idmx+roffset}
+      Rmx={ssup_Con3IdMn+roffset+ssup_CabThk/2.0,
+	   ssup_Con4IdMn+roffset+ssup_CabThk/2.0,
+	   ssup_Con4IdMx+roffset+ssup_CabThk/2.0},
+      Rmn={ssup_Con3IdMn+roffset, 
+	   ssup_Con4IdMn+roffset,
+	   ssup_Con4IdMx+roffset}
 endblock
 *
 *------------------------------------------------------------------------------
@@ -833,10 +835,10 @@ Block SHLA is the water hose layer for cone 3 (closer to vertex)
       Material  Air
       Attribute SHLA   Seen=0   Colo=1
       SHAPE     CONE   Dz=.5*(ssup_Cone3zmx-ssup_Rodlen/2.0-ssup_GrphThk),
-                       Rmn1=ssup_Cone3idmn+roffset,
-                       Rmx1=ssup_Cone3idmn+roffset+2.0*ssup_HosRmx,
-                       Rmn2=ssup_Cone4idmn+roffset,
-                       Rmx2=ssup_Cone4idmn+roffset+2.0*ssup_HosRmx
+                       Rmn1=ssup_Con3IdMn+roffset,
+                       Rmx1=ssup_Con3IdMn+roffset+2.0*ssup_HosRmx,
+                       Rmn2=ssup_Con4IdMn+roffset,
+                       Rmx2=ssup_Con4IdMn+roffset+2.0*ssup_HosRmx
 *
       Create   SHMA  " mother volumes for the water hoses on cone 3"
 endblock
@@ -844,8 +846,8 @@ endblock
 Block SHMA is a single mother volume for a water hose on the cone 3
 *     These are the divisions for the water hoses, rotation c0=guess
       roffset=ssup_GrphThk+ssup_CabThk
-      rmin=ssup_Cone3idmn+roffset
-      rmax=ssup_Cone4idmn+roffset
+      rmin=ssup_Con3IdMn+roffset
+      rmax=ssup_Con4IdMn+roffset
       zmin=ssup_Rodlen/2.0+ssup_GrphThk
       zmax=ssup_Cone3zmx
       cone_len=sqrt((zmax-zmin)**2.+(rmax-rmin)**2.)
@@ -871,10 +873,10 @@ Block SHLB is the water hose layer cone 4 (further from vertex)
       Material  Air
       Attribute SHLB   Seen=0   Colo=1
       SHAPE     CONE   Dz=.5*(ssup_Cone4zmx-ssup_Cone3zmx),
-                       Rmn1=ssup_Cone4idmn+roffset,
-                       Rmx1=ssup_Cone4idmn+roffset+2.0*ssup_HosRmx,
-                       Rmn2=ssup_Cone4idmx+roffset,
-                       Rmx2=ssup_Cone4idmx+roffset+2.0*ssup_HosRmx
+                       Rmn1=ssup_Con4IdMn+roffset,
+                       Rmx1=ssup_Con4IdMn+roffset+2.0*ssup_HosRmx,
+                       Rmn2=ssup_Con4IdMx+roffset,
+                       Rmx2=ssup_Con4IdMx+roffset+2.0*ssup_HosRmx
 *
       Create   SHMB  " mother volumes for the water hoses on cone 4"
 endblock
@@ -882,8 +884,8 @@ endblock
 Block SHMB is a single mother volume for a water hose on the cone 4
 *     These are the divisions for the water hoses, rotation c0=guess
       roffset=ssup_GrphThk+ssup_CabThk
-      rmin=ssup_Cone4idmn+roffset
-      rmax=ssup_Cone4idmx+roffset
+      rmin=ssup_Con4IdMn+roffset
+      rmax=ssup_Con4IdMx+roffset
       zmin=ssup_Cone3zmx
       zmax=ssup_Cone4zmx
       cone_len=sqrt((zmax-zmin)**2.+(rmax-rmin)**2.)
@@ -942,12 +944,12 @@ Block SCMY is a mylar wrap around the support cone
       zi ={ssup_Rodlen/2.0+ssup_GrphThk, 
 	   ssup_Cone3zmx, 
 	   ssup_Cone4zmx},
-      Rmx={ssup_Cone3idmn+roffset+ssup_WrpMyThk,
-	   ssup_Cone4idmn+roffset+ssup_WrpMyThk,
-	   ssup_Cone4idmx+roffset+ssup_WrpMyThk},
-      Rmn={ssup_Cone3idmn+roffset, 
-	   ssup_Cone4idmn+roffset,
-	   ssup_Cone4idmx+roffset}
+      Rmx={ssup_Con3IdMn+roffset+ssup_WrpMyThk,
+	   ssup_Con4IdMn+roffset+ssup_WrpMyThk,
+	   ssup_Con4IdMx+roffset+ssup_WrpMyThk},
+      Rmn={ssup_Con3IdMn+roffset, 
+	   ssup_Con4IdMn+roffset,
+	   ssup_Con4IdMx+roffset}
 endblock
 *
 *------------------------------------------------------------------------------
@@ -961,12 +963,12 @@ Block SCAL is the aluminization on the mylar wrap around the support cone
       zi ={ssup_Rodlen/2.0+ssup_GrphThk, 
 	   ssup_Cone3zmx, 
 	   ssup_Cone4zmx},
-      Rmx={ssup_Cone3idmn+roffset+ssup_WrpAlThk,
-	   ssup_Cone4idmn+roffset+ssup_WrpAlThk,
-	   ssup_Cone4idmx+roffset+ssup_WrpAlThk},
-      Rmn={ssup_Cone3idmn+roffset, 
-	   ssup_Cone4idmn+roffset,
-	   ssup_Cone4idmx+roffset}
+      Rmx={ssup_Con3IdMn+roffset+ssup_WrpAlThk,
+	   ssup_Con4IdMn+roffset+ssup_WrpAlThk,
+	   ssup_Con4IdMx+roffset+ssup_WrpAlThk},
+      Rmn={ssup_Con3IdMn+roffset, 
+	   ssup_Con4IdMn+roffset,
+	   ssup_Con4IdMx+roffset}
 endblock
 *
 *******************************************************************************
@@ -1110,7 +1112,7 @@ Endblock
 *
 Block SBWC is the bracket connecting the water manifold to the cone
       rin=swam_Rmin
-      rou=ssup_Cone1idmn
+      rou=ssup_Con1IdMn
       Material  Air
       Attribute SBWC  seen=0  colo=1
       Shape     TUBE  Rmin=rin,
@@ -1140,7 +1142,7 @@ Block SXAI is a first piece (A) of the bracket between mani and cone (X)
       Attribute SXAI   Seen=1    Colo=2
       Material   Aluminium
       Shape    TUBS rmin=swam_Rmin,
-                    rmax=ssup_Cone1idmn,
+                    rmax=ssup_Con1IdMn,
                     dz=ssup_BraThk/2.0,
                     phi1=-5,
 		    phi2=5
@@ -1151,8 +1153,8 @@ EndBlock
 Block SXBI is a second piece (B) of the bracket between mani and cone (X)
       Attribute SXBI   Seen=1    Colo=2
       Material   Aluminium
-      Shape    TUBS rmin=ssup_Cone1idmn-ssup_BraThk,
-                    rmax=ssup_Cone1idmn,
+      Shape    TUBS rmin=ssup_Con1IdMn-ssup_BraThk,
+                    rmax=ssup_Con1IdMn,
                     dz=((ssup_Cone1zmn-(swam_Zmin+swam_Len)- _
                          ssup_BraThk)/2.0),
                     phi1=-5,
