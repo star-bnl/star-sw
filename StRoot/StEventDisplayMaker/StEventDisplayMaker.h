@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.20 2000/08/27 16:55:13 fine Exp $
+// $Id: StEventDisplayMaker.h,v 1.21 2000/08/29 04:39:25 fine Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.21  2000/08/29 04:39:25  fine
+// RemoveName method introduced
+//
 // Revision 1.20  2000/08/27 16:55:13  fine
 // Title with Run event number etc
 //
@@ -25,6 +28,7 @@
 #include "StMaker.h"
 #include "TSeqCollection.h"
 #include "StDefaultFilter.h"
+#include "TObjString.h"
 
 class    TVolume;
 class    TVolumeView;
@@ -39,7 +43,7 @@ class TPaveLabel;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.20 2000/08/27 16:55:13 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.21 2000/08/29 04:39:25 fine Exp $";
  private: 
     TList         *m_HitCollector;     //!
     TList         *m_TrackCollector;   //!
@@ -54,7 +58,8 @@ class StEventDisplayMaker : public StMaker {
     TVolumeView  *m_EventsView;   //!
     TList        *m_ListDataSetNames; // The list of the names to be drawn
     TTable       *m_Table;        //! The table to be drawn if any
-    TObjArray    *m_FilterArray;     // Array of the "event" user supplied filters
+    TObjArray    *m_FilterArray;  // Array of the "event" user supplied filters
+    TList        *m_LockedNames;  // The names of the dataset loked temporary
 
     TCanvas      *m_PadBrowserCanvas; //!
     TPaveLabel   *mRunNumberLabel;    //!
@@ -89,8 +94,10 @@ class StEventDisplayMaker : public StMaker {
    virtual void         PrintFilterStatus(); // *MENU*
    virtual void         SetMode       (Int_t   m = 0){StMaker::SetMode(m);} // *MENU*
    virtual Int_t        ReDraw(){ClearCanvas(); return Make();} // *MENU*
+   virtual void         RemoveName(const char *name); // *MENU*
    virtual void         TurnOn() { SetMode(); }  // *MENU*
    virtual void         TurnOff(){ SetMode(1); } // *MENU*
+
      // --   Filters  --
 
      enum EDisplayEvents 
@@ -124,7 +131,7 @@ class StEventDisplayMaker : public StMaker {
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.20 2000/08/27 16:55:13 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.21 2000/08/29 04:39:25 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
