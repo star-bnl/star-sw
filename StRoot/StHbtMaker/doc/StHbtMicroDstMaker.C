@@ -50,7 +50,8 @@ void StHbtMicroDstMaker(const Int_t nevents=9999,
 			const Char_t *path=venusPath,
 			const Char_t *file=venusFile,
 			const Char_t* outDir="/star/rcf/pwg/hbt/Laue/Test/",		
-			const Char_t* outFile="")		
+			const Char_t* outFile="dummy",
+			const Char_t* appendix="test.microDst")		
 { 
   const char *fileListQQ[]={0,0};
   if (path[0]=='-') {
@@ -117,6 +118,10 @@ ioMaker->SetBranch("dstBranch",0,"r"); //activate EventBranch
 StEventMaker* eventMaker = new StEventMaker("events","title");
 cout << "Just instantiated StEventMaker... lets go StHbtMaker!" << endl;
 
+// Stick in the toplogy map maker
+StRandyTopMapMaker* myTopMapFixer = new StRandyTopMapMaker();
+
+
 // *********
 // Hbt Maker
 // *********
@@ -143,14 +148,8 @@ TheManager->SetEventReader(Reader);
 cout << "READER SET UP.... " << endl;
 
   //   set up a microDstWriter 
- StHbtBinaryReader* pionWriter = new StHbtBinaryReader(ioMaker);  // retrieve filename from ioMaker
- pionWriter->SetDirName( dirName );
- pionWriter->SetFileName("test");
- pionWriter->SetAppendix(".pion.microDst");
- //StHbtBinaryReader* pionWriter = new StHbtBinaryReader();           // specify filename
- //pionWriter->SetDirName( dirName );
- //pionWriter->SetFileNameName( fileName );
- //pionWriter->SetAppendix( appendix );
+ StHbtBinaryReader* pionWriter = new StHbtBinaryReader(ioMaker,dirName,"dummy",".pion.microDst");  // retrieve filename from ioMaker
+ //StHbtBinaryReader* pionWriter = new StHbtBinaryReader(dirName,"TheFile",".pion.microDst");
  TheManager->AddEventWriter(pionWriter);
  // set up the front loaded cuts
  mikesEventCut* pionEventCut = new mikesEventCut;
@@ -172,10 +171,7 @@ cout << "READER SET UP.... " << endl;
  cout << "WRITER SET UP.... " << endl;
     
   //   set up a microDstWriter 
- StHbtBinaryReader* kaonWriter = new StHbtBinaryReader(ioMaker);  // retrieve filename from ioMaker
- kaonWriter->SetDirName( dirName );
- kaonWriter->SetFileName("test");
- kaonWriter->SetAppendix(".kaon.microDst");
+ StHbtBinaryReader* kaonWriter = new StHbtBinaryReader(ioMaker,dirName,"dummy",".kaon.microDst");  // retrieve filename from ioMaker
  TheManager->AddEventWriter(kaonWriter);
  // set up the front loaded cuts
  mikesEventCut* kaonEventCut = new mikesEventCut;
@@ -197,10 +193,7 @@ cout << "READER SET UP.... " << endl;
  cout << "WRITER SET UP.... " << endl;
     
   //   set up a microDstWriter 
- StHbtBinaryReader* protonWriter = new StHbtBinaryReader(ioMaker);  // retrieve filename from ioMaker
- protonWriter->SetDirName( dirName );
- protonWriter->SetFileName("test");
- protonWriter->SetAppendix(".proton.microDst");
+ StHbtBinaryReader* protonWriter = new StHbtBinaryReader(ioMaker,dirName,"dummy",".proton.microDst");  // retrieve filename from ioMaker
  TheManager->AddEventWriter(protonWriter);
  // set up the front loaded cuts
  mikesEventCut* protonEventCut = new mikesEventCut;
@@ -223,12 +216,8 @@ cout << "READER SET UP.... " << endl;
     
 
   //   se up a microDstWriter  with multiple track cuts
- StHbtBinaryReader* pionProtonWriter = new StHbtBinaryReader(ioMaker);  // retrieve filename from ioMaker
- //StHbtBinaryReader* pionProtonWriter = new StHbtBinaryReader();
- pionProtonWriter->SetDirName( dirName );
- pionProtonWriter->SetFileName("test");
- pionProtonWriter->SetAppendix(".pion.proton.microDst");
- TheManager->AddEventWriter(pionProtonWriter);
+ StHbtBinaryReader* pionProtonWriter = new StHbtBinaryReader(ioMaker,dirName,"dummy",".pion.proton.microDst");  // retrieve filename from ioMaker
+ // TheManager->AddEventWriter(pionProtonWriter);
  // set up front loaded event cuts
  mikesEventCut* kaonEventCut = new mikesEventCut;
  kaonEventCut->SetEventMult(0,100000);      // selected multiplicity range

@@ -233,11 +233,11 @@ int StHbtIOBinary::readEvent(StHbtEvent& ev){
 
 // **********************************************************************
 char* StHbtIOBinary::parseDirFile(const char* dir, const char* file, const char* appendix) {
-  cout << dir << endl;
-  cout << file << endl;
-  cout << appendix << endl;
+  if (dir) cout << dir << endl;
+  if (file) cout << file << endl;
+  if (appendix) cout << appendix << endl;
 
-  if (!dir) return file;  // no dir specified
+  if (!dir || !appendix) return file;  // no dir specified
   StHbtString theDir = (char*)dir;
   StHbtString theFile = (char*)file;
   StHbtString theAppendix = (char*)appendix;
@@ -245,7 +245,7 @@ char* StHbtIOBinary::parseDirFile(const char* dir, const char* file, const char*
     cout << theFile.c_str() << " ";
     string::size_type pos =  theFile.find("/");
     cout << pos << endl;
-    theFile.erase(0, pos+1 );
+    theFile.erase(0, pos );
     cout << theFile.c_str() << endl;
   }
   cout << (theDir+theFile+theAppendix).c_str() << endl;
