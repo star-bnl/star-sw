@@ -2,6 +2,10 @@
 // $Id EfficiencyAnalysis.cxx $
 //
 // $Log: EfficiencyAnalysis.cxx,v $
+// Revision 1.2  2003/03/05 22:02:29  calderon
+// protect against tracks which have zero possible points...
+// caused a floating point exception
+//
 // Revision 1.1  2002/11/27 00:08:55  calderon
 // New version of evaluator using the minimctrees
 //
@@ -251,7 +255,7 @@ int EfficiencyAnalysis::fillHistograms(StMiniMcEvent* minimcevent) {
     cout << "EfficiencyAnalysis::fillHistograms " <<  mSuffix << endl;
     ++mNEvents;
     int nTracks = minimcevent->mNMcTrack;
-    
+
     // raw & accepted MC tracks
     int nPiKP = 0;
     for (int j=0; j<nTracks; ++j) {
@@ -259,7 +263,7 @@ int EfficiencyAnalysis::fillHistograms(StMiniMcEvent* minimcevent) {
 	StTinyMcTrack* tinymctrack = (StTinyMcTrack*) minimcevent->mMcTracks->At(j);
 	if (!tinymctrack) continue;
 	int geantId = tinymctrack->geantId(); 
-	//if (geantId != 0) cout << "j id " << j << " " << geantId << endl;
+// 	if (geantId != 0) cout << "j id " << j << " " << geantId << endl;
 	if (!acceptGeantId(geantId)) continue; // only look at pi-, k-, pbar = 9, 12, 15 and pi+, k+, prot = 8, 11, 14
 	++nPiKP;
 	float pt  = tinymctrack->ptMc();
@@ -280,7 +284,7 @@ int EfficiencyAnalysis::fillHistograms(StMiniMcEvent* minimcevent) {
     // matched and matched rec
     int nMatchedPiKP=0;
     int nMatchedPairs = minimcevent->mNMatchedPair;
-    cout << "# MatchedPairs  " << nMatchedPairs << endl;
+    cout << "# MatchedPairs  " << nMatchedPairs << " array says " << minimcevent->mMatchedPairs->GetEntries() << endl;
     for (int k=0; k<nMatchedPairs; ++k) {
 	// mNMatchedPair loop
 	StMiniMcPair* minimcpair = (StMiniMcPair*) minimcevent->mMatchedPairs->At(k);
@@ -299,7 +303,8 @@ int EfficiencyAnalysis::fillHistograms(StMiniMcEvent* minimcevent) {
 	matchedSpectrumRec->Fill(etarec,ptrec);
 	fitPointsUsed->Fill(minimcpair->fitPts());
 	fitPointsPossible->Fill(minimcpair->nPossiblePts());
-	fitPointsUsedPossRatio->Fill(minimcpair->fitPts()/minimcpair->nPossiblePts());
+	if (minimcpair->nPossiblePts())
+	    fitPointsUsedPossRatio->Fill(minimcpair->fitPts()/minimcpair->nPossiblePts());
 	dcaGlobal->Fill(minimcpair->dcaGl());
     }
     cout << "# Matched Pi,K,P  " << nMatchedPiKP << endl;
@@ -314,7 +319,7 @@ int EfficiencyAnalysis::fillHistograms(StMiniMcEvent* minimcevent) {
 
     // merged
     int nMergedPair = minimcevent->mNMergedPair;
-    cout << "# MergedPair  " << nMergedPair << endl;
+    cout << "# MergedPair  " << nMergedPair << " array says " << minimcevent->mMergedPairs->GetEntries() << endl;
     for (int j=0; j<nMergedPair; ++j) {
 	// mNMergedPair loop
 	StMiniMcPair* minimcpair = (StMiniMcPair*) minimcevent->mMergedPairs->At(j);
@@ -333,34 +338,40 @@ int EfficiencyAnalysis::fillHistograms(StMiniMcEvent* minimcevent) {
     // background, electron and decay/secondary
     int nContamPairs = minimcevent->mNContamPair;
     int nContamPiKP=0;
-    cout << "# ContamPairs  " << nContamPairs << endl;
-    for (int j=0; j<nContamPairs; ++j) {
-	// mNContamPair loop
-	StMiniMcPair* minimcpair = (StMiniMcPair*) minimcevent->mContamPairs->At(j);
-	if (!minimcpair) continue;
-	
-	// for the contamination, make sure the rec satisfies the cuts and
-	// then select electrons according to geant id
-	if (!acceptPair(minimcpair)) continue;
-	
-	float ptrec = minimcpair->ptPr();
-	float xvalrec =  minimcpair->etaPr();
-	
-	int geantId = minimcpair->geantId();
-	if (geantId == 2 || geantId == 3) {
-	    // e+/e- contamination (charge was selected by the acceptPair cut)
-	    electronBackground->Fill(xvalrec,ptrec);    
+    cout << "minimcevent->mContamPairs " << minimcevent->mContamPairs << endl;
+    if (minimcevent->mContamPairs) { 
+	cout << "# ContamPairs  " << nContamPairs << " array says " << minimcevent->mContamPairs->GetEntries() << endl;
+	for (int j=0; j<nContamPairs; ++j) {
+	    // mNContamPair loop
+	    StMiniMcPair* minimcpair = (StMiniMcPair*) minimcevent->mContamPairs->At(j);
+	    if (!minimcpair) continue;
+	    
+	    // for the contamination, make sure the rec satisfies the cuts and
+	    // then select electrons according to geant id
+	    if (!acceptPair(minimcpair)) continue;
+	    
+	    float ptrec = minimcpair->ptPr();
+	    float xvalrec =  minimcpair->etaPr();
+	    
+	    int geantId = minimcpair->geantId();
+	    if (geantId == 2 || geantId == 3) {
+		// e+/e- contamination (charge was selected by the acceptPair cut)
+		electronBackground->Fill(xvalrec,ptrec);    
+	    }
+	    else if (acceptGeantId(geantId)) { // mGeantId is set properly, use background for a specific particle
+		decayBackground->Fill(xvalrec,ptrec);
+		++nContamPiKP;
+	    }
+	    
 	}
-	else if (acceptGeantId(geantId)) { // mGeantId is set properly, use background for a specific particle
-	    decayBackground->Fill(xvalrec,ptrec);
-	    ++nContamPiKP;
-	}
-		 
+	cout << "# Contam Pi,K,P " << nContamPiKP << endl;
     }
-    cout << "# Contam Pi,K,P " << nContamPiKP << endl;
+    else {
+	cout << "The array mNContamPairs is null " << endl;
+    }
     // split
     int nSplitPairs = minimcevent->mNSplitPair;
-    // 	    cout << "# SplitPairs  " << nSplitPairs << endl;
+    // 	    cout << "# SplitPairs  " << nSplitPairs << " array says " << minimcevent->mSplitPairs->GetEntries() << endl;
     for (int j=0; j<nSplitPairs; ++j) { // mNSplitPair loop
 	StMiniMcPair* minimcpair = (StMiniMcPair*) minimcevent->mSplitPairs->At(j);
 	if (!minimcpair) continue;
