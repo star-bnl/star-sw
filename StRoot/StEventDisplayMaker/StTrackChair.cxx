@@ -1,6 +1,6 @@
 #include "StTrackChair.h"
 #include "StHelixD.hh"
-const Char_t *StTrackChair::trackTableList[] = {"tpt_track","dst_track"};
+const Char_t *StTrackChair::trackTableList[] = {"tpt_track_st","dst_track_st"};
 
 ClassImp(StTrackChair)
 //_____________________________________________________________________________
