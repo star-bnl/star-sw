@@ -195,6 +195,13 @@
 *                      with proper directory structure - so that gstar can
 *                      be run subsequently
 * 12/23/98 T. Wenaus - add content to obin, obout
+* 12/30/98 K. Turner - put fix in "tss" init section:
+*                      problem: tsspars table in 98l has changed so the version
+*                       you read in from $STAR/params/tpc/tss_pars.xdf is 
+*                       different than that on xdf file (made previous to 98l) 
+*                       - get error and table is deleted
+*                      solution: read in tss_pars.xdf file again when 
+*                       running tss - so now we always have 98l version
 * 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -280,8 +287,8 @@ macro bfc_init _
               message 'problem opening input file '
               goto EOF 
             endif
-     (evin)
-          exec read_table_from_file#init inev [input_file]
+   (evin)
+	  exec read_table_from_file#init inev [input_file]
            if ($vexist(readprob).ne.0) then 
             message ' BFC_UTIL,init: ERROR - cannot open input file - quit '
             goto EOF
@@ -290,7 +297,7 @@ macro bfc_init _
            if ($vexist(readprob).ne.0) then 
             message ' BFC_UTIL,init: ERROR - cannot read input file - quit '
             goto EOF
-	  endif 
+	  endif
     (mdin)
           exec read_table_from_file#init inev [input_file]
            if ($vexist(readprob).ne.0) then 
@@ -381,7 +388,14 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
          exec tcl_init#init_tcl
 	 exec tfs_init#init
       (tss) 
-	 exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
+         exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
+         message ' !!! FIX on 12/30/98 !!! '
+	 message '   98l param file has new tsspar table '
+	 message '    but input xdf files (< 98l) have old type '
+	 message '    --> NOW: read in tss_pars.xdf & overwrite input xdf file'
+	 exec read_table_from_file#init k1 $STAR/params/tpc/tss_pars.xdf
+	 exec read_table_from_file#read k1 [params]/tpc
+	 exec read_table_from_file#close k1
          exec tss_init#init [tpc_sector_first] [tpc_sector_last]
       (tfc) 
         exec create_tables_tpc#tfc
