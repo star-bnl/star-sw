@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.20 2001/10/24 14:36:54 suaide Exp $
+// $Id: StPreEclMaker.cxx,v 1.21 2003/01/23 03:49:59 jeromel Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.21  2003/01/23 03:49:59  jeromel
+// Include changed
+//
 // Revision 1.20  2001/10/24 14:36:54  suaide
 // small modifications
 //
@@ -110,7 +113,7 @@
 #include "StPreEclMaker.h"
 #include "StEmcSimulatorMaker/StEmcSimulatorMaker.h"
 #include "St_ems_Maker/St_ems_Maker.h"
-#include "StEmcUtil/StEmcMath.h"
+#include "StEmcUtil/others/StEmcMath.h"
 #include "tables/St_emcClusterParam_Table.h"
 #include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
 // added for StEvent
@@ -122,7 +125,7 @@ ClassImp(StPreEclMaker)
 
 
 int nModule[8] = {120, 120, 120, 120, 24, 24, 24, 24}; // temp.->database
-#include "StEmcUtil/emcDetectorName.h"
+#include "StEmcUtil/others/emcDetectorName.h"
 
 emcClusterParam_st *parTable=0;
 Bool_t        kCheckClustersOkConf[8];
@@ -476,7 +479,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.20 2001/10/24 14:36:54 suaide Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.21 2003/01/23 03:49:59 jeromel Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

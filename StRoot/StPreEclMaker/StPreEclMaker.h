@@ -1,8 +1,11 @@
 //
-// $Id: StPreEclMaker.h,v 1.12 2001/10/15 01:40:20 pavlinov Exp $
+// $Id: StPreEclMaker.h,v 1.13 2003/01/23 03:49:59 jeromel Exp $
 //
 //
 // $Log: StPreEclMaker.h,v $
+// Revision 1.13  2003/01/23 03:49:59  jeromel
+// Include changed
+//
 // Revision 1.12  2001/10/15 01:40:20  pavlinov
 // Added Clear method and EmcCollection not in .data
 //
@@ -74,7 +77,7 @@
 #include <TH2.h>
 #include "St_emc_Maker/StEmcHitCollection.h"
 #include "StEmcPreClusterCollection.h"
-#include "StEmcUtil/emcInternalDef.h"
+#include "StEmcUtil/others/emcInternalDef.h"
 
 class St_emcClusterParam;
 
