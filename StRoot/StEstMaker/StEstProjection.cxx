@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstProjection.cxx,v 1.4 2001/02/23 13:31:11 lmartin Exp $
+ * $Id: StEstProjection.cxx,v 1.5 2001/03/02 16:10:26 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstProjection.cxx,v $
+ * Revision 1.5  2001/03/02 16:10:26  lmartin
+ * geometrical cuts assigned to the layers and not to the number of hits in the segment.
+ *
  * Revision 1.4  2001/02/23 13:31:11  lmartin
  * cout replaced by gMessMgr.
  *
@@ -233,8 +236,8 @@ int StEstTracker::Projection(StEstBranch* branch, long slay) {
 	
 
 
-	realslay=3-branch->GetNHits();
-	//	realslay=slay;
+	//	realslay=3-branch->GetNHits();
+	realslay=slay;
 	if(tmpd1b>mParams[mPass]->geomcutl[realslay] || tmpd1c>mParams[mPass]->geomcutw[realslay])
 	  continue;  // geometrical cut
 	tmpl1  = mPreprojTable[il];	    
