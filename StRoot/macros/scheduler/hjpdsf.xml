@@ -6,9 +6,16 @@
     set finalDirectory=/star/data05/scratch/didenko/gridwork/hj/register
     set finalNode=gsiftp://stargrid02.rcf.bnl.gov
 
+    # --- set finalNode=gsiftp://pdsfgrid2.nersc.gov
+
     # ----- at PDSF (remote GRID node) ----
     #
+    # URL: http://www-pdsf.nersc.gov/~username/
     set localWebPage=~/public_html
+ 
+   #
+    # URL: http://www.rhic.bnl.gov/~username/
+    #    set localWebPage=~/WWW
     set packageDirectory=${localWebPage}/gridwork/hj 
     set finalPackageDirectory=${finalNode}/${finalDirectory}
     set packageDirectoryBin=${packageDirectory}/bin
