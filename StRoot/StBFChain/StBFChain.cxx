@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.342 2003/07/09 20:27:59 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.343 2003/07/19 02:03:19 lbarnby Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -427,7 +427,6 @@ Bfc_st BFC1[] = {
                                                                                "<StEvent creation>",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StBichsel,StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
-
 
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
@@ -919,6 +918,8 @@ Bfc_st BFC2[] = {
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StBichsel,StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
+  {"V02"         ,"v02","","db,StEvent","StV0FinderMaker","StSecondaryVertexMaker","Find V0s from StEvent",kFALSE},
+  {"Xi2"      ,"xi2","","db,StEvent","StXiFinderMaker","StSecondaryVertexMaker","Xis AND V0s from StEvent",kFALSE},
 
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
