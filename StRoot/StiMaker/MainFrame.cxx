@@ -33,6 +33,7 @@ using std::find_if;
 #include "StiGui/StiRootDrawableDetector.h"
 #include "StiGui/StiDrawable.h"
 #include "StiGui/StiDisplayManager.h"
+#include "StiGui/StiGuiIOBroker.h"
 
 //StiMaker
 #include "StiMaker.h"
@@ -200,6 +201,7 @@ ClassImp(MainFrame)
 
     mOptionsMenu = new TGPopupMenu(fClient->GetRoot());
     mOptionsMenu->AddEntry("Messenger Options", M_Messenger);
+    mOptionsMenu->AddEntry("Display Options", M_DisplayOptions);
 
     fMenuHelp = new TGPopupMenu(fClient->GetRoot());
     fMenuHelp->AddEntry("&Contents", M_HELP_CONTENTS);
@@ -293,7 +295,7 @@ ClassImp(MainFrame)
 			     new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 0, 2, 2));
     
     fTrackingFrame->AddFrame(fNextEventButton,
-			     new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 0, 2, 2));
+			     new TGLayoutHints(kLHintsTop | kLHintsRight, 2, 0, 2, 2));
 
     AddFrame(fTrackingFrame, new TGLayoutHints(kLHintsBottom | kLHintsExpandX,
 					       0, 0, 1, 0));
@@ -452,7 +454,7 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 		
 	    case M_FILE_OPEN:
 		{
-		    static TString dir("/star/data17/ITTF/");
+		    static TString dir("/star/data22/ITTF/");
 		    TGFileInfo fi;
 		    fi.fFileTypes = filetypes;
 		    fi.fIniDir    = StrDup(dir);
@@ -469,6 +471,10 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 
 	    case M_Messenger:	
 		new TestMsgBox(fClient->GetRoot(), this, 400, 200);
+		break;
+
+	    case M_DisplayOptions:
+		new EntryTestDlg(fClient->GetRoot(), this);		
 		break;
 		
 	    case M_Draw_TestObject:
@@ -1573,29 +1579,6 @@ void DetectorActivator::activateLayer(const string& name, bool on)
     }
 }
 
-// TGNumberEntry widget test dialog
-const char *const EntryTestDlg::numlabel[13] = {
-    "Integer",
-    "One digit real",
-    "Two digit real",
-    "Three digit real",
-    "Four digit real",
-    "Real",
-    "Degree.min.sec",
-    "Min:sec",
-    "Hour:min",
-    "Hour:min:sec",
-    "Day/month/year",
-    "Month/day/year",
-    "Hex"
-};
-
-const Double_t EntryTestDlg::numinit[13] = {
-    12345, 1.0, 1.00, 1.000, 1.0000, 1.2E-12,
-    90 * 3600, 120 * 60, 12 * 60, 12 * 3600 + 15 * 60,
-    19991121, 19991121, (Double_t) 0xDEADFACE
-};
-
 EntryTestDlg::EntryTestDlg(const TGWindow * p, const TGWindow * main)
     : TGTransientFrame(p, main, 10, 10, kHorizontalFrame)
 {
@@ -1603,57 +1586,33 @@ EntryTestDlg::EntryTestDlg(const TGWindow * p, const TGWindow * main)
     fF1 = new TGVerticalFrame(this, 200, 300);
     fL1 = new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 2, 2, 2);
     AddFrame(fF1, fL1);
+
     fL2 = new TGLayoutHints(kLHintsCenterY | kLHintsRight, 2, 2, 2, 2);
 
-    for (int i = 0; i < 13; i++) {
-	fF[i] = new TGHorizontalFrame(fF1, 200, 30);
-	fF1->AddFrame(fF[i], fL2);
-	fNumericEntries[i] = new TGNumberEntry(fF[i], numinit[i], 12, i + 20,
-					       (TGNumberFormat::EStyle) i);
-	fNumericEntries[i]->Associate(this);
-	fF[i]->AddFrame(fNumericEntries[i], fL2);
-	fLabel[i] = new TGLabel(fF[i], numlabel[i]);
-	fF[i]->AddFrame(fLabel[i], fL2);
-    }
+    makeNumberEntries();
+    
     fF2 = new TGVerticalFrame(this, 200, 500);
     fL3 = new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 2, 2, 2);
     AddFrame(fF2, fL3);
-    fLowerLimit = new TGCheckButton(fF2, "lower limit:", 4);
-    fLowerLimit->Associate(this);
-    fF2->AddFrame(fLowerLimit, fL3);
-    fLimits[0] = new TGNumberEntry(fF2, 0, 12, 10);
-    fLimits[0]->SetLogStep(kFALSE);
-    fLimits[0]->Associate(this);
-    fF2->AddFrame(fLimits[0], fL3);
-    fUpperLimit = new TGCheckButton(fF2, "upper limit:", 5);
-    fUpperLimit->Associate(this);
-    fF2->AddFrame(fUpperLimit, fL3);
-    fLimits[1] = new TGNumberEntry(fF2, 0, 12, 11);
-    fLimits[1]->SetLogStep(kFALSE);
-    fLimits[1]->Associate(this);
-    fF2->AddFrame(fLimits[1], fL3);
-    fPositive = new TGCheckButton(fF2, "Positive", 6);
-    fPositive->Associate(this);
-    fF2->AddFrame(fPositive, fL3);
-    fNonNegative = new TGCheckButton(fF2, "Non negative", 7);
-    fNonNegative->Associate(this);
-    fF2->AddFrame(fNonNegative, fL3);
-    fSetButton = new TGTextButton(fF2, " Set ", 2);
+    
+    fSetButton = new TGTextButton(fF2, " Apply ", 2);
     fSetButton->Associate(this);
     fF2->AddFrame(fSetButton, fL3);
+    
     fExitButton = new TGTextButton(fF2, " Close ", 1);
     fExitButton->Associate(this);
     fF2->AddFrame(fExitButton, fL3);
     
     // set dialog box title
-    SetWindowName("Number Entry Test");
-    SetIconName("Number Entry Test");
-    SetClassHints("NumberEntryDlg", "NumberEntryDlg");
+    SetWindowName("Display Options");
+    SetIconName("Display Options");
+    SetClassHints("DisplayOptions", "DisplayOptions");
     // resize & move to center
     MapSubwindows();
     UInt_t width = GetDefaultWidth();
     UInt_t height = GetDefaultHeight();
     Resize(width, height);
+
     Int_t ax;
     Int_t ay;
     if (main) {
@@ -1663,7 +1622,7 @@ EntryTestDlg::EntryTestDlg(const TGWindow * p, const TGWindow * main)
 					 fWidth) >> 1,
 					(((TGFrame *) main)->GetHeight() -
 					 fHeight) >> 1, ax, ay, wdum);
-    } else {
+;    } else {
 	UInt_t root_w, root_h;
 	gVirtualX->GetWindowSize(fClient->GetRoot()->GetId(), ax, ay,
 				 root_w, root_h);
@@ -1681,22 +1640,109 @@ EntryTestDlg::EntryTestDlg(const TGWindow * p, const TGWindow * main)
 		kMWMFuncMinimize, kMWMInputModeless);
     
     MapWindow();
-    fClient->WaitFor(this);
+    
+    //fClient->WaitFor(this);
+}
+
+void EntryTestDlg::makeNumberEntries()
+{
+    StiGuiIOBroker* broker = StiGuiIOBroker::instance();
+    
+    //Marked Hit Color
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("MarkedHitColor",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->markedHitColor() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 10);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Marked Hit Color") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //UnMarked Hit Color
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("UnMarkedHitColor",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->unMarkedHitColor() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 10);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "UnMarked Hit Color") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //Marked Hit Style
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("MarkedHitStyle",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->markedHitStyle() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 30);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Marked Hit Style") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //UnMarked Hit Style
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("UnMarkedHitStyle",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->unMarkedHitStyle() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 30);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "UnMarked Hit Style") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //Marked Hit Size
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("MarkedHitSize",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->markedHitSize() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESRealTwo, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 1.);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Marked Hit Size") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //UnMarked Hit Size
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("UnMarkedHitSize",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->unMarkedHitSize() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESRealTwo, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 1.);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "UnMarked Hit Size") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+
 }
 
 EntryTestDlg::~EntryTestDlg()
 {
-    for (int i = 0; i < 13; i++) {
-	delete fNumericEntries[i];
+    if (fNumericEntries.size()!=fLabel.size() || fLabel.size()!=fF.size()) {
+	cout <<"EntryTestDlg::~EntryTestDlg. ERROR:\t"
+	     <<"Mismatch in cleanup vector size"<<endl;
+    }
+    for (unsigned int i=0; i<fF.size(); ++i) {
+	delete fNumericEntries[i].second;
 	delete fLabel[i];
 	delete fF[i];
+	fNumericEntries[i].second=0;
+	fLabel[i]=0;
+	fF[i]=0;
     }
-    delete fLowerLimit;
-    delete fUpperLimit;
-    delete fLimits[0];
-    delete fLimits[1];
-    delete fPositive;
-    delete fNonNegative;
     delete fSetButton;
     delete fExitButton;
     delete fF1;
@@ -1713,33 +1759,36 @@ void EntryTestDlg::CloseWindow()
 
 void EntryTestDlg::SetLimits()
 {
-    Double_t min = fLimits[0]->GetNumber();
-    Bool_t low = (fLowerLimit->GetState() == kButtonDown);
-    Double_t max = fLimits[1]->GetNumber();
-    Bool_t high = (fUpperLimit->GetState() == kButtonDown);
-    TGNumberFormat::ELimit lim;
-    if (low && high) {
-	lim = TGNumberFormat::kNELLimitMinMax;
-    } else if (low) {
-	lim = TGNumberFormat::kNELLimitMin;
-    } else if (high) {
-	lim = TGNumberFormat::kNELLimitMax;
-    } else {
-	lim = TGNumberFormat::kNELNoLimits;
-    }
-    Bool_t pos = (fPositive->GetState() == kButtonDown);
-    Bool_t nneg = (fNonNegative->GetState() == kButtonDown);
-    TGNumberFormat::EAttribute attr;
-    if (pos) {
-	attr = TGNumberFormat::kNEAPositive;
-    } else if (nneg) {
-	attr = TGNumberFormat::kNEANonNegative;
-    } else {
-	attr = TGNumberFormat::kNEAAnyNumber;
-    }
-    for (int i = 0; i < 13; i++) {
-	fNumericEntries[i]->SetFormat(fNumericEntries[i]->GetNumStyle(), attr);
-	fNumericEntries[i]->SetLimits(lim, min, max);
+    StiGuiIOBroker* broker = StiGuiIOBroker::instance();
+
+    for (NumberEntryVec::const_iterator it=fNumericEntries.begin();
+	 it!=fNumericEntries.end(); ++it) {
+	//cout <<"Number Entry\t"<<(*it).first<<" has value:\t"<<(*it).second->GetNumber()<<endl;
+	const string& name = (*it).first;
+	
+	if (name=="MarkedHitColor") {
+	    broker->setMarkedHitColor( (*it).second->GetNumber() );
+	}
+	else if (name=="UnMarkedHitColor") {
+	    broker->setUnMarkedHitColor( (*it).second->GetNumber() );
+	}
+	else if (name=="MarkedHitStyle") {
+	    broker->setMarkedHitStyle( (*it).second->GetNumber() );
+	}
+	else if (name=="UnMarkedHitStyle") {
+	    broker->setUnMarkedHitStyle( (*it).second->GetNumber() );
+	}
+	else if (name=="MarkedHitSize") {
+	    broker->setMarkedHitSize( (*it).second->GetNumber() );
+	}
+	else if (name=="UnMarkedHitSize") {
+	    broker->setUnMarkedHitSize( (*it).second->GetNumber() );
+	}
+	else {
+	    cout <<"EntryTestDlg::SetLimits(). ERROR:\t"
+		 <<"Unknown name for NumberEntry:\t"<<name
+		 <<"\tYou had a compile time error"<<endl;
+	}
     }
 }
 
