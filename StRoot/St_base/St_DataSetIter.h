@@ -59,6 +59,7 @@ public:
   virtual St_DataSet    *operator()() {return  Next();}
   virtual St_DataSet    *operator()(const Char_t *path) { return Find(path); }
   virtual Int_t          GetDepth() const {return fDepth;}
+  virtual St_DataSet    *Cwd() const {return fWorkingDataSet;}
   virtual St_DataSet    *Dir(Char_t *dirname);
   virtual Int_t          Du() const;  // summarize dataset usage
   virtual Int_t          Df() const {return 0;} // report number of free "table" blocks. 
@@ -77,7 +78,7 @@ public:
   virtual St_DataSet    *Md(const Char_t *dirname){return Mkdir(dirname);}
   virtual TString        Path(const Char_t *path) {St_DataSet *set = Find(path); return set ? TString (""):set->Path();}
   virtual TString        Path() {return fWorkingDataSet ? TString ("") : fWorkingDataSet->Path();}
-  virtual St_DataSet    *Pwd() const {return fWorkingDataSet;}
+  virtual St_DataSet    *Pwd(Option_t *opt="") const {if (Cwd()) Cwd()->ls(opt); return Cwd();}
   virtual Int_t          Rmdir(St_DataSet *dataset,Option_t *option="");
   virtual Int_t          Rmdir(const Char_t *dirname,Option_t *option=""){return Rmdir(Find(dirname),option);}
   virtual Int_t          Rd(const Char_t *dirname,Option_t *option=""){return Rmdir(Find(dirname),option);}
