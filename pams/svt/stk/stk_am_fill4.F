@@ -1303,6 +1303,7 @@ c            write(889,*) ' considering track for storage:',itrack+1
             done(6)   = .true.
             done(7)   = .true.
             done(8)   = .true.
+            stk_am_fill4 = stafcv_bad
             itrack   = track_h.maxlen
          else                   ! (itrack.le.track_h.maxlen)
             ispt = 0
@@ -1347,6 +1348,7 @@ C     spt(ispts(k)).id_track     = itrack
                         done(4)   = .true.
                         done(5)   = .true.
                         done(6)   = .true.
+                        stk_am_fill4 = stafcv_bad
                         goto 117
                      endif
                      if (ispt.eq.1) then
@@ -1388,6 +1390,12 @@ c     wkw: itrack here is the sum of the previous loop and the old loops
       groups_h.nok      = n_groups -1
       
       call StInfo('STK_AM_FILL4: Stopping ############################')
-      STK_AM_FILL4=STAFCV_OK
+      
       RETURN
       END
+
+
+
+
+
+
