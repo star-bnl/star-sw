@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.46 2003/04/14 15:56:59 munhoz Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.47 2003/07/18 17:15:40 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.47  2003/07/18 17:15:40  caines
+ * Fix Pedoffset to be 20 not 10 change variables to int from floats to avoid casting problems, fix that when pedestal goes negative we dont
+ *
  * Revision 1.46  2003/04/14 15:56:59  munhoz
  * changes for gain calibration file
  *
@@ -191,7 +194,7 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
   // Set up some defaults
 
   mPedFile = NULL;
-  mPedOffSet = 10;
+  mPedOffSet = 20;
   m_thresh_lo = 3+mPedOffSet;
   m_thresh_hi = 5+mPedOffSet; 
   m_n_seq_lo  = 2;
@@ -567,7 +570,6 @@ Int_t StSvtSeqAdjMaker::Make()
 		  continue;
 		}
 	      }
-
 	      if( doCommon) CommonModeNoiseSub(iAnode);
 	      else SubtractFirstAnode(iAnode);
 	      //if (Debug() && !doCommon)MakeHistogramsAdc(mHybridRawData,index,Anode,1);
@@ -623,8 +625,7 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int iAnode, int Anode){
   int firstTimeBin;
 
   //Anode is the index into the anolist array
-  
-  status= mHybridRawData->getListSequences(iAnode,nSeqOrig,Sequence);
+   status= mHybridRawData->getListSequences(iAnode,nSeqOrig,Sequence);
   //status= mHybridRawData->getSequences(Anode,nSeqOrig,Sequence);
 
   nSeqNow = 0;
@@ -646,7 +647,6 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int iAnode, int Anode){
 	  count2++;
 	}
 
-	//cout << (int) adc[j] << " " ;
 	j++;
       }
 
@@ -702,7 +702,7 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int iAnode, int Anode){
   mHybridAdjData->setListSequences(iAnode, Anode,mNumOfSeq, tempSeq1);
   
   //if (nSeqNow)
-  //cout << "For Anode=" << Anode << " Number sequnces was=" << nSeqOrig << " Number now=" << nSeqNow << endl;
+  //  cout << "For Anode=" << Anode << " Number sequnces was=" << nSeqOrig << " Number now=" << nSeqNow << endl;
   
   //  data << endl;
   
@@ -908,13 +908,14 @@ void StSvtSeqAdjMaker::SubtractFirstAnode(int iAnode){
 
   int  nSeq, nSeqOrig, length;
   int startTimeBin,  status, j;
-  float adcMean;
+  int adcMean;
   StSequence* Sequence;
   unsigned char* adc;
 
 
   status= mHybridRawData->getListSequences(iAnode,nSeqOrig,Sequence);
 
+  adcMean = 0;
   for( nSeq=0; nSeq< nSeqOrig ; nSeq++){
   
     adc=Sequence[nSeq].firstAdc;
@@ -923,15 +924,17 @@ void StSvtSeqAdjMaker::SubtractFirstAnode(int iAnode){
     j =0;
     while( j<length){
 
-      adcMean = (float)adcCommon[j+startTimeBin]/mNAnodes;
-      //adcMean = (float)adcSecond[j];
+     if( mNAnodes) adcMean = adcCommon[j+startTimeBin]/mNAnodes;
 
-      //cout << "iAnode = " << iAnode << ", time = " << startTimeBin + j << ", adcFirst = " << (int)adcFirst[j] << ", adcSecond = " << (int)adcSecond[j] << ", adcMean = " << adcMean << endl;
-
-      if( (float)adc[j]-(float)adcMean < 0) adc[j]=0;
+     //cout << "iAnode = " << iAnode << "ADC value is: " << (int) adc[j] << " for time = " << startTimeBin + j << " and ADCMean = "<< adcMean << " mNAnodes = " << mNAnodes <<endl;
+      if( (int)adc[j]- adcMean < 0) adc[j]=0;
+      else if( adcMean < 0){
+	adc[j]	+= (unsigned char)(-1*adcMean);
+      }
       else{
 	adc[j] -= (unsigned char)adcMean;
       }
+      //cout << "Final ADC= " << (int)adc[j] << endl;
       j++;
     }
   }
@@ -957,7 +960,7 @@ int StSvtSeqAdjMaker::FindBlackAnodes(){
   
   status= mHybridRawData->getSequences(240,nSequence,Seq);
   length = 0;
-  
+  for(j=0; j<128; j++) adcCommon[j]=0;
   for( i=0; i<nSequence; i++)  length += Seq[i].length;
   if( length < 126){
     // IF anode 240 isnt black try 239
@@ -989,13 +992,13 @@ int StSvtSeqAdjMaker::FindBlackAnodes(){
       startTimeBin=Seq[nSeq].startTimeBin;
       j=0;
       while( j<length){
-	adcCommon[startTimeBin+j] = (float)adc[j]-mPedOffSet;
+	adcCommon[startTimeBin+j] = adc[j]-mPedOffSet;
 	adcAv += (int) adc[j];
 	j++;
       }
     }
     // If this black anode was bad dont count it in subtraction
-    if( adcAv <100) {
+    if( adcAv <100 || adcAv> 25000) {
       mNAnodes--;
       for(j=0; j<128; j++) adcCommon[j]=0;
     }
@@ -1027,13 +1030,13 @@ int StSvtSeqAdjMaker::FindBlackAnodes(){
       startTimeBin=Seq[nSeq].startTimeBin;
       j=0;
       while( j<length){
-	adcCommon[startTimeBin+j] += (float)adc[j]-mPedOffSet;
+	adcCommon[startTimeBin+j] += adc[j]-mPedOffSet;
 	adcAv += (int)  adc[j];
 	j++;
       }
     }
-    
-    if( adcAv <100) {
+
+    if( adcAv <100 || adcAv> 25000) {
       mNAnodes--;
       // If black anode is bad subtract back of wrong adc values
       // from average will subtract from all other anodes
@@ -1045,7 +1048,7 @@ int StSvtSeqAdjMaker::FindBlackAnodes(){
 	  startTimeBin=Seq[nSeq].startTimeBin;
 	  j=0;
 	  while( j<length){
-	    adcCommon[startTimeBin+j] -= (float)adc[j]-mPedOffSet;
+	    adcCommon[startTimeBin+j] -= adc[j]-mPedOffSet;
 	    adcAv += (int)  adc[j];
 	    j++;
 	  }
@@ -1080,6 +1083,7 @@ void StSvtSeqAdjMaker::MakeHistogramsAdc(StSvtHybridData* hybridData, int index,
 	mRawAdc[index]->Fill(Anode,(int)adc[j]);
 	//mTimeAn[index]->Fill(Anode,j+svtSequence[mSeq].startTimeBin,(int)adc[j]);
 	mAdcAfter[index]->Fill(Anode);
+	//cout << "Index= " << index << " Anode " << Anode << " " << (int)adc[j] - mPedOffSet << " count= " << Evt_counts <<endl;
 	if (adc[j] >0) numOfPixels++;
 	if (adc[j] >0) Evt_counts++;
       }

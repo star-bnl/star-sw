@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.20 2003/01/21 01:27:44 jeromel Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.21 2003/07/18 17:15:40 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.21  2003/07/18 17:15:40  caines
+// Fix Pedoffset to be 20 not 10 change variables to int from floats to avoid casting problems, fix that when pedestal goes negative we dont
+//
 // Revision 1.20  2003/01/21 01:27:44  jeromel
 // hfile->write(0 while NULL caused spurious crash.
 // Took the oportunity to add GetCVS()
@@ -125,7 +128,7 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t SetLowInvProd(int LowInvProd);// Set the low threshold based on the frequency distribution
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSvtSeqAdjMaker.h,v 1.20 2003/01/21 01:27:44 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSvtSeqAdjMaker.h,v 1.21 2003/07/18 17:15:40 caines Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
     
@@ -168,7 +171,7 @@ class StSvtSeqAdjMaker : public StMaker
   int mCommonModeNoiseAn[128];
   int mNAnodes;
   int doCommon;
-  float adcCommon[128];
+  int adcCommon[128];
 
  private:
   string buildFileName(string dir, string fileName, string extention);
