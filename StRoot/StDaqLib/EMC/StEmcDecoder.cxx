@@ -181,7 +181,7 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
   int FEE1_tmp[4]={1,4,3,2};
   int FEE2_tmp[4]={2,1,4,3};
   int FEE3_tmp[4]={3,2,1,4};
-  for(int i=0;i<8;i++) 
+  for(int i=0;i<4;i++) 
 	{
 		FEE1[i]=FEE1_tmp[i];
   	FEE2[i]=FEE2_tmp[i];
@@ -467,7 +467,7 @@ int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int&
   int daq_smd=index;
   
   int category=daq_smd/1600;
-  int wire=(daq_smd-category*1600)/20;
+  int wire=(daq_smd-category*1600)/20+1;
   int A_step=daq_smd%4;
   int S_step=daq_smd%20;
   int A_value=0;
@@ -476,8 +476,7 @@ int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int&
   if(category==0)
   {
     A_value=FEE1[A_step];
-    S_value=connector1[S_step];
-    
+    S_value=connector1[S_step];   
   }
 
   if(category==1)
@@ -523,10 +522,10 @@ int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int&
   if(mod_stat)
   {
     //Get strip no
-    int dummy=checkDummy(wire+1);
+    int dummy=checkDummy(wire);
     if(dummy==0)
     {
-      int stat=getSmdPin(det,half,wire+1,pin);
+      int stat=getSmdPin(det,half,wire,pin);
 
       /*cout <<"RDO = "<<RDO
            <<"  idx = "<<index
