@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.89 2004/12/17 22:33:35 aihong Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.90 2004/12/20 19:41:24 aihong Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -1179,7 +1179,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.89 2004/12/17 22:33:35 aihong Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.90 2004/12/20 19:41:24 aihong Exp $");
 
   return StMaker::Init();
 }
@@ -1212,7 +1212,7 @@ Bool_t StFlowAnalysisMaker::FillFromFlowEvent() {
   }
   mZDCSMD_e_PsiWgt = pFlowEvent->ZDCSMD_PsiWgtEast();
   mZDCSMD_w_PsiWgt = pFlowEvent->ZDCSMD_PsiWgtWest();
-  mZDCSMD_f_PsiWgt = pFlowEvent->ZDCSMD_PsiWgtFull();
+  mZDCSMD_f_PsiWgt = (pFlowEvent->UseZDCSMD()) ? pFlowEvent->ZDCSMD_PsiWgtFull():1.;
   mFlowWeight  	   = (pFlowEvent->UseZDCSMD()) ? mZDCSMD_e_PsiWgt*mZDCSMD_w_PsiWgt*mZDCSMD_f_PsiWgt:1.;
   return kTRUE;
 }
@@ -2338,6 +2338,9 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.90  2004/12/20 19:41:24  aihong
+// crashes when run without ZDCSMD. bug fixed
+//
 // Revision 1.89  2004/12/17 22:33:35  aihong
 // add in full Psi weight for ZDC SMD and fix a few bugs, done by Gang
 //
