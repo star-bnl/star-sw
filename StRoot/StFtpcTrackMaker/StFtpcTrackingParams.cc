@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.12 2003/01/16 18:04:34 oldi Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.13 2003/01/21 10:04:13 jcs Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.13  2003/01/21 10:04:13  jcs
+// initialize variables to eliminate compiler warnings for NODEBUG=yes
+//
 // Revision 1.12  2003/01/16 18:04:34  oldi
 // Bugs eliminated. Now it compiles on Solaris again.
 // Split residuals for global and primary fit.
@@ -428,6 +431,9 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
 			      - 2.*mObservedVertexOffsetY[i]*mInstallationPointY[i] 
 			      + TMath::Power(mInstallationPointZ[i], 2.)); // p-q-formula
     
+     // Initialize variable to avoid compiler warning
+     alpha = 0;
+     
     if (i == 0) { // east
       zShift = (mInstallationPointZ[i] + pq) * centimeter; // take correct solution of p-q-formula
       phi0 = TMath::ATan((mInstallationPointY[i] - mObservedVertexOffsetY[i]) / mInstallationPointZ[i]) * radian;
@@ -723,6 +729,9 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
 			      - 2.*mObservedVertexOffsetY[i]*mInstallationPointY[i] 
 			      + TMath::Power(mInstallationPointZ[i], 2.)); // p-q-formula
     
+     // Initialize variable to avoid compiler warning
+     alpha = 0;
+     
     if (i == 0) { // east
       zShift = (mInstallationPointZ[i] + pq) * centimeter; // take correct solution of p-q-formula
       phi0 = TMath::ATan((mInstallationPointY[i] - mObservedVertexOffsetY[i]) / mInstallationPointZ[i]) * radian;

@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.23 2003/01/20 13:16:23 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.24 2003/01/21 10:04:13 jcs Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.24  2003/01/21 10:04:13  jcs
+// initialize variables to eliminate compiler warnings for NODEBUG=yes
+//
 // Revision 1.23  2003/01/20 13:16:23  oldi
 // Additional volume segment added as garbage container. Hits which give a
 // segment index which is out of range (esp. those ones sitting exactly on the
@@ -561,7 +564,7 @@ void StFtpcConfMapper::NoFieldTracking()
 void StFtpcConfMapper::Settings(TString method) {
   // Sets settings with default values by given tracking method.
 
-  Int_t method_id;
+  Int_t method_id = 0;
 
   if (method == "main_vertex") {
     method_id = 0;
@@ -605,7 +608,7 @@ void StFtpcConfMapper::Settings(Int_t method_id) {
 void StFtpcConfMapper::Cuts(TString method) {
   // Sets cuts with default values by given tracking method.
 
-  Int_t method_id;
+  Int_t method_id = 0;
 
   if (method == "main_vertex") {
     method_id = 0;
