@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.17 2000/08/21 22:25:46 fine Exp $
+// $Id: PadControlPanel.C,v 1.18 2001/09/01 19:58:14 perev Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -30,11 +30,11 @@
 //  begin_html  <P ALIGN=CENTER> <IMG SRC="gif/FourStarView.gif" ></P> end_html
 //  To cutomize the default bar the dirived class with the custom void UserBar()
 //  method can be done.
-//         TControlBar *Bar(){ return fBar;}  
+//         TGButtonGroup *Bar(){ return fBar;}  
 //  method can be used.
 //
 //  Example:
-//    TControlBar *myBar =   __aa__.Bar();
+//    TGButtonGroup *myBar =   __aa__.Bar();
 //     myBar->AddButton("My custom","printf(\"here is my custom action\n\");","To add your own action replace the second parameter"); 
 //
 //  Note:  If you don't like what it does make your private copy 
@@ -51,79 +51,61 @@
 //  operation:
 //
 ///////////////////////////////////////////////////////////////////////
+TGButtonGroup *mainBar=0;
 
 class StPadControlPanel {
   private:
-   TControlBar *fBar;  
-  protected:
-   //_______________________________________________________________________________________
-   void Bar(const Char_t *buttonName, const Char_t *statement,const Char_t *tipText)
-   {   fBar->AddButton(buttonName,statement,tipText); }
+   TGButtonGroup *fBar;  
+   TGLayoutHints *fL1;
 
-  public:
-StPadControlPanel() { fBar=PadControlPanel();}
+protected:
+
+
 //_______________________________________________________________________________________
-static TControlBar *PadControlPanel(TControlBar *bar=0){
-//
-// This macro generates a Controlbar panel: 
-// begin_html  <P ALIGN=CENTER> <IMG SRC="gif/PadControlPanel.gif" ></P> end_html
-//
-// To execute an item, click with the left mouse button.
-//  
-// Just start this macro wheneven you want:
-//
-//  From Root/Cint macro:
-//  --------------------
-//   .x PadControlPanel.C
-//   .L PadControlPanel.C
-// or
-//   gROOT->LoadMacro("PadControlPanel.C");
-//
-//  From the compiled C++ code:
-//  --------------------
-//   gROOT->LoadMacro("PadControlPanel.C");
-//
-   if (bar) delete bar;
-   bar = new TControlBar("vertical", "Pad Control Panel");
-   bar->AddButton("Black background", "StPadControlPanel::SetBackround(kBlack);", "Change the backgroung color to black");
-   bar->AddButton("White background", "StPadControlPanel::SetBackround(19);", "Change the backgroung color to white");
-   bar->AddSeparator();
-//   bar->AddButton("Set background", "StPadControlPanel::SetBackroundStyle();", "Change the backgroung color to white");
-   bar->AddButton("Adjust scales","StPadControlPanel::AdjustScales();","Adjust the scales of all three axice");
-   bar->AddButton("Centered","StPadControlPanel::Centered3DImages();","Place (0,0,0) into the center of the view port");
-   bar->AddButton("Scale +","StPadControlPanel::Inscrease3DScale();","Change the scale of the image");
-   bar->AddButton("Scale -","StPadControlPanel::Decrease3DScale();","Change the scale of the image");
-   bar->AddSeparator();
-   bar->AddButton("Top View (X-Y)","StPadControlPanel::TopView();","Show the top view (X-Y projection)");
-   bar->AddButton("Side View (Y-Z)","StPadControlPanel::SideView();","Show the side view (Y-Z projection)");
-   bar->AddButton("Front View (X-Z)","StPadControlPanel::FrontView();","Show the front view (X-Z projection)");
-   bar->AddButton("4 views","StPadControlPanel::MakeFourView();","4 view");
-   bar->AddSeparator();
-   bar->AddButton("Add Axes","StPadControlPanel::AddAxes();","Add 3D axes to the current TPad view");
-   bar->AddButton("Rulers","StPadControlPanel::ToggleRulers();","Turn 3D ruler ON / OFF (a new ruler popes up with new attributes)");
-   bar->AddButton("Zoom","StPadControlPanel::ToggleZoom();","Turn ZOOM ON");
-   bar->AddSeparator();
+   void AddButt(const Char_t *buttonName, const Char_t *command)
+   {   
+       TGTextButton *tb = new TGTextButton(fBar,buttonName,command);
+       fBar->AddFrame(tb,fL1);   
+   }
 
-   bar->AddButton("Next event","chain->MakeEvent();","Make next event and draw it");
-   if (chain && chain->Maker("EventDisplay")) 
-     bar->AddButton("ReDraw canvas","((StEventDisplayMaker *)(chain->Maker(\"EventDisplay\")))->ReDraw();",
-                    "ReDraw canvas to take in account new options");
+public:
 
 
-   // UserBars();
+StPadControlPanel() { Build();}
+//_______________________________________________________________________________________
+void  Build()
+{
+   const char *fills[] = {
+    "Black background",	"StPadControlPanel::SetBackround(kBlack);"
+   ,"White background",	"StPadControlPanel::SetBackround    (19);"
+   ,"Adjust scales",	"StPadControlPanel::AdjustScales    ();"
+   ,"Centered",		"StPadControlPanel::Centered3DImages();"
+   ,"Scale +",		"StPadControlPanel::Inscrease3DScale();"
+   ,"Scale -",		"StPadControlPanel::Decrease3DScale ();"
+   ,"Top View (X-Y)",	"StPadControlPanel::TopView     ();"
+   ,"Side View (Y-Z)",	"StPadControlPanel::SideView    ();"
+   ,"Front View (X-Z)",	"StPadControlPanel::FrontView   ();"
+   ,"4 views",		"StPadControlPanel::MakeFourView();"
+   ,"Add Axes",		"StPadControlPanel::AddAxes     ();"
+   ,"Rulers",		"StPadControlPanel::ToggleRulers();"
+   ,"Zoom",		"StPadControlPanel::ToggleZoom  ();"
+   ,"ReDraw canvas",	"StEventDisplayMaker::MakeLoop(1);"
+   ,"Next event",	"StEventDisplayMaker::MakeLoop(2);"
+   ,"End of Chain",	"StEventDisplayMaker::MakeLoop(3);"
+   ,0};
 
-   bar->Show();
-   return bar;
+
+   fBar = new TGButtonGroup(gClient->GetRoot(), "Pad Control Panel");
+   mainBar=fBar;
+   fL1 = new TGLayoutHints(kLHintsCenterY | kLHintsExpandX, 1, 1, 1, 1);
+   for (int i=0;fills[i];i+=2) {AddButt(fills[i],fills[i+1]);}
+
+   fBar->Show();
 }
 //_______________________________________________________________________________________
-~StPadControlPanel(){ if(fBar) delete fBar; fBar = 0;}
+~StPadControlPanel(){ delete fBar; delete fL1;}
 //_______________________________________________________________________________________
- TControlBar *Bar() const { return fBar;}  
-//_______________________________________________________________________________________
- virtual void UserBars(){
-  // User may overload this method to add his own buttons
-  printf("Please, overload me\n");   
- }
+ TGButtonGroup *Bar() const { return fBar;}  
 
 //_______________________________________________________________________________________
 static void SetBackround(Color_t color, TVirtualPad *pad=0)
@@ -362,10 +344,13 @@ void AddAxes(TVirtualPad *pad=0)
 }
 };
 
-StPadControlPanel __aa__;
-void PadControlPanel(){}
+StPadControlPanel __StPadControlPanel__;
+
 
 // $Log: PadControlPanel.C,v $
+// Revision 1.18  2001/09/01 19:58:14  perev
+// scripts for StEvent draw inside of StEventDisplayMaker
+//
 // Revision 1.17  2000/08/21 22:25:46  fine
 // XYZ labels were added to the panel buttons
 //

@@ -10,26 +10,23 @@
 //=======================================================================
    //
    gROOT->Reset();
-   Bool_t NT=kFALSE;
-   if (strcmp(gSystem.GetName(),"WinNT") == 0 ) NT=kTRUE;
-   if (NT) gSystem->Load("ROOT_STAR");
-   else  gSystem->Load("libSTAR");
+   gSystem->Load("libStar");
    c1 = new TCanvas("c1","Geometry Shapes",200,10,700,500);
 
    //  Define some volumes
-   brik = new TBRIK("BRIK","BRIK","void",200,150,150);
-   trd1 = new TTRD1("TRD1","TRD1","void",200,50,100,100);
-   trd2 = new TTRD2("TRD2","TRD2","void",200,50,200,50,100);
-   trap = new TTRAP("TRAP","TRAP","void",190,0,0,60,40,90,15,120,80,180,15);
-   para = new TPARA("PARA","PARA","void",100,200,200,15,30,30);
-   gtra = new TGTRA("GTRA","GTRA","void",390,0,0,20,60,40,90,15,120,80,180,15);
-   tube = new TTUBE("TUBE","TUBE","void",150,200,400);
-   tubs = new TTUBS("TUBS","TUBS","void",80,100,100,90,235);
-   cone = new TCONE("CONE","CONE","void",100,50,70,120,150);
-   cons = new TCONS("CONS","CONS","void",50,100,100,200,300,90,270);
-   sphe = new TSPHE("SPHE","SPHE","void",25,340, 45,135, 0,270);
-   sphe1 = new TSPHE("SPHE1","SPHE1","void",0,140, 0,180, 0,360);
-   sphe2 = new TSPHE("SPHE2","SPHE2","void",0,200, 10,120, 45,145);
+   TBRIK *brik = new TBRIK("BRIK","BRIK","void",200,150,150);
+   TTRD1 *trd1 = new TTRD1("TRD1","TRD1","void",200,50,100,100);
+   TTRD2 *trd2 = new TTRD2("TRD2","TRD2","void",200,50,200,50,100);
+   TTRAP *trap = new TTRAP("TRAP","TRAP","void",190,0,0,60,40,90,15,120,80,180,15);
+   TPARA *para = new TPARA("PARA","PARA","void",100,200,200,15,30,30);
+   TGTRA *gtra = new TGTRA("GTRA","GTRA","void",390,0,0,20,60,40,90,15,120,80,180,15);
+   TTUBE *tube = new TTUBE("TUBE","TUBE","void",150,200,400);
+   TTUBS *tubs = new TTUBS("TUBS","TUBS","void",80,100,100,90,235);
+   TCONE *cone = new TCONE("CONE","CONE","void",100,50,70,120,150);
+   TCONS *cons = new TCONS("CONS","CONS","void",50,100,100,200,300,90,270);
+   TSPHE *sphe = new TSPHE("SPHE","SPHE","void",25,340, 45,135, 0,270);
+   TSPHE *sphe1 = new TSPHE("SPHE1","SPHE1","void",0,140, 0,180, 0,360);
+   TSPHE *sphe2 = new TSPHE("SPHE2","SPHE2","void",0,200, 10,120, 45,145);
  
    pcon = new TPCON("PCON","PCON","void",180,270,4);
    pcon->DefineSection(0,-200,50,100);
@@ -83,9 +80,10 @@
    TVolumeView view(*node1);   
 
    view.Draw();
+  
 
    //
-   //  Draw the geometry using the x3d viewver.
+   //  Draw the geometry using the x3d viewer.
    //  Note that this viewver may also be invoked from the "View" menu in
    //  the canvas tool bar
     c1->x3d();
