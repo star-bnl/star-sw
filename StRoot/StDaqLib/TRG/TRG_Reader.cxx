@@ -7,6 +7,8 @@
  *
  *   change log
  *  14-Jan-00 MJL added TRGD::PrintDataCompact()
+ *  04-Feb-00 hjw adaptations for "ushort ZDCDSM[8]" to "BYTE ZDC[16]" in trgStructures.h (BYTE = uchar)
+ *                
  *************************************************************************** 
 */
 
@@ -43,7 +45,7 @@ int Bank_TRGD::HerbSwap(void *theTRGDbank) {
   swapHerb2bytes( &(GS->EvtDesc.npre),                   1);
   swapHerb2bytes( &(GS->TrgSum.DSM.BCdata[0]),          16);
   swapHerb2bytes( &(GS->TrgSum.DSM.CPA[0]),             32);
-  swapHerb2bytes( &(GS->TrgSum.DSM.ZDCDSM[0]),           8);
+  /* This is now one-byte data, so no swapping needed. swapHerb2bytes( &(GS->TrgSum.DSM.ZDCDSM[0]),8); */
   swapHerb2bytes( &(GS->TrgSum.DSM.lastDSM[0]),          8);
   swapHerb2bytes( &(GS->TrgSum.DSM.quadDSM[0]),          8);
   swapHerb2bytes( &(GS->TrgSum.L0SumBytes),              1);
@@ -149,7 +151,7 @@ void Bank_TRGD::PrintAllTheData(FILE *ff) {
   for(i=0;i< 32;i++) FF Funsigned_short  ,PrintHelp("TrgSum.DSM.CPA",i),GS->TrgSum.DSM.CPA[i],GS->TrgSum.DSM.CPA[i]);
   for(i=0;i<  8;i++) FF Funsigned_short  ,PrintHelp("TrgSum.DSM.quadDSM",i),GS->TrgSum.DSM.quadDSM[i],GS->TrgSum.DSM.quadDSM[i]);
   for(i=0;i<  8;i++) FF Funsigned_short  ,PrintHelp("TrgSum.DSM.lastDSM",i),GS->TrgSum.DSM.lastDSM[i],GS->TrgSum.DSM.lastDSM[i]);
-  for(i=0;i<  8;i++) FF Funsigned_short  ,PrintHelp("TrgSum.DSM.ZDCDSM",i),GS->TrgSum.DSM.ZDCDSM[i],GS->TrgSum.DSM.ZDCDSM[i]);
+  for(i=0;i< 16;i++) FF Funsigned_char  ,PrintHelp("TrgSum.DSM.ZDC",i),GS->TrgSum.DSM.ZDC[i],GS->TrgSum.DSM.ZDC[i]);
   for(i=0;i< 16;i++) FF Funsigned_short  ,PrintHelp("TrgSum.DSM.BCdata",i),GS->TrgSum.DSM.BCdata[i],GS->TrgSum.DSM.BCdata[i]);
   FF Funsigned_short  ,"TrgSum.L1SumBytes",GS->TrgSum.L1SumBytes,GS->TrgSum.L1SumBytes);
   for(i=0;i<  2;i++) FF Fchar            ,PrintHelp("TrgSum.L1SumHeader",i),GS->TrgSum.L1SumHeader[i],GS->TrgSum.L1SumHeader[i]);
@@ -232,10 +234,10 @@ void Bank_TRGD::PrintDataCompact(FILE *ff) {
   FF "\n\n");
 
 
-  FF "\n%s   ","TrgSum.DSM.ZDCDSM:");
-  for(i=0;i< 8;i++) {
-    if (i%8) FF "%4x ",GS->TrgSum.DSM.ZDCDSM[i]);
-    else     FF "\n%2d| %4x ",i,GS->TrgSum.DSM.ZDCDSM[i]);
+  FF "\n%s   ","TrgSum.DSM.ZDC:");
+  for(i=0;i<16;i++) {
+    if (i%8) FF "%2x ",GS->TrgSum.DSM.ZDC[i]);
+    else     FF "\n%2d| %2x ",i,GS->TrgSum.DSM.ZDC[i]);
   }
   FF "\n\n");
 
