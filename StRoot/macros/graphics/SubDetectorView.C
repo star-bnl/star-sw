@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   26/03/99  (E-mail: fine@bnl.gov)
-// $Id: SubDetectorView.C,v 1.4 1999/05/21 15:33:55 kathy Exp $
+// $Id: SubDetectorView.C,v 1.5 1999/06/14 08:48:35 fine Exp $
 // $Log: SubDetectorView.C,v $
+// Revision 1.5  1999/06/14 08:48:35  fine
+// Some bug fixed
+//
 // Revision 1.4  1999/05/21 15:33:55  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
@@ -14,7 +17,8 @@
 // x3d view has been activated. Some improvement as well
 //=======================================================================
 // owner: Valery Fine
-// what it does: 
+// what it does: It shows how to select some particular portions of the
+//               STAR geometry to draw it out
 //=======================================================================
 
 {
@@ -48,12 +52,13 @@
   // Remove hall from the kist of ROOT nodes to make it free of ROOT control
   listOfNode->Remove(hall);
   listOfNode->Remove(hall);
+  hall->ls();
   St_DataSetIter volume(hall);
   St_Node *nextNode = 0;
   // Mark the pieces of the whole detector to create sub-structure
  
   volume("HALL")->Mark();
-  volume("HALL")->Mark()->SetVisibility(1);;
+  ((St_Node *)volume("HALL"))->SetVisibility(1);
   volume.Cd("HALL/CAVE");
 
   nextNode = (St_Node *)volume("SVTT/SCON");
@@ -99,8 +104,30 @@
   // Create the "open" sub-structure from the full one
   St_NodeView *s = new St_NodeView(fullView);
 
+  St_DataSetIter rangeIter(s);
+  St_NodeView *bmtcNode  = rangeIter.FindByName("TPAD");
+  Float_t min[3];
+  Float_t max[3];
+  if (bmtcNode) {
+    bmtcNode->GetLocalRange(min,max);
+    printf(" Range for %s node is x: %f-%f; y: %f-%f; z: %f-%f\n",
+     bmtcNode->GetName(), min[0],max[0],min[1],max[1],min[2],max[2]);
+
+    bmtcNode->GetGlobalRange(s,min,max);
+    printf(" Range for %s node is x: %f-%f; y: %f-%f; z: %f-%f\n",
+      s->GetName(), min[0],max[0],min[1],max[1],min[2],max[2]);
+  }
+
   printf( " Creating an empty TCanvas object to draw in\n");
-  
+
+ 
   s->Draw();
   gPad->Update();
+#if 0
+  TVirtualPad *thisPad = gPad;
+  TView *view = thisPad->GetView(); 
+  view->SetRange(min,max);
+  thisPad->Modified();
+  thisPad->Update();
+#endif
 } 
