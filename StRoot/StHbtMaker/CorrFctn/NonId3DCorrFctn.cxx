@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: NonId3DCorrFctn.cxx,v 1.4 2003/02/02 21:52:49 magestro Exp $
+ * $Id: NonId3DCorrFctn.cxx,v 1.5 2004/02/02 20:19:15 kisiel Exp $
  *
  * Author: Adam Kisiel, Warsaw University of Technology
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: NonId3DCorrFctn.cxx,v $
+ * Revision 1.5  2004/02/02 20:19:15  kisiel
+ * Properly initialize variables in NonId3DCorrFctn
+ *
  * Revision 1.4  2003/02/02 21:52:49  magestro
  * small changes to remove compiler warnings
  *
@@ -257,6 +260,8 @@ void NonId3DCorrFctn::makeHistos(char* title, const int& nbins, const float& Qin
 //  mHKStarExitDenOutN = new  StHbt2DHisto(strcat(htitle,title),htitle,
 //				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
 
+  mKCompCut = -1000.0;
+  mqSideSel = 0.0;   
 }
 
 //____________________________
@@ -264,13 +269,16 @@ NonId3DCorrFctn::NonId3DCorrFctn(char* title, const int& nbins, const float& Qin
 				 const float& QinvHi, const int aqSideSel){
   makeHistos(title, nbins, QinvLo, QinvHi);
   mqSideSel = aqSideSel;
+  mKCompCut = -1000.0;
 }
+
 
 NonId3DCorrFctn::NonId3DCorrFctn(char* title, const int& nbins, const float& QinvLo, 
 		  const float& QinvHi, const float KCompCut)
 {
   makeHistos(title, nbins, QinvLo, QinvHi);
   mKCompCut = KCompCut;
+  mqSideSel = 0.0;   
 }
 
 
