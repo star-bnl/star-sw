@@ -17,6 +17,10 @@
  ***************************************************************************
  *
  * $Log: StuRefMult.hh,v $
+ * Revision 1.2  2000/08/28 21:25:28  calderon
+ * changed the name of the function to
+ * uncorrectedNumberOfNegativePrimaries as per Frank's request
+ *
  * Revision 1.1  2000/08/24 17:53:57  calderon
  * Function to obtain a reference (uncorrected) multiplicity
  * from StEvent.  This counts track that satisfy the so called "Cut Set 1"
@@ -29,7 +33,7 @@
 
 #include "StEventTypes.h"
 inline unsigned int
-uncorrectedMultiplicity(StEvent& evt)
+uncorrectedNumberOfNegativePrimaries(StEvent& evt)
 {
     StPrimaryVertex* primVtx = evt.primaryVertex();
 
