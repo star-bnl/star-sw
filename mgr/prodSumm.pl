@@ -196,6 +196,7 @@ $ftpHpss->quit();
 ## for database filling
 my $setName = "no";
 my $geantFile = "no";
+my $geant_size = 0;
 my $produced_date = "00000000";
 my $pr_chain = "no";
 
@@ -305,6 +306,7 @@ foreach $eachSet (@Sets) {
 
 ## reinitialize variables
     $geantFile = "no";
+    $geant_size = 0;
     $produced_date = "00000000";
     $pr_chain = "no";
     
@@ -339,8 +341,8 @@ foreach $eachSet (@Sets) {
     $produced_date  = ($$eachGeantFile)->timeS;
     
     $basename = basename("$geantFile",".fzd");
-
-    $geantInputSize += ( ($$eachGeantFile)->size )/1000000;
+    $geant_size = ($$eachGeantFile)->size;
+    $geantInputSize += ($geant_size)/1000000;
     $basename =~ m/(^[a-z0-9]+)_([0-9]+)_([0-9]+)/;
     $geantInputEvts += $3;
 
@@ -546,6 +548,7 @@ sub fillDbTable {
     $sql="insert into $OperationT set ";
     $sql.="SetName='".$setName."',";
     $sql.="GeantFile='$geantFile',";
+    $sql.="Geant_size=$geant_size,";
     $sql.="Produced_date='$produced_date',";
     $sql.="Chain='$pr_chain',";
     $sql.="JobStatus='$job_status',";
