@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.22 2004/03/19 21:31:53 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.23 2004/03/28 04:09:08 balewski Exp $
  
 #include <TDatime.h>
 #include <time.h>
@@ -313,8 +313,9 @@ void  StEEmcDbMaker::mReloadCrateDb2003(){
       cr->crIDswitch= cr->crID;
       cr->fiber=i;
       if(i==2)  cr->fiber=3;
-      cr->nch=128;
+      cr->nCh=128;
       cr->nHead=4;
+      cr->type='T';
     }// end towers
 
   }
@@ -339,8 +340,9 @@ void  StEEmcDbMaker::mReloadCrateDb2004(){
       cr->crID=i+1;
       cr->crIDswitch= i+1;
       cr->fiber=i;
-      cr->nch=128;
+      cr->nCh=128;
       cr->nHead=4;
+      cr->type='T';
     }// end towers
 
     for(i=0;i<16;i++) {// smd/pre/post  crates
@@ -355,8 +357,9 @@ void  StEEmcDbMaker::mReloadCrateDb2004(){
       cr->fiber=i+2;
       if(i==4) cr->fiber=0; // 6S1
       if(i==7) cr->fiber=1; // 6P1
-      cr->nch=192;
+      cr->nCh=192;
       cr->nHead=4;
+      cr->type='S';
     }// end smd
 
 
@@ -631,7 +634,7 @@ void  StEEmcDbMaker::mOptimizeDb(){
 
 void  StEEmcDbMaker::mPrintItems  (){
 
-  printf("\n\nprintChan :::::: %s\n\nchan   crate -->  name\n ",GetName());
+  printf("\n\nprintChan :::::: %s\n\nChan   crate -->  name\n ",GetName());
 
   // int i=0,j=0;
 #if 0
@@ -735,6 +738,9 @@ template <class St_T, class T_st>  void StEEmcDbMaker
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.23  2004/03/28 04:09:08  balewski
+// storage of EEMC raw data, not finished
+//
 // Revision 1.22  2004/03/19 21:31:53  balewski
 // new EEMC data decoder
 //

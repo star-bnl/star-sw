@@ -11,8 +11,9 @@ class EEmcDbCrate {
   int crID ; ///< logical crate ID
   int crIDswitch ; ///<  crate ID set by hardware switch
   int fiber ;///<  position of the crate in the .daq data stream, couting from 0
-  int nch ;///< no. of valid channels for the crate
+  int nCh ;///< no. of valid channels for the crate
   int nHead ;///< no. of header words
+  char type; ///< use 'T' for towers & 'S' for MAPMT
 
   EEmcDbCrate();
   void clear();
