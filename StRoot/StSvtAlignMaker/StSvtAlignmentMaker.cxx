@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAlignmentMaker.cxx,v 1.2 2001/05/09 16:33:02 gaudiche Exp $
+ * $Id: StSvtAlignmentMaker.cxx,v 1.3 2002/02/23 19:13:25 perev Exp $
  *
  * Author: Helen Caines
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAlignmentMaker.cxx,v $
+ * Revision 1.3  2002/02/23 19:13:25  perev
+ * SetFormat removed
+ *
  * Revision 1.2  2001/05/09 16:33:02  gaudiche
  * bug on Solaris fixed - cleanup
  *
@@ -398,7 +401,7 @@ Int_t StSvtAlignmentMaker::Finish()
 
 
  TFile *hFile = new TFile("align0.root","RECREATE");
- hFile->SetFormat(1);
+//VP hFile->SetFormat(1);
  tetaDistribution->Write();
  nHitsPerTrackDistribution->Write();
  chi2Distribution->Write();
