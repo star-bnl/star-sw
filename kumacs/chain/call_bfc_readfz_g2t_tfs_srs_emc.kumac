@@ -15,7 +15,7 @@
    chain=' fzin rg2t tpg svg tfs srs ems evout' _
    first=1 _
    no_events=1 _
-   input_data_file=/net/rmds03/disk1/star/auau200/hijing135/default/b0_3/year1a/hadronic_off/Gstardata/set100/set100_01_45evts.fz _
-   output_file=set100_01_5ev_tfs_srs_emc _
+   input_data_file=/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/Gstardata/psc079_01_46evts.fza _
+   output_file=psc079_01_46evts.xdf
    log=bfc_readfz_g2t_tfs_srs_emc_set100_01_5ev.log
 
