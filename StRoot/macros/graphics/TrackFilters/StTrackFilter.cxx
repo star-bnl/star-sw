@@ -224,6 +224,11 @@ Int_t StTrackFilter::Channel(const TTable *tableObject,Int_t rowNumber,Size_t &s
 Int_t StTrackFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t &size,Style_t &style)
 {
   // SubChannel to provide a selections for St_dst_track tracks.
+  //
+  // 1. by curvature - all track with curvature > 0.01 are red
+  // 2. by track charge (if m_Charge_Sign != 0 ). 
+  //    The sung of m_Charge_Sign defines which track has to be selected.
+  //
   static int colorIndex = 0;
   static Float_t minCurv = track[rowNumber].curvature;
   static Float_t maxCurv = track[rowNumber].curvature;
@@ -231,10 +236,13 @@ Int_t StTrackFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t &s
   colorIndex++;
   if (curCurv > maxCurv) {maxCurv = curCurv; printf(" MaxCurv = %f\n", curCurv); }
   if (curCurv < minCurv) {minCurv = curCurv; printf(" MinCurv = %f\n", curCurv); }
-  // Selects only the tracks with the "large" curvature (> 0.1)
-  if (track[rowNumber].curvature > 0.01) {
-    if (colorIndex > 6) colorIndex = 0;
-    return kRed+colorIndex;
+  // Should we test track charge
+  if (m_Charge_Sign*track[rowNumber].icharge >= 0) {
+    // Selects only the tracks with the "large" curvature (> 0.1)
+    if (track[rowNumber].curvature > 0.01) {
+      if (colorIndex > 6) colorIndex = 0;
+      return kRed+colorIndex;
+    }
   }
   return 0;
 }

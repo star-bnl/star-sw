@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StTrackFilter.h,v 1.6 2000/08/10 17:09:31 fine Exp $ 
+// $Id: StTrackFilter.h,v 1.7 2001/08/13 20:18:40 fine Exp $ 
 // $Log: StTrackFilter.h,v $
+// Revision 1.7  2001/08/13 20:18:40  fine
+// StTrackFilter::SetChargeTest(int flag=0) method has benn implemented
+//
 // Revision 1.6  2000/08/10 17:09:31  fine
-// Wensheng example has been fixed
+//  Wensheng example has been fixed
 //
 // Revision 1.5  2000/03/10 19:14:59  fine
 // Separate SubChannel for dst_track table has been introduced
@@ -44,6 +47,7 @@ class StTrackFilter : public StVirtualEventFilter  {
 
     Int_t     m_tpt_track_id[100];
     Int_t     m_Ltpt_track;
+    Int_t     m_Charge_Sign; // Set "charge" selection" has to be applied (==0 no charge test)
 
     const TTableSorter *m_G2t_track; // pointer to g2t_track sorted table
     TTableIter *m_NextG2tTrack;
@@ -57,7 +61,7 @@ class StTrackFilter : public StVirtualEventFilter  {
     Int_t SubChannel(St_g2t_tpc_hit &hit,   Int_t rowNumber,Size_t &size,Style_t &style); 
     Int_t SubChannel(St_g2t_svt_hit &hit,   Int_t rowNumber,Size_t &size,Style_t &style); 
  public:
-    StTrackFilter() : m_LTrackP(0),m_Lid_globtrk(0),m_Ltpt_track(0), m_G2t_track(0), m_NextG2tTrack(0) {}
+    StTrackFilter() : m_LTrackP(0),m_Lid_globtrk(0),m_Ltpt_track(0), m_Charge_Sign(0), m_G2t_track(0), m_NextG2tTrack(0), m_Ge_pid(0), m_G2t_vertex(0){}
     virtual ~StTrackFilter() {Reset();}
     virtual Int_t Channel(const TTableSorter *tableObject,Int_t index,Size_t &size,Style_t &style);
     virtual Int_t Channel(const TTable *tableObject,Int_t rowNumber,Size_t &size,Style_t &style);
@@ -66,6 +70,7 @@ class StTrackFilter : public StVirtualEventFilter  {
     Int_t SetTrack_P(Int_t *track_p,Int_t n=1); 
     Int_t SetId_globtrk(Int_t *id_globtrk,Int_t n=1); 
     Int_t SetTptID(Int_t *track_id,Int_t n=1); 
+    Int_t SetChargeTest(Int_t charge=0){m_Charge_Sign = charge;} 
     ClassDef(StTrackFilter,0)
 };
 
