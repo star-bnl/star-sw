@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.hh,v 1.3 1999/01/30 23:03:11 wenaus Exp $
+ * $Id: StEvent.hh,v 1.4 1999/02/23 21:20:06 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.hh,v $
- * Revision 1.3  1999/01/30 23:03:11  wenaus
- * table load intfc change; include ref change
+ * Revision 1.4  1999/02/23 21:20:06  ullrich
+ * Modified EMC hit collections.
+ *
+ * Revision 1.5  1999/03/04 15:56:56  wenaus
+ * add std namespace for Sun CC5 compatibility
  *
  * Revision 1.4  1999/02/23 21:20:06  ullrich
  * Modified EMC hit collections.
@@ -35,8 +38,10 @@ using namespace std;
 #include <string>
 #include <time.h>
 #include "StEvent/StDstEventSummary.hh"
-#include "StEvent/StEmcHitCollection.hh"
-#include "StEvent/StSmdHitCollection.hh"
+#include "StEvent/StRun.hh"
+#include "StEvent/StTrackCollection.hh"
+#include "StEvent/StFtpcHitCollection.hh"
+#include "StEvent/StVertexCollection.hh"
 #include "StEvent/StSvtHitCollection.hh"
 #include "StEvent/StTpcHitCollection.hh"
 #include "StEvent/StEmcTowerHitCollection.hh"
@@ -67,8 +72,10 @@ public:
     unsigned long                bunchCrossingNumber() const;
     double                       luminosity() const;
     StRun*                       run();
-    StEmcHitCollection*          emcHitCollection();
-    StSmdHitCollection*          smdHitCollection();
+    StVertex*                    primaryVertex();
+    StDstEventSummary*              summary();
+    StTrackCollection*           trackCollection();
+    StTpcHitCollection*          tpcHitCollection();
     StSvtHitCollection*          svtHitCollection();
     StFtpcHitCollection*         ftpcHitCollection();
     StEmcTowerHitCollection*     emcTowerHitCollection();
@@ -88,8 +95,10 @@ public:
     void setBunchCrossingNumber(unsigned long);      
     void setLuminosity(double);               
     void setRun(StRun*);                            
-    void setEmcHitCollection(StEmcHitCollection*);              
-    void setSmdHitCollection(StSmdHitCollection*);              
+    void setPrimaryVertex(StVertex*);                  
+    void setSummary(StDstEventSummary*);                        
+    void setTrackCollection(StTrackCollection*);                
+    void setTpcHitCollection(StTpcHitCollection*);               
     void setSvtHitCollection(StSvtHitCollection*);               
     void setFtpcHitCollection(StFtpcHitCollection*);              
     void setEmcTowerHitCollection(StEmcTowerHitCollection*);              
@@ -111,8 +120,10 @@ protected:
     double                       mLuminosity;
     StDstEventSummary*           mSummary;
     StRun*                       mRun;
-    StEmcHitCollection*          mEmcHits;
-    StSmdHitCollection*          mSmdHits;
+    StVertex*                    mPrimaryVertex;
+    StTrackCollection*           mTracks;
+    StVertexCollection*          mVertices;
+    StTpcHitCollection*          mTpcHits;
     StSvtHitCollection*          mSvtHits;
     StFtpcHitCollection*         mFtpcHits;
     StEmcTowerHitCollection*     mEmcTowerHits;
@@ -153,9 +164,13 @@ inline StDstEventSummary* StEvent::summary() { return mSummary;}
 
 inline StTrackCollection* StEvent::trackCollection() { return mTracks;}
 
-inline StEmcHitCollection* StEvent::emcHitCollection() { return mEmcHits;}
+inline StTpcHitCollection* StEvent::tpcHitCollection() { return mTpcHits;}
 
-inline StSmdHitCollection* StEvent::smdHitCollection() { return mSmdHits;}
+inline StSvtHitCollection* StEvent::svtHitCollection() { return mSvtHits;}
+
+inline StFtpcHitCollection* StEvent::ftpcHitCollection() { return mFtpcHits;}
+
+inline StEmcTowerHitCollection* StEvent::emcTowerHitCollection() { return mEmcTowerHits;}
 
 inline StEmcPreShowerHitCollection* StEvent::emcPreShowerHitCollection() { return mEmcPreShowerHits;}
 
