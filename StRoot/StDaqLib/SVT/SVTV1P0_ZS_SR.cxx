@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0_ZS_SR.cxx,v 1.2 2001/04/18 19:47:25 ward Exp $
+ * $Id: SVTV1P0_ZS_SR.cxx,v 1.3 2001/05/14 16:07:36 jschamba Exp $
  *      
  * Author: J. Schambach
  *      
@@ -11,6 +11,9 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0_ZS_SR.cxx,v $
+ * Revision 1.3  2001/05/14 16:07:36  jschamba
+ * corrected mezzanine and transition board evaluation in constructors
+ *
  * Revision 1.2  2001/04/18 19:47:25  ward
  * StDaqLib/SVT stuff from Jo Schambach.
  *
@@ -78,7 +81,7 @@ SVTV1P0_ZS_SR::SVTV1P0_ZS_SR(int w, SVTV1P0_Reader *det)
     }
   case 2:
     {
-      const int mezzIndex[3][6] = { {1,1,2,2,1,1},
+      const int mezzIndex[3][6] = { {1,1,3,3,1,1},
 				    {1,2,3,3,2,1},
 				    {2,2,3,3,2,2} };
       if (wafer > 3) hyperSector = 1;
@@ -86,7 +89,7 @@ SVTV1P0_ZS_SR::SVTV1P0_ZS_SR(int w, SVTV1P0_Reader *det)
       rcb = (ladder+2)/3;
       rcb *= 3;
       mezz = mezzIndex[(ladder-1)%3][wafer-1];
-      transitionBoard = ladder%3;
+      transitionBoard = (ladder-1)%3 + 1;
       break;
     }
   case 3: 
@@ -148,7 +151,7 @@ SVTV1P0_ZS_SR::SVTV1P0_ZS_SR(int b, int l, int w, SVTV1P0_Reader *det)
     }
   case 2:
     {
-      const int mezzIndex[3][6] = { {1,1,2,2,1,1},
+      const int mezzIndex[3][6] = { {1,1,3,3,1,1},
 				    {1,2,3,3,2,1},
 				    {2,2,3,3,2,2} };
       if (wafer > 3) hyperSector = 1;
@@ -156,7 +159,7 @@ SVTV1P0_ZS_SR::SVTV1P0_ZS_SR(int b, int l, int w, SVTV1P0_Reader *det)
       rcb = (ladder+2)/3;
       rcb *= 3;
       mezz = mezzIndex[(ladder-1)%3][wafer-1];
-      transitionBoard = ladder%3;
+      transitionBoard = (ladder-1)%3 + 1;
       break;
     }
   case 3: 
