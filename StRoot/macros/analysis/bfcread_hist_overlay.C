@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_overlay.C,v 1.1 2000/01/31 18:48:41 kathy Exp $
+// $Id: bfcread_hist_overlay.C,v 1.2 2000/02/14 20:30:41 kathy Exp $
 // $Log: bfcread_hist_overlay.C,v $
+// Revision 1.2  2000/02/14 20:30:41  kathy
+// removing unneeded macros; updating documentation in bfcread macros
+//
 // Revision 1.1  2000/01/31 18:48:41  kathy
 // new macro to show how to use the Overlay methods that Curtis wrote - just by themselves
 //
@@ -24,6 +27,10 @@
 //           NOTE: if you ran bfc, then the TopDirTree = bfcTree !!
 //         PageTitle - title at top of each page - if it's "", then it's
 //                set to MainFile by default
+//
+//
+// Documentation on StHistUtil class is at:
+//   http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StAnalysisUtilities/doc/
 //
 //======================================================================
 

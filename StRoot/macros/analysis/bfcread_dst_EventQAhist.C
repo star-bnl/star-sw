@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.17 2000/01/31 21:20:13 kathy Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.18 2000/02/14 20:30:40 kathy Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.18  2000/02/14 20:30:40  kathy
+// removing unneeded macros; updating documentation in bfcread macros
+//
 // Revision 1.17  2000/01/31 21:20:13  kathy
 // fixed up printouts - some printed wrong macro name; also moved finish method after drawhists method
 //
@@ -75,6 +78,13 @@
 //  are listed at 
 //  http://www.star.bnl.gov/STAR/html/comp_l/train/tut/bfc_maker_names.html
 //                                                     doEvents_maker_names.html
+//
+// Documentation on StEventQAMaker class is at:
+//   http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/St_QA_Maker/doc/
+//
+// Documentation on StHistUtil class is at:
+//   http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StAnalysisUtilities/doc/
+//
 //
 //======================================================================
 

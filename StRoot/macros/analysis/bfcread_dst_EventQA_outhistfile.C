@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.6 2000/01/19 16:29:50 kathy Exp $
+// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.7 2000/02/14 20:30:40 kathy Exp $
 // $Log: bfcread_dst_EventQA_outhistfile.C,v $
+// Revision 1.7  2000/02/14 20:30:40  kathy
+// removing unneeded macros; updating documentation in bfcread macros
+//
 // Revision 1.6  2000/01/19 16:29:50  kathy
 // update macros to use default input files in /afs/rhic/star/data/samples
 //
@@ -47,6 +50,11 @@
 //  http://www.star.bnl.gov/STAR/html/comp_l/train/tut/bfc_maker_names.html
 //                                                     doEvents_maker_names.html
 //
+// Documentation on StEventQAMaker class is at:
+//   http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/St_QA_Maker/doc/
+//
+// Documentation on StHistUtil class is at:
+//   http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StAnalysisUtilities/doc/
 //
 //======================================================================
 
