@@ -92,7 +92,8 @@ int  miptower( TH1   **hadc,
 	       const char *dname= "eta",
                const char *func = "landau",
 	       const float xmin = 10.0,
-	       const float xmax = 80.0);
+	       const float xmax = 80.0,
+	       FILE  *outfd     = stderr);
 
 
 // ===========================================================================
@@ -260,10 +261,13 @@ mipcalib(
     c1->Print(outName+".ps[");
     bool go_on = true;
     for(int sec=sec1;sec<=sec2 && go_on;sec++) {
+      char outfn[256];
+      sprintf(outfn,"sector%02d.cal",sec+1);
+      FILE *outfd = fopen(outfn,"w");
       for(int ssec=0;ssec<MaxSSec && go_on;ssec++) {
 	sprintf(dir,"%02dT%1c",sec+1,ssec+'A');
 	c1->Clear();
-	nFitOK += miptower(hadc+(sec*MaxSSec+ssec)*MaxEta,MinEta,MaxEta,dir,fitFunc,xMin,xMax);
+	nFitOK += miptower(hadc+(sec*MaxSSec+ssec)*MaxEta,MinEta,MaxEta,dir,fitFunc,xMin,xMax,outfd);
 	c1->Update();
 	c1->Print(outName+".ps");
 	//c1->Print(epsfn,"eps");
@@ -298,6 +302,7 @@ mipcalib(
 	  }
 	}
       }
+      fclose(outfd);
     }
     cout << "TOTAL FIT OK " << nFitOK << endl;
     c1->Clear();
@@ -320,7 +325,8 @@ miptower( TH1 **hadc,
 	  const char *dir,
 	  const char *func , 
 	  const float xMin ,
-	  const float xMax )
+	  const float xMax ,
+	  FILE  *outfd)
 {
   const Double_t MinCounts = 50.0; // King's constants or the cuts
   const Double_t MinPeakV  = 10.0;
@@ -397,7 +403,7 @@ miptower( TH1 **hadc,
     xgnerr  = xpkerr * xscale;
     
     // print all the stuff
-    fprintf(stderr,"%6s  %8.3f %8.3f 0.0   # %8.3f  %6.0f",
+    fprintf(outfd,"%6s  %8.3f %8.3f 0.0   # %8.3f  %6.0f",
 	    name,xgain,xgnerr,chi2,xint); 
 
     // now get the error message
@@ -407,8 +413,8 @@ miptower( TH1 **hadc,
     else if( MaxPeakE < xpkerr                ) errmsg = "fit error too large";
     else if(chi2<MinChi2 || MaxChi2<chi2      ) errmsg = "chi2 too large";
 
-    if(errmsg==NULL) fprintf(stderr," fit %s ok \n",func);
-    else             fprintf(stderr," *** %s ***\n",errmsg);
+    if(errmsg==NULL) fprintf(outfd," fit %s ok \n",func);
+    else             fprintf(outfd," *** %s ***\n",errmsg);
     if(eta<MinEta) continue;
 
     // plot 
@@ -430,7 +436,7 @@ miptower( TH1 **hadc,
     }
     gpad->Update();
   }
-  fprintf(stderr,"\n");
+  fprintf(outfd,"\n");
   if(gROOT->IsBatch()) cout << " (" << nFitOK << ") DONE " << endl;
   return nFitOK;
 }
