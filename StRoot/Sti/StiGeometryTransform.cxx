@@ -167,13 +167,22 @@ void StiGeometryTransform::setStiHitError(const StHit* stHit, StiHit* stiHit, do
     //This will have to be changed in the future:
     double sinTheta = sin(theta);
     double cosTheta = cos(theta);
+    //this is a temp. kludge to bypass the problem stated above:
+    double syyMin = 1.E-1;
+    double szzMin = 1.E-1;
     
     StThreeVectorF error = stHit->positionError();
     
     //diagonal elements
     stiHit->setSxx( error.x()*cosTheta*cosTheta + error.y()*sinTheta*sinTheta );
-    stiHit->setSyy( error.x()*sinTheta*sinTheta + error.y()*cosTheta*cosTheta );
-    stiHit->setSzz( error.z() );
+
+    //Have to catch here:
+    double syy = error.x()*sinTheta*sinTheta + error.y()*cosTheta*cosTheta;
+    stiHit->setSyy( (syy>=syyMin) ? syy : syyMin  );
+
+    //Have to catch again:
+    double szz = error.z();
+    stiHit->setSzz( (szz>=szzMin) ? szz : szzMin );
     
     //off-diagonal elements
     stiHit->setSxy( -1.*error.x()*sinTheta*cosTheta + error.y()*sinTheta*cosTheta );
