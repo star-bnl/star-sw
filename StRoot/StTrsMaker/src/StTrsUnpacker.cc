@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.cc,v 1.7 1999/02/23 14:05:16 lasiuk Exp $
+ * $Id: StTrsUnpacker.cc,v 1.8 1999/03/01 15:20:15 lasiuk Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.cc,v $
- * Revision 1.7  1999/02/23 14:05:16  lasiuk
- * exit if last time bin has non-zero count in ADCs
+ * Revision 1.8  1999/03/01 15:20:15  lasiuk
+ * correct discrepancy at last time bin truncation (//length--)
  *
  * Revision 1.7  1999/02/23 14:05:16  lasiuk
  * exit if last time bin has non-zero count in ADCs
@@ -122,7 +122,7 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
 	    ii++;
 	    // Don't overstep the bounds
 	    if(ii==TrsPadData.first->size()) {
-		aSequence.length--;
+		//aSequence.length--;
 		//ii--;
 		break;
 	    }
