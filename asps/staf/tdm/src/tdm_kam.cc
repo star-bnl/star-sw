@@ -46,11 +46,11 @@ int kam_tdm_allocstats()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
 
-#ifdef	OLD_DSL
+#ifndef	NEW_DSL
    dsDatasetAllocStats();
-#else	/*OLD_DSL*/
+#else	/*NEW_DSL*/
    dsAllocStats();
-#endif	/*OLD_DSL*/
+#endif	/*NEW_DSL*/
    EML_SUCCESS(STAFCV_OK);
 }
 
