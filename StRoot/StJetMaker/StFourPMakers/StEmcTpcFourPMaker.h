@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.2 2004/10/13 15:32:34 mmiller Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.3 2004/11/30 19:01:42 mmiller Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.3  2004/11/30 19:01:42  mmiller
+ * Back compatibility for pre P04k bemc corrupt events
+ *
  * Revision 1.2  2004/10/13 15:32:34  mmiller
  * Big clean of StEmcTpcFourPMaker, no longer crashes simulation pass!
  *
@@ -586,8 +589,8 @@ public:
     EMCHitType getUseType(void) { return useType; };
     void setMaxPoints(long mPoints) { maxPoints = mPoints; };
     long getMaxPoints(void) { return maxPoints; };
-    StProjectedTrack &getTrack(StMuTrack *trk) 
-    { return binmap.moddTracks[trk]; };
+    StProjectedTrack &getTrack(StMuTrack *trk)     { return binmap.moddTracks[trk]; };
+
 
     StEmcTpcBinMap binmap;   
 protected:

@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.4 2004/09/22 15:46:21 mmiller Exp $
+// $Id: StJets.h,v 1.5 2004/11/30 19:01:38 mmiller Exp $
 // $Log: StJets.h,v $
+// Revision 1.5  2004/11/30 19:01:38  mmiller
+// Back compatibility for pre P04k bemc corrupt events
+//
 // Revision 1.4  2004/09/22 15:46:21  mmiller
 // Added a double check to verify that jet 4p is equal to the vector sum of
 // the particles 4-p.  Removed troublesome access methods to StJets.  See
@@ -159,6 +162,10 @@ public:
     ///Set event-wise information:
     void setMuDst(const StMuDst*);
 
+    ///Set the BEMC corrupt flag.  true --> event is corrupt, no jet finding was performed
+    void setBemcCorrupt(bool v);
+    bool bemcCorrupt() const;
+
     ///The number of jets found in this event
     int nJets() {return mJets->GetLast()+1;}
 
@@ -201,6 +208,7 @@ private:
     int mEventNumber;
     int mRunId;
     int mRunNumber;
+    bool mCorrupt;
 
     bool inBounds(int);
     StJet* jet(int);
@@ -236,6 +244,17 @@ inline void StJets::Clear(const char *opt)
 {
     TObject::Clear(opt);
     mEventId = mEventNumber = mRunId = mRunNumber = 0;
+    mCorrupt = false;
+}
+
+inline void StJets::setBemcCorrupt(bool v)
+{
+    mCorrupt = v;
+}
+
+inline bool StJets::bemcCorrupt() const
+{
+    return mCorrupt;
 }
 
 

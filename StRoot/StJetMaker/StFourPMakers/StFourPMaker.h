@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StFourPMaker.h,v 1.2 2004/10/25 22:19:09 mmiller Exp $
+ * $Id: StFourPMaker.h,v 1.3 2004/11/30 19:01:42 mmiller Exp $
  * $Log: StFourPMaker.h,v $
+ * Revision 1.3  2004/11/30 19:01:42  mmiller
+ * Back compatibility for pre P04k bemc corrupt events
+ *
  * Revision 1.2  2004/10/25 22:19:09  mmiller
  * Updates to deal with new storage/retreival of emc data from mudst.
  *
@@ -75,11 +78,17 @@ public:
     Float_t GetEtaLow(void) { return eta_low_lim; };
     Float_t GetEtaHigh(void) { return eta_high_lim; };
 
+    ///Access to BEMC event corruption flag
+    bool bemcCorrupt() const {return mCorrupt;}
+
     TrackPile tPile; 
 protected:
 
     FourList tracks;       //!
     StMuDstMaker *muDst;           //!
+    ///Is this event BEMC corrupted?
+    bool mCorrupt; 
+
 
 public:
     const double me;	

@@ -6,7 +6,8 @@ StChain *chain;
 int total=0;
 
 void RunJetFinder2(int nevents=100,
-		   const char* file="/star/data44/reco/productionPP/ReversedFullField/P04ij/2004/117/st_physics_5117059_raw_1020001.MuDst.root",
+		   //const char* file="/star/data44/reco/ppLong-1/FullField/P03ih/2003/150/st_physics_4150010_raw_0020071.MuDst.root",
+		   const char* file="/star/data44/reco/productionPP/ReversedFullField/P04ij/2004/135/st_physics_5135048_raw_2010001.MuDst.root",
 		   const char* outfile="blah.root",
 		   const char* dir = "",
 		   const char *filter = "")

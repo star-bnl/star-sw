@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.5 2004/10/28 19:44:24 mmiller Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.6 2004/11/30 19:01:42 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -46,6 +46,8 @@ using namespace std;
 #include "StEmcRawMaker/defines.h"
 #include "StEmcRawMaker/StBemcRaw.h"
 #include "StEmcRawMaker/StBemcTables.h"
+#include "StEmcRawMaker/StEmcRawMaker.h"
+#include "StEmcRawMaker/defines.h"
 
 //StJetMaker
 #include "StJetMaker/StMuTrackFourVec.h"
@@ -238,8 +240,36 @@ Int_t StEmcTpcFourPMaker::Make()
 
     // now it is like StEvent, getting energies for towers
     StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
-    assert(detector);
 
+    mCorrupt = false; //let's be optimistic to start
+    
+    //if detector==null, this means it's corrupt for pre-October 2004 BEMC code.  However, not all corrupt events give detector==0
+    if (!detector) {
+	mCorrupt=true;
+	tracks.clear();
+	cout <<"StEmcTpcFourPMaker::Maker():\tStEmcDetector* is null.  Flag this as a corrupt event.  Clear 4-p container and return"<<endl;
+	return kStOk;
+    }
+    
+    //now, still have to check for corruption in post-October 2004 BEMC code (P04k and later)
+    //cout <<"StEmcTpcFourPMaker::Make()\tcheck  crate corruption with key: crateUnknown=0, crateNotPresent=1, crateOK=2, crateHeaderCorrupt=3"<<endl;
+    for(int crate = 1; crate<=MAXCRATES; crate++) {
+	StEmcCrateStatus crateStatus = detector->crateStatus(crate);
+	//cout <<"crate:\t"<<crate<<"\tstauts:\t"<<crateStatus<<endl;
+	if (crateStatus==crateHeaderCorrupt) {
+	    mCorrupt=true;
+	}
+    }
+
+    //cout <<"corruption decisions:\tcorrupt="<<mCorrupt<<endl;
+    
+    if (mCorrupt) {
+	tracks.clear();
+	cout <<"StEmcTpcFourPMaker::Maker():\tStEmcDetector* is null.  Flag this as a corrupt event.  Clear 4-p container and return"<<endl;
+	return kStOk;
+    }
+
+    
     int hitId=0;
     for(int m = 1; m<=120;m++) { //loop on modules... 
 	StEmcModule* module = detector->module(m);
