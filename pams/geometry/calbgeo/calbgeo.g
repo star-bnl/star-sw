@@ -30,6 +30,7 @@ MODULE  CALBGEO is the geometry of the Barrel EM Calorimeter in (aG)STAR      *
 *  Version 2.2, W.J. Llope 10-Nov-96
 *       - fixed energy response
 *       - fixed energy response check mailing list
+*       - fixed energy response check mailing list
 *
 *******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
