@@ -1,5 +1,8 @@
-// $Id: bfcread_eventBranch.C,v 1.5 2000/06/02 18:54:38 kathy Exp $
+// $Id: bfcread_eventBranch.C,v 1.6 2000/06/13 01:41:50 lansdell Exp $
 // $Log: bfcread_eventBranch.C,v $
+// Revision 1.6  2000/06/13 01:41:50  lansdell
+// load libglobal_Tables to prevent crash
+//
 // Revision 1.5  2000/06/02 18:54:38  kathy
 // updated to find new BfcStatus table and report
 //
@@ -52,7 +55,7 @@ void bfcread_eventBranch(
 
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-
+    gSystem->Load("libglobal_Tables");
     gSystem->Load("StUtilities");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
