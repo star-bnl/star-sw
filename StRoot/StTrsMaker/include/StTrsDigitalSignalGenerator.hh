@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSignalGenerator.hh,v 1.4 1999/02/28 20:19:44 lasiuk Exp $
+ * $Id: StTrsDigitalSignalGenerator.hh,v 1.5 1999/12/08 02:10:25 calderon Exp $
  *
  * Author: brian, October 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSignalGenerator.hh,v $
+ * Revision 1.5  1999/12/08 02:10:25  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.4  1999/02/28 20:19:44  lasiuk
  * take number of time bins from db
  * not compatible with data compression from the analogSignalGenerator
@@ -57,7 +60,7 @@ protected:
     StTrsDigitalSignalGenerator(StTpcElectronics*, StTrsSector*);
 	
 protected:
-    int                 mNumberOfTimeBins;
+    unsigned int        mNumberOfTimeBins;
     
     StTpcElectronics*   mElectronicsDb;
     StTrsSector*        mSector;

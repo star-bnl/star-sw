@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsZeroSuppressedReader.cc,v 1.1 1999/11/05 22:18:17 calderon Exp $
+ * $Id: StTrsZeroSuppressedReader.cc,v 1.2 1999/12/08 02:10:43 calderon Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,7 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsZeroSuppressedReader.cc,v $
+ * Revision 1.2  1999/12/08 02:10:43  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.1  1999/11/05 22:18:17  calderon
+ *
  * Made private copy constructor and operator= in StTrsDigitalSector.
  * Renamed DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast
  * and use new "Fast" as default.
@@ -146,7 +150,7 @@ int StTrsZeroSuppressedReader::getPadList(int padRow, unsigned char **padList)
 	// Otherwise fill the pad list
 	mPadList = new unsigned char[(tmp.size())];
 
-	for(ii=0; ii< tmp.size(); ii++) {
+	for(unsigned int ii=0; ii< tmp.size(); ii++) {
 	    mPadList[ii] = tmp[ii];
 // 	    PR(static_cast<int>(mPadList[ii]));
 	}

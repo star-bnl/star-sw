@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsRawDataEvent.cc,v 1.5 1999/10/11 23:55:23 calderon Exp $
+ * $Id: StTrsRawDataEvent.cc,v 1.6 1999/12/08 02:10:42 calderon Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsRawDataEvent.cc,v $
+ * Revision 1.6  1999/12/08 02:10:42  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.5  1999/10/11 23:55:23  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
@@ -45,7 +48,7 @@ StTrsRawDataEvent::StTrsRawDataEvent(int numSectors)
     mSectors.resize(numSectors);
     //PR(mSectors.size());
 
-    for(int ii=0; ii<mSectors.size(); ii++) {
+    for(unsigned int ii=0; ii<mSectors.size(); ii++) {
 	mSectors[ii] = 0;
     }
     
@@ -54,7 +57,7 @@ StTrsRawDataEvent::StTrsRawDataEvent(int numSectors)
 StTrsRawDataEvent::~StTrsRawDataEvent()
 {
     //cout << "StTrsRawDataEvent::~StTrsRawDataEvent()" << endl;
-    for(int ii=0; ii<mSectors.size(); ii++)
+    for(unsigned int ii=0; ii<mSectors.size(); ii++)
 	delete mSectors[ii];
     mSectors.clear();
     //PR(mSectors.size());
@@ -63,7 +66,7 @@ StTrsRawDataEvent::~StTrsRawDataEvent()
 void StTrsRawDataEvent::clear()
 {
     cout << "StTrsRawDataEvent::clear()" << endl;
-    for(int ii=0; ii<mSectors.size(); ii++) {
+    for(unsigned int ii=0; ii<mSectors.size(); ii++) {
 	delete mSectors[ii];
 	mSectors[ii] = 0;     // remember to make sure pointer in NULL
     }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.hh,v 1.6 1999/07/19 21:39:31 lasiuk Exp $
+ * $Id: StTrsWireHistogram.hh,v 1.7 1999/12/08 02:10:25 calderon Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.hh,v $
+ * Revision 1.7  1999/12/08 02:10:25  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.6  1999/07/19 21:39:31  lasiuk
  * - addEntry() distributes charge on a (user) settable range of wires
  * - setRangeOfWiresForChargeDistribution(int) added (default is 0)
@@ -128,29 +131,33 @@ private:
 private:
     int             mMin;                      // minimum bin filled
     int             mMax;                      // maximum bin filled
-    int             mNumberOfInnerSectorAnodeWires; // from dataBase
-    int             mNumberOfOuterSectorAnodeWires; // from dataBase
-    int             mTotalNumberOfAnodeWires;
 
-    // Charge Distribution
-    int             mRangeOfWiresForChargeDistribution;
+    StTpcGeometry*    mGeomDb;
+    StTpcSlowControl* mSCDb;
+    StTrsDeDx*        mGasDb;
+
+
 
     // Gas Gain
     bool            mDoGasGain;
     bool            mDoGasGainFluctuations;
     bool            mGasGainCalculationDone;
     bool            mDoSingleElectronMultiplication;
-    double          mInnerSectorGasGain;
-    double          mOuterSectorGasGain;
 
     // Time Delay
     bool            mDoTimeDelay;
     
-    StTpcGeometry*    mGeomDb;
-    StTpcSlowControl* mSCDb;
-    StTrsDeDx*        mGasDb;
+    // Charge Distribution
+    int             mRangeOfWiresForChargeDistribution;
     
     aTpcWirePlane      mSectorWires;
+    
+    int             mNumberOfInnerSectorAnodeWires; // from dataBase
+    int             mNumberOfOuterSectorAnodeWires; // from dataBase
+    int             mTotalNumberOfAnodeWires;
+
+    double          mInnerSectorGasGain;
+    double          mOuterSectorGasGain;
 
     static StTrsWireHistogram* mInstance;
 

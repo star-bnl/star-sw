@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsOldDigitalSignalGenerator.cc,v 1.1 1999/11/05 22:18:16 calderon Exp $
+ * $Id: StTrsOldDigitalSignalGenerator.cc,v 1.2 1999/12/08 02:10:42 calderon Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,7 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsOldDigitalSignalGenerator.cc,v $
+ * Revision 1.2  1999/12/08 02:10:42  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.1  1999/11/05 22:18:16  calderon
+ *
  * Made private copy constructor and operator= in StTrsDigitalSector.
  * Renamed DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast
  * and use new "Fast" as default.
@@ -152,7 +156,7 @@ void StTrsOldDigitalSignalGenerator::digitizeSignal()
 #endif
     // Remember mSector is the "normal" analog sector!
     for(int irow=1; irow<=mSector->numberOfRows(); irow++) {
-	for(int ipad=1; ipad<=mSector->padsOfRow(irow).size(); ipad++) {
+	for(unsigned int ipad=1; ipad<=mSector->padsOfRow(irow).size(); ipad++) {
 
 	    currentPad = mSector->timeBinsOfRowAndPad(irow,ipad);
 	    if(!currentPad.size()) continue;
@@ -162,7 +166,7 @@ void StTrsOldDigitalSignalGenerator::digitizeSignal()
 	    digitalPadData.clear();
 
 
-	    int currentTimeBin = digitalPadData.size();
+	    unsigned int currentTimeBin = digitalPadData.size();
 // 	    PR(currentTimeBin);
 	    unsigned int zeroCounter = 0;
 	    for(mTimeSequenceIterator  = currentPad.begin();
@@ -174,7 +178,8 @@ void StTrsOldDigitalSignalGenerator::digitizeSignal()
 		// TRS calculates on a linear scale and then must
 		// convert to 8 bit data
 		//PR(*mTimeSequenceIterator);
-		int timeBinIndex = static_cast<int>(mTimeSequenceIterator->time());
+		unsigned int timeBinIndex =
+		    static_cast<unsigned int>(mTimeSequenceIterator->time());
 		if (timeBinIndex > currentTimeBin) {
 		    //cout << "Positive time shift" << endl;
 		    // remove previous zero if any

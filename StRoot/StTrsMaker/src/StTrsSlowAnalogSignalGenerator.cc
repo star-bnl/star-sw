@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.21 1999/10/25 18:38:49 calderon Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.22 1999/12/08 02:10:42 calderon Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
+ * Revision 1.22  1999/12/08 02:10:42  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.21  1999/10/25 18:38:49  calderon
  * changed mPos and pos() to mPosition and position() to
  * be compatible with StEvent/StMcEvent.
@@ -538,7 +541,7 @@ double StTrsSlowAnalogSignalGenerator::symmetricGaussianExactResponse(double tbi
     double value=0;
 
     // Calculate at bin Centroid
-    double t = mTimeBinWidth*(tbin+.5);
+    //double t = mTimeBinWidth*(tbin+.5);
     double lowerBound = tbin*mTimeBinWidth; // used to be --> 100.*nanosecond;
     double upperBound = lowerBound + mTimeBinWidth; // 100.*nanosecond;
 //     PR(lowerBound);

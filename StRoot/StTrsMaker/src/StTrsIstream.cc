@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsIstream.cc,v 1.6 1999/11/10 15:46:25 calderon Exp $
+ * $Id: StTrsIstream.cc,v 1.7 1999/12/08 02:10:42 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsIstream.cc,v $
+ * Revision 1.7  1999/12/08 02:10:42  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.6  1999/11/10 15:46:25  calderon
  * Made changes to reduce timing, including:
  * Made coordinate transfrom a data member of StTrsAnalogSignalGenerator
@@ -106,7 +109,7 @@ StTrsIstream::StTrsIstream(string streamName, StTpcGeometry* dB)
 	    padsAtRow.resize(mRows);
 	}
 	if (oneWord == string("pads")) {
-	    for(int m=0; m<mRows; m++) ifs >> padsAtRow[m];
+	    for(unsigned int m=0; m<mRows; m++) ifs >> padsAtRow[m];
 	}
     }
     cout << "# of events  read from file = " << mEvents << endl;
@@ -144,7 +147,7 @@ void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
 	    aDigitalSector->mData[currentRowNum].resize(padsAtRow[currentRowNum]);
 	    
 	    ifs >> currentPadNum;
-	    while (static_cast<unsigned int>(currentPadNum) < padsAtRow[currentRowNum]) {
+	    while (static_cast<int>(currentPadNum) < padsAtRow[currentRowNum]) {
 		
 		//PR(currentPadNum);
 		ifs >> lengthData;
@@ -174,7 +177,7 @@ void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
 	    if (EventData->mSectors[iSector]) { // does sector exist?
 		cout << "Data from Sector " << iSector+1 << endl;
 		for (unsigned int iRow = 0; iRow < mRows; iRow++) { // row loop
-		    for (unsigned int iPad = 0; iPad < padsAtRow[iRow]; iPad++) { // pad loop
+		    for (int iPad = 0; iPad < padsAtRow[iRow]; iPad++) { // pad loop
 			StTrsDigitalSector* currentSector = EventData->mSectors[iSector];
 			digitalTimeBins padData = currentSector->mData[iRow][iPad];
 			if (padData.size()>0){ // check if there is data

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSector.cc,v 1.6 1999/11/11 19:45:12 calderon Exp $
+ * $Id: StTrsSector.cc,v 1.7 1999/12/08 02:10:42 calderon Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSector.cc,v $
+ * Revision 1.7  1999/12/08 02:10:42  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.6  1999/11/11 19:45:12  calderon
  * Made variables-> data members in analog signal generator to avoid
  * initialization time when member functions are called.
@@ -75,8 +78,8 @@ StTrsSector::~StTrsSector() {/* nopt */}
 void StTrsSector::clear() // clears only the time bins
 {
     //cout << "in StTrsSector::clear()" << endl;
-    for(int irow=0; irow<mSector.size(); irow++) {
-	for(int ipad=0; ipad<mSector[irow].size(); ipad++) {
+    for(unsigned int irow=0; irow<mSector.size(); irow++) {
+	for(unsigned int ipad=0; ipad<mSector[irow].size(); ipad++) {
 	    mSector[irow][ipad].clear();
 	}
     }

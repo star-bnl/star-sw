@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.cc,v 1.13 1999/10/22 00:00:15 calderon Exp $
+ * $Id: StTrsUnpacker.cc,v 1.14 1999/12/08 02:10:43 calderon Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.cc,v $
+ * Revision 1.14  1999/12/08 02:10:43  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.13  1999/10/22 00:00:15  calderon
  * -added macro to use Erf instead of erf if we have HP and Root together.
  * -constructor with char* for StTrsDedx so solaris doesn't complain
@@ -74,7 +77,7 @@ StTrsUnpacker::StTrsUnpacker()
 StTrsUnpacker::~StTrsUnpacker()
 { /* nopt*/ }
     
-int StTrsUnpacker::getSector(int which, StTpcRawDataEvent* eventData)
+int StTrsUnpacker::getSector(unsigned int which, StTpcRawDataEvent* eventData)
 {
     int status;
     StTrsRawDataEvent *theData = (StTrsRawDataEvent*)eventData;
@@ -118,7 +121,7 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
     
 
     //PR(numberOfEntriesD);
-    short startTimeBin = 0;
+    
     unsigned short ii = 0;
 
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
@@ -234,7 +237,7 @@ int  StTrsUnpacker::getPadList(int padRow, unsigned char **padList)
 	// Otherwise fill the pad list
 	mPadList = new unsigned char[(tmp.size())];
 
-	for(ii=0; ii< tmp.size(); ii++) {
+	for(unsigned int ii=0; ii< tmp.size(); ii++) {
 	    mPadList[ii] = tmp[ii];
 // 	    PR(static_cast<int>(mPadList[ii]));
 	}

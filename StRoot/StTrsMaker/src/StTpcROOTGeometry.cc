@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcROOTGeometry.cc,v 1.2 1999/04/07 00:48:00 lasiuk Exp $
+ * $Id: StTpcROOTGeometry.cc,v 1.3 1999/12/08 02:10:42 calderon Exp $
  *
  * Author: brian May March 22, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcROOTGeometry.cc,v $
+ * Revision 1.3  1999/12/08 02:10:42  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.2  1999/04/07 00:48:00  lasiuk
  * add z offset for driftLength
  *
@@ -79,18 +82,18 @@ StTpcROOTGeometry::StTpcROOTGeometry(geometryDataSet* dS)
 	
     mFirstInnerSectorAnodeWire     = dS->firstInnerSectorAnodeWire;
     mLastInnerSectorAnodeWire      = dS->lastInnerSectorAnodeWire;
-    mNumberOfInnerSectorAnodeWires = dS->numberOfInnerSectorAnodeWires;
+    mNumberOfInnerSectorAnodeWires = static_cast<int>(dS->numberOfInnerSectorAnodeWires);
 
     mFirstOuterSectorAnodeWire     = dS->firstOuterSectorAnodeWire;
     mLastOuterSectorAnodeWire      = dS->lastOuterSectorAnodeWire;
-    mNumberOfOuterSectorAnodeWires = dS->numberOfOuterSectorAnodeWires;
+    mNumberOfOuterSectorAnodeWires = static_cast<int>(dS->numberOfOuterSectorAnodeWires);
     mInnerSectorEdge               = dS->innerSectorEdge;
     mOuterSectorEdge               = dS->outerSectorEdge;
 
     // should be assign --- not supported by egcs 1.0.2
     //mPadsInRow.assign(mPadRows);
     mPadsInRow.resize(mPadRows);
-    for(int ii=0; ii<mPadsInRow.size(); ii++)
+    for(unsigned int ii=0; ii<mPadsInRow.size(); ii++)
 	mPadsInRow[ii]= dS->padsInRow[ii];
     
     mRadialDistanceAtRow.resize(mPadRows);
@@ -99,25 +102,25 @@ StTpcROOTGeometry::StTpcROOTGeometry(geometryDataSet* dS)
 
      // !!!! In principle use data-base values for the loop variables!!!!!
      // first 8 pad rows
-    for(ii=1; ii<9; ii++)
-	mRadialDistanceAtRow[ii-1] =
-	    mFirstPadRow+(ii-1)*mInnerSectorRowPitch1;
+    for(unsigned int i=1; i<9; i++)
+	mRadialDistanceAtRow[i-1] =
+	    mFirstPadRow+(i-1)*mInnerSectorRowPitch1;
 	
     // padrows 9-13
     double base =
 	mFirstPadRow + 7*mInnerSectorRowPitch1;
-    for(ii=9; ii<14; ii++)
-	mRadialDistanceAtRow[ii-1] =
-	    base+(ii-8)*mInnerSectorRowPitch2;
+    for(unsigned int jj=9; jj<14; jj++)
+	mRadialDistanceAtRow[jj-1] =
+	    base+(jj-8)*mInnerSectorRowPitch2;
 
     // pad row 14
     mRadialDistanceAtRow[13] =
 	mFirstPadRow + 7*mInnerSectorRowPitch1 + 5*mInnerSectorRowPitch2 + mIoSectorSeparation;
 
     // pad row 15-45
-    for(ii=15; ii<46; ii++)
-	mRadialDistanceAtRow[ii-1] =
-	    mFirstOuterSectorPadRow + (ii-14)*mOuterSectorRowPitch;
+    for(unsigned int j=15; j<46; j++)
+	mRadialDistanceAtRow[j-1] =
+	    mFirstOuterSectorPadRow + (j-14)*mOuterSectorRowPitch;
 
     // Make sure units are as expected:
     
@@ -152,8 +155,8 @@ StTpcROOTGeometry::StTpcROOTGeometry(geometryDataSet* dS)
     mOuterSectorzOffSet    *= millimeter;
 
     
-    for(ii=0; ii<mRadialDistanceAtRow.size(); ii++)
-	mRadialDistanceAtRow[ii] *= millimeter;
+    for(unsigned int kk=0; kk<mRadialDistanceAtRow.size(); kk++)
+	mRadialDistanceAtRow[kk] *= millimeter;
 
     // Wires
     mAnodeWirePitch       *= millimeter;

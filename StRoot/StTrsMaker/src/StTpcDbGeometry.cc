@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcDbGeometry.cc,v 1.1 1999/10/11 23:55:21 calderon Exp $
+ * $Id: StTpcDbGeometry.cc,v 1.2 1999/12/08 02:10:41 calderon Exp $
  *
  * Authors: Brain Lasiuk & Manuel Calderon de la Barca Sanchez September 8, 1999
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcDbGeometry.cc,v $
+ * Revision 1.2  1999/12/08 02:10:41  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.1  1999/10/11 23:55:21  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
@@ -120,7 +123,7 @@ StTpcDbGeometry::StTpcDbGeometry(StTpcDb* globalDbPointer)
     // should be assign --- not supported by egcs 1.0.2
     //mPadsInRow.assign(mPadRows);
     mPadsInRow.resize(mPadRows);
-    for(int ii=0; ii<mPadsInRow.size(); ii++)
+    for(unsigned int ii=0; ii<mPadsInRow.size(); ii++)
 	mPadsInRow[ii] = gTpcDbPtr->PadPlaneGeometry()->numberOfPadsAtRow(ii+1); //careful indexing..
     //mRadialDistanceAtRow.assign(mPadRows);
     mRadialDistanceAtRow.resize(mPadRows);
@@ -131,30 +134,9 @@ StTpcDbGeometry::StTpcDbGeometry(StTpcDb* globalDbPointer)
     // from the DB, so can leave this part as is.  However, since the DB is
     // there already, we can just loop over it.  Does this help?
 
-    for(ii=1; ii<46; ii++)
-	mRadialDistanceAtRow[ii-1] = gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(ii);
+    for(unsigned int jj=1; jj<46; jj++)
+	mRadialDistanceAtRow[jj-1] = gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(jj);
     
-//     // first 8 pad rows
-//     for(int ii=1; ii<9; ii++)
-// 	mRadialDistanceAtRow[ii-1] =
-// 	    mFirstPadRow+(ii-1)*mInnerSectorRowPitch1;
-	
-//     // padrows 9-13
-//     double base =
-// 	mFirstPadRow + 7*mInnerSectorRowPitch1;
-//     for(ii=9; ii<14; ii++)
-// 	mRadialDistanceAtRow[ii-1] =
-// 	    base+(ii-8)*mInnerSectorRowPitch2;
-
-//     // pad row 14
-//     mRadialDistanceAtRow[13] =
-// 	mFirstPadRow + 7*mInnerSectorRowPitch1 + 5*mInnerSectorRowPitch2 + mIoSectorSeparation;
-
-//     // pad row 15-45
-//     for(ii=15; ii<46; ii++)
-// 	mRadialDistanceAtRow[ii-1] =
-// 	    mFirstOuterSectorPadRow + (ii-14)*mOuterSectorRowPitch;
-
     // Make sure units are as expected, the DB units are centimeters and so are SCL units:
     
     mIfcRadius           *= centimeter;
@@ -187,8 +169,8 @@ StTpcDbGeometry::StTpcDbGeometry(StTpcDb* globalDbPointer)
     mInnerSectorzOffSet    *= centimeter;
     mOuterSectorzOffSet    *= centimeter;
     
-    for(ii=0; ii<mRadialDistanceAtRow.size(); ii++)
-	mRadialDistanceAtRow[ii] *= centimeter;
+    for(unsigned int k=0; k<mRadialDistanceAtRow.size(); k++)
+	mRadialDistanceAtRow[k] *= centimeter;
 
     // Wires
     mAnodeWirePitch       *= centimeter;

@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcROOTElectronics.cc,v 1.1 1999/03/23 03:39:22 lasiuk Exp $
+ * $Id: StTpcROOTElectronics.cc,v 1.2 1999/12/08 02:10:41 calderon Exp $
  *
  * Author: brian March 22, 1999
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcROOTElectronics.cc,v $
+ * Revision 1.2  1999/12/08 02:10:41  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.1  1999/03/23 03:39:22  lasiuk
  * Initial Revsion
  *
@@ -31,7 +34,7 @@ StTpcROOTElectronics::StTpcROOTElectronics(electronicsDataSet* dS)
     mAdcConversion       = dS->adcConversion;    
     mAdcConversionCharge = dS->adcCharge;    
     mNumberOfTimeBins    = dS->numberOfTimeBins;    
-    mAveragePedestal     = dS-> averagePedestal;
+    mAveragePedestal     = static_cast<int>(dS->averagePedestal);
     mShapingTime         = dS->shapingTime;
     mTau                 = dS->tau;
 

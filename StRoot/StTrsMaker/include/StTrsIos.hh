@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsIos.hh,v 1.1 1999/10/11 23:55:11 calderon Exp $
+ * $Id: StTrsIos.hh,v 1.2 1999/12/08 02:10:25 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsIos.hh,v $
+ * Revision 1.2  1999/12/08 02:10:25  calderon
+ * Modified to eliminate warnings on Linux.
+ *
  * Revision 1.1  1999/10/11 23:55:11  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
@@ -38,9 +41,9 @@ public:
     virtual ~StTrsIos() {};
 
 protected:
-    int mEvents;
-    int mSectors;
-    int mRows;
+    unsigned int mEvents;
+    unsigned int mSectors;
+    unsigned int mRows;
     StTpcGeometry* mGeomDb;
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<int> padsAtRow;
