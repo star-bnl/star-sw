@@ -1,6 +1,6 @@
 # tbr/Makefile.control
 #
-ASPS := tbr dio dui tdm soc
+ASPS := tbr dio tdm soc
 #PAMS := 
 #
 USER_LIBS := -ldsu -ldsl -lasu

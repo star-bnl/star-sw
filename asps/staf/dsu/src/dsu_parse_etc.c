@@ -1,5 +1,5 @@
 /***********************************************************  TYPEDEFS  **/
-typedef int myBool;
+
 /***********************************************************  INCLUDES  **/
 #include <stdio.h>
 #include <math.h>
@@ -8,7 +8,6 @@ typedef int myBool;
 #include "dstype.h"
 #include "dsxdr.h"
 #include "dscuts.h"
-extern char gStr[100];
 /***********************************************************  DEFINES  **/
 #define ERR_1 "The number typed in the subscript box is too small.\nMin=1."
 #define ERR_2 "The number typed in the subscript box\nis too big.\nMax=%d"
@@ -28,17 +27,18 @@ extern char gStr[100];
 #define OPERATOR_TYPE_LE   4
 #define OPERATOR_TYPE_EQ   5
 /***********************************************************  GLOBALS  **/
-myBool gTableError,gAlreadyDidIt;
+char gStr[DSU_SIZE_OF_GSTR];
+int gTableError,gAlreadyDidIt;
 char gCopy[PSIZE];
-extern int gDone;
+int gDone;
 /***********************************************************  DEFINES  **/
 #define GRAPHICS 0
 #define TEXT 1
 #define PROGRESS 2
 /***********************************************************  FUNCTIONS  **/
-void Say(char *mess);
+
 void Say1(char *x) {
-  if(!gAlreadyDidIt) { gAlreadyDidIt=TRUE; Say(x); }
+  if(!gAlreadyDidIt) { gAlreadyDidIt=TRUE; printf("%s\n",x); }
 }
 void GetLocationAndTypeOfOperator(char *cc,int *location,int *type) {
   char k1,k2; int fo,ii; *type=OPERATOR_TYPE_PE;  /* PE=parse error */
@@ -70,43 +70,43 @@ int StripSubAndRetItsValue(char *xx) {
   }
   if(rv<1) rv=1; return rv-1;
 }
-float Val(char *cc,DS_DATASET_T *pTable,long row) {
+float dsu_Val(char *cc,DS_DATASET_T *pTable,long row) {
   size_t sizetRow,colNum;
   int dataType; float rv,fv; long iv; int sub;
   if(HasLetters(cc)) {
     sizetRow=row;
     sub=StripSubAndRetItsValue(cc);
     if(!dsFindColumn(&colNum,pTable,cc)) {
-      PP"Fatal error: table browser can't find column \"%s\".\n",cc);
+      PP"Fatal error: can't find column \"%s\".\n",cc);
       gDone=7; return 0.0;
     }
     if(!TableValue(&dataType,gStr,&fv,&iv,sizetRow,colNum,pTable,sub)) {
       gTableError=TRUE; return 0.0;
     }
-    if(dataType==FLOAT) rv=fv;
-    else if(dataType==INTEGER) rv=iv;
-    else if(dataType==STRING) {
-      PP"Fatal error in table browser:  char string used in cuts.\n");
+    if(dataType==DSU_FLOAT) rv=fv;
+    else if(dataType==DSU_INTEGER) rv=iv;
+    else if(dataType==DSU_STRING) {
+      PP"Fatal error:  char string used in cuts.\n");
       gDone=7; return 0.0;
     }
     /* PP"Val rets %f.  dataType=%d\n------------------\n",rv,dataType); */
     return rv;
   } else return(atof(cc));
 }
-float Val1(char *cc,int loc,DS_DATASET_T *pTable,long row) {
+float dsu_Val1(char *cc,int loc,DS_DATASET_T *pTable,long row) {
   char dd[PSIZE]; strcpy(dd,cc); dd[loc]='\0';
-  return Val(dd,pTable,row);
+  return dsu_Val(dd,pTable,row);
 }
-float Val2(char *cc,int loc,DS_DATASET_T *pTable,long row) {
+float dsu_Val2(char *cc,int loc,DS_DATASET_T *pTable,long row) {
   char dd[PSIZE]; strcpy(dd,cc+loc+4);
-  return Val(dd,pTable,row);
+  return dsu_Val(dd,pTable,row);
 }
 int SingleExpressionResult(DS_DATASET_T *pTable,long row,char *cuts) {
   int location,type;  /* type tells whether .gt., .lt., etc. */
   float v1,v2;
   GetLocationAndTypeOfOperator(cuts,&location,&type);
-  v1=Val1(cuts,location,pTable,row);
-  v2=Val2(cuts,location,pTable,row);
+  v1=dsu_Val1(cuts,location,pTable,row);
+  v2=dsu_Val2(cuts,location,pTable,row);
 #ifdef DEBUG
   /* PP"type=%d (le%d ge%d gt%d lt%d eq%d), val1=%f val2=%f\n",
   ** type, OPERATOR_TYPE_LE, OPERATOR_TYPE_GE, OPERATOR_TYPE_GT,
@@ -247,15 +247,17 @@ void ConvertFromCtoFortran(char *xx) {
     }
   }
 }
+dsu_Progress(int a,int total,char *junk1,char *junk2) {
+  printf("        %3d percent finished\n",(100*a)/total);
+}
 #define SHOW 35
-myBool dsuDoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
+int dsuDoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
   size_t numRows; long ii; char copy[COPY],litCopy[SHOW+5]; /* 5 for "..." */
   strncpy(copy,cuts,COPY-2); ConvertFromCtoFortran(copy);
   if(strlen(copy)>COPY-4) { Say1("Cuts string too big."); return FALSE; }
   gAlreadyDidIt=FALSE;
   strncpy(litCopy,cuts,SHOW+1); litCopy[SHOW]='\0';
   if(strlen(cuts)>SHOW) strcat(litCopy,"...");
-  Progress(-5,(int)numRows,"Cuts Progress                       ",litCopy);
   if(sizeof(char)!=1) {
     /* If you get this error message, you may have to adjust BITSPERCHAR */
     Say1("This is dsuDoCuts(). I need 8 bit chars."); return FALSE;
@@ -264,7 +266,7 @@ myBool dsuDoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
   for(ii=nBytes-1;ii>=0;ii--) ba[ii]=0;
   gTableError=FALSE;
   for(ii=0;ii<numRows;ii++) {
-    if(ii%150==0) Progress(ii,(int)numRows,NULL,NULL);
+    if(ii%150==0) dsu_Progress(ii,(int)numRows,NULL,NULL);
     if(gTableError) { Say1("Error 66d in dsuDoCuts()."); return FALSE; }
     switch(PassCuts(pTable,ii,copy)) {
       case TRUE: SetThisRow(ii,ba); break;
@@ -273,10 +275,9 @@ myBool dsuDoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
       default: Say1("Error 66c in dsuDoCuts()."); return FALSE;
     }
   }
-  Progress(-10,(int)numRows,NULL,NULL);
   return TRUE;
 }
-myBool dsuRowPassedCuts(char *ba,long row) {
+int dsuRowPassedCuts(char *ba,long row) {
   long whichChar; int whichBit; char mask;
   whichBit=row%BITSPERCHAR; whichChar=row/BITSPERCHAR;
   switch(whichBit) {
@@ -292,4 +293,75 @@ myBool dsuRowPassedCuts(char *ba,long row) {
   }
   if((ba[whichChar] & mask)) return TRUE;
   return FALSE;
+}
+void dsuTableValErr(int x) {
+  printf("%cError %d in dsu.\n",7,x);
+}
+int dsuCutsArray(
+  DS_DATASET_T *dsPtr, size_t colNum,int tentSubscript,
+  int *off, size_t *dim, size_t *array_size_t, char **typeName) {
+  /* see comment uu4 */
+  if(!dsColumnTypeName(typeName,dsPtr,colNum))          dsuTableValErr( 17);
+  if(!dsColumnDimCount(dim,dsPtr,colNum))               dsuTableValErr( 18);
+  if(!dsColumnDimensions(array_size_t,dsPtr,colNum))    dsuTableValErr( 19);
+  if(*dim>0) { 
+    *off=tentSubscript; if(*off<0||*off>=*array_size_t) dsuTableValErr( 20); 
+  } else *off=0;
+  return TRUE;
+}
+int TableValue(int *dType,char *uu,float *fv,long *iv,size_t row,
+  size_t colNum,DS_DATASET_T *tp,int subscript) {
+  /* Either fv or iv is filled in.  Caller knows which from dType.  This
+  ** function is the workhorse for getting numbers from the current table. */
+  int ii,off; size_t colSize,rowSize;
+  char *pData,*tn;
+  size_t dim;             /* 0 for x, 1 for x[], and 2 for x[][]. */
+  size_t arraysize;       /* x[arraysize] */
+  if(!dsuCutsArray(tp,colNum,subscript,&off,&dim,&arraysize,&tn)) {
+    dsuTableValErr( 21); return 0;
+  }
+  if(!dsCellAddress(&pData,tp,row,colNum)) {
+    /* 961003 dsuTableValErr( 22); */ *fv=0.0; return FALSE;
+  }
+  if(!strcmp(tn,  "long")) {
+    *iv=*((  long*)(pData+off*sizeof(long))); *dType=DSU_INTEGER;
+
+  } else if(!strcmp(tn,   "short")) {
+    *iv=*((   short*)(pData+off*sizeof(short))); *dType=DSU_INTEGER;
+  } else if(!strcmp(tn,   "unsigned short")) {
+    *iv=*((unsigned short*)(pData+off*sizeof(unsigned short))); 
+    *dType=DSU_INTEGER;
+  } else if(!strcmp(tn,   "unsigned long")) {
+    *iv=*((unsigned long*)(pData+off*sizeof(unsigned long))); 
+    *dType=DSU_INTEGER;
+  } else if(!strcmp(tn,"octet")) {
+    *iv=*((unsigned char*)(pData+off)); *dType=DSU_HEX;
+
+  } else if(!strcmp(tn,   "int")) {
+    *iv=*((   int*)(pData+off*sizeof(int))); *dType=DSU_INTEGER;
+  } else if(!strcmp(tn, "float")) {
+    *fv=*(( float*)(pData+off*sizeof(float))); *dType=DSU_FLOAT;
+  } else if(!strcmp(tn,"double")) {
+    *fv=*((double*)(pData+off*sizeof(double))); *dType=DSU_FLOAT;
+  } else if(!strcmp(tn,"char")) {
+    if(!dsColumnSize(&colSize,tp,colNum)) {dsuTableValErr(229); return 0;}
+    if(!dsTableRowSize(&rowSize,tp)) {dsuTableValErr(223); return 0;}
+    /* use row size for char strings, but sizeof() for others July 25 1995 */
+
+    /* Aug 27 1995  off should never be anything but zero for char arrays,
+    ** since we don't access the chars individually. */
+    if(off!=0) {dsuTableValErr(772); return 0;}
+
+    /*           */ strncpy(uu,(char*)(pData+off*rowSize),98);
+    if(colSize<98) uu[colSize]='\0';
+    for(ii=strlen(uu)-1;ii>=0;ii--) { if(uu[ii]<32||uu[ii]>126) uu[ii]=' '; }
+    for(ii=strlen(uu)-1;ii>=0;ii--) { if(uu[ii]!=' ') break; uu[ii]='\0'; }
+    *dType=DSU_STRING;
+  } else {
+    PP"This table contains a data type (%s)\n",tn);
+    PP"which I do not currently support.  Fatal error.\n");
+    return FALSE;
+  }
+  /* PP"tABLEvALUE rets iflt=%d fv=%f, iv=%d\n",*dType,*fv,*iv); */
+  return TRUE;
 }

@@ -5,7 +5,7 @@
 #######################################################################
 .PHONY: all clean test help setup config install default
 #
-VERSION			:= "$Id: Makefile,v 1.4 1997/02/07 21:17:55 tull Exp $"
+VERSION			:= "$Id: Makefile,v 1.5 1997/02/25 20:15:48 ward Exp $"
 #
 default: all
 #
@@ -42,7 +42,7 @@ reset:
 empty:
 	rm -r *
 	tar xvf $(SLM_DIR)/empty.tar
-	cp -i $(SLM_DIR)/SLMakefile Makefile
+	cp $(SLM_DIR)/SLMakefile Makefile
 #
 #?make test        - Test current environment for SLM compatability.
 test:

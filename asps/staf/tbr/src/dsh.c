@@ -10,6 +10,7 @@
 #define EXTERN
 #include "brow.h"
 #include "dscuts.h"
+extern char gStr[DSU_SIZE_OF_GSTR];
 void Sss(char *mess);
 int gAlreadyErr;
 extern int gDone;
@@ -27,21 +28,21 @@ the documentation on setting \"resources\".\n\
 ";
 void Ose(void);
 /***********************************************************  FUNCTIONS  **/
-myBool TableHasMoreThanZeroRows(int tlm) {
+int TableHasMoreThanZeroRows(int tlm) {
   size_t nRow;
-  if(!dsTableRowCount(&nRow,gDs[tlm]->dsPtr)) Err(938);
+  if(!dsTableRowCount(&nRow,gDs[tlm]->dsPtr)) dsu_Err(938);
   if(nRow>0) return TRUE;
   Sss("Please do not select\ntables that have zero rows."); return FALSE;
 }
-myBool TableHasMoreThanZeroCols(int tlm) {
+int TableHasMoreThanZeroCols(int tlm) {
   size_t nCol;
-  if(!dsTableColumnCount(&nCol,gDs[tlm]->dsPtr)) Err(538);
+  if(!dsTableColumnCount(&nCol,gDs[tlm]->dsPtr)) dsu_Err(538);
   if(nCol>0) return TRUE;
   Sss("Please do not select\ntables that have zero columns."); return FALSE;
 }
 void ExpandExceptCase(int wds) {
   char *x,c;
-  if(gDs[wds]->triStat==TRI_LEAF) Err( 59);
+  if(gDs[wds]->triStat==TRI_LEAF) dsu_Err( 59);
   if(gDs[wds]->type==TYPE_DS_TABLE) return;
   x=gDs[wds]->triText; c=x[0];
   if(c>='a'&&c<='z') {
@@ -50,7 +51,7 @@ void ExpandExceptCase(int wds) {
 }
 void ExpandCase(int wds) {
   char *x,c;
-  if(gDs[wds]->triStat==TRI_LEAF) Err( 52);
+  if(gDs[wds]->triStat==TRI_LEAF) dsu_Err( 52);
   x=gDs[wds]->triText; c=x[0];
   if(c>='a'&&c<='z') {
     x[0]+='Z'-'z'; x[1]+='Z'-'z'; gDs[wds]->triStat=TRI_EXPANDED;
@@ -58,15 +59,15 @@ void ExpandCase(int wds) {
 }
 void ContractCase(int wds) {
   char *x,c;
-  if(gDs[wds]->triStat==TRI_LEAF) Err( 53);
+  if(gDs[wds]->triStat==TRI_LEAF) dsu_Err( 53);
   x=gDs[wds]->triText; c=x[0];
   if(c>='A'&&c<='Z') {
     x[0]+='z'-'Z'; x[1]+='z'-'Z'; gDs[wds]->triStat=TRI_CONTRACTED;
   }
 }
-myBool ToggleCase(int wds) {
+int ToggleCase(int wds) {
   char *x,c;
-  if(gDs[wds]->triStat==TRI_LEAF) Err( 54);
+  if(gDs[wds]->triStat==TRI_LEAF) dsu_Err( 54);
   x=gDs[wds]->triText; c=x[0];
   if(c>='a'&&c<='z') {
     x[0]+='Z'-'z'; x[1]+='Z'-'z'; gDs[wds]->triStat=TRI_EXPANDED;
@@ -86,96 +87,96 @@ myBool ToggleCase(int wds) {
   ** output array_size_t  -- array size (max for subscript (+1))
   ** output typeName  -- data type (long, float, etc)
   */
-myBool ATable(int x) {
+int ATable(int x) {
   if(gDs[x]->type==TYPE_DS_TABLE) return TRUE;
   return FALSE;
 }
-myBool Array(
+int Array(
   DS_DATASET_T *dsPtr, size_t colNum,int tentSubscript,
   int *off, size_t *dim, size_t *array_size_t, char **typeName) {
   /* see comment uu4 */
-  if(!dsColumnTypeName(typeName,dsPtr,colNum))		Err( 17);
-  if(!dsColumnDimCount(dim,dsPtr,colNum))		Err( 18);
-  if(!dsColumnDimensions(array_size_t,dsPtr,colNum))	Err( 19);
-  if(*dim>0) { *off=tentSubscript; if(*off<0||*off>=*array_size_t) Err( 20); }
+  if(!dsColumnTypeName(typeName,dsPtr,colNum))		dsu_Err( 17);
+  if(!dsColumnDimCount(dim,dsPtr,colNum))		dsu_Err( 18);
+  if(!dsColumnDimensions(array_size_t,dsPtr,colNum))	dsu_Err( 19);
+  if(*dim>0) { *off=tentSubscript; if(*off<0||*off>=*array_size_t) dsu_Err( 20); }
   else *off=0;
   return TRUE;
 }
-myBool TableValue(int *dType,char *uu,float *fv,long *iv,size_t row,
-  size_t colNum,DS_DATASET_T *tp,int subscript) {
-  /* Either fv or iv is filled in.  Caller knows which from dType.  This
-  ** function is the workhorse for getting numbers from the current table. */
-  int ii,off; size_t colSize,rowSize;
-  char *pData,*tn;
-  size_t dim;             /* 0 for x, 1 for x[], and 2 for x[][]. */
-  size_t arraysize;       /* x[arraysize] */
-  if(!Array(tp,colNum,subscript,&off,&dim,&arraysize,&tn)) Err( 21);
-  if(!dsCellAddress(&pData,tp,row,colNum)) {
-    /* 961003 Err( 22); */ *fv=0.0; return FALSE;
-  }
-  if(!strcmp(tn,  "long")) {
-    *iv=*((  long*)(pData+off*sizeof(long))); *dType=INTEGER;
 
-  } else if(!strcmp(tn,   "short")) {
-    *iv=*((   short*)(pData+off*sizeof(short))); *dType=INTEGER;
-  } else if(!strcmp(tn,   "unsigned short")) {
-    *iv=*((unsigned short*)(pData+off*sizeof(unsigned short))); *dType=INTEGER;
-  } else if(!strcmp(tn,   "unsigned long")) {
-    *iv=*((unsigned long*)(pData+off*sizeof(unsigned long))); *dType=INTEGER;
-  } else if(!strcmp(tn,"octet")) {
-    *iv=*((unsigned char*)(pData+off)); *dType=HEX;
 
-  } else if(!strcmp(tn,   "int")) {
-    *iv=*((   int*)(pData+off*sizeof(int))); *dType=INTEGER;
-  } else if(!strcmp(tn, "float")) {
-    *fv=*(( float*)(pData+off*sizeof(float))); *dType=FLOAT;
-  } else if(!strcmp(tn,"double")) {
-    *fv=*((double*)(pData+off*sizeof(double))); *dType=FLOAT;
-  } else if(!strcmp(tn,"char")) {
-    if(!dsColumnSize(&colSize,tp,colNum)) Err(229);
-    if(!dsTableRowSize(&rowSize,tp)) Err(223);
-    /* use row size for char strings, but sizeof() for others July 25 1995 */
 
-    /* Aug 27 1995  off should never be anything but zero for char arrays,
-    ** since we don't access the chars individually. */
-    if(off!=0) Err(772);
 
-    /* gStr[100] */ strncpy(uu,(char*)(pData+off*rowSize),98);
-    if(colSize<98) uu[colSize]='\0';
-    for(ii=strlen(uu)-1;ii>=0;ii--) { if(uu[ii]<32||uu[ii]>126) uu[ii]=' '; }
-    for(ii=strlen(uu)-1;ii>=0;ii--) { if(uu[ii]!=' ') break; uu[ii]='\0'; }
-    *dType=STRING;
-  } else {
-    PP"This table contains a data type (%s)\n",tn);
-    PP"which the browser does not currently support.  Fatal error.\n");
-    return FALSE;
-  }
-  /* PP"tABLEvALUE rets iflt=%d fv=%f, iv=%d\n",*dType,*fv,*iv); */
-  return TRUE;
-}
-static float Value(int *dt,DS_DATASET_T *tp,size_t colNum,int row,int ss) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+static float dsu_Value(int *dt,DS_DATASET_T *tp,size_t colNum,int row,int ss) {
   size_t row_size_t; float fv; long iv; int dataType;
   row_size_t=row;
   if(!TableValue(&dataType,gStr,&fv,&iv,row_size_t,colNum,tp,ss))
       gTableValueError=TRUE; else gTableValueError=FALSE;
   if(gTableValueError) return 0.0;
   *dt=dataType;
-  if(dataType==FLOAT)   return fv;
-  else if(dataType==INTEGER) { fv=iv; return fv; }
-  else if(dataType==STRING)  return 0;
-  else if(dataType==HEX) { fv=iv; return fv; }
-  else Err( 43);
+  if(dataType==DSU_FLOAT)   return fv;
+  else if(dataType==DSU_INTEGER) { fv=iv; return fv; }
+  else if(dataType==DSU_STRING)  return 0;
+  else if(dataType==DSU_HEX) { fv=iv; return fv; }
+  else dsu_Err( 43);
 }
 float ValueWrapper(int wh_gDs,size_t colNum,int row,int subscript) {
   int dt;  /* dt = Data Type */
   float rv;
-  rv=Value(&dt,gDs[wh_gDs]->dsPtr,colNum,row,subscript);
-  if(dt==STRING)                  { gVWType=VWSTRING; return 0.0; }
-  else if(dt==INTEGER||dt==FLOAT) { gVWType=VWNUMBER; return rv; }
-  else if(dt==HEX)                { gVWType=VWHEX; return rv; }
-  else Err(552);
+  rv=dsu_Value(&dt,gDs[wh_gDs]->dsPtr,colNum,row,subscript);
+  if(dt==DSU_STRING)                  { gVWType=VWSTRING; return 0.0; }
+  else if(dt==DSU_INTEGER||dt==DSU_FLOAT) { gVWType=VWNUMBER; return rv; }
+  else if(dt==DSU_HEX)                { gVWType=VWHEX; return rv; }
+  else dsu_Err(552);
 }
-myBool DoCutsWrapper(int max8,char *ba,char *cuts,int wh_gDs) {
+int DoCutsWrapper(int max8,char *ba,char *cuts,int wh_gDs) {
   if(dsuDoCuts(max8,ba,cuts,gDs[wh_gDs]->dsPtr)) return TRUE;
   else return FALSE;
 }
@@ -187,9 +188,9 @@ void SetToDatasetInfo(int wh_gDs,char *xx,int max) { /* BBB max unused */
   strcat(xx,buf);
   sprintf(buf,"         Parent Name: %s\n",gDs[wh_gDs]->parentName);
   strcat(xx,buf);
-  if(!dsDatasetEntryCount(&nCol,gDs[wh_gDs]->dsPtr)) Err( 36);
+  if(!dsDatasetEntryCount(&nCol,gDs[wh_gDs]->dsPtr)) dsu_Err( 36);
   sprintf(buf,"    Number of Tables: %d\n",nCol); strcat(xx,buf);
-  /* if(!dsDatasetMaxEntryCount(&nCol,gDs[wh_gDs]->dsPtr)) Err( 37); */
+  /* if(!dsDatasetMaxEntryCount(&nCol,gDs[wh_gDs]->dsPtr)) dsu_Err( 37); */
   sprintf(buf,"Max Number of Tables: %s\n","???"); strcat(xx,buf);
 }
 void TableName(int wh_gDs,char *name) {
@@ -203,19 +204,19 @@ void SetToTableInfo(char *name,size_t *nRow,int wh_gDs,char *xx,int max) {
   strcpy(name,gDs[wh_gDs]->name);
   sprintf(buf,"Parent %s\n",gDs[wh_gDs]->parentName);
   strcat(xx,buf);
-  if(!dsTableColumnCount(&nCol,gDs[wh_gDs]->dsPtr)) Err( 38);
+  if(!dsTableColumnCount(&nCol,gDs[wh_gDs]->dsPtr)) dsu_Err( 38);
   sprintf(buf," #Cols %d\n",nCol); strcat(xx,buf);
   sprintf(buf,"  Type %s\n","????"); strcat(xx,buf);
-  if(!dsTableRowSize(&nCol,gDs[wh_gDs]->dsPtr)) Err( 29);
+  if(!dsTableRowSize(&nCol,gDs[wh_gDs]->dsPtr)) dsu_Err( 29);
   sprintf(buf,"  Size %d bytes/row\n",nCol); strcat(xx,buf);
-  if(! dsTableRowCount(nRow,gDs[wh_gDs]->dsPtr)) Err( 30);
+  if(! dsTableRowCount(nRow,gDs[wh_gDs]->dsPtr)) dsu_Err( 30);
   sprintf(buf," #Rows %d\n",*nRow); strcat(xx,buf);
   /*------------------------------------------------------
   sprintf(buf,COLUMN_LIST_FORMAT,"COLUMN","TYPE","MINIMUM","MAXIMUM",
   "AVERAGE","STD_DEV"); strcat(xx,buf);
   -----------------------------------------------------*/
 }
-void Err(int x) {
+void dsu_Err(int x) {
   if(gAlreadyErr) return;
   gAlreadyErr=7;
   PP"OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n");
@@ -234,19 +235,19 @@ void TouchUpType(void) {
   }
 }
 void FillgDs(char *parentName,DS_DATASET_T *dsPtr) {
-  myBool isDataset,isTable; size_t scr,numEntries,entryNumber; char *name;
+  int isDataset,isTable; size_t scr,numEntries,entryNumber; char *name;
   DS_DATASET_T *local;
   gIndent++;
-  if(!dsIsDataset(&isDataset,dsPtr))            Err(  4);
-  if(!dsIsTable(&isTable,dsPtr))                Err(  5);
-  if( isDataset&& isTable)                      Err(  1);
-  if(!isDataset&&!isTable)                      Err(  2);
-  if(isDataset) if(!dsDatasetName(&name,dsPtr)) Err(  9);
-  if(isTable)   if(!dsTableName(&name,dsPtr))   Err( 10);
-  if((int)strlen(name)>DATASET_NAME_SIZE)       Err( 12);
-  if(gNDs>=MAX_DATASET)                         Err(  0);
+  if(!dsIsDataset(&isDataset,dsPtr))            dsu_Err(  4);
+  if(!dsIsTable(&isTable,dsPtr))                dsu_Err(  5);
+  if( isDataset&& isTable)                      dsu_Err(  1);
+  if(!isDataset&&!isTable)                      dsu_Err(  2);
+  if(isDataset) if(!dsDatasetName(&name,dsPtr)) dsu_Err(  9);
+  if(isTable)   if(!dsTableName(&name,dsPtr))   dsu_Err( 10);
+  if((int)strlen(name)>DATASET_NAME_SIZE)       dsu_Err( 12);
+  if(gNDs>=MAX_DATASET)                         dsu_Err(  0);
   gDs[gNDs]=malloc(sizeof(DATASET_INFO));
-  if(gDs[gNDs]==NULL)				Err( 11);
+  if(gDs[gNDs]==NULL)				dsu_Err( 11);
   strcpy(gDs[gNDs]->name  ,name);
   strcpy(gDs[gNDs]->parentName  ,parentName);
          gDs[gNDs]->dsPtr =dsPtr;
@@ -261,9 +262,9 @@ void FillgDs(char *parentName,DS_DATASET_T *dsPtr) {
   if(isDataset) {
     strcpy(gDs[gNDs-1]->triText,"ds");
     gDs[gNDs-1]->triStat=TRI_CONTRACTED;
-    if(!dsDatasetEntryCount(&numEntries,dsPtr)) Err(  8);
+    if(!dsDatasetEntryCount(&numEntries,dsPtr)) dsu_Err(  8);
     for(entryNumber=0;entryNumber<numEntries;entryNumber++) {
-      if(!dsDatasetEntry(&local,dsPtr,entryNumber)) Err(  6);
+      if(!dsDatasetEntry(&local,dsPtr,entryNumber)) dsu_Err(  6);
       FillgDs(name,local); /* recursive */
     }
   } else {
@@ -274,14 +275,14 @@ void FillgDs(char *parentName,DS_DATASET_T *dsPtr) {
 }
 float MinMax(int control,DS_DATASET_T *pp,size_t whichCol,int subscript) {
   size_t nRow_size_t; int dataType,nRowInt,rowInt; float rv,cv;
-  if(!dsTableRowCount(&nRow_size_t,pp)) Err( 35);
+  if(!dsTableRowCount(&nRow_size_t,pp)) dsu_Err( 35);
   nRowInt=nRow_size_t;
   if(nRowInt<=0) return 0.0;
   if(control==0) rv=+1e28; else rv=-1e28;
   for(rowInt=nRowInt-1;rowInt>=0;rowInt--) {
-    cv=Value(&dataType,pp,whichCol,rowInt,subscript);
+    cv=dsu_Value(&dataType,pp,whichCol,rowInt,subscript);
     gDataType=dataType;
-    if(dataType==STRING||dataType==HEX) rv=0.0;
+    if(dataType==DSU_STRING||dataType==DSU_HEX) rv=0.0;
     else {
       if(gTableValueError) {
         Sss("Error 91t: This table has\nunsupported data types."); return 0;
@@ -292,24 +293,24 @@ float MinMax(int control,DS_DATASET_T *pp,size_t whichCol,int subscript) {
   }
   return rv;
 }
-float Ave(float *stdDev,DS_DATASET_T *pp,size_t whichCol,int subscript) {
+float dsu_Ave(float *stdDev,DS_DATASET_T *pp,size_t whichCol,int subscript) {
   size_t nRow_size_t; int dataType,nRowInt,rowInt; float ave,cv,sum2;
-  if(!dsTableRowCount(&nRow_size_t,pp)) Err( 24);
+  if(!dsTableRowCount(&nRow_size_t,pp)) dsu_Err( 24);
   nRowInt=nRow_size_t;
   if(nRowInt<=0) { *stdDev=0.0; return 0.0; }
   ave=0.0;
   for(rowInt=nRowInt-1;rowInt>=0;rowInt--) {
-    ave+=Value(&dataType,pp,whichCol,rowInt,subscript);
+    ave+=dsu_Value(&dataType,pp,whichCol,rowInt,subscript);
     gDataType=dataType;
-    if(dataType==STRING||dataType==HEX) { *stdDev=0; return 0.0; }
+    if(dataType==DSU_STRING||dataType==DSU_HEX) { *stdDev=0; return 0.0; }
     if(gTableValueError) {
       Sss("Error 92t: This table has\nunsupported data types."); return 0;
     }
   } ave/=nRowInt;
   sum2=0;
   for(rowInt=nRowInt-1;rowInt>=0;rowInt--) {
-    cv=Value(&dataType,pp,whichCol,rowInt,subscript);
-    if(dataType==STRING||dataType==HEX) Err(999);
+    cv=dsu_Value(&dataType,pp,whichCol,rowInt,subscript);
+    if(dataType==DSU_STRING||dataType==DSU_HEX) dsu_Err(999);
     if(gTableValueError) {
       Sss("Error 93t: This table has\nunsupported data types."); return 0;
     }
@@ -351,8 +352,8 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
   char minString[FORMAT],maxString[FORMAT],aveString[FORMAT],stdString[FORMAT];
   DS_DATASET_T *pp; int progNow=0,progTot=0;
   pp=gDs[wh_gDs]->dsPtr;
-  if(gDs[wh_gDs]->type!=TYPE_DS_TABLE) Err( 25);
-  if(!dsTableColumnCount(&rr_size_t,pp)) Err( 26); rr=rr_size_t;
+  if(gDs[wh_gDs]->type!=TYPE_DS_TABLE) dsu_Err( 25);
+  if(!dsTableColumnCount(&rr_size_t,pp)) dsu_Err( 26); rr=rr_size_t;
   sprintf(header,COLUMN_LIST_FORMAT,"ColumnName","Type","Minimum",
       "Maximum","Average","StdDev");
   if(!gCalculateAverages) {
@@ -364,15 +365,15 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
     "Doing min/max/averages.  See the \"Pre-");
     for(ii=0;ii<rr;ii++) { /* 1st pass for progTot */
       whichCol=ii;
-      if(!dsColumnDimCount(&dimensionality,pp,whichCol)) Err( 56);
-      if(dimensionality>1) Err( 57);
-      if(!dsColumnDimensions(&arraySize,pp,whichCol)) Err( 58);
+      if(!dsColumnDimCount(&dimensionality,pp,whichCol)) dsu_Err( 56);
+      if(dimensionality>1) dsu_Err( 57);
+      if(!dsColumnDimensions(&arraySize,pp,whichCol)) dsu_Err( 58);
       if(dimensionality==0) arraySize=1;
       asi=arraySize;
       for(jj=1;jj<=asi;jj++) {
         progTot++;
         if(jj==1) MinMax(0,pp,whichCol,jj-1); /* to set gDataType */
-        if(gDataType==STRING) break; /* See comment 66d. */
+        if(gDataType==DSU_STRING) break; /* See comment 66d. */
       }
       if(gTableValueError) break;
     }
@@ -384,12 +385,12 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
   for(ii=0;ii<rr;ii++) { /* 2nd pass, loop over columns */
     if(gTableValueError) break;
     whichCol=ii;
-    if(!dsColumnDimCount(&dimensionality,pp,whichCol)) Err( 39);
-    if(dimensionality>1) Err( 40);
-    if(!dsColumnDimensions(&arraySize,pp,whichCol)) Err( 41);
+    if(!dsColumnDimCount(&dimensionality,pp,whichCol)) dsu_Err( 39);
+    if(dimensionality>1) dsu_Err( 40);
+    if(!dsColumnDimensions(&arraySize,pp,whichCol)) dsu_Err( 41);
     if(dimensionality==0) arraySize=1;
-    if(!dsColumnName(&cc,pp,whichCol)) Err( 27);
-    if(!dsColumnTypeName(&dd,pp,whichCol)) Err( 28);
+    if(!dsColumnName(&cc,pp,whichCol)) dsu_Err( 27);
+    if(!dsColumnTypeName(&dd,pp,whichCol)) dsu_Err( 28);
     MakeAbbreviations(typeA,dd);
     asi=arraySize;
     for(jj=1;jj<=asi;jj++) { /* loop over array members */
@@ -397,8 +398,8 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
         tbrProgress(progNow++,progTot,NULL,NULL);
         minFloat=MinMax(0,pp,whichCol,jj-1); if(gTableValueError) break;
         maxFloat=MinMax(1,pp,whichCol,jj-1); if(gTableValueError) break;
-        aveFloat=Ave(&stdFloat,pp,whichCol,jj-1); if(gTableValueError) break;
-        if(gDataType==STRING||gDataType==HEX) {
+        aveFloat=dsu_Ave(&stdFloat,pp,whichCol,jj-1); if(gTableValueError) break;
+        if(gDataType==DSU_STRING||gDataType==DSU_HEX) {
           strcpy(minString,"-----"); strcpy(maxString,"-----");
           strcpy(stdString,"-----"); strcpy(aveString,"-----");
         } else {
@@ -409,8 +410,8 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
         if(jj==1) MinMax(0,pp,whichCol,jj-1); /* to set gDataType */
       }
       strcpy(totalName,cc);
-      if(gDataType!=STRING&&dimensionality==1) sprintf(ss,"(%d",jj);
-      else *ss='\0'; /* asi is len of string if(gDataType==STRING) */
+      if(gDataType!=DSU_STRING&&dimensionality==1) sprintf(ss,"(%d",jj);
+      else *ss='\0'; /* asi is len of string if(gDataType==DSU_STRING) */
       /* PP"minString=%s, ss=%s.\n",minString,ss); */
       strcat(totalName,ss);
       if(strcmp(typeA,"char")) strcpy(gg,typeA); else strcpy(gg,"string");
@@ -419,7 +420,7 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
       if(strlen(xx)+strlen(bf2)>max-SLACK) {
         PP"ii%d,jj%d,rr%d,asi%d,max%d,strl(xx)%d,strlen(bf2)%d,SLACK%d,\n",
         ii,jj,rr,asi,max,strlen(xx),strlen(bf2),SLACK);
-        Err( 16); doBreak=7; break;
+        dsu_Err( 16); doBreak=7; break;
       }
       strcat(xx,bf2);
       /* PP"(%2d,%2d) len=%4d bf2=%s\n",ii,jj,strlen(xx),bf2); Sleep(2); */
@@ -431,7 +432,7 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
       subscript[lineCnt]=jj-1; /* www */
       strcat(xx,"\n"); /* using the SLACK */
       lineCnt++;
-      if(gDataType==STRING) break; /* asi = len of data string in dsl 66d */
+      if(gDataType==DSU_STRING) break; /* asi=len of data string in dsl 66d */
     }           /* loop over array members */
     if(gTableValueError) break;
     if(doBreak) break;
@@ -443,7 +444,7 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
   ** You can search for tlm in x.c to get a list of uses. */
 void PrimaryList(char *header,  /* goes with WIN_TYPE_PRIMARY June 28 1995 */
   int wh_gDs,int *tot,int *wh_DsA,int ml,char *xx,int max) {
-  myBool fo,freeze,isTable; char indentStr[83],dashes[60];
+  int fo,freeze,isTable; char indentStr[83],dashes[60];
   int nextIndent,currIndent,freezeLevel;
   int off,lineCnt=0,ii; DS_DATASET_T *pp; size_t colIdx,nCol,val;
   char *colName,oneLine[200],xName[100],xCol[100],xRow[100],xMrw[100];
@@ -451,7 +452,7 @@ void PrimaryList(char *header,  /* goes with WIN_TYPE_PRIMARY June 28 1995 */
   /* June 28 1995
   sprintf(header,TABLE_LIST_FORMAT,"TableName","nCOL","nROW","maxRow"); */
   *header='\0';
-  if(wh_gDs!=0) Err(229); /* June 28 1995 */
+  if(wh_gDs!=0) dsu_Err(229); /* June 28 1995 */
   freeze=FALSE;
   for(ii=wh_gDs;ii<gNDs;ii++) { /* June 28 1995, removed +1 from wh_gDs */
     currIndent=gDs[ii]->indent;
@@ -464,27 +465,27 @@ void PrimaryList(char *header,  /* goes with WIN_TYPE_PRIMARY June 28 1995 */
     pp=gDs[ii]->dsPtr;
     /* if(gDs[ii]->type!=TYPE_DS_TABLE) break; June 28 1995 */
     sprintf(xName,"%s",gDs[ii]->name);
-    if(!dsIsTable(&isTable,pp))                Err( 42);
+    if(!dsIsTable(&isTable,pp))                dsu_Err( 42);
     if(isTable) {
-      if(!dsTableColumnCount(&nCol,pp)) Err( 31);
+      if(!dsTableColumnCount(&nCol,pp)) dsu_Err( 31);
       sprintf(xCol,"%d cols,",nCol);
-      if(!dsTableRowCount(&val,pp)) Err( 32); sprintf(xRow,"%d rows.",val);
-      if(!dsTableMaxRowCount(&val,pp)) Err( 33); sprintf(xMrw,"%d",val);
+      if(!dsTableRowCount(&val,pp)) dsu_Err( 32); sprintf(xRow,"%d rows.",val);
+      if(!dsTableMaxRowCount(&val,pp)) dsu_Err( 33); sprintf(xMrw,"%d",val);
       strcpy(xMrw,"");
       strcpy(dashes,"-------------------------------------------------");
       off= T41-currIndent*2-strlen(xName)
       -strlen(xCol)-strlen(xRow)-strlen(xMrw)-6; dashes[off]='\0';
-      if(lineCnt>=MAX_LINES_CLICK_PART) Err( 45);
+      if(lineCnt>=MAX_LINES_CLICK_PART) dsu_Err( 45);
     } else {
       strcpy(xCol,""); strcpy(xRow,""); strcpy(xMrw,""); dashes[0]='\0';
-      if(lineCnt>=MAX_LINES_CLICK_PART) Err(707);
+      if(lineCnt>=MAX_LINES_CLICK_PART) dsu_Err(707);
     }
     strcpy(indentStr,"                                                ");
     indentStr[currIndent*2]='\0';
     sprintf(oneLine,"%s%s %s %s %s %s %s",indentStr,gDs[ii]->triText,
     xName,dashes,xCol,xRow,xMrw);
-    if(strlen(xx)+strlen(oneLine)>max-SLACK) Err( 15); strcat(xx,oneLine);
-    if(lineCnt>=ml) Err( 55);
+    if(strlen(xx)+strlen(oneLine)>max-SLACK) dsu_Err( 15); strcat(xx,oneLine);
+    if(lineCnt>=ml) dsu_Err( 55);
     wh_DsA[lineCnt]=ii; /* recursion of a sort, note arg wh_gDs */
     strcat(xx,"\n"); /* using the SLACK */
     lineCnt++;
@@ -493,10 +494,10 @@ void PrimaryList(char *header,  /* goes with WIN_TYPE_PRIMARY June 28 1995 */
       strcpy(indentStr,"                                                ");
       indentStr[currIndent*2+2]='\0';
       for(colIdx=0;colIdx<nCol;colIdx++) {
-        if(!dsColumnName(&colName,pp,colIdx)) Err( 46);
+        if(!dsColumnName(&colName,pp,colIdx)) dsu_Err( 46);
         sprintf(oneLine,"%sCO %s\n",indentStr,colName);
-        if(strlen(xx)+strlen(oneLine)>max-SLACK) Err( 47); strcat(xx,oneLine);
-        if(lineCnt>=ml) Err( 34);
+        if(strlen(xx)+strlen(oneLine)>max-SLACK) dsu_Err( 47); strcat(xx,oneLine);
+        if(lineCnt>=ml) dsu_Err( 34);
         wh_DsA[lineCnt]=-19; lineCnt++;
       }
     }
@@ -513,8 +514,8 @@ void DatasetList(int *tot,int *wh_DsA,int maxLines,char *out,int max) {
     strcat(bf2,buf);
     if(gDs[ii]->type==TYPE_DS_DATASETS) strcat(bf2,", contains datasets");
     else if(gDs[ii]->type==TYPE_DS_DATASET) strcat(bf2,", contains tables");
-    else Err( 13);
-    if(strlen(out)+strlen(bf2)>max-SLACK) Err( 14); strcat(out,bf2);
+    else dsu_Err( 13);
+    if(strlen(out)+strlen(bf2)>max-SLACK) dsu_Err( 14); strcat(out,bf2);
     if(lineCnt>=maxLines) {
       PP"Error in the table browser error.\n");
       PP"lineCnt=%d, maxLines=%d.\n",lineCnt,maxLines); gDone=7; return;
@@ -534,7 +535,7 @@ void DumpDatasetInfo(void) {
     PP"type = %d (see TYPE_DS_XXX)\n",gDs[ii]->type);
   }
 }
-void Blurb(void) {
+void dsu_Blurb(void) {
  Sss(gTheBlurb);
 }
 void tbrNewDSTree(DS_DATASET_T **dsPtr,long nDsPtr) {
@@ -572,75 +573,7 @@ void UpdateUsageLog(void) {
   }
   system("rm UiR77xEe3T 2> /dev/null"); system("rm UiR77xEe3t 2> /dev/null");
 }
-/* float Value(int *dt,DS_DATASET_T *tp,size_t colNum,int row,int ss); */
-int WriteTempTphit(int *nlines,DS_DATASET_T *tphit) {
-  FILE *ff; int toGo;
-  char *colName[]={ "id", "x", "y", "z", "quit" };
-  size_t nRow,colNum; int col,dt,row; float val;
-  ff=fopen(".tbr.temp","w"); if(!ff) return 5;
-  fprintf(ff,"=== Red, from table tphit\n");
-  fprintf(ff,"List of columns:\n");
-  fprintf(ff,"id x y z\n");
-  if(!dsTableRowCount(&nRow,tphit)) return 2;
-  PP"Number of rows in tphit = %d\n",nRow); (*nlines)=nRow;
-  for(row=0;row<nRow;row++) {
-    toGo=nRow-row;
-    if(toGo%9000==0||(row<100&&row%10==0)) 
-        PP"Phase I, rows to go, tphit = %d\n",toGo);
-    for(col=0;;col++) {
-      if(!strcmp(colName[col],"quit")) break;
-      if(!dsFindColumn(&colNum,tphit,colName[col])) return 1;
-      val=Value(&dt,tphit,colNum,row,0);
-      fprintf(ff,"%g ",val);
-    }
-    fprintf(ff,"\n");
-  }
-  fclose(ff);
-  return 0;
-}
-int WriteTempTpt_track(int *nlines,DS_DATASET_T *tpt_track) {
-  FILE *ff; int toGo;
-  char *colName[]={"id","q","invp","phi0","psi","r0","tanl","z0","quit"};
-  size_t nRow,colNum; int col,dt,row; float val;
-  ff=fopen(".tbr.temp","w"); if(!ff) return 5;
-  fprintf(ff,"=== Green, from table tpt_track\n");
-  fprintf(ff,"List of columns:\n");
-  fprintf(ff,"id q invp phi0 psi r0 tanl z0\n");
-  if(!dsTableRowCount(&nRow,tpt_track)) return 2;
-  PP"Number of rows in tpt_track = %d\n",nRow); (*nlines)=nRow;
-  for(row=0;row<nRow;row++) {
-    toGo=nRow-row;
-    if(toGo%9000==0||(row<100&&row%10==0)) {
-      PP"Phase I, rows to go tpt_track = %d\n",toGo);
-    }
-    for(col=0;;col++) {
-      if(!strcmp(colName[col],"quit")) break;
-      if(!dsFindColumn(&colNum,tpt_track,colName[col])) return 1;
-      val=Value(&dt,tpt_track,colNum,row,0);
-      fprintf(ff,"%g ",val);
-    }
-    fprintf(ff,"\n");
-  }
-  fclose(ff);
-  return 0;
-}
-void writeTheVisualization(DS_DATASET_T *pDataset) { /* www */
-  DS_DATASET_T *tphit,*tpt_track;
-  int e,cnt=0,nlines;
-  if(!dsFindEntry(&tphit,pDataset,"tphit")) {
-    PP"Can't find tphit.\n"); return;
-  }
-  if(!dsFindEntry(&tpt_track,pDataset,"tpt_track")) {
-    PP"Can't find tpt_track.\n"); return;
-  }
-  e=WriteTempTphit(&nlines,tphit); 
-  if(e) { PP"Error %d for tphit.\n",e); return; }
-  ConvertToVisData("tphit",nlines,cnt++);
-  e=WriteTempTpt_track(&nlines,tpt_track);
-  if(e) { PP"Error %d for t_track.\n",e); return; }
-  ConvertToVisData("tpt_track",nlines,cnt++);
-  PP"Success.  Please FTP file 'vis.dump' to your visualization computer.\n");
-}
+/* float dsu_Value(int *dt,DS_DATASET_T *tp,size_t colNum,int row,int ss); */
 void tbrNewDSView(DS_DATASET_T **dsPtrs,long nDsPtr) {
   /* Must wait for return before calling this again, until port to C++. */
   int ii;
@@ -651,7 +584,7 @@ void tbrNewDSView(DS_DATASET_T **dsPtrs,long nDsPtr) {
   Ose(); PP"%s",gTheBlurb); Ose();
   for(ii=0;ii<nDsPtr;ii++) FillgDs("No parent",dsPtrs[ii]);
   TouchUpType();
-  if(gIndent!=INDENT_INIT) Err(  7);
+  if(gIndent!=INDENT_INIT) dsu_Err(  7);
   DoXStuff();
   GetRidOfWindows();
 }

@@ -11,7 +11,7 @@
  * This program is -not- in the public domain.
  */
 /***********************************************************  TYPEDEFS  **/
-typedef int myBool;
+
 /**********************************************************  INCLUDES  **/
 #include <stdio.h>
 #include <string.h>
@@ -44,7 +44,7 @@ void SetColor(XtPointer cld) { /*makeproto*/
   }
   XSetForeground(dpy,gGraphicsContext,col.pixel);
 }
-void Clear(void) {
+void dsu_Clear(void) {
   /* Don't call this (or XtWindow) before realization of gDrawingArea) */
   XClearWindow(XtDisplay(gDrawingArea),XtWindow(gDrawingArea));
   SetColor("white");

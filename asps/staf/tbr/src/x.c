@@ -5,6 +5,7 @@
 #include <strings.h>
 #include <stdlib.h>
 #include "dstype.h"
+#include "dscuts.h"
 #include "dsxdr.h"
 #include <X11/Intrinsic.h>
 #include <X11/IntrinsicP.h>
@@ -38,13 +39,16 @@
 #define BUF 1000
 /******************************************************  GLOBALS  **/
 extern int gNDs;
-int gCallBackData,gNVisDump,gOutType,gTruncateStrings=7;
+extern char gStr[100]; /* there may be some need to match size of memory
+    ** for gStr with gStr in dsu, but probably not. */
+int gCallBackData,gOutType,gTruncateStrings=7;
 FILE *gDump;
-int gLastWhWin=-10,gDone2,gDone;
-myBool gBlurb2,gBlurb1;
+int gLastWhWin=-10,gDone2;
+extern int gDone;
+int gBlurb2,gBlurb1;
 char *gColor;
-char *gBlurb7="Click on the abbreviation (to\n\
-expand/contract) to the left.  Do not click\n\
+char *gBlurb7="Click on the 2-letter abbre\n\
+viation to the left.  Do not click\n\
 directly on the names of datasets.  (You can\n\
 can click on names of tables.)";
 char *gMess0=
@@ -57,27 +61,24 @@ char *gMess0=
 Widget gSecondLabel,gCutsPopup,gProgressPopup,gCutsText,gProgressScale;
 Widget gColorSelPopup;
 /******************************************************  PROTOTYPES  **/
-void writeTheVisualization(void);
-int ConvertToVisData(char*,int,int count);
 void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad);
-void VisHelpCB(Widget w,caddr_t cld,caddr_t cad);
 void TableName(int wh_gDs,char *name);
 void SetHilite(int control,int whWin,int lineNum);
-myBool TableHasMoreThanZeroRows(int tlm);
+int TableHasMoreThanZeroRows(int tlm);
 void HelpCutsCB(Widget w,caddr_t cld,caddr_t cad);
-myBool TableHasMoreThanZeroCols(int tlm);
+int TableHasMoreThanZeroCols(int tlm);
 XtCP ExpandCB(Widget w,caddr_t cld,caddr_t cad);
 XtCP ExpandExceptCB(Widget w,caddr_t cld,caddr_t cad);
 XtCP ContractCB(Widget w,caddr_t cld,caddr_t cad);
-myBool ToggleCase(int wds);
-myBool ATable(int x);
-void Blurb(void),AuxOutputFromOneLn(int whWin,int whAct);
+int ToggleCase(int wds);
+int ATable(int x);
+void dsu_Blurb(void),AuxOutputFromOneLn(int whWin,int whAct);
 void DrawLineXOnly(int x1,int y1,int x2,int y2);
 void DrawLine(float x1,float y1,float x2,float y2);
 void DrawString(float xf,float yf,char *cc);
 void DrawStringXOnly(int x,int y,char *cc);
 void AddPs(char *x);
-void RunTheRows(myBool,int whWin,void (*fnct)());
+void RunTheRows(int,int whWin,void (*fnct)());
 void MakeWindow(int,int,int);
 Widget Column(Widget parent);
 Widget Row(Widget parent);
@@ -229,7 +230,7 @@ void ReadCalcAve(void) {
 }
 void DoOnce2(void) {
   ReadCalcAve(); /* SendMail(); */
-  gLast=-1; gNGraphicsUp=0; gNWin=0; gNVisDump=0; gColor="White";
+  gLast=-1; gNGraphicsUp=0; gNWin=0; gColor="White";
 }
 XtCP CutsCancelCB(Widget w,caddr_t cld,caddr_t cad) {
   gDone2=63;
@@ -308,7 +309,7 @@ void PrepareCutsPopup() {
   XmStringFree(title);
 
   title=XmStringCreateLtoR(
-  "If you have a big cuts string, you can use several lines.",
+  "If you have a long cuts string, you can use several lines.",
   XmSTRING_DEFAULT_CHARSET);
   nn=0;
   XtSetArg(args[nn],XmNlabelString,title); nn++;
@@ -431,7 +432,7 @@ void Complain5(void) {
  ");
 }
 void Write(char *mess,int whWin) {
-  if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(108);
+  if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) dsu_Err(108);
   if(strlen(gWin[whWin]->textOutput)+strlen(mess)>TEXT_SIZE_PART_3-5) {
     Complain5(); gWin[whWin]->textOutput[0]='\0'; gBreakRowsLoop=TRUE;
   }
@@ -442,7 +443,7 @@ void Write(char *mess,int whWin) {
       (XmTextPosition)strlen(gWin[whWin]->textOutput)-1);
   XmUpdateDisplay(gWin[whWin]->txtWidWrite);
 }
-myBool IsOperator(char *xx,int pp) {
+int IsOperator(char *xx,int pp) {
   if(xx[pp]=='.'&&(xx[pp+1]=='g'||xx[pp+1]=='G')) return TRUE;
   if(xx[pp]=='.'&&(xx[pp+1]=='l'||xx[pp+1]=='L')) return TRUE;
   if(xx[pp]=='.'&&(xx[pp+1]=='e'||xx[pp+1]=='E')) return TRUE;
@@ -454,7 +455,7 @@ myBool IsOperator(char *xx,int pp) {
 void BreakIntoLines(char *xx) {
   int len,ii,chos=0,bufPos=0,lastPrint=-1;
   char buf[MAX_CUTS_STRING],save;
-  len=strlen(xx); if(len>800) Err(996); *buf='\0';
+  len=strlen(xx); if(len>800) dsu_Err(996); *buf='\0';
   for(ii=0;ii<len;ii++) {
     if(IsOperator(xx,ii)&&chos>CUTS_WIDTH-15) {
       chos=0; save=xx[ii]; xx[ii]='\0';
@@ -469,7 +470,7 @@ void BreakIntoLines(char *xx) {
 void GetRidOfNewlines(char *xx) {
   int len,ii,bufPos=0,lastPrint=-1;
   char buf[MAX_CUTS_STRING];
-  len=strlen(xx); if(len<0||len>800) Err(770); *buf='\0';
+  len=strlen(xx); if(len<0||len>800) dsu_Err(770); *buf='\0';
   for(ii=0;ii<len;ii++) {
     if(xx[ii]=='\n') {
       xx[ii]='\0';
@@ -496,7 +497,7 @@ void SaveCutsInFile(char *tableName,char *xx) {
   fprintf(temp,"\n%s %s\n",tableName,xx); fclose(temp);
   system("mv bRoWsER.tmp browser.cuts");
 }
-myBool UserMod(char *tableName,char *xx) {
+int UserMod(char *tableName,char *xx) {
   XEvent event; XmString cuts;
   BreakIntoLines(xx); XmTextSetString(gCutsText,xx);
   XtPopup(gCutsPopup,XtGrabNone);
@@ -512,8 +513,8 @@ myBool UserMod(char *tableName,char *xx) {
   SaveCutsInFile(tableName,xx);
   return TRUE; /* User said OK. */
 }
-myBool GetCuts(char *out,char *tableName) {
-  FILE *ff; char *tok,fn[150],line[MAX_CUTS_STRING+5]; myBool fo;
+int GetCuts(char *out,char *tableName) {
+  FILE *ff; char *tok,fn[150],line[MAX_CUTS_STRING+5]; int fo;
   tok=NULL;
   sprintf(fn,"browser.cuts"); ff=fopen(fn,"r");
   if(ff!=NULL) {
@@ -530,7 +531,7 @@ myBool GetCuts(char *out,char *tableName) {
 }
 char *ColName(int ln,int whWin) {
   int ii,nl=0,len; char *cc,*rr;
-  if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(828);
+  if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) dsu_Err(828);
   len=strlen(gWin[whWin]->textClickPart);
   for(ii=0;ii<len;ii++) {
     if(nl>=ln) break; if(gWin[whWin]->textClickPart[ii]=='\n') nl++;
@@ -548,13 +549,13 @@ char *RadStr(int whWin) {
     case 1: strcpy(gPass,"Range"); break;
     case 2: strcpy(gPass,"Cuts"); break;
     case 3: strcpy(gPass,"Next10"); break;
-    default: Err(121);
+    default: dsu_Err(121);
   }
   return gPass;
 }
 void AddPs(char *x) {
   gNPs += strlen(x); if(gNPs<PS-4) strcat(gPs,x);
-  else Err(131);
+  else dsu_Err(131);
 }
 void InitPs(void) {
   *gPs='\0'; gNPs=0;
@@ -686,7 +687,7 @@ void BotLongerCB(Widget ww,caddr_t cld,caddr_t cad) {
   ARGS
   short rr;
   int whWin; whWin=(int)cld;
-  /* if(!gBlurb1) Blurb(); gBlurb1=TRUE; */
+  /* if(!gBlurb1) dsu_Blurb(); gBlurb1=TRUE; */
   rr=gWin[whWin]->nRowsWritePart; rr+=4; gWin[whWin]->nRowsWritePart=rr;
   nn=0;
   XtSetArg(args[nn],XmNrows,rr); nn++;
@@ -705,7 +706,7 @@ void RunNull(size_t row) { /* Menu item just counts selected rows. */
 }
 void RunHistMinMax(size_t row) {
   int irow=row; float val;
-  if(gWin[gRunWhWin]->tlm[gRunWhichHilitedLine]<0) Err( 48);
+  if(gWin[gRunWhWin]->tlm[gRunWhichHilitedLine]<0) dsu_Err( 48);
   val=ValueWrapper(gWin[gRunWhWin]->wh_gDs,
       gWin[gRunWhWin]->tlm[gRunWhichHilitedLine],irow,
       gWin[gRunWhWin]->subscript[gRunWhichHilitedLine]);
@@ -716,7 +717,7 @@ void RunHistMinMax(size_t row) {
 }
 void RunHistFill(size_t row) {
   int hist,irow=row; float val;
-  if(gWin[gRunWhWin]->tlm[gRunWhichHilitedLine]<0) Err( 49);
+  if(gWin[gRunWhWin]->tlm[gRunWhichHilitedLine]<0) dsu_Err( 49);
   val=ValueWrapper(gWin[gRunWhWin]->wh_gDs,
       gWin[gRunWhWin]->tlm[gRunWhichHilitedLine],irow,
       gWin[gRunWhWin]->subscript[gRunWhichHilitedLine]);
@@ -733,7 +734,7 @@ void RunHistFill(size_t row) {
 }
 void RunAverage(size_t row) {
   int irow=row;
-  if(gWin[gRunWhWin]->tlm[gRunWhichHilitedLine]<0) Err( 50);
+  if(gWin[gRunWhWin]->tlm[gRunWhichHilitedLine]<0) dsu_Err( 50);
   gRunTotal+=ValueWrapper(gWin[gRunWhWin]->wh_gDs,
       gWin[gRunWhWin]->tlm[gRunWhichHilitedLine],irow,
       gWin[gRunWhWin]->subscript[gRunWhichHilitedLine]);
@@ -744,60 +745,10 @@ void RunAverage(size_t row) {
 void ConvertToHex(char *out,float val) {
   /* Is this the only function in the world that translates floats to hex? */
   int ii,hh; char buf[WIDE+15];
-  hh=val; if(hh<0) Err(559); if(hh>255) Err(558);
+  hh=val; if(hh<0) dsu_Err(559); if(hh>255) dsu_Err(558);
   sprintf(out,"0x%02x",hh);
   for(ii=WIDE+14;ii>=0;ii--) buf[ii]=' ';
   buf[WIDE-4]='\0'; strcat(buf,out); strcpy(out,buf);
-}
-int IsAVisualizationColumn(char *xx) {
-  if(!strcmp(gWin[gRunWhWin]->tableName,"tpt_track")) {
-    if(!strcmp(xx,"id")) return 7;
-    if(!strcmp(xx,"q")) return 7;
-    if(!strcmp(xx,"r0")) return 7;
-    if(!strcmp(xx,"phi0")) return 7;
-    if(!strcmp(xx,"z0")) return 7;
-    if(!strcmp(xx,"tanl")) return 7;
-    if(!strcmp(xx,"psi")) return 7;
-    if(!strcmp(xx,"invp")) return 7;
-  } else if(!strcmp(gWin[gRunWhWin]->tableName,"tphit")) {
-    if(!strcmp(xx,"id")) return 7;
-    if(!strcmp(xx,"x")) return 7;
-    if(!strcmp(xx,"y")) return 7;
-    if(!strcmp(xx,"z")) return 7;
-  } else if(!strcmp(gWin[gRunWhWin]->tableName,"egr_globtrk")) {
-    if(!strcmp(xx,"icharge")) return 7;
-    if(!strcmp(xx,"r0")) return 7;
-    if(!strcmp(xx,"id")) return 7;
-    if(!strcmp(xx,"phi0")) return 7;
-    if(!strcmp(xx,"z0")) return 7;
-    if(!strcmp(xx,"tanl")) return 7;
-    if(!strcmp(xx,"psi")) return 7;
-    if(!strcmp(xx,"invpt")) return 7;
-    if(!strcmp(xx,"xlast(1")) return 7;
-    if(!strcmp(xx,"xlast(2")) return 7;
-    if(!strcmp(xx,"xlast(3")) return 7;
-  } else {
-    Err(996); /* The menu item should only appear for proper tables. */
-  }
-  return 0;
-}
-void SetHiliteListForVisDump(void) {
-  char *cc; int nn=0,ii;
-  /* This function sets the interior highlight list to correspond to
-  ** what is expected by BrowDump2Vis.  This external program may be
-  ** internalized later.  The interior list is reset later elsewhere
-  ** to re-correspond to what the user has hilited in the table window's
-  ** list of columns. */
-  if(gDump) fprintf(gDump,"List of columns:\n");
-  for(ii=0;;ii++) {
-    cc=ColName(ii,gRunWhWin);
-    if(!cc) break;
-    if(!IsAVisualizationColumn(cc)) continue;
-    gWin[gRunWhWin]->hlLst[nn++]=ii;
-    if(gDump) fprintf(gDump,"%s ",cc);
-  }
-  if(gDump) fprintf(gDump,"\n");
-  gWin[gRunWhWin]->nhlLst=nn;
 }
 void RunValue(size_t row) {
   int i,fo=0,tt,hlLstIx,lnfhl,irow=row;
@@ -814,9 +765,9 @@ void RunValue(size_t row) {
   if(!gTruncateStrings) strcat(buf," ");
   for(hlLstIx=0;hlLstIx<gWin[gRunWhWin]->nhlLst;hlLstIx++) {
     lnfhl=gWin[gRunWhWin]->hlLst[hlLstIx];
-    if(!gWin[gRunWhWin]->isHilited[lnfhl]&&gOutType!=15) Err( 60);
+    if(!gWin[gRunWhWin]->isHilited[lnfhl]&&gOutType!=15) dsu_Err( 60);
     fo++;
-    if(gWin[gRunWhWin]->tlm[lnfhl]<0) Err( 51);
+    if(gWin[gRunWhWin]->tlm[lnfhl]<0) dsu_Err( 51);
     val=ValueWrapper(gWin[gRunWhWin]->wh_gDs,
           gWin[gRunWhWin]->tlm[lnfhl],irow,gWin[gRunWhWin]->subscript[lnfhl]);
     if(gTableValueError) {
@@ -843,7 +794,7 @@ void RunValue(size_t row) {
     } else if(gVWType==VWHEX) {
       ConvertToHex(tt2,val);
     }
-    if(strlen(buf)+strlen(tt2)>BUF) Err(998); strcat(buf,tt2);
+    if(strlen(buf)+strlen(tt2)>BUF) dsu_Err(998); strcat(buf,tt2);
   }
   if(fo>0) {
     strcat(buf,"\n");
@@ -851,15 +802,11 @@ void RunValue(size_t row) {
       if(gDump) fprintf(gDump,"%s",buf);
     }
     else if(gOutType==0) Write(buf,gRunWhWin);
-    else Err(155);
+    else dsu_Err(155);
   } else if(gRunNRowsDone==0) SayError0(__LINE__);
 }
 int NumRows(int whWin) {
   return ((int)(gWin[whWin]->nRow));
-}
-void VisFileCB(Widget w,caddr_t cld,caddr_t cad) {
-  gCallBackData=(int)cld;
-  XtPopup(gColorSelPopup,XtGrabNone);
 }
 void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
   int e,whAct,whWin; char act[311];
@@ -869,7 +816,7 @@ void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
   else { whWin=((int)cld)%1000; whAct=((int)cld)/1000; }
   if(NumRows(whWin)<1) { Sss("This table has zero rows."); return; }
   gLastWhWin=whWin;
-  gRunWhWin=whWin; if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(128);
+  gRunWhWin=whWin; if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) dsu_Err(128);
   switch(whAct) {
     case 0: strcpy(act,"Value"); runFunc=RunValue; gOutType=0;
       gDump=NULL; break;
@@ -881,20 +828,16 @@ void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
     case 2: 
       strcpy(act,"Value"); runFunc=RunValue; gOutType=15;
       gDump=fopen(".tbr.temp","w");
-      if(!gDump) { PP"Can't write file.\n"); Err(994); }
+      if(!gDump) { PP"Can't write file.\n"); dsu_Err(994); }
       fprintf(gDump,"=== %s, from table %s\n",
       gColor,gWin[whWin]->tableName); break;
-    default: Err(129);
+    default: dsu_Err(129);
   }
   sprintf(gSumCol,"%6s ",act); /* for passing to runFunc */
   gRunNRowsDone=0;
   RunTheRows(FALSE,whWin,runFunc);
   if(gDump) {
     fclose(gDump);
-    if(gOutType==15) {
-      e=ConvertToVisData("xxx",0,gNVisDump++);
-      if(e) { PP"e=%d.\n",e); Err(991); }
-    }
   }
   if(gRunNRowsDone==0&&gDone2<10) {
     Sss("No rows were\nselected by \"ROW SELECTION\".");
@@ -903,12 +846,7 @@ void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
       sprintf(act,"Your output file is %s.\n",TXTOUT); Sss(act);
     }
     if(whAct==2) {
-      sprintf(act,"The color was >>  %s  <<.\nOutput file = %s.\n",
-      gColor,"vis.dump");
-      strcat(act,"You can add other tables besides\n");
-      strcat(act,gWin[whWin]->tableName);
-      strcat(act,".");
-      Sss(act);
+      Sss("This used to be for visualization.  You should not see this.");
     }
   }
   whActS=whAct; whWinS=whWin;
@@ -923,7 +861,7 @@ void IncrementByOneCol(int whWin) {
   short rr;
   gWin[whWin]->ncol++;
   gWin[whWin]->width+=WIDE;
-  /* if(!gBlurb2) Blurb(); gBlurb2=TRUE; */
+  /* if(!gBlurb2) dsu_Blurb(); gBlurb2=TRUE; */
   rr=gWin[whWin]->width;
   nn=0;
   XtSetArg(args[nn],XmNcolumns,rr); nn++;
@@ -933,29 +871,29 @@ void IncrementByOneCol(int whWin) {
 void OneLnAllRowsCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
   int ii,cnt,whAct,nCol=0,fo=0,lnfhl,hlLstIx,whWin; char tt[111],sumCol[211];
   float summary;
-  myBool firstTime=TRUE,dalo; /* dalo=doAtLeastOne */
+  int firstTime=TRUE,dalo; /* dalo=doAtLeastOne */
   char act[30],tt2[45],format[30];
   void (*runFunc)();
   whWin=((int)cld)%1000; whAct=((int)cld)/1000;
   if(NumRows(whWin)<1) { Sss("This table has zero rows."); return; }
-  gRunWhWin=whWin; if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(120);
+  gRunWhWin=whWin; if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) dsu_Err(120);
   /*Write("------------------------------------------------\n",whWin);*/
   switch(whAct) {
     case 0: strcpy(act,"Ave."); runFunc=RunAverage; dalo=FALSE; break;
     case 1: strcpy(act,"Bug1"); runFunc=RunNull; dalo=TRUE; break;
     case 2: strcpy(act,"Bug2"); runFunc=RunHistMinMax; dalo=FALSE;
       gMin=1e25; gMax=-1e25; break;
-    default: Err(125);
+    default: dsu_Err(125);
   }
   sprintf(sumCol,"%6s %6s",act,RadStr(whWin));
-  if(strlen(sumCol)!=EXT) Err(122); cnt=0;
+  if(strlen(sumCol)!=EXT) dsu_Err(122); cnt=0;
   for(hlLstIx=0; (dalo&&hlLstIx==0) || (hlLstIx<gWin[whWin]->nhlLst);
         hlLstIx++) {
     if(gWin[whWin]->nhlLst>0) lnfhl=gWin[whWin]->hlLst[hlLstIx];
     else lnfhl=0;  /* see the complicated for() which governs this loop */
-    if(!dalo&&!gWin[whWin]->isHilited[lnfhl]) Err( 61);
+    if(!dalo&&!gWin[whWin]->isHilited[lnfhl]) dsu_Err( 61);
     if(whAct==2&&++cnt>1) { Complain1(); return; } gHistWhLine=lnfhl;
-    if(++nCol>MCOL) Err( 44); /*ShouldBeProtectedInSetHiliteWIN_TYPE_TABLE*/
+    if(++nCol>MCOL) dsu_Err( 44); /*ShouldBeProtectedInSetHiliteWIN_TYPE_TABLE*/
     fo++; gRunTotal=0; gRunNRowsDone=0; gRunWhichHilitedLine=lnfhl;
     if(firstTime) { firstTime=FALSE; RunTheRows(FALSE,whWin,runFunc); }
     else RunTheRows(TRUE,whWin,runFunc);
@@ -968,7 +906,7 @@ void OneLnAllRowsCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
             Format(WIDE-1,tt,summary); sprintf(format,"%%%ds",WIDE);
             sprintf(tt2,format,tt); strcat(sumCol,tt2); break;
           case 1: case 2: break;
-          default: Err(130);
+          default: dsu_Err(130);
         }
       } else if(gDone2<10) { /* User did not cancel. */
         Write("\"ROW SELECTION\" selected zero rows.\n",whWin); break;
@@ -988,23 +926,23 @@ void OneLnAllRowsCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
         RunTheRows(TRUE,whWin,RunHistFill);
       }
       break; /* 950709, FALSE->TRUE */
-    default: Err(126);
+    default: dsu_Err(126);
   }
   AuxOutputFromOneLn(whWin,whAct);
 }
 void AuxOutputFromOneLn(int whWin,int whAct) { /* includes histogramming */
   char bf[222],car[30];
-  myBool reportCuts,reportRows;
+  int reportCuts,reportRows;
   switch(gWin[whWin]->whichRadio) {
     case 0: case 3: reportRows=FALSE; reportCuts=FALSE; break;
     case 1:         reportRows=TRUE;  reportCuts=FALSE; break;
     case 2:         reportRows=TRUE;  reportCuts=TRUE;  break;
-    default: Err(124);
+    default: dsu_Err(124);
   }
   switch(strlen(RadStr(whWin))) {
     case 4: strcpy(car,"^^^^"); break; case 7: strcpy(car,"^^^^^^^"); break;
     case 5: strcpy(car,"^^^^^"); break; case 6: strcpy(car,"^^^^^^"); break;
-    default: Err(127);
+    default: dsu_Err(127);
   }
   switch(whAct) {
     case 0:
@@ -1018,7 +956,7 @@ void AuxOutputFromOneLn(int whWin,int whAct) { /* includes histogramming */
       }
       break;
     case 2: if(gDone2<11) DrawHist(whWin); break;
-    default: Err(133);
+    default: dsu_Err(133);
   }
   if(reportCuts) { Write(gCuts,whWin); Write("\n",whWin); }
 } /* end of OneLnAllRowsCB() */
@@ -1030,11 +968,11 @@ void Complain6(void) {
  or \"12 to 24\".\n\
  ");
 }
-void RunTheRows(myBool skipInit,int whWin,void (*fnct)()) {
+void RunTheRows(int skipInit,int whWin,void (*fnct)()) {
   int h,nsave,save[MAX_LINES_CLICK_PART];
   size_t row,start,end; char cuts[MAX_CUTS_STRING];
   static char ba[MAXROW_DIV_BY_8];
-  if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(109);
+  if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) dsu_Err(109);
   start=FirstRow(whWin); end=LastRow(skipInit,whWin);
   if(start>end) { Complain6(); return; }
   if(!skipInit&&gWin[whWin]->useCuts) {
@@ -1046,22 +984,12 @@ void RunTheRows(myBool skipInit,int whWin,void (*fnct)()) {
     strcpy(gCuts+COL-8," etc...");
   }
   gBreakRowsLoop=FALSE;
-  if(gOutType==15) {
-    nsave=gWin[gRunWhWin]->nhlLst;
-    for(h=0;h<gWin[gRunWhWin]->nhlLst;h++) save[h]=gWin[gRunWhWin]->hlLst[h];
-    SetHiliteListForVisDump();
-  }
   for(row=start;row<=end;row++) {
     /* ActionCB/RunAverage are a simple example of how to use this */
     if(gWin[whWin]->useCuts) { if(!dsuRowPassedCuts(ba,(long)row)) continue; }
     fnct(row);
     gRunNRowsDone++;
     if(gBreakRowsLoop) break;
-  }
-  if(gOutType==15) {
-    gWin[gRunWhWin]->nhlLst=nsave;
-    for(h=0;h<gWin[gRunWhWin]->nhlLst;h++)
-        gWin[gRunWhWin]->hlLst[h]=save[h];
   }
 }
 void DumpPsCB(Widget w,caddr_t cld,caddr_t cad) {
@@ -1094,19 +1022,6 @@ void TruncCB(Widget w,caddr_t cld,caddr_t cad) {
 void SigFigCB(Widget w,caddr_t cld,caddr_t cad) { /* pops it up */
   Sss("This does not work yet.");
   /* XtPopup(gSigFigScalePopup,XtGrabNone); */
-}
-void VisHelpCB(Widget w,caddr_t cld,caddr_t cad) {
- Sss("\
- 1. Select rows in upper right corner.\n
- 2. Choose menu item 'Write visualizer file'.\n
- 3. OPTIONAL: Repeat 1 to 2.*\n
- 4. OPTIONAL: Repeat 1 to 3 with a different table**
-    (to change tables, go back to the primary window).\n
- 5. FTP the resultant file (vis.dump) to the machine
-    where you visualize.\n\n
-    *Eg, to color pions green and electrons red.\n
-    **Eg, to visualize hits and tracks together.\n
- ");
 }
 void HelpSelTabCB(Widget w,caddr_t cld,caddr_t cad) {
  Sss("\
@@ -1163,12 +1078,6 @@ void HelpBugRptCB(Widget w,caddr_t cld,caddr_t cad) {
 #else
 #define QUITSTRING "Close all browser windows"
 #endif
-int VisualizableTable(char *name) {
-  if(!strcmp(name,"tpt_track")) return 7;
-  if(!strcmp(name,"egr_globtrk")) return 7;
-  if(!strcmp(name,"tphit")) return 7;
-  return 0;
-}
 void CreateMenuItems(char *tableName,Widget mbar,int type) {
   register int nn; Arg args[19]; Widget mpane;
   mpane=XmCreatePulldownMenu(mbar,"a2",args,0);
@@ -1227,13 +1136,6 @@ void CreateMenuItems(char *tableName,Widget mbar,int type) {
   }
   MakeMenuItem(NOTUSED,mpane,"Talk to programmer",(XtCP)HelpBugRptCB);
   FinishThisMenu(mbar,mpane,"Help ");
-  if(VisualizableTable(tableName)) {
-    mpane=XmCreatePulldownMenu(mbar,"a2",args,0);
-    MakeMenuItem(NOTUSED,mpane,"Help.",(XtCP)VisHelpCB);
-    MakeMenuItem(2,mpane,"Write visualizer file.",(XtCP)VisFileCB);
-    FinishThisMenu(mbar,mpane,"Visualization ");
-  }
-
 }
 void SetToPrimaryInfo(char *xx,int max) {
  strncpy(xx,"\
@@ -1247,17 +1149,17 @@ void SetToPrimaryInfo(char *xx,int max) {
 Position Pos(int whWin,Position x,Position y) {
   Widget text;
   Position rv;
-  if(whWin<0||whWin>=gNWin) Err(102);
+  if(whWin<0||whWin>=gNWin) dsu_Err(102);
   text=gWin[whWin]->txtWidClick;
   rv=XmTextXYToPos(text,x,y);
   return rv;
 }
-int LineNumber(myBool *inTriangle,int whWin,Position pos) {
+int LineNumber(int *inTriangle,int whWin,Position pos) {
   int fromLeft=0,rv,ii,len; char *text;
-  myBool reachedTriangle=FALSE;
-  if(whWin<0||whWin>=gNWin) Err(103);
+  int reachedTriangle=FALSE;
+  if(whWin<0||whWin>=gNWin) dsu_Err(103);
   text=gWin[whWin]->textClickPart;
-  len=strlen(text); if(pos>len) Err(107);
+  len=strlen(text); if(pos>len) dsu_Err(107);
   rv=0;
   for(ii=pos-1;ii>=0;ii--) if(text[ii]=='\n') rv++;
   for(ii=0;ii<pos;ii++) {
@@ -1307,7 +1209,7 @@ void AddToHiliteList(int whWin,int lineNum) {
     }
   }
   ii=gWin[whWin]->nhlLst;
-  if(ii>=MAX_LINES_CLICK_PART) Err(773);
+  if(ii>=MAX_LINES_CLICK_PART) dsu_Err(773);
   gWin[whWin]->hlLst[ii]=lineNum; gWin[whWin]->nhlLst=ii+1;
 }
 void SetHilite(int control,int whWin,int lineNum) {
@@ -1315,7 +1217,7 @@ void SetHilite(int control,int whWin,int lineNum) {
   ** gWin[]->isHilited[].  Up to programmer to keep these two equal. */
   char buf[WIDE*MCOL+EXT+1]; /* see comments in x.h for meaning of MCOL etc */
   char tmp[111],format[22];
-  char cp[43],*otext; int num=0,len,ii,ln; myBool doReturn=FALSE;
+  char cp[43],*otext; int num=0,len,ii,ln; int doReturn=FALSE;
   int hlLstIx,lnfhl; /* line number from highlight list */
   XmTextPosition left,right;
   Widget txtWid;
@@ -1342,7 +1244,7 @@ void SetHilite(int control,int whWin,int lineNum) {
     sprintf(format,"%%%ds",WIDE); strcpy(buf,"  What RowNum");
     for(hlLstIx=0;hlLstIx<gWin[whWin]->nhlLst;hlLstIx++) {
       lnfhl=gWin[whWin]->hlLst[hlLstIx];
-      if(!gWin[whWin]->isHilited[lnfhl]) Err(666);
+      if(!gWin[whWin]->isHilited[lnfhl]) dsu_Err(666);
       if(num>=gWin[whWin]->ncol) IncrementByOneCol(whWin);
       if(num++>=MCOL) { Complain(); doReturn=TRUE; break; }
       strcpy(cp,ColName(lnfhl,whWin)); Abbr(cp); sprintf(tmp,format,cp);
@@ -1370,9 +1272,9 @@ void ResetTheTriangles(int wds) {
   else if(wds==-10) { for(ii=0;ii<gNDs;ii++) ExpandCase(ii); }
   else if(wds==-15) { for(ii=0;ii<gNDs;ii++) ExpandExceptCase(ii); }
   else if(wds==-20) { for(ii=0;ii<gNDs;ii++) ContractCase(ii); }
-  else Err(123);
+  else dsu_Err(123);
   gWin[0]->textClickPart=malloc((size_t)TEXT_SIZE_PART_2);
-  if(!gWin[0]->textClickPart) Err(777);
+  if(!gWin[0]->textClickPart) dsu_Err(777);
   PrimaryList(junk,0,&nLines,gWin[0]->tlm,MAX_LINES_CLICK_PART,
               gWin[0]->textClickPart,TEXT_SIZE_PART_2);
   gWin[0]->nlcpwtto=nLines;
@@ -1392,13 +1294,13 @@ XtCP ExpandCB(Widget w,caddr_t cld,caddr_t cad) {
   ResetTheTriangles(-10);
 }
 XtCP TextCB(Widget w,caddr_t cld,caddr_t cad) { /* user click in text window */
-  int whWin,tlm; myBool inTri;
+  int whWin,tlm; int inTri;
   /* tlm is either an index for gDs
   or it is an arg (cast to size_t) for dsColumnName (column number). */
   XmAnyCallbackStruct *xx; Position pos;
   XButtonEvent *bev; int lineNumber;
   whWin=(int)cld;
-  if(whWin<0||whWin>=gNWin) Err(104);
+  if(whWin<0||whWin>=gNWin) dsu_Err(104);
   xx=(XmAnyCallbackStruct*)cad;
   bev=(XButtonEvent*)(xx->event); /* Vol1 p512 */
   pos=Pos(whWin,(Position)(bev->x),(Position)(bev->y));
@@ -1411,7 +1313,7 @@ XtCP TextCB(Widget w,caddr_t cld,caddr_t cad) { /* user click in text window */
   tlm=gWin[whWin]->tlm[lineNumber];
   switch(gWin[whWin]->win_type) {
     case WIN_TYPE_D_TREE: /* does not work yet */
-      Err(192); /* June 28 1995 see err(552) */
+      dsu_Err(192); /* June 28 1995 see err(552) */
       MakeWindow(0,tlm,WIN_TYPE_PRIMARY);
       SetHilite(HILITE_TURN_ON,whWin,lineNumber); /*BBB un-hilite when closed*/
       break;
@@ -1421,14 +1323,14 @@ XtCP TextCB(Widget w,caddr_t cld,caddr_t cad) { /* user click in text window */
       if(!ATable(tlm)) { Sss(gBlurb7); return; }
       if(!TableHasMoreThanZeroCols(tlm)) return;
       /* 961003 if(!TableHasMoreThanZeroRows(tlm)) return; */
-      if(whWin!=0) Err(993); /* for sake of, eg, 0 in CloseThisWindowCB */
+      if(whWin!=0) dsu_Err(993); /* for sake of, eg, 0 in CloseThisWindowCB */
       SetHilite(HILITE_TURN_ON,whWin,lineNumber); /*BBB un-hilite when closed*/
       MakeWindow(lineNumber,tlm,WIN_TYPE_TABLE);
       break;
     case WIN_TYPE_TABLE: /* user has selected a column */
       SetHilite(HILITE_TOGGLE,whWin,lineNumber); /*tlmUsedInRunAverage()Etc*/
       break;
-    default: Err(106);
+    default: dsu_Err(106);
   }
 }
 Widget TxtWid(Widget par,char *itxt,int topMidBot,int nRow,int nCol) {
@@ -1447,7 +1349,7 @@ Widget TxtWid(Widget par,char *itxt,int topMidBot,int nRow,int nCol) {
       break;
     case 0:
       break;
-    default: Err(111);
+    default: dsu_Err(111);
   }
   XtSetArg(args[nn],XmNrows,nRow);  nn++;
   XtSetArg(args[nn], XmNcolumns, nCol);  nn++;
@@ -1477,7 +1379,7 @@ Widget LabelWidget(Widget parent,char *xx) {
   XmStringFree(string);
   return rv;
 }
-Widget RBut(Widget par,char *lab,XtCP cb,int cbData,myBool on) {
+Widget RBut(Widget par,char *lab,XtCP cb,int cbData,int on) {
   Widget scratch;
   scratch=XtVaCreateManagedWidget(lab,
       xmToggleButtonGadgetClass,par,NULL);
@@ -1492,13 +1394,13 @@ void RowCB(Widget w,caddr_t cld,caddr_t cad) {
   for(ii=NUM_RADIO-1;ii>=0;ii--) {
     if(XmToggleButtonGadgetGetState(gWin[whWin]->rad[ii])) break;
   }
-  if(ii<0) Err(112);
+  if(ii<0) dsu_Err(112);
   gWin[whWin]->whichRadio=ii;
   if(ii==1) XtSetSensitive(gVer2,True); else XtSetSensitive(gVer2,False);
 }
 size_t FirstRow(int whWin) {
   size_t rv; char *scratch;
-  if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(113);
+  if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) dsu_Err(113);
   gWin[whWin]->useCuts=FALSE;
   switch(gWin[whWin]->whichRadio) { /* see MakeRowSelectionWidget() */
     case 0: rv=0; break;
@@ -1510,14 +1412,14 @@ size_t FirstRow(int whWin) {
       XtFree(scratch);
       break;
     case 3: rv=gLast+1; break;
-    default: Err(114);
+    default: dsu_Err(114);
   }
   if(rv<0||rv>=gWin[whWin]->nRow) { rv=0; gLast=-1; }
   return rv;
 }
-size_t LastRow(myBool skipInit,int whWin) {
+size_t LastRow(int skipInit,int whWin) {
   size_t rv; char *scratch,scr[100],*pp;
-  if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(115);
+  if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) dsu_Err(115);
   switch(gWin[whWin]->whichRadio) { /* see MakeRowSelectionWidget() */
     case 2: case 0: rv=gWin[whWin]->nRow-1; break;
     case 1: scratch=XmTextGetString(gWin[whWin]->rowWidget);
@@ -1526,7 +1428,7 @@ size_t LastRow(myBool skipInit,int whWin) {
       else rv=99; /* see comments 88u */
       XtFree(scratch); break;
     case 3: rv=gLast+10; break;
-    default: Err(116);
+    default: dsu_Err(116);
   }
   if(rv<0||rv>=gWin[whWin]->nRow) rv=gWin[whWin]->nRow-1;
   if(!skipInit) {
@@ -1567,7 +1469,7 @@ void MakeRowSelectionWidget(Widget parent) {
   gWin[gNWin]->rad[Q]=RBut(rb,"Range",(XtCP)RowCB,10*gNWin+Q,FALSE); Q++;
   gWin[gNWin]->rad[Q]=RBut(rb,"Cuts",(XtCP)RowCB,10*gNWin+Q,FALSE); Q++;
   gWin[gNWin]->rad[Q]=RBut(rb,"Next 10",(XtCP)RowCB,10*gNWin+Q,FALSE); Q++;
-  if(Q!=NUM_RADIO) Err(117);
+  if(Q!=NUM_RADIO) dsu_Err(117);
   XtManageChild(rb);
 }
 void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
@@ -1575,14 +1477,14 @@ void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
   Widget hor,ls,ver,mbar,mw; int nbytes,mm,ii,nLines; size_t nRow;
   char name[NAME+2],header[100],reportSpaceNeeded;
   nn=0;
-  if(gNWin>=MAXWIN) Err(994);
+  if(gNWin>=MAXWIN) dsu_Err(994);
   if(type==WIN_TYPE_PRIMARY) {
     gMainWindow=XmCreateMainWindow(gAppShell,"0hhh",args,nn); mw=gMainWindow;
   } else {
     if(type==WIN_TYPE_PRIMARY) strcpy(name,"Dataset Browser");
     else if(type==WIN_TYPE_TABLE) strcpy(name,"Table Browser");
     else if(type==WIN_TYPE_GRAPHICS) strcpy(name,"Table Browser Graphics");
-    else Err(134);
+    else dsu_Err(134);
     ls=XtCreatePopupShell(name,transientShellWidgetClass,gAppShell,args,0);
     mw=XmCreateMainWindow(ls,"0hhh",args,nn);
   }
@@ -1590,7 +1492,7 @@ void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
   mbar=XmCreateMenuBar(mw,"mbar",args,0); XtManageChild(mbar);
   if(type==WIN_TYPE_TABLE) TableName(wh_gDs,name); else strcpy(name,"BadType");
   CreateMenuItems(name,mbar,type);
-  gWin[gNWin]=malloc(sizeof(WINDOW_INFO)); if(gWin[gNWin]==0) Err(100);
+  gWin[gNWin]=malloc(sizeof(WINDOW_INFO)); if(gWin[gNWin]==0) dsu_Err(100);
   for(ii=MAX_LINES_CLICK_PART-1;ii>=0;ii--) gWin[gNWin]->isHilited[ii]=FALSE;
   gWin[gNWin]->win_type=type; ver=Column(mw);
   gWin[gNWin]->width=COL;
@@ -1598,11 +1500,11 @@ void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
   gWin[gNWin]->ncol=MCOL_INIT;
   switch(type) {
     case WIN_TYPE_D_TREE: /* make primary window (for choosing a dataset) */
-      Err(552); /* June 28 1995 */
+      dsu_Err(552); /* June 28 1995 */
       gWin[gNWin]->rowSel=ROW_SEL_NOT_USED;
       SetToPrimaryInfo(gWin[gNWin]->textTop,TEXT_SIZE_PART_1);
       gWin[gNWin]->textClickPart=malloc((size_t)TEXT_SIZE_PART_2);
-      if(!gWin[gNWin]->textClickPart) Err(708);
+      if(!gWin[gNWin]->textClickPart) dsu_Err(708);
       DatasetList(&nLines,gWin[gNWin]->tlm,MAX_LINES_CLICK_PART,
               gWin[gNWin]->textClickPart,TEXT_SIZE_PART_2);
       gWin[gNWin]->txtWidTop=TxtWid(ver,gWin[gNWin]->textTop,0,5,48);
@@ -1610,12 +1512,12 @@ void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
       gWin[gNWin]->txtWidWrite=NULL;
       break;
     case WIN_TYPE_PRIMARY: /* we are making a window for choosing a table */
-      if(++gNumDatasetWindows>1) Err(553); /*6-28-95*/
-      if(wh_gDs!=0) Err(554); /*6-28-95*/
+      if(++gNumDatasetWindows>1) dsu_Err(553); /*6-28-95*/
+      if(wh_gDs!=0) dsu_Err(554); /*6-28-95*/
       gWin[gNWin]->rowSel=ROW_SEL_NOT_USED;
       SetToDatasetInfo(wh_gDs,gWin[gNWin]->textTop,TEXT_SIZE_PART_1); /*BBB*/
       gWin[gNWin]->textClickPart=malloc((size_t)TEXT_SIZE_PART_2);
-      if(!gWin[gNWin]->textClickPart) Err(717);
+      if(!gWin[gNWin]->textClickPart) dsu_Err(717);
       PrimaryList(header,wh_gDs,&nLines,gWin[gNWin]->tlm,MAX_LINES_CLICK_PART,
               gWin[gNWin]->textClickPart,TEXT_SIZE_PART_2);
       /* gWin[gNWin]->txtWidTop=TxtWid(ver,gWin[gNWin]->textTop,0,5,T41+2); */
@@ -1639,12 +1541,12 @@ void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
             gWin[gNWin]->subscript);
         if(mm==0) {
           gWin[gNWin]->textClickPart=malloc((size_t)nbytes);
-          if(!gWin[gNWin]->textClickPart) Err(188);
+          if(!gWin[gNWin]->textClickPart) dsu_Err(188);
         }
       }
       gWin[gNWin]->textOutput=malloc(TEXT_SIZE_PART_3);
       if(gWin[gNWin]->textOutput==NULL) {
-        PP"Table browser:  no more dynamic memory.\n"); Err(118);
+        PP"Table browser:  no more dynamic memory.\n"); dsu_Err(118);
       }
       strcpy(gWin[gNWin]->textOutput,"");
       hor=Row(ver);
@@ -1660,13 +1562,13 @@ void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
       gWin[gNWin]->rowSel=ROW_SEL_NOT_USED;
       MakeDrawingArea(ver,GRAPHWIDTH,GRAPHHITE); gNGraphicsUp++;
       break;
-    default: Err(101);
+    default: dsu_Err(101);
   }
   gWin[gNWin]->nlcpwtto=nLines;
   gWin[gNWin]->shell=ls;
   gNWin++; /*BBB chk init */
   if(type!=WIN_TYPE_PRIMARY) XtPopup(ls,XtGrabNone);
-  if(type==WIN_TYPE_GRAPHICS) Clear();
+  if(type==WIN_TYPE_GRAPHICS) dsu_Clear();
 }
 void GetRidOfWindows(void) {
   XtUnrealizeWidget(gAppShell);
@@ -1674,7 +1576,7 @@ void GetRidOfWindows(void) {
 }
 void DoXStuff(void) {
   ARGS
-  XEvent event; static myBool haveInited=FALSE;
+  XEvent event; static int haveInited=FALSE;
   XButtonEvent *bev;
   Widget j1; caddr_t j2,j3; int zero=0;
   DoOnce2();
