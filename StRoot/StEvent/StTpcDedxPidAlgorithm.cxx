@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.19 2003/04/30 18:05:55 fisyak Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.20 2003/08/02 01:14:11 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.20  2003/08/02 01:14:11  perev
+ * warnOff
+ *
  * Revision 2.19  2003/04/30 18:05:55  fisyak
  * Add P03ia flag, which fixes P03ia MuDst
  *
@@ -89,9 +92,9 @@
 #include "StTrackGeometry.h"
 #include "BetheBloch.h"
 #include "StBichsel/Bichsel.h"
-static Bichsel *m_Bichsel = 0;
+//VP static Bichsel *m_Bichsel = 0;
 static BetheBloch *theBetheBloch = 0;
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.19 2003/04/30 18:05:55 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.20 2003/08/02 01:14:11 perev Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
