@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.hh,v 1.1 2000/07/06 03:50:33 caines Exp $
+ * $Id: StSvtAnalysis.hh,v 1.2 2000/07/13 14:50:49 caines Exp $
  *
  * Author: Helen Caines
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.hh,v $
+ * Revision 1.2  2000/07/13 14:50:49  caines
+ * Improvements on not saving single pixels
+ *
  * Revision 1.1  2000/07/06 03:50:33  caines
  * First version of cluster finder and fitter
  *
@@ -36,6 +39,7 @@ public:
   void CluFirstTimeBin();
   void CluLastTimeBin();
   void MomentAnalysis(int PedOffSet);
+  int GetNumberOfPixels(int clu);
   int GetFirstAnode(int clu){return mCluFirstAnode[clu];}
   int GetLastAnode(int clu) {return mCluLastAnode[clu];}
   int GetFirstTimeBin(int clu){return mCluFirstTimeBin[clu];}

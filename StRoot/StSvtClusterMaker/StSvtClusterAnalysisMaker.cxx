@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.1 2000/07/06 03:50:33 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.2 2000/07/13 14:50:49 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.2  2000/07/13 14:50:49  caines
+ * Improvements on not saving single pixels
+ *
  * Revision 1.1  2000/07/06 03:50:33  caines
  * First version of cluster finder and fitter
  *
@@ -101,7 +104,7 @@ Int_t StSvtClusterAnalysisMaker::GetSvtCluster()
 Int_t StSvtClusterAnalysisMaker::CreateClusterHist(Int_t tNuOfHyb)
 {
    // Create Histograms
-   m_n_seq = new TH1F("NSeqClust","No. Pixels on cluster",100,0.,30.);
+   m_n_seq = new TH1F("NSeqClust","No. Pixels on cluster",100,0.,300.);
    m_nClust = new TH2F("NClust","No. clusters per event",1000,0.,1000.,100,0.,30.);
    m_SumADCvsTime = new TH2F("SumAdcVsTime" ,"Time bucket vs Sum ADC",128,0.,128.,1000,0,100);
    m_time_anode_clu = new TH2F*[tNuOfHyb];
@@ -193,13 +196,15 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
           mSvtAnalysis->CluFirstTimeBin();
           mSvtAnalysis->CluLastTimeBin();
           mSvtAnalysis->MomentAnalysis(mSvtEvent->getPedOffset());
-          mSvtAnalysis->Report(index);
+          //mSvtAnalysis->Report(index);
 
           SaveIntoTable(numOfClust,barrel, ladder, wafer, hybrid);
 	  if( index != 11 && index !=10){
 	    for( int clu=0; clu< numOfClust; clu++){
 	      m_sumADC[index]->Fill(mSvtAnalysis->GetSumADC(clu));
 	      m_SumADCvsTime->Fill((float)mSvtAnalysis->MeanClusterTimeBin(clu),(float)mSvtAnalysis->GetSumADC(clu));
+	    m_n_seq->Fill(mSvtAnalysis->GetNumberOfPixels(clu));
+	      
 	    }
 	  }
           mSvtAnalysis->ResetMeanValues();
@@ -246,22 +251,19 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
          mHybridCluster = (StSvtHybridCluster*)mSvtCluster->at(index); 
 
          numOfClust = mHybridCluster->getNumberOfClusters(); 
-	 TotalClusters+=numOfClust;
-  
+	 if( index != 11 && index!= 12){
+	   TotalClusters+=numOfClust;
+	 }
          cout<<"numOfClusters = "<<numOfClust << " For index = " << index<<endl;
-
+	 
          tempMemberInfo =  new StSvtClusterMemberInfo*[numOfClust];
-           
+	 
          for(int clu = 0; clu < numOfClust; clu++)
            {
-
+	     
 
             tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
             numOfMembers = mHybridCluster->getNumberOfMembers(clu);
-
-	    if( index !=11){
-	    m_n_seq->Fill(numOfMembers);
-	    }
 
             for(int mem = 0; mem < numOfMembers; mem++)
               {
