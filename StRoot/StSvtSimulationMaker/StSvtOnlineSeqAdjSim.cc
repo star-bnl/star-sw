@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtOnlineSeqAdjSim.cc,v 1.1 2003/11/14 15:55:56 caines Exp $
+ * $Id: StSvtOnlineSeqAdjSim.cc,v 1.2 2003/11/15 20:24:29 caines Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -180,7 +180,7 @@ void StSvtOnlineSeqAdjSim::SequenceSearch()
   unsigned char adc;
   int loCount;
   int hiCount;
-  int SeqBegins;
+  int SeqBegins=0;
 
   int HiTresh=mPedOffset+m_thresh_hi;
   int LoTresh=mPedOffset+m_thresh_lo;

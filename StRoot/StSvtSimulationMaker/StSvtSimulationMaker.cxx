@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.15 2003/11/14 17:33:19 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.16 2003/11/15 20:24:29 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.16  2003/11/15 20:24:29  caines
+ * fixes to remove warnings at compilation
+ *
  * Revision 1.15  2003/11/14 17:33:19  caines
  * DOnt read from pedmaker for now
  *
@@ -681,7 +684,7 @@ Int_t StSvtSimulationMaker::Make()
   St_DataSetIter g2t_svt_hit_it(g2t_svt_hit);
   St_g2t_svt_hit *g2t_SvtHit = (St_g2t_svt_hit *) g2t_svt_hit_it.Find("g2t_svt_hit");
 
-  g2t_svt_hit_st *trk_st;
+  g2t_svt_hit_st *trk_st=0;
   if( !g2t_SvtHit) {
     gMessMgr->Warning() << "No SVT hits" << endm;
     NumOfHitsPerHyb = 0;
@@ -768,7 +771,7 @@ Int_t StSvtSimulationMaker::Make()
       double phi = mSvtAngles->getPhi();
 
       //seting drift speed for simulation
-      double vd;
+      double vd=0;
       if (mDriftSpeedColl){
 	vd = ((StSvtHybridDriftVelocity*)mDriftSpeedColl->at(index))->getV3(1);
 	if (vd<=0) vd=mDefaultDriftVelocity;
