@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.3 2001/02/09 23:06:24 porter Exp $
+ * $Id: StDbManagerImpl.cc,v 1.4 2001/02/22 23:01:55 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.4  2001/02/22 23:01:55  porter
+ * Re-introduced many-to-one name-to-table capability
+ * & robustness for query errors
+ *
  * Revision 1.3  2001/02/09 23:06:24  porter
  * replaced ostrstream into a buffer with ostrstream creating the
  * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
@@ -1017,7 +1021,10 @@ bool siblings = true;
 
   if(node->hasData()){
     StDbTableIter* itr = node->getStDbTableIter();
-    while(!itr->done())  tables = (tables && fetchDbTable(itr->next()));
+    while(!itr->done()) {
+      StDbTable* tab=itr->next();
+      tables = (tables && fetchDbTable(tab));
+    }
     delete itr;
   }
 
@@ -1160,7 +1167,10 @@ StDbManagerImpl::rollBackAllNodes(StDbConfigNode* node){
 
   if(node->hasData()){
     StDbTableIter* itr = node->getStDbTableIter();
-    while(!itr->done()) tables=(tables && rollBack((StDbNode*)(itr->next())));
+    while(!itr->done()){
+      StDbTable* tab = itr->next();
+      tables=(tables && rollBack((StDbNode*)tab));
+    }
     delete itr;
   }
 
@@ -1209,7 +1219,10 @@ bool retVal=true;
 
   if(node->hasData()){
     StDbTableIter* itr = node->getStDbTableIter();
-    while(!itr->done()) (itr->next())->commitData();
+    while(!itr->done()){
+      StDbTable* tab = itr->next();
+      tab->commitData();
+    }
     delete itr;
   }
 
@@ -1229,7 +1242,10 @@ StDbManagerImpl::commitAllNodes(StDbConfigNode* node){
 
   if(node->hasData()){
     StDbTableIter* itr = node->getStDbTableIter();
-    while(!itr->done())((StDbNode*)itr->next())->commit();
+    while(!itr->done()){
+      StDbNode* ntab= (StDbNode*)itr->next();
+      ntab->commit();
+    }
     delete itr;
   }
 if(node->hasChildren())commitAllNodes(node->getFirstChildNode());

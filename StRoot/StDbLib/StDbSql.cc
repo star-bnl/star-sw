@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.4 2001/02/09 23:06:25 porter Exp $
+ * $Id: StDbSql.cc,v 1.5 2001/02/22 23:01:56 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.5  2001/02/22 23:01:56  porter
+ * Re-introduced many-to-one name-to-table capability
+ * & robustness for query errors
+ *
  * Revision 1.4  2001/02/09 23:06:25  porter
  * replaced ostrstream into a buffer with ostrstream creating the
  * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
@@ -103,6 +107,8 @@ StDbSql::QueryDb(StDbConfigNode* node) {
  if(debug)mgr->printInfo(queryNodes,dbMDebug,__LINE__,__CLASS__,__METHOD__);
  Db<<queryNodes<<endsql;
  delete [] queryNodes;
+ if(!Db.QueryStatus())
+    return mgr->printInfo(node->printName()," Node has no subnodes",dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
  if(Db.NbRows()==0 && debug)
     mgr->printInfo(node->printName()," Node has no subnodes",dbMDebug,__LINE__,__CLASS__,__METHOD__);
@@ -215,8 +221,13 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
     
   if(debug)mgr->printInfo(etq.str(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
   Db<<etq.str()<<endsql;
-  delete [] etq.str();
+  if(!Db.QueryStatus()){
+    mgr->printInfo("Query Failed ",etq.str(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
+    delete [] etq.str();
+    return 0;
+  }
 
+  delete [] etq.str();
   if(Db.NbRows()==1 && Db.Output(&buff)){
     char* edTime=0; 
     int eTime;
@@ -268,6 +279,13 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
 
    Db<<dq.str()<<endsql;
    if(debug)mgr->printInfo(dq.str(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
+
+  if(!Db.QueryStatus()){
+    mgr->printInfo("Query Failed ",dq.str(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
+    delete [] dq.str();
+    break;
+  }
+  
    delete [] dq.str();
    if(Db.NbRows()==0)break;     
 
@@ -401,7 +419,6 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
    for(int i=0;i<numTables;i++){
 
      ostrstream qs;
-
      qs<<" select unix_timestamp(beginTime) as bTime,";
      qs<<" "<<columnList<<" from "<<dataTables[i]<<" "<<whereClause;
      if(numRows)qs<<" limit "<<numRows;
@@ -409,8 +426,12 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
      char* qString = qs.str();
      mgr->printInfo(qString,dbMDebug,__LINE__,__CLASS__,__METHOD__);
      Db<<qString<<endsql;
+     if(!Db.QueryStatus()){
+      mgr->printInfo(" Query Failed", qString,dbMWarn,__LINE__,__CLASS__,__METHOD__);
+      delete [] qString;
+      return retVal;
+     }
      delete [] qString;
-
      int retRows=Db.NbRows();
      if(retRows==0) continue;
 
@@ -508,6 +529,11 @@ StDbSql::QueryDbFunction(StDbTable* table, const char* whereClause, char* funcNa
      mgr->printInfo(qString,dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
      Db<<qString<<endsql;
+     if(!Db.QueryStatus()){
+        mgr->printInfo("Query Failed ",qString,dbMWarn,__LINE__,__CLASS__,__METHOD__);
+        delete [] qString;
+        return 0;
+     }
      delete [] qString;
      int retRows=Db.NbRows();
      if(retRows==0) continue;
@@ -705,6 +731,11 @@ if(table->hasDescriptor())return 1;
     Db<<schemaQuery<<endsql;   
     mgr->printInfo(schemaQuery,dbMDebug,__LINE__,__CLASS__,__METHOD__);
     delete [] schemaQuery;
+    if(!Db.QueryStatus()){
+        mgr->printInfo("Query Failed",schemaQuery,dbMWarn,__LINE__,__CLASS__,__METHOD__);
+       delete [] schemaQuery;
+       return 0;
+    }
     if(Db.NbRows()==0) {
       deleteDescriptor(structID,requestSchemaID);
       return 0;
@@ -1357,7 +1388,7 @@ char*
 StDbSql::getDataTable(StDbTable* table, unsigned int time){
 
   if(mtableCatalog==0) checkTableCatalog();
-  if(mtableCatalog==1) return table->getName();
+  if(mtableCatalog==1) return table->getCstructName();
   char* retVal=0;
   clear();
 
@@ -1376,7 +1407,7 @@ Db<<qString<<endsql;
 
 if(Db.Output(&buff))buff.ReadScalar(retVal,"tableName");
 clear();
-if(!retVal)retVal=table->getName();
+if(!retVal)retVal=table->getCstructName();
 return retVal;
 }
 
@@ -1389,7 +1420,7 @@ StDbSql::getDataTables(StDbTable* table,int& numTables){
  if(mtableCatalog==1){
     numTables=1;
     retVal=new char*[1];
-    retVal[0]=table->getName();
+    retVal[0]=table->getCstructName();
     return retVal;
  }
  clear();
