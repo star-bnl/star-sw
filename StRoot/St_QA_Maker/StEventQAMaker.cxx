@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.4 2001/04/24 21:33:05 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.5 2001/04/24 22:53:51 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.5  2001/04/24 22:53:51  lansdell
+// Removed redundant radial position of first hit histograms
+//
 // Revision 2.4  2001/04/24 21:33:05  genevb
 // Use det_id to identify detectors, and some cleanup
 //
@@ -286,7 +289,6 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_z0T->Fill(origin.z());
         hists->m_glb_curvT->Fill(logCurvature);
 
-        hists->m_glb_rfT->Fill(firstPoint.perp());
         hists->m_glb_xfT->Fill(firstPoint.x());
         hists->m_glb_yfT->Fill(firstPoint.y());
         hists->m_glb_zfT->Fill(firstPoint.z());
@@ -372,7 +374,6 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_z0TS->Fill(origin.z());
         hists->m_glb_curvTS->Fill(logCurvature);
 
-        hists->m_glb_rfTS->Fill(firstPoint.perp());
         hists->m_glb_xfTS->Fill(firstPoint.x());
         hists->m_glb_yfTS->Fill(firstPoint.y());
         hists->m_glb_zfTS->Fill(firstPoint.z());
@@ -437,7 +438,6 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_max_pointFE->Fill(globtrk->numberOfPossiblePoints());
         hists->m_fit_pointFE->Fill(fTraits.numberOfFitPoints());
         hists->m_glb_chargeFE->Fill(geom->charge());
-        hists->m_glb_rfFE->Fill(firstPoint.perp());
         hists->m_glb_xfFE->Fill(firstPoint.x());
         hists->m_glb_yfFE->Fill(firstPoint.y());
         hists->m_glb_zfFE->Fill(firstPoint.z());
@@ -471,7 +471,6 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_max_pointFW->Fill(globtrk->numberOfPossiblePoints());
         hists->m_fit_pointFW->Fill(fTraits.numberOfFitPoints());
         hists->m_glb_chargeFW->Fill(geom->charge());
-        hists->m_glb_rfFW->Fill(firstPoint.perp());
         hists->m_glb_xfFW->Fill(firstPoint.x());
         hists->m_glb_yfFW->Fill(firstPoint.y());
         hists->m_glb_zfFW->Fill(firstPoint.z());

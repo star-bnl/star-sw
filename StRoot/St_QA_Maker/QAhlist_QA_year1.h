@@ -1,5 +1,8 @@
-// $Id: QAhlist_QA_year1.h,v 2.2 2000/08/25 20:29:34 lansdell Exp $
+// $Id: QAhlist_QA_year1.h,v 2.3 2001/04/24 22:53:51 lansdell Exp $
 // $Log: QAhlist_QA_year1.h,v $
+// Revision 2.3  2001/04/24 22:53:51  lansdell
+// Removed redundant radial position of first hit histograms
+//
 // Revision 2.2  2000/08/25 20:29:34  lansdell
 // year1 print list changed slightly; cosmetic improvement of some event summary histograms
 //
@@ -42,7 +45,6 @@
      "TabQaGtrkPhi0T",
      "TabQaGtrkZ0T",
      "TabQaGtrkCurvT",
-     "TabQaGtrkRfT",
      "TabQaGtrkPadfT",
      "TabQaGtrkf0",
      "TabQaGtrkXfT",
@@ -188,7 +190,6 @@
      "TabLMQaGtrkPhi0T",
      "TabLMQaGtrkZ0T",
      "TabLMQaGtrkCurvT",
-     "TabLMQaGtrkRfT",
      "TabLMQaGtrkPadfT",
      "TabLMQaGtrkf0",
      "TabLMQaGtrkXfT",
@@ -334,7 +335,6 @@
      "TabMMQaGtrkPhi0T",
      "TabMMQaGtrkZ0T",
      "TabMMQaGtrkCurvT",
-     "TabMMQaGtrkRfT",
      "TabMMQaGtrkPadfT",
      "TabMMQaGtrkf0",
      "TabMMQaGtrkXfT",
@@ -480,7 +480,6 @@
      "TabHMQaGtrkPhi0T",
      "TabHMQaGtrkZ0T",
      "TabHMQaGtrkCurvT",
-     "TabHMQaGtrkRfT",
      "TabHMQaGtrkPadfT",
      "TabHMQaGtrkf0",
      "TabHMQaGtrkXfT",

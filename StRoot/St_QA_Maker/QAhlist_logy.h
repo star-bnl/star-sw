@@ -1,5 +1,8 @@
-// $Id: QAhlist_logy.h,v 2.1 2000/08/25 16:04:10 genevb Exp $
+// $Id: QAhlist_logy.h,v 2.2 2001/04/24 22:53:51 lansdell Exp $
 // $Log: QAhlist_logy.h,v $
+// Revision 2.2  2001/04/24 22:53:51  lansdell
+// Removed redundant radial position of first hit histograms
+//
 // Revision 2.1  2000/08/25 16:04:10  genevb
 // Introduction of files
 //
@@ -52,8 +55,6 @@
  "QaGtrkZ0TS",
  "QaGtrkCurvT",
  "QaGtrkCurvTS",
- "QaGtrkRfT",
- "QaGtrkRfTS",
  "QaGtrkPadfT",
  "QaGtrkXfT",
  "QaGtrkXfTS",

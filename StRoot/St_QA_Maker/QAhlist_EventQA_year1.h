@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_year1.h,v 2.2 2000/08/25 20:29:33 lansdell Exp $
+// $Id: QAhlist_EventQA_year1.h,v 2.3 2001/04/24 22:53:50 lansdell Exp $
 // $Log: QAhlist_EventQA_year1.h,v $
+// Revision 2.3  2001/04/24 22:53:50  lansdell
+// Removed redundant radial position of first hit histograms
+//
 // Revision 2.2  2000/08/25 20:29:33  lansdell
 // year1 print list changed slightly; cosmetic improvement of some event summary histograms
 //
@@ -54,7 +57,6 @@
      "StEQaGtrkPhi0T",
      "StEQaGtrkZ0T",
      "StEQaGtrkCurvT",
-     "StEQaGtrkRfT",
      "StEQaGtrkPadfT",
      "StEQaGtrkf0",
      "StEQaGtrkXfT",
@@ -196,7 +198,6 @@
      "StELMQaGtrkPhi0T",
      "StELMQaGtrkZ0T",
      "StELMQaGtrkCurvT",
-     "StELMQaGtrkRfT",
      "StELMQaGtrkPadfT",
      "StELMQaGtrkf0",
      "StELMQaGtrkXfT",
@@ -338,7 +339,6 @@
      "StEMMQaGtrkPhi0T",
      "StEMMQaGtrkZ0T",
      "StEMMQaGtrkCurvT",
-     "StEMMQaGtrkRfT",
      "StEMMQaGtrkPadfT",
      "StEMMQaGtrkf0",
      "StEMMQaGtrkXfT",
@@ -480,7 +480,6 @@
      "StEHMQaGtrkPhi0T",
      "StEHMQaGtrkZ0T",
      "StEHMQaGtrkCurvT",
-     "StEHMQaGtrkRfT",
      "StEHMQaGtrkPadfT",
      "StEHMQaGtrkf0",
      "StEHMQaGtrkXfT",

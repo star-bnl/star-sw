@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.2 2000/09/08 18:55:53 lansdell Exp $ 
+// $Id: StQABookHist.cxx,v 2.3 2001/04/24 22:53:51 lansdell Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 2.3  2001/04/24 22:53:51  lansdell
+// Removed redundant radial position of first hit histograms
+//
 // Revision 2.2  2000/09/08 18:55:53  lansdell
 // turned on FTPC primary track histograms
 //
@@ -123,9 +126,6 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_glb_phi0T=0;
   m_glb_z0T=0;
   m_glb_curvT=0;
-  m_glb_rfT=0;
-  m_glb_rfFE=0;
-  m_glb_rfFW=0;
   m_glb_padfT=0;  
   m_glb_xf0=0;
   m_glb_xfT=0;
@@ -179,7 +179,6 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_glb_phi0TS=0;     
   m_glb_z0TS=0;       
   m_glb_curvTS=0;     
-  m_glb_rfTS=0;       
   m_glb_xfTS=0;       
   m_glb_yfTS=0;       
   m_glb_zfTS=0;       
@@ -528,7 +527,6 @@ void StQABookHist::BookHistGlob(){
   m_glb_z0T     = QAH::H1F("QaGtrkZ0T",     "globtrk: z-coord at start (cm), tpc ", 50, -300.,300.);
     m_glb_z0T->SetMinimum(500);
   m_glb_curvT   = QAH::H1F("QaGtrkCurvT",   "globtrk: log10 curvature (1/cm), tpc ", 80,-3.5,0.5);
-  m_glb_rfT     = QAH::H1F("QaGtrkRfT",     "globtrk: radial position of first hit, tpc", 100,40.,200.);
   m_glb_padfT   = QAH::H1F("QaGtrkPadfT",   "globtrk: padrow of first hit on trk, tpc", 45,0.,45.);
   m_glb_f0      = QAH::MH1F("QaGtrkf0",     "globtrk: first point: hit-helix, tpc",60,-3.,3.,3);
   m_glb_f0->Rebin(0,"X");
@@ -654,7 +652,6 @@ void StQABookHist::BookHistGlob(){
   m_glb_phi0TS   = QAH::H1F("QaGtrkPhi0TS",   "globtrk: azimuth (phi) at start (deg,force 0-360),tpc+svt", 64, 0.,360.);
   m_glb_z0TS     = QAH::H1F("QaGtrkZ0TS",     "globtrk: z-coord at start (cm), tpc+svt", 50, -300.,300.);
     m_glb_z0TS->SetMinimum(500);
-  m_glb_rfTS     = QAH::H1F("QaGtrkRfTS",     "globtrk: radial position of first hit, tpc+svt", 100,40,200.);
   m_glb_curvTS   = QAH::H1F("QaGtrkCurvTS",   "globtrk: log10 curvature (1/cm), tpc+svt", 80,-3.5,0.5);
   m_glb_f0TS     = QAH::MH1F("QaGtrkf0TS",    "globtrk: first point: hit-helix, tpc+svt",50,-5.,5.,3);
   m_glb_f0TS->Rebin(0,"X");
@@ -775,8 +772,6 @@ void StQABookHist::BookHistGlob(){
   m_glb_ratiomFW = QAH::H1F("QaGtrkRnmFW",     "globtrk: ratio Nfit/max pnt, ftpc west", 55, 0., 1.1);
   m_glb_chargeFE = QAH::H1F("QaGtrkChrgFE",    "globtrk: charge, ftpc east ", 20,-2.,2.);
   m_glb_chargeFW = QAH::H1F("QaGtrkChrgFW",    "globtrk: charge, ftpc west ", 20,-2.,2.);
-  m_glb_rfFE     = QAH::H1F("QaGtrkRfFE",      "globtrk: radial position of first hit, ftpc east",40,0.,40.);
-  m_glb_rfFW     = QAH::H1F("QaGtrkRfFW",      "globtrk: radial position of first hit, ftpc west",40,0.,40.);
   m_glb_xfFE     = QAH::H1F("QaGtrkXfFE",      "globtrk: x of first hit on trk, ftpc east", 50,-200.,200.);
   m_glb_xfFW     = QAH::H1F("QaGtrkXfFW",      "globtrk: x of first hit on trk, ftpc west", 50,-200.,200.);
   m_glb_yfFE     = QAH::H1F("QaGtrkYfFE",      "globtrk: y of first hit on trk, ftpc east", 50,-200.,200.);
