@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.h,v 1.5 2001/03/02 16:18:10 lmartin Exp $
+ * $Id: StEstTracker.h,v 1.6 2001/03/13 08:20:38 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.h,v $
+ * Revision 1.6  2001/03/13 08:20:38  lmartin
+ * essai
+ *
  * Revision 1.5  2001/03/02 16:18:10  lmartin
  * Data members added to store the cumulated numbers of ideal,good and bad tracks.
  * CumulEval method added.
@@ -32,6 +35,7 @@ class StEstIndexGeom;
 class StEstHit;
 class StEstTrack;
 class StEstTPCTrack;
+class StEstMcTrack;
 class StEstParams;
 class StEstSegments;
 class St_dst_vertex;
@@ -99,6 +103,8 @@ class StEstTracker {
   StEstHit*        mVertex;//!
   StEstTPCTrack**  mTPCTrack;//!
   StEstTrack**     mTrack;//!
+  StEstMcTrack**   mMcTrack;//!
+
   StEstProjOut     mProjOut;//!
   StEstGtrk*       gtrk; //!
   
@@ -109,6 +115,7 @@ class StEstTracker {
   long*    mTptIndex; //!
   
   
+  long     mNMcTrack;//! number of MC tracks
   long     mNTPCTrack;      //! number of TPC tracks
   long     mNTrack;         //! total number of tracks
   long     mNSvtHit;        //! number of SVT hits
@@ -135,10 +142,10 @@ class StEstTracker {
   void BuildFindableBranches();
   void PrintTrackDetails(int trackid);
   void Eval(int onoffmatrix, int nminhit);
+  void Eval2(int onoffmatrix, int nminhit);
   void FlagTPCTracksSP(int OverPass);
   void FinishFlag();
   void ReInitializeHelix();
-
   
 
 
@@ -153,6 +160,14 @@ class StEstTracker {
 	       table_head_st* m_egrpar_h);
   ~StEstTracker();
   long GetNTrack();
+  long GetIdealPrim() {return mNIdealPrim;};
+  long GetIdealSeco() {return mNIdealSeco;};
+  long GetGoodPrim() {return mNGoodPrim;};
+  long GetGoodSeco() {return mNGoodSeco;};
+  long GetBadPrim() {return mNBadPrim;};
+  long GetBadSeco() {return mNBadSeco;};
+  float GetVertexZ(); 
+
   int DoTracking();
   int SVTInit(St_svg_geom*   Stsvggeom,
 	      St_svg_shape*   Stsvgshape,
