@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.145 2000/10/03 12:05:50 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.146 2000/10/16 16:37:41 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -217,7 +217,7 @@ Bfc_st BFC[] = {
   {"pec"         ,"PeC","","Event"                       ,"StPeCMaker","StPeCMaker","PCollAnalysis",kFALSE},
   {"TagsChain"   ,"TagsChain","",""                                         ,"StMaker","StChain","",kFALSE},
   {"TpcTag"      ,"","TagsChain",""                             ,"StTpcTagMaker","StTpcTagMaker","",kFALSE},
-  {"Flow"        ,"","TagsChain","Event"                            ,"StFlowMaker","StFlowMaker","",kFALSE},
+  {"Flow"        ,"","TagsChain","Event"           ,"StFlowMaker","StEventUtilities,StFlowMaker","",kFALSE},
   {"FlowTag"     ,"","TagsChain","Event,Flow"                 ,"StFlowTagMaker","StFlowTagMaker","",kFALSE},
   {"FlowAnalysis","","TagsChain","Event,Flow"       ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
   {"StrangeTags" ,"","TagsChain","Event"              ,"StStrangeTagsMaker","StStrangeTagsMaker","",kFALSE},
@@ -230,6 +230,7 @@ Bfc_st BFC[] = {
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"dEdxTree"    ,"dEdx","","in,globT,tpcDb,Event","StDeDxTreeMaker","StAnalysisMaker,StDeDxTreeMaker"
                                                                                                 ,"",kFALSE},
+  {"dEdx"        ,"dEdx","","in,globT,tpcDb,Event","StdEdxMaker","StAnalysisMaker,StdEdxMaker"  ,"",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display"     ,"","","SCL,St_geom"               ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
   {"Mc"          ,"McChain","","sim_T,globT,McAss,McAna"                    ,"StMaker","StChain","",kFALSE},
@@ -239,7 +240,7 @@ Bfc_st BFC[] = {
   {"LAna"        ,"","","in,RY1h,geant,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"xout"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE}, 
-  {"Tree"        ,""  ,"",""    ,"StTreeMaker","StTreeMaker","Write requested branches into filles",kFALSE}
+  {"Tree"        ,""  ,"",""    ,"StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE}
 };
 Int_t NoChainOptions = sizeof (BFC)/sizeof (Bfc_st);
 class StEvent;
@@ -315,7 +316,7 @@ Int_t StBFChain::Load()
 Int_t StBFChain::Instantiate() 
 {
   Int_t status = kStOk;
-  Int_t i;
+  Int_t i, iFail=0;
   for (i = 1; i< NoChainOptions; i++) {// Instantiate Makers if any
     if (fBFC[i].Flag) {
       if (strlen(fBFC[i].Maker) > 0){// && strlen(fBFC[i].Name) > 0){// && GetMaker(fBFC[i].Name))) { 
@@ -452,6 +453,12 @@ Int_t StBFChain::Instantiate()
 	}
         else status = kStErr;
 	if (saveMk) saveMk->cd();
+	if (status != kStOk && i != iFail) {
+	  printf("QAInfo: ======================================\n");
+	  printf("QAInfo: problem with Instantiation of %s\n",fBFC[i].Maker);
+	  printf("QAInfo: ======================================\n");
+	  iFail = i;
+	}
       }
     }
   }
