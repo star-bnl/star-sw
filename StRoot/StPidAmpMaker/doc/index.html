@@ -110,7 +110,7 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
 <hr>
 <h2><a name="Tutorial">Tutorial</h2>
 <p> <font size=5 color=#EE1110>How to do the PID?</font></p>
-<p>If you have less than 300 events dst files and wanna do PID by using probability algorithm, my suggestion is do not do it. This is a tool that rely on STATISTICS heavily</p>
+<p>If you have less than 900000 tracks(global) and wanna do PID by using probability algorithm, my suggestion is do not do it. This is a tool that rely on STATISTICS heavily</p>
 <p>In order to use StuProbabilityPidAlgorithm, we have to use StPidAmpMaker to produce a set of parameters that can be used by StuProbabilityPidAlgorithm. So, before do PID, we should: </p>
 
 <p> <font size=5 color=#EE1110>First,Run StPidAmpMaker to produce parameters:</font></p>
@@ -119,11 +119,11 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
 
 <p><font color=blue>1.Decide which channel collection type are you going to use. There are three channel collection types available in StPidAmpMaker:</font></p>
 <p><img src="hand-right.gif"> StPidAmpMaker::AddDefaultChannelCollection( <a href="option.html">"your fit options"</a>)</p>
-<p>The default channel collection does not consider any PID dependence. It requires at least 400 events (~3k tracks per event).  For 1k events, it costs ~4 hrs.</p>
+<p>The default channel collection does not consider any PID dependence. It requires at least 1e+6 tracks.  For 1e+6 tracks, it costs ~1 hrs.</p>
 <p><img src="hand-right.gif">StPidAmpMaker::AddNHitsChannelCollection(yourNHitsBin1, yourNHitsBin2,etc.<a href="option.html">"your fit options"</a>)</p>
-<p>The NHits channel collection consider NHits dependence for PID. It requires ~1k events.For 1k events, it costs ~5 hrs to run. The maximum # of NHits bins you can set is 4. The recommended input is: AddNHitsChannelCollection(0,10,20,45,"A").</p>
+<p>The NHits channel collection consider NHits dependence for PID. It requires ~4e+6 tracks.For 4e+6 tracks, it costs ~3 hrs to run. The maximum # of NHits bins you can set is 4. The recommended input is: AddNHitsChannelCollection(0,10,20,45,"A").</p>
 <p><img src="hand-right.gif">StPidAmpMaker::AddNHitsDcaChannelCollection(yourNHitsBin1Start, yourNHitsBin1End, yourNHitsBin2End, etc.<a href="option.html">"your fit options"</a>,yourDcaBin1Start, yourDcaBin1End, yourDcaBin2End)</p>     
-<p>The NHitsDca channel collection consider both Dca and NHits dependences for PID. It requires ~1.5k events. For 1.5k events, it costs ~7 hrs to run. The maximum # of NHits bins you can set is 4. yourDcaBin1Start should be 0 always, yourDcaBin2End should be infinity (a large number like 50000 would be good). The recommended input is : AddNHitsDcaChannelCollection(0,10,20,45,"A",0,2.0,50000)</p>
+<p>The NHitsDca channel collection consider both Dca and NHits dependences for PID. It requires 6e+6 tracks. For 6e+6 tracks, it costs ~5 hrs to run. The maximum # of NHits bins you can set is 4. yourDcaBin1Start should be 0 always, yourDcaBin2End should be infinity (a large number like 50000 would be good). The recommended input is : AddNHitsDcaChannelCollection(0,10,20,45,"A",0,2.0,50000)</p>
 
 
 <br> 
@@ -196,7 +196,9 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
 <br>    //
 <br>  <font color=green> // StAnalysisMaker *analysisMaker = new StAnalysisMaker("analysis");</font>
 <br> <font color=red> StPidAmpMaker *myPidAmpMaker = new StPidAmpMaker("pidAmp");
-<br>    myPidAmpMaker->AddNHitsDcaChannelCollection(0,10,20,45,"A",0.0,2.0,50000);</font>
+<br>    myPidAmpMaker->AddNHitsDcaChannelCollection(0,10,20,45,"A",0.0,2.0,50000);
+<br>    myPidAmpMaker->SetTotalTracks(5000000);</font><font color=green>//If we do not have the required number of tracks (here the required #tracks is 6e+6), the maker will stop after it finish scanning all events. But this option can let you force the maker to run at less stastics. </font>
+
 <br>
 <br>    //
 <br>    // Initialize chain
@@ -205,7 +207,7 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
 <br>
 <br>
 
-
+<br>  Please be aware that the maximum value for the argument of SetTotalTracks(int)  is 8000000.
 <br>
 <br>
 <p>Then, </p>
@@ -218,7 +220,6 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
 <br><font color=green>//  In your macro(sth. like doEvents.C), do not forget : </font>
 <br>gSystem->Load("StEvent"); 
 <br>gSystem->Load("StEventUtilities"); 
-<br>gSystem->Load("StPidAmpMaker"); <font color=green> // This line will not be needed when the bad dependence of StEventUtilities on StPidAmpMaker get removed.This should happen in a few weeks.</font>
 <br><font color=green> // and load some other libraries as well.</font>
 <br>
 <br>
@@ -248,7 +249,9 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
 <h2><a name="FAQ">FAQ</h2>
 
 <li><a href="#howToCut">I wanna do a PID probability cut, how do I know my cut is tight or loose?</a>
-<li><a href="#howToDraw">How to read out the parameters from "Bands.root" file and draw the Bethe-Bloch curve?</a>
+<li><a href="#howToDrawInAnalysis">In the analysis code,How to read out the parameters from "Bands.root" file and draw the Bethe-Bloch curve?</a>
+<li><a href="#howToDrawInMacro">In the macro,How to read out the parameters from "Bands.root" file and draw the Bethe-Bloch curve?</a>
+
 <br>
 <br>
 <br>
@@ -262,7 +265,7 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
 <center><img src="primaryRatioOfSurvival.gif"></a></center>
 
 
-<p> <font size=5 color=#EE1110><a name="howToDraw"><img src="hand-right.gif"> How to read out the parameters from "Bands.root" file and draw the Bethe-Bloch curve?</font></p>
+<p> <font size=5 color=#EE1110><a name="howToDrawInAnalysis"><img src="hand-right.gif"> How to read out the parameters from "Bands.root" file and draw the Bethe-Bloch curve?</font></p>
 <br><font color=green>In your source code, the following lines of code will do the job. Later version will make it work at the command line.</font>
 <br>
 <br><font color=red>in your header file</font>
@@ -270,9 +273,8 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
 <br>#include "TF1.h"
 <br>#include "TFile.h"
 <br>#include "TCanvas.h"
-<br>#include "StPidAmpMaker/Include/BetheBlochFunction.hh" <font color=green>//include path will change later</font>
-<br>#include "StPidAmpMaker/StPidAmpNetOut.h"     <font color=green> //include path will change later</font>
-
+<br>#include "StEventUtilities/BetheBlochFunction.hh" 
+<br>#include "StEventUtilities/StPidAmpNetOut.h"     
 <br><font color=red>in your implementation file</font>
 
 <br> TFile f("nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_BGBands.root","READ","nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_BGBands.root"); <font color=green>//open a file produced by StPidAmpMaker.</font>
@@ -304,7 +306,9 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
 <br>
 
 <br>
-
+<br><a name="howToDrawInMacro"><img src="hand-right.gif"> <font size=4 color=#EE1110>In the macro,How to read out the parameters from "Bands.root" file and draw the Bethe-Bloch curve?</font></p>
+<br>Please refer to the example $STAR/StRoot/StPidAmpMaker/drawBetheBloch.C
+<br><BR><BR>
 <hr>
   <address><a href="mailto:aihong@cnr.physics.kent.gov">Aihong Tang</a></address>
 <!-- Created: Mon Feb 14 12:52:08 EST 2000 -->

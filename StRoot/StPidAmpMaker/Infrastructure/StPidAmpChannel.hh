@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannel.hh,v 1.4 2000/05/01 16:59:25 aihong Exp $
+ * $Id: StPidAmpChannel.hh,v 1.5 2000/07/22 22:27:13 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannel.hh,v $
+ * Revision 1.5  2000/07/22 22:27:13  aihong
+ * move files from StPidAmpMaker to StEventUtilities
+ *
  * Revision 1.4  2000/05/01 16:59:25  aihong
  * clean up
  *
@@ -45,7 +48,7 @@
 #include "StPidAmpMaker/Infrastructure/StPidAmpNHitsDcaNet.hh"
 #include "StPidAmpMaker/Include/StPidAmpEnum.hh"
 #include "StPidAmpMaker/StPidAmpTrkVector.h"
-#include "StPidAmpMaker/StPidAmpChannelInfoOut.h"
+#include "StEventUtilities/StPidAmpChannelInfoOut.h"
 
 
 class StPidAmpChannel {
