@@ -55,7 +55,17 @@ Int_t StDetectorDbMaker::Make(){
     StDetectorDbRichScalers* scalers = StDetectorDbRichScalers::instance();
     scalers->update(this);
 
+    // Also need to update instances for classes done in InitRun.
+    // This is needed because of a feature in TTable
+    StDetectorDbTpcRDOMasks* masks = StDetectorDbTpcRDOMasks::instance();
+    StDetectorDbMagnet* magnet = StDetectorDbMagnet::instance();
+    StDetectorDbSpaceCharge* spaceCharge = StDetectorDbSpaceCharge::instance();
+    StDetectorDbClock* clock = StDetectorDbClock::instance();
 
+    // Jamie Asked for SpaceCharge to be couted every event
+    cout << "Space Charge Correction = " << spaceCharge->getSpaceChargeCoulombs()
+	 << " Coulombs" << endl;
+    
     // Fill StEvent::StDetectorState
     StEvent* rEvent = 0;
     rEvent = static_cast<StEvent*>(GetInputDS("StEvent"));
