@@ -1,5 +1,8 @@
-* $Id: tgc_z_to_time.F,v 1.2 1998/01/27 01:56:45 fisyak Exp $
+* $Id: tgc_z_to_time.F,v 1.3 1998/07/08 02:44:01 sakrejda Exp $
 * $Log: tgc_z_to_time.F,v $
+* Revision 1.3  1998/07/08 02:44:01  sakrejda
+* truncation problem fixed - time bucket was too small by 1
+*
 * Revision 1.2  1998/01/27 01:56:45  fisyak
 * Split sources
 *
@@ -42,7 +45,7 @@ C     time - time bucket number
 
       zoff=0
       if(padrow.lt.14)zoff=z_offset
-      time=((z+zoff)/vdrift + t0_offset)*clock_local
+      time=((z+zoff)/vdrift + t0_offset)*clock_local+1.0
 
       tgc_z_to_time = STAFCV_OK      
 
