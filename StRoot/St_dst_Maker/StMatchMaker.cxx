@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.26 2000/06/26 22:13:18 fisyak Exp $
+// $Id: StMatchMaker.cxx,v 1.27 2000/06/29 04:12:35 lbarnby Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.27  2000/06/29 04:12:35  lbarnby
+// fix to track length calculation for very small tanl tracks
+//
 // Revision 1.26  2000/06/26 22:13:18  fisyak
 // remove params
 //
@@ -445,7 +448,8 @@ Int_t StMatchMaker::Make(){
   
   int iMake = kStOK;
   int iRes = 0, i;
-  
+  const Float_t deltaZCut = 1; //(cm) Cut used in track length calc.
+
   St_dst_track     *globtrk     = new St_dst_track("globtrk",20000);  
   AddData(globtrk);
   
@@ -619,7 +623,7 @@ Int_t StMatchMaker::Make(){
     gMessMgr->Warning() << "Problem on return from EGR_FITTER" << endm;}
   if(Debug()) gMessMgr->Debug() << " finished calling egr_fitter" << endm;
 
-  // globtrk length calaulation  
+  // globtrk length calculation  
   dst_track_st *globtrkPtr1  = globtrk->GetTable();
   for( Int_t no_rows=0; no_rows<globtrk->GetNRows(); no_rows++, globtrkPtr1++)
     {
@@ -634,9 +638,23 @@ Int_t StMatchMaker::Make(){
       StThreeVectorD origin(x0, y0, z0);  
       StHelixD globHelix(curvature, dip, phase, origin, h);
             
-      StThreeVectorD lastPoint(globtrkPtr1->x_last[0], 
-                               globtrkPtr1->x_last[1],globtrkPtr1->x_last[2]);
-      Float_t globLength = globHelix.pathLength(lastPoint); 
+      Float_t globLength;
+      //default is larger than cut, beware curvature=0 (straight) tracks
+      Float_t deltaZ = 2*deltaZCut;
+      if (curvature > 1E-20) deltaZ= (2*M_PI*globtrkPtr1->tanl)/curvature;
+      deltaZ = (deltaZ >= 0) ? deltaZ : (-deltaZ); 
+      //If case where dist. moved in z after 1 period is less than cut (1 cm) 
+      //use alternative pathLength method (prevents large false lengths)     
+      if (deltaZ >= deltaZCut) {
+	StThreeVectorD lastPoint(globtrkPtr1->x_last[0], 
+				globtrkPtr1->x_last[1],globtrkPtr1->x_last[2]);
+	globLength = globHelix.pathLength(lastPoint); 
+      }
+      
+      else {
+	globLength = 
+	  globHelix.pathLength(globtrkPtr1->x_last[0],globtrkPtr1->x_last[1]);
+	  }
       globtrkPtr1->length = (globLength>0) ? globLength : (-globLength);  
     }
   
