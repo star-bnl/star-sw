@@ -192,6 +192,9 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       << runinfo->zdcWestRate()+runinfo->zdcEastRate() << endm;
   }
 
+  // Fill the StEvent information for the SpaceCharge used in this event
+  runinfo->setSpaceCharge(lastsc);
+  runinfo->setSpaceChargeCorrectionMode(m_ExB->GetSpaceChargeMode());
 
   // Track loop
   unsigned int i,j;
@@ -596,8 +599,11 @@ float StSpaceChargeEbyEMaker::FakeAutoSpaceCharge() {
   return sc;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.4 2004/08/13 20:49:12 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.5 2005/02/16 17:18:06 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.5  2005/02/16 17:18:06  genevb
+// Fill StEvent info on SpaceCharge
+//
 // Revision 1.4  2004/08/13 20:49:12  genevb
 // Improve upon keeping method locked on for each event, and timestamp change
 //
