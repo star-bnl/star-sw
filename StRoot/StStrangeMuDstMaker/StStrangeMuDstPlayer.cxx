@@ -203,6 +203,7 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
       prefix[mNDstMakers] = "kink_";
       mNDstMakers++;
     }
+    ParseFileName(output, &file, &dir);
     for(Int_t i=0; i<mNDstMakers; i++) {
       //      outfile[i] = strdup(dir);    // doesn't work - too short ?
       outfile[i] = new char[strlen(output)+5];
