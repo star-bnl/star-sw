@@ -62,13 +62,16 @@ long type_of_call l3Clufi_(
   Short_t* adclong = NULL ; // long means 10 bit value of pixelentry
   UInt_t* bank = NULL ;    // DATAWORDS (=4 BYTE) to be written out in DAQ-Format   
   UInt_t* receiver = NULL ;
+  UInt_t* bank_limit = NULL ; // maximum address for outbank -> abort if we find too many clusters
  
   Int_t sectornumb = 0 ;
   struct TPCSECLP *seclp = NULL ;
     
   UShort_t* cpp = NULL;
   UChar_t* adc = NULL;     // 8 bit value of pixelentry
-    
+  
+  Int_t bank_overflow = 0;
+
   //
   // get the pixeldata only for one sector
   // pixel.data = short = 10 bit value of pixelentry
@@ -99,8 +102,12 @@ long type_of_call l3Clufi_(
       adc[i]= log10to8_table[adclong[i]];
     }
 
-  // get pointer for outgoing bank, calculate pointer to first rc bank
+  // get pointer for outgoing bank
   bank = (UInt_t*) &hits->data;
+
+  // get limit (=maximum space in buffer -10% = 90.000 datawords per supersector) for outgoing bank
+  Int_t buffsize = Int_t (0.9 * (hits_h->maxlen)) ;
+  bank_limit = (UInt_t*) &(hits[buffsize]) ;
 
   /* check outgoing data */
   /*printf("bank :%d  hits:%d\n",bank,&hits->data);*/
@@ -171,7 +178,7 @@ long type_of_call l3Clufi_(
   asic_eve(cpp,adc);
   
   /* loop over receiver boards  */ 
-  for( rb=1; rb<=6; rb++ ) 
+  for( rb=1; (rb<=6) && (bank_overflow==0) ; rb++ ) 
     { 
       struct TPCRBCLP *rbclp;
 	    
@@ -216,6 +223,15 @@ long type_of_call l3Clufi_(
 	      i960_id = ((rb-6) * mz) - 1 ;
 	    }
 	      
+	  // check whether we have enough space to write the clusters out
+	  // 3 = nrows per mz ; 2 = number words per cluster ; 1000 = max cluster per row  
+	  if( (bank_limit-receiver) < 3*2*1000 )
+	      {
+		  bank_overflow = 1;
+		  Int_t aa = bank_limit-receiver;
+		  break ;
+	      }
+
 	  i960[i960_id].Start(0);
 	  //for (Int_t depp =0 ; depp < 1000000 ; depp++) { Double_t t = depp*depp; };
 	  /* do the clusterfinding on this mz  */
@@ -239,6 +255,14 @@ long type_of_call l3Clufi_(
   // free memory
   free(cpp);
   free(adc);
+ 
+  
+  if (bank_overflow) 
+    {
+      printf("\n\n\nStop here ... too many clusters !\n\n\n");
+      return 0 ; 
+    }
+  
 
   /* done  */
   /* printf("  Finished clusterfinding module!\n"); */

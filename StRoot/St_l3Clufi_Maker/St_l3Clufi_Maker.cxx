@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.14 2000/03/24 19:45:16 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.15 2000/04/12 18:39:21 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.15  2000/04/12 18:39:21  flierl
+// check whether enough memory is allocated for the clusters ( for the tables and the buffers )
+//
 // Revision 1.14  2000/03/24 19:45:16  flierl
 // correct looping over pixels during filling of stpixel
 //
@@ -136,6 +139,9 @@ Int_t St_l3Clufi_Maker::Init(){
   Max_number_of_pads = 184;
   Max_number_of_buckets = 512;
 
+  // define buffer_size
+  Buffer_size = 100000 ;
+
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -162,7 +168,8 @@ Int_t St_l3Clufi_Maker::Make(){
   
   // some counters
   Int_t totalpixelcount = 0 ;
-  
+
+     
   /////////
   // Get raw data 
   /////////
@@ -238,7 +245,7 @@ Int_t St_l3Clufi_Maker::Make(){
 		  // allocate the table where the out bank will go for this supersector
 		  // 100000 longs (=4byte=online "word") we need 2 words per cluster
 		  // -> we have enough space for max. 50000 clusters per sector
-		  St_hit_bank[supersectorindex-1] = new St_hitarray(output_name,100000);
+		  St_hit_bank[supersectorindex-1] = new St_hitarray(output_name,Buffer_size);
 		  St_hit_bank_this = St_hit_bank[supersectorindex-1];
 		  hit_bank_this_st = (hitarray_st*) St_hit_bank_this->GetTable();
 		  // fill TPCSECLP bankheader with 1,3,5 ... or 23
@@ -307,19 +314,20 @@ Int_t St_l3Clufi_Maker::Make(){
 	      if (Debug()) { timer2.Start(0) ; }
 	      if ( l3Clufi(Stpixel,St_hit_bank_this) !=1 )
 		{
-		  cerr << "problems in clusterfinding module in sector: "<< sectorindex <<endl;
-		  // stop this maker and go back to bfc
-		  return kStWarn;
+		  // clean up, stop this maker and go back to bfc
+		  cerr << "Problems in L3 clusterfinding module in sector: "<< sectorindex <<endl;
+		  delete Stpixel;
+		  return kStErr;
 		}
 	      if (Debug()) { timer2.Stop() ; }
 
 	      // write out tables in online format just for the supersector
 	      if ( sectorindex%2 == 0 )
 		{
-		  for(Int_t tt=0;tt<100000;tt++)
-		    {
-		      St_hit_bank_this->AddAt(&hit_bank_this_st[tt],tt);
-		    }
+		  for(Int_t tt=0;tt<Buffer_size;tt++)
+		      {
+			  St_hit_bank_this->AddAt(&hit_bank_this_st[tt],tt);
+		      }
 		}
 
 	      ////// ---> goto next sector
@@ -328,10 +336,12 @@ Int_t St_l3Clufi_Maker::Make(){
 	}// while ( (sector = next()) && sectorindex<12 )
       // free memory
       delete Stpixel;
+     
     } //  if (raw_data_tpc) 
    
   // timing
   if (Debug()) { timer1.Stop() ; }
+  
 
   /////////
   /// now fill /l3/hits_in_sec_xx banks in /l3/hit/tcl_tphit tables
@@ -339,7 +349,7 @@ Int_t St_l3Clufi_Maker::Make(){
   cout << "Start filling banks into tables..." << endl;
     
   //creat tcl_tphits table
-  St_tcl_tphit* stl3hit = new St_tcl_tphit("L3hit",400000);
+  St_tcl_tphit* stl3hit = new St_tcl_tphit("L3hit",500000);
   tcl_tphit_st* l3hitst = (tcl_tphit_st*) stl3hit->GetTable();
   m_DataSet->Add(stl3hit);
     
@@ -368,7 +378,14 @@ Int_t St_l3Clufi_Maker::Make(){
 	
       // fill banks into tphit structs
       St_l3banks_2_tphits* filler = new St_l3banks_2_tphits(stl3hit,bank_entries);
-      filler->Filltclpoints();
+      if (filler->Filltclpoints() == 0) 
+	  {
+	    // clean up and abort this event !
+	      delete filler;
+	      cout << "Too many clusters." << endl ;
+	      return kStErr;
+	  }
+	      
       delete filler;
 
       //  call module which translates banks into tables old style

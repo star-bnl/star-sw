@@ -141,7 +141,7 @@ void St_l3_Coordinate_Transformer::Set_parameters_by_hand()
   drift_length_inner_west = 201.25;
   drift_length_outer_west = 201.71;
   
-  cout << "Constants for transformation set by hand." << endl;
+  //cout << "Constants for transformation set by hand." << endl;
 }
 //______________________________
 void St_l3_Coordinate_Transformer::Use_transformation_provided_by_db()
