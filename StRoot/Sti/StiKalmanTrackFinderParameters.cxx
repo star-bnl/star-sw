@@ -26,23 +26,7 @@ const StiKalmanTrackFinderParameters & StiKalmanTrackFinderParameters::operator=
   return *this; 
 } 
 
-/// Set the parameter values according to the given databse object
-const StiKalmanTrackFinderParameters & StiKalmanTrackFinderParameters::operator=(const KalmanTrackFinderParameters_st & p) 
-{ 
-  useMcAsRec      = p.useMcAsRec;
-  elossCalculated = p.elossCalculated;
-  mcsCalculated   = p.mcsCalculated; 
-  field           = p.field; 
-  maxNullCount    = p.maxNullCount;
-  maxContiguousNullCount            = p.maxContigNullCount; //maxContiguousNullCount; 
-  minContiguousHitCountForNullReset = p.minCountForReset;   //minContiguousHitCountForNullReset;
-  maxChi2Vertex   = p.maxChi2Vertex;
-  massHypothesis  = p.massHypothesis;
-  return *this; 
-} 
 
-
- 
 void StiKalmanTrackFinderParameters::initialize() 
 { 
   _enabled  = true; 
@@ -90,24 +74,6 @@ void StiKalmanTrackFinderParameters::initialize()
                             10, 
                             1, 
                             0));
-  /* 
-  add(f->getInstance()->set("minSearchWindow",     
-                            "minSearchWindow",   
-                            &minSearchWindow,  
-                            1.6, 0.5, 20., 0.1, 0)); 
-  add(f->getInstance()->set("maxSearchWindow", 
-                            "maxSearchWindow", 
-                            &maxSearchWindow,         
-                            7., 0.5, 20., 0.1, 0)); 
-  add(f->getInstance()->set("searchWindowScale", 
-                            "searchWindowScale",  
-                            &searchWindowScale, 
-                            10.0, 0.5, 20., 0.1, 0)); 
-  add(f->getInstance()->set("maxChi2ForSelection",  
-                            "maxChi2ForSelection",   
-                            &maxChi2ForSelection, 
-                            10., 0.5, 200., 0.1, 0)); 
-  */
   add(f->getInstance()->set("maxChi2Vertex",  
                             "maxChi2Vertex",   
                             &maxChi2Vertex, 
@@ -116,33 +82,57 @@ void StiKalmanTrackFinderParameters::initialize()
                             "massHypothesis",  
                             &massHypothesis,  
                             0.139, 0.1, 20., 0.01, 0)); 
-  
-  //add(f->getInstance()->set("OuterScaling",
-  //                          "OuterScaling",
-  //                          &outerScaling,
-  //                          1., 0., 20., 0.1, 0));
-  //add(f->getInstance()->set("InnerScaling",
-  //                          "InnerScaling",
-  //                          &innerScaling,
-  //                          1., 0., 20., 0.1, 0)); 
-  //
 } 
 
 
-void StiKalmanTrackFinderParameters::load(TDataSet * ds)
+void StiKalmanTrackFinderParameters::loadDS(TDataSet & ds)
 {
-	// validate source
-	if (!ds) throw runtime_error("StiKalmanTrackFinderParameters::load(TDataSet * ds)");
-	cout << " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<endl;
-	cout << " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<endl;
-	cout << " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<endl;
-	cout << " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<endl;
-	cout << " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<endl;
-	ds->ls(3);
-	// 	
-	St_KalmanTrackFinderParameters * a = static_cast<St_KalmanTrackFinderParameters*>(ds->Find("KalmanTrackFinderParameters" ));
-  if (!a) throw runtime_error("StiKalmanTrackFinderParameters::load(TDataSet * ds) -E- a==0");
-	KalmanTrackFinderParameters_st * b = a->GetTable();
-	if (!b) throw runtime_error("StiKalmanTrackFinderParameters::load(TDataSet * ds) -E- b==0");
-	*this = *b;
+  cout << "StiKalmanTrackFinder::load(TDataSet&ds) -I- Starting" << endl;
+  St_KalmanTrackFinderParameters * a = static_cast<St_KalmanTrackFinderParameters*>(ds.Find("KalmanTrackFinderParameters" ));
+  if (!a) throw runtime_error("StiKalmanTrackFinderParameters::load(TDataSet&ds) -E- a==0");
+  KalmanTrackFinderParameters_st * b = a->GetTable();
+  if (!b) throw runtime_error("StiKalmanTrackFinderParameters::load(TDataSet&ds) -E- b==0");
+  useMcAsRec      = b->useMcAsRec;               
+  elossCalculated = b->elossCalculated;
+  mcsCalculated   = b->mcsCalculated; 
+  field           = b->field; 
+  maxNullCount    = b->maxNullCount;
+  maxContiguousNullCount            = b->maxContigNullCount; 
+  minContiguousHitCountForNullReset = b->minCountForReset;   
+  maxChi2Vertex   = b->maxChi2Vertex;
+  massHypothesis  = b->massHypothesis;	
+  cout << *this;
+  cout << "StiKalmanTrackFinder::load(TDataSet*ds) -I- Done" << endl;
+}
+
+
+void StiKalmanTrackFinderParameters::loadFS(ifstream& inFile)
+{
+  cout << "StiKalmanTrackFinderParameters::load(ifstream& inFile) -I- Starting" << endl;
+  inFile >> useMcAsRec;
+  inFile >> elossCalculated;
+  inFile >> mcsCalculated;
+  inFile >> field;
+  inFile >> maxNullCount;
+  inFile >> maxContiguousNullCount;
+  inFile >> minContiguousHitCountForNullReset;
+  inFile >> maxChi2Vertex;
+  inFile >> massHypothesis;
+  cout << *this;
+  cout << "StiKalmanTrackFinderParameters::load(ifstream& inFile) -I- Done" << endl;
+}
+
+ostream& operator<<(ostream& os, const StiKalmanTrackFinderParameters& p)
+{
+  os << p.getName() << endl
+     << "                         useMcAsRec: " << p.useMcAsRec << endl
+     << "                    elossCalculated: " << p.elossCalculated << endl
+     << "                      mcsCalculated: " << p.mcsCalculated << endl
+     << "                              field: " << p.field << endl
+     << "                       maxNullCount: " << p.maxNullCount << endl
+     << "             maxContiguousNullCount: " << p.maxContiguousNullCount << endl
+     << "  minContiguousHitCountForNullReset: " << p.minContiguousHitCountForNullReset << endl
+     << "                      maxChi2Vertex: " << p.maxChi2Vertex << endl
+     << "                     massHypothesis: " << p.massHypothesis << endl;
+  return os;
 }
