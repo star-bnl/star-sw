@@ -6,9 +6,8 @@ C
 #include "tls_ecvalues.inc"
 C
 C        Inputs
-      INTEGER el1(*)    ! Element of first row to create index for.
-      INTEGER el2       ! Element in second row.
-                        ! we use Fortran 90.)
+      INTEGER el1(*)    ! First element of row zero.
+      INTEGER el2       ! First element in second row.
  
 C        Outputs
 C     None; memory starting at el1 going to el2 is zeroed.
