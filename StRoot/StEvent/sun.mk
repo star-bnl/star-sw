@@ -8,7 +8,7 @@ CPPFLAGS     += -I/afs/rhic/star/ROOT/2.20/root/include
 CPPFLAGS     += -I/afs/rhic/star/packages
 CPPFLAGS     += -I/afs/rhic/star/packages/dev/inc
 CPPFLAGS     += -I$(BFWORK)/include
-CPPFLAGS     += -I..
+CPPFLAGS     += -I.. -instances=global
 CXXFLAGS     := -pic -Qoption ld -t
 LD	     := $(CXX)
 LDFLAGS      := -G
@@ -44,4 +44,3 @@ $(LIBRARY):	$(OBJS)
 		@echo "Loading $(LIBRARY) ..."
 		@ar cru $(LIBRARY) $(OBJS)
 		@echo "done"
-
