@@ -21,7 +21,7 @@
 
 /* Convert time from structure tm format to character DATE.TIME format */
 char *tm2datetime(struct tm *t){
-  char ctime[17];
+  static char ctime[17];
   int summer;
   if( 0 == strftime(ctime, 16, "%Y%m%d.%H%M%S", t)){
     puts("***get_datetime: failed to convert date to char.");
@@ -75,7 +75,7 @@ int check_summertime(struct tm *t){
 
 /* Get character string, corresponding to UNIX environment */
 char* get_star_cal(char* calenv){
-  char *env, starcal[256];
+  char *env; static char starcal[256];
  
   if((env = getenv(calenv)) != NULL){
     strcpy(starcal, env);
@@ -88,7 +88,7 @@ char* get_star_cal(char* calenv){
 
 /* Return full path and file name for next file from directory */
 char* find_cal_file(char *domain, DIR **dirsave){
-  char dir[256], fullpath[256];
+  char dir[256]; static char fullpath[256];
   DIR *dirp;
   struct dirent *direntp;
 
