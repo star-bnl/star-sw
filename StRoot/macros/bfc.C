@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.53 1999/05/13 23:48:24 snelling Exp $
+// $Id: bfc.C,v 1.54 1999/05/14 00:16:16 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.54  1999/05/14 00:16:16  fisyak
+// take out analysis of input_file environment variable and redefiniton no. event to process from file name
+//
 // Revision 1.53  1999/05/13 23:48:24  snelling
 // changed switch QA to SQA because -qa at end of input would not work: changed EvalTPC to Eval to make it more general
 //
@@ -373,16 +376,6 @@ void Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0 ){
     printf("==============================================\n");
   }
   else {
-    if (ChainFlags[kFZIN]) {// zebra file, set I/O for crs using "input_file" varaible if any
-      InFile = new TString("$input_file");
-      gSystem->ExpandPathName(*InFile);
-      if (!strcmp("$input_file",InFile->Data())) {
-	delete InFile;
-	InFile =  new TString(infile); 
-      }
-      Int_t NN = atoi(strrchr(gSystem->BaseName(InFile->Data()),'_')+1);
-      if (NN > 0 && NN <= NoEvents) NoEvents = NN;  
-    }
     if (outfile) FileOut = new TString(outfile);
     else {
       FileOut = new TString(gSystem->BaseName(InFile->Data()));
