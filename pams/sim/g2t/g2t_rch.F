@@ -17,15 +17,19 @@
       logical   Local/.true./
 *
       G2T_RCH=STAFCV_OK
+
       if (g2t_rch_hit_h.maxlen.le.0) return
 *
       i=0
       g2t_rch_hit_h.nok = 0
 
+*      open(unit=21,file='a.txt',status='unknown')
       do Isys=1,2
 
        if (isys.eq.1) call G2R_GET_SYS ('RICH','RGAP',Iprin,Idigi)
        if (isys.eq.2) call G2R_GET_SYS ('RICH','RCSI',Iprin,Idigi)
+       if (isys.eq.3) call G2R_GET_SYS ('RICH','QUAR',Iprin,Idigi)
+       if (isys.eq.4) call G2R_GET_SYS ('RICH','FREO',Iprin,Idigi)
        if (Iprin.lt.0) goto 99
        Local  = Idigi.ge.2
 *
@@ -52,9 +56,15 @@
          endif
          g2t_rch_hit(i).tof           = tof
          g2t_rch_hit(i).de            = Elos
-        g2t_rch_hit(i).ds            = Step
+         g2t_rch_hit(i).ds            = Step
          g2t_rch_hit(i).track_p       = trac
          g2t_rch_hit(i).volume_id     = volume+Isys*1000
+
+*         write(21,*) x(1),x(2),x(3),xx(1),xx(2),xx(3),
+*     >   p(1),p(2),p(3),tof,Elos,Step,
+*     >   (volume+Isys*1000),trac,i,g2t_track(trac).ge_pid,
+*     >   g2t_track(trac).ptot,g2t_track(trac).n_tpc_hit,
+*     >   Lgam, Lpto, User, Etot
 *
 *                  add to track linked list 
 *
@@ -64,5 +74,6 @@
 
        enddo    
  99   enddo
+*      close (21)
       RETURN
       END
