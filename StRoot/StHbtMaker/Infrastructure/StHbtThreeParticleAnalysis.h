@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtThreeParticleAnalysis.h,v 1.4 2000/06/15 18:54:08 willson Exp $
+ * $Id: StHbtThreeParticleAnalysis.h,v 1.5 2000/07/25 03:26:52 willson Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtThreeParticleAnalysis.h,v $
+ * Revision 1.5  2000/07/25 03:26:52  willson
+ * Error with small event collections fixed.
+ *
  * Revision 1.4  2000/06/15 18:54:08  willson
  * Methods to access cuts and correlation functions moved to derived analysis
  * classes.
@@ -116,5 +119,8 @@ inline void StHbtThreeParticleAnalysis::SetEventCut(StHbtEventCut* x) {mEventCut
 inline void StHbtThreeParticleAnalysis::SetFirstParticleCut(StHbtParticleCut* x) {mFirstParticleCut = x; x->SetAnalysis((StHbtBaseAnalysis*)this);}
 inline void StHbtThreeParticleAnalysis::SetSecondParticleCut(StHbtParticleCut* x) {mSecondParticleCut = x; x->SetAnalysis((StHbtBaseAnalysis*)this);}
 inline void StHbtThreeParticleAnalysis::SetThirdParticleCut(StHbtParticleCut* x) {mThirdParticleCut = x; x->SetAnalysis((StHbtBaseAnalysis*)this);}
+
+inline void StHbtThreeParticleAnalysis::SetNumEventsToMix(const unsigned int& nmix){ mNumEventsToMix = nmix;}
+inline bool StHbtThreeParticleAnalysis::MixingBufferFull(){return (mMixingBuffer->size() >= mNumEventsToMix);}
 
 #endif
