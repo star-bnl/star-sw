@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.109 1999/08/20 13:13:30 fisyak Exp $
+# $Id: MakePam.mk,v 1.110 1999/08/20 23:07:28 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.110  1999/08/20 23:07:28  fisyak
+# Fix new StAF include path
+#
 # Revision 1.109  1999/08/20 13:13:30  fisyak
 # Devorce StAF and STAR Library
 #
@@ -302,8 +305,8 @@ endef
 STICFLAGS =  $(addprefix -I,  $(STAF_SYS_INCS) $(SRC_DIR) $(IDL_DIRS))
 CXXFLAGS   += -DASU_MALLOC_OFF
 
-INCLUDES += -I. -I../ -I/usr/include -I$(STAF_SYS_INCS) \
-             $(addprefix -I, $(SRC_DIR) $(GEN_TAB) $(GEN_DIR) $(INC_DIRS)) \
+INCLUDES += -I. -I../ -I/usr/include \
+             $(addprefix -I,$(STAF_SYS_INCS) $(SRC_DIR) $(GEN_TAB) $(GEN_DIR) $(INC_DIRS)) \
             -I$(CERN_ROOT)/include
 
 ifneq ($(OUT_DIR),$(STAR))        
