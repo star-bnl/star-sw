@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst2StEventMaker.h,v 1.6 2004/05/02 04:10:13 perev Exp $
+ * $Id: StMuDst2StEventMaker.h,v 1.7 2004/10/21 02:59:01 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDst2StEventMaker_hh
@@ -20,14 +20,14 @@ class StEvent;
 class StMuDst2StEventMaker : public StMaker {
  public:
     /// Default constructor; get pointer to StMuDstMaker
-    StMuDst2StEventMaker(const char* self="muDst2StEventMaker", const char* muDstMakerName="MuDst");
+    StMuDst2StEventMaker(const char* self="muDst2StEventMaker");
     ~StMuDst2StEventMaker();
     
     void Clear(const char*);  
     int Make();   ///< create a StEvent from the muDst and put it into the .data tree structure. Also time stamp gets written and set in StEvtHddr for database usage
     StEvent* event() { return  mStEvent; } ///< return pointer to StEvent, 0 if not created 
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StMuDst2StEventMaker.h,v 1.6 2004/05/02 04:10:13 perev Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StMuDst2StEventMaker.h,v 1.7 2004/10/21 02:59:01 mvl Exp $ built "__DATE__" "__TIME__ ; 
 	return cvs;
     }
   
@@ -36,10 +36,9 @@ class StMuDst2StEventMaker : public StMaker {
     void printTriggerIds(StEvent*);
     void loopOverTracks(StEvent*);
 
-    StMuDstMaker* mMuDstMaker;
     StEvent* mStEvent;
     
-    ClassDef(StMuDst2StEventMaker, 1)
+    ClassDef(StMuDst2StEventMaker, 0)
 }; 
 
 
@@ -48,6 +47,9 @@ class StMuDst2StEventMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StMuDst2StEventMaker.h,v $
+ * Revision 1.7  2004/10/21 02:59:01  mvl
+ * Now get MuDst from GetInputDS, instead of StMuDSTMaker
+ *
  * Revision 1.6  2004/05/02 04:10:13  perev
  * private => protected
  *

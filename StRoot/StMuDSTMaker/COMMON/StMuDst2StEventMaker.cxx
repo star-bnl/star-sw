@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst2StEventMaker.cxx,v 1.11 2004/04/15 00:24:07 perev Exp $
+ * $Id: StMuDst2StEventMaker.cxx,v 1.12 2004/10/21 02:59:01 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDst2StEventMaker.h"
@@ -14,9 +14,8 @@
 #include "StEvent/StTpcDedxPidAlgorithm.h"
 
 
-StMuDst2StEventMaker::StMuDst2StEventMaker(const char* self ,const char* muDstMakerName) : StMaker(self) {
+StMuDst2StEventMaker::StMuDst2StEventMaker(const char* self) : StMaker(self) {
   mStEvent =0;
-  mMuDstMaker = (StMuDstMaker*) GetMaker(muDstMakerName);
   //cout << "StMuDst2StEventMaker::StMuDst2StEventMaker : constructor with args called" << endl;
   //cout << "                      muDstMakerName           " << muDstMakerName << endl;
   //cout << "                      self                     " << self << endl;
@@ -37,9 +36,10 @@ int StMuDst2StEventMaker::Make(){  ///< create a StEvent from the muDst and put 
   mStEvent = 0; // I do not delete the StEvent, the chain is responsible for deletion. 
                 // I just set the pointer to zero, so that you never pick up the old StEvent 
 
-  if ( mMuDstMaker ) {
-    mStEvent = mMuDstMaker->muDst()->createStEvent();
-    //VP    StMuDst* muDst = mMuDstMaker->muDst();
+  StMuDst *muDst=0;
+  muDst=(StMuDst*)GetInputDS("MuDst");
+  if (muDst) {
+    mStEvent=muDst->createStEvent();
     if(mStEvent) {
       // set chain date to be the same of event date
       StEvtHddr *hd = GetEvtHddr();
@@ -57,7 +57,7 @@ int StMuDst2StEventMaker::Make(){  ///< create a StEvent from the muDst and put 
     //}
 
   } else {
-    cout << "StMuDst2StEventMaker::Make() : WARNING Did not get pointer to MuDstMaker. "    << endl;
+    cout << "StMuDst2StEventMaker::Make() : WARNING Did not get pointer to MuDst. "    << endl;
     cout <<  "                              StEvent will NOT be filled (nothing we can do)" << endl;
   }
   return 0;
@@ -132,6 +132,9 @@ ClassImp(StMuDst2StEventMaker)
 /***************************************************************************
  *
  * $Log: StMuDst2StEventMaker.cxx,v $
+ * Revision 1.12  2004/10/21 02:59:01  mvl
+ * Now get MuDst from GetInputDS, instead of StMuDSTMaker
+ *
  * Revision 1.11  2004/04/15 00:24:07  perev
  * GetEvtHddr() used now
  *
