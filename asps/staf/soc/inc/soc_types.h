@@ -63,6 +63,8 @@ extern CC_P void kam_soc_release_();
 extern CC_P void kam_socobject_name_();
 extern CC_P void kam_socobject_type_();
 extern CC_P void kam_socobject_version_();
+extern CC_P void kam_socobject_lock_();
+extern CC_P void kam_socobject_implements_();
 #endif /*NOKUIP*/
 
 extern CC_P STAFCV_T soc_bind(char* aspName, char* solibName);
@@ -76,6 +78,8 @@ extern CC_P STAFCV_T soc_release(char * aspName, char* solibName);
 extern CC_P STAFCV_T socobject_name(long idref);
 extern CC_P STAFCV_T socobject_type(long idref);
 extern CC_P STAFCV_T socobject_version(long idref);
+extern CC_P STAFCV_T socobject_lock(long idref,char l);
+extern CC_P STAFCV_T socobject_implements(long idref,char *iface);
 
 #endif /* SOC_TYPES_H */
 

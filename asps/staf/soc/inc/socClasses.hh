@@ -43,7 +43,9 @@ public:
    virtual void lock (unsigned char lock);
    virtual unsigned char lock ();
    virtual char * listing ();
+
 //:----------------------------------------------- PUB FUNCTIONS      --
+   virtual unsigned char implementsInterface (const char * iface);
 
 protected:
 //:----------------------------------------------- PROT VARIABLES     --
@@ -81,7 +83,9 @@ public:
    virtual char * listing ();
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- OVERRIDE VIRTUALS
    virtual char * list ();			// list all objects
+   virtual unsigned char implementsInterface (const char * iface);
 
    virtual STAFCV_T addEntry (IDREF_T idRef);
    virtual STAFCV_T deleteEntry (IDREF_T idRef);
@@ -121,23 +125,20 @@ public:
    virtual char * version (); // override virtual
 
 //:----------------------------------------------- PUB FUNCTIONS      --
-   virtual char * list ();			// override virtual
+//- OVERRIDE VIRTUALS
+   virtual char * list ();			// list all objects
+   virtual unsigned char implementsInterface (const char * iface);
+
    virtual STAFCV_T deleteID (IDREF_T id);
 
    virtual STAFCV_T deleteObject (const char * name, const char * type);
-
-   virtual socObject* findObject (const char * name
-		, const char * type);
-
+   virtual socObject* findObject (const char * name, const char * type);
    virtual socObject* getObject (IDREF_T id);
-
-   virtual STAFCV_T idObject (const char * name
-		, const char * type, IDREF_T& id);
-
+   virtual STAFCV_T idObject (const char * name, const char * type
+		, IDREF_T& id);
    virtual socObject* newObject (const char * name);
 
    virtual STAFCV_T signIn (socObject* obj, IDREF_T& id);
-
    virtual STAFCV_T signOut (IDREF_T id);
 
 protected:

@@ -24,6 +24,7 @@
 #include <dlfcn.h>
 #endif
 
+#define KUIP
 #include "asuAlloc.h"
 #include "asuLib.h"
 #include "emlLib.h"
@@ -79,7 +80,7 @@ STAFCV_T soc_bind(char* aspName, char* solibName)
    FREE(solibName);
    EML_SUCCESS(STAFCV_OK);
 #else /*ARCH_DL_SUPPORTED*/
-   EML_ERROR(NO_DYNAMIC_LINKING);
+   EML_FAILURE(NO_DYNAMIC_LINKING);
 #endif /*ARCH_DL_SUPPORTED*/
 }
 
@@ -123,7 +124,7 @@ STAFCV_T soc_release(char * aspName, char* solibName)
    FREE(solibName);
    EML_SUCCESS(STAFCV_OK);
 #else /*ARCH_DL_SUPPORTED*/
-   EML_ERROR(NO_DYNAMIC_LINKING);
+   EML_FAILURE(NO_DYNAMIC_LINKING);
 #endif /*ARCH_DL_SUPPORTED*/
 }
 
@@ -147,12 +148,12 @@ void kam_socobject_name_()
 STAFCV_T socobject_name(long idref)
 {
    if( !VALID_IDREF(idref) ){
-      EML_ERROR(KAM_INVALID_IDREF);
+      EML_FAILURE(KAM_INVALID_IDREF);
    }
 
    socObject* p;
    if( !(NULL != (p=soc->getObject(idref))) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
 
    char *n;
@@ -181,12 +182,12 @@ void kam_socobject_type_()
 STAFCV_T socobject_type(long idref)
 {
    if( !VALID_IDREF(idref) ){
-      EML_ERROR(KAM_INVALID_IDREF);
+      EML_FAILURE(KAM_INVALID_IDREF);
    }
 
    socObject* p;
    if( !(NULL != (p=soc->getObject(idref))) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
 
    char *t;
@@ -215,12 +216,12 @@ void kam_socobject_version_()
 STAFCV_T socobject_version(long idref)
 {
    if( !VALID_IDREF(idref) ){
-      EML_ERROR(KAM_INVALID_IDREF);
+      EML_FAILURE(KAM_INVALID_IDREF);
    }
 
    socObject* p;
    if( !(NULL != (p=soc->getObject(idref))) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
 
    char *t;
@@ -319,7 +320,7 @@ STAFCV_T soc_idobject(char* name, char* type)
 {
    IDREF_T id;
    if( !soc->idObject(name,type,id) ){
-      EML_ERROR(KAM_INVALID_IDREF);
+      EML_FAILURE(KAM_INVALID_IDREF);
    }
    printf("SOC:\tObject idRef =  %d \n",id);
    EML_SUCCESS(STAFCV_OK);
@@ -369,6 +370,95 @@ void kam_soc_newobject_()
 STAFCV_T soc_newobject(char* name)
 {
    soc->newObject(name);
+
+   EML_SUCCESS(STAFCV_OK);
+}
+
+/*
+*:>---------------------------------------------------------------------
+*:ROUTINE:      void kam_socobject_lock_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* SOC/OBJECT/LOCK IDREF [ LOCK ]
+*:<---------------------------------------------------------------------
+*/
+void kam_socobject_lock_()
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   long idref = ku_geti();	/* idRef of object */
+   char* l = ku_gets();		/* lock value */
+
+   STAFCV_T status = socobject_lock(idref,l[0]);
+}
+
+STAFCV_T socobject_lock(long idref, char l)
+{
+   if( !VALID_IDREF(idref) ){
+      EML_FAILURE(KAM_INVALID_IDREF);
+   }
+
+   socObject* p;
+   if( !(NULL != (p=soc->getObject(idref))) ){
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+   }
+
+   unsigned char lorig = p->lock();
+   switch (l) {
+   case 'T': case 't':
+      p->lock(TRUE);
+      break;
+   case 'F': case 'f':
+      p->lock(FALSE);
+      break;
+   case '-':
+   default:
+      if( lorig ){ printf("SOC:\tObject lock = TRUE \n"); }
+      else       { printf("SOC:\tObject lock = FALSE \n"); }
+      break;
+   }
+
+   EML_SUCCESS(STAFCV_OK);
+}
+
+/*
+*:>---------------------------------------------------------------------
+*:ROUTINE:      void kam_socobject_implements_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* SOC/OBJECT/LOCK IDREF [ LOCK ]
+*:<---------------------------------------------------------------------
+*/
+void kam_socobject_implements_()
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   long idref = ku_geti();	/* idRef of object */
+   char* iface = ku_gets();	/* lock value */
+
+   STAFCV_T status = socobject_implements(idref,iface);
+}
+
+STAFCV_T socobject_implements(long idref, char* iface)
+{
+   if( !VALID_IDREF(idref) ){
+      EML_FAILURE(KAM_INVALID_IDREF);
+   }
+
+   socObject* p;
+   if( !(NULL != (p=soc->getObject(idref))) ){
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
+   }
+   char *n=NULL;
+   if( p->implementsInterface(iface) ){
+      printf("SOC:\tObject (%s) DOES implement (%s) \n",n=p->name()
+		,iface);
+   }
+   else {
+      printf("SOC:\tObject (%s) DOES NOT implement (%s) \n",n=p->name()
+		,iface);
+   }
+   FREE(n);
 
    EML_SUCCESS(STAFCV_OK);
 }

@@ -6,12 +6,13 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.13 1997/01/30 21:00:57 tull Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.14 1997/05/10 02:05:36 tull Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <stream.h>
 #include <math.h>
 
+#define KUIP
 #include "asuAlloc.h"
 #include "asuLib.h"
 #include "emlLib.h"
@@ -142,6 +143,11 @@ char * socObject:: listing () {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+unsigned char socObject :: implementsInterface (const char * iface) {
+   if( 0 == strcmp("socObject",iface)
+   ){ return TRUE; }
+   return FALSE;
+}
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
 // **NONE**
@@ -192,6 +198,15 @@ char * socFactory::  listing () {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- override socObject::implementsInterface
+unsigned char socFactory :: implementsInterface (const char * iface) {
+   if( 0 == strcmp("socFactory",iface)
+   ||  socObject::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+}
+
+//----------------------------------
 char * socFactory :: list () {
    char *c=NULL;
    c = (char*)MALLOC(80*(4+maxCount()));
@@ -301,6 +316,14 @@ char * socCatalog:: version() {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- override socObject::implementsInterface
+unsigned char socCatalog :: implementsInterface (const char * iface) {
+   if( 0 == strcmp("socCatalog",iface)
+   ||  socFactory::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+}
+
 STAFCV_T socCatalog:: deleteID (IDREF_T id) {
    if( !VALID_IDREF(id) ){
       EML_ERROR(INVALID_IDREF);
