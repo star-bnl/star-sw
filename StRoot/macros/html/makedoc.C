@@ -1,4 +1,4 @@
-// $Id: makedoc.C,v 1.55 2000/05/30 00:00:37 fine Exp $
+// $Id: makedoc.C,v 1.56 2000/08/27 19:01:19 fine Exp $
 //=======================================================================
 // owner: Valery Fine
 // what it does: 
@@ -170,7 +170,7 @@
                        ,"StMaker",       "StChain",         "TVolumeView"
                        ,"table_head_st", "TVolumeViewIter", "TPolyLineShape"
                        ,"TPoints3D",     "St_PolyLine3D",   "TPointsArray3D"
-                       ,"TTable3Points", "TTablePoints"
+                       ,"TTable3Points", "TTablePoints",    "StDefaultFilter"
                        ,"St_io_Maker",   "StHelix3DPoints", "StHits3DPoints"
                        ,"StObjArray",    "StHit",            "StHelixD"
                        ,"StTrack",       
@@ -179,7 +179,7 @@
                        ,"StVirtualEventFilter", "TTableIter"
                        ,"St_srs_Maker",  "St_xdfin_Maker"
                       };
-  Int_t nclass = 39;
+  Int_t nclass = 40;
   html.MakeIndex();
 
   // Creat the definitions of the classes not derived from TObjects
@@ -307,6 +307,9 @@
 //___________________________________________________________________________
 //___________________________________________________________________________
 // $Log: makedoc.C,v $
+// Revision 1.56  2000/08/27 19:01:19  fine
+// StDefaultFilter docs added
+//
 // Revision 1.55  2000/05/30 00:00:37  fine
 // Correction to create STAR/ROOT classes html docs
 //
