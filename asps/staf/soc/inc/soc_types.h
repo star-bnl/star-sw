@@ -62,18 +62,17 @@ extern CC_P void kam_socobject_name_();
 extern CC_P void kam_socobject_type_();
 extern CC_P void kam_socobject_version_();
 
-extern CC_P int kam_soc_bind();
-extern CC_P int kam_soc_release();
-extern CC_P int kam_soc_count();
-extern CC_P int kam_soc_deleteid();
-extern CC_P int kam_soc_deleteobject();
-extern CC_P int kam_soc_findobject();
-extern CC_P int kam_soc_idobject();
-extern CC_P int kam_soc_list();
-extern CC_P int kam_soc_newobject();
-extern CC_P int kam_socobject_name();
-extern CC_P int kam_socobject_type();
-extern CC_P int kam_socobject_version();
+extern CC_P STAFCV_T soc_bind(char* aspName, char* solibName);
+extern CC_P STAFCV_T soc_release(char * aspName, char* solibName);
+extern CC_P STAFCV_T socobject_name(long idref);
+extern CC_P STAFCV_T socobject_type(long idref);
+extern CC_P STAFCV_T socobject_version(long idref);
+extern CC_P STAFCV_T soc_count();
+extern CC_P STAFCV_T soc_deleteid(long id);
+extern CC_P STAFCV_T soc_deleteobject(char* name, char* type);
+extern CC_P STAFCV_T soc_idobject(char* name, char* type);
+extern CC_P STAFCV_T soc_list();
+extern CC_P STAFCV_T soc_newobject(char* name);
 
 #endif /* SOC_TYPES_H */
 

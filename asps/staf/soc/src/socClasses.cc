@@ -77,23 +77,6 @@ socObject:: socObject(long n, const char* type) {
 }
 
 //----------------------------------
-char *id2name(char *base, long id)
-{
-   char *name;
-   if(id < 1){
-      name = (char*)malloc(strlen(base) +1);
-      strcpy(name,base);
-      return name;
-   }
-   else {
-      name = (char*)malloc(strlen(base) +1
-		+(int)(1 +log10((double)id)));
-      sprintf(name,"%s%d",base,id);
-      return name;
-   }
-}
-
-//----------------------------------
 socObject:: ~socObject() {
 }
 
@@ -277,7 +260,7 @@ socCatalog:: ~socCatalog() {
 
 //:----------------------------------------------- ATTRIBUTES         --
 char * socCatalog:: version() {
-	char * myVersion="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/soc/src/Attic/socClasses.cc,v 1.7 1996/07/25 00:32:16 tull Exp $";
+	char * myVersion="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/soc/src/Attic/socClasses.cc,v 1.8 1996/11/15 01:04:45 tull Exp $";
 	char *c=(char*)ASUALLOC(strlen(myVersion) +1);
 	strcpy(c,myVersion);
 	return c;
