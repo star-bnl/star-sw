@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.20 2000/07/17 19:19:10 long Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.21 2000/07/30 02:50:05 long Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.21  2000/07/30 02:50:05  long
+ * 1) restructure code
+ * 2)add new pad response function to take into account of the charge spread
+ *   in x direction additional to transverse gaussian diffusion.
+ *
  * Revision 1.20  2000/07/17 19:19:10  long
  * get zoffset by calling zFromTB
  *
@@ -104,18 +109,23 @@
  *
  *
  **************************************************************************/
+ 
 #include <unistd.h>
 #include <math.h>
 #include <algorithm>
 #include <ctime>
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
+
 #include "StTrsParameterizedAnalogSignalGenerator.hh"
+#ifndef TPC_DATABASE_PARAMETERS
+#include "StTpcLocalSectorCoordinate.hh"
+#else
 #include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
+#endif
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using std::sort;
 #endif
-
 
 
 static const double sigmaL = .037*centimeter/sqrt(centimeter);
@@ -128,8 +138,8 @@ StTrsAnalogSignalGenerator* StTrsParameterizedAnalogSignalGenerator::mInstance =
 
 StTrsParameterizedAnalogSignalGenerator::StTrsParameterizedAnalogSignalGenerator(StTpcGeometry* geo, StTpcSlowControl* sc, StTpcElectronics* el, StTrsSector* sec)
     : StTrsAnalogSignalGenerator(geo, sc, el, sec),
-      mPadResponseFunctionSigmaOuter(0.37),//old 0.395
-      mPadResponseFunctionSigmaInner(0.17)//old 0.198
+      mPadResponseFunctionSigmaOuter(0.3913),//old 0.395
+      mPadResponseFunctionSigmaInner(0.1964)//old 0.198
 {
 
   //
@@ -137,6 +147,7 @@ StTrsParameterizedAnalogSignalGenerator::StTrsParameterizedAnalogSignalGenerator
   //
   
   mDriftVelocity             = mSCDb->driftVelocity();
+ 
   mSamplingFrequency         = mElectronicsDb->samplingFrequency();//hz
   mTimeBinWidth              = 1./mSamplingFrequency;//s
   //mTau                     = mSigma1;
@@ -154,16 +165,19 @@ StTrsParameterizedAnalogSignalGenerator::StTrsParameterizedAnalogSignalGenerator
   // 
   // Set TSS parameters for signal generation
   //
-   mChargeFractionOuter.push_back(1.95456);
-   mChargeFractionOuter.push_back(1.88591); 
-   mChargeFractionOuter.push_back(1.43655);
-   mChargeFractionOuter.push_back(0.45415); 
-   mChargeFractionOuter.push_back(0.0813517);
-   mChargeFractionInner.push_back(1.86332); 
-   mChargeFractionInner.push_back(1.62671);
-   mChargeFractionInner.push_back(0.163125); 
-   mChargeFractionInner.push_back(0.00515731);
+   mChargeFractionOuter.push_back(0.33);
+   mChargeFractionOuter.push_back(0.32); 
+   mChargeFractionOuter.push_back(0.2515);
+   mChargeFractionOuter.push_back(0.0856); 
+   mChargeFractionOuter.push_back(0.01607);
+   mChargeFractionOuter.push_back(0.0036);
+   mChargeFractionInner.push_back(0.333); 
+   mChargeFractionInner.push_back(0.298);
+   mChargeFractionInner.push_back(0.038); 
+   mChargeFractionInner.push_back(0.00181);
    mChargeFractionInner.push_back(0.0000);
+   mChargeFractionInner.push_back(0.0000);
+  
    mYb.push_back(0.2);
    mYb.push_back(0.6); 
    mYb.push_back(1.0);
@@ -172,19 +186,25 @@ StTrsParameterizedAnalogSignalGenerator::StTrsParameterizedAnalogSignalGenerator
    mNumberOfEntriesInTable=4000;
    mRangeOfTable=4.0;
    errorFunctionTableBuilder();
-
+   
    mCentralPad = mCentralRow = 0;
    mNumberOfRows = mGeomDb->numberOfRows();
    mNumberOfInnerRows = mGeomDb->numberOfInnerRows();
    mFrischGrid    = mGeomDb->frischGrid();
    rowNormalization = padWidth = padLength = 0;
-   zoffset = wire_to_plane_coupling = xCentroidOfPad = yCentroidOfPad = 0;
-   delx = gridMinusZ = sigma_x = localXDirectionCoupling = 0;
+   zoffset = wire_to_plane_coupling = 0;
+   delx = gridMinusZ = sigma_x = 0;
    dely = constant = localYDirectionCoupling = 0;
    timeOfSignal = chargeOfSignal = 0;
    t = tzero = K = 0;
    sigmaLoverTau = sigmaL/mTau;
-   lambda = 0;
+   lambda = lambdasqr=0;
+   //    srand(0);
+   localArrayBuilder();
+
+    mAddNoise = true;
+   mNoiseRMS=1.2;
+   mAdcConversion=mElectronicsDb->adcConversion();
 }
 StTrsParameterizedAnalogSignalGenerator::~StTrsParameterizedAnalogSignalGenerator() {/* missing */}
 
@@ -197,8 +217,8 @@ StTrsParameterizedAnalogSignalGenerator::instance()
 #else
 	cerr << "StTrsParameterizedAnalogSignalGenerator::instance() Invalid Arguments" << endl;
 	cerr << "Cannot create Instance" << endl;
-	cerr << "Aborting..." << endl;
-	abort();
+	cerr << "Exitting..." << endl;
+	exit(1);
 #endif
     }
     return mInstance;
@@ -226,32 +246,58 @@ void StTrsParameterizedAnalogSignalGenerator::errorFunctionTableBuilder()
   }while(cntr < mNumberOfEntriesInTable);
  
 }
+void StTrsParameterizedAnalogSignalGenerator::localArrayBuilder()
+{
+  int rows=mNumberOfRows;
+  
+  int pad,row;
+  for(row=0;row<rows;row++)
+     {int max_pads=mGeomDb->numberOfPadsAtRow(row+1);
+      mPadsAtRow[row]=max_pads;
+      yCentroid[row]=transformer.yFromRow(row+1);
+      for(pad=0;pad<max_pads;pad++)
+         { xCentroid[row][pad]=transformer.xFromPad(row+1,pad+1);     
+	 // gain[row][pad]=1.0+(drand48()-0.5)*0.20;
+              }
+        
+      
+     }
+  
+ 
+}
 
 double  StTrsParameterizedAnalogSignalGenerator::erf_fast(double argument) const
 {
   
 
- 
-  
-  int index = static_cast<int>(argument/mRangeOfTable*mNumberOfEntriesInTable);
- 
-
-  if(index>=mNumberOfEntriesInTable)return 1.0;
-  if(index<=-mNumberOfEntriesInTable)return  -1.0;
- 
-  
-  return   index>0? mErrorFunctionTable[index] : -mErrorFunctionTable[abs(index)];
-  
+ float a =argument/mRangeOfTable*mNumberOfEntriesInTable;
+  int index;
+  if(a>=0){
+   index = (int)(a+0.5);
+   if(index>=mNumberOfEntriesInTable)return 1.0;
+   return mErrorFunctionTable[index];}
+  else
+   {index = (int)(-a+0.5);
+   if(index>=mNumberOfEntriesInTable)return -1.0;
+   return -mErrorFunctionTable[index];}
 }
+  
+ 
 
 
 void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wireHistogram)
 {
-    double offset=transformer.zFromTB(0.);
-    
+    double offset=transformer.zFromTB(0);
+
+    int PadsAtRow;
     double sigma_xpad2;
     double InOuterFactor=1.0075;
-    double charge_fraction[5]; 
+    double charge_fraction[7]; 
+    int wire_index;
+    double *SignalSum;
+    double pitch=mGeomDb->anodeWirePitch();
+    int PadAtRow;
+    
     //double mPadResponseFunctionSigma;
     //
     // This should probably be made a data member at some point!
@@ -262,132 +308,141 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	cerr << "Wire Plane is empty" << endl;
 	return;
     }
-   
-    for(int jj=wireHistogram->minWire(); jj<=wireHistogram->maxWire(); jj++) {
+        double x,y,z,xCentroidOfPad,yCentroidOfPad;
+        double xp,yp;
+        double electrons;
+        double tZero;
+        tZero=mElectronicsDb->tZero();
+    int bin_start,bin_end;
+    int pad_start,pad_end=max(mPadsAtRow[mNumberOfInnerRows-1],mPadsAtRow[mNumberOfRows-1])+1;
+    int row_start,row_end;
+    int pad_shift,pad_shift0;
+    bin_start=0;
+    bin_end=mGeomDb->numberOfTimeBuckets();
+    row_start=0;
+    row_end=  mNumberOfRows;
+    
+      SignalSum=(double  *)calloc(row_end*bin_end*pad_end,sizeof(double));
+    int index;
+    
+       for(int jj=wireHistogram->minWire(); jj<=wireHistogram->maxWire(); jj++) {
 
 	// StTrsWireHistogram defines typedefs:
 	// ABOVE: typedef vector<StTrsWireBinEntry> aTpcWire
 	aTpcWire currentWire = wireHistogram->getWire(jj);
 	aTpcWire::iterator iter;
-
+        int Repeat;
+           int timeBinUpperLimit = 6;
+           int timeBinLowerLimit = 2; 
+        //     int timeBinUpperLimit = 7;
+	//	     int timeBinLowerLimit = 3;
+	     double dAvalanch=0.015;//cm
+        int bin_low,bin_high; 
+        double signalTime;	
+        double pulseHeight ;
+        int max_bin=bin_end;
+        double  timeBinT ;
+        double *D,Dx,Dz,sigmaLz,Dt,sigmaLt;
+        double B1,B0,A,LAMBDAP,GAMAP,LAMBDAM,GAMAM,s1,s2;
 	for(iter  = currentWire.begin();
 	    iter != currentWire.end();
 	    iter++) {
-	    
-	    // What is the location of the avalanche
-	    // center of Pad that is being processed?
-	    // the y coordinate is the position of the wire
-
-//   	    PR(*iter);
-	    
-	  //  Info for segment:
-	  // x =>  iter->position().x()
-	  // y =>  iter->position().y()    // right now, wire position
-	                        // I will modify this for the y position of the hit
-	  // z =>  iter->position().z()
-	  // dE => iter->numberOfElectrons()
-
-
-	    // StTpcLocalCoordinate  xyCoord(iter->position());
-	    StTpcLocalSectorCoordinate  xyCoord(iter->position(),12);//HL,9/10/99 setor12coordinate,mVolumeId is invalid,just set to 12 to indicate sector 12.
-	    //
-	    // THIS IS IMPORTANT TO REALIZE!!!
-	    //
-	    // xyCoord is now:
-	    //   x position of hit
-	    //   y position of wire  <----CAREFUL
-	    //   z drift length
-// 	    PR(iter->position());
-//  	    PR(xyCoord);
-
-
-// 	    cout << "**Transform2Raw" << endl;
-	    transformer(xyCoord,mTpcRaw);
-//  	    PR(mTpcRaw);
-	    //  mCentralPad = mTpcRaw.pad();
-	    mCentralRow = mTpcRaw.row();
+	    z=iter->position().z();
+            D=iter->d();
+            Dx=D[0]+dAvalanch;// approximation
+            Dt=D[2]/mDriftVelocity;   //mDriftVelocity :  cm/s
+	    //   cout<<Dx<<" "<<D[2]<<" "<<mDriftVelocity<<endl;
            
-	    //	    PR(mCentralRow);
-//   	    PR(mDeltaRow);
-	    //	    PR(mCentralPad);
- //  	    PR(mDeltaPad);
+	   if( z<0.){cout<<"wrong z in function StTrsPara..e..."<<z<<endl;continue;}   
+	    sigmaLz=sigmaL* sqrt(z);
+             sigmaLt=sigmaLz/mDriftVelocity;
+	     signalTime =
+	       (z-offset)/mDriftVelocity; //inner outer offset is already in z
+            
+	     //     cout<<signalTime<<" "<<z<<endl;
+	     //    cin>>z;
+             if(signalTime<0.)continue;
+            
+             
+    
+            pulseHeight= iter->numberOfElectrons();
+           
+            bin_low=max(0,(int)(signalTime/mTimeBinWidth)-timeBinLowerLimit+1);
+            bin_high=min(max_bin-1,(int)(signalTime/mTimeBinWidth)+timeBinUpperLimit);     
+	  
+             K = sigmaLoverTau*sqrt(z)/mDriftVelocity; 
+	    if(D[2]>3.5*sigmaLz){
+     
+                 for(int itbin=bin_low;itbin<=bin_high;itbin++){
+	                SignalInTimeBin[itbin]=0.;
+                        timeBinT = itbin*mTimeBinWidth; 
+		        B1=(timeBinT-signalTime+Dt/2)/mTau;
+                        B0=(timeBinT-signalTime-Dt/2)/mTau;
+                        if(B0>0)
+			  SignalInTimeBin[itbin]=0.5*((B0*B0-2*B0+2)*exp(-B0)
+						    -(B1*B1-2*B1+2)*exp(-B1))*mTimeBinWidth/Dt;
+                        else
+                          if(B1>0)
+                           SignalInTimeBin[itbin]=0.5*((B0*B0-2*B0+2)*exp(-B0)-2)/Dt*mTimeBinWidth;
+                          else
+			     SignalInTimeBin[itbin]=0.;
+
+	             if(SignalInTimeBin[itbin]<0.)SignalInTimeBin[itbin]=0.;
+		
+ 	                                                        }// for itbin 
+               }
+
+           else 
+             
+	     {
+                 for(int itbin=bin_low;itbin<=bin_high;itbin++){
+	                SignalInTimeBin[itbin]=0.;
+                        timeBinT = itbin*mTimeBinWidth; 
+		
+                        lambda =  (signalTime-timeBinT)/(K*mTau) + K;
+                        lambdasqr = lambda*lambda;
+			SignalInTimeBin[itbin]=0.5/mTau*(sqr(K)*exp(K*(lambda-.5*K))*
+	( .5*(1+lambdasqr)*(1-erf_fast(lambda/M_SQRT2)) -
+	  
+	  lambda/sqrtTwoPi*exp(-.5*lambdasqr)))
+                                      *mTimeBinWidth;
+			if(SignalInTimeBin[itbin]<0.)SignalInTimeBin[itbin]=0.;
+		
+ 	                                                  }// for itbin 
+	                         
+	     }
+
+
+	    Repeat=0;
+	    x=iter->position().x();
+            y=iter->position().y(); 
+              
+	    
+	    //    electrons=iter->numberOfElectrons();
+            gridMinusZ     = z; // for new coordinates
+	    sigma_x        = iter->sigmaT();
+	    
+		     
+         
+	 
+	 
+	    // StTpcLocalSectorCoordinate  xyCoord(iter->position(),12);
+	    //  transformer(xyCoord,mTpcRaw);
+	    //
+	    mCentralRow = transformer.rowFromLocal(iter->position())-1;
+	   
 	  
 	    // Calculate the row/pad limits
-	    mRowLimits.first  = (mCentralRow > mDeltaRow) ?
-		mCentralRow - mDeltaRow : mCentralRow;
-	    mRowLimits.second = (mCentralRow < (mNumberOfRows-mDeltaRow)) ?
-		mCentralRow + mDeltaRow : mCentralRow;
+	    //   mRowLimits.first  = (mCentralRow > mDeltaRow) ?
+	    //
 
-	    // Careful No inner/outer sector coupling!!
-	    if(xyCoord.position().y() < mGeomDb->outerSectorEdge()) {
+         
+	    if(y < mGeomDb->outerSectorEdge()) {
 	      //	mRowLimits.second = min(mRowLimits.second, mNumberOfInnerRows); 
                      mRowLimits.second= mCentralRow;	
                      mRowLimits.first=  mCentralRow; //HL,2/20/00
-	    }
-	    else {
-		mRowLimits.first  = max(mRowLimits.first, (mNumberOfInnerRows+1));
-		mRowLimits.second = min(mRowLimits.second,(mNumberOfRows));
-	    }
-// 	    PR(mRowLimits.first);
-// 	    PR(mRowLimits.second);
-
-	    //	    mPadLimits.first  = (mCentralPad > mDeltaPad) ?
-	    //	mCentralPad - mDeltaPad : mCentralPad; 
-
-	    //
-	    // STEP SIZEs OF THE FACTORIZARION FUNCTION OF PAD RESPONSE FUNCTION 
-	    //IN LOCAL Y DIRECTION see tss note
-            // coupling normailization from tss
-	    // pad Dimenstions
-	    //
-	    // Loop over the cross coupled rows(irow)/pads(ipad)
-           
-	    //
-	    for(int irow=mRowLimits.first; irow<=mRowLimits.second; irow++) {
-		
-              mTpcRaw.setRow(irow);
-              transformer(mTpcRaw,xyCoord);
-              xyCoord.position().setX(iter->position().x());  
-              transformer(xyCoord,mTpcRaw);
-              mCentralPad = mTpcRaw.pad();	
-
-                mPadLimits.first  = (mCentralPad > mDeltaPad) ?
-	    		mCentralPad - mDeltaPad : mCentralPad; 
-
-
-                mPadLimits.second =
-		    (mCentralPad < (mGeomDb->numberOfPadsAtRow(irow) - mDeltaPad)) ?
-		    mCentralPad + mDeltaPad : mGeomDb->numberOfPadsAtRow(irow);
-//  		PR(mPadLimits.first);
-//  		PR(mPadLimits.second);
-            
-		
-
-
-		for(int ipad=mPadLimits.first; ipad<=mPadLimits.second; ipad++) {
-// 		    cout << " row: " << irow << " pad: " << ipad << endl;
-#ifdef ST_SECTOR_BOUNDS_CHECK
-		    if( (ipad<0 || ipad>mGeomDb->numberOfPadsAtRow(irow)) )
-			continue;
-#endif
-                    
-		    if(irow > mNumberOfInnerRows) {  // pad in Outer Sector
-		      //  padWidth  = mGeomDb->outerSectorPadWidth();//cm, HL,8/31/99
-		      //	padLength = mGeomDb->outerSectorPadLength();//cm
-			mPadResponseFunctionSigma= mPadResponseFunctionSigmaOuter;
-			//   zoffset=mGeomDb->outerSectorzOffSet();
-			//	rowNormalization = 0.62;//old 2.04
-                        wire_to_plane_coupling=0.512;
-			charge_fraction[0]=mChargeFractionOuter[0];
-                        charge_fraction[1]=mChargeFractionOuter[1]; 
-                        charge_fraction[2]=mChargeFractionOuter[2];
-                        charge_fraction[3]=mChargeFractionOuter[3];
-                        charge_fraction[4]=mChargeFractionOuter[4];
-		    }
-		    else {
-		      // padWidth  = mGeomDb->innerSectorPadWidth();//cm
-		      //	padLength = mGeomDb->innerSectorPadLength();// cm
-		         mPadResponseFunctionSigma= mPadResponseFunctionSigmaInner;  
+                     
+                     mPadResponseFunctionSigma= mPadResponseFunctionSigmaInner;  
 			 //	 rowNormalization =0.285 ; //old 1.24
 			 //   zoffset=mGeomDb->innerSectorzOffSet();
                         wire_to_plane_coupling=0.533*InOuterFactor;//HL,02/20/00
@@ -396,136 +451,207 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
                         charge_fraction[2]=mChargeFractionInner[2];
                         charge_fraction[3]=mChargeFractionInner[3];
                         charge_fraction[4]=mChargeFractionInner[4];
-                       
-		    }
-		    mTpcRaw.setPad(ipad);
-		    mTpcRaw.setRow(irow);
-                   
-		    transformer(mTpcRaw,xyCoord);
-// 		    PR(mTpcRaw);
-// 		    PR(xyCoord);
+                        charge_fraction[5]=mChargeFractionInner[5];
+	    }
+	    else {
+                
+		mRowLimits.first  = max(mCentralRow - mDeltaRow, mNumberOfInnerRows);
+		mRowLimits.second = min(mCentralRow + mDeltaRow,mNumberOfRows-1);
+                
+
+                mPadResponseFunctionSigma= mPadResponseFunctionSigmaOuter;
+			//   zoffset=mGeomDb->outerSectorzOffSet();
+			//	rowNormalization = 0.62;//old 2.04
+                        wire_to_plane_coupling=0.512;
+			charge_fraction[0]=mChargeFractionOuter[0];
+                        charge_fraction[1]=mChargeFractionOuter[1]; 
+                        charge_fraction[2]=mChargeFractionOuter[2];
+                        charge_fraction[3]=mChargeFractionOuter[3];
+                        charge_fraction[4]=mChargeFractionOuter[4];
+                        charge_fraction[5]=mChargeFractionOuter[5];
+	    }
+// 	    
+
+	    //   
+
+	   sigma_xpad2=sigma_x *sigma_x+ mPadResponseFunctionSigma*mPadResponseFunctionSigma; 
+	    for(int irow2=mRowLimits.second; irow2>=mRowLimits.first; irow2--) {              
+	     
+	        PadsAtRow=mPadsAtRow[irow2]-1;
+                yCentroidOfPad = yCentroid[irow2];
+		
+	     
+                dely           = fabs(yCentroidOfPad-y);            
+                wire_index=(int)(fabs(dely)/pitch+0.5);
+		if(wire_index<6)
+		  localYDirectionCoupling =charge_fraction[wire_index];
+		else 
+		  localYDirectionCoupling =0.;
+                if(localYDirectionCoupling<1.e-5)continue;
+                 
+	       
+                if(Repeat<0.5){ 
+                  
+                   mCentralPad = transformer.padFromLocal(iter->position(),irow2+1)-1;
+		   if(mCentralPad>  PadsAtRow)mCentralPad= PadsAtRow;//upper limit boundary check.
+
+                 
+		
+		    mPadLimits.first  = max(mCentralPad - mDeltaPad ,0); 
+		    mPadLimits.second =min(mCentralPad +mDeltaPad ,PadsAtRow);
+                    pad_shift0=PadsAtRow;
+		    //       cout<< mPadLimits.first<< " "<<mPadLimits.second<<" "<<PadsAtRow<<" "<<irow2<<endl;
+//  		  
+		     for(int ipad2=mPadLimits.first; ipad2<=mPadLimits.second; ipad2++) {
+// 		    cout << " row: " << irow << " pad: " << ipad << endl;
+
+		      
+		      
+		   
+	            
+                  
 		    // Integral limits for nearest pad
-		    xCentroidOfPad = xyCoord.position().x();
-		    yCentroidOfPad = xyCoord.position().y();
-		    delx           = xCentroidOfPad-iter->position().x();
-		    gridMinusZ     = iter->position().z(); // for new coordinates
-		    sigma_x        = iter->sigmaT();
-		    sigma_xpad2=sigma_x *sigma_x+ mPadResponseFunctionSigma*mPadResponseFunctionSigma; 
+		    xCentroidOfPad = xCentroid[irow2][ipad2];
+		    //  cout<<  xCentroidOfPad << " xce  "<<ipad2<<endl;
+		    //	    cin>>hhh;
+		    delx           = xCentroidOfPad-x;
+		    
 		     
 
                     
-		    localXDirectionCoupling  =
+		    //	    localXDirectionCoupling[ipad2]  =
 
-                       mPadResponseFunctionSigma/sqrt(sigma_xpad2)*exp(-0.5*delx*delx/sigma_xpad2);   //sqrt(2pi) is absorbed in the local Y coupling
+		    //     mPadResponseFunctionSigma/sqrt(sigma_xpad2)*exp(-0.5*delx*delx/sigma_xpad2);   //sqrt(2pi) is absorbed in the local Y coupling
+                     localXDirectionCoupling[ipad2]= mPadResponseFunctionSigma/Dx*(erf_fast((Dx/2-delx)/sqrt(2*sigma_xpad2))-erf_fast((-Dx/2-delx)/sqrt(2*sigma_xpad2)))*0.5;   //sqrt(2pi) is absorbed in the local Y coupling
                                 
                       
+		    //	    cout<<ipad2<<" "<<localXDirectionCoupling[ipad2]<<" "<<endl;
+                    
+		      
+		     
+		       
+		    //  chargeOfSignal=localYDirectionCoupling*localXDirectionCoupling[ipad2]*wire_to_plane_coupling*pulseHeight*mGain*gain[irow2][ipad2]; 
+                   
+		    chargeOfSignal=localYDirectionCoupling*localXDirectionCoupling[ipad2]*pulseHeight*mGain;
+                    if(chargeOfSignal<0.)  continue;// ASIC threshold 
+		    
+		   
+
+                    for(int itbin2=bin_low;itbin2<=bin_high;itbin2++){
+                   
+                      index=irow2*bin_end*pad_end+ipad2*bin_end+itbin2;
+		      *(SignalSum+index)+=chargeOfSignal*SignalInTimeBin[itbin2]; 
+		     
+                   
+		    
+		    }
+		} // pad limits
+		Repeat=1;
+		} // if repeat<0.5
+	     else{
+                     pad_shift=(PadsAtRow-pad_shift0)/2; 
+		     //      cout<<mPadLimits.first<<" "<<mPadLimits.second<<" "<<irow2<<" "<<pad_shift<<" "<<PadsAtRow<<" repeat"<<endl;
+                     for(int ipad22=mPadLimits.first; ipad22<=mPadLimits.second; ipad22++) {
+// 		    cout << " row: " << irow << " pad: " << ipad << endl;
+
+		
+
+		       if((ipad22+pad_shift)<0||(ipad22+pad_shift)> PadsAtRow)continue;    
+		    
+		   
+		   
+
+                    
+		  
 		  
 		   
 
-                        //  dely           = fabs(yCentroidOfPad-iter->position().y()); 
-                    dely           = fabs(yCentroidOfPad-iter->position().y());            //        cout<<delx<<""<<dely<<" "<<yCentroidOfPad<<" "<<iter->position().y()<<endl;
-                    
-		    constant       =sigma_x*M_SQRT2 ;
-		     		     
-
-		    localYDirectionCoupling =
-
-		      0.5/twopi*((charge_fraction[0]-charge_fraction[1])*(erf_fast((dely+mYb[0])/constant)-
-						     erf_fast((dely-mYb[0])/constant))+
-					    (charge_fraction[1]-charge_fraction[2])*(erf_fast((dely+mYb[1])/constant)-
-						     erf_fast((dely-mYb[1])/constant))+
-					    (charge_fraction[2]-charge_fraction[3])*(erf_fast((dely+mYb[2])/constant)-
-						     erf_fast((dely-mYb[2])/constant))+
-                                            (charge_fraction[3]-charge_fraction[4])*(erf_fast((dely+mYb[3])/constant)-
-						     erf_fast((dely-mYb[3])/constant))+
-					    (charge_fraction[4])                   *(erf_fast((dely+mYb[4])/constant)-
-					             erf_fast((dely-mYb[4])/constant))
-                                            );
-		       
-
-		   
-		    chargeOfSignal=localYDirectionCoupling*localXDirectionCoupling*wire_to_plane_coupling; 
                    
-                    if(chargeOfSignal<0.0) { chargeOfSignal=0.0; continue; }
+		       	       
+		       //     cout<<ipad22+pad_shift<<" repeat "<<localXDirectionCoupling[ipad22]<<" "<<endl;
+		   
+		          chargeOfSignal=localYDirectionCoupling*localXDirectionCoupling[ipad22]*pulseHeight*mGain ;
+		       //     chargeOfSignal=localYDirectionCoupling*localXDirectionCoupling[ipad22]*pulseHeight*mGain*gain[irow2][ipad22]; 
+                   
+                    if(chargeOfSignal<0.)  continue;// ASIC threshold 
 		    
-//    		    PR(chargeOfSignal);
-//    		    PR(iter->numberOfElectrons());
+//    		   
 		    
-		    chargeOfSignal *= iter->numberOfElectrons();
+		    //    chargeOfSignal *= electrons*mTimeBinWidth*mGain*0.5/mTau;;
 		    
  		    
-		    //
-		    // This should really be from the Coordinate transform!
-		    // otherwise code has to be changed twice!
-		    // time = (localz + zoffset)/v_drift + tZero
-		    // The z position already has a z offset, it was put in
-		    // the fast charge transporter.
-		    timeOfSignal =
-			(iter->position().z()-offset)/mDriftVelocity;
-		    	
 		  
-		    // OH-OH OFFSET (replaced!...)
-		     //	     timeOfSignal =
-		     //  	iter->position().z()/mSCDb->driftVelocity();
-
-	     
-		     
-		    // Check the threshold before you
-		    // make and store an analog signal
-		    if(!chargeOfSignal) continue;
-		   
-		    StTrsAnalogSignal padSignal(timeOfSignal, chargeOfSignal);
-
-		    //
-		    // DIAGNOSTIC: Print out all the signals on the pad
-// 		    cout << "padSignal "
-// 			 << padSignal.time()/nanosecond << " ns\t"
-// 			 << padSignal.amplitude() << '\t'
-// 			 << irow << "," << ipad <<endl;
-		    mSector->addEntry(irow,ipad,padSignal);
+		    
+		 
+		    for(int itbin22=bin_low;itbin22<=bin_high;itbin22++){
+                      index=irow2*bin_end*pad_end+(ipad22+pad_shift)*bin_end+itbin22;
+                       
+		       *(SignalSum+index)+=chargeOfSignal*SignalInTimeBin[itbin22];
+		      
+		      
+		       }
+		
 		    
 		} // pad limits
-	       	       
-         
+      
+	     }  //if Repeat>0.5
+		//         cin>>pad_start;
 	    } // row limits
-	   
+	  
+	  
 	 	    		   
 	} // (iterator) Loop over all wires
 
     } // (jj)Loop over the wires of the Histogram
     
+    
+       //   cout<<" kkkkkkkkkkkk"<<endl;
+    	
+     pad_start=0;
 
+    for(int irow3=row_start;irow3<row_end;irow3++)
+      {
+      
+        int pad_end2= mPadsAtRow[irow3];
+        for(int ipad3=pad_start;ipad3<pad_end2;ipad3++)
+	  { // mSector->addEntry(irow,ipad,dummy);
+	    mDiscreteAnalogTimeSequence.clear();
+          for(int itbin3=bin_start;itbin3<bin_end;itbin3++)
+	    {
+              index=irow3*pad_end*bin_end+ipad3*bin_end+itbin3;
+              double a=*(SignalSum+index);
+	    
+             
+	      if(a<=0)continue;
+            
+	        a+=(addNoise(mNoiseRMS)*mAdcConversion);
+          
+	      if(a<=mSignalThreshold)continue;
+               mElectronicSignal.setTime(itbin3);
+	      mElectronicSignal.setAmplitude(a*1.1);
+              mDiscreteAnalogTimeSequence.push_back(mElectronicSignal);
+	      
+            }  
+           
+	   if(mDiscreteAnalogTimeSequence.size()>0)mSector->assignTimeBins(irow3+1,ipad3+1,mDiscreteAnalogTimeSequence);
+	  }
+      }
+    free(SignalSum);
 }
 
 double StTrsParameterizedAnalogSignalGenerator::realShaperResponse(double tbin, StTrsAnalogSignal& sig)
 {
-    //
-    // Take the value of the function at the mid-point of the
-    // time bin, and multiply it by the width of the bin!
-    // charge = F(t) dt
+    
     double value=0.0;
     
-    // Use mDriftVelocity...
-    //double driftVelocity = mSCDb->driftVelocity();
     
-    // use mTau
-    //double tau = mSigma1;
-    
-    // Oh darn! Why do we need gas parmeters here...it is because
-    // we convolute the response of the electronics with the diffusion
-    // DON'T DO THAT!!!!
     //double sigmaL = .05*centimeter/sqrt(centimeter);
     // double t = mTimeBinWidth*(tbin+.5);//started from the center of time bin
     //double t = mTimeBinWidth*(tbin);//  started from the edge of time bin ,HL
     t = tbin; //passed it directly.
-    // Remember centroid is at 2tau+10ns
-    // should be calculated via the extremem...but this
-    // can only be found numerically...There is a routine
-    // that will do this, but I won't incorporate it yet.
-    // For now use the approximation:
-    //  double tzero = sig.time() - 2.*mTau+10.*nanosecond;
-    tzero = sig.time() ;// Hui Long,8/26/99
     
+    tzero = sig.time() ;// Hui Long,8/26/99
+    // tzero =0;
     //double K = sigmaL*sqrt(sig.time())/(tau*sqrt(driftVelocity));
     K = sigmaLoverTau*sqrt((tzero- mTimeShiftOfSignalCentroid)/mDriftVelocity);//retrieve the real drift length,HL,8/31/99
     //UNITS:   sigmaL:  cm/sqrt(cm)
@@ -535,42 +661,35 @@ double StTrsParameterizedAnalogSignalGenerator::realShaperResponse(double tbin, 
     //         <mDriftVelocity  :cm/second
 
     lambda =  (tzero - t)/(K*mTau) + K;
-    double lambdasqr = lambda*lambda;
+    lambdasqr = lambda*lambda;
     // Corrected From SN197
     value = .5/(mTau)*sqr(K)*exp(K*(lambda-.5*K))*
-	( .5*(1+lambdasqr)*(1-erf_fast(lambda/M_SQRT2)) -
+	( .5*(1+lambdasqr)*(1-erf_fast(lambda)) -
 	  
 	  lambda/sqrtTwoPi*exp(-.5*lambdasqr));
     
-    value=value*mTimeBinWidth;
+    //  value*=mTimeBinWidth;
     
     
-    value *= mFractionSampled*mGain*sig.amplitude();
-    
-
-    // Amount of Charge in the bin
-//     PR(sig.amplitude());
-//     PR(t/nanosecond);
-//     PR(tzero/nanosecond);
-//     PR((tzero-t)/nanosecond);
-//     PR(value);
-    //    cout << "gain/volt " << (s.amplitude()*mGain/(.001*volt)) << " mV" << endl;
+    //  value *= mFractionSampled*mGain*sig.amplitude();
+        value *= sig.amplitude();
+   
     return value;
 
 }
 
-// double StTrsParameterizedAnalogSignalGenerator::signalSampler(double t, StTrsAnalogSignal& sig)
-// {
-//     //
-//     // This is where the function for the Signal Sampling is selected
-//     // Add a function that returns the amplitude of a signal at
-//     // a time 't' given the position in time and amplitude of all
-//     // the other signals (contained in the StTrsAnalogSignal 'sig'
-  
+double StTrsParameterizedAnalogSignalGenerator::addNoise(double sigma)
+ {
+   float  x, y, z;
 
-//   return realShaperResponse(t,sig);
-  
-// }
+   y = drand48();
+   if (!y) y = drand48();
+   z = drand48();
+   x = z * 6.283185;
+   
+   return sigma*sin(x)*sqrt(-2*log(y));//Gaussian with mean=0
+    
+ }
 
 
 void StTrsParameterizedAnalogSignalGenerator::sampleAnalogSignal()
@@ -589,24 +708,19 @@ void StTrsParameterizedAnalogSignalGenerator::sampleAnalogSignal()
 #endif
     //double freq = mElectronicsDb->samplingFrequency();
     //PR(freq);
-    double timeBinUpperLimit = 6.;
-    double timeBinLowerLimit = 3.;
-
-//     double sortTime = 0;
-//     time_t sortBegin;
-//     time_t sortEnd;
-//     double timeBinTime = 0;
-//     time_t timeBinBegin;
-//     time_t timeBinEnd;
-//     double seqIterTime = 0;
-//     time_t seqIterBegin;
-//     time_t seqIterEnd;
-//     double samplerTime = 0;
-//     time_t samplerBegin;
-//     time_t samplerEnd;
-    
+    int timeBinUpperLimit = 7;
+    int timeBinLowerLimit = 3;
+   
+    int max_pad,max_bin;  
+   double timeBinT = 0;
+   int bin_low,bin_high;
+   double signalTime;	  
+   max_bin=mGeomDb->numberOfTimeBuckets();    
+    double pulseHeight ;
     for(int irow=1; irow<=mSector->numberOfRows(); irow++) {
-	for(int ipad=1; ipad<=mSector->numberOfPadsInRow(irow); ipad++) {
+      max_pad=mSector->numberOfPadsInRow(irow);
+	for(int ipad=1; ipad<=max_pad; ipad++) {
+       
 	    continuousAnalogTimeSequence = mSector->timeBinsOfRowAndPad(irow,ipad);
 
 	    mDiscreteAnalogTimeSequence.clear();
@@ -614,129 +728,70 @@ void StTrsParameterizedAnalogSignalGenerator::sampleAnalogSignal()
 	    // Make sure it is not empty
            
 	    if(!continuousAnalogTimeSequence.size()) continue; 
-// 	    sortBegin = time(0);
-	    sort(continuousAnalogTimeSequence.begin(),continuousAnalogTimeSequence.end(), StTrsAnalogSignalComparator());
-// 	    sortEnd = time(0);
-// 	    sortTime += difftime(sortEnd, sortBegin);
-	    double maxTime = continuousAnalogTimeSequence.back().time();
-
-// 	    PR(maxTime/nanosecond);
-
-// 	    for(mTimeSequenceIterator  = continuousAnalogTimeSequence.begin();
-// 		mTimeSequenceIterator != continuousAnalogTimeSequence.end();
-// 		mTimeSequenceIterator ++) {
-                    
-// //   		    PR(mTimeSequenceIterator->time());
-// //   		    PR(mTimeShiftOfSignalCentroid);
-// 	      //		    double tmpTime =
-// 	      //	      mTimeSequenceIterator->time() +mTimeShiftOfSignalCentroid;//shift was already done before the input
-// 		  	    double tmpTime =
-// 			      mTimeSequenceIterator->time();//HL,9/8/99
-// 			    //	    cout<<tmpTime<<" time after shifting offset"<<endl;
-// 		    mTimeSequenceIterator->setTime(tmpTime);
-// //   		PR(mTimeSequenceIterator->time());
-// //   		PR(mTimeSequenceIterator->time()/nanosecond);
-// 	    }
-//  	    cout << "row/pad " << irow << '/' << ipad << ' ' << continuousAnalogTimeSequence.size() << endl;
+              
 	    
-	    // Calculate the analog signal at the centroid of the time bin
-	    // Loop over all the time bins:
 
-	    double timeBinT = 0;
-// 	    timeBinBegin = time(0);
-	    lowerBound = continuousAnalogTimeSequence.begin();
-	    for(int itbin=0; itbin<mGeomDb->numberOfTimeBuckets(); itbin++) {
-		timeBinT = itbin*mTimeBinWidth;
-
-// 		int d;
-// 		cin >> d;
-// 		cout << itbin << ", ";
-//  		PR(timeBinT/nanosecond);
-// 		PR(maxTime/nanosecond);
-		double pulseHeight = 0.0;
+	   
 		
-		if (timeBinT-maxTime < timeBinUpperLimit*mTimeBinWidth &&
-		    lowerBound->time()-timeBinT < timeBinLowerLimit*mTimeBinWidth) {
-		    //Not gone beyond max time & 
-		    //reached at least the lowerBound time.
-// 		    seqIterBegin = time(0);
-		    double signalTime = 0;
-		    for(mTimeSequenceIterator =lowerBound;
-			mTimeSequenceIterator!=continuousAnalogTimeSequence.end();
-			mTimeSequenceIterator++) {
-			signalTime = mTimeSequenceIterator->time();
+                   
+		    for(mTimeSequenceIterator = continuousAnalogTimeSequence.begin();
+  			mTimeSequenceIterator!=continuousAnalogTimeSequence.end();
+ 			mTimeSequenceIterator++) {
+		     
+ 	 		signalTime = mTimeSequenceIterator->time();    
+                        pulseHeight=mTimeSequenceIterator->amplitude();
+      		 	bin_low=max(0,(int)(signalTime/mTimeBinWidth)-timeBinLowerLimit+1);
+                         bin_high=min(max_bin,(int)(signalTime/mTimeBinWidth)+timeBinUpperLimit);
+                        
 
-//  			PR(signalTime/nanosecond);
-			
-			//
-			// The current time bin will be filled with
-			// charge from any signal that is within
-			// timeBinCut time bins.  This should be a settable
-			// parameter.
-			//
-			
-			if( signalTime-timeBinT> timeBinLowerLimit*mTimeBinWidth) break;
 
-			if( timeBinT-signalTime> timeBinUpperLimit*mTimeBinWidth) {
-			    lowerBound++;
-			    continue;
-			}
-// 			samplerBegin = time(0);
-			pulseHeight +=
-			    signalSampler(timeBinT, *mTimeSequenceIterator);
-// 			samplerEnd = time(0);
-// 			samplerTime += difftime(samplerEnd,samplerBegin);
-
-// 			cout << " tb " << itbin << " "
-// 			     << signalTime/nanosecond << " "
-// 			     << (*mTimeSequenceIterator) << " "
-// 			     << "pulseHeight "<< pulseHeight << endl;
-		    }
-// 		    seqIterEnd = time(0);
-// 		    seqIterTime += difftime(seqIterEnd, seqIterBegin);
-		//
-		// DIAGNOSTIC
-		// Print out the pulse height in each time bin
+                        for(int itbin=bin_low;itbin<=bin_high;itbin++){
+                        timeBinT = itbin*mTimeBinWidth; 
+                        K = sigmaLoverTau*sqrt((signalTime- mTimeShiftOfSignalCentroid)/mDriftVelocity);
+                        lambda =  (-timeBinT +signalTime)/(K*mTau) + K;
+                        lambdasqr = lambda*lambda;
+			SignalInTimeBin[itbin]+=(sqr(K)*exp(K*(lambda-.5*K))*
+	( .5*(1+lambdasqr)*(1-erf_fast(lambda)) -
+	  
+	  lambda/sqrtTwoPi*exp(-.5*lambdasqr)))
+                                      *pulseHeight;
+ 		        }// for itbin 
+		    }   // for mtimeSequences
+       
+         
+// 		   
+		
 		    
-		    //cout << itbin << " pulse Height: " << pulseHeight << '\t' << (pulseHeight/(.001*volt)) << " mV" << endl;
+	   
+              
 
-		} // if itbin is beyond maxTime
-
-		if (!mAddNoise && timeBinT-maxTime > timeBinUpperLimit*mTimeBinWidth) break;
-		//
-		// Add noise here 
-		//
-		if(mAddNoise) {
-		    if (!mAddNoiseUnderSignalOnly)
-			pulseHeight += generateNoise(); // noise everywhere;
-		    if(mAddNoiseUnderSignalOnly && pulseHeight){
-			pulseHeight += generateNoise(); //noise only under signal;
-		    }
-			
-		}
+		for(int itbin=0;itbin<max_bin;itbin++){
+//
+		  //	if(mAddNoise) SignalInTimeBin[itbin] += generateNoise(); 
+		        
+		if(	SignalInTimeBin[itbin]<mSignalThreshold) continue;
+	       
 
 		//Do not store analog Signal if it is not above a
 		// minimal threshold (should read value from database) rowN
-  		if(pulseHeight < mSignalThreshold) continue;
+  		
 
 		mElectronicSignal.setTime(itbin);
-		mElectronicSignal.setAmplitude(pulseHeight);
+		mElectronicSignal.setAmplitude(SignalInTimeBin[itbin]);
 		mDiscreteAnalogTimeSequence.push_back(mElectronicSignal);
-		
-
-	    } // loop over time bins
-// 	    timeBinEnd = time(0);
-// 	    timeBinTime += difftime(timeBinEnd, timeBinBegin);
 	    
+             
+	        } // loop over time bins
+// 	   
+	       
 	    mSector->assignTimeBins(irow,ipad,mDiscreteAnalogTimeSequence);
-	    
+	    //  cout<<ipad<<" "<<irow<<endl;
 	} // loop over pads
 	
     } // loop over rows
     
-//     cout << "Time to sort Analog Sequence: " << sortTime << " sec\n\n";
-//     cout << "Time to loop over Time bins : " << timeBinTime << " sec\n";
-//     cout << "\tSeq Iter T : " << seqIterTime << " sec\n";
-//     cout << "\t Sampler T : " << samplerTime << " sec\n";
+
 }
+
+
 
