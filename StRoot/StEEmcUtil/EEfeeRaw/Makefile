@@ -23,7 +23,7 @@ CFLAGS   = -Wall $(DEBUG) $(DEFINES) -fPIC $(ROOTCFLAGS)
 CXXFLAGS = $(CFLAGS)
 LDFLAGS  = -shared 
 
-all:	$(LIBNAME)
+all:	$(LIBNAME) 
 	-rm  $(LINK) $(DICT).*	
 
 $(LIBNAME): $(OBJS)
