@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.46 2001/04/13 01:28:42 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.47 2001/04/13 21:21:34 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.47  2001/04/13 21:21:34  perev
+// small fix (fine) + cons's
+//
 // Revision 1.46  2001/04/13 01:28:42  perev
 // Small bug fixed (fine found)
 //
@@ -131,7 +134,8 @@ public:
    Int_t  fMod;
    St_ValiSet(const char *name,TDataSet *parent);
    virtual ~St_ValiSet(){};
-   virtual void ls(Int_t lev=1);
+   virtual void ls(Int_t lev=1) const;
+   virtual void ls(const Option_t *opt) const {TDataSet::ls(opt);}
            void Modified(int m=1){fMod=m;}
           Int_t IsModified(){return fMod;}
 };
@@ -147,7 +151,7 @@ St_ValiSet::St_ValiSet(const char *name,TDataSet *parent): TDataSet(name,parent)
 }
 
 //_____________________________________________________________________________
-void St_ValiSet::ls(Int_t lev)
+void St_ValiSet::ls(Int_t lev) const
 {
   printf("  %s.Validity = %s ",GetName(),fTimeMin.AsString());
   printf(" <-> %s\n",     fTimeMax.AsString());
@@ -518,7 +522,6 @@ TDataSet *St_db_Maker::FindLeft(St_ValiSet *val, TDatime vals[2])
 //_____________________________________________________________________________
 TDataSet *St_db_Maker::LoadTable(TDataSet* left)
 {
-  char *cc;
   TFile *tf =0;
   TObject *to =0;
   TString command;  
@@ -528,7 +531,9 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
 
   TDataSet *ds = left->GetParent();
   ds = ds->GetParent();
-  cc = strchr(strstr(ds->Path(),"/.data/")+7,'/');
+
+  TString path = ds->Path();
+  char *cc = strchr(strstr(path,"/.data/")+7,'/');
   if (cc) dbfile += cc;
   dbfile += "/"; dbfile += left->GetName();
   gSystem->ExpandPathName(dbfile);
@@ -624,7 +629,7 @@ EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
   return kContinue;
 }
 //_____________________________________________________________________________
-TDatime St_db_Maker::GetDateTime()
+TDatime St_db_Maker::GetDateTime() const
 { 
   if (!fIsDBTime) return StMaker::GetDateTime();
   return fDBTime;
