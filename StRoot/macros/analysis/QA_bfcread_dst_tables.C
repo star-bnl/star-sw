@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.21 2000/04/12 15:31:50 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.22 2000/04/13 20:25:46 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.22  2000/04/13 20:25:46  kathy
+// make prettier output
+//
 // Revision 1.21  2000/04/12 15:31:50  kathy
 // keep libtpc table library in by default
 //
@@ -85,7 +88,7 @@ void QA_bfcread_dst_tables(
  Int_t nevents=500, 
  const char *MainFile=
    "/afs/rhic/star/data/samples/gstar.dst.root",
- const char *fname="qa_tables.out") 
+ const char *fname="qa_dst.out") 
 {
   gSystem->Load("St_base");
   gSystem->Load("StChain");
@@ -239,8 +242,8 @@ void QA_bfcread_dst_tables(
       }
 // ------------------------------------------------------------
 
-      cout <<  "QAInfo:  # tables in event = " << tabcntr << endl;
-      fout <<  "QAInfo:  # tables in event = " << tabcntr << endl;
+      cout <<  "QAInfo:  # tables in event = " << tabcntr << endl << endl;
+      fout <<  "QAInfo:  # tables in event = " << tabcntr << endl << endl;
 
      tottabcntr += tabcntr;
     }
