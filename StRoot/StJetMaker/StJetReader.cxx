@@ -259,7 +259,7 @@ void StJetReader::exampleEventAna()
 		    double dphi = gDeltaPhi(j->Phi(), phi);
 		    double deta = j->Eta()-eta;
 		    double dR = sqrt( dphi*dphi  +  deta*deta );
-		    cout <<"/tE_tower:\t"<<e<<"\tEta_tower:\t"<<eta<<"\tPhi_tower:\t"<<phi<<"\tdR:\t"<<dR<<endl;
+		    cout <<"\tE_tower:\t"<<e<<"\tEta_tower:\t"<<eta<<"\tPhi_tower:\t"<<phi<<"\tdR:\t"<<dR<<endl;
 		}
 	    }
 	}
