@@ -35,162 +35,94 @@ using namespace std;
 using std::sort;
 
 StiRootDrawableKalmanTrack::StiRootDrawableKalmanTrack()
-    : mBroker(StiGuiIOBroker::instance()), mSubject(StiGuiIOBroker::instance())
+    : StiRootDrawableTrack()
 {
-    mLineHitPair.first = new StiRootDrawableLine();
-    mLineHitPair.second = new StiRootDrawableHits();
-    
-    mLineHitPair.first->setRemoved(true);
-    mLineHitPair.second->setRemoved(true);
-
-    mSubject->attach(this);
-    getNewValues();
+  getNewState();
 }
 
 StiRootDrawableKalmanTrack::~StiRootDrawableKalmanTrack()
-{
-    // cout <<"StiRootDrawableKalmanTrack::~StiRootDrawableKalmanTrack()"<<endl;
-    delete mLineHitPair.first;
-    mLineHitPair.first=0;
-    delete mLineHitPair.second;
-    mLineHitPair.second=0;
+{ }
 
-    if (mSubject) {
-	mSubject->detach(this);
-    }
-    // cout <<"\tdone"<<endl;
-}
-
-void StiRootDrawableKalmanTrack::getNewValues()
+void StiRootDrawableKalmanTrack::getNewState()
 {
-    // cout <<"StiRootDrawableKalmanTrack::getNewValues()"<<endl;
-    mLineHitPair.second->setColor( mBroker->markedHitColor() );
-    mLineHitPair.second->setMarkerSize( mBroker->markedHitSize() );
-    mLineHitPair.second->setMarkerStyle( mBroker->markedHitStyle() );
-    // cout <<"\tdone"<<endl;
-    
-}
-
-void StiRootDrawableKalmanTrack::reset()
-{
-    StiKalmanTrack::reset();
-    mLineHitPair.first->clear();
-    mLineHitPair.second->clear();
-    mLineHitPair.first->setIsAdded(false);
-    mLineHitPair.second->setIsAdded(false);
-}
-
-void StiRootDrawableKalmanTrack::update()
-{
-    // cout <<"StiRootDrawableKalmanTrack::update()"<<endl;
-    //getNewValues();
-    fillHitsForDrawing();
-    // cout <<"\t done"<<endl;
+    _hits->setColor( mBroker->markedHitColor() );
+    _hits->setMarkerSize( mBroker->markedHitSize() );
+    _hits->setMarkerStyle( mBroker->markedHitStyle() );
 }
 
 void StiRootDrawableKalmanTrack::fillHitsForDrawing()
 {
+  cout<<"StiRootDrawableKalmanTrack::fillHitsForDrawing()"<<endl;
     //be sure to reset internal state
-    mLineHitPair.first->clear();
-    mLineHitPair.second->clear();
+    _line->clear();
+    _hits->clear();
 
     //Set color and line type
-    mLineHitPair.first->clearLine();
+    _line->clearLine();
     
     //Loop over nodes by hand (faster than using StiKalmanTrack interface)
     //This is essentailly the guts of an interpolation routine that should become
     // a class at some point.
     double step = 1.; //cm
     
-    bool go = true;
-    StiKalmanTrackNode * lastNode = getLastNode();
+    StiKalmanTrackNode * lastNode = getInnerMostNode();
     double xLocal = lastNode->fX;
     StiKTNForwardIterator it(lastNode);
     StiKTNForwardIterator end = it.end();
-    while( go && it!=end ) {
-			StiKalmanTrackNode& node = *it;
-	
+    while(it!=end ) 
+      {
+	StiKalmanTrackNode& node = *it;
 	++it;
-	if (it==end) { //we're done
-	    go=false;
-	}
-	else {
-	    StiKalmanTrackNode& next = *it;
-	    while (xLocal<next.fX) {
-		bool threw = false;
-		//Try the new method:
-		StThreeVector<double> pos;
-		try {
-		    pos = node.getPointAt(xLocal);
-		}
-		catch (runtime_error & rte)	{
-		    threw=true;
-		    //cout << "RunTime Error Exception: " << rte.what()<<endl;
-		}
-		catch (exception & e) {
-		    threw=true;
-		    //cout << "Exception: " << e.what()<<endl;
-		}
+	if (it==end)   
+	  break;
+	StiKalmanTrackNode& next = *it;
 
-		if (threw==false) {
-		    mLineHitPair.first->push_back(pos.x());
-		    mLineHitPair.first->push_back(pos.y());
-		    mLineHitPair.first->push_back(pos.z());
-		}
-		else {
-		    mLineHitPair.first->setColor( 3 );
-		    mLineHitPair.second->setColor( 3 );
-		}
-		
-		xLocal+=step;
-	    }
-	    //cout <<"Done stepping"<<endl;
-	    //} //temporary patch
-	}
-    }
-		//cout <<"now fill hits for real"<<endl;
-    //now fill hits for real:
-    //remember, we *ARE* an StiKalmanTrack (public inheritance)
-    StiKalmanTrackNode* node = getLastNode(); //start at innermost
-    int hits=0;
-    go=true;
-    while (go) {
-	if (node->getHit()) {
-
-	    //Add this point to the drawable hits
-	    const StThreeVectorF& pos = node->getHit()->globalPosition();
-	    mLineHitPair.second->push_back( pos.x() );
-	    mLineHitPair.second->push_back( pos.y() );
-	    mLineHitPair.second->push_back( pos.z() );
-	    ++hits;
-	}
-	//now check for parent:
-	if (node->isRoot()) {
-	    go=false;
-	}
-	else {
-	    node = dynamic_cast<StiKalmanTrackNode*>(node->getParent());
-	    if (!node) {
-		cout <<"StiRootDrawableStiEvaluableTrac;::fillHitsForDrawing. ERROR:\t"
-		     <<"Cast to StiKalmanTrackNodeFailed.  Abort"<<endl;
-		return;
-	    }
-	}
-    }
-
-    //cout <<"Hits on track:\t"<<hits<<endl;
-    mLineHitPair.first->fillHitsForDrawing();
-    mLineHitPair.second->fillHitsForDrawing();
+	// Fill node position itself.
+	StiHit * hit = node.getHit();
+	if (hit)
+	  {
+	    const StThreeVectorF& pos = hit->globalPosition();
+	    _hits->push_back( pos.x() );
+	    _hits->push_back( pos.y() );
+	    _hits->push_back( pos.z() );
+	  }
+	// Fill interpolation to muck up a continuous track
+	StThreeVector<double> pos;
+	while (xLocal<next.fX) 
+	  {
+	    try 
+	      {
+		pos = node.getPointAt(xLocal);
+		_line->push_back(pos.x());
+		_line->push_back(pos.y());
+		_line->push_back(pos.z());
+	      }
+	    catch (runtime_error & rte)	
+	      {
+		_line->setColor( 1 );
+	      }
+	    catch (exception & e) 
+	      {
+		_line->setColor( 1 );
+	      }
+	    xLocal+=step;
+	  }
+      }
+	
+    _line->fillHitsForDrawing();
+    _hits->fillHitsForDrawing();
 
     //These get automatically removed from display each event
     //The display dynamically shrinks temp objects each event (tracks, hits, etc)
-    if (!mLineHitPair.first->isAdded()) {
-	StiRootDisplayManager::instance()->addDrawable( mLineHitPair.first );
-    }
-    if (!mLineHitPair.second->isAdded()) {
-	StiRootDisplayManager::instance()->addDrawable( mLineHitPair.second );
-    }
-    
+    if (!_line->isAdded())
+	StiRootDisplayManager::instance()->addDrawable( _line );
+    if (!_hits->isAdded()) 
+	StiRootDisplayManager::instance()->addDrawable( _hits );
     return;
 }
 
+void StiRootDrawableKalmanTrack::reset()
+{
+  this->StiKalmanTrack::reset();
+  this->StiRootDrawableTrack::reset();
+}
