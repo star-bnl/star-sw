@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst2StEventMaker.cxx,v 1.7 2003/09/07 03:49:03 perev Exp $
+ * $Id: StMuDst2StEventMaker.cxx,v 1.8 2003/09/12 21:32:40 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDst2StEventMaker.h"
@@ -15,6 +15,7 @@
 
 
 StMuDst2StEventMaker::StMuDst2StEventMaker(const char* self ,const char* muDstMakerName) : StMaker(self) {
+  mStEvent =0;
   mMuDstMaker = (StMuDstMaker*)GetMaker(muDstMakerName);
 }
 
@@ -125,6 +126,9 @@ ClassImp(StMuDst2StEventMaker)
 /***************************************************************************
  *
  * $Log: StMuDst2StEventMaker.cxx,v $
+ * Revision 1.8  2003/09/12 21:32:40  jeromel
+ * Bug fix : zeroing missing
+ *
  * Revision 1.7  2003/09/07 03:49:03  perev
  * gcc 3.2 + WarnOff
  *
