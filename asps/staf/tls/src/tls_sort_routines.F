@@ -35,6 +35,7 @@ C                  wasted space in index and it may be better to use
 C                  an index sort and then a search routine to find the
 C                  desired offsets.
 C
+C 9/8/95 Add code to handle 0,1 row tables   djp
       INTEGER tls_loc
       INTEGER loop, rc, ind, istride, id
 C
@@ -42,6 +43,14 @@ C First zero index.
       DO loop = 1,isize
          index(loop) = 0
          END DO
+      IF (nrows.EQ.0) THEN
+          tls_Id_Offsets = tls_sort_normal_cv
+          RETURN
+        ELSE IF (nrows.EQ.1) THEN
+          index(loop) = 0
+          tls_Id_Offsets = tls_sort_normal_cv
+          RETURN
+        END IF
 C
 C Loop through table filling index.
       rc = tls_sort_normal_cv
@@ -101,6 +110,7 @@ C FUNCTION WRITTEN BY:
 C     Duncan Prindle,   8/30/91
 C                       Taken from Numerical Recipes.
 C     Modified         11/ 4/93 More convenient for STAR tables.
+C                       9/ 8/95 Add code to handle 0,1 row tables   djp
 C
       INTEGER tls_loc
       INTEGER I, IR, J, L, IndxT
@@ -116,6 +126,11 @@ C
       DO 1 J = 1,nrows
     1    Index(J) = J
 C
+      IF (nrows.LT.2) THEN
+          tls_Index_Sort_r = tls_sort_normal_cv
+          RETURN
+          END IF
+
       L  = 1 + nrows/2
       IR = nrows
       len = (tls_loc(el2) - tls_loc(el1(1)))/4
@@ -177,6 +192,7 @@ C           tls_sort_normal_cv (S):   Successful.
 C           tls_sort_is_short_cv (E): index array not long enough.
 C
 C
+C 9/ 8/95 Add code to handle 0,1 row tables   djp
       INTEGER tls_loc
       INTEGER I, IR, J, L, IndxT
       INTEGER len
@@ -191,6 +207,10 @@ C
       DO 1 J = 1,nrows
     1    Index(J) = J
 C
+      IF (nrows.LT.2) THEN
+          tls_Index_Sort_i = tls_sort_normal_cv
+          RETURN
+          END IF
       L  = 1 + nrows/2
       IR = nrows
       len = (tls_loc(el2) - tls_loc(el1(1)))/4
@@ -245,6 +265,7 @@ C           tls_sort_normal_cv (S):        Successful.
 C           tls_sort_qs_longrow_cv (E):    temp. row space not long enough.
 C           tls_sort_qs_stackshort_cv (E): stack in quicksort too short.
 C
+C 9/ 8/95 Add code to handle 0,1 row tables   djp
       INTEGER M, NSTACK
       REAL    FM, FA, FC, FMI
       PARAMETER (M=7,NSTACK=50,FM=7875.,FA=211.,FC=1663.
@@ -260,6 +281,10 @@ C
       REAL    t(200), tel1, FX
       INTEGER ISTACK(NSTACK)
 C
+      IF (nrows.LT.2) THEN
+          tls_Quick_Sort_r = tls_sort_normal_cv
+          RETURN
+          END IF
       len = (tls_loc(el2) - tls_loc(el1(1)))/4
       IF (len.GT.200) THEN
           tls_Quick_Sort_r = tls_sort_qs_longrow_cv
@@ -368,6 +393,7 @@ C           tls_sort_normal_cv (S):        Successful.
 C           tls_sort_qs_longrow_cv (E):    temp. row space not long enough.
 C           tls_sort_qs_stackshort_cv (E): stack in quicksort too short.
 C
+C 9/ 8/95 Add code to handle 0,1 row tables   djp
       INTEGER M, NSTACK
       REAL    FM, FA, FC, FMI
       PARAMETER (M=7,NSTACK=50,FM=7875.,FA=211.,FC=1663.
@@ -384,6 +410,10 @@ C
       REAL    FX
       INTEGER ISTACK(NSTACK)
 C
+      IF (nrows.LT.2) THEN
+          tls_Quick_Sort_i = tls_sort_normal_cv
+          RETURN
+          END IF
       len = (tls_loc(el2) - tls_loc(el1(1)))/4
       IF (len.GT.200) THEN
           tls_Quick_Sort_i = tls_sort_qs_longrow_cv
@@ -525,6 +555,7 @@ C FUNCTION WRITTEN BY:
 C     Duncan Prindle,  12/ 4/91
 C                       Taken from Numerical Recipes.
 C         Modified     11/ 5/93 More convenient for Tables.
+C                       9/ 8/95 Add code to handle 0,1 row tables   djp
 C
       INTEGER tls_loc
       INTEGER JLow, JHigh, JM
@@ -532,6 +563,23 @@ C
       LOGICAL Ascend
 C-------------------------------------------------------------------------------
 C
+      IF (nrows.EQ.0) THEN
+          tls_Search_r = tls_sort_s_nomatch_cv
+          k_rows = 0
+          RETURN
+        ELSE IF (nrows.EQ.1) THEN
+          IF (el1(1).EQ.rkey) THEN
+              tls_Search_r = tls_sort_normal_cv
+              j_table_off(1) = 1
+              k_rows = 1
+              RETURN
+            ELSE
+              tls_Search_r = tls_sort_s_nomatch_cv
+              k_rows = 0
+              RETURN
+            END IF
+        END IF
+          
       JLow   = 0
       JM     = 1
       JHigh  = nrows + 1
@@ -611,12 +659,29 @@ C           tls_sort_s_nomatch_cv (I):   key not found in specified column.
 C           tls_sort_s_listshort_cv (W): j_table_off too short to contain
 C                                        all rows with key.
 C
+C 9/8/95 Add code to handle 0,1 row tables   djp
       INTEGER tls_loc
       INTEGER JLow, JHigh, JM
       INTEGER len, inc, i_row
       LOGICAL Ascend
 C-------------------------------------------------------------------------------
 C
+      IF (nrows.EQ.0) THEN
+          tls_Search_i = tls_sort_s_nomatch_cv
+          k_rows = 0
+          RETURN
+        ELSE IF (nrows.EQ.1) THEN
+          IF (el1(1).EQ.key) THEN
+              tls_Search_i = tls_sort_normal_cv
+              j_table_off(1) = 1
+              k_rows = 1
+              RETURN
+            ELSE
+              tls_Search_i = tls_sort_s_nomatch_cv
+              k_rows = 0
+              RETURN
+            END IF
+        END IF
       JLow   = 0
       JHigh  = nrows + 1
       len    = (tls_loc(el2) - tls_loc(el1(1)))/4
@@ -720,6 +785,7 @@ C FUNCTION WRITTEN BY:
 C     Duncan Prindle,  12/ 4/91
 C                       Taken from Numerical Recipes.
 C         Modified     11/ 5/93 More convenient for Tables.
+C                       9/ 8/95 Add code to handle 0,1 row tables   djp
 C
       INTEGER tls_loc
       INTEGER JLow, JHigh, JM
@@ -727,6 +793,23 @@ C
       LOGICAL Ascend
 C-------------------------------------------------------------------------------
 C
+      IF (nrows.EQ.0) THEN
+          tls_Search_Index_r = tls_sort_s_nomatch_cv
+          k_rows = 0
+          RETURN
+        ELSE IF (nrows.EQ.1) THEN
+          IF (el1(1).EQ.rkey) THEN  ! I ingore the index assuming it is ok.
+              tls_Search_Index_r = tls_sort_normal_cv
+              j_index_off(1) = 1
+              k_rows = 1
+              RETURN
+            ELSE
+              tls_Search_Index_r = tls_sort_s_nomatch_cv
+              k_rows = 0
+              RETURN
+            END IF
+        END IF
+          
       JLow   = 0
       JHigh  = nrows + 1
       len    = (tls_loc(el2) - tls_loc(el1(1)))/4
@@ -820,12 +903,29 @@ C           tls_sort_si_nomatch_cv (I):   key not found in specified column.
 C           tls_sort_si_listshort_cv (W): j_table_off too short to contain
 C                                         all rows with key.
 C           
+C 9/8/95 Add code to handle 0,1 row tables   djp
       INTEGER tls_loc
       INTEGER JLow, JHigh, JM
       INTEGER len, inc, i_row
       LOGICAL Ascend
 C-------------------------------------------------------------------------------
 C
+      IF (nrows.EQ.0) THEN
+          tls_Search_Index_i = tls_sort_s_nomatch_cv
+          k_rows = 0
+          RETURN
+        ELSE IF (nrows.EQ.1) THEN
+          IF (el1(1).EQ.key) THEN  ! I ingore the index assuming it is ok.
+              tls_Search_Index_i = tls_sort_normal_cv
+              j_index_off(1) = 1
+              k_rows = 1
+              RETURN
+            ELSE
+              tls_Search_Index_i = tls_sort_s_nomatch_cv
+              k_rows = 0
+              RETURN
+            END IF
+        END IF
       JLow   = 0
       JHigh  = nrows + 1
       len    = (tls_loc(el2) - tls_loc(el1(1)))/4
@@ -934,6 +1034,7 @@ C FUNCTION WRITTEN BY:
 C     Duncan Prindle,  12/ 4/91
 C                       Taken from Numerical Recipes.
 C         Modified     11/ 5/93 More convenient for Tables.
+C                       9/ 8/95 Add code to handle 0,1 row tables   djp
 C
       INTEGER tls_loc, tls_Search_r
       INTEGER JLow, JHigh, JM
@@ -941,6 +1042,22 @@ C
       LOGICAL Ascend
 C-------------------------------------------------------------------------------
 C
+      IF (nrows.EQ.0) THEN
+          tls_Search_Near_r = tls_sort_s_nomatch_cv
+          k_rows = 0
+          RETURN
+        ELSE IF (nrows.EQ.1) THEN
+          IF (el1(1).EQ.rkey) THEN
+              tls_Search_Near_r = tls_sort_normal_cv
+              j_table_off(1) = 1
+              k_rows = 1
+              RETURN
+            ELSE
+              tls_Search_Near_r = tls_sort_s_nomatch_cv
+              k_rows = 0
+              RETURN
+            END IF
+        END IF
       JLow = j_table_off(1)
 C
 C Check that j_table_off(1) is a valid guess. (Otherwise just call Search)
@@ -1053,12 +1170,29 @@ C           tls_sort_normal_cv (S):       Normal return
 C           tls_sort_sn_nomatch_cv (I):   key not found in specified column.
 C           tls_sort_sn_listshort_cv (W): j_table_off too short for all rows with rkey.
 C           
+C 9/8/95 Add code to handle 0,1 row tables   djp
       INTEGER tls_loc, tls_Search_i
       INTEGER JLow, JHigh, JM
       INTEGER len, inc, i_row
       LOGICAL Ascend
 C-------------------------------------------------------------------------------
 C
+      IF (nrows.EQ.0) THEN
+          tls_Search_Near_i = tls_sort_s_nomatch_cv
+          k_rows = 0
+          RETURN
+        ELSE IF (nrows.EQ.1) THEN
+          IF (el1(1).EQ.key) THEN
+              tls_Search_Near_i = tls_sort_normal_cv
+              j_table_off(1) = 1
+              k_rows = 1
+              RETURN
+            ELSE
+              tls_Search_Near_i = tls_sort_s_nomatch_cv
+              k_rows = 0
+              RETURN
+            END IF
+        END IF
       JLow = j_table_off(1)
 C
 C Check that j_table_off(1) is a valid guess. (Otherwise just call Search)
@@ -1194,6 +1328,7 @@ C FUNCTION WRITTEN BY:
 C     Duncan Prindle,  12/ 4/91
 C                       Taken from Numerical Recipes.
 C         Modified     11/ 5/93 More convenient for Tables.
+C                       9/ 8/95 Add code to handle 0,1 row tables   djp
 C
       INTEGER tls_loc, tls_Search_Index_r
       INTEGER JLow, JHigh, JM
@@ -1201,6 +1336,23 @@ C
       LOGICAL Ascend
 C-------------------------------------------------------------------------------
 C
+      IF (nrows.EQ.0) THEN
+          tls_Search_Near_Index_r = tls_sort_s_nomatch_cv
+          k_rows = 0
+          RETURN
+        ELSE IF (nrows.EQ.1) THEN
+          IF (el1(1).EQ.rkey) THEN  ! I ingore the index assuming it is ok.
+              tls_Search_Near_Index_r = tls_sort_normal_cv
+              j_index_off(1) = 1
+              k_rows = 1
+              RETURN
+            ELSE
+              tls_Search_Near_Index_r = tls_sort_s_nomatch_cv
+              k_rows = 0
+              RETURN
+            END IF
+        END IF
+          
       JLow = j_index_off(1)
 C
 C Check that j_table_off(1) is a valid guess. (Otherwise just call Search_Index)
@@ -1321,12 +1473,30 @@ C           tls_sort_normal_cv (S):        Normal return
 C           tls_sort_sni_nomatch_cv (I):   key not found in specified column.
 C           tls_sort_sni_listshort_cv (W): j_table_off too short for all rows with rkey.
 C           
+C 9/8/95 Add code to handle 0,1 row tables   djp
       INTEGER tls_loc, tls_Search_Index_i
       INTEGER JLow, JHigh, JM
       INTEGER len, inc, i_row
       LOGICAL Ascend
 C-------------------------------------------------------------------------------
 C
+      IF (nrows.EQ.0) THEN
+          tls_Search_Near_Index_i = tls_sort_s_nomatch_cv
+          k_rows = 0
+          RETURN
+        ELSE IF (nrows.EQ.1) THEN
+          IF (el1(1).EQ.key) THEN  ! I ingore the index assuming it is ok.
+              tls_Search_Near_Index_i = tls_sort_normal_cv
+              j_index_off(1) = 1
+              k_rows = 1
+              RETURN
+            ELSE
+              tls_Search_Near_Index_i = tls_sort_s_nomatch_cv
+              k_rows = 0
+              RETURN
+            END IF
+        END IF
+          
       JLow = j_index_off(1)
 C
 C Check that j_table_off(1) is a valid guess. (Otherwise just call Search)
