@@ -1,12 +1,15 @@
-//                DrawDstHists.C
-//-------------------------------------------------------------
-//  
-//  
+// $Id: DrawDstHist.C,v 1.21 1999/05/21 21:05:43 kathy Exp $ 
+// $Log: DrawDstHist.C,v $
+// Revision 1.21  1999/05/21 21:05:43  kathy
+// fixed comments for DrawDstHist.C
 //
-//  create chain to:
-//        read in root dst file(s) from MDC2
-//        run St_QA_Maker  
-//        send all histograms to a postscript file
+//
+//======================================================================
+// owner:  Kathy Turner
+// what it does: 
+//    - reads a root dst file created during MDC2
+//    - runs St_QA_Maker
+//    - draws QA histograms and then sends them to a postscript file
 //
 //===============================================================
 //
