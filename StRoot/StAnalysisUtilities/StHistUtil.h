@@ -1,5 +1,8 @@
-//! $Id: StHistUtil.h,v 1.7 2000/06/23 15:53:00 kathy Exp $
+//! $Id: StHistUtil.h,v 1.8 2000/06/23 18:05:36 kathy Exp $
 //! $Log: StHistUtil.h,v $
+//! Revision 1.8  2000/06/23 18:05:36  kathy
+//! add new method PrintInfoHists which prints info about hist to screen & file -- name,entries,mean,rms
+//!
 //! Revision 1.7  2000/06/23 15:53:00  kathy
 //! change hardwared max num copied histograms to 512
 //!
@@ -56,6 +59,7 @@
 #include "TList.h"
 #include "TString.h"
 
+
 //  - if not using the methods of the class, then can just put class TCanvas;
 //   -  however, if we are using the methods of TCanvas, then put include "TCanvas.h"
 class TCanvas;
@@ -104,6 +108,7 @@ class StHistUtil {
   virtual TList*  FindHists(Char_t *dirName="QA");
   virtual Int_t   CopyHists(TList  *dirList);
   virtual Int_t   AddHists(TList  *dirList, Int_t nHistCopy=0);
+  virtual Int_t   PrintInfoHists(TList  *dirList,  const Char_t *fname="printinfo.out");
 
   virtual void    SetDefaultLogYList(Char_t *dirName="QA");
   virtual Int_t   AddToLogYList(const Char_t *HistName="");
@@ -137,7 +142,7 @@ class StHistUtil {
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.7 2000/06/23 15:53:00 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.8 2000/06/23 18:05:36 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };

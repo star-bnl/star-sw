@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.19 2000/06/23 15:26:22 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.20 2000/06/23 18:05:36 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.20  2000/06/23 18:05:36  kathy
+// add new method PrintInfoHists which prints info about hist to screen & file -- name,entries,mean,rms
+//
 // Revision 1.19  2000/06/23 15:26:22  kathy
 // added method to return the copied array & it's size
 //
@@ -139,6 +142,7 @@
                                                                           
 
 #include <iostream.h>
+#include <fstream.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -411,7 +415,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
   }
   return histCounter;
 }
-
+ 
 //_____________________________________________________________________________
 
 
@@ -550,6 +554,65 @@ Int_t StHistUtil::ListHists(Char_t *dirName)
 
   cout << " ListHists: Total No. Histograms Booked  = " << histReadCount <<endl;
   return histReadCount;
+}
+
+
+//_____________________________________________________________________________
+
+Int_t StHistUtil::PrintInfoHists(TList *dirList,  const Char_t *fname )
+{  
+
+  cout << " **** Now in StHistUtil::PrintInfoHists **** " << endl;
+  cout << " output file = " << fname << endl;
+
+  ofstream fout(fname);
+
+  if (!dirList) cout << " PrintInfoHists - histograms not available! " << endl;
+
+  Int_t histInfoCount = 0;
+
+  if (dirList){
+
+//Now want to loop over all histograms
+// Create an iterator
+    TIter nextObj(dirList);
+    TObject *obj = 0;
+
+    cout << " Hist #, Name, #Entries, Mean, RMS " << endl;
+    fout << " Hist #, Name, #Entries, Mean, RMS " << endl;
+
+// use = instead of ==, because we are setting obj equal to nextObj and then seeing if it's T or F
+
+    while ((obj = nextObj())) {
+
+// now check if obj is a histogram
+      if (obj->InheritsFrom("TH1")) {
+ 
+        histInfoCount++;
+
+        cout << 
+              histInfoCount << " " <<
+              obj->GetName() << " " <<
+              ((TH1 *)obj)->GetEntries() << " " <<
+              ((TH1 *)obj)->GetMean() << " " <<
+              ((TH1 *)obj)->GetRMS() << " " <<
+              endl;
+
+        fout << 
+              histInfoCount << " " <<
+              obj->GetName() << " " <<
+              ((TH1 *)obj)->GetEntries() << " " <<
+              ((TH1 *)obj)->GetMean() << " " <<
+              ((TH1 *)obj)->GetRMS() << " " <<
+              endl;
+
+      }
+    }
+  } // if dirList
+
+  cout << " PrintInfoHists: # hist read  = " << histInfoCount <<endl;
+
+  return histInfoCount;
 }
 
 
