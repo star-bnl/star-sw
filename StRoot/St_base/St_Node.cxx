@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.22 1999/04/23 22:47:33 fine Exp $
+// $Id: St_Node.cxx,v 1.23 1999/05/12 15:46:00 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.23  1999/05/12 15:46:00  fine
+// some cosmetic change fro Browse method
+//
 // Revision 1.22  1999/04/23 22:47:33  fine
 // Node family has been adjusted for St_PolyLineShape class
 //
@@ -375,7 +378,8 @@ void St_Node::Browse(TBrowser *b)
        Int_t posNumber = 0;
        while (nodePosition = (St_NodePosition *)next()) {
          posNumber       = nodePosition->GetId();
-         TString posName = nodePosition->GetNode()->GetTitle();
+         TString posName = "*";
+         posName += nodePosition->GetNode()->GetTitle();
          char num[10];
          posName += ";";
          sprintf(num,"%d",posNumber);
