@@ -549,10 +549,11 @@ c              if (nspt.gt.6) nspt=6 ! wkw
                   call SCV_MESSAGES( ok, mess )
                   write(6,*)' in stk_fit:',mess
                endif
+#if 0
                if( nrows .ne. track(itrack).nspt) then
                   write(6,*) 'nrows=',nrows, 'for track',itrack
                endif
-               
+#endif               
                do i = 1, nrows
                   the_spt     = groups(table_off(i)).id2
                   kspt(ispt)   = the_spt
