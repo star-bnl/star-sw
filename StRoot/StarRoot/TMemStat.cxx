@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TMemStat.cxx,v 1.11 2004/04/09 21:55:50 perev Exp $
+ * $Id: TMemStat.cxx,v 1.12 2004/09/03 20:53:06 perev Exp $
  *
  ***************************************************************************
  *
@@ -127,6 +127,13 @@ Double_t TMemStat::Used()
   info = mallinfo();
   return double(info.uordblks + info.usmblks)/1000000;
 }
+//______________________________________________________________________________
+Double_t TMemStat::Free()
+{
+  struct mallinfo info;
+  info = mallinfo();
+  return double(info.fordblks + info.fsmblks)/1000000;
+}
 
 //______________________________________________________________________________
 Double_t TMemStat::ProgSize()
@@ -166,10 +173,11 @@ Double_t TMemStat::ProgSize()
 void TMemStat::PrintMem(const char *tit)
 {
   Double_t used = Used();
+  Double_t free = Free();
   Double_t exec = ProgSize();
 
   if (tit) printf("\nTMemStat::%s",tit);
-  printf("\t total =%10.6f heap =%10.6f (%+10.6f)\n",exec, used,used-fgUsed);
+  printf("\t total =%10.6f heap =%10.6f and %10.6f(%+10.6f)\n",exec,used,free,used-fgUsed);
   fgUsed = used;
 }
 //______________________________________________________________________________
