@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.24 2000/08/28 22:19:12 ward Exp $
+ * $Id: EventReader.cxx,v 1.25 2000/08/29 17:08:51 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.25  2000/08/29 17:08:51  ward
+ * In corruption detector, temporarily remove L3_P (no doc), and add SVTP.
+ *
  * Revision 1.24  2000/08/28 22:19:12  ward
  * Skip corrupted events. StDaqLib/GENERIC/EventReader.cxx & StDAQMaker/StDAQReader.cxx.
  *
@@ -749,7 +752,8 @@ void EventReader::WhereAreThePointers(int *beg,int *end,char *xx) {
   if(!strcmp(xx,  "TPCRBP")) { *beg=1; *end= 6; }
   if(!strcmp(xx,"L3_SECTP")) { *beg=9; *end=14; }
   if(!strcmp(xx, "L3_SECP")) { *beg=6; *end=11; }
-  if(!strcmp(xx,    "L3_P")) { *beg=6; *end=57; }
+  if(!strcmp(xx,    "L3_P")) { *beg=0; *end= 0; return; } // bbb I don't have good doc for L3_P yet.
+  if(!strcmp(xx,    "SVTP")) { *beg=1; *end= 8; }
   (*beg)--; (*end)--;
   if((*beg)<0||(*end)<0) {
     printf("Please add code to WhereAreThePointers for '%s'.\n",xx);
@@ -794,8 +798,10 @@ char EventReader::BankOrItsDescendentsIsBad(int herbFd,long currentOffset) { // 
   numberOfDataWords=header[2]-10; assert(numberOfDataWords<=DATA);
   if(!strcmp(bankname,"TPCMZP")) { beg=0; end=numberOfDataWords-1; }
   else WhereAreThePointers(&beg,&end,bankname); 
-  assert(end<=numberOfDataWords);
-
+  if(end>=numberOfDataWords) {
+    PP"end=%d, numberOfDataWords=%d, bankname=%s.\n",end,numberOfDataWords,bankname);
+    assert(end<numberOfDataWords);
+  }
 
   bytesRead=read(herbFd,data,numberOfDataWords*sizeof(ulong));
   if(bytesRead!=numberOfDataWords*sizeof(ulong)) return TRUE;
