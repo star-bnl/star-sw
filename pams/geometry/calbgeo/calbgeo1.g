@@ -4,8 +4,15 @@ MODULE  CALBGEO1 is the geometry of the Barrel EM Calorimeter
    Created   January 20, 2004
 * Based on the original CALBGEO
 *
-* $Id: calbgeo1.g,v 1.1 2004/01/19 21:18:39 potekhin Exp $
+* $Id: calbgeo1.g,v 1.2 2004/01/19 22:48:41 potekhin Exp $
 * $Log: calbgeo1.g,v $
+* Revision 1.2  2004/01/19 22:48:41  potekhin
+* A working version of the new barrel calorimeter geometry,
+* which does not reply on DIV, but instead creates copies of modules
+* (the only workable solution for the config we re trying to
+* implement). Geant volume numbers seem to be OK according to testing,
+* however the g2t part would need to be verified by the EMC team
+*
 * Revision 1.1  2004/01/19 21:18:39  potekhin
 * Need a fairly new version of the calb geometry for 2004,
 * due to the way the modules were populated. Have to
@@ -28,7 +35,7 @@ external etsphit
                        Seta2Wdh, Netsecon, Set12Wdh, SphiWdh,  SphidWdh, 
                        NPhistr,  NSmdAlw,  Nsuper  , Nsmd,     NsubLay(2),
                        Nmodule(2), Shift(2), MaxModule, NetaT, Nsub,
-                       NetaSMDp}
+                       NetaSMDp, ModMap(60)}
       Structure CALR { Rmin, Rprs, Rsmd1, Rsmd2, Rmax } 
 
       Real      RKB2sc/0.013/, RKB3sc/9.6E-6/
@@ -39,7 +46,7 @@ external etsphit
                 eta_lenght, current_csda, h_eta1, h_eta2, h_phi1, h_phi2,
                 sh_eta1,sh_eta2,sh_phi1,sh_phi2,Rmax,Hleng, Deta,
                 DphiTot, DphiMod, DphiT, R1, R2, R3, R4, RR(2)
-      integer   layer,super,sub,i,j,ii,nn
+      integer   layer,super,sub,i,j,ii,nn,imod
 *
 * ---------------------------------------------------------------------------
 *                          primary geometrical constant
@@ -84,7 +91,10 @@ external etsphit
       Netsecon = 75.         ! Number of strip in second part eta=0.5-1.0
       Nmodule  = {60,60}     ! number of modules
       Shift    = {75,105}    ! starting azimuth of the first module   
-*      ModMap   = 
+      ModMap   = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}  ! Populated modules map
    Endfill
 *
 
@@ -153,12 +163,25 @@ Block CHLV corresponds to double modules...
                       zi  = { 0,          cut_length,  Hleng},
                       rmn = { Calg_rmin,  Calg_Rmin,   cut_radius},
                       rmx = { Rmax,       Rmax,        Rmax };
-      Create    CPHI
+      Create  CPHI
+      do imod=1,calg_Nmodule(ii)
+
+          if(ii==1) then
+            Position CPHI AlphaZ=calg_shift(ii)+3.0+6.0*(imod-1) Ncopy=imod
+          endif
+
+          if(ii.eq.2.and.calg_ModMap(imod).gt.0) then
+            Position CPHI AlphaZ=calg_shift(ii)+3.0+6.0*(imod-1) Ncopy=imod
+          endif
+      enddo
 EndBlock
 * -----------------------------------------------------------------------------
 Block CPHI corresponds to a single module
-      attribute CPHI  seen=0   colo=4
-      Shape  Division Iaxis=2  Ndiv=calg_Nmodule(ii) " C0=105 - not supported "
+      attribute CPHI  seen=1   colo=5
+      Shape  PCON Phi1=0.0 DPhi=3.0 Nz=3,
+                      zi  = { 0,          cut_length,  Hleng},
+                      rmn = { Calg_rmin,  Calg_Rmin,   cut_radius},
+                      rmx = { Rmax,       Rmax,        Rmax };
 *
       current_depth = calg_Rmin
       c_dep=current_depth
