@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAihongPid.h,v 1.1 2001/09/05 20:41:41 laue Exp $
+ * $Id: StHbtAihongPid.h,v 1.2 2002/01/14 16:10:57 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@bnl.gov
  ***************************************************************************
@@ -24,8 +24,8 @@ class StuProbabilityPidAlgorithm;
 
 class StHbtAihongPid  {
  public:
-  static StHbtAihongPid* Instance();
-  void setPidTable(const char* fileName="PIDTable.root");
+  static StHbtAihongPid* Instance(const char* fileName="PIDTable.root");
+  void setPidTable(const char* fileName);
   void updateEvent(int refMult);
   void updateTrack(int charge, double p, double eta, double nHitsDedx, double dedx);
   StuProbabilityPidAlgorithm* aihongPid(int refMult, int charge, double p, double eta, double nHitsDedx, double dedx);
@@ -34,7 +34,7 @@ class StHbtAihongPid  {
   
   friend class nobody;
  protected: 
-  StHbtAihongPid();
+  StHbtAihongPid(const char* fileName);
   virtual ~StHbtAihongPid() { /* no-op */ }
  private:
   static StHbtAihongPid* _instance;
