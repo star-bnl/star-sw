@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.6 1999/02/26 17:25:18 kathy Exp $
+// $Id: St_mwc_Maker.cxx,v 1.7 1999/02/26 18:09:02 kathy Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.7  1999/02/26 18:09:02  kathy
+// made hist limits go neg
+//
 // Revision 1.6  1999/02/26 17:25:18  kathy
 // fix histograms
 //
@@ -73,9 +76,9 @@ Int_t St_mwc_Maker::Init(){
 
 // Create Histograms 
 
-   m_px = new TH1F("MwcHitPx","MWC: px",100,0.,4.0);
-   m_py = new TH1F("MwcHitPy","MWC: py",100,0.,4.0);
-   m_pz = new TH1F("MwcHitPz","MWC: pz",100,0.,4.0);
+   m_px = new TH1F("MwcHitPx","MWC: px",100,-4.0,4.0);
+   m_py = new TH1F("MwcHitPy","MWC: py",100,-4.0,4.0);
+   m_pz = new TH1F("MwcHitPz","MWC: pz",100,-4.0,4.0);
 
    return StMaker::Init();
 }
@@ -143,7 +146,7 @@ Int_t St_mwc_Maker::Make(){
 //_____________________________________________________________________________
 void St_mwc_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_mwc_Maker.cxx,v 1.6 1999/02/26 17:25:18 kathy Exp $\n");
+  printf("* $Id: St_mwc_Maker.cxx,v 1.7 1999/02/26 18:09:02 kathy Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
