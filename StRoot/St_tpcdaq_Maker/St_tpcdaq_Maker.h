@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.38 2003/12/24 13:44:55 fisyak Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.39 2004/01/02 17:53:18 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.39  2004/01/02 17:53:18  ward
+// Add receiver board and mezzanine to daq100cl output table.
+//
 // Revision 1.38  2003/12/24 13:44:55  fisyak
 // Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
 //
@@ -172,7 +175,7 @@ class St_tpcdaq_Maker : public StMaker {
  private:
    void PrepareSimulatedData(unsigned int sector,unsigned int *out);
    void DAQ100clOutput(const unsigned int *pTPCP); //!
-   void DAQ100clTableOut(unsigned int, char,const unsigned int *); //!
+   void DAQ100clTableOut(unsigned int,unsigned int,unsigned int, char,const unsigned int *); //!
  public: 
    void SetCorrection(int);
    int GetCorrection(void);
@@ -234,7 +237,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.38 2003/12/24 13:44:55 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.39 2004/01/02 17:53:18 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker,0)   //StAF chain virtual base class for Makers
 };
