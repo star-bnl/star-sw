@@ -260,23 +260,30 @@ int FtfSl3::readSector ( struct TPCSECLP *seclp ) {
 
     // check byte order of SECLP bank
     // byte swapping is needed
+    short swapByte = 0 ;
     if (checkByteOrder(swap32((unsigned int)seclp->bh.byte_order))) {
-            ;
+       swapByte = 1     ;
     }
     else {
-            fprintf(stderr, "Error - FtfSl3::readSector: Wrong byte order in SECLP bank!\n");
-	    return -1;
+        swapByte = 0 ;
+	//fprintf(stderr, "Error - FtfSl3::readSector: Wrong byte order in SECLP bank!\n");
+	//   return -1;
     }
 
     nHitsOfMz = 0;
-    sector = swap32((unsigned int)seclp->bh.bank_id) ;
+
+
+    sector = (unsigned int)seclp->bh.bank_id ;
+    if ( swapByte ) sector = swap32(sector) ;
+   
 
     // run over receiver boards
     for (iRb=0; iRb<SB_RB_NUM; iRb++) {
 
             if (iRb==6) sector++ ;	// the other Sector
 
-	    if (swap32((unsigned int)seclp->rb[iRb].off)) {
+	        
+	    if ((unsigned int)seclp->rb[iRb].off) {
 #ifdef TRDEBUG
 	            if ( debugLevel > 1 ) {
 		            fprintf (stderr, "FtfSl3::readSector:     RBCLP %d exists!\n", iRb+1) ;
@@ -284,8 +291,12 @@ int FtfSl3::readSector ( struct TPCSECLP *seclp ) {
 #endif
 	    }
 	    else continue ;
+	    
+	    int off;
+	    off = (unsigned int)seclp->rb[iRb].off;
+	    if ( swapByte ) swap32(off);
 
-	    rbclp = (struct TPCRBCLP *)((char *)seclp + swap32((unsigned int)seclp->rb[iRb].off) * 4) ;
+	    rbclp = (struct TPCRBCLP *)((char *)seclp + off * 4) ;
 
 	    // run over the 3 mezzanines
 	    for (kMz=0; kMz<RB_MZ_NUM; kMz++) {
