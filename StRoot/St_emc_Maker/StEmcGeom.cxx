@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.8 2000/05/17 16:05:32 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.9 2000/05/18 17:07:31 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.9  2000/05/18 17:07:31  pavlinov
+ * Fixed error for methods getXYZ(...)
+ *
  * Revision 1.8  2000/05/17 16:05:32  pavlinov
  * Change method getVolIdBemc
  *
@@ -439,7 +442,7 @@ Int_t &sub, Int_t &detector)
   // Transition from Geant Volume Id to usual for BSMDE and BSMDP
   // See  emc/util/volid_bsmd.F
   static Int_t smdIvid[5]={100000000,1000000,1000,100,1}; //matched with AGI&G2T
-  Int_t smdChid[5], i, ividw, rl, phi, t, strip, type;
+  Int_t smdChid[5], i, ividw, rl, phi, t, strip;
 
   ividw = ivid;
   for(i=0; i<5; i++){
@@ -470,17 +473,17 @@ Int_t &sub, Int_t &detector)
       return 1;
     }
     if     (t==1){
-      type = BSMDE;
+      detector = BSMDE;
       eta  = strip;
       sub  = 1;
     }
     else if(t==2){
-      type = BSMDE;
+      detector = BSMDE;
       eta  = strip + 75;
       sub  = 1;
     }
     else if(t==3){
-      type = BSMDP;
+      detector = BSMDP;
       eta  = abs(eta);
       sub  = strip;
     }
