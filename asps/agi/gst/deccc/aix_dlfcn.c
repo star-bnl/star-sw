@@ -1,7 +1,10 @@
 /*
- * $Id: cs_dlfcn.c,v 1.2 1998/04/16 17:01:56 fisyak Exp $
+ * $Id: aix_dlfcn.c,v 1.1 1998/06/10 00:52:21 perev Exp $
  *
- * $Log: cs_dlfcn.c,v $
+ * $Log: aix_dlfcn.c,v $
+ * Revision 1.1  1998/06/10 00:52:21  perev
+ * Change || to | in dlopen
+ *
  * Revision 1.2  1998/04/16 17:01:56  fisyak
  * 2nd pass with gstar
  *
@@ -36,7 +39,7 @@
 #include <sys/ldr.h>
 #include <a.out.h>
 #include <ldfcn.h>
-#include "dlfcn.h"
+#include "aix_dlfcn.h"
  
 typedef struct {
 	char		*name;		/* the symbols's name */
