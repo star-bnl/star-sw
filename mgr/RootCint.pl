@@ -277,8 +277,9 @@ my $hfile = $DirName . "/Stypes.h";
 if (-f $hfile) {$h_files .= " Stypes.h";}
 if ($h_files) {
   $h_files .= " " . "LinkDef.h";
-  my $local_cint = basename($Cint_cxx);  		#print "files = $#files\n";
+#  my $local_cint = basename($Cint_cxx);  		#print "files = $#files\n";
   $CPPFLAGS = " -I" . $DirName . " " . $CPPFLAGS;
+#  $CPPFLAGS .= " -I" . $DirName;
 #  my $cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ -I. $CPPFLAGS $h_files";
   my $cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
   print "cmd = ",$cmd,"\n";
