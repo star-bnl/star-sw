@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.h,v 1.1 2000/07/06 03:50:34 caines Exp $
+// $Id: StSvtClusterMaker.h,v 1.2 2000/08/21 13:06:58 caines Exp $
 // $Log: StSvtClusterMaker.h,v $
+// Revision 1.2  2000/08/21 13:06:58  caines
+// Much improved hit finding and fitting
+//
 // Revision 1.1  2000/07/06 03:50:34  caines
 // First version of cluster finder and fitter
 //
@@ -15,7 +18,6 @@
 #include "StMaker.h"
 #endif 
 
-#include "StSvtCluster.hh"
 #include "StSvtClusterFinder.hh"
 
 class TH1F;
@@ -24,8 +26,9 @@ class TObjectSet;
 
 class StSvtData;
 class StSvtHybridData;
-class StSvtHybridCluster;
 class StSvtClusterFinder;
+class StSvtHybridCollection;
+class StSvtHybridCluster;
 
 class StSvtClusterMaker : public StMaker 
 {
@@ -45,9 +48,9 @@ class StSvtClusterMaker : public StMaker
 
   StSvtData *mSvtEvent;               //!  
   StSvtHybridData* mHybridData ;           //!
-  StSvtHybridCluster* mHybridCluster ;      //!
+  StSvtHybridCluster* mHybridCluster;      //!
   StSvtClusterFinder* mClusterFinder;   //!
-  StSvtCluster* mCluster;         //!
+  StSvtHybridCollection* mClusterColl;         //!
   St_ObjectSet* mClusterSet;   //!
  
   //TH1F *m_n_seq; //! No. of seq on a cluster

@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.cxx,v 1.1 2000/07/06 03:50:34 caines Exp $
+// $Id: StSvtClusterMaker.cxx,v 1.2 2000/08/21 13:06:58 caines Exp $
 // $Log: StSvtClusterMaker.cxx,v $
+// Revision 1.2  2000/08/21 13:06:58  caines
+// Much improved hit finding and fitting
+//
 // Revision 1.1  2000/07/06 03:50:34  caines
 // First version of cluster finder and fitter
 //
@@ -16,9 +19,10 @@
 #include "TObjectSet.h"
 #include "StSequence.hh"
 
-#include "StSvtHybridCluster.hh"
+#include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClassLibrary/StSvtHybridData.hh"
 #include "StSvtClassLibrary/StSvtData.hh"
+#include "StSvtHybridCluster.hh"
 #include "StSvtClusterMaker.h"
 
 
@@ -29,7 +33,7 @@ StSvtClusterMaker::StSvtClusterMaker(const char *name) : StMaker(name)
  mSvtEvent = NULL;
  mHybridData = NULL;
  mHybridCluster = NULL;
- mCluster = NULL;
+ mClusterColl = NULL;
  mClusterSet = NULL;
  mClusterFinder = NULL;
 }
@@ -38,8 +42,7 @@ StSvtClusterMaker::~StSvtClusterMaker()
 {
 
  delete mHybridCluster;
- delete mCluster;
- delete mClusterSet;
+ delete mClusterColl;
  delete mClusterFinder;
 }
 
@@ -64,12 +67,12 @@ Int_t StSvtClusterMaker::Init(){
 Int_t StSvtClusterMaker::SetSvtCluster()
 {
   mClusterSet = new St_ObjectSet("StSvtCluster");
-  AddConst(mClusterSet);  
+  AddData(mClusterSet);  
   SetOutput(mClusterSet); //Declare for output
 
-  if (!mCluster) {
-    mCluster = new StSvtCluster(mSvtEvent->getConfiguration(),mSvtEvent->getEventNumber(),mSvtEvent->getTrigWord());
-    mClusterSet->SetObject((TObject*)mCluster);
+  if (!mClusterColl) {
+    mClusterColl = new StSvtHybridCollection(mSvtEvent->getConfiguration());
+    mClusterSet->SetObject((TObject*)mClusterColl);
   } 
 
   return kStOK;
@@ -112,10 +115,16 @@ Int_t StSvtClusterMaker::SetHybridClusters()
 
           mClusterFinder->ClusterFinder();
           
-          mHybridCluster = new StSvtHybridCluster();
-          mHybridCluster->setCluster(mClusterFinder);
- 
-          mCluster->at(index) = mHybridCluster;
+
+	  mHybridCluster = (StSvtHybridCluster* )mClusterColl->at(index);
+	  if( mHybridCluster){
+	    delete mHybridCluster;
+	  }
+	  
+	  mHybridCluster = new StSvtHybridCluster();
+	  
+	  mHybridCluster->setCluster(mClusterFinder);
+	  mClusterColl->at(index) = mHybridCluster;
           mClusterFinder->ResetContainers();
 	  
             

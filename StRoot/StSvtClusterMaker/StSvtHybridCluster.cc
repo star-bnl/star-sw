@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridCluster.cc,v 1.1 2000/07/06 03:50:34 caines Exp $
+ * $Id: StSvtHybridCluster.cc,v 1.2 2000/08/21 13:06:58 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridCluster.cc,v $
+ * Revision 1.2  2000/08/21 13:06:58  caines
+ * Much improved hit finding and fitting
+ *
  * Revision 1.1  2000/07/06 03:50:34  caines
  * First version of cluster finder and fitter
  *
@@ -45,7 +48,7 @@ StSvtHybridCluster::~StSvtHybridCluster()
 for(int clu = 0; clu <  numberOfClusters; clu++)
   delete[] memberInfo[clu];
 
-// delete memberInfo;
+ delete [] memberInfo;
 
 }
 
