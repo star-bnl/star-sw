@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.14 2003/03/03 16:24:36 aihong Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.15 2003/07/07 21:58:19 posk Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -213,7 +213,7 @@ Int_t StFlowCumulantMaker::Init() {
 			 mEtaMin, mEtaMax, Flow::nPtBins, Flow::ptMin,
 			 ptMaxPart, -1.*FLT_MAX, FLT_MAX, "");
 	histFull[k].histFullHar[j].mHistCumul2D[ord]->SetXTitle((char*)xLabel.Data());
-	histFull[k].histFullHar[j].mHistCumul2D[ord]->SetYTitle("Pt (GeV)");
+	histFull[k].histFullHar[j].mHistCumul2D[ord]->SetYTitle("Pt (GeV/c)");
 	delete histTitle;
 	
 	histTitle = new TString("Flow_CumulEta_Order");
@@ -280,7 +280,7 @@ Int_t StFlowCumulantMaker::Init() {
 			 Flow::ptMax,-1.*FLT_MAX, FLT_MAX, "");
 	histFull[k].histFullHar[j].mCumulG0Denom2D[pq]->
 	  SetXTitle((char*)xLabel.Data());
-	histFull[k].histFullHar[j].mCumulG0Denom2D[pq]->SetYTitle("Pt (GeV)");
+	histFull[k].histFullHar[j].mCumulG0Denom2D[pq]->SetYTitle("Pt (GeV/c)");
 	delete histTitle;
 	
 	histTitle = new TString("Flow_CumulDenomEta_Order");
@@ -411,7 +411,7 @@ Int_t StFlowCumulantMaker::Init() {
   }
   
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.14 2003/03/03 16:24:36 aihong Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.15 2003/07/07 21:58:19 posk Exp $");
 
   return StMaker::Init();
 }
@@ -798,7 +798,7 @@ if (ord>0)  histFull[k].mHist_v[ord]->Scale(1./profScale);
 		     ProjectionXY(histTitle->Data(),"e")));
 	histFull[k].histFullHar[j].mHist_v2D[ord]->SetTitle(histTitle->Data());
 	histFull[k].histFullHar[j].mHist_v2D[ord]->SetXTitle((char*)xLabel.Data());
-	histFull[k].histFullHar[j].mHist_v2D[ord]->SetYTitle("Pt (GeV)");
+	histFull[k].histFullHar[j].mHist_v2D[ord]->SetYTitle("Pt (GeV/c)");
 	histFull[k].histFullHar[j].mHist_v2D[ord]->SetZTitle("v (%)");
 	delete histTitle;
 	
@@ -830,7 +830,7 @@ if (ord>0) histFull[k].histFullHar[j].mHist_vEta[ord]->Scale(1./profScale);
 	  new  TH1D(*(histFull[k].histFullHar[j].mHistCumulPt[ord]->
 		      ProjectionX(histTitle->Data(),"e")));
 	histFull[k].histFullHar[j].mHist_vPt[ord]->SetTitle(histTitle->Data());
-	histFull[k].histFullHar[j].mHist_vPt[ord]->SetXTitle("Pt (GeV)");
+	histFull[k].histFullHar[j].mHist_vPt[ord]->SetXTitle("Pt (GeV/c)");
 	histFull[k].histFullHar[j].mHist_vPt[ord]->SetYTitle("v (%)");
 	delete histTitle;
 
@@ -1049,6 +1049,9 @@ void StFlowCumulantMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.15  2003/07/07 21:58:19  posk
+// Made units of momentum GeV/c instead of GeV.
+//
 // Revision 1.14  2003/03/03 16:24:36  aihong
 // blow up 4-part cumulant by 1000 in order to let error bars calculated by ROOT
 //
