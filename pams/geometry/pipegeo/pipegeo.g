@@ -16,7 +16,7 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
                       RibNum,   RibSpa,   RibThk,   RibOutR,  RibCent }
 *
 *    local variable for section positioning
-      Real    Z1,Z2,Z3,Z4,R1,R2
+      Real    Z1,Z2,Z3,Z4,R1,R2,vacuum/1.e-5/
 *
 * -----------------------------------------------------------------------------
 *
@@ -93,7 +93,10 @@ Block PIPC is the Central Beam PIPe Volume
 EndBlock
 *
 Block PVAC is the Vacuum Volume of Be section of pipe
-       Material  Vacuum
+       Material  Air
+       Material  PVacuum   dens=ag_dens*Vacuum,
+                           Radl=ag_RadL*Vacuum, AbsL=ag_AbsL*Vacuum
+                           
        Shape     TUBE      Rmax=pipg_BeInnR  
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -107,7 +110,7 @@ Block PIPO is Steel pipe from Be to 1st flanges
 EndBlock
 *
 Block PVAO is its cavity
-       Material  Vacuum
+       Material  Pvacuum
        Shape     TUBE      Rmax=pipg_S1InnR 
 EndBlock
 
@@ -121,7 +124,7 @@ Block PIPI is Steel pipe of the Bellow section
 EndBlock
 *
 Block PVAI is its cavity
-       Material  Vacuum
+       Material  Pvacuum
        Shape     TUBE      Rmax=pipg_S2InnR 
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -134,7 +137,7 @@ Block PIPT is short Steel pipe of the transition section
 EndBlock
 *
 Block PVAT is its cavity
-       Material  Vacuum
+       Material  Pvacuum
        Shape     TUBE      Rmax=pipg_S3InnR 
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -148,7 +151,7 @@ Block PIPB is the beam pipe Bell reducing section
 EndBlock
 *
 Block PVAB is its cavity
-       Material  Vacuum
+       Material  Pvacuum
        Shape     CONE      rmx1=pipg_S3InnR,
                            rmx2=pipg_S4InnR
 EndBlock
@@ -163,7 +166,7 @@ Block PIPS 5 inch OD steel beam pipe starting ~4.5 m from IR
 EndBlock
 *
 Block PVAS is its cavity
-       Material  Vacuum
+       Material  Pvacuum
        Shape     TUBE      Rmax=pipg_S4InnR
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
