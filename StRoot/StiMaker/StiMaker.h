@@ -25,6 +25,7 @@ class StAssociationMaker;
 class StMcEvent;
 class StiTrackMerger;
 class StiToolkit;
+class StiTrackingPlots;
 
 class StiMaker : public StMaker 
 {
@@ -39,7 +40,7 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.3 2003/03/13 15:15:52 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.4 2003/03/13 16:32:33 andrewar Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
     static StiMaker* instance();
     static void kill();
@@ -63,6 +64,7 @@ private:
     StiTrackFinder * tracker;
     StMcEventMaker* mMcEventMaker; //!
     StAssociationMaker* mAssociationMaker; //!
+    StiTrackingPlots* plotter;
     ClassDef(StiMaker, 1)
 };
 
