@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 1.17 1999/04/08 15:27:52 ullrich Exp $
+% $Id: StEvent.tex,v 1.18 1999/04/13 23:27:23 genevb Exp $
 %
 % Author: Thomas Ullrich, March 1999
 %
@@ -21,8 +21,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 1.17  1999/04/08 15:27:52  ullrich
-% Added description of PID classes
+% Revision 1.18  1999/04/13 23:27:23  genevb
+% Slightly refined vertex code, updated V0, Xi vertex documentation
+%
+% Revision 1.19  1999/04/19 17:37:21  genevb
+% Updated vertex documentation
 %
 % Revision 1.18  1999/04/13 23:27:23  genevb
 % Slightly refined vertex code, updated V0, Xi vertex documentation
@@ -155,14 +158,14 @@
 % Revision 2.20  2000/02/24 13:25:12  ullrich
 % Added RICH and EMC to the reference section. Created
 % (empty) section for EMC and RICH in User Guide.
-  {\LARGE $ $Revision: 1.17 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/04/08 15:27:52 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.18 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/04/13 23:27:23 $ $}  % replaced by cvs with current revision
 %
 % Revision 2.18  2000/02/11 16:23:45  ullrich
 % Add info on order in which primary vertices are stored
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.17 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/04/08 15:27:52 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.18 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/04/13 23:27:23 $ $}  % replaced by cvs with current revision
 % Added Helens description of iflag (see StTrack::flag()).
 %
 % Revision 2.16  2000/01/27 18:38:30  ullrich
@@ -306,7 +309,7 @@ are not guaranteed to compile. Their only purpose is to illustrate a
 specific feature and not to provide a fully functional programming
 unit.
 
-  {\LARGE $ $Date: 1999/04/08 15:27:52 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/04/13 23:27:23 $ $}  % replaced by cvs with current revision
      \advance\leftmargin by \labelsep%
 \section{Further documentation}
 \label{sec:furtherdoc}
@@ -3450,11 +3453,15 @@ bool triggerDetectorsComplete(StEvent *event)
     \verb+StV0Vertex(dst_v0_vertex_st* v0vtx, dst_vertex_st* vtx);+\\
     Constructor using a \name{dst\_v0\_vertex.idl} table
     entry.\index{dst\_v0\_vertex.idl} A pointer to the corresponding
+    entry in a \name{dst\_vertex.idl} table must also be
+    provided.\index{dst\_vertex.idl} This constructor builds both the
+    base \name{StVertex} object and the derived \name{StV0Vertex} object.
+
+\item[Public Member\\ Functions]
 
     \verb+virtual StGlobalTrack* daughter(StTrackSign sign, double B);+\\
     Pointer to the negative (\name{sign=negativeTrack}) or positive
-    (\name{sign=negativeTrack}) or positive
-    (\name{sign=positiveTrack}) daughter track to the primary vertex.
+    (\name{sign=positiveTrack}) daughter global track,
     given the magnetic field B.
 
     \verb+virtual float+\\
@@ -3926,6 +3933,12 @@ void printVpdAdcs(StEvent *event)
     entry in a \name{dst\_vertex.idl} table must also be
     provided.\index{dst\_vertex.idl} This constructor builds both the
     base \name{StVertex} object and the derived \name{StXiVertex} object.
+    The \name{StV0Vertex} pointer is also set to null in this constructor.
+    The associated V0 vertex should be assigned via the setV0Vertex()
+    member function as soon as possible after construction.
+
+
+\item[Public Member\\ Functions]
     \verb+StGlobalTrack* bachelor();+\\
     Pointer to the bachelor global track.
 
@@ -4009,7 +4022,7 @@ unsigned long countHighPtXis(StEvent *event, double limit)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{StZdcSegment}
-    \name{StZdzSegment} represents a single
+\index{StZdcSegment|textbf}
 \index{ZDC}
 \index{zero degree calorimeter (ZDC)}
 \label{sec:StZdcSegment}
@@ -4018,7 +4031,7 @@ unsigned long countHighPtXis(StEvent *event, double limit)
     \name{StZdcSegment} represents a single
     zero degree calorimeter (ZDC) segment.
 
-    \name{StZdzSegment} holds information on a single ZDC segment as
+\item[Synopsis]
     \verb+#include "StZdcSegment.hh"+\\
     \verb+class StZdcSegment;+\\
 
@@ -4028,7 +4041,7 @@ unsigned long countHighPtXis(StEvent *event, double limit)
     stored in the \\
     \name{dst\_TriggerDetectors.idl} table. Each segment
     is identified by an ID. The class holds the ADC and TDC value.
-    The list of \name{StZdzSegment} objects
+
 \item[Persistence]
     None
 
