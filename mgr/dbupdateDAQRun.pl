@@ -17,12 +17,18 @@ use Class::Struct;
 use File::Basename;
 
 require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
+require "/afs/rhic/star/packages/DEV00/mgr/dbOnLineSetup.pl";
+require "/afs/rhic/star/packages/DEV00/mgr/dbDescriptorSetup.pl";
 
-my $prodSr = "P00hd_1"; 
+
+
+my $prodSr = "P00hf"; 
 
 my @Sets = (
              "2000/06",
              "2000/07",
+             "2000/08",
+             "2000/09",
 );
 
 
@@ -43,6 +49,7 @@ struct JFileAttr => {
     gpath       => '$',
     gsize       => '$',
     gtimeS      => '$',
+    gdone       => '$',
                     };
 
 struct JSFileAttr => {
@@ -81,6 +88,39 @@ my %monthHash = (
 		 "Dec" => 12
 		 );
 
+
+my %daqHash = ();
+my %collHash = (
+                "Gold"    => "Au", 
+                "Protons" => "p",
+                "Gas"     => "gas"
+              );  
+
+
+struct RunAttr => {
+        drun   => '$',
+        iname  => '$',
+        jname  => '$',
+        iMomnt => '$',
+        jMomnt => '$',
+        magFld => '$',
+        rtpc   => '$', 
+        rftpc  => '$',
+        rsvt   => '$',
+        remc   => '$',
+        rsmd   => '$',
+        rtof   => '$',
+        rrich  => '$',
+        rgl3   => '$',
+        rsl3   => '$', 
+}; 
+
+my @runDetector = ("tpc","svt","ftpc","emc","smd","tof","rich","gl3","sl3"); 
+my @DetecOn;
+my @runDescr;
+my $nrunDescr = 0;
+my @runSet;
+my $nrunSet = 0;
 
 my %flagHash = ();
 my $eachHpssFile;
@@ -143,6 +183,7 @@ foreach $diskDir (@diskRecoDirs) {
         $maccess = "-rw-r--r--"; 
         $mdowner = "starreco";
      $fullname = $diskDir."/".$flname;
+#    print "Name :", $fullname, "\n";
 
     ($size, $mTime) = (stat($fullname))[7, 9];
     ($sec,$min,$hr,$dy,$mo,$yr) = (localtime($mTime))[0,1,2,3,4,5];
@@ -179,11 +220,11 @@ closedir DIR;
 print "Total reco files: $nDiskFiles\n";
 
 
-###### Find reco files in Files Catalog
+###### Find reco files in FileCatalog
  &StDbProdConnect();
 
 
- $sql="SELECT fName, path, size, createTime FROM $FileCatalogT  WHERE fName LIKE '%root' AND jobID LIKE '%$prodSr%' ";
+ $sql="SELECT fName, path, size, createTime, redone FROM $FileCatalogT  WHERE fName LIKE '%root' AND jobID LIKE '%$prodSr%' ";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
           $cursor->execute;
@@ -201,6 +242,7 @@ print "Total reco files: $nDiskFiles\n";
         ($$fObjAdr)->gpath($fvalue)     if( $fname eq 'path'); 
         ($$fObjAdr)->gsize($fvalue)     if( $fname eq 'size'); 
         ($$fObjAdr)->gtimeS($fvalue)    if( $fname eq 'createTime');
+        ($$fObjAdr)->gdone($fvalue)     if( $fname eq 'redone');
  }
 
    $jobIn_set[$jobIn_no] = $fObjAdr;
@@ -358,7 +400,7 @@ my $mformat = "n\/a";
 my $msite = "n\/a";
 my $mhpss = "Y";
 my $mstatus = 0;
-
+my $mdataset = "n\/a"; 
 my $dbset;
 my $dbfname;
 my $dbfsize;
@@ -391,7 +433,7 @@ my $fullName;
        $dbctime = $gtime;
 
        if ( ($mfName eq $dbfname) and ($mpath eq $dbfpath)) { 
-# print "Name of dst on HPSS: ", $mpath, "Name of dst onDB:", $dbfpath,"\n";
+
 #           if ( ($msize eq $dbfsize) and ($mcTime eq $dbctime)) {
           if ( $msize eq $dbfsize) {  
            $flagHash{$fullName} = 0;
@@ -413,6 +455,8 @@ my @trk;
 my $jbFile;
 my $topHpss = "home/starreco";
 my $topDisk = "star/rcf";
+my $mdone = 0;
+my $mName;
 
    foreach $eachRecoFile (@hpssRecoFiles) {
 
@@ -424,6 +468,7 @@ my $topDisk = "star/rcf";
   $mevtType = 0;
   $mfName = "n\/a";
   $mpath  = "n\/a";
+  $mdataset = "n\/a";
   $msize = 0;
   $mcTime = 0;
   $mNevts = 0;
@@ -438,6 +483,7 @@ my $topDisk = "star/rcf";
   $mhpss = "Y";
   $mstatus = 0;
     
+  
 ##### end of reinitialization
 
    $mfName = ($$eachRecoFile)->filename;
@@ -474,21 +520,19 @@ my $topDisk = "star/rcf";
 
    $fullName = $mpath ."/" . $mfName;
    $gflag = $flagHash{$fullName}; 
-      
+# print "File Name :", $fullName," % ", $gflag, "\n";     
       $newset = $fullName;
       @trk = split ("/", $newset);
    if( $fullName =~ /$topHpss/) {
     $jbFile = $trk[4] ."_" . $trk[5] ."_" . $trk[6];    
-#    print "HPSS dir :", $jbFile, "\n";
    }
   elsif (  $fullName =~ /$topDisk/) { 
-     $jbFile = $trk[5] ."_" . $trk[6] ."_" . $trk[7];    
-#    print "DISK dir :", $jbFile, "\n";    
+     $jbFile = $trk[5] ."_" . $trk[6] ."_" . $trk[7];        
    }     
   
    if( $gflag != 0 ) {
 
-    foreach my $jobnm (@jobFSum_set){
+    foreach my $jobnm (@jobSum_set){
        $mproSr   = ($$jobnm)->prSer;
        $mJobId   = ($$jobnm)->job_id;
        $msumFile = ($$jobnm)->smFile;
@@ -500,8 +544,7 @@ my $topDisk = "star/rcf";
       $jfile =~ s/.sum//g;
 
        if ($mfName =~ /$jfile/ and $mjobFname =~ /$jbFile/) {
-
-if ( $gflag eq 1) {
+  if ( $gflag == 1) {
 
    print "Files to be inserted :", "\n"; 
    print "Job ID: ", $mJobId," % ", "Path: ", $mpath," % ", "File: ", $mfName, " % ","Date:", $mcTime,"\n"; 
@@ -513,17 +556,28 @@ if ( $gflag eq 1) {
    &fillDbTable();
  }
 
-elsif ( $gflag eq 2) {
+elsif ( $gflag == 2) {
     
  print "Files to be updated :", "\n";    
- print "Job ID: ", $mJobId, " % ","Path: ", $mpath," % ","File:", $mfName, " % ","Date:", $mcTime, "\n";
-#  print "Number Event: Evts, EvtLo, EvtHi :", $mNevts," % ",$mNevtLo," % ",$mNevtHi, "\n",
+
     $NumUpFile++; 
 
+    foreach my $rdfile (@jobIn_set){
+     $mdone = ($$rdfile)->gdone;
+     $mName = ($$rdfile)->gname;
+     if($mfName eq $mName) {
+        $mdone++;
+
+  print "Job ID: ", $mJobId, " % ","Path: ", $mpath," % ","File:", $mfName, " % ","Date:", $mcTime, "\n";
+  print "Redone, Number of Events: Evts, EvtLo, EvtHi :", $mdone," % ", $mNevts," % ",$mNevtLo," % ",$mNevtHi, "\n",      
 ##### update RECO DAQ files in Files Catalog if rerun 
    print "Updating Files Catalog\n";
    &updateDbTable();  
-
+       last;
+      }else{
+       next;
+     }
+   }
  }
   last;
  }else{
@@ -537,7 +591,141 @@ elsif ( $gflag eq 2) {
    print "Number of missing files : ", $NumMisFile, "\n";
    print "Number of updated files : ", $NumUpFile, "\n";
 
+##### select files where dataset is not defined
+
+my $myRun;
+
+ for ($ll = 0; $ll<scalar(@DirD); $ll++) {
+
+ $sql="SELECT DISTINCT runID FROM $FileCatalogT WHERE path like '%$Sets' AND dataset = 'n/a' ";
+  
+      $cursor =$dbh->prepare($sql)
+
+    || die "Cannot prepare statement: $DBI::errstr\n";
+   $cursor->execute;
+ 
+    while(@fields = $cursor->fetchrow) {
+     my $cols=$cursor->{NUM_OF_FIELDS};
+
+        for($i=0;$i<$cols;$i++) {
+          my $fvalue=$fields[$i];
+          my $fname=$cursor->{NAME}->[$i];
+#        print "$fname = $fvalue\n" ;
+
+        $myRun = $fvalue     if( $fname eq 'runID');  
+   }
+        $runSet[$nrunSet] = $myRun;
+        $nrunSet++;
+ }
+ }
+
+
  &StDbProdDisconnect();
+##### connect to the DB RunLog
+
+ &StDbDescriptorConnect();
+
+  for ($ii = 0; $ii<scalar(@runSet); $ii++) { 
+
+ $sql="SELECT $runDescriptorT.runNumber as runDNum, cwName, ccwName, cwMomentum, ccwMomentum, magFieldCurrent, $daqDescriptorT.runNumber as runTNum, tpc, svt, ftpc, emc, smd, tof, rich, gl3, sl3 FROM $runDescriptorT, $daqDescriptorT WHERE category = 'physics' AND $runDescriptorT.runNumber = '$runSet[$ii]' AND $daqDescriptorT.runNumber = $runDescriptorT.runNumber ";
+
+   $cursor =$dbh->prepare($sql)
+    || die "Cannot prepare statement: $DBI::errstr\n";
+   $cursor->execute;
+ 
+    while(@fields = $cursor->fetchrow) {
+      my $cols=$cursor->{NUM_OF_FIELDS};
+        $fObjAdr = \(RunAttr->new());
+
+        for($i=0;$i<$cols;$i++) {
+           my $fvalue=$fields[$i];
+           my $fname=$cursor->{NAME}->[$i];
+#        print "$fname = $fvalue\n" ;
+
+    ($$fObjAdr)->drun($fvalue)      if( $fname eq 'runDNum');
+    ($$fObjAdr)->iname($fvalue)     if( $fname eq 'cwName');   
+    ($$fObjAdr)->jname($fvalue)     if( $fname eq 'ccwName');
+    ($$fObjAdr)->iMomnt($fvalue)    if( $fname eq 'cwMomentum');
+    ($$fObjAdr)->jMomnt($fvalue)    if( $fname eq 'ccwMomentum');
+    ($$fObjAdr)->magFld($fvalue)    if( $fname eq 'magFieldCurrent');
+    ($$fObjAdr)->rtpc($fvalue)      if( $fname eq 'tpc');
+    ($$fObjAdr)->rsvt($fvalue)      if( $fname eq 'svt');
+    ($$fObjAdr)->rftpc($fvalue)     if( $fname eq 'ftpc');
+    ($$fObjAdr)->remc($fvalue)      if( $fname eq 'emc');
+    ($$fObjAdr)->rsmd($fvalue)      if( $fname eq 'smd');
+    ($$fObjAdr)->rtof($fvalue)      if( $fname eq 'tof');
+    ($$fObjAdr)->rrich($fvalue)     if( $fname eq 'rich');
+    ($$fObjAdr)->rgl3($fvalue)      if( $fname eq 'gl3');
+    ($$fObjAdr)->rsl3($fvalue)      if( $fname eq 'sl3'); 
+
+   }
+     $runDescr[$nrunDescr] = $fObjAdr;
+     $nrunDescr++;
+ } 
+}
+ &StDbDescriptorDisconnect();
+
+my $Numrun;
+my $cWname;
+my $cEname;
+my $cWMnt;
+my $cEMnt; 
+my $ccn;
+my $enrg;
+my $magF;
+my $mdataset = "n/a";
+my $mrunID;
+
+ &StDbProdConnect();
+
+foreach my $runDsc (@runDescr) {
+
+       $Numrun     = ($$runDsc)->drun;
+       $cWname     = ($$runDsc)->iname;
+       $cEname     = ($$runDsc)->jname;   
+       $cWMnt      = ($$runDsc)->iMomnt;
+       $cEMnt      = ($$runDsc)->jMomnt;
+       $magF       = ($$runDsc)->magFld;
+       $DetecOn[0] = ($$runDsc)->rtpc;
+       $DetecOn[1] = ($$runDsc)->rsvt;
+       $DetecOn[2] = ($$runDsc)->rftpc;
+       $DetecOn[3] = ($$runDsc)->remc;
+       $DetecOn[4] = ($$runDsc)->rsmd;
+       $DetecOn[5] = ($$runDsc)->rtof;
+       $DetecOn[6] = ($$runDsc)->rrich;
+
+       $DetecOn[7] = ($$runDsc)->rgl3;
+       $DetecOn[8] = ($$runDsc)->rsl3;
+
+       $ccn = $collHash{$cWname}.$collHash{$cEname};
+       $engr = int($cWMnt + $cEMnt);
+       if( !defined $magF) {$magF = 0};  
+
+#       if ($magF == 0) {
+#       $daqHash{$Numrun} = $ccn . $engr ."_" ."FieldOff" . "_";
+#     }else{
+       $daqHash{$Numrun} = $ccn . $engr ."_" ."HalfField" . "_";
+#     }
+       for ($ll = 0; $ll < scalar(@runDetector); $ll++) {
+
+       if($DetecOn[$ll] != 0) { 
+       $daqHash{$Numrun} .= $runDetector[$ll]. "."; 
+     }
+     }
+    chop $daqHash{$Numrun};
+    print "RunID : ", $Numrun, " % " ,$daqHash{$Numrun}, "\n";
+
+       $mrunID = $Numrun;
+       $mdataset = $daqHash{$Numrun}; 
+    if ( defined $mdataset) { 
+    &updateDataSet();
+   }
+ } 
+
+#### finished with data base
+   &StDbProdDisconnect();
+
+
 
  exit;
 
@@ -599,12 +787,27 @@ elsif ( $gflag eq 2) {
      $sql.="Nevents='$mNevts',";
      $sql.="NevLo='$mNevtLo',";
      $sql.="NevHi='$mNevtHi',";
-     $sql.="owner='$mowner'";
+     $sql.="owner='$mowner',";
+     $sql.="redone='$mdone'"; 
      $sql.=" WHERE fName = '$mfName' AND path='$mpath'";
      print "$sql\n" if $debugOn;
      $rv = $dbh->do($sql) || die $dbh->errstr;
 
    }
+
+##############################################################################
+
+   sub updateDataSet {
+  
+    $sql="update $FileCatalogT set ";   
+    $sql.="dataset='$mdataset'";
+    $sql.=" WHERE runID = '$mrunID'"; 
+    print "$sql\n" if $debugOn;
+    $rv = $dbh->do($sql) || die $dbh->errstr;
+  
+   }
+
+
 
 #####=========================================================================
  sub sumInfo {
