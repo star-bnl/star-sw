@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.66 2002/10/28 19:45:52 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.67 2003/01/08 19:28:07 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -35,6 +35,7 @@
 #include "TOrdCollection.h"
 #include "StMessMgr.h"
 #include "TMath.h"
+#include "TText.h"
 #define PR(x) cout << "##### FlowAnalysis: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowAnalysisMaker)
@@ -1060,7 +1061,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.66 2002/10/28 19:45:52 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.67 2003/01/08 19:28:07 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1241,21 +1242,27 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
   for (itr = pFlowTracks->begin(); itr != pFlowTracks->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
 
-    float phi       = pFlowTrack->Phi();
+    float phi         = pFlowTrack->Phi();
     if (phi < 0.) phi += twopi;
-    float eta       = pFlowTrack->Eta();
-    float pt        = pFlowTrack->Pt();
-    int   charge    = pFlowTrack->Charge();
-    float dca       = pFlowTrack->Dca();
-    float dcaGlobal = pFlowTrack->DcaGlobal();
-    float chi2      = pFlowTrack->Chi2();
-    int   fitPts    = pFlowTrack->FitPts();
-    int   maxPts    = pFlowTrack->MaxPts();
+    float eta         = pFlowTrack->Eta();
+    float zFirstPoint;
+    float zLastPoint;
+    if (pFlowEvent->FirstLastPoints()) {
+      zFirstPoint = pFlowTrack->ZFirstPoint();
+      zLastPoint  = pFlowTrack->ZLastPoint();
+    }
+    float pt          = pFlowTrack->Pt();
+    int   charge      = pFlowTrack->Charge();
+    float dca         = pFlowTrack->Dca();
+    float dcaGlobal   = pFlowTrack->DcaGlobal();
+    float chi2        = pFlowTrack->Chi2();
+    int   fitPts      = pFlowTrack->FitPts();
+    int   maxPts      = pFlowTrack->MaxPts();
     Char_t pid[10];
     strcpy(pid, pFlowTrack->Pid());
-    float totalp    = pFlowTrack->P();
-    float logp      = log(totalp);
-    float dEdx      = pFlowTrack->Dedx();
+    float totalp      = pFlowTrack->P();
+    float logp        = log(totalp);
+    float dEdx        = pFlowTrack->Dedx();
 
     // no selections: Charge, Dca, Chi2, FitPts, MaxPts, FitOverMax, PID
     mHistCharge->Fill((float)charge);
@@ -1387,7 +1394,6 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     // For Eta symmetry
     (eta > 0.) ? etaSymPosN++ : etaSymNegN++;
 
-    Float_t vertexZ = pFlowEvent->VertexPos().z();
     for (int k = 0; k < Flow::nSels; k++) {
       pFlowSelect->SetSelection(k);
       for (int j = 0; j < Flow::nHars; j++) {
@@ -1414,14 +1420,27 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	    // Tpc track, or TopologyMap not available
 	    detId = kTpcId;
 	    // Set TpcEast and West
-	    if (eta > 0. && vertexZ > 0.) {
-	      kTpcFarWest = kTRUE;
-	    } else if (eta > 0. && vertexZ < 0.) {
-	      kTpcWest = kTRUE;
-	    } else if (eta < 0. && vertexZ > 0.) {
-	      kTpcEast = kTRUE;
+	    if (pFlowEvent->FirstLastPoints()) {
+	      if (zFirstPoint > 0. && zLastPoint > 0.) {
+		kTpcFarWest = kTRUE;
+	      } else if (zFirstPoint > 0. && zLastPoint < 0.) {
+		kTpcWest = kTRUE;
+	      } else if (zFirstPoint < 0. && zLastPoint > 0.) {
+		kTpcEast = kTRUE;
+	      } else {
+		kTpcFarEast = kTRUE;
+	      }
 	    } else {
-	      kTpcFarEast = kTRUE;
+	      Float_t vertexZ = pFlowEvent->VertexPos().z();
+	      if (eta > 0. && vertexZ > 0.) {
+		kTpcFarWest = kTRUE;
+	      } else if (eta > 0. && vertexZ < 0.) {
+		kTpcWest = kTRUE;
+	      } else if (eta < 0. && vertexZ > 0.) {
+		kTpcEast = kTRUE;
+	      } else {
+		kTpcFarEast = kTRUE;
+	      }
 	    }
 	  } else if (pFlowTrack->TopologyMap().numberOfHits(kFtpcEastId)) {
 	    detId = kFtpcEastId;
@@ -1458,24 +1477,42 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  histFull[k].histFullHar[j].mHistYield2D->Fill(eta, pt);
 	  histFull[k].histFullHar[j].mHistEtaPhi2D->Fill(eta, phi);
 
-	  // Get phiWgt
-	  double phiWgt = pFlowEvent->PhiWeight(k, j, pFlowTrack);
-
-	  double phiWgtRaw = phiWgt; // removes wt effects
-	  if (oddHar && eta < 0.) phiWgtRaw /= -1.;
-	  if (detId == kFtpcEastId) {
-	    histFull[k].histFullHar[j].mHistPhiFlatFtpcEast->Fill(phi, phiWgtRaw);
-	  } else if (detId == kFtpcWestId) {
-	    histFull[k].histFullHar[j].mHistPhiFlatFtpcWest->Fill(phi, phiWgtRaw);
-	  } else if (kTpcFarEast) {
-	    histFull[k].histFullHar[j].mHistPhiFlatFarEast->Fill(phi, phiWgtRaw);
-	  } else if (kTpcEast) {
-	    histFull[k].histFullHar[j].mHistPhiFlatEast->Fill(phi, phiWgtRaw);
-	  } else if (kTpcWest) {
-	    histFull[k].histFullHar[j].mHistPhiFlatWest->Fill(phi, phiWgtRaw);
-	  } else if (kTpcFarWest) {
-	    histFull[k].histFullHar[j].mHistPhiFlatFarWest->Fill(phi, phiWgtRaw);
+	  if (pFlowEvent->FirstLastPoints() && !pFlowEvent->FirstLastPhiWgt()) {
+	    kTpcFarEast = kFALSE;
+	    kTpcEast    = kFALSE;
+	    kTpcWest    = kFALSE;
+	    kTpcFarWest = kFALSE;
+	    Float_t vertexZ = pFlowEvent->VertexPos().z();
+	    if (eta > 0. && vertexZ > 0.) {
+	      kTpcFarWest = kTRUE;
+	    } else if (eta > 0. && vertexZ < 0.) {
+	      kTpcWest = kTRUE;
+	    } else if (eta < 0. && vertexZ > 0.) {
+	      kTpcEast = kTRUE;
+	    } else {
+	      kTpcFarEast = kTRUE;
+	    }
 	  }
+
+	  // Get phiWgt from file
+	  double phiWgt = pFlowEvent->PhiWeight(k, j, pFlowTrack);
+	  if (oddHar && eta < 0.) phiWgt /= -1.; // only for flat hists
+
+	  // Fill Flat histograms
+	  if (detId == kFtpcEastId) {
+	    histFull[k].histFullHar[j].mHistPhiFlatFtpcEast->Fill(phi, phiWgt);
+	  } else if (detId == kFtpcWestId) {
+	    histFull[k].histFullHar[j].mHistPhiFlatFtpcWest->Fill(phi, phiWgt);
+	  } else if (kTpcFarEast) {
+	    histFull[k].histFullHar[j].mHistPhiFlatFarEast->Fill(phi, phiWgt);
+	  } else if (kTpcEast) {
+	    histFull[k].histFullHar[j].mHistPhiFlatEast->Fill(phi, phiWgt);
+	  } else if (kTpcWest) {
+	    histFull[k].histFullHar[j].mHistPhiFlatWest->Fill(phi, phiWgt);
+	  } else if (kTpcFarWest) {
+	    histFull[k].histFullHar[j].mHistPhiFlatFarWest->Fill(phi, phiWgt);
+	  }
+	  if (oddHar && eta < 0.) phiWgt *= -1.; // restore value
 
 	  // Remove autocorrelations
 	  TVector2 Q_i;
@@ -1781,10 +1818,19 @@ Int_t StFlowAnalysisMaker::Finish() {
   GetHistList()->Write();
   histFile.Close();
   
-  // Write PhiWgt histograms
+  // Write PhiWgt histograms preceded by documenting text
   TFile phiWgtNewFile("flowPhiWgtNew.hist.root", "RECREATE");
+  TText* textInfo;
+  if (pFlowEvent->FirstLastPoints()) {
+    char chInfo[400];
+    sprintf(chInfo, "%s%d%s%d%s", " pt weight= ", pFlowEvent->PtWgt(),
+	    ", eta weight= ", pFlowEvent->EtaWgt(), "\n");
+    textInfo = new TText(0,0,chInfo);
+    textInfo->Write("info");
+  }
   phiWgtHistNames->Write();
   phiWgtNewFile.Close();
+  if (pFlowEvent->FirstLastPoints()) delete textInfo;
   delete phiWgtHistNames;
 
   delete pFlowSelect;
@@ -1795,6 +1841,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.67  2003/01/08 19:28:07  posk
+// PhiWgt hists sorted on sign of z of first and last points.
+//
 // Revision 1.66  2002/10/28 19:45:52  posk
 // Eliminate events with Psi=0.
 //
