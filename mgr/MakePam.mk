@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.101 1999/07/07 14:08:37 fisyak Exp $
+# $Id: MakePam.mk,v 1.102 1999/07/20 00:24:55 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.102  1999/07/20 00:24:55  fisyak
+# Remove Objy
+#
 # Revision 1.101  1999/07/07 14:08:37  fisyak
 # Extract dependencies from standard make path, add pathes to StarClassLibrary and MySql
 #
@@ -259,6 +262,10 @@ ifneq ($(ROOT_DIR),$(STAR))
 INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
 endif
 #INC_DIRS:= $(wildcard $(OUT_DIR)/pams/*/inc $(STAR)/pams/*/inc)
+DINCINT  :=  -DROOT_CINT $(filter-out -DST_NO_TEMPLATE_DEF_ARGS, $(CPPFLAGS)) $(ROOTCINTD) $(INCINT)
+ifeq ($(STAR_HOST_SYS),sun4x_56)
+CXXFLAGS +=-ptr$(OBJ_DIR)
+endif
 VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS) $(INC_DIRS)
 ifneq (,$(FILES_IDM))
 VPATH   += $(GEN_DIR)
@@ -427,7 +434,7 @@ $(LIB_PKG):$(OBJS)
 #	$(AR) $(ARFLAGS) $(LIB_PKG) $(FILES_O); $(RM) $(FILES_O)
 endif                          
 ifneq ($(strip $(FILES_SL) $(FILES_OG) $(FILES_init)),)   
-$(SL_PKG): $(FILES_SL) $(FILES_OG) $(FILES_init) $(LIB_PKG)
+$(SL_PKG): $(FILES_SL) $(FILES_OG) $(FILES_init) $(LIB_PKG) $(wildcard $(OBJ_DIR)/Templates.DB/*.$(O))
 	$(SO) $(SOFLAGS) $(FILES_SL) $(FILES_OG) $(FILES_init)  -o $(SL_NEW)  $(LIBRARIES) $(SL_EXTRA_LIB)
 	$(RM) $(SL_PKG)
 	$(LN) $(SL_NEW) $(SL_PKG)
