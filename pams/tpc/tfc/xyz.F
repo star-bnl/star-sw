@@ -1,5 +1,8 @@
-* $Id: xyz.F,v 1.5 1998/01/27 01:14:52 fisyak Exp $
+* $Id: xyz.F,v 1.6 1999/03/06 21:08:13 perev Exp $
 * $Log: xyz.F,v $
+* Revision 1.6  1999/03/06 21:08:13  perev
+* some small fixes
+*
 * Revision 1.5  1998/01/27 01:14:52  fisyak
 * Split sources
 *
@@ -118,12 +121,12 @@ c -----	Unpack the Pad/Pixel Tables
 	    nbuck = tppixel(tppad(i).jpix+offset).datum / seq_fact
 	    do k = 1, nbuck
 	      inok = inok + 1
-	      adcxyz_h.nok = inok
+!!!VP	      adcxyz_h.nok = inok
 	      if (inok.gt.adcxyz_h.maxlen) then
 	        write (6,*) 'XYZ: !!! too many pixels !!!'
 	        goto 999
 	      endif
-
+	      adcxyz_h.nok = inok		!!!VP
 c -----	Extract the encoded information
 	      adcxyz(inok).nseq = tppad(i).nseq
 	      adcxyz(inok).nbuck = nbuck
