@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: StppLPprojectMaker.cxx,v 1.7 2001/05/04 20:29:36 balewski Exp $
+// $Id: StppLPprojectMaker.cxx,v 1.8 2001/05/08 03:24:51 balewski Exp $
 // $Log: StppLPprojectMaker.cxx,v $
+// Revision 1.8  2001/05/08 03:24:51  balewski
+// *** empty log message ***
+//
 // Revision 1.7  2001/05/04 20:29:36  balewski
 // *** empty log message ***
 //
@@ -102,9 +105,11 @@ Int_t StppLPprojectMaker::Make(){
     printf("%s-maker WARN, default value of spinID=%d used\n",GetName(),spinID);
   }
 	   
-  StEvent *stEvent= (StEvent *) GetInputDS("StEvent");  assert(stEvent);
-  printf("spinID=%d, eveID=%d\n",spinID,(int)stEvent->id());
+  //StEvent *stEvent= (StEvent *) GetInputDS("StEvent");  assert(stEvent);
      
+  //printf("spinID=%d, eveID=%d\n",spinID,(int)stEvent->id());
+  printf("spinID=%d\n",spinID);
+  
   St_DataSet* ds1=GetDataSet("dst/rec_lp"); // assert(ds1);
   if(ds1==NULL) {
     printf("%s-maker, no dst/rec_lp, ignore eve\n",GetName());
