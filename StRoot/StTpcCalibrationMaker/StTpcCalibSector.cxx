@@ -614,8 +614,8 @@ void StTpcCalibSector::writeCalibCoefTable(ofstream* aOutFile){
   int tNInnerSectorRow=13;//gStTpcDb->PadPlaneGeometry()->firstOuterSectorPadRow()-1;
   int tFirstOuterSectorRow=14;//gStTpcDb->PadPlaneGeometry()->firstOuterSectorPadRow();
   int tLastOuterSectorRow=45;//gStTpcDb->PadPlaneGeometry()->numberOfRows();
-
-  for(int tiRow=1;tiRow<=tNInnerSectorRow;tiRow++){
+  int tiRow;
+  for(tiRow=1;tiRow<=tNInnerSectorRow;tiRow++){
     (*aOutFile) << "Row " << tiRow << " " 
 		<< mNumberOfPadAtRow[tiRow-1] <<endl;
     for(int tiPad=1; tiPad<=mNumberOfPadAtRow[tiRow-1];tiPad++){
@@ -624,7 +624,7 @@ void StTpcCalibSector::writeCalibCoefTable(ofstream* aOutFile){
     (*aOutFile) << endl;
   }
 
-  for(int tiRow=tFirstOuterSectorRow;
+  for(tiRow=tFirstOuterSectorRow;
       tiRow<=tLastOuterSectorRow;tiRow++){
     (*aOutFile) << "Row " << tiRow << " " 
 		<< mNumberOfPadAtRow[tiRow-1] <<endl;
