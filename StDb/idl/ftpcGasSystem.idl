@@ -1,0 +1,24 @@
+/*    ftpcGasSystem.idl
+*
+*  Table: ftpcGasSystem
+*
+*       description:
+*/ 
+
+
+struct ftpcGasSystem { 
+
+   unsigned long  runNumber;   /*       run number  */
+   unsigned long  timeOffset;   /*       eventtime  */
+   double  west02ppm;   /*   */
+   double  west02mv;   /*   */
+   double  east02ppm;   /*   */
+   double  east02mv;   /*   */
+   double  ext02ppm;   /*   */
+   double  ext02mv;   /*   */
+   double  westH20dp;   /*   */
+   double  eastH20dp;   /*   */
+   double  flowAr;   /*   */
+   double  flowC02;   /*   */
+
+ };  
