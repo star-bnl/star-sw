@@ -2,11 +2,16 @@ CC:>--------------------------------------------------------------------
 CC: FILE:       dst_point_unpack.F
 CC: HISTORY:
 CC:          Created on August 21, 1998
+CC:
+CC:           Modified on January 21, 1999 - include FTPC data
+CC:                       Janet Seyboth, jcs@mppmu.mpg.de
+CC:
 CC:<--------------------------------------------------------------------
 
       INTEGER*4 FUNCTION DST_POINT_UNPACK(
      1         tcl_tphit_h,         tcl_tphit ,
      2           scs_spt_h,           scs_spt ,
+     2       fcl_fppoint_h,       fcl_fppoint ,
      3         dst_point_h,         dst_point ) 
       IMPLICIT NONE
 #include "dst_point_unpack.inc"
@@ -16,10 +21,11 @@ CC: DESCRIPTION:
 CC:             This routine reads in the DST level space point table,
 CC:             dst_point, and uncompresses the information and fills
 CC:             the resulting space point information into tcl_tphit
-CC:             (for TPC space points) and scs_spt (for SVT space points).
+CC:             (for TPC space points) and scs_spt (for SVT space points)
+CC:             and fcl_fppoint (for FTPC space points).
 CC:             This is intended for POST-DST physics analysis which
 CC:             requires space points.
-CC:             All unused variables in these latter two tables are
+CC:             All unused variables in these latter three tables are
 CC:             set to zero; these variables were not saved in the
 CC:             DST space point table.
 CC: AUTHOR:     Lanny Ray, ray@physics.utexas.edu
@@ -33,6 +39,8 @@ CC:        tcl_tphit     - TPC space point table - for use in post-DST
 CC:      tcl_tphit_h     - Header Structure for tcl_tphit
 CC:          scs_spt     - SVT space point table - for use in post-DST
 CC:        scs_spt_h     - Header Structure for scs_spt
+CC:      fcl_fppoint     - FTPC reconstructed space points
+CC:    fcl_fppoint_h     - Header Structure for fcl_fppoint
 CC: RETURNS:    STAF Condition Value
 CC:>--------------------------------------------------------------------
 
@@ -43,11 +51,16 @@ CC:  Local Variable Type Declarations:
       integer*4 two16,two17,two18,two20,two21,two24,two25,two26
       integer*4 tpcx,tpcy,tpcz,tpcy10,tpcy11,tpcq,tpcdq
       integer*4 svtx,svty,svtz,svty10,svty11,svtq,svtdq
+      integer*4 nbins,npads,ftpcx,ftpcy,ftpcz,ftpcy10,ftpcy11,ftpcq,ftpcdq
 
       real*4    tpc_fac, svt_fac
 
       parameter(tpc_fac = 2380.0)
       parameter(svt_fac = 23800.)
+
+      real*4    ftpc_fac, ftpc_length
+      parameter(ftpc_fac = 2380.0)
+      parameter(ftpc_length = 270.0)
 
       parameter(two4  = 16)
       parameter(two5  = 32)
@@ -65,25 +78,35 @@ CC:  Local Variable Type Declarations:
       parameter(two25 = 33554432)
       parameter(two26 = 67108864)
 
-CC:  Set TPC and SVT post-DST space point table # rows to zero:
+CC:  Set TPC and SVT and FTPC post-DST space point table # rows to zero:
 
       tcl_tphit_h.nok = 0
       scs_spt_h.nok   = 0
+      fcl_fppoint_h.nok = 0
 
 CC:  Loop thru all space points in dst_point and unpack the information
-CC:  and load into tcl_tphit and scs_spt:
+CC:  and load into tcl_tphit and scs_spt and fcl_fppoint:
 
       IF (dst_point_h.nok .gt. 0 .and. tcl_tphit_h.maxlen .ge. 1
-     1    .and. scs_spt_h.maxlen .ge. 1) then
+     1    .and. scs_spt_h.maxlen .ge. 1 
+     1    .and. fcl_fppoint_h.maxlen .ge. 1) then
          do i = 1,dst_point_h.nok
 
 CC:  Determine which detector this space point is located in>>>
 
          hwsave = dst_point(i).hw_position
-         c = hwsave/two20
-         b = (hwsave - two20*c)/two4
-         a = hwsave - two20*c - two4*b
-         detid = a
+         if ( hwsave .lt. two25 ) then
+            c = hwsave/two20
+            b = (hwsave - two20*c)/two4
+            a = hwsave - two20*c - two4*b
+            detid = a
+         else
+            nbins = hwsave/two25
+            npads = (hwsave - two25*nbins)/two21
+            c     = (hwsave - two25*nbins - two21*npads)/two11
+            b     = (hwsave - two25*nbins - two21*npads - two11*c)/two4
+            detid = hwsave - two25*nbins - two21*npads - two11*c - two4*b
+         end if
 
          if(detid .eq. 1) then      !  Fill TPC space points
 
@@ -203,6 +226,61 @@ CC:  Determine which detector this space point is located in>>>
                DST_POINT_UNPACK = STAFCV_BAD
                Return
             end if
+  
+
+         else if(detid.eq.4 .or. detid.eq.5) then  !  Fill FTPC space points
+
+            if(fcl_fppoint_h.nok .lt. fcl_fppoint_h.maxlen) then
+               fcl_fppoint_h.nok = fcl_fppoint_h.nok + 1
+               fcl_fppoint(fcl_fppoint_h.nok).row  = b
+               fcl_fppoint(fcl_fppoint_h.nok).sector = c
+               fcl_fppoint(fcl_fppoint_h.nok).n_pads = npads
+               fcl_fppoint(fcl_fppoint_h.nok).n_bins = nbins
+
+               fcl_fppoint(fcl_fppoint_h.nok).max_adc = 
+     1               dst_point(i).charge/two16
+               fcl_fppoint(fcl_fppoint_h.nok).charge  = 
+     1               dst_point(i).charge 
+     2                 - two16*fcl_fppoint(fcl_fppoint_h.nok).max_adc
+             
+               fcl_fppoint(fcl_fppoint_h.nok).flags      = 0
+
+               pos1 = dst_point(i).position(1)
+               pos2 = dst_point(i).position(2)
+               ftpcy11 = pos1/two20
+               ftpcz   = pos2/two10
+               ftpcx   = pos1 - two20*ftpcy11
+               ftpcy10 = pos2 - two10*ftpcz
+               ftpcy   = ftpcy11 + two10*ftpcy10
+               fcl_fppoint(fcl_fppoint_h.nok).x = 
+     1              (float(ftpcx)/ftpc_fac)-ftpc_length
+               fcl_fppoint(fcl_fppoint_h.nok).y = 
+     1              (float(ftpcy)/ftpc_fac)-ftpc_length
+               fcl_fppoint(fcl_fppoint_h.nok).z = 
+     1              (float(ftpcz)/ftpc_fac)-ftpc_length
+
+               pos1 = dst_point(i).pos_err(1)
+               pos2 = dst_point(i).pos_err(2)
+               ftpcy11 = pos1/two20
+               ftpcz   = pos2/two10
+               ftpcx   = pos1 - two20*ftpcy11
+               ftpcy10 = pos2 - two10*ftpcz
+               ftpcy   = ftpcy11 + two10*ftpcy10
+               fcl_fppoint(fcl_fppoint_h.nok).x_err = float(ftpcx)/float(two17)
+               fcl_fppoint(fcl_fppoint_h.nok).y_err = float(ftpcy)/float(two17)
+               fcl_fppoint(fcl_fppoint_h.nok).z_err = float(ftpcz)/float(two17)
+
+
+               fcl_fppoint(fcl_fppoint_h.nok).s_phi = 0.0
+               fcl_fppoint(fcl_fppoint_h.nok).s_r   = 0.0
+
+            else if(fcl_fppoint_h.nok .ge. fcl_fppoint_h.maxlen) then
+               write(6,40) fcl_fppoint_h.nok
+40             Format(2x,'Number of FTPC space point entries = ',
+     1                I10,', which is .ge. MAXLEN')
+               DST_POINT_UNPACK = STAFCV_BAD
+               Return
+            end if
 
          Else
             write(6,10) detid
@@ -210,8 +288,8 @@ CC:  Determine which detector this space point is located in>>>
      1             'is .ne. 1 or 2 - NO UNPACKING DONE')
                DST_POINT_UNPACK = STAFCV_BAD
                Return
+
          End If
-  
          End Do     !   End loop thru all rows in dst_point
       END IF
 

@@ -10,8 +10,10 @@
 #include "scs_cluster.idl"
 #include "tcl_tphit.idl"
 #include "scs_spt.idl"
+#include "fcl_fppoint.idl"
 #include "tpt_track.idl"
 #include "stk_track.idl"
+#include "fpt_fptrack.idl"
 #include "svm_evt_match.idl"
 #include "ctu_cor.idl"
 #include "dst_vertex.idl"
@@ -24,8 +26,10 @@ interface dst_monitor_soft_filler : amiModule {
                        in     scs_cluster       scs_cluster,
                        in     tcl_tphit         tcl_tphit,
                        in     scs_spt           scs_spt,
+                       in     fcl_fppoint       fcl_fppoint,
                        in     tpt_track         tpt_track,
                        in     stk_track         stk_track,
+                       in     fpt_fptrack       fpt_fptrack,
                        in     svm_evt_match     svm_evt_match,
                        in     ctu_cor           ctu_cor,
                        in     dst_vertex        dst_vertex,
@@ -33,4 +37,4 @@ interface dst_monitor_soft_filler : amiModule {
                       out     dst_monitor_soft  dst_monitor_soft
              );
      };
-     /*  Last mod. for dst_monitor_soft_filler $Date: 1998/08/12 16:34:57 $ */
+     /*  Last mod. for dst_monitor_soft_filler $Date: 1999/01/26 14:43:42 $ */
