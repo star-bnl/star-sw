@@ -1,5 +1,5 @@
 -*- mode:outline -*-
-Time-stamp: <99/12/20 17:07:54 ullrich>
+Time-stamp: <00/08/24 12:41:19 calderon>
 
 * StEventUtitites
   This repository contains small to moderate sized
@@ -120,6 +120,27 @@ bool StuFixTopoMap(StTrack* track);
 and then load the StEventUtilities shared library
 to get it in your analysis session.
 
+** StuRefMult: Function to return a standard event multiplicity
+----------------------------------------------------------------
+Files:       StuRefMult.hh
+Author:      Manuel Calderon de la Barca Sanchez
+Date:        Aug 24, 2000
+Description:
+Function to give a standard reference multiplicity for                   
+an event, uncorrected of course.  The agreed upon cuts are:              
+primary tracks only                                                      
+flag > 0                                                                 
+charge < 0                                                               
+fit points >= 10                                                         
+abs(eta) < 0.5                                                           
+dca < 3 cm                                                               
+The header file just contains an inline function and one
+only needs to include the header file to use it.
+No need to link with any library.
+
+Example:
+
+unsigned int mult = uncorrectedMultiplicity(evt);
 
 <next entry comes here>
 
