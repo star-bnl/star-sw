@@ -1,5 +1,8 @@
-// $Id: strange.C,v 1.7 1999/09/17 16:29:03 genevb Exp $
+// $Id: strange.C,v 1.8 2000/01/19 16:58:32 genevb Exp $
 // $Log: strange.C,v $
+// Revision 1.8  2000/01/19 16:58:32  genevb
+// New input file
+//
 // Revision 1.7  1999/09/17 16:29:03  genevb
 // Update macro for newer libraries.
 //
@@ -46,7 +49,7 @@ StChain *chain=0;
 
 TBrowser *b=0;
 
-const char *dstFile ="/disk00001/star/auau200/two_photon/starlight/twogam/year_1b/hadronic_on/tfs/ric0022_01_14552evts.dst.root";
+const char *dstFile ="/afs/rhic/star/data/smaple/gstar.dst.root";
 const char *xdfFile ="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf";
 const char *mdcFile ="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0081_07_40evts.root";
 const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
@@ -77,7 +80,7 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 void strange(Int_t,const Char_t **,const char *qaflag = "");
 void strange(Int_t nevents=999,
               const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
-              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf",
+              const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
               const char *qaflag = "off");
 
 
