@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.1 1998/11/10 17:12:05 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.2 1999/01/28 02:51:40 lasiuk Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,9 +16,13 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
- * Revision 1.1  1998/11/10 17:12:05  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/28 02:51:40  lasiuk
+ * add ()localSector --> Raw
+ * add ()localSector --> Local
  *
+ * Revision 1.3  1999/02/16 23:28:46  lasiuk
+ * matrix(3) is a data member to avoid constructor calls
+ * protection against pad<1
  * const removed from several functions (because of matrix)
  *
  * Revision 1.2  1999/01/28 02:51:40  lasiuk
@@ -71,6 +75,10 @@
 
 class StTpcCoordinateTransform {
 public:
+    StTpcCoordinateTransform(StTpcGeometry*, StTpcSlowControl*);
+
+    void  operator()(const StTpcPadCoordinate&, StTpcLocalCoordinate&) const;
+    void  operator()(const StTpcLocalCoordinate&, StTpcPadCoordinate&) const;
     //StTpcCoordinateTransform& operator=(const StTpcCoordinateTransform&);
     
     void  operator()(const StTpcLocalSectorCoordinate&, StTpcLocalCoordinate&) const;
