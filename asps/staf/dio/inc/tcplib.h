@@ -55,7 +55,7 @@ int tcpStartServer(int serverPort, int *pSocket); /* blocks until connect */
 #define TCPREAD  int (*)(...)             
 #define TCPWRITE int (*)(...)             
 #endif
-#ifdef i386_redhat51
+#if defined(i386_redhat51) || defined(i386_redhat60)
 #define TCPREAD  int (*)(char *, char *, int)             /*JCS*/
 #define TCPWRITE int (*)(char *, char *, int)             /*JCS*/
 #endif
