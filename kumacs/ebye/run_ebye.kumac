@@ -9,17 +9,19 @@
 *       2.  moved sca_ensemble_ave and sca_prior to /dui/calib/ebye/sca
 * 8/10/98 K. Turner - changed exec create_tables_global#sca to 
 *                             exec create_tables_global#egr to make it standard
+* 8/10/98 LDC - added calib_dir  
 * 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk
-* 
+*
 ************************************************************************
 ************************************************************************
 
  macro run__
-          TOP=$STAR _
+          TOP=/star/u2d/lcarr/research/stafWork/dev/ _
           domain='geometry tpc svt global ebye' _
           input_data_dir=/star/u2/dhammika/data/ _
           input_data_file=DST_prodrun2_evt1-99.xdf _
           num_events=1 _
+	  calib_dir = $STAR_CALIB _
 	  prior_switch=1 _
 	  ensemble_switch=0 _
 	  analysis_switch=0 _
@@ -42,6 +44,7 @@
   message ' *** Data Sample directory -->              ' [input_data_dir]
   message ' *** Input data file -->                    ' [input_data_file]
   message ' *** Num Events to process -->              ' [num_events]
+  message ' *** Calibration Directory -->              ' [calib_dir]
   message ' *** Prior Switch -->                       ' [prior_switch]
   message ' *** Ensemble Switch -->                    ' [ensemble_switch]
   message ' *** Analysis Switch -->                    ' [analysis_switch]
@@ -89,7 +92,7 @@
   
   exec create_tables_global#egr
   
-  exec init_sca#init [prior_switch] [ensemble_switch] [analysis_switch]
+  exec init_sca#init [calib_dir] [prior_switch] [ensemble_switch] [analysis_switch]
   
 *------------------- process events ------------------------------*
 
@@ -124,6 +127,9 @@
     message ' End of input file'
   endif  
 
+* write out sca reference information if switches set accordingly
+  exec run_sca#close [calib_dir] [prior_switch] [ensemble_switch] [analysis_switch]
+
 * close ntuple
   message ' close ntuple'
   exec write_table_to_ntuple#close_disk [funit] [nid]
@@ -131,7 +137,6 @@
 * close input file
   message ' close input file'
   exec read_table_from_file#close ebye
-  
   
 return
  
