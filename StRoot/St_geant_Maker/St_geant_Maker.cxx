@@ -1,6 +1,10 @@
-//  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.83 2003/09/02 17:59:29 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.84 2003/10/02 00:13:03 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.84  2003/10/02 00:13:03  potekhin
+// Added the handling of the gdat structure, for now being
+// written into runco are. may want to later augment this
+// so that it gets into geant.root file.
+//
 // Revision 1.83  2003/09/02 17:59:29  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -304,6 +308,7 @@
 #include "tables/St_g2t_gepart_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_g2t_track_Table.h"
+#include "tables/St_geom_gdat_Table.h"
 
 #include "TDataSetIter.h"
 #include "g2t/St_g2t_get_event_Module.h"
@@ -468,6 +473,7 @@ Int_t St_geant_Maker::Init(){
     }
   }
   BookHist();
+
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -1138,6 +1144,14 @@ Int_t St_geant_Maker::SetInputFile(const char *file)
   if (cquest->iquest[0]) {return kStEOF;}
   Do("gclose all");
   Agstroot();
+
+  St_geom_gdat *gdat = (St_geom_gdat *) Find(".const/geom/geom_gdat");
+
+  if(gdat) {
+    St_geom_gdat *gdat_copy = new St_geom_gdat(*gdat);
+    AddRunco(gdat_copy);
+  }
+
   return kStOK;
 }
 //_____________________________________________________________________________
