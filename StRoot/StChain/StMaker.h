@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.41 1999/12/06 01:57:30 fine Exp $
+// $Id: StMaker.h,v 1.42 2000/01/07 22:31:43 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.42  2000/01/07 22:31:43  perev
+// one more argument for SetOutputAll
+//
 // Revision 1.41  1999/12/06 01:57:30  fine
 // Time statistic fixed
 //
@@ -236,7 +239,7 @@ public:
    virtual void       	SetOutput(const char* log,const char* act){SetAlias(log,act,".aliases");};
    virtual void       	SetOutput(const char* log,St_DataSet *ds);
    virtual void       	SetOutput(St_DataSet *ds){SetOutput(0,ds);};
-   virtual void       	SetOutputAll(St_DataSet *ds);
+   virtual void       	SetOutputAll(St_DataSet *ds,Int_t level=1);
    virtual void   	SetMode(Int_t mode=0)   {m_Mode=mode;}   // *MENU*
 
    virtual Double_t     RealTime(){ return m_Timer.RealTime();}
@@ -256,7 +259,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.41 1999/12/06 01:57:30 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.42 2000/01/07 22:31:43 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };

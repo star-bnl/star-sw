@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.83 2000/01/04 17:27:06 perev Exp $
+// $Id: StMaker.cxx,v 1.84 2000/01/07 22:31:43 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -192,10 +192,10 @@ void StMaker::SetOutput(const char* log,St_DataSet *ds)
 }
 
 //______________________________________________________________________________
-void StMaker::SetOutputAll(St_DataSet *ds)
+void StMaker::SetOutputAll(St_DataSet *ds, Int_t level)
 {
   St_DataSet *set;
-  St_DataSetIter next(ds);
+  St_DataSetIter next(ds,level);
   while ((set = next())) SetOutput(set);
 }
 
@@ -939,6 +939,9 @@ Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.84  2000/01/07 22:31:43  perev
+// one more argument for SetOutputAll
+//
 // Revision 1.83  2000/01/04 17:27:06  perev
 // Use timestamp instead of current one
 //
