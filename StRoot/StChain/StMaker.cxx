@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.157 2004/11/03 16:41:21 fine Exp $
+// $Id: StMaker.cxx,v 1.158 2004/11/03 22:30:12 fine Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -16,7 +16,7 @@
  * The method will be described.
  *                                                                     
  */
-// #define STAR_LOGGER 1
+//#define STAR_LOGGER 1
 
 #include "Stiostream.h"
 #include <stdio.h>
@@ -109,7 +109,7 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker")
    memset(fTallyMaker,0,(kStFatal+1)*sizeof(Int_t));
    StMkDeb::Register(this);
 
-   // fLoggger = StStarLogger::Instance(ClassName());   
+   fLogger = StMessMgr::Instance(ClassName());   
 }
 
 //_____________________________________________________________________________
@@ -640,24 +640,6 @@ Int_t StMaker::Finish()
  #ifdef STAR_LOGGER  
       if (fst) {
         fst=0;
-        Printf("=================================================================================\n");
-        Printf("QAInfo: Chain %20s::%-20s Ast =%6.2f        Cpu =%6.2f "
-               ,ClassName(),GetName(),totalRealTime,totalCpuTime);
-      }
-      printf("QAInfo: Maker %20s::%-20s Ast =%6.2f(%4.1f%%) Cpu =%6.2f(%4.1f%%) "
-             ,maker->ClassName(),maker->GetName()
-             ,maker->RealTime()
-             ,100*maker->RealTime()/totalRealTime
-             ,maker->CpuTime()
-             ,100*maker->CpuTime()/totalCpuTime);
-
-      static const char *ee[]={"nStOK","nStWarn","nStEOF","nStErr","nStFatal"};
-      for (int j=0;j<=kStFatal;j++) {
-        if (fTallyMaker[j]) printf(" %s=%d",ee[j],fTallyMaker[j]);}
-      printf("\n");
-#else
-      if (fst) {
-        fst=0;
         LOG_INFO <<
             Form("=================================================================================") << endm;
         LOG_INFO <<
@@ -676,8 +658,25 @@ Int_t StMaker::Finish()
       TString tail;
       for (int j=0;j<=kStFatal;j++) {
         if (fTallyMaker[j]) tail += Form(" %s=%d",ee[j],fTallyMaker[j]);}
-      LOG_INFO << (const char *) tail << endm;
-      
+      LOG_INFO << (const char *) tail << endm;     
+#else
+     if (fst) {
+        fst=0;
+        Printf("=================================================================================\n");
+        Printf("QAInfo: Chain %20s::%-20s Ast =%6.2f        Cpu =%6.2f "
+               ,ClassName(),GetName(),totalRealTime,totalCpuTime);
+      }
+      printf("QAInfo: Maker %20s::%-20s Ast =%6.2f(%4.1f%%) Cpu =%6.2f(%4.1f%%) "
+             ,maker->ClassName(),maker->GetName()
+             ,maker->RealTime()
+             ,100*maker->RealTime()/totalRealTime
+             ,maker->CpuTime()
+             ,100*maker->CpuTime()/totalCpuTime);
+
+      static const char *ee[]={"nStOK","nStWarn","nStEOF","nStErr","nStFatal"};
+      for (int j=0;j<=kStFatal;j++) {
+        if (fTallyMaker[j]) printf(" %s=%d",ee[j],fTallyMaker[j]);}
+      printf("\n");
 #endif      
    }
 
@@ -697,17 +696,17 @@ Int_t StMaker::Finish()
    }
    if (!GetParent()) {// Only for top maker
 #ifdef STAR_LOGGER     
-     printf("\n--------------Error Codes-------------------------\n");
-     printf("     nStOK   nStWarn    nStEOF    nStErr  nStFatal  \n");
-     for( int i=0; i<=kStFatal; i++) printf("%10d",fgTallyMaker[i]); 
-     printf("\n--------------------------------------------------\n");
-#else
      LOG_INFO << "--------------Error Codes-------------------------" << endm;
      LOG_INFO << "     nStOK   nStWarn    nStEOF    nStErr  nStFatal" << endm;
      TString tail;
      for( int i=0; i<=kStFatal; i++) tail += Form("%10d",fgTallyMaker[i]); 
      LOG_INFO << (const char *)tail << endm;
      LOG_INFO << "--------------------------------------------------" << endm;
+#else
+     printf("\n--------------Error Codes-------------------------\n");
+     printf("     nStOK   nStWarn    nStEOF    nStErr  nStFatal  \n");
+     for( int i=0; i<=kStFatal; i++) printf("%10d",fgTallyMaker[i]); 
+     printf("\n--------------------------------------------------\n");
 #endif          
    }  
 //VP   Printf("=================================================================================\n");
@@ -751,9 +750,9 @@ Int_t StMaker::Make()
        if (Debug() && this == fgStChain && m_LastRun!=run){
          m_LastRun = run;
 #ifdef STAR_LOGGER     
-        printf(" +++ New RunNumber found=%d (previous = %d)\n",run,oldrun);
-#else
         LOG_INFO << " +++ New RunNumber found=" << run << " (previous = " << oldrun << ")" << endm;
+#else
+        printf(" +++ New RunNumber found=%d (previous = %d)\n",run,oldrun);
 #endif                
          hd->Print();
        }
@@ -1517,20 +1516,23 @@ void StTestMaker::SetNext(StMaker *mk)
 void StTestMaker::Print(const char *) const
 {
 #ifdef STAR_LOGGER    
+   if (fLast) { LOG_INFO << Form("%s: Last Maker %s::%s(%p)\n",
+              ClassName(),fLast->ClassName(),fLast->GetName(),(void*)fLast)<< endm;}
+   if (fNext) { LOG_INFO << Form("%s: Next Maker %s::%s(%p)\n",
+              ClassName(),fNext->ClassName(),fNext->GetName(),(void*)fNext) << endm;}
+#else
    if (fLast) printf("%s: Last Maker %s::%s(%p)\n",
               ClassName(),fLast->ClassName(),fLast->GetName(),(void*)fLast);
    if (fNext) printf("%s: Next Maker %s::%s(%p)\n",
               ClassName(),fNext->ClassName(),fNext->GetName(),(void*)fNext);
-#else
-   if (fLast) { LOG_INFO << Form("%s: Last Maker %s::%s(%p)\n",
-              ClassName(),fLast->ClassName(),fLast->GetName(),(void*)fLast)<< endm;}
-   if (fNext) { LOG_INFO << Form("%s: Next Maker %s::%s(%p)\n",
-              ClassName(),fNext->ClassName(),fNext->GetName(),(void*)fNext) << endm;
 #endif      
 }
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.158  2004/11/03 22:30:12  fine
+// Instantiate the logger per maker and clean up
+//
 // Revision 1.157  2004/11/03 16:41:21  fine
 // add new logger invocation (optional)
 //
