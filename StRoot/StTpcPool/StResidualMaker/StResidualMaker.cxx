@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StResidualMaker.cxx,v 1.1.1.1 2001/03/15 00:22:23 lisa Exp $
+ * $Id: StResidualMaker.cxx,v 1.2 2002/03/23 22:47:04 lisa Exp $
  *
  * Author: malisa
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StResidualMaker.cxx,v $
+ * Revision 1.2  2002/03/23 22:47:04  lisa
+ * macros and documentation added - small changes to code itself
+ *
  * Revision 1.1.1.1  2001/03/15 00:22:23  lisa
  * Making new StTpcPool area and putting StResidualMaker into it
  *
@@ -20,6 +23,7 @@
 #include "StEventTypes.h"
 #include "StEvent.h"
 #include "TNtuple.h"
+#include "TText.h"
 #include "TFile.h"
 #include "StMessMgr.h"
 #include "SystemOfUnits.h"
@@ -127,7 +131,7 @@ Int_t StResidualMaker::Init()
       mPadRowPlanes[isector][ipr] = RowCenter;
       isector2 = (isector!=12) ? 24-isector : 24;
       mPadRowPlanes[isector2][ipr] = RowCenter;
-      cout << "StResidualMaker::Init() - sector " << isector << " padrow " << ipr << ":" << RowCenter << endl;
+      //      cout << "StResidualMaker::Init() - sector " << isector << " padrow " << ipr << ":" << RowCenter << endl;
     }
   }
 
@@ -137,6 +141,7 @@ Int_t StResidualMaker::Init()
     isector2 = (isector!=12) ? 24-isector : 24;
     mSectorAngle[isector2] = double(isector)*(M_PI/6.0);  // no negative sign
   }
+  cout << "Done StMaker::Init() " << endl;
 
   return StMaker::Init();
 }
@@ -151,6 +156,7 @@ Int_t StResidualMaker::Finish()
   cout << "StResidualMaker::Finish()\n";
   cout << "Processed " << mEventCounter << " events " << endl;
   cout << "Now filling 2D RMS histograms" << endl;
+
 
   makeRMShisto(mPrimaryHistos[0],mPrimaryHistos[4],mPrimaryHistos[10]);  // X-dist Inner sector
   makeRMShisto(mPrimaryHistos[1],mPrimaryHistos[5],mPrimaryHistos[11]);  // X-dist Outer sector
@@ -183,7 +189,12 @@ Int_t StResidualMaker::Make()
   //   }
   //   mBfield = run->magneticField();
   // above looks good but doesn't work.... just hard-wire
-  mBfield = 0.25*tesla;
+
+  //  mBfield = 0.25*tesla;
+  // nope. now I found what works (21mar02)
+  mBfield = event->summary()->magneticField()*tesla/10.0;
+
+
   cout << "************\n B-field is " << mBfield << "\n************\n";
 
 
@@ -192,9 +203,14 @@ Int_t StResidualMaker::Make()
   //
   if (!accept(event)) return kStOK;   
 
+  cout << "Event accepted \n";
 
   StTrack* track;
   StSPtrVecTrackNode& nodes = event->trackNodes();
+
+
+  int nPrimaryTracks=0;
+  int nPrimaryAccepted=0;
 
   for(unsigned int j=0; j<nodes.size(); j++){
     // Helen suggests that when making global track plots, ONLY use those globals
@@ -204,13 +220,19 @@ Int_t StResidualMaker::Make()
     //
     track = nodes[j]->track(primary);
     if (track){
-      if (accept(track)) fill3Dhistos(track,mPrimaryHistos);
+      nPrimaryTracks++;
+      if (accept(track)) 
+	{
+	  fill3Dhistos(track,mPrimaryHistos);
+	  nPrimaryAccepted++;
+	}
       track = nodes[j]->track(global);
       if (accept(track)) fill3Dhistos(track,mGlobalHistos);
     }
   }
 
-    return kStOK;
+  cout << nPrimaryAccepted << " out of " << nPrimaryTracks << " primary tracks accepted \n";
+  return kStOK;
 }
 //=====================================================================
 void StResidualMaker::fill3Dhistos(StTrack* track, TH1** histos)
@@ -310,6 +332,7 @@ bool StResidualMaker::accept(StTrack* track)
   float pT = track->geometry()->helix().momentum(mBfield).perp();
 
   //  cout << "nHits, pT: " << nHits << " " << pT << endl;
+  //  cout << "Limits: " << mPt[0] << " - " << mPt[1] << ", " << mNTpcHits[0] << " - " << mNTpcHits[1] << endl;
 
   return ((nHits >= mNTpcHits[0]) && (nHits <= mNTpcHits[1]) &&
 	  (pT >= mPt[0]) && (pT <= mPt[1]));
@@ -456,10 +479,19 @@ TCanvas* StResidualMaker::fitRMShisto(TH1* rmshisto)
   fitfunc->SetParameter(2,0.005);
 
   h2->Fit("BlumRolandi","NW");
-
+  
   TCanvas* cv = new TCanvas("FitCanv","Fit_canv",200,10,600,600);
   cv->Divide(2,2);
   cv->cd(1);
+  h2->GetXaxis()->SetTitle("Drift");
+  h2->GetYaxis()->SetTitle("Crossing Angle");
+  h2->GetZaxis()->SetTitle("Residual Width");
+  h2->GetXaxis()->SetTitleOffset(1.5);
+  h2->GetYaxis()->SetTitleOffset(1.5);
+  h2->GetZaxis()->SetTitleOffset(1.2);
+  h2->GetXaxis()->SetTitleColor(4);
+  h2->GetYaxis()->SetTitleColor(4);
+  h2->GetZaxis()->SetTitleColor(4);
   h2->Draw("Lego");
   cv->cd(2);
 
@@ -469,7 +501,19 @@ TCanvas* StResidualMaker::fitRMShisto(TH1* rmshisto)
   *FitHisto = *h2;  // get binning the same
   FitHisto->Eval(fitfunc);
   FitHisto->SetStats(kFALSE);
+  FitHisto->GetXaxis()->SetTitle("Drift");
+  FitHisto->GetYaxis()->SetTitle("Crossing Angle");
+  FitHisto->GetZaxis()->SetTitle("Residual Width");
+  FitHisto->GetYaxis()->SetTitleOffset(1.5);
+  FitHisto->GetXaxis()->SetTitleOffset(1.5);
+  FitHisto->GetZaxis()->SetTitleOffset(1.2);
+  FitHisto->GetXaxis()->SetTitleColor(4);
+  FitHisto->GetYaxis()->SetTitleColor(4);
+  FitHisto->GetZaxis()->SetTitleColor(4);
   FitHisto->Draw("Lego");
+
+  Stat_t maximumFitValue = FitHisto->GetBinContent(FitHisto->GetMaximumBin());
+
 
   // now draw some projections...
   cv->cd(3);
@@ -482,6 +526,10 @@ TCanvas* StResidualMaker::fitRMShisto(TH1* rmshisto)
   YprojData->SetMarkerColor(icolor);
   YprojData->SetMarkerStyle(29);
   YprojFit->SetLineColor(icolor);
+  YprojData->SetMaximum(1.1*maximumFitValue);
+  YprojData->GetXaxis()->SetTitle("Crossing Angle");
+  YprojData->GetYaxis()->SetTitle("Residual Width");
+  YprojData->GetYaxis()->SetTitleOffset(1.2);
   YprojData->Draw("P");
   YprojFit->Draw("SAME");
   for (idriftbin-=3; idriftbin>0; idriftbin -=3){
@@ -496,7 +544,42 @@ TCanvas* StResidualMaker::fitRMShisto(TH1* rmshisto)
     YprojData->Draw("P,SAME");
     YprojFit->Draw("SAME");
   }
-    
+  
+  // now put some informational stuff in 4th panel
+  cv->cd(4);
+  gPad->Range(0.0,0.0,20.0,20.0);
+  TText *txt = new TText();
+  txt->SetTextFont(32);
+  txt->SetTextColor(1);
+  txt->SetTextSize(0.06);
+  txt->SetTextAlign(12);
+
+  char legend[40];
+  char number[20];
+
+  icolor=0;
+  for (idriftbin = h2->GetNbinsX(); idriftbin>0; idriftbin-=3){
+    icolor++;
+    float yval = ((float)icolor)*2.0;
+    txt->SetTextColor(icolor);
+    strcpy(legend,"Drift = ");
+    double driftDistance = h2->GetXaxis()->GetBinCenter(idriftbin);
+    sprintf(number,"%f",driftDistance);
+    strcat(legend,number);
+    txt->DrawText(3.0,yval,legend);
+  }
+
+  txt->SetTextColor(1);
+  float yval=10.0;
+  for(int ipar=0; ipar<3; ipar++){
+    yval += 2.0;
+    strcpy(legend,fitfunc->GetParName(ipar));
+    sprintf(number,"%e",fabs(fitfunc->GetParameter(ipar)));
+    strcat(legend," = ");
+    strcat(legend,number);
+    txt->DrawText(1.0,yval,legend);
+  }
+
   return cv;
   //  return fitfunc;
 
@@ -518,29 +601,34 @@ void StResidualMaker::makeRMShisto(TH1* threeDhisto, TH1* twoDhisto, TH1* GaussS
   int nAngleBins = h3->GetNbinsY();
 
   TH1D* ResidDist;
-  double RMS,Sigma;
+  double RMS,Sigma,NotReallyAnUncertainty;
 
   Int_t bin;
   TF1* fit;
   for (int iD=1; iD < nDriftBins+1; iD++){
     for (int iA=1; iA < nAngleBins+1; iA++){
       ResidDist = h3->ProjectionZ("proj",iD,iD,iA,iA);
-      if (ResidDist->GetEntries() > 20){
+      //      if (ResidDist->GetEntries() > 20){
+      if (ResidDist->GetEntries() > 40){
 	RMS =  ResidDist->GetRMS();
 	// now get Gaussian Sigma from Gaussian fit (for Al)
 	cout << "try to fit with Gaussian"<< endl;
 	ResidDist->Fit("gaus","0");
 	fit = ResidDist->GetFunction("gaus");
 	Sigma = fit->GetParameter(2);
+	NotReallyAnUncertainty = 1.0;
       }
       else{
 	RMS=0.0;
 	Sigma = 0.0;
+	NotReallyAnUncertainty = 10000000000000000000000.0;
       }
       // this little "two-step" below is such bullshit - why can't root handle this internally?
       bin = h2->GetBin(iD,iA);	
       h2->SetBinContent(bin,RMS);
+      //      h2->SetBinError(bin,NotReallyAnUncertainty);
       SigHist->SetBinContent(bin,Sigma);
+      //      SigHist->SetBinError(bin,NotReallyAnUncertainty);
     }
   }
 
