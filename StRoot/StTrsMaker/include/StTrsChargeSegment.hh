@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.hh,v 1.2 1999/01/15 11:02:26 lasiuk Exp $
+ * $Id: StTrsChargeSegment.hh,v 1.3 1999/01/22 20:59:36 fisyak Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -11,11 +11,14 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.hh,v $
- * Revision 1.2  1999/01/15 11:02:26  lasiuk
- * remove g2t pointer
- * add pid member; add systemofunits; mv access fcts to .hh
- * add ostream operator
+ * Revision 1.3  1999/01/22 20:59:36  fisyak
+ * remove iostream from private list
  *
+ * Revision 1.4  1999/02/10 18:02:09  lasiuk
+ * ostream (const)
+ *
+ * Revision 1.3  1999/01/22 20:59:36  fisyak
+ * remove iostream from private list
  *
  * Revision 1.2  1999/01/15 11:02:26  lasiuk
  * remove g2t pointer
@@ -40,7 +43,7 @@
  * Revision 1.2  1998/05/21 21:27:39  lasiuk
  * Initial revision
  *
-#include "iostream.h"
+ * Revision 1.1.1.1  1998/05/19 22:33:44  lasiuk
  * Initial Revision
  *
  **************************************************************************/
