@@ -499,7 +499,7 @@ Int_t St_DataSet::Purge(Option_t *)
  return 0;
 }
 //______________________________________________________________________________
-void  St_DataSet::SetLock(int lock){}
+void  St_DataSet::SetLock(int ){}
 //______________________________________________________________________________
 void  St_DataSet::SetParent(St_DataSet *parent){
 //
@@ -527,7 +527,7 @@ void St_DataSet::SetWrite()
 //______________________________________________________________________________
 void St_DataSet::Shunt(St_DataSet *dataset)
 {
-  /
+  //
   //  Remove the object from the original and add it to dataset 
   //  St_DataSet dataset   != 0  -  Make this object the "Structural Member"
   //                                of "dataset"
