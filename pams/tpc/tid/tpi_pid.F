@@ -1,5 +1,8 @@
-* $Id: tpi_pid.F,v 1.3 1998/11/03 15:14:18 ogilvie Exp $
+* $Id: tpi_pid.F,v 1.4 1998/11/12 16:13:59 ogilvie Exp $
 * $Log: tpi_pid.F,v $
+* Revision 1.4  1998/11/12 16:13:59  ogilvie
+* resolution of dedx updated from mdc1 info
+*
 * Revision 1.3  1998/11/03 15:14:18  ogilvie
 * tpi_pid.F now reads in dst_dedx tables
 *
@@ -136,18 +139,14 @@ C     satura = assigned saturation value of dE/dx (in Gev/cm)
        dedxpar(3,3) = parm(1).mean3(3)  
        dedxpar(4,3) = parm(1).mean3(4)
 
-c       write(6,*) 1,dedxpar(1,1),dedxpar(1,2)
-c       write(6,*) 2,dedxpar(2,1),dedxpar(2,2)
-c       write(6,*) 3,dedxpar(3,1),dedxpar(3,2)
-c       write(6,*) 4,dedxpar(4,1),dedxpar(4,2)
-       
+c       write(6,*) 1,dedxpar(1,1),dedxpar(1,2),dedxpar(1,3)
+c       write(6,*) 2,dedxpar(2,1),dedxpar(2,2),dedxpar(2,3)
+c       write(6,*) 3,dedxpar(3,1),dedxpar(3,2),dedxpar(3,3)
+c       write(6,*) 4,dedxpar(4,1),dedxpar(4,2),dedxpar(4,3)
+      
 c    
-c     sigma = sigmapar(i,1) + 1/p*sigmapar(i,2)
+c     sigma = sigmapar(i,1) + sigmapar(i,2)*<dedx>/sqrt(ndedx)
 c
-c old, better will be to parameterize resolution
-c as a function of number of hits in sample
-c currently sigma2 = 0
-
        sigmapar(1,1) = parm(1).sigma1(1)
        sigmapar(2,1) = parm(1).sigma1(2)      
        sigmapar(3,1) = parm(1).sigma1(3)
@@ -181,6 +180,7 @@ c
                 gl(igl).id_hypo_pid = use_this_id
                 current_id = current_id + 1
            else
+                write (6,*) gl(igl).id_hypo_pid
 		use_this_id = gl(igl).id_hypo_pid
 	   endif
 c
@@ -213,8 +213,11 @@ c
            dedx1 = dedx(j).dedx(1)
            dedx2 = dedx(j).dedx(2)
            nrec = dedx(j).ndedx
-          
-          if (method.eq.0) then    ! test
+
+c
+c method = 0 is a testing feature
+c          
+          if (method.eq.0) then    
 c
 c temporary fill dedx table
 c
@@ -223,40 +226,54 @@ c
                 dedx(j).iflag=1
              endif
           endif
-          if (method.ne.0) then
 c
-c cmpare to Bethe-Block
-
+c compare to Bethe-Block
+c
              do nid=1,4
  
 C     Calculate the mean dedx, and sigma 
-
-c Bethe-Bloch form 1997
+c
+c Bethe-Bloch
 c
                 gamma=sqrt((p/mass(nid))**2+1.)
                 beta=sqrt(abs(-1./(gamma**2)+1.))
                 rise=abs(dedxpar(nid,3))*(beta*gamma)**2
                 bethe=dedxpar(nid,1)/(beta**2)*
-     >               (0.5*log(rise)-beta**2+dedxpar(nid,2))
+     >               (0.5*log(rise)-beta**2-dedxpar(nid,2))
                 ave_dedx(nid)=bethe
  
                 if (ave_dedx(nid).gt.satura) ave_dedx(nid)=satura
 
 c
-c form of calculation 1997, constant percentage of dedx (temporary
+c  protect against nrec=0
 c
-                sigma(nid) = sigmapar(nid,1)*ave_dedx(nid)
-            
-                if (sigma(nid).lt.0.01e-05) sigma(nid)=0.01e-05
+           if (nrec.gt.0) then
+c
+c width of dE/dx
+c
+                sigma(nid)=sigmapar(nid,1)+
+     >             sigmapar(nid,2)*ave_dedx(nid)/sqrt(real(nrec))
+
+            else
+                sigma(nid) = -1
+c
+c              flag this as an error somehow
+c                
+            endif
+c
+c method=0 is a testing feature
+c
+                if (method.eq.0) sigma(nid)=1
+   
 c
 c calc number of sigma measurement is away from mean, 
 c	+ve=above mean, -ve = below mean
 c
                 nsigma(nid) = (dedx1-ave_dedx(nid))/sigma(nid)
-            
+                if (abs(nsigma(nid)).gt.1000) nsigma(nid)=1000.  
+
             enddo ! hypothe    
 
-         endif   ! method ne 0
 c
 c fill deviants
 c
@@ -270,16 +287,29 @@ c
                 hypo(n).gid = gpid_neg(nid)
              endif
              hypo(n).prob = 0.
+           
              hypo(n).nsigma = nsigma(nid)
              hypo(n).method = method
              if (.not.primary) then
-              hypo(n).weight = 1.
+              hypo(n).weight = 0.
              else
               hypo(n).weight = 0.
              endif
-              
-             hypo(n).det    = 2
-          
+             hypo(n).det    = 1
+c
+c method =0 is a test feature
+c
+             if (method.eq.0) then
+                hypo(n).weight = p
+                if (.not.primary) then
+                  hypo(n).method=0
+                else 
+                 hypo(n).method=nrec
+                endif
+             endif          
+c
+c end test feature
+c
              hypo_h.nok = hypo_h.nok + 1
            enddo ! hypothes
         endif    ! tpc dedx 
