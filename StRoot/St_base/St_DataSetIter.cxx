@@ -88,13 +88,13 @@ St_DataSet *St_DataSetIter::Add(St_DataSet *set, St_DataSet *dataset)
  //  returns  the pointer to set is success or ZERO poiner                    //
  //  =======                                                                  //
  //                                                                           //
- //  Note: If this St_DataSetIter is empty (i.e. Pwd() returns 0), the "set"  //
+ //  Note: If this St_DataSetIter is empty (i.e. Cwd() returns 0), the "set"  //
  //        becomes the "root" dataset of this iterator                        //                                                                         //
  ///////////////////////////////////////////////////////////////////////////////
  
   if (!set) return 0;
   St_DataSet *s =  dataset;
-  if (!s) s = Pwd();
+  if (!s) s = Cwd();
   if (s) {
      s->Add(set);
      s = set;
@@ -321,7 +321,7 @@ St_DataSet *St_DataSetIter::Mkdir(const Char_t *dirname)
  return set;
 }
 //______________________________________________________________________________
-void St_DataSetIter::Notify(St_DataSet *dataset)
+void St_DataSetIter::Notify(St_DataSet *)
 {
   //
   //  Notify(St_DataSet *dataset)
@@ -330,7 +330,7 @@ void St_DataSetIter::Notify(St_DataSet *dataset)
   //  to look for thew next level of the dataset's
 } 
 //______________________________________________________________________________
-Int_t St_DataSetIter::Rmdir(St_DataSet *dataset,Option_t *option)
+Int_t St_DataSetIter::Rmdir(St_DataSet *dataset,Option_t *)
 {
 //
 //  Remove the St_DataSet *dataset from the current dataset
@@ -587,7 +587,7 @@ St_DataSet *St_DataSetIter::Shunt(St_DataSet *set, St_DataSet *dataset)
  
   if (!set) return 0;
   St_DataSet *s =  dataset;
-  if (!s) s = Pwd();
+  if (!s) s = Cwd();
   if (s) {
      s->Shunt(set);
      s = set;
