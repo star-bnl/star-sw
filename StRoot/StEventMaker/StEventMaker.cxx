@@ -42,7 +42,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.51 2003/02/15 20:19:31 genevb Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.52 2003/02/18 23:25:55 jeromel Exp $";
 
 ClassImp(StEventMaker)
   
@@ -314,20 +314,28 @@ StEventMaker::makeEvent()
 
         StDetectorDbTriggerID* dbTriggerId = StDetectorDbTriggerID::instance();
         triggerIdColl->setNominal(trigId[dbTriggerId->getDefaultTriggerLevel()]);
-        for (unsigned int iTrg = 0; iTrg < dbTriggerId->getIDNumRows() ; iTrg++)
-        {
-            StTriggerId* whichTrig = trigId[dbTriggerId->getIdxLevel(iTrg) - 1];
-            // Shift the mask by daqTrigId bits to examine that bit
-            if ((whichTrig->mask()) >> (dbTriggerId->getDaqTrgId(iTrg)) & 1U) {
-                whichTrig->addTrigger(
-                    dbTriggerId->getOfflineTrgId(iTrg),
-                    dbTriggerId->getTrgVersion(iTrg),
-                    dbTriggerId->getTrgNameVersion(iTrg),
-                    dbTriggerId->getThreashVersion(iTrg),
-                    dbTriggerId->getPsVersion(iTrg)
-                );
+
+
+	// Loop over trigger level
+	for(unsigned int trglevel=0 ; trglevel < 3 ; trglevel++){
+	  StTriggerId* whichTrig =  trigId[trglevel];
+
+	  // Loop over the triggers within this level
+	  for (unsigned int iTrg = 0; iTrg < dbTriggerId->getIDNumRows() ; iTrg++){
+	    // Shift the mask by daqTrigId bits to examine that bit
+            if ( whichTrig->mask() &  (1 << (dbTriggerId->getDaqTrgId(iTrg)) )  ) {
+	      whichTrig->addTrigger(
+				    dbTriggerId->getOfflineTrgId(iTrg),
+				    dbTriggerId->getTrgVersion(iTrg),
+				    dbTriggerId->getTrgNameVersion(iTrg),
+				    dbTriggerId->getThreashVersion(iTrg),
+				    dbTriggerId->getPsVersion(iTrg)
+				    );
             }
-        }
+	  }
+	}
+
+
     } else {
       gMessMgr->Warning("StEventMaker: No StDAQReader found");
     }
@@ -1470,8 +1478,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.51 2003/02/15 20:19:31 genevb Exp $
+ * $Id: StEventMaker.cxx,v 2.52 2003/02/18 23:25:55 jeromel Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.52  2003/02/18 23:25:55  jeromel
+ * Loop over trigger blabla corrected
+ *
  * Revision 2.51  2003/02/15 20:19:31  genevb
  * Added Trigger ID Summary
  *
