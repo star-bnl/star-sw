@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.20 2001/04/06 22:17:11 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.21 2001/04/26 18:28:09 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.21  2001/04/26 18:28:09  flierl
+// clean up & write L3_P struct out on demand
+//
 // Revision 1.20  2001/04/06 22:17:11  flierl
 // add outcommented code to write clusters into files in order to run standalone tracking
 //
@@ -105,6 +108,13 @@
 #include <string.h>
 #include "St_l3_Coordinates.h"
 #include "St_l3_Coordinate_Transformer.h"
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include "daqFormats.h"
+#include "L3Formats.h"
 
 extern TStopwatch i960[18];
 
@@ -140,22 +150,26 @@ Int_t St_l3Clufi_Maker::Init(){
 
   // Create tables
   // Create Histograms 
-  x_dis = new TH1F("L3ClufiTphitx","x coordinate of hits",400,-200,200);
-  y_dis = new TH1F("L3ClufiTphity","y coordinate of hits",400,-200,200);
-  z_dis = new TH1F("L3ClufiTphitz","z coordinate of hits",400,-400,400);
-  charge_dis =  new TH1F("L3ClufiTphitcharge","charge of hits",40,-10,10);
-  i960_time = new TH1D("times","times",18,1,19);
-  for (Int_t id=0; id<18 ;id++) i960[id].Reset();
+  x_dis = new TH1F("L3ClufiTphitx","x coordinate of hits",400,-200,200) ;
+  y_dis = new TH1F("L3ClufiTphity","y coordinate of hits",400,-200,200) ;
+  z_dis = new TH1F("L3ClufiTphitz","z coordinate of hits",400,-400,400) ;
+  charge_dis =  new TH1F("L3ClufiTphitcharge","charge of hits",40,-10,10) ;
+  i960_time = new TH1D("times","times",18,0.5,18.5) ;
+  for (Int_t id=0; id<18 ;id++) i960[id].Reset() ;
     
   // set max values for pixel array
   // these values must be equal to those in the module (in croat.h)
-  Max_number_of_rows = 45;
-  Max_number_of_pads = 184;
-  Max_number_of_buckets = 512;
+  Max_number_of_rows = 45 ;
+  Max_number_of_pads = 184 ;
+  Max_number_of_buckets = 512 ;
 
   // define buffer_size
   Buffer_size = 100000 ;
 
+  // switch on/off debugging
+  l3ClufiDebug = 0 ;
+
+  // done
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -165,30 +179,27 @@ Int_t St_l3Clufi_Maker::Make(){
   //  get tpc raw data
   //  prepare it to be handeld by the online clusterfinder (croat.c)
   //  call online clusterfinder
-  //  produce output in online format 
-  //  convert online format to tpt_points
-  //  write tpt_points out
+  //  produce output in online format which is later used by l3 tracking 
+  //  optional :
+  //  write clusters into tables 
+  //  write clusters into L3_P strcture ( l3 online format )
   //  
     
-
   // here we start
-  cout << "Now we start l3Clufi Maker." << endl;
-     
-  // check time consumption of different parts of the maker
+  cout << endl << "Now we start l3Clufi Maker." << endl;
+    
+  // check time consumption of different parts of this maker
   TStopwatch timer1 ; 
   TStopwatch timer2 ; 
   TStopwatch timer3 ; 
-  if (Debug()) { timer1.Reset() ; timer2.Reset() ; timer3.Reset() ; }
+  if (l3ClufiDebug) { timer1.Reset() ; timer2.Reset() ; timer3.Reset() ; }
   
   // some counters
   Int_t totalpixelcount = 0 ;
-
-     
-  /////////
-  // Get raw data 
-  /////////
+    
+  // get raw data 
   raw_data_tpc = (St_DataSet*) GetInputDS("tpc_raw");
-  if (Debug()) { timer1.Start() ; } 
+  if (l3ClufiDebug) { timer1.Start() ; } 
 
   // do we have something ? 
   if (!raw_data_tpc)
@@ -199,8 +210,8 @@ Int_t St_l3Clufi_Maker::Make(){
   else if (raw_data_tpc) 
     { 
       // what did we get ?
-      //cout << endl << "We get some raw data." << endl << endl; 
-      //raw_data_tpc->ls("*");
+      // cout << endl << "We get some raw data." << endl << endl; 
+      // raw_data_tpc->ls("*");
 	
       // iterator of raw_data_tpc to navigate through it
       St_DataSetIter next(raw_data_tpc);
@@ -284,7 +295,7 @@ Int_t St_l3Clufi_Maker::Make(){
 	      // fill pixel array for this sector
 	      //////	  
 	      // set pixel array 0 clumsey and slow but working 
-	      if (Debug()) { timer3.Start(0) ; }
+	      if (l3ClufiDebug) { timer3.Start(0) ; }
 	      for(Int_t pixindex=0;pixindex<Max_number_of_rows*Max_number_of_pads*Max_number_of_buckets;pixindex++)
 		{
 		  pixelst[pixindex].data=0;
@@ -303,11 +314,11 @@ Int_t St_l3Clufi_Maker::Make(){
 		  cerr << " in sector " << sectorindex <<endl;
 		  return kStWarn;
 		}
-	      if (Debug()) { timer3.Stop() ; }	
+	      if (l3ClufiDebug) { timer3.Stop() ; }	
 	
 
 	      // just checking
-	      if (Debug())
+	      if (l3ClufiDebug)
 		{
 		  Int_t pixelcount = 0;
 		  for(Int_t Pixindex=0;Pixindex<Max_number_of_rows*Max_number_of_pads*Max_number_of_buckets;Pixindex++)
@@ -325,15 +336,25 @@ Int_t St_l3Clufi_Maker::Make(){
 	      //cout << "Call the clusterfinding module for the "<< sectorindex <<"sector. " << endl;
 			   			
 	      // call the clusterfinder module 
-	      if (Debug()) { timer2.Start(0) ; }
-	      if ( l3Clufi(Stpixel,St_hit_bank_this) !=1 )
+	      if (l3ClufiDebug) { timer2.Start(0) ; }
+	      Int_t ret = l3Clufi(Stpixel,St_hit_bank_this);
+	      if (!ret)
 		{
 		  // clean up, stop this maker and go back to bfc
 		  cerr << "Problems in L3 clusterfinding module in sector: "<< sectorindex <<endl;
 		  delete Stpixel;
 		  return kStErr;
 		}
-	      if (Debug()) { timer2.Stop() ; }
+	      if (l3ClufiDebug) { timer2.Stop() ; }
+	      // store length of cluster bank
+	      if ( sectorindex%2 == 1 )
+		{
+		  clbanklengths[supersectorindex-1] = ret ;
+		}
+	      else if ( sectorindex%2 == 0 )
+		{
+		  clbanklengths[supersectorindex-1] += ret ;
+		}
 
 	      // write out tables in online format just for the supersector
 	      if ( sectorindex%2 == 0 )
@@ -342,19 +363,7 @@ Int_t St_l3Clufi_Maker::Make(){
 		      {
 			  St_hit_bank_this->AddAt(&hit_bank_this_st[tt],tt);
 		      }
-		  /* Comment this out and files will be written out containing clusters in online format
-		     This can be used to run clusterfinding on some generated (geant,trs) events and
-		     run tracking code in a standalone version
-		   */
-		  /*  Char_t ccc[40] ;
-		      sprintf(ccc,"HitsInSector%d.bin",sectorindex) ;
-		      FILE *fp = fopen(ccc,"wb");
-		      fwrite(hit_bank_this_st,4,Buffer_size,fp);
-		      cout << "done writing out !" << endl;
-		      fclose(fp);
-		  */
 		}
-
 	      ////// ---> goto next sector
 	      //cout << "Done with this sector. " << endl;
 	    }// if ((name = strstr(sector->GetName(),"Sector"))) 
@@ -365,10 +374,68 @@ Int_t St_l3Clufi_Maker::Make(){
     } //  if (raw_data_tpc) 
    
   // timing
-  if (Debug()) { timer1.Stop() ; }
-  
-if (0)
+  if (l3ClufiDebug) { timer1.Stop() ; }
+
+  ////
+  // fill clusters into one file : produce L3_P object which is usable by
+  ////
+  if (l3ClufiDebug)
     {
+      WriteClustersIntoFile() ;
+    }
+
+  //// 
+  // fill clusters into tables : the same format offline clusterfinder tcl uses
+  ////
+  if (l3ClufiDebug)
+    {
+      WriteClustersIntoTables() ;
+    }
+
+  ////
+  // fill i960 timeing to display the time consumption for the 18 different mezzanine cards 
+  ////
+  if (l3ClufiDebug)
+    {
+      for (Int_t index1=1;index1<=18;index1++ )
+	{
+	  // fill histos
+	  i960_time->Fill(index1,(Double_t)i960[index1-1].CpuTime()) ;
+	  // talk to me
+	  cout << "Time per i960 :  " << index1 << "\t" ;
+	  cout << (Double_t)(i960[index1-1].RealTime()) << "\t" ;
+	  cout << (Double_t)(i960[index1-1].CpuTime()) << endl ;
+	  // reset
+	  i960[index1-1].Reset() ;
+	}
+    }
+ 
+  ////
+  // timing output for this Maker
+  ////
+  if (l3ClufiDebug)
+    {
+      cout << endl ;
+      cout << "Timer1 : " ; timer1.Print() ; cout << endl ;
+      cout << "Timer2 : " ; timer2.Print() ; cout << endl ;
+      cout << "Timer3 : " ; timer3.Print() ; cout << endl ;
+      cout << endl ;
+    }
+  
+  ////
+  // done with the whole job  
+  ////
+  Int_t totalMemory = 0 ;
+  for( Int_t ssindex = 0 ; ssindex <= 11 ; ssindex++ )
+    {
+      totalMemory += clbanklengths[ssindex] ;
+    }
+  cout << "Done with l3 clusterfinding " << totalMemory/pow(2,16) << " Mb of clusters found." << endl << endl ;
+  return kStOK;    
+}
+//_____________________________________________________________________________
+Int_t St_l3Clufi_Maker::WriteClustersIntoTables() 
+{
   /////////
   /// now fill /l3/hits_in_sec_xx banks in /l3/hit/tcl_tphit tables
   /////////
@@ -414,10 +481,9 @@ if (0)
 	      
       delete filler;
 
-      //  call module which translates banks into tables old style
+      //  call module which translates banks into tables old stylex
       // l3totphit(bank_entries,stl3hit);
     }
-    
 
   // fill histogramms
   cout << "Number of clusters found by l3 :  " << stl3hit->GetNRows() << endl << endl ;
@@ -429,36 +495,102 @@ if (0)
       z_dis->Fill(l3hitst[tt].z);
       charge_dis->Fill(l3hitst[tt].q);
     }
-
-  // fill i960 timer
-  for (Int_t index1=1;index1<19;index1++ )
-    {
-      i960_time->Fill(index1,(Double_t)i960[index1-1].CpuTime());
-      //i960_time->Fill(index1,(Float_t)index1);
-      if (Debug())
-	{
-	  cout << "Time per i960 :  " << index1 << "\t" ;
-	  cout << (Double_t)(i960[index1-1].RealTime()) << "\t";
-	  cout << (Double_t)(i960[index1-1].CpuTime()) << endl;
-	}
-    }
- 
-  // timing output
-  if (Debug())
-    {
-      cout << endl ;
-      cout << "Timer1 : " ; timer1.Print() ; cout << endl ;
-      cout << "Timer2 : " ; timer2.Print() ; cout << endl ;
-      cout << "Timer3 : " ; timer3.Print() ; cout << endl ;
-      cout << endl ;
-    }
-    }
-
-  // done with the whole job  
-  cout << "Done with l3 clusterfinding." << endl;
-  return kStOK;    
 }
+//_____________________________________________________________________________
+Int_t St_l3Clufi_Maker::WriteClustersIntoFile() 
+{ 
+    // allocate memory for raw data event
+    UInt_t *event = new UInt_t [5000000] ;
+  
+    // open file for raw data dump
+    int fd = open ("rawdata.dat", O_WRONLY|O_CREAT|O_TRUNC, 00777) ;
+    if (!fd) 
+	{
+	    perror("l3Clufi") ; 
+	    return -1 ;
+	}
+    cout << "l3Clufi:  Open file for raw data dump.\n" ;
 
+    // pointer to top-layer bank L3_P
+    L3_P *l3_p = (L3_P *)event ;
+  
+    // fill L3_P header
+    strncpy (l3_p->bh.bank_type, CHAR_L3_P, 8) ;
+    l3_p->bh.length     = 40 ; 
+    // l3_p->bh.bank_id    = 77 ???? 
+    l3_p->bh.format_ver = DAQ_RAW_FORMAT_VERSION ;
+    l3_p->bh.byte_order = DAQ_RAW_FORMAT_ORDER ;
+    l3_p->bh.token      = 1 ;
+    l3_p->bh.w9         = DAQ_RAW_FORMAT_WORD9 ;
+    l3_p->bh.crc        = 0 ;
+    // no gl3 tracks in L3_P!
+    l3_p->tracks.off = 0; 
+    l3_p->tracks.len = 0;
+
+    // set address of first L3_SECP bank behind l3_p 
+    L3_SECP *l3_secp = (L3_SECP *) &event[sizeof(struct L3_P)/4] ;
+        
+    // loop over super sectors
+    for(Int_t superSectorIndex = 0 ;  superSectorIndex<12 ; superSectorIndex++)
+	{
+	    // fill L3_SECP header
+	    cout << "l3Clufi:   fill L3_SECP header, super sector :"<<  superSectorIndex << endl ;
+	    strncpy (l3_secp->bh.bank_type, CHAR_L3_SECP, 8) ;
+	    l3_secp->bh.length     = 18 ; 
+	    l3_secp->bh.bank_id    = 2*superSectorIndex+1 ;
+	    l3_secp->bh.format_ver = DAQ_RAW_FORMAT_VERSION ;
+	    l3_secp->bh.byte_order = DAQ_RAW_FORMAT_ORDER ; 
+	    l3_secp->bh.token      = 1 ;
+	    l3_secp->bh.w9         = DAQ_RAW_FORMAT_WORD9 ;
+	    l3_secp->bh.crc        = 0 ;
+	    l3_secp->time = 99 ; // offline chain
+	    l3_secp->seq  = 1 ;
+	    l3_secp->trg_word = 0 ;
+	    l3_secp->trg_in_word = 0 ;
+  
+	    // get offset
+	    TPCSECLP* tpcseclp = (TPCSECLP *) (((UInt_t *)l3_secp)+sizeof(struct L3_SECP)/4) ;
+	
+	    // fill offsets and lengths
+	    l3_secp->clusterp.off = (UInt_t *)tpcseclp - (UInt_t *)l3_secp ;
+	    l3_secp->clusterp.len = 4*clbanklengths[superSectorIndex] ;
+	    l3_secp->trackp.off = 0 ; // l3_secp->clusterp.off + l3_secp->clusterp.len;
+	    l3_secp->trackp.len = 0 ;
+	    l3_secp->sl3clusterp.off = 0 ; // l3_secp->trackp.off + l3_secp->trackp.len;
+	    l3_secp->sl3clusterp.len = 0 ;
+	  
+	    // fill clusterdata	 
+	    Int_t len =  4*clbanklengths[superSectorIndex] ;
+	    hitarray_st* hh = (hitarray_st*) St_hit_bank[superSectorIndex]->GetTable() ;
+	    memcpy ( tpcseclp, hh , len ) ;
+	    
+	
+	    // now fill offsets in L3_P
+	    l3_p->sector[2*superSectorIndex].off = (UInt_t *)l3_secp - (UInt_t *)l3_p ;
+	    l3_p->sector[2*superSectorIndex].len = (UInt_t *)tpcseclp + l3_secp->clusterp.len - (UInt_t *)l3_secp ;
+	    // as long as we have supersectors the odd sectors are set to 0    
+	    l3_p->sector[2*superSectorIndex+1].off = 0 ; 
+	    l3_p->sector[2*superSectorIndex+1].len = 0 ;
+	    
+	    // set pointer to next l3_secp
+	    l3_secp = (L3_SECP *) ((UInt_t *)l3_p + l3_p->sector[2*superSectorIndex].off + l3_p->sector[2*superSectorIndex].len + 1) ;
+	}
+    
+    // fill overall length in L3_P
+    l3_p->len = (UInt_t *)l3_secp - (UInt_t *)l3_p;
+    
+    // dump data into file
+    int wbytes = write (fd, l3_p, l3_p->len*4) ;
+    if (!wbytes) perror ("l3Clufi") ;
+    printf("l3Clufi: Close raw data file, %d bytes written to file.\n", wbytes) ;
+    
+    // clean up
+    close (fd) ;
+    delete event ;
+
+    // go home
+    return(kTRUE);
+}
 //_____________________________________________________________________________
 Int_t St_l3Clufi_Maker::Fill_pixel_of_inner_rows(){
  
@@ -538,7 +670,7 @@ Int_t St_l3Clufi_Maker::Fill_pixel_of_inner_rows(){
 		    + (pad_id-1) * Max_number_of_buckets 
 		    + (bucket_id);
 
-		  if ( adc_value <= 1024 && adc_value >= 0 
+		  if ( adc_value <= 2000 && adc_value >= 0 
 		       && pixelarrayindex <= Max_number_of_rows*Max_number_of_pads*Max_number_of_buckets 
 		       && pixelarrayindex >= 0 )
 		    {
@@ -650,7 +782,7 @@ Int_t St_l3Clufi_Maker::Fill_pixel_of_outer_rows(){
 		    + (pad_id-1) * Max_number_of_buckets 
 		    + (bucket_id) ;
 
-		  if ( adc_value <= 1024 && adc_value >= 0 
+		  if ( adc_value <= 2000 && adc_value >= 0 
 		       && pixelarrayindex <= Max_number_of_rows*Max_number_of_pads*Max_number_of_buckets 
 		       && pixelarrayindex >= 0 )
 		    {
