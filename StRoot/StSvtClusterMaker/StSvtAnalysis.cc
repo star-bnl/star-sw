@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.2 2000/07/13 14:50:49 caines Exp $
+ * $Id: StSvtAnalysis.cc,v 1.3 2000/07/16 22:32:54 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.3  2000/07/16 22:32:54  caines
+ * Fills spacepoint table correctly
+ *
  * Revision 1.2  2000/07/13 14:50:49  caines
  * Improvements on not saving single pixels
  *
@@ -267,6 +270,8 @@ void StSvtAnalysis::MomentAnalysis(int PedOffset)
     sumTimeBinTimesAdc = 0;
     sumHybAnTimesAdc = 0;
     sumAdc = 0;
+    mTotalADCCounts[clu]=0;
+
 	      
    for(int mem = 0; mem < numOfMembers; mem++)
      {

@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtClusterFinder.cc,v 1.2 2000/07/13 14:50:49 caines Exp $
+ * $Id: StSvtClusterFinder.cc,v 1.3 2000/07/16 22:32:54 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterFinder.cc,v $
+ * Revision 1.3  2000/07/16 22:32:54  caines
+ * Fills spacepoint table correctly
+ *
  * Revision 1.2  2000/07/13 14:50:49  caines
  * Improvements on not saving single pixels
  *
@@ -149,7 +152,7 @@ void StSvtClusterFinder::getClusterMembers(int& mAnode, int &mSeq)
 	 mNumOfCluMem[cluIndex-1] = memCount;
 
 
-	 if( memCount == 1 && mSeqLength==4){
+	 if( memCount == 1 && mSeqLength==5){
 	   cluIndex--;
 	 }
 	 
