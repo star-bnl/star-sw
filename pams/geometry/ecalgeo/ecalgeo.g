@@ -81,7 +81,7 @@ Author    Rashid Mehdiyev
 
 Fill  EMCG                          ! EM EndCAp Calorimeter basic data 
       Version  = 5.0                ! Geometry version 
-      OnOff    = 1                  ! Configurations 0-no, 1-west 2-east 3-both
+      OnOff    = 3                  ! Configurations 0-no, 1-west 2-east 3-both
       FillMode = 3                  ! sectors fill mode 
 
 Fill  EMCS                          ! EM Ebdcap Calorimeter geometry
