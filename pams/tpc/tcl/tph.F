@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.15 1999/07/17 00:32:05 genevb Exp $
+* $Id: tph.F,v 1.16 1999/08/25 21:27:12 liq Exp $
 * $Log: tph.F,v $
+* Revision 1.16  1999/08/25 21:27:12  liq
+* add new table tphitclus
+*
 * Revision 1.15  1999/07/17 00:32:05  genevb
 * Use StMessMgr
 *
@@ -66,7 +69,8 @@
      +,                       pixel_data_out_h,  pixel_data_out
      +,                       tpseq_h,         tpseq 
      +,                       tpcluster_h,     tpcluster 
-     +,                       tphit_h,         tphit) 
+     +,                       tphit_h,         tphit 
+     +,                       tphitclus_h,  tphitclus) 
 
       IMPLICIT NONE
 
@@ -263,7 +267,14 @@ c
 	integer npix_seq(300)         ! Number of pixels in sequence on pad
         integer nseq                  ! Number of sequences in cluster
         integer pads_per_row(nrows)   ! Listing of number of TPC pads by row
-
+c+liq
+        integer nmax_max              ! maximum number of hits in one cluster liq
+        parameter (nmax_max=100)      !limit it to 100 liq
+        integer ipad_hit_lo(nmax_max) ! Pad number extent for each hit in this cluster
+        integer ipad_hit_hi(nmax_max) ! Pad number extent for each hit in this cluster
+        integer itdc_hit_lo(nmax_max) ! Time bucket extent for cluster
+        integer itdc_hit_hi(nmax_max) ! Time bucket extent for cluster
+c-liq
         real de_scale                 ! Energy loss / charge
 	real dx_prime                 ! Uncertainty in x, global coord.
         real filtered_noise           ! Noise from SAS chip, after shaping
@@ -417,7 +428,8 @@ C             skip clusters on the end pads.
      +             white_noise, filtered_noise, nhits,
      +             max_hits_in_cluster, qq, x, dx, prf, z, dz, zrf,
      +             phi,track,mu1,mu2,mu3,mu4,mu5, irow, isec, npads,
-     +             ipad_lo, ipad_hi, itdc_lo, itdc_hi)
+     +             ipad_lo, ipad_hi, itdc_lo, itdc_hi,
+     +             ipad_hit_lo, ipad_hit_hi, itdc_hit_lo, itdc_hit_hi)
 
            else
 c
@@ -579,8 +591,56 @@ c             tphit(tphit_h.nok).dz+0.07
               
               
 c     also put q (magnitude of hit) into units of energy loss
-              tphit(tphit_h.nok).q = tphit(tphit_h.nok).q * de_scale         
+              tphit(tphit_h.nok).q = tphit(tphit_h.nok).q * de_scale 
 
+c+liq
+c     begin to fill the tcl_hitclus table (tphitclus)
+              if(tclpar(1).mc.gt.1)then
+	         if (tphitclus_h.nok.ge.tphitclus_h.maxlen) then
+c ??? Direct write is forbidden
+               	   write(m132,*)
+     + 'TPHITCLUS table full - quitting at cluster', jtpcl
+                   call StWarning(m132)
+	           return		
+        	 endif	
+		
+                if(nhits.eq.1)then
+                 ipad_hi	t_lo(ihit)=ipad_lo
+                 ipad_hit_hi(ihi	t)=ipad_hi
+                 itdc_hit_lo(ihit)=itdc_lo
+                 itdc_hit_hi(ihit)=itdc_hi
+                endif
+c fill the tphitclus table
+                tphitclus_h.nok = tphitclus_h.nok+1
+	        tphitclus(tphitclus_h.nok).id = tphitclus_h.nok 
+                tphitclus(tphitclus_h.nok).sector=isec
+                tphitclus(tphitclus_h.nok).row=irow
+                tphitclus(tphitclus_h.nok).cluster = jtpcl
+                tphitclus(tphitclus_h.nok).nhits = nhits
+                tphitclus(tphitclus_h.nok).nth_hit = ihit
+                tphitclus(tphitclus_h.nok).npads_clus=
+     *             ipad_hi-ipad_lo+1    
+                tphitclus(tphitclus_h.nok).minpad_clus=ipad_lo     
+                tphitclus(tphitclus_h.nok).maxpad_clus=ipad_hi     
+                tphitclus(tphitclus_h.nok).ntmbk_clus=
+     *             itdc_hi-itdc_lo+1    
+                tphitclus(tphitclus_h.nok).mintmbk_clus=itdc_lo   
+                tphitclus(tphitclus_h.nok).maxtmbk_clus=itdc_hi   
+                tphitclus(tphitclus_h.nok).npads_hit=
+     *             ipad_hit_hi(ihit)-ipad_hit_lo(ihit)+1     
+                tphitclus(tphitclus_h.nok).minpad_hit=
+     *             ipad_hit_lo(ihit)     
+                tphitclus(tphitclus_h.nok).maxpad_hit=
+     *             ipad_hit_hi(ihit)     
+                tphitclus(tphitclus_h.nok).ntmbk_hit=
+     *             itdc_hit_hi(ihit)-itdc_hit_lo(ihit)+1         
+                tphitclus(tphitclus_h.nok).mintmbk_hit=
+     *             itdc_hit_lo(ihit)   
+                tphitclus(tphitclus_h.nok).maxtmbk_hit=
+     *             itdc_hit_hi(ihit)                      
+
+             endif !tclpar(1).mc.gt.1
+c-liq
            ENDDO
 
           Else if (isec.gt.CurrentSector) then
