@@ -307,7 +307,7 @@ void StTreeMaker::FillHistBranch(StBranch *histBr)
 
     TString ts(ds->GetName());
     if (strncmp(bname,"hist"   ,4)==0) ts +="Hist";
-    if (strncmp(bname,"runco",7)==0) ts +="Runco";
+    if (strncmp(bname,"runco",5)==0) ts +="Runco";
 
 
     St_ObjectSet *os = new St_ObjectSet(ts);
