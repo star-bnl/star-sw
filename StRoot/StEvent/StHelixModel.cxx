@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixModel.cxx,v 2.7 2001/07/19 16:18:46 ullrich Exp $
+ * $Id: StHelixModel.cxx,v 2.8 2001/07/21 18:04:02 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.cxx,v $
+ * Revision 2.8  2001/07/21 18:04:02  ullrich
+ * Added code to helix() in order to stay backwards compatible.
+ *
  * Revision 2.7  2001/07/19 16:18:46  ullrich
  * Added missing method helicity().
  *
@@ -41,7 +44,7 @@
 
 ClassImp(StHelixModel)
 
-static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.7 2001/07/19 16:18:46 ullrich Exp $";
+static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.8 2001/07/21 18:04:02 ullrich Exp $";
 
 StHelixModel::StHelixModel() : mModel(helixModel)
 {
@@ -137,6 +140,23 @@ StHelixModel::helix() const
     //  +1 convention.
     //
     int h = mHelicity;
+
+    //
+    //  Need to stay backwards compatible. All we can do here
+    //  is to assume B > 0. This is OK since the inverse field
+    //  and the introduction of mHelicity happened at the same time.
+    //
+    if (h == 0) {
+	if (mCharge == 0)
+	    h = 1;
+	else if (mCharge > 0)
+	    h = -1;
+	else
+	    h = 1;
+    }
+    // end backwards compatibility fix
+
+    
     if (mCharge == 0) h = 1;
     
     double phase = mPsi-h*pi/2;
