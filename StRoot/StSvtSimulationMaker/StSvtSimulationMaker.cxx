@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.6 2001/04/03 15:24:24 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.7 2001/04/12 20:34:54 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.7  2001/04/12 20:34:54  caines
+ * Add check for if no svt hits present
+ *
  * Revision 1.6  2001/04/03 15:24:24  caines
  * Increase hit space size again
  *
@@ -164,9 +167,25 @@ Int_t StSvtSimulationMaker::Init()
 
   }
 
+
+
   mCoordTransform =  new StSvtCoordinateTransform();
   
   setTables();
+
+     St_svg_shape* SvtShape=0;
+     St_svg_geom* SvtGeom=0;
+     St_DataSetIter       local(GetInputDB("svt"));
+     SvtShape = (St_svg_shape   *) local("svgpars/shape");
+     
+     if ( !strncmp(mConfigString.Data(), "Y1L", strlen("Y1L")) )
+       SvtGeom  = (St_svg_geom    *) local("svgpars/geomy1l");
+     else
+       SvtGeom = (St_svg_geom    *) local("svgpars/geom");
+     
+  
+
+      cout << mSvtGeom << endl;
 
   mTimeBinSize = 1.E6/mSvtSrsPar->fsca;  // Micro Secs
   mAnodeSize = mSvtSrsPar->pitch*10;  // mm
@@ -433,6 +452,10 @@ Int_t StSvtSimulationMaker::Make()
       St_DataSet *g2t_svt_hit =  GetDataSet("g2t_svt_hit");
       St_DataSetIter g2t_svt_hit_it(g2t_svt_hit);
       mG2tSvtHit = (St_g2t_svt_hit *) g2t_svt_hit_it.Find("g2t_svt_hit");
+      if( !mG2tSvtHit) {
+	gMessMgr->Warning() << "No SVT hits" << endm;
+	return kStOK;
+      }
       g2t_svt_hit_st *trk_st = mG2tSvtHit->GetTable();
       St_svg_shape* SvtShape=0;
       St_svg_geom* SvtGeom=0;
@@ -447,9 +470,12 @@ Int_t StSvtSimulationMaker::Make()
       
       SvtSrsPar  = (St_srs_srspar  *) local("srspars/srs_srspar");
 
+
+      cout << mSvtGeom << endl;
       mSvtSrsPar = SvtSrsPar->GetTable();
       mSvtShape  = SvtShape->GetTable();
       mSvtGeom   = SvtGeom->GetTable();
+      cout << mSvtGeom << endl;
       mCoordTransform->setParamPointers(mSvtSrsPar, mSvtGeom, mSvtShape, mSvtSimDataColl->getSvtConfig());
 
 
