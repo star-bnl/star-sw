@@ -467,7 +467,7 @@ void StTreeMaker::FillHistBranch(StBranch *histBr)
     && ds->IsA() != StMaker::Class()) {// GetCVS not overloaded
        ds->Warning("StMaker::Init","GetCVS is not overloaded");
        printf("  Please add into file %s the following line: \n",ds->IsA()->GetDeclFileName());
-       printf("  virtual const char *GetCVS()\n");
+       printf("  virtual const char *GetCVS() const\n");
        printf("  {static const char cvs[]=\"Tag %sName:$ %sId:$ built \"__DATE__\" \"__TIME__ ; return cvs;}\n\n","$","$");  
      }
 
