@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.464 2005/02/05 00:55:03 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.465 2005/02/10 02:52:37 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -102,6 +102,7 @@ Bfc_st BFC1[] = { // standard chains
   {"Y2005x" ,"","","db,detDb","","",                              "Full barrel EMC Year5 geometry", kFALSE},
 
   {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
+  {"Ist1"    ,"","","db,detDb"                                   ,"","","Development geometry STAR",kFALSE},
   {"NoDb"  ,""  ,"","-db,-tpcDb,-magF"                              ,"","","Take out Db from Chain",kFALSE},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -724,6 +725,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Y2005x" ,"","","db,detDb","","",                              "Full barrel EMC Year5 geometry", kFALSE},
 
   {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
+  {"Ist1"    ,"","","db,detDb"                                   ,"","","Development geometry STAR",kFALSE},
   {"NoDb"  ,""  ,"","-db,-tpcDb,-magF"                              ,"","","Take out Db from Chain",kFALSE},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -2470,6 +2472,7 @@ void StBFChain::SetGeantOptions(){
 
       else if (GetOption("Y2b"))      geantMk->LoadGeometry("detp geometry YEAR_2b");
       else if (GetOption("Complete")) geantMk->LoadGeometry("detp geometry complete");
+      else if (GetOption("Ist1"))     geantMk->LoadGeometry("detp geometry ist1");
       else                            geantMk->LoadGeometry("detp geometry year2001");
 
 
