@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.7 2001/04/12 20:34:54 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.8 2001/05/10 04:29:52 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.8  2001/05/10 04:29:52  caines
+ * Change pedestal offset to match real raw data
+ *
  * Revision 1.7  2001/04/12 20:34:54  caines
  * Add check for if no svt hits present
  *
@@ -488,16 +491,17 @@ Int_t StSvtSimulationMaker::Make()
       // Loop over geant hits
       //
       for (int j=0;j<mG2tSvtHit->GetNRows() ;j++)
+      //for (int j=0;j<2 ;j++)
 	{
 	  volId = trk_st[j].volume_id;
 	  if( volId > 7000) continue; // SSD hit
 	  xVec.setX( trk_st[j].x[0]);
 	  xVec.setY( trk_st[j].x[1]);
 	  xVec.setZ( trk_st[j].x[2]);
-	  
+	   
 	  px = trk_st[j].p[0];  py = trk_st[j].p[1];  pz = trk_st[j].p[2];
-	  // mEnergy =  trk_st[j].de*1e9;
-	  mEnergy =  96000;
+	  mEnergy =  trk_st[j].de*1e9;
+	  // mEnergy =  96000;
 
 	  waferCoordArray[j] = mSvtSimulation->toLocalCoord(xVec,mCoordTransform); 
 
@@ -514,11 +518,14 @@ Int_t StSvtSimulationMaker::Make()
 	  else
 	    barrel = 3;
 	  if ( !strncmp(mConfigString.Data(), "Y1L", strlen("Y1L")) ) {
+	   
 	    if ((wafer == 1) || (wafer == 2) || (wafer == 3))
-	      ladder = 2;
+	      {
+		ladder = 2;
+	      }
 	  }	   
-
-
+	  
+       
 	  if( 1000*layer+100*wafer+ladder !=volId){
 	    cout << "trouble " << volId << " and our calc" << layer << " " 
 		 << wafer << " " << ladder << " " << j <<endl;
@@ -640,9 +647,10 @@ Int_t StSvtSimulationMaker::fillEval(int barrel,int ladder,int wafer,int hybrid,
   }
 
   mSvtGeantHit->setGeantHit(counter[index],waferCoord);
+  mSvtGeantHit->setGlobalCoord(counter[index],xVec);
   ++counter[index];
   mSvtGeantHit->setNumOfHits(counter[index]);
-  mSvtGeantHit->setGlobalCoord(counter[index],xVec);
+  
     
   return kStOK;
 }
@@ -732,7 +740,7 @@ void StSvtSimulationMaker::MakeHistograms1()
                    adc = svtSequence[mSeq].firstAdc;
                    for(int j = 0 ; j < len; j++)
                      {
-                       float c = (float) adc[j] - 100.0;
+                       float c = (float) adc[j];
 
                        hit_plus_backgr[index]->Fill(anode,stTimeBin + j,c);
 		     }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridSimData.hh,v 1.1 2000/11/30 20:47:49 caines Exp $
+ * $Id: StSvtHybridSimData.hh,v 1.2 2001/05/10 04:29:52 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridSimData.hh,v $
+ * Revision 1.2  2001/05/10 04:29:52  caines
+ * Change pedestal offset to match real raw data
+ *
  * Revision 1.1  2000/11/30 20:47:49  caines
  * First version of Slow Simulator - S. Bekele
  *
@@ -32,6 +35,7 @@ public:
 
 protected:
 
+  int mOffSet;
   ClassDef(StSvtHybridSimData,1)
 };
 
