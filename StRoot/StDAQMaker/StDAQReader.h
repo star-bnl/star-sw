@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.8 2000/01/24 20:35:37 ward Exp $
+ * $Id: StDAQReader.h,v 1.9 2000/04/07 15:43:19 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.9  2000/04/07 15:43:19  perev
+ * SetVerbose method added
+ *
  * Revision 1.8  2000/01/24 20:35:37  ward
  * Access trigger data.
  *
@@ -93,6 +96,7 @@ public:
   StDAQReader(const char *file=0);
   virtual ~StDAQReader();
 
+  virtual void setVerbose(int ver=1){fVerbose=ver;};
   virtual int open(const char *file);
   virtual int close();
   virtual int isOpened(){ return (fFd != (-1));};
@@ -124,6 +128,7 @@ public:
 
 protected:
 int fFd;	//File descriptor
+int fVerbose;
 EventReader *fEventReader;  
 StTPCReader *fTPCReader;  
 StFTPCReader *fFTPCReader;  
