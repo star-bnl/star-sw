@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichRingPoint.cxx,v 2.5 2000/11/01 17:41:26 lasiuk Exp $
+ * $Id: StRichRingPoint.cxx,v 2.6 2000/12/08 04:57:09 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingPoint.cxx,v $
+ *  Revision 2.6  2000/12/08 04:57:09  lasiuk
+ *  small fix to units quantities
+ *
  *  Revision 2.5  2000/11/01 17:41:26  lasiuk
  *  use math.h for FLT_MAX definition
  *
@@ -31,17 +34,16 @@
  *  Revision 1.1  2000/04/03 19:36:08  horsley
  *  initial revision
  **********************************************************/
+#include "StRichRingPoint.h"
 
-//#include <values.h> // Needed for MAXFLOAT
 #include <math.h>
 
-#include "StRichRingPoint.h"
 #include "SystemOfUnits.h"
-#include "StRichMaterialsDb.h"
-
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
+
+#include "StRichMaterialsDb.h"
 
 
 StRichRingPoint::StRichRingPoint(StRichTrack* track, 
@@ -67,11 +69,11 @@ StRichRingPoint::StRichRingPoint(StRichTrack* track,
   mMeanPathInQuartz   = 0.0;
 
   // detector parameters used in light propagation to pad plane depth
-  mDepthRad  = richGeometryDb->radiatorDimension().z()*centimeter;  
-  mDepthQuar = richGeometryDb->quartzDimension().z()*centimeter;
+  mDepthRad  = richGeometryDb->radiatorDimension().z()/centimeter;  
+  mDepthQuar = richGeometryDb->quartzDimension().z()/centimeter;
   
   // here we have changed the proximity depth to include the mwpc gap!!!
-  mDepthProx = richGeometryDb->proximityGap()*centimeter;
+  mDepthProx = richGeometryDb->proximityGap()/centimeter;
   
 
   // index of refraction's
@@ -107,12 +109,12 @@ StRichRingPoint::StRichRingPoint(StRichTrack* track,
 
   // track parameters  
   mTrack       = track;
-  mMomentum    = track->getMomentum().mag()*GeV;
+  mMomentum    = track->getMomentum().mag()/GeV;
   
   mTrackTheta  = track->getTheta();
   mTrackPhi    = track->getPhi();
    
-  mImpactPoint = track->getImpactPoint()*centimeter;
+  mImpactPoint = track->getImpactPoint()/centimeter;
   mRingType    = type;
   mFastEnough  = false;
   
