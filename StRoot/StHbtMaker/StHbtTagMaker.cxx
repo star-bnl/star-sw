@@ -21,6 +21,8 @@ ClassImp(StHbtTagMaker)
 
 //-------------------------------------------------------------
 StHbtTagMaker::StHbtTagMaker(const Char_t* name) : StMaker(name) {
+  mHbtTag    = 0;
+  mSt_HbtTag = 0;
   mShowTags=0;
   mTagWriter = StHbtTagWriter::Instance();
 }
@@ -34,10 +36,13 @@ Int_t StHbtTagMaker::Init() {
   return StMaker::Init();
 }
 //-------------------------------------------------------------
+void StHbtTagMaker::Clear(Option_t* opt) {
+    if (mTagWriter) mTagWriter->Clear();
+    cout << " StHbtTagMaker::Clear() " << endl;
+}
+//-------------------------------------------------------------
 Int_t StHbtTagMaker::Make() {
   // Create a new tag
-  mHbtTag    = 0;
-  mSt_HbtTag = 0;
 
   // instantiate new St_HbtTag class
   mSt_HbtTag = new St_HbtTag("HbtTag",1);      // table header
@@ -66,7 +71,6 @@ Int_t StHbtTagMaker::Make() {
 }
 
 //-------------------------------------------------------------
-
 void StHbtTagMaker::Fill(StHbtTagWriter* writer) {
   *mHbtTag = writer->mHbtTag;
 }
