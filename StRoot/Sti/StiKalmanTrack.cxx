@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.43 2004/11/10 21:44:26 pruneau Exp $
- * $Id: StiKalmanTrack.cxx,v 2.43 2004/11/10 21:44:26 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.44 2004/11/11 03:19:05 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.44 2004/11/11 03:19:05 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.44  2004/11/11 03:19:05  pruneau
+ * implementation of extrapolation functions for Jan
+ *
  * Revision 2.43  2004/11/10 21:44:26  pruneau
  * adding functions for extrapolation
  *
@@ -1207,9 +1210,19 @@ double  StiKalmanTrack::getDca(const StiHit * vertex)    const
 StiKalmanTrackNode * StiKalmanTrack::extrapolateToBeam()
 {
   StiKalmanTrackNode * innerMostNode = getInnerMostNode();
+  //return null if there is no node to extrapolate from.
+  if (!innerMostNode) return 0;
+  StiKalmanTrackNode * n = trackNodeFactory->getInstance();
+  if (n->propagateToBeam(innerMostNode)) return n;
+  return 0;
 }
 
 StiKalmanTrackNode * StiKalmanTrack::extrapolateToRadius(double radius)
 {
-  StiKalmanTrackNode * innerMostNode = getInnerMostNode();
+  StiKalmanTrackNode * outerMostNode = getOuterMostNode();
+  //return null if there is no node to extrapolate from.
+  if (!outerMostNode) return 0;
+  StiKalmanTrackNode * n = trackNodeFactory->getInstance();
+  if (n->propagateToRadius(outerMostNode,radius)>=0) return n;
+  return 0;
 }
