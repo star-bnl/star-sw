@@ -1,7 +1,10 @@
 *
-* $Id: rzink.F,v 1.4 1998/06/05 20:55:42 perev Exp $
+* $Id: rzink.F,v 1.5 2000/01/06 02:42:36 nevski Exp $
 *
 * $Log: rzink.F,v $
+* Revision 1.5  2000/01/06 02:42:36  nevski
+* elastic zebra updated
+*
 * Revision 1.4  1998/06/05 20:55:42  perev
 * AGI commit
 *
@@ -126,13 +129,16 @@
          IQUEST(20)=I
          LCYC=IQ(KQSP+LCDIR+LKC)
          IF (KVSCYC.NE.0) THEN
-            II=I
-            IF (IQUEST(99).GE.96) II=IQ(KQSP+LCDIR+LKC+1)
-            IF (IQ(KQSP+LCDIR+LCYC+KKYCYC).NE.II) THEN
+*           instead of ... IF (IQUEST(99).GE.96)
+            II   = I                        ! old rz
+            JJ   = IQ(KQSP+LCDIR+LKC+1)     ! new rz
+            ICYC = IQ(KQSP+LCDIR+LCYC+KKYCYC)
+            IF (ICYC.NE.II .and. ICYC.NE.JJ) THEN
                IQUEST(1) = 11
                GO TO 99
             ENDIF
          ENDIF
+*
          NC=0
   20     NC=NC+1
          ICY = JBYT(IQ(KQSP+LCDIR+LCYC+KCNCYC),21,12)
@@ -258,4 +264,7 @@ C
       ENDIF
 *
   99  RETURN
+C     prevent "never used" warning
+99999 N=JBIT(1,2)+JBYT(1,2,3)
       END
+

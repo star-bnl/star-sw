@@ -1,7 +1,10 @@
 *
-* $Id: rzmake.F,v 1.7 1999/03/04 03:26:58 didenko Exp $
+* $Id: rzmake.F,v 1.8 2000/01/06 02:42:37 nevski Exp $
 *
 * $Log: rzmake.F,v $
+* Revision 1.8  2000/01/06 02:42:37  nevski
+* elastic zebra updated
+*
 * Revision 1.7  1999/03/04 03:26:58  didenko
 * updates from Pavel
 *
@@ -28,7 +31,7 @@
 *           Routine to create a new RZ file
 *           To use an already existing file CALL RZFILE
 * Input:
-*   LUNP    Logical unit number associated with  the RZ file.   A FORTRAN
+*   LUNIN   Logical unit number associated with  the RZ file.   A FORTRAN
 *           OPEN statement must precede the call to RZFILE.
 *           Starting address of the memory area which will contain the RZ
 *           information ('M' option)
@@ -52,7 +55,8 @@
 *                   Disk
 *             'M'   Memory
 *                   In this  case the user  must have allocated  at least
-*                   NRECP*LUNP words of memory starting at address LUN.
+*                   NRecp*LRecp words of memory starting at address LUNIN.
+*                   LRecp is passes as the first word in this area
 *           mode
 *             default
 *                   Native mode
@@ -71,6 +75,12 @@
 *          : 09.03.94 S.Banerjee (Change in cycle structure)
 *          : 30.01.95 J.Shiers. Permit nrecp>65000 for new format
 *          : 10.12.97 P.Nevski  Default is NEW
+*          : 01.03.99 Perevozchikov  default NRECP for NEW is 1M
+*          : 04.01.00 P.Nevski  add common /rzNHRECP/  NHrecp
+* Nrecp: If non zero, overwrites 1M default in this version of RZMAKE.
+*        This should be passed in IQUEST(10) by calling HROPEN with Copt=Q.
+*        Unfortunatly, HRFILE resets it to 100<NQUOTA<65K when Copt=Q,
+*        and sets only NQUOTA=32K otherwise
 ************************************************************************
 *
 #include "zebra/zunit.inc"
@@ -80,6 +90,8 @@
 #include "zebra/rzclun.inc"
 #include "zebra/rzk.inc"
 #include "zebra/rzcycle.inc"
+      integer            NHrecp
+      common /rzNHRECP/  NHrecp
 #if defined(CERNLIB_QMVAX)
       CHARACTER*16 CHORG
 #endif
@@ -90,6 +102,7 @@
       EQUIVALENCE (IOPTM,IOPTV(1)), (IOPTX,IOPTV(2))
      +,           (IOPTF,IOPTV(3)), (IOPTC,IOPTV(4))
      +,           (IOPTN,IOPTV(5)), (IOPTO,IOPTV(6))
+      INTEGER      HMEM/0/
 *
 *-----------------------------------------------------------------------
 *
@@ -97,9 +110,9 @@
       IQUEST(1)=0
       LOGLV = MIN(NQLOGD,4)
       LOGLV = MAX(LOGLV,-3)
-      LUNP  = LUNIN
 *
       CALL UOPTC(CHOPT,'MXFCNO',IOPTV)
+
 #if !defined(CERNLIB_QCFIO)
       IF(IOPTC.NE.0) THEN
          WRITE(IQPRNT,*) 'RZMAKE. option C ignored - valid only ',
@@ -107,22 +120,27 @@
          IOPTC = 0
       ENDIF
 #endif
-      IOPTN =1-IOPTO
-      IMODEX=IOPTX
-      IMODEC=IOPTC
+
+      IOPTN  = 1-IOPTO
+      IMODEX = IOPTX
+      IMODEC = IOPTC
+      IRELAT = 0
+      LUNP   = LUNIN
       IF(IOPTC.NE.0) LUNP = IQUEST(11)
-*
-**	VP correction on NRECP
-      nrecp = nrecpqq
-      if (ioptn.ne.0) NRECP = max(NRECPQQ,1000000)
+
 #if defined(CERNLIB_FQXISN)
-      IMODEX=1
+C     RZfile maked always with Exchange mode for FQXISN (ie LINUX ...)
+      IMODEX = 1
 #endif
-#if defined(CERNLIB_QMLNX)
-C     RZfile maked always with Exchange mode for LINUX
-*     IMODEX=1
-#endif
-      IRELAT=0
+*
+**	         VP correction on NRECP default is 1M for new format
+*
+      NRECP = NRECPQQ
+      if (ioptn.ne.0) then                  ! NEW RZ format
+         M = 1 000 000
+         if (NHRecp.gt.0) M=NHRecp*1024
+         NRECP = max(NRECPQQ,M)
+      endif
 *
 *                Check NWKEY and NRECP
 *
@@ -133,6 +151,7 @@ C     RZfile maked always with Exchange mode for LINUX
          IQUEST(11)=NWKEY
          GO TO 99
       ENDIF
+
       IF(NRECP.LT.2.OR.(NRECP.GT.65000.AND.IOPTN.EQ.0))THEN
          IF(LOGLV.GE.-2) WRITE(IQLOG,9011)
  9011    FORMAT(' RZMAKE. NRECP input value is invalid')
@@ -141,24 +160,22 @@ C     RZfile maked always with Exchange mode for LINUX
          GO TO 99
       ENDIF
 *
-*          Save existing material (if any)
-*
-      CALL RZSAVE
-*
-*            Find record length (as specified in the OPEN statement)
-*
-*          A, Memory option. LUN contains the buffer address
-*                            and the value of LUNP is the block length
+*     Find record length (as specified in the OPEN statement)
 *
       IF(IOPTM.NE.0)THEN
-         LRECP=LUNP
+*
+*          A, Memory option. LUNIN itself IS the buffer and contains the
+*                            value of LUNP as the block length (what a mess)
+         LUNP  = HMEM+1
+         LRECP = LUNINI
          IF(LRECP.LT.100.OR.LRECP.GT.10000)LRECP=1024
+
       ELSE
 *
 *          B, Standard option DISK. Use information as specified
 *             in the Fortran OPEN statement
 *
-          IF(IOPTC.EQ.0) THEN
+         IF (IOPTC.EQ.0) THEN
 #if (!defined(CERNLIB_QMVAX))&&(!defined(CERNLIB_QMVDS))
             INQUIRE(UNIT=LUNP,RECL=LRECB)
 #endif
@@ -167,7 +184,7 @@ C     RZfile maked always with Exchange mode for LINUX
 #endif
 #if defined(CERNLIB_QMVAX)
             INQUIRE(UNIT=LUNP,RECL=LRECB,ORGANIZATION=CHORG)
-            IF(CHORG.EQ.'RELATIVE')IRELAT=1
+            IF (CHORG.EQ.'RELATIVE') IRELAT=1
 #endif
 *
 #if defined(CERNLIB_RZBYTES)
@@ -191,7 +208,7 @@ C     RZfile maked always with Exchange mode for LINUX
          ENDIF
       ENDIF
 *
-      LUN = LUNP
+      LUN    = LUNP
       IZRECL = LRECP
       IF(LUN.LE.0.AND.IOPTM.EQ.0)THEN
          IF(LOGLV.GE.-2) WRITE(IQLOG,9012)
@@ -207,9 +224,15 @@ C     RZfile maked always with Exchange mode for LINUX
          IQUEST(11)=LRECP
          GO TO 99
       ENDIF
-      IF(LOGLV.GE.0) WRITE(IQLOG,9014) LUNP,LRECP,CHOPT
- 9014 FORMAT(' RZMAKE. Unit ',I6,' Initializing with LREC=',I6,
-     +', OPT= ',A)
+*     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+*
+*          Save existing material (if any)
+*
+      CALL RZSAVE
+*
+      IF(LOGLV.GE.0) WRITE(IQLOG,9014) LUNP,NRECP,LRECP,CHOPT
+ 9014 FORMAT(' RZMAKE. Unit ',I6,' Initializing Nrec=',i6,
+     >' with LREC=',I6,', OPT= ',A)
       CALL MZSDIV (0,-7)
 *
 *           Check if LUN not already defined
@@ -275,7 +298,7 @@ C     RZfile maked always with Exchange mode for LINUX
          IF(2*NMEM.GT.IQ(KQSP+LRZ0-1))THEN
             CALL MZPUSH(JQPDVS,LRZ0,0,10,'I')
          ENDIF
-         IQ(KQSP+LRZ0+2*NMEM-1)=LOCF(LUNP)-LOCF(IQ(1))+1
+         IQ(KQSP+LRZ0+2*NMEM-1)=LOCF(LUNIN)-LOCF(IQ(1))+1
          IQ(KQSP+LRZ0+2*NMEM  )=LRECP
          LUN=-NMEM
       ENDIF
@@ -292,7 +315,7 @@ C     RZfile maked always with Exchange mode for LINUX
          ENDIF
       ENDIF
 *
-*            Write empty record for locks'
+*            Write empty record for locks
 *
       CALL RZIODO(LUN,LREC,1,IQ(KQSP+LTOP+1),2)
       IF(IQUEST(1).NE.0) GO TO 99
@@ -324,15 +347,15 @@ C     RZfile maked always with Exchange mode for LINUX
       IQ(KQSP+LTOP+KWUSED) = NWL
       IF (IOPTN.NE.0) THEN
         WRITE(IQLOG,7001) CHDIR
- 7001   FORMAT(10x,'RZMAKE. new RZ format selected for ',a)
-*     +        10x,'This file will not be readable with versions',
+ 7001   FORMAT(' RZMAKE. new RZ format selected for ',a)
+*     +        ' This file will not be readable with versions',
 *     +            ' of RZ prior to release 94B')
         IQ(KQSP+LTOP+KRZVER) = 1
       ELSE
         WRITE(IQLOG,7007) CHDIR
- 7007 FORMAT(10x,'RZMAKE. OLD RZ format selected for ',a/,
-     +       10x,'This file will have the limit on the number of',
-     +           ' blocks < 64 K')
+ 7007   FORMAT(' *****  RZMAKE. OLD RZ format selected for ',a)
+*     +        ' This file will have the limit on the number of',
+*     +           ' blocks < 64 K')
         IQ(KQSP+LTOP+KRZVER) = 0
       ENDIF
       IQ(KQSP+LTOP+KIP1)   = 2
@@ -403,9 +426,7 @@ C     RZfile maked always with Exchange mode for LINUX
       CHNDIR(1)=CHTOP
       IQUEST(1)=0
 *
-* prevent warning "not used"
-#if defined(CERNLIB_HPUX)
-      I=IBITS(1,1,1)
-#endif
   99  RETURN
+C     prevent "never used" warning
+99999 I=JBIT(1,2)+JBYT(1,2,3)
       END

@@ -1,7 +1,10 @@
 *
-* $Id: rzpurg.F,v 1.1 1998/08/21 19:40:06 nevski Exp $
+* $Id: rzpurg.F,v 1.2 2000/01/06 02:42:37 nevski Exp $
 *
 * $Log: rzpurg.F,v $
+* Revision 1.2  2000/01/06 02:42:37  nevski
+* elastic zebra updated
+*
 * Revision 1.1  1998/08/21 19:40:06  nevski
 * significant change in fz i/o error handling, scale in AgSVERT
 *
@@ -40,8 +43,6 @@
 *-----------------------------------------------------------------------
 *
 #include "zebra/q_jbit.inc"
-#include "zebra/q_jbyt.inc"
-
       IQUEST(1)=0
       NK=NKEEP
       IF(NK.LT.1)NK=1
@@ -77,9 +78,9 @@
            print *,' RZPURG: cant purge keys starting from ',ik
            print *,' nkeys,ik,nc,LK,LKC,LCYC =',nkeys,ik,nc,LK,LKC,LCYC
            IQUEST(1)=9
-           return
+*           return
          endif
- 
+
          IF (KVSCYC.EQ.0) THEN
             LCOLD = JBYT(IQ(KQSP+LCDIR+LCYC+KPPCYC), 1,16)
          ELSE
