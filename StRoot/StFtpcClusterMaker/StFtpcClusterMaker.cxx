@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.51 2003/06/12 10:01:25 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.52 2003/06/13 10:57:28 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.52  2003/06/13 10:57:28  jcs
+// remove debug statement
+//
 // Revision 1.51  2003/06/12 10:01:25  jcs
 // renamed ftpcClusterGeometry database table to ftpcClusterGeom
 // (name was too long)
@@ -344,7 +347,6 @@ Int_t StFtpcClusterMaker::Make()
   m_asicmap    = (St_ftpcAsicMap *)dblocal_geometry("ftpcAsicMap");
   m_clustergeo = (St_ftpcClusterGeom *)dblocal_geometry("ftpcClusterGeom");
   m_cathode      = (St_ftpcInnerCathode *)dblocal_geometry("ftpcInnerCathode");
-  cout<<"DEBUG: m_clustergeo =  "<<m_clustergeo<<" m_cathode      = "<<m_cathode<<endl;
 
   St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
   if ( !ftpc_calibrations_db ){
