@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.hh,v 1.8 1999/03/04 15:56:58 wenaus Exp $
+ * $Id: StGlobalTrack.hh,v 1.9 1999/03/04 18:17:04 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.hh,v $
- * Revision 1.8  1999/03/04 15:56:58  wenaus
- * add std namespace for Sun CC5 compatibility
+ * Revision 1.9  1999/03/04 18:17:04  ullrich
+ * Namespace std not used if ST_NO_NAMESPACES defined
  *
  * Revision 1.11  1999/04/08 14:58:34  ullrich
  * Moved PID traits from StTrack to StGlobalTrack.
@@ -40,7 +40,7 @@
  * Revision 1.4  1999/02/12 02:01:18  wenaus
  * New track constructor to load helix params independently of table
  *
-using namespace std;
+ * Revision 1.3  1999/01/30 23:03:12  wenaus
  * table load intfc change; include ref change
  *
  * Revision 1.2  1999/01/15 22:53:45  wenaus
@@ -51,6 +51,9 @@ using namespace std;
 #define StGlobalTrack_hh
 
 #include <vector>
+#include "StEvent/StFtpcHit.hh"
+#include "StEvent/StTpcHit.hh"
+#include "StEvent/StSvtHit.hh"
 #include "StEvent/StDedx.hh"
 #include "StEvent/StTrack.hh"
 #include "StEvent/StVecPtrSvtHit.hh"

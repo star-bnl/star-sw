@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.hh,v 1.4 1999/03/04 15:56:59 wenaus Exp $
+ * $Id: StL0Trigger.hh,v 1.5 1999/03/04 18:17:06 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.hh,v $
- * Revision 1.4  1999/03/04 15:56:59  wenaus
- * add std namespace for Sun CC5 compatibility
+ * Revision 1.5  1999/03/04 18:17:06  ullrich
+ * Namespace std not used if ST_NO_NAMESPACES defined
  *
  * Revision 1.4  1999/03/04 15:56:59  wenaus
  * add std namespace for Sun CC5 compatibility
@@ -26,8 +26,10 @@
 #ifndef StL0Trigger_hh
 #define StL0Trigger_hh 
 #include "StEvent/StTrigger.hh"
-using namespace std;
 #include <vector>
+#if !defined(ST_NO_NAMESPACES)
+using namespace std;
+#endif
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<long, allocator<long> > VecLong;
