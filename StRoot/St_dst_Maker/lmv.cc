@@ -1,5 +1,8 @@
-// $Id: lmv.cc,v 1.1 1999/10/27 19:30:08 nystrand Exp $
+// $Id: lmv.cc,v 1.2 1999/11/12 01:46:07 nystrand Exp $
 // $Log: lmv.cc,v $
+// Revision 1.2  1999/11/12 01:46:07  nystrand
+// Update to include events with SVT tracks
+//
 // Revision 1.1  1999/10/27 19:30:08  nystrand
 // First Version of lmv
 //
@@ -49,26 +52,34 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 //#include "StMagF.h"
 
 
-//static const char rcsid[] = "$Id: lmv.cc,v 1.1 1999/10/27 19:30:08 nystrand Exp $";
+//static const char rcsid[] = "$Id: lmv.cc,v 1.2 1999/11/12 01:46:07 nystrand Exp $";
 
-long lmv(St_dst_track *track, St_dst_vertex *vertex)
+long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 {
 
   // Constants
-  //  double kappa  = 0.299792458; // Constant Units (GeV T**-1 m**-1)
-  double RIfc   = 49.3;        // From Roy Bossingham
-  double RBPipe = 3.95;        // From $STAR/pams/geometry/pipegeo/pipegeo.g
-  double X_X0_Ifc   = 0.0052;  // From Jim Thomas Web Page
-  double X_X0_BPipe = 0.00283; // Based on 1 mm of Be
-  double X0_N2      = 32609;   // This is in cm. Calc from PDG.
+  //  double kappa  = 0.299792458;  // Constant Units (GeV T**-1 m**-1)
+  double RIfc            = 49.3;    // From Roy Bossingham
+  double RBPipe          = 3.95;    // From $STAR/pams/geometry/pipegeo/pipegeo.g
+  double X_X0_Ifc        = 0.0052;  // From Jim Thomas Web Page
+  double X_X0_BPipe      = 0.00283; // Based on 1 mm of Be
+  double X0_N2           = 32609;   // This is in cm. Calc from PDG.
+  double R_SVT_Barrel1   =  5.97;   // From SVT Web page
+  double R_SVT_Barrel2   = 10.15;   //  ---- " ----
+  double R_SVT_Barrel3   = 14.91;   //  ---- " ---- 
+  double X_X0_SVTBarrel  = 0.015;   //  ---- " ----
 
   // Parameters
   double Rmincut      = 4.0;
   long   MinTrkPoints = 10;
   double DVtxMax      = 4.0;
 
+  // Determine if SVT is in or not, depending on geometry and date in db
+  long Is_SVT = 0;
+  if( mdate > 20000000 )Is_SVT=1;
+
   // Get BField from gufld(,) 
-  cout<<"Trying to Get the BField the old way..."<<endl;
+  //  cout<<"Trying to Get the BField the old way..."<<endl;
   float x[3] = {0,0,0};
   float b[3];
   gufld(x,b);
@@ -81,9 +92,6 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex)
   //          StMagF *mymag = new StMagF();
   //          mymag->Field(y,c);
   //          cout<<"New field in KGauss: "<<c[2]<<endl;
-          
-
-  //  St_dst_track *glb_pointer = (St_tpt_track *) tpc_iterator("tptrack");
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
   vector<long,allocator<long> > index;
@@ -156,10 +164,10 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex)
   }
 
   //Currently, use only pure tpc tracks
-  if( i_non_tpc == 1 ){
-    cout<<"This event contains non-tpc tracks - lmv currently only works for pure tpc tracks"<<endl;
-    return kStWarn;
-  }
+  //  if( i_non_tpc == 1 ){
+  //    cout<<"This event contains non-tpc tracks - lmv currently only works for pure tpc tracks"<<endl;
+  //    return kStWarn;
+  //  }
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
   vector<StPhysicalHelixD,allocator<StPhysicalHelixD> >::iterator ihlx=helices.begin();
@@ -191,37 +199,106 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex)
   // Do the Multiple Scattering
   for(unsigned int jj=0; jj < helices.size(); jj++){
 
+    double lpath_tot = 0.0;
     double xo = 0.0; double yo = 0.0;
     spath = helices[jj].pathLength(xo, yo);
+    double s=0.0;
+    double R1St = sqrt( helices[jj].x(s)*helices[jj].x(s) + helices[jj].y(s)*helices[jj].y(s) );
+    if( R1St < RBPipe ){cout<<"lmv: ERROR: Radius of First point < RBeamPipe!! R1St= "<<R1St<<endl; return kStWarn;}
 
     // Find Coordinates of Intersect with IFC
-    double ifcpath=0.0;
-    pairD  SIfc; 
-    SIfc = helices[jj].pathLength(RIfc);
-    if(SIfc.first > 0.0)SIfc.first=SIfc.first-helices[jj].period();
-    if(SIfc.second > 0.0)SIfc.second=SIfc.second-helices[jj].period();
-    if( SIfc.second < SIfc.first){
-      ifcpath = SIfc.first;
+    if( R1St > RIfc ){
+      double ifcpath=0.0;
+      pairD  SIfc; 
+      SIfc = helices[jj].pathLength(RIfc);
+      if(SIfc.first > 0.0)SIfc.first=SIfc.first-helices[jj].period();
+      if(SIfc.second > 0.0)SIfc.second=SIfc.second-helices[jj].period();
+      if( SIfc.second < SIfc.first){
+        ifcpath = SIfc.first;
+      }
+      else{
+        ifcpath = SIfc.second;
+      }
+
+      StThreeVectorD xpos;
+      xpos = helices[jj].at(ifcpath);
+      // Find momentum at this point
+      StThreeVectorD pmom;
+      pmom = helices[jj].momentumAt(ifcpath, bfield*tesla);
+
+      double incang = acos( (xpos.x()/xpos.mag())*(pmom.x()/pmom.mag()) + (xpos.y()/xpos.mag())*(pmom.y()/pmom.mag()) );
+      double lpath_ifc = X_X0_Ifc/cos(incang); 
+      lpath_tot = lpath_tot + lpath_ifc;
+
     }
-    else{
-      ifcpath = SIfc.second;
+
+    //Check SVT
+    if( Is_SVT = 1 && R1St > RIfc ){
+      //Scattered in 3rd SVT Barrel
+      double svt3path = 0.0;
+      pairD Ssvt3 = helices[jj].pathLength(R_SVT_Barrel3);
+      if(Ssvt3.first > 0.0)Ssvt3.first=Ssvt3.first-helices[jj].period();
+      if(Ssvt3.second > 0.0)Ssvt3.second=Ssvt3.second-helices[jj].period();
+      if( Ssvt3.second < Ssvt3.first){
+        svt3path = Ssvt3.first;
+      }
+      else{
+        svt3path = Ssvt3.second;
+      }
+      StThreeVectorD xpos;
+      xpos = helices[jj].at(svt3path);
+      // Find momentum at this point
+      StThreeVectorD pmom;
+      pmom = helices[jj].momentumAt(svt3path, bfield*tesla);
+
+      double incang = acos( (xpos.x()/xpos.mag())*(pmom.x()/pmom.mag()) + (xpos.y()/xpos.mag())*(pmom.y()/pmom.mag()) );
+      double lpath_svt3 = X_X0_SVTBarrel/cos(incang); 
+      lpath_tot = lpath_tot + lpath_svt3;
     }
+    if( Is_SVT = 1 && R1St > R_SVT_Barrel3 ){
+      //Scattered in 2nd SVT Barrel
+      double svt2path = 0.0;
+      pairD Ssvt2 = helices[jj].pathLength(R_SVT_Barrel2);
+      if(Ssvt2.first > 0.0)Ssvt2.first=Ssvt2.first-helices[jj].period();
+      if(Ssvt2.second > 0.0)Ssvt2.second=Ssvt2.second-helices[jj].period();
+      if( Ssvt2.second < Ssvt2.first){
+        svt2path = Ssvt2.first;
+      }
+      else{
+        svt2path = Ssvt2.second;
+      }
+      StThreeVectorD xpos;
+      xpos = helices[jj].at(svt2path);
+      // Find momentum at this point
+      StThreeVectorD pmom;
+      pmom = helices[jj].momentumAt(svt2path, bfield*tesla);
 
-    StThreeVectorD xpos;
-    xpos = helices[jj].at(ifcpath);
-    double xhat = xpos.x()/xpos.mag();
-    double yhat = xpos.y()/xpos.mag();
-    double zhat = xpos.z()/xpos.mag();
+      double incang = acos( (xpos.x()/xpos.mag())*(pmom.x()/pmom.mag()) + (xpos.y()/xpos.mag())*(pmom.y()/pmom.mag()) );
+      double lpath_svt2 = X_X0_SVTBarrel/cos(incang); 
+      lpath_tot = lpath_tot + lpath_svt2;
+    }
+    if( Is_SVT = 1 && R1St > R_SVT_Barrel2 ){
+      //Scattered in 1st SVT Barrel
+      double svt1path = 0.0;
+      pairD Ssvt1 = helices[jj].pathLength(R_SVT_Barrel1);
+      if(Ssvt1.first > 0.0)Ssvt1.first=Ssvt1.first-helices[jj].period();
+      if(Ssvt1.second > 0.0)Ssvt1.second=Ssvt1.second-helices[jj].period();
+      if( Ssvt1.second < Ssvt1.first){
+        svt1path = Ssvt1.first;
+      }
+      else{
+        svt1path = Ssvt1.second;
+      }
+      StThreeVectorD xpos;
+      xpos = helices[jj].at(svt1path);
+      // Find momentum at this point
+      StThreeVectorD pmom;
+      pmom = helices[jj].momentumAt(svt1path, bfield*tesla);
 
-    // Find momentum at this point
-    StThreeVectorD pmom;
-    pmom = helices[jj].momentumAt(ifcpath, bfield*tesla);
-    double pxhat = pmom.x()/pmom.mag();
-    double pyhat = pmom.y()/pmom.mag();
-    double pzhat = pmom.z()/pmom.mag();
-
-    double incang = acos( xhat*pxhat + yhat*pyhat );
-    double lpath_ifc = X_X0_Ifc/cos(incang); // 0.52% is dr/Lrad for IFC
+      double incang = acos( (xpos.x()/xpos.mag())*(pmom.x()/pmom.mag()) + (xpos.y()/xpos.mag())*(pmom.y()/pmom.mag()) );
+      double lpath_svt1 = X_X0_SVTBarrel/cos(incang); 
+      lpath_tot = lpath_tot + lpath_svt1;
+    }
 
     // Find Coordinates of Intersect with Beam Pipe
     double bpipepath=0.0;
@@ -236,63 +313,42 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex)
       bpipepath = SBPipe.second;
     }
 
-    //    StThreeVectorD xpos;
-    xpos = helices[jj].at(bpipepath);
-    xhat = xpos.x()/xpos.mag();
-    yhat = xpos.y()/xpos.mag();
-    zhat = xpos.z()/xpos.mag();
-
+    StThreeVectorD xpos = helices[jj].at(bpipepath);
     // Find momentum at this point
-    //    StThreeVectorD pmom;
-    pmom = helices[jj].momentumAt(ifcpath, bfield*tesla);
-    pxhat = pmom.x()/pmom.mag();
-    pyhat = pmom.y()/pmom.mag();
-    pzhat = pmom.z()/pmom.mag();
+    StThreeVector pmom = helices[jj].momentumAt(bpipepath, bfield*tesla);
 
-    incang = acos( xhat*pxhat + yhat*pyhat );
+    double incang = acos( (xpos.x()/xpos.mag())*(pmom.x()/pmom.mag()) + (xpos.z()/xpos.mag())*(pmom.y()/pmom.mag()) );
     double lpath_bp = X_X0_BPipe/cos(incang); 
+    lpath_tot = lpath_tot + lpath_bp;
 
     // Do the rescattering in the gas
-    double lpath_gas = fabs(spath-ifcpath)/X0_N2;
+    double lpath_gas = fabs(spath)/X0_N2;
+    lpath_tot = lpath_tot + lpath_gas;
 
     // From Particle Data Booklet
     double beta = pmom.mag()/sqrt(pmom.mag()*pmom.mag()+0.139*0.139); //Assume pion
 
-    //
-    //    double dth1 = (0.0136/(beta*pmom.mag()))*sqrt(lpath_ifc)*(1+0.038*log(lpath_ifc));
-    //           dth1 = C_SQRT2*dth1;
-    //    cout<<"Error in angle    : "<<dth<<endl;
-
-    //    double dth2 = (0.0136/(beta*pmom.mag()))*sqrt(lpath_bp)*(1+0.038*log(lpath_bp));
-    //           dth2 = C_SQRT2*dth2;
-
-    //    double dth3 = (0.0136/(beta*pmom.mag()))*sqrt(lpath_gas)*(1+0.038*log(lpath_gas));
-    //           dth3 = C_SQRT2*dth3;
-
-    double lpath_tot = lpath_ifc + lpath_bp + lpath_gas;
     double dth4 = (0.0136/(beta*pmom.mag()))*sqrt(lpath_tot)*(1+0.038*log(lpath_tot));
            dth4 = C_SQRT2*dth4;
 
-    //    double dr1 = fabs(dth1*(spath-ifcpath));
-    //    double dr2 = fabs(dth2*(spath-bpipepath));
-    //    double dr3 = fabs(dth3*(spath-ifcpath));
-    double dr4 = fabs(dth4*(spath-ifcpath));
+    double dr4 = fabs(dth4*spath);
     sigma.push_back(dr4);
 
   }  
 
   // Do the extrapolation
   // This is entirely phenomenological now since there is no complete error matrix. 
-  if( helices.size() != TrkLength.size() )cout<<"This is a problem!"<<endl;
+  if( helices.size() != TrkLength.size() )cout<<"lmv: This is a problem!"<<endl;
   for(unsigned int kk=0; kk < helices.size(); kk++){
 
     double xoo = 0.0; double yoo = 0.0;
     spath = helices[kk].pathLength(xoo, yoo);
-    double D_fst_point = 0.030; // Estimated track resolution at first point
+    double D_fst_point = 0.030; // Estimated track resolution
 
     double dr_ext = 0.0;
     if( TrkLength[kk] > 1.0 ){
       dr_ext = D_fst_point + D_fst_point*fabs(spath/TrkLength[kk]);
+      sigma[kk] = sqrt( sigma[kk]*sigma[kk] + dr_ext*dr_ext );
     }
 
   }
@@ -362,7 +418,6 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex)
     
 
     // Check if the fit is any good
-
     // Loop over tracks again to get Chi2 and check each track's deviation
     double dmax=0.0;
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
@@ -412,6 +467,8 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex)
 
   chi2pdof = chi2/(helices.size()-1);
 
+  long IVertex = 1; //By definition
+
   // Mark the vertex tracks in the global_trk table
   for (long ll=0; ll<Ntrk; ll++){
     long idt = sec_pointer->id;
@@ -421,36 +478,42 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex)
       if( idt == index[ine] )icheck=1;
     }  
     if( icheck == 1 ){
-      // sec_pointer->id_start_vertex = 1;
-      sec_pointer->id_start_vertex = 7;
+      // This track was included in the Vertex
+      sec_pointer->id_start_vertex = 10.*IVertex + 1;
     }
     else{
-      sec_pointer->id_start_vertex = 99;
+      // This track was NOT included in the Vertex
+      sec_pointer->id_start_vertex = 10.*IVertex;
     } 
     sec_pointer++;
   }
 
   // Fill the dst_vertex table
   long Nvtx = vertex->GetNRows();
-  if( Nvtx != 1 ){cout<<"lvm: Problem, NPrimaryVertices>1 = "<<Nvtx<<endl;}
+  if( Nvtx <= 0 ){cout<<"lvm: Problem, NPrimaryVertices = "<<Nvtx<<endl;}
   dst_vertex_st *dst_vertex_pointer = vertex->GetTable();
-  dst_vertex_pointer->vtx_id      = 1;
-  dst_vertex_pointer->n_daughters = helices.size();
-  dst_vertex_pointer->id          = 1;
-  dst_vertex_pointer->iflag       = 1;
-  dst_vertex_pointer->det_id      = kTpcIdentifier; //TPC track by definition
-  dst_vertex_pointer->id_aux_ent  = 0;
-  dst_vertex_pointer->x           = XVertex.x();
-  dst_vertex_pointer->y           = XVertex.y();
-  dst_vertex_pointer->z           = XVertex.z();
-  dst_vertex_pointer->covar[0]    = sqrt(C11);
-  dst_vertex_pointer->covar[1]    = sqrt(C12);
-  dst_vertex_pointer->covar[2]    = sqrt(C22);
-  dst_vertex_pointer->covar[3]    = sqrt(C13);
-  dst_vertex_pointer->covar[4]    = sqrt(C23);
-  dst_vertex_pointer->covar[5]    = sqrt(C33);
-  dst_vertex_pointer->chisq[0]    = chi2pdof;
-  dst_vertex_pointer->chisq[1]    = 1.0; // Need to find the prob func in Root
+  dst_vertex_pointer[IVertex].vtx_id      = 1;
+  dst_vertex_pointer[IVertex].n_daughters = helices.size();
+  dst_vertex_pointer[IVertex].id          = 1;
+  dst_vertex_pointer[IVertex].iflag       = 1;
+  if( Is_SVT = 1){
+    dst_vertex_pointer[IVertex].det_id    = kTpcSsdSvtIdentifier; 
+  }
+  else{
+    dst_vertex_pointer[IVertex].det_id    = kTpcIdentifier; //TPC track by definition
+  }
+  dst_vertex_pointer[IVertex].id_aux_ent  = 0;
+  dst_vertex_pointer[IVertex].x           = XVertex.x();
+  dst_vertex_pointer[IVertex].y           = XVertex.y();
+  dst_vertex_pointer[IVertex].z           = XVertex.z();
+  dst_vertex_pointer[IVertex].covar[0]    = sqrt(C11);
+  dst_vertex_pointer[IVertex].covar[1]    = sqrt(C12);
+  dst_vertex_pointer[IVertex].covar[2]    = sqrt(C22);
+  dst_vertex_pointer[IVertex].covar[3]    = sqrt(C13);
+  dst_vertex_pointer[IVertex].covar[4]    = sqrt(C23);
+  dst_vertex_pointer[IVertex].covar[5]    = sqrt(C33);
+  dst_vertex_pointer[IVertex].chisq[0]    = chi2pdof;
+  dst_vertex_pointer[IVertex].chisq[1]    = 1.0; // Need to find the prob func in Root
 
   return kStOK;
 }
