@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.11 2000/06/29 22:42:22 lansdell Exp $
+// $Id: bfcread_hist_files_add.C,v 2.12 2000/07/07 04:18:55 lansdell Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.12  2000/07/07 04:18:55  lansdell
+// loops over all branches of multiple hist.root files and saves the summed histograms to a new hist.root file (thanks Gene!)
+//
 // Revision 2.11  2000/06/29 22:42:22  lansdell
 // now write to specified hist branch properly
 //
@@ -43,49 +46,28 @@
 //  - adds contents of all histograms in subsequent files
 //          with the same NAME into the newHist
 //
-//  **** needs to have new histograms written out to new file
-//
 // inputs: 
 //   nevents - number of files to process (assuming 1 "event" per file)
 //   fileName - .txt file with list of hist.root files from bfc output
 //   outHistFile - output .hist.root file
-//   MakerHistDir - directory name of Maker that you want histograms 
-//                  from (this will be first input when you did constructor)
-//                - see standard Maker names note below!
 //   TopDirTree - top level directory tree in your input hist file
 //                (this is 3rd argument of constructor for StTreeMaker that
 //                 you probably used to write the *.hist.root file)
 //            NOTE: if you ran bfc, then the TopDirTree = bfcTree !!
-//   mxCopy - maximum number of histograms in first file 
-//            (this is the max number that will be copied)
 //
 //======================================================================
 
-class StChain;
-StChain *chain;
-
-class StIOMaker;
-StIOMaker *IOMk=0;
-
-class StHistMaker;
-
-class StHistUtil;
-
-//------------------------------------------------------------------------
 
 void bfcread_hist_files_add(
-  int nevents=2,
+  int nevents=3,
   const Char_t *fileName="fileList.txt",
   const Char_t *outHistFile="kathy",
-  const Char_t *MakerHistDir="QA",
   const Char_t *TopDirTree="bfcTree")
 {
   cout << "bfcread_hist_files_add.C, input file list = " 
        << fileName << endl;
   cout << "bfcread_hist_files_add.C, output file list = "
        << outHistFile << endl;
-  cout << "bfcread_hist_files_add.C, directory name for hist = " 
-       << MakerHistDir << endl;
   cout << "bfcread_hist_files_add.C, top level directory in hist file = " 
        << TopDirTree << endl;
 
@@ -97,6 +79,7 @@ void bfcread_hist_files_add(
   gSystem->Load("StUtilities");
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("libglobal_Tables");
+  gSystem->Load("StTreeMaker");
 
 // read file list from text file
   char **fList = new char[512][200];
@@ -114,11 +97,15 @@ void bfcread_hist_files_add(
   }
   fin.close();
 
-//  Setup top part of chain
-  chain = new StChain("MyChain");
+// set up write chain which knows about hist and tree makers
+  StChain* chainW = new StChain("writeChain");
+  char *MakerHistDir= new char[128];
 
-// constructor for other maker (not used in chain)
-  StHistUtil   *HU  = new StHistUtil;
+// set up output file structure
+  StTreeMaker* treeMk = new StTreeMaker("outTree",outHistFile,TopDirTree);
+  treeMk->SetIOMode("w");
+  treeMk->SetBranch("histBranch");
+  treeMk->Init();
 
 // loop over files:
   Int_t istat=0;
@@ -126,84 +113,105 @@ void bfcread_hist_files_add(
   Int_t hCCount=0;
   Int_t hACount=0;
 
+  StFile fff(fList);
+  StIOMaker *IOMk = new StIOMaker("IO","r",&fff,TopDirTree);
+  IOMk->SetIOMode("r");
+  IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+  IOMk->SetBranch("histBranch",0,"r"); //activate hist Branch
+  IOMk->Init();
+// we DON'T want IOMaker in the write chain
+  IOMk->Shunt();
+
+// create arrays for histmakers, histutils for multiple branches/files
+  StHistMaker* HM[128];
+  StHistUtil*  HU[128];
+  int nbranch=0;
+
  EventLoop: if (ifl<nevents && istat==0) {  
   
-   cout << "Processing Event : " << ifl+1 << endl;
-   cout << endl << " NOW GOING TO POINT TO FILE " << ifl+1 <<  endl;
-
-   StIOMaker *IOMk = new StIOMaker("IO","r",fList[ifl],TopDirTree);
-   IOMk->SetIOMode("r");
-   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-   IOMk->SetBranch("histBranch",0,"r"); //activate hist Branch
-
-   HU->SetPntrToMaker((StMaker *)IOMk);
+   cout << endl << "Now processing file : " << ifl+1 << endl << endl;
 
 // --- each file contains only histograms (1 "event" == 1 Make call)
-   chain->Init();
-   chain->Clear();
-   istat = chain->Make();
 
-// get the TList pointer to the histograms:
-   TList  *dirList = 0;
-   dirList = HU->FindHists(MakerHistDir);
+   IOMk->Clear();
+   istat = IOMk->Open();
+   istat = IOMk->Make();
+ // from list_all macro
+   Event = IOMk->GetDataSet("hist");
+    if (!Event) {
+     cout << " No histogram branch found in file!" << endl;
+   }
 
-// clone(copy) histograms from first file  -----------------------------
-   if (ifl==0) {
+ // loop over all branches in the file
+   TDataSetIter nextHistList(Event);
+   St_ObjectSet *histContainer = 0;
+   TList *dirList = 0;
+   while (histContainer = (St_ObjectSet *)nextHistList.Next()) {
+     dirList = (TList *) histContainer->GetObject();
+     strcpy(MakerHistDir,histContainer->GetName());
+     MakerHistDir[strlen(MakerHistDir)-4] = 0;
+     //if (strcmp(MakerHistDir,"IO")==0 || strcmp(MakerHistDir,"IO_Root")==0) {
+     //  cout << " --- Skipping " << MakerHistDir << endl;
+     //  continue;
+     //}
+     cout << endl << " --- MakerHistDir : " << MakerHistDir << endl;
+
+// check for new branches and instantiate them
+     int bnum=-1;
+     for (int l=0; l<nbranch; l++) {
+       if (!strcmp(MakerHistDir,HM[l]->GetName())) {
+         bnum = l;
+	 break;
+       }
+     }
+
+     if (bnum==-1) {
+       bnum = nbranch++;
+       HM[bnum] = new StHistMaker(MakerHistDir);
+       HM[bnum]->Init();
+       HU[bnum] = new StHistUtil();
+       HU[bnum]->SetPntrToMaker(IOMk);
+
+// get the TList pointer to the histograms for this branch:
+       dirList = HU[bnum]->FindHists(MakerHistDir);
+
+// now make a copy of all histograms into the new histograms!
+       hCCount = HU[bnum]->CopyHists(dirList);
+
+       cout << "bfcread_hist_files_add.C, # histograms copied = " << 
+	 hCCount << endl;
+
+       HM[bnum]->SetHArray(HU[bnum]->getNewHist());
+       HM[bnum]->Make();
+     }  // first time
+
+     else {
+       dirList = HU[bnum]->FindHists(MakerHistDir);
 
 // now make a copy of all histograms into my new histograms!
-     hCCount = HU->CopyHists(dirList);
+       hACount = HU[bnum]->AddHists(dirList);
 
-     cout << "bfcread_hist_files_add.C, # histograms copied = " << 
-       hCCount << endl;
+       cout << "bfcread_hist_files_add.C, # histograms added = " << 
+	 hACount << endl;
 
-   }  // if ifl==0
-
-   else {
-
-// now make a copy of all histograms into my new histograms!
-     hACount = HU->AddHists(dirList,hCCount);
-
-     cout << "bfcread_hist_files_add.C, # histograms added = " << 
-       hACount << endl << endl;
-
-   }  //else (ifl not #1)
-
-   ifl++;                                
-   goto EventLoop;   
-
- } // loop over files
-
+     }  //else (ifl not #1)
 
 // to see an example of histograms being added together:   
-  cout << "bfcread_hist_files_add.C, an example! = " <<  endl;
-  Int_t imk = 0;
-  TH1** kathyArray=0;
-  for (imk=0;imk<hCCount;imk++) {
-    kathyArray = HU->getNewHist();
-    if (strcmp(kathyArray[imk]->GetName(),"TabQaEvsumTrkTot")==0) {       
-      kathyArray[imk]->Draw();
-      gPad->Update();
-    } // if strcmp -- to draw
-  } // for -- end of example
+     TH1** kathyArray = HU[bnum]->getNewHist();
+     for (Int_t imk=0;imk<hCCount;imk++) {
+       if (strcmp(kathyArray[imk]->GetName(),"TabQaEvsumTrkTot")==0) {       
+	 kathyArray[imk]->Draw();
+	 gPad->Update();
+       } // if strcmp -- to draw
+     } // for -- end of example
+   } // end while loop
 
-  if (kathyArray) {
+   ifl++;
+   istat = IOMk->Close();
+   goto EventLoop;
+ } // loop over files
 
-    // constructor 
-    StHistMaker *HM  = new StHistMaker(MakerHistDir);
-    HM->SetHArray(kathyArray);
-
-    // output hist.root file:
-    cout << " MakerHistDir : " << MakerHistDir << endl;
-    StTreeMaker* treeMk = new StTreeMaker(MakerHistDir,outHistFile,TopDirTree);
-    treeMk->SetIOMode("w");
-    treeMk->SetBranch("histBranch");
-
-    HM->Init();
-    treeMk->Init();
-    HM->Make();
-    treeMk->Make();
-    HM->Finish();
-    treeMk->Finish();
-  }
-
+  treeMk->Make();
+  treeMk->Finish();
+  IOMk->Finish();
 } // end of the macro!
