@@ -48,7 +48,7 @@ BfcItem BFC[] = {
   {"cy1e"        ,""  ,"","y1e,Cdefault"                                 ,"","","Turn on chain y1h",kFALSE},
   {"cy1h"        ,""  ,"","y1h,Cdefault"                                 ,"","","Turn on chain y1e",kFALSE},
   {"Cy2a"        ,""  ,"","y2a,tpc,ftpc,emc,l0,l3,Cdst,tags,Tree,svt"    ,"","","Turn on chain y2a",kFALSE},
-  {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,Cdst,tags,Tree,evout","",""
+  {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,Cdst,Kalman,tags,Tree,evout","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----","------------------------------------------------","","","",kFALSE},
@@ -757,8 +757,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.99 2000/06/11 22:27:31 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.100 2000/06/13 17:22:14 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.100  2000/06/13 17:22:14  fisyak
+// Add Kalman to p00h
+//
 // Revision 1.99  2000/06/11 22:27:31  fisyak
 // Restore Tags subchain
 //
