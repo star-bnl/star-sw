@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.9  1998/07/08 12:57:50  fisyak
+#  replace /usr/pgi => (PGI)
+#
 #  Revision 1.8  1998/07/07 21:55:32  fisyak
 #  HPUX fixes
 #
@@ -23,7 +26,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/07/07 21:55:32 $ 
+#             Last modification $Date: 1998/07/08 12:57:50 $ 
 #. default setings
 
 RM := rm -f
@@ -158,8 +161,8 @@ ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50))
   EXEFLAGS := -Wl,-Bdynamic  
   SOFLAGS  := -shared  
 ##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
-  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lXt -lXpm -lX11 -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
-  FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
+  CLIBS    := -L$(PGI)/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lXt -lXpm -lX11 -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
+  FLIBS    := -L$(PGI)/linux86/lib -lpgftnrtl 
   FFLAGS   := -DPGI  $(DEBUG)
   FEXTEND  := -Mextend
   YACC     := bison -y
