@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.cxx,v 2.9 2004/02/11 01:42:09 ullrich Exp $
+ * $Id: StZdcTriggerDetector.cxx,v 2.10 2004/04/06 19:39:44 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.cxx,v $
+ * Revision 2.10  2004/04/06 19:39:44  ullrich
+ * Added ZDC SMD support.
+ *
  * Revision 2.9  2004/02/11 01:42:09  ullrich
  * Added new constructor to load data from StTriggerData.
  *
@@ -47,7 +50,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.9 2004/02/11 01:42:09 ullrich Exp $";
+static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.10 2004/04/06 19:39:44 ullrich Exp $";
 
 ClassImp(StZdcTriggerDetector)
 
@@ -55,6 +58,8 @@ StZdcTriggerDetector::StZdcTriggerDetector()
 {
     fill_n(mAdc, static_cast<int>(mMaxZdcWords), 0);
     fill_n(mTdc, static_cast<int>(mMaxZdcWords), 0);
+    fill_n(mZdcSmdEast, static_cast<int>(mMaxZdcWords), 0);
+    fill_n(mZdcSmdWest, static_cast<int>(mMaxZdcWords), 0);
     fill_n(mSumAdc, 2, 0);
     mSum = 0;
     mVertexZ = 0;
@@ -64,6 +69,8 @@ StZdcTriggerDetector::StZdcTriggerDetector(const dst_TrgDet_st& t)
 {
     copy(t.adcZDC+0, t.adcZDC+mMaxZdcWords, mAdc);
     copy(t.tdcZDC+0, t.tdcZDC+mMaxZdcWords, mTdc);
+    fill_n(mZdcSmdEast, static_cast<int>(mMaxZdcWords), 0);
+    fill_n(mZdcSmdWest, static_cast<int>(mMaxZdcWords), 0);
     mSumAdc[east] = t.adcZDCEast;
     mSumAdc[west] = t.adcZDCWest;
     mSum          = t.adcZDCsum;
@@ -106,6 +113,12 @@ StZdcTriggerDetector::StZdcTriggerDetector(const StTriggerData& t)
     mSumAdc[west] = t.zdcAttenuated(west);
     mSum          = t.zdcAtAddress(14);
 
+
+    for (int i=0; i<mMaxZdcWords; i++) 
+      mZdcSmdEast[i] = t.zdcSMD(east, ((i>7) ? 1 : 0), ((i>7) ? (i-8) : i));
+    for (int i=0; i<mMaxZdcWords; i++) 
+      mZdcSmdWest[i] = t.zdcSMD(west, ((i>7) ? 1 : 0), ((i>7) ? (i-8) : i));
+
     fill_n(mTdc, static_cast<int>(mMaxZdcWords), 0); // always 0
 }
 
@@ -140,6 +153,19 @@ StZdcTriggerDetector::adcSum(StBeamDirection dir) const
 {
     return mSumAdc[dir];
 }
+
+
+float
+StZdcTriggerDetector::zdcSmd(StBeamDirection eastwest, int verthori, int strip) const
+{
+    
+    if (eastwest<0 || eastwest>1) return 0.;
+    if (verthori<0 || verthori>1) return 0.;
+    if (strip > 8) return 0.;
+    
+    return ((eastwest<1) ? (mZdcSmdEast[strip -1 + verthori*8]) : (mZdcSmdWest[strip-1 + verthori*8])); 
+}
+
 
 float
 StZdcTriggerDetector::adcSum() const {return mSum;}
@@ -177,4 +203,16 @@ void
 StZdcTriggerDetector::setVertexZ(float val)
 {
     mVertexZ = val;
+}
+
+void 
+StZdcTriggerDetector::setZdcSmd(StBeamDirection eastwest, int verthori, int strip, float val)
+{
+    if (eastwest<0 || eastwest>1) return ;
+    if (verthori<0 || verthori>1) return ;
+    if (strip > 8) return ;
+    
+    if (eastwest==0) mZdcSmdEast[strip -1 + verthori*8] = val;
+    else if (eastwest==1) mZdcSmdWest[strip -1 + verthori*8] = val;
+    
 }

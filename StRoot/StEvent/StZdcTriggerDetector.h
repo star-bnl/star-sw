@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.h,v 2.8 2004/02/11 01:42:09 ullrich Exp $
+ * $Id: StZdcTriggerDetector.h,v 2.9 2004/04/06 19:39:44 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.h,v $
+ * Revision 2.9  2004/04/06 19:39:44  ullrich
+ * Added ZDC SMD support.
+ *
  * Revision 2.8  2004/02/11 01:42:09  ullrich
  * Added new constructor to load data from StTriggerData.
  *
@@ -63,12 +66,14 @@ public:
     float         adc(unsigned int) const;
     float         tdc(unsigned int) const;
     float         vertexZ() const;
+    float         zdcSmd(StBeamDirection eastwest, int verthori, int strip) const;
 
     void setAdc(unsigned int, float);
     void setTdc(unsigned int, float);
     void setAdcSum(StBeamDirection, float);
     void setAdcSum(float);
     void setVertexZ(float);
+    void setZdcSmd(StBeamDirection eastwest, int verthori, int strip, float val);
 
     unsigned int   numberOfZdcCounters() const;  // usage depreciated, to be removed soon
     
@@ -79,7 +84,10 @@ protected:
     Float_t  mSumAdc[2];
     Float_t  mSum;
     Float_t  mVertexZ;
+
+    Float_t  mZdcSmdEast[mMaxZdcWords];
+    Float_t  mZdcSmdWest[mMaxZdcWords];
     
-    ClassDef(StZdcTriggerDetector,2)
+    ClassDef(StZdcTriggerDetector,3)
 };
 #endif
