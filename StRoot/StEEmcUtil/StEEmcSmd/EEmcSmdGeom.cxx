@@ -2,7 +2,7 @@
 
 /*****************************************************************************
  *
- * $Id: EEmcSmdGeom.cxx,v 1.1 2004/01/29 15:26:10 jwebb Exp $
+ * $Id: EEmcSmdGeom.cxx,v 1.2 2004/01/29 16:37:25 jwebb Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -27,6 +27,10 @@
  *****************************************************************************
  *
  * $Log: EEmcSmdGeom.cxx,v $
+ * Revision 1.2  2004/01/29 16:37:25  jwebb
+ * Removed dependence on StMaker.h and PhysicalConstants.h.  Should be fully
+ * decoupled from Star environment now.
+ *
  * Revision 1.1  2004/01/29 15:26:10  jwebb
  * The StEEmcSmdGeom class was split into two classes.  All StRoot-independent
  * code has been moved to EEmcSmdGeom.  TVector3 replaces StThreeVectorD in
@@ -42,8 +46,15 @@
 */
 #include "EEmcSmdGeom.h"
 #include "EEmcStripGeom.h"
-#include "PhysicalConstants.h"
-#include "StMaker.h"
+
+// decouple from StarClassLibrary
+//#include "PhysicalConstants.h"  
+#ifndef HEP_SYSTEM_OF_UNITS_H
+#include <math.h>
+static const double     radian      = 1.;
+static const double     pi          = M_PI; // from <math.h>
+static const double     degree      = (M_PI/180.0)*radian;
+#endif
 
 /// defaulty constructor
 ClassImp(EEmcSmdGeom)
