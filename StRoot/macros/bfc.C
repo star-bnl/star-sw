@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.16 1998/09/26 00:35:31 fisyak Exp $
+// $Id: bfc.C,v 1.17 1998/09/27 01:24:22 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.17  1998/09/27 01:24:22  fisyak
+// bfc.C for whole file
+//
 // Revision 1.16  1998/09/26 00:35:31  fisyak
 // Add real files
 //
@@ -88,7 +91,7 @@
   StChain chain("StChain");
 //  Create the makers to be called by the current chain
   St_run_Maker run_Maker("run_Maker","run/params");
-  if (xdfin) {
+  if (xdf_in) {
     St_xdfin_Maker xdfin("xdfin_Maker","event/geant");
     chain.SetInputXDFile(xdf_in);
   }
@@ -97,12 +100,12 @@
   St_srs_Maker srs_Maker("srs_Maker","event/data/svt/hits");
   //  St_fss_Maker fss_Maker("fss_Maker","event/raw_data/ftpc/pixels");
   //  St_tss_Maker tss_Maker("tss_Maker","event/raw_data/tpc");
+// Set parameters
+//  tss_Maker.adcxyzon();
   St_tcl_Maker tcl_Maker("tcl_Maker","event/data/tpc/hits");
   St_stk_Maker stk_Maker("stk_Maker","event/data/svt/tracks");
   St_tpt_Maker tpt_Maker("tpt_Maker","event/data/tpc/tracks");
   St_dst_Maker dst_Maker("dst_Maker","event/data/global");
-// Set parameters
-//  tss_Maker.adcxyzon();
   chain.PrintInfo();
 // Init the mai chain and all its makers
   chain.Init();
@@ -144,19 +147,21 @@
     //    chain.FillTree();
     //  histCanvas->Modified();
     //  histCanvas->Update();
-    chain.Clear();
+    if (i != Nevents) chain.Clear();
   }
-  chain.Finish();
-  delete xdf_in;
-  if (xdf_out){
-    delete xdf_out;;
-    gBenchmark->Print("xdf out");
+  if (Nevents > 1) {
+    chain.Finish();
+    delete xdf_in;
+    if (xdf_out){
+      delete xdf_out;;
+      gBenchmark->Print("xdf out");
+    }
+    if (root_out){
+      root_out->Close();   
+      delete root_out;
+      gBenchmark->Print("root i/o");
+    }
+    gBenchmark->Print("bfc");
   }
-  if (root_out){
-    root_out->Close();   
-    delete root_out;
-    gBenchmark->Print("root i/o");
-  }
-  gBenchmark->Print("bfc");
-  //  TBrowser b;
+  else TBrowser b;
 }
