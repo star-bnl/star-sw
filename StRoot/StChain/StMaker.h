@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.15 1999/03/11 01:23:59 perev Exp $
+// $Id: StMaker.h,v 1.16 1999/03/19 20:30:50 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.16  1999/03/19 20:30:50  perev
+// GetCVSTag introduced
+//
 // Revision 1.15  1999/03/11 01:23:59  perev
 // new schema StChain
 //
@@ -59,6 +62,7 @@ protected:
    St_DataSet     *m_ConstSet;		//!  
    St_DataSet     *m_GarbSet;		//!  
    TList          *m_Inputs;	 	//!list of logInput:ActualInput
+   TList          *m_Histograms;	//!list of Histograms
    static StMaker *fgStChain;     	//current pointer to StChain
    Int_t	   m_Mode;		// Integer mode of maker
    Int_t           m_Number;        	//Serial event number
@@ -104,6 +108,8 @@ public:
    virtual Int_t     	GetDate()  const ;
    virtual Int_t     	GetTime()  const ;
    virtual const Char_t *GetEventType() const ;
+   static  const Char_t *VersionTag() {return GetCVSTag();};
+
 
 //		Get
    virtual St_DataSet  *GetDataSet (const char* logInput) const ;
@@ -123,6 +129,8 @@ public:
    virtual TString      GetInput(const char* logInput) const ;
    virtual TList       *GetMakeList() const ;
    virtual StMaker     *GetParentMaker () const;
+   virtual StMaker     *GetMaker (const char *mkname);
+   virtual StMaker     *Maker (const char *mkname){return GetMaker (mkname);};
 
 
 //    Setters for flags and switches
@@ -139,6 +147,16 @@ public:
 //		Static functions
    static  StMaker     *GetMaker(const St_DataSet *ds)  ;
    static EDataSetPass  ClearDS (St_DataSet* ds,void *user );
+
+//		must be in .cxx
+   static const char   *GetCVSIdC();
+
+//		must be in here in .h
+   static const char   *GetCVSIdH() 
+    {static const char cvs[]="$Id: StMaker.h,v 1.16 1999/03/19 20:30:50 perev Exp $";
+     return cvs;};
+   static const char   *GetCVSTag()
+     {static const char cvs[]="$Name:  $"; return cvs;};
 
 protected:
 TObject        *GetDirObj(const char *dir) const;

@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.21 1999/03/11 01:23:59 perev Exp $
+// $Id: StMaker.cxx,v 1.22 1999/03/19 20:30:49 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.22  1999/03/19 20:30:49  perev
+// GetCVSTag introduced
+//
 // Revision 1.21  1999/03/11 01:23:59  perev
 // new schema StChain
 //
@@ -46,9 +49,14 @@
 #include "StMaker.h"
 #include "StChain.h"
 #include "St_Table.h"
+
 StMaker *StMaker::fgStChain = 0;
 
 ClassImp(StMaker)
+
+const char  *StMaker::GetCVSIdC()
+{static const char cvs[]="$Id: StMaker.cxx,v 1.22 1999/03/19 20:30:49 perev Exp $";
+return cvs;};
 
 //_____________________________________________________________________________
 StMaker::StMaker()
@@ -68,7 +76,7 @@ StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker")
    m_DataSet  = new St_ObjectSet(".data") ;Add(m_DataSet);
    m_ConstSet = new St_ObjectSet(".const");Add(m_ConstSet);
    m_GarbSet  = new St_ObjectSet(".garb" );Add(m_GarbSet);
-
+   AddHist(0); m_Histograms = GetHistList();
    gStChain = this; //?????????????????????????????????????????????????????
 
 }
@@ -83,6 +91,12 @@ StMaker *StMaker::GetParentMaker() const
 { 
   St_DataSet *par = GetParent(); if (!par) return 0;
   return (StMaker*)par->GetParent();
+}
+//______________________________________________________________________________
+StMaker *StMaker::GetMaker(const char *mkname) 
+{ 
+  TString path(".make/"); path+=mkname;
+  return (StMaker*)GetDataSet((const char*)path);
 }
 //______________________________________________________________________________
 TObject *StMaker::GetDirObj(const char *dir) const
@@ -102,7 +116,8 @@ void StMaker::SetDirObj(TObject *obj,const char *dir)
 //______________________________________________________________________________
 void   StMaker::AddObj(TObject *obj,const char *dir)
 { 
-  St_ObjectSet *set = (St_ObjectSet*)GetDataSet(dir);
+  assert (dir[0]=='.');
+  St_ObjectSet *set = (St_ObjectSet*)Find(dir);
   if (!set) { // No dir, make it
     set = new St_ObjectSet(dir); Add(set);}
 
@@ -110,7 +125,7 @@ void   StMaker::AddObj(TObject *obj,const char *dir)
   if (!list) {// No list, make it
     list = new TList();
     set->SetObject((TObject*)list);}
-  list->Add(obj);
+  if (obj) list->Add(obj);
 }
 //______________________________________________________________________________
 void   StMaker::AddData(St_DataSet *ds, const char* dir)

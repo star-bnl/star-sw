@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.35 1999/03/11 01:23:58 perev Exp $
+// $Id: StChain.cxx,v 1.36 1999/03/19 20:30:48 perev Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.36  1999/03/19 20:30:48  perev
+// GetCVSTag introduced
+//
 // Revision 1.35  1999/03/11 01:23:58  perev
 // new schema StChain
 //
@@ -251,7 +254,10 @@
 StChain *fgStChain;
 
 ClassImp(StChain)
-
+//_____________________________________________________________________________
+const char  *StChain::GetCVSIdC()
+{static const char cvs[]="$Id: StChain.cxx,v 1.36 1999/03/19 20:30:48 perev Exp $";
+ return cvs;};
 
 //_____________________________________________________________________________
 StChain::StChain():StMaker("StChain") 
@@ -263,9 +269,7 @@ StChain::StChain():StMaker("StChain")
 
 //_____________________________________________________________________________
 StChain::StChain(const char *name):
-StMaker(name),
-m_VersionCVS("$Id: StChain.cxx,v 1.35 1999/03/11 01:23:58 perev Exp $"),
-m_VersionTag("$Name:  $")
+StMaker(name)
 {
    m_Version     = 100;       //StChain  version number and release date
    m_VersionDate = 180698;
@@ -302,7 +306,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.35 1999/03/11 01:23:58 perev Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.36 1999/03/19 20:30:48 perev Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");

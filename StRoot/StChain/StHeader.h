@@ -32,8 +32,7 @@ public:
   
   virtual  void  SetEvent(Int_t event) {fEvent = event;}
   virtual  Int_t GetEvent() {return fEvent;}
-
-  virtual void Dump();
+  virtual  void Dump();
   
   ClassDef(StHeader,1) //STAR event header
     
