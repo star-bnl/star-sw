@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.h,v 2.2 2001/07/19 00:04:07 ullrich Exp $
+ * $Id: StL0Trigger.h,v 2.3 2001/07/21 00:46:54 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.h,v $
+ * Revision 2.3  2001/07/21 00:46:54  ullrich
+ * Changed nMaxBcData from 8 to 16 since table changed.
+ *
  * Revision 2.2  2001/07/19 00:04:07  ullrich
  * Updated to handle new trigger info.
  *
@@ -66,7 +69,7 @@ public:
     void setBcDataArray(unsigned int, unsigned short);
     
 protected:
-    enum {mMaxPixels = 32, mMaxLastDsm = 8, mMaxBcData = 8};
+    enum {mMaxPixels = 32, mMaxLastDsm = 8, mMaxBcData = 16};
     Int_t         mCoarsePixelArray[mMaxPixels];
     Int_t         mMwcCtbMultiplicity;
     Int_t         mMwcCtbDipole;
