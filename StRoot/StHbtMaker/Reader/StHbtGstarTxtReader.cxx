@@ -143,10 +143,10 @@ StHbtEvent* StHbtGstarTxtReader::ReturnHbtEvent(){
   const StHbtThreeVector vertexPos(0.0,0.0,0.0);
 
   event->SetEventNumber(ievent);
-  event->SetCtbMult(0.);
-  event->SetZdcAdcEast(0.);
-  event->SetZdcAdcWest(0.);
-  event->SetNumberOfTpcHits(0.);
+  event->SetCtbMult(0);
+  event->SetZdcAdcEast(0);
+  event->SetZdcAdcWest(0);
+  event->SetNumberOfTpcHits(0);
   event->SetNumberOfTracks(ntracks);
   event->SetNumberOfGoodTracks(ntracks);  // same for now
   event->SetReactionPlane(0.);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.36 2001/12/05 14:42:18 laue Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.37 2003/01/31 20:22:57 magestro Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.37  2003/01/31 20:22:57  magestro
+ * Small changes to eliminate compiler warnings
+ *
  * Revision 1.36  2001/12/05 14:42:18  laue
  * updated for trigger(action)word and l3TriggerAlgorithm
  *
@@ -356,7 +359,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
       unsigned int nAlgorithms = mL3EventSummary->numberOfAlgorithms();
       cout << "Number of L3 algorithms for this run: " << nAlgorithms << endl;
       const StSPtrVecL3AlgorithmInfo& mL3AlgInfo = mL3EventSummary->algorithms();
-      for (int i=0; i<nAlgorithms; i++) {
+      for (unsigned int i=0; i<nAlgorithms; i++) {
 	int algId = mL3AlgInfo[i]->id();
 	nL3Processed = mL3AlgInfo[i]->numberOfProcessedEvents();
 	nL3Accept = mL3AlgInfo[i]->numberOfAcceptedEvents();
@@ -369,7 +372,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
       const StPtrVecL3AlgorithmInfo& mL3TriggerAlgInfo = mL3EventSummary->algorithmsAcceptingEvent();
       cout << "Number of L3 algorithms which triggered this event: " << mL3TriggerAlgInfo.size() << endl;
       cout << "triggered algorithms: ";
-      for (int i=0; i<mL3TriggerAlgInfo.size(); i++) cout << mL3TriggerAlgInfo[i]->id() << "  ";
+      for (unsigned int i=0; i<mL3TriggerAlgInfo.size(); i++) cout << mL3TriggerAlgInfo[i]->id() << "  ";
       cout << endl;
 
       firedL3TriggerAlgorithm=0;
@@ -405,10 +408,10 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   if (!PidAlgorithm) cout << " StStandardHbtEventReader::ReturnHbtEvent() - Whoa!! No PidAlgorithm!! " << endl;
 
   // the following just point to particle definitions in StEvent
-  StElectron* Electron = StElectron::instance();
-  StPionPlus* Pion = StPionPlus::instance();
-  StKaonPlus* Kaon = StKaonPlus::instance();
-  StProton* Proton = StProton::instance();
+  //StElectron* Electron = StElectron::instance();
+  //StPionPlus* Pion = StPionPlus::instance();
+  //StKaonPlus* Kaon = StKaonPlus::instance();
+  //StProton* Proton = StProton::instance();
 
   int iNoHits = 0;
   int iNoPidTraits = 0;
@@ -433,7 +436,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
       cout << cTrack->impactParameter() << " ";
       cout << cTrack->numberOfPossiblePoints() << " ";
       cout << endl;
-#endif STHBTDEBUG
+#endif 
     }
   }
 
@@ -446,8 +449,8 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   
   if (rEvent->triggerDetectorCollection()) {
     StZdcTriggerDetector zdc = rEvent->triggerDetectorCollection()->zdc();
-    hbtEvent->SetZdcAdcWest(zdc.adc(10)); // Zdc West sum attenuated
-    hbtEvent->SetZdcAdcEast(zdc.adc(13)); // Zdc East sum attenuated
+    hbtEvent->SetZdcAdcWest((int)zdc.adc(10)); // Zdc West sum attenuated
+    hbtEvent->SetZdcAdcEast((int)zdc.adc(13)); // Zdc East sum attenuated
   }
   else {
     cout << "StStandardHbtEventReader::Return(...) - no triggerDetectorCollection " << endl;
@@ -612,7 +615,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   /* now read the kinks from the StEvent */
   /* *************************************/
   // Now do the Kink Stuff - mal 25May2001
-  StKinkVertex* starKink;
+  //StKinkVertex* starKink;
   StHbtKink* hbtKink;
   if( mReadKinks ) {
     for (unsigned int icount=0; icount<(unsigned int)rEvent->kinkVertices().size(); icount++)

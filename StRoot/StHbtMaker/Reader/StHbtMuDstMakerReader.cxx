@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMuDstMakerReader.cxx,v 1.1 2002/08/27 18:21:26 laue Exp $
+ * $Id: StHbtMuDstMakerReader.cxx,v 1.2 2003/01/31 20:22:57 magestro Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -55,7 +55,7 @@ ClassImp(StHbtMuDstMakerReader)
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 StHbtMuDstMakerReader::StHbtMuDstMakerReader(StMuDstMaker* maker) : 
-  mMuDstMaker(maker), mFlowMaker(0),
+  mFlowMaker(0), mMuDstMaker(maker), 
   mTrackType(primary), mReadTracks(1), 
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
   mHbtEvent(0)
@@ -141,6 +141,9 @@ void StHbtMuDstMakerReader::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StHbtMuDstMakerReader.cxx,v $
+ * Revision 1.2  2003/01/31 20:22:57  magestro
+ * Small changes to eliminate compiler warnings
+ *
  * Revision 1.1  2002/08/27 18:21:26  laue
  * New reader. Wrapper around the StMuDstMaker
  *
