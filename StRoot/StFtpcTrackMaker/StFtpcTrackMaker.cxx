@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.65 2004/08/10 12:21:42 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.66 2004/08/10 12:42:10 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.66  2004/08/10 12:42:10  jcs
+// move DEBUGFILE and tracking method define statements from .h to .cxx
+//
 // Revision 1.65  2004/08/10 12:21:42  jcs
 // remove histograms which are also created in St_QA_Maker
 //
@@ -262,6 +265,13 @@
 //----------Author:        Markus D. Oldenburg
 //----------Last Modified: 10.11.2000
 //----------Copyright:     &copy MDO Production 1999
+
+// Uncomment the following line for cluster and/or laser analysis
+//#define DEBUGFILE
+
+// Select tracking method
+#define TWOCYCLETRACKING
+//#define LASERTRACKING
 
 #include "StFtpcTrackMaker.h"
 #include "StFtpcVertex.hh"
@@ -818,7 +828,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.65 2004/08/10 12:21:42 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.66 2004/08/10 12:42:10 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
