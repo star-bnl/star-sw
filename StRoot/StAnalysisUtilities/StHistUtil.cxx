@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.11 2002/04/23 01:59:54 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.12 2002/09/06 02:51:34 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.12  2002/09/06 02:51:34  genevb
+// Remove limit on maximum number of histograms that can be copied
+//
 // Revision 2.11  2002/04/23 01:59:54  genevb
 // Addition of BBC/FPD histos
 //
@@ -94,6 +97,9 @@ StHistUtil::StHistUtil(){
   debug = kFALSE;
   m_CurPrefix = -1;
 
+  maxHistCopy = 512;
+  newHist = new (TH1*)[maxHistCopy];
+  memset(newHist,0,maxHistCopy*sizeof(TH1*));
 
 }
 //_____________________________________________________________________________
@@ -603,11 +609,6 @@ Int_t StHistUtil::CopyHists(TList *dirList)
 
 // create array of pointers to the new histograms I will create
  Int_t ilg = 0;
- cout << " StHistUtil::CopyHists - max # hist to copy (hardwired) = " << 
-   maxHistCopy << endl;
- for (ilg=0;ilg<maxHistCopy;ilg++) {
-      newHist[ilg]=0;
- }
 
   Int_t ijk=0;
   Int_t histCopyCount = 0;
@@ -618,9 +619,16 @@ Int_t StHistUtil::CopyHists(TList *dirList)
     while ((obj = nextObj())) {    
      if (obj->InheritsFrom("TH1")) {
        histCopyCount++;         
-       if (ijk<maxHistCopy){
-         newHist[ijk] = ((TH1 *)obj->Clone());
+       if (ijk>=maxHistCopy){
+         Int_t newMaxHistCopy = maxHistCopy * 4;
+         TH1** temp1 = new (TH1*)[newMaxHistCopy];
+         memset(temp1,0,newMaxHistCopy*sizeof(TH1*));
+         memcpy(temp1,newHist,maxHistCopy*sizeof(TH1*));
+         delete newHist;
+         newHist = temp1;
+         maxHistCopy = newMaxHistCopy;
        } // if ijk
+       newHist[ijk] = ((TH1 *)obj->Clone());
        ijk++;
      }   // if obj
     }    // while obj
