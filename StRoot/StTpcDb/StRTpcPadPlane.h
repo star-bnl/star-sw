@@ -1,3 +1,19 @@
+/***************************************************************************
+ *
+ * $Id: StRTpcPadPlane.h,v 1.9 1999/12/16 22:00:53 hardtke Exp $
+ *
+ * Author:  David Hardtke
+ ***************************************************************************
+ *
+ * Description: TPC Pad Plane Geometry Interface 
+ *
+ ***************************************************************************
+ *
+ * $Log: StRTpcPadPlane.h,v $
+ * Revision 1.9  1999/12/16 22:00:53  hardtke
+ * add CVS tags
+ *
+ **************************************************************************/
 #ifndef __STRTPCPADPLANE__
 #define __STRTPCPADPLANE__
 //#include <TObject.h>

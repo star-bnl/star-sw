@@ -1,3 +1,19 @@
+/***************************************************************************
+ *
+ * $Id: StRTpcElectronics.h,v 1.7 1999/12/16 22:00:53 hardtke Exp $
+ *
+ * Author:  David Hardtke
+ ***************************************************************************
+ *
+ * Description: Root implementation of Tpc Electronics interface  
+ *
+ ***************************************************************************
+ *
+ * $Log: StRTpcElectronics.h,v $
+ * Revision 1.7  1999/12/16 22:00:53  hardtke
+ * add CVS tags
+ *
+ **************************************************************************/
 #ifndef __STRTPCELECTRONICS__
 #define __STRTPCELECTRONICS__
 #include "StTpcElectronicsI.h"

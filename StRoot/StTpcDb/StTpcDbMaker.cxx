@@ -1,9 +1,20 @@
-//*-- Author : David Hardtke
-
-//////////////////////////////////////////////////////////////////////////
-// This make initializes and controls the TPC interface to the database
-//
-//////////////////////////////////////////////////////////////////////////
+/***************************************************************************
+ *
+ * $Id: StTpcDbMaker.cxx,v 1.5 1999/12/16 22:00:53 hardtke Exp $
+ *
+ * Author:  David Hardtke
+ ***************************************************************************
+ *
+ * Description:  
+ *This make initializes and controls the TPC interface to the database
+ *
+ ***************************************************************************
+ *
+ * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.5  1999/12/16 22:00:53  hardtke
+ * add CVS tags
+ *
+ **************************************************************************/
 
 #include "StTpcDbMaker.h"
 #include "StChain.h"

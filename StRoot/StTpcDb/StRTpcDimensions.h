@@ -1,3 +1,19 @@
+/***************************************************************************
+ *
+ * $Id: StRTpcDimensions.h,v 1.7 1999/12/16 22:00:52 hardtke Exp $
+ *
+ * Author:  David Hardtke
+ ***************************************************************************
+ *
+ * Description: Root Implementation of Tpc Dimensions interface  
+ *
+ ***************************************************************************
+ *
+ * $Log: StRTpcDimensions.h,v $
+ * Revision 1.7  1999/12/16 22:00:52  hardtke
+ * add CVS tags
+ *
+ **************************************************************************/
 #ifndef __STRTPCDIMENSIONS__
 #define __STRTPCDIMENSIONS__
 #include "StTpcDimensionsI.h"

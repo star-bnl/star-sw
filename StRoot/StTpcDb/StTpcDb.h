@@ -1,3 +1,23 @@
+/***************************************************************************
+ *
+ * $Id: StTpcDb.h,v 1.11 1999/12/16 22:00:53 hardtke Exp $
+ *
+ * Author:  David Hardtke
+ ***************************************************************************
+ *
+ * Description: This is the interface between the database and the offline
+ *              TPC software.  This classes takes care of the annoying
+ *              calls to the root infrastucture, packages and manipulates
+ *              the data, and returns the data to the user via simple
+ *              interface classes.    
+ *
+ ***************************************************************************
+ *
+ * $Log: StTpcDb.h,v $
+ * Revision 1.11  1999/12/16 22:00:53  hardtke
+ * add CVS tags
+ *
+ **************************************************************************/
 #ifndef ClassStTpcDb
 #define ClassStTpcDb
 

@@ -1,3 +1,19 @@
+/***************************************************************************
+ *
+ * $Id: StTpcDbMaker.h,v 1.3 1999/12/16 22:00:53 hardtke Exp $
+ *
+ * Author:  David Hardtke
+ ***************************************************************************
+ *
+ * Description:  This maker creates StTpcDb.  
+ *
+ ***************************************************************************
+ *
+ * $Log: StTpcDbMaker.h,v $
+ * Revision 1.3  1999/12/16 22:00:53  hardtke
+ * add CVS tags
+ *
+ **************************************************************************/
 #ifndef STAR_StTpcDbMaker
 #define STAR_StTpcDbMaker
 
@@ -30,7 +46,7 @@ class StTpcDbMaker : public StMaker {
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.2 1999/09/21 20:14:35 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.3 1999/12/16 22:00:53 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker, 1)   //StAF chain virtual base class for Makers
 };

@@ -1,3 +1,20 @@
+/***************************************************************************
+ *
+ * $Id: StTpcSlowControlSimI.h,v 1.2 1999/12/16 22:00:54 hardtke Exp $
+ *
+ * Author:  David Hardtke
+ ***************************************************************************
+ *
+ * Description: Abstract Interface for Tpc Slow Control parameters needed
+ *              for TRS  
+ *
+ ***************************************************************************
+ *
+ * $Log: StTpcSlowControlSimI.h,v $
+ * Revision 1.2  1999/12/16 22:00:54  hardtke
+ * add CVS tags
+ *
+ **************************************************************************/
 #ifndef __STTPCSLOWCONTROLSIMI__
 #define __STTPCSLOWCONTROLSIMI__
 #include <TObject.h>
