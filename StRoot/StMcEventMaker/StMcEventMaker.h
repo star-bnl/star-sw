@@ -1,7 +1,11 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.5 2000/05/11 14:40:29 calderon Exp $
+ * $Id: StMcEventMaker.h,v 1.6 2000/06/06 03:00:18 calderon Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.6  2000/06/06 03:00:18  calderon
+ * Introduction of Calorimeter classes.  Filled according to algorithm from
+ * Aleksei, plus some additional checks.
+ *
  * Revision 1.5  2000/05/11 14:40:29  calderon
  * Added switches to do/do not load hit information from different detectors.
  * By default, all the detectors' hit information is loaded.
@@ -31,7 +35,7 @@
 
 class StMcEvent;
 class StMcTrack;
-
+class StMcEmcHitCollection;
 class StMcEventMaker : public StMaker {
 public:
 
@@ -46,7 +50,7 @@ public:
     StMcEvent* currentMcEvent() { return mCurrentMcEvent;}; 
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.5 2000/05/11 14:40:29 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.6 2000/06/06 03:00:18 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -57,9 +61,11 @@ public:
     Bool_t  doUseSvt;              //!
     Bool_t  doUseFtpc;             //!
     Bool_t  doUseRich;             //!
+    Bool_t  doUseBemc;             //!
 protected:
     void   printEventInfo();
     void   printTrackInfo(StMcTrack*);
+    void   printEventInfoForEmc(StMcEmcHitCollection*);
 
 private:
     Bool_t drawinit;
