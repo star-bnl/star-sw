@@ -1,31 +1,27 @@
-/*:Description: 
-  :Synonyms::::
-  :Source:
-  :Update:
-  :Update frequncy:
-  :Reminder:
-  :Recall frequency:
-  :Size of Data:
-  :Pointer to data:  
-*/
-struct tpcGlobalPosition {
+/*    tpcGlobalPosition.idl
+*
+*  Table: tpcGlobalPosition
+*
+*       description:
+*/ 
 
-  /*  type varnam;      Units : Comments */
 
-  float LocalxShift;     /* cm : x position of TPC center in magnet frame */
-  float LocalyShift;     /* cm : y position of TPC center in magnet frame */
-  float LocalzShift;     /* cm : z position of TPC center in magnet frame */
+struct tpcGlobalPosition { 
 
-  //use direction cosines
+   float  LocalxShift;   /*     cm : x position of TPC center in magnet frame  */
+   float  LocalyShift;   /*     cm : y position of TPC center in magnet frame  */
+   float  LocalzShift;   /*     cm : z position of TPC center in magnet frame  */
+   float  PhiXY;   /*     radians: rotation angle around z axis  */
+   float  PhiXZ;   /*     radians: rotation angle around y axis  */
+   float  PhiYZ;   /*     radians: rotation angle around x axis  */
+   float  XX;   /*     XX element of rotation matrix  */
+   float  YY;   /*     YY element of rotation matrix  */
+   float  ZZ;   /*     ZZ element of rotation matrix  */
+   float  PhiXY_geom;   /*     radians: geometrical rotation angle around z axis  */
+   float  PhiXZ_geom;   /*     radians: geometrical rotation angle around y axis  */
+   float  PhiYZ_geom;   /*     radians: geometrical rotation angle around x axis  */
+   float  XX_geom;   /*     XX element of geometrical rotation matrix  */
+   float  YY_geom;   /*     YY element of geometrical rotation matrix  */
+   float  ZZ_geom;   /*     ZZ element of geometrical rotation matrix  */
 
-  float PhiXY;         /* radians: rotation angle around z axis */
-  float PhiXZ;         /* radians: rotation angle around y axis */
-  float PhiYZ;         /* radians: rotation angle around x axis */
-  float XX;            /* XX element of rotation matrix */
-  float YY;            /* YY element of rotation matrix */
-  float ZZ;            /* ZZ element of rotation matrix */ 
-
-};
-
-/*  Last mod. for tpcGlobalPosition:  $Log $  */
-
+ };  
