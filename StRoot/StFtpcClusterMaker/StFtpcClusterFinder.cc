@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.10 2000/11/27 14:09:07 hummler Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.11 2001/01/15 18:18:00 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.11  2001/01/15 18:18:00  jcs
+// replace hidden constants with parameters
+//
 // Revision 1.10  2000/11/27 14:09:07  hummler
 // implement tzero and lorentz angle correction factor
 //
@@ -27,6 +30,8 @@
 #include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "math_constants.h"
 #include <math.h>
+
+#include "PhysicalConstants.h"
 
 StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,  
 					 StFtpcParamReader *paramReader,
@@ -547,9 +552,9 @@ int StFtpcClusterFinder::search()
   fclose(fin);
   fclose(fpoints);
   
-  for(iRow=0; iRow<20; iRow++)
+  for(iRow=0; iRow<mParam->numberOfPadrows(); iRow++)
     {
-      for(iSec=0; iSec<6; iSec++)
+      for(iSec=0; iSec<mParam->numberOfSectors(); iSec++)
 	{
 	  sprintf(finname, "test%d%d", iRow, iSec);
 	  sprintf(fpointsname, "charge%d%d", iRow, iSec);
@@ -1713,7 +1718,7 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
   Peak->Phi = mParam->radiansPerBoundary() / 2 
     + (Peak->PadPosition + 0.5) * mParam->radiansPerPad()
     - PhiDeflect + iSec * (mParam->numberOfPads() * mParam->radiansPerPad()
-			   + mParam->radiansPerBoundary())+C_PI_2;
+			   + mParam->radiansPerBoundary())+halfpi;
 
 
   /* transform to cartesian */
@@ -1842,7 +1847,7 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
 	  pradius[padrow+mParam->numberOfPadrowsPerSide()*(i+1)]=r_next;
 	  pdeflection[padrow+mParam->numberOfPadrowsPerSide()*(i+1)]
 	    =pdeflection[padrow+mParam->numberOfPadrowsPerSide()*i]
-	    +((r_last-r_next)*tan(mParam->radiansPerDegree() * psi_now)/r_last);
+	    +((r_last-r_next)*tan(degree * psi_now)/r_last);
 	  t_last=t_next;
 	  r_last=r_next;
 	}
