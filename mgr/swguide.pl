@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: swguide.pl,v 1.5 1999/07/25 16:26:52 wenaus Exp $
+# $Id: swguide.pl,v 1.6 1999/08/08 18:51:31 wenaus Exp $
 #
 # $Log: swguide.pl,v $
+# Revision 1.6  1999/08/08 18:51:31  wenaus
+# Report open failure to page
+#
 # Revision 1.5  1999/07/25 16:26:52  wenaus
 # Report linecounts in files modified in last 2 months
 #
@@ -156,13 +159,13 @@ $pkg = $q->param('pkg');
 
 #read in avail file of package owners
 open(AVAIL,"< /afs/rhic/star/packages/repository/CVSROOT/avail")
-    or die "Can't open avail file: $!";
+    or print "Can't open avail file: $!\n";
 @availFile=<AVAIL>;
 close AVAIL;
 
 #read in loginfo file of package mod notification email
 open(LOGINFO,"< /afs/rhic/star/packages/repository/CVSROOT/loginfo")
-    or die "Can't open loginfo file: $!";
+    or print "Can't open loginfo file: $!\n";
 @loginfoFile=<LOGINFO>;
 close LOGINFO;
 
