@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridCollection.cc,v 1.1.1.1 2000/03/10 14:26:21 munhoz Exp $
+ * $Id: StSvtHybridCollection.cc,v 1.2 2000/07/03 02:07:53 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridCollection.cc,v $
+ * Revision 1.2  2000/07/03 02:07:53  perev
+ * StEvent: vector<TObject*>
+ *
  * Revision 1.1.1.1  2000/03/10 14:26:21  munhoz
  * SVT Class Library
  *
@@ -33,7 +36,7 @@
 ClassImp(StSvtHybridCollection)
 
 StSvtHybridCollection::StSvtHybridCollection(char* config) : 
-  StObjArray(1)
+  StObjArray()
 {
   // As the SVT can present various configurations, 
   // the constructor of this class has one parameter that corresponds to the configuration name.
@@ -115,7 +118,7 @@ void StSvtHybridCollection::setConfiguration(char* config)
   else
     gMessMgr->Message("Configuration of SVT not defined! It must be SYST, Y1L or FULL","E");
 
-  Expand(mTotalNumberOfHybrids);
+  resize(mTotalNumberOfHybrids);
 }
 
 int StSvtHybridCollection::getHybridIndex(int barrelID, int ladderID, int waferID, int hybridID)
@@ -201,5 +204,5 @@ StHybridObject* StSvtHybridCollection::getObject(int barrelID, int ladderID, int
 
   int index = getHybridIndex(barrelID, ladderID, waferID, hybridID);
 
-  return (StHybridObject*)At(index);
+  return (StHybridObject*)(*this)[index];
 }

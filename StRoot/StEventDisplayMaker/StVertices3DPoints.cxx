@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   03/08/99  (E-mail: fine@bnl.gov)
-// $Id: StVertices3DPoints.cxx,v 1.1 1999/11/02 01:49:52 fine Exp $
+// $Id: StVertices3DPoints.cxx,v 1.2 2000/07/03 02:07:48 perev Exp $
 // $Log: StVertices3DPoints.cxx,v $
+// Revision 1.2  2000/07/03 02:07:48  perev
+// StEvent: vector<TObject*>
+//
 // Revision 1.1  1999/11/02 01:49:52  fine
 // The primitives moved from StEvent
 //
@@ -26,7 +29,7 @@ StVertices3DPoints::~StVertices3DPoints(){;}
  
 //________________________________________________________________________________
 Int_t  StVertices3DPoints::GetLastPosition()const {
-  return m_VertexCollection?m_VertexCollection->GetLast():-1;
+  return m_VertexCollection?m_VertexCollection->size()-1:-1;
 }
 
 //________________________________________________________________________________

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqData.cc,v 1.1 2000/06/13 20:42:05 caines Exp $
+ * $Id: StSvtDaqData.cc,v 1.2 2000/07/03 02:07:55 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqData.cc,v $
+ * Revision 1.2  2000/07/03 02:07:55  perev
+ * StEvent: vector<TObject*>
+ *
  * Revision 1.1  2000/06/13 20:42:05  caines
  * StRoot/StSvtDaqMaker
  *
@@ -57,12 +60,12 @@ int StSvtDaqData::setData(StSVTReader* reader, char* option)
 	  // have to swap the hybrids in collection due to hardware swapping for Y1
 	  if ( !strncmp(getConfiguration(), "Y1L", strlen("Y1L")) ) {
 	    if (hybrid == 1)
-	      mData = (StSvtHybridDaqData*)At(getHybridIndex(barrel, ladder, wafer, 2));
+	      mData = (StSvtHybridDaqData*)at(getHybridIndex(barrel, ladder, wafer, 2));
 	    else if (hybrid == 2)
-	      mData = (StSvtHybridDaqData*)At(getHybridIndex(barrel, ladder, wafer, 1));
+	      mData = (StSvtHybridDaqData*)at(getHybridIndex(barrel, ladder, wafer, 1));
 	  }
 	  else
-	    mData = (StSvtHybridDaqData*)At(getHybridIndex(barrel, ladder, wafer, hybrid));
+	    mData = (StSvtHybridDaqData*)at(getHybridIndex(barrel, ladder, wafer, hybrid));
 
 	  if (mData)
 	    delete mData;
@@ -75,13 +78,11 @@ int StSvtDaqData::setData(StSVTReader* reader, char* option)
 
 	    // have to swap the hybrids in collection due to hardware swapping for Y1
 	    if ( !strncmp(getConfiguration(), "Y1L", strlen("Y1L")) ) {
-	      if (hybrid == 1)
-		AddAt(mData, getHybridIndex(barrel,ladder,wafer,2));	  
-	      else if (hybrid == 2)
-		AddAt(mData, getHybridIndex(barrel,ladder,wafer,1));	  
+	      if (hybrid == 1 || hybrid == 2 )
+		put_at(mData, getHybridIndex(barrel,ladder,wafer,3-hybrid));	  
 	    }
 	    else
-	      AddAt(mData, getHybridIndex(barrel,ladder,wafer,hybrid));	  
+	      put_at(mData, getHybridIndex(barrel,ladder,wafer,hybrid));	  
 	  }
 	  else
 	    delete mData;

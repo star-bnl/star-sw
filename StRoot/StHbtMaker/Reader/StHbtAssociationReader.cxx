@@ -8,6 +8,7 @@
 #include "StEvent.h"
 #include "StGlobalTrack.h"
 #include "StTrackNode.h"
+#include "StTrackDetectorInfo.h"
 #include "StContainers.h"
 #include "StPrimaryVertex.h"
 #include "StVertex.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridPixels2.hh,v 1.1.1.1 2000/03/10 14:26:21 munhoz Exp $
+ * $Id: StSvtHybridPixels2.hh,v 1.2 2000/07/03 02:07:54 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridPixels2.hh,v $
+ * Revision 1.2  2000/07/03 02:07:54  perev
+ * StEvent: vector<TObject*>
+ *
  * Revision 1.1.1.1  2000/03/10 14:26:21  munhoz
  * SVT Class Library
  *
@@ -29,8 +32,8 @@ public:
   StSvtHybridPixels2(int barrel, int ladder, int wafer, int hybrid);
   virtual ~StSvtHybridPixels2();
 
-  void setSvtHybridPixels(StSvtHybridPixels* pixels, int time2) {mPixels->AddAt(pixels,time2);}
-  StSvtHybridPixels* getSvtHybridPixels(int time2) {return (StSvtHybridPixels*)mPixels->At(time2);}
+  void setSvtHybridPixels(StSvtHybridPixels* pixels, int time2) {mPixels->at(time2) = pixels;}
+  StSvtHybridPixels* getSvtHybridPixels(int time2) {return (StSvtHybridPixels*)mPixels->at(time2);}
 
   int getNumberOfCapacitors(){return mNumberOfCapacitors;}
 

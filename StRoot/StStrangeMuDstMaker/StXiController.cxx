@@ -1,5 +1,8 @@
-// $Id: StXiController.cxx,v 2.1 2000/06/09 22:17:11 genevb Exp $
+// $Id: StXiController.cxx,v 2.2 2000/07/03 02:07:52 perev Exp $
 // $Log: StXiController.cxx,v $
+// Revision 2.2  2000/07/03 02:07:52  perev
+// StEvent: vector<TObject*>
+//
 // Revision 2.1  2000/06/09 22:17:11  genevb
 // Allow MC data to be copied between DSTs, other small improvements
 //
@@ -18,6 +21,7 @@
 #include "StAssociationMaker/StAssociationMaker.h"
 #include "StAssociationMaker/StTrackPairInfo.hh"
 #include "StTrack.h"
+#include "StTrackDetectorInfo.h"
 #include "StGlobalTrack.h"
 #include "StXiVertex.h"
 #include "StXiMuDst.hh"

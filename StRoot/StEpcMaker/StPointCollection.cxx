@@ -3,6 +3,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.2  2000/07/03 02:07:45  perev
+// StEvent: vector<TObject*>
+//
 // Revision 1.1  2000/05/15 21:18:33  subhasis
 // initial version
 //
@@ -66,8 +69,8 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 
 // declaring cernlib routine (mathlib, H301) assndx to be used for matching.
 #define    assndx  F77_NAME(assndx,ASSNDX)
-extern "C" {void type_of_call assndx ( Int_t &, Float_t (*)[], Int_t &, Int_t &,
- Int_t &,Int_t *, Float_t &,Int_t (*)[],Int_t &); }
+extern "C" {void type_of_call assndx ( Int_t &, Float_t *, Int_t &, Int_t &,
+ Int_t &,Int_t *, Float_t &,Int_t *,Int_t &); }
 
 
 ClassImp(StPointCollection)
@@ -340,8 +343,9 @@ Int_t
         ma=pvec.size();
 	UInt_t it;
   Float_t PointMember[9];
+  {
      for (Int_t iF=0;iF<9;iF++){PointMember[iF]=0.0;}
-
+  }
 // will be taken as track pointer later
 	Float_t TrackMom[Epc::nMaxNoOfClinBin][Epc::nMaxNoOfClinBin];
 	Float_t DeltaEta[Epc::nMaxNoOfClinBin][Epc::nMaxNoOfClinBin];
@@ -446,41 +450,41 @@ Int_t
     }
   }
 
- assndx(mode,ep,na,ma,ida,k,smin,iw,idw);
+ assndx(mode,&ep[0][0],na,ma,ida,k,smin,&iw[0][0],idw);
 
      switch (Category) {
      case 0:
-       for(Int_t i1=0;i1<na;i1++){
+      {for(Int_t i1=0;i1<na;i1++){
        if((k[i1]-1)>=0){
 	 StEmcPreCluster *cl1;
 	 cl1 = (StEmcPreCluster*)mvec[i1];
 	 Float_t avg_en = cl1->Energy();
 	 totAvg += avg_en;
        }
-       }
+      }}
        break;
      case 1:
-       for(Int_t i1=0;i1<na;i1++){
+      {for(Int_t i1=0;i1<na;i1++){
        if((k[i1]-1)>=0){
 	 StEmcPreCluster *cl1;
 	 cl1 = (StEmcPreCluster*)evec[i1];
 	 Float_t avg_en = cl1->Energy();
 	 totAvg += avg_en;
        }
-       }
+      }}
        break;
      case 2:
-       for(Int_t i1=0;i1<na;i1++){
+      {for(Int_t i1=0;i1<na;i1++){
        if((k[i1]-1)>=0){
 	 StEmcPreCluster *cl1;
 	 cl1 = (StEmcPreCluster*)mvec[i1];
 	 Float_t avg_en = cl1->Energy();
 	 totAvg += avg_en;
        }
-       }
+      }}
        break;
      case 3:
-       for(Int_t i1=0;i1<na;i1++){
+      {for(Int_t i1=0;i1<na;i1++){
        if((k[i1]-1)>=0){
 	 StEmcPreCluster *cl1;
 	 cl1 = (StEmcPreCluster*)evec[i1];
@@ -489,7 +493,7 @@ Int_t
 	 Float_t avg_en = (cl1->Energy()+cl2->Energy())/2.;
 	 totAvg += avg_en;
        }
-       }
+       }}
        break;
  }
 
@@ -613,9 +617,9 @@ Int_t
         
 	//Energy In Detector
 	Float_t EnergyInDetector[4];
-	for(Int_t i=0;i<4;i++){EnergyInDetector[i]=PointEnergyinDet[i];}
+	{for(Int_t i=0;i<4;i++){EnergyInDetector[i]=PointEnergyinDet[i];}}
 	Float_t SizeAtDetector[4];
-	for(Int_t i=0;i<4;i++){SizeAtDetector[i]=PointSizeinDet[i];}
+	{for(Int_t i=0;i<4;i++){SizeAtDetector[i]=PointSizeinDet[i];}}
 
 	StEmcPoint *point = new StEmcPoint();
 	point->setPosition(PointPosition);

@@ -15,9 +15,8 @@ StEvtHddr::StEvtHddr(TDataSet *parent):TDataSet("EvtHddr",parent)
 //_____________________________________________________________________________
 StEvtHddr &StEvtHddr::operator=(const StEvtHddr &hddr)
 {
-  SetParent(0);
-  SetName(hddr.GetName());
-  SetTitle(hddr.GetTitle());
+  if (!GetName() [0]) SetName (hddr.GetName ());
+  if (!GetTitle()[0]) SetTitle(hddr.GetTitle());
   memcpy(&mRunNumber,&hddr.mRunNumber,(char*)((&mEventNumber)+1)-(char*)&mRunNumber);
   mEventTime = hddr.mEventTime;
   mProdTime  = hddr.mProdTime;

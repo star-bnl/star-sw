@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedSub.cc,v 1.1 2000/06/15 20:04:54 caines Exp $
+ * $Id: StSvtPedSub.cc,v 1.2 2000/07/03 02:07:56 perev Exp $
  *
  * Author: Helen Caines
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedSub.cc,v $
+ * Revision 1.2  2000/07/03 02:07:56  perev
+ * StEvent: vector<TObject*>
+ *
  * Revision 1.1  2000/06/15 20:04:54  caines
  * Initial versions of sequence adjusting codes
  *
@@ -61,7 +64,7 @@ int StSvtPedSub::ReadFromFile(char* fileName, StSvtData* fSvtData)
 	  mPed = (StSvtHybridPed*)file->Get(name);
 	  	  
 	  if (mPed)
-	    mSvtPed->AddAt(mPed,mSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid));
+	    (*mSvtPed)[mSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid)] = mPed;
 	}
       }
     }
@@ -95,7 +98,7 @@ int StSvtPedSub::SubtractPed( StSvtHybridData* fData, int Index, int PedOffset)
     nSeq = 0;
     
     status = fData->getSequences(anodeID,nSeq,Seq);
-    mPed = (StSvtHybridPed *) mSvtPed->At(Index);
+    mPed = (StSvtHybridPed *) mSvtPed->at(Index);
     for (iseq=0;iseq<nSeq;iseq++) {	  	  
       for (time=Seq[iseq].startTimeBin; time<Seq[iseq].startTimeBin+Seq[iseq].length; time++) {
 	

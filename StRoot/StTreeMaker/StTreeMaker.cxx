@@ -116,18 +116,6 @@ Int_t StTreeMaker::Open(const char*)
 
       fTree = new StTree(GetTreeName()); 
       if (!fFile.IsNull()) fTree->SetBaseName(fFile);
-
-//    		Several default branches
-//VP      if ( fTreeName=="bfcTree") { 
-//VP        if (!Find(".branches/dstBranch"  )) SetBranch("dstBranch"  ,0,"w");
-//VP        if (!Find(".branches/histBranch" )) SetBranch("histBranch" ,0,"w","const");
-//VP        if (!Find(".branches/runcoBranch")) SetBranch("runcoBranch",0,"w","const");
-//VP      }
-
-//   	Set filename for runcoBranch
-//VP    StBranch *h = (StBranch*)fTree->Find("histBranch");
-//VP    StBranch *r = (StBranch*)fTree->Find("runcoBranch");
-//VP    if (h && r) r->SetFile(h->GetFile(),0,1);
       
 
     }//end of new tree
@@ -173,19 +161,26 @@ Int_t StTreeMaker::MakeRead(const StUKey &RunEvent){
   if (!RunEvent.IsNull())	iret = fTree->ReadEvent(RunEvent);
   else                  	iret = fTree->NextEvent(        );
 
+  StEvtHddr *hddr = (StEvtHddr*)GetDataSet("EvtHddr");
   if (iret) return iret;
   St_DataSetIter nextBr(fTree);
   StBranch *br ;
   while ((br = (StBranch*)nextBr())){
-   SetOutput(br);
-   TString tsBr(br->GetName());
-   if (tsBr.Contains("Branch")) {
-     TString tsName = tsBr;
-     tsName.ReplaceAll("Branch","");
-     if (!br->Find(tsName)) SetOutput(tsName,br);
-   }
-   int lv=1; if (strncmp("runco",br->GetName(),5)==0) lv = 2;  
-   SetOutputAll(br,lv);
+    SetOutput(br);
+    TString tsBr(br->GetName());
+    if (tsBr.Contains("Branch")) {
+      TString tsName = tsBr;
+      tsName.ReplaceAll("Branch","");
+      if (!br->Find(tsName)) SetOutput(tsName,br);
+    }
+    int lv=1; if (strncmp("runco",br->GetName(),5)==0) lv = 2;  
+    SetOutputAll(br,lv);
+//		copy StEVTHddr (RunEvent)
+    if (!hddr) 		continue;
+    StEvtHddr *runevt = (StEvtHddr*)br->FindObject("RunEvent");
+    if (!runevt)	continue;
+    *hddr = *runevt;
+//
   }
   return iret;
 }    
@@ -355,7 +350,7 @@ Int_t StTreeMaker::Finish()
     StBranch *br;
     fTree->Clear(); 
     while ((br = (StBranch*)nextBr())) {
-      if (strncmp("hist",br->GetName() ,4)
+      if (strncmp("hist" ,br->GetName(),4)
       &&  strncmp("runco",br->GetName(),5)) continue;
       FillHistBranch(br);
     }

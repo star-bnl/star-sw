@@ -24,7 +24,6 @@ class StAngleCorrAnalysis {
 private:
   TH1D* signal;
   TH1D* background;
-  int FALSE,TRUE;
   StAngleCorrFunction*  correlationFunction;
 
   /* cuts */

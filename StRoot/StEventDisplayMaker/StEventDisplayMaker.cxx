@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.60 2000/05/03 01:19:42 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.61 2000/07/03 02:07:47 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -550,7 +550,7 @@ Color_t StEventDisplayMaker::GetColorAttribute(Int_t adc)
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeHits(const StObjArray *eventCollection,StVirtualEventFilter *filter)
 {
-  if (eventCollection && eventCollection->GetLast() ) {
+  if (eventCollection && eventCollection->size() ) {
     Color_t hitColor = kYellow;
     Style_t hitStyle = 1;
     Size_t hitSize  = 2;
@@ -622,7 +622,7 @@ Int_t StEventDisplayMaker::MakeVertex(const StVertex *vertex,StVirtualEventFilte
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeVertices(const StObjArray *eventCollection,StVirtualEventFilter *filter)
 {
-  if (eventCollection && eventCollection->GetLast() ) {
+  if (eventCollection && eventCollection->size() ) {
 #ifdef STEVENT
     Int_t   hitCounter = 0;
     Color_t hitColor = kYellow;
@@ -919,6 +919,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.61  2000/07/03 02:07:47  perev
+// StEvent: vector<TObject*>
+//
 // Revision 1.60  2000/05/03 01:19:42  fine
 // emc geometry has been introduced
 //

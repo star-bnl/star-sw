@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtHybridStat2.cc,v 1.1.1.1 2000/03/10 14:26:21 munhoz Exp $
+ * $Id: StSvtHybridStat2.cc,v 1.2 2000/07/03 02:07:54 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridStat2.cc,v $
+ * Revision 1.2  2000/07/03 02:07:54  perev
+ * StEvent: vector<TObject*>
+ *
  * Revision 1.1.1.1  2000/03/10 14:26:21  munhoz
  * SVT Class Library
  *
@@ -50,9 +53,9 @@ StSvtHybridStat2::StSvtHybridStat2(int barrel, int ladder, int wafer, int hybrid
     m1PerCapacitor = new StSvtHybridPixels(barrel, ladder, wafer, hybrid);
     m2PerCapacitor = new StSvtHybridPixels(barrel, ladder, wafer, hybrid);
 
-    m0->AddAt(m0PerCapacitor,i);
-    m1->AddAt(m1PerCapacitor,i);
-    m2->AddAt(m2PerCapacitor,i);
+    m0->push_back(m0PerCapacitor);
+    m1->push_back(m1PerCapacitor);
+    m2->push_back(m2PerCapacitor);
   }
 }
 
@@ -75,8 +78,8 @@ float StSvtHybridStat2::getMean(int anode, int time, int capacitor)
 {
   // Returns the mean value for pixel (anode,time) and capacitor
 
-  StSvtHybridPixels* m0PerCapacitor = (StSvtHybridPixels*)m0->At(capacitor);
-  StSvtHybridPixels* m1PerCapacitor = (StSvtHybridPixels*)m1->At(capacitor);
+  StSvtHybridPixels* m0PerCapacitor = (StSvtHybridPixels*)m0->at(capacitor);
+  StSvtHybridPixels* m1PerCapacitor = (StSvtHybridPixels*)m1->at(capacitor);
 
   int index = m0PerCapacitor->getPixelIndex(anode,time);
   int n = (int)m0PerCapacitor->At(index);
@@ -96,9 +99,9 @@ float StSvtHybridStat2::getRMS(int anode, int time, int capacitor)
 {
   // Returns the RMS for pixel (anode,time) and capacitor
 
-  StSvtHybridPixels* m0PerCapacitor = (StSvtHybridPixels*)m0->At(capacitor);
-  StSvtHybridPixels* m1PerCapacitor = (StSvtHybridPixels*)m1->At(capacitor);
-  StSvtHybridPixels* m2PerCapacitor = (StSvtHybridPixels*)m2->At(capacitor);
+  StSvtHybridPixels* m0PerCapacitor = (StSvtHybridPixels*)m0->at(capacitor);
+  StSvtHybridPixels* m1PerCapacitor = (StSvtHybridPixels*)m1->at(capacitor);
+  StSvtHybridPixels* m2PerCapacitor = (StSvtHybridPixels*)m2->at(capacitor);
 
   int index = m0PerCapacitor->getPixelIndex(anode,time);
   int n = (int)m0PerCapacitor->At(index);
@@ -124,9 +127,9 @@ void StSvtHybridStat2::fillMom(int x, int anode, int time, int capacitor)
 {
   // Fills the 0th, 1st and 2nd order momenta of pixel (anode,time) and capacitor with the value x
 
-  StSvtHybridPixels* m0PerCapacitor = (StSvtHybridPixels*)m0->At(capacitor);
-  StSvtHybridPixels* m1PerCapacitor = (StSvtHybridPixels*)m1->At(capacitor);
-  StSvtHybridPixels* m2PerCapacitor = (StSvtHybridPixels*)m2->At(capacitor);
+  StSvtHybridPixels* m0PerCapacitor = (StSvtHybridPixels*)m0->at(capacitor);
+  StSvtHybridPixels* m1PerCapacitor = (StSvtHybridPixels*)m1->at(capacitor);
+  StSvtHybridPixels* m2PerCapacitor = (StSvtHybridPixels*)m2->at(capacitor);
 
   int previousValue;
   int index = m0PerCapacitor->getPixelIndex(anode,time);

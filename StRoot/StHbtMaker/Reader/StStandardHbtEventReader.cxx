@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.22 2000/06/08 16:12:11 laue Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.23 2000/07/03 02:07:51 perev Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.23  2000/07/03 02:07:51  perev
+ * StEvent: vector<TObject*>
+ *
  * Revision 1.22  2000/06/08 16:12:11  laue
  * StStandardHbtEventReader.cxx: Topology map for V0 fixed
  * StHbtMcEventReader.cxx:       V0 updated
@@ -107,7 +110,7 @@
 #include "StHbtMaker/Reader/StStandardHbtEventReader.h"
 #include "StChain.h"
 #include "TOrdCollection.h"
-
+#include "StTrackDetectorInfo.h"
 
 // these StEvent files keep oscillating between ".hh" and ".h" files
 // fortunatey, they are used only here
