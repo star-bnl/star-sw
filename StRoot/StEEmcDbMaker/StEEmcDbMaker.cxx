@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.41 2004/10/20 20:06:55 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.42 2004/10/27 17:02:46 balewski Exp $
  
 
 #include <time.h>
@@ -63,7 +63,7 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
   myTimeStampDay=0;
   myTimeStampUnix=0;
 
- //................ allocate memory for lookup tables
+  //................ allocate memory for lookup tables
   byIndex=new  EEmcDbItem[EEindexMax];
   
   byCrate=new  EEmcDbItem ** [MaxAnyCrate];
@@ -89,6 +89,10 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
   mxChMask=8;
   chMaskL = new TString [mxChMask];
   nChMask=0;
+
+  setThreshold(5.0);  // defines threshold for ADCs
+  // should be +2 or +3 sigma in the future
+  //  setPreferedFlavor("onlped","eemcPMTped"); // tmp for tests,JB
 
 }
 
@@ -169,10 +173,6 @@ void StEEmcDbMaker::setPreferredFlavor(const char *flavor, const char *nameMask)
 //________________________________________________________
 Int_t StEEmcDbMaker::Init(){
   if( mNSector==0) setSectors(1,12);//default
-  setThreshold(5.0);  // defines threshold for ADCs
-  // should be +2 or +3 sigma in the future
-
-  //  setPreferedFlavor("onlped","eemcPMTped"); // tmp for tests,JB
 
   return StMaker::Init();
 }
@@ -1016,6 +1016,9 @@ void  StEEmcDbMaker::changeMaskAction(const char *fname) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.42  2004/10/27 17:02:46  balewski
+// move setKsig from Init() to constructor where it belongs
+//
 // Revision 1.41  2004/10/20 20:06:55  balewski
 // only printouts
 //
