@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.18 1999/12/16 19:52:36 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.19 1999/12/16 23:12:03 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.19  1999/12/16 23:12:03  kathy
+// fixed list of default histograms, had wrong title and added a few for tables and stevent; rescaled some histograms and fixed titles in booking
+//
 // Revision 1.18  1999/12/16 19:52:36  kathy
 // fix hist titles in QABookHist; unpack n_point,n_fit_point,n_max_point correctly for globtrk table - must still fix for primtrk table - in St_QA_Maker
 //
@@ -551,18 +554,18 @@ void StQABookHist::BookHistGlob(){
   m_glb_ratiomT = QAH1F("QaGtrkRnmT",    "globtrk: ratio Nfit/max pnt, tpc", 55, 0., 1.1);
   m_glb_chargeT = QAH1F("QaGtrkChrgT",   "globtrk: charge, tpc ", 20,-2.,2.);
   m_glb_r0T     = QAH1F("QaGtrkR0T",     "globtrk: radius at start (cm), tpc ", 50,0.,200.);
-  m_glb_phi0T   = QAH1F("QaGtrkPhi0T",   "globtrk: azimuth ang at start (deg), tpc ", 36,0.,360.);
+  m_glb_phi0T   = QAH1F("QaGtrkPhi0T",   "globtrk: azimuth ang at start (deg), tpc ", 64,0.,360.);
   m_glb_z0T     = QAH1F("QaGtrkZ0T",     "globtrk: z-coord at start (cm), tpc ", 50, -300.,300.);
   m_glb_curvT   = QAH1F("QaGtrkCurvT",   "globtrk: curvature (1/cm), tpc ", 50,0.,.1);
   m_glb_xfT     = QAH1F("QaGtrkXfT",     "globtrk: x of first hit on trk, tpc", 50,-200.,200.);
   m_glb_xf0     = QAH1F("QaGtrkXf0",     "globtrk: x of first hit - on helix at start, tpc",50,-5.,5.);
   m_glb_yfT     = QAH1F("QaGtrkYfT",     "globtrk: y of first hit on trk, tpc", 50,-200.,200.);
-  m_glb_yf0     = QAH1F("QaGtrkTf0",     "globtrk: y of first hit - on helix at start, tpc",50,-5.,5.);
+  m_glb_yf0     = QAH1F("QaGtrkYf0",     "globtrk: y of first hit - on helix at start, tpc",50,-5.,5.);
   m_glb_zfT     = QAH1F("QaGtrkZfT",     "globtrk: z of first hit on trk, tpc", 50,-300.,300.);
   m_glb_zf0     = QAH1F("QaGtrkZf0",     "globtrk: z of first hit - on helix at start, tpc",50,-5.,5.);
   m_glb_radfT   = QAH1F("QaGtrkRT",      "globtrk: radial position of first hit, tpc", 50,0.,200.);
   m_lengthT     = QAH1F("QaGtrkLengthT", "globtrk: track length, tpc", 50,0.,300.);
-  m_psiT        = QAH1F("QaGtrkPsiT",    "globtrk: psi, tpc", 36, 0.,360.);
+  m_psiT        = QAH1F("QaGtrkPsiT",    "globtrk: psi, tpc", 64, 0.,360.);
   m_tanlT       = QAH1F("QaGtrkTanlT",   "globtrk: tanl, tpc",32,-4.,4.);
   m_glb_thetaT  = QAH1F("QaGtrkThetaT",  "globtrk: theta, tpc",20,0.,4.);
   m_etaT        = QAH1F("QaGtrkEtaT",    "globtrk: eta, tpc",60,-6.,6.);
@@ -576,7 +579,7 @@ void StQABookHist::BookHistGlob(){
 
 // 2D - tpc
 
-  m_pT_eta_recT = QAH2F("QaGtrkPtVsEtaT","globtrk: log pT versus eta, tpc", 20,-2.,2.,40,1.,4.);
+  m_pT_eta_recT = QAH2F("QaGtrkPtVsEtaT","globtrk: log pT vs eta, tpc", 20,-2.,2.,40,1.,4.);
     m_pT_eta_recT->SetXTitle("eta");
     m_pT_eta_recT->SetYTitle(" log pT (MeV)");
 
@@ -652,9 +655,9 @@ void StQABookHist::BookHistGlob(){
 
 // 1D tpc + silicon (svt+ssd)
 
-  m_pointTS      = QAH1F("QaGtrkNPntTS",   "globtrk: N points on trk,tpc+svt", 50, 0.,10000.);
+  m_pointTS      = QAH1F("QaGtrkNPntTS",   "globtrk: N points on trk,tpc+svt", 50, 0.,100.);
   m_max_pointTS  = QAH1F("QaGtrkNPntMaxTS","globtrk: N max pnts on trk, tpc+svt", 50, 0.,100.);
-  m_fit_pointTS  = QAH1F("QaGtrkNPntFitTS","globtrk: N fit pnts on trk, tpc+svt", 50, 0.,50.);
+  m_fit_pointTS  = QAH1F("QaGtrkNPntFitTS","globtrk: N fit pnts on trk, tpc+svt", 50, 0.,100.);
   m_glb_ratioTS  = QAH1F("QaGtrkRnfTS",    "globtrk: ratio Nfit/tot pnt, tpc+svt", 55, 0., 1.1);
   m_glb_ratiomTS = QAH1F("QaGtrkRnmTS",    "globtrk: ratio Nfit/max pnt, tpc+svt", 55, 0., 1.1);
   m_glb_chargeTS = QAH1F("QaGtrkChrgTS",   "globtrk: charge, tpc+svt ", 20,-2.,2.);
@@ -683,7 +686,7 @@ void StQABookHist::BookHistGlob(){
 
 // 2D - tpc + sillicon (svt + ssd)
 
-  m_pT_eta_recTS = QAH2F("QaGtrkPtVsEtaTS","globtrk: log pT versus eta, tpc+svt", 20,-2.,2.,40,1.,4.);
+  m_pT_eta_recTS = QAH2F("QaGtrkPtVsEtaTS","globtrk: log pT vs eta, tpc+svt", 20,-2.,2.,40,1.,4.);
     m_pT_eta_recTS->SetXTitle("eta");
     m_pT_eta_recTS->SetYTitle(" log pT (MeV)");
 
@@ -872,7 +875,7 @@ void StQABookHist::BookHistPrim(){
 
 
 // 2D
-  m_ppT_eta_rec = QAH2F("QaPtrkPtVsEta","primtrk: log pT versus eta", 20,-2.,2.,40,1.,4.);
+  m_ppT_eta_rec = QAH2F("QaPtrkPtVsEta","primtrk: log pT vs eta", 20,-2.,2.,40,1.,4.);
     m_ppT_eta_rec->SetXTitle("eta");
     m_ppT_eta_rec->SetYTitle(" log pT (MeV)");
 
@@ -977,7 +980,7 @@ void StQABookHist::BookHistGen(){
   m_H_pT_gen  = QAH1F("QaEvgenPt",         "particle: charged pt (generated)",nxpT,xminpT,xmaxpT);
   m_H_eta_gen = QAH1F("QaEvgenEta",        "particle: charged eta (generated)",60,-6.,6.);
   m_H_pT_eta_gen = QAH2F("QaEvgenPtVsEta", "particle: charged pT versus eta (generated)",
-			    60,-6.,6.,40,1.,4.);
+			    20,-2.,2.,40,1.,4.);
   m_H_pT_eta_gen->SetXTitle("eta");
   m_H_pT_eta_gen->SetYTitle("pT (GeV)");
   m_H_vtxx    = QAH1F("QaEvgenVtxX","particle: Generator prod vertex x (mm)",50,-1.,1.);
@@ -1014,9 +1017,9 @@ void StQABookHist::BookHistVertex(){
   m_v_num   = QAH1F("QaVtxNum"," vertex: num vertices ",50,0.,10000.);
   m_v_detid = QAH1F("QaVtxDetId"," vertex: Detector ID ",100,0.,10000.);
   m_v_vtxid = QAH1F("QaVtxVtxId"," vertex: Vertex ID ",10,0.,10.);
-  m_v_x     = QAH1F("QaVtxX"," vertex: x ",50,-50.,50.);
-  m_v_y     = QAH1F("QaVtxY"," vertex: y ",50,-50.,50.);
-  m_v_z     = QAH1F("QaVtxZ"," vertex: z ",50,-100.,100.);
+  m_v_x     = QAH1F("QaVtxX"," vertex: x ",50,-250.,250.);
+  m_v_y     = QAH1F("QaVtxY"," vertex: y ",50,-250.,250.);
+  m_v_z     = QAH1F("QaVtxZ"," vertex: z ",50,-250.,250.);
   m_v_pchi2 = QAH1F("QaVtxChisq"," vertex: chisq/dof ",50,0.,50.);
   
   m_pv_detid = QAH1F("QaVtxPrDetId"," vertex,prim: Detector ID ",40,0.,40.);
@@ -1024,7 +1027,7 @@ void StQABookHist::BookHistVertex(){
   m_pv_x     = QAH1F("QaVtxPrX"," vertex,prim: x ",50,-5.,5.);
   m_pv_y     = QAH1F("QaVtxPrY"," vertex,prim: y ",50,-5.,5.);
   m_pv_z     = QAH1F("QaVtxPrZ"," vertex,prim: z ",50,-50.,50.);
-  m_pv_pchi2 = QAH1F("QaVtxPrChisq"," vertex,prim: chisq/dof ",50,0.,5.);
+  m_pv_pchi2 = QAH1F("QaVtxPrChisq"," vertex,prim: chisq/dof ",40,0.,20.);
   
 }
 //_____________________________________________________________________________
