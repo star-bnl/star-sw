@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtGeantHits.hh,v 1.3 2001/03/22 20:46:21 caines Exp $
+ * $Id: StSvtGeantHits.hh,v 1.4 2001/04/03 15:24:24 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtGeantHits.hh,v $
+ * Revision 1.4  2001/04/03 15:24:24  caines
+ * Increase hit space size again
+ *
  * Revision 1.3  2001/03/22 20:46:21  caines
  * Expand MAX_HIT so high multiplicty events work
  *
@@ -24,7 +27,7 @@
 #ifndef STSVTGEANTHITS_HH
 #define STSVTGEANTHITS_HH
 
-#define MAX_HITS 100
+#define MAX_HITS 200
 
 #include "StSvtClassLibrary/StSvtHybridObject.hh"
 #include <vector>

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.5 2001/03/19 22:25:53 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.6 2001/04/03 15:24:24 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.6  2001/04/03 15:24:24  caines
+ * Increase hit space size again
+ *
  * Revision 1.5  2001/03/19 22:25:53  caines
  * Catch wrong wafer ids more elegantly
  *
@@ -491,7 +494,8 @@ Int_t StSvtSimulationMaker::Make()
 
 
 	  if( 1000*layer+100*wafer+ladder !=volId){
-	    cout << "trouble" << endl;
+	    cout << "trouble " << volId << " and our calc" << layer << " " 
+		 << wafer << " " << ladder << " " << j <<endl;
 	    continue;
 	  }
 	  int index = mSvtSimPixelColl->getHybridIndex(barrel,ladder,wafer,hybrid);
