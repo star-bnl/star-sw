@@ -389,7 +389,7 @@ double StiKalmanTrackNode::getPt() const
 }
 
 int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode, 
-																	StiDetector * tDet)	throw (Exception)
+				  StiDetector * tDet)	//throw (Exception)
 {
 
   int position = 0;
@@ -413,7 +413,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 void  StiKalmanTrackNode::propagate(double xk, 
 				  double x0,   // thickness of material
 				  double rho)  // density of material
-  throw (Exception)
+    //throw (Exception)
 {
   double x1=fX, x2=x1+(xk-x1), dx=x2-x1, y1=fP0, z1=fP1;
   double c1=fP3*x1 - fP2;
@@ -479,8 +479,12 @@ void  StiKalmanTrackNode::propagate(double xk,
       double d=sqrt((x1-fX)*(x1-fX)
 		    +(y1-fP0)*(y1-fP0)  +(z1-fP1)*(z1-fP1));
       double tanl  = fP4;
-			if (fP3==0.)
-				throw new Exception("StiKalmanTrackNode::propagate - Error - fP3 wass null");
+      if (fP3==0.) {
+	  cout <<"StiKalmanTrackNode::propogate(). ERROR:\t";
+	  cout <<"fp3==0, line 484. return"<<endl;
+	  //throw new Exception("StiKalmanTrackNode::propagate - Error - fP3 wass null");
+	  return;
+      }
 			
       double pt = 0.3*kField/fP3;
       double p2=(1.+tanl*tanl)*pt*pt;
@@ -512,7 +516,7 @@ void  StiKalmanTrackNode::propagate(double xk,
 }
 
 double 
-StiKalmanTrackNode::evaluateChi2() 	throw ( Exception)
+StiKalmanTrackNode::evaluateChi2() 	//throw ( Exception)
 {
   //-----------------------------------------------------------------
   // This function calculates a chi2 increment given the track state
@@ -526,8 +530,12 @@ StiKalmanTrackNode::evaluateChi2() 	throw ( Exception)
   double r01=hit->syz()+fC10;
   double r11=hit->szz()+fC11;
   double det=r00*r11 - r01*r01;
-  if (det< 1.e-10 && det>-1.e-10) 
-      throw new Exception(" KalmanTrack warning: Singular matrix !\n");
+  if (det< 1.e-10 && det>-1.e-10) {
+      cout <<"StiKalmanTrackNode::evaluateChi2(). ERROR:\t";
+      cout <<"det test failed line 535.  return 0."<<endl;
+      //throw new Exception(" KalmanTrack warning: Singular matrix !\n");
+      return 0.;
+  }
   // inverse matrix
   double tmp=r00; r00=r11; r11=tmp; r01=-r01;  
   double dy=hit->y() - fP0;
@@ -537,29 +545,30 @@ StiKalmanTrackNode::evaluateChi2() 	throw ( Exception)
 	return chi2inc;
 }
 
-void StiKalmanTrackNode::updateNode() throw (Exception)
+void StiKalmanTrackNode::updateNode() //throw (Exception)
 {
   // Updates this node with the information 
   // from its associated hit. The given chisq is set as the chi2 
   // of this node.
   //__________________________________________________________________
 	// Update Measurement Error Matrix, calculate its determinant
-	if (hit==0)
-		{
-			cout << "StiKalmanTrackNode::updateNode() - Null HIT" << endl;
-      //throw new Exception(" KalmanTrack warning: Singular matrix !\n");
-			return;
-		}
-	double r00=hit->syy()+fC00;
-  double r01=hit->syz()+fC10;
-  double r11=hit->szz()+fC11;
-  double det=r00*r11 - r01*r01;
-  if (det< 1.e-10 && det>-1.e-10) 
-		{
-			cout << "StiKalmanTrackNode::updateNode() - Singular matrix" << endl;
-      //throw new Exception(" KalmanTrack warning: Singular matrix !\n");
-			return;
-		}
+    if (hit==0)		{
+	cout << "StiKalmanTrackNode::updateNode(). ERROR:\t";
+	cout <<" - Null HIT, line 558.  return" << endl;
+	return;
+	//throw new Exception(" KalmanTrack warning: Singular matrix !\n");
+    }
+    double r00=hit->syy()+fC00;
+    double r01=hit->syz()+fC10;
+    double r11=hit->szz()+fC11;
+    double det=r00*r11 - r01*r01;
+    if (det< 1.e-10 && det>-1.e-10) 
+      {
+	  cout << "StiKalmanTrackNode::updateNode(). ERROR:\t";
+	  cout <<" - Singular matrix line 568. return" << endl;
+	  //throw new Exception(" KalmanTrack warning: Singular matrix !\n");
+	  return;
+      }
   // inverse matrix
   double tmp=r00; r00=r11/det; r11=tmp/det; r01=-r01/det;
   // update error matrix
@@ -574,14 +583,14 @@ void StiKalmanTrackNode::updateNode() throw (Exception)
   double cur = fP3 + k30*dy + k31*dz;
   double eta = fP2 + k20*dy + k21*dz;
   double ddd = cur*fX-eta;
-  if (ddd >= 0.99999 || ddd<-0.99999) 
-		{
-      cout << "StiKalmanTrackNode::updateNode() - extrapolation failed ddd" 
-					 << endl;
-			//throw new Exception("StiKalmanTrackNode - Warning - Filtering failed !\n");
-			return;
-		}
-	// update state
+  if (ddd >= 0.99999 || ddd<-0.99999) 		{
+      cout << "StiKalmanTrackNode::updateNode(). ERROR:\t";
+      cout <<" - extrapolation failed line 588. return"<< endl;
+      //throw new Exception("StiKalmanTrackNode - Warning - Filtering failed !\n");
+      return;
+  }
+  
+  // update state
   fP0 += k00*dy + k01*dz;
   fP1 += k10*dy + k11*dz;
   fP2  = eta;
@@ -610,7 +619,7 @@ void StiKalmanTrackNode::updateNode() throw (Exception)
 }
 
 //_____________________________________________________________________________
-void StiKalmanTrackNode::rotate(double alpha) throw ( Exception)
+void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
 {
   //-----------------------------------------------------------------
   // This function rotates by an angle alpha the track representation 
@@ -636,9 +645,11 @@ void StiKalmanTrackNode::rotate(double alpha) throw ( Exception)
   if (r2>=1) r2 = 0.99999;
   if (r2<=-1) r2 = -0.99999;
   double y0=fP0 + sqrt(1.- r2*r2)/fP3;
-  if ((fP0-y0)*fP3 >= 0.) 
-    {
-      throw new Exception(" StiKalmanTrackNode - Warning: Rotation failed - case 2 !\n");
+  if ((fP0-y0)*fP3 >= 0.)     {
+      cout <<"StiKalmanTrackNode::rotate(double). ERROR:\t";
+      cout <<"Rotation failed, line 650. return"<<endl;
+      //throw new Exception(" StiKalmanTrackNode - Warning: Rotation failed - case 2 !\n");
+      return;
     }
 
   //f = F - 1
@@ -676,7 +687,7 @@ void StiKalmanTrackNode::rotate(double alpha) throw ( Exception)
 
 
 //_____________________________________________________________________________
-void StiKalmanTrackNode::extendToVertex() throw (Exception)
+void StiKalmanTrackNode::extendToVertex() //throw (Exception)
 {
   //-----------------------------------------------------------------
   // This function propagates tracks to the "vertex".

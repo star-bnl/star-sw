@@ -7,10 +7,11 @@
 
 #include "StiShape.h"
 
-class StiConicalShape: public StiShape{
+class StiConicalShape: public StiShape
+{
 public:
-
-  // constructor
+    
+    // constructor
     StiConicalShape(): StiShape(), outerRadiusEast(0.), outerRadiusWest(0.),
                        openingAngle(0.){}
     StiConicalShape(float halfDepth_, float thickness_,

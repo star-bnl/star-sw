@@ -7,50 +7,61 @@ StiKalmanTrackFitter::StiKalmanTrackFitter()
   fitMethod = Inward;
 }
 
-void StiKalmanTrackFitter::fit(StiTrack * stiTrack) throw (Exception)
+void StiKalmanTrackFitter::fit(StiTrack * stiTrack) //throw (Exception)
 {
-  /*
-    Fit this track using the currently selected fit method.
-  */
-  cout << "StiKalmanTrackFitter::fit() - ";
-
-  StiKalmanTrack * track = dynamic_cast<StiKalmanTrack * >(stiTrack);
-
-  StiKalmanTrackNode * first = track->getFirstNode();
-  StiKalmanTrackNode * last  = track->getLastNode();  
-  if (first==0)
-    throw new Exception("StiKalmanTrackFitter::fit(): track->getFirstChild() returned null");
-  if (last==0)
-    throw new Exception("StiKalmanTrackFitter::fit(): track->getLastChild() returned null");
-  
-  switch (fitMethod)
-    {
+    /*
+      Fit this track using the currently selected fit method.
+    */
+    cout << "StiKalmanTrackFitter::fit() - ";
+    
+    StiKalmanTrack * track = dynamic_cast<StiKalmanTrack * >(stiTrack);
+    if (track==0) {
+	cout <<"StiKalmanTrack::fit(). ERROR:\t";
+	cout <<"Cast to StiKalmanTrack line 20 failed.  Return."<<endl;
+	return;
+    }
+    
+    StiKalmanTrackNode * first = track->getFirstNode();
+    StiKalmanTrackNode * last  = track->getLastNode();  
+    if (first==0) {
+	cout <<"StiKalmanTrackFitter::fit(). ERROR:\t";
+	cout <<"track->getFirstChild()==0, line 28. return"<<endl;
+	//throw new Exception("StiKalmanTrackFitter::fit(): track->getFirstChild() returned null");
+	return;
+    }
+    
+    if (last==0) {
+      cout <<"StiKalmanTrackFitter::fit(). ERROR:\t";
+      cout <<"track->getLastChild()==0, line 28. return"<<endl;
+      //throw new Exception("StiKalmanTrackFitter::fit(): track->getLastChild() returned null");
+    }
+    switch (fitMethod)	{
     case Inward:
-      cout << "Inward" << endl;
-      fitInward(first);
-      track->setChi2(last->fChi2);
-			if (last->fP3>0)
-				track->setCharge(unitCharge);
-			else
-				track->setCharge(-unitCharge);
-			break;
+	cout << "Inward" << endl;
+	fitInward(first);
+	track->setChi2(last->fChi2);
+	if (last->fP3>0)
+	    track->setCharge(unitCharge);
+	else
+	    track->setCharge(-unitCharge);
+	break;
     case Outward:
-      cout << "Outward" << endl;
-      fitOutward(last);
-      track->setChi2(first->fChi2);
-			if (last->fP3>0)
-				track->setCharge(unitCharge);
-			else
-				track->setCharge(-unitCharge);
-			break;
+	cout << "Outward" << endl;
+	fitOutward(last);
+	track->setChi2(first->fChi2);
+	if (last->fP3>0)
+	    track->setCharge(unitCharge);
+	else
+	    track->setCharge(-unitCharge);
+	break;
     }
 }
 
-void StiKalmanTrackFitter::fitInward(StiKalmanTrackNode * node) throw (Exception)
+void StiKalmanTrackFitter::fitInward(StiKalmanTrackNode * node) //throw (Exception)
 {
-  /**
-     Perform a track fit from the outside-in.
-     The track is assumed to consist of a simple node a sequence. 
+    /**
+       Perform a track fit from the outside-in.
+       The track is assumed to consist of a simple node a sequence. 
      i.e. It is assumed to be pruned. Additionally, since the 
      fit is done from the outside-in the MCS and E-loss are 
      turned off since one would be getting wrong values in 
@@ -90,7 +101,7 @@ void StiKalmanTrackFitter::fitInward(StiKalmanTrackNode * node) throw (Exception
   }
 }
 
-void StiKalmanTrackFitter::fitOutward(StiKalmanTrackNode * node) throw (Exception) 
+void StiKalmanTrackFitter::fitOutward(StiKalmanTrackNode * node) //throw (Exception) 
 {
   /**
      Perform a track fit from the outside-in.

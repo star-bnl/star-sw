@@ -23,7 +23,7 @@ public:
   // action methods
   
   virtual void reset();
-  virtual void fit() throw (Exception);
+    virtual void fit(); //throw (Exception);
 
   // accessor methods
   
