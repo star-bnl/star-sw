@@ -14,8 +14,8 @@
  
 * ****************************************************************
  macro init tpc_sector_first tpc_sector_last
-macro/global/import *
-
+   
+   macro/global/import *
 
   
   * now overwrite which sector you want to run 	      
@@ -25,8 +25,7 @@ macro/global/import *
            message 'Min and Max Sector numbers for tpc slow simulation: '
            tdm/table/cell/getvalue 'tsspar[0].min_sect'
            tdm/table/cell/getvalue 'tsspar[0].max_sect'
-	   tdm/table/cell/getvalue 'tsspar[0].bfield'
-	   
+
    cd /dui
   
 return
