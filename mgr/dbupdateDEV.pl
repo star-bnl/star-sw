@@ -132,14 +132,14 @@ struct JFileAttr => {
        oldvail   => '$',
 };
 
-# struct LFileAttr => {
-#        jbId     => '$',
-#        pth      => '$',
-#        lbT      => '$', 
-#        lgName   => '$',
-#        evDn     => '$',
-#        evSkp    => '$',
-#};        
+ struct LFileAttr => {
+        jbId     => '$',
+        pth      => '$',
+        lbT      => '$', 
+        lgName   => '$',
+        evDn     => '$',
+        evSkp    => '$',
+};        
 
  my $fullyear;
  my $mo;
