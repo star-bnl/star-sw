@@ -8,9 +8,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
-//  $Id: Stl3RawReaderMaker.cxx,v 1.16 2004/03/26 00:31:59 dietel Exp $
+//  $Id: Stl3RawReaderMaker.cxx,v 1.17 2004/03/26 11:25:23 kollegge Exp $
 //
 //  $Log: Stl3RawReaderMaker.cxx,v $
+//  Revision 1.17  2004/03/26 11:25:23  kollegge
+//  Added another quality check of raw data quality to prevent inconsistent information in StL3EventSummary, fixes bug http://www.star.bnl.gov/rt2/Ticket/Display.html?id=359
+//
 //  Revision 1.16  2004/03/26 00:31:59  dietel
 //  Check L3_SUMD, fixes http://www.star.bnl.gov/rt2/Ticket/Display.html?id=357
 //
@@ -286,16 +289,30 @@ Int_t Stl3RawReaderMaker::fillStEvent()
   }
   mStEvent->setL3Trigger(myStL3Trigger);
 
-  // create StL3EventSummary
 
+  // check data
   if (!ml3reader->getL3_SUMD()) {
     gMessMgr->Warning("Stl3RawReaderMaker: No L3_SUMD bank.");
     myStL3Trigger->setL3EventSummary(NULL);
     return 0;
   }
 
-  StL3EventSummary* myEventSummary = new StL3EventSummary(ml3reader->getL3_SUMD());
+  if (!ml3reader->getL3_Summary()) {
+    gMessMgr->Warning("Stl3RawReaderMaker: No l3 summary.");
+    myStL3Trigger->setL3EventSummary(NULL);
+    return 0;
+  }
 
+  // L3_summary.on==0 indicates that the event crashed in
+  // L3 online and raw data contains no valid information for us
+  if (ml3reader->getL3_Summary()->on == 0) {
+        gMessMgr->Warning("Stl3RawReaderMaker: L3 crashed online on this event, no usefull information.");
+	myStL3Trigger->setL3EventSummary(NULL);
+	return 0;
+  }
+
+  // create StL3EventSummary
+  StL3EventSummary* myEventSummary = new StL3EventSummary(ml3reader->getL3_SUMD());
   if (!myEventSummary) {
     gMessMgr->Error("Stl3RawReaderMaker: No Stl3EventSummary.");
     return 1;
@@ -310,15 +327,6 @@ Int_t Stl3RawReaderMaker::fillStEvent()
   if (!gl3Reader) {
         gMessMgr->Error("Stl3RawReaderMaker: L3 is ON, but L3 summary data is missing!");
 	return 1;
-  }
-
-  // check data
-  // L3_summary.on==0 indicates that the event crashed in
-  // L3 online and raw data contains no valid information for us
-  if (ml3reader->getL3_Summary()->on == 0) {
-        gMessMgr->Warning("Stl3RawReaderMaker: L3 crashed online on this event, no usefull information.");
-	myEventSummary->setCounters(-1, -1);
-	return 0;
   }
 
   // get database info
