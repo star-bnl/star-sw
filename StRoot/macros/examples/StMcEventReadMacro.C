@@ -1,5 +1,9 @@
-// $Id: StMcEventReadMacro.C,v 1.9 1999/12/14 18:18:01 calderon Exp $
+// $Id: StMcEventReadMacro.C,v 1.10 2000/01/12 20:29:15 calderon Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.10  2000/01/12 20:29:15  calderon
+// Changed default file to the one produced weekly by Lidia in
+// /star/rcf/test/dev/tfs_Linux/Tue/year_2a/hc_standard/
+//
 // Revision 1.9  1999/12/14 18:18:01  calderon
 // using new StMcEvent, StEvent & StAssociationMaker
 //
@@ -49,7 +53,7 @@ TBrowser *brow=0;
 // The acual file to be used is passed as an argument to the macro, or a default can be set
 
 void StMcEventReadMacro(Int_t nevents=1,
-const char *MainFile="/star/rcf/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0372_02_35evts.geant.root")
+const char *MainFile="/star/rcf/test/dev/tfs_Linux/Tue/year_2a/hc_standard/*.geant.root")
 {
 // Load all the System libraries
     gSystem->Load("St_base");
