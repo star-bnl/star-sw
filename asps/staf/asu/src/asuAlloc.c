@@ -26,8 +26,9 @@ void asuMallocInit()
       fprintf(stderr,"ASU_MALLOC: use Reset \n");fflush(0);
       return;
    }
+#ifndef QUIET_ASP
    fprintf(stderr,"ASU_MALLOC: Initializing ");fflush(0);
-
+#endif
    asuMallocLevel(ASU_MALLOC_LEVEL);
 
    switch(asu_mallocLevel) {
