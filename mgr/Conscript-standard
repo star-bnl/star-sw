@@ -332,8 +332,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    print "modC = $modC\n" if $param::debug;
 
 	    if ( $STAR_SYS !~ /^intel_wnt$/ ) {
-	      my $stic_cmd = "mkdir /tmp/\$\$; cd /tmp/\$\$;";
-	      $stic_cmd .= " stic -s -r $STIC_CPPPATH -q %<:a ; mv %>:f %>:a; rm -rf /tmp/\$\$";
+	      my $stic_cmd = 
+		  "mkdir /tmp/\$\$; cd /tmp/\$\$; ".
+		  "stic -s -r $STIC_CPPPATH -q %<:a ; mv %>:f %>:a; ".
+		  "cd /tmp ; rm -rf /tmp/\$\$";
 	      Command $env2 [$modh], @idlS, qq($stic_cmd);
 	      Command $env2 [$modi], @idlS, qq($stic_cmd);
 	      Command $env2 [$modH], @idlS, qq($stic_cmd);
@@ -495,7 +497,9 @@ if ( $#idlL > -1 ) {
                 my @Deps = ($idll);
                 print "Deps: $Deps[0]\n" if $param::debug;
                 if ( $STAR_SYS !~ /^intel_wnt$/ ) {
-		  my $stic_cmd = "mkdir /tmp/\$\$; cd /tmp/\$\$; stic -q %<:a ; mv %>:f %>:a; rm -rf /tmp/\$\$";
+		    my $stic_cmd  = 
+			"mkdir /tmp/\$\$ ; cd /tmp/\$\$; stic -q %<:a ; mv %>:f %>:a; ".
+			"cd /tmp ; rm -rf /tmp/\$\$";
                     Command $env3 [$idlh], @Deps, qq ($stic_cmd);
                     Command $env3 [$idli], @Deps, qq ($stic_cmd);
                     push @Deps, $idlh;
