@@ -43,8 +43,8 @@
 /*		is checked to make sure the tracks actually 		*/
 /*		intersect in 3-D.  Finally, the information 		*/
 /*		detailed in the tkf_out structure is calculated and	*/
-/*		stored.  											*/
-/*															*/
+/*		stored.  						        */
+/*										*/
 /*	C code created 11/95 by Scott Tooker					*/
 /*	C code heavily modified 12/95 by S. Margetis to make it actually work	*/
 /*	C code ported to STAF 8/97 by S. Margetis				*/
@@ -58,7 +58,7 @@ long type_of_call tkf_(
   TABLE_HEAD_ST           *tpch_h,    G2T_TPC_HIT_ST             *tpch ,
   TABLE_HEAD_ST        *tptrack_h,    TPT_TRACK_ST          *tptrack ,
   TABLE_HEAD_ST         *tpeval_h,      TTE_MCTRK_ST           *tpeval ,
-  TABLE_HEAD_ST        *globtrk_h,    EGR_GLOBTRK_ST          *globtrk ,
+  TABLE_HEAD_ST        *globtrk_h,    DST_TRACK_ST          *globtrk ,
   TABLE_HEAD_ST       *gpideval_h, EPI_GLOB_PID_EVAL_ST         *gpideval )
 {
 	int							returnCode;
@@ -103,7 +103,7 @@ long type_of_call tkf_(
 	int						aux[10000], iv1, iv2;
 
 	const double				alpha = 0.299792458;
-	const double				beta = 5.0;
+	const double				magnetic_field = 5.0;
 
 		
 	/*	Set counters for number of rows of good data to zero	*/
@@ -136,7 +136,7 @@ long type_of_call tkf_(
           {
                  if (localTracks[ii] = (localTrack *) malloc(sizeof(localTrack)))
                   {
-                    if( globtrk[i].sflag > 0 ) 
+                    if( globtrk[i].iflag > 0 ) 
                       {
                         localTracks[ii]->id    = 0;
                         localTracks[ii]->mc_id = 0;
@@ -154,15 +154,18 @@ long type_of_call tkf_(
                         localTracks[ii]->id    = globtrk[i].id;
                         localTracks[ii]->mc_id = aux[globtrk[i].id];
                         localTracks[ii]->nhits = globtrk[i].ndegf;
-                        localTracks[ii]->row   = globtrk[i].last_row;
-                        localTracks[ii]->lr    = sqrt(globtrk[i].xlast[0]*globtrk[i].xlast[0] +
-                                                     globtrk[i].xlast[1]*globtrk[i].xlast[1]);
-                        localTracks[ii]->r     = globtrk[i].r0;
-                        localTracks[ii]->rphi  = globtrk[i].r0 * globtrk[i].phi0 * (degToRad);
+			/*                        localTracks[ii]->row   = globtrk[i].last_row; */
+                        localTracks[ii]->lr    = sqrt(globtrk[i].x_last[0]*globtrk[i].x_last[0] +
+                                                     globtrk[i].x_last[1]*globtrk[i].x_last[1]);
+                        localTracks[ii]->r     = sqrt(globtrk[i].x0*globtrk[i].x0 +
+                                                      globtrk[i].y0*globtrk[i].y0);
+                        localTracks[ii]->rphi  = localTracks[ii]->r * 
+			                         atan2(globtrk[i].y0,globtrk[i].x0);
                         localTracks[ii]->z     = globtrk[i].z0;
                         localTracks[ii]->psi   = globtrk[i].psi * (degToRad);
                         localTracks[ii]->tanl  = globtrk[i].tanl;
-                        localTracks[ii]->qR    = globtrk[i].icharge * (alpha*beta) * (globtrk[i].invpt/1000.0);
+                        localTracks[ii]->qR    = ((double) globtrk[i].icharge) * (alpha*magnetic_field) * 
+			                                  (globtrk[i].invpt/1000.0);
                         tracksFound++;
                         ii++;
                       }
