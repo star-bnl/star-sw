@@ -10,7 +10,6 @@ cc:			information is then put into the adcxyz table.
 CC:<--------------------------------------------------------------------
 
       INTEGER*4 FUNCTION XYZ(
-     1            tsspar_h,            tsspar ,
      2         pad_plane_h,         pad_plane ,
      3          detector_h,          detector ,
      4           tppixel_h,           tppixel ,
@@ -28,8 +27,6 @@ CC:
 CC: AUTHOR:     N.T.B. Stone
 CC: ARGUMENTS:
 CC:          IN:
-CC:           tsspar     - Slow Simulator switches/parameters
-CC:         tsspar_h     - Header Structure for tsspar
 CC:        pad_plane     - Pad Plane description
 CC:      pad_plane_h     - Header Structure for pad_plane
 CC:         detector     - Detector hardware info
@@ -63,18 +60,17 @@ c -----	TPG function calls
 	integer		tgc_row_to_y
 	integer		tgc_pad_to_x
 	integer		tgc_local_to_global
-
+        integer         tgc_time_to_z
 	save		first_call
 
 	if (first_call) then
 	  first_call = .false.
-	  time_bucket = detector(1).drift_length / float(tsspar(1).ntime)
-	  time_bin = time_bucket / tsspar(1).v_drift
+	  time_bucket = detector(1).vdrift/detector(1).clock_frequency
+	  time_bin = 1.0/detector(1).clock_frequency
 	  write (6,*) 'XYZ: drift_length = ', detector(1).drift_length
-	  write (6,*) 'XYZ: ntime        = ', tsspar(1).ntime
-	  write (6,*) 'XYZ: v_drift      = ', tsspar(1).v_drift
-	  write (6,'(1x,a,f5.2,a)') 'XYZ: This implies '//
-	2	'an SCA clock frequency of ', (1/time_bin), '(x2) MHz'
+	  write (6,'(1x,a,f5.2,a)') 'XYZ: '//
+     2       'SCA clock frequency: ', detector(1).clock_frequency,
+     3       '(x2) MHz'
 	  write (6,*) '           '//
 	2	'(as of 11/96, SysTest uses a ~9(x2) MHz clock)'
 
@@ -82,12 +78,6 @@ c -----	TPG function calls
 	  buck_fact = 2**10
 	endif
 
-c -----	Make sure incoming tables look OK
-	if ((tsspar_h.maxlen.le.0) .or. 
-	2	(tsspar_h.nok.gt.tsspar_h.maxlen)) then
-	  write (6,*) 'XYZ: !!! Poorly defined table: TSSPAR !!!'
-	  goto 999
-	endif
 
 	if ((pad_plane_h.maxlen.le.0) .or. 
 	2	(pad_plane_h.nok.gt.pad_plane_h.maxlen)) then
@@ -152,8 +142,8 @@ c -----	Translate to cartesian coordinates
 	      istatus = tgc_row_to_y (float(adcxyz(inok).row), 
 	2	Xlocal(2), pad_plane_h, pad_plane)
 
-	      Xlocal(3) = adcxyz(inok).bucket * time_bucket
-
+*	      Xlocal(3) = adcxyz(inok).bucket * time_bucket
+              istatus = tgc_time_to_z(adcxyz(inok).bucket,1,1,1,Xlocal(3))
 	      istatus = tgc_local_to_global (adcxyz(inok).sector,
 	2	Xlocal, Xglobal)
 
