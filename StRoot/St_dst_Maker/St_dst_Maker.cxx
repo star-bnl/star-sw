@@ -1,7 +1,7 @@
-// $Id: St_dst_Maker.cxx,v 1.37 1999/11/27 18:21:42 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.38 1999/11/29 20:20:29 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
-// Revision 1.37  1999/11/27 18:21:42  fisyak
-// Add test that primary vertex exists
+// Revision 1.38  1999/11/29 20:20:29  fisyak
+// Janet changes due to ftpc
 //
 // Revision 1.36  1999/11/19 14:03:44  fisyak
 // Missed dst lavel
@@ -117,11 +117,14 @@
 #include "tables/St_dst_mon_soft_l3_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.37 1999/11/27 18:21:42 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.38 1999/11/29 20:20:29 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
-  St_dst_Maker::St_dst_Maker(const char *name):StMaker(name){
+  St_dst_Maker::St_dst_Maker(const char *name):
+StMaker(name),
+m_fdepar(0)
+{
   fSelect = 0;
 }
 //_____________________________________________________________________________
@@ -357,7 +360,7 @@ Int_t  St_dst_Maker::Filler(){
   St_DataSet *ftpc_tracks = GetInputDS("ftpc_tracks");
   St_fpt_fptrack *fpt_fptrack = 0;
   if (ftpc_tracks)  fpt_fptrack = (St_fpt_fptrack *) ftpc_tracks->Find("fpt_fptrack");
-  if (point && fcl_fppoint &&  fpt_fptrack && vertex) {
+  if (point && fcl_fppoint &&  fpt_fptrack) {
     if(Debug()) gMessMgr->Debug()<<" run_dst: Calling fill_ftpc_dst"<<endm;
     Int_t No_of_Tracks = 0;
     if (globtrk) No_of_Tracks += globtrk->GetNRows();
@@ -365,8 +368,13 @@ Int_t  St_dst_Maker::Filler(){
     if (globtrk) globtrk->ReAllocate(No_of_Tracks);
     else {globtrk     = new St_dst_track("globtrk", No_of_Tracks); dstI.Add(globtrk);}
     dst_dedx->ReAllocate(No_of_Tracks);
-    iRes = fill_ftpc_dst(fpt_fptrack, fcl_fppoint, globtrk,
-                         point,vertex,dst_dedx);
+   
+    St_DataSet *ftpcpars = GetInputDB("params/ftpc");
+    assert(ftpcpars);
+    St_DataSetIter gime(ftpcpars);
+    m_fdepar = (St_fde_fdepar *) gime("fdepars/fdepar");
+    iRes = fill_ftpc_dst(fpt_fptrack, fcl_fppoint, m_fdepar, globtrk,
+                         point,dst_dedx);
     //             ==========================================================
     if (iRes != kSTAFCV_OK) {
       iMake = kStWarn;
