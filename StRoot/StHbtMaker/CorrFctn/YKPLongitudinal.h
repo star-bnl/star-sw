@@ -20,9 +20,10 @@ class YKPLongitudinal : public StHbtCorrFctn {
 
  public:
     // constructors
-    YKPLongitudinal(const char* frame, const int& nbins, const float& QLo, const float& QHi,
+    YKPLongitudinal(TString ctype, TString frame, const int& nbins, const float& QLo, const float& QHi,
 		    const int& nKtbins, const double& ktMin, const double& ktMax,
-		    const int& nYbins, const double& YMin, const double& YMax) ;
+		    const int& nYbins, const double& YMin, const double& YMax,
+		    const int& nbinsQINV = 100, const float& QLoQINV = 0.0, const float& QHiQINV = 0.2 ) ;
     virtual ~YKPLongitudinal() ;
     // mandatory report
     virtual StHbtString Report() ;
@@ -72,7 +73,8 @@ class YKPLongitudinal : public StHbtCorrFctn {
     double*  mYBinsMax ;
 
     // the frame we calculate the correlationfuntion in
-    char mFrame ;
+    TString mFrame ;
+    TString mCtype ;
 
     // upper and lower bounds of Qinv region where to do normalization
     float mQinvNormLo ;
