@@ -1,6 +1,9 @@
-//$Id: StLaserEvent.h,v 1.7 2001/12/12 20:49:35 love Exp $
+//$Id: StLaserEvent.h,v 1.8 2001/12/18 20:27:38 pfachini Exp $
 // Header file for TPC Laser event - Bill Love
 //$Log: StLaserEvent.h,v $
+//Revision 1.8  2001/12/18 20:27:38  pfachini
+//Adding date and time stamp to Bill's tree
+//
 //Revision 1.7  2001/12/12 20:49:35  love
 //Added //-> to clones array declarations
 //
@@ -53,6 +56,7 @@ private:
    Int_t   fEvtNum;
    Int_t   fRun;
    Int_t   fDate;
+   Int_t   fTime;
    Float_t ftZero;
    Float_t fDriVel;
    Float_t fClock;
@@ -60,9 +64,9 @@ private:
 
 
 public:
-   EventHeader() : fEvtNum(0), fRun(0), fDate(0) { }
+   EventHeader() : fEvtNum(0), fRun(0), fDate(0), fTime(0) { }
    virtual ~EventHeader() { }
-   void   Set(Int_t i, Int_t r, Int_t d) { fEvtNum = i; fRun = r; fDate = d; }
+   void   Set(Int_t i, Int_t r, Int_t d, Int_t t) { fEvtNum = i; fRun = r; fDate = d; fTime = t; }
    void   SetE(Float_t tz, Float_t dv, Float_t ck) {
           ftZero = tz; fDriVel = dv; fClock = ck; }
    void   SetE(Float_t tz, Float_t dv, Float_t ck, Float_t tg) {
@@ -70,6 +74,7 @@ public:
    Int_t  GetEvtNum() const { return fEvtNum; }
    Int_t  GetRun() const { return fRun; }
    Int_t  GetDate() const { return fDate; }
+   Int_t  GetTime() const { return fTime; }
 
    ClassDef(EventHeader,1)  //Event Header
 };
@@ -104,10 +109,10 @@ public:
    void          SetNpixel(Int_t n) { fNpixel = n; }
    void          SetNvertex(Int_t n) { fNvertex = n; }
    void          SetFlag(UInt_t f) { fFlag = f; }
-   void          SetHeader(Int_t i, Int_t run, Int_t date);
-   void          SetHeader(Int_t i, Int_t run, Int_t date,
+   void          SetHeader(Int_t i, Int_t run, Int_t date, Int_t time);
+   void          SetHeader(Int_t i, Int_t run, Int_t date, Int_t time,
                  Float_t tzero, Float_t drivel, Float_t clock); 
-   void          SetHeader(Int_t i, Int_t run, Int_t date,
+   void          SetHeader(Int_t i, Int_t run, Int_t date, Int_t time,
               Float_t tzero, Float_t drivel, Float_t clock, Float_t trigger);
    void          AddTrack(Int_t flag,Int_t hitid,Int_t tid,Int_t id_globtrk,
          Int_t ndedx, Int_t nfit, Int_t nrec, Int_t npos,
@@ -168,25 +173,25 @@ class Hit : public TObject {
 public:
    Hit() { }
    Hit(Float_t q,Float_t x,Float_t y,Float_t z, 
-                        Int_t row, Int_t track, Int_t flag);
+       Int_t row, Int_t track, Int_t flag);
    Hit(Float_t q,Float_t x,Float_t y,Float_t z, Int_t row, Int_t track,
-  Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t dx,
-  Float_t dz,Float_t alpha, Float_t lambda, Float_t prf,Float_t zrf);
-  
-    Hit(Float_t q,Float_t x,Float_t y,Float_t z, Int_t row, Int_t track,
-   Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t ftkinvp,
-   Int_t tknfit, Float_t dx, Float_t dz,Float_t alpha, Float_t lambda,
-   Float_t prf,Float_t zrf);
-
-  Hit(Float_t q,Float_t x,Float_t y,Float_t z, Int_t row, Int_t track,
-  Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t ftkinvp,
-  Int_t tknfit, Float_t dx, Float_t dz,Float_t alpha, Float_t lambda,
-  Float_t prf,Float_t zrf, Float_t exbdx, Float_t exbdy);
-
+       Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t dx,
+       Float_t dz,Float_t alpha, Float_t lambda, Float_t prf,Float_t zrf);
+   
+   Hit(Float_t q,Float_t x,Float_t y,Float_t z, Int_t row, Int_t track,
+       Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t ftkinvp,
+       Int_t tknfit, Float_t dx, Float_t dz,Float_t alpha, Float_t lambda,
+       Float_t prf,Float_t zrf);
+   
+   Hit(Float_t q,Float_t x,Float_t y,Float_t z, Int_t row, Int_t track,
+       Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t ftkinvp,
+       Int_t tknfit, Float_t dx, Float_t dz,Float_t alpha, Float_t lambda,
+       Float_t prf,Float_t zrf, Float_t exbdx, Float_t exbdy);
+   
    virtual ~Hit() { }      
    ClassDef(Hit,1)  //A TPC TPhit object
 };
-
+     
 class Pixel : public TObject {
 private:
    Int_t frow;
