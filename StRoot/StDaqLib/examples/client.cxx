@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: client.cxx,v 1.7 2000/01/14 17:54:26 levine Exp $
+ * $Id: client.cxx,v 1.8 2000/06/07 15:06:26 jml Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: sample top-level code sould be used as a tutorial
@@ -14,6 +14,9 @@
  *
  ***************************************************************************
  * $Log: client.cxx,v $
+ * Revision 1.8  2000/06/07 15:06:26  jml
+ * Changed exit() calls to assert(0) to aid in debugging
+ *
  * Revision 1.7  2000/01/14 17:54:26  levine
  * example use of TRG_Reader
  *
@@ -140,7 +143,7 @@ int main(int argc, char *argv[])
 	{
 	  cout << "Error creating ER" << endl;
 	  close(fd);
-	  exit(0);
+	  assert(0);
 	}
 
       er->printEventInfo();
@@ -156,7 +159,7 @@ int main(int argc, char *argv[])
       if(!tr) {
 	cout << "Error creating TRG_Reader: " << er->errstr() << endl;
 	close(fd);
-	exit(0);
+	assert(0);
       } 
       else printf("created TRG_Reader!!!\n");
       fprintf(er->logfd,"\n\n================\n\nHerb's formatted TRGD dump:\n\n\n");
@@ -170,7 +173,7 @@ int main(int argc, char *argv[])
       if(!dr) {
 	cout << "Error creating TPC_Reader: " << er->errstr() << endl;
 	close(fd);
-	exit(0);
+	assert(0);
       } 
       else printf("created TPC_Reader!!!\n");
 #ifdef DO_SECTORS
@@ -186,7 +189,7 @@ int main(int argc, char *argv[])
 	    {
 	      cout << "Error creating pedestal reader: " << dr->errstr() << endl;
 	      close(fd);
-	      exit(0);
+	      assert(0);
 	    }
 
 	  PedestalRMSReader *rmsr = dr->getPedestalRMSReader(sector);
@@ -194,7 +197,7 @@ int main(int argc, char *argv[])
 	    {
 	      cout << "Error creating pedestal RMS reader: " << dr->errstr() << endl;
 	      close(fd);
-	      exit(0);
+	      assert(0);
 	    }
 
 	  // test for existence of PEDR banks this sector
