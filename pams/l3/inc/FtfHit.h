@@ -1,3 +1,10 @@
+//:>----------------------------------------------------------------------
+//: FILE:      FtfHit.h
+//: HISTORY:
+//:           18apr2000  ppy    add hardwareId
+//:           19apr2000  cs ppy add short sector for dEdx
+//:>----------------------------------------------------------------------
+
 #ifndef FTFHIT
 #define FTFHIT
 #include "FtfBaseHit.h"
@@ -21,16 +28,21 @@
        long         id ;
        short        phiIndex ;        // Phi index    
        short        etaIndex ;        // Eta index    
-       int          mcTrackId;        // id of a MC track   
-       FtfHit       *nextVolumeHit ;  // Next volume hit            
-       FtfHit       *nextRowHit    ;  // Next row hit               
+       short        flags    ;        // various flags      
+       short        sector   ;        // various flags      
+       //
+       void*        nextVolumeHit ;  // Next volume hit            
+       void*        nextRowHit    ;  // Next row hit               
        float        r    ;            // radius                     
        float        phi  ;            // azimuthal angle            
        float        dphi ;            // Error in phi               
        float        eta  ;            // hit pseudorapidity         
        float        xp   ;            // x conformal coordinate 
        float        yp   ;            // y conformal coordinate 
-       ClassDef(FtfHit,1)
+       short        buffer1 ;          //
+       short        buffer2 ;          
+       unsigned short hardwareId ;
+ClassDef(FtfHit,1)
    } ;
 #endif
 

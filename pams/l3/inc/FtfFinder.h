@@ -12,7 +12,7 @@
 
 #ifndef FTFFINDER
 #define FTFFINDER
-#include <memory.h>
+#include <string.h>
 
 #include "FtfGeneral.h"
 #include "FtfPara.h"

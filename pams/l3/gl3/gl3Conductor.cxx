@@ -48,7 +48,6 @@ int gl3Conductor::checkHistoRequest (  ) {
     socklen_t  sin_size = sizeof(struct sockaddr_in);
 
    if ((remoteSocket = accept(socketFd, (struct sockaddr *)&remoteAddress, &sin_size)) == -1) {
-//    printf ( " gl3Conductor::checkHistoRequest: No histo request \n " ) ;
       return 0;
    }
 
@@ -58,11 +57,11 @@ int gl3Conductor::checkHistoRequest (  ) {
    int nBytes = writeHistos ( maxBytes, buffer ) ;
 
    if ( nBytes < 0 ) {
-      fprintf ( stderr, "gl3Conductor::checkHistoRequest: buffer too small \n " ) ;
+      printf ( "gl3Conductor::checkHistoRequest: buffer too small \n " ) ;
       return 1 ;
    }
    int nSend = send(remoteSocket, buffer, nBytes, 0 ) ;
-   fprintf ( stderr, " N bytes sent %d send request %d \n ", nSend, nBytes ) ;
+   printf ( " N bytes sent %d send request %d \n ", nSend, nBytes ) ;
    if ( nSend == -1) {
       perror("send");
       return 1 ;
@@ -196,7 +195,7 @@ int gl3Conductor::setCommunications (  ){
 #ifdef GL3ONLINE
    struct sockaddr_in gl3Address;    /* my address information */
 
-   gl3Port = 3333 ;
+   gl3Port = 9999 ;
    int backLog = 5 ; // how many pending connections will hold
     
    if ((socketFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
@@ -227,6 +226,15 @@ int gl3Conductor::setCommunications (  ){
 //####################################################################
 //
 //####################################################################
+void gl3Conductor::setHitProcessing ( int hitPro ){
+  hitProcessing = hitPro ;
+  for ( int i = 0 ; i < maxEvents ; i++ ) {
+     event[i].setHitProcessing ( hitPro ) ;
+  }
+}
+//####################################################################
+//
+//####################################################################
 int gl3Conductor::setup ( int maxEventsIn, int maxAnalysesIn ) {
 //
    maxEvents   = maxEventsIn ;
@@ -250,6 +258,8 @@ int gl3Conductor::setup ( int maxEventsIn, int maxAnalysesIn ) {
 #ifdef GL3ONLINE
    if ( communicationsFlag ) setCommunications();
 #endif
+   hitProcessing = 0 ;
+   for ( i = 0 ; i < maxEvents ; i++ ) event[i].setHitProcessing ( hitProcessing ) ; 
 
    return 0 ;
 }
@@ -265,6 +275,7 @@ int gl3Conductor::writeHistos ( int maxBytes, char *buffer ){
    container->nHistos = histoList.size();
    
    char* pointer = (char *)&(container->buffer) ;
+   char* endBuffer = buffer + maxBytes ;
    int nBytes ;
    int nTotalBytes = 0 ;
    gl3Histo hTest ;
@@ -273,7 +284,11 @@ int gl3Conductor::writeHistos ( int maxBytes, char *buffer ){
 	 hPointer != 0; 
 	 hPointer = (gl3Histo *)histoList.next() ) {
 
-      nBytes = hPointer->Write ( pointer ) ;
+      nBytes = hPointer->Write ( endBuffer-pointer, pointer ) ;
+      if ( nBytes <= 0 ) {
+         printf ( "gl3Container::writeHistos %d byte long buffer is too short \n", maxBytes ) ;
+	 return 0 ;
+      }
 //    printf ( "nBytes written %d pointer %x \n", nBytes, pointer ) ;
       nTotalBytes += nBytes ;
       if ( nTotalBytes > maxBytes ) {

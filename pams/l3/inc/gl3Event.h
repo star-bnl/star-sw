@@ -18,13 +18,19 @@
 #include "daqFormats.h"
 #include "l3GeneralHeaders.h"
 #include "FtfGeneral.h"
-#include "gl3Tracks.h"
-#include "gl3MergingTrack.h"
+#include "gl3Track.h"
+#include "gl3Hit.h"
 #include "gl3Sector.h"
 #include "FtfPara.h"
 
 #ifndef GL3EVENT 
 #define GL3EVENT 
+
+#ifdef SL3ROOT
+#include "Rtypes.h"
+#else
+#define ClassDef(a,b)
+#endif
 
 
 class gl3HistoContainer {
@@ -38,15 +44,17 @@ public:
 class gl3Event {
 
 public:
-   gl3Event(int mxTracks=15000 ):track(0),busy(0){
-      mergingTrack = 0 ;
+   gl3Event(int mxHits=500000, int mxTracks=20000 ):hit(0),track(0),busy(0){
       trackContainer = 0 ;
-      setup ( mxTracks ) ;
+      trackIndex     = 0 ;
+      hitProcessing  = 0 ;
+      setup ( mxHits, mxTracks ) ;
    } ;
    ~gl3Event( ){ 
+       if ( hit            != 0 ) delete []hit   ;  
        if ( track          != 0 ) delete []track ;  
-       if ( mergingTrack   != 0 ) delete []mergingTrack ;
        if ( trackContainer != 0 ) delete []trackContainer ;
+       if ( trackIndex     != 0 ) delete []trackIndex     ;
    } ;
 
 
@@ -66,32 +74,43 @@ public:
       return &(sectorInfo[n]) ;
    }
 
-   void addTracks ( short sector, int nTracks, type1_track* track1 ) ;
-   void addTracks ( short sector, int nTracks, type2_track* track2 ) ;
-   void addTracks ( short sector, int nTracks, type3_track* track3 ) ;
+   void addTracks ( short sector, int nTracks, local_track* track ) ;
 
    int getNTracks ( ) { return nTracks ; } ;
 
    int  readEvent  ( int maxLength, char* buffer ) ;
-   int  readSector ( char* buffer ) ;
+   int  readSectorHits   ( char* buffer, int nSectorTracks ) ;
+   int  readSectorTracks ( char* buffer ) ;
    int  resetEvent ( ) ;
+   void setHitProcessing ( int hitPro ) { hitProcessing = hitPro ; } ;
+
+   int fillTracks ( int maxBytes, char* buffer, unsigned int token ) ;
    //
    float          bField ;
    //
-   int  setup ( int mTracks = 20000, int maxMergingTracks=10000 ) ;
+   int  setup ( int mHits=600000, int mTracks = 20000 ) ;
 private:
- //
+   //
+   int           hitProcessing ; // 0=does read hits
+                                 // 1=reassigns trackId in hits to
+                                 // pass that info downstream
+                                 // 2=full hit unpacking for module use
+   gl3Hit*          hit   ;
    gl3Track*        track ;
-   int              busy ;
+   int*             trackIndex ; // to keep track of relation ship between orig. tracks
+   int              busy ;       // and final tracks
    int     maxTracks ;
+   int     maxTracksSector ;
    int     nTracks ;
-   int     maxMergingTracks ;
-   int     nMergingTracks ;
-   gl3MergingTrack* mergingTrack ;
+   int     maxHits ;
+   int     nHits ;
+   int     nMergedTracks ;
    //
    FtfPara          para ;
    FtfContainer*    trackContainer ;
    gl3Sector        sectorInfo[NSECTORS];
+
+   ClassDef(gl3Event,1)
 //
 } ;
 #endif

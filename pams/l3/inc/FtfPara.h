@@ -1,5 +1,6 @@
 #ifndef FTFPARA
 #define FTFPARA
+#include <stdio.h>
 //:>------------------------------------------------------------------
 //: FILE:       FtfPara.h
 //: HISTORY:
@@ -10,6 +11,8 @@
 //:             23aug1999 ppy add ROOT option
 //:             19nov1999 ppy add maxChi2Primary to decide whether track is primary
 //:             11feb2000 ppy add maxTime
+//:             28mar2000 ppy add parameterLocation variable
+//:             30mar2000 ppy add parameters to merge secondaries
 //:
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
@@ -21,6 +24,7 @@
 #else
 #define ClassDef(a,b)
 #endif
+
 //
 //           fft control parameters                          
 //
@@ -28,35 +32,39 @@
      public:
        FtfPara ( ) { setDefaults() ; } ;
        void      setDefaults ( ) ;
-       short     infoLevel;       // Level of information printed about progress
-       short     segmentRowSearchRange;       // Row search range for segments 
-       short     trackRowSearchRange;         // Row search range for tracks 
-       short     dEdx  ;          // dEdx switch
-       short     dEdxNTruncate ;  // # points to truncate in dEdx
-       short     eventReset   ;   // Flag to reset event in fft 
-       short     getErrors    ;   // Flag to switch error calculation
-       short     fillTracks   ;   // Flag to switch FtfTrack class filling
-       short     ghostFlag    ;   // =1 when there are ghost hits
-       short     goBackwards  ;   // Flag to go backwards at the end of track reco
-       short     init;            // Control initialization 
-       short     mergePrimaries ; // Switch to control primary merging 
-       short     minHitsPerTrack; // Minimum # hits per track 
-       short     modRow;          // Modulo pad row number to use 
-       short     nHitsForSegment; // # hits in initial segments 
-       short     minHitsForFit;
-       short     nEta;            // # volumes in eta 
-       short     nEtaTrack;       // # Track areas in eta 
-       short     nPhi;            // # volumes in nphi 
-       short     nPhiTrack;       // # Track areas in nphi 
-       short     nPrimaryPasses;  // # iterations looking for primaries
-       short     nSecondaryPasses;// # iterations looking for secondaries
-       short     vertexConstrainedFit; // 
+       void      read  ( char* inputFile ) ;
+       void      write ( char* outputFile ) ;
+
+       int       infoLevel;       // Level of information printed about progress
+       int       segmentRowSearchRange;       // Row search range for segments 
+       int       trackRowSearchRange;         // Row search range for tracks 
+       int       dEdx  ;          // dEdx switch
+       int       dEdxNTruncate ;  // # points to truncate in dEdx
+       int       eventReset   ;   // Flag to reset event in fft 
+       int       getErrors    ;   // Flag to switch error calculation
+       int       fillTracks   ;   // Flag to switch FtfTrack class filling
+       int       ghostFlag    ;   // =1 when there are ghost hits
+       int       goBackwards  ;   // Flag to go backwards at the end of track reco
+       int       init;            // Control initialization 
+       int       mergePrimaries ; // Switch to control primary merging 
+       int       minHitsPerTrack; // Minimum # hits per track 
+       int       modRow;          // Modulo pad row number to use 
+       int       nHitsForSegment; // # hits in initial segments 
+       int       minHitsForFit;
+       int       nEta;            // # volumes in eta 
+       int       nEtaTrack;       // # Track areas in eta 
+       int       nPhi;            // # volumes in nphi 
+       int       nPhiTrack;       // # Track areas in nphi 
+       int       nPrimaryPasses;  // # iterations looking for primaries
+       int       nSecondaryPasses;// # iterations looking for secondaries
+       int       vertexConstrainedFit; // 
+       int       parameterLocation; // 1=inner most point, 0=closest approach
        float     maxChi2Primary ; // maximum chi2 to be considered primary 
-       short     rowInnerMost;    // Row where end track search 
-       short     rowOuterMost;    // Outer most row to consider tin tracking
-       short     rowStart;        // Row where start track search
-       short     rowEnd  ;        // Row where end   track search
-       short     szFitFlag;       // Switch for sz fit 
+       int       rowInnerMost;    // Row where end track search 
+       int       rowOuterMost;    // Outer most row to consider tin tracking
+       int       rowStart;        // Row where start track search
+       int       rowEnd  ;        // Row where end   track search
+       int       szFitFlag;       // Switch for sz fit 
        float     bField      ;    // Magnetic field  
        float     hitChi2Cut;      // Maximum hit chi2 
        float     goodHitChi2;     // Chi2 to stop looking for next hit 
@@ -65,6 +73,7 @@
        float     dphi;            // Phi search range 
        float     detaMerge ;      // Eta difference for track merge 
        float     dphiMerge ;      // Phi difference for track merge
+       float     distanceMerge ;  // Maximum distance for reference point to merge secondaries
        float     etaMin;          // Min eta to consider 
        float     etaMinTrack ;    // Track min eta to consider 
        float     etaMax;          // Max eta to consider 
@@ -92,8 +101,8 @@
        float     phiVertex      ;
        float     rVertex        ;
        float     maxTime        ; // maxTime tracker can run
-       short     phiClosed ;
-       short     primaries  ;
+       int       phiClosed ;
+       int       primaries  ;
        int       nRowsPlusOne, nPhiPlusOne   ; // Number volumes + 1
        int       nEtaPlusOne, nPhiEtaPlusOne ; // Number volumes + 1 
        int       nPhiTrackPlusOne, nEtaTrackPlusOne ;                
