@@ -1,0 +1,133 @@
+<HTML>
+<PRE>
+<H2>file: dui/inc/dui_types.h</H2>
+
+
+/*:Copyright 1995, Lawrence Berkeley National Laboratory
+*:&gt;---------------------------------------------------------------------
+*:FILE:         dui_types.h
+*:DESCRIPTION:  Variable types for <A HREF="dui_macros.h.html#DUI">DUI</A>
+*:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+*:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      08dec95-v000a-cet- creation
+*:&lt;---------------------------------------------------------------------
+*/
+#ifndef <A HREF="#DUI_TYPES_H">DUI_TYPES_H</A>
+<B>#define <A NAME="DUI_TYPES_H">DUI_TYPES_H</A></B>
+
+/*-------------------------------------------- INCLUDES             --*/
+#include "<A HREF="dui_macros.h.html">dui_macros.h</A>"
+#include "dstype.h"
+
+#ifdef CORBA
+#include "dui_i.hh"
+#endif
+
+/*-------------------------------------------- CORBA                --*/
+
+/*-------------------------------------------- TYPEDEFS             --*/
+/*-------------------------------------------- GLOBALS              --*/
+/*-------------------------------------------- PROTOTYPES           --*/
+extern CC_P char * <A HREF="dui_utils.cc.html#dui_dirof">dui_dirof(</A>const char* path);
+extern CC_P char * <A HREF="dui_utils.cc.html#dui_notdirof">dui_notdirof(</A>const char* path);
+extern CC_P char * <A HREF="dui_utils.cc.html#dui_pathof">dui_pathof(</A>const char* base,const char* mod);
+extern CC_P char * <A HREF="dui_utils.cc.html#dui_rootof">dui_rootof(</A>const char* path);
+
+#ifdef __cplusplus
+extern CC_P int <A HREF="dui_utils.cc.html#duiFindDS">duiFindDS(</A>DS_DATASET_T *& node, DS_DATASET_T* root
+		, char* path);
+extern CC_P int <A HREF="dui_dslUnix.cc.html#dui_ls_l_Table">dui_ls_l_Table(</A>DS_DATASET_T *pDS, char*& listing);
+extern CC_P int <A HREF="dui_dslUnix.cc.html#dui_ls_ld_Dataset">dui_ls_ld_Dataset(</A>DS_DATASET_T *pDS, char*& listing);
+extern CC_P int <A HREF="dui_dslUnix.cc.html#dui_ls_l_Dataset">dui_ls_l_Dataset(</A>DS_DATASET_T *pDS, char*& listing);
+extern CC_P int <A HREF="dui_dslUnix.cc.html#dui_ls_l_Header">dui_ls_l_Header(</A>char*& listing);
+#endif /*__cplusplus*/
+
+extern CC_P int <A HREF="dui_init.cc.html#dui_init">dui_init(</A>);
+extern CC_P int <A HREF="dui_init.cc.html#dui_start">dui_start(</A>);
+extern CC_P int <A HREF="dui_init.cc.html#dui_stop">dui_stop(</A>);
+extern CC_P void dui_def_();
+
+#ifndef NOKUIP
+extern CC_P void kam_dui_count_();
+extern CC_P void kam_dui_list_();
+extern CC_P void <A HREF="dui_kam.cc.html#kam_dui_cd_">kam_dui_cd_(</A>);
+extern CC_P void <A HREF="dui_kam.cc.html#kam_dui_cp_">kam_dui_cp_(</A>);
+extern CC_P void <A HREF="dui_kam.cc.html#kam_dui_ls_">kam_dui_ls_(</A>);
+extern CC_P void <A HREF="dui_kam.cc.html#kam_dui_mkdir_">kam_dui_mkdir_(</A>);
+extern CC_P void <A HREF="dui_kam.cc.html#kam_dui_mktable_">kam_dui_mktable_(</A>);
+extern CC_P void <A HREF="dui_kam.cc.html#kam_dui_mv_">kam_dui_mv_(</A>);
+extern CC_P void <A HREF="dui_kam.cc.html#kam_dui_pwd_">kam_dui_pwd_(</A>);
+extern CC_P void <A HREF="dui_kam.cc.html#kam_dui_rm_">kam_dui_rm_(</A>);
+extern CC_P void <A HREF="dui_kam.cc.html#kam_dui_rmdir_">kam_dui_rmdir_(</A>);
+
+extern CC_P int kam_dui_count();
+extern CC_P int kam_dui_list();
+extern CC_P int <A HREF="dui_kam.cc.html#kam_dui_cd">kam_dui_cd(</A>);
+extern CC_P int <A HREF="dui_kam.cc.html#kam_dui_cp">kam_dui_cp(</A>);
+extern CC_P int <A HREF="dui_kam.cc.html#kam_dui_ls">kam_dui_ls(</A>);
+extern CC_P int <A HREF="dui_kam.cc.html#kam_dui_mkdir">kam_dui_mkdir(</A>);
+extern CC_P int <A HREF="dui_kam.cc.html#kam_dui_mktable">kam_dui_mktable(</A>);
+extern CC_P int <A HREF="dui_kam.cc.html#kam_dui_mv">kam_dui_mv(</A>);
+extern CC_P int <A HREF="dui_kam.cc.html#kam_dui_pwd">kam_dui_pwd(</A>);
+extern CC_P int <A HREF="dui_kam.cc.html#kam_dui_rm">kam_dui_rm(</A>);
+extern CC_P int <A HREF="dui_kam.cc.html#kam_dui_rmdir">kam_dui_rmdir(</A>);
+#endif /*NOKUIP*/
+
+#endif /* <A HREF="#DUI_TYPES_H">DUI_TYPES_H</A> */
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>
