@@ -9,10 +9,15 @@
  macro/global/import *
 
  cd [params]/global/evrpars
-*
-tdm/table/cell/putvalue 'evr_evrpar[0].match'  0
-tdm/table/cell/putvalue 'evr_evrpar[0].minhit' 5
-tdm/table/cell/putvalue 'evr_evrpar[0].use'    2
+* 
+* removed by KATHY since bad boy Spiros didn't do it! on 12/11
+* tdm/table/cell/putvalue 'evr_evrpar[0].match'  0
+* tdm/table/cell/putvalue 'evr_evrpar[0].minhit' 5
+* tdm/table/cell/putvalue 'evr_evrpar[0].use'    2
+* 
+* added by KATHY on 12/11
+ tdm/table/cell/putvalue 'evr_evrpar[0].vcut'   1.0
+* 
 tdm/table/cell/putvalue 'evr_evrpar[0].cutxy'  1.0
 tdm/table/cell/putvalue 'evr_evrpar[0].cutz'  10.0
 tdm/table/cell/putvalue 'evr_evrpar[0].cut2'   2.0
