@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.5 2003/10/21 15:18:48 fisyak Exp $
+// $Id: StdEdxY2Maker.h,v 1.6 2004/02/10 00:31:27 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -66,9 +66,11 @@ class StdEdxY2Maker : public StMaker {
   void    Histogramming(StGlobalTrack* gTrack);
   void    DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ);
   void    PrintdEdx(Int_t iop = 0);
+  static  void Landau(Double_t x, Double_t *val);
+  static  void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.5 2003/10/21 15:18:48 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.6 2004/02/10 00:31:27 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
