@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcCtbHit.cc,v 2.2 2003/04/11 19:58:29 calderon Exp $
+ * $Id: StMcCtbHit.cc,v 2.3 2003/12/02 21:22:03 calderon Exp $
  * $Log: StMcCtbHit.cc,v $
+ * Revision 2.3  2003/12/02 21:22:03  calderon
+ * remove unnecessary #include "StMcTrack.hh"
+ *
  * Revision 2.2  2003/04/11 19:58:29  calderon
  * Fixed bug in calculating slat and tray.  Start with an int, make sure
  * i_eta and i_phi begin at zero (was missing before), and finally return the values as unsigned
@@ -15,9 +18,8 @@
  * accordingly.
  */
 #include "StMcCtbHit.hh"
-#include "StMcTrack.hh"
 #include "tables/St_g2t_ctf_hit_Table.h"
-static const char rcsid[] = "$Id: StMcCtbHit.cc,v 2.2 2003/04/11 19:58:29 calderon Exp $";
+static const char rcsid[] = "$Id: StMcCtbHit.cc,v 2.3 2003/12/02 21:22:03 calderon Exp $";
 
 StMemoryPool StMcCtbHit::mPool(sizeof(StMcCtbHit));
 

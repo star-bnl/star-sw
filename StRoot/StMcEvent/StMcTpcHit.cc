@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.cc,v 2.7 2000/06/06 02:58:41 calderon Exp $
+ * $Id: StMcTpcHit.cc,v 2.8 2003/12/02 21:22:03 calderon Exp $
  * $Log: StMcTpcHit.cc,v $
+ * Revision 2.8  2003/12/02 21:22:03  calderon
+ * remove unnecessary #include "StMcTrack.hh"
+ *
  * Revision 2.7  2000/06/06 02:58:41  calderon
  * Introduction of Calorimeter classes.  Modified several classes
  * accordingly.
@@ -35,10 +38,9 @@
  *
  **************************************************************************/
 #include "StMcTpcHit.hh"
-#include "StMcTrack.hh"
 #include "tables/St_g2t_tpc_hit_Table.h"  
 
-static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.7 2000/06/06 02:58:41 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.8 2003/12/02 21:22:03 calderon Exp $";
 
 StMemoryPool StMcTpcHit::mPool(sizeof(StMcTpcHit));
 

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.cc,v 2.9 2003/10/08 21:21:31 calderon Exp $
+ * $Id: StMcFtpcHit.cc,v 2.10 2003/12/02 21:22:03 calderon Exp $
  * $Log: StMcFtpcHit.cc,v $
+ * Revision 2.10  2003/12/02 21:22:03  calderon
+ * remove unnecessary #include "StMcTrack.hh"
+ *
  * Revision 2.9  2003/10/08 21:21:31  calderon
  * Added backward compatibility for plane(), in case of volumeId < 1000.
  * The sector() will return a dummy value of 99999 in this case.
@@ -48,10 +51,9 @@
 #include "StThreeVectorF.hh"
 
 #include "StMcFtpcHit.hh"
-#include "StMcTrack.hh"
 #include "tables/St_g2t_ftp_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.9 2003/10/08 21:21:31 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.10 2003/12/02 21:22:03 calderon Exp $";
 
 StMemoryPool StMcFtpcHit::mPool(sizeof(StMcFtpcHit));
 
