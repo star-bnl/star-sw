@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.h,v 1.3 1999/04/28 22:27:32 fisyak Exp $
+ * $Id: StFtpcHit.h,v 1.4 1999/05/02 00:00:17 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.h,v $
- * Revision 1.3  1999/04/28 22:27:32  fisyak
- * New version with pointer instead referencies
+ * Revision 1.4  1999/05/02 00:00:17  fisyak
+ * Add default ctors
+ *
+ * Revision 1.4  1999/05/02 00:00:17  fisyak
+ * Add default ctors
  *
  * Revision 1.3  1999/04/28 22:27:32  fisyak
  * New version with pointer instead referencies
@@ -44,12 +47,13 @@ class StGlobalTrackCollection;
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif
-    StFtpcHit(const StThreeVectorF&,
-	      const StThreeVectorF&,
-	      Float_t, UChar_t = 0);
-    StFtpcHit(dst_point_st*);
+  StFtpcHit() : StHit() { /* noop */ };
+ * Adapted new StArray version. First version to compile on Linux and Sun.
+ *
+  StFtpcHit(){ /* noop */ };
+  StFtpcHit(const StThreeVectorF&,
 	    const StThreeVectorF&,
-    StVecPtrGlobalTrack relatedTracks(const StGlobalTrackCollection*);
+  StFtpcHit(dst_point_st*);
 #ifndef __CINT__
   StVecPtrGlobalTrack relatedTracks(const StGlobalTrackCollection*);
 #endif

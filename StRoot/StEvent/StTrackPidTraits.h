@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.h,v 1.5 1999/04/30 13:16:30 fisyak Exp $
+ * $Id: StTrackPidTraits.h,v 1.6 1999/05/02 00:00:18 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.h,v $
- * Revision 1.5  1999/04/30 13:16:30  fisyak
- * add StArray for StRootEvent
+ * Revision 1.6  1999/05/02 00:00:18  fisyak
+ * Add default ctors
+ *
+ * Revision 1.6  1999/05/02 00:00:18  fisyak
+ * Add default ctors
  *
  * Revision 1.5  1999/04/30 13:16:30  fisyak
  * add StArray for StRootEvent
@@ -32,14 +35,15 @@
 class StGlobalTrack;
 class StDedxPid;
  * Completely Revised for New Version
-    StTrackPidTraits(StGlobalTrack*);
-    ~StTrackPidTraits();
+#include "StObject.h"
+ *
+ **************************************************************************/
   StTrackPidTraits() : mTpcDedxPid() {/* noop */};
-    const StDedxPid* tpcDedxPid() const;
+  StTrackPidTraits(StGlobalTrack*);
   ~StTrackPidTraits();
     StTrackPidTraits();
-    StDedxPid *mTpcDedxPid;
-    // StDedxPid *mSvtDedxPid;  
+  const StDedxPid* tpcDedxPid() const;
+    Short_t method() const;
 private:
   StDedxPid *mTpcDedxPid;
   // StDedxPid *mSvtDedxPid;  
