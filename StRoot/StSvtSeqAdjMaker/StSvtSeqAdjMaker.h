@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.10 2001/08/24 20:57:46 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.11 2001/09/16 22:24:26 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.11  2001/09/16 22:24:26  caines
+// Fix for when SVT isnt in every event
+//
 // Revision 1.10  2001/08/24 20:57:46  caines
 // Do common mode noise suppression from first two anodes
 //
@@ -87,6 +90,7 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t SetMinAdcLevels( int MinAdc1,  int MinAbove1, int MinAdc2, int MinAbove2, int PedOffset); // Set the 2 thresholds for a sequence
   Int_t SetPedestalFile(const char* PedFile);
   Int_t SetLowInvProd(int LowInvProd);// Set the low threshold based on the frequency distribution
+
     
  protected:
   St_ObjectSet* mSvtDataSet;             //!
