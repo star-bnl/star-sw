@@ -385,7 +385,7 @@ void StTree::Close(const char* opt)
       St_DataSet *par = GetParent(); SetParent(0);
       StIO::Write(tfbr,(const char*)treeKey,2000,this);
       SetParent(par);}
-    if (!opt || strstr(opt,"keep")) br->Close();
+    if (!(opt && strcmp(opt,"keep")==0)) br->Close();
   }
 }  
 
