@@ -1,5 +1,8 @@
-// $Id: bfcread_tagsBranch.C,v 1.12 2000/06/06 21:14:42 kathy Exp $
+// $Id: bfcread_tagsBranch.C,v 1.13 2000/06/06 22:04:31 kathy Exp $
 // $Log: bfcread_tagsBranch.C,v $
+// Revision 1.13  2000/06/06 22:04:31  kathy
+// updated to print out more info about tags
+//
 // Revision 1.12  2000/06/06 21:14:42  kathy
 // updated to print out more info about tags
 //
@@ -65,14 +68,15 @@ void bfcread_tagsBranch(
   cout << "  Total # leaves  = " << nLeaves << endl;
 
   TString *tName = new TString(" ");
-  TNamed *tableName;
+  TNamed *tableName=0;
   TObjArray *tagTable = new TObjArray;
   Int_t tableCount = 0;
   Int_t *tableIndex = new Int_t[nLeaves];
   Int_t tagCount = 0;
 
-  TBranch *branch;
-  TLeaf *leaf;
+  TBranch *branch=0;
+  TLeaf *leaf=0;
+  Int_t ndim =0;
 
 //count number of tag tables encoded in the TTree branch names
   for (Int_t l=0;l<nLeaves;l++) {
@@ -93,7 +97,7 @@ void bfcread_tagsBranch(
     tableIndex[l]=tableCount-1;
   }
 
-  cout << endl << "  Total num tables(branches) ,tags = " 
+  cout << endl << "  Total num tables(branches),tags = " 
               << tableCount << "   " << tagCount << endl << endl;
 
   Int_t *countTagsTable = new Int_t[tableCount];
@@ -101,43 +105,25 @@ void bfcread_tagsBranch(
   Float_t *sumTagsLeaf = new Float_t[nLeaves];
   Int_t *countTagsLeaf = new Int_t[nLeaves];
 
-  Int_t ndim =0;
-
 // Now loop over leaves (to get values of tags)
 
    for (Int_t l=0;l<nLeaves;l++) {
 
       leaf = (TLeaf*)leaves->UncheckedAt(l);
       branch = leaf->GetBranch();
+      ndim = leaf->GetNdata();
 
       countTagsTable[tableIndex[l]]+=leaf->GetNdata();
       countLeavesTable[tableIndex[l]]++;
- 
-      ndim = leaf->GetNdata();
-
       countTagsLeaf[l]+=ndim;
 
-      cout << " QAInfo: branch ";
-      cout.width(2);
-      cout << tableIndex[l] << " = ";
-      cout.width(12);
-      cout << ((TNamed*)tagTable->UncheckedAt(tableIndex[l]))->GetName();
-      cout << ", leaf ";
-      cout.width(3);
-      cout << l << " = ";
-      cout.width(24);
-      cout << leaf->GetName();
-      cout << ", #tags = ";     
-      cout.width(4);
-      cout << ndim;
-      cout << endl;
-
-      fout << 
-       " QAInfo: branch " <<  tableIndex[l] << 
-       " = "  << ((TNamed*)tagTable->UncheckedAt(tableIndex[l]))->GetName() <<
-       ", leaf " << l << 
-       " = " << leaf->GetName() <<
-       ", #tags = " << ndim << endl;
+      cout << " QAInfo: branch, leaf, #tags =  ";
+       cout.width(4);
+       cout << tableIndex[l];
+       cout.width(4);
+       cout << l;
+       cout.width(4);
+       cout << ndim << endl;
 
 //  loop over all events in each leaf
 
@@ -165,13 +151,11 @@ void bfcread_tagsBranch(
 	} 	
       }
     }
-
-// end of loop over all leaves
-
-     cout << endl  << endl;
-     fout << endl  << endl;
+    cout << endl  << endl;
+    fout << endl  << endl;
 
 
+// loop over all tables
      for (Int_t m=0; m<tableCount; m++){
           cout << " QAInfo: branch(table) ";
 	  cout.width(10);
@@ -179,28 +163,52 @@ void bfcread_tagsBranch(
 	  cout.width(4);
 	  cout << countLeavesTable[m] << " leaves,";
 	  cout.width(4);
-	  cout << countTagsTable[m] << " tags" << endl << endl << endl;
+	  cout << countTagsTable[m] << " tags" << endl;
 
-          fout << " QAInfo: branch(table) ";
-	  fout.width(10);
-	  fout << ((TNamed*)tagTable->UncheckedAt(m))->GetName() << " has ";
-	  fout.width(4);
-	  fout << countLeavesTable[m] << " leaves,";
-	  fout.width(4);
-	  fout << countTagsTable[m] << " tags" << endl << endl << endl;
+     }
+     cout << endl  << endl;
+     fout << endl  << endl;
+
+
+// loop over leaves again for printout at end
+     for (Int_t m=0; m<nLeaves; m++){
+
+       leaf = (TLeaf*)leaves->UncheckedAt(m);
+       branch = leaf->GetBranch();
+       ndim = leaf->GetNdata();
+
+      cout << " QAInfo: branch ";
+        cout.width(2);
+        cout << tableIndex[m] << " = ";
+        cout.width(10);
+        cout << ((TNamed*)tagTable->UncheckedAt(tableIndex[m]))->GetName();
+        cout << ", leaf ";
+        cout.width(3);
+        cout << m << " = ";
+        cout.width(24);
+        cout << leaf->GetName();
+        cout << ", #tags = ";     
+        cout.width(1);
+        cout << ndim;
+        cout << endl;
+
      }
 
 
+// loop over leaves again for printout at end of averages
+     cout << endl << " QAInfo: each leaf's avg over all tags,evts: " << endl;
 
      for (Int_t m=0; m<nLeaves; m++){
-       sumTagsLeaf[m]/=countTagsLeaf[m]*nEntries;
-          cout << " QAInfo: leaf ";
-	  cout.width(3);
-          cout << m << "  has ";
-	  cout.width(4);
-	  cout << countTagsLeaf[m] << " tags, avg all tags+ev =  ";
-          cout.width(24);
-          cout << sumTagsLeaf[m] << endl;
+
+      sumTagsLeaf[m]/=countTagsLeaf[m]*nEntries;
+
+      cout << " QAInfo:   leaf ";
+        cout.width(2);
+        cout << m << " = "; 
+        cout.width(12);
+        cout << sumTagsLeaf[m];
+        cout << endl;
+
      }
 
 
