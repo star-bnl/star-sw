@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.h,v 2.4 2000/02/10 18:49:08 ullrich Exp $
+ * $Id: StVertex.h,v 2.5 2000/03/08 14:29:56 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
- * Revision 2.4  2000/02/10 18:49:08  ullrich
- * Fixed typo introduced at last check-in.
+ * Revision 2.5  2000/03/08 14:29:56  ullrich
+ * New method probChiSquared() added.
  *
  * Revision 2.4  2000/02/10 18:49:08  ullrich
  * Fixed typo introduced at last check-in.
@@ -54,6 +54,7 @@ public:
     virtual StVertexId     type() const = 0;
     Long_t                 flag() const;
     Float_t                chiSquared() const;
+    Float_t                probChiSquared() const;
     StMatrixF              covariantMatrix() const;  // overwrite inherited
     StThreeVectorF         positionError() const;    // overwrite inherited
     StTrack*               parent();
@@ -66,6 +67,7 @@ public:
     virtual void setFlag(Long_t);
     virtual void setCovariantMatrix(Float_t[6]);
     virtual void setChiSquared(Float_t);
+    virtual void setProbChiSquared(Float_t);
     virtual void setParent(StTrack*);
     virtual void addDaughter(StTrack*) = 0;
     virtual void removeDaughter(StTrack*) = 0;
@@ -75,6 +77,7 @@ protected:
     Long_t        mFlag;
     Float_t       mCovariantMatrix[6];
     Float_t       mChiSquared;
+    Float_t       mProbChiSquared;
     StTrack*      mParent;             //$LINK
 
     ClassDef(StVertex,1)
