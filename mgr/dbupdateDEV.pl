@@ -85,6 +85,8 @@ if($thisday eq "Sat" or $thisday eq "Sun" ){
 } 
   print "Day Name: ",$thisday, " % ", "Index", $iday, "\n";
 
+#$testDay = "Fri";
+#$beforeDay = "Thu";
 
 ##### setup output directories for DEV with thisDay
 
@@ -1050,6 +1052,7 @@ sub  updateJSTable {
  my $i;
  my @part;
  my @size_line;
+ my @memSize;
  my @cpu_output;
  my $ij = 0;
  my $end_line; 
@@ -1113,16 +1116,15 @@ my $Anflag = 0;
 
 #  get memory size
       if ($num_line > 200){
-      if( $line =~ /EndMaker/ and $line =~ /root4sta/){
+#      if( $line =~ /EndMaker/ and $line =~ /root4sta/){
+	if( $line =~ /EndMaker/ and $line =~ /total/ ) {
         @size_line = split(" ",$line); 
 
           $mymaker = $size_line[3];
+        @memSize = split("=",$size_line[6]);
         if( $mymaker eq "outputStream:"){
-	  if( $plt_form eq "tfs_Solaris_CC5" or $plt_form eq "trs_Solaris" ) {
-         $maker_size[$no_event + 1] = $size_line[12]/1000;
-        }else {
-          $maker_size[$no_event + 1] = $size_line[9]/1000;
-        }
+          $maker_size[$no_event + 1] = $memSize[1];
+#          print "outputStream size:",$maker_size[$no_event + 1], "\n";  
        }
       }
     }
