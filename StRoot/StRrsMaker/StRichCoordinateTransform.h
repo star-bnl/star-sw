@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StRichCoordinateTransform.h,v 1.1 2000/02/08 16:34:04 lasiuk Exp $
+ * $Id: StRichCoordinateTransform.h,v 1.2 2000/02/08 23:48:19 lasiuk Exp $
  *
  * Author: brian made this on Jan 27, 2000
  *
@@ -16,9 +16,12 @@
  ***********************************************************************
  *
  * $Log: StRichCoordinateTransform.h,v $
- * Revision 1.1  2000/02/08 16:34:04  lasiuk
- * Initial Revision:  eventually for StUtilities
+ * Revision 1.2  2000/02/08 23:48:19  lasiuk
+ * remove matrix from SCL
  *
+ *
+ * Revision 1.2  2000/02/08 23:48:19  lasiuk
+ * remove matrix from SCL
  *
  * Revision 1.1  2000/02/08 16:34:04  lasiuk
  * Initial Revision:  eventually for StUtilities
@@ -33,7 +36,7 @@
 //#include <stdexcept>
 #endif
 
-#include "StMatrix.hh"
+// SCL
 #include "StGlobals.hh"
 #include "SystemOfUnits.h"
 #include "StThreeVector.hh"
