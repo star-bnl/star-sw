@@ -1,3 +1,5 @@
+#ifndef TPC_DIMENSIONS_H
+#define TPC_DIMENSIONS_H
 //:Description: 
 //:Synonyms::::
 //:Source: Pavel Nevski
@@ -6,7 +8,7 @@
 //:Reminder:
 //:Recall frequency:
 //:Size of Data:
-//:Pointer to data:  TPCDimensions.time:
+//:Pointer to data: Geometry_tpc/tpcDimensions
 struct tpcDimensions {
 
   //  type varnam;    //Units : Comments
@@ -95,3 +97,4 @@ struct tpcDimensions {
 
 };
 
+#endif

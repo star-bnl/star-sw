@@ -1,4 +1,6 @@
-//:Description: 
+#ifndef TPC_PADPLANES_H
+#define TPC_PADPLANES_H
+//:Description: geometrical characteristic of tpc's padplanes
 //:Synonyms::::
 //:Source:
 //:Update:
@@ -6,7 +8,7 @@
 //:Reminder:
 //:Recall frequency:
 //:Size of Data:
-//:Pointer to data:  TPCPadplanes.time:
+//:Pointer to data: Geometry_tpc/tpcPadPlanes
 struct tpcPadPlanes {
   //  type varnam;    //Units : Comments
 
@@ -44,3 +46,4 @@ struct tpcPadPlanes {
     double outerRowRadii[32];
 
 };
+#endif

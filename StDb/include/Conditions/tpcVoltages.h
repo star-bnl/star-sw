@@ -1,4 +1,6 @@
-//:Description: 
+#ifndef TPC_VOLTAGES_H
+#define TPC_VOLTAGES_H
+//:Description: tpc voltage values
 //:Synonyms::::
 //:Source:
 //:Update:
@@ -6,7 +8,7 @@
 //:Reminder:
 //:Recall frequency:
 //:Size of Data:
-//:Pointer to data:  TPCVoltages.time:
+//:Pointer to data: Conditions_tpc/tpcVoltages
 struct tpcVoltages {
 
   //  type varnam;    //Units : Comments
@@ -21,3 +23,4 @@ struct tpcVoltages {
   double stripe182WestOFCVoltage;        // volts
 
 };
+#endif
