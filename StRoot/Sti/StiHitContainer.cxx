@@ -24,6 +24,7 @@ using std::sort;
 using std::find;
 using std::lower_bound;
 using std::upper_bound;
+using std::stable_partition;
 
 StiHitContainer* StiHitContainer::sinstance = 0;
 
@@ -115,7 +116,8 @@ void StiHitContainer::push_back(StiHit* hit)
 {
     mkey.refangle = hit->refangle();
     mkey.position = hit->position();
-    mmap[mkey].push_back(hit);
+    //mmap[mkey].push_back(hit);
+    mmap[mkey].theHitVec.push_back(hit);
     return;
 }
 
@@ -128,7 +130,9 @@ void StiHitContainer::clear()
 {
     hitmap::iterator it;
     for (it=mmap.begin(); it!=mmap.end(); it++) {
-	(*it).second.clear();
+	//(*it).second.clear();
+	(*it).second.theHitVec.clear();
+	(*it).second.theEffectiveEnd = (*it).second.theHitVec.end();
     }
     mvertexvec.clear();
     return;
@@ -143,7 +147,8 @@ unsigned int StiHitContainer::size() const
     unsigned int thesize = 0;
     hitmap::const_iterator it;
     for (it=mmap.begin(); it!=mmap.end(); it++) {
-	thesize+=(*it).second.size();
+	//thesize+=(*it).second.size();
+	thesize+=(*it).second.theHitVec.size();
     }
     return thesize;
 }
@@ -162,14 +167,39 @@ const hitvector& StiHitContainer::hits(double refangle, double position)
 {
     mkey.refangle = refangle;
     mkey.position = position; 
-    return mmap[mkey];
+    //return mmap[mkey];
+    return mmap[mkey].theHitVec;
 }
 
 hitvector& StiHitContainer::hits(const StiDetector* layer)
 {
     mkey.refangle = layer->getPlacement()->getCenterRefAngle();
     mkey.position = layer->getPlacement()->getCenterRadius();
-    return mmap[mkey];
+    //return mmap[mkey];
+    return mmap[mkey].theHitVec;
+}
+
+hitvector::iterator StiHitContainer::hitsBegin(const StiDetector* layer)
+{
+    mkey.refangle = layer->getPlacement()->getCenterRefAngle();
+    mkey.position = layer->getPlacement()->getCenterRadius();
+    //return mmap[mkey].begin();
+    return mmap[mkey].theHitVec.begin();
+}
+
+hitvector::iterator StiHitContainer::hitsEnd(const StiDetector* layer)
+{
+    mkey.refangle = layer->getPlacement()->getCenterRefAngle();
+    mkey.position = layer->getPlacement()->getCenterRadius();
+    //return mmap[mkey].end();
+    //if (mmap[mkey].theHitVec.end() != mmap[mkey].theEffectiveEnd) {
+    //cout <<"StiHitContainer::hitsEnd(const StiDetector*). ERROR:\t"
+    //     <<"theEffectiveEnd != theHitVec.end()"<<endl
+    //     <<"mkey:\t"<<mkey.refangle<<" "<<mkey.position<<endl;
+    //}
+    //return mmap[mkey].theHitVec.end();
+
+    return mmap[mkey].theEffectiveEnd;
 }
 
 /*! This form of setRefPoint packs the information passed as arguments into
@@ -227,26 +257,27 @@ void StiHitContainer::setRefPoint(StiHit* ref)
     mminpoint->setZ( ref->z() -mdeltaz );
     mmaxpoint->setZ( ref->z() +mdeltaz );
     
-    hitvector& tempvec = mmap[mkey];
+    //hitvector& tempvec = mmap[mkey];
+    hitvector& tempvec = mmap[mkey].theHitVec;
+    hitvector::iterator& tempend = mmap[mkey].theEffectiveEnd;
+
     //Search first by distance along z
-    mstart = lower_bound(tempvec.begin(), tempvec.end(), mminpoint,
-			 StizHitLessThan());
+    mstart = lower_bound(tempvec.begin(), tempend, mminpoint, StizHitLessThan());
     
-    if (mstart!=tempvec.end()) {
-	mstop = upper_bound(tempvec.begin(), tempvec.end(),
-			    mmaxpoint, StizHitLessThan());
+    if (mstart!=tempend) {
+	mstop = upper_bound(tempvec.begin(), tempend, mmaxpoint, StizHitLessThan());
     }
     
     else {
-	//mMessenger <<"mstart==tempvec.end()\tAbort"<<endl;
-	mstart = tempvec.end();
+	//mMessenger <<"mstart==tempend\tAbort"<<endl;
+	mstart = tempend;
 	mstop = mstart;
         mcurrent = mcandidatevec.end();
 	return;
     }
 
     if (mstart==mstop) {
-	mstart=tempvec.end();
+	mstart=tempend;
 	mstop = mstart;
 	mcurrent = mcandidatevec.end();
 	return;
@@ -279,12 +310,30 @@ void StiHitContainer::setRefPoint(StiHit* ref)
 void StiHitContainer::sortHits()
 {
     hitmap::iterator it;
-    for (it=mmap.begin(); it!=mmap.end(); it++) {
-	hitvector& tempvec = (*it).second;
+    for (it=mmap.begin(); it!=mmap.end(); ++it) {
+	//hitvector& tempvec = (*it).second;
+	hitvector& tempvec = (*it).second.theHitVec;
 	sort(tempvec.begin(), tempvec.end(), StizHitLessThan());
+	(*it).second.theEffectiveEnd =(*it).second.theHitVec.end();
     }
     return;
-} 
+}
+
+void StiHitContainer::partitionUsedHits()
+{
+    hitmap::iterator it;
+    Messenger& msgr = *(Messenger::instance(MessageType::kHitMessage));
+    
+    for (it=mmap.begin(); it!=mmap.end(); ++it) {
+	hitvector& tempvec = (*it).second.theHitVec;
+	msgr <<"-- Hits before partition --"<<endl;
+	msgr <<(*it).second.theHitVec<<endl;
+	(*it).second.theEffectiveEnd =
+	    stable_partition(tempvec.begin(), (*it).second.theEffectiveEnd, StiHitIsUsed() );
+	msgr <<"-- Hits after partition --"<<endl;
+	msgr <<(*it).second.theHitVec<<endl;
+    }
+}
 
 ostream& operator<<(ostream& os, const hitvector& vec)
 {
@@ -298,7 +347,8 @@ ostream& operator<<(ostream& os, const StiHitContainer& store)
 {
     for (hitmap::const_iterator it=store.mmap.begin(); it!=store.mmap.end(); it++) {
 	os <<endl;
-	os <<(*it).second;
+	//os <<(*it).second;
+	os <<(*it).second.theHitVec;
     }
     return os;   
 }

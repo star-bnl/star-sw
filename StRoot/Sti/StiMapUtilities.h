@@ -59,11 +59,18 @@ struct StizHitLessThan
     bool operator() (const StiHit*, const StiHit*) const;
 };
 
+struct StiHitIsUsed
+{
+    bool operator() (const StiHit*) const;
+};
+
+//Detector sorter
 struct StiDetectorNodePositionLessThan
 {
     bool operator() (const StiDetectorNode*, const StiDetectorNode*) const;
 };
 
+//StHit utility
 struct SameStHit
 {
     bool operator() (const StiHit*) const;

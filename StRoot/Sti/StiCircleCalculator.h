@@ -19,6 +19,7 @@
 #define StiCircleCalculator_HH
 
 #include "Messenger.h"
+#include "StThreeVector.hh"
 
 class StiCircleCalculator
 {

@@ -60,7 +60,12 @@ bool StHitRadiusLessThan::operator() (const StHit* hit1, const StHit* hit2) cons
     return (sqrt( pos1.x()*pos1.x() + pos1.y()*pos1.y() + pos1.z()*pos1.z() ) <
 	    sqrt( pos2.x()*pos2.x() + pos2.y()*pos2.y() + pos2.z()*pos2.z() ) );
 }
-	
+
+bool StiHitIsUsed::operator() (const StiHit* hit) const
+{
+    return !hit->isUsed();
+}
+
 //Order StHits (NOT Sti!) by radius
 bool StHitRadiusGreaterThan::operator() (const StHit* hit1, const StHit* hit2) const
 {

@@ -46,7 +46,7 @@
   efficient.
   
   \author M.L. Miller (Yale Software)
-
+  
   \warning You do not have to call StiDetectorContainer::kill() to avoid a
   memory leak. When you call kill(), you invalidate all pre-existing pointers to
   instance().  Because termination of program execution will automatically
@@ -111,10 +111,10 @@ public:
     StiDetector* operator*() const;
     
     ///Step out radially in STAR TPC global coordinates.
-    void moveOut();
+    bool moveOut();
     
     ///Step in radially in STAR TPC global coordinates.
-    void moveIn();
+    bool moveIn();
 
     ///Step around in increasing phi.
     void movePlusPhi();
@@ -139,6 +139,10 @@ public:
     
 private:
 
+    // Utility function for moveIn(), moveOut() functions
+    bool setPhiIterator(double oldOrder, unsigned int oldNDaughters,
+			data_node_vec::difference_type oldDistance);
+    
     ///The root of the tree representation of the detector material.
     data_node* mroot;
 

@@ -131,9 +131,16 @@ class Messenger;
 
 ///We define this globally for convenience of users.
 typedef vector<StiHit*> hitvector;
+struct VectorAndEnd
+{	
+    VectorAndEnd() {theEffectiveEnd=theHitVec.end();}
+    hitvector theHitVec;
+    hitvector::iterator theEffectiveEnd;
+};
 
 ///We define this globally for convenience of users.
-typedef map<HitMapKey, hitvector, MapKeyLessThan> hitmap;
+//typedef map<HitMapKey, hitvector, MapKeyLessThan> hitmap;
+typedef map<HitMapKey, VectorAndEnd, MapKeyLessThan> hitmap;
 
 ///We define this globally for convenience of users.
 typedef hitmap::value_type hitMapValType;
@@ -182,11 +189,18 @@ public:
     ///Sort all of the hits in the container.
     virtual void sortHits();
 
+    ///Ignore hits marked as used (std::stable_partition)
+    void partitionUsedHits();
+
     //Gets
 
     ///Return a const reference to a vector of hits.
     const hitvector& hits(double refangle, double position);
+
+    ///Return a reference to the vectore of hits, or iterators marking it's bounds
     hitvector& hits(const StiDetector*);
+    hitvector::iterator hitsBegin(const StiDetector*);
+    hitvector::iterator hitsEnd(const StiDetector*);
 
     ///Return a const reference ot the hit-vector map.
     const hitmap& hits() const;

@@ -18,18 +18,21 @@ class StiTrackSeedFinder;
 class StiCompositeSeedFinder : public StiSeedFinder
 {
 public:
-    StiCompositeSeedFinder();
+    StiCompositeSeedFinder(StiObjectFactoryInterface<StiKalmanTrack>*);
     virtual ~StiCompositeSeedFinder();
 
     //Inherited interface
     virtual bool hasMore();
     virtual StiKalmanTrack* next();
-    virtual void build();
     virtual void reset();
 
 protected:
+    virtual void build();
     
 private:
+    //Not implemented
+    StiCompositeSeedFinder();
+    
     typedef vector<StiTrackSeedFinder*> SeedFinderVec;
 
     //The seedvec holds pointers to objects on the heap, owned by mSeedVec

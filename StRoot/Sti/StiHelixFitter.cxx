@@ -18,8 +18,6 @@ using std::for_each;
 #include "StiHit.h"
 #include "StiHelixFitter.h"
 
-StiHelixFitter* StiHelixFitter::sInstance = 0;
-
 ostream& operator<<(ostream& os, const StiHit&);
 
 double g2dPathlength(double radius, double xcenter, double ycenter,
@@ -30,7 +28,6 @@ StiHelixFitter::StiHelixFitter() : mCircleFitter(), mLineFitter()
     //mLineInserter(mCircleFitter, mLineFitter)
 {
     cout <<"StiHelixFitter::StiHelixFitter()"<<endl;
-    sInstance = this;
 }
 
 StiHelixFitter::~StiHelixFitter()

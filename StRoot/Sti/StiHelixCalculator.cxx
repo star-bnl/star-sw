@@ -57,9 +57,9 @@ void StiHelixCalculator::calculateLine(const StThreeVector<double>& pt1,
     //          ds     dR   ds   
     
     //mMessenger <<"StiHelixCalculator::calculateLine()"<<endl;
-    //mMessenger <<"pt1: "<<pt1<<" pt2: "<<pt2<<" pt3: "<<pt3<<endl;
+    //mMessenger <<"pt1: "<<pt1<<" pt2: "<<pt2<<" pt2: "<<pt2<<endl;
 
-    double dzdr = (pt3.z()-pt1.z())/(abs(pt3-pt1));
+    double dzdr = (pt2.z()-pt1.z())/(abs(pt2-pt1));
 
     //mMessenger <<"dzdr: "<<dzdr<<"\tasin(dzdr): "<<asin(dzdr)
     //<<"\ttan( asin(dzdr)): "<<tan(asin(dzdr))<<endl;

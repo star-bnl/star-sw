@@ -5,6 +5,12 @@
 #ifndef StiIOBroker_HH
 #define StiIOBroker_HH
 
+#include <vector>
+using std::vector;
+#include <algorithm>
+using std::copy;
+using std::ostream_iterator;
+
 #include "SubjectObserver.h"
 
 class StiIOBroker : public Subject
@@ -47,6 +53,28 @@ public:
     virtual unsigned int etsfLowerBound() const = 0;
     virtual void setETSFMaxHits(unsigned int) = 0;
     virtual unsigned int etsfMaxHits() const = 0;
+
+    //Local Track Seed Finder (LTSF) IO
+    
+    virtual void addLTSFPadrow(unsigned int) = 0;
+    virtual void addLTSFSector(unsigned int) = 0;
+    virtual const vector<unsigned int>& ltsfPadrows() const = 0;
+    virtual const vector<unsigned int>& ltsfSectors() const = 0;
+
+    virtual void setLTSFZWindow(double) = 0;
+    virtual double ltsfZWindow() const = 0;
+    
+    virtual void setLTSFYWindow(double) = 0;
+    virtual double ltsfYWindow() const = 0;
+    
+    virtual void setLTSFSeedLength(unsigned int) = 0;
+    virtual unsigned int ltsfSeedLength() const = 0;
+    
+    virtual void setLTSFUseVertex(bool) = 0;
+    virtual bool ltsfUseVertex() const = 0;
+
+    virtual void setLTSFDoHelixFit(bool) = 0;
+    virtual bool ltsfDoHelixFit() const = 0;
     
 protected:
     //singleton management
@@ -59,14 +87,27 @@ protected:
 
 inline ostream& operator<<(ostream& os, const StiIOBroker& b)
 {
-    return os <<"simulated():\t"<<b.simulated()<<endl
-	      <<"useGui():\t"<<b.useGui()<<endl
-	      <<"doTrackFit():\t"<<b.doTrackFit()<<endl
-	      <<"seedFinderType():\t"<<static_cast<int>(b.seedFinderType())<<endl
-	      <<"tphfMinPadrow():\t"<<b.tphfMinPadrow()<<endl
-	      <<"tphfMaxPadrow():\t"<<b.tphfMaxPadrow()<<endl
-	      <<"etsfLowerBound():\t"<<b.etsfLowerBound()<<endl
-	      <<"etsfMaxHits():\t"<<b.etsfMaxHits()<<endl;
+    os <<"simulated():\t"<<b.simulated()<<endl
+       <<"useGui():\t"<<b.useGui()<<endl
+       <<"doTrackFit():\t"<<b.doTrackFit()<<endl
+       <<"seedFinderType():\t"<<static_cast<int>(b.seedFinderType())<<endl
+       <<"tphfMinPadrow():\t"<<b.tphfMinPadrow()<<endl
+       <<"tphfMaxPadrow():\t"<<b.tphfMaxPadrow()<<endl
+       <<"etsfLowerBound():\t"<<b.etsfLowerBound()<<endl
+       <<"etsfMaxHits():\t"<<b.etsfMaxHits()<<endl
+       <<"ltsfPadrows():\t";
+    copy( b.ltsfPadrows().begin(), b.ltsfPadrows().end(), ostream_iterator<unsigned int>(os, " "));
+    os <<endl
+       <<"ltsfSectors():\t";
+    copy( b.ltsfSectors().begin(), b.ltsfSectors().end(), ostream_iterator<unsigned int>(os, " "));
+    os <<endl
+       <<"ltsfZWindow():\t"<<b.ltsfZWindow()<<endl
+       <<"ltsfYWindow():\t"<<b.ltsfYWindow()<<endl
+       <<"ltsfSeedLength():\t"<<b.ltsfSeedLength()<<endl
+       <<"ltsfUseVertex():\t"<<b.ltsfUseVertex()<<endl
+       <<"ltsfDoHelixFit():\t"<<b.ltsfDoHelixFit()<<endl;
+    
+    return os;
 }
 
 #endif
