@@ -4,7 +4,7 @@
  */
 /*********************************************************
  *
- * $Id: StPmdDBUtil.h,v 1.4 2004/03/11 12:17:11 subhasis Exp $
+ * $Id: StPmdDBUtil.h,v 1.5 2004/04/10 00:48:39 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -16,6 +16,9 @@
  *************************************************************
  *
  * $Log: StPmdDBUtil.h,v $
+ * Revision 1.5  2004/04/10 00:48:39  subhasis
+ * 2016 changed to 1728 in DbUtil
+ *
  * Revision 1.4  2004/03/11 12:17:11  subhasis
  * *** empty log message ***
  *
@@ -40,7 +43,9 @@
 #define PMD_SECTOR 2
 #define PMD_CRAMS_MAX 12
 #define PMD_CRAMS_BLOCK 2
-#define PMD_CRAMS_CH_MAX 2016
+// made like daqlib/EVP
+#define PMD_CRAMS_CH_MAX 1728
+//#define PMD_CRAMS_CH_MAX 2016
 
 class StPmdGeom;
 
