@@ -65,6 +65,9 @@
 *                           - remove rm and rmdir (see few days ago);  just 
 *                             leave old unused tables in
 *                           - write out information to log file from (rg2t)
+* editted 8/27/98 K. Turner - now get global tables in run/params/global
+*                             from par2mem, so have to change calls to
+*                              global init kumacs
 *                             
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -189,7 +192,7 @@ macro bfc_init _
          exec create_tables_svt#stk
 *        exec init_sgr#read
 *        exec init_stk#read
-         exec init_stk#vtx
+         exec init_vertices#init
 	 exec init_sgr#init
 	 exec init_stk#init
       (sgr) 
@@ -197,7 +200,7 @@ macro bfc_init _
          exec create_tables_svt#stk
 *        exec init_sgr#read
 *        exec init_stk#read
-         exec init_stk#vtx
+         exec init_vertices#init
          exec init_sgr#init
 	 exec init_stk#init 
       (spr) 
@@ -226,15 +229,15 @@ macro bfc_init _
             exec fte_init#init	    
       (svm) 
             exec create_tables_global#svm
-            exec init_svm
-      (evr) exec init_evr
+            exec init_svm#init
+      (evr) exec init_evr#init
       (egr) 
 	    exec create_tables_global#egr
-	    exec init_egr
+	    exec init_egr#init
       (ev0) exec create_tables_global#ev0 
-            exec init_ev0#init_ev0
+            exec init_ev0#init
+            exec init_magf#init
     (ev0_e) exec create_tables_global#ev0_eval2
-            exec init_ev0#ev0_eval2
       (ctf) exec create_tables_ctf#init
             exec ctg_init#read
             exec cts_init#cts_init
@@ -253,8 +256,9 @@ macro bfc_init _
     (dmsft) exec create_tables_global#dst
     (dmhrd) exec create_tables_global#dst
     (desum) exec create_tables_global#dst
-            exec init_dst#init_dst
-    (drsum) exec create_tables_global#dst   
+            exec init_dst#init_esum
+    (drsum) exec create_tables_global#dst
+	    exec init_dst#init_rsum
     (fzout) user/output o [output_fzd_file]
     (evout)
             if output_xdf_file="" then
