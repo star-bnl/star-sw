@@ -1,5 +1,8 @@
-// $Id: tpcdraw.C,v 1.6 1999/08/10 18:38:19 snelling Exp $
+// $Id: tpcdraw.C,v 1.7 1999/09/23 21:52:35 snelling Exp $
 // $Log: tpcdraw.C,v $
+// Revision 1.7  1999/09/23 21:52:35  snelling
+// added gSystem->Load("StAnalysisUtilities") because that's not in bfc anymore
+//
 // Revision 1.6  1999/08/10 18:38:19  snelling
 // made it compatible with the new bfc.C
 //
@@ -285,7 +288,7 @@ void tpcdraw() {
    * -----------------------------------------------------------------
    *	draw TPC sectors with some options 
    * -----------------------------------------------------------------*/
-
+  gSystem->Load("StAnalysisUtilities");
 
   if (chain->GetOption(kMINIDAQ)) {
     chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
@@ -362,20 +365,4 @@ void tpcdraw() {
   pad4->cd();
   DrawEvent(*pad4,0.0,0.0);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
