@@ -7,6 +7,7 @@
        long      id;         /* a unique point id */
        long      id_globtrk; /* id of reconstructed/sim global track */
        long      track;      /* track_id*1000+position on on a track (starts from 1) */
+       long      truncTag;   /* a tag for ensemble truncation */
        float     alpha;      /* reconstructed crossing angle in xy */
        float     dalpha;     /* error on the crossing angle */
        float     lambda;     /* dip angle (degree) */
@@ -31,8 +32,7 @@
        short     ntmbk;      /* number of time bucket fired in this hit */
        short     mintmbk;    /* lowest time bucket in hit */
        short     maxtmbk;    /* highest time bucket in hit */
-       short     truncTag;   /* a tag for ensemble truncation */
    };
-/*  Last mod. for tphit: $Date: 2000/04/07 18:30:31 $ */
+/*  Last mod. for tphit: $Date: 2000/07/02 23:03:40 $ */
 
 
