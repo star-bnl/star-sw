@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.12 2003/11/14 22:31:57 andrewar Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.13 2003/11/24 18:37:20 andrewar Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.13  2003/11/24 18:37:20  andrewar
+ * Reduced number of bins in 3D hists. There were memory problems.
+ *
  * Revision 2.12  2003/11/14 22:31:57  andrewar
  * Added isPrimary() cut so only Primary tracks are histogrammed
  * (not a mix of Primary and global).
@@ -121,66 +124,66 @@ void StiTrackingPlots::initialize()
 
   mGDcavNptsvEtaA = book("mGDcavNptsvEtaA",
 				"Global DCA vs. Npts vs. Eta, All charges",
-				100,0.,20.,645,0.,645.,30,-2.,2.);
+				100,0.,20.,6,0.,645.,30,-2.,2.);
   //mPDcavNptsvEtaA = book("mPDcavNptsvEtaA",
   //			"Primary DCA vs. Npts vs. Eta, All charges",
   //			100,0.,20.,645,0.,645.,30,-2.0,2.);
   mGDcavNptsvPtA = book("mGDcavNptsvPtA",
 				"Global DCA vs. Npts vs. Pt, All charges",
-				100,0.,20.,645,0.,645.,50,0.,5.);
+				100,0.,20.,6,0.,645.,10,0.,5.);
   //mPDcavNptsvPtA = book("mPDcavNptsvPtA",
   //			"Global DCA vs. Npts vs. Pt, All charges",
   //			100,0.,20.,645,0.,645.,50,0.,5.);
   
   mNptsvPtvEtaA = book("mNptsvPtvEtaA",
 				"Npts vs. Pt. vs. Eta, All charges",
-				645,0.,645.,30,-2.,2., 50,0.,5.);
+				6,0.,645.,30,-2.,2., 50,0.,5.);
   mGDcavEtavPtA = book("mGDcavEtavPtA",
 		       "Global DCA vs. Eta vs. Pt",
-       		      100,0.,20.,20,-2.,2.,50,0.,5.);
+       		      100,0.,20.,10,-2.,2.,10,0.,5.);
   //mPDcavEtavPtA= book("mPDcavEtavPtA",
   //		      "Primary DCA vs. Eta vs. Pt"
   //		      100,0,20.,20,-2.,2.,50,0.,5.);
 
   mGDcavNptsvEtaP = book("mGDcavNptsvEtaP",
 				"Global DCA vs. Npts vs. Eta, P All charges",
-				100,0.,20.,645,0.,645.,30,-2.,2.);
+				20,0.,20.,6,0.,645.,15,-2.,2.);
   //mPDcavNptsvEtaP = book("mPDcavNptsvEtaP",
   //			"Primary DCA vs. Npts vs. Eta, All charges",
   //			100,0.,20.,645,0.,645.,30,-2.0,2.);
   mGDcavNptsvPtP = book("mGDcavNptsvPtP",
 				"Global DCA vs. Npts vs. Pt, All charges",
-				100,0.,20.,645,0.,645.,50,0.,5.);
+				20,0.,20.,6,0.,645.,10,0.,5.);
   //mPDcavNptsvPtP = book("mPDcavNptsvPtP",
   //			"Global DCA vs. Npts vs. Pt, All charges",
   //			100,0.,20.,645,0.,645.,50,0.,5.);
   
   mNptsvPtvEtaP = book("mNptsvPtvEtaP",
 				"Npts vs. Pt. vs. Eta, All charges",
-				645,0.,645.,30,-2.,2., 50,0.,5.);
+				645,0.,645.,4,-2.,2., 10,0.,5.);
   mGDcavEtavPtP = book("mGDcavEtavPtP",
 		       "Global DCA vs. Eta vs. Pt",
-		       100,0,20.,20,-2.,2.,50,0.,5.);
+		       10,0,20.,4,-2.,2.,10,0.,5.);
   //mPDcavEtavPtP= book("mPDcavEtavPtP",
   //		      "Primary DCA vs. Eta vs. Pt"
   //		      100,0,20.,20,-2.,2.,50,0.,5.);
 
   mGDcavNptsvEtaM = book("mGDcavNptsvEtaM",
 				"Global DCA vs. Npts vs. Eta, P All charges",
-				100,0.,20.,645,0.,645.,30,-2.,2.);
+				10,0.,20.,6,0.,645.,4,-2.,2.);
   //mPDcavNptsvEtaM = book("mPDcavNptsvEtaM",
   //			"Primary DCA vs. Npts vs. Eta, All charges",
   //			100,0.,20.,645,0.,645.,30,-2.0,2.);
   mGDcavNptsvPtM = book("mGDcavNptsvPtM",
 				"Global DCA vs. Npts vs. Pt, All charges",
-				100,0.,20.,645,0.,645.,50,0.,5.);
+				10,0.,20.,6,0.,645.,10,0.,5.);
   //mPDcavNptsvPtM = book("mPDcavNptsvPtM",
   //			"Global DCA vs. Npts vs. Pt, All charges",
   //			100,0.,20.,645,0.,645.,50,0.,5.);
   
   mNptsvPtvEtaM = book("mNptsvPtvEtaM",
   			"Npts vs. Pt. vs. Eta, All charges",
-  			645,0.,645.,30,-2.,2., 50,0.,5.);
+  			6,0.,645.,4,-2.,2., 10,0.,5.);
   mGDcavEtavPtM = book("mGDcavEtavPtM",
 		       "Global DCA vs. Eta vs. Pt",
        		      100,0,20.,20,-2.,2.,50,0.,5.);
