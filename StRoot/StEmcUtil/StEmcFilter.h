@@ -152,7 +152,7 @@ class StEmcFilter: public TObject
     EmcStatus   		getEmcStatus(Int_t,Int_t);            ///< Return EMC status (kGOOD, kBAD, kOTHER) for a given detector and bin.
         
     Bool_t      		getTrackId(StTrack*,Float_t&,Int_t&); ///< Return track id based on dE/dX
-    Bool_t      		getTrackId(StTrack*,Float_t&,Int_t&,Float_t*); ///< Return track id based on dE/dX and nsigma for each particle
+    Bool_t      		getTrackId(StTrack*,Float_t&,Int_t&,Int_t*,Float_t*); ///< Return track id based on dE/dX and nsigma for each particle
     Float_t     		getEmcETotal(StEvent*);               ///< Return total energy on EMC
     
     Float_t     		getFraction(Int_t,Int_t,Int_t=0);     ///< Return fraction of EMC live on a given detector and eta bin

@@ -521,7 +521,8 @@ Float_t StEmcFilter::getPtTower(Int_t m, Int_t e, Int_t s)
 Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id)
 {
 	Float_t nSigma[4];
-	return getTrackId(track,mass,id,nSigma);
+	Int_t order[4];
+	return getTrackId(track,mass,id,order,nSigma);
 }
 //------------------------------------------------------------------------------
 /*!
@@ -532,12 +533,14 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id)
 
 To the present, only pions, protons, kaons and electrons are tested. 
 */
-Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id,Float_t *nSigmaFinal)
+Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id,Int_t *idOrder,Float_t *nSigmaFinal)
 {
  // dE/dx
   id=8;
   mass=mPion->mass();  
   if(!track) return kFALSE;
+  Int_t charge=track->geometry()->charge();
+	if(charge<0) id=9;
   
   double momentum  = fabs(track->geometry()->momentum().mag());
   StPtrVecTrackPidTraits traits = track->pidTraits(kTpcId);
@@ -568,8 +571,7 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id,Float_t *n
     double dedx_resolution = (double)pid->errorOnMean();
     if(dedx_resolution<=0) dedx_resolution=npt > 0 ? 0.45/sqrt(npt) : 1000.;
     double z;
-    Float_t nSigma[4];
-    Int_t charge=track->geometry()->charge();
+    Float_t nSigma[4],nSigmaTmp[4];
     Float_t length = (Float_t)pid->length();
 		if(length<=0) length = 60.;
 		for(Int_t i=0;i<4;i++)
@@ -577,8 +579,8 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id,Float_t *n
       //dedx_expected=mBB(momentum/m[i])*mdEdXScale;      
 			dedx_expected = 1.0e-6*mBB.Sirrf(momentum/m[i],length,kk[i])*mdEdXScale;
 			z = log(dEdX/dedx_expected);
-			nSigmaFinal[i]=(Float_t) z/dedx_resolution;
-      nSigma[i]=fabs(nSigmaFinal[i]) ;
+			nSigmaTmp[i]=(Float_t) z/dedx_resolution;
+      nSigma[i]=fabs(nSigmaTmp[i]) ;
     }
   
     Float_t SigmaOrder[4];
@@ -589,11 +591,23 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id,Float_t *n
       type[i]=0;
       for(Int_t k=0;k<4;k++) 
       {
-        if(nSigma[k]<SigmaOrder[i]) {SigmaOrder[i]=nSigma[k]; type[i]=k;}
+        if(nSigma[k]<SigmaOrder[i]) {SigmaOrder[i]=nSigma[k]; nSigmaFinal[i]=nSigmaTmp[k]; type[i]=k;}
       }
       nSigma[type[i]]=9999; 
     }
     
+		for(Int_t i=0;i<4;i++)
+		{
+			if(type[i]==0 && charge>0) idOrder[i] = 8; 
+			if(type[i]==0 && charge<0) idOrder[i] = 9; 
+			if(type[i]==1 && charge>0) idOrder[i] = 14; 
+			if(type[i]==1 && charge<0) idOrder[i] = 15; 
+			if(type[i]==2 && charge>0) idOrder[i] = 11; 
+			if(type[i]==2 && charge<0) idOrder[i] = 12; 
+			if(type[i]==3 && charge>0) idOrder[i] = 2; 
+			if(type[i]==3 && charge<0) idOrder[i] = 3; 
+		}
+		
 		if(momentum>mdEdXPMax) return kFALSE;
 		if(npt<mPointsdEdX) return kFALSE;
 		if(dEdX<mdEdXCut) return kFALSE;
