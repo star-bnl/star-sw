@@ -51,6 +51,7 @@ C* ( 5  9 12 14 15)  -  q/pt
       ENDIF
 
       IGPART = IDGEANT
+      IF(IGPART.EQ.0)IGPART = 9 ! if not specified set to pion
 *--
 *--   track model along reference surface
 *--

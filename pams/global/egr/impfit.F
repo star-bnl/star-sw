@@ -1,5 +1,5 @@
       INTEGER*4 FUNCTION impfit(Iter,rxy,pvect,cov,
-     +                            bfield,mv,chisq,err)
+     +                            bfield,mv,chisq,err,alen)
 
 ***********************************************************************
 *                                                                     *
@@ -15,6 +15,7 @@
 * mv is the x,y,z of the mv                                           *
 * chisq is the change of chisq of the constrained fit                 *
 * err is the error matrix of the fit                                  *
+* alen is the arc length between proximity and mv                     *
 *                                                                     *
 ***********************************************************************
       IMPLICIT NONE
@@ -42,7 +43,7 @@
       REAL rxy,bfield
       DOUBLE PRECISION COV(*)
 
-      REAL err(Nx,Nx), r1
+      REAL err(Nx,Nx), r1, alen
       REAL Lastchisq, Xi2
       REAL Good, Goodsc(Nc)
 
@@ -103,6 +104,10 @@ CCC      Xb(6) = r1*(pvecv(4)-pvect(4))
           err(i,j) = Gf(i,j)
          enddo
         enddo
+C -- return fitted values
+        CALL UCOPY(Xf(1),pvect(1),5)
+
+        alen = Xf(6) ! arclen
 
  999  Continue
       if(Ierr.eq.0)impfit = 1

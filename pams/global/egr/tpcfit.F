@@ -300,6 +300,9 @@ c fill in covar here
         REAL PMASS
         COMMON/HMASS/PMASS
 
+       INTEGER IGPART ! GEANT particle ID
+       COMMON/GPARID/IGPART
+
         DOUBLE PRECISION CONSB
         COMMON /VXMAGF/CONSB
       PARAMETER (MTPC=70)
@@ -794,6 +797,9 @@ CCC      CALL TPCSCA(R,RL,PR(1),P(1),X,CMS(1))
 
 *--
       REAL P(5),C(15),PL(5),PMS(5)
+      REAL rcrossi, rcrosso, phi, pio2
+      LOGICAL trackradl
+      REAL xradl,xrad,dxrad
 *--
       CALL VZERO(C(1),15)
 *--
@@ -808,16 +814,19 @@ CCC      CALL TPCSCA(R,RL,PR(1),P(1),X,CMS(1))
       DYSQ = (R*sin(p(1)/R)-RL*sin(pl(1)/RL))**2
       DZSQ = (p(2)-pl(2))**2
 
+      XLTRUE = 0.0
 *-- fraction of radiation length for P10
-      XLTRUE = SQRT(DXSQ+DYSQ+DZSQ)/11600.
+      IF(rl.ge.55)XLTRUE = SQRT(DXSQ+DYSQ+DZSQ)/11600.
 
-*-- put in the material for inner field cage
-      if((rl.gt.50.0).and.(r.lt.50.0))XLTRUE = XLTRUE + 0.006/COSL
-*-- put in the material for beam pipe
-      if((rl.gt.4.0).and.(r.lt.4.0))then
-        if(abs(p(2)).lt.76.0)XLTRUE = XLTRUE + 0.003/COSL ! Beryllium
-        if(abs(p(2)).ge.76.0)XLTRUE = XLTRUE + 0.011/COSL ! Aluminum
+      If(rl.lt.55)then
+       IF(trackradl(rl,xradl).and.trackradl(r,xrad))then
+        dxrad = xradl-xrad
+*        print *,' rl, r, xradl, xrad, dxrad =',rl,r,xradl,xrad,dxrad
+*        print *,' XLTRUE at start = ',XLTRUE
+       endif
       endif
+      XLTRUE = XLTRUE + dxrad
+
       IF (XLTRUE.GT.1E-8) THEN
          CORR = 1. + 0.11111111 * ALOG10(XLTRUE)
       ELSE
