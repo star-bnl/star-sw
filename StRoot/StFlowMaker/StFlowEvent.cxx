@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.15 2000/09/22 22:02:55 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.16 2000/09/26 20:51:37 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.16  2000/09/26 20:51:37  posk
+// Updated documentation.
+//
 // Revision 1.15  2000/09/22 22:02:55  posk
 // Clean up.
 //
@@ -517,7 +520,7 @@ void StFlowEvent::SetCentrality(const UInt_t& tracks) {
   else if (tracks < cent[6])  { mCentrality = 6; }
   else if (tracks < cent[7])  { mCentrality = 7; }
   else if (tracks < cent[8])  { mCentrality = 8; }
-  else if (tracks >= cent[8]) { mCentrality = 9; }
+  else                        { mCentrality = 9; }
 
 }
 
