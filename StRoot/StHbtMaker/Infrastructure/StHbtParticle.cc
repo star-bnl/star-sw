@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.16 2001/05/25 23:23:59 lisa Exp $
+ * $Id: StHbtParticle.cc,v 1.17 2001/12/14 23:11:30 fretiere Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.17  2001/12/14 23:11:30  fretiere
+ * Add class HitMergingCut. Add class fabricesPairCut = HitMerginCut + pair purity cuts. Add TpcLocalTransform function which convert to local tpc coord (not pretty). Modify StHbtTrack, StHbtParticle, StHbtHiddenInfo, StHbtPair to handle the hit information and cope with my code
+ *
  * Revision 1.16  2001/05/25 23:23:59  lisa
  * Added in StHbtKink stuff
  *
@@ -88,6 +91,13 @@
 #else
   #include <cmath>
 #endif
+int TpcLocalTransform(StThreeVectorD& xgl, 
+		      int& iSector, 
+		      int& iPadrow, 
+		      double& xlocal,
+		      double& ttPhi);
+
+
 //_____________________
 StHbtParticle::StHbtParticle() : mTrack(0), mV0(0), mKink(0) {
   /* no-op for default */
@@ -112,11 +122,14 @@ StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass
   mHelix = hbtTrack->Helix();
   CalculateNominalTpcExitAndEntrancePoints();
 
+  
   // ***
+  mHiddenInfo= 0;
   if(hbtTrack->ValidHiddenInfo()){
-    mHiddenInfo= hbtTrack->HiddenInfo()->getParticleHiddenInfo();
+    mHiddenInfo= hbtTrack->getHiddenInfo()->clone();
   }
   // ***
+
 }
 //_____________________
 StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mTrack(0), mV0(0), mKink(0) {
@@ -138,6 +151,17 @@ StHbtParticle::StHbtParticle(const StHbtKink* const hbtKink,const double& mass) 
   mMap[1]= 0;
   // I know there is a better way to do this...
   StHbtThreeVector temp = hbtKink->Parent().P();
+  mFourMomentum.setVect(temp);
+  double ener = sqrt(temp.mag2()+mass*mass);
+  mFourMomentum.setE(ener);
+}
+
+//_____________________
+StHbtParticle::StHbtParticle(const StHbtXi* const hbtXi, const double& mass){
+  mXi = new StHbtXi(*hbtXi);
+  mMap[0]= 0;
+  mMap[1]= 0;
+  StHbtThreeVector temp;// = hbtXi->mMomXi;
   mFourMomentum.setVect(temp);
   double ener = sqrt(temp.mag2()+mass*mass);
   mFourMomentum.setE(ener);
@@ -264,5 +288,67 @@ void StHbtParticle::CalculateNominalTpcExitAndEntrancePoints(){
   }
 
 
+
+  static double tSectToPhi[24]={2.,1.,0.,11.,10.,9.,8. ,7. ,6.,5.,4.,3.,
+				4.,5.,6., 7., 8.,9.,10.,11.,0.,1.,2.,3.};
+  static float tRowRadius[45] = {60,64.8,69.6,74.4,79.2,84,88.8,93.6,98.8, 
+				 104,109.2,114.4,119.6,127.195,129.195,131.195,
+				 133.195,135.195,137.195,139.195,141.195,
+				 143.195,145.195,147.195,149.195,151.195,
+				 153.195,155.195,157.195,159.195,161.195,
+				 163.195,165.195,167.195,169.195,171.195,
+				 173.195,175.195,177.195,179.195,181.195,
+				 183.195,185.195,187.195,189.195};
+  int tRow,tSect,tOutOfBound;
+  double tU,tLength,tPhi;
+  StHbtThreeVector tPoint;
+  StThreeVectorD tn(0,0,0);
+  StThreeVectorD tr(0,0,0);
+  for(int ti=0;ti<45;ti++){
+    // Find which sector it is on
+    candidates =  hel.pathLength(tRowRadius[ti]);
+    tLength = (candidates.first > 0) ? candidates.first : candidates.second;
+    tPoint = hel.at(tLength);
+    TpcLocalTransform(tPoint,mSect[ti],tRow,tU,tPhi);
+    // calculate crossing plane
+    //tPhi = tSectToPhi[mSect[ti]-1]*TMath::Pi()/6.;
+    tn.setX(cos(tPhi));
+    tn.setY(sin(tPhi));       
+    tr.setX(tRowRadius[ti]*cos(tPhi));
+    tr.setY(tRowRadius[ti]*sin(tPhi));
+    // find crossing point
+    tLength = hel.pathLength(tr,tn);
+    tPoint = hel.at(tLength);
+    mZ[ti] = tPoint.z();
+    tOutOfBound = TpcLocalTransform(tPoint,tSect,tRow,mU[ti],tPhi);
+    if(tOutOfBound || (mSect[ti] == tSect && tRow!=(ti+1))){
+      //cout << "Out of bound " << tOutOfBound2 << " " << tOutOfBound << " " 
+      //   << tSect << " " << mSect[ti] << " "
+      //   << ti+1 << " " << tRow << " " << tRowRadius[ti] << " " 
+      //   << tU << " " << mU[ti] << endl;
+      mSect[ti]=-1;
+    }
+    else{
+      if(mSect[ti] != tSect){
+	// Try again on the other sector
+	tn.setX(cos(tPhi));
+	tn.setY(sin(tPhi));       
+	tr.setX(tRowRadius[ti]*cos(tPhi));
+	tr.setY(tRowRadius[ti]*sin(tPhi));
+	// find crossing point
+	tLength = hel.pathLength(tr,tn);
+	tPoint = hel.at(tLength);
+	mZ[ti] = tPoint.z();
+	mSect[ti] = tSect;
+	tOutOfBound = TpcLocalTransform(tPoint,tSect,tRow,mU[ti],tPhi);
+	if(tOutOfBound || tSect!= mSect[ti] || tRow!=(ti+1)){
+	  mSect[ti]=-1;
+	  //cout << "Twice bad : OutOfBound =  " << tOutOfBound 
+	  //   << " SectOk = " << (tSect!= mSect[ti])
+	  //   << " RowOk = " <<  (tRow!=(ti+1)) << endl;
+	}
+      }
+    }
+  }
 }
 //_____________________

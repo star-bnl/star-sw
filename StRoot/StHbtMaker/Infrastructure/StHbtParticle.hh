@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.15 2001/05/25 23:23:59 lisa Exp $
+ * $Id: StHbtParticle.hh,v 1.16 2001/12/14 23:11:30 fretiere Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
+ * Revision 1.16  2001/12/14 23:11:30  fretiere
+ * Add class HitMergingCut. Add class fabricesPairCut = HitMerginCut + pair purity cuts. Add TpcLocalTransform function which convert to local tpc coord (not pretty). Modify StHbtTrack, StHbtParticle, StHbtHiddenInfo, StHbtPair to handle the hit information and cope with my code
+ *
  * Revision 1.15  2001/05/25 23:23:59  lisa
  * Added in StHbtKink stuff
  *
@@ -82,6 +85,7 @@
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0.hh"
 #include "StHbtMaker/Infrastructure/StHbtKink.hh"
+#include "StHbtMaker/Infrastructure/StHbtXi.hh"
 #include "StPhysicalHelixD.hh"
 // ***
 class StHbtHiddenInfo;
@@ -92,6 +96,7 @@ public:
   StHbtParticle(const StHbtTrack* const hbtTrack, const double& mass);
   StHbtParticle(const StHbtV0* const hbtV0, const double& mass);
   StHbtParticle(const StHbtKink* const hbtKink, const double& mass);
+  StHbtParticle(const StHbtXi* const hbtXi, const double& mass);
   ~StHbtParticle();
 
   const StHbtLorentzVector& FourMomentum() const;
@@ -120,17 +125,23 @@ public:
 
 
   StHbtThreeVector mNominalPosSample[11];  // I make this public for convenience and speed of StHbtPair()
+  double mZ[45];
+  double mU[45];
+  int mSect[45];
+
 
   void ResetFourMomentum(const StHbtLorentzVector& fourMomentum);
 
-  // ***
   const StHbtHiddenInfo*  HiddenInfo() const;
+  // Fab private
+  StHbtHiddenInfo*  getHiddenInfo() const;
   void SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo);
-  // ***
+
 private:
   StHbtTrack* mTrack;  // copy of the track the particle was formed of, else Null
   StHbtV0* mV0;        // copy of the v0 the particle was formed of, else Null
   StHbtKink* mKink;        // copy of the v0 the particle was formed of, else Null
+  StHbtXi* mXi;
 
   StHbtLorentzVector mFourMomentum;
   StPhysicalHelixD mHelix;
@@ -138,9 +149,7 @@ private:
   int mNhits;
   StHbtThreeVector mNominalTpcExitPoint;
   StHbtThreeVector mNominalTpcEntrancePoint;
-  StHbtHiddenInfo* mHiddenInfo;  // ***
-
-
+  mutable StHbtHiddenInfo* mHiddenInfo;  // Fab private
 };
 
 inline StHbtTrack* StHbtParticle::Track() const { return mTrack; }
@@ -155,6 +164,8 @@ inline unsigned short StHbtParticle::NegTrackId() const { return mV0->idNeg(); }
 inline unsigned short StHbtParticle::PosTrackId() const { return mV0->idPos(); }
 inline const StHbtThreeVector StHbtParticle::DecayVertexPosition() const {return mV0->decayVertexV0(); }
 // ***
+inline StHbtHiddenInfo* StHbtParticle::getHiddenInfo() const
+{return mHiddenInfo;}
 inline const StHbtHiddenInfo* StHbtParticle::HiddenInfo() const
 {return mHiddenInfo;}
 inline void StHbtParticle::SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo)
@@ -164,5 +175,6 @@ inline void StHbtParticle::SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo)
 inline void StHbtParticle::ResetFourMomentum(const StHbtLorentzVector& vec){mFourMomentum = vec;}
 
 inline StHbtKink* StHbtParticle::Kink() const { return mKink; }
+
 
 #endif
