@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.2 1999/04/08 16:37:15 nystrand Exp $
+// $Id: StPeCMaker.cxx,v 1.3 1999/05/01 00:57:02 fisyak Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.3  1999/05/01 00:57:02  fisyak
+// Change Clear function to defualt
+//
 // Revision 1.2  1999/04/08 16:37:15  nystrand
 // MakeBranch,SetBranch removed
 //
@@ -39,7 +42,7 @@
 #include <vector>
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.2 1999/04/08 16:37:15 nystrand Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.3 1999/05/01 00:57:02 fisyak Exp $";
 
 double minv(double m1, double px1, double py1, double pz1, double m2, double px2, double py2, double pz2);
 void tagFiller(StEvent& event, HighPtTag_st& hptTag);
@@ -291,7 +294,7 @@ Int_t StPeCMaker::Init() {
 
 void StPeCMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StPeCMaker.cxx,v 1.2 1999/04/08 16:37:15 nystrand Exp $\n");
+  printf("* $Id: StPeCMaker.cxx,v 1.3 1999/05/01 00:57:02 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
@@ -301,7 +304,7 @@ void StPeCMaker::Clear(Option_t *opt) {
     delete theTag;
     theTag = 0;
   }
-  SafeDelete(m_DataSet);
+  StMaker::Clear();
 }
 
 Int_t StPeCMaker::Finish() {

@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.54 1999/04/21 18:32:58 genevb Exp $
+// $Id: St_glb_Maker.cxx,v 1.55 1999/05/01 00:57:04 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.55  1999/05/01 00:57:04  fisyak
+// Change Clear function to defualt
+//
 // Revision 1.54  1999/04/21 18:32:58  genevb
 // Vertex table declaration was reverted to old version when new maker schema was introduced
 //
@@ -572,7 +575,6 @@ Int_t St_glb_Maker::Make(){
   if (!globtrk)     {globtrk     = new St_dst_track("globtrk",20000);         dst.Add(globtrk);}
   if (!globtrk_aux) {globtrk_aux = new St_dst_track_aux("globtrk_aux",20000); dst.Add(globtrk_aux);}
   
-  
   if (tptrack && svtracks) {
     
     //			svm
@@ -847,7 +849,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.54 1999/04/21 18:32:58 genevb Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.55 1999/05/01 00:57:04 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
