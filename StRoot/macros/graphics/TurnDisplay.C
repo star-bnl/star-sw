@@ -1,9 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   02/12/99
-// $Id: TurnDisplay.C,v 1.1 1999/12/02 18:49:35 fine Exp $
-  StMaker *dsMaker = 0;
+// $Id: TurnDisplay.C,v 1.2 1999/12/02 19:56:22 fine Exp $
+  StEventDisplayMaker *dsMaker = 0;
   StVirtualEventFilter *trackFilter;
 //___________________________________________________________________
-void TurnDisplay(const Char_t *filterName=0) {
+void TurnDisplay(const Char_t *filterName="StTrackFilter") {
   // TurnDisplay.C macro:
   //
   //  - Load StEventDisplayMaker
@@ -21,7 +21,7 @@ void TurnDisplay(const Char_t *filterName=0) {
            gSystem->Load(filterName);  // Load the user-defined filter
            TClass *filterClass = GetClass(filterName);
            if (filterClass) {
-             trackFilter = (StVirtualEventFilter *)filterClass->New(filterName);
+             trackFilter = (StVirtualEventFilter *)filterClass->New();
 
              // Activate some filter channels
              dsMaker->SetFilter(trackFilter,StEventDisplayMaker::kTable);    
@@ -59,6 +59,9 @@ void TurnDisplay(const Char_t *filterName=0) {
   }
 //__________________________________________________________________________
 // $Log: TurnDisplay.C,v $
+// Revision 1.2  1999/12/02 19:56:22  fine
+// Clean up
+//
 // Revision 1.1  1999/12/02 18:49:35  fine
 // two new macro to play with Event Display have been introduced
 //
