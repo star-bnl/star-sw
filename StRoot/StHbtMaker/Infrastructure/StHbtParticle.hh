@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.10 2000/07/16 21:38:23 laue Exp $
+ * $Id: StHbtParticle.hh,v 1.11 2000/07/17 20:03:17 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
+ * Revision 1.11  2000/07/17 20:03:17  lisa
+ * Implemented tools for addressing and assessing trackmerging
+ *
  * Revision 1.10  2000/07/16 21:38:23  laue
  * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
  * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
@@ -86,6 +89,15 @@ public:
   StHbtTrack* Track() const;
   StHbtV0* V0() const;
 
+
+  const StHbtThreeVector& NominalTpcExitPoint() const;     // position track exits TPC assuming start at (0,0,0)
+  const StHbtThreeVector& NominalTpcEntrancePoint() const; // position track crosses IFC assuming start at (0,0,0)
+
+  // the following method is for explicit internal calculation to fill datamembers.
+  // It is invoked automatically if StHbtParticle constructed from StHbtTrack
+  void CalculateNominalTpcExitAndEntrancePoints(); // NOTE - this requires the mHelix, so be sure this is filled
+
+
 private:
   StHbtTrack* mTrack;  // copy of the track the particle was formed of, else Null
   StHbtV0* mV0;        // copy of the v0 the particle was formed of, else Null
@@ -94,6 +106,8 @@ private:
   StPhysicalHelixD mHelix;
   unsigned long  mMap[2]; 
   int mNhits;
+  StHbtThreeVector mNominalTpcExitPoint;
+  StHbtThreeVector mNominalTpcEntrancePoint;
 
 };
 

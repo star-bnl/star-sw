@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.9 2000/07/16 21:38:23 laue Exp $
+ * $Id: StHbtParticle.cc,v 1.10 2000/07/17 20:03:17 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.10  2000/07/17 20:03:17  lisa
+ * Implemented tools for addressing and assessing trackmerging
+ *
  * Revision 1.9  2000/07/16 21:38:23  laue
  * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
  * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
@@ -51,6 +54,7 @@
  **************************************************************************/
 
 #include "StHbtMaker/Infrastructure/StHbtParticle.hh"
+#include "math_constants.h"
 
 //_____________________
 StHbtParticle::StHbtParticle() : mTrack(0), mV0(0) {
@@ -86,5 +90,103 @@ StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mT
   mFourMomentum.setE(ener);
   //  cout << mPosTrackId << " " << mNegTrackId << " " << hbtV0->idPos() << " " << hbtV0->idNeg() << endl;
   //  mHelix = hbtTrack->Helix(); ?? what to do with mHelix for a Particle coming from a V0?
+}
+//_____________________
+const StHbtThreeVector& StHbtParticle::NominalTpcExitPoint() const{
+  // in future, may want to calculate this "on demand" only, sot this routine may get more sophisticated
+  // for now, we calculate Exit and Entrance points upon instantiation
+  return mNominalTpcExitPoint;
+}
+//_____________________
+const StHbtThreeVector& StHbtParticle::NominalTpcEntrancePoint() const{
+  // in future, may want to calculate this "on demand" only, sot this routine may get more sophisticated
+  // for now, we calculate Exit and Entrance points upon instantiation
+  return mNominalTpcEntrancePoint;
+}
+//_____________________
+void StHbtParticle::CalculateNominalTpcExitAndEntrancePoints(){
+  // this calculates the "nominal" exit point of a track, either through the endcap or through the Outer Field Cage
+  // "nominal" means the track is assumed to start at (0,0,0)
+  // it also calculates the "nominal" entrance point of the track, which is the point at which it crosses the
+  // inner field cage
+  static StHbtThreeVector ZeroVec(0.,0.,0.);
+  double dip, curv, phase;
+  int h;
+  curv = mHelix.curvature();
+  dip  = mHelix.dipAngle();
+  phase= mHelix.phase();
+  h    = mHelix.h();
+  StHelixD hel(curv,dip,phase,ZeroVec,h);
+
+  pairD candidates;
+  double sideLength;  // this is how much length to go to leave through sides of TPC
+  double endLength;  // this is how much length to go to leave through endcap of TPC
+  // figure out how far to go to leave through side...
+  candidates = hel.pathLength(200.0);  // bugfix MAL jul00 - 200cm NOT 2cm
+  sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
+
+  static StHbtThreeVector WestEnd(0.,0.,200.);  // bugfix MAL jul00 - 200cm NOT 2cm
+  static StHbtThreeVector EastEnd(0.,0.,-200.); // bugfix MAL jul00 - 200cm NOT 2cm
+  static StHbtThreeVector EndCapNormal(0.,0.,1.0);
+
+  endLength = hel.pathLength(WestEnd,EndCapNormal);
+  if (endLength < 0.0) endLength = hel.pathLength(EastEnd,EndCapNormal);
+
+  if (endLength < 0.0) cout << "StHbtParticle::CalculateNominalTpcExitAndEntrancePoints(): "
+                            << "Hey-- I cannot find an exit point out endcaps" << endl;
+
+  // OK, firstExitLength will be the shortest way out of the detector...
+  double firstExitLength = (endLength < sideLength) ? endLength : sideLength;
+
+  // now then, let's return the POSITION at which particle leaves TPC...
+  mNominalTpcExitPoint = hel.at(firstExitLength);
+
+
+  // Finally, calculate the position at which the track crosses the inner field cage
+  candidates = hel.pathLength(50.0);  // bugfix MAL jul00 - 200cm NOT 2cm
+
+  sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
+//   if (sideLength < 0.0)
+//     {
+//       cout 
+//      << "no crossing with IFC" 
+//      << " curve=" << curv 
+//      << " candidates=" << candidates.first << " " << candidates.second 
+//       << "origin=" << mHelix.origin() << " "<< dip << " " << phase << " " << h << endl;
+//     }
+//   else
+//     {
+//       cout 
+//      << "does cross       IFC" 
+//      << " curve=" << curv 
+//      << " candidates=" << candidates.first << " " << candidates.second 
+//      << "origin=" << mHelix.origin() << " "<< dip << " " << phase << " " << h << endl;
+//     }
+
+
+//   if (sideLength < 0.0)
+//     {
+//       if (phase > C_PI)
+//      {
+//        cout << "righto" << endl;
+//      }
+//       else
+//      {
+//        cout << "WRONGO!! 1 " << phase << endl;
+//      }
+//     }
+//   else
+//     {
+//       if (phase > C_PI)
+//      {
+//        cout << "WRONGO!! 2 " << phase << endl;
+//      }
+//       else
+//      {
+//        cout << "righto " << endl;
+//      }
+//    }
+
+  mNominalTpcEntrancePoint = hel.at(sideLength);
 }
 //_____________________

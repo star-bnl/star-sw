@@ -17,7 +17,8 @@
 ClassImp(ExitSepCorrFctn)
 #endif
 
-StHbtThreeVector FindExitPoint(const StPhysicalHelixD& pHelix);
+  // following function (found at bottom of this file) is obsolete - MALisa July2000
+  // StHbtThreeVector FindExitPoint(const StPhysicalHelixD& pHelix);
 
 //____________________________
 ExitSepCorrFctn::ExitSepCorrFctn(char* title, const int& nbinsQ, const float& QLo, const float& QHi,
@@ -72,14 +73,14 @@ StHbtString ExitSepCorrFctn::Report(){
 //____________________________
 void ExitSepCorrFctn::AddRealPair(const StHbtPair* pair){
 
-  // Let's find the exit seperation for the particles
-  // IF THEY WOULD BOTH ORIGINATE AT (0,0,0)
+  // MALisa July2000 - take explicit calculation of exit points and exit separation out of this
+  // class and put it into StHbtParticle and StHbtPair where they belong
+  //  StHbtThreeVector exitPt1 = FindExitPoint(pair->track1()->Helix());
+  //  StHbtThreeVector exitPt2 = FindExitPoint(pair->track2()->Helix());
+  //  StHbtThreeVector diff = exitPt1 - exitPt2;
+  //  double exitSep = diff.mag();
 
-  StHbtThreeVector exitPt1 = FindExitPoint(pair->track1()->Helix());
-  StHbtThreeVector exitPt2 = FindExitPoint(pair->track2()->Helix());
-  StHbtThreeVector diff = exitPt1 - exitPt2;
-
-  double exitSep = diff.mag();
+  double exitSep = pair->NominalTpcExitSeparation();
   double Qinv = fabs(pair->qInv());   // note - qInv() will be negative for identical pairs...
 
   mNumerator2D->Fill(Qinv,exitSep,1.0);
@@ -87,48 +88,45 @@ void ExitSepCorrFctn::AddRealPair(const StHbtPair* pair){
 //____________________________
 void ExitSepCorrFctn::AddMixedPair(const StHbtPair* pair){
 
-  StHbtThreeVector exitPt1 = FindExitPoint(pair->track1()->Helix());
-  StHbtThreeVector exitPt2 = FindExitPoint(pair->track2()->Helix());
-  StHbtThreeVector diff = exitPt1 - exitPt2;
-
-  double exitSep = diff.mag();
+  double exitSep = pair->NominalTpcExitSeparation();
   double Qinv = fabs(pair->qInv());   // note - qInv() will be negative for identical pairs...
 
   mDenominator2D->Fill(Qinv,exitSep,1.0);
 }
 
 
-
+// The following functionality has been moved to StHbtParticle (for exit point)
+// and StHbtPair (for exit separation).  It is kept here (commented out) for reference
 //_______________ seperate function for calculating the exit point...
-StHbtThreeVector FindExitPoint(const StPhysicalHelixD& pHelix){
-  static StHbtThreeVector ZeroVec(0.,0.,0.);
-  double dip, curv, phase;
-  int h;
-  curv = pHelix.curvature();
-  dip  = pHelix.dipAngle();
-  phase= pHelix.phase();
-  h    = pHelix.h();
-  StHelixD hel(curv,dip,phase,ZeroVec,h);
+// StHbtThreeVector FindExitPoint(const StPhysicalHelixD& pHelix){
+//   static StHbtThreeVector ZeroVec(0.,0.,0.);
+//   double dip, curv, phase;
+//   int h;
+//   curv = pHelix.curvature();
+//   dip  = pHelix.dipAngle();
+//   phase= pHelix.phase();
+//   h    = pHelix.h();
+//   StHelixD hel(curv,dip,phase,ZeroVec,h);
 
-  pairD candidates;
-  double sideLength;  // this is how much length to go to leave through sides of TPC
-  double endLength;  // this is how much length to go to leave through endcap of TPC
-  // figure out how far to go to leave through side...
-  candidates = hel.pathLength(200.0);  // bugfix MAL jul00 - 200cm NOT 2cm
-  sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
+//   pairD candidates;
+//   double sideLength;  // this is how much length to go to leave through sides of TPC
+//   double endLength;  // this is how much length to go to leave through endcap of TPC
+//   // figure out how far to go to leave through side...
+//   candidates = hel.pathLength(200.0);  // bugfix MAL jul00 - 200cm NOT 2cm
+//   sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
 
-  static StHbtThreeVector WestEnd(0.,0.,200.);  // bugfix MAL jul00 - 200cm NOT 2cm
-  static StHbtThreeVector EastEnd(0.,0.,-200.); // bugfix MAL jul00 - 200cm NOT 2cm
-  static StHbtThreeVector EndCapNormal(0.,0.,1.0);
+//   static StHbtThreeVector WestEnd(0.,0.,200.);  // bugfix MAL jul00 - 200cm NOT 2cm
+//   static StHbtThreeVector EastEnd(0.,0.,-200.); // bugfix MAL jul00 - 200cm NOT 2cm
+//   static StHbtThreeVector EndCapNormal(0.,0.,1.0);
 
-  endLength = hel.pathLength(WestEnd,EndCapNormal);
-  if (endLength < 0.0) endLength = hel.pathLength(EastEnd,EndCapNormal);
+//   endLength = hel.pathLength(WestEnd,EndCapNormal);
+//   if (endLength < 0.0) endLength = hel.pathLength(EastEnd,EndCapNormal);
 
-  if (endLength < 0.0) cout << "FindExitPoint: Hey-- I cannot find an exit point out endcaps" << endl;
+//   if (endLength < 0.0) cout << "FindExitPoint: Hey-- I cannot find an exit point out endcaps" << endl;
 
-  // OK, firstExitLength will be the shortest way out of the detector...
-  double firstExitLength = (endLength < sideLength) ? endLength : sideLength;
+//   // OK, firstExitLength will be the shortest way out of the detector...
+//   double firstExitLength = (endLength < sideLength) ? endLength : sideLength;
 
-  // now then, let's return the POSITION at which particle leaves TPC...
-  return hel.at(firstExitLength);
-}
+//   // now then, let's return the POSITION at which particle leaves TPC...
+//   return hel.at(firstExitLength);
+// }
