@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.cxx,v 2.7 2001/04/05 04:00:52 ullrich Exp $
+ * $Id: StPrimaryVertex.cxx,v 2.8 2002/04/18 23:38:21 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.cxx,v $
+ * Revision 2.8  2002/04/18 23:38:21  jeromel
+ * Implementation of the SVT 2 tables scheme ...
+ *
  * Revision 2.7  2001/04/05 04:00:52  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -42,7 +45,7 @@
 
 ClassImp(StPrimaryVertex)
 
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.7 2001/04/05 04:00:52 ullrich Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.8 2002/04/18 23:38:21 jeromel Exp $";
 
 StPrimaryVertex::StPrimaryVertex()
 { mType = kEventVtxId; }
@@ -64,10 +67,32 @@ StPrimaryVertex::numberOfDaughters() const
     return mDaughters.size();
 }
 
+unsigned int
+StPrimaryVertex::numberOfDaughters(StTrackType type) const
+{
+    if (type == primary)
+	return mDaughters.size();
+    else if (type == estPrimary)
+	return mEstDaughters.size();
+    else
+	return 0;
+}
+
 StTrack*
 StPrimaryVertex::daughter(unsigned int i)
 {
     return i < mDaughters.size() ? mDaughters[i] : 0;
+}
+
+StTrack*
+StPrimaryVertex::daughter(unsigned int i, StTrackType type)
+{
+    if (type == primary)
+	return i < mDaughters.size() ? mDaughters[i] : 0;
+    else if (type == estPrimary)
+	return i < mEstDaughters.size() ? mEstDaughters[i] : 0;	
+    else
+	return 0;
 }
 
 const StTrack*
@@ -76,28 +101,72 @@ StPrimaryVertex::daughter(unsigned int i) const
     return i < mDaughters.size() ? mDaughters[i] : 0;
 }
 
+const StTrack*
+StPrimaryVertex::daughter(unsigned int i, StTrackType type) const
+{
+    if (type == primary)
+	return i < mDaughters.size() ? mDaughters[i] : 0;
+    else if (type == estPrimary)
+	return i < mEstDaughters.size() ? mEstDaughters[i] : 0;	
+    else
+	return 0;
+}
+
 StPtrVecTrack
 StPrimaryVertex::daughters(StTrackFilter& filter)
 {
     StPtrVecTrack vec;
     for (unsigned int i=0; i<mDaughters.size(); i++)
-        if (filter(mDaughters[i])) vec.push_back(mDaughters[i]);
+	if (filter(mDaughters[i])) vec.push_back(mDaughters[i]);
+    return vec;
+}
+
+StPtrVecTrack
+StPrimaryVertex::daughters(StTrackFilter& filter, StTrackType type)
+{
+    StPtrVecTrack vec;
+    if (type == primary) {
+	for (unsigned int i=0; i<mDaughters.size(); i++)
+	    if (filter(mDaughters[i])) vec.push_back(mDaughters[i]);
+    }
+    else if (type == estPrimary) {
+	for (unsigned int i=0; i<mEstDaughters.size(); i++)
+	    if (filter(mEstDaughters[i])) vec.push_back(mEstDaughters[i]);
+    }
     return vec;
 }
 
 StSPtrVecPrimaryTrack&
-StPrimaryVertex::daughters() { return mDaughters; }
+StPrimaryVertex::daughters(StTrackType type)
+{
+    if (type == estPrimary)
+	return mEstDaughters;
+    else 
+	return mDaughters;	     
+}
 
 const StSPtrVecPrimaryTrack&
-StPrimaryVertex::daughters() const { return mDaughters; }
+StPrimaryVertex::daughters(StTrackType type) const
+{
+    if (type == estPrimary)
+	return mEstDaughters;
+    else 
+	return mDaughters;	     
+}
 
 void
 StPrimaryVertex::addDaughter(StTrack* t)
 {
     StPrimaryTrack* p = dynamic_cast<StPrimaryTrack*>(t);
     if (p) {
-        mDaughters.push_back(p);
-        p->setVertex(this);
+	if (p->type() == primary) {
+	    mDaughters.push_back(p);
+	    p->setVertex(this);
+	}
+	else if (p->type() == estPrimary) {
+	    mEstDaughters.push_back(p);
+	    p->setVertex(this);
+	}
     }
 }
 
@@ -107,11 +176,20 @@ StPrimaryVertex::removeDaughter(StTrack* t)
     StPrimaryTrack* p = dynamic_cast<StPrimaryTrack*>(t);
     if (!p) return;
     StSPtrVecPrimaryTrackIterator iter;
-    for (iter=mDaughters.begin(); iter != mDaughters.end(); iter++)
-        if (*iter == t) {
-            mDaughters.erase(iter);
-            p->setVertex(0);
-        }
+    if (p->type() == primary) {
+	for (iter=mDaughters.begin(); iter != mDaughters.end(); iter++)
+	    if (*iter == t) {
+		mDaughters.erase(iter);
+		p->setVertex(0);
+	    }
+    }
+    else if (p->type() == estPrimary) {
+	for (iter=mEstDaughters.begin(); iter != mEstDaughters.end(); iter++)
+	    if (*iter == t) {
+		mEstDaughters.erase(iter);
+		p->setVertex(0);
+	    }
+    }
 }
 
 void

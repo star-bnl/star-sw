@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.h,v 2.7 2002/02/22 22:56:49 jeromel Exp $
+ * $Id: StPrimaryVertex.h,v 2.8 2002/04/18 23:38:21 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.h,v $
+ * Revision 2.8  2002/04/18 23:38:21  jeromel
+ * Implementation of the SVT 2 tables scheme ...
+ *
  * Revision 2.7  2002/02/22 22:56:49  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -50,21 +53,26 @@ public:
     ~StPrimaryVertex();
     
     StVertexId                   type() const;
-    unsigned int                       numberOfDaughters() const;
+    unsigned int                 numberOfDaughters() const;
+    unsigned int                 numberOfDaughters(StTrackType) const;      // remove when EST becomes standard
     StTrack*                     daughter(unsigned int);
     const StTrack*               daughter(unsigned int) const;
+    StTrack*                     daughter(unsigned int, StTrackType);       // remove when EST becomes standard
+    const StTrack*               daughter(unsigned int, StTrackType) const; // remove when EST becomes standard
     StPtrVecTrack                daughters(StTrackFilter&);
-    StSPtrVecPrimaryTrack&       daughters();
-    const StSPtrVecPrimaryTrack& daughters() const;
+    StPtrVecTrack                daughters(StTrackFilter&, StTrackType);    // remove when EST becomes standard
+    StSPtrVecPrimaryTrack&       daughters(StTrackType = primary);          // change when EST becomes standard
+    const StSPtrVecPrimaryTrack& daughters(StTrackType = primary) const;    // change when EST becomes standard
     void                         addDaughter(StTrack*);
     void                         removeDaughter(StTrack*);
 
     void setParent(StTrack*);     // overwrite inherited
-
+    
 protected:
-    StSPtrVecPrimaryTrack mDaughters;
+    StSPtrVecPrimaryTrack    mDaughters;
+    StSPtrVecPrimaryTrack    mEstDaughters;  // remove when EST becomes standard
 
     StObject* clone() const;
-    ClassDef(StPrimaryVertex,1)
+    ClassDef(StPrimaryVertex,2)
 };
 #endif

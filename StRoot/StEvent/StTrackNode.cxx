@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackNode.cxx,v 2.8 2001/04/05 04:00:58 ullrich Exp $
+ * $Id: StTrackNode.cxx,v 2.9 2002/04/18 23:38:21 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackNode.cxx,v $
+ * Revision 2.9  2002/04/18 23:38:21  jeromel
+ * Implementation of the SVT 2 tables scheme ...
+ *
  * Revision 2.8  2001/04/05 04:00:58  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -43,7 +46,7 @@
 
 ClassImp(StTrackNode)
 
-static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.8 2001/04/05 04:00:58 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.9 2002/04/18 23:38:21 jeromel Exp $";
 
 StTrackNode::StTrackNode() { /* noop */ }
 
@@ -55,6 +58,7 @@ StTrackNode::addTrack(StTrack* track)
     if (track) {
         switch (track->type()) {
         case primary:
+        case estPrimary:
             mReferencedTracks.push_back(track);
             break;
         case secondary:                // not implemented yet
@@ -62,6 +66,7 @@ StTrackNode::addTrack(StTrack* track)
             break;
         case global:
         case tpt:
+        case estGlobal:
             mOwnedTracks.push_back(track);
             break;
         default:
@@ -81,14 +86,16 @@ StTrackNode::removeTrack(StTrack* track)
     if (track) {
         switch (track->type()) {
         case primary:
+        case estPrimary:
             for (iter = mReferencedTracks.begin(); iter != mReferencedTracks.end(); iter++)
                 if (*iter == track) mReferencedTracks.erase(iter);
             break;
         case secondary:                // not implemented yet
             cerr << "StTrackNode::removeTrack(): track type 'secondary' not implemented yet." << endl;
             break;
-        case global:
         case tpt:
+        case global:
+        case estGlobal:
             for (iterS = mOwnedTracks.begin(); iterS != mOwnedTracks.end(); iterS++)
                 if (*iterS == track) mOwnedTracks.erase(iterS);
             break;
@@ -133,16 +140,20 @@ StTrackNode::track(unsigned int i)
             return 0;
     }
 }
-    
+
 unsigned int
 StTrackNode::entries(StTrackType type) const
 {
     StSPtrVecTrackConstIterator iterS;
-    unsigned int           counter;
+    StPtrVecTrackConstIterator  iter;
+    unsigned int                counter;
 
     switch (type) {
     case primary:
-        return mReferencedTracks.size();
+    case estPrimary:
+        for (counter = 0, iter = mReferencedTracks.begin(); iter != mReferencedTracks.end(); iter++)
+            if ((*iter)->type() == type) counter++;
+        return counter;
         break;
     case secondary:                // not implemented yet
         cerr << "StTrackNode::entries(): track type 'secondary' not implemented yet." << endl;
@@ -150,6 +161,7 @@ StTrackNode::entries(StTrackType type) const
         break;
     case tpt:
     case global:
+    case estGlobal:
         for (counter = 0, iterS = mOwnedTracks.begin(); iterS != mOwnedTracks.end(); iterS++)
             if ((*iterS)->type() == type) counter++;
         return counter;
@@ -169,10 +181,12 @@ StTrackNode::track(StTrackType type, unsigned int i) const
 
     switch (type) {
     case primary:
-        if (i < mReferencedTracks.size())
-            return mReferencedTracks[i];
-        else
-            return 0;
+    case estPrimary:
+        for (j=-1, k=0; k < mReferencedTracks.size(); k++) {
+            if (mReferencedTracks[k]->type() == type) j++;
+            if (j == static_cast<int>(i)) return mReferencedTracks[k];
+        }
+        return 0;
         break;
     case secondary:                // not implemented yet
         cerr << "StTrackNode::track(): track type 'secondary' not implemented yet." << endl;
@@ -180,6 +194,7 @@ StTrackNode::track(StTrackType type, unsigned int i) const
         break;
     case tpt:
     case global:
+    case estGlobal:
         for (j=-1, k=0; k < mOwnedTracks.size(); k++) {
             if (mOwnedTracks[k]->type() == type) j++;
             if (j == static_cast<int>(i)) return mOwnedTracks[k];
@@ -201,10 +216,12 @@ StTrackNode::track(StTrackType type, unsigned int i)
 
     switch (type) {
     case primary:
-        if (i < mReferencedTracks.size())
-            return mReferencedTracks[i];
-        else
-            return 0;
+    case estPrimary:
+        for (j=-1, k=0; k < mReferencedTracks.size(); k++) {
+            if (mReferencedTracks[k]->type() == type) j++;
+            if (j == static_cast<int>(i)) return mReferencedTracks[k];
+        }
+	return 0;
         break;
     case secondary:                // not implemented yet
         cerr << "StTrackNode::track(): track type 'secondary' not implemented yet." << endl;
@@ -212,6 +229,7 @@ StTrackNode::track(StTrackType type, unsigned int i)
         break;
     case tpt:
     case global:
+    case estGlobal:
         for (j=-1, k=0; k < mOwnedTracks.size(); k++) {
             if (mOwnedTracks[k]->type() == type) j++;
             if (j == static_cast<int>(i)) return mOwnedTracks[k];
