@@ -465,8 +465,10 @@ cdl_load(char *lib_name)
 {
    FilesPtr   f;
    FileHandle file_handle;
+   int flags;
+
 #if defined(__hpux)
-   int flags = BIND_DEFERRED | DYNAMIC_PATH;
+   flags = BIND_DEFERRED | DYNAMIC_PATH;
    long address = 0L;
    extern int errno;
 
@@ -476,11 +478,16 @@ cdl_load(char *lib_name)
       return (errno);
     }
 #else
-    /* hjw, for porting to low-version irix int flags=RTLD_NOW|RTLD_GLOBAL; */
-#ifndef RTLD_GLOBAL
-  #define RTLD_GLOBAL 0
+
+   /* The Alpha doesn't recognize the RTLD_GLOBAL flag; besides, 
+      it declares shared library symbols globally by default. */
+
+#if defined(__alpha)
+    flags = RTLD_LAZY;
+#else
+    flags = RTLD_LAZY | RTLD_GLOBAL;
 #endif
-    int flags = RTLD_LAZY | RTLD_GLOBAL;
+
     file_handle = dlopen(lib_name, flags);
     if (file_handle ==  NULL) {
        printf("cdl_load:  %s\n",dlerror() );
