@@ -101,7 +101,7 @@ Int_t StEventQAMaker::Make() {
   event = (StEvent*) GetInputDS("StEvent");
   if (event) {
     Bool_t realData = (event->info()->type() == "NONE");
-    if (firstEvent) {
+    if (eventCount==0) {
       if (histsSet == StQA_Undef) {
         if (realData) {
           histsSet = StQA_AuAuOld;
@@ -142,7 +142,7 @@ Int_t StEventQAMaker::Make() {
         } else if ((tword >= 0x2000) && (tword < 0x3000)) {
           mTrigWord->Fill(4.); // "pp Physics"
 	  doEvent = kTRUE;
-          if ((firstEvent) && (histsSet==StQA_AuAuOld)) histsSet = StQA_pp;
+          if ((eventCount==0) && (histsSet==StQA_AuAuOld)) histsSet = StQA_pp;
         } else if (tword == 0xF200) {
           mTrigWord->Fill(7.); // "Laser"
         } else {
@@ -205,10 +205,30 @@ Int_t StEventQAMaker::Make() {
 
  // AuAu
 
-       if (isTriggerInRange(trigId,15000,15999)) {
-         mTrigWord->Fill(1.); // "AuAu Physics"
+       if (isTriggerInRange(trigId,15007,15099)) {
+         mTrigWord->Fill(1.); // "MinBias"
          doEvent = kTRUE;
 	 evClasses[nEvClasses] = 1;
+	 nEvClasses++;
+         histsSet = StQA_AuAu;
+       }
+       if (isTriggerInRange(trigId,15105,15199)) {
+         mTrigWord->Fill(2.); // "Central"
+         doEvent = kTRUE;
+	 evClasses[nEvClasses] = 2;
+	 nEvClasses++;
+         histsSet = StQA_AuAu;
+       }
+       if (isTriggerInRange(trigId,15202,15299)) {
+         mTrigWord->Fill(5.); // "High Tower"
+         doEvent = kTRUE;
+	 evClasses[nEvClasses] = 3;
+	 nEvClasses++;
+         histsSet = StQA_AuAu;
+       }
+       if ((nEvClasses==0) && (isTriggerInRange(trigId,15300,15999))) {
+         mTrigWord->Fill(3.); // "Other Physics"
+	 evClasses[nEvClasses] = 4;
 	 nEvClasses++;
          histsSet = StQA_AuAu;
        }
@@ -229,7 +249,7 @@ Int_t StEventQAMaker::Make() {
       return kStOk;
     }
 
-    if (firstEvent) BookHist();
+    if (!mNullPrimVtx) BookHist();
     multiplicity = event->trackNodes().size();
     switch (histsSet) {
       case (StQA_AuAuOld) : {
@@ -238,6 +258,7 @@ Int_t StEventQAMaker::Make() {
         else if (multiplicity < 2500) eventClass = 2;
         else eventClass = 3;
         break; }
+      case (StQA_AuAu):
       case (StQA_dAu) : {
         eventClass = evClasses[0];
 	break; }
@@ -1464,6 +1485,8 @@ void StEventQAMaker::MakeHistVertex() {
   UInt_t currentNumber=0;
 
   if (primVtx) {
+
+    // Decide true primary vertex by most daughters
     for (UInt_t v=0; v<event->numberOfPrimaryVertices(); v++) {
       currentNumber = event->primaryVertex(v)->numberOfDaughters();
       if (currentNumber > daughters) {
@@ -1472,13 +1495,8 @@ void StEventQAMaker::MakeHistVertex() {
       }
     }
 
-    float z_svt = 999.;
-    float z_tpc = -999.;
     for (UInt_t j=0; j<event->numberOfPrimaryVertices(); j++) {
       StPrimaryVertex *aPrimVtx = event->primaryVertex(j);
-
-      if (aPrimVtx->flag() == 201) z_svt = aPrimVtx->position().z();
-      if (aPrimVtx->flag() == 101) z_tpc = aPrimVtx->position().z();
 
       if (aPrimVtx == primVtx) {
         hists->m_pv_vtxid->Fill(primVtx->type());
@@ -1506,7 +1524,18 @@ void StEventQAMaker::MakeHistVertex() {
 		    aPrimVtx->position().y()*aPrimVtx->position().y());
       }
     }
+  }
+
+  float z_svt = 999.;
+  float z_tpc = -999.;
+  for (UInt_t j=0; j<event->numberOfCalibrationVertices(); j++) {
+    StCalibrationVertex *aCalibVtx = event->calibrationVertex(j);
+    if (aCalibVtx->flag() == 101) z_tpc = aCalibVtx->position().z();
+    if (aCalibVtx->flag() == 201) z_svt = aCalibVtx->position().z();
+  }
+  if (z_svt != 999. && z_tpc != -999.) {
     hists->m_vtx_z->Fill(z_tpc-z_svt);
+    hists->m_pv_SvtvsTpc->Fill(z_svt,z_tpc);
   }
 
   // V0 vertices
@@ -1748,7 +1777,19 @@ void StEventQAMaker::MakeHistPoint() {
 	      hists->m_pnt_barrelS->Fill(i+1); // physical barrel numbering starts at 1
 	      hists->m_pnt_xyS->Fill(x,y);
               totalSvtHits++;
+
             }
+            // Laser spots:
+            // barrel 3, ladder 15, wafer 7
+            if (i==2 && j==14 && k==6 && svthit->hybrid() == 1 &&
+                svthit->anode() >= 195 && svthit->anode() <= 201 &&
+                svthit->timebucket() >= 90)
+              hists->m_pnt_svtLaser->Fill(eventCount,svthit->timebucket());
+            // barrel 3, ladder 7, wafer 1
+            if (i==2 && j==6 && k==0 && svthit->hybrid() == 2 &&
+                svthit->anode() >= 195 && svthit->anode() <= 200 &&
+                svthit->timebucket() >= 90 && svthit->timebucket() <= 110)
+              hists->m_pnt_svtLaser->Fill(eventCount,svthit->timebucket()/2.);
 	  }
         }
       }
@@ -2050,8 +2091,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.55 2004/02/05 19:04:30 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.56 2004/02/12 05:03:05 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.56  2004/02/12 05:03:05  genevb
+// Year 4 AuAu changes. New SVT histos.
+//
 // Revision 2.55  2004/02/05 19:04:30  genevb
 // math touchup for arc length calcs
 //

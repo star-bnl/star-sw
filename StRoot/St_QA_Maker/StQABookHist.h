@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.16 2004/01/10 01:10:18 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.17 2004/02/12 05:03:12 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.17  2004/02/12 05:03:12  genevb
+// Year 4 AuAu changes. New SVT histos.
+//
 // Revision 2.16  2004/01/10 01:10:18  genevb
 // Preparations for Year 5, added some svt plots
 //
@@ -81,7 +84,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.16 2004/01/10 01:10:18 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.17 2004/02/12 05:03:12 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -562,9 +565,11 @@ class StQABookHist : public TObject {
   TH2F     *m_pv_xy;    //! x versus y
   TH1F     *m_pv_pchi2; //! row1-chisq per dof of vertex fit
   TH1F     *m_pv_r;     //! radius to primary vertex
+  TH2F     *m_pv_SvtvsTpc;   //! SVT prim vtx vs TPC prim vtx
 
   TH1F     *m_vtx_z;    //! resolution of SVT vertex finder relative
                         //! to main vertex finder
+
   TH1F     *m_vtx_phi_dist;  //! azimuthal distribution of V0s relative to primVtx
   TH1F     *m_vtx_r_dist;  //! radial distribution of V0s relative to primVtx
   TH1F     *m_vtx_z_dist;  //! z distribution of V0s relative to primVtx
@@ -605,6 +610,8 @@ class StQABookHist : public TObject {
   TH2F     *m_pnt_ftpc;    //! number of hits ftpc
   TH1F     *m_pnt_ftpcE;   //! number of hits ftpcE
   TH1F     *m_pnt_ftpcW;   //! number of hits ftpcW
+
+  TH2F     *m_pnt_svtLaser; //! laser spots in svt
     
 // for method MakeHistRich
   TH1F     *m_rich_tot;   //! number of rich hits
