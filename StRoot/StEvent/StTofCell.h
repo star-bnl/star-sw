@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofCell.h,v 2.4 2004/02/05 17:59:31 ullrich Exp $
+ * $Id: StTofCell.h,v 2.5 2004/06/11 19:36:48 ullrich Exp $
  *
  * Author: F. Geurts, May 2003
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofCell.h,v $
+ * Revision 2.5  2004/06/11 19:36:48  ullrich
+ * Added implementation of zHit().
+ *
  * Revision 2.4  2004/02/05 17:59:31  ullrich
  * Changed $LINK to StLink mechanism and add new member.
  *
@@ -175,6 +178,12 @@ inline int
 StTofCell::matchFlag() const
 {
   return mMatchFlag;
+}
+
+inline float
+StTofCell::zHit() const
+{
+  return mZHit;
 }
 
 #endif
