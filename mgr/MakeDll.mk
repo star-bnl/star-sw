@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.47 1999/01/21 02:15:30 fisyak Exp $
+# $Id: MakeDll.mk,v 1.48 1999/01/25 23:49:13 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.48  1999/01/25 23:49:13  fisyak
+# Add MAKEFLAG
+#
 # Revision 1.47  1999/01/21 02:15:30  fisyak
 # New StChain w/o automatical streamer generation
 #
@@ -43,6 +46,11 @@
 # fix shared libraries versioning for St_Root
 #
 #
+ifdef SILENT
+.SILENT:
+endif       
+
+
 ifdef SO_LIB
    OUT_UP  := $(subst / ,,$(dir $(SO_LIB))  )
    OUT_UPP := $(subst / ,,$(dir $(OUT_UP))  )
