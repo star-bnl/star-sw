@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsMiniChargeSegment.hh,v 1.1 1998/11/10 17:12:11 fisyak Exp $
+ * $Id: StTrsMiniChargeSegment.hh,v 1.2 1999/01/18 21:03:30 lasiuk Exp $
  *
  * Author: brian
  *
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StTrsMiniChargeSegment.hh,v $
- * Revision 1.1  1998/11/10 17:12:11  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/18 21:03:30  lasiuk
+ * Jan 18,1999
  *
  * Revision 1.1  1998/11/10 17:12:11  fisyak
  * Put Brian trs versin into StRoot
@@ -79,5 +79,5 @@ inline const double StTrsMiniChargeSegment::charge() const {return mNumberOfElec
 inline void StTrsMiniChargeSegment::setCharge(double n) {mNumberOfElectrons = n;}
 
 // Non-Member Function
-ostream& operator<<(ostream&, StTrsMiniChargeSegment&);
+ostream& operator<<(ostream&, const StTrsMiniChargeSegment&);
 #endif
