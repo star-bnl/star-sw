@@ -19,21 +19,14 @@
 #include "StPmtSignal.h"
 #include "StMcCalorimeterHit.hh"
 #include "StMcEmcHitCollection.hh"
-#include "StEventTypes.h"
-//#include "StEmcDetector.h"
-//#include "StEmcModule.h"
-//#include "StEmcRawHit.h"
-//#include "StBFChain.h"
+#include "StEmcCollection.h"
+#include "StEmcDetector.h"
+#include "StEmcModule.h"
+#include "StEmcRawHit.h"
 
 #include "tables/St_g2t_emc_hit_Table.h"
 #include "tables/St_ems_hits_Table.h"
 #include "tables/St_controlEmcSimulatorMaker_Table.h"
-// DB staff 
-//#include "tables/St_emcRunning_Table.h"
-//#include "tables/St_smdRunning_Table.h"
-//#include "tables/St_emcCalibration_Table.h"
-//#include "tables/St_emcPedestal_Table.h"
-//#include "tables/St_smdPedestal_Table.h"
 
 #include "tables/St_emcStatus_Table.h"
 #include "tables/St_smdStatus_Table.h"
@@ -45,21 +38,9 @@
 
 ClassImp(StEmcSimulatorMaker)
 
-TDataSet  *geaIn, *ems;
-St_g2t_emc_hit *g2t_emc_hit, *g2t_smd_hit;
 
-St_controlEmcSimulatorMaker* controlMaker; 
-controlEmcSimulatorMaker_st* controlTable;
-
-St_controlEmcPmtSimulator* pmtSimulator; 
-controlEmcPmtSimulator_st* pmtTable;
-
-TDataSet* DB=0, *status=0, *ped=0, *calib = 0;
-St_emcStatus* statusEmc=0;   // status for BEMC  or BPRS
-emcStatus_st* statusEmcRec=0;
-St_smdStatus* statusSmd=0;   // status for BSMDE or BSMDP
-smdStatus_st* statusSmdRec=0;
-
+void StEmcSimulatorMaker::clearStEventStaf() { mEmcCollection = 0; } 
+StEmcCollection *StEmcSimulatorMaker::getEmcCollection() { return mEmcCollection;} 
 St_controlEmcSimulatorMaker *StEmcSimulatorMaker::getControlSimulator() { return controlMaker;} 
 St_controlEmcPmtSimulator   *StEmcSimulatorMaker::getControlPmtSimulator() { return pmtSimulator;} 
 
@@ -74,6 +55,27 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name)
    mEmcCollection = NULL;
    mC1            = NULL;
    m_nhit         = 0;   
+   
+   geaIn          = 0;
+   ems            = 0;
+   g2t_emc_hit    = 0;
+   g2t_smd_hit    = 0;
+
+   controlMaker   = 0; 
+   controlTable   = 0;
+
+   pmtSimulator   = 0; 
+   pmtTable       = 0;
+
+   DB             = 0;
+   status         = 0;
+   ped            = 0;
+   calib          = 0;
+   statusEmc      = 0;   // status for BEMC  or BPRS
+   statusEmcRec   = 0;
+   statusSmd      = 0;   // status for BSMDE or BSMDP
+   statusSmdRec   = 0;
+
    for(int i =0;i<MAXDET;i++)
    {
      mEmcMcHits[i] = NULL;
@@ -85,7 +87,7 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name)
 }
 void StEmcSimulatorMaker::Clear(const char *)
 {
-  delete mEmcCollection;
+  if(mEmcCollection) delete mEmcCollection;
   mEmcCollection=0;
   StMaker::Clear();		
 }
@@ -359,6 +361,7 @@ void StEmcSimulatorMaker::makeHistograms(const Int_t det)
 
 Int_t StEmcSimulatorMaker::Make()
 {
+  mEmcCollection = NULL;
   // Changed the order of searching - xdf first.
   static Char_t* typeOfFile[3] = {"xdf", "geant.root", "fz"};
   static Char_t* nameIn[3] = {"event/geant/Event", "geantBranch", "geant"};
@@ -730,6 +733,7 @@ Int_t StEmcSimulatorMaker::makeAllRawHitsForBemc()
             } else if(mPrint) gMessMgr->Warning()<<"StEmcSimulatorMaker::makeAllRawHitsForBemc() Bad m "<<m<<" or eta "<<eta <<endm; 
           } 
         }
+        
       }
     } else if(mPrint) gMessMgr->Warning()<<"StEmcSimulatorMaker -> no hits for detector " << i + 1 << endm;; 
   }
@@ -750,7 +754,7 @@ Int_t StEmcSimulatorMaker::fillStEvent()
     St_emc_hits  *table = mEmcRawHits[i];
     if(table)
     {
-      StEmcDetector* detector = new StEmcDetector(id, mGeom[i]->NModule());
+      StEmcDetector* detector = new StEmcDetector(id, 120);
       mEmcCollection->setDetector(detector);
       emc_hits_st *t = table->GetTable();
       for(Int_t j=0; j<table->GetNRows(); j++) if(t[j].adc>0)
@@ -1025,8 +1029,12 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.27 2004/08/06 13:24:48 suaide Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.28 2004/08/09 19:43:28 suaide Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.28  2004/08/09 19:43:28  suaide
+// moved global variables to private members and
+// made small modifications to run in embedding mode
+//
 // Revision 1.27  2004/08/06 13:24:48  suaide
 // New features added and fixed some bugs in the database
 //

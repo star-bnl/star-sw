@@ -17,11 +17,20 @@
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "tables/St_emc_hits_Table.h"
 
+#define EMCSIMNEW
+
 class StMcEmcHitCollection;
 class StEmcCollection;
 class StEmcVirtualSimulator;
 class St_controlEmcSimulatorMaker; 
 class St_controlEmcPmtSimulator; 
+class controlEmcSimulatorMaker_st;
+class controlEmcPmtSimulator_st;
+class St_emcStatus;
+class emcStatus_st;
+class St_smdStatus;
+class smdStatus_st;
+class St_g2t_emc_hit;
 
 class StEmcSimulatorMaker : public StMaker 
 {
@@ -30,22 +39,41 @@ class StEmcSimulatorMaker : public StMaker
     UInt_t                  mBEMC;            // Switch for BEMC; 0 => off; >0 => on
     UInt_t                  mEEMC;            // Switch for EEMC; 0 => off; >0 => on
     UInt_t                  mHistControl;     // Do histogramms (1) or no (0)
-    UInt_t                  mDB;               // =0, no DB; >=1, using DB
+    UInt_t                  mDB;              // =0, no DB; >=1, using DB
 
-    StEmcGeom*              mGeom[MAXDET]; //! Geometry 
+    StEmcGeom*              mGeom[MAXDET];    // Geometry 
   
     Bool_t                  mCompare;
     Bool_t                  mPrint;
-    TCanvas*                mC1;             //!
+    TCanvas*                mC1;              //
     
     Float_t                 mGain[MAXDET][18000];
+    
+    TDataSet*               geaIn;
+    TDataSet*               ems;
+    St_g2t_emc_hit*         g2t_emc_hit; 
+    St_g2t_emc_hit*         g2t_smd_hit;
 
-  protected:
-    StMcEmcHitCollection*   mEmcMcHits[MAXDET];  //! For convinience 
-    St_emc_hits*            mEmcRawHits[MAXDET]; //! For convinience 
-    StEmcCollection*        mEmcCollection;      //! As in StEvent
+    St_controlEmcSimulatorMaker* controlMaker; 
+    controlEmcSimulatorMaker_st* controlTable;
 
-    StEmcVirtualSimulator*  mSimulator[MAXDET];  //!
+    St_controlEmcPmtSimulator* pmtSimulator; 
+    controlEmcPmtSimulator_st* pmtTable;
+
+    TDataSet*               DB;
+    TDataSet*               status;
+    TDataSet*               ped;
+    TDataSet*               calib;
+    St_emcStatus*           statusEmc;   // status for BEMC  or BPRS
+    emcStatus_st*           statusEmcRec;
+    St_smdStatus*           statusSmd;   // status for BSMDE or BSMDP
+    smdStatus_st*           statusSmdRec;
+   
+    StMcEmcHitCollection*   mEmcMcHits[MAXDET];  // For convinience 
+    St_emc_hits*            mEmcRawHits[MAXDET]; // For convinience 
+    StEmcCollection*        mEmcCollection;      // As in StEvent
+
+    StEmcVirtualSimulator*  mSimulator[MAXDET];  //
 
     TH2F*                   m_nhit;           //! 
     TH2F*                   m_etot;           //!
@@ -90,12 +118,12 @@ class StEmcSimulatorMaker : public StMaker
     StMcEmcHitCollection*   getBprsMcHits() {return getEmcMcHits(BPRS);}
     StMcEmcHitCollection*   getBsmdeMcHits() {return getEmcMcHits(BSMDE);}
     StMcEmcHitCollection*   getBsmdpMcHits() {return getEmcMcHits(BSMDP);}
-    StEmcCollection*        getEmcCollection() {return  mEmcCollection;}
     
-    void                    clearStEventStaf() {mEmcCollection = 0;}
+    void                    clearStEventStaf();
     void                    Browse(TBrowser* b); // StEvent staf will be visible in browser
     St_controlEmcSimulatorMaker* getControlSimulator(); 
     St_controlEmcPmtSimulator*   getControlPmtSimulator(); 
+    StEmcCollection*        getEmcCollection();
 
     void                    pictureAllDetectors(Int_t print=0);                          // *MENU* 
     void                    pictureForDetector(Int_t det, Int_t logy=1, Int_t print=0);  // *MENU* 
@@ -110,7 +138,7 @@ class StEmcSimulatorMaker : public StMaker
     void                    setBEMC(UInt_t  key) {mBEMC = key; if (Debug()) printmBEMC();}
     void                    setPrint(Bool_t a) {mPrint = a;}
     void                    setHistControl(UInt_t key) {mHistControl = key;}
-    virtual const char*     GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.13 2004/08/06 13:24:48 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    virtual const char*     GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.14 2004/08/09 19:43:28 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     ClassDef(StEmcSimulatorMaker,0)  // Simulation maker for BEMC and EEMC
 };
@@ -118,8 +146,12 @@ class StEmcSimulatorMaker : public StMaker
 #endif
 //////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEmcSimulatorMaker.h,v 1.13 2004/08/06 13:24:48 suaide Exp $
+// $Id: StEmcSimulatorMaker.h,v 1.14 2004/08/09 19:43:28 suaide Exp $
 // $Log: StEmcSimulatorMaker.h,v $
+// Revision 1.14  2004/08/09 19:43:28  suaide
+// moved global variables to private members and
+// made small modifications to run in embedding mode
+//
 // Revision 1.13  2004/08/06 13:24:48  suaide
 // New features added and fixed some bugs in the database
 //
