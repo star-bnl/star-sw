@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.4 2004/07/16 15:06:08 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.5 2004/07/16 18:28:17 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,10 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.5  2004/07/16 18:28:17  dongx
+ * -Tofp Slewing function changed in AuAu200 GeV Run IV
+ * -Include those runs with eastern PVPD dead
+ *
  * Revision 1.4  2004/07/16 15:06:08  dongx
  * Z correction function separated for TOFp and TOFr.
  * Use a new one for RunIV AuAu 200GeV runs
@@ -91,6 +95,7 @@ StTofCalibMaker::StTofCalibMaker(const char *name) : StMaker(name)
   setOuterGeometry(true);
 
   mValidStartTime = kTRUE;
+  mEastPVPDValid = kTRUE;
 
   resetPars();
 }
@@ -154,11 +159,13 @@ void StTofCalibMaker::initFormulas()
 {
   /// define the calibration functions
   mTofrSlewing = new TF1("TofrSlewing", "[0]+[1]/sqrt(x)+[2]/x+[3]/sqrt(x)/x+[4]/x/x");
-  mTofpSlewing = new TF1("TofpSlewing", "[0]+[1]/sqrt(x)+[2]/x+[3]/sqrt(x)/x+[4]/x/x");
+  //  mTofpSlewing = new TF1("TofpSlewing", "[0]+[1]/sqrt(x)+[2]/x+[3]/sqrt(x)/x+[4]/x/x");
+  // Run 4, AuAu200GeV, Jiansong's calibration function
+  mTofpSlewing = new TF1("TofpSlewing","[0]+[1]*sqrt(x)+[2]*x+[3]*x*sqrt(x)");
   mTofrZCorr = new TF1("TofrZCorr", "pol7");
   //  mTofpZCorr = new TF1("TofpZCorr", "pol7");
   // Run 4, AuAu200GeV, Jiansong's calibration function
-  mTofpZCorr = new TF1("TofpZCorr", "[0]+[1]/sqrt(x)+[2]/x+[3]/sqrt(x)/x+[4]/x/x");
+  mTofpZCorr = new TF1("TofpZCorr", "[0]+[1]*sqrt(x)+[2]*x+[3]*x*sqrt(x)");
   mPVPDSlewing = new TF1("pVPDSlewing","[0]+[1]/sqrt(x)+[2]/x+[3]*x");
 }
 
@@ -181,6 +188,14 @@ Int_t StTofCalibMaker::InitRun(int runnumber)
   } else {
     gMessMgr->Info(" ==> No valid cali parameters! ","OS");
   }
+
+  // RUN IV 023-035, east PVPD dead
+  if(runnumber>5023000&&runnumber<5035000) {
+    mEastPVPDValid = kFALSE;
+  } else {
+    mEastPVPDValid = kTRUE;
+  }
+
   return kStOK;
 
 }
@@ -746,7 +761,9 @@ Double_t StTofCalibMaker::tstart(const Double_t *adc, const Double_t *tdc, const
 
   Double_t TdcSum = TdcSumEast + TdcSumWest;
   
-  if ( Ieast>=mPVPDEastHitsCut && Iwest>=mPVPDWestHitsCut ) {
+  //  if ( Ieast>=mPVPDEastHitsCut && Iwest>=mPVPDWestHitsCut ) {
+  /// To include those runs with east PVPD dead
+  if ( (Ieast>=mPVPDEastHitsCut || !mEastPVPDValid) && Iwest>=mPVPDWestHitsCut ) {
     Tstart = (TdcSum*mTDCWidth-(Ieast-Iwest)*vz/(C_C_LIGHT/1.e9))/(Ieast+Iwest);
   }
 
