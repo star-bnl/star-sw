@@ -24,7 +24,7 @@ Table of Contents:
 <li><a href="#print">"Print statement" transition</a>
 </ul>
 <a name="#logger"></a>
-<h2> Intergration log4j package for STAR framework</h2>
+<h2> Integration log4j package for STAR framework</h2>
 
 
   Integration of the <a href="http://logging.apache.org">log4j</a> packages and STAR offline framework 
@@ -55,9 +55,10 @@ Table of Contents:
   for the logger as needed. 
 
 <a name="#makers"></a>
-<h2> Logger for STAR Makers  </h2>
+<h2> "Loggers" for STAR Makers  </h2>
 
-  With new implementation each STAR StMaker subclass instantiate 
+  With new implementation the STAR framework initiate two common loggers: <b><code>"BFC"</code></b> 
+  and <b><code>"QA"</code></b> and each STAR StMaker subclass instantiates 
   its own logger. The logger name is the subclass class name.
   This allows to set the logger list of appenders, filters and level of 
   the severity for entire production chain or / and for each STAR maker subclass separately.
@@ -66,7 +67,7 @@ Table of Contents:
   via the <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr#i1"><code>gMessMgr</code> 
   global pointer</a>
   communicate with the so-called "current logger".
-   The base StMaker class internally governs the logger selection to make sure he current
+   The base StMaker class internally governs the logger selection to make sure the current
   logger  matches the logger of the current active StMaker instance.
 
 <a name="#macros"></a>
@@ -84,7 +85,7 @@ It is recommended now instead of direct use of the Messager global pointer apply
   <li> <b><code>LOG_DEBUG</code></a> </b>
   <li> <b><code>LOG_QA</code></a> </b>
 </ul>
-are followed by the C++ output "stream" elements  and ended up with the "endm" object.
+are followed by the C++ output "stream" elements  and ended up with the <b><code>"endm"</code></b> object.
 For example, to direct the message to the "error" logger on needs:
 
 <b><code> <pre>
@@ -94,12 +95,24 @@ For example, to direct the message to the "error" logger on needs:
 <a name="#use"></a>
 <h2> How to use the manager </h2>
 
-By default STAR "root4star" framework works with the old STAR message manager implementation.
+To use the STAR message manager your code mas to contain the STAR message manager 
+<a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/St_base/StMessMgr.h">interface header file</a>:
+
+  <b><code>
+   <pre>
+    #include "StMessMgr.h" 
+  </pre>
+   </code></b>
+  and use that interface <a href="#macros">CPP macros</a>
+
+<P>
+ By default STAR "root4star" framework works with the old STAR message manager implementation.
 
 <p>
-  Ti turn the new one one should load the extra shared library.
-  The ROOT macros <code>LoadLogger.C</code> does just that.
-  This means to instantiate the new logger it is enough to call "LoadLogger.C" before invoking your ROOT macro. 
+  To turn the new one one should load the extra shared library.
+  The ROOT macros <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/macros/LoadLogger.C"><b><code>LoadLogger.C</code></b></a> does just that.
+  This means to instantiate the new logger it is enough to call <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/macros/LoadLogger.C"><b><code>"LoadLogger.C"</code></b></a>
+  followed by you your ROOT macro invocation. 
   <p>
    For example to get BFC.C works with the new logger schema one needs to start the "root4star" session and call TWO macros:
    <b><code>
@@ -125,8 +138,20 @@ By default STAR "root4star" framework works with the old STAR message manager im
    It is enough to define the desirable messages and its level. 
    All other features can be ordered with the configuration 
    file at run-time without any needs to change and re-compile the code.
- <a name="#conf"></a>
+<a name="#conf"></a>
 <h2>How to configure</h2>
+
+<a name="#file"></a>
+To overwrite the STAR default output logger configuration one can provide 
+the custom configuration with the 
+<b><code>"log4j.xml"</code></b> file in the current working directory.
+
+<a name="#env"></a>
+One can alternate the default configuration file name and its location via <b><code>STAR_LOGGER_PROPERTY</code></b>
+environment variable.
+
+<p>
+
 "Jakarta log4j" is a community-supported project that includes the log4cxx,
  log4c, and log4perl packages (thereby supporting multiple computing languages) 
  
@@ -147,10 +172,134 @@ These four types are necessary to empower the developers with the capabilities
 to log messages according to message type and level, to control at runtime 
 how these messages are formatted, and lastly to decide where they are reported. 
 
-The C++ version fo teh package provide the readey-to-eat components to choose from:
+The C++ version of the package provide the ready-to-eat components to choose from:
 See: <a href="http://logging.apache.org/log4cxx/">http://logging.apache.org/log4cxx</a>
+
+<a name=#formats"></a>
+   <b><code>
+   <pre>
+  Formats:
+     %c  - logger name %c{2} = b.c  ( a.b.c. )
+     %d  - date        %d{%H:%M:%S} or %d{%d %b %Y %H:%M:%S}. 
+                        a - short week date name, A - full week date name
+                        b - short month name,     B - full month name  m - month number (1-12)
+                        d - day of the month
+                        H - hours (0-23)          I - hours ( 1 - 12)
+     %F  - the file name where the logging request was issued
+     %l  - location information of the caller which generated the logging event
+     %L  - the line number from where the logging request was issued
+   </pre>
+   </code></b>
+   <b><i><code>
+   <pre>
+     %m  - the application (user) supplied message associated with the logging event
+   </pre>
+   </code></i></b>
+   <b><code>
+   <pre>
+     %n  - the platform dependent line separator character or characters ("newline" symbol)
+     %p  - the level(priority) of the logging event
+     %r  - the number of milliseconds elapsed since the start 
+     %x  - the NDC (nested diagnostic context) 
+   </pre>
+   </code></b>
+
+
+"By default" STAR message manager uses the "pattern layout" with the format:
+   <b><code>
+   <pre>
+        PatternLayout("%-3c{2}:%-5p - %m%n"));
+   </pre>
+   </code></b>
+
+According the format and layout that prints out:
+<ul>
+  <li> <b><code>"%-3c{2}"</code></b> - the current STAR "StMaker" class name within 3 symbols field
+  <li> <b><code>":"</code></b>  - the symbol ":" 
+  <li> <b><code>"%-3p"</code></b>  - the current level (defined for example by <a href="#macros">the macro applied</a>) of the message within the 5 symbols field 
+  <li> <b><code>" - "</code></b> - 3 symbols: blank, dash, blank
+  <li> <b><code>"%m"</code></b> - the user provided message (via CPP <a href="#macros">macros</a> within 30 letters at most field 
+  <li> <b><code>"%n"</code></b>  - the "end-of-line" symbol
+</ul>
+<p>
+Examples:
+
+   <b><code>
+   <pre>
+      QA :INFO  - Output root file name gtrack.root
+   </pre>
+   </code></b>
+
+
+   <b><code>
+   <pre>
+      BFC:INFO  - StTpcDbMaker::Using any drift velocity
+   </pre>
+   </code></b>
+
+   <b><code>
+   <pre>
+      BFC:WARN  -  Validity:19980101/0  -----   20010710/5436
+   </pre>
+   </code></b>
+<p>
+  
 <a name="#print"></a>
 <h2> "Print statement" transition</h2>
+ To enjoy the new logger feature one should replace the "regular C++ I/O stream output statement or C output function  with that calling the loggers.
+This transition is simple and straightforward.
+<p>
+<a name="#printCplus"></a>
+<h3> "C++" output stream statements </h3>
+If you use the C++ output streams like <b><code>"cout"</code></b>, <b><code>"cerr"</code></b>  to get an access to the logger it is enough to 
+<ul>p
+<li> replace the <b><code>"cout"</code></b> and <b><code>"cerr"</code></b> object with the appropriated <a href="#macros">logger macros</a>
+and 
+<li>replace the <b><code>"endl"</code></b> object with <b><code>"endm"</code></b> ones.
+</ul>
+
+For example, replace of your plain C++ statement:
+   <b><code>
+   <pre>
+          cout << "DbFill: structure: " << structName << endl;
+   </pre>
+   </code></b>
+
+with
+   <b><code>
+   <pre>
+      LOG_INFO << "DbFill: structure: " << structName << endm;
+   </pre>
+   </code></b>
+<a name="#printCprintf"></a>
+<h3> "C"output subroutines</h3>
+
+If you use the C-language output subroutines like <b><code>"printf"</code></b> or <b><code>"fprintf"</code></b>, then to simplify the transition
+one advises the <a href="http://root.cern.ch/root/htmldoc/TString.html#TString:Form">"Form"</a> ROOT method.
+Add the appropriated  logger macros followed by the former <b><code>printf</code></b> statement followed by <b><code>"endm"</code></b> object and 
+semicolon and replace the name of the C subrotuine (for example printf) with the Form method.
+Don't forget to remove the end-of-line symbol ( <b><code>"\n"</code></b>
+) from the format string.
+
+For example:
+   <b><code>
+   <pre>
+  printf(" %d pre and %d post crossing data available\n",numberOfPreXing(),numberOfPostXing());
+   </pre>
+   </code></b>
+do
+   <b><code>
+   <pre>
+  LOG_DEBUG <<
+     Form(" %d pre and %d post crossing data available",numberOfPreXing(),numberOfPostXing())
+            << endm;
+   </pre>
+   </code></b>
+
+<hr>
+<small>
+Webmaster: <a href="mailto:fine@bnl.gov">Valeri Fine</a>
+</small>
 
 </body>
 </html>
