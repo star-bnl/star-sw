@@ -1,4 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98   
+// $Id: St_NodePosition.h,v 1.2 1998/12/26 21:40:40 fisyak Exp $
+// $Log: St_NodePosition.h,v $
+// Revision 1.2  1998/12/26 21:40:40  fisyak
+// Add Id and Log
+// 
 //+SEQ,CopyRight,T=NOINCLUDE.
  
 //////////////////////////////////////////////////////////////////////////
@@ -35,10 +40,10 @@ class St_NodePosition  : public TObject {
         virtual void        DrawOnly(Option_t *option="");
         virtual void        ExecuteEvent(Int_t event, Int_t px, Int_t py);
         virtual TRotMatrix  *GetMatrix() const {return fMatrix;}
-        virtual St_Node      *GetNode() const {return fNode;}
+        virtual St_Node     *GetNode() const {return fNode;}
         virtual Text_t      *GetObjectInfo(Int_t px, Int_t py);
-        const   Option_t    *GetOption() const { return GetNode()?GetNode()->GetOption():0;}
-        Int_t               GetVisibility() const {return GetNode()?GetNode()->GetVisibility():0;}
+	const   Option_t    *GetOption() const { return GetNode()?GetNode()->GetOption():0;}
+	Int_t               GetVisibility() const {return GetNode()?GetNode()->GetVisibility():0;}
         virtual Double_t    GetX() const {return fX;}
         virtual Double_t    GetY() const {return fY;}
         virtual Double_t    GetZ() const {return fZ;}

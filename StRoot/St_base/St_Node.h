@@ -1,4 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
+// $Id: St_Node.h,v 1.2 1998/12/26 21:40:40 fisyak Exp $
+// $Log: St_Node.h,v $
+// Revision 1.2  1998/12/26 21:40:40  fisyak
+// Add Id and Log
+//
 //Copyright (C) 1998. Brookhaven National Laboratory. Valery Fine (Faine). All right reserved.
  
 //////////////////////////////////////////////////////////////////////////
