@@ -33,15 +33,14 @@
 #include "../Sti/StiCompositeSeedFinder.h"
 #include "../Sti/StiLocalTrackMerger.h"
 #include "../Sti/StiDisplayManager.h"
-#include "../Sti/StiEvaluator.h"
 #include "../Sti/StiIOBroker.h"
 #include "../Sti/StiDynamicTrackFilter.h"
 #include "../Sti/StiHitFiller.h"
 #include "../StiMaker/StiRootIOBroker.h"
 #include "../StiGui/StiRootDisplayManager.h"
 
+#include "../StiEvaluator/StiEvaluator.h"
 #include "../StiEvaluator/StiEventAssociator.h"
-#include "../StiEvaluator/StiDefaultEvaluator.h"
 #include "../Sti/StiEvaluableTrackSeedFinder.h"
 #include "StAssociationMaker/StAssociationMaker.h"
 
@@ -63,7 +62,6 @@ StiDefaultToolkit::StiDefaultToolkit() :
 	trackFitter(0),
 	trackMerger(0),
 	displayManager(0),
-	evaluator(0),
 	ioBroker(0),
 	hitFiller(0),
 	associationMaker(0)
@@ -87,8 +85,8 @@ StiDefaultToolkit::~StiDefaultToolkit()
 	delete trackFilter;
 	delete trackFitter;
 	delete trackMerger;
-	//	delete displayManager;
-	delete evaluator;
+	//delete displayManager;
+	//delete evaluator;
 	//delete eventAssociator;
 	delete ioBroker;
 };
@@ -300,7 +298,7 @@ StiHitFiller    * StiDefaultToolkit::getHitFiller()
 	hitFiller->addDetector(kSvtId);
 	return hitFiller;
 }
-
+/*
 StiEvaluator         * StiDefaultToolkit::getEvaluator(const string& fname)
 {
 	if (evaluator)
@@ -317,7 +315,7 @@ StiEvaluator         * StiDefaultToolkit::getEvaluator()
 	evaluator = StiDefaultEvaluator::instance("Evaluator.root");
 	return evaluator;
 }
-
+*/
 StiIOBroker * StiDefaultToolkit::getIOBroker()
 {
 	if (ioBroker)
