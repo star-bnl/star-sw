@@ -36,7 +36,7 @@ extern "C" long r_ftpc_(
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
 //
-  float Todeg = 180.F / M_PI ;
+  float Todeg = 57.29577951 ;
 //
 //   Check there is something coming in
 //

@@ -81,6 +81,8 @@ void FTF_Hit::Set_Status ( FTF_Track* this_track, FTF_Para *para ) {
 	}
 		  if ( n >= nmax ) printf ( " \n Set_Status: Going into an infinite loop " ) ;
 }
+/*
 void FTF_Hit::Show ( int color ) {
 	printf ( " \n You better include the graphic package gft " ) ;
 }
+*/

@@ -7,8 +7,8 @@
    class FTF_Hit {         
    public:
        void         Print ( int level ) ;
-	   void			Show  ( int color ) ;
-	   void  Set_Status ( FTF_Track* this_track, FTF_Para *para ) ;
+       void	    Show  ( int color ) ;
+       void         Set_Status ( FTF_Track* this_track, FTF_Para *para ) ;
 
 
        int          id    ;     // Primary key 
