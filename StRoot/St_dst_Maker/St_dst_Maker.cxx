@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.11 1999/05/01 01:49:15 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.12 1999/05/03 01:39:22 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.12  1999/05/03 01:39:22  fisyak
+// Remove tables from DST, add access to different makers
+//
 // Revision 1.11  1999/05/01 01:49:15  fisyak
 // Add StRootEvent fill
 //
@@ -81,8 +84,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: St_dst_Maker.cxx,v 1.11 1999/05/01 01:49:15 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.12 1999/05/03 01:39:22 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.12  1999/05/03 01:39:22  fisyak
+// Remove tables from DST, add access to different makers
+//
 // Revision 1.11  1999/05/01 01:49:15  fisyak
 // Add StRootEvent fill
 //
@@ -155,7 +161,7 @@
 #include "StV0Vertex.h"
 #include "StXiVertex.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.11 1999/05/01 01:49:15 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.12 1999/05/03 01:39:22 fisyak Exp $";
 #include "StEventManager.h"
 StEventManager MakerEventManager;
 
@@ -182,9 +188,9 @@ Bool_t doLoad = kTRUE;
 
 
 ClassImp(St_dst_Maker)
-
-//_____________________________________________________________________________
-St_dst_Maker::St_dst_Maker(const char *name):StMaker(name){
+  
+  //_____________________________________________________________________________
+  St_dst_Maker::St_dst_Maker(const char *name):StMaker(name){
   fSelect = 0;
   setEventManager(&MakerEventManager);
   currentRun = 0;
@@ -197,71 +203,74 @@ St_dst_Maker::~St_dst_Maker(){
 //_____________________________________________________________________________
 Int_t St_dst_Maker::Init(){
   static const char *todst[] = {
-
-  "global:",	"dst",
-  "geant:", 	"particle", "g2t_rch_hit",
-  "trg:", 	"dst_TriggerDetectors",
-  0};
-
+    
+    "global:",	"dst",
+    "geant:", 	"particle", "g2t_rch_hit",
+    "trg:", 	"dst_TriggerDetectors",
+    0};
+  
   if (!fSelect) fSelect = todst;   
-
-// Create Histograms    
-   return StMaker::Init();
+  
+  // Create Histograms    
+  return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_dst_Maker::Make(){
-
+#if 0
   St_DataSet *ds=0,*mk=0;
   const char *name,*mkname;
   
- 
-  for (int idst=0; (name=fSelect[idst]); idst++) {
   
+  for (int idst=0; (name=fSelect[idst]); idst++) {
+    
     if (strchr(name,':')) {
       mkname = name; mk = GetInputDS(name); continue;}
-
+    
     if (!mk) continue;
     ds = mk->Find(name);
     if (!ds) continue;
     ds->Shunt(m_DataSet);
     if (Debug()) printf("\n*** <%s::Make> *** selected %s%s\n",ClassName(),mkname,name);
   }
-  Int_t Res = EventReader(); if (Res){/*touch*/};
-  return kStOK;
+#endif
+  return EventReader();
 }
 //_____________________________________________________________________________
 
 Int_t St_dst_Maker::EventReader() {
+  
   dst_run_header_st& dstRunHeader = dummy_hdr;
-  theEventManager->ResetDstIter(m_DataSet);
+  St_DataSet *global = GetInputDS("global:dst");
+  if (! global) return kStErr;
+  theEventManager->ResetDstIter(global);
   status = theEventManager->readRunHeader(dstRunHeader);
   if (status) {
     cout << "StEventReaderMaker: Run header: ID " << dstRunHeader.run_id << endl;
     /* run summary not used
-    dst_run_summary_st dummy_sum;
-    dst_run_summary_st& dstRunSummary = dummy_sum;
-    status = theEventManager->readRunSummary(dstRunSummary);
-    if (status) {
-      cout << "StEventReaderMaker: Run summary found" << endl;
-      // Create transient run header
-      currentRun = new StRun(dstRunHeader, dstRunSummary);
-    } else {
-      currentRun = new StRun(dstRunHeader);
-    }
+       dst_run_summary_st dummy_sum;
+       dst_run_summary_st& dstRunSummary = dummy_sum;
+       status = theEventManager->readRunSummary(dstRunSummary);
+       if (status) {
+       cout << "StEventReaderMaker: Run summary found" << endl;
+       // Create transient run header
+       currentRun = new StRun(dstRunHeader, dstRunSummary);
+       } else {
+       currentRun = new StRun(dstRunHeader);
+       }
     */
     if (doLoad) {
       if (currentRun) delete currentRun;
       currentRun = new StRun(dstRunHeader);
       AddConst(currentRun);
     }
-
+    
     // Since this is a run header record, there is no event data
     // so we're finished
     //    currentEvent = 0;
     //    theEventManager->closeEvent();
     return kStOK;
   }
-
+  
   cout << "StEventReaderMaker: Reading Event" << endl;
   theEventManager->readHeader(dstEventHeader);
   status = theEventManager->readTable(dstEventSummary);
@@ -270,9 +279,10 @@ Int_t St_dst_Maker::EventReader() {
     currentEvent = new StEvent(currentRun,
                                dstEventHeader,
                                dstEventSummary);
+    currentEvent->SetCvsTag(GetCVSTag()); 
     AddData(currentEvent);
   }
-
+  
   status = theEventManager->readTable(dstMonitorHard);
   if (status) {
     cout << "StEventReaderMaker: Found dstMonitorHard" << endl;
@@ -281,393 +291,402 @@ Int_t St_dst_Maker::EventReader() {
   if (status) {
     cout << "StEventReaderMaker: Found dstMonitorSoft" << endl;
   }
-
+  
   // Read and load trigger detector data
-  status = theEventManager->readTable(dstTriggerDetectors);
-  if (status) {
-    cout << "StEventReaderMaker: Loading triggerDetectors" << endl;
-    StTriggerDetectorCollection *trgDets =
-      currentEvent->triggerDetectorCollection();
-    // Load CTB data
-    StCtbCounter* ctb;
-    for (i=0; i<240; i++) {
-      if (dstTriggerDetectors.nCtb[i] > 0) {
-        ctb = new StCtbCounter( i, 
-                                dstTriggerDetectors.nCtb[i],
-                                dstTriggerDetectors.timeCtb[i]);
-        trgDets->ctbCounters().push_back(ctb);
+  St_DataSet *trg = GetInputDS("trg");
+  if (trg) {
+    theEventManager->ResetDstIter(trg);
+    status = theEventManager->readTable(dstTriggerDetectors);
+    if (status) {
+      cout << "StEventReaderMaker: Loading triggerDetectors" << endl;
+      StTriggerDetectorCollection *trgDets =
+	currentEvent->triggerDetectorCollection();
+      // Load CTB data
+      StCtbCounter* ctb;
+      for (i=0; i<240; i++) {
+	if (dstTriggerDetectors.nCtb[i] > 0) {
+	  ctb = new StCtbCounter( i, 
+				  dstTriggerDetectors.nCtb[i],
+				  dstTriggerDetectors.timeCtb[i]);
+	  trgDets->ctbCounters().push_back(ctb);
+	}
       }
-    }
-    // Load MWC data
-    StMwcSector* mwc;
-    for (i=0; i<96; i++) {
-      if (dstTriggerDetectors.nMwc[i] > 0) {
-        mwc = new StMwcSector( i, dstTriggerDetectors.nMwc[i]);
-        trgDets->mwcSectors().push_back(mwc);
+      // Load MWC data
+      StMwcSector* mwc;
+      for (i=0; i<96; i++) {
+	if (dstTriggerDetectors.nMwc[i] > 0) {
+	  mwc = new StMwcSector( i, dstTriggerDetectors.nMwc[i]);
+	  trgDets->mwcSectors().push_back(mwc);
+	}
       }
-    }
-    // Load VPD data
-    StVpdCounter* vpd;
-    for (i=0; i<48; i++) {
-      // No filling code exists, so no criteria to ignore empty bins
-      vpd = new StVpdCounter( i,
-                              dstTriggerDetectors.adcVPD[i],
-                              dstTriggerDetectors.timeVPD[i]);
-      trgDets->vpdCounters().push_back(vpd);
-    }
-    trgDets->vpdSummary().setVertexZ(dstTriggerDetectors.vertexZ);
-    trgDets->vpdSummary().setMinimumTime(east,dstTriggerDetectors.TimeEastVpd);
-    trgDets->vpdSummary().setMinimumTime(west,dstTriggerDetectors.TimeWestVpd);
-    // Load ZDC data
-    StZdcSegment* zdc;
-    for (i=0; i<6; i++) {
-      // No filling code exists, so no criteria to ignore empty bins
-      zdc = new StZdcSegment( i,
-                              dstTriggerDetectors.adcZDC[i],
-                              dstTriggerDetectors.tdcZDC[i]);
-      trgDets->zdcSegments().push_back(zdc);
-    }
-    trgDets->zdcSummary().setAdcSum(dstTriggerDetectors.adcZDCsum);
-    trgDets->zdcSummary().setAdcSum(east,dstTriggerDetectors.adcZDCEast);
-    trgDets->zdcSummary().setAdcSum(west,dstTriggerDetectors.adcZDCWest);
-  }
-  status = theEventManager->readTable(particle);
-  if (status) {
-    /*
-    // load genHeader table from particle
-    genHeader.bimp = particle.phep[0];
-    genHeader.phi = particle.phep[1];
-    genHeader.genid = particle.phep[2];
-    genHeader.ecms = particle.phep[3];
-    int aWest = int(particle.phep[4]);
-    int aEast = (particle.phep[4]-aWest)*1000;
-    genHeader.awest = aWest;
-    genHeader.aeast = aEast;
-    genHeader.run = particle.vhep[0];
-    genHeader.event = particle.vhep[1];
-    genHeader.date = particle.vhep[2];
-    genHeader.time = particle.vhep[3];
-    objyEventManager->loadTable(&genHeader);
-    */
-  }
-
-  // Load and create tracks, vertices etc. and add to collections
-  long nDedx, nPoint, nTrack, nTrackAux, nVertex, nV0Vertex, nXiVertex;
-  long nTofTrk, nTofEvt;
-
-  // *** BEGIN VERTEX BUILDING ***
-  // build a vector of vertex addresses to use in lieu of an index
-  // during vertex->track pointer loading. Assumes (requires!) that
-  // vertices are ordered
-
-  // First, find the total number of vertices
-  StVertexCollection vtxPtr("MyVertices");
-  int indexCount = 0;                    // count vertices added to collection
-  int vertexMatchIndex[20000];
-  dst_vertex_st* dstVertex = theEventManager->returnTable_dst_vertex(nVertex);
-  for (i=0; i<nVertex; i++) vertexMatchIndex[i]=-1;
-
-  // Second, deal with xi's
-  dst_xi_vertex_st* dstXiVertex = theEventManager->returnTable_dst_xi_vertex(nXiVertex);
-  if (nXiVertex > nVertex)
-    cout << "StEventReaderMaker: Warning - more Xi's than vertices" << endl;
-  if (dstXiVertex) {
-    cout << "StEventReaderMaker: " << nXiVertex << " dst_xi_vertex" << endl;
-    // Add Xi vertices to vertex collection
-    if (doLoad) {
-      StVertex* vtx = NULL;
-      long vertex_id;
-      for (i=0; i<nXiVertex; i++) {
-        vertex_id = dstXiVertex[i].id_xi;
-        vertexMatchIndex[vertex_id-1] = indexCount;
-        vtx = (StVertex*) new StXiVertex(&(dstXiVertex[i]), &(dstVertex[vertex_id]) );
-        // Add associated v0's during v0 loop
-        vtx->setIndex(indexCount++);
-        currentEvent->vertexCollection()->push_back(vtx);
-        vtxPtr.push_back(vtx);
+      // Load VPD data
+      StVpdCounter* vpd;
+      for (i=0; i<48; i++) {
+	// No filling code exists, so no criteria to ignore empty bins
+	vpd = new StVpdCounter( i,
+				dstTriggerDetectors.adcVPD[i],
+				dstTriggerDetectors.timeVPD[i]);
+	trgDets->vpdCounters().push_back(vpd);
       }
+      trgDets->vpdSummary().setVertexZ(dstTriggerDetectors.vertexZ);
+      trgDets->vpdSummary().setMinimumTime(east,dstTriggerDetectors.TimeEastVpd);
+      trgDets->vpdSummary().setMinimumTime(west,dstTriggerDetectors.TimeWestVpd);
+      // Load ZDC data
+      StZdcSegment* zdc;
+      for (i=0; i<6; i++) {
+	// No filling code exists, so no criteria to ignore empty bins
+	zdc = new StZdcSegment( i,
+				dstTriggerDetectors.adcZDC[i],
+				dstTriggerDetectors.tdcZDC[i]);
+	trgDets->zdcSegments().push_back(zdc);
+      }
+      trgDets->zdcSummary().setAdcSum(dstTriggerDetectors.adcZDCsum);
+      trgDets->zdcSummary().setAdcSum(east,dstTriggerDetectors.adcZDCEast);
+      trgDets->zdcSummary().setAdcSum(west,dstTriggerDetectors.adcZDCWest);
+    }
+  } // end of Trigger part
+  St_DataSet *geant = GetInputDS("geant");
+  if (geant) {
+    theEventManager->ResetDstIter(geant);
+    status = theEventManager->readTable(particle);
+    if (status) {
+      /*
+	// load genHeader table from particle
+	genHeader.bimp = particle.phep[0];
+	genHeader.phi = particle.phep[1];
+	genHeader.genid = particle.phep[2];
+	genHeader.ecms = particle.phep[3];
+	int aWest = int(particle.phep[4]);
+	int aEast = (particle.phep[4]-aWest)*1000;
+	genHeader.awest = aWest;
+	genHeader.aeast = aEast;
+	genHeader.run = particle.vhep[0];
+	genHeader.event = particle.vhep[1];
+	genHeader.date = particle.vhep[2];
+	genHeader.time = particle.vhep[3];
+	objyEventManager->loadTable(&genHeader);
+      */
     }
   }
-
-  // Third, deal with v0's
-  dst_v0_vertex_st* dstV0Vertex = theEventManager->returnTable_dst_v0_vertex(nV0Vertex);
-  if (nV0Vertex > nVertex)
-    cout << "StEventReaderMaker: Warning - more V0's than vertices" << endl;
-  if (dstV0Vertex) {
-    cout << "StEventReaderMaker: " << nV0Vertex << " dst_v0_vertex" << endl;
-    // Add V0 vertices to vertex collection
-    if (doLoad) {
-      StVertex* vtx = NULL;
-      long vertex_id;
-      long xi_index = 0;
-      for (i=0; i<nV0Vertex; i++) {
-        vertex_id = dstV0Vertex[i].id_vertex;
-        vertexMatchIndex[vertex_id-1] = indexCount;
-        vtx = (StVertex*) new StV0Vertex(&(dstV0Vertex[i]), &(dstVertex[vertex_id]) );
-        vtx->setIndex(indexCount++);
-        currentEvent->vertexCollection()->push_back(vtx);
-        vtxPtr.push_back(vtx);
-        // Add associated v0's to xi's
-        //  - take advantage of ordered xi/v0 tables
-        //  - take advantage of xi's being added to vtxPtr first
-        if (dstXiVertex) {
-          while ((xi_index<nXiVertex) &&
-            (dstXiVertex[xi_index].id_v0 == dstV0Vertex[i].id) )
-          ((StXiVertex*) (vtxPtr[xi_index++]))->setV0Vertex((StV0Vertex*) vtx);
-        }
+  if (global) {
+    theEventManager->ResetDstIter(global);
+    // Load and create tracks, vertices etc. and add to collections
+    long nDedx, nPoint, nTrack, nTrackAux, nVertex, nV0Vertex, nXiVertex;
+    long nTofTrk, nTofEvt;
+    
+    // *** BEGIN VERTEX BUILDING ***
+    // build a vector of vertex addresses to use in lieu of an index
+    // during vertex->track pointer loading. Assumes (requires!) that
+    // vertices are ordered
+    
+    // First, find the total number of vertices
+    StVertexCollection vtxPtr("MyVertices");
+    int indexCount = 0;                    // count vertices added to collection
+    int vertexMatchIndex[20000];
+    dst_vertex_st* dstVertex = theEventManager->returnTable_dst_vertex(nVertex);
+    for (i=0; i<nVertex; i++) vertexMatchIndex[i]=-1;
+    
+    // Second, deal with xi's
+    dst_xi_vertex_st* dstXiVertex = theEventManager->returnTable_dst_xi_vertex(nXiVertex);
+    if (nXiVertex > nVertex)
+      cout << "StEventReaderMaker: Warning - more Xi's than vertices" << endl;
+    if (dstXiVertex) {
+      cout << "StEventReaderMaker: " << nXiVertex << " dst_xi_vertex" << endl;
+      // Add Xi vertices to vertex collection
+      if (doLoad) {
+	StVertex* vtx = NULL;
+	long vertex_id;
+	for (i=0; i<nXiVertex; i++) {
+	  vertex_id = dstXiVertex[i].id_xi;
+	  vertexMatchIndex[vertex_id-1] = indexCount;
+	  vtx = (StVertex*) new StXiVertex(&(dstXiVertex[i]), &(dstVertex[vertex_id]) );
+	  // Add associated v0's during v0 loop
+	  vtx->setIndex(indexCount++);
+	  currentEvent->vertexCollection()->push_back(vtx);
+	  vtxPtr.push_back(vtx);
+	}
       }
     }
-  }    
-
-  // Last for the vertices, add any un-accounted-for vertices (primary)
-  if (dstVertex) {
-    cout << "StEventReaderMaker: " << nVertex << " dst_vertex" << endl;
-    // Build vertex collection
-    if (doLoad) {
-      StVertex* vtx = NULL;
-      for (i=0; i<nVertex; i++) {
-        if (vertexMatchIndex[i]<0) {
-          vertexMatchIndex[i] = indexCount;
-          vtx = new StVertex(&(dstVertex[i]) );
-          vtx->setIndex((ULong_t)indexCount++);
-          currentEvent->vertexCollection()->push_back(vtx);
-          vtxPtr.push_back(vtx);
-        }
+    
+    // Third, deal with v0's
+    dst_v0_vertex_st* dstV0Vertex = theEventManager->returnTable_dst_v0_vertex(nV0Vertex);
+    if (nV0Vertex > nVertex)
+      cout << "StEventReaderMaker: Warning - more V0's than vertices" << endl;
+    if (dstV0Vertex) {
+      cout << "StEventReaderMaker: " << nV0Vertex << " dst_v0_vertex" << endl;
+      // Add V0 vertices to vertex collection
+      if (doLoad) {
+	StVertex* vtx = NULL;
+	long vertex_id;
+	long xi_index = 0;
+	for (i=0; i<nV0Vertex; i++) {
+	  vertex_id = dstV0Vertex[i].id_vertex;
+	  vertexMatchIndex[vertex_id-1] = indexCount;
+	  vtx = (StVertex*) new StV0Vertex(&(dstV0Vertex[i]), &(dstVertex[vertex_id]) );
+	  vtx->setIndex(indexCount++);
+	  currentEvent->vertexCollection()->push_back(vtx);
+	  vtxPtr.push_back(vtx);
+	  // Add associated v0's to xi's
+	  //  - take advantage of ordered xi/v0 tables
+	  //  - take advantage of xi's being added to vtxPtr first
+	  if (dstXiVertex) {
+	    while ((xi_index<nXiVertex) &&
+		   (dstXiVertex[xi_index].id_v0 == dstV0Vertex[i].id) )
+	      ((StXiVertex*) (vtxPtr[xi_index++]))->setV0Vertex((StV0Vertex*) vtx);
+	  }
+	}
       }
-      if (vtx) currentEvent->setPrimaryVertex(vtx); // Last vertex is primary?
+    }    
+    
+    // Last for the vertices, add any un-accounted-for vertices (primary)
+    if (dstVertex) {
+      cout << "StEventReaderMaker: " << nVertex << " dst_vertex" << endl;
+      // Build vertex collection
+      if (doLoad) {
+	StVertex* vtx = NULL;
+	for (i=0; i<nVertex; i++) {
+	  if (vertexMatchIndex[i]<0) {
+	    vertexMatchIndex[i] = indexCount;
+	    vtx = new StVertex(&(dstVertex[i]) );
+	    vtx->setIndex((ULong_t)indexCount++);
+	    currentEvent->vertexCollection()->push_back(vtx);
+	    vtxPtr.push_back(vtx);
+	  }
+	}
+	if (vtx) currentEvent->setPrimaryVertex(vtx); // Last vertex is primary?
+      }
     }
+    // *** END VERTEX BUILDING ***
+    
+    dst_track_st* dstTrack = theEventManager->returnTable_dst_track(nTrack);
+    if (dstTrack) {
+      cout << "StEventReaderMaker: " << nTrack << " dst_track" << endl;
+      if (doLoad) {
+	StGlobalTrack* trk = NULL;
+	for (i=0; i<nTrack; i++) {
+	  // Extract fit params: curv, dip, phase, origin
+	  dst_track_st& tktbl = dstTrack[i];
+	  // $$$ get field from somewhere!
+	  double B     = 0.5*tesla;
+	  
+	  //
+	  //   Derive the helix parameter from the variables
+	  //   stored in the table.
+	  //
+	  double dip   = atan(tktbl.tanl);
+	  int    h     = (B*tktbl.icharge > 0 ? -1 : 1);  // -sign(q*B)
+	  double phase = tktbl.psi*degree-h*pi/2;
+	  double pt    = (1./tktbl.invpt)*GeV;
+	  double curvature = fabs(c_light*nanosecond/meter*tktbl.icharge*B/tesla)/(pt/GeV); // in meter^-1	
+	  StThreeVectorF origin(tktbl.x0, tktbl.y0, tktbl.z0);  // in centimeter
+	  
+	  //   Create the track, pass the helix parameter (note h)
+	  trk = new StGlobalTrack(&(dstTrack[i]),
+				  curvature/meter,
+				  dip*radian,
+				  phase*radian,
+				  origin*centimeter,
+				  h);
+	  currentEvent->trackCollection()->push_back(trk);
+	  // add the track to vertex
+	  unsigned long idStartVertex = dstTrack[i].id_start_vertex;
+	  unsigned long idStopVertex = dstTrack[i].id_stop_vertex;
+	  // For now, if start or stop vertex id is zero, assume it is the primary
+	  //  vertex, even though the primary vertex should not be a stop vertex
+	  StVertex* startVertex = 0;
+	  StVertex* stopVertex = 0;
+	  if (idStartVertex == 0) {
+	    startVertex = currentEvent->primaryVertex();
+	  } else {
+	    if ( idStartVertex > 0 && idStartVertex <= vtxPtr.size() ) {
+	      startVertex = vtxPtr[vertexMatchIndex[--idStartVertex]];
+	    } else {
+	      cout << "StEventReaderMaker: WARNING: idStartVertex " << idStartVertex <<
+		" either null or larger than vertex list " << vtxPtr.size() << endl;
+	    }
+	  }
+	  if (idStopVertex == 0) {
+	    stopVertex  = currentEvent->primaryVertex();
+	  } else {
+	    if ( idStopVertex > 0 && idStopVertex <= vtxPtr.size() ) {
+	      stopVertex  = vtxPtr[vertexMatchIndex[--idStopVertex]];
+	    } else {
+	      cout << "StEventReaderMaker: WARNING: idStopVertex " << idStopVertex <<
+		" either null or larger than vertex list " << vtxPtr.size() << endl;
+	    }
+	  }
+	  // Load the appropriate vertex info using the vertex pointer vector
+	  if ( startVertex ) {
+	    trk->setStartVertex(startVertex);
+	    startVertex->daughters().push_back(trk); // Add track to start vtx daughters
+	  }
+	  if ( stopVertex ) {
+	    trk->setStopVertex(stopVertex);
+	    stopVertex->setParent(trk); // Set track as stop vtx
+	  }
+	}
+      }
+    }  
+    
+    dst_track_aux_st* dstTrackAux = theEventManager->returnTable_dst_track_aux(nTrackAux);
+    if (dstTrackAux) {
+      cout << "StEventReaderMaker: " << nTrackAux << " dst_track_aux" << endl;
+      // Add auxiliary info to tracks
+      if (doLoad) {
+	StGlobalTrack* theTrack;
+	StTrackCollection* theTrackCollection = currentEvent->trackCollection();
+	long itrk;
+	for (i=0; i<nTrackAux; i++) {
+	  dst_track_aux_st* theTrackAux = &dstTrackAux[i];
+	  itrk = theTrackAux->id_track-1;
+	  // theTrack = (*theTrackCollection)[itrk]; // id_track isn't filled, apparently
+	  theTrack = (*theTrackCollection)[i]; // Less safe, but with no ID, what else can we do
+	  // Load auxiliary info into track
+	  if (theTrack) {
+	    // $$$ where to put resids. They aren't loaded at present either.
+	    //        = dstTrackAux[i].residuals[0];
+	    //        = dstTrackAux[i].residuals[1];
+	    theTrack->fitTraits().covariantMatrix()(1,2) = 
+	      dstTrackAux[i].covar_off_diag[0];
+	    theTrack->fitTraits().covariantMatrix()(2,1) = 
+	      dstTrackAux[i].covar_off_diag[0];
+	    theTrack->fitTraits().covariantMatrix()(1,3) = 
+	      dstTrackAux[i].covar_off_diag[1];
+	    theTrack->fitTraits().covariantMatrix()(3,1) = 
+	      dstTrackAux[i].covar_off_diag[1];
+	    theTrack->fitTraits().covariantMatrix()(2,3) = 
+	      dstTrackAux[i].covar_off_diag[2];
+	    theTrack->fitTraits().covariantMatrix()(3,2) = 
+	      dstTrackAux[i].covar_off_diag[2];
+	    theTrack->fitTraits().covariantMatrix()(1,4) = 
+	      dstTrackAux[i].covar_off_diag[3];
+	    theTrack->fitTraits().covariantMatrix()(4,1) = 
+	      dstTrackAux[i].covar_off_diag[3];
+	    theTrack->fitTraits().covariantMatrix()(2,4) = 
+	      dstTrackAux[i].covar_off_diag[4];
+	    theTrack->fitTraits().covariantMatrix()(4,2) = 
+	      dstTrackAux[i].covar_off_diag[4];
+	    theTrack->fitTraits().covariantMatrix()(3,4) = 
+	      dstTrackAux[i].covar_off_diag[5];
+	    theTrack->fitTraits().covariantMatrix()(4,3) = 
+	      dstTrackAux[i].covar_off_diag[5];
+	    theTrack->fitTraits().covariantMatrix()(5,1) = 
+	      dstTrackAux[i].covar_off_diag[6];
+	    theTrack->fitTraits().covariantMatrix()(1,5) = 
+	      dstTrackAux[i].covar_off_diag[6];
+	    theTrack->fitTraits().covariantMatrix()(5,2) = 
+	      dstTrackAux[i].covar_off_diag[7];
+	    theTrack->fitTraits().covariantMatrix()(2,5) = 
+	      dstTrackAux[i].covar_off_diag[7];
+	    theTrack->fitTraits().covariantMatrix()(5,3) = 
+	      dstTrackAux[i].covar_off_diag[8];
+	    theTrack->fitTraits().covariantMatrix()(3,5) = 
+	      dstTrackAux[i].covar_off_diag[8];
+	    theTrack->fitTraits().covariantMatrix()(5,4) = 
+	      dstTrackAux[i].covar_off_diag[9];
+	    theTrack->fitTraits().covariantMatrix()(4,5) = 
+	      dstTrackAux[i].covar_off_diag[9];
+	  } else {
+	    cout << "StEventReaderMaker: ERROR: Track find failed for ID " << itrk << endl;
+	  }
+	}
+      }
+    }    
+    
+    dst_dedx_st* dstDedx = theEventManager->returnTable_dst_dedx(nDedx);
+    if (dstDedx) {
+      cout << "StEventReaderMaker: " << nDedx << " dst_dedx" << endl;
+      // Add dedx info to tracks
+      if (doLoad) {
+	StDedx* dedx = NULL;
+	long itrk, idet;
+	StGlobalTrack* theTrack;
+	StTrackCollection* theTrackCollection = currentEvent->trackCollection();
+	for (i=0; i<nDedx; i++) {
+	  dst_dedx_st* theDedx = &dstDedx[i];
+	  dedx = new StDedx(theDedx);
+	  dedx->setNumberOfPointsUsed(theDedx->ndedx);
+	  dedx->setMean(theDedx->dedx[0]);
+	  dedx->setVariance(theDedx->dedx[1]);
+	  dedx->setStatus(theDedx->iflag);
+	  itrk = theDedx->id_track-1;
+	  theTrack = (*theTrackCollection)[itrk];
+	  if (theTrack) {
+	    idet = theDedx->det_id;
+	    if (idet == detid_tpc) {
+	      theTrack->setTpcDedx(dedx);
+	    } else if (idet == detid_ftpcWest || idet == detid_ftpcEast) {
+	      theTrack->setFtpcDedx(dedx);
+	    } else if (idet == detid_svt) {
+	      theTrack->setSvtDedx(dedx);
+	    } else {
+	      cout << "StEventReaderMaker: ERROR: Dedx: Det ID " << idet << 
+		" not recognized" << endl;
+	      delete dedx;
+	      dedx=0;
+	    }
+	  } else {
+	    cout << "StEventReaderMaker: ERROR: Track find failed for ID " << itrk << endl;
+	  }
+	}
+      }
+    }    
+    
+    dst_tof_evt_st* dstTofEvt = theEventManager->returnTable_dst_tof_evt(nTofEvt);
+    if (dstTofEvt) {
+      if (doLoad) {
+      }
+    }    
+    
+    dst_tof_trk_st* dstTofTrk = theEventManager->returnTable_dst_tof_trk(nTofTrk);
+    if (dstTofTrk) {
+      cout << "StEventReaderMaker: " << nTofTrk << " dst_tof_trk" << endl;
+      if (doLoad) {
+      }
+    }    
+    
+    dst_point_st* dstPoint = theEventManager->returnTable_dst_point(nPoint);
+    dst_point_st* thePoint = NULL;  
+    if (dstPoint) {
+      cout << "StEventReaderMaker: " << nPoint << " dst_point" << endl;
+      if (doLoad) {
+	StTpcHit* tpcHit = NULL;
+	StFtpcHit* ftpcHit = NULL;
+	StSvtHit* svtHit = NULL;
+	long idet;
+	for (i=0; i<nPoint; i++) {
+	  thePoint = &(dstPoint[i]);
+	  long itrk = thePoint->id_track-1;
+	  StTrackCollection* theTrackCollection = currentEvent->trackCollection();
+	  StGlobalTrack* theTrack = (*theTrackCollection)[itrk];
+	  if (! theTrack) {
+	    cout << "StEventReaderMaker: ERROR: Track find failed for ID " << itrk << endl;
+	  } else {
+	    // Handle point depending on what detector it comes from
+	    idet = thePoint->hw_position%16;
+	    if (idet == detid_tpc) {
+	      tpcHit = new StTpcHit(thePoint);
+	      currentEvent->tpcHitCollection()->push_back(tpcHit);
+	      theTrack->addTpcHit(tpcHit);
+	    }
+	    else if (idet == detid_svt) {
+	      svtHit = new StSvtHit(thePoint);
+	      currentEvent->svtHitCollection()->push_back(svtHit);
+	      theTrack->addSvtHit(svtHit);
+	    }
+	    else if (idet == detid_ftpcWest || idet == detid_ftpcEast ) {
+	      ftpcHit = new StFtpcHit(thePoint);
+	      currentEvent->ftpcHitCollection()->push_back(ftpcHit);
+	      theTrack->addFtpcHit(ftpcHit);
+	    }
+	    else {
+	      cout << "StEventReaderMaker: ERROR: Detector ID " << idet << " not known" << endl;
+	    }
+	  }
+	}
+      }
+    }    
   }
-  // *** END VERTEX BUILDING ***
-
-  dst_track_st* dstTrack = theEventManager->returnTable_dst_track(nTrack);
-  if (dstTrack) {
-    cout << "StEventReaderMaker: " << nTrack << " dst_track" << endl;
-    if (doLoad) {
-      StGlobalTrack* trk = NULL;
-      for (i=0; i<nTrack; i++) {
-        // Extract fit params: curv, dip, phase, origin
-        dst_track_st& tktbl = dstTrack[i];
-        // $$$ get field from somewhere!
-        double B     = 0.5*tesla;
-
-	//
-	//   Derive the helix parameter from the variables
-	//   stored in the table.
-	//
-        double dip   = atan(tktbl.tanl);
-	int    h     = (B*tktbl.icharge > 0 ? -1 : 1);  // -sign(q*B)
-	double phase = tktbl.psi*degree-h*pi/2;
-        double pt    = (1./tktbl.invpt)*GeV;
-	double curvature = fabs(c_light*nanosecond/meter*tktbl.icharge*B/tesla)/(pt/GeV); // in meter^-1	
-	StThreeVectorF origin(tktbl.x0, tktbl.y0, tktbl.z0);  // in centimeter
-
-	//   Create the track, pass the helix parameter (note h)
-        trk = new StGlobalTrack(&(dstTrack[i]),
-				curvature/meter,
-                                dip*radian,
-				phase*radian,
-				origin*centimeter,
-				h);
-        currentEvent->trackCollection()->push_back(trk);
-        // add the track to vertex
-        unsigned long idStartVertex = dstTrack[i].id_start_vertex;
-        unsigned long idStopVertex = dstTrack[i].id_stop_vertex;
-// For now, if start or stop vertex id is zero, assume it is the primary
-//  vertex, even though the primary vertex should not be a stop vertex
-        StVertex* startVertex = 0;
-        StVertex* stopVertex = 0;
-        if (idStartVertex == 0) {
-          startVertex = currentEvent->primaryVertex();
-        } else {
-          if ( idStartVertex > 0 && idStartVertex <= vtxPtr.size() ) {
-            startVertex = vtxPtr[vertexMatchIndex[--idStartVertex]];
-          } else {
-            cout << "StEventReaderMaker: WARNING: idStartVertex " << idStartVertex <<
-              " either null or larger than vertex list " << vtxPtr.size() << endl;
-          }
-        }
-        if (idStopVertex == 0) {
-          stopVertex  = currentEvent->primaryVertex();
-        } else {
-          if ( idStopVertex > 0 && idStopVertex <= vtxPtr.size() ) {
-            stopVertex  = vtxPtr[vertexMatchIndex[--idStopVertex]];
-          } else {
-            cout << "StEventReaderMaker: WARNING: idStopVertex " << idStopVertex <<
-              " either null or larger than vertex list " << vtxPtr.size() << endl;
-          }
-        }
-        // Load the appropriate vertex info using the vertex pointer vector
-        if ( startVertex ) {
-          trk->setStartVertex(startVertex);
-          startVertex->daughters().push_back(trk); // Add track to start vtx daughters
-        }
-        if ( stopVertex ) {
-          trk->setStopVertex(stopVertex);
-          stopVertex->setParent(trk); // Set track as stop vtx
-        }
-      }
-    }
-  }  
-
-  dst_track_aux_st* dstTrackAux = theEventManager->returnTable_dst_track_aux(nTrackAux);
-  if (dstTrackAux) {
-    cout << "StEventReaderMaker: " << nTrackAux << " dst_track_aux" << endl;
-    // Add auxiliary info to tracks
-    if (doLoad) {
-      StGlobalTrack* theTrack;
-      StTrackCollection* theTrackCollection = currentEvent->trackCollection();
-      long itrk;
-      for (i=0; i<nTrackAux; i++) {
-        dst_track_aux_st* theTrackAux = &dstTrackAux[i];
-        itrk = theTrackAux->id_track-1;
-        // theTrack = (*theTrackCollection)[itrk]; // id_track isn't filled, apparently
-        theTrack = (*theTrackCollection)[i]; // Less safe, but with no ID, what else can we do
-        // Load auxiliary info into track
-        if (theTrack) {
-          // $$$ where to put resids. They aren't loaded at present either.
-          //        = dstTrackAux[i].residuals[0];
-          //        = dstTrackAux[i].residuals[1];
-          theTrack->fitTraits().covariantMatrix()(1,2) = 
-            dstTrackAux[i].covar_off_diag[0];
-          theTrack->fitTraits().covariantMatrix()(2,1) = 
-            dstTrackAux[i].covar_off_diag[0];
-          theTrack->fitTraits().covariantMatrix()(1,3) = 
-            dstTrackAux[i].covar_off_diag[1];
-          theTrack->fitTraits().covariantMatrix()(3,1) = 
-            dstTrackAux[i].covar_off_diag[1];
-          theTrack->fitTraits().covariantMatrix()(2,3) = 
-            dstTrackAux[i].covar_off_diag[2];
-          theTrack->fitTraits().covariantMatrix()(3,2) = 
-            dstTrackAux[i].covar_off_diag[2];
-          theTrack->fitTraits().covariantMatrix()(1,4) = 
-            dstTrackAux[i].covar_off_diag[3];
-          theTrack->fitTraits().covariantMatrix()(4,1) = 
-            dstTrackAux[i].covar_off_diag[3];
-          theTrack->fitTraits().covariantMatrix()(2,4) = 
-            dstTrackAux[i].covar_off_diag[4];
-          theTrack->fitTraits().covariantMatrix()(4,2) = 
-            dstTrackAux[i].covar_off_diag[4];
-          theTrack->fitTraits().covariantMatrix()(3,4) = 
-            dstTrackAux[i].covar_off_diag[5];
-          theTrack->fitTraits().covariantMatrix()(4,3) = 
-            dstTrackAux[i].covar_off_diag[5];
-          theTrack->fitTraits().covariantMatrix()(5,1) = 
-            dstTrackAux[i].covar_off_diag[6];
-          theTrack->fitTraits().covariantMatrix()(1,5) = 
-            dstTrackAux[i].covar_off_diag[6];
-          theTrack->fitTraits().covariantMatrix()(5,2) = 
-            dstTrackAux[i].covar_off_diag[7];
-          theTrack->fitTraits().covariantMatrix()(2,5) = 
-            dstTrackAux[i].covar_off_diag[7];
-          theTrack->fitTraits().covariantMatrix()(5,3) = 
-            dstTrackAux[i].covar_off_diag[8];
-          theTrack->fitTraits().covariantMatrix()(3,5) = 
-            dstTrackAux[i].covar_off_diag[8];
-          theTrack->fitTraits().covariantMatrix()(5,4) = 
-            dstTrackAux[i].covar_off_diag[9];
-          theTrack->fitTraits().covariantMatrix()(4,5) = 
-            dstTrackAux[i].covar_off_diag[9];
-        } else {
-          cout << "StEventReaderMaker: ERROR: Track find failed for ID " << itrk << endl;
-        }
-      }
-    }
-  }    
-
-  dst_dedx_st* dstDedx = theEventManager->returnTable_dst_dedx(nDedx);
-  if (dstDedx) {
-    cout << "StEventReaderMaker: " << nDedx << " dst_dedx" << endl;
-    // Add dedx info to tracks
-    if (doLoad) {
-      StDedx* dedx = NULL;
-      long itrk, idet;
-      StGlobalTrack* theTrack;
-      StTrackCollection* theTrackCollection = currentEvent->trackCollection();
-      for (i=0; i<nDedx; i++) {
-        dst_dedx_st* theDedx = &dstDedx[i];
-        dedx = new StDedx(theDedx);
-        dedx->setNumberOfPointsUsed(theDedx->ndedx);
-        dedx->setMean(theDedx->dedx[0]);
-        dedx->setVariance(theDedx->dedx[1]);
-        dedx->setStatus(theDedx->iflag);
-        itrk = theDedx->id_track-1;
-        theTrack = (*theTrackCollection)[itrk];
-        if (theTrack) {
-          idet = theDedx->det_id;
-          if (idet == detid_tpc) {
-            theTrack->setTpcDedx(dedx);
-          } else if (idet == detid_ftpcWest || idet == detid_ftpcEast) {
-            theTrack->setFtpcDedx(dedx);
-          } else if (idet == detid_svt) {
-            theTrack->setSvtDedx(dedx);
-          } else {
-            cout << "StEventReaderMaker: ERROR: Dedx: Det ID " << idet << 
-              " not recognized" << endl;
-            delete dedx;
-            dedx=0;
-          }
-        } else {
-          cout << "StEventReaderMaker: ERROR: Track find failed for ID " << itrk << endl;
-        }
-      }
-    }
-  }    
-
-  dst_tof_evt_st* dstTofEvt = theEventManager->returnTable_dst_tof_evt(nTofEvt);
-  if (dstTofEvt) {
-    if (doLoad) {
-    }
-  }    
-
-  dst_tof_trk_st* dstTofTrk = theEventManager->returnTable_dst_tof_trk(nTofTrk);
-  if (dstTofTrk) {
-    cout << "StEventReaderMaker: " << nTofTrk << " dst_tof_trk" << endl;
-    if (doLoad) {
-    }
-  }    
-
-  dst_point_st* dstPoint = theEventManager->returnTable_dst_point(nPoint);
-  dst_point_st* thePoint = NULL;  
-  if (dstPoint) {
-    cout << "StEventReaderMaker: " << nPoint << " dst_point" << endl;
-    if (doLoad) {
-      StTpcHit* tpcHit = NULL;
-      StFtpcHit* ftpcHit = NULL;
-      StSvtHit* svtHit = NULL;
-      long idet;
-      for (i=0; i<nPoint; i++) {
-        thePoint = &(dstPoint[i]);
-        long itrk = thePoint->id_track-1;
-        StTrackCollection* theTrackCollection = currentEvent->trackCollection();
-        StGlobalTrack* theTrack = (*theTrackCollection)[itrk];
-        if (! theTrack) {
-          cout << "StEventReaderMaker: ERROR: Track find failed for ID " << itrk << endl;
-        } else {
-          // Handle point depending on what detector it comes from
-          idet = thePoint->hw_position%16;
-          if (idet == detid_tpc) {
-            tpcHit = new StTpcHit(thePoint);
-            currentEvent->tpcHitCollection()->push_back(tpcHit);
-            theTrack->addTpcHit(tpcHit);
-          }
-          else if (idet == detid_svt) {
-            svtHit = new StSvtHit(thePoint);
-            currentEvent->svtHitCollection()->push_back(svtHit);
-            theTrack->addSvtHit(svtHit);
-          }
-          else if (idet == detid_ftpcWest || idet == detid_ftpcEast ) {
-            ftpcHit = new StFtpcHit(thePoint);
-            currentEvent->ftpcHitCollection()->push_back(ftpcHit);
-            theTrack->addFtpcHit(ftpcHit);
-          }
-          else {
-            cout << "StEventReaderMaker: ERROR: Detector ID " << idet << " not known" << endl;
-          }
-        }
-      }
-    }
-  }    
-
   // theEventManager->closeEvent();
   return kStOK;
 }
@@ -680,7 +699,7 @@ void St_dst_Maker::setEventManager(StEventManager* mgr)
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_dst_Maker.cxx,v 1.11 1999/05/01 01:49:15 fisyak Exp $\n");
+  printf("* $Id: St_dst_Maker.cxx,v 1.12 1999/05/03 01:39:22 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

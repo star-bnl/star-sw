@@ -1,5 +1,8 @@
-// $Id: StEventManager.cxx,v 1.1 1999/05/01 01:49:14 fisyak Exp $
+// $Id: StEventManager.cxx,v 1.2 1999/05/03 01:39:21 fisyak Exp $
 // $Log: StEventManager.cxx,v $
+// Revision 1.2  1999/05/03 01:39:21  fisyak
+// Remove tables from DST, add access to different makers
+//
 // Revision 1.1  1999/05/01 01:49:14  fisyak
 // Add StRootEvent fill
 //
@@ -69,7 +72,7 @@ StEventManager::~StEventManager()
 ooStatus StEventManager::readRunHeader(dst_run_header_st& table)
 {
   TString nm("dst/run_header");
-//VF  St_dst_run_header *tableWrap = (St_dst_run_header *) dst->Next(nm.Data());
+//VF  St_dst_run_header *tableWrap = (St_dst_run_header *) dst->Next(nm.Data()];
   St_dst_run_header *tableWrap = (St_dst_run_header *) dst[nm.Data()];
   if (tableWrap && tableWrap->GetTable()) {
     table = *(tableWrap->GetTable());
@@ -83,7 +86,7 @@ ooStatus StEventManager::readRunHeader(dst_run_header_st& table)
 ooStatus StEventManager::readRunSummary(dst_run_summary_st& table)
 {
   TString nm = "dst/run_summary";  
-//VF  St_dst_run_summary *tableWrap = (St_dst_run_summary *) dst->Next(nm.Data());
+//VF  St_dst_run_summary *tableWrap = (St_dst_run_summary *) dst->Next(nm.Data()];
   St_dst_run_summary *tableWrap = (St_dst_run_summary *) dst[nm.Data()];
   if (tableWrap && tableWrap->GetTable()) {
     table = *(tableWrap->GetTable());
@@ -97,7 +100,7 @@ ooStatus StEventManager::readRunSummary(dst_run_summary_st& table)
 void StEventManager::readHeader(dst_event_header_st& table)
 {
   TString nm = "dst/event_header";  
-//VF  St_dst_event_header *tableWrap = (St_dst_event_header *) dst->Next(nm.Data());
+//VF  St_dst_event_header *tableWrap = (St_dst_event_header *) dst->Next(nm.Data()];
   St_dst_event_header *tableWrap = (St_dst_event_header *) dst[nm.Data()];
   if (tableWrap) {
     table = *(tableWrap->GetTable());
@@ -108,8 +111,8 @@ void StEventManager::readHeader(dst_event_header_st& table)
 
 ooStatus StEventManager::readTable(dst_TriggerDetectors_st& table)
 {
-  TString nm = "dst/dst_TriggerDetectors";  
-//VF  St_dst_TriggerDetectors *tableWrap = (St_dst_TriggerDetectors *) dst->Next(nm.Data());
+  TString nm = "dst_TriggerDetectors";  
+//VF  St_dst_TriggerDetectors *tableWrap = (St_dst_TriggerDetectors *) dst->Next(nm.Data()];
   St_dst_TriggerDetectors *tableWrap = (St_dst_TriggerDetectors *) dst[nm.Data()];
   if (tableWrap) {
     table = *(tableWrap->GetTable());
@@ -123,7 +126,7 @@ ooStatus StEventManager::readTable(dst_TriggerDetectors_st& table)
 ooStatus StEventManager::readTable(dst_event_summary_st& table)
 {
   TString nm = "dst/event_summary";  
-//VF   St_dst_event_summary *tableWrap = (St_dst_event_summary *) dst->Next(nm.Data());
+//VF   St_dst_event_summary *tableWrap = (St_dst_event_summary *) dst->Next(nm.Data()];
   St_dst_event_summary *tableWrap = (St_dst_event_summary *) dst[nm.Data()];
   if (tableWrap) {
     table = *(tableWrap->GetTable());
@@ -137,7 +140,7 @@ ooStatus StEventManager::readTable(dst_event_summary_st& table)
 ooStatus StEventManager::readTable(dst_monitor_hard_st& table)
 {
   TString nm = "dst/monitor_hard";  
-//VF   St_dst_monitor_hard *tableWrap = (St_dst_monitor_hard *) dst->Next(nm.Data());
+//VF   St_dst_monitor_hard *tableWrap = (St_dst_monitor_hard *) dst->Next(nm.Data()];
   St_dst_monitor_hard *tableWrap = (St_dst_monitor_hard *) dst[nm.Data()];
   if (tableWrap) {
     table = *(tableWrap->GetTable());
@@ -152,7 +155,7 @@ ooStatus StEventManager::readTable(dst_monitor_hard_st& table)
 ooStatus StEventManager::readTable(dst_monitor_soft_st& table)
 {
   TString nm = "dst/monitor_soft";  
-//VF  St_dst_monitor_soft *tableWrap = (St_dst_monitor_soft *) dst->Next(nm.Data());
+//VF  St_dst_monitor_soft *tableWrap = (St_dst_monitor_soft *) dst->Next(nm.Data()];
   St_dst_monitor_soft *tableWrap = (St_dst_monitor_soft *) dst[nm.Data()];
   if (tableWrap) {
     table = *(tableWrap->GetTable());
@@ -166,8 +169,8 @@ ooStatus StEventManager::readTable(dst_monitor_soft_st& table)
 
 ooStatus StEventManager::readTable(particle_st& table)
 {
-  TString nm = "dst/particle";  
-//VF  St_particle *tableWrap = (St_particle *) dst->Next(nm.Data());
+  TString nm = "particle";  
+//VF  St_particle *tableWrap = (St_particle *) dst->Next(nm.Data()];
   St_particle *tableWrap = (St_particle *) dst[nm.Data()];
   if (tableWrap) {
     table = *(tableWrap->GetTable());
@@ -182,7 +185,7 @@ dst_dedx_st* StEventManager::returnTable_dst_dedx(long& nentries)
 {
   dst_dedx_st* table = NULL;
   TString nm = "dst/dst_dedx";  
-//VF  St_dst_dedx *tableWrap = (St_dst_dedx *) dst->Next(nm.Data());
+//VF  St_dst_dedx *tableWrap = (St_dst_dedx *) dst->Next(nm.Data()];
   St_dst_dedx *tableWrap = (St_dst_dedx *) dst[nm.Data()];
   if (tableWrap) {
     table = tableWrap->GetTable();
@@ -198,7 +201,7 @@ dst_point_st* StEventManager::returnTable_dst_point(long& nentries)
 {
   dst_point_st* table = NULL;
   TString nm = "dst/point";  
-//VF  St_dst_point *tableWrap = (St_dst_point *) dst->Next(nm.Data());
+//VF  St_dst_point *tableWrap = (St_dst_point *) dst->Next(nm.Data()];
   St_dst_point *tableWrap = (St_dst_point *) dst[nm.Data()];
   if (tableWrap) {
     table = tableWrap->GetTable();
@@ -214,7 +217,7 @@ dst_tof_evt_st* StEventManager::returnTable_dst_tof_evt(long& nentries)
 {
   dst_tof_evt_st* table = NULL;
   TString nm = "dst/dst_tof_evt";  
-//VF  St_dst_tof_evt *tableWrap = (St_dst_tof_evt *) dst->Next(nm.Data());
+//VF  St_dst_tof_evt *tableWrap = (St_dst_tof_evt *) dst->Next(nm.Data()];
   St_dst_tof_evt *tableWrap = (St_dst_tof_evt *) dst[nm.Data()];
   if (tableWrap) {
     table = tableWrap->GetTable();
@@ -230,7 +233,7 @@ dst_tof_trk_st* StEventManager::returnTable_dst_tof_trk(long& nentries)
 {
   dst_tof_trk_st* table = NULL;
   TString nm = "dst/dst_tof_trk";  
-//  St_dst_tof_trk *tableWrap = (St_dst_tof_trk *) dst->Next(nm.Data());
+//  St_dst_tof_trk *tableWrap = (St_dst_tof_trk *) dst->Next(nm.Data()];
   St_dst_tof_trk *tableWrap = (St_dst_tof_trk *) dst[nm.Data()];
   if (tableWrap) {
     table = tableWrap->GetTable();
@@ -247,7 +250,7 @@ dst_track_st* StEventManager::returnTable_dst_track(long& nentries)
   dst_track_st* table = NULL;
   St_dst_track *tableWrap;
   TString nm = "dst/globtrk";  
-//  tableWrap = (St_dst_track *) dst->Next(nm.Data());
+//  tableWrap = (St_dst_track *) dst->Next(nm.Data()];
   tableWrap = (St_dst_track *) dst[nm.Data()];
   if (tableWrap) {
     table = tableWrap->GetTable();
@@ -264,7 +267,7 @@ dst_track_aux_st* StEventManager::returnTable_dst_track_aux(long& nentries)
 {
   dst_track_aux_st* table = NULL;
   TString nm = "dst/globtrk_aux";  
-//VF  St_dst_track_aux *tableWrap = (St_dst_track_aux *) dst->Next(nm.Data());
+//VF  St_dst_track_aux *tableWrap = (St_dst_track_aux *) dst->Next(nm.Data()];
   St_dst_track_aux *tableWrap = (St_dst_track_aux *) dst[nm.Data()];
   if (tableWrap) {
     table = tableWrap->GetTable();
@@ -280,7 +283,7 @@ dst_vertex_st* StEventManager::returnTable_dst_vertex(long& nentries)
 {
   dst_vertex_st* table = NULL;
   TString nm = "dst/vertex";  
-//VF  St_dst_vertex *tableWrap = (St_dst_vertex *) dst->Next(nm.Data());
+//VF  St_dst_vertex *tableWrap = (St_dst_vertex *) dst->Next(nm.Data()];
   St_dst_vertex *tableWrap = (St_dst_vertex *) dst[nm.Data()];
   if (tableWrap) {
     table = tableWrap->GetTable();
@@ -296,7 +299,7 @@ dst_v0_vertex_st* StEventManager::returnTable_dst_v0_vertex(long& nentries)
 {
   dst_v0_vertex_st* table = NULL;
   TString nm = "dst/dst_v0_vertex";  
-//VF  St_dst_v0_vertex *tableWrap = (St_dst_v0_vertex *) dst->Next(nm.Data());
+//VF  St_dst_v0_vertex *tableWrap = (St_dst_v0_vertex *) dst->Next(nm.Data()];
   St_dst_v0_vertex *tableWrap = (St_dst_v0_vertex *) dst[nm.Data()];
   if (tableWrap) {
     table = tableWrap->GetTable();
@@ -312,7 +315,7 @@ dst_xi_vertex_st* StEventManager::returnTable_dst_xi_vertex(long& nentries)
 {
   dst_xi_vertex_st* table = NULL;
   TString nm = "dst/dst_xi_vertex";  
-//VF  St_dst_xi_vertex *tableWrap = (St_dst_xi_vertex *) dst->Next(nm.Data());
+//VF  St_dst_xi_vertex *tableWrap = (St_dst_xi_vertex *) dst->Next(nm.Data()];
   St_dst_xi_vertex *tableWrap = (St_dst_xi_vertex *) dst[nm.Data()];
   if (tableWrap) {
     table = tableWrap->GetTable();
