@@ -4,10 +4,10 @@
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f112/top.html 
 //
-// $Id: StCL.cxx,v 1.3 1999/09/29 01:03:12 fine Exp $
+// $Id: StCL.cxx,v 1.4 1999/09/29 02:30:48 fine Exp $
 // $Log: StCL.cxx,v $
-// Revision 1.3  1999/09/29 01:03:12  fine
-// comment problem fixed
+// Revision 1.4  1999/09/29 02:30:48  fine
+// Change return type from void to float/double
 //
 // Revision 1.2  1999/09/29 00:31:49  fine
 // RMath class has been repleaced with StCL one
@@ -512,8 +512,49 @@ end_html
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ClassImp(StCL)
+#define StCL_MXMAD(n_,a,b,c,i,j,k)                       \
+    /* Local variables */                                \
+    int l, m, n, ia, ic, ib, ja, jb, iia, iib, ioa, iob; \
+                                                         \
+    /* Parameter adjustments */                          \
+    --a;  --b;  --c;                                     \
+    /* Function Body */                                  \
+/*                      MXMAD MXMAD1 MXMAD2 MXMAD3 MXMPY MXMPY1 MXMPY2 MXMPY3 MXMUB MXMUB1 MXMUB2 MXMUB3 */ \
+/*  const int iandj1[] = {21,   22,    23,    24,   11,    12,    13,    14,    31,   32,   33,    34 }; */ \
+    const int iandj1[] = {2,    2 ,    2 ,    2 ,   1 ,    1 ,    1 ,    1 ,    3 ,   3 ,   3 ,    3  }; \
+    const int iandj2[] = { 1,    2,     3,     4,    1,     2,     3,     4,     1,    2,    3,     4 }; \
+    int n1 = iandj1[n_];                                  \
+    int n2 = iandj2[n_];                                  \
+    if (i == 0 || k == 0) return 0;                       \
+                                                          \
+    switch (n2) {                                         \
+      case 1: iia = 1; ioa = j; iib = k; iob = 1; break;  \
+      case 2: iia = 1; ioa = j; iib = 1; iob = j; break;  \
+      case 3: iia = i; ioa = 1; iib = k; iob = 1; break;  \
+      case 4: iia = i; ioa = 1; iib = 1; iob = j; break;  \
+    };                                                    \
+                                                          \
+    ia = 1; ic = 1;                                       \
+    for (l = 1; l <= i; ++l) {                            \
+	    ib = 1;                                           \
+	    for (m = 1; m <= k; ++m,++ic) {                   \
+	      switch (n1) {                                   \
+		      case 1:  c[ic] = 0.;      break;            \
+		      case 3:  c[ic] = -c[ic];  break;            \
+	      };                                              \
+	      if (j == 0) continue;                           \
+	      ja = ia; jb = ib;                               \
+          double cic = c[ic];                             \
+	      for (n = 1; n <= j; ++n, ja+=iia, jb+=iib)      \
+		       cic += a[ja] * b[jb];                      \
+          c[ic] = cic;                                    \
+	      ib += iob;                                      \
+	    }                                                 \
+	    ia += ioa;                                        \
+    }
+
 //___________________________________________________________________________
-void StCL::mxmad_0_(int n_, float *a, float *b, float *c, int i, int j, int k)
+float *StCL::mxmad_0_(int n_, float *a, float *b, float *c, int i, int j, int k)
 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* begin_html 
@@ -814,110 +855,57 @@ height=7 src="gif/tcpack_files/img37.gif" width=6> <BR>
 end_html 
 */
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /* Local variables */
-    int l, m, n, ia, ic, ib, ja, jb, iia, iib, ioa, iob;
-
-/* CERN PROGLIB# F110    MXMAD           .VERSION KERNFOR  1.0   650809 */
-/* ORIG. 01/01/64 RKB */
-
-    /* Parameter adjustments */
-    --a;  --b;  --c;
-    /* Function Body */
-//                      MXMAD MXMAD1 MXMAD2 MXMAD3 MXMPY MXMPY1 MXMPY2 MXMPY3 MXMUB MXMUB1 MXMUB2 MXMUB3
-//  const int iandj1[] = {21,   22,    23,    24,   11,    12,    13,    14,    31,   32,   33,    34 };
-    const int iandj1[] = {2,    2 ,    2 ,    2 ,   1 ,    1 ,    1 ,    1 ,    3 ,   3 ,   3 ,    3  };
-    const int iandj2[] = { 1,    2,     3,     4,    1,     2,     3,     4,     1,    2,    3,     4 };
-    int n1 = iandj1[n_];
-    int n2 = iandj2[n_];
-    if (i == 0 || k == 0) return;
-    
-    switch (n2) {
-	    case 1: iia = 1; ioa = j; iib = k; iob = 1; break;
-      case 2: iia = 1; ioa = j; iib = 1; iob = j; break;
-	    case 3: iia = i; ioa = 1; iib = k; iob = 1; break;
-      case 4: iia = i; ioa = 1; iib = 1; iob = j; break;
-    };
-
-    ia = 1; ic = 1;
-    double cic;
-    for (l = 1; l <= i; ++l) {
-	    ib = 1;
-	    for (m = 1; m <= k; ++m,++ic) {
-	    switch (n1) {
-		    case 1:  c[ic] = 0.;     break;
-		    case 3:  c[ic] = -c[ic]; break;
-	    };
-	    if (j == 0) continue;
-	    ja = ia; jb = ib;
-      cic = double(c[ic]);
-	    for (n = 1; n <= j; ++n, ja+=iia, jb+=iib) 
-		    cic += a[ja] * b[jb];
-      c[ic] = float(cic);
-	    ib += iob;
-	 }
-	 ia += ioa;
- }
- return;
+  StCL_MXMAD(n_,a,b,c,i,j,k)
+  return c;
 } /* mxmad_ */
-
-#define StCL_mxmad(n_,a,b,c,i,j,k)                       \
-    /* Local variables */                                \
-    int l, m, n, ia, ic, ib, ja, jb, iia, iib, ioa, iob; \
-                                                         \
-    /* Parameter adjustments */                          \
-    --a;  --b;  --c;                                     \
-    /* Function Body */                                  \
-/*                      MXMAD MXMAD1 MXMAD2 MXMAD3 MXMPY MXMPY1 MXMPY2 MXMPY3 MXMUB MXMUB1 MXMUB2 MXMUB3 */ \
-/*  const int iandj1[] = {21,   22,    23,    24,   11,    12,    13,    14,    31,   32,   33,    34 }; */ \
-    const int iandj1[] = {2,    2 ,    2 ,    2 ,   1 ,    1 ,    1 ,    1 ,    3 ,   3 ,   3 ,    3  }; \
-    const int iandj2[] = { 1,    2,     3,     4,    1,     2,     3,     4,     1,    2,    3,     4 }; \
-    int n1 = iandj1[n_];                                  \
-    int n2 = iandj2[n_];                                  \
-    if (i == 0 || k == 0) return 0;                       \
-                                                          \
-    switch (n2) {                                         \
-      case 1: iia = 1; ioa = j; iib = k; iob = 1; break;  \
-      case 2: iia = 1; ioa = j; iib = 1; iob = j; break;  \
-      case 3: iia = i; ioa = 1; iib = k; iob = 1; break;  \
-      case 4: iia = i; ioa = 1; iib = 1; iob = j; break;  \
-    };                                                    \
-                                                          \
-    ia = 1; ic = 1;                                       \
-    for (l = 1; l <= i; ++l) {                            \
-	    ib = 1;                                           \
-	    for (m = 1; m <= k; ++m,++ic) {                   \
-	      switch (n1) {                                   \
-		      case 1:  c[ic] = 0.;      break;            \
-		      case 3:  c[ic] = -c[ic];  break;            \
-	      };                                              \
-	      if (j == 0) continue;                           \
-	      ja = ia; jb = ib;                               \
-	      for (n = 1; n <= j; ++n, ja+=iia, jb+=iib)      \
-		      c[ic] += a[ja] * b[jb];                     \
-	      ib += iob;                                      \
-	    }                                                 \
-	    ia += ioa;                                        \
-    }
 
 //___________________________________________________________________________
 double *StCL::mxmad_0_(int n_, double *a, double *b, double *c, int i, int j, int k)
 {
-   StCL_mxmad(n_,a,b,c,i,j,k)
+   StCL_MXMAD(n_,a,b,c,i,j,k)
    return c;
 } /* mxmad_ */
 
+#undef StCL_MXMAD
+
 //___________________________________________________________________________
-void StCL::mxmlrt_0_(int n__, float *a, float *b, float *c, int ni,int nj)
+//
+//             Matrix Multiplication 
+//___________________________________________________________________________
+
+#define StCL_MXMLRT( n__, a, b, c,  ni,nj) \
+  if (ni <= 0 || nj <= 0) return 0;        \
+  double x;                                \
+  int ia, ib, ic, ja, kc, ii, jj, kj, ki, ia1, ib1, ic1, ja1; \
+  int ipa = 1;  int jpa = nj;              \
+  if (n__ == 1) { ipa = ni;  jpa = 1; }    \
+                                           \
+  --a;  --b;  --c;                         \
+                                           \
+  ic1 = 1;  ia1 = 1;                       \
+  for (ii = 1; ii <= ni; ++ii, ic1+=ni, ia1+=jpa) { \
+    ic = ic1;                                       \
+    for (kc = 1; kc <= ni; ++kc,ic++) c[ic] = 0.;   \
+    ib1 = 1;  ja1 = 1;                              \
+    for (jj = 1; jj <= nj; ++jj,++ib1,ja1 += ipa) { \
+      ib = ib1;  ia = ia1;                          \
+      x = 0.;                                       \
+      for (kj = 1;kj <= nj;++kj,ia+=ipa,ib += nj)   \
+		    x += a[ia] * b[ib];	                    \
+      ja = ja1;  ic = ic1;                          \
+      for (ki = 1; ki <= ni; ++ki,++ic,ja += jpa)   \
+		    c[ic] += x * a[ja];	                    \
+    }                                               \
+  }
+
+//___________________________________________________________________________
+float *StCL::mxmlrt_0_(int n__, float *a, float *b, float *c, int ni,int nj)
 {
  // Matrix Multiplication 
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/tcpack_files/img31.gif"> </P> End_Html // 
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/tcpack_files/img32.gif"> </P> End_Html // 
  // CERN PROGLIB# F110    MXMLRT          .VERSION KERNFOR  2.00  720707
  // ORIG. 01/01/64 RKB 
-
-  /* Local variables */
-  float x;
-  int ia, ib, ic, ja, kc, ii, jj, kj, ki, ia1, ib1, ic1, ja1;
 
 
 
@@ -932,13 +920,6 @@ void StCL::mxmlrt_0_(int n__, float *a, float *b, float *c, int ni,int nj)
 /*        OR   CALL MXMPY1 (B,A,Y,NJ,NJ,NI) */
 /*             CALL MXMPY (A,Y,C,NI,NJ,NI) */
 
-    /* Parameter adjustments to use indeces from "1" */
-  --a;  --b;  --c;
-
-  /* Function Body */
-  int ipa = 1;
-  int jpa = nj;
-  if (n__ == 1) { ipa = ni;  jpa = 1; }
 
 // --                C = A*(I,J) X B(J,J) X A(J,I) 
 // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/tcpack_files/img32.gif"> </P> End_Html // 
@@ -949,67 +930,39 @@ void StCL::mxmlrt_0_(int n__, float *a, float *b, float *c, int ni,int nj)
 
 //        OR   CALL MXMPY (B,A,Y,NJ,NJ,NI) 
 //             CALL MXMPY2 (A,Y,C,NI,NJ,NI)
-
-  if (ni <= 0 || nj <= 0) return;
-    
-  ic1 = 1;  ia1 = 1;
-  for (ii = 1; ii <= ni; ++ii, ic1+=ni, ia1+=jpa) {
-    ic = ic1;
-    for (kc = 1; kc <= ni; ++kc,ic++) c[ic] = (float)0.;
-    ib1 = 1;  ja1 = 1;
-    for (jj = 1; jj <= nj; ++jj,++ib1,ja1 += ipa) {
-      ib = ib1;  ia = ia1;
-      x = (float)0.;
-      for (kj = 1;kj <= nj;++kj,ia+=ipa,ib += nj) 
-		    x += a[ia] * b[ib];	    
-      ja = ja1;  ic = ic1;
-      for (ki = 1; ki <= ni; ++ki,++ic,ja += jpa) 
-		    c[ic] += x * a[ja];	    
-    }
-  }
-  return;
+  StCL_MXMLRT( n__, a, b, c,  ni,nj)
+  return c;
 } /* mxmlrt_ */
 
 //___________________________________________________________________________
-void StCL::mxmlrt_0_(int n__, double *a, double *b, double *c, int ni,int nj)
+double *StCL::mxmlrt_0_(int n__, double *a, double *b, double *c, int ni,int nj)
 {
  // Matrix Multiplication (double precision)
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/tcpack_files/img31.gif"> </P> End_Html // 
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/tcpack_files/img32.gif"> </P> End_Html // 
-  /* Local variables */
-  double x;
-  int ia, ib, ic, ja, kc, ii, jj, kj, ki, ia1, ib1, ic1, ja1;
 
-    /* Parameter adjustments to use indeces from "1" */
-  --a;  --b;  --c;
+  StCL_MXMLRT( n__, a, b, c,  ni,nj)
+  return c;
 
-  /* Function Body */
-  int ipa = 1;  int jpa = nj;
-  if (n__ == 1) { ipa = ni;  jpa = 1; }
-
-  if (ni <= 0 || nj <= 0) 	return;
-    
-  ic1 = 1;  ia1 = 1;
-  for (ii = 1; ii <= ni; ++ii, ic1+=ni, ia1+=jpa) {
-    ic = ic1;
-    for (kc = 1; kc <= ni; ++kc,ic++) c[ic] = (double)0.;
-    ib1 = 1; ja1 = 1;
-    for (jj = 1; jj <= nj; ++jj,++ib1,ja1 += ipa) {
-      ib = ib1;  ia = ia1;
-      x = 0.;
-      for (kj = 1;kj <= nj;++kj,ia+=ipa,ib += nj) 
-		    x += a[ia] * b[ib];	    
-      ja = ja1; ic = ic1;
-      for (ki = 1; ki <= ni; ++ki,++ic,ja += jpa) 
-		    c[ic] += x * a[ja];	    
-    }
-  }
-  return;
 } /* mxmlrt_ */
 
+#undef StCL_MXMLRT
 
 //___________________________________________________________________________
-void StCL::mxtrp(float *a, float *b, int i, int j)
+//
+//             Matrix Transposition 
+//___________________________________________________________________________
+
+#define StCL_MXTRP(a, b, i, j)    \
+  if (i == 0 || j == 0) return 0; \
+  --b;  --a;                      \
+  int ib = 1;                     \
+  for (int k = 1; k <= j; ++k)    \
+  { int ia = k;                   \
+    for (int l = 1; l <= i; ++l,ia += j,++ib) b[ib] = a[ia]; }
+
+//___________________________________________________________________________
+float *StCL::mxtrp(float *a, float *b, int i, int j)
 {
 //
 //  Matrix Transposition 
@@ -1017,39 +970,23 @@ void StCL::mxtrp(float *a, float *b, int i, int j)
 // CERN PROGLIB# F110    MXTRP           .VERSION KERNFOR  1.0   650809 
 // ORIG. 01/01/64 RKB 
 
-  /* Parameter adjustments */
-  --b;  --a;
-  if (i == 0 || j == 0) return;
-
-  int ib = 1;
-  for (int k = 1; k <= j; ++k) 
-  {
-    int ia = k;
-    for (int l = 1; l <= i; ++l,ia += j,++ib) b[ib] = a[ia];
-  }
+  StCL_MXTRP(a, b, i, j)
+  return b;
 } /* mxtrp */
 
 //___________________________________________________________________________
-void StCL::mxtrp(double *a, double *b, int i, int j)
+double *StCL::mxtrp(double *a, double *b, int i, int j)
 {
 //  Matrix Transposition (double precision)
 // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/tcpack_files/img29.gif"> </P> End_Html // 
 // CERN PROGLIB# F110    MXTRP           .VERSION KERNFOR  1.0   650809 
 // ORIG. 01/01/64 RKB 
 
-  /* Parameter adjustments */
-  --b;  --a;
-  /* Function Body */
-  if (i == 0 || j == 0) return;
+  StCL_MXTRP(a, b, i, j)
+  return b;
 
-  int ib = 1;
-  for (int k = 1; k <= j; ++k) 
-  {
-    int ia = k;
-    for (int l = 1; l <= i; ++l,ia += j,++ib) b[ib] = a[ia];
-  }
 } /* mxtrp */
-
+#undef StCL_MXTRP
 
 //___________________________________________________________________________
 //___________________________________________________________________________
@@ -1559,11 +1496,11 @@ float *StCL::traat(float *a, float *s, int m, int n)
      iat = 0;
      for (j = 1; j <= i; ++j) {
        ia = ipiv;
-       sum = (float)0.;
+       sum = 0.;
        do {
-          ++ia;  ++iat;
-           sum += a[ia] * a[iat]; }
-       while (ia < ipivn);
+         ++ia;  ++iat;
+         sum += a[ia] * a[iat]; 
+       } while (ia < ipivn);
        ++is;
        s[is] = sum;
      }
@@ -1593,26 +1530,23 @@ float *StCL::tral(float *a, float *u, float *b, int m, int n)
     ib = 1;
 
     for (i = 1; i <= m; ++i) {
-	indu = 0;
+	  indu = 0;
 
-	for (j = 1; j <= n; ++j) {
+  	  for (j = 1; j <= n; ++j) {
 	    indu += j;
 	    ia = ib;
 	    iu = indu;
 	    sum = 0.;
 
 	    for (k = j; k <= n; ++k) {
-		sum += a[ia] * u[iu];
-		++ia;
-/* L30: */
-		iu += k;
+		  sum += a[ia] * u[iu];
+		  ++ia;
+		  iu += k;
 	    }
 	    b[ib] = sum;
-/* L40: */
 	    ++ib;
-	}
+	  }
     }
-
     return 0;
 } /* tral_ */
 
@@ -1639,17 +1573,17 @@ float *StCL::tralt(float *a, float *u, float *b, int m, int n)
     do {
       iu = indu;
       for (j = 1; j <= n; ++j) {
- 	ia = ib;
-	sum = (float)0.;
+ 	    ia = ib;
+	    sum = 0.;
 
-	for (k = j; k <= n; ++k) {
+ 	    for (k = j; k <= n; ++k) {
           sum += a[ia] * u[iu];
           --ia;
           --iu;
-	}
-	b[ib] = sum;
-	--ib;
-     } 
+	    }
+	    b[ib] = sum;
+	    --ib;
+      } 
     } while (ib > 0);
 
     ++b; // restore b;
@@ -1684,29 +1618,23 @@ float *StCL::tras(float *a, float *s, float *b, int m, int n)
       ib = i__ + 1;
 
       for (j = 1; j <= m; ++j) {
-	is = inds;
-	sum = 0.;
-	k = 0;
+	    is = inds;
+	    sum = 0.;
+	    k = 0;
 
-L10:
-	if (k > i__) 	    goto L20;
-	++is;
-	goto L30;
-L20:
-	is += k;
-L30:
-	++ia;
-	sum += a[ia] * s[is];
-	++k;
-	if (k < n) 	    goto L10;
+        do {
+	      if (k > i__) is += k;
+	      else        ++is;
+ 	      ++ia;
+	      sum += a[ia] * s[is];
+	      ++k;
+	    } while (k < n);
 
-	b[ib] = sum;
-/* L40: */
-	ib += n;
+	    b[ib] = sum;
+	    ib += n;
       }
       ++i__;
-      } while (i__ < n);
-
+    } while (i__ < n);
     ++b;
     return b;
 } /* tras_ */
@@ -1782,22 +1710,19 @@ float *StCL::trata(float *a, float *r__, int m, int n)
     ir = 0;
 
     for (i__ = 1; i__ <= m; ++i__) {
-
-	for (j = 1; j <= i__; ++j) {
+	  for (j = 1; j <= i__; ++j) {
 	    ia = i__;
 	    iat = j;
-
-	    sum = (float)0.;
-            do {
+	    sum = 0.;
+        do {
 	      sum += a[ia] * a[iat];
 	      ia +=  m;
 	      iat += m;
 	    } while  (ia <= mn);
 	    ++ir;
 	    r__[ir] = sum;
-	}
+	  }
     }
-
     return 0;
 } /* trata_ */
 
@@ -1817,31 +1742,29 @@ float *StCL::trats(float *a, float *s, float *b, int m, int n)
 
     /* Function Body */
     ib = 0;    inds = 0;    i__ = 0;
-
     do {
       inds += i__;
       ib = i__ + 1;
 
       for (j = 1; j <= m; ++j) {
-	ia = j;
-	is = inds;
-	sum = (float)0.;
-	k = 0;
+	    ia = j;
+	    is = inds;
+	    sum = 0.;
+	    k = 0;
 
         do {
-	  if (k > i__) is += k;
+	      if (k > i__) is += k;
           else         ++is;
-	  sum += a[ia] * s[is];
-	  ia += m;
-	  ++k;
-	} while (k < n);
+	      sum += a[ia] * s[is];
+	      ia += m;
+	      ++k;
+	    } while (k < n);
 
-	b[ib] = sum;
-	ib += n;
+	    b[ib] = sum;
+	    ib += n;
       }
       ++i__;
     } while (i__ < n);
-
     return 0;
 } /* trats_ */
 
@@ -1874,25 +1797,25 @@ float *StCL::trats(float *a, float *s, float *b, int m, int n)
       ir = 0;
 
       for (j = 1; j <= m; ++j) {
-	is = ind;
-	ia = j;
-	sum = (float)0.;
-	k = 0;
+	    is = ind;
+	    ia = j;
+	    sum = 0.;
+	    k = 0;
 
-       do {
-	  if (k > i__) is += k;
-	  else         ++is;
-	  sum += s[is] * a[ia];
-	  ia += m;
-	  ++k;
-	} while  (k < n);
-	iaa = i__ * m;
+        do {
+	      if (k > i__) is += k;
+	      else         ++is;
+	      sum += s[is] * a[ia];
+	      ia += m;
+	      ++k;
+	    } while  (k < n);
+	    iaa = i__ * m;
 
-	for (k = 1; k <= j; ++k) {
-	    ++iaa;
-	    ++ir;
-	    r__[ir] += sum * a[iaa];
-	}
+	    for (k = 1; k <= j; ++k) {
+	      ++iaa;
+	      ++ir;
+	      r__[ir] += sum * a[iaa];
+	    }
       }
       ++i__;
     } while (i__ < n);
@@ -1930,27 +1853,27 @@ float *StCL::trchlu(float *a, float *b, int n)
       r__ = a[ipiv];
 
       for (j = i__; j <= n; ++j) {
-	sum = 0.;
-	if (i__ == 1) 	    goto L40;
-	if (r__ == 0.)      goto L42;
-	id = ipiv - i__ + 1;
-	kd = kpiv - i__ + 1;
+	    sum = 0.;
+	    if (i__ == 1) 	    goto L40;
+	    if (r__ == 0.)      goto L42;
+	    id = ipiv - i__ + 1;
+	    kd = kpiv - i__ + 1;
 
         do {
-	  sum += b[kd] * b[id];
-	  ++kd;	  ++id;
-	} while (id < ipiv);
+	      sum += b[kd] * b[id];
+	      ++kd;	  ++id;
+	    } while (id < ipiv);
 
 L40:
-	sum = a[kpiv] - sum;
+	    sum = a[kpiv] - sum;
 L42:
-	if (j != i__) b[kpiv] = sum * r__;
+	    if (j != i__) b[kpiv] = sum * r__;
         else {
-	  dc = TMath::Sqrt(sum);
-	  b[kpiv] = dc;
-	  if (r__ > 0.)  r__ = (float)1. / dc;
+	      dc = TMath::Sqrt(sum);
+	      b[kpiv] = dc;
+	      if (r__ > 0.)  r__ = 1. / dc;
         }
-	kpiv += j;
+	    kpiv += j;
       }
 
     } while  (i__ < n);
@@ -1988,8 +1911,8 @@ L42:
 
       do {
         sum = 0.;
-        if (i__ == n) 	        goto L40;
-        if (r__ == (float)0.) 	goto L42;
+        if (i__ == n)   goto L40;
+        if (r__ == 0.) 	goto L42;
         id = ipiv;
         kd = kpiv;
         nstep = i__;
@@ -2008,7 +1931,7 @@ L42:
         else {
           dc = TMath::Sqrt(sum);
           b[kpiv] = dc;
-          if (r__ > (float)0.) 	r__ = (float)1. / dc;
+          if (r__ > 0.) 	r__ = 1. / dc;
         }
         --kpiv;
       } while (kpiv > ipiv - i__);
@@ -2096,7 +2019,7 @@ L42:
         ia = ib;
         iu = ipiv;
   
-        sum = (float)0.;
+        sum = 0.;
         do {
           sum += a[ia] * u[iu];
           --iu;
@@ -2274,7 +2197,7 @@ float *StCL::trsa(float *s, float *a, float *b, int m, int n)
       for (j = 1; j <= n; ++j) {
   	    ia = j;
   	    is = inds;
-  	    sum = (float)0.;
+  	    sum = 0.;
   	    k = 0;
   
         do {
@@ -2491,12 +2414,12 @@ double *StCL::traat(double *a, double *s, int m, int n)
      ipivn = ipiv + n;
      iat = 0;
      for (j = 1; j <= i; ++j) {
-       ia = ipiv;
-       sum = (double)0.;
+       ia  = ipiv;
+       sum = 0.;
        do {
-          ++ia;  ++iat;
-           sum += a[ia] * a[iat]; }
-       while (ia < ipivn);
+         ++ia;  ++iat;
+         sum += a[ia] * a[iat]; 
+       } while (ia < ipivn);
        ++is;
        s[is] = sum;
      }
@@ -2526,24 +2449,23 @@ double *StCL::tral(double *a, double *u, double *b, int m, int n)
     ib = 1;
 
     for (i = 1; i <= m; ++i) {
-	indu = 0;
+	  indu = 0;
 
-	for (j = 1; j <= n; ++j) {
+	  for (j = 1; j <= n; ++j) {
 	    indu += j;
 	    ia = ib;
 	    iu = indu;
 	    sum = (double)0.;
 
 	    for (k = j; k <= n; ++k) {
-		sum += a[ia] * u[iu];
-		++ia;
-		iu += k;
+		  sum += a[ia] * u[iu];
+		  ++ia;
+		  iu += k;
 	    }
 	    b[ib] = sum;
 	    ++ib;
-	}
+	  }
     }
-
     return 0;
 } /* tral_ */
 
