@@ -315,7 +315,13 @@ C     fit wasn't succesful, reset all the points
                   n_bad = n_bad + 1
                endif
             enddo
+
+            do i=gtrk(igtrk).nhit-n_bad+1, gtrk(igtrk).nhit
+               gtrk(igtrk).pos(i) = -99
+            enddo
          endif
+
+         
 
          EGR_REFIT_TRACK = STAFCV_OK
       endif

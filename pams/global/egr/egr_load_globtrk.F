@@ -50,7 +50,7 @@ C     Local variables
       RECORD /track_pointers/ gtrk(1)
       
       INTEGER igtrk,sgn,lasthit,firsthit,iglob,itpct,isvtt
-      INTEGER imsg,ipriv
+      INTEGER imsg,ipriv,i,det
       REAL    covar(3,3),bfield
       DATA    imsg /0/
 
@@ -94,42 +94,87 @@ c---<<<<<<<<<<<<<<<<<<<<<<<<
      +     real(2*globtrk(iglob).n_fit_point-2)
       globtrk(iglob).length=9999.9
       if( isvtt .eq. 0) then
-         firsthit = gtrk(igtrk).ipnt(gtrk(igtrk).ntpc)
-         if (firsthit .gt. 0) then
+         firsthit = gtrk(igtrk).pos(gtrk(igtrk).nhit)
+         i = gtrk(igtrk).nhit
+         det = gtrk(igtrk).det(i)        
+         do while (firsthit .lt. 0 .and. det .gt. 1)
+            i = i-1
+            firsthit = gtrk(igtrk).pos(i)
+            det = gtrk(igtrk).det(i)
+         enddo
+         firsthit = gtrk(igtrk).ipnt(i)
+         if( det .eq. 1) then
             globtrk(iglob).x_first(1) = tphit(firsthit).x
             globtrk(iglob).x_first(2) = tphit(firsthit).y
             globtrk(iglob).x_first(3) = tphit(firsthit).z
+         else
+            globtrk(iglob).x_first(1) = -9999.
+            globtrk(iglob).x_first(2) = -9999.
+            globtrk(iglob).x_first(3) = -9999.       
+            
          endif
       else
-         firsthit = gtrk(igtrk).ipnt(gtrk(igtrk).ntpc+1)
-         if (firsthit .gt. 0) then
+         firsthit = gtrk(igtrk).pos(gtrk(igtrk).nhit)
+         i = gtrk(igtrk).nhit
+         det = gtrk(igtrk).det(i)
+         do while (firsthit .lt. 0 .and. det .gt. 2)
+            i = i-1
+            firsthit = gtrk(igtrk).pos(i)
+            det = gtrk(igtrk).det(i)
+         enddo
+         
+         firsthit = gtrk(igtrk).ipnt(i)
+         if( det .eq. 2) then
+            do while (det .eq. 2)
+               i = i-1
+               firsthit = gtrk(igtrk).ipnt(i)
+               det = gtrk(igtrk).det(i)
+            enddo          
+            firsthit =  gtrk(igtrk).ipnt(i+1)
             globtrk(iglob).x_first(1) = svthit(firsthit).x(1)
             globtrk(iglob).x_first(2) = svthit(firsthit).x(2)
             globtrk(iglob).x_first(3) = svthit(firsthit).x(3)
+         elseif( det .eq. 1) then
+            globtrk(iglob).x_first(1) = tphit(firsthit).x
+            globtrk(iglob).x_first(2) = tphit(firsthit).y
+            globtrk(iglob).x_first(3) = tphit(firsthit).z
+         else
+            globtrk(iglob).x_first(1) = -9999.
+            globtrk(iglob).x_first(2) = -9999.
+            globtrk(iglob).x_first(3) = -9999.       
+            
          endif
       endif
 C     Now find last point on track and calculate track length.
       if (firsthit .gt. 0) then
          if (itpct.ne.0) then
             lasthit = gtrk(igtrk).ipnt(1)
-            if (lasthit .gt. 0) then
-               globtrk(iglob).x_last(1) = tphit(lasthit).x
-               globtrk(iglob).x_last(2) = tphit(lasthit).y
-               globtrk(iglob).x_last(3) = tphit(lasthit).z
+            
+            globtrk(iglob).x_last(1) = tphit(lasthit).x
+            globtrk(iglob).x_last(2) = tphit(lasthit).y
+            globtrk(iglob).x_last(3) = tphit(lasthit).z
 C----->>>>  new calculation of .length   S.Margetis
-               gseed = sqrt((globtrk(iglob).x_last(1) 
-     +              - globtrk(iglob).x_first(1))**2 +
-     +              (globtrk(iglob).x_last(2) 
-     +              - globtrk(iglob).x_first(2))**2)
-               
-               gtanl = globtrk(iglob).tanl
-               ginvpt= globtrk(iglob).invpt
-               call egr_trk_length(gseed,gtanl,ginvpt,bfield,glength)
-               globtrk(iglob).length=glength
+            gseed = sqrt((globtrk(iglob).x_last(1) 
+     +           - globtrk(iglob).x_first(1))**2 +
+     +           (globtrk(iglob).x_last(2) 
+     +           - globtrk(iglob).x_first(2))**2)
+            
+            gtanl = globtrk(iglob).tanl
+            ginvpt= globtrk(iglob).invpt
+            call egr_trk_length(gseed,gtanl,ginvpt,bfield,glength)
+            globtrk(iglob).length=glength
 C---  <<<<<<<
-            endif
+            
          else
-            lasthit = gtrk(igtrk).ipnt(gtrk(igtrk).nhit)
+            lasthit = gtrk(igtrk).pos(gtrk(igtrk).nhit)
+            i = gtrk(igtrk).nhit
+            det = gtrk(igtrk).det(i)
+            do while (lasthit .lt. 0 .and. (det .ne. 2))
+               i = i-1
+               lasthit = gtrk(igtrk).pos(i)
+               det = gtrk(igtrk).det(i)
+            enddo
+            lasthit = gtrk(igtrk).ipnt(i)
             if (lasthit .gt. 0) then
                globtrk(iglob).x_last(1) = svthit(lasthit).x(1)
                globtrk(iglob).x_last(2) = svthit(lasthit).x(2)
@@ -148,6 +193,7 @@ C---  <<<<<<<
             endif
          endif
       endif
+
       if( itpct .ne. 0 .and. isvtt .ne. 0) then
          globtrk(iglob).det_id = kTpcSsdSvtIdentifier
          if( ipriv .eq. 0) then
