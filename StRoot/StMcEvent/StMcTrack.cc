@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.6 2000/04/06 08:34:56 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.7 2000/04/06 23:29:10 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.7  2000/04/06 23:29:10  calderon
+ * Store the parent track for all tracks.
+ *
  * Revision 2.6  2000/04/06 08:34:56  calderon
  * Version using the particle table:
  * 1) Constructor for particle_st*
@@ -56,7 +59,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.6 2000/04/06 08:34:56 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.7 2000/04/06 23:29:10 calderon Exp $";
 
 StMcTrack::StMcTrack() 
 {
@@ -112,7 +115,7 @@ void StMcTrack::initToZero()
     mStartVertex  = 0;
     mStopVertex   = 0;
     mParticleDefinition = 0;
-    mGeneratorParent = 0;
+    mParent = 0;
     mIsShower        = 0;
     mGeantId         = 0;
     mPdgId           = 0;
@@ -172,7 +175,7 @@ void StMcTrack::setKey(long val) { mKey = val; }
 
 void StMcTrack::setEventGenLabel(long val) { mEventGenLabel = val; }
 
-void StMcTrack::setGeneratorParent(StMcTrack* val) { mGeneratorParent = val; }
+void StMcTrack::setParent(StMcTrack* val) { mParent = val; }
 
 void StMcTrack::addTpcHit(StMcTpcHit* hit)
 {
