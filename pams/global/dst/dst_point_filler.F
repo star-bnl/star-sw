@@ -88,8 +88,9 @@ CC:  Fill hardware position for hit>>>
                if(tcl_tphit(i).nseq .le. two11) then
                   dst_point(dst_point_h.nok).hw_position =
      1               detid_tpc 
-     2             + two4*tcl_tphit(i).row
-     3             + two20*tcl_tphit(i).nseq
+     2             + two4*int(tcl_tphit(i).row/100)
+     3             + two9*mod(tcl_tphit(i).row,100)
+     4             + two20*tcl_tphit(i).nseq
                else
                   dst_point(dst_point_h.nok).hw_position =
      1               detid_tpc 
