@@ -1,6 +1,6 @@
 #ifndef STSCFBARREL_HH
 #define STSCFBARREL_HH
-# include <stdiostream.h>
+# include <iostream.h>
 # include <stdlib.h>
 # include <math.h>
 # include "scf_am.h"
