@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichTofMuDstMaker.cxx,v 1.5 2002/03/10 17:59:33 dunlop Exp $
+ * $Id: StRichTofMuDstMaker.cxx,v 1.6 2002/03/10 20:28:42 dunlop Exp $
  *
  * Author: Thomas Ullrich, Oct 2000
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichTofMuDstMaker.cxx,v $
+ * Revision 1.6  2002/03/10 20:28:42  dunlop
+ * Tweak logic of removing events
+ *
  * Revision 1.5  2002/03/10 17:59:33  dunlop
  * More clever with removing of RICH collection and pid traits when not wanted.
  *
@@ -398,14 +401,14 @@ bool StRichTofMuDstMaker::accept(StEvent* event)
 	mEventAcceptedRich = false;
     }
     
-// Also check if there is a rich collection
+
     if (event->detectorState(kRichId) && !(event->detectorState(kRichId)->good())) {
 	cout << "Bad rich event: detectorState(kRichId)->good():" << event->detectorState(kRichId)->good() << " time " << event->time() << endl;
 	
 	mEventAcceptedRich = false;
     }
-//    if (!(event->richCollection())) mEventAcceptedRich = false;
-//    if (event->richCollection() && !(event->richCollection()->pixelsPresent())) mEventAcceptedRich = false;
+
+    if (!(mEventAcceptedRich || mEventAcceptedTof)) return false;
     
     
     return true;
