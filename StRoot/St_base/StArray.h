@@ -44,6 +44,7 @@ class StRegistry : public TObject
  protected: 
     static TObjArray *fReg;				// pointer to container of containers
     static TList     *fNon;				// pointer to container of non init containers
+    static Int_t      fFree;
  public:
  StRegistry(){};
  static void Clear();
@@ -53,8 +54,8 @@ class StRegistry : public TObject
  static const char    *GetCollName (Int_t idx );	// get name of cont by index
  static StStrArray    *GetColl (Int_t idx );		// get name of cont by index
  static void  List() ;					// print list of registered conts    
- static ULong_t Ident(ULong_t colidx,ULong_t objidx);
- static void    Ident(ULong_t ident,ULong_t &colidx,ULong_t &objidx);
+ static UInt_t Ident(UInt_t colidx,UInt_t objidx);
+ static void    Ident(UInt_t ident,UInt_t &colidx,UInt_t &objidx);
  static Int_t GetNColl();				// Number of collections
  static void  AddNon(StRefArray *coll);
  static void  Init();
@@ -179,7 +180,7 @@ class StStrArray : public StObjArray {
 protected:
  TString fName;
  TString fIDName;
- ULong_t fIdx;
+ UInt_t fIdx;
 
  void Book(TObject* obj,int idx);
 

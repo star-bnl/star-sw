@@ -1,5 +1,8 @@
-// $Id: StObject.h,v 1.3 1999/10/30 19:36:02 perev Exp $
+// $Id: StObject.h,v 1.4 1999/11/15 23:09:10 perev Exp $
 // $Log: StObject.h,v $
+// Revision 1.4  1999/11/15 23:09:10  perev
+// Streamer for StrArray and auto remove
+//
 // Revision 1.3  1999/10/30 19:36:02  perev
 // Added clone() to StObject
 //
@@ -22,6 +25,7 @@
 #include "TObject.h"
 class StObject : public TObject {
   public:
+  virtual ~StObject();
   virtual void Browse(TBrowser *b);
   static  int Browse(const TObject *This, TBrowser *b);
   virtual Bool_t IsFolder(){return Browse(this,0);};
