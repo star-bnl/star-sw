@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.11 1999/09/12 23:03:04 fisyak Exp $
+// $Id: StV0Maker.cxx,v 1.12 1999/09/16 13:53:08 fisyak Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.12  1999/09/16 13:53:08  fisyak
+// Fix typo in ev0par2 (thanks Matt)
+//
 // Revision 1.11  1999/09/12 23:03:04  fisyak
 // Move parameters into makers
 //
@@ -65,17 +68,17 @@ Int_t StV0Maker::Init(){
   // TPC only cuts
     row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
     row.dca	 =        0.8; // cut on dca between the two tracks ;
-    row.dcav0	 =        0.3; // cut on dca(impact parameter) of V0 from event vertex ;
-    row.dlen	 =        0.6; // cut on dist. of decay from prim. vertex ;
+    row.dcav0	 =        0.7; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dlen	 =        2.0; // cut on dist. of decay from prim. vertex ;
     row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
     row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
-    row.dcapnmin=        0.7; // Min. value of tracks at interaction ;
+    row.dcapnmin=         0.7; // Min. value of tracks at interaction ;
     m_ev0par2->AddAt(&row,0);
     memset(&row,0,m_ev0par2->GetRowSize());
   //SVT only cuts
     row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
     row.dca	 =        0.8; // cut on dca between the two tracks ;
-    row.dcav0	 =        0.7; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dcav0	 =        0.3; // cut on dca(impact parameter) of V0 from event vertex ;
     row.dlen	 =      10000; // cut on dist. of decay from prim. vertex ;
     row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
     row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
