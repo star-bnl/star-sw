@@ -1,5 +1,58 @@
-//  
-
+/***************************************************************************
+ *
+ * $Id: StHelix.cc,v 1.12 2002/04/24 02:40:25 ullrich Exp $
+ *
+ * Author: Thomas Ullrich, Sep 1997
+ ***************************************************************************
+ *
+ * Description: Parametrization of a helix
+ * 
+ ***************************************************************************
+ *
+ * $Log: StHelix.cc,v $
+ * Revision 1.12  2002/04/24 02:40:25  ullrich
+ * Restored old format and lost CVS statements.
+ *
+ * Revision 1.11  2002/02/12 19:37:51  jeromel
+ * fix for Linux 7.2 (float.h). Took oportunity to doxygenize.
+ *
+ * Revision 1.10  2000/07/17 21:44:19  ullrich
+ * Fixed problem in pathLength(cyl_rad).
+ *
+ * Revision 1.9  2000/05/22 21:38:28  ullrich
+ * Add parenthesis to make Linux compiler happy.
+ *
+ * Revision 1.8  2000/05/22 21:11:21  ullrich
+ * In pathLength(StThreeVector&): Increased number of max iteration
+ * in Newton method from 10 to 100. Improved initial guess in case
+ * it is off by n period.
+ *
+ * Revision 1.7  2000/03/06 20:24:25  ullrich
+ * Parameter h for case B=0 correctly handled now.
+ *
+ * Revision 1.6  1999/12/22 15:14:39  ullrich
+ * Added analytical solution for dca between two helices
+ * in the case for B=0.
+ *
+ * Revision 1.5  1999/12/21 15:14:08  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
+ *
+ * Revision 1.4  1999/11/29 21:45:38  fisyak
+ * fix abs for HP
+ *
+ * Revision 1.3  1999/03/07 14:55:41  wenaus
+ * fix scope problem
+ *
+ * Revision 1.2  1999/03/02 19:47:35  ullrich
+ * Added method to find dca between two helices
+ *
+ * Revision 1.1  1999/01/30 03:59:02  fisyak
+ * Root Version of StarClassLibrary
+ *
+ * Revision 1.1  1999/01/23 00:29:15  ullrich
+ * Initial Revision
+ *
+ **************************************************************************/
 #if !defined(ST_NO_NUMERIC_LIMITS)
 #    include <limits>
 #    if !defined(ST_NO_NAMESPACES)
@@ -516,45 +569,3 @@ ostream& operator<<(ostream& os, const StHelix& h)
 }
 
 
-/***************************************************************************
- * $Log: StHelix.cc,v $
- * Revision 1.11  2002/02/12 19:37:51  jeromel
- * fix for Linux 7.2 (float.h). Took oportunity to doxygenize.
- *
- * Revision 1.10  2000/07/17 21:44:19  ullrich
- * Fixed problem in pathLength(cyl_rad).
- *
- * Revision 1.9  2000/05/22 21:38:28  ullrich
- * Add parenthesis to make Linux compiler happy.
- *
- * Revision 1.8  2000/05/22 21:11:21  ullrich
- * In pathLength(StThreeVector&): Increased number of max iteration
- * in Newton method from 10 to 100. Improved initial guess in case
- * it is off by n period.
- *
- * Revision 1.7  2000/03/06 20:24:25  ullrich
- * Parameter h for case B=0 correctly handled now.
- *
- * Revision 1.6  1999/12/22 15:14:39  ullrich
- * Added analytical solution for dca between two helices
- * in the case for B=0.
- *
- * Revision 1.5  1999/12/21 15:14:08  ullrich
- * Modified to cope with new compiler version on Sun (CC5.0).
- *
- * Revision 1.4  1999/11/29 21:45:38  fisyak
- * fix abs for HP
- *
- * Revision 1.3  1999/03/07 14:55:41  wenaus
- * fix scope problem
- *
- * Revision 1.2  1999/03/02 19:47:35  ullrich
- * Added method to find dca between two helices
- *
- * Revision 1.1  1999/01/30 03:59:02  fisyak
- * Root Version of StarClassLibrary
- *
- * Revision 1.1  1999/01/23 00:29:15  ullrich
- * Initial Revision
- *
- **************************************************************************/
