@@ -15,7 +15,7 @@
 #include "cpe_eval.idl"
 #include "cpe_mkine.idl"
 
-interface cpe_am: amiModule {
+interface cpe: amiModule {
         STAFCV_T call
                 ( inout ctg_geo      geo      
                 , inout ctg_slat_phi slat_phi 

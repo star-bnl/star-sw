@@ -13,7 +13,7 @@
 #include "cts_mslat.idl"
 #include "ctu_raw.idl"
 
-interface cts_am: amiModule {
+interface cts: amiModule {
         STAFCV_T call
                 ( inout g2t_ctf_hit  mhit
                 , inout g2t_track    mkine  

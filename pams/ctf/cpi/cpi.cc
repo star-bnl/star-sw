@@ -1,5 +1,5 @@
 /*:>--------------------------------------------------------------------
-**: FILE:       cpi_am.cc
+**: FILE:       cpi.cc
 **: HISTORY:
 **:             03mar97-v0001-cpi- First STAF version     
 **:             26sep97-v0002-cpi- old cpi split in two packages: cte & cpi
@@ -8,8 +8,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <sys/types.h>
-#include "cpi_am.h"
-#define M_1_PI		0.31830988618379067154
+#include "cpi.h"
+#define M_1_PI          0.31830988618379067154
 
 /*------------------------------------------------------------------
       Declarations of routines
@@ -31,15 +31,15 @@ long   globtrk_pointer [GLOBTRK_LEN] ;
 
 
 
-extern "C" long cpi_am_(
+extern "C" long cpi_(
   TABLE_HEAD_ST *para_h,     CPI_PARA_ST     *para ,
   TABLE_HEAD_ST *globtrk_h,  EGR_GLOBTRK_ST  *globtrk ,
   TABLE_HEAD_ST *extra_h,    CTE_EXTRA_ST    *extra ,
   TABLE_HEAD_ST *hypo_pid_h, EPI_HYPO_PID_ST *hypo_pid )
 {
 /*:>--------------------------------------------------------------------
-**: ROUTINE:    cpi_am_
-**: DESCRIPTION: Physics Analysis Module cpi_am.               
+**: ROUTINE:    cpi_
+**: DESCRIPTION: Physics Analysis Module cpi.               
 **:              It gets particle id information from TOF
 **:              and global tracks
 **: AUTHOR:     ppy - P.P. Yepes, yepes@physics.rice.edu       

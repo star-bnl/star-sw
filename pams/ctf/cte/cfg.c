@@ -1,17 +1,17 @@
 /*:>--------------------------------------------------------------------
-**: FILE:       cfg_am.c.template
+**: FILE:       cfg.c.template
 **: HISTORY:
 **:             00jan93-v000a-hpl- Created by stic Version
 **:  Id: idl.y,v 1.8 1996/10/15 18:33:35 ward Exp  
 **:<------------------------------------------------------------------*/
-#include "cfg_am.h"
+#include "cfg.h"
 
-long cfg_am_(
+long cfg_(
   TABLE_HEAD_ST       *tptrack_h,     TPT_TRACK_ST        *tptrack ,
   TABLE_HEAD_ST       *globtrk_h,     EGR_GLOBTRK_ST      *globtrk )
 {
 /*:>--------------------------------------------------------------------
-**: ROUTINE:    cfg_am_
+**: ROUTINE:    cfg_
 **: DESCRIPTION: Fills globtrk table with tptrack table  
 **:  
 **: AUTHOR:     ppy - P.P. Yepes, yepes@physics.rice.edu      

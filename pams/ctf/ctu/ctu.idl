@@ -7,7 +7,7 @@
 #include "ctu_raw.idl"
 #include "ctu_cor.idl"
 
-interface ctu_am: amiModule {
+interface ctu: amiModule {
         STAFCV_T call
                 ( inout ctg_geo      geo
                 , inout ctg_slat     slat
