@@ -107,7 +107,6 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 //Temp, to be moved to own file
 
 
-
 ClassImp(TrackEntry)
     
 TrackEntry::TrackEntry() 
@@ -149,11 +148,13 @@ void TrackEntry::setGlobalTrack(StTrack *newtrack)
 
 void TrackEntry::setStiTrack(StiTrack *newtrack)
 {
+    stiTrackPt = newtrack->getPt();
     /*
-    const StThreeVectorD& mom = newtrack->geometry()->momentum();
-    StiTrackPt = mom.perp();
-    StiTrackQ  = newtrack->geometry()->charge();
-    StiTrackPsi = newtrack->geometry()->psi();*/
+      stiTrackEta = newtrack->
+      const StThreeVectorD& mom = newtrack->geometry()->momentum();
+      StiTrackPt = mom.perp();
+      StiTrackQ  = newtrack->geometry()->charge();
+      StiTrackPsi = newtrack->geometry()->psi();*/
 }
 
 void TrackEntry::setMcTrack(StMcTrack *newtrack)
