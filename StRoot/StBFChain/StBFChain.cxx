@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.251 2001/12/05 15:18:49 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.252 2001/12/06 00:51:49 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -568,8 +568,8 @@ Int_t StBFChain::Instantiate()
 	// special maker options
 	if (mk) {
 	  if (GetOption("pp") ) {// pp specific stuff
-	    if (maker == "StTrsMaker") mk->SetMode(1);
-	    if (maker == "StPrimaryMaker") mk->SetMode(15);
+	    if (maker == "StTrsMaker") mk->SetMode(1);      // Pile-up correction
+	    if (maker == "StPrimaryMaker") mk->SetMode(15); // Switch vertex finder to ppLMV
 	  }
 	  if ((maker == "StPrimaryMaker"  ||
 	       maker == "StPreVertexMaker") &&
