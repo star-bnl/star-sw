@@ -1,8 +1,11 @@
 #! /opt/star/bin/perl
 #
-# $Id: dbrunhpss.pl,v 1.1 1999/07/23 15:08:58 wenaus Exp $
+# $Id: dbrunhpss.pl,v 1.2 1999/08/08 18:56:33 wenaus Exp $
 #
 # $Log: dbrunhpss.pl,v $
+# Revision 1.2  1999/08/08 18:56:33  wenaus
+# Include handling of new name format - WD
+#
 # Revision 1.1  1999/07/23 15:08:58  wenaus
 # Wensheng's script to update DAQ HPSS files in DB
 #
@@ -13,7 +16,7 @@
 #
 # Wensheng Deng 7/99
 #
-# Present run log submission form and content display
+# Update DAQ HPSS file list in database
 #
 # Usage: dbrunhpss.pl
 #
@@ -21,13 +24,15 @@
 use Net::FTP;
 use Class::Struct;
 
+use lib "/star/u2d/wenaus/datadb";
 require "dbsetup.pl";
 
 struct FileAttri => {
-    filename  => '$',
-    nrun      => '$',
-    ctime     => '$',
-    size      => '$',
+    filename      => '$',
+    nameformat    => '$',
+# (1). st_unknown_0002807_dst_0011.daq (2). 990719.3.daq  (3). 990723.2607.01.daq
+    ctime         => '$',
+    size          => '$',
 };
 
 my $debugOn=0;
@@ -50,10 +55,9 @@ $nHpssDirs = 1;
 $theDaqDirs[0] = $ftpDaqHome;
 $checkedDaqDirs[0] = 0;
 $nHpssFiles = 0;
-print "Finding HPSS Daq files\n";
 &walkHpss( $ftpDaq, $ftpDaqHome, \@theDaqDirs,\@checkedDaqDirs,
            \@theDaqFiles, \@theDaqFileSpecs );
-print "Total Daq files in HPSS: ".@theDaqFiles."\n";
+print "Total Daq files in HPSS: ".@theDaqFiles."\n" if $debugOn;
 $ftpDaq->quit();
 
 ## Find the whole RunFile table, files in DB
@@ -66,38 +70,66 @@ $cursor =$dbh->prepare($sql)
 $cursor->execute;
 
 while(@fields = $cursor->fetchrow) {
-    my $cols=$cursor->{NUM_OF_FIELDS};
-    for($i=0;$i<$cols;$i++) {
-        my $fvalue=$fields[$i];
-        my $fname=$cursor->{NAME}->[$i];
-        if ( $fname eq "name") {
-            $theDbFiles[$nDbfiles] = $fvalue;
-            printf "$fname ".$theDbFiles[$nDbfiles]."\n" if $debugOn; 
-            $nDbfiles++;
-        }
-    }
+  my $cols=$cursor->{NUM_OF_FIELDS};
+  for($i=0;$i<$cols;$i++) {
+    my $fvalue=$fields[$i];
+    my $fname=$cursor->{NAME}->[$i];
+    $theDbFiles[$nDbfiles] = $fvalue;
+    printf "$fname ".$theDbFiles[$nDbfiles]."\n" if $debugOn; 
+    $nDbfiles++;
+  }
 }
-print "Total files in RunFile table: ".@theDbFiles."\n";
+print "Total files in RunFile table: ".@theDbFiles."\n" if $debugOn;
 
 ## @theDaqFiles---HPSS files list  @theDbFiles---DB files list 
- HPSSLOOP: foreach $daqEach (@theDaqFiles) {
+ HPSSLOOP: foreach $daqE (@theDaqFiles) {
      foreach $dbEach (@theDbFiles) {
-         if( ($$daqEach)->filename eq $dbEach ) {
+         if( ($$daqE)->filename eq $dbEach ) {
              next HPSSLOOP;
          }
      }
-     $daqEachName = ($$daqEach)->filename;
-     $daqEachNrun = ($$daqEach)->nrun;
-     $daqEachCtime = ($$daqEach)->ctime;
-     $daqEachSize = ($$daqEach)->size;
-     
+     $daqEName     = ($$daqE)->filename;
+     $daqENameForm = ($$daqE)->nameformat;
+     $daqECtime    = ($$daqE)->ctime;
+     $daqESize     = ($$daqE)->size;
+
+     $onlyName =  (split(/\//,$daqEName))[7];
+
+     if ( $daqENameForm == 1 ) {
+       $onlyName =~ m/st_([a-z0-9]+)_([0-9]+)_([a-z0-9]+)_([0-9]+)\.([\.a-z0-9]+)/;
+       $type = $1;
+       if ( $type eq 'pedestal' ) {
+	 $type = substr($type,0,3);
+       }
+       $nrun = $2;
+       $stage = $3;
+       $nseq = $4;
+       $format = $5;
+     } elsif ( $daqENameForm == 2 ) {
+       @onlyNameE = split(/\./, $onlyName);
+       $type = 'unknown';
+       $nrun = $onlyNameE[1];
+       $stage = 'daq';
+       $nseq = 0;
+       $format = $onlyNameE[2];
+     } else {
+       @onlyNameE = split(/\./, $onlyName);
+       $type = 'unknown';     
+       $nrun = $onlyNameE[1];
+       $stage = 'daq';
+       $nseq = $onlyNameE[2];
+       $format = $onlyNameE[3];
+     }
+
      $sql="insert into $RunFileT set ";
-     $sql.="name='".$daqEachName."',";
-     $sql.="nrun=$daqEachNrun,";
-     $sql.="stage='daq',";
-     $sql.="format='daq',";
-     $sql.="ctime=$daqEachCtime,";
-     $sql.="size=$daqEachSize,";
+     $sql.="name='".$daqEName."',";
+     $sql.="type='$type',";
+     $sql.="nrun=$nrun,";
+     $sql.="stage='$stage',";
+     $sql.="nseq=$nseq,";
+     $sql.="format='$format',";
+     $sql.="ctime=$daqECtime,";
+     $sql.="size=$daqESize,";
      $sql.="hpss='Y'";
      print "$sql\n" if $debugOn;
      $rv = $dbh->do($sql) || die $dbh->errstr;
@@ -135,10 +167,18 @@ sub walkHpss {
                     $nHpssDirs++;
                     print "Dir  ".$fullDir."\n" if $debugOn;
                 } else {
-                    $fname = $dirs->[$ii]."/".$name;		  
-                    
+		    $filter1 = ( $name =~ /^st_[a-z0-9]+_[0-9]+_[a-z0-9]+_[0-9]+[\.a-z0-9]+/ );
+		    $filter2 = ( $name =~ /^[0-9]{6}\.[0-9]+\.[a-z]+$/ );
+		    $filter3 = ( $name =~ /^[0-9]{6}\.[0-9]+\.[0-9]+\.[a-z]+$/ );
+                    next if ( !($filter1 || $filter2 || $filter3) );
+
+		    $nameformat = 1 if ( $filter1 );
+		    $nameformat = 2 if ( $filter2 );
+		    $nameformat = 3 if ( $filter3 );
+		  
+                    $fname = $dirs->[$ii]."/".$name;
+		                      
                     @nameE = split(/\./, $name);
-                    $numRun = $nameE[1];
                     
                     @fnameE = split(/\//,$fname);
                     @timeE = split(/:/,$time);
@@ -148,7 +188,7 @@ sub walkHpss {
                     
                     $fObjAdr = \(FileAttri->new());
                     ($$fObjAdr)->filename($fname);
-                    ($$fObjAdr)->nrun($numRun);
+                    ($$fObjAdr)->nameformat($nameformat);
                     ($$fObjAdr)->ctime($cTimeS);
                     ($$fObjAdr)->size($size);
                 
