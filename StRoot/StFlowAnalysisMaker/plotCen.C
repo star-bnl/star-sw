@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.3 2000/09/15 22:52:56 posk Exp $
+// $Id: plotCen.C,v 1.4 2000/09/26 20:54:13 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
 //               Plots a set of histograms with different centrality
-//               starting with anaXX.root given by base run number XX.
+//               starting with anaXX.root given by first run number XX.
 //               Run Number appended to "ana" is entered in the bottom, left box.
 //               Default selN = 1 and harN = 2.
 //               First time type .x plotCen.C() to see the menu.
@@ -17,6 +17,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.4  2000/09/26 20:54:13  posk
+// Updated documentation.
+//
 // Revision 1.3  2000/09/15 22:52:56  posk
 // Added Pt weighting for event plane calculation.
 //
@@ -68,19 +71,24 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
 			     "Flow_VertexXY2D",
 			     "Flow_EtaSymVerZ2D",
 			     "Flow_EtaSym",
+			     "Flow_CTBversusZDC",
+			     "Flow_MeanDedx",
 			     //"Flow_EtaPtPhi3D",
 			     "Flow_EtaPtPhi2D.PhiEta",
                              "Flow_EtaPtPhi2D.PhiPt",
   			     "Flow_YieldAll2D",
   			     "Flow_YieldAll.Eta",
   			     "Flow_YieldAll.Pt",
-  			     "Flow_PidPiPlus",
-  			     "Flow_PidPiMinus",
-  			     "Flow_PidProton",
-  			     "Flow_PidAntiProton",
-  			     "Flow_PidKplus",
-  			     "Flow_PidKminus",
-  			     "Flow_PidDeuteron",
+  			     "Flow_PidPiPlusSel",
+  			     "Flow_PidPiMinusSel",
+  			     "Flow_PidProtonSel",
+  			     "Flow_PidAntiProtonSel",
+  			     "Flow_PidKplusSel",
+  			     "Flow_PidKminusSel",
+  			     "Flow_PidDeuteronSel",
+  			     "Flow_PidAntiDeuteronSel",
+  			     "Flow_PidElectronSel",
+  			     "Flow_PidPositronSel",
   			     "Flow_PidMult",
   			     "Flow_Cent",
    			     //"Flow_Bin_Eta",
@@ -107,7 +115,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
 			     "Flow_vEta_Sel",
 			     "Flow_vPt_Sel"};
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles = 30 + 1;
+  const int nSingles = 35 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -118,12 +126,12 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
     if (cp) *cp = '\0';                                  // truncate
   }
 
-  // input the base run number
+  // input the first run number
   if (runNumber == 0) {
-    cout << "     base run number? ";
+    cout << "     first run number? ";
     cin >> runNumber;
     sprintf(runName, "ana%2d", runNumber);               // add ana prefix
-    cout << " base run name = " << runName << endl;
+    cout << " first run name = " << runName << endl;
 
   // open the files
     for (int n = 0; n < nCens; n++) {
@@ -160,7 +168,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
   pageNumber--;
 
   // set constants
-  float qMax    =     3.5;
+  float qMax    =   3.5;
   float phiMax  = twopi; 
   int   n_qBins =    50;
   TString* histProjName = NULL;
@@ -480,5 +488,5 @@ void plotCenAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
     if (strstr(temp,"y")!=0) c->Print(".ps");
     c->Delete();
   }
-  cout << "  plotAll Done" << endl;
+  cout << "  Done" << endl;
 }

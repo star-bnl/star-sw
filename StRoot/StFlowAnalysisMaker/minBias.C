@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.1 2000/09/26 00:19:43 posk Exp $
+// $Id: minBias.C,v 1.2 2000/09/26 20:54:11 posk Exp $
 //
 // Author:       Sergei Voloshin and Art Poskanzer, Sep. 2000
 // Description:  Macro to add centrality-selected histograms together with
 //               weighting to make a minimum bias result.
 //               Uses a set of histograms with different centrality
-//               starting with anaXX.root given by base run number XX.
+//               starting with anaXX.root given by first run number XX.
 //               First Run Number appended to "ana" is entered in the box.
 //               Default selN = 1 and harN = 2.
 //               First time type .x minBias.C() to see the menu.
@@ -18,6 +18,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: minBias.C,v $
+// Revision 1.2  2000/09/26 20:54:11  posk
+// Updated documentation.
+//
 // Revision 1.1  2000/09/26 00:19:43  posk
 // New macro to add centrality-selected histograms with proper weights, to make
 // minimum bias histogram.
@@ -52,12 +55,12 @@ TCanvas* minBias(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2) {
 			     "Flow_vPt"};
   const int nNames = sizeof(baseName) / sizeof(char*);
   
-  // input the base run number
+  // input the first run number
   if (runNumber == 0) {
-    cout << "     base run number? ";
+    cout << "     first run number? ";
     cin >> runNumber;
     sprintf(runName, "ana%2d", runNumber);               // add ana prefix
-    cout << " base run name = " << runName << endl;
+    cout << " first run name = " << runName << endl;
     
     // open the files
     for (int n = 0; n < nCens; n++) {
@@ -95,8 +98,8 @@ TCanvas* minBias(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2) {
   cout << " hist name= " << histName->Data() << endl;
   
   // make the graph page
-  TCanvas* c = new TCanvas(baseName[pageNumber],baseName[pageNumber],
-			   canvasWidth,canvasHeight);
+  TCanvas* c = new TCanvas(baseName[pageNumber], baseName[pageNumber],
+			   canvasWidth, canvasHeight);
   c->ToggleEventStatus();
   TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runName);  
   run->Draw();
@@ -176,5 +179,5 @@ void minBiasAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
     if (strstr(temp,"y")!=0) c->Print(".ps");
     c->Delete();
   }
-  cout << "  plotAll Done" << endl;
+  cout << "  Done" << endl;
 }

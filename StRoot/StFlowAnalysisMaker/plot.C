@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.26 2000/09/15 22:52:56 posk Exp $
+// $Id: plot.C,v 1.27 2000/09/26 20:54:12 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -11,12 +11,14 @@
 //               Default hist file is flow.hist.root .
 //               After the first execution, just type plot(N) .
 //               A negative N plots all pages starting with page N.
-//
 //               Place a symbolic link to this file in StRoot/macros/analysis .
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.27  2000/09/26 20:54:12  posk
+// Updated documentation.
+//
 // Revision 1.26  2000/09/15 22:52:56  posk
 // Added Pt weighting for event plane calculation.
 //
@@ -81,7 +83,6 @@ const Int_t nSels    = 2;
 const Int_t nSubs    = 2;
 const Float_t twopi  = 2. * 3.1416;
 const Float_t etaMax = 1.5;
-//const Float_t ptMax  = 2.;
 Int_t runNumber      = 0;
 char  runName[6];
 char  fileNumber[4]  = "x";
@@ -115,19 +116,24 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_VertexXY2D",
 			     "Flow_EtaSymVerZ2D",
 			     "Flow_EtaSym",
+			     "Flow_CTBversusZDC",
+			     "Flow_MeanDedx",
 			     //"Flow_EtaPtPhi3D",
 			     "Flow_EtaPtPhi2D.PhiEta",
                              "Flow_EtaPtPhi2D.PhiPt",
   			     "Flow_YieldAll2D",
   			     "Flow_YieldAll.Eta",
   			     "Flow_YieldAll.Pt",
-  			     "Flow_PidPiPlus",
-  			     "Flow_PidPiMinus",
-  			     "Flow_PidProton",
-  			     "Flow_PidAntiProton",
-  			     "Flow_PidKplus",
-  			     "Flow_PidKminus",
-  			     "Flow_PidDeuteron",
+  			     "Flow_PidPiPlusSel",
+  			     "Flow_PidPiMinusSel",
+  			     "Flow_PidProtonSel",
+  			     "Flow_PidAntiProtonSel",
+  			     "Flow_PidKplusSel",
+  			     "Flow_PidKminusSel",
+  			     "Flow_PidDeuteronSel",
+  			     "Flow_PidAntiDeuteronSel",
+  			     "Flow_PidElectronSel",
+  			     "Flow_PidPositronSel",
   			     "Flow_PidMult",
   			     "Flow_Cent",
    			     //"Flow_Bin_Eta",
@@ -154,7 +160,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_vEta_Sel",
 			     "Flow_vPt_Sel"};
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles = 30 + 1;
+  const int nSingles = 35 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -180,8 +186,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     if (strlen(fileNumber) == 1) {
       sprintf(fileName, "flow.hist.root");
     } else {
-      fileNumber[strlen(fileNumber)-1] = '\0';             // remove CR
-      sprintf(fileName, "ana%s.root", fileNumber);         // insert
+      fileNumber[strlen(fileNumber)-1] = '\0';           // remove CR
+      sprintf(fileName, "ana%s.root", fileNumber);       // insert
     }
     cout << " file name = " << fileName << endl;
     histFile = new TFile(fileName);
@@ -212,7 +218,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   cout << "  graph name= " << shortName[pageNumber] << endl;
 
   // set constants
-  float qMax    =     3.5;
+  float qMax    =   3.5;
   float phiMax  = twopi; 
   int   n_qBins =    50;
   TString* histProjName = NULL;
@@ -230,8 +236,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   } else {
     int canvasWidth = 780, canvasHeight = 600;             // landscape
   }
-  TCanvas* c = new TCanvas(shortName[pageNumber],shortName[pageNumber],
-			   canvasWidth,canvasHeight);
+  TCanvas* c = new TCanvas(shortName[pageNumber], shortName[pageNumber],
+			   canvasWidth, canvasHeight);
   c->ToggleEventStatus();
   if (selN==0) {
     TPaveLabel* title = new TPaveLabel(0.1,0.96,0.9,0.99,shortName[pageNumber]);
