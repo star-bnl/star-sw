@@ -66,6 +66,14 @@
 **:                             tcl handles offset by 1, changing start to 1.
 **:                           * Fix bugs for applying time bucket range limits.
 **:                           
+**:  R.Bossingham  01/27/98   Fixed two bugs encountered by Ken Barish and
+**:                           hunted down by Iwona Sakrejda:
+**:                           * Sequence length was not set for the last
+**:                             time bucket in a sequence for "normal" data.
+**:                           * Threshold was being constrained to be positive;
+**:                             while this is *usual*, it is not necessary.
+**:                             (A warning is still issued, however.)
+**:                           
 **:<------------------------------------------------------------------*/
 #include "reformat.h"
 
@@ -467,9 +475,7 @@ long reformat_
 
     /* Check some critical switches */
     if (fmtpar[0].thresh < 1){
-	printf(" <W> reformat: zero/negative threshold is disallowed!\n"
-	       "     resetting it to 1...\n");
-	fmtpar[0].thresh = 1;
+	printf(" <W> reformat: zero/negative threshold constant used!\n");
     }
     threshold = fmtpar[0].thresh;
     
@@ -1234,7 +1240,7 @@ long reformat_
 			    (j==fmtpar[0].last_bucket-1 || datum<threshold)){
 			    nSeq++;
 			    for (k=tppixel_h->nok-nBuck;
-				 k<tppixel_h->nok-1;
+				 k<=tppixel_h->nok-1;
 				 k++) tppixel[k].datum += nBuck*nBfact;
 			    nBuck = 0;
 			}
