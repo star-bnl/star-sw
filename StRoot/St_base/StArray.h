@@ -166,7 +166,7 @@ virtual void operator=(const StObjArrayIter &iter);
 virtual Bool_t operator==(const StObjArrayIter &iter);
 virtual Bool_t operator!=(const StObjArrayIter &iter);
 
-
+protected:
 const StObjArray* fColl;
 ClassDef(StObjArrayIter,1)
 };
