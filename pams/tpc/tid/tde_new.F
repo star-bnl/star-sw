@@ -1,5 +1,8 @@
-* $Id: tde_new.F,v 1.13 1999/05/27 13:54:46 ogilvie Exp $
+* $Id: tde_new.F,v 1.14 1999/05/27 15:28:14 ogilvie Exp $
 * $Log: tde_new.F,v $
+* Revision 1.14  1999/05/27 15:28:14  ogilvie
+* removed extra write statements
+*
 * Revision 1.13  1999/05/27 13:54:46  ogilvie
 * added new parameter to control the method used to calculate averages
 * called "averaging_method"
@@ -166,10 +169,9 @@ c      =2
 c      tdpar(1).truncopt=4
 c      tdpar(1).truncfact=0.3 
 
-      write(6,*) "averaging method"
-      write(6,*)  tdpar(1).averaging_method            
+c      write(6,*) "averaging method"
+c      write(6,*)  tdpar(1).averaging_method            
 
-      pause
 C Sort the hit array according to the track number
       
       iret = tls_Index_Sort_i(hit_h.nok,hit(1).track,
