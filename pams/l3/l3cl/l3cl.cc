@@ -6,7 +6,9 @@
 **:                            06/02/98  cs: StAF version
 **:                            06/15/98  ppy
 **:                            09/17/98  cs: new l3 pixel format
-**:   
+**:                            07/06/99  ppy: comment out writting hits, sl3Hit table
+**:                                      changed, code needs to be modified to write buffer
+**:                            07/07/99  ppy: SLHIT replaced with SL3BUFFER
 **:  
 **:<------------------------------------------------------------------*/
 
@@ -15,22 +17,18 @@
 #include "l3cl_inc.h"
 #include <stdlib.h>
 
-
-
 extern "C" long l3cl_(
   TABLE_HEAD_ST     *para_h,       L3CLPARA_ST        *para,
   TABLE_HEAD_ST     *pad_h,        L3CLPAD_ST         *pad,
   TABLE_HEAD_ST     *pixel_h,      TYPE_SHORTDATA_ST  *pixel,        
-  TABLE_HEAD_ST     *hit_h,        SL3HIT_ST          *hit   )
-
-
+  TABLE_HEAD_ST     *hit_h,        SL3BUFFER_ST       *hit   )
 {
 /*:>--------------------------------------------------------------------
 **: ROUTINE:    l3cl_
 **: DESCRIPTION: Prepares data and calls fast clusterfinder   
 **:
 **: 
-**: AUTHOR:     ppy - Pablo P. Yepes, yepes@physics.rice.edu
+**: AUTHOR:     ppy - Pablo P. Yepes, yepes@rice.edu
 **:             cs  - Christof Struck, struck@star.physics.yale.edu
 **:
 **: ARGUMENTS:
@@ -53,6 +51,7 @@ extern "C" long l3cl_(
   l3clInitClusters     ( pad_h, pad, pixel );
   l3clFindClusters     ( para->StartRow, para->EndRow );
   int  initialNok = hit_h->nok ;
+/*
   l3clWriteDataToTable ( hit_h, hit );  
 //
 //   Include sector in row
@@ -60,6 +59,7 @@ extern "C" long l3cl_(
   for ( int ihit = initialNok ; ihit < hit_h->nok ; ihit++ ) {
       hit[ihit].row = hit[ihit].row + 100 * para->sector ; 
   }
+*/
 //
   l3clFreeMemory() ;
 // 

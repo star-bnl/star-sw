@@ -7,14 +7,14 @@
 #include "l3clPara.idl"
 #include "l3clPad.idl"
 #include "type_shortdata.idl"
-#include "sl3Hit.idl"
+#include "sl3Buffer.idl"
 
 interface l3cl : amiModule{
 	STAFCV_T call
 		( inout l3clPara        l3clPara
                 , in    l3clPad         l3clPad
                 , in    type_shortdata  l3cl_pixel
-                , inout sl3Hit          sl3Hit
+                , inout sl3Buffer       sl3Hit
 		);
 };
 /* Last mod. for l3cl: 09/17/98 cs */

@@ -15,7 +15,7 @@
 #include "PAM.h"
 #include "l3clPad.h"
 #include "type_shortdata.h"
-#include "sl3Hit.h"
+#include "sl3Buffer.h"
 
 /* defines */
 #define MAXCLUSTERSIZE 75	/* upper limit to clusters calculated */
@@ -111,7 +111,7 @@ void l3clInitClusters ( TABLE_HEAD_ST        *pad_h,
 		        TYPE_SHORTDATA_ST    *pixel );
 void l3clMakeCluster     ( int pr,int off,int mbeg,int mend, int *seq );
 void l3clWriteDataToTable( TABLE_HEAD_ST *hit_h,
-	  	           SL3HIT_ST     *hit );
+	  	           SL3BUFFER_ST     *hit );
 void SetupLogTable();
 void l3clSector2GlobalCoordinates ( int sector,
                                     float& xSector, float& ySector, float& zSector,
