@@ -1,5 +1,8 @@
-* $Id: tfs_tpchit_merge.F,v 1.7 1998/09/20 23:48:23 perev Exp $
+* $Id: tfs_tpchit_merge.F,v 1.8 1998/09/21 19:32:19 perev Exp $
 * $Log: tfs_tpchit_merge.F,v $
+* Revision 1.8  1998/09/21 19:32:19  perev
+* Redundant work array removed
+*
 * Revision 1.7  1998/09/20 23:48:23  perev
 * malloc for temporary array
 *
@@ -121,16 +124,6 @@ C Local variables
       integer  iret,irowl,i_rows(10),ii_rows
       integer  tls_Quick_Sort_r, tls_Quick_Sort_i,tls_Search_i
 
-      integer  malloc,max_hit_merge,n_hit_merge,imerge_hit_id
-      PARAMETER  (max_hit_merge=50000000)
-       structure /merge_t/
-        integer key
-        integer row
-      end structure
-      record/merge_t/  imerge_id(max_hit_merge)
-      pointer (p_merge,imerge_id)
-
-
       integer IsectorDummy
       integer idI1, idI2, idI3
       character*132 m132  ! And some message-generating space.
@@ -138,16 +131,13 @@ C Local variables
       save idI1, idI2, idI3
 C=========================== Begin Executable Code =======================
 
-C     Initialize imerge_id.  04/16/1997   DSW.
-      n_hit_merge = 0
-      p_merge = malloc(2*4*tpc_index_h.nok)
       
 C     Quick_sort tpc_index table for key2 so it's easy to find  right
 C     geant hit corresponding to given tpc hit. This is needed to update
 C     the tpc_index table after tpc hit merging.
 
-      iret = tls_Quick_Sort_i(tpc_index_h.nok,tpc_index(1).key2,
-     >     tpc_index(2).key2, tpc_index)
+      iret = tls_Quick_Sort_i(tpc_index_h.nok,tpc_index(1).key1,
+     >     tpc_index(2).key1, tpc_index)
       if(iret.ne.tls_sort_normal_cv)then
            write(m132,*) 'TFS-MERGE-I2 sorting failed ',iret
            call Message( m132, 1, idI2 )
@@ -278,16 +268,8 @@ C     find merged partner
                zsizl = 2. * tphit(l).zrf
                
 C     calculate widths and overlaps
-               dr    = ( tphit(k).x - tphit(l).x )**2 +
-     >                 ( tphit(k).y - tphit(l).y )**2 
-                     if (dr.ge.0.) then
-                      dr    = sqrt( dr )
-                     else
-                      write(m132,*) 'TFS-MERGE-I3 SQRT of negative number '
-     >                          //'set to 0.0  '  
-                      call Message( m132, 1, idI3 )
-                      dr = 0.
-                     endif
+               dr    = sqrt(( tphit(k).x - tphit(l).x )**2 +
+     >                 ( tphit(k).y - tphit(l).y )**2 )
                dz    = abs( tphit(k).z - tphit(l).z )
                zwid = tphit(k).zrf + tphit(l).zrf
                rwid = tphit(k).prf + tphit(l).prf
@@ -417,23 +399,20 @@ C     Search for row index  with tpc_index.key2=tphit(k).id
 CCC   Replaced 10 in tls_Search_i by ii_rows, it has to be a variable
 CCC   IMS 12/15/96
 CCC   
-               ii_rows=10
-               iret = tls_Search_i(tpc_index_h.nok,tpc_index(1).key2, 
-     >              tpc_index(2).key2,tphit(k).id,i_rows,ii_rows)
+               ii_rows=1
+               i_rows(1) = tphit(k).id
+               if(tpc_index(i_rows(1)).key1 .ne. tphit(k).id) 
+     >           iret = tls_Search_i(tpc_index_h.nok,tpc_index(1).key1, 
+     >           tpc_index(2).key1,tphit(k).id,i_rows,ii_rows)
                
 C     store the tpc_index table row# & tphit(l).id for this hit
 C     04/16/1997  DSW
-               irowl = i_rows(1)
-               n_hit_merge = n_hit_merge + 1 
-               if(n_hit_merge.le.max_hit_merge)then
-                  imerge_id(n_hit_merge).row =  irowl
-                  imerge_id(n_hit_merge).key =  tphit(l).id
+               if (ii_rows.eq.0) then
+                  write(*,*) '*** TFS_TPCHIT_MERGE internal ERROR ***'
                else
-                  write(m132,*) 'TFS-MERGE-I1 total number of merged '
-     >                          //'hits exceeds  ' ,max_hit_merge 
-                  call Message( m132, 1, idI1 )
-               endif
-               
+                 irowl = i_rows(1)
+                 tpc_index(irowl).key2 = tphit(l).id
+               endif               
  100        continue
            
          enddo                  ! loop over rows
@@ -442,13 +421,5 @@ C     04/16/1997  DSW
 *     (the end of that ugly patch)
  666  continue
 
-C     Update  tphit.id in the index table for merged hits.
-C     04/16/1997  DSW
-
-      do ij = 1, n_hit_merge
-         irowl                 = imerge_id(ij).row
-         tpc_index(irowl).key2 = imerge_id(ij).key 
-      enddo
-      call free(p_merge)
       return
       end
