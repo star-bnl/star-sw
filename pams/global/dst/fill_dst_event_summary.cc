@@ -157,7 +157,7 @@ long  type_of_call fill_dst_event_summary_ (
   pt_max  = dstSummaryParam->pt_bins[8];
   eta_min = 0.;
   eta_max = dstSummaryParam->eta_bins[8];
-
+  
   /* Get double precision pi */
   pi    = acos(-1.);
   piov2 = pi/2;
@@ -256,7 +256,7 @@ long  type_of_call fill_dst_event_summary_ (
 
 float  mt_inverse_slope(double *mthisto,int ibegin, int istop)
 {
-  float mt_max, mt_min;
+  float mt_max=2.0, mt_min=0.0;
   float mtx, mt_binsize, invslope;
   float s=0, sx=0, sy=0, sxx=0, sxy=0, delta=0;
   int   imtbin, index, NBINS=10;
