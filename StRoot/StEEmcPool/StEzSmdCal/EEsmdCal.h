@@ -3,7 +3,7 @@
 #ifndef EEsmdCal_h
 #define EEsmdCal_h
 /*********************************************************************
- * $Id: EEsmdCal.h,v 1.5 2004/07/08 01:20:20 balewski Exp $
+ * $Id: EEsmdCal.h,v 1.6 2004/07/10 18:40:54 balewski Exp $
  *********************************************************************
  * Descripion:
  *  Calibration of SMD/pre/post using MIPs from UxV
@@ -114,7 +114,7 @@ class EEsmdCal {
   
   EEsmdCal();
   virtual ~EEsmdCal();
-  void finish();
+  void finish(int k=0);
 
   void init(); 
   void initRun(int runID);// must be called after DB timestamp is known
@@ -132,6 +132,9 @@ class EEsmdCal {
 
 /*****************************************************************
  * $Log: EEsmdCal.h,v $
+ * Revision 1.6  2004/07/10 18:40:54  balewski
+ * use now first and last 8 strips in 00xx00
+ *
  * Revision 1.5  2004/07/08 01:20:20  balewski
  * merged with Murad
  *

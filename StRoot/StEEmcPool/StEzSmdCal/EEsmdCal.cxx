@@ -1,4 +1,4 @@
-// $Id: EEsmdCal.cxx,v 1.6 2004/07/08 01:20:20 balewski Exp $
+// $Id: EEsmdCal.cxx,v 1.7 2004/07/10 18:40:48 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -103,7 +103,7 @@ void EEsmdCal::init( ){
     smdHitPl[i].set(thrMipSmdE,emptyStripCount,i+'U');
   }
 
-  printf("use thrMipSmdE=%f emptyStripCount=%d  twMipRelEne/high=%f/%f\npresMipElow/high=%f/%f\n", thrMipSmdE,emptyStripCount,twMipRelEneLow, twMipRelEneHigh,presMipElow,presMipEhigh);
+  printf("use thrMipSmdE=%.2f emptyStripCount=%d  twMipRelEne/high=%.2f/%.2f\npresMipElow/high=%.2f/%.2f\n", thrMipSmdE,emptyStripCount,twMipRelEneLow, twMipRelEneHigh,presMipElow,presMipEhigh);
   assert(sectID>0 && sectID<=MaxSectors);
 
   //....................... initilize energy cuts for MIPs in towers
@@ -326,8 +326,8 @@ int EEsmdCal::getUxVmip(){
     pl->scanAdc(smdEne[iuv], thrMipSmdE);
     pl->findMipPattern();
     hA[12+iuv]->Fill(pl->nMatch);
-    // pl->print(1);
-    //printf("iuv=%d  nM=%d\n",iuv, pl->nMatch);  
+    //    pl->print(1);
+    // printf("iuv=%d  nM=%d\n",iuv, pl->nMatch);  
   }
   
   int ret=smdHitPl[0].nMatch*smdHitPl[1].nMatch;
@@ -343,18 +343,20 @@ int EEsmdCal::getUxVmip(){
 
 //-------------------------------------------------
 //-------------------------------------------------
-void EEsmdCal::finish(){
-  printf("\n  EEsmdCal::finish(sec=%d) nInpEve=%d\n",sectID,nInpEve);
+void EEsmdCal::finish(int k){
+  printf("\n  EEsmdCal::finish(sec=%d) nInpEve=%d \n",sectID,nInpEve);
 
-#if 1
+  if(k<0) return;
   // some test drawing:
   printf("drawing ...\n");
-  TFile* f=new TFile("outSec5b/mip05b-8zAB.hist.root");
+  //  TFile* f=new TFile("outSec5b/mip05b-8zAB.hist.root");
 
   int iuv=1;
-  TCanvas *c=new TCanvas();
-  c->Divide(2,1);
-  TH2F * h=(TH2F *)f->Get("xy05ct");
+  TString tt="sec"; tt+=sectID;
+  TCanvas *c=new TCanvas(tt,tt,600,600);
+  c->Divide(1,2);
+  //  TH2F * h=(TH2F *)f->Get("xy05ct");
+  TH2F * h=(TH2F *)hA[22];
 
   for(iuv=0;iuv<2;iuv++) {
     c->cd(iuv+1);
@@ -398,7 +400,7 @@ void EEsmdCal::finish(){
 
   }
   
-#endif
+
 }
 
 
