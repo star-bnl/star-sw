@@ -63,7 +63,7 @@ MESS ****  Count and list all know TDM objects               ****
 MESS ************************************************************
 TDM/COUNT
 TDM/LIST
-WAIT 'Hit <CR> to continue:' 0
+WAIT 'Hit <CR> to continue:' 0 
 
 
 MESS
@@ -175,3 +175,11 @@ MESS ****   I couldnt figure out what they were doing       ****
 MESS ************************************************************
 
 RETURN
+
+
+
+
+
+
+
+
