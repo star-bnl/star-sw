@@ -1,6 +1,9 @@
-* $Id: gstar_input.g,v 1.35 2000/06/10 18:58:25 nevski Exp $
+* $Id: gstar_input.g,v 1.36 2000/06/12 15:35:47 nevski Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.36  2000/06/12 15:35:47  nevski
+* debuging prints removed
+*
 * Revision 1.35  2000/06/10 18:58:25  nevski
 * rqmd cwntuple read added
 *
@@ -348,7 +351,7 @@ c ---- Column-Wise-Ntuples ----
            NpHEP=ip;  Num = {1,Igate,1,NpHep+1 }
            do i=1,5   { IdEvHep(i) = Pxyz(i);  }
            Call REBANK('/EVNT/GENE/GENT.GENT',num,15,L,ia)
-           print *,' Rebank done with L,ia = ',L,ia
+           * print *,' Rebank done with L,ia = ',L,ia
         }
         elseif ipdg=999998 { call Ucopy(Pxyz,Hpar,4) }
         elseif ipdg=999997 { call Ucopy(Pxyz,Comp,4) }
@@ -362,7 +365,7 @@ c ---- Column-Wise-Ntuples ----
       if (InEvent<NnEvent) Next;  
       Nin+=1; num(3)=Nin;  
       Call RbSTORE ('/EVNT/GENE/GENT*',num,Cform,15,istat)
-      print *,' RBSTORE nin,istat=',nin,istat
+      * print *,' RBSTORE nin,istat=',nin,istat
     
       Check Istat==1
 
