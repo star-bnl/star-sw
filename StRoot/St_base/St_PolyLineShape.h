@@ -27,6 +27,7 @@ protected:
    virtual void  Create();
    virtual Size3D *CreateX3DSize(Bool_t marker=kFALSE);
    virtual void  SetConnection(TShape *connection){ m_Connection = connection;}
+   virtual Int_t PointDistancetoPrimitive(Int_t px, Int_t py);
 
 public:
    St_PolyLineShape();

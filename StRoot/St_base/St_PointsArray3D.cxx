@@ -177,7 +177,7 @@ Int_t St_PointsArray3D::DistancetoPrimitive(Int_t px, Int_t py)
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
  
    const Int_t inaxis = 7;
-   Int_t dist = 9999;
+   Float_t dist = 9999;
  
    Int_t puxmin = gPad->XtoAbsPixel(gPad->GetUxmin());
    Int_t puymin = gPad->YtoAbsPixel(gPad->GetUymin());
@@ -192,17 +192,18 @@ Int_t St_PointsArray3D::DistancetoPrimitive(Int_t px, Int_t py)
  
    TView *view = gPad->GetView();
    if (!view) return dist;
-   Int_t i, dpoint;
+   Int_t i;
+   Float_t dpoint;
    Float_t xndc[3];
    Int_t x1,y1;
    for (i=0;i<Size();i++) {
       view->WCtoNDC(&fP[3*i], xndc);
       x1     = gPad->XtoAbsPixel(xndc[0]);
       y1     = gPad->YtoAbsPixel(xndc[1]);
-      dpoint = Int_t(TMath::Sqrt((Long_t)((px-x1)*(px-x1) + (py-y1)*(py-y1))));
+      dpoint = (px-x1)*(px-x1) + (py-y1)*(py-y1);
       if (dpoint < dist) dist = dpoint;
    }
-   return dist;
+   return Int_t(TMath::Sqrt(dist));
 }
  
  
