@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcRichHit.hh,v 2.4 2000/05/26 21:42:11 calderon Exp $
+ * $Id: StMcRichHit.hh,v 2.5 2000/06/06 02:58:41 calderon Exp $
  * $Log: StMcRichHit.hh,v $
+ * Revision 2.5  2000/06/06 02:58:41  calderon
+ * Introduction of Calorimeter classes.  Modified several classes
+ * accordingly.
+ *
  * Revision 2.4  2000/05/26 21:42:11  calderon
  * Added volumeId() method.
  *
@@ -33,7 +37,7 @@ class StMcRichHit : public StMcHit {
 public:
     StMcRichHit();
     StMcRichHit(const StThreeVectorF&,const StThreeVectorF&,
-	     const float, const float, StMcTrack*);
+	     const float, const float,  const long, const long, StMcTrack*);
     StMcRichHit(g2t_rch_hit_st*);
     ~StMcRichHit();
     int operator==(const StMcRichHit&) const;
@@ -41,7 +45,6 @@ public:
 
     unsigned short  pad() const;
     unsigned short  row() const;
-    long       volumeId() const;
     float           tof() const;
     
     void* operator new(size_t)     { return mPool.alloc(); }
@@ -49,14 +52,10 @@ public:
     
 private:
     static StMemoryPool mPool; //!
-    long                mVolumeId;
     float               mTof;
 };
 
 ostream&  operator<<(ostream& os, const StMcRichHit&);
-inline long
-StMcRichHit::volumeId() const
-{    return (mVolumeId); }
 
 inline unsigned short
 StMcRichHit::pad() const

@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.7 2000/04/06 23:29:10 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.8 2000/06/06 02:58:42 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.8  2000/06/06 02:58:42  calderon
+ * Introduction of Calorimeter classes.  Modified several classes
+ * accordingly.
+ *
  * Revision 2.7  2000/04/06 23:29:10  calderon
  * Store the parent track for all tracks.
  *
@@ -69,35 +73,43 @@ public:
 
     void initToZero();
   // "Get" Methods
-    const StLorentzVectorF&      fourMomentum() const; //!
-    const StThreeVectorF&        momentum() const; //!
-    float                        energy() const; //!
-    float                        pt() const; //!
-    float                        rapidity() const; //!
-    float                        pseudoRapidity() const; //!
-    StMcVertex*                  startVertex(); //!
-    const StMcVertex*            startVertex() const; //!
-    StMcVertex*                  stopVertex(); //!
-    const StMcVertex*            stopVertex() const; //!
-    StMcTrack*                   parent(); //!
-    const StMcTrack*             parent() const; //!
-    StPtrVecMcVertex&            intermediateVertices(); //!
-    const StPtrVecMcVertex&      intermediateVertices() const; //!
-    StPtrVecMcTpcHit&            tpcHits(); //!
-    const StPtrVecMcTpcHit&      tpcHits() const; //!
-    StPtrVecMcSvtHit&            svtHits(); //!
-    const StPtrVecMcSvtHit&      svtHits() const; //!
-    StPtrVecMcFtpcHit&           ftpcHits(); //!
-    const StPtrVecMcFtpcHit&     ftpcHits() const; //!
-    StPtrVecMcRichHit&           richHits(); //!
-    const StPtrVecMcRichHit&     richHits() const; //!
-    StParticleDefinition*        particleDefinition(); //!
-    const StParticleDefinition*  particleDefinition() const; //!
-    int                          isShower() const; //! 1 = yes, 0 = no
-    long                         geantId() const;  //!
-    long                         pdgId()   const;  //!
-    long                         key()     const;  //!
-    long                         eventGenLabel() const; //!
+    const StLorentzVectorF&         fourMomentum() const; //!
+    const StThreeVectorF&           momentum() const; //!
+    float                           energy() const; //!
+    float                           pt() const; //!
+    float                           rapidity() const; //!
+    float                           pseudoRapidity() const; //!
+    StMcVertex*                     startVertex(); //!
+    const StMcVertex*               startVertex() const; //!
+    StMcVertex*                     stopVertex(); //!
+    const StMcVertex*               stopVertex() const; //!
+    StMcTrack*                      parent(); //!
+    const StMcTrack*                parent() const; //!
+    StPtrVecMcVertex&               intermediateVertices(); //!
+    const StPtrVecMcVertex&         intermediateVertices() const; //!
+    StPtrVecMcTpcHit&               tpcHits(); //!
+    const StPtrVecMcTpcHit&         tpcHits() const; //!
+    StPtrVecMcSvtHit&               svtHits(); //!
+    const StPtrVecMcSvtHit&         svtHits() const; //!
+    StPtrVecMcFtpcHit&              ftpcHits(); //!
+    const StPtrVecMcFtpcHit&        ftpcHits() const; //!
+    StPtrVecMcRichHit&              richHits(); //!
+    const StPtrVecMcRichHit&        richHits() const; //!
+    StPtrVecMcCalorimeterHit&       bemcHits(); //!
+    const StPtrVecMcCalorimeterHit& bemcHits() const; //!
+    StPtrVecMcCalorimeterHit&       bprsHits(); //!
+    const StPtrVecMcCalorimeterHit& bprsHits() const; //!
+    StPtrVecMcCalorimeterHit&       bsmdeHits(); //!
+    const StPtrVecMcCalorimeterHit& bsmdeHits() const; //!
+    StPtrVecMcCalorimeterHit&       bsmdpHits(); //!
+    const StPtrVecMcCalorimeterHit& bsmdpHits() const; //!
+    StParticleDefinition*           particleDefinition(); //!
+    const StParticleDefinition*     particleDefinition() const; //!
+    int                             isShower() const; //! 1 = yes, 0 = no
+    long                            geantId() const;  //!
+    long                            pdgId()   const;  //!
+    long                            key()     const;  //!
+    long                            eventGenLabel() const; //!
 
   // "Set" Methods
     void setFourMomentum(const StLorentzVectorF&); //!
@@ -108,6 +120,10 @@ public:
     void setSvtHits(StPtrVecMcSvtHit&); //!
     void setFtpcHits(StPtrVecMcFtpcHit&); //!
     void setRichHits(StPtrVecMcRichHit&); //!
+    void setBemcHits(StPtrVecMcCalorimeterHit&); //!
+    void setBprsHits(StPtrVecMcCalorimeterHit&); //!
+    void setBsmdeHits(StPtrVecMcCalorimeterHit&); //!
+    void setBsmdpHits(StPtrVecMcCalorimeterHit&); //!
   
     void setShower(char); //!
     void setGeantId(long); //!
@@ -120,29 +136,42 @@ public:
     void addSvtHit(StMcSvtHit*); //!
     void addFtpcHit(StMcFtpcHit*); //!
     void addRichHit(StMcRichHit*); //!
+    void addBemcHit(StMcCalorimeterHit*); //!
+    void addBprsHit(StMcCalorimeterHit*); //!
+    void addBsmdeHit(StMcCalorimeterHit*); //!
+    void addBsmdpHit(StMcCalorimeterHit*); //!
     void removeTpcHit(StMcTpcHit*); //!
     void removeSvtHit(StMcSvtHit*); //!
     void removeFtpcHit(StMcFtpcHit*); //!
     void removeRichHit(StMcRichHit*); //!
+    void removeCalorimeterHit(StPtrVecMcCalorimeterHit&, StMcCalorimeterHit*); //!
+    void removeBemcHit(StMcCalorimeterHit*); //!
+    void removeBprsHit(StMcCalorimeterHit*); //!
+    void removeBsmdeHit(StMcCalorimeterHit*); //!
+    void removeBsmdpHit(StMcCalorimeterHit*); //!
 
     //    void setTopologyMap(StTrackTopologyMap&); //!
     
 protected:
-    StLorentzVectorF       mFourMomentum; //! 
-    StMcVertex*            mStartVertex; //!
-    StMcVertex*            mStopVertex; //!
-    StPtrVecMcVertex       mIntermediateVertices; //!
-    StPtrVecMcTpcHit       mTpcHits; //!
-    StPtrVecMcSvtHit       mSvtHits; //!
-    StPtrVecMcFtpcHit      mFtpcHits; //!
-    StPtrVecMcRichHit      mRichHits; //!
-    StParticleDefinition*  mParticleDefinition; //!
-    StMcTrack*             mParent;
-    char                   mIsShower; //!
-    long                   mGeantId; //!
-    long                   mPdgId; //!
-    long                   mKey;     //!
-    long                   mEventGenLabel; //!
+    StLorentzVectorF         mFourMomentum; //! 
+    StMcVertex*              mStartVertex; //!
+    StMcVertex*              mStopVertex; //!
+    StPtrVecMcVertex         mIntermediateVertices; //!
+    StPtrVecMcTpcHit         mTpcHits; //!
+    StPtrVecMcSvtHit         mSvtHits; //!
+    StPtrVecMcFtpcHit        mFtpcHits; //!
+    StPtrVecMcRichHit        mRichHits; //!
+    StPtrVecMcCalorimeterHit mBemcHits; //!
+    StPtrVecMcCalorimeterHit mBprsHits; //!
+    StPtrVecMcCalorimeterHit mBsmdeHits; //!
+    StPtrVecMcCalorimeterHit mBsmdpHits; //!
+    StParticleDefinition*    mParticleDefinition; //!
+    StMcTrack*               mParent;
+    char                     mIsShower; //!
+    long                     mGeantId; //!
+    long                     mPdgId; //!
+    long                     mKey;     //!
+    long                     mEventGenLabel; //!
     //    StTrackTopologyMap     mTopologyMap; //!
 };
 
@@ -191,6 +220,22 @@ inline const StPtrVecMcFtpcHit& StMcTrack::ftpcHits() const { return mFtpcHits; 
 inline StPtrVecMcRichHit& StMcTrack::richHits() { return mRichHits; }
 
 inline const StPtrVecMcRichHit& StMcTrack::richHits() const { return mRichHits; }
+
+inline StPtrVecMcCalorimeterHit& StMcTrack::bemcHits() { return mBemcHits; }
+
+inline const StPtrVecMcCalorimeterHit& StMcTrack::bemcHits() const { return mBemcHits; }
+
+inline StPtrVecMcCalorimeterHit& StMcTrack::bprsHits() { return mBprsHits; }
+
+inline const StPtrVecMcCalorimeterHit& StMcTrack::bprsHits() const { return mBprsHits; }
+
+inline StPtrVecMcCalorimeterHit& StMcTrack::bsmdeHits() { return mBsmdeHits; }
+
+inline const StPtrVecMcCalorimeterHit& StMcTrack::bsmdeHits() const { return mBsmdeHits; }
+
+inline StPtrVecMcCalorimeterHit& StMcTrack::bsmdpHits() { return mBsmdpHits; }
+
+inline const StPtrVecMcCalorimeterHit& StMcTrack::bsmdpHits() const { return mBsmdpHits; }
 
 inline StParticleDefinition* StMcTrack::particleDefinition() { return mParticleDefinition; }
 

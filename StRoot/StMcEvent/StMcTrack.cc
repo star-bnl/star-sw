@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.11 2000/05/05 15:25:44 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.12 2000/06/06 02:58:42 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.12  2000/06/06 02:58:42  calderon
+ * Introduction of Calorimeter classes.  Modified several classes
+ * accordingly.
+ *
  * Revision 2.11  2000/05/05 15:25:44  calderon
  * Reduced dependencies and made constructors more efficient
  *
@@ -67,7 +71,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.11 2000/05/05 15:25:44 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.12 2000/06/06 02:58:42 calderon Exp $";
 
 StMcTrack::StMcTrack() 
 {
@@ -152,11 +156,15 @@ ostream&  operator<<(ostream& os, const StMcTrack& t)
     os << "Four Momentum : " << t.fourMomentum() << endl; 
     os << "Pt            : " << t.pt() << endl;
     os << "Rapidity      : " << t.rapidity() << endl;
-    os << "PseudoRapidity: " << t.pseudoRapidity() << endl;
-    os << "No. Tpc  Hits : " << t.tpcHits().size() << endl;
-    os << "No. Svt  Hits : " << t.svtHits().size() << endl;
-    os << "No. Ftpc Hits : " << t.ftpcHits().size() << endl;
-    os << "No. Rich Hits : " << t.richHits().size() << endl;
+    os << "PseudoRapidity: " << t.pseudoRapidity()   << endl;
+    os << "No. Tpc   Hits: " << t.tpcHits().size()   << endl;
+    os << "No. Svt   Hits: " << t.svtHits().size()   << endl;
+    os << "No. Ftpc  Hits: " << t.ftpcHits().size()  << endl;
+    os << "No. Rich  Hits: " << t.richHits().size()  << endl;
+    os << "No. Bemc  Hits: " << t.bemcHits().size()  << endl;
+    os << "No. Bprs  Hits: " << t.bprsHits().size()  << endl;
+    os << "No. Bsmdp Hits: " << t.bsmdeHits().size() << endl;
+    os << "No. Bsmdp Hits: " << t.bsmdpHits().size() << endl;
     os << "Is Shower     : " << t.isShower() << endl;
     os << "Geant Id      : " << t.geantId()  << endl;
     os << "Pdg Code      : " << t.pdgId()  << endl;
@@ -179,6 +187,16 @@ void StMcTrack::setTpcHits(StPtrVecMcTpcHit& val) { mTpcHits = val; }
 void StMcTrack::setSvtHits(StPtrVecMcSvtHit& val) { mSvtHits = val; }
 
 void StMcTrack::setFtpcHits(StPtrVecMcFtpcHit& val) { mFtpcHits = val; }
+
+void StMcTrack::setRichHits(StPtrVecMcRichHit& val) { mRichHits = val; }
+
+void StMcTrack::setBemcHits(StPtrVecMcCalorimeterHit& val) { mBemcHits = val; }
+
+void StMcTrack::setBprsHits(StPtrVecMcCalorimeterHit& val) { mBprsHits = val; }
+
+void StMcTrack::setBsmdeHits(StPtrVecMcCalorimeterHit& val) { mBsmdeHits = val; }
+
+void StMcTrack::setBsmdpHits(StPtrVecMcCalorimeterHit& val) { mBsmdpHits = val; }
 
 void StMcTrack::setShower(char val) { mIsShower = val; }
 
@@ -212,28 +230,81 @@ void StMcTrack::addRichHit(StMcRichHit* hit)
   mRichHits.push_back(hit);
 }
 
+void StMcTrack::addBemcHit(StMcCalorimeterHit* hit)
+{
+  mBemcHits.push_back(hit);
+}
+
+void StMcTrack::addBprsHit(StMcCalorimeterHit* hit)
+{
+  mBprsHits.push_back(hit);
+}
+
+void StMcTrack::addBsmdeHit(StMcCalorimeterHit* hit)
+{
+  mBsmdeHits.push_back(hit);
+}
+
+void StMcTrack::addBsmdpHit(StMcCalorimeterHit* hit)
+{
+  mBsmdpHits.push_back(hit);
+}
+// Not very elegant.  Maybe should have kept all collections as
+// vector<StMcHit*> so that then we could have used the same
+// routine for all of them... 
 void StMcTrack::removeTpcHit(StMcTpcHit* hit)
 {
-  StMcTpcHitIterator iter = find(mTpcHits.begin(), mTpcHits.end(), hit);
-  if (iter != mTpcHits.end()) mTpcHits.erase(iter);
+    StMcTpcHitIterator iter = find (mTpcHits.begin(), mTpcHits.end(), hit);
+    if (iter != mTpcHits.end()) {
+	mTpcHits.erase(iter);
+    }
 }
 
 void StMcTrack::removeFtpcHit(StMcFtpcHit* hit)
 {
-  StMcFtpcHitIterator iter = find(mFtpcHits.begin(), mFtpcHits.end(), hit);
-  if (iter != mFtpcHits.end()) mFtpcHits.erase(iter);
+    StMcFtpcHitIterator iter = find (mFtpcHits.begin(), mFtpcHits.end(),hit);
+    if (iter != mFtpcHits.end()) {
+	mFtpcHits.erase(iter);
+    }
 }
 
 void StMcTrack::removeSvtHit(StMcSvtHit* hit)
 {
-  StMcSvtHitIterator iter = find(mSvtHits.begin(), mSvtHits.end(), hit);
-  if (iter != mSvtHits.end()) mSvtHits.erase(iter);
+    StMcSvtHitIterator iter = find(mSvtHits.begin(), mSvtHits.end(), hit);
+    if (iter != mSvtHits.end()) {
+	mSvtHits.erase(iter);
+    }
 }
 
 void StMcTrack::removeRichHit(StMcRichHit* hit)
 {
-  StMcRichHitIterator iter = find(mRichHits.begin(), mRichHits.end(), hit);
-  if (iter != mRichHits.end()) mRichHits.erase(iter);
+    StMcRichHitIterator iter = find(mRichHits.begin(), mRichHits.end(), hit);
+    if (iter != mRichHits.end()){
+	mRichHits.erase(iter);
+    }
 }
-
+void StMcTrack::removeCalorimeterHit(StPtrVecMcCalorimeterHit& vch, StMcCalorimeterHit* hit)
+{
+    StMcCalorimeterHitIterator iter = find(vch.begin(), vch.end(), hit);
+    if (iter != vch.end()) {
+	vch.erase(iter);
+    }
+    
+}
+void StMcTrack::removeBemcHit(StMcCalorimeterHit* hit)
+{
+    removeCalorimeterHit(mBemcHits, hit);
+}
+void StMcTrack::removeBprsHit(StMcCalorimeterHit* hit)
+{
+    removeCalorimeterHit(mBprsHits, hit);
+}
+void StMcTrack::removeBsmdeHit(StMcCalorimeterHit* hit)
+{
+    removeCalorimeterHit(mBsmdeHits, hit);
+}
+void StMcTrack::removeBsmdpHit(StMcCalorimeterHit* hit)
+{
+    removeCalorimeterHit(mBsmdpHits, hit);
+}
 //void StMcTrack::setTopologyMap(StTrackTopologyMap& val) { mTopologyMap = val; }

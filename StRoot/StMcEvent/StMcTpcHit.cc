@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.cc,v 2.6 2000/05/05 15:25:44 calderon Exp $
+ * $Id: StMcTpcHit.cc,v 2.7 2000/06/06 02:58:41 calderon Exp $
  * $Log: StMcTpcHit.cc,v $
+ * Revision 2.7  2000/06/06 02:58:41  calderon
+ * Introduction of Calorimeter classes.  Modified several classes
+ * accordingly.
+ *
  * Revision 2.6  2000/05/05 15:25:44  calderon
  * Reduced dependencies and made constructors more efficient
  *
@@ -34,15 +38,16 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_tpc_hit_Table.h"  
 
-static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.6 2000/05/05 15:25:44 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.7 2000/06/06 02:58:41 calderon Exp $";
 
 StMemoryPool StMcTpcHit::mPool(sizeof(StMcTpcHit));
 
 StMcTpcHit::StMcTpcHit() { /* noop */ }
 
 StMcTpcHit::StMcTpcHit(const StThreeVectorF& x,const StThreeVectorF& p,
-		       const float de, const float ds,
-		       StMcTrack* parent)  : StMcHit(x, p, de, ds, parent)
+		       const float de, const float ds, const long key,
+		       const long id,
+		       StMcTrack* parent)  : StMcHit(x, p, de, ds, key, id, parent)
 { /* noop */ }
 
 StMcTpcHit::StMcTpcHit(g2t_tpc_hit_st* pt)
@@ -50,8 +55,9 @@ StMcTpcHit::StMcTpcHit(g2t_tpc_hit_st* pt)
 	  StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]),
 	  pt->de,
 	  pt->ds,
-	  0),
-  mVolumeId(pt->volume_id)
+	  pt->id,
+	  pt->volume_id,
+	  0)
 {/* noop */ }
 
 StMcTpcHit::~StMcTpcHit() {/* noop */}
