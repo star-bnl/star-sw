@@ -20,6 +20,7 @@
     float scintthk;     /* - ACTIVE SCINTILLATOR PLATE HALF THICKNESS */
     float absorthk;     /* - ABSORBER PLATE THICKNESS HALFPTHICKNESS  */
     float abpapthk;     /* - ABSORBER PAPER PLATE THICKNESS HALF THIC */
+    float sntchthk;     /* - NOT USED - SMD FRONT NOTCH WIDTH         */
     float g10sbthk;     /* - G10 SMD FRONT AND BACK PLATE HALF THICKN */
     float smalfwdh;     /* - SMD AL FRONT BACK PLATE WITH AR HALF WID */
     float smalfthk;     /* - SMD AL FRONT BACK PLATE WITH AR HALF THI */
