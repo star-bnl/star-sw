@@ -45,17 +45,21 @@ public:
     // only go one step at a time.
     static StiIntersection findIntersection(
         const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
-        double &dXlocal, double &dThickness, double &dDensity);
+        double &dXlocal, double &dThickness, double &dDensity,
+        double &dDistance);
 protected:
     static StiIntersection findPlanarIntersection(
         const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
-        double &dXlocal, double &dThickness, double &dDensity);
+        double &dXlocal, double &dThickness, double &dDensity,
+        double &dDistance);
     static StiIntersection findCylindricalIntersection(
         const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
-        double &dXlocal, double &dThickness, double &dDensity);
+        double &dXlocal, double &dThickness, double &dDensity,
+        double &dDistance);
     static StiIntersection findConicalIntersection(
         const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
-        double &dXlocal, double &dThickness, double &dDensity);
+        double &dXlocal, double &dThickness, double &dDensity,
+        double &dDistance);
 
     static double findThickness(const StiDetector *pDetector, 
                                 const StThreeVectorD *pPoint,
