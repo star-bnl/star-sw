@@ -34,6 +34,9 @@ StrangeMuDstPlayer::StrangeMuDstPlayer() {
   doT0Abort = kTRUE;
   doTopMapFix = kFALSE;
   doReadDST = kFALSE;
+  doV0 = kTRUE;
+  doXi = kTRUE;
+  doKink = kTRUE;
 
   evPrimTracks = 0;
   evPrimVertexZ = 100.;
@@ -59,9 +62,8 @@ void StrangeMuDstPlayer::Make(Int_t NEvents, StFile* input, Char_t* output) {
   StMcEventMaker *mcEventReader;
   StAssociationMaker *associator;
   StRandyTopMapMaker *topoMapFixer;
-  Char_t *file, *dir, *outfile[3];
-  Char_t *prefix[3] = {"v0_", "xi_", "kink_"};
-  Int_t mNDstMakers;
+  Char_t *file, *dir, *outfile[3], *prefix[3];
+  Int_t mNDstMakers = 0;
 
   // Create a chain
   StChain chain("myChain");
@@ -87,17 +89,27 @@ void StrangeMuDstPlayer::Make(Int_t NEvents, StFile* input, Char_t* output) {
     topoMapFixer = new StRandyTopMapMaker();
   
   if( doFileSplit ) {
-    mNDstMakers = 3;
-    v0MuDstMaker = new StStrangeMuDstMaker("v0MuDstMaker");
-    xiMuDstMaker = new StStrangeMuDstMaker("xiMuDstMaker");
-    kinkMuDstMaker = new StStrangeMuDstMaker("kinkMuDstMaker");
-    v0MuDstMaker->DoV0();      // Selects V0 vertices for new micro-DST
-    xiMuDstMaker->DoXi();      // Selects Xi vertices for new micro-DST
-    kinkMuDstMaker->DoKink();  // Selects Kink vertices for new micro-DST
-    // Copy pointer to makers: access by name or via array of pointers
-    muDstMakers[0] = v0MuDstMaker;
-    muDstMakers[1] = xiMuDstMaker;
-    muDstMakers[2] = kinkMuDstMaker;
+    if( doV0 ) {
+      v0MuDstMaker = new StStrangeMuDstMaker("v0MuDstMaker");
+      v0MuDstMaker->DoV0();      // Selects V0 vertices for new micro-DST
+      muDstMakers[mNDstMakers] = v0MuDstMaker;
+      prefix[mNDstMakers] = "v0_";
+      mNDstMakers++;
+    }
+    if( doXi ) {
+      xiMuDstMaker = new StStrangeMuDstMaker("xiMuDstMaker");
+      xiMuDstMaker->DoXi();      // Selects Xi vertices for new micro-DST
+      muDstMakers[mNDstMakers] = xiMuDstMaker;
+      prefix[mNDstMakers] = "xi_";
+      mNDstMakers++;
+    }
+    if( doKink ) {
+      kinkMuDstMaker = new StStrangeMuDstMaker("kinkMuDstMaker");
+      kinkMuDstMaker->DoKink();  // Selects Kink vertices for new micro-DST
+      muDstMakers[mNDstMakers] = kinkMuDstMaker;
+      prefix[mNDstMakers] = "kink_";
+      mNDstMakers++;
+    }
     ParseFileName(output, &file, &dir);
     for(Int_t i=0; i<mNDstMakers; i++) {
       //      outfile[i] = strdup(dir);    // doesn't work - too short ?
@@ -114,9 +126,9 @@ void StrangeMuDstPlayer::Make(Int_t NEvents, StFile* input, Char_t* output) {
   } else {
     mNDstMakers = 1;
     muDstMakers[0] = new StStrangeMuDstMaker("muDstMaker");
-    muDstMakers[0]->DoV0();    // Selects V0 vertices for new micro-DST
-    muDstMakers[0]->DoXi();    // Selects Xi vertices for new micro-DST
-    muDstMakers[0]->DoKink();  // Selects Kink vertices for new micro-DST
+    if( doV0 ) muDstMakers[0]->DoV0();    // Selects V0sfor new micro-DST
+    if( doXi ) muDstMakers[0]->DoXi();    // Selects Xis for new micro-DST
+    if( doKink ) muDstMakers[0]->DoKink();  // Selects Kinks for new micro-DST
     muDstMakers[0]->SetWrite(output);
     if( doT0Abort ) 
       muDstMakers[0]->DoT0JitterAbort();
@@ -155,9 +167,8 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
 
   StStrangeMuDstMaker *oldMuDstMaker, *newMuDstMakers[3];
   StStrangeMuDstMaker *v0MuDstMaker, *xiMuDstMaker, *kinkMuDstMaker;
-  Char_t *file, *dir, *outfile[3];
-  Char_t *prefix[3] = {"v0_", "xi_", "kink_"};
-  Int_t mNDstMakers;
+  Char_t *file, *dir, *outfile[3], *prefix[3];
+  Int_t mNDstMakers = 0;
 
   // Create a chain
   StChain chain("myChain");
@@ -171,18 +182,27 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
   // erasing the event.
   
   if( doFileSplit ) {
-    mNDstMakers = 3;
-    v0MuDstMaker = new StStrangeMuDstMaker("v0MuDstMaker");
-    xiMuDstMaker = new StStrangeMuDstMaker("xiMuDstMaker");
-    kinkMuDstMaker = new StStrangeMuDstMaker("kinkMuDstMaker");
-    v0MuDstMaker->DoV0();      // Selects V0 vertices for new micro-DST
-    xiMuDstMaker->DoXi();      // Selects Xi vertices for new micro-DST
-    kinkMuDstMaker->DoKink();  // Selects Kink vertices for new micro-DST
-    // Copy pointer to makers: access by name or via array of pointers
-    newMuDstMakers[0] = v0MuDstMaker;
-    newMuDstMakers[1] = xiMuDstMaker;
-    newMuDstMakers[2] = kinkMuDstMaker;
-    ParseFileName(output, &file, &dir);
+    if( doV0 ) {
+      v0MuDstMaker = new StStrangeMuDstMaker("v0MuDstMaker");
+      v0MuDstMaker->DoV0();      // Selects V0 vertices for new micro-DST
+      newMuDstMakers[mNDstMakers] = v0MuDstMaker;
+      prefix[mNDstMakers] = "v0_";
+      mNDstMakers++;
+    }
+    if( doXi ) {
+      xiMuDstMaker = new StStrangeMuDstMaker("xiMuDstMaker");
+      xiMuDstMaker->DoXi();      // Selects Xi vertices for new micro-DST
+      newMuDstMakers[mNDstMakers] = xiMuDstMaker;
+      prefix[mNDstMakers] = "xi_";
+      mNDstMakers++;
+    }
+    if( doKink ) {
+      kinkMuDstMaker = new StStrangeMuDstMaker("kinkMuDstMaker");
+      kinkMuDstMaker->DoKink();  // Selects Kink vertices for new micro-DST
+      newMuDstMakers[mNDstMakers] = kinkMuDstMaker;
+      prefix[mNDstMakers] = "kink_";
+      mNDstMakers++;
+    }
     for(Int_t i=0; i<mNDstMakers; i++) {
       //      outfile[i] = strdup(dir);    // doesn't work - too short ?
       outfile[i] = new char[strlen(output)+5];
@@ -198,9 +218,9 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
   } else {
     mNDstMakers = 1;
     newMuDstMakers[0] = new StStrangeMuDstMaker("newMuDstMaker");
-    newMuDstMakers[0]->DoV0();    // Selects V0 vertices for new micro-DST
-    newMuDstMakers[0]->DoXi();    // Selects Xi vertices for new micro-DST
-    newMuDstMakers[0]->DoKink();  // Selects Kink vertices for new micro-DST
+    if( doV0 ) newMuDstMakers[0]->DoV0();    // Selects V0s for new micro-DST
+    if( doXi ) newMuDstMakers[0]->DoXi();    // Selects Xis for new micro-DST
+    if( doKink ) newMuDstMakers[0]->DoKink();// Selects Kinks for new micro-DST
     newMuDstMakers[0]->SetWrite(output);
     if( doT0Abort ) 
       newMuDstMakers[0]->DoT0JitterAbort();
@@ -228,29 +248,33 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
     newMuDstMakers[i]->Cuts().Add("evPrimTracks",buff);
   }}
   // Specific cuts follow
-  sprintf(buff,"> %f",v0DecayLength);
-  v0MuDstMaker->Cuts().Add("v0DecayLength",buff);
-  sprintf(buff,"> %f",v0DcaDaughtersToPrimVertex);
-  v0MuDstMaker->Cuts().Add("dcaPosToPrimVertex || dcaNegToPrimVertex",buff);
-  sprintf(buff,"< %f",v0DcaToPrimVertex);
-  v0MuDstMaker->Cuts().Add("v0DcaToPrimVertex",buff);
-  sprintf(buff,"< %f",v0DcaDaughters);
-  v0MuDstMaker->Cuts().Add("v0DcaDaughters",buff);
-  sprintf(buff,"> %f",v0NumTpcHits);
-  v0MuDstMaker->Cuts().Add("v0NumTpcHits",buff);
-  sprintf(buff,"> %f",xiDecayLength);
-  xiMuDstMaker->Cuts().Add("xiDecayLength",buff);
-  sprintf(buff,"< %f",xiDcaDaughters);
-  xiMuDstMaker->Cuts().Add("xiDcaDaughters",buff);
-  sprintf(buff,"< %f",xiDcaV0Daughters);
-  xiMuDstMaker->Cuts().Add("xiDcaV0Daughters",buff);
-  sprintf(buff,"< %f",xiDcaToPrimVertex);
-  xiMuDstMaker->Cuts().Add("xiDcaToPrimVertex",buff);
-  sprintf(buff,"> %f",xiDcaV0ToPrimVertex);
-  xiMuDstMaker->Cuts().Add("xiDcaV0ToPrimVertex",buff);
-  sprintf(buff,"> %f",xiDcaBachelorToPrimVertex);
-  xiMuDstMaker->Cuts().Add("xiDcaBachelorToPrimVertex",buff);
-  
+  if( doV0 ) {
+    sprintf(buff,"> %f",v0DecayLength);
+    v0MuDstMaker->Cuts().Add("v0DecayLength",buff);
+    sprintf(buff,"> %f",v0DcaDaughtersToPrimVertex);
+    v0MuDstMaker->Cuts().Add("dcaPosToPrimVertex || dcaNegToPrimVertex",buff);
+    sprintf(buff,"< %f",v0DcaToPrimVertex);
+    v0MuDstMaker->Cuts().Add("v0DcaToPrimVertex",buff);
+    sprintf(buff,"< %f",v0DcaDaughters);
+    v0MuDstMaker->Cuts().Add("v0DcaDaughters",buff);
+    sprintf(buff,"> %f",v0NumTpcHits);
+    v0MuDstMaker->Cuts().Add("v0NumTpcHits",buff);
+  }
+  if( doXi ) {
+    sprintf(buff,"> %f",xiDecayLength);
+    xiMuDstMaker->Cuts().Add("xiDecayLength",buff);
+    sprintf(buff,"< %f",xiDcaDaughters);
+    xiMuDstMaker->Cuts().Add("xiDcaDaughters",buff);
+    sprintf(buff,"< %f",xiDcaV0Daughters);
+    xiMuDstMaker->Cuts().Add("xiDcaV0Daughters",buff);
+    sprintf(buff,"< %f",xiDcaToPrimVertex);
+    xiMuDstMaker->Cuts().Add("xiDcaToPrimVertex",buff);
+    sprintf(buff,"> %f",xiDcaV0ToPrimVertex);
+    xiMuDstMaker->Cuts().Add("xiDcaV0ToPrimVertex",buff);
+    sprintf(buff,"> %f",xiDcaBachelorToPrimVertex);
+    xiMuDstMaker->Cuts().Add("xiDcaBachelorToPrimVertex",buff);
+  }  
+
   gMessMgr->Info() << "evPrimVertexZ < " << evPrimVertexZ << endm;
   gMessMgr->Info() << "evPrimTracks > " << evPrimTracks << endm;
   gMessMgr->Info() << "v0DecayLength > " << v0DecayLength << endm;
@@ -272,7 +296,7 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
   if( istatus ) { chain.FatalErr(istatus,"on init"); return; }
 
   // Loop over events
-  {for( Int_t i=0; i<NEvents; i++ ) {
+  for( Int_t i=0; i<NEvents; i++ ) {
     switch (istatus = chain.Make(i)) {
       case 0: break;
       case 2: { gMessMgr->Info("Last event from input."); break; }
@@ -288,33 +312,36 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
     unsigned int primaryTracks = oldMuDstMaker->GetEvent()->primaryTracks();
     // Apply cut on the primary vertex Z position
     if (TMath::Abs(primZ)<evPrimVertexZ && primaryTracks>evPrimTracks) {
-      // Apply selection criteria to the V0s
-      {for( Int_t j=0; j<oldMuDstMaker->GetNV0(); j++ ) {
-	StV0MuDst *v0j = oldMuDstMaker->GetV0(j);
-	if( v0j->decayLengthV0() > v0DecayLength && 
-	    v0j->dcaV0ToPrimVertex() < v0DcaToPrimVertex &&
-	    ((v0j->dcaPosToPrimVertex() > v0DcaDaughtersToPrimVertex) ||
-	     (v0j->dcaNegToPrimVertex() > v0DcaDaughtersToPrimVertex)) &&
-	    v0j->dcaV0Daughters() < v0DcaDaughters &&
-	    v0j->topologyMapPos().numberOfHits(kTpcId) > v0NumTpcHits &&
-	    v0j->topologyMapNeg().numberOfHits(kTpcId) > v0NumTpcHits )
-	  v0MuDstMaker->SelectV0(j);
-      }}
-      // Apply selection criteria to the Xis
-      {for( Int_t j=0; j<oldMuDstMaker->GetNXi(); j++ ) {
-	StXiMuDst *xij = oldMuDstMaker->GetXi(j);
-	if( xij->decayLengthXi() > xiDecayLength &&
-	    xij->dcaXiDaughters() < xiDcaDaughters &&
-	    xij->dcaV0Daughters() < xiDcaV0Daughters &&
-	    xij->dcaXiToPrimVertex() < xiDcaToPrimVertex &&
-	    xij->dcaV0ToPrimVertex() > xiDcaV0ToPrimVertex &&
-	    xij->dcaBachelorToPrimVertex() > xiDcaBachelorToPrimVertex )
-	  xiMuDstMaker->SelectXi(j);
-      }}
-      // Just copy the kinks for now
-      {for( Int_t j=0; j<oldMuDstMaker->GetNKink(); j++ ) {
-	kinkMuDstMaker->SelectKink(j);
-      }}
+      if( doV0 )
+	// Apply selection criteria to the V0s
+	for( Int_t j=0; j<oldMuDstMaker->GetNV0(); j++ ) {
+	  StV0MuDst *v0j = oldMuDstMaker->GetV0(j);
+	  if( v0j->decayLengthV0() > v0DecayLength && 
+	      v0j->dcaV0ToPrimVertex() < v0DcaToPrimVertex &&
+	      ((v0j->dcaPosToPrimVertex() > v0DcaDaughtersToPrimVertex) ||
+	       (v0j->dcaNegToPrimVertex() > v0DcaDaughtersToPrimVertex)) &&
+	      v0j->dcaV0Daughters() < v0DcaDaughters &&
+	      v0j->topologyMapPos().numberOfHits(kTpcId) > v0NumTpcHits &&
+	      v0j->topologyMapNeg().numberOfHits(kTpcId) > v0NumTpcHits )
+	    v0MuDstMaker->SelectV0(j);
+	}
+      if( doXi ) 
+	// Apply selection criteria to the Xis
+	for( Int_t j=0; j<oldMuDstMaker->GetNXi(); j++ ) {
+	  StXiMuDst *xij = oldMuDstMaker->GetXi(j);
+	  if( xij->decayLengthXi() > xiDecayLength &&
+	      xij->dcaXiDaughters() < xiDcaDaughters &&
+	      xij->dcaV0Daughters() < xiDcaV0Daughters &&
+	      xij->dcaXiToPrimVertex() < xiDcaToPrimVertex &&
+	      xij->dcaV0ToPrimVertex() > xiDcaV0ToPrimVertex &&
+	      xij->dcaBachelorToPrimVertex() > xiDcaBachelorToPrimVertex )
+	    xiMuDstMaker->SelectXi(j);
+	}
+      if( doKink ) 
+	// Just copy the kinks for now
+	for( Int_t j=0; j<oldMuDstMaker->GetNKink(); j++ ) {
+	  kinkMuDstMaker->SelectKink(j);
+	}
     } else {
       {for( Int_t j=0; j<mNDstMakers; j++ )
 	newMuDstMakers[j]->AbortEvent();}
@@ -322,7 +349,7 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
   
     if( i != NEvents) chain.Clear();
     printf("*** Finished processing event %d\n",i);
-  }}
+  }
   
   // Finish
   if( NEvents >= 1 ) {
@@ -339,9 +366,8 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
   StMcEventMaker *mcEventReader;
   StAssociationMaker *associator;
   StRandyTopMapMaker *topoMapFixer;
-  Char_t *file, *dir, *outfile[3];
-  Char_t *prefix[3] = {"v0_", "xi_", "kink_"};
-  Int_t mNDstMakers;
+  Char_t *file, *dir, *outfile[3], *prefix[3];
+  Int_t mNDstMakers = 0;
 
   // Create a chain
   StChain chain("myChain");
@@ -373,17 +399,27 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
   // erasing the event.
   
   if( doFileSplit ) {
-    mNDstMakers = 3;
-    v0MuDstMaker = new StStrangeMuDstMaker("v0MuDstMaker");
-    xiMuDstMaker = new StStrangeMuDstMaker("xiMuDstMaker");
-    kinkMuDstMaker = new StStrangeMuDstMaker("kinkMuDstMaker");
-    v0MuDstMaker->DoV0();      // Selects V0 vertices for new micro-DST
-    xiMuDstMaker->DoXi();      // Selects Xi vertices for new micro-DST
-    kinkMuDstMaker->DoKink();  // Selects Kink vertices for new micro-DST
-    // Copy pointer to makers: access by name or via array of pointers
-    newMuDstMakers[0] = v0MuDstMaker;
-    newMuDstMakers[1] = xiMuDstMaker;
-    newMuDstMakers[2] = kinkMuDstMaker;
+    if( doV0 ) {
+      v0MuDstMaker = new StStrangeMuDstMaker("v0MuDstMaker");
+      v0MuDstMaker->DoV0();      // Selects V0 vertices for new micro-DST
+      newMuDstMakers[mNDstMakers] = v0MuDstMaker;
+      prefix[mNDstMakers] = "v0_";
+      mNDstMakers++;
+    }
+    if( doXi ) {
+      xiMuDstMaker = new StStrangeMuDstMaker("xiMuDstMaker");
+      xiMuDstMaker->DoXi();      // Selects Xi vertices for new micro-DST
+      newMuDstMakers[mNDstMakers] = xiMuDstMaker;
+      prefix[mNDstMakers] = "xi_";
+      mNDstMakers++;
+    }
+    if( doKink ) {
+      kinkMuDstMaker = new StStrangeMuDstMaker("kinkMuDstMaker");
+      kinkMuDstMaker->DoKink();  // Selects Kink vertices for new micro-DST
+      newMuDstMakers[mNDstMakers] = kinkMuDstMaker;
+      prefix[mNDstMakers] = "kink_";
+      mNDstMakers++;
+    }
     ParseFileName(output, &file, &dir);
     for(Int_t i=0; i<mNDstMakers; i++) {
       //      outfile[i] = strdup(dir);    // doesn't work - too short ?
@@ -400,9 +436,9 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
   } else {
     mNDstMakers = 1;
     newMuDstMakers[0] = new StStrangeMuDstMaker("newMuDstMaker");
-    newMuDstMakers[0]->DoV0();    // Selects V0 vertices for new micro-DST
-    newMuDstMakers[0]->DoXi();    // Selects Xi vertices for new micro-DST
-    newMuDstMakers[0]->DoKink();  // Selects Kink vertices for new micro-DST
+    if( doV0 ) newMuDstMakers[0]->DoV0();    // Selects V0s for new micro-DST
+    if( doXi ) newMuDstMakers[0]->DoXi();    // Selects Xis for new micro-DST
+    if( doKink ) newMuDstMakers[0]->DoKink();// Selects Kinks for new micro-DST
     newMuDstMakers[0]->SetWrite(output);
     if( doT0Abort ) 
       newMuDstMakers[0]->DoT0JitterAbort();
@@ -432,29 +468,33 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
     newMuDstMakers[i]->Cuts().Add("evPrimTracks",buff);
   }}
   // Specific cuts follow
-  sprintf(buff,"> %f",v0DecayLength);
-  v0MuDstMaker->Cuts().Add("v0DecayLength",buff);
-  sprintf(buff,"> %f",v0DcaDaughtersToPrimVertex);
-  v0MuDstMaker->Cuts().Add("dcaPosToPrimVertex || dcaNegToPrimVertex",buff);
-  sprintf(buff,"< %f",v0DcaToPrimVertex);
-  v0MuDstMaker->Cuts().Add("v0DcaToPrimVertex",buff);
-  sprintf(buff,"< %f",v0DcaDaughters);
-  v0MuDstMaker->Cuts().Add("v0DcaDaughters",buff);
-  sprintf(buff,"> %f",v0NumTpcHits);
-  v0MuDstMaker->Cuts().Add("v0NumTpcHits",buff);
-  sprintf(buff,"> %f",xiDecayLength);
-  xiMuDstMaker->Cuts().Add("xiDecayLength",buff);
-  sprintf(buff,"< %f",xiDcaDaughters);
-  xiMuDstMaker->Cuts().Add("xiDcaDaughters",buff);
-  sprintf(buff,"< %f",xiDcaV0Daughters);
-  xiMuDstMaker->Cuts().Add("xiDcaV0Daughters",buff);
-  sprintf(buff,"< %f",xiDcaToPrimVertex);
-  xiMuDstMaker->Cuts().Add("xiDcaToPrimVertex",buff);
-  sprintf(buff,"> %f",xiDcaV0ToPrimVertex);
-  xiMuDstMaker->Cuts().Add("xiDcaV0ToPrimVertex",buff);
-  sprintf(buff,"> %f",xiDcaBachelorToPrimVertex);
-  xiMuDstMaker->Cuts().Add("xiDcaBachelorToPrimVertex",buff);
-  
+  if( doV0 ) {
+    sprintf(buff,"> %f",v0DecayLength);
+    v0MuDstMaker->Cuts().Add("v0DecayLength",buff);
+    sprintf(buff,"> %f",v0DcaDaughtersToPrimVertex);
+    v0MuDstMaker->Cuts().Add("dcaPosToPrimVertex || dcaNegToPrimVertex",buff);
+    sprintf(buff,"< %f",v0DcaToPrimVertex);
+    v0MuDstMaker->Cuts().Add("v0DcaToPrimVertex",buff);
+    sprintf(buff,"< %f",v0DcaDaughters);
+    v0MuDstMaker->Cuts().Add("v0DcaDaughters",buff);
+    sprintf(buff,"> %f",v0NumTpcHits);
+    v0MuDstMaker->Cuts().Add("v0NumTpcHits",buff);
+  }
+  if( doXi ) {
+    sprintf(buff,"> %f",xiDecayLength);
+    xiMuDstMaker->Cuts().Add("xiDecayLength",buff);
+    sprintf(buff,"< %f",xiDcaDaughters);
+    xiMuDstMaker->Cuts().Add("xiDcaDaughters",buff);
+    sprintf(buff,"< %f",xiDcaV0Daughters);
+    xiMuDstMaker->Cuts().Add("xiDcaV0Daughters",buff);
+    sprintf(buff,"< %f",xiDcaToPrimVertex);
+    xiMuDstMaker->Cuts().Add("xiDcaToPrimVertex",buff);
+    sprintf(buff,"> %f",xiDcaV0ToPrimVertex);
+    xiMuDstMaker->Cuts().Add("xiDcaV0ToPrimVertex",buff);
+    sprintf(buff,"> %f",xiDcaBachelorToPrimVertex);
+    xiMuDstMaker->Cuts().Add("xiDcaBachelorToPrimVertex",buff);
+  }  
+
   gMessMgr->Info() << "evPrimVertexZ < " << evPrimVertexZ << endm;
   gMessMgr->Info() << "evPrimTracks > " << evPrimTracks << endm;
   gMessMgr->Info() << "v0DecayLength > " << v0DecayLength << endm;
@@ -492,33 +532,36 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
     unsigned int primaryTracks = oldMuDstMaker->GetEvent()->primaryTracks();
     // Apply cut on the primary vertex Z position
     if (TMath::Abs(primZ)<evPrimVertexZ && primaryTracks>evPrimTracks) {
-      // Apply selection criteria to the V0s
-      for( Int_t j=0; j<oldMuDstMaker->GetNV0(); j++ ) {
-	StV0MuDst *v0j = oldMuDstMaker->GetV0(j);
-	if( v0j->decayLengthV0() > v0DecayLength && 
-	    v0j->dcaV0ToPrimVertex() < v0DcaToPrimVertex &&
-	    ((v0j->dcaPosToPrimVertex() > v0DcaDaughtersToPrimVertex) ||
-	     (v0j->dcaNegToPrimVertex() > v0DcaDaughtersToPrimVertex)) &&
-	    v0j->dcaV0Daughters() < v0DcaDaughters &&
-	    v0j->topologyMapPos().numberOfHits(kTpcId) > v0NumTpcHits &&
-	    v0j->topologyMapNeg().numberOfHits(kTpcId) > v0NumTpcHits )
-	  v0MuDstMaker->SelectV0(j);
-      }
-      // Apply selection criteria to the Xis
-      {for( Int_t j=0; j<oldMuDstMaker->GetNXi(); j++ ) {
-	StXiMuDst *xij = oldMuDstMaker->GetXi(j);
-	if( xij->decayLengthXi() > xiDecayLength &&
-	    xij->dcaXiDaughters() < xiDcaDaughters &&
-	    xij->dcaV0Daughters() < xiDcaV0Daughters &&
-	    xij->dcaXiToPrimVertex() < xiDcaToPrimVertex &&
-	    xij->dcaV0ToPrimVertex() > xiDcaV0ToPrimVertex &&
-	    xij->dcaBachelorToPrimVertex() > xiDcaBachelorToPrimVertex )
-	  xiMuDstMaker->SelectXi(j);
-      }}
-      // Just copy the kinks for now
-      {for( Int_t j=0; j<oldMuDstMaker->GetNKink(); j++ ) {
-	kinkMuDstMaker->SelectKink(j);
-      }}
+      if( doV0 )
+	// Apply selection criteria to the V0s
+	for( Int_t j=0; j<oldMuDstMaker->GetNV0(); j++ ) {
+	  StV0MuDst *v0j = oldMuDstMaker->GetV0(j);
+	  if( v0j->decayLengthV0() > v0DecayLength && 
+	      v0j->dcaV0ToPrimVertex() < v0DcaToPrimVertex &&
+	      ((v0j->dcaPosToPrimVertex() > v0DcaDaughtersToPrimVertex) ||
+	       (v0j->dcaNegToPrimVertex() > v0DcaDaughtersToPrimVertex)) &&
+	      v0j->dcaV0Daughters() < v0DcaDaughters &&
+	      v0j->topologyMapPos().numberOfHits(kTpcId) > v0NumTpcHits &&
+	      v0j->topologyMapNeg().numberOfHits(kTpcId) > v0NumTpcHits )
+	    v0MuDstMaker->SelectV0(j);
+	}
+      if( doXi )
+	// Apply selection criteria to the Xis
+	for( Int_t j=0; j<oldMuDstMaker->GetNXi(); j++ ) {
+	  StXiMuDst *xij = oldMuDstMaker->GetXi(j);
+	  if( xij->decayLengthXi() > xiDecayLength &&
+	      xij->dcaXiDaughters() < xiDcaDaughters &&
+	      xij->dcaV0Daughters() < xiDcaV0Daughters &&
+	      xij->dcaXiToPrimVertex() < xiDcaToPrimVertex &&
+	      xij->dcaV0ToPrimVertex() > xiDcaV0ToPrimVertex &&
+	      xij->dcaBachelorToPrimVertex() > xiDcaBachelorToPrimVertex )
+	    xiMuDstMaker->SelectXi(j);
+	}
+      if( doKink ) 
+	// Just copy the kinks for now
+	for( Int_t j=0; j<oldMuDstMaker->GetNKink(); j++ ) {
+	  kinkMuDstMaker->SelectKink(j);
+	}
     } else {
       {for( Int_t j=0; j<mNDstMakers; j++ )
 	newMuDstMakers[j]->AbortEvent();}

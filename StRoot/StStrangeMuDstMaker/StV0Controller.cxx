@@ -1,5 +1,8 @@
-// $Id: StV0Controller.cxx,v 3.9 2002/06/13 16:06:01 genevb Exp $
+// $Id: StV0Controller.cxx,v 3.10 2002/08/20 12:45:35 jones Exp $
 // $Log: StV0Controller.cxx,v $
+// Revision 3.10  2002/08/20 12:45:35  jones
+// Fix to MakeCreateMcDst in StV0Controller; better file handling in StStrangeMuDstPlayer
+//
 // Revision 3.9  2002/06/13 16:06:01  genevb
 // Additional security against zombies in StEvent vectors
 //
@@ -163,16 +166,16 @@ Int_t StV0Controller::MakeCreateMcDst(StMcVertex* mcVert) {
           fabs(z - tmpV0->decayVertexV0Z()) < 0.00001 )
       { indexRecoArray = i; break; }
     }
+  }
 
-    StSPtrVecMcTrack& Daughters = mcVert->daughters();
-    for (StMcTrackIterator DTrackIt = Daughters.begin();
-                           DTrackIt != Daughters.end(); DTrackIt++) {
-      switch ((Int_t)(*DTrackIt)->particleDefinition()->charge()) {
-        case ( 1) : // Positive
-          Pos = (*DTrackIt); break;
-        case (-1) : // Negative
-          Neg = (*DTrackIt); break;
-      }
+  StSPtrVecMcTrack& Daughters = mcVert->daughters();
+  for (StMcTrackIterator DTrackIt = Daughters.begin();
+       DTrackIt != Daughters.end(); DTrackIt++) {
+    switch ((Int_t)(*DTrackIt)->particleDefinition()->charge()) {
+    case ( 1) : // Positive
+      Pos = (*DTrackIt); break;
+    case (-1) : // Negative
+      Neg = (*DTrackIt); break;
     }
   }
 
