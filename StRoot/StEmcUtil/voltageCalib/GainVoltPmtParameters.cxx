@@ -98,25 +98,22 @@ void GainVoltPmtParameters::fit()
 ostream& operator<<(ostream& os, GainVoltPmtParameters& object)
 {
   os << object._id << "\t";
-  if (object.ioMode&1)
-    os << object._a <<"\t" << object._b<< "\t";
+  if (object.ioMode&1) os << object._a <<"\t" << object._b<< "\t";
   if (object.ioMode&2)
-    {
-      map<double,double>::const_iterator i;
-      if (object.ioMode&4)
-	{
-	  os << object.getNPoints()<<"\t";
-	  for (i=object._data.begin();i!=object._data.end();i++)
-	    os << i->first << "\t" << i->second<<"\t";
-	 }
-       else
-	 {
-	   i=object._data.begin(); i++;i++;
-	   os <<  i->first <<"\t";
-	   for (i=object._data.begin();i!=object._data.end();i++)
-	     os << i->second << "\t";
-	 }
-    }
+  {
+     map<double,double>::const_iterator i;
+     if (object.ioMode&4)
+	   {
+	    os << object.getNPoints()<<"\t";
+	    for (i=object._data.begin();i!=object._data.end();i++) os << i->first << "\t" << i->second<<"\t";
+	   }
+     else
+	   {
+	     i=object._data.begin(); i++;i++;
+	     os <<  i->first <<"\t";
+	     for (i=object._data.begin();i!=object._data.end();i++) os << i->second << "\t";
+	   }
+  }
   os << endl;
   return os;
 }

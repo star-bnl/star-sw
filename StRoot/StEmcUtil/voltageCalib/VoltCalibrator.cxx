@@ -84,32 +84,50 @@ void VoltCalibrator::process()
   // loop on all channels, read current volt, read requested gain change
   // calculate new voltage, write voltage 
   PmtIdentifier pmtId;
+  PmtIdentifier pmtIdCurrent;
+  double mygain[4800];
   double g,v,newV,cGain;
-  vector<GainVoltPmtParameters*>::iterator i;
-  for (i=calculator.begin();i!=calculator.end();i++)
+  
+  // read all gains from file and save in this vector
+  while(!gain.eof())
+  {
+    gain >> pmtId >>g;
+    mygain[pmtId._softId-1]=g;
+  }
+  
+  // loop over current voltage database file
+  while(!currentVolt.eof())
+  {
+    currentVolt >> pmtIdCurrent >> v;
+	  long soft = pmtIdCurrent._softId;
+    long serial = pmtIdCurrent._serial;
+    g = mygain[soft-1];
+    if(g==0 || g==1) newV = v;
+    else
     {
-			gain>>pmtId>>g;
-      long a = pmtId._serial;
-			long soft = pmtId._softId;
-      // read current voltage
-      currentVolt >> pmtId>>v;
-			if(g==1 || g==0) newV=v;
-			else
-			{
-      	// current gain
-      	cGain = (*i)->getGain(v);
-      	// new voltage
-      	newV = (*i)->getVoltage(g*cGain);
-			}
-			cout <<"id = "<<soft<<"  pmtId = "<<a<<"  voltage = "<<v<<"  cGain = "<<cGain<<"  new V = "<<newV<<"  correction = "<< g<<endl;
-      if (a!=pmtId._serial)
-	{
-	  cout <<"Gain and HV Files are not in synch - abort"<<endl;
-	  return;
-	}
-      // save the values to file.
-      newVolt<<pmtId<<"\t"<<newV<<endl;
+      vector<GainVoltPmtParameters*>::iterator i;
+      for (i=calculator.begin();i!=calculator.end();i++)
+      {
+        PmtIdentifier identifier = (*i)->getPmtIdentifier();
+        if(identifier._serial==serial)
+        {
+          cout <<"PMT found in DB  | ";
+      	  cGain = (*i)->getGain(v);
+      	  newV  = (*i)->getVoltage(g*cGain);
+          goto NEXT;          
+        }
+      }
+      double A = 2.56e-29;
+      double B = 10.71;
+      cGain = exp(A+B*log(v));
+      newV = exp(log(cGain*g)/B-A);
+      cout <<"PMT is not in DB | ";
     }
+    NEXT:
+		cout <<"id = "<<soft<<"  pmtId = "<<pmtIdCurrent<<"  V = "<<v<<"  cGain = "<<cGain<<"  newV = "<<newV<<"  corr = "<<g<<endl;
+    newVolt<<pmtIdCurrent<<"\t"<<newV<<endl;
+  }
+  
   ref.close();
   gain.close();
   currentVolt.close();
