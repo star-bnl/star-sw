@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.h,v 2.1 1999/10/28 22:28:09 ullrich Exp $
+ * $Id: StVertex.h,v 2.2 2000/01/11 19:22:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
- * Revision 2.1  1999/10/28 22:28:09  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.2  2000/01/11 19:22:14  ullrich
+ * Added non-const parent() method.
  *
  * Revision 2.4  2000/02/10 18:49:08  ullrich
  * Fixed typo introduced at last check-in.
@@ -47,6 +47,7 @@ public:
     // StVertex(const StVertex&);            use default
     // StVertex& operator=(const StVertex&); use default
     ULong_t                flag() const;
+    
     Int_t operator==(const StVertex&) const;
     Int_t operator!=(const StVertex&) const;
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 2.3 1999/12/21 15:09:23 ullrich Exp $
+ * $Id: StVertex.cxx,v 2.4 2000/01/11 19:22:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
- * Revision 2.3  1999/12/21 15:09:23  ullrich
- * Modified to cope with new compiler version on Sun (CC5.0).
+ * Revision 2.4  2000/01/11 19:22:12  ullrich
+ * Added non-const parent() method.
  *
  * Revision 2.5  2000/02/10 16:32:19  ullrich
  * flag changed from unsigned to signed long
@@ -43,7 +43,7 @@ using std::copy;
 
 ClassImp(StVertex)
 
-static const char rcsid[] = "$Id: StVertex.cxx,v 2.3 1999/12/21 15:09:23 ullrich Exp $";
+static const char rcsid[] = "$Id: StVertex.cxx,v 2.4 2000/01/11 19:22:12 ullrich Exp $";
 
 StVertex::StVertex()
 {
@@ -102,6 +102,9 @@ StVertex::covariantMatrix() const
     return m;
 }
     
+StThreeVectorF
+StVertex::positionError() const
+{
     return StThreeVectorF(sqrt(mCovariantMatrix[0]), sqrt(mCovariantMatrix[2]), sqrt(mCovariantMatrix[5]));
 }
 
