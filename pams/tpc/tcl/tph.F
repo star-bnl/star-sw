@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.24 2000/02/26 01:51:45 snelling Exp $
+* $Id: tph.F,v 1.25 2000/07/02 19:37:47 snelling Exp $
 * $Log: tph.F,v $
+* Revision 1.25  2000/07/02 19:37:47  snelling
+* Fixed min time, max time, min pad, max pad for single hit clusters
+*
 * Revision 1.24  2000/02/26 01:51:45  snelling
 * cleanup related to Db
 *
@@ -76,13 +79,6 @@ c functions:
       integer tpc_row_to_y
       integer tpc_local_to_global
       integer tpc_drift_velocity !function that returns as a first
-c                                !argument the drift velocity
-c                                !two next arguments dummy             
-c
-c      integer tgc_pad_to_x
-c      integer tgc_row_to_y
-c      integer tgc_local_to_global
-c      integer tgc_drift_velocity !function that returns as a first
 c                                !argument the drift velocity
 c                                !two next arguments dummy             
 c
@@ -297,10 +293,10 @@ c     Fill TPCLUSTER Table
 c     fill array if fit-isolated cluster is called without mountainfinder
 c     if nhits gt 1 then this array is already filled.
            if(nhits .eq. 1) then
-              ipad_hit_lo(ihit) = ipad_lo
-              ipad_hit_hi(ihit) = ipad_hi
-              itdc_hit_lo(ihit) = itdc_lo
-              itdc_hit_hi(ihit) = itdc_hi
+              ipad_hit_lo(1) = ipad_lo
+              ipad_hit_hi(1) = ipad_hi
+              itdc_hit_lo(1) = itdc_lo
+              itdc_hit_hi(1) = itdc_hi
            endif
            
 
