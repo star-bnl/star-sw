@@ -1,5 +1,8 @@
-// $Id: StArray.cxx,v 1.18 1999/11/17 14:22:09 perev Exp $
+// $Id: StArray.cxx,v 1.19 1999/11/19 20:40:12 perev Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.19  1999/11/19 20:40:12  perev
+// StObjArray::Streamer==TCollection::Streamer(b)
+//
 // Revision 1.18  1999/11/17 14:22:09  perev
 // bug in dtor fix
 //
@@ -201,8 +204,8 @@ Bool_t 	StObjArray::empty() const {return IsEmpty();}
 TObject** StObjArray::GetCell(Int_t idx) const{return &((*fArr)[idx]);}
 
 //______________________________________________________________________________
-void StObjArray::Streamer(TBuffer &)
-{;}
+void StObjArray::Streamer(TBuffer &b)
+{TCollection::Streamer(b);}
 //______________________________________________________________________________
 // void StObjArray::ShowMembers(TMemberInspector &, char *){}
 //______________________________________________________________________________
