@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.cc,v 1.7 1999/11/10 15:46:25 calderon Exp $
+ * $Id: StTrsAnalogSignalGenerator.cc,v 1.8 2000/01/10 23:14:30 lasiuk Exp $
  *
  * Author: brian Nov 3, 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.cc,v $
+ * Revision 1.8  2000/01/10 23:14:30  lasiuk
+ * Include MACROS for compatiblity with SUN CC5
+ *
  * Revision 1.7  1999/11/10 15:46:25  calderon
  * Made changes to reduce timing, including:
  * Made coordinate transfrom a data member of StTrsAnalogSignalGenerator
@@ -54,6 +57,8 @@
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
+
+
 
 HepJamesRandom  StTrsAnalogSignalGenerator::mEngine;
 RandGauss       StTrsAnalogSignalGenerator::mGaussDistribution(mEngine);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsIstream.cc,v 1.7 1999/12/08 02:10:42 calderon Exp $
+ * $Id: StTrsIstream.cc,v 1.8 2000/01/10 23:14:30 lasiuk Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsIstream.cc,v $
+ * Revision 1.8  2000/01/10 23:14:30  lasiuk
+ * Include MACROS for compatiblity with SUN CC5
+ *
  * Revision 1.7  1999/12/08 02:10:42  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -56,22 +59,30 @@
 #include "StTrsDigitalSector.hh"
 #include "StTpcDbGeometry.hh"
 
+#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+//using std::istream_iterator;
+//using std::ostream_iterator;
+using std::transform;
+#endif
+
+
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<int> intVec;
 typedef vector<unsigned char> digitalTimeBins;
+#if !defined __SUNPRO_CC >= 0x500
 typedef istream_iterator<unsigned char> istream_iter_uns_char;
 typedef ostream_iterator<int> ostream_iter_int;
-
-
+#endif
 #else
 typedef vector<int, allocator<int> > intVec;
 typedef vector<unsigned char, allocator<unsigned char> > digitalTimeBins;
+#if !defined __SUNPRO_CC >= 0x500
 typedef istream_iterator<unsigned char,ptrdiff_t> istream_iter_uns_char;
 typedef ostream_iterator<int> ostream_iter_int;
-
+#endif
 #endif
 
-#ifdef __SUNPRO_CC
+#if defined (__SUNPRO_CC) && __SUNPRO_CC < 0x500
 inline istream& operator>>( istream& stream, string& str )
 {
     char buffer[ 1024 ];
@@ -94,9 +105,11 @@ StTrsIstream::StTrsIstream(string streamName, StTpcGeometry* dB)
     //
     // Read Header
     //
-    string oneWord;
+    //string oneWord;
+    char* oneWord = 0;
+    
     const string eohMarker = "##";
-    while (oneWord != eohMarker) {
+    while (oneWord != eohMarker.c_str()) {
 	ifs >> oneWord;
 	if (oneWord == string("events")) {
 	    ifs >> mEvents;
@@ -191,7 +204,10 @@ void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
 			    cout << "     " << iRow+1;
 			    cout << "     " << iPad+1;
 			    cout << "     ";
+#if !defined __SUNPRO_CC >= 0x500
+			    // DO NOT DO THIS WITH CC5 &^&*%
 			    copy (DataOut.begin(), DataOut.end(), ostream_iter_int(cout, " "));
+#endif
 			    cout << endl;
 			} // if there's data to write...
 		    } // pad

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.18 1999/12/08 02:10:43 calderon Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.19 2000/01/10 23:14:31 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.19  2000/01/10 23:14:31  lasiuk
+ * Include MACROS for compatiblity with SUN CC5
+ *
  * Revision 1.18  1999/12/08 02:10:43  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -98,7 +101,20 @@
 #include <algorithm>
 #include <unistd.h> // sleep
 
+#ifndef ST_NO_EXCEPTIONS
+#   include <stdexcept>
+#   if !defined(ST_NO_NAMESPACES)
+        using std::range_error;
+#   endif
+#endif
+#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+using std::min;
+using std::max;
+#endif
 #include "SystemOfUnits.h"
+#ifndef ST_NO_NAMESPACES
+using namespace units;
+#endif
 #include "StTrsWireHistogram.hh"
 
 

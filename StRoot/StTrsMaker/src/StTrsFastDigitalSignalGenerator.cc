@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
+ * Revision 1.22  2000/01/10 23:14:30  lasiuk
+ * Include MACROS for compatiblity with SUN CC5
+ *
  * Revision 1.21  1999/12/08 02:10:42  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -49,8 +52,8 @@
  *
  **************************************************************************/
 #include <unistd.h>
-
 #include <utility>
+
 #include "StTrsFastDigitalSignalGenerator.hh"
 
 StTrsDigitalSignalGenerator* StTrsFastDigitalSignalGenerator::mInstance = 0; // static member

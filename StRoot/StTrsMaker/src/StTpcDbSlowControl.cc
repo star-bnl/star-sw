@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbSlowControl.cc,v 1.1 1999/10/11 23:55:21 calderon Exp $
+ * $Id: StTpcDbSlowControl.cc,v 1.2 2000/01/10 23:14:29 lasiuk Exp $
  *
  * Authors: Manuel Calderon de la Barca Sanchez
  *          Brian Lasiuk
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbSlowControl.cc,v $
+ * Revision 1.2  2000/01/10 23:14:29  lasiuk
+ * Include MACROS for compatiblity with SUN CC5
+ *
  * Revision 1.1  1999/10/11 23:55:21  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
@@ -24,6 +27,14 @@
  **************************************************************************/
 #ifdef __ROOT__
 #include "StTpcDbSlowControl.hh"
+
+#ifndef ST_NO_EXCEPTIONS
+#   include <stdexcept>
+#   if !defined(ST_NO_NAMESPACES)
+        using std::invalid_argument;
+#   endif
+#endif
+
 //#include "StUtilities/StMessMgr.h"
 
 

@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcDbElectronics.cc,v 1.2 1999/12/08 02:10:41 calderon Exp $
+ * $Id: StTpcDbElectronics.cc,v 1.3 2000/01/10 23:14:29 lasiuk Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcDbElectronics.cc,v $
+ * Revision 1.3  2000/01/10 23:14:29  lasiuk
+ * Include MACROS for compatiblity with SUN CC5
+ *
  * Revision 1.2  1999/12/08 02:10:41  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -27,6 +30,13 @@
 #include "StTpcDbElectronics.hh"
 //#include "StUtilities/StMessMgr.h"
 #include "StTpcDb/StTpcDb.h"
+
+#ifndef ST_NO_EXCEPTIONS
+#   include <stdexcept>
+#   if !defined(ST_NO_NAMESPACES)
+        using std::invalid_argument;
+#   endif
+#endif
 
 StTpcElectronics* StTpcDbElectronics::mInstance = 0; // static data member
 

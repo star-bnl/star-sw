@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.20 1999/12/08 02:10:42 calderon Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.21 2000/01/10 23:14:30 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.21  2000/01/10 23:14:30  lasiuk
+ * Include MACROS for compatiblity with SUN CC5
+ *
  * Revision 1.20  1999/12/08 02:10:42  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -86,9 +89,12 @@
 #include "StTrsChargeSegment.hh"
 
 #include <algorithm>
-#if  defined(__sun) && ! defined(__GNUG__)
+#if  defined(__SUNPRO_CC) && __SUNPRO_CC < 0x500
 #include <ospace/stl/src/randgen.cpp>
+#else
+using std::random_shuffle;
 #endif
+
 #include "StPhysicalHelix.hh"
 
 #include "StTpcCoordinateTransform.hh"

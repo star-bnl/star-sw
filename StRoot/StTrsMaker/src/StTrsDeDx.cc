@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.12 1999/10/22 00:00:13 calderon Exp $
+ * $Id: StTrsDeDx.cc,v 1.13 2000/01/10 23:14:30 lasiuk Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
+ * Revision 1.13  2000/01/10 23:14:30  lasiuk
+ * Include MACROS for compatiblity with SUN CC5
+ *
  * Revision 1.12  1999/10/22 00:00:13  calderon
  * -added macro to use Erf instead of erf if we have HP and Root together.
  * -constructor with char* for StTrsDedx so solaris doesn't complain
@@ -88,6 +91,9 @@
  ******************************************************************/
 #ifndef ST_NO_EXCEPTIONS
 #include <stdexcept>
+#   if !defined(ST_NO_NAMESPACES)
+        using std::invalid_argument;
+#   endif
 #endif
 #include <math.h>
 // SCL

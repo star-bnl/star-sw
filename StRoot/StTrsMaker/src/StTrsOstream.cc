@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsOstream.cc,v 1.5 1999/12/08 02:10:42 calderon Exp $
+ * $Id: StTrsOstream.cc,v 1.6 2000/01/10 23:14:30 lasiuk Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsOstream.cc,v $
+ * Revision 1.6  2000/01/10 23:14:30  lasiuk
+ * Include MACROS for compatiblity with SUN CC5
+ *
  * Revision 1.5  1999/12/08 02:10:42  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -55,19 +58,25 @@
 #include "StTrsDigitalSector.hh"
 #include "StTpcGeometry.hh"
 
+#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+using std::transform;
+#endif
+
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<int> intVec;
 typedef vector<unsigned char> digitalTimeBins;
+#if !defined __SUNPRO_CC >= 0x500
 typedef istream_iterator<unsigned char> istream_iter_uns_char;
 typedef ostream_iterator<int> ostream_iter_int;
-
+#endif
 
 #else
 typedef vector<int, allocator<int> > intVec;
 typedef vector<unsigned char, allocator<unsigned char> > digitalTimeBins;
+#if !defined __SUNPRO_CC >= 0x500
 typedef istream_iterator<unsigned char,ptrdiff_t> istream_iter_uns_char;
 typedef ostream_iterator<int> ostream_iter_int;
-
+#endif
 #endif
 
 int getInt2(unsigned char a) { return static_cast<int>(a);}
@@ -146,7 +155,9 @@ void StTrsOstream::writeTrsEvent(StTrsRawDataEvent* EventData)
 				if (false) { // to debug, change to true
 				intVec DataOut(lengthData);
 				transform (aDigitalSector->mData[iRow][iPad].begin(), aDigitalSector->mData[iRow][iPad].end(), DataOut.begin(), getInt2);
+#if !defined __SUNPRO_CC >= 0x500
 				copy (DataOut.begin(), DataOut.end(), ostream_iter_int(cout, " "));
+#endif
 				cout << endl;
 				cout << "Wrote..." << endl;
 				}
