@@ -1,11 +1,15 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.37 2004/08/06 22:23:29 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.38 2004/08/10 14:21:13 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.38  2004/08/10 14:21:13  calderon
+ * Use the firstHit from the dynamic_cast, to avoid a compiler warning
+ * for an unused variable.
+ *
  * Revision 2.37  2004/08/06 22:23:29  calderon
  * Modified the code to use the setNumberOfxxxPoints(unsigned char,StDetectorId)
  * methods of StTrack, StTrackDetectorInfo, StTrackFitTraits, and to use
@@ -595,7 +599,7 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
   vector<StMeasuredPoint*> hitVec = track->stHits();
   vector<StMeasuredPoint*>::iterator first = hitVec.begin();
   if (StHit* firstHit = dynamic_cast<StHit*> (*first)) {
-      detInfo->setFirstPoint((*first)->position());
+      detInfo->setFirstPoint(firstHit->position());
   }
   else {
       first++;
