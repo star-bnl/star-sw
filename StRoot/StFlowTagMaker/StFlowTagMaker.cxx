@@ -1,13 +1,18 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.7 1999/12/15 21:56:21 posk Exp $
+// $Id: StFlowTagMaker.cxx,v 1.8 1999/12/21 21:28:33 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
+//////////////////////////////////////////////////////////////////////
+//
 // Description:  Maker to fill the Flow EbyE Tag database
 //
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.8  1999/12/21 21:28:33  posk
+// Updated the README file.
+//
 // Revision 1.7  1999/12/15 21:56:21  posk
 // Increased number of harmonics from 4 to 6.
 //
@@ -26,8 +31,6 @@
 // Revision 1.2  1999/07/26 23:39:34  snelling
 // added histograms for FlowTag QA
 //
-// FlowTagMaker: fills FlowTags defined by EbE workgroup
-//
 //  
 //////////////////////////////////////////////////////////////////////
 
@@ -36,6 +39,7 @@
 #include <math.h>
 #include "../StFlowMaker/StFlowMaker.hh"
 #include "../StFlowMaker/StFlowEvent.hh"
+#include "../StFlowMaker/StFlowConstants.hh"
 #include "StFlowTagMaker.hh"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -94,7 +98,7 @@ Int_t StFlowTagMaker::Make()
 
 void StFlowTagMaker::PrintInfo() 
 {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.7 1999/12/15 21:56:21 posk Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.8 1999/12/21 21:28:33 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -265,25 +269,25 @@ Int_t StFlowTagMaker::fillHistograms()
     histSubEvents[0].histHarmonics[j].mHistMult->Fill(pFlowTag->na[j]);
     histSubEvents[0].histHarmonics[j].mHist_q->
       Fill(sqrt(pFlowTag->qxa[j]*pFlowTag->qxa[j] +
-	pFlowTag->qya[j]*pFlowTag->qya[j]) / sqrt(pFlowTag->na[j]));
+	pFlowTag->qya[j]*pFlowTag->qya[j]) / sqrt((float)(pFlowTag->na[j])));
     histSubEvents[1].histHarmonics[j].mHistMeanPt->
       Fill(pFlowTag->sptb[j]);
     histSubEvents[1].histHarmonics[j].mHistMult->Fill(pFlowTag->nb[j]);
     histSubEvents[1].histHarmonics[j].mHist_q->
       Fill(sqrt(pFlowTag->qxb[j]*pFlowTag->qxb[j] +
-	pFlowTag->qyb[j]*pFlowTag->qyb[j]) / sqrt(pFlowTag->nb[j]));
+	pFlowTag->qyb[j]*pFlowTag->qyb[j]) / sqrt((float)(pFlowTag->nb[j])));
     histSubEvents[2].histHarmonics[j].mHistMeanPt->
       Fill(pFlowTag->sptc[j]);
     histSubEvents[2].histHarmonics[j].mHistMult->Fill(pFlowTag->nc[j]);
     histSubEvents[2].histHarmonics[j].mHist_q->
       Fill(sqrt(pFlowTag->qxc[j]*pFlowTag->qxc[j] +
-        pFlowTag->qyc[j]*pFlowTag->qyc[j]) / sqrt(pFlowTag->nc[j]));
+        pFlowTag->qyc[j]*pFlowTag->qyc[j]) / sqrt((float)(pFlowTag->nc[j])));
     histSubEvents[3].histHarmonics[j].mHistMeanPt->
       Fill(pFlowTag->sptd[j]);
     histSubEvents[3].histHarmonics[j].mHistMult->Fill(pFlowTag->nd[j]);
     histSubEvents[3].histHarmonics[j].mHist_q->
       Fill(sqrt(pFlowTag->qxd[j]*pFlowTag->qxd[j] +
-        pFlowTag->qyd[j]*pFlowTag->qyd[j]) / sqrt(pFlowTag->nd[j]));
+        pFlowTag->qyd[j]*pFlowTag->qyd[j]) / sqrt((float)(pFlowTag->nd[j])));
 
     float EventPlaneAngle1 = atan2(pFlowTag->qya[j], pFlowTag->qxa[j]) / order;
     if (EventPlaneAngle1 < 0.) {EventPlaneAngle1 += twopi / order;}

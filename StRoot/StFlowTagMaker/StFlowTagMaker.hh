@@ -1,10 +1,11 @@
-#ifndef StFlowTagMaker_HH
-#define StFlowTagMaker_HH
-
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.hh
-// $Id: StFlowTagMaker.hh,v 1.3 1999/12/15 21:56:23 posk Exp $
+// $Id: StFlowTagMaker.hh,v 1.4 1999/12/21 21:28:34 posk Exp $
+//
+// Author List: 
+//  Raimond Snellings and Art Poskanzer, LBNL, 6/99
+///////////////////////////////////////////////////////////////////////////////
 //
 // Description: 
 //  Maker to fill Tag database for flow analysis
@@ -12,13 +13,14 @@
 // Environment:
 //  Software developed for the STAR Detector at LBNL
 //
-// Author List: 
-//  Raimond Snellings and Art Poskanzer, LBNL, 6/99
 //
 //////////////////////////////////////////////////////////////////////
 //
 // History:
 // $Log: StFlowTagMaker.hh,v $
+// Revision 1.4  1999/12/21 21:28:34  posk
+// Updated the README file.
+//
 // Revision 1.3  1999/12/15 21:56:23  posk
 // Increased number of harmonics from 4 to 6.
 //
@@ -40,6 +42,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef StFlowTagMaker_HH
+#define StFlowTagMaker_HH
 #include <iostream.h>
 #include <stdlib.h>
 #include "StMaker.h"

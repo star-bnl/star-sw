@@ -1,11 +1,21 @@
-StFlowAnalysisMaker
+Files:		StFlowAnalysisMaker.cxx
+		StFlowAnalysisMaker.hh
+		plot.C	
+Author:		Art Poskanzer and Raimond Snellings
+Date:		Dec 1999
+Description:
 
-Reads the tags
-Calculates event plane angle of full event
-Calculates magnitude of Q for full event
-Removes autocorrelation of a particle with 
-	respect to the event plane 
-	(Reason for storing x and y components)
-Calculates the event plane resolution from 
-	the correlation of sub-event event planes 
-	(Reason for storing values for sub-events)
+Makes histograms for the flow analysis. If the FlowTagDB exist, it
+reads from it. Otherwise, it reads the event quantities from
+StFlowEvent. In either case it reads the particle quantities from
+StFlowEvent. It removes autocorrelations of each particle with respect
+to the event plane and for each harmonic makes a 2D histogram of v
+vs. y and p_t.
+
+In Finish it calculates the event plane resolution from the
+correlation of sub-event event planes. It then corrects the v
+histograms for the event plane resolution. It fits the q histogram
+with the q distribution. It calculates the PhiWgts needed to make the
+event plane isotropic in the lab and outputs them as
+flowPhiWgtNew.hist.root . To use these PhiWgts in the next analysis
+you have to copy them to flowPhiWgt.hist.root .

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.hh,v 1.4 1999/12/21 01:19:28 posk Exp $
+// $Id: StFlowAnalysisMaker.hh,v 1.5 1999/12/21 21:29:47 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.hh,v $
+// Revision 1.5  1999/12/21 21:29:47  posk
+// Updated the README file.
+//
 // Revision 1.4  1999/12/21 01:19:28  posk
 // Added more histograms.
 //
@@ -61,12 +64,10 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
 
-private:
+protected:
 
   void     fillFromTags();
   void     fillFromFlowEvent();
-  void     fillEventHistograms();
-  void     fillParticleHistograms();
 
   StFlowEvent*  pFlowEvent; //!
   FlowTag_st*   pFlowTag;   //!
@@ -83,6 +84,11 @@ private:
   Float_t  mRes[Flow::nSels][Flow::nHars];      // event plane resolution
   Float_t  mResErr[Flow::nSels][Flow::nHars];   // event plane resolution error
  
+private:
+
+  void     fillEventHistograms();
+  void     fillParticleHistograms();
+
   // for single histograms
   TH1F*     mHistCharge;        //!
   TH1F*     mHistImpactPar;     //!

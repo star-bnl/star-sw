@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.9 1999/12/21 01:11:00 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.10 1999/12/21 21:30:53 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //////////////////////////////////////////////////////////////////////
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.10  1999/12/21 21:30:53  posk
+// Updated the README file.
+//
 // Revision 1.9  1999/12/21 01:11:00  posk
 // Added more quantities to StFlowEvent.
 //
@@ -41,6 +44,9 @@
 //
 //////////////////////////////////////////////////////////////////////
 
+#include <iostream.h>
+#include <stdlib.h>
+#include <math.h>
 #include "StFlowMaker.hh"
 #include "StFlowEvent.hh"
 #include "StEvent.h"
@@ -91,7 +97,7 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.9 1999/12/21 01:11:00 posk Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.10 1999/12/21 21:30:53 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 
 }
