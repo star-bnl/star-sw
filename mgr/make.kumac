@@ -10,8 +10,8 @@ for pam in [*]
   exec makes pam=[p]
 endfor
 else
-for pam in emc global mwc sim svt vpd ctf ftpc geometry magnet tpc
-  exec makes pam=pams/[pam]
+for pam in geometry  mwc sim svt vpd ctf ftpc magnet tpc emc global
+   exec makes pam=pams/[pam]
 endfor
 endif
 return
@@ -65,8 +65,8 @@ macro ld_standard
   if [sl]=1 then
      message  '================ Load standard shared library:' [slib] '================'
      plib = $STAR_LIB/[p]
-*     call  csrmsl($quote([plib])); for/call [p]_init;
-     gexec [slib]; for/call [p]_init;
+     for/call  csrmsl($quote([p]))
+     gexec [slib]| for/call [p]_init;
   endif
 return
 **************************************************
@@ -74,16 +74,16 @@ macro ld_private
   pam = [1]
   n = $words([pam],'/') 
   p = $word([pam],[n],[n],'/')
-*  plib = $STAR_LIB/[p]
-*  call  csrmsl($quote([plib]))
+  plib = $STAR_LIB/[p]
+  for/call  csrmsl($quote([p]))
   shell gmake SILENT=YES -f $STAR/mgr/MakePam.mk -C [pam]
   slib = lib/$STAR_SYS/[p].sl
   sl = $fexist([slib])
   if [sl]=1 then
     message  '================ Load private shared library:' [slib] '================'
     plib = $STAR_LIB/[p]
-*    call  csrmsl($quote([plib])); for/call [p]_init;
-    gexec [slib]; for/call [p]_init;
+    call  csrmsl($quote([p]))
+    gexec [slib]| for/call [p]_init;
   endif
 return
 endkumac

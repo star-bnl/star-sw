@@ -1,4 +1,7 @@
 #  $Log: MakePam.mk,v $
+#  Revision 1.3  1998/03/23 02:31:42  fisyak
+#  move staff in group_dir
+#
 #  Revision 1.2  1998/03/09 14:36:30  fisyak
 #  Switch varibales
 #
@@ -40,7 +43,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/03/09 14:36:30 $ 
+#           Last modification $Date: 1998/03/23 02:31:42 $ 
 #  #. default setings
 include $(STAR)/mgr/MakeSYS.mk
 PWD       = /bin/pwd
@@ -78,7 +81,8 @@ else                    #1
 	SUBDIRS := $(filter-out src, $(SUBDIRS))
 	SUBDIRS := $(filter-out exa, $(SUBDIRS))
 	SUBDIRS := $(strip $(sort $(SUBDIRS)))
-        SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS))
+#       SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS))
+        SUBDIRS := $(filter-out util, $(SUBDIRS))
 ifeq ($(PAMS), $(strip $(SN)))  #2  #pams level
 		LEVEL   :=1
 		ROOT    := $(shell cd $(INP_DIR)/../; $(PWD))
@@ -227,16 +231,16 @@ ifneq (,$(NAMES_G))             #2
 FILES_SL  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(NAMES_G)))
 endif                           #2
 #-------------------------------includes----------------------------
-STICFLAGS =  $(addprefix -I,  $(STAR)/asps/staf/idl $(SRC_DIR) $(IDL_DIRS))
+STICFLAGS =  $(addprefix -I,  $(STAR)/asps/../.$(STAR_HOST_SYS)/inc $(SRC_DIR) $(IDL_DIRS))
 ifneq ($(STAR_SYS),hp_ux102)    #2
 CPPFLAGS += -D$(STAR_SYS) $(strip -D$(shell uname)) 
 endif                           #2
-CPPFLAGS +=              -I. -I../ -I/usr/include -I$(STAR)/asps/staf/inc  \
+CPPFLAGS +=              -I. -I../ -I/usr/include -I$(STAR)/asps/../.$(STAR_HOST_SYS)/inc  \
              $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) 
 ifneq ($(ROOT),$(STAR))         #2
 CPPFLAGG :=  $(addprefix -I, $(INC_DIRG))
 endif                           #2
-FFLAGS   += -DCERNLIB_TYPE -I$(CERN_ROOT)/src -I$(CERN_ROOT)/src/geant321
+FFLAGS   += -DCERNLIB_TYPE -I$(CERN_ROOT)/src -I$(CERN_ROOT)/src/geant321 -I$(CERN_ROOT)/src/packlib/zebra  -I$(CERN_ROOT)/src/graflib/dzdoc 
 ifndef NODEBUG                  #2
 FFLAGS   += -g
 CFLAGS   += -g
@@ -244,18 +248,19 @@ CXXFLAGS += -g
 CPPFLAGS += -DDEBUG
 endif                           #2
 ifndef CERN_LIBS                #2
-    CERN_LIBS := $(shell cernlib mathlib kernlib)
+#    CERN_LIBS := $(shell cernlib mathlib kernlib)
 endif                           #2
 ifndef LIBRARIES                #2
 ifeq ($(STAR_LIB),$(LIB_DIR))   #3
 		LIBRARIES :=  $(STAR_LIB)/$(PKG_LIB) \
-               -L$(STAR)/asps/../lib/$(STAR_HOST_SYS) -L$(STAR_LIB)
+               -L$(STAR)/asps/../.$(STAR_HOST_SYS)/lib -L$(STAR_LIB)
 else                            #3
 		LIBRARIES :=  $(LIB_PKG)  \
                 $(shell test -f $(STAR_LIB)/$(PKG_LIB) && echo $(STAR_LIB)/$(PKG_LIB)) \
-               -L$(STAR)/asps/../lib/$(STAR_HOST_SYS) -L$(LIB_DIR) -L$(STAR_LIB)
+               -L$(STAR)/asps/../.$(STAR_HOST_SYS)/lib -L$(LIB_DIR) -L$(STAR_LIB)
 endif                           #3
-LIBRARIES +=  -lutil
+#LIBRARIES +=  -lutil
+LIBRARIES +=  -ltls -lmsg
 endif                           #2
 #-------------------------------rules-------------------------------
 # phony - not a file
@@ -283,11 +288,11 @@ $(SL_PKG): $(FILES_SL) $(LIB_PKG)
 #endif
 	@echo "          Shared library " $(SL_PKG) " has been created"
 #--------- module ---------
+ifneq ($(NAMES_IDM),)           #5
 $(OBJ_DIR)/$(PKG)_init.o: $(FILES_IDM) 
 	@if [ -f $(GEN_DIR)/$(PKG)_init.cc ]; then  rm $(GEN_DIR)/$(PKG)_init.cc ; fi
 	@echo '/* '$(PKG)' package interface to STAF */' > $(GEN_DIR)/$(PKG)_init.cc
 	@echo '/* automatically generated file */'      >> $(GEN_DIR)/$(PKG)_init.cc
-ifneq ($(NAMES_IDM),)           #5
 	@for p in $(NAMES_IDM); do echo $p; echo '#include "'$$p'.h"'   \
                                                         >> $(GEN_DIR)/$(PKG)_init.cc ; done
 	@echo 'extern "C" int  $(PKG)_init (void);'     >> $(GEN_DIR)/$(PKG)_init.cc
@@ -301,8 +306,8 @@ ifneq ($(NAMES_IDM),)           #5
                                                         >> $(GEN_DIR)/$(PKG)_init.cc ; done
 	@echo '                       return 1; }'      >> $(GEN_DIR)/$(PKG)_init.cc
 	@echo 'int  $(PKG)_stop () { return 1; }'       >> $(GEN_DIR)/$(PKG)_init.cc
-endif                           #5
 	$(CXX) $(CPPFLAGS) $(CPPFLAGG) $(CXXFLAGS) -c $(GEN_DIR)/$(PKG)_init.cc -o $(ALL_TAGS)
+endif                           #5
 endif                           #4 # NO idl- or g-files
 #-----cleaning------------------------------
 clean: clean_obj clean_lib
@@ -333,10 +338,10 @@ clean: $(addsuffix _clean, $(SUBDIRS))
 	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
 clean_lib: $(addsuffix _clean_lib, $(SUBDIRS))
 %_clean_lib: 
-	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
+	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean_lib 
 clean_share: $(addsuffix _clean_share, $(SUBDIRS))
 %_clean_share: 
-	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
+	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean_share 
 clean_obj: $(addsuffix _clean_obj, $(SUBDIRS))
 %_clean_obj: 
 	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
@@ -347,7 +352,7 @@ $(GEN_DIR)/%.h $(GEN_DIR)/%.inc %.h %.inc: %.idl
 	cp  $(FIRST_DEP) $(GEN_DIR)/ ; cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(FIRST_DEP); $(RM) $(STEM).idl
 #--- compilation -
 $(OBJ_DIR)/%.o: %.g
-	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/bin/share/geant3.def  $(GEN_DIR)/geant3.def
+	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR_BIN)/geant3.def  $(GEN_DIR)/geant3.def
 	cd $(GEN_DIR); geant3    $(FIRST_DEP)  -o  $(GEN_DIR)/$(STEM).f 
 	$(FC) $(FFLAGS) -c $(GEN_DIR)/$(STEM).f  -o  $(ALL_TAGS)
 $(OBJ_DIR)/%.o: %.F
@@ -434,6 +439,7 @@ test_mk:
 	@echo "RM        =" $(RM)
 	@echo "SUBDIRS   =" $(SUBDIRS)
 	@echo "LIBRARIES =" $(LIBRARIES)
+	@echo "CERN_LIBS =" $(CERN_LIBS)
 	@echo "DIRS      =" $(DIRS)
 	@echo "ALL_DEPS  =" $(ALL_DEPS)
 	@echo "FIRST_DEP =" $(FIRST_DEP)
