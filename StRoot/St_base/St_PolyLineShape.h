@@ -1,6 +1,6 @@
 #ifndef STAR_St_PolyLineShape
 #define STAR_St_PolyLineShape
-// $Id: St_PolyLineShape.h,v 1.13 1999/12/17 23:28:41 fine Exp $ 
+// $Id: St_PolyLineShape.h,v 1.14 1999/12/21 18:57:14 fine Exp $ 
 // ***********************************************************************
 // *  C++ class library to define an abstract 3D shape os STAR "event" geometry
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -57,7 +57,7 @@ public:
    virtual void         ExecuteEvent(Int_t event, Int_t px, Int_t py);
    virtual TShape      *GetConnection() const { return m_Connection;}
    virtual Color_t      GetColorAttribute() const;
-   virtual Width_t      GetSizeAttribute()  const;
+   virtual Size_t       GetSizeAttribute()  const;
    virtual Style_t      GetStyleAttribute() const;
    virtual TPoints3DABC *GetMarker() const { return m_Points;}
    virtual TPoints3DABC *GetPoints() const { return m_Points;}
@@ -75,7 +75,7 @@ public:
    static Float_t       Product(Float_t *v1, Float_t *v2,Int_t ndim=3);
    static Double_t      Product(Double_t *v1, Double_t *v2,Int_t ndim=3);
    virtual Color_t      SetColorAttribute(Color_t color);
-   virtual Width_t      SetSizeAttribute(Width_t size);
+   virtual Size_t       SetSizeAttribute(Size_t size);
    virtual Int_t        SetConnection(EShapeTypes connection=kBrik);
    virtual void         SetShape(TShape *shape);
    virtual void         SetSmooth(Bool_t smooth=kTRUE){ m_Smooth=smooth;}
@@ -87,6 +87,9 @@ public:
 };
 //______________________________________________________________________________
 // $Log: St_PolyLineShape.h,v $
+// Revision 1.14  1999/12/21 18:57:14  fine
+// compilation warning plus new type for SizeAttribute
+//
 // Revision 1.13  1999/12/17 23:28:41  fine
 // clean up for the sake of docs + new class St_Table3DPackedPoints introduced
 //

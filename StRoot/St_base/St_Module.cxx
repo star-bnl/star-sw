@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Module.cxx,v 1.9 1999/12/07 22:26:26 fine Exp $
+// $Id: St_Module.cxx,v 1.10 1999/12/21 18:57:13 fine Exp $
 
 #include <assert.h>
 #include <string.h>
@@ -459,12 +459,14 @@ Int_t  St_Module::ExecuteModule(void  *f1,void  *f2,void  *f3,void  *f4,
                   );
   return ExecuteModule();
 }
-void St_Module::Streamer(TBuffer &b)
-{
-};
+void St_Module::Streamer(TBuffer &)
+{assert(0);}
 
 //________________________________________________________________________
 // $Log: St_Module.cxx,v $
+// Revision 1.10  1999/12/21 18:57:13  fine
+// compilation warning plus new type for SizeAttribute
+//
 // Revision 1.9  1999/12/07 22:26:26  fine
 // Clean up to remove the compilation warnings
 //

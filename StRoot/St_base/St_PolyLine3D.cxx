@@ -1,6 +1,6 @@
 //*CMZ :          29/04/99  16.26.07  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine     17/08/95
-// $Id: St_PolyLine3D.cxx,v 1.14 1999/12/17 23:28:40 fine Exp $ 
+// $Id: St_PolyLine3D.cxx,v 1.15 1999/12/21 18:57:14 fine Exp $ 
 // ***********************************************************************
 // * Defines 3D polyline base class to construct STAR "event" geometry
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -20,6 +20,7 @@
 // * purpose.  It is provided "as is" without express or implied warranty.
 // ************************************************************************
  
+#include <assert.h>
 #include <fstream.h>
 #include <iostream.h>
  
@@ -188,7 +189,7 @@ Int_t St_PolyLine3D::DistancetoPrimitive(Int_t px, Int_t py)
 }
  
 //______________________________________________________________________________
-void St_PolyLine3D::DrawPolyLine(Int_t n, Float_t *p, Option_t *option)
+void St_PolyLine3D::DrawPolyLine(Int_t, Float_t *p, Option_t *option)
 {
 //*-*-*-*-*-*-*-*-*Draw this 3-D polyline with new coordinates*-*-*-*-*-*-*-*-*-*
 //*-*              ============================================
@@ -237,6 +238,7 @@ void St_PolyLine3D::Streamer(TBuffer &b)
 {
 //*-*-*-*-*-*-*-*-*Stream a class object*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 //*-*              =========================================
+assert(&b&&0);
 #if 0
    if (b.IsReading()) {
       Version_t v = b.ReadVersion();
@@ -266,28 +268,28 @@ void St_PolyLine3D::Streamer(TBuffer &b)
 
 //_______________________________________________________________________
 Int_t   St_PolyLine3D::GetAttributeI(const Char_t *attribName) const
-{ return 0;}
+{ assert(attribName || 1);  return 0;}
 //_______________________________________________________________________
 Float_t St_PolyLine3D::GetAttributeF(const Char_t *attribName) const
-{ return 0;}
+{ assert(attribName || 1);  return 0;}
 //_______________________________________________________________________
 Double_t St_PolyLine3D::GetAttributeD(const Char_t *attribName) const
-{ return 0;}
+{ assert(attribName || 1);  return 0;}
 //_______________________________________________________________________
 Int_t  St_PolyLine3D::SetAttribute(const Char_t *attribName,Int_t    attrib)
-{ return 0;}
+{ assert(attribName || attrib || 1);  return 0;}
 //_______________________________________________________________________
 Float_t St_PolyLine3D::SetAttribute(const Char_t *attribName,Float_t  attrib)
-{ return 0;}
+{ assert(attribName || attrib || 1);  return 0;}
 //_______________________________________________________________________
 Double_t St_PolyLine3D::SetAttribute(const Char_t *attribName,Double_t attrib)
-{ return 0;}
+{ assert(attribName || attrib || 1);  return 0;}
 //_______________________________________________________________________
 Int_t   St_PolyLine3D::GetNumberOfAttributes() const
 { return 3;}
 //_______________________________________________________________________
 Int_t   St_PolyLine3D::SetNumberOfAttributes(Int_t n)
-{ return 0;}
+{ assert(n || 1); return 0;}
 
 //______________________________________________________________________________
 void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
@@ -429,6 +431,9 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
 }   
 //__________________________________________________________________________
 // $Log: St_PolyLine3D.cxx,v $
+// Revision 1.15  1999/12/21 18:57:14  fine
+// compilation warning plus new type for SizeAttribute
+//
 // Revision 1.14  1999/12/17 23:28:40  fine
 // clean up for the sake of docs + new class St_Table3DPackedPoints introduced
 //

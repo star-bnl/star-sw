@@ -1,6 +1,6 @@
 #ifndef ROOT_St_Points3D
 #define ROOT_St_Points3D
-// $Id: St_Points3D.h,v 1.5 1999/12/17 23:28:40 fine Exp $ 
+// $Id: St_Points3D.h,v 1.6 1999/12/21 18:57:14 fine Exp $ 
 // ***********************************************************************
 // *  C++ class to define the abstract array of 3D points
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -72,7 +72,7 @@ public:
 #endif
 #endif
         virtual void      ls(Option_t *option="");
-        virtual void      PaintPoints(Int_t n, Float_t *p,Option_t *option=""){;}
+        virtual void      PaintPoints(Int_t, Float_t *,Option_t *){;}
         virtual void      Print(Option_t *option="");
         virtual Int_t     SetLastPosition(Int_t idx);
         virtual void      SetOption(Option_t *option="");
@@ -105,4 +105,13 @@ inline Int_t     St_Points3D::SetPoint(Int_t point, Float_t x, Float_t y, Float_
 inline Int_t     St_Points3D::SetPoints(Int_t n, Float_t *p, Option_t *option){return fPoints?fPoints->SetPoints(n,p,option):0;}
 
 inline Int_t     St_Points3D::Size() const               {return fPoints?fPoints->Size():0;}
+//___________________________________________________________________
+// $Log: St_Points3D.h,v $
+// Revision 1.6  1999/12/21 18:57:14  fine
+// compilation warning plus new type for SizeAttribute
+// 
+//___________________________________________________________________
+
 #endif
+
+
