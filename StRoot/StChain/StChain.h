@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.26 1999/03/19 20:30:49 perev Exp $
+// $Id: StChain.h,v 1.27 1999/07/11 20:40:35 perev Exp $
 // $Log: StChain.h,v $
+// Revision 1.27  1999/07/11 20:40:35  perev
+// Move Clear from StChain to StMaker
+//
 // Revision 1.26  1999/03/19 20:30:49  perev
 // GetCVSTag introduced
 //
@@ -109,7 +112,6 @@ public:
 //BaseUsed   virtual Int_t      Make();
    Int_t              GetVersion() {return m_Version;}
    Int_t              GetVersionDate() {return m_VersionDate;}
-   virtual void       Clear(Option_t *option="");
    virtual void       PrintInfo();
 
 //		must be in .cxx
@@ -117,7 +119,7 @@ public:
 
 //		must be here in .h
    static const char   *GetCVSIdH()
-    {static const char cvs[]="$Id: StChain.h,v 1.26 1999/03/19 20:30:49 perev Exp $";
+    {static const char cvs[]="$Id: StChain.h,v 1.27 1999/07/11 20:40:35 perev Exp $";
      return cvs;};
 
 
