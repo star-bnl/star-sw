@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.12 1998/04/22 15:54:55 sakrejda Exp $
+* $Id: tte.F,v 1.13 1998/06/05 19:02:28 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.13  1998/06/05 19:02:28  sakrejda
+* protection agains bad track numbers added
+*
 * Revision 1.12  1998/04/22 15:54:55  sakrejda
 * estimate of purity for reconstructed tracks fixed
 *
@@ -443,8 +446,11 @@ c             check whether this point was assigned to a track
                  return
               endif
 c
+c             make sure id is non zero - possible problem with bad 
+c             track numbering 
+              if(id_track.gt.0) then
 c             check whether it's flag is ok
-              if(list_tracks(id_track).eq.0.and.id_track.gt.0) then
+              if(list_tracks(id_track).eq.0) then
 c                bad track
 c                 write(m132(1),*) 'TTE-I11 bad track', id_track
 c                 call Message (m132, 1, idI11 )
@@ -452,7 +458,7 @@ c                 call Message (m132, 1, idI11 )
               endif
 
 c
-              if(id_track.gt.0.and.list_tracks(id_track).gt.0) then
+              if(list_tracks(id_track).gt.0) then
 c                check whether we have it on our rec_track_on_mc_track list
                  iloc=0
                  do ii=1,rec_track_on_mc_track_nok
@@ -471,6 +477,7 @@ c                check whether we have it on our rec_track_on_mc_track list
                  endif
                  rec_track_on_mc_track(2,iloc)=
      >           rec_track_on_mc_track(2,iloc)+1
+              endif
               endif
            end do
 c          went through all the reconstructed hits, now it's time to deal
