@@ -4,6 +4,7 @@
 *:DESCRIPTION:  C++ KUIP Action Modules for TDM
 *:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
 *:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      09jul96-v011a-cet- modify putvalue for vectors
 *:HISTORY:      29nov95-v010a-cet- recreation
 *:HISTORY:      19jul95-v000a-cet- creation
 *:<---------------------------------------------------------------------
@@ -465,7 +466,7 @@ int kam_tdmtable_cell_putvalue()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* cellSpec = ku_gets();	/* table.cell name specification */
-   char* value = ku_gets();	/* value string */
+   char* value; // = ku_gets();	/* value string */
 
    tdmTable* table;		/* tdmTable object */
 
@@ -488,51 +489,65 @@ int kam_tdmtable_cell_putvalue()
 
    int ncol = col.nCol;
    DS_TYPE_CODE_T tcode = col.code;
+   long elsize = col.size/col.elcount;	/* element size (bytes) */
 	
    TDM_CELLDATA_T cellData;
    cellData._d = tcode;
-   cellData.data.v = ASUALLOC(sizeof(double));
+   cellData.data.v = ASUALLOC(col.size);
+   TDM_CELLDATA_T buff;
+   buff.data.v = cellData.data.v;
+
    char *v;
-   switch( tcode ){
-      case DS_TYPE_CHAR:
-	 v = (char*)ASUALLOC(strlen(value) +1);
-	 strcpy(v,value);
-         cellData.data.c = (char*)v;
-	 break;
-      case DS_TYPE_OCTET:
-         *(cellData.data.o) = atol(value);
-	 break;
-      case DS_TYPE_SHORT:
-         *(cellData.data.s) = atol(value);
-	 break;
-      case DS_TYPE_U_SHORT:
-         *(cellData.data.us) = atol(value);
-	 break;
-      case DS_TYPE_LONG:
-         *(cellData.data.l) = atol(value);
-	 break;
-      case DS_TYPE_U_LONG:
-         *(cellData.data.ul) = atol(value);
-	 break;
-      case DS_TYPE_FLOAT:
-         *(cellData.data.f) = atof(value);
-	 break;
-      case DS_TYPE_DOUBLE:
-         *(cellData.data.d) = atof(value);
-	 break;
-      case DS_TYPE_STRUCT:
-	 EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
-	 break;
-      default:
-	 EML_ERROR(KAM_INVALID_TYPE);
-	 break;
+   for( int np=1;np<npars;np++ ){
+      value = ku_gets();		/* value string */
+      switch( tcode ){
+	 case DS_TYPE_CHAR:
+	    v = (char*)ASUALLOC(strlen(value) +1);
+	    strcpy(v,value);
+	    buff.data.c = (char*)v;
+	    break;
+	 case DS_TYPE_OCTET:
+	    *(buff.data.o) = atol(value);
+	    break;
+	 case DS_TYPE_SHORT:
+	    *(buff.data.s) = atol(value);
+	    break;
+	 case DS_TYPE_U_SHORT:
+	    *(buff.data.us) = atol(value);
+	    break;
+	 case DS_TYPE_LONG:
+	    *(buff.data.l) = atol(value);
+	    break;
+	 case DS_TYPE_U_LONG:
+	    *(buff.data.ul) = atol(value);
+	    break;
+	 case DS_TYPE_FLOAT:
+	    *(buff.data.f) = atof(value);
+	    break;
+	 case DS_TYPE_DOUBLE:
+	    *(buff.data.d) = atof(value);
+	    break;
+	 case DS_TYPE_STRUCT:
+	    ASUFREE(cellData.data.v);
+	    ASUFREE(cs);
+	    EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+	    break;
+	 default:
+	    ASUFREE(cellData.data.v);
+	    ASUFREE(cs);
+	    EML_ERROR(KAM_INVALID_TYPE);
+	    break;
+      }
+      buff.data.c += elsize;
    }
 
    if( !table->putCell(cellData,nrow,ncol) ){
+      ASUFREE(cellData.data.v);
+      ASUFREE(cs);
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   ASUFREE(cellData.data.v);
 
+   ASUFREE(cellData.data.v);
    ASUFREE(cs);
    EML_SUCCESS(STAFCV_OK);
 }
