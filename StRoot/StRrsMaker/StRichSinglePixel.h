@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSinglePixel.h,v 1.3 2000/04/05 16:05:34 lasiuk Exp $
+ * $Id: StRichSinglePixel.h,v 1.4 2000/05/17 22:29:15 lasiuk Exp $
  *
  * Description:
  *  Definition of a single pixel object
@@ -9,8 +9,11 @@
  ****************************************************************
  *
  * $Log: StRichSinglePixel.h,v $
- * Revision 1.3  2000/04/05 16:05:34  lasiuk
- * add operator==
+ * Revision 1.4  2000/05/17 22:29:15  lasiuk
+ * keep charge info as a float only.  Access with charge() uniformly
+ *
+ * Revision 1.4  2000/05/17 22:29:15  lasiuk
+ * keep charge info as a float only.  Access with charge() uniformly
  *
  * Revision 1.3  2000/04/05 16:05:34  lasiuk
  * add operator==
@@ -34,9 +37,9 @@ using namespace std::stack;
 
 #include "StRichEnumeratedTypes.h"
 
-    StRichSinglePixel(int p, int r, int adc);
+class StRichSinglePixel  {
 public:
-    ~StRichSinglePixel();
+    StRichSinglePixel();
     StRichSinglePixel(int p, int r, float q);
 
     virtual ~StRichSinglePixel();
@@ -46,13 +49,13 @@ public:
 
     bool operator==(const StRichSinglePixel&) const;
     
-    double amplitude() const;
+    // access functions
     int    pad() const;
     int    row() const;
     float  charge() const;
 
     int clusterNumber() const;
-    void setAmplitude(double amp);
+
     void setPad(int p);
     void setRow(int r);
     void setCharge(float q);
@@ -63,21 +66,21 @@ public:
     void setBit(StRichSinglePixelFlag f);
     void unSetBit(StRichSinglePixelFlag f);    
 
-    double        mAmplitude;
+protected:
     int           mPad;
     int           mRow;
     float         mCharge;
     unsigned long mFlags;
     int mClusterNumber;
-inline double StRichSinglePixel::amplitude() const { return mAmplitude; }
+};
 inline int StRichSinglePixel::pad() const { return mPad; }
 inline int StRichSinglePixel::row() const { return mRow; }
 inline float StRichSinglePixel::charge() const { return mCharge; }
-inline void StRichSinglePixel::setAmplitude(double amp) { mAmplitude = amp; }
+inline int StRichSinglePixel::clusterNumber() const { return mClusterNumber; }
 inline void StRichSinglePixel::setPad(int p) { mPad = p; }
 inline void StRichSinglePixel::setRow(int r) { mRow = r; } 
 inline void StRichSinglePixel::setCharge(float q) { mCharge = q; }
-    return (mPad==pix.pad() && mRow==pix.row() && mAmplitude==pix.amplitude());
+inline void StRichSinglePixel::setClusterNumber(int number) { mClusterNumber = number; }
 inline bool StRichSinglePixel::operator==(const StRichSinglePixel& pix) const
 {
     return (mPad==pix.pad() && mRow==pix.row() && mCharge==pix.charge());

@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSingleMCPixel.h,v 1.1 2000/04/05 15:55:20 lasiuk Exp $
+ * $Id: StRichSingleMCPixel.h,v 1.2 2000/05/17 22:29:14 lasiuk Exp $
  *
  * Description:
  *  Definition of a single MC pixel object
@@ -8,8 +8,11 @@
  ****************************************************************
  *
  * $Log: StRichSingleMCPixel.h,v $
- * Revision 1.1  2000/04/05 15:55:20  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/05/17 22:29:14  lasiuk
+ * keep charge info as a float only.  Access with charge() uniformly
+ *
+ * Revision 1.2  2000/05/17 22:29:14  lasiuk
+ * keep charge info as a float only.  Access with charge() uniformly
  *
  * Revision 1.1  2000/04/05 15:55:20  lasiuk
  * Initial Revision
@@ -21,7 +24,8 @@
 #include "StRichSinglePixel.h"
 #include "StRichPadPlane.h" // for typedefs
 
-    StRichSingleMCPixel(int p, int r, int adc, anIDList info);
+class StRichSingleMCPixel : public StRichSinglePixel {
+public:
     StRichSingleMCPixel();
     StRichSingleMCPixel(int p, int r, float q);
     StRichSingleMCPixel(int p, int r, float q, anIDList info);
@@ -29,9 +33,10 @@
     ~StRichSingleMCPixel();
     
     //StRichSingleMCPixel(const StRichSingleMCPixel&) {/*use default*/}
+    //StRichSingleMCPixel& operator=(const StRichSingleMCPixel&) {/*use default*/|
 
     const anIDList& MCInfo() const;
-    anIDList mMCInfo;
+    void  setMCInfo(const anIDList&);
     
 protected:
     anIDList mMCInfo;//!
