@@ -22,8 +22,9 @@
      $        'south(16),top(16),bot(16),'//
      $        'tnsum,tssum,ttsum,tbsum,'//
      $        'smxsum,smysum,'//
-     $        'time(7),zvertex,token:I,bunch:I,trgwd:I,'//
-     $        'nprim:I,lcppt:R,lcpeta:R,lcpphi:R,bunch48:I')
+     $        'time(7),zvertex,token:I,bunch:I,bunch48:I,trgwd:I,'//
+     $        'nprim:I,lcppt:R,lcpeta:R,lcpphi:R,'//
+     $        'bbcadc(32):I,bbctdc(32):I')
          print *, '>>> N-tuple BOOKED <<<'
       else
          print *, 'File open error'
@@ -33,15 +34,14 @@
       return
       end
 
-      subroutine fpdpi0mass(adc,iin,rin,result)
-      implicit none
+      subroutine fpdpi0mass(adc,iin,rin,result,abbc,tbbc)
       include "StSpinMaker/fpd_pi0dat.inc"
       include "StSpinMaker/fpd_ntdat.inc"
 
       integer ierr, run
       integer n, t, b
  
-      integer adc(256), iin(10)
+      integer adc(256), iin(10), abbc(32), tbbc(32)
       real  rin(10), result(10)
       integer i, j
       integer sumSMD1,sumSMD2,sumN       
@@ -75,6 +75,11 @@
          ttsum     =ttsum + adc(i)
          tbsum     =tbsum + adc(i+16)
       enddo
+      do i=1,32
+         bbcadc(i) = abbc(i)
+         bbctdc(i) = tbbc(i)
+*         write(*,*) 'BBC ',i,bbcadc(i),bbctdc(i)
+      enddo
       token = iin(1)
       bunch = iin(2)
       trgwd = iin(3)
@@ -89,6 +94,10 @@
       lcppt  = rin(3)
       lcpeta = rin(4)
       lcpphi = rin(5)
+      nttim(4) = rin(6)
+      nttim(5) = rin(7)
+      nttim(6) = rin(8)
+      nttim(7) = rin(9)
       if(smxsum.gt.100 .and. smysum.gt.100 .and. tnsum.gt.300) then
          call hgnt(10,n,ierr)
          call init
@@ -114,7 +123,7 @@
          result(6)=SMDdif
          result(7)=tpczv
          result(8)=rin(2)
-      else if (tssum.gt.300 .or. tbsum.gt.300 .or. ttsum.gt.300) then
+      else
          npkpar=-1
          do i=1,10
             result(i)=0.0
@@ -132,8 +141,8 @@
       call hrout(12,icycle,' ')
       call hrend('fpd')
       close(1)
-      call hdelet(12)
-      print *,'Just wrote/closed ntuple file after ntcnt ',ntcnt
+*      call hdelet(12)
+      print *,'Just wrote/closed ntuple file'
 
 *      call hropen(10,'LUN10','fpdpi0.hist','N',1024,ISTAT)
 *      call hrout(0,icycle,' ')

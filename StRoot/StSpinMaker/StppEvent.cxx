@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.9 2002/12/04 20:28:08 thenry Exp $
+// $Id: StppEvent.cxx,v 1.10 2003/02/04 21:57:09 akio Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.10  2003/02/04 21:57:09  akio
+// Improvments on pi0 reconstruction code and ntuple
+//
 // Revision 1.9  2002/12/04 20:28:08  thenry
 // StppuDstMaker was modified to allow multiple jet analysis modules to be
 // run simultaneosly with various parameters while the Maker loads the events
@@ -74,7 +77,7 @@
 
 ClassImp(StppEvent)
 
-extern "C" void fpdpi0mass_(int*,int*,float*,float*);
+extern "C" void fpdpi0mass_(int*,int*,float*,float*, int*, int*);
 
 StppEvent::StppEvent(){
     tracks = new TClonesArray ("StMuTrack",200);  //warning hardcoded # of track limits!
@@ -136,6 +139,11 @@ void StppEvent::clear(){
     zVertexBbc=0.0;
 
     fpdESumNorth  = 0.0;
+    fpdESumSouth  = 0.0;
+    fpdESumTop    = 0.0;
+    fpdESumBottom = 0.0;
+    fpdESumSmdX   = 0.0;
+    fpdESumSmdY   = 0.0;
     fpdAdcSumNorth  = 0;
     fpdAdcSumSouth  = 0;
     fpdAdcSumTop    = 0;
@@ -152,8 +160,6 @@ void StppEvent::clear(){
     fpdPi0EShare    = 0.0;  
     fpdPi0SmdDiff   = 0.0;  
 
-    ctbAdcSum = 0.0;
-    ctbNHit=0;
     zdcEast = 0;
     zdcWest=0;
     zdcTdcEast = 0;
@@ -344,7 +350,74 @@ Int_t StppEvent::fill(StEvent *event){
 
     //FPD
     if(fpd){
-	token = fpd->token();
+      //FPD
+      if(fpd){
+        token = fpd->token();	
+	if(runN<3007014){
+	  static const short SmdXoff[60] = {
+	    31 ,      38 ,      64 ,      60 ,     260 ,
+	    255 ,      56 ,      32 ,      75 ,      73 ,
+	    42 ,      45 ,      58 ,      63 ,     252 ,
+	    248 ,      34 ,      38 ,      76 ,      67 ,
+	    36 ,      46 ,      62 ,      61 ,     256 ,
+	    251 ,      36 ,      36 ,      86 ,      78 ,
+	    29 ,      42 ,      56 ,      61 ,     228 ,
+	    251 ,      43 ,      30 ,      75 ,      68 ,
+	    44 ,      40 ,      58 ,      62 ,     243 ,
+	    229 ,      54 ,      34 ,      74 ,      76 ,
+	    45 ,      46 ,      60 ,      60 ,     240 ,
+	    263 ,      39 ,      34 ,      85 ,      81 };
+	  static const short SmdYoff[100] = {
+	    50 ,      38 ,      62 ,      60 ,     262 ,
+	    237 ,      42 ,      34 ,      79 ,      81 ,
+	    77 ,      67 ,      34 ,      35 ,     264 ,
+	    253 ,      56 ,      55 ,      36 ,      46 ,
+	    39 ,      39 ,     112 ,     107 ,      35 ,
+	    45 ,      26 ,      21 ,      45 ,      60 ,
+	    42 ,      32 ,     103 ,      98 ,      43 ,
+	    46 ,      28 ,      28 ,      56 ,      58 ,
+	    54 ,      46 ,     101 ,      98 ,      45 ,
+	    50 ,      23 ,      25 ,      54 ,      64 ,
+	    34 ,      35 ,     100 ,     100 ,      43 ,
+	    43 ,      22 ,      20 ,      46 ,      50 ,
+	    37 ,      43 ,     119 ,     123 ,      43 ,
+	    49 ,      23 ,      29 ,      71 ,      67 ,
+	    36 ,      44 ,     111 ,     107 ,      42 ,
+	    40 ,      21 ,      23 ,      70 ,      49 ,
+	    37 ,      31 ,      90 ,     104 ,      43 ,
+	    47 ,      28 ,      20 ,      65 ,      73 ,
+	    31 ,      33 ,     113 ,      97 ,      46 ,
+	    49 ,      22 ,      27 ,      48 ,      68 };
+	  static const short Northoff [12] = {
+	    14 ,      70 ,      23 ,       3 ,       3 ,
+	    146 ,     192 ,     176 ,     106 ,      22 ,
+	    130 ,      32 };
+	  static const short Southoff [16] = {
+	    37 ,      33 ,      33 ,      34 ,      34 ,
+	    37 ,      40 ,      34 ,      37 ,      31 ,
+	    38 ,      39 ,      38 ,      35 ,      35 ,
+	    36 };
+	  static const short Topoff   [16] = {
+	    14 ,      28 ,      28 ,      37 ,      41 ,
+	    16 ,      32 ,      40 ,      37 ,      28 ,
+	    11 ,      19 ,      16 ,      19 ,      53 ,
+	    33 };
+	  static const short Bottomoff[16] = {
+	    105 ,      43 ,       8 ,      53 ,      29 ,
+	    71 ,       78 ,      34 ,      32 ,      13 ,
+	    29 ,       34 ,      44 ,      18 ,      42 ,
+	    41 };
+	  
+	  unsigned short* adc = fpd->adc();
+	  int j=0;
+	  for(int i=0; i< 16; i++) { adc[j] = (adc[j] >    Topoff[i]) ? adc[j]-   Topoff[i] : 0;  j++;}
+	  for(int i=0; i< 16; i++) { adc[j] = (adc[j] > Bottomoff[i]) ? adc[j]-Bottomoff[i] : 0;  j++;}
+	  for(int i=0; i< 16; i++) { adc[j] = (adc[j] >  Southoff[i]) ? adc[j]- Southoff[i] : 0;  j++;}
+	  for(int i=0; i< 12; i++) { adc[j] = (adc[j] >  Northoff[i]) ? adc[j]- Northoff[i] : 0;  j++;}
+	  for(int i=0; i< 60; i++) { adc[j] = (adc[j] >   SmdXoff[i]) ? adc[j]-  SmdXoff[i] : 0;  j++;}
+	  for(int i=0; i<100; i++) { adc[j] = (adc[j] >   SmdYoff[i]) ? adc[j]-  SmdYoff[i] : 0;  j++;}
+	}
+	
 	fpdAdcSumNorth  = fpd->sumAdcNorth();
 	fpdAdcSumSouth  = fpd->sumAdcSouth();
 	fpdAdcSumTop    = fpd->sumAdcTop();
@@ -355,12 +428,66 @@ Int_t StppEvent::fill(StEvent *event){
 	fpdAdcSumSmdY   = fpd->sumAdcSmdY();
 	fpdSouthVeto    = fpd->southVeto();
 	
-	static const float NGain[12] = {  1.029, 0.738, 0.673, 0.522, 
-					  1.124, 0.906, 0.707, 0.597,
-					  1.076, 0.756, 0.786, 0.454}; 
-	for(int i=1; i<=12; i++){
-	  fpdESumNorth += fpd->north(i) * NGain[i-1] * 0.04;
+	//North tower calibration
+	static const float NGain1[12] = {  1.029, 0.738, 0.673, 0.522, 
+					   1.124, 0.906, 0.707, 0.597,
+					   1.076, 0.756, 0.786, 0.454}; 
+	static const float NGain2[12] = {  0.965, 0.814, 0.644, 0.543, 
+					   1.124, 0.912, 0.674, 0.579, 
+					   1.036, 0.759, 0.824, 0.433};
+	const float* gain;
+	if(runN <= 3014027){gain=NGain1;}
+	else {gain=NGain2;}
+	for(int i=0; i<12; i++){
+	  fpdENorth[i] = fpd->north(i+1) * gain[i] * 0.04;
+	  fpdESumNorth += fpdENorth[i];
 	}
+
+	//North SMD calibration
+	static const float SmdXGain[60] = {
+	  0.81925 , 1.58648 , 1.30039 , 1.93758 , 0.68921 ,
+	  0.84525 , 0.80624 , 1.43043 , 0.72822 , 1.02731 ,
+	  0.65020 , 0.93628 , 1.14434 , 1.84655 , 0.74122 ,
+	  0.81925 , 0.89727 , 1.37841 , 0.67620 , 1.07932 ,
+	  0.78023 , 1.13134 , 0.85826 , 1.46944 , 0.94928 ,
+	  0.84525 , 0.98830 , 1.19636 , 0.70221 , 1.04031 ,
+	  1.05332 , 1.52146 , 1.13134 , 1.96359 , 1.06632 ,
+	  1.09233 , 1.07932 , 1.54746 , 0.81925 , 1.40442 ,
+	  1.07932 , 1.07932 , 1.13134 , 2.01560 , 0.93628 ,
+	  0.81925 , 1.05332 , 0.88427 , 0.94928 , 0.63719 ,
+	  0.79324 , 0.92328 , 1.27438 , 3.04291 , 0.74122 ,
+	  1.09233 , 1.01430 , 0.96229 , 0.79324 , 0.87126 };
+	static const float SmdYGain[100] = {
+	  1.07932 , 0.88427 , 1.11834 , 0.83225 , 0.78023 ,
+	  0.65020 , 0.80624 , 0.70221 , 0.76723 , 0.62419 ,
+	  0.67620 , 0.62419 , 0.76723 , 0.87126 , 0.74122 ,
+	  0.78023 , 0.92328 , 1.04031 , 0.78023 , 0.84525 ,
+	  0.78023 , 0.85826 , 0.42913 , 0.45514 , 1.59948 ,
+	  1.85956 , 1.62549 , 2.71782 , 0.76723 , 0.63719 ,
+	  1.26138 , 1.09233 , 0.46814 , 0.48114 , 3.27698 ,
+	  2.36671 , 2.82185 , 2.74382 , 1.37841 , 0.68921 ,
+	  1.39142 , 1.13134 , 0.55917 , 2.32770 , 2.89987 ,
+	  2.43173 , 2.65280 , 3.43303 , 1.54746 , 0.88427 ,
+	  1.11834 , 1.61248 , 0.61118 , 0.91027 , 2.28869 ,
+	  3.65410 , 2.50975 , 3.87516 , 0.92328 , 1.00130 ,
+	  1.15735 , 0.85826 , 0.46814 , 0.48114 , 2.40572 ,
+	  1.84655 , 8.98570 , 2.36671 , 0.96229 , 0.84525 ,
+	  1.20936 , 1.49545 , 0.65020 , 0.53316 , 2.89987 ,
+	  4.10923 , 3.47204 , 2.96489 , 1.01430 , 1.56047 ,
+	  1.31339 , 1.84655 , 0.63719 , 0.59818 , 2.95189 ,
+	  4.36931 , 3.15995 , 3.28999 , 1.13134 , 1.71651 ,
+	  1.37841 , 1.13134 , 0.80624 , 0.59818 , 2.54876 ,
+	  2.32770 , 3.12094 , 2.00260 , 1.00130 , 0.98830 };
+	
+	for(int i=0; i<=60; i++){
+	  fpdESmdX[i] = fpd->smdx(i+1) * SmdXGain[i];
+	  fpdESumSmdX += fpdESmdX[i];
+	}
+	for(int i=0; i<=100; i++){
+	  fpdESmdY[i] = fpd->smdy(i+1) * SmdYGain[i];
+	  fpdESumSmdY += fpdESmdY[i];
+	}
+      }
     }
 
     //l0 trigger info
@@ -387,7 +514,7 @@ Int_t StppEvent::fill(StEvent *event){
 	     << runN << " " << token << " " << time << " " 
 	     << bunchId << " " << bunchId7bit << " " << doubleSpinIndex  << endl;
     }
-
+    
 #ifdef _Jet_
     //simple jet finder
     nJets = 0;
@@ -407,16 +534,15 @@ Int_t StppEvent::fill(StEvent *event){
 
     cout << "Number Analyzers " << numAnalyzers << endl;
     //now use third-party jet analysis
-    for(Int_t anaNum = 0; anaNum < numAnalyzers; anaNum++)
-    {
+    for(Int_t anaNum = 0; anaNum < numAnalyzers; anaNum++){
       StppJetAnalyzer* thisAna = mAnalyzers[anaNum];
       if (!thisAna) {
-          cout <<"StppEvent::fill() ERROR:\tmAnalyzer[" << anaNum << "]==0.  abort()"<<endl;
-          abort();
+	cout <<"StppEvent::fill() ERROR:\tmAnalyzer[" << anaNum << "]==0.  abort()"<<endl;
+	abort();
       }
       thisAna->setEvent(this);
       thisAna->findJets();
-
+      
       typedef StppJetAnalyzer::JetList JetList;
       JetList &cJets = thisAna->getJets();
       
@@ -425,22 +551,21 @@ Int_t StppEvent::fill(StEvent *event){
       if (cJets.size()>0) foundJet = true;
       
       for(JetList::iterator it=cJets.begin(); it!=cJets.end(); ++it) {
-	  muDstJets->addProtoJet(*it);
+	muDstJets->addProtoJet(*it);
       }
     }  
     
 #endif
-
-    /*
+    
     //example fpd analysis
     //print out fpd infos
     //fpd->dump();
     //print out bbc infos
     //bbc->dump();
-
+    
     //calling fortran pi0 finder from FPD
     float result[10], rin[10], bbcdif;
-    int   iin[10];
+    int iin[10], ibbca[32], ibbct[32];
     for(int i=0; i<10; i++){ result[i]=0.0; }
     unsigned short east=1500, west=1500;
     for(int i=0; i<8; i++){
@@ -454,6 +579,10 @@ Int_t StppEvent::fill(StEvent *event){
     rin[2]=t->pt();
     rin[3]=t->eta();
     rin[4]=t->phi();
+    rin[5]=(float)zdcTdcEast;
+    rin[6]=(float)zdcTdcWest;
+    rin[7]=(float)zdcEast;
+    rin[8]=(float)zdcWest;
     iin[0]=token;
     iin[1]=bunchId7bit;
     iin[2]=triggerWord;
@@ -466,7 +595,8 @@ Int_t StppEvent::fill(StEvent *event){
     int iadc[256];
     unsigned short * adc = fpd->adc();
     for(int i=0; i<256; i++){iadc[i] = (int) adc[i];}
-    fpdpi0mass_(iadc, iin, rin, result);
+    for(int i=0; i<32; i++) {ibbca[i] = (int) bbc->adc(i); ibbct[i] = (int) bbc->tdc(i);}
+    fpdpi0mass_(iadc, iin, rin, result, ibbca, ibbct);
     fpdPi0E      = result[0];
     fpdPi0Mass   = result[1];
     fpdPi0EShare = result[2];
@@ -478,7 +608,6 @@ Int_t StppEvent::fill(StEvent *event){
       for(int i=0; i<5; i++){cout << result[i] << " ";}; cout<< endl;
     }
 
-    */
     return 0;
 }
 #endif /*__CINT__*/

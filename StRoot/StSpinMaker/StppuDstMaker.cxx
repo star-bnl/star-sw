@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StppuDstMaker.cxx,v 1.4 2002/12/04 20:28:09 thenry Exp $
+ * $Id: StppuDstMaker.cxx,v 1.5 2003/02/04 21:57:10 akio Exp $
  * 
  * Author: Akio Ogawa June 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StppuDstMaker.cxx,v $
+ * Revision 1.5  2003/02/04 21:57:10  akio
+ * Improvments on pi0 reconstruction code and ntuple
+ *
  * Revision 1.4  2002/12/04 20:28:09  thenry
  * StppuDstMaker was modified to allow multiple jet analysis modules to be
  * run simultaneosly with various parameters while the Maker loads the events
@@ -61,83 +64,6 @@
 
 extern "C" void initfpdpi0_(const char*);
 extern "C" void finishfpdpi0_();
-
-class asytext{
-public:
-  asytext(const char* filename){
-    cout <<"Opening output file  "<< filename << endl;
-    if((out = fopen(filename,"w")) == NULL){
-      cout << "Could open output file" << endl;
-      exit(0);
-    }
-    for(int cut=0; cut<7; cut++){
-      for(int bin=0; bin<6; bin++){
-	for(int index=0; index<136; index++){
-	  N[cut][bin][index]=0;
-	}
-      }
-    }
-  };
-  ~asytext(){};
-  void fill(StppEvent* event){
-    const int BINN[7]   = {30,   35,   40,   45, 50,     70};
-    const int BINSTB[7] = {500, 550,  600,  700, 1000, 2000};
-    const int  det[7]   = {0,1,2,3,0,0,1};
-    int bunch = (event->bunchId7bit+5)%120;
-    for(int cut=0; cut<7; cut++){
-      float e=0.0;
-      switch(det[cut]){
-      case 0: e=event->fpdESumNorth; break;
-      case 1: e=event->fpdAdcSumSouth; break;
-      case 2: e=event->fpdAdcSumTop; break;
-      case 3: e=event->fpdAdcSumBottom; break;
-      }
-      cout << "akio1 cut=" << cut << " e=" <<e<<endl; 
-      for(int bin=0; bin<6; bin++){
-	const int *bins;
-	switch(det[cut]){
-	case 0: bins=BINN; break;
-	default: bins=BINSTB;			    
-	}
-	//cout << "akio2 bin=" << bin << " bin=" <<bins[bin]<<endl; 
-	if(e>=bins[bin] && e<bins[bin+1]){
-	  int flag=0;
-	  switch(cut){
-	  case(4): if(event->fpdAdcSumSmdX>100 && event->fpdAdcSumSmdY<100) flag=1; break;
-	  case(5): if(event->fpdAdcSumSmdX>100 && event->fpdAdcSumSmdY<100 &&
-		      event->fpdAdcSumPres1<100 && event->fpdAdcSumPres2<100) flag=1; break;
-	  case(6): if(event->fpdSouthVeto>65) flag=1; break;
-	  default: flag=1;
-	  }
-	  cout << "akio3 flag=" << flag << " bunch=" <<bunch<<" spin="<<event->doubleSpinIndex<<endl;
-	  if(flag==1){
-	    N[cut][bin][bunch]++;
-	    N[cut][bin][120+event->doubleSpinIndex]++;
-	    N[cut][bin][135]++;
-	  }
-	}
-      }
-    }
-  }
-  void write(){
-    const char *NAME[7] = {"North","South","Top","Bottom","North+SMD","North-Pres+SMD","South-PRS"};
-    const int  SIGN[7]  = {1,-1,1,-1,1,1,-1};
-    for(int cut=0; cut<7; cut++){
-      for(int bin=0; bin<6; bin++){
-	fprintf(out,"%s   %3d   %2d  ",NAME[cut],bin,SIGN[cut]);
-	for(int index=0; index<136; index++){
-	  fprintf(out," %d ",N[cut][bin][index]);
-	}     
-	fprintf(out,"\n");
-      } 
-    }
-  };
-private:
-  FILE* out;
-  int N[7][7][136];
-};
-
-asytext* asyt;
 
 ClassImp(StppuDstMaker)
   
@@ -243,14 +169,11 @@ Int_t StppuDstMaker::Init(const Char_t *filename)
     uDstFileName.ReplaceAll(".spinDst.root",".spinDst.nt");
     initfpdpi0_(uDstFileName.Data());
     
-    uDstFileName.ReplaceAll(".spinDst.nt",".asytext");
-    //asyt = new asytext(uDstFileName.Data());
-    
     return StMaker::Init();
 }
 
 Int_t StppuDstMaker::Make() {
-  cout <<" Start StpuDstMaker :: "<< GetName() <<" mode="<<m_Mode<<endl;   
+  cout <<" Start StppuDstMaker :: "<< GetName() <<" mode="<<m_Mode<<endl;   
 
   ppEvent->clear();
 #ifdef _GEANT_
@@ -282,8 +205,6 @@ Int_t StppuDstMaker::Make() {
     mBadCounter++;
     return kStOK;
   }
-  
-  //asyt->fill(ppEvent);
   
   // Get geant info, if any, and fill geant branch
 #ifdef _GEANT_
@@ -344,8 +265,7 @@ Int_t StppuDstMaker::Finish()
 {
   m_outfile->Write();
   m_outfile->Close();
-  //finishfpdpi0_();
-  //asyt->write();
+  finishfpdpi0_();
   cout << "=================================================================\n";
   cout << "StppuDstger statistics:\n";
   cout << "events with StppuDstger data: " << mGoodCounter << endl;

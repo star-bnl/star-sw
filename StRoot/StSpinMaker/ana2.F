@@ -141,9 +141,12 @@ c   *      write(*,*) float(i),float(adc(i+120)),smygain(i),float(adc(i+120))*sm
       real finv                 ! Invariant mass
       integer nx,ny,nt          ! loop variables
       integer icycle            ! HBOOK variable for HROUT
+      integer filled
+
 
 *      write(6,*) '**fillpi2** event number ',numevt
 
+      filled=0
       npkpar=10*npeak(1)+npeak(2)
       if(npkpar.gt.11) then
          nmax=(nrmax-1)*4+ncmax
@@ -226,6 +229,7 @@ c   *      write(*,*) float(i),float(adc(i+120)),smygain(i),float(adc(i+120))*sm
 *            ntcnt=ntcnt+1
 *            if(ntcnt.le.5000) then
                call hfnt(12)
+               filled = 1
 *              write(6,*) '**fillpi2** hfnt ',numevt,ntcnt
 *            elseif(f_cwn.eq.1) then
 *               call hrout(12,icycle,' ')
@@ -242,6 +246,9 @@ c   *      write(*,*) float(i),float(adc(i+120)),smygain(i),float(adc(i+120))*sm
 ************************
          endif
       endif
+      if(filled.eq.0) then
+         call hfnt(12)
+      endif         
 *
       return
       end
@@ -317,7 +324,7 @@ c   *      write(*,*) float(i),float(adc(i+120)),smygain(i),float(adc(i+120))*sm
       if(npeak(1).eq.2.or.npeak(2).eq.2) then
          call pi0ana(zvertex, bbcdiff, run)
       endif
-*      write(6,*) '**anasmd** end event ',numevt
+*     write(6,*) '**anasmd** end event ',numevt
       return
       end
 

@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.h,v 1.5 2002/12/04 20:28:08 thenry Exp $ 
+// $Id: StppEvent.h,v 1.6 2003/02/04 21:57:09 akio Exp $ 
 // $Log: StppEvent.h,v $
+// Revision 1.6  2003/02/04 21:57:09  akio
+// Improvments on pi0 reconstruction code and ntuple
+//
 // Revision 1.5  2002/12/04 20:28:08  thenry
 // StppuDstMaker was modified to allow multiple jet analysis modules to be
 // run simultaneosly with various parameters while the Maker loads the events
@@ -116,7 +119,6 @@ public:
     Int_t        bbcNHitWest;   
     Float_t      zVertexBbc;
 
-    Float_t      fpdESumNorth;   
     Int_t        fpdAdcSumNorth;   
     Int_t        fpdAdcSumSouth;   
     Int_t        fpdAdcSumTop;   
@@ -126,6 +128,13 @@ public:
     Int_t        fpdAdcSumSmdX;   
     Int_t        fpdAdcSumSmdY;   
     Int_t        fpdSouthVeto;   
+  
+    Float_t      fpdESumNorth;   
+    Float_t      fpdESumSouth;   
+    Float_t      fpdESumTop;   
+    Float_t      fpdESumBottom;   
+    Float_t      fpdESumSmdX;   
+    Float_t      fpdESumSmdY;   
 
     Float_t      fpdPi0Mass;
     Float_t      fpdPi0E;
@@ -133,6 +142,13 @@ public:
     Float_t      fpdPi0Phi;
     Float_t      fpdPi0EShare;  
     Float_t      fpdPi0SmdDiff; 
+
+    Float_t      fpdENorth[12];
+    Float_t      fpdESouth[16];
+    Float_t      fpdETop[16];
+    Float_t      fpdEBottom[16];
+    Float_t      fpdESmdX[60];
+    Float_t      fpdESmdY[100];
 
     Float_t      ctbAdcSum;   
     Int_t        ctbNHit;   
