@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.48 1998/08/26 01:59:22 fisyak Exp $
+# $Id: MakePam.mk,v 1.49 1998/08/28 02:10:14 nevski Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.49  1998/08/28 02:10:14  nevski
+# Add standard tables include
+#
 # Revision 1.48  1998/08/26 01:59:22  fisyak
 # Remove system from ROOT path
 #
@@ -116,7 +119,7 @@ CPPFLAGS += -I. -I../ -I/usr/include -I$(STAR)/inc \
              $(addprefix -I, $(SRC_DIR) $(GEN_TAB) $(GEN_DIR) $(INC_DIRS)) \
             -I$(CERN_ROOT)/include
 ifneq ($(OUT_DIR),$(STAR))        
-CPPFLAGG :=  -I$(STAR)/.share/$(DOMAIN) -I$(STAR)/.share/tables
+CPPFLAGS +=  -I$(STAR)/.share/$(DOMAIN) -I$(STAR)/.share/tables
 endif                          
 FFLAGS   += -DCERNLIB_TYPE
 #                                   -I$(CERN_ROOT)/src/geant321 
@@ -273,7 +276,7 @@ $(OBJ_DIR)/$(PKG)_init.o: $(FILES_IDM)
                                                         >> $(GEN_DIR)/$(PKG)_init.cc ; done
 	@echo '                       return 1; }'      >> $(GEN_DIR)/$(PKG)_init.cc
 	@echo 'int  $(PKG)_stop () { return 1; }'       >> $(GEN_DIR)/$(PKG)_init.cc
-	$(CXX) $(CPPFLAGS) $(CPPFLAGG) $(CXXFLAGS) -c $(GEN_DIR)/$(PKG)_init.cc -o $(ALL_TAGS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(GEN_DIR)/$(PKG)_init.cc -o $(ALL_TAGS)
 endif                           
 endif                           # NO idl- or g-files
 #_________________dependencies_____________________________
