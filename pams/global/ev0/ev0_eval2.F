@@ -1,6 +1,6 @@
       INTEGER*4 FUNCTION EV0_EVAL2( svt_track_h,  svt_track,
      +                         tpt_track_h,  tpt_track,
-     +                         tte_eval_h,  tte_eval,
+     +                        tte_eval_h,  tte_eval,
      +                         vertex_h,  vertex,
      +                         ev0out_h,  ev0out,
      +                         ev0_eval_h, ev0_eval,
@@ -31,7 +31,8 @@ C---------------
          call StError('No evaluation tables qutiing')
          return
       endif
-*
+
+*     
 * Sort tptrack and svttrack by id_globtrk
 
       ok = tls_quick_sort_i(tpt_track_h.nok, tpt_track(1).id_globtrk,
@@ -65,7 +66,8 @@ C---------------
       do 10 i=1,ev0out_h.nok
 *
 * check if daughter particles came from a secondary vertex
-*
+* 
+ 
          iv1=ev0out(i).idneg
          iv2=ev0out(i).idpos
          done1 = 0

@@ -152,13 +152,17 @@ c
 c     
 c     call analysis (clean up) module, ev0par(1).iflag=1
 c     
+
       
       if( ev0out_h.nok .gt. ev0out_h.maxlen )then
+         vertex_h.nok = vertex_h.nok-(ev0out_h.nok-ev0out_h.maxlen)
          ev0out_h.nok = ev0out_h.maxlen
          EV0_AM2= STAFCV_BAD
          return
       endif
+
       if( vertex_h.nok .gt. vertex_h.maxlen) then
+         ev0out_h.nok = ev0out_h.nok-(vertex_h.nok-vertex_h.maxlen)
          vertex_h.nok = vertex_h.maxlen
          EV0_AM2 = STAFCV_BAD
          return
