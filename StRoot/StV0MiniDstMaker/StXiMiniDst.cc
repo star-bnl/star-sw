@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMiniDst.cc,v 1.1 1999/08/13 12:38:17 jones Exp $
+ * $Id: StXiMiniDst.cc,v 1.2 1999/09/02 09:04:57 jones Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 30-Mar-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StXiMiniDst.cc,v $
+ * Revision 1.2  1999/09/02 09:04:57  jones
+ * Added StEvMiniDst class, New file handling, Partially implemented TTrees
+ *
  * Revision 1.1  1999/08/13 12:38:17  jones
  * Major revision to merge StV0MiniDstMaker and StXiMiniDstMaker
  *
@@ -27,8 +30,8 @@ StXiMiniDst::StXiMiniDst() {
 
 StXiMiniDst::StXiMiniDst(StXiVertex* xiVertex, 
 			 StV0Vertex* v0Vertex,
-			 StVertex*   primaryVertex) : 
-             StV0MiniDst(v0Vertex, primaryVertex) {
+			 StEvMiniDst* event) : 
+             StV0MiniDst(v0Vertex, event) {
 
   double B=0.5*tesla; // Hardwired - fix later
 
@@ -55,26 +58,29 @@ StXiMiniDst::~StXiMiniDst() {
 void StXiMiniDst::UpdateXi() { 
   // Calculate derived data members
 
-       mDecayLengthXi = sqrt(pow(mDecayVertexXi[0] - mPrimaryVertex[0],2) +
-			     pow(mDecayVertexXi[1] - mPrimaryVertex[1],2) +
-			     pow(mDecayVertexXi[2] - mPrimaryVertex[2],2));
-
-       mPtot2Bachelor = mMomBachelor[0]*mMomBachelor[0] +
-                        mMomBachelor[1]*mMomBachelor[1] + 
-                        mMomBachelor[2]*mMomBachelor[2];
+     mDecayLengthXi = sqrt(pow(mDecayVertexXi[0] - 
+			       mEvent->primaryVertex()[0],2) +
+			   pow(mDecayVertexXi[1] - 
+			       mEvent->primaryVertex()[1],2) +
+			   pow(mDecayVertexXi[2] - 
+			       mEvent->primaryVertex()[2],2));
+     
+     mPtot2Bachelor = mMomBachelor[0]*mMomBachelor[0] +
+                      mMomBachelor[1]*mMomBachelor[1] + 
+                      mMomBachelor[2]*mMomBachelor[2];
   
-            mMomXi[0] = mMomV0[0] + mMomBachelor[0];
-            mMomXi[1] = mMomV0[1] + mMomBachelor[1];
-            mMomXi[2] = mMomV0[2] + mMomBachelor[2];
-               mPt2Xi = mMomXi[0]*mMomXi[0] + mMomXi[1]*mMomXi[1];
-             mPtot2Xi = mPt2Xi + mMomXi[2]*mMomXi[2];
+          mMomXi[0] = mMomV0[0] + mMomBachelor[0];
+          mMomXi[1] = mMomV0[1] + mMomBachelor[1];
+          mMomXi[2] = mMomV0[2] + mMomBachelor[2];
+             mPt2Xi = mMomXi[0]*mMomXi[0] + mMomXi[1]*mMomXi[1];
+           mPtot2Xi = mPt2Xi + mMomXi[2]*mMomXi[2];
   
-  mMomBachelorAlongXi = ( mMomBachelor[0]*mMomXi[0] + 
-			  mMomBachelor[1]*mMomXi[1] +
-			  mMomBachelor[2]*mMomXi[2] ) / sqrt(mPtot2Xi); 
-        mMomV0AlongXi = ( mMomV0[0]*mMomXi[0] + 
-			  mMomV0[1]*mMomXi[1] + 
-			  mMomV0[2]*mMomXi[2] ) / sqrt(mPtot2Xi);
+mMomBachelorAlongXi = ( mMomBachelor[0]*mMomXi[0] + 
+			mMomBachelor[1]*mMomXi[1] +
+			mMomBachelor[2]*mMomXi[2] ) / sqrt(mPtot2Xi); 
+      mMomV0AlongXi = ( mMomV0[0]*mMomXi[0] + 
+			mMomV0[1]*mMomXi[1] + 
+			mMomV0[2]*mMomXi[2] ) / sqrt(mPtot2Xi);
 }
 
 float StXiMiniDst::alphaXi() {

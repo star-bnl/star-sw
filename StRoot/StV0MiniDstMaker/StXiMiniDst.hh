@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMiniDst.hh,v 1.3 1999/08/16 10:21:03 jones Exp $
+ * $Id: StXiMiniDst.hh,v 1.4 1999/09/02 09:04:57 jones Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 30-Mar-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StXiMiniDst.hh,v $
+ * Revision 1.4  1999/09/02 09:04:57  jones
+ * Added StEvMiniDst class, New file handling, Partially implemented TTrees
+ *
  * Revision 1.3  1999/08/16 10:21:03  jones
  * Fixed compilation problem on HP related to use of const on pointer type
  *
@@ -34,7 +37,7 @@ class StXiMiniDst : public StV0MiniDst {
 public:
   StXiMiniDst();
   ~StXiMiniDst();
-  StXiMiniDst(StXiVertex*,StV0Vertex*,StVertex*);
+  StXiMiniDst(StXiVertex*,StV0Vertex*,StEvMiniDst*);
   void UpdateXi();
 
   int   charge() const;              // Particle charge
