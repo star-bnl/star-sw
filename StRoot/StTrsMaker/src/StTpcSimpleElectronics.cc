@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleElectronics.cc,v 1.2 1999/01/18 10:22:08 lasiuk Exp $
+ * $Id: StTpcSimpleElectronics.cc,v 1.3 1999/01/18 17:21:29 lasiuk Exp $
  *
  * Author: brian Nov 3, 1998
  *
@@ -11,8 +11,8 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleElectronics.cc,v $
- * Revision 1.2  1999/01/18 10:22:08  lasiuk
- * add tau
+ * Revision 1.3  1999/01/18 17:21:29  lasiuk
+ * tau units
  *
  * Revision 1.4  1999/02/24 19:33:29  lasiuk
  * add tzero offset parameter
@@ -59,7 +59,7 @@ StTpcSimpleElectronics::StTpcSimpleElectronics(const char* file)
     using namespace units;
 #endif
 
-    mTau                 += nanosecond;
+    mNominalGain         *= ((volt*.001)/(coulomb*1.e-15));  // mV/fC
     mSamplingFrequency   *= MHz;
     mTZero               *= microsecond;
     mAdcConversion       *= (volt*.001);
