@@ -18,13 +18,13 @@ class StAutoInspector : public TMemberInspector {
 public:
 StAutoInspector(TBrowser *b){fBrowser=b;fCount=0;};
 virtual ~StAutoInspector(){};
-virtual void Inspect(TClass* cl, const char* parent, const char* name, void* addr);
+virtual void Inspect(TClass* cl, const char* parent, const char* name, const void* addr);
 
 Int_t fCount;
 TBrowser *fBrowser;
 };      
 //______________________________________________________________________________
-void StAutoInspector::Inspect(TClass* kl, const char* tit , const char* name, void* addr)
+void StAutoInspector::Inspect(TClass* kl, const char* tit , const char* name, const void* addr)
 {
   if(tit && strchr(tit,'.'))	return ;
   if (fCount && !fBrowser) return;
