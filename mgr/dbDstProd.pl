@@ -224,7 +224,7 @@ print "Total files: $nDiskFiles\n";
  $nHpssDirs = scalar(@hpssRecoDirs);
  $nhpssFiles = 0;
 
- $ftpHpss = Net::FTP->new("rmds01.rhic.bnl.gov", Port => 2121, Timeout=>100)
+ $ftpHpss = Net::FTP->new("rmds01g.rcf.bnl.gov", Port => 2121, Timeout=>100)
    or die "HPSS access failed";
  $ftpHpss->login("starreco","MockData") or die "HPSS access failed";
 
