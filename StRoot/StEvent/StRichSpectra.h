@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectra.h,v 2.2 2002/02/19 16:54:33 ullrich Exp $
+ * $Id: StRichSpectra.h,v 2.3 2002/02/19 23:22:30 ullrich Exp $
  *
  * Author: Brian Lasiuk, Dec 14, 2002
  ***************************************************************************
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: StRichSpectra.h,v $
+ * Revision 2.3  2002/02/19 23:22:30  ullrich
+ * Minor modifications.
+ *
  * Revision 2.2  2002/02/19 16:54:33  ullrich
  * Minor changes - code not altered.
  *
@@ -34,8 +37,8 @@ public:
 		  int, int, int,
 		  int=-999);
     
-    //StRichSpectra(const StRichSpectra&){/* nopt */}    
-    //operator =(StRichSpectra(const StRichSpectra&) {/* nopt */}
+    //StRichSpectra(const StRichSpectra&) use default
+    //StRichSpectra& operator =(const StRichSpectra&) use default
     
     void setExtrapolatedPosition(float, float);
     void setExtrapolatedResidual(float, float);
