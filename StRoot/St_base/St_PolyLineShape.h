@@ -1,5 +1,24 @@
 #ifndef STAR_St_PolyLineShape
 #define STAR_St_PolyLineShape
+// $Id: St_PolyLineShape.h,v 1.13 1999/12/17 23:28:41 fine Exp $ 
+// ***********************************************************************
+// *  C++ class library to define an abstract 3D shape os STAR "event" geometry
+// * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
+// * Author                  Valerie Fine  (fine@bnl.gov)
+// * Copyright(c) 1997~1999  Valerie Fine  (fine@bnl.gov)
+// *
+// * This program is distributed in the hope that it will be useful,
+// * but WITHOUT ANY WARRANTY; without even the implied warranty of
+// * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// *
+// * Permission to use, copy, modify and distribute this software and its
+// * documentation for any purpose is hereby granted without fee,
+// * provided that the above copyright notice appear in all copies and
+// * that both that copyright notice and this permission notice appear
+// * in supporting documentation.  Brookhaven National Laboratory makes no
+// * representations about the suitability of this software for any
+// * purpose.  It is provided "as is" without express or implied warranty.
+// ************************************************************************
 
 #include <TShape.h>
 #include <TAttMarker.h>
@@ -64,7 +83,14 @@ public:
    virtual void         SetWidthFactor(Float_t fact=1.0){m_WidthFactor = fact;} //*MENU 
    virtual Int_t        Size() const;
    virtual void         Sizeof3D() const;
-   ClassDef(St_PolyLineShape,0)
+   ClassDef(St_PolyLineShape,0) // the base class to define an abstract 3D shape of STAR "event" geometry
 };
+//______________________________________________________________________________
+// $Log: St_PolyLineShape.h,v $
+// Revision 1.13  1999/12/17 23:28:41  fine
+// clean up for the sake of docs + new class St_Table3DPackedPoints introduced
+//
+//______________________________________________________________________________
+
 
 #endif

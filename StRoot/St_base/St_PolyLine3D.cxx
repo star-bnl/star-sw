@@ -1,5 +1,24 @@
 //*CMZ :          29/04/99  16.26.07  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine     17/08/95
+// $Id: St_PolyLine3D.cxx,v 1.14 1999/12/17 23:28:40 fine Exp $ 
+// ***********************************************************************
+// * Defines 3D polyline base class to construct STAR "event" geometry
+// * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
+// * Author                  Valerie Fine  (fine@bnl.gov)
+// * Copyright(c) 1997~1999  Valerie Fine  (fine@bnl.gov)
+// *
+// * This program is distributed in the hope that it will be useful,
+// * but WITHOUT ANY WARRANTY; without even the implied warranty of
+// * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// *
+// * Permission to use, copy, modify and distribute this software and its
+// * documentation for any purpose is hereby granted without fee,
+// * provided that the above copyright notice appear in all copies and
+// * that both that copyright notice and this permission notice appear
+// * in supporting documentation.  Brookhaven National Laboratory makes no
+// * representations about the suitability of this software for any
+// * purpose.  It is provided "as is" without express or implied warranty.
+// ************************************************************************
  
 #include <fstream.h>
 #include <iostream.h>
@@ -146,7 +165,8 @@ Int_t St_PolyLine3D::DistancetoPrimitive(Int_t px, Int_t py)
  
    Int_t i, dsegment;
    Float_t x1,y1,x2,y2, xndc[3];
-   for (i=0;i<m_Points->Size()-1;i++) {
+   Int_t size = m_Points->Size()-1;
+   for (i=0; i < size; i++) {
       Float_t xyz[6];
       m_Points->GetXYZ(xyz,i,2);
       view->WCtoNDC(xyz, xndc);
@@ -407,4 +427,10 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
    }
    if (savpad) savpad->cd();
 }   
+//__________________________________________________________________________
+// $Log: St_PolyLine3D.cxx,v $
+// Revision 1.14  1999/12/17 23:28:40  fine
+// clean up for the sake of docs + new class St_Table3DPackedPoints introduced
+//
+//__________________________________________________________________________
 
