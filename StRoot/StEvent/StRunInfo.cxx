@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunInfo.cxx,v 2.1 2001/09/18 00:14:17 ullrich Exp $
+ * $Id: StRunInfo.cxx,v 2.2 2001/12/02 19:27:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2001
  ***************************************************************************
@@ -10,13 +10,16 @@
  ***************************************************************************
  *
  * $Log: StRunInfo.cxx,v $
+ * Revision 2.2  2001/12/02 19:27:12  ullrich
+ * Added new member and methods.
+ *
  * Revision 2.1  2001/09/18 00:14:17  ullrich
  * Initial Revision.
  *
  **************************************************************************/
 #include "StRunInfo.h"
 
-static const char rcsid[] = "$Id: StRunInfo.cxx,v 2.1 2001/09/18 00:14:17 ullrich Exp $";
+static const char rcsid[] = "$Id: StRunInfo.cxx,v 2.2 2001/12/02 19:27:12 ullrich Exp $";
 
 ClassImp(StRunInfo)
 
@@ -32,6 +35,12 @@ StRunInfo::StRunInfo()
     mMagneticFieldZ = 0;
     mTpcDriftVelocity[east] = 0;
     mTpcDriftVelocity[west] = 0;
+
+    mZdcEastRate = 0;
+    mZdcWestRate = 0;
+    mZdcCoincidenceRate = 0;
+    mBackgroundRate = 0;
+    mL0RateToRich = 0;
 }
 
 StRunInfo::~StRunInfo() {/* noop */}
@@ -68,6 +77,26 @@ double
 StRunInfo::tpcDriftVelocity(StBeamDirection dir) const
 {return mTpcDriftVelocity[dir];}
 
+double
+StRunInfo::zdcWestRate() const
+{return mZdcWestRate;}
+
+double
+StRunInfo::zdcEastRate() const
+{return mZdcEastRate;}
+
+double
+StRunInfo::zdcCoincidenceRate() const
+{return mZdcCoincidenceRate;}
+
+double
+StRunInfo::backgroundRate() const
+{return mBackgroundRate;}
+
+double
+StRunInfo::l0RateToRich() const
+{return mL0RateToRich;}
+
 void
 StRunInfo::setRunId(int val) {mRunId = val;}
 
@@ -98,3 +127,23 @@ StRunInfo::setMagneticField(double val)
 void
 StRunInfo::setTpcDriftVelocity(StBeamDirection dir, double val)
 {mTpcDriftVelocity[dir] = val;}  
+
+void
+StRunInfo::setZdcWestRate(double val)
+{mZdcWestRate = val;}
+
+void
+StRunInfo::setZdcEastRate(double val)
+{mZdcEastRate = val;}
+
+void
+StRunInfo::setZdcCoincidenceRate(double val)
+{mZdcCoincidenceRate = val;}
+
+void
+StRunInfo::setBackgroundRate(double val)
+{mBackgroundRate = val;}
+
+void
+StRunInfo::setL0RateToRich(double val)
+{mL0RateToRich = val;}

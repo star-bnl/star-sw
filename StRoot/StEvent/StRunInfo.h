@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunInfo.h,v 2.1 2001/09/18 00:14:17 ullrich Exp $
+ * $Id: StRunInfo.h,v 2.2 2001/12/02 19:27:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRunInfo.h,v $
+ * Revision 2.2  2001/12/02 19:27:12  ullrich
+ * Added new member and methods.
+ *
  * Revision 2.1  2001/09/18 00:14:17  ullrich
  * Initial Revision.
  *
@@ -38,14 +41,26 @@ public:
     double   magneticField() const;
     double   tpcDriftVelocity(StBeamDirection) const;
 
+    double   zdcWestRate() const;
+    double   zdcEastRate() const;
+    double   zdcCoincidenceRate() const;
+    double   backgroundRate() const;
+    double   l0RateToRich() const;
+
     void     setRunId(int);
     void     setProductionTime(time_t);                 
-    void     setProductionVersion(const char*);              
+    void     setProductionVersion(const char*);   
     void     setCenterOfMassEnergy(double);             
     void     setBeamMassNumber(StBeamDirection, int);  
     void     setBeamCharge(StBeamDirection, int);      
     void     setMagneticField(double);                  
     void     setTpcDriftVelocity(StBeamDirection, double);
+
+    void     setZdcWestRate(double);
+    void     setZdcEastRate(double);
+    void     setZdcCoincidenceRate(double);
+    void     setBackgroundRate(double);
+    void     setL0RateToRich(double); 
     
 protected:
     Int_t	mRunId;
@@ -59,7 +74,13 @@ protected:
     
     Double_t    mMagneticFieldZ;
     Float_t     mTpcDriftVelocity[2];
-    
-    ClassDef(StRunInfo,1)
+
+    Double_t    mZdcEastRate;
+    Double_t    mZdcWestRate;
+    Double_t    mZdcCoincidenceRate;
+    Double_t    mBackgroundRate;
+    Double_t    mL0RateToRich;
+
+    ClassDef(StRunInfo,2)
 };
 #endif
