@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.10 2003/02/04 21:57:09 akio Exp $
+// $Id: StppEvent.cxx,v 1.11 2003/03/07 23:46:59 thenry Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.11  2003/03/07 23:46:59  thenry
+// Added Fill calls with different parameters
+//
 // Revision 1.10  2003/02/04 21:57:09  akio
 // Improvments on pi0 reconstruction code and ntuple
 //
@@ -178,6 +181,16 @@ void StppEvent::clear(){
 
 #ifndef __CINT__
 Int_t StppEvent::fill(StEvent *event){
+    return fill(event, mudst);
+}
+
+Int_t StppEvent::fill(StMuDst* uDst){
+    return fill(NULL, uDst);
+}
+
+Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
+    mudst = uDst;
+
     foundJet = false;
 
     for(Int_t anaNum = 0; anaNum < numAnalyzers; anaNum++) {
@@ -191,7 +204,7 @@ Int_t StppEvent::fill(StEvent *event){
 	muDstJets->Clear(true);
     }
 
-    if(!event && !mudst){
+    if(!event && !uDst){
 	cout << "StppEvent::fill()   Error:Neither StEvent nor Mudst exist!" << endl;
 	return 1;
     }
