@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.1 2000/06/13 20:42:05 caines Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.2 2000/06/25 20:40:16 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
- * Revision 1.1  2000/06/13 20:42:05  caines
- * StRoot/StSvtDaqMaker
+ * Revision 1.2  2000/06/25 20:40:16  caines
+ * Add debugging statements and protection against SVT not being there
  *
  *
  **************************************************************************/
@@ -23,6 +23,7 @@
 #include "StSvtDaqData.hh"
 #include "StSvtHybridDaqData.hh"
 #include "StSvtDaqMaker.h"
+#include "StMessMgr.h"
 
 ClassImp(StSvtDaqMaker)
 
@@ -47,15 +48,12 @@ StSvtDaqMaker::~StSvtDaqMaker()
 {
   delete fData;     
   delete fSvtData;    
-
-  //delete daqReader;   
-  //delete svtReader;   
 }
 
 //_____________________________________________________________________________
 Int_t StSvtDaqMaker::Init()
 {
-  //cout << "StSvtDaqMaker::Init" << endl;
+  if (Debug()) gMessMgr->Debug() << "StSvtDaqMaker::Init" << endm;
 
   daqReader = NULL;
 
@@ -100,7 +98,7 @@ Int_t StSvtDaqMaker::SetHybridData()
 //_____________________________________________________________________________
 Int_t StSvtDaqMaker::Make()
 {
-  //cout << "StSvtDaqMaker::Make" << endl;
+   if (Debug()) gMessMgr->Debug() << "StSvtDaqMaker::Make" << endm;
 
   GetSvtData();
 
@@ -110,6 +108,11 @@ Int_t StSvtDaqMaker::Make()
 //_____________________________________________________________________________
 Int_t StSvtDaqMaker::GetSvtData()
 {
+
+  if(  !daqReader->SVTPresent ()){
+    gMessMgr->Error() << "SVT -No SVT Present but trying to read it" << endm;
+    return kStErr;
+  }
   svtReader = daqReader->getSVTReader();
   assert(svtReader);
 
@@ -123,16 +126,17 @@ Int_t StSvtDaqMaker::GetSvtData()
   fSvtData->setRunNumber(daqReader->getRunNumber()); 
   fSvtData->setEventNumber(daqReader->getEventNumber()); 
   fSvtData->setTrigWord(daqReader->getTrigWord()); 
-  fSvtData->setSCAZero(svtReader->getSCAZero()); 
-  //  fSvtData->setTimeZero(svtReader->getTimeZero()); 
-
+  fSvtData->setSCAZero(svtReader->getSCAZero());
+  for( int i=1; i<=N_SECTORS; i++){
+    fSvtData->setTimeZero(128*40-(32*105)-(12*105)+svtReader->getTimeZero(),i); 
+  }
   return kStOK;
 }
 
 //_____________________________________________________________________________
 Int_t StSvtDaqMaker::GetHybridData(int barrel, int ladder, int wafer, int hybrid)
 {
-  //cout << "StSvtDaqMaker::Make" << endl;
+  if (Debug()) gMessMgr->Debug() << "StSvtDaqMaker::Make" << endm;
 
   int status = 0;
 
@@ -162,7 +166,7 @@ void StSvtDaqMaker::PrintEventInfo()
 //_____________________________________________________________________________
 Int_t StSvtDaqMaker::Clear()
 {
-  //cout << "StSvtDaqMaker::Clear" << endl;
+  if (Debug()) gMessMgr->Debug() << "StSvtDaqMaker::Clear" << endm;
 
   if (fSvtData) {
     fSvtData->Delete();
@@ -180,7 +184,7 @@ Int_t StSvtDaqMaker::Clear()
 //_____________________________________________________________________________
 Int_t StSvtDaqMaker::Reset()
 {
-  //cout << "StSvtDaqMaker::Reset" << endl;
+  if (Debug()) gMessMgr->Debug()<< "StSvtDaqMaker::Reset" << endm;
 
   Clear();
 
@@ -199,7 +203,7 @@ Int_t StSvtDaqMaker::Reset()
 //_____________________________________________________________________________
 Int_t StSvtDaqMaker::Finish()
 {
-  //cout << "StSvtDaqMaker::Finish" << endl;
+  if (Debug()) gMessMgr->Debug()<< "StSvtDaqMaker::Finish" << endm;
 
   Reset();
 
@@ -210,7 +214,7 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.1 2000/06/13 20:42:05 caines Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.2 2000/06/25 20:40:16 caines Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
