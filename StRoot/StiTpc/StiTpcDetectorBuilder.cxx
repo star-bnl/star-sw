@@ -18,6 +18,7 @@
 #include "Sti/StiHitErrorCalculator.h"
 #include "StiTpcDetectorBuilder.h" 
 #include "StiTpcIsActiveFunctor.h"
+#include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 
 StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active)
   : StiDetectorBuilder("TpcBuilder",active)
@@ -25,14 +26,20 @@ StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active)
   _innerCalc = new StiDefaultHitErrorCalculator();
   _innerCalc->set(.066, 1.2e-04, 0.0004,
 		  .03, 2.2e-4, 2.8-02);
+  //_innerCalc->set(3.12735e-03,1.51055e-04,2.43806e-02,
+  //3.28243e-03,5.23272e-05,5.75341e-02);
+  //		  3.68243e-03,5.23272e-05,5.75341e-02); //original C.P.5/1/03
   _outerCalc = new StiDefaultHitErrorCalculator();
   _outerCalc->set(.015, 8e-04, 0.0004,
 		  .012, 1.6e-4, 1.3e-01);
+  //_outerCalc->set(8.158e-03,5.69582e-05,4.48440e-02,
+  //8.02775e-03,3.55219e-05,6.45610e-02);
+  //2.02775e-04,3.55219e-05,6.45610e-02);  //original C.P. 5/1/03 
   StiTrackingParameters * trackingPars = getTrackingParameters();
   trackingPars->setMaxChi2ForSelection(10.);
-  trackingPars->setMinSearchWindow(1.5);
-  trackingPars->setMaxSearchWindow(7.);
-  trackingPars->setSearchWindowScaling(10.);
+  trackingPars->setMinSearchWindow(2.);
+  trackingPars->setMaxSearchWindow(8.);
+  trackingPars->setSearchWindowScaling(12.);
 }
 
 StiTpcDetectorBuilder::~StiTpcDetectorBuilder()
@@ -106,7 +113,7 @@ TPC, the field cage are artificially segmented into 12 sectors each.
       StiDetector *ifcVolume = _detectorFactory->getInstance();
       sprintf(name, "TPC/Ifc/Sector_%d", sector);
       ifcVolume->setName(name);
-      ifcVolume->setIsOn(true);
+      ifcVolume->setIsOn(false);
       ifcVolume->setIsActive(new StiNeverActiveFunctor);
       ifcVolume->setIsContinuousMedium(false);
       ifcVolume->setIsDiscreteScatterer(true);
@@ -114,8 +121,9 @@ TPC, the field cage are artificially segmented into 12 sectors each.
       ifcVolume->setPlacement(p);
       ifcVolume->setGas(_gas);
       ifcVolume->setMaterial(_fcMaterial);
-      add(ifcVolume);
-      
+      //add(ifcVolume);
+      add(45,sector,ifcVolume);
+
       // outer field cage
       p = new StiPlacement;
       p->setZcenter(0.);
@@ -127,7 +135,7 @@ TPC, the field cage are artificially segmented into 12 sectors each.
       StiDetector *ofcVolume = _detectorFactory->getInstance();
       sprintf(name, "TPC/Ofc/Sector_%d", sector);
       ofcVolume->setName(name);
-      ofcVolume->setIsOn(true);
+      ofcVolume->setIsOn(false);
       ofcVolume->setIsActive(new StiNeverActiveFunctor);
       ofcVolume->setIsContinuousMedium(false);
       ofcVolume->setIsDiscreteScatterer(true);
@@ -136,12 +144,15 @@ TPC, the field cage are artificially segmented into 12 sectors each.
       ofcVolume->setGas(_gas);
       ofcVolume->setMaterial(_fcMaterial);
       // remove it for now...
-      //add(ofcVolume);
+      //add(ofcVolume);  
+      add(46,sector,ofcVolume);
   } 
+
+  StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
   StiPlanarShape *pShape;
   //Active TPC padrows 
   unsigned int _nInnerPadrows = _padPlane->numberOfInnerRows();
-  for(row = 0; row<getNRows(); row++)
+  for(row = 0; row<45; row++)
     {
       // create properties shared by all sectors in this padrow
       float fRadius = _padPlane->radialDistanceAtRow(row+1);
@@ -170,17 +181,25 @@ TPC, the field cage are artificially segmented into 12 sectors each.
 	  StiDetector *pDetector = _detectorFactory->getInstance();
 	  pDetector->setName(name);
 	  pDetector->setIsOn(true);
-	  if (_active)
-	    pDetector->setIsActive(new StiTpcIsActiveFunctor(sector, row));
-	  else
-	    pDetector->setIsActive(new StiNeverActiveFunctor());
+
+	  int iRdo = rdoForPadrow(row+1);
+	  bool west = s_pRdoMasks->isOn(sector+1, iRdo);
+	  bool east = s_pRdoMasks->isOn( 24-(sector+1)%12, iRdo);
+	  // temp overide...
+	  if (row==12 || 
+	      (sector==3 && (row==13 || row==14 || row==15 || row==16 || row==17 || row==18 || row==19 || row==20)))
+	    {
+	      east = false;
+	      west = false;
+	    }
+	  pDetector->setIsActive(new StiTpcIsActiveFunctor(_active,west,east));
 	  pDetector->setIsContinuousMedium(true);
 	  pDetector->setIsDiscreteScatterer(false);
 	  pDetector->setMaterial(_gas);
 	  pDetector->setGas(_gas);
 	  pDetector->setShape(pShape);
 	  pDetector->setPlacement(pPlacement);
-	  if (row<15)
+	  if (row<20)
 	    pDetector->setHitErrorCalculator(_innerCalc);
 	  else
 	    pDetector->setHitErrorCalculator(_outerCalc);
@@ -207,7 +226,7 @@ void StiTpcDetectorBuilder::loadDb()
   StTpcPadPlaneI *_padPlane = gStTpcDb->PadPlaneGeometry();
   if (!_padPlane)
     throw runtime_error("StiTpcDetectorBuilder::loadDb() - ERROR - _padPlane==0");
-  unsigned int nRows = _padPlane->numberOfRows();
+  unsigned int nRows = _padPlane->numberOfRows()+2;
   setNRows(nRows);
   for(unsigned int row = 0; row<nRows;row++)
     {

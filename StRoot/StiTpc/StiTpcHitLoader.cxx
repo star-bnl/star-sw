@@ -188,7 +188,8 @@ void StiTpcHitLoader::loadMcHits(StMcEvent* source,
 				hit->position().y(),
 				hit->position().z(),
 				hit->dE());
-	      //_mcHitContainer->push_back( stiHit );
+	      _mcHitContainer->push_back( stiHit );
+	      mcTrack->addHit(stiHit);
 	      if (useMcAsRec) 
 		{
 		  _hitContainer->push_back( stiHit );
