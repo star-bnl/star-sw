@@ -1,4 +1,21 @@
-//kT pair cut
+/***************************************************************************
+ *
+ * $Id: kTPairCut.h,v 1.2 2002/05/17 14:45:50 mercedes Exp $
+ *
+ * Author: Mercedes Lopez Noriega, OSU, mercedes@pacific.mps.ohio-state.edu
+ ***************************************************************************
+ *
+ * Description: part of STAR HBT Framework: StHbtMaker package
+ *   cut on kT of the pair
+ *
+ ***************************************************************************
+ *
+ * $Log: kTPairCut.h,v $
+ * Revision 1.2  2002/05/17 14:45:50  mercedes
+ * Pair cut on kT, k is four-momentum of the pair
+ *
+ *
+ **************************************************************************/
 
 #ifndef kTPairCut_hh
 #define kTPairCut_hh
