@@ -77,9 +77,9 @@ int StSvtClusterMatrix::SetDimension(int mRow, int mCol)
 
 	 StSvtClusterMatrix temp(mRow, mCol);
 
-	 for(int i=0; i<mCluRow; i++)
-	 for(int j=0; j<mCluCol; j++)
-		temp(i,j) = mData[i][j]; //copy the existing data
+	 {for(int i=0; i<mCluRow; i++)
+	  for(int j=0; j<mCluCol; j++)
+		temp(i,j) = mData[i][j];} //copy the existing data
 
 	 //delete the existing data;
 	MatrixDeAlloc();
@@ -89,9 +89,9 @@ int StSvtClusterMatrix::SetDimension(int mRow, int mCol)
 	mCluRow = mRow;
 	mCluCol = mCol;
 
- 	for(int i=0; i<mCluRow; i++)
-	for(int j=0; j<mCluCol; j++)
-		mData[i][j] = temp.mData[i][j]; //copy the existing data
+ 	{for(int i=0; i<mCluRow; i++)
+	 for(int j=0; j<mCluCol; j++)
+		mData[i][j] = temp.mData[i][j];} //copy the existing data
 
 	 return 0; //could be used to return the success
 				  // or failure of allocation

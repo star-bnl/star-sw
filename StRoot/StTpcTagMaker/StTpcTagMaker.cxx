@@ -1,7 +1,10 @@
 //*-- Author : Iwona Sakrejda
 // 
-// $Id: StTpcTagMaker.cxx,v 1.5 2000/05/25 05:22:31 sakrejda Exp $
+// $Id: StTpcTagMaker.cxx,v 1.6 2001/04/25 19:09:17 perev Exp $
 // $Log: StTpcTagMaker.cxx,v $
+// Revision 1.6  2001/04/25 19:09:17  perev
+// HPcorrs
+//
 // Revision 1.5  2000/05/25 05:22:31  sakrejda
 // Number of rows (1) set.
 //
@@ -71,24 +74,24 @@ Int_t StTpcTagMaker::Make(){
   // Fill the Tpc Tags
 
   tagtab_st->n_clus_tpc_tot = tpc_mon_data_st->n_clus_tpc_tot;
-  for(Int_t ij=0;ij<24;ij++){
-    tagtab_st->n_clus_tpc_in[ij] = tpc_mon_data_st->n_clus_tpc_in[ij];}
-  for(Int_t ij=0;ij<24;ij++){
-    tagtab_st->n_clus_tpc_out[ij] = tpc_mon_data_st->n_clus_tpc_out[ij];}
+  {for(Int_t ij=0;ij<24;ij++){
+    tagtab_st->n_clus_tpc_in[ij] = tpc_mon_data_st->n_clus_tpc_in[ij];}}
+  {for(Int_t ij=0;ij<24;ij++){
+    tagtab_st->n_clus_tpc_out[ij] = tpc_mon_data_st->n_clus_tpc_out[ij];}}
   tagtab_st->n_pts_tpc_tot = tpc_mon_data_st->n_pts_tpc_tot;
-  for(Int_t ij=0;ij<24;ij++){
-    tagtab_st->n_pts_tpc_in[ij] = tpc_mon_data_st->n_pts_tpc_in[ij];}
-  for(Int_t ij=0;ij<24;ij++){
-    tagtab_st->n_pts_tpc_out[ij] = tpc_mon_data_st->n_pts_tpc_out[ij];}
+  {for(Int_t ij=0;ij<24;ij++){
+    tagtab_st->n_pts_tpc_in[ij] = tpc_mon_data_st->n_pts_tpc_in[ij];}}
+  {for(Int_t ij=0;ij<24;ij++){
+    tagtab_st->n_pts_tpc_out[ij] = tpc_mon_data_st->n_pts_tpc_out[ij];}}
   tagtab_st->n_trk_tpc[0] = tpc_mon_data_st->n_trk_tpc[0];
   tagtab_st->n_trk_tpc[1] = tpc_mon_data_st->n_trk_tpc[1];
-  for(Int_t ij=0;ij<10;ij++){
-    tagtab_st->chrg_tpc_drift[ij] = tpc_mon_data_st->chrg_tpc_drift[ij];}
+  {for(Int_t ij=0;ij<10;ij++){
+    tagtab_st->chrg_tpc_drift[ij] = tpc_mon_data_st->chrg_tpc_drift[ij];}}
   tagtab_st->chrg_tpc_tot = tpc_mon_data_st->chrg_tpc_tot;
-  for(Int_t ij=0;ij<24;ij++){
-    tagtab_st->chrg_tpc_in[ij] = tpc_mon_data_st->chrg_tpc_in[ij];}
-  for(Int_t ij=0;ij<24;ij++){
-    tagtab_st->chrg_tpc_out[ij] = tpc_mon_data_st->chrg_tpc_out[ij];}
+  {for(Int_t ij=0;ij<24;ij++){
+    tagtab_st->chrg_tpc_in[ij] = tpc_mon_data_st->chrg_tpc_in[ij];}}
+  {for(Int_t ij=0;ij<24;ij++){
+    tagtab_st->chrg_tpc_out[ij] = tpc_mon_data_st->chrg_tpc_out[ij];}}
   tagtab_st->hit_frac_tpc[0] = tpc_mon_data_st->hit_frac_tpc[0];
   tagtab_st->hit_frac_tpc[1] = tpc_mon_data_st->hit_frac_tpc[1];
   tagtab_st->avg_trkL_tpc[0] = tpc_mon_data_st->avg_trkL_tpc[0];

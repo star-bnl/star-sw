@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.16 2001/03/28 21:49:38 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.17 2001/04/25 19:00:17 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.17  2001/04/25 19:00:17  perev
+ * HPcorrs
+ *
  * Revision 1.16  2001/03/28 21:49:38  caines
  * Correct bug that allowed AdjustSeq1 code to fall off end
  *
@@ -263,22 +266,22 @@ Int_t StSvtSeqAdjMaker::GetBadAnodes()
     index = 3;
     mHybridBadAnodeData = new StSvtBadAnode();
     mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
-    for( int i=80; i<159; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
+    {for( int i=80; i<159; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
     
     // Wafer 3 Hybrid 2
     
     index = 5;
     mHybridBadAnodeData = new StSvtBadAnode();
     mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
-    for( int i=80; i<159; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
+    {for( int i=80; i<159; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
     
     // Wafer 4 Hybrid 1
     
     index = 6;
     mHybridBadAnodeData = new StSvtBadAnode();
     mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
-    for( int i=165; i<167; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
-    for( int i=171; i<174; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
+    {for( int i=165; i<167; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    {for( int i=171; i<174; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
     
     
     // Wafer 4 Hybrid 2
@@ -286,32 +289,32 @@ Int_t StSvtSeqAdjMaker::GetBadAnodes()
     index = 7;
     mHybridBadAnodeData = new StSvtBadAnode();
     mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
-    for( int i=38; i<80; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
-    for( int i=94; i<95; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
-    for( int i=102; i<160; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
+    {for( int i=38; i<80; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    {for( int i=94; i<95; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    {for( int i=102; i<160; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
     
     // Wafer 5 Hybrid 2
     
     index = 9;
     mHybridBadAnodeData = new StSvtBadAnode();
     mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
-    for( int i=208; i<240; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
+    {for( int i=208; i<240; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
     
     // Wafer 6 Hybrid 1
     
     index = 10;
     mHybridBadAnodeData = new StSvtBadAnode();
     mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
-    for( int i=69;  i<73;  i++)  mHybridBadAnodeData->SetBadAnode(i,1);
-    for( int i=189; i<192; i++)  mHybridBadAnodeData->SetBadAnode(i,1);
-    for( int i=224; i<240; i++)  mHybridBadAnodeData->SetBadAnode(i,1);
+    {for( int i=69;  i<73;  i++)  mHybridBadAnodeData->SetBadAnode(i,1);}
+    {for( int i=189; i<192; i++)  mHybridBadAnodeData->SetBadAnode(i,1);}
+    {for( int i=224; i<240; i++)  mHybridBadAnodeData->SetBadAnode(i,1);}
     
     // Wafer 6 Hybrid 2
     
     index = 11;
     mHybridBadAnodeData = new StSvtBadAnode();
     mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
-    for( int i=0; i<240; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
+    {for( int i=0; i<240; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
   }
   return kStOK; 
 }

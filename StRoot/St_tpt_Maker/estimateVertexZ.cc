@@ -1,5 +1,8 @@
-//$Id: estimateVertexZ.cc,v 1.9 2000/10/10 19:31:08 wdeng Exp $
+//$Id: estimateVertexZ.cc,v 1.10 2001/04/25 19:09:46 perev Exp $
 //$Log: estimateVertexZ.cc,v $
+//Revision 1.10  2001/04/25 19:09:46  perev
+//HPcorrs
+//
 //Revision 1.9  2000/10/10 19:31:08  wdeng
 //Delete array properly.
 //
@@ -13,6 +16,7 @@
 //Rewrite. Improve the speed by a factor of 3. This introduces a dependence: tphit table must be pre-sorted.
 //
 #include <stdlib.h>
+#include <math.h>
 #include "TH1.h"
 #include "TTable.h"
 #include "tables/St_tcl_tphit_Table.h"
@@ -26,19 +30,19 @@ void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHei
   tcl_tphit_st* tphitPtr = tphitT;
 
   Float_t* radius2D = new Float_t[hitNumber];
-  for( Int_t i=0; i<hitNumber; i++,tphitPtr++) {
+  {for( Int_t i=0; i<hitNumber; i++,tphitPtr++) {
     Float_t hitX = tphitPtr->x;     
     Float_t hitY = tphitPtr->y;     
     radius2D[i] = sqrt( hitX*hitX + hitY*hitY );
-  }
+  }}
   
   tphitPtr = tphitT;
   Int_t indexTableI=0; // index for the inner hit
   Int_t indexTableO=0; // index for the outer hit
   
-  for(Int_t i=0; i<hitNumber; i++, tphitPtr++) {
+  {for(Int_t i=0; i<hitNumber; i++, tphitPtr++) {
     if( tphitPtr->row==114 ) { indexTableI=i; break; }
-  }
+  }}
   
   for(Int_t sector=1; sector<=24; sector++) {
     
@@ -99,13 +103,13 @@ void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHei
   
   Float_t backgroundSamples = 0;
   Int_t counter = 0;
-  for(Int_t i=1; i<8; i++) {
+  {for(Int_t i=1; i<8; i++) {
     Int_t sampleBin = i*4000/8;
     if( abs(sampleBin-maximumBin) > 100 ) {    
       backgroundSamples += vertexZHistogram->GetBinContent(sampleBin);
       counter++;  
     }
-  }
+  }}
   
   Float_t background = backgroundSamples/counter;
   
