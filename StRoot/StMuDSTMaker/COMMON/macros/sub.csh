@@ -4,7 +4,7 @@
 
 set inputDir = $1
 set dataSet =  st_physics
-set maxJobs = 500 
+set maxJobs = 1000
 
 @ i=0
 @ s=0
@@ -28,7 +28,7 @@ foreach f (`find $inputDir -name '*.event.root' | grep $dataSet | grep -v BadFil
     echo $user
     if ($user == "") then
       @ s++
-      bsub  -u laue -q star_cas -L ~/public/tcsh -o $outfile -e $outfile root4star -q -b StRoot/StMuDstMaker/macros/StMuDstMaker.C\(1e9,\"-\",\"$f:q\",\"$outputDir:q\"\) >& /dev/null
+      bsub  -u laue -q star_cas -L ~/public/tcsh -o $outfile -e $outfile root4star -q -b StRoot/StMuDSTMaker/COMMON/macros/StMuDstMaker.C\(10,\"-\",\"$f:q\",\"$outputDir:q\"\) >& /dev/null
 #      echo "submitted"
     endif
   endif
