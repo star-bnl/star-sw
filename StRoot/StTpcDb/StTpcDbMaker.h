@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.7 2000/02/23 22:21:09 hardtke Exp $
+ * $Id: StTpcDbMaker.h,v 1.8 2000/04/11 16:06:26 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.8  2000/04/11 16:06:26  hardtke
+ * improve speed of tpc_row_par and tpc_global_to_sector
+ *
  * Revision 1.7  2000/02/23 22:21:09  hardtke
  * add tpc_global_to_local_p
  *
@@ -103,6 +106,11 @@ class StTpcDb;
 class St_tpg_pad_plane;
 class St_tpg_detector;
 //class StTpcCoordinateTransform;
+
+
+static float aline[24][45];  //hold parameterization
+static float bline[24][45];  //ax+by=0
+
 class StTpcDbMaker : public StMaker {
  private:
   StTpcDb* m_TpcDb;               //! tpc database class
@@ -119,7 +127,7 @@ class StTpcDbMaker : public StMaker {
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.7 2000/02/23 22:21:09 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.8 2000/04/11 16:06:26 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker, 1)   //StAF chain virtual base class for Makers
 };
@@ -127,3 +135,7 @@ class StTpcDbMaker : public StMaker {
 inline StTpcDb* StTpcDbMaker::tpcDbInterface() const {return m_TpcDb;}
 
 #endif
+
+
+
+
