@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.146  2005/01/21 03:13:37  pruneau
+// turned off StiHistograms
+//
 // Revision 1.145  2005/01/17 03:56:47  pruneau
 // change track container to vector
 //
@@ -393,7 +396,7 @@ Int_t StiMaker::InitRun(int run)
 					_eventDisplay->initialize();
 					_eventDisplay->draw();
 				}
-      _pars->doPlots = true;
+      _pars->doPlots = false;
       if (_pars->doPlots)
 	{
 	  _recPlotter = new StiTrackingPlots("R","Reconstructed");
