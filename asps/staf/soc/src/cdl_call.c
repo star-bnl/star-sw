@@ -6,9 +6,9 @@ cdl_calli_ (name,n,p)
  int (*(*name)) ();
  int *n;
 #ifdef SGI      /* hjw.   SGI wants char* and not int* */
- char *p[15];   /* hjw.   SGI wants char* and not int* */
+ char *p[16];   /* hjw.   SGI wants char* and not int* */
 #else           /* hjw.   SGI wants char* and not int* */
- int  *p[15];   /* hjw.   SGI wants char* and not int* */
+ int  *p[16];   /* hjw.   SGI wants char* and not int* */
 #endif          /* hjw.   SGI wants char* and not int* */
 {
       switch (*n)
@@ -67,9 +67,9 @@ cdl_callr_ (name,n,p)
  float (*(*name)) ();
  int *n;
 #ifdef SGI      /* hjw.   SGI wants char* and not int* */
- char *p[15];   /* hjw.   SGI wants char* and not int* */
+ char *p[16];   /* hjw.   SGI wants char* and not int* */
 #else           /* hjw.   SGI wants char* and not int* */
- int  *p[15];   /* hjw.   SGI wants char* and not int* */
+ int  *p[16];   /* hjw.   SGI wants char* and not int* */
 #endif          /* hjw.   SGI wants char* and not int* */
 
 {
@@ -129,9 +129,9 @@ cdl_calld_ (name,n,p)
  double (*(*name)) ();
  int *n;
 #ifdef SGI      /* hjw.   SGI wants char* and not int* */
- char *p[15];   /* hjw.   SGI wants char* and not int* */
+ char *p[16];   /* hjw.   SGI wants char* and not int* */
 #else           /* hjw.   SGI wants char* and not int* */
- int  *p[15];   /* hjw.   SGI wants char* and not int* */
+ int  *p[16];   /* hjw.   SGI wants char* and not int* */
 #endif          /* hjw.   SGI wants char* and not int* */
 {
       switch (*n)
@@ -305,9 +305,9 @@ cdl_callr_ (fptr,n,p)
 	int *fptr;
 	int *n;
 #ifdef SGI      /* hjw.   SGI wants char* and not int* */
- char *p[15];   /* hjw.   SGI wants char* and not int* */
+ char *p[16];   /* hjw.   SGI wants char* and not int* */
 #else           /* hjw.   SGI wants char* and not int* */
- int  *p[15];   /* hjw.   SGI wants char* and not int* */
+ int  *p[16];   /* hjw.   SGI wants char* and not int* */
 #endif          /* hjw.   SGI wants char* and not int* */
 {
 #ifdef LINK_LOW

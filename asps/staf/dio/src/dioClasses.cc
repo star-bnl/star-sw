@@ -80,6 +80,7 @@ char * dioStream::  listing () {
    strncpy(ll,l,strlen(ll)-1);
    cc = (char*)MALLOC(79);
    memset(cc,0,79);
+   if(strlen(ll)>24) ll[24]=0; // hjw 980118
    sprintf(cc,"%s (%c,%c) %s",c,m[0],s[0],ll);
    FREE(c);
    FREE(l);

@@ -166,7 +166,11 @@ int tcpRead(int *fd, char *buf, int len)
         while (locallen < 1 && timeout < 30)
         {
            if (timeout <20)
+#ifdef sun
               usleep(100000);
+#else
+              sleep(0);
+#endif
            else
               sleep(1);
            timeout++;
