@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.24 2004/06/14 14:49:35 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.25 2004/07/02 20:48:18 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -644,7 +644,7 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
   int index;
   if (mDriftVelocity) {
     index = mDriftVelocity->getHybridIndex(barrel,ladder,wafer,hybrid);
-    if (index > 0)
+    if (index >= 0)
       vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1)*
 	mDeltaDriftVelocity;
   }
@@ -718,7 +718,7 @@ double StSvtCoordinateTransform::UnCalcDriftLength(const StSvtLocalCoordinate& a
   int index;
   if (mDriftVelocity) {
     index = mDriftVelocity->getHybridIndex(barrel,a.ladder(),a.wafer(),a.hybrid());
-    if (index > 0)
+    if (index >= 0)
       vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1)*
 	mDeltaDriftVelocity;
   }
