@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.h,v 3.2 2000/09/07 02:22:10 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.3 2000/09/28 20:16:05 jones Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.3  2000/09/28 20:16:05  jones
+// Added doT0JitterAbort() optio; added fix to CheckFile in case of no file
+//
 // Revision 3.2  2000/09/07 02:22:10  genevb
 // Added AbortEvent() functionality
 //
@@ -70,6 +73,7 @@ class StStrangeMuDstMaker : public StMaker {
   void SetNoKeep();
   StrangeEnum GetMode();
   char* GetFile(Int_t dstType) const;
+  void DoT0JitterAbort(Bool_t doIt=kTRUE);
 
   void DoV0(Bool_t doIt=kTRUE);
   void DoXi(Bool_t doIt=kTRUE);
@@ -174,6 +178,8 @@ class StStrangeMuDstMaker : public StMaker {
   Bool_t doT[strDstT];
   Bool_t doMc;
 
+  Bool_t doT0JitterAbort;
+
   StrangeEnum rw;
   TClonesArray* evClonesArray;   //!
 
@@ -191,6 +197,8 @@ class StStrangeMuDstMaker : public StMaker {
 
 inline StrangeEnum StStrangeMuDstMaker::GetMode()
             { return rw; }
+inline void StStrangeMuDstMaker::DoT0JitterAbort(Bool_t doIt) 
+            { doT0JitterAbort = doIt; }
 inline void StStrangeMuDstMaker::DoV0(Bool_t doIt)
             { doT[v0T] = doIt; }
 inline void StStrangeMuDstMaker::DoXi(Bool_t doIt)

@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.4 2000/09/07 02:22:09 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.5 2000/09/28 20:16:05 jones Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.5  2000/09/28 20:16:05  jones
+// Added doT0JitterAbort() optio; added fix to CheckFile in case of no file
+//
 // Revision 3.4  2000/09/07 02:22:09  genevb
 // Added AbortEvent() functionality
 //
@@ -64,6 +67,7 @@
 #include "StMcEventTypes.hh"
 #include "StParticleDefinition.hh"
 #include "StMessMgr.h"
+#include "StuJitterBug.hh"
 
 // Set maximum file size to 1.9 GB (Root has a 2GB limit)
 #define MAXFILESIZE 1900000000
@@ -83,6 +87,7 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
   cuts = new StStrangeCuts();
   SetNumber(-2);
   outFileNum = 1;
+  doT0JitterAbort = kFALSE;
 
   TString suffix = "MuDst.root";
   for (Int_t i=0; i<strDstT; i++) {
@@ -258,6 +263,10 @@ Int_t StStrangeMuDstMaker::MakeCreateDst() {
   StEventMaker* evMaker = (StEventMaker *) GetMaker("events");
   StEvent* event = evMaker->event();
   if (!event) return kStOK; 
+  if (doT0JitterAbort && t0JitterAbort(event)) {
+    gMessMgr->Warning("StStrangeMuDstMaker: T0 jitter; skipping event.");
+    return kStWarn;
+  }
   if (!(event->primaryVertex())) {
     gMessMgr->Warning("StStrangeMuDstMaker: no primary vertex; skipping event.");
     return kStWarn;
@@ -448,33 +457,35 @@ Int_t StStrangeMuDstMaker::CloseFile() {
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::CheckFile() {
-  if (muDst->GetBytesWritten() > MAXFILESIZE) {
-    gMessMgr->Warning() << "StStrangeMuDstMaker: File size limit "
-                        << MAXFILESIZE << " exceeded!\n"
-			<< "           Closing file " << file[evT] << endm;
-    CloseFile();
-    char buf_[10];
-    sprintf(buf_,"_%d",(++outFileNum));
-    for (Int_t i=0; i<strDstT; i++) {
-      TString fixer = file[i];
-      size_t len = fixer.Length();
-      if (outFileNum>2) {
-        TString suffix = strrchr(file[i],'.');
-        size_t last_ = fixer.Last('_');
-	size_t len_ = len - last_;
-	fixer.Remove(last_,len_).Append(buf_).Append(suffix);
-        len = fixer.Length();
-      } else {
-        size_t lastdot = fixer.Last('.');
-        fixer.Insert(lastdot,buf_);
-        len = fixer.Length();
-        file[i] = new char[len + 5];
+  if (muDst) {
+    if (muDst->GetBytesWritten() > MAXFILESIZE) {
+      gMessMgr->Warning() << "StStrangeMuDstMaker: File size limit "
+			  << MAXFILESIZE << " exceeded!\n"
+			  << "           Closing file " << file[evT] << endm;
+      CloseFile();
+      char buf_[10];
+      sprintf(buf_,"_%d",(++outFileNum));
+      for (Int_t i=0; i<strDstT; i++) {
+	TString fixer = file[i];
+	size_t len = fixer.Length();
+	if (outFileNum>2) {
+	  TString suffix = strrchr(file[i],'.');
+	  size_t last_ = fixer.Last('_');
+	  size_t len_ = len - last_;
+	  fixer.Remove(last_,len_).Append(buf_).Append(suffix);
+	  len = fixer.Length();
+	} else {
+	  size_t lastdot = fixer.Last('.');
+	  fixer.Insert(lastdot,buf_);
+	  len = fixer.Length();
+	  file[i] = new char[len + 5];
+	}
+	strncpy(file[i],fixer.Data(),len);
+	(file[i])[len] = 0;
       }
-      strncpy(file[i],fixer.Data(),len);
-      (file[i])[len] = 0;
+      OpenFile();
+      InitCreateDst();
     }
-    OpenFile();
-    InitCreateDst();
   }
 }
 //_____________________________________________________________________________
@@ -485,3 +496,4 @@ void StStrangeMuDstMaker::SelectEvent() {
 void StStrangeMuDstMaker::UnselectEvent() {
   EachController(Unselect(-1));
 }
+
