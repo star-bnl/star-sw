@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.178 2001/03/08 22:27:42 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.179 2001/03/20 13:09:13 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -28,18 +28,20 @@ Bfc_st BFC[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"SD97"        ,""  ,"","db"                                ,"","","Turn on 1997 test parameters",kFALSE},
   {"SD98"        ,""  ,"","db"                                ,"","","Turn on 1998 test parameters",kFALSE},
-  {"Y1a"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1a parameters",kFALSE},
-  {"Y1b"         ,""  ,"","db,calib"                                    ,"","","Year 1b parameters",kFALSE},
-  {"Y1c"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1c parameters",kFALSE},
+  {"Y1a"         ,""  ,"","db,calib"         ,"","","YEAR_1A  approximation to year1: TPC+CTB+FTPC",kFALSE},
+  {"Y1b"         ,""  ,"","db,calib"         ,"","","YEAR_1B: TPC+CTB+FTPC+calo patch+RICH, no svt",kFALSE},
+  {"Y1s"         ,""  ,"","db,calib"        ,"","","YEAR_1S  started in summer: TPC, CONE, AL pipe",kFALSE},
+  {"Y1e"         ,"","","db,calib","","","YEAR_1E  even better y1:TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
   {"ES99"        ,""  ,"","db"          ,"","","Turn on 1999 engineering run simulation parameters",kFALSE},
   {"ER99"        ,""  ,"","db"           ,"","","Turn on 1999 engineering run real data parameters",kFALSE},
   {"DC99"        ,""  ,"","db"       ,"","","Turn on December 1999 engineering run real parameters",kFALSE},
-  {"Y1d"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1d parameters",kFALSE},
-  {"Y1e"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1e parameters",kFALSE},
-  {"Y1h"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1h parameters",kFALSE},
+  {"Y1h"      ,"","","db,calib","","","YEAR_1H  fantastic y1:TPC+CTB+FTPC+RICH+caloPatch+svtLadder",kFALSE},
+  {"Y2000"    ,"","","db,calib"             ,"","","actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
   {"RY1h"        ,""  ,"","db,calib"                        ,"","","Real data with Year1h geometry",kFALSE},
-  {"Y2a"         ,""  ,"","db,calib"                      ,"","","Turn on Year 2A :asymptotic STAR",kFALSE},
+  {"Y2a"         ,""  ,"","db,calib"                          ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"         ,"" ,"","db,calib","","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
+  {"Y2001"       ,"","","db,calib","","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
+  {"Complete"   ,"","","db,calib"         ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"NoDb"        ,""  ,"","HalfField"                               ,"","","Take out Db from Chain",kFALSE},
   {"NoHits"      ,""  ,"",""                            ,"","","Don't write hits into Event.Branch",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -61,13 +63,17 @@ Bfc_st BFC[] = {
                                                                          ,"","","Assymptotic chain",kFALSE}, 
   {"Cy1a"        ,""  ,"","y1a,C1default"                                ,"","","Turn on chain y1a",kFALSE},
   {"Cy1b"        ,""  ,"","y1b,C1default"                                ,"","","Turn on chain y1b",kFALSE},
-  {"Cy1c"        ,""  ,"","y1c,C1default"                                ,"","","Turn on chain y1c",kFALSE},
+  {"Cy1s"        ,""  ,"","y1s,C1default"                                ,"","","Turn on chain y1s",kFALSE},
   {"Cy1d"        ,""  ,"","y1d,C1default"                                ,"","","Turn on chain y1d",kFALSE},
   {"cy1e"        ,""  ,"","y1e,C1default"                                ,"","","Turn on chain y1h",kFALSE},
   {"cy1h"        ,""  ,"","y1h,C1default"                                ,"","","Turn on chain y1e",kFALSE},
   {"Cy2a"        ,""  ,"","y2a,CAdefault"                                ,"","","Turn on chain y2a",kFALSE},
   {"Cy2b"        ,""  ,"","y2b,C2default"                                ,"","","Turn on chain y2b",kFALSE},
+  {"C2001"       ,""  ,"","y2001,C2default"                            ,"","","Turn on chain Y2001",kFALSE},
+  {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
+                                                           ,"Production chain for summer 2000 data",kFALSE},
+  {"P2000"       ,""  ,"","y2000,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -765,37 +771,6 @@ void StBFChain::SetInputFile (const Char_t *infile){
   // define input file
   if (infile) fInFile = new TString(infile);
   if (!GetOption("NoInput")) {
-    if (!fInFile && GetOption("Lana")) {
-      if (GetOption("FieldOff")) {// Laser data
-	fInFile = new TString("/star/rcf/daq/2000/03/st_physics_1062035_raw_000*.daq");
-	fInFile->Append(",/star/rcf/scratch/love/st_physics_1062036_raw_0002.daq");
-	printf ("Use default input file %s for Laser, FieldOff \n",fInFile->Data());
-      }
-      else {
-	if (GetOption("HalfField")) {// Laser data
-	  fInFile = new TString("/star/rcf/daq/2000/03/st_physics_1062006_raw_0002.daq");
-	  fInFile->Append(",/star/rcf/daq/2000/03/st_physics_1062004_raw_0002.daq");
-	  printf ("Use default input file %s for Laser, HalfField \n",fInFile->Data());
-	}
-	else {
-	  fInFile = new TString("/star/rcf/daq/2000/03/st_physics_1063012_raw_0002.daq");
-	  fInFile->Append(",/star/rcf/daq/2000/03/st_physics_1063013_raw_0002.daq");
-	  printf ("Use default input file %s for Laser, Full Field \n",fInFile->Data());
-	}
-      }
-    }
-    if (!fInFile && GetOption("Laser")) {
-	  fInFile = new TString("/star/rcf/data08/daq/2000/08/st_physics_1225045_raw_0001.daq");
-	  printf ("Use default input file %s for Laser\n",fInFile->Data());
-    }    
-    if (!fInFile && GetOption("p00h")) {
-	  fInFile = new TString("/star/data08/daq/2000/08/st_physics_1225033_raw_0001.daq");
-	  printf ("Use default input file %s for real data\n",fInFile->Data());
-    }    
-    if (!fInFile && GetOption("miniDAQ")) {
-      fInFile = new TString("/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"); // laser data
-      printf ("Use default input file %s for %s \n",fInFile->Data(),"miniDAQ");
-    }
     if (!fInFile && GetOption("fzin")) {
       fInFile = new TString("/star/rcf/simu/cocktail/hadronic/default/lowdensity/");
       if (GetOption("y1h")) fInFile->Append("year_1h/hadronic_on/Gstardata/rcf0078/hc_lowdensity.400_evts.fz");
@@ -803,18 +778,6 @@ void StBFChain::SetInputFile (const Char_t *infile){
 	if (GetOption("y2a")) fInFile->Append("year_2a/hadronic_on/Gstardata/rcf0079/hc_lowdensity.400_evts.fz");
 	else {printf ("for fzin Option In file has not been defined. Exit!\n"); gSystem->Exit(1);}
       printf ("Use default input file %s for %s \n",fInFile->Data(),"fzin");
-    }
-    if (!fInFile && GetOption("doEvents")){
-      fInFile = new TString("/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf");
-      printf ("Use default input file %s for %s \n",fInFile->Data(),"doEvent");
-    }
-    if (!fInFile && GetOption("in")) {
-      fInFile = new TString("/star/rcf/daq/2000/02/st_physics_1054031_raw_000*.daq"); 
-      printf ("Use default DAQ input file %s\n",fInFile->Data());
-    }
-    if (!fInFile && !GetOption("gstar")) {
-      fInFile = new TString("/afs/rhic/star/data/samples/hijet-g2t.xdf");	       // g2t xdf file
-      printf ("Use default input file %s for %s \n",fInFile->Data(),"xin");
     }
     if (fInFile) {
       if (!GetOption("fzin")) {
@@ -883,30 +846,34 @@ void StBFChain::SetGeantOptions(){
 		GetOption("Y1a")  || 
 		GetOption("ES99") || 
 		GetOption("ER99") || 
-		GetOption("DC99"))   geantMk->LoadGeometry("detp geometry YEAR_1A"); 
-      else {if (GetOption("Y1b"))    geantMk->LoadGeometry("detp geometry YEAR_1B");
-      else {if (GetOption("Y1c"))    geantMk->LoadGeometry("detp geometry YEAR_1C");
+		GetOption("DC99"))    geantMk->LoadGeometry("detp geometry YEAR_1A"); 
+      else {if (GetOption("Y1b"))     geantMk->LoadGeometry("detp geometry YEAR_1B");
+      else {if (GetOption("Y1E"))     geantMk->LoadGeometry("detp geometry YEAR_1E");
       else {if (GetOption("Y1h") || 
-		GetOption("RY1h"))   geantMk->LoadGeometry("detp geometry YEAR_1H");
-      else {if (GetOption("Y2a"))    geantMk->LoadGeometry("detp geometry YEAR_2A");
-      else {if (GetOption("Y2b"))    geantMk->LoadGeometry("detp geometry YEAR_2b");
-      else                           geantMk->LoadGeometry("detp geometry YEAR_2A");}}}}}
-      if (GetOption("gstar")) {
-	geantMk->Do("subevent 0;");
-	// gkine #particles partid ptrange yrange phirange vertexrange 
-	geantMk->Do("gkine 80 6 1. 1. -4. 4. 0 6.28  0. 0.;");
-	geantMk->Do("mode g2tm prin 1;");
-	//  geantMk->Do("next;");
-	//  geantMk->Do("dcut cave z 1 10 10 0.03 0.03;");
-	if (GetOption("Debug") ||GetOption("Debug2")) geantMk->Do("debug on;");
-	geantMk->Do("swit 2 3;");
-      }
+		GetOption("RY1h"))    geantMk->LoadGeometry("detp geometry YEAR_1H");
+      else {if (GetOption("Y1s"))     geantMk->LoadGeometry("detp geometry YEAR_1S");
+      else {if (GetOption("Y2000"))   geantMk->LoadGeometry("detp geometry year2000");
+      else {if (GetOption("Y2a"))     geantMk->LoadGeometry("detp geometry YEAR_2A");
+      else {if (GetOption("Y2001"))   geantMk->LoadGeometry("detp geometry year2001");
+      else {if (GetOption("Y2b"))     geantMk->LoadGeometry("detp geometry YEAR_2b");
+      else {if (GetOption("Y2001"))   geantMk->LoadGeometry("detp geometry year2001");
+      else {if (GetOption("Complete"))geantMk->LoadGeometry("detp geometry complete");
+      else                            geantMk->LoadGeometry("detp geometry year2001");}}}}}}}}}}}
+    if (GetOption("gstar")) {
+      geantMk->Do("subevent 0;");
+      // gkine #particles partid ptrange yrange phirange vertexrange 
+      geantMk->Do("gkine 80 6 1. 1. -4. 4. 0 6.28  0. 0.;");
+      geantMk->Do("mode g2tm prin 1;");
+      //  geantMk->Do("next;");
+      //  geantMk->Do("dcut cave z 1 10 10 0.03 0.03;");
+      if (GetOption("Debug") ||GetOption("Debug2")) geantMk->Do("debug on;");
+      geantMk->Do("swit 2 3;");
     }
-    else {
-      if (fInFile && geantMk->SetInputFile(fInFile->Data()) > kStOK) {
-	printf ("File %s cannot be opened. Exit! \n",fInFile->Data());
-	gSystem->Exit(1);
-      }
+  }
+  else {
+    if (fInFile && geantMk->SetInputFile(fInFile->Data()) > kStOK) {
+      printf ("File %s cannot be opened. Exit! \n",fInFile->Data());
+      gSystem->Exit(1);
     }
   }
 }
@@ -927,7 +894,7 @@ void StBFChain::SetDbOptions(){
   else {if (GetOption("SD98")) db->SetDateTime("sd98");
   else {if (GetOption("Y1a"))  db->SetDateTime("year_1a");
   else {if (GetOption("Y1b"))  db->SetDateTime("year_1b");
-  else {if (GetOption("Y1c"))  db->SetDateTime("year_1c");
+  else {if (GetOption("Y1s"))  db->SetDateTime("year_1s");
   else {if (GetOption("ES99")) db->SetDateTime("es99");
   else {if (GetOption("ER99")) db->SetDateTime("er99");
   else {if (GetOption("DC99")) db->SetDateTime("dc99");
