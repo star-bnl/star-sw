@@ -1,8 +1,8 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHit.hh,v 2.2 2004/09/14 05:00:30 calderon Exp $
- * $Log: StMcPixelHit.hh,v $
- * Revision 2.2  2004/09/14 05:00:30  calderon
+ * $Id: StMcIstHit.hh,v 2.1 2004/09/14 05:00:29 calderon Exp $
+ * $Log: StMcIstHit.hh,v $
+ * Revision 2.1  2004/09/14 05:00:29  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
  * Revision 2.1  2003/08/20 18:50:21  calderon
@@ -12,39 +12,39 @@
  *
  *
  **************************************************************************/
-#ifndef StMcPixelHit_hh
-#define StMcPixelHit_hh
+#ifndef StMcIstHit_hh
+#define StMcIstHit_hh
 
 #include "StMcHit.hh"
 #include "StMemoryPool.hh"
 
 class StMcTrack;
 class StThreeVectorF;
-class g2t_pix_hit_st;
+class g2t_ist_hit_st;
 
 #if !defined(ST_NO_NAMESPACES)
 #endif
 
-class StMcPixelHit : public StMcHit {
+class StMcIstHit : public StMcHit {
 public:
-    StMcPixelHit();
-  StMcPixelHit(const StThreeVectorF&,const StThreeVectorF&,
+    StMcIstHit();
+  StMcIstHit(const StThreeVectorF&,const StThreeVectorF&,
 	       const float, const float, const long, const long, StMcTrack*);
-    StMcPixelHit(g2t_pix_hit_st*);
-    ~StMcPixelHit();
+    StMcIstHit(g2t_ist_hit_st*);
+    ~StMcIstHit();
 
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
 
-    unsigned long layer() const; // 1-2
-    unsigned long ladder() const; // 1-6, 1-18
+    unsigned long layer() const; // 
+    unsigned long ladder() const; // 
     
 private:
 
     static StMemoryPool mPool; //!
 };
 
-ostream&  operator<<(ostream& os, const StMcPixelHit&);
+ostream&  operator<<(ostream& os, const StMcIstHit&);
 
 
 #endif

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.14 2004/01/13 21:03:34 fisyak Exp $
+ * $Id: StMcTrack.hh,v 2.15 2004/09/14 05:00:30 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.15  2004/09/14 05:00:30  calderon
+ * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
+ *
  * Revision 2.14  2004/01/13 21:03:34  fisyak
  * Replace iostream by Stiostream.h (for icc)
  *
@@ -33,8 +36,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
  *
- * $Id: StMcTrack.hh,v 2.14 2004/01/13 21:03:34 fisyak Exp $
+ * $Id: StMcTrack.hh,v 2.15 2004/09/14 05:00:30 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.15  2004/09/14 05:00:30  calderon
+ * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
+ *
  * Revision 2.14  2004/01/13 21:03:34  fisyak
  * Replace iostream by Stiostream.h (for icc)
  *
@@ -171,6 +177,10 @@ public:
     const StPtrVecMcCalorimeterHit& eemcHits() const; //!
     StPtrVecMcPixelHit&             pixelHits(); //!
     const StPtrVecMcPixelHit&       pixelHits() const; //!
+    StPtrVecMcIstHit&               istHits(); //!
+    const StPtrVecMcIstHit&         istHits() const; //!
+    StPtrVecMcSsdHit&               ssdHits(); //!
+    const StPtrVecMcSsdHit&         ssdHits() const; //!
     StParticleDefinition*           particleDefinition(); //!
     const StParticleDefinition*     particleDefinition() const; //!
     int                             isShower() const; //! 1 = yes, 0 = no
@@ -186,6 +196,7 @@ public:
     void setIntermediateVertices(StPtrVecMcVertex&); //!
     void setTpcHits(StPtrVecMcTpcHit&); //!
     void setSvtHits(StPtrVecMcSvtHit&); //!
+    void setSsdHits(StPtrVecMcSsdHit&); //!
     void setFtpcHits(StPtrVecMcFtpcHit&); //!
     void setRichHits(StPtrVecMcRichHit&); //!
     void setCtbHits(StPtrVecMcCtbHit&); //!
@@ -196,6 +207,7 @@ public:
     void setTofHits(StPtrVecMcTofHit&); //!
     void setEemcHits(StPtrVecMcCalorimeterHit&); //!
     void setPixelHits(StPtrVecMcPixelHit&); //!
+    void setIstHits(StPtrVecMcIstHit&); //!
 
     void setShower(char); //!
     void setGeantId(long); //!
@@ -206,6 +218,7 @@ public:
 
     void addTpcHit(StMcTpcHit*); //!
     void addSvtHit(StMcSvtHit*); //!
+    void addSsdHit(StMcSsdHit*); //!
     void addFtpcHit(StMcFtpcHit*); //!
     void addRichHit(StMcRichHit*); //!
     void addCtbHit(StMcCtbHit*); //!
@@ -216,8 +229,10 @@ public:
     void addTofHit(StMcTofHit*); //!
     void addEemcHit(StMcCalorimeterHit*); //!
     void addPixelHit(StMcPixelHit*); //!
+    void addIstHit(StMcIstHit*); //!
     void removeTpcHit(StMcTpcHit*); //!
     void removeSvtHit(StMcSvtHit*); //!
+    void removeSsdHit(StMcSsdHit*); //!
     void removeFtpcHit(StMcFtpcHit*); //!
     void removeRichHit(StMcRichHit*); //!
     void removeCtbHit(StMcCtbHit*); //!
@@ -229,6 +244,7 @@ public:
     void removeTofHit(StMcTofHit*); //!
     void removeEemcHit(StMcCalorimeterHit*); //!
     void removePixelHit(StMcPixelHit*); //!
+    void removeIstHit(StMcIstHit*); //!
 
     //    void setTopologyMap(StTrackTopologyMap&); //!
     
@@ -239,6 +255,7 @@ protected:
     StPtrVecMcVertex         mIntermediateVertices; //!
     StPtrVecMcTpcHit         mTpcHits; //!
     StPtrVecMcSvtHit         mSvtHits; //!
+    StPtrVecMcSsdHit         mSsdHits; //!
     StPtrVecMcFtpcHit        mFtpcHits; //!
     StPtrVecMcRichHit        mRichHits; //!
     StPtrVecMcCtbHit         mCtbHits; //!
@@ -249,6 +266,7 @@ protected:
     StPtrVecMcTofHit         mTofHits; //!
     StPtrVecMcCalorimeterHit mEemcHits; //!
     StPtrVecMcPixelHit       mPixelHits; //!
+    StPtrVecMcIstHit         mIstHits; //!
     StParticleDefinition*    mParticleDefinition; //!
     StMcTrack*               mParent;
     char                     mIsShower; //!
@@ -297,6 +315,10 @@ inline StPtrVecMcSvtHit& StMcTrack::svtHits() { return mSvtHits; }
 
 inline const StPtrVecMcSvtHit& StMcTrack::svtHits() const { return mSvtHits; }
 
+inline StPtrVecMcSsdHit& StMcTrack::ssdHits() { return mSsdHits; }
+
+inline const StPtrVecMcSsdHit& StMcTrack::ssdHits() const { return mSsdHits; }
+
 inline StPtrVecMcFtpcHit& StMcTrack::ftpcHits() { return mFtpcHits; }
 
 inline const StPtrVecMcFtpcHit& StMcTrack::ftpcHits() const { return mFtpcHits; }
@@ -336,6 +358,10 @@ inline const StPtrVecMcCalorimeterHit& StMcTrack::eemcHits() const { return mEem
 inline StPtrVecMcPixelHit& StMcTrack::pixelHits() { return mPixelHits; }
 
 inline const StPtrVecMcPixelHit& StMcTrack::pixelHits() const { return mPixelHits; }
+
+inline StPtrVecMcIstHit& StMcTrack::istHits() { return mIstHits; }
+
+inline const StPtrVecMcIstHit& StMcTrack::istHits() const { return mIstHits; }
 
 inline StParticleDefinition* StMcTrack::particleDefinition() { return mParticleDefinition; }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEventTypes.hh,v 2.6 2003/08/20 18:50:21 calderon Exp $
+ * $Id: StMcEventTypes.hh,v 2.7 2004/09/14 05:00:29 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEventTypes.hh,v $
+ * Revision 2.7  2004/09/14 05:00:29  calderon
+ * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
+ *
  * Revision 2.6  2003/08/20 18:50:21  calderon
  * Addition of Tof classes and Pixel classes.  Modified track, event, and
  * container code to reflect this.
@@ -59,6 +62,9 @@
 #include "StMcSvtBarrelHitCollection.hh"
 #include "StMcSvtLadderHitCollection.hh"
 #include "StMcSvtWaferHitCollection.hh"
+#include "StMcSsdHit.hh"
+#include "StMcSsdHitCollection.hh"
+#include "StMcSsdLayerHitCollection.hh"
 #include "StMcTpcHit.hh"
 #include "StMcTpcHitCollection.hh"
 #include "StMcTpcPadrowHitCollection.hh"
@@ -68,6 +74,9 @@
 #include "StMcPixelHit.hh"
 #include "StMcPixelHitCollection.hh"
 #include "StMcPixelLayerHitCollection.hh"
+#include "StMcIstHit.hh"
+#include "StMcIstHitCollection.hh"
+#include "StMcIstLayerHitCollection.hh"
 #include "StMcTrack.hh"
 #include "StMcVertex.hh"
 
