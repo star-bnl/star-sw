@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.40 1999/02/26 19:49:27 caines Exp $
+// $Id: St_glb_Maker.cxx,v 1.41 1999/02/27 23:10:32 caines Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.41  1999/02/27 23:10:32  caines
+// Fixed impact calc
+//
 // Revision 1.40  1999/02/26 19:49:27  caines
 // Lots of memory fixes
 //
@@ -445,7 +448,7 @@ Int_t St_glb_Maker::Make(){
       m_svt_config     = (St_svg_config  *) params("svt/svgpars/config");
       m_svt_geom       = (St_svg_geom    *) params("svt/svgpars/geom");
       m_srs_activea    = (St_srs_activea *) params("svt/srspars/srs_activea");
-      m_srspar     = (St_srs_srspar  *) params("svt/srspars/srs_srspar");
+      m_srspar         = (St_srs_srspar  *) params("svt/srspars/srs_srspar");
       
       St_DataSetIter si_tracks(sitracks);
 
@@ -541,11 +544,23 @@ Int_t St_glb_Maker::Make(){
      
      dst_track_st *glob  = globtrk->GetTable();
      dst_track_st *glob2 = globtrk2->GetTable();
+     dst_vertex_st *vrtx = vertex->GetTable();
+     if( vrtx->vtx_id != 1){
+       for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,vrtx++){
+	 if( vrtx->vtx_id == 1) break;
+       }
+     }
+     Float_t vx0 = vrtx->x;
+     Float_t vy0 = vrtx->y;
+     Float_t vz0 = vrtx->z; 
+		 
      for( Int_t no_rows=0; no_rows<globtrk2->GetNRows(); 
-	  no_rows++, glob++,glob2++)
-       glob->impact = 
-	 TMath::Sqrt(glob2->x0*glob2->x0+glob2->y0*glob2->y0+glob2->z0*glob2->z0);
-     
+	  no_rows++, glob++,glob2++){
+       Float_t x0 = (glob2->x0 - vx0)*(glob2->x0 - vx0);
+       Float_t y0 = (glob2->y0 - vy0)*(glob2->y0 - vy0);
+       Float_t z0 = (glob2->z0 - vz0)*(glob2->z0 - vz0);
+       glob->impact = 	 TMath::Sqrt(x0+y0+z0);
+     }
        
     cout << " finished calling track-propagator" << endl;
     // egr2
@@ -713,7 +728,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.40 1999/02/26 19:49:27 caines Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.41 1999/02/27 23:10:32 caines Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
