@@ -1,11 +1,8 @@
-*** TO DO:
-** put in tss
-** fix directory pointers for tpc parameters - don't use setup global macros
 ****************************************************
 * TO RUN:
 *
 *  1. stardev (or whichever version you want)
-*  2. staf++
+*  2. staf
 *  3. exec $STAR/kumacs/chain/glob_svt_tpc_chain
 * 
 * if you want to change anything, copy kumac to your area and change:
@@ -36,6 +33,8 @@
  *          Feb 24, 97 - created
  *          May 1, 1998 - editted by Kathy Turner
  *          May 5, 1998 - Kathy
+ *          May 22, 1998 - editted by Kathy Turner 
+ *                       - broke up tpc into simulation & tracker
 **************************************************
  
 MACRO run_all _
@@ -74,6 +73,7 @@ message ' *** EV0 Finder            -->  ' [ev0_finder]
  DEFAULT = _
 ./kumacs/util,_
 ./kumacs/chain,_
+./kumacs/tpc,_
 ./pams/emc/kumac,_
 ./pams/global/kumac,_
 ./pams/svt/kumac,_
@@ -158,21 +158,39 @@ $STAR/pams/trg/kumac
  * SVT initialization - geometry
  *****************************************
 
-
  exec init_svg
  message ' called init_svg'
+
+
+ ****************************************
+ * TPC geometry initialization
+ ****************************************
+
+  exec tpg_init#init
+
+
+ *****************************************
+ * SVT initialization - simulation
+ *****************************************
+
  if [svt_simul] = sss then
    message 'run_all-I1 : will use svt simulator sss/ssf'
    exec init_sss
    exec init_ssf
  endif
 
- ****************************************
- * TPC geometry &  pam initialization 
- ****************************************
+ *****************************************
+ * TPC initialization - simulation
+ *****************************************
 
-  exec tpg_init#init
   exec tpc_fast_sim#initialize
+
+ *****************************************
+ * TPC initialization - tracker
+ *****************************************
+
+  exec tpc_tracker#initialize
+
 
  *****************************************
  *  MAIN EVENT LOOP 
@@ -206,6 +224,21 @@ $cptime
    sigma vsrs = vsrs + $cptime
 
 
+* TPC simulator ---------------------------------------------------------
+
+  if [tpc_simul]=tfs then
+    exec tpc_fast_sim#process_event [ievent]
+    if (staf_status(1) .ne. stafcv_ok) then
+     message ' problem with tpc_fast_sim_process_event'
+     goto NEXT_EVENT
+    endif
+    sigma vtfs = vtfs + $cptime
+  else
+    message ' not a valid tpc simulator '
+    go to NEXT_EVENT
+  endif
+
+
  *  svt track finding and momentum reconstruction -----------------------
 
     if [svt_tracker]= stk then
@@ -222,36 +255,22 @@ $cptime
     endif
     sigma vstk = vstk + $cptime
 
+  message ' made it thru the SVT tracking!'
 
 TPC:
-
-* TPC simulator ---------------------------------------------------------
-
-  if [tpc_simul]=tfs then
-    exec tpc_fast_sim#process_event [ievent]
-    if (staf_status(1) .ne. stafcv_ok) then
-     message ' problem with tpc_fast_sim_process_event'
-     goto NEXT_EVENT
-    endif
-    sigma vtfs = vtfs + $cptime
-  else
-    message ' not a valid tpc simulator '
-    go to NEXT_EVENT
-  endif
-
 
 * TPC tracking ----------------------------------------------------------
 
    if [tpc_tracker]=tpt then
-     exec tpc_fast_sim#run_tracker_tpt [ievent]
+     exec tpc_tracker#tpt [ievent]
      if (staf_status(1) .ne. stafcv_ok) then
-      message ' problem with tpc_fast_sim_run_tracker_tpt'
+      message ' problem with tpc_tracker_tpt'
       goto NEXT_EVENT
      endif
    elseif [tpc_tracker]=tte then
-     exec tpc_fast_sim#run_tracker_tte [ievent]
+     exec tpc_tracker#tte [ievent]
      if (staf_status(1) .ne. stafcv_ok) then
-      message ' problem with tpc_fast_sim_run_tracker_tte'
+      message ' problem with tpc_tracker_tte'
       goto NEXT_EVENT
      endif
    else
