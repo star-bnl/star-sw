@@ -41,12 +41,13 @@ long type_of_call tpt_residuals_(
 **:>------------------------------------------------------------------*/
 float xlocal[]={0,0,0}; /* scratch position */
 float bfield[3]; /* magnetic field */
-#define LEN 300000
+#define LEN 600000
 long  loc_hit[LEN]; /* array to index the hit table sorted by track */
 long  mylen=LEN; /* variable holding length of loc_hit array */
 #define TRACK_LEN 20000
 long loc_track[TRACK_LEN]; /* array to index the track table by track id */
-long l,i,j ,offset ; /* loop index */
+long l; /* loop index */
+long j; /* running track index */
 long id_track;
 long newmaxlen; /* new rowcount for the resolution table */
 float x1,y1,z1;
@@ -54,6 +55,7 @@ float xc,yc,psic,radius;
 float phi, phi0,phidif, tanl;
 float arclen;
 TCL_TPHIT_ST *jhit;
+TPT_RES_ST *jres;
 
 /* If no hits return */
 if(hit_h->nok == 0) return STAFCV_OK;
@@ -85,13 +87,20 @@ for (l=0;l<track_h->nok; l++)
 for(l=0;l<=hit_h->nok;l++)
 if(hit[loc_hit[l]].track>0) break;
 
-i=0;
-offset=l;
-while (l<=hit_h[0].nok && hit[loc_hit[l]].track>0)
+/* Set pointer to residuals to point to the first element */
+jres = res;
+/* Set size for the table of residuals */
+res_h->nok = 0;
+
+/* Start looping from the non-zero hit */
+while (l<=hit_h->nok && hit[loc_hit[l]].track>0)
   {
-    /* get the track number and calculate the track parameters */
+    /* get the track number */
     id_track=hit[loc_hit[l]].track/1000;
     j=loc_track[id_track];
+    /* Make sure it's a valid track */
+    if( track[j].flag>0){
+    /* and calculate the track parameters */
     /* calculate the firstpoint on the track */
     x1 = track[j].r0*cos(track[j].phi0*C_RAD_PER_DEG);
     y1 = track[j].r0*sin(track[j].phi0*C_RAD_PER_DEG);
@@ -111,34 +120,40 @@ while (l<=hit_h[0].nok && hit[loc_hit[l]].track>0)
     arclen=0;
 
     /* loop over all the points and calculate residuals */
-    while (id_track == hit[loc_hit[i+offset]].track/1000)
+    while (id_track == hit[loc_hit[l]].track/1000)
       {
-	jhit=&(hit[loc_hit[i+offset]]);
-	res[i].trk   = id_track;
-	res[i].hit   = jhit->id;
-	res[i].resy  = sqrt((jhit->x-xc)*(jhit->x-xc)+
-			    (jhit->y-yc)*(jhit->y-yc))-radius;
+	jhit=&(hit[loc_hit[l]]);
+	jres->trk   = id_track;
+	jres->hit   = jhit->id;
+	/* Calculate residuum along the padrow */
+	jres->resy  = (sqrt((jhit->x-xc)*(jhit->x-xc)+
+		      (jhit->y-yc)*(jhit->y-yc))-radius)/
+                       cos(jhit->alpha*C_RAD_PER_DEG);
 
-	/* now calculate the track length, get the azimuthal angle (with respect to the center)
-        for the current point */
+	/* now calculate the track length, get the azimuthal angle 
+	   (with respect to the center) for the current point */
         phi = atan2(jhit->y-yc,jhit->x-xc);
         phidif = fabs(phi-phi0);
         phidif = (phidif<C_2PI-phidif) ? phidif : C_2PI-phidif;
-        arclen=arclen+radius*phidif;
-        phi0 = phi;
-        res[i].resz=jhit->z-z1-arclen*tanl;
-        i++;
-    	if (i >= res_h->maxlen) { /* Increase table */
+        arclen=radius*phidif;
+	/*        phi0 = phi;*/
+        jres->resz=jhit->z-z1-arclen*tanl;
+	/* increase pointer to the residuals and increase the residual count */
+	jres++;
+        res_h->nok = res_h->nok+1;
+        l++;
+    	if (res_h->nok >= res_h->maxlen) { /* Increase table length*/
              newmaxlen = res_h->maxlen*1.3;
              ds2ReallocTable(&res_h,&res,newmaxlen);}
-        if(i+offset>hit_h->nok) break;
+        if(l>hit_h->nok) break;
       }
-    l=i+offset;
+    }
+    else
+      {
+	l++;
+      }
     if(l>hit_h->nok) break;
   }
-	  
-   res_h->nok =--i;
- 
    return STAFCV_OK;
 }
 

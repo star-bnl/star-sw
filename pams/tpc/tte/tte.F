@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.20 1999/01/22 17:33:42 sakrejda Exp $
+* $Id: tte.F,v 1.21 1999/01/25 06:00:59 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.21  1999/01/25 06:00:59  sakrejda
+* tte_res.idl removed from the tte call - obsolete
+*
 * Revision 1.20  1999/01/22 17:33:42  sakrejda
 * local array increased to accomodate pointers to hits from a Vini event
 *
@@ -67,7 +70,6 @@ C<----------------------------------------------------------------------------
      >                           tindex_type_h, tindex_type,
      >                           eval_h,        eval,
      >                           evmc_h,        evmc,
-     >                           everes_h,      everes,
      >                           cntrl_h,       cntrl)
 
       IMPLICIT NONE
@@ -99,8 +101,6 @@ C  evalh    - header of the tpeval (tpc evaluation) table
 C  eval     - rows of the tpeval (tpc evaluation) table
 C  evmch    - header of the tp_mctrk (mc tracks in TPC) table
 C  evmc     - rows of the tp_mctrk (mc tracks in TPC) table
-C  everesh  - header of the everes (fitting evaluation) table
-C  everes   - rows of the everes table
 C
 C
 C      Update history:

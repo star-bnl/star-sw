@@ -11,7 +11,6 @@
 #include "tcl_tpc_index_type.idl"
 #include "tte_eval.idl"
 #include "tte_mctrk.idl"
-#include "tte_res.idl"
 #include "tte_control.idl"
 
 interface tte : amiModule{
@@ -24,7 +23,6 @@ interface tte : amiModule{
 			, in     tcl_tpc_index_type tindex_type 
 			, out    tte_eval eval 
 			, out    tte_mctrk evmc 
-			, out    tte_res everes 
 			, out    tte_control cntrl);
 };
-/* Last mod. for tte: $Date: 1998/01/27 02:18:52 $ */
+/* Last mod. for tte: $Date: 1999/01/25 06:01:01 $ */

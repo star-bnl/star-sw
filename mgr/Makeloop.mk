@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.43  1999/01/25 23:49:14  fisyak
+#  Add MAKEFLAG
+#
 #  Revision 1.42  1999/01/20 02:16:52  fisyak
 #  Active STAR_HOST_SYS for egcs
 #
@@ -205,12 +208,12 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/01/20 02:16:52 $ 
+#           Last modification $Date: 1999/01/25 23:49:14 $ 
 #  default setings
 # Current Working Directory
 #
 ifdef SILENT
-.SILENT:
+.SILENT:.
 endif       
 
 ifdef STAR_MAKE_HOME
@@ -256,7 +259,9 @@ ifndef INP_DIR
   INP_DIR := $(CWD)
 endif           
 NAME    := $(notdir $(INP_DIR))
-MAKEFLG := $(filter-out w, $(MAKEFLAGS))
+MAKFLAGS := $(filter-out w, $(MAKEFLAGS))
+#MAKFLAGS := $(filter-out s, $(MAKFLAGS))
+#MAKFLAGS := $(filter-out --, $(MAKFLAGS))
 # define level pams -> domain -> package from *.idl and *.g files
 #======================= level ===========================
 PAMS    := $(findstring /pams,$(INP_DIR))
@@ -369,23 +374,29 @@ StRoot += StChain
 endif
 Makers  :=  $(notdir $(wildcard $(ROOT_DIR)/StRoot/St*Maker)) 
 #Makers  :=  $(notdir $(wildcard $(ROOT_DIR)/StRoot/St*)) 
+ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
+Makers  :=  $(filter-out StTrsMaker, $(Makers))
+endif
 Makers  :=  $(filter-out St_ebye_Maker, $(Makers))
 Makers  :=  $(filter-out St_laser_Maker, $(Makers))
 Makers  :=  $(filter-out St_mev_Maker, $(Makers))
 Makers  :=  $(filter-out St_hbt_Maker, $(Makers))
-ifneq ($(EMPTY),$(findstring i386_linux2, $(STAR_SYS)) )
-Makers  :=  $(filter-out St_trs_Maker, $(Makers))
-endif
+Makers  :=  $(filter-out St_params_Maker, $(Makers))
+Makers  :=  $(filter-out St_db_Maker, $(Makers))
 ifneq ($(EMPTY),$(Makers))
 StRoot += St_Makers
 endif
+ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/StDisplay))
+StRoot += StDisplay
+endif
+
 endif
 #          I have subdrs
-.PHONY               :  all $(BASE) $(XDF2ROOT) $(TARGET) $(StRoot) StDisplay test clean clean_lib clean_share clean_obj
+.PHONY               :  all $(TARGET) ROOT test clean clean_lib clean_share clean_obj
 #      I_have_subdirs
-all:  $(BASE) $(XDF2ROOT)  $(TARGETS) $(StRoot)
+all:    $(TARGETS) ROOT
 ifndef NOROOT
-ROOT:      St_base xdf2root St_Makers StChain St_Tables StDisplay
+ROOT:   $(BASE) $(XDF2ROOT)  $(StRoot)
 St_base:
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base     SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St_base.$(So)
 xdf2root:
@@ -409,42 +420,45 @@ St%Maker:
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St$(STEM)Maker  SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St$(STEM)Maker.$(So)
 endif
 %_all:  $(BASE)
-	$(MAKE)  -f $(Makeloop) -C $(STEM) $(MAKEFLG) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) $(MAKFLAGS) 
 test:  $(BASE) $(addsuffix _test, $(SUBDIRS))
 %_test: 
-	$(MAKE)  -f $(Makeloop) -C $(STEM) test $(MAKEFLG) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) test $(MAKFLAGS) 
 clean: $(addsuffix _clean, $(SUBDIRS))
 %_clean: 
-	$(MAKE)  -f $(Makeloop) -C $(STEM) clean $(MAKEFLG) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) clean $(MAKFLAGS) 
 clean_lib: $(addsuffix _clean_lib, $(SUBDIRS))
 %_clean_lib: 
-	$(MAKE)  -f $(Makeloop) -C $(STEM) clean_lib $(MAKEFLG) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) clean_lib $(MAKFLAGS) 
 clean_share: $(addsuffix _clean_share, $(SUBDIRS))
 %_clean_share: 
-	$(MAKE)  -f $(Makeloop) -C $(STEM) clean_share $(MAKEFLG) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) clean_share $(MAKFLAGS) 
 clean_obj: $(addsuffix _clean_obj, $(SUBDIRS))
 %_clean_obj: 
-	$(MAKE)  -f $(Makeloop) -C $(STEM) clean $(MAKEFLG) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) clean $(MAKFLAGS) 
 else # I have no subdirs
 PKG     := $(notdir $(shell $(PWD)))
 GEN_DIR := $(ROOT_DIR)/.share/$(PKG)
 GEN_TAB := $(DIR_GEN)/tables
 .PHONY               : default clean clean_lib clean_share clean_obj test
 all:
-	$(MAKE)  -f $(MakePam) $(MAKEFLG)
+	$(MAKE)  -f $(MakePam) $(MAKFLAGS)
 ifndef NOROOT
-	$(MAKE)  -f $(MakeDll) $(MAKEFLG) -C  $(GEN_DIR) SO_LIB=$(SO_LIB)
+	$(MAKE)  -f $(MakeDll) $(MAKFLAGS) -C  $(GEN_DIR) SO_LIB=$(SO_LIB)
 endif
-clean:;      $(MAKE)  -f $(MakePam) $(MAKEFLG)  clean
-clean_lib:;  $(MAKE)  -f $(MakePam) $(MAKEFLG)  clean_lib
-clean_share:;$(MAKE)  -f $(MakePam) $(MAKEFLG)  clean_share
-clean_obj:;  $(MAKE)  -f $(MakePam) $(MAKEFLG)  clean_obj
-clean_test:; $(MAKE)  -f $(MakePam) $(MAKEFLG)  test
+clean:;      $(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean
+clean_lib:;  $(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean_lib
+clean_share:;$(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean_share
+clean_obj:;  $(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean_obj
+clean_test:; $(MAKE)  -f $(MakePam) $(MAKFLAGS)  test
 endif
 endif
+w:
 test: test_level
 test_level:
-	@echo "MAKEFLG   = |"$(MAKEFLG)"|"
+	@echo MAKELEVEL = $(MAKELEVEL) 
+	@echo MAKEFILE  = $(MAKEFILE) 
+	@echo MAKFLAGS  = $(MAKFLAGS) 
 	@echo "PWD       = |"$(PWD)"|"
 	@echo "LEVEL     = |"$(LEVEL)"|"
 	@echo "SUBDIRS   = |"$(SUBDIRS)"|"
