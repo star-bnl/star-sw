@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.1 2000/11/23 10:16:43 hummler Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.2 2001/01/11 18:28:47 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.2  2001/01/11 18:28:47  jcs
+// use PhysicalConstants.h instead of math.h, remove print statement
+//
 // Revision 1.1  2000/11/23 10:16:43  hummler
 // New FTPC slow simulator in pure maker form
 //
@@ -124,7 +127,7 @@ Int_t StFtpcSlowSimMaker::Make(){
 //_____________________________________________________________________________
 void StFtpcSlowSimMaker::MakeHistograms() {
 
-   cout<<"*** NOW MAKING HISTOGRAMS FOR FtpcSlowSim ***"<<endl;
+   if(Debug()) cout<<"*** NOW MAKING HISTOGRAMS FOR FtpcSlowSim ***"<<endl;
 
    // Create an iterator
    St_DataSetIter ftpc_raw(m_DataSet);
