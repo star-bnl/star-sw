@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.41 1998/12/17 18:01:16 fisyak Exp $
+# $Id: MakeDll.mk,v 1.42 1999/01/01 01:46:09 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.42  1999/01/01 01:46:09  fisyak
+# Clean up include path
+#
 # Revision 1.41  1998/12/17 18:01:16  fisyak
 # remove duplicated includes
 #
@@ -131,18 +134,18 @@ endif #/* NT */
 #	Includes
 
 # 	Define internal and external includes dirs
-INC_NAMES := tables base StChain StModule xdf2root
-INC_DIRS :=$(strip \
-           $(foreach dir, $(OUT_DIR)/.share/ $(ROOT_DIR)/StRoot/ $(STAR)/.share/ $(STAR)/StRoot/,\
-           $(wildcard $(addprefix $(dir),$(INC_NAMES)))) \
-           $(wildcard $(OUT_DIR)/.share $(STAR)/.share $(SRC_DIR) $(SRC_DIR)/include $(GEN_DIR) $(ROOT_DIR)/inc  $(STAR)/inc  $(STAF_UTILS_INCS)) \
-                      $(ROOTSYS)/src \
-           $(STAF_SYS_INCS) $(CERN_ROOT)/include $(SRC_DIR) $(GEN_TAB) $(GEN_DIR))
+INC_NAMES := $(addprefix StRoot/,base StChain xdf2root) .share .share/tables pams inc
+INC_DIRS  := $(wildcard $(SRC_DIR) $(SRC_DIR)/include)
+INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) 
+ifneq ($(ROOT_DIR),$(STAR))
+INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES))))
+endif
+INC_DIRS  +=  $(STAF_UTILS_INCS) $(CERN_ROOT)/include $(ROOTSYS)/src
+
 INCINT := $(INC_DIRS)
 ifdef NT
 INC_DIRS := $(INC_DIRS) $(SUNRPC)
 endif
-
 INCLUDES := $(addprefix -I,$(INC_DIRS))
 INCINT   := $(addprefix -I,$(INCINT))
 
@@ -188,8 +191,8 @@ ifneq (,$(DOIT))
 
 DEP_DIR := $(SYS_DIR)/dep/$(PKGNAME)
 
-OUTPUT_DIRS := $(LIB_DIR) $(OBJ_DIR) $(DEP_DIR) $(BIN_DIR) $(TMP_DIR) $(GEN_DIR)
-#                                                                                $(SRC_DIR) 
+OUTPUT_DIRS := $(LIB_DIR) $(OBJ_DIR) $(DEP_DIR) $(BIN_DIR) $(TMP_DIR) 
+#                                                                     $(GEN_DIR) $(SRC_DIR) 
 INPUT_DIRS += $(SRC_DIR) $(SRC_DIR)/src
 
 # 	Make dirs before make real work. Othervice VPATH does not see
@@ -515,14 +518,6 @@ $(DEP_DIR)/%.d: %.cc
 	$(MAKEDEPEND) $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
 's/$(notdir $(STEM))\.o/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)/$(STEM).o)) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
-$(DEP_DIR)/%.d:%.F
-	$(MAKEDEPEND) -traditional -x c $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
-'s/$(notdir $(STEM))\.F\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
-        > $(ALL_TAGS)
-$(DEP_DIR)/%.d:%.f
-	$(MAKEDEPEND) -traditional -x c $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
-'s/$(notdir $(STEM))\.F\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
-        > $(ALL_TAGS)
 $(DEP_DIR)/%.d:%.g
 	$(MAKEDEPEND) -traditional -x c $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
 's/$(notdir $(STEM))\.g\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
@@ -531,6 +526,14 @@ $(DEP_DIR)/%.d:%.cdf
 	cd $(SRC_DIR); \
         echo "$(notdir $(STEM)).c $(ALL_TAGS): $(ALL_DEPS)" > $(ALL_TAGS) ;
         echo "$(STEM).$(O): $(STEM).c" >> $(ALL_TAGS)
+$(DEP_DIR)/%.d:%.F
+	$(MAKEDEPEND) -traditional -x c $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
+'s/$(notdir $(STEM))\.F\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
+        > $(ALL_TAGS)
+$(DEP_DIR)/%.d:%.f
+	$(MAKEDEPEND) -traditional -x c $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
+'s/$(notdir $(STEM))\.F\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
+        > $(ALL_TAGS)
 endif
 DeleteDirs :
 ifndef NT

@@ -74,7 +74,7 @@ FILES_O := $(sort $(addprefix $(OBJ_DIR)/,$(addsuffix .o,$(NAMES_O))))
 FILES_D := $(sort $(addprefix $(DEP_DIR)/,$(addsuffix .d,$(NAMES_D)))) 
 
 # ggsim.o agdummy.o dummy.o 
-INCL  := $(ROOTSYS)/src $(INP_DIR) $(GST_DIR) $(STAF_SYS_INCS) $(STAR)/asps/agi $(STAR)/asps/agi/kuip  $(CERN_ROOT)/include $(CERN_ROOT)/src/pawlib/paw/ntuple 
+INCL  := $(ROOTSYS)/src $(STAR)/StRoot/base $(INP_DIR) $(GST_DIR) $(STAF_SYS_INCS) $(STAR)/asps/agi $(STAR)/asps/agi/kuip  $(CERN_ROOT)/include $(CERN_ROOT)/src/pawlib/paw/ntuple 
 INCL  := $(addprefix -I,$(INCL))
 
 #STAF  = YES
