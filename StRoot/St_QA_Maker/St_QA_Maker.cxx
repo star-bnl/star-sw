@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.22 1999/04/27 21:05:29 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.23 1999/04/28 18:39:29 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.23  1999/04/28 18:39:29  kathy
+// removed check of two different directory for GetDataSet because the infrastructure code should take care of this and not the Makers
+//
 // Revision 1.22  1999/04/27 21:05:29  kathy
 // clean up comments
 //
@@ -427,10 +430,7 @@ Int_t St_QA_Maker::Make(){
   
   // Call methods to fill histograms
   
-  St_DataSet *dst = GetDataSet("dst/dst");
-  St_DataSet *dst1 = GetDataSet("dst");
-  if(!dst) dst = dst1;
-  
+  St_DataSet *dst = GetDataSet("dst");  
   
   // histograms from table event_summary
   MakeHistEvSum(dst);
@@ -442,7 +442,7 @@ Int_t St_QA_Maker::Make(){
   MakeHistPrim(dst);
   
   // histograms from table particle
-  MakeHistGen(dst1);
+  MakeHistGen(dst);
   
   // histograms from table dst_v0_vertex
   MakeHistV0(dst);
@@ -1077,7 +1077,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.22 1999/04/27 21:05:29 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.23 1999/04/28 18:39:29 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
