@@ -52,8 +52,9 @@ void EEmcTTMMaker::Run(
   int counter=0;
   //---------------------------------------------------
   while(nEvents<0 || counter<nEvents ) {
-    if( (stat = chain->Make()) != 0 ) break;
-
+    
+    stat = chain->Make();
+    if(stat==kStEOF || stat==kStFatal) break;
     // just for fun
 #if 0
     switch(counter%4) {
@@ -65,7 +66,7 @@ void EEmcTTMMaker::Run(
     }
     cout.flush();
 #endif
-    if(++counter%100==0) cout << "analyzed " << counter << " events" << endl;
+    if(++counter%10==0) cout << "analyzed " << counter << " events" << endl;
   }
   ttmmk->Summary(std::cerr);    // 
   ttmmk->Finish();
