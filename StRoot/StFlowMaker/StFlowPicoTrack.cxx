@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoTrack.cxx,v 1.8 2001/07/27 01:26:37 snelling Exp $
+// $Id: StFlowPicoTrack.cxx,v 1.9 2001/12/12 21:36:20 posk Exp $
 //
 // Author: Raimond Snellings, March 2000
 //
@@ -9,6 +9,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "StFlowPicoTrack.h"
+#include <math.h>
 
 ClassImp(StFlowPicoTrack)
 
@@ -65,6 +66,9 @@ StFlowPicoTrack::StFlowPicoTrack(StFlowPicoTrack *track) : TObject() {
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoTrack.cxx,v $
+// Revision 1.9  2001/12/12 21:36:20  posk
+// For Solaris compatability, added: #include <math.h>
+//
 // Revision 1.8  2001/07/27 01:26:37  snelling
 // Added and changed variables for picoEvent. Changed trackCut class to StTrack
 //
