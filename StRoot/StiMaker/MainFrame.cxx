@@ -10,6 +10,7 @@
 
 //Star
 #include "StChain.h"
+#include "StIOMaker/StIOMaker.h"
 
 //SCL
 #include "StMemoryInfo.hh"
@@ -99,7 +100,7 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
       mIfcViewMenu(0), mAllViewMenu(0), mNavigateMenu(0),
       mTrackingMenu(0),
       fMenuBarLayout(0), fMenuBarItemLayout(0), fMenuBarHelpLayout(0),
-      mchain(0),
+      mchain(0), mIoMaker(0),
       fTrackingFrame(0), fFinishTrackButton(0), fFinishEventButton(0),
       fNextEventButton(0)
 {
@@ -200,7 +201,7 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
     AddFrame(fMenuBar, fMenuBarLayout);
 
     fCanvasWindow =
-	new TRootEmbeddedCanvas("My Embedded Canvas", this, 600, 600);
+	new TRootEmbeddedCanvas("My Embedded Canvas", this, 650, 600);
 
     fContainer = new TileFrame(fCanvasWindow->GetViewPort());
     fContainer->SetCanvas(fCanvasWindow);
@@ -323,6 +324,19 @@ MainFrame::~MainFrame()
 
     delete fMenuBarHelpLayout;
     fMenuBarHelpLayout=0;
+
+    delete fTrackingFrame;
+    fTrackingFrame=0;
+
+    delete fFinishTrackButton;
+    fFinishTrackButton=0;
+
+    delete fFinishEventButton;
+    fFinishEventButton=0;
+
+    delete fNextEventButton;
+    fNextEventButton=0;
+
 }
 
 void MainFrame::CloseWindow()
@@ -367,7 +381,7 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 		
 	    case M_FILE_OPEN:
 		{
-		    static TString dir(".");
+		    static TString dir("/star/data17/ITTF/");
 		    TGFileInfo fi;
 		    fi.fFileTypes = filetypes;
 		    fi.fIniDir    = StrDup(dir);
@@ -375,6 +389,8 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 		    printf("Open file: %s (dir: %s)\n", fi.fFilename,
 			   fi.fIniDir);
 		    dir = fi.fIniDir;
+		    mIoMaker->Close();
+		    mIoMaker->SetFile(fi.fFilename);
 		}
 		break;
 
@@ -804,8 +820,6 @@ void MainFrame::printVertices()
 {
     cout <<StiHitContainer::instance()->vertices()<<endl;
 }
-
-
 
 //Extras
 

@@ -80,6 +80,8 @@ enum ETestCommandIdentifiers {
 
 class TileFrame;
 
+class StIOMaker;
+
 class MainFrame : public TGMainFrame
 {    
 public:
@@ -94,8 +96,14 @@ public:
 
 public:
     
-    virtual void CloseWindow();
+    //General access
+    void setStChain(StChain* val) {mchain=val;}
+    void setIoMaker(StIOMaker* val) {mIoMaker=val;}
     
+private:
+    
+    virtual void CloseWindow();
+
     //Add some new test function
     void setAllVisible();
     void setAllInvisible();
@@ -153,9 +161,6 @@ public:
     
     void toggleFitFind();
     
-    //General access
-    void setStChain(StChain* val) {mchain=val;}
-    
 private:
     
     MainFrame(); ///Not implemented
@@ -178,15 +183,16 @@ private:
     
     TGPopupMenu *mTrackingMenu;
     
-    TGLayoutHints      *fMenuBarLayout, *fMenuBarItemLayout, *fMenuBarHelpLayout;
+    TGLayoutHints *fMenuBarLayout, *fMenuBarItemLayout, *fMenuBarHelpLayout;
 
     StChain* mchain;
-
+    StIOMaker* mIoMaker;
+    
     TGCompositeFrame* fTrackingFrame;
     TGTextButton* fFinishTrackButton;
     TGTextButton* fFinishEventButton;
     TGTextButton* fNextEventButton;
-    
+
     ClassDef(MainFrame,1)
 };
 

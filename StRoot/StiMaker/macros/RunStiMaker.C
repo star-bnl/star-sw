@@ -153,6 +153,7 @@ const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.ro
     //if (draw==true) {
     MainFrame* sti = new MainFrame(gClient->GetRoot(), 400, 220);
     sti->setStChain(chain);
+    sti->setIoMaker(ioMaker);
     
     cout <<"Calling Init() Methods "<<endl;
     chain->Init();
