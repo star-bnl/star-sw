@@ -1,5 +1,9 @@
-// $Id: EEsectorDst.cxx,v 1.2 2003/02/20 05:15:14 balewski Exp $
+// $Id: EEsectorDst.cxx,v 1.3 2003/02/20 20:13:15 balewski Exp $
 // $Log: EEsectorDst.cxx,v $
+// Revision 1.3  2003/02/20 20:13:15  balewski
+// fixxy
+// xy
+//
 // Revision 1.2  2003/02/20 05:15:14  balewski
 // reorganization
 //
@@ -114,13 +118,14 @@ void EEsectorDst::addTwHit(char sub, int eta, float ener, TClonesArray *hitA) {
 //---------------------------------------------------
 //---------------------------------------------------
 //---------------------------------------------------
-void EEsectorDst::addSmdHit(char strip, float ener, TClonesArray *hitA) {
+void EEsectorDst::addSmdHit(int strip, float ener, TClonesArray *hitA) {
  
   TClonesArray &hits = *hitA;
   int len=hits.GetEntries();
   EEsmdHitDst *hit= new(hits[len]) EEsmdHitDst;
+  //printf("in , added ~smd hit=%d ener=%f\n",len,ener);
+  
   hit->set(strip,ener);
-  //  printf("in , added ~smd hit=%d ener=%f\n",len,ener);
 }
  
 //---------------------------------------------------

@@ -5,12 +5,16 @@
 #ifndef EEmcMCData_h
 #define EEmcMCData_h
 /*********************************************************************
- * $Id: EEmcMCData.h,v 1.1 2003/02/20 05:14:07 balewski Exp $
+ * $Id: EEmcMCData.h,v 1.2 2003/02/20 20:13:20 balewski Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Monte Carlo Data
  *********************************************************************
  * $Log: EEmcMCData.h,v $
+ * Revision 1.2  2003/02/20 20:13:20  balewski
+ * fixxy
+ * xy
+ *
  * Revision 1.1  2003/02/20 05:14:07  balewski
  * reorganization
  *
@@ -48,7 +52,7 @@
  *********************************************************************/
 #include "TObject.h"
 #include "EEmcDefs.h"
-#include "EEmcException.h"
+//#include "EEmcException.h"
 
 class   StMaker;
 
@@ -56,7 +60,7 @@ class   St_g2t_emc_hit;
 class   St_g2t_event;
 
 class   EEeventDst;
-class   EEmcException;
+//class   EEmcException1;
 
 const   Float_t kEEmcDefaultEnergyThreshold = 0.0005; // 0.5 MeV
 const   Int_t   kEEmcDefaultMCHitSize       = 0x1000; // 4k hitow
