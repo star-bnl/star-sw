@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.16 2001/12/06 16:47:13 laue Exp $
+ * $Id: StHbtEvent.cc,v 1.17 2002/03/21 18:49:31 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.17  2002/03/21 18:49:31  laue
+ * updated for new MuDst reader
+ *
  * Revision 1.16  2001/12/06 16:47:13  laue
  * l3 trigger algorithm added
  *
@@ -175,6 +178,93 @@ StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) {
 }
 #endif
 
+
+#ifdef __ROOT__
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
+#include "StMuDSTMaker/COMMON/StMuDebug.h"
+
+StHbtEvent::StHbtEvent(const StMuDst* dst, int trackType) {
+  DEBUGMESSAGE1("");
+  StMuEvent* ev = dst->event();
+  mEventNumber = ev->eventNumber();
+  mRunNumber = ev->runNumber();
+  mTpcNhits = 0;
+  mNumberOfTracks = ev->eventSummary().numberOfTracks();
+  mNumberOfGoodTracks = ev->eventSummary().numberOfGoodTracks();
+  mCtbMultiplicity = ev->ctbMultiplicity();
+  mZdcAdc[0] = ev->zdcAdcAttentuatedSumWest();
+  mZdcAdc[1] = ev->zdcAdcAttentuatedSumEast();
+  mUncorrectedNumberOfPositivePrimaries = ev->refMultPos();
+  mUncorrectedNumberOfNegativePrimaries = ev->refMultNeg();
+  mReactionPlane[0] = 0;
+  mReactionPlane[1] = 0;
+  mReactionPlanePtWgt[0] = 0;
+  mReactionPlanePtWgt[1] = 0;
+  mPrimVertPos = ev->eventSummary().primaryVertexPosition();
+  mMagneticField = ev->magneticField();
+
+  mTriggerWord = ev->l0Trigger().triggerWord();
+  mTriggerActionWord = ev->l0Trigger().triggerActionWord();
+
+
+
+  // create collections
+  mV0Collection = new StHbtV0Collection();
+  mXiCollection = new StHbtXiCollection();
+  mKinkCollection = new StHbtKinkCollection();
+  mTrackCollection = new StHbtTrackCollection();
+
+  // copy track collection  
+  TClonesArray* tracks=0;
+  switch (trackType) {
+  case 0: tracks = dst->globalTracks(); break;
+  case 1: tracks = dst->primaryTracks(); break;
+  default: DEBUGMESSAGE("don't know how to handle this track type");
+  }
+  if (tracks) {
+    DEBUGVALUE2(trackType);
+    int nTracks = tracks->GetEntries();
+    DEBUGVALUE2(tracks->GetEntries());
+    for ( int i=0; i<nTracks; i++) {
+      StHbtTrack* trackCopy = new StHbtTrack(dst, (StMuTrack*) tracks->UncheckedAt(i));
+      mTrackCollection->push_back(trackCopy);
+    }
+  }
+
+  StStrangeEvMuDst* strangeEvent = dst->strangeEvent();
+  // copy v0 collection  
+  int nV0s = dst->v0s()->GetEntries();
+  for ( int i=0; i<nV0s; i++) {
+    dst->v0s(i)->SetEvent(strangeEvent);
+    StHbtV0* v0Copy = new StHbtV0( *dst->v0s(i) );
+    mV0Collection->push_back(v0Copy);
+  }
+  // copy xi collection  
+  int nXis = dst->xis()->GetEntries();
+  for ( int i=0; i<nXis; i++) {
+    dst->xis(i)->SetEvent(strangeEvent);
+    StHbtXi* xiCopy = new StHbtXi( *dst->xis(i) );
+    mXiCollection->push_back(xiCopy);
+  }
+//   // copy kink collection  
+//   int nKinks = dst->kinks()->GetEntries();
+//   for ( unsigned int i=0; i <nKinks; i++) {
+//     StHbtKink* kinkCopy = new StHbtKink( *dst->kinks(i) );
+//     mKinkCollection->push_back(kinkCopy);
+//   }
+  cout << "StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) - collections:";
+  cout << " " << mTrackCollection->size();
+  cout << "/" << mV0Collection->size();
+  cout << "/" << mXiCollection->size();
+  cout << "/" << mKinkCollection->size();
+  cout << endl;
+}
+#endif
+
+
+
 //___________________
 StHbtEvent::StHbtEvent(){
   mPrimVertPos[0]=-999.0;
@@ -217,7 +307,6 @@ StHbtEvent::StHbtEvent(const StHbtEvent& ev, StHbtTrackCut* tCut, StHbtV0Cut* vC
   // copy track collection  
   for ( StHbtTrackIterator tIter=ev.mTrackCollection->begin(); tIter!=ev.mTrackCollection->end(); tIter++) {
     if ( !tCut || tCut->Pass(*tIter) ) {
-      //cout << " trackCut passed " << endl;
       StHbtTrack* trackCopy = new StHbtTrack(**tIter);
       mTrackCollection->push_back(trackCopy);
     }

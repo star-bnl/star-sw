@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.hh,v 1.17 2001/12/06 16:47:13 laue Exp $
+ * $Id: StHbtEvent.hh,v 1.18 2002/03/21 18:49:31 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.hh,v $
+ * Revision 1.18  2002/03/21 18:49:31  laue
+ * updated for new MuDst reader
+ *
  * Revision 1.17  2001/12/06 16:47:13  laue
  * l3 trigger algorithm added
  *
@@ -93,13 +96,15 @@ class StHbtXiCut;
 class StHbtKinkCut;
 #ifdef __ROOT__
 class StHbtTTreeEvent;
+class StMuDst;
 #endif
 
 class StHbtEvent{
 public:
   StHbtEvent();
 #ifdef __ROOT__
-  StHbtEvent(const StHbtTTreeEvent* ); // copy constructor with track and v0 cuts
+  StHbtEvent(const StHbtTTreeEvent* ); 
+  StHbtEvent(const StMuDst*, int trackType );
 #endif
   StHbtEvent(const StHbtEvent&, StHbtTrackCut* =0, StHbtV0Cut* =0,  StHbtXiCut* =0, StHbtKinkCut* =0); // copy constructor with track and v0 cuts
   ~StHbtEvent();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.20 2001/12/14 23:11:30 fretiere Exp $
+ * $Id: StHbtTrack.hh,v 1.21 2002/03/21 18:49:31 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.21  2002/03/21 18:49:31  laue
+ * updated for new MuDst reader
+ *
  * Revision 1.20  2001/12/14 23:11:30  fretiere
  * Add class HitMergingCut. Add class fabricesPairCut = HitMerginCut + pair purity cuts. Add TpcLocalTransform function which convert to local tpc coord (not pretty). Modify StHbtTrack, StHbtParticle, StHbtHiddenInfo, StHbtPair to handle the hit information and cope with my code
  *
@@ -118,6 +121,8 @@ class StEvent;
 class StTrack;
 class StHbtTTreeTrack;
 class StHbtTTreeEvent;
+class StMuDst;
+class StMuTrack;
 
 class StHbtTrack{
 public:
@@ -126,6 +131,7 @@ public:
 #ifdef __ROOT__
   StHbtTrack(const StTrack*, StHbtThreeVector);   // c-tor from StTrack of STAR DSTs
   StHbtTrack(const StHbtTTreeEvent* ev, const StHbtTTreeTrack* t);
+  StHbtTrack(const StMuDst* dst, const StMuTrack* t);
 #endif
   StHbtTrack(const StEvent*, const StTrack*);
   ~StHbtTrack(){/* no-op*/};
