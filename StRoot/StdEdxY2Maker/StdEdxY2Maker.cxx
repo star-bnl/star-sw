@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.14 2003/09/02 17:59:40 perev Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.15 2003/10/06 23:43:22 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -994,7 +994,7 @@ Int_t StdEdxY2Maker::Make(){
       Double_t LogTrackLength = TMath::Log(TrackLength);
       Int_t NRrowsTL = 0;
       if (m_TpcLengthCorrection) NRrowsTL = m_TpcLengthCorrection->GetNRows();
-      if (N70 > 0) {
+      if (N70 > 1) {
 	I70 /= N70; D70 /= N70;
 	D70  = TMath::Sqrt(D70 - I70*I70);
 	D70 /= I70;
