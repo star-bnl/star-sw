@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.15 2002/01/17 18:29:55 jeromel Exp $
+ * $Id: EventReader.hh,v 1.16 2002/10/13 20:43:37 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -21,6 +21,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.16  2002/10/13 20:43:37  ward
+ * Support for decoding DAQ100 data and writing it into a table.
+ *
  * Revision 1.15  2002/01/17 18:29:55  jeromel
  * After I looked at the code, corrections from Akio (pass2).
  *
@@ -349,6 +352,7 @@ public:
 class DetectorReader
 {
   friend class EventReader;
+  friend class StTPCReader; // Herb Oct 2002 for DAQ100.
 
 public:
   virtual ZeroSuppressedReader *getZeroSuppressedReader(int sector)=0;
@@ -391,6 +395,7 @@ protected:
 
   int errnum;
   char errstr0[250];
+  void *motherPointerBank; // Herb Oct 2002 for DAQ100.
 
 private:
   EventReader *er;

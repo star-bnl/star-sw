@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.69  2002/10/13 20:43:38  ward
+// Support for decoding DAQ100 data and writing it into a table.
+//
 // Revision 1.68  2002/10/11 18:10:53  jeromel
 // Changes to accomodate for DAQ100 Cluster reading or raw hit reading
 //
@@ -211,6 +214,7 @@
 #include "tables/St_asic_thresholds_Table.h"
 #include "tables/St_noiseElim_Table.h"
 #include "tables/St_tpcGain_Table.h"
+#include "tables/St_daq100cl_Table.h"
 
 ClassImp(St_tpcdaq_Maker)
 
@@ -221,19 +225,17 @@ ClassImp(St_tpcdaq_Maker)
 #define DEBUG_ACTIVE_ROW 33
 #define HISTOGRAMS
 
-// We switched to the IO maker, so this is obsolete.  #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDAQMaker/StDAQReader.h"
 StDAQReader *victorPrelim;
 StTPCReader *victor;
 int gSector;
-// obsolete since we are moving to StIOMaker ZeroSuppressedReader *gZsr;  
-// obsolete since we are moving to StIOMaker DetectorReader *gDetectorReader;
 //________________________________________________________________________________
 St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name),gConfig(daqOrTrs)
 {
   printf("This is St_tpcdaq_Maker, name = \"%s\".\n",name);
   alreadySet=0; // FALSE
   daq_flag  =1; // deafult value for DAQ Reading is to use pad_raw table filling
+  // daq100cl debug daq_flag = 3;
 }
 //________________________________________________________________________________
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
@@ -490,6 +492,7 @@ int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequenc
 /// Method to set the DAQ Reading mode.
 void St_tpcdaq_Maker::SetDAQFlag(Int_t mode)
 {
+  // daq100cl debug if(7) return;
   daq_flag = mode;
   cout << "St_tpcdaq_Maker::SetDAQFlag : Setting mandatory DAQ flag to ";
   if (daq_flag == 0){
@@ -510,7 +513,7 @@ void St_tpcdaq_Maker::SetDAQFlag(Int_t mode)
 #include "StDaqLib/TPC/fee_pin.h"
 //________________________________________________________________________________
 #ifdef GAIN_CORRECTION
-void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) { // www
+void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) {
   register int row,pad;
 
   TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc"); assert(tpc_calib);
@@ -644,7 +647,7 @@ int St_tpcdaq_Maker::Output() {
   unsigned short conversion;
   char dataOuter[NSECT],dataInner[NSECT];
   St_DataSet *sector;
-  St_DataSetIter raw_data_tpc(m_DataSet); // m_DataSet set from name in ctor
+  St_DataSetIter raw_data_tpc(m_DataSet); //raw_data_tpc=iterator on St_tpcdaq_Maker's top level
   raw_sec_m_st singlerow;
   int pad,sectorStatus,ipadrow,npad,ipad,seqStatus,iseq,nseq,startTimeBin,ibin;
   int numberOfUnskippedSeq,prevStartTimeBin,rowR,padR,seqR;  // row counters
@@ -655,10 +658,13 @@ int St_tpcdaq_Maker::Output() {
   int isect,pixSave,pixR;
   unsigned long int nPixelThisPadRow;
   StSequence *listOfSequences;
-  St_raw_sec_m  *raw_sec_m = (St_raw_sec_m *) raw_data_tpc("raw_sec_m");
+  St_raw_sec_m  *raw_sec_m;
 
-  if(!raw_sec_m) {
-    raw_sec_m=new St_raw_sec_m("raw_sec_m",NSECT); raw_data_tpc.Add(raw_sec_m);
+  if(daq_flag & 0x01) { // Herb Oct 2002 for DAQ100.
+    raw_sec_m = (St_raw_sec_m *) raw_data_tpc("raw_sec_m");
+    if(!raw_sec_m) {
+      raw_sec_m=new St_raw_sec_m("raw_sec_m",NSECT); raw_data_tpc.Add(raw_sec_m);
+    }
   }
 
   // See "DAQ to Offline", section "Better example - access by padrow,pad",
@@ -668,13 +674,17 @@ int St_tpcdaq_Maker::Output() {
     SetGainCorrectionStuff(isect);
 #endif
     dataOuter[isect-1]=0; dataInner[isect-1]=0;
-    sector=raw_data_tpc(NameOfSector(isect));
-    if(!sector) {
-      raw_data_tpc.Mkdir(NameOfSector(isect));
+
+    if(daq_flag & 0x01) { // Herb Oct 2002 for DAQ100.  This is the switch which cuts 
+                           // off the old data in favor of the new online clusters.
       sector=raw_data_tpc(NameOfSector(isect));
+      if(!sector) {
+        raw_data_tpc.Mkdir(NameOfSector(isect));
+        sector=raw_data_tpc(NameOfSector(isect));
+      }
+      MkTables(isect,sector,&raw_row_in,&raw_row_out,&raw_pad_in,&raw_pad_out, 
+          &raw_seq_in,&raw_seq_out,&pixel_data_in,&pixel_data_out);
     }
-    MkTables(isect,sector,&raw_row_in,&raw_row_out,&raw_pad_in,&raw_pad_out, 
-        &raw_seq_in,&raw_seq_out,&pixel_data_in,&pixel_data_out);
     sectorStatus=getSector(isect);
     if(sectorStatus) continue;
     raw_row_gen=raw_row_out; raw_pad_gen=raw_pad_out; rowR=0; padR=0;
@@ -808,14 +818,138 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
  mTdr = new StTrsDetectorReader(mEvent); assert(mTdr);
  return 0;
 }
+unsigned short int St_tpcdaq_Maker::Swap2(char doSwap,unsigned short int x) {
+  char *hh,temp[2];
+  if(!doSwap) return x;
+  hh=(char*)(&x);
+  temp[0]=hh[1]; temp[1]=hh[0];
+  return *((unsigned short int*)temp);
+}
+unsigned int St_tpcdaq_Maker::Swap4(char doSwap,unsigned int x) {
+  char *hh,temp[4];
+  if(!doSwap) return x;
+  hh=(char*)(&x);
+  temp[0]=hh[3]; temp[1]=hh[2]; temp[2]=hh[1]; temp[3]=hh[0];
+  return *((unsigned int*)temp);
+}
+//________________________________________________________________________________
+char St_tpcdaq_Maker::WhetherToSwap(unsigned int x) {
+  if(x==0x04030201) return 0;
+  if(x==0x01020304) return 7;
+  assert(0);
+}
+//________________________________________________________________________________
+#define MAXPADROWSPERBANK 50
+void St_tpcdaq_Maker::DAQ100clTableOut(unsigned int sectorCntsFrom1,char swap,
+      const unsigned int *data) {
+  unsigned int wordNumber[MAXPADROWSPERBANK],npadrow,ipadrow;
+  unsigned int padrow,numClusters,icluster;
+  unsigned int numberOfClustersInPreviousChunk,numberOfWordsInPreviousChunk;
+  unsigned short int *pad,*time,*flag,*charge;
+  static int totalRowCount=0;
+
+  npadrow=Swap4(swap,*(data+0));
+  if(npadrow==0) return;
+
+  // Open the daq100cl root4star table for output in append mode.
+  daq100cl_st singlerow;
+  St_DataSetIter rootIterator(m_DataSet);
+  St_daq100cl *daq100cl = (St_daq100cl*) rootIterator("daq100cl");
+  if(!daq100cl) {
+    daq100cl=new St_daq100cl("daq100cl",1000); // bbb Chk num w/Valerie.
+    rootIterator.Add(daq100cl); totalRowCount=0;
+  }
+
+  // In preparation for intra-bank navigation, fill the array wordNumber[], which counts from 0.
+  // This array tells the word number of the data at which the chunk for a given row starts.
+  // See the discussion of TPCMZCLD in the DAQ format doc, at about page 17.
+  wordNumber[0]=1;
+  assert(npadrow<=MAXPADROWSPERBANK); // Protect against overfilling the array.
+  for(ipadrow=1;ipadrow<npadrow;ipadrow++) {
+    numberOfClustersInPreviousChunk = Swap4(swap,*(data+wordNumber[ipadrow-1]+1));
+    numberOfWordsInPreviousChunk = 2 * numberOfClustersInPreviousChunk + 2;
+    wordNumber[ipadrow] = wordNumber[ipadrow-1] + numberOfWordsInPreviousChunk;
+  }
+
+  // Now we have the array wordNumber[] and npadrow, which tells how many members the array has.
+  for(ipadrow=1;ipadrow<npadrow;ipadrow++) {
+    padrow=     Swap4(swap,*(data+wordNumber[ipadrow]  ));
+    numClusters=Swap4(swap,*(data+wordNumber[ipadrow]+1));
+    assert(numClusters>  0); // bbb Check this with Jeff.
+    assert(numClusters<200); // bbb Check this with Jeff.
+    for(icluster=0;icluster<numClusters;icluster++) {
+      pad=(unsigned short int*)(data+wordNumber[ipadrow]+2*icluster+2);
+      time=pad+1; flag=pad+2; charge=pad+3;
+
+      // At this point, we have all six of the columns ready for output to
+      // the root4star table, so let's do it.
+      singlerow.sector=sectorCntsFrom1; // Values of 1-24, not 0-23.
+      singlerow.row=padrow;
+      singlerow.pad=Swap2(swap,*pad);
+      singlerow.timebucket=Swap2(swap,*time);
+      singlerow.charge=Swap2(swap,*charge);
+      singlerow.flag=Swap2(swap,*flag);
+      daq100cl->AddAt(&singlerow,totalRowCount++); // bbb Ask Valerie whether there's a better way.
+    }
+  }
+}
+//________________________________________________________________________________
+void St_tpcdaq_Maker::DAQ100clOutput(const unsigned int *pTPCP) {
+  char swapTPCRBCLP,swapTPCSECLP,swapTPCSECP,swapTPCP,swapTPCMZCLD;
+  const unsigned int *pTPCSECP,*pTPCSECLP,*pTPCRBCLP,*pTPCMZCLD;
+  unsigned int imz,irb,format,offset,length,isec,numberOfPresentSectors=0;
+  assert(sizeof(unsigned int)==4); // Casting the pointer as uint* lets us avoid many *4's.
+  assert(sizeof(unsigned short int)==2);
+  swapTPCP=WhetherToSwap(*(pTPCP+5));
+
+  // Loop over the sectors.  For some reason, in a standard DAQ file 12 sectors are
+  // missing, with each of the 12 present sectors having two physical sectors.
+  for(isec=0;isec<24;isec++) {
+
+    // Navigate from the TPCP bank to the TPCSECP bank for this sector.
+    offset=Swap4(swapTPCP,*(pTPCP+10+2*isec  ));
+    length=Swap4(swapTPCP,*(pTPCP+10+2*isec+1));
+    if(length==0) continue; // This sector is missing, as noted above.
+    pTPCSECP=pTPCP+offset; assert(!strncmp((char*)pTPCSECP,"TPCSECP",7));
+    swapTPCSECP=WhetherToSwap(*(pTPCSECP+5));
+
+    // Navigate from TPCSECP to TPCSECLP, the first bank dedicated to online clusters.
+    offset=Swap4(swapTPCSECP,*(pTPCSECP+8)); if(offset==0) continue;
+    format=Swap4(swapTPCSECP,*(pTPCSECP+6)); if(format <2) continue;
+    pTPCSECLP=pTPCSECP+offset; assert(!strncmp((char*)pTPCSECLP,"TPCSECLP",8));
+    swapTPCSECLP=WhetherToSwap(*(pTPCSECLP+5));
+
+    // Loop over the 12 receiver boards, navigating from TPCSECLP to TPCRBCLP.
+    for(irb=0;irb<12;irb++) {
+      offset=Swap4(swapTPCSECLP,*(pTPCSECLP+10+2*irb  ));
+      length=Swap4(swapTPCSECLP,*(pTPCSECLP+10+2*irb+1));
+      if(length==0) continue;
+      pTPCRBCLP=pTPCSECLP+offset; assert(!strncmp((char*)pTPCRBCLP,"TPCRBCLP",8));
+      swapTPCRBCLP=WhetherToSwap(*(pTPCRBCLP+5));
+      // Loop over the 3 mezzanine boards, navigating from TPCRBCLP to TPCMZCLD.
+      for(imz=0;imz<3;imz++) {
+        offset=Swap4(swapTPCRBCLP,*(pTPCRBCLP+10+2*imz  ));
+        length=Swap4(swapTPCRBCLP,*(pTPCSECLP+10+2*imz+1));
+        if(length==0) continue;
+        pTPCMZCLD=pTPCSECLP+offset; assert(!strncmp((char*)pTPCMZCLD,"TPCMZCLD",8));
+        swapTPCMZCLD=WhetherToSwap(*(pTPCMZCLD+5));
+        DAQ100clTableOut(isec+1,swapTPCMZCLD,pTPCMZCLD+10); // Decodes data words of TPCMZCLD.
+      }
+    }
+
+    numberOfPresentSectors++;
+
+  }
+  assert(numberOfPresentSectors==12||numberOfPresentSectors==0);
+}
 //________________________________________________________________________________
 Int_t St_tpcdaq_Maker::Make() {
-  int errorCode;
-  printf("I am Ronald McDonald. (Mar 7 2000).  St_tpcdaq_Maker::Make().\n"); 
+  int errorCode; const char *pTPCP;
+  printf("I am Perry Mason. (Oct 12 2002).  St_tpcdaq_Maker::Make().\n"); 
   mErr=0;
   errorCode=GetEventAndDecoder();
   if(m_Mode != 1) { victor=victorPrelim->getTPCReader(); assert(victor); }
-  printf("GetEventAndDecoder() = %d\n",errorCode);
+  // printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
     PP("Error: St_tpcdaq_Maker no event from TRS (%d).\n",errorCode);
     return kStErr;
@@ -824,6 +958,15 @@ Int_t St_tpcdaq_Maker::Make() {
   if(Output()) {
     PP("St_tpcdaq_Maker has detected .daq file corruption.  Skip this event.\n");
     return kStErr; // See comment 66f.
+  }
+  if(daq_flag & 0x02) { // Herb Oct 2002 for DAQ100.
+    if(m_Mode != 1) {
+      pTPCP=(const char*)(victor->ptrTPCP); // StDaqLib's memory.  We have been set up as
+         // a friend class to StDaqLib.  Let's be worthy of the trust and
+         // use "const" to help us avoid modification of this borrowed memory.
+      assert(pTPCP[0]=='T'&&pTPCP[1]=='P'&&pTPCP[2]=='C'&&pTPCP[3]=='P');
+      DAQ100clOutput((const unsigned int*)pTPCP);
+    }
   }
   if(mErr) {
     PP("St_tpcdaq_Maker failed with error code %d.\n",mErr);
