@@ -34,6 +34,7 @@ typedef enum {
 class St_DataSet : public TNamed
 {
  friend class St_DataSetIter;
+ friend class St_DataSetTree;
  protected:
     TObject     *fMother; // pointer to mother of the directory
     TList       *fList;   // List of the the the objects included into this dataset
@@ -63,6 +64,7 @@ class St_DataSet : public TNamed
     virtual EDataSetPass Pass(EDataSetPass ( *callback)(St_DataSet *),Int_t depth=0);
 
     virtual void        Remove(St_DataSet *set);
+    virtual void        Shunt(St_DataSet *dataset);
     ClassDef(St_DataSet,1)
 };
  
@@ -121,6 +123,11 @@ public:
   virtual Int_t          Rmdir(St_DataSet *dataset,Option_t *option="");
   virtual Int_t          Rmdir(const Char_t *dirname,Option_t *option=""){return Rmdir(Next(dirname),option);}
   virtual Int_t          Rd(const Char_t *dirname,Option_t *option=""){return Rmdir(Next(dirname),option);}
+ 
+  virtual St_DataSet    *Shunt(St_DataSet *set){return Shunt(set,(St_DataSet *)0);}
+  virtual St_DataSet    *Shunt(St_DataSet *set, const Char_t *path);
+  virtual St_DataSet    *Shunt(St_DataSet *set, St_DataSet *dataset);
+ 
   virtual St_DataSet    *Next();
   virtual St_DataSet    *Next(const Char_t *path, St_DataSet *rootset=0,Bool_t mkdir=kFALSE);
   const Option_t *GetOption() const { return fNext ? fNext->GetOption():0; }

@@ -1,7 +1,13 @@
 //*-- Author :    Valery Fine   24/03/98
+// $Id: St_Module.cxx,v 1.4 1998/08/25 23:07:24 didenko Exp $
+// $Log: St_Module.cxx,v $
+// Revision 1.4  1998/08/25 23:07:24  didenko
+// New base with Tree
+//
 
 #include <string.h>
 #include "St_Module.h"
+#include "table_header.h" 
 
 ClassImp(St_Module)
 
@@ -309,6 +315,50 @@ Int_t St_Module::CheckParameters(const Char_t *names[])
        }
    }
    return errcode;
+}
+//______________________________________________________________________________
+Int_t St_Module::CheckResults(Int_t res, const Char_t *names[])
+{
+   Int_t errcode = 0;
+   if (st_Params) {
+     Int_t headfl = 1;
+     for (Int_t i=0;i<fN;i++) {
+       if (headfl==1){
+          Bool_t bug = kFALSE;
+       // Check header 
+        table_head_st *h = (table_head_st *)st_Params[i];
+
+        if (h->nok > h->maxlen){
+           res = kFALSE; 
+           errcode++;
+           bug = kTRUE;
+        }
+#if 0
+        else if (h->nok == h->maxlen && h->maxlen != 1) {
+           errcode++;  
+           bug = kTRUE;
+        } 
+#endif
+        if (errcode && bug) {
+          if (errcode == 1) 
+                 fprintf(stderr,
+                 "\n \t ***** module  <%s>  returned the corrupted table *****\n \t * The number of the used rows more (or equal) of the allocated ones *\n"
+                               ,GetName()); 
+          Char_t *suffix[4]={"st","nd","rd","th"};
+          Char_t *title[2] = {"table","table"};
+          Int_t  odd = i>>1;
+          Int_t indx = (odd+1)%10;
+          if ( (10 < odd && odd < 20) || indx > 3 || indx == 0) indx = 4;
+          indx--;
+          const Char_t *name = names ? names[odd] : "unknown" ;
+          fprintf(stderr, "\t %i-%s <%s> %s has used %d with %d allocated\n"
+                   ,odd+1,suffix[indx],name,title[i&1],h->nok,h->maxlen);
+        }
+       }
+       headfl = -headfl;
+     }
+   }
+   return res;
 }
 //______________________________________________________________________________
 Int_t St_Module::ExecuteModule()
