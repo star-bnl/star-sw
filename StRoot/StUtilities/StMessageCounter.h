@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.h,v 1.7 1999/06/30 17:24:50 genevb Exp $
+// $Id: StMessageCounter.h,v 1.8 1999/07/17 00:23:24 genevb Exp $
 // $Log: StMessageCounter.h,v $
+// Revision 1.8  1999/07/17 00:23:24  genevb
+// Fixed bug when option fields are empty in FORTRAN, and let type limits be set before types are even added
+//
 // Revision 1.7  1999/06/30 17:24:50  genevb
 // Better limit management, remove Bool_t
 //
@@ -50,6 +53,8 @@ class StMessageCounter : public ostrstream {
    StMessTypeList* messTypeList;
    const char* limitMessage;
    int yesLimits;
+   messCharVecIter curString;
+   size_t index;
 
  protected:
    StMessageCounter();
@@ -59,6 +64,8 @@ class StMessageCounter : public ostrstream {
    messCharVec limitList;
    intVector limitNList;
    intVector limitNCountList;
+   messCharVec limitWList;
+   intVector limitWCountList;
  
  public:
    ~StMessageCounter();
@@ -66,7 +73,7 @@ class StMessageCounter : public ostrstream {
       void SetLimit(char* str, int n=0);
        int GetLimit(char* str);
       void ListLimits();
-      void AddType();
+      void AddType(const char* type);
        int CheckLimit(char* mess, const char* type);
 };
 
