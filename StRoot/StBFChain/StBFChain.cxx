@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.445 2004/09/18 02:10:20 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.446 2004/10/19 23:17:17 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -431,14 +431,6 @@ Bfc_st BFC1[] = { // standard chains
 
 
 
-  {"emcY2"             ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
-                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
-  {"emcSim"   ,"emcRaw","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
-                                                                           "New simulator for BEMC",kFALSE},
-  {"emcDY2"   ,"",""                 ,"db,StEvent,EmcUtil,PreEcl,Epc","StEmcADCtoEMaker","StEmcADCtoEMaker",
-                                                                                    "EMC raw chain",kFALSE},
-
-
   {"global"      ,"globalChain","","globT,Match,vertex,primary,dst,SCL,dEdxY2"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
@@ -501,6 +493,17 @@ Bfc_st BFC1[] = { // standard chains
   {"sce"         ,"","",""                        ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker",
                                                                                 "... SSD Evaluator",kFALSE},
 
+
+  {"emcY2"    ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
+                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
+  {"emcSim"   ,"","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
+                                                                           "New simulator for BEMC",kFALSE},
+  {"emcDY2"   ,"emcRaw","emcY2","daq,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
+                                                               "EMC raw data interface for B/E EMC",kFALSE},
+  {"emcAtoE"  ,"","" ,"db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker", "B-EMC ADC to E converter",kFALSE},
+
+
+
   {"Kink2"       ,"kink2","","db,MuDST,-kink","StKinkMaker","StSecondaryVertexMaker",
                                                                           "Find Kinks from StEvent",kFALSE},
   {"V02"         ,"v02","","db,MuDST,-V0","StV0FinderMaker","StSecondaryVertexMaker",
@@ -516,9 +519,8 @@ Bfc_st BFC1[] = { // standard chains
 
 
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,PreEcl,EmcUtil"      ,"StMaker","StChain","",kFALSE},
-  {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
-
-  {"Epc"         ,"epc","PostChain","PreEcl,EmcUtil"                  ,"StEpcMaker","StEpcMaker","",kFALSE},
+  {"PreEcl"      ,"preecl","PostChain","" ,"StPreEclMaker",  "StPreEclMaker","B-EMC Cluster finder",kFALSE},
+  {"Epc"         ,"epc","PostChain","PreEcl,EmcUtil" ,"StEpcMaker","StEpcMaker","B-EMC point maker",kFALSE},
 
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
 
@@ -785,10 +787,10 @@ Bfc_st BFC2[] = { // ITTF Chains
   //  there is no PreVtx in tpcI so no need to do -PreVtx for pp chain
   //  SVT is added as base default, svtIT in chains
   {"P2004"       ,"" ,"",
-                   "B2004,fcf,VFMinuit,l3onl,ToF,emcDY2,eemcD,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr4,OSpaceZ2",
+                   "B2004,fcf,VFMinuit,l3onl,ToF,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr4,OSpaceZ2",
               "","","Production chain for 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
   {"pp2004"      ,"" ,"",
-  "B2004,fcf,ppOpt,VFppLMV5,CtbMatchVtx,l3onl,ToF,emcDY2,eemcD,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr4,OSpaceZ2",
+  "B2004,fcf,ppOpt,VFppLMV5,CtbMatchVtx,l3onl,ToF,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr4,OSpaceZ2",
              "","","Production chain for 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
 
@@ -1040,12 +1042,6 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Est"         ,"","svtChain","globT"              ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
 
 
-  {"emcY2"             ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
-                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
-  {"emcSim"   ,"emcRaw","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
-                                                                           "New simulator for BEMC",kFALSE},
-  {"emcDY2"   ,"",""                 ,"db,StEvent,EmcUtil,PreEcl,Epc","StEmcADCtoEMaker","StEmcADCtoEMaker",
-                                                                                    "EMC raw chain",kFALSE},
   //  Reminder: You are within the ITTF chain definitions
   {"global"      ,"globalChain","","globT,Match,vertex,primary,dst,SCL,dEdxY2"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
@@ -1060,6 +1056,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"V0"         ,"v0","globalChain","SCL,globT,tls" ,"StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Xi"         ,"xi","globalChain","SCL,globT,tls" ,"StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Kink","kink","globalChain","SCL,globT,tls","StOldKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
+
+
 
   {"Fglobal"     ,"","","","",""                                         ,"OBSOLETE option Fglobal",kFALSE},
   {"Fprimary"    ,"","","","",""                                        ,"OBSOLETE option Fprimary",kFALSE},
@@ -1117,6 +1115,16 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"sce"         ,"","",""                        ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker",
                                                                                 "... SSD Evaluator",kFALSE},
 
+
+  {"emcY2"    ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
+                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
+  {"emcSim"   ,"","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
+                                                                           "New simulator for BEMC",kFALSE},
+  {"emcDY2"   ,"emcRaw","emcY2","daq,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
+                                                               "EMC raw data interface for B/E EMC",kFALSE},
+  {"emcAtoE"  ,"","","db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker",  "B-EMC ADC to E converter",kFALSE},
+
+
   //  Reminder: You are within the ITTF chain definitions
   {"Kink2"       ,"kink2","","db,MuDST,-kink","StKinkMaker","StSecondaryVertexMaker",
                                                                           "Find Kinks from StEvent",kFALSE},
@@ -1132,10 +1140,11 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                          "Determine EbyE SpaceCharge using StEvent",kFALSE},
 
 
-  {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,PreEcl,EmcUtil",      "StMaker","StChain","",kFALSE},
-  {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
 
-  {"Epc"         ,"epc","PostChain","PreEcl,EmcUtil"                  ,"StEpcMaker","StEpcMaker","",kFALSE},
+
+  {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,PreEcl,EmcUtil",      "StMaker","StChain","",kFALSE},
+  {"PreEcl"      ,"preecl","PostChain","" ,"StPreEclMaker",  "StPreEclMaker","B-EMC Cluster finder",kFALSE},
+  {"Epc"         ,"epc","PostChain","PreEcl,EmcUtil" ,"StEpcMaker","StEpcMaker","B-EMC point maker",kFALSE},
 
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
 
@@ -1144,6 +1153,8 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                                               "EEMC fast simulator",kFALSE},
   {"eemcD"       ,"eeRaw","","eemcDb,EEmcUtil",                         "StEEmcDataMaker","StEEmcDataMaker",
                                                                                   "EEMC data maker",kFALSE},
+
+
 
   // Reminder: You are within the ITTF chain definitions
   {"rich"        ,"RichChain","","rch,RichPiD,RichSpectra",        "StMaker","StChain","RICH chain",kFALSE},
