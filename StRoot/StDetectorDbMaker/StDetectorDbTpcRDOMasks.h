@@ -3,7 +3,13 @@
 
 #include "StMaker.h"
 
+#ifdef sun
+#include <iostream.h>
+#endif
+
+#ifndef sun
 class ostream;
+#endif
 class TTable;
 struct tpcRDOMasks_st;
 

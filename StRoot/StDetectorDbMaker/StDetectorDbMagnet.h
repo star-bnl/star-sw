@@ -3,7 +3,13 @@
 
 #include "StMaker.h"
 
-class  ostream;
+#ifdef sun
+#include <iostream.h>
+#endif
+
+#ifndef sun
+class ostream;
+#endif
 class  TTable;
 struct starMagOnl_st;
 

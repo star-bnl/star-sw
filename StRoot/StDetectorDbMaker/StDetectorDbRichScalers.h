@@ -3,7 +3,13 @@
 
 #include "StMaker.h"
 
-class  osstream;
+#ifdef sun
+#include <iostream.h>
+#endif
+
+#ifndef sun
+class ostream;
+#endif
 struct trigDetSums_st;
 struct richvoltages_st;
 struct y1Mult_st;
