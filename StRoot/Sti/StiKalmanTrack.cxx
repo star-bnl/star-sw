@@ -689,3 +689,23 @@ bool  StiKalmanTrack::isPrimary() const
 {
   return true; // for now - this must be fixed!!!!!!!!!
 }
+
+///return hits;
+vector<StHit*> StiKalmanTrack::stHits() const
+{
+    StiKalmanTrackNode* leaf = getLastNode();
+    StiKTNForwardIterator it(leaf);
+    StiKTNForwardIterator end = it.end();
+
+    vector<StHit*> hits;
+    
+    while (it!=end) {
+	const StiKalmanTrackNode& node = *it;
+	StiHit* hit = node.getHit();
+	if (hit) {
+	    hits.push_back( const_cast<StHit*>( hit->stHit() ) );
+	}
+	++it;
+    }
+    return hits;
+}

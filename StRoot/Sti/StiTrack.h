@@ -3,6 +3,8 @@
 
 //std
 #include <math.h>
+#include <vector>
+using namespace std;
 
 //SCL
 #include "StThreeVector.hh"
@@ -13,6 +15,7 @@
 
 class StiHit;
 class StiTrackFitter;
+class StHit;
 
 class StiTrack 
 {
@@ -99,7 +102,10 @@ public:
     //Flag:
     void setFlag(long v) {mFlag = v;}
     long getFlag() const {return mFlag;}
-  
+
+    ///return hits;
+    virtual vector<StHit*> stHits() const=0;
+
     
 protected:
     static StiTrackFitter * trackFitter;
