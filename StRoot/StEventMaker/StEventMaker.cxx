@@ -44,7 +44,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.66 2004/02/14 19:25:27 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.67 2004/04/12 16:48:21 ullrich Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -333,6 +333,23 @@ StEventMaker::makeEvent()
     dst_L1_Trigger_st* dstL1Trigger    = mEventManager->returnTable_dst_L1_Trigger(nrows);
 
     //
+    // Get trgStructure structures from StTriggerDataMaker
+    // and store them in StEvent. Note that they are need
+    // pior to creating the old StTriggerDetectorCollection
+    // since the latter uses StTriggerData at construction. 
+    //
+    if (!mCurrentEvent->triggerData()) {
+	TObjectSet *os = (TObjectSet*)GetDataSet("StTriggerData");
+	if (os) {
+	    StTriggerData* pTrg = (StTriggerData*)os->GetObject();
+	    Assert(pTrg); 		// wrong, empty data
+	    Assert(os->IsOwner()); 	// wrong, data allready taken
+	    os->DoOwner(0); 	        //change ownership
+	    mCurrentEvent->setTriggerData(pTrg);
+	}
+    }
+
+    //
     //  year 2001, 2002: use TrgDet tables
     //  year >= 2003: use info from StTriggerData
     //  Long term: get rid of StTriggerDetectorCollection
@@ -352,23 +369,6 @@ StEventMaker::makeEvent()
 
     if (dstL0Trigger && dstL1Trigger && !mCurrentEvent->l1Trigger())
 	mCurrentEvent->setL1Trigger(new StL1Trigger(*dstL0Trigger, *dstL1Trigger));
-
-
-    //
-    // Get trgStructure from StTriggerDataMaker and put it into StEvent
-    //
-    if (!mCurrentEvent->triggerData()) {//no trigger data yet
-
-      TObjectSet *os = (TObjectSet*)GetDataSet("StTriggerData");
-      if (os) {// found trigger data
-        StTriggerData* pTrg = (StTriggerData*)os->GetObject();
-        Assert(pTrg); 		//Wrong, empty data
-        Assert(os->IsOwner()); 	//Wrong, data allready taken
-        os->DoOwner(0); 	//change ownership
-        mCurrentEvent->setTriggerData(pTrg);
-      }// end of found trigger data
-    }//end of no trigger data yet
-
     
     //
     //  Trigger ID summary
@@ -1649,8 +1649,13 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.66 2004/02/14 19:25:27 perev Exp $
+ * $Id: StEventMaker.cxx,v 2.67 2004/04/12 16:48:21 ullrich Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.67  2004/04/12 16:48:21  ullrich
+ * Fixed bug in creating StTriggerDetectorCollection. StTriggerData
+ * needs to be instantiated and added before StTriggerDetectorCollection
+ * gets constructed.
+ *
  * Revision 2.66  2004/02/14 19:25:27  perev
  * More strong check for secondaries objects
  *
