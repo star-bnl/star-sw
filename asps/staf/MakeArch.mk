@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.5  1998/04/06 00:00:52  fisyak
+#  hpux modification
+#
 #  Revision 1.4  1998/04/02 21:40:50  fisyak
 #  Add grep
 #
@@ -29,8 +32,97 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/04/02 21:40:50 $ 
+#             Last modification $Date: 1998/04/06 00:00:52 $ 
 #. default setings
+#include $(STAF_HOME)/MakeEnv.mk
+#
+#	Determine Make variables
+ALL_TAGS = $@
+ALL_DEPS = $^
+1ST_DEPS = $<
+NEW_DEPS = $?
+FUL_DEPS = $+
+STEM     = $*
+
+#
+# Current Working Directory
+#
+  CWD := $(shell pwd)
+
+#
+# Determine STAF main env variables.
+#
+ifndef STAF_HOME
+  STAF_HOME := $(CWD)
+endif
+
+ifndef STAF_SYS_LEVEL
+   STAF_SYS_LEVEL := dev
+endif
+# 	
+#
+# Determine STAF_ARCH variable.
+#
+ifndef STAF_ARCH
+   STAF_ARCH := $(shell sys)
+endif
+#
+
+UNAMES := $(shell uname -s)
+UNAMER := $(shell uname -r)
+ifneq (HP-UX,$(UNAMES))
+UNAMEP := $(shell uname -p)
+endif
+UNAMESRP := $(UNAMES)_$(UNAMER)_$(UNAMEP)
+#
+# Determine TULL_ARCH variable.
+#
+TULL_ARCH := unknown
+ifeq (AIX,$(UNAMES))
+  TULL_ARCH := aix
+endif        
+
+ifeq (HP-UX,$(UNAMES))
+  TULL_ARCH := hpux
+override UNAMES := HPUX
+endif        
+
+ifeq (IRIX_4,$(findstring IRIX_4,$(UNAMESRP)))
+  TULL_ARCH := irix
+endif        
+
+ifeq (IRIX_5,$(findstring IRIX_5,$(UNAMESRP)))
+  TULL_ARCH := irix
+endif        
+
+ifeq (IRIX64,$(UNAMES))
+  TULL_ARCH := irix64
+endif        
+
+ifeq (Linux,$(UNAMES))
+  TULL_ARCH := linux
+endif        
+
+ifeq (OSF1,$(UNAMES))
+  TULL_ARCH := osf1
+endif        
+
+ifeq (SunOS_4,$(findstring SunOS_4,$(UNAMESRP)))
+  TULL_ARCH := sun4
+endif        
+
+ifeq (SunOS_5,$(findstring SunOS_5,$(UNAMESRP)))
+  ifeq (86,$(findstring 86,$(UNAMEP))) 
+    TULL_ARCH := sun4os5pc
+  else
+    TULL_ARCH := sun4os5
+  endif        
+endif        
+
+
+
+
+
 GREP := grep
 #GCC := /afs/rhic/opt/rhic/bin/gcc
 GCC      :=  gcc
@@ -92,7 +184,8 @@ ifndef PGI_dummy
   CFLAGS   := -fPIC -Dlynx -ansi
   LDFLAGS  := 
   SOFLAGS  := -shared 
-  CLIBS    := -L/usr/X11R6/lib -lXm -lXpm _-lXt -lXext -lX11 -lg++ -lm -ldl -rdynamic
+  CLIBS    := -L/usr/X11R6/lib -lXpm -lXt -lXext -lX11 -lg++ -lm -ldl -rdynamic
+# CLIBS    := -L/usr/X11R6/lib -lXm -lXpm -lXt -lXext -lX11 -lg++ -lm -ldl -rdynamic
   FLIBS    := -lU77
   FFLAGS   := -export -dynamic -fno-second-underscore -e
 #              -w -Nx800 -NC200 
@@ -159,7 +252,9 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
     FFLAGS  += +DAportable +U77 +ppu +B +Z +es 
     LDFLAGS := -z -Wl,+s -Wl,-E 
     SOFLAGS := -b -z -Wl,+vnocompatwarnings 
-    CLIBS   := -lXm -lXt -lX11 -lm -lPW -ldld
+    CLIBS   := -lm -lPW -ldld
+#   CLIBS   := -L/usr/lib/Motif1.2 -lXm -lXt -lX11 -lm -lPW -ldld
+#   CLIBS   := -lm -lPW -ldld
     SOEXT   := sl
     FLIBS   := /opt/fortran/lib/libU77.a 
     CFLAGS  += 

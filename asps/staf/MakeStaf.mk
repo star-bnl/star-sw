@@ -7,7 +7,6 @@ endif
 ###	Suppress all imlicit rules
 .SUFFIXES:
 
-include $(STAF_HOME)/MakeEnv.mk
 include $(STAF_HOME)/MakeArch.mk
 
 #
@@ -90,3 +89,4 @@ show:
 	@echo ASPSLIB     := $(ASPSLIB)
 	@echo INC_GEN_DIR := $(INC_GEN_DIR)
 	@echo GREP        := $(GREP)
+	@echo STAF_ARCH   := $(STAF_ARCH)
