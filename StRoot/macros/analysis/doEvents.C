@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.3 1999/02/16 18:15:48 fisyak Exp $
+// $Id: doEvents.C,v 1.4 1999/02/20 05:39:24 wenaus Exp $
 // $Log: doEvents.C,v $
-// Revision 1.3  1999/02/16 18:15:48  fisyak
-// Check in the latest updates to fix them
+// Revision 1.4  1999/02/20 05:39:24  wenaus
+// turn off TBrowser (gives bus errors) and don't count run header as an event
+//
+// Revision 1.4  1999/02/20 05:39:24  wenaus
+// turn off TBrowser (gives bus errors) and don't count run header as an event
 //
 // Revision 1.3  1999/02/16 18:15:48  fisyak
 // Check in the latest updates to fix them
@@ -48,6 +51,8 @@ St_DataSetIter* nextXdf;
 class St_XDFFile;
 St_XDFFile *theFile = 0;
 TString  originalPath;
+class StChain;
+const char *xdfFile ="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf";
 // If you specify a path, all *dst.xdf files below that path will be
 
 // If 'file ends in '.xdf', XDF DSTs are searched for.
@@ -71,8 +76,6 @@ void doEvents(const Int_t nevents=999,
   gSystem->Load("StEventReaderMaker");
 //  gSystem->Load("StEventReaderMaker");
 //  gSystem->Load("St_geom_Maker");
-  TBrowser *b=0;
-
   // Set up the chain
   StChain chain("StChain");
   // Maker to read events from file or database into StEvent
@@ -94,6 +97,7 @@ void doEvents(const Int_t nevents=999,
 
     // Event loop
     for (Int_t i=1; i<=nevents; i++) {
+      if (i == 1) chain.Make(0); // Read the run header
       cout << "============================ Event " << i << " start" << endl;
       if (chain.Make(i)) break;
       cout << "============================ Event " << i << " finish" << endl;
@@ -103,7 +107,7 @@ void doEvents(const Int_t nevents=999,
      chain->Clear();
     chain.Finish();
   if (nevents > 1) {
-    if (!b) b = new TBrowser;
+    // results in bus errors at present // if (!b) b = new TBrowser;
       //       gROOT->LoadMacro("PadControlPanel.C");
 }
 
