@@ -97,7 +97,7 @@ show
 
   
   // now we add Makers to the chain...  some of that is black magic :) 
-  muDstMaker = new StMuDstMaker(0,0,inpDir,inpFile,"MuDst.root",nFiles);  // muDST main chain
+  muDstMaker = new StMuDstMaker(0,0,inpDir,inpFile,"",nFiles);  // muDST main chain
   StMuDbReader  *db          = StMuDbReader::instance();                        // need the database
   StEEmcDbMaker *eemcDbMaker =new StEEmcDbMaker("eemcDb");                      // need EEMC database  
   St_db_Maker   *dbMk        = new St_db_Maker("StarDb", "MySQL:StarDb");       // need the database (???)
