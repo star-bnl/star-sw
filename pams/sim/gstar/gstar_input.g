@@ -1,6 +1,11 @@
-* $Id: gstar_input.g,v 1.37 2000/08/10 23:55:40 nevski Exp $
+* $Id: gstar_input.g,v 1.38 2003/05/14 23:00:54 potekhin Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.38  2003/05/14 23:00:54  potekhin
+* This is an adapter that reads external event
+* file. This has been upgraded to propagate event
+* record data such as the number of binary collisions etc.
+*
 * Revision 1.37  2000/08/10 23:55:40  nevski
 * rqmd-type cwn accepted
 *
@@ -43,7 +48,7 @@
 *
    subroutine gstar_input
 +CDE,typing,gcnum.
-   print *,' All Gstar User Input formats are activated (XDF,TX,FZ,St,MM,Nt)'
+   print *,' Not All Gstar User Input formats are activated (XDF,TX,FZ,St,MM,Nt)'
    print *,' Automatic recognition uses the first letter of a file extension'
 *  print *,' To activate XDF format readout do " gexec gstar_readxdf " '
    end
@@ -151,7 +156,7 @@
 *
    o=CHAR(0)
    Call HEPEVNT
-*  print *,' AGUSREAD: doing input command :',Ccommand
+  print *,' AGUSREAD: doing input command :',Ccommand
    Do i=1,LENOCC(Ccommand)
      C=CCOMMAND(i:i);  Igate=i;  J=0;
 
@@ -316,7 +321,7 @@ c ---- Column-Wise-Ntuples ----
 *************************************************************************
    Subroutine    gstar_ReadNT(Igate)
    implicit      none
-+CDE,GCUNIT,GCFLAG.
++CDE,GCBANK,GCUNIT,SCLINK,GCFLAG.
 *
    Integer           Igate,Irec,InEvent,NnEvent,NpHEP,IdEvHep(5)
    Real              CT/3.e11/,Comp(4)/4*0/,Hpar(4)/4*0/
@@ -329,7 +334,7 @@ c ---- Column-Wise-Ntuples ----
                                                    Vxyz(3),Vtime
 *
    Integer           Id/999/,StartVx/0/,Ubuf/0/,num(4),
-                     Ge_pid,nin,nv,nt,ier,L,Ia,i             
+                     Ge_pid,nin,nv,nt,ier,L,Ia,i,k
    Character         CWD*20, Cform*8/'/6I 9F'/
    Logical           First/.true./
 *
@@ -346,13 +351,13 @@ c ---- Column-Wise-Ntuples ----
        Call HBNAME (id+Igate*1000,'particle',Ip,'$SET'  )
        InEvent=0
    endif
-* 
+*        all banks are already booked, so just fill them
    Nin=0
    Loop
    {  Irec(Igate)+=1; 
       Call HGNT(Id+Igate*1000,Irec(Igate),ier); if (ier!=0) goto :err:;
 
-      if Istat>10 
+      if Istat>10 & ipdg>999990
       {
         if ipdg=999999
         {
@@ -361,17 +366,24 @@ c ---- Column-Wise-Ntuples ----
            NpHEP=ip;  Num = {1,Igate,1,NpHep+1 }
            do i=1,5   { IdEvHep(i) = Pxyz(i);  }
            Call REBANK('/EVNT/GENE/GENT.GENT',num,15,L,ia)
+           if L<=0 {print *,' READ_NT error: cant find GENT bank'; goto :err:;}
            * print *,' Rebank done with L,ia = ',L,ia
         }
-        elseif ipdg=999998 { call Ucopy(Pxyz,Hpar,4) }
-        elseif ipdg=999997 { call Ucopy(Pxyz,Comp,4) }
-        else   { print *,' Yet unknown HEP header '  }
+        elseif ipdg=999998 {call Ucopy(Pxyz,Hpar,  4)}
+        elseif ipdg=999997 {call Ucopy(Pxyz,Comp,  4)}
+        elseif ipdg<=999996{k=999997-ipdg;
+          Call REBANK('/EVNT/PASS/MPAR',num,4*(k+1),L,ia)
+          if L<=0 {print *,' READ_NT error: cant find MPAR bank'; goto :err:;}
+          do i=1,4 { IQ(L+4*k+i)=Pxyz(i); }
+        }
+        else {print *,' Yet unknown HEP header '}
 
         Call Ucopy  (IdEvHep,Moth,4)
         Call Ucopy  (Hpar,   Pxyz,4)
         Call Ucopy  (Comp,   Vxyz,4)
         Ip=0; Nin=0; mass=IdEvHep(5)
       }
+
       if (InEvent<NnEvent) Next;  
       Nin+=1; num(3)=Nin;  
       Call RbSTORE ('/EVNT/GENE/GENT*',num,Cform,15,istat)
@@ -593,10 +605,13 @@ Replace [READ[DIGIT](#)#;] with _
 
  Old Structure GENT {int IstHEP, int IdHEP, int JmoHEP(2), int JdaHEP(2),
                      PHEP(3), ENER, MASS, VHEP(3), TIME }
+ structure     MPAR { int Version, int SUBPR, int Nbin,
+                      int NWE, int NWW, int Njets }
 
      If (LkEvnt==0) Call MZBOOK(IxDIV,LKAR P2,LkEvnt, 1,'EVNT',2,2,7,2,0)
 
      IrbDIV=IxDIV;         LKARP2=LkEvnt
+*
      Fill /EVNT/PASS(1)  ! Pass Record Bank
         SYS1 = 1         !  Format flag
         SYS2 = 1         !  Member system word = 100000*NG+NM NGEN 
@@ -605,7 +620,16 @@ Replace [READ[DIGIT](#)#;] with _
         GJID = 1         !  Generator Job ID.
         EVID = 1         !  ZEBRA IDN of event read in or generated
      endfill
-
+***
+     Fill /EVNT/PASS/MPAR ! event generator parameters
+        Version = 2      ! bank format version, 1 was just subprocess
+        SUBPR   = 0      ! pythia subprocess
+        Nbin    = 0      ! number of binary collisons
+        NWE     = 0      ! number of wounded nucleons in the east nucleus
+        NWW     = 0      ! number of wounded nucleons in the west nucleus
+        NJETS   = 0      ! number of jets
+     endfill
+***
      IrbDIV=IxDIV;         LKARP2=LkEvnt
      Fill /EVNT/GENE(1)  ! GENZ Event Bank  
        SYS1 =     1      !  Format flag = 1
@@ -621,7 +645,7 @@ Replace [READ[DIGIT](#)#;] with _
        WTFL =     1      !  Interaction weight flag
        WEIG =  1.00      !  Interaction weight  
      endfill
- 
+*** 
      IrbDIV=IxDIV;             LKARP2=LkEvnt
      Fill /EVNT/GENE/GENT(1) ! HEPEVT parton level data 
        IstHEP  =   0     !  Status flag
