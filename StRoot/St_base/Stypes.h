@@ -15,6 +15,9 @@
  *                                                                      
  */
 #ifndef ST_NO_NAMESPACES
+#ifdef __DECCXX
+namespace std {};
+#endif
 using namespace std;
 #endif
 
