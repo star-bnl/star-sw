@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.4 2005/03/08 21:56:42 porter Exp $
+ * $Id: StEStructSupport.cxx,v 1.5 2005/03/28 22:10:51 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -90,10 +90,13 @@ StEStructSupport::StEStructSupport(TFile* tf, int bgmode, float* npairs, float n
     mnpairs = new float[6];
     for(int i=0;i<6;i++)mnpairs[i]=npairs[i];
   }
-
+  else mnpairs = 0;
 }
 
-StEStructSupport::~StEStructSupport(){ if(mtmpString) delete [] mtmpString; };
+StEStructSupport::~StEStructSupport(){ 
+  if(mtmpString) delete [] mtmpString; 
+  if(mnpairs) delete [] mnpairs; 
+};
 
 //---------------------------------------------------------
 TH1** StEStructSupport::getHists(const char* name){
@@ -596,6 +599,9 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.5  2005/03/28 22:10:51  msd
+ * Fixed initialization of npairs
+ *
  * Revision 1.4  2005/03/08 21:56:42  porter
  * fixed bug in StEStructHAdd.cxx and added diagnostic option in ptcorrelations to
  * view individual terms separately
