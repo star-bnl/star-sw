@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.10 2000/08/04 21:03:45 perev Exp $
+// $Id: StFlowEvent.h,v 1.11 2000/08/05 21:21:33 fisyak Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.11  2000/08/05 21:21:33  fisyak
+// hide from CINT inline functions
+//
 // Revision 1.10  2000/08/04 21:03:45  perev
 // Leaks + Clear() cleanup
 //
@@ -143,7 +146,7 @@ private:
 
   ClassDef(StFlowEvent,1)                    // macro for rootcint
 };
-
+#ifndef __CINT__
 inline StFlowTrackCollection* StFlowEvent::TrackCollection() const {
   return pTrackCollection; }
 
@@ -187,5 +190,6 @@ inline void StFlowEvent::SetPiMinusCut(Float_t lo, Float_t hi) {
 inline void StFlowEvent::SetProtonCut(Float_t lo, Float_t hi) { 
   mProtonCuts[0] = lo; mProtonCuts[1] = hi; }
 
+#endif
 #endif
 
