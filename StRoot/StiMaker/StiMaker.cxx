@@ -67,6 +67,8 @@ ostream& operator<<(ostream&, const StiHit&);
 ClassImp(StiMaker)
   
 StiMaker::StiMaker(const Char_t *name) : StMaker(name),
+					 //names
+					 mEvalFileName("empty"),
 					 //flags
 					 mSimulation(false), mUseGui(true),
 					 mDoTrackFit(true), mSeedFinderType(kUndefined),
@@ -85,7 +87,8 @@ StiMaker::StiMaker(const Char_t *name) : StMaker(name),
 					 //Tracker
 					 mtracker(0),
 					 //Members
-					 mevent(0), mMcEventMaker(0), mAssociationMaker(0)
+					 mevent(0), mMcEventMaker(0),
+					 mAssociationMaker(0)
 {
     cout <<"StiMaker::StiMaker()"<<endl;
     sinstance = this;
@@ -182,7 +185,8 @@ Int_t StiMaker::Finish()
 Int_t StiMaker::Init()
 {
     //The Display
-    mdisplay = StiDisplayManager::instance(); //Must come before anything that you want to be drawn
+    mdisplay = StiDisplayManager::instance();
+    //Must come before anything that you want to be drawn
     mdisplay->cd();
 
     //The track store
@@ -198,16 +202,19 @@ Int_t StiMaker::Init()
 
     //The Evalualbe Track Factory
     if (mUseGui==true) {
-	mtrackfactory = new StiRDEvaluableTrackFactory("StiRDEvaluableTrackFactory");
+	mtrackfactory =
+	    new StiRDEvaluableTrackFactory("StiRDEvaluableTrackFactory");
     }
     else {
-	mtrackfactory = new StiEvaluableTrackFactory("StiEvaluableTrackFactory");
+	mtrackfactory =
+	    new StiEvaluableTrackFactory("StiEvaluableTrackFactory");
     }
     mtrackfactory->setIncrementalSize(1000);
     mtrackfactory->setMaxIncrementCount(10);
 
     //The Track node factory
-    mktracknodefactory = new StiKalmanTrackNodeFactory("StiKalmanTrackNodeFactory");
+    mktracknodefactory =
+	new StiKalmanTrackNodeFactory("StiKalmanTrackNodeFactory");
     mktracknodefactory->setIncrementalSize(1000);
     mktracknodefactory->setMaxIncrementCount(100);
     StiKalmanTrack::setKalmanTrackNodeFactory( mktracknodefactory );
@@ -244,7 +251,8 @@ Int_t StiMaker::Init()
     //The seed finder (must be built after detector-tree)
     if (mSeedFinderType==kEvaluable) {
 	cout <<"StiMaker::init(). Set tracker seed finder to kEvaluable"<<endl;
-	StiEvaluableTrackSeedFinder* temp = new StiEvaluableTrackSeedFinder(mAssociationMaker);
+	StiEvaluableTrackSeedFinder* temp =
+	    new StiEvaluableTrackSeedFinder(mAssociationMaker);
 	temp->setFactory(mtrackfactory);
 	temp->setBuildPath("StRoot/StiMaker/RunTimeParameters/EvaluableSeedFinder.txt");
 	temp->build();
@@ -275,6 +283,10 @@ Int_t StiMaker::Init()
     mdisplay->draw();
     mdisplay->update();
 
+    //The Evaluator
+    //First call to instance must specify then output file name
+    StiEvaluator::instance(mEvalFileName);
+    
     return StMaker::Init();
 }
 

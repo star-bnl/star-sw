@@ -2,7 +2,11 @@
 //M.L. Miller (Yale Software)
 //04/01
 
-//This class is meant to be instantiated from the root-prompt, from where it controls program flow for the chain that executes Sti Tracker
+/*!
+  This class is meant to be instantiated from the root-prompt,
+  from where it controls program flow for the chain that executes
+  Sti Tracker.
+*/
 
 #ifndef StiControlBar_HH
 #define StiControlBar_HH

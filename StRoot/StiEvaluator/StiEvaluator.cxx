@@ -31,10 +31,18 @@
 
 StiEvaluator* StiEvaluator::sinstance = 0;
 
-StiEvaluator::StiEvaluator() : mFile(0), mTree(0), mEntry(0)
+StiEvaluator::StiEvaluator(const string& fname)
+    : mFileName(fname), mFile(0), mTree(0), mEntry(0)
 {
     cout <<"StiEvaluator::StiEvaluator()"<<endl;
-    build();
+    if (mFileName=="empty") {
+	cout <<"StiEvaluator::StiEvaluator() ERROR:\t";
+	cout <<"No file name specified for output file.";
+	cout <<"Abort witout building!"<<endl;
+    }
+    else {
+	build();
+    }
     sinstance = this;
 }
 
@@ -45,9 +53,9 @@ StiEvaluator::~StiEvaluator()
     mFile->Close();
 }
 
-StiEvaluator* StiEvaluator::instance()
+StiEvaluator* StiEvaluator::instance(const string val)
 {
-    return (sinstance) ? sinstance : new StiEvaluator();
+    return (sinstance) ? sinstance : new StiEvaluator(val);
 }
 
 void StiEvaluator::kill()
@@ -60,9 +68,11 @@ void StiEvaluator::kill()
 
 void StiEvaluator::build()
 {
-    cout <<"StiEvaluator::build().\tOpening Root file, building TTree(s)"<<endl;
+    cout <<"StiEvaluator::build()"<<endl;
+    
     //Must open TFile first if you want ntuple to disk
-    mFile = new TFile("TestEvaluation.root","RECREATE");
+    cout <<"Opening ROOT file: "<<mFileName<<endl;
+    mFile = new TFile(mFileName.c_str(),"RECREATE");
 
     mEntry = new TrackEntry();
     mTree = new TTree("TestTree","The Test Tree");

@@ -5,6 +5,9 @@
 #ifndef StiMaker_HH
 #define StiMaker_HH
 
+#include <string>
+using std::string;
+
 #include "StMaker.h"
 #include "StEvent/StEnumerations.h"
 #include "Sti/StiCompositeTreeNode.h" //For typedefs
@@ -38,7 +41,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.28 2001/10/09 12:54:51 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.29 2001/10/11 13:18:04 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -53,6 +56,7 @@ public:
     void setGui(bool); // true->gui version.  Defaults to true
     void setDoFit(bool);// true->doFit, false->doFind
     void setSeedFinderType(SeedFinderType);
+    void setEvaluationFileName(const char*);
 
     void printStatistics() const;
     
@@ -65,6 +69,9 @@ protected:
 
 private:
 
+    //Names
+    string mEvalFileName; //!
+    
     //flags
     bool mSimulation;//! true->m.c.
     bool mUseGui; //!
@@ -110,6 +117,10 @@ private:
 inline void StiMaker::setMcEventMaker(StMcEventMaker* val)
 {
     mMcEventMaker = val;
+}
+inline void StiMaker::setEvaluationFileName(const char* val)
+{
+    mEvalFileName=val;
 }
 
 inline void StiMaker::setAssociationMaker(StAssociationMaker* val)

@@ -5,6 +5,9 @@
 #ifndef StiEvaluator_HH
 #define StiEvaluator_HH
 
+#include <string>
+using std::string;
+
 //forward declarations (must #include these in the source file)
 class StiTrackContainer;
 class TFile;
@@ -83,7 +86,7 @@ private:
 class StiEvaluator
 {
  public:
-    static StiEvaluator* instance();
+    static StiEvaluator* instance(const string val="empty");
     static void kill();
 
     friend class nobody;
@@ -92,8 +95,10 @@ class StiEvaluator
     
  private:
     //singleton stuff
-    StiEvaluator();
-    virtual ~StiEvaluator();
+    StiEvaluator(); //Not implemented
+    StiEvaluator(const string&); //Must pass file-name
+    virtual ~StiEvaluator(); 
+    
     static StiEvaluator* sinstance;
 
  private:
@@ -101,6 +106,7 @@ class StiEvaluator
 
     void fillTree(StiTrack*, StTrackPairInfo*);
 
+    string mFileName;
     TFile* mFile;
     TTree* mTree;
     TrackEntry* mEntry;
