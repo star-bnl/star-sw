@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.65 2001/09/06 18:27:37 jeromel Exp $
+// $Id: St_tpt_Maker.cxx,v 1.66 2001/10/04 22:33:34 jeromel Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.66  2001/10/04 22:33:34  jeromel
+// Option mask changed to 0xFE to accomodate for soon-to-come changes (more options).
+//
 // Revision 1.65  2001/09/06 18:27:37  jeromel
 // Modifications for larger number of ExB options, forcing different configuration 9EB1 EB2 ...). Added loading of StTableUtilities when 'display' option is required.
 //
@@ -399,7 +402,7 @@ Int_t St_tpt_Maker::Make(){
     if(m_Mode & 1)
       {
 	Float_t x[3], xprime[3] ;
-	Int_t   option = (m_Mode & 0x0E) >> 1;
+	Int_t   option = (m_Mode & 0xFE) >> 1;
 	// request from Jim Thomas to have 2 (or more)
 	// method in StMagUtilities. We then use the
 	// option as a mask. J.Lauret July 2001. 
