@@ -13,12 +13,12 @@ use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
 
-# $Id: cons,v 1.53 2000/07/20 20:36:09 fisyak Exp $
+# $Id: cons,v 1.54 2000/08/02 15:23:54 fisyak Exp $
 
 $ver_num = __VERSION__;
 $ver_rev = "__REVISION__";
 $version = sprintf "This is Cons %2.1f%s " .
-	    '($Id: cons,v 1.53 2000/07/20 20:36:09 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.54 2000/08/02 15:23:54 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -641,6 +641,8 @@ sub buildtarget {
 # main package by cons), these are all invoked by user scripts.
 package script;
 
+use vars qw( $ARG );
+
 # This is called from main to interpret/run the top-level Construct
 # file, passed in as the single argument.
 sub main::doscripts {
@@ -703,7 +705,7 @@ sub caller_info {
     my(@frame);
     do {
 	@frame = caller ++$lev;
-	if ($frame[3] eq '(eval)') {
+	if (defined($frame[3]) && $frame[3] eq '(eval)') {
 	    return caller --$lev;
 	}
     } while ($frame[3]);
@@ -1235,10 +1237,18 @@ sub _subst {
     if (ref($str) eq ARRAY) {
 	return [ map($env->_subst($_), @$str) ];
     } else {
-	while (($str =~ s/\%\{([_a-zA-Z]\w*)\}/$env->{$1}/ge) ||
-	       ($str =~ s/\%([_a-zA-Z]\w*)/$env->{$1}/ge)) {}
-    $str =~ s/-features=no_/-features=no\%/g; # no% option for Sun
-    $str =~ s/-library=iostream,no_Cstd/-library=iostream,no%Cstd/g;
+	# % expansion.  %% gets converted to % later, so expand any
+	# %keyword construction that doesn't have a % in front of it
+	# (modulo multiple %% pairs in between).
+	# We could actually do this in one expression as follows
+	# using a conditional expression:
+	#	while ($str =~ s/($pre)\%(\{)?([_a-zA-Z]\w*)(?(2)\})/"$1".$env->{$3}/ge) {}
+	# but conditional expressions weren't introduced until Perl5.005.
+	# The following two-step approach is backwards-compatible
+	# to at least Perl5.003.
+	my $pre = '^|[^\%](?:\%\%)*';
+	while ($str =~ s/($pre)\%([_a-zA-Z]\w*)/$1.$env->{$2}/ge) {}
+	while ($str =~ s/($pre)\%\{([_a-zA-Z]\w*)\}/$1.$env->{$2}/ge) {}
 	return $str;
     }
 }
@@ -1597,6 +1607,9 @@ sub getcoms {
 	    &{$self->{env}->{$func}}(@args);
 	}gex;
 
+	# Convert left-over %% into %.
+	$com =~ s/%%/%/g;
+
 	# White space cleanup. XXX NO WAY FOR USER TO HAVE QUOTED SPACES
 	$com = join(' ', split(' ', $com));
 	next if $com =~ /^:/ && $com !~ /^:\S/;
@@ -1717,7 +1730,9 @@ sub find {
 	my($ldirs) = '';
 	my($wd) = $env->{_cwd};
 	my($pdirs) = $env->{LIBPATH};
-	if (ref($pdirs) ne 'ARRAY') {
+	if (! defined $pdirs) {
+	    $pdirs = [ ];
+	} elsif (ref($pdirs) ne 'ARRAY') {
 	    $pdirs = [ split(/$main::PATH_SEPARATOR/o, $pdirs) ];
 	}
 	for $dir (map($wd->lookupdir($env->_subst($_)), @$pdirs)) {
@@ -1765,11 +1780,13 @@ sub includes {
     my($self, $tgt) = @_;
     my($env) = $self->{env};
     my($ewd) = $env->{_cwd};
-    my($ldirs) = $env->{LIBPATH};
-    if (ref($ldirs) ne 'ARRAY') {
+    my $ldirs = $env->{LIBPATH};
+    if (! defined $ldirs) {
+	$ldirs = [ ];
+    } elsif (ref($ldirs) ne 'ARRAY') {
 	$ldirs = [ split(/$main::PATH_SEPARATOR/o, $ldirs) ];
     }
-    my(@lpath) = map($ewd->lookupdir($_), @$ldirs);
+    my @lpath = map($ewd->lookupdir($_), @$ldirs);
     my(@sigs);
     my(@names);
 
@@ -1778,7 +1795,7 @@ sub includes {
 	# <schwarze@isa.de> 1998-06-18
 	@names = split(' ', $env->_subst($env->{LIBS}));
     } else {
-	@names = split(' ', $env->{LIBS});
+	@names = split(' ', $env->{LIBS} || '');
     }
     for $name (@names) {
 	my($lpath,@allnames);
@@ -2010,7 +2027,9 @@ sub comsig {
 	$com =~ s/\s.*//;
 	next if !$com; # blank line
 	my($pdirs) = $env->{ENV}->{PATH};
-	if (ref($pdirs) ne 'ARRAY') {
+	if (! defined $pdirs) {
+	    $pdirs = [ ];
+	} elsif (ref($pdirs) ne 'ARRAY') {
 	    $pdirs = [ split(/$main::PATH_SEPARATOR/o, $pdirs) ];
 	}
 	for $dir (map($dir::top->lookupdir($_), @$pdirs)) {
@@ -2226,10 +2245,12 @@ BEGIN { @ISA = qw(scan) }
 # for the same path: otherwise we will unecessarily scan files.
 sub find {
     my($class, $dir, $pdirs) = @_;
-    if (ref($pdirs) ne 'ARRAY') {
+    if (! defined $pdirs) {
+	$pdirs = [ ];
+    } elsif (ref($pdirs) ne 'ARRAY') {
 	$pdirs = [ split(/$main::PATH_SEPARATOR/o, $pdirs) ];
     }
-    my(@path) = map($dir->lookupdir($_), @$pdirs);
+    my @path = map($dir->lookupdir($_), @$pdirs);
     my($spath) = "@path";
     $scanner{$spath} || do {
 	my($self) = {'path' => \@path};
@@ -2404,6 +2425,7 @@ sub catfile {
     return $file unless @_;
     my $dir = $self->catdir(@_);
     $dir .= $_SEP unless substr($dir,-1) eq $_SEP;
+    $file = '' if ! defined($file);
     return $dir.$file;
 }
 
@@ -2463,8 +2485,10 @@ BEGIN {
     }
     # Cache these values so we don't have to make a method call
     # every time we need them.
-    $dir::CURDIR = File::Spec->curdir;	# '.' on UNIX
-    $dir::UPDIR = File::Spec->updir;	# '..' on UNIX
+    $CURDIR = File::Spec->curdir;	# '.' on UNIX
+    $UPDIR = File::Spec->updir;	# '..' on UNIX
+    #
+    $cwd_vol = '';
 }
 
 # Annotate a node (file or directory) with info about the
@@ -3284,6 +3308,8 @@ sub mkdir {
 
 # Signature package.
 package sig::hash;
+
+use vars qw( $called );
 
 sub init {
     my($dir) = @_;
@@ -5089,7 +5115,8 @@ Within the construction command, any variable from the construction
 environment may be introduced by prefixing the name of the construction
 variable with C<%>. This is recursive: the command is expanded until no more
 substitutions can be made. If a construction variable is not defined in the
-environment, then the null string will be substituted.
+environment, then the null string will be substituted.  A doubled C<%%>
+will be replaced by a single C<%> in the construction command.
 
 There are several pseudo variables which will also be expanded:
 
