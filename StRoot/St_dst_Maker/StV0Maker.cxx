@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.18 2000/02/08 21:14:18 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.19 2000/03/02 20:41:35 caines Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.19  2000/03/02 20:41:35  caines
+// New dcav0 cut went from 0.7cm ->2.5cm from Curtis
+//
 // Revision 1.18  2000/02/08 21:14:18  genevb
 // Handle cases with no tracks.
 //
@@ -88,7 +91,7 @@ Int_t StV0Maker::Init(){
   // TPC only cuts
     row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
     row.dca	 =        0.8; // cut on dca between the two tracks ;
-    row.dcav0	 =        0.7; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
     row.dlen	 =        2.0; // cut on dist. of decay from prim. vertex ;
     row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
     row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
@@ -99,7 +102,7 @@ Int_t StV0Maker::Init(){
   //SVT only cuts
     row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
     row.dca	 =        0.8; // cut on dca between the two tracks ;
-    row.dcav0	 =        0.3; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
     row.dlen	 =      10000; // cut on dist. of decay from prim. vertex ;
     row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
     row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
@@ -110,7 +113,7 @@ Int_t StV0Maker::Init(){
   // SVT+TPC cuts
     row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
     row.dca	 =        0.8; // cut on dca between the two tracks ;
-    row.dcav0	 =        0.3; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
     row.dlen	 =        0.6; // cut on dist. of decay from prim. vertex ;
     row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
     row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
