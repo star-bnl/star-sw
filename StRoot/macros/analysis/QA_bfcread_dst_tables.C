@@ -1,12 +1,15 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.1 1999/06/25 19:43:47 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.2 1999/06/28 16:53:20 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.2  1999/06/28 16:53:20  kathy
+// updated version - now checks to see how many tables are really there, not just ones we know about
+//
 // Revision 1.1  1999/06/25 19:43:47  kathy
 // new macros for official QA use
 //
 //
 //======================================================================
 // owner: Kathy Turner
-// revised by: Curtis Lansdell
+// revised by: Curtis Lansdell, Kathy,
 // what it does: see below 
 //=======================================================================
 // QA_bfcread_dst_tables.C
@@ -23,9 +26,9 @@ StChain *chain;
 class St_DataSet;
 St_DataSet *Event;
 
-void QA_bfcread_dst_tables(const char *MainFile=
-"/disk00000/star/test/new/tfs_Solaris/year_1b/psc0050_01_40evts.dst.root",
-const char *fname="QA_test.txt")
+void QA_bfcread_dst_tables(const char 
+*MainFile="/afs/rhic/star/data/test/dev/tfs_Linux/Thu/year_2a/psc0208_01_40evts.dst.root",
+const char *fname="QA_dst.txt")
 
 {
 //
@@ -36,12 +39,22 @@ const char *fname="QA_test.txt")
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StRootEvent");
 
-
   ofstream fout(fname);
-  fout << "QA-> " << MainFile << endl;
-  fout << "  " << endl;
-  cout << "QA-> " << MainFile << endl;
-  cout << "  " << endl;
+  fout << "Tester: " << endl;
+  fout << "Date tested: " << endl;
+  fout << "Date DST created: " << endl;
+  fout << "QA-> " << MainFile << endl << endl;
+  fout << "QA-> table name";
+  fout.width(18);
+  fout << "# rows";
+  fout.width(15);
+  fout << "data looks" << endl;
+  fout << "QA-> __________";
+  fout.width(18);
+  fout << "______";
+  fout.width(15);
+  fout << "__________" << endl << endl;
+
 
 //  Setup top part of chain
   chain = new StChain("bfc");
@@ -58,33 +71,69 @@ const char *fname="QA_test.txt")
   chain->Init();
  
   Int_t numtables=0;
+  St_DataSet *ds=0;
+  St_Table *tabl=0;
+  St_DataSet *obj=0;
+  Int_t tabcntr=0;
 
 // We will always just check 1 event!
   Int_t nevents=1;
+
+// Loop over events
   for (int iev=0;iev<nevents; iev++)
     {
       chain->Clear();
       int iret = chain->Make();
       if (iret) break;
 
-
-    St_DataSet *ds=chain->GetDataSet("dst");
+    ds=chain->GetDataSet("dst");
     St_DataSetIter tabiter(ds);
-    St_Table  *tabl=0;
+
+    numtables=0;
+    tabcntr=0;
 
       if (ds) {
 
 // ls() returns a virtual void, so don't have to set it = to anything
       ds->ls(2);
- 
+
+      cout << "QA-> Tester: " << endl;
+      cout << "QA-> Date tested: " << endl << endl;
+      cout << "QA-> DST file: " << MainFile << endl;
+      cout << "QA-> Date DST created: " << endl << endl;
+      cout << "QA-> table name";
+      cout.width(18);
+      cout << "# rows";
+      cout.width(15);
+      cout << "data looks" << endl;
+      cout << "QA-> ----------";
+      cout.width(18);
+      cout << "------";
+      cout.width(15);
+      cout << "----------" << endl << endl;
+
+      while (obj = tabiter.Next()) {
+//.. count all tables that exist:
+	    if (obj->InheritsFrom("St_Table")) {
+               tabcntr++;
+//	       cout << "object  = " << obj->GetName() << endl;
+//             cout << "tabcntr = " << tabcntr << endl;
+            }
+      }
+
 //.. go to event_header
 
         tabl = (St_Table *)tabiter.Find("event_header");
+        
 
         if (tabl) {
           numtables++;
-          cout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
-          fout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
+          cout << "QA-> " << tabl->GetName();
+          cout.width(16);
+          cout << tabl->GetNRows()<< endl;
+          fout << "QA-> " << tabl->GetName();
+          fout.width(16);
+          fout << tabl->GetNRows()<< endl;
 
         }
 
@@ -94,8 +143,12 @@ const char *fname="QA_test.txt")
 
         if (tabl) {
           numtables++;
-          cout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
-          fout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
+          cout << "QA-> " << tabl->GetName();
+          cout.width(15);
+          cout << tabl->GetNRows()<< endl;
+          fout << "QA-> " << tabl->GetName();
+          fout.width(15);
+          fout << tabl->GetNRows()<< endl;
 
         }
 
@@ -105,8 +158,12 @@ const char *fname="QA_test.txt")
 
         if (tabl) {
           numtables++;
-          cout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
-          fout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
+          cout << "QA-> " << tabl->GetName();
+          cout.width(21);
+          cout << tabl->GetNRows()<< endl;
+          fout << "QA-> " << tabl->GetName();
+          fout.width(21);
+          fout << tabl->GetNRows()<< endl;
 
         }
 
@@ -116,8 +173,12 @@ const char *fname="QA_test.txt")
 
         if (tabl) {
           numtables++;
-          cout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
-          fout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
+          cout << "QA-> " << tabl->GetName();
+          cout.width(17);
+          cout << tabl->GetNRows()<< endl;
+          fout << "QA-> " << tabl->GetName();
+          fout.width(17);
+          fout << tabl->GetNRows()<< endl;
 
         }
 
@@ -127,8 +188,12 @@ const char *fname="QA_test.txt")
 
         if (tabl) {
           numtables++;
-          cout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
-          fout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
+          cout << "QA-> " << tabl->GetName();
+          cout.width(22);
+          cout << tabl->GetNRows()<< endl;
+          fout << "QA-> " << tabl->GetName();
+          fout.width(22);
+          fout << tabl->GetNRows()<< endl;
 
         }
 
@@ -138,8 +203,12 @@ const char *fname="QA_test.txt")
 
         if (tabl) {
           numtables++;
-          cout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
-          fout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
+          cout << "QA-> " << tabl->GetName();
+          cout.width(20);
+          cout << tabl->GetNRows()<< endl;
+          fout << "QA-> " << tabl->GetName();
+          fout.width(20);
+          fout << tabl->GetNRows()<< endl;
  
         }
 
@@ -149,8 +218,12 @@ const char *fname="QA_test.txt")
 
         if (tabl) {
           numtables++;
-          cout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
-          fout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
+          cout << "QA-> " << tabl->GetName();
+          cout.width(21);
+          cout << tabl->GetNRows()<< endl;
+          fout << "QA-> " << tabl->GetName();
+          fout.width(21);
+          fout << tabl->GetNRows()<< endl;
 
         }
 
@@ -160,8 +233,12 @@ const char *fname="QA_test.txt")
 
         if (tabl) {
           numtables++;
-          cout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
-          fout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
+          cout << "QA-> " << tabl->GetName();
+          cout.width(17);
+          cout << tabl->GetNRows()<< endl;
+          fout << "QA-> " << tabl->GetName();
+          fout.width(17);
+          fout << tabl->GetNRows()<< endl;
 
         }
 
@@ -171,8 +248,12 @@ const char *fname="QA_test.txt")
 
         if (tabl) {
           numtables++;
-          cout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
-          fout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
+          cout << "QA-> " << tabl->GetName();
+          cout.width(15);
+          cout << tabl->GetNRows()<< endl;
+          fout << "QA-> " << tabl->GetName();
+          fout.width(15);
+          fout << tabl->GetNRows()<< endl;
 
         }
 
@@ -182,8 +263,12 @@ const char *fname="QA_test.txt")
 
         if (tabl) {
           numtables++;
-          cout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
-          fout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
+          cout << "QA-> " << tabl->GetName();
+          cout.width(15);
+          cout << tabl->GetNRows()<< endl;
+          fout << "QA-> " << tabl->GetName();
+          fout.width(15);
+          fout << tabl->GetNRows()<< endl;
 
         }
 
@@ -193,8 +278,12 @@ const char *fname="QA_test.txt")
 
         if (tabl) {
           numtables++;
-          cout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
-          fout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
+          cout << "QA-> " << tabl->GetName();
+          cout.width(20);
+          cout << tabl->GetNRows()<< endl;
+          fout << "QA-> " << tabl->GetName();
+          fout.width(20);
+          fout << tabl->GetNRows()<< endl;
 
         }
 
@@ -204,8 +293,12 @@ const char *fname="QA_test.txt")
 
         if (tabl) {
           numtables++;
-          cout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
-          fout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
+          cout << "QA-> " << tabl->GetName();
+          cout.width(23);
+          cout << tabl->GetNRows()<< endl;
+          fout << "QA-> " << tabl->GetName();
+          fout.width(23);
+          fout << tabl->GetNRows()<< endl;
 
         }
 
@@ -215,8 +308,12 @@ const char *fname="QA_test.txt")
 
         if (tabl) {
           numtables++;
-          cout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
-          fout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
+          cout << "QA-> " << tabl->GetName();
+          cout.width(16);
+          cout << tabl->GetNRows()<< endl;
+          fout << "QA-> " << tabl->GetName();
+          fout.width(16);
+          fout << tabl->GetNRows()<< endl;
 
         }
 
@@ -226,8 +323,12 @@ const char *fname="QA_test.txt")
 
         if (tabl) {
           numtables++;
-          cout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
-          fout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
+          cout << "QA-> " << tabl->GetName();
+          cout.width(20);
+          cout << tabl->GetNRows()<< endl;
+          fout << "QA-> " << tabl->GetName();
+          fout.width(20);
+          fout << tabl->GetNRows()<< endl;
 
         }
 
@@ -237,8 +338,12 @@ const char *fname="QA_test.txt")
 
         if (tabl) {
           numtables++;
-          cout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
-          fout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
+          cout << "QA-> " << tabl->GetName();
+          cout.width(17);
+          cout << tabl->GetNRows()<< endl;
+          fout << "QA-> " << tabl->GetName();
+          fout.width(17);
+          fout << tabl->GetNRows()<< endl;
         }
 
 
@@ -248,29 +353,25 @@ const char *fname="QA_test.txt")
 
         if (tabl) {
           numtables++;
-          cout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
-          fout << " QA-> Table: " << tabl->GetName() << ",  #rows: " << tabl->GetNRows()<< endl;
+          cout << "QA-> " << tabl->GetName();
+          cout.width(8);
+          cout << tabl->GetNRows()<< endl;
+          fout << "QA-> " << tabl->GetName();
+          fout.width(8);
+          fout << tabl->GetNRows()<< endl;
 
         }
-
       }
-
 
 // ------------------------------------------------------------
 
-      cout << " " << endl;
-      cout << " QA-> total # tables = " << numtables << endl;
+      cout << endl <<"QA-> total # tables = " << tabcntr << endl;
+      fout << endl << "QA-> total # tables = " << tabcntr << endl;
 
-      fout << " " << endl;
-      fout << " QA-> total # tables = " << numtables << endl;
+      cout << "QA-> total # tables checked = " << numtables << endl;
+      fout << "QA-> total # tables checked = " << numtables << endl;
 
       fout.close();
       chain->Finish();    
-  
     }
 }
- 
-
-
-        
-
