@@ -79,8 +79,7 @@ if ( -e $OBJLIB_DBG ) then
 endif
 #
 set OBJFILES = ( `(ls ../lib/$STAR_ARCH/*.o |& grep -v "No match")` )
-#if( -e $OBJFILES ) then
-if( $OBJFILES == "" ) then
+if( $OBJFILES[$#OBJFILES] == "" ) then
 	echo "No objects to remove"
 else
 	echo "Removing all object files"
@@ -108,8 +107,15 @@ cd ../src
 make -e all
 echo "Moving all .a files to ../lib/$STAR_ARCH"
 mv *.a ../lib/$STAR_ARCH
-echo "Removing all .o files"
-rm -f *.o >& /dev/null
+#
+set OBJFILES = ( `(ls *.o |& grep -v "No match")` )
+if( $OBJFILES[$#OBJFILES] == "" ) then
+	echo "No objects to remove"
+else
+	echo "Removing all object files"
+	rm -f *.o
+endif
+#
 #
 echo "cleaning up include file links.."
 rmlink *
