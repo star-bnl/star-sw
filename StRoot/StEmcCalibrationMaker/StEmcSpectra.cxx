@@ -12,7 +12,7 @@
 #include "TGraphErrors.h"
 #include "TString.h"
 #include "TFile.h"
-#include "StEmcUtil/StEmcGeom.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StEventTypes.h"
 
@@ -20,13 +20,13 @@ ClassImp(StEmcSpectra);
 //_____________________________________________________________________________
 const char* StEmcSpectra::GetDetName()   
 { 
-  #include "StEmcUtil/emcDetectorName.h"
+  #include "StEmcUtil/others/emcDetectorName.h"
   return detname[mDetNum].Data(); 
 }
 //_____________________________________________________________________________
 StEmcSpectra::StEmcSpectra(const char* cdet,Int_t nb, Float_t bin0, Float_t bin1):St_DataSet(cdet)
 {
-  #include "StEmcUtil/emcDetectorName.h"
+  #include "StEmcUtil/others/emcDetectorName.h"
   Float_t nadc[4]={4096,1024,1024,1024};
   SetTitle(cdet);
   //geo=new StEmcGeom(cdet);
@@ -56,7 +56,7 @@ StEmcSpectra::StEmcSpectra(const char* cdet,Int_t nb, Float_t bin0, Float_t bin1
 //_____________________________________________________________________________
 void StEmcSpectra::Init()
 {
-  #include "StEmcUtil/emcDetectorName.h"
+  #include "StEmcUtil/others/emcDetectorName.h"
   if(mSpectra) delete mSpectra;
 	if(mSum) delete mSum;
 	

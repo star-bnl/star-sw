@@ -17,7 +17,7 @@
 #include "TFile.h"
 #include "StTpcDedxPidAlgorithm.h"
 #include "StEventUtilities/StuRefMult.hh"
-#include "StEmcUtil/StEmcGeom.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEmcPosition.h"
 #include "StarClassLibrary/SystemOfUnits.h"
 #include "StuProbabilityPidAlgorithm.h"

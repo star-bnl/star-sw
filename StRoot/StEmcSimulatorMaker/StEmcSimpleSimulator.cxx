@@ -3,7 +3,7 @@
 #include <assert.h>
 #include "TMath.h"
 #include <TRandom.h>
-#include "StEmcUtil/emcInternalDef.h"
+#include "StEmcUtil/others/emcInternalDef.h"
 
 ClassImp(StEmcSimpleSimulator)
 
@@ -265,8 +265,11 @@ Double_t StEmcSimpleSimulator::getSinTheta(Double_t eta)
 }
 
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcSimpleSimulator.cxx,v 1.6 2002/10/17 21:17:01 pavlinov Exp $
+//  $Id: StEmcSimpleSimulator.cxx,v 1.7 2003/01/23 03:09:02 jeromel Exp $
 //  $Log: StEmcSimpleSimulator.cxx,v $
+//  Revision 1.7  2003/01/23 03:09:02  jeromel
+//  Include modif
+//
 //  Revision 1.6  2002/10/17 21:17:01  pavlinov
 //  default - no pedestal for all detectors
 //

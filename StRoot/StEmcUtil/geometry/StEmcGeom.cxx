@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.1 2003/01/23 01:30:28 suaide Exp $
+ * $Id: StEmcGeom.cxx,v 1.2 2003/01/23 03:04:56 jeromel Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.2  2003/01/23 03:04:56  jeromel
+ * Include modif
+ *
  * Revision 1.1  2003/01/23 01:30:28  suaide
  * moving to sub directories
  *
@@ -94,7 +97,7 @@
 #include <stdlib.h>
 #include <TROOT.h>
 #include "StMaker.h"
-#include "StEmcUtil/emcInternalDef.h"
+#include "StEmcUtil/others/emcInternalDef.h"
 
 ClassImp(StEmcGeom)
 

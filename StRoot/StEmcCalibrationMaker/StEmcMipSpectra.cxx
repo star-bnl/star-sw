@@ -11,7 +11,7 @@
 #include "TCanvas.h"
 #include "TGraphErrors.h"
 #include "StEmcFit.h"
-#include "StEmcUtil/StEmcGeom.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEvent.h"
 #include "StEventTypes.h"
 

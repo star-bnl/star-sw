@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide 
 // 
-// $Id: StEmcPreCalibrationMaker.cxx,v 1.9 2003/01/22 22:49:11 suaide Exp $
+// $Id: StEmcPreCalibrationMaker.cxx,v 1.10 2003/01/23 03:09:04 jeromel Exp $
 // $Log: StEmcPreCalibrationMaker.cxx,v $
+// Revision 1.10  2003/01/23 03:09:04  jeromel
+// Include modif
+//
 // Revision 1.9  2003/01/22 22:49:11  suaide
 // fix to create StEvent without L3
 //
@@ -34,14 +37,14 @@
 #include "St_DataSetIter.h"
 #include "StEvent.h"
 #include "StEventTypes.h"
-#include "emcDetectorName.h"
+#include "StEmcUtil/others/emcDetectorName.h"
 #include "StGlobals.hh"
 // DAQ Libraries
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/EMC/EMC_Reader.hh"
 #include "StDAQMaker/StDAQReader.h"
 
-#include "StEmcDaqUtil.h"
+#include "StEmcUtil/daq/StEmcDaqUtil.h"
 ClassImp(StEmcPreCalibrationMaker)
 
 //_____________________________________________________________________________

@@ -11,7 +11,7 @@
 #include "TStopwatch.h"
 #include <fstream.h>
 #include "TFile.h"
-#include "StEmcUtil/StEmcGeom.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 #include "time.h"
 #include "TDatime.h"
 

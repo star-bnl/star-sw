@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.36 2003/01/21 22:40:29 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.37 2003/01/23 03:09:05 jeromel Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.37  2003/01/23 03:09:05  jeromel
+// Include modif
+//
 // Revision 1.36  2003/01/21 22:40:29  suaide
 // small modification to save all tower hits
 //
@@ -71,8 +74,8 @@
 #include "StEvent.h"
 #include <iostream.h>
 #include <math.h>
-#include "StEmcUtil/emcDetectorName.h"
-#include "StEmcUtil/StEmcGeom.h"
+#include "StEmcUtil/others/emcDetectorName.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 #include "TStopwatch.h"
 // DAQ Libraries
 #include "StDaqLib/GENERIC/EventReader.hh"

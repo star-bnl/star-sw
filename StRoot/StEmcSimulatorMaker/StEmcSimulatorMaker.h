@@ -13,8 +13,8 @@
 #include <TH2.h>
 #include <TH1.h>
 #include <TCanvas.h>
-#include "StEmcUtil/emcInternalDef.h"
-#include "StEmcUtil/StEmcGeom.h"
+#include "StEmcUtil/others/emcInternalDef.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 #include "tables/St_emc_hits_Table.h"
 
 class StMcEmcHitCollection;
@@ -98,7 +98,7 @@ public:
   void   setBEMC(UInt_t  key){mBEMC = key; if (Debug()) printmBEMC();}
   void   setHistControl(UInt_t key) {mHistControl = key;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.8 2002/09/10 16:51:32 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.9 2003/01/23 03:09:02 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcSimulatorMaker, 1)  // Simulation maker for BEMC and EEMC
 };
@@ -106,8 +106,11 @@ public:
 #endif
 //////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEmcSimulatorMaker.h,v 1.8 2002/09/10 16:51:32 pavlinov Exp $
+// $Id: StEmcSimulatorMaker.h,v 1.9 2003/01/23 03:09:02 jeromel Exp $
 // $Log: StEmcSimulatorMaker.h,v $
+// Revision 1.9  2003/01/23 03:09:02  jeromel
+// Include modif
+//
 // Revision 1.8  2002/09/10 16:51:32  pavlinov
 // Discard line with mDbMaker->SetDateTime
 //
