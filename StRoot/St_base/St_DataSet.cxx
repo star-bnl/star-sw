@@ -18,9 +18,10 @@
 //                                                                      //
 // St_DataSet class is to create a special compound object-container:   //
 //                                                                      //
+// ==================================================================== //
 //    St_DataSet object ::= the "named" list of St_DataSet objects      //
-//    ============================================================      //
-//  where the "list" may contain no object                              //
+// ==================================================================== //
+// where the "list" (the pointer to TList object) may contain no object //
 //                                                                      //
 //  St_DataSet object has a back pointer to its "parent" St_DataSet     //
 //  object, the "character" *name* and "character" *title*              //
@@ -70,21 +71,23 @@
 // - Any St_DataSet object may be an "Associated Member" for any number //
 //   of other St_DataSet objects if any                                 //
 //                                                                      //
-// - Each "dataset member" is in possession of the some                 //
-//   "alpha-numerical" NAME.                                            //
+// - NAME issue:                                                        //
+//   Each "dataset member" is in possession of some "alpha-numerical"   //
+//   NAME as defined by TNamed class.                                   //
 //   The NAME may contain any "printable" symbols but "SLASH" - "/"     //
 //   The symbol "RIGHT SLASH" - "/" can not be used as any part of the  //
 //   "DataSet Member" NAME                                              //
 //    Any DataSet  can be found by its NAME with St_DataSetIter object  //
 //                                                                      //
-// - Each "dataset member" is in possession of the some                 //
-//   "alpha-numerical" TITLE. The meaning of the TITLE is reserved for  //
-//   the derived classes to hold there some indetification that is      //
-//   special for that derived class.                                    //
+// - TITLE issue:                                                       //
+//   Each "dataset member" is in possession of the "alpha-numerical"    //
+//   TITLE as defined by TNamed class. The meaning of the TITLE is      //
+//   reserved for the derived classes to hold there some indetification //
+//   that is special for that derived class.                            //
 //                                                                      //
 //   This means the user must be careful about  the "St_DataSet         //
 //   NAME and TITLE since this may cause some "side effects" of the     //
-//   particular class functions                                          //
+//   particular class functions                                         //
 //                                                                      //
 // - It is NOT required those all "DataSet Members" are in possession   //
 //   of the unique names, i.e. any number of "DataSet Members"          // 
