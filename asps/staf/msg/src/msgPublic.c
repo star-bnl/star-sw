@@ -916,15 +916,6 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	control->shmid = -1;                            /*  Indicate msg memory not (yet) shared.  */
 	control->ProcessID = 0;
 	if ( switches ) {
-	  if ( strchr( switches, 's' ) ) {
-/*	    Variable argument list machinations to get optional shareName (executable file name):  */
-/*	    const char* shareName = "";                                                            */
-/*	    va_list ap;                                                                            */
-/*	    char *initArgs;                                                                        */
-/*	    va_start( ap, switches );        /*  Make ap point to 1st unnamed arg.                 */
-/*	    shareName = va_arg(   ap, char* );                                                     */
-	    control->shmid = MsgShare( 0 );  /*  Share the msg memory; "0" causes this process's ID to be used. */
-	  }
 	  if ( strchr( switches, 'h' ) ) MsgInitialized = FALSE;  /*  Force hard initialization.   */
 	}
 
@@ -935,6 +926,13 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	  }
  	} else {                  /* Cold-start initialization -- get everything:              */
 	  MsgInitialized = TRUE;
+	  if ( sysinfo( SI_HOSTNAME, s1000, 1000) < 0 ) s1000[0] = NULL;
+	  MsgNodeNameSet( s1000 );
+	  if ( switches ) {
+	    if ( strchr( switches, 's' ) ) {
+	      control->shmid = MsgShare( 0 );  /*  Share the msg memory; "0" causes this process's ID to be used. */
+	    }
+	  }
 	  JournalFILE = fopen( "/dev/null", "w" );  /* Ensure that this isn't NULL, or it'll start outputing to standard out.  */
 	  control->Nprefixes    = 0;
 	  control->Nclasses     = 0;
@@ -947,8 +945,6 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	  control->Alarming     = FALSE;
 	  control->Sorted       = FALSE;
 	  MsgJournalOff();
-	  if ( sysinfo( SI_HOSTNAME, s1000, 1000) < 0 ) s1000[0] = NULL;
-	  MsgNodeNameSet( s1000 );
 
 /*	  Msg Summary defaults:                                                                */
 	  MsgSetSummaryPageLength (   60 );   /* 60 lines per page.                            */

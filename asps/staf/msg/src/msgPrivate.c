@@ -45,6 +45,8 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 9-Oct-1996, \tcomp
 #include <sys/ipc.h>  /*  Interprocess Communications  -- needed for Shared Memory.  */
 #include <sys/shm.h>  /*  Shared Memory.  */
 
+#include <sys/systeminfo.h>
+
 #include <errno.h>
 #include <msg.h>
 #include <msgData.h>
@@ -1143,6 +1145,10 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	  perror( "MsgShare-e2 system error:\n" );
 	  return( -1 );
 	}
+
+/*	Need to re-establish this:  */
+	if ( sysinfo( SI_HOSTNAME, s1000, 1000) < 0 ) s1000[0] = NULL;
+	MsgNodeNameSet( s1000 );
 
 	shmidLogFILE = fopen( "msg.shmid", "a" );  /* Append to this log file -- keep track of shmids!  */
 	MsgTimeStampFileOut( shmidLogFILE );       /* Put a time stamp on it.                           */
