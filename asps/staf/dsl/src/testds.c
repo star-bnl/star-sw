@@ -121,6 +121,22 @@ void main(int argc, char **argv)
 				status = xdrWriteTest(TRUE);
 				break;
 
+			case 'I':
+				status = xdrRandIOTest();
+				break;
+
+			case 'R':
+				status = xdrRandReadTest();
+				break;
+
+			case 'S':
+				status = xdrRandSkipTest();
+				break;
+
+			case 'W':
+				status = xdrRandWriteTest();
+				break;
+
 			default:
 				errflag = 1;
 				break;
@@ -144,7 +160,7 @@ void main(int argc, char **argv)
 */
 static void usage(char *name)
 {
-	printf("usage: %s [a | b | c | d | f | g |j | m | p | q | r | s| t | w]\n", name);
+	printf("usage: %s optLetter\n", name);
 	printf("\ta - dsTestApi\n");
 	printf("\tb - dumpBasic\n");
 	printf("\tc - testCorba\n");
@@ -162,4 +178,8 @@ static void usage(char *name)
 	printf("\ts - sample\n");
 	printf("\tt - testType\n");
 	printf("\tw - xdrWriteTest big endian\n");
+	printf("\tI - xdrRandIOTest read of meta data\n");
+	printf("\tR - xdrRandReadTest sequential read of rand file\n");
+	printf("\tS - xdrRandSkipTest test xdr_dataset_skip\n");
+	printf("\tW - xdrRandWriteTest write file for random tests\n");
 }

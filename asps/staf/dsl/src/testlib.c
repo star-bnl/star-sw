@@ -23,6 +23,11 @@ collection of routine to test ds lib
 #define DS_PRIVATE
 #include "dsxdr.h"
 
+#ifndef SEEK_SET /* for sunos */
+#define SEEK_SET 0
+#define SEEK_END 2
+#endif /* ifndef SEEK_SET */
+
 #define NLOOP 300
 #define XDR_MEM_SIZE(nloop) ((nloop)*(316 + 40*(nloop)))
 #define DS_TEST_FAILED(msg) {dsErrorPrint("TEST FAILED: %s - %s.%d\n",\
@@ -522,6 +527,202 @@ fail:
 	}
 	return FALSE;
 }
+/*****************************************************************************
+* xdrRand - types for tests
+*/
+static char *kbyteType = "struct kbyte_t {octet kbyte[1024];}";
+typedef struct kbyte_t {DS_OCTET kbyte[1024];} KB_T;
+static char *metaType = "struct meta_t {long id; octet fill[1020];}";
+typedef struct meta_t {DS_LONG id; DS_OCTET fill[1020];} META_T;
+/******************************************************************************
+*
+* xdrRandIOTest - read types and one KB table for each dataset in rand.bin
+*
+* RETURN: TRUE for success else FALSE
+*/
+int xdrRandIOTest(void)
+{
+	int i, n;
+	unsigned cur, end, pos[1000];
+	DS_DATASET_T *pDataset = NULL, *pTable;
+	FILE *stream;
+	META_T *pMeta;
+	XDR xdr;
+
+	/* open file */
+	if ((stream = fopen("rand.bin", "rb")) == NULL) {
+		printf("xdrRandIOTest: fopen failed for rand.bin\n");
+		return FALSE;
+	}
+	/* find end of file */
+	fseek(stream, 0, SEEK_END);
+	end = ftell(stream);
+	fseek(stream, 0, SEEK_SET);
+
+	/* create xdr stream */
+	xdrstdio_create(&xdr, stream, XDR_DECODE);
+
+	/* get position of datasets */
+	for (n = 0; (cur = xdr_getpos(&xdr)) < end && n < 1000; n++) {
+		pos[n] = cur;
+		if (!xdr_dataset_skip(&xdr)) {
+			printf("xdrRandSkipTest: xdr_dataset_skip failed\n");
+			fclose(stream);
+			return FALSE;
+		}
+	}
+	/* back through file reading types and meta table */
+	for (i = n; i-- > 0;) {
+		if (!xdr_setpos(&xdr, pos[i]) ||
+			!xdr_dataset_type(&xdr, &pDataset) ||
+			!dsFindEntry(&pTable, pDataset, "meta") ||
+			!dsAllocTables(pTable) ||
+			!dsTableDataAddress((char **)&pMeta, pTable) ||
+			!xdr_dataset_data(&xdr, pDataset)) {
+			dsPerror("xdrRandIOTest: get data failed");
+			goto fail;
+		}
+		if (pMeta->id != i) {
+			printf("xdrRandIOTest: bad meta->id, %d, %d\n", pMeta->id, i);
+			goto fail;
+		}
+		dsFreeDataset(pDataset);
+	}
+	printf("\nxdrRandIOTest: read types and meta table for "); 
+	printf("%d datasets, %u bytes\n\n", n, end);
+	fclose(stream);
+	return TRUE;
+fail:
+	fclose(stream);
+	if (pDataset != NULL) {
+		dsFreeDataset(pDataset);
+	}
+	return FALSE;
+}
+/******************************************************************************
+*
+* xdrRandReadTest - sequential read of rand.bin file
+*
+* RETURN: TRUE for success else FALSE
+*/
+int xdrRandReadTest(void)
+{
+	size_t n;
+	unsigned end;
+	DS_DATASET_T *pDataset = NULL;
+	FILE *stream;
+	XDR xdr;
+
+	if ((stream = fopen("rand.bin", "rb")) == NULL) {
+		printf("xdrRandWrite: fopen failed for rand.bin\n");
+		return FALSE;
+	}
+	fseek(stream, 0, SEEK_END);
+	end = ftell(stream);
+	fseek(stream, 0, SEEK_SET);
+	xdrstdio_create(&xdr, stream, XDR_DECODE);
+	for (n = 0; xdr_getpos(&xdr) < end && n < 1000 ; n++) {
+		if (!xdr_dataset(&xdr, &pDataset)) {
+			dsPerror("xdrRandReadTest: xdr_dataset failed");
+			goto fail;
+		}
+		dsFreeDataset(pDataset);
+	}
+	printf("\nxdrRandReadTest: read %d datasets, %u bytes\n\n", n, end);
+	fclose(stream);
+	return TRUE;
+fail:
+	fclose(stream);
+	if (pDataset != NULL) {
+		dsFreeDataset(pDataset);
+	}
+	return FALSE;
+}
+/******************************************************************************
+*
+* xdrRandSkipTest - skip datasets in file using xdr_dataset_skip
+*
+*/
+int xdrRandSkipTest(void)
+{
+	int n;
+	unsigned cur, end, pos[1000];
+	DS_DATASET_T *pDset = NULL;
+	FILE *stream;
+	XDR xdr;
+
+	if ((stream = fopen("rand.bin", "rb")) == NULL) {
+		printf("xdrRandSkipTest: fopen failed for rand.bin\n");
+		return FALSE;
+	}
+	fseek(stream, 0, SEEK_END);
+	end = ftell(stream);
+	fseek(stream, 0, SEEK_SET);
+	xdrstdio_create(&xdr, stream, XDR_DECODE);
+
+	for (n = 0; (cur = xdr_getpos(&xdr)) < end && n < 1000; n++) {
+		pos[n] = cur;
+		if (!xdr_dataset_skip(&xdr)) {
+			printf("xdrRandSkipTest: xdr_dataset_skip failed\n");
+			fclose(stream);
+			return FALSE;
+		}
+	}
+	printf("\nxdrRandSkipTest: %d datasets, %u bytes\n\n", n, end);
+	fclose(stream);
+	return TRUE;
+}
+/******************************************************************************
+*
+* xdrRandWrite - write file for random I/O tests
+*
+* RETURN: TRUE for success else FALSE
+*/
+int xdrRandWriteTest(void)
+{
+	char *pData;
+	size_t i, n = 50;
+	DS_DATASET_T *pDataset;
+	FILE *stream;
+	META_T meta, *pMeta = &meta;
+	XDR xdr;
+
+	if ((stream = fopen("rand.bin", "wb")) == NULL) {
+		printf("xdrRandWrite: fopen failed for rand.bin\n");
+		return FALSE;
+	}
+	xdrstdio_create(&xdr, stream, XDR_ENCODE);
+	if(NULL == (pData = malloc(3000*sizeof(KB_T)))) {
+		printf("xdrRandWrite: malloc failed\n");
+		return FALSE;
+	}
+	if (!dsNewDataset(&pDataset, "event") ||
+		!dsAddTable(pDataset, "threeMB", kbyteType, 3000, (char **)&pData) ||
+		!dsAddTable(pDataset, "meta", metaType, 1, (char **)&pMeta) ||
+		!dsAddTable(pDataset, "twoMB", kbyteType, 2000, (char **)&pData)) {
+		dsPerror("dsRandWrite setup failed");
+		goto fail;
+	}
+	for (i = 0; i < n; i++) {
+		pMeta->id = i;
+		if (!xdr_dataset(&xdr, &pDataset)) {
+			dsPerror("writeTest xdr_dataset failed");
+			goto fail;
+		}
+	}
+	printf("\nxdrRandWriteTest: wrote %d datasets with %u bytes\n\n",
+		n, xdr_getpos(&xdr));
+	fclose(stream);
+	free(pData);
+	return dsFreeDataset(pDataset);
+fail:
+	fclose(stream);
+	free(pData);
+	if (pDataset != NULL) {
+		dsFreeDataset(pDataset);
+	}
+	return FALSE;
+}
 /******************************************************************************
 *
 * xdrReadTest - read data from file using xdr_dataset
@@ -529,6 +730,7 @@ fail:
 */
 int xdrReadTest(int fast)
 {
+	int status;
 	FILE *stream;
 	XDR xdr;
 
@@ -541,7 +743,9 @@ int xdrReadTest(int fast)
 		dsReadAll(&xdr);
 		return TRUE;
 	}
-	return dsReadTest(&xdr, NLOOP);
+	status = dsReadTest(&xdr, NLOOP);
+	fclose(stream);
+	return status;
 
 }
 /******************************************************************************
@@ -551,6 +755,7 @@ int xdrReadTest(int fast)
 */
 int xdrWriteTest(int bigEndian)
 {
+	int status;
 	FILE *stream;
 	XDR xdr;
 
@@ -560,7 +765,9 @@ int xdrWriteTest(int bigEndian)
 		return FALSE;
 	}
 	xdrstdio_create(&xdr, stream, XDR_ENCODE);
-	return dsWriteTest(&xdr, NLOOP, bigEndian);
+	status =  dsWriteTest(&xdr, NLOOP, bigEndian);
+	fclose(stream);
+	return status;
 }
 /******************************************************************************
 *

@@ -504,7 +504,8 @@ fail:
 bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset)
 {
 	int swap;
-	size_t i, npad;
+	size_t elcount, i, npad, skip = 0;
+	unsigned pos;
 	DS_DATASET_T *item;
 	DS_LIST_T list;
 	DS_TYPE_T *type;
@@ -523,6 +524,39 @@ bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset)
 	for (i = 0; i < list.count; i++) {
 		item = list.pItem[i];
 		if (DS_IS_TABLE(item)) {
+			elcount = xdrs->x_op == XDR_DECODE ? item->maxcount : item->elcount;
+			if (elcount == 0) {
+				continue;
+			}
+			if (!dsTypePtr(&type, item->tid)) {
+				goto fail;
+			}
+			npad = DS_PAD(elcount*type->stdsize, BYTES_PER_XDR_UNIT);
+			if (item->p.data == NULL) {
+				if (xdrs->x_op != XDR_DECODE) {
+					DS_LOG_ERROR(DS_E_NULL_POINTER_ERROR);
+					goto fail;
+				}
+				skip += elcount*type->stdsize + npad;
+				continue;
+			}
+			if (skip !=0) {
+				pos = xdr_getpos(xdrs) + skip;
+				skip = 0;
+				if (!xdr_setpos(xdrs, pos)) {
+					DS_LOG_ERROR(DS_E_XDR_SETPOS_ERROR);
+					goto fail;
+				}
+			}
+			item->elcount = elcount;
+			if (!xdr_ctype(xdrs, item->p.data, item->elcount, type, swap)) {
+				goto fail;
+			}
+			if (!XDR_PAD(xdrs, npad)) {
+				DS_LOG_ERROR(DS_E_XDR_PAD_ERROR);
+				goto fail;
+			}
+			/*------------------------------------------------------------------
 			if (xdrs->x_op == XDR_DECODE) {
 				item->elcount = item->maxcount;
 			}
@@ -542,12 +576,43 @@ bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset)
 				DS_LOG_ERROR(DS_E_XDR_PAD_ERROR);
 				goto fail;
 			}
+			--------------------------------------------------------------------*/
+		}
+	}
+	if (skip !=0) {
+		pos = xdr_getpos(xdrs) + skip;
+		skip = 0;
+		if (!xdr_setpos(xdrs, pos)) {
+			DS_LOG_ERROR(DS_E_XDR_SETPOS_ERROR);
+			goto fail;
 		}
 	}
 	return dsListFree(&list);
 fail:
 	dsListFree(&list);
 	return FALSE;
+}
+/******************************************************************************
+*
+* xdr_dataset_skip - skip a dataset in an decode stream
+*
+* RETURNS: TRUE if success else FALSE
+*/
+bool_t xdr_dataset_skip(XDR *xdrs)
+{
+	DS_DATASET_T *pDataset = NULL;
+
+	if (xdrs->x_op != XDR_DECODE) {
+		DS_ERROR(DS_E_INVALID_XDR_OP);
+	}
+	if (!xdr_dataset_type(xdrs, &pDataset)) {
+		return FALSE;
+	}
+	if (!xdr_dataset_data(xdrs, pDataset)) {
+		dsFreeDataset(pDataset);
+		return FALSE;
+	}
+	return dsFreeDataset(pDataset);
 }
 /******************************************************************************
 *
