@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.223 2001/08/22 20:19:49 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.224 2001/08/22 21:17:09 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -93,10 +93,10 @@ Bfc_st BFC[] = {
   // Physics,Cdst,... Physics was removed since trg reads the wrong format
   {"P2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
                                                ,"Production chain for summer 2001 data (tpc, rich)",kFALSE},
-  {"P2001a"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,svt_daq,SvtD,emcY2,ftpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
-                               ,"Production chain for summer 2001 data (tpc, rich, ftpc, svt, emc)",kFALSE},
-  {"P2001b"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,svt_daq,SvtD,emcY2,ftpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
-                                   ,"Production chain for summer 2001 data (as P2001a, reshapable)",kFALSE},
+  {"P2001a"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,svt_daq,SvtD,emcY2,ftpc,l3onl,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""              ,"Production chain for summer 2001 data (tpc, rich, ftpc, svt, emc)",kFALSE},
+
+  {"P2001b"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,svt_daq,SvtD,emcY2,ftpc,l3onl,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""                 ,"Production chain for summer 2001 data (P2001a + nohits)",kFALSE},
+
 
 
 
