@@ -57,6 +57,7 @@ extern CC_P void set_staf_status_(long* status);
 extern CC_P long get_staf_status_(long* n);
 extern CC_P void set_staf_result_(float* result);
 extern CC_P float get_staf_result_(long* n);
+extern CC_P void  set_quest_(int* n);
 
 /*- C Stubs for STAF vector functions. -*/
 extern CC_P void set_staf_status(long status);

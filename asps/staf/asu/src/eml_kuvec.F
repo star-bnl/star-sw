@@ -135,3 +135,13 @@ c:<---------------------------------------------------------------------
 
       END
 
+c:<---------------------------------------------------------------------
+C:ROUTINE:      REAL*4 FUNCTION GET_STAF_RESULT
+C:DESCRIPTION:  Get a value of the STAF_RESULT vector.
+C:ARGUMENTS:    INTEGER*4 N
+C:RETURN VALUE: Nth result value
+c:<---------------------------------------------------------------------
+      SUBROUTINE SET_QUEST(N)
+      COMMON/QUEST/IQUEST(100)
+      IQUEST(1) = N
+      END
