@@ -18,7 +18,7 @@
  *         some or all tracks-
  *         This can be handled by filling additional rows and distinguishing
  *         the averaging procedures with the value of 'method'.
- *    (3)  Additional track tables based on altername track finding or fitting
+ *    (3)  Additional track tables based on alternate track finding/fitting
  *         algorithms (e.g. 3D helix, analytic E-loss, Kalman, etc.)-
  *         For additional space point-track assignments additional instances
  *         of the dst_dedx table can be filled.
@@ -44,5 +44,5 @@
   short  ndedx;      /* number of points used in dE/dx calcu.            */
   float  dedx[2];    /* dE/dx summary info; mean,sigma                   */
  } ;
-/*  Last mod. for dst_dedx:   $Date: 1999/11/30 23:43:46 $ */
+/*  Last mod. for dst_dedx:   $Date: 1999/12/01 21:18:20 $ */
 
