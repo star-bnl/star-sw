@@ -14,4 +14,4 @@ interface track_propagator   :        amiModule {
                ,  out     dst_track  ptrack
                );
 };
-/* Last mod. for track_propagator: $Date: 1998/09/25 21:52:07 $ */
+/* Last mod. for track_propagator: $Date: 1998/11/18 21:01:54 $ */
