@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.2 1999/10/05 16:54:14 posk Exp $
+// $Id: plot.C,v 1.3 1999/11/05 00:02:04 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker
@@ -8,6 +8,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.3  1999/11/05 00:02:04  posk
+// Changed the flow vector, Q, to a TVector2.
+//
 // Revision 1.2  1999/10/05 16:54:14  posk
 // Added getPhiWeight method for making the event plane isotropic.
 //
@@ -17,11 +20,11 @@
 
 TFile histFile("flow.hist.root");
 
-const int nHarmonics = 4;
-const int nSubEvents = 4;
-const float twopi = 2. * 3.1416;
+const Int_t nHarmonics = 4;
+const Int_t nSubEvents = 4;
+const Float_t twopi = 2. * 3.1416;
 
-TCanvas* plot(int pageNumber=0, int eventN=0, int harN=0){
+TCanvas* plot(Int_t pageNumber=0, Int_t eventN=0, Int_t harN=0){
 
   TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
   if (cOld) cOld->Delete();
@@ -50,7 +53,7 @@ TCanvas* plot(int pageNumber=0, int eventN=0, int harN=0){
 			     "Flow_v.Pt_Event"};
   // 			     "Flow_Bin_Eta_Event",
   // 			     "Flow_Bin_Pt_Event"};
-  const int nNames = sizeof(baseName) / sizeof(*baseName);
+  const Int_t nNames = sizeof(baseName) / sizeof(*baseName);
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -82,23 +85,23 @@ TCanvas* plot(int pageNumber=0, int eventN=0, int harN=0){
   cout << "  name= " << shortName[pageNumber] << endl;
 
   // set the constants
-  float qMax   =     2.;
-  float etaMax =     2.;
-  float ptMax  =     2.;
-  float phiMax = twopi; 
-  int n_qBins  =    50;
+  Float_t qMax   =     2.;
+  Float_t etaMax =     2.;
+  Float_t ptMax  =     2.;
+  Float_t phiMax = twopi; 
+  Int_t n_qBins  =    50;
 
   char* cp = strstr(shortName[pageNumber],"Subs");
-  int columns = (cp) ? nSubEvents : nSubEvents/2;
-  int rows = (strcmp(shortName[pageNumber],"Flow_Psi_Sub_Corr_Diff")!=0) ?
+  Int_t columns = (cp) ? nSubEvents : nSubEvents/2;
+  Int_t rows = (strcmp(shortName[pageNumber],"Flow_Psi_Sub_Corr_Diff")!=0) ?
     nHarmonics : nHarmonics -1;
-  int pads = rows*columns;
+  Int_t pads = rows*columns;
 
   // make the plots
   if (eventN == 0) {
-    int canvasWidth = 600; int canvasHeight = 780;
+    Int_t canvasWidth = 600, canvasHeight = 780;
   } else {
-    int canvasWidth = 780; int canvasHeight = 600;
+    Int_t canvasWidth = 780, canvasHeight = 600;
   }
   TCanvas* c = new TCanvas(shortName[pageNumber],shortName[pageNumber],
 			   canvasWidth,canvasHeight);
@@ -107,16 +110,17 @@ TCanvas* plot(int pageNumber=0, int eventN=0, int harN=0){
     TPaveLabel* title = new TPaveLabel(0.1,0.96,0.9,0.99,shortName[pageNumber]);
     title->Draw();
   }
-  TPad* graphPad = new TPad("Graphs","Graphs",0.02,0.02,0.98,0.95);
+  TDatime now;
+  TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
+  date->Draw();
+  TPad* graphPad = new TPad("Graphs","Graphs",0.01,0.05,0.95,0.95);
   graphPad->Draw();
   graphPad->cd();
   if (eventN==0) {
     graphPad->Divide(columns,rows);
-    int firstK = 0; int firstJ = 0;
-    int lastK = columns; int lastJ = rows;
+    Int_t firstK = 0, firstJ = 0, lastK = columns, lastJ = rows;
   } else {
-    int firstK = eventN -1; int lastK = eventN;
-    int firstJ = harN -1; int lastJ = harN;
+    Int_t firstK = eventN -1, firstJ = harN -1, lastK = eventN, lastJ = harN;
   }
   TLine* lineZeroEta = new TLine(-etaMax, 0., etaMax, 0.);
   TLine* lineZeroPt = new TLine(0., 0., ptMax, 0.);
@@ -127,7 +131,7 @@ TCanvas* plot(int pageNumber=0, int eventN=0, int harN=0){
     for (int k = firstK ; k < lastK; k++) {
       char countColumns[2];
       sprintf(countColumns,"%d",k+1);
-      int padN = j*columns + k + 1; // pad number
+      Int_t padN = j*columns + k + 1; // pad number
       char* temp = new char[30];    // construct histName
       strcpy(temp,shortName[pageNumber]);
       char* cproj = strstr(temp,".");
@@ -195,7 +199,7 @@ TCanvas* plot(int pageNumber=0, int eventN=0, int harN=0){
 	}
   	lineZeroPt->Draw();
       } else if (strstr(shortName[pageNumber],"Corr")!=0) { // azimuthal corr.
-	float norm = (float)(hist->GetNbinsX()) / hist->Integral(); 
+	Float_t norm = (float)(hist->GetNbinsX()) / hist->Integral(); 
 	cout << "  Normalized by: " << norm << endl;
 	hist->Scale(norm); // normalize height to one
 	if (strstr(shortName[pageNumber],"Diff")!=0) { 
@@ -261,22 +265,29 @@ TCanvas* plot(int pageNumber=0, int eventN=0, int harN=0){
 }
 
 // macro for the profile plots
-TCanvas* plotProfile(int pageN=1){
+TCanvas* plotProfile(Int_t pageN=1){
   pageN--;
   char* profName[] = {"Flow_prof_Cos_Event","Flow_Res_Event"};
-  int columns = nSubEvents/2;
-  int rows = 2;
-  int pads = rows*columns;
+  Int_t columns = nSubEvents/2;
+  Int_t rows = 2;
+  Int_t pads = rows*columns;
 
   TCanvas* c = new TCanvas(profName[1],profName[1],600,780);
-  c->Divide(columns,rows);
+  c->ToggleEventStatus();
+  TDatime now;
+  TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
+  date->Draw();
+  TPad* graphPad = new TPad("Graphs","Graphs",0.01,0.05,0.95,0.99);
+  graphPad->Draw();
+  graphPad->cd();
+  graphPad->Divide(columns,rows);
   for (int j = 0; j < rows; j++) {
-    int profNumber = j;
+    Int_t profNumber = j;
     cout << "profile name= " << profName[profNumber] << endl;
     for (int k = 0; k < columns; k++) {
       char countColumns[2];
       sprintf(countColumns,"%d",k+1);
-      int padN = j*columns + k +1;
+      Int_t padN = j*columns + k +1;
       TString* histName = new TString(profName[profNumber]);
       histName->Append(*countColumns);
       cout << "row= " << j << " col= " << k << " pad= " << padN << "\t" 
@@ -288,7 +299,7 @@ TCanvas* plotProfile(int pageN=1){
 	cout << "### Can't find histogram " << histName->Data() << endl;
 	return;
       }
-      c->cd(padN);
+      graphPad->cd(padN);
       gStyle->SetOptStat(0);
       if (hist) hist->Draw();
       if (hist) hist->Print("all");
@@ -298,10 +309,13 @@ TCanvas* plotProfile(int pageN=1){
   return c;
 }
 
-void plotAll(int nNames = 21, int eventN = 0, int harN = 0) {
+void plotAll(Int_t nNames = 21, Int_t eventN = 0, Int_t harN = 0) {
   for (int i =  1; i < nNames + 1; i++) {
     TCanvas* c = plot(i, eventN, harN);
     c->Print(".ps");
+    char temp[2];
+    cout << "Hit return" << endl;
+    fgets(temp, sizeof(temp), stdin);
     c->Delete();
   }
   cout << "  plotAll Done" << endl;
