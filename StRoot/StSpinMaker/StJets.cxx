@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.4 2003/05/20 19:17:42 thenry Exp $
+// $Id: StJets.cxx,v 1.5 2003/05/20 20:22:44 thenry Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.5  2003/05/20 20:22:44  thenry
+// Moved body of jetTrackIndices to cxx.
+//
 // Revision 1.4  2003/05/20 19:17:42  thenry
 // Fixed problem with jet value accessor functions (always returned -999. fixed),
 // now return useful values.
@@ -101,6 +104,7 @@ void StJets::addProtoJet(StProtoJet& pj)
 	    return;
 	}
 	int muTrackIndex = track->getIndex();
+        cout << "muTrackIndex : " << muTrackIndex << endl;
 	if (muTrackIndex >=0) {
 	    //add to trackToJetIndices
 	    int addAt = mTrackToJetIndices->GetLast()+1;
@@ -148,6 +152,23 @@ StJets::TrackVec StJets::jetParticles(StppEvent* event, int jetIndex)
     
     return vec;
 }
+
+vector<int> StJets::jetTrackIndices(int jetIndex)
+{
+  vector<int> vec;
+  int size = mTrackToJetIndices->GetLast()+1;
+  
+  for (int i=0; i<size; ++i) {
+    TrackToJetIndex* id = dynamic_cast<TrackToJetIndex*>
+      ( mTrackToJetIndices->UncheckedAt(i) );
+    if(id) {
+      int trackIndex = id->trackIndex();
+      vec.push_back( trackIndex ); }
+  }
+  
+  return vec;
+}
+
 
 bool StJets::inBounds(int i)
 {
