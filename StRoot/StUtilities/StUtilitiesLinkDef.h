@@ -7,6 +7,7 @@
 #pragma link C++ class StMessage;
 #pragma link C++ class StMessageManager;
 #pragma link C++ class StMessageCounter;
+#pragma link C++ class StMessMgr;
 #pragma link C++ global gMessMgr;
 #pragma link C++ global gMessage;
 #pragma link C++ global endm;

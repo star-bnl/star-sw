@@ -1,5 +1,8 @@
-// $Id: StMessage.h,v 1.4 1999/06/30 17:24:50 genevb Exp $
+// $Id: StMessage.h,v 1.5 1999/07/08 22:58:18 genevb Exp $
 // $Log: StMessage.h,v $
+// Revision 1.5  1999/07/08 22:58:18  genevb
+// Created an abstract interface with StMessMgr.h hiding template implementation from others, a few other small fixes
+//
 // Revision 1.4  1999/06/30 17:24:50  genevb
 // Better limit management, remove Bool_t
 //
@@ -28,7 +31,7 @@
 #ifndef ClassStMessage
 #define ClassStMessage
 
-class TDatime;
+#include "TDatime.h"
 
 class StMessage {
 
@@ -48,7 +51,7 @@ class StMessage {
    StMessage(const StMessage&);
    virtual ~StMessage();
    virtual           void PrintInfo();
-   virtual          int Print(int nChars=0);
+   virtual          int Print(int nChars=-1);
    virtual     TDatime& GetTime() {return messTime;}
    virtual const  char* GetType() const {return type;}
    virtual        char* GetMessage() {return message;}
