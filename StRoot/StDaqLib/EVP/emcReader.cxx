@@ -3,7 +3,9 @@
 #include <arpa/inet.h>
 
 #include "rtsLog.h"
-#include "rtsSystems.h"
+#include "rtsSystemsEVP.h"
+#define qswap16(test,x) ((test)?swap16(x):(x))
+#define qswap32(test,x) ((test)?swap32(x):(x))
 #include "daqFormats.h"
 
 #include "evpSupport.h"

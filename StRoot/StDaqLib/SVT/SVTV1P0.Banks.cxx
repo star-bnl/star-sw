@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: SVTV1P0.Banks.cxx,v 1.5 2003/10/28 20:53:38 perev Exp $
+ * $Id: SVTV1P0.Banks.cxx,v 1.6 2004/03/01 18:05:47 fisyak Exp $
  *
  * Author: Marcelo Munhoz, J. Schambach
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: SVTV1P0.Banks.cxx,v $
+ * Revision 1.6  2004/03/01 18:05:47  fisyak
+ * Account for new place for rts.h, add osf
+ *
  * Revision 1.5  2003/10/28 20:53:38  perev
- * Linux ==> __linux__
+ *  Linux ==> __linux__
  *
  * Revision 1.4  2003/09/02 17:55:32  perev
  * gcc 3.2 updates + WarnOff
@@ -82,7 +85,7 @@ int classname(Bank_SVTANODK)::swap()
     return iret;
   else
     iret = swap_raw(header.ByteOrder,&bpADC,12);
-#elif __i386__
+#elif defined(__i386__) || defined(__osf__)
   if(!iret) 
     return 0;
   else if(iret < 0) 
