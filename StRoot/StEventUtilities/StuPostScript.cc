@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuPostScript.cc,v 1.1 2002/04/23 03:15:28 ullrich Exp $
+ * $Id: StuPostScript.cc,v 1.2 2002/06/25 02:43:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, April 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StuPostScript.cc,v $
+ * Revision 1.2  2002/06/25 02:43:12  ullrich
+ * Added drawing of hits.
+ *
  * Revision 1.1  2002/04/23 03:15:28  ullrich
  * Initial Revision.
  *
@@ -31,6 +34,8 @@ bool StuPostScript::mFewerPointsPerTrack = false;
 bool StuPostScript::mAddText = false;
 bool StuPostScript::mAllGlobalTracks = false;
 bool StuPostScript::mSideView = false;
+bool StuPostScript::mShowTrackHits = false;
+bool StuPostScript::mShowAllHits = false;
 const int StuPostScript::mllx = -220;
 const int StuPostScript::mlly = -220;
 const int StuPostScript::murx = 220;
@@ -65,6 +70,8 @@ bool StuPostScript::write(const char* filename, const StEvent* event, const char
     mAllGlobalTracks = (options.find('a') != string::npos);
     mAddText = (options.find('t') != string::npos);
     mSideView = (options.find('s') != string::npos);
+    mShowTrackHits = (options.find('h') != string::npos);
+    mShowAllHits = (options.find('H') != string::npos);
     mUserTracks = userTracks;
 
     //
@@ -73,6 +80,7 @@ bool StuPostScript::write(const char* filename, const StEvent* event, const char
     writeHeader(ofs, filename);
     writeDetectorFrame(ofs);
     writeTracks(ofs, event);
+    if (mShowTrackHits || mShowAllHits) writeHits(ofs, event);
     if (mAddText) writeText(ofs, event);
     writeTrailor(ofs);
 
@@ -97,6 +105,23 @@ void StuPostScript::writeHeader(ostream &os, const char* filename) {
     os << "%%CreationDate: " << ctime(&now);
     os << "%%Pages: 0" << endl; 
     os << "%%EndComments" << endl;
+    //
+    //  Definitions
+    //
+    int  hitGrayLevel = mBlackBackground ? 1 : 0;
+    const double boxSize = 1;
+    os << "/Hit {gsave moveto " << -boxSize/2 << ' ' << boxSize/2
+       << " rmoveto " << boxSize << " 0 rlineto 0 " << -boxSize
+       << " rlineto " << -boxSize << " 0 rlineto closepath "
+       << hitGrayLevel << " setgray 0.2 setlinewidth stroke grestore} def" << endl;
+    os << "/tHit {gsave moveto 45 rotate " << -boxSize/2 << ' ' << boxSize/2
+       << " rmoveto " << boxSize << " 0 rlineto 0 " << -boxSize
+       << " rlineto " << -boxSize << " 0 rlineto closepath "
+       << hitGrayLevel << " setgray 0.2 setlinewidth stroke grestore} def" << endl;
+    
+    //
+    //  Scaling and translation
+    //
     os << "1 1 scale" << endl;
     os << -mllx << ' ' << -mlly << " translate" << endl;
 
@@ -327,7 +352,43 @@ void StuPostScript::writeTracks(ostream &os, const StEvent* event)
 	}
     }
 }
-    
+
+void StuPostScript::writeHits(ostream& os, const StEvent* event)
+{
+    unsigned int i, m, n, h;
+    const StTrack  *track;
+    const StHit *hit;
+    const StTpcHitCollection *theHits = event->tpcHitCollection();
+        
+    if (mUserTracks) {
+	for (i=0; i<mUserTracks->size(); i++) {
+	    track = (*mUserTracks)[i];
+	    if (track->detectorInfo()) {
+		const StPtrVecHit& trackHits = track->detectorInfo()->hits(kTpcId);
+		for (m=0; m<trackHits.size(); m++) {
+		    hit = trackHits[m];
+		    os << (mSideView ? hit->position().z() : hit->position().x())
+		       << ' ' << hit->position().y() << " tHit" << endl;
+		}
+	    }
+	}
+    }
+    else {
+	for (n=0; n<theHits->numberOfSectors(); n++) {
+	    for (m=0; m<theHits->sector(n)->numberOfPadrows(); m++) { 
+		for (h=0; h<theHits->sector(n)->padrow(m)->hits().size(); h++) {
+		    hit = theHits->sector(n)->padrow(m)->hits()[h];
+		    if (mShowAllHits || (mShowTrackHits && hit->trackReferenceCount())) {
+			os << (mSideView ? hit->position().z() : hit->position().x())
+			   << ' ' << hit->position().y()
+			   << (hit->trackReferenceCount() ? " tHit" : " Hit") << endl;
+		    }
+		}
+	    }
+	}
+    }
+}
+
 void StuPostScript::writeText(ostream& os, const StEvent* event)
 {
     const int fontsize = 11;
