@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.20 2000/02/24 16:42:22 long Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.21 2000/07/30 02:45:58 long Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,8 +11,15 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.21  2000/07/30 02:45:58  long
+ * 1)add random class
+ * 2)add erf look up table and table builder,EXB pull dx[],time delay dz[]
+ *   OmegaTau
+ * 3)do Charge to wire assignment!!!
+ * 4)add polya distribution for single electron avalanch.
+ *
  * Revision 1.20  2000/02/24 16:42:22  long
- * StTrsWireBinEntry
+ *  StTrsWireBinEntry
  * 		theNewSegment(position,0);--->
  * StTrsWireBinEntry
  * 		theNewSegment(position,0,bin.sigmaL(),bin.sigmaT());
@@ -129,19 +136,24 @@ HepJamesRandom  StTrsWireHistogram::mEngine;
 RandGauss       StTrsWireHistogram::mGaussianDistribution(mEngine);
 RandExponential StTrsWireHistogram::mExponentialDistribution(mEngine);
 
-StTrsWireHistogram::StTrsWireHistogram(StTpcGeometry* geoDb, StTpcSlowControl* scDb, StTrsDeDx* gasDb)
+StTrsWireHistogram::StTrsWireHistogram(StTpcGeometry* geoDb, StTpcSlowControl* scDb, StTrsDeDx* gasDb,StMagneticField* mag)
     : mMin(-1),
       mMax(-1),
       mGeomDb(geoDb),
       mSCDb(scDb),
       mGasDb(gasDb),
       mDoGasGain(true),
-      mDoGasGainFluctuations(false),
+      mDoGasGainFluctuations(true),
       mGasGainCalculationDone(false),
       mDoSingleElectronMultiplication(false),
-      mDoTimeDelay(false),
-      mRangeOfWiresForChargeDistribution(0)
+      mDoTimeDelay(false)
+    
+      
 {
+    srand(0);
+    random=new TRandom(); 
+    mNumberOfEntriesInTable=4000;
+    mRangeOfTable=4.0;
     mNumberOfInnerSectorAnodeWires =
 	mGeomDb->numberOfInnerSectorAnodeWires();
     mNumberOfOuterSectorAnodeWires =
@@ -154,14 +166,58 @@ StTrsWireHistogram::StTrsWireHistogram(StTpcGeometry* geoDb, StTpcSlowControl* s
 
     gasGainCalculation();
     mGasGainCalculationDone = true;
+    FreqFunctionTableBuilder();
+    mOmegaTau=2.34*mag->at(StThreeVector<double>(0,0,0)).z()/kilogauss/5.0;
+    dx[0]=mOmegaTau*0.14/sqrt((1+mOmegaTau*mOmegaTau)*(1+mOmegaTau*mOmegaTau)*0.75+0.25);
+    dx[1]=mOmegaTau*0.04/sqrt((1+mOmegaTau*mOmegaTau)*(1+mOmegaTau*mOmegaTau)*0.925+0.075);
+    dx[2]=-dx[1];
+    dx[3]=-dx[0];
+    dz[0]=0.08; //cm old 0.068cm
+    dz[1]=-0.08; //cm 
+    dz[2]=-0.08; //cm 
+    dz[3]=0.08; //cm
+    
+   
 }
 
 StTrsWireHistogram::~StTrsWireHistogram() {/* nopt */}
 
-StTrsWireHistogram* StTrsWireHistogram::instance(StTpcGeometry* geoDb, StTpcSlowControl* scDb, StTrsDeDx* gasDb)
+void StTrsWireHistogram::FreqFunctionTableBuilder()
+{//  erf(x)
+     int  cntr=0;
+    
+do { 
+   
+    mFreqFunctionTable.push_back(erf(1.0*cntr*mRangeOfTable/mNumberOfEntriesInTable));
+    cntr++; 
+  }while(cntr < mNumberOfEntriesInTable);
+ 
+}  
+double  StTrsWireHistogram::table_fast( double argument) const
+{
+  
+
+ 
+  
+ 
+  float a =argument/mRangeOfTable*mNumberOfEntriesInTable;
+  int index;
+  if(a>=0){
+   index = (int)(a+0.5);
+   if(index>=mNumberOfEntriesInTable)return 1.0;
+   return mFreqFunctionTable[index];}
+  else
+   {index = (int)(-a+0.5);
+   if(index>=mNumberOfEntriesInTable)return -1.0;
+   return -mFreqFunctionTable[index];}
+}
+
+  
+   
+StTrsWireHistogram* StTrsWireHistogram::instance(StTpcGeometry* geoDb, StTpcSlowControl* scDb, StTrsDeDx* gasDb,StMagneticField *mag)
 {
     if(!mInstance) {
-	mInstance = new StTrsWireHistogram(geoDb, scDb, gasDb);
+	mInstance = new StTrsWireHistogram(geoDb, scDb, gasDb,mag);
     }
     else { // do nothing
 	cerr << "Cannot make a second instance of StTrsWireHistogram() " << endl;
@@ -170,128 +226,148 @@ StTrsWireHistogram* StTrsWireHistogram::instance(StTpcGeometry* geoDb, StTpcSlow
     return mInstance;
 }
 
-void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
+void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin,int sector)
 {
     // also needs db information to create coordinate->wire map
     // Find closes wire to: bin.position().y()
-
-    double yCoordinateOfHit = bin.position().y();
-    //PR(yCoordinateOfHit);
-    double tmpWire;
-    int    offSet;
-    int    wireLimit;
     double innerSectorBoundary =
 	mGeomDb->outerSectorEdge() - mGeomDb->ioSectorSpacing();
+    double yCoordinateOfHit = bin.position().y();
+    double sigma=bin.sigmaT();
+    double D=mGeomDb->anodeWirePitch()/2.;
+    double *d=bin.d();
+    double dy=d[1];
     
+    //  if(dy<=0.){cout<<"  wrong in dySubsegment calculation..."<<dy<<" "<<bin.position().y()<<" "<<bin.position().x()<<" "<<bin.position().z()<<endl;
+    //    return ;}
+    //     dy=0.;
+       double yMax=yCoordinateOfHit+1.5*sigma+dy/2.0;
+       double yMin=yCoordinateOfHit-1.5*sigma-dy/2.0;
+	  //  double yMax=yCoordinateOfHit+3.0*sigma+dy/2.0;
+	  //  double yMin=yCoordinateOfHit-3.0*sigma-dy/2.0;
+   
+    int WireHigh,WireLow;
     if(yCoordinateOfHit < innerSectorBoundary) { // in inner part of sector
-	tmpWire =
-	    (yCoordinateOfHit - mGeomDb->firstInnerSectorAnodeWire())/mGeomDb->anodeWirePitch() + .5;
-	offSet = 0;
-	wireLimit = mGeomDb->numberOfInnerSectorAnodeWires() - 1;
+	WireHigh =
+          (int)((yMax - mGeomDb->firstInnerSectorAnodeWire())/mGeomDb->anodeWirePitch()+0.5);      
+        WireLow =
+	    (int)((yMin - mGeomDb->firstInnerSectorAnodeWire())/mGeomDb->anodeWirePitch() + .5);     
+        WireHigh=min(mGeomDb->numberOfInnerSectorAnodeWires() - 1,WireHigh);
+        WireLow=max(1,WireLow); 
+     
+	
     }
-    else { // in outer part of sector
-	tmpWire =
-	    (yCoordinateOfHit - mGeomDb->firstOuterSectorAnodeWire())/mGeomDb->anodeWirePitch() + .5;
-	offSet = mGeomDb->numberOfInnerSectorAnodeWires();
-	wireLimit = mGeomDb->numberOfInnerSectorAnodeWires() +
-	    mGeomDb->numberOfOuterSectorAnodeWires() - 1;
-    }
+    else { // in outer part of sectortmpWireHigh =
+            WireHigh=(int)((yMax - mGeomDb->firstOuterSectorAnodeWire())/mGeomDb->anodeWirePitch() + .5);	        
+       	
+             WireLow =(int)((yMin - mGeomDb->firstOuterSectorAnodeWire())/mGeomDb->anodeWirePitch() + .5);     
+            WireHigh=min(mGeomDb->numberOfOuterSectorAnodeWires() - 1,WireHigh)+mGeomDb->numberOfInnerSectorAnodeWires();
+            WireLow=max(1,WireLow)+mGeomDb->numberOfInnerSectorAnodeWires(); 
+	
+    } 
+  
+    int WireIndex,gWire;
+    double Prob;
+    double  nQOnWire;
+    double y1,y2,y3,y4;
+    double ax=0.;
+    double  az=0.;
+    double nQ=0; 
+    int Qtotal=0;
+    D=D/4;
+    float w=0.1   ;  // pitch of gating grid ;
+    for(WireIndex=WireLow;WireIndex<=WireHigh;WireIndex++)
+      {
+	for(gWire=-2;gWire<2;gWire++){
+        
+	 y2=(wireCoordinate(WireIndex)+w*gWire+w/2+D+dy-yCoordinateOfHit)/sigma/M_SQRT2;
+         y1=(wireCoordinate(WireIndex)+w*gWire+w/2-D+dy-yCoordinateOfHit)/sigma/M_SQRT2;
+         y4=(wireCoordinate(WireIndex)+w*gWire+w/2+D-dy-yCoordinateOfHit)/sigma/M_SQRT2;
+         y3=(wireCoordinate(WireIndex)+w*gWire+w/2-D-dy-yCoordinateOfHit)/sigma/M_SQRT2;
+	  
 
-    //
-    // CAREFUL at the i/o sector boundaries
-    // let boundary wires catch more than +/- pitch/2
-    //
-    int    wireIndex = static_cast<int>(tmpWire) + offSet; 
-    if(wireIndex < offSet)
-	wireIndex = offSet;
-    if(wireIndex > wireLimit)
-	wireIndex = wireLimit;
+	  //    y2=(wireCoordinate(WireIndex)+w*gWire+D-yCoordinateOfHit)/sigma/M_SQRT2;
+	  //  y1=(wireCoordinate(WireIndex)+w*gWire-D-yCoordinateOfHit)/sigma/M_SQRT2;
+	 Prob=y2*table_fast(y2)-y1*table_fast(y1)
+             -y4*table_fast(y4)+y3*table_fast(y3)
+             +1./sqrt(M_PI)*(exp(-y2*y2)- exp(-y1*y1)
+	     +exp(-y3*y3)- exp(-y4*y4));
+	    Prob=Prob*sigma/dy/4.0*M_SQRT2;
+	    // Prob=0.5*(table_fast(y2)-table_fast(y1));
+        nQOnWire=	(int)(Prob* bin.numberOfElectrons()+0.5);  
+        Qtotal+=nQOnWire;
+	  if( Qtotal> bin.numberOfElectrons())nQOnWire--;  
+            
+               
+        double newx,newz;  
+        
+        if(nQOnWire>0){
+          
+          
 
-    //PR(offSet);
-    //PR(wireLimit);
-    //PR(wireIndex);
-    //PR(wireCoordinate(wireIndex));
+          nQ+=nQOnWire;
+	  //  float unknown=0.02;
+	  //	  newx=random->Gaus(bin.position().x(),bin.sigmaT()/sqrt(nQOnWire)+unknown); 
+	  //   cout<<bin.position().x()<<" "<<bin.sigmaT()<<" "<<nQOnWire<<" "<<bin.position().z()<<" "<<bin.sigmaL()<<endl;
+          newx=random->Gaus(bin.position().x(),bin.sigmaT()/sqrt(nQOnWire)); 
+          
+	  newz=random->Gaus(bin.position().z(),bin.sigmaL()/sqrt(nQOnWire)); 
+     
+           if(newz<0.)continue; 
+	    if(sector>12.5)newx+=dx[gWire+2];
+	   else
+	    newx-=dx[gWire+2];  
+           
 
-    //
-    // Check Wire Index before doing any further calculations:
-    //
-    if (wireIndex >= 0 &&
-	wireIndex < mTotalNumberOfAnodeWires) {
-
-	//
-	// Distribute Charge on Multiple Wires!
-	//
-	double chargeFraction;
-	int lowestWireToCollectCharge =
-	    max(0,(wireIndex-mRangeOfWiresForChargeDistribution));
-	int highestWireToCollectCharge =
-	    min((mTotalNumberOfAnodeWires-1),(wireIndex+mRangeOfWiresForChargeDistribution));
-
-	double delta = mGeomDb->anodeWirePitch()/2.;
-	double sigma =
-	    mGasDb->transverseDiffusionCoefficient()*sqrt(bin.position().z());
-
-	for(int kk=lowestWireToCollectCharge;
-	    kk<=highestWireToCollectCharge; kk++) {
-
-	    // the y coordinate of the wire:
-	    //double yOfMiniSegment = wireCoordinate(kk);
-	    //
-	    // Make a new StTrsWireBinEntry
-	    //
-	    //    StThreeVector<double>
-	    //	position(bin.position().x(),
-	    //		 wireCoordinate(kk),
-	    //		 bin.position().z()); 
-       StThreeVector<double>	
-                position(bin.position().x(),
-                   	 bin.position().y(),
-	    		 bin.position().z());//HL,8/31/99
+	      newz+=dz[gWire+2]; 
+          
+	    //   ax=ax+newx*nQOnWire;
+	    //   az=az+newz*nQOnWire;
+	   //  newx=0;
+	   //  newz=100;
+	       StThreeVector<double>
+	          position(newx,
+			   wireCoordinate(WireIndex),
+			  
+			   //	    bin.position().y(),
+	   		    newz); //HL 04/25/00
+    
              
-	    StTrsWireBinEntry
-		theNewSegment(position,0,bin.sigmaL(),bin.sigmaT());
-	     
-	    //
-	    // Establish integration Limits:
-	    // Take care of charge conservatione (Integral to +/- infinity)
-	    double yLower = (kk == lowestWireToCollectCharge) ?
-		-9.e99 : (wireCoordinate(kk) - delta);
-	    double yUpper = (kk == highestWireToCollectCharge) ?
-		+9.e99 : wireCoordinate(kk) + delta;
-
-	    double arg1 = (yUpper-yCoordinateOfHit)/(M_SQRT2*sigma);
-	    double arg2 = (yLower-yCoordinateOfHit)/(M_SQRT2*sigma);
-
-	    chargeFraction = 0.5*(erf(arg1)-erf(arg2));
-            chargeFraction=1.0;//HL,8/31/99
+	
+	   
 
 	    //
 	    // Gas Gain
-	    double avalancheFactor = bin.numberOfElectrons()*chargeFraction;
+	    double avalancheFactor = nQOnWire;
 	    if(mDoGasGain) {
+	       if(nQOnWire<12)mDoSingleElectronMultiplication=1;
+	       //    mDoSingleElectronMultiplication=0;
 		if(mDoSingleElectronMultiplication) {
 		    avalancheFactor =
-			exponentialAvalanche(kk, bin.numberOfElectrons()*chargeFraction);
+		      //	exponentialAvalanche(WireIndex,avalancheFactor );	
+                                 polyaAvalanche(WireIndex,avalancheFactor );
 		}
 		else {  // Do Gaussian scaling
 		    avalancheFactor =
-			gaussianAvalanche(kk, bin.numberOfElectrons()*chargeFraction);
+			gaussianAvalanche(WireIndex, avalancheFactor);
 		}
 	    }  // end of gas gain
            
-	    
-	    theNewSegment.setNumberOfElectrons(avalancheFactor);	
+	    if(avalancheFactor<0.5)continue;
+            StTrsWireBinEntry
+		theNewSegment(position,0,bin.sigmaL(),sigma,bin.d()); 
+	    theNewSegment.setNumberOfElectrons((int)(avalancheFactor+0.5)); 
 	  
 	    // Time Delay
 	    // Increase DriftLength Proportional to the Distance from the Wire
 	    // Keeping in mind a 2mm shift is approximately .1 timebins
 	    // This means 500 um is 2 mm!
 	    // Currently a linear function is used, but a better profile
-	    // can probably be found with some study.
+	    // can Probably be found with some study.
 
 	    if(mDoTimeDelay) {
 		double distanceToWire =
-		    fabs(yCoordinateOfHit - wireCoordinate(wireIndex));
+		    fabs(yCoordinateOfHit - wireCoordinate(WireIndex));
 		{
 #ifndef ST_NO_NAMESPACES
 		    using namespace units;
@@ -322,20 +398,22 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 // 					    (scaledSigma));
 // 	    theNewSegment.position().setX(xPosition);
 
-	    mSectorWires[kk].push_back(theNewSegment);
+	    mSectorWires[WireIndex].push_back(theNewSegment);
 
 	    //
 	    // Set the limits for the wire Histogram
-	    if (mMin<0) mMin = kk;
-	    if (mMax<0) mMax = kk;
-	    if (mMin > kk) mMin = kk;
-	    if (mMax < kk) mMax = kk;
-	    
-	} // loop over kk wires
-    }
-    else {
-	cout << "wire " << wireIndex << " Out Of Wire Grid..."<< endl;
-    }
+	    if (mMin<0) mMin = WireIndex;
+	    if (mMax<0) mMax = WireIndex;
+	    if (mMin >WireIndex ) mMin = WireIndex;
+	    if (mMax <WireIndex) mMax = WireIndex;
+	  
+	} //endif nQ>0
+	}  //loop over gWire
+      }//  for loop over  WireIndex 
+   
+   
+   
+ 
 }
 
 void StTrsWireHistogram::clear()
@@ -346,6 +424,8 @@ void StTrsWireHistogram::clear()
     }
     mMin = -1;
     mMax = -1;
+   
+    
 
 }
 
@@ -403,7 +483,7 @@ void StTrsWireHistogram::setDoGasGainFluctuations(bool doIt)
 }
 
 // These two could be inline, but are only called once
-// so probably doesn't matter performance wise
+// so Probably doesn't matter performance wise
 void StTrsWireHistogram::setGasGainInnerSector(double v)
 {
     mInnerSectorGasGain = v;
@@ -416,10 +496,49 @@ void StTrsWireHistogram::setGasGainOuterSector(double v)
     cout << "Gas gain OS: " << mOuterSectorGasGain << endl;
 }
 
+double StTrsWireHistogram::polya(){
+  double x,y;
+  do{
+    x=drand48()*8.0;
+    y=drand48();
+  }while(y>2.4395225*x*sqrt(x)/exp(x));
+  return x;
+}
+          
+double StTrsWireHistogram::polyaAvalanche(int iWire, double numElec)
+{
+    double gasGainFactor;
+    double electrons = 0;
+    double  b=0.4;
+         mInnerSectorGasGain=3558;
+    //   mOuterSectorGasGain=1315;
+         mOuterSectorGasGain=1310;
+    if(mDoGasGainFluctuations) {
+	int ctr = 0;
+	do {
+	    gasGainFactor = polya();
+	    electrons += gasGainFactor;
+	    ctr++;
+	} while(ctr<numElec);
+         
+  electrons =(iWire < mNumberOfInnerSectorAnodeWires) ?
+	    electrons*b*mInnerSectorGasGain: 
+	    electrons*b*mOuterSectorGasGain; 
+    }
+    else {
+	electrons = (iWire < mNumberOfInnerSectorAnodeWires) ?
+	    numElec*mInnerSectorGasGain :
+	    numElec*mOuterSectorGasGain;
+    }
+    return electrons;
+}
 double StTrsWireHistogram::exponentialAvalanche(int iWire, double numElec)
 {
     double gasGainFactor;
     double electrons = 0;
+         mInnerSectorGasGain=3558;
+  
+         mOuterSectorGasGain=1310;
     if(mDoGasGainFluctuations) {
 	int ctr = 0;
 	do {
@@ -446,28 +565,31 @@ double StTrsWireHistogram::gaussianAvalanche(int iWire, double numElec)
     // here
     double innerFluc;
     double outerFluc;
-    if(mDoGasGainFluctuations) {
-	innerFluc = .13;
-	outerFluc = .13;
-    }
-    else {
-	innerFluc = 0.;
-	outerFluc = 0.;
-        return  (iWire < mNumberOfInnerSectorAnodeWires) ?//HL
-	  mInnerSectorGasGain*numElec ://HL
-	  mOuterSectorGasGain*numElec ;//HL
-    }
+    double b=0.4;
+    //   mInnerSectorGasGain=2503;
+         mInnerSectorGasGain=3558;
+    //   mOuterSectorGasGain=1315;
+         mOuterSectorGasGain=1310;
+    //  mDoGasGainFluctuations=0;
+    if(mDoGasGainFluctuations) 
+        return (iWire < mNumberOfInnerSectorAnodeWires) ?
+	mGaussianDistribution.shoot(mInnerSectorGasGain*numElec,mInnerSectorGasGain*sqrt(numElec*b)):
+	mGaussianDistribution.shoot(mOuterSectorGasGain*numElec,mOuterSectorGasGain*sqrt(numElec*b));
+      
+    
+    else
+         return (iWire < mNumberOfInnerSectorAnodeWires) ?
+	 mInnerSectorGasGain*numElec:
+	 mOuterSectorGasGain*numElec; 
 
-    return (iWire < mNumberOfInnerSectorAnodeWires) ?
-	mGaussianDistribution.shoot(mInnerSectorGasGain,innerFluc*mInnerSectorGasGain)*numElec :
-	mGaussianDistribution.shoot(mOuterSectorGasGain,outerFluc*mOuterSectorGasGain)*numElec;
+   
 }
 
 
 double StTrsWireHistogram::noFluctuations(int wireIndex) const
 {
     return (wireIndex<mNumberOfInnerSectorAnodeWires) ?
-	mInnerSectorGasGain : mOuterSectorGasGain;
+         mInnerSectorGasGain : mOuterSectorGasGain;
 }
 
 void StTrsWireHistogram::gasGainCalculation()
