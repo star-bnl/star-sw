@@ -8,12 +8,12 @@
 
 struct ftpcGas { 
 
-   float  percentAr;   /*   */
-   float  percentCO2;   /*   */
-   float  percentNe;   /*   */
-   float  percentHe;   /*   */
-   float  gasGain;   /*   */
-   float  gasAttenuation;   /*   */
-   float  gasIonizationPotential;   /*   */
+   float  percentAr;                /*   */
+   float  percentCO2;               /*   */
+   float  percentNe;                /*   */
+   float  percentHe;                /*   */
+   float  gasGain;                  /*   */
+   float  gasAttenuation;           /* [1/cm] */
+   float  gasIonizationPotential;   /* [eV] */
 
  };  
