@@ -1,7 +1,13 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.9 1999/12/08 00:00:24 calderon Exp $
+ * $Id: StAssociationMaker.h,v 1.10 1999/12/14 07:07:41 calderon Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.10  1999/12/14 07:07:41  calderon
+ * Added Ratio Number of Common Hits / Number of Reconstructed Hits for
+ * each detector.
+ * Numbering scheme from StEvent & StMcEvent as per SVT request
+ * Added Kink, V0 and Xi vertex associations.
+ *
  * Revision 1.9  1999/12/08 00:00:24  calderon
  * New version of StAssociationMaker.
  * -Uses new StEvent / StMcEvent
@@ -53,11 +59,16 @@ class StTpcHit;
 class StSvtHit;
 class StFtpcHit;
 class StGlobalTrack;
+class StVertex;
+class StKinkVertex;
+class StV0Vertex;
+class StXiVertex;
 
 class StMcTpcHit;
 class StMcSvtHit;
 class StMcFtpcHit;
 class StMcTrack;
+class StMcVertex;
 
 class StTrackPairInfo;
 
@@ -114,6 +125,20 @@ struct compMcTrack {
     bool operator()(const StMcTrack*, const StMcTrack*) const;
 };
 
+struct compKinkVertex {
+    bool operator()(const StKinkVertex*, const StKinkVertex*) const;
+};
+struct compV0Vertex {
+    bool operator()(const StV0Vertex*, const StV0Vertex*) const;
+};
+struct compXiVertex {
+    bool operator()(const StXiVertex*, const StXiVertex*) const;
+};
+
+struct compMcVertex {
+    bool operator()(const StMcVertex*, const StMcVertex*) const;
+};
+
 // Need to define the maps & Iterators,
 // typedef them so we don't write the whole thing out every time
 
@@ -138,6 +163,21 @@ typedef  multimap<const StMcFtpcHit*, const StFtpcHit*, compMcFtpcHit> mcFtpcHit
 //
 typedef  multimap<StGlobalTrack*, StTrackPairInfo*, compTrack>   rcTrackMapType;//!
 typedef  multimap<StMcTrack*,     StTrackPairInfo*, compMcTrack> mcTrackMapType;//!
+//
+// Kink Vertices
+//
+typedef  multimap<StKinkVertex*, StMcVertex*, compKinkVertex>   rcKinkMapType;//!
+typedef  multimap<StMcVertex*, StKinkVertex*, compMcVertex> mcKinkMapType;//!
+//
+// V0 Vertices
+//
+typedef  multimap<StV0Vertex*, StMcVertex*, compV0Vertex>   rcV0MapType;//!
+typedef  multimap<StMcVertex*, StV0Vertex*, compMcVertex> mcV0MapType;//!
+//
+// Xi Vertices
+//
+typedef  multimap<StXiVertex*, StMcVertex*, compXiVertex>   rcXiMapType;//!
+typedef  multimap<StMcVertex*, StXiVertex*, compMcVertex> mcXiMapType;//!
 
 #else
 // This type of definition is really criptic, but this is what ObjectSpace wants...
@@ -193,7 +233,42 @@ typedef  multimap<rcTrackMapKey, trackMapValue, compTrack,
     allocator< OS_PAIR(rcTrackMapKey, trackMapValue) > > rcTrackMapType;//!
 typedef  multimap<mcTrackMapKey, trackMapValue, compMcTrack,
     allocator< OS_PAIR(mcTrackMapKey, trackMapValue) > > mcTrackMapType;//!
+//
+// Kink Vertices
+//
+typedef  StKinkVertex*    rcKinkMapKey;
+typedef  StKinkVertex*    mcKinkMapValue;
+typedef  StMcVertex*      rcKinkMapValue;
+typedef  StMcVertex*      mcKinkMapKey;
 
+typedef  multimap<rcKinkMapKey, rcKinkMapValue, compKinkVertex,
+    allocator< OS_PAIR(rcKinkMapKey, rcKinkMapValue) > > rcKinkMapType;//!
+typedef  multimap<mcKinkMapKey, mcKinkMapValue, compMcVertex,
+    allocator< OS_PAIR(mcKinkMapKey, mcKinkMapValue) > > mcKinkMapType;//!
+//
+// V0 Vertices
+//
+typedef  StV0Vertex*    rcV0MapKey;
+typedef  StV0Vertex*    mcV0MapValue;
+typedef  StMcVertex*    rcV0MapValue;
+typedef  StMcVertex*    mcV0MapKey;
+
+typedef  multimap<rcV0MapKey, rcV0MapValue, compV0Vertex,
+    allocator< OS_PAIR(rcV0MapKey, rcV0MapValue) > > rcV0MapType;//!
+typedef  multimap<mcV0MapKey, mcV0MapValue, compMcVertex,
+    allocator< OS_PAIR(mcV0MapKey, mcV0MapValue) > > mcV0MapType;//!
+//
+// Xi Vertices
+//
+typedef  StXiVertex*    rcXiMapKey;
+typedef  StXiVertex*    mcXiMapValue;
+typedef  StMcVertex*    rcXiMapValue;
+typedef  StMcVertex*    mcXiMapKey;
+
+typedef  multimap<rcXiMapKey, rcXiMapValue, compXiVertex,
+    allocator< OS_PAIR(rcXiMapKey, rcXiMapValue) > > rcXiMapType;//!
+typedef  multimap<mcXiMapKey, mcXiMapValue, compMcVertex,
+    allocator< OS_PAIR(mcXiMapKey, mcXiMapValue) > > mcXiMapType;//!
 
 #endif
 typedef  rcTpcHitMapType::iterator          rcTpcHitMapIter;     //!
@@ -205,6 +280,15 @@ typedef  rcFtpcHitMapType::value_type       rcFtpcHitMapValType; //!
 typedef  rcTrackMapType::iterator           rcTrackMapIter;      //!
 typedef  rcTrackMapType::const_iterator     rcTrackMapConstIter; //!
 typedef  rcTrackMapType::value_type         rcTrackMapValType;   //!
+typedef  rcKinkMapType::iterator            rcKinkMapIter;      //!
+typedef  rcKinkMapType::const_iterator      rcKinkMapConstIter; //!
+typedef  rcKinkMapType::value_type          rcKinkMapValType;   //!
+typedef  rcV0MapType::iterator              rcV0MapIter;      //!
+typedef  rcV0MapType::const_iterator        rcV0MapConstIter; //!
+typedef  rcV0MapType::value_type            rcV0MapValType;   //!
+typedef  rcXiMapType::iterator              rcXiMapIter;      //!
+typedef  rcXiMapType::const_iterator        rcXiMapConstIter; //!
+typedef  rcXiMapType::value_type            rcXiMapValType;   //!
 
 typedef  mcTpcHitMapType::iterator          mcTpcHitMapIter;     //!
 typedef  mcTpcHitMapType::value_type        mcTpcHitMapValType;  //!
@@ -215,6 +299,15 @@ typedef  mcFtpcHitMapType::value_type       mcFtpcHitMapValType; //!
 typedef  mcTrackMapType::iterator           mcTrackMapIter;      //!
 typedef  mcTrackMapType::const_iterator     mcTrackMapConstIter; //!
 typedef  mcTrackMapType::value_type         mcTrackMapValType;   //!
+typedef  mcKinkMapType::iterator            mcKinkMapIter;      //!
+typedef  mcKinkMapType::const_iterator      mcKinkMapConstIter; //!
+typedef  mcKinkMapType::value_type          mcKinkMapValType;   //!
+typedef  mcV0MapType::iterator              mcV0MapIter;      //!
+typedef  mcV0MapType::const_iterator        mcV0MapConstIter; //!
+typedef  mcV0MapType::value_type            mcV0MapValType;   //!
+typedef  mcXiMapType::iterator              mcXiMapIter;      //!
+typedef  mcXiMapType::const_iterator        mcXiMapConstIter; //!
+typedef  mcXiMapType::value_type            mcXiMapValType;   //!
 #else
 class rcTpcHitMapType;     //!
 class rcTpcHitMapIter;     //!
@@ -229,6 +322,18 @@ class rcTrackMapType;      //!
 class rcTrackMapValType;   //!
 class rcTrackMapIter;      //!
 class rcTrackMapConstIter; //!
+class rcKinkMapType;       //!
+class rcKinkMapValType;    //!
+class rcKinkMapIter;       //!
+class rcKinkMapConstIter;  //!
+class rcV0MapType;         //!
+class rcV0MapValType;      //!
+class rcV0MapIter;         //!
+class rcV0MapConstIter;    //!
+class rcXiMapType;         //!
+class rcXiMapValType;      //!
+class rcXiMapIter;         //!
+class rcXiMapConstIter;    //!
 
 class mcTpcHitMapType;     //!
 class mcTpcHitMapIter;     //!
@@ -243,6 +348,18 @@ class mcTrackMapType;      //!
 class mcTrackMapValType;   //!
 class mcTrackMapIter;      //!
 class mcTrackMapConstIter; //!
+class mcKinkMapType;       //!
+class mcKinkMapValType;    //!
+class mcKinkMapIter;       //!
+class mcKinkMapConstIter;  //!
+class mcV0MapType;         //!
+class mcV0MapValType;      //!
+class mcV0MapIter;         //!
+class mcV0MapConstIter;    //!
+class mcXiMapType;         //!
+class mcXiMapValType;      //!
+class mcXiMapIter;         //!
+class mcXiMapConstIter;    //!
 
 #endif
 
@@ -273,6 +390,12 @@ class StAssociationMaker : public StMaker {
     mcFtpcHitMapType* mcFtpcHitMap() { return mMcFtpcHitMap; } //!
     rcTrackMapType*   rcTrackMap()   { return mRcTrackMap; }   //!
     mcTrackMapType*   mcTrackMap()   { return mMcTrackMap; }   //!
+    rcKinkMapType*    rcKinkMap()    { return mRcKinkMap; }    //!
+    mcKinkMapType*    mcKinkMap()    { return mMcKinkMap; }    //!
+    rcV0MapType*      rcV0Map()      { return mRcV0Map; }      //!
+    mcV0MapType*      mcV0Map()      { return mMcV0Map; }      //!
+    rcXiMapType*      rcXiMap()      { return mRcXiMap; }      //!
+    mcXiMapType*      mcXiMap()      { return mMcXiMap; }      //!
 
 private:
 
@@ -286,11 +409,17 @@ private:
     mcFtpcHitMapType* mMcFtpcHitMap; //!
     rcTrackMapType*   mRcTrackMap;   //!
     mcTrackMapType*   mMcTrackMap;   //!
+    rcKinkMapType*    mRcKinkMap;    //!
+    mcKinkMapType*    mMcKinkMap;    //!
+    rcV0MapType*      mRcV0Map;      //!
+    mcV0MapType*      mMcV0Map;      //!
+    rcXiMapType*      mRcXiMap;      //!
+    mcXiMapType*      mMcXiMap;      //!
 
     Bool_t drawinit;
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.9 1999/12/08 00:00:24 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.10 1999/12/14 07:07:41 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker, 1)
 

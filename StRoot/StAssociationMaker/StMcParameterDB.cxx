@@ -1,11 +1,17 @@
 /*****************************************
  *
- * $Id: StMcParameterDB.cxx,v 1.4 1999/12/08 00:00:25 calderon Exp $
+ * $Id: StMcParameterDB.cxx,v 1.5 1999/12/14 07:07:41 calderon Exp $
  *
  * Changed extension to .cxx so that it
  * would be accessible from Root macro
  *
  * $Log: StMcParameterDB.cxx,v $
+ * Revision 1.5  1999/12/14 07:07:41  calderon
+ * Added Ratio Number of Common Hits / Number of Reconstructed Hits for
+ * each detector.
+ * Numbering scheme from StEvent & StMcEvent as per SVT request
+ * Added Kink, V0 and Xi vertex associations.
+ *
  * Revision 1.4  1999/12/08 00:00:25  calderon
  * New version of StAssociationMaker.
  * -Uses new StEvent / StMcEvent
@@ -37,8 +43,6 @@ ClassImp(StMcParameterDB)
     
 StMcParameterDB* StMcParameterDB::mParamDB = 0;
 
-StMcParameterDB::~StMcParameterDB() { /*noop*/ }
-
 StMcParameterDB* StMcParameterDB::instance()
 {
     if (!mParamDB) mParamDB = new StMcParameterDB;
@@ -46,12 +50,13 @@ StMcParameterDB* StMcParameterDB::instance()
 }
 
 StMcParameterDB::StMcParameterDB()
-    :mXCutTpc(5.*millimeter),mZCutTpc(3.*millimeter),mReqCommonHitsTpc(3),
+    :mXCutTpc(5.*millimeter),mYCutTpc(5.*millimeter),mZCutTpc(3.*millimeter),mReqCommonHitsTpc(3),
      mXCutSvt(1.*millimeter),mYCutSvt(1.*millimeter),mZCutSvt(1.*millimeter),mReqCommonHitsSvt(1),
      mRCutFtpc(3.*millimeter),mPhiCutFtpc(5.*degree),mReqCommonHitsFtpc(2)
 { /*noop*/ }
 
 void StMcParameterDB::setXCutTpc(float val) { mXCutTpc = val ;}
+void StMcParameterDB::setYCutTpc(float val) { mYCutTpc = val ;}
 void StMcParameterDB::setZCutTpc(float val) { mZCutTpc = val ;}
 void StMcParameterDB::setReqCommonHitsTpc(unsigned int val) { mReqCommonHitsTpc = val;}
 
@@ -68,6 +73,7 @@ ostream& operator<<(ostream &os, const StMcParameterDB& mcDb)
 {
     os << " TPC Cuts " << endl;
     os << " X Cut   : " << mcDb.xCutTpc()/millimeter << " mm" << endl; 
+    os << " Y Cut   : " << mcDb.yCutTpc()/millimeter << " mm" << endl; 
     os << " Z Cut   : " << mcDb.zCutTpc()/millimeter << " mm" << endl; 
     os << " Required Hits for Associating Tracks: " << mcDb.reqCommonHitsTpc() << endl;
     os << " SVT Cuts " << endl;
