@@ -46,6 +46,7 @@ my $OSFID    = "";
 my $ROOTCINTD= "";
 my $CPPPATH  = "";
 my $INCLUDE_PATH = $INCLUDE;
+my $LINKMODULECOM  = "";
 $_ = $STAR_SYS;
 print "System: ", $_,"\n";
 if (/^i386_linux2/ || /^i386_redhat50/ || /^i386_redhat51/ ||  /^i386_redhat52/) {
@@ -112,7 +113,8 @@ elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $SO        =  $CXX;
   $SOFLAGS   =  " -G";
   my $STDHOME = "/afs/rhic/star/packages/ObjectSpace/2.0m";
-  $CPPPATH .= $STDHOME . ":" . $STDHOME ."/ospace/std:" . $STDHOME . "/ospace:";
+#  $CPPPATH .= $STDHOME . ":" . $STDHOME ."/ospace/std:" . $STDHOME . "/ospace:";
+  $CXXFLAGS .= " -I" . $STDHOME . " -I" . $STDHOME ."/ospace/std -I" . $STDHOME . "/ospace";
 }
 elsif (/^intel_wnt/) {
 #  $DEBUG    = "-Zi";
@@ -122,7 +124,8 @@ elsif (/^intel_wnt/) {
   $A        = "lib";
   $Cxx      = "cxx";
   $so       = "DLL";
-
+  $AR       = "lib";
+  $ARFLAGS  = "-nologo -MACHINE:IX86";
   $Cout     = "-Fo";
   $Fout     = "-Fo";
   $Lout     = "-out:";
@@ -154,7 +157,7 @@ elsif (/^intel_wnt/) {
 }
 
 $MAIN    = cwd();
-$INCLUDE = "#inc";
+$INCLUDE = "#include";
 $LIB     = "";
 $EXPORT = "#.share";
 $FFLAGS .= " -DCERNLIB_TYPE";
@@ -170,25 +173,29 @@ print "LD  =\t",$LD,";\t$LDFLGAS = \t",$LDFLAGS,"\n";
 print "SO  =\t",$SO,";\t$SOFLGAS = \t",$SOFLAGS,"\n";
 print "INCLUDE = ",$INCLUDE,"\n";
 (my $inc = $INCLUDE) =~ s/\#//g;
-$CPPPATH .= ".:" . $inc .":StRoot:pams:.share:.share/tables:StRoot/StDbLib:StRoot/StDbLib/Calibrations:StRoot/StDbLib/Conditions:StRoot/StDbLib/Geometry";
-my @includes = ("St_base","StChain","StUtilities","xdf2root","StarClassLibrary","StEvent");
+$CPPPATH .= ".:" . $inc .":StRoot:pams:.share:.share/tables";#:StRoot/StDbLib:StRoot/StDbLib/Calibrations:StRoot/StDbLib/Conditions:StRoot/StDbLib/Geometry";
+#my @includes = ("St_base","StChain","StUtilities","xdf2root","StarClassLibrary","StEvent");
 foreach my $inc (@includes) {
   $CPPPATH .= ":StRoot/" . $inc;
 }
-$CPPPATH .= ":" . $ROOTSYS . "/src:" . $STAF . "/inc:/opt/star/include";
+my $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/ROOT/src";
+
+$CPPPATH .= ":" . $ROOTSRC . ":" . $STAF . "/inc:/opt/star/include";
 #$CPPPATH =~ s/:/$PATH_SEPARATOR/g;
 #$FCPPPATH = "-I.. -I../.. -I" . $CERN_ROOT ."/include -I" . $CERN_ROOT . "/include/geant321";
 $FCPPPATH = "-I.. -I../.. -I" . $STAR ."/cern/geant321 -I" . $STAR . "/cern/geant321/geant321";
 print "CPPPATH = ",$CPPPATH,"\n";
-print " STAR = ",$STAR,"\n";
+print "STAR = ",$STAR,"\n";
 push @Reps, $STAR;
 Repository ($STAR);
-(my $DirPath  = cwd()) =~ s/\/$//g;
-print " in DirPath=$DirPath\n";
+(my $DirPath  = cwd()) =~ s/\/$//g;#print " in DirPath=$DirPath\n";
 if ($STAR_SYS !~ /^intel_wnt/) {
   $INCLUDE_PATH = "";
+  $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %<";
 }
 else {
+  $LINKMODULECOM = 
+"BINDEXPLIB.exe %> %< > %>.def && %AR %ARFLAGS %Lout%>.lib  %< -def:%>.def && %SO %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
   $CPPPATH = "";
   $FCPPPATH = "";
   foreach my $dir ($DirPath, @Reps) {
@@ -201,7 +208,7 @@ else {
       $INCLUDE_PATH .= ";" . $dir . "/StRoot/" . $inc;
     }
   }
-  $INCLUDE_PATH .= ";" . $ROOTSYS . "/src";
+  $INCLUDE_PATH .= ";" . $ROOTSRC . "/src";
   $INCLUDE_PATH .= ";" . $STAF . "/inc";
   $INCLUDE_PATH .= ";" . $CERN_ROOT . "/include";
 }
@@ -224,22 +231,22 @@ $env = new cons(
 		'Cout'         => $Cout,
 		'Lout'         => $Lout,
 		'SoOUT'        => $SoOUT,
-		'FCCOM'        => 'cd %<:d && %FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %<:f %Fout%>:f',
+		'FCCOM'        => 'cd %>:d && %FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %<:f %Fout%>:f',
 		'GEANT3'       => $GEANT3,
-		'GEANT3COM'    => 'cd %<:d && %GEANT3 %<:f -o %<:f.F; %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %<:f.F -o %>:f',
+		'GEANT3COM'    => 'cd %>:d && %GEANT3 %<:f -o %<:f.F; %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %<:f.F -o %>:f',
 		'CC'	       => $CC,
 		'CFLAGS'       => $CFLAGS,
-		'CCCOM'        => 'cd %<:d && %CC %CFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %Cinp%<:f %Cout%>:f',
+		'CCCOM'        => 'cd %>:d && %CC %CFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %Cinp%<:f %Cout%>:f',
 		'CXX'          => $CXX,
 		'CXXFLAGS'     => $CXXFLAGS,
-		'CXXCOM'       => 'cd %<:d && %CXX %CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %CXXinp%<:f %Cout%>:f',
+		'CXXCOM'       => 'cd %>:d && %CXX %CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %CXXinp%<:f %Cout%>:f',
 		'LINK'	       => $LD,
 		'LDFLAGS'      => $LDFLAGS,
 		'LINKCOM'      => '%LINK %DEBUG %LDFLAGS %Lout%> %<:f %_LDIRS %LIBS',
 		'SO'           => $SO,
 		'SOFLAGS'      => $SOFLAGS, 
 		'SoOUT'        => $SoOUT,
-		'LINKMODULECOM'=> '%SO %DEBUG %SOFLAGS %SoOUT%> %<',
+		'LINKMODULECOM'=> $LINKMODULECOM,
 		'AR'	       => $AR,
 		'ARFLAGS'      => $ARFLAGS,
 		'ARCOM'        => "%AR %ARFLAGS %> %<;%RANLIB %>",
@@ -269,6 +276,7 @@ $env = new cons(
 		'SUFOBJ'	=> "." . $O,
 		'ENV'	        => { 'PATH' => $PATH,
 				     'ROOTSYS' => $ROOTSYS,
+				     'ROOTSRC' => $ROOTSRC,
 				     'LD_LIBRARY_PATH' => $LD_LIBRARY_PATH,
 				     'PGI' => $PGI,
 				     'STAR' => $STAR,
@@ -276,11 +284,13 @@ $env = new cons(
 				     'STAR_BIN' => $STAR_BIN,
 				     'INCLUDE' => $INCLUDE_PATH,
 				     'TEMP' => $TEMP,
-				     'TMP'  => $TMP
+				     'TMP'  => $TMP,
+				     'STAR_SYS' => $STAR_SYS,
+				     'LIB'   => $LIB
 				   },
 	       );
 #Command $env 
-my $build  = "." . $STAR_HOST_SYS; print "build = $build\n";
+my $build  = "." . $STAR_HOST_SYS; print "build for $build\n";
 #if (! -d $build) {mkdir $build, 0664;}
 $BUILD  = "#" . $build;
 $LIB    = $BUILD . "/lib";
@@ -291,12 +301,12 @@ Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n";
 #if (! -d "$obj")   {mkdir $obj, 0664;}
 my @Targets = ();
 my @dirs = ();
-if ($STAR_SYS =~ /^intel_wnt/) {@dirs = ("pams/vpd");}
-else {@dirs = ("StRoot","pams","pams/tables","cern/minicern","cern/geant321");}
+if ($STAR_SYS =~ /^intel_wnt/) {@dirs = ("StRoot/St_base");}
+else {@dirs = ("StRoot","pams","pams/tables");}#,"cern/minicern","cern/geant321");}
 foreach my $dir (@dirs) {
   if (-d $dir) {
     my $target = $OBJ . "/" . $dir . "/Conscript";
-    push @Targets, $target; print "new taret = $target\n";
+    push @Targets, $target; print "new Target = $target\n";
   }
 }
 print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ Targets = @Targets\n";
