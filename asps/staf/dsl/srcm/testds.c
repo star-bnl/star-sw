@@ -8,6 +8,7 @@ modification history
 01aug93,whg  written.
 */
 
+#ifndef WIN32
 /*
 DESCRIPTION
 main program to run test code for dsl
@@ -159,3 +160,4 @@ void usage(char *name)
 	printf("\tt - testType\n");
 	printf("\tw - xdrWriteTest\n");
 }
+#endif

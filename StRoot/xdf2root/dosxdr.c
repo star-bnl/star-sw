@@ -66,6 +66,7 @@ static struct xdr_ops xdrstdio_ops = {
 	xdrstdio_inline,
 	xdrstdio_destroy,
 };
+#ifndef WIN32 
 /******************************************************************************
 */
 long htonl(long l)
@@ -98,6 +99,7 @@ long ntohl(long l)
 	rtn.c[3] = cp[0];
 	return rtn.l;
 }
+#endif
 /******************************************************************************
 *
 * xdr_bytes - counted block opaque bytes

@@ -2,6 +2,7 @@
 
 /* unixtest.c unix test program for xdrtape */
 
+#ifndef WIN32
 /*
 modification history
 --------------------
@@ -153,15 +154,4 @@ static void usage(void)
 	exit(0);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
+#endif /* WIN32 */

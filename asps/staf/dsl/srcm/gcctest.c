@@ -1,5 +1,6 @@
 /* program to find gcc work around */
 
+#ifndef WIN32
 #include <stdio.h>
 
 #define DS_NAME_DIM	32	/* size of name plus zero byte */ 
@@ -68,3 +69,4 @@ void main()
 	}
 
 }
+#endif /* WIN32 */

@@ -2,6 +2,7 @@
 
 /* sample.c - example data structure I/O */
 
+#ifndef WIN32
 /*
 modification history
 --------------------
@@ -370,3 +371,4 @@ done:
 	dsFreeDataset(pDataset);
 	return rtn;
 }
+#endif /* WIN32 */
