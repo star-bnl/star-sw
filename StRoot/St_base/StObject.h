@@ -1,5 +1,8 @@
-// $Id: StObject.h,v 1.2 1999/06/23 20:31:04 perev Exp $
+// $Id: StObject.h,v 1.3 1999/10/30 19:36:02 perev Exp $
 // $Log: StObject.h,v $
+// Revision 1.3  1999/10/30 19:36:02  perev
+// Added clone() to StObject
+//
 // Revision 1.2  1999/06/23 20:31:04  perev
 // StArray I/O + browser
 //
@@ -18,9 +21,11 @@
 //////////////////////////////////////////////////////////////////////////
 #include "TObject.h"
 class StObject : public TObject {
-  ClassDef(StObject,1) // Base class for StEvent
+  public:
   virtual void Browse(TBrowser *b);
   static  int Browse(const TObject *This, TBrowser *b);
   virtual Bool_t IsFolder(){return Browse(this,0);};
+  virtual TObject *clone() const {return 0;}
+  ClassDef(StObject,1) // Base class for StEvent
 };
 #endif
