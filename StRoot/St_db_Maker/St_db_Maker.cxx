@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.31 2000/05/12 15:10:19 fine Exp $
+// $Id: St_db_Maker.cxx,v 1.32 2000/05/20 01:00:43 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.32  2000/05/20 01:00:43  perev
+// SetFlavor() added
+//
 // Revision 1.31  2000/05/12 15:10:19  fine
 // new Table macro introduced
 //
@@ -235,10 +238,16 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
    
    fDBBroker  = new StDbBroker();
 
-   //if (!fDBBroker) {
-   //  Warning("OpenDB","***Can not open MySQL DB %s ***");
-   //  return 0;
-   //}
+//   if (fDBBroker->IsZombie()) {
+//     Warning("OpenDB","***Can not open MySQL DB %s ***");
+//     return 0;
+//   }
+
+   if (*GetFlavor()) {
+      if (GetDebug()) 
+         printf("<St_db_Maker::OpenMySQL> Flavor %s is set\n",GetFlavor());
+      fDBBroker->SetFlavor(GetFlavor());
+   }
 
    TString ts(dbname); ts+="_hierarchy";
    fHierarchy = new St_dbConfig((char*)ts.Data());    
@@ -247,6 +256,7 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
    if (!thy || !nrows){
      Warning("OpenMySQL","***Can not open MySQL DB %s ***",dbname);
      return 0;}
+
 
    fHierarchy->Adopt(nrows,thy);
    if (GetDebug()>1)  fHierarchy->Print(0,nrows);  
