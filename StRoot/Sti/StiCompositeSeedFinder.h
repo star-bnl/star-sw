@@ -16,7 +16,7 @@ class StiCompositeSeedFinder : public StiSeedFinder
 {
 public:
 
-    //Nested helper class to encapsulate seed finders with their starting points
+    //Nested helper class to encapsulate seed finders with their starting points (*Union*)
     class StiSeedFinderRep
     {
     public:
@@ -25,7 +25,7 @@ public:
 	typedef IntDetectorMap_t::const_iterator IntDetectorMapIterator_t;
     
 	StiSeedFinderRep(StiTrackSeedFinder*, const char* buildPath);
-	~StiSeedFinderRep() {}; //Non-virtual class!
+	virtual ~StiSeedFinderRep() {};
 
 	void reset(); //Reset to beginning for each new event
 

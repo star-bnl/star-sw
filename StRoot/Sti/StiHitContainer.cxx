@@ -10,6 +10,10 @@
 // STL
 #include <algorithm>
 
+//StiGui
+#include "StiGui/StiRootDrawableHitContainer.h"
+
+//Sti
 #include "StiHit.h"
 #include "StiHitContainer.h"
 
@@ -29,7 +33,13 @@ ostream& operator<<(ostream&, const NameMapKey&);
 
 StiHitContainer* StiHitContainer::instance()
 {
-    return (sinstance) ? sinstance : new StiHitContainer();
+    if (sinstance==0) {
+	//Switch on what type to create based on some variable
+	//sinstance = new StiHitContainer();
+	sinstance = new StiRootDrawableHitContainer();
+    }
+    
+    return sinstance;
 }
 
 void StiHitContainer::kill()
@@ -41,13 +51,22 @@ void StiHitContainer::kill()
 }
 
 StiHitContainer::StiHitContainer() 
-{ 
+{
+    cout <<"StiHitContainer::StiHitContainer()"<<endl;
     mminpoint = new StiHit();
     mmaxpoint = new StiHit();
-    sinstance = this;
 }
 
-StiHitContainer::~StiHitContainer() {};
+StiHitContainer::~StiHitContainer()
+{
+    cout <<"StiHitContainer::~StiHitContainer()"<<endl;
+}
+
+//Null implementation
+void StiHitContainer::update()
+{
+    cout <<"StiHitContainer::update()"<<endl;
+}
 
 void StiHitContainer::push_back(StiHit* hit)
 {
@@ -207,13 +226,11 @@ void StiHitContainer::print(double refangle, double position, ofstream& myout)
 void StiHitContainer::print() const
 {
     cout <<"\nStiHitContainer::print()"<<endl;
-    hitmap::const_iterator it;
-    for (it=mmap.begin(); it!=mmap.end(); it++) {
+    for (hitmap::const_iterator it=mmap.begin(); it!=mmap.end(); it++) {
 	cout <<(*it).first<<endl;
 	
 	const hitvector& tempvec = (*it).second;
-	hitvector::const_iterator vit;
-	for (vit=tempvec.begin(); vit!=tempvec.end(); vit++) {
+	for (hitvector::const_iterator vit=tempvec.begin(); vit!=tempvec.end(); vit++) {
 	    cout <<*(*vit)<<endl;
 	}
     }

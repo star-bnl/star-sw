@@ -163,11 +163,10 @@ void StiDetectorContainer::moveMinusPhi()
 }
 
 // Recursively load all detector definition files from the given directory.
-void StiDetectorContainer::buildDetectors(const char* buildDirectory, data_node_factory* nodefactory,
-					 detector_factory* detfactory)
+void StiDetectorContainer::buildDetectors(data_node_factory* nodefactory, detector_factory* detfactory)
 {
     StiDetectorTreeBuilder mybuilder;
-    mroot = mybuilder.build(buildDirectory, nodefactory, detfactory);
+    mroot = mybuilder.build(nodefactory, detfactory);
 
     //Set region to midrapidity, hard-coded for now, update later to allow for other regions
     SameName<data_t> mySameName;

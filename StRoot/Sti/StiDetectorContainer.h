@@ -34,8 +34,7 @@ public:
     static void kill();
     
     //Build functions
-    virtual void buildDetectors(const char* buildDirectory, data_node_factory* nodefactory,
-				detector_factory* detfactory);
+    virtual void buildDetectors(data_node_factory* nodefactory,	detector_factory* detfactory);
 
     //Action
     void reset(); //full internal reset of interator structure
