@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <utility>
 #include <cstdlib>
+#include "TError.h"
 #include "StEventMaker/StEventMaker.h"
 #include "StEventMaker/StRootEventManager.hh"
 #include "PhysicalConstants.h"
@@ -27,7 +28,6 @@
 #include "StDetectorDbMaker/StDetectorDbBeamInfo.h"
 #include "StDetectorDbMaker/StDetectorDbTriggerID.h"
 #include "StDAQMaker/StDAQReader.h"
-#include "StTriggerDataMaker/StTriggerDataMaker.h"
 #include "StPrompt.hh"
 #include <typeinfo>
 
@@ -43,7 +43,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.57 2003/04/16 17:52:28 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.58 2003/07/16 19:58:32 perev Exp $";
 
 ClassImp(StEventMaker)
   
@@ -294,19 +294,18 @@ StEventMaker::makeEvent()
     //
     // Get trgStructure from StTriggerDataMaker and put it into StEvent
     //
-    StTriggerDataMaker* trgDataMaker = (StTriggerDataMaker*) GetMaker("trgd");
-    if (trgDataMaker==0) {
-	gMessMgr->Warning("StEventMaker: No StTriggerDataMaker found");
-    }
-    else{ 
-	StTriggerData* pTrg = trgDataMaker->getTriggerData();
-	if (pTrg==0){
-	    gMessMgr->Warning("StEventMaker: StTriggerDataMaker was empty");
-	}
-	else {
-	    mCurrentEvent->setTriggerData(pTrg);
-	}
-    }
+    if (!mCurrentEvent->triggerData()) {//no trigger data yet
+
+      TObjectSet *os = (TObjectSet*)GetDataSet("StTriggerData");
+      if (os) {// found trigger data
+        StTriggerData* pTrg = (StTriggerData*)os->GetObject();
+        Assert(pTrg); 		//Wrong, empty data
+        Assert(os->IsOwner()); 	//Wrong, data allready taken
+        os->DoOwner(0); 	//change ownership
+        mCurrentEvent->setTriggerData(pTrg);
+      }// end of found trigger data
+    }//end of no trigger data yet
+
     
     //
     //  Trigger ID summary
@@ -1504,8 +1503,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.57 2003/04/16 17:52:28 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.58 2003/07/16 19:58:32 perev Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.58  2003/07/16 19:58:32  perev
+ * Cleanup of StTriggerData2003 at all
+ *
  * Revision 2.57  2003/04/16 17:52:28  ullrich
  * Cleaned up section where trigger structures are added,
  * that us removed debud print-outs.

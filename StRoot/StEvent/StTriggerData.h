@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.2 2003/05/21 03:58:44 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.3 2003/07/16 19:58:31 perev Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.3  2003/07/16 19:58:31  perev
+ * Cleanup of StTriggerData2003 at all
+ *
  * Revision 2.2  2003/05/21 03:58:44  ullrich
  * Added more methods to retrieve spin bits.
  *
@@ -25,7 +28,7 @@
 class StTriggerData : public StObject {
 public:
     StTriggerData();
-    ~StTriggerData();
+virtual ~StTriggerData();
     
     virtual void dump() const = 0;   //dump data into text
     

@@ -26,12 +26,15 @@ class St_dst_L2_Trigger;
 class St_dst_TrgDet;
 class StDAQReader;
 class StTRGReader;
+struct TrgDataType2003;
 
 class St_trg_Maker : public StMaker {
  private:
    Bool_t drawinit;
    StDAQReader *fVictorPrelim;           //!
    StTRGReader *fVictor;                 //!
+   struct TrgDataType2003 *mS2003;
+   unsigned short mActionWord;
 
    void dumpDataToScreenAndExit    ();
    void dumpDataToScreenAndExit2000();
@@ -90,7 +93,7 @@ class St_trg_Maker : public StMaker {
    virtual Int_t Make();
 
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.19 2003/01/23 00:01:58 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+     static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.20 2003/07/16 19:58:35 perev Exp $ built "__DATE__" "__TIME__ ; 
      return cvs;
    }
 
@@ -100,8 +103,11 @@ class St_trg_Maker : public StMaker {
 #endif
 
 
-// $Id: St_trg_Maker.h,v 1.19 2003/01/23 00:01:58 jeromel Exp $
+// $Id: St_trg_Maker.h,v 1.20 2003/07/16 19:58:35 perev Exp $
 // $Log: St_trg_Maker.h,v $
+// Revision 1.20  2003/07/16 19:58:35  perev
+// Cleanup of StTriggerData2003 at all
+//
 // Revision 1.19  2003/01/23 00:01:58  jeromel
 // Bbc
 //

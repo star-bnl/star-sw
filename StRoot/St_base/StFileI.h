@@ -65,6 +65,6 @@ public:
 protected:
  Int_t fDebug;
  
-//ClassDef(StFileI,1)
+ClassDef(StFileI,0)
 };
 #endif

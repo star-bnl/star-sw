@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTRGReader.cxx,v 1.2 2000/06/12 15:04:02 perev Exp $
+ * $Id: StTRGReader.cxx,v 1.3 2003/07/16 19:58:29 perev Exp $
  *
  * Author: Herbert Ward, Dec 28 1999, 13:10 EST.
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTRGReader.cxx,v $
+ * Revision 1.3  2003/07/16 19:58:29  perev
+ * Cleanup of StTriggerData2003 at all
+ *
  * Revision 1.2  2000/06/12 15:04:02  perev
  * SVT + cleanup
  *
@@ -33,23 +36,54 @@
 #include <fcntl.h>
 #define PP printf(
 
+//_____________________________________________________________________________
 StTRGReader::StTRGReader(StDAQReader *daqr) {
   fDAQReader = daqr;
   fTRGImpReader = 0;
   Update();
 }
+//_____________________________________________________________________________
 void StTRGReader::Update() {
   delete fTRGImpReader;
   fTRGImpReader = ::getTRGReader(fDAQReader->getEventReader());
   assert(fTRGImpReader);
 }
+//_____________________________________________________________________________
 StTRGReader::~StTRGReader() {
   close();
 }
+//_____________________________________________________________________________
 int StTRGReader::close() {
+  delete fTRGImpReader; fTRGImpReader=0;
   return 0;
 }
+//_____________________________________________________________________________
 char StTRGReader::thereIsTriggerData() {
   if(fTRGImpReader) return 7; // TRUE
   return 0;                   // FALSE
 }
+//_____________________________________________________________________________
+const char *StTRGReader::getData() const
+{
+  if(!fTRGImpReader) return 0;
+  return (const char*)(fTRGImpReader->pBankTRGD)+40;
+
+}
+//_____________________________________________________________________________
+int   StTRGReader::getYear() const
+{
+   char *dat = (char*)getData(); 
+   if(!dat) return 0;
+   return fTRGImpReader->YearOfData(dat);
+}
+//_____________________________________________________________________________
+const TrgDataType2003 *StTRGReader::getDataType2003() const
+{
+  if (getYear()!=2003) return 0;
+  return (const TrgDataType2003*)getData();
+}
+//_____________________________________________________________________________
+const TrgDataType2000 *StTRGReader::getDataType2000() const
+{return 0;}
+
+ 	

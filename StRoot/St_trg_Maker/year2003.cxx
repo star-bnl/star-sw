@@ -3,7 +3,6 @@
 #include "St_DataSetIter.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "StDAQMaker/StTRGReader.h"
-TrgDataType *gs2003;
 #include "tables/St_dst_L0_Trigger_Table.h"
 #include "tables/St_dst_L1_Trigger_Table.h"
 #include "tables/St_dst_L2_Trigger_Table.h"
@@ -12,22 +11,20 @@ TrgDataType *gs2003;
 #include "tables/St_mwc_raw_Table.h"
 #include "tables/St_dst_TrgDet_Table.h"
 #define PREPOST 11
-unsigned short gActionWord;
-
 
 void St_trg_Maker::SecondDstDaq2003(St_dst_L0_Trigger *dst2) {
   int i;
   
   dst_L0_Trigger_st *tt = dst2->GetTable();
-  tt->TrgToken         = gs2003->EvtDesc.TrgToken;
-  tt->TriggerActionWd  = gActionWord;
-  tt->DSMInput         = gs2003->EvtDesc.DSMInput;
-  tt->DSMAddress       = gs2003->EvtDesc.DSMAddress;
-  tt->TriggerWd        = gs2003->EvtDesc.TriggerWord;
-  tt->DetectorBusy     = gs2003->EvtDesc.modifiedBusyStatus; // bbb chk with Zoran.
-  tt->addBits          = gs2003->EvtDesc.addBits;
-  for(i=0;i<32;i++) tt->CPA[i]=gs2003->TrgSum.DSMdata.CPA[i];
-  tt->MWC_CTB_mul      = gs2003->TrgSum.DSMdata.lastDSM[2];
+  tt->TrgToken         = mS2003->EvtDesc.TrgToken;
+  tt->TriggerActionWd  = mActionWord;
+  tt->DSMInput         = mS2003->EvtDesc.DSMInput;
+  tt->DSMAddress       = mS2003->EvtDesc.DSMAddress;
+  tt->TriggerWd        = mS2003->EvtDesc.TriggerWord;
+  tt->DetectorBusy     = mS2003->EvtDesc.modifiedBusyStatus; // bbb chk with Zoran.
+  tt->addBits          = mS2003->EvtDesc.addBits;
+  for(i=0;i<32;i++) tt->CPA[i]=mS2003->TrgSum.DSMdata.CPA[i];
+  tt->MWC_CTB_mul      = mS2003->TrgSum.DSMdata.lastDSM[2];
   tt->MWC_CTB_dipole   = 0;
   tt->MWC_CTB_topology = 0;
   tt->MWC_CTB_moment   = 0;
@@ -38,10 +35,10 @@ void St_trg_Maker::CtbMwcDaq2003(St_dst_TrgDet *dst1) {
   int npre,npost,pp,i,tray,slat,subsector,sector;
   dst_TrgDet_st *tt = dst1->GetTable();
 
-  tt->bunchXing_lo=gs2003->EvtDesc.bunchXing_lo;
-  tt->bunchXing_hi=(gs2003->EvtDesc.bunchXing_hi)&(0xFFFF);
-  npre=gs2003->EvtDesc.npre;
-  npost=gs2003->EvtDesc.npost;
+  tt->bunchXing_lo=mS2003->EvtDesc.bunchXing_lo;
+  tt->bunchXing_hi=(mS2003->EvtDesc.bunchXing_hi)&(0xFFFF);
+  npre=mS2003->EvtDesc.npre;
+  npost=mS2003->EvtDesc.npost;
   tt->npre=npre;
   tt->npost=npost;
   for(pp=0;pp<1+npre+npost;pp++) {
@@ -49,25 +46,25 @@ void St_trg_Maker::CtbMwcDaq2003(St_dst_TrgDet *dst1) {
     // CTB information
     for(slat=0;slat<2;slat++) {
       for(tray=0;tray<120;tray++) {
-        tt->nCtb[tray][slat][pp]=gs2003->rawTriggerDet[pp].CTB[ctbmap[tray][slat]];
+        tt->nCtb[tray][slat][pp]=mS2003->rawTriggerDet[pp].CTB[ctbmap[tray][slat]];
         tt->timeCtb[tray][slat][pp]=0;
       }
     }
     // MWC information 
     for(sector=0;sector<24;sector++) {
       for(subsector=0;subsector<4;subsector++) {
-        tt->nMwc[sector][subsector][pp]=gs2003->rawTriggerDet[pp].MWC[mwcmap[sector][subsector]];
+        tt->nMwc[sector][subsector][pp]=mS2003->rawTriggerDet[pp].MWC[mwcmap[sector][subsector]];
       }
     }
-    for(i=0;i<16;i++) tt->ctbaux[i][pp]=gs2003->rawTriggerDet[pp].CTB[auxctbmap[i]];
-    for(i=0;i<32;i++) tt->mwcaux[i][pp]=gs2003->rawTriggerDet[pp].MWC[auxmwcmap[i]];
+    for(i=0;i<16;i++) tt->ctbaux[i][pp]=mS2003->rawTriggerDet[pp].CTB[auxctbmap[i]];
+    for(i=0;i<32;i++) tt->mwcaux[i][pp]=mS2003->rawTriggerDet[pp].MWC[auxmwcmap[i]];
   }
 }
 
 Int_t St_trg_Maker::SanityCheck2003() {
   unsigned short x;
-  x=gs2003->TrgSum.L1SumBytes; assert(x==0x0084||x==0x8400);
-  x=gs2003->TrgSum.L2SumBytes; assert(x==0x0084||x==0x8400);
+  x=mS2003->TrgSum.L1SumBytes; assert(x==0x0084||x==0x8400);
+  x=mS2003->TrgSum.L2SumBytes; assert(x==0x0084||x==0x8400);
   return kStOK;
 }
 
@@ -120,8 +117,8 @@ void St_trg_Maker::Emc2003(St_dst_TrgDet *dst1) {
   for (i=0; i<NUMDSM ; i++) {		//Fill dsm info, including L1 & L2
     for (j=0; j < BYTESPERDSM; j++) {
       index = (i*16) + j;
-      dsmval[i][j] = gs2003->rawTriggerDet[0].BEMC[index];
-//      if (gs2003->rawTriggerDet[0].BEMC[index]!=0)
+      dsmval[i][j] = mS2003->rawTriggerDet[0].BEMC[index];
+//      if (mS2003->rawTriggerDet[0].BEMC[index]!=0)
 //	printf("dsmval[%2d][%2d]= %2d",i,j,dsmval[i][j]);
     }
   }
@@ -186,14 +183,13 @@ int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger
   // TRG_Reader  *StTRGReader::fTRGImpReader;
   // Bank_TRGD   *TRG_Reader::pBankTRGD;
 
-  ptr=(char*)(fVictor->fTRGImpReader->pBankTRGD);
+  ptr=(char*)(fVictor->getData());
   assert(ptr);
-  ptr+=40; // Skip 10-word DAQ bank header.
-  gs2003=(TrgDataType*)ptr;
-  gActionWord=
-    ( (unsigned short)(gs2003->EvtDesc.actionWdTrgCommand) * 16 * 16 * 16 ) +
-    ( (unsigned short)(gs2003->EvtDesc.actionWdDaqCommand) * 16 * 16      ) +
-    (                  gs2003->EvtDesc.actionWdDetectorBitMask & 0x00ff   );
+  mS2003=(TrgDataType2003*)ptr;
+  mActionWord=
+    ( (unsigned short)(mS2003->EvtDesc.actionWdTrgCommand) * 16 * 16 * 16 ) +
+    ( (unsigned short)(mS2003->EvtDesc.actionWdDaqCommand) * 16 * 16      ) +
+    (                  mS2003->EvtDesc.actionWdDetectorBitMask & 0x00ff   );
   Int_t Iret = SanityCheck2003();
   if (Iret !=  kStOK) {
     printf("St_trg_Maker:: Daq2003 : failed L1/L2 summary sanity check.\n"); 
@@ -202,18 +198,18 @@ int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger
 
   // printf("St_trg_Maker:: Daq2003 : passed L1/L2 summary sanity check.\n"); 
   printf("St_trg_Maker:: Daq2003 : ActionWrdCommand is 0x%0x TriggerWord 0x%0x\n",
-	 gs2003->EvtDesc.actionWdTrgCommand,
-	 gs2003->EvtDesc.TriggerWord);
+	 mS2003->EvtDesc.actionWdTrgCommand,
+	 mS2003->EvtDesc.TriggerWord);
 
 
-  if(  (((gActionWord)&0xf000)==0x9000 ) &&
-       (((gActionWord)&0x0001)==0x0001 ) //&&
-       //( gs2003->EvtDesc.TriggerWord          ==0xf200 )
+  if(  (((mActionWord)&0xf000)==0x9000 ) &&
+       (((mActionWord)&0x0001)==0x0001 ) //&&
+       //( mS2003->EvtDesc.TriggerWord          ==0xf200 )
   ) isLaser=7; 
 
   // See comment 77y above.
-  if(gActionWord>>12==4)                  isPhysics=7;
-  if(gs2003->EvtDesc.TriggerWord==0xf101) isPulser=7;
+  if(mActionWord>>12==4)                  isPhysics=7;
+  if(mS2003->EvtDesc.TriggerWord==0xf101) isPulser=7;
 
   if((m_Mode  )==0)         thisEventOk=7;
   if((m_Mode&1)&&isPhysics) thisEventOk=7;
@@ -227,8 +223,8 @@ int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger
   if(isPulser)  oo="Pulser";
 
   printf("St_trg_Maker:: Daq2003 : %s event.  TrgActionWd=0x%x.  TriggerWd=0x%0x. Returning %s. m_Mode=%d.\n",
-	 oo,gActionWord,
-	 gs2003->EvtDesc.TriggerWord,
+	 oo,mActionWord,
+	 mS2003->EvtDesc.TriggerWord,
 	 thisEventOk?"kStOK":"kStErr",
 	 m_Mode);
 
@@ -257,8 +253,8 @@ void St_trg_Maker::TakeCareOfL1andL2Daq2003(St_dst_L1_Trigger *dst3,St_dst_L2_Tr
   dst_L1_Trigger_st *tt1 = dst3->GetTable();
   dst_L2_Trigger_st *tt2 = dst4->GetTable();
   for(i=0;i<32;i++) {
-    tt1->L1_result[i] = gs2003->TrgSum.L1Result[i];
-    tt2->L2_result[i] = gs2003->TrgSum.L2Result[i];
+    tt1->L1_result[i] = mS2003->TrgSum.L1Result[i];
+    tt2->L2_result[i] = mS2003->TrgSum.L2Result[i];
   }
 }
 void St_trg_Maker::VpdDaq2003(St_dst_TrgDet *dst1) {
@@ -276,15 +272,15 @@ void St_trg_Maker::ZdcDaq2003(St_dst_TrgDet *dst1) {
   // bbb Need to add BBC stuff for Mikhail.
   int i;
   dst_TrgDet_st *tt = dst1->GetTable();
-  for(i=0;i<8;i++) tt->lastDSM[i]=gs2003->TrgSum.DSMdata.lastDSM[i];
+  for(i=0;i<8;i++) tt->lastDSM[i]=mS2003->TrgSum.DSMdata.lastDSM[i];
   for(i=0;i<16;i++) { 
-    tt->adcZDC[i]=gs2003->rawTriggerDet[0].ZDC[i];
+    tt->adcZDC[i]=mS2003->rawTriggerDet[0].ZDC[i];
     tt->tdcZDC[i]=0;
-    tt->BCdata[i]=gs2003->TrgSum.DSMdata.BCdata[i];
+    tt->BCdata[i]=mS2003->TrgSum.DSMdata.BCdata[i];
   }
-  tt->adcZDCEast=gs2003->rawTriggerDet[0].ZDC[13];
-  tt->adcZDCWest=gs2003->rawTriggerDet[0].ZDC[10];
-  tt->adcZDCsum=gs2003->rawTriggerDet[0].ZDC[13]+gs2003->rawTriggerDet[0].ZDC[10];
+  tt->adcZDCEast=mS2003->rawTriggerDet[0].ZDC[13];
+  tt->adcZDCWest=mS2003->rawTriggerDet[0].ZDC[10];
+  tt->adcZDCsum=mS2003->rawTriggerDet[0].ZDC[13]+mS2003->rawTriggerDet[0].ZDC[10];
 }
 
 
@@ -293,7 +289,7 @@ void St_trg_Maker::BbcDaq2003(St_dst_TrgDet *dst1) {
   int i;
   dst_TrgDet_st *tt = dst1->GetTable();
   for(i=0; i < 80 ;i++) { 
-    tt->BBC[i] = (unsigned short) gs2003->rawTriggerDet[0].BBC[i];
+    tt->BBC[i] = (unsigned short) mS2003->rawTriggerDet[0].BBC[i];
     //printf("DEBUG >>> %2.2d %d %c\n",i,tt->BBC[i],tt->BBC[i]);
   }
 }

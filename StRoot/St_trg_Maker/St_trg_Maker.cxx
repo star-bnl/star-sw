@@ -20,7 +20,7 @@
 #include "tables/St_dst_TrgDet_Table.h"
 #define PREPOST 11 // CAUTION:  this number is also in dst_TrgDet.idl
 
-#include "trgStructures.h"
+#include "StDaqLib/TRG/trgStructures.h"
 typedef struct {
   EvtDescData    EvtDesc;           /* L1 Event Descriptor Data */  
   TrgSumData     TrgSum;            /* summary data */
@@ -30,7 +30,7 @@ typedef struct {
 MarilynMonroe *gs;
 
 
-#include "trgStructures2000.h"
+#include "StDaqLib/TRG/trgStructures2000.h"
 typedef struct {
   EvtDescData2000    EvtDesc;       /* L1 Event Descriptor Data */  
   TrgSumData2000     TrgSum;        /* summary data */
@@ -93,20 +93,13 @@ void St_trg_Maker::SecondDstSim(St_dst_L0_Trigger *dst2)
 /// Decode pBankTRGD and return the value of the year associated to the dataset
 int St_trg_Maker::YearOfData(St_DataSet *herb) 
 {
-  unsigned char *data;
   StDAQReader *fromVictor = (StDAQReader*) (herb->GetObject()); assert(fromVictor);
   StTRGReader *trgReader  = fromVictor->getTRGReader(); assert(trgReader);
   assert(trgReader->thereIsTriggerData());
-  data  =(unsigned char*)(trgReader->fTRGImpReader->pBankTRGD);
-  data +=40;                                  // Skip the 10 word DAQ bank header
-  data +=sizeof(unsigned short)+sizeof(char); // Skip the first two data.
-
-  if(*data==0x12) return 2000;
-  if(*data==0x13) return 2001;
-  if(*data==0x20) return 2003;
-  assert(0);  // Should not be here.  My ne dolshnie byt6 zdes6.
-
-  return 0;   // to make insure happy
+  int y = trgReader->getYear();
+  assert(y);
+  return y;
+  
 }
 
 /*!
@@ -989,8 +982,11 @@ void St_trg_Maker::InitMwcArrays(void) {
 
 
 
-// $Id: St_trg_Maker.cxx,v 1.43 2003/03/24 18:12:16 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.44 2003/07/16 19:58:35 perev Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.44  2003/07/16 19:58:35  perev
+// Cleanup of StTriggerData2003 at all
+//
 // Revision 1.43  2003/03/24 18:12:16  ward
 // Full support for EEMC from Herbert Ward.
 //

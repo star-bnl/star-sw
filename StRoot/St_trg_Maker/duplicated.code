@@ -168,9 +168,8 @@ int St_trg_Maker::SWITCH(Daq)(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Tri
               // StTRGReader *St_trg_Maker::fVictor;
               // TRG_Reader  *StTRGReader::fTRGImpReader;
               // Bank_TRGD   *TRG_Reader::pBankTRGD;
-  ptr=(char*)(fVictor->fTRGImpReader->pBankTRGD);
+  ptr=(char*)(fVictor->getData());
   assert(ptr);
-  ptr+=40; /* skip header */
   SWITCH(gs)=(SWITCH(MarilynMonroe)*)ptr;
   Int_t Iret = SWITCH(SanityCheck)();
   if (Iret !=  kStOK) {

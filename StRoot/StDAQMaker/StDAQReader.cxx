@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.35 2003/05/15 19:25:47 jeromel Exp $
+ * $Id: StDAQReader.cxx,v 1.36 2003/07/16 19:58:29 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.36  2003/07/16 19:58:29  perev
+ * Cleanup of StTriggerData2003 at all
+ *
  * Revision 1.35  2003/05/15 19:25:47  jeromel
  * Missing Update() ??
  *
@@ -197,6 +200,7 @@ int StDAQReader::close()
   if(fSVTReader) 	fSVTReader ->close();  
 //if (fRICHReader) 	fRICHReader->close();  
   if(fFTPCReader)       fFTPCReader->close();
+  if(fTRGReader)        fTRGReader ->close();
   delete fL3Reader; 	fL3Reader  = 0;  
   fOffset = -1;
   return 0;
@@ -226,13 +230,13 @@ int StDAQReader::readEvent()
   *fEventInfo = fEventReader->getEventInfo();
   if(fEventInfo->Token==0) return kStErr;  // Herb, July 5 2000
 
-  if (fTPCReader)       fTPCReader->Update();
-  if (fFTPCReader)	fFTPCReader->Update();  
-  if (fTRGReader) 	fTRGReader ->Update();
-  if (fSVTReader) 	fSVTReader ->Update();
-  if (fEMCReader) 	fEMCReader ->Update();
-  if (fEEMCReader) 	fEEMCReader ->Update();
-  if (fPMDReader) 	fPMDReader ->Update();
+  if (fTPCReader&&TPCPresent  ())       fTPCReader ->Update();
+  if (fFTPCReader&&FTPCPresent())	fFTPCReader->Update();  
+  if (fTRGReader&&TRGDetectorsPresent())fTRGReader ->Update();
+  if (fSVTReader&&SVTPresent  ()) 	fSVTReader ->Update();
+  if (fEMCReader&&EMCPresent  ()) 	fEMCReader ->Update();
+  if (fEEMCReader&&EMCPresent ()) 	fEEMCReader->Update();
+  if (fPMDReader&&PMDPresent  ()) 	fPMDReader ->Update();
 
 //	Trigger Summary, code provided by Herb
   Bank_DATAP *datap = (Bank_DATAP*)(fEventReader->getDATAP());
@@ -312,6 +316,7 @@ void StDAQReader::setFTPCVersion(const char* vers)
 StTPCReader *StDAQReader::getTPCReader() 
 {
   int updateStatus;
+  if(!TPCPresent()) return 0;
   if (!fTPCReader) {
     fTPCReader = new StTPCReader(this);
     updateStatus=fTPCReader->Update();
@@ -330,6 +335,7 @@ StEEMCReader *StDAQReader::getEEMCReader()
 //_____________________________________________________________________________
 StEMCReader *StDAQReader::getEMCReader()
 {
+  if (!EMCPresent()) return 0;
   if (!fEMCReader) {
     fEMCReader = new StEMCReader(this);
   }
@@ -339,6 +345,7 @@ StEMCReader *StDAQReader::getEMCReader()
 //_____________________________________________________________________________
 StPMDReader *StDAQReader::getPMDReader()
 {
+  if (!PMDPresent()) return 0;
   if (!fPMDReader) {
     fPMDReader = new StPMDReader(this);
 //     fPMDReader->Update(); 
@@ -348,6 +355,7 @@ StPMDReader *StDAQReader::getPMDReader()
 //_____________________________________________________________________________
 StRICHReader *StDAQReader::getRICHReader() 
 {
+  if (!RICHPresent()) return 0;
   if (!fRICHReader) {
     fRICHReader = ::getRICHReader(fEventReader);
   }
@@ -356,6 +364,7 @@ StRICHReader *StDAQReader::getRICHReader()
 //_____________________________________________________________________________
 StL3Reader *StDAQReader::getL3Reader() 
 {
+  if (!L3Present()) return 0;
   if (!fL3Reader) {
     fL3Reader = ::getL3Reader(fEventReader);
   }
@@ -364,6 +373,7 @@ StL3Reader *StDAQReader::getL3Reader()
 //_____________________________________________________________________________
 StFTPCReader *StDAQReader::getFTPCReader() 
 {
+  if (!FTPCPresent()) return 0;
   if (!fFTPCReader) {
     fFTPCReader = new StFTPCReader(this);
     fFTPCReader->Update();
@@ -373,6 +383,7 @@ StFTPCReader *StDAQReader::getFTPCReader()
 //_____________________________________________________________________________
 StTOFReader *StDAQReader::getTOFReader()
 {
+  if (!TOFPresent()) return 0;
   if (!fTOFReader) {
     fTOFReader = ::getTOFReader(fEventReader);
   }
@@ -381,6 +392,7 @@ StTOFReader *StDAQReader::getTOFReader()
 //_____________________________________________________________________________
 StFPDReader *StDAQReader::getFPDReader()
 {
+  if (!FPDPresent()) return 0;
   if (!fFPDReader) {
     fFPDReader = ::getFPDReader(fEventReader);
   }
@@ -389,6 +401,7 @@ StFPDReader *StDAQReader::getFPDReader()
 //_____________________________________________________________________________
 StTRGReader *StDAQReader::getTRGReader()
 {
+  if (!TRGDetectorsPresent()) return 0;
   if (!fTRGReader) {
     fTRGReader = new StTRGReader(this);
     fTRGReader->Update();
@@ -398,6 +411,7 @@ StTRGReader *StDAQReader::getTRGReader()
 //_____________________________________________________________________________
 StSVTReader *StDAQReader::getSVTReader()
 {
+  if (!SVTPresent()) return 0;
   if (!fSVTReader) {
     fSVTReader = new StSVTReader(this);
     fSVTReader->Update();

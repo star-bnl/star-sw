@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.14 2003/07/07 17:48:13 akio Exp $
+// $Id: StppEvent.cxx,v 1.15 2003/07/16 19:58:32 perev Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.15  2003/07/16 19:58:32  perev
+// Cleanup of StTriggerData2003 at all
+//
 // Revision 1.14  2003/07/07 17:48:13  akio
 // adding trigger id mask (daqbits/summary bits/daqTrgId)
 //
@@ -84,7 +87,7 @@
 
 //trigger data2003
 #include "StTriggerData2003.h"
-#include "StTriggerDataMaker/trgStructures2003.h"
+#include "StDaqLib/TRG/trgStructures2003.h"
 
 //StJetFinder
 #include "StJetFinder/StProtoJet.h"

@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.64 2003/07/03 18:25:51 jeromel Exp $
+// $Id: St_db_Maker.cxx,v 1.65 2003/07/16 19:58:34 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.65  2003/07/16 19:58:34  perev
+// Cleanup of StTriggerData2003 at all
+//
 // Revision 1.64  2003/07/03 18:25:51  jeromel
 // y2003x = 20021115 as for year2003
 //
@@ -731,6 +734,7 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
    TDataSetIter  flaNext(flaDir);
    while((fl = flaNext())) {			// 2nd Flavor loop
      if (fl->GetUniqueID()) continue;
+     if (strcmp(fl->GetName(),".all" )==0) 	continue;
      Warning("SetFlavor","Flavor %s for table %s was NOT USED",
               fl->GetTitle(),fl->GetName());
    }
