@@ -11,7 +11,7 @@ class MinvCorrFctn;
 MinvCorrFctn* MinvCF;
 
 void StHbtExample(Int_t nevents=1,
-		  const char *MainFile="/disk00000/star/test/dev/tfs_Solaris/Wed/year_2a/psc0208_01_40evts.dst.root")
+		  const char *MainFile="/disk00000/star/test/dev/tfs_Solaris/Tue/year_2a/psc0208_01_40evts.dst.root")
 {
 
     // Dynamically link needed shared libs
@@ -23,7 +23,6 @@ void StHbtExample(Int_t nevents=1,
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StEvent");
-    //    gSystem->Load("StEventReaderMaker");
     gSystem->Load("StEventMaker");
     gSystem->Load("StHbtMaker");
 
@@ -91,7 +90,7 @@ void StHbtExample(Int_t nevents=1,
     mikesPairCut* paircut = new mikesPairCut;  // use "mike's" pair cut object
     anal->SetPairCut(paircut);         // this is the pair cut for this analysis
     // 4) set the number of events to mix (per event)
-    anal->SetNumEventsToMix(5);        
+    anal->SetNumEventsToMix(1);        
     // 5) now set up the correlation functions that this analysis will make
     // this particular analysis will have two: the first is a Q-invariant correlation function
     QinvCF = new QinvCorrFctn("mikesQinvCF",50,0.0,0.2);  // defines a Qinv correlation function
@@ -145,7 +144,7 @@ void StHbtExample(Int_t nevents=1,
     mikesPairCut* phiPaircut = new mikesPairCut;  // use "mike's" pair cut object
     phiAnal->SetPairCut(phiPaircut);         // this is the pair cut for this analysis
     // 4) set the number of events to mix (per event)
-    phiAnal->SetNumEventsToMix(5);        
+    phiAnal->SetNumEventsToMix(1);        
     // 5) now set up the correlation functions that this analysis will make
     MinvCF = new MinvCorrFctn("franksMinvCF",100,0.98,1.18); // defines a Minv correlation function
     phiAnal->AddCorrFctn(MinvCF);   // adds the just-defined correlation function to the analysis
@@ -166,17 +165,29 @@ void StHbtExample(Int_t nevents=1,
   chain->Init(); // This should call the Init() method in ALL makers
   chain->PrintInfo();
 
-  for (Int_t iev=1;iev<=nevents; iev++) {
-    cout << "StHbtExample -- Working on eventNumber " << iev << " of " << nevents << endl;
-    chain->Clear();
-    int iret = chain->Make(iev); // This should call the Make() method in ALL makers
-    if (iret) {
-      cout << "StHbtExample.C -- chain returned nonzero value " << iret 
-	   << " on event " << iev << endl;
-      break;
-    }
-    
-  } // Event Loop
+
+  // Event loop
+  int istat=0,iev=1;
+ EventLoop: if (iev <= nevents && !istat) {
+   cout << "StHbtExample -- Working on eventNumber " << iev << " of " << nevents << endl;
+   chain->Clear();
+   istat = chain->Make(iev);
+   if (istat) {cout << "Last event processed. Status = " << istat << endl;}
+   iev++; goto EventLoop;
+ }
+
+//  good old Cint can't even handle a for-loop
+//   for (Int_t iev=1;iev<=nevents; iev++) {
+//     chain->Clear();
+//     int iret = chain->Make(iev); // This should call the Make() method in ALL makers
+//     if (iret) {
+//       cout << "StHbtExample.C -- chain returned nonzero value " << iret 
+// 	   << " on event " << iev << endl;
+//       break;
+//     } 
+//   } // Event Loop
+
+
 
   cout << "StHbtExample -- Done with event loop" << endl;
 
