@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.4 2000/01/14 17:57:30 levine Exp $
+ * $Id: DetectorReader.cxx,v 1.5 2000/01/18 17:56:08 levine Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -8,12 +8,12 @@
  *   change log
  * 02-Jul-99 MJL add #includes for other detectors
  * 08-Jul-99 MJL separate RICH_Reader
- * 13-Jan-00 MJL add TRG
+ * 14-Jan-00 HH   add FTPC 
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
- * Revision 1.4  2000/01/14 17:57:30  levine
- * added getTRGReader()
+ * Revision 1.5  2000/01/18 17:56:08  levine
+ * Added FTPC call to TPC-like detectors
  *
  * Revision 1.3  1999/07/26 17:00:02  levine
  * changes to RICH file organization
@@ -45,7 +45,7 @@
 #include "SSD/SSD_Reader.hh"
 #include "EMC/EMC_Reader.hh"
 #include "RICH/RICH_Reader.hh"
-#include "FTPC/FTPC_Reader.hh"
+#include "FTPC/FTPV1P0_Reader.hh"
 
 
 DetectorReader *getDetectorReader(EventReader *er, string det)
@@ -90,10 +90,10 @@ DetectorReader *getDetectorReader(EventReader *er, string det)
      }
   else if  (det == "FTPC")
      {
-      Bank_FTPP *pFTPP;
-      pFTPP = (Bank_FTPP *)er->findBank("FTPP");
+      Bank_FTPPV1P0 *pFTPP;
+      pFTPP = (Bank_FTPPV1P0 *)er->findBank("FTPP");
       if (!pFTPP) dr = FALSE;
-      else dr =  new FTPC_Reader(er,pFTPP);
+      else dr =  new FTPV1P0_Reader(er,pFTPP);
      }
   else
   {
@@ -103,6 +103,12 @@ DetectorReader *getDetectorReader(EventReader *er, string det)
   return dr;
 }
 
+// DetectorReader *getFTPCReader(EventReader *er)
+// {
+//   string det="FTPC";
+//   DetectorReader *detReader=getDetectorReader(er,det);
+//   return detReader;
+// }
 
 RICH_Reader *getRICHReader(EventReader *er)
 {
