@@ -1,5 +1,5 @@
-/***************************************************************
- * $Id: StRichSelectWire.h,v 1.2 2000/01/25 22:02:22 lasiuk Exp $
+/********************************************************************
+ * $Id: StRichSelectWire.h,v 1.3 2000/02/08 16:31:56 lasiuk Exp $
  *
  * Description:
  *   StRichSelectWire is a function object containing the algorithm that
@@ -18,8 +18,8 @@
  *
  ********************************************************************
  * $Log: StRichSelectWire.h,v $
- * Revision 1.2  2000/01/25 22:02:22  lasiuk
- * Second Revision
+ * Revision 1.3  2000/02/08 16:31:56  lasiuk
+ * use dbs
  *
  * Revision 1.3  2000/02/08 16:31:56  lasiuk
  * use dbs
@@ -32,7 +32,7 @@
  ********************************************************************/
 #ifndef ST_RICH_SELECTWIRE_H
 #define ST_RICH_SELECTWIRE_H
-#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+
 #include <functional>
 
 #ifndef ST_NO_NAMESPACES
@@ -42,11 +42,11 @@ using std::unary_function;
 #ifndef ST_NO_NAMESPACES
 //namespace StRichRawData {
 #endif
-    typedef double wirePosition;
+#include "StRichRrsMacros.h"
 #include "StRichGHit.h"
-    struct StRichSelectWire : public unary_function<StRichGHit,wirePosition> {
-	wirePosition operator()(const StRichGHit&) const;
-  };
+
+typedef double wirePosition;
+
 struct StRichSelectWire : public unary_function<StRichGHit,wirePosition> {
     wirePosition operator()(const StRichGHit&) const;
 };
