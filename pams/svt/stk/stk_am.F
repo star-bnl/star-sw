@@ -322,7 +322,8 @@ c               filler(1).th87  =    th
      4            track_h,             track ,
      5           filler_h,            filler ,
      6           config_h,            config ,
-     7             geom_h,              geom )
+     7             geom_h,              geom,
+     8           stkpar_h,            stkpar )
                   if (status.ne.stafcv_ok) then
                      write(mess,1001) 'stf','stk_am_fill4'
                      call message(mess,1,mess_id(6))
@@ -436,7 +437,8 @@ c     filler(1).th65  =    th
      4             track_h,             track ,
      5            filler_h,            filler ,
      6            config_h,            config ,
-     7              geom_h,              geom )
+     7              geom_h,              geom ,
+     8            stkpar_h,             stkpar)
                         if (status.ne.stafcv_ok) then
                            write(mess,1001) 'stf','stk_am_fill3'
                            call message(mess,1,mess_id(6))
@@ -449,7 +451,8 @@ c     filler(1).th65  =    th
      4             track_h,             track ,
      5            filler_h,            filler ,
      6            config_h,            config ,
-     7              geom_h,              geom )
+     7              geom_h,              geom, 
+     8            stkpar_h,             stkpar)
                         if (status.ne.stafcv_ok) then
                            write(mess,1001) 'stf','stk_am_fill4'
                            call message(mess,1,mess_id(6))
