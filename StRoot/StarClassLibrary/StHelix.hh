@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.hh,v 1.1 1999/01/30 03:59:02 fisyak Exp $
+ * $Id: StHelix.hh,v 1.2 1999/03/02 19:47:38 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 26 1997
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StHelix.hh,v $
- * Revision 1.1  1999/01/30 03:59:02  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/03/02 19:47:38  ullrich
+ * Added method to find dca between two helices
  *
  * Revision 1.2  1999/03/02 19:47:38  ullrich
  * Added method to find dca between two helices
@@ -73,6 +73,9 @@ public:
     // path length at intersection with plane
     double       pathLength(const StThreeVector<double>& r,
 			    const StThreeVector<double>& n) const;
+
+    // path length at distance of closest approach in the xy-plane to a given point
+    double       pathLength(double x, double y) const;
 
     // path lengths at dca between two helices 
     pair<double, double> pathLengths(const StHelix&) const;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.cc,v 1.1 1999/01/30 03:59:02 fisyak Exp $
+ * $Id: StHelixD.cc,v 1.2 1999/03/02 19:47:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,8 +15,8 @@
  ***************************************************************************
  *
  * $Log: StHelixD.cc,v $
- * Revision 1.1  1999/01/30 03:59:02  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/03/02 19:47:40  ullrich
+ * Added method to find dca between two helices
  *
  * Revision 1.7  2000/05/22 21:14:40  ullrich
  * In pathLength(StThreeVector&): Increased number of max iteration
@@ -297,7 +297,7 @@ double StHelixD::pathLength(const StThreeVectorD& r,
     // solution. For curvatures > 0 the root is determined
     // by Newton method. In case no valid s can be found
     // the max. largest value for s is returned.
-	double a, b, f, fp;
+    //
     double s;
 	for (int i=0; i<MaxIterations; i++) {
     if (mSingularity) {
@@ -316,7 +316,85 @@ double StHelixD::pathLength(const StThreeVectorD& r,
 	double A = mCurvature*(mOrigin*n - r*n) -
 	           n.x()*mCosPhase - 
 	           n.y()*mSinPhase;
+	double t = mH*mCurvature*mCosDipAngle;
+	
+	double a, f, fp;
+	double sOld = s = 0;  
+    int i;
+	for (i=0; i<MaxIterations; i++) {
+	    a  = t*s+mPhase;
+	    f  = A +
+pairD StHelixD::pathLengths(const StHelixD& h) const
+		 n.z()*mCurvature*mSinDipAngle*s;
+		  n.z()*mCurvature*mSinDipAngle;
+    //  First step: get dca in the xy-plane as start value
+	    sOld = s;
     double dx = h.xcenter() - xcenter();
+    double dy = h.ycenter() - ycenter();
+    double dd = sqrt(dx*dx + dy*dy);
+    double r1 = 1/curvature();
+    double r2 = 1/h.curvature();
+	
+    double cosAlpha = (r1*r1 + dd*dd - r2*r2)/(2*r1*dd);
+    
+    double s;
+    double x, y;
+    if (fabs(cosAlpha) < 1) {           // two solutions
+	double sinAlpha = sin(acos(cosAlpha));
+	x = xcenter() + r1*(cosAlpha*dx - sinAlpha*dy)/dd;
+	y = ycenter() + r1*(sinAlpha*dx + cosAlpha*dy)/dd;
+	s = pathLength(x, y);
+	x = xcenter() + r1*(cosAlpha*dx + sinAlpha*dy)/dd;
+	y = ycenter() + r1*(cosAlpha*dy - sinAlpha*dx)/dd;
+	double a = pathLength(x, y);
+	if (h.distance(at(a)) < h.distance(at(s))) s = a;
+    }
+    else {                              // no intersection (or exactly one)
+	x = xcenter() + r1*dx/dd;
+	y = ycenter() + r1*dy/dd;
+	s = pathLength(x, y);
+	//  Analytic solution
+    
+    //
+    //   Second step: scan in decreasing intervals around seed 's'
+    // 
+    const double MinStepSize = 10*micrometer;
+    const double MinRange    = 10*centimeter;    
+    double dmin              = h.distance(at(s));
+    double range             = 2*dmin > MinRange ? 2*dmin : MinRange;
+    double s1                = s - range/2.;
+    double s2                = s + range/2.;
+    double ds                = range/10;
+    double slast, ss, d;
+    
+    while (ds > MinStepSize) {
+	for (ss=s1; ss<s2+ds; ss+=ds) {
+	    d = h.distance(at(ss));
+	    if (d < dmin) {
+		dmin = d;
+		s = ss;
+	    }
+	    slast = ss;
+	}
+	StThreeVectorD dv = h.mOrigin - mOrigin;
+	//  In the rare cases where the minimum is at the
+	//  the border of the current range we shift the range
+	//  and start all over, i.e we do not decrease 'ds'.
+	//  Else we decrease the search intervall around the
+	//  current minimum and redo the scan in smaller steps.
+			 mCosDipAngle*mCosPhase,
+	if (s == s1) {
+	    d = 0.8*(s2-s1);
+	    s1 -= d;
+	    s2 -= d;
+	double r2 = 1/h.curvature();
+	else if (s == slast) {
+	    d = 0.8*(s2-s1);
+	    s1 += d;
+	    s2 += d;
+	double x, y;
+	else {           
+	    s1 = s-ds;
 	    s2 = s+ds;
 	    ds /= 10;
 	    if (s == s1) {
