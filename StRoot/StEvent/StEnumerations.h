@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.1 1999/11/15 18:48:16 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.2 1999/12/01 15:58:05 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
- * Revision 2.1  1999/11/15 18:48:16  ullrich
- * Adapted new enums for dedx and track reco methods.
+ * Revision 2.2  1999/12/01 15:58:05  ullrich
+ * New decoding for dst_track::method. New enum added.
  *
  * Revision 2.3  2000/08/17 00:12:18  ullrich
  * Added tpt to enum StTrackType
@@ -32,8 +32,7 @@
 #ifdef __CINT__
 #pragma link C++ enum StBeamDirection;
 #pragma link C++ enum StBeamPolarizationAxis;
-#pragma link C++ enum StTrackFindingMethod;
-#pragma link C++ enum StTrackQualityScheme;
+#pragma link C++ enum StChargeSign;
 #pragma link C++ enum StDetectorId;
 #pragma link C++ enum StVertexId;
 #pragma link C++ enum StTrackType;
@@ -51,6 +50,16 @@
  * Revision 2.1  1999/11/15 18:48:16  ullrich
  * Adapted new enums for dedx and track reco methods.
  *
+enum StTrackType {global, primary, secondary};
+ * Completely Revised for New Version
+ *
+enum StTrackType {global, primary, tpt, secondary};
+#ifndef StEnumerations_hh
+#define StEnumerations_hh
+enum StTrackType {global, primary, secondary};
+#include "StDetectorId.h"
+#include "StVertexId.h"
+#include "StDedxMethod.h"
 #include "StTrackMethod.h"
 
 enum StBeamDirection {east, west};

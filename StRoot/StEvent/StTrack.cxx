@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.8 1999/12/01 00:15:27 didenko Exp $
+ * $Id: StTrack.cxx,v 2.9 1999/12/01 15:58:08 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
- * Revision 2.8  1999/12/01 00:15:27  didenko
- * temporary solution to compile the library
+ * Revision 2.9  1999/12/01 15:58:08  ullrich
+ * New decoding for dst_track::method. New enum added.
  *
  * Revision 2.10  2000/01/20 14:42:40  ullrich
  * Fixed bug in numberOfPossiblePoints(). Sum was wrong.
@@ -58,7 +58,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.8 1999/12/01 00:15:27 didenko Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.9 1999/12/01 15:58:08 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -139,60 +139,18 @@ StTrack::~StTrack()
 
 Short_t
 StTrack::flag() const { return mFlag; }
-#if 0
-StTrackFindingMethod           
-StTrack::findingMethod() const
 
-    switch(mEncodedMethod%10) {
-    case kSvtGrouperId:
-	return kSvtGrouperId;
-	break;
-    case kSvtStkId:
-	return kSvtStkId;
-	break;
-    case kTpcStandardId:
-	return kTpcStandardId;
-	break;
-    case kSvtTpcSvmId:
-	return kSvtTpcSvmId;
-	break;
-    case kSvtTpcEstId:
-	return kSvtTpcEstId;
-	break;
-    default:
-    case kUndefinedFinderId:
-	return kUndefinedFinderId;
-	break;
-    }
+UShort_t
+StTrack::key() const { return mKey; }
+
+UShort_t
 StTrack::encodedMethod() const { return mEncodedMethod; }
 
-StTrackQualityScheme           
-StTrack::qualityScheme() const
-{
-    switch((mEncodedMethod%100)/10) {
-    case kGrouperPassId:
-	return kGrouperPassId;
-	break;
-    case kStkPassId:
-	return kStkPassId;
-	break;
-    case kSvmPassId:
-	return kSvmPassId;
-	break;
-    case kEstPassId:
-	return kEstPassId;
-	break;
-    default:
-    case kUndefinedQualityId:
-	return kUndefinedQualityId;
-	break;
-    }
-}
-#endif
 Bool_t
 StTrack::finderMethod(StTrackFinderMethod bit) const
 {
-    switch((mEncodedMethod%1000)/100) {
+    return mEncodedMethod & (1<<bit);
+}
 
 StTrackFittingMethod           
 StTrack::fittingMethod() const
