@@ -156,10 +156,22 @@ char *name; int  n;
    if (GET(ptr,sname,pp,nn)) printf("xdf_geta ok %d %d %d\n",ptr,pp,nn);
 }
 
+/****************************************************************************\
+*
+*         dsFindTab - find table of a given typ in a dataset
+*
+\****************************************************************************/
 
-
-
-
-
-
+int dsFindTab (DS_DATASET_T **ppEntry, DS_DATASET_T* pDataset, char* spec)
+{
+    int i,same; 
+    if (!DS_IS_DATASET(pDataset)) { printf(" not a dataset\n"); return 0; }
+      
+    for (i = 0; i < pDataset->elcount; i++) 
+    {  if (!(*ppEntry = pDataset->p.link[i])  )  continue;
+       if (!dsTableIsType(&same,*ppEntry,spec))  continue;
+       if (same) return 1;
+    }
+    return 0;
+}
 
