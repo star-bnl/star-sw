@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLCMSFrame3DCorrFctn.cxx,v 1.5 2001/05/23 00:19:04 lisa Exp $
+ * $Id: BPLCMSFrame3DCorrFctn.cxx,v 1.6 2002/06/07 22:51:38 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: BPLCMSFrame3DCorrFctn.cxx,v $
+ * Revision 1.6  2002/06/07 22:51:38  lisa
+ * Widely used BPLCMSFrame3DCorrFctn class now accumulates UNcorrected denominator and has a WriteOutHistos method
+ *
  * Revision 1.5  2001/05/23 00:19:04  lisa
  * Add in Smearing classes and methods needed for momentum resolution studies and correction
  *
@@ -59,6 +62,10 @@ BPLCMSFrame3DCorrFctn::BPLCMSFrame3DCorrFctn(char* title, const int& nbins, cons
   char TitDen[100] = "Den";
   strcat(TitDen,title);
   mDenominator = new StHbt3DHisto(TitDen,title,nbins,QLo,QHi,nbins,QLo,QHi,nbins,QLo,QHi);
+  // set up uncorrected denominator
+  char TitDenUncoul[100] = "DenNoCoul";
+  strcat(TitDenUncoul,title);
+  mUncorrectedDenominator = new StHbt3DHisto(TitDenUncoul,title,nbins,QLo,QHi,nbins,QLo,QHi,nbins,QLo,QHi);
   // set up ratio
   char TitRat[100] = "Rat";
   strcat(TitRat,title);
@@ -71,6 +78,7 @@ BPLCMSFrame3DCorrFctn::BPLCMSFrame3DCorrFctn(char* title, const int& nbins, cons
   // to enable error bar calculation...
   mNumerator->Sumw2();
   mDenominator->Sumw2();
+  mUncorrectedDenominator->Sumw2();
   mRatio->Sumw2();
 
   // Following histos are for the momentum resolution correction
@@ -140,6 +148,30 @@ BPLCMSFrame3DCorrFctn::~BPLCMSFrame3DCorrFctn(){
   delete mCorrectionHisto;
   delete mCorrCFHisto;
 }
+
+//_________________________
+void BPLCMSFrame3DCorrFctn::WriteOutHistos(){
+
+  mNumerator->Write();
+  mDenominator->Write();
+  mUncorrectedDenominator->Write();
+  mRatio->Write();
+  mQinvHisto->Write();
+
+  if (mSmearPair){
+    mIDNumHisto->Write();
+    mIDDenHisto->Write();
+    mIDRatHisto->Write();
+    //
+    mSMNumHisto->Write();
+    mSMDenHisto->Write();
+    mSMRatHisto->Write();
+    //
+    mCorrectionHisto->Write();
+    mCorrCFHisto->Write();
+  }
+}
+
 //_________________________
 void BPLCMSFrame3DCorrFctn::Finish(){
   // here is where we should normalize, fit, etc...
@@ -160,7 +192,7 @@ void BPLCMSFrame3DCorrFctn::Finish(){
   }
 
   mRatio->Divide(mNumerator,mDenominator,DenFact,NumFact);
-  mQinvHisto->Divide(mDenominator);
+  mQinvHisto->Divide(mUncorrectedDenominator);
 
   // now do all the resolution correction stuff..
   if (mSmearPair){  // but only do it if we have been working with a SmearPair
@@ -244,6 +276,7 @@ void BPLCMSFrame3DCorrFctn::AddMixedPair(const StHbtPair* pair){
   double qLong = fabs(pair->qLongCMS());
 
   mDenominator->Fill(qOut,qSide,qLong,CoulombWeight);
+  mUncorrectedDenominator->Fill(qOut,qSide,qLong,1.0);
   mQinvHisto->Fill(qOut,qSide,qLong,Qinv);
 
   // now for the momentum resolution stuff...
