@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.6 2000/04/17 23:01:14 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.7 2000/05/11 14:27:23 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.7  2000/05/11 14:27:23  calderon
+ * use clear() in destructors to reduce size of containers
+ *
  * Revision 2.6  2000/04/17 23:01:14  calderon
  * Added local momentum to hits as per Lee's request
  *
@@ -54,8 +57,8 @@
 
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.6 2000/04/17 23:01:14 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.6 2000/04/17 23:01:14 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.7 2000/05/11 14:27:23 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.7 2000/05/11 14:27:23 calderon Exp $";
 
 void StMcEvent::initToZero()
 {
@@ -121,13 +124,15 @@ StMcEvent::~StMcEvent()
     if (mRichHits) delete mRichHits;
     mRichHits=0;
 
-    for(StMcTrackIterator it=mTracks.begin();
+    for(StMcTrackIterator it=mTracks.begin(); // mTracks is not held by pointer
 	it != mTracks.end(); it++)
 	delete *it;    
         
-    for(StMcVertexIterator iv=mVertices.begin();
+    for(StMcVertexIterator iv=mVertices.begin(); // mVertices is not held by pointer
 	iv != mVertices.end(); iv++)
 	delete *iv;
+    mTracks.clear();
+    mVertices.clear();
 }
 
 int StMcEvent::operator==(const StMcEvent& e) const

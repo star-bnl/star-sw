@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcTpcPadrowHitCollection.cc,v 2.0 1999/11/17 02:01:00 calderon Exp $
+ * $Id: StMcTpcPadrowHitCollection.cc,v 2.1 2000/05/11 14:27:23 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcTpcPadrowHitCollection.cc,v $
+ * Revision 2.1  2000/05/11 14:27:23  calderon
+ * use clear() in destructors to reduce size of containers
+ *
  * Revision 2.0  1999/11/17 02:01:00  calderon
  * Completely revised for new StEvent
  *
@@ -18,7 +21,7 @@
 #include "StMcTpcPadrowHitCollection.hh"
 #include "StMcTpcHit.hh"
 
-static const char rcsid[] = "$Id: StMcTpcPadrowHitCollection.cc,v 2.0 1999/11/17 02:01:00 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTpcPadrowHitCollection.cc,v 2.1 2000/05/11 14:27:23 calderon Exp $";
 
 #ifdef PERSISTENT
 ClassImp(StMcTpcPadrowHitCollection)
@@ -36,7 +39,7 @@ StMcTpcPadrowHitCollection::~StMcTpcPadrowHitCollection()
         delete mHits[i];
         mHits[i] = 0;
     }
-
+    mHits.clear();
 }
 
 const StSPtrVecMcTpcHit&
