@@ -4,7 +4,7 @@ Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
 (my $build = $OBJ) =~ s/\#//g;
 $build =~ s/\\/\//g;# print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
 (my $ObjDir = DirPath '.') =~ s/\\/\//g;# print "ObjDir = $ObjDir\n";
-(my $Dir = $ObjDir) =~ s/$build\///g; #print "Dir = $Dir\n";
+(my $Dir = $ObjDir) =~ s/$build\///g;# print "Dir = $Dir\n";
 $ObjDir = "#" . $ObjDir; #print "ObjDir = $ObjDir\n";
 (my $obj_dir = $ObjDir) =~ s/^\#//g;# print "obj_dir = $obj_dir\n";
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
@@ -50,7 +50,7 @@ if ($pkg =~ /^pyth$/){
 $share =~ s/\/StRoot//g;
 $share =~ s/\/(sim|gen)//g; 
 my $CPPP =":#" . $Dir . ":" .  $env->{CPPPATH};
-if ($Dir =~ /^StTrsMaker$/) {
+if ($pkg =~ /^StTrsMaker$/) {
   $CPPP = ":#" . $Dir . ":#" . $Dir . "/include:" . $env->{CPPPATH};#  print "CPPP = $CPPP\n";
 }
 if ($Dir =~ /pams\//) {
