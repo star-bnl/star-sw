@@ -1,8 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.3 1999/12/02 13:20:58 hummler Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.4 2000/01/27 09:47:18 hummler Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
-// Revision 1.3  1999/12/02 13:20:58  hummler
-// Move cluster processing from maker to cluster finder class.
-// (Preparations for new raw data implementation.)
+// Revision 1.4  2000/01/27 09:47:18  hummler
+// implement raw data reader, remove type ambiguities that bothered kcc
+//
 //
 //
 //////////////////////////////////////////////////////////////////////////
@@ -13,6 +13,13 @@
 
 #include <iostream.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/fcntl.h>
+#include "StDaqLib/GENERIC/EventReader.hh"
+#include "StDAQMaker/StFTPCReader.h"
+
 #include "StFtpcClusterMaker.h"
 #include "StFtpcClusterFinder.hh"
 #include "StFtpcCluster.hh"
@@ -23,7 +30,7 @@
 #include "TH2.h"
 
 #include "tables/St_fcl_fppoint_Table.h"
-#include "tables/St_fcl_ftpcndx_Table.h"
+// #include "tables/St_fcl_ftpcndx_Table.h"
 #include "tables/St_fcl_ftpcsqndx_Table.h"
 #include "tables/St_fcl_ftpcadc_Table.h"
 
@@ -100,36 +107,56 @@ Int_t StFtpcClusterMaker::Init(){
 Int_t StFtpcClusterMaker::Make()
 {
   int iMake=kStOK;
+
+  St_DataSet *daqDataset;
+  StDAQReader *daqReader;
+  StFTPCReader *ftpcReader;
+  daqDataset=GetDataSet("StDaqReader");
+  if(daqDataset)
+    {
+      cout << "Using StDAQReader to get StFTPCReader" << endl;
+      assert(daqDataset);
+      daqReader=(StDAQReader *)(daqDataset->GetObject());
+      assert(daqReader);
+      ftpcReader=daqReader->getFTPCReader();
+    }
+  
   St_DataSet *raw = GetDataSet("ftpc_raw");
   if (raw) {
     //			FCL
     St_DataSetIter get(raw);
     
-    St_fcl_ftpcndx   *fcl_ftpcndx   = (St_fcl_ftpcndx*  )get("fcl_ftpcndx");
     St_fcl_ftpcsqndx *fcl_ftpcsqndx = (St_fcl_ftpcsqndx*)get("fcl_ftpcsqndx");
     St_fcl_ftpcadc   *fcl_ftpcadc   = (St_fcl_ftpcadc*  )get("fcl_ftpcadc");
-    if (fcl_ftpcndx&&fcl_ftpcsqndx&&fcl_ftpcadc) { 
-      
+
+    if (fcl_ftpcsqndx&&fcl_ftpcadc) { 
+
+      ftpcReader=new StFTPCReader((short unsigned int *) fcl_ftpcsqndx->GetTable(),
+				  fcl_ftpcsqndx->GetNRows(),
+				  (char *) fcl_ftpcadc->GetTable(),
+				  fcl_ftpcadc->GetNRows());
+
+      cout << "created StFTPCReader from tables" << endl;
+
       St_fcl_fppoint *fcl_fppoint = new St_fcl_fppoint("fcl_fppoint",150000);
       m_DataSet->Add(fcl_fppoint);
       if(Debug()) cout<<"start running fcl"<<endl;
             
       StFtpcClusterFinder *fcl = new StFtpcClusterFinder();
 
-      StFtpcCluster *clusters=fcl->search(m_det->GetTable(),
+      StFtpcCluster *clusters=fcl->search(ftpcReader,
+					  m_det->GetTable(),
 					  m_padtrans->GetTable(),
 					  m_zrow->GetTable(),
 					  m_ampoff->GetTable(),
 					  m_ampslope->GetTable(),
 					  m_timeoff->GetTable(),
-					  fcl_ftpcsqndx->GetTable(),
-					  fcl_ftpcadc->GetTable(),
 					  fcl_fppoint,
 					  m_padtrans->GetNRows(),
 					  m_ampslope->GetNRows(),
 					  m_ampoff->GetNRows(),
-					  m_timeoff->GetNRows(),
-					  fcl_ftpcsqndx->GetNRows());
+					  m_timeoff->GetNRows());
+
       if (clusters == NULL)
 	{
 	  iMake=kStWarn;
@@ -139,7 +166,6 @@ Int_t StFtpcClusterMaker::Make()
     else {
       
       cout <<"StFtpcClusterMaker: Tables are not found:" 
-	   << " fcl_ftpcndx   = " << fcl_ftpcndx 
 	   << " fcl_ftpcsqndx = " << fcl_ftpcsqndx 
 	   << " fcl_ftpcadc   = " << fcl_ftpcadc << endl;
     }
