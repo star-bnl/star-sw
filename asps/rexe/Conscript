@@ -56,7 +56,7 @@ foreach my $cpp (split /:/,$env->{CPPPATH},$Dir) {
   else               {$ROOTCINT_CPP .= $cpp;}
 }
 $cscanner= find scan::cpp($env2->{_cwd}, $ROOTCINT_CPP);
-my $ROOTCINT_CPPPATH = $cscanner->iflags; print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
+my $ROOTCINT_CPPPATH = $cscanner->iflags($env2); print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
 my $DIR = cwd(); 
 my $line;
 my @Defs = ();
