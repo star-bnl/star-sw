@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.21 2000/06/08 12:44:37 jml Exp $
+ * $Id: EventReader.cxx,v 1.22 2000/06/15 23:05:06 jml Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -22,6 +22,11 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.22  2000/06/15 23:05:06  jml
+ * I set the number of pointers in DATAP hardcoded to 10.
+ * The algorithm for determinining this has been broken by the
+ * addition of the trigger data at the end of this bank.
+ *
  * Revision 1.21  2000/06/08 12:44:37  jml
  * Added <assert.h> to fix compile error in offline
  *
@@ -665,10 +670,14 @@ char * EventReader::findBank(char *bankid)
   }
   pBankDATAP->header.CRC = 0;
   
-    // position independent pointers to lower banks, variable DATAP length
-  int len = pBankDATAP->header.BankLength - sizeof(Bank_Header)/4;
-  len -= ((INT32 )&pBankDATAP->TPC -  (INT32 )&pBankDATAP->EventLength)/4;
-  len /= sizeof(Pointer)/4;
+// position independent pointers to lower banks, variable DATAP length
+//   int len = pBankDATAP->header.BankLength - sizeof(Bank_Header)/4;
+//   len -= ((INT32 )&pBankDATAP->TPC -  (INT32 )&pBankDATAP->EventLength)/4;
+//   len /= sizeof(Pointer)/4;
+  // JML - the length is now hard coded again as DATAP now contains
+  // non-pointer data after the pointer data
+  int len = 10;
+
   Bank_Header *pBank;
   Pointer *ptr = &pBankDATAP->TPC;
   int i;
