@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.24 2000/05/26 21:26:51 posk Exp $
+// $Id: StFlowTagMaker.cxx,v 1.25 2000/06/30 14:43:37 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.25  2000/06/30 14:43:37  posk
+// Using MessageMgr.
+//
 // Revision 1.24  2000/05/26 21:26:51  posk
 // Number of subevents fixed at 2.
 //
@@ -81,6 +84,7 @@
 #include "TH2.h"
 #include "TProfile.h"
 #include "TVector2.h"
+#include "StMessMgr.h"
 #define PR(x) cout << "##### FlowTag: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowTagMaker)
@@ -124,7 +128,7 @@ Int_t StFlowTagMaker::Make() {
     FillFlowTag();                                // fill the tag database
   } else {
     pFlowTag = NULL;
-    cout << "$$$$$ null FlowEvent pointers" << endl;
+    gMessMgr->Info("##### FlowTag: null FlowEvent pointers");
     return kStOK;      // no StFlowEvent or no Tag pointer or no selection
   }
 
@@ -133,14 +137,9 @@ Int_t StFlowTagMaker::Make() {
   // fill histograms from the Flow Tags
   FillHistograms();
 
-  return kStOK;
-}
-
-//-------------------------------------------------------------
-
-void StFlowTagMaker::PrintInfo() {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.24 2000/05/26 21:26:51 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
+
+  return kStOK;
 }
 
 //-------------------------------------------------------------
@@ -162,6 +161,11 @@ void StFlowTagMaker::PrintTag(ostream& os) {
 Int_t StFlowTagMaker::Finish() {
 
   delete pFlowSelect;
+
+  cout << endl;
+  gMessMgr->Summary(3);
+  cout << endl;
+
   return StMaker::Finish();
 }
 
@@ -240,6 +244,10 @@ Int_t StFlowTagMaker::Init() {
 
     }
   }
+
+  gMessMgr->SetLimit("##### FlowTag", 5);
+  gMessMgr->Info("##### FlowTag: $Id: StFlowTagMaker.cxx,v 1.25 2000/06/30 14:43:37 posk Exp $");
+  if (Debug()) StMaker::PrintInfo();
 
   return StMaker::Init();
 }
