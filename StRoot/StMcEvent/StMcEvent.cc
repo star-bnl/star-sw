@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.11 2003/04/17 18:01:24 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.12 2003/05/15 18:28:47 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.12  2003/05/15 18:28:47  calderon
+ * Added data members from modified g2t_event table:
+ * Event Generator Final State Tracks, N Binary Collisions,
+ * N Wounded Nucleons East and West, N Jets.
+ *
  * Revision 2.11  2003/04/17 18:01:24  calderon
  * print the subprocess id when dumping event info in operator<<
  *
@@ -75,8 +80,8 @@
 
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.11 2003/04/17 18:01:24 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.11 2003/04/17 18:01:24 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.12 2003/05/15 18:28:47 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.12 2003/05/15 18:28:47 calderon Exp $";
 
 void StMcEvent::initToZero()
 {
@@ -129,12 +134,16 @@ StMcEvent::StMcEvent(g2t_event_st* evTable)
      mNWest(evTable->n_part_neut_west),
      mZEast(evTable->n_part_prot_east),
      mNEast(evTable->n_part_neut_east),
+     mEvGenFSTracks(evTable->n_track_eg_fs),
      mPrimaryTracks(evTable->n_track_prim),
      mSubProcessId(evTable->subprocess_id),
      mImpactParameter(evTable->b_impact),
      mPhiReactionPlane(evTable->phi_impact),
-     mTriggerTimeOffset(evTable->time_offset)
-     
+     mTriggerTimeOffset(evTable->time_offset),
+     mNBinary(evTable->n_binary),
+     mNWoundedEast(evTable->n_wounded_east),
+     mNWoundedWest(evTable->n_wounded_west),
+     mNJets(evTable->njets)
 {
     initToZero();
 }
@@ -208,11 +217,16 @@ ostream&  operator<<(ostream& os, const StMcEvent& e)
     os << "Participant Protons  West: " << e.zWest() << endl;
     os << "Participant Neutrons East: " << e.nEast() << endl;
     os << "Participant Neutrons West: " << e.nWest() << endl;
+    os << "# Ev. Gen. Fin. St. Track: " << e.eventGeneratorFinalStateTracks() << endl;
     os << "Number of Primary Tracks : " << e.numberOfPrimaryTracks() << endl;
     os << "Subprocess Id    : " << e.subProcessId() << endl;
     os << "Impact Parameter : " << e.impactParameter()   << endl;
     os << "Phi Reaction Pl. : " << e.phiReactionPlane()  << endl;
     os << "Trig. Time Offset: " << e.triggerTimeOffset() << endl;
+    os << "N Binary Coll.   : " << e.nBinary() << endl;
+    os << "N Wounded East   : " << e.nWoundedEast() << endl;
+    os << "N Wounded West   : " << e.nWoundedWest() << endl;
+    os << "N Jets           : " << e.nJets() << endl;
     return os;
 }
 
@@ -233,6 +247,8 @@ void StMcEvent::setZEast(unsigned long val) { mZEast = val; }
 
 void StMcEvent::setNEast(unsigned long val) { mNEast = val; }     
 
+void StMcEvent::setEventGeneratorFinalStateTracks(unsigned long val){ mEvGenFSTracks = val; } 
+
 void StMcEvent::setNumberOfPrimaryTracks(unsigned long val){ mPrimaryTracks = val; } 
 
 void StMcEvent::setImpactParameter(float val) { mImpactParameter = val; }               
@@ -240,6 +256,14 @@ void StMcEvent::setImpactParameter(float val) { mImpactParameter = val; }
 void StMcEvent::setPhiReactionPlane(float val) { mPhiReactionPlane = val; } 
 
 void StMcEvent::setTriggerTimeOffset(float val) { mTriggerTimeOffset = val; }
+
+void StMcEvent::setNBinary(unsigned long val) { mNBinary = val; }
+
+void StMcEvent::setNWoundedEast(unsigned long val) { mNWoundedEast = val; }
+
+void StMcEvent::setNWoundedWest(unsigned long val) { mNWoundedWest = val; }
+
+void StMcEvent::setNJets(unsigned long val) { mNJets = val; }
 
 void StMcEvent::setPrimaryVertex(StMcVertex* val) {  mPrimaryVertex = val; }
 
