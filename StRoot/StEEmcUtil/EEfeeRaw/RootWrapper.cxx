@@ -14,7 +14,7 @@
 #include "EEfeeRunDescr.h"
 
 
-#define DEBUG 1
+//#define DEBUG 0
 const int MaxCommentLen=1024;
 
 static TFile   *file  = NULL ;
@@ -32,17 +32,26 @@ static char *filename = NULL;
 
 
 extern "C" void
-rootopen_(long& run, long& runtime, char *chfile, int len)
+eemcfeerootopen_(long& run, long& runtime, char *chfile, int len)
 { 
   char *comment  = new char[MaxCommentLen];
-  filename = new char[len];
-  memcpy(filename,chfile,len);
-  char *isp  = strchr(filename,' ');  *isp = 0x0;
-
-  //sprintf(comment,"file:%s, run:%05ld, time:%s ",filename,run,ctime(&runtime));
-  sprintf(comment,"%s",filename);
-  char *idt  = strchr(filename,'.');  *idt = 0x0;
-  strcat(filename,".root");
+  char *basefile = new char[MaxCommentLen];
+  char *rootdir  = getenv("MINIROOTDIR");
+  if ( rootdir == NULL ) rootdir=".";
+  filename = new char[(len<MaxCommentLen)?MaxCommentLen:len]; // ???
+  
+  // a hack for now
+  if(strstr(chfile,"[BSND ALL]")!=NULL) { // we have an online case
+    fprintf(stderr,"rootopen: on-line data <[BSND ALL]>\n");
+    sprintf(basefile,"run%05ld",run);
+  } else {
+    memcpy(basefile,chfile,len);
+    char *isp  = strchr(basefile,' ');  *isp = 0x00; // locate first space
+    fprintf(stderr,"rootopen: off-line data <%s>\n",basefile);
+    char *idt  = strchr(basefile,'.');  *idt = 0x00; // locate first dot
+  }
+  sprintf(filename,"%s/%s.root",rootdir,basefile); 
+  sprintf(comment,"run:%05ld, time:%s ",run,ctime(&runtime));
 
   file  = new TFile(filename,"RECREATE");
   tree  = new TTree("fee","A tree with FEE events");
@@ -58,14 +67,17 @@ rootopen_(long& run, long& runtime, char *chfile, int len)
   des->setTimeStamp(runtime);
   des->setComment(comment);
 
-  fprintf(stderr,"rootopen: %s\n",comment);
-
+  fprintf(stderr,"rootopen: file=%s\n",filename);
+  fprintf(stderr,"rootopen: comment=%s\n",comment);
+  fflush(stderr);
+  delete basefile;
+  delete comment;
   return;
 }
 
 
 extern "C" void 
-rootfill_(unsigned short& evtype, unsigned short& size , unsigned short *e, int *ierr)
+eemcfeerootfill_(unsigned short& evtype, unsigned short& evtoken, unsigned short& size , unsigned short *e, int *ierr)
 { 
   UShort_t *head = new UShort_t[EEfeeDataBlock::DefaultMaxHead];
 
@@ -96,13 +108,15 @@ rootfill_(unsigned short& evtype, unsigned short& size , unsigned short *e, int 
   for(unsigned short *p = e; (p-e)<size; ) {
     b->clear();
     *p++;                 // skip marker
-    int wordcnt   = *p++;    
-
+    unsigned int wordcnt   = *p++;    
     *p++;                    // 0 resword1 
     *p++;                    // 1 resword2 
-    int token     = *p++;    // 2
-    int cratrig   = *p++;    // 3
-
+    unsigned short token   = *p++;    // 2
+    unsigned short cratrig = *p++;    // 3
+    if(token!=evtoken) {
+      fprintf(stderr,"eemcfeerootfile: *** token mismatch *** ");
+      fprintf(stderr,"(event token=%hd crate token=%hd)\n",evtoken,token);
+    }
     if(wordcnt>4) wordcnt -= 4;
     head[EEfeeDataBlock::EVTYPE] = evtype;
     head[EEfeeDataBlock::WRDCNT] = wordcnt;
@@ -127,14 +141,15 @@ rootfill_(unsigned short& evtype, unsigned short& size , unsigned short *e, int 
 
 
 extern "C" void
-rootclose_()
+eemcfeerootclose_()
 { 
   if(file) { 
     file->Write();
     delete file;
     file=NULL;
-    fprintf(stderr,"rootclose: file %s written\n",filename);
+    fprintf(stderr,"eemcfeerootclose: file %s written\n",filename);
   }
-  fprintf(stderr,"rootclose: OK (total events=%8d)\n",evnum); 
+  fprintf(stderr,"eemcfeerootclose: OK (total events=%8d)\n",evnum); 
+  delete filename;
   return;
 }
