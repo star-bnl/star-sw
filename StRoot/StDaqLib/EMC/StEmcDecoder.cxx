@@ -167,7 +167,7 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
     goto FEE;
   }
   
-  if(date >= 20021001 && date < 20030701) // year 2002/2003 pp and dAu runs
+  if(date >= 20021001) // year 2002/2003 pp and dAu runs
   {
     int SmdModules_tmp[8][15]={
                               {46,47,48,49,50,51,52,53,54,55,56,57,58,59,60},                //RDO 0
@@ -183,7 +183,7 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
     goto FEE;
   }
   
-  if(date >=  20030701) // year 2004 AuAu and pp runs
+  /*if(date >=  20030701) // year 2004 AuAu and pp runs
   {
     int SmdModules_tmp[8][15]={
                               {31,32,33,34,35,36,37,38,39,40,41,42,43,44,45},                //RDO 0
@@ -197,7 +197,7 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
                               }; 
     for(int i=0;i<8;i++) for(int j=0;j<15;j++) SmdModules[i][j]=SmdModules_tmp[i][j];
     goto FEE;
-  }
+  }*///Steve Trentalange told this has not changed since last year
 
   FEE:
   int FEE1_tmp[4]={1,4,3,2};
