@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.30 2002/02/13 21:56:29 jeromel Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.31 2002/02/13 22:03:00 jeromel Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.31  2002/02/13 22:03:00  jeromel
+// Swell, made incomplete prototype .. Now ** really ** fixed.
+//
 // Revision 1.30  2002/02/13 21:56:29  jeromel
 // InitRun() function proto.
 //
@@ -202,11 +205,11 @@ class St_tpcdaq_Maker : public StMaker {
    }  
    virtual       ~St_tpcdaq_Maker();
    virtual Int_t  Init();
-   virtual Int_t  InitRun();
+   virtual Int_t  InitRun(Int_t );
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.30 2002/02/13 21:56:29 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.31 2002/02/13 22:03:00 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };
