@@ -1,9 +1,9 @@
-#include <Stiostream.h>
 #include "StDetectorDbSpaceCharge.h"
 #include "tables/St_spaceChargeCor_Table.h"
 #include "TUnixTime.h"
 #include "StDetectorDbMagnet.h"
 #include "StDetectorDbRichScalers.h"
+#include "StMessMgr.h"
 
 /*!
 
@@ -13,6 +13,7 @@
 
 /// Initialize Instance
 StDetectorDbSpaceCharge* StDetectorDbSpaceCharge::sInstance = 0;
+StDetectorDbSpaceChargeR2* StDetectorDbSpaceChargeR2::sInstanceR2 = 0;
 
 /// Returns previous instance if exits, if not makes new one
 StDetectorDbSpaceCharge* StDetectorDbSpaceCharge::instance()
@@ -21,13 +22,16 @@ StDetectorDbSpaceCharge* StDetectorDbSpaceCharge::instance()
     if(!sInstance){
 	sInstance = new StDetectorDbSpaceCharge();
     }
-    // Need to reinitilize array for some unkown reason
-    // the array memeory changed althoug the TTable stays the same
+    // Need to reinitialize array for some unknown reason
+    // the array memory changed although the TTable stays the same
     if(sInstance->mTable)
 	sInstance->mSpaceCharge = (spaceChargeCor_st*)(sInstance->mTable->GetArray());
     
     return sInstance;
 };
+StDetectorDbSpaceCharge* StDetectorDbSpaceCharge::instanceR2() {
+  return StDetectorDbSpaceChargeR2::instance();
+}
 
 /// Updates data in instance from database
 void StDetectorDbSpaceCharge::update(StMaker* maker){
@@ -39,7 +43,7 @@ void StDetectorDbSpaceCharge::update(StMaker* maker){
 	TDataSet* dataSet = maker->GetDataBase("Calibrations/rich");
 
 	if(dataSet){
-	    mTable = dynamic_cast<TTable*>(dataSet->Find("spaceChargeCor"));
+	    mTable = dynamic_cast<TTable*>(dataSet->Find(tableName));
 	    
 	    if(mTable){
 		mSpaceCharge = (spaceChargeCor_st*)(mTable->GetArray());
@@ -50,13 +54,14 @@ void StDetectorDbSpaceCharge::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbSpaceCharge::StDetectorDbSpaceCharge(){
-    cout << "StDetectorDbSpaceCharge::StDetectorDbSpaceCharge" << endl;
+    ++gMess << "StDetectorDbSpaceCharge::StDetectorDbSpaceCharge" << endm;
     mSpaceCharge = 0;
     mTable = 0;
+    sprintf(tableName,"spaceChargeCor");
 };
 /// Default destructor
 StDetectorDbSpaceCharge::~StDetectorDbSpaceCharge(){
-  delete sInstance;
+  //delete sInstance; //unnecessary, deleting it if here!
   sInstance = 0;
 };
 
@@ -92,12 +97,20 @@ double StDetectorDbSpaceCharge::getSpaceChargeCorrection(){
 double StDetectorDbSpaceCharge::getSpaceChargeCoulombs(double scaleFactor){
 
     StDetectorDbRichScalers* scalers = StDetectorDbRichScalers::instance();
-    double mult = scalers->getMult();
+    double mult;
+    switch ((int) this->getSpaceChargeDetector()) {
+	case (0) : mult = scalers->getMult(); break;
+	case (1) : mult = scalers->getBBCX(); break;
+	case (2) : mult = scalers->getZDCX(); break;
+	case (3) : mult = scalers->getZDCEast()+scalers->getZDCWest(); break;
+	default  : mult = 0.;
+    }
     double saturation = this->getSpaceChargeSatRate();
     double correction = this->getSpaceChargeCorrection(scaleFactor);
+    double factor     = this->getSpaceChargeFactor();
 
     double intens = (mult < saturation) ? mult : saturation;
-    return intens * correction;
+    return factor * intens * correction;
     
 };
 
@@ -117,6 +130,26 @@ double StDetectorDbSpaceCharge::getSpaceChargeSatRate(){
     
 };
 
+/// Returns multiplicative shape scale factor to use for Space Charge
+float StDetectorDbSpaceCharge::getSpaceChargeFactor(){
+    float value = 0;
+    if(mSpaceCharge){
+	value = mSpaceCharge->factor;
+    }
+    return value;
+    
+};
+
+/// Returns Detector to use for Space Charge measure
+float StDetectorDbSpaceCharge::getSpaceChargeDetector(){
+    float value = 0;
+    if(mSpaceCharge){
+	value = mSpaceCharge->detector;
+    }
+    return value;
+    
+};
+
 /// outputs to ostream the entire class
 ostream& operator<<(ostream& os, StDetectorDbSpaceCharge& v){
 
@@ -130,6 +163,36 @@ ostream& operator<<(ostream& os, StDetectorDbSpaceCharge& v){
     os << endl;
     os << "Saturation Rate:     " << v.getSpaceChargeSatRate() << endl;
     os << "Coulombs:            " << v.getSpaceChargeCoulombs() << endl;
+    os << "Shape Scale Factor:  " << v.getSpaceChargeFactor() << endl;
+    os << "Detector:            " << v.getSpaceChargeDetector() << endl;
     
     return os;
+};
+
+
+/// Returns previous instance if exits, if not makes new one
+StDetectorDbSpaceCharge* StDetectorDbSpaceChargeR2::instance()
+{
+    
+    if(!sInstanceR2){
+	sInstanceR2 = new StDetectorDbSpaceChargeR2();
+    }
+    // Need to reinitialize array for some unknown reason
+    // the array memory changed although the TTable stays the same
+    if(sInstanceR2->mTable)
+	sInstanceR2->mSpaceCharge = (spaceChargeCor_st*)(sInstanceR2->mTable->GetArray());
+    
+    return (StDetectorDbSpaceCharge*) sInstanceR2;
+};
+
+/// Default constructor
+StDetectorDbSpaceChargeR2::StDetectorDbSpaceChargeR2() :
+  StDetectorDbSpaceCharge() {
+    ++gMess << "StDetectorDbSpaceCharge:: ...in R2 mode" << endm;
+    sprintf(tableName,"spaceChargeCorR2");
+}
+/// Default destructor
+StDetectorDbSpaceChargeR2::~StDetectorDbSpaceChargeR2(){
+  //delete sInstanceR2; //unnecessary, deleting it if here!
+  sInstanceR2 = 0;
 };
