@@ -12,6 +12,7 @@
 // x[3] = C  (local) curvature of the track
 // x[4] = tan(l) 
 
+double StiKalmanTrackNode::kField = 0.5;
 
 //_____________________________________________________________________________
 void StiKalmanTrackNode::reset()
