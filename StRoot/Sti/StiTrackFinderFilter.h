@@ -1,9 +1,9 @@
 #ifndef StiTrackFinderFilter_H_INCLUDED
 #define StiTrackFinderFilter_H_INCLUDED
+#include <string>
 #include "StiTrack.h"
 #include "Base/Filter.h"
 ////////#include "Base/Parameter.h"
-
 class StiTrackFinderFilter : public Filter<StiTrack>
 {
  public:
