@@ -4,21 +4,26 @@
 * this is the initialization kumac for the sca event by event package
 * ----------------------------------------------------------------
 * 8/4/98 - K. Turner - edited to make standard
-* 8/7/98 - LDC - added switches
- 
+* 8/7/98 - LDC
+*	1.  added switches
+*	2.  added calib/ebye/sca_calib.xdf filestream readin
 * ***************************************************************
 macro init prior_switch=0 ensemble_switch=0 analysis_switch=1
   
   macro/global/import *
   message 'initialize sca tables and switches '  
-  cd [params]
-  
-  dio/newfilestream      SCAPARAM  $STAR/params/ebye/scaconst.xdf r 
+  cd [params]/ebye
+  dio/newfilestream      SCAPARAM  $STAR/params/ebye/sca_params.xdf r 
   dio/stream/getevent    SCAPARAM
   dio/stream/close       SCAPARAM
   
+  cd [calib]/ebye
+  dio/newfilestream      SCACALIB  $STAR_CALIB/ebye/sca_calib.xdf r 
+  dio/stream/getevent    SCACALIB
+  dio/stream/close       SCACALIB
+  
 * set switches
-  cd [params]/ebye
+  cd [params]/ebye/sca
   if [prior_switch]=1 then 
     tdm/table/cell/putvalue 'sca_switch[0].makePrior' 1
   endif
