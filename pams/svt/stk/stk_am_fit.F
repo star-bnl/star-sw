@@ -135,13 +135,13 @@ C     ================
 C      call StInfo('STK_AM_FIT: Starting ################################')
 
       if (stkpar(1).c1norm(1).eq.0) then
-         call StError('Setting chi1 normalization to 1.0')
+         call StWarning('Setting chi1 normalization to 1.0')
          stkpar(1).c1norm(1)=1.0
          stkpar(1).c1norm(2)=0.0
          stkpar(1).c1norm(3)=1.0
       endif
       if (stkpar(1).c2norm(1).eq.0) then
-         call StError('Setting chi2 normalization to 1.0')
+         call StWarning('Setting chi2 normalization to 1.0')
          stkpar(1).c2norm(1)=1.0
          stkpar(1).c2norm(2)=0.0
          stkpar(1).c2norm(3)=1.0
@@ -155,19 +155,19 @@ c     check if inputs are valid, if not return with abort event status
       
       if (vtx_h.nok.le.0) then
          stk_am_fit = stafcv_bad
-         call StError('stk_am_fit_npvi-e: no primary vertex information')
+         call StError('SVT stk_am_fit: no primary vertex information')
          return
       else if (spt_h.nok.le.0) then
          stk_am_fit = stafcv_bad
-         call StError('<e>_stk_am_fit_nspp: no svt space point')
+         call StError('SVT stk_am_fit: no svt space point')
          return
       else if (track_h.nok.le.0) then
          stk_am_fit = stafcv_bad 
-         call StError('<e>_stk_am_fit_ntc: no track candidate')
+         call StError('SVT stk_am_fit: no track candidate')
          return
       else if (groups_h.nok.le.0) then
          stk_am_fit = stafcv_bad
-         call StError( '<e>_stk_am_fit_ntc: no groups')
+         call StError( 'SVT stk_am_fit: no groups')
          return
       end if
       
@@ -249,10 +249,10 @@ c               write(6,*) ' nspt=',nspt
      +              groups(2).id1,itrack,table_off,nrows)
        
                if( .not. SCV_STATE( ok, 'i')) then
-                  call StError('Problem in tls search_near')
+                  call StError('SVT Problem in tls search_near')
                endif
                if( nrows .ne. track(itrack).nspt) then
-                  write(mess,1004) 'nrows=',nrows, 'for track',itrack
+                  write(mess,1004) 'SVT nrows=',nrows, 'for track',itrack
                   call StError(mess)
                endif
 
@@ -565,11 +565,11 @@ C               layer(3) = 0
                ok = tls_Search_Near_i(groups_h.nok,groups(1).id1,
      +              groups(2).id1,itrack,table_off,nrows)
                if( .not. SCV_STATE( ok, 'i')) then
-                  CALL StError('Problem in tls_serach_near')
+                  CALL StError('SVT Problem in tls_serach_near')
                endif
 #if 0
                if( nrows .ne. track(itrack).nspt) then
-                  write(mess,1004) 'nrows=',nrows, 'for track',itrack
+                  write(mess,1004) 'SVT nrows=',nrows, 'for track',itrack
                   call StError(mess)
                endif
 #endif               

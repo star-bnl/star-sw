@@ -43,9 +43,9 @@ C     RETURN:
 C     =======
 C     FORMAT:
 C     =======
- 1001 format(1x,'<e>-stk_am_vertex_direct : no rows in',
+ 1001 format(1x,'SVT stk_am_vertex_direct : no rows in',
      &     'g2t_vertex table ')
- 1002 format(1x,'<w>-stk_am_vertex_direct : no rows in',
+ 1002 format(1x,'SVT stk_am_vertex_direct : no rows in',
      &     'vtx_direct, will use defaults')
 
 C     EXECUTABLE CODE:

@@ -77,21 +77,21 @@ C     Returned Values:
 C     ================
 C     Format:
 C     =======
- 1001 format(1x,'stk_am_direct_nrspt-e: no rows in spt.')
- 1002 format(1x,'stk_am_direct_nrgeom-e: no rows in geom.')
- 1004 format(1x,'stk_am_direct_nrmkin-e: no rows in g2t_track.')
- 1013 format(1x,'stk_am_direct_g2t_trackoob-e : ',
+ 1001 format(1x,'SVT stk_am_direct: no rows in spt.')
+ 1002 format(1x,'SVT stk_am_direct: no rows in geom.')
+ 1004 format(1x,'SVT stk_am_direct: no rows in g2t_track.')
+ 1013 format(1x,'SVT stk_am_direct_g2t : ',
      & ' g2t_track(ig2t_track).id out of boundaries:',2i6)
- 1024 format(1x,'stk_am_direct_nmctrk-e : mctrk has no key',
+ 1024 format(1x,'SVT stk_am_direct: mctrk has no key',
      &     'for idtrack=',i10)
- 1025 format(1x,'stk_am_direct_bmctrk-e : bad mctrk key =',
+ 1025 format(1x,'SVT stk_am_direct: bad mctrk key =',
      &     2i10)
- 1026 format(1x,'stk_am_direct_tmsot-e : too many space',
+ 1026 format(1x,'SVT stk_am_direct: too many space',
      &     'points on track',3i10)
- 1027 format(1x,'stk_am_direct_tmst-e : too many SVT tracks')
- 1028 format(1x,'stk_am_direct_snm_e :',
+ 1027 format(1x,'SVT stk_am_direct: too many SVT tracks')
+ 1028 format(1x,'SVT stk_am_direct:',
      & ' spt has not a valid id_mctrack, ispt=',i8)
- 1029 format(1x,'stk_am_direct_snm_f : jdtrack out of bound',i8)
+ 1029 format(1x,'SVT stk_am_direct: jdtrack out of bound',i8)
 
 C     Executable Code:
 C     ================

@@ -91,15 +91,15 @@ C     RETURN:
 C     =======
 C     FORMAT:
 C     =======
- 1000 format(1x,'f-stk_am_fill: no rows in spt - abort event.')
- 1001 format(1x,'f-stk_am_fill: no rows in vtx - abort event.')
- 1003 format(1x,'f-stk_am_fill: no rows in filler -',
+ 1000 format(1x,'SVT stk_am_fill: no rows in spt - abort event.')
+ 1001 format(1x,'SVT stk_am_fill: no rows in vtx - abort event.')
+ 1003 format(1x,'SVT stk_am_fill: no rows in filler -',
      &     'will use defaults parameters.')
- 1004 format(1x,'f-stk_am_fill: no rows in config - abort event.')
- 1005 format(1x,'f-stk_am_fill: layer number out of bounds at label:'
+ 1004 format(1x,'SVT stk_am_fill: no rows in config - abort event.')
+ 1005 format(1x,'SVT stk_am_fill: layer number out of bounds at label:'
      &      ,i5)
- 1006 format(1x,'f-stk_am_fill: no space points on layer :',i5)
- 1007 format(1x,'f-stk_am_fill: too many track candidates: ',i8)
+ 1006 format(1x,'SVT stk_am_fill: no space points on layer :',i5)
+ 1007 format(1x,'SVT stk_am_fill: too many track candidates: ',i8)
  1008 format(1x,a,i8)
 
 C     EXECUTABLE CODE:
@@ -207,7 +207,7 @@ c     wkw: make cthij parameters
                ilist = 0
                do iwafer2 = waferi(ilayer2-1)+1, waferi(ilayer2)
                   if (ilayer2.ne.geom(iwafer2).layer) then
-                     call StError( ' une erreur est survenu - crash...')
+                     call StError( 'SVT une erreur est survenu-crash...')
                      stop
                   end if
                   x(1,ilayer2) = geom(iwafer2).x(1)
@@ -336,7 +336,7 @@ C     &        (iladder-1)*config(1).n_wafer(ilayer) + iwafer1
  112     continue
          if (iwafer2 .eq. 0 ) then
 
-           call StError( ' fatal mis-match')
+           call StError( 'SVT fatal mis-match')
             write(mess,*) 'idw,ly,w,ld,w2,id:', 
      &           kwafer,ilayer,iwafer1,iladder,
      &           iwafer2, geom(iwafer2).id
@@ -1354,7 +1354,7 @@ C     spt(ispts(k)).id_track     = itrack
                      groups(n_groups).id2 = ispts(k)
                      n_groups = n_groups + 1
                      if( n_groups .gt. groups_h.maxlen) then
-                        write(mess,*)'Too many groups', n_groups
+                        write(mess,*)'SVT Too many groups', n_groups
                         call StError(mess)
                         done(1)   = .true.
                         done(2)   = .true.

@@ -121,7 +121,7 @@ c     calculate coefficients
 
       if (d2.gt.d1) then		! use second form
          if (d2.le.dmin) then         ! second form also fails
-            call StError('Failed d2 test in linfit') ! wkw: temporary comment
+            call StError('SVT Failed d2 test in linfit') ! wkw: temporary comment
             chi2  = infinity
             a(1)  = infinity
             a(2)  = infinity
@@ -278,7 +278,7 @@ c     calculate coefficients
 
       if (d2.gt.d1) then		! use second form
          if (d2.le.dmin) then         ! second form also fails
-            call StError('Failed d2 test in linfit') ! wkw: temporary comment
+            call StError('SVT Failed d2 test in linfit') ! wkw: temporary comment
             chi2  = infinity
             a(1)  = infinity
             a(2)  = infinity
@@ -409,8 +409,8 @@ c     ==================
 
 c     format
 c     ======
- 1001 format(1x,' <F>-parabolfit: insuficient number of points:',i5)
- 1002 format(1x,' <F>-parabolfit: insuficient number of points ',
+ 1001 format(1x,'SVT parabolfit: insuficient number of points:',i5)
+ 1002 format(1x,'SVT parabolfit: insuficient number of points ',
      &     'with dy>0:',i5)
 
 

@@ -76,11 +76,11 @@ c     check if inputs are valid, if not return with abort event status
       
       if (vtx_h.nok.le.0) then
          stk_am_kine = stafcv_bad
-         call StError('stk_am_kine_npvi-e : no primary vertex information')
+         call StError('SVT stk_am_kine: no primary vertex information')
          return
       else if (track_h.nok.le.0) then
          stk_am_kine = stafcv_bad
-         call StError('stk_am_kine_nt-e : no rows in track ')
+         call StError('SVT stk_am_kine: no rows in track ')
          return
       end if
       
@@ -192,7 +192,7 @@ cccc  pt   = sqrt(p(1)**2+p(2)**2)
                kine(ikine).ph     = ph ! transverse momentum
                kine(ikine).sec    = track(ikine).sec 
             else
-               msg = 'stk_am_kine_tmt-e : '//
+               msg = 'SVT stk_am_kine: '//
      &              'number of tracks exceeds max length of table kine'
                call StError(msg)
                done = .true.
@@ -201,7 +201,7 @@ cccc  pt   = sqrt(p(1)**2+p(2)**2)
 
 c     track with bad parameters - store it with "infinity"
 
-            msg = 'stk_am_kine_invpt-e : '//
+            msg = 'SVT stk_am_kine: '//
      &           'found track with |invpt| out of bound'
             call StError(msg)
             ikine = ikine + 1
@@ -218,7 +218,7 @@ c     track with bad parameters - store it with "infinity"
                kine(ikine).ph     = -infinity
                kine(ikine).sec    = 0
             else
-               msg = 'stk_am_kine_temlts-e : '//
+               msg = 'SVT stk_am_kine: '//
      &              'number of tracks exceeds max length of table kine'
                call StError(msg)
                done = .true.
