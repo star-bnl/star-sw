@@ -31,6 +31,10 @@ void RunStiEvaluation(
 		      const char* postFName="EvalHists.ps",
 		      Int_t debug = 10000)
 {
+
+  // test for batch mode - we only create ps files in batch mode.
+  bool isBatch = gROOT->IsBatch()==true;
+
   //File stuff - input/output files open and setup
   //test for existence of file
    //get Tree Entries
@@ -43,12 +47,13 @@ void RunStiEvaluation(
    cout << "Opening file: " << evalFName << endl;
 
    // open output file for histogram objects
-   TFile histFile(histFName, "RECREATE");
+   TFile *pHistFile = new TFile(histFName, "RECREATE");
 
    //create a multi-page portraitpostscript file for the histograms
    gStyle->SetPaperSize(TStyle::kUSLetter);
-   TPostScript *ps = new TPostScript(postFName, 111);
-   ps->Range(20, 26);  //set x,y of printed page (us letter)
+   TPostScript *ps = NULL;
+   if(isBatch) ps = new TPostScript(postFName, 111);
+   if(isBatch) ps->Range(20, 26);  //set x,y of printed page (us letter)
 
    cout << "Create histograms" << endl;
    //1. Px
@@ -71,7 +76,7 @@ void RunStiEvaluation(
 
   //////////////// page 1 //////////////////////////////////////////////
 
-  ps->NewPage();
+  if(isBatch) ps->NewPage();
   TCanvas* canvas1=new TCanvas("canvas1","ITTF Momentum", 425,550);
   canvas1->Divide(2,2);
 
@@ -99,11 +104,11 @@ void RunStiEvaluation(
   hstpt->SetXTitle("Pt (GeV/c)");
   hstpt->Draw();
 
-  canvas1->Update();
+  if(isBatch) canvas1->Update();
 
   //////////////// page 2 //////////////////////////////////////////////
 
-  ps->NewPage();
+  if(isBatch) ps->NewPage();
   TCanvas* canvas2 = new TCanvas("canvas2","Momentum Comparison", 425, 550);
   canvas2->Divide(2,2);
 
@@ -131,7 +136,7 @@ void RunStiEvaluation(
   hptMvsSt->SetXTitle("(ITTF-MC)/MC Pt (%)");
   hptMvsSt->Draw();
 
-  canvas2->Update();
+  if(isBatch) canvas2->Update();
 
   //////////////// page X //////////////////////////////////////////////
 
@@ -141,7 +146,7 @@ void RunStiEvaluation(
 
   //////////////// page 3 //////////////////////////////////////////////
 
-  ps->NewPage();
+  if(isBatch) ps->NewPage();
   TCanvas* canvas4 = new TCanvas("canvas4","Track Reconstruction Charateristics",425,550);
 
   //3. Pz
@@ -156,11 +161,11 @@ void RunStiEvaluation(
   hgc2->Draw();
   hstc2->Draw("SAME");
 
-  canvas4->Update();
+  if(isBatch) canvas4->Update();
 
   //////////////// page 4 //////////////////////////////////////////////
 
-  ps->NewPage();
+  if(isBatch) ps->NewPage();
   TCanvas* canvas5 = new TCanvas("canvas5", "Track Residuals", 425,550);
   canvas5->Divide(2,2);
 
@@ -184,11 +189,11 @@ void RunStiEvaluation(
   TestTree->Draw("sqrt((nodeLocalX-hitLocalX)*(nodeLocalX-hitLocalX))>> hresr","mcNTimesFound>0 && nodeHasHit==1","goff",debug/100);
   hresr->Draw();
 
-  canvas5->Update();
+  if(isBatch) canvas5->Update();
 
   //////////////// page 5 //////////////////////////////////////////////
 
-  ps->NewPage();
+  if(isBatch) ps->NewPage();
   TCanvas* canvas6 = new TCanvas("canvas6","Hit and Node Characteristics", 425,550);
   canvas6->Divide(1,1); // kludge for TPostScript
 
@@ -207,18 +212,20 @@ void RunStiEvaluation(
   gotHitRZ->SetMarkerSize(.5);
   gotHitRZ->Draw("Same,p");
 
-  canvas6->Update();
+  if(isBatch) canvas6->Update();
 
-  ps->Close();
+  if(isBatch) ps->Close();
 
   // convert ps to pdf
-  char szBuf[128];
-  sprintf(szBuf, "ps2pdf %s", postFName);
-  gSystem->Exec(szBuf);
+  if(isBatch){
+    char szBuf[128];
+    sprintf(szBuf, "ps2pdf %s", postFName);
+    gSystem->Exec(szBuf);
+  }
 
   // write out histogram objects
-  histFile.Write();
-  histFile.Close();
+  pHistFile->Write();
+  if(isBatch) pHistFile->Close();
 
   //missedHitXY = new TH2F("missedHitXY","Missed Node Position", 256, -100,100,256,-100,100);
   //TestTree->Draw("nodeLocalX:nodeLocalY >> missedHitXY","nodeHasHit==0","goff",debug);
