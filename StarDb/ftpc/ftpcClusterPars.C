@@ -56,8 +56,8 @@ memset(&row,0,tableSet->GetRowSize());
     row.deltaTime                 =         2;  // width unfolding window time
     row.deltaPad                  =         2;  // width unfolding window pad
                                                 // inner cathode shift offset (cm)
-    row.offsetCathodeWest         =     0.035;  // west
-    row.offsetCathodeEast         =      0.06;  // east
+    row.offsetCathodeWest         =     -0.035;  // west
+    row.offsetCathodeEast         =      -0.06;  // east
 
     row.normalizedNowPressure     =    1013.25; // normalized air pressure (in hPa) ;
     row.adjustedAirPressureWest   =    1013.25; // temperature adjusted air pressure for FTPC West 
