@@ -89,7 +89,8 @@ C     Local variables
       INTEGER egr_cross_fact
       INTEGER iplane,isvth
       INTEGER imsg
-      LOGICAL good_hit(mxpnt)
+      INTEGER i_index(mxpnt)
+      LOGICAL good_hit(mxpnt), good_hit_tpc(mxpnt)
       DOUBLE PRECISION    xcir(mxpnt),ycir(mxpnt),zcir(mxpnt)
       DOUBLE PRECISION    xerr(mxpnt),yerr(mxpnt),zerr(mxpnt),pnt(mxpnt)
       DOUBLE PRECISION    chisquare, param(*)
@@ -160,6 +161,9 @@ C     load the fitting arrays for the primary vertex
 
          if (ipriv.eq.1) then
             ncir = ncir + 1
+            write(6,*) ' EGR not designed to work this way'
+            good_hit_tpc(ncir) = .true.
+            i_index(ncir) = i   ! store index for reference
             xcir(ncir) = prim_vrtx_x
             ycir(ncir) = prim_vrtx_y 
             zcir(ncir) = prim_vrtx_z
@@ -174,7 +178,10 @@ C     Load the fitting arrays with the SVT space points
             do iplane=gtrk(igtrk).ntpc+1,
      +           gtrk(igtrk).ntpc+svt_track(isvtt).nspt
                if (good_hit(iplane) ) then
+                  write(6,*) ' EGR not designed to work this way!!!!!'
                   ncir = ncir + 1
+                  good_hit_tpc(ncir) = .true.
+                  i_index(ncir) = i ! store index for reference
                   isvth = gtrk(igtrk).ipnt(iplane)
                   xcir(ncir) = svt_spt(isvth).x(1)
                   ycir(ncir) = svt_spt(isvth).x(2)
@@ -207,9 +214,12 @@ C     omit points that were marked as outliers
                   if( ient .gt. 0 .and. (tphit(ient).flag .lt. 0 .or.
      +             tphit(ient).flag .gt. 1)) then
                      good_hit(i) = .false.
+                     gtrk(igtrk).pos(i) = -99
                   endif
                   if( ient .ne. 0 .and. good_hit(i)) then
                      ncir = ncir+1
+                     good_hit_tpc(ncir) = .true.
+                     i_index(ncir) = i ! store index for reference
                      xcir(ncir) = tphit(ient).x
                      ycir(ncir) = tphit(ient).y
                      zcir(ncir) = tphit(ient).z
@@ -226,7 +236,7 @@ C        write(6,*) param(1), param(2), param(3), param(4), param(5)
          EGR_REFIT_TRACK_KAL = STAFCV_BAD
          iret = fitter(ncir, xcir, ycir, zcir, xerr, yerr, zerr, param, 
      c   chisquare, 
-     c   covar, egrpar(2).useglobal, npfit, good_hit)
+     c   covar, egrpar(2).useglobal, npfit, good_hit_tpc)
 CCC     c   covar, egrpar(1).prob(1), egrpar(1).minfit)
 C        write(6,*) param(1), param(2), param(3), param(4), param(5)
          gtrk(igtrk).flag = iret
@@ -246,9 +256,12 @@ CCC         gtrk(igtrk).nfit = ncir
 
 C     clean up list of hits and remove outliers
 
-         do i=1,gtrk(igtrk).nhit
-            if( .not. good_hit(i)) then
-               gtrk(igtrk).pos(i) = -99
+         do i=1,ncir
+CCC         do i=1,gtrk(igtrk).nhit
+CCC            if( .not. good_hit(i)) then
+CCC               gtrk(igtrk).pos(i) = -99
+            if( .not. good_hit_tpc(i)) then
+               gtrk(igtrk).pos(i_index(i)) = -99
             endif
          enddo
          
