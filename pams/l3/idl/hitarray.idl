@@ -1,6 +1,0 @@
-/*   hitarray
- * 
-*/
-struct hitarray{
-    long      data;      /* 4 byte variable */
-};
