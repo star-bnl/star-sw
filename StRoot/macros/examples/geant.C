@@ -1,5 +1,8 @@
-// $Id: geant.C,v 1.10 1999/05/21 15:33:58 kathy Exp $
+// $Id: geant.C,v 1.11 1999/06/17 20:00:44 didenko Exp $
 // $Log: geant.C,v $
+// Revision 1.11  1999/06/17 20:00:44  didenko
+// set default #ev= 1
+//
 // Revision 1.10  1999/05/21 15:33:58  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
@@ -34,7 +37,7 @@
 // what it does: 
 //=======================================================================
 //
-#define gtrack
+//#define gtrack
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -50,7 +53,7 @@ void Load(){
   gSystem->Load("St_geant_Maker");
   gSystem->Load("St_TLA_Maker");
 }
-void geant(const Int_t Nevents=0,const Char_t *fzfile ="/disk1/star/test/psc0049_08_40evts.fzd")
+void geant(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/psc0049_08_40evts.fzd")
 {
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load();
