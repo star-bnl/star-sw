@@ -1,3 +1,10 @@
+* $Id: magpgeo.g,v 1.2 2004/03/31 20:49:13 potekhin Exp $
+* $Log: magpgeo.g,v $
+* Revision 1.2  2004/03/31 20:49:13  potekhin
+* A cosmetic change in one of the color
+* attributes and minor formatting,
+* plus the CVS id tag.
+*
 ********************************************************************************
 Module  MAGPGEO is the geometry of the STAR magnet
 ********************************************************************************
@@ -5,13 +12,18 @@ Module  MAGPGEO is the geometry of the STAR magnet
    Author    Pavel Nevski
    Created   19 March 1996
 *  Original  version:  W.B. Christie 15-NOV-1993
+
    Content   MAGP,COIL,MTCL,MPTV,MPCV,MRET,MRGV,MSEC,MBAR,MCSE
+
    structure MAGG { version,Rmax,Length,test}
+
    structure MBAR { CoilRmn,CoilRmx,CoilLen,RetYRmn,RetYLen,
                     BarWidin,BarWidou,BarHeigh,RingRmn,
                     Ncoil,zcoil(6),dzcoil(6) }
+
    structure MEND { PoleRmn,poleZ,PoleRmx,tcoilRmn,tcoilRmx,PoleCavR,
                     PoleCavD,tcoilDZ,etacut  }
+
    real      TanTheta,Rcorner,Zcut,d
    Integer   I_coil
 ********************************************************************************
@@ -139,7 +151,7 @@ EndBlock
 *
 Block MPCV is the coil cavity in the pole-tip (filled with cables ?)
       Material  Aluminium
-      Attribute MPTV    seen=1  colo=7
+      Attribute MPCV    seen=1  colo=7
       Shape     TUBE    Rmin=mend_tcoilRmn  Rmax=mend_PoleCavR,
                         dz=mend_PoleCavD/2
       Create and Position MTCL   z=+mend_tcoilDZ/2-mend_PoleCavD/2      
