@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.2 2000/08/26 23:50:04 fisyak Exp $
+// $Id: StTpcT0Maker.cxx,v 1.3 2000/08/28 17:42:29 hardtke Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.3  2000/08/28 17:42:29  hardtke
+// Add new histogram
+//
 // Revision 1.2  2000/08/26 23:50:04  fisyak
 // Make it chain
 //
@@ -57,7 +60,9 @@ Int_t StTpcT0Maker::Init(){
   T0HIST_MIN = 36.0;
   T0HIST_MAX = 38.0;
   t0result = new TH1F("t0result","t0result",1000,T0HIST_MIN,T0HIST_MAX);
+  t0guessError = new TH1F("t0guessError","t0 measured - t0 guess",1000,-1,1);
   AddHist(t0result);
+  AddHist(t0guessError);
   date = 0;
   time = 0;
   return StMaker::Init();
@@ -137,6 +142,7 @@ Int_t StTpcT0Maker::Make(){
       gMessMgr->Info() << "StTpcT0Maker::zVertexEast = " << zVertexEast << endm;
       gMessMgr->Info() << "StTpcT0Maker::t0 = " << t0current << endm;
       t0result->Fill(t0current);
+      t0guessError->Fill(t0current-t0guess);
       if (t0current<T0HIST_MIN||t0current>T0HIST_MAX){
          gMessMgr->Info() << "StTpcT0Maker::t0 out of defined range for histogram"<< endm;
       }
@@ -176,7 +182,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.2 2000/08/26 23:50:04 fisyak Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.3 2000/08/28 17:42:29 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
