@@ -26,7 +26,9 @@ using std::copy;
 #include "StiCompositeSeedFinder.h"
 #include "MessageType.h"
 
-StiCompositeSeedFinder::StiCompositeSeedFinder(StiObjectFactoryInterface<StiKalmanTrack>* fact)
+StiCompositeSeedFinder::StiCompositeSeedFinder(StiObjectFactoryInterface<StiKalmanTrack>* fact,
+					       StiHitContainer* hc)
+    : StiSeedFinder(hc)
 {
     cout <<"StiCompositeSeedFinder::StiCompositeSeedFinder()"<<endl;
     mFactory = fact;
@@ -99,11 +101,11 @@ void StiCompositeSeedFinder::build()
     StiTrackSeedFinder* sf=0;
     if (StiIOBroker::instance()->useGui()==true) {
 	sf = new StiRDLocalTrackSeedFinder( StiDetectorContainer::instance(),
-					    StiHitContainer::instance() );
+					    mHitStore);
     }
     else {
 	sf = new StiLocalTrackSeedFinder( StiDetectorContainer::instance(),
-					  StiHitContainer::instance() );
+					  mHitStore);
     }
     
     if (!mFactory) {

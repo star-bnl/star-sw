@@ -11,7 +11,7 @@
 #include <algorithm>
 
 //StiGui
-#include "StiGui/StiRootDrawableHitContainer.h"
+//#include "StiGui/StiRootDrawableHitContainer.h"
 
 //Sti
 #include "Messenger.h"
@@ -26,7 +26,7 @@ using std::lower_bound;
 using std::upper_bound;
 using std::stable_partition;
 
-StiHitContainer* StiHitContainer::sinstance = 0;
+//StiHitContainer* StiHitContainer::sinstance = 0;
 
 ostream& operator<<(ostream& os, const StiHit& hit);
 //Non member functions
@@ -47,30 +47,34 @@ ostream& operator<<(ostream&, const HitMapKey&);
   2) Any call to instance after the first call can be treated normally.
   That is, one need not specify the boolean argument to the instance() call.
 */
-StiHitContainer* StiHitContainer::instance(bool drawable)
-{
-    if (sinstance==0) {
-	//Switch on what type to create based on some variable
-	if (drawable==true) {
-	    sinstance = new StiRootDrawableHitContainer();
-	}
-	else {
-	    sinstance = new StiHitContainer();
-	}
-    }
-    
-    return sinstance;
-}
+/*
+  StiHitContainer* StiHitContainer::instance(bool drawable)
+  {
+  if (sinstance==0) {
+  //Switch on what type to create based on some variable
+  if (drawable==true) {
+  sinstance = new StiRootDrawableHitContainer();
+  }
+  else {
+  sinstance = new StiHitContainer();
+  }
+  }
+  
+  return sinstance;
+  }
+*/
 
 /*! Use this wisely, if at all.  See the above warning regarding use of kill().
  */
-void StiHitContainer::kill()
-{
-    if (sinstance) {
-	delete sinstance;
-	sinstance = 0;
-    }
-}
+/*
+  void StiHitContainer::kill()
+  {
+  if (sinstance) {
+  delete sinstance;
+  sinstance = 0;
+  }
+  }
+*/
 
 StiHitContainer::StiHitContainer()
     : mMessenger(*(Messenger::instance(MessageType::kHitMessage)))

@@ -632,7 +632,7 @@ pair<double, double> StiGeometryTransform::angleAndPosition(const StTpcHit *pHit
 } // angleAndPosition
 
 
-void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* sti,
+void StiGeometryTransform::operator() (StiHitContainer* hc, const StGlobalTrack* st, StiKalmanTrack* sti,
 				       unsigned int maxHits, const StTpcHitFilter* filter) const
 {
     Messenger& mess = *(Messenger::instance(MessageType::kGeometryMessage));
@@ -682,7 +682,7 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 		    cout <<"Detector for (sector,padrow): (";
 		    cout <<iIttfSector<<","<<prow<<") not found.  Abort"<<endl;
 		}
-		const hitvector& stiHits = StiHitContainer::instance()->hits(layer);
+		const hitvector& stiHits = hc->hits(layer);
 
 		if (stiHits.size()==0) 	{
 		    mess <<"Error, no StiHits for this sector, padrow"<<endl;

@@ -42,7 +42,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.37 2001/12/17 16:32:03 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.38 2002/02/04 17:06:00 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -55,6 +55,7 @@ public:
     void setAssociationMaker(StAssociationMaker*);
     void setEvaluationFileName(const char*);
 
+    StiHitContainer* hitContainer() const;
     void printStatistics() const;
     
     //Used for stepping to next action (via MainFrame class)
@@ -126,4 +127,8 @@ inline void StiMaker::setAssociationMaker(StAssociationMaker* val)
     mAssociationMaker = val;
 }
 
+inline StiHitContainer* StiMaker::hitContainer() const
+{
+    return mhitstore;
+}
 #endif
