@@ -356,6 +356,9 @@ Int_t StV0FinderMaker::Prepare() {
       hits[trks] = map.numberOfHits(kTpcId) +
 	map.numberOfHits(kSvtId) +
 	map.numberOfHits(kSsdId);
+      //Cut: number of hits
+      pars2 = ev0par2->GetTable(detId[trks]-1);
+      if (hits[trks] < pars2->n_point) continue;
       
       if (!trks)
 	{StThreeVectorD p1 = triGeom->momentum();
@@ -462,8 +465,9 @@ Int_t StV0FinderMaker::Make() {
       pars2 = ev0par2->GetTable(det_id_v0-1);
 
       //Cut: number of hits
-      if ((hits[i] < pars2->n_point) ||
-          (hits[j] < pars2->n_point)) continue;
+      //Now cut directly when filling the table of tracks in Prepare().
+      /*if ((hits[i] < pars2->n_point) ||
+          (hits[j] < pars2->n_point)) continue;*/
 
       //Cut: Initial cut on dca of tracks to primary vertex
       // (perform as early as possible)
@@ -806,8 +810,11 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.17 2004/02/16 16:18:39 betya Exp $
+// $Id: StV0FinderMaker.cxx,v 1.18 2004/03/04 18:31:03 faivre Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.18  2004/03/04 18:31:03  faivre
+// Add cut number of hits for Xi's bachelors.
+//
 // Revision 1.17  2004/02/16 16:18:39  betya
 // added a check on (!triGeom) in V0Finder::Prepare()
 //
