@@ -1,9 +1,13 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.16 2000/01/12 00:30:55 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.17 2000/01/14 21:53:58 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
- * Revision 1.16  2000/01/12 00:30:55  calderon
- * Modified Kink Vertex association as per Lee's request.
+ * Revision 1.17  2000/01/14 21:53:58  calderon
+ * Make sure the common hits for each detector are initialized to zero.
+ * (Thanks, Lee).
+ *
+ * Make sure the common hits for each detector are initialized to zero.
+ * (Thanks, Lee).
  *
  * Revision 1.16  2000/01/12 00:30:55  calderon
  * Modified Kink Vertex association as per Lee's request.
@@ -815,11 +819,17 @@ Int_t StAssociationMaker::Make()
     const StMcTpcHit* mcValueTpcHit;
     const StMcSvtHit* mcValueSvtHit;
     const StMcFtpcHit* mcValueFtpcHit;
+
+    StMcTrack* trackCand;
+    StTrackPairInfo* trkPair;
+
+    trackPing initializedTrackPing;
+    initializedTrackPing.mcTrack = 0;
     initializedTrackPing.nPingsTpc = 0;
     initializedTrackPing.nPingsSvt = 0;
-    vector<trackPing> candidates(100);
+    initializedTrackPing.nPingsFtpc = 0;
     
-    vector<trackPing, allocator<trackPing> > candidates(100);
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<trackPing> candidates(100, initializedTrackPing);
 #else
     vector<trackPing, allocator<trackPing> > candidates(100, initializedTrackPing);
