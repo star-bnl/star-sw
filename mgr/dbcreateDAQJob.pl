@@ -224,9 +224,9 @@ my $mrunId;
      }else {
        $mrunId = 0;
      }
-#        if ( $mrunId < 1223003 || $mrunId > 1228003 ) {   
-#      if ( $mrunId == 1246037 ) {
-        if ( $mrunId > 1243002 ) {
+        if ( $mrunId > 1222001 ) {
+        if ( $mrunId < 1223003 || $mrunId > 1228003 ) {   
+#      if ( $mrunId == 1244036 ) {
       foreach my $runNum (@runSet) {
 
         if ( $mrunId eq $runNum) {      
@@ -283,6 +283,7 @@ my $mrunId;
        next;
      }
       }  
+    }
    }
     }
 #####delete from $JobStatusT inserted JobID
