@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.95 2003/10/10 17:41:51 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.96 2003/10/28 06:07:30 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -71,6 +71,7 @@
 #include "TMath.h"
 #include "TObjString.h"
 #include "TSystem.h"
+#include "TPolyLine3D.h"
 
 #include "StEventDisplayMaker.h"
 #include "TDataSetIter.h"
@@ -843,17 +844,30 @@ void  StEventDisplayMaker::DrawIt(StPoints3DABC *pnt,const char *opt
        bigPnt->Add(pnt);
     
     } else {
-
       tracksShape = new TPolyLineShape(pnt,opt);
       tracksShape->SetVisibility(1);
       tracksShape->SetColorAttribute(col);
       tracksShape->SetLineStyle(sty);
       tracksShape->SetSizeAttribute(siz);
+       
+#if 1
+      // Create the dummy TPolyLine3D
+      m_PadBrowserCanvas->cd();
+      int i= 0;
+      Int_t n = pnt->Size();
+      TPolyLine3D  *line = new TPolyLine3D ( n, (Float_t *)pnt->GetXYZ(0),"");
+      line->SetLineColor(col);
+      line->SetLineWidth(1);
+      line->Draw();
+      m_TrackCollector->Add(line);
+#endif            
 
     // 		Create a node to hold it
       TVolume *thisTrack = new TVolume(pnt->GetName(),pnt->GetTitle(),tracksShape);
       thisTrack->Mark();   thisTrack->SetVisibility();
+#if 0      
       m_EventsNode->Add(thisTrack); 
+#endif      
    }
 }
 //_____________________________________________________________________________
@@ -1106,6 +1120,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.96  2003/10/28 06:07:30  fine
+// workaround to make the new viewer happy
+//
 // Revision 1.95  2003/10/10 17:41:51  fine
 // change the default view for HALL to unvisible
 //
