@@ -73,26 +73,26 @@ c:>------------------------------------------------------------------
 
       eta=0.5
       do i=1,120
-         phi=float(i-0.5)/120.0*C_2PI
+         phi=(float(i)-0.5)/120.0*C_2PI
          call find_bin_emc(ems_control,phi,eta,det,mod,ebin,sub)
          write(*,*)'find_bin/barrel/phi(z+);',phi,' /',det,mod,ebin,sub
       enddo
       eta=-0.5
       do i=1,120
-         phi=float(i-0.5)/120.0*C_2PI
+         phi=(float(i)-0.5)/120.0*C_2PI
          call find_bin_emc(ems_control,phi,eta,det,mod,ebin,sub)
          write(*,*)'find_bin/barrel/phi(z-);',phi,' /',det,mod,ebin,sub
       enddo
 
       eta=1.5
       do i=1,60
-         phi=float(i-1.0)/60.0*C_2PI
+         phi=float(i-1)/60.0*C_2PI
          call find_bin_emc(ems_control,phi,eta,det,mod,ebin,sub)
          write(*,*)'find_bin/endcap/phi(z+);',phi,' /',det,mod,ebin,sub
       enddo
       eta=-1.5
       do i=1,60
-         phi=float(i-1.0)/60.0*C_2PI
+         phi=float(i-1)/60.0*C_2PI
          call find_bin_emc(ems_control,phi,eta,det,mod,ebin,sub)
          write(*,*)'find_bin/endcap/phi(z-);',phi,' /',det,mod,ebin,sub
       enddo
