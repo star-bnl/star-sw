@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.69 2005/03/19 00:20:33 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.70 2005/03/24 18:05:07 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.70  2005/03/24 18:05:07  perev
+ * Derivatives and their test fixed to eta==Psi model
+ *
  * Revision 2.69  2005/03/19 00:20:33  perev
  * Assert for zero determinant ==> print
  *
@@ -280,7 +283,7 @@ TString StiKalmanTrackNode::comment("");
 int StiKalmanTrackNode::counter = 0;
 //debug vars
 //#define STI_ERROR_TEST
-//#define STI_DERIV_TEST
+#define STI_DERIV_TEST
 #ifdef STI_DERIV_TEST
 int    StiKalmanTrackNode::fDerivTestOn=0;   
 #endif
@@ -288,7 +291,7 @@ int    StiKalmanTrackNode::fDerivTestOn=0;
 int    StiKalmanTrackNode::fDerivTestOn=-10;   
 #endif
 
-double StiKalmanTrackNode::fDerivTest[5][5];   
+double StiKalmanTrackNode::fDerivTest[kNPars][kNPars];   
 int gCurrShape=0;
 
 void StiKalmanTrackNode::Break(int kase)
@@ -775,7 +778,7 @@ int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
 {
   static int nCalls=0;
   nCalls++;
-  assert(_state==kTNRotEnd ||_state>=kTNReady);
+  assert(fDerivTestOn!=-10 || _state==kTNRotEnd ||_state>=kTNReady);
   _state = kTNProBeg;
   numeDeriv(xk,1,option,dir);
   assert(fabs(_x)<1.e+10);
@@ -839,7 +842,7 @@ int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
 //______________________________________________________________________________
 int StiKalmanTrackNode::nudge(StiHit *hit)
 {
-  assert(_state==kTNProEnd || _state>=kTNReady);
+  assert(fDerivTestOn!=-10 || _state==kTNProEnd || _state>=kTNReady);
   _state = kTNNudBeg;
   if (!hit) hit = getHit();
   double deltaX = hit->x()-_x;
@@ -887,7 +890,7 @@ int StiKalmanTrackNode::nudge(StiHit *hit)
 void StiKalmanTrackNode::propagateError()
 {  
   static int nCall=0; nCall++;
-  assert(_state==kTNProEnd);
+  assert(fDerivTestOn!=-10 || _state==kTNProEnd);
   if (debug() & 1) 
     {
       counter++;
@@ -907,17 +910,20 @@ void StiKalmanTrackNode::propagateError()
 #endif// STI_ERROR_TEST
 
 //  	fYE == dY/dEta
-  double fYE= dx*(cosCA1*sumCos+sinCA1*sumSin)/(sumCos*cosCA2);
+  double fYE= dx*(1.+cosCA1*cosCA2+sinCA1*sinCA2)/(sumCos*cosCA2);
+//	fEC == dEta/dRho
+  double fEC = dx/cosCA2;
 //	fYC == dY/dRho
-  double fYC=dx*dx*(1.+cosCA1*cosCA2+sinCA1*sinCA2)/(sumCos*sumCos*cosCA2);
+  double fYC=(dy*sinCA2+dx*cosCA2)/sumCos*fEC;
 //	fZE == dZ/dEta
-  double fZE =  _tanl*dy/(cosCA2);
+  double dLdEta = dy/cosCA2;
+  double fZE =  _tanl*dLdEta;
 
 // 	fZC == dZ/dRho
   double dang = dl*_curv;
   double C2LDX;
   if (fabs(dang) < 0.02) {
-    C2LDX = 0.5*dx*dl*(dy/dx+dl*_curv/6);
+    C2LDX = (sinCA2/2-(dang)*cosCA2/6)*dl*dl;
   } else {
     C2LDX = (dx-cosCA2*dl)/_curv;
   }
@@ -925,8 +931,6 @@ void StiKalmanTrackNode::propagateError()
 
 //  	fZT == dZ/dTanL; 
   double fZT= dl; 
-//	fEC == dEta/dRho
-  double fEC = dl+_curv*C2LDX/cosCA2;
 
   
   double f[kNPars][kNPars]; memset(f,0,sizeof(f));
@@ -965,6 +969,10 @@ void StiKalmanTrackNode::propagateError()
 	   << "cCY:"<<_cCY<<" cCZ:"<<_cCZ<<endl
 	   << "cTY:"<<_cTY<<" cTZ:"<<_cTZ<<endl;
     }
+// now set hiterrors
+   setHitErrors();
+
+// set state node is ready
   _state = kTNReady;
 }
 
@@ -1112,14 +1120,6 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   if (pL1<0) pL1=0;
   if (pL2<0) pL2=0;
   if (pL3<0) pL3=0;
-  if (!finite(pL1) ||
-      !finite(pL2) ||
-      !finite(pL3))
-    {
-      //we are dealing with a track parallel to the 
-      // pad row - let's not try to correct it.
-      return;
-    }
   double x0p =-1;
   double x0Gas=-1;
   double x0=-1;
@@ -1246,7 +1246,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
 int StiKalmanTrackNode::updateNode() 
 {
 static int nCall=0; nCall++;
-  assert(_state>=kTNReady);
+  assert(fDerivTestOn!=-10 || _state>=kTNReady);
   _state = kTNFitBeg;
 #ifdef STI_ERROR_TEST
   testError(&_cXX,0);
@@ -1453,7 +1453,7 @@ static double ACOS02 = acos(0.2);
 */
 int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
 {
-  assert(_state>=kTNReady);
+  assert(fDerivTestOn!=-10 || _state>=kTNReady);
   if (fabs(alpha)<1.e-6) return 0;
   _state = kTNRotBeg;
   numeDeriv(alpha,2);
@@ -1471,7 +1471,7 @@ int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
   double ca = cos(alpha);
   double sa = sin(alpha);
   _x = x1*ca + y1*sa;
-  _y=-x1*sa + y1*ca;
+  _y= -x1*sa + y1*ca;
   _cosCA =  cosCA1*ca+sinCA1*sa;
   _sinCA = -cosCA1*sa+sinCA1*ca;
    double nor = 0.5*(_sinCA*_sinCA+_cosCA*_cosCA +1);
@@ -1603,12 +1603,12 @@ double StiKalmanTrackNode::getWindowY()
   double maxSearchWindow   = parameters->getMaxSearchWindow();
 
   const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
-  if (!calc)throw runtime_error("SKTN::getWindowY() -E- calc==0");
-  calc->calculateError(this);
+  double myEyy,myEzz;
+  calc->calculateError(this,myEyy,myEzz);
 
  
 
-    double window = searchWindowScale*::sqrt(_cYY+eyy);
+    double window = searchWindowScale*::sqrt(_cYY+myEyy);
   if (window<minSearchWindow)
     window = minSearchWindow;
   else if (window>maxSearchWindow)
@@ -1626,11 +1626,11 @@ double StiKalmanTrackNode::getWindowZ()
   double maxSearchWindow   = parameters->getMaxSearchWindow();
 
   const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
-  if (!calc)throw runtime_error("SKTN::getWindowZ() -E- calc==0");
-  calc->calculateError(this);
+  double myEyy,myEzz;
+  calc->calculateError(this,myEyy,myEzz);
 
   
-  double window = searchWindowScale*::sqrt(_cZZ+ezz); 
+  double window = searchWindowScale*::sqrt(_cZZ+myEzz); 
   if (window<minSearchWindow)
     window = minSearchWindow;
   else if (window>maxSearchWindow)
@@ -1744,6 +1744,7 @@ void StiKalmanTrackNode::initialize(StiHit *h,double alpha, double XcRho, double
    _eta = asin(_sinCA);
   //cout << "StiKalmanTrackNode::initialize(...) -I- Done"<<endl;
   setDetector(h->detector());
+  setHitErrors();
   _state = kTNInit;
   setChi2(0.1);
 };
@@ -1753,24 +1754,21 @@ void StiKalmanTrackNode::initialize(StiHit *h,double alpha, double XcRho, double
 const StiKalmanTrackNode& StiKalmanTrackNode::operator=(const StiKalmanTrackNode &n)
 {
   StiTrackNode::operator=(n);
-  _alpha     = n._alpha;
-  _cosAlpha = n._cosAlpha;
-  _sinAlpha = n._sinAlpha;
-  _sinCA = n._sinCA;
-  _cosCA = n._cosCA;
-  _refX = n._refX;
-  _layerAngle = n._layerAngle;
-  memcpy(&_x,&n._x,kNPars*sizeof(_x));
-  memcpy(&_cXX,&n._cXX,kNErrs*sizeof(_cXX));
-  eyy   = n.eyy;
-  ezz   = n.ezz;
-  hitCount = n.hitCount;
-  nullCount = n.nullCount;
-  contiguousHitCount = n.contiguousHitCount;
-  contiguousNullCount = n.contiguousNullCount;
+  memcpy(_beg,n._beg,_end-_beg+1);
   return *this;
 }
-
+//______________________________________________________________________________
+void StiKalmanTrackNode::setHitErrors()
+{
+  setHitErrors(0.,0.);
+  const StiDetector * detector = getDetector();
+  if (!detector) return;
+  const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
+  if (!calc) return;
+  double myEyy,myEzz;
+  calc->calculateError(this,myEyy,myEzz);
+  setHitErrors(myEyy,myEzz);
+}
 #if 1
 //______________________________________________________________________________
 int StiKalmanTrackNode::testError(double *emx, int begend)
@@ -1812,6 +1810,7 @@ int StiKalmanTrackNode::testError(double *emx, int begend)
 //______________________________________________________________________________
 void StiKalmanTrackNode::numeDeriv(double val,int kind,int shape,int dir)
 {
+   double maxStep[kNPars]={0.1,0.1,0.1,0.01,0.001,0.01};
    if (fDerivTestOn<0) return;
    gCurrShape = shape;
    fDerivTestOn=-1;
@@ -1822,21 +1821,20 @@ void StiKalmanTrackNode::numeDeriv(double val,int kind,int shape,int dir)
    saveStatics(save);
    if (fabs(_curv)> 0.02) goto FAIL;
    int ipar;
-   for (ipar=0;ipar<kNPars;ipar++)
+   for (ipar=1;ipar<kNPars;ipar++)
    {
      for (int is=-1;is<=1;is+=2) {
        myNode = *this;
        backStatics(save);
        double step = 0.1*sqrt((&(_cXX))[idx66[ipar][ipar]]);
+       if (step>maxStep[ipar]) step = maxStep[ipar];
 //       if (step>0.1*fabs(pars[ipar])) step = 0.1*pars[ipar];
 //       if (fabs(step)<1.e-7) step = 1.e-7;
        pars[ipar] +=step*is;
 // 		Update sinCA & cosCA       
        myNode._sinCA = sin(myNode._eta);
        if (fabs(myNode._sinCA) > 0.9) goto FAIL;
-       state = myNode._cosCA<0;
-       myNode._cosCA = sqrt((1.-myNode._sinCA)*(1.+myNode._sinCA));
-       if (state) myNode._cosCA=-myNode._cosCA;
+       myNode._cosCA = cos(myNode._eta);
        
        switch (kind) {
 	 case 1: //propagate
@@ -1847,7 +1845,7 @@ void StiKalmanTrackNode::numeDeriv(double val,int kind,int shape,int dir)
        }  
        if(state  ) goto FAIL;
 
-       for (int jpar=0;jpar<kNPars;jpar++) {
+       for (int jpar=1;jpar<kNPars;jpar++) {
 	 if (is<0) {
 	   fDerivTest[jpar][ipar]= pars[jpar];
 	 } else      {
@@ -1868,14 +1866,16 @@ int StiKalmanTrackNode::testDeriv(double *der)
    if (fDerivTestOn!=1) return 0;
    double *num = fDerivTest[0];
    int nerr = 0;
-   for (int i=0;i<kNErrs*kNErrs;i++) {
+   for (int i=1;i<kNErrs;i++) {
+     int ipar = i/kNPars;
+     int jpar = i%kNPars;
+     if (ipar==jpar)					continue;
+     if (ipar==0)					continue;
+     if (jpar==0)					continue;
      double dif = fabs(num[i]-der[i]);
      if (fabs(dif) <= 1.e-5) 				continue;
      if (fabs(dif) <= 0.2*0.5*fabs(num[i]+der[i]))	continue;
      nerr++;
-     int ipar = i/kNPars;
-     int jpar = i%kNPars;
-     if (ipar==jpar)					continue;
      printf ("***Wrong deriv [%d][%d] = %g %g %g\n",ipar,jpar,num[i],der[i],dif);
   }
   fDerivTestOn=0;
