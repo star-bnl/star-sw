@@ -30,25 +30,18 @@ using namespace std;
 #include "StiRootDrawableLine.h"
 #include "StiRootDrawableHits.h"
 #include "StiRootDrawableKalmanTrack.h"
-#include "StiGuiIOBroker.h"
-
 using std::sort;
 
 StiRootDrawableKalmanTrack::StiRootDrawableKalmanTrack()
     : StiRootDrawableTrack()
 {
-  getNewState();
+	_hits->setColor( 2 );
+	_hits->setMarkerSize( 0.3 );
+	_hits->setMarkerStyle( 3 );
 }
 
 StiRootDrawableKalmanTrack::~StiRootDrawableKalmanTrack()
 { }
-
-void StiRootDrawableKalmanTrack::getNewState()
-{
-    _hits->setColor( mBroker->markedHitColor() );
-    _hits->setMarkerSize( mBroker->markedHitSize() );
-    _hits->setMarkerStyle( mBroker->markedHitStyle() );
-}
 
 void StiRootDrawableKalmanTrack::fillHitsForDrawing()
 {

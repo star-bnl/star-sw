@@ -22,18 +22,13 @@ using namespace std;
 StiRootDrawableMcTrack::StiRootDrawableMcTrack()
   : StiRootDrawableTrack()
 {
-  getNewState();
+	_hits->setColor( 2 );
+	_hits->setMarkerSize( 0.3 );
+	_hits->setMarkerStyle( 3 );
 }
 
 StiRootDrawableMcTrack::~StiRootDrawableMcTrack()
 {}
-
-void StiRootDrawableMcTrack::getNewState()
-{
-  _hits->setColor( mBroker->markedHitColor() );
-  _hits->setMarkerSize( mBroker->markedHitSize() );
-  _hits->setMarkerStyle( mBroker->markedHitStyle() );
-}
 
 void StiRootDrawableMcTrack::fillHitsForDrawing()
 {

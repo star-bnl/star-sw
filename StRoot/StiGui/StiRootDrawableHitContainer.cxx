@@ -9,18 +9,14 @@
 //StiGui
 #include "StiRootDisplayManager.h"
 #include "StiRootDrawableHitContainer.h"
-#include "StiGuiIOBroker.h"
 
 StiRootDrawableHitContainer::StiRootDrawableHitContainer()
 {
     cout <<"StiRootDrawableHitContainer::StiRootDrawableHitContainer()"<<endl;
-    StiGuiIOBroker* broker = StiGuiIOBroker::instance();
-    
-    setMarkerSize( broker->unMarkedHitSize() );
-    setColor( broker->unMarkedHitColor() );
-    setMarkerStyle( broker->unMarkedHitStyle() );
-    
-    setName("AStiRootDrawableHitContainer"); //must come first in list of drawable!!!
+    setMarkerSize( 0.3 );
+    setColor( 4 );
+    setMarkerStyle( 8 );
+		setName("AStiRootDrawableHitContainer"); //must come first in list of drawable!!!
     StiRootDisplayManager::instance()->addDrawable(this);
 }
 
