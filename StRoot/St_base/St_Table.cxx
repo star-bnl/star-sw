@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.68 1999/08/13 21:38:48 fine Exp $ 
+// $Id: St_Table.cxx,v 1.69 1999/08/13 23:27:56 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.69  1999/08/13 23:27:56  fisyak
+// remove endif
+//
 // Revision 1.68  1999/08/13 21:38:48  fine
 // if endif fixed
 //
@@ -1186,13 +1189,13 @@ void St_Table::SetType(const Text_t *const type)
    SetTableType(type);
    St_DataSet::SetTitle(s_TableHeader->type);
 }
-#if 0
 //______________________________________________________________________________
 int St_Table::PointerToPointer(G__DataMemberInfo &m)
 {
    if (strstr(m.Type()->Name(), "**")) return 1;
    return 0;
 }
+#if 0
 //______________________________________________________________________________
 Bool_t St_Table::MakeExpression(const Char *expressions[],Int_t nExpressions)
 {
@@ -1201,8 +1204,8 @@ Bool_t St_Table::MakeExpression(const Char *expressions[],Int_t nExpressions)
    Int_t size = dsc->GetNRows();
    // Create function
    cout << "Float_t  Selection(const Char *expresions[],Float *results[], void *address[])" << endl;
-   cout << "{                                                          << endl;
-   cout << "  void *nextAddress[] = address;"                          << endl;
+   cout << "{"                                                          << endl;
+   cout << "   void *nextAddress[] = address;"                          << endl;
    for (int i=0; i < dsc->GetNRows(); i++,descTable++ ) {
      const Char_t *type = typeNames[descTable->m_Type];
      cout << type  << " &" << descTable->m_ColumnName << " = *(" << type << "*)nextAddress++" << endl;
@@ -1217,7 +1220,7 @@ Bool_t St_Table::MakeExpression(const Char *expressions[],Int_t nExpressions)
    // Create byte code and check syntax
     return kTRUE;
 }
-#endif
+#endif 
 //______________________________________________________________________________
 void St_Table::MakeHeader(const Char_t *prefix,const Char_t *tablename,
                          const Char_t *suffix, FILE *fl)
@@ -1257,7 +1260,6 @@ void St_Table::MakeHeader(const Char_t *prefix,const Char_t *tablename,
   fclose(fp);
   delete [] include;
 }
-#endif
 //______________________________________________________________________________
 void St_Table::StafStreamer(Char_t *structname, FILE *fl)
 {
