@@ -1,3 +1,11 @@
+/*:>-------------------------------------------------------------------
+**: FILE:       sl3Daq.cc
+**: HISTORY:
+**:
+**: 10/21/99 ppy Demo version from Christof Struck
+**:
+**:<------------------------------------------------------------------*/
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>

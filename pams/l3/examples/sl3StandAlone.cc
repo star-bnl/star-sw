@@ -2,7 +2,9 @@
 **: FILE:       sl3StandAlone.cc
 **: HISTORY:
 **:   
-**: 10/12/99 Demo version 
+**: 10/12/99 ppy Demo version 
+**: 10/18/99 ppy Check in reading loop to turn all phi angle to positive values
+**:              It causes problems when reading hits with phi=(0,2*pi)
 **:  
 **:<------------------------------------------------------------------*/
 #include "FtfSl3.h"
@@ -84,12 +86,11 @@ int main ( ) {
        break ;
     }
   }
-  printf ( " counter %d\n", counter ) ;
 
 
   tracker.nHits = counter ;
 
-  int nLoops = 1 ;
+  int nLoops = 100 ;
   int   lastNTracks = 0 ;
   float sectorTime ;
   float averageTime       = 0.F ;

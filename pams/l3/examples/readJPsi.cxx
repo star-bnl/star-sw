@@ -1,5 +1,5 @@
 {
-   gSystem->Load("/afs/rhic/star/users/yepes/wrk/pams/l3/example/FtfSl3.so");
+   gSystem->Load("FtfSl3.so");
    FtfGraphic tracker ;
    int debugLevel = 5 ;
 //

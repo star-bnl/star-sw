@@ -12,8 +12,8 @@ GRAPHSRC = graphic
 #CFLAGS    = -g -D ALPHA_500MHZ
 CFLAGS	  = -g
 CFLAGS	  = -O2
-CFLAGS    = -g -D DEBUG -D SL3ROOT -I$(ROOTSYS)/include
 LIBS      = -lm
+CFLAGS    = -g -D DEBUG -D SL3ROOT -I$(ROOTSYS)/include
 
 #-----------------------------------
 
