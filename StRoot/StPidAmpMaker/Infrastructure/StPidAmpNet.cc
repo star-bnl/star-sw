@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNet.cc,v 1.2 2000/03/22 14:08:25 aihong Exp $
+ * $Id: StPidAmpNet.cc,v 1.3 2000/04/09 16:17:29 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNet.cc,v $
+ * Revision 1.3  2000/04/09 16:17:29  aihong
+ * screen out bad pion region for band fitting
+ *
  * Revision 1.2  2000/03/22 14:08:25  aihong
  * reduce unnecessary bound checking for faster run
  *
@@ -710,22 +713,22 @@ void StPidAmpNet::fillSlices(StPidAmpTrkVector* trks,StPidAmpChannelCollection* 
  StPidAmpTrkIter iter;
  StPidAmpTrk* thisTrack;
 
- if( ( mParticleType.id()==9 || mParticleType.id()==8 ) && set )
+ if( ( mParticleType.id()==9 || mParticleType.id()==8 ) && set ){
  mNetWindow.addWindow(2.5,4.5); //for pi relative rising
-
+ mNetWindow.addScreen(0.0,0.12);//screen out muon for betheBlock fitting.
+ }
+ 
 
  for (iter=trks->begin(); iter!=trks->end(); iter++){
    thisTrack=*iter;
-   if (mParticleType.id()==2||mParticleType.id()==3){ //e+/- filling
-                     pushATrk(thisTrack,set);
- } else { if (thisTrack->dca()<VetexCut) pushATrk(thisTrack,set);}//need dca()
-                                                         //to filter e+/- out.
- }//for
+   pushATrk(thisTrack,set);
+ }
 
 
- if ( ( mParticleType.id()==9 || mParticleType.id()==8 ) && set)
+ if ( ( mParticleType.id()==9 || mParticleType.id()==8 ) && set){
    mNetWindow.removeLastWindow(); //for pi relative rising
-
+   mNetWindow.removeAllScreens();
+ }
 
 }
 //----------------------------------
