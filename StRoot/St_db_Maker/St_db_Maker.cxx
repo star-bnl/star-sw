@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.70 2003/09/28 21:11:30 jeromel Exp $
+// $Id: St_db_Maker.cxx,v 1.71 2003/10/01 21:51:31 jeromel Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.71  2003/10/01 21:51:31  jeromel
+// Adjust as well
+//
 // Revision 1.70  2003/09/28 21:11:30  jeromel
 // Unsued variable ldsname removed
 //
@@ -76,7 +79,7 @@ static Int_t AliasTime(const char *alias);
 static const char *aliases[]={
 "sd97",   "sd98",   "year_1a","year_1b","year_1c",
 "es99",   "er99",   "dc99"   ,"year_1d","year_1e",
-"year_1h","year_2a", "year_2b", "year2001", "year2003", "year2003x",
+"year_1h","year_2a", "year_2b", "year2001", "year2003", "y2003x",
 0};   
 
 static const int   dates[]=  {
