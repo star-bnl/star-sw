@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.18 2000/06/23 00:12:40 snelling Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.19 2000/06/23 17:54:44 long Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.19  2000/06/23 17:54:44  long
+ * offset-->offset*mTimeBinWidth
+ *
  * Revision 1.18  2000/06/23 00:12:40  snelling
  * Removed dependence on local files now pointed to StDbUtilities
  *
@@ -241,7 +244,8 @@ double  StTrsParameterizedAnalogSignalGenerator::erf_fast(double argument) const
 
 void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wireHistogram)
 {
-    double offset=transformer.tBFromZ(0.);
+    double offset=transformer.tBFromZ(0.)*mTimeBinWidth;
+    
     double sigma_xpad2;
     double InOuterFactor=1.0075;
     double charge_fraction[5]; 
@@ -456,7 +460,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 		    timeOfSignal =
 			(iter->position().z())/mDriftVelocity+offset;
 		    	
-		 
+		  
 		    // OH-OH OFFSET (replaced!...)
 		     //	     timeOfSignal =
 		     //  	iter->position().z()/mSCDb->driftVelocity();
