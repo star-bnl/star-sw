@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doHists.C,v 3.1 2000/11/30 19:35:13 fine Exp $
+// $Id: doHists.C,v 3.2 2000/12/12 23:11:05 perev Exp $
 //
 // Description: 
 // Chain to read production histgrams from files or database and acculuate it across all files read
@@ -136,15 +136,6 @@ void doHists(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, const
     //
 
 
-    // WriteOut StEvent
-// vf   if (wrStEOut) {
-// vf       cout << "!!!! doHists: will write out .event.root file !!" << endl << endl;
-// vf   if (wrStEOut) {
-// vf       StTreeMaker *outMk = new StTreeMaker("EvOut","","bfcTree");
-// vf         outMk->SetIOMode("w");
-// vf         outMk->SetBranch("eventBranch","test.event.root","w");
-// vf         outMk->IntoBranch("eventBranch","StEvent");
-// vf     }
     //
 
     //
@@ -152,6 +143,13 @@ void doHists(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, const
     //
     StHistCollectorMaker *histsMaker = new StHistCollectorMaker("merged");
 
+    // WriteOut Hist Merged
+   if (wrStEOut) {
+       cout << "!!!! doHists: will write out .event.root file !!" << endl << endl;
+       StTreeMaker *outMk = new StTreeMaker("mergeOut","","mergeTree");
+         outMk->SetBranch ("mergeBranch","test.merge.root","w","const");
+         outMk->IntoBranch("mergeBranch","Merged");
+     }
     //
     // Initialize chain
     //
@@ -159,13 +157,6 @@ void doHists(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, const
     if (iInit) chain->Fatal(iInit,"on init");
     chain->PrintInfo();
 
-
-//----- added 6/20/00 by Kathy
-  TTable   *tabl=0;
-  TDataSet *obj=0;
-  TDataSet *ddb=0;
-  TDataSet *ddstBranch=0;
-//------
 
     //
     // Event loop
@@ -216,6 +207,9 @@ void doHists(const Int_t nevents, const Char_t *path, const Char_t *file,
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doHists.C,v $
+// Revision 3.2  2000/12/12 23:11:05  perev
+// Add write of merged histos
+//
 // Revision 3.1  2000/11/30 19:35:13  fine
 // New analysis utility to collect all histogram from all histBranh production branches
 //
