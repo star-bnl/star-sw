@@ -180,6 +180,10 @@ int dsTasProject(DS_DATASET_T *pDataset, char *name,
 		pSrcTable == NULL || !DS_IS_TABLE(pSrcTable)) {
 		DS_ERROR(DS_E_TABLE_NOT_FOUND);
 	}
+	if (pSrcTable->elcount == 0) {
+		*pCount = 0;
+		return TRUE;
+	}
 	strcpy(table.name, pSrcTable->name);
 	if (!dsTypeId(&table.tid, decl, NULL)) {
 		return FALSE;
