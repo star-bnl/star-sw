@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.7 1999/03/01 18:53:33 sakrejda Exp $
+// $Id: St_tcl_Maker.h,v 1.8 1999/03/11 20:40:20 ward Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.8  1999/03/11 20:40:20  ward
+// Add code for cluster morphology.
+//
 // Revision 1.7  1999/03/01 18:53:33  sakrejda
 // hit eveluation switchable
 //
@@ -24,6 +27,9 @@
 #ifndef STAR_St_tcl_Maker
 #define STAR_St_tcl_Maker
 
+#define TCC_PAD 182
+#define TCC_BIN 512
+
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_tcl_Maker virtual base class for Maker                            //
@@ -47,6 +53,11 @@ class St_tfs_fsctrl;
 
 class TH1F;
 
+#include "St_type_shortdata_Table.h"
+#include "St_tcl_tpcluster_Table.h"
+#include "St_tcl_tp_seq_Table.h"
+#include "St_tcc_morphology_Table.h"
+
 class St_tcl_Maker : public StMaker {
  private:
                void                  MakeHistograms();// Histograms for tpc clustering
@@ -65,6 +76,26 @@ class St_tcl_Maker : public StMaker {
 	                                        // correlations for tpc evaluations
                St_tfs_fspar          *m_tfs_fspar;   //! TFS parameter table 
                St_tfs_fsctrl         *m_tfs_fsctrl;  //! TFS control switches
+    Int_t cluster_morphology( Int_t sectorNumber,
+          St_type_shortdata *pixel_data_in, St_type_shortdata *pixel_data_out,
+          St_tcl_tpcluster *tpcluster, St_tcl_tp_seq *tpseq,St_tcc_morphology *morph);
+Int_t FillOneRowOfMorphTable(int iClusterTbl,
+        St_tcc_morphology *morph,
+        int padrow,int sector,int nseq,int npix,int npad,
+        unsigned int totalChargeEq1,
+        int maxCharge,float averageCharge,float meanPadPos,float meanTimePos,
+        float padSigma1Eq5,float bucSigma1Eq6,
+        float padTimeSigma1Eq7,float padSigma2Eq12,
+        float bucSigma2Eq13,float padTimeSigma2Eq14,
+        float ecc1Eq15,float ecc2Eq16,
+        float linEcc1Eq8,float linEcc2Eq9);
+    Int_t CalculateQuadrupoleMoms(
+        int padrow,int npad,int *pads,unsigned short charge[TCC_PAD][TCC_BIN],
+        unsigned int *totalChargeEq1,float *meanPadEq3,float *meanTimeEq4,
+        float *padSigma1Eq5,float *timeSigma1Eq6,float *padTimeSigma1Eq7,
+        float *padSigma2Eq12,float *timeSigma2Eq13,float *padTimeSigma2Eq14,
+        float *ecc1Eq15,float *ecc2Eq16,
+        float *linEcc1Eq8,float *linEcc2Eq9);
 
 protected:
 
