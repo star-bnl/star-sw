@@ -260,7 +260,7 @@ macro bfc_init _
     (desum) exec create_tables_global#fill_dst_event_summary
             exec init_dst#init_ehead
     (drsum) exec create_tables_global#fill_dst_run_summary
-            exec create_tables_global#fill_tof
+            exec create_tables_global#fill_dst_tof
 	    exec init_dst#init_rhead
     (fzout) user/output o [output_fzd_file]
     (evout)
