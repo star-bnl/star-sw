@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.11 1999/07/11 23:27:49 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.12 1999/07/12 15:08:33 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.12  1999/07/12 15:08:33  fisyak
+// Add  type_of_call F77_NAME
+//
 // Revision 1.11  1999/07/11 23:27:49  fisyak
 // dst_TriggerDetectors => dst_TrgDet
 //
@@ -114,8 +117,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.11 1999/07/11 23:27:49 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.12 1999/07/12 15:08:33 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.12  1999/07/12 15:08:33  fisyak
+// Add  type_of_call F77_NAME
+//
 // Revision 1.11  1999/07/11 23:27:49  fisyak
 // dst_TriggerDetectors => dst_TrgDet
 //
@@ -241,18 +247,17 @@
 #endif
 #include "StEventMaker/StRootEventManager.hh"
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.11 1999/07/11 23:27:49 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.12 1999/07/12 15:08:33 fisyak Exp $";
 #include "StEventManager.hh"
  * Revision 2.23  2000/05/22 21:53:41  ullrich
 const long detid_tpc = 1;
 const long detid_svt = 2;
 const long detid_ftpcWest = 4;
 const long detid_ftpcEast = 5;
-
+#include "fortranc.h"
 #define gufld gufld_
-extern "C" {void gufld(Float_t *, Float_t *);}
+extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #include "StTrack.h"
-
  * zero length. Added for primary and global tracks.
 #include "St_ObjectSet.h"
   //_____________________________________________________________________________
@@ -738,7 +743,7 @@ void StEventMaker::setEventManager(StEventManager* mgr)
 //_____________________________________________________________________________
 void StEventMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StEventMaker.cxx,v 1.11 1999/07/11 23:27:49 fisyak Exp $\n");
+  printf("* $Id: StEventMaker.cxx,v 1.12 1999/07/12 15:08:33 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
