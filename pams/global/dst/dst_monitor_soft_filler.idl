@@ -7,7 +7,6 @@
 
 #include "PAM.idl"
 #include "tcl_tpcluster.idl"
-#include "scs_cluster.idl"
 #include "tcl_tphit.idl"
 #include "scs_spt.idl"
 #include "fcl_fppoint.idl"
@@ -26,7 +25,6 @@
 interface dst_monitor_soft_filler : amiModule {
              STAFCV_T call
                      ( in     tcl_tpcluster     tcl_tpcluster,
-                       in     scs_cluster       scs_cluster,
                        in     tcl_tphit         tcl_tphit,
                        in     scs_spt           scs_spt,
                        in     fcl_fppoint       fcl_fppoint,
@@ -43,4 +41,4 @@ interface dst_monitor_soft_filler : amiModule {
                       out     dst_mon_soft_tpc  dms_tpc
              );
      };
-     /*  Last mod. for dst_monitor_soft_filler $Date: 1999/11/17 15:22:09 $ */
+     /*  Last mod. for dst_monitor_soft_filler $Date: 2000/03/01 17:12:16 $ */
