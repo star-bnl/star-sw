@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.hh,v 1.2 1999/01/22 08:06:03 lasiuk Exp $
+ * $Id: StTrsDigitalSector.hh,v 1.3 1999/10/11 23:55:10 calderon Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -24,6 +24,13 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.hh,v $
+ * Revision 1.3  1999/10/11 23:55:10  calderon
+ * Version with Database Access and persistent file.
+ * Not fully tested due to problems with cons, it
+ * doesn't find the local files at compile time.
+ * Yuri suggests forcing commit to work directly with
+ * files in repository.
+ *
  * Revision 1.2  1999/01/22 08:06:03  lasiuk
  * use unsigned char for compatibilty with interface.
  * requires use of two arrays...ugly but fine for now.
@@ -46,13 +53,13 @@
 #include "StTpcPadCoordinate.hh"
 
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
-typedef vector<unsigned char>               digitalTimeBins;
+typedef vector<unsigned char>      digitalTimeBins;
 typedef vector<digitalTimeBins>    digitalPadRow;
 typedef vector<digitalPadRow>      digitalSector;
 
 typedef vector<unsigned char>::iterator digitialTimeBinIterator;
 #else
-typedef vector<unsigned char, allocator<unsigned char> >                       digitalTimeBins;
+typedef vector<unsigned char, allocator<unsigned char> >     digitalTimeBins;
 typedef vector<digitalTimeBins, allocator<digitalTimeBins> > digitalPadRow;
 typedef vector<digitalPadRow, allocator<digitalPadRow> >     digitalSector;
 
@@ -84,7 +91,8 @@ public:
 
     void assignTimeBins(int, int, pair<digitalTimeBins*, digitalTimeBins*> );
     void assignTimeBins(StTpcPadCoordinate&, pair<digitalTimeBins*, digitalTimeBins*>);
-
+    // When writing, make sure we don't carry unnecessary zeros:
+    int cleanup();
 public:
     digitalSector mData;
     digitalSector mZeros;

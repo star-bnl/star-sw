@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsRawDataEvent.hh,v 1.3 1999/04/29 00:16:24 lasiuk Exp $
+ * $Id: StTrsRawDataEvent.hh,v 1.4 1999/10/11 23:55:13 calderon Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsRawDataEvent.hh,v $
+ * Revision 1.4  1999/10/11 23:55:13  calderon
+ * Version with Database Access and persistent file.
+ * Not fully tested due to problems with cons, it
+ * doesn't find the local files at compile time.
+ * Yuri suggests forcing commit to work directly with
+ * files in repository.
+ *
  * Revision 1.3  1999/04/29 00:16:24  lasiuk
  * add the member function clear() to take care of
  * allocated memory within the event loop.
@@ -34,7 +41,7 @@
 
 class StTrsRawDataEvent : public StTpcRawDataEvent {
 public:
-    StTrsRawDataEvent();
+    StTrsRawDataEvent(int);
     virtual ~StTrsRawDataEvent();
     
     //StTrsRawDataEvent(const StTrsRawDataEvent&);

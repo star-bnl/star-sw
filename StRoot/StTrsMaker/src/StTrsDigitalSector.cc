@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.cc,v 1.4 1999/02/10 04:25:43 lasiuk Exp $
+ * $Id: StTrsDigitalSector.cc,v 1.5 1999/10/11 23:55:22 calderon Exp $
  *
  * Author: bl 
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.cc,v $
+ * Revision 1.5  1999/10/11 23:55:22  calderon
+ * Version with Database Access and persistent file.
+ * Not fully tested due to problems with cons, it
+ * doesn't find the local files at compile time.
+ * Yuri suggests forcing commit to work directly with
+ * files in repository.
+ *
  * Revision 1.4  1999/02/10 04:25:43  lasiuk
  * remove debug
  *
@@ -94,3 +101,25 @@ void StTrsDigitalSector::assignTimeBins(StTpcPadCoordinate& coord, pair<digitalT
 {
     assignTimeBins(coord.row(), coord.pad(), tbins);
 }
+int StTrsDigitalSector::cleanup()
+{
+    int numberOfEmptyRows=0;
+    for (int iRow=0; iRow<mData.size(); iRow++) {
+	int numberOfEmptyPads=0;
+	for (int iPad=0; iPad<mData[iRow].size(); iPad++) {
+	    if (mData[iRow][iPad].size()<4) {
+		mData[iRow][iPad].clear();
+		mZeros[iRow][iPad].clear();
+		numberOfEmptyPads++;
+	    }
+	} // Pads are now clean
+	if (numberOfEmptyPads==mData[iRow].size()) {
+	    cout << "Removing Row " << iRow+1 << endl;  
+	    mData[iRow].clear();
+	    mZeros[iRow].clear();
+	    numberOfEmptyRows++;
+	}
+    } // Rows are now clean
+    if (numberOfEmptyRows==mData.size()) return 1;
+    else return 0;
+}    

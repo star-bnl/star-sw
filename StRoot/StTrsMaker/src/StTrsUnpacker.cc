@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.cc,v 1.11 1999/09/24 01:23:31 fisyak Exp $
+ * $Id: StTrsUnpacker.cc,v 1.12 1999/10/11 23:55:23 calderon Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.cc,v $
+ * Revision 1.12  1999/10/11 23:55:23  calderon
+ * Version with Database Access and persistent file.
+ * Not fully tested due to problems with cons, it
+ * doesn't find the local files at compile time.
+ * Yuri suggests forcing commit to work directly with
+ * files in repository.
+ *
  * Revision 1.11  1999/09/24 01:23:31  fisyak
  * Reduced Include Path
  *
@@ -48,7 +55,7 @@
 
 #include "StGlobals.hh"
 
-#include "StTrsMaker/include/StTrsUnpacker.hh"
+#include "StTrsUnpacker.hh"
 
 StTrsUnpacker::StTrsUnpacker()
 {
@@ -128,7 +135,8 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
 	    continue;
 	}
 	if ( (*TrsPadData.second)[ii] == static_cast<unsigned char>(255) )
-	    continue;
+	    continue;  // If you have a 255 in the Zeros, shouldn't you have a 0 in the Data?
+	               // If so, then this previous if statement never is true, isn't it?
 
 	StSequence aSequence;
 	aSequence.startTimeBin = numberOfZeros;

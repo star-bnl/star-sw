@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleGeometry.cc,v 1.4 1999/04/07 00:48:00 lasiuk Exp $
+ * $Id: StTpcSimpleGeometry.cc,v 1.5 1999/10/11 23:55:21 calderon Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -11,6 +11,13 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleGeometry.cc,v $
+ * Revision 1.5  1999/10/11 23:55:21  calderon
+ * Version with Database Access and persistent file.
+ * Not fully tested due to problems with cons, it
+ * doesn't find the local files at compile time.
+ * Yuri suggests forcing commit to work directly with
+ * files in repository.
+ *
  * Revision 1.4  1999/04/07 00:48:00  lasiuk
  * add z offset for driftLength
  *
@@ -351,6 +358,7 @@ void StTpcSimpleGeometry::print(ostream& os) const
     os << "outerSectorRowPitch    = " << mOuterSectorRowPitch/millimeter    << " mm" << endl;
     os << "outerSectorLength      = " << mOuterSectorLength /millimeter     << " mm" << endl;
     os << "ioSectorSeparation     = " << mIoSectorSeparation/millimeter     << " mm" << endl;
+    os << "frishGrid              = " << mFrischGrid/millimeter             << " mm" << endl;
     os << "\nWires:" << endl;
     os << "anodeWirePitch         = " << mAnodeWirePitch/millimeter         << " mm" << endl;
     os << "frischGridWirePitch    = " << mFrischGridWirePitch/millimeter    << " mm" << endl;
