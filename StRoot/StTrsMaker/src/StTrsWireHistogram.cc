@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.21 2000/07/30 02:45:58 long Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.22 2000/07/30 22:26:14 long Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.22  2000/07/30 22:26:14  long
+ * nQOnWire<12-->nQOnWire<6.5
+ *
  * Revision 1.21  2000/07/30 02:45:58  long
  * 1)add random class
  * 2)add erf look up table and table builder,EXB pull dx[],time delay dz[]
@@ -340,7 +343,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin,int sector)
 	    // Gas Gain
 	    double avalancheFactor = nQOnWire;
 	    if(mDoGasGain) {
-	       if(nQOnWire<12)mDoSingleElectronMultiplication=1;
+	       if(nQOnWire<6.5)mDoSingleElectronMultiplication=1;
 	       //    mDoSingleElectronMultiplication=0;
 		if(mDoSingleElectronMultiplication) {
 		    avalancheFactor =
