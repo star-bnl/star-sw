@@ -1,7 +1,11 @@
+#include <stdlib.h>
 /*
- * $Id: memget.c,v 1.2 1998/06/05 20:55:09 perev Exp $
+ * $Id: memget.c,v 1.3 1998/07/20 20:17:29 perev Exp $
  *
  * $Log: memget.c,v $
+ * Revision 1.3  1998/07/20 20:17:29  perev
+ * Mods for exe SGI64 and HP rubber Zebra
+ *
  * Revision 1.2  1998/06/05 20:55:09  perev
  * AGI commit
  *
@@ -29,3 +33,4 @@ unsigned long memget_(unsigned int *n)
   /* malloc() returns a pointer;     memget() returns an integer.   */
   return ( (unsigned long) malloc(*n) );
 }
+unsigned long iudivd_ (unsigned long *u1, unsigned long *u2) { return (*u1 / *u2);}

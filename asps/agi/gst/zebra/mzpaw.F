@@ -1,7 +1,10 @@
 *
-* $Id: mzpaw.F,v 1.4 1998/06/05 20:55:36 perev Exp $
+* $Id: mzpaw.F,v 1.5 1998/07/20 20:17:32 perev Exp $
 *
 * $Log: mzpaw.F,v $
+* Revision 1.5  1998/07/20 20:17:32  perev
+* Mods for exe SGI64 and HP rubber Zebra
+*
 * Revision 1.4  1998/06/05 20:55:36  perev
 * AGI commit
 *
@@ -23,8 +26,13 @@ C--------------------------------------------------------------------
  
       NW   = abs (NWORDS)
       NW   = max (NW,100000)
-      I1   = LOCF(IPAW)
-      I2   = memget (NW*4+1000)/4
+      I1   = LOCF(IPAW(1))
+      I2   = memget (NW*4+1000)
+      I2   = iudivd (i2,4)
+      if (i2 .le. i1) then
+        write(*,*) 'MZPAW. Error: No or Wrong space ',i1,i2,NW
+        stop 
+      endif
       LL   = max    (I2-I1,0)
       NW   = NW + LL
       KWW  = LL + 100

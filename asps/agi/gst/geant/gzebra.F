@@ -1,7 +1,10 @@
 *
-* $Id: gzebra.F,v 1.2 1998/04/16 16:59:50 fisyak Exp $
+* $Id: gzebra.F,v 1.3 1998/07/20 20:17:30 perev Exp $
 *
 * $Log: gzebra.F,v $
+* Revision 1.3  1998/07/20 20:17:30  perev
+* Mods for exe SGI64 and HP rubber Zebra
+*
 * Revision 1.2  1998/04/16 16:59:50  fisyak
 * 2nd pass with gstar
 *
@@ -26,7 +29,7 @@ C.
 #include "gst/atcdes/typing.inc"
 #include "geant321/gcbank.inc"
 #include "geant321/gcflag.inc"
-       INTEGER I1,I2,Itry,LL,KWW,memget,LOCF,NZEB
+       INTEGER I1,I2,Itry,LL,KWW,memget,LOCF,NZEB,iudivd
 C.
 C.    ------------------------------------------------------------------
 C.
@@ -34,7 +37,8 @@ C.
        NZEBRA = max(NZEBRA,1000000)
        I1     = LOCF   (IQ)
        Do iTry=0,5
-          I2  = memget (NZEBRA*4+1000)/4
+          I2  = memget (NZEBRA*4+1000)
+          i2  = iudivd (I2,4)
           If (I2.GT.I1) GO TO 11
           NZEBRA = NZEBRA/2
           PRINT *,'* GZEBRA: requested memory size reduced to ',
