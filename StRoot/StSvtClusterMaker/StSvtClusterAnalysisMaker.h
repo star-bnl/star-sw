@@ -1,5 +1,8 @@
-// $Id: StSvtClusterAnalysisMaker.h,v 1.2 2000/08/21 13:06:58 caines Exp $
+// $Id: StSvtClusterAnalysisMaker.h,v 1.3 2001/04/04 19:12:01 didenko Exp $
 // $Log: StSvtClusterAnalysisMaker.h,v $
+// Revision 1.3  2001/04/04 19:12:01  didenko
+// remove ! from comments to create Streamer
+//
 // Revision 1.2  2000/08/21 13:06:58  caines
 // Much improved hit finding and fitting
 //
@@ -105,7 +108,7 @@ class StSvtClusterAnalysisMaker : public StMaker
 
  private:
 
-  ClassDef(StSvtClusterAnalysisMaker,1)       //!virtual base class for Makers
+  ClassDef(StSvtClusterAnalysisMaker,1)       //virtual base class for Makers
 
 };
 
