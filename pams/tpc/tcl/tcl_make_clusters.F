@@ -1,6 +1,7 @@
 
         LOGICAL FUNCTION  TCL_Get_Row_Pixels
      1                 ( Sector, Row, Npixels_max
+     1                 , pad_plane_h, pad_plane
      1	               , tppadh, tppad, tppixelh, tppixel, tpmcpixh
      1	               , tpmcpix, Jtppad
      1	               , Npixels, Ipix, Ipad, Iadc, Itdc, Itid ) 
@@ -8,6 +9,9 @@
 	IMPLICIT NONE
 
 #include "tas_structures.inc"
+
+#include "tpg_pad_plane_pars.inc"
+#include "tpg_pad_plane_st.inc"
 
 #include "tcl_tppad_pars.inc"
 #include "tcl_tppad_st.inc"
@@ -22,6 +26,8 @@
 	INTEGER                      Sector      !Sector no. of current data set.
 	INTEGER                      Row         !Row no. of current data set.
 	INTEGER                      Npixels_max !Max pixels in a sequence.
+        RECORD/ table_head_st      / pad_plane_h
+        RECORD/ pad_plane_row_st   / pad_plane(*)
         RECORD / table_head_st     / tppadh     !header for tppad table
         RECORD / tppad_row_st      / tppad(*)   !rows of tppad table
         RECORD / table_head_st     / tppixelh   !header for tppixel table
@@ -57,8 +63,11 @@
 *	No information reqarding which raw sequence owns a pixel is kept.
 
 
+	INTEGER TPG_Nrows_in_Sector
+	INTEGER TPG_Nsectors
+
 	LOGICAL Done
-	LOGICAL Started
+	LOGICAL Started, First
 	INTEGER Ipixel, Nseqpix, Isequence, Nsequences, Iseqpix
 	INTEGER Jpixel
 	INTEGER TDC, ADC, ADCraw, PAD, MCid
@@ -71,47 +80,88 @@
         
         integer jndx,kseqpix,pix_offset
 
+c->RJM  this should eventually be fixed! (tppad is not "logically" packed)
+        integer     mxsect,mxrow,isec,irow,ksec,lsec
+        parameter   (mxsect = 48, mxrow = 45)
+        integer     padptr(mxrow,mxsect),saveptr,saveoff
+
 	INTEGER IDE1
 	SAVE    IDE1
 	DATA    IDE1 /0/
 
-        data seqmask/'3F00'X/,botmask/'FF'X/
+        data seqmask/'3F00'X/,botmask/'FF'X/,first/.true./
+
+c
+c       set up pointers into tppad; note that tppad uses
+c       sectors 1,48 but rows 1,45; handled below by 
+c       subtracting off pad_plane(1).nrow_in for now!
+c
+        if(first)then
+           first = .false.
+            saveptr = 0
+            saveoff = 1
+            do isec = 1, mxsect/4
+               ksec = 2*isec-1
+               do irow = 1, tpg_nrows_in_sector(ksec)
+                  padptr(irow,ksec)=saveptr+saveoff
+                  padptr(irow,ksec+mxsect/2)=padptr(irow,ksec)
+     +                               +pad_plane(1).npads(irow)
+                  saveptr = padptr(irow,ksec+mxsect/2)
+                  saveoff = pad_plane(1).npads(irow)
+               enddo
+               lsec = 2*isec
+               do irow = 1, tpg_nrows_in_sector(lsec)
+                  padptr(irow,lsec)=saveptr+saveoff
+                  padptr(irow,lsec+mxsect/2)=padptr(irow,lsec)
+     +                  +pad_plane(1).npads(irow+pad_plane(1).nrow_in)
+                  saveptr = padptr(irow,lsec+mxsect/2)
+                  saveoff = pad_plane(1).npads(irow
+     +                                          +pad_plane(1).nrow_in)
+               enddo
+            enddo
+        endif
 
 	Npixels = 0
 
 *	Jtppad is the starting point in the tppad table.  Initially (each event), the
 *	caller sets it to one.  Afterwards it is maintained by this routine and is
 *	used to save time in searching for the next row/sector.
-	IF ( Jtppad .LE. 1 ) THEN !This is just to be safe;  caller may set Jtppad = 0.
-	  Jtppad = 1
-	END IF
+*	IF ( Jtppad .LE. 1 ) THEN !This is just to be safe;  caller may set Jtppad = 0.
+*	  Jtppad = 1
+*	END IF
+
+        Jtppad = padptr(row,sector)
 
 *	Look for the requested row and sector -- find or fail:
-	Started = .FALSE.
-	DO WHILE ( .NOT. Started )
+*	Started = .FALSE.
+*	DO WHILE ( .NOT. Started )
 	  IF ( Jtppad .GT. tppadh.nok ) THEN !Table exhausted -- failure.
 	    TCL_Get_Row_Pixels = .FALSE.
 	    RETURN
 	  END IF
 c-> RJM   1 April 1994; the convention for jsector adopted in tss 
-c-> RJM   starts at jsector = 1
+c-> RJM   starts at jsector = 1; must translate from tppads 1,45 rows
 	  Jrow    = MOD( tppad( Jtppad ).tpc_row , 100 )
+          if(Jrow .gt. pad_plane(1).nrow_in)then
+             Jrow = Jrow - pad_plane(1).nrow_in
+          endif
 c         Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 	  Jsector =      tppad( Jtppad ).tpc_row / 100 
-	  IF      ( Jsector .GT. Sector ) THEN !Passed it.
+*	  IF      ( Jsector .GT. Sector ) THEN !Passed it.
+	  IF      ( Jsector .NE. Sector .and. Jrow .NE. Row) THEN 
 	    TCL_Get_Row_Pixels = .FALSE.       !Fail.
 	    RETURN
-	  ELSE IF ( Jsector .LT. Sector ) THEN !Not there yet.
-	    Jtppad = Jtppad + 1                !Next "pad".
-	  ELSE IF ( Jrow    .GT. Row    ) THEN !Passed it.
-	    TCL_Get_Row_Pixels = .FALSE.       !Fail.
-	    RETURN
-	  ELSE IF ( Jrow    .LT. Row    ) THEN !Not there yet.
-	    Jtppad = Jtppad + 1                !Next "pad".
-	  ELSE                                 !There.
-	    Started = .TRUE.                   !Find.
+*	  ELSE IF ( Jsector .LT. Sector ) THEN !Not there yet.
+*	    Jtppad = Jtppad + 1                !Next "pad".
+*	  ELSE IF ( Jrow    .GT. Row    ) THEN !Passed it.
+*	    TCL_Get_Row_Pixels = .FALSE.       !Fail.
+*	    RETURN
+*	  ELSE IF ( Jrow    .LT. Row    ) THEN !Not there yet.
+*	    Jtppad = Jtppad + 1                !Next "pad".
+*	  ELSE                                 !There.
+*	    Started = .TRUE.                   !Find.
 	  END IF
-	END DO !WHILE ( .NOT. Started )
+*	END DO !WHILE ( .NOT. Started )
 
 
 *	Jtppad now points to the first pad-sequence in this sector/row, table tppad:
@@ -121,10 +171,9 @@ c         Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 	  Jpixel     = tppad( Jtppad ).jpix   !Offset into the tppixel table.
 	  Nsequences = tppad( Jtppad ).nseq   !Number of sequences for this pad.
 
-          pix_offset = 0
  	  DO Isequence = 1, Nsequences
 
-             ldatum = tppixel(tppad(jtppad).jpix+pix_offset).datum
+             ldatum = tppixel(tppad(jtppad).jpix).datum
              nseqpix = iand(idatum(2),seqmask)/'100'X
 
              IF ( ( Npixels + Nseqpix ) .GT. Npixels_max ) THEN !No room left in the local array:
@@ -138,8 +187,8 @@ c         Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 c	    Jpixel = Jpixel + 2             !This points at first ADC value.
 *	    Load the pixels from this sequence:
 
-            do jndx = tppad(jtppad).jpix+pix_offset,
-     +              tppad(jtppad).jpix+pix_offset+nseqpix-1
+            do jndx = tppad(jtppad).jpix,
+     +              tppad(jtppad).jpix+nseqpix-1
 
                ldatum = tppixel(jndx).datum
                adc = idatum(1)
@@ -147,7 +196,7 @@ c	    Jpixel = Jpixel + 2             !This points at first ADC value.
                tdc_lo = iand(idatum(2),botmask)
                tdc_hi = ibits(idatum(2),14,2)*'100'X
                tdc = tdc_lo + tdc_hi
-               MCid           = tpmcpix( Jpixel ).mcid !This shadows tppixel (we hope).
+               MCid           = tpmcpix( jndx ).mcid !This shadows tppixel (we hope).
                Npixels        = Npixels + 1 !One more pixel being stored in caller-arrays.
 
                Ipix( Npixels ) = Ipixel !This item repeats, but it makes life easier.
@@ -157,7 +206,6 @@ c	    Jpixel = Jpixel + 2             !This points at first ADC value.
                Itid( Npixels ) = MCid
                Jpixel         = Jpixel + 1
  	    END DO !Iseqpix = 1, Nseqpix
-            pix_offset = pix_offset + kseqpix
 
 *	    Take no special action to start the next sequence -- it follows this one;  Jpixel is ready to go.
 	  END DO !Isequence = 1, Nsequences
@@ -170,6 +218,9 @@ c	    Jpixel = Jpixel + 2             !This points at first ADC value.
 c-> RJM     1 April 1994; the convention for jsector adopted in tss 
 c-> RJM     starts at jsector = 1
 	    Jrow    = MOD( tppad( Jtppad ).tpc_row , 100 )
+            if(Jrow .gt. pad_plane(1).nrow_in)then
+               Jrow = Jrow - pad_plane(1).nrow_in
+            endif
 c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
             Jsector =      tppad( Jtppad ).tpc_row / 100 
 	    IF      ( Jsector .NE. Sector ) THEN !Passed it.
@@ -189,7 +240,7 @@ c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 
 
 
-        INTEGER FUNCTION TCL_Make_Clusters( 
+        INTEGER FUNCTION TCL_Make_Clusters( pad_plane_h, pad_plane,
      1	                 tppadh, tppad, tppixelh, tppixel, tpmcpixh, 
      1	                 tpmcpix, tpclusterh, tpcluster, tpseqh, tpseq )
 
@@ -197,6 +248,9 @@ c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 
 #include "tas_structures.inc"
 #include "tas_user_codes.inc"
+
+#include "tpg_pad_plane_pars.inc"
+#include "tpg_pad_plane_st.inc"
 
 #include "tcl_tppad_pars.inc"
 #include "tcl_tppad_st.inc"
@@ -214,6 +268,9 @@ c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 #include "tcl_tpseq_st.inc"
 
 *  Inputs:
+        RECORD/ table_head_st      / pad_plane_h
+        RECORD/ pad_plane_row_st   / pad_plane(*)
+
         RECORD / table_head_st     / tppadh     !header for tppad table
         RECORD / tppad_row_st      / tppad(*)   !rows of tppad table
         RECORD / table_head_st     / tppixelh   !header for tppixel table
@@ -268,9 +325,9 @@ c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 	DATA    IDE1 /0/
 
 
-        CALL MESSAGE(
-     +               'TCL_Make_Clusters-I1  Making TCL table "cluster"'
-     +               //'from "tppad" et al.' , 1, -1 )
+*       CALL MESSAGE(
+*    +               'TCL_Make_Clusters-I1  Making TCL table "cluster"'
+*    +               //'from "tppad" et al.' , 1, -1 )
 
 *	Need a call like this:
 *	Nsectors = TPG_Nsectors()
@@ -285,7 +342,8 @@ c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 
 	  DO Row = 1, Nrows
 
-	    TAS_Code = TCL_Make_Cluster_Row( Sector, Row
+	    TAS_Code = TCL_Make_Cluster_Row( Sector, Row 
+     1                   , pad_plane_h, pad_plane
      1	                 , tppadh, tppad, tppixelh, tppixel, tpmcpixh
      1	                 , tpmcpix, Jtppad
      1	                 , tpclusterh, tpcluster, tpseqh, tpseq )
@@ -311,6 +369,7 @@ c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 
 
         INTEGER FUNCTION TCL_Make_Cluster_Row( Sector, Row
+     1                 , pad_plane_h, pad_plane
      1	               , tppadh, tppad, tppixelh, tppixel, tpmcpixh
      1	               , tpmcpix, Jtppad
      1	               , tpclusterh, tpcluster, tpseqh, tpseq )
@@ -319,6 +378,9 @@ c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 
 #include "tas_structures.inc"
 #include "tas_user_codes.inc"
+
+#include "tpg_pad_plane_pars.inc"
+#include "tpg_pad_plane_st.inc"
 
 #include "tcl_tppad_pars.inc"
 #include "tcl_tppad_st.inc"
@@ -343,6 +405,8 @@ c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 *  Inputs:
 	INTEGER                      Sector     !Sector no. of current data set.
 	INTEGER                      Row        !Row no. of current data set.
+        RECORD/ table_head_st      / pad_plane_h
+        RECORD/ pad_plane_row_st   / pad_plane(*)
         RECORD / table_head_st     / tppadh     !header for tppad table
         RECORD / tppad_row_st      / tppad(*)   !rows of tppad table
         RECORD / table_head_st     / tppixelh   !header for tppixel table
@@ -454,11 +518,17 @@ c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
      1         '    pixels in row:'I7'.  Limit:'I7/
      1	       '    (Nrowpixels_max in padfit_inc).')
 
-        CALL MESSAGE('TCL_Make_Cluster_Row-I1  Making TCL table '
-     1      //'"cluster" from "tppad" et al.' , 1, -1 )
+c       CALL MESSAGE('TCL_Make_Cluster_Row-I1  Making TCL table '
+c    1      //'"cluster" from "tppad" et al.' , 1, -1 )
+
+c
+c       Must initialise value of tcl_make_cluster_row!
+c
+	TCL_Make_Cluster_Row = tucod_ok     !Success
 
 	IF ( .NOT. TCL_Get_Row_Pixels
      1                 ( Sector, Row, Nrowpixels_max
+     1                 , pad_plane_h, pad_plane
      1	               , tppadh, tppad, tppixelh, tppixel, tpmcpixh
      1	               , tpmcpix, Jtppad
      1	               , Nrowpixels, Ipix, Ipad, Iadc, Itdc, Itid ) 
@@ -473,7 +543,7 @@ c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 	END IF ! .NOT. TCL_Get_Row_Pixels
 
 *	Initialize the table row-counts:
-	tpclusterh.nok = 0
+c	tpclusterh.nok = 0
 
 
 	IF ( MSG_Enabled_Trace( 'TCL_Make_Cluster_Row-T1', ID1 ) ) THEN
@@ -721,6 +791,7 @@ c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 	INTEGER Nclusters, Nsequences
 	INTEGER Iclupix, Jpix_last
 
+        INTEGER oldseq
 
 	INTEGER     Nclusters_max
 	PARAMETER ( Nclusters_max = tpcluster_len ) !Buffer this definition.
@@ -730,6 +801,7 @@ c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 
 	Nclusters  = tpclusterh.nok !Total clusters so far.
 	Nclusters  = Nclusters + 1  !One more cluster.
+
 	IF ( Nclusters .GT. Nclusters_max ) THEN
 	  CALL Message( 'TCL_Put_Cluster-E1  Out of table space, table '
      +                //'[tpcluster].', 1, -1 )
@@ -739,6 +811,7 @@ c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 
 	Jpix_last  = 0 !Force first test to be true.
 	Nsequences = tpseqh.nok     !Total cluster's sequences so far.
+        oldseq = tpseqh.nok
 
 *	Step through the cluster pixels, pointing to a new sequence whenever
 *	the pixels come from a new sequence, as indicated by a changing Jpix.
@@ -754,6 +827,7 @@ c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 	    tpseqh.nok = Nsequences
 	    tpseq( Nsequences ).jpix   = Jpix( Iclupix ) !Point to the top of this seq. in tppixel.
 	    tpseq( Nsequences ).secpad = Jpad( Iclupix )
+            tpseq( Nsequences ).tpc_row = 100*sector + row
 	    IF ( Jpix_last .GT. 0 ) THEN !Don't do this for the first sequence.
 	      tpseq( Nsequences - 1 ).next = Nsequences  !Previous one points to this one.
 	    END IF
@@ -763,6 +837,10 @@ c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 	tpseq( Nsequences ).next = 0 !Last one points to nothing.
 
 	tpclusterh.nok = Nclusters  !Total clusters so far.
+        tpcluster( Nclusters ).nseq = Nsequences - oldseq
+        tpcluster( Nclusters ).jseq = oldseq + 1
+        tpcluster( Nclusters ).secpad = 100*sector + row
+c       tpcluster( Nclusters ).flag
 
 	RETURN
         END
