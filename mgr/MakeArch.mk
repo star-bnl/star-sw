@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.15  1998/07/14 01:22:17  perev
+#  static EXE for sgi_64
+#
 #  Revision 1.14  1998/07/14 00:23:21  perev
 #  things
 #
@@ -23,7 +26,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/07/14 00:23:21 $ 
+#             Last modification $Date: 1998/07/14 01:22:17 $ 
 #. default setings
 
 RM := rm -f
@@ -285,6 +288,7 @@ ifneq (,$(findstring $(STAF_ARCH),sgi_64 ))
   CXXFLAGS  :=  -n32 -fullwarn
   LD        :=   $(CXX)
   LDFLAGS   :=  -n32 -multigot
+  STAF_ARCHIVE_LIBS := ON
   SO        :=   $(CXX)
   SOFLAGS   :=  -n32 -shared -multigot
   CLIBS     :=  -lsun  -lm -lc -lPW -lXext -lmalloc
