@@ -47,9 +47,6 @@ class  StMessage  {
 
 const char *StLoggerManager::fgLevels = "FEWIDQ";
 
-//StMessMgr* gMessMgr = 0;
-// StMessage* endm     = 0;
-
 //________________________________________
 std::ostream& StLoggerManager::OperatorShift(std::ostream& os, StMessage* stm) {
 // std::ostream& operator<<(std::ostream& os, StMessage* stm) {
@@ -377,7 +374,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.8 2004/11/05 20:24:00 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.9 2004/11/05 20:24:43 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -683,8 +680,11 @@ _NO_IMPLEMENTATION_;   return 5;
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.8 2004/11/05 20:24:00 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.9 2004/11/05 20:24:43 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.9  2004/11/05 20:24:43  fine
+// Remove some redundant lines, clean up
+//
 // Revision 1.8  2004/11/05 20:24:00  fine
 // Replace the obsolete StLoggerManager::Instance with tMessMgr::CurrentMessager()
 //
