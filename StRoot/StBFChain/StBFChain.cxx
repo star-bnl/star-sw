@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.37 1999/11/29 22:32:05 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.38 1999/12/01 02:06:19 didenko Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.38  1999/12/01 02:06:19  didenko
+// Add tpc to y1b, dependence of St_global from St_tpc and St_svt
+//
 // Revision 1.37  1999/11/29 22:32:05  fisyak
 // Add St_l3 for St_l3Clufi_Maker
 //
@@ -191,7 +194,7 @@ BfcItem BFC[] = {
   {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis"                                  ,"","","",kFALSE},
   {"Cy1a"        ,""  ,"","y1a,tpc,ftpc,l0,l3t,Cdst,tree"                ,"","","Turn on chain y1a",kFALSE},
-  {"Cy1b"        ,""  ,"","y1b,ftpc,l0,l3t,ems,emc,rich,Cdst,tree"       ,"","","Turn on chain y1b",kFALSE},
+  {"Cy1b"        ,""  ,"","y1b,tpc,ftpc,l0,l3t,ems,emc,rich,Cdst,tree"   ,"","","Turn on chain y1b",kFALSE},
   {"Cy1c"        ,""  ,"","y1c,tpc,ftpc,l0,l3t,Cdst,tree"                ,"","","Turn on chain y1c",kFALSE},
   {"Cy1d"        ,""  ,"","y1d,tpc,global,Cdst,qa,event,analysis,tree"   ,"","","Turn on chain y1d",kFALSE},
   {"cy1e"        ,""  ,"","y1e,tpc,Cdst,tree"                            ,"","","Turn on chain y1e",kFALSE},
@@ -235,8 +238,8 @@ BfcItem BFC[] = {
   {"laser"       ,"tpc_tracks","tpc","tdaq,tpc,-tpt"
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},  
   {"svt"         ,"svt","","tables,srs,stk"                            ,"StChainMaker","StChain","",kFALSE},
-  {"srs"         ,"svt_hits","svt","tls"                   ,"St_srs_Maker","St_svt,St_srs_Maker","",kFALSE},
-  {"stk"         ,"svt_tracks","svt","tls"                 ,"St_stk_Maker","St_svt,St_stk_Maker","",kFALSE},
+  {"srs"         ,"svt_hits","svt","tls"            ,"St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
+  {"stk"         ,"svt_tracks","svt","tls"          ,"St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},
   {"Ftpc"        ,"ftpc"  ,"","tables,fcl,fpt"                         ,"StChainMaker","StChain","",kFALSE},
   {"fss"         ,"ftpc_raw","ftpc","SCL"                 ,"St_fss_Maker","St_ftpc,St_fss_Maker","",kFALSE},
   {"Fcl"         ,"ftpc_hits","ftpc","SCL"    ,"StFtpcClusterMaker","St_ftpc,StFtpcClusterMaker","",kFALSE},
@@ -252,7 +255,8 @@ BfcItem BFC[] = {
   {"l3cl"        ,"","l3","tables"                  ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3","tables"                          ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
   {"rich"        ,"rch","","tables"                                   ,"StRchMaker","StRchMaker","",kFALSE},
-  {"global"      ,"global","","tables,Match,primary,v0,xi,kink,dst"    ,"StChainMaker","StChain","",kFALSE},
+  {"global"   ,"global","","tables,Match,primary,v0,xi,kink,dst"
+                                                         ,"St_tpc,St_svt,StChainMaker","StChain","",kFALSE},
   {"Match"       ,"match","global","SCL,tables,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Primary"     ,"primary","global","SCL,tables,tls"
