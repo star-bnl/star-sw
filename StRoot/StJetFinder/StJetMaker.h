@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.1 2003/02/27 21:38:10 thenry Exp $
+ * $Id: StJetMaker.h,v 1.2 2003/04/04 21:26:42 thenry Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.2  2003/04/04 21:26:42  thenry
+ * Repeated jet bug fix + debugging output not removed
+ *
  * Revision 1.1  2003/02/27 21:38:10  thenry
  * Created by Thomas Henry
  *
@@ -43,20 +46,15 @@ class StppEvent;
 class StppGeant;
 class StBbcTriggerDetector;
 class StFpdCollection;
-class StEmcClusterCollection;
-class StEmcPoint;
 class StMuDst;
-class StEmcMicroEvent;
-class StEmcMicroCollection;
-class StEmcCollection;
+class StMuEmcCollection;
 class StMuDstMaker;
 class StFourPMaker;
 
 class StJetMaker : public StMaker {
 public:
     StJetMaker(const Char_t *name, StFourPMaker* fPMaker, 
-        StEmcMicroCollection *emc, StMuDstMaker* uDstMaker, 
-        const char *outputName);
+        StMuDstMaker* uDstMaker, const char *outputName);
     Int_t Init();
     Int_t Make();
     Int_t Finish();
@@ -73,7 +71,7 @@ protected:
     void InitFile(void);
     void FinishFile(void);
 
-    StEmcMicroCollection* muEmcCol; //!
+    StMuEmcCollection* muEmcCol; //!
     StppJetAnalyzer **jetBranches; //!
     char** names;                  //!
     Int_t numJetBranches;          
