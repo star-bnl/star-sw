@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNode.cc,v 1.8 2003/09/16 22:44:17 porter Exp $
+ * $Id: StDbNode.cc,v 1.9 2003/12/16 01:30:32 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbNode.cc,v $
+ * Revision 1.9  2003/12/16 01:30:32  porter
+ * additional fixes for change from ostrstream to ostringstream that were not exposed until
+ * running in online
+ *
  * Revision 1.8  2003/09/16 22:44:17  porter
  * got rid of all ostrstream objects; replaced with ostringstream+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
@@ -185,7 +189,8 @@ while(id){
    }
    if(id)id++;
 }
- const char* islist = (sl.str()).c_str();
+ char* islist=new char[strlen((sl.str()).c_str())+1];
+ strcpy(islist,(sl.str()).c_str());
 
  // cout << "My string list = " << islist << endl;
 
@@ -218,7 +223,7 @@ while(id){
  for(k=0;k<numElements;k++)retVal[k]=tmpElements[k];
  numRows = numElements;
  
-//VP delete [] islist;
+ delete [] islist;
  delete [] tmpElements;
  delete [] tmpName; 
 
