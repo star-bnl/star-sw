@@ -1,7 +1,7 @@
-// $Id: StMessage.cxx,v 1.4 1999/06/29 17:37:30 genevb Exp $
+// $Id: StMessage.cxx,v 1.5 1999/06/29 19:17:14 genevb Exp $
 // $Log: StMessage.cxx,v $
-// Revision 1.4  1999/06/29 17:37:30  genevb
-// Lots of fixes...
+// Revision 1.5  1999/06/29 19:17:14  genevb
+// Lots of fixes..
 //
 // Revision 1.3  1999/06/26 00:24:52  genevb
 // Fixed const type mismatches
@@ -95,7 +95,8 @@ int StMessage::Print(int nChars) {
     addedMessage = messCounter->str();
   } else {
     if (nChars>0) {
-      messBuffer.seekp(nChars);   // set end-of-string at nChars
+      if (messBuffer.tellp() > nChars)
+        messBuffer.seekp(nChars);   // set end-of-string at nChars
     } else
       nChars = 0;
   }
@@ -115,7 +116,7 @@ int StMessage::Print(int nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.4 1999/06/29 17:37:30 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.5 1999/06/29 19:17:14 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
