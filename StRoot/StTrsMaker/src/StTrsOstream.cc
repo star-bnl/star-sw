@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsOstream.cc,v 1.8 2000/03/15 23:33:55 calderon Exp $
+ * $Id: StTrsOstream.cc,v 1.9 2001/02/16 16:56:24 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsOstream.cc,v $
+ * Revision 1.9  2001/02/16 16:56:24  fisyak
+ * Make Solaris happy
+ *
  * Revision 1.8  2000/03/15 23:33:55  calderon
  * Remove extra messages
  *
@@ -158,7 +161,8 @@ void StTrsOstream::writeTrsEvent(StTrsRawDataEvent* EventData)
 								
 				ofs << static_cast<unsigned short>(lengthData);
 				ofs.put(' ');
-				ofs.write(static_cast<const unsigned char*>(&(aDigitalSector->mData[iRow][iPad][0])),lengthData);
+				ofs.write((char*)(&(aDigitalSector->mData[iRow][iPad][0])),lengthData);
+//yf				ofs.write(static_cast<const unsigned char*>(&(aDigitalSector->mData[iRow][iPad][0])),lengthData);
 				ofs << " ";
 
 				if (false) { // to debug, change to true
