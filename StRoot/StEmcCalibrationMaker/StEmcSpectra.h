@@ -20,6 +20,7 @@ standard functions to manipulate spectra, such as mean, rms, rebins, etc.
 #include "TH1.h"
 #include "StEmcUtil/filters/StEmcFilter.h"
 #include "StEmcUtil/projection/StEmcPosition.h"
+#define MAXHIST 1000
 
 class StEmcGeom;
 class StEvent;
@@ -36,6 +37,8 @@ class StEmcSpectra : public St_DataSet
 					 TH2F       		*mCalib;   //!
 					 TH1D           *mEtaBinTmp; //!
 					 TH1D           *mRebinTmp;
+           TH1D           *mHistTmp[MAXHIST];
+           TH1D           *mHistTmpAsym[MAXHIST];
            
 					 Float_t    		mSpecMax;
 					 Float_t    		mSpecMin;
@@ -83,6 +86,7 @@ class StEmcSpectra : public St_DataSet
            TH1D*    			Draw(Int_t); ///< Draw bin spectrum
            void     			DrawOccupancy(); ///< Draw occupancy
   virtual  TH1D*    			DrawEtaBin(Int_t); ///< Draw eta bin spectrum  
+  virtual  void     			DrawAllEtaBin(Int_t,Float_t=10); ///< Draw all spectra in the eta bin 
 	         TH1D*    			GetSpectra(Int_t); ///< Return spectrum for one bin
            TH1D*    			GetSpectra(Int_t,Float_t,Float_t); ///< Return spectrum for one bin after apply equalization
   virtual  void     			CalcEtaBin(Int_t,Int_t*,Int_t*,Int_t*,Int_t*); ///< Calculates eta bin

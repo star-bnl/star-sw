@@ -29,6 +29,8 @@ StEmcSpectra::StEmcSpectra(const char* cdet,Int_t nb, Float_t bin0, Float_t bin1
   #include "StEmcUtil/others/emcDetectorName.h"
   Float_t nadc[4]={4096,1024,1024,1024};
   SetTitle(cdet);
+  for(Int_t i=0;i<MAXHIST;i++) mHistTmp[i]=NULL;
+  for(Int_t i=0;i<MAXHIST;i++) mHistTmpAsym[i]=NULL;
   //geo=new StEmcGeom(cdet);
   mGeo=StEmcGeom::getEmcGeom(cdet);
   for(Int_t i=0;i<4;i++) if(!strcmp(cdet,detname[i].Data())) mDetNum=i;
@@ -330,6 +332,86 @@ TH1D* StEmcSpectra::DrawEtaBin(Int_t etabin)
 	return hist;
 }
 //_____________________________________________________________________________
+void StEmcSpectra::DrawAllEtaBin(Int_t etabin,Float_t Norm)
+{
+  if(etabin>mNEtaBins || etabin<1) return;
+  if(!mEqual) return;
+  TCanvas* canvas8=new TCanvas("canvas8","EMC Eta Bin Spectrum",500,700);  
+  TH1D* hist=GetEtaBinSpectra(etabin);
+  canvas8->Divide(1,2);
+  canvas8->cd(1);
+
+  Int_t mi,mf,ei,ef,si,sf;
+  CalcEtaBin(etabin,&mi,&mf,&ei,&ef);
+  si=1; sf=GetNSub();
+  Int_t nh = 0;
+
+  Float_t scale1 = 0;
+  for(Int_t m=mi;m<=mf;m++)
+    for(Int_t e=ei;e<=ef;e++)
+      for(Int_t s=si;s<=sf;s++)
+      {
+        Int_t id=GetID(m,e,s);
+        if(GetStatus(id)==1)
+        {
+          Float_t a=1;
+					Float_t b=0;
+          Int_t s;
+				  GetEqualConst(id,&a,&b,&s);
+          if(a!=0 && s==1) 
+          {
+            if(mHistTmp[nh]) {delete mHistTmp[nh]; mHistTmp[nh] = NULL;}
+            if(nh>0) if(mHistTmpAsym[nh]) {delete mHistTmp[nh]; mHistTmp[nh] = NULL;}
+            mHistTmp[nh] = new TH1D(*ReBin(id,a,b));
+            mHistTmp[nh]->Rebin(4);
+            char name[30];
+            sprintf(name,"id%4d",id);
+            mHistTmp[nh]->SetName(name);
+            mHistTmp[nh]->SetTitle("Equalized Spectra");
+            Float_t scale = mHistTmp[nh]->Integral(mHistTmp[nh]->FindBin(Norm),mHistTmp[nh]->GetNbinsX());
+            mHistTmp[nh]->Scale(1./scale);
+            if(nh==1) scale1=scale;
+            canvas8->cd(1);
+            if(nh==0) mHistTmp[nh]->Draw(); else  mHistTmp[nh]->Draw("same");
+            if(nh>0) 
+            {
+              TH1D* tmp = new TH1D(*mHistTmp[0]);
+              TH1D* tmp2= new TH1D(*mHistTmp[0]);
+              tmp->Add(mHistTmp[nh],-1);
+              tmp2->Add(mHistTmp[nh],1);
+              tmp->Divide(tmp2);
+              delete tmp2;
+              mHistTmpAsym[nh] = tmp;
+              mHistTmpAsym[nh]->SetName(name);
+              mHistTmpAsym[nh]->SetTitle("Asymmetry");
+              canvas8->cd(2);
+              if(nh==1) mHistTmpAsym[nh]->Draw("P"); else  mHistTmpAsym[nh]->Draw("sameP");
+            }
+            nh++;
+          }
+        }
+      }
+      for(int i=1;i<=mHistTmp[1]->GetNbinsX();i++)
+      {
+        Float_t y = scale1*mHistTmp[1]->GetBinContent(i);
+        Float_t ey = sqrt(y)/scale1;
+        mHistTmp[1]->SetBinError(i,ey);
+      }
+      canvas8->cd(1);
+      mHistTmp[1]->SetLineColor(2);
+      mHistTmp[1]->SetMarkerStyle(20);
+      mHistTmp[1]->SetMarkerSize(0.7);
+      mHistTmp[1]->SetMarkerColor(2);
+      mHistTmp[1]->SetLineWidth(2);
+      mHistTmp[1]->Draw("sameELP");
+      canvas8->cd(2);
+      mHistTmpAsym[1]->SetLineColor(2);
+      mHistTmpAsym[1]->SetLineWidth(2);
+      mHistTmpAsym[1]->Draw("sameL");
+
+	return ;
+}
+//_____________________________________________________________________________
 TH1D* StEmcSpectra::GetSpectra(Int_t position)
 {
   return GetSpectra(position,1,0);
@@ -342,7 +424,7 @@ TH1D* StEmcSpectra::GetSpectra(Int_t position,Float_t a,Float_t b)
 //_____________________________________________________________________________
 TH1D* StEmcSpectra::ReBin(Int_t position,Float_t a,Float_t b)
 {
-	Float_t seg = 5;
+	Float_t seg = 50;
   if(a<=0) return NULL;	
 	TH1D *h = mSpectra->ProjectionY("tmp",(Int_t)position,(Int_t)position);	
 	mRebinTmp->Reset();
@@ -356,14 +438,15 @@ TH1D* StEmcSpectra::ReBin(Int_t position,Float_t a,Float_t b)
   
 	Float_t deltaBin=h->GetBinWidth(1)/seg;
 	Int_t nbins=h->GetNbinsX();	
-  for(Int_t i=0;i<nbins;i++)
+  for(Int_t i=1;i<=nbins;i++)
   {
     Float_t x = h->GetBinLowEdge(i);
 		Float_t y = h->GetBinContent(i);
 		for(Int_t j=0;j<(Int_t)seg;j++)
 		{
-			Float_t x1 = x+((Float_t)i+0.5)*deltaBin;
+			Float_t x1 = x+((Float_t)j+0.5)*deltaBin;
 			Float_t x2 = x1*a+b;
+      //if (a>1) cout <<position<<"  "<<a<<"  "<<x1<<"  "<<x2<<endl;
 			mRebinTmp->Fill(x2,y/seg);
 		}
   }
