@@ -1,10 +1,13 @@
+// $Id: StFtpcPrimaryMaker.cxx,v 1.3 2001/03/30 13:30:12 jcs Exp $
+// $Log: StFtpcPrimaryMaker.cxx,v $
+// Revision 1.3  2001/03/30 13:30:12  jcs
+// correct Id and Log
+//
+//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StFtpcPrimaryMaker class                                             //
 //                                                                      //
-//  
-// 
-//
 //////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
