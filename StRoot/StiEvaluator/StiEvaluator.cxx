@@ -21,7 +21,7 @@
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiEvaluableTrack.h"
 
-//StiMaker includes
+//StiEvaluator includes
 #include "StiEvaluator.h"
 
 StiEvaluator* StiEvaluator::sinstance = 0;
