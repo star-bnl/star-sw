@@ -70,16 +70,22 @@ STAFCV_T reset();
 };      /* topMaskI */
 
 //:#####################################################################
+enum TOP_ORDER_T {
+	TOP_ACCENDING,
+	TOP_DECENDING
+};
 //:=============================================== INTERFACE          ==
 interface topSortI : socObjectI {
 
 //:----------------------------------------------- ATTRIBUTES         --
-readonly attribute string keyFunction;
+readonly attribute string function;
+attribute TOP_ORDER_T order;
 
 //:----------------------------------------------- FUNCTIONS          --
-STAFCV_T sort(in tdmTableI table1, inout tdmTableI table2);
+STAFCV_T sort(inout tdmTableI table);
+STAFCV_T shuffle(inout tdmTableI table);
 
-};	/* topMaskI */
+};	/* topSortI */
 
 //:#####################################################################
 //:=============================================== INTERFACE          ==

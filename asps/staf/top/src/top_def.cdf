@@ -157,16 +157,15 @@ For the second step, use either TOP/CUTAGENT/FILTER or TOP/CUTAGENT/CUT.
 >ACTION KAM_TOP_NEWCUT
 
 ** ---------------------------------------------------------------------
-** TOP/NEWSORT AGENT [ SORTFUNC ]
-**>COMMAND NEWSORT
-**>PARAMETERS
-**AGENT 'Sort Agent Name' C 
-**+
-**SORTFUNC 'Original sort function.' C D='-'
-**>GUIDANCE
-**Create and register a new topSort agent.
-**.
-**>ACTION KAM_TOP_NEWSORT
+** TOP/NEWSORT AGENT WHICH_COLUMN
+>COMMAND NEWSORT
+>PARAMETERS
+AGENT 'Sort Agent Name' C 
+WHICH_COLUMN 'which column to sort on' C
+>GUIDANCE
+Create and register a new topSort agent.
+.
+>ACTION KAM_TOP_NEWSORT
 
 ************************************************************************
 ************************************************************************
@@ -235,6 +234,40 @@ The computer types 'pid.eq.5 .and. invpt.gt.1.12e3'.
 .
 >ACTION KAM_TOPCUT_FUNCTION
 
+************************************************************************
+************************************************************************
+** TOP/SORT_AGENT
+>MENU \SORT_AGENT
+>GUIDANCE
+topSort commands.
+** ---------------------------------------------------------------------
+** ---------------------------------------------------------------------
+** TOP/SORT_AGENT/COLUMN AGENT [ WHICH_COLUMN ]
+>COMMAND COLUMN
+>PARAMETERS
+AGENT 'Name of sort agent.' C
++
+WHICH_COLUMN 'New column to sort on.' C D='-'
+>GUIDANCE
+Show or change the sorting column.
+.
+Show or change the column which the agent uses as its sorting criterion.
+.
+>ACTION KAM_TOPSORT_COLUMN
+
+** ---------------------------------------------------------------------
+** TOP/SORT_AGENT/SORT AGENT TABLE1
+>COMMAND SORT
+>PARAMETERS
+AGENT 'Name of sort agent.' C
+TABLE1 'Name of table to be sorted.' C
+>GUIDANCE
+Sorts TABLE1, using the column specified for AGENT.
+
+.
+>ACTION KAM_TOPSORT_SORT
+
+** ---------------------------------------------------------------------
 ************************************************************************
 ************************************************************************
 ** TOP/PROJECT_AGENT
@@ -316,6 +349,45 @@ Show or change where clause.
 See HELP TOP for syntax of WHERE.
 .
 >ACTION KAM_TOPJOIN_WHERECLAUSE
+
+** ---------------------------------------------------------------------
+** TOP/JOIN_AGENT/FASTJOIN AGENT TABLE1 TABLE2 TABLE3 [ SELECT WHERE ]
+>COMMAND FASTJOIN
+>PARAMETERS
+AGENT 'Name of Join agent.' C
+TABLE1 'Name of first input table.' C
+TABLE2 'Name of second input table.' C
+TABLE3 'Name of output table.' C
++
+SELECT 'Original selection specification.' C D='-'
+WHERE 'Original where clause.' C D='-'
+>GUIDANCE
+Join two tables to form a third.
+You can read about joining in a book on relational databases
+(eg, an SQL reference book).
+You can use the same JOIN agent with either JOIN or FASTJOIN.
+FASTJOIN works the same as JOIN, except as noted below.
+.
+It runs very fast (proportional to n instead of n squared).
+Eg, two 10,000 row tables that previously took 20 minutes will
+run in 0.12 seconds.
+.
+You must first sort each table on its corresponding 
+column in the WHERE clause of FASTJOIN.
+You can sort the tables easily with TOP/SORT_AGENT/SORT.
+This sort is based on a fancy sorting algorithm (quicksort),
+and runs very fast.  
+.
+The WHERE parameter must be simple, ie,
+'{' column_name <WHITE_SPACE> column_name '}'.
+No commas, no periods.
+The first  column_name is for the first  table.
+The second column_name is for the second table.
+.
+See HELP TOP for syntax of SELECT.
+See HELP TOP for syntax of WHERE.
+.
+>ACTION KAM_TOPJOIN_FASTJOIN
 
 ** ---------------------------------------------------------------------
 ** TOP/JOIN_AGENT/JOIN AGENT TABLE1 TABLE2 TABLE3 [ SELECT WHERE ]

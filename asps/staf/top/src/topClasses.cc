@@ -13,12 +13,19 @@
 #include "topClasses.hh"
 #include "tdmClasses.hh"
 #include "top_utils.h"
+
+extern "C" int TableValue(int *dataType,char *xx,float *fv,long *iv,
+  size_t row, size_t colNum,DS_DATASET_T *tp,int subscript);
 extern "C" void CutsInit(void);
 extern "C" int dsuDoCuts(size_t bytes, char *ba, char *cut
 		,DS_DATASET_T *pTab);
 extern "C" int dsuRowPassedCuts(char *ba,long row);
 extern "C" int IsValidCutFunc(char*);
+extern "C" int topFastjoin(DS_DATASET_T *pJoinTable, DS_DATASET_T *pTableOne,
+        DS_DATASET_T *pTableTwo, char *aliases,
+        char *joinList, char *projectList);
 //:----------------------------------------------- MACROS             --
+#define PP printf(
 //:----------------------------------------------- PROTOTYPES         --
 extern "C" char* id2name(char* base,long id);
 
@@ -49,7 +56,7 @@ topProject:: topProject(const char * name, const char * spec)
 //:---------------------------------
 topProject:: ~topProject(){
    FREE(mySelectSpec);
-};
+}
 
 //:----------------------------------------------- ATTRIBUTES         --
 char* topProject:: selectionSpecification() {
@@ -173,7 +180,7 @@ topCut:: topCut(const char * name, const char * func)
 //:---------------------------------
 topCut:: ~topCut(){
    FREE(myCutFunction);
-};
+}
 
 //:----------------------------------------------- ATTRIBUTES         --
 char* topCut:: cutFunction() {
@@ -216,8 +223,8 @@ STAFCV_T topCut:: DoCutTable(tdmTable *tbl,char *func,
     return 0;
   }
   startRow=-10;
-  for(row=0;row<*orig+1;row++) { /* The <x+1 is deliberate, to invoke the
-                                 ** else cluase during ending of the loop. */
+  for(row=0;row<*orig+1;row++) { /* The +1 is deliberate, to invoke the
+                                 ** else clause during ending of the loop. */
     if(row<(*orig)&&dsuRowPassedCuts((char*)mask,row)) {
       if(row%1557==0) printf("Phase II: %d %% complete.\n",(row*100)/(*orig));
       rowCnt++; if(startRow<0) startRow=row;
@@ -325,6 +332,114 @@ STAFCV_T topCut:: cut(tdmTable * table1) {
 
 //:#####################################################################
 //:=============================================== CLASS              ==
+//: topSort
+
+topSort:: topSort()
+		: socObject("NULL","topSort") {
+   myPtr = (SOC_PTR_T)this;
+   myWhichColumn = NULL;
+}
+
+topSort:: topSort(const char * name, const char * whichCol) 
+		: socObject(name,"topSort") {
+   myPtr = (SOC_PTR_T)this;
+   myWhichColumn = (char*)MALLOC(strlen(whichCol) +1);
+   strcpy(myWhichColumn,whichCol);
+}
+
+topSort:: ~topSort(){
+   FREE(myWhichColumn);
+}
+
+void topSort:: whichColumn(char *whichCol) {
+  FREE(myWhichColumn);
+  myWhichColumn = (char*)MALLOC(strlen(whichCol) +1);
+  strcpy(myWhichColumn,whichCol);
+}
+char* topSort:: whichColumn() {
+  char* c=NULL;
+  c = (char*)MALLOC(strlen(myWhichColumn) +1);
+  strcpy(c,myWhichColumn);
+  return c;
+}
+void topSort::SwapRows(
+    void *data, size_t rowsize,void *temp,
+    DS_DATASET_T* dsPtr,int rowNumberA,int rowNumberB) {
+  void *row1,*row2;
+  row1=(void*)((char*)data+(rowsize*rowNumberA));
+  row2=(void*)((char*)data+(rowsize*rowNumberB));
+  memcpy( temp , row1 , rowsize );
+  memcpy( row1 , row2 , rowsize );
+  memcpy( row2 , temp , rowsize );
+}
+float topSort::Value(int *errFlag,DS_DATASET_T* dsPtr,
+      int rownumInt,size_t colNum) {
+  float returnValue;
+  int dataType;
+  char junk[103];
+  long intValue;
+  float floatValue;
+  size_t rownum=rownumInt;
+  if(TableValue(&dataType,junk,&floatValue,&intValue,rownum,colNum,dsPtr,0)) {
+    if(dataType==1) returnValue=intValue;
+    else if(dataType==0) returnValue=floatValue;
+    else { *errFlag=1; returnValue=0.0;  } /* string or hex */
+  } else {
+    *errFlag=2; returnValue=0.0;
+  }
+  return returnValue;
+}
+void topSort::top_qsort(void *data,size_t rowsize,void *temp,
+    DS_DATASET_T* pp,int left,int rite,size_t colNum,int *errFlag) {
+  register int ii,jj;
+  ii=left; jj=rite;
+  float comparator;
+  comparator=Value(errFlag,pp,(left+rite)/2,colNum);
+  do {
+    while(Value(errFlag,pp,ii,colNum)<comparator&&ii<rite) ii++;
+    while(Value(errFlag,pp,jj,colNum)>comparator&&jj>left) jj--;
+    if(ii<=jj) {
+      if(ii<jj) SwapRows(data,rowsize,temp,pp,ii,jj);
+      ii++; jj--;
+    }
+  } while(ii<=jj);
+  if(left<jj) {
+    top_qsort(data,rowsize,temp,pp,left,jj,colNum,errFlag);
+  }
+  if(ii<rite) {
+    top_qsort(data,rowsize,temp,pp,ii,rite,colNum,errFlag);
+  }
+}
+STAFCV_T topSort:: SortTheTable(tdmTable *table) { // www 
+  DS_DATASET_T* dsPtr = table->dslPointer();
+  size_t nrows,rowsize,colNum;
+  int errFlag;
+  char *dataAddr;
+  void *tmp;
+
+  if(!dsTableRowCount(&nrows,dsPtr)) EML_ERROR(TABLE_NOT_FOUND);
+  PP"number of rows is %d.\n",nrows);
+
+  if(!dsTableRowSize(&rowsize,dsPtr)) EML_ERROR(CANT_FIND_ROW_SIZE);
+  if(!dsTableDataAddress(&dataAddr,dsPtr)) EML_ERROR(CANT_FIND_DATA);
+  if(!dsFindColumn(&colNum,dsPtr,myWhichColumn)) EML_ERROR(CANT_FIND_COLUMN);
+
+  tmp=MALLOC(rowsize);
+  errFlag=0;
+  top_qsort((void*)dataAddr,rowsize,tmp,dsPtr,0,nrows-1,colNum,&errFlag);
+  FREE(tmp);
+  if(errFlag) {
+    if(errFlag==1) EML_ERROR(INVALID_COLUMN_DATA_TYPE);
+    EML_ERROR(SORT_FAILURE);
+  }
+  EML_SUCCESS(STAFCV_OK);
+}
+STAFCV_T topSort:: sort(tdmTable *table) {
+  if(!SortTheTable(table)) EML_ERROR(SORT_FAILURE);
+  EML_SUCCESS(STAFCV_OK);
+}
+//:#####################################################################
+//:=============================================== CLASS              ==
 //: topJoin
 
 //:----------------------------------------------- CTORS & DTOR       --
@@ -361,7 +476,7 @@ topJoin:: topJoin(const char * name, const char * spec
 //:---------------------------------
 topJoin:: ~topJoin(){
    FREE(myWhereClause);
-};
+}
 
 //:----------------------------------------------- ATTRIBUTES         --
 char* topJoin:: whereClause() {
@@ -396,6 +511,22 @@ char * topJoin::  listing () {
    return cc;
 }
 
+//:----------------------------------------------- INTERFACE METHODS  --
+STAFCV_T topJoin:: fastjoin(tdmTable * table1, tdmTable * table2
+		, tdmTable *& table3) {
+   DS_DATASET_T *pTbl1=table1->dslPointer();
+   DS_DATASET_T *pTbl2=table2->dslPointer();
+   DS_DATASET_T *pTbl3=NULL;
+   if( NULL == table3 ){
+      table3 = jTarget(table1, table2, NULL);
+   }
+   pTbl3=table3->dslPointer();
+   if( !topFastjoin(pTbl3,pTbl1,pTbl2,NULL,myWhereClause,mySelectSpec) ){
+      EML_ERROR(JOIN_FAILURE);
+   }
+   EML_SUCCESS(STAFCV_OK);
+
+}
 //:----------------------------------------------- INTERFACE METHODS  --
 STAFCV_T topJoin:: join(tdmTable * table1, tdmTable * table2
 		, tdmTable *& table3) {
@@ -593,6 +724,31 @@ STAFCV_T topFactory:: getJoin (IDREF_T id, topJoin*& join) {
 }
 
 //:---------------------------------
+STAFCV_T topFactory:: findSort (const char * name
+		, topSort*& sort) {
+  socObject* obj=NULL;
+  
+  if( NULL == (obj = soc->findObject(name,"topSort")) ){
+    sort = NULL;   //- ???-leave as is?
+    EML_ERROR(OBJECT_NOT_FOUND);
+  }
+  sort = TOPSORT(obj);
+  EML_SUCCESS(STAFCV_OK);
+}
+//:---------------------------------
+STAFCV_T topFactory:: newSort (const char * name, const char * whichCol) {
+   IDREF_T id;
+   if( soc->idObject(name,"topSort",id) ){
+      EML_ERROR(DUPLICATE_OBJECT_NAME);
+   }
+   topSort* p;
+   p = new topSort(name,whichCol);
+   if( !soc->idObject(name,"topSort",id) ){
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   addEntry(id);
+   EML_SUCCESS(STAFCV_OK);
+}
 STAFCV_T topFactory:: newJoin (const char * name, const char * spec
 		, const char * clause) {
    IDREF_T id;

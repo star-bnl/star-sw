@@ -21,7 +21,8 @@ void CutsInit(void) {
 
 
 void ErrTop(int x) {
-  PP"Error number %d in the file %s.\n",__FILE__);
+  PP"Error number %d in the file %s.\n",__LINE__,__FILE__);
+	/*INS++:BAD_FORMAT(24)-BUGFIX*/
 }
 int TopArray(
   DS_DATASET_T *dsPtr, size_t colNum,int tentSubscript,

@@ -102,18 +102,63 @@ STAFCV_T top_newcut(char* agent, char* func)
 }
  
 /*-------------------------------------------------------------------*/
+void kam_topsort_sort_() {
+  char *agent = ku_gets(); /* name of sort agent */
+  char *whichTable = ku_gets(); /* which table to sort */
+  STAFCV_T status = topsort_sort(agent,whichTable);
+}
+STAFCV_T topsort_sort(char *agent,char *whichTable) {
+  topSort* sort=NULL;
+  if(!top->findSort(agent,sort)) EML_ERROR(KAM_OBJECT_NOT_FOUND);
+  tdmTable* tbl=NULL;
+  if( NULL == (tbl = tdm->findTable(whichTable)) ){
+    printf("I can't find table '%s'.\n",whichTable);
+    EML_ERROR(KAM_OBJECT_NOT_FOUND);
+  }
+  if(!sort->sort(tbl)) EML_ERROR(KAM_METHOD_FAILURE);
+  EML_SUCCESS(STAFCV_OK);
+}
 void kam_top_newsort_()
 {
-   long npars = ku_npar(); /* no. of KUIP param.s */
-   char *agent = ku_gets(); /* name of sort agent */
-   char *sfunc = ku_gets(); /* sort function */
-        STAFCV_T status = top_newsort();
+  // long npars = ku_npar(); /* no. of KUIP param.s */
+  char *agent = ku_gets(); /* name of sort agent */
+  char *whichCol = ku_gets(); /* which column to sort on */
+  STAFCV_T status = top_newsort(agent,whichCol);
 }
-STAFCV_T top_newsort() {
-EML_ERROR(NOT_YET_IMPLEMENTED);
+STAFCV_T top_newsort(char *agent,char *whichCol) {
+  if( !top->newSort(agent, whichCol) ){
+     EML_ERROR(KAM_METHOD_FAILURE);
+  }
+  EML_SUCCESS(STAFCV_OK);
 }
  
 /*-------------------------------------------------------------------*/
+void kam_topsort_column_()
+{
+   // long npars = ku_npar();
+   char *agent = ku_gets(); /* name of project agent */
+   char *whichColumn = ku_gets(); /* which column to sort with */
+
+   STAFCV_T status = topsort_column(agent, whichColumn);
+}
+STAFCV_T topsort_column(char* agent, char* whichCol)
+{
+   topSort* sort=NULL;
+   if( !top->findSort(agent, sort) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   char *s=NULL;
+   switch (whichCol[0]) {
+   case '-':
+      printf("TOP:\tThis agent sorts on column '%s'\n",s=sort->whichColumn());
+      FREE(s);
+      break;
+   default:
+      sort->whichColumn(whichCol);
+      break;
+   }
+   EML_SUCCESS(STAFCV_OK);
+}
 void kam_topproject_selectspec_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
@@ -265,6 +310,63 @@ STAFCV_T topjoin_whereclause(char* agent, char* where)
    EML_SUCCESS(STAFCV_OK);
 }
  
+/*-------------------------------------------------------------------*/
+void kam_topjoin_fastjoin_()
+{
+   long npars = ku_npar(); /* no. of KUIP param.s */
+   char *agent = ku_gets(); /* name of join agent */
+   char *table1 = ku_gets(); /* first input table */
+   char *table2 = ku_gets(); /* second input table */
+   char *table3 = ku_gets(); /* output table */
+   char *select = ku_gets(); /* selection specification */
+   char *where = ku_gets(); /* where clause */
+
+        STAFCV_T status = topjoin_fastjoin(agent, table1, table2, table3
+		, select, where);
+}
+STAFCV_T topjoin_fastjoin(char* agent, char* table1, char* table2
+	, char* table3, char* select, char* where)
+{
+//- Find Mandatory Input Objects
+   topJoin* join=NULL;
+   if( !top->findJoin(agent, join) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   tdmTable* tbl1=NULL;
+   if( NULL == (tbl1 = tdm->findTable(table1)) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   tdmTable* tbl2=NULL;
+   if( NULL == (tbl2 = tdm->findTable(table2)) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+//- Handle Optional Selection Specification
+   switch (select[0]) {
+   case '-':
+      break;
+   default:
+      join->selectionSpecification(select);
+      break;
+   }
+//- Handle Optional Where Clause
+   switch (where[0]) {
+   case '-':
+      break;
+   default:
+      join->whereClause(where);
+      break;
+   }
+//- Find or Create Optional Output Object
+   tdmTable* tbl3=NULL;
+   if( NULL == (tbl3 = tdm->findTable(table3)) ){
+      tbl3 = join->jTarget(tbl1, tbl2, table3);
+   }
+//- Join tables
+   if( !join->fastjoin(tbl1,tbl2,tbl3) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(STAFCV_OK);
+}
 /*-------------------------------------------------------------------*/
 void kam_topjoin_join_()
 {
