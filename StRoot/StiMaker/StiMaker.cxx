@@ -34,6 +34,8 @@
 
 //StiGui
 //#include "StiGui/StiRootDrawableDetector.h"
+#include "StiGui/StiDrawableHits.h"
+#include "StiGui/StiRootDrawableHits.h"
 #include "StiGui/StiDisplayManager.h"
 
 // StiMaker
@@ -91,6 +93,9 @@ void StiMaker::Clear(const char*)
 {
     //Clear HitContainer
     mhitstore->clear();
+
+    //Clear Drawable hits
+    mdrawablehits->clear();
     
     //Reset DetectorContainer
     StiDetectorContainer::instance()->reset();
@@ -122,6 +127,10 @@ Int_t StiMaker::Init()
     mdisplay->draw();
     mdisplay->update();
     
+    //Drawable hits
+    mdrawablehits = new StiRootDrawableHits();
+    mdrawablehits->clear();
+    mdisplay->addDrawable(mdrawablehits);
     
     //Must build Polygons and Materials before detectors
     mdetector = StiDetectorContainer::instance();
@@ -157,8 +166,21 @@ Int_t StiMaker::Make()
 	mhitfiller->setEvent(mevent);
 	mhitfiller->fillHits(mhitstore, mhitfactory);
 	mhitstore->sortHits();
+
+	//Temp patch to draw hits
+	const hitmap& hits = mhitstore->hits();
+	for (hitmap::const_iterator it=hits.begin(); it!=hits.end(); it++) {
+	    const hitvector& tempvec = (*it).second;
+	    for (hitvector::const_iterator vit=tempvec.begin(); vit!=tempvec.end(); vit++) {
+		
+		mdrawablehits->push_back( (*vit) );
+	    }
+	}
+	mdrawablehits->fillHitsForDrawing();
 	
     }
+    mdisplay->draw();
+    mdisplay->update();
     return kStOK;
 }
 

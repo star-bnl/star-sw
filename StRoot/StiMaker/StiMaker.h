@@ -14,6 +14,7 @@ class StiHitFiller;
 class StiDisplayManager;
 class StiDetectorContainer;
 class StiTrackContainer;
+class StiDrawableHits;
 
 class StiMaker : public StMaker {
  public:
@@ -26,7 +27,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.6 2001/06/14 17:19:27 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.7 2001/07/05 21:05:03 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -61,6 +62,7 @@ private:
     StiDisplayManager* mdisplay; //!
     StiDetectorContainer* mdetector; //!
     StiTrackContainer* mtrackstore; //!
+    StiDrawableHits* mdrawablehits; //!
 
     char* mmaterialbuildpath; //!
     char* mdetectorbuildpath; //!
