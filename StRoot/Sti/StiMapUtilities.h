@@ -13,6 +13,7 @@ class StHit;
 class StiHit;
 class StTpcHit;
 class StiIOBroker;
+class StiTrackNode;
 
 //Structure for hit map key
 struct HitMapKey {
@@ -98,6 +99,11 @@ public:
 private:
     unsigned int mMinPadrow;
     unsigned int mMaxPadrow;
+};
+
+struct SetHitUsed
+{
+    void operator() (StiTrackNode&);
 };
 
 #endif

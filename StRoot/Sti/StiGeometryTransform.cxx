@@ -589,7 +589,11 @@ pair<double, double> StiGeometryTransform::angleAndPosition(const StTpcHit *pHit
 void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* sti,
 				       unsigned int maxHits, const StTpcHitFilter* filter) const
 {
-    *(Messenger::instance(MessageType::kGeometryMessage)) <<"\n\n\nmaxHits:\t"<<maxHits<<"\tfilter"<<filter<<endl;
+    Messenger& mess = *(Messenger::instance(MessageType::kGeometryMessage));
+    
+#ifdef DEBUG
+    mess <<"\n\n\nmaxHits:\t"<<maxHits<<"\tfilter"<<filter<<endl;
+#endif
     
     //now get hits
     StPtrVecHit hits = st->detectorInfo()->hits(kTpcId);
@@ -600,8 +604,10 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 	 it!=hits.end() && hitvec.size()<=maxHits; ++it) {
 	StTpcHit* hit = dynamic_cast<StTpcHit*>(*it);
 	if (!hit) {
-	    *(Messenger::instance(MessageType::kGeometryMessage)) <<"StiGeometryTransform::operator(GlobalTrack->KalmanTrack). Error:\t";
-	    *(Messenger::instance(MessageType::kGeometryMessage)) <<"StHit->StTpcHit cast failed.  Skip this point."<<endl;
+#ifdef DEBUG
+	    mess <<"StiGeometryTransform::operator(GlobalTrack->KalmanTrack). Error:\t";
+	    mess <<"StHit->StTpcHit cast failed.  Skip this point."<<endl;
+#endif
 	}
 	else  {
 	    //Find StiHit for this StHit
@@ -637,8 +643,9 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 		const hitvector& stiHits = StiHitContainer::instance()->hits(layer);
 
 		if (stiHits.size()==0) 	{
-		    cout <<"Error, no StiHits for this sector, padrow"<<endl;
-		    *(Messenger::instance(MessageType::kGeometryMessage)) <<"Error, no StiHits for this sector, padrow"<<endl;
+#ifdef DEBUG
+		    mess <<"Error, no StiHits for this sector, padrow"<<endl;
+#endif
 		    sti=0;
 		    return;
 		}
@@ -647,7 +654,9 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 		hitvector::const_iterator where = find_if(stiHits.begin(), stiHits.end(),
 							  mySameStHit);
 		if (where==stiHits.end()) {
-		    *(Messenger::instance(MessageType::kGeometryMessage)) <<"Error, no StiHit with this StHit was found"<<endl;
+#ifdef DEBUG
+		    mess <<"Error, no StiHit with this StHit was found"<<endl;
+#endif
 		    sti=0;
 		    return;
 		}
@@ -673,56 +682,16 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
     double curvature = sthelix.curvature();
     if (sthelix.h()<0) 
 	curvature=-curvature;
-    // *(Messenger::instance(MessageType::kGeometryMessage)) <<"StiGeometryTransform:  curvature: "<<curvature<<endl;
     
     double tanLambda = tan(sthelix.dipAngle());
 	    
-    // *(Messenger::instance(MessageType::kGeometryMessage)) <<"tanLambda: "<<tanLambda<<endl;
-
     if (hitvec.size()<3) {
-	*(Messenger::instance(MessageType::kGeometryMessage)) << " Track Transform Error:\t"
-						 <<" hitvec.size()<3.  Abort"<<endl;
+#ifdef DEBUG
+	mess << " Track Transform Error:\t"
+	      <<" hitvec.size()<3.  Abort"<<endl;
+#endif
 	return;
     }
-    //int size = hitvec.size();
-
-    //StiHelixCalculator calc;
-    //Use the outer 3 hits
-    //const StThreeVectorF& outside = hitvec[size-3]->globalPosition();
-    //const StThreeVectorF& middle = hitvec[size-2]->globalPosition();
-    //const StThreeVectorF& inside = hitvec[size-1]->globalPosition();
-
-    //Try 3 hits over a wide distance:
-    //const StThreeVectorF& outside = hitvec.front()->globalPosition();
-    //const StThreeVectorF& inside = hitvec.back()->globalPosition();
-    //const StThreeVectorF& middle = (*(hitvec.begin()+hitvec.size()/2))->globalPosition();
-        
-    //calc.calculate( StThreeVector<double>(inside.x(),  inside.y(),  inside.z()),
-    //	    StThreeVector<double>(middle.x(),  middle.y(),  middle.z()),
-    //	    StThreeVector<double>(outside.x(), outside.y(), outside.z()) );
-    
-    // *(Messenger::instance(kSeedFinderMessage)) <<"origin: "<<calc.xCenter()<<" "
-    //				       <<calc.yCenter()<<" "
-    //				       <<calc.z0()<<" "
-    //				       <<" curvature: "<<calc.curvature()<<" "
-    //				       <<" tanLambda: "<<calc.tanLambda()<<endl;
-    
-    // *(Messenger::instance(kSeedFinderMessage)) <<"origin: "<<stiGlobalOrigin
-    //				       <<" curvature: "<<curvature
-    //				       <<" tanLambda: "<<tanLambda<<endl;
-    //Test the calculator
-    //sti->initialize( calc.curvature(), calc.tanLambda(),
-    //	     StThreeVectorD(calc.xCenter(), calc.yCenter(), 0.),
-    //	     hitvec);
-    
     sti->initialize(curvature, tanLambda, stiGlobalOrigin, hitvec);
-    
-    //Test the fitter
-    //StiHelixFitter* fitter = StiHelixFitter::instance();
-    //bool worked = StiHelixFitter::instance()->fit(hitvec);
-    // *(Messenger::instance(kSeedFinderMessage)) <<*(StiHelixFitter::instance())<<endl;
-    
-    //StThreeVectorF fitOrigin(fitter->xCenter(), fitter->yCenter(), fitter->z0());
-    //sti->initialize(fitter->curvature(), fitter->tanLambda(), fitOrigin, hitvec);
     
 }

@@ -91,9 +91,11 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store,
 	    StiDetector* layer =
 		StiDetectorFinder::instance()->findDetector(szBuf);
 	    if (!layer) {
+#ifdef DEBUG
 		mMessenger <<"StiHitFiller::fillTpcHits(). ERROR:\t";
 		mMessenger <<"Detector for (sector,padrow): (";
 		mMessenger <<sector<<","<<prow<<") not found.  Abort"<<endl;
+#endif
 		mtimer.stop();
 		return;
 	    }
@@ -174,7 +176,7 @@ void StiHitFiller::fillSvtHits(StiHitContainer* store, StiObjectFactoryInterface
 			    store->push_back( stihit );
 			    ++nhit;
 			    if (fmod(nhit, nprint)==0.) {
-				mMessenger <<"Filling TpcHit:\t"<<nhit<<endl;
+				mMessenger <<"Filling SvtHit:\t"<<nhit<<endl;
 			    }
 			}
 		    }

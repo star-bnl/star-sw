@@ -71,14 +71,15 @@ public:
     bool fit(const StiHitVector&);
 
 private:
-    void calculateH(const StiHitVector&);
+    bool calculateH(const StiHitVector&);
     
     StFastCircleFitter mCircleFitter;
     StFastLineFitter mLineFitter;
-    //Store to represent the (0,0) point, avoid constructor calls
-    StThreeVectorF mOrigin;
     //Store the fit result in a 3-vec to avoid constructor calls
     StThreeVectorF mCenter;
+    StThreeVectorF mOutside;
+    StThreeVectorF mInside;
+    StThreeVectorF mMiddle;
 
     //Store the sign of the curvature;
     double mH; 

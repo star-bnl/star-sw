@@ -5,33 +5,20 @@
 class StChain;
 StChain *chain=0;
 
-void RunStiMaker(Int_t nevents=1,
+void RunStiMaker(Int_t nevents=4,
 		 bool simulated=true, //sim or data?
 		 //bool doFit=true, // true->fit track only
 		 bool doFit=false, // false->find track only
 		 const char* outfile = "Evaluation.root",
 		 //This file points to 30 events of 10 neg muons w/ pt=.9 
 		 const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
-		 //const char* MainFile="/direct/star+rcf/test/dev/trs_redhat61/Sat/year_2001/hc_lowdensity/hc_lowdensity.400_evts.event.root")
+		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Mon/year_2001/pp_minbias/pds0200_04_12812evts.event.root")
+		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Mon/year_2001/hc_highdensity/hc_highdensity.16_evts.event.root")
+    //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Mon/year_2001/hc_standard/hc_standard.40_evts.event.root")
+    //const char* MainFile="/direct/star+rcf/test/dev/trs_redhat61/Mon/year_2001/hc_lowdensity/hc_lowdensity.400_evts.event.root")
     //const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
-    //const char* MainFile="/star/data22/ITTF/EvalData/MCNtuple/muon_100_neg.event.root")
-    
-    //const char* MainFile = "/direct/star+rcf/test/dev/trs_redhat61/Mon/year_2001/hc_highdensity/hc_highdensity.16_evts.geant.root")
-    
-    //This file points to 110 events from mevsim (homebrew had. cocktail)
-    //const char* MainFile="/star/data22/ITTF/data/mevsim/10_9_01/*.event.root")
-    
-    //This file points to a nightly low density hadronic cocktail reconstruction.
-    //const char* MainFile="/star/rcf/test/dev/trs_redhat61/Tue/year_2001/hc_lowdensity/*.event.root")
-    
     //This file points to 5 muons /event
     //const char* MainFile="/star/data22/ITTF/EvalData/MCNtuple/muon_100_neg.event.root")
-    
-    //This file points to 110 events from mevsim (homebrew had. cocktail)
-    //const char* MainFile="/star/data22/ITTF/data/mevsim/10_9_01/*.event.root")
-    
-    //This file points to a nightly low density hadronic cocktail reconstruction.
-    //const char* MainFile="/star/rcf/test/dev/trs_redhat61/Tue/year_2001/hc_lowdensity/*.event.root")
     
 {
     //bool optimized = true;
@@ -174,12 +161,14 @@ void RunStiMaker(Int_t nevents=1,
     //Set Local Track Seed Finder (LTSF) run-time values
     stiIO->setLTSFZWindow(5.);
     stiIO->setLTSFYWindow(2.);
-    stiIO->setLTSFSeedLength(4);
-    
+    stiIO->setLTSFSeedLength(2);
+
+    stiIO->setLTSFDoHelixFit(true);
     stiIO->setLTSFExtrapYWindow(1.);
     stiIO->setLTSFExtrapZWindow(2.);
     stiIO->setLTSFExtrapMaxSkipped(3);
-    stiIO->setLTSFExtrapLength(3);
+    stiIO->setLTSFExtrapMinLength(5);
+    stiIO->setLTSFExtrapMaxLength(10);
     
     stiIO->setLTSFUseVertex(true);
     
@@ -189,7 +178,7 @@ void RunStiMaker(Int_t nevents=1,
     }
     //Add padrows;
     //for (unsigned int padrow=1; padrow<=45; ++padrow) {
-    for (unsigned int padrow=15; padrow<=45; padrow+=2) {
+    for (unsigned int padrow=15; padrow<=45; padrow+=1) {
 	stiIO->addLTSFPadrow(padrow);
     }
     

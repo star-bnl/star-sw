@@ -48,13 +48,13 @@ StiDetectorContainer::StiDetectorContainer()
     : mroot(0), mregion(0), mLeafIt(0),
       mMessenger( *Messenger::instance(MessageType::kDetectorMessage) )
 {
-    mMessenger <<"StiDetectorContainer::StiDetectorContainer()"<<endl;
+    cout <<"StiDetectorContainer::StiDetectorContainer()"<<endl;
     sinstance = this;
 }
 
 StiDetectorContainer::~StiDetectorContainer()
 {
-    mMessenger <<"StiDetectorContainer::~StiDetectorContainer()"<<endl;
+    cout <<"StiDetectorContainer::~StiDetectorContainer()"<<endl;
     if (mLeafIt) {
 	delete mLeafIt;
 	mLeafIt=0;
@@ -67,8 +67,12 @@ void StiDetectorContainer::setToDetector(double radius)
     theKey.key = radius;
     mradial_it = gFindClosestOrderKey(mregion->begin(), mregion->end(), theKey);
     if (mphi_it == mregion->end()) {
+	
+#ifdef DEBUG
 	mMessenger <<"StiDetectorContainer::setToDetector(double)\tError:\t";
 	mMessenger <<"Find radius failed"<<endl;
+#endif
+	
 	mradial_it = mregion->begin();
     }
     mphi_it = (*mradial_it)->begin();
@@ -89,8 +93,12 @@ void StiDetectorContainer::setToDetector(double radius, double angle)
     mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
 				   (*mradial_it)->end(), theKey);
     if (mphi_it == (*mradial_it)->end()) {
+
+#ifdef DEBUG
 	mMessenger <<"StiDetectorContainer::setToDetector(double, double)\tError:\t";
 	mMessenger <<"Find Phi failed"<<endl;
+#endif
+	
 	mphi_it = (*mradial_it)->begin();
     }
 }
@@ -259,7 +267,7 @@ StiDetectorContainer::buildDetectors(StiObjectFactoryInterface<StiDetectorNode>*
     mySameName.mname = "midrapidity";
     data_node_vec::iterator where = find_if(mroot->begin(), mroot->end(), mySameName);
     if (where==mroot->end()) {
-	mMessenger <<"Error:\tmidrapidity region not found"<<endl;
+	cout <<"Error:\tmidrapidity region not found"<<endl;
     }
     //Find leaves
     mLeafIt = new StiCompositeLeafIterator<data_t>(mroot);

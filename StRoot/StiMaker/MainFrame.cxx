@@ -2256,17 +2256,30 @@ void LocalSeedFinderIO::makeNumberEntries()
     fLabel.push_back( new TGLabel(fF.back(), "Largest Gap During Extrapolation") );
     fF.back()->AddFrame(fLabel.back(), fL2);
 
-    //Extrapolation Length
+    //Min Extrapolation Length
     fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
     fF1->AddFrame(fF.back(), fL2);
-    fNumericEntries.push_back( NamedNumberEntry("ExtrapLength",
+    fNumericEntries.push_back( NamedNumberEntry("ExtrapMinLength",
 						new TGNumberEntry( fF.back() ) ) );
-    fNumericEntries.back().second->SetNumber( broker->ltsfExtrapLength() );
+    fNumericEntries.back().second->SetNumber( broker->ltsfExtrapMinLength() );
     fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
     fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 45);
     fNumericEntries.back().second->Associate(this);
     fF.back()->AddFrame(fNumericEntries.back().second, fL2);
-    fLabel.push_back( new TGLabel(fF.back(), "Length of Extrapolation") );
+    fLabel.push_back( new TGLabel(fF.back(), "Min. Length of Extrapolation") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //MaxExtrapolation Length
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("ExtrapMaxLength",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->ltsfExtrapMaxLength() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 45);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Max. Length of Extrapolation") );
     fF.back()->AddFrame(fLabel.back(), fL2);
 
     //Add a toggle to include the vertex
@@ -2356,8 +2369,11 @@ void LocalSeedFinderIO::SetLimits()
 	else if (name=="ExtrapMaxSkipped") {
 	    broker->setLTSFExtrapMaxSkipped( (*it).second->GetNumber() );
 	}
-	else if (name=="ExtrapLength") {
-	    broker->setLTSFExtrapLength( (*it).second->GetNumber() );
+	else if (name=="ExtrapMinLength") {
+	    broker->setLTSFExtrapMinLength( (*it).second->GetNumber() );
+	}
+	else if (name=="ExtrapMaxLength") {
+	    broker->setLTSFExtrapMaxLength( (*it).second->GetNumber() );
 	}
 	else {
 	    cout <<"LocalSeedFinderIO::SetLimits(). ERROR:\t"

@@ -82,9 +82,12 @@ public:
     
     virtual void setLTSFExtrapMaxSkipped(unsigned int) = 0;
     virtual unsigned int ltsfExtrapMaxSkipped() const = 0;
+
+    virtual void setLTSFExtrapMinLength(unsigned int) = 0;
+    virtual unsigned int ltsfExtrapMinLength() const = 0;
     
-    virtual void setLTSFExtrapLength(unsigned int) = 0;
-    virtual unsigned int ltsfExtrapLength() const = 0;
+    virtual void setLTSFExtrapMaxLength(unsigned int) = 0;
+    virtual unsigned int ltsfExtrapMaxLength() const = 0;
     
     virtual void setLTSFUseVertex(bool) = 0;
     virtual bool ltsfUseVertex() const = 0;
@@ -171,7 +174,8 @@ inline ostream& operator<<(ostream& os, const StiIOBroker& b)
 	
        <<"ltsfExtrapZWindow():\t"<<b.ltsfExtrapZWindow()<<endl
        <<"ltsfExtrapYWindow():\t"<<b.ltsfExtrapYWindow()<<endl
-       <<"ltsfExtrapLength():\t"<<b.ltsfExtrapLength()<<endl	
+       <<"ltsfExtrapMinLength():\t"<<b.ltsfExtrapMinLength()<<endl	
+       <<"ltsfExtrapMaxLength():\t"<<b.ltsfExtrapMaxLength()<<endl	
        <<"ltsfExtrapMaxSkipped():\t"<<b.ltsfExtrapMaxSkipped()<<endl
 	
        <<"ltsfUseVertex():\t"<<b.ltsfUseVertex()<<endl

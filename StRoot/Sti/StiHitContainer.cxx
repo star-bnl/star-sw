@@ -75,15 +75,15 @@ void StiHitContainer::kill()
 StiHitContainer::StiHitContainer()
     : mMessenger(*(Messenger::instance(MessageType::kHitMessage)))
 {
-    mMessenger <<"StiHitContainer::StiHitContainer()"<<endl;
+    cout <<"StiHitContainer::StiHitContainer()"<<endl;
     mminpoint = new StiHit();
     mmaxpoint = new StiHit();
-    mMessenger <<"\tLeaving StiHitContainer()"<<endl;
+    //mMessenger <<"\tLeaving StiHitContainer()"<<endl;
 }
 
 StiHitContainer::~StiHitContainer()
 {
-    mMessenger <<"StiHitContainer::~StiHitContainer()"<<endl;
+    cout <<"StiHitContainer::~StiHitContainer()"<<endl;
     delete mminpoint;
     mminpoint=0;
     delete mmaxpoint;
@@ -333,16 +333,21 @@ void StiHitContainer::sortHits()
 void StiHitContainer::partitionUsedHits()
 {
     hitmap::iterator it;
-    Messenger& msgr = *(Messenger::instance(MessageType::kHitMessage));
-    
+
     for (it=mmap.begin(); it!=mmap.end(); ++it) {
 	hitvector& tempvec = (*it).second.theHitVec;
-	msgr <<"-- Hits before partition --"<<endl;
-	msgr <<(*it).second.theHitVec<<endl;
+#ifdef DEBUG
+	mMessenger <<"-- Hits before partition --"<<endl;
+	mMessenger <<(*it).second.theHitVec<<endl;
+#endif
 	(*it).second.theEffectiveEnd =
 	    stable_partition(tempvec.begin(), (*it).second.theEffectiveEnd, StiHitIsUsed() );
-	msgr <<"-- Hits after partition --"<<endl;
-	msgr <<(*it).second.theHitVec<<endl;
+	
+#ifdef DEBUG
+	mMessenger <<"-- Hits after partition --"<<endl;
+	mMessenger <<(*it).second.theHitVec<<endl;
+#endif
+
     }
 }
 

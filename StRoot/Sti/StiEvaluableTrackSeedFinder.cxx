@@ -48,9 +48,9 @@ StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(StAssociationMaker* ass
       mIOBroker(StiIOBroker::instance()), mSubject(StiIOBroker::instance()),
       mLowerBound(0), mMaxHits(0)
 {
-    mMessenger <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder()"<<endl;
+    cout <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder()"<<endl;
     if (!assoc) {
-	mMessenger <<"\tERROR:\tAssociationMaker==0.  Undefined Behavior"<<endl;
+	cout <<"\tERROR:\tAssociationMaker==0.  Undefined Behavior"<<endl;
     }
 
     mSubject->attach(this);
@@ -61,7 +61,7 @@ StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(StAssociationMaker* ass
 
 StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()
 {
-    mMessenger <<"StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()"<<endl;
+    cout <<"StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()"<<endl;
     if (mTpcHitFilter) {
 	delete mTpcHitFilter;
 	mTpcHitFilter=0;
@@ -88,12 +88,14 @@ void StiEvaluableTrackSeedFinder::setEvent(StMcEvent* mcevt)
 {
     mMcEvent = mcevt;
     if (mcevt==0) {
-	mMessenger <<"StiEvaluableTrackSeedFinder::setEvent(). ERROR:\tmcEvent==0"<<endl;
+	cout <<"StiEvaluableTrackSeedFinder::setEvent(). ERROR:\tmcEvent==0"<<endl;
 	return;
     }
 
     //Get StMcTrack list from StMcEvent
+#ifdef DEBUG
     mMessenger <<"StiEvaluableTrackSeedFinder::setEvent().  GetMcTrackContainer"<<endl;
+#endif
     StSPtrVecMcTrack& tracks = mMcEvent->tracks();
     mBeginMc = tracks.begin();
     mEndMc = tracks.end();
@@ -149,8 +151,10 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     
     mcTrackMapType* mcToStTrackMap = mAssociationMaker->mcTrackMap();
     if (!mcToStTrackMap) {
+#ifdef DEBUG
 	mMessenger <<"StiEvaluableTrackSeedFinder::makeTrack(StMcTrack*).  ERROR:\t";
 	mMessenger <<"McTrackMap==0"<<endl;
+#endif
 	return 0;
     }
     
@@ -196,7 +200,9 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
 	return 0;
     }
     else {
+#ifdef DEBUG
 	mMessenger <<"Match Found, commonTpcHits:\t"<<bestPair->commonTpcHits()<<endl;
+#endif
     }
     track->setStTrackPairInfo(bestPair);
 
@@ -208,8 +214,10 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     //the innermost point on the track seed
     StiKalmanTrackNode* node = track->getLastNode(); //Should return innermost
     if (!node) {
+#ifdef DEBUG
 	mMessenger <<"StiEvaluableTrackSeedFinder::makeTrack(). ERROR:\t";
 	mMessenger <<"node==0.  return;"<<endl;
+#endif
 	return 0;
     }
     else {
