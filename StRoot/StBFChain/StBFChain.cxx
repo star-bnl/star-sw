@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.448 2004/10/28 15:22:29 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.449 2004/10/28 17:30:51 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -144,6 +144,7 @@ Bfc_st BFC1[] = { // standard chains
   // Detector combined-chains
   {"SvtD"        ,""  ,"","SvtDb,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit,SvtVtx", "", "",
                                                                                "SVT chain for Data",kFALSE},
+  {"SsdD"        ,""  ,"","SsdDb", "", "",                                     "SSD chain for Data",kFALSE},
 
   // Year 1 chains
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
@@ -218,8 +219,8 @@ Bfc_st BFC1[] = { // standard chains
   {"Ev03"        ,""  ,"","","",""                                 ,"Turn on alternative V0 method",kFALSE},
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
   {"gstar"       ,""  ,"","geant,Simu","","" ,"gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE},
-  {"tdaq"        ,""  ,"","in,tpc_daq"                                                   ,"","","",kFALSE},
-  {"miniDAQ"     ,"tpc_raw","tpc","in,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
+  {"tdaq"        ,""  ,"","in,tpc_daq"                                                    ,"","","",kFALSE},
+  {"miniDAQ"     ,"tpc_raw","tpc","in,FieldOff,SD97,Eval"     ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
   {"fzin"        ,""  ,"","geant,Simu","" ,""                                 ,"read gstar fz-file",kFALSE},
   {"clearDAQCTB" ,""  ,"","","" ,""                             ,"clear DAQ CTB Hits for embedding",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
@@ -723,6 +724,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   // Detector combined-chains
   {"SvtD"        ,""  ,"","SvtDb,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit,SvtVtx", "", "",
                                                                                "SVT chain for Data",kFALSE},
+  {"SsdD"        ,""  ,"","SsdDb", "", "",                                     "SSD chain for Data",kFALSE},
 
   // Year 1 chains
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
@@ -785,7 +787,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   // *** ITTF chains *** Year4 drops standard chains and support ITTF chains only
   //     Main change tpc -> tpcI and Cdst -> Idst
   //
-  {"B2004"       ,""        ,"","ry2004,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
+  {"B2004"       ,""    ,"","ry2004,in,tpc_daq,tpcI,svt_daq,SvtD,SsdDb,Physics,Idst,l0,tags,Tree,evout","",""
                                                              ,"Base chain for 2004 ITTF (tpc+svt)",kFALSE},
 
   // Notes:
@@ -817,7 +819,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"ITTF"        ,""  ,"","Sti,svtDb",                                   "","","Turn on ITTF chain",kFALSE},
+  {"ITTF"        ,""  ,"","Sti,svtDb,ssdDb",                             "","","Turn on ITTF chain",kFALSE},
   {"SvtHitFilt"  ,"", "","",                                           "","","SVT Hit filter Maker",kFALSE},
   {"NoHits"      ,""  ,"",""                            ,"","","Don't write hits into Event.Branch",kFALSE},
   {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
@@ -825,8 +827,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Ev03"        ,""  ,"","","",""                                 ,"Turn on alternative V0 method",kFALSE},
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
   {"gstar"       ,""  ,"","geant,Simu","","" ,"gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE},
-  {"tdaq"        ,""  ,"","in,tpc_daq"                                                   ,"","","",kFALSE},
-  {"miniDAQ"     ,"tpc_raw","tpc","in,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
+  {"tdaq"        ,""  ,"","in,tpc_daq"                                                    ,"","","",kFALSE},
+  {"miniDAQ"     ,"tpc_raw","tpc","in,FieldOff,SD97,Eval"     ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
   {"fzin"        ,""  ,"","geant,Simu","" ,""                                 ,"read gstar fz-file",kFALSE},
   {"clearDAQCTB" ,""  ,"","","" ,""                             ,"clear DAQ CTB Hits for embedding",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
@@ -1529,8 +1531,8 @@ Int_t StBFChain::Instantiate()
 	    //pars->tpcInputFile     = "StRoot/StiMaker/macros/tpcInputFile.dat";
 	    //pars->ftpcInputFile    = "none";
 	    //pars->pixelInputFile   = "none";
-
-	    pars->useSvt=kTRUE;         // SVT used in Sti but not active. ??
+	    if (GetOption("SsdDB")) pars->useSsd=kTRUE; 
+	    pars->useSvt=kTRUE;         // SVT used in IT but not active. ??
 	                                // Pre-2001 data, will build only 1 ladder?
 	    pars->useSsd=kTRUE;         // use SSD in Sti
 
