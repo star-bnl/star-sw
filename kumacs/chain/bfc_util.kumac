@@ -80,9 +80,11 @@ macro bfc_init _
           exec read_table_from_file#read inev 
      (rgst)
      (rg2t) 
-      (svg) exec init_svg         | SVT initialization - geometry
+     (svg) exec init_svg#read
+           exec init_svg#svg_am
       (tpg) exec tpg_init#init    | TPC geometry initialization
-      (sss) exec svt_slow_sim#initialize | SVT initialization - slow simulation
+      (sss) exec init_sss
+            exec init_ssf
       (srs) 
             exec create_tables_svt#srs
             exec init_srs		| SVT initialization - fast simulation
@@ -110,13 +112,13 @@ macro bfc_init _
       (stk)
 	    exec create_tables_svt#sgr
             exec create_tables_svt#stk
-            exec init_stk
             exec init_sgr
+            exec init_stk
       (sgr) 
 	    exec create_tables_svt#sgr
             exec create_tables_svt#stk
-            exec init_stk
             exec init_sgr
+            exec init_stk
       (svm) 
             exec create_tables_global#svm
             exec init_svm
@@ -178,17 +180,21 @@ EOF:
             cd /dui
       (svg)    nextl 1
       (tpg)    nextl 1
-      (sss)    exec svt_slow_sim#process_event;
-      (srs)    exec svt_fast_sim#process_event; 
+      (sss)    exec run_sss
+               exec run_ssf
+      (srs)    exec run_srs
+               if (staf_status(1) .ne. stafcv_ok) then 
+                  message ' problem with run_srs'
+		endif
       (tfs)    
                exec tfs_run#run
                if (staf_status(1) .ne. stafcv_ok) then 
-                  message ' problem with tpc_fast_sim_process_event'
+                  message ' problem with tfs_run'
 	       endif
       (tss)    
                exec tss_run#run [tpc_sector_first] [tpc_sector_last]
                if (staf_status(1) .ne. stafcv_ok) then 
-                 message ' problem with tpc_slow_sim_process_event'
+                 message ' problem with tss_run'
                endif
       (tfc)    exec tfc_run#run_newtab [tpc_sector_first] [tpc_sector_last]
       (tcl)    
@@ -199,11 +205,14 @@ EOF:
                endif
     (tcl_e)    exec tte_run#run_tte_hit_match
       (emc)    exec run_ems_interface          
-      (stk)    exec svt_tracker#process_event_stk [ievent];
+      (stk)    exec run_stk#vtx
+               exec run_stk#run
                if (staf_status(1) .ne. stafcv_ok) then
                  nextl 1;
                endif
-      (sgr)    exec svt_tracker#process_event_sgr [ievent];
+      (sgr)    exec run_stk#vtx
+	       exec run_sgr#run
+	       exec run_stk#run
                if (staf_status(1) .ne. stafcv_ok) then
                  nextl 1;
                endif
