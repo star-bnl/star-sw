@@ -96,7 +96,7 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
   if(!pBankTRGD->test_CRC()) printf("CRC error: %s %d\n",__FILE__,__LINE__); 
   char *ptr=(char*)pBankTRGD; ptr+=40; /* skip header */ GS=(MarilynMonroe_t*)ptr;
   SanityCheck();
-  if(pBankTRGD->HerbSwap()<0) { printf("Swap error %s %d.\n"__FILE__,__LINE__); }
+  if(pBankTRGD->HerbSwap()<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
   printf("Trigger reader instantiated, distance to data = %d bytes.\n",pBankTRGP->theData.offset);
 }
 void TRG_Reader::dumpWordsToScreenInHexAndExit(int nwords) {
@@ -294,7 +294,7 @@ void Bank_TRGD::PrintDataCompact(FILE *ff) {
   FF "\n\n");
 
   PLINE
-  FF "\n%-20s0x%x (%d) bytes\tHeader:  '%c%c'\n","RAW.MWCdata:",GS->RAW[0].MWCdataBytes,GS->RAW[0].EMCdataBytes,GS->RAW[0].EMCdataBytes,GS->RAW[0].EMCdataHeader[0],GS->RAW[0].EMCdataHeader[1]);
+  FF "\n%-20s0x%x (%d) bytes\tHeader:  '%c%c'\n","RAW.MWCdata:",GS->RAW[0].EMCdataBytes,GS->RAW[0].EMCdataBytes,GS->RAW[0].EMCdataHeader[0],GS->RAW[0].EMCdataHeader[1]);
   PLINE
 
   FF "\n");
