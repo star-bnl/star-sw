@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.465 2005/02/10 02:52:37 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.466 2005/02/10 15:26:53 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -213,11 +213,11 @@ Bfc_st BFC1[] = { // standard chains
   //
   {"B2005"       ,""  ,"","ry2005,in,tpc_daq,tpc,svt_daq,SvtD,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                    ,"Base chain for 2005 (tpc+svt)",kFALSE},
-  {"P2005"       ,""     ,"","B2005,l3onl,fcf,ToF,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr3","",""
-                ,"Production chain for winter 2004/2005 data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
+  {"P2005"       ,""     ,"","B2005,l3onl,fcf,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr3","",""
+                     ,"Production chain for winter 2004/2005 data (+ l3, bcc/fpd, ftpc, emc, trgd)",kFALSE},
   {"pp2005"     ,""   ,"",
-   "B2005,fcf,ppOpt,VFppLMV5,-PreVtx,l3onl,ToF,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr3",
-                    "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
+   "B2005,fcf,ppOpt,VFppLMV5,-PreVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr3",
+                         "","","Production chain for 2005 pp data (+ l3, bcc/fpd, ftpc, emc, trgd)",kFALSE},
   
 
 
@@ -860,10 +860,10 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"B2005"       ,""        ,"","ry2005,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
                                                               ,"Base chain for 2005 ITTF (tpc+svt)",kFALSE},
   {"P2005"       ,"" ,"",
-                   "B2005,fcf,VFMinuit,l3onl,ToF,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr3",
+                   "B2005,fcf,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr3",
               "","","Production chain for 2004/2005 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
   {"pp2005"      ,"" ,"",
-   "B2005,fcf,ppOpt,VFppLMV5,CtbMatchVtx,l3onl,ToF,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr3",
+   "B2005,fcf,ppOpt,VFppLMV5,CtbMatchVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr3",
                 "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
 
