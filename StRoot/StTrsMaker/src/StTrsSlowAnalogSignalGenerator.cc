@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.6 1999/01/22 23:38:28 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.7 1999/02/10 20:55:16 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,9 +10,12 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
- * Revision 1.6  1999/01/22 23:38:28  lasiuk
- * set defaults for signal sampling and induced charge
+ * Revision 1.7  1999/02/10 20:55:16  lasiuk
+ * Feb 10,1999
  *
+ *
+ * Revision 1.12  1999/02/19 10:35:04  lasiuk
+ * Function prototype for StTpcCoordinateTransform
  *
  * Revision 1.11  1999/02/16 23:34:33  lasiuk
  * inline 2 functions
@@ -204,7 +207,7 @@ double StTrsSlowAnalogSignalGenerator::imageChargeIntegral(double xo, double yo,
 	double t62 = 5*sqrt(t27+t2+t48+(d*d)/100-2.*t49-2.*t28+t13);
 	double t66 = atan((50./d)*t29*t46*t31/t62);
 	double t74 = 0.1591549431*q*(-t19*xu*t23+t19*xo*t23+t37*xl*t9-t37*xo*t9)*t44
-    cout << "Got to StTrsSlowAnalogSignalGenerator::signalOnPad()" << endl;
+    cout << "StTrsSlowAnalogSignalGenerator::signalOnPad()" << endl;
 	
 	return t74;
 double StTrsSlowAnalogSignalGenerator::signalOnPad(double xo, double yo, double xl, double xu, double yl, double yu)
@@ -236,7 +239,7 @@ double StTrsSlowAnalogSignalGenerator::signalOnPad(double xo, double yo, double 
 // // 	    return gattiChargeIntegral(xo,yo,xl,xu,yl,yu);
 // 	    cout << "Gatti Distribution Not Implemented Yet!" << endl;
 // 	    exit(0);
- 	cout << "Wire Index: " << jj << '\n' << endl;
+//  	    break;
 // 	case dipole:
     StTpcCoordinateTransform transformer(mGeomDb, mSCDb);
  	//cout << "Wire Index: " << jj << endl;
@@ -630,10 +633,7 @@ double StTrsSlowAnalogSignalGenerator::signalSampler(double t, StTrsAnalogSignal
 	default:
 	    cerr << "Default Function Selected. ERROR!" << endl;
 	    exit(0);
-    cout << "Got to StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()" << endl;
-    //Initialize mSigma1 & 2
-    
-
+    cout << "StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()" << endl;
 	}
 }
 // 	    return asymmetricGaussianApproximateResponse(t, sig);
@@ -641,7 +641,6 @@ double StTrsSlowAnalogSignalGenerator::signalSampler(double t, StTrsAnalogSignal
 //     PR(mSigma2);
 //     PR(mSamplingFrequency);
 //     PR(mGain);
-    // ??sort?? ---> not necessary
 // 	    break;
 // 	case realShaper:
 // 	    return realShaperResponse(t,sig);
@@ -676,7 +675,8 @@ void StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()
 //  	    cout << "How many signals? " << endl;
 //  	    PR(continuousAnalogTimeSequence.size());
 //  	    for(int bbb=0; bbb<continuousAnalogTimeSequence.size(); bbb++)
-		//cout << itbin << " pulse Height: " << pulseHeight << endl;
+//  		cout << " " << bbb << " " << continuousAnalogTimeSequence[bbb] << endl;
+		    mTimeSequenceIterator++) {
 
 // 		if(pulseHeight > 1.e-5)
 // 		cout << itbin << " pulse Height: " << pulseHeight << " " << (*mTimeSequenceIterator) << endl;
@@ -691,9 +691,10 @@ void StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()
 		    if( fabs(timeBinT-mTimeSequenceIterator->time()) > 10.*mTimeBinWidth)
 			continue;
 //   		    cout << " tb " << itbin << " " << (*mTimeSequenceIterator) << endl;
-// 		if(mElectronicSignal.amplitude() !=0 ) {
-// 		    PR(mElectronicSignal);
-// 		    PR(mElectronicSignal.amplitude()/(.001*volt));
+			signalSampler(itbin, *mTimeSequenceIterator);
+//  		if(pulseHeight > 1.e-5)
+// 		cout << itbin << " pulse Height: " << pulseHeight << endl;
+
 // 		cout << itbin << " pulse Height: " << pulseHeight << '\t' << (pulseHeight/(.001*volt)) << endl;
 		// 
 		//pulseHeight += abs(gauss.shoot(0.,.1));

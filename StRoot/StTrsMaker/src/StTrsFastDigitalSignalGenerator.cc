@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.10 1999/02/10 04:24:50 lasiuk Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.11 1999/02/10 20:55:16 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
- * Revision 1.10  1999/02/10 04:24:50  lasiuk
- * sleep/unistd
+ * Revision 1.11  1999/02/10 20:55:16  lasiuk
+ * Feb 10,1999
+ *
+ * Revision 1.12  1999/02/12 01:26:37  lasiuk
+ * Limit debug output
  *
  * Revision 1.11  1999/02/10 20:55:16  lasiuk
  * Feb 10,1999
@@ -166,7 +169,7 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 	    // print it out:
 // 	    PR(digitalPadData.size());
 // 	    for(int ii=0; ii<digitalPadData.size(); ii++) {
-	    sleep(2);
+// 		cout << (ii) << '\t' << dec << (int)(digitalPadData[ii]) << '\t' << dec << (int)(digitalPadZeros[ii]) << endl;
 // 	    }
 	    
 	    currentPad.clear();
