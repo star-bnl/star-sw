@@ -202,9 +202,11 @@ private:
     TGPopupMenu *mIfcViewMenu;
     TGPopupMenu *mAllViewMenu;
     TGPopupMenu *mNavigateMenu;
-    
+
     TGPopupMenu *mTrackingMenu;
     TGPopupMenu* mNextStepMenu;
+
+    TGPopupMenu* mOptionsMenu;
     
     TGLayoutHints *fMenuBarLayout, *fMenuBarItemLayout, *fMenuBarHelpLayout;
     

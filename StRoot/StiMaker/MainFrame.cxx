@@ -125,11 +125,8 @@ ClassImp(MainFrame)
     fMenuFile->AddSeparator();
     fMenuFile->AddEntry("&Print", -1);
     fMenuFile->AddEntry("P&rint setup...", -1);
-    
-    fMenuFile->AddSeparator();
-    fMenuFile->AddEntry("Messenger Options", M_Messenger);
-    fMenuFile->AddSeparator();
 
+    fMenuFile->AddSeparator();
     fMenuFile->AddEntry("E&xit", M_FILE_EXIT);
     
     fMenuFile->DisableEntry(M_FILE_SAVEAS);
@@ -187,7 +184,10 @@ ClassImp(MainFrame)
     mTrackingMenu->AddEntry("Finish Event",M_Tracking_FinishEvent);
     mTrackingMenu->AddEntry("Event Step",M_Tracking_EventStep);
     mTrackingMenu->AddEntry("N-Event Step",M_Tracking_NEventStep);
-    
+
+    mOptionsMenu = new TGPopupMenu(fClient->GetRoot());
+    mOptionsMenu->AddEntry("Messenger Options", M_Messenger);
+
     fMenuHelp = new TGPopupMenu(fClient->GetRoot());
     fMenuHelp->AddEntry("&Contents", M_HELP_CONTENTS);
     fMenuHelp->AddEntry("&Search...", M_HELP_SEARCH);
@@ -207,11 +207,13 @@ ClassImp(MainFrame)
     mNavigateMenu->Associate(this);
     mNextStepMenu->Associate(this);
     mTrackingMenu->Associate(this);
+    mOptionsMenu->Associate(this);
     
     fMenuBar = new TGMenuBar(this, 1, 1, kHorizontalFrame);
     fMenuBar->AddPopup("&File", fMenuFile, fMenuBarItemLayout);
     fMenuBar->AddPopup("&Detector",fDetectorMenu, fMenuBarItemLayout);
     fMenuBar->AddPopup("&Tracking",mTrackingMenu, fMenuBarItemLayout);
+    fMenuBar->AddPopup("&Options",mOptionsMenu, fMenuBarItemLayout);
     fMenuBar->AddPopup("&Help", fMenuHelp, fMenuBarHelpLayout);
     
     AddFrame(fMenuBar, fMenuBarLayout);
@@ -333,6 +335,9 @@ MainFrame::~MainFrame()
     delete mTrackingMenu;
     mTrackingMenu=0;
 
+    delete mOptionsMenu;
+    mOptionsMenu=0;
+    
     delete mSvtViewMenu;
     mSvtViewMenu=0;
 
