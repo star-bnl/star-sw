@@ -9,12 +9,12 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.23 1999/11/27 16:29:34 fisyak Exp $
+# $Id: cons,v 1.24 1999/11/27 23:20:52 fisyak Exp $
 
 $ver_num = 1.7;
 $ver_rev = "";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.23 1999/11/27 16:29:34 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.24 1999/11/27 23:20:52 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -2644,11 +2644,14 @@ sub install {
     }
     my $lsp = $dir_prefix . $sp;
     return 1 if $tp eq $sp;
-    return 1 if eval { link($sp, $tp) };
+    my $readname = "";
+    if (-f $tp) {$readname = readlink $tp;}
+    return 1 if $readname eq $sp;
+#yf    return 1 if eval { link($sp, $tp) };
     return 1 if eval { symlink($lsp, $tp) };
     unlink($tp);
     futil::mkdir($tgt->{dir});
-    return 1 if eval { link($sp, $tp) };
+#yf    return 1 if eval { link($sp, $tp) };
     return 1 if eval { symlink($lsp, $tp) };
     futil::copy($sp, $tp);
 }
@@ -2852,6 +2855,7 @@ sub signature {
 	    # builds going on... In principle, we could use the source
 	    # path and only compute this once.
 	    my($sig) = srcsig($path);
+#	    my($sig) = srcsig($srcpath);
 	    sig::hash::out($file, $sig);
 	    return $file->{sig} = $sig;
 	} else {
@@ -2906,6 +2910,7 @@ sub collect {
 sub srcsig {
     my($path) = @_;
     $md5->reset();
+    if (-l $path) {my $readname = readlink $path; if (-r $readname)  {$path = $readname;}}
     open(FILE, $path) || die("$0: couldn't read $path ($!)\n");
     $md5->addfile(FILE);
     close(FILE);
