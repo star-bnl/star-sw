@@ -20,6 +20,8 @@ class StiRootDrawable : public StiDrawable
 public:
     StiRootDrawable();
     virtual ~StiRootDrawable();
+    virtual int  getColor() const;
+    virtual bool isVisible() const;
     virtual void setColor(int val);
     virtual void setStyle(int val);
     virtual void setSize(double val);

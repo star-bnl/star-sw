@@ -39,9 +39,6 @@ class EventDisplay : public Named, public Described, public TGMainFrame, public 
 EventDisplay(const string& name, const string & description, StiToolkit * toolkit, const TGWindow *p, UInt_t w, UInt_t h);
   virtual ~EventDisplay();
   void initialize();
-
-  void showCurrentDetector();
-
   void createMenu();
   void createCanvasFrame();
   void createFilters();

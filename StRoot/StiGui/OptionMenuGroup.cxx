@@ -147,7 +147,7 @@ void OptionMenuGroup::setGuiMcTrackFilterOptions()
 void OptionMenuGroup::setFinderTrackFilterOptions()
 {
   cout << "OptionMenuGroup::setFinderTrackFilterOptions() -I- Started" <<endl;
-  EditableParameters * pars = dynamic_cast<EditableParameters *>(getDisplay()->getMcTrackFilter());
+  EditableParameters * pars = dynamic_cast<EditableParameters *>(getToolkit()->getFinderTrackFilter());
   if (pars)
     new StiOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
   else
@@ -160,7 +160,7 @@ void OptionMenuGroup::setFinderTrackFilterOptions()
 void OptionMenuGroup::setMcTrackLoaderFilterOptions()
 {
   cout << "OptionMenuGroup::setFinderTrackFilterOptions() -I- Started" <<endl;
-  EditableParameters * pars = dynamic_cast<EditableParameters *>(getDisplay()->getMcTrackFilter());
+  EditableParameters * pars = dynamic_cast<EditableParameters *>(getToolkit()->getLoaderTrackFilter());
   if (pars)
     new StiOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
   else
