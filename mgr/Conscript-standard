@@ -25,7 +25,8 @@ my $SHARE   = $EXPORT;   # *** Will remove later. For now, old version have
 my $pkg;
 my $PKG;
 
-if ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/ ){
+if ( ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/) ||
+     ($Dir =~ m/StRoot.*Client\// && $Dir !~ /StRoot.*Client\/St/)  ){
     # Added 2003. In Construct, the logic is such
     # that the Pool directories have their sub-directories
     # set as targets (n sub-dir => n libraries). That's
@@ -33,7 +34,8 @@ if ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/ ){
     # here.
     $pkg = $Dir;
     $pkg =~ s/StRoot\///;
-    $pkg =~ s/Pool\//Pool/;
+    $pkg =~ s/Pool\//Pool/      if ($pkg =~ m/Pool/);
+    $pkg =~ s/Client\//Client/  if ($pkg =~ m/Client/);
     $PKG = $pkg;
     print "\t[".File::Basename::basename($Dir)."] (possible name clash) changed to $pkg\n";
 
@@ -186,7 +188,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    if (-f $file) {$LIBS .= " -l" . $py; last;}
 	}
 
-    } elsif ( $pkg =~ m/^StTrsMaker$/ ) {
+    } elsif ( $pkg =~ m/^StTrsMaker$/ ||
+	      $pkg =~ m/^StRTSClient$/ ) {
 	$CPPPATH =
 	    "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include"
 	    . $main::PATH_SEPARATOR . $env->{CPPPATH};

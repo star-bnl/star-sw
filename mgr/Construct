@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.133 2003/09/10 19:38:08 perev Exp $
+# $Id: Construct,v 1.134 2003/09/16 20:51:17 jeromel Exp $
 use Env;
 use lib $ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -324,9 +324,10 @@ foreach my $dir( "pams", "StRoot" ,"StPiD" ) {
                     next;
                 }
 
-                if ( ( $sub_dir =~ /^sim$/ || 
-		       $sub_dir =~ /^gen$/ ||
-		       $sub_dir =~ /Pool$/ ) ){
+                if ( ( $sub_dir =~ /^sim$/    || 
+		       $sub_dir =~ /^gen$/    ||
+		       $sub_dir =~ /Pool$/    ||
+		       $sub_dir =~ /Client$/ ) ){
                     if ( $SKIP_DIRS && $SKIP_DIRS =~ $subsub_dir ) {
                         print "skip dir: $subsub_dir \t=> $SKIP_DIRS\n";
                         next;
@@ -337,7 +338,8 @@ foreach my $dir( "pams", "StRoot" ,"StPiD" ) {
                 }
             }
         }
-        if ( $sub_dir =~ /Pool$/ ) { next; }
+        if ( $sub_dir =~ /Pool$/ )   { next; }
+        if ( $sub_dir =~ /Client$/ ) { next; }
         push @subdirs, $sub_DIR;
         print "================== add $sub_DIR\n" if ($param::debug);
     }
