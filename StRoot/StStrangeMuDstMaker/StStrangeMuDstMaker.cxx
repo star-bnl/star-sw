@@ -166,6 +166,14 @@ void StStrangeMuDstMaker::InitReadDst() {
       cuts->UnknownCuts();
     }
   }
+
+  if( Debug() ) {
+    TObjArray *listOfBranches = tree->GetListOfBranches();
+    for( Int_t i=0; i<tree->GetNbranches(); i++) {
+      const char* n = ((TBranch*) listOfBranches->At(i))->GetName();
+      gMessMgr->Debug() << "Branch " << n << " Status = " << tree->GetBranchStatus(n) << endm;
+    }
+  }
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::InitCreateDst() {
@@ -528,6 +536,7 @@ void StStrangeMuDstMaker::SetRead(const char* eFile, char* treeName) {
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::SetRead(StFile* eFiles, char* treeName) {
+  rw = StrangeRead;
   while (!(eFiles->GetNextBundle()))
     SetRead(eFiles->GetFileName(0),treeName);
 }
@@ -644,8 +653,11 @@ char* StStrangeMuDstMaker::GetFile() const {
 }       
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.24 2003/03/20 00:26:05 jeromel Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.25 2003/05/14 00:12:41 jones Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.25  2003/05/14 00:12:41  jones
+// Stops if StFile input file doesn't exist. Added some debugging info on branch status
+//
 // Revision 3.24  2003/03/20 00:26:05  jeromel
 // Logic correction ; can't call a method if no instance
 //
