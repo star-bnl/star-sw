@@ -1,5 +1,8 @@
-// $Id: Root2XDF.C,v 1.6 2000/05/09 19:37:51 kathy Exp $
+// $Id: Root2XDF.C,v 1.7 2000/05/17 21:12:07 fine Exp $
 // $Log: Root2XDF.C,v $
+// Revision 1.7  2000/05/17 21:12:07  fine
+// It was confused by the brand-mew Cint. Adjusted to make it happy
+//
 // Revision 1.6  2000/05/09 19:37:51  kathy
 // update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
 //
@@ -93,7 +96,7 @@ void Root2XDF(
    " events have been written out" << endl << endl; 
     TString lsOut = "ls -l ";
     lsOut += xdfOut;
-    gSystem->Exec(lsOut);
+    gSystem->Exec(lsOut.Data());
     cout << endl;
    cout   << " You may try to check this file with ROOT as follows: " << endl
           << " root.exe \'XDFBrowser.C(\""<<  xdfOut.Data() << "\")\'" << endl << endl;
