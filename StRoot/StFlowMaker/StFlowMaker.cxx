@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.98 2004/12/17 22:33:16 aihong Exp $
+// $Id: StFlowMaker.cxx,v 1.99 2004/12/21 17:06:12 aihong Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -222,7 +222,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.98 2004/12/17 22:33:16 aihong Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.99 2004/12/21 17:06:12 aihong Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -2003,6 +2003,26 @@ Int_t StFlowMaker::InitPicoEventRead() {
   
   for (Int_t ilist = 0;  ilist < pPicoFileList->GetNBundles(); ilist++) {
     pPicoFileList->GetNextBundle();
+
+    TFile dummyFile(pPicoFileList->GetFileName(0),"READ");
+
+    if (!(dummyFile.IsOpen())) {
+      gMessMgr->Info() <<pPicoFileList->GetFileName(0)<<" open failed ! not chained"<<endm;
+      continue;   
+    }
+
+    if (dummyFile.IsZombie()) {
+      gMessMgr->Info() <<"  sth. very wrong (overwritten, invalid) with "<<pPicoFileList->GetFileName(0)<<", not chained "<<endm;
+      continue;   
+    }
+
+    if (dummyFile.TestBit(1024)) { 
+      gMessMgr->Info() <<"  revocer procedure applied to "<<pPicoFileList->GetFileName(0)<<", maybe useful but still not chained for flow analyses"<<endm;
+      continue;   
+    }
+
+
+
     if (Debug()) gMessMgr->Info() << " doFlowEvents -  input fileList = " 
 				  << pPicoFileList->GetFileName(0) << endm;
     pPicoChain->Add(pPicoFileList->GetFileName(0));
@@ -2033,6 +2053,27 @@ Int_t StFlowMaker::InitMuEventRead() {
   
   for (Int_t ilist = 0;  ilist < pMuFileList->GetNBundles(); ilist++) {
     pMuFileList->GetNextBundle();
+
+
+
+    TFile dummyFile(pMuFileList->GetFileName(0),"READ");
+
+    if (!(dummyFile.IsOpen())) {
+      gMessMgr->Info() <<pMuFileList->GetFileName(0)<<" open failed ! not chained"<<endm;
+      continue;   
+    }
+
+    if (dummyFile.IsZombie()) {
+      gMessMgr->Info() <<"  sth. very wrong (overwritten, invalid) with "<<pMuFileList->GetFileName(0)<<", not chained "<<endm;
+      continue;   
+    }
+
+    if (dummyFile.TestBit(1024)) { 
+      gMessMgr->Info() <<"  revocer procedure applied to "<<pMuFileList->GetFileName(0)<<", maybe useful but still not chained for flow analyses"<<endm;
+      continue;   
+    }
+
+
 
     //**************  this block is to remove files with # evts < 5
     // if there is only one event in a file, the job will crash
@@ -2110,6 +2151,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.99  2004/12/21 17:06:12  aihong
+// check corrupted files for MuDst and picoDst
+//
 // Revision 1.98  2004/12/17 22:33:16  aihong
 // add in full Psi weight for ZDC SMD and fix a few bugs, done by Gang
 //
