@@ -504,9 +504,28 @@ void tbrNewTbView(DS_DATASET_T *dsPtr) {
   PP"Function tbrNewTbView() in the table browser does not work yet.\n");
 
 }
+void UpdateUsageLog(void) {
+  FILE *gg,*ff; char line[50]; int len;
+  system("date   > UiR77xEe3T 2> /dev/null");
+  system("whoami > UiR77xEe3t 2> /dev/null");
+  ff=fopen("UiR77xEe3T","r"); if(ff!=NULL) {
+    if(fgets(line,48,ff)) {
+      len=strlen(line); line[len-1]='\0'; gg=fopen("/u2/ward/tbr.log","a");
+      if(gg!=NULL) { fprintf(gg,"%s ",line); fclose(gg); }
+    } fclose(ff);
+  }
+  ff=fopen("UiR77xEe3t","r"); if(ff!=NULL) {
+    if(fgets(line,48,ff)) {
+      gg=fopen("/u2/ward/tbr.log","a");
+      if(gg!=NULL) { fprintf(gg,"%s ",line); fclose(gg); }
+    } fclose(ff);
+  }
+  system("rm UiR77xEe3T 2> /dev/null"); system("rm UiR77xEe3t 2> /dev/null");
+}
 void tbrNewDSView(DS_DATASET_T **dsPtrs,long nDsPtr) {
   /* Must wait for return before calling this again, until port to C++. */
   int ii;
+  UpdateUsageLog();
   gAlreadyErr=0; gDone=0; gNumDatasetWindows=0; /* June 28 1995 */
   gIndent=INDENT_INIT; gNDs=0;
   Ose(); PP"%s",gTheBlurb); Ose();
