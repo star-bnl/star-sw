@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   08/01/03  
-// $Id: StFilterDialog.cxx,v 1.2 2003/01/28 23:10:47 fine Exp $
+// $Id: StFilterDialog.cxx,v 1.3 2003/02/26 23:50:22 fine Exp $
 
 #include "StFilterDialog.h"
 #include <assert.h>
@@ -40,8 +40,8 @@ static const float  DefsQQ[]={
    0};
 
 //_______________________________________________________________________________________
-StFilterDialog::StFilterDialog(const char *wName,const char **NamVal,const float *defs, float *vals,int *flagg)
-: QVBox()
+StFilterDialog::StFilterDialog(const char *wName,const char **NamVal,const float *defs, float *vals,int *flagg, bool *active)
+: QVBox(),fActive(active), fOn(0)
 {
   char cbuf[200];
   if (!wName) wName = "DefaultStFilterDialog";
@@ -78,13 +78,25 @@ StFilterDialog::StFilterDialog(const char *wName,const char **NamVal,const float
      {
         QPushButton *ok         = new QPushButton("OK",buttons);
         connect(ok,SIGNAL(clicked()),this,SLOT(Update()));
-
+        if (active) {
+           //  add activation button
+            fOn    = new QPushButton("ON",buttons);
+            fOn->setToggleButton(true);
+            connect(fOn,SIGNAL(clicked()),this,SLOT(Toggle()));
+            // Turn the button on
+            fOn->setOn(*active);
+            Toggle();
+         }
         QPushButton *setDefault = new QPushButton("Reset",buttons);
         connect(setDefault,SIGNAL(clicked()),this,SLOT(Reset()));
 
         QBoxLayout * l = new QHBoxLayout( buttons );
         l->addItem(new QSpacerItem(10,1));
         l->addWidget( ok );
+        if (fOn) {
+           l->addItem(new QSpacerItem(10,1));
+           l->addWidget( fOn );
+        }
         l->addItem(new QSpacerItem(10,1));
         l->addWidget( setDefault );
         l->addItem(new QSpacerItem(10,1));
@@ -104,6 +116,22 @@ void StFilterDialog::Reset()
     fTable->setText(irow,0,cbuf);
   }
   Show();
+}
+//_______________________________________________________________________________________
+void StFilterDialog::Toggle()   
+{
+   // Turn this filter on/off
+   if (fOn && fActive) {
+      if (fOn->isOn()) {
+         fOn->setText("ON");
+        *fActive = true;            // activate the filter
+         fTable->setEnabled(true);
+      } else {
+         fOn->setText("OFF");        
+        *fActive = false;           // disactivate the filter
+         fTable->setEnabled(false); // visualize the suspend state
+      }
+   }
 }
 //_______________________________________________________________________________________
 void StFilterDialog::Update()   
