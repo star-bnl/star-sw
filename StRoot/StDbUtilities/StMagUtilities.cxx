@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.7 2001/05/17 18:35:11 lasiuk Exp $
+ * $Id: StMagUtilities.cxx,v 1.8 2001/05/18 22:16:19 lasiuk Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.8  2001/05/18 22:16:19  lasiuk
+ * add ey component to the exb calculation (brian III)
+ *
  * Revision 1.7  2001/05/17 18:35:11  lasiuk
  * make changes to allow full transport (brian II)
  *
@@ -852,6 +855,13 @@ StThreeVectorD StMagUtilities::calculateDriftVelocity(StThreeVectorD r) {
     //
     double q = -1.;
 
+    //
+    // distortion field
+    //
+    double ey = (r.y()>0) ? (.1*(volt/centimeter)) : -.1*(volt/centimeter);
+    double rotAngle = 50.*degree;
+    StThreeVectorD addition(-1.*ey*sin(rotAngle), ey*cos(rotAngle), 0);
+    mDriftField = mtmpField + addition;
     //
     // wt = uB
     //
