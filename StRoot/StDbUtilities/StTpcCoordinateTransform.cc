@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.10 2000/04/05 13:58:13 hardtke Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.11 2000/04/05 20:00:19 hardtke Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.11  2000/04/05 20:00:19  hardtke
+ * check for physical sector number before getting t0 table
+ *
  * Revision 1.10  2000/04/05 13:58:13  hardtke
  * correct mistake in drift velocity units
  *
@@ -226,11 +229,16 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
 //       :gTpcDbPtr->PadPlaneGeometry()->innerSectorzOffSet() ;
 	mOuterSectorzOffset
 	:mInnerSectorzOffset;
-    double t0zoffset = 
-      gTpcDbPtr->DriftVelocity()*1e-6*   //cm/s -> cm/us
-      (gTpcDbPtr->T0(sector)->getT0(row,probablePad) *mTimeBinWidth);  
-      //t0 offset -- DH  27-Mar-00
-
+    double t0zoffset;
+    if (sector>=1&&sector<=24){
+     t0zoffset = 
+       gTpcDbPtr->DriftVelocity()*1e-6*   //cm/s -> cm/us
+       (gTpcDbPtr->T0(sector)->getT0(row,probablePad) *mTimeBinWidth);  
+       //t0 offset -- DH  27-Mar-00
+    }
+    else{
+     t0zoffset = 0;
+    }
     int tb = tBFromZ(a.position().z()+zoffset-t0zoffset);  
     b = StTpcPadCoordinate(sector, row, probablePad, tb);
 }
