@@ -29,7 +29,7 @@ class StGlobalTrack;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.2 1999/07/14 15:24:47 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.3 1999/07/14 16:59:41 fine Exp $";
  private: 
     TList         *m_HitCollector;     //!
     TList         *m_TrackCollector;   //!
@@ -76,9 +76,12 @@ class StEventDisplayMaker : public StMaker {
    virtual Int_t        HitsFilter(const StVecPtrTpcHit &hitPoints);
    virtual Int_t        GlobalTrackFilter(StGlobalTrack *globTrack);
    virtual Int_t        TrackFilter(StGlobalTrack *globTrack);
+   virtual void         TurnOn() { SetMode(); }  // *MENU*
+   virtual void         TurnOff(){ SetMode(1); } // *MENU*
+
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.2 1999/07/14 15:24:47 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.3 1999/07/14 16:59:41 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
 };
