@@ -16,6 +16,7 @@ public:
 
   StDb_tpcGainFactors(const char* name): StDbTableComponent(name),mstruct(0) {}; 
   StDb_tpcGainFactors(StDb_tpcGainFactors& c) : StDbTableComponent(c) {
+                                     mstruct=0;
                                      tpcGainFactors *a = c.getTable();
                                      if(a)mstruct=new tpcGainFactors(*a);};
 
