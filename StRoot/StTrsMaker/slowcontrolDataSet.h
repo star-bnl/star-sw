@@ -13,6 +13,13 @@ class slowcontrolDataSet : public St_DataSet {
     double innerSectorGatingGridV;
     double outerSectorAnodeVoltage;
     double outerSectorGatingGridV;
+    double innerSectorGasGain;
+    double innerSectorGasGainVzero;
+    double innerSectorGasGainb;
+
+    double outerSectorGasGain;
+    double outerSectorGasGainVzero;
+    double outerSectorGasGainb; 
     double hallPressure;
     double hallTemperature;
     ClassDef(slowcontrolDataSet,1) //
