@@ -85,8 +85,9 @@ void
 kam_topproject_agent_selectspec_()
 {
   char *agent = ku_gets(); /* name of project agent */
-
-  topproject_agent_selectspec(agent);
+  char *select; /*17jan98 = ku_gets(); selection specification */
+  
+  topproject_agent_selectspec(agent, select);
 }
  
 void 
@@ -112,16 +113,18 @@ void
 kam_topjoin_agent_selectspec_()
 {
   char *agent = ku_gets(); /* name of join agent */
+  char *select; /*17jan98 = ku_gets(); selection specification */
 
-  topjoin_agent_selectspec(agent);
+  topjoin_agent_selectspec(agent, select);
 }
  
 void 
 kam_topjoin_agent_whereclause_()
 {
   char *agent = ku_gets(); /* name of join agent */
+  char *where; /*17jan98 = ku_gets(); where clause */
 
-  topjoin_agent_whereclause(agent);
+  topjoin_agent_whereclause(agent, where);
 }
  
 void 
