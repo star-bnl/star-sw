@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofCell.h,v 2.5 2004/06/11 19:36:48 ullrich Exp $
+ * $Id: StTofCell.h,v 2.6 2004/06/14 23:54:38 jeromel Exp $
  *
  * Author: F. Geurts, May 2003
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofCell.h,v $
+ * Revision 2.6  2004/06/14 23:54:38  jeromel
+ * Corrected typo
+ *
  * Revision 2.5  2004/06/11 19:36:48  ullrich
  * Added implementation of zHit().
  *
@@ -183,7 +186,7 @@ StTofCell::matchFlag() const
 inline float
 StTofCell::zHit() const
 {
-  return mZHit;
+  return mZhit;
 }
 
 #endif
