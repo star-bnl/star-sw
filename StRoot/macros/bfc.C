@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.119 1999/11/15 23:46:41 fisyak Exp $
+// $Id: bfc.C,v 1.120 1999/11/18 21:02:22 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -21,7 +21,7 @@ void Load(){
   gSystem->Load("StUtilities");
   gSystem->Load("StChain");
   gSystem->Load("StBFChain");
-  if (!chain) delete chain;
+  if (chain) delete chain;
   chain = new StBFChain;   // Create the main chain object
   if (!chain) gSystem->Exit(1);
 }
