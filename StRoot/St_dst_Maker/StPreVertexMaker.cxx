@@ -1,5 +1,8 @@
-// $Id: StPreVertexMaker.cxx,v 1.3 2000/02/16 16:13:08 genevb Exp $
+// $Id: StPreVertexMaker.cxx,v 1.4 2000/02/16 16:18:20 genevb Exp $
 // $Log: StPreVertexMaker.cxx,v $
+// Revision 1.4  2000/02/16 16:18:20  genevb
+// Fixed typo in previous check-in
+//
 // Revision 1.3  2000/02/16 16:13:08  genevb
 // Correction to not call evr_am with <1 tracks
 //
@@ -74,7 +77,7 @@ Int_t StPreVertexMaker::Make(){
   if( !tptrack ) {
     gMessMgr->Warning() << "StPreVertexMaker: no tptrack. Exit without doing anything!" << endm;
     return kStWarn;    
-  } else if ( !(tptrack->GetNRows() ) {
+  } else if ( !(tptrack->GetNRows()) ) {
     gMessMgr->Warning() << "StPreVertexMaker: zero rows in tptrack. Exit without doing anything!" << endm;
     return kStWarn;    
   } else {
