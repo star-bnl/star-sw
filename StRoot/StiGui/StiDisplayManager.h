@@ -44,11 +44,13 @@ public:
     void setInvisible(const StiDrawable*);
     void setVisible(); //All
     void setVisible(const StiDrawable*);
+    void setSkeletonView();
 
     void setTpcVisible();
     void setTpcInvisible();
     void setSvtVisible();
     void setSvtInvisible();
+    void setIfcInvisible();
 
     //Utility
     void print() const;

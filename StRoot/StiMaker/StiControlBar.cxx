@@ -42,17 +42,6 @@ StiControlBar::~StiControlBar()
     cout <<"StiControlBar::~StiControlBar()"<<endl;
 }
 
-void StiControlBar::resetStiGuiForEvent()
-{
-    //cout <<"StiControlBar::resetStiGuiForEvent()"<<endl;
-    StiControlBar::setCurrentDetectorToDefault();
-    StiMaker::instance()->Clear();
-    StiDisplayManager::instance()->draw();
-    StiDisplayManager::instance()->update();
-    StiControlBar::showCurrentDetector();
-    //cout <<"\t Leaving StiControlBar::resetStiGuiForEvent()"<<endl;
-}
-
 void StiControlBar::doNextStiGuiAction()
 {
     //cout <<"StiControlBar::doNextStGuiAction()"<<endl;
@@ -108,6 +97,13 @@ void StiControlBar::setVisible()
 void StiControlBar::setInvisible()
 {
     StiDisplayManager::instance()->setInvisible();
+    StiDisplayManager::instance()->draw();
+    StiDisplayManager::instance()->update();
+}
+
+void StiControlBar::setSkeletonView()
+{
+    StiDisplayManager::instance()->setSkeletonView();
     StiDisplayManager::instance()->draw();
     StiDisplayManager::instance()->update();
 }
@@ -283,6 +279,7 @@ void StiControlBar::setCurrentDetectorToDefault()
 	return;
     }
     layer->setColor(1);
+    layer->setVisibility(false);
     //cout <<"\t Leaving StiControlBar::setCurrentDetectorToDefault()"<<endl;
 }
 
@@ -317,6 +314,7 @@ TControlBar* StiControlBar::makeControlBar()
     
     bar->AddButton("All Visible","StiControlBar::setVisible()","Set All Drawables to Visible State");
     bar->AddButton("All Invisible","StiControlBar::setInvisible()","Set All Drawables to Invisible State");
+    bar->AddButton("SkeletonView","StiControlBar::setSkeletonView()","Set Display to Skeleton View");
     
     bar->AddButton("Svt Visible","StiControlBar::setSvtVisible()","Set Svt Drawables to Visible State");    
     bar->AddButton("Svt Invisible","StiControlBar::setSvtInvisible()","Set Svt Drawables to Invisible State");
@@ -342,7 +340,6 @@ TControlBar* StiControlBar::makeControlBar()
 
     //Chain management
     bar->AddSeparator();
-    bar->AddButton("Reset", "StiControlBar::resetStiGuiForEvent()","Reset Sti For Next Event");
     bar->AddButton("Step",  "StiControlBar::doNextStiGuiAction()","Step Through Next Action");
     bar->AddButton("Event Step","StiControlBar::stepToNextEvent()","Step Through to Next Event");
     bar->AddButton("N-Event Step","StiControlBar::stepThroughNEvents()","Step Through N-Events");

@@ -183,6 +183,26 @@ void StiDisplayManager::addDrawable(StiDrawable* tempval)
     return;
 }
 
+void StiDisplayManager::setSkeletonView()
+{
+    setVisible();
+    setIfcInvisible();
+    for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
+	string::size_type where = (*it).first.find("Tpc");
+	if ( where != (*it).first.npos ) { //it's from tpc
+	    //now look for outermost padrow
+	    where = (*it).first.find("Padrow_45");
+	    if ( where != (*it).first.npos ) { //it's from padrow 45	    
+		(*it).second->setVisibility(true);
+	    }
+	    else {
+		(*it).second->setVisibility(false);
+	    }
+	}
+    }
+    return;
+}
+
 void StiDisplayManager::setSvtVisible()
 {
     for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
@@ -198,6 +218,17 @@ void StiDisplayManager::setSvtInvisible()
 {
     for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	string::size_type where = (*it).first.find("Svg");
+	if ( where != (*it).first.npos ) {
+	    (*it).second->setVisibility(false);
+	}
+    }
+    return;
+}
+
+void StiDisplayManager::setIfcInvisible()
+{
+    for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
+	string::size_type where = (*it).first.find("Ifc");
 	if ( where != (*it).first.npos ) {
 	    (*it).second->setVisibility(false);
 	}
