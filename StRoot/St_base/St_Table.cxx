@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.54 1999/06/25 01:35:53 fine Exp $ 
+// $Id: St_Table.cxx,v 1.55 1999/06/25 17:29:14 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.55  1999/06/25 17:29:14  fine
+// Some bugs with a new Streamer fixed
+//
 // Revision 1.54  1999/06/25 01:35:53  fine
 // New streamers for St_Tables
 //
@@ -1595,14 +1598,14 @@ Int_t St_Table::SetfN(Long_t len)
  if (nextCol->GetDimensions())                                   \
    R__b.ReadStaticArray((_NAME2_(type,_t) *)(row+nextCol->GetOffset()));    \
  else                                                            \
-   R__b << *(_NAME2_(type,_t) *)(row+nextCol->GetOffset());      \
+   R__b >> *(_NAME2_(type,_t) *)(row+nextCol->GetOffset());      \
  break
 
 #define StreamElementOut(type) case St_TableElementDescriptor::_NAME2_(k,type):          \
  if (nextCol->GetDimensions())                                   \
     R__b.WriteArray((_NAME2_(type,_t) *)(row+nextCol->GetOffset()), nextCol->GetSize()/sizeof(_NAME2_(type,_t))); \
  else                                                            \
-    R__b >> *(_NAME2_(type,_t) *)(row+nextCol->GetOffset());     \
+    R__b << *(_NAME2_(type,_t) *)(row+nextCol->GetOffset());     \
  break
 
 //______________________________________________________________________________
@@ -1616,8 +1619,8 @@ void St_Table::Streamer(TBuffer &R__b)
       Version_t R__v = R__b.ReadVersion(); if (R__v) { }
       St_Table::StreamerTable(R__b);
       if (*s_MaxIndex <= 0) return; 
+      char *row= s_Table;
       for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
-        char *row= s_Table;
         TIter nextColDescriptor(GetRowDescritors());
         St_TableElementDescriptor *nextCol = 0;
         while ( ( nextCol = (St_TableElementDescriptor *)nextColDescriptor() ) )
@@ -1643,9 +1646,8 @@ void St_Table::Streamer(TBuffer &R__b)
 //      R__b.WriteVersion(St_ev0_track2::IsA());
       St_Table::StreamerTable(R__b);
       if (*s_MaxIndex <= 0) return; 
-
+      char *row= s_Table;
       for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
-        char *row= s_Table;
         TIter nextColDescriptor(GetRowDescritors());
         St_TableElementDescriptor *nextCol = 0;
         while ( ( nextCol = (St_TableElementDescriptor *)nextColDescriptor() ) )

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableElementDescriptor.cxx,v 1.2 1999/05/18 20:08:46 fine Exp $
+// $Id: St_TableElementDescriptor.cxx,v 1.3 1999/06/25 17:29:31 fine Exp $
 // $Log: St_TableElementDescriptor.cxx,v $
+// Revision 1.3  1999/06/25 17:29:31  fine
+// Some bugs with a new Streamer fixed
+//
 // Revision 1.2  1999/05/18 20:08:46  fine
 // St_TAbleElementDescriptor class have been introduced
 //
@@ -106,7 +109,7 @@ void St_TableElementDescriptor::LearnTable(St_Table *parentTable, const Char_t *
       Int_t globalIndex = 0;
       if ( (dim = member->GetArrayDim()) ) {
       // Check dimensions
-        if (dim != m_Dimensions) {
+        if (m_Dimensions && dim != m_Dimensions) {
            Error("LearnTable","Wrong dimension");
            parentTable->Print();
            return;
@@ -116,6 +119,7 @@ void St_TableElementDescriptor::LearnTable(St_Table *parentTable, const Char_t *
            globalIndex *= member->GetMaxIndex(indx);
            globalIndex += indexArray[indx];
         } 
+        if (!m_Dimensions) m_Dimensions = dim;
       }
       m_Size   = memberType->Size();
       m_Offset = member->GetOffset() + memberType->Size() * globalIndex;
