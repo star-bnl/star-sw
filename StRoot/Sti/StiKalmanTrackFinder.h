@@ -47,7 +47,8 @@ public:
   /// Find all tracks of the currently loaded event
   virtual void findTracks(); 
   /// Find/extend the given track, in the given direction
-  virtual bool find(StiTrack *track, int direction);
+          bool find(StiTrack *track, int direction);
+          int  find(StiKalmanTrack *track, int direction,StiKalmanTrackNode *node,double &chi2sum);
   /// Find the next track 
   virtual StiTrack * findTrack(); 
   /// Extent all tracks to the given vertex
