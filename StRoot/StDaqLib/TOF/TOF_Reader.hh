@@ -1,10 +1,13 @@
 /***************************************************************************
-* $Id: TOF_Reader.hh,v 1.2 2001/07/13 21:12:34 geurts Exp $
+* $Id: TOF_Reader.hh,v 1.3 2001/09/28 18:45:43 llope Exp $
 * Author: Frank Geurts
 ***************************************************************************
 * Description:  TOF Event Reader
 ***************************************************************************
 * $Log: TOF_Reader.hh,v $
+* Revision 1.3  2001/09/28 18:45:43  llope
+* modified for compatibility w/ updated StTofMaker
+*
 * Revision 1.2  2001/07/13 21:12:34  geurts
 * changed type of A2D data in struct TofDATA to allow negative values
 *
@@ -128,7 +131,7 @@ struct TofDATA {
   unsigned int EventNumber; //Token number
   unsigned short AdcData[TOFP_NUM_ADC_CHANNELS];
   unsigned short TdcData[TOFP_NUM_TDC_CHANNELS];
-  short A2dData[TOFP_NUM_A2D_CHANNELS];
+           short A2dData[TOFP_NUM_A2D_CHANNELS];
   unsigned short ScaData[TOFP_NUM_SCA_CHANNELS];
 };
 
@@ -138,6 +141,8 @@ public:
   virtual ~StTofReaderInterface(){}
   virtual unsigned short GetAdcFromSlat(int)=0;
   virtual unsigned short GetTdcFromSlat(int)=0;
+  virtual          short GetTc(int)=0;
+  virtual unsigned short GetSc(int)=0;
   virtual unsigned int GetEventNumber()=0;
   // virtual void printRawData();
 };
@@ -155,6 +160,8 @@ public:
   ~TOF_Reader(){};
   unsigned short GetAdcFromSlat(int slatId);
   unsigned short GetTdcFromSlat(int slatId);
+           short GetTc(int chanId);
+  unsigned short GetSc(int chanId);
   unsigned int   GetEventNumber();  
   void printRawData();
 };
