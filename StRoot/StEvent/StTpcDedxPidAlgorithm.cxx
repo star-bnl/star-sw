@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.3 1999/12/02 16:35:34 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.4 1999/12/03 13:18:18 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
- * Revision 2.3  1999/12/02 16:35:34  ullrich
- * Added method to return the stored dE/dx traits
+ * Revision 2.4  1999/12/03 13:18:18  ullrich
+ * Fixed problem on Sun CC4.2 (dynamic_cast) and switched
+ * off cut on number of points.
  *
  * Revision 2.7  2000/04/20 16:47:31  ullrich
  * Check for null pointer added.
@@ -46,7 +47,7 @@ StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm()
 #include "StDedxPidTraits.h"
 #include "StTrackGeometry.h"
 
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.3 1999/12/02 16:35:34 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.4 1999/12/03 13:18:18 ullrich Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -55,15 +56,15 @@ StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     //  Add all particles we want to get
     //  checked in operator().
     //
-    //  vec[i]->method() might be needed.
+    mParticles.push_back(StPionMinus::instance());
     mParticles.push_back(StPionPlus::instance());
     mParticles.push_back(StKaonMinus::instance());
     mParticles.push_back(StKaonPlus::instance());
     mParticles.push_back(StProton::instance());
 }
-	const StDedxPidTraits *p = dynamic_cast<const StDedxPidTraits*>((StTrackPidTraits*)vec[i]);
+    //  the TPC and select the first we find. A check for
     //  vec[i]->method() might be needed later.
-	const StDedxPidTraits *p = dynamic_cast<const StDedxPidTraits*>(vec[i]);
+StParticleDefinition*
 #if defined(__SUNPRO_CC)
 {
     //
@@ -72,7 +73,7 @@ StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     //  the TPC and select the method
 	const StDedxPidTraits *p = dynamic_cast<StDedxPidTraits*>(vec[i]);
     mTraits = 0;
-    if (mTraits->numberOfPoints() < 5) return 0;
+        if (p && vec[i]->detector() == kTpcId) mTraits = p;
     for (unsigned int i=0; i<vec.size(); i++) {
 #if defined (__SUNPRO_CC) && __SUNPRO_CC < 0x500
         const StDedxPidTraits *p = dynamic_cast<StDedxPidTraits*>((StTrackPidTraits*)vec[i]);
