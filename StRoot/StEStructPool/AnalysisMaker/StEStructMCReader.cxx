@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMCReader.cxx,v 1.4 2004/03/05 23:48:11 chunhuih Exp $
+ * $Id: StEStructMCReader.cxx,v 1.5 2004/03/18 18:35:48 chunhuih Exp $
  *
  * Author: Chunhui Han
  *
@@ -13,7 +13,11 @@
  **********************************************************************
  *
  * $Log: StEStructMCReader.cxx,v $
+ * Revision 1.5  2004/03/18 18:35:48  chunhuih
+ * use const char * instead of char * for the constructor argument filelistfile.
+ *
  * Revision 1.4  2004/03/05 23:48:11  chunhuih
+ *
  * test the number of entries for the given chain: avoid integer overflow.
  * use GetEntries() instead of GetEntriesFast() for TChain.
  *
@@ -40,6 +44,7 @@
 #include "TH2.h"
 #include "TStyle.h"
 #include "TCanvas.h"
+#include <fstream>
 
 ClassImp(StEStructMCReader)
 
@@ -51,7 +56,7 @@ StEStructMCReader::StEStructMCReader(int nevents, TTree *tree, StEStructEventCut
   Init(tree);
 }
 
-StEStructMCReader::StEStructMCReader(int nevents, char *fileListFile, StEStructEventCuts *ecuts, StEStructTrackCuts *tcuts) : meventsToDo(nevents), meventCount(0), mloopIndex(0), mAmDone(false), mNentries(0), mECuts(ecuts), mTCuts(tcuts), mIPMAX(1000000) {
+StEStructMCReader::StEStructMCReader(int nevents, const char *fileListFile, StEStructEventCuts *ecuts, StEStructTrackCuts *tcuts) : meventsToDo(nevents), meventCount(0), mloopIndex(0), mAmDone(false), mNentries(0), mECuts(ecuts), mTCuts(tcuts), mIPMAX(1000000) {
   ifstream fin(fileListFile);
   char s[256];
   TChain *chain = new TChain("h999");
