@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.71 2003/10/01 21:51:31 jeromel Exp $
+// $Id: St_db_Maker.cxx,v 1.72 2003/10/06 04:05:33 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.72  2003/10/06 04:05:33  perev
+// deletes to be pleasant to Insure
+//
 // Revision 1.71  2003/10/01 21:51:31  jeromel
 // Adjust as well
 //
@@ -171,7 +174,11 @@ St_db_Maker::St_db_Maker(const char *name
    fMaxEntryTime = 0;
 }
 //_____________________________________________________________________________
-St_db_Maker::~St_db_Maker(){
+St_db_Maker::~St_db_Maker()
+{
+delete fDBBroker; fDBBroker =0;
+delete fDataBase; fDataBase =0;
+delete fHierarchy;fHierarchy=0;
 }
 //_____________________________________________________________________________
 Int_t St_db_Maker::InitRun(int runumber)
