@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.28 2004/04/29 03:34:49 perev Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.29 2004/06/04 11:05:26 jcs Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.29  2004/06/04 11:05:26  jcs
+// replaced StarDb/ftpc/fdepars/fdepar with StarDb/ftpc/ftpcdEdxPars
+//
 // Revision 1.28  2004/04/29 03:34:49  perev
 // minor cleanup
 //
@@ -128,7 +131,7 @@ extern "C" void gufld(float *, float *);
 
 ClassImp(StFtpcTrackingParams)
 
-class St_fde_fdepar;
+class St_ftpcdEdxPars;
 
 // Initialization of instance
 StFtpcTrackingParams* StFtpcTrackingParams::mInstance = 0;
@@ -219,7 +222,7 @@ StMagUtilities *StFtpcTrackingParams::MagField() { return mMagField;       }
 
 StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug,
 						     St_ftpcTrackingPars *trackPars,
-						     St_fde_fdepar *dEdxPars,
+						     St_ftpcdEdxPars *dEdxPars,
 						     St_ftpcDimensions *dimensions, 
 						     St_ftpcPadrowZ *padrow_z) {
   // makes new instance or returns old one if it exists already
@@ -273,7 +276,7 @@ StFtpcTrackingParams* StFtpcTrackingParams::Instance() {
 
 
 StFtpcTrackingParams::StFtpcTrackingParams(St_ftpcTrackingPars *trackPars,
-					   St_fde_fdepar *dEdxPars,
+					   St_ftpcdEdxPars *dEdxPars,
 					   St_ftpcDimensions *dimensions, 
 					   St_ftpcPadrowZ *zrow) 
   : mTpcToGlobalRotation(3, 3, 1), mGlobalToTpcRotation(3, 3, 1)
@@ -724,7 +727,7 @@ Int_t StFtpcTrackingParams::InitTrackingParams(ftpcTrackingPars_st *trackParsTab
 }
 
 
-Int_t StFtpcTrackingParams::InitdEdx(FDE_FDEPAR_ST *dEdxParsTable) {
+Int_t StFtpcTrackingParams::InitdEdx(ftpcdEdxPars_st *dEdxParsTable) {
   // Sets dEdx parameters
   
   if (dEdxParsTable) {
@@ -743,7 +746,7 @@ Int_t StFtpcTrackingParams::InitdEdx(FDE_FDEPAR_ST *dEdxParsTable) {
   }
   
   else {
-    gMessMgr->Message("No data in table class St_fde_fdepar.", "E", "OS");
+    gMessMgr->Message("No data in table class St_ftpcdEdxPars.", "E", "OS");
     assert(dEdxParsTable);
     
     return 0;

@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.60 2004/05/25 07:25:47 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.61 2004/06/04 11:04:15 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.61  2004/06/04 11:04:15  jcs
+// replaced StarDb/ftpc/fdepars/fdepar with StarDb/ftpc/ftpcdEdxPars
+//
 // Revision 1.60  2004/05/25 07:25:47  jcs
 // initialize StFtpcSoftwareMonitor*ftpcMon
 //
@@ -350,7 +353,7 @@ Int_t StFtpcTrackMaker::Init()
   // get tracking parameters from database
   StFtpcTrackingParams::Instance(Debug(),
   				 (St_ftpcTrackingPars *)ftpcPars("ftpcTrackingPars"),
-  				 (St_fde_fdepar *)ftpcPars("fdepars/fdepar"),
+  				 (St_ftpcdEdxPars *)ftpcPars("ftpcdEdxPars"),
   				 (St_ftpcDimensions *)ftpcGeometry("ftpcDimensions"), 
   				 (St_ftpcPadrowZ *)ftpcGeometry("ftpcPadrowZ"));
 
@@ -786,7 +789,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.60 2004/05/25 07:25:47 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.61 2004/06/04 11:04:15 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
