@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.11 2001/12/05 22:31:12 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.12 2001/12/06 17:50:08 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.12  2001/12/06 17:50:08  suaide
+// changes to save ADC without pedestal subtraction
+//
 // Revision 1.11  2001/12/05 22:31:12  suaide
 // Modifications to include SMD
 //
@@ -67,8 +70,11 @@ class StEmcADCtoEMaker : public StMaker
            
            Int_t             status[MAXDET][18000];
            Int_t             nChannels[MAXDET];
+           Float_t           ADCTemp[18000];
            
            Int_t             smdTimeBin[2][8];
+           Int_t             smdTimeBinTemp[18000];
+           Bool_t            kCalibTemp[MAXDET];
            
            StEmcCollection   *GetEmcCollectionFromDaq(TDataSet* daq);
            void              GetStatus(Int_t);
@@ -86,7 +92,7 @@ class StEmcADCtoEMaker : public StMaker
    virtual Int_t             Make();
    virtual Int_t             Finish();
            Bool_t            GetEmcEvent();
-           Bool_t            SubtractPedestal(Int_t);
+           Bool_t            CreateVector(Int_t);
            Bool_t            Calibrate(Int_t,Int_t*,Float_t*);
            Bool_t            FillHistograms(Int_t,Int_t,Float_t);
            Bool_t            FillStEvent();
