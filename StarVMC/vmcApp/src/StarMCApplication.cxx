@@ -1,5 +1,8 @@
-// $Id: StarMCApplication.cxx,v 1.4 2004/07/16 22:52:35 potekhin Exp $
+// $Id: StarMCApplication.cxx,v 1.5 2004/09/02 23:27:31 potekhin Exp $
 // $Log: StarMCApplication.cxx,v $
+// Revision 1.5  2004/09/02 23:27:31  potekhin
+// *** empty log message ***
+//
 // Revision 1.4  2004/07/16 22:52:35  potekhin
 // Incremental changes
 //
@@ -27,9 +30,8 @@
 ClassImp(StarMCApplication)
 
 //_____________________________________________________________________________
-  StarMCApplication::StarMCApplication(const char *name, const char *title,
-                                     FileMode fileMode) 
-    : TVirtualMCApplication(name,title),
+StarMCApplication::StarMCApplication(const char *name, const char *title,
+                                     FileMode fileMode)  : TVirtualMCApplication(name,title),
       _stack(0),
       _DetectorConstruction(),
       fFieldB(0),
@@ -43,7 +45,8 @@ ClassImp(StarMCApplication)
 
 
   // Create a user stack
-  _stack   = new StarStack(100); 
+  _stack   = new StarStack(10000);
+  //  _stack->SetDebug(3);
   
   // need a fresh container for the modules
   _modules = new TObjArray(0);
@@ -92,9 +95,10 @@ StarMCApplication::~StarMCApplication()
   delete gMC;
   gMC = 0;
 }
-
-
-
+//_______________________________________________________________________
+void StarMCApplication::SetInterest(const char* processName_) {
+  _stack->SetInterest(processName_);
+}
 //_______________________________________________________________________
 void StarMCApplication::SetGenerator(StarGenerator   *generator) {
   if(!_generator) _generator = generator;
@@ -167,6 +171,7 @@ void StarMCApplication::ConstructGeometry()
   StarDetector* d = (StarDetector*) it->Next();
 
   while(d) {
+    cout<<"*** "<<d->GetName()<<endl;
     d->CreateGeometry();
     d=(StarDetector*) it->Next();
   }
@@ -268,11 +273,10 @@ void StarMCApplication::GeneratePrimaries()
 }
 
 //_____________________________________________________________________________
-void StarMCApplication::BeginEvent() {    
-  // User actions at beginning of event
-  // ---
-  
-  // nothing to be done this example
+void StarMCApplication::BeginEvent() { 
+  cout<<"Begin Event"<<endl;
+  Hits()->Delete();   //  _stack->Print();  
+  Stack()->Reset();
 }
 
 //_____________________________________________________________________________
@@ -303,15 +307,13 @@ void StarMCApplication::Stepping() { // User actions at each step
     exit(-1);
   }
 
-  if(_display) { // prepare tracks to be shown
-  }
+  if(_display) { } // prepare tracks to be shown
 
 
-  if (! sv->IsSensitive()) return;       //  cout<<"volume id: "<<id<<" name "<<sv->GetName()<<endl;
+  if(!sv->IsSensitive()) return;       //  cout<<"volume id: "<<id<<" name "<<sv->GetName()<<endl;
 
   Double_t edep = gMC->Edep();
-
-  if (edep==0.) return;
+  if (edep==0.0) return;
 
   StarHit* newHit = new StarHit(); // = AddHit();
 
@@ -341,6 +343,10 @@ void StarMCApplication::PostTrack()
   // User actions after finishing of each track
   // ---
 
+  // cout<<"Stack current: "<<endl;//_stack->GetCurrentParticle()<<endl;
+
+
+
   // nothing to be done this example
 }
 
@@ -349,6 +355,8 @@ void StarMCApplication::FinishPrimary()
 {    
   // User actions after finishing of a primary track
   // ---
+
+  cout<<"Finished primary track"<<endl;
   
   // nothing to be done this example
 }
@@ -363,36 +371,19 @@ void StarMCApplication::FinishEvent()
   if (TString(gMC->GetName()) == "TGeant3") { gMC->Gdraw("WRLD", 90., 180.);
   }  
  
-  fRootManager.Fill();
+  //  fRootManager.Fill();
 
 
   cout<<"End Event"<<endl;
-  PrintHits();
+  //  PrintHits();
 
   if(_display) {
     _display->DrawVolume();
     _display->DrawHits(Hits());
     _display->Update();
-    cout<<"Continue";
-    TString foo;
-    cin>>foo;
-
   }
 
-  if(_finishEventCB) _finishEventCB();
-
-  // Clear hits: tbd?
-  Hits()->Delete();
-
-  //  _stack->Print();  
-  _stack->Reset();
-
-  if(_display) {
-
-    //    _display->DrawVolume();
-    //    _display->DrawHits(Hits());
-    //    _display->Update();
-  }
+  if(_finishEventCB) _finishEventCB(Hits());
 
 } 
 
@@ -410,10 +401,11 @@ void  StarMCApplication::ReadEvent(Int_t i) {
   // ---
   
   //  fTrackerSD.Register();
-  RegisterStack();
-  fRootManager.ReadEvent(i);
+  //  RegisterStack();
+  //  fRootManager.ReadEvent(i);
 
-  _stack->Print();  
+  //  cout<<"Read Event"<<endl;
+  //  _stack->Print();  
   //  fTrackerSD.Print();
 }  
 //_____________________________________________________________________________
@@ -423,6 +415,17 @@ void StarMCApplication::RunMC(Int_t nofEvents) {
 
   gMC->ProcessRun(nofEvents);
   FinishRun();
+}
+
+//_____________________________________________________________________________
+void StarMCApplication::Trig(void) {    
+// MC run.
+// ---
+  cout<<"Begin Trig"<<endl;
+  BeginEvent();
+  gMC->ProcessEvent();
+  FinishEvent();
+  cout<<"End Trig"<<endl;
 }
 
 //_____________________________________________________________________________
@@ -456,5 +459,72 @@ void StarMCApplication::PrintHits(void) {
   while(h) {
     h->Print();
     h=(StarHit*) it->Next();
+  }
+}
+//_____________________________________________________________________________
+void StarMCApplication::PrintKine(void) {
+  Stack()->PrintKine();
+}
+//_____________________________________________________________________________
+void StarMCApplication::PrintVertex(int n_) {
+
+  // Now do individual vertices
+  cout<<"Print Vertex"<<endl;
+
+  TObjArray*    vert=Vertices();
+
+  cout<<"number  parent"<<endl;
+  if(!vert) {
+    cout<<"No vertices found"<<endl;
+    return;
+  }
+
+  if(n_>=0) { // individual vertex
+    StarVertex* v = (StarVertex*) vert->At(n_);
+    v->Print();
+    return;  // done here
+  }
+
+  // Have to do all
+  TIterator*      it = vert->MakeIterator();
+  StarVertex*      v = (StarVertex*) it->Next();
+
+  while(v) {
+    v->Print();
+    v=(StarVertex*) it->Next();
+  }
+}
+//_____________________________________________________________________________
+void StarMCApplication::PrintParticle(int n_) {
+
+  // Now do individual vertices
+
+  TObjArray*    part=_stack->Kine();
+
+  if(!part) {
+    cout<<"No particles found in the event"<<endl;
+    return;
+  }
+
+
+  cout<<"id   origin  vertices"<<endl;
+
+  if(n_>=0) { // individual particle
+    StarParticle* p = (StarParticle*) part->At(n_);
+    if(!p) {
+      cout<<"No particle found at "<<n_<<endl;
+      return;
+    }
+    p->Print();
+    return;  // done here
+  }
+
+  // Have to do all
+  TIterator*      it = part->MakeIterator();
+  StarParticle*    p = (StarParticle*) it->Next();
+
+  while(p) {
+    p->Print();
+    p=(StarParticle*) it->Next();
   }
 }

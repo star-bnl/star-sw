@@ -1,4 +1,4 @@
-// $Id: tpcLinkDef.h,v 1.1 2004/07/12 20:15:51 potekhin Exp $
+// $Id: tpcLinkDef.h,v 1.2 2004/09/02 23:23:51 potekhin Exp $
 
 #ifdef __CINT__
 
@@ -8,6 +8,7 @@
  
 #pragma link C++ class StarTpc+;
 #pragma link C++ class TECW+;
+#pragma link C++ class TPRS+;
 
 #pragma link C++ enum   FileMode;
 
