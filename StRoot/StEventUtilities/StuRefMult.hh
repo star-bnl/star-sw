@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuRefMult.hh,v 1.3 2000/09/05 18:53:22 calderon Exp $
+ * $Id: StuRefMult.hh,v 1.4 2001/11/14 19:28:18 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez Aug 2000
  ***************************************************************************
@@ -17,6 +17,11 @@
  ***************************************************************************
  *
  * $Log: StuRefMult.hh,v $
+ * Revision 1.4  2001/11/14 19:28:18  calderon
+ * Made the functions take as argument a const StEvent&, as per Mike's request.
+ * It is actually better to do this, as the function does not change the StEvent
+ * object, and now the language reflects this.
+ *
  * Revision 1.3  2000/09/05 18:53:22  calderon
  * Added the functions:
  * 1) uncorrectedNumberOfPositivePrimaries
@@ -40,7 +45,7 @@
 
 #include "StEventTypes.h"
 inline unsigned int
-uncorrectedNumberOfNegativePrimaries(StEvent& evt)
+uncorrectedNumberOfNegativePrimaries(const StEvent& evt)
 {
     StPrimaryVertex* primVtx = evt.primaryVertex();
 
@@ -60,7 +65,7 @@ uncorrectedNumberOfNegativePrimaries(StEvent& evt)
     return countedTracks;
 }
 inline unsigned int
-uncorrectedNumberOfPositivePrimaries(StEvent& evt)
+uncorrectedNumberOfPositivePrimaries(const StEvent& evt)
 {
     StPrimaryVertex* primVtx = evt.primaryVertex();
 
@@ -80,7 +85,7 @@ uncorrectedNumberOfPositivePrimaries(StEvent& evt)
     return countedTracks;
 }
 inline unsigned int
-uncorrectedNumberOfPrimaries(StEvent& evt)
+uncorrectedNumberOfPrimaries(const StEvent& evt)
 {
     StPrimaryVertex* primVtx = evt.primaryVertex();
     
