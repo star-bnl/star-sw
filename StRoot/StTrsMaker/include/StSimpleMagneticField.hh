@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSimpleMagneticField.hh,v 1.1 1998/11/10 17:12:05 fisyak Exp $
+ * $Id: StSimpleMagneticField.hh,v 1.2 1999/01/20 16:38:56 lasiuk Exp $
  *
  * Author: Thomas Ullrich, May 1998 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSimpleMagneticField.hh,v $
- * Revision 1.1  1998/11/10 17:12:05  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/20 16:38:56  lasiuk
+ * add threevector capability
  *
  * Revision 1.1  1998/11/10 17:12:05  fisyak
  * Put Brian trs versin into StRoot
@@ -43,6 +43,7 @@ public:
     static StMagneticField* instance(const char* file);
     
     const StThreeVector<double>& at(const StGlobalCoordinate& gc) const;
+    const StThreeVector<double>& at(const StThreeVector<double>& v) const;
 
 private:
     StSimpleMagneticField();
@@ -73,6 +74,8 @@ StSimpleMagneticField::instance()
 }
 
 inline const StThreeVector<double>&
-StSimpleMagneticField::at(const StGlobalCoordinate&) const {return mB;}
+StSimpleMagneticField::at(const StGlobalCoordinate& gc) const {return mB;}
 
+inline const StThreeVector<double>&
+StSimpleMagneticField::at(const StThreeVector<double>& v) const {return mB;}
 #endif
