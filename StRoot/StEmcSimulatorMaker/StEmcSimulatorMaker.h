@@ -20,6 +20,7 @@
 class StMcEmcHitCollection;
 class StEmcCollection;
 class StEmcVirtualSimulator;
+class St_db_Maker;
 
 class StEmcSimulatorMaker : public StMaker {
 private:
@@ -27,6 +28,8 @@ private:
   UInt_t  mBEMC;            // Switch for BEMC; 0 => off; >0 => on
   UInt_t  mEEMC;            // Switch for EEMC; 0 => off; >0 => on
   UInt_t  mHistControl;     // Do histogramms (1) or no (0)
+  UInt_t  mDB;               // =0, no DB; >=1, using DB
+  St_db_Maker *mDbMaker;    //!
 
   StEmcGeom *mGeom[MAXDET]; //! Geometry 
   
@@ -80,18 +83,22 @@ public:
   StEmcCollection*      getEmcCollection() {return  mEmcCollection;}
   void                  clearStEventStaf() {mEmcCollection = 0;}
   void                  Browse(TBrowser* b); // StEvent staf will be visible in browser
-  void   pictureAllDetectors(Int_t print=0);          // *MENU* 
+
+  void   pictureAllDetectors(Int_t print=0);                          // *MENU* 
   void   pictureForDetector(Int_t det, Int_t logy=1, Int_t print=0);  // *MENU* 
+  void   pictureCompareDe(Int_t print=0);                             // *MENU* 
+  void   printSimulator(Int_t det=0);                                 // *MENU* 
+  void   printStatusTable(Int_t det=1, Int_t hist=0);                 // *MENU*
   //  void   print(const char *filename, Option_t *option) {if(mC1) mC1->Print(filename,option);}
+  TDataSet* getStatus(const Int_t ind, TDataSet* statusDB);
 
   void   compareOldSimulator();
-  void   pictureCompareDe(Int_t print=0);             // *MENU* 
 
   void   printmBEMC();
   void   setBEMC(UInt_t  key){mBEMC = key; if (Debug()) printmBEMC();}
   void   setHistControl(UInt_t key) {mHistControl = key;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.6 2002/06/03 23:35:11 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.7 2002/06/04 16:09:37 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcSimulatorMaker, 1)  // Simulation maker for BEMC and EEMC
 };
@@ -99,8 +106,11 @@ public:
 #endif
 //////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEmcSimulatorMaker.h,v 1.6 2002/06/03 23:35:11 pavlinov Exp $ 
+// $Id: StEmcSimulatorMaker.h,v 1.7 2002/06/04 16:09:37 pavlinov Exp $
 // $Log: StEmcSimulatorMaker.h,v $
+// Revision 1.7  2002/06/04 16:09:37  pavlinov
+// added option with DB(pedestal ans calibration  coefficients
+//
 // Revision 1.6  2002/06/03 23:35:11  pavlinov
 // Last correction without DB for ped and calib. coeff.
 //

@@ -9,7 +9,7 @@ controlEmcPmtSimulator_st row;
 St_controlEmcPmtSimulator *tableSet = new St_controlEmcPmtSimulator("Simulator",4);
 //
 memset(&row,0,tableSet->GetRowSize());
-    row.mode	 =          2; // 0->no conversion; 1->simple conversion; 2-> precise simulation ;
+    row.mode	 =          3; // 0->no conversion; 1->simple conversion; 2-> precise simulation ;
     row.maxAdc	 =       3500; // ADC bits ;
     row.maxEnergy	 =         60; // Max energy in BEMC tower (~60 GeV/c)            ;
     row.sfCoeff[0]	 =      14.69; // ;
@@ -18,9 +18,12 @@ memset(&row,0,tableSet->GetRowSize());
     row.depMip	 =     0.0198; // MIP deposit energy in Sc.layers at zero angle   ;
     row.npheMip	 =         63; // number of PHE for MIP at zero angle         ;
     row.typeOfPmt	 =          1; // ;
+    row.pedDistribution  = 0;   //  must be 0 for embedding 
+    row.pedMean          = 10.; // for 2001 year
+    row.pedRMS           = 2.;
 tableSet->AddAt(&row,0);
 memset(&row,0,tableSet->GetRowSize());
-    row.mode	 =          2; // 0->no conversion; 1->simple conversion; 2-> precise simulation ;
+    row.mode	 =          3; // 0->no conversion; 1->simple conversion; 2-> precise simulation ;
     row.maxAdc	 =        220; // ADC bits ;
     row.maxEnergy	 =          1; // Max energy in BEMC tower (~60 GeV/c)            ;
     row.sfCoeff[0]	 =      14.69; // ;
@@ -29,6 +32,9 @@ memset(&row,0,tableSet->GetRowSize());
     row.depMip	 =      0.002; // MIP deposit energy in Sc.layers at zero angle   ;
     row.npheMip	 =          6; // number of PHE for MIP at zero angle         ;
     row.typeOfPmt	 =          1; // ;
+    row.pedDistribution  = 0;
+    row.pedMean          = 10.; // for 2001 year (the same as for bemc)
+    row.pedRMS           = 2.;
 tableSet->AddAt(&row,1);
 memset(&row,0,tableSet->GetRowSize());
     row.mode	 =          1; // 0->no conversion; 1->simple conversion; 2-> precise simulation ;
@@ -40,6 +46,9 @@ memset(&row,0,tableSet->GetRowSize());
     row.depMip	 =          0; // MIP deposit energy in Sc.layers at zero angle   ;
     row.npheMip	 =          0; // number of PHE for MIP at zero angle         ;
     row.typeOfPmt	 =          0; // ;
+    row.pedDistribution  = 0;
+    row.pedMean          = 40.; // for 2001 year
+    row.pedRMS           = 4.;
 tableSet->AddAt(&row,2);
 memset(&row,0,tableSet->GetRowSize());
     row.mode	 =          1; // 0->no conversion; 1->simple conversion; 2-> precise simulation ;
@@ -51,6 +60,9 @@ memset(&row,0,tableSet->GetRowSize());
     row.depMip	 =          0; // MIP deposit energy in Sc.layers at zero angle   ;
     row.npheMip	 =          0; // number of PHE for MIP at zero angle         ;
     row.typeOfPmt	 =          0; // ;
+    row.pedDistribution  = 0;
+    row.pedMean          = 40.; // for 2001 year
+    row.pedRMS           = 4.;
 tableSet->AddAt(&row,3);
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;

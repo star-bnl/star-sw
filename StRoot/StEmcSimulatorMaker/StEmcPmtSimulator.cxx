@@ -33,7 +33,14 @@ Bool_t StEmcPmtSimulator::setControlDefault(UInt_t det=1)
                        <<mDetector<<endm;
       return kFALSE;
   }
+
+  mMode      = mControl[0].mode;
+  mTypeOfPmt = mControl[0].typeOfPmt;
+  mNpheMip   = mControl[0].npheMip;
+  mDepMip    = mControl[0].depMip;
+
   init();
+
   return kTRUE;
 }
 
@@ -42,15 +49,14 @@ void StEmcPmtSimulator::init()
   //
   // If mode has wrong value then switch to full simulation.
   //
-  if(mControl[0].mode<0 || mControl[0].mode>4) mControl[0].mode=3;
-  if(mControl[0].maxEnergy > 0.0){
-    mC1 = (Double_t)mControl[0].maxAdc / mControl[0].maxEnergy;
-    mC2 = (Double_t)(mControl[0].npheMip / mControl[0].depMip);
-    mC3 = (Double_t)((mControl[0].maxAdc    * mControl[0].depMip)/
-                     (mControl[0].maxEnergy * mControl[0].npheMip));
+  if(mMode<0 || mMode>4) mMode=3;
+  if(mMaxEnergy > 0.0){
+    mC1 = mMaxAdc  / mMaxEnergy;
+    mC2 = mNpheMip / mDepMip;
+    mC3 = (mMaxAdc  * mDepMip) / (mMaxEnergy * mNpheMip);
   }
-  if     (mControl[0].mode==3) mVer = 0; // full (slow) simulation;
-  else if(mControl[0].mode==4) mVer = 1; // fast (approximate) simulation;
+  if     (mMode==3) mVer = 0; // full (slow) simulation;
+  else if(mMode==4) mVer = 1; // fast (approximate) simulation;
 }
 
 void StEmcPmtSimulator::print()
@@ -59,11 +65,11 @@ void StEmcPmtSimulator::print()
 
   StEmcSimpleSimulator::print();
 
-  if(mControl[0].mode>=3){
+  if(mMode>=3){
     printf(" <I>  Addition infor for Pmt Simulator\n");
-    printf("     MIP deposit  energy   for eta      => %7.6f Gev\n",mControl[0].depMip);
-    printf("     Number of PHE for MIP for eta      => %7.1f\n",mControl[0].npheMip);
-    printf("     Type of PMT                        => %2i\n --\n",mControl[0].typeOfPmt);
+    printf("     MIP deposit  energy   for eta      => %7.6f Gev\n",mDepMip);
+    printf("     Number of PHE for MIP for eta      => %7.1f\n", mNpheMip);
+    printf("     Type of PMT                        => %2i\n --\n", mTypeOfPmt);
     printf("     Ideal calibration coefficient      => %8.3f\n", mC1);
     printf("     Number of PHE on one Gev           => %7.1f\n", mC2); 
     printf("     Coefficient for calculation a gain => %7.6f\n", mC3); 
@@ -78,35 +84,55 @@ Int_t StEmcPmtSimulator::getAdc(const Double_t de, const Double_t eta)
   static Int_t   nphe;
 
   mDe = de;
-  if     (mControl[0].mode==0 || mControl[0].mode==1){
+  if     (mMode==0 || mMode==1){
     mAdc = StEmcSimpleSimulator::getAdc(de,eta);
-  }
-  else if(mControl[0].mode==2 || mControl[0].mode==3){
+  } else if(mMode==2 || mMode==3){
   // 1./cosh(eta) = sin(theta)
-    mSinTheta  = 1./TMath::CosH(eta);
-    sf         = sampleFraction(eta);
-    amu        = de * mC2;              // Mean value of PHE
-    nphe       = mRandom.Poisson(amu);  // Number of primary electrons
-    gain       = mC3 * mSinTheta * sf;  // Must be check  !!
+     mSinTheta  = getSinTheta(eta);      // depend from mKeySet
+     sf         = sampleFraction(eta);
+     amu        = de * mC2;              // Mean value of PHE
+     nphe       = mRandom.Poisson(amu);  // Number of primary electrons
+     gain       = mC3 * mSinTheta * sf;
 
-    if(mControl[0].mode == 2){
-      mRadc = gain * (Float_t)nphe;
-    }
-    else{ // mode==3
-      mPmtSignal.setAllParameters(gain, adcped, gnoise);   // adcped and gnoise equal 0 now 
-      mRadc = (Float_t)mPmtSignal.getAdc(nphe, mVer);
-    }
-    checkAdc();
-  }
-  else gMessMgr->Warning()<<"StEmcSimulatorMaker => StEmcPmtSimulator::getAdc => mode is wrong "
-			  <<mControl[0].mode<<endm;
+     if(mMode == 2){
+        mRadc = gain * (Float_t)nphe;
+        if(mPedType) mRadc += getPedestal(mPedType, mPedMean, mPedRMS);
+     } else { // mode==3
+        if(mPedType) {
+	   adcped = mPedMean;
+           gnoise = mPedRMS;
+        } 
+        mPmtSignal.setAllParameters(gain, adcped, gnoise);   // adcped and gnoise equal 0 now 
+        mRadc = (Float_t)mPmtSignal.getAdc(nphe, mVer);
+     }
+     checkAdc();
+  } else gMessMgr->Warning()<<"StEmcSimulatorMaker => StEmcPmtSimulator::getAdc => mode is wrong "
+			  <<mMode<<endm;
 
   return mAdc;
 }
 
+Float_t  StEmcPmtSimulator::getEnergy()
+{
+  return StEmcSimpleSimulator::getEnergy();
+}
+
+void  StEmcPmtSimulator::setParameters
+(const Float_t calibCoeff,const UInt_t type, const Float_t pedMean, const Float_t pedRMS)
+{
+  StEmcSimpleSimulator::setParameters(calibCoeff, type, pedMean, pedRMS);
+  // see init(); mC1 - defined in simple simulator
+  mC2 = mNpheMip / mDepMip;
+  mC3 = (mMaxAdc  * mDepMip) / (mMaxEnergy * mNpheMip);
+}
+
+
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcPmtSimulator.cxx,v 1.2 2001/05/14 01:30:13 pavlinov Exp $
+//  $Id: StEmcPmtSimulator.cxx,v 1.3 2002/06/04 16:09:34 pavlinov Exp $
 //  $Log: StEmcPmtSimulator.cxx,v $
+//  Revision 1.3  2002/06/04 16:09:34  pavlinov
+//  added option with DB(pedestal ans calibration  coefficients
+//
 //  Revision 1.2  2001/05/14 01:30:13  pavlinov
 //  Cleanup
 //
