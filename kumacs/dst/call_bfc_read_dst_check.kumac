@@ -16,12 +16,12 @@
    domain='  ' _
    chain=' dstin dchkt ntup' _
    skip=0 _
-   no_events=90 _
-   input_data_file=/disk1/star/kathy/year2a_psc079_01_46evts_dst.xdf _
-   output_file=rcf011_08_87evts_h_dst _
-   log=rcf011_08_87evts_h_dst.log _
+   no_events=70 _
+   input_data_file=/disk1/star/kathy/rcf002_12_61evts_h_dst.xdf _
+   output_file=rcf002_12_61evts_h_dst _
+   log=rcf002_12_61evts_h_dst.log _
    nunit=21 _
-   nfile=rcf011_08_87evts_h_dst.ntup _
+   nfile=rcf002_12_61evts_h_dst.ntup _
    nid=111 _
    ntable=event/data/global/dst/event_summary
 
