@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.h,v 2.3 2000/11/07 14:12:47 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.h,v 2.4 2001/02/07 16:07:21 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.h,v $
+ * Revision 2.4  2001/02/07 16:07:21  lasiuk
+ * Charge sharing by ratio of local maximum implemented
+ * loadPixels(interface) removed
+ *
  * Revision 2.3  2000/11/07 14:12:47  lasiuk
  * init() information and
  * quadrant threshold cuts default is 200 ADC counts
@@ -62,9 +66,9 @@ using std::vector;
 using std::stack;
 #endif
 
+#include "StRrsMaker/StRichPadPlane.h"
 #include "StRrsMaker/StRichSinglePixel.h"
 #include "StRrsMaker/StRichSingleMCPixel.h"
-#include "StRrsMaker/StRichPadPlane.h"
 
 #include "StRichSimpleCluster.h"
 #include "StRichSimpleHit.h"
@@ -75,9 +79,7 @@ using std::stack;
 class StRrsReader;
 class StRichGeometryDb;
 class StRichCoordinateTransform;
-#ifdef NEVER
-class StRichReaderInterface;
-#endif
+
 // #ifndef ST_NO_TEMPLATE_DEF_ARGS
 // typedef stack<StRichSinglePixel*> PixelStack;
 // typedef vector<StRichCluster*>    ClusterVector;
@@ -108,10 +110,8 @@ public:
     // Load the pixels by either passing:
     // a) the interface to access data
     // b) a collection (vector) of pixels
-    // OR
-#ifdef NEVER
-    void loadPixels(StRichReaderInterface*);
-#endif
+    //
+    
     void loadPixels(vector<StRichSinglePixel>&);
     void loadPixels(vector<StRichSinglePixel*>&);
     
@@ -155,6 +155,9 @@ private:
     bool constructTheAdjacentNeighbors(StRichSinglePixel*, int, vector<StRichSinglePixel*>*);
     bool constructTheNearestNeighbors(StRichSinglePixel*, int, vector<StRichSinglePixel*>*);
 
+    StRichSinglePixel* findTheMaximumPixel(vector<StRichSinglePixel*>&) const;
+    double findTheSharingMaximum(StRichSinglePixel*) const;
+    
     //
     // centroid determination
     bool centerOfGravity(vector<StRichSinglePixel*>&, StRichHitInformation*);
