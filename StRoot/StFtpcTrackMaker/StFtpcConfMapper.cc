@@ -1,5 +1,10 @@
-// $Id: StFtpcConfMapper.cc,v 1.18 2002/04/08 15:37:43 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.19 2002/04/29 15:49:33 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.19  2002/04/29 15:49:33  oldi
+// All tracking parameters moved to StFtpcTrackingParameters.cc/hh.
+// In a future version the actual values should be moved to an .idl file (the
+// interface should be kept as is in StFtpcTrackingParameters.cc/hh).
+//
 // Revision 1.18  2002/04/08 15:37:43  oldi
 // Switch for magnetic field factor installed.
 // Minor corrections/improvements.
@@ -107,6 +112,7 @@
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcConfMapper.hh"
+#include "StFtpcTrackingParams.hh"
 #include "StFtpcConfMapPoint.hh"
 #include "StFtpcTrack.hh"
 #include "StFormulary.hh"
@@ -165,9 +171,12 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, Double_t vertexP
 
   mLaser = (Bool_t)false;
 
-  mNumRowSegment = 20;   // The number of rows has to be fixed to 20 (because this is the number of rows in both Ftpc's)!
-  mNumPhiSegment = phi_segments; 
-  mNumEtaSegment = eta_segments; 
+  // get tracking parameters from database
+  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
+
+  mNumRowSegment = params->RowSegments();
+  mNumPhiSegment = params->PhiSegments(); 
+  mNumEtaSegment = params->EtaSegments(); 
   mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
   mMaxFtpcRow = mNumRowSegment/2;
 
@@ -227,9 +236,12 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, MIntArray *good_
 
   mLaser = (Bool_t)false;
 
-  mNumRowSegment = 20;   // The number of rows has to be fixed to 20 (because this is the number of rows in both Ftpc's)!
-  mNumPhiSegment = phi_segments; 
-  mNumEtaSegment = eta_segments; 
+  // get tracking parameters from database
+  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
+
+  mNumRowSegment = params->RowSegments();
+  mNumPhiSegment = params->PhiSegments();
+  mNumEtaSegment = params->EtaSegments();
   mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
   mMaxFtpcRow = mNumRowSegment/2;
 
@@ -302,9 +314,12 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t
 
   mLaser = (Bool_t)false;
 
-  mNumRowSegment = 20;   // The number of rows has to be fixed to 20 (because this is the number of rows in both Ftpc's)!
-  mNumPhiSegment = phi_segments; 
-  mNumEtaSegment = eta_segments; 
+  // get tracking parameters from database
+  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
+
+  mNumRowSegment = params->RowSegments();
+  mNumPhiSegment = params->PhiSegments();
+  mNumEtaSegment = params->EtaSegments();
   mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
   mMaxFtpcRow = mNumRowSegment/2;
 
@@ -376,19 +391,12 @@ void StFtpcConfMapper::MainVertexTracking()
     mBench->Start("main_vertex");
   }
   
-  // settings
-  SetMaxDca(2.5);  //Test
-  MainVertexSettings(3, 5, 1, 2, 1, 1);  //Markus
+  Settings("main_vertex");
   //MainVertexSettings(3, 5, 1, 2, 1, 3);    //loose cuts
-  SetVertexConstraint(true);
 
-  // cuts
-  SetTrackletCuts(0.02, true);  //Test
+  Cuts("main_vertex");
   //SetTrackletCuts(0.007, true);  //Markus
   //SetTrackletCuts(0.03, true); //loose cuts
-
-
-  SetTrackCuts(0.06, 0.03, 30, true); //Test
   //SetTrackCuts(0.007, 0.03, 30, true);  //Markus
   //SetTrackCuts(0.07, 0.3, 50, true);  //loose cuts
 
@@ -412,7 +420,7 @@ void StFtpcConfMapper::MainVertexTracking()
     mBench->Start("splits");
   }
 
-  HandleSplitTracks(0.11, 0.5, 0.5);
+  HandleSplitTracks();
 
   if (mBench) {
     mBench->Stop("splits");
@@ -432,14 +440,8 @@ void StFtpcConfMapper::FreeTracking()
     mBench->Start("non_vertex");
   }
 
-  // settings
-  SetMaxDca(1.);
-  NonVertexSettings (3, 5, 1, 2, 1, 1);
-  SetVertexConstraint(false);
-
-  // cuts
-  SetTrackletCuts(0.007, false);
-  SetTrackCuts(0.007, 0.03, 70., false);
+  Settings("non_vertex");
+  Cuts("non_vertex");
 
   ClusterLoop();
 
@@ -461,16 +463,10 @@ void StFtpcConfMapper::LaserTracking()
   if (mBench) {
     mBench->Start("laser");
   }
+  
+  Settings("laser");
+  Cuts("laser");
 
-  // settings
-  SetLaser((Bool_t)true);
-  SetMaxDca(1.);
-  NonVertexSettings(10, 5, 3, 2, 2, 15);
-  SetVertexConstraint(false);
-  
-  // cuts
-  SetTrackletCuts(0.05, false);
-  
   ClusterLoop();
 
   if (mBench) {
@@ -492,7 +488,7 @@ void StFtpcConfMapper::LaserTracking()
     mBench->Start("splits");
   }
 
-  HandleSplitTracks(0.11, 0.5, 0.5);
+  HandleSplitTracks();
 
   if (mBench) {
     mBench->Stop("splits");
@@ -503,30 +499,25 @@ void StFtpcConfMapper::LaserTracking()
   return;
 }
 
+
 void StFtpcConfMapper::NoFieldTracking()
 {
   // Tracking of straight tracks originating from main vertex.
   // Cuts and settings are optimized to find straight tracks.
   
-  if (mBench) {
-    mBench->Start("nofield");
-  }
+  if (mBench) { 
+    mBench->Start("no_field");
+  } 
   
-  // settings
-  SetLaser((Bool_t)true);
-  SetMaxDca(1.);
-  MainVertexSettings(10, 5, 2, 2, 1, 3);
-  SetVertexConstraint(true);
-  
-  // cuts
-  SetTrackletCuts(0.03, true);
-  
+  Settings("no_field");
+  Cuts("no_field");
+
   ClusterLoop();
 
   if (mBench) {
-    mBench->Stop("nofield");
-    gMessMgr->Message("", "I", "OST") << "No field tracking finished    (" << mBench->GetCpuTime("nofield") << " s)." << endm;
-    mBench->GetCpuTime("nofield");
+    mBench->Stop("no_field");
+    gMessMgr->Message("", "I", "OST") << "No field tracking finished    (" << mBench->GetCpuTime("no_field") << " s)." << endm;
+    mBench->GetCpuTime("no_field");
 
     mBench->Start("extend");
   }
@@ -541,7 +532,7 @@ void StFtpcConfMapper::NoFieldTracking()
     mBench->Start("splits");
   }
 
-  HandleSplitTracks(0.11, 0.5, 0.5);
+  HandleSplitTracks();
 
   if (mBench) {
     mBench->Stop("splits");
@@ -552,7 +543,95 @@ void StFtpcConfMapper::NoFieldTracking()
   return;
 }
  
+void StFtpcConfMapper::Settings(TString method) {
+  // Sets settings with default values by given tracking method.
+
+  Int_t method_id;
+
+  if (method == "main_vertex") {
+    method_id = 0;
+  }
+    
+  else if (method == "non_vertex") {
+    method_id = 1;
+  }
+    
+  else if (method == "no_field") {
+    method_id = 2;
+  }
+    
+  else if (method == "laser") {
+    method_id = 3;
+  }
+
+  Settings(method_id);
+  
+  return;
+} 
+
+
+void StFtpcConfMapper::Settings(Int_t method_id) {
+  // Sets settings with default values by given tracking method id.
+
+  // get tracking parameters from database
+  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
+
+  SetLaser(params->Laser(method_id));
+  SetMaxDca(params->MaxDca(method_id));
+  SetVertexConstraint(params->VertexConstraint(method_id));
+  SetTrackletLength(params->MaxTrackletLength(method_id));
+  SetRowScopeTracklet(params->RowScopeTracklet(method_id));
+  SetMinPoints(params->MinTrackLength(method_id));
+  SetRowScopeTrack(params->RowScopeTrack(method_id));
+  SetPhiScope(params->PhiScope(method_id));
+  SetEtaScope(params->EtaScope(method_id));
+
+  return;
+}
+
+
+void StFtpcConfMapper::Cuts(TString method) {
+  // Sets cuts with default values by given tracking method.
+
+  Int_t method_id;
+
+  if (method == "main_vertex") {
+    method_id = 0;
+  }
+    
+  else if (method == "non_vertex") {
+    method_id = 1;
+  }
+    
+  else if (method == "no_field") {
+    method_id = 2;
+  }
+    
+  else if (method == "laser") {
+    method_id = 3;
+  }
+  
+  Cuts(method_id);
+
+  return;
+} 
+
+
+void StFtpcConfMapper::Cuts(Int_t method_id) {
+  // Sets cuts with default values by given tracking method id.
+
+  // get tracking parameters from database
+  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
+
+  SetMaxAngleTracklet(params->MaxAngleTracklet(method_id));
+  SetMaxAngleTrack(params->MaxAngleTrack(method_id));
+  SetMaxCircleDistTrack(params->MaxCircleDist(method_id));
+  SetMaxLengthDistTrack(params->MaxLengthDist(method_id));
  
+  return;
+}
+
+
 void StFtpcConfMapper::Settings(Int_t trackletlength1, Int_t trackletlength2, Int_t tracklength1, Int_t tracklength2, Int_t rowscopetracklet1, Int_t rowscopetracklet2, Int_t rowscopetrack1, Int_t rowscopetrack2, Int_t phiscope1, Int_t phiscope2, Int_t etascope1, Int_t etascope2)
 {
   // Sets all settings of the tracker.
@@ -604,50 +683,7 @@ void StFtpcConfMapper::Settings(Int_t trackletlength1, Int_t trackletlength2, In
 } 
 
 
-void StFtpcConfMapper::Settings(Int_t trackletlength, Int_t tracklength, Int_t rowscopetracklet, Int_t rowscopetrack, Int_t phiscope, Int_t etascope)
-{
-  // Sets settings for the given vertex constraint.
-  // See Begin_Html<a href="#settings">above</a>End_Html for details on the settings.
-
-  SetTrackletLength(trackletlength, mVertexConstraint);
-  SetRowScopeTracklet(rowscopetracklet, mVertexConstraint);
-  SetRowScopeTrack(rowscopetrack, mVertexConstraint);
-  SetPhiScope(phiscope, mVertexConstraint);
-  SetEtaScope(etascope, mVertexConstraint);
-  SetMinPoints(tracklength, mVertexConstraint);
-}
-
-
-void StFtpcConfMapper::MainVertexSettings(Int_t trackletlength, Int_t tracklength, Int_t rowscopetracklet, Int_t rowscopetrack, Int_t phiscope, Int_t etascope)
-{
-  // Sets settings for vertex constraint on.
-  // See Begin_Html<a href="#settings">above</a>End_Html for details on the settings.
-
-  SetTrackletLength(trackletlength, (Bool_t) true);
-  SetRowScopeTracklet(rowscopetracklet, (Bool_t) true);
-  SetRowScopeTrack(rowscopetrack, (Bool_t) true);
-  SetPhiScope(phiscope, (Bool_t) true);
-  SetEtaScope(etascope, (Bool_t) true);
-  SetMinPoints(tracklength, (Bool_t) true);
-}
-
-
-void StFtpcConfMapper::NonVertexSettings(Int_t trackletlength, Int_t tracklength, Int_t rowscopetracklet, Int_t rowscopetrack, Int_t phiscope, Int_t etascope)
-{
-  // Sets settings for vertex constraint off.
-  // Begin_Html
-  // See <a href="#settings">above</a> for details on the settings.<a name="cuts"></a>End_Html
-
-  SetTrackletLength(trackletlength, (Bool_t) false);
-  SetRowScopeTracklet(rowscopetracklet, (Bool_t) false);
-  SetRowScopeTrack(rowscopetrack, (Bool_t) false);
-  SetPhiScope(phiscope, (Bool_t) false);
-  SetEtaScope(etascope, (Bool_t) false);
-  SetMinPoints(tracklength, (Bool_t) false);
-}
-
-
-void StFtpcConfMapper::SetCuts(Double_t maxangletracklet1, Double_t maxangletracklet2, Double_t maxangletrack1,  Double_t maxangletrack2, Double_t maxcircletrack1, Double_t maxcircletrack2, Double_t maxlengthtrack1, Double_t maxlengthtrack2)
+void StFtpcConfMapper::Cuts(Double_t maxangletracklet1, Double_t maxangletracklet2, Double_t maxangletrack1,  Double_t maxangletrack2, Double_t maxcircletrack1, Double_t maxcircletrack2, Double_t maxlengthtrack1, Double_t maxlengthtrack2)
 {
   // Sets all cuts for the tracking.
   // 
@@ -666,38 +702,6 @@ void StFtpcConfMapper::SetCuts(Double_t maxangletracklet1, Double_t maxangletrac
   SetMaxAngleTrack(maxangletrack1, maxangletrack2);
   SetMaxCircleDistTrack(maxcircletrack1, maxcircletrack2);
   SetMaxLengthDistTrack(maxlengthtrack1, maxlengthtrack2);
-}
-
-
-void StFtpcConfMapper::SetCuts(Double_t maxangletracklet, Double_t maxangletrack, Double_t maxcircletrack, Double_t maxlengthtrack) 
-{
-  // Sets cuts for vertex constraint on or off.
-  // See Begin_Html<a href="#cuts">above</a>End_Html for details on the cuts.
-
-  SetMaxAngleTracklet(maxangletracklet, mVertexConstraint);
-  SetMaxAngleTrack(maxangletrack, mVertexConstraint);
-  SetMaxCircleDistTrack(maxcircletrack, mVertexConstraint);
-  SetMaxLengthDistTrack(maxlengthtrack, mVertexConstraint);
-}
-
-
-void StFtpcConfMapper::SetTrackCuts(Double_t maxangle, Double_t maxcircletrack, Double_t maxlengthtrack, Bool_t vertex_constraint)
-{
-  // Sets cuts of tracks for the given vertex constraint.
-  // See Begin_Html<a href="#cuts">above</a>End_Html for details on the cuts.
-
-  SetMaxAngleTrack(maxangle, vertex_constraint);
-  SetMaxCircleDistTrack(maxcircletrack, vertex_constraint);
-  SetMaxLengthDistTrack(maxlengthtrack, vertex_constraint);
-}
-
-
-void StFtpcConfMapper::SetTrackletCuts(Double_t maxangle, Bool_t vertex_constraint)
-{
-  // Sets cuts of tracklets for the given vertex constraint.
-  // See Begin_Html<a href="#cuts">above</a>End_Html for details on the cuts.
-
-  SetMaxAngleTracklet(maxangle, vertex_constraint);
 }
 
 
@@ -1123,6 +1127,21 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
 
   return;
 }
+
+
+void StFtpcConfMapper::HandleSplitTracks() {
+  // Handle split tracks with default values.
+
+  // get tracking parameters from database
+  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
+  
+  HandleSplitTracks(params->MaxDist(), 
+		    params->MinPointRatio(), 
+		    params->MaxPointRatio());
+
+  return;
+}
+
 
 
 void StFtpcConfMapper::HandleSplitTracks(Double_t max_dist, Double_t ratio_min, Double_t ratio_max)

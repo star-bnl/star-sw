@@ -1,5 +1,10 @@
-// $Id: StFtpcVertex.cc,v 1.8 2002/04/05 16:51:16 oldi Exp $
+// $Id: StFtpcVertex.cc,v 1.9 2002/04/29 15:50:29 oldi Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.9  2002/04/29 15:50:29  oldi
+// All tracking parameters moved to StFtpcTrackingParameters.cc/hh.
+// In a future version the actual values should be moved to an .idl file (the
+// interface should be kept as is in StFtpcTrackingParameters.cc/hh).
+//
 // Revision 1.8  2002/04/05 16:51:16  oldi
 // Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
 // Each Track inherits from StHelix, now.
@@ -48,9 +53,10 @@
 //----------Last Modified: 24.07.2000
 //----------Copyright:     &copy MDO Production 1999
 
-#include "StMessMgr.h"
 #include "StFtpcVertex.hh"
+#include "StFtpcTrackingParams.hh"
 #include "StFtpcPoint.hh"
+#include "StMessMgr.h"
 
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
@@ -92,18 +98,16 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
 {
   // constructor with ftpc points - fits vertex from points
 
-  // constants, to be moved to parameter database
-#define HISTOBINS 300
-#define HISTOMIN -75.0
-#define HISTOMAX 75.0
+  // get tracking parameters from database
+  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
 
   Float_t *rmap = new Float_t[20*6*numFppoints];
   Float_t *zmap = new Float_t[20];
   Int_t *mapMax = new Int_t[20*6];
-  Int_t *myhist = new Int_t[HISTOBINS];
-  Float_t hratio=HISTOBINS/(HISTOMAX-HISTOMIN);
+  Int_t *myhist = new Int_t[params->HistoBins()];
+  Float_t hratio=params->HistoBins()/(params->HistoMax()-params->HistoMin());
   
-  for(Int_t iii=0; iii<HISTOBINS; iii++) {
+  for(Int_t iii=0; iii<params->HistoBins(); iii++) {
     myhist[iii]=0;
   }
   
@@ -136,8 +140,8 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
 		  vtx_pos->Fill(intersect);
 		}
 
-		if(intersect>HISTOMIN && intersect<HISTOMAX) {
-		  myhist[int((intersect-HISTOMIN)*hratio)]++;
+		if(intersect>params->HistoMin() && intersect<params->HistoMax()) {
+		  myhist[int((intersect-params->HistoMin())*hratio)]++;
 		}
 	      }
 	    }
@@ -147,12 +151,12 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
     }
   }
 
-  Int_t maxBin=HISTOBINS/2, maxHeight=0;
+  Int_t maxBin=params->HistoBins()/2, maxHeight=0;
   
   Float_t vertex = 0.;
   Float_t sigma = 0.;
 
-  for(Int_t hindex=1; hindex<HISTOBINS-1; hindex++) {
+  for(Int_t hindex=1; hindex<params->HistoBins()-1; hindex++) {
     
     if(myhist[hindex]>maxHeight && myhist[hindex]>=myhist[hindex-1] && myhist[hindex]>=myhist[hindex+1]) {
       maxBin=hindex;
@@ -168,9 +172,9 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
      || (myhist[maxBin] <= myhist[maxBin-1])) {
     
     // use weighted mean instead 
-    vertex=(myhist[maxBin]*((maxBin+0.5)/hratio+HISTOMIN)
-	    + myhist[maxBin-1]*((maxBin-0.5)/hratio+HISTOMIN)
-	    + myhist[maxBin+1]*((maxBin+1.5)/hratio+HISTOMIN))
+    vertex=(myhist[maxBin]*((maxBin+0.5)/hratio+params->HistoMin())
+	    + myhist[maxBin-1]*((maxBin-0.5)/hratio+params->HistoMin())
+	    + myhist[maxBin+1]*((maxBin+1.5)/hratio+params->HistoMin()))
       / (myhist[maxBin]+myhist[maxBin-1]+myhist[maxBin+1]);
   }
 
@@ -180,7 +184,7 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
     sigma = sqrt (1 / ((2 * log(myhist[maxBin])) -
 		       (log(myhist[maxBin+1]) + 
 			log(myhist[maxBin-1]))));
-    vertex =  ((maxBin+0.5)/hratio+HISTOMIN) + 
+    vertex =  ((maxBin+0.5)/hratio+params->HistoMin()) + 
       sigma*sigma/(hratio*hratio) * (log(myhist[maxBin+1]) - 
 				     log(myhist[maxBin-1]));
   } 
@@ -209,20 +213,18 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
 {
   // Constructor with TObjArray of ftpc points - fits vertex from points
 
-  // constants, to be moved to parameter database
-#define HISTOBINS 300
-#define HISTOMIN -75.0
-#define HISTOMAX 75.0
+  // get tracking parameters from database
+  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
 
   Int_t numFppoints = hits->GetEntriesFast();
 
   Float_t *rmap = new Float_t[20*6*numFppoints];
   Float_t *zmap = new Float_t[20];
   Int_t *mapMax = new Int_t[20*6];
-  Int_t *myhist = new Int_t[HISTOBINS];
-  Float_t hratio=HISTOBINS/(HISTOMAX-HISTOMIN);
+  Int_t *myhist = new Int_t[params->HistoBins()];
+  Float_t hratio=params->HistoBins()/(params->HistoMax()-params->HistoMin());
   
-  for(Int_t iii=0; iii<HISTOBINS; iii++) {
+  for(Int_t iii=0; iii<params->HistoBins(); iii++) {
     myhist[iii]=0;
   }
   
@@ -258,8 +260,8 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
 		  vtx_pos->Fill(intersect);
 		}
 
-		if(intersect>HISTOMIN && intersect<HISTOMAX) {
-		  myhist[int((intersect-HISTOMIN)*hratio)]++;
+		if(intersect>params->HistoMin() && intersect<params->HistoMax()) {
+		  myhist[int((intersect-params->HistoMin())*hratio)]++;
 		}
 	      }
 	    }
@@ -269,12 +271,12 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
     }
   }
 
-  Int_t maxBin=HISTOBINS/2, maxHeight=0;
+  Int_t maxBin=params->HistoBins()/2, maxHeight=0;
   
   Float_t vertex = 0.;
   Float_t sigma = 0.;
 
-  for(Int_t hindex=1; hindex<HISTOBINS-1; hindex++) {
+  for(Int_t hindex=1; hindex<params->HistoBins()-1; hindex++) {
     
     if(myhist[hindex]>maxHeight && myhist[hindex]>=myhist[hindex-1] && myhist[hindex]>=myhist[hindex+1]) {
       maxBin=hindex;
@@ -290,9 +292,9 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
      || (myhist[maxBin] <= myhist[maxBin-1])) {
     
     // use weighted mean instead 
-    vertex=(myhist[maxBin]*((maxBin+0.5)/hratio+HISTOMIN)
-	    + myhist[maxBin-1]*((maxBin-0.5)/hratio+HISTOMIN)
-	    + myhist[maxBin+1]*((maxBin+1.5)/hratio+HISTOMIN))
+    vertex=(myhist[maxBin]*((maxBin+0.5)/hratio+params->HistoMin())
+	    + myhist[maxBin-1]*((maxBin-0.5)/hratio+params->HistoMin())
+	    + myhist[maxBin+1]*((maxBin+1.5)/hratio+params->HistoMin()))
       / (myhist[maxBin]+myhist[maxBin-1]+myhist[maxBin+1]);
   }
 
@@ -302,7 +304,7 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
     sigma = sqrt (1 / ((2 * log(myhist[maxBin])) -
 		       (log(myhist[maxBin+1]) + 
 			log(myhist[maxBin-1]))));
-    vertex =  ((maxBin+0.5)/hratio+HISTOMIN) + 
+    vertex =  ((maxBin+0.5)/hratio+params->HistoMin()) + 
       sigma*sigma/(hratio*hratio) * (log(myhist[maxBin+1]) - 
 				     log(myhist[maxBin-1]));
   } 

@@ -1,5 +1,10 @@
-// $Id: StFtpcTrack.cc,v 1.17 2002/04/22 14:18:17 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.18 2002/04/29 15:50:01 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.18  2002/04/29 15:50:01  oldi
+// All tracking parameters moved to StFtpcTrackingParameters.cc/hh.
+// In a future version the actual values should be moved to an .idl file (the
+// interface should be kept as is in StFtpcTrackingParameters.cc/hh).
+//
 // Revision 1.17  2002/04/22 14:18:17  oldi
 // Assume hit resolution to be 0.1mm if it is equal to 0.
 //
@@ -90,8 +95,9 @@
 //----------Last Modified: 10.11.2000
 //----------Copyright:     &copy MDO Production 1999
 
-#include "StFormulary.hh"
 #include "StFtpcTrack.hh"
+#include "StFtpcTrackingParams.hh"
+#include "StFormulary.hh"
 #include "StFtpcVertex.hh"
 #include "StFtpcPoint.hh"
 #include "StFtpcConfMapPoint.hh"
@@ -388,8 +394,9 @@ void StFtpcTrack::CalculateNMax()
   // In addition this funtion calculates the radius and the angle of a potential 
   // track point in the first (inner) and the last (outer) pad row.
 
-  // This should be read from the appropriate table, of course.
-  Double_t z_row[] = {162.75, 171.25, 184.05, 192.55, 205.35, 213.85, 226.65, 235.15, 247.95, 256.45};
+  // get tracking parameters from database
+  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
+
   Short_t nmax = 0;
   
   StFtpcConfMapPoint *lastpoint  = (StFtpcConfMapPoint *)this->GetHits()->Last();
@@ -402,14 +409,11 @@ void StFtpcTrack::CalculateNMax()
   Double_t r2 = TMath::Sqrt((firstpoint->GetX() * firstpoint->GetX()) + (firstpoint->GetY() * firstpoint->GetY())); 
   Double_t r1 = TMath::Sqrt((lastpoint->GetX() * lastpoint->GetX()) + (lastpoint->GetY() * lastpoint->GetY())); 
 
-  // These values should go into an .idl file.
-  Double_t outer_radius =  30.05;
-  Double_t inner_radius =   7.73;
   Double_t r, x;
     
   for (Int_t i = 0; i < 10; i++) {
-    r = (r2 - r1) / (z2 - z1) * (TMath::Sign(z_row[i], z1) - z1) + r1;
-    x = (x2 - x1) / (z2 - z1) * (TMath::Sign(z_row[i], z1) - z1) + x1;
+    r = (r2 - r1) / (z2 - z1) * (TMath::Sign(params->PadRowPosZ(i), z1) - z1) + r1;
+    x = (x2 - x1) / (z2 - z1) * (TMath::Sign(params->PadRowPosZ(i), z1) - z1) + x1;
     
     if (i == 0) {
       mRFirst = r;
@@ -435,7 +439,7 @@ void StFtpcTrack::CalculateNMax()
       mAlphaLast = TMath::ACos(ratio);
     }
     
-    if (r < outer_radius && r > inner_radius) {
+    if (r < params->OuterRadius() && r > params->InnerRadius()) {
       nmax++;
     }
   }
