@@ -25,6 +25,8 @@
 #include "StMinuitVertexFinder.h"
 #include "StppLMVVertexFinder.h"
 
+//#include "StiPPVertex/StPPVertexFinder.h"
+
 #include "StTreeMaker/StTreeMaker.h"
 
 #include "tables/St_g2t_vertex_Table.h" // tmp for Dz(vertex)
@@ -92,6 +94,8 @@ Int_t StGenericVertexMaker::Init()
   } else if ( m_Mode & 0x4){
     theFinder= new StppLMVVertexFinder();
     theFinder->SetMode(1);                 // this mode is an internal to ppLMV option switch
+ // } else if ( m_Mode & 0x8){
+ //   theFinder= new StPPVertexFinder();
   } else {
     // Later, this would NEVER make multiple possible vertex
     // finder unlike for option 0x1 .
@@ -109,7 +113,14 @@ Int_t StGenericVertexMaker::Init()
 }
 
 //_____________________________________________________________________________
+void StGenericVertexMaker::Clear(const char*){
+ // theFinder->Clear();
+}
+
+
+//_____________________________________________________________________________
 Int_t StGenericVertexMaker::InitRun(int runnumber){
+  theFinder->InitRun(runnumber);
   if (useCTB) theFinder->CTBforSeed();
   if (usebeamline) {
      double x0 = 0.;
@@ -158,7 +169,7 @@ Int_t StGenericVertexMaker::Finish()
 
   //LSB TODO check whether this is correct usage
   if(theFinder) delete theFinder;
-
+  
   return  kStOK;
 }
 

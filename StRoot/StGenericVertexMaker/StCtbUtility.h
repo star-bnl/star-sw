@@ -1,7 +1,7 @@
 #ifndef StCtbUtility_h
 #define StCtbUtility_h
 /*********************************************************************
- * $Id: StCtbUtility.h,v 1.1 2004/07/24 02:57:40 balewski Exp $
+ * $Id: StCtbUtility.h,v 1.2 2005/03/09 19:24:18 balewski Exp $
  *********************************************************************
  * utility function for CTB, used by the vertex finder(s)
  */
@@ -38,6 +38,7 @@ class StCtbUtility {
     void ctb_get_slat_from_data(int slat, int tray, float & phiRad, float &eta);
     void collectCTBhitsMC(St_DataSet *gds);
     void collectCTBhitsData(StTriggerData *trgD);
+    void printCtb();
     int NCtbMatches();
 };
 #endif
@@ -45,6 +46,9 @@ class StCtbUtility {
 
 /*
  * $Log: StCtbUtility.h,v $
+ * Revision 1.2  2005/03/09 19:24:18  balewski
+ * preparation for PPV vertex finder
+ *
  * Revision 1.1  2004/07/24 02:57:40  balewski
  * clean up of ppLMV, CTB-util separated
  *
