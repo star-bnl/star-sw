@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.5 2001/05/30 17:45:54 perev Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.6 2001/10/15 23:15:50 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.6  2001/10/15 23:15:50  ullrich
+ * Added StRunInfo.
+ *
  * Revision 2.5  2001/05/30 17:45:54  perev
  * StEvent branching
  *
@@ -29,7 +32,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.5 2001/05/30 17:45:54 perev Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.6 2001/10/15 23:15:50 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -39,6 +42,7 @@ StEventClusteringHints::StEventClusteringHints()
 {
     fParent = 0;
     setMiniDstMode();
+    setBranch("StRunInfo",                   "evt_header",   2);
     setBranch("StEventInfo",                 "evt_header",   2);
     setBranch("StEventSummary",              "evt_header",   2);
     setBranch("StEventClusteringHints",      "evt_header",   2);
@@ -61,6 +65,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StFtpcHitCollection",         "evt_hits",     8);
 
     setDstMode();
+    setBranch("StRunInfo",                   "event", 1);
     setBranch("StEventInfo",                 "event", 1);
     setBranch("StEventSummary",              "event", 1);
     setBranch("StEventClusteringHints",      "event", 1);
@@ -237,4 +242,3 @@ void StEventClusteringHints::Streamer(TBuffer &R__b)
       R__b.SetByteCount(R__c, kTRUE);
    }
 }
-
