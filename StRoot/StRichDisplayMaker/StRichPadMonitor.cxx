@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPadMonitor.cxx,v 2.2 2000/08/11 20:20:43 gans Exp $
+ * $Id: StRichPadMonitor.cxx,v 2.3 2000/08/13 01:26:49 gans Exp $
  * Description:
  *  A Pad Monitor for the STAR-RICH.
  *  Runs only in ROOT
@@ -7,6 +7,9 @@
  *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
+ * Revision 2.3  2000/08/13 01:26:49  gans
+ * Added directory changing for pidMaker->printCanvas("directory/")
+ *
  * Revision 2.2  2000/08/11 20:20:43  gans
  * Added use of StRichDrawableTControl
  *
@@ -760,7 +763,7 @@ void StRichPadMonitor::drawFileName(char * fileName) {
     mFileName->SetTextSize(.019495); // Found this works
     mFileName->SetTextAlign(31);
     mFileName->Draw();
-void StRichPadMonitor::printCanvas(char * filename,int eventNum){ 
+void StRichPadMonitor::printCanvas(char * directory,char * filename,int eventNum){ 
 
 
 
@@ -775,8 +778,7 @@ void StRichPadMonitor::printCanvas(char * filename,int eventNum){
     if(filename[i] == '/')
 	i++;
       j++;
-    sprintf(tempChar,"%s_%d.ps",&filename[i],eventNum);
-    // sprintf(tempChar,"/star/rcf/scratch/gans/plots/1185017_%d.ps",eventNum);
+    sprintf(tempChar,"%s%s_%d.ps",directory,&filename[i],eventNum);
     newFile[j]='\0';
     sprintf(tempChar,"%s_%s%d.ps",directory,newFile,eventNum);
 
