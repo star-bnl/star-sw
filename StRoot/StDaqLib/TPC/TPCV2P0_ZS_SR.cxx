@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.19 2000/11/07 16:30:27 ward Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.20 2000/11/15 21:02:02 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -35,6 +35,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.20  2000/11/15 21:02:02  ward
+ * Another .daq corruption check.  It is on the TPCSEQD bank.
+ *
  * Revision 1.19  2000/11/07 16:30:27  ward
  * New check for .daq corruption, with kStErr from St_tpcdaq_Maker.
  *
@@ -318,9 +321,11 @@ int TPCV2P0_ZS_SR::initialize()
 		int nseq = Pad_array[padrow-1][pad-1].nseq;
 		if (nseq) { // only if there are sequences on this pad
 		  //allocate memory for Sequence arrays
-		  if (Pad_array[padrow-1][pad-1].seq) // already malloc()ed?
+		  if (Pad_array[padrow-1][pad-1].seq) {
 		    printf("ERROR DETECTED: Pad_array[%d][%d] already malloced\n",
 			   padrow-1,pad-1);
+		    return FALSE; // Herb, 15nov2000.  Causes root4star to skip the event.
+		  }
 		  Pad_array[padrow-1][pad-1].seq= 
 		    (Sequence *)malloc(nseq*sizeof(Sequence));
 		  if (Pad_array[padrow-1][pad-1].seq==NULL) {
