@@ -6,8 +6,11 @@
 // matrix / vector "derived" from  
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: StMicky.cxx,v 1.4 1999/10/02 21:58:07 fine Exp $
+// $Id: StMicky.cxx,v 1.5 1999/12/07 22:33:10 fine Exp $
 // $Log: StMicky.cxx,v $
+// Revision 1.5  1999/12/07 22:33:10  fine
+// Clean up to remove compilation warnings
+//
 // Revision 1.4  1999/10/02 21:58:07  fine
 // double precision
 //
@@ -163,7 +166,7 @@ void StMicky::Mverif(int ntt, float *have, float *amust, int nn)
       Prtest();
       param_1.nfail = 0;
     }
-L39:
+
     ++param_1.ntest;
     param_1.mtestv[param_1.ntest - 1] = ntuse;
     if (param_1.neachp == 0) return ;
