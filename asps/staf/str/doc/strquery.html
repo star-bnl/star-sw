@@ -1,0 +1,24 @@
+<pre><h3>LOGICAL FUNCTION STRQUERY(Q,D,INLUN,OUTLUN,A)</h3>
+
+
+*  Inputs:
+	CHARACTER*(*) Q,D !Question & default answer.
+	INTEGER INLUN !FORTRAN logical unit from which input is taken.
+	INTEGER OUTLUN !FORTRAN logical unit to which the questions are put.
+
+*  Output:
+	CHARACTER*(*) A !Answer to the question.
+
+*  Description:
+*	Ask the operator, found on INLUN and OUTLUN, for the answer to the
+*	.le. 80 character question Q.  The default .le. 80 character answer
+*	is specified by the calling program in D.  The answer is returned
+*	in A.  The last non-blank answer is returned.  STRQUERY does not
+*	exit until a blank answer or EOF is specified.
+*	If OUTLUN is 0, then nothing is output and the first input from
+*	INCOM is accepted & returned.
+
+*	STRQUERY = .TRUE. for normal return,
+*	STRQUERY = .FALSE. for EOF on INLUN.
+
+</pre>

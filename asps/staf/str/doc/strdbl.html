@@ -1,0 +1,32 @@
+<pre><h3>LOGICAL FUNCTION STRDBL(S,RADIX,D_MIN,D_MAX,D,ERRMSG)</h3>
+
+
+*  Inputs:
+	CHARACTER*(*) S !String containing a numerical argument.
+	INTEGER RADIX   !RADIX, base 2,8,10 or 16, for the conversion.
+	DOUBLE PRECISION D_MIN,D_MAX !Min. and Max. for acceptable result.
+
+*  Input/Output:
+	DOUBLE PRECISION D    !Decoded floating value, from char. rep.
+*                              May be specified at call time to be a default
+*                              value, used in case of error.
+
+*  Output:
+	CHARACTER*(*) ERRMSG  !Possible error message, if fail.
+
+*  Return values:
+*	.TRUE. if a successful conversion occurred,
+*	.FALSE. if not.
+
+*  Description:
+*	"Read" a double precision number from the character string S.
+*	Convert according to the radix indicated in S by
+*	one of the (prefix) radix indicators:
+*	" or O ==> octal    X or H ==> hex    % ==> binary   $ ==> decimal.
+*	If no prefix is used, the default radix is used, specified by
+*	RADIX as 2, 8 or 16 (anything else is taken as 10).
+*	The result, if successful, is in D.  D_MIN and D_MAX specify the
+*	acceptable range of D.
+*	If D_MAX .le. D_MIN, the limits are ignored.
+
+</pre>

@@ -1,0 +1,15 @@
+<pre><h3>SUBROUTINE STRELACNV(ELA_TIME,ELA_ASC)</h3>
+
+
+*  Input:
+	INTEGER ELA_TIME(2) !Elapsed time, msecs & days.
+*  Output (should be CHARACTER*18 or more):
+	CHARACTER*(*) ELA_ASC !ddddd_hh:mm:ss.mmm (ASCII elapsed time; "_" = blank)
+
+*  Description:
+*	Convert specified elapsed time to 18 character ASCII days, hours, minutes,
+*	seconds and milliseconds.
+*	If the passed string isn't long enough, a truncation is performed, and
+*	the last character in the passed string is set to "*".
+
+</pre>

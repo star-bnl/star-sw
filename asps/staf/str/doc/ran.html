@@ -1,0 +1,11 @@
+<pre><h3>REAL FUNCTION RAN(ISEED)</h3>
+*	This is meant to provide VMS look-alike random number generator.
+*	ISEED isn't used at all - VMS ISEED and IBM SEED are different things.
+	INTEGER ISEED
+	REAL SEED
+	SAVE SEED
+	REAL RAND
+	DATA SEED/0.5/
+
+	CALL SRAND(SEED)
+</pre>

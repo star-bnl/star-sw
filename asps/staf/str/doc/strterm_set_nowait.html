@@ -1,0 +1,17 @@
+<pre><h3>SUBROUTINE strterm_set_nowait</h3>
+
+
+*  No arguments
+
+*  Return value:  none
+
+*  Functional description:
+*	Set the terminal into "nowait", or asynchronous I/O mode.  ie, if
+*	no characters are available at a read, a null byte is returned
+*	and program flow continues, rather than waiting for something to be
+*	transmitted.
+*	Under VMS, this is done at the actual I/O call itself.  Here,
+*	software flags are set, but no action is taken.
+
+
+</pre>

@@ -1,0 +1,18 @@
+<pre><h3>SUBROUTINE STRPUTCHRS( CHRS, Nchrs, Buffer_size, Nwords, Buffer )</h3>
+
+
+*  Inputs:
+	CHARACTER*(*) CHRS !Character-string to be copied to Buffer.
+	INTEGER Nchrs !The number of characters from CHRS to copy.
+	INTEGER Buffer_size !Size, in 32-bit words, of Buffer.
+
+*  Outputs:
+	INTEGER Nwords !Number of longwords in Buffer, from the copy.
+	INTEGER Buffer(*) !Longword-buffer into which CHRS is copied.
+
+*  Description:
+*	Copy Nchrs characters from CHRS into Buffer;  pad 0, 1, 2 or 3
+*	bytes in the last word in Buffer with spaces, if the Nchrs is
+*	not a multiple of 4.
+
+</pre>

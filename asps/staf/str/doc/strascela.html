@@ -1,0 +1,24 @@
+<pre><h3>SUBROUTINE STRASCELA(TELA_TIME,DELA_TIME,TELA_ASC,DELA_ASC,
+	                     ASC_DATE,ASC_WEEKDAY,ASC_TIME)</h3>
+
+
+*  Input/Output:
+	INTEGER TELA_TIME(2) !Total "absolute" elapsed time since last
+	                     !call to STRELA0.  Input value is used
+	                     !to get DELA_TIME.
+
+*  Outputs:
+	INTEGER DELA_TIME(2) !ELA time-difference between input and
+	                     !output values of TELA_TIME.
+	CHARACTER*17 TELA_ASC !ASCII representation of TELA_TIME.
+	CHARACTER*17 DELA_ASC !ASCII representation of DELA_TIME.
+	CHARACTER*9 ASC_DATE  !ASCII representation of real date.
+	CHARACTER*9 ASC_WEEKDAY !ASCII representation of weekday.
+	CHARACTER*8 ASC_TIME  !ASCII representation of real time.
+
+*  Description:
+*	Return absolute (since last STRELA0 call) and delta ELA
+*	times, and 9 character ASCII date, 8 character ASCII time,
+*	and 9 character ASCII weekday.
+
+</pre>
