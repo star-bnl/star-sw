@@ -1,3 +1,4 @@
+#include <math.h>
 //  sl3CoordinateTransform.h
 //
 //  Christof Struck, struck@star.physics.yale.edu
