@@ -1,12 +1,23 @@
 /***************************************************************************
  *
- * Description: part of STAR HBT Framework: StHbtMaker package
- *    the Triplet object is passed to the TripletCuts for verification, and
+ * $Id: StHbtTriplet.hh,v 1.2 2000/04/12 01:56:03 willson Exp $
+ *
+ * Author: Robert Willson, Ohio State, willson@bnl.gov
+ ***************************************************************************
+ *
+ * Description: part of STAR HBT Framework: StHbtMaker package.
+ *    The triplet object is passed to the TripletCuts for verification, and
  *    then to the AddRealTriplet and AddMixedTriplet methods of the
- *    Three Particle Correlation Functions
+ *    three-particle correlation functions.
+ *
+ ***************************************************************************
+ *
+ * $Log: StHbtTriplet.hh,v $
+ * Revision 1.2  2000/04/12 01:56:03  willson
+ * Qinv Correlation Functions corrected
+ *
  *
  ***************************************************************************/
-
 
 #ifndef ST_HBT_TRIPLET_HH
 #define ST_HBT_TRIPLET_HH
@@ -37,6 +48,9 @@ public:
 
   StHbtLorentzVector fourMomentum() const;
   double qInv() const;
+  double qInv12() const;
+  double qInv23() const;
+  double qInv31() const;
   double kT()   const;
   double mInv() const;
 
