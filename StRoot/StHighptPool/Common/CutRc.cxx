@@ -58,8 +58,8 @@ bool
 CutRc::AcceptFlowCent(StHiMicroEvent* event)
 {
   return (
-	  event->Centrality() >= mFlowCent[0] &&
-	  event->Centrality() <= mFlowCent[1]
+	  flowCentrality(event->NUncorrectedPrimaries()) >= mFlowCent[0] &&
+	  flowCentrality(event->NUncorrectedPrimaries()) <= mFlowCent[1]
 	 );
 }
 //----------------

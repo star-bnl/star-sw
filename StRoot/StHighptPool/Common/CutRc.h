@@ -2,6 +2,7 @@
 #define CutRc_H
 
 #include "Cut.h"
+#include "Centrality.h"
 #include "StHighptPool/StHiMicroEvent/StHiMicroEvent.h"
 
 class CutRc :public Cut {
