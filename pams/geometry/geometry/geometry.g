@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.97 2004/11/02 19:00:55 potekhin Exp $
+* $Id: geometry.g,v 1.98 2004/12/07 00:46:04 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.98  2004/12/07 00:46:04  potekhin
+* We need to steer the newly added FSTD (forward tracker).
+* For now I add it to the experimental tag IST1, which is
+* used for development only.
+*
 * Revision 1.97  2004/11/02 19:00:55  potekhin
 * Added the Y2005 tag which we need for testing and
 * for general consistency. It will be subject to possible
@@ -390,7 +395,7 @@
 * list of system on/off switches:
    Logical    cave,pipe,svtt,sisd,tpce,ftpc,
               btof,vpdd,magp,calb,ecal,upst,rich,
-              zcal,mfld,bbcm,fpdm,phmd,pixl,istb,ftro
+              zcal,mfld,bbcm,fpdm,phmd,pixl,istb,fstd,ftro
 
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,svtw,
@@ -412,7 +417,8 @@
               CorrNum, PhmdConfig,
               BtofConfig, VpddConfig, FpdmConfig,
               SisdConfig, PipeConfig, CalbConfig,
-              PixlConfig, IstbConfig, FtroConfig
+              PixlConfig, IstbConfig, FstdConfig,
+              FtroConfig
 
 * Note that SisdConfig can take values in the tens, for example 20
 * We do this to not proliferate additional version flags -- there has
@@ -428,6 +434,7 @@
 *            FpdmConfig  -- fpd
 *            PixlConfig  -- pixel
 *            IstbConfig  -- outer pixel
+*            FstdConfig  -- forward pixel
 *            FtroConfig  -- FTPC readout barrel
 
 * CorrNum allows us to control incremental bug fixes in a more
@@ -473,6 +480,7 @@ replace[;ON#{#;] with [
    FpdmConfig  = 0 ! 0 means the original source code
    PixlConfig  = 0 ! 0=no, 1=inside the SVT, 2=inside CAVE
    IstbConfig  = 0 ! 0=no, >1=version
+   FstdConfig  = 0 ! 0=no, >1=version
    FtroConfig  = 0 ! 0=no, >1=version
 
 * Set only flags for the main configuration (everthing on, except for tof),
@@ -484,7 +492,7 @@ replace[;ON#{#;] with [
 * "Canonical" detectors are all ON by default,
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
 * whereas some newer stuff is considered optional:
-   {bbcm,fpdm,phmd,pixl,istb,sisd,ftro} = off;
+   {bbcm,fpdm,phmd,pixl,istb,fstd,sisd,ftro} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
    {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
@@ -660,11 +668,14 @@ If LL>1
                      SisdConfig = 1;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   pixl=on;    " put the pixel detector in"
-                   PixlConfig=2;
-* The new MIT detector
+                   pixl=off;    " put the pixel detector in"
+                   PixlConfig=0;
+* Inner STAR tracker barrel (new MIT detector)
                    istb=on;  "new pixel based inner tracker"
                    IstbConfig=1;
+* Forward STAR tracker disk
+                   fstd=on;  "new pixel based forward tracker"
+                   FstdConfig=1;
                 }
 
 *************************************************************************************************************
@@ -1508,6 +1519,7 @@ If LL>1
    if (pixl.and.PixlConfig==2) Call pixlgeo1
 
    if (istb.and.IstbConfig>0)  Call istbgeo
+   if (fstd.and.FstdConfig>0)  Call fstdgeo
 
 ******************************************************************
 * If PHMD is present and a non-zero version of the Photon Multiplicity Detector
