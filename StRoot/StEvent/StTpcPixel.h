@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcPixel.h,v 2.4 2002/02/22 22:56:52 jeromel Exp $
+ * $Id: StTpcPixel.h,v 2.5 2004/04/26 16:33:35 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcPixel.h,v $
+ * Revision 2.5  2004/04/26 16:33:35  fisyak
+ * Make use of StTpcPixel
+ *
  * Revision 2.4  2002/02/22 22:56:52  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -32,34 +35,37 @@
 #define StTpcPixel_hh
 
 #include "StObject.h"
+#include "Stiostream.h"
 #include "StEnumerations.h"
-
-class dst_pixel_st;
 
 class StTpcPixel : public StObject {
 public:
-    StTpcPixel();
-    StTpcPixel(unsigned short, unsigned int);
-    StTpcPixel(const dst_pixel_st&);
-    virtual ~StTpcPixel();
-    // StTpcPixel(const StSvtTpcPixel&);         use default
-    // StTpcPixel& operator=(const StTpcPixel&); use default
-    
-    int operator==(const StTpcPixel&) const;
-    int operator!=(const StTpcPixel&) const;
-
-    unsigned short detector() const;
-    unsigned short sector() const;
-    unsigned short padrow() const;
-    unsigned int   pad() const;
-    unsigned int   timebin() const;
-    unsigned int   adc() const;
-    
+    StTpcPixel(UChar_t Detector = 0, UChar_t Sector = 0, UChar_t Row = 0,
+	       UChar_t Pad = 0, UShort_t TimeBin = 0,UShort_t Adc=0, 
+	       UShort_t  mIdTruth=0) :
+      mDetector(Detector),  mSector(Sector), mRow(Row), 
+      mPad(Pad), mTimeBin(TimeBin), mAdc(Adc), mIdTruth(mIdTruth) {}
+    virtual ~StTpcPixel() {}
+    virtual void Print(Option_t *option="") const;
+    UChar_t   detector() const {return mDetector;}  
+    UChar_t   sector()   const {return  mSector;}   
+    UChar_t   padrow()   const {return  mRow;}      
+    UChar_t   pad()      const {return     mPad;}      
+    UShort_t  timebin()  const {return mTimeBin;}  
+    UShort_t  adc()      const {return     mAdc;}      
+    UShort_t  idTruth()  const {return mIdTruth;}  
 protected:
-    UShort_t  mDetectorSectorRow;
-    UInt_t    mPadTimeAdc;
-    
+    //    UShort_t  mDetectorSectorRow;
+    //    UInt_t    mPadTimeAdc;
+
+    UChar_t   mDetector; 
+    UChar_t   mSector;   
+    UChar_t   mRow;      
+    UChar_t   mPad;      
+    UShort_t  mTimeBin;  
+    UShort_t  mAdc;      
+    UShort_t  mIdTruth;  
     ClassDef(StTpcPixel,1)  //StTpcPixel structure
 };
-
+ostream& operator<< (ostream&, const StTpcPixel&);
 #endif

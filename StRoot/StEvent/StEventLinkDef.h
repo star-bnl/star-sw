@@ -67,5 +67,7 @@
 #pragma link C++ class TrgSumData2004+;  
 #pragma link C++ class RawTrgDet2004+; 
 #pragma link C++ class L0_DSM_Data2004+;
+
+#pragma link C++ function operator<<(ostream&, const StTpcPixel&);        
 #endif
 
