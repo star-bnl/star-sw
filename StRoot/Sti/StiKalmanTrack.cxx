@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.58 2005/03/28 05:48:49 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.58 2005/03/28 05:48:49 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.59 2005/03/31 17:25:57 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.59 2005/03/31 17:25:57 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.59  2005/03/31 17:25:57  perev
+ * getMaxPointCount() fixed(thank to Jan)
+ *
  * Revision 2.58  2005/03/28 05:48:49  perev
  * Reorganization of node container
  *
@@ -410,7 +413,7 @@ double  StiKalmanTrack::getChi2() const
     trackChi2 += nodeChi2;
     ++fitHits;
   }
-  return (fitHits>5)?trackChi2/(fitHits-5.):-1;
+  return (fitHits>5)?trackChi2/(2.*fitHits-5.):1e30;
 }
 
 
@@ -454,11 +457,13 @@ int StiKalmanTrack::getMaxPointCount(int detectorId) const
   int k=0;
 
   for (it=begin();it!=end();it++,k++){
-    StiHit* h = (*it).getHit();
-    if (!h)		continue;
-    const StiDetector *detector = h->detector();
-    if (!detector)	continue;
-    if (detectorId && detector->getGroupId() != detectorId) continue;
+    const StiKalmanTrackNode *node = (*it);
+    if (!node->isValid()) 					continue;
+    const StiDetector *detector = node->getDetector();
+    if (!detector)						continue;
+    StiHit* h = node->getHit();
+    if (!h && !detector->isActive(node->getY(),node->getZ()))	continue;
+    if (detectorId && detector->getGroupId() != detectorId) 	continue;
     nPts++;
   }
   return nPts;
@@ -686,8 +691,8 @@ StiKalmanTrackNode * StiKalmanTrack::getInnOutMostNode(int inot,int qua)  const
     if ((qua&2) && hit && node->getChi2()>10000.)	continue;
     return node;
   }
-  cout << "StiKalmanTrack::getInnOutMostNode() -E- No requested tracks " << endl;
-  //throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- No requested tracks");
+  cout << "StiKalmanTrack::getInnOutMostNode() -E- No requested nodes " << endl;
+  //throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- No requested nodes");
   return 0;
 }
 StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode(int qua)  const
@@ -995,9 +1000,11 @@ vector<StiHit*> StiKalmanTrack::getHits()
   for (;it!=end;++it) 
     {
       const StiKalmanTrackNode& node = *it;
-      if (node.getChi2()>10000.) continue;
+      if (!node.isValid())		continue;
+      if (node.getChi2()>10000.) 	continue;
       StiHit* hit = node.getHit();
-      if (hit) hits.push_back(hit);
+      if (!hit) 			continue;
+      hits.push_back(hit);
     }
   return hits;
 }
