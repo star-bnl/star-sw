@@ -426,7 +426,9 @@ void StiMaker::finishEvent()
 	//mTrackMerger->mergeTracks();
 	//clock.stop();
 	//cout <<"Time to merge tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
+	cout <<"Associate for event\t";
 	StiEventAssociator::instance()->associate(mMcEvent);
+	cout <<"done"<<endl;
 	StiEvaluator::instance()->evaluateForEvent(mtrackstore);
     }
     else {

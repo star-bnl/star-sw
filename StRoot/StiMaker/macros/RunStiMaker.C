@@ -9,8 +9,8 @@ void RunStiMaker(Int_t nevents=1,
 		 bool simulated=true, //sim or data?
 		 //bool doFit=true, // true->fit track only
 		 bool doFit=false, // false->find track only
-		 const char* outfile = "/star/rcf/pwg/spectra/mmiller/Evaluation.root",
-		 //const char* outfile = "Evaluation.root",
+		 //const char* outfile = "/star/rcf/pwg/spectra/mmiller/Evaluation.root",
+		 const char* outfile = "Evaluation.root",
 		 bool doProfile=false, // produce profiling output? 
 		 //const char* MainFile="/a1/pruneau/data/EvalData/MCNtuple/muon_100_neg.event.root")
 		 
