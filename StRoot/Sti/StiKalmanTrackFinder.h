@@ -52,6 +52,38 @@ protected:
     int maxNullCount;  
     int maxContiguousNullCount;
 
+ private:
+
+	int       hitCount;
+	int       contiguousHitCount;
+	int       nullCount; 
+	int       contiguousNullCount;	
+	int       visitedDet ;
+	int       position;
+	int       lastMove;
+
+	//double    sAlpha, tAlpha;
+	//double    yWindow,zWindow;
+	double    chi2;
+	double    bestChi2;
+	StiKalmanTrackNode * sNode;
+	StiKalmanTrackNode * tNode;
+	StiKalmanTrackNode * bestNode;
+	StiKalmanTrackNode * leadNode;
+	StiDetector * sDet;
+	StiDetector * tDet;
+	const StiDetector * leadDet;
+	bool trackDone;
+	bool scanningDone;
+	bool hasHit;
+	bool hasDet;
+
+	int initSearch(StiKalmanTrackNode * node);
+	void search();
+	void initLayer();
+	void scanLayer();
+	void finishLayer();
+
 };
 
 #endif
