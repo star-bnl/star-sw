@@ -1,5 +1,14 @@
-// $Id: StFtpcTracker.hh,v 1.12 2002/01/29 11:08:29 oldi Exp $
+// $Id: StFtpcTracker.hh,v 1.13 2002/04/05 16:51:13 oldi Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.13  2002/04/05 16:51:13  oldi
+// Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
+// Each Track inherits from StHelix, now.
+// Therefore it is possible to calculate, now:
+//  - residuals
+//  - vertex estimations obtained by back extrapolations of FTPC tracks
+// Chi2 was fixed.
+// Many additional minor (and major) changes.
+//
 // Revision 1.12  2002/01/29 11:08:29  oldi
 // Write() renamed to WriteCluster() resp. WriteTrack() to avoid compiler warnings.
 // As a result the functions TObject::Write() are available again (directly).
@@ -87,7 +96,10 @@ protected:
               TBenchmark   *mBench;         // benchmark object (just for run-time measurements)
                  Float_t    mTime;          // total time consumption
       
-            StFtpcVertex   *mVertex;        // pointer to the vertex
+            StFtpcVertex   *mVertex;        // vertex used for tracking
+            StFtpcVertex   *mVertexEast;    // vertex estimation obtained by back extrapolation of east tracks
+            StFtpcVertex   *mVertexWest;    // vertex estimation obtained by back extrapolation of west tracks
+
                TObjArray   *mHit;           // ObjArray of clusters
                TObjArray   *mTrack;         // ObjArray of tracks
                   Bool_t    mHitsCreated;   // indicator if this class created the mHit ObjArray
@@ -98,7 +110,7 @@ public:
 
             StFtpcTracker();                                  // default constructor
             StFtpcTracker(St_fcl_fppoint *fcl_fppoint, 
-			  Double_t vertexPos[3] = NULL, 
+			  Double_t vertexPos[6] = 0, 
 			  Bool_t bench = (Bool_t)false, 
 			  Double_t max_Dca = 100.);           // real constructor
             StFtpcTracker(StFtpcVertex *vertex, 
@@ -118,8 +130,10 @@ public:
 
   virtual  ~StFtpcTracker();  // destructor
 
+  void    EstimateVertex(StFtpcVertex *vertex, UChar_t iterations = 1);     // vertex estimation with fit tracks for FTPC east amd west
+  void    EstimateVertex(StFtpcVertex *vertex, Char_t west, UChar_t iterations);  // vertex estimation with fit tracks
   void    CalcEnergyLoss(FDE_FDEPAR_ST *fdepar);                            // calculates dE/dx
-  void    Sorter(Double_t *arr, Int_t *index, Int_t len);                  // sorts by dE/dx
+  void    Sorter(Double_t *arr, Int_t *index, Int_t len);                   // sorts by dE/dx
   Int_t   FitAnddEdxAndWrite(St_fpt_fptrack *trackTable, 
 			     FDE_FDEPAR_ST *fdepar, 
 			     Int_t id_start_vertex);                        // does momentum fit, the dEdx calculation and writes tracks to STAF table
@@ -130,6 +144,8 @@ public:
        Float_t   GetTime()              { return mTime;                    }  // returns time consumption
        Float_t   GetTime(char name[10]) { return mBench->GetCpuTime(name); }  // returns time consumption for different tracking parts
   StFtpcVertex  *GetVertex()            { return mVertex;                  }  // returns the vertex
+  StFtpcVertex  *GetVertexEast()        { return mVertexEast;              }  // returns the vertex estimation of FTPC east
+  StFtpcVertex  *GetVertexWest()        { return mVertexWest;              }  // returns the vertex estimation of FTPC west
          Int_t   GetNumberOfClusters()  { return mHit->GetEntriesFast();   }  // returns the number of clusters
          Int_t   GetNumberOfTracks()    { return mTrack->GetEntriesFast(); }  // returns the number of tracks
      TObjArray  *GetClusters()          { return mHit;                     }  // returns ObjArray of clusters

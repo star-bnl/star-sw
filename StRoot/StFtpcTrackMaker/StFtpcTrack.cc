@@ -1,5 +1,14 @@
-// $Id: StFtpcTrack.cc,v 1.14 2002/02/21 22:57:57 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.15 2002/04/05 16:50:42 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.15  2002/04/05 16:50:42  oldi
+// Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
+// Each Track inherits from StHelix, now.
+// Therefore it is possible to calculate, now:
+//  - residuals
+//  - vertex estimations obtained by back extrapolations of FTPC tracks
+// Chi2 was fixed.
+// Many additional minor (and major) changes.
+//
 // Revision 1.14  2002/02/21 22:57:57  oldi
 // Fixes to avoid warnings during optimized compilation.
 //
@@ -77,10 +86,19 @@
 #include "StFormulary.hh"
 #include "StFtpcTrack.hh"
 #include "StFtpcVertex.hh"
+#include "StFtpcPoint.hh"
 #include "StFtpcConfMapPoint.hh"
-#include "StFtpcMomentumFit.hh"
+
+#include "SystemOfUnits.h"
+#include "PhysicalConstants.h"
+#include "StMessMgr.h"
 
 #include <math.h>
+
+#ifndef gufld
+#define gufld gufld_
+extern "C" {void gufld(float *, float *);}
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                                                                //
@@ -378,8 +396,8 @@ void StFtpcTrack::CalculateNMax()
   Double_t r1 = TMath::Sqrt((lastpoint->GetX() * lastpoint->GetX()) + (lastpoint->GetY() * lastpoint->GetY())); 
 
   // These values should go into an .idl file.
-  Double_t outer_radius =  30.00;
-  Double_t inner_radius =   8.00;
+  Double_t outer_radius =  30.05;
+  Double_t inner_radius =   7.73;
   Double_t r, x;
     
   for (Int_t i = 0; i < 10; i++) {
@@ -416,34 +434,8 @@ void StFtpcTrack::CalculateNMax()
   }
   
   mNMax = nmax;
-}
 
-
-void StFtpcTrack::Fit()
-{
-  // set up hits for calling fit class
-  Int_t numHits = GetNumberOfPoints();
-  StThreeVector<double> *Hit=new StThreeVector<double>[numHits];
-  for(Int_t i=0; i<numHits; i++)
-    {
-      Hit[numHits -1 -i].setX((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).X());
-      Hit[numHits -1 -i].setY((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).Y());
-      Hit[numHits -1 -i].setZ((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).Z());
-    }
-
-  // call fit class
-  StFtpcMomentumFit *Fit = new StFtpcMomentumFit(Hit, numHits);
-
-  mP.SetX(Fit->momentum().x());
-  mP.SetY(Fit->momentum().y());
-  mP.SetZ(Fit->momentum().z());
-  mChiSq[0] = Fit->chi2Rad();
-  mChiSq[1] = Fit->chi2Lin();
-  mQ = Fit->usedCharge();
-  mTheta = Fit->momentum().theta();
-
-  delete Fit;
-  delete[] Hit;
+  return;
 }
 
 
@@ -451,127 +443,131 @@ Double_t StFtpcTrack::CalcDca(StFtpcVertex *vertex)
 {
   // Calculates distance of closest approach to vertex.
 
-  Int_t numHits = GetNumberOfPoints();
-  StThreeVector<double> *Hit = new StThreeVector<double>[numHits];
-  TVector3 vertexPos = vertex->GetCoord();
-  
-  for(Int_t i=0; i<numHits; i++) {
-    Hit[numHits -1 -i].setX((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).X());
-    Hit[numHits -1 -i].setY((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).Y());
-    Hit[numHits -1 -i].setZ((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).Z());
-  }
-
   // call fit class
-  StFtpcMomentumFit *looseFit = new StFtpcMomentumFit(Hit, numHits);
+  MomentumFit();
 
-  StThreeVector<double> rv(vertexPos.X(), vertexPos.Y(), vertexPos.Z());
-  StThreeVector<double> nv(0,0,1);
-  Double_t pl = looseFit->pathLength(rv,nv);
-  Double_t xvert = looseFit->x(pl) - vertexPos.X();
-  Double_t yvert = looseFit->y(pl) - vertexPos.Y();
-  Double_t dca = TMath::Sqrt(xvert * xvert + yvert * yvert);
+  TVector3 vertexPos = vertex->GetCoord();
+  StThreeVector<Double_t> rv(vertexPos.X(), vertexPos.Y(), vertexPos.Z());
+  StThreeVector<Double_t> nv(0,0,1);
+  Double_t pl = pathLength(rv, nv);
+  Double_t xvert = x(pl) - vertexPos.X();
+  Double_t yvert = y(pl) - vertexPos.Y();
 
-  delete looseFit;
-  delete[] Hit;
+  return TMath::Sqrt(xvert * xvert + yvert * yvert);
+}
 
-  return dca;
+
+void StFtpcTrack::CalcResiduals() {
+  // Calculates the residuals to the momentum fit helix for each point.
+  
+  StThreeVector<Double_t> nv(0,0,1);
+
+  for (Int_t i = 0; i < mPoints->GetEntriesFast(); i++) {
+    // loop over all points on track
+    StFtpcPoint *hit = (StFtpcPoint*)mPoints->At(i);
+    StThreeVector<Double_t> hitpos(hit->GetX(), hit->GetY(), hit->GetZ());
+
+    Double_t pl = pathLength(hitpos, nv);
+    Double_t x_hel = x(pl);
+    Double_t y_hel = y(pl);
+    Double_t x_hit = hit->GetX();
+    Double_t y_hit = hit->GetY();
+
+    hit->SetXResidual(x_hit - x_hel);
+    hit->SetYResidual(y_hit - y_hel);
+    hit->SetRResidual(TMath::Sqrt(x_hit*x_hit + y_hit*y_hit) - TMath::Sqrt(x_hel*x_hel + y_hel*y_hel));
+    hit->SetPhiResidual(TMath::ATan2(y_hit, x_hit) - TMath::ATan2(y_hel, x_hel));
+  }
+   
+  return;
+}
+
+
+void StFtpcTrack::Fit()
+{
+  // call fit class
+  MomentumFit();
+
+  mP.SetX(momentum().x());
+  mP.SetY(momentum().y());
+  mP.SetZ(momentum().z());
+  mChiSq[0] = chi2Rad();
+  mChiSq[1] = chi2Lin();
+  mTheta = momentum().theta();
+
+  return;
 }
 
 
 void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_vertex)
 {
   // Fitting.
-
-  // set up hits for calling fit class
-  Int_t numHits = GetNumberOfPoints();
-  StThreeVector<double> *Hit = new StThreeVector<double>[numHits];
-  StThreeVector<double>  vertexPos(vertex->GetCoord().X(), vertex->GetCoord().Y(), vertex->GetCoord().Z());
   
-  for(Int_t i=0; i<numHits; i++) {
-    Hit[numHits -1 -i].setX((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).X());
-    Hit[numHits -1 -i].setY((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).Y());
-    Hit[numHits -1 -i].setZ((((StFtpcConfMapPoint *)mPoints->At(i))->GetCoord()).Z());
-  }
-
   // call fit class
-  StFtpcMomentumFit *looseFit = new StFtpcMomentumFit(Hit, numHits);
+  MomentumFit();
 
-  StThreeVector<double> rv(vertexPos.x(), vertexPos.y(), vertexPos.z());
-  StThreeVector<double> nv(0,0,1);
-  Double_t pl = looseFit->pathLength(rv,nv);
-  Double_t xvert = looseFit->x(pl) - vertexPos.x();
-  Double_t yvert = looseFit->y(pl) - vertexPos.y();
+  // tracks are treated as the particles fly
+  StFtpcPoint *firstP = (StFtpcPoint *)mPoints->At(GetNumberOfPoints()-1);
+  StFtpcPoint *lastP  = (StFtpcPoint *)mPoints->At(0);
+
+  StThreeVector<Double_t> vertexPos(vertex->GetCoord().X(), vertex->GetCoord().Y(), vertex->GetCoord().Z());
+  StThreeVector<Double_t> lastPoint(lastP->GetCoord().X(), lastP->GetCoord().Y(), lastP->GetCoord().Z());
+  StThreeVector<Double_t> firstPoint;
+  StThreeVector<Double_t> nv(0, 0, 1);
+
+  Double_t pl = pathLength(vertexPos, nv);
+  Double_t xvert = x(pl) - vertexPos.x();
+  Double_t yvert = y(pl) - vertexPos.y();
+
   mDca = TMath::Sqrt(xvert * xvert + yvert * yvert);
 
-  StFtpcMomentumFit *Fit = new StFtpcMomentumFit(&vertexPos, Hit, numHits);
-
-  if (id_start_vertex < 0 ) {
-    mP.SetX(looseFit->momentum().x());
-    mP.SetY(looseFit->momentum().y());
-    mP.SetZ(looseFit->momentum().z());
-    StThreeVector<double> firstPoint(Hit[0].x(),Hit[0].y(),Hit[0].z());
-    pl = looseFit->pathLength(firstPoint,nv);
-    mV.SetX(looseFit->x(pl));
-    mV.SetY(looseFit->y(pl));
-    mV.SetZ(looseFit->z(pl));
-    mTrackLength = looseFit->pathLength(Hit[numHits-1],nv);
-    mChiSq[0] = looseFit->chi2Rad();
-    mChiSq[1] = looseFit->chi2Lin();
-    mQ = looseFit->usedCharge();
-    mRadius = 1./looseFit->curvature();
-    mTheta = mP.Theta();
-
+  if (id_start_vertex < 0 ) {    
+    firstPoint = StThreeVector<Double_t>(firstP->GetCoord().X(), firstP->GetCoord().Y(), firstP->GetCoord().Z());
+    
     if (mDca > max_Dca) {
-       mFromMainVertex = (Bool_t)false;
+      mFromMainVertex = (Bool_t)false;
     }
-
+    
     else {
-       mFromMainVertex = (Bool_t)true;
+      mFromMainVertex = (Bool_t)true;
+    }
+  }
+  
+  else {
+    
+    if (mDca > max_Dca) {
+      firstPoint = StThreeVector<Double_t>(firstP->GetCoord().X(), firstP->GetCoord().Y(), firstP->GetCoord().Z());
+      mFromMainVertex = (Bool_t)false;
+    }
+    
+    else {
+      MomentumFit(vertex);
+      
+      firstPoint = StThreeVector<Double_t>(vertexPos.x(), vertexPos.y(), vertexPos.z());
+      mFromMainVertex = (Bool_t)true;
     }
   }
 
-  else {
-
-     if (mDca > max_Dca) {
-       mP.SetX(looseFit->momentum().x());
-       mP.SetY(looseFit->momentum().y());
-       mP.SetZ(looseFit->momentum().z());
-       StThreeVector<double> firstPoint(Hit[0].x(), Hit[0].y(), Hit[0].z());
-       pl = looseFit->pathLength(firstPoint,nv);
-       mV.SetX(looseFit->x(pl));
-       mV.SetY(looseFit->y(pl));
-       mV.SetZ(looseFit->z(pl));
-       mTrackLength = looseFit->pathLength(Hit[numHits-1], nv);
-       mFromMainVertex = (Bool_t)false;
-       mChiSq[0] = looseFit->chi2Rad();
-       mChiSq[1] = looseFit->chi2Lin();
-       mQ = looseFit->usedCharge();
-       mRadius = 1./looseFit->curvature();
-       mTheta = mP.Theta();
-     }
-
-     else {
-       mP.SetX(Fit->momentum().x());
-       mP.SetY(Fit->momentum().y());
-       mP.SetZ(Fit->momentum().z());
-       StThreeVector<double> firstPoint(vertexPos.x(), vertexPos.y(), vertexPos.z());
-       pl = Fit->pathLength(firstPoint,nv);
-       mV.SetX(Fit->x(pl));
-       mV.SetY(Fit->y(pl));
-       mV.SetZ(Fit->z(pl));
-       mTrackLength = Fit->pathLength(Hit[numHits-1], nv);
-       mFromMainVertex = (Bool_t)true;
-       mChiSq[0] = Fit->chi2Rad();
-       mChiSq[1] = Fit->chi2Lin();
-       mQ = Fit->usedCharge();
-       mRadius = 1./Fit->curvature();
-       mTheta = mP.Theta();
-     }
-   }
+  pl = pathLength(firstPoint, nv);
+  mTrackLength = pathLength(lastPoint, nv);
   
-  delete looseFit;
-  delete Fit;
-  delete[] Hit;
+  mP.SetX(momentum().x());
+  mP.SetY(momentum().y());
+  mP.SetZ(momentum().z());
+  mV.SetX(x(pl));
+  mV.SetY(y(pl));
+  mV.SetZ(z(pl));
+
+  mChiSq[0] = chi2Rad();
+  mChiSq[1] = chi2Lin();
+  mFitRadius = 1./curvature();
+  mTheta = mP.Theta();
+
+  CalcResiduals();
+
+  //cout << id_start_vertex << " " << GetCharge() << " " << mP.x() << " " << mP.y() << " " << mP.z() << " " << mChiSq[0] << " " << mChiSq[1] << endl;
+  
+  return;
 }
 
 
@@ -637,11 +633,558 @@ Int_t StFtpcTrack::WriteTrack(fpt_fptrack_st *trackTableEntry, Int_t id_start_ve
   trackTableEntry->v[2] = mV.Z();
   trackTableEntry->length = mTrackLength;
   trackTableEntry->theta = mTheta;
-  trackTableEntry->curvature = 1/mRadius;
+  trackTableEntry->curvature = 1/mFitRadius;
   trackTableEntry->impact = mDca;
   trackTableEntry->nmax = mNMax;
   trackTableEntry->dedx = mdEdx;
   trackTableEntry->ndedx = mNumdEdxHits;
 
   return 0;
+}
+
+
+void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
+{
+  Double_t xWeight[11], yWeight[11];
+  Double_t xval[11], yval[11], zval[11];
+  Double_t xhelix[11], yhelix[11], zhelix[11];
+  Int_t i, j;
+  
+  mIterSteps = 10;
+  mYCenter = 0.;
+  mXCenter = 0.;
+
+  if (vertex) {
+    //additional point needed
+    mVertexPointOffset = 1;
+    
+    //vertex used as additional point on track
+    xval[0] = vertex->GetX() * centimeter;
+    yval[0] = vertex->GetY() * centimeter;
+    zval[0] = vertex->GetZ() * centimeter;
+    
+    // use vertex error as weight (if it exists)
+    if (vertex->GetXerr() == 0.) {
+      // assume 0.01 cm resolution
+      xWeight[0] = 100.;
+    }
+    
+    else {
+      xWeight[0] = 1./(vertex->GetXerr() * centimeter);
+    }
+    
+    if (vertex->GetYerr() == 0.) {
+      // assume 0.01 cm resolution
+      yWeight[0] = 100.;
+    }
+    
+    else {
+      yWeight[0] = 1./(vertex->GetYerr() * centimeter);
+    }        
+  }
+
+  else {
+    //no additional point needed
+    mVertexPointOffset = 0;
+  }
+  
+  Int_t backw_counter = 0;
+  // initialize position arrays
+  // these values will later be manipulated, mPoint array will not be touched   
+  for(i = 0; i < GetNumberOfPoints(); i++) {
+    backw_counter = GetNumberOfPoints() - 1 - i + mVertexPointOffset;
+    
+    xval[backw_counter] = (((StFtpcPoint*)mPoints->At(i))->GetCoord()).X() * centimeter;
+    yval[backw_counter] = (((StFtpcPoint*)mPoints->At(i))->GetCoord()).Y() * centimeter;
+    zval[backw_counter] = (((StFtpcPoint*)mPoints->At(i))->GetCoord()).Z() * centimeter;
+    
+    // hit resolution taken from hit error
+    xWeight[backw_counter] = 1./((((StFtpcPoint*)mPoints->At(i))->GetError()).X() * centimeter);
+    yWeight[backw_counter] = 1./((((StFtpcPoint*)mPoints->At(i))->GetError()).Y() * centimeter);
+  }
+
+  /////////////////////////////////////////////////////////////////////
+  // calculate first guess momentum from helix fit
+  /////////////////////////////////////////////////////////////////////
+  CircleFit(xval, yval, xWeight, yWeight, GetNumberOfPoints() + mVertexPointOffset);
+
+  LineFit(xval, yval, zval, xWeight, yWeight, GetNumberOfPoints() + mVertexPointOffset);
+
+  // determine helix parameters
+  Double_t dipAngle = fabs(atan(1/(mFitRadius*mArcSlope)));
+  
+  if(zval[1]<0) {
+    dipAngle*=-1;
+  }
+  
+  Double_t startPhase = atan((yval[0]-mYCenter)/(xval[0]-mXCenter));
+  
+  if (xval[0]-mXCenter<0) {
+    startPhase+=pi;
+  }
+  
+  else if (yval[0]-mYCenter<0) {
+    startPhase += twopi;
+  }
+  
+  Int_t orientation = 1;
+
+  if (mArcSlope * zval[1] < 0) {
+    orientation = -1;
+  }
+
+  // create helix
+  Double_t startAngle = mArcOffset + mArcSlope * zval[0];
+  Double_t startX = mXCenter + mFitRadius * cos(startAngle);
+  Double_t startY = mYCenter + mFitRadius * sin(startAngle);
+
+  StThreeVector<Double_t> startHit(startX, startY, zval[0]);
+  setParameters(1/mFitRadius, dipAngle, startPhase, startHit, orientation);
+
+  // get z-component of B-field at 0,0,0 for first momentum guess
+  Float_t pos[3] = {0, 0, 0};
+  Float_t centralField[3];
+  gufld(pos,centralField);
+  centralField[0] *= kilogauss;
+  centralField[1] *= kilogauss;
+  centralField[2] *= kilogauss;
+  mZField = (Double_t) centralField[2];
+  
+  // get momentum at track origin and charge
+  StThreeVector<Double_t> rv(0, 0, zval[0]);
+  StThreeVector<Double_t> nv(0, 0, 1);
+  Double_t pl = pathLength(rv, nv);
+  mHelixMomentum = momentumAt(pl, mZField);
+  SetCharge(charge(mZField));
+
+  // store helix fitted hit positions
+  for(i = 0; i < GetNumberOfPoints() + mVertexPointOffset; i++) {
+    StThreeVector<Double_t> rvec(0, 0, zval[i]);
+    StThreeVector<Double_t> nvec(0, 0, 1);
+    Double_t plength = pathLength(rvec, nvec);
+    xhelix[i] = x(plength);
+    yhelix[i] = y(plength);
+    zhelix[i] = z(plength);
+  }
+
+  ///////////////////////////////////////////////////////////////////////
+  // track helix momentum through measured field:
+  ///////////////////////////////////////////////////////////////////////
+
+  // initialize position and momentum
+  StThreeVector<Double_t> currentPosition(xhelix[0+mVertexPointOffset], 
+					  yhelix[0+mVertexPointOffset],
+					  zhelix[0+mVertexPointOffset]);
+  pl=pathLength(currentPosition, nv);
+  StThreeVector<Double_t> currentMomentum(momentumAt(pl, mZField));
+
+  // iterate over points
+  Double_t stepSize;
+
+  for(i = 1 + mVertexPointOffset; i < GetNumberOfPoints() + mVertexPointOffset; i++) {
+    stepSize = (zval[i] - zval[i-1]) / mIterSteps;
+    
+    // iterate between points
+    for(j = 0; j < mIterSteps; j++) {
+      // store momentum for position propagation
+      Double_t propagateXMomentum = currentMomentum.x();
+      Double_t propagateYMomentum = currentMomentum.y();
+      Double_t propagateZMomentum = currentMomentum.z();
+      
+      // get local magnetic field
+      Float_t positionArray[3] = {currentPosition.x(), 
+				currentPosition.y(), 
+				currentPosition.z() + stepSize/2};
+      Float_t localField[3];
+      gufld(positionArray, localField);
+      StThreeVector<Double_t> fieldVector
+	((Double_t) localField[0] * kilogauss/tesla*c_light*nanosecond/meter, 
+	 (Double_t) localField[1] * kilogauss/tesla*c_light*nanosecond/meter, 
+	 (Double_t) localField[2] * kilogauss/tesla*c_light*nanosecond/meter); 
+      
+      // calculate new momentum as helix segment
+      Double_t absMomentum = abs(currentMomentum);
+      StThreeVector<Double_t> perpField = 
+	currentMomentum.cross(fieldVector) * (Double_t)mQ/absMomentum;
+      Double_t twistRadius = (absMomentum/abs(perpField)) * meter/GeV;
+      
+      Double_t stepLength = stepSize/cos(currentMomentum.theta());
+      
+      Double_t newMomentumCross = absMomentum*stepLength/twistRadius;
+      Double_t newMomentumParallel = 
+	sqrt(absMomentum * absMomentum - newMomentumCross * newMomentumCross);
+      currentMomentum.setMagnitude(newMomentumParallel);
+      StThreeVector<Double_t> momentumChange(perpField);
+      momentumChange.setMagnitude(newMomentumCross);
+      currentMomentum = currentMomentum+momentumChange;
+      
+      // propagate position
+      propagateXMomentum = (propagateXMomentum + currentMomentum.x())/2;
+      propagateYMomentum = (propagateYMomentum + currentMomentum.y())/2;
+      propagateZMomentum = (propagateZMomentum + currentMomentum.z())/2;
+      currentPosition.setX(currentPosition.x() + stepSize *
+			   (propagateXMomentum / propagateZMomentum));
+      currentPosition.setY(currentPosition.y() + stepSize *
+			   (propagateYMomentum / propagateZMomentum));
+      currentPosition.setZ(currentPosition.z() + stepSize);
+    }
+    
+    // change position array to compensate for distortion
+    StThreeVector<Double_t> rvec(0, 0, zval[i]);
+    StThreeVector<Double_t> nvec(0, 0, 1);
+    Double_t plength=pathLength(rvec, nvec);
+    
+    if (zval[1] > 0) {
+      xval[i] += (x(plength) - currentPosition.x());
+      yval[i] += (y(plength) - currentPosition.y());
+    }
+    
+    else {
+      xval[i] -= (x(plength) - currentPosition.x());
+      yval[i] -= (y(plength) - currentPosition.y());
+    }
+    
+    // calculate fit quality indicators only if needed
+    //       Double_t distHitHelix=sqrt((xval[i]-x(plength))*(xval[i]-x(plength))+(yval[i]-y(plength))*(yval[i]-y(plength)));
+    //       Double_t distHelixFit=sqrt((x(plength)-currentPosition.x())*(x(plength)-currentPosition.x())+(y(plength)-currentPosition.y())*(y(plength)-currentPosition.y()));
+    
+  }
+  
+  //////////////////////////////////////////////////////////////////////
+  // refit helix
+  //////////////////////////////////////////////////////////////////////
+  
+  CircleFit(xval, yval, xWeight, yWeight, GetNumberOfPoints()+mVertexPointOffset);
+  LineFit(xval, yval, zval, xWeight, yWeight, GetNumberOfPoints()+mVertexPointOffset);
+  
+  // determine helix parameters
+  dipAngle = fabs(atan(1/(mFitRadius*mArcSlope)));
+  
+  if (zval[1] < 0) {
+    dipAngle*=-1;
+  }
+
+  startPhase = atan((yval[0]-mYCenter)/(xval[0]-mXCenter));
+  
+  if(xval[0] - mXCenter < 0) {
+    startPhase+=pi;
+  }
+  
+  else if(yval[0]-mYCenter<0) {
+    startPhase+=twopi;
+  }
+  
+  orientation = 1;
+  
+  if (mArcSlope * zval[1] < 0) {
+    orientation = -1;
+  }
+  
+  // set helix parameters to new values
+  startAngle = mArcOffset + mArcSlope * zval[0];
+  startX = mXCenter + mFitRadius * cos(startAngle);
+  startY = mYCenter + mFitRadius * sin(startAngle);
+  startHit.setX(startX);
+  startHit.setY(startY);
+  setParameters(1/mFitRadius, dipAngle, startPhase, startHit, orientation);
+  
+  // set final momentum value
+  pl = pathLength(rv, nv);
+  mFullMomentum = momentumAt(pl, mZField);
+}
+
+
+//////////////////////////////////////////////////////////////////
+// Circle fitting program
+//
+// This function will fit a circle to the points in the matrix x and y.
+// 'num' is the number of points in x and y
+// 'xc' is the found center in x
+// 'yc' is the found center in y
+// 'R' is the radius of the fitted circle
+// 'chi2' error in fit
+//
+// Written by Mike Heffner Sept 21 1998
+// error calculation added Oct 3 1998, Mike Heffner
+// fit with point errors added May 1999 Holm Huemmler
+//
+// Fitting algorithm by: N.Chernov,G.Ososkov, Computer Physics 
+//          Communications 33(1984) 329-333
+//////////////////////////////////////////////////////////////////  
+
+
+Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t yw[], Int_t num)
+{
+#ifndef __IOSTREAM__
+#include <iostream.h>
+#endif
+  
+  Int_t i;
+  Int_t debug = 0; //set to 1 for debug messages
+  
+  if(num ==0 ) {
+    // added to remove error from zero input
+    return 0;
+  }
+
+  //-------------------------------------------------
+  ////////////////////////////////////////////////
+  // calculate the center of gravity of the points.
+  // then transform to that origin
+  Double_t xav = 0;
+  Double_t yav = 0;
+  Double_t xwav = 0;
+  Double_t ywav = 0;
+  Double_t wei[11];
+
+  for(i=0;i<num;i++) {
+    wei[i] = xw[i] + yw[i];
+    xav += x[i] * wei[i];
+    yav += y[i] * wei[i];
+    xwav += wei[i];
+    ywav += wei[i];
+  }
+  
+  xav = xav/xwav;
+  yav = yav/ywav;
+  
+  cout.precision(16);
+  
+  if(debug) {
+    cout << "from circle fitting program" << endl;
+  }
+
+  for(i=0;i<num;i++) {
+      
+    if(debug) { 
+      cout << "x: " << x[i] << " y: " << y[i] << "xw: " << xw[i] << " yw: " << yw[i] <<endl;
+    }
+
+    x[i] = x[i] - xav;
+    y[i] = y[i] - yav;
+  }
+  
+  /////////////////////////////////////////////////
+  // calculate some moments of the points
+  
+  Double_t F = 0;
+  Double_t G = 0;
+  Double_t H = 0;
+  Double_t P = 0;
+  Double_t Q = 0;
+  Double_t T = 0;
+  Double_t gamma0 = 0;
+  Double_t wF = 0;
+  Double_t wG = 0;
+  Double_t wH = 0;
+  Double_t wP = 0;
+  Double_t wQ = 0;
+  Double_t wT = 0;
+  Double_t wgamma0 = 0;
+  
+  // change error parameters to 1d, 2d errors not usable in this fit
+  for(i = 0; i < num; i++) {
+    F += wei[i] * (3 * x[i] * x[i] + y[i] * y[i]);
+    wF += wei[i];
+    G += wei[i] * (x[i] * x[i] + 3 * y[i] * y[i]);
+    wG += wei[i];
+    H += wei[i] * 2 * x[i] *y[i];
+    wH += wei[i];
+    P += wei[i] * x[i] * (x[i] * x[i] + y[i] * y[i]);
+    wP += wei[i];
+    Q += wei[i] * y[i] * (x[i] * x[i] + y[i] * y[i]);
+    wQ += wei[i];
+    T += wei[i] * (x[i] * x[i] + y[i] * y[i]) * (x[i] * x[i] + y[i] * y[i]);
+    wT += wei[i];
+    gamma0 += wei[i] * (x[i] * x[i] + y[i] * y[i]);
+    wgamma0 += wei[i];
+  }
+
+  gamma0 = gamma0/wgamma0;
+  F = F/wF;
+  G = G/wG;
+  H = H/wH;
+  P = P/wP;
+  Q = Q/wQ;
+  T = T/wT;
+  
+
+  Double_t  A = -F -G;
+  Double_t  B =  F * G - T - H * H;
+  Double_t  C =  T * (F + G) - 2 * (P *P + Q * Q);
+  Double_t  D =  T * (H * H - F * G) + 2 * (P * P * G + Q * Q * F) - 4 * P * Q *H;
+  
+  Double_t A0 = A / gamma0;
+  Double_t B0 = B / (gamma0*gamma0);
+  Double_t C0 = C / (gamma0*gamma0*gamma0);
+  Double_t D0 = D / (gamma0*gamma0*gamma0*gamma0);
+
+  ///////////////////////////////////////////////////////
+  // now solve the equation by Newton method
+
+  Int_t MaxIter = 100;
+  Double_t w = 1.;
+  Double_t wNew = 0.;
+  Double_t f = 0., fp = 0.;
+  Double_t xc = 0., yc = 0.;
+  
+  if(debug) { 
+    cout << "Solving by Newton method" << endl;
+  }
+  
+  for(i = 0; i < MaxIter; i++) {
+    f = w*w*w*w + A0 * w*w*w + B0 * w*w + C0 * w + D0;
+    fp = 4 * w*w*w + 3 * A0 * w*w + 2 * B0 * w + C0;
+    wNew = w - f / fp;
+    
+    if(debug) { 
+      cout << "Iteration Number" << i << endl;
+    }
+    
+    if ((wNew-w) < 10e-16 && (w-wNew) < 10e-16) {
+      break;
+    }
+    
+    w = wNew;
+  }
+  
+  ////////////////////////////////////////////
+  // compute the output variables
+  Double_t gamma = gamma0 * wNew;
+  Double_t b = (Q - H * P / (F - gamma)) / (G - gamma - H * H / (F - gamma));
+  Double_t a = (P - H * b) / (F - gamma);
+  
+  Double_t R = 0;
+  if ((wNew-w) < 10e-16 && (w-wNew) < 10e-16) {
+    R = sqrt(a * a + b * b + gamma);
+    xc = a + xav;
+    yc = b + yav;
+  }
+  
+  // compute chi2
+  Double_t chi2 = 0.;
+  Double_t variance = 0.;
+  //   Double_t wchi2=0;
+  //   for(i=0;i<num;i++)
+  //     {
+  //       x[i] = x[i] + xav;
+  //       y[i] = y[i] + yav;
+  
+  //       Double_t err = R - sqrt(xw[i]*(x[i]-xc)*xw[i]*(x[i]-xc) 
+  // 			    + yw[i]*(y[i]-yc)*yw[i]*(y[i]-yc));
+  //       chi2 += err*err;
+  //       wchi2 += xw[i]*xw[i]+yw[i]*yw[i];
+  //     }
+  //   chi2 *= num / wchi2;
+  
+  
+  for (i = 0; i < num; i++) {
+    x[i] = x[i] + xav;
+    y[i] = y[i] + yav;
+    
+    Double_t err = R - sqrt((x[i] - xc) * (x[i] - xc) + (y[i] - yc) * (y[i] - yc));
+    chi2 += err * err;
+    
+    if(i>0) {
+      // approximation for sigma r, more precise using atan...
+      variance += 1 / (xw[i] * xw[i]) + 1 / (yw[i] * yw[i]);
+    }
+  }
+  
+  variance /= (num-1);
+  chi2 /= variance;
+  
+  mXCenter = xc;
+  mYCenter = yc;
+  mFitRadius = R;
+  mChi2Rad = chi2;
+  
+  return 1;
+}
+
+void StFtpcTrack::LineFit(Double_t *xval, Double_t *yval, Double_t *zval, Double_t *xw, Double_t *yw, Int_t num)
+{
+  Double_t x_ss = 0., x_sang = 0., x_sz = 0., x_szang = 0., x_szz = 0.;
+  Double_t weight, t;
+  Int_t i;
+  Double_t angle = 0., lastangle = 0.;
+  
+  for(i = 0; i < num; i++) {
+    // calculate angle and eliminate steps in atan function
+    angle = atan((yval[i]-mYCenter)/(xval[i]-mXCenter));
+    
+    if (xval[i] - mXCenter < 0) {
+      angle += pi;
+    }
+    
+    else if (yval[i] - mYCenter < 0) {
+      angle += twopi;
+    }
+    
+    // shift into same phase
+    if (i != 0) {
+      if(angle>lastangle+pi) angle -= twopi;
+      if(angle<lastangle-pi) angle += twopi;
+    }
+    
+    lastangle = angle;
+    
+    // do sums
+    weight = sqrt(xw[i] * xw[i] * cos(angle) * cos(angle)
+		  + yw[i] * yw[i] * sin(angle) * sin(angle));
+    x_ss += weight;
+    x_sang += weight * angle;
+    x_sz += weight * zval[i];
+    x_szang += weight * zval[i] * angle;
+    x_szz += weight * zval[i] * zval[i];
+  }
+  
+  t = x_ss * x_szz - x_sz * x_sz;
+  
+  if (t != 0) {
+    mArcOffset = ((x_szz * x_sang) - (x_sz * x_szang)) / t;
+    mArcSlope = ((x_ss * x_szang) - (x_sz * x_sang)) / t;
+  }
+  
+  else {
+    mArcOffset = 0;
+    mArcSlope = 0;
+  }
+  
+  Double_t chi2 = 0., variance = 0.;
+  
+  for(i = 0; i < num; i++) {      
+    Double_t angle = atan((yval[i] - mYCenter) / (xval[i] - mXCenter));
+    
+    if (xval[i]-mXCenter<0) {
+      angle+=pi;
+    }
+    
+    else if (yval[i]  -mYCenter < 0) {
+      angle += twopi;
+    }
+
+    Double_t lastangle = mArcOffset + mArcSlope*zval[i];
+    
+    // shift into same phase
+    if (i != 0){
+      if(angle>lastangle+pi) angle-=twopi;
+      if(angle<lastangle-pi) angle+=twopi;
+    }
+    
+    Double_t err = (angle - (mArcOffset + mArcSlope*zval[i]));
+    chi2 += err*err;
+    
+    if(i>0) {
+      // approximation for sigma r, more precise using atan...
+      Double_t temp= ((1 / xw[i] * 1 / xw[i]) + (1 / yw[i] * 1 / yw[i]))
+	* ((mArcSlope * (zval[i] - zval[0])) * (mArcSlope * (zval[i] - zval[0])))
+	/ ((xval[i] - xval[0]) * (xval[i] - xval[0]) + (yval[i] - yval[0]) * (yval[i] - yval[0]));
+      variance += temp;
+    }
+  }
+  
+  variance /= (num-1);
+  chi2 /= variance;
+  mChi2Lin = chi2;
 }

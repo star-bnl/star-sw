@@ -1,5 +1,14 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.29 2002/03/25 12:50:56 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.30 2002/04/05 16:51:00 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.30  2002/04/05 16:51:00  oldi
+// Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
+// Each Track inherits from StHelix, now.
+// Therefore it is possible to calculate, now:
+//  - residuals
+//  - vertex estimations obtained by back extrapolations of FTPC tracks
+// Chi2 was fixed.
+// Many additional minor (and major) changes.
+//
 // Revision 1.29  2002/03/25 12:50:56  oldi
 // Customization of Warnings.
 //
@@ -91,7 +100,7 @@
 // (depending on how far the vertex is off) are printed.
 //
 // Revision 1.6  2000/06/13 14:25:56  oldi
-// Changed cout to gMessMgr->Message().
+// Changed couts to gMessMgr->Message().
 // Printed output changed (slightly).
 //
 // Revision 1.5  2000/06/07 11:16:29  oldi
@@ -193,13 +202,28 @@ Int_t StFtpcTrackMaker::Init()
   m_track        = new TH1F("fpt_track"     ,"FTPC: number of tracks found"                    ,100, 1. ,5000. );    
   m_nrec_track   = new TH2F("fpt_hits_mom"  ,"FTPC: points found per track vs. momentum"       , 10, 1. ,  11. , 100, 1., 20.);
 
-  m_padvstime_West = new TH2F("fpt_padvstimeW","FTPCW padlength vs. timelength",12,0.5,12.5,10,0.5,10.5);
-  m_padvstime_East = new TH2F("fpt_padvstimeE","FTPCE padlength vs. timelength",12,0.5,12.5,10,0.5,10.5);
-  m_maxadc_West = new TH1F("fpt_maxadcW","FTPCW MaxAdc",50,0.5,50.5);
-  m_maxadc_East = new TH1F("fpt_maxadcE","FTPCE MaxAdc",50,0.5,50.5);
-  m_charge_West = new TH1F("fpt_chargeW","FTPCW charge",50,0.5,500.5);
-  m_charge_East = new TH1F("fpt_chargeE","FTPCE charge",50,0.5,500.5);
+  m_padvstime_West = new TH2F("fpt_padvstimeW", "FTPCW padlength vs. timelength", 12, 0.5, 12.5, 10, 0.5, 10.5);
+  m_padvstime_East = new TH2F("fpt_padvstimeE", "FTPCE padlength vs. timelength", 12, 0.5, 12.5, 10, 0.5, 10.5);
+  m_maxadc_West = new TH1F("fpt_maxadcW", "FTPCW MaxAdc", 50, 0.5, 50.5);
+  m_maxadc_East = new TH1F("fpt_maxadcE", "FTPCE MaxAdc", 50, 0.5, 50.5);
+  m_charge_West = new TH1F("fpt_chargeW", "FTPCW charge", 50, 0.5, 500.5);
+  m_charge_East = new TH1F("fpt_chargeE", "FTPCE charge", 50, 0.5, 500.5);
  
+  m_xres = new TH1F("fpt_x_res", "FTPC x residuals", 100, -0.25, 0.25);
+  m_yres = new TH1F("fpt_y_res", "FTPC y residuals", 100, -0.25, 0.25);
+  m_rres = new TH1F("fpt_r_res", "FTPC r residuals", 100, -0.25, 0.25);
+  m_phires = new TH1F("fpt_phi_res", "FTPC phi residuals", 100, -0.01, 0.01);
+
+  m_rres_vs_r_east = new TH2F("fpt_r_res_vs_r_east", "FTPC east r residuals vs. r", 100, -0.25, 0.25, 100, 6.5, 31.);
+  m_phires_vs_r_east = new TH2F("fpt_phi_res_vs_r_east", "FTPC east phi residuals vs. r", 100, -0.01, 0.01, 100, 6.5, 31.);
+  m_rres_vs_r_west = new TH2F("fpt_r_res_vs_r_west", "FTPC west r residuals vs. r", 100, -0.25, 0.25, 100, 6.5, 31.);
+  m_phires_vs_r_west = new TH2F("fpt_phi_res_vs_r_west", "FTPC west phi residuals vs. r", 100, -0.01, 0.01, 100, 6.5, 31.);
+
+  m_vertex_east_xy = new TH2F("fpt_vertex_east_xy", "FTPC east vertex xy estimation with resp. to TPC vertex", 80, -2., 2., 80, -2., 2.);
+  m_vertex_east_z = new TH1F("fpt_vertex_east_z", "FTPC east vertex z estimation with resp. to TPC vertex", 100, -5., 5.);
+  m_vertex_west_xy = new TH2F("fpt_vertex_west_xy", "FTPC west vertex xy estimation with resp. to TPC vertex", 80, -2., 2., 80, -2., 2.);
+  m_vertex_west_z = new TH1F("fpt_vertex_west_z", "FTPC west vertex z estimation with resp. to TPC vertex", 100, -5., 5.);
+
   return StMaker::Init();
 }
 
@@ -225,14 +249,16 @@ Int_t StFtpcTrackMaker::Make()
     return kStWarn;
   }
   
-  Float_t primary_vertex_x = 0.0;
-  Float_t primary_vertex_y = 0.0;
-  Float_t primary_vertex_z = 0.0;
-  Int_t   primary_vertex_id = 0;
-  Int_t iflag = 0;
+  Float_t primary_vertex_x = 0.;
+  Float_t primary_vertex_y = 0.;
+  Float_t primary_vertex_z = 0.;
+  Float_t primary_vertex_x_err = 0.;
+  Float_t primary_vertex_y_err = 0.;
+  Float_t primary_vertex_z_err = 0.;
+    Int_t primary_vertex_id = 0;
+    Int_t iflag = 0;
   
   // Use Primary vertex if it exists
-
   St_DataSet * primary = GetDataSet("primary");
   if (primary) {
    St_dst_vertex *vertex = (St_dst_vertex *) primary->Find("vertex");
@@ -243,7 +269,11 @@ Int_t StFtpcTrackMaker::Make()
              primary_vertex_x = primvtx->x;
              primary_vertex_y = primvtx->y;
              primary_vertex_z = primvtx->z;
-             iflag = primvtx->iflag;
+             if (isnan(primary_vertex_x_err = TMath::Sqrt(primvtx->covar[0]))) primary_vertex_x_err = 0.;
+             if (isnan(primary_vertex_y_err = TMath::Sqrt(primvtx->covar[2]))) primary_vertex_y_err = 0.;
+             if (isnan(primary_vertex_z_err = TMath::Sqrt(primvtx->covar[5]))) primary_vertex_z_err = 0.;
+	     iflag = primvtx->iflag;
+	     primary_vertex_id = primvtx->id;
              break;
           }       
         }
@@ -270,9 +300,12 @@ Int_t StFtpcTrackMaker::Make()
          primary_vertex_x =  preVtxPtr->x;
          primary_vertex_y =  preVtxPtr->y;
          primary_vertex_z =  preVtxPtr->z;
-         primary_vertex_id = preVtxPtr->id;
-         iflag = preVtxPtr->iflag;
-         break;
+         if (isnan(primary_vertex_x_err = TMath::Sqrt(preVtxPtr->covar[0]))) primary_vertex_x_err = 0.;
+         if (isnan(primary_vertex_y_err = TMath::Sqrt(preVtxPtr->covar[2]))) primary_vertex_y_err = 0.;
+         if (isnan(primary_vertex_z_err = TMath::Sqrt(preVtxPtr->covar[5]))) primary_vertex_z_err = 0.;
+	 iflag = preVtxPtr->iflag;
+	 primary_vertex_id = preVtxPtr->id;
+	 break;
        }
      }
     }  // end of if (preVertex)
@@ -280,11 +313,11 @@ Int_t StFtpcTrackMaker::Make()
  
   if (iflag == 1) {
     // TPC  Vertex used
-    gMessMgr->Message("", "I", "OST") << "Using Tpc Vertex (" << primary_vertex_x << ", " << primary_vertex_y << ", " << primary_vertex_z <<  ") for Ftpc tracking." << endm;
+    gMessMgr->Message("", "I", "OST") << "Using Tpc Vertex (" << primary_vertex_x << "+-" << primary_vertex_x_err << ", " << primary_vertex_y << "+-" << primary_vertex_y_err << ", " << primary_vertex_z << "+-" << primary_vertex_z_err <<  ") for Ftpc tracking." << endm;
   }
   if (iflag == 101) {
     // TPC  preVertex used
-    gMessMgr->Message("", "I", "OST") << "Using Tpc preVertex estimation (" << primary_vertex_x << ", " << primary_vertex_y << ", " << primary_vertex_z <<  ") for Ftpc tracking." << endm;
+    gMessMgr->Message("", "I", "OST") << "Using Tpc preVertex estimation (" << primary_vertex_x << "+-" << primary_vertex_x_err << ", " << primary_vertex_y << "+-" << primary_vertex_y_err << ", " << primary_vertex_z << "+-" << primary_vertex_z_err <<  ") for Ftpc tracking." << endm;
   }
   if (iflag == 0) {
     //  No vertex found, no FTPC tracking is possible
@@ -339,8 +372,9 @@ Int_t StFtpcTrackMaker::Make()
   }
 
 
-  Double_t vertexPos[3] = {primary_vertex_x, primary_vertex_y, primary_vertex_z};
-  StFtpcConfMapper *tracker = new StFtpcConfMapper(fcl_fppoint, vertexPos, Debug());
+  Double_t vertexPos[6] = {primary_vertex_x,     primary_vertex_y,     primary_vertex_z, 
+			   primary_vertex_x_err, primary_vertex_y_err, primary_vertex_z_err};
+  StFtpcConfMapper *tracker = new StFtpcConfMapper(fcl_fppoint, vertexPos, kTRUE);
 
   // tracking 
   tracker->MainVertexTracking();
@@ -356,6 +390,7 @@ Int_t StFtpcTrackMaker::Make()
 
   // momentum fit, dE/dx calculation, write tracks to tables
   tracker->FitAnddEdxAndWrite(fpt_fptrack, m_fdepar->GetTable(), -primary_vertex_id);
+  tracker->EstimateVertex(tracker->GetVertex(), 1);
 
   if (Debug()) {
     gMessMgr->Message("", "I", "OST") << "Total time consumption         " << tracker->GetTime() << " s." << endm;
@@ -399,7 +434,7 @@ Int_t StFtpcTrackMaker::Make()
   delete eval;
   */
 
-  MakeHistograms(tracker->GetTracks());
+  MakeHistograms(tracker);
 
   delete tracker;
 
@@ -418,7 +453,7 @@ void StFtpcTrackMaker::MakeHistograms()
   St_DataSetIter ftpc_tracks(m_DataSet);
 
   //Get the table
-  St_fpt_fptrack *trk = NULL;
+  St_fpt_fptrack *trk = 0;
   trk = (St_fpt_fptrack *) ftpc_tracks.Find("fpt_fptrack");
 
   if (trk) 
@@ -439,13 +474,20 @@ void StFtpcTrackMaker::MakeHistograms()
 }
 
 //_____________________________________________________________________________
-void   StFtpcTrackMaker::MakeHistograms(TObjArray *foundtracks)
+void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 {
   // Fill histograms.
 
-  for (Int_t t_counter = 0; t_counter < foundtracks->GetEntriesFast(); t_counter++) 
+  m_vertex_east_xy->Fill(tracker->GetVertexEast()->GetX()-tracker->GetVertex()->GetX(),
+			 tracker->GetVertexEast()->GetY()-tracker->GetVertex()->GetY());
+  m_vertex_east_z->Fill(tracker->GetVertexEast()->GetZ()-tracker->GetVertex()->GetZ());
+  m_vertex_west_xy->Fill(tracker->GetVertexWest()->GetX()-tracker->GetVertex()->GetX(),
+			 tracker->GetVertexWest()->GetY()-tracker->GetVertex()->GetY());
+  m_vertex_west_z->Fill(tracker->GetVertexWest()->GetZ()-tracker->GetVertex()->GetZ());
+
+  for (Int_t t_counter = 0; t_counter < tracker->GetTracks()->GetEntriesFast(); t_counter++) 
     {
-      StFtpcTrack *tracks = (StFtpcTrack*) foundtracks->At(t_counter);
+      StFtpcTrack *tracks = (StFtpcTrack*) tracker->GetTracks()->At(t_counter);
       TObjArray   *fhits  = (TObjArray*) tracks->GetHits();
       
       m_nrec_track->Fill(tracks->GetNumberOfPoints(),tracks->GetP());
@@ -458,17 +500,36 @@ void   StFtpcTrackMaker::MakeHistograms(TObjArray *foundtracks)
 	{
 	  StFtpcPoint *mhit = (StFtpcPoint *) fhits->At(h_counter);
 
+	  // Residuals
+	  if (mhit->GetUsage()) {
+	    m_xres->Fill(mhit->GetXResidual());
+	    m_yres->Fill(mhit->GetYResidual());
+	    m_rres->Fill(mhit->GetRResidual());
+	    m_phires->Fill(mhit->GetPhiResidual());
+	  }
+
 	  if (mhit->GetPadRow()<=10)
 	    {
 	      m_maxadc_West->Fill(mhit->GetMaxADC());
 	      m_charge_West->Fill(mhit->GetCharge());
 	      m_padvstime_West->Fill(mhit->GetNumberBins(),mhit->GetNumberPads());
+
+	      if (mhit->GetUsage()) {
+		m_rres_vs_r_west->Fill(mhit->GetRResidual(), mhit->GetRadius());
+		m_phires_vs_r_west->Fill(mhit->GetPhiResidual(), mhit->GetRadius());
+	      }
 	    }
+
 	  else if (mhit->GetPadRow()>=11)
 	    {
 	      m_maxadc_East->Fill(mhit->GetMaxADC());
 	      m_charge_East->Fill(mhit->GetCharge());
 	      m_padvstime_East->Fill(mhit->GetNumberBins(),mhit->GetNumberPads());
+
+	      if (mhit->GetUsage()) {
+		m_rres_vs_r_east->Fill(mhit->GetRResidual(), mhit->GetRadius());
+		m_phires_vs_r_east->Fill(mhit->GetPhiResidual(), mhit->GetRadius());
+	      }
 	    }
 	}
     }
@@ -480,7 +541,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.29 2002/03/25 12:50:56 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.30 2002/04/05 16:51:00 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {

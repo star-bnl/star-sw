@@ -1,5 +1,14 @@
-// $Id: StFtpcPoint.hh,v 1.7 2002/01/29 11:08:03 oldi Exp $
+// $Id: StFtpcPoint.hh,v 1.8 2002/04/05 16:50:40 oldi Exp $
 // $Log: StFtpcPoint.hh,v $
+// Revision 1.8  2002/04/05 16:50:40  oldi
+// Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
+// Each Track inherits from StHelix, now.
+// Therefore it is possible to calculate, now:
+//  - residuals
+//  - vertex estimations obtained by back extrapolations of FTPC tracks
+// Chi2 was fixed.
+// Many additional minor (and major) changes.
+//
 // Revision 1.7  2002/01/29 11:08:03  oldi
 // Write() renamed to WriteCluster() resp. WriteTrack() to avoid compiler warnings.
 // As a result the functions TObject::Write() are available again (directly).
@@ -54,6 +63,7 @@
 #include "TObject.h"
 #include "TObjArray.h"
 #include "TVector3.h"
+#include "TMath.h"
 
 #include "tables/St_fcl_fppoint_Table.h"
 #include "tables/St_ffs_gepoint_Table.h"
@@ -74,6 +84,11 @@ private:
   Int_t     mNextHitNumber; // number of next hit on same track
   Int_t     mTrackNumber;   // track number to which this cluster belongs to
   
+  Double_t  mXResidual;     // x distance of measured point to momentum fit
+  Double_t  mYResidual;     // y distance of measured point to momentum fit
+  Double_t  mRResidual;     // r of measured point to r of momentum fit
+  Double_t  mPhiResidual;   // angle of measured point to angle of momentum fit
+
   // additional input variables from cluster finder
   
   Long_t    mPadRow;        // FTPC row number
@@ -117,6 +132,7 @@ public:
   Double_t GetX()          const { return mCoord.X();   }
   Double_t GetY()          const { return mCoord.Y();   }
   Double_t GetZ()          const { return mCoord.Z();   }
+  Double_t GetRadius()     const { return TMath::Sqrt(mCoord.X()*mCoord.X() + mCoord.Y()*mCoord.Y()); }
   Double_t GetXerr()       const { return mError.X();   }
   Double_t GetYerr()       const { return mError.Y();   }
   Double_t GetZerr()       const { return mError.Z();   }
@@ -139,6 +155,11 @@ public:
   Long_t   GetCharge()        const { return mCharge;        }
   Long_t   GetFlags()         const { return mFlags;         }
   
+  Double_t GetXResidual()     const { return mXResidual;     }
+  Double_t GetYResidual()     const { return mYResidual;     }
+  Double_t GetRResidual()     const { return mRResidual;     }
+  Double_t GetPhiResidual()   const { return mPhiResidual;   }
+
   // setter  
   void    SetX(Double_t f)        {     mCoord.SetX(f); }
   void    SetY(Double_t f)        {     mCoord.SetY(f); } 
@@ -161,6 +182,10 @@ public:
   void    SetSigmaPhi(Double_t f)   {      mSigmaPhi =  f;  }
   void    SetSigmaR(Double_t f)     {        mSigmaR =  f;  }
   
+  void    SetXResidual(Double_t f)  {      mXResidual = f;  }
+  void    SetYResidual(Double_t f)  {      mYResidual = f;  }
+  void    SetPhiResidual(Double_t f){    mPhiResidual = f;  }
+  void    SetRResidual(Double_t f)  {      mRResidual = f;  }
   
   ClassDef(StFtpcPoint, 1)   //Ftpc point class
 };

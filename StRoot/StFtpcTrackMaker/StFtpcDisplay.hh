@@ -1,5 +1,14 @@
-// $Id: StFtpcDisplay.hh,v 1.7 2001/07/13 18:01:03 oldi Exp $
+// $Id: StFtpcDisplay.hh,v 1.8 2002/04/05 16:50:28 oldi Exp $
 // $Log: StFtpcDisplay.hh,v $
+// Revision 1.8  2002/04/05 16:50:28  oldi
+// Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
+// Each Track inherits from StHelix, now.
+// Therefore it is possible to calculate, now:
+//  - residuals
+//  - vertex estimations obtained by back extrapolations of FTPC tracks
+// Chi2 was fixed.
+// Many additional minor (and major) changes.
+//
 // Revision 1.7  2001/07/13 18:01:03  oldi
 // New function WriteData() added. It writes TPolyMarkers and TPolyLine3Ds to
 // a file which can be used to display results (pictures) offline.
@@ -117,8 +126,8 @@ public:
   void  WriteData(Char_t *filename);                                                           // writes clusters and tracks to file
   void  TrackInfo();                                                                           // plots single tracks
   void  ShowClusters();                                                                        // displays clusters
-  void  ShowTracks(Int_t trackanz = 0, Int_t trackarray[] = NULL);                             // displays tracks
-  void  ShowEvalTracks(MIntArray *splitArr = NULL, MIntArray *uncleanArr = NULL, MIntArray *clusterArr = NULL);                    // displays evaluated tracks
+  void  ShowTracks(Int_t trackanz = 0, Int_t trackarray[] = 0);                               // displays tracks
+  void  ShowEvalTracks(MIntArray *splitArr = 0, MIntArray *uncleanArr = 0, MIntArray *clusterArr = 0);   // displays evaluated tracks
   void  FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Bool_t geant_hits, 
 		  Float_t eta_low, Float_t eta_up, Float_t pt_low, Float_t pt_up, Bool_t blue);// fills geant histograms
   void  FillFound(Bool_t good_found, Bool_t st, MIntArray *split, MIntArray *unclean, MIntArray *found_hits, 

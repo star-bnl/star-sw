@@ -1,5 +1,14 @@
-// $Id: StFtpcVertex.hh,v 1.8 2002/03/15 10:04:41 oldi Exp $
+// $Id: StFtpcVertex.hh,v 1.9 2002/04/05 16:51:20 oldi Exp $
 // $Log: StFtpcVertex.hh,v $
+// Revision 1.9  2002/04/05 16:51:20  oldi
+// Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
+// Each Track inherits from StHelix, now.
+// Therefore it is possible to calculate, now:
+//  - residuals
+//  - vertex estimations obtained by back extrapolations of FTPC tracks
+// Chi2 was fixed.
+// Many additional minor (and major) changes.
+//
 // Revision 1.8  2002/03/15 10:04:41  oldi
 // Adjust eta segments not only to z-position of vertex but to x,y as well.
 // Avoid tracking if vertex position is outside of the inner radius of the Ftpc.
@@ -61,6 +70,8 @@
 #include "TMath.h"
 #include "TVector3.h"
 #include "St_DataSet.h"
+#include "tables/St_dst_vertex_Table.h"
+
 
 class fcl_fppoint_st;
 
@@ -77,8 +88,13 @@ public:
   StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F *vtx_pos = 0);   // constructor from points        
   StFtpcVertex(TObjArray *hits, TH1F *vtx_pos = 0);                                  // constructor from point array   
   StFtpcVertex(St_DataSet *const geant);                                             // constructor from geant
-  StFtpcVertex(Double_t pos[3]);                                                     // constructor from array of doubles
-  StFtpcVertex(Double_t x, Double_t y, Double_t z);                                  // constructor from doubles
+  StFtpcVertex(dst_vertex_st *vertex);                                               // constructor from dst vertex
+  StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t west);                // constructor form track array
+  StFtpcVertex(Double_t pos[6]);                                                     // constructor from array of doubles
+  StFtpcVertex(Double_t pos[3], Double_t err[3]);                                    // constructor from arrays of doubles (with errors)
+  StFtpcVertex(Double_t x,     Double_t y,     Double_t z, 
+	       Double_t x_err, Double_t y_err, Double_t z_err);                      // constructor from doubles with errors
+  StFtpcVertex(const StFtpcVertex &vertex);                                          // Copy constructor
   virtual  ~StFtpcVertex();                                                          // destructor
 
   // getter
@@ -101,6 +117,8 @@ public:
   void SetYerr(Double_t f) { mError.SetY(f); }
   void SetZerr(Double_t f) { mError.SetZ(f); }
   
+  StFtpcVertex& operator=(const StFtpcVertex &vertex);    // Assignment operator
+
   ClassDef(StFtpcVertex, 1)   //Ftpc vertex class
 };
 
