@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.168 2001/02/11 17:43:04 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.169 2001/02/12 17:46:50 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -37,7 +37,7 @@ Bfc_st BFC[] = {
   {"Y1e"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1e parameters",kFALSE},
   {"Y1h"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1h parameters",kFALSE},
   {"RY1h"        ,""  ,"","db,calib"                        ,"","","Real data with Year1h geometry",kFALSE},
-  {"Y2a"         ,""  ,"","db,calib"                      ,"","","Turn on Year 2B :asymptotic STAR",kFALSE},
+  {"Y2a"         ,""  ,"","db,calib"                      ,"","","Turn on Year 2A :asymptotic STAR",kFALSE},
   {"Y2b"         ,"" ,"","db,calib","","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
   {"NoDb"        ,""  ,"","HalfField"                               ,"","","Take out Db from Chain",kFALSE},
   {"NoHits"      ,""  ,"",""                            ,"","","Don't write hits into Event.Branch",kFALSE},
@@ -53,17 +53,20 @@ Bfc_st BFC[] = {
   {"doEvents"    ,""  ,"","xin,event,analysis,NoDb"                                       ,"","","",kFALSE},
   {"drawDst"     ,""  ,"","xin,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                  ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
-  {"Cdefault"   ,"","","tpc,ftpc,rrs,rich,l0,l3,Cdst,Kalman,tags,Tree,NoHits","","","Default chain",kFALSE}, 
-  {"Cy1a"        ,""  ,"","y1a,Cdefault"                                 ,"","","Turn on chain y1a",kFALSE},
-  {"Cy1b"        ,""  ,"","y1b,Cdefault"                                 ,"","","Turn on chain y1b",kFALSE},
-  {"Cy1c"        ,""  ,"","y1c,Cdefault"                                 ,"","","Turn on chain y1c",kFALSE},
-  {"Cy1d"        ,""  ,"","y1d,Cdefault"                                 ,"","","Turn on chain y1d",kFALSE},
-  {"cy1e"        ,""  ,"","y1e,Cdefault"                                 ,"","","Turn on chain y1h",kFALSE},
-  {"cy1h"        ,""  ,"","y1h,Cdefault"                                 ,"","","Turn on chain y1e",kFALSE},
-  {"Cy2a"        ,""  ,"","y2a,tpc,ftpc,emcY2,l0,l3,Cdst,tags,Tree,svt"  ,"","","Turn on chain y2a",kFALSE},
-  {"Cy2b"        ,""  ,"","y2b,tpc,rich,ftpc,emcY2,svt,l0,l3,Cdst,Kalman,tags,Tree,evout"
-                                                                         ,"","","Turn on chain y2b",kFALSE},
-  {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
+  {"C1default"   ,""  ,"","tpc,rrs,rich,l0,l3,Cdst,Kalman,tags,Tree,EvOut.NoHits"
+                                                                              ,"","","Year 1 chain",kFALSE}, 
+  {"C2default"   ,""  ,"","C1default,ftpc,svt"                                ,"","","Year 2 chain",kFALSE}, 
+  {"CAdefault"   ,""  ,"","tpc,l0,l3,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt"
+                                                                         ,"","","Assymptotic chain",kFALSE}, 
+  {"Cy1a"        ,""  ,"","y1a,C1default"                                ,"","","Turn on chain y1a",kFALSE},
+  {"Cy1b"        ,""  ,"","y1b,C1default"                                ,"","","Turn on chain y1b",kFALSE},
+  {"Cy1c"        ,""  ,"","y1c,C1default"                                ,"","","Turn on chain y1c",kFALSE},
+  {"Cy1d"        ,""  ,"","y1d,C1default"                                ,"","","Turn on chain y1d",kFALSE},
+  {"cy1e"        ,""  ,"","y1e,C1default"                                ,"","","Turn on chain y1h",kFALSE},
+  {"cy1h"        ,""  ,"","y1h,C1default"                                ,"","","Turn on chain y1e",kFALSE},
+  {"Cy2a"        ,""  ,"","y2a,CAdefault"                                ,"","","Turn on chain y2a",kFALSE},
+  {"Cy2b"        ,""  ,"","y2b,C2default"                                ,"","","Turn on chain y2b",kFALSE},
+  {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
