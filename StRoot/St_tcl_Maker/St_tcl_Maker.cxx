@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.37 1999/04/08 17:21:27 snelling Exp $
+// $Id: St_tcl_Maker.cxx,v 1.38 1999/04/14 13:54:56 sakrejda Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.38  1999/04/14 13:54:56  sakrejda
+// Iterator Reset() taken out of the if for pixel table creation
+//
 // Revision 1.37  1999/04/08 17:21:27  snelling
 // calculated size for tcl_tp table and create it with this size
 //
@@ -557,11 +560,11 @@ Int_t St_tcl_Maker::Make(){
 
     if (!adcxyz && m_tclPixTransOn) {  // create tfc_adcxyz Table
       if (Debug()) cout << "making adcxyz table with " << isumpix << " entries" << endl;
-      next.Reset();
       adcxyz = new St_tfc_adcxyz("adcxyz",isumpix);  next.Add(adcxyz);
       adcxyz->SetNRows(0);
     }
 
+    next.Reset();
 
     while ((sector=next())) {// loop over sectors
       Char_t *name= 0;
@@ -690,7 +693,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.37 1999/04/08 17:21:27 snelling Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.38 1999/04/14 13:54:56 sakrejda Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
