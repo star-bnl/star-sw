@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.2 2003/01/23 03:04:56 jeromel Exp $
+ * $Id: StEmcGeom.cxx,v 1.3 2003/04/16 15:27:51 suaide Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.3  2003/04/16 15:27:51  suaide
+ * small fix on default geant geometry
+ *
  * Revision 1.2  2003/01/23 03:04:56  jeromel
  * Include modif
  *
@@ -969,7 +972,7 @@ StEmcGeom::getGeantGeometryTable()
     //mCalg_st[0].shift[0]=21.0;
     //mCalg_st[0].shift[1]=0.0;
     // For year2003 configuration only
-    mCalg_st[0].shift[0]=0.0;
-    mCalg_st[0].shift[1]=0.0;
+    mCalg_st[0].shift[0]=75.0;
+    mCalg_st[0].shift[1]=105.0;
   }
 }
