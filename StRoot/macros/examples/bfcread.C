@@ -1,5 +1,8 @@
-// $Id: bfcread.C,v 1.17 1999/07/13 01:13:02 kathy Exp $
+// $Id: bfcread.C,v 1.18 1999/07/27 00:47:04 kathy Exp $
 // $Log: bfcread.C,v $
+// Revision 1.18  1999/07/27 00:47:04  kathy
+// remove the for loop from bfcread.C and replace with basically while and go to statements;  this is due to the for loop problem in CINT - see my email on 26Jul99 to starsoft
+//
 // Revision 1.17  1999/07/13 01:13:02  kathy
 // moved rch.C to obsolete, put in id,log,owner into HbtExample, removed loading of StRootEvent and changed default input file in bfcread.C and Example_readdst_qa_tables.C
 //
@@ -49,27 +52,22 @@
 
 class StChain;
 class St_DataSet;
+
 St_DataSet *Event;
 StChain *chain;
 TBrowser *brow=0;
-void Load(){
+
+void bfcread(
+ Int_t nevents=1, 
+ const char *MainFile=
+ "/disk00000/star/test/dev/tfs_Linux/Wed/year_2a/psc0208_01_40evts.dst.root")
+{
+//
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
     gSystem->Load("StTreeMaker");
 
-//    gSystem->Load("StarClassLibrary");
-//  gSystem->Load("St_QA_Maker");
-
-
-    cout << "  .. bfcread.C, have loaded libraries " << endl;
-}
-void bfcread(Int_t nevents=1, const char
-*MainFile="/afs/rhic/star/data/test/dev/tfs_Solaris/Thu/year_2a/psc0208_01_40evts.dst.root")
-
-{
-//
-  if (gClassTable->GetID("StChain") < 0) Load();
 
 //  Setup top part of chain
     chain = new StChain("bfc");
@@ -88,19 +86,21 @@ void bfcread(Int_t nevents=1, const char
 // --- now execute chain member functions
   chain->Init();
  
-  for (int iev=0;iev<nevents; iev++)
-  {
+// Event loop
+  int istat=0,i=1;
+EventLoop: if (i <= nevents && !istat) {
+    cout << "============================ Event " << i << " start" << endl;
     chain->Clear();
-    int iret = chain->Make();
-    if (iret) break;
+    istat = chain->Make(i);
+    cout << "     istat value returned from chain Make = " << istat << endl;
+    if (istat) {cout << "Last event processed. Status = " << istat << endl;}
+    i++; goto EventLoop;
+   }
 
-  }
 
-//  You are out of event loop now.  
-// Now print out contents of dataset and pop browser
-// for the last event.
-// Create browser with name=BName,title=Btitle
-    Event = chain->GetDataSet("dst");
+  cout << " bfcread: passed event loop " << endl;
+
+      Event = chain->GetDataSet("dst");
     if (Event) {
           Event->ls(9);
           brow = new TBrowser("BName","BTitle");    
@@ -110,7 +110,7 @@ void bfcread(Int_t nevents=1, const char
 // look at data in browser!  
 //  Call finish routines:
 // chain->Finish();    
-  
+
 }
  
 
