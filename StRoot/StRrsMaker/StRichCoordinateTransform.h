@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StRichCoordinateTransform.h,v 1.2 2000/02/08 23:48:19 lasiuk Exp $
+ * $Id: StRichCoordinateTransform.h,v 1.3 2000/03/12 22:20:24 lasiuk Exp $
  *
  * Author: brian made this on Jan 27, 2000
  *
@@ -16,9 +16,13 @@
  ***********************************************************************
  *
  * $Log: StRichCoordinateTransform.h,v $
- * Revision 1.2  2000/02/08 23:48:19  lasiuk
- * remove matrix from SCL
+ * Revision 1.3  2000/03/12 22:20:24  lasiuk
+ * make into a singleton class
+ * incliniation angle stored as data members
  *
+ * Revision 1.3  2000/03/12 22:20:24  lasiuk
+ * make into a singleton class
+ * incliniation angle stored as data members
  *
  * Revision 1.2  2000/02/08 23:48:19  lasiuk
  * remove matrix from SCL
@@ -43,8 +47,9 @@
 //#include "StMatrix.hh"
 
 #include "StRichCoordinates.h"
-    StRichCoordinateTransform(StRichGeometryDbInterface*);
-    StRichCoordinateTransform(); // DO NOT CALL!
+#include "StRichGeometryDbInterface.h"
+
+class StRichCoordinateTransform {
 public:
     static StRichCoordinateTransform* getTransform(StRichGeometryDbInterface*);
     static StRichCoordinateTransform* getTransform(); // do not call!
@@ -79,15 +84,19 @@ public:
 
 public:
     //
-    
+    // Routines that are public to save time from doing a complete
+    // transformation.
+    int      whichQuadrant(const StRichRawCoordinate&)   const;
+    int      whichQuadrant(const StRichLocalCoordinate&) const;
+
 protected:
     StRichCoordinateTransform(StRichGeometryDbInterface*);
     StRichCoordinateTransform(); // DO NOT CALL!
-    double   row2QuadX(int,int)      const;
-    double   pad2QuadZ(int,int)      const;
-    int      quadX2Row(double,int)   const;
-    int      quadZ2Pad(double, int)  const;
-    int      nearestInteger(double)   const;
+
+private:
+    // Transformation Routines!!
+    // Raw Data From Coordinates
+    double   quadX2Pad(double, int)  const;
     double   row2QuadY(double, int)      const;
     double   pad2QuadX(double, int)      const;
     double   quadY2Row(double, int)   const;
@@ -102,22 +111,29 @@ private:
     //StMatrix<double>  mRotation;  // (2x2)
     //StMatrix<double>  mRotate;    // (2x1)
     //StMatrix<double>  mResult;    // (2x1)
+    
+    StRichGeometryDbInterface    *mGeomDb;
 
 private:
     static StRichCoordinateTransform* mInstance;
     
-
+    int mNumberOfPadsInAQuadrantRow;
+    int mNumberOfRowsInAQuadrantColumn;
     double mPadPitch;
     double mRowPitch;
     double mXGap;
-    double mZQBound;
+    double mYGap;
     //
-    double mZLBound;
+    // For Bounds check
     double mXQBound;
     double mYQBound;
     double mXLBound;
     double mYLBound;
+    
+    //
     // Survey
+    double mInclinationAngle;
+    double mCosB;
     double mSinB;
     double mRadialDistanceToRich;
 
