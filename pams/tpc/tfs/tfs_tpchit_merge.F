@@ -1,5 +1,8 @@
-* $Id: tfs_tpchit_merge.F,v 1.1 1998/01/27 01:47:24 fisyak Exp $
+* $Id: tfs_tpchit_merge.F,v 1.2 1998/04/02 20:57:23 sakrejda Exp $
 * $Log: tfs_tpchit_merge.F,v $
+* Revision 1.2  1998/04/02 20:57:23  sakrejda
+* check error condition on return from tls_Quick_Sort_i
+*
 * Revision 1.1  1998/01/27 01:47:24  fisyak
 * Split sources
 *
@@ -48,6 +51,7 @@ C----------------------------------------------------------------------
 #include "tcl_tphit.inc"
 #include "tcl_tpc_index.inc"
 #include "tcl_tpc_index_type.inc"
+#include "tls_ecvalues.inc"
 C-----------------------------------------------------------------------
       RECORD / table_head_st / ctrl_h
       RECORD / tfs_fsctrl_st / ctrl(*)
@@ -90,7 +94,10 @@ C Local variables
       integer  max_hit_merge,n_hit_merge,imerge_hit_id
       parameter (max_hit_merge=50000)
       integer  imerge_id(max_hit_merge,2)
-
+      integer idI1, idI2
+      character*132 m132  ! And some message-generating space.
+      data idI1, idI2 /0, 0/
+      save idI1, idI2
 C=========================== Begin Executable Code =======================
 
 C     Initialize imerge_id.  04/16/1997   DSW.
@@ -103,6 +110,14 @@ C     the tpc_index table after tpc hit merging.
 
       iret = tls_Quick_Sort_i(tpc_index_h.nok,tpc_index(1).key2,
      >     tpc_index(2).key2, tpc_index)
+      if(iret.ne.tls_sort_normal_cv)then
+           write(m132,*) 'TFS-MERGE-I2 sorting failed ',iret
+           call Message( m132, 1, idI2 )
+           return
+      else
+           write(m132,*) 'TFS-MERGE-I2 sorting succesfull',iret
+           call Message( m132, 1, idI2 )
+      endif
 
 
 C     loop over sector-rows
@@ -333,9 +348,9 @@ C     04/16/1997  DSW
                   imerge_id(n_hit_merge,1) =  irowl
                   imerge_id(n_hit_merge,2) =  tphit(l).id
                else
-                  write(*,*)
-     >                 ' total number of merged hits exceeds  ',
-     >                 max_hit_merge
+                  write(m132,*) 'TFS-MERGE-I1 total number of merged '
+     >                          //'hits exceeds  ' ,max_hit_merge 
+                  call Message( m132, 1, idI1 )
                endif
                
  100        continue
@@ -348,9 +363,8 @@ C     Update  tphit.id in the index table for merged hits.
 C     04/16/1997  DSW
 
       do i = 1, n_hit_merge
-         irowl         = imerge_id(i,1)
-         imerge_hit_id = imerge_id(i,2)
-         tpc_index(irowl).key2 =  imerge_hit_id 
+         irowl                 = imerge_id(i,1)
+         tpc_index(irowl).key2 = imerge_id(i,2) 
       enddo
 
       return
