@@ -55,7 +55,8 @@ rm cts_ctb
 newtab cts_ctb cts_mpara 1
 rowcount cts_ctb 1
 tdm/table/cell/putvalue 'cts_ctb[0].slat_para'           1   
-tdm/table/cell/putvalue 'cts_ctb[0].adc_overflow'      256.0 
+tdm/table/cell/putvalue 'cts_ctb[0].adc_overflow'     1024.0 
+tdm/table/cell/putvalue 'cts_ctb[0].tdc_overflow'     1024.0 
 tdm/table/cell/putvalue 'cts_ctb[0].attlen'            380.0 
 tdm/table/cell/putvalue 'cts_ctb[0].cath_eff'            0.2  
 tdm/table/cell/putvalue 'cts_ctb[0].cath_surf'           0.25 
@@ -71,7 +72,6 @@ tdm/table/cell/putvalue 'cts_ctb[0].nphe_to_adc'         0.027
 tdm/table/cell/putvalue 'cts_ctb[0].position_tolerance'  0.3
 tdm/table/cell/putvalue 'cts_ctb[0].phys_noise'          0      
 tdm/table/cell/putvalue 'cts_ctb[0].surf_loss'           0.27   
-tdm/table/cell/putvalue 'cts_ctb[0].tdc_overflow'      256.0 
 tdm/table/cell/putvalue 'cts_ctb[0].start_res'          50.e-12
 tdm/table/cell/putvalue 'cts_ctb[0].time_res'          200.e-12 
 *|roughly 2ns at far end... 
