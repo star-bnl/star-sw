@@ -1,7 +1,10 @@
 /*
- * $Id: acmain.cc,v 1.4 1998/06/28 23:31:37 perev Exp $
+ * $Id: acmain.cc,v 1.5 1998/06/29 17:47:07 didenko Exp $
  *
  * $Log: acmain.cc,v $
+ * Revision 1.5  1998/06/29 17:47:07  didenko
+ * fixed error
+ *
  * Revision 1.4  1998/06/28 23:31:37  perev
  * STAF size and others
  *
@@ -87,9 +90,10 @@ for (int i=1; i<=argc; i++) { // Search -S <number>
 int getarg_ (int *k, char *args, int n)
 { int i=0;  memset (args,' ',n); 
 if (*k<__argc_save) i=strlen(__argv_save[*k]);  if (i>n) i=n;
-  strncpy(args,__argv_save[*k],i);   
+  strncpy(args,__argv_save[*k],i); return 0;   
 }
 int iargc_() { return __argc_save;}
 
 
 #endif
+
