@@ -190,11 +190,11 @@ int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger
     ( (unsigned short)(mS2003->EvtDesc.actionWdTrgCommand) * 16 * 16 * 16 ) +
     ( (unsigned short)(mS2003->EvtDesc.actionWdDaqCommand) * 16 * 16      ) +
     (                  mS2003->EvtDesc.actionWdDetectorBitMask & 0x00ff   );
-  Int_t Iret = SanityCheck2003();
-  if (Iret !=  kStOK) {
-    printf("St_trg_Maker:: Daq2003 : failed L1/L2 summary sanity check.\n"); 
-    return Iret;
-  }
+  // Int_t Iret = SanityCheck2003();
+  // if (Iret !=  kStOK) {
+  //   printf("St_trg_Maker:: Daq2003 : failed L1/L2 summary sanity check.\n"); 
+  //   return Iret;
+  // }
 
   // printf("St_trg_Maker:: Daq2003 : passed L1/L2 summary sanity check.\n"); 
   printf("St_trg_Maker:: Daq2003 : ActionWrdCommand is 0x%0x TriggerWord 0x%0x\n",
