@@ -83,7 +83,7 @@ class St_DataSet : public TNamed
             TList       *GetList()   const { return fList; }
     virtual Int_t        GetListSize() const;
             TObject     *GetMother() const { return (TObject*)GetParent();}
-    virtual TObject     *GetObject(){printf("***DUMMY GetObject***\n");return 0;}
+    virtual TObject     *GetObject() const {printf("***DUMMY GetObject***\n");return 0;}
     virtual St_DataSet  *GetParent() const { return fParent;}
     virtual Long_t       HasData() const {return 0;} 	// Check whether this dataset has extra "data-members"
     virtual TString      Path() const;                  // return the "full" path of this dataset
