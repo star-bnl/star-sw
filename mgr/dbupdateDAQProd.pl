@@ -22,15 +22,14 @@ my $DISK1 = "/star/rcf/disk00001/star";
 my $DISK2 =  "/star/rcf/data09/reco";
 my $DISK3 = "/star/rcf";
 
-my $prodSr = "P00hd";
+my $prodSr = "P00hd_1";
 my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
 
 my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetD = (
-             "P00hd/2000/06",
-             "P00hd/2000/07",
-             "P00hd/2000/08",  
+             "P00hd_1/2000/06",
+             "P00hd_1/2000/07",
 );
 
 
@@ -99,6 +98,8 @@ my @dbDaqFiles;
 my $ndbDaqFiles = 0;
 
  $nDHpssFiles = 0;
+
+
 
 for( $ll = 0; $ll<scalar(@SetD); $ll++) {
   $hpssDstDirs[$ll] = $topHpssReco . "/" . $SetD[$ll];
@@ -295,7 +296,7 @@ foreach my $jobnm (@jobSum_set){
      @parts = split ("/",$msumDir);
  
     $JOB_DIR = $jobFDir . $parts[7];
-   print "Job Dir = ", $JOB_DIR, "\n";
+#   print "Job Dir = ", $JOB_DIR, "\n";
  
    $jb_news = $JOB_DIR . "/new_jobs/" . $mjobFname;
    $jb_archive = $JOB_DIR . "/archive/" . $mjobFname;
@@ -444,8 +445,8 @@ my $daqType = 0;
    $msite = "disk_rcf";
    $mhpss = "N";
  }
-   $mtype = "reco_daq";
- print  "Path:  ", $mpath," % ","Name :",$mfName," % ","Nrun = ", $mrunId," % ", "FileSeq = ", $mfileSeq," % ", "component =", $mcomp, "\n";
+   $mtype = "daq_reco";
+# print  "Path:  ", $mpath," % ","Name :",$mfName," % ","Nrun = ", $mrunId," % ", "FileSeq = ", $mfileSeq," % ", "component =", $mcomp, "\n";
 
  $daqType = 0; 
 
@@ -471,7 +472,7 @@ foreach my $jobnm (@jobFSum_set){
         
      if ( $mfName =~ /$dfile/) {
 
-  print "Num Events: first, last, done :", $mNevtLo," % ", $mNevtHi," % ",$mNevts, "\n";  
+#  print "Num Events: first, last, done :", $mNevtLo," % ", $mNevtHi," % ",$mNevts, "\n";  
    
       print "updating FileCatalogT table\n";
  
@@ -668,7 +669,7 @@ my @output = `more $jb_sum`;
    } 
   	    if ( $sum_line =~ /Number of Events Skiped/ ) {
                  @word_sum = split (":", $sum_line);          
-       $mEvtSkip = $word_sum[1];
+       $mEvtSk = $word_sum[1];
 	       }
 	    if ( $sum_line =~ /First event/ ) {
                  @word_sum = split (":", $sum_line);          
