@@ -1,78 +1,26 @@
 #!/usr/local/bin/perl
+use File::Basename;
 Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
-my $PWD = `pwd`;
-print "Build in $PWD\n";
-#Build qw( St_dst_Maker/Conscript St_geant_Maker/Conscript St_tpt_Maker/Conscript);
-Build qw( St_base/Conscript  StarClassLibrary/Conscript );
-#Build qw (
-#	  StAnalysisMaker/Conscript
-#	  StAngleCorrMaker/Conscript
-#	  StAssociationMaker/Conscript
-#	  StChain/Conscript
-#	  StDAQMaker/Conscript
-#	  StDaqLib/Conscript
-#	  StDbLib/Conscript
-#	  StDbMaker/Conscript
-#	  StDisplay/Conscript
-#	  StDisplayMaker/Conscript
-#	  StEbyeScaMaker/Conscript
-#	  StEbyeScaTagsMaker/Conscript
-#	  StEclMaker/Conscript
-#	  StEvent/Conscript
-#	  StEventDisplayMaker/Conscript
-#	  StEventMaker/Conscript
-#	  StFlowTagMaker/Conscript
-#	  StFtpcV0Maker/Conscript
-#	  StHbtMaker/Conscript
-#	  StIOMaker/Conscript
-#	  StMagF/Conscript
-#	  StMcAnalysisMaker/Conscript
-#	  StMcEvent/Conscript
-#	  StMcEventMaker/Conscript
-#	  StMinidaqMaker/Conscript
-#	  StPadDisplayMaker/Conscript
-#	  StPeCMaker/Conscript
-#	  StRchMaker/Conscript
-#	  StSmdstMaker/Conscript
-#	  StSpectraTagsMaker/Conscript
-#	  StStrangeTagsMaker/Conscript
-#	  StTpcDb/Conscript
-#	  StTreeMaker/Conscript
-#	  StTrsMaker/Conscript
-#	  StUtilities/Conscript
-#	  StV0MiniDstMaker/Conscript
-#	  StXiMiniDstMaker/Conscript
-#	  St_LSEvent_Maker/Conscript
-#	  St_QA_Maker/Conscript
-#	  St_TLA_Maker/Conscript
-#	  St_base/Conscript
-#	  St_ctf_Maker/Conscript
-#	  St_db_Maker/Conscript
-#	  St_dst_Maker/Conscript
-#	  St_ebye_Maker/Conscript
-#	  St_ecl_Maker/Conscript
-#	  St_emc_Maker/Conscript
-#	  St_ems_Maker/Conscript
-#	  St_evg_Maker/Conscript
-#	  St_fcl_Maker/Conscript
-#	  St_fpt_Maker/Conscript
-#	  St_fss_Maker/Conscript
-#	  St_geant_Maker/Conscript
-#	  St_geom_Maker/Conscript
-#	  St_io_Maker/Conscript
-#	  St_l3cl_Maker/Conscript
-#	  St_l3t_Maker/Conscript
-#	  St_mwc_Maker/Conscript
-#	  St_rl0_Maker/Conscript
-#	  St_smdst_Maker/Conscript
-#	  St_srs_Maker/Conscript
-#	  St_stk_Maker/Conscript
-#	  St_tcl_Maker/Conscript
-#	  St_tpcdaq_Maker/Conscript
-#	  St_tpt_Maker/Conscript
-#	  St_tptsts_Maker/Conscript
-#	  St_trg_Maker/Conscript
-#	  St_tss_Maker/Conscript
-#	  St_xdfin_Maker/Conscript
-#	  StarClassLibrary/Conscript
-#);
+my $PWD = DirPath;                           print "Build in $PWD\n";
+(my $pwd = SourcePath($PWD)) =~ s/\/$PWD//; # print "new pwd = $pwd\n";
+my @sources = `ls -1 $pwd/*/*.c* $pwd/*/*.g`;# $pwd/*/*.[fF]`;# print "@sources\n";  
+my $dirlist = "";
+for $src (@sources) {
+    my $dir = dirname ($src);
+    if (grep (/$dir/,$dirlist)) {next;}
+#    if (grep (/StDbLib/,$dir))  {next;}
+#    if (grep (/StDbMaker/,$dir))  {next;}
+#    if (grep (/StEvent/,$dir))  {next;}
+#    if (grep (/StHbtMaker/,$dir))  {next;}
+#    if (grep (/StTrsMaker/,$dir))  {next;}
+#    if (grep (/StUtilities/,$dir))  {next;}
+#    if (grep (/St_fmg_Maker/,$dir))  {next;}
+#    if (grep (/StarClassLibrary/,$dir))  {next;}
+    $dirlist .= $dir . ": "; #print "dirlist = $dirlist\n";
+}
+$dirlist =~ s/$pwd\///g; #print "dirlist = $dirlist\n";
+$dirlist =~ s/\:/\/Conscript/g; #print "dirlist = $dirlist\n";
+my @dirs = split ' ',$dirlist;
+Build @dirs;
+#Build qw( StDbLib/Conscript );
+
