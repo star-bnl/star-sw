@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.93 1999/07/16 02:15:34 fisyak Exp $
+// $Id: bfc.C,v 1.94 1999/07/16 14:49:03 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -646,7 +646,7 @@ void bfc(const Int_t First,
   if (ChainFlags[kHalfField])field   = new StMagFC("field","STAR Half field",0.5);
   if (ChainFlags[kXIN]) {
     xdfMk = new St_xdfin_Maker("xdfin",InFile->Data());
-    if (xdfMK && ChainFlags[kDEBUG]) xdfMk->SetDebug();
+    if (xdfMk && ChainFlags[kDEBUG]) xdfMk->SetDebug();
     chain->SetInput("geant",".make/xdfin/.data/event/geant/Event");
   }
   if (ChainFlags[kGEANT])  {
