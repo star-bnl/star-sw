@@ -1,5 +1,8 @@
-* $Id: control.g,v 1.12 2000/01/12 00:10:44 nevski Exp $
+* $Id: control.g,v 1.13 2000/03/04 18:20:55 nevski Exp $
 * $Log: control.g,v $
+* Revision 1.13  2000/03/04 18:20:55  nevski
+* add filter for events with wrong ITRA in hits
+*
 * Revision 1.12  2000/01/12 00:10:44  nevski
 * add cvs headers
 *
@@ -22,7 +25,7 @@
       subroutine agudigi
       implicit   none
 +CDE,gcbank,gcnum,gcflag,gcunit,quest.
-      integer ISLFLAG,IEV/0/,Itrac,Ipart,Ivert,Nu,NtpcHit,Iad,
+      integer ISLFLAG,AGDIGC,IEV/0/,Itrac,Ipart,Ivert,Nu,NtpcHit,Iad,
      >        Iw,Ihit,Ltra,Ntbeam,Nttarg,Nhit,N10,
      >        Nvs(15)/15*0/,NBV(15),IP,ISTAT,IDPDG,MOTH(2),IDAU(2)
       real    VMOD,Tofg,vert(4),pvert(4),ubuf(100),Digi(15),
@@ -41,6 +44,7 @@
          <W>; ('CONTROL: empty event rejected');             go to :e:
       endif
 * 
+      if (AGDIGC(0)!=0)              goto :e:
       if (ISLFLAG('CONT','HIST')<=0) goto :r:
 
       call xntup ('Ieotri',Ieotri)
@@ -118,6 +122,41 @@
       IEOTRI = 1
       iquest(100)=Iev 
       end
+
+**********************************************************************
+*                                                                    *
+   function   AGDIGC (dummy)
+*                                                                    *
+**********************************************************************
++CDE,TYPING,GCBANK,GCUNIT,GCNUM,GCFLAG.
+  CHARACTER*4 Cset
+  Integer     AGDIGC,Iset,Idet,JS,JD,JH,JX,JXD,NW,I,J,X,dummy,Last,LTRA
+* - - - - - - - - - - - - - - - - - - - - - - - - -
+
+   AGDIGC = 0
+   Check Jset>0
+   do Iset = 1,IQ(Jset-1)
+   { JS   = LQ(Jset-Iset);                                    Check Js  > 0;
+     do Idet = 1,IQ(JS-1)
+     { JD  = LQ(JS-Idet);                                     Check JD  > 0;
+       CALL UHTOC(IQ(Jset+Iset),4,Cset,4)
+       if Cset(4:4)=='H' {X=1;JH=JHITS} else {X=2;JH=JDIGI};  Check JH  > 0;
+       Jx  = LQ(JH-Iset);                                     Check Jx  > 0;
+       JXD = LQ(JX-Idet);                                     Check JXD > 0;
+       Last= IQ(JX+Idet);                                     Check Last> 0;
+       NW  = IQ(JD+1)+IQ(JD+2*X+1)+1
+
+       I=0; if (Mod(Last,Nw)>0)  go to :e:
+       DO i=1,Last,Nw { LTRA=IQ(JXD+i); if (0>=Ltra|Ltra>Ntrack) go to :e:; }
+   } }
+   return
+:e:Print *,' CONTROL: hits wrong ',Cset,Idet,i,Ltra,Ntrack,', event rejected'
+   AGDIGC = Iset*100+Idet
+   END
+
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
