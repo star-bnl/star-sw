@@ -29,12 +29,12 @@ void help()
 void loadLibrairies(bool doProfile)
 {	
   char * list[]={"St_base","StChain","StUtilities", "St_Tables", "StarClassLibrary",
-		 "libsim_Tables","libglobal_Tables","geometry","St_g2t","St_geant_Maker","libGui",
+		 "libsim_Tables","libglobal_Tables","libGeom","geometry","St_g2t","St_geant_Maker","libGui",
 		 "StIOMaker","StTreeMaker", "St_db_Maker","StDbLib","StDbBroker",
 		 "StSvtDbMaker","StDbUtilities", "StTpcDb","StEvent","StEventMaker","StEmcUtil", 
 		 "StMcEvent","StMcEventMaker","StAssociationMaker","StDaqLib","StDAQMaker",
 		 "StDetectorDbMaker", "StSvtClassLibrary","StSvtDaqMaker",
-		 "StSvtSimulationMaker","StSvtCalibMaker", "StSvtSeqAdjMaker",
+		 "StSvtCalibMaker", "StSvtSeqAdjMaker",
 		 "StSvtClusterMaker","StMiniMcEvent","StMiniMcMaker",
 		 "Sti","StiGui", "StiEvaluator",
 		 "StiPixel",
