@@ -1,6 +1,10 @@
-// $Id: StFtpcParamReader.cc,v 1.20 2002/03/01 14:22:20 jcs Exp $
+// $Id: StFtpcParamReader.cc,v 1.21 2003/02/27 22:47:40 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.21  2003/02/27 22:47:40  jcs
+// make the temperature and pressure parameters available to the Ftpc slow simulator
+// (needed for embedding)
+//
 // Revision 1.20  2002/03/01 14:22:20  jcs
 // add additional histograms to monitor cluster finding
 //
@@ -243,6 +247,12 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     mNormalizedNowPressure = detTable->normalizedNowPressure;
     mAdjustedAirPressureWest = detTable->adjustedAirPressureWest;
     mAdjustedAirPressureEast = detTable->adjustedAirPressureEast;
+    mMinPressure = detTable->minPressure;
+    mMaxPressure = detTable->maxPressure;
+    mGasTemperatureWest = detTable->gasTemperatureWest;
+    mGasTemperatureEast = detTable->gasTemperatureEast;
+    mMinGasTemperature = detTable->minGasTemperature;
+    mMaxGasTemperature = detTable->maxGasTemperature;
     mMaxNumSequences = detTable->maxNumSequences ; 
     mMaxNumSeqPeaks = detTable->maxNumSeqPeaks;
     mMaxNumPeaks = detTable->maxNumPeaks;          
