@@ -1,10 +1,13 @@
 #ifndef EEstarTrig_h
 #define EEstarTrig_h
 /*********************************************************************
- * $Id: EEstarTrig.h,v 1.4 2003/05/29 21:43:54 zolnie Exp $
+ * $Id: EEstarTrig.h,v 1.5 2003/06/02 04:36:40 balewski Exp $
  *********************************************************************
  * container for STAR trigger data
  * $Log: EEstarTrig.h,v $
+ * Revision 1.5  2003/06/02 04:36:40  balewski
+ * added check if trigID
+ *
  * Revision 1.4  2003/05/29 21:43:54  zolnie
  * back to Jas order
  *
@@ -61,6 +64,7 @@ class EEstarTrig : public TObject {
   u_char bitBlueDown()  const { return ( spinBits()>>6) & 0x1; }
   u_char bitBlueUnpol() const { return ( spinBits()>>7) & 0x1;}
   u_short bbcTimeDiff() const { return VTX[3] & 0x1ff; }
+  int isTrigID(int id);
   EEstarTrig();
   virtual ~EEstarTrig();
   void  print(int k=0, FILE *fd=stdout) const;
