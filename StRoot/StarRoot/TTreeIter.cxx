@@ -39,6 +39,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "TROOT.h"
 
@@ -62,7 +63,6 @@
 #include "TNamed.h"
 #include "TSystem.h"
 #include "TRegexp.h"
-#include "assert.h"
 #include "TError.h"
 
 enum ETTI { kUnknown=0,
