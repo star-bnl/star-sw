@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsIstream.cc,v 1.4 1999/10/22 00:00:14 calderon Exp $
+ * $Id: StTrsIstream.cc,v 1.5 1999/11/09 19:30:48 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StTrsIstream.cc,v $
+ * Revision 1.5  1999/11/09 19:30:48  calderon
+ * Added istream& >> string& definition explicitly
+ * when using solaris-Root.
+ *
  * Revision 1.4  1999/10/22 00:00:14  calderon
  * -added macro to use Erf instead of erf if we have HP and Root together.
  * -constructor with char* for StTrsDedx so solaris doesn't complain
@@ -56,6 +60,16 @@ typedef vector<unsigned char, allocator<unsigned char> > digitalTimeBins;
 typedef istream_iterator<unsigned char,ptrdiff_t> istream_iter_uns_char;
 typedef ostream_iterator<int> ostream_iter_int;
 
+#endif
+
+#ifdef __SUNPRO_CC
+inline istream& operator>>( istream& stream, string& str )
+{
+    char buffer[ 1024 ];
+    stream >> buffer;
+    str = buffer;
+  return stream;
+}
 #endif
 
 int getInt(unsigned char a) { return static_cast<int>(a);}
