@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.5 1999/10/19 14:30:40 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.6 1999/12/03 19:02:01 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.6  1999/12/03 19:02:01  porter
+ * modified descriptor to accept tableDescriptor once this St_base object
+ * has been updated to have longer name lengths.
+ *
  * Revision 1.5  1999/10/19 14:30:40  porter
  * modifications relevant to use with StDbBroker and future merging with
  * "params" database structure + some docs + suppressing diagnostics messages
@@ -39,6 +43,85 @@ mnumElements = 0;
 lastType=Stdouble;
 padsize = 0;
 mcols = new tableDescriptor[mMax+1];
+
+}
+
+///////////////////////////////////////////////////////////////////////
+
+StDbTableDescriptor::StDbTableDescriptor(_Descriptor* d, unsigned int numElements, unsigned int sizeOfStruct){
+
+mnumElements = numElements;
+mCur = mnumElements-1;
+mtableSize = sizeOfStruct;
+mcols = new tableDescriptor[mnumElements];
+ for(int i=0;i<mnumElements;i++){
+  strcpy(mcols[i].name,d[i].name);
+  mcols[i].size = (unsigned int)d[i].typeSize;
+  mcols[i].offset = (unsigned int)d[i].offset;
+
+  int k= (int)(sizeof(mcols[i].dimensionlen)/sizeof(int));
+  for(int j=0;j<k;j++)mcols[i].dimensionlen[j]=1;
+  if(d[i].firstDimension)mcols[i].dimensionlen[0]=d[i].firstDimension;
+  if(d[i].secondDimension)mcols[i].dimensionlen[1]=d[i].secondDimension;
+  
+  switch (d[i].type) {
+  case kFloat:
+    {
+      mcols[i].type=Stfloat;
+      break;
+    }
+  case kInt:
+    {
+      mcols[i].type=Stint;
+      break;
+    }
+  case kLong:
+    {
+      mcols[i].type=Stlong;
+      break;
+    }
+  case kShort:
+    {
+      mcols[i].type=Stshort;
+      break;
+    }
+  case kDouble:
+    {
+      mcols[i].type=Stdouble;
+      break;
+    }
+  case kUInt:
+    {
+      mcols[i].type=Stuint;
+      break;
+    }
+  case kULong:
+    {
+      mcols[i].type=Stulong;
+      break;
+    }
+  case kUShort:
+    {
+      mcols[i].type=Stushort;
+      break;
+    }
+  case kUChar:
+    {
+      mcols[i].type=Stuchar;
+      break;
+    }
+  case kChar:
+    {
+      mcols[i].type=Stchar;
+      break;
+    }
+  default:
+    {
+      break;
+    }
+  }
+
+ }
 
 }
 

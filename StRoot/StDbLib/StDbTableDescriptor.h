@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.h,v 1.4 1999/10/19 14:30:40 porter Exp $
+ * $Id: StDbTableDescriptor.h,v 1.5 1999/12/03 19:02:02 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.h,v $
+ * Revision 1.5  1999/12/03 19:02:02  porter
+ * modified descriptor to accept tableDescriptor once this St_base object
+ * has been updated to have longer name lengths.
+ *
  * Revision 1.4  1999/10/19 14:30:40  porter
  * modifications relevant to use with StDbBroker and future merging with
  * "params" database structure + some docs + suppressing diagnostics messages
@@ -36,6 +40,23 @@ struct tableDescriptor {
   unsigned int  offset; // byte offset in table to this element
   unsigned int  dimensionlen[4]; // len per dimension if multi-D array
 };
+
+// These are from  StDbBroker
+//#ifndef STAR_StDbBroker
+      enum _EColumnType {kNAN, kFloat, kInt, kLong, kShort, kDouble, kUInt
+                             ,kULong, kUShort, kUChar, kChar };
+  struct _Descriptor{
+     char name[20];             //variable name 
+     int firstDimension;                //first dimension, if this is an array
+     int secondDimension;       //second dimension
+     int offset;                        //variable offset
+     int size;                  //total size of element
+     int typeSize;              //unit size
+     int dimensions;            //number of dimensions
+     _EColumnType type;          //type of element
+     };
+
+//#endif
 
 
 class StDbTableDescriptor : public StTableDescriptorI {
@@ -63,6 +84,7 @@ protected:
 public:
 
   StDbTableDescriptor();
+  StDbTableDescriptor(_Descriptor* d, unsigned int numElements, unsigned int sizeOfStruct); // descriptor from StDbBroker
   StDbTableDescriptor(StDbTableDescriptor& d);
   virtual ~StDbTableDescriptor() {if(mcols) delete [] mcols; }
   virtual void fillElement(StDbBuffer* buff, int tableID);

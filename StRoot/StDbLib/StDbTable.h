@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.6 1999/10/19 14:30:39 porter Exp $
+ * $Id: StDbTable.h,v 1.7 1999/12/03 19:02:01 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.7  1999/12/03 19:02:01  porter
+ * modified descriptor to accept tableDescriptor once this St_base object
+ * has been updated to have longer name lengths.
+ *
  * Revision 1.6  1999/10/19 14:30:39  porter
  * modifications relevant to use with StDbBroker and future merging with
  * "params" database structure + some docs + suppressing diagnostics messages
@@ -51,7 +55,8 @@ StDbAccessor maccessor;//!
 
   virtual void ReadElement(char*& ptr, char* name, int length, StTypeE type, StDbBuffer* buff);
   virtual void WriteElement(char* ptr, char* name, int length, StTypeE type, StDbBuffer* buff);
-  virtual void PassElement(char* ptr, char* name, int length, StTypeE type, typeAcceptor* accept);
+  virtual void PassOutElement(char* ptr, char* name, int length, StTypeE type, typeAcceptor* accept);
+  virtual void PassInElement(char* ptr, char* name, int length, StTypeE type, typeAcceptor* accept);
   virtual void getElementSpecs(int elementNum, char*& c, char*& name, unsigned int& length,StTypeE& type);
 
   bool createMemory();
@@ -75,6 +80,7 @@ public:
   virtual unsigned int getTableSize() const;
   virtual char* getTableName() const;
   virtual void setTableName(const char* name);
+  virtual bool checkTableName(const char* name);
   virtual StDbType getDbType() const  ;
   virtual void setDbType(StDbType type) ;
   virtual StDbDomain getDbDomain() const ;
@@ -128,8 +134,8 @@ public:
  
   // methods for reading & writing to Db & to file
 
-  virtual void StreamAccessor(typeAcceptor* accept);
-  virtual void dbStreamer(typeAcceptor* accept);
+  virtual void StreamAccessor(typeAcceptor* accept, bool isReading);
+  virtual void dbStreamer(typeAcceptor* accept, bool isReading);
 
   virtual void StreamAccessor(StDbBufferI* buff, bool isReading);
   virtual void dbStreamer(StDbBufferI* buff, bool isReading);
@@ -157,6 +163,12 @@ StDbAccessor StDbTable::getAccessor() const {return maccessor;}
 
 inline 
 void StDbTable::setAccessor(StDbAccessor a) {maccessor = a;}
+
+inline 
+bool StDbTable::checkTableName(const char* name) {
+if(strcmp(name,mtableName)==0) return true;
+return false;
+}
 
 
 inline 
