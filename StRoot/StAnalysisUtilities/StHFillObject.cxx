@@ -1,5 +1,8 @@
-// $Id: StHFillObject.cxx,v 1.5 2000/06/30 17:52:53 genevb Exp $
+// $Id: StHFillObject.cxx,v 1.6 2001/05/31 02:39:47 perev Exp $
 // $Log: StHFillObject.cxx,v $
+// Revision 1.6  2001/05/31 02:39:47  perev
+// const(ing)
+//
 // Revision 1.5  2000/06/30 17:52:53  genevb
 // Fixed array size
 //
@@ -591,7 +594,7 @@ void StHFillObject::Draw(Option_t* option) {
   return;
 }
 //_____________________________________________________________________________
-void StHFillObject::Print(Option_t* option) {
+void StHFillObject::Print(Option_t* option) const {
   vars.thisClass = this->IsA();
   if (strcmp(vars.buffer,option)) vars.Setup(option,0);
   vars.obj = (TObject*) this;
@@ -599,9 +602,9 @@ void StHFillObject::Print(Option_t* option) {
   return;
 }
 //_____________________________________________________________________________
-void StHFillObject::ls(Option_t* option) {
+void StHFillObject::ls(Option_t* option) const {
   if ((option) && !(strcmp(option,"Update")))
-    Update();
+    ((StHFillObject*)this)->Update();
   else
     TObject::ls(option);
 }

@@ -1,5 +1,8 @@
-// $Id: StHFillObject.h,v 1.1 1999/08/31 20:40:20 genevb Exp $
+// $Id: StHFillObject.h,v 1.2 2001/05/31 02:39:47 perev Exp $
 // $Log: StHFillObject.h,v $
+// Revision 1.2  2001/05/31 02:39:47  perev
+// const(ing)
+//
 // Revision 1.1  1999/08/31 20:40:20  genevb
 // Introduction of library and inclusion of StHFillObject
 //
@@ -32,8 +35,8 @@ class StHFillObject : public TObject {
   virtual ~StHFillObject();
    static void Reset();
   virtual void Draw(Option_t* option);
-  virtual void Print(Option_t* option);
-  virtual void ls(Option_t* option);
+  virtual void Print(Option_t* option) const;
+  virtual void ls(Option_t* option) const;
   virtual void Update();
   ClassDef(StHFillObject,1)   //virtual base class for Makers
 };
