@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.16 2000/03/01 20:56:15 porter Exp $
+ * $Id: StDbConfigNode.cc,v 1.17 2000/03/28 17:03:18 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,14 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.17  2000/03/28 17:03:18  porter
+ * Several upgrades:
+ * 1. configuration by timestamp for Conditions
+ * 2. query by whereClause made more systematic
+ * 3. conflict between db-stored comments & number lists resolved
+ * 4. ensure endtime is correct for certain query falures
+ * 5. dbstl.h->handles ObjectSpace & RogueWave difference (Online vs Offline)
+ *
  * Revision 1.16  2000/03/01 20:56:15  porter
  * 3 items:
  *    1. activated reConnect for server timeouts
@@ -148,7 +156,7 @@ deleteChildren();
 ////////////////////////////////////////////////////////////////
 
 void
-StDbConfigNode::buildTree(){
+StDbConfigNode::buildTree(int opt){
 
  StDbServer* server=0;
  StDbTableIter* itr=0;
@@ -169,17 +177,19 @@ StDbConfigNode::buildTree(){
    }
  }
 
- if(mhasData){
-  itr = getStDbTableIter();
-  while(!itr->done()){
+ if(!opt){
+  if(mhasData){
+   itr = getStDbTableIter();
+   while(!itr->done()){
     table = itr->next();
     server->QueryDescriptor(table);
+   }
+  if(itr)delete itr;
   }
- if(itr)delete itr;
  }
 
- if(mfirstChildNode)mfirstChildNode->buildTree();
- if(mnextNode)mnextNode->buildTree();
+ if(mfirstChildNode)mfirstChildNode->buildTree(opt);
+ if(mnextNode)mnextNode->buildTree(opt);
 
 }
 
@@ -187,6 +197,12 @@ StDbConfigNode::buildTree(){
 
 void
 StDbConfigNode::printTree(int depth){
+
+  if(!depth){
+    cout<<endl;
+    cout<<"************* Node Structure ****************" <<endl;
+    cout<<endl;
+  }
 
   if(StDbManager::Instance()->IsVerbose()){
     for(int k=0;k<depth;k++)cout<<" ";
@@ -199,6 +215,11 @@ StDbConfigNode::printTree(int depth){
  int depth3=depth+4;
  if(mfirstChildNode)mfirstChildNode->printTree(depth3);
  if(mnextNode)mnextNode->printTree(depth);
+
+ if(!depth){
+   cout<<endl;
+   cout<<"*********************************************" << endl;
+ }
 
 }
 
@@ -213,23 +234,22 @@ StDbConfigNode::printTables(int depth){
     ostrstream os(pdepth,depth+1);
     for(int k=0;k<depth;k++)os<<" ";
     os<<ends;
-    int* elementID;
-    int nrows;
 
     TableList::iterator itr;
     for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
       cout <<pdepth<<"Table="<<(*itr)->getMyName();
-      cout <<" VersionKey = "<<(*itr)->getVersion()<<endl;
-      elementID = (*itr)->getElementID(nrows);
-      cout <<pdepth<<"ElementIDs = ";
-      if(elementID){
-        for(int j=0;j<nrows;j++)cout<<" "<<elementID[j]<<" ";
+      cout <<", VersionKey="<<(*itr)->getVersion();
+      cout <<", number of Rows="<< (*itr)->GetNRows();
+      StDbNode* node=(StDbNode*)(*itr);
+      char* tmp=node->getElementID();
+      if(strcmp(tmp,"None")==0){
+        cout <<", ElementList=0"<<endl;
       } else {
-        cout<< " None ";
+        cout <<", ElementList="<<tmp<<endl;
       }
-      cout << endl;
+      delete [] tmp;
     }
- }
+  }
 
 }
 

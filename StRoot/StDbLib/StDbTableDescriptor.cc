@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.14 2000/03/06 17:11:49 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.15 2000/03/28 17:03:19 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,14 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.15  2000/03/28 17:03:19  porter
+ * Several upgrades:
+ * 1. configuration by timestamp for Conditions
+ * 2. query by whereClause made more systematic
+ * 3. conflict between db-stored comments & number lists resolved
+ * 4. ensure endtime is correct for certain query falures
+ * 5. dbstl.h->handles ObjectSpace & RogueWave difference (Online vs Offline)
+ *
  * Revision 1.14  2000/03/06 17:11:49  porter
  * - WriteDb(table) returns true if no data is in table
  * - fixed memory leak introduced in 2/18/00 update.
@@ -93,6 +101,7 @@ mcols = new tableDescriptor[mMax+1];
 
 ///////////////////////////////////////////////////////////////////////
 
+/*
 StDbTableDescriptor::StDbTableDescriptor(_Descriptor* d, unsigned int numElements, unsigned int sizeOfStruct){
 
 mnumElements = numElements;
@@ -104,10 +113,14 @@ mcols = new tableDescriptor[mnumElements];
   mcols[i].size = (unsigned int)d[i].typeSize;
   mcols[i].offset = (unsigned int)d[i].offset;
 
-  int k= (int)(sizeof(mcols[i].dimensionlen)/sizeof(int));
-  for(int j=0;j<k;j++)mcols[i].dimensionlen[j]=1;
-  if(d[i].firstDimension)mcols[i].dimensionlen[0]=d[i].firstDimension;
-  if(d[i].secondDimension)mcols[i].dimensionlen[1]=d[i].secondDimension;
+  int k,j;
+  // sets all in my struct to 1
+  k= (int)(sizeof(mcols[i].dimensionlen)/sizeof(int));
+  for(j=0;j<k;j++)mcols[i].dimensionlen[j]=1;
+  // sets all that input struct defines to its value
+  k= (int)(sizeof(d[i].DimensionList)/sizeof(int));
+  for(j=0;j<k;j++)mcols[i].dimensionlen[j]=d[i].DimensionList[j];
+  
   
   switch (d[i].type) {
   case kFloat:
@@ -169,6 +182,7 @@ mcols = new tableDescriptor[mnumElements];
  }
 
 }
+*/
 
 /////////////////////////////////////////////////////////////////////////
 

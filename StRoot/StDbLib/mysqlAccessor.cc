@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.22 2000/03/09 20:11:30 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.23 2000/03/28 17:03:19 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,14 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.23  2000/03/28 17:03:19  porter
+ * Several upgrades:
+ * 1. configuration by timestamp for Conditions
+ * 2. query by whereClause made more systematic
+ * 3. conflict between db-stored comments & number lists resolved
+ * 4. ensure endtime is correct for certain query falures
+ * 5. dbstl.h->handles ObjectSpace & RogueWave difference (Online vs Offline)
+ *
  * Revision 1.22  2000/03/09 20:11:30  porter
  * modified datetime string format for endTime in QueryDb(table)
  *
@@ -248,6 +256,7 @@ mysqlAccessor::QueryDb(StDbNode* node){
   StDbNodeInfo currentNode;
   if(!node->IsConfigured()){
    if(!prepareNode(node,&currentNode))return 0;
+   node->setConfigured(true);
   }
 
 return 1;
@@ -266,6 +275,25 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
   // --> get table name &, if needed, get the descriptor
 
   StDbNodeInfo currentNode;
+
+  // 1st setup default return values for the validity time.
+  char* bTime = getDateTime(reqTime);
+  char* eTime = getEndDateTime();
+  if(table){
+    table->setBeginTime(reqTime);    // uint version
+    table->setBeginTime(bTime);      // char* version
+    table->setEndTime(getEndTime()); // uint of dec-31st 2037, 11:59:59
+    table->setEndTime(eTime);        // char* of dec-31st 2037, 11:59:59
+  }
+
+  if(bTime){
+    delete [] bTime;
+    bTime=0;  
+  }
+  if(eTime){
+    delete [] eTime;
+    eTime=0;  
+  }
 
   if(!table->IsConfigured()){
   
@@ -316,16 +344,6 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
     es<<" "<<ends;
   }
 
-  // zero beginTime for table
-  table->setBeginTime((unsigned int)0);
-  char* bTime=getDateTime(0);  
-  table->setBeginTime(bTime);
-  if(bTime){
-    delete [] bTime;
-    bTime=0;  
-  }
-
-  char* eTime=0;
   int numberOfRows=0;
 
   Db << " select beginTime as mendTime from dataIndex";
@@ -336,20 +354,16 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
     buff.SetClientMode();
     buff.ReadScalar(eTime,"mendTime");
     Db.Release(); buff.Raz();
-    //    table->setEndTime(eTime);
     table->setEndTime(getUnixTime(eTime));
     char* tmpEtime=getDateTime(table->getEndTime());
     table->setEndTime(tmpEtime); delete [] tmpEtime;    
-  } else {
-    table->setEndTime(getEndTime()); // simply use dec-31st 2037, 11:59:59
-    eTime=getEndDateTime();
-    table->setEndTime(eTime); // simply use dec-31st 2037, 11:59:59
   }
-
+ 
   if(eTime) {
      delete [] eTime;
      eTime=0;
   }
+
   unsigned int t1,t2;
   t1=t2=0;
   int countRows = 0;
@@ -580,6 +594,26 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
 int
 mysqlAccessor::QueryDb(StDbTable* table, const char* whereClause){
 
+  /*
+     rules for # of rows returned (by user request via SetNRows(int nrows);)
+     1) if input table->GetNRows() = 0, no limit on the number of rows
+     2) if input table->GetNRows() = n, limit 'n' on number of rows
+     3) regardless of the request, table->GetNRows() will tell the
+        user how many rows were actually returned.
+
+     rules for beginTime & endTime
+     1) if table is not indexed, then beginTime & endTime are set
+        arbitrarily (currently both at year-2038)
+     2) if 1 row satisfies query & the table is indexed, then
+        the beginTime & endTime are returned correctly
+     3) if more than 1 row statisfy the query & table is indexed then
+        the beginTime is set to 'earlyest' row & endTime is set to
+        the beginTime of the row after the 'latest' row of the set 
+        retrieved
+         
+  */
+
+
    if(!table->hasDescriptor()){
       if(!QueryDescriptor(table))return 0;
    }
@@ -587,66 +621,119 @@ mysqlAccessor::QueryDb(StDbTable* table, const char* whereClause){
    if(table->IsBinary()) return 0;
 
    Db.Release();
-   Db<<"Select * from "<<table->getCstrName()<<" "<<whereClause<<endsql;
-
-   int icount=0;
-   int dataID=0;
-   table->setRowNumber();
-   while(Db.Output(&buff)){
-     if(table->IsIndexed() && icount==0)buff.ReadScalar(dataID,"dataID");
-     table->dbStreamer(&buff,true);
-     buff.Raz();
-     icount++;
+   int  rows = table->GetNRows();
+   char rowLimit[50];
+   ostrstream rl(rowLimit,50);
+   if(rows==0){ 
+     rl<<ends;
+   } else {
+     rl<<" limit "<<rows<<ends;
+   }
+   char qString[1024];
+   ostrstream qs(qString,1024);
+   
+   qs<<"Select * from "<<table->getCstrName()<<" "<<whereClause;
+   qs<<rowLimit<<ends;
+   if(StDbManager::Instance()->IsVerbose()){
+     cout<< "QueryByWhereClause:: "<<qString<<endl;
    }
 
-   if(icount==0){
+   Db<<qString<<endsql;
+
+   int retRows = Db.NbRows();
+   if(retRows==0){
      cerr<<"Query::Table NO DATA via whereClause [ "<<endl;
      cerr<<" Select * from "<<table->getMyName()<<" "<<whereClause<<" ]"<<endl;
      return 0;
    }
 
+   if(rows==0 || (retRows != rows))table->SetNRows(retRows);
+
+   int icount=0;
+   int* dataIDs = new int[retRows]; memset(dataIDs,0,retRows*sizeof(int));
+    table->setRowNumber(); // zero the row counter
+    while(Db.Output(&buff)){
+      if(table->IsIndexed())buff.ReadScalar(dataIDs[icount],"dataID");
+      table->dbStreamer(&buff,true);
+      buff.Raz();
+      icount++;
+    }
+
+   //preset timestamps to large future times
+   unsigned int itime = getEndTime();
+   table->setBeginTime(itime);
+   table->setEndTime(itime);
+   char* aTime = getEndDateTime();
+   table->setBeginTime(aTime); 
+   table->setEndTime(aTime);
+   delete [] aTime; aTime=0;
+
    // This checks to see if row is indexed on timestamp
-   // & if so, get the beginTime & endTime for returned row
-   if(dataID){
+   // & if so, get the beginTime & endTime for returned rows
+   if(dataIDs[0]){
+
       int nodeID = table->getNodeID();
       if(!nodeID){
         if(!QueryDb((StDbNode*)table))return icount;
         nodeID=table->getNodeID();
       }
 
-      char NodeID[12]; char DataID[12];
-      ostrstream nid(NodeID,12); ostrstream did(DataID,12);
-      nid<<nodeID<<ends;  did<<dataID<<ends;
-      char* bTime=0;
+      char NodeID[12]; char DataID[4096];
+      ostrstream nid(NodeID,12); ostrstream did(DataID,4096);
+      nid<<" nodeID="<<nodeID<<ends;  
+      did<<" and dataID In(";
+      for(int k=0;k<retRows-1;k++)did<<dataIDs[k]<<",";
+      did<<dataIDs[retRows-1]<<")"<<ends;
 
-      Db.Release();
-      Db<<"select beginTime from dataIndex where nodeID="<<NodeID;
-      Db<<" and dataID="<<DataID<<" limit 1 "<<endsql;
+      Db.Release(); buff.Raz();
+      char* bTime=0;
+      char bTimeString[4096];
+      ostrstream bt(bTimeString,4096);
+
+      bt<<"select beginTime from dataIndex where"<<NodeID<<DataID;
+      bt<<" Order by beginTime limit 1 "<<ends;
+
+      if(StDbManager::Instance()->IsVerbose())cout<<"BTimeQuery:: "<<bTimeString<<endl;
+      Db<<bTimeString<<endsql;
 
       if(Db.Output(&buff)){
         if(buff.ReadScalar(bTime,"beginTime")){
            table->setBeginTime(bTime);
            table->setBeginTime(getUnixTime(bTime));
         }
-      } else { return icount; }
+      } 
 
-      Db.Release();
-      Db<<"select beginTime from dataIndex where nodeID="<<NodeID;
-      Db<<" and dataID="<<DataID<<" And beginTime>'"<<bTime<<"' ";
-      Db<<" order by beginTime limit 1 "<<endsql;
+      // now endTime
 
+      Db.Release(); buff.Raz();
       char* eTime=0;
+      char eTimeString[4096];
+      ostrstream et(eTimeString,4096);
 
-      if(Db.Output(&buff)){
-        if(buff.ReadScalar(eTime,"beginTime")){
-           table->setEndTime(eTime);
-           table->setEndTime(getUnixTime(eTime));
+      et<<"select beginTime from dataIndex where"<<NodeID<<DataID;
+      et<<" Order by beginTime DESC limit 1 "<<ends;
+
+      if(StDbManager::Instance()->IsVerbose())cout<<"ETimeQuery:: "<<eTimeString<<endl;
+      Db<<eTimeString<<endsql;
+
+      if(Db.Output(&buff))buff.ReadScalar(eTime,"beginTime");
+      if(eTime){ // now find the next row (in time-space)
+        Db.Release();
+        Db<<"select beginTime from dataIndex where"<<NodeID;
+        Db<<" and beginTime>'"<<eTime<<"' Order by beginTime limit 1"<<endsql;
+        if(Db.Output(&buff)){
+          delete [] eTime; eTime=0;
+          buff.ReadScalar(eTime,"beginTime");
+          table->setEndTime(eTime);
+          table->setEndTime(getUnixTime(eTime));
         }
-      } else { if(bTime)delete [] bTime; return icount; }
+      } 
+
+      Db.Release(); buff.Raz();
       
       if(eTime) delete [] eTime;
+      if(bTime) delete [] bTime;
    }
-
 
 return icount;
 }

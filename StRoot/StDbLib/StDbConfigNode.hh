@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.hh,v 1.13 2000/01/27 05:54:33 porter Exp $
+ * $Id: StDbConfigNode.hh,v 1.14 2000/03/28 17:03:18 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,14 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.hh,v $
+ * Revision 1.14  2000/03/28 17:03:18  porter
+ * Several upgrades:
+ * 1. configuration by timestamp for Conditions
+ * 2. query by whereClause made more systematic
+ * 3. conflict between db-stored comments & number lists resolved
+ * 4. ensure endtime is correct for certain query falures
+ * 5. dbstl.h->handles ObjectSpace & RogueWave difference (Online vs Offline)
+ *
  * Revision 1.13  2000/01/27 05:54:33  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -143,7 +151,7 @@ public:
 
   // Tree operations
   virtual void deleteTree();
-  virtual void buildTree();
+  virtual void buildTree(int opt=0);//0=get tableDescriptors from db
   virtual void deleteChildren();
 
   // check container

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbDefs.hh,v 1.8 2000/01/27 05:54:33 porter Exp $
+ * $Id: StDbDefs.hh,v 1.9 2000/03/28 17:03:18 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -13,6 +13,14 @@
  ***************************************************************************
  *
  * $Log: StDbDefs.hh,v $
+ * Revision 1.9  2000/03/28 17:03:18  porter
+ * Several upgrades:
+ * 1. configuration by timestamp for Conditions
+ * 2. query by whereClause made more systematic
+ * 3. conflict between db-stored comments & number lists resolved
+ * 4. ensure endtime is correct for certain query falures
+ * 5. dbstl.h->handles ObjectSpace & RogueWave difference (Online vs Offline)
+ *
  * Revision 1.8  2000/01/27 05:54:33  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -52,13 +60,7 @@ enum StDbType { dbStDb=0, dbServer, dbRunLog, dbConfigurations, dbConditions, db
 
 enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3 };
 
-
-#ifdef ST_NO_TEMPLATE_DEF_ARGS
-#ifndef ST_DBAPI_CC5
-// then get bool definition from object-space
-#include <ospace/config.h>
-#endif
-#endif
+#include "dbstl.h"
 
 #endif
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.14 2000/02/15 20:27:44 porter Exp $
+ * $Id: StDbTable.cc,v 1.15 2000/03/28 17:03:19 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,14 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.15  2000/03/28 17:03:19  porter
+ * Several upgrades:
+ * 1. configuration by timestamp for Conditions
+ * 2. query by whereClause made more systematic
+ * 3. conflict between db-stored comments & number lists resolved
+ * 4. ensure endtime is correct for certain query falures
+ * 5. dbstl.h->handles ObjectSpace & RogueWave difference (Online vs Offline)
+ *
  * Revision 1.14  2000/02/15 20:27:44  porter
  * Some updates to writing to the database(s) via an ensemble (should
  * not affect read methods & haven't in my tests.
@@ -52,6 +60,14 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.15  2000/03/28 17:03:19  porter
+ * Several upgrades:
+ * 1. configuration by timestamp for Conditions
+ * 2. query by whereClause made more systematic
+ * 3. conflict between db-stored comments & number lists resolved
+ * 4. ensure endtime is correct for certain query falures
+ * 5. dbstl.h->handles ObjectSpace & RogueWave difference (Online vs Offline)
+ *
  * Revision 1.14  2000/02/15 20:27:44  porter
  * Some updates to writing to the database(s) via an ensemble (should
  * not affect read methods & haven't in my tests.
@@ -107,6 +123,7 @@
 
 StDbTable::StDbTable(const char* tableName): StDbNode(tableName,"default"), mhasDescriptor(false), mdescriptor(0), mdata(0), mhasData(false), mstoreMode(false) { 
 
+ mschemaID=0;
  mendTime.munixTime=0;
  mrows=0;
  mrowNumber=0;
@@ -120,6 +137,7 @@ StDbTable::StDbTable(const char* tableName): StDbNode(tableName,"default"), mhas
 
 StDbTable::StDbTable(const char* tableName, int schemaID): StDbNode(tableName,"default"), mhasDescriptor(false), mdescriptor(0), mdata(0), mhasData(false), mstoreMode(false) { 
 
+mendTime.munixTime=0;
 mschemaID=schemaID;
 mrows=0;
 mrowNumber=0;
@@ -334,6 +352,7 @@ StDbTable::setElementID(int* elements, int nrows) {
      os<<elements[i]<<",";
    }
    os<<elements[nrows-1]<<ends;
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -470,8 +489,6 @@ char* ptr;
  for(int i=0; i<max; i++){
     getElementSpecs(i,ptr,name,length,type);
     if(isReading){
-      //       cout << " Reading object " << name << endl;
-      //     cout << " buffer offset is " << ptr-mdata << endl;
      ReadElement(ptr,name,length,type,(StDbBuffer*)buff);
      } else {
      WriteElement(ptr,name,length,type,(StDbBuffer*)buff);
@@ -485,7 +502,6 @@ char* ptr;
  } else {
    cerr << "dbStreamer:: more rows delivered than allocated " << endl;
  }
-
 
  if(!ClientMode)buff->SetStorageMode();  // reset to StorageMode
 }
@@ -580,12 +596,24 @@ float* mfloat; double* mdouble;
   switch (type) {
   case Stchar:
     {
-    buff->ReadScalar(mchar,name);
-    unsigned int len1=strlen(mchar);
-    strncpy(ptr,mchar,len1);
-    delete [] mchar;
-    //buff->ReadArray(mchar,len,name);
-    //memcpy(ptr,mchar,len);
+           char commentName[1024];
+           ostrstream cn(commentName,1024);
+           cn<<name<<".text"<<ends;
+           //      buff->ReadScalar(mchar,name);
+           mchar = 0;
+           if(!buff->ReadScalar(mchar,commentName))
+                buff->ReadScalar(mchar,name);              
+           if(mchar){
+             unsigned int len1=strlen(mchar);
+             strncpy(ptr,mchar,len1);
+             delete [] mchar;
+           } else {
+             *ptr='\0';
+           }
+      //    buff->ReadArray(mchar,len,name);
+      //    cout << "In ReadArray " << len << " & " << mchar << endl;
+      //    memcpy(ptr,mchar,len);
+
     break;
     }
   case Stuchar:

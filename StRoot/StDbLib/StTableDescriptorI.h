@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTableDescriptorI.h,v 1.4 1999/12/29 13:49:35 porter Exp $
+ * $Id: StTableDescriptorI.h,v 1.5 2000/03/28 17:03:19 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,14 @@
  ***************************************************************************
  *
  * $Log: StTableDescriptorI.h,v $
+ * Revision 1.5  2000/03/28 17:03:19  porter
+ * Several upgrades:
+ * 1. configuration by timestamp for Conditions
+ * 2. query by whereClause made more systematic
+ * 3. conflict between db-stored comments & number lists resolved
+ * 4. ensure endtime is correct for certain query falures
+ * 5. dbstl.h->handles ObjectSpace & RogueWave difference (Online vs Offline)
+ *
  * Revision 1.4  1999/12/29 13:49:35  porter
  * fix for Solaris-CC4.2 within StRoot make (cons)...
  * replaced #include <config.h> with #include <ospace/config.h>
@@ -27,19 +35,8 @@
 #ifndef StTableDescriptorI_HH
 #define StTableDescriptorI_HH
 
-#ifdef ST_NO_TEMPLATE_DEF_ARGS
-#include <ospace/config.h>
-#endif
 
-
-//#ifdef SOLARIS
-//typedef int bool;
-//#ifndef false
-//#define false 0
-//#define true 1
-//#endif
-//#endif
-
+#include "dbstl.h"
 #include "StTypeEnum.h"
 
 class StTableDescriptorI {

@@ -6,9 +6,10 @@
 #
 #  options,  gcc w/shared+static lib for linux & solaris
 #            CC5 w/shared+static lib for solaris
+#            CC4.2 w/shared+static lib & RW-STL for solaris
 #
 #  options are chosen via tests on 'uname -s' and, if SunOS, on 
-#  GNU_GCC environment variable 
+#  GNU_GCC & ONL_solaris environment variables 
 #
 #  many of the flags were taken from Offline build process
 #  with only minor investigation.
@@ -24,29 +25,51 @@ AR       := ar -rvu
 
 ifeq (SunOS,$(SYSTYPE))
 
-  OSDEFS   := sun SUN SOLARIS Solaris ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES 
+  OSDEFS   := sun SUN SOLARIS Solaris ST_NO_NUMERIC_LIMITS 
+  OSDEFS   += ST_NO_EXCEPTIONS ST_NO_NAMESPACES 
   CXXFLAGS := -g -fPIC -Wall
   CFLAGS   := -g -fPIC -Wall
-#  LDFLAGS  := -g
   EXEFLAGS := -g -Wl,-Bdynamic   
   SOFLAGS  := -g -shared  
   LIBS     := -lnsl -lsocket
 
 ifndef GNU_GCC
-#-->then we're using CC5
-  OSDEFS   := sun SUN SOLARIS Solaris ST_NO_NUMERIC_LIMITS ST_NO_MEMBER_TEMPLATES ST_NO_EXCEPTIONS  ST_DBAPI_CC5 
+#--> then were using native Sun
+
+  OSDEFS   += ST_NO_MEMBER_TEMPLATES
   LDFLAGS  :=  -g  -xar -o
   SOFLAGS  :=  -g  -G
-  CC :=  /opt/WS5.0/bin/cc
-  CXX := /opt/WS5.0/bin/CC
-  AR  := $(CXX)
-  CXXFLAGS :=  -g  -KPIC +w -features=no%anachronisms -features=rtti -library=iostream,no%Cstd 
-  CLIBS    := -L/opt/WS5.0/lib -L/opt/WS5.0/SC5.0/lib -liostream  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
-endif
 
+ifndef ONL_solaris
+#-->then we're using CC5
+
+  CC        :=  /opt/WS5.0/bin/cc
+  CXX       := /opt/WS5.0/bin/CC
+  CXXFLAGS  := -g  -KPIC +w -features=no%anachronisms -features=rtti 
+  CXXFLAGES += -library=iostream,no%Cstd 
+  CLIBS     := -L/opt/WS5.0/lib -L/opt/WS5.0/SC5.0/lib -liostream 
+  CLIBS     += -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
+
+else
+#-->CC4.2 with rogue wave
+
+ OSDEFS   += ST_NO_TEMPLATE_DEF_ARGS ONL_solaris
+ STLHOME  := /online/production/packages/rogue/workspaces/SOLARIS25/SUNPRO42/15d
+ CC       := /opt/WS4.0/bin/cc
+ CXX      := /opt/WS4.0/bin/CC
+ CXXFLAGS := -g  -KPIC +w -features=no%anachronisms -features=rtti 
+ CXXFLAGS += -I/$(STLHOME)/include  
+ CLIBS    := -L/opt/WS4.0/lib -L/opt/WS4.0/SC4.2/lib -L$(STLHOME)/lib -lstd15d 
+ CLIBS    += -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
+ EXTRA_LIBS = -L$(STLHOME)/lib -lstd15d
+
+endif
+  AR  := $(CXX)
+endif
 endif
 
 ifeq (Linux,$(SYSTYPE))
+
   OSDEFS     := GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES
   LD       := $(CXX)
   SO       := $(CXX)
@@ -55,6 +78,7 @@ ifeq (Linux,$(SYSTYPE))
   LDFLAGS  := -g -Wl,-Bstatic
   SOFLAGS  := -g -shared  
   CLIBS    := -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lm -ldl  -rdynamic 
+
 endif
 
 
@@ -68,10 +92,10 @@ SO  := $(CXX)
 #
 ###############################################################
 
+LIBS += $(EXTRA_LIBS)
 LOCAL_INCS = -I. -I/opt/star/include
 SHARED_LIBS = -L/opt/star/lib/ -L/opt/star/lib/mysql -lmysqlclient $(LIBS)
 STATIC_LIBS = /opt/star/lib/libmysqlclient.a $(LIBS)
-
 
 ########################################
 #
@@ -82,7 +106,7 @@ STATIC_LIBS = /opt/star/lib/libmysqlclient.a $(LIBS)
 ALL_CXXFLAGS	= $(CXXFLAGS) 
 ALL_CPPFLAGS	= $(CPPFLAGS) $(LOCAL_INCS) 
 ALL_LDFLAGS	    = $(LDFLAGS)
-ALL_DEFS    := $(addprefix -D,$(OSDEFS))
+ALL_DEFS       := $(addprefix -D,$(OSDEFS))
 
 ####################################################
 #
