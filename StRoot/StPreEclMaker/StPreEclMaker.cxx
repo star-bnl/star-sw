@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.10 2001/02/06 18:23:58 pavlinov Exp $
+// $Id: StPreEclMaker.cxx,v 1.11 2001/04/17 23:51:50 pavlinov Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.11  2001/04/17 23:51:50  pavlinov
+// Clean up before MDC4
+//
 // Revision 1.10  2001/02/06 18:23:58  pavlinov
 // Changed the algorithm of finding of EMC's collection in StPreEclMaker
 //
@@ -75,12 +78,13 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
-#include <math.h>
+#include <cmath>
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StPreEclMaker.h"
 #include "StEmcSimulatorMaker/StEmcSimulatorMaker.h"
 #include "St_ems_Maker/St_ems_Maker.h"
+#include "StEmcUtil/StEmcMath.h"
 
 // added for StEvent
 
@@ -117,12 +121,13 @@ Int_t StPreEclMaker::Init()
   SetClusterConditions("bsmde",5,0.08,0.001,0.001,kFALSE);
   SetClusterConditions("bsmdp",5,0.08,0.001,0.001,kFALSE);
   
-  Int_t greta[4]={40,40,300,20}; // eta bins
-  Int_t grphi[4]={40,40,60,900}; // phi bins
+  Int_t greta[4]={40,40,300,20};   // eta bins
+  Int_t grphi[4]={120,120,60,900}; // phi bins ?? 16-apr by PAI
+  Float_t myPI = M_PI + 0.0001;
   
   //Making QA histgrams
   m_ncl  = new TH2F("Ncluster","Number of cluster(log) .vs. Detector #",40,0.0,4.0, 4,0.5,4.5);
-  m_etot = new TH2F("Ecluster" ,"Total PreCluster Energy(log) .vs. Detector #", 40,-2.0,2.0, 4,0.5,4.5);
+  m_etot = new TH2F("Ecluster" ,"Total PreCluster Energy(log) .vs. Detector #", 60,-2.0,4.0, 4,0.5,4.5);
   Float_t rmsMax=0.026;
   Int_t   rmsN=52;
   m_sig_e= new TH2F("RMS(eta)" ,"Sigma(eta) .vs. Detector #",rmsN,0.0,rmsMax,4,0.5,4.5);
@@ -133,8 +138,15 @@ Int_t StPreEclMaker::Init()
     TString name_e = detname[i] + "_cluster_energy";
     TString tit_h  = detname[i] + " cluster";
     TString tit_e  = detname[i] + " energy of cluster";
-    m_cl[i]     = new TH2F(name_h,tit_h,greta[i],-1.0,1.0,grphi[i],-M_PI, M_PI);
-    m_energy[i] = new TH2F(name_e,tit_e,greta[i],-1.0,1.0,grphi[i],-M_PI, M_PI);
+    if(i==2) {
+      m_cl[i]     = new TH2F(name_h,tit_h,greta[i],-1.0,1.0,grphi[i],-M_PI*1.015, M_PI*0.985);
+      m_energy[i] = new TH2F(name_e,tit_e,greta[i],-1.0,1.0,grphi[i],-M_PI*1.015, M_PI*0.985);
+    }
+    else{
+      m_cl[i]     = new TH2F(name_h,tit_h,greta[i],-1.0,1.0,grphi[i],-myPI, myPI);
+      m_energy[i] = new TH2F(name_e,tit_e,greta[i],-1.0,1.0,grphi[i],-myPI, myPI);
+    }
+    
 
     TString name_m  = detname[i] + "ClNum";
     TString tit_m   = "Number hits in cluster for " + detname[i];
@@ -146,11 +158,20 @@ Int_t StPreEclMaker::Init()
 
     TString name_eta  = detname[i] + "Eta";
     TString tit_eta   = "Eta of clusters for " + detname[i];
-    m_EtaInCl[i]   = new TH1F(name_eta, tit_eta, greta[i], -1., 1.);
-
     TString name_phi  = detname[i] + "Phi";
     TString tit_phi   = "Phi of clusters for " + detname[i];
-    m_PhiInCl[i]   = new TH1F(name_phi, tit_phi, grphi[i], -M_PI, M_PI);
+    if(i==2) {
+      TArrayD *xb  = StEmcMath::binForSmde();
+      if(xb){
+        m_EtaInCl[i] = new TH1F(name_eta, tit_eta, xb->GetSize()-1, xb->GetArray());
+        delete xb;
+      }
+      m_PhiInCl[i]   = new TH1F(name_phi, tit_phi, grphi[i], -M_PI*1.015, M_PI*0.985);
+    }
+    else{ 
+      m_EtaInCl[i]   = new TH1F(name_eta, tit_eta, greta[i], -1., 1.);
+      m_PhiInCl[i]   = new TH1F(name_phi, tit_phi, grphi[i], -myPI, myPI);
+    }
   }
   return StMaker::Init();
 }  
@@ -216,6 +237,7 @@ Int_t StPreEclMaker::Make()
     StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
     StEmcDetector* mDet=emc->detector(id); // getting detector pointer
     StEmcPreClusterCollection* cc=new StEmcPreClusterCollection(detname[i].Data(),mDet);
+    if(Debug()>=2) AddData(cc);  // 17-apr-2001 by PAI
     if(cc->IsOk())
     {
       cc->setSizeMax(mSizeMaxConf[i]);
@@ -228,10 +250,10 @@ Int_t StPreEclMaker::Make()
       MakeHistograms(i,cc); // Fill QA histgrams
       fillStEvent(i,cc);
     }      
-    delete cc;  
+    if(Debug()<2) delete cc;  
   }
   
-  AddData(new St_ObjectSet("PreEclEmcCollection",emc));
+  AddData(new St_ObjectSet("PreEclEmcCollection",emc));  // for what ??
   cout <<"***** New EmcCollection on local .data\n";
     
   return kStOK;
@@ -262,22 +284,19 @@ void StPreEclMaker::MakeHistograms(Int_t idet,StEmcPreClusterCollection* cluster
           Float_t sigmaphi=cl->SigmaPhi();
           Int_t   nhits=cl->Nhits();
 
-          if(sigmaeta>1.0e-5) m_sig_e->Fill(sigmaeta, (Float_t)det);
-          else m_sig_e->Fill(-1.,(Float_t)det);
+          if(sigmaeta > 0) m_sig_e->Fill(sigmaeta, Axis_t(det));          
+          if(sigmaphi > 0.0) m_sig_p->Fill(sigmaphi, Axis_t(det));
           
-          if(sigmaphi>1.0e-5) m_sig_p->Fill(sigmaphi, (Float_t)det);
-          else m_sig_p->Fill(-1.,(Float_t)det);
-          
-          m_cl[det-1]->Fill(eta, phi);
-          m_energy[det-1]->Fill(eta, phi, energy);
-          m_HitsInCl[det-1]->Fill((Float_t)nhits);
-          m_EnergyCl[det-1]->Fill(energy);
-          m_EtaInCl[det-1]->Fill(eta);
-          m_PhiInCl[det-1]->Fill(phi);
+          m_cl[det-1]->Fill(Axis_t(eta), Axis_t(phi));
+          m_energy[det-1]->Fill(Axis_t(eta), Axis_t(phi), energy);
+          m_HitsInCl[det-1]->Fill(Axis_t(nhits));
+          m_EnergyCl[det-1]->Fill(Axis_t(energy));
+          m_EtaInCl[det-1]->Fill(Axis_t(eta));
+          m_PhiInCl[det-1]->Fill(Axis_t(phi));
 
           Etot+=energy;         
         }
-        m_etot->Fill(log10(Etot),(Float_t)det);
+        m_etot->Fill(log10(Etot), Axis_t(det));
       }
     }
   
@@ -368,11 +387,12 @@ void StPreEclMaker::SetClusterConditions(char *cdet,Int_t mSizeMax,
     }
   }
 }
-//_____________________________________________________________________________
-void StPreEclMaker::PrintInfo(){
+
+void 
+StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.10 2001/02/06 18:23:58 pavlinov Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.11 2001/04/17 23:51:50 pavlinov Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
-//_____________________________________________________________________________
+

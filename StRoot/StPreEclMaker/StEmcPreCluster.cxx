@@ -1,6 +1,9 @@
-// $Id: StEmcPreCluster.cxx,v 1.8 2001/02/01 22:23:09 suaide Exp $
+// $Id: StEmcPreCluster.cxx,v 1.9 2001/04/17 23:51:22 pavlinov Exp $
 //
 // $Log: StEmcPreCluster.cxx,v $
+// Revision 1.9  2001/04/17 23:51:22  pavlinov
+// Clean up before MDC4
+//
 // Revision 1.8  2001/02/01 22:23:09  suaide
 // Fixed some memory leaks
 //
@@ -75,6 +78,7 @@
 #include "StEvent/StEvent.h" 
 #include "StEvent/StEventTypes.h"
 #include "StEmcUtil/StEmcGeom.h"
+#include "StEmcUtil/StEmcMath.h"
 
 ClassImp(StEmcPreCluster)
 
@@ -82,11 +86,11 @@ ClassImp(StEmcPreCluster)
 StEmcGeom* emcgeo;
 
 //_____________________________________________________________________________
-StEmcPreCluster::StEmcPreCluster(TArrayI *hits) : TObject() 
+StEmcPreCluster::StEmcPreCluster(TArrayI *hits) : StObject() 
 {
 }
 //_____________________________________________________________________________
-StEmcPreCluster::StEmcPreCluster(Int_t mod,TArrayI *hits,Int_t detector) : TObject() 
+StEmcPreCluster::StEmcPreCluster(Int_t mod,TArrayI *hits,Int_t detector) : StObject() 
 {
   mEnergy = 0.0; mEta = 0.0; mPhi = 0.0; 
   mSigmaEta =0.0; mSigmaPhi=0.0;
@@ -127,64 +131,72 @@ void StEmcPreCluster::calcMeanAndRms(StEmcDetector* mDet,Int_t mod)
   emcgeo=new StEmcGeom(mDetector);
   StSPtrVecEmcRawHit& mStEventHits=mDet->module(mod)->hits();
   Float_t etah, phih;
-  Int_t m, e, s;
+  Int_t m, e, s, indh;
   if(mNhits == 1){
-    m=(Int_t)mStEventHits[mHitsID[0]]->module();
-    e=(Int_t)mStEventHits[mHitsID[0]]->eta();
-    s=abs(mStEventHits[mHitsID[0]]->sub());
+    indh = mHitsID[0];
+    m=(Int_t)mStEventHits[indh]->module();
+    e=(Int_t)mStEventHits[indh]->eta();
+    s=abs(mStEventHits[indh]->sub());
     emcgeo->getEta(m,e, etah);      
     emcgeo->getPhi(m,s, phih);
     mEta      = etah;
     mPhi      = phih;
     mSigmaEta = 0.0;
     mSigmaPhi = 0.0;
-    mEnergy   = mStEventHits[mHitsID[0]]->energy();
-    
+    mEnergy   = mStEventHits[indh]->energy();
   }
   else{
-    Float_t E;
-    Float_t phi0,MPI=3.1415926;
-    Float_t MPI2=2*MPI;
+    Float_t E, phi0;
     for(int i=0; i<mNhits; i++)
     {
-      m=mStEventHits[1]->module();
-      e=mStEventHits[mHitsID[i]]->eta();
-      s=abs(mStEventHits[mHitsID[i]]->sub());
+      indh = mHitsID[i];
+      m=mStEventHits[indh]->module();
+      e=mStEventHits[indh]->eta();
+      s=abs(mStEventHits[indh]->sub());
       
-      E = mStEventHits[mHitsID[i]]->energy();
+      E = mStEventHits[indh]->energy();
       emcgeo->getEta(m,e, etah);      
       emcgeo->getPhi(m,s, phih);      
       
-      if(i==0)phi0=phih;
-      phih=phih-phi0;
-      if(phih>MPI) phih-=MPI2;
-      if(phih<-MPI)phih+=MPI2;
+      if(i == 0) {phi0 =  phih; phih = 0.0;}
+      else        phih -= phi0;           // Rotate to the system of first hit 
+      phih = StEmcMath::getPhiPlusMinusPi(phih);
 
       mEnergy   += E;
       mEta      += etah*E;
       mPhi      += phih*E;
       mSigmaEta += etah*etah*E;
-      mSigmaPhi += phih*phih*E;
-      
+      mSigmaPhi += phih*phih*E;      
     }
 
     mEta /= mEnergy;
     mSigmaEta = mSigmaEta/mEnergy - mEta*mEta;
-    if(mSigmaEta<=1.e-7) mSigmaEta = 0.0;
-    else mSigmaEta = sqrt(mSigmaEta);
+    if(mNhits==2 && (mStEventHits[mHitsID[0]]->eta()==mStEventHits[mHitsID[1]]->eta())) 
+      mSigmaEta = 0.0; // Same eta
+    else {
+      if(mSigmaEta <= 0.0) mSigmaEta = 0.0;
+      else mSigmaEta = sqrt(mSigmaEta);
+    }
 
     mPhi /= mEnergy;
-    mPhi += phi0;
     mSigmaPhi = mSigmaPhi/mEnergy - mPhi*mPhi;
-    if(mSigmaPhi<=1.0e-7) mSigmaPhi = 0.0;
-    else mSigmaPhi = sqrt(mSigmaPhi);
+    if(mNhits==2 && (mStEventHits[mHitsID[0]]->sub()==mStEventHits[mHitsID[1]]->sub()))
+       mSigmaPhi = 0.0;  // Same phi
+    else {
+      if(mSigmaPhi <= 0.0) mSigmaPhi = 0.0;
+      else mSigmaPhi = sqrt(mSigmaPhi);
+    }
+    mPhi += phi0;                 // Rotate to STAR system
+    mPhi  = StEmcMath::getPhiPlusMinusPi(mPhi);
   }
   delete emcgeo;
 }
-//_____________________________________________________________________________
-void StEmcPreCluster::print(ostream *os)
+
+void 
+StEmcPreCluster::print(ostream *os)
 {
 // Printing member function.
+  *os << " m " << Module();
   *os << " Energy " << mEnergy << " #hits " << mNhits;
   *os <<" HitsId => ";
   for(Int_t i=0; i<mNhits; i++){*os <<mHitsID[i]<<" ";}
@@ -193,9 +205,16 @@ void StEmcPreCluster::print(ostream *os)
   *os << " eta " << mEta << "+/-" << mSigmaEta;
   *os <<"   phi " << mPhi << "+/-" << mSigmaPhi << endl;
 }
-//_____________________________________________________________________________
+
 ostream &operator<<(ostream &os, StEmcPreCluster &cl)
 {
 // Global operator << for StEmcPreCluster. 
   cl.print(&os); return os;
+}
+
+void 
+StEmcPreCluster::Browse(TBrowser *b)
+{
+  cout << (*this) << endl;
+  StObject::Browse(b);
 }

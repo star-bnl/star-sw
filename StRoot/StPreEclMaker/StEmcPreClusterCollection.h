@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.h,v $
+// Revision 1.7  2001/04/17 23:51:43  pavlinov
+// Clean up before MDC4
+//
 // Revision 1.6  2001/02/01 22:23:12  suaide
 // Fixed some memory leaks
 //
@@ -97,7 +100,8 @@ public:
   void            setNclusters(Int_t);  
   void            setCheckClusters(Bool_t);
 
-  void            Browse(TBrowser *b);
+  virtual  void   Browse(TBrowser *b);
+  virtual  void   Delete(Option_t *opt="");
 
 // methods for cluster finder
   Int_t           findClusters(); 
@@ -112,9 +116,11 @@ public:
   Float_t         profile(Float_t,Float_t,Float_t);
 // methods for cluster printing 
   virtual  void   printCluster(Int_t, StEmcPreCluster*);
-  virtual  void   printClusters(Int_t n=5, Int_t start=5);
+  virtual  void   printClusters(Int_t n=5, Int_t start=5, Int_t m=0);
   virtual  void   printClustersAll();
+  virtual  void   printClusterFromModule(Int_t m=0);  // *MENU* 
            void   printConf();
+  
   
   ClassDef(StEmcPreClusterCollection,2)// Base class for electromagnetic calorimeter cluster collection 
 };

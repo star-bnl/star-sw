@@ -1,7 +1,10 @@
 //
-// $Id: StEmcPreCluster.h,v 1.5 2001/02/01 22:23:10 suaide Exp $
+// $Id: StEmcPreCluster.h,v 1.6 2001/04/17 23:51:30 pavlinov Exp $
 //
 // $Log: StEmcPreCluster.h,v $
+// Revision 1.6  2001/04/17 23:51:30  pavlinov
+// Clean up before MDC4
+//
 // Revision 1.5  2001/02/01 22:23:10  suaide
 // Fixed some memory leaks
 //
@@ -48,9 +51,9 @@
 #include <math.h>
 #include <iostream.h>
 #include "TArrayI.h"
-#include "TObject.h"
+#include "StObject.h"
 #include "StEvent/StEmcDetector.h"
-class StEmcPreCluster : public TObject {
+class StEmcPreCluster : public StObject {
 
 private:
   Int_t             mDetector;
@@ -76,6 +79,7 @@ public:
   Int_t             Module() const;
   Int_t             ID(Int_t);
   TArrayI*          HitsID();
+  virtual void      Browse(TBrowser *b);
 
   virtual void      calcMeanAndRms(StEmcDetector*,Int_t);
   virtual void      print(ostream *os);

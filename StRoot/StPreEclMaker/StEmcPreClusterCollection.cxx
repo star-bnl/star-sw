@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.cxx,v $
+// Revision 1.10  2001/04/17 23:51:35  pavlinov
+// Clean up before MDC4
+//
 // Revision 1.9  2001/02/01 22:23:11  suaide
 // Fixed some memory leaks
 //
@@ -77,6 +80,7 @@
 // collection. 
 //
 //////////////////////////////////////////////////////////////////////////
+#include <TBrowser.h>
 #include "StEmcPreClusterCollection.h"
 #include <math.h>
 #include "emc_def.h"
@@ -148,13 +152,20 @@ StEmcPreClusterCollection::StEmcPreClusterCollection(const Char_t *Name, StEmcDe
   
   kIsOk=kTRUE;
 }
-//_____________________________________________________________________________
+
 StEmcPreClusterCollection::~StEmcPreClusterCollection()
 {
-  delete geo;
-  mClusters.Delete();
+  Delete();
 }
-//_____________________________________________________________________________
+
+void 
+StEmcPreClusterCollection::Delete(Option_t *opt)
+{
+   if(opt) {/*unused*/}
+   mClusters.Delete();
+   if(geo) {delete geo; geo=0;} 
+}
+
 Int_t StEmcPreClusterCollection::findClusters()
 {
   nhits=mDet->numberOfHits();
@@ -661,11 +672,12 @@ void StEmcPreClusterCollection::printCluster(Int_t ic, StEmcPreCluster *cl)
   cout << (*cl) << endl;
 }
 //_____________________________________________________________________________
-void StEmcPreClusterCollection::printClusters(Int_t n, Int_t start)
+void StEmcPreClusterCollection::printClusters(Int_t n, Int_t start, Int_t m)
 {
+  Int_t iprint=0;
   cout << endl << mDetector << "  " << GetName() << " : ";
   if(mNclusters<=0){cout << "No Clusters" << endl; return;}
-  else{cout << mNclusters << " clusters" <<endl;} 
+  else{cout << mNclusters << " clusters" << endl;} 
   cout<<" mEnergySeed " << mEnergySeed;
   cout<<" mEnergyAdd "  << mEnergyAdd; 
   cout<<" mEnergyThresholdAll " << mEnergyThresholdAll << endl;
@@ -684,20 +696,34 @@ void StEmcPreClusterCollection::printClusters(Int_t n, Int_t start)
   if(start+n>=mNclusters) n=mNclusters-start;
   for(Int_t i=start; i<start+n; i++){
     if(i<=mClusters.Capacity()){
-      if( (cl=(StEmcPreCluster*)next()) ) printCluster(i,cl);
+      if( (cl=(StEmcPreCluster*)next()) && (m==0||m==cl->Module())) {
+        printCluster(i,cl);
+        if(m==cl->Module()) iprint++;
+      }
     }
     else cout<<" PreCluster "<<i<<" out of capacity "<<endl;
   }
+  if(m) cout<<"Module "<<m<<" has "<<iprint<<" clustes(s)"<<endl;
 }
-//_____________________________________________________________________________
-void StEmcPreClusterCollection::printClustersAll()
+
+void 
+StEmcPreClusterCollection:: printClustersAll()
 {
   printClusters(mNclusters,0);
 }
-//_____________________________________________________________________________
-void StEmcPreClusterCollection::Browse(TBrowser *b)
+
+void 
+StEmcPreClusterCollection::printClusterFromModule(Int_t m)
 {
-  printClusters(mNclusters,0);
+  printClusters(mNclusters,0,m);
+}
+
+void 
+StEmcPreClusterCollection::Browse(TBrowser *b)
+{
+  printClusters(10,0); // Print 10 clusters or less
+  b->Add((TObject*)(Clusters()), GetName());
+  TDataSet::Browse(b);
 }
 //_____________________________________________________________________________
 void StEmcPreClusterCollection::printConf()
