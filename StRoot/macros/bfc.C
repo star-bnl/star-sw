@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.145 2000/09/01 19:10:20 didenko Exp $
+// $Id: bfc.C,v 1.146 2000/09/04 00:28:56 didenko Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -105,7 +105,7 @@ void bfc(const Int_t First,
     }
   }
   if (chain->GetOption("TpcT0")) {
-    StTpcT0Maker *t0mk = (StTpcT0Maker *) chain->GetMaker("tpc_t0");
+    StTpcT0Maker *t0mk = (StTpcT0Maker *) chain->GetMaker("TpcT0");
     if (t0mk) t0mk->SetDesiredEntries(10);
   }
       
