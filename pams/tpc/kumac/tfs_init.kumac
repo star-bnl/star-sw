@@ -1,0 +1,33 @@
+macro init_tfs TPC_HOME=$STAR/pams/tpc/params
+
+
+*set tfs parameters
+
+cd /dui/constants/tpc/params
+/DIO/NEWf tfspar $STAR/params/tpc/tfs_pars.xdf r
+/DIO/STREAM/GETEVENT tfspar
+/DIO/STREAM/close tfspar
+
+
+* initialise the index type table
+
+
+newtable /dui/constants/tpc/params/type      tcl_tpc_index_type 1
+tdm/table/rowcount /dui/constants/tpc/params/type 1
+tdm/table/cell/putvalue 'type[0].tphit_mhitstpc' 1
+tdm/table/cell/putvalue 'type[0].tphit_tpcluster' 2
+tdm/table/cell/putvalue 'type[0].tphit_tpsegment' 3
+tdm/table/cell/putvalue 'type[0].tphit_tptrack' 4
+tdm/table/cell/putvalue 'type[0].tpsegment_mctrack' 5
+tdm/table/cell/putvalue 'type[0].tptrack_mctrack' 6
+tdm/table/cell/putvalue 'type[0].tptrack_tpsegment' 7
+
+
+* get ready output tables from tcl/tph
+
+cd /dui/data/tpc/hits
+
+newtable tphit     tcl_tphit     100000
+newtable index     tcl_tpc_index 300000
+
+return
