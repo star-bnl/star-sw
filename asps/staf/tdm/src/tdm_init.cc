@@ -61,7 +61,7 @@ int tdm_stop()
    delete tdm;
 unecessary -- soc will do it. -*/
 
-   printf("\n");
+   EML_MESSAGE("\n");
 #ifndef OLD_DSL
    dsAllocStats();			/* show allocation stats */
 #else   /*OLD_DSL*/

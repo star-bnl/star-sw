@@ -41,6 +41,8 @@ public:
 
 //----------------------------------
 // Unix-Like commands
+   virtual STAFCV_T du (const char * dirPath,long minsize);
+   virtual STAFCV_T df ();
    virtual STAFCV_T cd (const char * dirPath);
    virtual STAFCV_T ln (const char * fromPath, const char * toPath); 
    virtual STAFCV_T cp (const char * fromPath, const char * toPath);
@@ -61,6 +63,11 @@ public:
           const char * toPath);  // The unLinkSrc arg allows mv() to be
                                  // simply lnmv(TRUE,xx,xx).
 				 // and ln to be lnmv(FALSE,xx,xx).
+//-cet-17nov97-from HJW's df,du version
+   virtual void duiSprinfWithCommas(char *out,long in);
+   virtual STAFCV_T duRecurse (char *path,int indent,
+		DS_DATASET_T *pDS, long minsize);
+
 
 //----------------------------------
 // Over-ride tdmFactory methods
@@ -76,6 +83,8 @@ protected:
 
    tdmDataset *myRoot;
    DS_DATASET_T *pDSroot;
+   long totBytes;  // used with the du command
+
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
    virtual STAFCV_T findNode_ds (const char * path

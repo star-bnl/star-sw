@@ -249,12 +249,15 @@ long tdmTable::  rowSize () {
 //----------------------------------
 char * tdmTable::  typeName () {
    char* tname=NULL;
+   char* tn=NULL;
 
    if(!dsTableTypeName(&tname,pDSthis)) {
       EML_PUSHERROR(dsError("DSL_ERROR"));
       return NULL;
    }
-   return tname;
+   tn = (char*)MALLOC(strlen(tname) +1);
+   strcpy(tn,tname);
+   return tn;
 }
 
 //----------------------------------
@@ -725,7 +728,7 @@ unsigned char tdmDataset :: implementsInterface (const char * iface) {
 
 STAFCV_T tdmDataset:: addDataset (const char * name, long setDim) {
 //BUG- add dsAddDataset functionality
-   EML_PUSHERROR(NOT_YET_IMPLEMENTED);
+   EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
 //----------------------------------
@@ -1009,7 +1012,7 @@ STAFCV_T tdmFactory:: findTypeSpecification (const char * name
 
    for(int i=1;;i++){
       if( !getTypeName(i,nm) ){
-         EML_SUCCESS(STAFCV_OK);
+         EML_ERROR(TYPE_NOT_FOUND);
       }
       if( (0 == strcmp(name,nm)) ){
          FREE(nm);

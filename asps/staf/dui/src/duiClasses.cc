@@ -4,6 +4,8 @@
 //:DESCRIPTION: Dataset Unix-like Interface Classes
 //:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
 //:BUGS:        -- STILL IN DEVELOPMENT --
+//:HISTORY:     08dec97-v031b-cet- fix ctor bug
+//:HISTORY:     17nov97-v031a-cet,hjw- add du,df
 //:HISTORY:     14nov97-v030c-cet- Rename ln to lnmv and use for ln
 //:HISTORY:     03sep97-v030b-cet- merge CET & HJW versions (minimal)
 //:HISTORY:     22Jul97-v030a-hjw- add rm,rmdir,ln,cp,mv
@@ -18,6 +20,7 @@
 #define PP printf(
 //:----------------------------------------------- INCLUDES           --
 #include <string.h>
+#include <malloc.h>
 #include "asuAlloc.h"
 #include "tdmLib.h"
 #include "duiClasses.hh"
@@ -57,7 +60,9 @@ duiFactory:: duiFactory(const char * name)
    if( soc->idObject(myCwd,"tdmDataset",id) ){
       EML_WARNING(DUPLICATE_OBJECT_NAME);
    }
-   myRoot = new tdmDataset(myCwd,pDSroot);
+   else { // v031b
+      myRoot = new tdmDataset(myCwd,pDSroot);
+   }
    if( !soc->idObject(myCwd,"tdmDataset",id) ){
       EML_WARNING(OBJECT_NOT_FOUND);
    }
@@ -130,6 +135,107 @@ STAFCV_T duiFactory:: cd (const char * dirPath) {
    FREE(p);
    cwd(newPath);
    FREE(newPath);
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//----------------------------------
+STAFCV_T duiFactory:: df () {
+  static long previous = -123;
+  char buf1[40],buf2[40];
+  long thisTime;
+  struct mallinfo qq;
+  qq=mallinfo();
+  thisTime=qq.usmblks+qq.uordblks;
+  // bbb Do we need to delete qq?
+  if(previous>=0) {
+    duiSprinfWithCommas(buf1,(long)(thisTime));
+    duiSprinfWithCommas(buf2,(long)(thisTime-previous));
+    printf("%s Bytes of memory allocated, increase = %s bytes\n",buf1,buf2);
+  } else {
+    duiSprinfWithCommas(buf1,(long)(thisTime));
+    printf("%s Bytes of memory allocated\n",buf1);
+  }
+  previous=thisTime;
+  EML_SUCCESS(STAFCV_OK);
+}
+//----------------------------------
+#define DUI_PATH_SIZE 150
+STAFCV_T duiFactory:: duRecurse (char *path,int indent,DS_DATASET_T *pDS,
+      long minsize) {
+  bool_t isDataset; DS_DATASET_T *pDS2; char *dsName;
+  static callCnt=0;
+  int ii; char path2[DUI_PATH_SIZE+1],buf[17];
+  size_t iEntry,numEntries,rowsize,nrows;
+  indent++; indent++; path2[0]=0;
+  if(!dsIsDataset(&isDataset,pDS)) EML_ERROR(DATASET_NOT_FOUND);
+  if(isDataset) {
+    if(!dsDatasetName(&dsName,pDS)) EML_ERROR(CANT_GET_NAME_OF_DIR);
+    if(strlen(dsName)+strlen(path)+1>DUI_PATH_SIZE) EML_ERROR(PATH_TOO_BIG);
+    sprintf(path2,"%s/%s",path,dsName);
+  } else {
+    if(!dsTableName(&dsName,pDS)) EML_ERROR(CANT_GET_NAME_OF_TBL);
+  }
+  if(isDataset) {
+    if(!dsDatasetEntryCount(&numEntries,pDS)) EML_ERROR(DATASET_ERROR);
+    for(iEntry=0;iEntry<numEntries;iEntry++) {
+      if(!dsDatasetEntry(&pDS2,pDS,iEntry)) EML_ERROR(DATASET_ERROR);
+      if(duRecurse(path2,indent,pDS2,minsize)!=STAFCV_OK) 
+          EML_ERROR(DATASET_ERROR);
+    }
+  } else { /* is a table */
+    if(!dsTableRowSize(&rowsize,pDS)) EML_ERROR(DATASET_ERROR);
+    if(!dsTableMaxRowCount(&nrows,pDS)) EML_ERROR(DATASET_ERROR);
+    if(nrows*rowsize>=minsize) {
+      printf("%s/%s ",path,dsName);
+      duiSprinfWithCommas(buf,(long)(nrows*rowsize));
+      for(ii=56-strlen(buf)-strlen(path)-strlen(dsName);ii>=0;ii--) {
+        printf("%c",(callCnt%3==0)?'-':' ');
+      }
+      printf(" %s bytes  %6d rows\n",buf,nrows); callCnt++;
+      totBytes+=nrows*rowsize;
+    }
+  }
+  EML_SUCCESS(STAFCV_OK);
+}
+//----------------------------------
+void duiFactory:: duiSprinfWithCommas(char *out,long in) {
+  char *p,buf[77];
+  int ii,len,leadoff;
+  sprintf(buf,"%d",in); len=strlen(buf); p=out;
+  leadoff=len%3+98;
+  for(ii=0;ii<len;ii++) {
+    *(p++)=buf[ii]; if(!buf[ii+1]) break;
+    if((leadoff--)%3==0) *(p++)=',';
+  }
+  *(p++)=0;
+}
+//----------------------------------
+STAFCV_T duiFactory:: du (const char * dirPath,long minsize) {
+
+   DS_DATASET_T *pDS=NULL; int i; char buf[50];
+   bool_t result;
+
+   if( !findNode_ds(dirPath,pDS)
+   ){
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+
+   char* path2 = (char*)dui_pathof(myCwd,dirPath);
+   char* p=NULL;
+   if( NULL == strstr(path2,p=myRoot->name()) ){
+      EML_ERROR(INVALID_DATASET);
+   }
+   FREE(p);
+   for(i=strlen(path2)-1;i>=0;i--) { if(path2[i]=='/') { path2[i]=0; break; } }
+   totBytes=0;
+   if(duRecurse(path2,0,pDS,minsize)!=STAFCV_OK) {
+     EML_ERROR(CANNOT_TRAVERSE_TREE);
+   }
+   FREE(path2); duiSprinfWithCommas(buf,(long)totBytes);
+   printf("                                     Total bytes %11s\n",buf);
+   if(minsize>0) {
+      printf("Only tables of size >= %d bytes are listed above.\n",minsize);
+   }
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -316,6 +422,8 @@ STAFCV_T duiFactory:: unlinkAndMaybeFreeMemory (char freeMemory,
   if(!dsUnlink(parentOfFrom,from)) EML_ERROR(UNLINK_OF_SRC_FAILED);
   if(freeMemory&&numLinks<2) {
     if(!dsFreeDataset(from)) EML_ERROR(MEMORY_NOT_FREED);
+    /*- 03dec97-cet-Dave Morrison's patch -*/
+    tdm->deleteTable(filePath);
   }
 
   EML_SUCCESS(STAFCV_OK);
