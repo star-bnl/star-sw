@@ -20,8 +20,8 @@ StiStarDetectorBuilder::~StiStarDetectorBuilder()
 void StiStarDetectorBuilder::buildMaterials()
 {
   _messenger << "StiStarDetectorBuilder::buildMaterials() - INFO - Started" << endl;
-  _pipeMaterial = add(new StiMaterial("Be", 6.,12.,12850., 0.00156, 5.));
-  _vacuumMaterial = add(new StiMaterial("Vaccum",0.,1.,0.,0.,0.));
+  _pipeMaterial = add(new StiMaterial("Be", 4.,9.012, 1.848, 65.19, 3.) );  
+  _vacuumMaterial = add(new StiMaterial("Vaccum",0., 1., 0., 1e30, 0.)  );
   _messenger << "StiStarDetectorBuilder::buildMaterials() - INFO - Done" << endl;
 }
 
