@@ -154,9 +154,3 @@ Int_t StEmcTriggerMaker::Finish()
   return StMaker::Finish();
 }
 
-//_____________________________________________________________________________
-Int_t StEmcTriggerMaker::Clear()
-{
-  delete BemcTrigger;
-  return kStOk;
-}

@@ -42,8 +42,7 @@ class StEmcTriggerMaker : public StMaker
     virtual Int_t Init();
     virtual Int_t Make();
     virtual Int_t Finish();
-    virtual Int_t Clear();
-            void FillHistograms();
+            void  FillHistograms();
 
   ClassDef(StEmcTriggerMaker, 1) 
 };
