@@ -1,9 +1,12 @@
  //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StMatchMaker class ( svm + est + egr )                               //
+// StMatchMaker class ( svm + egr )                                     //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.33 2000/11/01 00:53:01 lbarnby Exp $
+// $Id: StMatchMaker.cxx,v 1.34 2001/01/29 21:01:06 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.34  2001/01/29 21:01:06  caines
+// Remove est calls from StMatchMaker no longer used
+//
 // Revision 1.33  2000/11/01 00:53:01  lbarnby
 // Move field dependent set up from Init into InitRun
 //
@@ -127,9 +130,6 @@ using namespace units;
 #include "global/St_svm_svt_eval_Module.h"
 #include "global/St_svm_efficiency_Module.h"
 
-#include "global/St_est_am_Module.h"
-#include "global/St_est_toglob2_Module.h"
-#include "global/St_est_eval_Module.h"
 #include "global/St_egr_fitter_Module.h"
 #define gufld   gufld_
 extern "C" {void gufld(Float_t *, Float_t *);}
@@ -143,8 +143,7 @@ ClassImp(StMatchMaker)
   //_____________________________________________________________________________
   StMatchMaker::StMatchMaker(const char *name):StMaker(name),
   m_svm_ctrl(0),
-  m_egr_egrpar(0),
-  m_est_ctrl(0)
+  m_egr_egrpar(0)
 {
   drawinit=kFALSE;
   m_svtchicut = 0;
@@ -203,200 +202,6 @@ Int_t StMatchMaker::Init(){
     m_svm_ctrl->AddAt(&row,0);
   }
   AddRunCont(m_svm_ctrl);
-  //est
-  
-  m_est_ctrl= new St_est_ctrl("est_ctrl",1);
-  {
-    est_ctrl_st row;
-//
-    memset(&row,0,m_est_ctrl->GetRowSize());
-    row.ktrl1	 =          1; // control switch for printing (1=on, 0=off) ;
-    row.pass	 =          5; // number of passes;
-    row.nhole[0]	 =          1; // number of holes in the segment (pass 1);
-    row.nhole[1]	 =          1; // number of holes in the segment (pass 2);
-    row.nhole[2]	 =          2; // number of holes in the segment (pass 3);
-    row.nhole[3]	 =          3; // number of holes in the segment (pass 4);
-    row.nhole[4]	 =          3; // number of holes in the segment (pass 5);
-    row.apmin[0]	 =        0.9; // minimum pt (pt loop  1);
-    row.apmin[1]	 =        0.7; // minimum pt (pt loop  2);
-    row.apmin[2]	 =        0.6; // minimum pt (pt loop  3);
-    row.apmin[3]	 =        0.5; // minimum pt (pt loop  4);
-    row.apmin[4]	 =        0.1; // minimum pt (pt loop  5);
-    row.apmin[5]	 =        0.1; // minimum pt (pt loop  6);
-    row.apmin[6]	 =        0.1; // minimum pt (pt loop  7);
-    row.afacmax1[0]	 =          2; // division factor for the scaning area (layer 1 pt loop  1) ;
-    row.afacmax1[1]	 =          2; // division factor for the scaning area (layer 1 pt loop  2) ;
-    row.afacmax1[2]	 =          2; // division factor for the scaning area (layer 1 pt loop  3) ;
-    row.afacmax1[3]	 =          2; // division factor for the scaning area (layer 1 pt loop  4) ;
-    row.afacmax1[4]	 =          2; // division factor for the scaning area (layer 1 pt loop  5) ;
-    row.afacmax1[5]	 =          2; // division factor for the scaning area (layer 1 pt loop  6) ;
-    row.afacmax1[6]	 =          2; // division factor for the scaning area (layer 1 pt loop  7) ;
-    row.afacmax2[0]	 =          2; // division factor for the scaning area (layer 2 pt loop  1) ;
-    row.afacmax2[1]	 =          2; // division factor for the scaning area (layer 2 pt loop  2) ;
-    row.afacmax2[2]	 =          2; // division factor for the scaning area (layer 2 pt loop  3) ;
-    row.afacmax2[3]	 =          2; // division factor for the scaning area (layer 2 pt loop  4) ;
-    row.afacmax2[4]	 =          2; // division factor for the scaning area (layer 2 pt loop  5) ;
-    row.afacmax2[5]	 =          2; // division factor for the scaning area (layer 2 pt loop  6) ;
-    row.afacmax2[6]	 =          2; // division factor for the scaning area (layer 2 pt loop  7) ;
-    row.afacmax3[0]	 =          2; // division factor for the scaning area (layer 3 pt loop  1) ;
-    row.afacmax3[1]	 =          2; // division factor for the scaning area (layer 3 pt loop  2) ;
-    row.afacmax3[2]	 =          2; // division factor for the scaning area (layer 3 pt loop  3) ;
-    row.afacmax3[3]	 =          2; // division factor for the scaning area (layer 3 pt loop  4) ;
-    row.afacmax3[4]	 =          2; // division factor for the scaning area (layer 3 pt loop  5) ;
-    row.afacmax3[5]	 =          2; // division factor for the scaning area (layer 3 pt loop  6) ;
-    row.afacmax3[6]	 =          2; // division factor for the scaning area (layer 3 pt loop  7) ;
-    row.afacmax4[0]	 =          2; // division factor for the scaning area (layer 4 pt loop  1) ;
-    row.afacmax4[1]	 =          2; // division factor for the scaning area (layer 4 pt loop  2) ;
-    row.afacmax4[2]	 =          2; // division factor for the scaning area (layer 4 pt loop  3) ;
-    row.afacmax4[3]	 =          2; // division factor for the scaning area (layer 4 pt loop  4) ;
-    row.afacmax4[4]	 =          2; // division factor for the scaning area (layer 4 pt loop  5) ;
-    row.afacmax4[5]	 =          2; // division factor for the scaning area (layer 4 pt loop  6) ;
-    row.afacmax4[6]	 =          2; // division factor for the scaning area (layer 4 pt loop  7) ;
-    row.stupid	 =          0; // =1 - perfect tracking, =0 - real tracking ;
-    row.ext[0]	 =        1.1; // extension factor of the wafer area (pt loop  1) ;
-    row.ext[1]	 =        1.1; // extension factor of the wafer area (pt loop  2) ;
-    row.ext[2]	 =        1.2; // extension factor of the wafer area (pt loop  3) ;
-    row.ext[3]	 =        1.2; // extension factor of the wafer area (pt loop  4) ;
-    row.ext[4]	 =        1.3; // extension factor of the wafer area (pt loop  5) ;
-    row.ext[5]	 =        1.4; // extension factor of the wafer area (pt loop  6) ;
-    row.ext[6]	 =        1.5; // extension factor of the wafer area (pt loop  7) ;
-    row.ext[7]	 =        1.6; // extension factor of the wafer area (pt loop  8) ;
-    row.ext[8]	 =        1.7; // extension factor of the wafer area (pt loop  9) ;
-    row.ext[9]	 =        1.8; // extension factor of the wafer area (pt loop 10) ;
-    row.ext[10]	 =        1.9; // extension factor of the wafer area (pt loop 11) ;
-    row.ext[11]	 =        2.5; // extension factor of the wafer area (pt loop 12) ;
-    row.ext[12]	 =          2; // extension factor of the wafer area (pt loop 13) ;
-    row.ext[13]	 =          2; // extension factor of the wafer area (pt loop 14) ;
-    row.ptcut	 =        0.1; // minimum pt value for the tracker ;
-    row.tanl_cut =        1.4; // maximum tanl value for the tracker ;
-    row.pid_cut	 =          7; // minimum value of the pid for the tracker ;
-    row.min_nrec =          5; // minimum number of tpc points in track ;
-    row.max_nrec =         50; // maximum number of tpc points in track ;
-    row.maxloop	 =          7; // number of loops in pt ;
-    row.minlay	 =          1; // innermost layer to scan ;
-    row.maxlay	 =          4; // outermost layer to scan ;
-    row.mxfnd	 =         10; // maximum number of found hits per tracks ;
-    row.maxass	 =         10; // maximum of sharing for a given hit ;
-    row.aphi1[0]	 =       0.03; // scanning area in phi (layer 1 pt loop  1) ;
-    row.aphi1[1]	 =       0.03; // scanning area in phi (layer 1 pt loop  2) ;
-    row.aphi1[2]	 =       0.03; // scanning area in phi (layer 1 pt loop  3) ;
-    row.aphi1[3]	 =       0.03; // scanning area in phi (layer 1 pt loop  4) ;
-    row.aphi1[4]	 =       0.03; // scanning area in phi (layer 1 pt loop  5) ;
-    row.aphi1[5]	 =       0.03; // scanning area in phi (layer 1 pt loop  6) ;
-    row.aphi1[6]	 =       0.03; // scanning area in phi (layer 1 pt loop  7) ;
-    row.aphi1[7]	 =       0.03; // scanning area in phi (layer 1 pt loop  8) ;
-    row.aphi1[8]	 =      0.035; // scanning area in phi (layer 1 pt loop  9) ;
-    row.aphi1[9]	 =       0.03; // scanning area in phi (layer 1 pt loop 10) ;
-    row.aphi1[10]	 =       0.03; // scanning area in phi (layer 1 pt loop 11) ;
-    row.aphi1[11]	 =       0.03; // scanning area in phi (layer 1 pt loop 12) ;
-    row.aphi1[12]	 =       0.03; // scanning area in phi (layer 1 pt loop 13) ;
-    row.aphi1[13]	 =       0.04; // scanning area in phi (layer 1 pt loop 14) ;
-    row.az1[0]	 =        0.2; // scanning area in z (layer 1 pt loop  1) ;
-    row.az1[1]	 =        0.2; // scanning area in z (layer 1 pt loop  2) ;
-    row.az1[2]	 =        0.2; // scanning area in z (layer 1 pt loop  3) ;
-    row.az1[3]	 =        0.2; // scanning area in z (layer 1 pt loop  4) ;
-    row.az1[4]	 =        0.2; // scanning area in z (layer 1 pt loop  5) ;
-    row.az1[5]	 =        0.2; // scanning area in z (layer 1 pt loop  6) ;
-    row.az1[6]	 =        0.2; // scanning area in z (layer 1 pt loop  7) ;
-    row.az1[7]	 =        0.2; // scanning area in z (layer 1 pt loop  8) ;
-    row.az1[8]	 =       0.25; // scanning area in z (layer 1 pt loop  9) ;
-    row.az1[9]	 =        0.2; // scanning area in z (layer 1 pt loop 10) ;
-    row.az1[10]	 =        0.2; // scanning area in z (layer 1 pt loop 11) ;
-    row.az1[11]	 =        0.2; // scanning area in z (layer 1 pt loop 12) ;
-    row.az1[12]	 =        0.2; // scanning area in z (layer 1 pt loop 13) ;
-    row.az1[13]	 =        0.3; // scanning area in z (layer 1 pt loop 14) ;
-    row.aphi2[0]	 =       0.03; // scanning area in phi (layer 2 pt loop  1) ;
-    row.aphi2[1]	 =       0.03; // scanning area in phi (layer 2 pt loop  2) ;
-    row.aphi2[2]	 =       0.03; // scanning area in phi (layer 2 pt loop  3) ;
-    row.aphi2[3]	 =       0.03; // scanning area in phi (layer 2 pt loop  4) ;
-    row.aphi2[4]	 =       0.03; // scanning area in phi (layer 2 pt loop  5) ;
-    row.aphi2[5]	 =       0.03; // scanning area in phi (layer 2 pt loop  6) ;
-    row.aphi2[6]	 =       0.03; // scanning area in phi (layer 2 pt loop  7) ;
-    row.aphi2[7]	 =      0.035; // scanning area in phi (layer 2 pt loop  8) ;
-    row.aphi2[8]	 =      0.035; // scanning area in phi (layer 2 pt loop  9) ;
-    row.aphi2[9]	 =       0.04; // scanning area in phi (layer 2 pt loop 10) ;
-    row.aphi2[10]	 =       0.04; // scanning area in phi (layer 2 pt loop 11) ;
-    row.aphi2[11]	 =       0.03; // scanning area in phi (layer 2 pt loop 12) ;
-    row.aphi2[12]	 =       0.03; // scanning area in phi (layer 2 pt loop 13) ;
-    row.aphi2[13]	 =       0.04; // scanning area in phi (layer 2 pt loop 14) ;
-    row.az2[0]	 =        0.2; // scanning area in z (layer 2 pt loop  1) ;
-    row.az2[1]	 =        0.2; // scanning area in z (layer 2 pt loop  2) ;
-    row.az2[2]	 =        0.2; // scanning area in z (layer 2 pt loop  3) ;
-    row.az2[3]	 =        0.2; // scanning area in z (layer 2 pt loop  4) ;
-    row.az2[4]	 =        0.2; // scanning area in z (layer 2 pt loop  5) ;
-    row.az2[5]	 =        0.2; // scanning area in z (layer 2 pt loop  6) ;
-    row.az2[6]	 =        0.2; // scanning area in z (layer 2 pt loop  7) ;
-    row.az2[7]	 =        0.3; // scanning area in z (layer 2 pt loop  8) ;
-    row.az2[8]	 =        0.3; // scanning area in z (layer 2 pt loop  9) ;
-    row.az2[9]	 =        0.4; // scanning area in z (layer 2 pt loop 10) ;
-    row.az2[10]	 =        0.4; // scanning area in z (layer 2 pt loop 11) ;
-    row.az2[11]	 =        0.2; // scanning area in z (layer 2 pt loop 12) ;
-    row.az2[12]	 =        0.2; // scanning area in z (layer 2 pt loop 13) ;
-    row.az2[13]	 =        0.3; // scanning area in z (layer 2 pt loop 14) ;
-    row.aphi3[0]	 =       0.03; // scanning area in phi (layer 3 pt loop  1) ;
-    row.aphi3[1]	 =       0.03; // scanning area in phi (layer 3 pt loop  2) ;
-    row.aphi3[2]	 =       0.03; // scanning area in phi (layer 3 pt loop  3) ;
-    row.aphi3[3]	 =       0.03; // scanning area in phi (layer 3 pt loop  4) ;
-    row.aphi3[4]	 =       0.03; // scanning area in phi (layer 3 pt loop  5) ;
-    row.aphi3[5]	 =       0.03; // scanning area in phi (layer 3 pt loop  6) ;
-    row.aphi3[6]	 =       0.03; // scanning area in phi (layer 3 pt loop  7) ;
-    row.aphi3[7]	 =       0.03; // scanning area in phi (layer 3 pt loop  8) ;
-    row.aphi3[8]	 =       0.03; // scanning area in phi (layer 3 pt loop  9) ;
-    row.aphi3[9]	 =       0.03; // scanning area in phi (layer 3 pt loop 10) ;
-    row.aphi3[10]	 =       0.03; // scanning area in phi (layer 3 pt loop 11) ;
-    row.aphi3[11]	 =       0.03; // scanning area in phi (layer 3 pt loop 12) ;
-    row.aphi3[12]	 =       0.03; // scanning area in phi (layer 3 pt loop 13) ;
-    row.aphi3[13]	 =       0.04; // scanning area in phi (layer 3 pt loop 14) ;
-    row.az3[0]	 =        0.2; // scanning area in z (layer 3 pt loop  1) ;
-    row.az3[1]	 =        0.2; // scanning area in z (layer 3 pt loop  2) ;
-    row.az3[2]	 =        0.2; // scanning area in z (layer 3 pt loop  3) ;
-    row.az3[3]	 =        0.2; // scanning area in z (layer 3 pt loop  4) ;
-    row.az3[4]	 =        0.2; // scanning area in z (layer 3 pt loop  5) ;
-    row.az3[5]	 =        0.2; // scanning area in z (layer 3 pt loop  6) ;
-    row.az3[6]	 =        0.2; // scanning area in z (layer 3 pt loop  7) ;
-    row.az3[7]	 =        0.2; // scanning area in z (layer 3 pt loop  8) ;
-    row.az3[8]	 =        0.2; // scanning area in z (layer 3 pt loop  9) ;
-    row.az3[9]	 =        0.2; // scanning area in z (layer 3 pt loop 10) ;
-    row.az3[10]	 =        0.2; // scanning area in z (layer 3 pt loop 11) ;
-    row.az3[11]	 =        0.2; // scanning area in z (layer 3 pt loop 12) ;
-    row.az3[12]	 =        0.2; // scanning area in z (layer 3 pt loop 13) ;
-    row.az3[13]	 =        0.3; // scanning area in z (layer 3 pt loop 14) ;
-    row.aphi4[0]	 =       0.02; // scanning area in phi (layer 4 pt loop  1) ;
-    row.aphi4[1]	 =       0.02; // scanning area in phi (layer 4 pt loop  2) ;
-    row.aphi4[2]	 =      0.025; // scanning area in phi (layer 4 pt loop  3) ;
-    row.aphi4[3]	 =      0.025; // scanning area in phi (layer 4 pt loop  4) ;
-    row.aphi4[4]	 =       0.02; // scanning area in phi (layer 4 pt loop  5) ;
-    row.aphi4[5]	 =       0.03; // scanning area in phi (layer 4 pt loop  6) ;
-    row.aphi4[6]	 =       0.05; // scanning area in phi (layer 4 pt loop  7) ;
-    row.az4[0]	 =        0.3; // scanning area in z (layer 4 pt loop  1) ;
-    row.az4[1]	 =       0.35; // scanning area in z (layer 4 pt loop  2) ;
-    row.az4[2]	 =        0.4; // scanning area in z (layer 4 pt loop  3) ;
-    row.az4[3]	 =       0.45; // scanning area in z (layer 4 pt loop  4) ;
-    row.az4[4]	 =        0.3; // scanning area in z (layer 4 pt loop  5) ;
-    row.az4[5]	 =       0.45; // scanning area in z (layer 4 pt loop  6) ;
-    row.az4[6]	 =        0.7; // scanning area in z (layer 4 pt loop  7) ;
-    row.current_loop	 =          7; // current loop in pt ;
-    row.prerefit[0]	 =         40; // flag for prerefitting (pt loop  1) ;
-    row.prerefit[1]	 =         35; // flag for prerefitting (pt loop  2) ;
-    row.prerefit[2]	 =         30; // flag for prerefitting (pt loop  3) ;
-    row.prerefit[3]	 =         25; // flag for prerefitting (pt loop  4) ;
-    row.prerefit[4]	 =         20; // flag for prerefitting (pt loop  5) ;
-    row.prerefit[5]	 =         15; // flag for prerefitting (pt loop  6) ;
-    row.prerefit[6]	 =          5; // flag for prerefitting (pt loop  7) ;
-    //    row.bmag	 =        0.5; // magnetic field (T) ;
-    row.bmag	 =    B/tesla;// magnetic field (T) ;
-    row.rifc	 =     46.825; // radial position of tpc IFC (cm) ;
-    row.rlgas	 =      36000; // radiation length of gas (cm) ;
-    row.rlifc	 =        128; // radiation length of tpc IFC (cm) ;
-    row.rltpc_gas	 =      10949; // Radiation length of TPC gas (cm) ;
-    row.tifc	 =        0.3; // thickness of tpc inner field cage (cm) ;
-    row.layer	 =          1; // current layer ;
-    row.svt_er	 =     0.01   ; // svt resolution error ;
-    m_est_ctrl->AddAt(&row,0);
-    // ----------------- end of code ---------------
-  }
-  AddRunCont(m_est_ctrl);
-
   //egr 
   m_egr_egrpar = new St_egr_egrpar("egr_egrpar",2);
   {
@@ -537,7 +342,6 @@ Int_t StMatchMaker::Make(){
     scs_spt     = (St_scs_spt    *)  svthits->Find("scs_spt");
   }
   
-  St_est_match   *est_match    = 0;
   
   // Case silicon not there
   if (!stk_track) {stk_track = new St_stk_track("stk_track",1); AddGarb(stk_track);}
@@ -548,8 +352,6 @@ Int_t StMatchMaker::Make(){
     svt_groups = new St_sgr_groups("svt_groups",10000); AddGarb(svt_groups);
     stk_track    = (St_stk_track *) m_GarbSet->Find("stk_tracks");
     if( !stk_track){ stk_track = new St_stk_track("stk_tracks",5000); AddGarb(stk_track);}
-    est_match    = (St_est_match *) m_GarbSet->Find("est_match");
-    if ( !est_match){ est_match = new St_est_match("est_match",10000); AddGarb(est_match); }
   } 
 
   St_DataSet *ctf = GetInputDS("ctf");
@@ -571,41 +373,7 @@ Int_t StMatchMaker::Make(){
     
     if (iRes !=kSTAFCV_OK) iMake = kStWarn;
     
-  } else if (tptrack && svthits){
-    
-    //est
-    
-    egr_egrpar_st *egr_egrpar = m_egr_egrpar->GetTable();
-    egr_egrpar->useglobal = 3;
-    St_g2t_track   *g2t_track    = 0;
-    St_DataSet *geant = GetInputDS("geant");
-    if (geant) {
-      St_DataSetIter geantI(geant);
-      g2t_track    = (St_g2t_track  *) geantI("g2t_track");
-    }
-    if (!g2t_track) {g2t_track = new St_g2t_track("g2t_track",1); AddGarb(g2t_track);}
-    iRes = est_am(m_svt_geom, m_svt_shape,  m_srs_activea,
-		  m_srspar,m_svt_config,scs_spt,tphit,
-		  tptrack,evaltrk,mctrk,m_est_ctrl,
-		  est_match,g2t_track,m_egr_egrpar);
-    //          ==============================================
-    if (iRes !=kSTAFCV_OK) iMake = kStWarn;
-    if(Debug()) gMessMgr->Debug() << "Calling EST_TOGLOB2" << endm;
-    iRes = est_toglob2(est_match, tphit,     tptrack, scs_spt,
-		       svt_groups,stk_track,evt_match);
-    //         ==================================================
-    
-    if (iRes !=kSTAFCV_OK) iMake = kStWarn;
-    if(Debug()) gMessMgr->Debug() << "finished est_toglob2 " << endm;
-#if 0     
-    if(Debug()) gMessMgr->Debug() << "Calling EST_EVAL" << endm;
-    iRes_est_eval = est_eval(g2t_track, tptrack, mctrk, 
-			     m_est_ctrl,est_match,est_ev,scs_spt); 
-    if (iRes !=kSTAFCV_OK) iMake = kStWarn;
-#endif
   }
-  
-
   // Create groups table for tpc
   St_sgr_groups *tpc_groups;
   if (tphit->GetNRows() != 0){
