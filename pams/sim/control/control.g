@@ -1,3 +1,9 @@
+* $Id: control.g,v 1.12 2000/01/12 00:10:44 nevski Exp $
+* $Log: control.g,v $
+* Revision 1.12  2000/01/12 00:10:44  nevski
+* add cvs headers
+*
+*
       subroutine control
 +CDE,gcbank,gcnum,gcflag,gcunit,quest.
       <w>; (' control ready ')

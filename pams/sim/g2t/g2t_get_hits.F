@@ -1,3 +1,9 @@
+* $Id: g2t_get_hits.F,v 1.23 2000/01/12 00:10:45 nevski Exp $
+* $Log: g2t_get_hits.F,v $
+* Revision 1.23  2000/01/12 00:10:45  nevski
+* add cvs headers
+*
+*
 C :>--------------------------------------------------------------------
 C : DESCRIPTION: general hit table filling  using it specification
 C :              4 bytes per computer word are assumed
