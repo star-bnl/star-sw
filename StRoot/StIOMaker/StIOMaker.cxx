@@ -68,6 +68,16 @@ Int_t StIOMaker::Init()
   fFileSet->AddFile(file);
 }
 //_____________________________________________________________________________
+Int_t StIOMaker::Skip(int nskip)
+{
+  if (!fCurrMk) {
+    Error("Skip","Ignored. File is NOT opened");
+    return kStErr;
+  }
+  return fCurrMk->Skip(nskip);
+}
+
+//_____________________________________________________________________________
 Int_t StIOMaker::Open()
 {
   
