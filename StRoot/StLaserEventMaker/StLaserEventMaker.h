@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.h,v 1.14 2002/01/24 23:56:51 pfachini Exp $
+// $Id: StLaserEventMaker.h,v 1.15 2002/02/20 16:14:20 pfachini Exp $
 // $Log: StLaserEventMaker.h,v $
+// Revision 1.15  2002/02/20 16:14:20  pfachini
+// The clock is now obtained from Jon Gans offline db code
+//
 // Revision 1.14  2002/01/24 23:56:51  pfachini
 // Correcting for the clock
 //
@@ -99,7 +102,8 @@ public:
   StLaserEventMaker(const char *name="tpc_stracks");
   virtual       ~StLaserEventMaker();
 
-  virtual Int_t  Init();
+  //change Init() to InitRun(int)
+  virtual Int_t  InitRun(int);
   virtual Int_t  Make();
   virtual void   Clear(Option_t *option="");
   virtual void  DOCA(Float_t r0,Float_t phi0,Float_t z0,
@@ -134,7 +138,7 @@ public:
   double clockNominal;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.14 2002/01/24 23:56:51 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.15 2002/02/20 16:14:20 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker, 1)   //StAF chain virtual base class for Makers
 };
