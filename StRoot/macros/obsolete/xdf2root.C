@@ -1,5 +1,8 @@
-// $Id: xdf2root.C,v 1.1 1999/02/17 16:55:25 kathy Exp $
+// $Id: xdf2root.C,v 1.2 1999/05/21 15:34:02 kathy Exp $
 // $Log: xdf2root.C,v $
+// Revision 1.2  1999/05/21 15:34:02  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
 // Revision 1.1  1999/02/17 16:55:25  kathy
 // Proper name
 //
@@ -15,6 +18,10 @@
 // Revision 1.1  1999/01/21 00:54:27  fisyak
 // Cleanup
 //
+//=======================================================================
+// owner: Yuri Fisyak
+// what it does: 
+//=======================================================================
 
 // This is test macro to read in xdf file with g2t tables 
 // and write out the corresponding root files 

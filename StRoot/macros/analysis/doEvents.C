@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.13 1999/04/15 18:03:14 wenaus Exp $
+// $Id: doEvents.C,v 1.14 1999/05/21 15:33:57 kathy Exp $
 // $Log: doEvents.C,v $
-// Revision 1.13  1999/04/15 18:03:14  wenaus
-// clean out duplicate/conflicting declarations
+// Revision 1.14  1999/05/21 15:33:57  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+// Revision 1.1  1999/05/22 19:38:12  perev
+// temporary macro for RootEvents
 //
 // Revision 1.13  1999/04/15 18:03:14  wenaus
 // clean out duplicate/conflicting declarations
@@ -40,6 +43,10 @@
 // load StEvent for Linux
 //
 // Revision 1.1  1999/02/11 15:44:28  wenaus
+//=======================================================================
+// owner: Torre Wenaus
+// what it does: 
+//=======================================================================
 //          to fill StEvent and StAnalysisMaker to show example of analysis
 //          
 //=======================================================================

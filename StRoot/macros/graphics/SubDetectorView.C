@@ -1,15 +1,22 @@
 //*-- Author :    Valery Fine   26/03/99  (E-mail: fine@bnl.gov)
-// $Id: SubDetectorView.C,v 1.3 1999/05/20 19:57:08 fine Exp $
+// $Id: SubDetectorView.C,v 1.4 1999/05/21 15:33:55 kathy Exp $
 // $Log: SubDetectorView.C,v $
+// Revision 1.4  1999/05/21 15:33:55  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
 // Revision 1.3  1999/05/20 19:57:08  fine
-// some clean up and protections
+//  some clean up and protections
 //
 // Revision 1.2  1999/04/08 21:12:24  fine
 // SubDetectorView macro has been introduced
 //
 // Revision 1.2  1999/03/29 19:17:54  fine
 // x3d view has been activated. Some improvement as well
-//
+//=======================================================================
+// owner: Valery Fine
+// what it does: 
+//=======================================================================
+
 {
  // example to show how to generate the STAR/GEANT geometry sub-structure
  // To run this example one needs the access to Internet

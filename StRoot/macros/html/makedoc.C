@@ -1,7 +1,14 @@
+// $Id: makedoc.C,v 1.31 1999/05/21 15:33:59 kathy Exp $
+// $Log: makedoc.C,v $
+// Revision 1.31  1999/05/21 15:33:59  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner: Valery Fine
+// what it does: 
+//=======================================================================
   {
  //*-- Author :    Valery Fine   25/12/98
- //  
- // 
   gROOT.Reset();
   Char_t *libs[] = { "St_base","xdf2root","St_Tables"
                     ,"libmsg", 

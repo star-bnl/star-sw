@@ -1,3 +1,12 @@
+// $Id: StarView.C,v 1.2 1999/05/21 15:33:54 kathy Exp $
+// $Log: StarView.C,v $
+// Revision 1.2  1999/05/21 15:33:54  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner: Valery Fine
+// what it does: 
+//=======================================================================
 //*-- Author :    Valery Fine   28/08/98  (E-mail: fine@bnl.gov)
 {
  // To run this example one needs the access to the "rhic" node of afs (/afs/rhic/star . . .)

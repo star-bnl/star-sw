@@ -1,3 +1,12 @@
+// $Id: load.C,v 1.3 1999/05/21 15:33:59 kathy Exp $
+// $Log: load.C,v $
+// Revision 1.3  1999/05/21 15:33:59  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner: Yuri Fisyak
+// what it does: 
+//=======================================================================
 {
    gSystem->Load("St_base.so");
    gSystem->Load("xdf2root.so");

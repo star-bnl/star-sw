@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.57 1999/05/21 14:46:39 fisyak Exp $
+// $Id: bfc.C,v 1.58 1999/05/21 15:33:56 kathy Exp $
 // $Log: bfc.C,v $
+// Revision 1.58  1999/05/21 15:33:56  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
 // Revision 1.57  1999/05/21 14:46:39  fisyak
 // More Iwona's correction
 //
@@ -70,6 +73,11 @@
 // New schema
 //
 // macro to read fz files, xdf files and minidaq data 
+//
+//=======================================================================
+// owner:  Yuri Fisyak
+// what it does: 
+//=======================================================================
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //

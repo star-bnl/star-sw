@@ -1,5 +1,8 @@
-// $Id: laser.C,v 1.6 1998/09/08 13:53:31 love Exp $
+// $Id: laser.C,v 1.7 1999/05/21 15:33:58 kathy Exp $
 // $Log: laser.C,v $
+// Revision 1.7  1999/05/21 15:33:58  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
 // Revision 1.6  1998/09/08 13:53:31  love
 // laser.C divided into load.C and a new laser.C package of routines.  tpctest.C created to use tpt tracking
 //
@@ -33,6 +36,10 @@
 // Revision 1.2  1998/07/20 15:08:19  fisyak
 // Add tcl and tpt
 //
+//=======================================================================
+// owner: Bill Love
+// what it does: 
+//=======================================================================
 /*************************************************************\
    laser.C is a CINT script package to analyse data from the
    1997 TPC test at LBL which included both Cosmic Ray 

@@ -1,5 +1,8 @@
-// $Id: dedx.C,v 1.3 1999/04/08 17:12:21 fisyak Exp $
+// $Id: dedx.C,v 1.4 1999/05/21 15:33:57 kathy Exp $
 // $Log: dedx.C,v $
+// Revision 1.4  1999/05/21 15:33:57  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
 // Revision 1.3  1999/04/08 17:12:21  fisyak
 // Change file names to MDC2 dst
 //
@@ -8,6 +11,10 @@
 //
 // Revision 1.1  1998/11/19 23:40:04  fine
 // A new macro "dedx.C" by Craig Ogilvie has been introduced
+//=======================================================================
+// owner: Craig Ogilvie
+// what it does: 
+//=======================================================================
 //
 void dedx(const Char_t *Path="/disk00001/star/auau200/venus412/default/b6_9/year_1b/hadronic_on/tss/",const Char_t *root_file="all2.root")
 {  

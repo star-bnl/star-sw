@@ -1,4 +1,13 @@
-//========================================================================
+// $Id: Example_root_look_at_tables_after_bfcread.C,v 1.2 1999/05/21 15:33:49 kathy Exp $
+// $Log: Example_root_look_at_tables_after_bfcread.C,v $
+// Revision 1.2  1999/05/21 15:33:49  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner: Kathy Turner
+// what it does: 
+//=======================================================================
+//
 //  Example_root_look_at_tables_after_bfcread.C
 //
 // Kathy (5/13/99):

@@ -1,3 +1,12 @@
+// $Id: Example_read_hist_file_to_ps.C,v 1.2 1999/05/21 15:33:48 kathy Exp $
+// $Log: Example_read_hist_file_to_ps.C,v $
+// Revision 1.2  1999/05/21 15:33:48  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner: Kathy Turner
+// what it does: 
+//=======================================================================
 //read root histogram file and send histograms to a postscript file
 // separate paper for each hist.
 // in TPostScript set 

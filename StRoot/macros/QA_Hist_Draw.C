@@ -1,4 +1,15 @@
-//read root histogram file and send all histograms to a postscript file
+// $Id: QA_Hist_Draw.C,v 1.7 1999/05/21 15:33:52 kathy Exp $
+// $Log: QA_Hist_Draw.C,v $
+// Revision 1.7  1999/05/21 15:33:52  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner: Kathy Turner
+// what it does: read root histogram file and send all histograms to a
+//                postscript file
+//         !! Written by Valery, but Kathy will maintain
+//=======================================================================
+//
 TCanvas *QACanvas = 0;
 TBrowser *QABrowser = 0;
 void QA_Hist_Draw(

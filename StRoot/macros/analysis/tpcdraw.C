@@ -1,3 +1,13 @@
+// $Id: tpcdraw.C,v 1.4 1999/05/21 15:34:02 kathy Exp $
+// $Log: tpcdraw.C,v $
+// Revision 1.4  1999/05/21 15:34:02  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner: Bill Love
+// what it does: 
+//=======================================================================
+
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // Macro for plotting hits and pixels in combination with bfc.C         //

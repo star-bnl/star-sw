@@ -1,3 +1,13 @@
+// $Id: rootlogon.C,v 1.4 1999/05/21 15:34:00 kathy Exp $
+// $Log: rootlogon.C,v $
+// Revision 1.4  1999/05/21 15:34:00  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner:  Valery Fine
+// what it does: 
+//=======================================================================
+
 {
 #include <iostream.h>
    printf("\nWelcome to the ROOT tutorials\n\n");

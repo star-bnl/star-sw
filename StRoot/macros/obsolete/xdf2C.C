@@ -1,7 +1,14 @@
-// $Id: xdf2C.C,v 1.2 1999/04/01 00:55:17 perev Exp $
+// $Id: xdf2C.C,v 1.3 1999/05/21 15:34:02 kathy Exp $
 // $Log: xdf2C.C,v $
+// Revision 1.3  1999/05/21 15:34:02  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
 // Revision 1.2  1999/04/01 00:55:17  perev
 // xdf to .C converter
+//=======================================================================
+// owner:  Victor Perevoztchikov
+// what it does: 
+//=======================================================================
 //
 //
 void xdf2C(const char *Input="$STAR/params",const char *Output="qweDB")

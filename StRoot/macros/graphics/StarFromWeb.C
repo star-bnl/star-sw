@@ -1,9 +1,17 @@
 //*-- Author :    Valery Fine   26/03/99  (E-mail: fine@bnl.gov)
-// $Id: StarFromWeb.C,v 1.2 1999/03/29 19:17:54 fine Exp $
+// $Id: StarFromWeb.C,v 1.3 1999/05/21 15:33:53 kathy Exp $
 // $Log: StarFromWeb.C,v $
+// Revision 1.3  1999/05/21 15:33:53  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
 // Revision 1.2  1999/03/29 19:17:54  fine
 // x3d view has been activated. Some improvement as well
 //
+//=======================================================================
+// owner: Valery fine
+// what it does: 
+//=======================================================================
+
 {
  // To run this example one needs the access to Internet
  // To start this example launch ROOT as follows:

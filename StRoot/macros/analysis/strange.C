@@ -1,5 +1,8 @@
-// $Id: strange.C,v 1.3 1999/01/21 00:53:24 fisyak Exp $
+// $Id: strange.C,v 1.4 1999/05/21 15:34:01 kathy Exp $
 // $Log: strange.C,v $
+// Revision 1.4  1999/05/21 15:34:01  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
 // Revision 1.3  1999/01/21 00:53:24  fisyak
 // Cleanup
 //
@@ -9,6 +12,10 @@
 // Revision 1.1  1998/12/29 10:24:40 genevb
 // strangeness dst analysis
 //
+//=======================================================================
+// owner: Gene Van Buren
+// what it does: 
+//=======================================================================
 
 {
 

@@ -1,6 +1,14 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/01/99  
-//  
-// 
+// $Id: StarGeom.C,v 1.2 1999/05/21 15:33:54 kathy Exp $ 
+// $Log: StarGeom.C,v $
+// Revision 1.2  1999/05/21 15:33:54  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner: Gene Van Buren
+// what it does: 
+//=======================================================================
+
 {
   // Load the share library
   gSystem->Load("St_base");

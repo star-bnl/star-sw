@@ -1,5 +1,8 @@
-// $Id: tpctest.C,v 1.6 1999/05/06 03:21:30 fisyak Exp $
+// $Id: tpctest.C,v 1.7 1999/05/21 15:34:02 kathy Exp $
 // $Log: tpctest.C,v $
+// Revision 1.7  1999/05/21 15:34:02  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
 // Revision 1.6  1999/05/06 03:21:30  fisyak
 // synchronize FTPC and TPC slow/fast
 //
@@ -10,6 +13,10 @@
 // New makers
 //
 //
+//=======================================================================
+// owner: Bill Love
+// what it does: 
+//=======================================================================
 /*************************************************************\
 tpctest99.C is a CINT script package to analyse data from the
 1997 (LBL) and 1998 (BNL) TPC tests which included both

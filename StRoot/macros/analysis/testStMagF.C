@@ -1,3 +1,12 @@
+// $Id: testStMagF.C,v 1.2 1999/05/21 15:34:01 kathy Exp $
+// $Log: testStMagF.C,v $
+// Revision 1.2  1999/05/21 15:34:01  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner: Bill Love
+// what it does: 
+//=======================================================================
 {
 //testB.C macro to read in and run over the magnetic field map grid. 
   gROOT->Reset();

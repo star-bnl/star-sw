@@ -1,3 +1,12 @@
+// $Id: MakeHtmlTables.cxx,v 1.7 1999/05/21 15:33:51 kathy Exp $
+// $Log: MakeHtmlTables.cxx,v $
+// Revision 1.7  1999/05/21 15:33:51  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner: Valery Fine
+// what it does: Create the HTML page for STAF tables
+//=======================================================================
 {
   // Create the HTML page for STAF tables
 

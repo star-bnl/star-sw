@@ -1,10 +1,16 @@
-// $Id: bfcread.C,v 1.11 1999/05/20 18:43:21 kathy Exp $
+// $Id: bfcread.C,v 1.12 1999/05/21 15:33:57 kathy Exp $
 // $Log: bfcread.C,v $
+// Revision 1.12  1999/05/21 15:33:57  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
 // Revision 1.11  1999/05/20 18:43:21  kathy
 // removing unecessary macros
 //
 //======================================================================
-//   bfcread.C
+// owner:  Victor Perevoztchikov
+// what it does: 
+//=======================================================================
+// bfcread.C
 //
 // Kathy's notes (5/13/99):
 //     - Victor's example to show how to read in a DST produced from bfc.C and
