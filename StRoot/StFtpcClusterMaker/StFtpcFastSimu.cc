@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.18 2001/01/08 17:09:56 jcs Exp $
+// $Id: StFtpcFastSimu.cc,v 1.19 2001/01/15 16:08:28 jcs Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.19  2001/01/15 16:08:28  jcs
+// get phiOrigin and phiPerSector fro ftpcDimensions
+//
 // Revision 1.18  2001/01/08 17:09:56  jcs
 // move remaining constants from code to database
 //
@@ -487,10 +490,10 @@ int StFtpcFastSimu::ffs_ini()
     Va = Vhm[0] + Vhm[1]*ra + Vhm[2]*sqr(ra) + Vhm[3]*ra*sqr(ra);
 
     //     phi of sector number 1 origin
-    phimin = degree * mParam->simulationPhiOrigin();
+    phimin = degree * mParam->phiOrigin();
 
     //     size of one sector in phi
-    phisec = degree * mParam->simulationPhiSector();
+    phisec = degree * mParam->phiPerSector();
 
     //     a cluster is too close to lower sector boundary if it is
     //     not more than 2 pads away 
@@ -630,8 +633,8 @@ int StFtpcFastSimu::ffs_merge_tagger()
     dist_rad_out = s_rad[0] + s_rad[1]*ra + s_rad[2]*sqr(ra) + 
       s_rad[3]*ra*ra*ra;
     // minimum distance in cm = 2*cluster sigma in microns
-    dist_rad_in /= 5000;
-    dist_rad_out /= 5000;
+    dist_rad_in *= 2.*micrometer;
+    dist_rad_out *= 2.*micrometer;
       
     while(id_2 < nPoints)
       {
