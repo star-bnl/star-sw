@@ -1,5 +1,8 @@
-// $Id: StFtpcRawWriter.cc,v 1.7 2003/09/02 17:58:16 perev Exp $
+// $Id: StFtpcRawWriter.cc,v 1.8 2003/09/22 13:14:18 fsimon Exp $
 // $Log: StFtpcRawWriter.cc,v $
+// Revision 1.8  2003/09/22 13:14:18  fsimon
+// Fixed code to eliminate compiler warning
+//
 // Revision 1.7  2003/09/02 17:58:16  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -126,7 +129,7 @@ int StFtpcRawWriter::writeArray(float *array,
 
 
 	
-  Int_t valid_seq;
+  Int_t valid_seq = 0;
   Int_t nAboveLow = 0;
   Int_t highReached = 0;
   pixel_per_seq=0;

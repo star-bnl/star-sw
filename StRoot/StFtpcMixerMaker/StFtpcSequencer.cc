@@ -96,7 +96,7 @@ int StFtpcSequencer::writeArray(const int *cArray,
 
 
 	
-  Int_t validSeq;
+  Int_t validSeq = 0;
   Int_t nAboveLow = 0;
   Int_t highReached = 0;
   pixelPerSeq=0;
@@ -246,9 +246,12 @@ int StFtpcSequencer::writeArray(const int *cArray,
 
  /***************************************************************************
  *
- * $Id: StFtpcSequencer.cc,v 1.2 2003/09/02 17:58:15 perev Exp $
+ * $Id: StFtpcSequencer.cc,v 1.3 2003/09/22 13:13:39 fsimon Exp $
  *
  * $Log: StFtpcSequencer.cc,v $
+ * Revision 1.3  2003/09/22 13:13:39  fsimon
+ * Fixed code to eliminate compiler warning
+ *
  * Revision 1.2  2003/09/02 17:58:15  perev
  * gcc 3.2 updates + WarnOff
  *
