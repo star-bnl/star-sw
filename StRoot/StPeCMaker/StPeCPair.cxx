@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.cxx,v 1.4 2001/02/12 21:15:59 yepes Exp $
+// $Id: StPeCPair.cxx,v 1.5 2001/02/13 17:54:43 yepes Exp $
 // $Log: StPeCPair.cxx,v $
+// Revision 1.5  2001/02/13 17:54:43  yepes
+// still problems on differnt platforms
+//
 // Revision 1.4  2001/02/12 21:15:59  yepes
 // New version of StPeCMaker, lots of changes
 //
@@ -197,7 +200,6 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
       p4pair = pf1 + pf2;
       FourMomentum = p4pair ;
       mInv = p4pair.m() ;
-
 
   // ThetaStar is the angle between of one of the daughter tracks
   // and the Z-axis in the Helicity frame. The Helicity frame is

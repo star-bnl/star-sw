@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.5 2001/02/12 22:33:51 yepes Exp $
+// $Id: StPeCEvent.cxx,v 1.6 2001/02/13 17:54:40 yepes Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.6  2001/02/13 17:54:40  yepes
+// still problems on differnt platforms
+//
 // Revision 1.5  2001/02/12 22:33:51  yepes
 // avoid printing
 //
@@ -43,8 +46,6 @@ StPeCEvent::~StPeCEvent() {
   delete pPairs ;
   delete sPairs ;
 }
-
-
 
 
 void  StPeCEvent::clear ( ) {
@@ -187,8 +188,6 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
 #endif	   
      }
   }
-
-
   return 0 ;
 }
 
