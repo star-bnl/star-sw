@@ -1,12 +1,12 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.8 2000/11/21 19:46:09 lasiuk Exp $
+ * $Id: StRichTrack.cxx,v 2.9 2000/11/25 12:27:42 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
- *  Revision 2.8  2000/11/21 19:46:09  lasiuk
- *  px/pz correction uncommented
+ *  Revision 2.9  2000/11/25 12:27:42  lasiuk
+ *  implement algorithm for finding MIP
  *
  *  Revision 2.10  2000/11/28 19:18:54  lasiuk
  *  Include protection/error warning if no MIP
@@ -63,6 +63,7 @@
 #include <numeric>
 #include <algorithm>
 
+#ifdef __SUNPRO_CC
 #include <utility> //bool is defined here in SUN
 #ifndef ST_NO_NAMESPACES
 using std::pair;
@@ -88,6 +89,14 @@ using std::sort;
 
 #ifndef ST_NO_NAMESPACES
 using namespace units;
+#endif
+
+#include "StRichPidTraits.h"
+#include "StRichHit.h"
+#include "StRichRingHit.h"
+
+
+//
 // For sorting the possible MIP candiates
 //
 typedef pair<StRichHit*, double> candidate;
@@ -607,7 +616,7 @@ bool StRichTrack::correct() {
   return true;
 }
 
-    typedef pair<StRichHit*, double> candidate;
+void StRichTrack::assignMIP(const StSPtrVecRichHit* hits) {
 
     //
     // proximity matching between TPC track's predicted MIP and 
@@ -648,16 +657,29 @@ bool StRichTrack::correct() {
     // take the one with the highest charge
  	cout << "StRichTrack::associateHit()\n";
     
+    if(candidateHits.size()>1) {
+ 	cout << "StRichTrack::associateMIP()\n";
+ 	cout << "\tMore than 1 hit *CAN BE* associated ";
+	cout << "(" << candidateHits.size() << ")\n";
+ 	cout << "\tTake highest amplitude with smallest residual\n";
+
 	//
 	// sort from smallest residual to highest
-	    cout << "\t" << ii << " " << candidateHits[ii].second
-		 << " " << candidateHits[ii].first->charge() << endl;
-	    if(highestAmplitude < candidateHits[ii].first->charge()) {
+	// see operator< defined at the top of this file
+	//
 	sort(candidateHits.begin(), candidateHits.end());
 
+	double highestAmplitude = 0;
 	for(size_t ii=0; ii<candidateHits.size(); ii++) {
 
-	cout << highestAmplitude << endl;
+	    if( candidateHits[ii].first->isSet(eMip) ) {
+		mAssociatedMIP = candidateHits[ii].first;
+		highestAmplitude = candidateHits[ii].first->charge();
+		break;
+	    }
+	}
+	
+	if(!mAssociatedMIP) {
 	    //cout << "StRichTrack::assignMIP()\n";
 	    //cout << "\tTake smallest Residual" << endl;
 	    mAssociatedMIP = candidateHits[0].first;
