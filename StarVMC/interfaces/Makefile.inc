@@ -1,1 +1,1 @@
-INCAUX=-I$(STAR)/StRoot/StMcEvent -I$(STAR)/StRoot/St_base
+INCAUX=-I$(STAR)/StRoot/StMcEvent -I$(STAR)/StRoot/St_base -I$(STAR)/StRoot/StarClassLibrary
