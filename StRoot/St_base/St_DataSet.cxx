@@ -110,7 +110,7 @@ void  St_DataSet::ls(Option_t *option)
     St_DataSet *set = 0;
     if (option && strlen(option) > 0) {
       St_DataSetIter local(this);
-      St_DataSet *set = local(option);
+      set = local(option);
     }
     else
       set = this;

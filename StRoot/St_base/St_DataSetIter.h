@@ -63,6 +63,7 @@ public:
   virtual Int_t          Du() const {return 0;} // summarize dataset usage
   virtual Int_t          Df() const {return 0;} // report number of free "table" blocks. 
 
+  virtual St_DataSet    *FindObject(const Char_t *name,const Char_t *path="",Option_t *opt="");
   virtual Int_t          Flag(UInt_t flag=kMark,EBitOpt reset=kSet){return Flag((St_DataSet *)0,flag,reset);}
   virtual Int_t          Flag(const Char_t *path,UInt_t flag=kMark,EBitOpt reset=kSet);
   virtual Int_t          Flag(St_DataSet *dataset,UInt_t flag=kMark,EBitOpt reset=kSet);
