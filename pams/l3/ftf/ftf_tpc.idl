@@ -1,0 +1,20 @@
+/*	ftf_tpc.idl
+*
+*	Module: ftf_tpc
+*	description: Fast tracking interface
+*/
+#include "PAM.idl"
+#include "sl3TpcPara.idl"
+#include "tcl_tphit.idl"
+#include "tpt_track.idl"
+#include "sl3Monitor.idl"
+
+interface ftf_tpc : amiModule{
+	STAFCV_T call
+		( in    sl3TpcPara  para
+		, inout tcl_tphit   hit
+		, out   tpt_track   track
+		, out   sl3Monitor  monitor
+		);
+};
+/* Last mod. for ftf_tpc: $Data$ */
