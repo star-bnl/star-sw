@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.5 1999/02/24 15:38:49 genevb Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.6 1999/03/15 01:18:36 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.6  1999/03/15 01:18:36  genevb
+ * Fixed Xi vertex typo
+ *
  * Revision 1.5  1999/02/24 15:38:49  genevb
  * Fixed a typo
  *
@@ -75,7 +78,7 @@ Int_t StStrangeTagsMaker::Make()
 
 void StStrangeTagsMaker::PrintInfo()
 {
-    cout << "$Id: StStrangeTagsMaker.cxx,v 1.5 1999/02/24 15:38:49 genevb Exp $" << endl;
+    cout << "$Id: StStrangeTagsMaker.cxx,v 1.6 1999/03/15 01:18:36 genevb Exp $" << endl;
     if (gStChain->Debug()) StMaker::PrintInfo();
 }
 
@@ -137,7 +140,7 @@ void StStrangeTagsMaker::fillTag()
         else if (TMath::Abs(perc + m2Range) < mRange) nbelowLb++;
         else if (TMath::Abs(perc - m2Range) < mRange) naboveLb++;
 
-      } else if ( (*vertices)->type() == threeBody ) {
+      } else if ( (*vertices)->type() == Xi ) {
 
         StXiVertex *vertex = (StXiVertex *) *vertices;
         const StThreeVector<float>& pMom = vertex->momentumOfBachelor();
