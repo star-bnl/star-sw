@@ -56,7 +56,7 @@ foreach my $dir (@dirs) {
 	  my $v = $s; $v =~ s/$so\.//;# print "s = $s v = $v vers = $vers\n";
 	  next if !$v;
 	  if ($vers == $v) {
-	    print "keep \t$file => \t$link\n";
+	    #print "keep \t$file => \t$link\n";
 	    next;
 	  }
 	  my $diff = $vers - $v - $KEEP;
