@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNHitsNet.cc,v 1.4 2000/05/01 16:59:26 aihong Exp $
+ * $Id: StPidAmpNHitsNet.cc,v 1.5 2000/05/12 13:44:59 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNHitsNet.cc,v $
+ * Revision 1.5  2000/05/12 13:44:59  aihong
+ * adjudge fitAmp()
+ *
  * Revision 1.4  2000/05/01 16:59:26  aihong
  * clean up
  *
@@ -156,7 +159,7 @@ void StPidAmpNHitsNet::fitAmp(StPidAmpTrkVector* trks){
 
 
      if (mParticleType.id()==8||mParticleType.id()==9) 
-     heightExpected=(maxPoint(ampGraph(),true))*1.4;
+       heightExpected=(maxPoint(ampGraph(),true))*1.0;
 
      if (mParticleType.id()==14||mParticleType.id()==15) 
      heightExpected=(maxPoint(ampGraph(),true))*1.0;
