@@ -13,14 +13,14 @@
 # Regression tests keep the code honest by checking for warnings
 # and "use strict" failures.
 
-# $Id: cons,v 1.1.1.16 2000/09/22 00:19:36 fisyak Exp $
+# $Id: cons,v 1.1.1.17 2000/10/02 11:47:50 fisyak Exp $
 
 use vars qw( $ver_num $ver_rev $version );
 
 $ver_num = "2.1";
 $ver_rev = ".3";
 $version = sprintf "This is Cons %s%s " .
-	    '($Id: cons,v 1.1.1.16 2000/09/22 00:19:36 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.1.1.17 2000/10/02 11:47:50 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -1142,7 +1142,7 @@ sub Command {
 	my(@tgts) = map($dir::cwd->lookupfile($_), @$tgt);
 	die("empty target list in multi-target command\n") if !@tgts;
 	$env = $env->_resolve($tgts[0]);
-	my($builder) = find build::command::user($env, $com);
+	my $builder = find build::command::user($env, $com, $script::conscript_module);
 	my($multi) = build::multiple->new($builder, \@tgts);
 	for $tgt (@tgts) {
 	    $tgt->bind($multi, @sources);
@@ -1150,7 +1150,7 @@ sub Command {
     } else {
 	$tgt = $dir::cwd->lookupfile($tgt);
 	$env = $env->_resolve($tgt);
-	my($builder) = find build::command::user($env, $com);
+	my $builder = find build::command::user($env, $com, $script::conscript_module);
 	$tgt->bind($builder, @sources);
     }
 }
@@ -1226,17 +1226,17 @@ use vars qw( @ISA %com );
 BEGIN { @ISA = qw(build) }
 
 sub find {
-    my($class, $env, $com, $includes) = @_;
+    my ($class, $env, $com, $package) = @_;
     $com = $env->_subst($com);
-    $includes ||= '';
-    $com{$env,$com,$includes} || do {
+    $package ||= '';
+    $com{$env,$com,$package} || do {
 	# Remove unwanted bits from signature -- those bracketed by %( ... %)
-	my($comsig) = $com;
+	my $comsig = $com;
 	$comsig =~ s/^\@\s*//mg;
 	while ($comsig =~ s/%\(([^%]|%[^\(])*?%\)//g) { }
-	my($self) = { env => $env, com => $com, includes => $includes,
+	my $self = { env => $env, com => $com, 'package' => $package,
 		     comsig => $comsig };
-	$com{$env,$com,$includes} = bless $self, $class;
+	$com{$env,$com,$package} = bless $self, $class;
     }
 }
 
@@ -1393,6 +1393,21 @@ sub action {
 	}
 	if ($param::build) {
 
+	  if ($com =~ /^\[perl\]\s*/) {
+	    my $perlcmd = $';
+	    my $status;
+	    {
+	      $status = eval "package ${\$self->{'package'}}; $perlcmd";
+	    }
+	    if (!defined($status)) {
+		warn "$0: *** Error during perl command eval: $@.\n";
+		return undef;
+	    } elsif ($status == 0) {
+		warn "$0: *** Perl command returned $status (this indicates an error).\n";
+		return undef;
+	    }
+	    next;
+	  }
 	  #---------------------
 	  # Can't fork on Win32
 	  #---------------------
@@ -4114,7 +4129,7 @@ building the derived files from the repository source:
 
   % rm world.c
   % cons -R /usr/src_only/repository hello
-  gcc -c /usr/src_only/world.c/repository -o world.o
+  gcc -c /usr/src_only/repository/world.c -o world.o
   ar r libworld.a world.o
   ar: creating libworld.a
   ranlib libworld.a
@@ -4878,12 +4893,12 @@ the F<test> directory:
 Any of the above pseudo variables may be followed immediately by one of
 the following suffixes to select a portion of the expanded path name:
 
-  C<:a>    the absolute path to the file name
-  C<:b>    the directory plus the file name stripped of any suffix
-  C<:d>    the directory
-  C<:f>    the file name
-  C<:s>    the file name suffix
-  C<:F>    the file name stripped of any suffix
+  :a    the absolute path to the file name
+  :b    the directory plus the file name stripped of any suffix
+  :d    the directory
+  :f    the file name
+  :s    the file name suffix
+  :F    the file name stripped of any suffix
 
 Continuing with the above example, C<%<:f> would expand to C<foo bar baz>,
 and C<%>:d> would expand to C<test>.
@@ -4928,6 +4943,38 @@ strings this way, you must either explicitly set up a dependency (with the
 C<Depends> method), or be sure that the command you are using is a system
 command which is expected to be available. If it isn't available, you will,
 of course, get an error.
+
+If any command (even one within a multi-line command) begins with
+C<[perl]>, the remainder of that command line will be evaluated by the
+running Perl instead of being forked by the shell.  If an error occurs
+in parsing the Perl or if the Perl expression returns 0 or undef, the
+command will be considered to have failed.  For example, here is a simple
+command which creates a file C<foo> directly from Perl:
+
+  $env = new cons();
+  Command $env 'foo',
+    qq([perl] open(FOO,'>foo');print FOO "hi\\n"; close(FOO); 1);
+
+Note that when the command is executed, you are in the same package as
+when the F<Construct> or F<Conscript> file was read, so you can call
+Perl functions you've defined in the same F<Construct> or F<Conscript>
+file in which the C<Command> appears:
+
+  $env = new cons();
+  sub create_file {
+    	my $file = shift;
+	open(FILE, ">$file");
+	print FILE "hi\n";
+	close(FILE);
+	return 1;
+  }
+  Command $env 'foo', "[perl] &create_file('%>')";
+
+The Perl string will be used to generate the signature for the derived
+file, so if you change the string, the file will be rebuilt.  The contents
+of any subroutines you call, however, are not part of the signature,
+so if you modify a called subroutine such as C<create_file> above,
+the target will I<not> be rebuilt.  Caveat user.
 
 Cons normally prints a command before executing it.  This behavior is
 suppressed if the first character of the command is C<@>.  Note that
