@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.30 2001/05/08 21:29:56 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.31 2001/05/09 21:25:59 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.31  2001/05/09 21:25:59  calderon
+ * Added debug messages to see where do we exceed the size of the candidate vector
+ *
  * Revision 1.30  2001/05/08 21:29:56  calderon
  * Resize the candidates vector when we have more than 20 candidates.
  *
@@ -1089,7 +1092,10 @@ Int_t StAssociationMaker::Make()
 				nCandidates++;
 				// check that we don't overstep the bounds,
 				// if so increase the size of the vector in steps of 20 candidates
-				if (nCandidates>=candidates.size()) candidates.resize(nCandidates+20);
+				if (nCandidates>=candidates.size()) {
+				  candidates.resize(nCandidates+20);
+				  if (Debug()) cout << "Resizing in the TPC hits of the track " << endl;
+				}
 				break;
 			    }
 			} // candidate loop
@@ -1143,7 +1149,10 @@ Int_t StAssociationMaker::Make()
 				nCandidates++;
 				// check that we don't overstep the bounds,
 				// if so increase the size of the vector in steps of 20 candidates
-				if (nCandidates>=candidates.size()) candidates.resize(nCandidates+20);
+				if (nCandidates>=candidates.size()) {
+				  candidates.resize(nCandidates+20);
+				  if (Debug()) cout << "Resizing in the SVT hits of the track " << endl;
+				}
 				break;
 			    }
 			} // candidate loop
@@ -1202,7 +1211,10 @@ Int_t StAssociationMaker::Make()
 				nCandidates++;
 				// check that we don't overstep the bounds,
 				// if so increase the size of the vector in steps of 20 candidates
-				if (nCandidates>=candidates.size()) candidates.resize(nCandidates+20);
+				if (nCandidates>=candidates.size()) {
+				  candidates.resize(nCandidates+20);
+				  if (Debug()) cout << "Resizing in the East FTPC hits of the track " << endl;
+				}
 				break;
 			    }
 			} // candidate loop
@@ -1251,7 +1263,10 @@ Int_t StAssociationMaker::Make()
 				nCandidates++;
 				// check that we don't overstep the bounds,
 				// if so increase the size of the vector in steps of 20 candidates
-				if (nCandidates>=candidates.size()) candidates.resize(nCandidates+20);
+				if (nCandidates>=candidates.size()) {
+				  candidates.resize(nCandidates+20);
+				  if (Debug()) cout << "Resizing in the West FTPC hits of the track " << endl;
+				}
 				break;
 			    }
 			} // candidate loop
