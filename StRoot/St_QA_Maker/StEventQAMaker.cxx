@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.5 1999/12/06 22:25:05 kathy Exp $
+// $Id: StEventQAMaker.cxx,v 1.6 1999/12/07 18:56:00 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.6  1999/12/07 18:56:00  lansdell
+// added a few more histograms and updated the default list of logy plots
+//
 // Revision 1.5  1999/12/06 22:25:05  kathy
 // split apart the tpc and ftpc (east & west) histograms for the globtrk table; had to add characters to end of each histogram pointer to differentiate the different ones; updated the default list of hist to be plotted with logy scale
 //
@@ -129,6 +132,8 @@ void StEventQAMaker::MakeHistGlob() {
       Float_t chisq1 = globtrk->fitTraits().chi2(1);
       Float_t nfitntot = (Float_t(globtrk->fitTraits().numberOfFitPoints())) /
 	                 (Float_t(globtrk->detectorInfo()->numberOfPoints()));
+      Float_t nfitnmax = (Float_t(globtrk->fitTraits().numberOfFitPoints())) /
+                         (Float_t(globtrk->numberOfPossiblePoints()));
       Float_t xdif = (globtrk->detectorInfo()->firstPoint().x()) -
 	             (globtrk->geometry()->origin().x());
       Float_t ydif = (globtrk->detectorInfo()->firstPoint().y()) -
@@ -152,55 +157,136 @@ void StEventQAMaker::MakeHistGlob() {
       for (UInt_t k=0; k<globtrk->pidTraits().size(); k++)
 	m_det_id->Fill(globtrk->pidTraits()[k]->detector());
 
-      m_pointT->Fill(globtrk->detectorInfo()->numberOfPoints());
-      m_max_pointT->Fill(globtrk->numberOfPossiblePoints());
-      m_fit_pointT->Fill(globtrk->fitTraits().numberOfFitPoints());
-      m_glb_chargeT->Fill(globtrk->geometry()->charge());
-      m_glb_xfT->Fill(globtrk->detectorInfo()->firstPoint().x());
-      m_glb_yfT->Fill(globtrk->detectorInfo()->firstPoint().y());
-      m_glb_zfT->Fill(globtrk->detectorInfo()->firstPoint().z());
-      m_glb_xf0->Fill(xdif);
-      m_glb_yf0->Fill(ydif);
-      m_glb_zf0->Fill(zdif);
-      m_glb_radfT->Fill(radf);
-      m_glb_ratioT->Fill(nfitntot);
-        
-      //originally t->psi... but psi()=t->psi*degree in StEvent -CL
-      m_psiT->Fill(globtrk->geometry()->psi());
+// now fill all TPC histograms ------------------------------------------------
+      if (globtrk->flag()<700) {
 
-      //originally was t->tanl -CL
-      m_tanlT->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
-      m_glb_thetaT->Fill(theta);
-      m_etaT->Fill(eta);
-      m_pTT->Fill(pT);
-      m_momT->Fill(gmom);
-      m_lengthT->Fill(globtrk->length());
-      m_glb_impactT->Fill(globtrk->impactParameter());
+// these are TPC only
+	m_glb_xf0->Fill(xdif);
+	m_glb_yf0->Fill(ydif);
+	m_glb_zf0->Fill(zdif);
+	m_glb_impactT->Fill(globtrk->impactParameter());
 
-      m_chisq0T->Fill(chisq0);
-      m_chisq1T->Fill(chisq1);
+// these are TPC & FTPC
+	m_pointT->Fill(globtrk->detectorInfo()->numberOfPoints());
+	m_max_pointT->Fill(globtrk->numberOfPossiblePoints());
+	m_fit_pointT->Fill(globtrk->fitTraits().numberOfFitPoints());
+	m_glb_chargeT->Fill(globtrk->geometry()->charge());
+	m_glb_xfT->Fill(globtrk->detectorInfo()->firstPoint().x());
+	m_glb_yfT->Fill(globtrk->detectorInfo()->firstPoint().y());
+	m_glb_zfT->Fill(globtrk->detectorInfo()->firstPoint().z());
+	m_glb_radfT->Fill(radf);
+	m_glb_ratioT->Fill(nfitntot);
+        m_glb_ratiomT->Fill(nfitnmax);
+	//originally t->psi... but psi()=t->psi*degree in StEvent -CL
+	m_psiT->Fill(globtrk->geometry()->psi());
+	//originally was t->tanl -CL
+	m_tanlT->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
+	m_glb_thetaT->Fill(theta);
+	m_etaT->Fill(eta);
+	m_pTT->Fill(pT);
+	m_momT->Fill(gmom);
+	m_lengthT->Fill(globtrk->length());
+	m_chisq0T->Fill(chisq0);
+	m_chisq1T->Fill(chisq1);
 
-      m_pT_eta_recT->Fill(eta,lmevpt);
-      m_globtrk_xf_yfT->Fill(globtrk->detectorInfo()->firstPoint().x(),
-			    globtrk->detectorInfo()->firstPoint().y());
-      m_tanl_zfT->Fill(globtrk->detectorInfo()->firstPoint().z(),
-		      Float_t(TMath::Tan(globtrk->geometry()->dipAngle())));
-      m_mom_trklengthT->Fill(globtrk->length(),lmevmom);
-      m_eta_trklengthT->Fill(eta,globtrk->length());
-      m_npoint_lengthT->Fill(globtrk->length(),
-			    Float_t(globtrk->detectorInfo()->numberOfPoints()));
-      m_fpoint_lengthT->Fill(globtrk->length(),
-			    Float_t(globtrk->fitTraits().numberOfFitPoints()));
-      m_chisq0_momT->Fill(lmevmom,chisq0);
-      m_chisq1_momT->Fill(lmevmom,chisq1);
-      m_chisq0_etaT->Fill(eta,chisq0);
-      m_chisq1_etaT->Fill(eta,chisq1);
-      m_chisq0_dipT->Fill(TMath::Tan(globtrk->geometry()->dipAngle()),chisq0);
-      m_chisq1_dipT->Fill(TMath::Tan(globtrk->geometry()->dipAngle()),chisq1);
-      m_chisq0_zfT->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq0);
-      m_chisq1_zfT->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq1);
-      m_nfptonpt_momT->Fill(lmevmom,nfitntot);
-      m_nfptonpt_etaT->Fill(eta,nfitntot);
+// these are for TPC & FTPC
+	m_globtrk_xf_yfT->Fill(globtrk->detectorInfo()->firstPoint().x(),
+			       globtrk->detectorInfo()->firstPoint().y());
+	m_eta_trklengthT->Fill(eta,globtrk->length());
+	m_npoint_lengthT->Fill(globtrk->length(),
+	      		       Float_t(globtrk->detectorInfo()->numberOfPoints()));
+	m_fpoint_lengthT->Fill(globtrk->length(),
+			       Float_t(globtrk->fitTraits().numberOfFitPoints()));
+
+// these are TPC only
+	m_pT_eta_recT->Fill(eta,lmevpt);
+	m_tanl_zfT->Fill(globtrk->detectorInfo()->firstPoint().z(),
+		         Float_t(TMath::Tan(globtrk->geometry()->dipAngle())));
+	m_mom_trklengthT->Fill(globtrk->length(),lmevmom);
+	m_chisq0_momT->Fill(lmevmom,chisq0);
+	m_chisq1_momT->Fill(lmevmom,chisq1);
+	m_chisq0_etaT->Fill(eta,chisq0);
+	m_chisq1_etaT->Fill(eta,chisq1);
+	m_chisq0_dipT->Fill(TMath::Tan(globtrk->geometry()->dipAngle()),chisq0);
+	m_chisq1_dipT->Fill(TMath::Tan(globtrk->geometry()->dipAngle()),chisq1);
+	m_chisq0_zfT->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq0);
+	m_chisq1_zfT->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq1);
+	m_nfptonpt_momT->Fill(lmevmom,nfitntot);
+	m_nfptonpt_etaT->Fill(eta,nfitntot);
+      }
+
+// now fill all FTPC East histograms ------------------------------------------
+      if (globtrk->flag()>700 && globtrk->flag()<800 && globtrk->pidTraits()[0]->detector()==5) {             // didn't loop over pidTraits vector this time
+                               // -> should I have? -CL
+// these are TPC & FTPC
+	m_pointFE->Fill(globtrk->detectorInfo()->numberOfPoints());
+	m_max_pointFE->Fill(globtrk->numberOfPossiblePoints());
+	m_fit_pointFE->Fill(globtrk->fitTraits().numberOfFitPoints());
+	m_glb_chargeFE->Fill(globtrk->geometry()->charge());
+	m_glb_xfFE->Fill(globtrk->detectorInfo()->firstPoint().x());
+	m_glb_yfFE->Fill(globtrk->detectorInfo()->firstPoint().y());
+	m_glb_zfFE->Fill(globtrk->detectorInfo()->firstPoint().z());
+	m_glb_radfFE->Fill(radf);
+	m_glb_ratioFE->Fill(nfitntot);
+        m_glb_ratiomFE->Fill(nfitnmax);
+	//originally t->psi... but psi()=t->psi*degree in StEvent -CL
+	m_psiFE->Fill(globtrk->geometry()->psi());
+	//originally was t->tanl -CL
+	m_tanlFE->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
+	m_glb_thetaFE->Fill(theta);
+	m_etaFE->Fill(eta);
+	m_pTFE->Fill(pT);
+	m_momFE->Fill(gmom);
+	m_lengthFE->Fill(globtrk->length());
+	m_chisq0FE->Fill(chisq0);
+	m_chisq1FE->Fill(chisq1);
+
+// these are for TPC & FTPC
+	m_globtrk_xf_yfFE->Fill(globtrk->detectorInfo()->firstPoint().x(),
+			       globtrk->detectorInfo()->firstPoint().y());
+	m_eta_trklengthFE->Fill(eta,globtrk->length());
+	m_npoint_lengthFE->Fill(globtrk->length(),
+	      		       Float_t(globtrk->detectorInfo()->numberOfPoints()));
+	m_fpoint_lengthFE->Fill(globtrk->length(),
+			       Float_t(globtrk->fitTraits().numberOfFitPoints()));
+
+      }
+// now fill all FTPC West histograms ------------------------------------------
+      if (globtrk->flag()>700 && globtrk->flag()<800 && globtrk->pidTraits()[0]->detector()==4) {             // didn't loop over pidTraits vector this time
+                               // -> should I have? -CL
+// these are TPC & FTPC
+	m_pointFW->Fill(globtrk->detectorInfo()->numberOfPoints());
+	m_max_pointFW->Fill(globtrk->numberOfPossiblePoints());
+	m_fit_pointFW->Fill(globtrk->fitTraits().numberOfFitPoints());
+	m_glb_chargeFW->Fill(globtrk->geometry()->charge());
+	m_glb_xfFW->Fill(globtrk->detectorInfo()->firstPoint().x());
+	m_glb_yfFW->Fill(globtrk->detectorInfo()->firstPoint().y());
+	m_glb_zfFW->Fill(globtrk->detectorInfo()->firstPoint().z());
+	m_glb_radfFW->Fill(radf);
+	m_glb_ratioFW->Fill(nfitntot);
+        m_glb_ratiomFW->Fill(nfitnmax);
+	//originally t->psi... but psi()=t->psi*degree in StEvent -CL
+	m_psiFW->Fill(globtrk->geometry()->psi());
+	//originally was t->tanl -CL
+	m_tanlFW->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
+	m_glb_thetaFW->Fill(theta);
+	m_etaFW->Fill(eta);
+	m_pTFW->Fill(pT);
+	m_momFW->Fill(gmom);
+	m_lengthFW->Fill(globtrk->length());
+	m_chisq0FW->Fill(chisq0);
+	m_chisq1FW->Fill(chisq1);
+
+// these are for TPC & FTPC
+	m_globtrk_xf_yfFW->Fill(globtrk->detectorInfo()->firstPoint().x(),
+			       globtrk->detectorInfo()->firstPoint().y());
+	m_eta_trklengthFW->Fill(eta,globtrk->length());
+	m_npoint_lengthFW->Fill(globtrk->length(),
+	      		       Float_t(globtrk->detectorInfo()->numberOfPoints()));
+	m_fpoint_lengthFW->Fill(globtrk->length(),
+			       Float_t(globtrk->fitTraits().numberOfFitPoints()));
+
+      }
     }
   }
   m_globtrk_tot->Fill(cnttrk);
@@ -218,12 +304,12 @@ void StEventQAMaker::MakeHistDE() {
     cntrows++;
     StTrack *theTrack = theNodes[i]->track(0);
     if (!theTrack) continue;
-    StTrackPidTraits *trkPidTr = theTrack->pidTraits()[0];
-    if (trkPidTr) {
+    StSPtrVecTrackPidTraits &trkPidTr = theTrack->pidTraits();
+    if (trkPidTr.size() > 0) {
 
       //  should use dynamic_cast, but will crash in root4star (why?) -CL
-      //StDedxPidTraits *dedxPidTr = dynamic_cast<StDedxPidTraits*>(trkPidTr);
-      StDedxPidTraits *dedxPidTr = (StDedxPidTraits*)(trkPidTr);
+      //StDedxPidTraits *dedxPidTr = dynamic_cast<StDedxPidTraits*>(trkPidTr[0]);
+      StDedxPidTraits *dedxPidTr = (StDedxPidTraits*)(trkPidTr[0]);
       if (dedxPidTr) {
 	m_ndedx->Fill(dedxPidTr->numberOfPoints());
 	m_dedx0->Fill(dedxPidTr->mean());
@@ -539,8 +625,8 @@ void StEventQAMaker::MakeHistVertex() {
     for (UInt_t j=0; j<event->numberOfPrimaryVertices(); j++) {
       StPrimaryVertex *aPrimVtx = event->primaryVertex(j);
       if (aPrimVtx == primVtx) {
-	//m_pv_detid->Fill(primVtx->_);
-	//m_pv_vtxid->Fill(primVtx->_);
+	//m_pv_detid->Fill(primVtx->det_id);
+	m_pv_vtxid->Fill(primVtx->type());
 	if (!isnan(double(primVtx->position().x())))
 	  m_pv_x->Fill(primVtx->position().x());
 	if (!isnan(double(primVtx->position().y())))
@@ -550,7 +636,7 @@ void StEventQAMaker::MakeHistVertex() {
 	m_pv_pchi2->Fill(primVtx->chiSquared());
       }
       //m_v_detid->Fill(aPrimVtx->det_id); 
-      //m_v_vtxid->Fill(aPrimVtx->vtx_id);
+      m_v_vtxid->Fill(aPrimVtx->type());
       if (!isnan(double(aPrimVtx->position().x())))
 	m_v_x->Fill(aPrimVtx->position().x());     
       if (!isnan(double(aPrimVtx->position().y())))
@@ -568,7 +654,7 @@ void StEventQAMaker::MakeHistVertex() {
       StV0Vertex *v0 = v0Vtx[k];
       if (v0) {
 	//m_v_detid->Fill(v0->det_id); 
-	//m_v_vtxid->Fill(v0->vtx_id);
+	m_v_vtxid->Fill(v0->type());
 	if (!isnan(double(v0->position().x())))
 	  m_v_x->Fill(v0->position().x());     
 	if (!isnan(double(v0->position().y())))
@@ -587,7 +673,7 @@ void StEventQAMaker::MakeHistVertex() {
       StXiVertex *xi = xiVtx[l];
       if (xi) {
 	//m_v_detid->Fill(xi->det_id); 
-	//m_v_vtxid->Fill(xi->vtx_id);
+	m_v_vtxid->Fill(xi->type());
 	if (!isnan(double(xi->position().x())))
 	  m_v_x->Fill(xi->position().x());     
 	if (!isnan(double(xi->position().y())))
@@ -606,7 +692,7 @@ void StEventQAMaker::MakeHistVertex() {
       StKinkVertex *kink = kinkVtx[m];
       if (kink) {
 	//m_v_detid->Fill(kink->det_id); 
-	//m_v_vtxid->Fill(kink->vtx_id);
+	m_v_vtxid->Fill(kink->type());
 	if (!isnan(double(kink->position().x())))
 	  m_v_x->Fill(kink->position().x());     
 	if (!isnan(double(kink->position().y())))
@@ -663,20 +749,10 @@ void StEventQAMaker::MakeHistKink() {
 
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistL3() {
-/*
+
   if (Debug()) cout << " *** in StEventQAMaker - filling L3 histograms " << endl;
 
-  // THIS IS NOT FINISHED AND WILL NOT COMPILE YET! -CL
-
-  St_DataSetIter dstI(dst);           
-
-  St_tpt_track *pt = (St_tpt_track*) dstI["l3Track"];
-  if (pt) {
-    Int_t cntrows=0;
-    cntrows = pt->GetNRows();
-    m_l3_tot->Fill(cntrows);
-  }
-*/
+  m_l3_tot->Fill(event->softwareMonitor()->l3()->nTotalTracks);
 }
 
 //_____________________________________________________________________________
@@ -700,21 +776,10 @@ void StEventQAMaker::MakeHistV0Eval() {
 
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistRich() {
-/*
+
   if (Debug()) cout << " *** in StEventQAMaker - filling Rich histograms " << endl;
 
-  // THIS IS NOT FINISHED AND WILL NOT COMPILE YET! -CL
-  // This table does not seem to exist in the new StEvent. -CL
-
-  St_DataSetIter dstI(dst);           
-
-  St_g2t_rch_hit *pt = (St_g2t_rch_hit*) dstI["g2t_rch_hit"];
-  if (pt) {
-    Int_t cntrows=0;
-    cntrows = pt->GetNRows();
-    m_rich_tot->Fill(cntrows);
-  }
-*/
+  m_rich_tot->Fill(event->softwareMonitor()->rich()->mult_rich_tot);
 }
 
 //_____________________________________________________________________________
