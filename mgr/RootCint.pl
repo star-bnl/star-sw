@@ -21,7 +21,7 @@ my %class_written = ();
 my @classes = 0; # list of classes
 my $h_files = "";
 my $coll = 0;
-
+my $col  = 0;
 # count no. of classes i LinkDef's
 my $ListOfWrittenClasses = ":"; 
 my $ListOfDefinedClasses = "";
@@ -92,9 +92,9 @@ for my $h  (split /\s/,$sources) {#  print "SRC:", $h, "\n";
 	if ($class) {
 	  (my $core = $class) =~ s/^St//g; # print "core $core\n";
           my $cl = "";
-	  foreach my $stem ("Collection","Iterator","VecPtr") {
-	    if ($stem eq "VecPtr") {$cl = "St" . $stem . $core . "-";}
-	    else                   {$cl = "St" . $core . $stem . "-";}
+	  foreach my $stem ("Iterator","PtrVec","SPtrVec") {
+	    if ($stem eq "Iterator") {$cl = "St" . $core . $stem . "-";}
+	    else                     {$cl = "St" . $stem . $core . "-";}
 	    push @classes, $cl; $class_hfile{$cl} = $new_h; $class_hfile_depens_on{$cl} = $includes;
 #	    print "class: $stem $core $cl includes  $includes\n";
 	  }
