@@ -172,8 +172,8 @@ if ( $pkg =~ m/^StEventDisplay/){
 } elsif ( $pkg =~ m/^StAssociationMaker$/ ||
 	  $pkg =~ m/EmcUtil$/             ||
 	  $pkg =~ m/^StMuDSTMaker$/       ||
-	  $pkg =~ m/^StEEmcPool2$/       ||
 	  $pkg =~ m/^StRichPool$/         ||
+	  $pkg =~ m/^StEEmcPool$/         ||
 	  $pkg =~ m/^Sti/           ) {
     $CPPPATH = "#" . $Dir;
 
