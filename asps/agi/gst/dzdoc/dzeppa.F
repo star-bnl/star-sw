@@ -1,8 +1,11 @@
-$Id: dzeppa.F,v 1.1 2000/01/06 01:01:11 nevski Exp $
-$Log: dzeppa.F,v $
-Revision 1.1  2000/01/06 01:01:11  nevski
-dzdoc for agi
-
+* $Id: dzeppa.F,v 1.2 2000/01/06 23:57:24 nevski Exp $
+* $Log: dzeppa.F,v $
+* Revision 1.2  2000/01/06 23:57:24  nevski
+* cvs header record corrected
+*
+* Revision 1.1  2000/01/06 01:01:11  nevski
+* dzdoc for agi
+*
       SUBROUTINE DZEPPA(LUN,CPN,IXW,IYW)
       CHARACTER*80 CLINE
       COMMON/DZDPPC/CLINE

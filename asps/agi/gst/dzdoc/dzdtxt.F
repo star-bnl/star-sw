@@ -1,8 +1,11 @@
-$Id: dzdtxt.F,v 1.1 2000/01/06 01:01:10 nevski Exp $
-$Log: dzdtxt.F,v $
-Revision 1.1  2000/01/06 01:01:10  nevski
-dzdoc for agi
-
+* $Id: dzdtxt.F,v 1.2 2000/01/06 23:57:24 nevski Exp $
+* $Log: dzdtxt.F,v $
+* Revision 1.2  2000/01/06 23:57:24  nevski
+* cvs header record corrected
+*
+* Revision 1.1  2000/01/06 01:01:10  nevski
+* dzdoc for agi
+*
       SUBROUTINE DZDTXT(CHT,NCM,X0,Y0,CS,ANG,IALG)
 *.
 *...DZDTXT   output a text string

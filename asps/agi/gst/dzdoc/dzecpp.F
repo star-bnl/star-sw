@@ -1,8 +1,11 @@
-$Id: dzecpp.F,v 1.1 2000/01/06 01:01:10 nevski Exp $
-$Log: dzecpp.F,v $
-Revision 1.1  2000/01/06 01:01:10  nevski
-dzdoc for agi
-
+* $Id: dzecpp.F,v 1.2 2000/01/06 23:57:24 nevski Exp $
+* $Log: dzecpp.F,v $
+* Revision 1.2  2000/01/06 23:57:24  nevski
+* cvs header record corrected
+*
+* Revision 1.1  2000/01/06 01:01:10  nevski
+* dzdoc for agi
+*
       SUBROUTINE DZECPP(LUNIN,LUNOUT)
       CHARACTER*80 CLINE
       COMMON/DZDPPC/CLINE

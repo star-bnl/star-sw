@@ -1,8 +1,11 @@
-$Id: dzdgds.F,v 1.1 2000/01/06 01:01:09 nevski Exp $
-$Log: dzdgds.F,v $
-Revision 1.1  2000/01/06 01:01:09  nevski
-dzdoc for agi
-
+* $Id: dzdgds.F,v 1.2 2000/01/06 23:57:24 nevski Exp $
+* $Log: dzdgds.F,v $
+* Revision 1.2  2000/01/06 23:57:24  nevski
+* cvs header record corrected
+*
+* Revision 1.1  2000/01/06 01:01:09  nevski
+* dzdoc for agi
+*
       SUBROUTINE DZDGDS(CHBANK,CLINE,NLT,NLU)
 
 *...DZDGDS returns the bank descriptor in CLINE
