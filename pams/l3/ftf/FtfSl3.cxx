@@ -730,6 +730,7 @@ int FtfSl3::setParameters ( ) {
    para.etaMinTrack      = -2.2F  ;
    para.etaMaxTrack      =  2.2F  ;
 
+   para.dEdx             =  1     ;
    para.getErrors        =  0     ;
    para.goBackwards      =  1     ;
    para.goodDistance     =  5.F   ;

@@ -15,7 +15,7 @@ int gl3Hit::set ( int sector, l3_cluster* cluster ){
    double time = double(cluster->time)/64.;
 
    readoutBoard    = cluster->RB_MZ / 16 ;
-   if ( readoutBoard > 2 ) sector++ ; // when two sectors in one crate
+   if ( readoutBoard > 5 ) sector++ ; // when two sectors in one crate
                                       // last 3 readout boards belong to next sector
    mezzanninneCard = cluster->RB_MZ%16 ; 
 
