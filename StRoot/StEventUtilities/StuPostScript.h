@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuPostScript.h,v 1.2 2002/04/23 17:17:10 ullrich Exp $
+ * $Id: StuPostScript.h,v 1.3 2002/04/23 17:26:52 ullrich Exp $
  *
  * Author: Thomas Ullrich, April 2002
  ***************************************************************************
@@ -37,12 +37,12 @@
  *       Otherwise the frame is drawn in black and the                 
  *       background is white.                                         
  * p     Draw beampipe.                                               
- * c     Use many colors for tracks (colored according to pt).        
+ * c     Use 3 colors to color tracks according to their pt.        
  *       red pt>1 GeV/c, green 0.5<pt<1  GeV/c, blue<0.5  GeV/c
- * C     Use many colors for tracks (colored according to pt).        
- *       Blue lowest, red highest.                                    
+ * C     Use color spectra to color tracks according to their.        
+ *       Blue lowest pt, red highest pt.                                    
  * f     Track drawn with fewer points (factor 4 less).
- *       Helices are approximated by a line to many points.
+ *       Helices are approximated by a line trough many points.
  *       With fewer points the helices become slightly more
  *       chiseled but files get considerable smaller.                          
  *       Still sufficient for most cases.                              
@@ -53,14 +53,17 @@
  * s     Plot sideview (zy)                                           
  *       Default is front view (xy)                                   
  *
- * StuPostScript writes PS without dictionary. This makes the produced
+ * StuPostScript writes PS without a dictionary. This makes the produced
  * files slightly bigger but the code easier to maintain.
  *
  * Known Problems: The side view and text are not compatible. It works
- *                 bit doesn't look nice. 
+ *                 but doesn't look nice. 
  ***************************************************************************
  *
  * $Log: StuPostScript.h,v $
+ * Revision 1.3  2002/04/23 17:26:52  ullrich
+ * More description.
+ *
  * Revision 1.2  2002/04/23 17:17:10  ullrich
  * More description.
  *
