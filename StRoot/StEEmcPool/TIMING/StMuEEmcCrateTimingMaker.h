@@ -1,4 +1,4 @@
-// $Id: StMuEEmcCrateTimingMaker.h,v 1.2 2005/01/28 20:27:04 jwebb Exp $
+// $Id: StMuEEmcCrateTimingMaker.h,v 1.3 2005/01/31 16:21:23 jwebb Exp $
 
 /*
  * \class StMuEEmcCrateTimingMaker
@@ -56,6 +56,9 @@ class StMuEEmcCrateTimingMaker : public StMaker {
   /// Sets the number of sigma above pedestal (if set,
   /// overrides the nchannel cut above).
   void setNumberOfSigma( Int_t n=10 );
+  /// Sets the minimum number of counts in a channel to
+  /// analysed
+  void setMinCounts( Int_t min );
 
  private:
   const static int  MxMapmtFeeCh= (MaxMapmtCrates* MaxMapmtCrateCh / 16) + 1;
@@ -74,9 +77,12 @@ class StMuEEmcCrateTimingMaker : public StMaker {
   Int_t mNchannels;
   // Number of sigma above pedestal to cut (only if set)
   Float_t mNsigma;
+  /// Minimum number of counts
+  Int_t mMinCounts;
                 
   Float_t mTimeDelay;
   Float_t totalIntegral[MxMapmtFeeCh];
+  Float_t totalError[MxMapmtFeeCh];
   Int_t kludge;
   TH2F* cratehist;
 
@@ -86,5 +92,5 @@ class StMuEEmcCrateTimingMaker : public StMaker {
 };
 
 inline void StMuEEmcCrateTimingMaker::setNumberOfChannels( Int_t n ) { mNchannels = n; }
-
+inline void StMuEEmcCrateTimingMaker::setMinCounts( Int_t c ) { mMinCounts = c; }
 #endif

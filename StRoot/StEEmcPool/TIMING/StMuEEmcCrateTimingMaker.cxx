@@ -19,6 +19,7 @@ StMuEEmcCrateTimingMaker::StMuEEmcCrateTimingMaker(StMuDstMaker* mudstmaker){
   mNchannels = 25;
   mPhase = 0;
   mCycle = 16;
+  mMinCounts = 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -38,6 +39,7 @@ Int_t StMuEEmcCrateTimingMaker::Init() {
   /// of events, channel integrals, and delay settings
   mOutputTree->Branch("kludge",&kludge,"kludge/I");
   mOutputTree->Branch("chanint",totalIntegral,"chanint[kludge]/F");
+  mOutputTree->Branch("chanerr",totalError,"chanerr[kludge]/F");
   mOutputTree->Branch("delay",&mTimeDelay,"delay/F");
   mOutputFile->cd();
   TString tmpstr = "histograms for " + mFlavor + " crate channels";
@@ -164,10 +166,12 @@ Int_t StMuEEmcCrateTimingMaker::Finish() {
 
     TH1D* proj = cratehist->ProjectionY("projTemp",i,i);
     if (proj) {
-      //if (0&&proj->GetEntries() < 100) {
-      //ofs << chanId << "\t" << "0" << endl;
-      //continue;
-      //}
+      
+      /// Require a minimum number of counts (default
+      /// is zero).
+      if ( proj -> GetEntries() < mMinCounts ) 
+	continue;
+
       Int_t maxBin = 0;
       Float_t maxValue = -1;
       for (Int_t j = 1; j < proj->GetXaxis()->GetNbins(); j++) {
@@ -207,8 +211,15 @@ Int_t StMuEEmcCrateTimingMaker::Finish() {
 
       maxBin = proj->GetXaxis()->GetNbins() - 1;
       Stat_t nHitsAbovePedestal = proj->Integral(minBin,maxBin);
-      // cout << "THIS IS THE INTEGRAL FOR CHANNEL " << chanId << " : " << nHitsAbovePedestal << endl;
+
+      /// Compute statistical error on ratio
+      Float_t delR = 0.;
+      if ( nHitsAbovePedestal > 0. && totalIntegral[MxMapmtFeeCh-1] > 0. ) {
+	delR = 1.0 / nHitsAbovePedestal + 1.0 / totalIntegral[MxMapmtFeeCh-1];
+      }
+      
       totalIntegral[chanId] = nHitsAbovePedestal/totalIntegral[MxMapmtFeeCh-1];
+      totalError[chanId] = delR * totalIntegral[chanId];
             
       ofs << chanId << "\t" << setprecision(5) << nHitsAbovePedestal/totalIntegral[MxMapmtFeeCh-1] << endl;
     }

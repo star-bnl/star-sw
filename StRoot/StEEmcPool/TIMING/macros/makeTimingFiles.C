@@ -16,6 +16,7 @@
 /////////////////////////////////////////////////////////////////////////////
 void makeTimingFiles( Char_t *file="R6020047.lis",
 		      Float_t timing= 8.00,
+		      Int_t adc_cut=25, 
 		      Char_t *flavor="tower",
 		      Int_t numberOfFilesInt=100,
 		      Char_t *dir ="./",
@@ -52,7 +53,9 @@ void makeTimingFiles( Char_t *file="R6020047.lis",
   myEEmcCrateTimingMaker->setFlavor(flavor);
   myEEmcCrateTimingMaker->setTiming(timing);
   myEEmcCrateTimingMaker->setDirectory(outdir);
-  myEEmcCrateTimingMaker->setNumberOfChannels(15);
+  myEEmcCrateTimingMaker->setNumberOfChannels(adc_cut);
+  myEEmcCrateTimingMaker->setMinCounts(100);
+  myEEmcCrateTimingMaker->setPhase(6); 
 
   TString myOutName=file;
   myOutName.ReplaceAll("lis","");
