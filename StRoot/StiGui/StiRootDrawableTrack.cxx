@@ -55,7 +55,7 @@ void StiRootDrawableTrack::setStyle(int val)
 
 void StiRootDrawableTrack::add(double x, double y, double z, int direction)
 {
-  double r = sqrt(x*x+y*y+z*z);
+  //double r = sqrt(x*x+y*y+z*z);
   //if (direction>0)
   // {
       push_back(x);
