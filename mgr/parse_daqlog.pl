@@ -251,7 +251,7 @@ sub parse_log($) {
 }
 
   #--------------------------------------------------------------------------
-   $num_event = $no_event - 1;   
+   $num_event = $no_event;   
   # output header info
   
   print '=' x 80, "\n";
