@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.41 2000/03/20 17:32:55 kathy Exp $
+// $Id: doEvents.C,v 1.42 2000/04/07 15:54:26 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -35,6 +35,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.42  2000/04/07 15:54:26  perev
+// GC added
+//
 // Revision 1.41  2000/03/20 17:32:55  kathy
 // setbranches in all macros so that they will work with softlinks - for StIOMaker
 //
@@ -102,11 +105,20 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     // Handling depends on whether file is a ROOT file or XDF file
     //
     chain  = new StChain("StChain");
-
-    StFile *setFiles= new StFile();
-
-    for (int ifil=0; fileList[ifil]; ifil++)
-	{ setFiles->AddFile(fileList[ifil]);}
+    StFileI *setFiles =0;
+    if (fileList) {	//Normal case
+      setFiles= new StFile(fileList);
+    } else        {	//Grand Chalenge
+      gSystem->Load("StChallenger");
+      setFiles = StChallenger::Challenge();
+      setFiles->SetDebug();
+      Int_t Argc=4;
+      const char *Argv[4]= {
+        "-s","dst;hist;runco",
+        "-q","-5<=qxa_3<0.3 && 22>qxc_1>18"
+        };
+      setFiles->Init(Argc,Argv);
+    }
     StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
      IOMk->SetIOMode("r");
      IOMk->SetBranch("*",0,"0");                 //deactivate all branches
@@ -136,12 +148,13 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     // Event loop
     //
     int istat=0,i=1;
- EventLoop: if (i <= nevents && !istat) {
+ EventLoop: if (i <= nevents && istat!=2) {
      cout << "============================ Event " << i
 	  << " start ============================" << endl;
      chain->Clear();
      istat = chain->Make(i);
-     if (istat) {cout << "Last event processed. Status = " << istat << endl;}
+     if (istat==2) {cout << "Last  event processed. Status = " << istat << endl;}
+     if (istat==3) {cout << "Error event processed. Status = " << istat << endl;}
      i++;
      goto EventLoop;
  }
@@ -163,7 +176,9 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,const char *qaflag)
 {
     const char *fileListQQ[]={0,0};
-    if (path[0]=='-') {
+    if (strncmp(path,"GC",2)==0) {
+      fileListQQ=0;
+    } else if (path[0]=='-') {
 	fileListQQ[0]=file;
     } else {
 	fileListQQ[0] = gSystem->ConcatFileName(path,file);
