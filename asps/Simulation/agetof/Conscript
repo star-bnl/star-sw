@@ -29,7 +29,7 @@ if ($PGI) {
   $LD = "g77";
   $LDFLAGS .= " -Wl,-Bstatic";
   $FC = "g77"; #print "set FC => $FC ==============================\n";
-  $FFLAGS   = "-pipe -fno-second-underscore -Wall -W -Wsurprising -fPIC";
+  $FFLAGS   = " -fno-second-underscore -Wall -W -Wsurprising -fPIC";
   $FEXTEND  = ""; 
   $CERNLIBS = `cernlib kernlib`;
   chomp($CERNLIBS);
