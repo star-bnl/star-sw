@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Reader.cxx,v 1.5 2000/07/26 02:38:06 struck Exp $
+ * $Id: L3_Reader.cxx,v 1.6 2000/08/09 15:27:03 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -12,10 +12,14 @@
  * change log:
  *   06 Jun 00 CS initial version
  *   25 Jul 00 CS added i960 cluster reader
+ *   09 Aug 00 CS removed 'cout' statement in i960 reader 
  *
  ***************************************************************************
  *
  * $Log: L3_Reader.cxx,v $
+ * Revision 1.6  2000/08/09 15:27:03  struck
+ * removed 'cout' statement in i960ClusterReader
+ *
  * Revision 1.5  2000/07/26 02:38:06  struck
  * minor changes
  *
@@ -392,8 +396,8 @@ int I960ClusterReader::initialize ()
 	      }
 	}
   }
-  cout << "sector "<<sector<<": found " 
-       <<nCluster<<" space pts" <<endl;
+  //cout << "sector "<<sector<<": found " 
+  //     <<nCluster<<" space pts" <<endl;
   
   cluster = new l3_cluster[nCluster];
   if (cluster==NULL) {
