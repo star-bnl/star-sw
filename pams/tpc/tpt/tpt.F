@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.3 1998/02/06 22:03:14 fisyak Exp $
+* $Id: tpt.F,v 1.4 1998/02/09 19:18:11 love Exp $
 * $Log: tpt.F,v $
+* Revision 1.4  1998/02/09 19:18:11  love
+* This is a test
+*
 * Revision 1.3  1998/02/06 22:03:14  fisyak
 * Remove tgc_cross_and_dip.F
 *
@@ -34,7 +37,7 @@ C
 C<---------------------------------------------------------------------
 C
 C Modified: 13-NOV-1997 by R.Bossingham
-C           Eliminate unused variable.
+C           Eliminate unused variable.  (I wonder which ones?)
 C
       IMPLICIT NONE
 
