@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.40 1999/12/20 22:53:16 didenko Exp $
+// $Id: StBFChain.cxx,v 1.41 1999/12/28 21:07:35 didenko Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.41  1999/12/28 21:07:35  didenko
+// Add dc99 tag for December 99 test run, remove StEvent from default output
+//
 // Revision 1.40  1999/12/20 22:53:16  didenko
 // libtls => tls
 //
@@ -190,6 +193,7 @@ BfcItem BFC[] = {
   {"Y1c"         ,""  ,"","db"                                  ,"","","Turn on Year 1c parameters",kFALSE},
   {"ES99"        ,""  ,"","db"          ,"","","Turn on 1999 engineering run simulation parameters",kFALSE},
   {"ER99"        ,""  ,"","db"           ,"","","Turn on 1999 engineering run real data parameters",kFALSE},
+  {"DC99"        ,""  ,"","db"       ,"","","Turn on December 1999 engineering run real parameters",kFALSE},
   {"Y1d"         ,""  ,"","db"                                  ,"","","Turn on Year 1d parameters",kFALSE},
   {"Y1e"         ,""  ,"","db"                                  ,"","","Turn on Year 1e parameters",kFALSE},
   {"Y2a"         ,""  ,"","db"                                  ,"","","Turn on Year 2a parameters",kFALSE},
@@ -275,6 +279,7 @@ BfcItem BFC[] = {
   {"analysis"    ,"analysis","","SCL"               ,"StAnalysisMaker","StEvent,StAnalysisMaker","",kFALSE},
   {"QA"          ,"QA","","tables,SCL"                    ,"St_QA_Maker","St_Tables,St_QA_Maker","",kFALSE},
   {"QAC"         ,"CosmicsQA","tables",""         ,"StQACosmicMaker","St_Tables,StQACosmicMaker","",kFALSE},
+  {"EvOut"       ,""  ,"",""                                          ,"Write StEvent to StTree","",kFALSE},
   {"AllEvent"    ,""  ,"",""                                   ,"","","Write whole event to StTree",kFALSE},
   {"St_geom"     ,"","",""       ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display"    ,"EventDisplay","","SCL,St_geom"    ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
@@ -664,13 +669,12 @@ void StBFChain::SetGeantOptions(){
 		GetOption("SD98") || 
 		GetOption("Y1a")  || 
 		GetOption("ES99") || 
-		GetOption("ER99"))   geantMk->LoadGeometry("detp geometry YEAR_1A"); 
+		GetOption("ER99") || 
+		GetOption("DC99"))   geantMk->LoadGeometry("detp geometry YEAR_1A"); 
       else {if (GetOption("Y1b"))    geantMk->LoadGeometry("detp geometry YEAR_1B");
       else {if (GetOption("Y1c"))    geantMk->LoadGeometry("detp geometry YEAR_1C");
-      else {if (GetOption("ES99"))   geantMk->LoadGeometry("detp geometry YEAR_1A");
-      else {if (GetOption("ER99"))   geantMk->LoadGeometry("detp geometry YEAR_1A");
       else {if (GetOption("Y2a"))    geantMk->LoadGeometry("detp geometry YEAR_2A");
-      else                           geantMk->LoadGeometry("detp geometry YEAR_2A");}}}}}
+      else                           geantMk->LoadGeometry("detp geometry YEAR_2A");}}}}
       if (GetOption("gstar")) {
 	geantMk->Do("subevent 0;");
 	// gkine #particles partid ptrange yrange phirange vertexrange 
@@ -699,6 +703,7 @@ void StBFChain::SetDbOptions(){
   else {if (GetOption("Y1c"))  dbMk->SetDateTime("year_1c");
   else {if (GetOption("ES99")) dbMk->SetDateTime("es99");
   else {if (GetOption("ER99")) dbMk->SetDateTime("er99");
+  else {if (GetOption("DC99")) dbMk->SetDateTime("dc99");
   else {if (GetOption("Y1d"))  dbMk->SetDateTime("year_1d");
   else {if (GetOption("Y1e"))  dbMk->SetDateTime("year_1e");
   else {if (GetOption("Y2a"))  dbMk->SetDateTime("year_2a");
@@ -724,7 +729,8 @@ void StBFChain::SetTreeOptions()
   treeMk->SetBranch("histBranch");
   treeMk->SetBranch("runcoBranch");
   if (GetOption("dst"))      treeMk->IntoBranch("dstBranch","dst");
-  if (GetOption("Event"))    treeMk->IntoBranch("eventBranch","StEvent");
+  if (GetOption("Event") && (GetOption("EvOut"))  
+                             treeMk->IntoBranch("eventBranch","StEvent");
   if (GetOption("AllEvent")) {
     if (geantMk) {
       treeMk->IntoBranch("geantBranch","geant");
