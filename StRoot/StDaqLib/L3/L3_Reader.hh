@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Reader.hh,v 1.7 2001/07/17 19:16:11 struck Exp $
+ * $Id: L3_Reader.hh,v 1.8 2001/08/20 05:37:45 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: L3_Reader.hh,v $
+ * Revision 1.8  2001/08/20 05:37:45  struck
+ * removed naming conflicts with 'Stl3Utils/foreign/L3Formats.h'
+ *
  * Revision 1.7  2001/07/17 19:16:11  struck
  * update to 2001 data format (backwards compatible)Z
  *
@@ -89,7 +92,7 @@ public:
   int getNumberofAlgorithms() { return mNAlg; }
   unsigned int getNumberOfProcessedEvents() { return mNProcessed; }
   unsigned int getNumberOfReconstructedEvents() { return mNReconstructed; }
-  algorithm_data *getAlgorithmData() { return mAlgData; }
+  Algorithm_Data *getAlgorithmData() { return mAlgData; }
   int initialize();
 
 private:
@@ -97,7 +100,7 @@ private:
   unsigned int mNProcessed;
   unsigned int mNReconstructed;
   int mNAlg;
-  algorithm_data *mAlgData;
+  Algorithm_Data *mAlgData;
 
   L3_Reader *mL3r;
 };
@@ -140,7 +143,7 @@ private:
 class Sl3ClusterReader {
 
 public:
-  l3_cluster *getClusterList () { return mCluster; }
+  L3_Cluster *getClusterList () { return mCluster; }
   int getNumberOfClusters () { return mNCluster; }
 
   int initialize (int sector);
@@ -150,7 +153,7 @@ public:
 
 private:
   Bank_L3_SECCD *mL3SECCD;
-  l3_cluster *mCluster;
+  L3_Cluster *mCluster;
   int mNCluster;
   int mSector;
   L3_Reader *mL3;
@@ -202,7 +205,7 @@ private:
 class I960ClusterReader {
 
 public:
-  l3_cluster *getClusterList () { return mCluster; }
+  L3_Cluster *getClusterList () { return mCluster; }
   int getNumberOfClusters () { return mNCluster; }
 
   int initialize (int sector);
@@ -211,7 +214,7 @@ public:
 
 private:
   Bank_TPCMZCLD *mBankTPCMZCLD[12][3];  // pointers to banks of one sector
-  l3_cluster *mCluster;
+  L3_Cluster *mCluster;
   int mNCluster;
   int mSector;
   L3_Reader *mL3;
@@ -253,7 +256,7 @@ public:
   unsigned char getL3PFormatNumber() { return mBankL3P->header.FormatNumber; }
   unsigned int getTime() { return mTime; }
   unsigned int getGl3Id() { return mGl3Id; }
-  L3_summary *getL3_summary() { return mL3sum; }
+  L3_Summary *getL3_Summary() { return mL3sum; }
 
   int errorNo() { return errnum; };
   string errstr() { return string(errstr0); };
@@ -285,7 +288,7 @@ private:
   Sl3TrackReader     *mStr;
   I960ClusterReader  *mIcr;
 
-  L3_summary  *mL3sum;
+  L3_Summary  *mL3sum;
   unsigned int mGl3Id;
   unsigned int mTime;
 

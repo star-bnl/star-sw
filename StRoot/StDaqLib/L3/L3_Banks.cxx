@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Banks.cxx,v 1.3 2001/07/17 19:16:11 struck Exp $
+ * $Id: L3_Banks.cxx,v 1.4 2001/08/20 05:37:36 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: L3_Banks.cxx,v $
+ * Revision 1.4  2001/08/20 05:37:36  struck
+ * removed naming conflicts with 'Stl3Utils/foreign/L3Formats.h'
+ *
  * Revision 1.3  2001/07/17 19:16:11  struck
  * update to 2001 data format (backwards compatible)Z
  *
@@ -140,7 +143,7 @@ int Bank_L3_SECCD::swap()
   iret = swap_raw(header.ByteOrder, (INT32 *)&nrClusters_in_sector, 1);
   assert(iret > 0);
 
-  // now swap l3_cluster structure
+  // now swap L3_Cluster structure
   for (unsigned int i=0; i<nrClusters_in_sector; i++) {
 	iret = l3Swap_short((short *)&cluster[i].pad, (short) 5);
   }
