@@ -5,7 +5,7 @@ void
 TableIter::init(StDbConfigNode* node){
 itr = node->mTables.begin();
 // cout << " will try here first " << endl;
- cout << "Table [" << (*itr)->getTableName()<<"] is available" << endl;
+// cout << "Table [" << (*itr)->getTableName()<<"] is available" << endl;
 }
 
 

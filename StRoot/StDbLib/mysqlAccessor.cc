@@ -10,6 +10,7 @@ mysqlAccessor::QueryDb(StDbConfigNode* node){
 char* keyTable = getKeyName(node->getName());
 char* queryString = prepareConfigQuery(node->getConfigName());
 mresult = mquery.selectFromWhere("*",keyTable,queryString);
+delete [] queryString; delete [] keyTable;
  if(mresult){
    int mnum_rows = mysql_num_rows(mresult);
    if(mnum_rows != 1){
@@ -29,14 +30,15 @@ mresult = mquery.selectFromWhere("*",keyTable,queryString);
      for(int i=1;i<mnum_fields;i++){ // Table Name & Version
        //cout << i << " field = " << mfields[i].name << endl;
        //cout << i << " row = " << mrow[i] << endl;
-       if(strlen(mrow[i])==0)continue;  // null field
+       if(!mrow[i] || mrow[i]==NULL || strlen(mrow[i])==0)continue;  // null field
        //cout << i << " field = " << mfields[i].name << endl;
 
        if(isConfig(mfields[i].name)){ // it is a configKey
 
          char* nodeName = getNodeName(mfields[i].name);
          newNode = new StDbConfigNode(node,nodeName,mrow[i]);
-
+         delete [] nodeName;
+        
          } else {
          
          elementID = getElementID(node->getName());
@@ -51,6 +53,7 @@ mresult = mquery.selectFromWhere("*",keyTable,queryString);
      } // table/config loop
    } // if(mresult)
 
+mysql_free_result(mresult);
 return 1;
 }
 
@@ -66,7 +69,7 @@ char* queryString = prepareDataQuery(requestTime,iversion);
 
 mresult = mquery.selectFromWhere("*",tableName,queryString);
 
-
+delete [] queryString; delete [] tableName;
  if(mresult){
 
    int mnum_rows = mysql_num_rows(mresult);
@@ -92,6 +95,7 @@ mresult = mquery.selectFromWhere("*",tableName,queryString);
 
  }  
 
+ //mysql_free_result(mresult);
 return 1;
 }
 
@@ -163,7 +167,7 @@ mysqlAccessor::getKeyName(const char* nodeName){
  // strcat(keyName,nodeName);
  // strcat(keyName,keys);
 
-return strdup(keyName);
+return keyName;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -184,6 +188,7 @@ strcpy(aname,keyName);
  nodeName = new char[size];
  strncpy(nodeName,p,size);
  nodeName[size]='\0';
+ delete [] aname;
 
 return strdup(nodeName);
 }
@@ -231,8 +236,7 @@ ostrstream ost(hquery,1024);
  char * queryString = new char[strlen(hquery)+1];
  strcpy(queryString,hquery);
 
-return strdup(queryString);
-
+return queryString;
 }
 
 
@@ -262,7 +266,7 @@ ostrstream ost(hquery,1024);
  char * queryString = new char[strlen(hquery)+1];
  strcpy(queryString,hquery);
 
-return strdup(queryString);
+return queryString;
 
 }
 

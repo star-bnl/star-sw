@@ -278,6 +278,7 @@ mysqlTypeR::pass(char* name, float* i,  unsigned int size){
       strncpy(tmp,p2,iloc); tmp[iloc]='\0';
       //     cout << "Data passed " << tmp << " from " << dataString << endl;
       i[iloop] = (float)atof(tmp);
+      // cout << "Data passed " << tmp << " to " << i[iloop] << endl;
       p1++; 
       ilen = strlen(dataString)-iloc;
       dstring=new char[ilen];
@@ -310,6 +311,7 @@ mysqlTypeR::pass(char* name, double* i,  unsigned int size){
   if(mfields[mcolumn].type == 250 ||
      mfields[mcolumn].type == 251){
 
+    // cout << mfields[mcolumn].type << "is  a blob " << endl;
 
 #ifdef _ByteSwap_
    double* itmp = new double[iend];
@@ -350,6 +352,7 @@ mysqlTypeR::pass(char* name, double* i,  unsigned int size){
       strncpy(tmp,p2,iloc); tmp[iloc]='\0';
       //     cout << "Data passed " << tmp << " from " << dataString << endl;
       i[iloop] = atof(tmp);
+      // cout << "Data passed " << tmp << " to " << i[iloop] << endl;
       p1++; 
       ilen = strlen(dataString)-iloc;
       dstring=new char[ilen];
