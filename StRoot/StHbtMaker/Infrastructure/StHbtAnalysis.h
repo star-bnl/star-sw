@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.h,v 1.15 2001/04/05 21:57:45 laue Exp $
+ * $Id: StHbtAnalysis.h,v 1.16 2002/06/22 17:53:32 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.h,v $
+ * Revision 1.16  2002/06/22 17:53:32  lisa
+ * implemented switch to allow user to require minimum number of particles in First and Second ParticleCollections - default value is zero so if user does not Set this value then behaviour is like before
+ *
  * Revision 1.15  2001/04/05 21:57:45  laue
  * current pico-event becomes a member of the analysis (mPicoEvent) and gets
  * an access-function (CurrentPicoEvent)
@@ -140,6 +143,9 @@ public:
   void SetFirstParticleCut(StHbtParticleCut*);
   void SetSecondParticleCut(StHbtParticleCut*);
 
+  void SetMinSizePartCollection(unsigned int minSize);
+
+
   unsigned int NumEventsToMix();
   void SetNumEventsToMix(const unsigned int&);
   StHbtPicoEvent* CurrentPicoEvent();
@@ -172,6 +178,9 @@ protected:
   unsigned int mNumEventsToMix;
   unsigned int mNeventsProcessed;
 
+  unsigned int mMinSizePartCollection;  // minimum # particles in ParticleCollection
+
+
 #ifdef __ROOT__
   ClassDef(StHbtAnalysis, 0)
 #endif
@@ -201,5 +210,6 @@ inline void StHbtAnalysis::SetNumEventsToMix(const unsigned int& nmix){ mNumEven
 inline bool StHbtAnalysis::MixingBufferFull(){return (mMixingBuffer->size() >= mNumEventsToMix);}
 inline int StHbtAnalysis::GetNeventsProcessed() {return mNeventsProcessed;}
 
+inline void StHbtAnalysis::SetMinSizePartCollection(unsigned int minSize){mMinSizePartCollection = minSize;}
 
 #endif
