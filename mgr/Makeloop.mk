@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.3  1998/08/10 23:20:54  fisyak
+#  Add test for base and tables
+#
 #  Revision 1.2  1998/07/01 12:15:57  fisyak
 #  Move NODEBUG flag in Env, variable
 #
@@ -88,7 +91,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/07/01 12:15:57 $ 
+#           Last modification $Date: 1998/08/10 23:20:54 $ 
 #  default setings
 # Current Working Directory
 #
@@ -183,10 +186,18 @@ ifeq ($(NAME),$(PKG))
 endif                          
 ifneq ($(EMPTY),$(SUBDIRS))     
 ifneq (,$(findstring $(LEVEL),0 1))
-TARGETS := St_base St_Tables St_Chain
+ifneq (,$(wildcard $(OUT_DIR)/StRoot/base))
+TARGETS += St_base 
+endif
+ifneq (,$(wildcard $(OUT_DIR)/.share/tables))
+TARGETS += St_Tables
+endif
+ifneq (,$(wildcard $(OUT_DIR)/StRoot/StChain))
+TARGETS += StChain
+endif
 endif
 #          I have subdrs
-.PHONY               :  all St_base St_Tables St_Chain test clean clean_lib clean_share clean_obj
+.PHONY               :  all St_base St_Tables StChain test clean clean_lib clean_share clean_obj
 #      I_have_subdirs
 all:  $(addsuffix _all, $(SUBDIRS))   $(TARGETS)
 %_all:; $(MAKE) -f $(MakePam) -C $(STEM) $(MAKFLAGS) 

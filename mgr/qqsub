@@ -5,9 +5,14 @@ set batch = r`echo ${*} | sed -e 's/ //g' -e 's/-/_/g'`
 echo ${batch}
 rm -f ${batch}
 cat > ${batch} <<EOF
+#!/usr/local/bin/tcsh -x
+# Send mail to these users
+#\$ -M ${USER}@bnl.gov
+# Mail at beginning/end/on suspension
+#\$ -m bes
 ${run} ${*}
 EOF
 more ${batch}
 set PWD = `pwd`
-echo qsub  -o ${PWD}/${batch}.log -e ${PWD}/${batch}.err ${PWD}/${batch}
-qsub -l test -o ${PWD}/${batch}.log -e ${PWD}/${batch}.err ${PWD}/${batch}
+echo qsub -l star -o ${PWD}/${batch}.log -e ${PWD}/${batch}.err   ${batch}
+qsub -l star -o ${PWD}/${batch}.log -e ${PWD}/${batch}.err ${batch}
