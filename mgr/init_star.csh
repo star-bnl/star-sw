@@ -1,4 +1,7 @@
 #  $Log: init_star.csh,v $
+#  Revision 1.4  1998/02/13 14:18:20  fisyak
+#  Simplify Makefile, reduce SLibrary
+#
 #  Revision 1.3  1998/02/12 13:35:09  fisyak
 #  Add versioning, new Makefile with domain/package libraries
 #
@@ -13,7 +16,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/02/12 13:35:09 $ 
+#             Last modification $Date: 1998/02/13 14:18:20 $ 
 #! /bin/csh -f
 #. default setings
 	setenv CC        gcc
@@ -218,7 +221,7 @@ switch ($SYS_HOST_STAR)
     case "sunx86_55":
 #  ====================
 	setenv CXX          CC
-	setenv CXXFLAGS   "-pic -D_cplusplus"
+	setenv CXXFLAGS   "-w -pic -D_cplusplus"
 	setenv FFLAGS     "-w -pic -Nq1500 -Nl100"
 	setenv F_EXTENDED  -e
 	setenv LDFLAGS    "-G -t -z muldefs"
