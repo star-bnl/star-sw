@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.13 2000/02/03 23:19:11 fisyak Exp $
+ * $Id: StDAQReader.cxx,v 1.14 2000/04/07 15:43:18 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.14  2000/04/07 15:43:18  perev
+ * SetVerbose method added
+ *
  * Revision 1.13  2000/02/03 23:19:11  fisyak
  * Reduce file map size
  *
@@ -68,6 +71,7 @@ typedef EventInfo DAQEventInfo;
 StDAQReader::StDAQReader(const char *file)
 {
   fFd = -1;
+  fVerbose = 0;
   fEventReader = 0;
   fTPCReader = 0;
   fRICHReader = 0;
@@ -123,6 +127,7 @@ int StDAQReader::readEvent()
   delete fRICHReader; fRICHReader = 0;
   if (fOffset == -1) return kStEOF;
   fEventReader = new EventReader();
+  fEventReader->setVerbose(fVerbose);
   //  fEventReader->InitEventReader(fFd, fOffset, 0);
   fEventReader->InitEventReader(fFd, fOffset);
   if(fEventReader->errorNo()) return kStErr;  
