@@ -199,7 +199,7 @@ void St_g2t_rch_hit::Streamer(TBuffer &R__b)
          //   Skip 5th elememnt
          //   float ds; /* energy deposition over ds */
           if (R__v == 0 && colCounter == 4) {
-              *(Float_t *)(row+nextCol->m_Offset) = -1956.;
+              *(Float_t *)(row+nextCol->m_Offset) = -7070707.;
               continue; 
           }
           // Stream one table row supplied
