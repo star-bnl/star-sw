@@ -4,9 +4,12 @@
    gSystem->Load("St_Tables.so");
    gSystem->Load("libmsg.so");
    gSystem->Load("libtls.so");
-   gSystem->Load("svt.sl");
-   gSystem->Load("St_svt.so");
    gSystem->Load("tpc.sl");
    gSystem->Load("St_tpc.so");
    gSystem->Load("StChain.so");
+   gSystem->Load("St_xdfin_Maker.so");
+   gSystem->Load("St_tcl_Maker.so");
+   gSystem->Load("St_tpctest_Maker.so");
+   gSystem->Load("St_tss_Maker.so");
+   gSystem->Load("St_run_Maker.so");
 }
