@@ -8,9 +8,10 @@ int
 mysqlAccessor::QueryDb(StDbConfigNode* node){
   
   char* configName = node->getConfigName();
+  char* keyName = getKeyName(configName);
 
     Db<< "SELECT NodeKeys.ID FROM NodeKeys WHERE NodeKeys.KeyName='";
-    Db<<configName<<"'"<<endsql;
+    Db<<configName<<"' AND NodeKeys.Name='"<<keyName<<"'"<<endsql;
 
     Db.Output(&buff);
 
@@ -32,7 +33,7 @@ mysqlAccessor::QueryDb(StDbConfigNode* node){
     Db<<"FROM NodeKeys LEFT JOIN NodeRelation ON ";
     Db<<"NodeKeys.ID=NodeRelation.KeyID LEFT JOIN Nodes ON ";
     Db<<"NodeRelation.NodeID=Nodes.ID WHERE NodeKeys.KeyName='";
-    Db<< configName <<"'"<<endsql;
+    Db<< configName <<"' AND NodeKeys.Name='"<<keyName<<"'"<<endsql;
 
     delete [] configName;
 

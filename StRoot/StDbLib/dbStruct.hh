@@ -1,3 +1,6 @@
+#ifndef DBSTRUCT_HH
+#define DBSTRUCT_HH
+
 #include <vector>
 
 class basic {
@@ -47,10 +50,10 @@ class elem : public basic {
 };
 
 
-#ifdef OS_NO_ALLOCATORS
-typedef vector<elem*> elemVec;
-#else
+#ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<elem*, allocator<elem*> > elemVec;
+#else
+typedef vector<elem*> elemVec;
 #endif
 
 class accessor : public basic {
@@ -82,13 +85,4 @@ class dbTable : public accessor {
 };
 
 
-
-
-
-
-
-
-
-
-
-
+#endif
