@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StMuPmdCollection.cxx,v 1.2 2004/04/08 23:55:41 jeromel Exp $
+ * $Id: StMuPmdCollection.cxx,v 1.3 2004/04/09 23:03:16 jeromel Exp $
  *
  * Class : StMuPmdCollection
  * Author: Supriya Das & Subhasis Chattopadhyay
@@ -8,6 +8,9 @@
  * Description: This class holds the PMD clusters for MuDst
  * ****************************************************************
  * $Log: StMuPmdCollection.cxx,v $
+ * Revision 1.3  2004/04/09 23:03:16  jeromel
+ * Ignoring indent, commented out redundant messages (lots of them in the log file)
+ *
  * Revision 1.2  2004/04/08 23:55:41  jeromel
  * Extraneous message commented out
  *
@@ -123,12 +126,11 @@ int StMuPmdCollection::getNClusters(int detector)
   //     << detector << " " << bemc << " " << bsmdp << endl;
 
   if (tca) {
-	  cout<<"Got tca"<<endl;
-	  return tca->GetEntries();
-  }
-  else  {
-          cout<<"No tca"<<endl;
-	  return 0;
+    //cout << "Got tca"<<endl;
+    return tca->GetEntries();
+  } else  {
+    cout << "StMuPmdCollection::getNClusters No tca" << endl;
+    return 0;
   }
 }
 
@@ -147,7 +149,7 @@ void StMuPmdCollection::addCluster(int detector)
   if(detector<pmd && detector>cpv) return;
   TClonesArray *tca =NULL;
   if(detector>=pmd && detector <= cpv) tca = mPmdClusters[detector-pmd];
-/*
+  /*
   int counter =0;
   if(tca)counter=tca->GetEntries();
   if(counter==0){
@@ -156,15 +158,15 @@ void StMuPmdCollection::addCluster(int detector)
   }
   */
   
-int counter =0;
-if(mPmdClusters[detector -pmd] == NULL){
-       	init(detector);
-	tca = mPmdClusters[detector-pmd];
-}
-if(tca) counter=tca->GetEntries();
-  cout<<"addcluster: entry "<<counter<<" "<<detector-pmd<<endl;
+  int counter =0;
+  if(mPmdClusters[detector -pmd] == NULL){
+    init(detector);
+    tca = mPmdClusters[detector-pmd];
+  }
+  if(tca) counter=tca->GetEntries();
+  //cout << "addcluster: entry "<<counter<<" "<<detector-pmd<<endl;
   new ((*tca)[counter]) StMuPmdCluster();
- // cout<<"counter after2  "<<tca->GetEntries()<<endl;
+  // cout<<"counter after2  "<<tca->GetEntries()<<endl;
   return;
 }
 
