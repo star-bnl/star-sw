@@ -8,9 +8,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
-//  $Id: Stl3RawReaderMaker.cxx,v 1.17 2004/03/26 11:25:23 kollegge Exp $
+//  $Id: Stl3RawReaderMaker.cxx,v 1.18 2004/08/09 18:25:21 kollegge Exp $
 //
 //  $Log: Stl3RawReaderMaker.cxx,v $
+//  Revision 1.18  2004/08/09 18:25:21  kollegge
+//  Added tpc detector id when setting the number of points since StEvent can now store the number of points for different detectors.
+//
 //  Revision 1.17  2004/03/26 11:25:23  kollegge
 //  Added another quality check of raw data quality to prevent inconsistent information in StL3EventSummary, fixes bug http://www.star.bnl.gov/rt2/Ticket/Display.html?id=359
 //
@@ -595,7 +598,7 @@ Int_t Stl3RawReaderMaker::fillStEventWithL3GlobalTracks()
 
   for (int trackindex=0; trackindex<numberOfTracks; trackindex++) {
         StTrackDetectorInfo* detectorInfo = new StTrackDetectorInfo();
-	detectorInfo->setNumberOfPoints(globalL3Tracks[trackindex].nHits);
+	detectorInfo->setNumberOfPoints(globalL3Tracks[trackindex].nHits,kTpcId);
 	myTrackDetectorInfoVector.push_back(detectorInfo);
 		
 	// StTrackGeometry
