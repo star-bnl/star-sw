@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.48 1999/12/22 15:27:34 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.49 1999/12/27 21:45:45 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -126,13 +126,14 @@ StEventDisplayMaker::~StEventDisplayMaker(){
 Int_t StEventDisplayMaker::Init(){
    // Create geometry 
    BuildGeometry();
-   // Create a special node to keep "tracks" and "hits"
+     // Create a special node to keep "tracks" and "hits"
    CreateTrackNodes();
-   // define the custom palette (may affect other pictures)
+     // define the custom palette (may affect other pictures)
 #ifdef PALETTE
    palette();    
 #endif
    // Call the "standard" Init()
+   
    return StMaker::Init();
 }
 
@@ -295,7 +296,7 @@ Int_t StEventDisplayMaker::CreateCanvas()
    // objects otherwise those will be destroyed by TCanvas ctor !!!
      m_PadBrowserCanvas = new TCanvas("STARMonitor","Event Display",10,600,400,400);
   }
-  m_ShortView->Draw();
+  if (m_ShortView) m_ShortView->Draw();
   m_PadBrowserCanvas->Modified();
   m_PadBrowserCanvas->Update();
   return 0;
@@ -963,6 +964,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.49  1999/12/27 21:45:45  fine
+// Protection against of zero-pointer
+//
 // Revision 1.48  1999/12/22 15:27:34  fine
 // Protection against of double names
 //
