@@ -1,0 +1,23 @@
+************************************************************************
+
+macro setup_global_macros
+
+ /MACRO/GLOBAL/CREATE G2T       $AFS_RHIC/star/data/samples/ 
+ /MACRO/GLOBAL/CREATE UTIL      $AFS_RHIC/star/packages/SL98b/kumacs/util/
+ /MACRO/GLOBAL/CREATE TPC_PAMS  $AFS_RHIC/star/packages/SL98b/pams/tpc/kumac/
+
+ message ' *** Have set up global macros *** '
+
+return
+
+*********************************************************************
+
+
+
+
+
+
+
+
+
+

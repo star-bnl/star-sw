@@ -1,45 +1,7 @@
 ************************************************************************
 ************************************************************************
-macro run
-
-*  
-* --> to run
-*    - change the inputs below in the macro run_tpc_slow_sim stmt (if desired)
-*    - run staf++
-*    -   make tpc   (need pams tpg,tfc,tss,tcl)
-*    -   exec tpc_slow_sim#run
-*            
-
-  exec setup_global_macros 
-
-  exec run_tpc_slow_sim
-
-return
-
-************************************************************************
-************************************************************************
-************************************************************************
-************************************************************************
-
-macro setup_global_macros
-
- /MACRO/GLOBAL/CREATE G2T       /afs/rhic/star/data/samples/ 
- /MACRO/GLOBAL/CREATE UTIL      /afs/rhic/star/packages/SL98b/kumacs/util/
- /MACRO/GLOBAL/CREATE TPC_PAMS  /afs/rhic/star/packages/SL98b/pams/tpc/kumac/
- /MACRO/GLOBAL/CREATE TPC_GEOM  /afs/rhic/star/packages/SL98b/params/tpc/
-
- message ' *** Have set up global macros *** '
-
-return
-
-************************************************************************
-************************************************************************
-************************************************************************
-************************************************************************
-
-macro run_tpc_slow_sim_
-  input_g2t_file=[G2T]gstar_ven_phys_on_auau_2central.xdr_
-  input_tpc_geom_file=[TPC_GEOM]tpc_geometry_params.xdf_
+macro run_
+          input_g2t_file=gstar_ven_phys_on_auau_2central.xdr_
           num_events=1_
           tpc_sector_first=18_
           tpc_sector_last=18_
@@ -47,29 +9,67 @@ macro run_tpc_slow_sim_
           nid=100_
           table=/dui/data/tpc/hits/tphit
 
- macro/global/import UTIL,TPC_PAMS,G2T,TPC_GEOM  
+
+*  
+* --> to run
+*    - change the inputs above as desired
+*    - run staf++
+*    -   make tpc   (need pams tpg,tfc,tss,tcl)
+*    -   exec tpc_slow_sim#run
+*            
 
 message ' *** Input G2T file -->        '  [input_g2t_file]
-message ' *** Input TPC geom file -->   '  [input_tpc_geom_file]
 message ' *** Num Events to process --> '  [num_events]
 message ' *** TPC Sector first,last --> '  [tpc_sector_first],[tpc_sector_last]
 message ' *** Magnetic Field -->        '  [magfield]
 message ' *** Ntuple ID # -->           '  [nid]
 message ' *** Table to write to ntup --> ' [table]
 
+ 
+* global macros
+  exec [UTIL]setup_global_macros 
+  macro/global/import UTIL,TPC_PAMS,G2T 
+
+* generic inits
+  exec [UTIL]setup_dir
+  exec [UTIL]input_g2t_file#init [G2T][input_g2t_file]
+
+* tpc slow sim init
+  exec tpc_slow_sim_initialize [tpc_sector_first] [tpc_sector_last] _
+                               [magfield] [nid] [table]
+
+
+* read event and then process thru tpc slow sim
+  do i=1,[num_events]
+    message ' processing event ' [i]
+    exec [UTIL]input_g2t_file#read
+    exec tpc_slow_sim_process_event [i] [nid] [table] 
+  enddo
+
+return
+
+************************************************************************
+************************************************************************
+************************************************************************
+************************************************************************
 
 *--------------------------------------------------------------------
 
- do i=1,[num_events]
+macro tpc_slow_sim_initialize_
+               tpc_sector_first_ 
+               tpc_sector_last_ 
+               magfield_
+               nid_
+               table
 
-*
-*  *** Initialization *** 
 
-  if [i]=1 then
     message ' Initializing for tpc slow simulator '
 
-*   setup directories and tables for tpc slow simulator
-    exec [UTIL]setup_directories_tpc_slow_sim#init
+    macro/global/import UTIL,TPC_PAMS,G2T 
+
+
+*
+*  create tables
     exec [UTIL]create_tables_tpc_slow_sim#tss
     exec [UTIL]create_tables_tpc_slow_sim#tfc
     exec [UTIL]create_tables_tpc_slow_sim#tcl
@@ -80,20 +80,23 @@ message ' *** Table to write to ntup --> ' [table]
                       [tpc_sector_first] [tpc_sector_last] [magfield]
     exec [TPC_PAMS]tcl_init#init
 
-*   setup for input file and output file
-    exec [UTIL]input_g2t_file#init [input_g2t_file]
+
     exec [UTIL]write_table_to_ntuple#init_memory [nid] [table]
 
-    message ' Finished initialization '
-  endif
+ return
 
-*
-*    ***  Here is actual event loop  ***
+*------------------------------------------------------------------------
 
-  message ' TPC slow sim:  Reading Event # ' [i]
+macro tpc_slow_sim_process_event_
+            nev_
+            nid_
+            table
 
-* read in event
-  exec [UTIL]input_g2t_file#read
+
+   macro/global/import UTIL,TPC_PAMS,G2T 
+
+   message ' TPC slow sim: Processing Event # ' [nev]
+
 
 * call tssam - simulated tpc pixels
   exec [TPC_PAMS]tss_run#run
@@ -109,13 +112,10 @@ message ' *** Table to write to ntup --> ' [table]
 
 
 * write  tphit table to ntuple in memory
-  if [i]=1 then
+  if [nev]=1 then
     exec [UTIL]write_table_to_ntuple#write_event_memory [nid] [table]
   endif
 
- enddo
-
-*----------------------------------------------------------------
 
 return
 
