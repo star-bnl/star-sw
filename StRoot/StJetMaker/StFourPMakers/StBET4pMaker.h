@@ -1,38 +1,63 @@
-//StBET4pMaker.h
-//M.L. Miller (MTI Software)
-//9/04
+/*!
+  \class StBET4pMaker
+  \author M.L. Miller (MIT Software)
 
-//BET: Barrel-Endcap-Tpc
+  StBET4pMaker is used to fill the list of 4-momenta that is then passed to a
+  StJetFinder instance.  StBET4pMaker simply instantiates an object of type
+  StBETMuTrackFourVec for every final state particle in the event.
+*/
 
 #ifndef StBET4pMaker_HH
-#define StBET4pmaker_HH
+#define StPYthia4pMaker_HH
 
-#include <map>
 #include <vector>
 using namespace std;
 
-class StMuTrack;
-class EmcHit;
+class StMuTrackFourVec;
+class StMuDstMaker;
+class StEmcADCtoEMaker;
+class StEmcRawHit;
+class StMuEmcPosition;
 
-#include "StJetMaker/StFourPMakers/Functors.h"
-#include "StJetMaker/StFourPMakers/St4pMaker.h"
+#include "StJetMaker/StFourPMakers/StFourPMaker.h"
 
-class StBET4pMaker : public St4pMaker
+class StBET4pMaker : public StFourPMaker
 {
 public:
-    StBET4pMaker(const char* name, StMuDstMaker*, StEmcTrackMatcher*);
-    virtual ~StBET4pMaker();
-
+    
+    ///Require StMuDstMaker pointer at instantiation
+    StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, StEmcADCtoEMaker* adc2e);
+    
+    ///Default destructor
+    virtual ~StBET4pMaker() {};
+    
+    ///Fill the lists
     virtual Int_t Make();
-        
+    
+    ///Clear the lists
+    virtual void Clear(Option_t* opt);
+    
 protected:
+    void fillBarrelHits();
 
-    typedef vector<StMuTrack*> TrackVec;
-    typedef map<EmcHit*, EmcHit*, EmcHitLT> EmcHitMap;
-    TrackVec mTracks;
-    EmcHitMap mHits;
+    typedef vector<StMuTrackFourVec*> BET4Vec;
+    BET4Vec mVec;
+    bool mCorrupt;
+    double mField;
+
+    //these arrays are used to correlate tracks w/ towers
+    StEmcRawHit* mBTowHits[4801]; //!indexed from [1,4800]
+    int mNtracksOnTower[4801]; //!indexed form [1,4800] (number of tracks incident on this tower)
+
+    //utility used for track-> towe rprojection
+    StMuEmcPosition*  mMuPosition; //!
+
+    StMuDstMaker* mMuDstMaker; //!
+    StEmcADCtoEMaker* mAdc2E; //!
+
     
     ClassDef(StBET4pMaker,1)
-};
+	};
+
 
 #endif

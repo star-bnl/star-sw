@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFourPMaker.cxx,v 1.2 2004/10/25 22:19:09 mmiller Exp $
+ * $Id: StFourPMaker.cxx,v 1.3 2005/01/26 20:42:53 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -35,7 +35,7 @@ ClassImp(StFourPMaker)
   
 StFourPMaker::StFourPMaker(const char* name, StMuDstMaker* uDstMaker) 
   : StMaker(name), muDst(uDstMaker), me(0.000511), mpr(0.9383), 
-    mpi(0.1396), mk(0.4937), eta_high_lim(1.6), eta_low_lim(-1.6)
+    mpi(0.1396), mk(0.4937), eta_high_lim(2.0), eta_low_lim(-2.0)
 {
 }
 
