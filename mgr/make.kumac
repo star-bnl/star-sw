@@ -91,9 +91,12 @@ macro ld_private
   pam = [1]
   n = $words([pam],'/') 
   p = $word([pam],[n],[n],'/')
-  for/call  csrmsl($quote([p]))
+  nw = $words($STAR_LIB,'/')
+  lib = $word($STAR_LIB,[nw],1,'/')
+*  wait
   shell gmake NOROOT=YES SILENT=YES -f $STAR/mgr/MakePam.mk -C [pam]
-  slib = .$STAR_SYS/lib/[p].sl
+  for/call  csrmsl($quote([p]))
+  slib = .$STAR_SYS/[lib]/[p].sl
   sl = $fexist([slib])
   if [sl]=1 then
     message  '================ Load private shared library:' [slib] '================'
