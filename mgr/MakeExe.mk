@@ -122,11 +122,11 @@ $(SRG_DIR)/%.f : %.g
 	cd $(GST_DIR); \
 	$(EXE_DIR)/geant3    $(1ST_DEPS) -o $(SRG_DIR)/$(STEM).f
 
+$(OBJ_DIR)/%.o : %.F
+	$(FOR) -c $(INCL) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.o : $(SRG_DIR)/%.f
 	$(FOR) -c $(INCL) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.o : %.f
-	$(FOR) -c $(INCL) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).o
-$(OBJ_DIR)/%.o : %.F
 	$(FOR) -c $(INCL) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.o : %.c
 	$(CC)  -c $(INCL) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).o
