@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.h,v 1.4 2001/04/27 19:32:07 akio Exp $
+// $Id: StPeCEvent.h,v 1.5 2002/03/19 22:23:28 meissner Exp $
 // $Log: StPeCEvent.h,v $
+// Revision 1.5  2002/03/19 22:23:28  meissner
+// New variables: zdc unatt., Trigger word, MC tree if Geant Branch, DCA  for primary pairs, all tracks for secondary pairs (Test)
+//
 // Revision 1.4  2001/04/27 19:32:07  akio
 // fixing a #define conflict bug
 //
@@ -85,6 +88,7 @@ private:
   Float_t                         xVertex;
   Float_t                         yVertex;
   Float_t                         zVertex;
+  Float_t                         rVertex;
   Int_t                           nTracks ;
   Int_t                           nPPairs ;
   Int_t                           nSPairs ;

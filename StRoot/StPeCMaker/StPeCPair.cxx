@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.cxx,v 1.6 2001/02/21 20:42:12 yepes Exp $
+// $Id: StPeCPair.cxx,v 1.7 2002/03/19 22:23:49 meissner Exp $
 // $Log: StPeCPair.cxx,v $
+// Revision 1.7  2002/03/19 22:23:49  meissner
+// New variables: zdc unatt., Trigger word, MC tree if Geant Branch, DCA  for primary pairs, all tracks for secondary pairs (Test)
+//
 // Revision 1.6  2001/02/21 20:42:12  yepes
 // Add ctb signals to tree
 //
@@ -27,7 +30,7 @@
 ClassImp(StPeCPair)
 
 StPeCPair::StPeCPair() {
-}
+} 
 
 StPeCPair::~StPeCPair() {
 }
@@ -78,18 +81,18 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
    if ( track1->geometry()->charge() > 0 && track2->geometry()->charge() < 0 ) {
       p1 = track1->geometry()->momentum();
       p2 = track2->geometry()->momentum();
-      if ( !primaryFlag ) {
-         h1 = track1->geometry()->helix() ;
-         h2 = track2->geometry()->helix() ;
-      }
+      //   if ( !primaryFlag ) {
+      h1 = track1->geometry()->helix() ;
+      h2 = track2->geometry()->helix() ;
+      // }
    }
    else {
-      p1 = track2->geometry()->momentum();
-      p2 = track1->geometry()->momentum();
-      if ( !primaryFlag ) {
-         h1 = track2->geometry()->helix() ;
-         h2 = track1->geometry()->helix() ;
-      }
+     p1 = track2->geometry()->momentum();
+     p2 = track1->geometry()->momentum();
+     // if ( !primaryFlag ) {
+     h1 = track2->geometry()->helix() ;
+     h2 = track1->geometry()->helix() ;
+     // }
    }
 //
 //  Check whether tracks are primary or secondary
@@ -101,41 +104,45 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
    rV0       = 0. ;
    phiV0     = 0. ;
    zV0       = 0. ;
-   if ( !primaryFlag ) {
-      pairD dcaLengths ;
-      dcaLengths = h1.pathLengths(h2);
-      StEventSummary* summary = 0 ;
-      summary = event->summary();
-      Float_t bField ;
-      if ( summary != 0 ) bField = summary->magneticField();
-      else bField = 0.25 ;
+   // Want the DCA Vertex info  also for the Primary Pair !!
+   //  if ( !primaryFlag ) {
+   pairD dcaLengths ;
+   dcaLengths = h1.pathLengths(h2);
+   StEventSummary* summary = 0 ;
+   summary = event->summary();
+   Float_t bField ;
+   if ( summary != 0 ) bField = summary->magneticField();
+   else bField = 0.25 ;
 
+   // The momentum we do not need for the primary pair ....
+   if ( !primaryFlag ) {
       p1 = h1.momentumAt(dcaLengths.first, bField*tesla*0.1 ) ;
       p2 = h2.momentumAt(dcaLengths.second, bField*tesla*0.1 ) ;
-
-      StThreeVectorD x1 = h1.at(dcaLengths.first);
-      StThreeVectorD x2 = h2.at(dcaLengths.second);
-      StThreeVectorD x = (x1-x2) ;
-      pPartDca = x.mag();
-      //
-      //  Construct a helix with very large momentums
-      //  to get intersection of V0 with vertex
-      //
-      StThreeVectorD xMean = (x1+x2)/2. ;
-      rV0   = xMean.perp();
-      phiV0 = xMean.phi();
-      zV0   = xMean.z();
-      
-      StThreeVectorD pSum  = p1+p2 ;
-      StPhysicalHelixD v0Helix ( pSum, xMean, 10.*bField/tesla, 100000./GeV ) ;
-
-      StPrimaryVertex* vtx = 0;
-      vtx = event->primaryVertex();
-      if ( vtx ) {
-	 pV0Dca = v0Helix.distance ( vtx->position() ) ;
-      }
    }
 
+
+   StThreeVectorD x1 = h1.at(dcaLengths.first);
+   StThreeVectorD x2 = h2.at(dcaLengths.second);
+   StThreeVectorD x = (x1-x2) ;
+   pPartDca = x.mag();
+   //
+   //  Construct a helix with very large momentums
+   //  to get intersection of V0 with vertex
+   //
+   StThreeVectorD xMean = (x1+x2)/2. ;
+   rV0   = xMean.perp();
+   phiV0 = xMean.phi();
+   zV0   = xMean.z();
+   
+   StThreeVectorD pSum  = p1+p2 ;
+   StPhysicalHelixD v0Helix ( pSum, xMean, 10.*bField/tesla, 100000./GeV ) ;
+   
+   StPrimaryVertex* vtx = 0;
+   vtx = event->primaryVertex();
+   if ( vtx ) {
+     pV0Dca = v0Helix.distance ( vtx->position() ) ;
+   }
+   
 
    StThreeVectorF p = p1 + p2 ;
    pPt              = p.perp() ;
@@ -144,9 +151,16 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
   // cos(theta) = (p1"dot"p2)/(abs(p1)*abs(p2))
    Float_t ScalarProduct = p1*p2;
    Float_t Denominator   = p1.mag()*p2.mag();
-   pAngle = acos(ScalarProduct/Denominator);
-
-   pXyAngle = acos((p1.x()*p2.x()+p1.y()*p2.y())/p1.perp()/p2.perp());
+   if(Denominator) {
+     pAngle = acos(ScalarProduct/Denominator);
+   }else{
+     pAngle = -999;
+   }
+   if (p1.perp() * p2.perp()) {
+     pXyAngle = acos((p1.x()*p2.x()+p1.y()*p2.y())/p1.perp()/p2.perp());
+   } else { 
+     pXyAngle = -999;
+   }
 //
 //  Calculate Armenteros variables
 //
@@ -205,6 +219,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
       p4pair = pf1 + pf2;
       FourMomentum = p4pair ;
       mInv = p4pair.m() ;
+
 
   // ThetaStar is the angle between of one of the daughter tracks
   // and the Z-axis in the Helicity frame. The Helicity frame is

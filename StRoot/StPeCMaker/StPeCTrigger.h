@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.h,v 1.3 2001/04/25 18:12:32 perev Exp $
+// $Id: StPeCTrigger.h,v 1.4 2002/03/19 22:23:54 meissner Exp $
 // $Log: StPeCTrigger.h,v $
+// Revision 1.4  2002/03/19 22:23:54  meissner
+// New variables: zdc unatt., Trigger word, MC tree if Geant Branch, DCA  for primary pairs, all tracks for secondary pairs (Test)
+//
 // Revision 1.3  2001/04/25 18:12:32  perev
 // HPcorrs
 //
@@ -67,9 +70,18 @@ public:
   Int_t     nMwcHits ;
   Float_t   ctbSum ;
   Float_t   mwcSum ;
+  
+  // attanuated 
   Float_t   zdcEast ;
   Float_t   zdcWest ;
   Float_t   zdcSum  ;
+  // unattenuated 
+  Float_t   zdcEastUA;
+  Float_t   zdcWestUA;
+  Float_t   zdcSumUA  ;
+  //trigger word 
+  Int_t     tw;
+  
 #ifndef __CINT__
   void  setInfoLevel ( Int_t in ) { infoLevel = in ; } ; 
   Int_t        infoLevel ;

@@ -66,6 +66,8 @@ Int_t StPeCGeant::fill ( TDataSet* geant ) {
    TClonesArray &pParticle = *pPart ;
 
    int vert ;
+   printf ( "StPeCGeant::fill: %i tracks found \n", nTracks ) ; 
+
    for ( int i = 0 ; i < nTracks ; i++ ) {
       new(pParticle[nPart++]) StPeCParticle(&(trkT[i])) ;
       
