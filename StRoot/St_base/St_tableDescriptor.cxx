@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   09/08/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.cxx,v 1.3 1999/08/12 18:53:49 fine Exp $
+// $Id: St_tableDescriptor.cxx,v 1.4 1999/08/13 16:35:53 fine Exp $
 // $Log: St_tableDescriptor.cxx,v $
+// Revision 1.4  1999/08/13 16:35:53  fine
+// The artificial restrictions for tableDescriptor have been introduced since database want that
+//
 // Revision 1.3  1999/08/12 18:53:49  fine
 // clash between St_tableDescriptor::GetSize and St_Table::GetSize resolved
 //
@@ -57,7 +60,14 @@ void St_tableDescriptor::LearnTable(const St_Table *parentTable)
 //
 //  LearnTable() creates an array of the descriptors for elements of the row
 //
-
+//  This is to introduce an artificial restriction demanded by STAR database group
+//
+//    1. the name may be 19 symbols at most
+//    2. the number the dimension is 2 at mots
+//
+//  To lift this restriction one has to provide -DNORESTRICTIONS CPP symbol and
+//  recompile code.
+//
   if (!parentTable) {
     MakeZombie();
     return;
@@ -81,7 +91,13 @@ void St_tableDescriptor::LearnTable(const St_Table *parentTable)
   while ( (member = (TDataMember *) next()) ) {
     memset(&elementDescriptor,0,sizeof(tableDescriptor_st));
     varname = (Char_t *) member->GetName();
-                                              elementDescriptor.m_ColumnName = StrDup(varname);
+#ifdef NORESTRICTIONS
+//  This is remove to introduce an artificial restriction demanded by STAR database group
+                                             elementDescriptor.m_ColumnName = StrDup(varname);
+#else
+                                             elementDescriptor.m_ColumnName[0] = '\0';
+         strncat(elementDescriptor.m_ColumnName,varname,sizeof(elementDescriptor.m_ColumnName));
+#endif
     // define index
     TDataType *memberType = member->GetDataType();
                                               elementDescriptor.m_TypeSize = memberType->Size(); 
@@ -103,7 +119,14 @@ void St_tableDescriptor::LearnTable(const St_Table *parentTable)
       Int_t dim = 0;
       if ( (dim = member->GetArrayDim()) ) {
                                               elementDescriptor.m_Dimensions = dim;
+#ifdef NORESTRICTIONS
                                               elementDescriptor.m_IndexArray = new UInt_t(dim);
+#else
+       if (dim > sizeof(elementDescriptor.m_IndexArray)/sizeof(UInt_t *)) {
+                Error("LearnTable","Too many dimenstions - %d", dim);
+                dim =  2;
+       }
+#endif
         for( Int_t indx=0; indx < dim; indx++ ){
                                               elementDescriptor.m_IndexArray[indx] = member->GetMaxIndex(indx);
           globalIndex *= elementDescriptor.m_IndexArray[indx];
