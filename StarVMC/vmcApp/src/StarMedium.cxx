@@ -1,4 +1,8 @@
-/* $Id: StarMedium.cxx,v 1.1 2004/07/12 20:36:39 potekhin Exp $ */
+// $Id: StarMedium.cxx,v 1.2 2004/09/02 23:28:49 potekhin Exp $
+// $Log: StarMedium.cxx,v $
+// Revision 1.2  2004/09/02 23:28:49  potekhin
+// changed comments and added ID
+//
 
 #include <TVirtualMC.h>
 #include <iostream.h>
