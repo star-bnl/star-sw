@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.85 1999/06/10 21:45:54 fisyak Exp $
+# $Id: MakeDll.mk,v 1.86 1999/06/11 12:47:09 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.86  1999/06/11 12:47:09  fisyak
+# Add rtti & exceptions, more fixes for StDaqLib
+#
 # Revision 1.85  1999/06/10 21:45:54  fisyak
 # More fixes for StDaqLib
 #
@@ -212,6 +215,9 @@ endif
 SRC_DIRS  :=$(SRC_DIR)
 suffixes  :=.c .cc .cxx .f .F .g
 FILES_ALL := $(wildcard $(addprefix $(SRC_DIR)/*,$(suffixes)))
+ifeq ($(GEN_DIR),$(SRC_DIR))
+FILES_ALL := $(filter-out $(wildcard $(addprefix $(GEN_DIR)/*.,f F g)), $(FILES_ALL))
+endif
 ALL_DIRS  :=$(strip $(sort $(dir $(wildcard $(addprefix $(SRC_DIR)/*/*,$(suffixes))))))
 ifneq (,$(ALL_DIRS))
 ALL_DIRS  := $(subst / , ,$(ALL_DIRS) )
@@ -221,10 +227,7 @@ ifneq (,$(ALL_DIRS))
 FILES_ALL += $(filter-out $(ALL_DIRS), $(wildcard $(addprefix $(ALL_DIRS)/*,$(suffixes))))
 SRC_DIRS  += $(ALL_DIRS)
 endif
-ifneq ($(GEN_DIR),$(SRC_DIR))
-FILES_ALL += $(filter-out $(wildcard $(addprefix $(SRC_DIRS)/,*.f *.F *.g)), $(FILES_ALL))
 FILES_ALL := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_ALL)))
-endif
 FILES_SRC  = $(filter-out      %Cint.cxx, $(FILES_ALL))
 FILES_SRC := $(filter-out %/.share/%/*.F, $(FILES_SRC))
 FILES_SRC := $(filter-out %/.share/%/*.f, $(FILES_SRC))

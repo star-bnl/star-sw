@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.77  1999/06/11 12:47:09  fisyak
+#  Add rtti & exceptions, more fixes for StDaqLib
+#
 #  Revision 1.76  1999/06/08 11:30:14  fisyak
 #  take out NT stuff for the moment
 #
@@ -307,7 +310,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/06/08 11:30:14 $ 
+#           Last modification $Date: 1999/06/11 12:47:09 $ 
 #  default setings
 # Current Working Directory
 #
@@ -371,13 +374,15 @@ ifneq (wenuas,$(USER))
   SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker objy, $(SUBDIRS)) 
 endif
    SUBDIRS := $(filter-out StPeCMaker, $(SUBDIRS))
-  ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
-    SUBDIRS := $(filter-out StTrsMaker, $(SUBDIRS))
-    SUBDIRS := $(filter-out CLHEP, $(SUBDIRS)) 
-    SUBDIRS := $(filter-out l3, $(SUBDIRS)) 
-    SUBDIRS := $(filter-out StEventReaderMaker, $(SUBDIRS)) 
-    SUBDIRS := $(filter-out StEvent, $(SUBDIRS)) 
-  endif
+#  ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
+#    SUBDIRS := $(filter-out StTrsMaker, $(SUBDIRS))
+#    SUBDIRS := $(filter-out StEventReaderMaker, $(SUBDIRS)) 
+#    SUBDIRS := $(filter-out StEvent, $(SUBDIRS)) 
+#  endif
+ ifneq (,$(findstring $(STAR_SYS),sun4x_56 hp_ux102))
+    SUBDIRS := $(filter-out StDaqLib StNoiseMaker, $(SUBDIRS))
+    SUBDIRS := $(filter-out StFtpcV0Maker, $(SUBDIRS))
+ endif
   ifdef PKG
     SUBDIRS:=
   endif
