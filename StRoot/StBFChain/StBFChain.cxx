@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.455 2005/01/07 01:35:45 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.456 2005/01/14 23:47:29 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -114,8 +114,9 @@ Bfc_st BFC1[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"C H A I N S ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"doEvents"    ,""  ,"","in,StEvent,analysis,NoDb"                                     ,"","","",kFALSE},
-  {"drawDst"     ,""  ,"","in,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                  ,"","","",kFALSE},
+  {"doEvents"    ,""  ,"","in,StEvent,analysis,NoDb"                                      ,"","","",kFALSE},
+  {"drawDst"     ,""  ,"","in,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                   ,"","","",kFALSE},
+  {"Sdst"        ,""  ,"","global,dst,event"                                              ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,event,analysis,EventQA"                             ,"","","",kFALSE},
   {"C1default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits"    ,"","","Year 1 chain",kFALSE},
   {"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt,emcY2"
@@ -212,11 +213,11 @@ Bfc_st BFC1[] = { // standard chains
                                                                     "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal",""  ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","","",
                                                                           "Laser Calibration Chain",kFALSE},
-  {"L3Counter","" ,"","db,detDb,in,l3count","","",                    "L3 Counter extraction pass",kFALSE},
+  {"L3Counter","" ,"","db,detDb,in,l3count","","",                     "L3 Counter extraction pass",kFALSE},
   {"VtxSeedCal","","",
    "ppOpt,ry2001,in,tpc_daq,tpc,global,-Tree,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2",
                                                                      "","","Pass0 Vertex evaluator",kFALSE},
-  {"SpcChgCal","","","B2004,fcf,Corr3,OSpaceZ2,OShortR,SCEbyE,-Tree,-tags,-EvOut",
+  {"SpcChgCal","","","B2004,-Cdst,Sdst,fcf,Corr3,OSpaceZ2,OShortR,SCEbyE,-Tree,-tags,-EvOut",
                                                                 "","","Pass0 SpaceCharge evaluator",kFALSE},
 
 
@@ -230,8 +231,8 @@ Bfc_st BFC1[] = { // standard chains
   {"Ev03"        ,""  ,"","","",""                                 ,"Turn on alternative V0 method",kFALSE},
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
   {"gstar"       ,""  ,"","geant,Simu","","" ,"gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE},
-  {"tdaq"        ,""  ,"","in,tpc_daq"                                                   ,"","","",kFALSE},
-  {"miniDAQ"     ,"tpc_raw","tpc","in,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
+  {"tdaq"        ,""  ,"","in,tpc_daq"                                                    ,"","","",kFALSE},
+  {"miniDAQ"     ,"tpc_raw","tpc","in,FieldOff,SD97,Eval"     ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
   {"fzin"        ,""  ,"","geant,Simu","" ,""                                 ,"read gstar fz-file",kFALSE},
   {"clearDAQCTB" ,""  ,"","","" ,""                             ,"clear DAQ CTB Hits for embedding",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
@@ -359,7 +360,7 @@ Bfc_st BFC1[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"in"          ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
+  {"in"          ,""  ,"",""                  ,"StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
   {"geant"       ,"geant","","geomT,gen_T,sim_T"
                           ,"St_geant_Maker","libGeom,geometry,St_g2t,StMagF,St_geant_Maker","GEANT",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -395,7 +396,8 @@ Bfc_st BFC1[] = { // standard chains
   {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
 
 
-  {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation>",kFALSE},
+  {"Event"    ,"0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation>",kFALSE},
+  {"MakeEvent","","","","","",                                                         STR_OBSOLETE,kFALSE},
 
 
   {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE},
@@ -500,9 +502,8 @@ Bfc_st BFC1[] = { // standard chains
                                                                          "Regular dEdx calculation",kFALSE},
   {"svtdEdx"     ,"svtdEdx","globalChain","globT,TbUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
 
-  {"Event","","",",StEvent,tpcDB,detDb","StEventMaker",",StEventMaker","<StEvent creation/filling>",kFALSE},
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
-  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
+  {"dEdxY2"      ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
 
@@ -526,7 +527,7 @@ Bfc_st BFC1[] = { // standard chains
 
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
   {"sls"         ,"","","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker",
-                                                                            "... SSD slow simulator",kFALSE},
+                                                                           "... SSD slow simulator",kFALSE},
   {"spa"         ,"","","tls,Simu,SvtCL","St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker",
                                                                      "... SSD Pedestal Annihilator",kFALSE},
   {"scf"       ,"","","" ,"St_scf_Maker","St_tpc,St_svt,StSsdClusterMaker","... SSD cluster finder",kFALSE},
@@ -715,8 +716,9 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"C H A I N S ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"doEvents"    ,""  ,"","in,StEvent,analysis,NoDb"                                     ,"","","",kFALSE},
-  {"drawDst"     ,""  ,"","in,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                  ,"","","",kFALSE},
+  {"doEvents"    ,""  ,"","in,StEvent,analysis,NoDb"                                      ,"","","",kFALSE},
+  {"drawDst"     ,""  ,"","in,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                   ,"","","",kFALSE},
+  {"Sdst"        ,""  ,"","global,dst,event"                                              ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,event,analysis,EventQA"                             ,"","","",kFALSE},
   {"C1default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits"    ,"","","Year 1 chain",kFALSE},
   {"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt,emcY2"
@@ -839,18 +841,18 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                                     "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal",""  ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","","",
                                                                           "Laser Calibration Chain",kFALSE},
-  {"L3Counter","" ,"","db,detDb,in,l3count","","",                    "L3 Counter extraction pass",kFALSE},
+  {"L3Counter","" ,"","db,detDb,in,l3count","","",                     "L3 Counter extraction pass",kFALSE},
   {"VtxSeedCal","","",
    "ppOpt,ry2001,in,tpc_daq,tpc,global,-Tree,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2",
                                                                      "","","Pass0 Vertex evaluator",kFALSE},
-  {"SpcChgCal","","","B2004,fcf,Corr3,OSpaceZ2,OShortR,SCEbyE,-Tree,-tags,-EvOut",
+  {"SpcChgCal","","","B2004,-Cdst,Sdst,fcf,Corr3,OSpaceZ2,OShortR,SCEbyE,-Tree,-tags,-EvOut",
                                                                 "","","Pass0 SpaceCharge evaluator",kFALSE},
 
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"ITTF"        ,""  ,"","Sti",                                          "","","Turn on ITTF chain",kFALSE},
+  {"ITTF"        ,""  ,"","Sti",                                         "","","Turn on ITTF chain",kFALSE},
   {"SvtHitFilt"  ,"", "","",                                           "","","SVT Hit filter Maker",kFALSE},
   {"NoHits"      ,""  ,"",""                            ,"","","Don't write hits into Event.Branch",kFALSE},
   {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
@@ -858,8 +860,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Ev03"        ,""  ,"","","",""                                 ,"Turn on alternative V0 method",kFALSE},
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
   {"gstar"       ,""  ,"","geant,Simu","","" ,"gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE},
-  {"tdaq"        ,""  ,"","in,tpc_daq"                                                   ,"","","",kFALSE},
-  {"miniDAQ"     ,"tpc_raw","tpc","in,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
+  {"tdaq"        ,""  ,"","in,tpc_daq"                                                    ,"","","",kFALSE},
+  {"miniDAQ"     ,"tpc_raw","tpc","in,FieldOff,SD97,Eval"     ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
   {"fzin"        ,""  ,"","geant,Simu","" ,""                                 ,"read gstar fz-file",kFALSE},
   {"clearDAQCTB" ,""  ,"","","" ,""                             ,"clear DAQ CTB Hits for embedding",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
@@ -1025,7 +1027,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
 
-  {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation>",kFALSE},
+  {"Event"    ,"0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation>",kFALSE},
+  {"MakeEvent","","","","","",                                                         STR_OBSOLETE,kFALSE},
 
   {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE},
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE},
@@ -1135,7 +1138,6 @@ Bfc_st BFC2[] = { // ITTF Chains
 
 
   //  Reminder: You are within the ITTF chain definitions
-  {"Event","","",",StEvent,tpcDB,detDb","StEventMaker",",StEventMaker","<StEvent creation/filling>",kFALSE},
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"genvtx"      ,"","","","StGenericVertexMaker","Sti,StGenericVertexMaker","Generic Vertex Finder",kFALSE},
   {"Mc"          ,"McChain","McEvent","sim_T,globT,McAss,McAna"             ,"StMaker","StChain","",kFALSE},
