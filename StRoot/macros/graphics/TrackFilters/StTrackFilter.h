@@ -1,8 +1,8 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StTrackFilter.h,v 1.2 1999/12/14 17:56:40 fine Exp $ 
+// $Id: StTrackFilter.h,v 1.3 1999/12/15 23:04:14 fine Exp $ 
 // $Log: StTrackFilter.h,v $
-// Revision 1.2  1999/12/14 17:56:40  fine
-// Advanced Event Filter
+// Revision 1.3  1999/12/15 23:04:14  fine
+// header file fixed by Wensheng
 // 
 //
 #ifndef STAR_StTrackFilter
