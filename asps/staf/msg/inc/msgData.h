@@ -85,4 +85,4 @@ typedef struct {
   control_t control;               /*  msg's control structure.  */
   prefix_t  prefix[MAXPREFIXES+1];   /*  msg's prefix  structure.  */
   class_t   class[ MAXCLASSES+1];    /*  msg's class   structure.  */
-} msg_t;
+} msgData_t;
