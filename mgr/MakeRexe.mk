@@ -1,5 +1,8 @@
-# $Id: MakeRexe.mk,v 1.14 1999/02/20 19:39:55 fisyak Exp $
+# $Id: MakeRexe.mk,v 1.15 1999/02/25 02:21:51 wenaus Exp $
 # $Log: MakeRexe.mk,v $
+# Revision 1.15  1999/02/25 02:21:51  wenaus
+# StSclRoot -> StarClassLibrary
+#
 # Revision 1.14  1999/02/20 19:39:55  fisyak
 # Take out ROOT New library
 #
@@ -82,8 +85,8 @@ CCload = YES
 
 # static linking of SCL and StEvent needed with current Solaris compiler
 ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
-  STEVENT_OBJS =  $(wildcard $(STAR)/.$(STAR_HOST_SYS)/obj/StSclRoot/*.o \
-$(STAR)/.$(STAR_HOST_SYS)/obj/StSclRoot/Templates.DB/*.o) $(wildcard \
+  STEVENT_OBJS =  $(wildcard $(STAR)/.$(STAR_HOST_SYS)/obj/StarClassLibrary/*.o \
+$(STAR)/.$(STAR_HOST_SYS)/obj/StarClassLibrary/Templates.DB/*.o) $(wildcard \
 $(STAR)/.$(STAR_HOST_SYS)/obj/StEvent/*.o \
 $(STAR)/.$(STAR_HOST_SYS)/obj/StEvent/Templates.DB/*.o)
 else
