@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.5 1999/01/18 21:01:30 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.6 1999/01/22 23:38:28 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,9 +10,12 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
- * Revision 1.5  1999/01/18 21:01:30  lasiuk
- * use fractionSampled(); enumerated types for function selection
+ * Revision 1.6  1999/01/22 23:38:28  lasiuk
+ * set defaults for signal sampling and induced charge
  *
+ *
+ * Revision 1.11  1999/02/16 23:34:33  lasiuk
+ * inline 2 functions
  * merge operations for speed up (after profiler0
  *
  * Revision 1.10  1999/02/15 03:38:16  lasiuk
@@ -57,7 +60,11 @@
  * Revision 1.2  1998/10/22 00:24:27  lasiuk
  * Oct 22
  *
-{/* nopt */}
+#include "PhysicalConstants.h"
+#include "StCoordinates.hh"
+
+#include "StTrsSlowAnalogSignalGenerator.hh"
+
     : StTrsAnalogSignalGenerator(geo, sc, el, sec)
 {
 //static const double tau1              = mSigma1;
