@@ -3,6 +3,10 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.139  2004/03/25 22:42:44  andrewar
+// temp mag field fix; cache filed value and reset if it goes to zero. This
+// protects against corrupt event headers...
+//
 // Revision 1.138  2004/02/24 01:59:46  jeromel
 // Commented out include of disappeared .h
 //
@@ -261,7 +265,9 @@ Int_t StiMaker::Finish()
 }
 
 Int_t StiMaker::Init()
-{  
+{
+
+  runField =0.;
   _loaderHitFilter = 0; // not using this yet.
   _loaderTrackFilter = new StiDefaultTrackFilter("LoaderTrackFilter","MC Tracks Filter"); 
   _loaderTrackFilter->add(new EditableParameter("PhiUsed",  "Use Phi",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPhi));
@@ -396,6 +402,10 @@ Int_t StiMaker::Make()
       cout <<"StiMaker::Make() -E- field:"<<field<<endl;
       return -1;
     }
+
+  if (runField==0) runField=field;
+  if (field==0 && field != runField) field=runField;
+  
   if (_toolkit->isMcEnabled() )
     {
       if (!mMcEventMaker)
