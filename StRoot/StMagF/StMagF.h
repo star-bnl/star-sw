@@ -4,23 +4,27 @@
 #include "TNamed.h"
 #include "TVector.h"
 
-enum Field_t {Undef=1, Const=1, ConMesh=2};
+enum EField   {Const=1, ConMesh=2};
+enum EMagType {Undef=1};
+
+#define agufld_ F77_NAME(agufld,AGUFLD)
+R_EXTERN void type_of_call agufld_(Float_t *x, Float_t *b);
 
 class StMagF : public TNamed {
 
 protected:
-  Int_t     fType;   // Type allows for different implementations. 
-  Int_t     fMap;    // Field Map identifier
+  EMagType  fType;   // Type allows for different implementations. 
+  EField    fMap;    // Field Map identifier
   Float_t   fFactor; // Multiplicative factor (allows sign reversal)
 
 public:
-  void agufld_ (float *x, float *b);
+  void Agufld(float *x, float *b);
   StMagF(){}
   StMagF(const char *name, const char *title, const Field_t map=ConMesh, 
 	  const Float_t factor=1);
   virtual ~StMagF() {}
   virtual void Field(Float_t *x, Float_t *b);
-  virtual Field_t Type() {return (Field_t) fType;}
+  virtual EMagType Type() {return fType;}
   virtual void ReadField() {}
   
   ClassDef(StMagF,1)  //Base class for all STAR MagField

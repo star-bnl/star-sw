@@ -12,11 +12,20 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static StMagF *fMagfield = 0;
+
+
+static StMagF *gMagfield = 0;
+//________________________________________
+void type_of_call agufld_(Float_t *x, Float_t *b)
+{
+  if (gMagfield) gMagfield->Agufld(x,y);
+  else fprintf(stderr,"No instanse of <StMagF> class has been defined yet !\n");
+}
+
 ClassImp(StMagF)
 
 //________________________________________
-StMagF::StMagF(const char *name, const char *title, const Field_t map, 
+StMagF::StMagF(const char *name, const char *title, const EField map, 
 		 const Float_t factor)
   : TNamed(name,title)
 {
@@ -24,7 +33,7 @@ StMagF::StMagF(const char *name, const char *title, const Field_t map,
   fFactor = factor;
 }
 //________________________________________
-void StMagF::agufld_(Float_t *x, Float_t *b)
+void StMagF::Agufld(Float_t *x, Float_t *b)
 {
   b[0]=b[1]=b[2]=0;
   if(!fMagfield){
@@ -33,15 +42,15 @@ void StMagF::agufld_(Float_t *x, Float_t *b)
       fType = Undef;
     }
     else if(fMap==Const){
-       fMagfield = new StMagFC("Uniform Field","Fixed",Const,1.0);
-       fMagfield->Field(x,b);
+       gMagfield = new StMagFC("Uniform Field","Fixed",Const,1.0);
+       gMagfield->Field(x,b);
     }
     else if(fMap==ConMesh){
-       fMagfield = new StMagFCM(" Star Full Field","bfp112.map",ConMesh,1.0);
-       fMagfield->Field(x,b);
+       gMagfield = new StMagFCM(" Star Full Field","bfp112.map",ConMesh,1.0);
+       gMagfield->Field(x,b);
     }
   }
-  else fMagfield->Field(x,b);
+  else gMagfield->Field(x,b);
 }
 //________________________________________
 void StMagF::Field(Float_t *x, Float_t *b)
@@ -66,7 +75,7 @@ StMagFC::StMagFC(const char *name, const char *title, const Field_t map,
 void StMagFC::Field(Float_t *x, Float_t *b)
 {
   b[0]=b[1]=b[2]=0;
-  if(fMap==1) {
+  if(fMap==Const) {
     if(TMath::Abs(x[2])<280 && x[0]*x[0]+x[1]*x[1] < 240*240) 
       b[2]=5.0;
   } else {
@@ -125,7 +134,7 @@ void StMagFCM::Field(Float_t *x, Float_t *b)
     ratz=hiz-int(hiz);
     iz=int(hiz);
     
-    if(fMap==2) {
+    if(fMap==ConMesh) {
       // ... simple interpolation
       ratp1=one-ratp;
       ratr1=one-ratr;
@@ -201,7 +210,7 @@ void StMagFCM::ReadField()
       }
     }
   } else { 
-    printf("File %s not found !\n",fTitle.Data());
+    fprintf(stderr,"File %s not found !\n",fTitle.Data());
     exit(1);
   }
 }
