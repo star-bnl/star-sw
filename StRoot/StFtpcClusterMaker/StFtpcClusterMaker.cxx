@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.12 2000/09/18 14:26:46 hummler Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.13 2000/11/14 13:08:16 hummler Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.13  2000/11/14 13:08:16  hummler
+// add charge step calculation, minor cleanup
+//
 // Revision 1.12  2000/09/18 14:26:46  hummler
 // expand StFtpcParamReader to supply data for slow simulator as well
 // introduce StFtpcGeantReader to separate g2t tables from simulator code
@@ -48,6 +51,7 @@
 #include "StFtpcClusterMaker.h"
 #include "StFtpcParamReader.hh"
 #include "StFtpcGeantReader.hh"
+#include "StFtpcChargeStep.hh"
 #include "StFtpcClusterFinder.hh"
 #include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "StFtpcFastSimu.hh"
@@ -108,6 +112,7 @@ Int_t StFtpcClusterMaker::Init(){
   m_gaspar     = (St_ffs_gaspar   *)local("ffspars/gaspar"  );
 
 // 		Create Histograms
+m_csteps      = new TH2F("fcl_csteps"	,"FTPC charge steps by sector"	,60,-0.5,59.5, 260, -0.5, 259.5);
 //m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,7,0.,8.);
 //m_row        = new TH1F("fcl_row"	,"FTPC rows"			,20,1.,21.);
 //m_sector     = new TH1F("fcl_sector"	,"FTPC sectors"			,6,1.,7.);
@@ -164,6 +169,14 @@ Int_t StFtpcClusterMaker::Make()
 
       TClonesArray *hitarray = new TClonesArray("StFtpcPoint", 0);
 
+      StFtpcChargeStep *step = new StFtpcChargeStep(m_csteps,
+						    ftpcReader, 
+						    paramReader);
+      // uncomment to recalculate normalized pressure from charge step:
+      step->histogram(1);
+      // uncomment to fill charge step histogram only:
+      //      step->histogram(0);
+
       if(Debug()) cout<<"start running StFtpcClusterFinder"<<endl;
             
       StFtpcClusterFinder *fcl = new StFtpcClusterFinder(ftpcReader, 
@@ -196,6 +209,7 @@ Int_t StFtpcClusterMaker::Make()
 	  
 	}
       delete fcl;
+      delete step;
       delete ftpcReader;
     }
     else {
@@ -244,7 +258,6 @@ Int_t StFtpcClusterMaker::Make()
   }
   
   delete paramReader;
-
 // Deactivate histograms for MDC3
 //MakeHistograms(); // FTPC cluster finder histograms
   return iMake;

@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.8 2000/08/03 14:39:00 hummler Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.9 2000/11/14 13:08:04 hummler Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.9  2000/11/14 13:08:04  hummler
+// add charge step calculation, minor cleanup
+//
 // Revision 1.8  2000/08/03 14:39:00  hummler
 // Create param reader to keep parameter tables away from cluster finder and
 // fast simulator. StFtpcClusterFinder now knows nothing about tables anymore!
@@ -156,7 +159,7 @@ int StFtpcClusterFinder::search()
 #ifdef DEBUG
 	  printf("Now on Sector %d, Row %d\n", iSec, iRow);
 #endif
-	  
+
 	  // calculate hardware (daq) sectors from software position
 	  iHardSec = mParam->numberOfSectors()*(int)(iRow/2) + iSec + 1;
 	  iHardRow = iRow%2 + 1;
@@ -164,8 +167,8 @@ int StFtpcClusterFinder::search()
 	  // get list of occupied pads in sector
 	  unsigned char *(padlist[2]);
 	  int iOccPads=mReader->getPadList(iHardSec, iHardRow, 
-					  padlist[iHardRow-1]);
-	  
+					   padlist[iHardRow-1]);
+
 	  // loop over occupied pads
 	  int iThPad;
 	  for(iThPad=0; iThPad<iOccPads; iThPad++)
@@ -1682,9 +1685,10 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
   PadtransLower= (int) (TimeCoordinate*PadtransPerTimebin);
 
   /* linear interpolation in radius table */
-  Peak->Rad = ((pRadius[iRow + 10 * PadtransLower] * 
+  Peak->Rad = ((pRadius[iRow + mParam->numberOfPadrowsPerSide() * PadtransLower] * 
 		((float) (PadtransLower+1) / (float) PadtransPerTimebin - 
-		 TimeCoordinate) + pRadius[iRow + 10 * (PadtransLower+1)] * 
+		 TimeCoordinate) + pRadius[iRow + mParam->numberOfPadrowsPerSide()
+					   * (PadtransLower+1)] * 
 		(TimeCoordinate - (float) PadtransLower 
 		 / (float) PadtransPerTimebin)) / 
 	       (((float) (PadtransLower + 1) / (float) PadtransPerTimebin - 
@@ -1692,10 +1696,10 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
   
   /* linear interpolation in deflection table */
   PhiDeflect = mParam->directionOfMagnetField() 
-    * ((pDeflection[iRow + 10 * PadtransLower]
+    * ((pDeflection[iRow + mParam->numberOfPadrowsPerSide() * PadtransLower]
 	* ((float) (PadtransLower + 1.0) 
 	 / (float) PadtransPerTimebin - TimeCoordinate) 
-	+ pDeflection[iRow + 10 * (PadtransLower + 1)] 
+	+ pDeflection[iRow + mParam->numberOfPadrowsPerSide() * (PadtransLower + 1)] 
 	* (TimeCoordinate - (float) PadtransLower / (float) PadtransPerTimebin))
        / (((float) (PadtransLower + 1.0) / (float) PadtransPerTimebin 
 	   - (float) PadtransLower / (float) PadtransPerTimebin)));
@@ -1757,7 +1761,7 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
   printf("integrating padtrans table...\n");
 #endif
 
-  for (padrow=0; padrow<10; padrow++)
+  for (padrow=0; padrow<mParam->numberOfPadrowsPerSide(); padrow++)
     {
       /* determine starting values */
       t_last=0;
@@ -1826,8 +1830,10 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
 	  
 	  /* correct r_next: */
 	  r_next = r_last - v_now * step_size *mParam->microsecondsPerTimebin();
-	  pradius[padrow+10*(i+1)]=r_next;
-	  pdeflection[padrow+10*(i+1)]=pdeflection[padrow+10*i]+((r_last-r_next)*tan(mParam->radiansPerDegree() * psi_now)/r_last);
+	  pradius[padrow+mParam->numberOfPadrowsPerSide()*(i+1)]=r_next;
+	  pdeflection[padrow+mParam->numberOfPadrowsPerSide()*(i+1)]
+	    =pdeflection[padrow+mParam->numberOfPadrowsPerSide()*i]
+	    +((r_last-r_next)*tan(mParam->radiansPerDegree() * psi_now)/r_last);
 	  t_last=t_next;
 	  r_last=r_next;
 	}

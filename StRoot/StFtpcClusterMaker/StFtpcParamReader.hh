@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.6 2000/11/06 13:42:57 hummler Exp $
+// $Id: StFtpcParamReader.hh,v 1.7 2000/11/14 13:08:30 hummler Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.7  2000/11/14 13:08:30  hummler
+// add charge step calculation, minor cleanup
+//
 // Revision 1.6  2000/11/06 13:42:57  hummler
 // include latest changes in second constructor as well
 //
@@ -43,6 +46,7 @@ protected:
   //STAF table pointers stored for writing back in destructor
   //set to NULL if not set in constructor
   fcl_padtrans_st *mPadtransTable;
+  fcl_det_st *mDetTable;
 
   //ClusterFinder parameters (also used by other classes)
   Float_t *mAmplitudeOffset;
@@ -182,6 +186,7 @@ public:
   Int_t setPadtransDeflection(Int_t i, Int_t padrow, Float_t  newvalue); 
   Int_t setPadtransdVDriftdP(Int_t i, Int_t padrow, Float_t  newvalue); 
   Int_t setPadtransdDeflectiondP(Int_t i, Int_t padrow, Float_t  newvalue); 
+  Int_t setNormalizedNowPressure(Float_t f) {mNormalizedNowPressure=f; return 1;}
 
   // inline get functions
   Int_t numberOfCalibrationValues() {return mNumberOfCalibrationValues;}
@@ -249,6 +254,7 @@ public:
   Float_t sigmaPadResponseFuntion() {return mSigmaPadResponseFuntion;}
   Float_t readoutShaperTime() {return mReadoutShaperTime;}
   Float_t padPitch() {return mRadiansPerPad*mSensitiveVolumeOuterRadius;}
+
 };
 
 #endif
