@@ -1,5 +1,8 @@
-* $Id: tde.F,v 1.7 2000/02/22 20:05:13 hardtke Exp $
+* $Id: tde.F,v 1.8 2000/03/05 23:56:52 sakrejda Exp $
 * $Log: tde.F,v $
+* Revision 1.8  2000/03/05 23:56:52  sakrejda
+* Changed limit for "no field' from 0.00001 to 0.00002.
+*
 * Revision 1.7  2000/02/22 20:05:13  hardtke
 * use tpc_row_par instead of tpg_row_par
 *
@@ -202,7 +205,7 @@ C Abort if there are too many TPC tracks to work with
       endif
 
       call gufld(xlocal,bfield)
-      if(abs(bfield(3)).lt.0.00001) return 
+      if(abs(bfield(3)).lt.0.00002) return 
       
 c
 c  this only once on initialisation-
