@@ -20,7 +20,7 @@
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiSvt/StiSvtIsActiveFunctor.h"
 #include <stdio.h>
-#include "Sti/StiHitErrorCalculator.h"
+#include "tables/St_HitError_Table.h"
 
 /*
   SVT Layer and Ladder Naming Convention
@@ -66,34 +66,19 @@
     6     13       5     6
     6     15       5     7
  */
-StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active, char* baseName)
+StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active)
   : StiDetectorBuilder("Svt",active)
+{}
+
+void StiSvtDetectorBuilder::load(const char * baseName)
 {
- 
-  StiTrackingParameters * trackingPars = getTrackingParameters();
-
+  StiTrackingParameters & trackingPars = getTrackingParameters();
   string fName= _name + baseName;
-
   ifstream inF(fName.c_str());
   if (inF)
     {
-      trackingPars->setPar(inF);
       cout <<"New tracking parameters set from file:"<<fName<<endl;
-    }
-  else
-    {
-      trackingPars->setMaxChi2ForSelection(5.);
-      trackingPars->setMinSearchWindow(1.);
-      trackingPars->setMaxSearchWindow(4.);
-      trackingPars->setSearchWindowScaling(10.);
-      cout <<"Tracking Parameters set from default. "<<endl;
-    }
-  cout <<*trackingPars<<endl;
-
-   cout <<"Creating Hit Error Calculator:"<<endl;
-  _calc = new StiDefaultHitErrorCalculator();
-  if(inF)
-    {
+      trackingPars.setPar(inF);
       double intrY, driftY, dipY, intrZ,driftZ,dipZ;
       inF>>intrY;
       inF>>driftY;
@@ -101,85 +86,97 @@ StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active, char* baseName)
       inF>>intrZ;
       inF>>driftZ;
       inF>>dipZ;
-      _calc->set(intrY,driftY,dipY,intrZ,driftZ,dipZ);
-
+      _calc.set(intrY,driftY,dipY,intrZ,driftZ,dipZ);
     }
   else
     {
-      cout <<"Setting Hit Error Calculator parameters from defaults:"<<endl;
-      _calc->set(.0009,0.004,0.04,.0009,0.0032,0.09); 
+      cout <<"Tracking Parameters and hit errors set from default. "<<endl;
+      trackingPars.setMaxChi2ForSelection(5.);
+      trackingPars.setMinSearchWindow(1.);
+      trackingPars.setMaxSearchWindow(4.);
+      trackingPars.setSearchWindowScaling(10.);
+      _calc.set(.0009,0.004,0.04,.0009,0.0032,0.09); 
     }
-
-
+  cout <<trackingPars<<endl;
 }
 
 StiSvtDetectorBuilder::~StiSvtDetectorBuilder()
-{
-  delete _calc;
+{}
 
-}
-
-void StiSvtDetectorBuilder::buildMaterials()
+void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 {
-  _messenger << "StiSvtDetectorBuilder::buildMaterials() - INFO - Started" << endl;
+  char name[50];  
+	int nRows;
+  cout << "StiSvtDetectorBuilder::buildDetectors() -I- Started" << endl;
+
+	// Load Tracker Parameters 
+	TDataSet * ds = source.GetDataSet("calibrations/tracker");
+	if (ds)
+		{
+			cout << "StiSvtDetectorBuilder::buildDetectors() -I- Loading SVT Tracking parameters from STAR DB" << endl;
+			StiTrackingParameters & trackingPars = getTrackingParameters();
+			trackingPars.load(ds);
+			St_HitError * t = dynamic_cast<St_HitError*>(ds->Find("SvtHitError"));
+			HitError_st * h = t->GetTable();
+			_calc = *h;
+		}
+	else
+		cout <<  "StiSvtDetectorBuilder::buildingDetectors() -W- Using DEFAULT SVT tracking parameters" << endl;
+
+	St_DataSet *dataSet = NULL;
+  dataSet = source.GetDataSet("StSvtConfig");
+	if (!dataSet)	throw runtime_error("StiSvtDetectorBuilder::loadDb() -E- dataSet==0 while getting StSvtConfig");
+  _config = static_cast<StSvtConfig*>(dataSet->GetObject());
+  if (!_config) throw runtime_error("StiSvtDetectorBuilder::loadDb() -E- _config==0");
+
+  dataSet = source.GetDataSet("StSvtGeometry");
+	if (!dataSet)	throw runtime_error("StiSvtDetectorBuilder::loadDb() -E- dataSet==0 while getting StSvtGeometry");
+  _geometry = static_cast<StSvtGeometry*>(dataSet->GetObject());
+  if (!_geometry) throw runtime_error("StiSvtDetectorBuilder::loadDb() -E- _geometry==0");
+
+	nRows = 2* _config->getNumberOfBarrels();
+  setNRows(nRows);
+  cout << "SVT Number of  Rows : "<<2* _config->getNumberOfBarrels()<<endl
+			 << "  Layer#  numberOfLadders      Radius" << endl;
+  for (unsigned int layer=0;layer<nRows;layer++)
+		cout << "  "<<layer<<"     "<<_config->getNumberOfLadders(1+layer/2)/2 << "   " 
+				 << _geometry->getBarrelRadius(layer+1) << endl;
+
+  cout << "StiSvtDetectorBuilder::buildDetectors() -I- Define Svt Materials" << endl;
   _gasMat    = add(new StiMaterial("Air",     0.49919,  1.,       0.001205, 30420.*0.001205, 5.) );
   _siMat     = add(new StiMaterial("Si",     14.,      28.0855,   2.33,     21.82,           5.) );
   _hybridMat = add(new StiMaterial("Hybrid", 14.,      28.0855,   2.33,     21.82,           5.) );
-  _messenger << "StiSvtDetectorBuilder::buildMaterials() - INFO - Done" << endl;
-}
-
-void StiSvtDetectorBuilder::buildShapes()
-{
-  char name[50];  
-  int nLayers = getNRows();
+  cout << "StiSvtDetectorBuilder::buildDetectors() -I- Define Svt Shapes" << endl;
+	int nLayers = nRows;
   for(int layer = 0; layer<nLayers; layer++)
     {
       int nWafers = _config->getNumberOfWafers(1+layer/2);
-      cout << " layer:"<<layer<<" nWafrers:"<<nWafers<<endl;
       // Si wafer
       sprintf(name, "Svt/Layer_%d/Wafers", layer);
-
-      cout <<"StiSvtDetectorBuilder::buildShapes() -I- layer:"<<layer<<"thickness:"<< _geometry->getWaferThickness()<<endl;
       _waferShape[layer] = new StiPlanarShape(name,
-					      nWafers*_geometry->getWaferLength(),
-					      2.*_geometry->getWaferThickness(),
-					      _geometry->getWaferWidth() );
+																							nWafers*_geometry->getWaferLength(),
+																							2.*_geometry->getWaferThickness(),
+																							_geometry->getWaferWidth() );
       add(_waferShape[layer]);
       // Hybrids
       sprintf(name, "Svt/Layer_%d/Hybrids", layer);
       _hybridShape[layer] = new StiPlanarShape(name,nWafers*_geometry->getWaferLength(),0.1, 1.);
       add(_hybridShape[layer]);
     } // for layer
-}
 
-void StiSvtDetectorBuilder::buildDetectors()
-{
-  char name[50];  
-  cout << "StiSvtDetectorBuilder::buildDetectors() - INFO - Starting"<<endl;
-
-  cout << "SVT 0:"<< _geometry->getBarrelRadius(0)<<endl;
-  cout << "SVT 1:"<< _geometry->getBarrelRadius(1)<<endl;
-  cout << "SVT 2:"<< _geometry->getBarrelRadius(2)<<endl;
-  cout << "SVT 3:"<< _geometry->getBarrelRadius(3)<<endl;
-  cout << "SVT 4:"<< _geometry->getBarrelRadius(4)<<endl;
-  cout << "SVT 5:"<< _geometry->getBarrelRadius(5)<<endl;
-  cout << "SVT 6:"<< _geometry->getBarrelRadius(6)<<endl;
-
-
-  for(unsigned int layer = 0; layer<getNRows(); layer++)
+	for (unsigned int layer=0;layer<nRows;layer++)
     {
+			int nSectors = _config->getNumberOfLadders(1+layer/2)/2;
+      setNSectors(layer,nSectors); 
       // calculate generic params for this layer
       // number of ladders per layer (not barrel) & phi increment between ladders
-      float fDeltaPhi = M_PI/getNSectors(layer);
+      float fDeltaPhi = M_PI/nSectors;
       // width of gap between the edges of 2 adjacent ladders:
       //   first, the angle subtended by 1/2 of the ladder
       float fLadderRadius  = _geometry->getBarrelRadius(layer+1);
-      cout << "SVT layer:"<<layer<<" Radius "<< fLadderRadius<<endl;
-      if (fLadderRadius<=0)
-	throw runtime_error("StiSvtDetectorBuilder::buildDetectors() - FATAL - fLadderRadius<=0");
+      if (fLadderRadius<=0)	throw runtime_error("StiSvtDetectorBuilder::buildDetectors() - FATAL - fLadderRadius<=0");
       float fHalfLadderPhi = atan2(_waferShape[layer]->getHalfWidth(),fLadderRadius);
       float fHalfGapPhi    = fDeltaPhi - fHalfLadderPhi;    
-      
       // then the distance from the origin to  the gap center
       // != the layer radius bc the layer width differs from the gap width,
       // i.e. not a regular polygon.
@@ -195,7 +192,6 @@ void StiSvtDetectorBuilder::buildDetectors()
 			float phiC, phiN, dPhi;
       for(unsigned int ladder = 0; ladder<getNSectors(layer); ladder++)
 				{
-					cout << " layer:"<<layer<<" ladder:"<<ladder;
 					//detector wafers placement 
 					if (layer==0 || layer==2 || layer==4)
 						waferGeom = (StSvtWaferGeometry*) _geometry->at(_geometry->getWaferIndex(1+layer/2,2*ladder+2,1));		
@@ -210,7 +206,6 @@ void StiSvtDetectorBuilder::buildDetectors()
 					dx = waferGeom->d(0);
 					dy = waferGeom->d(1);
 					dz = waferGeom->d(2);
-					cout << " x:"<<x<<" y:"<<y<<" z:"<<z<<endl;
 					rc = sqrt(x*x+y*y);
 					rn = x*nx+y*ny;
 					dPhi = acos((x*nx+y*ny)/rc);
@@ -218,12 +213,10 @@ void StiSvtDetectorBuilder::buildDetectors()
 					phiN = atan2(ny,nx);
 					dPhi = phiC-phiN;
 					yOff = sqrt(rc*rc-rn*rn);
-					cout << "  phiN:"<< 180*phiN/3.1415927 << " phiC:"<< 180*phiC/3.1415927<< " dPhi:"<<180*dPhi/3.1415927<<"  yOff:"<<yOff<<endl;
 					StiPlacement *pPlacement = new StiPlacement;
 					pPlacement->setZcenter(0.);
 					pPlacement->setLayerRadius(fLayerRadius);
 					pPlacement->setRegion(StiPlacement::kMidRapidity);
-					//float fLadderPhi = phiForSvtBarrelLadder(layer, ladder);
 					pPlacement->setCenterRep(phiC, rc, -dPhi); 
 					sprintf(name, "Svt/Layer_%d/Ladder_%d/Wafers", layer, ladder);
 					StiDetector *pLadder = _detectorFactory->getInstance();
@@ -236,7 +229,7 @@ void StiSvtDetectorBuilder::buildDetectors()
 					pLadder->setMaterial(_siMat);
 					pLadder->setShape(_waferShape[layer]);
 					pLadder->setPlacement(pPlacement); 
-					pLadder->setHitErrorCalculator(_calc);
+					pLadder->setHitErrorCalculator(&_calc);
 					add(layer,ladder,pLadder);
 					
 					double offset = _hybridShape[layer]->getHalfWidth() - fHalfGap;
@@ -277,176 +270,3 @@ void StiSvtDetectorBuilder::buildDetectors()
 				} // for ladder
     } // for layer
 }
-
-void StiSvtDetectorBuilder::loadDb()
-{
-  _transform = new StSvtCoordinateTransform;
-  if (!_transform)
-    throw runtime_error("StiSvtDetectorBuilder::loadDb() - ERROR - Null _transform");
-  if (!gStSvtDbMaker)
-    throw runtime_error("StiSvtDetectorBuilder::loadDb() - ERROR - gStSvtDbMaker==0");
-  St_SvtDb_Reader *pSvtDb_Reader = gStSvtDbMaker->get_SvtDb_Reader();
-  if (!pSvtDb_Reader)
-    throw runtime_error("StiSvtDetectorBuilder::loadDb() - ERROR - pSvtDb_Reader==0");
-  _config = pSvtDb_Reader->getConfiguration();
-  if (!_config)
-    throw runtime_error("StiSvtDetectorBuilder::loadDb() - ERROR - _config_Reader==0");
-  _geometry = pSvtDb_Reader->getGeometry();
-  if (!_geometry)
-    throw runtime_error("StiSvtDetectorBuilder::loadDb() - ERROR - _geometry==0");
-  StSvtHybridCollection *pDriftVelocity = pSvtDb_Reader->getDriftVelocity();
-  if (!pDriftVelocity)
-    throw runtime_error("StiSvtDetectorBuilder::loadDb() - ERROR - _pDriftVelocity==0");
-  _transform->setParamPointers(_geometry, _config,pDriftVelocity);
-  setNRows(2* _config->getNumberOfBarrels());
-  cout << "SVT N Rows:"<<2* _config->getNumberOfBarrels()<<endl;
-  for (unsigned int layer=0;layer<getNRows();layer++)
-    {
-      cout << "SVT Layer"<<layer<<" N Ladders:"<<_config->getNumberOfLadders(layer/2)/2<<endl;
-      setNSectors(layer, _config->getNumberOfLadders(1+layer/2)/2);
-    }
-
-	/////
-    double x,y,z;
-    StSvtWaferGeometry* waferGeom;
-    for (int barrel=1;
-	 barrel<=_config->getNumberOfBarrels();
-	 barrel++) 
-       { // loop over barrels
-	      for (int ladder=1;
-		   ladder<=_config->getNumberOfLadders(barrel);
-		   ladder++) 
-		 { //	loop over ladders
-		     for (int wafer=1;
-			  wafer<=_geometry->getNumberOfWafers(barrel);
-			  wafer++)
-		       { // loop over wafers
-			    waferGeom =
-				  (StSvtWaferGeometry*) _geometry->at(_geometry->getWaferIndex(barrel,ladder,wafer));
-							
-		             x = waferGeom->x(0);
-			     y = waferGeom->x(1);
-			     z = waferGeom->x(2);
-					
-		       }//end loop over wafers
-		 }//end loop over ladders
-       }//end loop over barrels
-
-
-}
-
-
-double StiSvtDetectorBuilder::phiForSvtBarrelLadder(unsigned int layer, 
-						    unsigned int ladder) const
-{
-  double angle;
-  switch (layer)
-    {
-    case 0:
-      switch (ladder)
-	{
-	case 0: angle =    0.; break;
-	case 1: angle =  270.; break;
-	case 2: angle =  180.; break;
-	case 3: angle =   90.; break;
-	default: throw runtime_error("StiSvtDetectorBuilder::phiForSvtBarrelLadder() -E- Arg out of bound");
-	};
-      break;
-    case 1:
-      switch (ladder)
-	{
-	case 0: angle =   45.; break;
-	case 1: angle =  315.; break;
-	case 2: angle =  225.; break;
-	case 3: angle =  135.; break;
-	default: throw runtime_error("StiSvtDetectorBuilder::phiForSvtBarrelLadder() -E- Arg out of bound");
-	};
-      break;
-    case 2:
-      switch (ladder)
-	{
-	case 0: angle =   30.; break;
-	case 1: angle =  330.; break;
-	case 2: angle =  270.; break;
-	case 3: angle =  210.; break;
-	case 4: angle =  150.; break;
-	case 5: angle =   90.; break;
-	default: throw runtime_error("StiSvtDetectorBuilder::phiForSvtBarrelLadder() -E- Arg out of bound");
-	};
-      break;
-    case 3:
-      switch (ladder)
-	{
-	case 0: angle =   60.; break;
-	case 1: angle =    0.; break;
-	case 2: angle =  300.; break;
-	case 3: angle =  240.; break;
-	case 4: angle =  180.; break;
-	case 5: angle =  120.; break;
-	default: throw runtime_error("StiSvtDetectorBuilder::phiForSvtBarrelLadder() -E- Arg out of bound");
-	};
-      break;
-    case 4:
-      switch (ladder)
-	{
-	case 0: angle =   45.; break;
-	case 1: angle =    0.; break;
-	case 2: angle =  315.; break;
-	case 3: angle =  270.; break;
-	case 4: angle =  225.; break;
-	case 5: angle =  180.; break;
-	case 6: angle =  135.; break;
-	case 7: angle =   90.; break;
-	default: throw runtime_error("StiSvtDetectorBuilder::phiForSvtBarrelLadder() -E- Arg out of bound");
-	};
-      break;
-    case 5:
-      switch (ladder)
-	{
-	case 0: angle =   67.5; break;
-	case 1: angle =   22.5; break;
-	case 2: angle =  337.5; break;
-	case 3: angle =  292.5; break;
-	case 4: angle =  247.5; break;
-	case 5: angle =  202.5; break;
-	case 6: angle =  157.5; break;
-	case 7: angle =  112.5; break;
-	default: throw runtime_error("StiSvtDetectorBuilder::phiForSvtBarrelLadder() -E- Arg out of bound");
-	};
-      break;
-    default:   throw runtime_error("StiSvtDetectorBuilder::phiForSvtBarrelLadder() -E- Arg out of bound");
-    }
-  cout << "  Layer:"<<layer<<" LADDER:"<<ladder<<" ANGLE PHI:"<< angle*M_PI/180.;
-  return  angle*M_PI/180.;
-} // phiForSvtLayerLadder
-
-
-
-/*
-
-
-
-
-
-  StSvtGeometry* mSvtGeom = (StSvtGeometry*)dataSet->GetObject();
-  assert(mSvtGeom);
-
-  for (unsigned int barrel=1; barrel<=mSvtGeom->numberOfBarrels();
-barrel++) { // loop over barrels
-     for (unsigned int ladder=1;
-ladder<=mSvtGeom->barrel(barrel-1)->numberOfLadders(); ladder++) { //
-loop over ladders
-        for (unsigned int wafer=1;
-wafer<=mSvtGeom->barrel(barrel-1)->ladder(barrel-1)->numberOfWafers();
-wafer++) { // loop over wafers
-
-             waferGeom =
-(StSvtWaferGeometry*)mSvtGeom->at(mSvtGeom->getWaferIndex(barrel,ladder,wafer));
-
-             x = waferGeom->x(0);
-             y = waferGeom->x(1);
-             z = waferGeom->x(2);
-          }
-       }
-   }
-*/
