@@ -76,15 +76,31 @@ my $CPPPATH = $env->{CPPPATH};
 my $FC      = $env->{FC};
 my $FFLAGS  = $env->{FFLAGS};
 my $FEXTEND = $env->{FEXTEND};
-if ( $pkg =~ /^St.*Db/ ) {
-  $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{OPTSTAR} . "/include";
+
+
+# Resolve Mysql right away i.e. use the Linux local installed
+# library instead of the eventually provided /opt/star one.
+my $MYSQLINC,$MYSQLLIB;
+if (-d "/usr/include/mysql"){
+    $MYSQLINC = "/usr/include/mysql";
+    $MYSQLLIB = "/usr/lib/mysql";
+} else {
+    $MYSQLINC = $env->{ENV}->{OPTSTAR} . "/include";
+    $MYSQLLIB = $env->{ENV}->{OPTSTAR} . "/lib";
 }
-if ( $pkg =~ /^StDbLib$/ ) {
+
+if ( $pkg =~ /^St.*Db/ ) {
+  $CPPPATH .= $main::PATH_SEPARATOR . $MYSQLINC;
+}
+if ( $pkg =~ /^StDbLib$/ || $pkg =~ /^StDbBroker$/) {
     if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
-    $LIBPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{OPTSTAR} . "/lib/mysql";
+
+    $LIBPATH .= $main::PATH_SEPARATOR . $MYSQLLIB;
     print "LIBPATH = $LIBPATH\n" if $param::debug;
     $LIBS .= " -lmysqlclient";
-    print "LIBS = $LIBS\n" if $param::debug;
+    print "LIBS    = $LIBS\n" if $param::debug;
+    $CPPPATH .=  $main::PATH_SEPARATOR . $MYSQLINC;
+    print "CPPPATH = $CPPPATH\n" if $param::debug;
 }
 
 if ( $pkg =~ /^pyth$/ ) {
