@@ -1,4 +1,9 @@
-#include "assert.h"
+// $Id: StArray.cxx,v 1.2 1999/01/21 21:14:43 fisyak Exp $
+// $Log: StArray.cxx,v $
+// Revision 1.2  1999/01/21 21:14:43  fisyak
+// assert
+//
+#include <assert.h>
 #include "StArray.h"
 
 TObjArray *StRegistry::fReg = 0;
