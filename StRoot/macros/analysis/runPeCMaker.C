@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: runPeCMaker.C,v 1.4 2000/04/13 21:46:35 kathy Exp $
+// $Id: runPeCMaker.C,v 1.5 2000/04/18 20:20:33 nystrand Exp $
 //
 // Description: 
 // Chain for StPeCMaker based on doEvents.C. Runs StEventMaker and StPeCMaker.
@@ -32,6 +32,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: runPeCMaker.C,v $
+// Revision 1.5  2000/04/18 20:20:33  nystrand
+// StFile --> StFileI + updated chain return codes
+//
 // Revision 1.4  2000/04/13 21:46:35  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -94,7 +97,7 @@ void runPeCMaker(Int_t nevents, const Char_t **fileList, const char *qaflag)
 
     chain  = new StChain("StChain");
 
-    StFile *setFiles= new StFile();
+    StFileI *setFiles= new StFile();
 
     for (int ifil=0; fileList[ifil]; ifil++){ 
       setFiles->AddFile(fileList[ifil]);
@@ -119,12 +122,13 @@ void runPeCMaker(Int_t nevents, const Char_t **fileList, const char *qaflag)
 
     // Event loop
     int istat=0,i=1;
- EventLoop: if (i <= nevents && !istat) {
+ EventLoop: if (i <= nevents && istat!=2) {
      cout << "============================ Event " << i
 	  << " start ============================" << endl;
      chain->Clear();
      istat = chain->Make(i);
-     if (istat) {cout << "Last event processed. Status = " << istat << endl;}
+     if (istat==2) {cout << "Last  event processed. Status = " << istat << endl;}
+     if (istat==3) {cout << "Error event processed. Status = " << istat << endl;}
      i++;
      goto EventLoop;
  }
