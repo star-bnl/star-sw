@@ -1,5 +1,10 @@
-// $Id: St_geant_Maker.h,v 1.31 2003/09/10 19:47:47 perev Exp $
+// $Id: St_geant_Maker.h,v 1.32 2003/10/01 23:54:08 potekhin Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.32  2003/10/01 23:54:08  potekhin
+// Added a declaration a a pointer to the structure geom_gdat,
+// needed for the propagation the GEANT run data --
+// geometry tag and field scale.
+//
 // Revision 1.31  2003/09/10 19:47:47  perev
 // ansi corrs
 //
@@ -46,6 +51,8 @@ class TRotMatrix;
 class TH1F;
 class TShape;
 
+class St_geom_gdat;
+
 class St_geant_Maker : public StMaker {
 protected:
   Int_t  fNwGeant;     // No. of words in GCBANK common block
@@ -58,6 +65,9 @@ protected:
   virtual TVolume *MakeVolume(TString *name, Int_t ivo, Int_t Nlevel, Int_t *Names, Int_t *Numbers);
 
  private:
+
+  St_geom_gdat *m_geom_gdat;
+
   virtual void   BookHist();
   virtual void   FillHist();
 
@@ -124,7 +134,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.31 2003/09/10 19:47:47 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.32 2003/10/01 23:54:08 potekhin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
