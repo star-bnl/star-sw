@@ -1,7 +1,10 @@
-* $Id: g2t_tpc.F,v 1.1 2000/01/24 14:48:46 nevski Exp $
+* $Id: g2t_tpc.F,v 1.2 2004/03/01 18:03:17 fisyak Exp $
 * $Log: g2t_tpc.F,v $
+* Revision 1.2  2004/03/01 18:03:17  fisyak
+* Clean up for starsim
+*
 * Revision 1.1  2000/01/24 14:48:46  nevski
-* combined g2t+g2r version
+*  combined g2t+g2r version
 *
 * Revision 1.10  2000/01/12 00:10:45  nevski
 * add cvs headers
@@ -12,17 +15,7 @@
       IMPLICIT  NONE
 #include "g2t_tpc.inc"
 #include "geant321/gckine.inc"
-*    - - - - - - - - - 
-      Integer         Lnmax
-      Parameter       (Lnmax=50)
-      Integer         id,trac,next,volume,IQQ(Lnmax)
-      Real            x,   xx,   c,   p   ,r,rr,phi,the,eta,tdr,tof,
-     >                Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn,QQ(Lnmax)
-      common /genhit/ id,trac,next,volume,
-     >                x(3),xx(3),c(3),p(4),r,rr,phi,the,eta,tdr,tof,
-     >                Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
-      Equivalence     (QQ(1),IQQ(1),id)
-*    - - - - - - - - -
+#include "genhit.h"
       INTEGER         G2T_TPC,G2R_GET_HIT,Iprin,Idigi,Ip0,N,ish,npar,n0,i,jtra
       REAL            G2T_FIELD,par(50),U(100),Pt,Vr,dphi,dtr,FieldZ
       logical         Local
