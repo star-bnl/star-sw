@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.3 1999/11/09 19:35:20 ullrich Exp $
+ * $Id: StSvtHit.cxx,v 2.4 1999/11/11 11:03:55 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
- * Revision 2.3  1999/11/09 19:35:20  ullrich
- * Memory now allocated using StMemoryPool via overloaded new/delete
+ * Revision 2.4  1999/11/11 11:03:55  ullrich
+ * Inlined layer(), sector() and ladder().
  *
  * Revision 2.5  1999/12/13 20:16:19  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
@@ -36,7 +36,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.3 1999/11/09 19:35:20 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.4 1999/11/11 11:03:55 ullrich Exp $";
 
 ClassImp(StSvtHit)
     
@@ -94,27 +94,6 @@ StSvtHit::StSvtHit(const dst_point_st& pt)
     mHardwarePosition = pt.hw_position;
 }
 
-StSvtHit::layer() const
-{
-    ULong_t w = mHardwarePosition>>4;
-    return w/1000;
-}
-
-ULong_t
-StSvtHit::ladder() const
-{
-    ULong_t w = mHardwarePosition>>4;
-    return w-1000*layer()-100*wafer();
-}
-
-ULong_t
-StSvtHit::wafer() const
-{
-    ULong_t w = mHardwarePosition>>4;
-    return (w-layer()*1000)/100;
-}
-
-ULong_t
 StSvtHit::~StSvtHit() {/* noop */}
 
 StObject*
