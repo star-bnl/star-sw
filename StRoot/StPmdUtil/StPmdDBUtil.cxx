@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdDBUtil.cxx,v 1.3 2004/01/26 23:02:38 perev Exp $
+ * $Id: StPmdDBUtil.cxx,v 1.4 2004/03/11 11:58:36 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdDBUtil.cxx,v $
+ * Revision 1.4  2004/03/11 11:58:36  subhasis
+ * Board status based mapping added
+ *
  * Revision 1.3  2004/01/26 23:02:38  perev
  * Stiostream.h added
  *
@@ -53,15 +56,13 @@ void StPmdDBUtil::GetBoardInfo()
   
   for(Int_t Chain_No=1;Chain_No<=PMD_CHAIN_MAX;Chain_No++){
     for(Int_t CHANNEL=0;CHANNEL<PMD_CHAIN_CHANNEL_MAX;CHANNEL++){
-      //Int_t Chain_No=(CRAM+1)+(SEC*12)+(BLOCK*24);
       Int_t channel=CHANNEL+1;
       if(channel != 1728){
 	mPmdGeom->ChainMapping(Chain_No,channel,sm,col,row);
 	Int_t Board_no=(Int_t)channel/PMD_BOARD_CH_MAX;
-	//		if(Chain_No>=45)cout<<"#2: Chain,ch,sm,col,row,brd "<<Chain_No<<" "<<channel<<" "<<sm<<" "<<col<<" "<<row<<" "<<Board_no<<endl;
 	m_BoardNumber[sm-1][row-1][col-1]=Board_no;
 	m_ChannelInBoard[sm-1][row-1][col-1]=channel;
-	// if(Chain_No>=45) cout<<"m_ChannelInBoard = "<<m_ChannelInBoard[sm-1][row-1][col-1]<<endl;
+	m_Chain[sm-1][row-1][col-1]=Chain_No;
       }
     }
   }
