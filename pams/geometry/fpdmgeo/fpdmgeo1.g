@@ -1,7 +1,10 @@
 *
-* $Id: fpdmgeo1.g,v 1.1 2004/03/31 16:36:46 potekhin Exp $
+* $Id: fpdmgeo1.g,v 1.2 2005/01/04 15:54:18 potekhin Exp $
 * $Name:  $
 * $Log: fpdmgeo1.g,v $
+* Revision 1.2  2005/01/04 15:54:18  potekhin
+* Removed an annoying print statement
+*
 * Revision 1.1  2004/03/31 16:36:46  potekhin
 * A new source from Akio, reflecting the most
 * current configuration. Because of significant
@@ -232,7 +235,7 @@ Fill FMXG                           ! SMD geometry
         endif
 
         Create and Position FBOX in CAVE x=xx y=yy z=zz AlphaY=FPOS_AY        
-        print *,m,xx,yy,zz,FPOS_AY
+*        print *,m,xx,yy,zz,FPOS_AY
       enddo
 
 * ----------------------------------------------------------------------------------
