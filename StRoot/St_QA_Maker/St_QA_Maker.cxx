@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 2.14 2003/02/28 06:17:56 genevb Exp $
+// $Id: St_QA_Maker.cxx,v 2.15 2003/02/28 16:01:09 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.15  2003/02/28 16:01:09  genevb
+// Further improvements for previous check-in
+//
 // Revision 2.14  2003/02/28 06:17:56  genevb
 // Allow StQAMakerBase::Make to be called for all events
 //
@@ -156,10 +159,10 @@ Int_t St_QA_Maker::Make(){
 	  int makeStat = StQAMakerBase::Make();
 	  foundPrimVtx = kTRUE;
 	  mNullPrimVtx->Fill(1);
-	  if (histsSet == StQA_AuAu)
-	    hists->mNullPrimVtxClass->Fill(1);
-	  return makeStat;
-	}
+          if ((histsSet == StQA_AuAu) && (hists))
+            hists->mNullPrimVtxClass->Fill(1);
+          return makeStat;
+        }
       }
     }
   }
@@ -168,7 +171,7 @@ Int_t St_QA_Maker::Make(){
     mNullPrimVtx->Fill(-1);
     fillHists = kFALSE;
     int makeStat = StQAMakerBase::Make();
-    if (histsSet == StQA_AuAu)
+    if ((histsSet == StQA_AuAu) && (hists))
       hists->mNullPrimVtxClass->Fill(-1);
     return makeStat;
   }

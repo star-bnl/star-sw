@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.22 2003/02/28 06:17:56 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.23 2003/02/28 16:01:09 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.23  2003/02/28 16:01:09  genevb
+// Further improvements for previous check-in
+//
 // Revision 2.22  2003/02/28 06:17:56  genevb
 // Allow StQAMakerBase::Make to be called for all events
 //
@@ -144,7 +147,7 @@ Int_t StQAMakerBase::Make() {
     case (StQA_AuAu) :
       mMultClass->Fill((float) eventClass);
     default : {
-      if (!eventClass) return kStOk;
+      if (!eventClass) { hists=0; return kStOk; }
       hists = (StQABookHist*) histsList.At((--eventClass));
     }
   }
