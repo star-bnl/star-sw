@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.7 1998/10/06 18:00:27 perev Exp $
+// $Id: StMaker.h,v 1.8 1998/11/18 22:46:10 fine Exp $
 // $Log: StMaker.h,v $
+// Revision 1.8  1998/11/18 22:46:10  fine
+// The lost MakeDoc method has been re-introduced
+//
 // Revision 1.7  1998/10/06 18:00:27  perev
 // cleanup
 //
@@ -63,6 +66,7 @@ public:
    TObject       *Clones() {return m_Clones;}
    virtual void   FillClone();
    virtual Int_t  Make() = 0;
+   virtual void   MakeDoc(const TString &stardir="$(STAR)",const TString &outdir="$(STAR)/StRoot/html");
    virtual void   PrintInfo();
    virtual void MakeBranch();
    virtual void   Save(Int_t save=1) {m_Save = save;}
