@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.11 2000/04/05 20:00:19 hardtke Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.12 2000/04/05 23:00:55 calderon Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,10 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.12  2000/04/05 23:00:55  calderon
+ * Use the outer sector edge as the boundary between charge going to
+ * padrow 13 or 14.
+ *
  * Revision 1.11  2000/04/05 20:00:19  hardtke
  * check for physical sector number before getting t0 table
  *
@@ -384,11 +388,7 @@ int StTpcCoordinateTransform::rowFromLocal(const StThreeVector<double>& b) const
     double rowPitch;
     int    offset;
     double boundary =
-      (gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(13) +
-       gTpcDbPtr->PadPlaneGeometry()->innerSectorRowPitch2()/2. +
-       gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(14) -
-       gTpcDbPtr->PadPlaneGeometry()->outerSectorRowPitch()/2.)/2.;
-
+	gTpcDbPtr->PadPlaneGeometry()->outerSectorEdge();
     if(b.y() > boundary) {    // in the outer sector
 	referencePosition = gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(14);
 	rowPitch          = gTpcDbPtr->PadPlaneGeometry()->outerSectorRowPitch();
@@ -412,10 +412,10 @@ int StTpcCoordinateTransform::rowFromLocal(const StThreeVector<double>& b) const
     int probableRow =
 	static_cast<int>( (b.y() - (referencePosition-rowPitch/2))/rowPitch )+offset;
 
-    if(b.y() < boundary && probableRow>13) { //This should almost never be called, but ensures proper numbering
+    if(b.y() < boundary && probableRow>13) {
 	probableRow=13;
     } 
-    if(b.y() > boundary && probableRow<14){ //ditto above
+    if(b.y() > boundary && probableRow<14){ 
 	probableRow=14;
     }
     if (probableRow<1)
