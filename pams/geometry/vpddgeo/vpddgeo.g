@@ -1,5 +1,9 @@
-* $Id: vpddgeo.g,v 1.8 2002/11/26 17:32:00 geurts Exp $
+* $Id: vpddgeo.g,v 1.9 2002/11/26 17:45:45 geurts Exp $
 * $Log: vpddgeo.g,v $
+* Revision 1.9  2002/11/26 17:45:45  geurts
+* Updated the pVPD mothervolume positions for the 2002/2003 run.
+* Removed obsolete vpdg_zpos.
+*
 * Revision 1.8  2002/11/26 17:32:00  geurts
 * The pVPD mothervolumes have been moved to the best estimate for the
 * 2000/2001 run. The two mothervolumes are now asymetrically
@@ -69,9 +73,8 @@ Created 21 June 2000
 *
      FILL VPDG  ! pVPD basic dimensions
         version   =    3.     ! geometry version
-CCCC    zpos      =  591.44   ! Z position of pVPD-volume (used for I-Beam)
-        zposEast  =  561.2638 ! Z position of the East pVPD volume
-        zposWest  =  563.1688 ! Z position of the West pVPD volume
+        zposEast  =  564.4388 ! Z position of the East pVPD volume
+        zposWest  =  563.4069 ! Z position of the West pVPD volume
         rmin      =    6.35   ! mothervolume rmin		(2.5inch)
         rmax      =   31.27375! mothervolume rmin		(12.3125inch)
         BPwidth   =   30.48   ! baseplate width 		(12inch)
