@@ -1,6 +1,6 @@
 // *-- Author : Renee Fatemi
 // 
-// $Id: StRFEmcTrigMaker.cxx,v 1.6 2004/08/18 19:52:49 balewski Exp $
+// $Id: StRFEmcTrigMaker.cxx,v 1.7 2004/10/21 13:31:34 balewski Exp $
 
 #include "StRFEmcTrigMaker.h"
 #include "StChain.h"
@@ -228,7 +228,7 @@ Int_t StRFEmcTrigMaker::Make(){
     }
     muEvent=muDstMaker->muDst()->event();
     bbcCol=&(muEvent->bbcTriggerDetector());
-    muEmcCol=muDstMaker->muDst()->emcCollection();
+    muEmcCol=muDstMaker->muDst()->muEmcCollection();
     unpackEmcFromMu();
     } break;
   case 1: {// stEvent    
@@ -622,6 +622,9 @@ void StRFEmcTrigMaker::fillHisto() {
 
 
 // $Log: StRFEmcTrigMaker.cxx,v $
+// Revision 1.7  2004/10/21 13:31:34  balewski
+// to match new name of emcCollection in muDst
+//
 // Revision 1.6  2004/08/18 19:52:49  balewski
 // works for BBC
 //

@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.26 2004/07/08 00:45:21 balewski Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.27 2004/10/21 13:31:36 balewski Exp $
 // doxygen info here
 /** 
  * \class  EEmcTTMMaker
@@ -10,8 +10,8 @@
  * of towers with associated tracks (list of EEmcTTMatch objects)
  *
  * \author Piotr A. Zolnierczuk
- * $Date: 2004/07/08 00:45:21 $
- * $Revision: 1.26 $
+ * $Date: 2004/10/21 13:31:36 $
+ * $Revision: 1.27 $
  *
  * \section ttmakerremarks Remarks
  *
@@ -241,7 +241,7 @@ EEmcTTMMaker::Make(){
     return kStErr;
   }
   //
-  StMuEmcCollection *emc    = muDst->emcCollection();   // fetch endcap data
+  StMuEmcCollection *emc    = muDst->muEmcCollection();   // fetch endcap data
   if (!emc) {
     Info("Make","%s: no EMC data for this event",GetName());
     return kStErr;
@@ -476,6 +476,9 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm)  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.27  2004/10/21 13:31:36  balewski
+// to match new name of emcCollection in muDst
+//
 // Revision 1.26  2004/07/08 00:45:21  balewski
 // cleanup
 //

@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsmdCalMaker.cxx,v 1.4 2004/07/27 21:59:47 balewski Exp $
+// $Id: StEEsmdCalMaker.cxx,v 1.5 2004/10/21 13:31:31 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -116,7 +116,7 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
   gMessMgr->Message("","D") <<GetName()<<"::::getAdc() is called "<<endm;
   
   // Access to muDst .......................
-  StMuEmcCollection* emc = mMuDstMaker->muDst()->emcCollection();
+  StMuEmcCollection* emc = mMuDstMaker->muDst()->muEmcCollection();
   if (!emc) {
     gMessMgr->Message("","W") <<"No EMC data for this event"<<endm;    return kStOK;
   }
@@ -263,6 +263,9 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
 
 
 // $Log: StEEsmdCalMaker.cxx,v $
+// Revision 1.5  2004/10/21 13:31:31  balewski
+// to match new name of emcCollection in muDst
+//
 // Revision 1.4  2004/07/27 21:59:47  balewski
 // now runs on muDst as well
 //

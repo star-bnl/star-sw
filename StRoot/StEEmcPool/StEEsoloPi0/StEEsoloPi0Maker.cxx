@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsoloPi0Maker.cxx,v 1.9 2004/09/29 18:04:44 balewski Exp $
+// $Id: StEEsoloPi0Maker.cxx,v 1.10 2004/10/21 13:31:25 balewski Exp $
 
 #include <TFile.h>
 
@@ -165,7 +165,7 @@ bool StEEsoloPi0Maker::unpackMuEemc(){
   gMessMgr->Debug() <<GetName()<<"::unpackMuDst() is called "<<endm;
 
   // Access to muDst .......................
-  StMuEmcCollection* emc = mMuDstMaker->muDst()->emcCollection();
+  StMuEmcCollection* emc = mMuDstMaker->muDst()->muEmcCollection();
   if (!emc) {
     gMessMgr->Warning() <<"No EMC data for this event"<<endm;    return false;
   }
@@ -259,6 +259,9 @@ float StEEsoloPi0Maker::getCtbSum(){
 
 
 // $Log: StEEsoloPi0Maker.cxx,v $
+// Revision 1.10  2004/10/21 13:31:25  balewski
+// to match new name of emcCollection in muDst
+//
 // Revision 1.9  2004/09/29 18:04:44  balewski
 // now it runs on M-C as well
 //
