@@ -1,8 +1,12 @@
-// $Id: St_ebye_Maker.cxx,v 1.7 1999/01/21 19:13:44 dhammika Exp $
+// $Id: St_ebye_Maker.cxx,v 1.8 1999/01/27 00:17:53 dhammika Exp $
 // $Log: St_ebye_Maker.cxx,v $
-// Revision 1.7  1999/01/21 19:13:44  dhammika
-// Updated ebye stuff which works for one event only
+// Revision 1.8  1999/01/27 00:17:53  dhammika
+// EbyE PKG works for more than one event in ROOT
 //
+// Revision 1.9  1999/01/26 18:18:04  dhammika
+// Fixed ebye Maker and macro. Ebye stuff works for more than one event.
+// Revision 1.8  1999/01/21 19:13:44  dhammika
+// Updated ebye stuff which works for one event only
 // Revision 1.7  1999/01/05 14:11:08  dhammika
 // Updated to be in synch with stardev and the latest SCA V2.0 
 //
@@ -58,7 +62,7 @@ ClassImp(St_ebye_Maker)
 #ifdef   DEBUG
 #undef   DEBUG 
 #endif
-#define  DEBUG  1
+#define  DEBUG  0
 
 //_____________________________________________________________________________
 //St_ebye_Maker::St_ebye_Maker():
@@ -131,14 +135,34 @@ Int_t St_ebye_Maker::Init(){
   St_DataSetIter     local(params);
   St_DataSet *ebye = local("ebye");
   //SafeDelete(ebye);  
-  if (! ebye) ebye = local.Mkdir("ebye");
-  //Char_t *ebye_pars = "${STAR}/params/ebye/sca_params.xdf";
-  Char_t *ebye_pars = "/star/u2/dhammika/newupdate/params/ebye/sca_params.xdf";
-  St_XDFFile::GetXdFile(ebye_pars,ebye);
+  if (! ebye) {
+    printf(" ===> <St_ebye_Maker::Init()>: params/ebye doesn't exsist. Create");
+    ebye = local.Mkdir("ebye");
+  }
+
+  // I don't know how to prevent chain->Clear deleting dst/run_header
+  // at the end of the first event. So temporarily store run_header table 
+  // in params/ebye.
+  St_DataSet  *my_run_dst = local.Mkdir("ebye/run");
+  this_dst_run_header  = new St_dst_run_header("run_header",1);
+  local.Add(this_dst_run_header,"params/ebye/run");
+  run_header = this_dst_run_header->GetTable();
+  run_header->run_id =       1;
+  this_dst_run_header->AddAt(&run_header,0);
+  if(DEBUG){
+    this_dst_run_header->ls("*");
+    local.Du();
+  }
   St_DataSet *sca = local("ebye/sca");
-  if (!sca) { 
-    printf(" ===> <St_ebye_Maker::Init()>: <<< ERROR >>> the file \"%s\" has no \"sca\" dataset\n",ebye_pars);
-    return kStErr;
+  if (!sca){
+    //Char_t *ebye_pars = "${STAR}/params/ebye/sca_params.xdf";
+    Char_t *ebye_pars = "/star/u2/dhammika/newupdate/params/ebye/sca_params.xdf";
+    St_XDFFile::GetXdFile(ebye_pars,ebye);
+    sca = local("ebye/sca");
+    if (!sca) { 
+      printf(" ===> <St_ebye_Maker::Init()>: <<< ERROR >>> the file \"%s\" has no \"sca\" dataset\n",ebye_pars);
+      return kStErr;
+    }
   }
   if (DEBUG)printf(" ===> <St_ebye_Maker::Init()>: Begin Iterating sca \n");
   St_DataSetIter scatable(sca);
@@ -193,7 +217,7 @@ Int_t St_ebye_Maker::Make(){
     return kStErr;
   }
   else
-    dsttables.Du();  // This line is a new one
+    if (DEBUG)dsttables.Du();  // This line is a new one
 
   if(DEBUG)this_dst_track->ls("*");
   iret = this_dst_track->HasData();
@@ -293,11 +317,11 @@ Int_t St_ebye_Maker::SetdoAnalysis(Bool_t flag){
   if (!m_sca_switch) return  kStErr;
   St_DataSet *calib = gStChain->DataSet("calib");
   if (!calib) {
-    cout << " ===> <St_ebye_Maker::Init()>: No calib  Dataset; create calib  " << endl;
+    cout << " ===> <St_ebye_Maker::SetdoAnalysis()>: No calib  Dataset; create calib  " << endl;
     calib  = new St_DataSet("calib");
   }
   if (DEBUG) {
-    printf(" ===> <St_ebye_Maker::Init()>: *calib  = %d\n",calib);
+    printf(" ===> <St_ebye_Maker::SetdoAnalysis()>: *calib  = %d\n",calib);
   }
   St_DataSetIter      local(calib);
   St_DataSet *ebye  = local("ebye");
@@ -375,7 +399,7 @@ Int_t St_ebye_Maker::PutEnsembleAve(){
 //_____________________________________________________________________________
 void St_ebye_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ebye_Maker.cxx,v 1.7 1999/01/21 19:13:44 dhammika Exp $\n");
+  printf("* $Id: St_ebye_Maker.cxx,v 1.8 1999/01/27 00:17:53 dhammika Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
