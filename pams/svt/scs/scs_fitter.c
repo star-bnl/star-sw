@@ -32,7 +32,7 @@ ARGUMENTS:    spt   : space point table
 RETURN VALUE: STAF Condition Value
 ------------------------------------------------------------------*/
 #include "scs_fitter.h"
-
+#include <math.h>
 #define ANALYSIS_OK      0
 #define ANALYSIS_FAILED  1
 #define DAQ_INPUT        0
@@ -41,6 +41,13 @@ RETURN VALUE: STAF Condition Value
 #define SQR(a)  ((a)*(a))
 #define CUBE(a) ((a)*(a)*(a))
 #define PI 3.1415926535
+typedef struct POINT_TYPE
+{
+  long  x,y;
+  float val;
+} scsPOINT;
+
+
 /******************************************************************/
 /*   Prototype Function Definition                                */
 /******************************************************************/
@@ -53,7 +60,8 @@ int Deconvolve_Cluster (SCS_CLUSTER_ST  *clus,
 			TABLE_HEAD_ST *mv_h,       SSF_MV_ST   *mv ,
 			TABLE_HEAD_ST *adc_h,     SSF_ADC_ST   *adc ,
 			TABLE_HEAD_ST *spt_h,     SCS_SPT_ST   *spt,
-			TABLE_HEAD_ST *merge_h, SCS_MERGE_ST   *merge );
+			TABLE_HEAD_ST *merge_h, SCS_MERGE_ST   *merge,
+		        SSF_8TO10MAP_ST  *map);
 int Find_Spt_MC_Hit (SCS_CLUSTER_ST  *clus,
 		     TABLE_HEAD_ST *seq_h,   SSF_SEQ_ST   *seq ,
 		     TABLE_HEAD_ST *mv_h,    SSF_MV_ST    *mv);
@@ -67,7 +75,22 @@ int Calculate_Cluster_Moments (TABLE_HEAD_ST  *seq_h,       SSF_SEQ_ST  *seq,
 			       TABLE_HEAD_ST  *adc_h,       SSF_ADC_ST  *adc,
 			       TABLE_HEAD_ST  *map_h,  SSF_8TO10MAP_ST  *map,
 			       SCS_CLUSTER_ST    *clus);
+void Fill_Pixel_Array (int   *Pixels[],  int   iFirstTime,  int   iFirstAnode,
+		  SCS_CLUSTER_ST   *clus, SSF_8TO10MAP_ST  *map,
+		  SSF_SEQ_ST       *seq, SSF_ADC_ST       *adc);
 
+
+void Fit_Peaks (int             *Pixels[], int             iRows,
+	       int             iCols, int             iFirstAnode,
+	       int             iFirstTime,  int             iNumPeaks,
+               scsPOINT           *Peaks, SVG_GEOM_ST     *geom,
+	       SVG_SHAPE_ST    *shape, SCS_PAR_ST      *par,
+	       SCS_CLUSTER_ST  *clus, TABLE_HEAD_ST   *spt_h,      
+               SCS_SPT_ST *spt, TABLE_HEAD_ST   *merge_h,     
+               SCS_MERGE_ST *merge);
+
+
+void BlockOut (int   *Shadow[], int x, int y);
 /***************************************************************************/
 
 long type_of_call scs_fitter_(
@@ -103,7 +126,7 @@ long type_of_call scs_fitter_(
 				   mv_h,    mv,
 				   adc_h,   adc,
 				   spt_h,   spt,
-				   merge_h, merge);
+				   merge_h, merge, map);
 	     }
 	   else
 	     {
@@ -431,11 +454,6 @@ int Fill_Spt (SCS_PAR_ST     *par,
   return ANALYSIS_OK;
 }
 
-typedef struct POINT_TYPE
-{
-  long  x,y;
-  float val;
-} scsPOINT;
 
 
 void      free_matrix ();
@@ -459,7 +477,8 @@ int Deconvolve_Cluster (SCS_CLUSTER_ST  *clus,
 			TABLE_HEAD_ST *mv_h,    SSF_MV_ST    *mv ,
 			TABLE_HEAD_ST *adc_h,   SSF_ADC_ST   *adc ,
 			TABLE_HEAD_ST *spt_h,   SCS_SPT_ST   *spt,
-			TABLE_HEAD_ST *merge_h, SCS_MERGE_ST *merge )
+			TABLE_HEAD_ST *merge_h, SCS_MERGE_ST *merge,
+			SSF_8TO10MAP_ST  *map )
 {
   int   i, iSeq, iRows, iFirstTime, iLastTime, iFirstAnode, iLastAnode, iCols, iNumPeaks;
   
@@ -525,8 +544,10 @@ int Deconvolve_Cluster (SCS_CLUSTER_ST  *clus,
   
   /* Now fill the pixel array with pixels from the cluster */
   
-  Fill_Pixel_Array (Pixels, iFirstTime, iFirstAnode, clus, seq, adc);
-  
+  Fill_Pixel_Array (Pixels, iFirstTime, iFirstAnode, clus, map, seq, adc);
+ 
+
+ 
   /*
     PrintPixels (Pixels, iRows, iCols);
     */
