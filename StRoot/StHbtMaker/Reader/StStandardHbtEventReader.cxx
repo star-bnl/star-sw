@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.38 2003/05/07 20:05:26 magestro Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.39 2003/05/16 21:30:18 magestro Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.39  2003/05/16 21:30:18  magestro
+ * Removed obsolete include file
+ *
  * Revision 1.38  2003/05/07 20:05:26  magestro
  * Removed StFlowTagMaker.h include
  *
@@ -193,7 +196,6 @@
 
 #include "StEventMaker/StEventMaker.h"
 
-#include "tables/St_FlowTag_Table.h"
 #include "StFlowMaker/StFlowMaker.h"
 #include "StFlowMaker/StFlowEvent.h"
 #include "StFlowAnalysisMaker/StFlowAnalysisMaker.h"
