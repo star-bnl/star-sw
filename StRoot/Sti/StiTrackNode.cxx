@@ -117,7 +117,7 @@ void StiTrackNode::setAsCopyOf(StiTrackNode * node)
 //_____________________________________________________________________________
 void StiTrackNode::setHit(StiHit * h)
 {
-	hit = h;
+  hit = h;
 }
 
 
@@ -372,4 +372,7 @@ ostream& operator<<(ostream& os, const StiTrackNode& n)
   << n.fC43<<"\t"
   << n.fC44;
 }
+
+
+
 

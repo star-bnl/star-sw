@@ -1008,3 +1008,30 @@ StiDefaultMutableTreeNode *  StiDefaultMutableTreeNode::getPreviousLeaf()
   return myParent->getPreviousLeaf();		// tail recursion
 }
 
+
+StiDefaultMutableTreeNodeVector * StiDefaultMutableTreeNode::breadthFirstEnumeration()
+{
+ StiDefaultMutableTreeNodeVector * nodes = new vector<StiDefaultMutableTreeNode*>();
+ // add itself to the vector
+ nodes->push_back(this);
+ // append the children in a breadth first fashion
+ appendChildrenToVector(this, nodes);
+ return nodes;
+}
+
+void 
+StiDefaultMutableTreeNode::appendChildrenToVector(
+						  StiDefaultMutableTreeNode *node, 
+						  StiDefaultMutableTreeNodeVector *v)
+{
+  StiDefaultMutableTreeNodeIterator it;
+  if (node->getChildCount()==0)
+    {
+      // insert children
+      for (it=node->children.begin();it!=node->children.end();it++)
+	v->push_back(*it);
+      // insert children of children
+      for (it=node->children.begin();it!=node->children.end();it++)
+	appendChildrenToVector(*it,v);
+    }
+}

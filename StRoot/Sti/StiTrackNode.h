@@ -57,7 +57,6 @@ class StiTrackNode : public StiDefaultMutableTreeNode
   void           setDetector(StiDetector * d) { detector = d;    };
   StiDetector *  getDetector() const          { return detector; };
   
-
   // static methods
   static void    setFieldConstant(double f) { kField = f;};
   static double  getFieldConstant()         { return kField;}; 

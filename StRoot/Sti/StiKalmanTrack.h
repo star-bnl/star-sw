@@ -5,6 +5,7 @@
 #include "StiTrack.h"
 #include "StiObjectFactory.h"
 #include "StiTrackNode.h"
+#include "StiHitContainer.h"
 
 class StiKalmanTrack : public StiTrack 
 {
@@ -48,14 +49,18 @@ class StiKalmanTrack : public StiTrack
   void   setTpcDedx(double dedx) { tpcDedx = dedx; };
 
   // convenience methods for adding/retrieving points
-  void addHit(StiHit *h);
-  void insertHit(StiHit *hInserted, StiHit * targetParent);
+  StiTrackNode * addHit(StiHit *h);
+  StiTrackNode * insertHit(StiHit *hInserted, StiHit * targetParent);
   void removeHit(StiHit *h);
   void removeAllHits();
   int  getHitCount();
   StiHit * getHit(int index);
   StiTrackNode * findHit(StiHit * h);
 
+  void initialize(double alpha, double x[5], double e[15], const hitvector &);
+  void getStateNear(double x, double &xx, double x[5], double e[15]);
+  void getPointNear(double x, double x[3]);
+  
   static StiTrackNodeFactory * trackNodeFactory;
 
  protected:
