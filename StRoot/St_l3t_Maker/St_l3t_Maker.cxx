@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.42 2001/08/07 18:00:28 dietel Exp $
+// $Id: St_l3t_Maker.cxx,v 1.43 2001/08/07 20:07:26 dietel Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -179,7 +179,7 @@ Int_t St_l3t_Maker::MakeOnLine(){
     
     St_l3_Coordinate_Transformer transformer ;
     transformer.Use_transformation_provided_by_db() ;
-    transformer.LoadTPCLookupTable("map.bin");
+    //transformer.LoadTPCLookupTable("map.bin");
     
     // get l3 dataset
     St_DataSet* sec_bank_set = 0 ;
