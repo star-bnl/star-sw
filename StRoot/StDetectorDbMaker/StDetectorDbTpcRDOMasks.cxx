@@ -1,77 +1,83 @@
 #include "StDetectorDbTpcRDOMasks.h"
-#include "StDetectorDbInterpolator.h"
 #include "TDataSet.h"
 #include "TTable.h"
 #include "StMaker.h"
-#include "TUnixTime.h"
 
-/* Needs a StMaker* passed in. This is because GetDatabase only works in a maker class. So this must be declared inside a maker.
+/* 
 In database, TPC Sector 1 and 2 are packed into Sector 1 with higher 6 bits belonding to sector 2, lower order to sector 1. Sector 3 and 4 in sector 2, etc. This class pulls the sector, rdo enable out in human readable Sector (1-24) rdo 1-6
-*/
-StDetectorDbTpcRDOMasks::StDetectorDbTpcRDOMasks(StMaker* maker){
-    cout << "StDetectorDbTpcRDOMasks::StDetectorDbTpcRDOMasks" << endl;
 
-    mNumEntries = 0;
-    mRunNumber = 0;
-    mSectors = 0;
-    mMasks = 0;
+It is a singleton which requires manual updating, usually taken care of in StDetectorDbMaker.cxx::Make(). If no data exists all values return DEAD. To use:
+
+  #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
+  StDetectorDbTpcRDOMasks * masks = StDetectorDbTpcRDOMasks::intstance();
+  cout << *masks << endl;
+  cout << masks->isOn(sector,rdo) << endl;
+ 
+*/
+
+/// Initialize Instance
+StDetectorDbTpcRDOMasks* StDetectorDbTpcRDOMasks::sInstance = 0;
+
+/// Returns previous instance if exits, if not makes new one
+StDetectorDbTpcRDOMasks* StDetectorDbTpcRDOMasks::instance()
+{
+
+    if(!sInstance){
+	sInstance = new StDetectorDbTpcRDOMasks();
+    }
+
+    // get new address of struck eack instance
+    // data somehow gets garbles between events
+    if(sInstance->mTable){ 
+	sInstance->mNumEntries = sInstance->mTable->GetNRows() ;
+	if(sInstance->mNumEntries == 12){
+	    sInstance->mMaskVector = (tpcRDOMasks_st*)(sInstance->mTable->GetArray());
+	}
+	else{
+	    sInstance->mNumEntries = 0;
+	}
+    }
+    
+    return sInstance;
+};
+
+/// Updates data in instance from database
+void StDetectorDbTpcRDOMasks::update(StMaker* maker){
     
     if(maker){
-
-	// Time conversions to avoid root automatically converting timezones
-	TDatime rootTime = maker->GetDateTime();
-	TUnixTime unixTime;
-	unixTime.SetGTime(rootTime.GetDate(),rootTime.GetTime());
-			
+	// RDO in RunLog_onl
+	
 	TDataSet* dataSet = maker->GetDataBase("RunLog/onl");
 	
 	if(dataSet){
-	    TTable* table = dynamic_cast<TTable*>(dataSet->Find("tpcRDOMasks"));
-	    if(table){
-		mNumEntries = table->GetNRows() ;
+	    mTable = dynamic_cast<TTable*>(dataSet->Find("tpcRDOMasks"));
+	    
+	    if(mTable){
+		mNumEntries = mTable->GetNRows() ;
 		if(mNumEntries == 12){
-		    tpcRDOMasks_st* value = (tpcRDOMasks_st*)(table->GetArray());
-		    
-		    mRunNumber = value[0].runNumber;
-		    mSectors = new unsigned int[mNumEntries];
-		    mMasks = new unsigned int[mNumEntries];
-		    
-		    for(unsigned int i = 0;i < mNumEntries;i++){
-			mSectors[i] = value[i].sector;
-			mMasks[i] = value[i].mask;
-		    }
+		    mMaskVector = (tpcRDOMasks_st*)(mTable->GetArray());
+		}
+		else{
+		    mNumEntries = 0;
 		}
 	    }
 	}
     }
 };
-    
-/// Delete all the arrays
-StDetectorDbTpcRDOMasks::~StDetectorDbTpcRDOMasks(){
-    
-    delete mSectors;
-    delete mMasks;
+
+/// Default constructor
+StDetectorDbTpcRDOMasks::StDetectorDbTpcRDOMasks(){
+    cout << "StDetectorDbTpcRDOMasks::StDetectorDbTpcRDOMasks" << endl;
+    mNumEntries = 0;
+    mMaskVector = 0;
+    mTable = 0;
 };
+	
+/// Default destructor, does nothing
+StDetectorDbTpcRDOMasks::~StDetectorDbTpcRDOMasks(){};
 
-/// sets the run number
-void StDetectorDbTpcRDOMasks::setRunNumber(unsigned int value){ mRunNumber = value;};
-
-/// sets the number of entries in the class (must be done because using static arrays
-void StDetectorDbTpcRDOMasks::setNumEntries(unsigned int value){ mNumEntries = value;};
-
-/// sets the sector list array.
-void StDetectorDbTpcRDOMasks::setSectors(unsigned int* value){ mSectors = value;};
-
-/// sets the mask that corresponds to the sector.
-void StDetectorDbTpcRDOMasks::setMasks(unsigned int* value){ mMasks = value;};
-
-/// gets the run number of the data
-unsigned int StDetectorDbTpcRDOMasks::getRunNumber(){ return mRunNumber;};
-
-/// gets the number of different status corresponding to an event
-unsigned int StDetectorDbTpcRDOMasks::getNumEntries(){ return mNumEntries;};
-
-/// one can get the event timestamp from StEvent::time() along with other methods
+/// boolen that returns status of sector and rdo
+/// 1 is on, 0 for off
 bool StDetectorDbTpcRDOMasks::isOn(unsigned int sector,unsigned int rdo){
 
     if(sector < 1 || sector > 24 || rdo < 1 || rdo > 6)
@@ -84,6 +90,8 @@ bool StDetectorDbTpcRDOMasks::isOn(unsigned int sector,unsigned int rdo){
     return mask;
 };
 
+/// Gets sectors mask. Returns in 2 Hex Digits for 6 RDO per mask
+/// higher order bit is higher mask
 unsigned int StDetectorDbTpcRDOMasks::getSectorMask(unsigned int sector){
 
     unsigned int mask = 0xDEAD; // DEAD in Hex (all masks should only be 12 bit anyways)
@@ -92,7 +100,7 @@ unsigned int StDetectorDbTpcRDOMasks::getSectorMask(unsigned int sector){
 	return mask;
 
     
-    mask = mMasks[ ((sector + 1) / 2) - 1]; // does the mapping from sector 1-24 to packed sectors
+    mask = mMaskVector[ ((sector + 1) / 2) - 1].mask; // does the mapping from sector 1-24 to packed sectors
 
     if( sector % 2 == 0){ // if its even relevent bits are 6-11
 	mask = mask >> 6;
@@ -102,11 +110,9 @@ unsigned int StDetectorDbTpcRDOMasks::getSectorMask(unsigned int sector){
     return mask;
 };
 
-/// prints all the datamembers to standard out
+/// outputs to ostream the entire class
 ostream& operator<<(ostream& os, StDetectorDbTpcRDOMasks& v){
     
-    os << "Run " << v.mRunNumber << endl;
-
     os << "Sector" << "\t" << "Enable Mask (HEX)" << endl;
     
     for(unsigned int i=1; i <= 24 ; i++){
