@@ -93,7 +93,7 @@ if (-d "/usr/include/mysql"){
     $MYSQLINC = "/usr/include/mysql";
     $MYSQLLIB = "/usr/lib/mysql";
 } else {
-    $MYSQLINC = $env->{ENV}->{OPTSTAR} . "/include";
+    $MYSQLINC = $env->{ENV}->{OPTSTAR} . "/include/mysql";
     $MYSQLLIB = $env->{ENV}->{OPTSTAR} . "/lib";
 }
 my $QTDIR = $ENV{QTDIR};
