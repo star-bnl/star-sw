@@ -238,28 +238,34 @@ Int_t StBranch::SetFile(const Char_t *file,const Char_t *mode,int insist)
 Int_t StBranch::UpdateFile(const Char_t *file)
 {
 fIOMode = abs(fIOMode);
+TString bas[2],dir[2];
+TString nam(GetName()); nam.ReplaceAll("Branch","");
 TString outFile = file; gSystem->ExpandPathName(outFile);
-TString outDir  = gSystem->DirName (outFile);
-TString outBas  = gSystem->BaseName(outFile);
+        dir[0] = gSystem->DirName (outFile);
+        bas[0] = gSystem->BaseName(outFile);
 
 if (strncmp(".none",GetFile(),4)==0) {//FileName was corrupted by old bug
-  TString ts("/.nowhere/");     ts += outBas;
+  TString ts("/.nowhere/");     ts += bas[0];
   ts.ReplaceAll(".root","");    ts.Replace(ts.Last('.')+1,999,"");
   ts += GetName();              ts.ReplaceAll("Branch","");
   ts +=".root";                 SetFile(ts);
 }
 
-TString intDir  = gSystem->DirName (GetFile());
-TString intBas  = gSystem->BaseName(GetFile());
-Char_t * newFile = gSystem->ConcatFileName(outDir,intBas);
-SetIOMode("0");
-if (intBas == outBas) SetIOMode("r");
-if (intBas == outBas || outBas.IsNull())        goto RETN00;
-if (!StIO::IfExi(newFile))                      goto RETN99;
-RETN00: fFile = newFile;
-printf("<StBranch::UpdateFile> Branch=%s file %s\n",GetName(),newFile);
-RETN99: delete [] newFile;
-return 0;
+  dir[1]  = gSystem->DirName (GetFile());
+  bas[1]  = gSystem->BaseName(GetFile());
+  SetIOMode("0");
+  if (bas[0] == bas[1] || bas[0].Contains(nam)) SetIOMode("r");
+  else                                  	bas[0]=bas[1];
+  for (int d=1; d>=0; d--) {
+    for (int b=1; b>=0; b--) {
+      char *newFile = gSystem->ConcatFileName(dir[d],bas[b]);
+      if (StIO::IfExi(newFile)) {        
+        fFile = newFile;
+        printf("<StBranch::UpdateFile> Branch=%s file %s\n",GetName(),newFile);
+        delete [] newFile;
+        return 0;
+  } } }
+  return 0;
 }
 //_______________________________________________________________________________
 Int_t StBranch::SetTFile(TFile *tfile)
