@@ -1,4 +1,4 @@
-// $Id: StRFEmcTrigMaker.h,v 1.1 2004/08/16 22:19:01 rfatemi Exp $
+// $Id: StRFEmcTrigMaker.h,v 1.2 2004/08/17 00:13:53 rfatemi Exp $
 
 #ifndef STAR_StRFEmcTrigMaker
 #define STAR_StRFEmcTrigMaker
@@ -107,7 +107,7 @@ class StRFEmcTrigMaker : public StMaker {
 
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StRFEmcTrigMaker.h,v 1.1 2004/08/16 22:19:01 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StRFEmcTrigMaker.h,v 1.2 2004/08/17 00:13:53 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -118,8 +118,8 @@ class StRFEmcTrigMaker : public StMaker {
 
 
 // $Log: StRFEmcTrigMaker.h,v $
-// Revision 1.1  2004/08/16 22:19:01  rfatemi
-// *** empty log message ***
+// Revision 1.2  2004/08/17 00:13:53  rfatemi
+// Update to include BEMC in StEvent trigger
 //
 // Revision 1.14  2002/11/26 23:49:40  jeromel
 // Small modif after Art's note ... doxygen issue + cleanup
