@@ -348,7 +348,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.2 2004/05/11 22:42:27 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.3 2004/05/11 23:21:58 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -654,8 +654,11 @@ static StMessMgr* temp=StLoggerManager::Instance();
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.2 2004/05/11 22:42:27 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.3 2004/05/11 23:21:58 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.3  2004/05/11 23:21:58  fine
+// add the default logger description
+//
 // Revision 1.2  2004/05/11 22:42:27  fine
 // Add the default configurator
 //
