@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.4 1998/07/21 01:04:41 fisyak Exp $
+// $Id: bfc.C,v 1.5 1998/07/21 13:35:14 fine Exp $
 // $Log: bfc.C,v $
+// Revision 1.5  1998/07/21 13:35:14  fine
+// The new version of the macros: MakeHtmlTables and makedoc have been introduced
+//
 // Revision 1.4  1998/07/21 01:04:41  fisyak
 // Clean up
 //
@@ -10,18 +13,18 @@
 // Add tcl and tpt
 //
 {
-   gSystem->Load("lib/libasu.so");
-   gSystem->Load("lib/libdsl.so");
-   gSystem->Load("lib/St_base.so");
-   gSystem->Load("lib/St_Tables.so");
-   gSystem->Load("lib/libmsg.so");
-   gSystem->Load("lib/libtls.so");
-   //   gSystem->Load("lib/geometry.sl");
-   gSystem->Load("lib/tpc.sl");
-   gSystem->Load("lib/St_tpc.so");
-   gSystem->Load("lib/svt.sl");
-   gSystem->Load("lib/St_svt.so");
-   gSystem->Load("lib/StChain.so");
+   gSystem->Load("$STAR/lib/libasu.so");
+   gSystem->Load("$STAR/lib/libdsl.so");
+   gSystem->Load("$STAR/lib/St_base.so");
+   gSystem->Load("$STAR/lib/St_Tables.so");
+   gSystem->Load("$STAR/lib/libmsg.so");
+   gSystem->Load("$STAR/lib/libtls.so");
+   //   gSystem->Load("$STAR/lib/geometry.sl");
+   gSystem->Load("$STAR/lib/tpc.sl");
+   gSystem->Load("$STAR/lib/St_tpc.so");
+   gSystem->Load("$STAR/lib/svt.sl");
+   gSystem->Load("$STAR/lib/St_svt.so");
+   gSystem->Load("$STAR/lib/StChain.so");
 
 #ifndef __CINT__
 #include "Rtypes.h"
