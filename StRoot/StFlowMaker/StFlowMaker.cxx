@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.37 2000/08/25 19:55:16 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.38 2000/08/26 21:37:02 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.38  2000/08/26 21:37:02  snelling
+// Removed flownanoevent, Added multiple input for pico, fixed IO bug
+//
 // Revision 1.37  2000/08/25 19:55:16  snelling
 // Changed naming pico files (1 pico per dst)
 //
@@ -116,7 +119,6 @@
 #include <math.h>
 #include "StFlowMaker.h"
 #include "StFlowEvent.h"
-#include "StFlowNanoEvent.h"
 #include "StFlowPicoEvent.h"
 #include "StEvent.h"
 #include "StEventTypes.h"
@@ -130,6 +132,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TBranch.h"
+#include "TChain.h"
 #include "StFlowConstants.h"
 #include "StPionPlus.hh"
 #include "StPionMinus.hh"
@@ -148,22 +151,19 @@ ClassImp(StFlowMaker)
 //-----------------------------------------------------------------------
 
 StFlowMaker::StFlowMaker(const Char_t* name): 
-  StMaker(name), mNanoEventWrite(kFALSE), mNanoEventRead(kFALSE), 
+  StMaker(name), 
   mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE),
   mFlowEventWrite(kFALSE), mFlowEventRead(kFALSE), pEvent(NULL) {
   pFlowSelect = new StFlowSelection();
-  SetNanoEventFileName("flownanoevent.root"); 
   SetPicoEventFileName("flowpicoevent.root");
 }
 
 StFlowMaker::StFlowMaker(const Char_t* name,
 			 const StFlowSelection& flowSelect) :
   StMaker(name), 
-  mNanoEventWrite(kFALSE), mNanoEventRead(kFALSE), 
   mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), 
   mFlowEventWrite(kFALSE), mFlowEventRead(kFALSE), pEvent(NULL) {
   pFlowSelect = new StFlowSelection(flowSelect); //copy constructor
-  SetNanoEventFileName("flownanoevent.root"); 
   SetPicoEventFileName("flowpicoevent.root");
 }
 
@@ -176,38 +176,42 @@ StFlowMaker::~StFlowMaker() {
 
 Int_t StFlowMaker::Make() {
 
+  if (Debug()) gMessMgr->Info() << "FlowMaker: Make() " << endm;
   // Delete previous StFlowEvent
   if (pFlowEvent) delete pFlowEvent;
   pFlowEvent = NULL;
 
-  mEventFileName = strrchr(pIOMaker->GetFile(),'/')+1;
-  if (Debug()) { 
-    gMessMgr->Info() << "FlowMaker: filename: " << mEventFileName << endm;
-    gMessMgr->Info() << "FlowMaker: Old filename: " 
-		     << mEventFileNameOld << endm;  
-  }
-
-  if (mEventFileName != mEventFileNameOld) { 
-    if (Debug()) gMessMgr->Info() << "FlowMaker: New file opened " << endm;
-    if (mPicoEventWrite && pPicoDST->IsOpen()) {
-      pPicoDST->Write();
-      pPicoDST->Close();
+  // Get the input file name from the ioMaker
+  if (!mPicoEventRead && !mFlowEventRead && pIOMaker) {
+    mEventFileName = strrchr(pIOMaker->GetFile(),'/')+1;
+    if (Debug()) { 
+      gMessMgr->Info() << "FlowMaker: filename: " << mEventFileName << endm;
+      gMessMgr->Info() << "FlowMaker: Old filename: " 
+		       << mEventFileNameOld << endm;  
     }
-    if (mPicoEventWrite) {
-      if (pPicoEvent) delete pPicoEvent;
-      if (pPicoDST) delete pPicoDST;
-      //      cout << "FlowMaker: FlowTree deleted " << endl;
-      //      if (pFlowTree) delete pFlowTree;
-      pPicoEvent = NULL;
+
+    if (mEventFileName != mEventFileNameOld) { 
+      if (Debug()) gMessMgr->Info() << "FlowMaker: New file opened " << endm;
+      if (mPicoEventWrite && pPicoDST->IsOpen()) {
+	pPicoDST->Write();
+	pPicoDST->Close();
+      }
+      if (mPicoEventWrite) {
+	if (pPicoEvent) delete pPicoEvent;
+	if (pPicoDST) delete pPicoDST;
+	//      cout << "FlowMaker: FlowTree deleted " << endl;
+	//      if (pFlowTree) delete pFlowTree;
+	pPicoEvent = NULL;
       pPicoDST = NULL;
       //      pFlowTree = NULL;
       InitPicoEventWrite();
+      }
+      mEventFileNameOld = mEventFileName;
     }
-    mEventFileNameOld = mEventFileName;
   }
 
   // Get a pointer to StEvent
-  if (!mFlowEventRead && !mNanoEventRead && !mPicoEventRead) {
+  if (!mFlowEventRead && !mPicoEventRead) {
     pEvent = (StEvent*)GetDataSet("StEvent");
     if (!pEvent) return kStOK; // If no event, we're done
     
@@ -218,7 +222,6 @@ Int_t StFlowMaker::Make() {
       if (!pFlowEvent) return kStOK;
       FillFlowEvent();
       if (!pFlowEvent) return kStOK;  // could have been deleted
-      if (mNanoEventWrite) FillNanoEvent();
       if (mPicoEventWrite) FillPicoEvent();
       if (mFlowEventWrite) pFlowMicroTree->Fill();  // fill the tree
     } else {
@@ -230,16 +233,8 @@ Int_t StFlowMaker::Make() {
   } else if (mFlowEventRead) {
     // Get a pointer to StFlowEvent
     if (!pFlowEvent) return kStOK; // If no event, we're done
-    if (mNanoEventWrite) FillNanoEvent();
     if (mPicoEventWrite) FillPicoEvent();
-
-  } else if (mNanoEventRead) {
-    // Instantiate a new StFlowEvent
-    pFlowEvent = new StFlowEvent;
-    if (!pFlowEvent) return kStOK;
-    if (!FillFromNanoDST(pNanoEvent)) return kStEOF; // false if EOF
-    if (mFlowEventWrite) pFlowMicroTree->Fill();  // fill the tree
-
+    
   } else if (mPicoEventRead) {
     // Instantiate a new StFlowEvent
     pFlowEvent = new StFlowEvent;
@@ -247,13 +242,13 @@ Int_t StFlowMaker::Make() {
     if (!FillFromPicoDST(pPicoEvent)) return kStEOF; // false if EOF
     if (!pFlowEvent) return kStOK; // could have been deleted
   }
-
+  
   UInt_t flowEventMult;
   if (!pFlowEvent) { flowEventMult = 0;}
   else { flowEventMult = pFlowEvent->FlowEventMult(); }
 
   if (Debug()) StMaker::PrintInfo();
-
+  
   return kStOK;
 }
 
@@ -261,33 +256,34 @@ Int_t StFlowMaker::Make() {
 
 Int_t StFlowMaker::Init() {
 
-  cout << "FlowMaker: Init is called" << endl;
+  if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
   // Open PhiWgt file
   ReadPhiWgtFile();
 
   Int_t kRETURN = kStOK;
 
-  // get input file name
-  TString* makerName = new TString("IO");
-  pIOMaker = (StIOMaker*)GetMaker(makerName->Data());
-  delete makerName;
+  if (!mPicoEventRead && !mFlowEventRead) {
+    // get input file name
+    TString* makerName = new TString("IO");
+    pIOMaker = (StIOMaker*)GetMaker(makerName->Data());
+    delete makerName;
+    if (pIOMaker) {
+      mEventFileName = strrchr(pIOMaker->GetFile(),'/')+1;
+      mEventFileNameOld = mEventFileName; 
+    
+      gMessMgr->Info() << "##### FlowMaker: truncated filename " 
+		       <<  mEventFileName << endm;
+    }
+  }
 
-  mEventFileName = strrchr(pIOMaker->GetFile(),'/')+1;
-  mEventFileNameOld = mEventFileName; 
-
-  gMessMgr->Info() << "##### FlowMaker: truncated filename " 
-		   <<  mEventFileName << endm;
-
-  if (mNanoEventWrite) kRETURN += InitNanoEventWrite();
-  if (mNanoEventRead)  kRETURN += InitNanoEventRead();
   if (mPicoEventWrite) kRETURN += InitPicoEventWrite();
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
   if (mFlowEventWrite) kRETURN += InitFlowEventWrite();
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.37 2000/08/25 19:55:16 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.38 2000/08/26 21:37:02 snelling Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -296,8 +292,7 @@ Int_t StFlowMaker::Init() {
 //-----------------------------------------------------------------------
 
 Int_t StFlowMaker::InitRun() {
-  cout << "FlowMaker: InitRun is called" << endl;
-  // check filename which is being processed
+  if (Debug()) gMessMgr->Info() << "FlowMaker: InitRun()" << endm;
 
   return kStOK;
 }
@@ -305,28 +300,22 @@ Int_t StFlowMaker::InitRun() {
 //-----------------------------------------------------------------------
 
 Int_t StFlowMaker::Finish() {
+  if (Debug()) gMessMgr->Info() << "FlowMaker: Finish()" << endm;
   // Print the cut lists
   cout << "#######################################################" << endl;
   cout << "##### FlowMaker: Cut Lists" << endl;
-  if (!mFlowEventRead && !mNanoEventRead) {
+  if (!mFlowEventRead) {
     StFlowCutEvent::PrintCutList();
     StFlowCutTrack::PrintCutList();
   }
   pFlowEvent->PrintSelectionList();
-
-  if (mNanoEventWrite && pNanoDST->IsOpen()) {
-    pNanoDST->Write();
-    pNanoDST->Close();
-  }
-
-  if (mNanoEventRead && pNanoDST->IsOpen()) { pNanoDST->Close(); }
 
   if (mPicoEventWrite && pPicoDST->IsOpen()) {
     pPicoDST->Write();
     pPicoDST->Close();
   }
 
-  if (mPicoEventRead && pPicoDST->IsOpen()) { pPicoDST->Close(); }
+  //  if (mPicoEventRead) { pPicoChain->Close(); }
 
   if (mFlowEventWrite && pFlowDST->IsOpen()) {
     pFlowDST->Write();
@@ -342,6 +331,8 @@ Int_t StFlowMaker::Finish() {
 //-----------------------------------------------------------------------
 
 Int_t StFlowMaker::ReadPhiWgtFile() {
+  if (Debug()) gMessMgr->Info() << "FlowMaker: ReadPhiWgtFile()" << endm;
+
   // Read the PhiWgt root file
 
   TDirectory* dirSave = gDirectory;
@@ -387,8 +378,8 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::FillFlowEvent() {
+  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFlowEvent()" << endm;
   // Make StFlowEvent from StEvent
-
   // Fill PhiWgt array
   pFlowEvent->SetPhiWeight(mPhiWgt);
 
@@ -519,40 +510,10 @@ void StFlowMaker::FillFlowEvent() {
 
 }
 
-//-----------------------------------------------------------------------
-
-void StFlowMaker::FillNanoEvent() {
-
-  if (!pNanoEvent) {
-    gMessMgr->Warning("##### FlowMaker: No FlowNanoEvent");
-    return;
-  }
-
-  pNanoEvent->SetEventID(pFlowEvent->EventID());
-  pNanoEvent->SetOrigMult(pFlowEvent->OrigMult());
-  pNanoEvent->SetMultEta1(pFlowEvent->MultEta1());
-  pNanoEvent->SetMultEta2(pFlowEvent->MultEta2());
-  pNanoEvent->SetCentrality(pFlowEvent->Centrality());
-  pNanoEvent->SetVertexPos(pFlowEvent->VertexPos());
-  pNanoEvent->SetCTB(pFlowEvent->CTB());
-  pNanoEvent->SetZDCe(pFlowEvent->ZDCe());
-  pNanoEvent->SetZDCw(pFlowEvent->ZDCw());
-  
-  StFlowTrackIterator itr;
-  StFlowTrackCollection* pFlowTracks = pFlowEvent->TrackCollection();
-  
-  for (itr = pFlowTracks->begin(); itr != pFlowTracks->end(); itr++) {
-    StFlowTrack* pFlowTrack = *itr;
-    pNanoEvent->AddTrack(pFlowTrack);
-  }
-  pFlowTree->Fill();           //fill the tree
-  pNanoEvent->Clear();  
-  
-}
-
 //----------------------------------------------------------------------
 
 void StFlowMaker::FillPicoEvent() {
+  if (Debug()) gMessMgr->Info() << "FlowMaker: FillPicoEvent()" << endm;
 
   if (!pPicoEvent) {
     gMessMgr->Warning("##### FlowMaker: No FlowPicoEvent");
@@ -605,50 +566,11 @@ void StFlowMaker::FillPicoEvent() {
 
 //-----------------------------------------------------------------------
 
-Bool_t StFlowMaker::FillFromNanoDST(StFlowNanoEvent* pNanoEvent) {
-  // Make StFlowEvent from StFlowNanoEvent
-
-  if (!pNanoEvent || !pFlowTree->GetEntry(mNanoEventCounter++)) {
-    cout << "##### FlowMaker: no more events" << endl; 
-    return kFALSE; 
-  }
-
-  // Fill FlowEvent
-  pFlowEvent->SetPhiWeight(mPhiWgt);
-  pFlowEvent->SetEventID(pNanoEvent->EventID());
-  UInt_t origMult = pNanoEvent->OrigMult();
-  pFlowEvent->SetOrigMult(origMult);
-  pFlowEvent->SetMultEta1(pNanoEvent->MultEta1());
-  pFlowEvent->SetMultEta2(pNanoEvent->MultEta2());
-  pFlowEvent->SetCentrality(pNanoEvent->MultEta1());
-  pFlowEvent->SetVertexPos(pNanoEvent->VertexPos());
-  pFlowEvent->SetCTB(pNanoEvent->CTB());
-  pFlowEvent->SetZDCe(pNanoEvent->ZDCe());
-  pFlowEvent->SetZDCw(pNanoEvent->ZDCw());
-
-  // Fill FlowTracks
-  Int_t nTracks = (Int_t)pNanoEvent->GetNtrack();
-  TClonesArray &tracks = *pNanoEvent->GetTracks();
-  for (Int_t nt=0; nt<nTracks; nt++) {
-      pFlowEvent->TrackCollection()->push_back((StFlowTrack*)tracks[nt]);
-  }
-
-  pFlowEvent->SetSelections();
-  pFlowEvent->MakeSubEvents();
-  pFlowEvent->SetPids();
-
-  //  PR("Nano Subs");
-  //  PrintSubeventMults();
-
-  return kTRUE;
-}
-
-//-----------------------------------------------------------------------
-
 Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
+  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoDST()" << endm;
   // Make StFlowEvent from StFlowPicoEvent
 
-  if (!pPicoEvent || !pFlowTree->GetEntry(mPicoEventCounter++)) {
+  if (!pPicoEvent || !pPicoChain->GetEntry(mPicoEventCounter++)) {
     cout << "##### FlowMaker: no more events" << endl; 
     return kFALSE; 
   }
@@ -736,6 +658,7 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintSubeventMults() {
+  if (Debug()) gMessMgr->Info() << "FlowMaker: PrintSubeventMults()" << endm;
 
   int j, k, n;
 
@@ -764,43 +687,8 @@ void StFlowMaker::PrintSubeventMults() {
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowMaker::InitNanoEventWrite() {
-
-  Int_t split  = 1;       // by default split Event into sub branches
-  Int_t comp   = 1;       // by default file is compressed
-  Int_t bufsize = 256000;
-  if (split) bufsize /= 4;
-
-  pNanoEvent = new StFlowNanoEvent();   
-
-  // Open an output file
-  Char_t* file = mNanoEventFileName;  
-  pNanoDST = new TFile(mNanoEventFileName,"RECREATE","Flow Nano DST file");
-  if (!pNanoDST) {
-    cout << "##### FlowMaker: Warning: no NanoEvents file = " << file << endl;
-    return kStFatal;
-  }
-  pNanoDST->SetFormat(1);
-  pNanoDST->SetCompressionLevel(comp);
-  gMessMgr->Info() << "##### FlowMaker: NanoEvents file = " << file << endm;
-
-  // Create a ROOT Tree and one superbranch
-  pFlowTree = new TTree("FlowTree", "Flow Nano Tree");
-  if (!pFlowTree) {
-    cout << "##### FlowMaker: Warning: No FlowNanoTree" << endl;
-    return kStFatal;
-  }
-
-  pFlowTree->SetAutoSave(10000000);  // autosave when 10 Mbyte written
-  pFlowTree->Branch("pNanoEvent", "StFlowNanoEvent", &pNanoEvent,
-		    bufsize, split);
-
-  return kStOK;  
-}
-
-//-----------------------------------------------------------------------
-
 Int_t StFlowMaker::InitPicoEventWrite() {
+  if (Debug()) gMessMgr->Info() << "FlowMaker: InitPicoEventWrite()" << endm;
 
   Int_t split  = 1;       // by default split Event into sub branches
   Int_t comp   = 1;       // by default file is compressed
@@ -842,74 +730,56 @@ Int_t StFlowMaker::InitPicoEventWrite() {
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowMaker::InitNanoEventRead() {
+Int_t StFlowMaker::InitPicoEventRead() {
+  if (Debug()) gMessMgr->Info() << "FlowMaker: InitPicoEventRead()" << endm;
+
+  //  pFlowTree = NULL;
+  pPicoEvent = new StFlowPicoEvent(); 
+  pPicoChain = new TChain("FlowTree");
   
-  pNanoEvent = new StFlowNanoEvent(); 
+  //  pPicoDST = new TFile(file);
   
-  // Open the input file
-  Char_t* file = mNanoEventFileName;  
-  pNanoDST = new TFile(file);
-  if (!pNanoDST->IsOpen()) {
-    cout << "##### FlowMaker: Warning: no NanoEvents file = " << file << endl;
-    return kStFatal;
+  
+  for (Int_t ilist = 0;  ilist < pPicoFileList->GetNBundles(); ilist++) {
+    pPicoFileList->GetNextBundle();
+    if (Debug()) gMessMgr->Info() << " doFlowEvents -  input fileList = " 
+				  << pPicoFileList->GetFileName(0) << endm;
+    pPicoChain->Add(pPicoFileList->GetFileName(0));
   }
 
-  gMessMgr->Info() << "##### FlowMaker: NanoEvents file = " << file << endm;
-
+  cout << " Out of file list loop" << endl;  
+  //  if (!pPicoDST->IsOpen()) {
+  //    cout << "##### FlowMaker: Error: no PicoEvents file = " << file << endl;
+  //    return kStFatal;
+  //  }
+  
+  //  gMessMgr->Info() << "##### FlowMaker: PicoEvents file = " << file << endm;
+  
   // Get the tree, the branch, and the entries
-  pFlowTree = (TTree*)pNanoDST->Get("FlowTree");
-  if (!pFlowTree) {
-    cout << "##### FlowMaker: Warning: No FlowTree" << endl;
-    return kStFatal;
-  }
+  //  pFlowTree = (TTree*)pPicoDST->Get("FlowTree");
+  //  if (!pFlowTree) {
+  //    cout << "##### FlowMaker: Error: No FlowTree" << endl;
+  //    return kStFatal;
+  //  }
+  
+  //  TBranch* branch = pFlowTree->GetBranch("pPicoEvent");
+  //  branch->SetAddress(&pPicoEvent);
 
-  TBranch* branch = pFlowTree->GetBranch("pNanoEvent");
-  branch->SetAddress(&pNanoEvent);
-  Int_t nEntries = (Int_t)pFlowTree->GetEntries(); 
-  gMessMgr->Info() << "##### FlowMaker: events in nano-DST file = " 
+  pPicoChain->SetBranchAddress("pPicoEvent", &pPicoEvent);
+
+  Int_t nEntries = (Int_t)pPicoChain->GetEntries(); 
+  gMessMgr->Info() << "##### FlowMaker: events in Pico-DST file = "
 		   << nEntries << endm;
   
-  mNanoEventCounter = 0;
-
-  return kStOK;  
-  }
-
-//-----------------------------------------------------------------------
-
-Int_t StFlowMaker::InitPicoEventRead() {
-  
-  pPicoEvent = new StFlowPicoEvent(); 
-  
-  // Open the file
-  Char_t* file = mPicoEventFileName;  
-  pPicoDST = new TFile(file);
-  if (!pPicoDST->IsOpen()) {
-    cout << "##### FlowMaker: Error: no PicoEvents file = " << file << endl;
-    return kStFatal;
-  }
-
-  gMessMgr->Info() << "##### FlowMaker: PicoEvents file = " << file << endm;
-
-  // Get the tree, the branch, and the entries
-  pFlowTree = (TTree*)pPicoDST->Get("FlowTree");
-  if (!pFlowTree) {
-    cout << "##### FlowMaker: Error: No FlowTree" << endl;
-    return kStFatal;
-  }
-
-  TBranch* branch = pFlowTree->GetBranch("pPicoEvent");
-  branch->SetAddress(&pPicoEvent);
-  Int_t nEntries = (Int_t)pFlowTree->GetEntries(); 
-  gMessMgr->Info() << "##### FlowMaker: events in Pico-DST file = " << nEntries << endm;
-
   mPicoEventCounter = 0;
-
+  
   return kStOK;
-  }
+}
 
 //-----------------------------------------------------------------------
 
 Int_t StFlowMaker::InitFlowEventWrite() {
+  if (Debug()) gMessMgr->Info() << "FlowMaker: InitFlowEventWrite()" << endm;
 
   Int_t split  = 1;       // by default, split Event in sub branches
   Int_t comp   = 1;       // by default file is compressed
@@ -920,6 +790,7 @@ Int_t StFlowMaker::InitFlowEventWrite() {
   // Note that this file may contain any kind of ROOT objects, histograms,
   // pictures, graphics objects, detector geometries, tracks, events, etc..
   // This file is now becoming the current directory.
+
   pFlowDST = new TFile("flowevent.root", "RECREATE", "Flow micro DST file");
   if (!pFlowDST) {
     cout << "##### FlowMaker: Warning: no FlowEvents file" << endl;
@@ -944,6 +815,8 @@ Int_t StFlowMaker::InitFlowEventWrite() {
 //-----------------------------------------------------------------------
 
 Int_t StFlowMaker::InitFlowEventRead() {
+  if (Debug()) gMessMgr->Info() << "FlowMaker: InitFlowEventRead()" << endm;
+
   pFlowDST = new TFile("flowevent.root", "READ");
   if (pFlowDST) return kStFatal;
 
