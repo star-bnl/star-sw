@@ -1,4 +1,5 @@
-*----------------------------------------------------
+ 
+* ----------------------------------------------------
 
 macro tss_old
 macro/global/import *
@@ -46,6 +47,7 @@ macro/global/import *
     tdm/newtable readout_map  readout_map  1
     tdm/newtable bad_channels bad_channels 1
 
+
   cd /dui
 
  return
@@ -78,12 +80,13 @@ macro/global/import *
     tdm/newtable tpcluster tcl_tpcluster   200000
     tdm/newtable tpseq     tcl_tp_seq     2000000
     
+
   cd [params]/tpc
   mkdir tclpars
   cd tclpars
   
     tdm/newtable tcl_sector_index tcl_sector_index 1  
-    
+      
   cd /dui
 
 return
