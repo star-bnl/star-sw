@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.90 2000/04/13 02:53:35 perev Exp $
+// $Id: StMaker.cxx,v 1.91 2000/04/20 14:25:17 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -524,10 +524,7 @@ StMaker *StMaker::GetMaker(const TDataSet *ds)
 //_____________________________________________________________________________
 EDataSetPass StMaker::ClearDS (TDataSet* ds,void * )
 {
-  static TClass *tabClass = 0;
-  if (!tabClass) tabClass  = gROOT->GetClass("TTable");
-
-  if (ds->InheritsFrom(tabClass)) ds->Clear("Garbage");
+  if (ds->InheritsFrom(TTable::Class())) ds->Clear("Garbage");
   return kContinue; 
 }
 //_____________________________________________________________________________
@@ -963,6 +960,9 @@ Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.91  2000/04/20 14:25:17  perev
+// Minor simplification
+//
 // Revision 1.90  2000/04/13 02:53:35  perev
 // StMaker::GetValidity added
 //
