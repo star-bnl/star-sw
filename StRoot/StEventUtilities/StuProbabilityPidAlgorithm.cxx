@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.9 2000/08/15 23:04:18 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.10 2000/08/16 12:46:07 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.10  2000/08/16 12:46:07  aihong
+ * bug killed
+ *
  * Revision 1.9  2000/08/15 23:04:18  aihong
  * speed it up by looking up table
  *
@@ -1124,7 +1127,7 @@ void StuProbabilityPidAlgorithm::setBins4Table(){
 
 }
 //-------------------------------
-void StuProbabilityPidAlgorithm::fillPIDByLookUpTable(int myCharge, int myDca, int myNhits, double myPt, double myDedx, double myRig){
+void StuProbabilityPidAlgorithm::fillPIDByLookUpTable(int myCharge, double myDca, int myNhits, double myPt, double myDedx, double myRig){
      int totalEntry
       =mNChargeBins*mNDcaBins*mNNhitsBins*mNPtBins*mNDedxBins*mNRigBins;
 
@@ -1206,7 +1209,7 @@ void StuProbabilityPidAlgorithm::setRanges4Table(TVectorD* theSetting){
 }
     
 //-------------------------------
-void StuProbabilityPidAlgorithm::fillPIDByCalculation(int myCharge, int myDca, int myNhits, double myPt, double myDedx, double myRig){
+void StuProbabilityPidAlgorithm::fillPIDByCalculation(int myCharge, double myDca, int myNhits, double myPt, double myDedx, double myRig){
  
    double   total=0.0;
    int     i=0;
@@ -1299,6 +1302,7 @@ void StuProbabilityPidAlgorithm::debug(double theDedx, double theRig, double the
      channelInfoOut=(StPidAmpChannelInfoOut *)channelLevel->At(0);
  
      if (channelInfoOut->IsInChannel(theNHits, thePt,theDca )) {//pick up the right channel
+       cout<<" in the above channel "<<endl;
 
        if (mTurnOnNoise){
        StPidAmpNetOut*  protonNetOut=(StPidAmpNetOut *)channelLevel->At(8);
@@ -1351,13 +1355,14 @@ void StuProbabilityPidAlgorithm::debug(double theDedx, double theRig, double the
     }
 
       
-  for (int y=0; y<1000; y++)  cout<<"tempReport->GetProb(0) "<<tempReport->GetProb(0)<<endl;
+  for (int y=0; y<10; y++)  cout<<"tempReport->GetProb(0) "<<tempReport->GetProb(0)<<endl;
 
      
 
 
 }
 */
+
 
 /*
 //-------------------------------

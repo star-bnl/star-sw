@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannelInfoOut.cxx,v 1.1 2000/07/22 22:27:14 aihong Exp $
+ * $Id: StPidAmpChannelInfoOut.cxx,v 1.2 2000/08/16 12:46:01 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannelInfoOut.cxx,v $
+ * Revision 1.2  2000/08/16 12:46:01  aihong
+ * bug killed
+ *
  * Revision 1.1  2000/07/22 22:27:14  aihong
  * move files from StPidAmpMaker to StEventUtilities
  *
@@ -97,12 +100,12 @@ Double_t StPidAmpChannelInfoOut::DcaEnd()   const {return mDcaEnd;}
 
 Bool_t StPidAmpChannelInfoOut::IsInChannel(Int_t nhits,Double_t pt){
 
- return ((nhits<=mNHitsEnd)&&(nhits>mNHitsStart)&&(pt<=mPtEnd)&&(pt>mPtStart));
+ return ((nhits<mNHitsEnd)&&(nhits>=mNHitsStart)&&(pt<mPtEnd)&&(pt>=mPtStart));
 }
 
 Bool_t StPidAmpChannelInfoOut::IsInChannel(Int_t nhits,Double_t pt,Double_t dca){
 
- return ((nhits<=mNHitsEnd)&&(nhits>mNHitsStart)&&(pt<=mPtEnd)&&(pt>mPtStart)&&(dca<=mDcaEnd)&&(dca>mDcaStart));
+ return ((nhits<mNHitsEnd)&&(nhits>=mNHitsStart)&&(pt<mPtEnd)&&(pt>=mPtStart)&&(dca<mDcaEnd)&&(dca>=mDcaStart));
 }
 
 void StPidAmpChannelInfoOut::PrintContent(){

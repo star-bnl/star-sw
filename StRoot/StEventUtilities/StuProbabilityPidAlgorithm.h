@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.h,v 1.5 2000/08/15 23:04:18 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.h,v 1.6 2000/08/16 12:46:07 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.h,v $
+ * Revision 1.6  2000/08/16 12:46:07  aihong
+ * bug killed
+ *
  * Revision 1.5  2000/08/15 23:04:18  aihong
  * speed it up by looking up table
  *
@@ -89,7 +92,7 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
 
      static  void   fillReportObjArray(TString fileName);
 
-     /*
+     /*     
      static  void   debug(double theDedx, double theRig, double theNHits, double thePt, int theCharge, double theDca);
      static  void   debug2(double theDedx, double theRig, int theNHits, double thePt, int theCharge, double theDca);
      */
@@ -98,8 +101,8 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
 
  private:
      
-     void    fillPIDByLookUpTable(int myCharge, int myDca, int myNhits, double myPt, double myDedx, double myRig);
-     void    fillPIDByCalculation(int myCharge, int myDca, int myNhits, double myPt, double myDedx, double myRig);
+     void    fillPIDByLookUpTable(int myCharge, double myDca, int myNhits, double myPt, double myDedx, double myRig);
+     void    fillPIDByCalculation(int myCharge, double myDca, int myNhits, double myPt, double myDedx, double myRig);
 
 
      static  double bandCenter(double rig, TArrayD* bandPars);
