@@ -30,6 +30,7 @@ endif
 #endif
 #	Generic .inc dir  , copy of all includes
 INC_GEN_DIR := $(OUT_DIR)/inc
+#INC_GEN_DIR :=  ./inc
 #	list of all /inc dirs
 ALL_INC_DIRS := $(wildcard $(INP_DIR)/???/inc)
 ALL_INC_DIRS := $(filter-out $(INC_GEN_DIR), $(ALL_INC_DIRS))
@@ -69,8 +70,8 @@ $(ASPSEXE): %_EXE :
 
 incs : $(ALL_INC_INST)
 
-$(ALL_INC_INST): $(OUT_DIR)/inc/%  : %
-	ln -s $(ALL_DEPS) $(OUT_DIR)/inc/$(STEM)
+$(ALL_INC_INST): $(INC_GEN_DIR)/%  : %
+	ln -s $(ALL_DEPS) $(INC_GEN_DIR)/$(STEM)
 
 show: 
 	@echo MAKE        := $(MAKE)

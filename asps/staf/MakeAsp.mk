@@ -49,7 +49,7 @@ endif
 #	Define .src dir. If does not exist EMPTY
 #
 SRC_DIR := $(INP_DIR)/src
-SRC_GEN_DIR := $(OUT_DIR)/$(PKGNAME)/srg
+SRC_GEN_DIR := $(OUT_DIR)/srg/$(PKGNAME)
 ifneq (YES,$(shell if { test -d $(SRC_DIR); } then { echo YES; } fi ))
   SRC_DIR :=
   SRC_GEN_DIR :=
@@ -60,7 +60,7 @@ endif
 #	Define .srcm dir. If does not exist EMPTY
 #
 SRM_DIR     := $(INP_DIR)/srcm
-SRM_GEN_DIR := $(OUT_DIR)/$(PKGNAME)/SRG
+#SRM_GEN_DIR := $(OUT_DIR)/SRG/$(PKGNAME)
 ifneq (YES,$(shell if { test -d $(SRM_DIR); } then { echo YES; } fi))
   SRM_DIR :=
 endif
@@ -72,14 +72,14 @@ IDL_DIR := $(INC_DIR)
 IDM_DIR := $(SRC_DIR)
 
 LIB_DIR := $(OUT_DIR)/lib
-OBJ_DIR := $(OUT_DIR)/$(PKGNAME)/obj
+OBJ_DIR := $(OUT_DIR)/obj/$(PKGNAME)
 TMP_DIR := $(OUT_DIR)/tmp
 INC_GEN_DIR := $(OUT_DIR)/inc
 
 
 
 #	Includes
-INCLUDES := $(addprefix -I,$(wildcard $(UPP_INP_DIR)/*/inc))
+INCLUDES := $(addprefix -I,$(wildcard $(UPP_INP_DIR)/*/inc)) -I$(CERN_ROOT)/src/cfortran
 
 
 BIN_DIR := $(OUT_DIR)/bin
@@ -101,7 +101,7 @@ DOIT := $(strip $(SRC_DIR) $(SRM_DIR))
 ifdef DOIT
 
 
-DEP_DIR := $(OUT_DIR)/$(PKGNAME)/dep
+DEP_DIR := $(OUT_DIR)/dep/$(PKGNAME)
 
 OUPUT_DIRS := $(LIB_DIR) $(OBJ_DIR) $(DEP_DIR) $(BIN_DIR) $(TMP_DIR) $(SRC_GEN_DIR) $(INC_GEN_DIR) 
 INPUT_DIRS := $(SRC_DIR) $(SRM_DIR) $(IDL_DIR) $(IDM_DIR) 
@@ -127,11 +127,11 @@ FILES_SRM := $(filter-out %-lex.c %-yacc.c, $(FILES_SRM))
 #
 #	Test for main() it MUST NOT be in src but .....
 #	I hope it is temporary check
-ifdef FILES_SRC
-  QWE1 := $(shell $(GREP) -l -e '.*main *(.*)' $(FILES_SRC))
-endif
+#ifdef FILES_SRC
+#  QWE1 := $(shell grep -l -e '.*main *(.*)' $(FILES_SRC))
+#endif
 ifdef FILES_SRM
-  QWE2 := $(shell $(GREP) -l -e '.*main *(.*)' $(FILES_SRM))
+  QWE2 := $(shell grep -l -e '.*main *(.*)' $(FILES_SRM))
 endif
 #FILES_SRC := $(filter-out $(QWE1),$(FILES_SRC) )
 FILES_SRM := $(filter     $(QWE2),$(FILES_SRM) )
@@ -229,21 +229,23 @@ CDFtoC: $(FILES_C_CDF)
 #Libraries : $(MY_LIB) $(MY_SO)
 Libraries : $(MY_LIB) 
 
-$(LIB_DIR)/lib$(PKGNAME).a : $(FILES_O)
-	$(AR) $(ARFLAGS) $(LIB_DIR)/lib$(PKGNAME).a $(FILES_O)
+$(MY_LIB) : $(FILES_O)
+	$(AR) $(ARFLAGS) $(MY_LIB) $(FILES_O)
+#	OBJS := $(foreach  OBJ, $(FILES_O), $(shell test -z `nm -p $OBJ |  grep ' T main' ` || echo $(OBJ)))
+#	$(AR) $(ARFLAGS) $(MY_LIB) $(OBJS)
+#	@OBJS=; for OBJ in $(FILES_O)/ ; do x=`nm -p $$OBJ | grep ' T main' `; if test "$$x"="" ; then OBJS="$$OBJS $$OBJ"; fi done;\
+#	$(AR) $(ARFLAGS) $(MY_LIB) $(OBJS)
 
 $(LIB_DIR)/lib$(PKGNAME).$(SOEXT) : $(FILES_O)
 	$(SO) $(SOFLAGS) -o $(LIB_DIR)/lib$(PKGNAME).$(SOEXT) $(FILES_O)
 
 $(SRC_GEN_DIR)/%.c : %.cdf
-	echo .c.cdf
 	kuipc -c $(ALL_DEPS) $(SRC_GEN_DIR)/$(STEM).c
 
 %.c : %.y
 	$(YACC) $(ALL_DEPS) ; mv y.tab.c $(STEM).c
 
 $(OBJ_DIR)/%.o : %.c 
-	echo .o.c
 	$(CC)  -c $(CPPFLAGS) $(CFLAGS)    $(INCLUDES) $(1ST_DEPS) -o $(ALL_TAGS)
 
 $(OBJ_DIR)/%.o : %.cc 
@@ -270,16 +272,22 @@ $(SRC_GEN_DIR)/%-lex.c : $(SRM_DIR)/%.l
 
 $(DEP_DIR)/%.d: %.c 
 	$(RM) $(ALL_TAGS)
-	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES)  $(ALL_DEPS) > $(ALL_TAGS)
+	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES)  $(ALL_DEPS) | \
+        sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g'\
+        > $(ALL_TAGS)
 
 $(DEP_DIR)/%.d: %.cc 
 	$(RM) $(ALL_TAGS)
-	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES)  $(ALL_DEPS) > $(ALL_TAGS)
+	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES)  $(ALL_DEPS) | \
+        sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g'\
+        > $(ALL_TAGS)
 
 
 $(DEP_DIR)/%.d:  %.F
 	$(RM)  $(ALL_TAGS)
-	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES) $(ALL_DEPS) | sed -e 's/\.F\.o/.o/' > $(ALL_TAGS)
+	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES) $(ALL_DEPS)  | \
+        sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g'\
+        > $(ALL_TAGS)
 
 ####%.d:  %.cdf
 
@@ -287,7 +295,7 @@ $(DEP_DIR)/%.didlm : $(IDM_DIR)%.$(SUFF_IDM)
 	cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm; \
         $(GCC)  $(MKDEPFLAGS) $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm | \
         sed -e 's/.idlm.o/.didlm/g' > $(GEN_DIR)/$(STEM).didlm
-	$(STIC) -M  $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm | $(GREP) ":" >> $(GEN_DIR)/$(STEM).didlm
+	$(STIC) -M  $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm | grep ":" >> $(GEN_DIR)/$(STEM).didlm
 #       temporarly, until stic is fixed:
 	@sed -e 's/broker->newInvoker(\(.*\),/broker->deleteInvoker(\1); broker->newInvoker(\1,/' \
                 $(GEN_DIR)/$(STEM)_i.cc > temp
@@ -349,8 +357,8 @@ show:
 	@echo UNDERSCORES      := $(UNDERSCORES)
 	@echo NOUNDERSCOR      := $(NOUNDERSCOR)
 	@echo ONLYOSFID        := $(ONLYOSFID)
-	echo QWE1        := $(QWE1)
+	@echo QWE1        := $(QWE1)
 	@echo QWE2        := $(QWE2)
-
-
-
+	@echo CXXFLAGS    := $(CXXFLAGS)
+	@echo CFLAGS      := $(CFLAGS)
+	@echo FFLAGS      := $(FFLAGS)

@@ -15,11 +15,7 @@
 #include "dsxdr.h"
 #include "dsuType.h"
 #include "cfortran.h"
-#ifdef hpux
-#include "hbook_hpux.h"
-#else
 #include "hbook.h"
-#endif
 
 /*----------------------------------
 *  globals
