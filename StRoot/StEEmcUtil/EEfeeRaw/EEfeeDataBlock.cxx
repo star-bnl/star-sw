@@ -165,7 +165,7 @@ int  EEfeeDataBlock :: isValid(){
 int  EEfeeDataBlock 
 ::isHeadValid(int token, int crId, int len, int trigComm, int errFlag){
 #if 0
-  printf("ask/0x: %x %x %x %x %x\n", token,crId,len,trigComm,errFlag);
+  printf("\nask/0x: %x %x %x %x %x\n", token,crId,len,trigComm,errFlag);
   print(0);
   printf("getCrateID()/0x = %x %x\n",getCrateID(),crId);
   printf("getToken()/0x = %x %x\n",getToken(),token);
@@ -186,6 +186,9 @@ int  EEfeeDataBlock
 
 /*
  * $Log: EEfeeDataBlock.cxx,v $
+ * Revision 1.14  2004/06/01 16:05:18  balewski
+ * forgoten update of data block headers check
+ *
  * Revision 1.13  2004/04/16 17:26:46  balewski
  * more header checking, some mess introduced
  *
