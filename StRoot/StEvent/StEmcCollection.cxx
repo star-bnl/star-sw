@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEmcCollection.cxx,v 2.1 2000/02/23 17:34:05 ullrich Exp $
+ * $Id: StEmcCollection.cxx,v 2.2 2000/03/23 22:24:06 akio Exp $
  *
  * Author: Akio Ogawa, Nov 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCollection.cxx,v $
+ * Revision 2.2  2000/03/23 22:24:06  akio
+ * Initial version of Emc Point, and Inclusion of track pointers
+ *
  * Revision 2.1  2000/02/23 17:34:05  ullrich
  * Initial Revision
  *
@@ -19,7 +22,7 @@
 
 ClassImp(StEmcCollection)
 
-static const char rcsid[] = "$Id: StEmcCollection.cxx,v 2.1 2000/02/23 17:34:05 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcCollection.cxx,v 2.2 2000/03/23 22:24:06 akio Exp $";
 
 StEmcCollection::StEmcCollection() {/* noop*/}
 
@@ -55,14 +58,20 @@ StEmcCollection::setDetector(StEmcDetector* val)
     } 
 }
 
-//const StSPtrVecEmcPoint&
-//StEmcCollection::barrelPoints() const { return mBarrel; }
+const StSPtrVecEmcPoint&
+StEmcCollection::barrelPoints() const { return mBarrel; }
 
-//StSPtrVecEmcPoint&
-//StEmcCollection::barrelPoints() { return mBarrel; }
+StSPtrVecEmcPoint&
+StEmcCollection::barrelPoints() { return mBarrel; }
 
-//const StSPtrVecEmcPoint&
-//StEmcCollection::endcapPoints() const { return mEndcap; }
+const StSPtrVecEmcPoint&
+StEmcCollection::endcapPoints() const { return mEndcap; }
 
-//StSPtrVecEmcPoint&
-//StEmcCollection::endcapPoints() { return mEndcap; }
+StSPtrVecEmcPoint&
+StEmcCollection::endcapPoints() { return mEndcap; }
+
+void 
+StEmcCollection::addBarrelPoint(const StEmcPoint* p){mBarrel.push_back(p);}
+
+void 
+StEmcCollection::addEndcapPoint(const StEmcPoint* p){mEndcap.push_back(p);}

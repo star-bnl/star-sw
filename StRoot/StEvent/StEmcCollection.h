@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcCollection.h,v 2.1 2000/02/23 17:34:07 ullrich Exp $
+ * $Id: StEmcCollection.h,v 2.2 2000/03/23 22:24:06 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCollection.h,v $
+ * Revision 2.2  2000/03/23 22:24:06  akio
+ * Initial version of Emc Point, and Inclusion of track pointers
+ *
  * Revision 2.1  2000/02/23 17:34:07  ullrich
  * Initial Revision
  *
@@ -20,6 +23,7 @@
 #include "StObject.h"
 #include "StContainers.h"
 #include "StEnumerations.h"
+#include "StEmcPoint.h"
 
 class StEmcDetector;
 
@@ -31,10 +35,12 @@ public:
     StEmcDetector*            detector(StDetectorId);
     const StEmcDetector*      detector(StDetectorId) const;
     
-    //StSPtrVecEmcPoint&                barrelPoints();
-    //const StSPtrVecEmcPoint&          barrelPoints() const;
-    //StSPtrVecEmcPoint&                endcapPoints();
-    //const StSPtrVecEmcPoint&          endcapPoints() const;
+    StSPtrVecEmcPoint&                barrelPoints();
+    const StSPtrVecEmcPoint&          barrelPoints() const;
+    StSPtrVecEmcPoint&                endcapPoints();
+    const StSPtrVecEmcPoint&          endcapPoints() const;
+    void addBarrelPoint(const StEmcPoint*);             
+    void addEndcapPoint(const StEmcPoint*);             
   
     void setDetector(StEmcDetector*);
 
@@ -44,8 +50,8 @@ private:
     
 private:
     StEmcDetector*            mDetector[8];
-    //StSPtrVecEmcPoint         mBarrel;
-    //StSPtrVecEmcPoint         mEndcap;
+    StSPtrVecEmcPoint         mBarrel;
+    StSPtrVecEmcPoint         mEndcap;
 
     ClassDef(StEmcCollection,1)
 };

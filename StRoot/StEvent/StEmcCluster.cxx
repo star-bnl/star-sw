@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcCluster.cxx,v 2.1 2000/02/23 17:34:01 ullrich Exp $
+ * $Id: StEmcCluster.cxx,v 2.2 2000/03/23 22:24:06 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCluster.cxx,v $
+ * Revision 2.2  2000/03/23 22:24:06  akio
+ * Initial version of Emc Point, and Inclusion of track pointers
+ *
  * Revision 2.1  2000/02/23 17:34:01  ullrich
  * Initial Revision
  *
@@ -18,7 +21,7 @@
 
 ClassImp(StEmcCluster)
     
-static const char rcsid[] = "$Id: StEmcCluster.cxx,v 2.1 2000/02/23 17:34:01 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcCluster.cxx,v 2.2 2000/03/23 22:24:06 akio Exp $";
 
 StEmcCluster::StEmcCluster() {/* noop*/};
 
@@ -45,6 +48,9 @@ StEmcCluster::nHits() const {return mHits.size();}
 Int_t
 StEmcCluster::nNeighbors() const {return mNeighbors.size();}
 
+Int_t
+StEmcCluster::nTracks() const {return mTracks.size();}
+
 StPtrVecEmcRawHit&
 StEmcCluster::hit() {return mHits;}
 
@@ -56,6 +62,12 @@ StEmcCluster::neighbor() {return mNeighbors;}
 
 const StPtrVecEmcCluster&
 StEmcCluster::neighbor() const {return mNeighbors;}
+
+StPtrVecTrack&
+StEmcCluster::track() {return mTracks;}
+
+const StPtrVecTrack&
+StEmcCluster::track() const {return mTracks;}
 
 void
 StEmcCluster::setEta(Float_t ver)      {mEta=ver;}
@@ -77,6 +89,9 @@ StEmcCluster::addHit(StEmcRawHit* hit) {mHits.push_back(hit);}
 
 void
 StEmcCluster::addNeighbor(StEmcCluster* cluster) {mNeighbors.push_back(cluster);}
+
+void
+StEmcCluster::addTrack(StTrack* track) {mTracks.push_back(track);}
 
 StObject*
 StEmcCluster::clone() {return new StEmcCluster(*this);}
