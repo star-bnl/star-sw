@@ -96,6 +96,7 @@ for ( my $iter=0; $iter < 2; $iter++ ) {
    }
 
    # Change name between 0 and 1 ($iter)
+   if( $^O ne "linux"){ last;}
    $root = "root"; 
    $lib  = "LIB";
    $bin  = "BIN";
