@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.7 2005/03/22 10:38:51 lmartin Exp $
+// $Id: StSsdPointMaker.cxx,v 1.8 2005/03/22 13:46:43 lmartin Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.8  2005/03/22 13:46:43  lmartin
+// PrintStripSummary method added
+//
 // Revision 1.7  2005/03/22 10:38:51  lmartin
 // HighCut value taken from the db
 //
@@ -41,6 +44,8 @@
 
 #include "StSsdBarrel.hh"
 #include "StSsdLadder.hh"
+#include "StSsdWafer.hh"
+#include "StSsdStripList.hh"
 #include "StEvent.h"
 #include "StSsdHitCollection.h"
 #include "StSsdDynamicControl.h"
@@ -78,10 +83,10 @@ StSsdPointMaker::~StSsdPointMaker(){
 }
 //_____________________________________________________________________________
 Int_t StSsdPointMaker::Init(){
-  gMessMgr->Info() << " In StSsdPointMaker::init() - " << endm;
+  gMessMgr->Info() << "In StSsdPointMaker::init() - " << endm;
 
   // database readout 
-  gMessMgr->Info() << " Trying to access to databases " << endm;
+  gMessMgr->Info() << "Trying to access to databases " << endm;
 
   mDbMgr = StDbManager::Instance();
   mDbMgr -> setVerbose(false);             // set Verbose mode for debug
@@ -287,6 +292,7 @@ Int_t StSsdPointMaker::Make()
   cout<<"####        NUMBER OF SPA STRIPS "<<stripTableSize<<"        ####"<<endl;
   //  mySsd->writeNoiseToFile(spa_strip);
   mySsd->sortListStrip();
+  PrintStripSummary(mySsd);
   //int noiseTableSize = mySsd->readNoiseFromTable(m_noise,mDynamicControl);
   int noiseTableSize = mySsd->readNoiseFromTable(m_noise2,mDynamicControl);
   cout<<"####       NUMBER OF DB ENTRIES "<<noiseTableSize<<"       ####"<<endl;
@@ -419,6 +425,43 @@ void StSsdPointMaker::writeScmCtrlHistograms()
   }
 }
 
+//_____________________________________________________________________________
+void StSsdPointMaker::PrintStripSummary(StSsdBarrel *mySsd)
+{
+  int ladderCountN[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
+  int ladderCountP[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
+  for (int i=0;i<20;i++) 
+    if (mySsd->isActiveLadder(i)>0) {
+      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+	ladderCountP[i]=ladderCountP[i]+mySsd->mLadders[i]->mWafers[j]->getStripP()->getSize();
+	ladderCountN[i]=ladderCountN[i]+mySsd->mLadders[i]->mWafers[j]->getStripN()->getSize();
+      }
+    }
+  
+  gMessMgr->Info() <<"StSsdPointMaker::PrintStripSummary/Number of raw data in the SSD" << endm;
+  gMessMgr->Info() << "StSsdPointMaker::PrintStripSummary/Active Ladders : ";
+  for (int i=0;i<20;i++) 
+    if (mySsd->isActiveLadder(i)>0) {
+      gMessMgr->width(5);
+      *gMessMgr<<i+1<<" ";
+    }
+  
+  *gMessMgr<<endm;
+  gMessMgr->Info() << "StSsdPointMaker::PrintStripSummary/Counts (p-side): ";
+  for (int i=0;i<20;i++)
+    if (mySsd->isActiveLadder(i)>0) {
+      gMessMgr->width(5);
+      *gMessMgr <<ladderCountP[i]<<" ";
+    }
+  *gMessMgr<<endm;
+  gMessMgr->Info() << "StSsdPointMaker::PrintStripSummary/Counts (n-side): ";
+  for (int i=0;i<20;i++)
+    if (mySsd->isActiveLadder(i)>0) {
+      gMessMgr->width(5);
+      *gMessMgr <<ladderCountN[i]<<" ";
+    }
+  *gMessMgr<<endm;
+}
 
 void StSsdPointMaker::debugUnPeu(StSsdBarrel *mySsd)
 {
