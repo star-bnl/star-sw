@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.23 1999/11/08 16:45:41 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.24 1999/11/09 01:51:08 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.24  1999/11/09 01:51:08  fisyak
+// Fix Files, introduce tables and tls as separated option
+//
 // Revision 1.23  1999/11/08 16:45:41  fisyak
 // Fix typo in tpc chain
 //
@@ -146,57 +149,58 @@ BfcItem BFC[] = {
                                                                                   "Turn on Year 2a",kFALSE},
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
   {"OFF"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
-  {"db"          ,""  ,"",""           ,"St_db_Maker","St_Tables,StDbLib,StDbBroker,St_db_Maker","",kFALSE},
-  {"calib"       ,""  ,"",""           ,"St_db_Maker","St_Tables,StDbLib,StDbBroker,St_db_Maker","",kFALSE},
-  {"XIN"         ,""  ,"",""    ,"St_Tables,StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
-  {"GSTAR"  ,""  ,"","geant","","" ,"St_Tables,gstar for 10 muon track with pT = 10 GeV in |eta|<1",kFALSE}, 
+  {"db"          ,""  ,"","tables"               ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
+  {"calib"       ,""  ,"","tables"               ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
+  {"XIN"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
+  {"GSTAR"       ,"" ,"","tables,geant","","","gstar for 10 muon track with pT = 10 GeV in |eta|<1",kFALSE}, 
   {"TDAQ"        ,""  ,"","er99,xin,tpc_daq"                                              ,"","","",kFALSE},  
   {"FZIN"        ,""  ,"","geant","" ,""                                      ,"read GSTAR fz-file",kFALSE},
   {"UTIL"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
+  {"tables"      ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
+  {"tls"         ,""  ,"","",""                                                        ,"libtls","",kFALSE},
+  {"SCL"         ,""  ,"","","","StarClassLibrary",                         "Load StarClassLibrary",kFALSE},
   {"FieldOn"     ,""  ,"","-FieldOff,-HalfField,-ReverseField","StMagFC","StMagF"  ,"Nominal field",kFALSE},
   {"FieldOff"    ,""  ,"","-FieldOn,-HalfField,-ReverseField","StMagFC","StMagF" ,"No Field option",kFALSE},
   {"HalfField"   ,""  ,"","-FieldOn,-FieldOff,-ReverseField","StMagFC","StMagF","Half Field option",kFALSE},
   {"ReverseField",""  ,"","-FieldOn,-FieldOff,-HalfField","StMagFC","StMagF","Reverse Field option",kFALSE},
   {"NoEvent"     ,""  ,"","-event,-analysis"      ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
-  {"GEANT","geant","","","St_geant_Maker","St_Tables,geometry,St_g2r,St_geant_Maker"
-                                                                                ,"initailize GEANT",kFALSE}, 
-  {"TPC"         ,"tpc"    ,""   ,"db,-tss,-trs,tcl,tpt"          ,"StMaker","St_Tables,StChain","",kFALSE},
-  {"TSS"         ,"tpc_raw","tpc","-trs"            ,"St_tss_Maker","libtls,St_tpc,St_tss_Maker","",kFALSE},  
-  {"TRS"         ,"tpc_raw","tpc","-tss,tpc_daq"     ,"StTrsMaker","StarClassLibrary,StTrsMaker","",kFALSE},
+  {"GEANT","geant","","tables","St_geant_Maker","geometry,St_g2r,St_geant_Maker","initailize GEANT",kFALSE}, 
+  {"TPC"         ,"tpc","","tables,tls,db,-tss,-trs,tcl,tpt"                ,"StMaker","StChain","",kFALSE},
+  {"TSS"         ,"tpc_raw","tpc","tls,-trs"               ,"St_tss_Maker","St_tpc,St_tss_Maker","",kFALSE},  
+  {"TRS"         ,"tpc_raw","tpc","scl,-tss,tpc_daq"                  ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"MINIDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
-  {"tpc_daq"     ,"tpc_raw","tpc",""               ,"St_tpcdaq_Maker","StDaqLib,St_tpcdaq_Maker","",kFALSE},
+  {"tpc_daq"     ,"tpc_raw","tpc","xin"                     ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"TFS"         ,""  ,"","tpc,-trs,-tss","",""     ,"use TFS       (no St_[tss_ and no Trs]Maker)",kFALSE},
-  {"TCL"         ,"tpc_hits","tpc",""               ,"St_tcl_Maker","libtls,St_tpc,St_tcl_Maker","",kFALSE},
-  {"TPT"         ,"tpc_tracks","tpc",""   ,"St_tpt_Maker","St_Tables,libtls,St_tpc,St_tpt_Maker","",kFALSE},
-  {"SVT"         ,"svt"     ,""     ,"srs,stk"                    ,"St_Tables,StMaker","StChain","",kFALSE},
-  {"SRS"         ,"svt_hits","svt",""               ,"St_srs_Maker","libtls,St_svt,St_srs_Maker","",kFALSE},
-  {"STK"         ,"svt_tracks","svt",""             ,"St_stk_Maker","libtls,St_svt,St_stk_Maker","",kFALSE},
-  {"FTPC"        ,"ftpc"  ,"","-fss,fcl,fpt"                      ,"St_Tables,StMaker","StChain","",kFALSE},
-  {"FSS"         ,"ftpc_raw","ftpc",""   ,"St_fss_Maker","StarClassLibrary,St_ftpc,St_fss_Maker","",kFALSE},
-  {"FCL"         ,"ftpc_hits","ftpc","","StFtpcClusterMaker","StarClassLibrary,St_ftpc,StFtpcClusterMaker"
-                                                                                                ,"",kFALSE},
-  {"FPT"         ,"ftpc_tracks","ftpc","","St_fpt_Maker","StarClassLibrary,St_ftpc,St_fpt_Maker","",kFALSE},
-  {"EMC"         ,"emc","","ems,emh"                              ,"StMaker","St_Tables,StChain","",kFALSE},
-  {"EMS"         ,"emc_raw","emc",""             ,"St_ems_Maker","St_Tables,St_emc,St_ems_Maker","",kFALSE},
-  {"EMH"         ,"emc_hits","emc",""            ,"St_emc_Maker","St_Tables,St_emc,St_emc_Maker","",kFALSE},
-  {"L0"          ,"l0","","ctf,mwc,trg"                           ,"St_Tables,StMaker","StChain","",kFALSE}, 
-  {"CTF"         ,"ctf","l0",""                  ,"St_ctf_Maker","St_Tables,St_ctf,St_ctf_Maker","",kFALSE}, 
-  {"MWC"         ,"mwc","l0",""                  ,"St_mwc_Maker","St_Tables,St_mwc,St_mwc_Maker","",kFALSE}, 
-  {"TRG"         ,"trg","l0",""                  ,"St_trg_Maker","St_trg,St_Tables,St_trg_Maker","",kFALSE},
-  {"L3T"         ,"l3Tracks","",""                ,"St_l3t_Maker","St_Tables,St_l3,St_l3t_Maker","",kFALSE},
-  {"RICH"        ,"rch","",""                               ,"StRchMaker","St_Tables,StRchMaker","",kFALSE},
-  {"GLOBAL"      ,"global","","match,primary,v0,xi,kink,dst"      ,"StMaker","St_Tables,StChain","",kFALSE},
-  {"MATCH"       ,"match","global",""     ,"StMatchMaker","libtls,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"MATCH"       ,"match","global",""     ,"StMatchMaker","libtls,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"PRIMARY"     ,"primary","global","" ,"StPrimaryMaker","libtls,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"V0"          ,"v0","global",""           ,"StV0Maker","libtls,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"XI"          ,"xi","global",""           ,"StXIMaker","libtls,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"KINK"        ,"kink","global",""       ,"StKinkMaker","libtls,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"DST"         ,"dst","global",""       ,"St_dst_Maker","libtls,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"EVENT"       ,"StEventMaker","",""          ,"StEventMaker","St_Tables,StEvent,StEventMaker","",kFALSE},
-  {"ANALYSIS"    ,"analysis","",""                  ,"StAnalysisMaker","StEvent,StAnalysisMaker","",kFALSE},
-  {"QA"          ,"QA","",""                              ,"St_QA_Maker","St_Tables,St_QA_Maker","",kFALSE},
-  {"QAC"         ,"CosmicsQA","",""               ,"StQACosmicMaker","St_Tables,StQACosmicMaker","",kFALSE},
+  {"TCL"         ,"tpc_hits","tpc","tables,tls"            ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
+  {"TPT"         ,"tpc_tracks","tpc","tables,tls"          ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
+  {"SVT"         ,"svt"     ,""     ,"tables,srs,stk"                       ,"StMaker","StChain","",kFALSE},
+  {"SRS"         ,"svt_hits","svt","tls"                   ,"St_srs_Maker","St_svt,St_srs_Maker","",kFALSE},
+  {"STK"         ,"svt_tracks","svt","tls"                 ,"St_stk_Maker","St_svt,St_stk_Maker","",kFALSE},
+  {"FTPC"        ,"ftpc"  ,"","tables,-fss,fcl,fpt"                         ,"StMaker","StChain","",kFALSE},
+  {"FSS"         ,"ftpc_raw","ftpc","SCL"                 ,"St_fss_Maker","St_ftpc,St_fss_Maker","",kFALSE},
+  {"FCL"         ,"ftpc_hits","ftpc","SCL"    ,"StFtpcClusterMaker","St_ftpc,StFtpcClusterMaker","",kFALSE},
+  {"FPT"         ,"ftpc_tracks","ftpc","SCL"              ,"St_fpt_Maker","St_ftpc,St_fpt_Maker","",kFALSE},
+  {"EMC"         ,"emc","","tables,ems,emh"                                 ,"StMaker","StChain","",kFALSE},
+  {"EMS"         ,"emc_raw","emc","tables"                 ,"St_ems_Maker","St_emc,St_ems_Maker","",kFALSE},
+  {"EMH"         ,"emc_hits","emc","tables"                ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
+  {"L0"          ,"l0","","tables,ctf,mwc,trg"                              ,"StMaker","StChain","",kFALSE}, 
+  {"CTF"         ,"ctf","l0","tables"                      ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE}, 
+  {"MWC"         ,"mwc","l0","tables"                      ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
+  {"TRG"         ,"trg","l0","tables"                      ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
+  {"L3T"         ,"l3Tracks","","tables"                    ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
+  {"RICH"        ,"rch","","tables"                                   ,"StRchMaker","StRchMaker","",kFALSE},
+  {"GLOBAL"      ,"global","","tables,match,primary,v0,xi,kink,dst"         ,"StMaker","StChain","",kFALSE},
+  {"MATCH"     ,"match","global","SCL,tables,tls","StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"MATCH"     ,"match","global","SCL,tables,tls","StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"PRIMARY","primary","global","SCL,tables,tls","StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"V0"          ,"v0","global","SCL,tables,tls"    ,"StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"XI"          ,"xi","global","SCL,tables,tls"    ,"StXIMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"KINK"        ,"kink","global","SCL,tables,tls","StKinkMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"DST"         ,"dst","global","SCL,tables,tls","St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"EVENT"       ,"StEventMaker","","tables,SCL","StEventMaker","St_Tables,StEvent,StEventMaker","",kFALSE},
+  {"ANALYSIS"    ,"analysis","","SCL"               ,"StAnalysisMaker","StEvent,StAnalysisMaker","",kFALSE},
+  {"QA"          ,"QA","","tables,SCL"                    ,"St_QA_Maker","St_Tables,St_QA_Maker","",kFALSE},
+  {"QAC"         ,"CosmicsQA","tables",""         ,"StQACosmicMaker","St_Tables,StQACosmicMaker","",kFALSE},
   {"AllEvent"    ,""  ,"",""                                   ,"","","Write whole event to StTree",kFALSE},
   {"St_geom"     ,"","",""       ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"DISPLAY"    ,"EventDisplay","","St_geom","StEventDisplayMaker","StEvent,StEventDisplayMaker","",kFALSE},
@@ -239,7 +243,9 @@ Int_t StBFChain::Load()
 	Int_t NParsed = ParseString(BFC[i].Libs,Libs);
 	const Char_t *lib = gSystem->GetLibraries(); 
 	for (j=0;j<=NParsed;j++) {
-	  if (!strstr(lib,Libs[j]->Data())) {
+	  TString libe(*Libs[j]);
+	  libe.Append(".");
+	  if (!strstr(lib,libe.Data())) {
 	    iok = gSystem->Load(Libs[j]->Data());
 	    if (iok < 0)  {
 	      gMessMgr->QAInfo() << "\tproblem with loading\t" << Libs[j]->Data() << endm;
@@ -523,7 +529,7 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
       }
     }
   }
-  if (Infile) {
+  if (Infile && !GetOption("FZIN")) {
     setFiles= new StFile();
     InFile = new TString(Infile);
     TString *Files[80];
@@ -531,13 +537,11 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
     Int_t i;
     for (i=0;i<=NParsed;i++) {
       if (!strstr(Files[i]->Data(),"*") &&
-	gSystem->AccessPathName(Files[i]->Data())) {// file does not exist
+	  gSystem->AccessPathName(Files[i]->Data())) {// file does not exist
 	printf (" *** NO FILE: %s, exit!\n", Files[i]->Data());
 	gSystem->Exit(1); 
       }
-    }
-    if (!GetOption("FZIN")) {
-      setFiles->AddFile(Files[i]->Data());
+      else setFiles->AddFile(Files[i]->Data());
     }
   }
   if (GetOption("GSTAR")) {
