@@ -235,7 +235,7 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
   // these tables are for PSD decoding //////////////////////////////////
 
   // which PMT Box is connected to each RDO and crate board
-  if(date >= 20040101) // year 2002/2003 pp and dAu runs
+  if(date >= 0) // year 2002/2003 pp and dAu runs
   {
     int PsdModules_tmp[4][15]={
                               {11,12,13,14,15,16,17,18,19,20,21,22,23,24,25},                //RDO 0
