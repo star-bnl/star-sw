@@ -125,7 +125,7 @@ void WriteOutPIDTableMacro( char* myOutputName){
    //////////filling............
    TFile outFile(mOutputFileName,"RECREATE");
 
-   outFile.SetFormat(1);
+   //   outFile.SetFormat(1);
    outFile.cd();
 
 
@@ -383,8 +383,8 @@ void WriteOutPIDTableMacro( char* myOutputName){
        if (     pPosition<=EFcnRight->GetXmax()
 	     && pPosition >EFcnRight->GetXmin() && EFcnRight->GetParameter(1)<0 )
              theAmp = EFcnRight->Eval(pPosition,0.,0.);
-       else  theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
-                  (theAmpHist->GetBinContent(pIdx+1)) : 0.;       
+       //       else  theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
+       //                  (theAmpHist->GetBinContent(pIdx+1)) : 0.;       
 
       if (nhitsPosition<=5)  //ndedx<5, E fcn fitting not good. use hist.
          theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
