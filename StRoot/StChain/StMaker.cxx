@@ -1,7 +1,10 @@
-// $Id: StMaker.cxx,v 1.26 1999/04/30 14:58:41 perev Exp $
+// $Id: StMaker.cxx,v 1.27 1999/04/30 21:08:16 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.27  1999/04/30 21:08:16  perev
+// GetDataSet fix maker:
+//
 // Revision 1.26  1999/04/30 14:58:41  perev
-// cd() added to StMaker class
+//  cd() added to StMaker class
 //
 // Revision 1.25  1999/04/16 14:22:00  fisyak
 // replace break in Makers loop from ==kStErr to >kStWarn to account EOF
@@ -68,7 +71,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.26 1999/04/30 14:58:41 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.27 1999/04/30 21:08:16 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -255,10 +258,17 @@ int icol;
   
   icol = actInput.Index(":");
   if (icol>=0) {//there is maker name is hidden
-    tmp.Replace(0,999,actInput,icol);
-    if (tmp != GetName()) 	goto DOWN;
-    tmp = actInput; tmp.Replace(0,icol+1,"");
-    dataset = Find(tmp);
+    tmp = actInput; 
+    tmp.Replace(0,0,".make/"); icol +=6;
+    tmp.Replace(icol,1,"/.data");
+    dataset = Find((const char*)tmp);  		// .make/MAKER/.data/...
+    if (dataset) return dataset;
+    dataset = Find((const char*)tmp+6);		//       MAKER/.data/...
+    if (dataset) return dataset;
+    tmp.Replace(icol,6,"/.const");
+    dataset = Find((const char*)tmp);		// .make/MAKER/.const/...
+    if (dataset) return dataset;
+    dataset = Find((const char*)tmp+6);		//       MAKER/.const/...
     if (dataset) return dataset;
   }
 
