@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.31 1999/05/06 00:19:04 fine Exp $
+// $Id: StMaker.cxx,v 1.32 1999/05/06 00:23:45 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.32  1999/05/06 00:23:45  fine
+// StMaker::MakeDoc some extra comments have been introduced
+//
 // Revision 1.31  1999/05/06 00:19:04  fine
 // StMaker::MakeDoc method has been re-introduced for the 3d time
 //
@@ -80,7 +83,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.31 1999/05/06 00:19:04 fine Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.32 1999/05/06 00:23:45 fine Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -502,6 +505,7 @@ void StMaker::PrintTimer(Option_t *option)
 void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseClasses){
  //
  // MakeDoc - creates the HTML doc for this class and for the base classes:
+ //           (if baseClasses == kTRUE)
  //         *  St_XDFFile  St_Module      St_Table       *
  //         *  St_DataSet  St_DataSetIter St_FileSet     *
  //         *  StMaker     StChain                       *
@@ -542,12 +546,14 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   THtml html;
 
   // Define the set of the subdirectories with the STAR class sources
-  //                         Directory name    Class name   Share library name
-  const Char_t *source[] = {"StRoot/St_base" ,"St_DataSet",    "St_base"
-                           ,"StRoot/StChain" ,"StMaker"   ,    "StChain"
-                           ,"StRoot/xdf2root","St_XDFFile",    "xdf2root"
-                           ,".share/tables"  , ""         ,    ""
-                           ,"inc"            , ""         ,    ""
+  //                       | --------------  | ----------  | ------------------ |
+  //                       | Directory name    Class name    Share library name |
+  //                       | --------------  | ----------  | ------------------ |
+  const Char_t *source[] = {"StRoot/St_base" ,"St_DataSet",     "St_base"
+                           ,"StRoot/StChain" ,"StMaker"   ,     "StChain"
+                           ,"StRoot/xdf2root","St_XDFFile",     "xdf2root"
+                           ,".share/tables"  , ""         ,     ""
+                           ,"inc"            , ""         ,     ""
                            };
   const Int_t lsource = sizeof(source)/4;
  
