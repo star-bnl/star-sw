@@ -203,6 +203,11 @@ void THelixTrack::Set(const double *xyz,const double *dir,double rho,const doubl
   Build();
 }
 //_____________________________________________________________________________
+void THelixTrack::Set(double rho)
+{
+   fRho = rho; fMax = 1./(fabs(fRho*fCosL)+1.e-10);
+}
+//_____________________________________________________________________________
 void THelixTrack::Backward()
 {
 
@@ -295,10 +300,9 @@ double THelixTrack::Step(double step, double *xyz, double *dir) const
 //_____________________________________________________________________________
 double THelixTrack::Move(double step) 
 {
-  Step(step,fX,fP);
-  fHXP[0] = fH[1]*fP[2] - fH[2]*fP[1];
-  fHXP[1] = fH[2]*fP[0] - fH[0]*fP[2];
-  fHXP[2] = fH[0]*fP[1] - fH[1]*fP[0];
+  double xyz[3],dir[3];
+  Step(step,xyz,dir);
+  Set(xyz,dir,fRho);
   return step;
 }
 
@@ -447,7 +451,7 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
 //		Z estimated step 
 
     int zStep=0;
-    step[1]= 0.5*GetPeriod(); if (fHP<0) step[1]=- step[1];
+    step[1] = 0;
     if (fabs(fHP) > 0.01){ //Z approximation
       zStep = 1;
       step[1] = pnd[2]/fHP;
@@ -464,7 +468,7 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
       }
       step[2] /= fCosL;
     }
-    if (fabs(step[1]-step[2]) > GetPeriod()) {
+    if (zStep && fabs(step[1]-step[2]) > GetPeriod()) {
       int nperd = (int)((step[1]-step[2])/GetPeriod());
       step[2] += nperd*GetPeriod();
     }
@@ -481,9 +485,12 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
     memset(xnear,0,sizeof(xnear));
     pnear[0]= fCosL; pnear[2]=fHP;
 //		iterations
-    double dstep = 1.e+10;
-    double lMax = (step[1]>step[2])? step[1]:step[2];
-    double lMin = (step[1]>step[2])? step[2]:step[1];
+    double dstep = 1.e+10,dztep;
+    double lMax = step[0]+0.25*GetPeriod();
+    double lMin = step[0]-0.25*GetPeriod();
+    if (zStep) {
+      lMax = (step[1]>step[2])? step[1]:step[2];
+      lMin = (step[1]>step[2])? step[2]:step[1];}
     int iter=40,icut=1;
     THelixTrack local(xnear,pnear,fRho);
     local.Move(step[0]);
@@ -503,9 +510,11 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
       dstep = 0; icut = 0;
       for (i=0;i<3;i++) {dstep += pnear[i]*(pnd[i]-xnear[i]);}
       if(dstep<0) {
-        lMax = ss; if ((ss+dstep)<lMin) {icut=1;dstep = 0.5*(lMin-lMax);}
+        lMax = ss; dztep = -0.5*(lMax-lMin);
+	if (dstep<dztep) {icut=1;dstep = dztep;}
       } else {
-        lMin = ss; if ((ss+dstep)>lMax) {icut=1;dstep = 0.5*(lMax-lMin);}
+        lMin = ss; dztep =  0.5*(lMax-lMin);
+	if (dstep>dztep) {icut=1;dstep = dztep;}
       }
       ss += dstep; 
     }
