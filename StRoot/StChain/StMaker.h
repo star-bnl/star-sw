@@ -212,14 +212,14 @@ public:
    /// Static functions
    static  StMaker     *GetMaker(const TDataSet *ds)  ;
    static EDataSetPass  ClearDS (TDataSet* ds,void *user );
-
+   static const char   *RetCodeAsString(int kode);
 
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.65 2004/04/15 16:05:29 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.66 2004/04/26 00:07:19 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -249,8 +249,11 @@ private:
 #endif
 
 
-// $Id: StMaker.h,v 1.65 2004/04/15 16:05:29 fine Exp $
+// $Id: StMaker.h,v 1.66 2004/04/26 00:07:19 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.66  2004/04/26 00:07:19  perev
+// RetCodeAsString(kode) added. String form of STAR return codes
+//
 // Revision 1.65  2004/04/15 16:05:29  fine
 // Add extra data-mmeber and method for the coming STAR logger
 //
