@@ -1,14 +1,17 @@
 /****************************************************************
- * $Id: StRichPadMonitor.cxx,v 2.0 2000/08/09 16:28:04 gans Exp $
+ * $Id: StRichPadMonitor.cxx,v 2.1 2000/08/09 23:26:58 gans Exp $
  * Description:
- *  First aTtempt at a simple Pad Monitor.
+ *  A Pad Monitor for the STAR-RICH.
  *  Runs only in ROOT
  *
  *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
- * Revision 2.0  2000/08/09 16:28:04  gans
- * Created New Maker for all drawable objects.
+ * Revision 2.1  2000/08/09 23:26:58  gans
+ * Use TBoxes instead of TLines for Pad Monitor
+ *
+ * Revision 2.1  2000/08/09 23:26:58  gans
+ * Use TBoxes instead of TLines for Pad Monitor
  *
  * Revision 2.0  2000/08/09 16:28:04  gans
  * Created New Maker for all drawable objects.
@@ -146,30 +149,44 @@ StRichPadMonitor::StRichPadMonitor(StRichGeometryDb* geoDb) : mGeometryDb(geoDb)
 //     cout << "yci (1.5)   " << yci << endl;
     TLine aLine;
     aLine.SetLineWidth(2);
+
+    TLine aLine;
+    aLine.SetLineWidth(2);
+
+    TBox aBox;
+    aBox.SetLineWidth(2);
+    aBox.SetLineColor(1);
+    aBox.SetFillStyle(0);
+
+    // Quadrant 1 Outline
+    aBox.DrawBox(xci,yci,xco,yco);
+    // Quadrant 2 Outline
+    aBox.DrawBox(-xci,yci,-xco,yco);
+    // Quadrant 3 Outline
     aBox.DrawBox(-xci,-yci,-xco,-yco);
     // Quandrant 4 Outline
-    aLine.DrawLine(xci, yco, xco, yco);
-    aLine.DrawLine(xci, yci, xco, yci);
-    aLine.DrawLine(xci, yco, xci, yci);
-    aLine.DrawLine(xco, yco, xco, yci);
+    aBox.DrawBox(xci,-yci,xco,-yco);
+    
+    // Quadrant 1 outline
+    // aLine.DrawLine(xci, yco, xco, yco);
     // aLine.DrawLine(xci, yci, xco, yci);
     // aLine.DrawLine(xci, yco, xci, yci);
-    aLine.DrawLine(-xco, yco, -xci, yco);
-    aLine.DrawLine(-xco, yci, -xci, yci);
-    aLine.DrawLine(-xco, yco, -xco, yci);
-    aLine.DrawLine(-xci, yco, -xci, yci);
+    // aLine.DrawLine(xco, yco, xco, yci);
+    
+    // Quadrant 2 outline
+    //aLine.DrawLine(-xco, yco, -xci, yco);
     //aLine.DrawLine(-xco, yci, -xci, yci);
     //aLine.DrawLine(-xco, yco, -xco, yci);
-    aLine.DrawLine(-xco, -yci, -xci, -yci);
-    aLine.DrawLine(-xco, -yco, -xci, -yco);
-    aLine.DrawLine(-xco, -yci, -xco, -yco);
-    aLine.DrawLine(-xci, -yci, -xci, -yco);
+    //aLine.DrawLine(-xci, yco, -xci, yci);
+    
+    // Quadrant 3 outline
+    //aLine.DrawLine(-xco, -yci, -xci, -yci);
     //aLine.DrawLine(-xco, -yco, -xci, -yco);
     //aLine.DrawLine(-xco, -yci, -xco, -yco);
-    aLine.DrawLine(xci, -yci, xco, -yci);
-    aLine.DrawLine(xci, -yco, xco, -yco);
-    aLine.DrawLine(xci, -yci, xci, -yco);
-    aLine.DrawLine(xco, -yci, xco, -yco);
+    //aLine.DrawLine(-xci, -yci, -xci, -yco);
+    
+    // Quadrant 4 outline
+    //aLine.DrawLine(xci, -yci, xco, -yci);
     //aLine.DrawLine(xci, -yco, xco, -yco);
     //aLine.DrawLine(xci, -yci, xci, -yco);
     //aLine.DrawLine(xco, -yci, xco, -yco);
@@ -613,7 +630,8 @@ void StRichPadMonitor::drawRings()
 	}
 	mVectorTracks[j]->getProjectedMIP()->Draw();
       // .5 GeV, but somehow are. limit now at 1 Gev/c
-}
+    mVectorTracks[j]->getProjectedMIP()->Draw();
+  }
   }  
 void StRichPadMonitor::clearTracks()
 {
