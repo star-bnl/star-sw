@@ -1,6 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.26 1999/03/20 20:07:56 fisyak Exp $
+// $Id: StTrsMaker.cxx,v 1.27 1999/03/23 03:37:26 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.27  1999/03/23 03:37:26  lasiuk
+// incorporate ROOT dataSets for DB initialization
+// move construction and destruction of "mAllthedata"
+//
 // Revision 1.26  1999/03/20 20:07:56  fisyak
 // Add access to DataSet with parameters
 //
@@ -75,6 +79,10 @@
 #define hISTOGRAM  1
 #define uNPACK_ALL 1
 #define vERBOSITY  0
+//
+// You must select a data base initializer method
+#define ROOT_DATABASE_PARAMETERS
+#define aSCII_DATABASE_PARAMETERS
 //////////////////////////////////////////////////////////////////////////
 
 #include "StTrsMaker.h"
@@ -104,11 +112,20 @@
 #include "StTpcCoordinateTransform.hh"
 
 // TRS
-// db
+// DataBase Initialization
+#ifdef ROOT_DATABASE_PARAMETERS
+#include "StTpcROOTGeometry.hh"
+#include "StTpcROOTSlowControl.hh"
+#include "StTpcROOTElectronics.hh"
+#include "StROOTMagneticField.hh"
+#endif
+
+#ifdef ASCII_DATABASE_PARAMETERS
 #include "StTpcSimpleGeometry.hh"
 #include "StTpcSimpleSlowControl.hh"
 #include "StTpcSimpleElectronics.hh"
 #include "StSimpleMagneticField.hh"
+#endif
 #include "StTrsDeDx.hh"
 
 #include "electronicsDataSet.h"
@@ -142,7 +159,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.26 1999/03/20 20:07:56 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.27 1999/03/23 03:37:26 lasiuk Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -165,11 +182,28 @@ Int_t StTrsMaker::Init()
     // Set up the DataBase access
   St_DataSet *TrsPars = GetDataBase("params/tpc/trspars");
   assert(TrsPars);
-  geometryDataSet *Geometry       = (geometryDataSet    *) TrsPars->Find("Trs/Geometry");
-  electronicsDataSet *Electonics  = (electronicsDataSet *) TrsPars->Find("Trs/Electronics");
-  slowcontrolDataSet *SlowControl = (slowcontrolDataSet *) TrsPars->Find("Trs/SlowControl");
-  
-#if 1
+  // should use dynamic_cast when available
+  geometryDataSet    *Geometry    = static_cast<geometryDataSet*>(TrsPars->Find("Trs/Geometry"));
+  electronicsDataSet *Electronics = static_cast<electronicsDataSet*>(TrsPars->Find("Trs/Electronics"));
+  slowcontrolDataSet *SlowControl = static_cast<slowcontrolDataSet*>(TrsPars->Find("Trs/SlowControl"));
+
+#ifdef ROOT_DATABASE_PARAMETERS
+  mGeometryDb =
+     StTpcROOTGeometry::instance(Geometry);
+  mGeometryDb->print();
+
+  mSlowControlDb =
+       StTpcROOTSlowControl::instance(SlowControl);
+  mSlowControlDb->print();
+   
+   mMagneticFieldDb =
+       StROOTMagneticField::instance();  // default is .5T field in z direction
+
+   mElectronicsDb =
+       StTpcROOTElectronics::instance(Electronics);
+   mElectronicsDb->print();
+#endif
+#ifdef ASCII_DATABASE_PARAMETERS
     //
     // Check File access
     //
@@ -290,9 +324,6 @@ Int_t StTrsMaker::Init()
    // which is accessible via the StTrsUnpacker
    mUnPacker = new StTrsUnpacker;
 
-   mAllTheData =
-       new StTrsRawDataEvent();
-
    //
    // Maker Initialization
    //
@@ -324,7 +355,11 @@ void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
 }
 Int_t StTrsMaker::Make(){
     //  PrintInfo();
-
+    //
+    // Make the event to put the data
+    mAllTheData =
+	new StTrsRawDataEvent();
+    
     //Do not use this unless you really know what you are
     // doing...
 #ifdef HISTOGRAM
@@ -731,7 +766,7 @@ Int_t StTrsMaker::Make(){
 //     m_DataSet =  new St_DataSet(GetName());
     m_DataSet->Add(new St_ObjectSet("Event", mAllTheData));
     m_DataSet->Add(new St_ObjectSet("Decoder", mUnPacker));
-  
+  PR(mAllTheData->mSectors.size());
     return kStOK;
 }
 
@@ -761,7 +796,7 @@ Int_t StTrsMaker::Finish()
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.26 1999/03/20 20:07:56 fisyak Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.27 1999/03/23 03:37:26 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
