@@ -20,10 +20,11 @@
 *:RETURN VALUE: TRUE or FALSE
 *:<---------------------------------------------------------------------
 */
-long dsuPrintDataset(DS_DATASET_T *pDataset)
+long 
+dsuPrintDataset(DS_DATASET_T *pDataset)
 {
    long i;
-   long iclen;
+   size_t iclen;
    char *typeSpec;
 
    if(pDataset->tid == 0) {
@@ -31,7 +32,7 @@ long dsuPrintDataset(DS_DATASET_T *pDataset)
       printf("DATASET %s",pDataset->name);
       printf("[%d%%%d]\n",pDataset->elcount,pDataset->maxcount);
       for (i=0;i<pDataset->elcount;i++) {
-         printf(" %4d - ",i);
+         printf(" %4ld - ",i);
 #ifndef OLD_DSL
          dsuPrintDataset(pDataset->p.link[i]);
 #else	/* OLD_DSL */
@@ -45,6 +46,8 @@ long dsuPrintDataset(DS_DATASET_T *pDataset)
       printf("%s",pDataset->name);
       printf("[%d%%%d];\n",pDataset->elcount,pDataset->maxcount);
    }
+
+   return TRUE;
 }
 
 /*
@@ -55,18 +58,17 @@ long dsuPrintDataset(DS_DATASET_T *pDataset)
 *:RETURN VALUE: TRUE or FALSE
 *:<---------------------------------------------------------------------
 */
-long dsuListDataset(DS_DATASET_T *pDataset)
+long
+dsuListDataset(DS_DATASET_T *pDataset)
 {
    long i;
-   long iclen;
-   char *typeSpec;
 
    if(pDataset->tid == 0) {
       printf(" ######################################## \n");
       printf("DATASET %s",pDataset->name);
       printf("[%d%%%d]\n",pDataset->elcount,pDataset->maxcount);
       for (i=0;i<pDataset->elcount;i++) {
-         printf(" %4d - ",i);
+         printf(" %4ld - ",i);
 #ifndef OLD_DSL
          dsuListDataset(pDataset->p.link[i]);
 #else	/* OLD_DSL */
@@ -77,5 +79,7 @@ long dsuListDataset(DS_DATASET_T *pDataset)
       printf("%s",pDataset->name);
       printf("[%d%%%d];\n",pDataset->elcount,pDataset->maxcount);
    }
+
+   return TRUE;
 }
 
