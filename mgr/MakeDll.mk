@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.96 1999/07/07 14:08:36 fisyak Exp $
+# $Id: MakeDll.mk,v 1.97 1999/07/13 14:41:42 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.97  1999/07/13 14:41:42  fisyak
+# Add SKIP_LIB env. varibale to skip unwanted directory
+#
 # Revision 1.96  1999/07/07 14:08:36  fisyak
 # Extract dependencies from standard make path, add pathes to StarClassLibrary and MySql
 #
@@ -525,7 +528,6 @@ $(OBJ_DIR)/%.$(O) : %.c
 $(OBJ_DIR)/%.$(O) : %.cc
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
 $(OBJ_DIR)/%.$(O) : %.cxx 
-	echo BOT OHO $(PKGNAME)
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
 $(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(OBJ_DIR)/geant3.def
 	$(CP)$(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
