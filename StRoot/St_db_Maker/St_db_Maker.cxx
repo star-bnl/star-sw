@@ -166,12 +166,12 @@ TDatime St_db_Maker::Time(const char *filename)
 
   if (idate) { time.Set(idate,itime);return time;}
 
-  if (lname+20 <= lfilename    &&
-      filename[lname+1 ]=='.'  && 
+  if (lname+18 <= lfilename    &&
+      filename[lname+0 ]=='.'  && 
       filename[lname+9 ]=='.'  && 
-      filename[lname+18]=='.'  ) {// file name format:  <name>.YYYYMMDD.hhmmss.<ext>
-       idate  = atoi(filename+lname+ 2); 
-       itime  = atoi(filename+lname+11);
+      filename[lname+16]=='.'  ) {// file name format:  <name>.YYYYMMDD.hhmmss.<ext>
+       idate  = atoi(filename+lname+ 1); 
+       itime  = atoi(filename+lname+10);
    } else {			   // file name format:  <name>.<ext>
        idate = kMinTime;
        itime = 0;
