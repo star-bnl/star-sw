@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.58 2000/07/16 23:04:27 perev Exp $
+// $Id: doEvents.C,v 1.59 2000/07/21 01:38:46 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -125,7 +125,7 @@ void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, cons
       setFiles->SetDebug();
       const char *Argv[]= {
 	    "-s","dst runco",                           // list of components needed
-	    "-q","n_trk_tpc[0]>1000 && n_trk_tpc[1]>1000",   // example of user query
+	    "-q","numberOfPrimaryTracks>1500",   // example of user query
 	    "-c","/afs/rhic/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
         };
       Int_t Argc=sizeof(Argv)/4;
@@ -269,8 +269,11 @@ void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
-// Revision 1.58  2000/07/16 23:04:27  perev
-// Remove redundunt Finish() call
+// Revision 1.59  2000/07/21 01:38:46  perev
+// GC query changed
+//
+// Revision 1.59  2000/07/21 01:38:46  perev
+// GC query changed
 //
 // Revision 1.58  2000/07/16 23:04:27  perev
 // Remove redundunt Finish() call
