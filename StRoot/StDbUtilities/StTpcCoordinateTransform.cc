@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.20 2001/05/22 22:32:14 hardtke Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.21 2001/05/23 00:09:55 hardtke Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.21  2001/05/23 00:09:55  hardtke
+ * Add error message if rotation matrix inversion fails
+ *
  * Revision 1.20  2001/05/22 22:32:14  hardtke
  * Add tpc global to local transformations
  *
@@ -216,7 +219,7 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
 // 	    PR(cos(beta));
 // 	    PR(sin(beta));
 	}
-	double phi = 0.0;
+	double phi = 0.0;  //large uncertainty, so set to 0
         double theta = gTpcDbPtr->GlobalPosition()->TpcRotationAroundGlobalAxisY();
         double psi = gTpcDbPtr->GlobalPosition()->TpcRotationAroundGlobalAxisX();
 	//        cout << cos(theta) << " " << cos(phi) << endl;
@@ -231,11 +234,11 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
         mGlobalToTpcRotation(3,3) = cos(theta)*cos(psi);
         unsigned int ierr;
         mTpcToGlobalRotation = mGlobalToTpcRotation.inverse(ierr);
-//  	if (ierr==0){ 
-//            cerr << "StTpcCoordinateTransform::Cant invert rotation matrix" << endl;
-//            cout << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endl;
-//  	  cout << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endl;
-//          }
+  	if (ierr!=0){ 
+            cerr << "StTpcCoordinateTransform::Cant invert rotation matrix" << endl;
+            cout << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endl;
+  	  cout << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endl;
+        }
         mTpcPositionInGlobal.setX(gTpcDbPtr->GlobalPosition()->TpcCenterPositionX());
         mTpcPositionInGlobal.setY(gTpcDbPtr->GlobalPosition()->TpcCenterPositionY());
         mTpcPositionInGlobal.setZ(gTpcDbPtr->GlobalPosition()->TpcCenterPositionZ());
