@@ -1,5 +1,5 @@
 // 
-// $Id: StEmcRawMaker.cxx,v 1.8 2004/12/14 11:32:11 suaide Exp $
+// $Id: StEmcRawMaker.cxx,v 1.5 2004/11/02 03:23:09 suaide Exp $
 
 #include <math.h>
 
@@ -33,7 +33,6 @@ ClassImp(StEmcRawMaker)
 */
 StEmcRawMaker::StEmcRawMaker(const char *name):StMaker(name)
 {
-  m_Mode = 0;
   mEvent = 0;
   mBemcRaw = new StBemcRaw();  
   mEemcRaw = new StEemcRaw();  
@@ -56,13 +55,7 @@ Int_t StEmcRawMaker::Init()
 {     
   //................BEMC stuff ..............
   mBemcRaw->initHisto();
-  mBemcRaw->printConf();
-  if(m_Mode&0x1==1) 
-  {
-    gMessMgr->Info()<<"Setting BEMC debug Mode -> save all hits into StEvent"<<endm;
-    mBemcRaw->saveAllStEvent(kTRUE);
-    mBemcRaw->initQAHisto();
-  }
+
   //................EEMC stuff ..............
   eeStDb= (StEEmcDbMaker*) GetMaker("eeDb");
   
@@ -281,17 +274,6 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
-// Revision 1.8  2004/12/14 11:32:11  suaide
-// added histograms for status tables creation
-//
-// Revision 1.7  2004/11/24 00:12:19  suaide
-// added check in for m_Mode&0x1==1 for bemcDebug flag in bfc
-//
-// Revision 1.6  2004/11/22 12:46:22  suaide
-// added new flags for hit reconstruction. Status are not checked
-// dureing production anymore in order to avoid bad status loaded in
-// DB
-//
 // Revision 1.5  2004/11/02 03:23:09  suaide
 // small changes in order to fix a bug
 //

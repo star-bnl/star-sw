@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.49 2004/12/07 17:04:46 posk Exp $
+// $Id: StFlowEvent.h,v 1.47 2004/05/05 21:13:45 aihong Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -59,7 +59,10 @@ public:
   Float_t        ZDCSMD_PsiWst();
   Float_t 	 ZDCSMD_GetPosition(int eastwest,int verthori,int strip);
   Double_t       G_New(StFlowSelection* pFlowSelect, Double_t Zx, Double_t Zy);
+  Double_t       G_Old(StFlowSelection* pFlowSelect, Double_t Zx, Double_t Zy);
   Double_t       SumWeightSquare(StFlowSelection* pFlowSelect);
+  Double_t       WgtMult_q4(StFlowSelection* pFlowSelect);
+  Double_t       WgtMult_q6(StFlowSelection* pFlowSelect);
   TVector2       NormQ(StFlowSelection* pFlowSelect);
   Float_t        CTB() const;
   Float_t        ZDCe() const;
@@ -102,6 +105,7 @@ public:
   void SetZDCw(const Float_t zdcw);
   void SetZDCSMD(int eastwest,int verthori,int strip,const Float_t zdcsmd);
 #ifndef __CINT__		
+  void SetPhiWeight(const Flow::PhiWgt_t &pPhiWgt);
   void SetPhiWeightFarEast(const Flow::PhiWgt_t &pPhiWgt);
   void SetPhiWeightEast(const Flow::PhiWgt_t &pPhiWgt);
   void SetPhiWeightWest(const Flow::PhiWgt_t &pPhiWgt);
@@ -137,6 +141,7 @@ public:
   static void SetPtWgtSaturation(Float_t);
   static void SetPtWgt(Bool_t);
   static void SetEtaWgt(Bool_t);
+  static void SetOnePhiWgt();
   static void SetFirstLastPhiWgt();
   static void SetFirstLastPoints();
   static void SetUseZDCSMD(Bool_t);
@@ -165,6 +170,7 @@ private:
   static Float_t      mEtaFtpcCuts[4][2][Flow::nSels];           // range values
   static Float_t      mPtTpcCuts[2][2][Flow::nSels];             // range
   static Float_t      mPtFtpcCuts[2][2][Flow::nSels];            // range
+  Flow::PhiWgt_t      mPhiWgt;                                   //!flattening weights
   Flow::PhiWgt_t      mPhiWgtFarEast;                            //!flattening weights FarEast
   Flow::PhiWgt_t      mPhiWgtEast;                               //!flattening weights East
   Flow::PhiWgt_t      mPhiWgtWest;                               //!flattening weights West
@@ -184,6 +190,7 @@ private:
   static Bool_t       mProbPid;                                  // flag for probability pid
   static Bool_t       mEtaSubs;                                  // flag for eta subevents
   static Bool_t       mRanSubs;                                  // flag for random subevents
+  static Bool_t       mOnePhiWgt;                                // flag for old phi weights
   static Bool_t       mFirstLastPhiWgt;                          // flag for using z of first and last points for reading phi weights
   static Bool_t       mFirstLastPoints;                          // flag for using z of first and last points for generating phi weights
   static Bool_t	      mUseZDCSMD;				 // flag for using ZDC SMD for RP
@@ -265,6 +272,9 @@ inline Bool_t   StFlowEvent::RanSubs() const { return mRanSubs; }
 inline Bool_t   StFlowEvent::UseZDCSMD() const { return mUseZDCSMD;}
 
 #ifndef __CINT__
+inline void StFlowEvent::SetPhiWeight(const Flow::PhiWgt_t& pPhiWgt) {
+  memcpy (mPhiWgt, pPhiWgt, sizeof(Flow::PhiWgt_t)); }
+
 inline void StFlowEvent::SetPhiWeightFarEast(const Flow::PhiWgt_t& pPhiWgtFarEast) {
   memcpy (mPhiWgtFarEast, pPhiWgtFarEast, sizeof(Flow::PhiWgt_t)); }
 
@@ -392,6 +402,8 @@ inline void StFlowEvent::SetEtaSubs() { mEtaSubs = kTRUE; }
 
 inline void StFlowEvent::SetRanSubs() { mRanSubs = kTRUE; }
 
+inline void StFlowEvent::SetOnePhiWgt() { mOnePhiWgt = kTRUE; }
+
 inline void StFlowEvent::SetFirstLastPhiWgt() { mFirstLastPhiWgt = kTRUE; }
 
 inline void StFlowEvent::SetFirstLastPoints() { mFirstLastPoints = kTRUE; }
@@ -409,13 +421,6 @@ inline void StFlowEvent::SetEtaWgt(Bool_t EtaWgt) { mEtaWgt = EtaWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
-// Revision 1.49  2004/12/07 17:04:46  posk
-// Eliminated the very old mOnePhiWgt, which used one phiWgt histogram for flttening
-// instead of four.
-//
-// Revision 1.48  2004/11/16 21:22:22  aihong
-// removed old cumulant method
-//
 // Revision 1.47  2004/05/05 21:13:45  aihong
 // Gang's code for ZDC-SMD added
 //

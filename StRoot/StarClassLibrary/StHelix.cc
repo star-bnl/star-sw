@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.23 2004/12/02 02:51:16 ullrich Exp $
+ * $Id: StHelix.cc,v 1.22 2004/05/03 23:35:31 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -10,10 +10,6 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
- * Revision 1.23  2004/12/02 02:51:16  ullrich
- * Added option to pathLenghth() and distance() to search for
- * DCA only within one period. Default stays as it was.
- *
  * Revision 1.22  2004/05/03 23:35:31  perev
  * Possible non init WarnOff
  *
@@ -210,12 +206,12 @@ double StHelix::fudgePathLength(const StThreeVector<double>& p) const
     return s;
 }
 
-double StHelix::distance(const StThreeVector<double>& p, bool scanPeriods) const
+double StHelix::distance(const StThreeVector<double>& p) const
 {
-    return abs(this->at(pathLength(p,scanPeriods))-p);
+    return abs(this->at(pathLength(p))-p);
 }
 
-double StHelix::pathLength(const StThreeVector<double>& p, bool scanPeriods) const 
+double StHelix::pathLength(const StThreeVector<double>& p) const 
 {
     //
     //  Returns the path length at the distance of closest 
@@ -259,29 +255,27 @@ double StHelix::pathLength(const StThreeVector<double>& p, bool scanPeriods) con
 	    // 
 	    s = fudgePathLength(p);
 
-	    if (scanPeriods) {
-	        double ds = period();
-	        int    j, jmin = 0;
-	        double d, dmin = abs(at(s) - p);
-	        for(j=1; j<MaxIterations; j++) {
-		  if ((d = abs(at(s+j*ds) - p)) < dmin) {
-		      dmin = d;
-		      jmin = j;
-		  }
-		  else
-		      break;
-	        }
-	        for(j=-1; -j<MaxIterations; j--) {
-		  if ((d = abs(at(s+j*ds) - p)) < dmin) {
-		      dmin = d;
-		      jmin = j;
-		  }
-		  else
-		      break;
-	        }
-	        if (jmin) s += jmin*ds;
+	    double ds = period();
+	    int    j, jmin = 0;
+	    double d, dmin = abs(at(s) - p);
+	    for(j=1; j<MaxIterations; j++) {
+		if ((d = abs(at(s+j*ds) - p)) < dmin) {
+		    dmin = d;
+		    jmin = j;
+		}
+		else
+		    break;
 	    }
-	    
+	    for(j=-1; -j<MaxIterations; j--) {
+		if ((d = abs(at(s+j*ds) - p)) < dmin) {
+		    dmin = d;
+		    jmin = j;
+		}
+		else
+		    break;
+	    }
+	    if (jmin) s += jmin*ds;
+
 	    //
 	    // Newtons method:
 	    // Stops after MaxIterations iterations or if the required
@@ -337,9 +331,9 @@ pair<double, double> StHelix::pathLength(double r) const
 	double t13 = mCosPhase*mCosPhase;
 	double t15 = r*r;
 	double t16 = mOrigin.x()*mOrigin.x();
-	double t20 = -mCosDipAngle*mCosDipAngle*(2.0*mOrigin.x()*mSinPhase*mOrigin.y()*mCosPhase +
+        double t20 = -mCosDipAngle*mCosDipAngle*(2.0*mOrigin.x()*mSinPhase*mOrigin.y()*mCosPhase +
 				 t12-t12*t13-t15+t13*t16);
-	if (t20<0.) return VALUE;
+        if (t20<0.) return VALUE;
 	t20 = ::sqrt(t20);
 	value.first  = (t1-t20)/(mCosDipAngle*mCosDipAngle);
 	value.second = (t1+t20)/(mCosDipAngle*mCosDipAngle);
@@ -367,9 +361,9 @@ pair<double, double> StHelix::pathLength(double r) const
 	             4.0*t11*mOrigin.y()*mCurvature*t2 + 4.0*t11 - 4.0*t14 +
 	             t32*t3 + 4.0*t15*t4 - 2.0*t35*t11 - 2.0*t35*t8;
 	double t40 = (-t3*t38);
-	if (t40<0.) return VALUE;
+        if (t40<0.) return VALUE;
 	t40 = ::sqrt(t40);
-	
+
 	double t43 = mOrigin.x()*mCurvature;
 	double t45 = 2.0*t5 - t35 + t21 + 2.0 - 2.0*t1*t2 -2.0*t43 - 2.0*t43*t5 + t8*t3;
 	double t46 = mH*mCosDipAngle*mCurvature;

@@ -1,9 +1,6 @@
-// $Id: StFtpcClusterFinder.cc,v 1.65 2004/12/10 23:07:46 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.64 2004/09/07 14:08:17 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
-// Revision 1.65  2004/12/10 23:07:46  jcs
-// Only fill FTPC software monitor if it exists
-//
 // Revision 1.64  2004/09/07 14:08:17  jcs
 // use the IAttr(".histos") to control histogramming
 // remove obsolete clfradius histogram
@@ -848,12 +845,12 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
     } // end of: for(iRow...)
 
   if (iftpc == 0 ) {
-  	  if (mFtpcMon) mFtpcMon->n_clus_ftpc[1] = clusters;
+  	  mFtpcMon->n_clus_ftpc[1] = clusters;
 	  westHits = mPoint->GetEntriesFast();
 	  gMessMgr->Message("", "I", "OS") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " << westHits << " hits in Ftpc West." << endm;
   }	  
   if (iftpc == 1 ) {
-	  if (mFtpcMon) mFtpcMon->n_clus_ftpc[0] = clusters;
+	  mFtpcMon->n_clus_ftpc[0] = clusters;
 	  eastHits = mPoint->GetEntriesFast() - westHits;
 	  gMessMgr->Message("", "I", "OS") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  eastHits << " hits in Ftpc East." << endm;
   }

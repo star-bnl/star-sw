@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: EztTrigBlob.cxx,v 1.2 2004/11/29 15:55:07 mvl Exp $
+ * $Id: EztTrigBlob.cxx,v 1.1 2004/10/28 00:10:19 mvl Exp $
  *********************************************************************
  * container for FULL STAR trigger data, requires Akio's calss to unpack it
  */
@@ -35,14 +35,15 @@ EztTrigBlob ::  ~EztTrigBlob() {
 void EztTrigBlob :: clear() {
   trgd->Reset();
   trgid->Reset();
-  version=0;
+  unixTimeStamp=0;
 }
 
 
 //--------------------------------------------------
 //--------------------------------------------------
 void EztTrigBlob :: print(int k, FILE *fd) const{
-  fprintf(fd,"EztTrigBlob::print() c-struct version=%d",version);
+  fprintf(fd,"EztTrigBlob:: print() ");
+  fprintf(fd,"timeStamp=%d=%s" ,(int)unixTimeStamp,ctime((const time_t *)&unixTimeStamp));
   fprintf(fd,"  size of banks: trgd=%d  trgid=%d\n",trgd->GetSize(),trgid->GetSize());
   if(k<=0) return;
   Char_t *d0=trgd->GetArray();

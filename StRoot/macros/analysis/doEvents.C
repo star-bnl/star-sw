@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: doEvents.C,v 1.102 2004/12/13 21:00:28 fine Exp $
+// $Id: doEvents.C,v 1.100 2004/08/27 02:23:48 fine Exp $
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
@@ -117,10 +117,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
   int nEvents = nEventsQQ;
   TString tflag = qaflag; tflag.ToLower();
   int eventDisplay = tflag.Contains("disp");
-  if (eventDisplay && gROOT->IsBatch() ){
-     cout <<  endl << endl <<" ** Warning  ** You have started the EventDisplay version in a batch mode" << endl;
-   return; 
-  }
+
   cout <<  endl << endl <<" doEvents -  input # events = " << nEvents << endl;
   Int_t ilist=0;
   while(fileList[ilist]){ 
@@ -174,7 +171,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
   if (eventDisplay) {
     int NwGeant=5000000, IwType=0, NwPaw=0;
     St_geant_Maker *geantMk = new St_geant_Maker("geant",NwGeant,NwPaw,IwType);
-    geantMk->LoadGeometry("detp geometry y2004");
+    geantMk->LoadGeometry("detp geometry year2001");
     geantMk->SetActive(kFALSE);
   }
 
@@ -467,12 +464,6 @@ int gcInit(const char *request)
 //____________________________________________________________________________
 //////////////////////////////////////////////////////////////////////////////
 // $Log: doEvents.C,v $
-// Revision 1.102  2004/12/13 21:00:28  fine
-// Add a protection against of batch mode for Event Display
-//
-// Revision 1.101  2004/11/08 17:20:59  fine
-// fix the default geometry version from year2001 to y2004
-//
 // Revision 1.100  2004/08/27 02:23:48  fine
 // comment out delete setFile to preserve setFile for interactive user
 //

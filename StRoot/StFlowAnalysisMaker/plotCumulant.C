@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCumulant.C,v 1.9 2004/12/09 23:47:12 posk Exp $
+// $Id: plotCumulant.C,v 1.8 2004/03/01 22:43:45 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Nov 2001
 // Description:  Macro to plot histograms made by StFlowCumulantMaker.
@@ -145,8 +145,14 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t selN=2, Int_t orderN=0, Int_t ha
   } else {                        // one graph from a multi graph page
     int firstK = orderN/2 -1, firstJ = harN -1, lastK = orderN/2, lastJ = harN;
   }
+  char countSel[2];
+  sprintf(countSel,"%d",selN);
   for (int j = firstJ; j < lastJ; j++) {
+    char countRows[2];
+    sprintf(countRows,"%d",j+1);
     for (int k = firstK ; k < lastK; k++) {
+      char countColumns[2];
+      sprintf(countColumns,"%d",k+1);
       char countOrder[2];
       sprintf(countOrder,"%d",2*(k+1));
       int padN = j*columns + k + 1;                          // pad number
@@ -156,12 +162,12 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t selN=2, Int_t orderN=0, Int_t ha
       if (!singleGraph) {
 	histName->Append(*countOrder);
 	histName->Append("_Sel");
-	*histName += selN;
+	histName->Append(*countSel);
 	histName->Append("_Har");
-	*histName += j+1;
+	histName->Append(*countRows);
       } else {
 	histName->Append("_Sel");
-	*histName += selN;
+	histName->Append(*countSel);
       }
       cout << " col= " << k+1 << " row= " << j+1 << " pad= " << padN << "\t" 
 	   << histName->Data() << endl;
@@ -251,10 +257,6 @@ void plotCumulantAll(Int_t nNames, Int_t orderN, Int_t selN, Int_t harN, Int_t f
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCumulant.C,v $
-// Revision 1.9  2004/12/09 23:47:12  posk
-// Minor changes in code formatting.
-// Added hist for TPC primary dca to AnalysisMaker.
-//
 // Revision 1.8  2004/03/01 22:43:45  posk
 // Changed some "->" to ".".
 //

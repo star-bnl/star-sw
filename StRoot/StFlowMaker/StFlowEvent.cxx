@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.52 2004/12/09 23:43:35 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.48 2004/08/24 20:24:33 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -68,6 +68,7 @@ Bool_t  StFlowEvent::mEtaWgt               = kTRUE;
 Bool_t  StFlowEvent::mProbPid              = kFALSE;
 Bool_t  StFlowEvent::mEtaSubs              = kFALSE;
 Bool_t  StFlowEvent::mRanSubs              = kFALSE;
+Bool_t  StFlowEvent::mOnePhiWgt            = kFALSE;
 Bool_t  StFlowEvent::mFirstLastPhiWgt      = kFALSE;
 Bool_t  StFlowEvent::mFirstLastPoints      = kFALSE;
 Bool_t  StFlowEvent::mUseZDCSMD		   = kFALSE;
@@ -96,9 +97,6 @@ Double_t StFlowEvent::PhiWeightRaw(Int_t selN, Int_t harN, StFlowTrack*
 				pFlowTrack) const {
   // Weight for making the event plane isotropic in the lab.
 
-  bool oddHar = (harN+1) % 2; // Choose odd or even
-  harN = oddHar ? 0 : 1;
-
   StTrackTopologyMap map = pFlowTrack->TopologyMap();
   float phi = pFlowTrack->Phi();
   if (phi < 0.) phi += twopi;
@@ -111,7 +109,9 @@ Double_t StFlowEvent::PhiWeightRaw(Int_t selN, Int_t harN, StFlowTrack*
   if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) { 
     // Tpc track, or no topologyMap
     n = (int)((phi/twopi)*Flow::nPhiBins);
-    if (mFirstLastPhiWgt) {
+    if (mOnePhiWgt) {
+      phiWgt = mPhiWgt[selN][harN][n];
+    } else if (mFirstLastPhiWgt) {
       float zFirstPoint = pFlowTrack->ZFirstPoint();
       float zLastPoint  = pFlowTrack->ZLastPoint();
       if (zFirstPoint > 0. && zLastPoint > 0.) {
@@ -198,26 +198,19 @@ Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN, StFlowTrack*
 }
 
 //-------------------------------------------------------------
-
 Double_t StFlowEvent::ZDCSMD_PsiWgtEast() {
   //get psi weight for east ZDCSMD
-
-  TH1F *mZDCSMD_PsiWgt = new TH1F("ZDCSMD_PsiWgt","ZDCSMD_PsiWgt",
-				  Flow::zdcsmd_nPsiBins,-twopi/2.,twopi/2.);
-  Int_t n = mZDCSMD_PsiWgt->FindBin(ZDCSMD_PsiEst());
+  TH1F *mZDCSMD_PsiWgt=new TH1F("ZDCSMD_PsiWgt","ZDCSMD_PsiWgt",Flow::zdcsmd_nPsiBins,-twopi/2.,twopi/2.);
+  Int_t n =mZDCSMD_PsiWgt->FindBin(ZDCSMD_PsiEst());
   mZDCSMD_PsiWgt->Delete();
 
   return mZDCSMD_PsiWgtEast[n-1];
 }
-
 //-------------------------------------------------------------
-
 Double_t StFlowEvent::ZDCSMD_PsiWgtWest() {
   //get psi weight for west ZDCSMD
-
-  TH1F *mZDCSMD_PsiWgt = new TH1F("ZDCSMD_PsiWgt","ZDCSMD_PsiWgt",
-				  Flow::zdcsmd_nPsiBins,-twopi/2.,twopi/2.);
-  Int_t n = mZDCSMD_PsiWgt->FindBin(ZDCSMD_PsiWst());
+  TH1F *mZDCSMD_PsiWgt=new TH1F("ZDCSMD_PsiWgt","ZDCSMD_PsiWgt",Flow::zdcsmd_nPsiBins,-twopi/2.,twopi/2.);
+  Int_t n =mZDCSMD_PsiWgt->FindBin(ZDCSMD_PsiWst());
   mZDCSMD_PsiWgt->Delete();
 
   return mZDCSMD_PsiWgtWest[n-1];
@@ -234,7 +227,7 @@ UInt_t StFlowEvent::Mult(StFlowSelection* pFlowSelect) {
   for (itr = TrackCollection()->begin(); 
        itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
-    if (pFlowSelect->Select(pFlowTrack)) mult++;
+    if (pFlowSelect->Select(pFlowTrack))  mult++;
   }
 
   return mult;
@@ -269,44 +262,44 @@ TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
   TVector2 mQ;
   Double_t mQx=0., mQy=0.;
 
-  if (mUseZDCSMD) { // pFlowSelect is disabled; only 1st order Q generated
-    Float_t eXsum=0., eYsum=0., wXsum=0., wYsum=0.;
-    Float_t eXWgt=0., eYWgt=0., wXWgt=0., wYWgt=0.;
-    for (int v=1; v<8; v++) {
-      eXsum += ZDCSMD_GetPosition(0,0,v)*ZDCSMD(0,0,v);
-      wXsum += ZDCSMD_GetPosition(1,0,v)*ZDCSMD(1,0,v);
-      eXWgt += ZDCSMD(0,0,v);
-      wXWgt += ZDCSMD(1,0,v);
-    } //v 
-    for (int h=1;h<9;h++) {
-      eYsum += ZDCSMD_GetPosition(0,1,h)*ZDCSMD(0,1,h);
-      wYsum += ZDCSMD_GetPosition(1,1,h)*ZDCSMD(1,1,h);
-      eYWgt += ZDCSMD(0,1,h);
-      wYWgt += ZDCSMD(1,1,h);
-    }
-    mQx= (eXWgt>0. && wXWgt>0. && eYWgt>0. && wYWgt>0.) ? 
-      eXsum/eXWgt - wXsum/wXWgt:0.;
-    mQy= (eXWgt>0. && wXWgt>0. && eYWgt>0. && wYWgt>0.) ? 
-      eYsum/eYWgt - wYsum/wYWgt:0.;
+  if(mUseZDCSMD) { //pFlowSelect is disabled;only 1st order Q generated
+  Float_t eXsum=0.,eYsum=0.,wXsum=0.,wYsum=0.;
+  Float_t eXWgt=0.,eYWgt=0.,wXWgt=0.,wYWgt=0.;
+  for(int v=1;v<8;v++) {
+    eXsum += ZDCSMD_GetPosition(0,0,v)*ZDCSMD(0,0,v);
+    wXsum += ZDCSMD_GetPosition(1,0,v)*ZDCSMD(1,0,v);
+    eXWgt += ZDCSMD(0,0,v);
+    wXWgt += ZDCSMD(1,0,v);
+  }//v 
+  for(int h=1;h<9;h++) {
+    eYsum += ZDCSMD_GetPosition(0,1,h)*ZDCSMD(0,1,h);
+    wYsum += ZDCSMD_GetPosition(1,1,h)*ZDCSMD(1,1,h);
+    eYWgt += ZDCSMD(0,1,h);
+    wYWgt += ZDCSMD(1,1,h);
+  }
+  mQx= (eXWgt>0. && wXWgt>0. && eYWgt>0. && wYWgt>0.) ? 
+    eXsum/eXWgt - wXsum/wXWgt:0.;
+  mQy= (eXWgt>0. && wXWgt>0. && eYWgt>0. && wYWgt>0.) ? 
+    eYsum/eYWgt - wYsum/wYWgt:0.;
   } //if
   else {
-    int    selN  = pFlowSelect->Sel();
-    int    harN  = pFlowSelect->Har();
-    double order = (double)(harN + 1);
-    
-    StFlowTrackIterator itr;
-    for (itr = TrackCollection()->begin(); 
-	 itr != TrackCollection()->end(); itr++) {
-      StFlowTrack* pFlowTrack = *itr;
-      if (pFlowSelect->Select(pFlowTrack)) {
-	double phiWgt = PhiWeight(selN, harN, pFlowTrack);
-	float phi = pFlowTrack->Phi();
-	mQx += phiWgt * cos(phi * order);
-	mQy += phiWgt * sin(phi * order);
-      }
+  int    selN  = pFlowSelect->Sel();
+  int    harN  = pFlowSelect->Har();
+  double order = (double)(harN + 1);
+
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    if (pFlowSelect->Select(pFlowTrack)) {
+      double phiWgt = PhiWeight(selN, harN, pFlowTrack);
+      float phi = pFlowTrack->Phi();
+      mQx += phiWgt * cos(phi * order);
+      mQy += phiWgt * sin(phi * order);
     }
-  } //else
-  
+  }
+  }//else
+
   mQ.Set(mQx, mQy);
   return mQ;
 }
@@ -331,10 +324,8 @@ Float_t StFlowEvent::Psi(StFlowSelection* pFlowSelect) {
 }
 
 //----------------------------------------------------------------------
-
 Float_t StFlowEvent::ZDCSMD_PsiCorr() {
   //difference between psi's from east and west ZDCSMD
-
   Float_t psi_e = ZDCSMD_PsiEst();
   Float_t psi_w = ZDCSMD_PsiWst();
   Float_t psi_w_shift = psi_w + twopi/2.;
@@ -351,17 +342,15 @@ Float_t StFlowEvent::ZDCSMD_PsiCorr() {
 }
 
 //----------------------------------------------------------------------
-
 Float_t StFlowEvent::ZDCSMD_PsiEst() {
   //psi angle from east ZDCSMD
+  Float_t eXsum=0.,eYsum=0.,eXWgt=0.,eYWgt=0.;
 
-  Float_t eXsum=0., eYsum=0., eXWgt=0., eYWgt=0.;
-
-  for(int v=1; v<8; v++) {
+  for(int v=1;v<8;v++) {
     eXsum += ZDCSMD_GetPosition(0,0,v)*ZDCSMD(0,0,v);
     eXWgt += ZDCSMD(0,0,v);
   }//v
-  for(int h=1; h<9; h++) {
+  for(int h=1;h<9;h++) {
     eYsum += ZDCSMD_GetPosition(0,1,h)*ZDCSMD(0,1,h);
     eYWgt += ZDCSMD(0,1,h);
   }//h
@@ -370,12 +359,9 @@ Float_t StFlowEvent::ZDCSMD_PsiEst() {
 
   return psi_e;
 }
-
 //----------------------------------------------------------------------
-
 Float_t StFlowEvent::ZDCSMD_PsiWst() {
   //psi angle from west ZDCSMD
-
   Float_t wXsum=0.,wYsum=0.,wXWgt=0.,wYWgt=0.;
 
   for(int v=1;v<8;v++) {
@@ -391,12 +377,9 @@ Float_t StFlowEvent::ZDCSMD_PsiWst() {
 
   return psi_w;
 }
-
 //-----------------------------------------------------------------------
-
 Float_t StFlowEvent::ZDCSMD_GetPosition(int eastwest,int verthori,int strip) {
   //get position of each slat;strip starts from 1
-
   Float_t zdcsmd_x[7] = {0.5,2,3.5,5,6.5,8,9.5};
   Float_t zdcsmd_y[8] = {1.25,3.25,5.25,7.25,9.25,11.25,13.25,15.25};
 
@@ -404,7 +387,6 @@ Float_t StFlowEvent::ZDCSMD_GetPosition(int eastwest,int verthori,int strip) {
   if(eastwest==1 && verthori==0) return Flow::zdcsmd_wx0-zdcsmd_x[strip-1];
   if(eastwest==0 && verthori==1) return zdcsmd_y[strip-1]/sqrt(2.)-Flow::zdcsmd_ey0;
   if(eastwest==1 && verthori==1) return zdcsmd_y[strip-1]/sqrt(2.)-Flow::zdcsmd_wy0;
-
   return 0;
   }
 
@@ -436,6 +418,17 @@ Double_t StFlowEvent::G_New(StFlowSelection* pFlowSelect, Double_t Zx, Double_t 
   return theG;
 }
 
+//-----------------------------------------------------------------------
+
+Double_t StFlowEvent::G_Old(StFlowSelection* pFlowSelect, Double_t Zx, Double_t Zy) { 
+  // Generating function for the old cumulant method.
+  // If expanded in Taylor series, one recovers G_New() in new new cumulant method.
+
+  TVector2 normQ = NormQ(pFlowSelect);
+
+  return exp(2*Zx*normQ.X() + 2*Zy*normQ.Y());
+
+}
 
 //-------------------------------------------------------------
 
@@ -497,6 +490,82 @@ Double_t StFlowEvent::SumWeightSquare(StFlowSelection* pFlowSelect) {
   return SumOfWeightSqr;
 }
 
+//-------------------------------------------------------------
+
+Double_t StFlowEvent::WgtMult_q4(StFlowSelection* pFlowSelect) { 
+  // Used only for the old cumulant method, for getting q4 when weight is on.
+  // Replace multiplicity in Eq.(74b) by this quantity when weight is on.
+  // This is derived based on (A4) in the old cumulant paper.
+
+  int selN = pFlowSelect->Sel();
+  int harN = pFlowSelect->Har();
+  double theMult        = 0.;
+  double theMeanWj4     = 0.;
+  double theMeanWj2     = 0.;
+  double theSumOfWgtSqr = 0;
+  double phiWgtSq;
+
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    if (pFlowSelect->Select(pFlowTrack)) {
+      
+      double phiWgt   = PhiWeight(selN, harN, pFlowTrack);
+      phiWgtSq        = phiWgt*phiWgt;
+      theSumOfWgtSqr += phiWgtSq;
+      theMeanWj4     += phiWgtSq*phiWgtSq;
+      theMult        += 1.;      
+    }
+  }
+  
+  if (theMult <= 0.) return theMult;
+
+  theMeanWj4 /= theMult;
+  theMeanWj2  = theSumOfWgtSqr / theMult;
+
+  return (theSumOfWgtSqr*theSumOfWgtSqr)/(theMult*(-theMeanWj4+2*theMeanWj2*theMeanWj2));
+}
+
+//-------------------------------------------------------------
+
+Double_t StFlowEvent::WgtMult_q6(StFlowSelection* pFlowSelect) { 
+  // Used only for the old cumulant method. For getting q6 when weight is on.
+  // Replace multiplicity in Eq.(74c) by this quantity when weight is on.
+  // This is derived based on (A4) in the old cumulant paper.
+
+  int selN = pFlowSelect->Sel();
+  int harN = pFlowSelect->Har();
+  double theMult        = 0.;
+  double theMeanWj6     = 0.;
+  double theMeanWj4     = 0.;
+  double theMeanWj2     = 0.;
+  double theSumOfWgtSqr = 0;
+  double phiWgtSq;
+
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    if (pFlowSelect->Select(pFlowTrack)) {
+      
+      double phiWgt   = PhiWeight(selN, harN, pFlowTrack);
+      phiWgtSq        = phiWgt*phiWgt;
+      theSumOfWgtSqr += phiWgtSq;
+      theMeanWj4     += phiWgtSq*phiWgtSq;
+      theMeanWj6     += phiWgtSq*phiWgtSq*phiWgtSq;
+      theMult        += 1.;
+    }
+  }
+    
+  if (theMult <= 0.) return theMult*theMult;
+
+  theMeanWj6 /= theMult;
+  theMeanWj4 /= theMult;
+  theMeanWj2  = theSumOfWgtSqr / theMult;
+
+  return 4.*(theSumOfWgtSqr*theSumOfWgtSqr*theSumOfWgtSqr)/(theMult*(theMeanWj6-9.*theMeanWj2*theMeanWj4+12.*theMeanWj2*theMeanWj2*theMeanWj2));
+}
 
 //-------------------------------------------------------------
 
@@ -973,20 +1042,6 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
-// Revision 1.52  2004/12/09 23:43:35  posk
-// Minor changes in code formatting.
-//
-// Revision 1.51  2004/12/07 23:08:11  posk
-// Only odd and even phiWgt hists. If the old phiWgt file contains more than
-// two harmonics, only the first two are read. Now writes only the first two.
-//
-// Revision 1.50  2004/12/07 17:04:44  posk
-// Eliminated the very old mOnePhiWgt, which used one phiWgt histogram for flttening
-// instead of four.
-//
-// Revision 1.49  2004/11/16 21:22:21  aihong
-// removed old cumulant method
-//
 // Revision 1.48  2004/08/24 20:24:33  oldi
 // Minor modifications to avoid compiler warnings.
 // Small bug fix (didn't affect anyone yet).

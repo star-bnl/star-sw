@@ -74,7 +74,7 @@ Double_t bichsel60(Double_t *x,Double_t *par) {
   return m_Bichsel->GetI60(TMath::Log10(poverm),par[3]);
 }
 void bichsel() {
-  if (gClassTable->GetID("StBichsel") < 0) {
+  if (gClassTable->GetID("BetheBloch") < 0) {
     gSystem->Load("libTable");
     gSystem->Load("St_base");
     gSystem->Load("StarClassLibrary");

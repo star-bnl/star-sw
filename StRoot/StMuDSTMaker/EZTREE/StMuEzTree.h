@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StMuEzTree.h,v 1.2 2004/11/29 15:55:07 mvl Exp $
+ * $Id: StMuEzTree.h,v 1.1 2004/10/28 00:10:20 mvl Exp $
  *
  * Author: Wei-Ming zhang           KSU  Aug. 2004
  *
@@ -18,9 +18,7 @@ class StEvent;
 class StEmcRawData;
 class EztEventHeader;
 class EztTrigBlob;
-class EztFpdBlob;
 class EztEmcRawData;
-
 
 
 class StMuEzTree {
@@ -30,14 +28,13 @@ class StMuEzTree {
   StMuEzTree();
   virtual ~StMuEzTree();
   
-  EztEventHeader*  copyHeader(StEvent* ev);
-  EztTrigBlob*     copyTrig(StEvent* ev);
-  EztFpdBlob*      copyFpd(StEvent* ev);
+  EztEventHeader*  getHeader(StEvent* ev);
+  EztTrigBlob*     getTrig(StEvent* ev);
   EztEmcRawData*   copy(StEmcRawData *inp, int i1, int i2); // working horse
   EztEmcRawData*   copyETow(StEmcRawData *inp);
   EztEmcRawData*   copyESmd(StEmcRawData *inp);
      
-  ClassDef(StMuEzTree,3)
+  ClassDef(StMuEzTree,2)
 };
     
 #endif /* StMuEzTree */

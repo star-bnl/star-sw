@@ -1,8 +1,5 @@
-* $Id: sisdgeo.g,v 1.3 2004/10/28 22:02:18 potekhin Exp $
+* $Id: sisdgeo.g,v 1.2 2004/01/29 19:57:37 potekhin Exp $
 * $Log: sisdgeo.g,v $
-* Revision 1.3  2004/10/28 22:02:18  potekhin
-* Improved the diagnostic message
-*
 * Revision 1.2  2004/01/29 19:57:37  potekhin
 * Positioned the laddre mother volume with the 'many'
 * option to guard ourselves against the quite possible
@@ -147,7 +144,6 @@ Module  SISDGEO  is the Silicon Strip Detector
       Component O      A=16  Z=8   W=1
       Mixture   Water  Dens=1.0
 
-      write(*,*) 'Level 0 of the SSD geometry'
       Create and Position SFMO in SVTT
 *******************************************************************************
 *

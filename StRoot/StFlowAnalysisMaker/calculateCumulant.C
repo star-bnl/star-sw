@@ -49,6 +49,8 @@ void calculateCumulant(const char* histFileName){
   //================        fill in pointers    ===================
   //for each selection
   for (int k = 0; k < nSels; k++) {
+    char countSels[2];
+    sprintf(countSels,"%d",k+1);
 
     histFull[k].mHistCumul = new TProfile*[nCumulDiffOrders];
     histFull[k].mHist_v    = new TH1D*[nCumulDiffOrders];
@@ -59,14 +61,14 @@ void calculateCumulant(const char* histFileName){
       histTitle = new TString("Flow_Cumul_Order"); 
       histTitle->Append(*theCumulOrderChar);           
       histTitle->Append("_Sel");                      
-      *histTitle += k+1;        
+      histTitle->Append(*countSels);        
       histFull[k].mHistCumul[ord] = (TProfile *)f->Get(histTitle->Data());
       delete histTitle;
 
       histTitle = new TString("Flow_Cumul_v_Order");
       histTitle->Append(*theCumulOrderChar);
       histTitle->Append("_Sel");
-      *histTitle += k+1;
+      histTitle->Append(*countSels);
       histFull[k].mHist_v[ord] = 
 	new  TH1D(*(histFull[k].mHistCumul[ord]->ProjectionX(histTitle->Data(),"e")));
       histFull[k].mHist_v[ord]->SetTitle(histTitle->Data());
@@ -78,6 +80,8 @@ void calculateCumulant(const char* histFileName){
 
     // for each harmonic
     for (int j = 0; j < nHars; j++) {
+      char countHars[2];
+      sprintf(countHars,"%d",j+1);
 
       histFull[k].histFullHar[j].mHistCumul2D  =  
 	new TProfile2D*[nCumulDiffOrders];
@@ -101,9 +105,9 @@ void calculateCumulant(const char* histFileName){
 	histTitle = new TString("Flow_Cumul2D_Order");
 	histTitle->Append(*theCumulOrderChar);
 	histTitle->Append("_Sel");
-	*histTitle += k+1;
+	histTitle->Append(*countSels);
 	histTitle->Append("_Har");
-	*histTitle += j+1;
+	histTitle->Append(*countHars);
         histFull[k].histFullHar[j].mHistCumul2D[ord] = 
                (TProfile2D *)f->Get(histTitle->Data());
         delete histTitle;
@@ -111,9 +115,9 @@ void calculateCumulant(const char* histFileName){
 	histTitle = new TString("Flow_CumulEta_Order");
 	histTitle->Append(*theCumulOrderChar);
 	histTitle->Append("_Sel");
-	*histTitle += k+1;
+	histTitle->Append(*countSels);
 	histTitle->Append("_Har");
-	*histTitle += j+1;
+	histTitle->Append(*countHars);
         histFull[k].histFullHar[j].mHistCumulEta[ord]= 
                (TProfile *)f->Get(histTitle->Data());
         delete histTitle;
@@ -122,9 +126,9 @@ void calculateCumulant(const char* histFileName){
 	histTitle = new TString("Flow_CumulPt_Order");
 	histTitle->Append(*theCumulOrderChar);
 	histTitle->Append("_Sel");
-	*histTitle += k+1;
+	histTitle->Append(*countSels);
 	histTitle->Append("_Har");
-	*histTitle += j+1;
+	histTitle->Append(*countHars);
 	histFull[k].histFullHar[j].mHistCumulPt[ord] = 
                (TProfile *)f->Get(histTitle->Data());
         delete histTitle;  
@@ -151,9 +155,9 @@ void calculateCumulant(const char* histFileName){
 	histTitle->Append("_GenFunIdx");
 	histTitle->Append(*qIndexOrderChar);
 	histTitle->Append("_Sel");
-	*histTitle += k+1;
+	histTitle->Append(*countSels);
 	histTitle->Append("_Har");
-	*histTitle += j+1;
+	histTitle->Append(*countHars);
 	histFull[k].histFullHar[j].mHistCumulIntegG0Sum[pq] =
                (TH1D *)f->Get(histTitle->Data());
         delete histTitle;  
@@ -166,33 +170,33 @@ void calculateCumulant(const char* histFileName){
 
 
       histTitle = new TString("Flow_CumulMultSum_Sel");
-      *histTitle += k+1;
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
-      *histTitle += j+1;
+      histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistMultSum =
              (TH1D *)f->Get(histTitle->Data());
         delete histTitle;  
 
       histTitle = new TString("Flow_CumulWgtMultSumq4_Sel");
-      *histTitle += k+1;
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
-      *histTitle += j+1;
+      histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistWgtMultSum_q4 =
              (TH1D *)f->Get(histTitle->Data());
         delete histTitle;  
 
       histTitle = new TString("Flow_CumulWgtMultSumq6_Sel");
-      *histTitle += k+1;
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
-      *histTitle += j+1;
+      histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistWgtMultSum_q6 =
              (TH1D *)f->Get(histTitle->Data());
         delete histTitle;  
 
       histTitle = new TString("Flow_CumulNEvent_Sel");
-      *histTitle += k+1;
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
-      *histTitle += j+1;
+      histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistNEvent =
              (TH1D *)f->Get(histTitle->Data());
         delete histTitle;  
@@ -206,6 +210,9 @@ void calculateCumulant(const char* histFileName){
 
 
   for (int k = 0; k < nSels; k++) {
+
+    char countSels[2];
+    sprintf(countSels,"%d",k+1);
 
     double  meanIntegV[nHars];     // V**1
     double  meanIntegV2[nHars];    // V**2
@@ -230,6 +237,9 @@ void calculateCumulant(const char* histFileName){
 
     for (int j = 0; j < nHars; j++) {
 
+
+      char countHars[2];
+      sprintf(countHars,"%d",j+1);
 
       cout<<" ========== Sel"<<k+1<<" Har"<<j+1<<" ==========="<<endl;
 
@@ -289,9 +299,9 @@ void calculateCumulant(const char* histFileName){
 	histTitle = new TString("Flow_Cumul_v2D_Order");
 	histTitle->Append(*theCumulOrderChar);
 	histTitle->Append("_Sel");
-	*histTitle += k+1;
+	histTitle->Append(*countSels);
 	histTitle->Append("_Har");
-	*histTitle += j+1;
+	histTitle->Append(*countHars);
 	histFull[k].histFullHar[j].mHist_v2D[ord] = 
 	  new TH2D(*(histFull[k].histFullHar[j].mHistCumul2D[ord]->
 		     ProjectionXY(histTitle->Data(),"e")));
@@ -304,9 +314,9 @@ void calculateCumulant(const char* histFileName){
 	histTitle = new TString("Flow_Cumul_vEta_Order");
 	histTitle->Append(*theCumulOrderChar);
 	histTitle->Append("_Sel");
-	*histTitle += k+1;
+	histTitle->Append(*countSels);
 	histTitle->Append("_Har");
-	*histTitle += j+1;
+	histTitle->Append(*countHars);
 	histFull[k].histFullHar[j].mHist_vEta[ord] = 
 	  new  TH1D(*(histFull[k].histFullHar[j].mHistCumulEta[ord]->
 		      ProjectionX(histTitle->Data(),"e")));
@@ -318,9 +328,9 @@ void calculateCumulant(const char* histFileName){
 	histTitle = new TString("Flow_Cumul_vPt_Order");
 	histTitle->Append(*theCumulOrderChar);
 	histTitle->Append("_Sel");
-	*histTitle += k+1;
+	histTitle->Append(*countSels);
 	histTitle->Append("_Har");
-	*histTitle += j+1;
+	histTitle->Append(*countHars);
 	histFull[k].histFullHar[j].mHist_vPt[ord] = 
 	  new  TH1D(*(histFull[k].histFullHar[j].mHistCumulPt[ord]->
 		      ProjectionX(histTitle->Data(),"e")));

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.24 2004/12/09 23:43:38 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.22 2004/08/18 00:19:21 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -40,7 +40,7 @@ StFlowSelection::StFlowSelection() : mSubevent(-1) {
   mChiSqPart[0]         = 0.;
   mChiSqPart[1]         = 0.;
   mDcaGlobalPart[0]     = 0.;
-  mDcaGlobalPart[1]     = 2.;
+  mDcaGlobalPart[1]     = 1.;
   mYPart[0]             = 0.;
   mYPart[1]             = 0.;
 }
@@ -66,7 +66,6 @@ Bool_t StFlowSelection::Select(StFlowTrack* pFlowTrack) {
 
   // Selected for event plane
   if (!pFlowTrack->Select(mHarmonic, mSelection, mSubevent)) return kFALSE;
-
   return kTRUE;
 }
 
@@ -127,7 +126,7 @@ Bool_t StFlowSelection::SelectPart(StFlowTrack* pFlowTrack) {
       (chiSq < mChiSqPart[0] || 
        chiSq >= mChiSqPart[1])) return kFALSE;
 
-  // Dca Global
+  // DCA Global
   float globdca = pFlowTrack->DcaGlobal();
   if (mDcaGlobalPart[1] > mDcaGlobalPart[0] && 
       (globdca < mDcaGlobalPart[0] || 
@@ -175,13 +174,6 @@ void StFlowSelection::PrintList() const {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
-// Revision 1.24  2004/12/09 23:43:38  posk
-// Minor changes in code formatting.
-//
-// Revision 1.23  2004/12/07 17:01:13  posk
-// Changed the default value of the dca selection for particles correlated with
-// the event plane from 1 cm back to 2 cm.
-//
 // Revision 1.22  2004/08/18 00:19:21  oldi
 // Several changes were necessary to comply with latest changes of MuDsts and StEvent:
 //

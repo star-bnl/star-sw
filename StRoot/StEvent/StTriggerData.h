@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.10 2004/11/30 19:19:11 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.9 2004/10/20 18:56:22 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
- * Revision 2.10  2004/11/30 19:19:11  ullrich
- * Added new access function for EEMC data (Akio).
- *
  * Revision 2.9  2004/10/20 18:56:22  ullrich
  * Add method getRawSize().
  *
@@ -154,10 +151,6 @@ public:
     // Experts only!
     virtual char* getTriggerStructure() = 0;
     virtual int getRawSize() const = 0;
-    virtual unsigned      char * getDsm0_EEMC(int prepost=0) const =0;
-    virtual unsigned short int * getDsm1_EEMC(int prepost=0) const =0;
-    virtual unsigned short int * getDsm2_EMC()  const =0;
-    virtual unsigned short int * getDsm3()      const =0;
 
 protected:
     int   mYear;

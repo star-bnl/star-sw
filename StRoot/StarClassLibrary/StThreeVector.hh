@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.11 2004/12/02 20:07:32 fine Exp $
+ * $Id: StThreeVector.hh,v 1.10 2003/10/30 20:06:46 perev Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,9 +15,6 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
- * Revision 1.11  2004/12/02 20:07:32  fine
- * define the valid method for both flavor of StThreeVector
- *
  * Revision 1.10  2003/10/30 20:06:46  perev
  * Check of quality added
  *
@@ -723,7 +720,6 @@ StThreeVector<T>::pseudoProduct(const StThreeVector<double>& v) const
 {
     return this->pseudoProduct(v.x(),v.y(),v.z());
 }
-#endif  // ST_NO_MEMBER_TEMPLATES
 template<class T>
 inline int
 StThreeVector<T>::valid(double world) const
@@ -734,6 +730,7 @@ StThreeVector<T>::valid(double world) const
   }		
   return 1;		
 }
+#endif  // ST_NO_MEMBER_TEMPLATES
 
 //
 //        Non-member functions

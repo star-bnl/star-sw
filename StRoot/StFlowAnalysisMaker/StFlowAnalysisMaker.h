@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.46 2004/12/09 23:47:07 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.44 2004/05/05 21:13:47 aihong Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -58,7 +58,7 @@ public:
   void     SetEtaRange_for_vPt(Float_t lo, Float_t hi);
   void     SetV1Ep1Ep2(Bool_t v1Ep1Ep2 = kTRUE);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.46 2004/12/09 23:47:07 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.44 2004/05/05 21:13:47 aihong Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -88,7 +88,6 @@ private:
   TH1F*     mHistChargeFtpc;           //!
   TH1F*     mHistDcaGlobalTpc;         //!
   TH1F*     mHistDcaGlobalFtpc;        //!
-  TH1F*     mHistDcaTpc;                  //!
   TH1F*     mHistDcaFtpc;              //!
   TH1F*     mHistChi2Tpc;              //!
   TH1F*     mHistChi2Ftpc;             //!
@@ -154,8 +153,8 @@ private:
   TH1F*     mZDC_SMD_west_hori;	       //!
   TH1F*     mZDC_SMD_east_vert;        //!
   TH1F*     mZDC_SMD_east_hori;        //!
-  TH1F*	    mHistZDCSMDPsiWgtEast;     //!
-  TH1F*     mHistZDCSMDPsiWgtWest;     //!
+  TH1F*	    mHistZDCSMDPsiWgtEast;	       //!
+  TH1F*     mHistZDCSMDPsiWgtWest;         //!
   
   // for each harmonic, each selection, and each sub-event
   struct histSubHars {
@@ -170,24 +169,6 @@ private:
 
   // for each harmonic and each selection
   struct histFullHars {
-    TH1F*       mHistPhiCorr;
-    TH1F*       mHistPsiSubCorr;
-    TH1F*       mHistPsiSubCorrDiff;
-    TH1F*       mHistPsi;
-    TH1F*       mHistPsi_Diff;
-    TH1F*       mHistMult;
-    TH1F*       mHist_q;
-    TH2D*       mHistYield2D;
-    TProfile2D* mHist_vObs2D;
-    TProfile*   mHist_vObsEta;
-    TProfile*   mHist_vObsPt;
-    TH2D*       mHist_v2D;
-    TH1D*       mHist_vEta;
-    TH1D*       mHist_vPt;
-  };
-
-  // for two harmonics and each selection
-  struct histTwoHars {
     TH1D*       mHistPhiFarEast;
     TH1D*       mHistPhiEast;
     TH1D*       mHistPhiWest;
@@ -212,6 +193,20 @@ private:
     TH1D*       mHistPhiFlatFtpcEast;
     TH1D*       mHistPhiFlatFtpcWest;
     TH1D*       mHistPhiFlatFtpcFarWest;
+    TH1F*       mHistPhiCorr;
+    TH1F*       mHistPsiSubCorr;
+    TH1F*       mHistPsiSubCorrDiff;
+    TH1F*       mHistPsi;
+    TH1F*       mHistPsi_Diff;
+    TH1F*       mHistMult;
+    TH1F*       mHist_q;
+    TH2D*       mHistYield2D;
+    TProfile2D* mHist_vObs2D;
+    TProfile*   mHist_vObsEta;
+    TProfile*   mHist_vObsPt;
+    TH2D*       mHist_v2D;
+    TH1D*       mHist_vEta;
+    TH1D*       mHist_vPt;
   };
 
   // for each selection
@@ -223,7 +218,6 @@ private:
     TProfile* mHist_vObs;
     TH1D*     mHist_v;
     struct histFullHars histFullHar[Flow::nHars];
-    struct histTwoHars histTwoHar[2];
   };
   struct histFulls histFull[Flow::nSels]; //!
 
@@ -252,14 +246,6 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
-// Revision 1.46  2004/12/09 23:47:07  posk
-// Minor changes in code formatting.
-// Added hist for TPC primary dca to AnalysisMaker.
-//
-// Revision 1.45  2004/12/07 23:10:21  posk
-// Only odd and even phiWgt hists. If the old phiWgt file contains more than
-// two harmonics, only the first two are read. Now writes only the first two.
-//
 // Revision 1.44  2004/05/05 21:13:47  aihong
 // Gang's code for ZDC-SMD added
 //

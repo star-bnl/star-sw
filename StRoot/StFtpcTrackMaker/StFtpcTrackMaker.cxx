@@ -1,13 +1,5 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.71 2004/12/10 23:07:37 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.69 2004/09/27 14:17:03 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
-// Revision 1.71  2004/12/10 23:07:37  jcs
-// Only fill FTPC software monitor if it exists
-//
-// Revision 1.70  2004/11/23 19:18:16  jcs
-// Store FTPC vertices (east and west) in StEvent/StCalibrationVertex
-// Comment out (should eventually be removed) Ftpc vertex - Tpc vertex histograms,
-// they are now filled in StEventQAMaker.cxx
-//
 // Revision 1.69  2004/09/27 14:17:03  jcs
 // pad vs. time histograms moved to St_QA_Maker
 //
@@ -287,8 +279,8 @@
 //#define DEBUGFILE
 
 // Select tracking method
-//#define TWOCYCLETRACKING
-#define LASERTRACKING
+#define TWOCYCLETRACKING
+//#define LASERTRACKING
 
 #include "StFtpcTrackMaker.h"
 #include "StFtpcVertex.hh"
@@ -317,8 +309,6 @@
 #include "StVertexId.h"
 #include "StFtpcHit.h"
 #include "StPrimaryVertex.h"
-#include "StCalibrationVertex.h"
-#include "StMeasuredPoint.h"
 #include "StMessMgr.h"
 
 #include "tables/St_ffs_gepoint_Table.h"
@@ -578,19 +568,6 @@ Int_t StFtpcTrackMaker::Make()
 
   if (tracker.GetNumberOfTracks() >= StFtpcTrackingParams::Instance()->MinNumTracks()) {
     tracker.EstimateVertex(tracker.GetVertex(), 1);
-    
-    // write FTPC vertices (east and west) to StEvent
-    const StThreeVectorF east(tracker.GetVertexEast()->GetX(), tracker.GetVertexEast()->GetY(), tracker.GetVertexEast()->GetZ());
-    StCalibrationVertex *ftpcEastVertex = new StCalibrationVertex();
-    ftpcEastVertex->setPosition(east);
-    ftpcEastVertex->setType(kFtpcEastCalVtxId);
-    event->addCalibrationVertex(ftpcEastVertex);
-
-    StThreeVectorF west(tracker.GetVertexWest()->GetX(), tracker.GetVertexWest()->GetY(), tracker.GetVertexWest()->GetZ());
-    StCalibrationVertex *ftpcWestVertex = new StCalibrationVertex();
-    ftpcWestVertex->setPosition(west);
-    ftpcWestVertex->setType(kFtpcWestCalVtxId);
-    event->addCalibrationVertex(ftpcWestVertex);
   }
 
   StFtpcSoftwareMonitor* ftpcMon = NULL;
@@ -601,15 +578,15 @@ Int_t StFtpcTrackMaker::Make()
        event->softwareMonitor()->setFtpcSoftwareMonitor(ftpcMon);
      }      
   }       	       
+  FillMonSoftFtpc(event,&tracker,ftpcMon);
 
-  if (ftpcMon) FillMonSoftFtpc(event,&tracker,ftpcMon);
-
-  // write global tracks, do primary fit, write primary tracks
-  StFtpcTrackToStEvent trackToStEvent;
-  trackToStEvent.FillEvent(event, tracker.GetTracks());  
-  tracker.PrimaryFit();
-  trackToStEvent.FillEventPrimaries(event, tracker.GetTracks());
-  
+  {
+    // write global tracks, do primary fit, write primary tracks
+    StFtpcTrackToStEvent trackToStEvent;
+    trackToStEvent.FillEvent(event, tracker.GetTracks());  
+    tracker.PrimaryFit();
+    trackToStEvent.FillEventPrimaries(event, tracker.GetTracks());
+  }
   if (Debug()) {
     gMessMgr->Message("", "I", "OS") << "Total time consumption         " << tracker.GetTime() << " s." << endm;
     StFtpcTrackingParams::Instance()->PrintParams();
@@ -701,15 +678,13 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
     
     if (tracker->GetNumberOfTracks() >= StFtpcTrackingParams::Instance()->MinNumTracks()) {
       
-// the following 4 histograms are now accumulated in StEventQAMaker.cxx
-// J.Seyboth Nov 19,2004
       // vertex estimation for both FTPCs (using all tracks)
-      //m_vertex_east_xy->Fill(tracker->GetVertexEast()->GetX()-tracker->GetVertex()->GetX(),
-      //			     tracker->GetVertexEast()->GetY()-tracker->GetVertex()->GetY());
-      //m_vertex_east_z->Fill(tracker->GetVertexEast()->GetZ()-tracker->GetVertex()->GetZ());
-      //m_vertex_west_xy->Fill(tracker->GetVertexWest()->GetX()-tracker->GetVertex()->GetX(),
-      //			     tracker->GetVertexWest()->GetY()-tracker->GetVertex()->GetY());
-      //m_vertex_west_z->Fill(tracker->GetVertexWest()->GetZ()-tracker->GetVertex()->GetZ());    
+      m_vertex_east_xy->Fill(tracker->GetVertexEast()->GetX()-tracker->GetVertex()->GetX(),
+			     tracker->GetVertexEast()->GetY()-tracker->GetVertex()->GetY());
+      m_vertex_east_z->Fill(tracker->GetVertexEast()->GetZ()-tracker->GetVertex()->GetZ());
+      m_vertex_west_xy->Fill(tracker->GetVertexWest()->GetX()-tracker->GetVertex()->GetX(),
+			     tracker->GetVertexWest()->GetY()-tracker->GetVertex()->GetY());
+      m_vertex_west_z->Fill(tracker->GetVertexWest()->GetZ()-tracker->GetVertex()->GetZ());    
       
       if (IAttr(".histos")) {
          for (Int_t i = 1; i <= 6; i++) { // east
@@ -794,7 +769,7 @@ void StFtpcTrackMaker::FillMonSoftFtpc(StEvent *event,StFtpcTracker *tracker, St
     
     iftpc = (firstPoint->GetDetectorId() == 5) ? 0 : 1; // 0 for detId == 5 and 1 for detId == 4
 
-   ftpcMon->n_trk_ftpc[iftpc]++;
+    ftpcMon->n_trk_ftpc[iftpc]++;
 
     Int_t nFitPoints = track->GetHits()->GetEntriesFast();
     ftpcMon->res_pad_ftpc[iftpc] += track->GetChiSq()[0] / (nFitPoints - 3);
@@ -860,7 +835,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.71 2004/12/10 23:07:37 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.69 2004/09/27 14:17:03 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {

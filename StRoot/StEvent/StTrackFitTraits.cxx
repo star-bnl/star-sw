@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.15 2004/12/02 23:35:13 ullrich Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.14 2004/08/13 18:15:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
- * Revision 2.15  2004/12/02 23:35:13  ullrich
- * Added misisng setXXX functions.
- *
  * Revision 2.14  2004/08/13 18:15:42  ullrich
  * Added +1 to the number of fit points when bool flag is set.
  *
@@ -74,7 +71,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.15 2004/12/02 23:35:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.14 2004/08/13 18:15:42 ullrich Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
@@ -257,23 +254,8 @@ StTrackFitTraits::setNumberOfFitPoints(unsigned char val, StDetectorId det)
 }
 
 void
-StTrackFitTraits::setPrimaryVertexUsedInFit(bool val)
+StTrackFitTraits:: setPrimaryVertexUsedInFit(bool val)
 {mPrimaryVertexUsedInFit = val;}
-
-void StTrackFitTraits::setPidHypothesis(unsigned short val)
-{
-    mPidHypothesis = val;
-}
-
-void StTrackFitTraits::setChi2(float val, unsigned int i)
-{
-    if (i<2) mChi2[i] = val;
-}
-
-void StTrackFitTraits::setCovariantMatrix(float val[15])
-{
-    mCovariantMatrix.Set(15, val);
-}
 
 //______________________________________________________________________________
 void StTrackFitTraits::Streamer(TBuffer &R__b)

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.62 2004/12/09 23:47:11 posk Exp $
+// $Id: plot.C,v 1.57 2004/03/11 18:00:05 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -33,7 +33,6 @@ char     tmp[10];
 TCanvas* can;
 
 TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
-  gInterpreter->ProcessLine(".O0");
 
   //Bool_t includeFtpc = kTRUE;
   Bool_t includeFtpc = kFALSE;
@@ -70,7 +69,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_Charge_Ftpc",
     "Flow_DcaGlobal_Tpc",
     "Flow_DcaGlobal_Ftpc",
-    "Flow_Dca_Tpc",
     "Flow_Dca_Ftpc",
     "Flow_Chi2_Tpc",
     "Flow_Chi2_Ftpc",
@@ -166,7 +164,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_MultOverOrig",
     "Flow_MultEta",
     "Flow_MultPart",
-    "Flow_Dca_Tpc",
     "Flow_DcaGlobal_Tpc",
     "Flow_Chi2_Tpc",
     "Flow_FitPts_Tpc",
@@ -235,10 +232,10 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   int nSingles;
   if (includeFtpc) {
     const int nNames = sizeof(baseName1) / sizeof(char*);
-    nSingles = 49 + 1;
+    nSingles = 48 + 1;
   } else {
     const int nNames = sizeof(baseName2) / sizeof(char*);
-    nSingles = 49 + 1 - 19;
+    nSingles = 48 + 1 - 19;
   }
 
   // construct arrays of base and short names
@@ -315,12 +312,9 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   // set row and column numbers
   char* cp = strstr(shortName[pageNumber],"Subs");
   int columns = (cp) ? nSubs + nSels : nSels;
-  int rows;
-  rows = (strstr(shortName[pageNumber],"Phi_")) ? 2 : nHars;
-  if (strcmp(shortName[pageNumber],"Flow_Phi_Corr")==0) rows = nHars;
-  if (strcmp(shortName[pageNumber],"Flow_Psi_Sub_Corr_Diff")==0) rows = nHars -1;
+  int rows = (strcmp(shortName[pageNumber],"Flow_Psi_Sub_Corr_Diff")!=0) ?
+    nHars : nHars -1;
   int pads = rows*columns;
-  //cout << "pads = " << pads << endl;
 
   // make the graph page
   if (multiGraph) {
@@ -356,8 +350,12 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   TLine* lineYcm    = new TLine(Ycm, -10., Ycm, 10.);
   TLine* lineOnePhi = new TLine(0., 1., phiMax, 1.);
   for (int j = firstJ; j < lastJ; j++) {
+    char countRows[2];
+    sprintf(countRows,"%d",j+1);
     float order = (float)(j+1);
     for (int k = firstK ; k < lastK; k++) {
+      char countColumns[2];
+      sprintf(countColumns,"%d",k+1);
       int padN = j*columns + k + 1;                    // pad number
 
       // construct histName and histProjName
@@ -380,17 +378,17 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	TString* histName = new TString(temp);
 	histProjName = new TString(baseName[pageNumber]);
 	if (!singleGraph) {
-	  *histProjName += k+1;
+	  histProjName->Append(*countColumns);
 	  histProjName->Append("_Har");
-	  *histProjName += j+1;
+	  histProjName->Append(*countRows);
 	}
       } else {                                         // not projection
 	TString* histName = new TString(baseName[pageNumber]);
       }
       if (!singleGraph) {
-	*histName += k+1;
+	histName->Append(*countColumns);
 	histName->Append("_Har");
-	*histName += j+1;
+	histName->Append(*countRows);
       }
       cout << " col= " << k+1 << " row= " << order << " pad= " << padN << "\t" 
 	   << histName->Data() << endl;
@@ -466,7 +464,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  lineZeroX->Draw();
 	  lineZeroY->Draw();
 	} else if (strstr(shortName[pageNumber],"Dedx")!=0) {   // dE/dx
-	  TVirtualPad::Pad()->SetLogz();
+	  gPad->SetLogz();
 	  gStyle->SetOptStat(10);
 	  hist2D->Draw("COLZ");
 	} else if (strstr(shortName[pageNumber],"_v")!=0) {    // v
@@ -501,7 +499,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	projY->SetName(histProjName->Data());
 	projY->SetXTitle("Pt (GeV/c)");
 	projY->SetYTitle("Counts");
-	TVirtualPad::Pad()->SetLogy();
+	gPad->SetLogy();
 	gStyle->SetOptStat(0);
 	if (projY) projY->Draw("H");
       } else if (strstr(shortName[pageNumber],".Phi")!=0) { // 2D Phi projection
@@ -556,9 +554,9 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	float n_qBins = (float)hist->GetNbinsX();
 	double area = hist->Integral() * max / n_qBins; 
 	TString* histName = new TString("Flow_Mul_Sel");
-	*histName += k+1;
+	histName->Append(*countColumns);
 	histName->Append("_Har");
-	*histName += j+1;
+	histName->Append(*countRows);
 	TH1* histMult = dynamic_cast<TH1*>(histFile->Get(histName->Data()));
 	if (!histMult) {
 	  cout << "### Can't find histogram " << histName->Data() << endl;
@@ -640,7 +638,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	hist->Draw();
 	lineDiagonal->Draw();
       } else if (strstr(shortName[pageNumber],"PidMult")!=0) {  // PID Mult
-	TVirtualPad::Pad()->SetLogy();
+	gPad->SetLogy();
 	gStyle->SetOptStat(0);
 	hist->Draw();
       } else {                                              // all other 1D
@@ -650,6 +648,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       delete [] temp;
       delete histName;
       if (histProjName) delete histProjName;
+      //gPad->Update();
     }
   }
   for (int m = 0; m < nNames; m++) {  
@@ -695,9 +694,11 @@ TCanvas* plotResolution(){
     int resNumber = j;
     cout << "resolution name= " << resName[resNumber] << endl;
     for (int k = 0; k < columns; k++) {
+      char countColumns[2];
+      sprintf(countColumns,"%d",k+1);
       int padN = j*columns + k +1;
       TString* histName = new TString(resName[resNumber]);
-      *histName += k+1;
+      histName->Append(*countColumns);
       cout << "row= " << j << " col= " << k << " pad= " << padN << "\t" 
 	   << histName->Data() << endl;
       TH1* hist = dynamic_cast<TH1*>(histFile->Get(histName->Data()));
@@ -739,7 +740,7 @@ void plotAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
     cout << "save? y/[n], quit? q" << endl;
     fgets(tmp, sizeof(tmp), stdin);
     if (strstr(tmp,"y")!=0) can->Print(".ps");
-    else if (strstr(tmp,"q")!=0) return;
+    else if (strstr(tmp,"q")!=0) return can;
   }
   cout << "  plotAll Done" << endl;
 }
@@ -762,38 +763,114 @@ static Double_t qDist(double* q, double* par) {
 static Double_t SubCorr(double* x, double* par) {
   // Calculates the n(Psi_a - Psi_b) distribution by fitting chi
   // From J.-Y. Ollitrault, Nucl. Phys. A590, 561c (1995), Eq. 6. with correc.
+  // The Struve functions are included.
 
   double chi2 = par[0] * par[0] / 2;     // divide by two for SV chi
   double z = chi2 * cos(par[1]*x[0]);
   double TwoOverPi = 2./TMath::Pi();
 
   Double_t dNdPsi = exp(-chi2)/TwoOverPi * (TwoOverPi*(1.+chi2) 
-                    + z*(TMath::BesselI0(z) + TMath::StruveL0(z))
-                    + chi2*(TMath::BesselI1(z) + TMath::StruveL1(z)));
+                    + z*(TMath::BesselI0(z) + StruveL0(z))
+                    + chi2*(TMath::BesselI1(z) + StruveL1(z)));
 
   return dNdPsi;
+}
+
+//-----------------------------------------------------------------------
+
+static Double_t StruveL1(Double_t x)
+{
+  // Modified Struve Function of Order One
+  //
+
+  const Double_t pi=TMath::Pi();
+  Double_t a1,sl1,bi1,s;
+  Double_t r=1.0;
+  Int_t km;
+  
+  if (x<=20.) {
+    s=0.0;
+    for (int i=1; i<=60;i++){
+      r*=x*x/(4.0*i*i-1.0);
+      s+=r;
+      if(TMath::Abs(r)<TMath::Abs(s)*1.e-12)break;
+    }
+    sl1=2.0/pi*s;
+  }else{
+    s=1.0;
+    km=int(0.5*x);
+    if(x>50.0)km=25;
+    for (int i=1; i<=km; i++){
+      r*=(2*i+3)*(2*i+1)/x/x;
+      s+=r;
+      if(TMath::Abs(r/s)<1.0e-12)break;
+    }
+    sl1=2.0/pi*(-1.0+1.0/(x*x)+3.0*s/(x*x*x*x));
+    a1=TMath::Exp(x)/TMath::Sqrt(2*pi*x);
+    r=1.0;
+    bi1=1.0;
+    for (int i=1; i<=16; i++){
+      r=-0.125*r*(4.0-(2.0*i-1.0)*(2.0*i-1.0))/(i*x);
+      bi1+=r;
+      if(TMath::Abs(r/bi1)<1.0e-12)break;
+    }
+    sl1+=a1*bi1;
+  }
+  
+  return sl1;
+  
+}
+
+static Double_t StruveL0(Double_t x)
+{
+  // Modified Struve Function of Order Zero
+  //
+  
+  const Double_t pi=TMath::Pi();
+  
+  Double_t s=1.0;
+  Double_t r=1.0;
+  
+  Double_t a0,sl0,a1,bi0;
+  
+  Int_t km;
+  
+  if (x<=20.) {
+    a0=2.0*x/pi;
+    for (int i=1; i<=60;i++){
+      r*=(x/(2*i+1))*(x/(2*i+1));
+      s+=r;
+      if(TMath::Abs(r/s)<1.e-12)break;
+    }
+    sl0=a0*s;
+  }else{
+    km=int(5*(x+1.0));
+    if(x>=50.0)km=25;
+    for (int i=1; i<=km; i++){
+      r*=(2*i-1)*(2*i-1)/x/x;
+      s+=r;
+      if(TMath::Abs(r/s)<1.0e-12)break;
+    }
+    a1=TMath::Exp(x)/TMath::Sqrt(2*pi*x);
+    r=1.0;
+    bi0=1.0;
+    for (int i=1; i<=16; i++){
+      r=0.125*r*(2.0*i-1.0)*(2.0*i-1.0)/(i*x);
+      bi0+=r;
+      if(TMath::Abs(r/bi0)<1.0e-12)break;
+    }
+    
+    bi0=a1*bi0;
+    sl0=-2.0/(pi*x)*s+bi0;
+  }
+  
+  return sl0;
+  
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
-// Revision 1.62  2004/12/09 23:47:11  posk
-// Minor changes in code formatting.
-// Added hist for TPC primary dca to AnalysisMaker.
-//
-// Revision 1.61  2004/12/07 23:10:23  posk
-// Only odd and even phiWgt hists. If the old phiWgt file contains more than
-// two harmonics, only the first two are read. Now writes only the first two.
-//
-// Revision 1.60  2004/12/02 16:10:55  posk
-// Added  gInterpreter->ProcessLine(".O0");
-//
-// Revision 1.59  2004/11/19 16:54:40  posk
-// Replaced gPad with (TVirtualPad::Pad()). Reverted to TMath::Struve functions.
-//
-// Revision 1.58  2004/11/11 18:25:43  posk
-// Minor updates.
-//
 // Revision 1.57  2004/03/11 18:00:05  posk
 // Added Random Subs analysis method.
 //

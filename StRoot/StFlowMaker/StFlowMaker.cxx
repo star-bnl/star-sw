@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.97 2004/12/09 23:43:36 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.92 2004/08/24 20:24:34 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -172,8 +172,7 @@ Int_t StFlowMaker::Make() {
     
     if (mPicoEventWrite) FillPicoEvent();
   }
-  if (Debug()) PrintSubeventMults();
-
+  
   
   UInt_t flowEventMult;
   if (!pFlowEvent) { flowEventMult = 0; }
@@ -222,7 +221,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.97 2004/12/09 23:43:36 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.92 2004/08/24 20:24:34 oldi Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -292,76 +291,97 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
     }
   }
 
-  // Fill mPhiWgt for each selection, and odd and even harmonics
+  // Fill mPhiWgt for each selection and each harmonic
   for (int k = 0; k < Flow::nSels; k++) {
-    for (int j = 0; j < 2; j++) {
+    char countSels[2];
+    sprintf(countSels,"%d",k+1);
+    for (int j = 0; j < Flow::nHars; j++) {
+      char countHars[2];
+      sprintf(countHars,"%d",j+1);
+      // Tpc
+      TString* histTitle = new TString("Flow_Phi_Weight_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
       // Tpc (FarEast)
       TString* histTitleFarEast = new TString("Flow_Phi_Weight_FarEast_Sel");
-      *histTitleFarEast += k+1;
+      histTitleFarEast->Append(*countSels);
       histTitleFarEast->Append("_Har");
-      *histTitleFarEast += j+1;
+      histTitleFarEast->Append(*countHars);
       // Tpc (East)
       TString* histTitleEast = new TString("Flow_Phi_Weight_East_Sel");
-      *histTitleEast += k+1;
+      histTitleEast->Append(*countSels);
       histTitleEast->Append("_Har");
-      *histTitleEast += j+1;
+      histTitleEast->Append(*countHars);
       // Tpc (West)
       TString* histTitleWest = new TString("Flow_Phi_Weight_West_Sel");
-      *histTitleWest += k+1;
+      histTitleWest->Append(*countSels);
       histTitleWest->Append("_Har");
-      *histTitleWest += j+1;
+      histTitleWest->Append(*countHars);
       // Tpc (FarWest)
       TString* histTitleFarWest = new TString("Flow_Phi_Weight_FarWest_Sel");
-      *histTitleFarWest += k+1;
+      histTitleFarWest->Append(*countSels);
       histTitleFarWest->Append("_Har");
-      *histTitleFarWest += j+1;
+      histTitleFarWest->Append(*countHars);
       // Ftpc (FarEast)
       TString* histTitleFtpcFarEast = new TString("Flow_Phi_Weight_FtpcFarEast_Sel");
-      *histTitleFtpcFarEast += k+1;
+      histTitleFtpcFarEast->Append(*countSels);
       histTitleFtpcFarEast->Append("_Har");
-      *histTitleFtpcFarEast += j+1;
+      histTitleFtpcFarEast->Append(*countHars);
       // Ftpc (East)
       TString* histTitleFtpcEast = new TString("Flow_Phi_Weight_FtpcEast_Sel");
-      *histTitleFtpcEast += k+1;
+      histTitleFtpcEast->Append(*countSels);
       histTitleFtpcEast->Append("_Har");
-      *histTitleFtpcEast += j+1;
+      histTitleFtpcEast->Append(*countHars);
       // Ftpc (West)
       TString* histTitleFtpcWest = new TString("Flow_Phi_Weight_FtpcWest_Sel");
-      *histTitleFtpcWest += k+1;
+      histTitleFtpcWest->Append(*countSels);
       histTitleFtpcWest->Append("_Har");
-      *histTitleFtpcWest += j+1;
+      histTitleFtpcWest->Append(*countHars);
       // Ftpc (FarWest)
       TString* histTitleFtpcFarWest = new TString("Flow_Phi_Weight_FtpcFarWest_Sel");
-      *histTitleFtpcFarWest += k+1;
+      histTitleFtpcFarWest->Append(*countSels);
       histTitleFtpcFarWest->Append("_Har");
-      *histTitleFtpcFarWest += j+1;
+      histTitleFtpcFarWest->Append(*countHars);
       if (pPhiWgtFile->IsOpen()) {
-	TH1* phiWgtHistFarEast = dynamic_cast<TH1*>(pPhiWgtFile->
-						    Get(histTitleFarEast->Data()));
-	TH1* phiWgtHistEast = dynamic_cast<TH1*>(pPhiWgtFile->
-						 Get(histTitleEast->Data()));
-	TH1* phiWgtHistWest = dynamic_cast<TH1*>(pPhiWgtFile->
-						 Get(histTitleWest->Data()));
-	TH1* phiWgtHistFarWest = dynamic_cast<TH1*>(pPhiWgtFile->
-						    Get(histTitleFarWest->Data()));
-	for (int n = 0; n < Flow::nPhiBins; n++) {
-	  mPhiWgtFarEast[k][j][n] = (phiWgtHistFarEast) ? 
-	    phiWgtHistFarEast->GetBinContent(n+1) : 1.;
-	  mPhiWgtEast[k][j][n] = (phiWgtHistEast) ? 
-	    phiWgtHistEast->GetBinContent(n+1) : 1.;
-	  mPhiWgtWest[k][j][n] = (phiWgtHistWest) ? 
-	    phiWgtHistWest->GetBinContent(n+1) : 1.;
-	  mPhiWgtFarWest[k][j][n] = (phiWgtHistFarWest) ? 
-	    phiWgtHistFarWest->GetBinContent(n+1) : 1.;
+	TH1* phiWgtHist = dynamic_cast<TH1*>(pPhiWgtFile->Get(histTitle->Data()));
+	if (k==0 && j==0 && phiWgtHist) {
+	  mOnePhiWgt = kTRUE;
+	  gMessMgr->Info("##### FlowMaker: Using old type phi weight file.");
+	}
+	if (mOnePhiWgt) {
+	  for (int n = 0; n < Flow::nPhiBins; n++) {
+	    mPhiWgt[k][j][n] = (phiWgtHist) ? 
+	      phiWgtHist->GetBinContent(n+1) : 1.;
+	  }
+	} else {
+	  TH1* phiWgtHistFarEast = dynamic_cast<TH1*>(pPhiWgtFile->
+						      Get(histTitleFarEast->Data()));
+	  TH1* phiWgtHistEast = dynamic_cast<TH1*>(pPhiWgtFile->
+						   Get(histTitleEast->Data()));
+	  TH1* phiWgtHistWest = dynamic_cast<TH1*>(pPhiWgtFile->
+						   Get(histTitleWest->Data()));
+	  TH1* phiWgtHistFarWest = dynamic_cast<TH1*>(pPhiWgtFile->
+						      Get(histTitleFarWest->Data()));
+	  for (int n = 0; n < Flow::nPhiBins; n++) {
+	    mPhiWgtFarEast[k][j][n] = (phiWgtHistFarEast) ? 
+	      phiWgtHistFarEast->GetBinContent(n+1) : 1.;
+	    mPhiWgtEast[k][j][n] = (phiWgtHistEast) ? 
+	      phiWgtHistEast->GetBinContent(n+1) : 1.;
+	    mPhiWgtWest[k][j][n] = (phiWgtHistWest) ? 
+	      phiWgtHistWest->GetBinContent(n+1) : 1.;
+	    mPhiWgtFarWest[k][j][n] = (phiWgtHistFarWest) ? 
+	      phiWgtHistFarWest->GetBinContent(n+1) : 1.;
+	  }
 	}
 	TH1* phiWgtHistFtpcFarEast = dynamic_cast<TH1*>(pPhiWgtFile->
-					    Get(histTitleFtpcFarEast->Data()));
+							Get(histTitleFtpcFarEast->Data()));
 	TH1* phiWgtHistFtpcEast = dynamic_cast<TH1*>(pPhiWgtFile->
-					    Get(histTitleFtpcEast->Data()));
+						     Get(histTitleFtpcEast->Data()));
 	TH1* phiWgtHistFtpcWest = dynamic_cast<TH1*>(pPhiWgtFile->
-					    Get(histTitleFtpcWest->Data()));
+						     Get(histTitleFtpcWest->Data()));
 	TH1* phiWgtHistFtpcFarWest = dynamic_cast<TH1*>(pPhiWgtFile->
-					    Get(histTitleFtpcFarWest->Data()));
+							Get(histTitleFtpcFarWest->Data()));
 	for (int n = 0; n < Flow::nPhiBinsFtpc; n++) {
 	  mPhiWgtFtpcFarEast[k][j][n] = (phiWgtHistFtpcFarEast) ? 
 	    phiWgtHistFtpcFarEast->GetBinContent(n+1) : 1.;
@@ -378,21 +398,19 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 	TH1F* mZDCSMDPsiEast = (TH1F *)pPhiWgtFile->Get("Flow_ZDCSMDPsiWgtEast");
 	
 	if (mZDCSMDPsiWest && mZDCSMDPsiEast) { //Weight histograms exist
-	  Float_t mZDCSMDPsiWest_mean = (mZDCSMDPsiWest->Integral())/
-	    (mZDCSMDPsiWest->GetNbinsX());
-	  Float_t mZDCSMDPsiEast_mean = (mZDCSMDPsiEast->Integral())/
-	    (mZDCSMDPsiEast->GetNbinsX());
+	  Float_t mZDCSMDPsiWest_mean = (mZDCSMDPsiWest->Integral())/(mZDCSMDPsiWest->GetNbinsX());
+	  Float_t mZDCSMDPsiEast_mean = (mZDCSMDPsiEast->Integral())/(mZDCSMDPsiEast->GetNbinsX());
 	  
-	  for (int n = 0; n < Flow::zdcsmd_nPsiBins; n++) {
+	  for(int n = 0; n < Flow::zdcsmd_nPsiBins; n++) {
 	    mZDCSMD_PsiWgtWest[n] = ((mZDCSMDPsiWest->GetBinContent(n+1))>0.) ?
 	      mZDCSMDPsiWest_mean/(mZDCSMDPsiWest->GetBinContent(n+1)):1.;
 	    mZDCSMD_PsiWgtEast[n] = ((mZDCSMDPsiEast->GetBinContent(n+1))>0.) ? 
 	      mZDCSMDPsiEast_mean/(mZDCSMDPsiEast->GetBinContent(n+1)):1.;
-	  }//zdcsmd_nPsiBins
+	  } //zdcsmd_nPsiBins
 	  
 	} else { //Weight histograms don't exist
 	  
-	  for (int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
+	  for(int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
 	    mZDCSMD_PsiWgtWest[n] = 1.;
 	    mZDCSMD_PsiWgtEast[n] = 1.;
 	  }//zdcsmd_nPsiBins
@@ -421,6 +439,7 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 	}//zdcsmd_nPsiBins	
       }
 
+      delete histTitle;
       delete histTitleFarEast;
       delete histTitleEast;
       delete histTitleWest;
@@ -446,11 +465,16 @@ void StFlowMaker::FillFlowEvent() {
   if (Debug()) gMessMgr->Info() << "FlowMaker: FillFlowEvent()" << endm;
 
   // Fill PhiWgt array
-  if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
-  pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
-  pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
-  pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
-  pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
+  if (mOnePhiWgt) {
+    pFlowEvent->SetOnePhiWgt();
+    pFlowEvent->SetPhiWeight(mPhiWgt);
+  } else {
+    if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
+    pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
+    pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
+    pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
+    pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
+  }
   pFlowEvent->SetPhiWeightFtpcFarEast(mPhiWgtFtpcFarEast);
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
@@ -487,7 +511,9 @@ void StFlowMaker::FillFlowEvent() {
     pFlowEvent->SetL0TriggerWord(triggerId); // reuse trigger word for trigger collection
   } else {
     StL0Trigger* pTrigger = pEvent->l0Trigger();
-    if (pTrigger) { pFlowEvent->SetL0TriggerWord(pTrigger->triggerWord()); }
+    if (pTrigger) {
+      pFlowEvent->SetL0TriggerWord(pTrigger->triggerWord());
+    }
   }
 
   // Get primary vertex position
@@ -498,10 +524,10 @@ void StFlowMaker::FillFlowEvent() {
   Float_t ctb  = -1.;
   Float_t zdce = -1.;
   Float_t zdcw = -1.;
-  Float_t zdcsmdEastHorizontal = -1.;
-  Float_t zdcsmdEastVertical = -1.;
-  Float_t zdcsmdWestHorizontal = -1.;
-  Float_t zdcsmdWestVertical = -1.;
+  Float_t zdcsmdEastHorizontal=-1.;
+  Float_t zdcsmdEastVertical=-1.;
+  Float_t zdcsmdWestHorizontal=-1.;
+  Float_t zdcsmdWestVertical=-1.;
   StTriggerDetectorCollection *triggers = pEvent->triggerDetectorCollection();
   if (triggers)	{
     StCtbTriggerDetector &CTB = triggers->ctb();
@@ -512,22 +538,18 @@ void StFlowMaker::FillFlowEvent() {
 	ctb += CTB.mips(tray,slat,0);
       }
     }
-    // get ZDCe and ZDCw        
+    //get ZDCe and ZDCw        
     zdce = ZDC.adcSum(east);
     zdcw = ZDC.adcSum(west);
-    // get ZDCSMD pedstal-subtracted and gain-corrected
-    for (int strip=1;strip<9;strip++) {
-      zdcsmdEastHorizontal = (ZDC.zdcSmd(east,1,strip)
-	   -Flow::zdcsmdPedstal[0][1][strip-1])/Flow::zdcsmdGainFac[0][1][strip-1];
+    //get ZDCSMD pedstal-subtracted and gain-corrected
+    for(int strip=1;strip<9;strip++) {
+      zdcsmdEastHorizontal=(ZDC.zdcSmd(east,1,strip)-Flow::zdcsmdPedstal[0][1][strip-1])/Flow::zdcsmdGainFac[0][1][strip-1];
       pFlowEvent->SetZDCSMD(0,1,strip,zdcsmdEastHorizontal);
-      zdcsmdEastVertical = (ZDC.zdcSmd(east,0,strip)
-	   -Flow::zdcsmdPedstal[0][0][strip-1])/Flow::zdcsmdGainFac[0][0][strip-1];
+      zdcsmdEastVertical=(ZDC.zdcSmd(east,0,strip)-Flow::zdcsmdPedstal[0][0][strip-1])/Flow::zdcsmdGainFac[0][0][strip-1];
       pFlowEvent->SetZDCSMD(0,0,strip,zdcsmdEastVertical);
-      zdcsmdWestHorizontal = (ZDC.zdcSmd(west,1,strip)
-	   -Flow::zdcsmdPedstal[1][1][strip-1])/Flow::zdcsmdGainFac[1][1][strip-1];
+      zdcsmdWestHorizontal=(ZDC.zdcSmd(west,1,strip)-Flow::zdcsmdPedstal[1][1][strip-1])/Flow::zdcsmdGainFac[1][1][strip-1];
       pFlowEvent->SetZDCSMD(1,1,strip,zdcsmdWestHorizontal);
-      zdcsmdWestVertical = (ZDC.zdcSmd(west,0,strip)
-	   -Flow::zdcsmdPedstal[1][0][strip-1])/Flow::zdcsmdGainFac[1][0][strip-1];
+      zdcsmdWestVertical=(ZDC.zdcSmd(west,0,strip)-Flow::zdcsmdPedstal[1][0][strip-1])/Flow::zdcsmdGainFac[1][0][strip-1];
       pFlowEvent->SetZDCSMD(1,0,strip,zdcsmdWestVertical);
     }
   } 
@@ -601,8 +623,7 @@ void StFlowMaker::FillFlowEvent() {
 
 	pFlowTrack->SetTrackLength(pTrack->length());
 
-	if (pTrack->topologyMap().hasHitInDetector(kFtpcEastId) || 
-	    pTrack->topologyMap().hasHitInDetector(kFtpcWestId)) { // FTPC track: first and last point are within these detectors
+	if (pTrack->topologyMap().hasHitInDetector(kFtpcEastId) || pTrack->topologyMap().hasHitInDetector(kFtpcWestId)) { // FTPC track: first and last point are within these detectors
 	  pFlowTrack->SetZFirstPoint(pTrack->detectorInfo()->firstPoint().z());
 	  pFlowTrack->SetZLastPoint(pTrack->detectorInfo()->lastPoint().z());
 	}
@@ -744,11 +765,16 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
   cout << "Inside FlowMaker::FillFlowEvent(HbtEvent)..." << endl;
 
   // set phiweights
-  if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
-  pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
-  pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
-  pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
-  pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
+  if (mOnePhiWgt) {
+    pFlowEvent->SetOnePhiWgt();
+    pFlowEvent->SetPhiWeight(mPhiWgt);
+  } else {
+    if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
+    pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
+    pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
+    pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
+    pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
+  }
   pFlowEvent->SetPhiWeightFtpcFarEast(mPhiWgtFtpcFarEast);
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
@@ -971,11 +997,16 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   }
   
   // Set phi weights
-  if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
-  pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
-  pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
-  pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
-  pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
+  if (mOnePhiWgt) {
+    pFlowEvent->SetOnePhiWgt();
+    pFlowEvent->SetPhiWeight(mPhiWgt);
+  } else {
+    if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
+    pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
+    pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
+    pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
+    pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
+  }
   pFlowEvent->SetPhiWeightFtpcFarEast(mPhiWgtFtpcFarEast);
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
@@ -1006,6 +1037,14 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
     break;
   case 4: FillFromPicoVersion4DST(pPicoEvent);
     break;
+//   case 3: FillFromPicoVersion3DST(pPicoEvent);
+//     break;
+//   case 2: FillFromPicoVersion2DST(pPicoEvent);
+//     break;
+//   case 1: FillFromPicoVersion1DST(pPicoEvent);
+//     break;
+//   case 0: FillFromPicoVersion0DST(pPicoEvent);
+//     break;
   default:
     cout << "##### FlowMaker: Illegal pico file version" << endl;
     return kStFatal;
@@ -1503,14 +1542,14 @@ Bool_t StFlowMaker::FillFromPicoVersion7DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetTrackLength(pPicoTrack->TrackLength());
 
       if (StuProbabilityPidAlgorithm::isPIDTableRead()) {
-	uPid.processPIDAsFunction(uPid.getCentrality(pPicoEvent->UncorrNegMult()),
-				  pPicoTrack->DcaGlobal(),
-				  pPicoTrack->Charge(),
-        fabs((pPicoTrack->Pt()/sqrt(1-(tanh(pPicoTrack->Eta())
-	    *tanh(pPicoTrack->Eta()))))/float(pPicoTrack->Charge())),
-				  pPicoTrack->Eta(),
-				  pPicoTrack->NdedxPts(),
-				  pPicoTrack->Dedx() );
+
+  uPid.processPIDAsFunction(uPid.getCentrality(pPicoEvent->UncorrNegMult()),
+                    pPicoTrack->DcaGlobal(),
+                    pPicoTrack->Charge(),
+  fabs((pPicoTrack->Pt()/sqrt(1-(tanh(pPicoTrack->Eta())*tanh(pPicoTrack->Eta()))))/float(pPicoTrack->Charge())),
+                    pPicoTrack->Eta(),
+                    pPicoTrack->NdedxPts(),
+                    pPicoTrack->Dedx() );
 
       pFlowTrack->SetMostLikelihoodPID(uPid.mostLikelihoodParticleGeantID());
       pFlowTrack->SetMostLikelihoodProb(uPid.mostLikelihoodProbability());   
@@ -1590,11 +1629,16 @@ Bool_t StFlowMaker::FillFromMuDST() {
   pMuEvent=(StMuEvent*)pMuEvents->UncheckedAt(0);
 
   // Set phi weights
-  if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
-  pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
-  pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
-  pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
-  pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
+  if (mOnePhiWgt) {
+    pFlowEvent->SetOnePhiWgt();
+    pFlowEvent->SetPhiWeight(mPhiWgt);
+  } else {
+    if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
+    pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
+    pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
+    pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
+    pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
+  }
   pFlowEvent->SetPhiWeightFtpcFarEast(mPhiWgtFtpcFarEast);
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
@@ -1657,7 +1701,9 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
     else if (pMuEvent->triggerIdCollection().nominal().isTrigger(35001)) triggerId = 35001;
     else if (pMuEvent->triggerIdCollection().nominal().isTrigger(35009)) triggerId = 35009;
     pFlowEvent->SetL0TriggerWord(triggerId); // reuse trigger word for trigger collection
-  } else { pFlowEvent->SetL0TriggerWord(pMuEvent->l0Trigger().triggerWord()); }
+  } else {
+    pFlowEvent->SetL0TriggerWord(pMuEvent->l0Trigger().triggerWord());
+  }
 
   pFlowEvent->SetMagneticField(pMuEvent->runInfo().magneticField());
   pFlowEvent->SetBeamMassNumberEast(pMuEvent->runInfo().beamMassNumber(east));
@@ -1666,26 +1712,22 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
   pFlowEvent->SetZDCe(pMuEvent->zdcAdcAttentuatedSumEast());
   pFlowEvent->SetZDCw(pMuEvent->zdcAdcAttentuatedSumWest());
     //get ZDCSMD pedstal-subtracted and gain-corrected
-  Float_t zdcsmdEastHorizontal = -1.;
-  Float_t zdcsmdEastVertical = -1.;
-  Float_t zdcsmdWestHorizontal = -1.;
-  Float_t zdcsmdWestVertical = -1.;
-  StZdcTriggerDetector &ZDC = pMuEvent->zdcTriggerDetector();
-  for (int strip=1;strip<9;strip++) {
-    zdcsmdEastHorizontal = (ZDC.zdcSmd(east,1,strip)
-	 -Flow::zdcsmdPedstal[0][1][strip-1])/Flow::zdcsmdGainFac[0][1][strip-1];
-    pFlowEvent->SetZDCSMD(0,1,strip,zdcsmdEastHorizontal);
-    zdcsmdEastVertical = (ZDC.zdcSmd(east,0,strip)
-	 -Flow::zdcsmdPedstal[0][0][strip-1])/Flow::zdcsmdGainFac[0][0][strip-1];
-    pFlowEvent->SetZDCSMD(0,0,strip,zdcsmdEastVertical);
-    zdcsmdWestHorizontal = (ZDC.zdcSmd(west,1,strip)
-	 -Flow::zdcsmdPedstal[1][1][strip-1])/Flow::zdcsmdGainFac[1][1][strip-1];
-    pFlowEvent->SetZDCSMD(1,1,strip,zdcsmdWestHorizontal);
-    zdcsmdWestVertical = (ZDC.zdcSmd(west,0,strip)
-	 -Flow::zdcsmdPedstal[1][0][strip-1])/Flow::zdcsmdGainFac[1][0][strip-1];
-    pFlowEvent->SetZDCSMD(1,0,strip,zdcsmdWestVertical);
-  }
-  UInt_t origMult = pMuEvent->eventSummary().numberOfGoodPrimaryTracks(); //???
+  Float_t zdcsmdEastHorizontal=-1.;
+  Float_t zdcsmdEastVertical=-1.;
+  Float_t zdcsmdWestHorizontal=-1.;
+  Float_t zdcsmdWestVertical=-1.;
+    StZdcTriggerDetector &ZDC =pMuEvent->zdcTriggerDetector();
+    for(int strip=1;strip<9;strip++) {
+      zdcsmdEastHorizontal=(ZDC.zdcSmd(east,1,strip)-Flow::zdcsmdPedstal[0][1][strip-1])/Flow::zdcsmdGainFac[0][1][strip-1];
+      pFlowEvent->SetZDCSMD(0,1,strip,zdcsmdEastHorizontal);
+      zdcsmdEastVertical=(ZDC.zdcSmd(east,0,strip)-Flow::zdcsmdPedstal[0][0][strip-1])/Flow::zdcsmdGainFac[0][0][strip-1];
+      pFlowEvent->SetZDCSMD(0,0,strip,zdcsmdEastVertical);
+      zdcsmdWestHorizontal=(ZDC.zdcSmd(west,1,strip)-Flow::zdcsmdPedstal[1][1][strip-1])/Flow::zdcsmdGainFac[1][1][strip-1];
+      pFlowEvent->SetZDCSMD(1,1,strip,zdcsmdWestHorizontal);
+      zdcsmdWestVertical=(ZDC.zdcSmd(west,0,strip)-Flow::zdcsmdPedstal[1][0][strip-1])/Flow::zdcsmdGainFac[1][0][strip-1];
+      pFlowEvent->SetZDCSMD(1,0,strip,zdcsmdWestVertical);
+    }
+    UInt_t origMult = pMuEvent->eventSummary().numberOfGoodPrimaryTracks(); //???
   pFlowEvent->SetOrigMult(origMult);
   PR(origMult);
   pFlowEvent->SetUncorrNegMult(pMuEvent->refMultNeg());
@@ -1702,14 +1744,9 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
       StFlowTrack* pFlowTrack = new StFlowTrack;
       if (!pFlowTrack) return kFALSE;
       pFlowTrack->SetPt(pMuTrack->pt());
-      if (pMuTrack->index2Global()<0) {
-        gMessMgr->Info() << "FlowMaker: FillFromMuVersion0DST(): WARNING! primary track has no reference to global track (index2Global < 0)" << endl;
-        continue;
-      }
-      StMuTrack* pMuGlobalTrack = (StMuTrack*)pMuGlobalTracks->
-	At(pMuTrack->index2Global());
+      StMuTrack* pMuGlobalTrack = (StMuTrack*)pMuGlobalTracks->UncheckedAt(pMuTrack->index2Global());
       if(!pMuGlobalTrack) {
-        gMessMgr->Info() << "FlowMaker: FillFromMuVersion0DST(): WARNING! primary track has no reference to global track (pMuGlobalTrack = 0)" << endl;
+        gMessMgr->Info() << "FlowMaker: FillFromMuVersion0DST(): WARNING! primary track has no reference to global track" << endl;
         continue;
       }
       pFlowTrack->SetPtGlobal(pMuGlobalTrack->pt());
@@ -1719,8 +1756,7 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
       pFlowTrack->SetEtaGlobal(pMuGlobalTrack->eta());
       pFlowTrack->SetDedx(pMuTrack->dEdx());
       pFlowTrack->SetCharge(pMuTrack->charge());
-      pFlowTrack->SetDcaSigned(CalcDcaSigned(pMuEvent->primaryVertexPosition(),
-					     pMuTrack->helix()));
+      pFlowTrack->SetDcaSigned(CalcDcaSigned(pMuEvent->primaryVertexPosition(),pMuTrack->helix()));
       pFlowTrack->SetDca(pMuTrack->dca().mag());
       pFlowTrack->SetDcaGlobal(pMuTrack->dcaGlobal().mag());
       pFlowTrack->SetChi2(pMuTrack->chi2xy()); 
@@ -1736,11 +1772,9 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
 
       pFlowTrack->SetNdedxPts(pMuTrack->nHitsDedx());
       pFlowTrack->SetDcaGlobal3(pMuTrack->dcaGlobal());
-      pFlowTrack->SetTrackLength(pMuTrack->helix().pathLength(pMuEvent->
-		     primaryVertexPosition())); //???
+      pFlowTrack->SetTrackLength(pMuTrack->helix().pathLength(pMuEvent->primaryVertexPosition())); //???
 
-      if (pFlowTrack->TopologyMap().hasHitInDetector(kFtpcEastId)
-	  || pFlowTrack->TopologyMap().hasHitInDetector(kFtpcWestId)) { // FTPC track: first and last point are within these detectors
+      if (pFlowTrack->TopologyMap().hasHitInDetector(kFtpcEastId) || pFlowTrack->TopologyMap().hasHitInDetector(kFtpcWestId)) { // FTPC track: first and last point are within these detectors
 	pFlowTrack->SetZFirstPoint(pMuTrack->firstPoint().z());
 	pFlowTrack->SetZLastPoint(pMuTrack->lastPoint().z());
       }
@@ -1765,6 +1799,7 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
 	  
 	  // Selects positive path length to project track forward along its helix relative to
 	  // first point of track. The smaller solution is taken when both are positive.
+	  
 	  if (finite(s1) != 0 || finite(s2) != 0) { // track could be projected
 	    if (s1 >= 0 && s2 >= 0) s = s1;
 	    else if (s1 >= 0 && s2 < 0) s = s1;
@@ -1777,7 +1812,8 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
       }
       
       if (StuProbabilityPidAlgorithm::isPIDTableRead()) {
-	uPid.processPIDAsFunction(uPid.getCentrality(pMuEvent->refMultNeg()),
+	
+  uPid.processPIDAsFunction(uPid.getCentrality(pMuEvent->refMultNeg()),
 		    pMuTrack->dcaGlobal().mag(),
 		    pMuTrack->charge(),
                     fabs((pMuTrack->p().mag())/float(pMuTrack->charge())),
@@ -1814,6 +1850,7 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
       pFlowTrack->SetProtonPbarProb(pMuTrack->pidProbProton()); 
 
       // pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
+
           
       int mostLikelihoodPid=0;
       double mostLikelihoodPidProbability=0;
@@ -1850,6 +1887,7 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
       pFlowTrack->SetMostLikelihoodProb(mostLikelihoodPidProbability);
 
       }    
+
 
       if (pMuTrack->charge() < 0) {
         pFlowTrack->SetPidPiMinus(pMuTrack->nSigmaPion()); 
@@ -1888,7 +1926,8 @@ void StFlowMaker::PrintSubeventMults() {
     pFlowSelect->SetHarmonic(j);
     for (k = 0; k < Flow::nSels; k++) {
       pFlowSelect->SetSelection(k);
-      cout << "j,k= " << j << k << " : " << pFlowEvent->Mult(pFlowSelect) << endl;
+      cout << "j,k= " << j << k << " : " << pFlowEvent->Mult(pFlowSelect) 
+	   << endl;
     }
   }
   
@@ -1938,8 +1977,8 @@ Int_t StFlowMaker::InitPicoEventWrite() {
     return kStFatal;
   }
   pPicoDST->SetCompressionLevel(comp);
-  //   gMessMgr->Info() << "##### FlowMaker: PicoEvents file = " 
-  // 		   << filestring->Data() << endm;
+//   gMessMgr->Info() << "##### FlowMaker: PicoEvents file = " 
+// 		   << filestring->Data() << endm;
   
   // Create a ROOT Tree and one superbranch
   pFlowTree = new TTree("FlowTree", "Flow Pico Tree");
@@ -2004,7 +2043,7 @@ Int_t StFlowMaker::InitMuEventRead() {
     pTempChain->Add(pMuFileList->GetFileName(0));
     if (((Int_t)pTempChain->GetEntries()) > 5 ) 
     pMuChain->Add(pMuFileList->GetFileName(0));
-    if (pTempChain) { delete pTempChain; pTempChain=0; }
+    if (pTempChain) {delete pTempChain; pTempChain=0;}
     //**************  end of the block   
 
 //     if (Debug()) gMessMgr->Info() << " doFlowEvents -  input fileList = " 
@@ -2023,8 +2062,8 @@ Int_t StFlowMaker::InitMuEventRead() {
     pMuChain->SetBranchStatus("GlobalTracks.mEta",1);
 
     Int_t nEntries = (Int_t)pMuChain->GetEntries(); 
-    // if (Debug()) gMessMgr->Info() << "##### FlowMaker: events in Mu-DST chain = "
-    // << nEntries << endm;
+//     if (Debug()) gMessMgr->Info() << "##### FlowMaker: events in Mu-DST chain = "
+//                      << nEntries << endm;
     gMessMgr->Info() << "### ## FlowMaker: " << pMuFileList->GetFileName(0)
 				  << " " << nEntries << " events" << endm;
     
@@ -2074,23 +2113,6 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
-// Revision 1.97  2004/12/09 23:43:36  posk
-// Minor changes in code formatting.
-//
-// Revision 1.96  2004/12/09 00:45:17  oldi
-// Little fix to get rid if problems when primaries don't have globals assigned to them.
-//
-// Revision 1.95  2004/12/07 23:08:12  posk
-// Only odd and even phiWgt hists. If the old phiWgt file contains more than
-// two harmonics, only the first two are read. Now writes only the first two.
-//
-// Revision 1.94  2004/12/07 17:04:46  posk
-// Eliminated the very old mOnePhiWgt, which used one phiWgt histogram for flttening
-// instead of four.
-//
-// Revision 1.93  2004/11/11 18:14:56  posk
-// Added a debug print statement.
-//
 // Revision 1.92  2004/08/24 20:24:34  oldi
 // Minor modifications to avoid compiler warnings.
 // Small bug fix (didn't affect anyone yet).

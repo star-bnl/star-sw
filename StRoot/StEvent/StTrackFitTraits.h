@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.12 2004/12/02 23:35:13 ullrich Exp $
+ * $Id: StTrackFitTraits.h,v 2.11 2004/08/13 18:15:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -31,9 +31,6 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
- * Revision 2.12  2004/12/02 23:35:13  ullrich
- * Added misisng setXXX functions.
- *
  * Revision 2.11  2004/08/13 18:15:42  ullrich
  * Added +1 to the number of fit points when bool flag is set.
  *
@@ -101,11 +98,6 @@ public:
     void                   clearCovariantMatrix();
     void                   setNumberOfFitPoints(unsigned char, StDetectorId);
     void                   setPrimaryVertexUsedInFit(bool);
-    
-    void                   setPidHypothesis(unsigned short);
-    void                   setChi2(float, unsigned int = 0);
-    void                   setCovariantMatrix(float[15]);
-    
     
 protected:
     UShort_t mPidHypothesis;       // GeantId

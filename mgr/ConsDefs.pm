@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.78 2004/12/10 02:04:08 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.77 2004/09/18 01:06:22 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -198,10 +198,8 @@
     #  ============================================================
     # Platform support should be concentrated here
     #  ============================================================
-    print "DEBUG >>> We will select architecture/compiler based on $STAR_HOST_SYS\n" if ($param::debug);
-    if ( ($STAR_HOST_SYS =~ m/^rh/ && $STAR_HOST_SYS =~ /_icc/) ||
-	 ($STAR_HOST_SYS =~ m/^sl/ && $STAR_HOST_SYS =~ /_icc/) ) {
-	#print "DEBUG >>> Switching ot ICC compiler\n" if ($param::debug);
+    if ($STAR_HOST_SYS =~ /^rh/ and $STAR_HOST_SYS =~ /_icc/ ||
+	$STAR_HOST_SYS =~ /^sl/ and $STAR_HOST_SYS =~ /_icc/) {
 	$PLATFORM      = "linux";
 	$ARCH          = "linuxicc";
 	$PGI           = "";

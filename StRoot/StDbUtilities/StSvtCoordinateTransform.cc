@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.33 2004/11/24 02:42:01 jeromel Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.31 2004/09/16 02:16:07 perev Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -685,12 +685,11 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
   int hybrid = a.hybrid();
 
   float vd = -1;
-  //float td = -1;
-  //int anode;
+  float td = -1;
+  int anode;
   int index;
-  //double Ratio = 1;
+  double Ratio = 1;
 
-  /*
   if (mDriftVelocity && mDriftCurve) 
     {
       index = mDriftVelocity->getHybridIndex(barrel,ladder,wafer,hybrid);
@@ -734,10 +733,7 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
 	}
     }
   else if (mDriftVelocity) 
-  */
-  
-  if (mDriftVelocity)
-   {
+    {
       //       gMessMgr->Warning() << "mDriftCurve is NULL: " << x << endm;
       index = mDriftVelocity->getHybridIndex(barrel,ladder,wafer,hybrid);
       if (index >= 0)

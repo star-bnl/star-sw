@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.cxx,v 1.14 2004/11/29 15:53:21 mvl Exp $
+ * $Id: StMuArrays.cxx,v 1.13 2004/10/28 00:11:32 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -27,7 +27,7 @@ const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent",
 							   "CpvCluster",
 /*tofArrayNames    [__NTOFARRAYS__    ]*/                  "TofHit","TofData",
 /*eztArrayNames    [__NEZTARRAYS__    ]*/                  "EztHead","EztTrig",
-							   "EztETow","EztESmd","EztFpd"};
+							   "EztETow","EztESmd"};
 
 const char** StMuArrays::strangeArrayNames = StMuArrays::arrayNames    +__NARRAYS__;
 const char** StMuArrays::emcArrayNames = StMuArrays::strangeArrayNames +__NSTRANGEARRAYS__;
@@ -49,7 +49,7 @@ const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent",
 							   "StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit",
 /*pmdArrayTypes   [__NPMDARRAYS__     ]*/                  "StMuPmdHit","StMuPmdHit","StMuPmdCluster","StMuPmdCluster",
 /*tofArrayTypes   [__NTOFARRAYS__     ]*/                  "StMuTofHit","StTofData",
-/*eztArrayTypes   [__NEZTARRAYS__     ]*/                  "EztEventHeader","EztTrigBlob","EztEmcRawData","EztEmcRawData","EztFpdBlob"};
+/*eztArrayTypes   [__NEZTARRAYS__     ]*/                  "EztEventHeader","EztTrigBlob","EztEmcRawData","EztEmcRawData"};
 const char** StMuArrays::strangeArrayTypes = StMuArrays::arrayTypes    +__NARRAYS__;
 const char** StMuArrays::emcArrayTypes = StMuArrays::strangeArrayTypes +__NSTRANGEARRAYS__;
 const char** StMuArrays::pmdArrayTypes = StMuArrays::emcArrayTypes     +__NEMCARRAYS__;
@@ -66,7 +66,7 @@ int   StMuArrays::arraySizes       [__NALLARRAYS__    ] = {1,1000,1000,1000,1000
 /*emcArraySizes    [__NEMCARRAYS__    ]*/                  1,1000,1000,1000,1000,1000,1000,
 /*pmdArraySizes    [__NPMDARRAYS__    ]*/                  1000,1000,1000,1000,
 /*tofArraySizes    [__NTOFARRAYS__    ]*/                  100, 200,
-/*eztArraySizes    [__NEZTARRAYS__    ]*/                  1, 1, 1, 1, 1};
+/*eztArraySizes    [__NEZTARRAYS__    ]*/                  1, 1, 1, 1};
 int* StMuArrays::strangeArraySizes = StMuArrays::arraySizes    +__NARRAYS__;
 int* StMuArrays::emcArraySizes = StMuArrays::strangeArraySizes +__NSTRANGEARRAYS__;
 int* StMuArrays::pmdArraySizes = StMuArrays::emcArraySizes     +__NEMCARRAYS__;
@@ -81,7 +81,7 @@ int   StMuArrays::arrayCounters       [__NALLARRAYS__ ] = {0,0,0,0,0,0,0,0,0,
 /*emcArrayCounters    [__NEMCARRAYS__    ]*/               0,0,0,0,0,0,0,
 /*pmdArrayCounters    [__NPMDARRAYS__    ]*/               0,0,0,0,
 /*tofArrayCounters    [__NTOFARRAYS__    ]*/               0, 0,
-/*eztArrayCounters    [__NEZTARRAYS__    ]*/               0, 0, 0, 0, 0};
+/*eztArrayCounters    [__NEZTARRAYS__    ]*/               0, 0, 0, 0};
 
 StMuArrays test;
 
@@ -111,9 +111,6 @@ StMuArrays::StMuArrays()
 /***************************************************************************
  *
  * $Log: StMuArrays.cxx,v $
- * Revision 1.14  2004/11/29 15:53:21  mvl
- * Additions by Jan for Fpd ezTree
- *
  * Revision 1.13  2004/10/28 00:11:32  mvl
  * Added stuff to support ezTree mode of MuDstMaker.
  * This is a special mode for fast-online processing of fast-detector data.

@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.21 2004/11/03 18:30:07 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.20 2004/10/20 18:51:56 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,9 +16,6 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
- * Revision 2.21  2004/11/03 18:30:07  ullrich
- * Added definitions for FTPC calibration vertices.
- *
  * Revision 2.20  2004/10/20 18:51:56  ullrich
  * Add enumerations from StDedxMethod.h StDetectorId.h StTrackMethod.h StVertexId.h.
  *
@@ -190,14 +187,12 @@ enum StTrackFittingMethod {kUndefinedFitterId         = kUndefinedFitterIdentifi
 /*!
  * \enum StVertexId
  */
-enum StVertexId {kUndefinedVtxId   = kUndefinedVertexIdentifier,
-                 kEventVtxId       = kEventVertexIdentifier,
-                 kV0VtxId          = kV0DecayIdentifier,
-                 kXiVtxId          = kXiDecayIdentifier,
-                 kKinkVtxId        = kKinkDecayIdentifier,
-                 kOtherVtxId       = kOtherTypeIdentifier,
-	       kFtpcEastCalVtxId = kFtpcEastCalibrationVertexIdentifier,
-	       kFtpcWestCalVtxId = kFtpcWestCalibrationVertexIdentifier};
+enum StVertexId {kUndefinedVtxId = kUndefinedVertexIdentifier,
+                 kEventVtxId     = kEventVertexIdentifier,
+                 kV0VtxId        = kV0DecayIdentifier,
+                 kXiVtxId        = kXiDecayIdentifier,
+                 kKinkVtxId      = kKinkDecayIdentifier,
+                 kOtherVtxId     = kOtherTypeIdentifier};
 
 /*!
  * \enum StRichPidFlag

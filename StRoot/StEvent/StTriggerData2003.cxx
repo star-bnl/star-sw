@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.cxx,v 2.12 2004/11/30 19:19:12 ullrich Exp $
+ * $Id: StTriggerData2003.cxx,v 2.11 2004/11/16 15:58:23 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.cxx,v $
- * Revision 2.12  2004/11/30 19:19:12  ullrich
- * Added new access function for EEMC data (Akio).
- *
  * Revision 2.11  2004/11/16 15:58:23  ullrich
  * Checks for valid pre/post samples added (Akio).
  *
@@ -788,20 +785,4 @@ int StTriggerData2003::getRawSize() const
     int rawSize=sizeof(EvtDescData2003)+sizeof(TrgSumData2003)
       + sizeof(RawTrgDet2003)*(npre+npost+1);
     return  rawSize;
-}
-
-unsigned char * StTriggerData2003::getDsm0_EEMC(int prepost) const {
-  return   mData->rawTriggerDet[prepostAddress(prepost)].EEMC;
-}
-
-unsigned short int  * StTriggerData2003::getDsm1_EEMC(int prepost) const{
-  return   mData->rawTriggerDet[prepostAddress(prepost)].EEMClayer1;
-}
-
-unsigned short int  * StTriggerData2003::getDsm2_EMC() const{
-  return   mData->TrgSum.DSMdata.EMC;
-}
-
-unsigned short int  * StTriggerData2003::getDsm3() const{
-  return   mData->TrgSum.DSMdata.lastDSM;
 }

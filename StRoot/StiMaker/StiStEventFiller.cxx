@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.48 2004/12/02 22:14:53 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.49 2004/12/21 20:46:00 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.49  2004/12/21 20:46:00  perev
+ * Cleanup. All known bugs fixed
+ *
  * Revision 2.48  2004/12/02 22:14:53  calderon
  * Only fill the fitTraits.chi2[1] data member for primaries.
  * It holds node->getChi2() from the innerMostHitNode, which will be the
@@ -475,6 +478,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 
   int fillTrackCount1=0;
   int fillTrackCount2=0;
+  int fillTrackCountG=0;
 
   for (TrackToTrackMap::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt) 
     {
@@ -507,6 +511,10 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	  if (trackNode->entries(global)<1)
 	    cout << "StiStEventFiller::fillEvent() - ERROR - Track Node has no entries!! -------------------------" << endl;
 	  fillTrackCount2++;
+          if (gTrack->numberOfPossiblePoints()<10) continue;
+          if (gTrack->geometry()->momentum().mag()<0.1) continue;
+	  fillTrackCountG++;
+          
 	}
       catch (runtime_error & rte ) 
 	{
@@ -528,6 +536,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 
   cout <<"StiStEventFiller::fillEvent() -I- Number of filled as global(1):"<< fillTrackCount1<<endl;
   cout <<"StiStEventFiller::fillEvent() -I- Number of filled as global(2):"<< fillTrackCount2<<endl;
+  cout <<"StiStEventFiller::fillEvent() -I- Number of filled GOOD globals:"<< fillTrackCountG<<endl;
 
 
   return mEvent;
@@ -568,6 +577,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 
   int fillTrackCount1=0;
   int fillTrackCount2=0;
+  int fillTrackCountG=0;
   bool testing= false;
 
   for (TrackToTrackMap::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt,++mTrackN) 
@@ -676,6 +686,9 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	      vertex->addDaughter(pTrack);
 	      StuFixTopoMap(pTrack);
 	      fillTrackCount2++;
+              if (pTrack->numberOfPossiblePoints()<10) 		continue;
+              if (pTrack->geometry()->momentum().mag()<0.1) 	continue;
+	      fillTrackCountG++;
 	    }
 	  catch (runtime_error & rte )
 	    {
@@ -695,6 +708,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
   if (skippedCount>0) cout << "StiStEventFiller::fillEventPrimaries() -I- A total of "<<skippedCount<<" StiKalmanTracks were skipped"<<endl;
   mTrkNodeMap.clear();  // need to reset for the next event
   cout <<"StiStEventFiller::fillEventPrimaries() -I- Primaries (1):"<< fillTrackCount1<< " (2):"<< fillTrackCount2<< " no pipe node:"<<noPipe<<" with IFC:"<< ifcOK<<endl;
+  cout <<"StiStEventFiller::fillEventPrimaries() -I- GOOD:"<< fillTrackCountG <<endl;
   return mEvent;
 }
 

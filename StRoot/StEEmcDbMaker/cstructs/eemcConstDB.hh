@@ -48,24 +48,26 @@ channels from a particular analysis, but let other
 analysis make a different choice.
 */
 
-// status bits (short int) 
-#define EEMCSTAT_ONLPED   0x0001 // only pedestal is visible
+// status bits (short int) -- please keep EEezAnalysis::addMask() comments up to date. 
+#define EEMCSTAT_ONLPED   0x0001 // only pedestal
 #define EEMCSTAT_STKBT    0x0002 // sticky lower bits
-#define EEMCSTAT_HOTHT    0x0004 // masked for HT trigger
-#define EEMCSTAT_HOTJP    0x0008 // masked for JP trigger
-//                        0x010 is free
+#define EEMCSTAT_HOTHT    0x0004 // hot for HT trigger
+#define EEMCSTAT_HOTJP    0x0008 // hot for JP trigger
+#define EEMCSTAT_OUTPI0   0x0010 // hot in pi0 analysis
+
 #define EEMCSTAT_HOTSTR   0x0020 // hot esmd strip
-#define EEMCSTAT_JUMPED   0x0040 // jumpy/wide ped over several chan
+#define EEMCSTAT_JUMPED   0x0040 // jumpy ped over several chan
 
 //The remaing  bits of 'stat' are free.
 
 /* The 'fail' 16-bits are meant as general abort of a given 
-channel.
+channel. If any bit is set in
+'fail' all analysis should exclude this channel.
 */
 
 // failure bits (short int)
-#define EEMCFAIL_GARBG  0x0001  // faulty channel
-#define EEMCFAIL_HVOFF  0x0002  // HV was off or varied
+#define EEMCFAIL_GARBG  0x0001  // exclude from any analysis
+#define EEMCFAIL_HVOFF  0x0002  // HV was off
 #define EEMCFAIL_NOFIB  0x0004  // signal fiber is broken
 
 

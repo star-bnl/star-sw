@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: centrality.C,v 1.6 2004/11/19 16:54:40 posk Exp $
+// $Id: centrality.C,v 1.5 2004/03/01 22:43:41 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 // Description:  Macro to plot flow, etc. as a function of centrality.
@@ -165,6 +165,7 @@ TCanvas* centrality(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
 //   TLine* lineZeroCen = new TLine(0., 0., x[bins], 0.);
   TLine* lineZeroCen = new TLine(0.5, 0., nCens+0.5, 0.);
   lineZeroCen->Draw();
+  gPad->Update();
 
   delete histName;
   delete histCenName;
@@ -189,9 +190,6 @@ void centralityAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: centrality.C,v $
-// Revision 1.6  2004/11/19 16:54:40  posk
-// Replaced gPad with (TVirtualPad::Pad()). Reverted to TMath::Struve functions.
-//
 // Revision 1.5  2004/03/01 22:43:41  posk
 // Changed some "->" to ".".
 //

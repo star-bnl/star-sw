@@ -1,10 +1,7 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.49 2004/10/29 20:08:26 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.48 2004/01/14 22:46:45 fisyak Exp $
  * $Log: StMcEventMaker.cxx,v $
- * Revision 1.49  2004/10/29 20:08:26  calderon
- * Reduce cout statements in normal running, but keep them in Debug mode.
- *
  * Revision 1.48  2004/01/14 22:46:45  fisyak
  * replace iostream by Stiostream.h
  *
@@ -227,7 +224,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.49 2004/10/29 20:08:26 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.48 2004/01/14 22:46:45 fisyak Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -265,7 +262,7 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
 StMcEventMaker::~StMcEventMaker()
 {
     // StMcEventMaker - destructor
-    if (Debug()>=2) cout << "Inside ReaderMaker Destructor" << endl;
+    cout << "Inside ReaderMaker Destructor" << endl;
     SafeDelete(mCurrentMcEvent);  //
 
 }
@@ -318,7 +315,7 @@ Int_t StMcEventMaker::Make()
     if (doPrintCpuInfo) timer.start();
     if (doPrintMemoryInfo) StMemoryInfo::instance()->snapshot();
     
-    if (Debug()>=1) cout << "Inside StMcEventMaker::Make()" << endl;
+    cout << "Inside StMcEventMaker::Make()" << endl;
     // We're supposed to get the dataset from the chain. I don't know how yet. I think it is:
     
     Char_t* geaTmp[3]={"geant","event/geant/Event","bfcTree/geantBranch"};
@@ -329,7 +326,7 @@ Int_t StMcEventMaker::Make()
 	gMessMgr->Warning() << "Could not find dataset " << geaTmp[i] << endm;
         dsGeant = GetDataSet("event/geant/Event");
       } else {
-	  if (Debug()) gMessMgr->Info() << "Get Geant info from  dataset " << geaTmp[i] << endm;
+	gMessMgr->Info() << "Get Geant info from  dataset " << geaTmp[i] << endm;
         break;
       }
     }
@@ -571,9 +568,7 @@ Int_t StMcEventMaker::Make()
 	    mCurrentMcEvent = new StMcEvent;  
 	}
 	
-	if (mCurrentMcEvent) {
-	    if (Debug()) cout << "****  Created new StMcEvent, Event No. " << mCurrentMcEvent->eventNumber() << endl;
-	}
+	if (mCurrentMcEvent) cout << "****  Created new StMcEvent" << endl;
 	else {
 	    gMessMgr->Warning() << "Could not create StMcEvent! Exit from StMcEventMaker." << endm;
 	    return kStWarn;
@@ -589,7 +584,7 @@ Int_t StMcEventMaker::Make()
 	vector<vertexFlag, allocator<vertexFlag> > vtemp(NVertices);
 #endif
        
-	if (Debug()>=1) cout << "Preparing to process and fill VERTEX information ....." << endl;
+	cout << "Preparing to process and fill VERTEX information ....." << endl;
 	StMcVertex* v = 0;
 	
 	
@@ -640,10 +635,10 @@ Int_t StMcEventMaker::Make()
 	size_t usedTracksEvGen = 0;
 	ttemp.resize(NTracks);
 	ttempParticle.resize(NGeneratorTracks);
-	if (Debug()>=1) cout << "Preparing to process and fill TRACK information ....." << endl;
+	cout << "Preparing to process and fill TRACK information ....." << endl;
 	StMcTrack* egTrk = 0;
 	size_t nParticlesInBothTables = 0;
-	if (Debug()>=1) cout << "Event Generator Tracks..." << endl;
+	cout << "Event Generator Tracks..." << endl;
 
 	// The filling of the event generator track assumes that if we encounter a particle that
 	// has a mother, the mother should ALREADY HAVE BEEN CREATED, i.e. that the mother indices
@@ -665,7 +660,7 @@ Int_t StMcEventMaker::Make()
 	long iItrmdVtxId = 0;
 	
 	int nThrownTracks = 0;
-	if (Debug()>=1) cout << "g2t Tracks..." << endl;
+	cout << "g2t Tracks..." << endl;
 	
 	{for (long itrk=0; itrk<NTracks; itrk++) {
 	    iStopVtxId = (trackTable[itrk].stop_vertex_p) - 1;
@@ -740,7 +735,7 @@ Int_t StMcEventMaker::Make()
 		    // We should rather keep the one in the g2t table, but we
 		    // need to keep the information of its parentage.
 		    nParticlesInBothTables++;
-		    if (Debug()>=2) {
+		    if (Debug()) {
 			if (particleTable[iEventGeneratorLabel].jmohep[0] && !(ttempParticle[particleTable[iEventGeneratorLabel].jmohep[0]])) {
 			    cout << "There should be a parent and there isn't one!\n";
 			    PR(iEventGeneratorLabel);
@@ -785,7 +780,7 @@ Int_t StMcEventMaker::Make()
 			<< "Can't assign mother track " << motherIndex
 			<< " to track with index " << gtrk << endm;
 		else ttempParticle[gtrk]->setParent(ttempParticle[motherIndex]);
-		if (Debug()>=2) {
+		if (Debug()) {
 		    if (motherIndex && !(ttempParticle[gtrk]->parent())) {
 			cout << "Error in assigning parent to particle table!\n There should be a parent and there isn't one!\n";
 			PR(gtrk);
@@ -799,7 +794,7 @@ Int_t StMcEventMaker::Make()
 	if (nThrownTracks)
 	    gMessMgr->Warning() << "StMcEventMaker::Make(): Throwing " << nThrownTracks
 				<< " whose stop vertex is the same as primary vertex." << endm;
-	if (Debug()>=2) {
+	if (Debug()) {
 	    // Check the whole ttempParticle for entries with problems
 	    for (long gtrk=0; gtrk<NGeneratorTracks; gtrk++)
 		if (ttempParticle[gtrk]->parent() && ttempParticle[gtrk]->parent() != ttempParticle[particleTable[gtrk].jmohep[0]]) {
@@ -822,7 +817,7 @@ Int_t StMcEventMaker::Make()
 	//______________________________________________________________________
 	// Step 4 - Fill Hits
 		
-	if (Debug()) cout << "Preparing to process and fill HIT information ....." << endl;
+	cout << "Preparing to process and fill HIT information ....." << endl;
 	
 
 	//
@@ -861,12 +856,10 @@ Int_t StMcEventMaker::Make()
 		    ttemp[iTrkId]->addTpcHit(th);
 	    
 		} // hit loop
-		if (Debug()) {
-		    cout << "Filled " << mCurrentMcEvent->tpcHitCollection()->numberOfHits() << " TPC Hits" << endl;
-		    cout << "Found " << nPseudoPadrow << " Hits in Pseudo-Padrows." << endl;
-		    if (nBadVolId) {gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
-							<< " TPC hits, wrong Volume Id." << endm;}
-		}
+		cout << "Filled " << mCurrentMcEvent->tpcHitCollection()->numberOfHits() << " TPC Hits" << endl;
+		cout << "Found " << nPseudoPadrow << " Hits in Pseudo-Padrows." << endl;
+		if (nBadVolId) {gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
+						    << " TPC hits, wrong Volume Id." << endm;}
 		// Sort the hits
 		for (unsigned int iSector=0;
 		      iSector<mCurrentMcEvent->tpcHitCollection()->numberOfSectors(); iSector++)
@@ -879,7 +872,7 @@ Int_t StMcEventMaker::Make()
 		    }
 	    } // pointer exists
 	    else {
-		if (Debug()) cout << "No TPC Hits in this event" << endl;
+		cout << "No TPC Hits in this event" << endl;
 	    }
 	} // doUseTpc
 	
@@ -914,13 +907,11 @@ Int_t StMcEventMaker::Make()
 		ttemp[iTrkId]->addSvtHit(sh);
 		
 	    }
-	    if (Debug()) {
-		cout << "Filled " << mCurrentMcEvent->svtHitCollection()->numberOfHits() << " SVT Hits" << endl;
-		cout << "Nhits, " << NHits << " rows from table" << endl;
-		if (nBadVolId)
-		    gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
-					<< " SVT hits, wrong Volume Id." << endm;
-	    }
+	    cout << "Filled " << mCurrentMcEvent->svtHitCollection()->numberOfHits() << " SVT Hits" << endl;
+	    cout << "Nhits, " << NHits << " rows from table" << endl;
+	    if (nBadVolId)
+		gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
+				    << " SVT hits, wrong Volume Id." << endm;
 	    // Sort the hits
 	    for (unsigned int iBarrel=0;
 		 iBarrel<mCurrentMcEvent->svtHitCollection()->numberOfBarrels(); iBarrel++)
@@ -937,7 +928,7 @@ Int_t StMcEventMaker::Make()
 
 	}
 	else {
-	    if (Debug()) cout << "No SVT Hits in this event" << endl;
+	    cout << "No SVT Hits in this event" << endl;
 	}
 	} // do use svt
 	
@@ -977,12 +968,10 @@ Int_t StMcEventMaker::Make()
 		ttemp[iTrkId]->addFtpcHit(fh);
 		
 	    }
-	    if (Debug()) {
-		cout << "Filled " << mCurrentMcEvent->ftpcHitCollection()->numberOfHits() << " FTPC Hits" << endl;
-		if (nBadVolId)
-		    gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
-					<< " FTPC hits, wrong Volume Id." << endm;
-	    }
+	    cout << "Filled " << mCurrentMcEvent->ftpcHitCollection()->numberOfHits() << " FTPC Hits" << endl;
+	    if (nBadVolId)
+		gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
+				    << " FTPC hits, wrong Volume Id." << endm;
 	    // Sort the hits
 	    for (unsigned int iPlane=0;
 		 iPlane<mCurrentMcEvent->ftpcHitCollection()->numberOfPlanes(); iPlane++) {
@@ -992,7 +981,7 @@ Int_t StMcEventMaker::Make()
 	    }
 	}
 	else {
-	    if (Debug()) cout << "No FTPC Hits in this event" << endl;
+	    cout << "No FTPC Hits in this event" << endl;
 	}
 	}// do use ftpc
 
@@ -1018,12 +1007,11 @@ Int_t StMcEventMaker::Make()
 		ttemp[iTrkId]->addRichHit(rh);
 		
 	    }
-	    if (Debug()) {
-		cout << "Filled " << mCurrentMcEvent->richHitCollection()->numberOfHits() << " RICH Hits" << endl;
-	    }
+	    cout << "Filled " << mCurrentMcEvent->richHitCollection()->numberOfHits() << " RICH Hits" << endl;
+	    
 	}
 	else {
-	    if (Debug()) cout << "No RICH Hits in this event" << endl;
+	    cout << "No RICH Hits in this event" << endl;
 	}
 	} // do use rich
 
@@ -1046,12 +1034,11 @@ Int_t StMcEventMaker::Make()
 		ttemp[iTrkId]->addCtbHit(ch);
 		
 	    }
-	    if (Debug()) {
-		cout << "Filled " << mCurrentMcEvent->ctbHitCollection()->numberOfHits() << " Ctb Hits" << endl;
-	    }
+	    cout << "Filled " << mCurrentMcEvent->ctbHitCollection()->numberOfHits() << " Ctb Hits" << endl;
+	    
 	}
 	else {
-	    if (Debug()) cout << "No Ctb Hits in this event" << endl;
+	    cout << "No Ctb Hits in this event" << endl;
 	}
 	}
 	// TOFp hits
@@ -1074,14 +1061,11 @@ Int_t StMcEventMaker::Make()
 		    ch->setParentTrack(ttemp[iTrkId]);
 		    ttemp[iTrkId]->addTofHit(ch);
 		}
-		
 		nTofpHits =  mCurrentMcEvent->tofHitCollection()->numberOfHits();
-		if (Debug()) {
-		    cout << "Filled " <<nTofpHits << " TOFp Hits" << endl;
-		}
+		cout << "Filled " <<nTofpHits << " TOFp Hits" << endl;
 	    }
 	    else {
-		if (Debug()) cout << "No TOFp Hits in this event" << endl;
+		cout << "No TOFp Hits in this event" << endl;
 	    }
         }
 	
@@ -1104,13 +1088,11 @@ Int_t StMcEventMaker::Make()
 		    ch->setParentTrack(ttemp[iTrkId]);
 		    ttemp[iTrkId]->addTofHit(ch);
 		}
-		if (Debug()) {
-		    cout << "Filled " << mCurrentMcEvent->tofHitCollection()->numberOfHits() - nTofpHits
-			 << " TOFr Hits" << endl;
-		}
+		cout << "Filled " << mCurrentMcEvent->tofHitCollection()->numberOfHits() - nTofpHits
+		     << " TOFr Hits" << endl;
 	    }
 	    else {
-		if (Debug()) cout << "No TOFr Hits in this event" << endl;
+		cout << "No TOFr Hits in this event" << endl;
 	    }
         }
 	
@@ -1138,12 +1120,10 @@ Int_t StMcEventMaker::Make()
 		    fh->setParentTrack(ttemp[iTrkId]);
 		    //ttemp[iTrkId]->addPixelHit(fh);
 		}
-		if (Debug()) {
 		cout << "Filled " << mCurrentMcEvent->pixelHitCollection()->numberOfHits() << " Pixel Hits" << endl;
-		}
 	    }
 	    else {
-		if (Debug()) cout << "No Pixel Hits in this event" << endl;
+		cout << "No Pixel Hits in this event" << endl;
 	    }
 	}// do use pixel
 	
@@ -1193,7 +1173,7 @@ void
 StMcEventMaker::fillBemc(St_g2t_emc_hit* g2t_emc_hitTablePointer)
 {
     if (g2t_emc_hitTablePointer == 0) {
-        if (Debug()) cout << "No BEMC and BPRS Hits in this event" << endl;
+        cout << "No BEMC and BPRS Hits in this event" << endl;
         return;
     }
 
@@ -1269,17 +1249,16 @@ StMcEventMaker::fillBemc(St_g2t_emc_hit* g2t_emc_hitTablePointer)
                                 << emcHitTable->volume_id << " detector "<< detector << endm;
         }
     }
-    if (Debug()) {
-	cout << "Filled " << mCurrentMcEvent->bemcHitCollection()->numberOfHits() << " BEMC Hits" << endl;
-	cout << "Filled " << mCurrentMcEvent->bprsHitCollection()->numberOfHits() << " BPRS Hits" << endl;
-    }
+    cout << "Filled " << mCurrentMcEvent->bemcHitCollection()->numberOfHits() << " BEMC Hits" << endl;
+    cout << "Filled " << mCurrentMcEvent->bprsHitCollection()->numberOfHits() << " BPRS Hits" << endl;
+		
 }
 
 void
 StMcEventMaker::fillBsmd(St_g2t_emc_hit* g2t_smd_hitTablePointer)
 {
     if (g2t_smd_hitTablePointer == 0) {
-        if (Debug()) cout << "No BSMDE and BSMDP Hits in this event" << endl;
+        cout << "No BSMDE and BSMDP Hits in this event" << endl;
         return;
     }
 
@@ -1330,17 +1309,16 @@ StMcEventMaker::fillBsmd(St_g2t_emc_hit* g2t_smd_hitTablePointer)
 				<< smdHitTable->volume_id << " detector "<< detector << endm;
         }
     }
-    if (Debug()) {
-	cout << "Filled " << mCurrentMcEvent->bsmdeHitCollection()->numberOfHits() << " BSMDE Hits" << endl;
-	cout << "Filled " << mCurrentMcEvent->bsmdpHitCollection()->numberOfHits() << " BSMDP Hits" << endl;
-    }
+    cout << "Filled " << mCurrentMcEvent->bsmdeHitCollection()->numberOfHits() << " BSMDE Hits" << endl;
+    cout << "Filled " << mCurrentMcEvent->bsmdpHitCollection()->numberOfHits() << " BSMDP Hits" << endl;
+
 }
 
 void
 StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_eem_hitTablePointer)
 {
     if (g2t_eem_hitTablePointer == 0) {
-        if (Debug()) cout << "No EEMC Hits in this event" << endl;
+        cout << "No EEMC Hits in this event" << endl;
         return;
     }
 
@@ -1459,9 +1437,9 @@ StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_eem_hitTablePointer)
 	    // hm, don't know what to do here...
 	}
     }
-    if (Debug()) {
-	cout << "Filled " << mCurrentMcEvent->eemcHitCollection()->numberOfHits() << " EEMC Hits" << endl;
-    }
+    
+    cout << "Filled " << mCurrentMcEvent->eemcHitCollection()->numberOfHits() << " EEMC Hits" << endl;
+
 }
 
 void
