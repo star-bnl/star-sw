@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.15 2003/03/13 18:59:08 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.16 2003/03/13 21:21:26 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.16  2003/03/13 21:21:26  pruneau
+ * getPhase() fixed. MUST inclde -helicity()*pi/2
+ *
  * Revision 2.15  2003/03/13 18:59:08  pruneau
  * various updates
  *
@@ -880,7 +883,7 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
     { 
       //cout << " on vertex plane:";
       chi2 = tNode->evaluateChi2(&localVertex); 
-      /*
+
 	double dx,dy,dz,d;
 	dx=tNode->_x- localVertex.x();
 	dy=tNode->_p0- localVertex.y();
@@ -891,7 +894,7 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 	<< " dz:"<< dz
 	<< " d: "<< d<<endl;
 	_dca = sqrt(dy*dy+dz*dz);
-      */
+
       if (chi2<pars->maxChi2Vertex)
 	{
 	  myHit = StiToolkit::instance()->getHitFactory()->getInstance();

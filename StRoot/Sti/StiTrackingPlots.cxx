@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.2 2003/03/13 18:59:15 pruneau Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.3 2003/03/13 21:21:29 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.3  2003/03/13 21:21:29  pruneau
+ * getPhase() fixed. MUST inclde -helicity()*pi/2
+ *
  * Revision 2.2  2003/03/13 18:59:15  pruneau
  * various updates
  *
@@ -46,6 +49,8 @@ StiTrackingPlots::StiTrackingPlots()
   add( mMomZ  = new TH3D("mMomZ","Momentum (Z) v. Eta and Phi",  256,0,30,128,-2,2,128,0,360));
   add( mPhase = new TH3D("mPhase","Phase v. Eta and Pt",  256,0,30,128,-2,2,128,0,360));
   add( globalDca = new TH1D("globalDca","Global DCA", 160, -20,20) );	 
+  add( _dca40 = new TH1D("dca40","DCA N>=40", 160, -20,20) );	 
+
   cout <<"StiTrackingPlots::StiTrackingPlots() -I- Done"<<endl;
 }
   
@@ -93,7 +98,8 @@ void StiTrackingPlots::fillStandardPlots(StiTrackContainer *mTrackStore)
       _phi->Fill(kTrack->getPhi());
       _pt->Fill(kTrack->getPt());
       globalDca->Fill(kTrack->getDca());
-
+      if (kTrack->getPointCount()>=40)
+	_dca40->Fill(kTrack->getDca());
       double phi = kTrack->getPhi();
       double eta = kTrack->getPseudoRapidity();
       double pt =  kTrack->getPt();

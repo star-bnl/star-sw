@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.h,v 2.2 2003/03/13 18:59:16 pruneau Exp $
+ * $Id: StiTrackingPlots.h,v 2.3 2003/03/13 21:21:29 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.h,v $
+ * Revision 2.3  2003/03/13 21:21:29  pruneau
+ * getPhase() fixed. MUST inclde -helicity()*pi/2
+ *
  * Revision 2.2  2003/03/13 18:59:16  pruneau
  * various updates
  *
@@ -39,6 +42,7 @@ class StiTrackingPlots : public HistogramGroup
   TH1D * _eta;
   TH1D * _phi;
   TH1D * _pt;
+  TH1D * _dca40;
 
   //rad length maps
   TH2D * radLengthZ;
