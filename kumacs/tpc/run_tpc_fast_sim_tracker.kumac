@@ -17,7 +17,7 @@
 ************************************************************************
 
  macro run__
-          TOP=$STAR _
+          TOP=/scr22/kathy/test11 _
           domain='geometry tpc' _
           INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
           input_g2t_file=auau_central_hijing.xdf _
