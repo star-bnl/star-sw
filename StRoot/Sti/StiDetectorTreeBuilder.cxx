@@ -13,30 +13,35 @@
 
 //Sti
 #include "StiDetector.h"
+#include "StiPlacement.h"
 #include "StiCompositeTreeNode.h"
 #include "StiDetectorTreeBuilder.h"
 #include "StlUtilities.h"
+#include "StiCodedDetectorBuilder.h"
 
 ostream& operator<<(ostream&, const StiDetector&);
 
 StiDetectorTreeBuilder::StiDetectorTreeBuilder()
     : mroot(0), mnodefactory(0), mdetfactory(0), mregion(0)
 {
-    cout <<"StiDetectorTreeBuilder::StiDetectorTreeBuilder()"<<endl;
+  mDetectorBuilder = new StiCodedDetectorBuilder();
+  cout <<"StiDetectorTreeBuilder::StiDetectorTreeBuilder()"<<endl;
 }
 
 StiDetectorTreeBuilder::~StiDetectorTreeBuilder()
 {
-    cout <<"StiDetectorTreeBuilder::~StiDetectorTreeBuilder()"<<endl;
+  delete mDetectorBuilder;
+  cout <<"StiDetectorTreeBuilder::~StiDetectorTreeBuilder()"<<endl;
 }
 
-data_node* StiDetectorTreeBuilder::build(const char* path,
-								 data_node_factory* nodefactory,
-								 detector_factory* detfactory)
+data_node* StiDetectorTreeBuilder::build(
+    const char* path, data_node_factory* nodefactory,
+    detector_factory* detfactory)
 {
     if (mroot) {
-	cout <<"StiDetectorTreeBuilder::build()\tError!\troot tree already built"<<endl;
-	return 0;
+      cout << "StiDetectorTreeBuilder::build()\tError!\t" 
+           << "root tree already built"<<endl;
+      return 0;
     }
     
     mnodefactory = nodefactory;
@@ -66,24 +71,29 @@ void StiDetectorTreeBuilder::buildRoot()
 void StiDetectorTreeBuilder::addToTree(StiDetector* layer)
 {
     //Where do we hang in radius?
-    StiOrderKey_t radius = layer->getCenterRadius();
+    StiOrderKey_t radius = layer->getPlacement()->getCenterRadius();
     string radstring = "_radius";
     data_node* radialnode = hangWhere(mregion, radius, radstring);
 
     //Where do we hang in phi?
-    StiOrderKey_t refAngle = layer->getCenterRefAngle();
+    StiOrderKey_t refAngle = layer->getPlacement()->getCenterRefAngle();
     string phistring = "_refAngle";
     data_node* phinode = hangWhere(radialnode, refAngle, phistring);
     phinode->setData(layer);
 }
 
-data_node* StiDetectorTreeBuilder::hangWhere(data_node* parent,
-								     StiOrderKey_t order, string& keystring)
+// Starting with the given parent, use the ordering key of the given type
+// to determine where the new detector should be hung.
+data_node* StiDetectorTreeBuilder::hangWhere(
+    data_node* parent, StiOrderKey_t order, string& keystring)
 {
+//  cout << "hangWhere(" << parent->getName() << ", " << order << ", " 
+//       << keystring << ")" << endl;
     SameOrderKey<data_t> mySameOrderKey;
     mySameOrderKey.morderKey = order;
 
-    data_node_vec::iterator where = find_if(parent->begin(), parent->end(), mySameOrderKey);
+    data_node_vec::iterator where = find_if(parent->begin(), parent->end(), 
+                                            mySameOrderKey);
 
     if (where == parent->end()) {
 	data_node* temp = mnodefactory->getObject();
@@ -106,33 +116,16 @@ data_node* StiDetectorTreeBuilder::hangWhere(data_node* parent,
 
 void StiDetectorTreeBuilder::loopOnDetectors(const char* buildDirectory)
 {
-    char* buildfile = new char[200];
-    
-    DIR *pDir = opendir(buildDirectory);
-    struct dirent *pDirEnt;
-    struct stat fileStat;
-    
-    while( (pDirEnt = readdir(pDir)) != 0){
-	sprintf(buildfile, "%s/%s", buildDirectory, pDirEnt->d_name);
-	
-	// get file attributes
-	stat(buildfile, &fileStat);
-	
-	// is this a directory?  if so, recursively build directory
-	if((S_ISDIR(fileStat.st_mode)) && pDirEnt->d_name[0] != '.'){
-	    loopOnDetectors(buildfile);
-	} // if is directory
-	
-	// if regular file, process as detector
-	if(S_ISREG(fileStat.st_mode)){
-	    //StiDetector* layer = makeDetectorObject();
-	    StiDetector* layer = mdetfactory->getObject();
 
-	    layer->build(buildfile);
-	    addToTree(layer);
-	    
-	} // if is regular file
-    }
-    closedir(pDir);
-    return;
+  while(mDetectorBuilder->hasMore()){
+ 
+    StiDetector* layer = mdetfactory->getObject();
+    mDetectorBuilder->fillNext(layer);
+
+    addToTree(layer);
+
+    cout << "Added detector " << layer->getName() << endl;
+  }
+
+  return;
 }

@@ -13,6 +13,7 @@
 
 //Sti
 #include "Sti/StiDetector.h"
+#include "Sti/StiPlacement.h"
 #include "Sti/StiDetectorContainer.h"
 #include "Sti/StiHitContainer.h"
 
@@ -238,7 +239,7 @@ void StiControlBar::printHitContainerForDetector()
 	cout <<"Error! StiControlBar::printHitContainerForDetector(): Failed to get detector"<<endl;
 	return;
     }
-    StiHitContainer::instance()->print( layer->getCenterRefAngle(), layer->getCenterRadius() );
+    StiHitContainer::instance()->print( layer->getPlacement()->getCenterRefAngle(), layer->getPlacement()->getCenterRadius() );
 }
 
 void StiControlBar::showCurrentDetector()

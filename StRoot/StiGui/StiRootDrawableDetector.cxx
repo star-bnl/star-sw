@@ -13,10 +13,16 @@
 #include "TPCON.h"
 
 //Sti
+#include "Sti/StiPlacement.h"
+#include "Sti/StiShape.h"
+#include "Sti/StiPlanarShape.h"
+#include "Sti/StiCylindricalShape.h"
+#include "Sti/StiConicalShape.h"
 #include "StiDisplayManager.h"
 #include "StiRootDrawableDetector.h"
 
-void gStiEulerMatrixForRoot(double phi, double* xx); //rotation about z-axis by angle phi
+//rotation about z-axis by angle phi
+void gStiEulerMatrixForRoot(double phi, double* xx);
 
 StiRootDrawableDetector::StiRootDrawableDetector()
 {
@@ -53,21 +59,55 @@ void StiRootDrawableDetector::makeShape()
     char* shapename = new char[200];
     sprintf(shapename,"Shape_%s",getName());
     // make rectangular or cylindrical shapes based on shape code
-    if(getShapeCode() == kPlanar){
-      mshape = new TBRIK(shapename,"BRIK","void", getThickness()/2., getHalfWidth(), getHalfDepth());
-    }else{ // kCylindrical
-      // R00T expects this angle in degrees, of all things
-      double dHalfDeltaPhi = 180.*getHalfWidth()/getCenterRadius()/M_PI;
-      double dMinRadius = getCenterRadius() - getThickness()/2;
-      double dMaxRadius = getCenterRadius() + getThickness()/2;
-      TPCON *pCon = new TPCON(shapename,"PCON","void", 
-                              getCenterRefAngle() - dHalfDeltaPhi,
-                              2.*dHalfDeltaPhi, 2);
-      pCon->DefineSection(0, -getHalfDepth(), dMinRadius, dMaxRadius);
-      pCon->DefineSection(1, getHalfDepth(), dMinRadius, dMaxRadius);
+    StiPlacement *pPlacement = getPlacement();
+    StiShapeCode code = getShape()->getShapeCode();
+    if(code == kPlanar){
+      StiPlanarShape *pPlane = 
+          dynamic_cast<StiPlanarShape *>( getShape() );
+      mshape = new TBRIK(shapename,"BRIK","void", 
+                         pPlane->getThickness()/2.,
+                         pPlane->getHalfWidth(), 
+                         pPlane->getHalfDepth());
+    }else if(code == kCylindrical){
+      StiCylindricalShape *pCyl = 
+          dynamic_cast<StiCylindricalShape *>( getShape() );
+      // R00T expects these angles in degrees, of all things
+      float fHalfOpening = pCyl->getOpeningAngle()/2.;
+      float fStarting = pPlacement->getCenterRefAngle() - fHalfOpening;
+      if(fStarting < 0) fStarting += 2*M_PI;
+      float fMinRadius = pCyl->getOuterRadius() - pCyl->getThickness();
+      float fMaxRadius = pCyl->getOuterRadius();
 
-      mshape = pCon;
-      pCon = 0;
+      mshape = new TPCON(shapename,"PCON","void", 
+                         180./M_PI*fStarting, 360./M_PI*fHalfOpening, 2);
+      ((TPCON *)mshape)->DefineSection(
+          0, pPlacement->getZcenter() - pCyl->getHalfDepth(), 
+          fMinRadius, fMaxRadius);
+      ((TPCON *)mshape)->DefineSection(
+          1, pPlacement->getZcenter() + pCyl->getHalfDepth(), 
+          fMinRadius, fMaxRadius);
+    }else if(code == kConical){
+      StiConicalShape *pCone = 
+          dynamic_cast<StiConicalShape *>( getShape() );
+      // R00T expects these angles in degrees, of all things
+      float fHalfOpening = pCone->getOpeningAngle()/2.;
+      float fStarting = pPlacement->getCenterRefAngle() - fHalfOpening;
+      if(fStarting < 0) fStarting += 2*M_PI;
+      float fMinRadiusEast = pCone->getOuterRadiusEast() - 
+          pCone->getThickness();
+      float fMaxRadiusEast = pCone->getOuterRadiusEast();
+      float fMinRadiusWest = pCone->getOuterRadiusWest() - 
+          pCone->getThickness();
+      float fMaxRadiusWest = pCone->getOuterRadiusWest();
+
+      mshape = new TPCON(shapename,"PCON","void", 
+                         180./M_PI*fStarting, 360./M_PI*fHalfOpening, 2);
+      ((TPCON *)mshape)->DefineSection(
+          0, pPlacement->getZcenter() - pCone->getHalfDepth(), 
+          fMinRadiusEast, fMaxRadiusEast);
+      ((TPCON *)mshape)->DefineSection(
+          1, pPlacement->getZcenter() + pCone->getHalfDepth(), 
+          fMinRadiusWest, fMaxRadiusWest);
     }
     mshape->SetLineColor(1);
     
@@ -75,20 +115,26 @@ void StiRootDrawableDetector::makeShape()
     //Hang shape on a drawable node in local coordinates of shape
     //cout <<"Make Local Volume"<<endl;
     char* localnodename = new char[200];
-    sprintf(localnodename, "local_node_%f_%f",getCenterRadius(), getCenterRefAngle());
+    sprintf(localnodename, "local_node_%f_%f",
+            getPlacement()->getCenterRadius(), 
+            getPlacement()->getCenterRefAngle());
     mselfnode = new TVolume(localnodename,"", mshape);
 
     //Now hand shape on node that is rotated w.r.t. global coordinates
     //cout <<"Rotate shape w.r.t. local center"<<endl;
     char* localmatrixname = new char[200];
-    sprintf(localmatrixname, "local_matrix_%f_%f",getCenterRadius(), getCenterRefAngle());
+    sprintf(localmatrixname, "local_matrix_%f_%f",
+            getPlacement()->getCenterRadius(), 
+            getPlacement()->getCenterRefAngle());
     double xlocal[9];    
-    gStiEulerMatrixForRoot(getOrientationAngle(), xlocal); //Make our euler-rotatin matrix
+    //Make our euler-rotatin matrix
+    gStiEulerMatrixForRoot(getPlacement()->getCenterOrientation(), xlocal); 
     mselfrotation = new TRotMatrix(localmatrixname, "void", xlocal);
 
     //cout <<"Make Global Node"<<endl;
     char* nodename = new char[200];
-    sprintf(nodename, "node_%f_%f",getCenterRadius(), getCenterRefAngle());
+    sprintf(nodename, "node_%f_%f", getPlacement()->getCenterRadius(), 
+            getPlacement()->getCenterRefAngle());
     mnode = new TVolume();
     mnode->SetName(nodename);
     mnode->SetTitle(nodename);
@@ -96,23 +142,32 @@ void StiRootDrawableDetector::makeShape()
 
     //cout <<"\tRotate node w.r.t global"<<endl;
     char* matrixname = new char[200];
-    sprintf(matrixname, "matrix_%f_%f",getCenterRadius(), getCenterRefAngle());
+    sprintf(matrixname, "matrix_%f_%f", getPlacement()->getCenterRadius(), 
+            getPlacement()->getCenterRefAngle());
     double x[9];    
-    gStiEulerMatrixForRoot(getCenterRefAngle(), x); //Make our euler-rotatin matrix
-    mrotation = new TRotMatrix(matrixname, "void", x);
+    //Make our euler-rotatin matrix
+    if(getShape()->getShapeCode() == kPlanar){ // normal rotation
+      gStiEulerMatrixForRoot(getPlacement()->getCenterRefAngle(), x); 
+      mrotation = new TRotMatrix(matrixname, "void", x);
+    }else{ // no rotation
+      gStiEulerMatrixForRoot(0., x); 
+      mrotation = new TRotMatrix(matrixname, "void", x);
+    }
 
     //Set position of center of shape w.r.t. global coordinates
     //cout <<"Set Position of center of shape w.r.t. global"<<endl;
-    if(getShapeCode() == kPlanar){
-      double xcenter = getCenterRadius()*cos(getCenterRefAngle());
-      double ycenter = getCenterRadius()*sin(getCenterRefAngle());
+    if(getShape()->getShapeCode() == kPlanar){
+      double xcenter = getPlacement()->getCenterRadius()*
+          cos(getPlacement()->getCenterRefAngle());
+      double ycenter = getPlacement()->getCenterRadius()*
+          sin(getPlacement()->getCenterRefAngle());
       mposition.setX(xcenter);
       mposition.setY(ycenter);
-      mposition.setZ(getZCenter());
+      mposition.setZ(getPlacement()->getZcenter());
     }else{ // for kCylindrical, we assume center @ origin
-      mposition.setX(0);
-      mposition.setY(0);
-      mposition.setZ(0);
+      mposition.setX(0.);
+      mposition.setY(0.);
+      mposition.setZ(0.);
     }
 
     //cout <<"Done Making Shape"<<endl;

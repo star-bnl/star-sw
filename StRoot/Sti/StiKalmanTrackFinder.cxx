@@ -34,6 +34,7 @@
 
 #include "StiHit.h"
 #include "StiDetector.h"
+#include "StiPlacement.h"
 #include "StiDetectorContainer.h"
 #include "StiTrackContainer.h"
 #include "StiTrack.h"
@@ -245,12 +246,12 @@ bool StiKalmanTrackFinder::propagateTrackAtNodeTo(StiTrack     * t,
   // if the two volumes do not have the same reference frame, a rotation
   // will be needed - do it now.
 
-  double sAngle = sDet->getNormalRefAngle();
-  double tAngle = tDet->getNormalRefAngle();
+  double sAngle = sDet->getPlacement()->getNormalRefAngle();
+  double tAngle = tDet->getPlacement()->getNormalRefAngle();
   if (sAngle!=tAngle)
     rotate(node,tAngle-sAngle);
 
-  double xk = tDet->getNormalRadius();
+  double xk = tDet->getPlacement()->getNormalRadius();
   double diff = node->fP3*xk - node->fP2;
   if (diff >= 0.99999 || diff<0.99999) 
     {
