@@ -1,12 +1,12 @@
-<h3>SUBROUTINE MSG_Enter( PREFIX, ID )</h3><pre>
+<pre><h3>SUBROUTINE MSG_Enter( Prefix, ID )</h3>
 
 
 *  Input:
-	CHARACTER*(*) PREFIX !A STAR-standard message prefix.
+	CHARACTER*(*) Prefix !A STAR-standard message prefix.
 
 *  Output:
-	INTEGER ID !STAR-standard message ID of the newly-entered
-	           !message-prefix PREFIX, or zero if no more room.
+	INTEGER ID !Fast-reference ID of the newly-entered
+	           !message-prefix, or zero if no more room.
 
 *  Brief description:  Define new prefixes and assign fast-ref IDs.
 

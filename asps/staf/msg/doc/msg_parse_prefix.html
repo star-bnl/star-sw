@@ -1,4 +1,4 @@
-<h3>SUBROUTINE MSG_Parse_Prefix( Prefix, Prefix_stripped, Prefix_number)</h3><pre>
+<pre><h3>SUBROUTINE MSG_Parse_Prefix( Prefix, Prefix_stripped, Prefix_number)</h3>
 
 
 *  Input:
@@ -19,6 +19,11 @@
 *	The principal use of this is for sorting, to preserve the sequence
 *	1,2,3...8,9,10,11, etc., instead of the straight ASCII sequence,
 *	which would go as 1,10,11,...,2,20,21,... etc.
+
+*	Note that classes are irrelevant to this purpose, and are ignored.
+
+*	Called in msglib.f in MSG_Summary.
+
 
 
 </pre>
