@@ -4,7 +4,7 @@
  */
 /******************************************************
  *
- * $Id: StPmdAbsClustering.h,v 1.3 2003/05/14 10:49:12 subhasis Exp $
+ * $Id: StPmdAbsClustering.h,v 1.4 2004/06/24 13:47:19 subhasis Exp $
  *
  * Author: Subhasis
  ******************************************************
@@ -14,6 +14,9 @@
  ******************************************************
  *
  * $Log: StPmdAbsClustering.h,v $
+ * Revision 1.4  2004/06/24 13:47:19  subhasis
+ * several changes in clustering code
+ *
  * Revision 1.3  2003/05/14 10:49:12  subhasis
  * CPV clustering added
  *
@@ -45,8 +48,9 @@ class StPmdAbsClustering
   StPmdAbsClustering(StPmdDetector *, StPmdDetector*);
   StPmdAbsClustering();
   virtual ~StPmdAbsClustering();
-  virtual void findPmdClusters() =0;
-  virtual void findCpvClusters() =0;
+  //  virtual void findPmdClusters() =0;
+  //  virtual void findPmdClusters(StPmdDetector*) =0;
+  //  virtual void findCpvClusters() =0;
   ClassDef(StPmdAbsClustering, 1) 
     };
 
