@@ -18,6 +18,7 @@ $content = <<END_BLOCK;
 <html>
 <head>
 <title>CVS commits by user</title>
+<meta http-equiv="expires" content="$currentTime">
 </head>
 <body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
 <basefont face="verdana,arial,helvetica,sans-serif">
@@ -34,11 +35,11 @@ Click on the username for a record of commits, and on the module
 name to browse that module's CVS area.
 </tr></td>
 </table>
-
+<p>
 <table border=1 cellpadding=3 cellspacing=0>
 <tr bgcolor=lightgrey>
   <td align=center><b> User </b></td>
-  <td align=center><b> # Commits </b></td>
+  <td align=center><b> Commits </b></td>
   <td align=center><b> Latest Commit </b></td>
   <td align=center><b> Latest Package </b></tr>
 END_BLOCK
@@ -79,6 +80,7 @@ while (<COMMITLOG>) {
           <html>
             <head>
             <title>CVS commits by $uname</title>
+            <meta http-equiv="expires" content="$currentTime">
           </head>
         <body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
         <basefont face="verdana,arial,helvetica,sans-serif">
@@ -164,7 +166,7 @@ Click on the username for a record of commits, and on the module
 name to browse that module's CVS area.
 </tr></td>
 </table>
-
+<p>
 <table border=1 cellpadding=3 cellspacing=0>
 <tr bgcolor=lightgrey>
   <td align=center><b> User </b></td>
