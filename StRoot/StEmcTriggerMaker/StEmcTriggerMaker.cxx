@@ -43,6 +43,12 @@ StEmcTriggerMaker::StEmcTriggerMaker(const char *name):StMaker(name)
   mBemcTrigger = new StBemcTrigger();
   mSaveStEvent = true;
   mPrint = false;
+  mHTBefore = NULL;
+  mPABefore = NULL;
+  mHT = NULL;
+  mPA = NULL;
+  mHTCorrel = NULL;
+  mPACorrel = NULL;
 }
 //____________________________________________________________________________
 StEmcTriggerMaker::~StEmcTriggerMaker()
@@ -51,12 +57,14 @@ StEmcTriggerMaker::~StEmcTriggerMaker()
 //_____________________________________________________________________________
 Int_t StEmcTriggerMaker::Init()
 {
-  mHTBefore = new TH2F("HighTower_DSM","High Tower trigger in DSM",300,-0.5,299.5,64,-0.5,63.5);
-  mPABefore = new TH2F("Patch_DSM","Patch trigger in DSM",300,-0.5,299.5,64,-0.5,63.5);
-  mHT       = new TH2F("HighTower","High Tower trigger",300,-0.5,299.5,64,-0.5,63.5);
-  mPA       = new TH2F("Patch","Patch trigger",300,-0.5,299.5,64,-0.5,63.5);
-  mHTCorrel = new TH2F("HighTower_Correl","High Tower trigger correlation",64,-0.5,63.5,64,-0.5,63.5);
-  mPACorrel = new TH2F("Patch_Correl","Patch trigger correlation",64,-0.5,63.5,64,-0.5,63.5);
+  if (IAttr(".histos")) {
+    mHTBefore = new TH2F("HighTower_DSM","High Tower trigger in DSM",300,-0.5,299.5,64,-0.5,63.5);
+    mPABefore = new TH2F("Patch_DSM","Patch trigger in DSM",300,-0.5,299.5,64,-0.5,63.5);
+    mHT       = new TH2F("HighTower","High Tower trigger",300,-0.5,299.5,64,-0.5,63.5);
+    mPA       = new TH2F("Patch","Patch trigger",300,-0.5,299.5,64,-0.5,63.5);
+    mHTCorrel = new TH2F("HighTower_Correl","High Tower trigger correlation",64,-0.5,63.5,64,-0.5,63.5);
+    mPACorrel = new TH2F("Patch_Correl","Patch trigger correlation",64,-0.5,63.5,64,-0.5,63.5);
+  }
   return StMaker::Init();
 }  
 //_____________________________________________________________________________
@@ -70,8 +78,10 @@ Int_t StEmcTriggerMaker::Make()
   mBemcTrigger->setEvent(event);
   mBemcTrigger->makeTrigger();
   
-  fillHistograms(event);
-  
+  if (IAttr(".histos")) {
+    fillHistograms(event);
+  }  
+
   if(mSaveStEvent) fillStEvent(event);
     
   return kStOK;
@@ -87,8 +97,8 @@ void StEmcTriggerMaker::fillHistograms(StEvent *event)
   emcTrigger emcTrg = mBemcTrigger->getTrigger();
   for(int i=0;i<300;i++)
   {
-    mHT->Fill(i,emcTrg.HT[i]);
-    mPA->Fill(i,emcTrg.Patch[i]);
+    if (mHT) mHT->Fill(i,emcTrg.HT[i]);
+    if (mPA) mPA->Fill(i,emcTrg.Patch[i]);
   }
   
   // comparison with existing data in StTriggerData
@@ -98,10 +108,10 @@ void StEmcTriggerMaker::fillHistograms(StEvent *event)
   {
     for(int i=0;i<300;i++)
     {
-      mHTBefore->Fill(i,trg->bemcHighTower(i));
-      mPABefore->Fill(i,trg->bemcJetPatch(i));
-      mHTCorrel->Fill(emcTrg.HT[i],trg->bemcHighTower(i));
-      mPACorrel->Fill(emcTrg.Patch[i],trg->bemcJetPatch(i));
+      if (mHTBefore) mHTBefore->Fill(i,trg->bemcHighTower(i));
+      if (mPABefore) mPABefore->Fill(i,trg->bemcJetPatch(i));
+      if (mHTCorrel) mHTCorrel->Fill(emcTrg.HT[i],trg->bemcHighTower(i));
+      if (mPACorrel) mPACorrel->Fill(emcTrg.Patch[i],trg->bemcJetPatch(i));
     }
   }
   return;
@@ -110,12 +120,12 @@ void StEmcTriggerMaker::fillHistograms(StEvent *event)
 void StEmcTriggerMaker::saveHistograms(char* file)
 {  
   TFile *f = new TFile(file,"RECREATE");
-  mHT->Write();
-  mPA->Write();
-  mHTBefore->Write();
-  mPABefore->Write();
-  mHTCorrel->Write();
-  mPACorrel->Write();
+  if (mHT)       mHT->Write();
+  if (mPA)       mPA->Write();
+  if (mHTBefore) mHTBefore->Write();
+  if (mPABefore) mPABefore->Write();
+  if (mHTCorrel) mHTCorrel->Write();
+  if (mPACorrel) mPACorrel->Write();
   f->Close();
   delete f;
   return;
