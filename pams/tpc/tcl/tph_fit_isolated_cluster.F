@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.7 1998/09/25 20:38:13 sakrejda Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.8 1998/12/04 19:47:46 hardtke Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.8  1998/12/04 19:47:46  hardtke
+* remove stop when ADCSUM = 0. Print warning instead
+*
 * Revision 1.7  1998/09/25 20:38:13  sakrejda
 * added check in calculation of skewness and curtosis to protect against NaN for 1 pad hits
 *
@@ -268,8 +271,12 @@ C time direction no longer a projection - WAL 13 Feb 98
              if(iret.eq.1)z_vector(ipix) = zdummy
            endif
         enddo
-	if (adc_sum.eq.0.) stop 'Hey -- ADCSUM=0!!!!'
-
+	if (adc_sum.eq.0.) then
+         write(6,*) 'Hey -- ADCSUM=0!!!!'
+         write(6,*) 'number of pixels in cluster = ',nclspix
+         write(6,*) 'ADC vaulues = ',(iadc(ir),ir=1,nclspix)
+         return
+        endif
 c mal 30aug97 - maybe a problem with decon=0 running - does this 
 c screw up for very wide clusters??????????
 C------------------------------------------------------------------
