@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.3 1999/11/08 17:04:59 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.4 1999/11/10 22:40:27 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.3  1999/11/08 17:04:59  ullrich
- * Hits now allocated individually.
+ * Revision 2.4  1999/11/10 22:40:27  ullrich
+ * Delete hit if it cannot be added to collection.
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -63,9 +63,9 @@
  * to printEventInfo().
  * With Victors help now possible to read the dst_summary_param
 #if defined(__SUNPRO_CC)
-    doPrintRunInfo    = kTRUE;  // TMP, set to fFALSE later
-    doPrintEventInfo  = kTRUE;  // TMP, set to fFALSE later
-    doPrintMemoryInfo = kTRUE;  // TMP, set to fFALSE later
+ *
+ * Revision 2.12  2000/01/10 18:20:32  ullrich
+ * Create new StTrackDetectorInfo object for primary tracks if
  * first or last points differ from the referring global track.
  *
  * Revision 2.11  2000/01/05 16:07:44  ullrich
@@ -88,7 +88,7 @@
     doPrintRunInfo    = kTRUE;  // TMP 
     doPrintEventInfo  = kTRUE;  // TMP
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.3 1999/11/08 17:04:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.4 1999/11/10 22:40:27 ullrich Exp $";
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -125,10 +125,10 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.3 1999/11/08 17:04:59 ull
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.3 1999/11/08 17:04:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.4 1999/11/10 22:40:27 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.3 1999/11/08 17:04:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.4 1999/11/10 22:40:27 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -431,12 +431,15 @@ StEventMaker::makeEvent()
     if (nfailed)
     if (doLoadTpcHits || doLoadFtpcHits || doLoadSvtHits) {
                             << " V0 vertices, no valid id_vertex." << endm;
-                tpcHitColl->addHit(tpcHit);
-                id = dstPoints[i].id_track;
-                if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
-                    vecGlobalTracks[id]->detectorInfo()->addHit(tpcHit);
-                else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
-                    vecPrimaryTracks[id]->detectorInfo()->addHit(tpcHit);
+
+    //
+    //  Setup Xi vertices
+    //
+    long         nXiVertices;
+    dst_xi_vertex_st* dstXiVertices = mEventManager->returnTable_dst_xi_vertex(nXiVertices);
+	if (id < static_cast<unsigned long>(nVertices)) {
+	    StKinkVertex *kink = new StKinkVertex(dstVertices[id], dstKinkVertices[i]);
+	    id = dstKinkVertices[i].idd;
 	    if (id < vecGlobalTracks.size()) kink->addDaughter(vecGlobalTracks[id]);
 		else
 		    delete tpcHit; 
@@ -451,16 +454,19 @@ StEventMaker::makeEvent()
     //  Setup kinks
 		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
 			vecGlobalTracks[id]->detectorInfo()->addHit(tpcHit);
-                svtHitColl->addHit(svtHit);
-                id = dstPoints[i].id_track;
-                if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
-                    vecGlobalTracks[id]->detectorInfo()->addHit(svtHit);
-                else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
-                    vecPrimaryTracks[id]->detectorInfo()->addHit(svtHit);
+		    else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
+			vecPrimaryTracks[id]->detectorInfo()->addHit(tpcHit);
+        if (id < static_cast<unsigned long>(nVertices)) {
+            StKinkVertex *kink = new StKinkVertex(dstVertices[id], dstKinkVertices[i]);
+            id = dstKinkVertices[i].idd;
+            if (id < vecGlobalTracks.size()) kink->addDaughter(vecGlobalTracks[id]);
+            id = dstKinkVertices[i].idp;
+            if (id < vecGlobalTracks.size()) kink->setParent(vecGlobalTracks[id]);
+	
         }
 		else
 		    delete svtHit; 		    
-
+	    nfailed = 0;
                             << " kink vertices, no valid id_vertex." << endm;
     //  we have to scan them all and get the first index and the total
     //  number of those which have to be loaded.
@@ -472,24 +478,30 @@ StEventMaker::makeEvent()
 		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
 			vecGlobalTracks[id]->detectorInfo()->addHit(svtHit);
 		    else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
-                ftpcHitColl->addHit(ftpcHit);
-                id = dstPoints[i].id_track;
-                if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
-                    vecGlobalTracks[id]->detectorInfo()->addHit(ftpcHit);
-                else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
-                    vecPrimaryTracks[id]->detectorInfo()->addHit(ftpcHit);
+			vecPrimaryTracks[id]->detectorInfo()->addHit(svtHit);
+        int  begin, end;
+        
+	    if (nfailed) 
+		gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
+				    << " TPC hits, wrong hardware address." << endm;
+        if (doLoadTpcHits) {
+            info    = 0;
+            nfailed = 0;
             StSvtHit *svtHit;
 		else
 	    info    = 0;
                 svtHit = new StSvtHit(dstPoints[i]);
                 if (svtHitColl->addHit(svtHit)) {
                     id = dstPoints[i].id_track;
-                ftpcHitColl->addHit(ftpcHit);
-                id = dstPoints[i].id_track;
-                if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
-                    vecGlobalTracks[id]->detectorInfo()->addHit(ftpcHit);
-                else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
-                    vecPrimaryTracks[id]->detectorInfo()->addHit(ftpcHit);
+                        info = vecGlobalTracks[id]->detectorInfo();
+                        info->addHit(svtHit);
+                    }
+		    id = dstPoints[i].id_track;
+		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
+			info = vecGlobalTracks[id]->detectorInfo();
+			info->addHit(ssdHit);
+		    }
+		    if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
 			if (vecPrimaryTracks[id]->detectorInfo() != info)
 		else
 		    else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
