@@ -186,7 +186,14 @@ void St_g2t_rch_hit::Streamer(TBuffer &R__b)
      R__b.WriteVersion(St_g2t_rch_hit::IsA());
      St_Table::Streamer(R__b); 
    } else {
-      Version_t R__v = R__b.ReadVersion(); if (R__v != 1) {St_Table::Streamer(R__b); return; }
+      Int_t save =  R__b.Length();
+      Version_t R__v = R__b.ReadVersion(); 
+      if (R__v) {
+        R__b.SetBufferOffset(save); // reset TBuffer offset;
+        St_Table::Streamer(R__b); 
+        return; 
+      }
+      // Special case to read "old" version of St_g2t_rch table
       St_Table::StreamerTable(R__b);
       if (*s_MaxIndex <= 0) return; 
       char *row = (char *)GetArray();
