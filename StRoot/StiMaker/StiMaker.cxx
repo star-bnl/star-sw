@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.112  2003/03/12 17:58:04  pruneau
+// fixing stuff
+//
 // Revision 1.111  2003/02/25 14:21:06  pruneau
 // *** empty log message ***
 //
@@ -83,11 +86,15 @@
 #include "StiTpc/StiTpcDetectorGroup.h"
 #include "StiSvt/StiSvtDetectorGroup.h"
 #include "StiEmc/StiEmcDetectorGroup.h"
+#include "Sti/StiKalmanTrackNode.h"
 
 #include "StiGui/StiRootDisplayManager.h"
 
 #include "StiDefaultToolkit.h"
 #include "StiMaker.h"
+#include "TFile.h"
+
+#include "TH1.h"
 
 StiMaker* StiMaker::sinstance = 0;
 
@@ -142,11 +149,19 @@ void StiMaker::Clear(const char*)
 
 Int_t StiMaker::Finish()
 {
+  TFile * file = new TFile("StiMakerPrivate.root","RECREATE");
+  dyHist->Write();
+  dzHist->Write();
+  file->Close();
+  delete file;
   return StMaker::Finish();
 }
 
 Int_t StiMaker::Init()
 {  
+  dyHist = new TH1D("dyHist","dyHist",160, -20., 20.);
+  dzHist = new TH1D("dzHist","dzHist",160, -20., 20.);
+  StiKalmanTrackNode::maker = this;
   return kStOk;
 }
 

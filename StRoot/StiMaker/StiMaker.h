@@ -10,6 +10,7 @@ using std::string;
 #include "StEvent/StEnumerations.h"
 #include "Sti/StiKalmanTrackFinder.h"
 
+class TH1D;
 class StEvent;
 
 class StiTrackContainer;
@@ -38,12 +39,15 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.1 2003/01/24 06:12:28 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.2 2003/03/12 17:58:05 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
     static StiMaker* instance();
     static void kill();
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
+
+    TH1D * dyHist;
+    TH1D * dzHist;
 
 protected:
     StiMaker(const char* name = "StiMaker");
