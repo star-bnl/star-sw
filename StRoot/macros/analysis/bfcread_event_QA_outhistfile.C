@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QA_outhistfile.C,v 1.8 2001/05/24 20:10:37 lansdell Exp $ 
+// $Id: bfcread_event_QA_outhistfile.C,v 1.9 2001/07/17 03:24:45 genevb Exp $ 
 // $Log: bfcread_event_QA_outhistfile.C,v $
+// Revision 1.9  2001/07/17 03:24:45  genevb
+// Modify TPC DB info for year 2001
+//
 // Revision 1.8  2001/05/24 20:10:37  lansdell
 // changed DB maker SetDateTime option to year_2b
 //
@@ -65,7 +68,7 @@ void bfcread_event_QA_outhistfile(
      Int_t nevents=2, 
      const Char_t *MainFile=
      //"/afs/rhic/star/data/samples/gstar.dst.root",
-"/star/rcf/test/dev/tfs_redhat61/Tue/year_1h/hc_standard/hc_standard.40_evts.event.root",
+"/star/rcf/test/dev/trs_redhat61/Tue/year_1h/hc_standard/hc_standard.40_evts.event.root",
      const Char_t *outHistFile="StEQAMaker",
      const Char_t *TopDirTree="StEQAtree",
      const Char_t *MakerHistDir="StEQA")
@@ -114,7 +117,8 @@ void bfcread_event_QA_outhistfile(
 
 // database stuff
   const char* calibDB = "MySQL:StarDb";
-  St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB);
+  const char* calibDB2 = "$STAR/StarDb";
+  St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB,calibDB2);
   calibMk->SetDateTime("year_2b");
   calibMk->SetDebug();  
   StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
