@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StppuDstMaker.h,v 1.8 2003/10/16 19:48:37 akio Exp $
+ * $Id: StppuDstMaker.h,v 1.9 2004/01/24 02:02:55 akio Exp $
  * $Log: StppuDstMaker.h,v $
+ * Revision 1.9  2004/01/24 02:02:55  akio
+ * Adding call for init and finish for 2004
+ *
  * Revision 1.8  2003/10/16 19:48:37  akio
  * updates for 2003
  *
@@ -53,7 +56,8 @@
 
 //#defile _SPINDSTOUT_
 //#define _2002ntuple_
-#define _2003ntuple_
+//#define _2003ntuple_
+#define _2004ntuple_
 //#define _GEANT_
 #define _BBC_data_
 #define _FPD_data_
@@ -84,7 +88,7 @@ class StppuDstMaker : public StMaker {
   Int_t Make();
   Int_t Finish(); 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StppuDstMaker.h,v 1.8 2003/10/16 19:48:37 akio Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StppuDstMaker.h,v 1.9 2004/01/24 02:02:55 akio Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   

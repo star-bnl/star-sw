@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StppuDstMaker.cxx,v 1.12 2003/10/16 19:48:37 akio Exp $
+ * $Id: StppuDstMaker.cxx,v 1.13 2004/01/24 02:02:55 akio Exp $
  * 
  * Author: Akio Ogawa June 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StppuDstMaker.cxx,v $
+ * Revision 1.13  2004/01/24 02:02:55  akio
+ * Adding call for init and finish for 2004
+ *
  * Revision 1.12  2003/10/16 19:48:37  akio
  * updates for 2003
  *
@@ -91,6 +94,10 @@ extern "C" void finishfpdpi0_();
 #ifdef _2003ntuple_
 extern "C" void initntp2003_(const char*);
 extern "C" void finishntp2003_();
+#endif
+#ifdef _2004ntuple_
+extern "C" void initntp2004_(const char*);
+extern "C" void finishntp2004_();
 #endif
 
 ClassImp(StppuDstMaker)
@@ -220,6 +227,9 @@ Int_t StppuDstMaker::Init(const Char_t *filename)
 #ifdef _2003ntuple_
     initntp2003_(uDstFileName.Data());
 #endif
+#ifdef _2004ntuple_
+    initntp2004_(uDstFileName.Data());
+#endif
     return 0;
 }
 
@@ -333,6 +343,10 @@ Int_t StppuDstMaker::Finish()
 
 #ifdef _2003ntuple_
   finishntp2003_();
+#endif
+
+#ifdef _2004ntuple_
+  finishntp2004_();
 #endif
 
   cout << "=================================================================\n";
