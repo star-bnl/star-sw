@@ -138,7 +138,18 @@ int St_l3_Coordinate_Transformer::LoadTPCLookupTable(char * mapfilename)
 //______________________________
 void St_l3_Coordinate_Transformer::raw_to_global(const St_l3_ptrs_Coordinate &raw ,St_l3_xyz_Coordinate &global)
 {
-    
+
+    if(!TPCmap) {
+	// no lookup table loaded -> using pure geometrical conversion
+	St_l3_xyz_Coordinate local;
+
+	raw_to_local(raw, local);
+	local_to_global(raw, local, global);
+
+	return;
+    }
+
+
     float (*binmap)[45][npad+1][ntb+1][3];
     binmap = (float (*)[45][npad+1][ntb+1][3])TPCmap;
 
