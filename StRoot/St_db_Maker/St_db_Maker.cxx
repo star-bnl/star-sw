@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.50 2001/10/13 20:23:16 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.51 2001/10/27 21:48:32 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.51  2001/10/27 21:48:32  perev
+// SetRunNumber added
+//
 // Revision 1.50  2001/10/13 20:23:16  perev
 // SetFlavor  working before and after Init()
 //
@@ -199,6 +202,12 @@ St_db_Maker::St_db_Maker(const char *name
 }
 //_____________________________________________________________________________
 St_db_Maker::~St_db_Maker(){
+}
+//_____________________________________________________________________________
+Int_t St_db_Maker::InitRun(int runumber)
+{
+  if (!fDBBroker) return 0;
+  fDBBroker->SetRunNumber((UInt_t) runumber);
 }
 //_____________________________________________________________________________
 Int_t St_db_Maker::Init()
