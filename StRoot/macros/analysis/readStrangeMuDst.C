@@ -1,0 +1,104 @@
+// $Id: readStrangeMuDst.C,v 1.1 2000/03/29 00:24:54 genevb Exp $
+// $Log: readStrangeMuDst.C,v $
+// Revision 1.1  2000/03/29 00:24:54  genevb
+// Introduction of macro to use StStrangeMuDstMaker
+//
+//
+//======================================================
+// owner:  Gene Van Buren, UCLA
+// what it does:  uses StStrangeMuDstMaker to read a micro DST
+//                and draw some histograms from it
+//======================================================
+
+
+TStopwatch clock;
+
+void load() {
+  gSystem->Load("St_base");
+  gSystem->Load("St_Tables");
+  gSystem->Load("StChain");
+  gSystem->Load("StUtilities");
+  gSystem->Load("StAnalysisUtilities");
+  gSystem->Load("StarClassLibrary");
+  gSystem->Load("StEvent");
+  gSystem->Load("StStrangeMuDstMaker");
+  
+  // Create new canvas
+  TCanvas* c1 =
+    new TCanvas("c1","Getting Started with StV0MiniDst",0,0,600,600);
+
+  c1->cd();
+  p1 = new TPad("p1","1st Pad",0.01,0.51,0.49,0.99,10,0,0);
+  p2 = new TPad("p2","2nd Pad",0.51,0.51,0.99,0.99,10,0,0);
+  p3 = new TPad("p3","3rd Pad",0.01,0.01,0.49,0.49,10,0,0);
+  p4 = new TPad("p4","4th Pad",0.51,0.01,0.99,0.49,10,0,0);
+
+  c1->cd();
+  p1->Draw();
+  p2->Draw();
+  p3->Draw();
+  p4->Draw();
+}
+
+void run() {
+  // Define some histograms
+  hX = new TH1F("mX","X coordinate",100,-50,50);
+  hY = new TH1F("mY","Y coordinate",100,-50,50);
+  hZ = new TH1F("mZ","Z coordinate",100,-100,100);
+  hMassLambda = new TH1F("mMassLambda","Lambda Mass",100,1.08,1.2);
+
+  // Set number of events to analyse
+  const Int_t Nevents = 999;   // go to EOF
+
+  StChain chain("myChain");
+  StStrangeMuDstMaker strangeDst("strangeMuDst");
+  strangeDst.DoV0();    // Selects V0 vertices for micro-DST
+//strangeDst.DoXi();    // Selects Xi vertices for micro-DST
+  strangeDst.SetRead(); // Sets "read" mode (using default file names)
+
+  clock.Start(kTRUE);
+
+  // Do init
+  Int_t ierr = chain.Init();
+  if( ierr ) { chain.Fatal(ierr,"on init"); return; }
+
+  // Loop over events
+  for( Int_t i=0; i<Nevents; i++ ) {
+    if( chain.Make(i) ) break;
+
+    for( Int_t j=0; j<strangeDst.GetNV0(); j++ ) {
+      StV0MuDst *v0m = strangeDst.GetV0(j);
+      float* dVertexV0 = v0m->decayVertexV0();
+      hX->Fill(dVertexV0[0]);
+      hY->Fill(dVertexV0[1]);
+      hZ->Fill(dVertexV0[2]);
+      hMassLambda->Fill(v0m->massLambda());
+    }
+
+    if( i != Nevents) chain.Clear();
+    printf("*** Finished processing event %d\n",i);
+  }
+
+  // Finish
+  if( Nevents >= 1 ) {
+    chain.Finish();
+  }
+
+  // Stop the stopwatch
+  clock.Stop();
+  clock.Print();
+
+  p1->cd();
+  hX->Draw();
+  p2->cd();
+  hY->Draw();
+  p3->cd();
+  hZ->Draw();
+  p4->cd();
+  hMassLambda->Draw();
+}
+
+void readStrangeMuDst() {
+  load();
+  run();
+}
