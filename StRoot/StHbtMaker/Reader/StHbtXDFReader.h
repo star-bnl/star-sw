@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtXDFReader.h,v 1.5 2000/07/16 21:14:45 laue Exp $
+ * $Id: StHbtXDFReader.h,v 1.6 2003/03/05 22:12:31 magestro Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -58,7 +58,6 @@
 #include "StIOInterFace.h"
 
 #include "StHbtMaker/Base/StHbtEventReader.hh"
-#include "StV0MiniDstMaker/StV0MiniDstMaker.h"
 #include "StHbtMaker/Base/StHbtEventCut.h"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 #include "StHbtMaker/Base/StHbtV0Cut.h"
@@ -82,7 +81,6 @@ class StHbtXDFReader : public StMaker, public StHbtEventReader {
 private:
 
   StMaker* mTheEventMaker;      //! this is the chain where the StEventReaderMaker is
-  StV0MiniDstMaker* mTheV0Maker; //! this is the chain where the StV0MiniDstMaker is
   long              mV0;        //! Number of v0s looked at to date
   pdgIdList* mAcceptedParticles; //!
   pdgIdList* mAcceptedMothers;   //!
@@ -103,8 +101,6 @@ public:
 
   void SetTheEventMaker(StMaker*);
   StMaker* TheEventMaker();
-  void SetTheV0Maker(StV0MiniDstMaker*);
-  StV0MiniDstMaker* TheV0Maker();
 
   void AddAcceptedParticle( int pdgCode );
   void AddAcceptedMother( int pdgCode );
@@ -117,8 +113,6 @@ public:
 
 inline void StHbtXDFReader::SetTheEventMaker(StMaker* maker){mTheEventMaker=maker;}
 inline StMaker* StHbtXDFReader::TheEventMaker(){return mTheEventMaker;}
-inline void StHbtXDFReader::SetTheV0Maker(StV0MiniDstMaker* maker){mTheV0Maker=maker;}
-inline StV0MiniDstMaker* StHbtXDFReader::TheV0Maker(){return mTheV0Maker;}
 
 #endif
 
