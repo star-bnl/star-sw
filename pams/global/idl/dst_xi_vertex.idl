@@ -14,4 +14,7 @@
 	float b_b;              /* impact of charged track to prim. vertex */
 	float b_v0;             /* impact of neutral track to prim. vertex */
 	float b_xi;             /* impact of xi to prim. vertex */
+        float px_b;             /* bachelor momentum at decay vertex */
+        float py_b;             
+        float pz_b;             
    };
