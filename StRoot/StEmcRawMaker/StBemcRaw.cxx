@@ -1,6 +1,9 @@
 // 
-// $Id: StBemcRaw.cxx,v 1.6 2004/11/02 03:23:09 suaide Exp $
+// $Id: StBemcRaw.cxx,v 1.7 2004/11/12 21:17:56 suaide Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.7  2004/11/12 21:17:56  suaide
+// non initialization of some variables were fixed
+//
 // Revision 1.6  2004/11/02 03:23:09  suaide
 // small changes in order to fix a bug
 //
@@ -122,9 +125,9 @@ Bool_t StBemcRaw::make(StEmcRawData* bemcRaw, StEvent* event)
   checkHeaders(bemcRaw);
   emptyEmcCollection(emc);
   
-  Int_t cap,crate;
-  Int_t ADC;
-  Float_t E;
+  Int_t cap=0,crate=0;
+  Int_t ADC=0;
+  Float_t E=0;
   
   for(Int_t det = 1; det<=MAXDETBARREL; det++)
   {
@@ -379,7 +382,7 @@ Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t
   }
   else if(det==BPRS) // PSD
   {
-    Int_t RDO,index;
+    Int_t RDO=0,index=0;
     Int_t S = mDecoder->GetPsdRDO(softId,RDO,index);
     CRATE = RDO+1;
     //cout <<det<<"  "<<RDO<<" "<<softId<<"   "<<RAW->header(RDO+BPRSOFFSET)<<endl;
@@ -394,9 +397,9 @@ Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t
   else if(det==BSMDE) // SMDE
   {
     StEmcGeom *geo = StEmcGeom::instance("bsmde");
-    Int_t m,e,s;
+    Int_t m=0,e=0,s=0;
     if(geo->getBin(softId,m,e,s)==1) return 0;
-    Int_t RDO,index;
+    Int_t RDO=0,index=0;
     Int_t S = mDecoder->GetSmdRDO(BSMDE,m,e,s,RDO,index);
     CRATE = RDO+1;
     if(S==1 && RAW->header(RDO+BSMDOFFSET) && RDO>=0 && RDO<MAXSMDCRATES) 
@@ -409,9 +412,9 @@ Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t
   else if(det==BSMDP) // SMDP
   {
     StEmcGeom *geo = StEmcGeom::instance("bsmdp");
-    Int_t m,e,s;
+    Int_t m=0,e=0,s=0;
     if(geo->getBin(softId,m,e,s)==1) return 0;
-    Int_t RDO,index;
+    Int_t RDO=0,index=0;
     Int_t S = mDecoder->GetSmdRDO(BSMDP,m,e,s,RDO,index);
     CRATE = RDO+1;
     if(S==1 && RAW->header(RDO+BSMDOFFSET) && RDO>=0 && RDO<MAXSMDCRATES)     
