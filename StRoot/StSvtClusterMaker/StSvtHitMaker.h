@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.1 2000/08/21 13:03:40 caines Exp $
+// $Id: StSvtHitMaker.h,v 1.2 2000/08/24 04:26:56 caines Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.2  2000/08/24 04:26:56  caines
+// Printout for debugging
+//
 // Revision 1.1  2000/08/21 13:03:40  caines
 // First version of cluster->STAR hit maker
 //
@@ -34,6 +37,7 @@ class St_svg_geom;
 class St_srs_srspar;
 class StSvtHybridCollection;
 class StSvtAnalysedHybridClusters;
+class StSvtData;
  
 class StSvtHitMaker : public StMaker
 {
@@ -52,7 +56,6 @@ class StSvtHitMaker : public StMaker
   void SetWriteNtuple(int iwrite=0){iWrite = iwrite;};
  protected:
 
-  int iMyEvt;
   int iWrite;
 
   St_svg_config   *m_config;//!
@@ -62,6 +65,9 @@ class StSvtHitMaker : public StMaker
 
   StSvtHybridCollection *mSvtCluColl; //!
   StSvtAnalysedHybridClusters  *mSvtBigHit;  //!
+  
+  StSvtData *mSvtData; //!
+  
   TH2F     *m_x_vs_y;  //! x vs y of Si points
   TH2F     **m_waf_no;  //! ladder no vs z of Si hit
 
