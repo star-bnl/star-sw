@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.cxx,v 1.5 2004/02/17 04:56:36 jeromel Exp $
+ * $Id: StMuDstFilterMaker.cxx,v 1.6 2004/10/19 01:47:57 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDstFilterMaker.h"
@@ -166,11 +166,8 @@ int StMuDstFilterMaker::Finish() {
  */
 void StMuDstFilterMaker::clear(){
   DEBUGMESSAGE2("");
-  int dummy;
-  /// from muDst
-  for ( int i=0; i<__NARRAYS__; i++) mMuDstMaker->clear(mArrays[i],dummy);
-  for ( int i=0; i<__NSTRANGEARRAYS__; i++) mMuDstMaker->clear(mStrangeArrays[i],dummy);
-  for ( int i=0; i<__NEMCARRAYS__; i++) mMuDstMaker->clear(mEmcArrays[i],dummy);
+
+  mMuDstMaker->clearArrays();
 }
 
 /**
@@ -214,6 +211,9 @@ ClassImp(StMuDstFilterMaker)
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.cxx,v $
+ * Revision 1.6  2004/10/19 01:47:57  mvl
+ * Changed calls to clear TClonesArray in StMuDstMaker (not tested ;-()
+ *
  * Revision 1.5  2004/02/17 04:56:36  jeromel
  * Extended help, added crs support, restored __GNUC__ for PRETTY_FUNCTION(checked once
  * more and yes, it is ONLY defined in GCC and so is __FUCTION__),  use of a consistent
