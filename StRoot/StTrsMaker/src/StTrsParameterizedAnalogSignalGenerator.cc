@@ -1,15 +1,20 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.11 2000/02/10 01:21:50 calderon Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.12 2000/02/24 16:35:03 long Exp $
  *
  * Author: Hui Long
  ***************************************************************************
  *
- * Description:tss alogrithm for signal generator in the trs
- *
+ * Description:tss alogrithm for signal generator in the trsRevision 1.11  2000/02/10 01:21:50  calderon
+ * normalization factors
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.12  2000/02/24 16:35:03  long
+ * modification for step functions, normalization factors of the padresponse functions of inner ,outer sector
+ *
+ *Revision 1.12  2000/02/23 01:21:50  long
+ * modification for step functions, normalization factors of the padresponse functions of inner ,outer sector
  * Revision 1.11  2000/02/10 01:21:50  calderon
  * Switch to use StTpcDb.
  * Coordinates checked for consistency.
@@ -88,7 +93,7 @@ using std::sort;
 
 
 static const double sigmaL = .037*centimeter/sqrt(centimeter);
-static const double sigmaT = .0633*centimeter/sqrt(centimeter);
+//static const double sigmaT = .0633*centimeter/sqrt(centimeter);
 static const double sqrtTwoPi = sqrt(twopi);
 StTrsAnalogSignalGenerator* StTrsParameterizedAnalogSignalGenerator::mInstance = 0; 
 // static data member
@@ -97,8 +102,8 @@ StTrsAnalogSignalGenerator* StTrsParameterizedAnalogSignalGenerator::mInstance =
 
 StTrsParameterizedAnalogSignalGenerator::StTrsParameterizedAnalogSignalGenerator(StTpcGeometry* geo, StTpcSlowControl* sc, StTpcElectronics* el, StTrsSector* sec)
     : StTrsAnalogSignalGenerator(geo, sc, el, sec),
-      mPadResponseFunctionSigmaOuter(0.395),
-      mPadResponseFunctionSigmaInner(0.25)
+      mPadResponseFunctionSigmaOuter(0.37),//old 0.395
+      mPadResponseFunctionSigmaInner(0.17)//old 0.198
 {
 
   //
@@ -123,10 +128,21 @@ StTrsParameterizedAnalogSignalGenerator::StTrsParameterizedAnalogSignalGenerator
   // 
   // Set TSS parameters for signal generation
   //
-   mChargeFraction[0] = 1.0;
-   mChargeFraction[1] = 0.7;
-   mChargeFraction[2] = 0.3;
-   mChargeFraction[3] = 0.05; 
+   mChargeFractionOuter.push_back(1.95456);
+   mChargeFractionOuter.push_back(1.88591); 
+   mChargeFractionOuter.push_back(1.43655);
+   mChargeFractionOuter.push_back(0.45415); 
+   mChargeFractionOuter.push_back(0.0813517);
+   mChargeFractionInner.push_back(1.86332); 
+   mChargeFractionInner.push_back(1.62671);
+   mChargeFractionInner.push_back(0.163125); 
+   mChargeFractionInner.push_back(0.00515731);
+   mChargeFractionInner.push_back(0.0000);
+   mYb.push_back(0.2);
+   mYb.push_back(0.6); 
+   mYb.push_back(1.0);
+   mYb.push_back(1.4); 
+   mYb.push_back(1.8); 
    mNumberOfEntriesInTable=4000;
    mRangeOfTable=4.0;
    errorFunctionTableBuilder();
@@ -135,7 +151,7 @@ StTrsParameterizedAnalogSignalGenerator::StTrsParameterizedAnalogSignalGenerator
    mNumberOfRows = mGeomDb->numberOfRows();
    mNumberOfInnerRows = mGeomDb->numberOfInnerRows();
    mFrischGrid    = mGeomDb->frischGrid();
-   yb1 = yb2 = yb3 = yb4 = rowNormalization = padWidth = padLength = 0;
+   rowNormalization = padWidth = padLength = 0;
    zoffset = wire_to_plane_coupling = xCentroidOfPad = yCentroidOfPad = 0;
    delx = gridMinusZ = sigma_x = localXDirectionCoupling = 0;
    dely = constant = localYDirectionCoupling = 0;
@@ -205,6 +221,10 @@ double  StTrsParameterizedAnalogSignalGenerator::erf_fast(double argument) const
 
 void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wireHistogram)
 {
+    double two_pi=6.2821852,sigma_xpad2;
+    double InOuterFactor=1.21;
+    double charge_fraction[5]; 
+    double mPadRespondFunctionSigma;
     //
     // This should probably be made a data member at some point!
 //     StTpcCoordinateTransform transformer(mGeomDb, mSCDb, mElectronicsDb);
@@ -214,6 +234,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	cerr << "Wire Plane is empty" << endl;
 	return;
     }
+   
     for(int jj=wireHistogram->minWire(); jj<=wireHistogram->maxWire(); jj++) {
 
 	// StTrsWireHistogram defines typedefs:
@@ -271,7 +292,9 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 
 	    // Careful No inner/outer sector coupling!!
 	    if(xyCoord.position().y() < mGeomDb->outerSectorEdge()) {
-		mRowLimits.second = min(mRowLimits.second, mNumberOfInnerRows);
+	      //	mRowLimits.second = min(mRowLimits.second, mNumberOfInnerRows); 
+                     mRowLimits.second= mCentralRow;	
+                     mRowLimits.first=  mCentralRow; //HL,2/20/00
 	    }
 	    else {
 		mRowLimits.first  = max(mRowLimits.first, (mNumberOfInnerRows+1));
@@ -310,28 +333,31 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 #endif
                     
 		    if(irow > mNumberOfInnerRows) {  // pad in Outer Sector
-		      padWidth  = mGeomDb->outerSectorPadWidth();//cm, HL,8/31/99
-			padLength = mGeomDb->outerSectorPadLength();//cm
+		      //  padWidth  = mGeomDb->outerSectorPadWidth();//cm, HL,8/31/99
+		      //	padLength = mGeomDb->outerSectorPadLength();//cm
 			mPadResponseFunctionSigma= mPadResponseFunctionSigmaOuter;
-                        zoffset=mGeomDb->outerSectorzOffSet();
-			rowNormalization = 2.04;
+			//   zoffset=mGeomDb->outerSectorzOffSet();
+			//	rowNormalization = 0.62;//old 2.04
                         wire_to_plane_coupling=0.512;
-			yb1        =0.6;
-			yb2        =1.0;
-			yb3        =1.4;
-			yb4        =1.8;
+			charge_fraction[0]=mChargeFractionOuter[0];
+                        charge_fraction[1]=mChargeFractionOuter[1]; 
+                        charge_fraction[2]=mChargeFractionOuter[2];
+                        charge_fraction[3]=mChargeFractionOuter[3];
+                        charge_fraction[4]=mChargeFractionOuter[4];
 		    }
 		    else {
-		      padWidth  = mGeomDb->innerSectorPadWidth();//cm
-			padLength = mGeomDb->innerSectorPadLength();// cm
+		      // padWidth  = mGeomDb->innerSectorPadWidth();//cm
+		      //	padLength = mGeomDb->innerSectorPadLength();// cm
 		         mPadResponseFunctionSigma= mPadResponseFunctionSigmaInner;  
-			rowNormalization = 1.24; 
-                        zoffset=mGeomDb->innerSectorzOffSet();
-                        wire_to_plane_coupling=0.533;
-                        yb1       =0.2;
-                        yb2       =0.6;
-			yb3       =1.0;
-                        yb4       =1.4;
+			 //	 rowNormalization =0.285 ; //old 1.24
+			 //   zoffset=mGeomDb->innerSectorzOffSet();
+                        wire_to_plane_coupling=0.533*InOuterFactor;//HL,02/20/00
+                        charge_fraction[0]=mChargeFractionInner[0];
+                        charge_fraction[1]=mChargeFractionInner[1]; 
+                        charge_fraction[2]=mChargeFractionInner[2];
+                        charge_fraction[3]=mChargeFractionInner[3];
+                        charge_fraction[4]=mChargeFractionInner[4];
+                       
 		    }
 		    mTpcRaw.setPad(ipad);
 		    mTpcRaw.setRow(irow);
@@ -344,34 +370,43 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 		    yCentroidOfPad = xyCoord.position().y();
 		    delx           = xCentroidOfPad-iter->position().x();
 		    gridMinusZ     = iter->position().z(); // for new coordinates
-		    sigma_x        = sigmaT*sqrt(gridMinusZ);
-		    sigma_x=sqrt(sqr(sigma_x )+sqr( mPadResponseFunctionSigma)); 
+		    sigma_x        = iter->sigmaT();
+		    sigma_xpad2=sigma_x *sigma_x+ mPadRespondFunctionSigma*mPadRespondFunctionSigma; 
 		     
 
-                     
-
+                    
 		    localXDirectionCoupling  =
-		      (padWidth/sigma_x)*exp(-0.5*delx*delx/sigma_x/sigma_x)/M_SQRT2/2.0*M_2_PI;
+
+                       mPadRespondFunctionSigma/sqrt(sigma_xpad2)*exp(-0.5*delx*delx/sigma_xpad2);   //sqrt(2pi) is absorbed in the local Y coupling
+                                
                       
 		  
 		   
-		    dely           = fabs(yCentroidOfPad-iter->position().y()); 
+
+                        //  dely           = fabs(yCentroidOfPad-iter->position().y()); 
+                    dely           = fabs(yCentroidOfPad-iter->position().y());            //        cout<<delx<<""<<dely<<" "<<yCentroidOfPad<<" "<<iter->position().y()<<endl;
+                    
 		    constant       =sigma_x*M_SQRT2 ;
 		     		     
 
 		    localYDirectionCoupling =
-			0.5/rowNormalization*((mChargeFraction[0]-mChargeFraction[1])*(erf_fast((dely+yb1)/constant)-
-										       erf_fast((dely-yb1)/constant))+
-					      (mChargeFraction[1]-mChargeFraction[2])*(erf_fast((dely+yb2)/constant)-
-										       erf_fast((dely-yb2)/constant))+
-					      (mChargeFraction[2]-mChargeFraction[3])*(erf_fast((dely+yb3)/constant)-
-										       erf_fast((dely-yb3)/constant))+
-					      (mChargeFraction[3])                   *(erf_fast((dely+yb4)/constant)-
-										       erf_fast((dely-yb4)/constant))
-					      );
-		    //		    cout<<ipad <<" pad   "<<irow<<" row  "<<"  x="<<iter->position().x()<<"  y="<<iter->position().y()<<"   dely=   "<<dely<<"  "<<"y couple=  " <<localYDirectionCoupling<<"  constant   "<<constant<<" sigmax= "<<sigma_x<<endl;
-		      
-		    chargeOfSignal=localYDirectionCoupling*localXDirectionCoupling*wire_to_plane_coupling;
+
+		      0.5/two_pi*((charge_fraction[0]-charge_fraction[1])*(erf_fast((dely+mYb[0])/constant)-
+						     erf_fast((dely-mYb[0])/constant))+
+					    (charge_fraction[1]-charge_fraction[2])*(erf_fast((dely+mYb[1])/constant)-
+						     erf_fast((dely-mYb[1])/constant))+
+					    (charge_fraction[2]-charge_fraction[3])*(erf_fast((dely+mYb[2])/constant)-
+						     erf_fast((dely-mYb[2])/constant))+
+                                            (charge_fraction[3]-charge_fraction[4])*(erf_fast((dely+mYb[3])/constant)-
+						     erf_fast((dely-mYb[3])/constant))+
+					    (charge_fraction[4])                   *(erf_fast((dely+mYb[4])/constant)-
+					             erf_fast((dely-mYb[4])/constant))
+                                            );
+		       
+
+		   
+		    chargeOfSignal=localYDirectionCoupling*localXDirectionCoupling*wire_to_plane_coupling; 
+                   
                     if(chargeOfSignal<0.0) { chargeOfSignal=0.0; continue; }
 		    
 //    		    PR(chargeOfSignal);
@@ -379,7 +414,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 		    
 		    chargeOfSignal *= iter->numberOfElectrons();
 		    
-//    		    PR(chargeOfSignal);
+ 		    
 		    //
 		    // This should really be from the Coordinate transform!
 		    // otherwise code has to be changed twice!
