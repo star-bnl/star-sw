@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.1 2000/06/22 21:16:14 kathy Exp $
+// $Id: bfcread_hist_files_add.C,v 2.2 2000/06/23 15:25:30 kathy Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.2  2000/06/23 15:25:30  kathy
+// now use the new methods CopyHists & AddHists in StHistUtil
+//
 // Revision 2.1  2000/06/22 21:16:14  kathy
 // new macro that will read in 2 hist.root files and add the contents of the histograms together into a new set of histograms
 //
@@ -42,6 +45,7 @@ class StIOMaker;
 StIOMaker *IOMk1=0;
 StIOMaker *IOMk2=0;
 
+class StHistUtil;
 //------------------------------------------------------------------------
 
 void bfcread_hist_files_add(
@@ -50,8 +54,7 @@ void bfcread_hist_files_add(
  const Char_t *MainFile2=
     "/star/rcf/test/dev/tfs_redhat61/Tue/year_1h/hc_lowdensity/hc_lowdensity.400_evts.hist.root",
   const Char_t *MakerHistDir="QA",
-  const Char_t *TopDirTree="bfcTree",
-  const Int_t mxCopy=500)
+  const Char_t *TopDirTree="bfcTree")
 {
   cout << "bfcread_hist_files_add.C, input hist file 1= " 
        << MainFile1 << endl;
@@ -61,12 +64,10 @@ void bfcread_hist_files_add(
        << MakerHistDir << endl;
   cout << "bfcread_hist_files_add.C, top level directory in hist file = " 
        << TopDirTree << endl;
-  cout << "bfcread_hist_files_add.C, max number histograms to copy = "
-       << mxCopy << endl;
 
   Int_t fnum=2;
   cout << "bfcread_hist_files_add.C, hardwired # input files = " << 
-         fnum << endl;
+    fnum << endl << endl <<endl;
 
 //
     gSystem->Load("St_base");
@@ -77,127 +78,88 @@ void bfcread_hist_files_add(
     gSystem->Load("StAnalysisUtilities");
     gSystem->Load("libglobal_Tables");
 
-//  Setup top part of chain
-  chain = new StChain("addHist");
-
-// setup chain with IOMaker - can read in .dst.root, .dst.xdf files
-  StIOMaker *IOMk1 = new StIOMaker("IO","r",MainFile1,TopDirTree);
-  IOMk1->SetIOMode("r");
-  IOMk1->SetBranch("*",0,"0");                 //deactivate all branches
-  IOMk1->SetBranch("histBranch",0,"r"); //activate dst Branch
-
-
-  StIOMaker *IOMk2 = new StIOMaker("IO","r",MainFile2,TopDirTree);
-  IOMk2->SetIOMode("r");
-  IOMk2->SetBranch("*",0,"0");                 //deactivate all branches
-  IOMk2->SetBranch("histBranch",0,"r"); //activate dst Branch
-
 
 // constructor for other maker (not used in chain)
    StHistUtil   *HU  = new StHistUtil;
 
-// now must set pointer to StMaker so HistUtil can find histograms
-//  with StHistUtil methods
-// -- input any maker pointer but must cast as type StMaker
-   HU->SetPntrToMaker((StMaker *)chain);
 
-// --- now execute chain member functions 
-// --- each file contains only histograms (1 "event" == 1 Make call)
-  chain->Init();
-  chain->Clear();
-  chain->Make();
-
-// create array of pointers to the new histograms I will create
- TH1 *newHist[mxCopy];
- Int_t ilg = 0;
- for (ilg=0;ilg<mxCopy;ilg++) {
-      newHist[ilg]=0;
- } 
- 
 // loop over files:
  Int_t ifl=1;
+
  EventLoop: if (ifl<=fnum) {  
 
-// now point to histograms in first file -----------------------------
  cout << endl << " NOW GOING TO POINT TO FILE " << ifl <<  endl;
 
+// clone(copy) histograms from first file  -----------------------------
  if (ifl==1) {
-   HU->SetPntrToMaker((StMaker *)IOMk1);
-// now make a copy of all histograms into my new histograms!
+
+// 
+  StIOMaker *IOMk1 = new StIOMaker("IO","r",MainFile1,TopDirTree);
+  IOMk1->SetIOMode("r");
+  IOMk1->SetBranch("*",0,"0");                 //deactivate all branches
+  IOMk1->SetBranch("histBranch",0,"r"); //activate hist Branch
+
+// --- each file contains only histograms (1 "event" == 1 Make call)
+  IOMk1->Init();
+  IOMk1->Clear();
+  IOMk1->Make();
+
+  HU->SetPntrToMaker((StMaker *)IOMk1);
+
 // get the TList pointer to the histograms:
   TList  *dirList = 0;
   dirList = HU->FindHists(MakerHistDir);
-  Int_t ijk=0;
-   if (dirList)
-   {
-   TIter nextObj(dirList);
-   Int_t histCopyCount = 0;
-   TObject *obj = 0;
-    while ((obj = nextObj())) {    
-     if (obj->InheritsFrom("TH1")) {
-       histCopyCount++;         
-       if (ijk<mxCopy){
-         newHist[ijk] = ((TH1 *)obj->Clone());
-	 //         cout << "clone hist # " << ijk << endl;
-       }
-       ijk++;
-     }
-    }
-    cout << endl << " COPIED tot num hist = " << histCopyCount << endl;
-   }
- }
 
-// Now see if we can find these copies:
- // Int_t imk = 0;
- //for (imk=0;imk<histCopyCount;imk++) {
- //  if (newHist[imk]->InheritsFrom("TH1")) {       
- //        cout << " !!! NEW Type: " << newHist[imk]->ClassName() << 
- //             ", Name: "    << newHist[imk]->GetName() << 
- //             ", Title: "   << newHist[imk]->GetTitle() << 
- //	    ", Max: " << ((TH1 *)newHist[imk])->GetMaximum() << endl; 
- //  }
- //} 
+// now make a copy of all histograms into my new histograms!
+  Int_t hCCount=0;
+  hCCount = HU->CopyHists(dirList);
+
+  cout << "bfcread_hist_files_add.C, # histograms copied = " << 
+       hCCount << endl;
+
+ }  // if ifl==1
 
  else{
 
-   if (ifl==2) {
-      HU->SetPntrToMaker((StMaker *)IOMk2); 
-   }
+  if (ifl==2) {
+// 
+    StIOMaker *IOMk2 = new StIOMaker("IO","r",MainFile2,TopDirTree);
+    IOMk2->SetIOMode("r");
+    IOMk2->SetBranch("*",0,"0");                 //deactivate all branches
+    IOMk2->SetBranch("histBranch",0,"r"); //activate hist Branch
+
+// --- each file contains only histograms (1 "event" == 1 Make call)
+    IOMk2->Init();
+    IOMk2->Clear();
+    IOMk2->Make();
+
+    HU->SetPntrToMaker((StMaker *)IOMk2);
+
+  } // if ifl=2
 
 // get the TList pointer to the histograms:
   TList  *dirList = 0;
   dirList = HU->FindHists(MakerHistDir);
-  if (dirList){
-   TIter nextObj(dirList);
-   Int_t histReadCount = 0;
-   TObject *obj = 0;
-    while ((obj = nextObj())) {    
-     if (obj->InheritsFrom("TH1")) {
-      histReadCount++;
-      
-// now want to add these histograms to the copied ones:
-      Int_t imk = 0;
-      for (imk=0;imk<histCopyCount;imk++) {
-       if (strcmp( (newHist[imk]->GetName()), (obj->GetName()) )==0) {       
-	 //	cout << "  ---- hist num to add --- " << imk << endl;
-         newHist[imk]->Add((TH1 *)obj);
-         cout << " !!! Added histograms with Name: "
-	      << newHist[imk]->GetName() <<  endl;
 
-         if (strcmp(newHist[imk]->GetName(),"TabQaEvsumTrkTot")==0) {       
-	   newHist[imk]->Draw();
-           gPad->Update();
-         }
+// now make a copy of all histograms into my new histograms!
+  Int_t hACount=0;
+  hACount = HU->AddHists(dirList,hCCount);
 
-       } // strcmp
-      }  // loop over imk
-     }   // if obj inherits from th1
-    }    //while
+  cout << "bfcread_hist_files_add.C, # histograms added = " << 
+    hACount << endl << endl;
 
-    cout << " Added tot num hist = " << histReadCount << 
-            " from file " << ifl <<endl;
-  } //dirlist
- }  //else
+// to see an example of histograms being added together:   
+  cout << "bfcread_hist_files_add.C, an example! = " <<  endl;
+   Int_t imk = 0;
+   for (imk=0;imk<hCCount;imk++) {
+       TH1** kathyArray = HU->getNewHist();
+       if (strcmp(kathyArray[imk]->GetName(),"TabQaEvsumTrkTot")==0) {       
+	 kathyArray[imk]->Draw();
+          gPad->Update();
+       } // if strcmp -- to draw
+   } // for -- end of example
+
+ }  //else (ifl not #1)
 
    ifl++;                                
    goto EventLoop;   
