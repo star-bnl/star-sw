@@ -63,6 +63,7 @@ void StiDedxCalculator::getDedx(const StiKalmanTrack* track,
         dEdx=DBL_MAX;
         dEdxE=DBL_MAX;
       }
+    
 }
 
 double NodeDedxCalculator::operator()(const StiKalmanTrackNode *mNode)
@@ -78,8 +79,8 @@ double NodeDedxCalculator::operator()(const StiKalmanTrackNode *mNode)
  
   //line aproximation
     double dedx= (mNode->getHit()->getEloss())/
-                  sqrt((mNode->getDetector()->getShape()->getThickness()
-                   *(1.+(mNode->fP4)*(mNode->fP4))));
+                  mNode->getDetector()->getShape()->getThickness()*
+                  sqrt((1.+1./(mNode->fP4)*(mNode->fP4)));
 
 
   //curve calculation
