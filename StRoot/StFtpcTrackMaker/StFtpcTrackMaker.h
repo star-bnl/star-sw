@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.h,v 1.16 2004/08/09 15:08:14 jcs Exp $
+// $Id: StFtpcTrackMaker.h,v 1.17 2004/08/10 12:21:42 jcs Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.17  2004/08/10 12:21:42  jcs
+// remove histograms which are also created in St_QA_Maker
+//
 // Revision 1.16  2004/08/09 15:08:14  jcs
 // remove unused histogram
 //
@@ -94,11 +97,8 @@ class StFtpcTrackMaker : public StMaker {
 
   protected:
        TH1F          *m_vtx_pos;    //! vertex position
-       TH1F          *m_q;          //! charge
        TH1F          *m_theta;      //! theta
-       TH1F          *m_ndedx;      //! # points used in de/dx calulation
-       TH1F          *m_found;      //! # points found per track
-       TH2F          *m_nrec_track; //! # points found per track vs. # tracks found
+       TH2F          *m_nrec_track; //! # points found per track vs. momentum
        TH2F          *m_padvstime_West; //! padlength vs. timelength
        TH2F          *m_padvstime_East; //! padlength vs. timelength
        TH1F          *m_maxadc_West;
@@ -134,7 +134,7 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  Finish();                                         // final cleanup
    virtual Int_t  FinishRun(Int_t run);                             // cleanup after every run
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.16 2004/08/09 15:08:14 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.17 2004/08/10 12:21:42 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
 	   void   MakeHistograms(StFtpcTracker *tracker);           // makes histograms
 	   void   FillMonSoftFtpc(StEvent *event,StFtpcTracker *tracker,StFtpcSoftwareMonitor *ftpcMon);  // fills StEvent->StSoftwareMonitor->StFtpcSoftwareMonitor

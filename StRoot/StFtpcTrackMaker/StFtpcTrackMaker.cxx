@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.64 2004/08/09 15:08:14 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.65 2004/08/10 12:21:42 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.65  2004/08/10 12:21:42  jcs
+// remove histograms which are also created in St_QA_Maker
+//
 // Revision 1.64  2004/08/09 15:08:14  jcs
 // remove unused histogram
 //
@@ -371,14 +374,7 @@ Int_t StFtpcTrackMaker::Init()
 
   // Create Histograms
   m_vtx_pos      = new TH1F("fpt_vtx_pos", "FTPC estimated vertex position", 800, -400.0, 400.0);
-  m_q            = new TH1F("fpt_q", "FTPC track charge", 3, -2.0, 2.0);
   m_theta        = new TH1F("fpt_theta", "FTPC theta", 100, -5.0, 5.0 );
-  m_ndedx        = new TH1F("fde_ndedx", "Number of points used in FTPC dE/dx calculation", 
-			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
-			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
-  m_found        = new TH1F("fpt_nrec"      ,"FTPC: number of points found per track", 
-			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
-			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
   m_nrec_track   = new TH2F("fpt_hits_mom", "FTPC: points found per track vs. momentum" , 
 			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
 			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5, 100, 0., 20.);
@@ -697,10 +693,7 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
     TObjArray   *fhits = (TObjArray*) track->GetHits();
     
     m_nrec_track->Fill(track->GetNumberOfPoints(),track->GetP());
-    m_found->Fill(track->GetNumberOfPoints());
-    m_q->Fill(track->GetCharge());
     m_theta->Fill(track->GetTheta());
-    m_ndedx->Fill(track->GetdEdx());
     
     for (Int_t h_counter = 0; h_counter < fhits->GetEntriesFast(); h_counter++) {
       
@@ -825,7 +818,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.64 2004/08/09 15:08:14 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.65 2004/08/10 12:21:42 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
