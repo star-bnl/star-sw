@@ -27,10 +27,13 @@
 
 // Sti
 #include "Sti/StiHitContainer.h"
+#include "Sti/StiDetector.h"
+#include "Sti/StiPlacement.h"
 #include "Sti/StiHitFiller.h"
 #include "Sti/StiDetectorContainer.h"
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiGeometryTransform.h"
+#include "Sti/StiTrackSeedFinder.h"
 #include "Sti/StiEvaluableTrackSeedFinder.h"
 
 //StiGui
@@ -43,8 +46,6 @@
 #include "StiMaker.h"
 
 StiMaker* StiMaker::sinstance = 0;
-bool StiMaker::mdone = true;
-int StiMaker::mcounter = 0;
 
 ClassImp(StiMaker)
   
@@ -99,7 +100,15 @@ StiMaker::~StiMaker()
 
     delete mdatanodefactory;
     mdatanodefactory = 0;
-    
+
+    delete mtracknodefactory;
+    mtracknodefactory = 0;
+
+    delete mkalmantrackfactory;
+    mkalmantrackfactory = 0;
+
+    delete mkalmanseedfinder;
+    mkalmanseedfinder = 0;
 }
 
 void StiMaker::Clear(const char*)
@@ -118,9 +127,14 @@ void StiMaker::Clear(const char*)
 
     //Reset TrackFactory
     mtrackfactory->reset();
-
+    mkalmantrackfactory->reset();
+    mtracknodefactory->reset();
+    
     //Reset DisplayManager
     mdisplay->reset();
+
+    //Reset Kalman Track Seed Finder
+    mkalmanseedfinder->clear();
     
     StMaker::Clear();
 }
@@ -148,11 +162,25 @@ Int_t StiMaker::Init()
     mtrackfactory->setIncrementalSize(1000);
     mtrackfactory->setMaxIncrementCount(10);
 
+    //The Track node factory
+    mtracknodefactory = new StiTrackNodeFactory("StiTrackNodeFactory");
+    mtracknodefactory->setIncrementalSize(1000);
+    mtracknodefactory->setMaxIncrementCount(100);
+    StiKalmanTrack::trackNodeFactory = mtracknodefactory;
+    
+    //The Kalman Track Factory
+    mkalmantrackfactory = new StiKalmanTrackNodeFactory("KalmanTrackFactory");
+    mkalmantrackfactory->setIncrementalSize(1000);
+    mkalmantrackfactory->setMaxIncrementCount(10);
+
     //EvaluableTrack SeedFinder
     mtrackseedfinder = new StiEvaluableTrackSeedFinder();
-    mtrackseedfinder->setFactory(mtrackfactory);
+    mtrackseedfinder->setFactory(mtrackfactory, mhitfactory);
     mtrackseedfinder->setStTrackType(global);
 
+    //KalmanTrackSeedFinder
+    mkalmanseedfinder = new StiTrackSeedFinder(mhitstore);
+    
     //The StiDetector factory
     mdetectorfactory = new detector_factory("DrawableDetectorFactory");
     mdetectorfactory->setIncrementalSize(1000);
@@ -211,6 +239,9 @@ Int_t StiMaker::Make()
 	mhitfiller->fillHits(mhitstore, mhitfactory);
 	mhitstore->sortHits();
 
+	//Init seed finder for start
+	initSeedFinderForStart();
+
 	//Temp patch to draw hits
 	const hitmap& hits = mhitstore->hits();
 	for (hitmap::const_iterator it=hits.begin(); it!=hits.end(); it++) {
@@ -231,7 +262,7 @@ Int_t StiMaker::Make()
 		thetrack->fillHitsForDrawing();
 	    }
 	}
-	
+
     }
     mdisplay->draw();
     mdisplay->update();
@@ -255,21 +286,42 @@ void StiMaker::setDetectorBuildPath(char* val)
     mdetectorbuildpath = val;
 }
 
-void StiMaker::reset()
-{
-    mdone=false;
-    mcounter=0;
-    
-}
-
 void StiMaker::doNextAction()
 {
     //Add call to next tracker action here
+    if (mkalmanseedfinder->hasMore()) {
+	StiKalmanTrack* track = mkalmanseedfinder->next();
+	cout <<"StiMaker::doNextAction()\tgot track"<<endl;
+    }
+    else if (mdetector->hasMoreStartPoints()) {
+	mdetector->nextStartPoint();
+	initSeedFinderForStart();
+	cout <<"StiMaker::doNextAction()\tSet to next start point"<<endl;
+    }
+    else {
+	cout <<"StiMaker::doNextActio():\tNo more start points"<<endl;
+    }
+	
     return;
 }
 
-bool StiMaker::hasMore()
+void StiMaker::initSeedFinderForStart()
 {
-    return (!mdone);
+    mkalmanseedfinder->clear();
+    StiDetectorContainer& rdet = (*mdetector);
+    //Get Outer 3 layers
+    for (int i=0; i<3; ++i) {
+	StiDetector* layer = *rdet;
+	mkalmanseedfinder->addLayer( layer->getPlacement()->getCenterRefAngle(),
+				     layer->getPlacement()->getCenterRadius());
+	rdet.moveIn();
+    }
+    //Move back out to where we were
+    for (int i=0; i<3; ++i) {
+	rdet.moveOut();
+    }
+    mkalmanseedfinder->init();
+    //mkalmanseedfinder->print();
+    return;
 }
 

@@ -56,7 +56,9 @@ void StiControlBar::resetStiGuiForEvent()
 void StiControlBar::doNextStiGuiAction()
 {
     //cout <<"StiControlBar::doNextStGuiAction()"<<endl;
+    StiControlBar::setCurrentDetectorToDefault();
     StiMaker::instance()->doNextAction();
+    StiControlBar::showCurrentDetector();
     //cout <<"\t Leaving StiControlBar::doNextStGuiAction()"<<endl;
 }
 
@@ -65,6 +67,7 @@ void StiControlBar::stepToNextEvent()
     StiControlBar::setCurrentDetectorToDefault();    
     mchain->Clear();
     mchain->Make();
+    StiControlBar::showCurrentDetector();
     ++mnevent;
 }
 
@@ -77,6 +80,7 @@ void StiControlBar::stepThroughNEvents()
     for (int i=0; i<nevents; ++i) {
 	mchain->Clear();
 	mchain->Make();
+	StiControlBar::showCurrentDetector();
 	++mnevent;
     }
 }
