@@ -9,8 +9,7 @@
 #include "StiDetectorBuilder.h"
 
 class StiDetector;
-class StiMaterial;
-class StiShape;
+class StiCoordinateTransform;
 
 class StiCodedDetectorBuilder: public StiDetectorBuilder{
 
@@ -36,6 +35,7 @@ protected:
     void buildShapes();
     void buildDetectors();
     
+    StiCoordinateTransform *m_pCoordinateTransform;
 };
 
 #endif // ifndef STI_CODED_DETECTOR_BUILDER_H

@@ -12,25 +12,29 @@ using std::string;
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcDb/StTpcPadPlaneI.h"
 #include "StTpcDb/StTpcDimensionsI.h"
-//XX#include "tables/St_svg_config_Table.h"
-//XX#include "tables/St_svg_shape_Table.h"
 #include "StSvtClassLibrary/StSvtConfig.hh"
 #include "StSvtClassLibrary/StSvtGeometry.hh"
+#include "StSvtDbMaker/StSvtDbMaker.h"
+#include "StSvtDbMaker/St_SvtDb_Reader.hh"
 
 //Sti
-#include "StiGeometryTransform.h"
+#include "StiCoordinateTransform.h"
 #include "StiPlanarShape.h"
 #include "StiCylindricalShape.h"
 #include "StiMaterial.h"
 #include "StiPlacement.h"
 #include "StiDetector.h"
 #include "Messenger.h"
+#include "StiToolkit.h"
 
 #include "StiCodedDetectorBuilder.h"
 
 StiCodedDetectorBuilder::StiCodedDetectorBuilder(){
     cout <<"StiCodedDetectorBuilder::StiCodedDetectorBuilder()"<<endl;
+
+    m_pCoordinateTransform = StiToolkit::instance()->getCoordinateTransform();
     init();
+
     m_messenger << 
 	"################################StiCodedDetectorBuilder()" << endl;
 }
@@ -130,16 +134,9 @@ void StiCodedDetectorBuilder::buildShapes()
   //---------------------------------------------------------------------------
     cout <<"Build Svt Shapes"<<endl;
   // get the configuration & geometry tables
-  StiGeometryTransform *pGeometryTransform = StiGeometryTransform::instance();
-  StSvtConfig *pSvtConfig = pGeometryTransform->getSvtConfig();
-  StSvtGeometry *pSvtGeometry = pGeometryTransform->getSvtGeometry();
-  //XXsvg_config_st svgConfig = pGeometryTransform->getSvgConfig();
-  //XXsvg_shape_st *pSvgShape = pGeometryTransform->getSvgShape();
-
-//XX  // extract the wafer shape parameters by looking up the shape code used by
-//XX  // the first wafer (assume SVT) and last wafer (assume SSD).
-//XX  svg_shape_st svtWaferShape = pSvgShape[ 0 ];
-//XX  svg_shape_st ssdWaferShape = pSvgShape[ 1 ];
+  StSvtConfig *pSvtConfig = 
+      gStSvtDbMaker->get_SvtDb_Reader()->getConfiguration();
+  StSvtGeometry *pSvtGeometry = gStSvtDbMaker->get_SvtDb_Reader()->getGeometry();
 
   Int_t nLayers = 2*pSvtConfig->getNumberOfBarrels();
   for(Int_t iLayer = 1; iLayer<=nLayers; iLayer++){
@@ -195,7 +192,6 @@ void StiCodedDetectorBuilder::buildDetectors(){
   // tpc
   //---------------------------------------------------------------------------
 
-  StiGeometryTransform *pGeometryTransform = StiGeometryTransform::instance();
   StTpcPadPlaneI *pPadPlane = gStTpcDb->PadPlaneGeometry();
 
   // create detector properties common to all TPC
@@ -215,7 +211,7 @@ void StiCodedDetectorBuilder::buildDetectors(){
       StiPlacement *pPlacement = new StiPlacement;
       pPlacement->setZcenter(0.);
       pPlacement->setNormalRep(
-          pGeometryTransform->phiForSector(iSector, 12), fRadius, 0.); 
+          m_pCoordinateTransform->phiForTpcSector(iSector), fRadius, 0.); 
       pPlacement->setLayerRadius(fRadius);
 
       sprintf(szName, "Tpc/Padrow_%d/Sector_%d", iPadrow, iSector);
@@ -248,8 +244,9 @@ void StiCodedDetectorBuilder::buildDetectors(){
   //---------------------------------------------------------------------------
   
   // get the configuration & geometry tables
-  StSvtConfig *pSvtConfig = pGeometryTransform->getSvtConfig();
-  StSvtGeometry *pSvtGeometry = pGeometryTransform->getSvtGeometry();
+  StSvtConfig *pSvtConfig = 
+      gStSvtDbMaker->get_SvtDb_Reader()->getConfiguration();
+  StSvtGeometry *pSvtGeometry = gStSvtDbMaker->get_SvtDb_Reader()->getGeometry();
 
   pGas = findMaterial("Air");
   StiMaterial *pLadderMaterial = findMaterial("Si");
@@ -257,7 +254,8 @@ void StiCodedDetectorBuilder::buildDetectors(){
 
   int nLayers = 2*pSvtConfig->getNumberOfBarrels();
   for(int iLayer = 1; iLayer<=nLayers; iLayer++){
- 
+    int iBarrel = (iLayer + 1)/2;
+
     //-----------------------------------------
     // calculate generic params for this layer
  
@@ -294,8 +292,8 @@ void StiCodedDetectorBuilder::buildDetectors(){
       StiPlacement *pPlacement = new StiPlacement;
       pPlacement->setZcenter(0.);
       pPlacement->setLayerRadius(fLayerRadius);
-      float fLadderPhi = pGeometryTransform->phiForSector(jLadder, 2*nLadders);
-
+      float fLadderPhi = 
+          m_pCoordinateTransform->phiForSvtBarrelLadder(iBarrel, jLadder);
       pPlacement->setCenterRep(fLadderPhi, fLadderRadius, 0.); 
       sprintf(szName, "Svt/Layer_%d/Ladder_%d/Wafers", iLayer, jLadder);
 
@@ -381,8 +379,8 @@ void StiCodedDetectorBuilder::buildDetectors(){
     StiPlacement *pPlacement = new StiPlacement;
     pPlacement->setZcenter(0.);
     pPlacement->setLayerRadius(fIfcRadius);
-    pPlacement->setNormalRep(pGeometryTransform->phiForSector(iSector, 12),
-                             fIfcRadius, 0.);
+    pPlacement->setNormalRep(
+        m_pCoordinateTransform->phiForTpcSector(iSector), fIfcRadius, 0.);
     
     sprintf(szName, "Ifc/Sector_%d", iSector);
     

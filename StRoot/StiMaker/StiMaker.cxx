@@ -32,7 +32,6 @@
 #include "Sti/StiHitFiller.h"
 #include "Sti/StiDetectorContainer.h"
 #include "Sti/StiTrackContainer.h"
-#include "Sti/StiGeometryTransform.h"
 #include "Sti/StiCompositeSeedFinder.h"
 #include "Sti/StiSeedFinder.h"
 #include "Sti/StiLocalTrackSeedFinder.h"
@@ -146,9 +145,6 @@ Int_t StiMaker::InitRun(int run)
       
       Messenger::init();
       Messenger::setRoutingMask(0);
-      //Messenger::instance()->setRoutingMask(0); //turn off all streams
-      //Messenger::instance()->setRoutingBits(MessageType::kHitMessage);
-      
       
       ioBroker = toolkit->getIOBroker();
       cout <<"\n\n ------------------- StiIOBroker ----------------------- \n\n"<<*ioBroker<<endl;
@@ -189,7 +185,7 @@ Int_t StiMaker::InitRun(int run)
 	}
       cout <<"\n --- StiMaker::InitRun(): Done building --- \n"<<endl;
     }
-  return StMaker::Init();
+  return StMaker::InitRun(run);
 }
 
 Int_t StiMaker::Make()
