@@ -33,8 +33,8 @@ long tte_hit_match_(
 **:         tpc_index_h   - header Structure for tpc_index
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
-#define tls_quick_sort_i_ F77_NAME(tls_quick_sort_i,TLS_QUICK_SORT_I)
-extern void type_of_call tls_quick_sort_i_(long *, long *,long *,long *);
+#define tls_qsort_herb_i_ F77_NAME(tls_qsort_herb_i,TLS_QSORT_HERB_I)
+extern void type_of_call tls_qsort_herb_i_(long *, long *,long *,long *);
 
 #define tls_quick_sort_r_ F77_NAME(tls_quick_sort_r,TLS_QUICK_SORT_R)
 extern void type_of_call tls_quick_sort_r_(long *, float *,float *,long *);
@@ -80,11 +80,11 @@ float dist_current; /* current sqared smallest distance between the geant and re
 
    
 /* Sort all the reconstructed hits according to sector/row*/
-    tls_quick_sort_i_(&tphit_h[0].nok, &tphit[0].row,
+    tls_qsort_herb_i_(&tphit_h[0].nok, &tphit[0].row,
 		      &tphit[1].row,&tphit[0].cluster);
 
 /* Sort all the geant hits according to sector/row*/
-    tls_quick_sort_i_(&g2t_hit_h[0].nok, &g2t_hit[0].volume_id,
+    tls_qsort_herb_i_(&g2t_hit_h[0].nok, &g2t_hit[0].volume_id,
 		      &g2t_hit[1].volume_id,&g2t_hit[0].id);
 
 /* Clear counter table */
@@ -129,7 +129,7 @@ float dist_current; /* current sqared smallest distance between the geant and re
     }
     /*sort each row in z, for both generated*/
 
-    start_p_g2t=0;
+    /*    start_p_g2t=0;
     for (k=0; k<MAX_SECTOR; k++){
       for (l=0; l<MAX_ROW; l++){
         if(count_hit_g2t[l][k]>1){
@@ -139,6 +139,8 @@ float dist_current; /* current sqared smallest distance between the geant and re
 	start_p_g2t += count_hit_g2t[l][k];
       }
     }
+    */
+
     /* and reconstructed hits*/
 
     start_p_g2t=0;
@@ -146,10 +148,10 @@ float dist_current; /* current sqared smallest distance between the geant and re
     g2t_ent=0;
     for (k=0; k<MAX_SECTOR; k++){
       for (l=0; l<MAX_ROW; l++){
-        if(count_hit_rec[l][k]>1){
+	/*        if(count_hit_rec[l][k]>1){
 	tls_quick_sort_r_(&count_hit_rec[l][k],&tphit[start_p_rec].z,
 			  &tphit[start_p_rec+1].z,&tphit[start_p_rec].cluster);
-	}
+			  }*/
 	/* now that hits are sorted, loop over both the generated and reconstructed hits and findthe closest one */
 	for(i=0;i<count_hit_g2t[l][k];i++){
 	  /*for each generated hit loop over all the reconstructed hits
