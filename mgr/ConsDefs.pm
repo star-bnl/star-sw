@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.69 2004/03/16 21:16:34 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.70 2004/04/03 00:58:30 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -287,7 +287,7 @@
         if ( defined($ARG{INSURE}) or defined($ENV{INSURE}) ) {
             print "Use INSURE++\n";
             $CC  = "insure -g -Zoi \"compiler_c gcc\"";
-            $CPP = "insure -g -Zoi \"compiler_c gcc\"";
+            $CPP = "gcc -E -P";
             $CXX = "insure -g -Zoi \"compiler_cpp g++\"";
             $LD  = $CXX;
             $SO  = $CXX;
