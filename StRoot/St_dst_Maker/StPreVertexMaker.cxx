@@ -1,5 +1,8 @@
-// $Id: StPreVertexMaker.cxx,v 1.4 2000/02/16 16:18:20 genevb Exp $
+// $Id: StPreVertexMaker.cxx,v 1.5 2000/03/16 21:31:21 wdeng Exp $
 // $Log: StPreVertexMaker.cxx,v $
+// Revision 1.5  2000/03/16 21:31:21  wdeng
+// Change the name of evr_evrpar to pre_evr_evrpar.
+//
 // Revision 1.4  2000/02/16 16:18:20  genevb
 // Fixed typo in previous check-in
 //
@@ -38,7 +41,7 @@ StPreVertexMaker::~StPreVertexMaker(){
 
 //_____________________________________________________________________________
 Int_t StPreVertexMaker::Init(){
-  m_pre_evrpar = new St_evr_evrpar("evr_evrpar",1);
+  m_pre_evrpar = new St_evr_evrpar("pre_evr_evrpar",1);
   {
     evr_evrpar_st row;
 
@@ -75,10 +78,10 @@ Int_t StPreVertexMaker::Make(){
 
   // If tptrack exists, we call evr_am
   if( !tptrack ) {
-    gMessMgr->Warning() << "StPreVertexMaker: no tptrack. Exit without doing anything!" << endm;
+    gMessMgr->Warning() << "no tptrack. Exit from StPreVertexMaker!" << endm;
     return kStWarn;    
   } else if ( !(tptrack->GetNRows()) ) {
-    gMessMgr->Warning() << "StPreVertexMaker: zero rows in tptrack. Exit without doing anything!" << endm;
+    gMessMgr->Warning() << "zero rows in tptrack. Exit from StPreVertexMaker!" << endm;
     return kStWarn;    
   } else {
     Int_t numRowTptrack = tptrack->GetNRows();
