@@ -62,7 +62,7 @@ void StDetectorDbTpcRDOMasks::update(StMaker* maker){
 	    }
 	}
 	
-	if( dataSet == 0 || mTable == 0 || mMaskVector == 0)
+	if( dataSet == 0 || mTable == 0 || mNumEntries == 0)
 	    cout << "StDetectorDbTpcRDOMasks: No RDO Table For This Run";
     }
     else
