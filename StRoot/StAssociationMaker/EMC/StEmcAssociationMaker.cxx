@@ -50,15 +50,11 @@ StEmcAssociationMaker::StEmcAssociationMaker(const char* name):StMaker(name)
   
   for (Int_t detnum=0; detnum<NDETECTORS; detnum++) // For detnum<4, only barrel EMC
   {
-    mAssocMatrix[detnum].ResizeTo(1,1);
-    mAssocMatrix[detnum].Zero();
-    mTrackHitEnergyRtMatrix[detnum].ResizeTo(1,1);
-    mTrackHitEnergyRtMatrix[detnum].Zero();
-    mClHitEnergyRtMatrix[detnum].ResizeTo(1,1);
-    mClHitEnergyRtMatrix[detnum].Zero();
+    mAssocMatrix[detnum]=0;
+    mTrackHitEnergyRtMatrix[detnum]=0;
+    mClHitEnergyRtMatrix[detnum]=0;
   }
-  mAssocPointMatrix.ResizeTo(1,1);
-  mAssocPointMatrix.Zero();
+  mAssocPointMatrix=0;
   mPrint = kTRUE;
 }
 //------------------------------------------------------------------------------
@@ -115,11 +111,15 @@ void StEmcAssociationMaker::Clear(const char* a)
   }
   for (Int_t detnum=0; detnum<NDETECTORS; detnum++) // For detnum<4, only barrel EMC
   {
-    mAssocMatrix[detnum].Zero();
-    mTrackHitEnergyRtMatrix[detnum].Zero();
-    mClHitEnergyRtMatrix[detnum].Zero();
+    if(mAssocMatrix[detnum]) delete mAssocMatrix[detnum];
+    if(mTrackHitEnergyRtMatrix[detnum]) delete mTrackHitEnergyRtMatrix[detnum];
+    if(mClHitEnergyRtMatrix[detnum]) delete mClHitEnergyRtMatrix[detnum];
+    mAssocMatrix[detnum]=0;
+    mTrackHitEnergyRtMatrix[detnum]=0;
+    mClHitEnergyRtMatrix[detnum]=0;
   }
-  mAssocPointMatrix.Zero();
+  if(mAssocPointMatrix) delete mAssocPointMatrix;
+  mAssocPointMatrix=0;
   return;
 }
 //------------------------------------------------------------------------------
@@ -130,7 +130,7 @@ Int_t StEmcAssociationMaker::Init()
 //------------------------------------------------------------------------------
 Int_t StEmcAssociationMaker::Make()
 {
-  gMessMgr->Info() << "StEmcAssociationMaker::Make()" << endm;
+  if(mPrint) gMessMgr->Info() << "StEmcAssociationMaker::Make()" << endm;
   
   // Getting McEvent object
   if(!GetMaker("StMcEvent")) return kStWarn;
@@ -160,12 +160,12 @@ Int_t StEmcAssociationMaker::Make()
 
       // Dimensioning Association Matrices
       if(mPrint) cout<<"Track size = "<<tracks.size()<<"  cluster size = "<<clusters.size()<<endl;
-      mAssocMatrix[detnum].ResizeTo(tracks.size(),clusters.size());
-      mAssocMatrix[detnum].Zero();
-      mTrackHitEnergyRtMatrix[detnum].ResizeTo(tracks.size(),clusters.size());
-      mTrackHitEnergyRtMatrix[detnum].Zero();
-      mClHitEnergyRtMatrix[detnum].ResizeTo(tracks.size(),clusters.size());
-      mClHitEnergyRtMatrix[detnum].Zero();
+      mAssocMatrix[detnum] = new TMatrix(tracks.size(),clusters.size());
+      mAssocMatrix[detnum]->Zero();
+      mTrackHitEnergyRtMatrix[detnum]=new TMatrix(tracks.size(),clusters.size());
+      mTrackHitEnergyRtMatrix[detnum]->Zero();
+      mClHitEnergyRtMatrix[detnum]=new TMatrix(tracks.size(),clusters.size());
+      mClHitEnergyRtMatrix[detnum]->Zero();
       
       for (UInt_t i=0; i<tracks.size(); i++)
       {
@@ -206,11 +206,11 @@ Int_t StEmcAssociationMaker::Make()
                 //Doing comparision between hit track and hit cluster
                 if (module==clModule && eta==clEta && sub==clSub)
                 {
-                  mAssocMatrix[detnum](i,j)=1;
+                  (*mAssocMatrix[detnum])(i,j)=1;
                   Float_t hitEnergy=dEToEnergy(hits[k],detnum);
-                  mTrackHitEnergyRtMatrix[detnum](i,j)+=hitEnergy/energy;
+                  (*mTrackHitEnergyRtMatrix[detnum])(i,j)+=hitEnergy/energy;
                   Float_t clEnergy=clusters[j]->energy();
-                  mClHitEnergyRtMatrix[detnum](i,j)+=hitEnergy/clEnergy;
+                  (*mClHitEnergyRtMatrix[detnum])(i,j)+=hitEnergy/clEnergy;
                 }
               }
             }
@@ -231,14 +231,13 @@ Int_t StEmcAssociationMaker::Make()
   // Finishing doing cluster association
   
   // Starting doing point association 
-  StSPtrVecEmcPoint& barrelPoints=emcCollection->barrelPoints();
-  mAssocPointMatrix.Zero();
   if(mPrint) cout <<"Doing point association\n";
+  StSPtrVecEmcPoint& barrelPoints=emcCollection->barrelPoints();
   if(barrelPoints.size()!=0)
   {
     // Dimensioning Association Matrix
-    mAssocPointMatrix.ResizeTo(tracks.size(),barrelPoints.size());
-    mAssocPointMatrix.Zero();
+    mAssocPointMatrix=new TMatrix(tracks.size(),barrelPoints.size());
+    mAssocPointMatrix->Zero();
     
     for (UInt_t i=0; i<tracks.size(); i++)
     {
@@ -281,10 +280,11 @@ Int_t StEmcAssociationMaker::Make()
           }
           nextDetector: continue;
         } 
-        mAssocPointMatrix(i,j)=assoc;
+        (*mAssocPointMatrix)(i,j)=assoc;
       }
     }   
   }  
+  if(mPrint) cout <<"Filling maps\n";
   fillMaps();
   // Finishing doing point association 
   return kStOK;
@@ -320,7 +320,7 @@ Float_t StEmcAssociationMaker::dEToEnergy(StMcCalorimeterHit* hit, Int_t detnum)
   return hitEnergy;
 }
 //---------------------------------------------------------------------
-TMatrix StEmcAssociationMaker::getMatrix(const char* detname, const char* matrixtype)
+TMatrix* StEmcAssociationMaker::getMatrix(const char* detname, const char* matrixtype)
 {
   Int_t det = getDetNum(detname);
   if(det>0)
@@ -365,12 +365,14 @@ void StEmcAssociationMaker::fillMaps()
       for(UInt_t i=0;i<tracks.size();i++)
         for(UInt_t j=0;j<clusters.size();j++)
         {
-          if(mAssocMatrix[detnum](i,j)==1) // association made
+          if(mAssocMatrix[detnum]) if((*mAssocMatrix[detnum])(i,j)==1) // association made
           {
             StEmcClusterAssociation *c=new StEmcClusterAssociation(tracks[i],clusters[j],
-                                           mTrackHitEnergyRtMatrix[detnum](i,j),mClHitEnergyRtMatrix[detnum](i,j));
+                                           (*mTrackHitEnergyRtMatrix[detnum])(i,j),
+                                           (*mClHitEnergyRtMatrix[detnum])(i,j));
             StEmcClusterAssociation *c1=new StEmcClusterAssociation(tracks[i],clusters[j],
-                                           mTrackHitEnergyRtMatrix[detnum](i,j),mClHitEnergyRtMatrix[detnum](i,j));
+                                           (*mTrackHitEnergyRtMatrix[detnum])(i,j),
+                                           (*mClHitEnergyRtMatrix[detnum])(i,j));
             if(!mTrackCluster[detnum]) mTrackCluster[detnum]=new multiEmcTrackCluster;
             if(!mClusterTrack[detnum]) mClusterTrack[detnum]=new multiEmcClusterTrack;
             mTrackCluster[detnum]->insert(multiEmcTrackClusterValue(tracks[i],c));
@@ -384,10 +386,10 @@ void StEmcAssociationMaker::fillMaps()
   for(UInt_t i=0;i<tracks.size();i++)
     for(UInt_t j=0;j<points.size();j++)
     {
-      if(mAssocPointMatrix(i,j)>0)
+      if(mAssocPointMatrix)if((*mAssocPointMatrix)(i,j)>0)
       {
-        StEmcPointAssociation *p= new StEmcPointAssociation(tracks[i],points[j],(int)mAssocPointMatrix(i,j));
-        StEmcPointAssociation *p1= new StEmcPointAssociation(tracks[i],points[j],(int)mAssocPointMatrix(i,j));
+        StEmcPointAssociation *p= new StEmcPointAssociation(tracks[i],points[j],(int)(*mAssocPointMatrix)(i,j));
+        StEmcPointAssociation *p1= new StEmcPointAssociation(tracks[i],points[j],(int)(*mAssocPointMatrix)(i,j));
         if(!mTrackPoint) mTrackPoint = new multiEmcTrackPoint;
         if(!mPointTrack) mPointTrack = new multiEmcPointTrack;
         mTrackPoint->insert(multiEmcTrackPointValue(tracks[i],p));
