@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowPhiWgtMaker.cxx,v 1.3 2003/09/02 17:58:11 perev Exp $
+// $Id: StFlowPhiWgtMaker.cxx,v 1.4 2004/05/31 20:09:25 oldi Exp $
 //
 // Authors: Art Poskanzer and Jamie Dunlop, May 2003
 //
@@ -82,6 +82,10 @@ Int_t StFlowPhiWgtMaker::Init() {
   const float phiMin          =    0.;
   const float phiMax          = twopi; 
   TString* histTitle;
+
+  //ZDCSMD Phi Weight
+  mHistZDCSMDPsiWgtEast  = new TH1F("Flow_ZDCSMDPsiWgtEast","Flow_ZDCSMDPsiWgtEast",Flow::zdcsmd_nPsiBins,-twopi/2.,twopi/2.);
+  mHistZDCSMDPsiWgtWest  = new TH1F("Flow_ZDCSMDPsiWgtWest","Flow_ZDCSMDPsiWgtWest",Flow::zdcsmd_nPsiBins,-twopi/2.,twopi/2.);
 
   // for each centrality
   for (int n = 1; n < nCens; n++) {
@@ -305,7 +309,7 @@ Int_t StFlowPhiWgtMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowPhiWgt", 2);
-  gMessMgr->Info("##### FlowPhiWgt: $Id: StFlowPhiWgtMaker.cxx,v 1.3 2003/09/02 17:58:11 perev Exp $");
+  gMessMgr->Info("##### FlowPhiWgt: $Id: StFlowPhiWgtMaker.cxx,v 1.4 2004/05/31 20:09:25 oldi Exp $");
 
   return StMaker::Init();
 }
@@ -313,6 +317,9 @@ Int_t StFlowPhiWgtMaker::Init() {
 //-----------------------------------------------------------------------
 
 void StFlowPhiWgtMaker::FillParticleHistograms() {
+  // Fill histograms with event quantities
+  mHistZDCSMDPsiWgtEast->Fill(pFlowEvent->ZDCSMD_PsiEst());
+  mHistZDCSMDPsiWgtWest->Fill(pFlowEvent->ZDCSMD_PsiWst());
   // Fill histograms from the particles
 
   // Centrality and vertex of this event
@@ -442,14 +449,14 @@ Int_t StFlowPhiWgtMaker::Finish() {
   // PhiWgt histogram collections
   TOrdCollection* phiWgtHistNames[nCens];
   for (int n = 1; n < nCens; n++) {
-    phiWgtHistNames[n] = new TOrdCollection(Flow::nSels*Flow::nHars);
+    phiWgtHistNames[n] = new TOrdCollection(Flow::nSels*Flow::nHars+2);
   }
 
   cout << endl << "##### PhiWgt Maker:" << endl;
-
-  for (int k = 0; k < Flow::nSels; k++) {
-    for (int j = 0; j < Flow::nHars; j++) {
-      for (int n = 1; n < nCens; n++) {
+  
+  for (int n = 1; n < nCens; n++) {
+    for (int k = 0; k < Flow::nSels; k++) {
+      for (int j = 0; j < Flow::nHars; j++) {
 	// Calculate PhiWgt
 	double meanFarEast = hist[k].histCen[n].histHar[j].mHistPhiFarEast->
 	  Integral() / (double)Flow::nPhiBins;
@@ -537,6 +544,8 @@ Int_t StFlowPhiWgtMaker::Finish() {
 	phiWgtHistNames[n]->AddLast(hist[k].histCen[n].histHar[j].mHistPhiWgtFtpcFarWest);
       }
     }
+    phiWgtHistNames[n]->AddLast(mHistZDCSMDPsiWgtEast);
+    phiWgtHistNames[n]->AddLast(mHistZDCSMDPsiWgtWest);
   }
   //GetHistList()->ls();
   
@@ -570,6 +579,12 @@ Int_t StFlowPhiWgtMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPhiWgtMaker.cxx,v $
+// Revision 1.4  2004/05/31 20:09:25  oldi
+// PicoDst format changed (Version 7) to hold ZDC SMD information.
+// Trigger cut modified to comply with TriggerCollections.
+// Centrality definition for 62 GeV data introduced.
+// Minor bug fixes.
+//
 // Revision 1.3  2003/09/02 17:58:11  perev
 // gcc 3.2 updates + WarnOff
 //

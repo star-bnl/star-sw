@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.32 2004/05/05 21:13:45 aihong Exp $
+// $Id: StFlowCutEvent.cxx,v 1.33 2004/05/31 20:09:35 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
@@ -79,10 +79,13 @@ Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
     return kFALSE;
   }
   
-  if (pEvent->l3Trigger() && pEvent->l3Trigger()->l3EventSummary() &&
-      !(pEvent->l3Trigger()->l3EventSummary()->unbiasedTrigger())) {
-    // cout << "FlowCutEvent: L3 biased trigger event " << endl;
-    return kFALSE;
+  if (!(pEvent->runInfo()->centerOfMassEnergy() > 60. && pEvent->runInfo()->centerOfMassEnergy() < 65.)) { // not 62 GeV
+    // for 62 GeV this is within the triggerID cut
+    if (pEvent->l3Trigger() && pEvent->l3Trigger()->l3EventSummary() &&
+	!(pEvent->l3Trigger()->l3EventSummary()->unbiasedTrigger())) {
+      // cout << "FlowCutEvent: L3 biased trigger event " << endl;
+      return kFALSE;
+    }
   }
 
   // update normal event counter
@@ -115,20 +118,50 @@ Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
   }
 
   // Trigger
-  StL0Trigger* pTrigger = pEvent->l0Trigger();
   Float_t trigger;
 
-  if (pTrigger) {
-    UInt_t triggerWord = pTrigger->triggerWord();
+  if (pEvent->runInfo()->centerOfMassEnergy() > 60. && pEvent->runInfo()->centerOfMassEnergy() < 65. ) { // 62 GeV
+    Float_t ctbMult;
+    StTriggerDetectorCollection *triggers = pEvent->triggerDetectorCollection();
+    if (triggers) {
+      StCtbTriggerDetector &CTB = triggers->ctb();
+      // get CTB
+      for (UInt_t slat = 0; slat < CTB.numberOfSlats(); slat++) {
+	for (UInt_t tray = 0; tray < CTB.numberOfTrays(); tray++) {
+	  ctbMult += CTB.mips(tray,slat,0);
+	}
+      }
+    }
+     
+    UInt_t triggerId = 0;
+    if (pEvent->triggerIdCollection()->nominal()->isTrigger(35004)) triggerId = 35004;
+    else if (pEvent->triggerIdCollection()->nominal()->isTrigger(35007)) triggerId = 35007;
+    else if (pEvent->triggerIdCollection()->nominal()->isTrigger(35001)) triggerId = 35001;
+    else if (pEvent->triggerIdCollection()->nominal()->isTrigger(35009)) triggerId = 35009;
     
-    switch (triggerWord) {
-    case 4096:  trigger = 1.;  break; // minbias
-    case 4352:  trigger = 2.;  break; // central
-    case 61952: trigger = 3.;  break; // laser
-    default:    trigger = 10.; break; // no clue
+    if (!( (triggerId == 35004 || triggerId == 35007) ||
+	  ((triggerId == 35001 || triggerId == 35009) && ctbMult > 15) )) {
+      trigger = 10.; // no clue
+    } else {
+      trigger = 1.; // minbias
+    }
+  } 
+  
+  else {
+    StL0Trigger* pTrigger = pEvent->l0Trigger();
+    
+    if (pTrigger) {
+      UInt_t triggerWord = pTrigger->triggerWord();
+      
+      switch (triggerWord) {
+      case 4096:  trigger = 1.;  break; // minbias
+      case 4352:  trigger = 2.;  break; // central
+      case 61952: trigger = 3.;  break; // laser
+      default:    trigger = 10.; break; // no clue
+      }
     }
   }
-
+  
   if (mTriggerCut && trigger != mTriggerCut) {
     mTriggerCutN++;
     return kFALSE;
@@ -157,11 +190,22 @@ Bool_t StFlowCutEvent::CheckEvent(StFlowPicoEvent* pPicoEvent) {
   UInt_t triggerWord = pPicoEvent->L0TriggerWord();
   Float_t trigger;
 
-  switch (triggerWord) {
-  case 4096:  trigger = 1.;  break; // minbias
-  case 4352:  trigger = 2.;  break; // central
-  case 61952: trigger = 3.;  break; // laser
-  default:    trigger = 10.; break; // no clue
+  if (pPicoEvent->CenterOfMassEnergy() > 60. && pPicoEvent->CenterOfMassEnergy() < 65. ) { // 62 GeV
+    if (!( (triggerWord == 35004 || triggerWord == 35007) ||
+	  ((triggerWord == 35001 || triggerWord == 35009) && pPicoEvent->CTB() > 15) )) {
+      trigger = 10.; // no clue
+    } else {
+      trigger = 1.; // minbias
+    }
+  } 
+
+  else {
+    switch (triggerWord) {
+    case 4096:  trigger = 1.;  break; // minbias
+    case 4352:  trigger = 2.;  break; // central
+    case 61952: trigger = 3.;  break; // laser
+    default:    trigger = 10.; break; // no clue
+    }    
   }
 
   if (mTriggerCut && trigger != mTriggerCut) {
@@ -223,18 +267,13 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
   // they'll make it into the MuDst. Unfortunately a proper scheme to exclude those events is missing. 
   // By cutting on the vertex position we eliminated those events. 
   // THIS WILL REMOVE SIMPLE SIMULATED EVENTS AS WELL!
-  if (pMuEvent->primaryVertexPosition().x() == 0. &&
-      pMuEvent->primaryVertexPosition().y() == 0. &&
-      pMuEvent->primaryVertexPosition().z() == 0.) {
+  if (pMuEvent->primaryVertexPosition().x() < 1.e-5 &&
+      pMuEvent->primaryVertexPosition().y() < 1.e-5 &&
+      pMuEvent->primaryVertexPosition().z() < 1.e-5) {
     // cout << "FlowCutEvent: no Vertex " << endl;
     return kFALSE;
   }
   
-  if (!pMuEvent->l3EventSummary().unbiasedTrigger()) {
-    // cout << "FlowCutEvent: L3 biased trigger event " << endl;
-    return kFALSE;
-  }
-
   // Multiplicity 
   Int_t mult = pMuEvent->eventSummary().numberOfGoodPrimaryTracks(); //???
   if (mMultCuts[1] > mMultCuts[0] && 
@@ -244,14 +283,37 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
   }
    
   // Trigger
-  UInt_t triggerWord = pMuEvent->l0Trigger().triggerWord();
   Float_t trigger;
+  if (pMuEvent->runInfo().centerOfMassEnergy() > 60. && pMuEvent->runInfo().centerOfMassEnergy() < 65. ) { // 62 GeV
 
-  switch (triggerWord) {
-  case 4096:  trigger = 1.;  break; // minbias
-  case 4352:  trigger = 2.;  break; // central
-  case 61952: trigger = 3.;  break; // laser
-  default:    trigger = 10.; break; // no clue
+    UInt_t triggerId = 0;
+    if (pMuEvent->triggerIdCollection().nominal().isTrigger(35004)) triggerId = 35004;
+    else if (pMuEvent->triggerIdCollection().nominal().isTrigger(35007)) triggerId = 35007;
+    else if (pMuEvent->triggerIdCollection().nominal().isTrigger(35001)) triggerId = 35001;
+    else if (pMuEvent->triggerIdCollection().nominal().isTrigger(35009)) triggerId = 35009;
+
+    if (!( (triggerId == 35004 || triggerId == 35007) ||
+	  ((triggerId == 35001 || triggerId == 35009) && pMuEvent->ctbMultiplicity() > 15) )) {
+      trigger = 10.; // no clue
+    } else {
+      trigger = 1.; // minbias
+    }
+  }
+
+  else {
+    if (!pMuEvent->l3EventSummary().unbiasedTrigger()) {
+      // cout << "FlowCutEvent: L3 biased trigger event " << endl;
+      return kFALSE;
+    }
+
+    UInt_t triggerWord = pMuEvent->l0Trigger().triggerWord();
+    
+    switch (triggerWord) {
+    case 4096:  trigger = 1.;  break; // minbias
+    case 4352:  trigger = 2.;  break; // central
+    case 61952: trigger = 3.;  break; // laser
+    default:    trigger = 10.; break; // no clue
+    }
   }
 
   if (mTriggerCut && trigger != mTriggerCut) {
@@ -260,7 +322,7 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
   }
 
   // Centrality
-  // Centrality=0 is not retievable
+  // Centrality=0 is not retrievable
   Int_t* cent;
   Int_t centrality;
 
@@ -272,7 +334,7 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
     }
   } else if (pMuEvent->runInfo().centerOfMassEnergy() <= 25.){ // year=2, 22 GeV
     cent = Flow::cent22;
-  } else if(pMuEvent->runInfo().centerOfMassEnergy() >60. && pMuEvent->runInfo().centerOfMassEnergy() <65) {//62 GeV
+  } else if(pMuEvent->runInfo().centerOfMassEnergy() > 60. && pMuEvent->runInfo().centerOfMassEnergy() < 65) { //62 GeV
     cent = Flow::cent62;
   }
 
@@ -527,6 +589,12 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.33  2004/05/31 20:09:35  oldi
+// PicoDst format changed (Version 7) to hold ZDC SMD information.
+// Trigger cut modified to comply with TriggerCollections.
+// Centrality definition for 62 GeV data introduced.
+// Minor bug fixes.
+//
 // Revision 1.32  2004/05/05 21:13:45  aihong
 // Gang's code for ZDC-SMD added
 //

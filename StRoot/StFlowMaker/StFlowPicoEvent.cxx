@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.cxx,v 1.12 2003/09/02 17:58:12 perev Exp $
+// $Id: StFlowPicoEvent.cxx,v 1.13 2004/05/31 20:09:39 oldi Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -74,8 +74,10 @@ UInt_t StFlowPicoEvent::CalcCentrality() {
     } else { // year=2, Au+Au, Half Field
       cent = Flow::cent200Half;
     }
-  } else if (mCenterOfMassEnergy <= 25.){ // year=2, 22 GeV
+  } else if (mCenterOfMassEnergy <= 25.) { // year=2, 22 GeV
     cent = Flow::cent22;
+  } else if (mCenterOfMassEnergy > 60. && mCenterOfMassEnergy < 65.) { // 62 GeV
+    cent = Flow::cent62;
   }
 
   if      (tracks < cent[0])  { mCentrality = 0; }
@@ -95,6 +97,12 @@ UInt_t StFlowPicoEvent::CalcCentrality() {
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.cxx,v $
+// Revision 1.13  2004/05/31 20:09:39  oldi
+// PicoDst format changed (Version 7) to hold ZDC SMD information.
+// Trigger cut modified to comply with TriggerCollections.
+// Centrality definition for 62 GeV data introduced.
+// Minor bug fixes.
+//
 // Revision 1.12  2003/09/02 17:58:12  perev
 // gcc 3.2 updates + WarnOff
 //
