@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.4 1999/02/12 21:47:16 lyons Exp $
+ * $Id: StRchMaker.cxx,v 1.5 1999/02/12 23:59:30 lyons Exp $
  *
  * Author: Dan Lyons
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 1.5  1999/02/12 23:59:30  lyons
+ * Hopefully working version.  Compiles, but untested.
+ *
  * Revision 1.4  1999/02/12 21:47:16  lyons
  * *** empty log message ***
  *
@@ -30,7 +33,7 @@
  *
  * comment out assert statement
  *
-#define RCH_DEBUG
+//#define RCH_DEBUG
 
  * debug macros;
  * used in first DAQ data
@@ -96,7 +99,7 @@ StRchMaker::StRchMaker(const char *name,
 void StRchMaker::PrintInfo() 
 {
   printf("**************************************************************\n");
-  printf("* $Id: StRchMaker.cxx,v 1.4 1999/02/12 21:47:16 lyons Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.5 1999/02/12 23:59:30 lyons Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
