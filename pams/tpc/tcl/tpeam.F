@@ -160,14 +160,14 @@ c
 
          
          integer nquota,nvar,icycle,nvar2,nvar3,nvar4,nvar5,nvar6
-         parameter (nvar=9,nvar2=24,nvar3=5,nvar4=5,nvar5=5,nvar6=4)
+         parameter (nvar=9,nvar2=25,nvar3=5,nvar4=5,nvar5=5,nvar6=4)
          character*4 chtags(nvar),chtags2(nvar2)
          character*4 chtags3(nvar3),chtags4(nvar4),chtags5(nvar5)
          character*4 chtags6(nvar6)
 C-----------------------------------------------------------------------
          logical lstat,first
 
-         real vec(24)
+         real vec(25)
          real vec2(4)
 
          integer istat
@@ -265,7 +265,7 @@ C-----------------------------------------------------------------------
          data chtags2/'itrk','mcx ','mcy ','mcz ','tpx ','tpy ','tpz '
      +,              'delx','dely','delz','nrow', 'clus','nseq',
      +                'dx','dy','dz','mhit','nmc',
-     +                'phi','lamd','malf','ralf','rhit','flag'/
+     +                'phi','lamd','malf','ralf','rhit','flag','q'/
          data chtags3/'prec','mce','tpe','rde','pre2'/
 *	 data chtags4/'hit ','clus','sect','row ','pad ',
 *     +		      'tdc ','adc ','mcid','xpix','ypix','zpix',
@@ -634,7 +634,7 @@ c  kind of stuff can be tricky
      +                       tpg_global_to_local(ksectortemp,
      +                       invec,outvec)
                         if (real(outvec(2)).ne.0.0) then
-                           vec(21)=atand(float(outvec(1)/outvec(2)))
+                           vec(21)=atand(sngl(outvec(1)/outvec(2)))
                         else
                            vec(21)=90.0
                         endif
@@ -699,6 +699,7 @@ c-------------------------------------------
      +                          tphit(dtptr(idummy,jdummy)).id)
                            vec(24) = real(
      +                          tphit(dtptr(idummy,jdummy)).flag)
+                           vec(25) = tphit(dtptr(idummy,jdummy)).q
 c ok we have found a reconstructed hit... how many mc tracks contributed
 c  to its cluster???
                            nmc_found=0
@@ -902,7 +903,7 @@ c  kind of stuff can be tricky
      +                 dble(mhits_tpc(mcptr(idummy,i_incidence)).p(3))
                   kstatus=tpg_global_to_local(ksectortemp,invec,outvec)
                   if (real(outvec(2)).ne.0.0) then
-                     vec(21)=atand(float(outvec(1)/outvec(2)))
+                     vec(21)=atand(sngl(outvec(1)/outvec(2)))
                   else
                      vec(21)=90.0
                   endif
@@ -951,6 +952,7 @@ c-------------------------------------------
                      vec(22) = tphit(ptr_ghost).alpha
                      vec(23) = real(tphit(ptr_ghost).id)
                      vec(24) = real(tphit(ptr_ghost).flag)
+                     vec(25) = tphit(ptr_ghost).q
 c find out how many mc tracks contributed to this hit's cluster...
                      nmc_found=0
                      iclstr=tphit(ptr_ghost).cluster
@@ -1003,6 +1005,7 @@ c-------------------------------------------
                      vec(22)=0.0
                      vec(23)=0.0
                      vec(24)=0.0
+                     vec(25)=0.0
                   endif
                   call hfn(300+ihisto,vec)
                enddo            ! i_maybe_lost

@@ -235,9 +235,11 @@ C-----------------------------------------------------------------------
 
         integer ntim, nseq, jseq
 
-        real pad_width, time_bucket, time_bin, tval, rms_noise
+        real pad_width, time_bucket, time_bin, tval
         real rstat
 	real rad,dx_prime
+
+        real white_noise,filtered_noise
 
         double precision invec(3),outvec(3)
 
@@ -285,10 +287,16 @@ c->         constants...
 c
            time_bucket = detector(1).drift_length/tsspar(1).ntime
            time_bin = time_bucket/tsspar(1).v_drift
-           rms_noise = sqrt((tsspar(1).white_rms/tsspar(1).scale)**2 +
-     +          (tsspar(1).sca_rms/tsspar(1).scale)**2+1.0) ! add 1 for digit
+c           rms_noise = sqrt((tsspar(1).white_rms/tsspar(1).scale)**2 +
+c     +          (tsspar(1).sca_rms/tsspar(1).scale)**2+1.0) ! add 1 for digit
            
         endif
+
+c noise in ADC counts...
+c sca and digitization noise
+	white_noise = sqrt((tsspar(1).sca_rms/tsspar(1).scale)**2+0.5)
+c noise that comes through shaper
+        filtered_noise = tsspar(1).white_rms/tsspar(1).scale
 
         do jtpcl = 1, tpclusterh.nok
 
@@ -319,7 +327,7 @@ c           endif
 
 	      call tph_fit_cluster(tclpar,nseq, nclspix, npix_seq,
      +             ipad, itdc, iadc, itrk,
-     +             rms_noise, nhits,
+     +             white_noise, filtered_noise, nhits,
      +             max_hits_in_cluster,
      +             q,x,dx,prf,z,dz,zrf,phi,track,irow)
 
@@ -719,7 +727,7 @@ c	write(13,*)'ntrk,iclspix for this cluster.....',ntrk,iclspix	! mal -** temp
 C-----------------------------------------------------------------------
       Subroutine tph_fit_cluster(tclpar, nseq, nclspix, npix_seq,
      +     ipad, itdc, iadc, itrk,
-     +     rms_noise, nhits,
+     +     white_noise,  filtered_noise, nhits,
      +     max_hits_in_cluster,
      +     q,x,dx,prf,z,dz,zrf,phi,track,irow)
 C-----------------------------------------------------------------------
@@ -774,7 +782,7 @@ C-----------------------------------------------------------------------
       integer npix_seq(*),nhits
       integer irow
 
-      real rms_noise
+      real white_noise,filtered_noise
 
       integer nhits_nnet        ! neural net estimator function
                                 ! of #hits in cluster
@@ -809,7 +817,7 @@ c*** skip the neural net for now..... mal 21jun95
          if (look_for_many) then
             call mountain_finder(tclpar, nseq, nclspix, npix_seq,
      +           ipad, itdc, iadc, itrk,
-     +           rms_noise,
+     +           white_noise, filtered_noise,
      +           nhits,
      +           q,x,dx,prf,z,dz,zrf,phi,track)
             if (nhits.gt.max_hits_in_cluster) 
@@ -818,7 +826,7 @@ c*** skip the neural net for now..... mal 21jun95
          if (nhits.eq.0) then
             call tph_fit_isolated_cluster(tclpar, nclspix,
      +           ipad, itdc, iadc, itrk,
-     +           rms_noise,
+     +           white_noise, filtered_noise,
      +           q,x,dx,prf,z,dz,zrf,phi,track)
             nhits=1
          endif
@@ -832,7 +840,7 @@ c*****************
       else
          call tph_fit_isolated_cluster(tclpar, nclspix,
      +        ipad, itdc, iadc, itrk,
-     +        rms_noise,
+     +        white_noise, filtered_noise,
      +        q,x,dx,prf,z,dz,zrf,phi,track)
          nhits=1
       endif
@@ -936,7 +944,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
       Subroutine mountain_finder(tclpar, nseq, nclspix, npix_seq,
      +     ipad, itdc, iadc, itrk,
-     +     rms_noise,
+     +     white_noise, filtered_noise,
      +     nhits,
      +     q,x,dx,prf,z,dz,zrf,phi,track)
 C-----------------------------------------------------------------------
@@ -979,7 +987,7 @@ c passed inputs
       integer nseq,nclspix
       integer ipad(*),itdc(*),iadc(*),itrk(*)
       integer npix_seq(*),nhits
-      real rms_noise
+      real white_noise,filtered_noise
 c passed outputs
       real q(*)
       real x(*)
@@ -1148,7 +1156,7 @@ c calculate "positions"...
       if (nmax.eq.1) then       ! use whole cluster in fitting
          call tph_fit_isolated_cluster(tclpar, nclspix,
      +        ipad,itdc,iadc,itrk,
-     +        rms_noise,
+     +        white_noise, filtered_noise,
      +        q,x,dx,prf,z,dz,zrf,phi,track)
       else                      ! just use pixels around local maximum
          do imax=1,nmax
@@ -1170,7 +1178,7 @@ c calculate "positions"...
             enddo
             call tph_fit_isolated_cluster(tclpar, nclspix_temp,
      +           ipad_temp,itdc_temp,iadc_temp,itrk_temp,
-     +           rms_noise,
+     +           white_noise, filtered_noise,
      +           qtemp,xtemp,dxtemp,prftemp,ztemp,dztemp,zrftemp,
      +           phitemp,tracktemp)
             q(imax)     = qtemp(1)
@@ -1208,7 +1216,7 @@ c finally, put back array allowed the way you found it.
 C-----------------------------------------------------------------------
       Subroutine tph_fit_isolated_cluster(tclpar, nclspix,
      +				ipad, itdc, iadc, itrk,
-     +				rms_noise,
+     +				white_noise, filtered_noise,
      +                          q,x,dx,prf,z,dz,zrf,phi,track)
 C-----------------------------------------------------------------------
 
@@ -1277,7 +1285,8 @@ c passed outputs
 
         integer tph_3point_gauss
 
-	real centroid,sigma,uncertainty,sum,rms_noise,dt0
+	real centroid,sigma,uncertainty,sum,dt0
+        real white_noise,filtered_noise
 C-----------------------------------------------------------------------
 
         integer ipix,adc_sum
@@ -1341,7 +1350,9 @@ c x,dx,prf: - try 3-point gauss... if does not work, do weighted mean
         do indx=1,npads_max
            if (pad_proj(indx).ne.0)
      +          d_rvec(indx) = 
-     +          sqrt(float(numpix_pad_proj(indx)))*rms_noise
+     +          sqrt((float(numpix_pad_proj(indx))*filtered_noise)**2+
+     +          (float(numpix_pad_proj(indx))*white_noise**2))
+c     +          sqrt(float(numpix_pad_proj(indx)))*rms_noise
         enddo
         if (tph_3point_gauss(identity_vector,rvec,d_rvec,
      +       npads_max,centroid,sigma,uncertainty).ne.1) 
@@ -1355,7 +1366,7 @@ c z,dz,zrf: - do weighted mean
         call vfloat(time_proj,rvec,nbuck_max)
         do indx=1,nbuck_max
            if (time_proj(indx).ne.0) then
-              d_rvec(indx) = sqrt(rvec(indx))*rms_noise
+              d_rvec(indx) = sqrt(rvec(indx))*white_noise ! needs work...
            else
               d_rvec(indx) = 0.0
            endif
