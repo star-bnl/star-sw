@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.24 2000/04/20 15:56:16 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.25 2000/04/24 22:08:23 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.25  2000/04/24 22:08:23  calderon
+ * change for indexing of mother particles
+ *
  * Revision 1.24  2000/04/20 15:56:16  calderon
  * If particle & g2t_rch_hit table are not found in geant branch,
  * look for them in dst branch (for backwards compatibility).
@@ -134,7 +137,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.24 2000/04/20 15:56:16 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.25 2000/04/24 22:08:23 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -462,7 +465,7 @@ Int_t StMcEventMaker::Make()
 			<< "Wrong ordering!  Track " << gtrk+1 << "from particle table: "
 			<< "Can't assign mother track " << motherIndex
 			<< "because it has not been created yet!" << endm;
-		else egTrk->setParent(ttempParticle[motherIndex-1]);
+		else egTrk->setParent(ttempParticle[motherIndex]);
 	    
 	} // Generator Tracks Loop
 	
