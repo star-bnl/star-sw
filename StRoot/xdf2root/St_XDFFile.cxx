@@ -1,5 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-
+// $Id: St_XDFFile.cxx,v 1.7 1998/07/23 21:09:14 fisyak Exp $ 
+// $Log: St_XDFFile.cxx,v $
+// Revision 1.7  1998/07/23 21:09:14  fisyak
+// Adjust for ROOT 2.09
+// 
 //////////////////////////////////////////////////////////////////////////////
 //                                                                          //
 //   St_XDFFile                                                             //
@@ -298,7 +302,7 @@ DS_DATASET_T *St_XDFFile::MakeDataSet(St_DataSet *dataset)
     Char_t tablespec[1000];
     if(!dsNewTable(&ds,(Char_t *)ta->GetName(),ta->Print(tablespec,1000), 
                        ta->GetNRows(), ta->GetArray())) {  
-        printf("xdf_open. Error, can not create table \"%s\"\n",ta->GetName());
+        printf("MakeDataSet. Error, can not create table \"%s\"\n",ta->GetName());
         return 0;
     }
   }
@@ -336,15 +340,4 @@ Int_t St_XDFFile::CloseXDF()
   fDataSet = 0;
   return ians;
 }
-//__________________________________________________________________________
-void St_XDFFile::GetXdFile(Char_t *filename, St_DataSet *dataset)
-{
-  if (!(dataset && filename && strlen(filename))) return;
-  St_XDFFile xdf;
-  if (xdf.OpenXDF(filename) == 0){
-    St_DataSet *set = xdf.NextEventGet();
-    if (set) dataset->Add(set);
-  }
-}
-
 
