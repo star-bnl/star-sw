@@ -71,6 +71,9 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name)
    mHistControl = 1;  // Hist  on
    mCompare     = kFALSE;
    mDB          = 0;
+   m_nhit       = 0;
+   for(Int_t i=0 ; i < MAXDET ; i++) mGeom[i] = 0;
+
    gMessMgr->SetLimit("StEmcSimulator",100);
 }
 
@@ -948,8 +951,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.18 2003/09/02 17:58:00 perev Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.19 2003/09/23 00:06:49 jeromel Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.19  2003/09/23 00:06:49  jeromel
+// The daily removal of un-initialized variable
+//
 // Revision 1.18  2003/09/02 17:58:00  perev
 // gcc 3.2 updates + WarnOff
 //
