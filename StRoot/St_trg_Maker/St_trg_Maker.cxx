@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.25 2001/07/12 17:40:34 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.26 2001/07/18 20:12:15 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.26  2001/07/18 20:12:15  ward
+// New trigger information for DST tables.
+//
 // Revision 1.25  2001/07/12 17:40:34  ward
 // New version of trgStructures.h, and modifications to other code in support thereof.
 //
@@ -151,10 +154,13 @@ Int_t St_trg_Maker::Init(){
 void St_trg_Maker::SecondDstDaq(St_dst_L0_Trigger *dst2) {
   int i;
   dst_L0_Trigger_st *tt = dst2->GetTable();
+  tt->TrgToken         = GraceSlick->EvtDesc.TCU1.FIFO1.TrgToken; // Jul 18 2001 A St_dst_L0_Trigger
   tt->TriggerActionWd  = GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd;
   tt->DSMInput         = GraceSlick->EvtDesc.TCU2.FIFO2.DSMInput;        // Oct 2 2000
+  tt->DSMAddress       = GraceSlick->EvtDesc.TCU2.FIFO2.DSMAddress;      // Jul 18 2001 B St_dst_L0_Trigger
   tt->TriggerWd        = GraceSlick->EvtDesc.TCU3.FIFO3.TriggerWd;
   tt->DetectorBusy     = GraceSlick->EvtDesc.TCU3.FIFO3.DetectorBusy;    // Oct 2 2000
+  tt->addBits          = GraceSlick->EvtDesc.TCU3.FIFO3.addBits;    // Jul 18 2001 C St_dst_L0_Trigger
   for(i=0;i<32;i++) tt->CPA[i]=GraceSlick->TrgSum.DSM.CPA[i];
   tt->MWC_CTB_mul      = GraceSlick->TrgSum.DSM.lastDSM[2]; // Per Hank Crawford, Jan 6 2000.
   tt->MWC_CTB_dipole   = 0;
@@ -414,9 +420,12 @@ void St_trg_Maker::VpdDaq(St_dst_TrgDet *dst1) {
 void St_trg_Maker::ZdcDaq(St_dst_TrgDet *dst1) {
   int i;
   dst_TrgDet_st *tt = dst1->GetTable();
+  for(i=0;i<8;i++) tt->lastDSM[i]=GraceSlick->TrgSum.DSM.lastDSM[i]; // Jul 18 2001 D   St_dst_TrgDet   This is 
+                                                                     // partially redundant with St_dst_L0_Trigger.
   for(i=0;i<16;i++) { 
     tt->adcZDC[i]=GraceSlick->TrgSum.DSM.ZDC[i];
     tt->tdcZDC[i]=0;
+    tt->BCdata[i]=GraceSlick->TrgSum.DSM.BCdata[i]; // Jul 18 2001 E     St_dst_TrgDet
   }
   tt->adcZDCEast=GraceSlick->TrgSum.DSM.ZDC[13];
   tt->adcZDCWest=GraceSlick->TrgSum.DSM.ZDC[10];
