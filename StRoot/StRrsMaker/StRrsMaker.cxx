@@ -16,12 +16,19 @@
 #define rICH_DIAGNOSTIC 1
 #define rICH_DECODE_DATA 1
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+#define rICH_WITH_RINGS 1
+
+#include "StChain.h"
+#include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
 
-#include "StRichFilter.h"
-#include "StRichNoiseSimulator.h"
-#include "StRichAnalogToDigitalConverter.h"
+//#include <iostream.h>
+
 // DataBases
+#include "StRichGeometryDb.h"
+#include "StRichPhysicsDb.h"
+#include "StRichMomentumTransform.h"
+#include "StRichGeantReader.h"
 //#include "StRichFilter.h"
 //#include "StRichNoiseSimulator.h"
 //#include "StRichAnalogToDigitalConverter.h"
