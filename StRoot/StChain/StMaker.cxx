@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.100 2000/07/14 01:52:19 perev Exp $
+// $Id: StMaker.cxx,v 1.101 2000/07/21 21:54:43 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -69,6 +69,7 @@ void StMaker::AddMaker(StMaker *mk)
 //_____________________________________________________________________________
 StMaker::~StMaker()
 {
+if (fgStChain == this) fgStChain = 0;
 }
 //______________________________________________________________________________
 void StMaker::SetNumber(Int_t number)
@@ -918,6 +919,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
 static void doPs(const char *who, const char *where)
 {
   static const char *ps =0;
+  TString *ts = 0;
   if (!ps) {
 //		execute shell      
     ps = gSystem->Getenv("StarEndMakerShell"); 
@@ -932,9 +934,9 @@ static void doPs(const char *who, const char *where)
 	ps = "ps -lP -p $$";
 #endif
       }
-      TString ts = TString(ps);
-      ts.ReplaceAll("$$",buf);
-      ps = ts.Data();
+      ts = new  TString(ps); // keep ts
+      ts->ReplaceAll("$$",buf);
+      ps = ts->Data();
     } else { ps ="";}
   }
   if (ps[0]) { //Execute shell
@@ -1059,6 +1061,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.101  2000/07/21 21:54:43  fisyak
+// Respore lost ps after memory leak correction
+//
 // Revision 1.100  2000/07/14 01:52:19  perev
 // SetIvent called in SetNumber
 //
