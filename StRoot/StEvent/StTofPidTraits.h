@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofPidTraits.h,v 2.4 2002/02/22 22:56:52 jeromel Exp $
+ * $Id: StTofPidTraits.h,v 2.5 2004/07/08 16:56:35 ullrich Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofPidTraits.h,v $
+ * Revision 2.5  2004/07/08 16:56:35  ullrich
+ * New class member introduced.
+ *
  * Revision 2.4  2002/02/22 22:56:52  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -36,13 +39,61 @@
 class StTofPidTraits : public StTrackPidTraits {
 public:
     StTofPidTraits();
+    StTofPidTraits(int, int, int, float, float, float);
     ~StTofPidTraits();
     
     //StTofPidTraits(const StTofPidTraits&) {/* nopt */}
     //StTofPidTraits& operator=(const StTofPidTraits&) {/* nopt */}
+
+    int     tray() const;
+    int     module() const;
+    int     cell() const;
+    float   tof() const;
+    float   pathLength() const;
+    float   beta() const;
+
+    float   sigmaElectron() const;
+    float   sigmaPion() const;
+    float   sigmaKaon() const;
+    float   sigmaProton() const;
         
+    void    setSigmaElectron(float);
+    void    setSigmaPion(float);
+    void    setSigmaKaon(float);
+    void    setSigmaProton(float);
+
+    void    Print(Option_t *opt = "") const;
+
 private:
-//VP    StObject* clone() const;
-    ClassDef(StTofPidTraits,1)
+    Int_t     mTray;
+    Int_t     mModule;
+    Int_t     mCell;
+    Float_t   mTof;
+    Float_t   mPathLength;
+    Float_t   mBeta;
+
+    Float_t   mSigmaElectron;
+    Float_t   mSigmaPion;
+    Float_t   mSigmaKaon;
+    Float_t   mSigmaProton;
+
+    StObject* clone() const;
+    ClassDef(StTofPidTraits,2)
 };
+
+inline int StTofPidTraits::tray() const { return mTray; }
+inline int StTofPidTraits::module() const { return mModule; }
+inline int StTofPidTraits::cell() const { return mCell; }
+inline float StTofPidTraits::tof() const { return mTof; }
+inline float StTofPidTraits::pathLength() const { return mPathLength; }
+inline float StTofPidTraits::beta() const { return mBeta; }
+inline float StTofPidTraits::sigmaElectron() const { return mSigmaElectron; }
+inline float StTofPidTraits::sigmaPion() const { return mSigmaPion; }
+inline float StTofPidTraits::sigmaKaon() const { return mSigmaKaon; }
+inline float StTofPidTraits::sigmaProton() const { return mSigmaProton; }
+inline void StTofPidTraits::setSigmaElectron(float sigma) { mSigmaElectron=sigma; }
+inline void StTofPidTraits::setSigmaPion(float sigma) { mSigmaPion=sigma; }
+inline void StTofPidTraits::setSigmaKaon(float sigma) { mSigmaKaon=sigma; }
+inline void StTofPidTraits::setSigmaProton(float sigma) { mSigmaProton=sigma; }
+
 #endif
