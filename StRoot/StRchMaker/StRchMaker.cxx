@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 2.13 2003/09/02 17:58:51 perev Exp $
+ * $Id: StRchMaker.cxx,v 2.14 2003/09/23 03:31:15 jeromel Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -83,8 +83,14 @@ ClassImp(StRchMaker) // macro
     mRchNTupleFile = 0;
     mPadPlane = 0;
 #endif
-    mRemovePicketFencePixels = 1;
+    mTheDataReader           = 0;
+    mTheRichReader           = 0;
+    mTheRichData             = 0;
+    mGeometryDb              = 0;
     
+    mRemovePicketFencePixels = 1;
+    mPedestalSubtract        = 0;
+
     drawinit=kFALSE;
 }
 
@@ -961,7 +967,7 @@ void StRchMaker::fillStEvent()
 void StRchMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRchMaker.cxx,v 2.13 2003/09/02 17:58:51 perev Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 2.14 2003/09/23 03:31:15 jeromel Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -1006,6 +1012,9 @@ void StRchMaker::clearPadMonitor(){
 /****************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 2.14  2003/09/23 03:31:15  jeromel
+ * Get read of a READ_UNINIT_MEM(read) [zeroed in constructor]
+ *
  * Revision 2.13  2003/09/02 17:58:51  perev
  * gcc 3.2 updates + WarnOff
  *
