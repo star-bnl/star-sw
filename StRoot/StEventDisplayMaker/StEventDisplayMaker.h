@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.19 2000/08/26 03:14:48 fine Exp $
+// $Id: StEventDisplayMaker.h,v 1.20 2000/08/27 16:55:13 fine Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.20  2000/08/27 16:55:13  fine
+// Title with Run event number etc
+//
 // Revision 1.19  2000/08/26 03:14:48  fine
 // New default filter from M.Panebratcev has been introduced
 //
@@ -32,10 +35,11 @@ class TCanvas;
 class StVirtualEventFilter;
 class StTrackChair;
 class TVirtualPad;
+class TPaveLabel;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.19 2000/08/26 03:14:48 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.20 2000/08/27 16:55:13 fine Exp $";
  private: 
     TList         *m_HitCollector;     //!
     TList         *m_TrackCollector;   //!
@@ -53,6 +57,10 @@ class StEventDisplayMaker : public StMaker {
     TObjArray    *m_FilterArray;     // Array of the "event" user supplied filters
 
     TCanvas      *m_PadBrowserCanvas; //!
+    TPaveLabel   *mRunNumberLabel;    //!
+    TPaveLabel   *mEventNumberLabel;  //!
+    TPaveLabel   *mDateTimeLabel;     //!
+
 
     Int_t         MakeTable(const Char_t **positions);
     Int_t         MakeTableHits(const TTable *points,StVirtualEventFilter *filter,const Char_t *keyColumn,const Char_t *keyPositions[]);
@@ -116,7 +124,7 @@ class StEventDisplayMaker : public StMaker {
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.19 2000/08/26 03:14:48 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.20 2000/08/27 16:55:13 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:

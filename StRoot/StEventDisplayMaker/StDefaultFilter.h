@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StDefaultFilter.h,v 1.1 2000/08/26 03:14:44 fine Exp $ 
+// $Id: StDefaultFilter.h,v 1.2 2000/08/27 16:55:09 fine Exp $ 
 #ifndef STAR_StDefaultFilter
 #define STAR_StDefaultFilter
 
@@ -16,6 +16,7 @@
 
 class TTableIter;
 class St_dst_track;
+class St_dst_point;
 
 class StDefaultFilter : public StVirtualEventFilter  {
  private:
@@ -38,7 +39,8 @@ class StDefaultFilter : public StVirtualEventFilter  {
     const TTableSorter *mDedx;
 
  protected:
-    Int_t SubChannel(St_dst_track &track, Int_t rowNumber,Size_t &size,Style_t &style); 
+    Int_t SubChannel(St_dst_track &track, Int_t index,Size_t &size, Style_t &style);
+    Int_t SubChannel(const TTableSorter *tableObject, Int_t index,Size_t &size, Style_t &style);
     Int_t MakeColor(Double_t energy);
  public:
     StDefaultFilter();
@@ -51,6 +53,9 @@ class StDefaultFilter : public StVirtualEventFilter  {
     ClassDef(StDefaultFilter,0)
 };
 // $Log: StDefaultFilter.h,v $
+// Revision 1.2  2000/08/27 16:55:09  fine
+// Title with Run event number etc
+//
 // Revision 1.1  2000/08/26 03:14:44  fine
 // New default filter from M.Panebratcev has been introduced
 //

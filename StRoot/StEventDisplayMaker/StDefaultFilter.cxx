@@ -1,4 +1,4 @@
-// $Id: StDefaultFilter.cxx,v 1.1 2000/08/26 03:14:42 fine Exp $
+// $Id: StDefaultFilter.cxx,v 1.2 2000/08/27 16:55:07 fine Exp $
 #include "iostream.h"
 #include "TH1.h"
 #include "StDefaultFilter.h"
@@ -6,12 +6,34 @@
 #include "TTableIter.h"
 #include "tables/St_dst_track_Table.h"
 #include "tables/St_dst_dedx_Table.h"
+#include "tables/St_dst_point_Table.h"
 #include "StCL.h"
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StDefaultFilter virtual base class                                     //
+//  StDefaultFilter  class to filter the events from DST                //
 //                                                                      //
+//  It can manage the following tables:                                 //
+//  St_dst_dedx , St_dst_point, St_dst_track                            //
+//                                                                      //
+//  Example provided by this filter :                                   //
+//  begin_html <P ALIGN=CENTER> <IMG SRC="gif/EventDefaultFilter.gif" width=100%> </P> end_html   //
+//                                                                      //
+// - "doEvents" - defines the "bfc" should make NO reconstruction       //
+//                and get the information from the begin_html <a href="http://www.rhic.bnl.gov/STAR/html/comp_l/ofl/dst_table_model.html">DST</a> end_html file directly    //
+// - "y1h geant" - define the source of the detector geometry           //
+// - "noevent"   - defines no StEvent output is required                //
+//                                                                      //
+// - small gray dots represent the hits                                 //
+//   from begin_html <a href="dst_point_st.html">dst/point</a> end_html  table with no track associated                      //
+//                                                                      //
+// - "colored" cirles represent the hits associated with begin_html <a href="dst_track_st.html">dst/globtrk</a> end_html //
+//   (The color is used to distinguish the hits of one track from others)//
+//                                                                      //
+// - "colored" lines represent the begin_html <a href="dst_track_st.html">dst/primtrk</a> end_html          //
+//    The color index of the track represent the track dedx:            //
+//    begin_html <font color=blue>Blue - small dedx (cool)</font> end_html                                          //
+//    begin_html <font color=red>Red -  the larger dedx (hot)</font> end_html                                      //
 //                                                                      //
 //  Submit any problem with this code via begin_html <A HREF="http://www.star.bnl.gov/STARAFS/comp/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
 //                                                                      //
@@ -103,6 +125,8 @@ Int_t StDefaultFilter::Channel(const TTableSorter* tableObject,Int_t index,Size_
                    mDeLookUp[i] = f[i]/s;
     
     mlookFactor = 1./de.GetBinWidth(1);
+  } else if (mStr == "point"){
+     color = SubChannel(tableObject, index, size, style);
   } else {
      color = StVirtualEventFilter::Channel(tableObject,index,size,style);   
   }
@@ -139,6 +163,25 @@ Int_t StDefaultFilter::Channel(const TTable *tableObject,Int_t rowNumber,Size_t 
   return StVirtualEventFilter::Channel(tableObject,rowNumber,size,style);
 }
 //_____________________________________________________________________________
+Int_t StDefaultFilter::SubChannel(const TTableSorter *tableObject, Int_t index,Size_t &size, Style_t &style)
+{
+  Int_t color = 0;
+  St_dst_point *hit = (St_dst_point *)tableObject->GetTable();
+  assert(hit);
+  dst_point_st &point = *hit->GetTable(index);
+  // Set "small" marker for the "noice" points
+  if (point.id_track == 0) {
+     style = 1;  
+     color = 18;
+  } else {
+    style = 4;
+    size  = 0.35;
+    color = StVirtualEventFilter::Channel(tableObject,index,size,style);
+  }
+  return color;
+}
+
+//_____________________________________________________________________________
 Int_t StDefaultFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t &size,Style_t &style)
 {
   // SubChannel to provide a selections for St_dst_track tracks.
@@ -154,6 +197,9 @@ Int_t StDefaultFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t 
 
 
 // $Log: StDefaultFilter.cxx,v $
+// Revision 1.2  2000/08/27 16:55:07  fine
+// Title with Run event number etc
+//
 // Revision 1.1  2000/08/26 03:14:42  fine
 // New default filter from M.Panebratcev has been introduced
 //
