@@ -48,7 +48,6 @@ protected:
    Int_t      SetfN(Long_t len);
    void       SetName(const Text_t *const name);
    void       SetTablePointer(void *table);
-   void       SetUsedRows(Int_t n);
    void       SetTitle(const Text_t *const title);
    void       SetType(const Text_t *const type);
    void       StreamerHeader(TBuffer &b);
@@ -87,6 +86,7 @@ public:
 //   ULong_t   &operator(){ return GetTable();}
    virtual     void       SetTableName(Char_t *name);
    virtual     void       SetTableType(Char_t *type);
+               void       SetUsedRows(Int_t n);
 
    virtual     void       StafStreamer(Char_t *structname=0, FILE *fl=0);
    virtual     void       Set(Int_t n);
