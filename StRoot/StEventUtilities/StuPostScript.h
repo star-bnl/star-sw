@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuPostScript.h,v 1.3 2002/04/23 17:26:52 ullrich Exp $
+ * $Id: StuPostScript.h,v 1.4 2002/06/25 02:43:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, April 2002
  ***************************************************************************
@@ -52,6 +52,10 @@
  *       (<10 points) get suppressed.                                 
  * s     Plot sideview (zy)                                           
  *       Default is front view (xy)                                   
+ * h     Show hits on tracks (diamonds)
+ * H     Show all hits (squares & diamonds)
+ *       Hits on tracks are drawn as diamonds
+ *       otherwise as squares
  *
  * StuPostScript writes PS without a dictionary. This makes the produced
  * files slightly bigger but the code easier to maintain.
@@ -61,6 +65,9 @@
  ***************************************************************************
  *
  * $Log: StuPostScript.h,v $
+ * Revision 1.4  2002/06/25 02:43:24  ullrich
+ * Added drawing of hits.
+ *
  * Revision 1.3  2002/04/23 17:26:52  ullrich
  * More description.
  *
@@ -89,6 +96,7 @@ protected:
     static void writeDetectorFrame(ostream&);
     static void writeTracks(ostream&, const StEvent*);
     static void writeText(ostream&, const StEvent*);
+    static void writeHits(ostream&, const StEvent*);
     static void hls2rgb(double, double, double, double&, double &, double &);
 
     static bool mBlackBackground;
@@ -99,7 +107,8 @@ protected:
     static bool mAddText;
     static bool mAllGlobalTracks;
     static bool mSideView;
-
+    static bool mShowTrackHits;
+    static bool mShowAllHits;
     static const int mllx;
     static const int mlly;
     static const int murx;
