@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3.h,v 1.4 2000/01/10 16:21:29 fisyak Exp $ */
+/* $Id: TGeant3.h,v 1.5 2000/03/26 02:50:50 fine Exp $ */
 
 //////////////////////////////////////////////// 
 //  C++ interface to Geant3 basic routines    // 
@@ -490,7 +490,7 @@ typedef struct {
  *      Commons for GEANE                                               *
  *                                                                      *
  ************************************************************************/
-class St_Node;
+class TVolume;
 
 class TGeant3 : public StarMC { 
 
