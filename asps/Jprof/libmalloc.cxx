@@ -71,7 +71,7 @@ static void writeStrStdout(const char* str)
 
 //----------------------------------------------------------------------
 
-#if defined(i386) || defined(_i386) 
+#if defined(__i386__) 
 static void CrawlStack(malloc_log_entry* me, jmp_buf jb, char* first)
 {
 #ifdef NTO
