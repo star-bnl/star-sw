@@ -56,6 +56,8 @@ int TRG_Reader::YearOfData(char *data) {
   if(*data==0x13) return 2001; // roughly to the file names for the various
   if(*data==0x20) return 2003; // trgStructures.h versions (eg, trgStructures2003.h).
   if(*data==0x21) return 2004; // trgStructures.h versions (eg, trgStructures2004.h).
+  
+  printf("TRG_Reader::YearOfData : value %d=%x not treated\n",*data,*data);
   assert(0);  // Should not be here.  My ne dolzhny byt6 zdec6.
 
   return 0;
