@@ -83,7 +83,7 @@ StiKalmanTrackFinder::~StiKalmanTrackFinder()
 void StiKalmanTrackFinder::getNewState()
 {
     StiIOBroker *  broker = StiIOBroker::instance();
-    cout <<"StiKalmanTrackFinder::getNewState()"<<endl;
+    //cout <<"StiKalmanTrackFinder::getNewState()"<<endl;
     setMCSCalculated(broker->ktfMcsCalculated());
     setElossCalculated(broker->ktfElossCalculated());
     setMaxChi2ForSelection(broker->ktfMaxChi2ForSelection());
@@ -248,11 +248,12 @@ void StiKalmanTrackFinder::doTrackFind()
 		    return;
 		}
 	    trackMes <<"StiKalmanTrackFinder::doTrackFind()\t Got Valid track"<<endl;
+
 	    findTrack(track);
 	    trackMes << " SKTFinder::doTrackFind() - Track Parameters" << endl << *track;
 	    reserveHits(track->getFirstNode());
-	    trackContainer->push_back(track);
-	    track->update();  //This updates the track on the display
+            trackContainer->push_back(track);
+            track->update();  //This updates the track on the display
 	    trackDone = false;  // ready for a new track
 	}
     else 
@@ -759,30 +760,30 @@ double StiKalmanTrackFinder::getMassHypothesis()
 
 void   StiKalmanTrackFinder::setField(double f)
 {
-    cout << "Field set to : " << f << endl;
+    //cout << "Field set to : " << f << endl;
     StiKalmanTrackNode::setFieldConstant(f);
 }
 
 void   StiKalmanTrackFinder::setMinContiguousHitCount(int count)
 {
-    cout << "minContiguousHitCount set to : " << count << endl;
+    //cout << "minContiguousHitCount set to : " << count << endl;
     StiKalmanTrackNode::minContiguousHitCountForNullReset = count;
 }
 
 void   StiKalmanTrackFinder::setMaxNullCount(int count)
 {
-    cout << "maxNullCount set to : " << count << endl;
+    //cout << "maxNullCount set to : " << count << endl;
     StiKalmanTrackNode::maxNullCount = count;
 }
 
 void   StiKalmanTrackFinder::setMaxContiguousNullCount(int count)
 {
-    cout << "maxContiguousNullCount set to : " << count << endl;
+    //cout << "maxContiguousNullCount set to : " << count << endl;
     StiKalmanTrackNode::maxContiguousNullCount = count;
 }
 
 void   StiKalmanTrackFinder::setMaxChi2ForSelection(double chi)
 {
-    cout << "	maxChi2ForSelection set to :" << chi << endl;
+    //cout << "	maxChi2ForSelection set to :" << chi << endl;
     maxChi2ForSelection = chi;
 }

@@ -57,7 +57,7 @@ public:
     ///Return the z reference point in global coordinates.
     double z0() const;
 
-    ///Return the curvature.
+    ///Return the signed curvature. (k*h)
     double curvature() const;
 
     ///Return the value of tanLambda.
@@ -71,10 +71,17 @@ public:
     bool fit(const StiHitVector&);
 
 private:
+    void calculateH(const StiHitVector&);
     
     StFastCircleFitter mCircleFitter;
     StFastLineFitter mLineFitter;
-    
+    //Store to represent the (0,0) point, avoid constructor calls
+    StThreeVectorF mOrigin;
+    //Store the fit result in a 3-vec to avoid constructor calls
+    StThreeVectorF mCenter;
+
+    //Store the sign of the curvature;
+    double mH; 
     bool mValid;
     
 };
@@ -105,7 +112,7 @@ inline double StiHelixFitter::z0() const
 
 inline double StiHelixFitter::curvature() const
 {
-    return (mValid) ? 1./mCircleFitter.radius() : DBL_MAX;
+    return (mValid) ? 1./mCircleFitter.radius() * mH : DBL_MAX;
 }
 
 inline double StiHelixFitter::tanLambda() const
