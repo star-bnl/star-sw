@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.26 2003/09/02 17:59:07 perev Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.27 2003/09/18 18:16:38 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.27  2003/09/18 18:16:38  caines
+ * Initialise stuff for new compiler
+ *
  * Revision 1.26  2003/09/02 17:59:07  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -117,7 +120,9 @@ ClassImp(StSvtHitMaker)
 //___________________________________________________________________________
 StSvtHitMaker::StSvtHitMaker(const char *name) : StMaker(name)
 {
-
+  iWrite = 0;
+  filenameN = 0;
+  filenameC = 0;
 }
 
 //_____________________________________________________________________________
@@ -141,6 +146,7 @@ Int_t StSvtHitMaker::Init()
   }
 
   // get geant hits if running MC data
+  mSvtGeantHitColl = 0;
    St_DataSet *dataSet2 = GetDataSet("StSvtGeantHits");
   if (dataSet2)
     mSvtGeantHitColl = (StSvtHybridCollection*)(dataSet2->GetObject());
@@ -264,7 +270,7 @@ Int_t StSvtHitMaker::GetSvtRawData()
 Int_t StSvtHitMaker::GetSvtClusterData()
 {
 
-  
+  mSvtCluColl = 0;
   St_DataSet *dataSet2  = GetDataSet("StSvtAnalResults");
   if( !dataSet2) return kStWarn;
    mSvtCluColl = (StSvtHybridCollection*)(dataSet2->GetObject());
@@ -319,6 +325,7 @@ Int_t StSvtHitMaker::GetSvtT0()
     return kStOK;
   }
 
+  m_t0 =  0;
   m_t0 = (StSvtT0*)dataSet->GetObject();
   
   return kStOK;
