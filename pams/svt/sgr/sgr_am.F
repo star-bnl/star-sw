@@ -55,7 +55,7 @@ C Converted to STAF HLC 4/12/96
 C iNTERNAL VARIABLES:
       integer MAXHITS
       parameter (MAXHITS=30000)
-      integer n_candidate
+      integer n_candidate,n_spt
       integer iTag(3,100)
       real    RTag(100)
       integer indTag(100)
@@ -88,9 +88,8 @@ C
       logical SCV_STATE
 C
       character*80 mess
-      logical First, Vert_Ok
-      data    First/ .TRUE. /
-      save    First
+      logical Vert_Ok
+
 C
 C-------------------------------------------------------------------------
 C How many passes is there to be done?. Check all setup info there
@@ -121,9 +120,31 @@ C How many passes is there to be done?. Check all setup info there
           return
        endif
 
+
+C Reset groups on first pass.
+       ok = grp_reset( groups, groups_h.maxlen )
+       groups_h.nok = 0
+       g_last = 0
+       
+C Record the number of usable spts
+       
+       n_spt = svt_hits_h.nok
+       
 C Loop up to number of passes requested.
 
+
        do 100 ipass = 1, pix_info_h.nok
+
+
+          write(6,*) '******************* Now on pass',ipass
+          
+
+C Check there are hits left to use
+
+      if( n_spt  .lt. 3 ) then
+         write(6,*) 'No more hits so jumping out on pass ',ipass
+         goto  101
+      endif
 
 C Use pix_info grouping.
 
@@ -138,29 +159,13 @@ C  ind_SVT(j) is the row in svt_hits with id=j
               call SCV_MESSAGES( ok, mess )
               write(6,*)' in sgr_am:',mess
            endif
-C Reset groups on first pass.
-          ok = grp_reset( groups, groups_h.maxlen )
-          groups_h.nok = 0
-          g_last = 0
 C Calculate phi, zs arrays on first pass.
           do i = 1,svt_hits_h.nok
              r2 = svt_hits(i).x(1)**2 + svt_hits(i).x(2)**2
-c             if(( 30.0 .lt. r2) .and. (r2 .lt. 45.0)) then
-c                Layer(i) = 1
-c             elseif(( 46.0 .lt. r2) .and. (r2 .lt. 70.0)) then
-c                Layer(i) = 1
-c             elseif(( 90.0 .lt. r2) .and. (r2 .lt. 115.0)) then
-c                Layer(i) = 2
-c             elseif( (116.0 .lt. r2) .and. (r2 .lt. 150.0)) then
-c                Layer(i) = 2
-c             elseif( (175.0 .lt. r2) .and. (r2 .lt. 210.0)) then
-c                Layer(i) = 3
-c             elseif( (211.0 .lt. r2) .and. (r2 .lt. 250.0)) then
-c                Layer(i) = 3
-c            endif
              Layer(i) = ((svt_hits(i).id_wafer/1000)+1)/2
-             if( Layer(i) .gt. 3 .or. Layer(i) .lt. 1) then
+             if( Layer(i) .gt. 4 .or. Layer(i) .lt. 1) then
                write(6,*) ' Hit',i,'recorded as on layer',Layer(i)
+
             endif
              rs       = 10.0 / sqrt(r2)
              zs(i)    = rs * (svt_hits(i).x(3) - z0) + z0
@@ -168,6 +173,9 @@ c            endif
      +            atan2d( svt_hits(i).x(2), svt_hits(i).x(1))
              Merge(i) = 0
              Used(i)  = .FALSE.
+             if( Layer(i) .eq. 4) then
+                Used(i) = .TRUE.
+             endif
           enddo
 C Now we try merging close hits together.
 C if we merge hits, say i and j, we set Merge(j)=i and average ZS and Phi
@@ -201,6 +209,7 @@ C pretty close together so i hope this won't matter.
                          phi(ind(i))   = (phi(ind(i)) + phi(ind(j)))/2.0
                          Layer(ind(j)) = 10
                          used(ind(j))  = .TRUE.
+                         n_spt = n_spt - 1
                       endif
                    endif
                    j = j + 1
@@ -214,6 +223,7 @@ C Now we have Merge set up with backward indices.
 C  We can have many Merge(j) = i for one i (with Merg(i) = 0).
 C  Since i is the hit we will be using, it will be more convenient to be
 C  able to follow a list starting at Merge(i) and going to the end.
+
           do i = 1,svt_hits_h.nok
              if( Merge(i) .ne. 0) then 
                 j = Merge(i)
@@ -239,23 +249,23 @@ C   yet, in this case set g_last back to zero
            else
               g_last = 0
            endif
-          
-        endif
 C
 C Reset pix_Map.
-      if( .not. First) then
           ok = pix_Reset( pix_map, pix_info(ipass).nhitsmax,
      +        pix_info(ipass).nphi, pix_info(ipass).nz,
      +        pix_info(ipass).nhitsmax )
        endif
-       First = .FALSE.
+       
 C
 C Mark SVThits that have been used so we ignore them on this pass.
-       do i = 1,groups_h.nok
-          ih = groups(i).id2
-          ih = ind_SVT(ih)
-          Used(ih) = .TRUE.
-       enddo
+C       do i = 1,groups_h.nok
+C          ih = groups(i).id2
+C          ih = ind_SVT(ih)
+C          if( Used(ih) .ne. .TRUE.) then
+C             write(6,*) '*****************Huston we have a  problem!!!!!!!!!'
+C          endif
+C          Used(ih) = .TRUE.
+C       enddo
 C
 C Enter all SVT hits in pixel map.
 C Note: i is simply an index into svt_hits.
@@ -293,6 +303,7 @@ C Form groups.
      +        pix_info(ipass).nhitsmax, pix_info(ipass).nphi,
      +        pix_info(ipass).nz, pix_info(ipass).nhitsmax, 1,
      +        candidate_groups,n_candidate,100)
+
 C     Need at least three hits to keep group.
          if( n_candidate .lt. 3) then
             goto 1
@@ -396,6 +407,7 @@ C     (When we have only one triplet we can save some time.)
                   groups(groups_h.nok).ident = ipass*10+3
                   ih = groups(groups_h.nok).id2
                   groups(groups_h.nok).id2 = svt_hits(ih).id
+                  n_spt = n_spt - 1
 C     
 C     Check if other hits have been merged with this one.
                   do while (Merge(ih).NE.0)
@@ -450,6 +462,7 @@ C                  kh = candidate_groups(iTag(3,1)).id_spt
                      groups(groups_h.nok).ident = 10*ipass+3
                      ih = groups(groups_h.nok).id2
                      groups(groups_h.nok).id2 = svt_hits(ih).id
+                     n_spt = n_spt - 1
 C     
 C     Check if other hits have been merged with this one.
                      do while (Merge(ih).ne.0)
@@ -484,6 +497,7 @@ C     endif
 C     
 C     is that all?
 
+ 101  continue
       ok = sgr_to_ctrack(svt_hits_h.nok, svt_hits,
      +     groups_h.nok, groups, stk_track_h.nok, stk_track)
 
