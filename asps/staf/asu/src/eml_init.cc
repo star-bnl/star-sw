@@ -9,8 +9,8 @@
 
 #include <string.h>
 #include <stdio.h>
+#define EML_MAIN TRUE
 #include "asuLib.h"	/* Analysis Service Utilities */
-#define EML_MAIN
 #include "emlLib.h"	/* Error Messaging and Logging */
 
 
