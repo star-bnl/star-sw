@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.cxx,v 1.9 2002/12/16 23:05:38 yepes Exp $
+// $Id: StPeCPair.cxx,v 1.10 2003/02/05 17:14:05 yepes Exp $
 // $Log: StPeCPair.cxx,v $
+// Revision 1.10  2003/02/05 17:14:05  yepes
+// Adding bField and pPairs.psi to tree
+//
 // Revision 1.9  2002/12/16 23:05:38  yepes
 // *** empty log message ***
 //
@@ -112,8 +115,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEventSummary* summary,
    //  if ( !primaryFlag ) {
    pairD dcaLengths ;
    dcaLengths = h1.pathLengths(h2);
-// StEventSummary* summary = 0 ;
-// summary = event->summary();
+
    Float_t bField ;
    if ( summary != 0 ) bField = summary->magneticField();
    else bField = 2.5 ;
@@ -145,6 +147,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEventSummary* summary,
    StThreeVectorF p = p1 + p2 ;
    pPt              = p.perp() ;
    pPz              = p.z() ;
+   pPsi             = p.phi();
   // Opening angle of the pair in the CM (lab)
   // cos(theta) = (p1"dot"p2)/(abs(p1)*abs(p2))
    Float_t ScalarProduct = p1*p2;

@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.h,v 1.5 2002/12/16 23:04:02 yepes Exp $
+// $Id: StPeCPair.h,v 1.6 2003/02/05 17:14:06 yepes Exp $
 // $Log: StPeCPair.h,v $
+// Revision 1.6  2003/02/05 17:14:06  yepes
+// Adding bField and pPairs.psi to tree
+//
 // Revision 1.5  2002/12/16 23:04:02  yepes
 // Field comes in KGauss and should be passed to routines in Teslas
 // problem pointed out by Vladimir
@@ -95,6 +98,7 @@ private:
   Int_t                           pCharge ;
   Float_t                         pPt ;
   Float_t                         pPz ;
+  Float_t                         pPsi ;
   Float_t                         pAngle ;
   Float_t                         pXyAngle ;
   Float_t                         pPtArm ; // Armenteros pt: pt positive along pair momentum

@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.10 2002/12/19 18:09:53 yepes Exp $
+// $Id: StPeCEvent.cxx,v 1.11 2003/02/05 17:14:05 yepes Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.11  2003/02/05 17:14:05  yepes
+// Adding bField and pPairs.psi to tree
+//
 // Revision 1.10  2002/12/19 18:09:53  yepes
 // MuDST input added
 //
@@ -100,6 +103,8 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
   runN   = event->runId(); 
   cout << "Event Run ID: " << runN << endl;
   cout << "Event ID: " << eventN << endl;
+
+  bField = event->summary()->magneticField();
 
   //get trigger info
 
@@ -253,25 +258,25 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
 
 Int_t StPeCEvent::fill(StMuDst *mudst) {
    //cout << "Entering StPeCEvent::fill(StMuDst *mudst)" << endl;
-   Int_t nGlobals = 0, SumQ = 0; 
-   Float_t SumPx = 0.0, SumPy = 0.0;  
-   float px, py;
-   TClonesArray* muTracks = 0;
-   StMuEvent* event = 0;
-   StMuTrack *tp = 0;
+  Int_t nGlobals = 0, SumQ = 0; 
+  Float_t SumPx = 0.0, SumPy = 0.0;  
+  float px, py;
+  TClonesArray* muTracks = 0;
+  StMuEvent* event = 0;
+  StMuTrack *tp = 0;
 
    //Save the event reference
-   muDst = mudst;
-   event = muDst->event();
-
+  muDst = mudst;
+  event = muDst->event();
 
    //Set Run and Event Number
-   eventN = event->eventInfo().id();
+  eventN = event->eventInfo().id();
 
-   runN = event->eventInfo().runId(); 
-   cout << "Event Run ID: " << runN << endl;
-   cout << "Event ID: " << eventN << endl;
+  runN = event->eventInfo().runId(); 
+  cout << "Event Run ID: " << runN << endl;
+  cout << "Event ID: " << eventN << endl;
 
+  bField = event->eventSummary().magneticField();
   StThreeVectorF vtx = event->primaryVertexPosition();
 
   xVertex = vtx.x();
