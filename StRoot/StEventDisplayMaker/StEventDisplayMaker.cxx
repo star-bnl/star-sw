@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.42 1999/11/24 19:01:15 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.43 1999/12/12 01:07:22 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -489,11 +489,11 @@ Int_t StEventDisplayMaker::MakeEvent()
   if (!m_Event) return 0;
 
   Int_t total      = 0;
-  Int_t hitCounter = 0;
   //----------------------------//
     total = MakeGlobalTracks(); //
   //----------------------------//
 #ifdef STEVENT
+  Int_t hitCounter = 0;
   StVirtualEventFilter *filter = 0;
   filter = (StVirtualEventFilter *)m_FilterArray->At(kTpcHit);
   if (!filter || filter->IsOn() ) {
@@ -583,7 +583,6 @@ Color_t StEventDisplayMaker::GetColorAttribute(Int_t adc)
 Int_t StEventDisplayMaker::MakeHits(const StObjArray *eventCollection,StVirtualEventFilter *filter)
 {
   if (eventCollection && eventCollection->GetLast() ) {
-    Int_t   hitCounter = 0;
     Color_t hitColor = kYellow;
     Style_t hitStyle = 1;
     Width_t hitSize  = 2;
@@ -592,6 +591,7 @@ Int_t StEventDisplayMaker::MakeHits(const StObjArray *eventCollection,StVirtualE
     if (filter) hitColor =  filter->Channel(eventCollection,hitSize,hitStyle); //
     // ---------------------------------------------------------------------- //
 #ifdef STEVENT
+    Int_t   hitCounter = 0;
     if (hitColor > 0) {
        StHits3DPoints   *hitsPoints  = new StHits3DPoints((StObjArray *)eventCollection);
        m_HitCollector->Add(hitsPoints);    // Collect to remove  
@@ -617,12 +617,12 @@ Int_t StEventDisplayMaker::MakeHits(const StObjArray *eventCollection,StVirtualE
 Int_t StEventDisplayMaker::MakeVertex(const StVertex *vertex,StVirtualEventFilter *filter)
 {
   if (vertex) {
+
+#ifdef STEVENT
     Int_t   vertexCounter = 0;
     Color_t vertexColor = kBlue;
     Style_t vertexStyle = 3;
     Width_t vertexSize  = 1;
-
-#ifdef STEVENT
     // ---------------------------- hits filter ----------------------------- //
     if (filter) vertexColor =  filter->Channel(vertex,vertexSize,vertexStyle); //
     // ---------------------------------------------------------------------- //
@@ -655,11 +655,11 @@ Int_t StEventDisplayMaker::MakeVertex(const StVertex *vertex,StVirtualEventFilte
 Int_t StEventDisplayMaker::MakeVertices(const StObjArray *eventCollection,StVirtualEventFilter *filter)
 {
   if (eventCollection && eventCollection->GetLast() ) {
+#ifdef STEVENT
     Int_t   hitCounter = 0;
     Color_t hitColor = kYellow;
     Style_t hitStyle = 1;
     Width_t hitSize  = 2;
-#ifdef STEVENT
     // ---------------------------- hits filter ----------------------------- //
     if (filter) hitColor =  filter->Channel(eventCollection,hitSize,hitStyle); //
     // ---------------------------------------------------------------------- //
@@ -687,11 +687,11 @@ Int_t StEventDisplayMaker::MakeVertices(const StObjArray *eventCollection,StVirt
 Int_t StEventDisplayMaker::MakeTracks( StGlobalTrack *globTrack,StVirtualEventFilter *filter)
 {
   if (globTrack) {
+#ifdef STEVENT
     Int_t   trackCounter = 0;
     Color_t trackColor = kRed;
     Style_t trackStyle = 1;
     Width_t trackSize  = 2;
-#ifdef STEVENT
     // --------------------- tracks filter ---------------------------------- //
     if (filter) trackColor =  filter->Channel(globTrack,trackSize,trackStyle); //
     // ---------------------------------------------------------------------- //
@@ -939,7 +939,11 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 // --  end of filter list --
 
+//_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.43  1999/12/12 01:07:22  fine
+// remove the compilation warnings
+//
 // Revision 1.42  1999/11/24 19:01:15  fine
 // all StVirtual::Filter have been renamed to Channel
 //
@@ -1032,5 +1036,4 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 //
 // Revision 1.11  1999/08/02 02:21:51  fine
 // new method ParseName has been introduced,but not activated yet
-//
-
+//_____________________________________________________________________________

@@ -1,9 +1,8 @@
-//Z,+KEEP,TAxis3D,T=C++..
-//*CMZ :          28/11/99  00.18.25  by  Valery Fine(fine@mail.cern.ch)
+//*CMZ :          28/11/99  00.18.25  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/11/99
 #ifndef ROOT_TAxis3D
 #define ROOT_TAxis3D
-// $Id: TAxis3D.h,v 1.5 1999/12/09 20:42:59 fine Exp $ 
+// $Id: TAxis3D.h,v 1.6 1999/12/12 01:07:22 fine Exp $ 
 // ***********************************************************************
 // *  C++ class library to paint axis "arround" TView object
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -117,8 +116,8 @@ public:
     virtual TAxis   *GetXaxis() {return &fAxis[0];}
     virtual TAxis   *GetYaxis() {return &fAxis[1];}
     virtual TAxis   *GetZaxis() {return &fAxis[2];}
-    virtual Bool_t    IsFolder(){ return kTRUE;}
-    virtual void     Paint(Option_t *option="");
+    virtual Bool_t  IsFolder(){ return kTRUE;}
+    virtual void    Paint(Option_t *option="");
             void     PaintAxis(TGaxis *axis, Float_t ang);
 //    virtual void     Print(Option_t *option="");
     virtual void     SavePrimitive(ofstream &out, Option_t *option);
@@ -148,8 +147,11 @@ public:
  
 
 inline Bool_t TAxis3D::SwitchZoom(){Bool_t s = fZoomMode; fZoomMode = !fZoomMode; return s;}
-
+//__________________________________________________________________________
 // $Log: TAxis3D.h,v $
+// Revision 1.6  1999/12/12 01:07:22  fine
+// remove the compilation warnings
+//
 // Revision 1.5  1999/12/09 20:42:59  fine
 // Zoom
 //
@@ -165,4 +167,6 @@ inline Bool_t TAxis3D::SwitchZoom(){Bool_t s = fZoomMode; fZoomMode = !fZoomMode
 // Revision 1.1  1999/11/29 19:49:57  fine
 // ROOT class: TAxis3D. To be moved to ROOT later
 //
+//__________________________________________________________________________
+
 #endif
