@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.25 2003/11/25 01:54:30 meissner Exp $
+// $Id: StPeCMaker.cxx,v 1.26 2004/02/07 01:40:46 meissner Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.26  2004/02/07 01:40:46  meissner
+// bug in check of un-analylized MC events, all MC events are now filled
+//
 // Revision 1.25  2003/11/25 01:54:30  meissner
 // correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
 //
@@ -113,7 +116,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.25 2003/11/25 01:54:30 meissner Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.26 2004/02/07 01:40:46 meissner Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -194,7 +197,7 @@ Int_t StPeCMaker::InitRun(Int_t runnr) {
 Int_t StPeCMaker::Make()
 {
    StEvent* event = 0;
-   Int_t flag = kStOk;
+   // Int_t flag = kStOk;
 
 
    Int_t NTracks = 0 ;
@@ -251,25 +254,26 @@ Int_t StPeCMaker::Make()
    //    }
 
    //Fill StPeCEvent
-   if ( geantBranch || (flag == kStOk) ) {
+   // old: event flag was set from global multiplicities above
+   // if ( geantBranch || (flag == kStOk) ) {
      
-      int ok = 0 ;
-      if (event) ok = pevent->fill(event);
-      else       ok = pevent->fill(muDst);
+   int ok = 0 ;
+   if (event) ok = pevent->fill(event);
+   else       ok = pevent->fill(muDst);
       
-      if ( !ok ) {
-	uDstTree->Fill();
-      }
-      
-      //Select only 4 prong candidates
-      //NOTE: This does not appear to do anything because the return code isn't used
-      if (event)
-	{
-	  if (filter == 1)
-	    flag = Cuts(event, pevent);
-	  else if (filter == 2)
-	    flag = Cuts4Prong(event, pevent);
-	}
+   if ( !ok|| geantBranch  ) {
+     uDstTree->Fill();
+     
+     
+     //      //Select only 4 prong candidates
+     //      //NOTE: This does not appear to do anything because the return code isn't used
+     //      if (event)
+     //        {
+     //        if (filter == 1)
+     // 	 flag = Cuts(event, pevent);
+     //        else if (filter == 2)
+     // 	 flag = Cuts4Prong(event, pevent);
+     //        }
    } else {
      cout << "Do Not fill Event to Tree!" << endl;
    }
