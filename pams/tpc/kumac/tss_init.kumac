@@ -16,8 +16,7 @@
  macro init tpc_sector_first tpc_sector_last
 macro/global/import *
 
-  
-  message ' tss_init#init, sector first, last =  ' [tpc_sector_first] [tpc_sector_last]
+
   
   * now overwrite which sector you want to run 	      
   cd [params]/tpc/tsspars

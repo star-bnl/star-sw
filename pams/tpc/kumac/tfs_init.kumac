@@ -1,4 +1,4 @@
-macro init
+macro read
 macro/global/import *
 
 cd [params]/tpc
@@ -12,4 +12,11 @@ cd [params]/tpc
 cd /dui
 
 return
-
+ 
+*********************************************************************
+ macro init
+   macro/global/import *
+     
+ return
+ 
+**********************************************************************
