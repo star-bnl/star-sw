@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.5 1999/02/10 18:02:54 lasiuk Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.6 1999/02/12 01:26:37 lasiuk Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,8 +11,11 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
- * Revision 1.5  1999/02/10 18:02:54  lasiuk
- * debug output
+ * Revision 1.6  1999/02/12 01:26:37  lasiuk
+ * Limit debug output
+ *
+ * Revision 1.6  1999/02/12 01:26:37  lasiuk
+ * Limit debug output
  *
  * Revision 1.5  1999/02/10 18:02:54  lasiuk
  * debug output
@@ -71,7 +74,7 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
     // must keep time/z position of cluster! -->
     // replace z component with transit (drift) distance!
     double driftLength = (frischGrid>0) ?
-    PR(driftLength);
+	frischGrid - seg.position().z() :
 	seg.position().z() - frischGrid ;
 
 //     PR(driftLength);
@@ -91,7 +94,7 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
 	seg.position().setZ( (mGaussDistribution.shoot(driftLength, (mSigmaLongitudinal*sqrt(driftLength)) ) ) );
     }
     else {
-    PR(seg.position());
+	seg.position().setZ(driftLength);
     }
 
 //     PR(seg.position());
@@ -103,7 +106,7 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
 
     // O2 abosorption (stat)
     if(mChargeAttachment) {
-    PR(seg.charge());
+	seg.setCharge(seg.charge()*chargeAttachment(driftLength));
     }
     
 //     PR(seg.charge());
@@ -111,7 +114,7 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
     // Grid Transparency (stat)
     if(mGatingGridTransparency) {
 	//PR(wireGridTransmission());
-    PR(seg.charge());
+	seg.setCharge(seg.charge()*wireGridTransmission());
     }
 
 //     PR(seg.charge());

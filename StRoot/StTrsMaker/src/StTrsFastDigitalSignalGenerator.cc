@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.11 1999/02/10 20:55:16 lasiuk Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.12 1999/02/12 01:26:37 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
- * Revision 1.11  1999/02/10 20:55:16  lasiuk
- * Feb 10,1999
+ * Revision 1.12  1999/02/12 01:26:37  lasiuk
+ * Limit debug output
+ *
+ * Revision 1.13  1999/02/14 20:46:07  lasiuk
+ * debug info
  *
  * Revision 1.12  1999/02/12 01:26:37  lasiuk
  * Limit debug output
@@ -119,7 +122,7 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
     vector<unsigned char, allocator<unsigned char> > digitalPadData;
     vector<unsigned char, allocator<unsigned char> > digitalPadZeros;
 #endif
-	    cout << "r/p " << irow << '/' << ipad << endl;
+    // Remember mSector is the "normal" analog sector!
     for(int irow=1; irow<=mSector->numberOfRows(); irow++) {
 	for(int ipad=1; ipad<=mSector->padsOfRow(irow).size(); ipad++) {
 	    //cout << "r/p " << irow << '/' << ipad << endl;
@@ -161,10 +164,10 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 			digitalPadZeros.back()++;
 		    }
 		}
-	    PR(digitalPadData.size());
-	    for(int ii=0; ii<digitalPadData.size(); ii++) {
-		cout << (ii) << '\t' << dec << (int)(digitalPadData[ii]) << '\t' << dec << (int)(digitalPadZeros[ii]) << endl;
-	    }
+		else {
+		    digitalPadData.push_back(static_cast<unsigned char>(0));
+		    digitalPadZeros.push_back(static_cast<unsigned char>(1));
+		}
 	    } // the iterator
 	    // print it out:
 // 	    PR(digitalPadData.size());

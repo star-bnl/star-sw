@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSector.cc,v 1.3 1999/01/18 21:02:57 lasiuk Exp $
+ * $Id: StTrsSector.cc,v 1.4 1999/02/12 01:26:37 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsSector.cc,v $
- * Revision 1.3  1999/01/18 21:02:57  lasiuk
- * comment diagnostics
+ * Revision 1.4  1999/02/12 01:26:37  lasiuk
+ * Limit debug output
+ *
+ * Revision 1.4  1999/02/12 01:26:37  lasiuk
+ * Limit debug output
  *
  * Revision 1.3  1999/01/18 21:02:57  lasiuk
  * comment diagnostics
@@ -73,7 +76,7 @@ void StTrsSector::clear() // clears only the time bins
 }
 
 // Caution: rowN specifies rowNumber 1..45
-    cout << "rowN " << rowN << " padN " << padN << endl;
+// Below, rowIndex specifies index 0..44
 void StTrsSector::addEntry(int rowN, int padN, StTrsAnalogSignal& signl)
 {
     //cout << "rowN " << rowN << " padN " << padN << endl;
