@@ -44,8 +44,13 @@ class StEmcPosition : public TObject
     Bool_t            trackOnEmc(StThreeVectorD*, StThreeVectorD*, StMcTrack*, Double_t, Double_t = 225.405); ///< Track projection utility
     
     Int_t             getTowerEtaPhi(Double_t, Double_t, Float_t*, Float_t*);                                 ///< Return tower eta/phi
+
     Int_t             getNextTowerId(Float_t, Float_t, Int_t, Int_t);                                         ///< Return neighbor tower id's
-    Float_t           getDistTowerToTrack(Double_t, Double_t, Int_t, Int_t);                                  ///< Return distance from track to center of one tower
+    Int_t             getNextTowerId(Int_t,Int_t,Int_t);                                                      ///< Return neighbor tower id's
+    Int_t             getNextTowerId(Int_t,Int_t,Int_t,Int_t,Int_t);                                          ///< Return neighbor tower id's
+		Int_t             getNextId(Int_t,Int_t,Int_t,Int_t,Int_t,Int_t);                                         ///< Return neighbor id (works for all detectors 1=bemc, 2=bprs, 3=bsmde, 4=bsmdp)
+
+		Float_t           getDistTowerToTrack(Double_t, Double_t, Int_t, Int_t);                                  ///< Return distance from track to center of one tower
     
     StThreeVectorF    getPosFromVertex(StVertex*,Int_t);        ///< Return Position from collision vertex
     StThreeVectorF    getPosFromVertex(StMcVertex*,Int_t);      ///< Return position from collision vertex
@@ -58,7 +63,7 @@ class StEmcPosition : public TObject
 
   protected:     
 
-    StEmcGeom* mBemcGeom;  //!
+    StEmcGeom* mGeom[4];   //!
 
   ClassDef(StEmcPosition,1)
 

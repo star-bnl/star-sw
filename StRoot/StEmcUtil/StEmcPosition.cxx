@@ -26,7 +26,10 @@ ClassImp(StEmcPosition)
 //------------------------------------------------------------------------------
 StEmcPosition::StEmcPosition():TObject()
 {  
-  mBemcGeom = StEmcGeom::getEmcGeom("bemc");  
+  mGeom[0] = StEmcGeom::getEmcGeom("bemc");  
+  mGeom[1] = StEmcGeom::getEmcGeom("bprs");  
+  mGeom[2] = StEmcGeom::getEmcGeom("bsmde");  
+  mGeom[3] = StEmcGeom::getEmcGeom("bsmdp");  
 }
 //------------------------------------------------------------------------------
 StEmcPosition::~StEmcPosition()
@@ -117,7 +120,7 @@ Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
       Int_t m = 0, e = 0, s = 0;
       Float_t phi = position->phi();
       Float_t eta = position->pseudoRapidity();
-      if ( mBemcGeom->getBin(phi, eta, m, e, s) == 0  && s != -1 ) return kTRUE;      
+      if ( mGeom[0]->getBin(phi, eta, m, e, s) == 0  && s != -1 ) return kTRUE;      
     }
   } 
 
@@ -140,7 +143,7 @@ Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
       Int_t m = 0, e = 0, s = 0;
       Float_t phi = position->phi();
       Float_t eta = position->pseudoRapidity();
-      if ( mBemcGeom->getBin(phi, eta, m, e, s) == 0 && s != -1 ) return kTRUE;
+      if ( mGeom[0]->getBin(phi, eta, m, e, s) == 0 && s != -1 ) return kTRUE;
     }
   } 
       
@@ -161,7 +164,7 @@ Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
       Int_t m = 0, e = 0, s = 0;
       Float_t phi = position->phi();
       Float_t eta = position->pseudoRapidity();
-      if ( mBemcGeom->getBin(phi, eta, m, e, s) == 0 && s != -1 ) return kTRUE;
+      if ( mGeom[0]->getBin(phi, eta, m, e, s) == 0 && s != -1 ) return kTRUE;
     }
   }  
   
@@ -175,44 +178,97 @@ Int_t StEmcPosition::getTowerEtaPhi( Double_t eta, Double_t phi,
   Float_t tempTowerEta = 0, tempTowerPhi = 0;
   Int_t m = 0, e = 0, s = 0, towerId = -1;
   
-  mBemcGeom->getBin(phi, eta, m, e, s);
+  mGeom[0]->getBin(phi, eta, m, e, s);
   if (m==0) return -1;
   if (s<0) s=1;
-  mBemcGeom->getId(m, e, s, towerId);
-  mBemcGeom->getEtaPhi(towerId, tempTowerEta, tempTowerPhi);
+  mGeom[0]->getId(m, e, s, towerId);
+  mGeom[0]->getEtaPhi(towerId, tempTowerEta, tempTowerPhi);
   *towerEta = tempTowerEta;
   *towerPhi = tempTowerPhi;
   return 0;
 }
 //------------------------------------------------------------------------------
-Int_t StEmcPosition::getNextTowerId(Float_t trackEta, Float_t trackPhi, 
-                                 Int_t nTowersdEta, Int_t nTowersdPhi)
+Int_t StEmcPosition::getNextTowerId(Float_t Eta, Float_t Phi, Int_t nTowersdEta, Int_t nTowersdPhi)
 {
-  // Some local variables
-  Int_t m = 0, e = 0, s = 0, nextTowerId = 0;
-  Float_t trackTowerEta = 0, trackTowerPhi = 0;
-  Float_t towersdEtaWdt = 0, towersdPhiWdt = 0;
+  Int_t m,e,s;
+  mGeom[0]->getBin( Phi, Eta, m, e, s );
+	if(m>0 && m<=120)
+	{
+		if(s<0) s=1;
+		return getNextTowerId(m,e,s,nTowersdEta,nTowersdPhi);
+	}
+	return 0;
+}
+//------------------------------------------------------------------------------
+Int_t StEmcPosition::getNextTowerId(Int_t id, Int_t nTowersdEta, Int_t nTowersdPhi)
+{
+	if(id<1 || id>4800) return 0;
+	Int_t m,e,s;
+	mGeom[0]->getBin(id,m,e,s);
+	return getNextTowerId(m,e,s,nTowersdEta,nTowersdPhi);
+}
+//------------------------------------------------------------------------------
+Int_t StEmcPosition::getNextTowerId(Int_t m, Int_t e, Int_t s, Int_t nTowersdEta, Int_t nTowersdPhi)
+{
+	if(m<1 || m>120) return 0;
+	if(e<1 || e>20) return 0;
+	if(s<1 || s>2) return 0;
+	return getNextId(1,m,e,s,nTowersdEta,nTowersdPhi);
+}
+//------------------------------------------------------------------------------
+Int_t StEmcPosition::getNextId(Int_t det,Int_t m, Int_t e, Int_t s, Int_t nEta, Int_t nPhi)
+{
+	if(det<1 || det>4) return 0;
+	if(m<1 || m>120) return 0;
+	if(s<1 || s>mGeom[det-1]->NSub()) return 0;
+	if(e<1 || e>mGeom[det-1]->NEta()) return 0;
+	
+	Int_t ef=e+nEta;
+	Int_t sf=s+nPhi;
+	Int_t mf=m;
+	
+	Int_t NE=mGeom[det-1]->NEta();
+	Int_t NS=mGeom[det-1]->NSub();
+	
+	if(abs(ef)>NE) return 0;
+	
+  do
+	{
+		if(sf<=0)
+		{
+			sf += NS;
+			mf--;
+			if(mf==60) mf  = 120;
+			if(mf==0)  mf  = 60;
+		}
+		if(sf>NS)
+		{
+			sf -= NS;
+			mf++;
+			if(mf==61)  mf = 1;
+			if(mf==121) mf = 61;
+		}
+	} while(sf<=0 || sf>NS);
+	
+	if(ef<=0)
+	{
+		ef = 1-ef;
+		sf = NS-sf+1;
+		if(ef>NE) return 0;
+	  Int_t rid,etmp,stmp;
+	  Float_t eta,phi;
+	  mGeom[det-1]->getId(mf, ef, sf, rid);
+    mGeom[det-1]->getEtaPhi(rid, eta, phi);
+		mGeom[det-1]->getBin(phi,-eta,mf,etmp,stmp);
+	}
+	
+	Int_t rid;
+	if(mf<1 || mf>120) return 0;
+	if(ef<1 || ef>NE) return 0;
+	if(sf<1 || sf>NS) return 0;
+	mGeom[det-1]->getId(mf, ef, sf, rid);
+	return rid;
 
-  towersdEtaWdt = 0.05;
-  towersdPhiWdt = 3./180.*pi;
-
-  if ( getTowerEtaPhi( trackEta, trackPhi, &trackTowerEta, &trackTowerPhi ) == 0)
-  {
-    // Calculating eta and phi of neighbour tower
-    Float_t nextTowerEta = trackTowerEta + nTowersdEta * towersdEtaWdt;
-
-    if ( fabs(nextTowerEta) > 1.0 ) return 0;
-    Float_t nextTowerPhi = trackTowerPhi + nTowersdPhi * towersdPhiWdt;
-
-    // Getting tower id of neighbour tower
-    mBemcGeom->getBin( nextTowerPhi, nextTowerEta, m, e, s );
-    if (s<0) s=1;
-    mBemcGeom->getId( m, e, s, nextTowerId );
-
-    return nextTowerId;
-  }
-  else 
-    return 0;
 }
 //------------------------------------------------------------------------------
 Float_t StEmcPosition::getDistTowerToTrack( Double_t trackEta, Double_t trackPhi, 
@@ -228,7 +284,7 @@ Float_t StEmcPosition::getDistTowerToTrack( Double_t trackEta, Double_t trackPhi
   if (towerId != 0)
   {
     // Getting eta and phi of neighbour tower
-    mBemcGeom->getEtaPhi(towerId, towerEta, towerPhi);
+    mGeom[0]->getEtaPhi(towerId, towerEta, towerPhi);
     towerToTrackdEta = towerEta-trackEta;
     towerToTrackdPhi = towerPhi-trackPhi;
       
@@ -247,7 +303,7 @@ StThreeVectorF StEmcPosition::getPosFromVertex( StVertex* vertex,Int_t TowerId )
   
   Float_t xTower,yTower,zTower;
   StThreeVectorF position = vertex->position();
-  mBemcGeom->getXYZ(TowerId, xTower, yTower, zTower);
+  mGeom[0]->getXYZ(TowerId, xTower, yTower, zTower);
   StThreeVectorF towerPosition(xTower, yTower, zTower);
   StThreeVectorF PositionFromVertex = towerPosition - position;
   
@@ -261,7 +317,7 @@ StThreeVectorF StEmcPosition::getPosFromVertex( StMcVertex* vertex,Int_t TowerId
   
   Float_t xTower,yTower,zTower;
   StThreeVectorF position = vertex->position();
-  mBemcGeom->getXYZ(TowerId, xTower, yTower, zTower);
+  mGeom[0]->getXYZ(TowerId, xTower, yTower, zTower);
   StThreeVectorF towerPosition(xTower, yTower, zTower);
   StThreeVectorF PositionFromVertex = towerPosition - position;
   
