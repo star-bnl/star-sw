@@ -1,5 +1,8 @@
-// $Id: StFtpcPrimaryMaker.cxx,v 1.9 2002/04/05 16:52:51 oldi Exp $
+// $Id: StFtpcPrimaryMaker.cxx,v 1.10 2002/08/02 11:22:34 oldi Exp $
 // $Log: StFtpcPrimaryMaker.cxx,v $
+// Revision 1.10  2002/08/02 11:22:34  oldi
+// MaxDCA is taken from StFtpcTrackingParams, now (it was hardcoded before).
+//
 // Revision 1.9  2002/04/05 16:52:51  oldi
 // Minor changes:
 // Global refit was removed, because TPC vertex is known at tracking time already.
@@ -53,6 +56,7 @@
 
 #include "StFtpcTrackMaker/StFtpcVertex.hh"
 #include "StFtpcTrackMaker/StFtpcTracker.hh"
+#include "StFtpcTrackMaker/StFtpcTrackingParams.hh"
 
 #include "tables/St_dst_track_Table.h"
 #include "tables/St_dst_vertex_Table.h"
@@ -136,10 +140,10 @@ Int_t StFtpcPrimaryMaker::Make(){
     }
 
 // Refit FTPC tracks with primary vertex
-
+    StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();  
     StFtpcVertex *refit_vertex = new StFtpcVertex(primvtx);
     Bool_t bench = (Bool_t)false;
-    StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, points, tracks, bench, 2.);
+    StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, points, tracks, bench, params->MaxDca(0));
     refitter->FitAndWrite(tracks, primvtx->id);
     delete refitter;
     delete refit_vertex;
