@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.15 1998/09/20 22:50:38 fine Exp $ 
+// $Id: St_XDFFile.cxx,v 1.16 1998/09/21 23:50:47 fine Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.16  1998/09/21 23:50:47  fine
+// Some cosmetic improvements
+//
 // Revision 1.15  1998/09/20 22:50:38  fine
 // New method to read XDF file has been introduced
 //
@@ -425,7 +428,7 @@ St_DataSet *St_XDFFile::GetXdFile(const Char_t *filename)
 {
   St_DataSet *set = 0;
   if (filename && strlen(filename)) {
-    printf(" GetXdfFile: read from %s to DataSet\n",filename);
+    printf("GetXdfFile: read from %s\n",filename);
     St_XDFFile xdf;
     if (xdf.OpenXDF(filename) == 0)
       set = xdf.NextEventGet();
