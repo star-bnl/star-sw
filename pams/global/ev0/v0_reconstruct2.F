@@ -131,14 +131,14 @@ C******************
 
 *     second track is a negative
               IF(trak(j).q .gt.0) GOTO 20
-              if( trak(i).det_id .eq. kTpcId )then
-                 det_id_i = 1
-              elseif( trak(i).det_id .eq. kSvtId .or.
-     +                trak(i).det_id .eq.  kSsdSvtId .or.
-     +                trak(i).det_id .eq. kSsdId )then
-                 det_id_i = 2
+              if( trak(j).det_id .eq. kTpcId )then
+                 det_id = 1
+              elseif( trak(j).det_id .eq. kSvtId .or.
+     +                trak(j).det_id .eq.  kSsdSvtId .or.
+     +                trak(j).det_id .eq. kSsdId )then
+                 det_id = 2
               else
-                 det_id_i = 3
+                 det_id = 3
               endif
 
 C******************
