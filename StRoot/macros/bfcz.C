@@ -1,8 +1,10 @@
-// $Id: bfcz.C,v 1.2 1999/02/19 16:31:01 fisyak Exp $
+// $Id: bfcz.C,v 1.3 1999/02/19 18:21:06 kathy Exp $
+
 //#define gtrack
 #define trs
 #define emc
 #define ctf
+
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -71,14 +73,16 @@ bfcz(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/muons.fz")
   TString FileOut = gSystem->BaseName(fzfile);
   FileOut.ReplaceAll(".fz",".root");
   TFile       *root_out  =  new TFile(FileOut.Data(),"RECREATE");
+
   // Create the main chain object
   if (chain) delete chain;
   chain = new StChain("bfc");
+
   //  Create the makers to be called by the current chain
-  St_params_Maker  *params = new St_params_Maker("params","params");
-  St_TLA_Maker       *geom = new St_TLA_Maker("geom","run/geant/Run");
-                      geant = new St_geant_Maker("geant","event/geant/Event");
-  geant->SetNwGEANT(40 000 000);
+  St_params_Maker     *params = new St_params_Maker("params","params");
+  St_TLA_Maker        *geom = new St_TLA_Maker("geom","run/geant/Run");
+      geant = new St_geant_Maker("geant","event/geant/Event");
+      geant->SetNwGEANT(40 000 000);
   //  geant->SetNwPAW(1000000);
 #ifdef gtrack
   geant->SetIwtype(1);
@@ -100,19 +104,19 @@ bfcz(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/muons.fz")
   geant->Do("swit 2 3;");
 #endif
   //  geant->Do("mode tpce prin 1 digi 2");   // make tpc_hit in local coordinates
-  St_calib_Maker    *calib = new St_calib_Maker("calib","calib"); 
-  //  St_evg_Maker      *evgen = new St_evg_Maker("evgen","event/evgen");
-  St_fss_Maker   *ftpc_raw = new St_fss_Maker("ftpc_raw","event/raw_data/ftpc");
+  St_calib_Maker       *calib = new St_calib_Maker("calib","calib"); 
+  //  St_evg_Maker     *evgen = new St_evg_Maker("evgen","event/evgen");
+  St_fss_Maker         *ftpc_raw = new St_fss_Maker("ftpc_raw","event/raw_data/ftpc");
 #ifndef trs
-  St_tss_Maker    *tpc_raw = new St_tss_Maker("tpc_raw","event/raw_data/tpc");
+  St_tss_Maker         *tpc_raw = new St_tss_Maker("tpc_raw","event/raw_data/tpc");
   // Set parameters
   //  tpc_raw->adcxyzon();
 #else
-  StTrsMaker          *trs = new StTrsMaker;
-  St_tpcdaq_Maker *tpc_raw = new St_tpcdaq_Maker;
+  StTrsMaker           *trs = new StTrsMaker;
+  St_tpcdaq_Maker      *tpc_raw = new St_tpcdaq_Maker;
 #endif
 #ifdef emc
-  St_ems_Maker          *emc_raw = new St_ems_Maker("emc_raw","event/raw_data/emc");
+  St_ems_Maker         *emc_raw = new St_ems_Maker("emc_raw","event/raw_data/emc");
   St_emc_Maker         *emc_hits = new St_emc_Maker("emc_hits","event/data/emc/hits");
 #endif
 #if 1
@@ -125,23 +129,23 @@ bfcz(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/muons.fz")
   St_trg_Maker         *trg      = new St_trg_Maker("trg","event/data/trg");
 #endif
   StRchMaker           *rch      = new StRchMaker("rch","event/raw_data/rch");
-  St_tpt_Maker       *tpc_tracks = new St_tpt_Maker("tpc_tracks","event/data/tpc/tracks");
+  St_tpt_Maker         *tpc_tracks = new St_tpt_Maker("tpc_tracks","event/data/tpc/tracks");
 #ifdef ctf
-  St_l3t_Maker       *l3Tracks   = new St_l3t_Maker("l3Tracks","event/data/l3/tracks");
+  St_l3t_Maker         *l3Tracks   = new St_l3t_Maker("l3Tracks","event/data/l3/tracks");
 #endif
-  St_stk_Maker       *stk_tracks = new St_stk_Maker("svt_tracks","event/data/svt/tracks");
-  St_fpt_Maker      *ftpc_tracks = new St_fpt_Maker("ftpc_tracks","event/data/ftpc/tracks");
-  St_glb_Maker           *global = new St_glb_Maker("global","event/data/global");
-  St_dst_Maker        *dst_Maker = new St_dst_Maker("dst","dst");
+  St_stk_Maker         *stk_tracks = new St_stk_Maker("svt_tracks","event/data/svt/tracks");
+  St_fpt_Maker         *ftpc_tracks = new St_fpt_Maker("ftpc_tracks","event/data/ftpc/tracks");
+  St_glb_Maker         *global = new St_glb_Maker("global","event/data/global");
+  St_dst_Maker         *dst_Maker = new St_dst_Maker("dst","dst");
   //  dst_Maker->Save();
-  St_run_summary_Maker  *summary = new St_run_summary_Maker("run_summary","run/dst");
-  St_QA_Maker        *qa         = new St_QA_Maker;  
-  St_io_Maker *out  = new St_io_Maker("Output","all");
+  St_run_summary_Maker *summary = new St_run_summary_Maker("run_summary","run/dst");
+  St_QA_Maker          *qa         = new St_QA_Maker;  
+  St_io_Maker          *out  = new St_io_Maker("Output","all");
   // Create HTML docs of all Maker's involved
   //   chain->MakeDoc();
 
-
   chain->PrintInfo();
+
   // Init the chain and all its makers
   //  chain->SetDebug(1);
   int iInit = chain->Init();
@@ -150,7 +154,7 @@ bfcz(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/muons.fz")
   //  chain->MakeTree("StChainTree","Title");
   //  chain->SetBranches();
   // Prepare TCanvas to show some histograms created by makers
-  out->Add(global->GetName(),"global_branch.root");
+  out->Add(dst_Maker->GetName(),"dst_branch.root");
   if (root_out) {chain->Write();}
 
   gBenchmark->Start("bfc");
