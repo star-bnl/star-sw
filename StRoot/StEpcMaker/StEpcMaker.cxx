@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.1 2000/05/15 21:18:32 subhasis Exp $
+// $Id: StEpcMaker.cxx,v 1.2 2000/05/15 21:53:57 subhasis Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.2  2000/05/15 21:53:57  subhasis
+// initialversion
+//
 // Revision 1.1  2000/05/15 21:18:32  subhasis
 // initial version
 //
@@ -252,7 +255,6 @@ Int_t StEpcMaker::fillStEvent()
 		StEmcPoint *cl;
 		for(Int_t i=0; i<nR; i++){
 		  cl = (StEmcPoint*)next();
-cout<<"EPCMaker, i, energy"<<i<<" "<<cl->energy()<<endl;
 		  emc->addBarrelPoint(cl);
 		} //for i=0
 	      }// for nR>0 check
