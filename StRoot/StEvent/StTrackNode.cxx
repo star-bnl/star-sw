@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackNode.cxx,v 2.3 1999/11/05 15:27:10 ullrich Exp $
+ * $Id: StTrackNode.cxx,v 2.4 1999/11/09 15:44:17 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackNode.cxx,v $
- * Revision 2.3  1999/11/05 15:27:10  ullrich
- * Added non-const versions of several methods
+ * Revision 2.4  1999/11/09 15:44:17  ullrich
+ * Removed method unlink() and all calls to it.
  *
  * Revision 2.6  2000/03/23 13:49:31  ullrich
  * Not implemented track type 'secondary' now handled
@@ -40,7 +40,7 @@
 
 ClassImp(StTrackNode)
 
-static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.3 1999/11/05 15:27:10 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.4 1999/11/09 15:44:17 ullrich Exp $";
 
 StTrackNode::StTrackNode() { /* noop */ }
 
@@ -81,37 +81,6 @@ StTrackNode::removeTrack(StTrack* track)
 	    break;
         case global:
             for (iterS = mOwnedTracks.begin(); iterS != mOwnedTracks.end(); iterS++)
-void
-StTrackNode::unlink(StTrack* track)
-{
-    StPtrVecTrackIterator  iter;
-    StSPtrVecTrackIterator iterS;
-    //
-    //  Remove a track from the node but do not delete it.
-    //  This is needed in case a track gets deleted elsewhere
-    //  but is referenced/owned by a node.
-    //
-    if (track) {
-        switch (track->type()) {
-        case primary:
-            for (iter = mReferencedTracks.begin(); iter != mReferencedTracks.end(); iter++)
-                if (*iter == track) mReferencedTracks.erase(iter);
-            break;
-        case secondary:		// for now handled as global
-        case global:
-            for (iterS = mOwnedTracks.begin(); iterS != mOwnedTracks.end(); iterS++)
-                if (*iterS == track) mOwnedTracks.clean(iterS);
-            break;
-	default:
-	    cerr << "StTrackNode::unlink(): cannot unlink, unknown track type." << endl;
-	    return;
-	    break;
-        }
-        track->setNode(0);
-    }
-}
-
-
                 if (*iterS == track) mOwnedTracks.erase(iterS);
             break;
 	default:

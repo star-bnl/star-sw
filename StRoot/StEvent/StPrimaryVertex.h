@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.h,v 2.3 1999/11/04 20:36:17 ullrich Exp $
+ * $Id: StPrimaryVertex.h,v 2.4 1999/11/09 15:44:22 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.h,v $
- * Revision 2.3  1999/11/04 20:36:17  ullrich
- * New method to obtain daughter container directly
+ * Revision 2.4  1999/11/09 15:44:22  ullrich
+ * Removed method unlink() and all calls to it.
  *
  * Revision 2.3  1999/11/04 20:36:17  ullrich
  * New method to obtain daughter container directly
@@ -47,11 +47,8 @@ public:
 
     void setParent(StTrack*);     // overwrite inherited
 
-    friend class StPrimaryTrack;
-    
 protected:
     StSPtrVecPrimaryTrack mDaughters;
-    void unlink(StTrack*);
 
     StObject* clone();
     ClassDef(StPrimaryVertex,1)

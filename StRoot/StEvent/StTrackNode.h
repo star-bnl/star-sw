@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackNode.h,v 2.3 1999/11/05 15:27:12 ullrich Exp $
+ * $Id: StTrackNode.h,v 2.4 1999/11/09 15:44:19 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackNode.h,v $
- * Revision 2.3  1999/11/05 15:27:12  ullrich
- * Added non-const versions of several methods
+ * Revision 2.4  1999/11/09 15:44:19  ullrich
+ * Removed method unlink() and all calls to it.
  *
  * Revision 2.3  1999/11/05 15:27:12  ullrich
  * Added non-const versions of several methods
@@ -47,12 +47,9 @@ public:
     StTrack*       track(StTrackType, UInt_t = 0);
     const StTrack* track(StTrackType, UInt_t = 0) const;
 
-    friend class StTrack;
-    
 private:
     StTrackNode(const StTrackNode&);
     StTrackNode& operator=(const StTrackNode&);
-    void unlink(StTrack*);
     
     StSPtrVecTrack  mOwnedTracks;
     StPtrVecTrack   mReferencedTracks;
