@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.33 1999/11/12 05:27:32 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.34 1999/11/12 18:12:37 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -176,13 +176,23 @@ Int_t StEventDisplayMaker::BuildGeometry()
   //
   // Create an iterator to navigate STAR geometry
   St_DataSetIter volume(m_Hall,0);
-
+// ---  Create "standard" TPC and SVT views ----
   St_Node *sector = 0;
+  const Char_t *volueNames[] = {"TPSS","SLDI","SFMD"};
+  const Int_t lvolueNames = sizeof(volueNames)/sizeof(Char_t *);
   while ( (sector = ( St_Node *)volume()) ){
-      if (strcmp(sector->GetName(),"TPSS") ) continue;
+    Bool_t found = kFALSE;
+    Int_t i;
+    for (i =0; i < lvolueNames; i++) 
+    if (strcmp(sector->GetName(),volueNames[i]) == 0 ) {found = kTRUE; break; }
+    if (found) {
       sector->SetVisibility(St_Node::kSonUnvisible);
-      TTUBE *tubs = (TTUBE *)sector->GetShape();
-      tubs->SetNumberOfDivisions(1);
+      sector->Mark();
+      if (!i) {  // special case for TPSS sectors
+        TTUBE *tubs = (TTUBE *)sector->GetShape();
+        tubs->SetNumberOfDivisions(1);
+      }
+    }
   }
 
   // Select sensors
@@ -207,8 +217,9 @@ Int_t StEventDisplayMaker::BuildGeometry()
   St_DataSet *tpssNode = 0;
   while (( tpssNode = nextSector() ) ) {
 //    if (strcmp(tpssNode->GetName(),"TPGV") && strcmp(tpssNode->GetName(),"TPSS")) continue;
-    if (strcmp(tpssNode->GetName(),"TPSS")) continue;
-    tpssNode->Mark();
+    Int_t i;
+    for (i =0; i < lvolueNames; i++) 
+      if (strcmp(tpssNode->GetName(),volueNames[i]) == 0 ) {tpssNode->Mark(); break;}    
   }
 
   //_______________________________________
@@ -952,6 +963,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 // --  end of filter list --
 
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.34  1999/11/12 18:12:37  fine
+// SVT view has been introduced
+//
 // Revision 1.33  1999/11/12 05:27:32  fine
 // phase parameter for  StHelix fixed. Thanks  Wensheng and Thomas
 //
