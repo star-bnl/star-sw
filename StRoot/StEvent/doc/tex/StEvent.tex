@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.14 2000/01/11 16:31:56 ullrich Exp $
+% $Id: StEvent.tex,v 2.15 2000/01/12 10:45:31 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -21,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.14  2000/01/11 16:31:56  ullrich
-% Regular update.
+% Revision 2.15  2000/01/12 10:45:31  ullrich
+% Fixed error (underscore in text).
 %
 % Revision 2.33  2000/05/22 22:04:07  ullrich
 % Removed StRichPixelCollection ref section and added description
@@ -146,8 +146,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.14 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/11 16:31:56 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.15 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/12 10:45:31 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -171,8 +171,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.14 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/11 16:31:56 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.15 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/12 10:45:31 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -180,17 +180,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.14 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/11 16:31:56 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.15 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/12 10:45:31 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.14 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/11 16:31:56 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.15 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/12 10:45:31 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.14 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/11 16:31:56 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.15 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/12 10:45:31 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -205,8 +205,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.14 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/11 16:31:56 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.15 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/12 10:45:31 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -3829,7 +3829,7 @@ definition in the header file.
     \verb+UInt_t numberOfPadrows() const;+\\
     Always 45.
     
-    Returns foreign key as defined in the dst_track table.
+    \verb+StTpcPadrowHitCollection* padrow(UInt_t i);+\\
     \verb+const StTpcPadrowHitCollection* padrow(UInt_t) const;+\\
     Returns padrow hit collection. Note that \texttt{i}=0--44.
     
@@ -4174,7 +4174,11 @@ numberOfPoints(kTpcId) == numberOfPoints(kFtpcWestId)
 \subsection{StTriggerDetectorCollection}
 \index{StTriggerDetectorCollection|textbf}
 \label{sec:StTriggerDetectorCollection}
+\begin{Entry}
+\item[Summary]
 \item[Synopsis]
+    \verb+#include "StTriggerDetectorCollection.h"+\\
+    \verb+class StTriggerDetectorCollection;+\\
     \verb+ULong_t flag() const;+\\
     \verb+StTriggerDetectorCollection();+\\
 \item[Public Member\\ Functions]
