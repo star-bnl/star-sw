@@ -23,8 +23,22 @@
 * editted 8/12/98 K. Turner - more comments; combine geomtype+phystype into
 *                             gstar_settings; use gstar_settings=field_only
 *                             if not running gstar
+* editted 8/12/98 K. Turner - added new modules to chain:
+*                               ==> chain name/module
+*                                    evr       evr
+*                                    ddedx     dst_dedx_filler
+*                                    dmsft     dst_monitor_soft_filler
+*                                    dmhrd     not available yet
+*                                    desum     fill_dst_event_summary
+*                                    drsum     fill_dst_run_summary
+*                                    emc       ems_interface2
+*                                    jet       emc_egrid,emc_erj
+*                                    ctf       cts,ctu
+*                                    mwc       mws,mwu
+*                                    trg       l3cl,ftf_tpc - won't work yet
 * 
-* ************************************************************
+* 
+*************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
 ******************************************************************
@@ -129,16 +143,32 @@ macro bfc_init _
       (svm) 
             exec create_tables_global#svm
             exec init_svm
+      (evr) exec init_evr
       (egr) 
 	    exec create_tables_global#egr
 	    exec init_egr
       (ev0) exec create_tables_global#ev0 
             exec init_ev0#init_ev0
     (ev0_e) exec create_tables_global#ev0_eval2
-	    exec init_ev0#ev0_eval2 
-      (emc)
-            exec init_ems;  
-            exec init_jet;     |  EMC geometry &  pam initialization 
+            exec init_ev0#ev0_eval2
+      (ctb) exec create_tables_ctf#init
+            exec ctg_init#read
+            exec cts_init#cts_init
+      (mwc) exec mwg_init
+	    exec mws_init
+	    exec create_tables_mwc#init
+      (trg) exec l3cl_init
+	    exec l3t_init
+	    exec create_tables_l3
+      (emc) exec create_tables_emc#ems
+	    exec init_ems#init
+      (jet) exec create_tables_emc#jet
+	    exec init_jet#init
+    (ddedx) exec create_tables_global#dst
+    (dmsft) exec create_tables_global#dst
+    (dmhrd) exec create_tables_global#dst
+    (desum) exec create_tables_global#dst
+    (drsum) exec create_tables_global#dst   
     (fzout)  user/output o [output_fzd_file]
     (evout) if output_xdf_file="" then
               message "empty output file"
@@ -211,7 +241,7 @@ EOF:
                  message ' problem with tpc_clustering_process_event'
                endif
     (tcl_e)    exec tte_run#run_tte_hit_match
-      (emc)    exec run_ems_interface          
+       
       (stk)    exec run_stk#run
                if (staf_status(1) .ne. stafcv_ok) then
                  nextl 1;
@@ -235,11 +265,24 @@ EOF:
                endif
     (tte_e)    exec tte_run#run_tte
       (svm)    exec run_svm#run_svm 	     |  TPC to SVT Matching 
-      (egr)    exec run_egr#egr              |  Event Global Refit
+      (evr)    exec run_evr
+      (egr)    exec run_egr#egr	|  Event Global Refit
       (ev0)    exec run_ev0#ev0_am           |  V0 Finder 
     (ev0_e)    exec run_ev0#ev0_eval2  
-      (erj)    exec run_jet_egrid
-               exec run_jet_erj
+      (ctf)    exec cts_run
+               exec ctu_run 
+      (mwc)    exec mws_run
+	       exec mwu_run
+      (trg)    exec l3cl_run
+	       exec ftf_run
+      (emc)    exec run_ems#ems_interface2  
+      (jet)    exec run_jet#egrid
+               exec run_jet#erj
+    (ddedx)    exec run_dst#dst_dedx_filler
+    (dmsft)    exec run_dst#dst_mon_soft
+    (dmhrd)    nextl 1
+    (desum)    nextl 1
+    (drsum)    nextl 1
     (evout)    if [output_xdf_file]="" then
                  message "Empty output file"
                else
