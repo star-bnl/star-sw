@@ -31,6 +31,7 @@ StEmcMicroTrack::StEmcMicroTrack(StEmcMicroTrack* track):TObject()
   mNdedxPts  = (Char_t)track->getNdedxPts();
   mTrackLength = track->getTrackLength();
   mTrackNode = track->getTrackNode();
+  mFlag      = (Char_t)track->getFlag();
 }
 StEmcMicroTrack::~StEmcMicroTrack()
 {
